@@ -405,6 +405,14 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
       }
     }
   fout << "\n\n";
+  const char * qt_files = m_Makefile->GetDefinition("GENERATED_QT_FILES");
+  if (m_Makefile->GetDefinition("GENERATED_QT_FILES")!=NULL && 
+      strlen(m_Makefile->GetDefinition("GENERATED_QT_FILES"))>0)
+    {
+    fout << "GENERATED_QT_FILES = ";
+    fout << m_Makefile->GetDefinition("GENERATED_QT_FILES");
+    fout << "\n\n";
+    }
 }
 
 
