@@ -162,7 +162,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
   
   // store the reduced args in this vector
   std::deque<std::string> newArgs;
-  int reducible = 1;
+  int reducible;
   unsigned int i;
   
   // copy to the list structure
