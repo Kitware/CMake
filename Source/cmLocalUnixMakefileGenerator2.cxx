@@ -442,8 +442,24 @@ cmLocalUnixMakefileGenerator2
     }
 
   // Get the full path name of the object file.
-  // TODO: Remove duplicate objects and warn.
   std::string obj = this->GetObjectFileName(target, source);
+
+  // Avoid generating duplicate rules.
+  if(m_ObjectFiles.find(obj) == m_ObjectFiles.end())
+    {
+    m_ObjectFiles.insert(obj);
+    }
+  else
+    {
+    cmOStringStream err;
+    err << "Warning: Source file \""
+        << source.GetSourceName().c_str() << "."
+        << source.GetSourceExtension().c_str()
+        << "\" is listed multiple times for target \"" << target.GetName()
+        << "\".";
+    cmSystemTools::Message(err.str().c_str(), "Warning");
+    return;
+    }
 
   // Create the directory containing the object file.  This may be a
   // subdirectory under the target's directory.
@@ -1907,11 +1923,6 @@ cmLocalUnixMakefileGenerator2
   for(std::vector<std::string>::iterator i = commands.begin();
       i != commands.end(); ++i)
     {
-    // TODO: Fix target output paths to use "cd...;pwd" idiom to pass
-    // a full path to the linker.  This should be done by identifying
-    // a relative path and stripping the directory part off to put in
-    // this format.  This rule is the only place that this idiom is
-    // needed.
     this->ExpandRuleVariables(*i,
                               linkLanguage,
                               buildObjs.c_str(),

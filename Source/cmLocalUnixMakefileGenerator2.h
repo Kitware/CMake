@@ -276,6 +276,9 @@ private:
   // Set of custom rule files that have been generated.
   std::set<cmStdString> m_CustomRuleFiles;
 
+  // Set of object file names that will be built in this directory.
+  std::set<cmStdString> m_ObjectFiles;
+
   // The prefix required of a path to be converted to a relative path.
   // No sequence of ../.. will ever go past this path.
   std::string m_RelativePathTop;
