@@ -143,10 +143,10 @@ fi
 # find make to use to build cmake, prefer gmake
 AC_PATH_PROGS(RUNMAKE, gmake make)
 
-AC_OUTPUT(Source/InitialConfigureFlags.cmake Makefile Source/Makefile)
+AC_OUTPUT(Source/InitialConfigureFlags.cmake Source/bootstrap/Makefile)
 # build cmake
-$RUNMAKE 
+(cd Source/bootstrap; $RUNMAKE)
 # run cmake 
-./Source/cmake $fullSrcDir
+./Source/bootstrap/cmake $fullSrcDir
 # run cmake depends
 $RUNMAKE depend

@@ -1,0 +1,57 @@
+srcdir        = @srcdir@/..
+VPATH         = @srcdir@/..
+
+CMAKE_CONFIG_DIR = @CMAKE_CONFIG_DIR@
+CXX           = @CXX@
+CXXFLAGS      =  @CMAKE_ANSI_CXXFLAGS@ -DCMAKE_ROOT_DIR='"@CMAKE_ROOT_DIR@"' @CXXFLAGS@ -DCMAKE_HAS_AUTOCONF -I${CMAKE_CONFIG_DIR}/Source
+
+.SUFFIXES: .cxx .java .class
+
+all: cmake
+
+.cxx.o:
+	${CXX} ${CXXFLAGS} -c $< -o $@
+
+
+OBJS = \
+cmake.o  \
+cmakewizard.o  \
+cmakemain.o \
+cmMakeDepend.o \
+cmMakefile.o \
+cmMakefileGenerator.o \
+cmRegularExpression.o \
+cmSourceFile.o \
+cmSystemTools.o \
+cmDirectory.o \
+cmUnixMakefileGenerator.o \
+cmCommands.o \
+cmTarget.o \
+cmCustomCommand.o \
+cmCacheManager.o \
+cmListFileCache.o \
+cmSourceGroup.o
+
+DEPENDS = ${CMAKE_CONFIG_DIR}/Source/cmConfigure.h
+
+cmCollectFlags.o : $(DEPENDS)
+cmake.o  : $(DEPENDS)
+cmakemain.o  : $(DEPENDS)
+cmMakeDepend.o : $(DEPENDS)
+cmMakefile.o : $(DEPENDS)
+cmMakefileGenerator.o : $(DEPENDS)
+cmAuxSourceDirectoryCommand.o : $(DEPENDS)
+cmRegularExpression.o : $(DEPENDS)
+cmSourceFile.o : $(DEPENDS)
+cmDirectory.o : $(DEPENDS)
+cmCustomCommand.o : $(DEPENDS)
+cmUnixMakefileGenerator.o : $(DEPENDS)
+cmCommands.o : $(DEPENDS) $(srcdir)/*Command*.cxx
+cmTarget.o : $(DEPENDS)
+cmCacheManager.o : $(DEPENDS)
+cmSourceGroup.o : $(DEPENDS)
+
+
+cmake: ${OBJS}
+	${CXX} ${OBJS} ${CXXFLAGS}  -o cmake
+

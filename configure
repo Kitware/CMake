@@ -1179,7 +1179,7 @@ done
 
 ac_given_srcdir=$srcdir
 
-trap 'rm -fr `echo "Source/InitialConfigureFlags.cmake Makefile Source/Makefile Source/cmConfigure.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
+trap 'rm -fr `echo "Source/InitialConfigureFlags.cmake Source/bootstrap/Makefile Source/cmConfigure.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
 EOF
 cat >> $CONFIG_STATUS <<EOF
 
@@ -1259,7 +1259,7 @@ EOF
 
 cat >> $CONFIG_STATUS <<EOF
 
-CONFIG_FILES=\${CONFIG_FILES-"Source/InitialConfigureFlags.cmake Makefile Source/Makefile"}
+CONFIG_FILES=\${CONFIG_FILES-"Source/InitialConfigureFlags.cmake Source/bootstrap/Makefile"}
 EOF
 cat >> $CONFIG_STATUS <<\EOF
 for ac_file in .. $CONFIG_FILES; do if test "x$ac_file" != x..; then
@@ -1433,8 +1433,8 @@ rm -fr confdefs* $ac_clean_files
 test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
 
 # build cmake
-$RUNMAKE 
+(cd Source/bootstrap; $RUNMAKE)
 # run cmake 
-./Source/cmake $fullSrcDir
+./Source/bootstrap/cmake $fullSrcDir
 # run cmake depends
 $RUNMAKE depend
