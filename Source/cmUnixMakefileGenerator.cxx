@@ -154,7 +154,8 @@ void cmUnixMakefileGenerator::OutputMakefile(const char* file)
     std::vector<std::string>& libdirs = m_Makefile->GetLinkDirectories();
     for(j = libdirs.begin(); j != libdirs.end(); ++j)
       { 
-      if((*j).find("-L") == std::string::npos 
+      std::string::size_type pos = (*j).find("-L");
+      if((pos == std::string::npos || pos > 0)
          && (*j).find("${") == std::string::npos)
         {
         linkLibs += "-L";
@@ -165,7 +166,8 @@ void cmUnixMakefileGenerator::OutputMakefile(const char* file)
     std::vector<std::string>& libs = m_Makefile->GetLinkLibraries();
     for(j = libs.begin(); j != libs.end(); ++j)
       {
-      if((*j).find("-l") == std::string::npos 
+      std::string::size_type pos = (*j).find("-l");
+      if((pos == std::string::npos || pos > 0)
          && (*j).find("${") == std::string::npos)
         {
         linkLibs += "-l";
