@@ -52,6 +52,8 @@ FIND_LIBRARY(TK_LIBRARY
 FIND_PATH(TCL_INCLUDE_PATH tcl.h 
   /usr/include 
   /usr/local/include
+  /usr/include/tcl8.2
+  /usr/include/tcl8.3
   "C:/Program Files/Tcl/include" 
   "C:/Tcl/include" 
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.4;Root]/include
@@ -65,6 +67,8 @@ FIND_PATH(TCL_INCLUDE_PATH tcl.h
 FIND_PATH(TK_INCLUDE_PATH tk.h 
   /usr/include 
   /usr/local/include
+  /usr/include/tcl8.2
+  /usr/include/tcl8.3
   "C:/Program Files/Tcl/include" 
   "C:/Tcl/include" 
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.4;Root]/include
