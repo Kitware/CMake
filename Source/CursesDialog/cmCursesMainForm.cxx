@@ -547,6 +547,14 @@ void cmCursesMainForm::UpdateStatusBar()
   pos_form_cursor(m_Form);
 }
 
+void cmCursesMainForm::UpdateProgress(const char *msg, float prog, void*)
+{
+  if ( prog < 0 )
+    {
+    std::cout << "-- " << msg << std::endl;
+    }
+}
+
 int cmCursesMainForm::Configure()
 {
 
@@ -559,7 +567,7 @@ int cmCursesMainForm::Configure()
   refresh();
   endwin();
   std::cerr << "Configuring, please wait...\n\r";
-
+  this->m_CMakeInstance->SetProgressCallback(cmCursesMainForm::UpdateProgress, this);
 
   // always save the current gui values to disk
   this->FillCacheManagerFromUI();
@@ -573,6 +581,7 @@ int cmCursesMainForm::Configure()
   // run the generate process
   m_OkToGenerate = true;
   int retVal = this->m_CMakeInstance->Configure();
+  this->m_CMakeInstance->SetProgressCallback(0, 0);
 
   initscr(); /* Initialization */ 
   noecho(); /* Echo off */ 
@@ -623,6 +632,7 @@ int cmCursesMainForm::Generate()
   refresh();
   endwin();
   std::cerr << "Generating, please wait...\n\r";
+  this->m_CMakeInstance->SetProgressCallback(cmCursesMainForm::UpdateProgress, this);
 
   // Get rid of previous errors
   m_Errors = std::vector<std::string>();
@@ -630,6 +640,7 @@ int cmCursesMainForm::Generate()
   // run the generate process
   int retVal = this->m_CMakeInstance->Generate();
 
+  this->m_CMakeInstance->SetProgressCallback(0, 0);
   initscr(); /* Initialization */ 
   noecho(); /* Echo off */ 
   cbreak(); /* nl- or cr not needed */ 

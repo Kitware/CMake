@@ -98,6 +98,11 @@ public:
    */
   void LoadCache(const char *dir);
   
+  /**
+   * Progress callback
+   */
+  static void UpdateProgress(const char *msg, float prog, void*);
+
 protected:
   cmCursesMainForm(const cmCursesMainForm& from);
   void operator=(const cmCursesMainForm&);
