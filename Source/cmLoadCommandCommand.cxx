@@ -18,6 +18,7 @@
 #include "cmCPluginAPI.h"
 #include "cmCPluginAPI.cxx"
 #include "cmDynamicLoader.h"
+#include <signal.h>
 
 // a class for loadabple commands
 class cmLoadedCommand : public cmCommand
@@ -76,11 +77,45 @@ public:
     {
       if (this->info.GetTerseDocumentation)
         {
-        return info.GetTerseDocumentation();
+        cmLoadedCommand::InstallSignalHandlers(info.Name);
+        const char* ret = info.GetTerseDocumentation(); 
+        cmLoadedCommand::InstallSignalHandlers(info.Name, 1);
+        return ret;
         }
       else
         {
         return "LoadedCommand without any additional documentation";
+        }
+    }
+  static const char* LastName;
+  static void TrapsForSignals(int sig)
+    {
+      fprintf(stderr, "CMake loaded command %s crashed with signal: %d.\n",
+              cmLoadedCommand::LastName, sig);
+    }
+  static void InstallSignalHandlers(const char* name, int remove = 0)
+    {
+      cmLoadedCommand::LastName = name;
+      if(!name)
+        {
+        cmLoadedCommand::LastName = "????";
+        }
+      
+      if(!remove)
+        {
+        signal(SIGSEGV, cmLoadedCommand::TrapsForSignals);
+#ifdef SIGBUS
+        signal(SIGBUS,  cmLoadedCommand::TrapsForSignals);
+#endif
+        signal(SIGILL,  cmLoadedCommand::TrapsForSignals);
+        }
+      else
+        {
+        signal(SIGSEGV, 0);
+#ifdef SIGBUS
+        signal(SIGBUS,  0);
+#endif
+        signal(SIGILL,  0);
         }
     }
   
@@ -91,7 +126,10 @@ public:
     {
       if (this->info.GetFullDocumentation)
         {
-        return info.GetFullDocumentation();
+        cmLoadedCommand::InstallSignalHandlers(info.Name);
+        const char* ret = info.GetFullDocumentation();
+        cmLoadedCommand::InstallSignalHandlers(info.Name, 1);
+        return ret;
         }
       else
         {
@@ -103,6 +141,8 @@ public:
 
   cmLoadedCommandInfo info;
 };
+
+const char* cmLoadedCommand::LastName = 0;
 
 bool cmLoadedCommand::InitialPass(std::vector<std::string> const& args)
 {
@@ -129,7 +169,9 @@ bool cmLoadedCommand::InitialPass(std::vector<std::string> const& args)
     {
     argv[i] = strdup(args[i].c_str());
     }
-  int result = info.InitialPass((void *)&info,(void *)this->m_Makefile,argc,argv);
+  cmLoadedCommand::InstallSignalHandlers(info.Name);
+  int result = info.InitialPass((void *)&info,(void *)this->m_Makefile,argc,argv); 
+  cmLoadedCommand::InstallSignalHandlers(info.Name, 1);
   cmFreeArguments(argc,argv);
   
   if (result)
@@ -149,7 +191,9 @@ void cmLoadedCommand::FinalPass()
 {
   if (this->info.FinalPass)
     {
+    cmLoadedCommand::InstallSignalHandlers(info.Name);
     this->info.FinalPass((void *)&this->info,(void *)this->m_Makefile);
+    cmLoadedCommand::InstallSignalHandlers(info.Name, 1);
     }
 }
 
@@ -157,7 +201,9 @@ cmLoadedCommand::~cmLoadedCommand()
 {
   if (this->info.Destructor)
     {
+    cmLoadedCommand::InstallSignalHandlers(info.Name);
     this->info.Destructor((void *)&this->info);
+    cmLoadedCommand::InstallSignalHandlers(info.Name, 1);
     }
   if (this->info.Error)
     {
