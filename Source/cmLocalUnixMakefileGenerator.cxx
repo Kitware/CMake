@@ -1877,15 +1877,17 @@ void cmLocalUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
           fout << " $(DESTDIR)" << prefix << l->second.GetInstallPath() << "\n";
           break;
         case cmTarget::SHARED_LIBRARY:
-          fout << "\t$(INSTALL_DATA) " << m_LibraryOutputPath << "lib" 
+          fout << "\t$(INSTALL_DATA) " << m_LibraryOutputPath
+               << this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_PREFIX")
                << l->first;
-          fout << m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
+          fout << this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_SUFFIX");
           fout << " $(DESTDIR)" << prefix << l->second.GetInstallPath() << "\n";
           break;
         case cmTarget::MODULE_LIBRARY:
-          fout << "\t$(INSTALL_DATA) " << m_LibraryOutputPath << "lib" 
+          fout << "\t$(INSTALL_DATA) " << m_LibraryOutputPath 
+               << this->GetSafeDefinition("CMAKE_SHARED_MODULE_PREFIX")
                << l->first;
-          fout << m_Makefile->GetDefinition("CMAKE_MODULE_SUFFIX");
+          fout <<  this->GetSafeDefinition("CMAKE_SHARED_MODULE_SUFFIX");
           fout << " $(DESTDIR)" << prefix << l->second.GetInstallPath() << "\n";
           break;
         case cmTarget::WIN32_EXECUTABLE:
