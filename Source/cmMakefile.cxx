@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmCommands.h"
 #include "cmCacheManager.h"
 #include "cmFunctionBlocker.h"
+#include <stdio.h>  // required for sprintf
 
 // default is not to be building executables
 cmMakefile::cmMakefile()
