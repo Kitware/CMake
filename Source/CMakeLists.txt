@@ -378,5 +378,4 @@ INCLUDE (${CMAKE_SOURCE_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
 
 INSTALL_TARGETS(/bin cmake)
 INSTALL_TARGETS(/bin ctest)
-INSTALL_TARGETS(/bin cmaketest)
 INSTALL_FILES(${CMAKE_DATA_DIR}/include cmCPluginAPI.h)
