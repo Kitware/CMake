@@ -177,6 +177,10 @@ IF(BUILD_TESTING)
   # cmake.
   SET(CMAKE_CTEST_COMMAND "${EXECUTABLE_OUTPUT_PATH}/ctest")
 
+  # Should the long tests be run?
+  OPTION(CMAKE_RUN_LONG_TESTS "Should the long tests be run (such as Bootstrap)." ON)
+  MARK_AS_ADVANCED(CMAKE_RUN_LONG_TESTS)
+
   ADD_TEST(CommandLineTest ${CMAKE_CTEST_COMMAND}
     --build-and-test 
     "${CMake_SOURCE_DIR}/Tests/CommandLineTest"
@@ -630,15 +634,15 @@ IF(BUILD_TESTING)
       )
   ENDIF (APPLE)
 
-  IF (CTEST_TEST_CTEST)
+  IF (CTEST_TEST_CTEST AND CMAKE_RUN_LONG_TESTS)
     CONFIGURE_FILE("${CMake_SOURCE_DIR}/Tests/CTestTest/test.cmake.in"
       "${CMake_BINARY_DIR}/Tests/CTestTest/test.cmake" @ONLY ESCAPE_QUOTES)
     ADD_TEST(CTestTest ${CMAKE_CTEST_COMMAND}
       -S "${CMake_BINARY_DIR}/Tests/CTestTest/test.cmake" -V
       )
-  ENDIF (CTEST_TEST_CTEST)
+  ENDIF (CTEST_TEST_CTEST AND CMAKE_RUN_LONG_TESTS)
 
-  IF(UNIX)
+  IF(UNIX AND CMAKE_RUN_LONG_TESTS)
     ADD_TEST(BootstrapTest ${CMAKE_CTEST_COMMAND}
       --build-and-test
       ${CMake_SOURCE_DIR}
@@ -647,7 +651,7 @@ IF(BUILD_TESTING)
       --build-noclean
       --build-makeprogram ${CMake_SOURCE_DIR}/bootstrap
       --test-command ${CMake_BINARY_DIR}/Tests/BootstrapTest/Bootstrap.cmk/cmake)
-  ENDIF(UNIX)
+  ENDIF(UNIX AND CMAKE_RUN_LONG_TESTS)
 
   IF(CMAKE_GENERATOR MATCHES "Makefiles")
     # see if we can find a fortran compiler on the machine
