@@ -52,7 +52,14 @@ bool cmMessageCommand::Invoke(std::vector<std::string>& args)
   
   if (args.size() >= 2)
     {
-    cmSystemTools::Message(args[0].c_str(), args[1].c_str());
+    std::string message;
+    std::vector<std::string>::iterator i = args.begin();
+    ++i;
+    for(;i != args.end(); ++i)
+      {
+      message += *i;
+      }
+    cmSystemTools::Message(args[0].c_str(), message.c_str());
     }
   else
     {
