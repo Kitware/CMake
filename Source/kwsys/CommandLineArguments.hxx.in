@@ -134,7 +134,7 @@ public:
   /**
    * Get / Set the help line length. Default length is 80.
    */
-  void SetLineLength();
+  void SetLineLength(unsigned int);
   unsigned int GetLineLength();
 
 protected:
