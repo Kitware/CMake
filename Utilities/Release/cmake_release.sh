@@ -19,23 +19,40 @@
 #
 # CMake UNIX Release Script.
 #
+# Run with no arguments for documentation.
+#
 
-[ -z "$REMOTE" ] && SELF="$0"
-CVSROOT=":pserver:anonymous@www.cmake.org:/cvsroot/CMake"
-CVSROOT_GREP=":pserver:anonymous@www.cmake.org:[0-9]*/cvsroot/CMake"
+# Release version number.
 TAG="Release-1-6-2"
 VERSION="1.6.2"
 RELEASE="1"
 PREVIOUS_VERSION="1.4.7"
 PREVIOUS_RELEASE="1"
+
+# CVSROOT setting used to check out CMake.
+CVSROOT=":pserver:anonymous@www.cmake.org:/cvsroot/CMake"
+CVSROOT_GREP=":pserver:anonymous@www.cmake.org:[0-9]*/cvsroot/CMake"
+
+# CMake release root directory.
 RELEASE_ROOT_NAME="CMakeReleaseRoot"
 RELEASE_ROOT="${HOME}/${RELEASE_ROOT_NAME}"
+
+# Installation prefix used during tarball creation.  Tarballs are
+# relative to the installation prefix and do not include this in their
+# paths.
+PREFIX="/usr/local"
+
+# Directory relative to PREFIX where documentation should be placed.
+DOC_DIR="/doc/cmake"
+
+# No default compiler.  The config file must provide it.
 CC=""
 CXX=""
 CFLAGS=""
 CXXFLAGS=""
-PREFIX="/usr/local"
-DOC_DIR="/doc/cmake"
+
+# Details of remote invocation.
+[ -z "$REMOTE" ] && SELF="$0"
 
 #-----------------------------------------------------------------------------
 usage()
@@ -115,14 +132,18 @@ check_host()
 # key authentication and no password.
 remote()
 {
+    if [ ! -z "$REMOTE" ]; then
+        echo "Cannot do recursive remote calls."
+        return 1
+    fi
     check_host "$1" || return 1
     shift
-    REMOTE_TASK="$@"
+    RTASK="'$1'"; shift; for i in "$@"; do RTASK="${RTASK} '$i'"; done
     RESULT=0
     echo "------- Running remote task on $HOST. -------" &&
     (echo "REMOTE=\"1\"" &&
-     echo "TASK=\"${REMOTE_TASK}\"" &&
-     cat $SELF) | ssh "$HOST" /bin/sh 2>/dev/null || RESULT=1
+        (echo TASK=\"`(eval echo '${RTASK}') | (sed 's/"/\\\\"/g')`\") &&
+        cat $SELF) | ssh -e none "$HOST" /bin/sh  || RESULT=1
     echo "-------- Remote task on $HOST done.  --------" &&
     return $RESULT
 }
@@ -647,12 +668,20 @@ osx_install()
     ) >Logs/osx_install.log 2>&1 || error_log Logs/osx_install.log
 }
 
-if [ -z "$TASK" ]; then
-    [ -z "$REMOTE" ] && TASK="$@"
-fi
+#-----------------------------------------------------------------------------
+run()
+{
+    CMD="'$1'"; shift; for i in "$@"; do CMD="${CMD} '$i'"; done
+    eval "$CMD"
+}
 
-if [ -z "$TASK" ]; then
-    TASK="usage"
+# Determine task and evaluate it.
+if [ -z "$TASK" ] && [ -z "$REMOTE" ] ; then
+    if [ -z "$1" ]; then
+        usage
+    else
+        run "$@"
+    fi
+else
+    [ -z "$TASK" ] || eval run "$TASK"
 fi
-
-eval $TASK
