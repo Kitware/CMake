@@ -15,6 +15,9 @@
 
 =========================================================================*/
 
+#ifndef cmCTest_h
+#define cmCTest_h
+
 
 #include "cmStandardIncludes.h"
 
@@ -92,6 +95,15 @@ public:
   bool SetTest(const char*);
 
   /**
+   * Set the cmake test mode (experimental, nightly, continuous).
+   */
+  void SetTestModel(int mode)
+    {
+    m_TestModel = mode;
+    }
+  std::string GetTestModelString();
+
+  /**
    * constructor
    */
   cmCTest();
@@ -107,6 +119,12 @@ public:
   bool m_Verbose;
   bool m_DartMode;
   bool m_ShowOnly;
+
+  enum {
+    EXPERIMENTAL,
+    NIGHTLY,
+    CONTINUOUS
+  };
 
 private:
   enum {
@@ -185,6 +203,8 @@ private:
   std::string             m_StartTest;
   std::string             m_EndTest;
 
+  bool                    m_TestModel;
+
   /**
    * Generate the Dart compatible output
    */
@@ -197,3 +217,4 @@ private:
   std::string MakeXMLSafe(const std::string&);
 };
 
+#endif

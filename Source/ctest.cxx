@@ -60,6 +60,25 @@ int main (int argc, char *argv[])
       inst.SetTest(args[i+1].c_str());
       }
     
+    if( ( arg.find("-M",0) == 0 || arg.find("--test-model",0) == 0 ) &&
+        (i < args.size() -1) )
+      {
+      std::string& str = args[i+1];
+      if ( str == "NIGHTLY" || str == "nightly" || str == "Nightly" )
+        {
+        inst.SetTestModel(cmCTest::NIGHTLY);
+        }
+      else if ( str == "CONTINUOUS" || str == "continuous" || 
+                str == "Continuous" )
+        {
+        inst.SetTestModel(cmCTest::CONTINUOUS);
+        }
+      else
+        {
+        inst.SetTestModel(cmCTest::EXPERIMENTAL);
+        }
+      }
+    
     if(arg.find("-R",0) == 0 && i < args.size() - 1)
       {
       inst.m_UseIncludeRegExp = true;
