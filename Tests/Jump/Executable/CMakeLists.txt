@@ -1,0 +1,2 @@
+ADD_EXECUTABLE(jumpExecutable jumpExecutable.cxx)
+TARGET_LINK_LIBRARIES(jumpExecutable jumpStatic jumpShared)
