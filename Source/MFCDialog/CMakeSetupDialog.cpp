@@ -1184,6 +1184,7 @@ void CMakeSetupDialog::ChangeDirectoriesFromFile(const char* buffer)
     {
     std::string name = cmSystemTools::GetFilenameName(file);
     std::string path = cmSystemTools::GetFilenamePath(file);
+    path = cmSystemTools::ConvertToOutputPath(path.c_str());
     this->m_WhereBuild = path.c_str();
 
     cmCacheManager *cache = cmCacheManager::GetInstance();
@@ -1191,13 +1192,9 @@ void CMakeSetupDialog::ChangeDirectoriesFromFile(const char* buffer)
         cache->LoadCache(path.c_str()) &&
         cache->GetCacheEntry("CMAKE_HOME_DIRECTORY"))
       {
-      this->m_WhereSource = 
-        cache->GetCacheEntry("CMAKE_HOME_DIRECTORY")->m_Value.c_str();
+      path = cmSystemTools::ConvertToOutputPath(cache->GetCacheEntry("CMAKE_HOME_DIRECTORY")->m_Value.c_str());
       }
-    else
-      {
-      this->m_WhereSource = path.c_str();
-      }
+    this->m_WhereSource = path.c_str();
     }
 }
 
