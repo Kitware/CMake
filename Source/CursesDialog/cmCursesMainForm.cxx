@@ -384,7 +384,8 @@ void cmCursesMainForm::PrintKeys()
 
 
     curses_move(y-4,0);
-    printw("Press [enter] to edit option");
+    char fmt[] = "Press [enter] to edit option";
+    printw(fmt);
     curses_move(y-3,0);
     printw(firstLine);
     curses_move(y-2,0);
@@ -417,7 +418,8 @@ void cmCursesMainForm::UpdateStatusBar()
     {
     curses_clear();
     curses_move(0,0);
-    printw("Window is too small. A size of at least %dx%d is required.",
+    char fmt[] = "Window is too small. A size of at least %dx%d is required.";
+    printw(fmt,
 	   (cmCursesMainForm::MIN_WIDTH < m_InitialWidth ?
 	    m_InitialWidth : cmCursesMainForm::MIN_WIDTH), 
 	   cmCursesMainForm::MIN_HEIGHT);

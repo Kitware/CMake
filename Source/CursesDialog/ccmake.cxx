@@ -28,6 +28,9 @@
 
 cmCursesForm* cmCursesForm::CurrentForm=0;
 
+extern "C"
+{
+
 void onsig(int sig)
 {
   if (cmCursesForm::CurrentForm)
@@ -45,6 +48,8 @@ void onsig(int sig)
     cmCursesForm::CurrentForm->UpdateStatusBar();
     }
   signal(SIGWINCH, onsig);
+}
+ 
 }
 
 void CMakeErrorHandler(const char* message, const char* title, bool& disable)
