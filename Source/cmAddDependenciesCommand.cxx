@@ -50,14 +50,20 @@ bool cmAddDependenciesCommand::InitialPass(std::vector<std::string> const& args)
     return false;
     }
   
+  std::string target_name = args[0];
+  m_Makefile->ExpandVariablesInString(target_name);
+
   cmTargets &tgts = m_Makefile->GetTargets();
-  if (tgts.find(args[0]) != tgts.end())
+  if (tgts.find(target_name) != tgts.end())
     {
     std::vector<std::string>::const_iterator s = args.begin();
     ++s;
+    std::string depend_target;
     for (; s != args.end(); ++s)
       {
-      tgts[args[0]].AddUtility(s->c_str());
+      depend_target = *s;
+      m_Makefile->ExpandVariablesInString(depend_target);
+      tgts[target_name].AddUtility(depend_target.c_str());
       }
     }
 
