@@ -7,6 +7,7 @@
 #
 
 MACRO(CHECK_INCLUDE_FILE_CXX INCLUDE VARIABLE)
+  MESSAGE(STATUS "Checking for CXX include file ${INCLUDE}")
   SET(CHECK_INCLUDE_FILE_VAR ${INCLUDE})
   CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CheckIncludeFile.cxx.in
                  ${PROJECT_BINARY_DIR}/CMakeTmp/CheckIncludeFile.cxx IMMEDIATE)
@@ -16,8 +17,10 @@ MACRO(CHECK_INCLUDE_FILE_CXX INCLUDE VARIABLE)
              CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${CMAKE_ANSI_CXXFLAGS}
              OUTPUT_VARIABLE OUTPUT)
   IF(${VARIABLE})
+    MESSAGE(STATUS "Checking for CXX include file ${INCLUDE} -- found")
     SET(${VARIABLE} 1 CACHE INTERNAL "Have include ${INCLUDE}")
   ELSE(${VARIABLE})
+    MESSAGE(STATUS "Checking for CXX include file ${INCLUDE} -- not found")
     SET(${VARIABLE} "" CACHE INTERNAL "Have include ${INCLUDE}")
     WRITE_FILE(${PROJECT_BINARY_DIR}/CMakeError.log 
       "Determining if the include file ${INCLUDE} "

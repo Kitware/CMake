@@ -3,18 +3,14 @@
 #
 # CMAKE_NO_ANSI_STREAM_HEADERS - defined accoreding to the results
 #
+INCLUDE(${CMAKE_ROOT}/Modules/CheckIncludeFileCXX.cmake)
 
 IF(NOT CMAKE_NO_ANSI_STREAM_HEADERS)
-  MESSAGE(STATUS "Check for ANSI stream headers")
-  TRY_COMPILE(CMAKE_ANSI_STREAM_HEADERS  ${PROJECT_BINARY_DIR} 
-    ${CMAKE_ROOT}/Modules/TestForANSIStreamHeaders.cxx 
-    CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${CMAKE_ANSI_CXXFLAGS})
+  CHECK_INCLUDE_FILE_CXX(iostream CMAKE_ANSI_STREAM_HEADERS)
   IF (CMAKE_ANSI_STREAM_HEADERS)
-    MESSAGE(STATUS "Check for ANSI stream headers - found")
     SET (CMAKE_NO_ANSI_STREAM_HEADERS 0 CACHE INTERNAL 
          "Does the compiler support headers like iostream.")
-  ELSE (CMAKE_ANSI_STREAM_HEADERS)
-    MESSAGE(STATUS "Check for ANSI stream headers - not found")
+  ELSE (CMAKE_ANSI_STREAM_HEADERS)   
     SET (CMAKE_NO_ANSI_STREAM_HEADERS 1 CACHE INTERNAL 
        "Does the compiler support headers like iostream.")
   ENDIF (CMAKE_ANSI_STREAM_HEADERS)
