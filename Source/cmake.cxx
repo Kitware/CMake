@@ -30,6 +30,7 @@
 #include "cmGlobalNMakeMakefileGenerator.h"
 #include "cmWin32ProcessExecution.h"
 #else
+#include "cmGlobalCodeWarriorGenerator.h"
 #include "cmGlobalUnixMakefileGenerator.h"
 #endif
 
@@ -112,7 +113,7 @@ void cmake::Usage(const char* program)
     {
     errorStream << "\"" << i->c_str() << "\" ";
     }
-	  errorStream << ")\n";
+  errorStream << ")\n";
 
   cmSystemTools::Error(errorStream.str().c_str());
 }
@@ -198,16 +199,16 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     if (args.size() == 2)
       {
       this->SetHomeDirectory
-	(cmSystemTools::CollapseFullPath(args[1].c_str()).c_str());
+        (cmSystemTools::CollapseFullPath(args[1].c_str()).c_str());
       this->SetStartDirectory
-	(cmSystemTools::CollapseFullPath(args[1].c_str()).c_str());
+        (cmSystemTools::CollapseFullPath(args[1].c_str()).c_str());
       }
     else
       {
       this->SetHomeDirectory
-	(cmSystemTools::GetCurrentWorkingDirectory().c_str());
+        (cmSystemTools::GetCurrentWorkingDirectory().c_str());
       this->SetStartDirectory
-	(cmSystemTools::GetCurrentWorkingDirectory().c_str());
+        (cmSystemTools::GetCurrentWorkingDirectory().c_str());
       }
     }
 
@@ -241,7 +242,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       }
     else if(arg.find("-V",0) == 0)
       {
-	m_Verbose = true;
+        m_Verbose = true;
       }
     else if(arg.find("-D",0) == 0)
       {
@@ -483,9 +484,9 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
       {
       unsigned int cc;
       for ( cc = 2; cc < args.size(); cc ++ )
-	{
-	std::cout << args[cc] << " ";
-	}
+        {
+        std::cout << args[cc] << " ";
+        }
       std::cout << std::endl;
       return 0;
       }
@@ -494,7 +495,7 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
     else if (args[1] == "remove" && args.size() > 2)
       {
       for (std::string::size_type cc = 2; cc < args.size(); cc ++)
-	{
+        {
         if(args[cc] != "-f")
           {
           if(args[cc] == "\\-f")
@@ -503,7 +504,7 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
             }
           cmSystemTools::RemoveFile(args[cc].c_str());
           }
-	}
+        }
       return 0;
       }
 
@@ -513,10 +514,10 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
       std::string command = args[2];
       std::string output;
       for (std::string::size_type cc = 3; cc < args.size(); cc ++)
-	{
+        {
         command += " ";
         command += args[cc];
-	}
+        }
 
       clock_t clock_start, clock_finish;
       time_t time_start, time_finish;
@@ -548,18 +549,18 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
       std::string command = args[3];
       std::string output;
       for (std::string::size_type cc = 4; cc < args.size(); cc ++)
-	{
+        {
         command += " ";
         command += args[cc];
-	}
+        }
 
       int retval = 0;
       if ( cmSystemTools::RunCommand(command.c_str(), output, retval, 
-				     directory.c_str(), false) )
-	{
-	std::cout << output.c_str();
-	return retval;
-	}	
+                                     directory.c_str(), false) )
+        {
+        std::cout << output.c_str();
+        return retval;
+        }        
 
       return 1;
     }
@@ -583,9 +584,9 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
       unsigned int cc;
       std::string command = args[2];
       for ( cc = 3; cc < args.size(); cc ++ )
-	{
-	command += " " + args[cc];
-	}
+        {
+        command += " " + args[cc];
+        }
       return cmWin32ProcessExecution::Windows9xHack(command.c_str());
       }
 #endif
@@ -603,6 +604,7 @@ void cmake::GetRegisteredGenerators(std::vector<std::string>& names)
   names.push_back(cmGlobalBorlandMakefileGenerator::GetActualName());
   names.push_back(cmGlobalNMakeMakefileGenerator::GetActualName());
 #else
+  names.push_back(cmGlobalCodeWarriorGenerator::GetActualName());
   names.push_back(cmGlobalUnixMakefileGenerator::GetActualName());
 #endif
 }
@@ -632,6 +634,11 @@ cmGlobalGenerator* cmake::CreateGlobalGenerator(const char* name)
     ret->SetCMakeInstance(this);
     }
 #else
+  if (!strcmp(name,cmGlobalCodeWarriorGenerator::GetActualName()))
+    {
+    ret = new cmGlobalCodeWarriorGenerator;
+    ret->SetCMakeInstance(this);
+    }
   if (!strcmp(name,cmGlobalUnixMakefileGenerator::GetActualName()))
     {
     ret = new cmGlobalUnixMakefileGenerator;
