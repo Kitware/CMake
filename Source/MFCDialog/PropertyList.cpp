@@ -5,6 +5,7 @@
 #include "PropertyList.h"
 #include "PathDialog.h"
 #include "../cmCacheManager.h"
+#include "../cmSystemTools.h"
 
 #define IDC_PROPCMBBOX   712
 #define IDC_PROPEDITBOX  713
@@ -374,43 +375,8 @@ void CPropertyList::OnButton()
 
   //display the appropriate common dialog depending on what type
   //of chooser is associated with the property
-  if (pItem->m_nItemType == CPropertyList::COLOR)
-    {
-    COLORREF initClr;
-    CString currClr = pItem->m_curValue;
-    //parse the property's current color value
-    if (currClr.Find("RGB") > -1)
-      {
-      int j = currClr.Find(',',3);
-      CString bufr = currClr.Mid(4,j-4);
-      int RVal = atoi(bufr);
-      int j2 = currClr.Find(',',j+1);
-      bufr = currClr.Mid(j+1,j2-(j+1));
-      int GVal = atoi(bufr);
-      int j3 = currClr.Find(')',j2+1);
-      bufr = currClr.Mid(j2+1,j3-(j2+1));
-      int BVal = atoi(bufr);
-      initClr = RGB(RVal,GVal,BVal);
-      }
-    else
-      initClr = 0;
-		
-    CColorDialog ClrDlg(initClr);
-		
-    if (IDOK == ClrDlg.DoModal())
-      {
-      COLORREF selClr = ClrDlg.GetColor();
-      CString clrStr;
-      clrStr.Format("RGB(%d,%d,%d)",GetRValue(selClr),
-                    GetGValue(selClr),GetBValue(selClr));
-      m_btnCtrl.ShowWindow(SW_HIDE);
 
-      pItem->m_curValue = clrStr;
-      m_Dirty = true;
-      Invalidate();
-      }
-    }
-  else if (pItem->m_nItemType == CPropertyList::FILE)
+  if (pItem->m_nItemType == CPropertyList::FILE)
     {
     CString SelectedFile; 
     CString Filter("All Files (*.*)||");
@@ -438,8 +404,9 @@ void CPropertyList::OnButton()
       SelectedFile = FileDlg.GetPathName();
 			
       m_btnCtrl.ShowWindow(SW_HIDE);
-			
-      pItem->m_curValue = SelectedFile;
+      std::string path = SelectedFile;
+      cmSystemTools::ConvertToUnixSlashes(path);
+      pItem->m_curValue = path.c_str();
       m_Dirty = true;
       Invalidate();
       }
@@ -456,22 +423,9 @@ void CPropertyList::OnButton()
       {
       CString SelectedFile = dlg.GetPathName();
       m_btnCtrl.ShowWindow(SW_HIDE);
-      pItem->m_curValue = SelectedFile;
-      m_Dirty = true;
-      Invalidate();
-      }
-    }
-  else if (pItem->m_nItemType == CPropertyList::FONT)
-    {	
-    CFontDialog FontDlg(NULL,CF_EFFECTS | CF_SCREENFONTS,NULL,this);
-		
-    if(IDOK == FontDlg.DoModal())
-      {
-      CString faceName = FontDlg.GetFaceName();
-			
-      m_btnCtrl.ShowWindow(SW_HIDE);
-			
-      pItem->m_curValue = faceName;
+      std::string path = SelectedFile;
+      cmSystemTools::ConvertToUnixSlashes(path);
+      pItem->m_curValue = path.c_str();
       m_Dirty = true;
       Invalidate();
       }
