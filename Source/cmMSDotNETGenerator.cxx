@@ -1101,7 +1101,9 @@ void cmMSDotNETGenerator::WriteVCProjFile(std::ostream& fout,
       if (source != libName || target.GetType() == cmTarget::UTILITY)
         {
         fout << "\t\t\t<File\n";
-        std::string d = this->ConvertToXMLOutputPath(source.c_str());
+        std::string d = cmSystemTools::ConvertToOutputPath(source.c_str());
+        // remove double quotes from the string
+        cmSystemTools::ReplaceString(d, "\"", "");
         // Tell MS-Dev what the source is.  If the compiler knows how to
         // build it, then it will.
         fout << "\t\t\t\tRelativePath=\"" << d << "\">\n";
