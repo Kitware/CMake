@@ -35,6 +35,7 @@ void cmGlobalVisualStudio7Generator::EnableLanguage(std::vector<std::string>cons
   mf->AddDefinition("CMAKE_GENERATOR_CC", "cl");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "cl");
   mf->AddDefinition("CMAKE_GENERATOR_RC", "rc");
+  mf->AddDefinition("CMAKE_GENERATOR_NO_COMPILER_ENV", "1");
   mf->AddDefinition("CMAKE_GENERATOR_Fortran", "ifort");
   
   // Create list of configurations requested by user's cache, if any.

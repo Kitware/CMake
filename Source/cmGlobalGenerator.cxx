@@ -198,21 +198,25 @@ void cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
         {
         cmSystemTools::Error("Could not find cmake module file:", determineFile.c_str());
         }
-      
-      // put ${CMake_(LANG)_COMPILER_ENV_VAR}=${CMAKE_(LANG)_COMPILER into the
-      // environment, in case user scripts want to run configure, or sub cmakes
-      std::string compilerName = "CMAKE_";
-      compilerName += lang;
-      compilerName += "_COMPILER";
-      std::string compilerEnv = "CMAKE_";
-      compilerEnv += lang;
-      compilerEnv += "_COMPILER_ENV_VAR";
-      std::string envVar = mf->GetRequiredDefinition(compilerEnv.c_str());
-      std::string envVarValue = mf->GetRequiredDefinition(compilerName.c_str());
-      std::string env = envVar;
-      env += "=";
-      env += envVarValue;
-      cmSystemTools::PutEnv(env.c_str());
+      // Some generators like visual studio should not use the env variables
+      // So the global generator can specify that in this variable
+      if(!mf->GetDefinition("CMAKE_GENERATOR_NO_COMPILER_ENV"))
+        {
+        // put ${CMake_(LANG)_COMPILER_ENV_VAR}=${CMAKE_(LANG)_COMPILER into the
+        // environment, in case user scripts want to run configure, or sub cmakes
+        std::string compilerName = "CMAKE_";
+        compilerName += lang;
+        compilerName += "_COMPILER";
+        std::string compilerEnv = "CMAKE_";
+        compilerEnv += lang;
+        compilerEnv += "_COMPILER_ENV_VAR";
+        std::string envVar = mf->GetRequiredDefinition(compilerEnv.c_str());
+        std::string envVarValue = mf->GetRequiredDefinition(compilerName.c_str());
+        std::string env = envVar;
+        env += "=";
+        env += envVarValue;
+        cmSystemTools::PutEnv(env.c_str());
+        }
       }
     
     // **** Step 5, Load the configured language compiler file, if not loaded.
