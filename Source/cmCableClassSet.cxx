@@ -77,10 +77,18 @@ cmCableClassSet::~cmCableClassSet()
 
 /**
  * Add a class to the set.
+ * Automatically replace ">>" with "> >" to prevent template class name
+ * problems after replacements.
  */
-void cmCableClassSet::AddClass(const char* name,
+void cmCableClassSet::AddClass(const char* in_name,
                                cmCableClass* cableClass)
 {
+  cmStdString name = in_name;
+  for(cmStdString::size_type pos = name.find(">>");
+      pos != cmStdString::npos; pos = name.find(">>", pos+2))
+    {
+    name.replace(pos, 2, "> >");
+    }
   m_CableClassMap.insert(CableClassMap::value_type(name, cableClass));
 }
 
@@ -153,14 +161,14 @@ private:
   {
   public:
     Substitution() {}
-    void Bind(const std::string& in_code, const cmCableClass* in_class)
+    void Bind(const cmStdString& in_code, const cmCableClass* in_class)
       {
         m_Code = in_code;
         m_Class = in_class;
       }
     const cmCableClass* GetClass() const
       { return m_Class; }
-    const std::string& GetCode() const
+    const cmStdString& GetCode() const
       { return m_Code; }    
     
   private:
@@ -172,7 +180,7 @@ private:
     /**
      * The code to be used for the substitution.
      */
-    std::string m_Code;
+    cmStdString m_Code;
   };
   
   
@@ -192,7 +200,7 @@ private:
     /**
      * Get the C++ code corresponding to this Portion of a string.
      */
-    virtual std::string GetCode() const =0;
+    virtual cmStdString GetCode() const =0;
     /**
      * Get the class corresponding to this Portion of a string.  This is NULL
      * for StringPortion, and points to a cmCableClass for ReplacePortion.
@@ -210,8 +218,8 @@ private:
   class StringPortion: public Portion
   {
   public:
-    StringPortion(const std::string& in_code): m_Code(in_code) {}
-    virtual std::string GetCode() const
+    StringPortion(const cmStdString& in_code): m_Code(in_code) {}
+    virtual cmStdString GetCode() const
       { return m_Code; }
     virtual const cmCableClass* GetClass() const
       { return NULL; }
@@ -220,7 +228,7 @@ private:
     /**
      * Hold this Portion's contribution to the output string.
      */
-    std::string m_Code;
+    cmStdString m_Code;
   };
   
 
@@ -235,7 +243,7 @@ private:
   public:
     ReplacePortion(const Substitution& in_substitution):
       m_Substitution(in_substitution) {}
-    virtual std::string GetCode() const
+    virtual cmStdString GetCode() const
       { return m_Substitution.GetCode(); }
     virtual const cmCableClass* GetClass() const
       { return m_Substitution.GetClass(); }
@@ -263,12 +271,12 @@ private:
   /**
    * The class name parsed out for this element, before set expansion.
    */
-  std::string m_ClassName;
+  cmStdString m_ClassName;
   
   /**
    * The tag name parsed out or generated for this element.
    */
-  std::string m_Tag;
+  cmStdString m_Tag;
   
   /**
    * The set of sources parsed out for this element.
@@ -289,10 +297,10 @@ private:
   void Generate(Substitutions::const_iterator);
   void ParseInputElement(const char*);
   void SplitClassName();
-  std::string ParseSetName(std::string::const_iterator&,
-                           std::string::const_iterator) const;
+  cmStdString ParseSetName(cmStdString::const_iterator&,
+                           cmStdString::const_iterator) const;
   void FindTagSource();
-  bool GenerateTag(const std::string&);
+  bool GenerateTag(const cmStdString&);
 };
 
 
@@ -356,8 +364,8 @@ ElementCombinationGenerator
   if(substitution == m_Substitutions.end())
     {
     // All substitutions have been prepared.  Generate this combination.
-    std::string tag = m_Tag;
-    std::string code = "";
+    cmStdString tag = m_Tag;
+    cmStdString code = "";
     
     // The set of sources for the generated combination.  It will
     // always include the sources parsed from the original element
@@ -440,8 +448,8 @@ ElementCombinationGenerator
   // A regular expression to match the element when more source files are given.
   cmRegularExpression sourcesRemain("^([^;]*);(.*)$");
   
-  std::string elementWithoutTag;
-  std::string sourceString;
+  cmStdString elementWithoutTag;
+  cmStdString sourceString;
   bool tagGiven = false;
   
   // See if the element was tagged, and if so, pull off the tag.
@@ -511,8 +519,8 @@ ElementCombinationGenerator
 {
   // Break the input code into blocks alternating between literal code and
   // set-substitution tokens (like $SomeSetName).
-  std::string currentPortion = "";
-  for(std::string::const_iterator c=m_ClassName.begin();
+  cmStdString currentPortion = "";
+  for(cmStdString::const_iterator c=m_ClassName.begin();
       c != m_ClassName.end(); ++c)
     {
     // Look for the '$' to mark the beginning of a token.
@@ -531,7 +539,7 @@ ElementCombinationGenerator
       // Skip over the '$' character.
       ++c;
       // Get element set name token.
-      std::string setName = this->ParseSetName(c, m_ClassName.end());
+      cmStdString setName = this->ParseSetName(c, m_ClassName.end());
 
       // We have a complete set name.  Look it up in makefile's data
       // collection.
@@ -583,11 +591,11 @@ ElementCombinationGenerator
  * Returns the set name after parsing.  "c" will point to the first
  * character after the end of the set name.
  */
-std::string
+cmStdString
 ElementCombinationGenerator
-::ParseSetName(std::string::const_iterator& c, std::string::const_iterator end) const
+::ParseSetName(cmStdString::const_iterator& c, cmStdString::const_iterator end) const
 {
-  std::string setName = "";
+  cmStdString setName = "";
   
   // Check for the $(setName) syntax.
   // If the first character after the '$' is a left paren, we scan for the
@@ -653,7 +661,7 @@ void ElementCombinationGenerator::FindTagSource()
   for(std::vector<std::string>::const_iterator dir = includePath.begin();
       dir != includePath.end(); ++dir)
     {
-    std::string filePath = *dir;
+    cmStdString filePath = *dir;
     m_Makefile->ExpandVariablesInString(filePath);
     filePath += "/"+m_Tag+".h";
     if(cmSystemTools::FileExists(filePath.c_str()))
@@ -670,7 +678,7 @@ void ElementCombinationGenerator::FindTagSource()
  * the element tag for it.  This function determines how the output
  * language of all CABLE-generated wrappers will look.
  */
-bool ElementCombinationGenerator::GenerateTag(const std::string& element)
+bool ElementCombinationGenerator::GenerateTag(const cmStdString& element)
 {
   // Hold the regular expressions for matching against the element.
   cmRegularExpression regex;

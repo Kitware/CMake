@@ -52,9 +52,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 class cmCableClass
 {
 public:
-  typedef std::set<std::string> Sources;
+  typedef std::set<cmStdString> Sources;
   cmCableClass() {}
-  cmCableClass(const std::string& tag): m_Tag(tag) {}
+  cmCableClass(const cmStdString& tag): m_Tag(tag) {}
   
   void AddSources(const Sources& sources);
   void AddSource(const char*);
@@ -62,13 +62,13 @@ public:
   Sources::const_iterator SourcesBegin() const { return m_Sources.begin(); }
   Sources::const_iterator SourcesEnd() const { return m_Sources.end(); }
 
-  const std::string& GetTag() const { return m_Tag; }
+  const cmStdString& GetTag() const { return m_Tag; }
   
 private:  
   /**
    * The tag name of this class.
    */
-  std::string m_Tag;
+  cmStdString m_Tag;
   
   /**
    * Store the set of source files (headers) needed to define this class.
