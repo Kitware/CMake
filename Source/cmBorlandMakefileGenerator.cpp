@@ -20,15 +20,16 @@ void cmBorlandMakefileGenerator::GenerateMakefile()
     m_LibraryOutputPath = m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH");
     if(m_LibraryOutputPath.size())
       {
-      if(m_LibraryOutputPath[m_LibraryOutputPath.size() -1] != '/')
+      std::string tempLibraryOutputPath = m_LibraryOutputPath;
+      if(tempLibraryOutputPath[tempLibraryOutputPath.size() -1] != '/')
         {
-        m_LibraryOutputPath += "/";
+        tempLibraryOutputPath += "/";
         }
-      if(!cmSystemTools::MakeDirectory(m_LibraryOutputPath.c_str()))
+      if(!cmSystemTools::MakeDirectory(tempLibraryOutputPath.c_str()))
         {
         cmSystemTools::Error("Error failed create "
                              "LIBRARY_OUTPUT_PATH directory:",
-                             m_LibraryOutputPath.c_str());
+                             tempLibraryOutputPath.c_str());
         }
       m_Makefile->AddLinkDirectory(m_LibraryOutputPath.c_str());
       }
@@ -39,15 +40,16 @@ void cmBorlandMakefileGenerator::GenerateMakefile()
       m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
     if(m_ExecutableOutputPath.size())
       {
-      if(m_ExecutableOutputPath[m_ExecutableOutputPath.size() -1] != '/')
+      std::string tempExecutableOutputPath = m_ExecutableOutputPath;
+      if(tempExecutableOutputPath[tempExecutableOutputPath.size() -1] != '/')
         {
-        m_ExecutableOutputPath += "/";
+        tempExecutableOutputPath += "/";
         }
-      if(!cmSystemTools::MakeDirectory(m_ExecutableOutputPath.c_str()))
+      if(!cmSystemTools::MakeDirectory(tempExecutableOutputPath.c_str()))
         {
-        cmSystemTools::Error("Error failed to create " 
+        cmSystemTools::Error("Error failed to create "
                              "EXECUTABLE_OUTPUT_PATH directory:",
-                             m_ExecutableOutputPath.c_str());
+                             tempExecutableOutputPath.c_str());
         }
       m_Makefile->AddLinkDirectory(m_ExecutableOutputPath.c_str());
       }
@@ -61,7 +63,7 @@ void cmBorlandMakefileGenerator::GenerateMakefile()
     m_LibraryOutputPath = ".";
     }
 
-  if (m_CacheOnly) 
+  if (m_CacheOnly)
     {
     // Generate the cache only stuff
     this->GenerateCacheOnly();
@@ -119,13 +121,14 @@ void cmBorlandMakefileGenerator::OutputMakefile(const char* file)
       cmSystemTools::MakeDirectory(i->c_str());
       }
     }
-  std::ostrstream fout;
+  //
+  std::ofstream fout(file);
   //
   // Begin writing to makefile.mak
   //
   fout << "# CMAKE Borland (win32) makefile : Edit with Caution \n\n";
   //
-  // Turn on Autodependency chaecking
+  // Turn on Autodependency checking
   //
   fout << ".autodepend \n\n";
   //
@@ -137,14 +140,21 @@ void cmBorlandMakefileGenerator::OutputMakefile(const char* file)
   fout << m_Makefile->ExpandVariablesInString(replace);
   replace = "BCB              = $(BCBBINPATH)/.. \n";
   fout << m_Makefile->ExpandVariablesInString(replace);
+//  replace = "OUTDIRLIB        = @LIBRARY_OUTPUT_PATH@ \n";
+//  fout << cmSystemTools::ConvertToWindowsSlashes(m_Makefile->ExpandVariablesInString(replace));
+//  replace = "OUTDIREXE        = @EXECUTABLE_OUTPUT_PATH@ \n";
+//  fout << m_Makefile->ExpandVariablesInString(replace);
+
   replace = "OUTDIRLIB        = ";
   replace += m_LibraryOutputPath;
   replace += "\n";
   fout << cmSystemTools::ConvertToWindowsSlashes(replace);
+
   replace = "OUTDIREXE        = ";
   replace += m_ExecutableOutputPath;
   replace += "\n";
   fout << cmSystemTools::ConvertToWindowsSlashes(replace);
+
   replace = "USERDEFINES      = @DEFS_USER@ \n";
   fout << m_Makefile->ExpandVariablesInString(replace);
   replace = "SYSDEFINES       = @DEFS_SYS@ \n";
@@ -178,21 +188,21 @@ void cmBorlandMakefileGenerator::OutputMakefile(const char* file)
   // sort the array
   std::sort(lfiles.begin(), lfiles.end(), std::less<std::string>());
   // remove duplicates
-  std::vector<std::string>::iterator new_end = 
+  std::vector<std::string>::iterator new_end =
     std::unique(lfiles.begin(), lfiles.end());
   lfiles.erase(new_end, lfiles.end());
   fout << "CMAKE_MAKEFILE_SOURCES = \\ \n";
   std::string dir;
   for (std::vector<std::string>::const_iterator i=lfiles.begin();
-       i!=lfiles.end(); ++i) 
+       i!=lfiles.end(); ++i)
     {
     dir = *i;
-    cmSystemTools::ConvertToWindowsSlashes(dir);
+//    cmSystemTools::ConvertToWindowsSlashes(dir);
     fout << "  " << dir << " \\\n";
     }
   dir = m_Makefile->GetHomeOutputDirectory();
   dir += "/CMakeCache.txt";
-  cmSystemTools::ConvertToWindowsSlashes(dir);
+//  cmSystemTools::ConvertToWindowsSlashes(dir);
   fout << "  " << dir << "\n\n";
   //
   // Output Include paths
@@ -200,12 +210,12 @@ void cmBorlandMakefileGenerator::OutputMakefile(const char* file)
   std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();
   fout << "INCLUDEPATH =";
   for (std::vector<std::string>::iterator i=includes.begin();
-       i!=includes.end(); ++i) 
+       i!=includes.end(); ++i)
     {
     std::string include = *i;
     fout << "-I" << cmSystemTools::EscapeSpaces(i->c_str()) << "; \\\n  ";
     }
-  fout << "-I" << 
+  fout << "-I" <<
     cmSystemTools::EscapeSpaces(m_Makefile->GetStartDirectory()) << "\n\n";
   //
   // for each target add to the list of targets
@@ -214,24 +224,24 @@ void cmBorlandMakefileGenerator::OutputMakefile(const char* file)
   const cmTargets &tgts = m_Makefile->GetTargets();
   // list libraries first
   for (cmTargets::const_iterator l=tgts.begin();
-       l!=tgts.end(); ++l) 
+       l!=tgts.end(); ++l)
     {
     if ((l->second.GetType() == cmTarget::STATIC_LIBRARY)
-        && l->second.IsInAll()) 
+        && l->second.IsInAll())
       {
-      fout << " \\\n  $(OUTDIRLIB)\\" << l->first.c_str() << ".lib";
+      fout << " \\\n  $(OUTDIRLIB)" << l->first.c_str() << ".lib";
       }
-    if ((l->second.GetType() == cmTarget::SHARED_LIBRARY) && l->second.IsInAll()) 
+    if ((l->second.GetType() == cmTarget::SHARED_LIBRARY) && l->second.IsInAll())
       {
-      fout << " \\\n  $(OUTDIRLIB)\\" << l->first.c_str() << ".dll";
+      fout << " \\\n  $(OUTDIRLIB)" << l->first.c_str() << ".dll";
       }
-    if ((l->second.GetType() == cmTarget::MODULE_LIBRARY) && l->second.IsInAll()) 
+    if ((l->second.GetType() == cmTarget::MODULE_LIBRARY) && l->second.IsInAll())
       {
-      fout << " \\\n  $(OUTDIRLIB)\\" << l->first.c_str() << ".bpl";
+      fout << " \\\n  $(OUTDIRLIB)" << l->first.c_str() << ".bpl";
       }
     }
   // executables
-  for (cmTargets::const_iterator l=tgts.begin(); l!=tgts.end(); l++) 
+  for (cmTargets::const_iterator l=tgts.begin(); l!=tgts.end(); l++)
     {
     if ((l->second.GetType() == cmTarget::EXECUTABLE
          || l->second.GetType() == cmTarget::WIN32_EXECUTABLE) && l->second.IsInAll())
@@ -240,9 +250,9 @@ void cmBorlandMakefileGenerator::OutputMakefile(const char* file)
       }
     }
   // list utilities last
-  for (cmTargets::const_iterator l=tgts.begin(); l!=tgts.end(); l++) 
+  for (cmTargets::const_iterator l=tgts.begin(); l!=tgts.end(); l++)
     {
-    if (l->second.GetType() == cmTarget::UTILITY && l->second.IsInAll()) 
+    if (l->second.GetType() == cmTarget::UTILITY && l->second.IsInAll())
       {
       fout << " \\\n  " << l->first.c_str();
       }
@@ -251,19 +261,19 @@ void cmBorlandMakefileGenerator::OutputMakefile(const char* file)
   //
   // Now create the source file groups for each target
   //
-  for (cmTargets::const_iterator l=tgts.begin(); l!=tgts.end(); l++) 
+  for (cmTargets::const_iterator l=tgts.begin(); l!=tgts.end(); l++)
     {
     std::vector<cmSourceFile> classes = l->second.GetSourceFiles();
-    if (classes.begin() != classes.end()) 
+    if (classes.begin() != classes.end())
       {
       fout << l->first << "_SRC_OBJS = ";
-      for (std::vector<cmSourceFile>::iterator i=classes.begin(); i!=classes.end(); i++) 
+      for (std::vector<cmSourceFile>::iterator i=classes.begin(); i!=classes.end(); i++)
         {
         std::string ext = i->GetSourceExtension();
-        if (!i->IsAHeaderFileOnly() && (ext!="def" && ext!="rc")) 
+        if (!i->IsAHeaderFileOnly() && (ext!="def" && ext!="rc"))
           {
-          fout << " \\\n  " << 
-            cmSystemTools::ConvertToWindowsSlashes(i->GetSourceName()) 
+          fout << " \\\n  " <<
+            cmSystemTools::ConvertToWindowsSlashes(i->GetSourceName())
                << ".obj ";
           }
         }
@@ -275,10 +285,10 @@ void cmBorlandMakefileGenerator::OutputMakefile(const char* file)
   //
   // do .lib files
   std::string libname;
-  for (cmTargets::const_iterator t=tgts.begin(); t!=tgts.end(); t++) 
+  for (cmTargets::const_iterator t=tgts.begin(); t!=tgts.end(); t++)
     {
     cmTarget::LinkLibraries const& libs = t->second.GetLinkLibraries();
-    
+
     if ((t->second.GetType() == cmTarget::STATIC_LIBRARY)   ||
         (t->second.GetType() == cmTarget::SHARED_LIBRARY)   ||
         (t->second.GetType() == cmTarget::MODULE_LIBRARY)   ||
@@ -287,17 +297,17 @@ void cmBorlandMakefileGenerator::OutputMakefile(const char* file)
       {
       fout << t->first << "_LINK_LIB = ";
       for (cmTarget::LinkLibraries::const_iterator l=libs.begin();
-           l!=libs.end(); l++) 
+           l!=libs.end(); l++)
         {
         if ((t->first!=l->first) &&
             (t->second.GetType()!=cmTarget::INSTALL_FILES
-             || t->second.GetType()!=cmTarget::INSTALL_PROGRAMS)) 
+             || t->second.GetType()!=cmTarget::INSTALL_PROGRAMS))
           {
           // if this lib is not a target then don't add OUTDIRLIB to it
           if (tgts.find(l->first)==tgts.end())
             libname = l->first;
           else
-            libname = "$(OUTDIRLIB)\\" + l->first;
+            libname = "$(OUTDIRLIB)" + l->first;
           if (libname.find(".bpi")!=std::string::npos) continue;
           cmSystemTools::ReplaceString(libname, ".lib", "");
           libname += ".lib";
@@ -329,7 +339,7 @@ void cmBorlandMakefileGenerator::OutputMakefile(const char* file)
           if (tgts.find(l->first)==tgts.end())
             libname = l->first;
           else
-            libname = "$(OUTDIRLIB)\\" + l->first;
+            libname = "$(OUTDIRLIB)" + l->first;
           if (libname.find(".bpi")==std::string::npos) continue;
           fout << " \\\n  " << cmSystemTools::EscapeSpaces(libname.c_str());
           }
@@ -347,7 +357,7 @@ void cmBorlandMakefileGenerator::OutputMakefile(const char* file)
     std::string temp = cmSystemTools::EscapeSpaces(d->c_str());
     fout << temp << ";";
     }
-  fout << "$(OUTDIRLIB)\n\n";
+  fout << "\n\n";
 
   //
   // The project rule - Build All targets
@@ -398,18 +408,7 @@ void cmBorlandMakefileGenerator::OutputMakefile(const char* file)
     }
   //
   //
-  //
-  std::ofstream ffout(file);
-  if (!ffout) 
-    {
-    cmSystemTools::Error("Error can not open for write: ", file);
-    return;
-    }
-  fout << std::ends;
-  std::string makefileastext = fout.str();
-//  cmSystemTools::CleanUpWindowsSlashes(makefileastext);
-//  makefileastext = StringReplace(makefileastext.c_str(), "¬", "/", TReplaceFlags()<<rfReplaceAll).c_str();
-  ffout << makefileastext << "\n# End of File\n";
+  fout << "\n# End of File\n";
 }
 //---------------------------------------------------------------------------
 // output the list of libraries that the executables in this makefile will depend on.
@@ -435,7 +434,7 @@ void cmBorlandMakefileGenerator::OutputDependencies(std::ostream& fout)
     const char* cacheValue = m_Makefile->GetDefinition(lib2->first.c_str());
     if (cacheValue) 
       {
-      fout << "\\\n  $(OUTDIRLIB)\\" << lib2->first << ".lib ";
+      fout << "\\\n  $(OUTDIRLIB)" << lib2->first << ".lib ";
       }
     }
   fout << "\n\n";
@@ -470,12 +469,12 @@ void cmBorlandMakefileGenerator::OutputTargets(std::ostream& fout)
       {
       //
       // at the moment, static and shared are treated the same
-      // WARNING. TLIB fails with Unix style Forward slashes - use $(OUTDIRLIB)\\
-      // WARNING. IMPLIB works better with Forward slashes - use $(OUTDIRLIB)\\
+      // WARNING. TLIB fails with Unix style Forward slashes - use $(OUTDIRLIB)
+      // WARNING. IMPLIB works better with Forward slashes - use $(OUTDIRLIB)
       //
       fout << "# this should be a static library \n";
-      fout << "$(OUTDIRLIB)\\" << l->first << ".lib : ${" << l->first << "_SRC_OBJS} \n";
-      std::string Libname = "$(OUTDIRLIB)\\" + l->first + ".lib";
+      fout << "$(OUTDIRLIB)" << l->first << ".lib : ${" << l->first << "_SRC_OBJS} \n";
+      std::string Libname = "$(OUTDIRLIB)" + l->first + ".lib";
       fout << "  TLib.exe $(LINKFLAGS_STATIC) /u " << Libname.c_str() << " @&&| \n";
       fout << "    $? \n";
       fout << "| \n\n";
@@ -483,19 +482,19 @@ void cmBorlandMakefileGenerator::OutputTargets(std::ostream& fout)
     if (l->second.GetType() == cmTarget::SHARED_LIBRARY) 
       {
       fout << "# this should be a shared (DLL) library \n";
-      fout << "$(OUTDIRLIB)\\" << l->first << ".dll : ${" << l->first << "_SRC_OBJS} \n";
+      fout << "$(OUTDIRLIB)" << l->first << ".dll : ${" << l->first << "_SRC_OBJS} \n";
       fout << "  @ilink32.exe @&&| \n";
       fout << "    -L\"$(BCB)/lib\" -L$(LINK_DIR) $(LINKFLAGS_DLL) $(LINKFLAGS_DEBUG) \"$(BCB)/lib/c0d32.obj\" ";
       fout << "$(" << l->first << "_SRC_OBJS) ";
       fout << "$(" << l->first << "_LINK_BPI) , $<, $*, ";
       fout << "$(" << l->first << "_LINK_LIB) $(LINK_LIB) \n";
       fout << "| \n";
-      fout << "  @implib -w " << "$(OUTDIRLIB)\\" << l->first << ".lib " << "$(OUTDIRLIB)\\" << l->first << ".dll \n\n";
+      fout << "  @implib -w " << "$(OUTDIRLIB)" << l->first << ".lib " << "$(OUTDIRLIB)" << l->first << ".dll \n\n";
       }
     if (l->second.GetType() == cmTarget::MODULE_LIBRARY) 
       {
       fout << "# this should be a Borland Package library \n";
-      fout << "$(OUTDIRLIB)\\" << l->first << ".bpl : ${" << l->first << "_SRC_OBJS} \n";
+      fout << "$(OUTDIRLIB)" << l->first << ".bpl : ${" << l->first << "_SRC_OBJS} \n";
       fout << "  @ilink32.exe @&&| \n";
       fout << "    -L\"$(BCB)/lib\" -L$(LINK_DIR) $(LINKFLAGS_BPL) $(LINKFLAGS_DEBUG) \"$(BCB)/lib/c0pkg32.obj\" ";
       fout << "$(" << l->first << "_SRC_OBJS) ";
