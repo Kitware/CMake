@@ -59,7 +59,13 @@ static const char *inet_ntop4 (const u_char *src, char *dst, size_t size)
 #ifdef HAVE_INET_NTOA_R
   return inet_ntoa_r(*(struct in_addr*)src, dst, size);
 #else
-  const char *addr = inet_ntoa(*(struct in_addr*)src);
+  union {
+    const u_char* uch;
+    const struct in_addr* iad;
+  } srcaddr;
+  const char *addr;
+  srcaddr.uch = src;
+  addr = inet_ntoa(*srcaddr.iad);
 
   if (strlen(addr) >= size)
   {
