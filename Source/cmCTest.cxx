@@ -4497,7 +4497,6 @@ int cmCTest::ReadCustomConfigurationFileTree(const char* dir)
        cmSystemTools::GetErrorOccuredFlag() ) )
       {
       std::cerr << "Problem reading custom configuration" << std::endl;
-      return 0;
       }
     dirs.erase(dirs.end()-1, dirs.end());
     cmSystemTools::SimpleGlob(rexpr, ndirs, -1);
