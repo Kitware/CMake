@@ -322,6 +322,17 @@ IF(BUILD_TESTING)
       --build-exe-dir "${CMake_BINARY_DIR}/Tests/ComplexOneConfig/bin"
       --test-command complex)
 
+    ADD_TEST(complexRelativePaths  ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/Complex"
+      "${CMake_BINARY_DIR}/Tests/ComplexRelativePaths"
+      --build-generator ${CMAKE_GENERATOR}
+      --build-project complex
+      --build-makeprogram ${MAKEPROGRAM}
+      --build-exe-dir "${CMake_BINARY_DIR}/Tests/ComplexRelativePaths/bin" 
+      --build-options -DCMAKE_USE_RELATIVE_PATHS:BOOL=ON
+      --test-command complex)
+
   ENDIF(NOT COMPILER_IS_COMO)
 
   ADD_TEST(Example ${CMAKE_CTEST_COMMAND}

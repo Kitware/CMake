@@ -32,6 +32,7 @@ cmLocalUnixMakefileGenerator::cmLocalUnixMakefileGenerator()
   m_MakefileVariableSize = 0;
   m_IgnoreLibPrefix = false;
   m_PassMakeflags = false;
+  m_UseRelativePaths = false;
 }
 
 cmLocalUnixMakefileGenerator::~cmLocalUnixMakefileGenerator()
@@ -41,6 +42,7 @@ cmLocalUnixMakefileGenerator::~cmLocalUnixMakefileGenerator()
 
 void cmLocalUnixMakefileGenerator::Generate(bool fromTheTop)
 {
+  m_UseRelativePaths = m_Makefile->IsOn("CMAKE_USE_RELATIVE_PATHS");
   // suppoirt override in output directories
   if (m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH"))
     {
@@ -700,12 +702,12 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
     if(emitted.insert(libpath).second)
       {
       std::string fullLibPath;
-      if(!m_WindowsShell)
+      if(!m_WindowsShell && m_UseRelativePaths)
         {
         fullLibPath = "\"`cd ";
         }
       fullLibPath += libpath;
-      if(!m_WindowsShell)
+      if(!m_WindowsShell && m_UseRelativePaths)
         {
         fullLibPath += ";pwd`\"";
         }
@@ -1076,16 +1078,16 @@ void cmLocalUnixMakefileGenerator::OutputLibraryRule(std::ostream& fout,
 
   std::string outpath;
   std::string outdir = this->ConvertToRelativeOutputPath(m_LibraryOutputPath.c_str());
-  if(!m_WindowsShell && outdir.size())
+  if(!m_WindowsShell && m_UseRelativePaths && outdir.size())
     {
     outpath =  "\"`cd ";
     }
   outpath += outdir;
-  if(!m_WindowsShell && outdir.size())
+  if(!m_WindowsShell && m_UseRelativePaths && outdir.size())
     {
     outpath += ";pwd`\"/";
     }
-  if(outdir.size() == 0 && !m_WindowsShell)
+  if(outdir.size() == 0 && m_UseRelativePaths && !m_WindowsShell)
     {
     outpath = "\"`pwd`\"/";
     }

@@ -1085,6 +1085,17 @@ int cmake::Configure()
                                   "Single output directory for building all executables.",
                                   cmCacheManager::PATH);
     }  
+  if(!m_CacheManager->GetCacheValue("CMAKE_USE_RELATIVE_PATHS"))
+    {
+    m_CacheManager->AddCacheEntry("CMAKE_USE_RELATIVE_PATHS", false,
+                                  "If true, cmake will use relative paths in makefiles and projects.");
+    cmCacheManager::CacheIterator it =
+      m_CacheManager->GetCacheIterator("CMAKE_USE_RELATIVE_PATHS");
+    if ( !it.PropertyExists("ADVANCED") )
+      {
+      it.SetProperty("ADVANCED", "1");
+      }
+    }  
   
   if(cmSystemTools::GetFatalErrorOccured() &&
      (!this->m_CacheManager->GetCacheValue("CMAKE_MAKE_PROGRAM") ||

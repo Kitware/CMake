@@ -246,6 +246,7 @@ protected:
   std::string m_ExecutableOutputPath;
   std::string m_LibraryOutputPath;
   bool m_WindowsShell;
+  bool m_UseRelativePaths;
   bool m_PassMakeflags;
 private:
 };
