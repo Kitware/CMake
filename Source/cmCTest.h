@@ -179,6 +179,10 @@ public:
   int RunTest(std::vector<const char*> args, std::string* output, int *retVal, 
     std::ostream* logfile);
 
+  //! Get the path to CTest
+  const char* GetCTestExecutable() { return m_CTestSelf.c_str(); }
+
+
 private:
   // these are helper classes
   cmCTestBuildHandler     *BuildHandler;

@@ -95,7 +95,7 @@ void cmCTestScriptHandler::AddConfigurationScript(const char *script)
 //----------------------------------------------------------------------
 // the generic entry point for handling scripts, this routine will run all
 // the scripts provides a -S arguments
-int cmCTestScriptHandler::RunConfigurationScript()
+int cmCTestScriptHandler::RunConfigurationScript(cmCTest* ctest)
 {
   int res = 0;
   std::vector<cmStdString>::iterator it;
@@ -104,7 +104,7 @@ int cmCTestScriptHandler::RunConfigurationScript()
         it ++ )
     {
     // for each script run it
-    res += this->RunConfigurationScript(
+    res += this->RunConfigurationScript(ctest,
       cmSystemTools::CollapseFullPath(it->c_str()));
     }
   return res;
@@ -114,7 +114,7 @@ int cmCTestScriptHandler::RunConfigurationScript()
 //----------------------------------------------------------------------
 // this sets up some variables for thew script to use, creates the required
 // cmake instance and generators, and then reads in the script
-int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
+int cmCTestScriptHandler::ReadInScript(cmCTest* ctest, const std::string& total_script_arg)
 {
   // if the argument has a , in it then it needs to be broken into the fist
   // argument (which is the script) and the second argument which will be
@@ -156,6 +156,8 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   m_LocalGenerator->GetMakefile()->AddDefinition("CTEST_SCRIPT_NAME",
                                    cmSystemTools::GetFilenameName(
                                      script).c_str());
+  m_LocalGenerator->GetMakefile()->AddDefinition("CTEST_EXECUTABLE_NAME",
+                                   ctest->GetCTestExecutable());
   // add the script arg if defined
   if (script_arg.size())
     {
@@ -277,13 +279,13 @@ void cmCTestScriptHandler::LocalSleep(unsigned int secondsToWait)
 
 //----------------------------------------------------------------------
 // run a specific script
-int cmCTestScriptHandler::RunConfigurationScript(
+int cmCTestScriptHandler::RunConfigurationScript(cmCTest* ctest,
   const std::string& total_script_arg)
 {
   int result;
   
   // read in the script
-  result = this->ReadInScript(total_script_arg);
+  result = this->ReadInScript(ctest, total_script_arg);
   if (result)
     {
     return result;

@@ -1575,7 +1575,7 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
     // call process directory
     if (this->m_RunConfigurationScript)
       {
-      res = this->ScriptHandler->RunConfigurationScript();
+      res = this->ScriptHandler->RunConfigurationScript(this);
       }
     else
       {

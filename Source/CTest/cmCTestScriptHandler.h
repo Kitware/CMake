@@ -26,6 +26,7 @@ class cmMakefile;
 class cmLocalGenerator;
 class cmGlobalGenerator;
 class cmake;
+class cmCTest;
 
 /** \class cmCTestScriptHandler
  * \brief A class that handles ctest -S invocations
@@ -74,7 +75,7 @@ public:
   /**
    * Run a dashboard using a specified confiuration script
    */
-  int RunConfigurationScript();
+  int RunConfigurationScript(cmCTest* ctest);
 
   /*
    * If verbose then more informaiton is printed out
@@ -86,7 +87,7 @@ public:
   
 private:
   // reads in a script
-  int ReadInScript(const std::string& total_script_arg);
+  int ReadInScript(cmCTest* ctest, const std::string& total_script_arg);
 
   // extract vars from the script to set ivars
   int ExtractVariables();
@@ -103,7 +104,7 @@ private:
   int BackupDirectories();
   void RestoreBackupDirectories();
 
-  int RunConfigurationScript(const std::string& script);
+  int RunConfigurationScript(cmCTest* ctest, const std::string& script);
   int RunConfigurationDashboard();
 
   std::vector<cmStdString> m_ConfigurationScripts;
