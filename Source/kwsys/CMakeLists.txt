@@ -180,7 +180,7 @@ FOREACH(header algorithm deque iterator list map numeric queue set stack string
   
   # Create an install target for the header wrapper.
   IF(KWSYS_HEADER_INSTALL_DIR)
-    INSTALL_FILES(${KWSYS_HEADER_INSTALL_DIR}/${KWSYS_NAMESPACE}
+    INSTALL_FILES(${KWSYS_HEADER_INSTALL_DIR}/${KWSYS_NAMESPACE}/std
       FILES ${KWSYS_HEADER_DIR}/std/${header})
   ENDIF(KWSYS_HEADER_INSTALL_DIR)
 ENDFOREACH(header)
@@ -196,7 +196,7 @@ FOREACH(header iostream fstream sstream iosfwd)
 
   # Create an install target for the header wrapper.
   IF(KWSYS_HEADER_INSTALL_DIR)
-    INSTALL_FILES(${KWSYS_HEADER_INSTALL_DIR}/${KWSYS_NAMESPACE}
+    INSTALL_FILES(${KWSYS_HEADER_INSTALL_DIR}/${KWSYS_NAMESPACE}/std
       FILES ${KWSYS_HEADER_DIR}/std/${header})
   ENDIF(KWSYS_HEADER_INSTALL_DIR)
 ENDFOREACH(header)
