@@ -46,7 +46,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "USE_MANGLED_MESA(\"path to gl_mangle.h\""
+      "USE_MANGLED_MESA(\"path to mesa includes, should contain gl_mangle.h\""
       " \"directory for output\"  )";
     }
 

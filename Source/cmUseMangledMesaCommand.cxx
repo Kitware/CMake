@@ -54,22 +54,20 @@ bool cmUseMangledMesaCommand::InitialPass(std::vector<std::string>& args)
     }
   m_Makefile->ExpandVariablesInString(args[0]);
   m_Makefile->ExpandVariablesInString(args[1]);
-  const char* inputFileName = args[0].c_str();
+  const char* inputDir = args[0].c_str();
   const char* destDir = args[1].c_str();
-  std::string dir, file;
-  cmSystemTools::SplitProgramPath(inputFileName, dir, file);
   std::vector<std::string> files;
-  cmSystemTools::Glob(dir.c_str(), "\\.h$", files);
+  cmSystemTools::Glob(inputDir, "\\.h$", files);
   if(files.size() == 0)
     {
-    cmSystemTools::Error("Could not open Mesa Directory ", dir.c_str());
+    cmSystemTools::Error("Could not open Mesa Directory ", inputDir);
     return false;
     }
   cmSystemTools::MakeDirectory(destDir);
   for(std::vector<std::string>::iterator i = files.begin();
       i != files.end(); ++i)
     {
-    std::string path = dir.c_str();
+    std::string path = inputDir;
     path += "/";
     path += *i;
     this->CopyAndFullPathMesaHeader(path.c_str(), destDir);
