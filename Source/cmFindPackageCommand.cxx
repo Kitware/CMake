@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -19,7 +19,7 @@
 
 #include "cmVariableWatch.h"
 
-void cmFindPackageNeedBackwardsCompatibility(const std::string& variable, 
+void cmFindPackageNeedBackwardsCompatibility(const std::string& variable,
                                              int access_type, void* )
 {
   if(access_type == cmVariableWatch::UNKNOWN_VARIABLE_READ_ACCESS)
@@ -46,9 +46,9 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  
+
   this->Name = args[0];
-  
+
   bool quiet = false;
   bool required = false;
   if(args.size() > 1)
@@ -78,7 +78,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
         }
       }
     }
-  
+
   // See if there is a Find<name>.cmake module.
   bool foundModule = false;
   if(!this->FindModule(foundModule, quiet, required))
@@ -91,12 +91,12 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     }
 
   // No find module.  Assume the project has a CMake config file.  Use
-  // a <NAME>_DIR cache variable to locate it.  
+  // a <NAME>_DIR cache variable to locate it.
   this->Variable = this->Name;
   this->Variable += "_DIR";
   this->Config = this->Name;
   this->Config += "Config.cmake";
-  
+
   // Support old capitalization behavior.
   std::string upperDir = cmSystemTools::UpperCase(this->Name);
   std::string upperFound = cmSystemTools::UpperCase(this->Name);
@@ -112,7 +112,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
       needCompatibility = true;
       }
     }
-  
+
   // Try to find the config file.
   const char* def = m_Makefile->GetDefinition(this->Variable.c_str());
   if(needCompatibility && cmSystemTools::IsOff(def))
@@ -125,7 +125,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
       m_Makefile->AddDefinition(this->Variable.c_str(), oldDef);
       def = m_Makefile->GetDefinition(this->Variable.c_str());
       }
-    }  
+    }
   if(cmSystemTools::IsOff(def))
     {
     if(!this->FindConfig())
@@ -133,7 +133,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
       return false;
       }
     }
-  
+
   // If the config file was found, load it.
   bool result = true;
   bool found = false;
@@ -180,12 +180,12 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
       }
     result = true;
     }
-  
+
   // Set a variable marking whether the package was found.
   std::string foundVar = this->Name;
-  foundVar += "_FOUND";  
+  foundVar += "_FOUND";
   m_Makefile->AddDefinition(foundVar.c_str(), found? "1":"0");
-  
+
   if(needCompatibility)
     {
     // Listfiles will be looking for the capitalized version of the
@@ -195,7 +195,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     m_Makefile->AddDefinition(upperFound.c_str(),
                               m_Makefile->GetDefinition(foundVar.c_str()));
     }
-  
+
   if(!(upperDir == this->Variable))
     {
     if(needCompatibility)
@@ -225,7 +225,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
         );
       }
     }
-  
+
   return result;
 }
 
@@ -269,7 +269,7 @@ bool cmFindPackageCommand::FindConfig()
   std::string help = "The directory containing ";
   help += this->Config;
   help += ".";
-  
+
   // Construct the list of relative paths to each prefix to be
   // searched.
   std::string rel = "/lib/";
@@ -278,7 +278,7 @@ bool cmFindPackageCommand::FindConfig()
   rel = "/lib/";
   rel += this->Name;
   this->Relatives.push_back(rel);
-  
+
   // It is likely that CMake will have recently built the project.
   for(int i=1; i <= 10; ++i)
     {
@@ -293,7 +293,7 @@ bool cmFindPackageCommand::FindConfig()
       this->Builds.push_back(entry);
       }
     }
-  
+
   // The project may be installed.  Use the system search path to
   // construct a list of possible install prefixes.
   std::vector<std::string> systemPath;
@@ -303,7 +303,7 @@ bool cmFindPackageCommand::FindConfig()
     {
     *i += "/..";
     if(cmSystemTools::FileIsDirectory(i->c_str()))
-      {      
+      {
       this->Prefixes.push_back(cmSystemTools::CollapseFullPath(i->c_str()));
       }
     }
@@ -311,10 +311,10 @@ bool cmFindPackageCommand::FindConfig()
   this->Prefixes.push_back("/usr/local");
   this->Prefixes.push_back("/usr");
 #endif
-  
+
   // Look for the project's configuration file.
   std::string init = this->SearchForConfig();
-  
+
   // Store the entry in the cache so it can be set by the user.
   m_Makefile->AddCacheDefinition(this->Variable.c_str(),
                                  init.c_str(),
@@ -338,7 +338,7 @@ std::string cmFindPackageCommand::SearchForConfig() const
       return *b;
       }
     }
-  
+
   // Search paths relative to each installation prefix.
   for(std::vector<cmStdString>::const_iterator p = this->Prefixes.begin();
       p != this->Prefixes.end(); ++p)
@@ -358,7 +358,7 @@ std::string cmFindPackageCommand::SearchForConfig() const
         }
       }
     }
-  
+
   return this->Variable + "-NOTFOUND";
 }
 
