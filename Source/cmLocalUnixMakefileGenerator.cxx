@@ -1725,7 +1725,7 @@ void cmLocalUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
               }
             else
               {
-              fout << "\t   @$(INSTALL_DATA) ";
+              fout << "\t   @$(INSTALL_PROGRAMS) ";
               }
 	    fout << *i
 		 << " $(DESTDIR)" << prefix << l->second.GetInstallPath() << "\n";
