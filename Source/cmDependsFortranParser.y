@@ -66,6 +66,7 @@ static void cmDependsFortranError(yyscan_t yyscanner, const char* message)
 #endif
 #ifdef _MSC_VER
 # pragma warning (disable: 4102) /* Unused goto label.  */
+# pragma warning (disable: 4065) /* Switch contains default but no case. */
 #endif
 %}
 
