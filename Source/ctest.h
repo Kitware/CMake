@@ -148,6 +148,8 @@ private:
   void GenerateDartOutput(std::ostream& os);
   void GenerateDartBuildOutput(std::ostream& os, 
                                std::vector<cmCTestBuildErrorWarning>);
-  
+
+  bool OpenFile(const std::string& path, 
+                const std::string& name, std::ofstream& stream);  
 };
 

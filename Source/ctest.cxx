@@ -464,37 +464,23 @@ int ctest::BuildDirectory()
   // Add parsing of output for errors and warnings.
 
   cmCTestBuildErrorWarning cerw;
-  char* coutput = new char[ output.size() + 1];
-  memcpy(coutput, output.c_str(), output.size());
   int cc;
+
+  std::ofstream ofs;
+  if ( this->OpenFile("Temporary", "LastBuild.log", ofs) )
+    {
+    ofs << output;
+    ofs.close();
+    }
   
-  std::vector<std::string> lines;
+  std::vector<cmStdString> lines;
+  cmSystemTools::Split(output.c_str(), lines);
 
   // Lines are marked: 
   // 0 - nothing
   // 1 - error
   // > 1 - warning
-  std::vector<int>         markedLines;
-  cmIStringStream istr(coutput);
-  while(istr)
-    {
-    char buffer[1024];
-    std::string line;
-    while ( istr )
-      {
-      buffer[0] = 0;
-      istr.getline(buffer, 1023);
-      buffer[1023] = 0;
-      line += buffer;
-      if ( strlen(buffer) < 1023 )
-        {
-        break;
-        }
-      }
-    lines.push_back(line);
-    markedLines.push_back(0);
-    //std::cout << "Line [" << line << "]" << std::endl;
-    }
+  std::vector<int> markedLines(lines.size(), 0);
   
   // Errors
   for ( cc = 0; cmCTestErrorMatches[cc]; cc ++ )
@@ -595,7 +581,23 @@ int ctest::BuildDirectory()
       errorsWarnings.push_back(errorwarning);
       }
     }
+
+  if( !this->OpenFile("", "Build.xml", ofs) )
+    {
+    return 1;
+    }
+  this->GenerateDartBuildOutput(ofs, errorsWarnings);
+  return 0;
+}
+
+bool ctest::OpenFile(const std::string& path, 
+                     const std::string& name, std::ofstream& stream)
+{
   std::string testingDir = m_ToplevelPath + "/Testing/CDart";
+  if ( path.size() > 0 )
+    {
+    testingDir += "/" + path;
+    }
   if ( cmSystemTools::FileExists(testingDir.c_str()) )
     {
     if ( !cmSystemTools::FileIsDirectory(testingDir.c_str()) )
@@ -603,7 +605,7 @@ int ctest::BuildDirectory()
       std::cerr << "File " << testingDir 
                 << " is in the place of the testing directory"
                 << std::endl;
-      return 1;
+      return false;
       }
     }
   else
@@ -612,20 +614,18 @@ int ctest::BuildDirectory()
       {
       std::cerr << "Cannot create directory " << testingDir
                 << std::endl;
-      return 1;
+      return false;
       }
     }
-  std::string buildxml = testingDir + "/Build.xml";
-  std::ofstream ofs(buildxml.c_str());
-  if( !ofs )
+  std::string filename = testingDir + "/" + name;
+  stream.open(filename.c_str());
+  if( !stream )
     {
     std::cerr << "Cannot create build XML file" << std::endl;
-    return 1;
+    return false;
     }
-  this->GenerateDartBuildOutput(ofs, errorsWarnings);
-  return 0;
+  return true;
 }
-
 
 void ctest::GenerateDartBuildOutput(std::ostream& os, 
                                     std::vector<cmCTestBuildErrorWarning> ew)
@@ -635,39 +635,40 @@ void ctest::GenerateDartBuildOutput(std::ostream& os,
      << "\" BuildStamp=\"" << m_CurrentTag << "-Experimental\" Name=\""
      << m_DartConfiguration["Site"] << "\">\n"
      << "<Build>\n"
-     << "  <StartDateTime>" << m_StartBuild << "</StartDateTime>\n"
-     << "  <BuildCommand>" << m_DartConfiguration["MakeCommand"]
+     << "\t<StartDateTime>" << m_StartBuild << "</StartDateTime>\n"
+     << "<BuildCommand>" << m_DartConfiguration["MakeCommand"]
      << "</BuildCommand>" << std::endl;
     
   std::vector<cmCTestBuildErrorWarning>::iterator it;
   for ( it = ew.begin(); it != ew.end(); it++ )
     {
     cmCTestBuildErrorWarning *cm = &(*it);
-    os << "  <" << (cm->m_Error ? "Error" : "Warning") << ">\n"
-       << "    <BuildLogLine>" << cm->m_LogLine << "</BuildLogLine>\n"
-       << "    <Text>" << cm->m_Text << "</Text>" << std::endl;
+    os << "\t<" << (cm->m_Error ? "Error" : "Warning") << ">\n"
+       << "\t\t<BuildLogLine>" << cm->m_LogLine << "</BuildLogLine>\n"
+       << "\t\t<Text>" << cm->m_Text << "\n</Text>" << std::endl;
     if ( cm->m_SourceFile.size() > 0 )
       {
-      os << "    <SourceFile>" << cm->m_SourceFile << "</SourceFile>" 
+      os << "\t\t<SourceFile>" << cm->m_SourceFile << "</SourceFile>" 
          << std::endl;
       }
     if ( cm->m_SourceFileTail.size() > 0 )
       {
-      os << "    <SourceFileTail>" << cm->m_SourceFileTail 
+      os << "\t\t<SourceFileTail>" << cm->m_SourceFileTail 
          << "</SourceFileTail>" << std::endl;
       }
     if ( cm->m_LineNumber >= 0 )
       {
-      os << "    <SourceLineNumber>" << cm->m_LineNumber 
+      os << "\t\t<SourceLineNumber>" << cm->m_LineNumber 
          << "</SourceLineNumber>" << std::endl;
       }
-    os << "    <PreContext>" << cm->m_PreContext << "</PreContext>\n"
-       << "    <PostContext>" << cm->m_PostContext << "</PostContext>\n"
-       << "  </" << (cm->m_Error ? "Error" : "Warning") << ">" 
+    os << "\t\t<PreContext>" << cm->m_PreContext << "\n</PreContext>\n"
+       << "\t\t<PostContext>" << cm->m_PostContext << "\n</PostContext>\n"
+       << "\t\t<RepeatCount>0</RepeatCount>\n"
+       << "</" << (cm->m_Error ? "Error" : "Warning") << ">\n\n" 
        << std::endl;
     }
-  os << "  <Log Encoding=\"base64\" Compression=\"/bin/gzip\">\n    </Log>\n"
-     << "  <EndDateTime>" << m_EndBuild << "</EndDateTime>\n"
+  os << "\t<Log Encoding=\"base64\" Compression=\"/bin/gzip\">\n\t</Log>\n"
+     << "\t<EndDateTime>" << m_EndBuild << "</EndDateTime>\n"
      << "</Build>\n"
      << "</Site>" << std::endl;
 }
@@ -966,7 +967,7 @@ void ctest::GenerateDartOutput(std::ostream& os)
        << "name=\"Completion Status\"><Value>"
        << result->m_CompletionStatus << "</Value></NamedMeasurement>\n"
        << "      <Measurement>\n"
-       << "        <Value>" << result->m_Output << "</value>\n"
+       << "        <Value>" << result->m_Output << "</Value>\n"
        << "      </Measurement>\n"
        << "    </Results>\n"
        << "  </Test>" << std::endl;
