@@ -100,8 +100,6 @@ void cmExportLibraryDependenciesCommand::FinalPass()
         }
       }
     }
-  fout << ")" << std::endl;
   fout.close();
   return;
 }
-
