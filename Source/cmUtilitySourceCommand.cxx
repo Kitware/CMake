@@ -83,6 +83,9 @@ bool cmUtilitySourceCommand::InitialPass(std::vector<std::string> const& args)
   std::string utilityExecutable =
     utilityDirectory+"/"+cmakeCFGout+"/"
     +utilityName+cmSystemTools::GetExecutableExtension();
+
+  // make sure we remove any /./ in the name
+  cmSystemTools::ReplaceString(utilityExecutable, "/./", "/");
   
   // Enter the value into the cache.
   m_Makefile->AddCacheDefinition(cacheEntry.c_str(),
