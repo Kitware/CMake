@@ -515,7 +515,7 @@ cmCacheManager::CacheIterator cmCacheManager::GetCacheIterator(const char *key)
 const char* cmCacheManager::GetCacheValue(const char* key) const
 {
   CacheEntryMap::const_iterator i = m_Cache.find(key);
-  if(i != m_Cache.end())
+  if(i != m_Cache.end() && i->second.m_Type != cmCacheManager::UNINITIALIZED)
     {
     return i->second.m_Value.c_str();
     }
