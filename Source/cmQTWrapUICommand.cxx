@@ -81,7 +81,22 @@ bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& argsIn)
       moc_file.SetName(moc_source_name.c_str(), 
                        m_Makefile->GetCurrentOutputDirectory(),
                        "cxx",false);
-      std::string origname = cdir + "/" + *j;
+      std::string origname;
+      if ( (*j)[0] == '/' )
+        {
+        origname = *j;
+        }
+      else
+        {
+        if ( curr && curr->GetPropertyAsBool("GENERATED") )
+          {
+          origname = std::string( m_Makefile->GetCurrentOutputDirectory() ) + "/" + *j;
+          }
+        else
+          {
+          origname = cdir + "/" + *j;
+          }
+        }
       std::string hname = header_file.GetFullPath();
       m_WrapUserInterface.push_back(origname);
       // add starting depends
