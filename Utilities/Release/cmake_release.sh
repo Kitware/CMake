@@ -53,25 +53,77 @@ error_log()
 }
 
 #-----------------------------------------------------------------------------
-remote()
+check_host()
 {
     HOST="$1"
+    if [ -z "$HOST" ]; then
+        echo "Must specify host."
+        return 1
+    fi
+}
+
+#-----------------------------------------------------------------------------
+remote()
+{
+    check_host "$1" || return 1
     shift
     REMOTE_TASK="$@"
-    echo "------- Running remote task on $HOST. -------"
+    RESULT=0
+    echo "------- Running remote task on $HOST. -------" &&
     (echo "REMOTE=\"1\"" &&
      echo "TASK=\"${REMOTE_TASK}\"" &&
-     cat $SELF) | ssh "$HOST" /bin/sh 2>/dev/null
-    echo "-------- Remote task on $HOST done.  --------"
+     cat $SELF) | ssh "$HOST" /bin/sh 2>/dev/null || RESULT=1
+    echo "-------- Remote task on $HOST done.  --------" &&
+    return $RESULT
 }
 
 #-----------------------------------------------------------------------------
 remote_copy()
 {
-    HOST="$1"
-    echo "------- Copying tarballs from $HOST. -------"
-    scp "$HOST:${RELEASE_ROOT_NAME}/Tarballs/*" .
+    check_host "$1" || return 1
+    EXPR="$2"
+    [ ! -z "$EXPR" ] || EXPR="*"
+    echo "------- Copying tarballs from $HOST. -------" &&
+    scp "$HOST:${RELEASE_ROOT_NAME}/Tarballs/${EXPR}" . &&
     echo "---- Done copying tarballs from $HOST. -----"
+}
+
+#-----------------------------------------------------------------------------
+remote_copy_source()
+{
+    check_host "$1" || return 1
+    remote_copy "$HOST" "cmake-${VERSION}.tar*"
+}
+
+#-----------------------------------------------------------------------------
+remote_copy_binary()
+{
+    check_host "$1" || return 1
+    remote_copy "$HOST" "cmake-${VERSION}-*"
+}
+
+#-----------------------------------------------------------------------------
+remote_source()
+{
+    check_host "$1" || return 1
+    remote "$HOST" source_tarball &&
+    remote_copy_source "$HOST"
+}
+
+#-----------------------------------------------------------------------------
+remote_binary()
+{
+    check_host "$1" || return 1
+    remote "$HOST" binary_tarball &&
+    remote_copy_binary "$HOST"
+}
+
+#-----------------------------------------------------------------------------
+upload()
+{
+    echo "------- Copying tarballs to www.cmake.org. -------"
+    scp cmake-${VERSION}*tar.* www.cmake.org:/projects/FTP/pub/cmake
+    echo "---- Done copying tarballs to www.cmake.org. -----"
 }
 
 #-----------------------------------------------------------------------------
