@@ -17,6 +17,7 @@
 #include "cmXMLParser.h"
 
 #include <cmexpat/expat.h>
+#include <ctype.h>
 
 //----------------------------------------------------------------------------
 cmXMLParser::cmXMLParser()

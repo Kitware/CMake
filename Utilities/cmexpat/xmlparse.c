@@ -4,7 +4,7 @@ See the file COPYING for copying permission.
 */
 
 #include <cmexpat/expatConfig.h>
-#include "expat.h"
+#include <cmexpat/expat.h>
 
 #include <stddef.h>
 #include <string.h>
