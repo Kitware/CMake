@@ -160,6 +160,13 @@ int cmGlobalGenerator::TryCompile(const char *, const char *bindir,
    */
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
   cmSystemTools::ChangeDirectory(bindir);
+
+  // Since we have full control over the invocation of nmake, let us
+  // make it quiet.
+  if ( strcmp(this->GetName(), "NMake Makefiles") == 0 )
+    {
+    makeCommand += " /NOLOGO ";
+    }
   
   // now build
   if (target)
