@@ -31,7 +31,7 @@ class cmCacheManager
 public:
   class CacheIterator;
   friend class cmCacheManager::CacheIterator;
-  enum CacheEntryType{ BOOL=0, PATH, FILEPATH, STRING, INTERNAL,STATIC,UNINITIALIZED };
+  enum CacheEntryType{ BOOL=0, PATH, FILEPATH, STRING, INTERNAL,STATIC, UNINITIALIZED };
 
 private:
   struct CacheEntry
@@ -124,6 +124,10 @@ public:
                          std::string& var,
                          std::string& value,
                          CacheEntryType& type);
+
+  static bool ParseEntry(const char* entry, 
+                         std::string& var,
+                         std::string& value);
 
   ///! Get a value from the cache given a key
   const char* GetCacheValue(const char* key) const;

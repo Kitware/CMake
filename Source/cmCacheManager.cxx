@@ -81,6 +81,42 @@ bool cmCacheManager::LoadCache(const char* path,
 
 bool cmCacheManager::ParseEntry(const char* entry, 
                                 std::string& var,
+                                std::string& value)
+{
+  // input line is:         key:type=value
+  cmsys::RegularExpression reg("^([^:]*)=(.*[^\t ]|[\t ]*)[\t ]*$");
+  // input line is:         "key":type=value
+  cmsys::RegularExpression regQuoted("^\"([^\"]*)\"=(.*[^\t ]|[\t ]*)[\t ]*$");
+  bool flag = false;
+  if(regQuoted.find(entry))
+    {
+    var = regQuoted.match(1);
+    value = regQuoted.match(2);
+    flag = true;
+    }
+  else if (reg.find(entry))
+    {
+    var = reg.match(1);
+    value = reg.match(2);
+    flag = true;
+    }
+
+  // if value is enclosed in single quotes ('foo') then remove them
+  // it is used to enclose trailing space or tab
+  if (flag && 
+      value.size() >= 2 &&
+      value[0] == '\'' && 
+      value[value.size() - 1] == '\'') 
+    {
+    value = value.substr(1, 
+                         value.size() - 2);
+    }
+
+  return flag;
+}
+
+bool cmCacheManager::ParseEntry(const char* entry, 
+                                std::string& var,
                                 std::string& value,
                                 CacheEntryType& type)
 {

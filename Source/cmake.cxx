@@ -185,12 +185,13 @@ void cmake::SetCacheArgs(const std::vector<std::string>& args)
       {
       std::string entry = arg.substr(2);
       std::string var, value;
-      cmCacheManager::CacheEntryType type;
-      if(cmCacheManager::ParseEntry(entry.c_str(), var, value, type))
+      cmCacheManager::CacheEntryType type = cmCacheManager::UNINITIALIZED;
+      if(cmCacheManager::ParseEntry(entry.c_str(), var, value, type) ||
+        cmCacheManager::ParseEntry(entry.c_str(), var, value))
         {
-          this->m_CacheManager->AddCacheEntry(var.c_str(), value.c_str(),
-            "No help, variable specified on the command line.",
-            type);
+        this->m_CacheManager->AddCacheEntry(var.c_str(), value.c_str(),
+          "No help, variable specified on the command line.",
+          type);
         }
       else
         {
