@@ -194,6 +194,7 @@ config()
         echo "${CONFIG_FILE} should specify CC, CXX, and PLATFORM." &&
         return 1
     fi
+    export CC CXX CFLAGS CXXFLAGS PATH LD_LIBRARY_PATH
 }
 
 #-----------------------------------------------------------------------------
@@ -262,7 +263,6 @@ configure()
     echo "Running configure ..." &&
     (
         cd "cmake-${VERSION}-${PLATFORM}" &&
-        export CC CXX CFLAGS CXXFLAGS PATH LD_LIBRARY_PATH &&
         ../cmake-${VERSION}/configure --prefix=${PREFIX}
     ) >Logs/configure.log 2>&1 || error_log Logs/configure.log
 }
@@ -367,6 +367,125 @@ binary_tarball()
             compress cmake-${VERSION}-${PLATFORM}.tar
         )
     ) >Logs/binary_tarball.log 2>&1 || error_log Logs/binary_tarball.log
+}
+
+#-----------------------------------------------------------------------------
+cygwin_source_tarball()
+{
+    [ -z "${DONE_cygwin_source_tarball}" ] || return 0 ; DONE_cygwin_source_tarball="yes"
+    config || return 1
+    [ -d "cmake-${VERSION}" ] || checkout || return 1
+    echo "Creating cygwin source tarball ..." &&
+    (
+        rm -rf cmake-${VERSION}.tar.bz2 &&
+        tar cvjf cmake-${VERSION}.tar.bz2 cmake-${VERSION}
+    ) >Logs/cygwin_source_tarball.log 2>&1 || error_log Logs/cygwin_source_tarball.log
+}
+
+#-----------------------------------------------------------------------------
+cygwin_source_patch()
+{
+    [ -z "${DONE_cygwin_source_patch}" ] || return 0 ; DONE_cygwin_source_patch="yes"
+    config || return 1
+    [ -d "cmake-${VERSION}" ] || checkout || return 1
+    echo "Creating source patch for cygwin ..." &&
+    (
+        rm -rf Patched &&
+        mkdir -p Patched &&
+        (tar c cmake-${VERSION} | (cd Patched; tar x)) &&
+        cd Patched &&
+        mkdir -p cmake-${VERSION}/CYGWIN-PATCHES &&
+        (
+            CYGVERSION=`uname -r`
+            cat > cmake-${VERSION}/CYGWIN-PATCHES/cmake.README <<EOF
+cmake
+--------------------------------------
+Runtime requirements:
+  cygwin-${CYGVERSION} or newer
+
+Build requirements
+  cygwin-${CYGVERSION} or newer
+  make
+
+Canonical homepage:
+  http://www.cmake.org
+
+Canonical download:
+  ftp://www.cmake.org/pub/cmake/
+
+------------------------------------
+
+Build instructions:
+  unpack cmake-${VERSION}-${RELEASE}-src.tar.bz2
+    if you use setup to install this src package, it will be
+	 unpacked under /usr/src automatically
+  cd /usr/src
+  ./cmake-${VERSION}-${RELEASE}.sh all
+
+This will create:
+  /usr/src/cmake-${VERSION}-${RELEASE}.tar.bz2
+  /usr/src/cmake-${VERSION}-${RELEASE}-src.tar.bz2
+
+-------------------------------------------
+
+Port Notes:
+
+<none>
+
+------------------
+
+Cygwin port maintained by: CMake Developers <cmake@www.cmake.org>
+
+EOF
+        ) &&
+        (
+            cat > cmake-${VERSION}/CYGWIN-PATCHES/setup.hint <<EOF
+# CMake setup.hint file for cygwin setup.exe program
+category: Devel 
+requires: libncurses6 cygwin 
+sdesc: "A cross platform build manger" 
+ldesc: "CMake is a cross platform build manager. It allows you to specify build parameters for C and C++ programs in a cross platform manner. For cygwin Makefiles will be generated. CMake is also capable of generating microsoft project files, nmake, and borland makefiles. CMake can also perform system inspection operations like finding installed libraries and header files." 
+prev: ${PREVIOUS_VERSION}-${PREVIOUS_RELEASE}
+curr: ${VERSION}-${RELEASE}
+EOF
+        ) &&
+        dos2unix cmake-${VERSION}/CYGWIN-PATCHES/setup.hint &&
+        cp cmake-${VERSION}/CYGWIN-PATCHES/setup.hint ../setup.hint &&
+        (diff -urN "../cmake-${VERSION}" "cmake-${VERSION}" > "../cmake-${VERSION}-${RELEASE}.patch"; [ "$?" = "1" ])
+    ) >Logs/cygwin_source_patch.log 2>&1 || error_log Logs/cygwin_source_patch.log
+}
+
+#-----------------------------------------------------------------------------
+cygwin_package_script()
+{
+    [ -z "${DONE_cygwin_package_script}" ] || return 0 ; DONE_cygwin_package_script="yes"
+    utilities || return 1
+    echo "Creating cygwin packaging script ..." &&
+    (
+        cp ReleaseUtilities/cmake-cygwin-package.sh cmake-${VERSION}-${RELEASE}.sh &&
+        chmod u+x cmake-${VERSION}-${RELEASE}.sh
+    ) >Logs/cygwin_package_script.log 2>&1 || error_log Logs/cygwin_package_script.log
+}
+
+#-----------------------------------------------------------------------------
+cygwin_package()
+{
+    [ -z "${DONE_cygwin_package}" ] || return 0 ; DONE_cygwin_package="yes"
+    config || return 1
+    [ -f "cmake-${VERSION}.tar.bz2" ] || cygwin_source_tarball || return 1
+    [ -f "cmake-${VERSION}-${RELEASE}.patch" ] || cygwin_source_patch || return 1
+    [ -f "cmake-${VERSION}-${RELEASE}.sh" ] || cygwin_package_script || return 1
+    echo "Running cygwin packaging script ..." &&
+    (
+        rm -rf Package &&
+        mkdir -p Package &&
+        cd Package &&
+        cp ../setup.hint . &&
+        cp ../cmake-${VERSION}.tar.bz2 . &&
+        cp ../cmake-${VERSION}-${RELEASE}.patch . &&
+        cp ../cmake-${VERSION}-${RELEASE}.sh . &&
+        ./cmake-${VERSION}-${RELEASE}.sh all
+    ) >Logs/cygwin_package.log 2>&1 || error_log Logs/cygwin_package.log
 }
 
 if [ -z "$TASK" ]; then
