@@ -1395,31 +1395,31 @@ int cmCTest::CoverageDirectory()
           }
         cov.m_Show = true;
         }
+      std::string::size_type kk;
+      for ( kk = 0; kk < lines.size(); kk ++ )
       //      std::cerr << "number of lines " << lines.size() << "\n";
-      for ( cc = 0; cc < lines.size(); cc ++ )
-        {
-        std::string& line = lines[cc];
+        std::string& line = lines[kk];
         //std::cerr << line << "\n";
         std::string sub = line.substr(0, strlen("      ######"));
         int count = atoi(sub.c_str());
         if ( sub.compare(0, strlen("    #####"), "    #####") == 0 
              || sub.compare("      ######") == 0 )
           {
-          if ( covlines[cc] == -1 )
+          if ( covlines[kk] == -1 )
             {
-            covlines[cc] = 0;
+            covlines[kk] = 0;
             }
           cov.m_UnTested ++;
           //std::cout << "Untested - ";
           }
         else if ( count > 0 )
           {
-          if ( covlines[cc] == -1 )
+          if ( covlines[kk] == -1 )
             {
-            covlines[cc] = 0;
+            covlines[kk] = 0;
             }
           cov.m_Tested ++;
-          covlines[cc] += count;
+          covlines[kk] += count;
           //std::cout << "Tested[" << count << "] - ";
           }
 
