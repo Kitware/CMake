@@ -821,6 +821,26 @@ kwsys_stl::string SystemTools::UnCapitalizedWords(const kwsys_stl::string& s)
   return n;
 }
 
+kwsys_stl::string SystemTools::AddSpaceBetweenCapitalizedWords(
+  const kwsys_stl::string& s)
+{
+  kwsys_stl::string n;
+  if (s.size())
+    {
+    n.reserve(s.size());
+    n += s[0];
+    for (size_t i = 1; i < s.size(); i++)
+      {
+      if (isupper(s[i]) && !isspace(s[i - 1]) && !isupper(s[i - 1]))
+        {
+        n += ' ';
+        }
+      n += s[0];
+      }
+    }
+  return n;
+}
+
 // Return a lower case string 
 kwsys_stl::string SystemTools::LowerCase(const kwsys_stl::string& s)
 {

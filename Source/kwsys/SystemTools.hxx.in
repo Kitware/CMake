@@ -55,6 +55,12 @@ static SystemToolsManager SystemToolsManagerInstance;
 class @KWSYS_NAMESPACE@_EXPORT SystemTools
 {
 public:
+
+  /** -----------------------------------------------------------------
+   *               String Manipulation Routines
+   *  -----------------------------------------------------------------
+   */
+
   /**
    * Replace symbols in str that are not valid in C identifiers as
    * defined by the 1999 standard, ie. anything except [A-Za-z0-9_].
@@ -65,43 +71,11 @@ public:
   static kwsys_stl::string MakeCindentifier(const char* s);
   
   /**
-   * Make a new directory if it is not there.  This function
-   * can make a full path even if none of the directories existed
-   * prior to calling this function.  
-   */
-  static bool MakeDirectory(const char* path);
-
-  /**
-   * Get current time as a double. On certain platforms this will
-   * return higher resolution than seconds:
-   * (1) gettimeofday() -- resolution in microseconds
-   * (2) ftime() -- resolution in milliseconds
-   * (3) time() -- resolution in seconds
-   */
-  static double GetTime();
-
-  /**
-   * Replace replace all occurances of the string in
-   * the source string.
+   * Replace replace all occurences of the string in the source string.
    */
   static void ReplaceString(kwsys_stl::string& source,
                             const char* replace,
                             const char* with);
-
-  /**
-   * Read a registry value
-   */
-  static bool ReadRegistryValue(const char *key, kwsys_stl::string &value);
-
-  /**
-   * Write a registry value
-   */
-  static bool WriteRegistryValue(const char *key, const char *value);
-
-  /**
-   * Delete a registry value
-   */
-  static bool DeleteRegistryValue(const char *key);
 
   /**
    * Return a capitalized string (i.e the first letter is uppercased,
@@ -110,14 +84,14 @@ public:
   static kwsys_stl::string Capitalized(const kwsys_stl::string&);
   
   /**
-   * Return capitalized words (i.e the first letter of each word is
-   *  uppercased all other are left untouched though).
+   * Return a 'capitalized words' string (i.e the first letter of each word
+   * is uppercased all other are left untouched though).
    */
   static kwsys_stl::string CapitalizedWords(const kwsys_stl::string&);
   
   /**
-   * Return uncapitalized words (i.e the first letter of each word is 
-   * lowercased all other are left untouched though).
+   * Return a 'uncapitalized words' string (i.e the first letter of each word
+   * is lowercased all other are left untouched though).
    */
   static kwsys_stl::string UnCapitalizedWords(const kwsys_stl::string&);
   
@@ -143,7 +117,7 @@ public:
   static char* RemoveChars(const char* str, const char *toremove);
 
   /**
-   * Remove remove all but 0->9, A->F from a string.
+   * Remove remove all but 0->9, A->F characters from a string.
    * Return a pointer to the new resulting string (allocated with 'new')
    */
   static char* RemoveCharsButUpperHex(const char* str);
@@ -155,7 +129,7 @@ public:
   static char* ReplaceChars(char* str, const char *toreplace,char replacement);
   
   /**
-   * Returns true if str1 starts or ends with str2
+   * Returns true if str1 starts (respectively ends) with str2
    */
   static bool StringStartsWith(const char* str1, const char* str2);
   static bool StringEndsWith(const char* str1, const char* str2);
@@ -176,12 +150,37 @@ public:
    * Return the string cropped to a given length by removing chars in the
    * center of the string and replacing them with an ellipsis (...)
    */
-  static kwsys_stl::string CropString(const kwsys_stl::string&, size_t max_len);
+  static kwsys_stl::string CropString(const kwsys_stl::string&,size_t max_len);
   
   /**
-   * do a case-independent string comparison
+   * Perform a case-independent string comparison
    */
   static int Strucmp(const char *s1, const char *s2);
+
+  /** 
+   * Convert a string in __DATE__ or __TIMESTAMP__ format into a time_t.
+   * Return false on error, true on success
+   */
+  static bool ConvertDateMacroString(const char *str, time_t *tmt);
+  static bool ConvertTimeStampMacroString(const char *str, time_t *tmt);
+
+  /**
+   * Split a string on its newlines into multiple lines
+   * Return false only if the last line stored had no newline
+   */
+  static bool Split(const char* s, kwsys_stl::vector<kwsys_stl::string>& l);
+  
+  /** 
+   * Return string with space added between capitalized words
+   * (i.e. EatMyShorts becomes Eat My Shorts 
+   */
+  static kwsys_stl::string AddSpaceBetweenCapitalizedWords(
+    const kwsys_stl::string&);
+
+  /** -----------------------------------------------------------------
+   *               Filename Manipulation Routines
+   *  -----------------------------------------------------------------
+   */
 
   /**
    * Replace Windows file system slashes with Unix-style slashes.
@@ -189,33 +188,29 @@ public:
   static void ConvertToUnixSlashes(kwsys_stl::string& path);
   
   /**
-   * For windows this calles ConvertToWindowsOutputPath and for unix
+   * For windows this calls ConvertToWindowsOutputPath and for unix
    * it calls ConvertToUnixOutputPath
    */
   static kwsys_stl::string ConvertToOutputPath(const char*);
   
-  /** Return true if a file exists in the current directory.  */
+  /**
+   * Return true if a file exists in the current directory
+   */
   static bool FileExists(const char* filename);
   
+  /**
+   * Return file length
+   */
   static unsigned long FileLength(const char *filename);
 
-  /** Compare file modification times.
-      Returns true for successful comparison and false for error.
-      When true is returned, result has -1, 0, +1 for
-      f1 older, same, or newer than f2.  */
+  /**
+   *  Compare file modification times.
+   *  Return true for successful comparison and false for error.
+   *  When true is returned, result has -1, 0, +1 for
+   *  f1 older, same, or newer than f2.  
+   */
   static bool FileTimeCompare(const char* f1, const char* f2,
                               int* result);
-
-  /**
-   *  Add the paths from the environment variable PATH to the 
-   *  string vector passed in.  If env is set then the value
-   *  of env will be used instead of PATH.
-   */
-  static void GetPath(kwsys_stl::vector<kwsys_stl::string>& path, const char* env=0);
-
-  /** Read an environment variable.  */
-  static const char* GetEnv(const char* key);
-  static bool GetEnv(const char* key, kwsys_stl::string& result);
 
   /**
    *  Get the file extension (including ".") needed for an executable
@@ -223,73 +218,6 @@ public:
    */
   static const char* GetExecutableExtension();
 
-  /**
-   * Copy the source file to the destination file only
-   * if the two files differ.  
-   */
-  static bool CopyFileIfDifferent(const char* source,
-                                  const char* destination);
-  
-  ///! Compare the contents of two files.  Return true if different.
-  static bool FilesDiffer(const char* source,
-                          const char* destination);
-  
-  ///! return true if the two files are the same file
-  static bool SameFile(const char* file1, const char* file2);
-
-  ///! Copy a file.
-  static bool CopyFileAlways(const char* source, const char* destination);
-
-  ///! Copy content directory to another directory with all files and subdirectories
-  static bool CopyADirectory(const char* source, const char* destination);
-  
-  ///! Remove a file.
-  static bool RemoveFile(const char* source);
-  
-  ///! Remove a directory
-  static bool RemoveADirectory(const char* source);
-
-  ///! Find a file in the system PATH, with optional extra paths.
-  static kwsys_stl::string FindFile(const char* name,
-                              const kwsys_stl::vector<kwsys_stl::string>& path= kwsys_stl::vector<kwsys_stl::string>());
-
-  ///! Find an executable in the system PATH, with optional extra paths.
-  static kwsys_stl::string FindProgram(const char* name,
-                                 const kwsys_stl::vector<kwsys_stl::string>& path = kwsys_stl::vector<kwsys_stl::string>(),
-                                 bool no_system_path = false);
-
-  ///! Find a library in the system PATH, with optional extra paths.
-  static kwsys_stl::string FindLibrary(const char* name,
-                                 const kwsys_stl::vector<kwsys_stl::string>& path);
-  
-  ///! return true if the file is a directory.
-  static bool FileIsDirectory(const char* name);
-  
-  static kwsys_stl::string GetCurrentWorkingDirectory();
-
-  ///! return true if the file has a given signature (first set of bytes)
-  static bool FileHasSignature(const char* filename, const char *signature, long offset = 0);
-
-  /**
-  *  Try to locate the file 'filename' in the directory 'dir'.
-  *  If 'filename' is a fully qualified filename, the basename of the file is
-  *  used to check for its existence in 'dir'.
-  *  If 'dir' is not a directory, GetFilenamePath() is called on 'dir' to
-  *  get its directory first (thus, you can pass a filename as 'dir', as
-  *  a convenience).
-  *  'filename_found' is assigned the fully qualified name/path of the file
-  *  if it is found (not touched otherwise).
-  *  If 'try_filename_dirs' is true, try to find the file using the
-  *  components of its path, i.e. if we are looking for c:/foo/bar/bill.txt, 
-  *  first look for bill.txt in 'dir', then in 'dir'/bar, then in 'dir'/foo/bar
-  *  etc.
-  *  Return true if the file was found, false otherwise.
-  */
-  static bool LocateFileInDir(const char *filename, 
-                              const char *dir, 
-                              kwsys_stl::string& filename_found,
-                              int try_filename_dirs = 0);
-  
   /**
    * Given the path to a program executable, get the directory part of
    * the path with the file stripped off.  If there is no directory
@@ -312,7 +240,6 @@ public:
    *  exeName is the name of the executable.
    *  buildDir is a possibly null path to the build directory.
    *  installPrefix is a possibly null pointer to the install directory.
-   
    */
   static bool FindProgramPath(const char* argv0, 
                               kwsys_stl::string& pathOut,
@@ -329,7 +256,7 @@ public:
    */
   static kwsys_stl::string CollapseFullPath(const char* in_relative);
   static kwsys_stl::string CollapseFullPath(const char* in_relative,
-                                      const char* in_base);
+                                            const char* in_base);
 
   /**
    * Split a path name into its basic components.  The first component
@@ -352,74 +279,66 @@ public:
    * Join components of a path name into a single string.  See
    * SplitPath for the format of the components.
    */
-  static kwsys_stl::string
-  JoinPath(const kwsys_stl::vector<kwsys_stl::string>& components);
+  static kwsys_stl::string JoinPath(
+    const kwsys_stl::vector<kwsys_stl::string>& components);
 
   /**
    * Compare a path or components of a path.
    */
   static bool ComparePath(const char* c1, const char* c2);
 
-  ///! return path of a full filename (no trailing slashes).
+
+  /**
+   * Return path of a full filename (no trailing slashes)
+   */
   static kwsys_stl::string GetFilenamePath(const kwsys_stl::string&);
 
-  
-  ///! return file name of a full filename (i.e. file name without path).
+  /**
+   * Return file name of a full filename (i.e. file name without path)
+   */
   static kwsys_stl::string GetFilenameName(const kwsys_stl::string&);
   
-  ///! Split a program from its arguments and handle spaces in the paths.
-  static void SplitProgramFromArgs(const char* path, 
-                                   kwsys_stl::string& program, kwsys_stl::string& args);
+  /**
+   * Split a program from its arguments and handle spaces in the paths
+   */
+  static void SplitProgramFromArgs(
+    const char* path, 
+    kwsys_stl::string& program, kwsys_stl::string& args);
   
-  ///! return longest file extension of a full filename (dot included).
+  /**
+   * Return longest file extension of a full filename (dot included)
+   */
   static kwsys_stl::string GetFilenameExtension(const kwsys_stl::string&);
   
-  ///! return shortest file extension of a full filename (dot included).
-  static kwsys_stl::string GetFilenameLastExtension(const kwsys_stl::string& filename);
+  /**
+   * Return shortest file extension of a full filename (dot included)
+   */
+  static kwsys_stl::string GetFilenameLastExtension(
+    const kwsys_stl::string& filename);
   
-  ///! return file name without extension of a full filename.
-  static kwsys_stl::string GetFilenameWithoutExtension(const kwsys_stl::string&);
+  /**
+   * Return file name without extension of a full filename
+   */
+  static kwsys_stl::string GetFilenameWithoutExtension(
+    const kwsys_stl::string&);
   
-  ///! return file name without its last (shortest) extension.
-  static kwsys_stl::string GetFilenameWithoutLastExtension(const kwsys_stl::string&);
+  /**
+   * Return file name without its last (shortest) extension
+   */
+  static kwsys_stl::string GetFilenameWithoutLastExtension(
+    const kwsys_stl::string&);
   
-  /** Return whether the path represents a full path (not relative).  */
+  /**
+   * Return whether the path represents a full path (not relative)
+   */
   static bool FileIsFullPath(const char*);
   
-  /** Return file's modified time.  */
-  static long int ModifiedTime(const char* filename);
-
-  /** Return file's creation time (Win32: works only for NTFS, not FAT).  */
-  static long int CreationTime(const char* filename);
-
-  /** 
-   * Convert a string in __DATE__ or __TIMESTAMP__ format into a time_t.
-   * Return false on error, true on success
+  /**
+   * For windows return the short path for the given path,
+   * Unix just a pass through
    */
-  static bool ConvertDateMacroString(const char *str, time_t *tmt);
-  static bool ConvertTimeStampMacroString(const char *str, time_t *tmt);
-
-  ///! for windows return the short path for the given path, unix just a pass through
   static bool GetShortPath(const char* path, kwsys_stl::string& result);
   
-  ///! change directory the the directory specified
-  static int ChangeDirectory(const char* dir);
-
-  /** Split a string on its newlines into multiple lines.  Returns
-      false only if the last line stored had no newline.  */
-  static bool Split(const char* s, kwsys_stl::vector<kwsys_stl::string>& l);
-  
-  static kwsys_stl::string GetCurrentDateTime(const char* format);
-
-  /** Get the result of strerror(errno).  */
-  static kwsys_stl::string GetLastSystemError();
-  
-  /** When building DEBUG with MSVC, this enables a hook that prevents
-   * error dialogs from popping up if the program is being run from
-   * DART.
-   */
-  static void EnableMSVCDebugHook();
-
   /**
    * Read line from file. Make sure to get everything. Due to a buggy stream
    * library on the HP and another on Mac OSX, we need this very carefully
@@ -427,8 +346,228 @@ public:
    * end-of-file was reached. If the has_newline argument is specified, it will
    * be true when the line read had a newline character.
    */
-  static bool GetLineFromStream(kwsys_ios::istream& istr, kwsys_stl::string& line,
+  static bool GetLineFromStream(kwsys_ios::istream& istr, 
+                                kwsys_stl::string& line,
                                 bool* has_newline=0);
+
+  /**
+   * Get the parent directory of the directory or file
+   */
+  static kwsys_stl::string GetParentDirectory(const char* fileOrDir);
+
+  /**
+   * Check if the given file or directory is in subdirectory of dir
+   */
+  static bool IsSubDirectory(const char* fileOrDir, const char* dir);
+
+  /** -----------------------------------------------------------------
+   *               File Manipulation Routines
+   *  -----------------------------------------------------------------
+   */
+
+  /**
+   * Make a new directory if it is not there.  This function
+   * can make a full path even if none of the directories existed
+   * prior to calling this function.  
+   */
+  static bool MakeDirectory(const char* path);
+
+  /**
+   * Copy the source file to the destination file only
+   * if the two files differ.  
+   */
+  static bool CopyFileIfDifferent(const char* source,
+                                  const char* destination);
+  
+  /**
+   * Compare the contents of two files.  Return true if different
+   */
+  static bool FilesDiffer(const char* source, const char* destination);
+  
+  /**
+   * Return true if the two files are the same file
+   */
+  static bool SameFile(const char* file1, const char* file2);
+
+  /**
+   * Copy a file
+   */
+  static bool CopyFileAlways(const char* source, const char* destination);
+
+  /**
+   * Copy content directory to another directory with all files and 
+   * subdirectories
+   */
+  static bool CopyADirectory(const char* source, const char* destination);
+  
+  /**
+   * Remove a file
+   */
+  static bool RemoveFile(const char* source);
+  
+  /**
+   * Remove a directory
+   */
+  static bool RemoveADirectory(const char* source);
+
+  /**
+   * Find a file in the system PATH, with optional extra paths
+   */
+  static kwsys_stl::string FindFile(
+    const char* name,
+    const kwsys_stl::vector<kwsys_stl::string>& path = 
+    kwsys_stl::vector<kwsys_stl::string>());
+
+  /**
+   * Find an executable in the system PATH, with optional extra paths
+   */
+  static kwsys_stl::string FindProgram(
+    const char* name,
+    const kwsys_stl::vector<kwsys_stl::string>& path = 
+    kwsys_stl::vector<kwsys_stl::string>(),
+    bool no_system_path = false);
+
+  /**
+   * Find a library in the system PATH, with optional extra paths
+   */
+  static kwsys_stl::string FindLibrary(
+    const char* name,
+    const kwsys_stl::vector<kwsys_stl::string>& path);
+  
+  /**
+   * Return true if the file is a directory
+   */
+  static bool FileIsDirectory(const char* name);
+  
+  /**
+   * return true if the file has a given signature (first set of bytes)
+   */
+  static bool FileHasSignature(
+    const char* filename, const char *signature, long offset = 0);
+
+  /**
+   * Try to locate the file 'filename' in the directory 'dir'.
+   * If 'filename' is a fully qualified filename, the basename of the file is
+   * used to check for its existence in 'dir'.
+   * If 'dir' is not a directory, GetFilenamePath() is called on 'dir' to
+   * get its directory first (thus, you can pass a filename as 'dir', as
+   * a convenience).
+   * 'filename_found' is assigned the fully qualified name/path of the file
+   * if it is found (not touched otherwise).
+   * If 'try_filename_dirs' is true, try to find the file using the
+   * components of its path, i.e. if we are looking for c:/foo/bar/bill.txt, 
+   * first look for bill.txt in 'dir', then in 'dir'/bar, then in 'dir'/foo/bar
+   * etc.
+   * Return true if the file was found, false otherwise.
+   */
+  static bool LocateFileInDir(const char *filename, 
+                              const char *dir, 
+                              kwsys_stl::string& filename_found,
+                              int try_filename_dirs = 0);
+  
+  /** 
+   * Check if the given file exists in one of the parent directory of the
+   * given file or directory and if it does, return the name of the file.
+   * Toplevel specifies the top-most directory to where it will look.
+   */
+  static kwsys_stl::string FileExistsInParentDirectories(const char* fname,
+    const char* directory, const char* toplevel);
+
+  /**
+   * Return file's modified time
+   */
+  static long int ModifiedTime(const char* filename);
+
+  /**
+   * Return file's creation time (Win32: works only for NTFS, not FAT)
+   */
+  static long int CreationTime(const char* filename);
+
+  /**
+   * Get and set permissions of the file.
+   */
+  static bool GetPermissions(const char* file, mode_t& mode);
+  static bool SetPermissions(const char* file, mode_t mode);
+
+  /** -----------------------------------------------------------------
+   *               Time Manipulation Routines
+   *  -----------------------------------------------------------------
+   */
+
+  /**
+   * Get current time as a double. On certain platforms this will
+   * return higher resolution than seconds:
+   * (1) gettimeofday() -- resolution in microseconds
+   * (2) ftime() -- resolution in milliseconds
+   * (3) time() -- resolution in seconds
+   */
+  static double GetTime();
+
+  /**
+   * Get current date/time
+   */
+  static kwsys_stl::string GetCurrentDateTime(const char* format);
+
+  /** -----------------------------------------------------------------
+   *               Registry Manipulation Routines
+   *  -----------------------------------------------------------------
+   */
+
+  /**
+   * Read a registry value
+   */
+  static bool ReadRegistryValue(const char *key, kwsys_stl::string &value);
+
+  /**
+   * Write a registry value
+   */
+  static bool WriteRegistryValue(const char *key, const char *value);
+
+  /**
+   * Delete a registry value
+   */
+  static bool DeleteRegistryValue(const char *key);
+
+  /** -----------------------------------------------------------------
+   *               Environment Manipulation Routines
+   *  -----------------------------------------------------------------
+   */
+
+  /**
+   *  Add the paths from the environment variable PATH to the 
+   *  string vector passed in.  If env is set then the value
+   *  of env will be used instead of PATH.
+   */
+  static void GetPath(kwsys_stl::vector<kwsys_stl::string>& path, 
+                      const char* env=0);
+
+  /**
+   * Read an environment variable
+   */
+  static const char* GetEnv(const char* key);
+  static bool GetEnv(const char* key, kwsys_stl::string& result);
+
+  /**
+   * Get current working directory CWD
+   */
+  static kwsys_stl::string GetCurrentWorkingDirectory();
+
+  /**
+   * Change directory the the directory specified
+   */
+  static int ChangeDirectory(const char* dir);
+
+  /**
+   * Get the result of strerror(errno)
+   */
+  static kwsys_stl::string GetLastSystemError();
+  
+  /** 
+   * When building DEBUG with MSVC, this enables a hook that prevents
+   * error dialogs from popping up if the program is being run from
+   * DART.
+   */
+  static void EnableMSVCDebugHook();
 
   /**
    * Get the width of the terminal window. The code may or may not work, so
@@ -453,25 +592,10 @@ public:
    */
   static void CheckTranslationPath(kwsys_stl::string & path);
 
-  /**
-   * Get and set permissions of the file.
+  /** 
+   * Delay the execution for a specified amount of time specified 
+   * in miliseconds 
    */
-  static bool GetPermissions(const char* file, mode_t& mode);
-  static bool SetPermissions(const char* file, mode_t mode);
-
-  /** Get the parent directory of the directory or file */
-  static kwsys_stl::string GetParentDirectory(const char* fileOrDir);
-
-  /** Check if the given file or directory is in subdirectory of dir */
-  static bool IsSubDirectory(const char* fileOrDir, const char* dir);
-
-  /** Check if the given file exists in one of the parent directory of the
-   * given file or directory and if it does, return the name of the file.
-   * Toplevel specifies the top-most directory to where it will look.*/
-  static kwsys_stl::string FileExistsInParentDirectories(const char* fname,
-    const char* directory, const char* toplevel);
-
-  /** Delay the execution for a specified amount of time specified in miliseconds */
   static void Delay(unsigned int msec);
 
 protected:
