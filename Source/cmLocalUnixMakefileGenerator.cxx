@@ -935,7 +935,8 @@ static RuleVariables ruleReplaceVars[] =
 
   {"<CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS>", "CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS"},
   {"<CMAKE_SHARED_MODULE_CREATE_C_FLAGS>", "CMAKE_SHARED_MODULE_CREATE_C_FLAGS"},
-  {"<CMAKE_SHARED_LIBRARY_SONAME_FLAG>", "CMAKE_SHARED_LIBRARY_SONAME_FLAG"},
+  {"<CMAKE_SHARED_LIBRARY_SONAME_C_FLAG>", "CMAKE_SHARED_LIBRARY_SONAME_C_FLAG"},
+  {"<CMAKE_SHARED_LIBRARY_SONAME_CXX_FLAG>", "CMAKE_SHARED_LIBRARY_SONAME_CXX_FLAG"},
   {"<CMAKE_C_LINK_FLAGS>", "CMAKE_C_LINK_FLAGS"},
 
   {"<CMAKE_AR>", "CMAKE_AR"},
@@ -1020,7 +1021,7 @@ cmLocalUnixMakefileGenerator::ExpandRuleVariables(std::string& s,
     }
   if(targetSOName)
     {
-    if(m_Makefile->GetDefinition("CMAKE_SHARED_LIBRARY_SONAME_FLAG"))
+    if(m_Makefile->GetDefinition("CMAKE_SHARED_LIBRARY_SONAME_C_FLAG"))
       {
       cmSystemTools::ReplaceString(s, "<TARGET_SONAME>", targetSOName);
       }
@@ -3114,7 +3115,7 @@ void cmLocalUnixMakefileGenerator::GetLibraryNames(const char* n,
   const char* soversion = t.GetProperty("SOVERSION");
   if((t.GetType() != cmTarget::SHARED_LIBRARY &&
       t.GetType() != cmTarget::MODULE_LIBRARY) ||
-     !m_Makefile->GetDefinition("CMAKE_SHARED_LIBRARY_SONAME_FLAG"))
+     !m_Makefile->GetDefinition("CMAKE_SHARED_LIBRARY_SONAME_C_FLAG"))
     {
     // Versioning is supported only for shared libraries and modules,
     // and then only when the platform supports an soname flag.
