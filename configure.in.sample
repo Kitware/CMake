@@ -1,3 +1,8 @@
+# This is a sample configure.in for CMake
+# To use CMake, you must put the CMake directory and
+# all of its source into the top level of your source tree.
+# You need to have the configure script in .. from CMake.
+
 # Process this file with autoconf to produce a configure script.
 AC_INIT()
 
