@@ -5,6 +5,50 @@
 #include "CMakeSetup.h"
 #include "CMakeSetupDialog.h"
 #include "CMakeCommandLineInfo.h" 
+#include "../cmDocumentation.h"
+#include "../cmake.h"
+
+
+//----------------------------------------------------------------------------
+static const cmDocumentationEntry cmDocumentationName[] =
+{
+  {0,
+   "  CMakeSetup - CMake Windows GUI.", 0},
+  {0,0,0}
+};
+
+//----------------------------------------------------------------------------
+static const cmDocumentationEntry cmDocumentationUsage[] =
+{
+  {0,
+   "  CMakeSetup [options]\n"
+   "  CMakeSetup [options] <path-to-source>\n"
+   "  CMakeSetup [options] <path-to-build>", 0},
+  {0,0,0}
+};
+
+//----------------------------------------------------------------------------
+static const cmDocumentationEntry cmDocumentationDescription[] =
+{
+  {0,
+   "The \"CMakeSetup\" executable is the CMake Windows GUI.  Project "
+   "configuration settings may be specified interactively.  "
+   "Brief instructions are provided at the bottom of the "
+   "window when the program is running.", 0},
+  CMAKE_STANDARD_INTRODUCTION,
+  {0,0,0}
+};
+
+//----------------------------------------------------------------------------
+static const cmDocumentationEntry cmDocumentationOptions[] =
+{
+  {"-A[on|off]", "Enable/disable display of advanced cache values.",
+   "There are two categories of CMake cache values: non-advanced and "
+   "advanced.  Most users will not need to change the advanced options.  "
+   "The CMakeSetup GUI contains a checkbox to enable/disable display of "
+   "advanced options.  This command line flag changes its default setting."},
+  {0,0,0}
+};
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -57,9 +101,28 @@ BOOL CMakeSetup::InitInstance()
 #endif
   CMakeCommandLineInfo cmdInfo;
   ParseCommandLine(cmdInfo);
-
+  
+  // Check for documentation options.
+  cmDocumentation doc;
+  if(doc.CheckOptions(cmdInfo.GetArgC(), cmdInfo.GetArgV()))
+    {
+    // Construct and print requested documentation.
+    cmake hcm;
+    std::vector<cmDocumentationEntry> commands;
+    std::vector<cmDocumentationEntry> generators;
+    hcm.GetCommandDocumentation(commands);
+    hcm.GetGeneratorDocumentation(generators);
+    doc.SetNameSection(cmDocumentationName);
+    doc.SetUsageSection(cmDocumentationUsage);
+    doc.SetDescriptionSection(cmDocumentationDescription);
+    doc.SetGeneratorsSection(&generators[0]);
+    doc.SetOptionsSection(cmDocumentationOptions);
+    doc.SetCommandsSection(&commands[0]);
+    return (doc.PrintRequestedDocumentation(std::cout)? 0:1);
+    }
+  
   CMakeSetupDialog dlg(cmdInfo);
-
+  
   m_pMainWnd = &dlg;
   INT_PTR nResponse = dlg.DoModal();
   if (nResponse == IDOK)
