@@ -13,18 +13,22 @@
 
 ; Regular expressions used by line indentation function.
 (defconst cmake-regex-quoted "\"\\([^\n\"\\\\]\\|\\\\.\\)*\"")
-(defconst cmake-regex-unquoted "\\([^\n \t()\\\\]\\|\\\\.\\)+")
 (defconst cmake-regex-arguments (concat "\\(" cmake-regex-quoted
-                                        "\\|" cmake-regex-unquoted
-                                        "\\|[ \t]\\)*"))
-(defconst cmake-regex-comment "\\(#[^\n]*\\)?")
+                                        "\\|" "[^\n()\\\\]"
+                                        "\\|" "\\\\."
+                                        "\\)*"))
+(defconst cmake-regex-comment "#[^\n]*")
 (defconst cmake-regex-identifier "[A-Za-z][A-Za-z0-9_]*")
+(defconst cmake-indent-comment-line (concat "^[ \t]*" cmake-regex-comment))
 (defconst cmake-indent-blank-regex "^[ \t]*$")
 (defconst cmake-indent-open-regex (concat "^[ \t]*" cmake-regex-identifier
                                           "[ \t]*(" cmake-regex-arguments
-                                          cmake-indent-comment-regex "\n"))
+                                          "\\(" cmake-regex-comment "\\)?"
+                                          "\n"))
 (defconst cmake-indent-close-regex (concat "^" cmake-regex-arguments
-                                           ")[ \t]*" cmake-indent-comment-regex "\n"))
+                                           ")[ \t]*"
+                                           "\\(" cmake-regex-comment "\\)?"
+                                           "\n"))
 (defconst cmake-indent-begin-regex "^[ \t]*\\(IF\\|MACRO\\|FOREACH\\|ELSE\\)")
 (defconst cmake-indent-end-regex "^[ \t]*\\(ENDIF\\|ENDFOREACH\\|ENDMACRO\\|ELSE\\)")
 
@@ -43,28 +47,35 @@
         (while (and (not (bobp)) (looking-at cmake-indent-blank-regex))
           (forward-line -1)
           )
+
         ; Start with previous non-blank line's indentation.
         (setq cur-indent (current-indentation))
         
-        ; If previous line begins a block, we indent this line.
-        (if (looking-at cmake-indent-begin-regex)
-            (setq cur-indent (+ cur-indent cmake-tab-width))
-          )
-
-        ; If previous line opens a command invocation, we indent this line.
-        (if (looking-at cmake-indent-open-regex)
-            (setq cur-indent (+ cur-indent cmake-tab-width))
-          )
-
-        ; If previous line closes a command invocation, we unindent
-        ; this line.
-        (if (looking-at cmake-indent-close-regex)
-            (setq cur-indent (- cur-indent cmake-tab-width))
-          )
-        (if (looking-at "^[ \t]*#[^\n]*")
-            (setq cur-indent (current-indentation))
+        ; If previous line is a comment line, just use its
+        ; indentation.  Otherwise, adjust indentation based on the
+        ; line's contents.
+        (if (not (looking-at cmake-indent-comment-line))
+            (progn
+              ; If previous line begins a block, we indent this line.
+              (if (looking-at cmake-indent-begin-regex)
+                  (setq cur-indent (+ cur-indent cmake-tab-width))
+                )
+              
+              ; If previous line opens a command invocation, we indent
+              ; this line.
+              (if (looking-at cmake-indent-open-regex)
+                  (setq cur-indent (+ cur-indent cmake-tab-width))
+                )
+              
+              ; If previous line closes a command invocation, we unindent
+              ; this line.
+              (if (looking-at cmake-indent-close-regex)
+                  (setq cur-indent (- cur-indent cmake-tab-width))
+                )
+              )
           )
         )
+
       
       ; If this line ends a block, we unindent it.
       (if (looking-at cmake-indent-end-regex)
