@@ -54,6 +54,17 @@ void f(istream& is, kwsys_stl::string& s) { is >> s; }
 int main() { return 0; }
 #endif
 
+#ifdef TEST_KWSYS_STL_STRING_HAVE_NEQ_CHAR
+# if KWSYS_STL_HAVE_STD
+#  define kwsys_stl std
+# else
+#  define kwsys_stl
+# endif
+# include <string>
+bool f(const kwsys_stl::string& s) { return s != ""; }
+int main() { return 0; }
+#endif
+
 #ifdef TEST_KWSYS_STAT_HAS_ST_MTIM
 #include <sys/types.h>
 #include <sys/stat.h>
