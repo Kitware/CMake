@@ -20,8 +20,7 @@ MACRO(CHECK_SYMBOL_EXISTS SYMBOL FILES VARIABLE)
             "${CHECK_SYMBOL_EXISTS_CONTENT}${POUND}include <${FILE}>\n")
     ENDFOREACH(FILE)
     SET(CHECK_SYMBOL_EXISTS_CONTENT
-        "${CHECK_SYMBOL_EXISTS_CONTENT}\n\nint main${PARENTS}{"
-        "\n${POUND}ifndef ${SYMBOL}\nchar ${OPEN_PARENT}*f${CLOSE_PARENT} ${PARENTS} = ${SYMBOL};\n${POUND}endif\nreturn 0;\n}\n")
+        "${CHECK_SYMBOL_EXISTS_CONTENT}\n\nint main${PARENTS}{\n${POUND}ifndef ${SYMBOL}\nchar ${OPEN_PARENT}*f${CLOSE_PARENT} ${PARENTS} = ${SYMBOL};\n${POUND}endif\nreturn 0;\n}\n")
     WRITE_FILE(${CMAKE_BINARY_DIR}/CMakeTmp/CheckSymbolExists.c 
                "${CHECK_SYMBOL_EXISTS_CONTENT}")
     
