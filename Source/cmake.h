@@ -298,8 +298,8 @@ private:
   bool m_InTryCompile;
   bool m_ScriptMode;
   std::string m_CMakeCommand;
-  const char* m_CXXEnvironment;
-  const char* m_CCEnvironment;
+  std::string m_CXXEnvironment;
+  std::string m_CCEnvironment;
   bool m_DebugTryCompile;
 };
 

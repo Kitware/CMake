@@ -3019,28 +3019,12 @@ int cmCTest::RunConfigurationScript()
   // set any environment variables
   if (ctestEnv)
     {
-    static char ctestEnvStatic[100][5000];
     std::vector<std::string> envArgs;
     cmSystemTools::ExpandListArgument(ctestEnv,envArgs);
-    int numArgs = envArgs.size();
-    // we have a hard limit of 100 env args due to stupid format of putenv
-    if (numArgs > 100)
-      {
-      numArgs = 100;
-      }
     // for each variable/argument do a putenv
-    int i;
-    for (i = 0; i < numArgs; ++i)
+    for (unsigned i = 0; i < envArgs.size(); ++i)
       {
-      // also limit args to be at most 4K long
-      std::string::size_type size = envArgs[i].size();
-      if(size > 4999)
-        {
-        size = 4999;
-        }
-      strncpy(ctestEnvStatic[i], envArgs[i].c_str(), size);
-      ctestEnvStatic[i][size] = 0;
-      putenv(ctestEnvStatic[i]);
+      cmSystemTools::PutEnv(envArgs[i].c_str());
       }
     }
 

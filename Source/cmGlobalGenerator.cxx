@@ -43,7 +43,7 @@ cmGlobalGenerator::~cmGlobalGenerator()
   m_LocalGenerators.clear();
 }
 
-
+  
 void cmGlobalGenerator::EnableLanguage(const char* lang, 
                                        cmMakefile *mf)
 {
@@ -116,7 +116,6 @@ void cmGlobalGenerator::EnableLanguage(const char* lang,
     systemFile += "/Modules/CMakeDetermineSystem.cmake";
     mf->ReadListFile(0, systemFile.c_str());
     }
-  
   // check for a C compiler and configure it
   if(!isLocal &&
      !this->GetLanguageEnabled("C") && 
@@ -137,20 +136,11 @@ void cmGlobalGenerator::EnableLanguage(const char* lang,
     this->SetLanguageEnabled("C");
     // put CC in the environment in case user scripts want
     // to run configure
-    // see man putenv for explaination of this stupid code...
     if(mf->GetDefinition("CMAKE_C_COMPILER"))
       { 
-      static char envCC[5000];
       std::string env = "CC=${CMAKE_C_COMPILER}";
       mf->ExpandVariablesInString(env);
-      unsigned int size = static_cast<unsigned int>(env.size());
-      if(size > 4999)
-        {
-        size = 4999;
-        }
-      strncpy(envCC, env.c_str(), size);
-      envCC[size] = 0;
-      putenv(envCC); 
+      cmSystemTools::PutEnv(env.c_str());
       }
     } 
   
@@ -166,20 +156,11 @@ void cmGlobalGenerator::EnableLanguage(const char* lang,
     this->SetLanguageEnabled("CXX");
     // put CXX in the environment in case user scripts want
     // to run configure
-    // see man putenv for explaination of this stupid code...
-    static char envCXX[5000];
     if(mf->GetDefinition("CMAKE_CXX_COMPILER"))
       {
       std::string env = "CXX=${CMAKE_CXX_COMPILER}";
       mf->ExpandVariablesInString(env); 
-      unsigned int size =  static_cast<unsigned int>(env.size());
-      if(size > 4999)
-        {
-        size = 4999;
-        }
-      strncpy(envCXX, env.c_str(), size);
-      envCXX[size] = 0;
-      putenv(envCXX);
+      cmSystemTools::PutEnv(env.c_str());
       }
     }
     // check for a Java compiler and configure it

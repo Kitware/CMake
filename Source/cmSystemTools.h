@@ -256,6 +256,10 @@ public:
   static std::string RelativePath(const char* local, const char* remote);
   ///! split a path by separator into an array of strings, default is /
   static std::vector<cmStdString> SplitString(const char* s, char separator = '/');
+  /** put a string into the environment
+      of the form var=value */
+  static bool PutEnv(const char* value);
+  
 private:
   static bool s_ForceUnixPaths;
   static bool s_RunCommandHideConsole;

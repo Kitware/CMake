@@ -84,8 +84,7 @@ cmake::cmake()
   // encode the MAKEFLAGS variable in a strange way.
   if(getenv("MAKEFLAGS"))
     {
-    static char makeflags[] = "MAKEFLAGS=";
-    putenv(makeflags);
+    cmSystemTools::PutEnv("MAKEFLAGS=");
     }  
   
   m_Local = false;
@@ -876,36 +875,18 @@ void cmake::SetGlobalGenerator(cmGlobalGenerator *gg)
     delete m_GlobalGenerator;
     // restore the original environment variables CXX and CC
     // Restor CC
-    static char envCC[5000];
     std::string env = "CC=";
-    if(m_CCEnvironment)
+    if(m_CCEnvironment.size())
       {
       env += m_CCEnvironment;
       }
-    std::string::size_type size = env.size();
-    if(size > 4999)
-      {
-      size = 4999;
-      }
-    strncpy(envCC, env.c_str(), size);
-    envCC[size] = 0;
-    putenv(envCC); 
-    
-    // Restore CXX
-    static char envCXX[5000];
+    cmSystemTools::PutEnv(env.c_str());
     env = "CXX=";
-    if(m_CXXEnvironment)
+    if(m_CXXEnvironment.size())
       {
       env += m_CXXEnvironment;
       }
-    size = env.size();
-    if(size > 4999)
-      {
-      size = 4999;
-      }
-    strncpy(envCXX, env.c_str(), size);
-    envCXX[size] = 0;
-    putenv(envCXX);
+    cmSystemTools::PutEnv(env.c_str());
     }
 
   // set the new
@@ -915,9 +896,24 @@ void cmake::SetGlobalGenerator(cmGlobalGenerator *gg)
   // on windows.
   cmSystemTools::SetForceUnixPaths(m_GlobalGenerator->GetForceUnixPaths());
   // Save the environment variables CXX and CC
-  m_CXXEnvironment = getenv("CXX");
-  m_CCEnvironment = getenv("CC");    
-  
+  const char* cxx = getenv("CXX");
+  const char* cc = getenv("CC");
+  if(cxx)
+    {
+    m_CXXEnvironment = cxx;
+    }
+  else
+    {
+    m_CXXEnvironment = "";
+    }
+  if(cc)
+    {
+    m_CCEnvironment = cc;
+    }
+  else
+    {
+    m_CCEnvironment = "";
+    }
   // set the cmake instance just to be sure
   gg->SetCMakeInstance(this);
 }
