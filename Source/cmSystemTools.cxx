@@ -923,8 +923,35 @@ std::string cmSystemTools::TemporaryFileName()
    risk of setting rights with 0666 */
   return tempnam(0, "cmake");
 }
-  
 
+/**
+ * Find the file the given name.  Searches the given path and then
+ * the system search path.  Returns the full path to the file if it is
+ * found.  Otherwise, the empty string is returned.
+ */
+std::string cmSystemTools::FindFile(const char* name, 
+				       const std::vector<std::string>& userPaths)
+{
+  // Add the system search path to our path.
+  std::vector<std::string> path = userPaths;
+  cmSystemTools::GetPath(path);
+
+  std::string tryPath;
+  for(std::vector<std::string>::const_iterator p = path.begin();
+      p != path.end(); ++p)
+    {
+    tryPath = *p;
+    tryPath += "/";
+    tryPath += name;
+    if(cmSystemTools::FileExists(tryPath.c_str()) &&
+      !cmSystemTools::FileIsDirectory(tryPath.c_str()))
+      {
+      return cmSystemTools::CollapseFullPath(tryPath.c_str());
+      }
+    }
+  // Couldn't find the file.
+  return "";
+}
 
 /**
  * Find the executable with the given name.  Searches the given path and then
@@ -947,11 +974,11 @@ std::string cmSystemTools::FindProgram(const char* name,
     {
     return cmSystemTools::CollapseFullPath(tryPath.c_str());
     }
-  
+
   // Add the system search path to our path.
   std::vector<std::string> path = userPaths;
   cmSystemTools::GetPath(path);
-  
+
   for(std::vector<std::string>::const_iterator p = path.begin();
       p != path.end(); ++p)
     {
@@ -970,7 +997,7 @@ std::string cmSystemTools::FindProgram(const char* name,
       return cmSystemTools::CollapseFullPath(tryPath.c_str());
       }
     }
-  
+
   // Couldn't find the program.
   return "";
 }

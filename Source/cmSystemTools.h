@@ -205,6 +205,10 @@ public:
    */
   static bool IsOff(const char* val);
 
+  ///! Find a file in the system PATH, with optional extra paths.
+  static std::string FindFile(const char* name,
+				 const std::vector<std::string>& path= std::vector<std::string>());
+
   ///! Find an executable in the system PATH, with optional extra paths.
   static std::string FindProgram(const char* name,
 				 const std::vector<std::string>& path= std::vector<std::string>());
