@@ -743,6 +743,19 @@ std::string cmSystemTools::ConvertToWindowsOutputPath(const char* path)
   return ret;
 }
 
+inline void RemoveComments(char* ptr)
+{
+  while(*ptr)
+    {
+    if(*ptr == '#')
+      {
+      *ptr = 0;
+      break;
+      }
+    ++ptr;
+    }
+}
+
 bool cmSystemTools::ParseFunction(std::ifstream& fin,
                                   std::string& name,
                                   std::vector<std::string>& arguments,
@@ -760,14 +773,15 @@ bool cmSystemTools::ParseFunction(std::ifstream& fin,
     }
   if(fin.getline(inbuffer, BUFFER_SIZE ) )
     {
+    RemoveComments(inbuffer);
     cmRegularExpression blankLine("^[ \t\r]*$");
-    cmRegularExpression comment("^[ \t]*#.*$");
+//    cmRegularExpression comment("^[ \t]*#.*$");
     cmRegularExpression oneLiner("^[ \t]*([A-Za-z_0-9]*)[ \t]*\\((.*)\\)[ \t\r]*$");
     cmRegularExpression multiLine("^[ \t]*([A-Za-z_0-9]*)[ \t]*\\((.*)$");
     cmRegularExpression lastLine("^(.*)\\)[ \t\r]*$");
 
-    // check for black line or comment
-    if(blankLine.find(inbuffer) || comment.find(inbuffer))
+    // check for blank line or comment
+    if(blankLine.find(inbuffer) )
       {
       return false;
       }
@@ -794,8 +808,9 @@ bool cmSystemTools::ParseFunction(std::ifstream& fin,
         // read lines until the end paren is found
         if(fin.getline(inbuffer, BUFFER_SIZE ) )
           {
+          RemoveComments(inbuffer);
           // Check for comment lines and ignore them.
-          if(blankLine.find(inbuffer) || comment.find(inbuffer))
+          if(blankLine.find(inbuffer))
             { continue; }
           // Is this the last line?
           if(lastLine.find(inbuffer))
