@@ -17,7 +17,7 @@ void onsig(int sig)
   if (cmCursesForm::CurrentForm)
     {
     endwin();
-    WINDOW* w= initscr(); /* Initialization */ 
+    initscr(); /* Initialization */ 
     noecho(); /* Echo off */ 
     cbreak(); /* nl- or cr not needed */ 
     keypad(stdscr,TRUE); /* Use key symbols as 
@@ -63,7 +63,7 @@ int main(int argc, char** argv)
 
   cmCacheManager::GetInstance()->LoadCache(cmSystemTools::GetCurrentWorkingDirectory().c_str());
 
-  WINDOW* w=initscr(); /* Initialization */ 
+  initscr(); /* Initialization */ 
   noecho(); /* Echo off */ 
   cbreak(); /* nl- or cr not needed */ 
   keypad(stdscr,TRUE); /* Use key symbols as 

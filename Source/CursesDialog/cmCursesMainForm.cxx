@@ -384,7 +384,6 @@ void cmCursesMainForm::UpdateStatusBar()
     width = cmCursesMainForm::MAX_WIDTH;
     }
 
-  int leftLen = width - helpLen;
   if (curFieldLen >= width)
     {
     strncpy(bar, curField, width);
@@ -563,7 +562,7 @@ void cmCursesMainForm::HandleInput()
       else if ( key == KEY_DOWN || key == ctrl('n') )
 	{
 	FIELD* cur = current_field(m_Form);
-	unsigned int index = field_index(cur);
+	int index = field_index(cur);
 	if ( index == 3*m_NumberOfVisibleEntries-1 )
 	  {
 	  continue;
@@ -670,7 +669,7 @@ void cmCursesMainForm::HandleInput()
       else if ( key == 'd' )
 	{
 	FIELD* cur = current_field(m_Form);
-	unsigned int index = field_index(cur);
+	int index = field_index(cur);
 
 	// make the next or prev. current field after deletion
 	// each entry consists of fields: label, isnew, value
