@@ -100,7 +100,7 @@ cvs_login()
             CVSPASS=""
         fi
         if [ -z "`grep \"$CVSROOT\" ${CVSPASS} /dev/null`" ]; then
-            echo "cmake" | cvs -q -z3 -d $CVSROOT cvs_login
+            echo "cmake" | cvs -q -z3 -d $CVSROOT login
         else
             echo "Already logged in."
         fi
