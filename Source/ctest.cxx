@@ -275,6 +275,11 @@ int main (int argc, char *argv[])
     {
     args.push_back(argv[i]);
     }
+
+#ifdef _WIN32
+  std::string comspec = "cmw9xcom.exe";
+  cmSystemTools::SetWindows9xComspecSubstitute(comspec.c_str());
+#endif
   
   for(unsigned int i=1; i < args.size(); ++i)
     {
