@@ -189,8 +189,8 @@ NameButtonCallback( Fl_Widget * widget, void * data)
   static Fl_Menu_Button * popupMenu = 0;
   if( !popupMenu )
   {
-    int lastMousePositionX = Fl::event_x_root();
-    int lastMousePositionY = Fl::event_y_root();
+    int lastMousePositionX = Fl::event_x();
+    int lastMousePositionY = Fl::event_y();
     popupMenu = new Fl_Menu_Button(lastMousePositionX,
                                    lastMousePositionY,100,200);
   }

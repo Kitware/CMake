@@ -352,8 +352,10 @@ CMakeSetupGUIImplementation
   // update the GUI with any new values in the caused by the
   // generation process
   this->LoadCacheFromDiskToGUI();
+
   // path is up-to-date now
   m_BuildPathChanged = false;
+
   // put the cursor back
   fl_cursor(FL_CURSOR_DEFAULT,FL_BLACK,FL_WHITE);
   fl_message("Done !");
@@ -405,6 +407,8 @@ CMakeSetupGUIImplementation
 {
 
   // Prepare to add rows to the scroll
+  m_CacheEntriesList.RemoveAll();
+  propertyListPack->clear();
   propertyListPack->begin();
 
   const cmCacheManager::CacheEntryMap &cache =
@@ -415,7 +419,6 @@ CMakeSetupGUIImplementation
     const char* key = i->first.c_str();
     const cmCacheManager::CacheEntry& value = i->second;
     
-
     switch(value.m_Type )
       {
       case cmCacheManager::BOOL:
@@ -453,6 +456,10 @@ CMakeSetupGUIImplementation
                                        fltk::PropertyList::EDIT,"");
         break;
       case cmCacheManager::INTERNAL:
+        m_CacheEntriesList.AddProperty(key,
+                                       value.m_Value.c_str(),
+                                       value.m_HelpString.c_str(),
+                                       fltk::PropertyList::EDIT,"");
         break;
       }
 
@@ -461,6 +468,10 @@ CMakeSetupGUIImplementation
   propertyListPack->end();
   propertyListPack->init_sizes();
   cacheValuesScroll->position( 0, 0 );
+
+  propertyListPack->redraw();
+
+  Fl::check();
 
   this->UpdateData(false);
 
