@@ -20,6 +20,8 @@
 #include "cmGeneratedFileStream.h"
 #include "cmake.h"
 
+#include <memory> // auto_ptr
+
 // cmExecutableCommand
 bool cmExportLibraryDependenciesCommand::InitialPass(std::vector<std::string> const& args)
 {
