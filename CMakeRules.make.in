@@ -15,22 +15,22 @@
 # 
 #------------------------------------------------------------------------------
 #
-all: ${OBJ_SUB_DIRS} ${EXECUTABLES} ${SUBDIR_BUILD} ${ITK_LIB_FILE} ${LOCAL_BUILD_TARGETS}
+all: ${OBJ_SUB_DIRS} ${EXECUTABLES} ${SUBDIR_BUILD} ${ITK_LIB_FILE} ${LOCAL_BUILD_TARGETS} 
 
 #------------------------------------------------------------------------------
 
-${RULESGEN}: @fullSrcDir@/Code/tools/*.cxx @fullSrcDir@/Code/tools/*.h
-	cd @ITK_OBJ@/Code/tools; ${MAKE} rulesgen
+${CMAKE}: @fullSrcDir@/CMake/Source/*.cxx @fullSrcDir@/CMake/Source/*.h
+	cd @CMAKE_OBJ_DIR@/CMake/Source; ${MAKE} CMakeBuildTargets
 
-depend: ${RULESGEN}
-	${RULESGEN} Makefile
+depend: ${CMAKE}
+	${CMAKE} ${srcdir}/CMakeLists.txt -S${srcdir} -I${srcdir} ${INCLUDE_FLAGS}
 
 
 clean: ${SUBDIR_CLEAN}
 	rm -f ${SRC_OBJ} ${ITK_EXECUTABLES} 
 
-targets.make: ${RULESGEN} Makefile
-	${RULESGEN} Makefile -S${srcdir} -I${srcdir} ${INCLUDE_FLAGS}
+CMakeTargets.make: ${CMAKE} ${srcdir}/CMakeLists.txt
+	${CMAKE} ${srcdir}/CMakeLists.txt -S${srcdir} -I${srcdir} ${INCLUDE_FLAGS}
 
 #------------------------------------------------------------------------------
 # rules for the normal library

@@ -1,17 +1,17 @@
 #------------------------------------------------------------------------------
 # Include generated rules
-@MAKEINCLUDE@ @MAKEQUOTE@targets.make@MAKEQUOTE@
+@MAKEINCLUDE@ @MAKEQUOTE@CMakeTargets.make@MAKEQUOTE@
 
 #------------------------------------------------------------------------------
 # Include all variable settings
-@MAKEINCLUDE@ @MAKEQUOTE@@ITK_OBJ@/Code/config/MakeVariables.make@MAKEQUOTE@
+@MAKEINCLUDE@ @MAKEQUOTE@@CMAKE_OBJ_DIR@/CMake/CMakeVariables.make@MAKEQUOTE@
 
 #------------------------------------------------------------------------------
 # Include user-editable defines.
-@MAKEINCLUDE@ @MAKEQUOTE@@ITK_OBJ@/local.make@MAKEQUOTE@
+@MAKEINCLUDE@ @MAKEQUOTE@@CMAKE_OBJ_DIR@/CMakeLocal.make@MAKEQUOTE@
 
 #------------------------------------------------------------------------------
 # Include General Build Rules
-@MAKEINCLUDE@ @MAKEQUOTE@@ITK_OBJ@/Code/config/MakeRules.make@MAKEQUOTE@
+@MAKEINCLUDE@ @MAKEQUOTE@@CMAKE_OBJ_DIR@/CMake/CMakeRules.make@MAKEQUOTE@
 
 

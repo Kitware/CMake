@@ -1,0 +1,18 @@
+CMakeMaster.make     -> main file to be included by makefiles
+CMakeVariables.make  -> all make varibles are set in this file
+CMakeRules.make      -> All build rules are here
+CMakeLocal.make      -> Place for hand configuration
+CMakeLists.txt       -> File in each directory that contains classes, exe, etc
+CMakeTargets.make    -> generated rules for make style build
+
+Windows / Visual Studio 6.0
+CMakeSetup.exe   -> window MFC based GUI for configure on windows
+CMakeSetupCMD.exe            -> windows command line version of CMakeConfigure
+
+Unix 
+configure            -> run on unix to configure for build
+CMakeBuildTargets    -> Unix program to read CMakeLists.txt and generate CMakeTargets.make
+
+TODO:
+Fix cmUnixMakefile.cxx and cmDSPMakefile.cxx 
+to read libraries and -I stuff from a config file

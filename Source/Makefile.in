@@ -1,0 +1,30 @@
+
+srcdir        = @srcdir@
+VPATH         = @srcdir@
+
+# DO NOT INCLUDE CMakeMaster.make here!
+# This will cause an infinite loop as it will add the
+# rule for changing into this directory
+
+@MAKEINCLUDE@ @MAKEQUOTE@@CMAKE_OBJ_DIR@/CMake/CMakeRules.make@MAKEQUOTE@
+CMAKE =
+@MAKEINCLUDE@ @MAKEQUOTE@@CMAKE_OBJ_DIR@/CMake/CMakeVariables.make@MAKEQUOTE@
+
+OBJS = \
+cmClassFile.o \
+cmMakefile.o \
+cmUnixMakefile.o \
+cmMakeDepend.o \
+cmRegularExpression.o \
+CMakeBuildTargets.o
+
+cmClassFile.o : cmClassFile.h cmClassFile.cxx
+cmMakefile.o : cmMakefile.h cmMakefile.cxx cmClassFile.h
+cmUnixMakefile.o : cmUnixMakefile.h cmUnixMakefile.cxx cmMakefile.h cmClassFile.h
+cmMakeDepend.o : cmMakeDepend.h cmMakeDepend.cxx  cmMakefile.h cmClassFile.h cmRegularExpression.h
+cmRegularExpression.o : cmRegularExpression.h cmRegularExpression.cxx
+CMakeBuildTargets.o : CMakeBuildTargets.cxx cmMakefile.h cmMakeDepend.h
+
+CMakeBuildTargets: ${OBJS}
+	${CXX}  ${OBJS} ${CXX_FLAGS}  -o CMakeBuildTargets
+

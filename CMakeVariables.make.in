@@ -1,10 +1,10 @@
 topdir = @fullSrcDir@
 
-CONFIG_DIR = @ITK_OBJ@
+CONFIG_DIR = @CMAKE_OBJ_DIR@
 
 SHELL = /bin/sh
 
-ITK_OBJ       = @ITK_OBJ@
+CMAKE_OBJ_DIR = ${CONFIG_DIR}
 
 RANLIB        = @RANLIB@
 CC            = @CC@
@@ -104,6 +104,6 @@ CXX_FLAGS = ${CPPFLAGS} ${LOCAL_CXXFLAGS} ${CXXFLAGS} \
 CC_FLAGS = ${CPPFLAGS} ${LOCAL_CFLAGS} ${CFLAGS} 
 
 # set up the path to the rulesgen program
-RULESGEN = @ITK_OBJ@/Code/tools/rulesgen
+CMAKE = @CMAKE_OBJ_DIR@/CMake/Source/CMakeBuildTargets
 
 BUILD_LIB_FILE  = lib${ME}${ITK_LIB_EXT}
