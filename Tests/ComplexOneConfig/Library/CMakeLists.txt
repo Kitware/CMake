@@ -40,6 +40,13 @@ ADD_CUSTOM_COMMAND(SOURCE CMakeTestLibraryShared
                    ARGS "${Complex_BINARY_DIR}/Library/postbuild.txt"
                    TARGET CMakeTestLibraryShared)
 
+ADD_CUSTOM_COMMAND(SOURCE CMakeTestLibraryShared
+	           COMMAND ${CCOMMAND_COMMAND}
+                   ARGS copy
+                        "${Complex_BINARY_DIR}/Library/postbuild.txt"
+                        "${Complex_BINARY_DIR}/Library/postbuild2.txt"
+                   TARGET CMakeTestLibraryShared)
+
 #
 # Add a custom target.
 # It runs ${CREATE_FILE_EXE} which will create a file.
