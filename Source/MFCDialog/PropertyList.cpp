@@ -15,6 +15,7 @@
 CPropertyList::CPropertyList()
 {
   m_Dirty = false;
+  m_curSel = -1;
 }
 
 CPropertyList::~CPropertyList()
@@ -665,6 +666,10 @@ void CPropertyList::OnRButtonUp( UINT nFlags, CPoint point )
 
 void CPropertyList::OnDelete()
 { 
+  if(m_curSel == -1 || this->GetCount() <= 0)
+    {
+    return;
+    }
   CPropertyItem* pItem = (CPropertyItem*) GetItemDataPtr(m_curSel);
   pItem->m_Removed = true;
   this->DeleteString(m_curSel);
@@ -673,6 +678,10 @@ void CPropertyList::OnDelete()
 
 void CPropertyList::OnHelp()
 { 
+  if(m_curSel == -1 || this->GetCount() <= 0)
+    {
+    return;
+    }
   CPropertyItem* pItem = (CPropertyItem*) GetItemDataPtr(m_curSel);
   MessageBox(pItem->m_HelpString);
 }
