@@ -202,7 +202,8 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
 }
 
 //----------------------------------------------------------------------------
-bool cmFileCommand::HandleMakeDirectoryCommand(std::vector<std::string> const& args)
+bool cmFileCommand::HandleMakeDirectoryCommand(
+  std::vector<std::string> const& args)
 {
   if(args.size() < 2 )
     {
@@ -235,7 +236,8 @@ bool cmFileCommand::HandleMakeDirectoryCommand(std::vector<std::string> const& a
 }
 
 //----------------------------------------------------------------------------
-bool cmFileCommand::HandleInstallCommand(std::vector<std::string> const& args)
+bool cmFileCommand::HandleInstallCommand(
+  std::vector<std::string> const& args)
 {
   if ( args.size() < 6 )
     {
@@ -246,7 +248,10 @@ bool cmFileCommand::HandleInstallCommand(std::vector<std::string> const& args)
   std::string destination = "";
   std::string stype = "FILES";
   const char* build_type = m_Makefile->GetDefinition("BUILD_TYPE");
-  const char* debug_postfix = m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX");
+  const char* debug_postfix 
+    = m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX");
+  const char* destdir = cmSystemTools::GetEnv("DESTDIR");
+
   std::string extra_dir = "";
   int debug = 0;
   if ( build_type )
@@ -258,7 +263,6 @@ bool cmFileCommand::HandleInstallCommand(std::vector<std::string> const& args)
       debug = 1;
       }
     }
-
 
   std::vector<std::string> files;
   int itype = cmTarget::INSTALL_FILES;
@@ -303,14 +307,72 @@ bool cmFileCommand::HandleInstallCommand(std::vector<std::string> const& args)
       }
     }
 
-  if ( destination.size() == 0 )
+  if ( destination.size() < 2 )
     {
-    this->SetError("called with inapropriate arguments. No DESTINATION provided.");
+    this->SetError("called with inapropriate arguments. "
+      "No DESTINATION provided or .");
     return false;
     }
+
+  if ( destdir && *destdir )
+    {
+    std::string sdestdir = destdir;
+    cmSystemTools::ConvertToUnixSlashes(sdestdir);
+
+    char ch1 = destination[0];
+    char ch2 = destination[1];
+    char ch3 = 0;
+    if ( destination.size() > 2 )
+      {
+      ch3 = destination[2];
+      }
+    int skip = 0;
+    if ( ch1 != '/' )
+      {
+      int relative = 0;
+      if ( ( ch1 >= 'a' && ch1 <= 'z' || ch1 >= 'a' && ch1 <= 'z' ) &&
+        ch2 == ':' )
+        {
+        // Assume windows
+        // let's do some destdir magic:
+        skip = 2;
+        if ( ch3 != '/' )
+          {
+          relative = 1;
+          }
+        }
+      else
+        {
+        relative = 1;
+        }
+      if ( relative )
+        {
+        // This is relative path on unix or windows. Since we are doing
+        // destdir, this case does not make sense.
+        this->SetError("called with relative DESTINATION. This "
+          "does not make sense when using DESTDIR. Specify "
+          "absolute path or remove DESTDIR environment variable.");
+        return false;
+        }
+      }
+    else
+      {
+      if ( ch2 == '/' )
+        {
+        // looks like a network path. 
+        this->SetError("called with network path DESTINATION. This "
+          "does not make sense when using DESTDIR. Specify local "
+          "absolute path or remove DESTDIR environment variable.");
+        return false;
+        }
+      }
+    destination = sdestdir + (destination.c_str() + skip);
+    }
+
   if ( files.size() == 0 )
     {
-    this->SetError("called with inapropriate arguments. No FILES provided.");
+    this->SetError(
+      "called with inapropriate arguments. No FILES provided.");
     return false;
     }
   if ( stype == "EXECUTABLE" )
@@ -354,11 +416,13 @@ bool cmFileCommand::HandleInstallCommand(std::vector<std::string> const& args)
 
   for ( i = 0; i < files.size(); i ++ )
     {
-    std::string destfile = destination + "/" + cmSystemTools::GetFilenameName(files[i]);
+    std::string destfile 
+      = destination + "/" + cmSystemTools::GetFilenameName(files[i]);
     std::string ctarget = files[i].c_str();
     std::string fname = cmSystemTools::GetFilenameName(ctarget);
     std::string ext = cmSystemTools::GetFilenameExtension(ctarget);
-    std::string fnamewe = cmSystemTools::GetFilenameWithoutExtension(ctarget);
+    std::string fnamewe 
+      = cmSystemTools::GetFilenameWithoutExtension(ctarget);
     switch( itype )
       {
     case cmTarget::MODULE_LIBRARY:
@@ -372,7 +436,8 @@ bool cmFileCommand::HandleInstallCommand(std::vector<std::string> const& args)
       if ( extra_dir.size() > 0 )
         {
         cmOStringStream str;
-        str << cmSystemTools::GetFilenamePath(ctarget) << "/" << extra_dir << "/" 
+        str << cmSystemTools::GetFilenamePath(ctarget) 
+          << "/" << extra_dir << "/" 
           << fname;
         ctarget = str.str();
         }
@@ -381,7 +446,8 @@ bool cmFileCommand::HandleInstallCommand(std::vector<std::string> const& args)
 
     if ( cmSystemTools::FileExists(ctarget.c_str()) )
       {
-      if ( !cmSystemTools::CopyFileAlways(ctarget.c_str(), destination.c_str()) )
+      if ( !cmSystemTools::CopyFileAlways(ctarget.c_str(), 
+          destination.c_str()) )
         {
         std::string errstring = "cannot copy file: " + ctarget + 
           " to directory : " + destination + ".";
@@ -415,7 +481,8 @@ bool cmFileCommand::HandleInstallCommand(std::vector<std::string> const& args)
       {
       if ( !optional )
         {
-        std::string errstring = "cannot find file: " + ctarget + " to install.";
+        std::string errstring = "cannot find file: " + 
+          ctarget + " to install.";
         this->SetError(errstring.c_str());
         return false;
         }
