@@ -34,8 +34,11 @@ FIND_PATH(VTK_BINARY_PATH UseVTK.cmake
   [HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\Settings\\StartPath;WhereBuild9]
   [HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\Settings\\StartPath;WhereBuild10]
   ../VTKBIN
+  ../VTK-bin
+  ../../VTK-bin
   ../vtkbin
   VTKBIN
+  VTK-bin
   vtkbin
   $ENV{HOME}/VTKBIN
   $ENV{HOME}/vtkbin
