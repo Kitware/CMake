@@ -471,7 +471,12 @@ int main()
   cmFailed("the LOAD_CACHE or CONFIGURE_FILE command is broken, "
          "CACHE_TEST_VAR_INTERNAL is not defined.");
 #else
-  if(strcmp(CACHE_TEST_VAR_INTERNAL, "bar") != 0)
+  std::string cachetest = CACHE_TEST_VAR_INTERNAL;
+  std::string copy = cachetest;
+  cachetest.find("bar");
+  cachetest.rfind("bar");
+  copy = cachetest.substr(0, cachetest.size());
+  if(cachetest != "bar")
     {
     cmFailed("the LOAD_CACHE or CONFIGURE_FILE command is broken, "
            "CACHE_TEST_VAR_INTERNAL == ", CACHE_TEST_VAR_INTERNAL);
