@@ -65,6 +65,15 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args)
     return false;
     }
 
+  std::string outputGUIDirectory = m_Makefile->GetCurrentOutputDirectory();
+
+  if(!cmSystemTools::MakeDirectory( outputGUIDirectory.c_str() ) )
+    {
+    cmSystemTools::Error("Error failed create GUI directory:",
+                                          outputGUIDirectory.c_str() );
+                             
+    }
+
   // what is the current source dir
   std::string cdir = m_Makefile->GetCurrentDirectory();
 
@@ -81,6 +90,11 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args)
     this->SetError("bad source list passed to FLTKWrapUICommand");
     return false;
     }
+
+  // Some of the generated files are *.h so the directory "GUI" 
+  // where they are created have to be added to the include path
+  m_Makefile->AddIncludeDirectory( outputGUIDirectory.c_str() );
+
   for(std::vector<cmSourceFile>::iterator i = l->second.begin(); 
       i != l->second.end(); i++)
     {
@@ -91,12 +105,11 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args)
       {
       cmSourceFile header_file;
       cmSourceFile source_file;
+      const bool headerFileOnly = true;
       header_file.SetName(curr.GetSourceName().c_str(), 
-                  m_Makefile->GetCurrentOutputDirectory(),
-                   "h",false);
+                  outputGUIDirectory.c_str(), "h",headerFileOnly);
       source_file.SetName(curr.GetSourceName().c_str(), 
-                  m_Makefile->GetCurrentOutputDirectory(),
-                   "cxx",false);
+                  outputGUIDirectory.c_str(), "cxx",!headerFileOnly);
       std::string origname = cdir + "/" + curr.GetSourceName() + "." +
           curr.GetSourceExtension();
       std::string hname   = header_file.GetFullPath();
@@ -108,20 +121,17 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args)
       header_file.GetDepends().push_back(origname);
       m_GeneratedHeadersClasses.push_back(header_file);
       m_GeneratedSourcesClasses.push_back(source_file);
-      m_Makefile->AddSource(source_file,
-                            m_GeneratedSourceList.c_str());
 
-      cmTarget htarget;
-      htarget.SetType( cmTarget::GENERATED_CODE );
-      cmTargets::value_type hpair( hname, htarget );
-      m_Makefile->GetTargets().insert( hpair );
+      m_Makefile->AddSource(header_file, m_GeneratedSourceList.c_str());
+      m_Makefile->AddSource(source_file, m_GeneratedSourceList.c_str());
+
+      m_Makefile->AddSource(header_file, m_GeneratedSourceList.c_str());
+      m_Makefile->AddSource(source_file, m_GeneratedSourceList.c_str());
 
       cmTarget cxxtarget;
       cxxtarget.SetType( cmTarget::GENERATED_CODE );
       cmTargets::value_type cxxpair( cxxname, cxxtarget );
       m_Makefile->GetTargets().insert( cxxpair );
-
-
 
       }
     }
@@ -134,20 +144,21 @@ void cmFLTKWrapUICommand::FinalPass()
 
   // first we add the rules for all the .fl to .h and .cxx files
   int lastHeadersClass = m_GeneratedHeadersClasses.size();
-  std::vector<std::string> depends;
   std::string fluid_exe = "${FLTK_FLUID_EXE}";
 
+
+  std::string outputGUIDirectory = m_Makefile->GetCurrentOutputDirectory();
 
   // Generate code for all the .fl files
   for(int classNum = 0; classNum < lastHeadersClass; classNum++)
     {
     // set up .fl to .h and .cxx command
-    std::string hres = m_Makefile->GetCurrentOutputDirectory();
+    std::string hres = outputGUIDirectory;
     hres += "/";
     hres += m_GeneratedHeadersClasses[classNum].GetSourceName() + "." +
         m_GeneratedHeadersClasses[classNum].GetSourceExtension();
 
-    std::string cxxres = m_Makefile->GetCurrentOutputDirectory();
+    std::string cxxres = outputGUIDirectory;
     cxxres += "/";
     cxxres += m_GeneratedSourcesClasses[classNum].GetSourceName() + "." +
         m_GeneratedSourcesClasses[classNum].GetSourceExtension();
@@ -160,22 +171,17 @@ void cmFLTKWrapUICommand::FinalPass()
     cxxargs.push_back(cxxres);
     cxxargs.push_back(m_WrapUserInterface[classNum]);// name of the GUI fluid file
 
-    depends.push_back(hres);
+    std::vector<std::string> depends;
 
+    std::vector<std::string> outputs;
+    outputs.push_back( cxxres );
+    outputs.push_back( hres   );
+     
     // Add command for generating the .h file
     m_Makefile->AddCustomCommand(m_WrapUserInterface[classNum].c_str(),
                                  fluid_exe.c_str(), cxxargs, depends, 
-                                 cxxres.c_str(), hres.c_str() );
-
-
-    // Add command for generating the .cxx file
-    m_Makefile->AddCustomCommand(m_WrapUserInterface[classNum].c_str(),
-                                 fluid_exe.c_str(), cxxargs, depends, 
-                                 cxxres.c_str(), cxxres.c_str() );
-
-
+                                 outputs, cxxres.c_str() );
     }
-
 }
 
 
