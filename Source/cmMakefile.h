@@ -629,6 +629,12 @@ public:
    * Return a location of a file in cmake or custom modules directory
    */
   std::string GetModulesFile(const char* name);
+
+  /**
+   * Copy file but change lines acording to ConfigureString
+   */
+  int ConfigureFile(const char* infile, const char* outfile, 
+    int copyonly, int atOnly, int escapeQuotes);
   
 protected:
   // add link libraries and directories to the target

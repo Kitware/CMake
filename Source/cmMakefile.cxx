@@ -2269,3 +2269,71 @@ void cmMakefile::ConfigureString(const std::string& input,
   this->ExpandVariablesInString(output, escapeQuotes, atOnly);
   this->RemoveVariablesInString(output, atOnly);
 }
+
+int cmMakefile::ConfigureFile(const char* infile, const char* outfile, 
+  int copyonly, int atOnly, int escapeQuotes)
+{
+  std::string soutfile = outfile;
+  std::string sinfile = infile;
+  this->AddCMakeDependFile(infile);
+  cmSystemTools::ConvertToUnixSlashes(soutfile);
+  mode_t perm = 0;
+  cmSystemTools::GetPermissions(sinfile.c_str(), perm);
+  std::string::size_type pos = soutfile.rfind('/');
+  if(pos != std::string::npos)
+    {
+    std::string path = soutfile.substr(0, pos);
+    cmSystemTools::MakeDirectory(path.c_str());
+    }
+  
+  if(copyonly)
+    {
+    if ( !cmSystemTools::CopyFileIfDifferent(sinfile.c_str(),
+                                       soutfile.c_str()))
+      {
+      return 0;
+      }
+    }
+  else
+    {
+    std::string tempOutputFile = soutfile;
+    tempOutputFile += ".tmp";
+    std::ofstream fout(tempOutputFile.c_str());
+    if(!fout)
+      {
+      cmSystemTools::Error(
+        "Could not open file for write in copy operatation ", 
+                           tempOutputFile.c_str());
+      return 0;
+      }
+    std::ifstream fin(sinfile.c_str());
+    if(!fin)
+      {
+      cmSystemTools::Error("Could not open file for read in copy operatation ",
+                           sinfile.c_str());
+      return 0;
+      }
+
+    // now copy input to output and expand variables in the
+    // input file at the same time
+    std::string inLine;
+    std::string outLine;
+    while( cmSystemTools::GetLineFromStream(fin, inLine) )
+      {
+      outLine = "";
+      this->ConfigureString(inLine, outLine, atOnly, escapeQuotes);
+      fout << outLine.c_str() << "\n";
+      }
+    // close the files before attempting to copy
+    fin.close();
+    fout.close();
+    cmSystemTools::CopyFileIfDifferent(tempOutputFile.c_str(),
+      soutfile.c_str());
+    cmSystemTools::RemoveFile(tempOutputFile.c_str());
+    cmSystemTools::SetPermissions(soutfile.c_str(), perm);
+    }
+  return 1;
+}
+
+
+

@@ -72,59 +72,11 @@ void cmConfigureFileCommand::FinalPass()
 
 void cmConfigureFileCommand::ConfigureFile()
 {
-  m_Makefile->AddCMakeDependFile(m_InputFile.c_str());
-  cmSystemTools::ConvertToUnixSlashes(m_OuputFile);
-  mode_t perm = 0;
-  cmSystemTools::GetPermissions(m_InputFile.c_str(), perm);
-  std::string::size_type pos = m_OuputFile.rfind('/');
-  if(pos != std::string::npos)
-    {
-    std::string path = m_OuputFile.substr(0, pos);
-    cmSystemTools::MakeDirectory(path.c_str());
-    }
-  
-  if(m_CopyOnly)
-    {
-    cmSystemTools::CopyFileIfDifferent(m_InputFile.c_str(),
-                                       m_OuputFile.c_str());
-    }
-  else
-    {
-    std::string tempOutputFile = m_OuputFile;
-    tempOutputFile += ".tmp";
-    std::ofstream fout(tempOutputFile.c_str());
-    if(!fout)
-      {
-      cmSystemTools::Error("Could not open file for write in copy operatation ", 
-                           tempOutputFile.c_str());
-      return;
-      }
-    std::ifstream fin(m_InputFile.c_str());
-    if(!fin)
-      {
-      cmSystemTools::Error("Could not open file for read in copy operatation ",
-                           m_InputFile.c_str());
-      return;
-      }
-
-    // now copy input to output and expand variables in the
-    // input file at the same time
-    std::string inLine;
-    std::string outLine;
-    while( cmSystemTools::GetLineFromStream(fin, inLine) )
-      {
-      outLine = "";
-      m_Makefile->ConfigureString(inLine, outLine, m_AtOnly, m_EscapeQuotes);
-      fout << outLine.c_str() << "\n";
-      }
-    // close the files before attempting to copy
-    fin.close();
-    fout.close();
-    cmSystemTools::CopyFileIfDifferent(tempOutputFile.c_str(),
-      m_OuputFile.c_str());
-    cmSystemTools::RemoveFile(tempOutputFile.c_str());
-    cmSystemTools::SetPermissions(m_OuputFile.c_str(), perm);
-    }
+  m_Makefile->ConfigureFile(m_InputFile.c_str(),
+    m_OuputFile.c_str(),
+    m_CopyOnly,
+    m_AtOnly,
+    m_EscapeQuotes);
 }
 
 
