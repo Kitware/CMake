@@ -197,6 +197,7 @@ protected:
                                       const char* path,
                                       const char* library,
                                       const char* fullpath);
+
   ///! return true if the two paths are the same
   virtual bool SamePath(const char* path1, const char* path2);
   virtual std::string GetOutputExtension(const char* sourceExtension);
@@ -213,7 +214,11 @@ protected:
 
   ///! for existing files convert to output path and short path if spaces
   std::string ConvertToOutputForExisting(const char*);
-  
+
+  /** Convert path to a format vaild for the left or right side of a
+      target: dependencies line in a makefile.  */
+  virtual std::string ConvertToMakeTarget(const char*);
+
   /** Get the full name of the target's file, without path.  */
   std::string GetFullTargetName(const char* n, const cmTarget& t);
 

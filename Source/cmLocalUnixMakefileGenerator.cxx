@@ -1183,9 +1183,10 @@ void cmLocalUnixMakefileGenerator::OutputLibraryRule(std::ostream& fout,
                        depend.c_str(),
                        commands);
   depend = targetFullPath;
-  targetFullPath = this->ConvertToRelativeOutputPath(targetFullPath.c_str());
-  cmSystemTools::ConvertToUnixSlashes(targetFullPath);
-  if(targetFullPath.find('/', 0) != targetFullPath.npos)
+  std::string tgt = this->ConvertToRelativeOutputPath(targetFullPath.c_str());
+  tgt = this->ConvertToMakeTarget(tgt.c_str());
+  cmSystemTools::ConvertToUnixSlashes(tgt);
+  if(tgt.find('/', 0) != tgt.npos)
     {
     // we need a local target
     depend = this->ConvertToRelativeOutputPath(depend.c_str());
@@ -1339,7 +1340,8 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
   target = this->ConvertToRelativeOutputPath(target.c_str());
   cmSystemTools::ConvertToUnixSlashes(target);
   bool needsLocalTarget = false;
-  if(target.find('/', 0) != target.npos)
+  std::string tgt = this->ConvertToMakeTarget(target.c_str());
+  if(tgt.find('/', 0) != tgt.npos)
     {
     needsLocalTarget = true;
     }
@@ -1935,7 +1937,6 @@ BuildInSubDirectoryWindows(std::ostream& fout,
       }
     }
   fout << "\tcd " << this->ConvertToOutputForExisting(cdback.c_str()) << "\n\n";
-  
 }
 
 
@@ -2208,7 +2209,7 @@ void cmLocalUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
       command += " ";
       // now add the arguments
       command += c->GetArguments();
-      std::string depends;
+      std::vector<std::string> depends;
       // Collect out all the dependencies for this rule.
       for(std::vector<std::string>::const_iterator d =
             c->GetDepends().begin();
@@ -2236,16 +2237,15 @@ void cmLocalUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
         cmSystemTools::ReplaceString(dep, "/./", "/");
         cmSystemTools::ReplaceString(dep, "/$(IntDir)/", "/");
         dep = this->ConvertToRelativeOutputPath(dep.c_str());
-        depends += " ";
-        depends += dep;
-        } 
+        depends.push_back(dep.c_str());
+        }
       // output rule
       if (processedOutputs.find(c->GetOutput()) == processedOutputs.end())
         {
         this->OutputMakeRule(fout,
                              (comment.size()?comment.c_str():"Custom command"),
                              c->GetOutput().c_str(),
-                             depends.c_str(),
+                             depends,
                              command.c_str());
         processedOutputs.insert(c->GetOutput());
         }
@@ -3013,6 +3013,7 @@ void cmLocalUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
   m_Makefile->ExpandVariablesInString(replace);
   
   std::string tgt = this->ConvertToRelativeOutputPath(replace.c_str());
+  tgt = this->ConvertToMakeTarget(tgt.c_str());
   if(depends.empty())
     {
     fout << tgt.c_str() << ":\n";
@@ -3026,6 +3027,7 @@ void cmLocalUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
       {
       replace = *dep;
       m_Makefile->ExpandVariablesInString(replace);
+      replace = this->ConvertToMakeTarget(replace.c_str());
       fout << tgt.c_str() << ": " << replace.c_str() << "\n";
       }
     }
@@ -3212,3 +3214,21 @@ void cmLocalUnixMakefileGenerator::GetLibraryNames(const char* n,
   baseName = this->GetBaseTargetName(n, t);
 }
 
+std::string cmLocalUnixMakefileGenerator::ConvertToMakeTarget(const char* tgt)
+{
+  // Make targets should not have a leading './' for a file in the
+  // directory containing the makefile.
+  std::string ret = tgt;
+  if(ret.size() > 2 &&
+     (ret[0] == '.') &&
+     ( (ret[1] == '/') || ret[1] == '\\'))
+    {
+    std::string upath = ret;
+    cmSystemTools::ConvertToUnixSlashes(upath);
+    if(upath.find(2, '/') == upath.npos)
+      {
+      ret = ret.substr(2, ret.size()-2);
+      }
+    }
+  return ret;
+}

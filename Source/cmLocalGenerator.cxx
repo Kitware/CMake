@@ -183,8 +183,11 @@ std::string cmLocalGenerator::ConvertToRelativeOutputPath(const char* p)
     {
     ret = relpath;
     }
+
+  // Relative paths should always start in a '.', so add a './' if
+  // necessary.
   if(ret.size()
-     && ret[0] != '\"' && ret[0] != '/' && ret[0] != '.')
+     && ret[0] != '\"' && ret[0] != '/' && ret[0] != '.' && ret[0] != '$')
     {
     if(ret.size() > 1 && ret[1] != ':')
       {
@@ -192,16 +195,5 @@ std::string cmLocalGenerator::ConvertToRelativeOutputPath(const char* p)
       }
     }
   ret = cmSystemTools::ConvertToOutputPath(ret.c_str());
-  if(ret.size() > 2 &&
-     (ret[0] == '.') &&
-     ( (ret[1] == '/') || ret[1] == '\\'))
-    {
-    std::string upath = ret;
-    cmSystemTools::ConvertToUnixSlashes(upath);
-    if(upath.find(2, '/') == upath.npos)
-      {
-      ret = ret.substr(2, ret.size()-2);
-      }
-    }
   return ret;
 }
