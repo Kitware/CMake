@@ -1,56 +1,58 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 1.5)
 
 SET(SRCS
-cmake.cxx
-cmakewizard.cxx
-cmMakeDepend.cxx
-cmMakefile.cxx
-cmSourceFile.cxx
-cmSystemTools.cxx
-cmDocumentation.cxx
-cmDynamicLoader.cxx
-cmCommands.cxx
-cmTarget.cxx
-cmCustomCommand.cxx
-cmCacheManager.cxx
-cmSourceGroup.cxx
-cmListFileCache.cxx
-cmListFileLexer.c
-cmGeneratedFileStream.cxx
-cmGlob.cxx
-cmGlobalGenerator.cxx
-cmGlobalUnixMakefileGenerator.cxx
-cmLocalGenerator.cxx
-cmLocalUnixMakefileGenerator.cxx
-cmLocalUnixMakefileGenerator2.cxx
-cmVariableWatch.cxx
-cmVersion.cxx
-cmake.h
-cmakewizard.h
-cmMakeDepend.h
-cmMakefile.h
-cmSourceFile.h
-cmSystemTools.h
-cmDynamicLoader.h
-cmCommands.h
-cmTarget.h
-cmCustomCommand.h
-cmCacheManager.h
-cmSourceGroup.h
-cmListFileCache.h
-cmGlobalGenerator.h
-cmGlobalUnixMakefileGenerator.h
-cmLocalGenerator.h
-cmLocalUnixMakefileGenerator.h
-cmVariableWatch.h
-cmVersion.h
-)
+  cmCacheManager.cxx
+  cmCacheManager.h
+  cmCommands.cxx
+  cmCommands.h
+  cmCustomCommand.cxx
+  cmCustomCommand.h
+  cmDocumentation.cxx
+  cmDynamicLoader.cxx
+  cmDynamicLoader.h
+  cmGeneratedFileStream.cxx
+  cmGlob.cxx
+  cmGlobalGenerator.cxx
+  cmGlobalGenerator.h
+  cmGlobalUnixMakefileGenerator.cxx
+  cmGlobalUnixMakefileGenerator.h
+  cmListFileCache.cxx
+  cmListFileCache.h
+  cmListFileLexer.c
+  cmLocalGenerator.cxx
+  cmLocalGenerator.h
+  cmLocalUnixMakefileGenerator.cxx
+  cmLocalUnixMakefileGenerator.h
+  cmLocalUnixMakefileGenerator2.cxx
+  cmMakeDepend.cxx
+  cmMakeDepend.h
+  cmMakefile.cxx
+  cmMakefile.h
+  cmSourceFile.cxx
+  cmSourceFile.h
+  cmSourceGroup.cxx
+  cmSourceGroup.h
+  cmSystemTools.cxx
+  cmSystemTools.h
+  cmTarget.cxx
+  cmTarget.h
+  cmVariableWatch.cxx
+  cmVariableWatch.h
+  cmVersion.cxx
+  cmVersion.h
+  cmXMLParser.cxx
+  cmXMLParser.h
+  cmake.cxx
+  cmake.h
+  cmakewizard.cxx
+  cmakewizard.h
+  )
 
 
 # configure the .h file
 CONFIGURE_FILE(
-${CMake_SOURCE_DIR}/Source/cmConfigure.cmake.h.in 
-${CMake_BINARY_DIR}/Source/cmConfigure.h )
+  ${CMake_SOURCE_DIR}/Source/cmConfigure.cmake.h.in 
+  ${CMake_BINARY_DIR}/Source/cmConfigure.h )
 
 # add the include path to find the .h 
 INCLUDE_DIRECTORIES(${CMake_BINARY_DIR}/Source)
@@ -129,7 +131,7 @@ SET(CMTEST_SRCS ctest.cxx cmCTest.cxx
   CTest/cmCTestScriptHandler.cxx
   CTest/cmCTestTestHandler.cxx
   CTest/cmCTestUpdateHandler.cxx
-)
+  )
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/Source/CTest)
 
@@ -168,7 +170,7 @@ IF(CMAKE_BUILD_WX_DIALOG)
 ENDIF(CMAKE_BUILD_WX_DIALOG)
 
 IF (NOT DART_ROOT)
-SET(MAKEPROGRAM ${CMAKE_MAKE_PROGRAM})
+  SET(MAKEPROGRAM ${CMAKE_MAKE_PROGRAM})
 ENDIF (NOT DART_ROOT)
 
 IF(BUILD_TESTING)
@@ -192,7 +194,7 @@ IF(BUILD_TESTING)
     --build-makeprogram ${MAKEPROGRAM}
     --build-project CommandLineTest
     --test-command CommandLineTest)
-  
+
   ADD_TEST(CustomCommand  ${CMAKE_CTEST_COMMAND}
     --build-and-test 
     "${CMake_SOURCE_DIR}/Tests/CustomCommand"
@@ -234,7 +236,7 @@ IF(BUILD_TESTING)
     --build-project StringFileTest
     --build-makeprogram ${MAKEPROGRAM}
     --test-command StringFileTest)
-  
+
   ADD_TEST(TryCompile ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/TryCompile"
@@ -247,8 +249,8 @@ IF(BUILD_TESTING)
 
   ADD_TEST(simple ${CMAKE_CTEST_COMMAND}
     --build-and-test 
-      "${CMake_SOURCE_DIR}/Tests/Simple"
-      "${CMake_BINARY_DIR}/Tests/Simple"
+    "${CMake_SOURCE_DIR}/Tests/Simple"
+    "${CMake_BINARY_DIR}/Tests/Simple"
     --build-generator ${CMAKE_GENERATOR}
     --build-project Simple
     --build-makeprogram ${MAKEPROGRAM}
@@ -257,8 +259,8 @@ IF(BUILD_TESTING)
 
   ADD_TEST(PreOrder ${CMAKE_CTEST_COMMAND}
     --build-and-test 
-      "${CMake_SOURCE_DIR}/Tests/PreOrder"
-      "${CMake_BINARY_DIR}/Tests/PreOrder"
+    "${CMake_SOURCE_DIR}/Tests/PreOrder"
+    "${CMake_BINARY_DIR}/Tests/PreOrder"
     --build-generator ${CMAKE_GENERATOR}
     --build-project PreOrder
     --build-makeprogram ${MAKEPROGRAM}
@@ -286,7 +288,7 @@ IF(BUILD_TESTING)
     --build-makeprogram ${MAKEPROGRAM}
     --build-two-config
     --build-options
-     "-DCMAKE_INSTALL_PREFIX:PATH=${SimpleInstallInstallDir}"
+    "-DCMAKE_INSTALL_PREFIX:PATH=${SimpleInstallInstallDir}"
     --test-command   ${SimpleInstallInstallDir}/bin/SimpleInstall)
   ADD_TEST(SimpleInstall-Stage2 ${CMAKE_CTEST_COMMAND}
     --build-and-test 
@@ -297,8 +299,8 @@ IF(BUILD_TESTING)
     --build-makeprogram ${MAKEPROGRAM}
     --build-two-config
     --build-options
-     "-DCMAKE_INSTALL_PREFIX:PATH=${SimpleInstallInstallDir}"
-     "-DSTAGE2:BOOL=1"
+    "-DCMAKE_INSTALL_PREFIX:PATH=${SimpleInstallInstallDir}"
+    "-DSTAGE2:BOOL=1"
     --test-command   ${SimpleInstallInstallDir}/bin/SimpleInstallS2)
 
   ADD_TEST(X11  ${CMAKE_CTEST_COMMAND}
@@ -393,7 +395,7 @@ IF(BUILD_TESTING)
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Testing/bin"
     --test-command testing
     )
-  
+
   ADD_TEST(wrapping  ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/Wrapping"
@@ -462,14 +464,14 @@ IF(BUILD_TESTING)
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/Dependency"
     "${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut"
-     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut/Exec"
-     --build-project Dependency 
+    --build-exe-dir "${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut/Exec"
+    --build-project Dependency 
     --build-generator ${CMAKE_GENERATOR}
     --build-makeprogram ${MAKEPROGRAM}
-     --build-options
-     -DLIBRARY_OUTPUT_PATH:PATH=${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut/Lib
-     --test-command exec
-     )
+    --build-options
+    -DLIBRARY_OUTPUT_PATH:PATH=${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut/Lib
+    --test-command exec
+    )
 
 
   ADD_TEST(dependency_wo_lib_out   ${CMAKE_CTEST_COMMAND}
@@ -532,7 +534,7 @@ IF(BUILD_TESTING)
     --build-options
     -DLIBRARY_OUTPUT_PATH:PATH=${CMake_BINARY_DIR}/Tests/Jump/WithLibOut/Lib
     --test-command jumpExecutable
-     )
+    )
 
   ADD_TEST(JumpNoLibOut  ${CMAKE_CTEST_COMMAND}
     --build-and-test
@@ -544,7 +546,7 @@ IF(BUILD_TESTING)
     --build-generator ${CMAKE_GENERATOR}
     --build-makeprogram ${MAKEPROGRAM}
     --test-command jumpExecutable
-     )
+    )
 
   ADD_TEST(linkline   ${CMAKE_CTEST_COMMAND}
     --build-and-test
@@ -599,33 +601,33 @@ IF(BUILD_TESTING)
     --test-command  test1
     )
 
-IF (WIN32)
-  ADD_TEST(SubDir ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/SubDir"
-    "${CMake_BINARY_DIR}/Tests/SubDir"
-    --build-exe-dir "${CMake_BINARY_DIR}/Tests/SubDir/Executable"
-    --build-generator ${CMAKE_GENERATOR}
-    --build-makeprogram ${MAKEPROGRAM}
-    --build-project SUBDIR
-    --test-command test 
-    "${CMake_BINARY_DIR}/Tests/SubDir/ShouldBeHere"
-    "${CMake_BINARY_DIR}/Tests/SubDir/testfromsubdir.obj"
-    )
-ELSE (WIN32)
-  ADD_TEST(SubDir ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/SubDir"
-    "${CMake_BINARY_DIR}/Tests/SubDir"
-    --build-exe-dir "${CMake_BINARY_DIR}/Tests/SubDir/Executable"
-    --build-generator ${CMAKE_GENERATOR}
-    --build-makeprogram ${MAKEPROGRAM}
-    --build-project SUBDIR
-    --test-command test 
-    "${CMake_BINARY_DIR}/Tests/SubDir/ShouldBeHere"
-    "${CMake_BINARY_DIR}/Tests/SubDir/testfromsubdir.o"
-    )
-ENDIF (WIN32)    
+  IF (WIN32)
+    ADD_TEST(SubDir ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/SubDir"
+      "${CMake_BINARY_DIR}/Tests/SubDir"
+      --build-exe-dir "${CMake_BINARY_DIR}/Tests/SubDir/Executable"
+      --build-generator ${CMAKE_GENERATOR}
+      --build-makeprogram ${MAKEPROGRAM}
+      --build-project SUBDIR
+      --test-command test 
+      "${CMake_BINARY_DIR}/Tests/SubDir/ShouldBeHere"
+      "${CMake_BINARY_DIR}/Tests/SubDir/testfromsubdir.obj"
+      )
+  ELSE (WIN32)
+    ADD_TEST(SubDir ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/SubDir"
+      "${CMake_BINARY_DIR}/Tests/SubDir"
+      --build-exe-dir "${CMake_BINARY_DIR}/Tests/SubDir/Executable"
+      --build-generator ${CMAKE_GENERATOR}
+      --build-makeprogram ${MAKEPROGRAM}
+      --build-project SUBDIR
+      --test-command test 
+      "${CMake_BINARY_DIR}/Tests/SubDir/ShouldBeHere"
+      "${CMake_BINARY_DIR}/Tests/SubDir/testfromsubdir.o"
+      )
+  ENDIF (WIN32)    
 
   IF(${CMAKE_GENERATOR} MATCHES "Visual Studio")
     ADD_TEST(VSExternalInclude ${CMAKE_CTEST_COMMAND}
@@ -717,7 +719,7 @@ ENDIF (WIN32)
       ENDIF(JNI_H) 
     ENDIF(JAVA_COMPILE AND JAVA_RUNTIME AND JAVA_ARCHIVE)
   ENDIF(CMAKE_GENERATOR MATCHES "Makefiles")
-  
+
   IF (CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE OR WXWINDOWS_INCLUDE_DIR)
     # Will be set if the wxwindows gui is on
     ADD_TEST(UseWX ${CMAKE_CTEST_COMMAND}
@@ -730,12 +732,12 @@ ENDIF (WIN32)
       --build-project UsewxWindows
       --build-options -DCMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE:FILEPATH=${CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE}
       --test-command UseWX
-    )
+      )
   ENDIF (CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE OR WXWINDOWS_INCLUDE_DIR)
 
   IF(UNIX)
     STRING(COMPARE EQUAL "${CMAKE_INSTALL_PREFIX}" "${CMake_BINARY_DIR}/Tests/TestShellInstall/Prefix"
-           PREFIX_IS_FOR_TEST)
+      PREFIX_IS_FOR_TEST)
     IF(PREFIX_IS_FOR_TEST)
       CONFIGURE_FILE(
         ${CMake_SOURCE_DIR}/Tests/TestInstall.sh.in
