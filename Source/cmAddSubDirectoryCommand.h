@@ -62,22 +62,34 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  ADD_SUBDIRECTORY(binary_dir [source_dir] [EXCLUDE_FROM_ALL] [PREORDER] )\n"
-      "Add a subdirectory to the build. The binary_dir specified can be "
-      "relative to the current otuput directory (the typical usage) or "
-      "absolute. If the source dir is not specified it "
-      "will be set to the same value as the binary_dir. "
-      "This will cause any CMakeLists.txt files in the sub directories "
-      "to be processed by CMake.  If the PREORDER flag "
-      "is specified then this directory will be traversed first by makefile "
-      "builds, the PRORDER flag has no effect on IDE projects. " 
+      "  ADD_SUBDIRECTORY(binary_dir [source_dir]\n"
+      "                   [EXCLUDE_FROM_ALL] [PREORDER])\n"
+      "Add a subdirectory to the build. The binary_dir specifies the "
+      "directory in which to store the build files. If it is a relative "
+      "path it will be evaluated with respect to the current output "
+      "directory (the typical usage), but it may also be an absolute path. "
+      "The source_dir specifies the directory in which to find the source "
+      "files. If it is a relative path it will be evaluated with respect "
+      "to the current source directory, but it may also be an absolute "
+      "path. If source_dir is not specified the value of binary_dir, "
+      "before expanding any relative path, will be used (the typical usage). "
+      "The CMakeLists.txt file in the specified source directory will "
+      "be processed immediately by CMake before processing in the current "
+      "input file continues beyond this command.\n"
+
+      "The PREORDER flag tells recursive makefile generators to build "
+      "targets in the subdirectory before those in the current directory. "
+      "If this flag is not specified then the targets in the current "
+      "directory are always built first. The PREORDER flag has no meaning "
+      "for global build system generators.\n"
+
       "If the EXCLUDE_FROM_ALL argument is provided then this subdirectory "
-      "will not be included in the top level makefile or project file.  "
-      "This is useful for having cmake create makefiles or projects for a "
-      "set of examples in a project. You would want cmake to generated "
-      "makefiles or project files for all the examples at the same time, "
-      "but you would not want them to show up in the top level project or "
-      "be built each time make is run from the top.";
+      "will not be included in build by default. Users will have to "
+      "explicitly start a build in the generated output directory. "
+      "This is useful for having cmake create a build system for a "
+      "set of examples in a project. One would want cmake to generate "
+      "a single build system for all the examples, but one may not want "
+      "the targets to show up in the main build system.";
     }
   
   cmTypeMacro(cmAddSubDirectoryCommand, cmCommand);
