@@ -30,6 +30,10 @@ bool cmStringCommand::InitialPass(std::vector<std::string> const& args)
     {
     return this->HandleRegexCommand(args);
     }  
+  else if(subCommand == "COMPARE")
+    {
+    return this->HandleCompareCommand(args);
+    }  
   
   std::string e = "does not recognize sub-command "+subCommand;
   this->SetError(e.c_str());
@@ -306,4 +310,60 @@ bool cmStringCommand::RegexReplace(std::vector<std::string> const& args)
   // Store the output in the provided variable.
   m_Makefile->AddDefinition(outvar.c_str(), output.c_str());
   return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmStringCommand::HandleCompareCommand(std::vector<std::string> const& args)
+{
+  if(args.size() < 2)
+    {
+    this->SetError("sub-command COMPARE requires a mode to be specified.");
+    return false;
+    }
+  std::string mode = args[1];
+  if((mode == "EQUAL") || (mode == "NOTEQUAL") ||
+     (mode == "LESS") || (mode == "GREATER"))
+    {
+    if(args.size() < 5)
+      {
+      std::string e = "sub-command COMPARE, mode ";
+      e += mode;
+      e += " needs at least 5 arguments total to command.";
+      this->SetError(e.c_str());
+      return false;
+      }
+    
+    const std::string& left = args[2];
+    const std::string& right = args[3];  
+    const std::string& outvar = args[4];
+    bool result;
+    if(mode == "LESS")
+      {
+      result = (left < right);
+      }
+    else if(mode == "GREATER")
+      {
+      result = (left > right);
+      }
+    else if(mode == "EQUAL")
+      {
+      result = (left == right);
+      }
+    else // if(mode == "NOTEQUAL")
+      {
+      result = !(left == right);
+      }
+    if(result)
+      {
+      m_Makefile->AddDefinition(outvar.c_str(), "1");
+      }
+    else
+      {
+      m_Makefile->AddDefinition(outvar.c_str(), "0");
+      }
+    return true;
+    }  
+  std::string e = "sub-command COMPARE does not recognize mode "+mode;
+  this->SetError(e.c_str());
+  return false;
 }

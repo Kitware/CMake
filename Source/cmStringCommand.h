@@ -63,11 +63,16 @@ public:
       "STRING(REGEX MATCH <regular_expression> <output variable> <input> [<input>...])\n"
       "STRING(REGEX MATCHALL <regular_expression> <output variable> <input> [<input>...])\n"
       "STRING(REGEX REPLACE <regular_expression> <replace_expression> <output variable> <input> [<input>...])\n"
+      "STRING(COMPARE EQUAL <string1> <string2> <output variable>)\n"
+      "STRING(COMPARE NOTEQUAL <string1> <string2> <output variable>)\n"
+      "STRING(COMPARE LESS <string1> <string2> <output variable>)\n"
+      "STRING(COMPARE GREATER <string1> <string2> <output variable>)\n"
       "REGEX MATCH will match the regular expression once and store the match in the output variable.\n"  
       "REGEX MATCHALL will match the regular expression as many times as possible and store the matches\n"
       "               in the output variable as a list.\n"
       "REGEX REPLACE will match the regular expression as many times as possible and substitute the\n"
-      "              replacement expression for the match in the output.\n";
+      "              replacement expression for the match in the output.\n"
+      "COMPARE EQUAL/NOTEQUAL/LESS/GREATER will compare the strings and store true or false in the output variable.\n";
     }
   
   cmTypeMacro(cmStringCommand, cmCommand);
@@ -76,6 +81,7 @@ protected:
   bool RegexMatch(std::vector<std::string> const& args);
   bool RegexMatchAll(std::vector<std::string> const& args);
   bool RegexReplace(std::vector<std::string> const& args);
+  bool HandleCompareCommand(std::vector<std::string> const& args);
   
   class RegexReplacement
   {
