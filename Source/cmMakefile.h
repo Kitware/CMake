@@ -611,7 +611,7 @@ public:
   void AddCommand(cmCommand* );
 
   ///! Enable support for the named language, if null then all languages are enabled.
-  virtual void EnableLanguage(std::vector<std::string>const& languages);
+  void EnableLanguage(std::vector<std::string>const& languages);
 
   /**
    * Set/Get the name of the parent directories CMakeLists file
