@@ -77,7 +77,7 @@ bool cmBuildCommand::InitialPass(std::vector<std::string> const& args)
   else
     {
     makecommand = makeprogram;
-    makecommand += " -k";
+    makecommand += " -i";
     }
   m_Makefile->AddCacheDefinition(define,
                                  makecommand.c_str(),
