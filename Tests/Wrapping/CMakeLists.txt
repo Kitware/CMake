@@ -31,7 +31,7 @@ ADD_EXECUTABLE (wrapping wrapping.cxx)
 #
 # Test VTK wrappers
 #
-SOURCE_FILES (SRCS
+SET (SRCS
   vtkExcluded
   vtkIncluded
 )
@@ -111,7 +111,7 @@ ENDIF (QT_FOUND)
 # Since FLTK_FLUID_EXE is supposed to create a .cxx/.h from a .fl/.fld,
 # create an empty one so that the dependencies can be met.
 #
-SOURCE_FILES (FLTK_SRCS
+SET (FLTK_SRCS
   fltk1.fl
 )
 SET (FLTK_WRAP_UI "On")
