@@ -27,7 +27,6 @@
 #include "cmCableWrapTclCommand.cxx"
 #include "cmCableWrapCommand.cxx"
 #include "cmConfigureFileCommand.cxx"
-#include "cmConfigureFileNoAutoconf.cxx"
 #include "cmElseCommand.cxx"
 #include "cmEnableTestingCommand.cxx"
 #include "cmEndIfCommand.cxx"
@@ -43,6 +42,7 @@
 #include "cmIncludeRegularExpressionCommand.cxx"
 #include "cmInstallFilesCommand.cxx"
 #include "cmInstallTargetsCommand.cxx"
+#include "cmOutputRequiredFilesCommand.cxx"
 #include "cmLinkDirectoriesCommand.cxx"
 #include "cmLinkLibrariesCommand.cxx"
 #include "cmLoadCacheCommand.cxx"
@@ -86,7 +86,6 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmCableWrapTclCommand);
   commands.push_back(new cmCableWrapCommand);
   commands.push_back(new cmConfigureFileCommand);
-  commands.push_back(new cmConfigureFileNoAutoconf);
   commands.push_back(new cmElseCommand);
   commands.push_back(new cmEnableTestingCommand);  
   commands.push_back(new cmEndIfCommand);
@@ -102,6 +101,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmIncludeRegularExpressionCommand);
   commands.push_back(new cmInstallFilesCommand);
   commands.push_back(new cmInstallTargetsCommand);
+  commands.push_back(new cmOutputRequiredFilesCommand);  
   commands.push_back(new cmLinkDirectoriesCommand);
   commands.push_back(new cmLinkLibrariesCommand);
   commands.push_back(new cmLoadCacheCommand);
