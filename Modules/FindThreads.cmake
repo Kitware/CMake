@@ -16,27 +16,29 @@ ENDIF(CMAKE_SYSTEM MATCHES IRIX)
 CHECK_INCLUDE_FILE("pthread.h" CMAKE_HAVE_PTHREAD_H)
 IF(CMAKE_HAVE_PTHREAD_H)
   IF(NOT CMAKE_HAVE_SPROC_H)
-    IF("THREADS_HAVE_PTHREAD_ARG" MATCHES "^THREADS_HAVE_PTHREAD_ARG")
-      MESSAGE(STATUS "Check if compiler accepts -pthread")
-      TRY_RUN(THREADS_PTHREAD_ARG THREADS_HAVE_PTHREAD_ARG
-        ${CMAKE_BINARY_DIR}
-        ${CMAKE_ROOT}/Modules/CheckForPthreads.c
-        CMAKE_FLAGS -DLINK_LIBRARIES:STRING=-pthread
-        OUTPUT_VARIABLE OUTPUT)
-      IF(THREADS_HAVE_PTHREAD_ARG)
-        IF(THREADS_PTHREAD_ARG MATCHES "^2$")
-          MESSAGE(STATUS "Check if compiler accepts -pthread - yes")
-        ELSE(THREADS_PTHREAD_ARG MATCHES "^2$")
+    IF(NOT APPLE)
+      IF("THREADS_HAVE_PTHREAD_ARG" MATCHES "^THREADS_HAVE_PTHREAD_ARG")
+        MESSAGE(STATUS "Check if compiler accepts -pthread")
+        TRY_RUN(THREADS_PTHREAD_ARG THREADS_HAVE_PTHREAD_ARG
+          ${CMAKE_BINARY_DIR}
+          ${CMAKE_ROOT}/Modules/CheckForPthreads.c
+          CMAKE_FLAGS -DLINK_LIBRARIES:STRING=-pthread
+          OUTPUT_VARIABLE OUTPUT)
+        IF(THREADS_HAVE_PTHREAD_ARG)
+          IF(THREADS_PTHREAD_ARG MATCHES "^2$")
+            MESSAGE(STATUS "Check if compiler accepts -pthread - yes")
+          ELSE(THREADS_PTHREAD_ARG MATCHES "^2$")
+            MESSAGE(STATUS "Check if compiler accepts -pthread - no")
+            FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeError.log 
+              "Determining if compiler accepts -pthread returned ${THREADS_PTHREAD_ARG} instead of 2. The compiler had the following output:\n${OUTPUT}\n\n")
+          ENDIF(THREADS_PTHREAD_ARG MATCHES "^2$")
+        ELSE(THREADS_HAVE_PTHREAD_ARG)
           MESSAGE(STATUS "Check if compiler accepts -pthread - no")
           FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeError.log 
-            "Determining if compiler accepts -pthread returned ${THREADS_PTHREAD_ARG} instead of 2. The compiler had the following output:\n${OUTPUT}\n\n")
-        ENDIF(THREADS_PTHREAD_ARG MATCHES "^2$")
-      ELSE(THREADS_HAVE_PTHREAD_ARG)
-        MESSAGE(STATUS "Check if compiler accepts -pthread - no")
-        FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeError.log 
-          "Determining if compiler accepts -pthread failed with the following output:\n${OUTPUT}\n\n")
-      ENDIF(THREADS_HAVE_PTHREAD_ARG)
-    ENDIF("THREADS_HAVE_PTHREAD_ARG" MATCHES "^THREADS_HAVE_PTHREAD_ARG")
+            "Determining if compiler accepts -pthread failed with the following output:\n${OUTPUT}\n\n")
+        ENDIF(THREADS_HAVE_PTHREAD_ARG)
+      ENDIF("THREADS_HAVE_PTHREAD_ARG" MATCHES "^THREADS_HAVE_PTHREAD_ARG")
+    ENDIF(NOT APPLE)
     IF(THREADS_HAVE_PTHREAD_ARG)
       SET(CMAKE_THREAD_LIBS_INIT "-pthread")
     ELSE(THREADS_HAVE_PTHREAD_ARG)
