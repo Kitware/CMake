@@ -65,6 +65,19 @@ int main(int ac, char** av)
     Usage(av[0]);
     return -1;
     }
+
+  // set the cmake root directory
+  std::string root = cmSystemTools::GetProgramPath(av[0]);
+  std::string::size_type slashPos = root.rfind("/");
+  if(slashPos != std::string::npos)      
+    {
+    root = root.substr(0, slashPos);
+    }
+  cmCacheManager::GetInstance()->AddCacheEntry
+    ("CMAKE_ROOT", root.c_str(),
+     "Path to CMake installation.", cmCacheManager::INTERNAL);
+
+
   // Create a makefile
   cmMakefile mf;
   mf.AddDefinition("UNIX", "1");
@@ -133,7 +146,6 @@ int main(int ac, char** av)
                                                cMakeSelf.c_str(),
                                                "Path to CMake executable.",
                                                cmCacheManager::INTERNAL);
-  mf.SetCMakeInstallDirectory(cmSystemTools::FindProgram(av[0]));
   
   // Transfer the cache into the makefile's definitions.
   cmCacheManager::GetInstance()->DefineCache(&mf);
