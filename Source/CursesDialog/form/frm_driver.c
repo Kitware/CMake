@@ -43,6 +43,21 @@
 
 MODULE_ID("$Id$")
 
+/* These declarations are missing from curses.h on some platforms.  */
+extern int winnstr(WINDOW *, char *, int);
+extern int waddnstr(WINDOW *,const char *const,int);
+extern void wbkgdset(WINDOW *,chtype);
+#ifndef untouchwin
+extern int untouchwin(WINDOW *);
+#endif
+extern void wcursyncup(WINDOW *);
+extern int copywin(const WINDOW*,WINDOW*,int,int,int,int,int,int,int);
+extern bool is_linetouched(WINDOW *,int);
+extern void wsyncup(WINDOW *);
+extern WINDOW *derwin(WINDOW *,int,int,int,int);
+extern int winsnstr(WINDOW *, const char *,int);
+extern int winsdelln(WINDOW *,int);
+
 /*----------------------------------------------------------------------------
   This is the core module of the form library. It contains the majority
   of the driver routines as well as the form_driver function. 
