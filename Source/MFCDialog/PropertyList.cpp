@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "PropertyList.h"
+#include "PathDialog.h"
 #include "../cmCacheManager.h"
 
 #define IDC_PROPCMBBOX   712
@@ -366,20 +367,6 @@ void CPropertyList::OnCheckBox()
   m_Dirty = true;
 }
 
-// Insane Microsoft way of setting the initial directory
-// for the Shbrowseforfolder function...
-//  SetSelProc
-//  Callback procedure to set the initial selection of the browser.
-
-int CALLBACK SetSelProc( HWND hWnd, UINT uMsg, LPARAM lParam, LPARAM
-                         lpData )
-{
-  if (uMsg==BFFM_INITIALIZED)
-    {
-    ::SendMessage(hWnd, BFFM_SETSELECTION, TRUE, lpData );
-    }
-  return 0;
-}
 
 void CPropertyList::OnButton()
 {
@@ -471,24 +458,12 @@ void CPropertyList::OnButton()
       initialDir = currPath.Left(endSlash);
       }
     initialDir.Replace("/", "\\");
-    char szPathName[4096];
-    BROWSEINFO bi;
-    bi.lpfn = SetSelProc;
-    bi.lParam = (LPARAM)(LPCSTR) initialDir;
-
-    bi.hwndOwner = m_hWnd;
-    bi.pidlRoot = NULL;
-    bi.pszDisplayName = (LPTSTR)szPathName;
-    bi.lpszTitle = "Select Directory";
-    bi.ulFlags = BIF_EDITBOX | BIF_RETURNONLYFSDIRS;
-    
-    LPITEMIDLIST pidl = SHBrowseForFolder(&bi);
-    
-    BOOL bSuccess = SHGetPathFromIDList(pidl, szPathName);
-    CString SelectedFile; 
-    if(bSuccess)
+    CString title = "Setting Cache Value: ";
+    title += pItem->m_propName;
+    CPathDialog dlg("Select Path", title, initialDir);
+    if(dlg.DoModal()==IDOK)
       {
-      SelectedFile = szPathName;
+      CString SelectedFile = dlg.GetPathName();
       m_btnCtrl.ShowWindow(SW_HIDE);
       pItem->m_curValue = SelectedFile;
       m_Dirty = true;

@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "CMakeSetup.h"
+#include "PathDialog.h"
 #include "CMakeSetupDialog.h"
 #include "../cmCacheManager.h"
 #include "../cmake.h"
@@ -205,57 +206,19 @@ HCURSOR CMakeSetupDialog::OnQueryDragIcon()
 
 
 
-// Insane Microsoft way of setting the initial directory
-// for the Shbrowseforfolder function...
-//  SetSelProc
-//  Callback procedure to set the initial selection of the browser.
-int CALLBACK CMakeSetupDialog_SetSelProc( HWND hWnd, UINT uMsg,
-                                          LPARAM lParam, LPARAM lpData )
-{
-  if (uMsg==BFFM_INITIALIZED)
-    {
-    ::SendMessage(hWnd, BFFM_SETSELECTION, TRUE, lpData );
-    }
-  return 0;
-}
-
-inline void ILFree(LPITEMIDLIST pidl)
-{
-  LPMALLOC pMalloc;     
-  if (pidl)     
-    { 
-    SHGetMalloc(&pMalloc); 
-    pMalloc->Free( pidl);
-    pMalloc->Release();  
-    }
-}
-
-
 // Browse button
 bool CMakeSetupDialog::Browse(CString &result, const char *title)
 {
-// don't know what to do with initial right now...
-  char szPathName[4096];
-  BROWSEINFO bi;
- 
-  bi.hwndOwner = m_hWnd;
-  bi.pidlRoot = NULL;
-  bi.pszDisplayName = (LPTSTR)szPathName;
-  bi.lpszTitle = title;
-  bi.ulFlags = BIF_BROWSEINCLUDEFILES;
-  // set up initial directory code
-  bi.lpfn = CMakeSetupDialog_SetSelProc;
-  bi.lParam = (LPARAM)(LPCSTR) result;
-  // open the directory chooser
-  LPITEMIDLIST pidl = SHBrowseForFolder(&bi);
-  // get the result
-  bool bSuccess = (SHGetPathFromIDList(pidl, szPathName) ? true : false);
-  if(bSuccess)
+  CPathDialog dlg("Select Path", title, result); 
+  if(dlg.DoModal()==IDOK)
     {
-    result = szPathName;
+    result =  dlg.GetPathName();
+    return true;
     }
-  ILFree(pidl);
-  return bSuccess;
+  else
+    {
+    return false;
+    }
 }
 
 
