@@ -46,9 +46,9 @@ enum
   cmCursesStandardIncludesHackRef1 = sizeof(cfgetospeed(0)),
   cmCursesStandardIncludesHackRef2 = sizeof(cfgetispeed(0)),
   cmCursesStandardIncludesHackRef3 = sizeof(tcgetattr(0, 0)),
-  cmCursesStandardIncludesHackRef4 = sizeof(tcsetattr(0, 0, 0))
+  cmCursesStandardIncludesHackRef4 = sizeof(tcsetattr(0, 0, 0)),
   cmCursesStandardIncludesHackRef5 = sizeof(cfsetospeed(0,0)),
-  cmCursesStandardIncludesHackRef6 = sizeof(cfsetispeed(0,0)),
+  cmCursesStandardIncludesHackRef6 = sizeof(cfsetispeed(0,0))
 };
 #endif
 
