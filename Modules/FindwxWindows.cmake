@@ -25,12 +25,12 @@ IF(WIN32)
   )
 
   SET (WXWINDOWS_POSSIBLE_INCLUDE_PATHS
-    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\wxWindows_is1;Inno Setup: App Path]/include/wx"
-    $ENV{WXWIN}/include/wx
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\wxWindows_is1;Inno Setup: App Path]/include"
+    $ENV{WXWIN}/include
   )
 
   FIND_PATH(WXWINDOWS_INCLUDE_PATH
-    wx.h
+    wx/wx.h
     ${WXWINDOWS_POSSIBLE_INCLUDE_PATHS} 
   )
 
