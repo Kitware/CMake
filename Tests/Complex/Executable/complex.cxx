@@ -477,6 +477,7 @@ int main()
   std::string cachetest = CACHE_TEST_VAR_INTERNAL;
   v.push_back(cachetest);
   v2 = v;
+  std::string x(5,'x');
   std::string copy = cachetest;
   cachetest.find("bar");
   cachetest.rfind("bar");
