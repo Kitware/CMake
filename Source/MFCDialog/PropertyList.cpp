@@ -34,6 +34,7 @@ CPropertyList::~CPropertyList()
 BEGIN_MESSAGE_MAP(CPropertyList, CListBox)
   //{{AFX_MSG_MAP(CPropertyList)
   ON_WM_CREATE()
+  ON_WM_VSCROLL()
   ON_CONTROL_REFLECT(LBN_SELCHANGE, OnSelchange)
   ON_WM_LBUTTONUP()
   ON_WM_KILLFOCUS()
@@ -354,6 +355,27 @@ void CPropertyList::OnChangeEditBox()
     pItem->m_curValue = newStr;
     m_Dirty = true;
     }
+}
+
+void CPropertyList::OnVScroll( UINT nSBCode, UINT nPos, CScrollBar* pScrollBar )
+{
+  if(m_editBox)
+    {
+    m_editBox.ShowWindow(SW_HIDE);
+    }
+  if(m_cmbBox)
+    {
+    m_cmbBox.ShowWindow(SW_HIDE);
+    }
+  if(m_CheckBoxControl)
+    {
+    m_CheckBoxControl.ShowWindow(SW_HIDE);
+    }
+  if(m_btnCtrl)
+    {
+    m_btnCtrl.ShowWindow(SW_HIDE);
+    }
+  CListBox::OnVScroll(nSBCode, nPos, pScrollBar);
 }
 
 void CPropertyList::OnCheckBox()

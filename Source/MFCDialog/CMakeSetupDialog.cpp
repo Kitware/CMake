@@ -406,7 +406,8 @@ void CMakeSetupDialog::OnBuildProjects()
       }
     }
   // set the wait cursor
-  ::SetCursor(LoadCursor(NULL, IDC_WAIT));
+  ::SetCursor(LoadCursor(NULL, IDC_WAIT));  
+
   // get all the info from the dialog
   this->UpdateData();
   if(!m_BuildPathChanged)

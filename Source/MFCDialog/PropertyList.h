@@ -104,6 +104,8 @@ protected:
   afx_msg void OnDelete();
   afx_msg void OnHelp();
   afx_msg void OnCheckBox();
+  afx_msg void OnVScroll( UINT nSBCode, UINT nPos, CScrollBar* pScrollBar );
+
 
   DECLARE_MESSAGE_MAP()
 
