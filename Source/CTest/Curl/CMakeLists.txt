@@ -60,12 +60,12 @@ SET(libCurl_SRCS
   strequal.c
   easy.c
   http_chunks.c
-  strtok.c
   connect.c
   llist.c
   hash.c
   multi.c
   )
+
 
 
 # if we have Kerberos 4, right now this is never on
@@ -259,6 +259,12 @@ IF(HAVE_SIGNAL_FUNC AND HAVE_SIGNAL_MACRO)
   SET(HAVE_SIGNAL 1)
 ENDIF(HAVE_SIGNAL_FUNC AND HAVE_SIGNAL_MACRO)
 
+# only build compat strtok if we need to
+IF (NOT HAVE_STRTOK_R)
+  SET(libCurl_SRCS ${libCurl_SRCS}
+    strtok.c
+    )
+ENDIF (NOT HAVE_STRTOK_R)
 
 # sigaction and sigsetjmp are special. Use special mechanism for
 # detecting those, but only if previous attempt failed.
