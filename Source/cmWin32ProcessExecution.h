@@ -17,19 +17,6 @@
 #ifndef cmWin32ProcessExecution_h
 #define cmWin32ProcessExecution_h
 
-/*
- * Portable 'popen' replacement for Win32.
- *
- * Written by Bill Tutt <billtut@microsoft.com>.  Minor tweaks
- * and 2.0 integration by Fredrik Lundh <fredrik@pythonware.com>
- * Return code handling by David Bolen <db3l@fitlinxx.com>.
- *
- * Modified for CMake.
- *
- * For more information, please check Microsoft Knowledge Base
- * Articles Q190351 and Q150956.
- */
-
 #include "cmStandardIncludes.h"
 #include "windows.h"
 
@@ -39,7 +26,19 @@ class cmMakefile;
  * \brief A process executor for windows
  *
  * cmWin32ProcessExecution is a class that provides a "clean" way of
- * executing processes on Windows.
+ * executing processes on Windows. It is modified code from Python 2.1
+ * distribution.
+ *
+ * Portable 'popen' replacement for Win32.
+ *
+ * Written by Bill Tutt <billtut@microsoft.com>.  Minor tweaks and 2.0
+ * integration by Fredrik Lundh <fredrik@pythonware.com> Return code
+ * handling by David Bolen <db3l@fitlinxx.com>.
+ *
+ * Modified for CMake.
+ *
+ * For more information, please check Microsoft Knowledge Base
+ * Articles Q190351 and Q150956.
  */
 class cmWin32ProcessExecution
 {
