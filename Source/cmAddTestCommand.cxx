@@ -67,18 +67,23 @@ void cmAddTestCommand::FinalPass()
     ++it;
     for (; it != m_Args.end(); ++it)
       {
-        if(it->find(" ") != std::string::npos) 
+      // Just double-quote all arguments so they are re-parsed
+      // correctly by the test system.
+      fout << " \"";
+      for(std::string::iterator c = it->begin(); c != it->end(); ++c)
+        {
+        // Escape quotes and backslashes within arguments.
+        if((*c == '"') || (*c == '\\'))
           {
-            fout << " \"" << *it << "\"";
+          fout << '\\';
           }
-        else
-          {
-            fout << " " << *it;
-          }
+        fout << *c;
+        }
+      fout << "\"";
       }
     fout << ")" << std::endl;
     fout.close();
-    }  
+    }
   return;
 }
 
