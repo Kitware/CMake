@@ -1246,7 +1246,12 @@ void cmSystemTools::cmCopyFile(const char* source,
       fout.write(buffer, fin.gcount());
       }
     }
-
+  
+  // Make sure the operating system has finished writing the file
+  // before closing it.  This will ensure the file is finished before
+  // the check below.
+  fout.flush();
+  
   fin.close();
   fout.close();
 
