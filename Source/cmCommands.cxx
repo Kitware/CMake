@@ -34,6 +34,7 @@
 #include "cmFindFileCommand.cxx"
 #include "cmFindPathCommand.cxx"
 #include "cmWrapExcludeFilesCommand.cxx"
+#include "cmVTKWrapJavaCommand.cxx"
 #include "cmVTKWrapPythonCommand.cxx"
 #include "cmVTKWrapTclCommand.cxx"
 #include "cmBuildSharedLibrariesCommand.cxx"
@@ -78,6 +79,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmFindFileCommand);
   commands.push_back(new cmFindPathCommand);
   commands.push_back(new cmWrapExcludeFilesCommand);  
+  commands.push_back(new cmVTKWrapJavaCommand);
   commands.push_back(new cmVTKWrapPythonCommand);
   commands.push_back(new cmVTKWrapTclCommand);
   commands.push_back(new cmBuildSharedLibrariesCommand);
