@@ -375,7 +375,7 @@ void cmSystemTools::ConvertToUnixSlashes(std::string& path)
     pos++;
     }
   // remove any trailing slash
-  if(path[path.size()-1] == '/')
+  if(path.size() && path[path.size()-1] == '/')
     {
     path = path.substr(0, path.size()-1);
     }
@@ -685,7 +685,7 @@ void cmSystemTools::cmCopyFile(const char* source,
     }
   while(fin.getline(buffer, buffer_length, '\n') || fin.gcount())
     {
-    std::streamsize count = fin.gcount();
+    unsigned long count = fin.gcount();
     if(fin.eof())
       {
       // Final line, but with no newline.
