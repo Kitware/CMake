@@ -1,0 +1,76 @@
+PROJECT(XMLRPC)
+
+# Include all the necessary files for macros
+SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake")
+
+# Check if header file exists and add it to the list.
+SET(CURRENT_INCLUDES)
+INCLUDE (CheckIncludeFiles)
+MACRO(CHECK_INCLUDE_FILE_CONCAT FILE VARIABLE)
+  CHECK_INCLUDE_FILES("${CURRENT_INCLUDES};${FILE}" ${VARIABLE})
+  IF(${VARIABLE})
+    SET(CURRENT_INCLUDES ${CURRENT_INCLUDES} ${FILE})
+  ENDIF(${VARIABLE})
+ENDMACRO(CHECK_INCLUDE_FILE_CONCAT)
+
+CHECK_INCLUDE_FILE_CONCAT("stdio.h" HAVE_STDIO_H)
+CHECK_INCLUDE_FILE_CONCAT("stdarg.h" HAVE_STDARG_H)
+CHECK_INCLUDE_FILE_CONCAT("sys/filio.h" HAVE_SYS_FILIO_H)
+CHECK_INCLUDE_FILE_CONCAT("sys/ioctl.h" HAVE_SYS_IOCTL_H)
+CHECK_INCLUDE_FILE_CONCAT("wchar.h" HAVE_WCHAR_H)
+
+INCLUDE (CheckSymbolExists)
+CHECK_SYMBOL_EXISTS(asprintf "${CURRENT_INCLUDES}" HAVE_ASPRINTF)
+CHECK_SYMBOL_EXISTS(setgroups "${CURRENT_INCLUDES}" HAVE_SETGROUPS)
+
+INCLUDE (CheckTypeSize)
+CHECK_TYPE_SIZE(size_t  SIZEOF_SIZE_T)
+
+INCLUDE (TryCompileFromSource)
+SET(HEADER_INCLUDES "${CURRENT_INCLUDES}")
+TRY_COMPILE_FROM_SOURCE("va_list list1, list2; list1 = list2"
+  VA_LIST_IS_ARRAY_DEFINE)
+TRY_COMPILE_FROM_SOURCE("int x __attribute__((__unused__))"
+  ATTR_UNUSED_VAR)
+SET(ATTR_UNUSED)
+IF(ATTR_UNUSED_VAR)
+  SET(ATTR_UNUSED "__attribute__((__unused__))")
+ENDIF(ATTR_UNUSED_VAR)
+
+SET(HAVE_LIBWWW_SSL)
+SET(DIRECTORY_SEPARATOR "/")
+
+INCLUDE_DIRECTORIES(
+  "${CMAKE_CURRENT_SOURCE_DIR}"
+  "${CMAKE_CURRENT_BINARY_DIR}"
+  "${CMAKE_EXPAT_INCLUDES}"
+  )
+
+CONFIGURE_FILE(
+  "${CMAKE_CURRENT_SOURCE_DIR}/xmlrpc_config.h.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/xmlrpc_config.h"
+  )
+CONFIGURE_FILE(
+  "${CMAKE_CURRENT_SOURCE_DIR}/xmlrpc_amconfig.h.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/xmlrpc_amconfig.h"
+  )
+
+SET(xmlrpc_SRCS
+  #XmlRpcCpp.cpp
+  xmlrpc_array.c
+  xmlrpc_authcookie.c
+  xmlrpc_base64.c
+  xmlrpc_client.c
+  xmlrpc_data.c
+  xmlrpc_expat.c
+  xmlrpc_parse.c
+  xmlrpc_registry.c
+  xmlrpc_serialize.c
+  #xmlrpc_server_abyss.c
+  xmlrpc_struct.c
+  xmlrpc_strutil.c
+  xmlrpc_support.c
+  xmlrpc_utf8.c
+  )
+
+ADD_LIBRARY(cmXMLRPC ${xmlrpc_SRCS})
