@@ -19,6 +19,13 @@
 // cmSourceFilesRemoveCommand
 bool cmSourceFilesRemoveCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
+  const char* versionValue
+    = m_Makefile->GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
+  if (versionValue && atof(versionValue) > 1.2)
+    {
+    this->SetError("The SOURCE_FILES_REMOVE command has been deprecated in CMake version 1.4. You should use the REMOVE command instead.\n");
+    return false;
+    }
   if(argsIn.size() < 1 )
     {
     this->SetError("called with incorrect number of arguments");
