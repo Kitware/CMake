@@ -373,8 +373,6 @@ void CMakeSetupDialog::OnBuildProjects()
  // copy from the cache manager to the cache edit list box
 void CMakeSetupDialog::FillCacheGUIFromCacheManager()
 {
-  // Clear the current GUI
-  m_CacheEntriesList.RemoveAll();
   const cmCacheManager::CacheEntryMap &cache =
     cmCacheManager::GetInstance()->GetCacheMap();
   for(cmCacheManager::CacheEntryMap::const_iterator i = cache.begin();
