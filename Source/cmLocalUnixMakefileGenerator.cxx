@@ -91,6 +91,31 @@ void cmLocalUnixMakefileGenerator::Generate(bool fromTheTop)
   this->OutputMakefile(dest.c_str(), !fromTheTop); 
 }
 
+void 
+cmLocalUnixMakefileGenerator::AddDependenciesToSourceFile(cmDependInformation const *info,
+                                                          cmSourceFile *i,
+                                                          std::set<cmDependInformation const*> *visited)
+{
+  // add info to the visited set
+  visited->insert(info);
+    
+  // add this dependency and the recurse
+  if(info->m_FullPath != "")
+    {
+    // now recurse with info's dependencies
+    for(cmDependInformation::DependencySet::const_iterator d = 
+          info->m_DependencySet.begin();
+        d != info->m_DependencySet.end(); ++d)
+      {
+      if (visited->find(*d) == visited->end())
+        {
+        i->GetDepends().push_back((*d)->m_FullPath);
+        this->AddDependenciesToSourceFile(*d,i,visited);
+        }
+      }
+    }
+}
+
 void cmLocalUnixMakefileGenerator::ProcessDepends(const cmMakeDepend &md)
 {
   // Now create cmDependInformation objects for files in the directory
@@ -109,21 +134,14 @@ void cmLocalUnixMakefileGenerator::ProcessDepends(const cmMakeDepend &md)
         
         // Delete any hints from the source file's dependencies.
         (*i)->GetDepends().erase((*i)->GetDepends().begin(), (*i)->GetDepends().end());
-        
+        std::cerr << "get depends for " << (*i)->GetFullPath() << "\n";
+
         // Now add the real dependencies for the file.
         if (info)
           {
-          for(cmDependInformation::DependencySet::const_iterator d = 
-                info->m_DependencySet.begin();
-              d != info->m_DependencySet.end(); ++d)
-            {
-            // Make sure the full path is given.  If not, the dependency was
-            // not found.
-            if((*d)->m_FullPath != "")
-              {
-              (*i)->GetDepends().push_back((*d)->m_FullPath);
-              }
-            }
+          // create visited set
+          std::set<cmDependInformation const*> visited;
+          this->AddDependenciesToSourceFile(info,*i, &visited);
           }
         }
       }

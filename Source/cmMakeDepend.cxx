@@ -24,12 +24,6 @@ void cmDependInformation::AddDependencies(cmDependInformation* info)
   if(this != info)
     {
     m_DependencySet.insert(info);
-    for (cmDependInformation::DependencySet::const_iterator
-           d = info->m_DependencySet.begin(); 
-         d != info->m_DependencySet.end(); ++d)
-      {
-      m_DependencySet.insert(*d);
-      }
     }
 }
 

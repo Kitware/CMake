@@ -19,6 +19,7 @@
 
 #include "cmLocalGenerator.h"
 
+class cmDependInformation;
 class cmMakeDepend;
 class cmTarget;
 class cmSourceFile;
@@ -77,6 +78,9 @@ public:
   void SetMakefileVariableSize(int s) { m_MakefileVariableSize = s; }
 
 protected:
+  void AddDependenciesToSourceFile(cmDependInformation const*info,
+                                   cmSourceFile *i,
+                                   std::set<cmDependInformation const*> *visited);
   virtual const char* GetSafeDefinition(const char*);
   virtual void ProcessDepends(const cmMakeDepend &md);
   virtual void OutputMakefile(const char* file, bool withDepends);
