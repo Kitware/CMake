@@ -416,7 +416,9 @@ void cmMakefile::AddCustomCommand(const char* source,
     
     for (i = 0; i < commandArgs.size(); ++i)
       {
-      combinedArgs += cmSystemTools::EscapeSpaces(commandArgs[i].c_str());
+      expandC = commandArgs[i].c_str();
+      this->ExpandVariablesInString(expandC);
+      combinedArgs += cmSystemTools::EscapeSpaces(expandC.c_str());
       combinedArgs += " ";
       }
     
