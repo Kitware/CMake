@@ -536,18 +536,6 @@ void cmLocalVisualStudio6Generator::SetBuildType(BuildType b,
   std::string root= m_Makefile->GetRequiredDefinition("CMAKE_ROOT");
   const char *def= m_Makefile->GetDefinition( "MSPROJECT_TEMPLATE_DIRECTORY");
 
-  std::string exportSymbol;
-  if (const char* custom_export_name = target.GetProperty("DEFINE_SYMBOL"))
-    {
-    exportSymbol = custom_export_name;
-    }
-  else
-    {
-    std::string in = libName;
-    in += "_EXPORTS";
-    exportSymbol = cmSystemTools::MakeCindentifier(in.c_str());
-    }
-
   if( def)
     {
     root = def;
@@ -611,8 +599,6 @@ void cmLocalVisualStudio6Generator::SetBuildType(BuildType b,
   std::string line;
   while(cmSystemTools::GetLineFromStream(fin, line))
     {
-    cmSystemTools::ReplaceString(line, "OUTPUT_LIBNAME_EXPORTS",
-                                 exportSymbol.c_str());
     cmSystemTools::ReplaceString(line, "OUTPUT_LIBNAME",libName);
     if (reg.find(line))
       {
@@ -996,7 +982,19 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
       staticLibOptions = libflags;
       }
     }
-  
+  std::string exportSymbol;
+  if (const char* custom_export_name = target.GetProperty("DEFINE_SYMBOL"))
+    {
+    exportSymbol = custom_export_name;
+    }
+  else
+    {
+    std::string in = libName;
+    in += "_EXPORTS";
+    exportSymbol = cmSystemTools::MakeCindentifier(in.c_str());
+    }
+
+
   std::string line;
   while(cmSystemTools::GetLineFromStream(fin, line))
     {
@@ -1005,6 +1003,8 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
       {
       mfcFlag = "0";
       }
+    cmSystemTools::ReplaceString(line, "OUTPUT_LIBNAME_EXPORTS",
+                                 exportSymbol.c_str());
     cmSystemTools::ReplaceString(line, "CMAKE_CUSTOM_RULE_CODE",
                                  customRuleCode.c_str());
     cmSystemTools::ReplaceString(line, "CMAKE_MFC_FLAG",
