@@ -162,6 +162,23 @@ public:
   static bool RunCommand(const char* command, std::string& output,
                          int &retVal, const char* directory = 0, 
                          bool verbose = true, int timeout = 0);  
+  /**
+   * Run a single executable command and put the stdout and stderr 
+   * in output.
+   *
+   * If verbose is false, no user-viewable output from the program
+   * being run will be generated.
+   *
+   * If timeout is specified, the command will be terminated after
+   * timeout expires. Timeout is specified in seconds.
+   *
+   * Argument retVal should be a pointer to the location where the
+   * exit code will be stored. If the retVal is not specified and 
+   * the program exits with a code other than 0, then the this 
+   * function will return false.
+   */
+  static bool RunSingleCommand(const char* command, std::string* output = 0,
+    int* retVal = 0, const char* dir = 0, bool verbose = true, int timeout = 0);
     
   static void EnableMessages() { s_DisableMessages = false; }
   static void DisableMessages() { s_DisableMessages = true; }

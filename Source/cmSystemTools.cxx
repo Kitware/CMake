@@ -22,6 +22,7 @@
 
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/Directory.hxx>
+#include <cmsys/Process.h>
 
 // support for realpath call
 #ifndef _WIN32
@@ -292,7 +293,135 @@ bool cmSystemTools::IsOff(const char* val)
           v == "N" || cmSystemTools::IsNOTFOUND(v.c_str()) || v == "IGNORE");
 }
 
-
+bool cmSystemTools::RunSingleCommand(
+  const char* command, 
+  std::string* output,
+  int *retVal, 
+  const char* dir,
+  bool verbose,
+  int timeout)
+{
+  if(s_DisableRunCommandOutput)
+    {
+    verbose = false;
+    }
+  
+  std::vector<std::string> args;
+  std::string arg;
+  
+  // Split the command into an argv array.
+  for(const char* c = command; *c;)
+    {
+    // Skip over whitespace.
+    while(*c == ' ' || *c == '\t')
+      {
+      ++c;
+      }
+    arg = "";
+    if(*c == '"')
+      {
+      // Parse a quoted argument.
+      ++c;
+      while(*c && *c != '"')
+        {
+        if(*c == '\\')
+          {
+          ++c;
+          if(*c)
+            {
+            arg.append(1, *c);
+            ++c;
+            }
+          }
+        else
+          {
+          arg.append(1, *c);
+          ++c;
+          }
+        }
+      if(*c)
+        {
+        ++c;
+        }
+      args.push_back(arg);
+      }
+    else if(*c)
+      {
+      // Parse an unquoted argument.
+      while(*c && *c != ' ' && *c != '\t')
+        {
+        arg.append(1, *c);
+        ++c;
+        }
+      args.push_back(arg);
+      }
+    }
+  
+  std::vector<const char*> argv;
+  for(std::vector<std::string>::const_iterator a = args.begin();
+      a != args.end(); ++a)
+    {
+    argv.push_back(a->c_str());
+    }
+  argv.push_back(0);
+  
+  if(argv.size() < 2)
+    {
+    return false;
+    }
+  
+  if ( output )
+    {
+    *output = "";
+    }
+  cmsysProcess* cp = cmsysProcess_New();
+  cmsysProcess_SetCommand(cp, &*argv.begin());
+  cmsysProcess_SetWorkingDirectory(cp, dir);
+  cmsysProcess_SetTimeout(cp, timeout);
+  cmsysProcess_Execute(cp);
+  
+  char* data;
+  int length;
+  while(cmsysProcess_WaitForData(cp, (cmsysProcess_Pipe_STDOUT |
+                                      cmsysProcess_Pipe_STDERR),
+                                 &data, &length, 0))
+    {
+    if ( output )
+      {
+      output->append(data, length);
+      }
+    if(verbose)
+      {
+      std::cout.write(data, length);
+      }
+    }
+  
+  cmsysProcess_WaitForExit(cp, 0);
+  
+  bool result = true;
+  if(cmsysProcess_GetState(cp) == cmsysProcess_State_Exited)
+    {
+    if ( retVal )
+      {
+      *retVal = cmsysProcess_GetExitValue(cp);
+      }
+    else
+      {
+      if ( cmsysProcess_GetExitValue(cp) !=  0 )
+        {
+        result = false;
+        }
+      }
+    }
+  else
+    {
+    result = false;
+    }
+  
+  cmsysProcess_Delete(cp);
+  
+  return result;
+}
 bool cmSystemTools::RunCommand(const char* command, 
                                std::string& output,
                                const char* dir,
