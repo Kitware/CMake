@@ -128,7 +128,8 @@ void ctest::ProcessDirectory(int &passed, int &failed)
 
       if (name == "ADD_TEST")
         {
-        std::cerr << "Testing " << args[0] << " ... ";
+        fprintf(stderr,"Testing %-30s ",args[0].c_str());
+        //std::cerr << "Testing " << args[0] << " ... ";
         // find the test executable
         std::string testCommand = this->FindExecutable(args[1].c_str());
         // add the arguments
