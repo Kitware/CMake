@@ -61,19 +61,6 @@ void cmTarget::GenerateSourceFilesFromSourceLists( cmMakefile &mf)
       done = 1;
       }
 
-    // check to see if it is an existing source file in the output directory
-    if (!done && cmSystemTools::GetFilenamePath(temps).empty())
-      {
-      std::string testName = mf.GetCurrentOutputDirectory();
-      testName += "/";
-      testName += temps;
-      if (mf.GetSource(testName.c_str()))
-        {
-        m_SourceFiles.push_back(mf.GetSource(testName.c_str()));
-        done = 1;
-        }
-      }
-    
     // if it wasn't a source file listed with the makefile
     // see if it is a variable. This is for old CMake 1.2 compatability 
     // where a source list would be passed into here, by making it
