@@ -1476,7 +1476,9 @@ static void kwsysProcessSetExitException(kwsysProcess* cp, int sig)
     case SIGSEGV: KWSYSPE_CASE(Fault, "Segmentation fault"); break;
 #endif
 #ifdef SIGBUS
+# if !defined(SIGSEGV) || SIGBUS != SIGSEGV
     case SIGBUS: KWSYSPE_CASE(Fault, "Bus error"); break;
+# endif
 #endif
 #ifdef SIGFPE
     case SIGFPE: KWSYSPE_CASE(Numerical, "Floating-point exception"); break;
