@@ -81,15 +81,6 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args)
   driver += *i;
   ++i;
 
-  std::ofstream fout(driver.c_str());
-  if (!fout)
-    {
-    std::string err = "Could not create file ";
-    err += driver;
-    err += " for cmCreateTestSourceList command.";
-    this->SetError(err.c_str());
-    return false;
-    }
   std::string configFile = 
     m_Makefile->GetDefinition("CMAKE_ROOT");
   configFile += "/Templates/TestDriver.cxx.in";
@@ -166,7 +157,11 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args)
     }
   m_Makefile->AddDefinition("CMAKE_FORWARD_DECLARE_TESTS", forwardDeclareCode.c_str());
   m_Makefile->AddDefinition("CMAKE_FUNCTION_TABLE_ENTIRES", functionMapCode.c_str());
-  m_Makefile->ConfigureFile(configFile.c_str(), driver.c_str(), false, true, false);
+  bool res = true;
+  if ( !m_Makefile->ConfigureFile(configFile.c_str(), driver.c_str(), false, true, false) )
+    {
+    res = false;
+    }
 
   // Create the source list
   cmSourceFile cfile;
@@ -194,7 +189,7 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args)
     }
 
   m_Makefile->AddDefinition(sourceList, sourceListValue.c_str());
-  return true;
+  return res;
 }
 
 
