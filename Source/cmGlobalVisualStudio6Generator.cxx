@@ -289,13 +289,9 @@ void cmGlobalVisualStudio6Generator::WriteDSWFile(std::ostream& fout,
       if (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
         {
         cmCustomCommand cc = l->second.GetPostBuildCommands()[0];
-        
-        // dodgy use of the cmCustomCommand's members to store the 
-        // arguments from the INCLUDE_EXTERNAL_MSPROJECT command
-        std::vector<std::string> stuff = cc.GetDepends();
-        std::vector<std::string> depends;
-        depends.push_back(cc.GetOutput());
-        this->WriteExternalProject(fout, stuff[0].c_str(), stuff[1].c_str(), depends);
+        std::string project = cc.GetCommand();
+        std::string location = cc.GetArguments();
+        this->WriteExternalProject(fout, project.c_str(), location.c_str(), cc.GetDepends());
         }
       else 
         {

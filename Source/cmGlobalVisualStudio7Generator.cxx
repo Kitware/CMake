@@ -392,13 +392,10 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout,
         {
         cmCustomCommand cc = l->second.GetPostBuildCommands()[0];
         
-        // dodgy use of the cmCustomCommand's members to store the 
-        // arguments from the INCLUDE_EXTERNAL_MSPROJECT command
-        std::vector<std::string> stuff = cc.GetDepends();
-        std::vector<std::string> depends;
-        depends.push_back(cc.GetOutput());
-        this->WriteExternalProject(fout, stuff[0].c_str(), 
-                                   stuff[1].c_str(), depends);
+        std::string project_name = cc.GetCommand();
+        std::string location = cc.GetArguments();
+        this->WriteExternalProject(fout, project_name.c_str(), 
+                                   location.c_str(), cc.GetDepends());
         }
       else 
         {
@@ -481,10 +478,8 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout,
        if (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
          {
          cmCustomCommand cc = l->second.GetPostBuildCommands()[0];
-         // dodgy use of the cmCustomCommand's members to store the 
-         // arguments from the INCLUDE_EXTERNAL_MSPROJECT command
-         std::vector<std::string> stuff = cc.GetDepends();
-         this->WriteProjectConfigurations(fout, stuff[0].c_str(), l->second.IsInAll());
+         std::string project = cc.GetCommand();
+         this->WriteProjectConfigurations(fout, project.c_str(), l->second.IsInAll());
          }
        else if ((l->second.GetType() != cmTarget::INSTALL_FILES)
                 && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))

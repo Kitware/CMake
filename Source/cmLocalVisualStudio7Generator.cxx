@@ -1285,10 +1285,10 @@ void cmLocalVisualStudio7Generator::ConfigureFinalPass()
   for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); l++)
     {
     if (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
-      { 
+      {
       cmCustomCommand cc = l->second.GetPostBuildCommands()[0];
-      std::vector<std::string> stuff = cc.GetDepends();
-      gg->CreateGUID(stuff[0].c_str());
+      std::string project_name = cc.GetCommand();
+      gg->CreateGUID(project_name.c_str());
       }
     else
       {
