@@ -4493,7 +4493,7 @@ case $system in
         fi
         rm -f conftest*
 	;;
-    IRIX-5* | IRIX-6* | IRIX64-6* | IRIX-64-6*)
+     IRIX-5* | IRIX-6* | IRIX64-6* | IRIX-64-6*)
         echo $ac_n "checking whether ${CC} accepts -LANG:std""... $ac_c" 1>&6
         echo 'void f(){}' > conftest.c
         if test -z "`${CC} -LANG:std -c conftest.c 2>&1`"; then
