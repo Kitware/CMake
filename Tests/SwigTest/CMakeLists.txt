@@ -1,0 +1,45 @@
+SET(language "python")
+
+
+PROJECT(example_${language}_class)
+
+FIND_PACKAGE(SWIG)
+IF(SWIG_FOUND)
+  INCLUDE(${SWIG_USE_FILE})
+
+  IF(${language} MATCHES python)
+    FIND_PACKAGE(PythonLibs)
+    INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
+  ENDIF(${language} MATCHES python)
+  IF(${language} MATCHES perl)
+    FIND_PACKAGE(PerlLibs)
+    INCLUDE_DIRECTORIES(${PERL_INCLUDE_PATH})
+    ADD_DEFINITIONS(${PERL_EXTRA_C_FLAGS})
+  ENDIF(${language} MATCHES perl)
+  IF(${language} MATCHES tcl)
+    FIND_PACKAGE(TCL)
+    INCLUDE_DIRECTORIES(${TCL_INCLUDE_PATH})
+  ENDIF(${language} MATCHES tcl)
+  IF(${language} MATCHES ruby)
+    FIND_PACKAGE(Ruby)
+    INCLUDE_DIRECTORIES(${RUBY_INCLUDE_PATH})
+  ENDIF(${language} MATCHES ruby)
+  IF(${language} MATCHES php4)
+    FIND_PACKAGE(PHP4)
+    INCLUDE_DIRECTORIES(${PHP4_INCLUDE_PATH})
+  ENDIF(${language} MATCHES php4)
+  IF(${language} MATCHES pike)
+    FIND_PACKAGE(Pike)
+    INCLUDE_DIRECTORIES(${PIKE_INCLUDE_PATH})
+  ENDIF(${language} MATCHES pike)
+
+  INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+
+  SET(CMAKE_SWIG_FLAGS "")
+
+  SET_SOURCE_FILES_PROPERTIES(example.i PROPERTIES CPLUSPLUS ON)
+  SET_SOURCE_FILES_PROPERTIES(example.i PROPERTIES SWIG_FLAGS "-includeall")
+  SWIG_ADD_MODULE(example "${language}"
+    example.i example.cxx)
+  SWIG_LINK_LIBRARIES(example ${PYTHON_LIBRARY})
+ENDIF(SWIG_FOUND)
