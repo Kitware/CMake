@@ -30,7 +30,7 @@ TARGET_LINK_LIBRARIES(complex
 # has no side-effects on the current Makefile (duplicated source file
 # due to source list expansion done twice).
 #
-SUBDIRS(required)
+SUBDIRS(Temp)
 
 #
 # Extra coverage.Not used.

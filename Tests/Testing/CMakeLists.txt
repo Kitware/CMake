@@ -67,4 +67,4 @@ ADD_TEST(testing ${Testing_BINARY_DIR}/bin/testing)
 # Force subdirs
 # (coverage)
 #
-SUBDIRS(sub1)
+SUBDIRS(Sub)
