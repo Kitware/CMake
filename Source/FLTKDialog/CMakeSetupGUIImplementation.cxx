@@ -230,12 +230,15 @@ CMakeSetupGUIImplementation
 
   if( m_WhereBuild != expandedAbsolutePath )
   {
-    m_BuildPathChanged = true;
-    m_WhereBuild = expandedAbsolutePath;
+    m_BuildPathChanged  = true;
+    m_WhereBuild        = expandedAbsolutePath;
+    LoadCacheFromDiskToGUI();
+  }
+  else 
+  {
+    m_BuildPathChanged = false;
   }
   
-  LoadCacheFromDiskToGUI();
-
   return true;
 
 }
