@@ -244,14 +244,6 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
       break;
     }
   
-  fout << "\t\t\tIntermediateDirectory=\".\\" << configName << "\"\n"
-       << "\t\t\tConfigurationType=\"" << configType << "\"\n"
-       << "\t\t\tUseOfMFC=\"" << mfcFlag << "\"\n"
-       << "\t\t\tATLMinimizesCRunTimeLibraryUsage=\"FALSE\"\n"
-       << "\t\t\tCharacterSet=\"2\">\n";
-  fout << "\t\t\t<Tool\n"
-       << "\t\t\t\tName=\"VCCLCompilerTool\"\n"
-       << "\t\t\t\tAdditionalOptions=\"";
   std::string flags;
   std::string flagsRelease = " ";
   std::string flagsMinSize = " ";
@@ -329,6 +321,26 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     flags += flagsDebugRel;
     }
   
+  fout << "\t\t\tIntermediateDirectory=\".\\" << configName << "\"\n"
+       << "\t\t\tConfigurationType=\"" << configType << "\"\n"
+       << "\t\t\tUseOfMFC=\"" << mfcFlag << "\"\n"
+       << "\t\t\tATLMinimizesCRunTimeLibraryUsage=\"FALSE\"\n";
+  // if -D_UNICODE or /D_UNICODE is found in the flags
+  // change the character set to unicode, if not then
+  // default to MBCS 
+  if(flags.find("D_UNICODE") != flags.npos )
+    {
+    fout << "\t\t\tCharacterSet=\"1\">\n";
+    }
+  else
+    {
+    fout << "\t\t\tCharacterSet=\"2\">\n";
+    }
+  
+  fout << "\t\t\t<Tool\n"
+       << "\t\t\t\tName=\"VCCLCompilerTool\"\n"
+       << "\t\t\t\tAdditionalOptions=\"";
+
   cmSystemTools::ReplaceString(flags, "\"", "&quot;");
   fout << flags;
 
