@@ -1,5 +1,4 @@
 PLATFORM="x86-linux-static"
-CREATE_SOURCE_TARBALL="yes"
 CURSES_LIBRARY="/usr/lib/libcurses.a"
 FORM_LIBRARY="/usr/lib/libform.a"
 CC="gcc"
