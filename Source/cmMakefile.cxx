@@ -1710,11 +1710,13 @@ cmSourceFile* cmMakefile::GetOrCreateSource(const char* sourceName,
   // make it a full path first
   std::string src = sourceName;
   bool relative = !cmSystemTools::FileIsFullPath(sourceName);
+  std::string srcTreeFile = this->GetCurrentDirectory();
+  srcTreeFile += "/";
+  srcTreeFile += sourceName;
+
   if(relative)
     {
-    src = this->GetCurrentDirectory();
-    src += "/";
-    src += sourceName;
+    src = srcTreeFile;
     }
   
   // check to see if it exists
@@ -1726,24 +1728,51 @@ cmSourceFile* cmMakefile::GetOrCreateSource(const char* sourceName,
 
   // OK a source file object doesn't exist for the source
   // maybe we made a bad call on assuming it was in the src tree
+  std::string buildTreeFile = this->GetCurrentOutputDirectory();
+  buildTreeFile += "/";
+  buildTreeFile += sourceName;
+
   if (relative)
     {
-    src = this->GetCurrentOutputDirectory();
-    src += "/";
-    src += sourceName;
+    src = buildTreeFile;
+    ret = this->GetSource(src.c_str());
+    if (ret)
+      {
+      return ret;
+      }
+    // if it has not been marked generated check to see if it exists in the
+    // src tree
+    if(!generated)
+      {
+      // see if the file is in the source tree, otherwise assume it 
+      // is in the binary tree
+      if (cmSystemTools::FileExists(srcTreeFile.c_str()) &&
+          !cmSystemTools::FileIsDirectory(srcTreeFile.c_str()))
+        {
+        src = srcTreeFile;
+        }
+      else
+        {
+        if ( cmSystemTools::GetFilenameLastExtension(srcTreeFile.c_str()).size() == 0)
+          {
+          if (cmSystemTools::DoesFileExistWithExtensions(
+                srcTreeFile.c_str(), this->GetSourceExtensions()))
+            {
+            src = srcTreeFile;
+            }
+          else if (cmSystemTools::DoesFileExistWithExtensions(
+                     srcTreeFile.c_str(), this->GetHeaderExtensions()))
+            {
+            src = srcTreeFile;
+            }
+          }
+        }
+      }
     }
-  ret = this->GetSource(src.c_str());
-  if (ret)
-    {
-    return ret;
-    }
+
+  // a cmSourceFile instance does not exist yet so we must create one
   // go back to looking in the source directory for it
-  if(relative)
-    {
-    src = this->GetCurrentDirectory();
-    src += "/";
-    src += sourceName;
-    }
+
   // we must create one
   cmSourceFile file; 
   std::string path = cmSystemTools::GetFilenamePath(src);
