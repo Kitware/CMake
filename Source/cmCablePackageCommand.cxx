@@ -117,7 +117,7 @@ bool cmCablePackageCommand::Invoke(std::vector<std::string>& args)
                                outputs, m_TargetName.c_str());
   
   // add the source list to the target
-  m_Makefile->GetTargets()[m_TargetName.c_str()].m_SourceLists.push_back(m_PackageName);
+  m_Makefile->GetTargets()[m_TargetName.c_str()].GetSourceLists().push_back(m_PackageName);
 
   return true;
 }

@@ -134,7 +134,7 @@ void cmDSWMakefile::WriteProject(std::ostream& fout,
     {
     if(*i != dspname)
       {
-      if (!l.m_IsALibrary || 
+      if (!l.IsALibrary() || 
           project->GetLibraryBuildType() == cmDSPMakefile::DLL)
         {
         fout << "Begin Project Dependency\n";

@@ -74,7 +74,7 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
   for(cmTargets::const_iterator l = tgts.begin(); 
       l != tgts.end(); l++)
     {
-    if (l->second.m_IsALibrary)
+    if (l->second.IsALibrary())
       {
       fout << " \\\nlib" << l->first.c_str() << "${CMAKE_LIB_EXT}";
       }
@@ -83,7 +83,7 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
   for(cmTargets::const_iterator l = tgts.begin(); 
       l != tgts.end(); l++)
     {
-    if (!l->second.m_IsALibrary)
+    if (!l->second.IsALibrary())
       {
       fout << "\\\n" << l->first.c_str();
       }
@@ -95,7 +95,7 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
       l != tgts.end(); l++)
     {
     std::vector<cmClassFile> classes = 
-      m_Makefile->GetClassesFromSourceLists(l->second.m_SourceLists);
+      m_Makefile->GetClassesFromSourceLists(l->second.GetSourceLists());
     fout << l->first << "_SRC_OBJS = ";
     for(std::vector<cmClassFile>::iterator i = classes.begin(); 
         i != classes.end(); i++)
@@ -174,7 +174,7 @@ void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
   for(cmTargets::const_iterator l = tgts.begin(); 
       l != tgts.end(); l++)
     {
-    if (l->second.m_IsALibrary)
+    if (l->second.IsALibrary())
       {
       fout << "#---------------------------------------------------------\n";
       fout << "# rules for a library\n";
@@ -432,11 +432,11 @@ void cmUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
     {
     // add any custom rules to the source groups
     for (std::vector<cmCustomCommand>::const_iterator cr = 
-           tgt->second.m_CustomCommands.begin(); 
-         cr != tgt->second.m_CustomCommands.end(); ++cr)
+           tgt->second.GetCustomCommands().begin(); 
+         cr != tgt->second.GetCustomCommands().end(); ++cr)
       {
       cmSourceGroup& sourceGroup = 
-        m_Makefile->FindSourceGroup(cr->m_Source.c_str(),
+        m_Makefile->FindSourceGroup(cr->GetSourceName().c_str(),
                                     sourceGroups);
       cmCustomCommand cc(*cr);
       cc.ExpandVariables(*m_Makefile);

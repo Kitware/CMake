@@ -91,7 +91,7 @@ void cmDSPMakefile::OutputDSPFile()
   for(cmTargets::const_iterator l = tgts.begin(); 
       l != tgts.end(); l++)
     {
-    if (l->second.m_IsALibrary)
+    if (l->second.IsALibrary())
       {
       this->SetBuildType(m_LibraryBuildType, l->first.c_str());
       }
@@ -196,7 +196,7 @@ void cmDSPMakefile::WriteDSPFile(std::ostream& fout,
   
   // get the classes from the source lists then add them to the groups
   std::vector<cmClassFile> classes = 
-    m_Makefile->GetClassesFromSourceLists(target.m_SourceLists);
+    m_Makefile->GetClassesFromSourceLists(target.GetSourceLists());
   for(std::vector<cmClassFile>::iterator i = classes.begin(); 
       i != classes.end(); i++)
     {
@@ -212,11 +212,11 @@ void cmDSPMakefile::WriteDSPFile(std::ostream& fout,
   
   // add any custom rules to the source groups
   for (std::vector<cmCustomCommand>::const_iterator cr = 
-         target.m_CustomCommands.begin(); 
-       cr != target.m_CustomCommands.end(); ++cr)
+         target.GetCustomCommands().begin(); 
+       cr != target.GetCustomCommands().end(); ++cr)
     {
     cmSourceGroup& sourceGroup = 
-      m_Makefile->FindSourceGroup(cr->m_Source.c_str(),
+      m_Makefile->FindSourceGroup(cr->GetSourceName().c_str(),
                                   sourceGroups);
     cmCustomCommand cc(*cr);
     cc.ExpandVariables(*m_Makefile);

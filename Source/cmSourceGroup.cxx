@@ -55,30 +55,30 @@ bool cmSourceGroup::Matches(const char* name)
  */
 void cmSourceGroup::AddCustomCommand(const cmCustomCommand &cmd)
 {
-  CustomCommands::iterator s = m_CustomCommands.find(cmd.m_Source);
+  CustomCommands::iterator s = m_CustomCommands.find(cmd.GetSourceName());
   if(s == m_CustomCommands.end())
     {
     // The source was not found.  Add it with this command.
-    m_CustomCommands[cmd.m_Source][cmd.m_Command].
-      m_Depends.insert(cmd.m_Depends.begin(),cmd.m_Depends.end());
-    m_CustomCommands[cmd.m_Source][cmd.m_Command].
-      m_Outputs.insert(cmd.m_Outputs.begin(),cmd.m_Outputs.end());
+    m_CustomCommands[cmd.GetSourceName()][cmd.GetCommand()].
+      m_Depends.insert(cmd.GetDepends().begin(),cmd.GetDepends().end());
+    m_CustomCommands[cmd.GetSourceName()][cmd.GetCommand()].
+      m_Outputs.insert(cmd.GetOutputs().begin(),cmd.GetOutputs().end());
     return;
     }
   
   // The source already exists.  See if the command exists.
   Commands& commands = s->second;
-  Commands::iterator c = commands.find(cmd.m_Command);
+  Commands::iterator c = commands.find(cmd.GetCommand());
   if(c == commands.end())
     {
     // The command did not exist.  Add it.
-    commands[cmd.m_Command].m_Depends.insert(cmd.m_Depends.begin(), cmd.m_Depends.end());
-    commands[cmd.m_Command].m_Outputs.insert(cmd.m_Outputs.begin(), cmd.m_Outputs.end());
+    commands[cmd.GetCommand()].m_Depends.insert(cmd.GetDepends().begin(), cmd.GetDepends().end());
+    commands[cmd.GetCommand()].m_Outputs.insert(cmd.GetOutputs().begin(), cmd.GetOutputs().end());
     return;
     }
   
   // The command already exists for this source.  Merge the sets.
   CommandFiles& commandFiles = c->second;
-  commandFiles.m_Depends.insert(cmd.m_Depends.begin(), cmd.m_Depends.end());
-  commandFiles.m_Outputs.insert(cmd.m_Outputs.begin(), cmd.m_Outputs.end());
+  commandFiles.m_Depends.insert(cmd.GetDepends().begin(), cmd.GetDepends().end());
+  commandFiles.m_Outputs.insert(cmd.GetOutputs().begin(), cmd.GetOutputs().end());
 }
