@@ -104,6 +104,7 @@ private:
   void OutputCustomRules(std::ostream&);
   void OutputMakeVariables(std::ostream&);
   void OutputMakeRules(std::ostream&);
+  void OutputInstallRules(std::ostream&);
   void OutputSubDirectoryVars(std::ostream& fout,
                               const char* var,
                               const char* target,

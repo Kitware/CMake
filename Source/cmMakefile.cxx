@@ -85,6 +85,11 @@ void cmMakefile::AddDefaultCommands()
   this->AddDefinition("UNIX", "1");
 #endif
   
+  // always creat an empty install target
+  cmTarget target;
+  target.SetType(cmTarget::INSTALL);
+  target.SetInAll(false);
+  m_Targets.insert(cmTargets::value_type("INSTALL",target));
 }
 
 cmMakefile::~cmMakefile()

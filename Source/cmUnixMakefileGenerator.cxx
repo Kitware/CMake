@@ -147,6 +147,7 @@ void cmUnixMakefileGenerator::OutputMakefile(const char* file)
     }
   this->OutputCustomRules(fout);
   this->OutputMakeRules(fout);
+  this->OutputInstallRules(fout);
   // only add the depend include if the depend file exists
   if(cmSystemTools::FileExists(dependName.c_str()))
     {
@@ -207,22 +208,29 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
       l != tgts.end(); l++)
     {
     std::vector<cmSourceFile> classes = l->second.GetSourceFiles();
-    fout << l->first << "_SRC_OBJS = ";
-    for(std::vector<cmSourceFile>::iterator i = classes.begin(); 
-        i != classes.end(); i++)
+    if (classes.begin() != classes.end())
       {
-      if(!i->IsAHeaderFileOnly())
-        {
-        fout << "\\\n" << i->GetSourceName() << ".o ";
-        }
+	fout << l->first << "_SRC_OBJS = ";
+	for(std::vector<cmSourceFile>::iterator i = classes.begin(); 
+	    i != classes.end(); i++)
+	  {
+	    if(!i->IsAHeaderFileOnly())
+	      {
+		fout << "\\\n" << i->GetSourceName() << ".o ";
+	      }
+	  }
+	fout << "\n\n";
       }
-    fout << "\n\n";
     }
   fout << "CLEAN_OBJECT_FILES = ";
   for(cmTargets::const_iterator l = tgts.begin(); 
       l != tgts.end(); l++)
     {
-    fout << "${" << l->first << "_SRC_OBJS} ";
+    std::vector<cmSourceFile> classes = l->second.GetSourceFiles();
+    if (classes.begin() != classes.end())
+      {
+      fout << "${" << l->first << "_SRC_OBJS} ";
+      }
     }
   fout << "\n";
 }
@@ -525,13 +533,13 @@ OutputSubDirectoryVars(std::ostream& fout,
     fout << target << "_" << subdir.c_str() << ":\n";
     if(target1)
       {
-	fout << "\tif test ! -d " << SubDirectories[i].c_str() << "; then ${MAKE} rebuild_cache; fi\n"
+	fout << "\t@if test ! -d " << SubDirectories[i].c_str() << "; then ${MAKE} rebuild_cache; fi\n"
 	  "\tcd " << SubDirectories[i].c_str()
            << "; ${MAKE} -${MAKEFLAGS} " << target1 << "\n";
       }
     if(target2)
       {
-      fout << "\tcd " << SubDirectories[i].c_str()
+      fout << "\t@cd " << SubDirectories[i].c_str()
            << "; ${MAKE} -${MAKEFLAGS} " << target2 << "\n";
       }
     }
@@ -560,6 +568,10 @@ void cmUnixMakefileGenerator::OutputSubDirectoryRules(std::ostream& fout)
                                SubDirectories);
   this->OutputSubDirectoryVars(fout, "SUBDIR_DEPEND", "depend",
                                "depend",
+                               0,
+                               SubDirectories);
+  this->OutputSubDirectoryVars(fout, "SUBDIR_INSTALL", "install",
+                               "install",
                                0,
                                SubDirectories);
 }
@@ -783,6 +795,86 @@ void cmUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
 }
 
 
+void cmUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
+{
+  bool dll = cmCacheManager::GetInstance()->IsOn("BUILD_SHARED_LIBS");
+  const char* root
+    = cmCacheManager::GetInstance()->GetCacheValue("CMAKE_ROOT");
+  fout << "INSTALL = " << root << "/Templates/install-sh -c\n";
+  fout << "INSTALL_PROGRAM = ${INSTALL}\n";
+  fout << "INSTALL_DATA =    ${INSTALL} -m 644\n";
+  
+  const cmTargets &tgts = m_Makefile->GetTargets();
+  fout << "install: ${SUBDIR_INSTALL}\n";
+  fout << "\t@echo \"Installing ...\"\n";
+  
+  const char* prefix
+    = cmCacheManager::GetInstance()->GetCacheValue("CMAKE_INSTALL_PREFIX");
+  if (!prefix)
+    {
+    prefix = "/usr/local";
+    }
+
+  for(cmTargets::const_iterator l = tgts.begin(); 
+      l != tgts.end(); l++)
+    {
+    if (l->second.GetInstallPath() != "")
+      {
+      // first make the directories for each target 
+      fout << "\t@if [ ! -d " << prefix << l->second.GetInstallPath() << 
+	" ] ; then \\\n";
+      fout << "\t   echo \"Making directory " << prefix 
+	   << l->second.GetInstallPath() << " \"; \\\n";
+      fout << "\t   mkdir -p " << prefix << l->second.GetInstallPath() 
+	   << "; \\\n";
+      fout << "\t   chmod 755 " <<  prefix << l->second.GetInstallPath() 
+	   << "; \\\n";
+      fout << "\t else true; \\\n";
+      fout << "\t fi\n";
+      // now install the target
+      switch (l->second.GetType())
+	{
+	case cmTarget::LIBRARY:
+	  fout << "\t$(INSTALL_DATA) lib" << l->first;
+	  if(dll)
+	    {
+	      fout << m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
+	    }
+	  else
+	    {
+	      fout << ".a";
+	    }
+	  fout << " " << prefix << l->second.GetInstallPath() << "\n";
+	  break;
+	case cmTarget::EXECUTABLE:
+	  fout << "\t$(INSTALL_PROGRAM) " << l->first 
+	       << " " << prefix << l->second.GetInstallPath() << "\n";
+	  break;
+	case cmTarget::INSTALL:
+	  {
+	  const std::vector<std::string> &sf = l->second.GetSourceLists();
+	  std::vector<std::string>::const_iterator i;
+	  for (i = sf.begin(); i != sf.end(); ++i)
+	    {
+	    fout << "\t@ echo \"Installing " << *i << " \"\n"; 
+	    fout << "\t@if [ -e " << *i << " ] ; then \\\n";
+	    fout << "\t   $(INSTALL_DATA) " << *i 
+		 << " " << prefix << l->second.GetInstallPath() << "; \\\n";
+	    fout << "\t elif [ -e ${srcdir}/" << *i << " ] ; then \\\n";
+	    fout << "\t   $(INSTALL_DATA) ${srcdir}/" << *i 
+		 << " " << prefix << l->second.GetInstallPath() << "; \\\n";
+	    fout << "\telse \\\n";
+	    fout << "\t   echo \" ERROR!!! Unable to find: " << *i 
+		 << " \"; \\\n";	 
+	    fout << "\t fi\n";
+	    }
+	  }
+	  break;
+	}
+      }
+    }
+}
+
 void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
 {
   this->OutputMakeRule(fout, 
@@ -797,7 +889,8 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                        "# build cplusplus file",
                        ".cxx.o", 
                        0,
-                       "${CMAKE_CXX_COMPILER} ${CMAKE_CXXFLAGS} ${INCLUDE_FLAGS} -c $< -o $@");  this->OutputMakeRule(fout, 
+                       "${CMAKE_CXX_COMPILER} ${CMAKE_CXXFLAGS} ${INCLUDE_FLAGS} -c $< -o $@");  
+  this->OutputMakeRule(fout, 
                        "Default build rule",
                        "all",
                        "Makefile cmake.depends ${TARGETS} ${SUBDIR_BUILD} ${CMAKE_COMMAND}",
