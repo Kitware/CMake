@@ -229,15 +229,15 @@ void cmBorlandMakefileGenerator::OutputMakefile(const char* file)
     if ((l->second.GetType() == cmTarget::STATIC_LIBRARY)
         && l->second.IsInAll())
       {
-      fout << " \\\n  $(OUTDIRLIB)" << l->first.c_str() << ".lib";
+      fout << " \\\n  $(OUTDIRLIB)\\" << l->first.c_str() << ".lib";
       }
     if ((l->second.GetType() == cmTarget::SHARED_LIBRARY) && l->second.IsInAll())
       {
-      fout << " \\\n  $(OUTDIRLIB)" << l->first.c_str() << ".dll";
+      fout << " \\\n  $(OUTDIRLIB)\\" << l->first.c_str() << ".dll";
       }
     if ((l->second.GetType() == cmTarget::MODULE_LIBRARY) && l->second.IsInAll())
       {
-      fout << " \\\n  $(OUTDIRLIB)" << l->first.c_str() << ".bpl";
+      fout << " \\\n  $(OUTDIRLIB)\\" << l->first.c_str() << ".bpl";
       }
     }
   // executables
@@ -307,7 +307,7 @@ void cmBorlandMakefileGenerator::OutputMakefile(const char* file)
           if (tgts.find(l->first)==tgts.end())
             libname = l->first;
           else
-            libname = "$(OUTDIRLIB)" + l->first;
+            libname = "$(OUTDIRLIB)/" + l->first;
           if (libname.find(".bpi")!=std::string::npos) continue;
           cmSystemTools::ReplaceString(libname, ".lib", "");
           libname += ".lib";
@@ -339,7 +339,7 @@ void cmBorlandMakefileGenerator::OutputMakefile(const char* file)
           if (tgts.find(l->first)==tgts.end())
             libname = l->first;
           else
-            libname = "$(OUTDIRLIB)" + l->first;
+            libname = "$(OUTDIRLIB)/" + l->first;
           if (libname.find(".bpi")==std::string::npos) continue;
           fout << " \\\n  " << cmSystemTools::EscapeSpaces(libname.c_str());
           }
@@ -414,51 +414,9 @@ void cmBorlandMakefileGenerator::OutputMakefile(const char* file)
 // output the list of libraries that the executables in this makefile will depend on.
 void cmBorlandMakefileGenerator::OutputDependencies(std::ostream& fout) 
 {
-  // Each dependency should only be emitted once.
-  std::set<std::string> emitted;
-  //
-  // Output/Search the list of libraries that will be linked into the executable
-  //
-  fout << "DEPEND_LIBS = ";
-  cmTarget::LinkLibraries& libs = m_Makefile->GetLinkLibraries();
-  emitted.clear();
-  for (cmTarget::LinkLibraries::const_iterator lib2=libs.begin(); 
-       lib2!=libs.end(); ++lib2) 
-    {
-
-    // loop over the list of directories that the libraries might
-    // be in, looking for an ADD_LIBRARY(lib...) line. This would
-    // be stored in the cache
-    if( ! emitted.insert(lib2->first).second ) continue;
-
-    const char* cacheValue = m_Makefile->GetDefinition(lib2->first.c_str());
-    if (cacheValue) 
-      {
-      fout << "\\\n  $(OUTDIRLIB)" << lib2->first << ".lib ";
-      }
-    }
-  fout << "\n\n";
-  //
-  // Same list, but this time output a rule to rebuild if they are out of date
-  //
-  emitted.clear();
-  for (cmTarget::LinkLibraries::const_iterator lib2=libs.begin(); 
-       lib2!=libs.end(); ++lib2) 
-    {
-    // loop over the list of directories that the libraries might
-    // be in, looking for an ADD_LIBRARY(lib...) line. This would
-    // be stored in the cache
-    if ( ! emitted.insert(lib2->first).second ) continue;
-
-//      const char* cacheValue = cmCacheManager::GetInstance()->GetCacheValue(lib2->first.c_str());
-//      if (cacheValue) {
-//        // put out a rule to build the library if it does not exist
-//        fout << "$(OUTDIRLIB)/" << lib2->first << ".lib : " << "$(OUTDIRLIB)/" << lib2->first << ".dll \n";
-//        fout << "  @implib -w " << "$(OUTDIRLIB)/" << lib2->first << ".lib " << "$(OUTDIRLIB)/" << lib2->first << ".dll \n\n";
-//      }
-    }
-//    fout << "\n";
+    // not required under win32
 }
+
 void cmBorlandMakefileGenerator::OutputTargets(std::ostream& fout) 
 {
   // Do Libraries first as executables may depend on them
@@ -468,33 +426,31 @@ void cmBorlandMakefileGenerator::OutputTargets(std::ostream& fout)
     if (l->second.GetType() == cmTarget::STATIC_LIBRARY) 
       {
       //
-      // at the moment, static and shared are treated the same
-      // WARNING. TLIB fails with Unix style Forward slashes - use $(OUTDIRLIB)
-      // WARNING. IMPLIB works better with Forward slashes - use $(OUTDIRLIB)
+      // WARNING. TLIB fails with Unix style Forward slashes - use $(OUTDIRLIB)\\
       //
       fout << "# this should be a static library \n";
-      fout << "$(OUTDIRLIB)" << l->first << ".lib : ${" << l->first << "_SRC_OBJS} \n";
-      std::string Libname = "$(OUTDIRLIB)" + l->first + ".lib";
+      fout << "$(OUTDIRLIB)\\" << l->first << ".lib : ${" << l->first << "_SRC_OBJS} \n";
+      std::string Libname = "$(OUTDIRLIB)\\" + l->first + ".lib";
       fout << "  TLib.exe $(LINKFLAGS_STATIC) /u " << Libname.c_str() << " @&&| \n";
       fout << "    $? \n";
       fout << "| \n\n";
       }
-    if (l->second.GetType() == cmTarget::SHARED_LIBRARY) 
+    if (l->second.GetType() == cmTarget::SHARED_LIBRARY)
       {
       fout << "# this should be a shared (DLL) library \n";
-      fout << "$(OUTDIRLIB)" << l->first << ".dll : ${" << l->first << "_SRC_OBJS} \n";
+      fout << "$(OUTDIRLIB)/" << l->first << ".dll : ${" << l->first << "_SRC_OBJS} \n";
       fout << "  @ilink32.exe @&&| \n";
       fout << "    -L\"$(BCB)/lib\" -L$(LINK_DIR) $(LINKFLAGS_DLL) $(LINKFLAGS_DEBUG) \"$(BCB)/lib/c0d32.obj\" ";
       fout << "$(" << l->first << "_SRC_OBJS) ";
       fout << "$(" << l->first << "_LINK_BPI) , $<, $*, ";
       fout << "$(" << l->first << "_LINK_LIB) $(LINK_LIB) \n";
       fout << "| \n";
-      fout << "  @implib -w " << "$(OUTDIRLIB)" << l->first << ".lib " << "$(OUTDIRLIB)" << l->first << ".dll \n\n";
+      fout << "  @implib -w " << "$(OUTDIRLIB)/" << l->first << ".lib " << "$(OUTDIRLIB)/" << l->first << ".dll \n\n";
       }
     if (l->second.GetType() == cmTarget::MODULE_LIBRARY) 
       {
       fout << "# this should be a Borland Package library \n";
-      fout << "$(OUTDIRLIB)" << l->first << ".bpl : ${" << l->first << "_SRC_OBJS} \n";
+      fout << "$(OUTDIRLIB)/" << l->first << ".bpl : ${" << l->first << "_SRC_OBJS} \n";
       fout << "  @ilink32.exe @&&| \n";
       fout << "    -L\"$(BCB)/lib\" -L$(LINK_DIR) $(LINKFLAGS_BPL) $(LINKFLAGS_DEBUG) \"$(BCB)/lib/c0pkg32.obj\" ";
       fout << "$(" << l->first << "_SRC_OBJS) ";

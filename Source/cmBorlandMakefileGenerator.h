@@ -5,10 +5,9 @@
 #include "cmMakefileGenerator.h"
 
 /** \class cmBorlandMakefileGenerator
- * \brief Write a Unix makefiles.
+ * \brief Write Borland BCB5 compatible makefiles.
  *
- * cmBorlandMakefileGenerator produces a Unix makefile from its
- * member m_Makefile.
+ * cmBorlandMakefileGenerator produces Borland BCB5 compatible makefiles
  */
 class cmBorlandMakefileGenerator : public cmMakefileGenerator
 {
