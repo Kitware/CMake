@@ -17,7 +17,7 @@ XXX_FOUND              	Set to false, or undefined, if we haven't found, or don'
 
 You do not have to provide all of the above variables. You should provide XXX_FOUND under most circumstances. If XXX is a library, then  XXX_LIBRARIES, should also be defined, and XXX_INCLUDE_DIR should usually be defined (I guess libm.a might be an exception)
 
-The following names should usually be used in CMakeLists.txt files, but they may be usefully modified in users CMake Cache to control stuff.
+The following names should not usually be used in CMakeLists.txt files, but they may be usefully modified in users' CMake Caches to control stuff.
 
 XXX_LIBRARY		Name of XXX Library. A User may set this and XXX_INCLUDE_DIR to ignore to force non-use of XXX.
 XXX_YY_LIBRARY		Name of YY library that is part of the XXX system. It may or may not be required to use XXX.
