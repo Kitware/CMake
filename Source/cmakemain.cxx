@@ -162,6 +162,12 @@ int do_cmake(int ac, char** av)
       }
     return result;
     }
+#else
+  if ( nocwd || ac == 1 )
+    {
+    std::cout << "Bootstrap CMake should not be used outside CMake build process." << std::endl;
+    return 0;
+    }
 #endif
   
   bool wiz = false;
