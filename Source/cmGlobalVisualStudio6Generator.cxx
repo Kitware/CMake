@@ -112,7 +112,7 @@ int cmGlobalVisualStudio6Generator::Build(
   makeCommand += " ";
   makeCommand += projectName;
   makeCommand += ".dsw /MAKE \"";
-  if (targetName)
+  if (targetName && strlen(targetName))
     {
     makeCommand += targetName;
     }
@@ -121,7 +121,7 @@ int cmGlobalVisualStudio6Generator::Build(
     makeCommand += "ALL_BUILD";
     }
   makeCommand += " - ";
-  if(config)
+  if(config && strlen(config))
     {
     makeCommand += config;
     }
