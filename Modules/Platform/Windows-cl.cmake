@@ -66,7 +66,7 @@ IF(CMAKE_GENERATOR MATCHES "Visual Studio 7")
   SET (CMAKE_CONFIGURATION_TYPES "Debug;Release;MinSizeRel;RelWithDebInfo" CACHE STRING 
      "Semicolon separated list of supported configuration types, only supports Debug, Release, MinSizeRel, and RelWithDebInfo, anything else will be ignored.")
   SET (CMAKE_CXX_WARNING_LEVEL "3" CACHE STRING
-       "Size of stack for programs.")
+       "Default compiler warning level for C++.")
   SET (CMAKE_CXX_STACK_SIZE "10000000" CACHE STRING
        "Size of stack for programs.")
   MARK_AS_ADVANCED(CMAKE_CONFIGURATION_TYPES CMAKE_CXX_STACK_SIZE CMAKE_CXX_WARNING_LEVEL)
