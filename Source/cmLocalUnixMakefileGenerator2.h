@@ -159,10 +159,6 @@ protected:
   void SplitFullPath(const char* p, std::vector<std::string>& components);
   bool ComparePath(const char* c1, const char* c2);
 
-  void AddLanguageFlags(std::string& flags, const char* lang);
-  void AddSharedFlags(std::string& flags, const char* lang, bool shared);
-  void AddConfigVariableFlags(std::string& flags, const char* var);
-  void AppendFlags(std::string& flags, const char* newFlags);
   void AppendTargetDepends(std::vector<std::string>& depends,
                            const cmTarget& target);
   void AppendAnyDepend(std::vector<std::string>& depends, const char* name);

@@ -94,6 +94,11 @@ public:
   void SetParent(cmLocalGenerator* g) { m_Parent = g;}
 
 protected:
+  void AddLanguageFlags(std::string& flags, const char* lang);
+  void AddSharedFlags(std::string& flags, const char* lang, bool shared);
+  void AddConfigVariableFlags(std::string& flags, const char* var);
+  void AppendFlags(std::string& flags, const char* newFlags);
+
   ///! Fill out these strings for the given target.  Libraries to link, flags, and linkflags.
   void GetTargetFlags(std::string& linkLibs, 
                       std::string& flags,

@@ -1267,3 +1267,74 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
     fout << m_Makefile->GetDefinition("CMAKE_STANDARD_LIBRARIES") << " ";
     }
 }
+
+
+//----------------------------------------------------------------------------
+void cmLocalGenerator::AddLanguageFlags(std::string& flags,
+                                                     const char* lang)
+{
+  // Add language-specific flags.
+  std::string flagsVar = "CMAKE_";
+  flagsVar += lang;
+  flagsVar += "_FLAGS";
+  this->AddConfigVariableFlags(flags, flagsVar.c_str());
+}
+
+//----------------------------------------------------------------------------
+void cmLocalGenerator::AddSharedFlags(std::string& flags,
+                                                   const char* lang,
+                                                   bool shared)
+{
+  std::string flagsVar;
+
+  // Add flags for dealing with shared libraries for this language.
+  if(shared)
+    {
+    flagsVar = "CMAKE_SHARED_LIBRARY_";
+    flagsVar += lang;
+    flagsVar += "_FLAGS";
+    this->AppendFlags(flags, m_Makefile->GetDefinition(flagsVar.c_str()));
+    }
+
+  // Add flags specific to shared builds.
+  if(cmSystemTools::IsOn(m_Makefile->GetDefinition("BUILD_SHARED_LIBS")))
+    {
+    flagsVar = "CMAKE_SHARED_BUILD_";
+    flagsVar += lang;
+    flagsVar += "_FLAGS";
+    this->AppendFlags(flags, m_Makefile->GetDefinition(flagsVar.c_str()));
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmLocalGenerator::AddConfigVariableFlags(std::string& flags,
+                                                           const char* var)
+{
+  // Add the flags from the variable itself.
+  std::string flagsVar = var;
+  this->AppendFlags(flags, m_Makefile->GetDefinition(flagsVar.c_str()));
+
+  // Add the flags from the build-type specific variable.
+  const char* buildType = m_Makefile->GetDefinition("CMAKE_BUILD_TYPE");
+  if(buildType && *buildType)
+    {
+    flagsVar += "_";
+    flagsVar += cmSystemTools::UpperCase(buildType);
+    this->AppendFlags(flags, m_Makefile->GetDefinition(flagsVar.c_str()));
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmLocalGenerator::AppendFlags(std::string& flags,
+                                                const char* newFlags)
+{
+  if(newFlags && *newFlags)
+    {
+    if(flags.size())
+      {
+      flags += " ";
+      }
+    flags += newFlags;
+    }
+}
+
