@@ -20,8 +20,6 @@
 # QT_WRAP_UI set true if QT_UIC_EXECUTABLE is found
 
 
-MESSAGE(STATUS "Checking for Qt")
-
 FIND_PATH(QT_INCLUDE_DIR qt.h
   $ENV{QTDIR}/include
   /usr/local/qt/include
@@ -35,8 +33,6 @@ FIND_PATH(QT_INCLUDE_DIR qt.h
   )
 
 IF(QT_INCLUDE_DIR)
-  MESSAGE(STATUS "Found Qt header files in ${QT_INCLUDE_DIR}")
-  
   #extract the version string from qglobal.h
   FILE(READ ${QT_INCLUDE_DIR}/qglobal.h QGLOBAL_H)
   STRING(REGEX MATCH "#define[\t ]+QT_VERSION_STR[\t ]+\"([0-9]+.[0-9]+.[0-9]+)\"" QGLOBAL_H "${QGLOBAL_H}")
@@ -46,7 +42,6 @@ IF(QT_INCLUDE_DIR)
   # version X.Y.Z, so we need to remove the dots from version
   STRING(REGEX REPLACE "\\." "" qt_version_str_lib "${QGLOBAL_H}")
 ELSE(QT_INCLUDE_DIR)
-  MESSAGE(STATUS "Did not find Qt headers (qglobal.h)")
 ENDIF(QT_INCLUDE_DIR)
 
 
@@ -78,9 +73,7 @@ ELSE (QT_MT_REQUIRED)
 ENDIF (QT_MT_REQUIRED)
 
 IF(QT_QT_LIBRARY)
-   MESSAGE(STATUS "Found Qt library: ${QT_QT_LIBRARY}")
 ELSE(QT_QT_LIBRARY)
-   MESSAGE(STATUS "Did not find Qt library")
 ENDIF(QT_QT_LIBRARY)
 
 
@@ -106,10 +99,8 @@ FIND_PROGRAM(QT_MOC_EXECUTABLE
   )
 
 IF(QT_MOC_EXECUTABLE)
-   MESSAGE(STATUS "Found Qt moc executable ${QT_MOC_EXECUTABLE}")
    SET ( QT_WRAP_CPP "YES")
 ELSE(QT_MOC_EXECUTABLE)
-   MESSAGE(STATUS "Did not find Qt moc executable")
 ENDIF(QT_MOC_EXECUTABLE)
 
 FIND_PROGRAM(QT_UIC_EXECUTABLE uic
@@ -121,10 +112,8 @@ FIND_PROGRAM(QT_UIC_EXECUTABLE uic
 )
 
 IF(QT_UIC_EXECUTABLE)
-   MESSAGE(STATUS "Found Qt uic executable ${QT_UIC_EXECUTABLE}")
    SET ( QT_WRAP_UI "YES")
 ELSE(QT_UIC_EXECUTABLE)
-   MESSAGE(STATUS "Did not find Qt uic executable")
 ENDIF(QT_UIC_EXECUTABLE)
 
 IF (WIN32)
@@ -174,7 +163,6 @@ IF (QT_MIN_VERSION)
       ENDIF (req_qt_minor_vers GREATER qt_minor_vers)
     ENDIF (req_qt_major_vers LESS qt_major_vers)
   ENDIF (req_qt_major_vers GREATER qt_major_vers)
-  MESSAGE(STATUS "Qt version ok (required: ${QT_MIN_VERSION}, found: ${qt_version_str})")
 ENDIF (QT_MIN_VERSION)
 
 # if the include a library are found then we have it
