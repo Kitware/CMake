@@ -365,11 +365,11 @@ void CMakeSetupDialog::LoadFromRegistry()
 
 void CMakeSetupDialog::OnBuildProjects() 
 {
+  // get all the info from the screen
+  this->UpdateData();
   ::SetCursor(LoadCursor(NULL, IDC_WAIT));
   // copy the GUI cache values into the cache manager
   this->FillCacheManagerFromCacheEditor();
-  // get all the info from the screen
-  this->UpdateData();
   CString makefileIn = m_WhereSource;
   makefileIn += "/CMakeLists.txt";
   m_Makefile.ReadListFile(makefileIn);
@@ -397,9 +397,18 @@ void CMakeSetupDialog::FillCacheEditorFromCacheManager()
     switch(value.m_Type )
       {
       case cmCacheManager::BOOL:
-        m_CacheEntriesList.AddProperty(key,
-                                       value.m_Value.c_str(),
-                                       PIT_CHECKBOX,"");
+        if(cmCacheManager::GetInstance()->IsOn(value.m_Value.c_str()))
+          {
+          m_CacheEntriesList.AddProperty(key,
+                                         "ON",
+                                         PIT_CHECKBOX,"");
+          }
+        else
+          {
+          m_CacheEntriesList.AddProperty(key,
+                                         "OFF",
+                                         PIT_CHECKBOX,"");
+          }
         break;
       case cmCacheManager::PATH:
         m_CacheEntriesList.AddProperty(key, value.m_Value.c_str(),

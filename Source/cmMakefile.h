@@ -145,6 +145,11 @@ public:
   void AddDefinition(const char* name, const char* value);
 
   /**
+   * Add bool variable definition to the build. 
+   */
+  void AddDefinition(const char* name, bool);
+
+  /**
    * Specify the name of the project for this build.
    */
   void SetProjectName(const char*);

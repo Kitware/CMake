@@ -26,13 +26,11 @@ bool cmWrapTclCommand::Invoke(std::vector<std::string>& args)
 
   // Now check and see if the value has been stored in the cache
   // already, if so use that value and don't look for the program
-  const char* cacheValue
-    = cmCacheManager::GetInstance()->GetCacheValue("WRAP_TCL");
-  if(!cacheValue || !strcmp(cacheValue,"0"))
+  if(!cmCacheManager::GetInstance()->IsOn("WRAP_TCL"))
     {
     return true;
     }
-
+  
   // add in a depend in the vtkWrapTcl executable
   m_Makefile->AddUtility("vtkWrapTcl");
   

@@ -48,6 +48,7 @@ public:
   //! Singleton pattern get instance of the cmCacheManager.
   static cmCacheManager* GetInstance();
 
+  
   //! Load a cache for given makefile.  Loads from ouput home.
   bool LoadCache(cmMakefile*);
   
@@ -56,12 +57,18 @@ public:
   
   //! Add an entry into the cache
   void AddCacheEntry(const char* key, const char* value, CacheEntryType type);
+
+  //! Add a BOOL entry into the cache
+  void AddCacheEntry(const char* key, bool);
   
   //! Remove an entry from the cache
   void RemoveCacheEntry(const char* key);
   
   //! Get a value from the cache given a key
   const char* GetCacheValue(const char* key);
+  //! Test a boolean cache entry to see if it is true or false, returns false 
+  //  if no entry.
+  bool IsOn(const char*);
   
   //! Print the cache to a stream
   void PrintCache(std::ostream&);

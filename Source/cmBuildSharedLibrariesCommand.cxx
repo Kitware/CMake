@@ -24,13 +24,14 @@ bool cmBuildSharedLibrariesCommand::Invoke(std::vector<std::string>& args)
     = cmCacheManager::GetInstance()->GetCacheValue("BUILD_SHARED_LIBS");
   if(!cacheValue)
     {
-    cmCacheManager::GetInstance()->AddCacheEntry("BUILD_SHARED_LIBS","0",
-                                                 cmCacheManager::BOOL);
-    m_Makefile->AddDefinition("BUILD_SHARED_LIBS", "0");
+    cmCacheManager::GetInstance()->AddCacheEntry("BUILD_SHARED_LIBS",false);
+    m_Makefile->AddDefinition("BUILD_SHARED_LIBS", false);
     }
   else
     {
-    m_Makefile->AddDefinition("BUILD_SHARED_LIBS", cacheValue);
+    m_Makefile->AddDefinition("BUILD_SHARED_LIBS", 
+                              cmCacheManager::
+                              GetInstance()->IsOn("BUILD_SHARED_LIBS"));
     }
   return true;
 }

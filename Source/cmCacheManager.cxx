@@ -151,7 +151,7 @@ void cmCacheManager::AddCacheEntry(const char* key,
   m_Cache[key] = e;
 }
 
-const char* cmCacheManager::GetCacheValue(const char* key)
+const char* cmCacheManager::GetCacheValue(const char* key) 
 {
   if(m_Cache.count(key))
     {
@@ -159,6 +159,19 @@ const char* cmCacheManager::GetCacheValue(const char* key)
     }
   return 0;
 }
+
+
+bool cmCacheManager::IsOn(const char* key)  
+{ 
+  if(!m_Cache.count(key))
+    {
+    return false;
+    }
+  std::string &v = m_Cache[key].m_Value;
+  return (v == "ON" || v == "on" || v == "1" || v == "true" || v == "yev"
+          || v == "TRUE" || v == "True" || v == "y" || v == "Y");
+}
+
 
 
 void cmCacheManager::PrintCache(std::ostream& out)
@@ -175,4 +188,16 @@ void cmCacheManager::PrintCache(std::ostream& out)
   out << "=================================================" << std::endl;
 }
 
+
+void cmCacheManager::AddCacheEntry(const char* key, bool v)
+{
+  if(v)
+    {
+    this->AddCacheEntry(key, "ON", cmCacheManager::BOOL);
+    }
+  else
+    {
+    this->AddCacheEntry(key, "OFF", cmCacheManager::BOOL);
+    }
+}
 

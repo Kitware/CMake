@@ -361,6 +361,17 @@ void cmMakefile::AddDefinition(const char* name, const char* value)
 {
   m_Definitions.insert(DefinitionMap::value_type(name, value));
 }
+void cmMakefile::AddDefinition(const char* name, bool value)
+{
+  if(value)
+    {
+    m_Definitions.insert(DefinitionMap::value_type(name, "ON"));
+    }
+  else
+    {
+    m_Definitions.insert(DefinitionMap::value_type(name, "OFF"));
+    }
+}
 
 void cmMakefile::SetProjectName(const char* p)
 {
