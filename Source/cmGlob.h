@@ -51,7 +51,8 @@ protected:
 
   //! Process last directory, but only when recurse flags is on. That is
   // effectively like saying: /path/to/file/**/file
-  void RecurseDirectory(const std::string& dir, bool dir_only);
+  void RecurseDirectory(std::string::size_type start,
+    const std::string& dir, bool dir_only);
 
   //! Escape all non-alphanumeric characters in pattern.
   void Escape(int ch, char* buffer);

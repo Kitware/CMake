@@ -154,7 +154,8 @@ std::string cmGlob::ConvertExpression(const std::string& expr)
   return res + "$";
 }
 
-void cmGlob::RecurseDirectory(const std::string& dir, bool dir_only)
+void cmGlob::RecurseDirectory(std::string::size_type start,
+  const std::string& dir, bool dir_only)
 {
   cmsys::Directory d;
   if ( !d.Load(dir.c_str()) )
@@ -174,14 +175,29 @@ void cmGlob::RecurseDirectory(const std::string& dir, bool dir_only)
       continue;
       }
 
-    realname = dir + "/" + fname;
+    if ( start == 0 )
+      {
+      realname = dir + fname;
+      }
+    else
+      {
+      realname = dir + "/" + fname;
+      }
 
 #if defined( CM_GLOB_CASE_INDEPENDENT )
     // On Windows and apple, no difference between lower and upper case
     fname = cmsys::SystemTools::LowerCase(fname);
 #endif
 
-    fullname = dir + "/" + fname;
+    if ( start == 0 )
+      {
+      fullname = dir + fname;
+      }
+    else
+      {
+      fullname = dir + "/" + fname;
+      }
+
     if ( !dir_only || !cmsys::SystemTools::FileIsDirectory(realname.c_str()) )
       {
       if ( m_Internals->Expressions[m_Internals->Expressions.size()-1].find(fname.c_str()) )
@@ -191,7 +207,7 @@ void cmGlob::RecurseDirectory(const std::string& dir, bool dir_only)
       }
     if ( cmsys::SystemTools::FileIsDirectory(realname.c_str()) )
       {
-      this->RecurseDirectory(realname, dir_only);
+      this->RecurseDirectory(start+1, realname, dir_only);
       }
     }
 }
@@ -203,7 +219,7 @@ void cmGlob::ProcessDirectory(std::string::size_type start,
   bool last = ( start == m_Internals->Expressions.size()-1 );
   if ( last && m_Recurse )
     {
-    this->RecurseDirectory(dir, dir_only);
+    this->RecurseDirectory(start, dir, dir_only);
     return;
     }
   cmsys::Directory d;
