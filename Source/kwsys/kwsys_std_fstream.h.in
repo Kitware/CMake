@@ -28,8 +28,7 @@
 # include <fstream>
 #else
 # include <fstream.h>
-# if !defined(KWSYS_NO_STD_NAMESPACE)
-
+# if !defined(KWSYS_NO_STD_NAMESPACE) && !defined(KWSYS_FAKE_STD_NAMESPACE)
 namespace std
 {
   using ::ostream;
@@ -40,7 +39,6 @@ namespace std
   using ::endl;
   using ::flush;
 }
-
 # endif
 #endif
 

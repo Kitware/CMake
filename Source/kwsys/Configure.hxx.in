@@ -23,6 +23,10 @@
 #cmakedefine KWSYS_NO_ANSI_STRING_STREAM
 #cmakedefine KWSYS_NO_ANSI_FOR_SCOPE
 
+#if defined(__GNUC__) && (__GNUC__ < 3)
+# define KWSYS_FAKE_STD_NAMESPACE
+#endif
+
 #if defined(KWSYS_NO_STD_NAMESPACE)
 # define kwsys_std
 #else

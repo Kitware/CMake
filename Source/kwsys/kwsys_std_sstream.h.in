@@ -37,8 +37,7 @@
 #  include <strstream>
 # else
 #  include <strstream.h>
-#  if !defined(KWSYS_NO_STD_NAMESPACE)
-
+#  if !defined(KWSYS_NO_STD_NAMESPACE) && !defined(KWSYS_FAKE_STD_NAMESPACE)
 namespace std
 {
   using ::ostream;
@@ -50,7 +49,6 @@ namespace std
   using ::ends;
   using ::flush;
 }
-
 #  endif
 # endif
 # ifdef _MSC_VER

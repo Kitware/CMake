@@ -33,7 +33,7 @@ class ios;
 class istream;
 class ofstream;
 class ostream;
-# if !defined(KWSYS_NO_STD_NAMESPACE)
+# if !defined(KWSYS_NO_STD_NAMESPACE) && !defined(KWSYS_FAKE_STD_NAMESPACE)
 namespace std
 {
   using ::fstream;
