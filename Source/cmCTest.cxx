@@ -91,6 +91,7 @@ static const char* cmCTestWarningMatches[] = {
   "([^:]+): warning[ \\t]*[0-9]+[ \\t]*:",
   "^Warning ([0-9]+):",
   "^Warning ",
+  "WARNING: ",
   "([^ :]+) : warning",
   "([^:]+): warning",
   0
