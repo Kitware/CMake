@@ -939,6 +939,15 @@ const char *cmake::GetReleaseVersion()
   return cmMakefile::GetReleaseVersion();
 }
 
+void cmake::AddCacheEntry(const char* key, const char* value, 
+                          const char* helpString, 
+                          int type)
+{
+  m_CacheManager->AddCacheEntry(key, value, 
+                                helpString,
+                                cmCacheManager::CacheEntryType(type));
+}
+
 const char* cmake::GetCacheDefinition(const char* name) const
 {
   return m_CacheManager->GetCacheValue(name);

@@ -23,7 +23,8 @@
 void cmGlobalUnixMakefileGenerator::EnableLanguage(const char* lang, 
                                                    cmMakefile *mf)
 {
-  if(!mf->GetDefinition("CMAKE_MAKE_PROGRAM"))
+  if(!mf->GetDefinition("CMAKE_MAKE_PROGRAM")
+     || cmSystemTools::IsOff(mf->GetDefinition("CMAKE_MAKE_PROGRAM")))
     {
     std::string setMakeProgram = mf->GetDefinition("CMAKE_ROOT");
     setMakeProgram += "/Modules/CMakeUnixFindMake.cmake";
@@ -155,7 +156,13 @@ cmLocalGenerator *cmGlobalUnixMakefileGenerator::CreateLocalGenerator()
 
 void cmGlobalUnixMakefileGenerator::EnableLanguagesFromGenerator(cmGlobalGenerator *gen)
 {
-  this->SetConfiguredFilesPath(gen->GetCMakeInstance()->GetHomeOutputDirectory());
+  this->SetConfiguredFilesPath(
+    gen->GetCMakeInstance()->GetHomeOutputDirectory());
+  const char* make =
+    gen->GetCMakeInstance()->GetCacheDefinition("CMAKE_MAKE_PROGRAM");
+  this->GetCMakeInstance()->AddCacheEntry("CMAKE_MAKE_PROGRAM", make,
+                                          "make program",
+                                          cmCacheManager::FILEPATH);
   // if C,  then enable C
   if(gen->GetLanguageEnabled("C"))
     {

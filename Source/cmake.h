@@ -170,7 +170,10 @@ class cmake
    * Given a variable name, return its value (as a string).
    */
   const char* GetCacheDefinition(const char*) const;
-
+  ///! Add an entry into the cache
+  void AddCacheEntry(const char* key, const char* value, 
+                     const char* helpString, 
+                     int type);
   /** 
    * Execute commands during the build process. Supports options such
    * as echo, remove file etc.
