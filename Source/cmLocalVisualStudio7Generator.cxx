@@ -20,6 +20,7 @@
 #include "cmSystemTools.h"
 #include "cmSourceFile.h"
 #include "cmCacheManager.h"
+#include "cmake.h"
 
 cmLocalVisualStudio7Generator::cmLocalVisualStudio7Generator()
 {
@@ -361,12 +362,18 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
                                           const cmTarget &target)
 { 
   std::string temp;
+  std::string debugPostfix = "";
+  bool debug = !strcmp(configName,"Debug");
+  if (debug && m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX"))
+    {
+    debugPostfix = m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX");
+    }
   switch(target.GetType())
     {
     case cmTarget::STATIC_LIBRARY:
     {
       std::string libpath = m_LibraryOutputPath + 
-        "$(OutDir)/" + libName + ".lib";
+        "$(OutDir)/" + libName + debugPostfix + ".lib";
       fout << "\t\t\t<Tool\n"
            << "\t\t\t\tName=\"VCLibrarianTool\"\n"
            << "\t\t\t\t\tOutputFile=\"" 
@@ -385,6 +392,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       temp += configName;
       temp += "/";
       temp += libName;
+      temp += debugPostfix;
       temp += ".dll";
       fout << "\t\t\t\tOutputFile=\"" 
            << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
@@ -395,9 +403,9 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       fout << "\"\n";
       this->OutputModuleDefinitionFile(fout, target);
       temp = m_LibraryOutputPath;
-      temp += "$(OutDir)";
-      temp += "/";
+      temp += "$(OutDir)/";
       temp += libName;
+      temp += debugPostfix;
       temp += ".pdb";
       fout << "\t\t\t\tProgramDatabaseFile=\"" << 
         this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
@@ -412,6 +420,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       temp += configName;
       temp += "/";
       temp += libName;
+      temp += debugPostfix;
       temp += ".lib";
       fout << "\t\t\t\tImportLibrary=\"" << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"/>\n";
       break;
@@ -491,8 +500,13 @@ void cmLocalVisualStudio7Generator::OutputLibraryDirectories(std::ostream& fout,
     fout << this->ConvertToXMLOutputPath(temp.c_str()) << "," << 
       this->ConvertToXMLOutputPath(m_LibraryOutputPath.c_str());
     }
-  if(m_ExecutableOutputPath.size())
+  if(m_ExecutableOutputPath.size() && 
+     (m_LibraryOutputPath != m_ExecutableOutputPath))
     {
+    if (hasone)
+      {
+      fout << ",";
+      }
     hasone = true;
     std::string temp = m_ExecutableOutputPath;
     temp += "$(INTDIR)"; 
@@ -517,7 +531,8 @@ void cmLocalVisualStudio7Generator::OutputLibraryDirectories(std::ostream& fout,
         fout << ",";
         }
       std::string lpathi = lpath + "$(INTDIR)";
-          fout << this->ConvertToXMLOutputPath(lpathi.c_str()) << "," << lpath;
+      fout << this->ConvertToXMLOutputPath(lpathi.c_str()) << "," << 
+        this->ConvertToXMLOutputPath(lpath.c_str());
       hasone = true;
       }
     }
@@ -535,14 +550,26 @@ void cmLocalVisualStudio7Generator::OutputLibraries(std::ostream& fout,
     if(j->first != libName)
       {
       std::string lib = j->first;
+      std::string debugPostfix = "";
+      // if this is a library we are building then watch for a debugPostfix
+      if (!strcmp(configName,"Debug"))
+        {
+        std::string libPath = j->first + "_CMAKE_PATH";
+        const char* cacheValue
+          = m_GlobalGenerator->GetCMakeInstance()->GetCacheDefinition(libPath.c_str());
+        if(cacheValue && m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX"))
+          {
+          debugPostfix = m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX");
+          }
+        }
       if(j->first.find(".lib") == std::string::npos)
         {
-        lib += ".lib";
+        lib += debugPostfix + ".lib";
         }
       lib = this->ConvertToXMLOutputPath(lib.c_str());
       if (j->second == cmTarget::GENERAL
-          || (j->second == cmTarget::DEBUG && strcmp(configName, "DEBUG") == 0)
-          || (j->second == cmTarget::OPTIMIZED && strcmp(configName, "DEBUG") != 0))
+          || (j->second == cmTarget::DEBUG && strcmp(configName, "Debug") == 0)
+          || (j->second == cmTarget::OPTIMIZED && strcmp(configName, "Debug") != 0))
         {
         fout << lib << " ";
         }
