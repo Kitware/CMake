@@ -104,6 +104,11 @@ int main()
 {
   std::string lib = BINARY_DIR;
   lib += "/bin/";
+#ifdef  CMAKE_INTDIR
+  lib += CMAKE_INTDIR;
+  lib += "/";
+#endif
+
   lib += cmDynamicLoader::LibPrefix();
   lib += "CMakeTestModule";
   lib += cmDynamicLoader::LibExtension();
