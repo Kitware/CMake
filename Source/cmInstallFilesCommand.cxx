@@ -63,7 +63,7 @@ void cmInstallFilesCommand::FinalPass()
       {
       // replace any variables
       std::string temps = *s;
-      testf = temps + ext;
+      testf = cmSystemTools::GetFilenameWithoutExtension(temps) + ext;
       // add to the result
       targetSourceLists.push_back(testf);
       }
