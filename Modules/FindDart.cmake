@@ -7,5 +7,6 @@ FIND_PATH(DART_ROOT README.INSTALL
     ${PROJECT_SOURCE_DIR}/Dart 
      /usr/share/Dart 
     "C:/Program Files/Dart" 
+    ${PROJECT_SOURCE_DIR}/../Dart 
     [HKEY_LOCAL_MACHINE\\SOFTWARE\\Dart\\InstallPath]
     )
