@@ -367,7 +367,7 @@ void cmGlobalGenerator::RecursiveConfigure(cmLocalGenerator *lg,
   lg->Configure();
                                   
   // get all the subdirectories
-  std::vector<std::string> subdirs = lg->GetMakefile()->GetSubDirectories();
+  std::vector<std::pair<cmStdString, bool> > subdirs = lg->GetMakefile()->GetSubDirectories();
   float progressPiece = (endProgress - startProgress)/(1.0f+subdirs.size());
   m_CMakeInstance->UpdateProgress("Configuring",
                                   startProgress + progressPiece);
@@ -377,18 +377,19 @@ void cmGlobalGenerator::RecursiveConfigure(cmLocalGenerator *lg,
   for (i = 0; i < subdirs.size(); ++i)
     {
     cmLocalGenerator *lg2 = this->CreateLocalGenerator();
+    lg2->SetParent(lg);
     m_LocalGenerators.push_back(lg2);
     
     // add the subdir to the start output directory
     std::string outdir = lg->GetMakefile()->GetStartOutputDirectory();
     outdir += "/";
-    outdir += subdirs[i];
+    outdir += subdirs[i].first;
     lg2->GetMakefile()->SetStartOutputDirectory(outdir.c_str());
-    
+    lg2->SetExcludeAll(!subdirs[i].second);
     // add the subdir to the start source directory
     std::string currentDir = lg->GetMakefile()->GetStartDirectory();
     currentDir += "/";
-    currentDir += subdirs[i];
+    currentDir += subdirs[i].first;
     lg2->GetMakefile()->SetStartDirectory(currentDir.c_str());
     lg2->GetMakefile()->MakeStartDirectoriesCurrent();
   
@@ -537,3 +538,20 @@ void cmGlobalGenerator::GetDocumentation(cmDocumentationEntry& entry) const
   entry.brief = "";
   entry.full = "";
 }
+
+bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root, 
+                                                cmLocalGenerator* gen)
+{
+  cmLocalGenerator* cur = gen->GetParent();
+  while(cur && cur != root)
+    {
+    if(cur->GetExcludeAll())
+      {
+      return true;
+      }
+    cur = cur->GetParent();
+    }
+  return false;
+}
+
+

@@ -63,13 +63,13 @@ void cmEnableTestingCommand::FinalPass()
   if (!m_Makefile->GetSubDirectories().empty())
     {
     fout << "SUBDIRS(";
-    const std::vector<std::string>& subdirs = m_Makefile->GetSubDirectories();
-    std::vector<std::string>::const_iterator i = subdirs.begin();
-    fout << (*i).c_str();
+    const std::vector<std::pair<cmStdString, bool> >& subdirs = m_Makefile->GetSubDirectories();
+    std::vector<std::pair<cmStdString, bool> >::const_iterator i = subdirs.begin();
+    fout << (*i).first.c_str();
     ++i;
     for(; i != subdirs.end(); ++i)
       {
-      fout << " " << (*i).c_str();
+      fout << " " << i->first.c_str();
       }
     fout << ")" << std::endl << std::endl;;
     }

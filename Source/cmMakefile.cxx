@@ -142,6 +142,17 @@ void cmMakefile::PrintStringVector(const char* s, const std::vector<std::string>
   std::cout << " )\n";
 }
 
+void cmMakefile::PrintStringVector(const char* s, const std::vector<std::pair<cmStdString, bool> >& v) const
+{
+  std::cout << s << ": ( \n";
+  for(std::vector<std::pair<cmStdString, bool> >::const_iterator i = v.begin();
+      i != v.end(); ++i)
+    {
+    std::cout << i->first.c_str() << " " << i->second;
+    }
+  std::cout << " )\n";
+}
+
 
 // call print on all the classes in the makefile
 void cmMakefile::Print() const
@@ -824,13 +835,14 @@ void cmMakefile::AddLinkDirectory(const char* dir)
     }
 }
 
-void cmMakefile::AddSubDirectory(const char* sub)
+void cmMakefile::AddSubDirectory(const char* sub, bool topLevel)
 {
+  std::pair<cmStdString, bool> p(sub, topLevel);
   // make sure it isn't already there
   if (std::find(m_SubDirectories.begin(),
-                m_SubDirectories.end(), sub) == m_SubDirectories.end())  
+                m_SubDirectories.end(), p) == m_SubDirectories.end())  
     {
-    m_SubDirectories.push_back(sub);
+    m_SubDirectories.push_back(p);
     }
 }
 

@@ -203,7 +203,7 @@ public:
   /**
    * Add a subdirectory to the build.
    */
-  void AddSubDirectory(const char*);
+  void AddSubDirectory(const char*, bool includeTopLevel=true);
 
   /**
    * Add an include directory to the build.
@@ -409,7 +409,7 @@ public:
   /**
    * Get a list of the build subdirectories.
    */
-  const std::vector<std::string>& GetSubDirectories()
+  const std::vector<std::pair<cmStdString, bool> >& GetSubDirectories()
     { 
     return m_SubDirectories;
     }
@@ -658,7 +658,7 @@ protected:
   cmTargets m_Targets;
   std::vector<cmSourceFile*> m_SourceFiles;
 
-  std::vector<std::string> m_SubDirectories; // list of sub directories
+  std::vector<std::pair<cmStdString, bool> > m_SubDirectories; // list of sub directories
   struct StringSet : public std::set<cmStdString>
   {
   };
@@ -695,6 +695,7 @@ private:
   void ReadSources(std::ifstream& fin, bool t);
   friend class cmMakeDepend;    // make depend needs direct access 
                                 // to the m_Sources array 
+  void PrintStringVector(const char* s, const std::vector<std::pair<cmStdString, bool> >& v) const;
   void PrintStringVector(const char* s, const std::vector<std::string>& v) const;
   void AddDefaultDefinitions();
   std::list<cmFunctionBlocker *> m_FunctionBlockers;

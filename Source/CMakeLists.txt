@@ -550,6 +550,17 @@ IF(BUILD_TESTING)
     --test-command  test1
     )
 
+  ADD_TEST(SubDir ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/SubDir"
+    "${CMake_BINARY_DIR}/Tests/SubDir"
+    --build-exe-dir "${CMake_BINARY_DIR}/Tests/SubDir/Executable"
+    --build-generator ${CMAKE_GENERATOR}
+    --build-makeprogram ${MAKEPROGRAM}
+    --build-project SUBDIR
+    --test-command test "${CMake_BINARY_DIR}/Tests/SubDir/ShouldBeHere"
+    )
+
   IF (APPLE)
     ADD_TEST(objc++ ${CMAKE_CTEST_COMMAND}
       --build-and-test

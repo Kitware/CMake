@@ -1,8 +1,10 @@
 #include <stdio.h>
-#include  <io.h>
-#include  <stdio.h>
 #include  <stdlib.h>
-
+#ifdef _WIN32
+#include <io.h>
+#else
+#include <unistd.h>
+#endif
 
 // return true if the file exists
 int FileExists(const char* filename)

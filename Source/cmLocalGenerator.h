@@ -78,6 +78,20 @@ public:
   virtual const char* GetSafeDefinition(const char*);
 
   std::string ConvertToRelativeOutputPath(const char* p);
+  
+  // flag to determine if this project should be included in a parent project
+  bool GetExcludeAll()
+    {
+      return m_ExcludeFromAll;
+    }
+  void SetExcludeAll(bool b)
+    {
+      m_ExcludeFromAll = b;
+    }
+  
+  ///! set/get the parent generator 
+  cmLocalGenerator* GetParent(){return m_Parent;}
+  void SetParent(cmLocalGenerator* g) { m_Parent = g;}
 protected:
   virtual void AddInstallRule(std::ostream& fout, const char* dest, int type, 
     const char* files, bool optional = false);
@@ -92,7 +106,8 @@ protected:
   std::string m_HomeOutputDirectory;
   std::string m_HomeDirectory;
   std::string m_HomeOutputDirectoryNoSlash;
-
+  bool m_ExcludeFromAll;
+  cmLocalGenerator* m_Parent;
 };
 
 #endif

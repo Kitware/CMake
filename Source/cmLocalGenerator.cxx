@@ -24,6 +24,8 @@ cmLocalGenerator::cmLocalGenerator()
 {
   m_Makefile = new cmMakefile;
   m_Makefile->SetLocalGenerator(this);
+  m_ExcludeFromAll = false;
+  m_Parent = 0;
 }
 
 cmLocalGenerator::~cmLocalGenerator()
@@ -229,12 +231,12 @@ void cmLocalGenerator::GenerateInstallRules()
   cmMakefile* mf = this->GetMakefile();
   if ( !mf->GetSubDirectories().empty() )
     {
-    const std::vector<std::string>& subdirs = mf->GetSubDirectories();
-    std::vector<std::string>::const_iterator i = subdirs.begin();
+    const std::vector<std::pair<cmStdString, bool> >& subdirs = mf->GetSubDirectories();
+    std::vector<std::pair<cmStdString, bool> >::const_iterator i = subdirs.begin();
     for(; i != subdirs.end(); ++i)
       {
       std::string odir = mf->GetCurrentOutputDirectory();
-      odir += "/" + (*i);
+      odir += "/" + (*i).first;
       cmSystemTools::ConvertToUnixSlashes(odir);
       fout << "INCLUDE(" <<  odir.c_str() 
            << "/cmake_install.cmake)" << std::endl;

@@ -1996,7 +1996,7 @@ OutputSubDirectoryVars(std::ostream& fout,
                        const char* target1,
                        const char* target2,
                        const char* depend,
-                       const std::vector<std::string>& SubDirectories,
+                       const std::vector<std::pair<cmStdString, bool> >& SubDirectories,
                        bool silent)
 {
   if(!depend)
@@ -2008,26 +2008,29 @@ OutputSubDirectoryVars(std::ostream& fout,
     return;
     }
   fout << "# Variable for making " << target << " in subdirectories.\n";
-  fout << var << " = \\\n";
+  fout << var << " = ";
   unsigned int ii;
   for(ii =0; ii < SubDirectories.size(); ii++)
     { 
-    std::string subdir = FixDirectoryName(SubDirectories[ii].c_str());
+    if(!SubDirectories[ii].second)
+      {
+      continue;
+      }
+    fout << " \\\n";
+    std::string subdir = FixDirectoryName(SubDirectories[ii].first.c_str());
     fout << target << "_" << subdir.c_str();
-    if(ii == SubDirectories.size()-1)
-      {
-      fout << " \n\n";
-      }
-    else
-      {
-      fout << " \\\n";
-      }
     }
+  fout << " \n\n";
+
   fout << "# Targets for making " << target << " in subdirectories.\n";
   std::string last = "";
   for(unsigned int cc =0; cc < SubDirectories.size(); cc++)
     {
-    std::string subdir = FixDirectoryName(SubDirectories[cc].c_str());
+    if(!SubDirectories[cc].second)
+      {
+      continue;
+      }
+    std::string subdir = FixDirectoryName(SubDirectories[cc].first.c_str());
     fout << target << "_" << subdir.c_str() << ": " << depend;
     
     // Make each subdirectory depend on previous one.  This forces
@@ -2042,7 +2045,7 @@ OutputSubDirectoryVars(std::ostream& fout,
     last = subdir;
     std::string dir = m_Makefile->GetCurrentOutputDirectory();
     dir += "/";
-    dir += SubDirectories[cc];
+    dir += SubDirectories[cc].first;
     this->BuildInSubDirectory(fout, dir.c_str(),
                               target1, target2, silent);
     }
@@ -2054,7 +2057,7 @@ OutputSubDirectoryVars(std::ostream& fout,
 void cmLocalUnixMakefileGenerator::OutputSubDirectoryRules(std::ostream& fout)
 {
     // Output Sub directory build rules
-  const std::vector<std::string>& SubDirectories
+  const std::vector<std::pair<cmStdString, bool> >& SubDirectories
     = m_Makefile->GetSubDirectories();
     
   if( SubDirectories.size() == 0)

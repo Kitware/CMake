@@ -201,8 +201,10 @@ void cmGlobalVisualStudio6Generator::CollectSubprojects()
     }
 }
 
+
 // Write a DSW file to the stream
 void cmGlobalVisualStudio6Generator::WriteDSWFile(std::ostream& fout,
+                                                  cmLocalGenerator* root,
                                                   std::vector<cmLocalGenerator*>& generators)
 {
   // Write out the header for a DSW file
@@ -215,8 +217,13 @@ void cmGlobalVisualStudio6Generator::WriteDSWFile(std::ostream& fout,
   unsigned int i;
   bool doneAllBuild = false;
   bool doneRunTests = false;
+
   for(i = 0; i < generators.size(); ++i)
     {
+    if(this->IsExcluded(root, generators[i]))
+      {
+      continue;
+      }
     cmMakefile* mf = generators[i]->GetMakefile();
     
     // Get the source directory from the makefile
@@ -324,15 +331,16 @@ void cmGlobalVisualStudio6Generator::WriteDSWFile(std::ostream& fout,
   this->WriteDSWFooter(fout);
 }
 
-void cmGlobalVisualStudio6Generator::OutputDSWFile(std::vector<cmLocalGenerator*>& generators)
+void cmGlobalVisualStudio6Generator::OutputDSWFile(cmLocalGenerator* root, 
+                                                   std::vector<cmLocalGenerator*>& generators)
 {
   if(generators.size() == 0)
     {
     return;
     }
-  std::string fname = generators[0]->GetMakefile()->GetStartOutputDirectory();
+  std::string fname = root->GetMakefile()->GetStartOutputDirectory();
   fname += "/";
-  fname += generators[0]->GetMakefile()->GetProjectName();
+  fname += root->GetMakefile()->GetProjectName();
   fname += ".dsw";
   std::ofstream fout(fname.c_str());
   if(!fout)
@@ -341,7 +349,7 @@ void cmGlobalVisualStudio6Generator::OutputDSWFile(std::vector<cmLocalGenerator*
                          fname.c_str());
     return;
     }
-  this->WriteDSWFile(fout, generators);
+  this->WriteDSWFile(fout, root, generators);
 }
 
 // output the DSW file
@@ -350,7 +358,7 @@ void cmGlobalVisualStudio6Generator::OutputDSWFile()
   std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
   for(it = m_SubProjectMap.begin(); it!= m_SubProjectMap.end(); ++it)
     {
-    this->OutputDSWFile(it->second);
+    this->OutputDSWFile(it->second[0], it->second);
     }
 }
 

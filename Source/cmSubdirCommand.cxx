@@ -25,15 +25,21 @@ bool cmSubdirCommand::InitialPass(std::vector<std::string> const& args)
     return false;
     }
   bool res = true;
+  bool intoplevel = true;
 
   for(std::vector<std::string>::const_iterator i = args.begin();
       i != args.end(); ++i)
     {
+    if(*i == "EXCLUDE_FROM_ALL")
+      {
+      intoplevel = false;
+      continue;
+      }
     std::string directory = std::string(m_Makefile->GetCurrentDirectory()) + 
       "/" + i->c_str();
     if ( cmSystemTools::FileIsDirectory(directory.c_str()) )
       {
-      m_Makefile->AddSubDirectory(i->c_str());
+      m_Makefile->AddSubDirectory(i->c_str(), intoplevel);
       }
     else
       {

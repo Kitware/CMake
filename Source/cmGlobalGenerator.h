@@ -106,6 +106,8 @@ public:
   
   bool GetForceUnixPaths() {return m_ForceUnixPaths;}
 protected:
+  bool IsExcluded(cmLocalGenerator* root, cmLocalGenerator* gen);
+
   bool m_ForceUnixPaths;
   cmStdString m_FindMakeProgramFile;
   cmStdString m_ConfiguredFilesPath;

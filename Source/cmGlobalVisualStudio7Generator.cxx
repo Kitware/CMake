@@ -269,15 +269,16 @@ void cmGlobalVisualStudio7Generator::Generate()
   this->OutputSLNFile();
 }
 
-void cmGlobalVisualStudio7Generator::OutputSLNFile(std::vector<cmLocalGenerator*>& generators)
+void cmGlobalVisualStudio7Generator::OutputSLNFile(cmLocalGenerator* root,
+                                                   std::vector<cmLocalGenerator*>& generators)
 {
   if(generators.size() == 0)
     {
     return;
     }
-  std::string fname = generators[0]->GetMakefile()->GetStartOutputDirectory();
+  std::string fname = root->GetMakefile()->GetStartOutputDirectory();
   fname += "/";
-  fname += generators[0]->GetMakefile()->GetProjectName();
+  fname += root->GetMakefile()->GetProjectName();
   fname += ".sln";
   std::ofstream fout(fname.c_str());
   if(!fout)
@@ -286,7 +287,7 @@ void cmGlobalVisualStudio7Generator::OutputSLNFile(std::vector<cmLocalGenerator*
                          fname.c_str());
     return;
     }
-  this->WriteSLNFile(fout, generators);
+  this->WriteSLNFile(fout, root, generators);
 }
 
 // output the SLN file
@@ -295,13 +296,14 @@ void cmGlobalVisualStudio7Generator::OutputSLNFile()
   std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
   for(it = m_SubProjectMap.begin(); it!= m_SubProjectMap.end(); ++it)
     {
-    this->OutputSLNFile(it->second);
+    this->OutputSLNFile(it->second[0], it->second);
     }
 }
 
 
 // Write a SLN file to the stream
 void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout,
+                                                  cmLocalGenerator* root,
                                                   std::vector<cmLocalGenerator*>& generators)
 {
   // Write out the header for a SLN file
@@ -318,6 +320,10 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout,
   unsigned int i;
   for(i = 0; i < generators.size(); ++i)
     {
+    if(this->IsExcluded(root, generators[i]))
+      {
+      continue;
+      }
     cmMakefile* mf = generators[i]->GetMakefile();
 
     // Get the source directory from the makefile
