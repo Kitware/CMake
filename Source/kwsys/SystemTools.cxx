@@ -253,7 +253,7 @@ void SystemTools::ReplaceString(kwsys_std::string& source,
                                    const char* with)
 {
   const char *src = source.c_str();
-  char *searchPos = strstr(src,replace);
+  char *searchPos = const_cast<char *>(strstr(src,replace));
   
   // get out quick if string is not found
   if (!searchPos)
