@@ -1,4 +1,5 @@
 #include "cmTestConfigure.h"
+#include "cmTestConfigureEscape.h"
 #include "cmVersion.h"
 #include "ExtraSources/file1.h"
 #include "file2.h"
@@ -678,6 +679,18 @@ int main()
     {
     cmFailed("SEPARATE_ARGUMENTS is not working");
     }
+  
+  // ----------------------------------------------------------------------
+  // Test Escape Quotes
+  if(strcmp("\"hello world\"", STRING_WITH_QUOTES) == 0)
+    {
+    cmPassed("ESCAPE_QUOTES is working");
+    }
+  else
+    {
+    cmFailed("ESCAPE_QUOTES is not working");
+    }
+    
   // ----------------------------------------------------------------------
   // Summary
 

@@ -156,6 +156,12 @@ CONFIGURE_FILE(
   ${Complex_SOURCE_DIR}/cmTestConfigure.h.in
   ${Complex_BINARY_DIR}/cmTestConfigure.h)
 
+SET(STRING_WITH_QUOTES "\"hello world\"")
+# test CONFIGURE_FILE with ESCAPE_QUOTES on
+CONFIGURE_FILE(
+  ${Complex_SOURCE_DIR}/cmTestConfigureEscape.h.in
+  ${Complex_BINARY_DIR}/cmTestConfigureEscape.h ESCAPE_QUOTES)
+
 #
 # Create the libs and the main exe
 #
