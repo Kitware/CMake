@@ -278,9 +278,10 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
       linkLibs += cmSystemTools::EscapeSpaces(dir.c_str());
       linkLibs += " ";
       librariesLinked += "-l";
-      if(reg.find(file))
+      cmRegularExpression libname("lib(.*)\\.(.*)");
+      if(libname.find(file))
         {
-        file = reg.match(1);
+        file = libname.match(1);
         }
       librariesLinked += file;
       librariesLinked += " ";
@@ -824,6 +825,12 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                        "Rebuild the cache",
                        "rebuild_cache",
                        "${CMAKE_BINARY_DIR}/CMakeCache.txt",
+                       "${CMAKE_COMMAND} "
+                       "-H${CMAKE_SOURCE_DIR} -B${CMAKE_BINARY_DIR}");
+  this->OutputMakeRule(fout, 
+                       "Rebuild the cache",
+                       "${CMAKE_BINARY_DIR}/CMakeCache.txt",
+		       0,
                        "${CMAKE_COMMAND} "
                        "-H${CMAKE_SOURCE_DIR} -B${CMAKE_BINARY_DIR}");
   this->OutputMakeRule(fout, 
