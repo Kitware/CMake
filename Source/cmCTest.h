@@ -230,6 +230,7 @@ private:
     std::string m_CompletionStatus;
     std::string m_Output;
     std::string m_RegressionImages;
+    int         m_TestCount;
   };
 
   struct cmCTestBuildErrorWarning
@@ -246,10 +247,11 @@ private:
 
   struct cmCTestTestProperties
     {
-    cmStdString Name;
-    cmStdString Directory;
-    tm_VectorOfListFileArgs Args;
+    cmStdString m_Name;
+    cmStdString m_Directory;
+    tm_VectorOfListFileArgs m_Args;
     };
+
   typedef std::vector<cmCTestTestProperties> tm_ListOfTests;
 
   // Some structures needed for cvs update

@@ -1948,9 +1948,9 @@ void cmCTest::GetListOfTests(tm_ListOfTests* testlist, bool memcheck)
         }
 
       cmCTestTestProperties test;
-      test.Name = testname;
-      test.Args = args;
-      test.Directory = cmSystemTools::GetCurrentWorkingDirectory();
+      test.m_Name = testname;
+      test.m_Args = args;
+      test.m_Directory = cmSystemTools::GetCurrentWorkingDirectory();
       testlist->push_back(test);
       }
     }
@@ -1960,6 +1960,7 @@ void cmCTest::ProcessDirectory(cmCTest::tm_VectorOfStrings &passed,
                              cmCTest::tm_VectorOfStrings &failed,
                              bool memcheck)
 {
+  std::string current_dir = cmSystemTools::GetCurrentWorkingDirectory();
   cmsys::RegularExpression dartStuff("(<DartMeasurement.*/DartMeasurement[a-zA-Z]*>)");
   tm_ListOfTests testlist;
   this->GetListOfTests(&testlist, memcheck);
@@ -1989,19 +1990,21 @@ void cmCTest::ProcessDirectory(cmCTest::tm_VectorOfStrings &passed,
   for ( it = testlist.begin(); it != testlist.end(); it ++ )
     {
     cnt ++;
-    const std::string& testname = it->Name;
-    tm_VectorOfListFileArgs& args = it->Args;
+    const std::string& testname = it->m_Name;
+    tm_VectorOfListFileArgs& args = it->m_Args;
     cmCTestTestResult cres;
     cres.m_Status = cmCTest::NOT_RUN;
+    cres.m_TestCount = cnt;
 
-    if (last_directory != it->Directory)
+    if (last_directory != it->m_Directory)
       {
       if ( m_Verbose )
         {
         std::cerr << "Changing directory into " 
-          << it->Directory.c_str() << "\n";
+          << it->m_Directory.c_str() << "\n";
         }
-      last_directory = it->Directory;
+      last_directory = it->m_Directory;
+      cmSystemTools::ChangeDirectory(last_directory.c_str());
       }
     cres.m_Name = testname;
     if ( m_ShowOnly )
@@ -2085,7 +2088,7 @@ void cmCTest::ProcessDirectory(cmCTest::tm_VectorOfStrings &passed,
         }
       *olog 
         << std::endl 
-        << "Directory: " << it->Directory << std::endl 
+        << "Directory: " << it->m_Directory << std::endl 
         << "\"" << testname.c_str() << "\" start time: " 
         << ::CurrentTime() << std::endl
         << "Output:" << std::endl 
@@ -2207,6 +2210,7 @@ void cmCTest::ProcessDirectory(cmCTest::tm_VectorOfStrings &passed,
     {
     *olog << "End testing: " << m_EndTest << std::endl;
     }
+  cmSystemTools::ChangeDirectory(current_dir.c_str());
 }
 
 bool cmCTest::InitializeMemoryChecking()
