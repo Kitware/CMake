@@ -68,7 +68,6 @@ case $system in
 	;;  
 esac
 fi
-CXXFLAGS=$CXXFLAGS $CMAKE_ANSI_CFLAGS
 AC_SUBST(CMAKE_ANSI_CFLAGS)
 
 # if we are not running g++ then we might need some other flags
