@@ -19,6 +19,8 @@
 #include "cmGeneratedFileStream.h"
 #include "cmSystemTools.h"
 
+#include <assert.h>
+
 //----------------------------------------------------------------------------
 cmDepends::cmDepends(const char* dir, const char* targetFile):
   m_Directory(dir),
@@ -44,6 +46,10 @@ cmDepends::~cmDepends()
 //----------------------------------------------------------------------------
 bool cmDepends::Write()
 {
+  // Dependency generation must always be done in the current working
+  // directory.
+  assert(m_Directory == ".");
+
   // Try to generate dependencies for the target file.
   cmGeneratedFileStream fout(m_DependsMakeFile.c_str());
   fout << "# Dependencies for " << m_TargetFile.c_str() << std::endl;
@@ -63,12 +69,26 @@ bool cmDepends::Write()
 //----------------------------------------------------------------------------
 void cmDepends::Check()
 {
+  // Dependency checks must be done in proper working directory.
+  std::string oldcwd = ".";
+  if(m_Directory != ".")
+    {
+    oldcwd = cmSystemTools::GetCurrentWorkingDirectory();
+    cmSystemTools::ChangeDirectory(m_Directory.c_str());
+    }
+
   // Check whether dependencies must be regenerated.
   std::ifstream fin(m_DependsMakeFile.c_str());
   if(!(fin && this->CheckDependencies(fin)))
     {
     // Clear all dependencies so they will be regenerated.
     this->Clear();
+    }
+
+  // Restore working directory.
+  if(oldcwd != ".")
+    {
+    cmSystemTools::ChangeDirectory(oldcwd.c_str());
     }
 }
 
