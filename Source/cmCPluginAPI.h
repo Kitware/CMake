@@ -113,6 +113,7 @@ typedef struct
   =========================================================================*/
   void *(*AddSource) (void *mf, void *sf); 
   void *(*CreateSourceFile) ();
+  void  (*DestroySourceFile) (void *sf);
   void *(*GetSource) (void *mf, const char* sourceName);
   void  (*SourceFileAddDepend) (void *sf, const char *depend);
   const char *(*SourceFileGetProperty) (void *sf, const char *prop);
@@ -132,13 +133,14 @@ typedef struct
   
   /*=========================================================================
   The following methods are from cmSystemTools.h see that file for specific
-  documentaiton on each method.
+  documentation on each method.
   =========================================================================*/
   char  *(*Capitalized)(const char *);
   void   (*CopyFileIfDifferent)(const char *f1, const char *f2);
   char  *(*GetFilenameWithoutExtension)(const char *);
   char  *(*GetFilenamePath)(const char *);
   void   (*RemoveFile)(const char *f1);
+  void   (*Free)(void *);
   
   /* this is the end of the C function stub API structure */ 
 } cmCAPI;

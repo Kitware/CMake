@@ -380,6 +380,12 @@ void * cmCreateSourceFile()
   return (void *)(new cmSourceFile);
 }
 
+void cmDestroySourceFile(void *arg)
+{
+  cmSourceFile *sf = static_cast<cmSourceFile *>(arg);
+  delete sf;
+}
+
 const char *cmSourceFileGetSourceName(void *arg)
 {
   cmSourceFile *sf = static_cast<cmSourceFile *>(arg);
@@ -479,6 +485,11 @@ void cmRemoveFile(const char *name)
   cmSystemTools::RemoveFile(name);
 }
 
+void cmFree(void *data)
+{
+  free(data);
+}
+
 } // close the extern "C" scope
 
 cmCAPI cmStaticCAPI =
@@ -517,6 +528,7 @@ cmCAPI cmStaticCAPI =
   
   cmAddSource,
   cmCreateSourceFile,
+  cmDestroySourceFile,
   cmGetSource,
   cmSourceFileAddDepend,
   cmSourceFileGetProperty,
@@ -532,5 +544,6 @@ cmCAPI cmStaticCAPI =
   cmGetFilenameWithoutExtension,
   cmGetFilenamePath,
   cmRemoveFile,
+  cmFree,
 };
 
