@@ -30,10 +30,10 @@ CFG=OUTPUT_LIBNAME - Win32 Debug
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "OUTPUT_LIBNAME - Win32 Debug" (based on "Win32 (x86) Application")
 !MESSAGE "OUTPUT_LIBNAME - Win32 MinSizeRel" (based on "Win32 (x86) Application")
 !MESSAGE "OUTPUT_LIBNAME - Win32 Release" (based on "Win32 (x86) Application")
 !MESSAGE "OUTPUT_LIBNAME - Win32 RelWithDebInfo" (based on "Win32 (x86) Application")
+!MESSAGE "OUTPUT_LIBNAME - Win32 Debug" (based on "Win32 (x86) Application")
 !MESSAGE 
 
 # Begin Project
