@@ -88,7 +88,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "EXEC_PROGRAM(Executble )";
+      "EXEC_PROGRAM(Executble [Directory to run in])";
     }
   
   cmTypeMacro(cmExecProgramCommand, cmCommand);
