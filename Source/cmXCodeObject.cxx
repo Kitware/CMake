@@ -4,15 +4,23 @@
 const char* cmXCodeObject::PBXTypeNames[] = {
     "PBXGroup", "PBXBuildStyle", "PBXProject", "PBXHeadersBuildPhase", 
     "PBXSourcesBuildPhase", "PBXFrameworksBuildPhase", "PBXNativeTarget",
-    "PBXFileReference", "PBXBuildFile", "PBXContainerItemProxy", "PBXTargetDependency",
-    "PBXShellScriptBuildPhase", "PBXResourcesBuildPhase", "PBXApplicationReference",
-    "PBXExecutableFileReference", "PBXLibraryReference", "PBXToolTarget", "PBXLibraryTarget",
+    "PBXFileReference", "PBXBuildFile", "PBXContainerItemProxy", 
+    "PBXTargetDependency", "PBXShellScriptBuildPhase", 
+    "PBXResourcesBuildPhase", "PBXApplicationReference",
+    "PBXExecutableFileReference", "PBXLibraryReference", "PBXToolTarget",
+    "PBXLibraryTarget", "PBXAggregateTarget",
     "None"
   };
+
+cmXCodeObject::~cmXCodeObject()
+{
+}
+
 
 //----------------------------------------------------------------------------
 cmXCodeObject::cmXCodeObject(PBXType ptype, Type type)
 {
+//  m_cmTarget = 0;
   m_IsA = ptype;
   cmOStringStream str;
   str << (void*)this;

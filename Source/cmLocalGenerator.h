@@ -97,6 +97,8 @@ public:
   void AddSharedFlags(std::string& flags, const char* lang, bool shared);
   void AddConfigVariableFlags(std::string& flags, const char* var);
   void AppendFlags(std::string& flags, const char* newFlags);
+  ///! Get the include flags for the current makefile and language
+  const char* GetIncludeFlags(const char* lang); 
 
 protected:
 
@@ -109,8 +111,6 @@ protected:
   ///! put all the libraries for a target on into the given stream
   virtual void OutputLinkLibraries(std::ostream&, const char* name, const cmTarget &);
 
-  ///! Get the include flags for the current makefile and language
-  const char* GetIncludeFlags(const char* lang); 
 
   /** Get the include flags for the current makefile and language.  */
   void GetIncludeDirectories(std::vector<std::string>& dirs);

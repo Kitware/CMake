@@ -23,6 +23,7 @@
 class cmake;
 class cmMakefile;
 class cmLocalGenerator;
+class cmTarget;
 
 /** \class cmGlobalGenerator
  * \brief Responable for overseeing the generation process for the entire tree
@@ -132,6 +133,8 @@ protected:
   ///! used by Configure()
   void RecursiveConfigure(cmLocalGenerator *lg, float start, float end);
   
+  ///! Find a target by name by searching the local generators.
+  cmTarget* FindTarget(const char* name);
 private:
   // If you add a new map here, make sure it is copied
   // in EnableLanguagesFromGenerator 

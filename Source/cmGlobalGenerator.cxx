@@ -798,3 +798,20 @@ void cmGlobalGenerator::FillProjectMap()
     }
   
 }
+
+cmTarget* cmGlobalGenerator::FindTarget(const char* name)
+{
+  for(unsigned int i = 0; i < m_LocalGenerators.size(); ++i)
+    {
+    cmTargets& tgts = m_LocalGenerators[i]->GetMakefile()->GetTargets();
+    for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); l++)
+      {
+      if(l->first == name)
+        {
+        return &l->second;
+        }
+      }
+    }
+  return 0;
+}
+

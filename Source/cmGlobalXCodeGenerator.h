@@ -66,6 +66,7 @@ public:
   virtual void Generate();
 
 private:
+  cmXCodeObject* FindXCodeTarget(cmTarget*);
   // create cmXCodeObject from these functions so that memory can be managed
   // correctly.  All objects created are stored in m_XCodeObjects.
   cmXCodeObject* CreateObject(cmXCodeObject::PBXType ptype);
@@ -74,19 +75,14 @@ private:
   cmXCodeObject* CreateObjectReference(cmXCodeObject*);
   cmXCodeObject* CreateXCodeTarget(cmTarget& target,
                                    cmXCodeObject* buildPhases);
+  cmXCodeObject* CreateUtilityTarget(cmTarget& target);
+  void AddDependAndLinkInformation(cmXCodeObject* target);
   void CreateBuildSettings(cmTarget& target,
                            cmXCodeObject* buildSettings,
                            std::string& fileType,
                            std::string& productType,
                            std::string& projectName);
   
-  // deprecated  TODO FIXME
-  cmXCodeObject* CreateExecutable(cmTarget& cmtarget,
-                                  cmXCodeObject* buildPhases);
-  cmXCodeObject* CreateStaticLibrary(cmTarget& cmtarget,
-                                     cmXCodeObject* buildPhases);
-  cmXCodeObject* CreateSharedLibrary(cmTarget& cmtarget,
-                                     cmXCodeObject* buildPhases);
   // delete all objects in the m_XCodeObjects vector.
   void ClearXCodeObjects();
   void CreateXCodeObjects(cmLocalGenerator* root,
@@ -100,7 +96,13 @@ private:
                                        cmXCodeObject* mainGroupChildren);
   void CreateXCodeTargets(cmLocalGenerator* gen, std::vector<cmXCodeObject*>&,
                           cmXCodeObject* mainGroupChildren);  
-  
+  void AddDependTarget(cmXCodeObject* target,
+                       cmXCodeObject* dependTarget);
+  void AddLinkTarget(cmXCodeObject* target,
+                     cmXCodeObject* dependTarget);
+  void AddLinkFlag(cmXCodeObject* target,
+                   const char*);
+private:
   std::vector<cmXCodeObject*> m_XCodeObjects;
   cmXCodeObject* m_RootObject;
   cmMakefile* m_CurrentMakefile;
