@@ -20,7 +20,7 @@
 #include "cmake.h"
 #include "cmTarget.h"
 
-void cmGlobalCodeWarriorGenerator::EnableLanguage(const char*, 
+void cmGlobalCodeWarriorGenerator::EnableLanguage(std::vector<std::string>const& l,
                                                   cmMakefile *mf)
 {
   // now load the settings

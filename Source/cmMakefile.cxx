@@ -2006,7 +2006,7 @@ cmSourceFile* cmMakefile::AddSource(cmSourceFile const&sf)
 }
 
   
-void cmMakefile::EnableLanguage(const char* lang)
+void cmMakefile::EnableLanguage(std::vector<std::string> const &  lang)
 {
   m_LocalGenerator->GetGlobalGenerator()->EnableLanguage(lang, this);
 }

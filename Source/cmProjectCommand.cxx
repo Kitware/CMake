@@ -48,19 +48,21 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args)
 
   m_Makefile->AddDefinition("PROJECT_NAME", args[0].c_str());
 
+  std::vector<std::string> languages;
   if(args.size() > 1)
     {
     for(size_t i =1; i < args.size(); ++i)
       {
-      m_Makefile->EnableLanguage(args[i].c_str());
+      languages.push_back(args[i]);
       }
     }
   else
     {
     // if no language is specified do c and c++
-    m_Makefile->EnableLanguage("C");
-    m_Makefile->EnableLanguage("CXX");
+    languages.push_back("C");
+    languages.push_back("CXX");
     }
+  m_Makefile->EnableLanguage(languages);
   return true;
 }
 

@@ -25,7 +25,7 @@ cmGlobalNMakeMakefileGenerator::cmGlobalNMakeMakefileGenerator()
   m_ForceUnixPaths = false;
 }
 
-void cmGlobalNMakeMakefileGenerator::EnableLanguage(const char* l,
+void cmGlobalNMakeMakefileGenerator::EnableLanguage(std::vector<std::string>const& l,
                                                     cmMakefile *mf)
 {
   // pick a default 

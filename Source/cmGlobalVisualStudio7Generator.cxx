@@ -28,7 +28,7 @@ cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator()
 }
 
 
-void cmGlobalVisualStudio7Generator::EnableLanguage(const char* lang, 
+void cmGlobalVisualStudio7Generator::EnableLanguage(std::vector<std::string>const &  lang, 
                                                     cmMakefile *mf)
 {
   mf->AddDefinition("CMAKE_CFG_INTDIR","$(IntDir)");

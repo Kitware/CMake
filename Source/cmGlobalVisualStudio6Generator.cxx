@@ -24,7 +24,7 @@ cmGlobalVisualStudio6Generator::cmGlobalVisualStudio6Generator()
   m_FindMakeProgramFile = "CMakeVS6FindMake.cmake";
 }
 
-void cmGlobalVisualStudio6Generator::EnableLanguage(const char* lang, 
+void cmGlobalVisualStudio6Generator::EnableLanguage(std::vector<std::string>const& lang,
                                                     cmMakefile *mf)
 {
   mf->AddDefinition("CMAKE_CFG_INTDIR","$(IntDir)");

@@ -98,10 +98,10 @@ void cmGlobalGenerator::FindMakeProgram(cmMakefile* mf)
 
 
 // enable the given language
-void cmGlobalGenerator::EnableLanguage(const char* lang, 
+void cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
                                        cmMakefile *mf)
 {  
-  if(!lang)
+  if(languages.size() == 0)
     {
     cmSystemTools::Error("EnableLanguage must have a lang specified!");
     cmSystemTools::SetFatalErrorOccured();
@@ -126,7 +126,7 @@ void cmGlobalGenerator::EnableLanguage(const char* lang,
 
   // **** Step 2, Load the CMakeDetermineSystem.cmake file and find out
   // what platform we are running on
-  if (!isLocal && !this->GetLanguageEnabled(lang))
+  if (!isLocal &&  !mf->GetDefinition("CMAKE_SYSTEM_NAME"))
     {
 #if defined(_WIN32) && !defined(__CYGWIN__) 
     /* Windows version number data.  */
@@ -151,65 +151,72 @@ void cmGlobalGenerator::EnableLanguage(const char* lang,
     fpath += "/CMakeSystem.cmake";
     mf->ReadListFile(0,fpath.c_str());
     }
-  // **** Step 4, load the CMakeDetermine(LANG)Compiler.cmake file to find
-  // the compiler
-  if(!isLocal && !this->GetLanguageEnabled(lang) )
-    {  
-    if (m_CMakeInstance->GetIsInTryCompile())
-      {
-      cmSystemTools::Error("This should not have happen. "
-                           "If you see this message, you are probably using a "
-                           "broken CMakeLists.txt file or a problematic release of "
-                           "CMake");
-      }
-    needTestLanguage = true; // must test a language after finding it
-    // read determine LANG compiler
-    std::string determinCompiler = "CMakeDetermine";
-    determinCompiler += lang;
-    determinCompiler += "Compiler.cmake";
-    std::string determineFile = mf->GetModulesFile(determinCompiler.c_str());
-    if(!mf->ReadListFile(0,determineFile.c_str()))
-      {
-      cmSystemTools::Error("Could not find cmake module file:", determineFile.c_str());
-      }
-    
-    this->SetLanguageEnabled(lang);
-    // put ${CMake_(LANG)_COMPILER_ENV_VAR}=${CMAKE_(LANG)_COMPILER into the
-    // environment, in case user scripts want to run configure, or sub cmakes
-    std::string compilerName = "CMAKE_";
-    compilerName += lang;
-    compilerName += "_COMPILER";
-    std::string compilerEnv = "CMAKE_";
-    compilerEnv += lang;
-    compilerEnv += "_COMPILER_ENV_VAR";
-    std::string envVar = mf->GetRequiredDefinition(compilerEnv.c_str());
-    std::string envVarValue = mf->GetRequiredDefinition(compilerName.c_str());
-    std::string env = envVar;
-    env += "=";
-    env += envVarValue;
-    cmSystemTools::PutEnv(env.c_str());
-    } 
-
-  // **** Step 5, Load the configured language compiler file, if not loaded.
-  // look to see if CMAKE_(LANG)_COMPILER_LOADED is set, 
-  // if not then load the CMake(LANG)Compiler.cmake file from the
-  // binary tree, this is a configured file provided by
-  // CMakeDetermine(LANG)Compiler.cmake
-  std::string loadedLang = "CMAKE_";
-  loadedLang +=  lang;
-  loadedLang += "_COMPILER_LOADED";
-  if(!mf->GetDefinition(loadedLang.c_str()))
+  // **** Step 4, foreach language 
+  // load the CMakeDetermine(LANG)Compiler.cmake file to find
+  // the compiler 
+  for(std::vector<std::string>::const_iterator l = languages.begin();
+      l != languages.end(); ++l)
     {
-    fpath = rootBin;
-    fpath += "/CMake";
-    fpath += lang;
-    fpath += "Compiler.cmake";
-    if(!mf->ReadListFile(0,fpath.c_str()))
-      {
-      cmSystemTools::Error("Could not find cmake module file:", fpath.c_str());
+    const char* lang = l->c_str();
+    if(!isLocal && !this->GetLanguageEnabled(lang) )
+      {  
+      if (m_CMakeInstance->GetIsInTryCompile())
+        {
+        cmSystemTools::Error("This should not have happen. "
+                             "If you see this message, you are probably using a "
+                             "broken CMakeLists.txt file or a problematic release of "
+                             "CMake");
+        }
+      needTestLanguage = true; // must test a language after finding it
+      // read determine LANG compiler
+      std::string determinCompiler = "CMakeDetermine";
+      determinCompiler += lang;
+      determinCompiler += "Compiler.cmake";
+      std::string determineFile = mf->GetModulesFile(determinCompiler.c_str());
+      if(!mf->ReadListFile(0,determineFile.c_str()))
+        {
+        cmSystemTools::Error("Could not find cmake module file:", determineFile.c_str());
+        }
+      
+      this->SetLanguageEnabled(lang);
+      // put ${CMake_(LANG)_COMPILER_ENV_VAR}=${CMAKE_(LANG)_COMPILER into the
+      // environment, in case user scripts want to run configure, or sub cmakes
+      std::string compilerName = "CMAKE_";
+      compilerName += lang;
+      compilerName += "_COMPILER";
+      std::string compilerEnv = "CMAKE_";
+      compilerEnv += lang;
+      compilerEnv += "_COMPILER_ENV_VAR";
+      std::string envVar = mf->GetRequiredDefinition(compilerEnv.c_str());
+      std::string envVarValue = mf->GetRequiredDefinition(compilerName.c_str());
+      std::string env = envVar;
+      env += "=";
+      env += envVarValue;
+      cmSystemTools::PutEnv(env.c_str());
       }
-    this->SetLanguageEnabled(lang);
+
+    // **** Step 5, Load the configured language compiler file, if not loaded.
+    // look to see if CMAKE_(LANG)_COMPILER_LOADED is set, 
+    // if not then load the CMake(LANG)Compiler.cmake file from the
+    // binary tree, this is a configured file provided by
+    // CMakeDetermine(LANG)Compiler.cmake
+    std::string loadedLang = "CMAKE_";
+    loadedLang +=  lang;
+    loadedLang += "_COMPILER_LOADED";
+    if(!mf->GetDefinition(loadedLang.c_str()))
+      {
+      fpath = rootBin;
+      fpath += "/CMake";
+      fpath += lang;
+      fpath += "Compiler.cmake";
+      if(!mf->ReadListFile(0,fpath.c_str()))
+        {
+        cmSystemTools::Error("Could not find cmake module file:", fpath.c_str());
+        }
+      this->SetLanguageEnabled(lang);
+      }
     }
+  
   // **** Step 6, Load the system specific information if not yet loaded
   if (!mf->GetDefinition("CMAKE_SYSTEM_SPECIFIC_INFORMATION_LOADED"))
     {
@@ -219,60 +226,65 @@ void cmGlobalGenerator::EnableLanguage(const char* lang,
       cmSystemTools::Error("Could not find cmake module file:", fpath.c_str());
       }
     }
-  std::string langLoadedVar = "CMAKE_";
-  langLoadedVar += lang;
-  langLoadedVar += "_INFORMATION_LOADED";
-  if (!mf->GetDefinition(langLoadedVar.c_str()))
-    { 
-    fpath = "CMake";
-    fpath +=  lang;
-    fpath += "Information.cmake";
-    fpath = mf->GetModulesFile(fpath.c_str());
-    if(!mf->ReadListFile(0,fpath.c_str()))
-      {
-      cmSystemTools::Error("Could not find cmake module file:", fpath.c_str());
-      }
-    }
-  
- // **** Step 7, Test the compiler for the language just setup
-  // At this point we should have enough info for a try compile
-  // which is used in the backward stuff
-  if(!isLocal)
+  for(std::vector<std::string>::const_iterator l = languages.begin();
+      l != languages.end(); ++l)
     {
-    if(needTestLanguage)
-      {
-      if (!m_CMakeInstance->GetIsInTryCompile())
+    const char* lang = l->c_str();
+    std::string langLoadedVar = "CMAKE_";
+    langLoadedVar += lang;
+    langLoadedVar += "_INFORMATION_LOADED";
+    if (!mf->GetDefinition(langLoadedVar.c_str()))
+      { 
+      fpath = "CMake";
+      fpath +=  lang;
+      fpath += "Information.cmake";
+      fpath = mf->GetModulesFile(fpath.c_str());
+      if(!mf->ReadListFile(0,fpath.c_str()))
         {
-        std::string testLang = "CMakeTest";
-        testLang += lang;
-        testLang += "Compiler.cmake";
-        std::string ifpath = mf->GetModulesFile(testLang.c_str());
-        if(!mf->ReadListFile(0,ifpath.c_str()))
-          {
-          cmSystemTools::Error("Could not find cmake module file:", ifpath.c_str());
-          }
-        // **** Step 8, load backwards compatibility stuff for C and CXX
-        // for old versions of CMake ListFiles C and CXX had some
-        // backwards compatibility files they have to load
-        const char* versionValue
-          = mf->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
-        if (atof(versionValue) <= 1.4)
-          {
-          if(strcmp(lang, "C") == 0)
-            {
-            ifpath =  mf->GetModulesFile("CMakeBackwardCompatibilityC.cmake");
-            mf->ReadListFile(0,ifpath.c_str()); 
-            }
-          if(strcmp(lang, "CXX") == 0)
-            {
-            ifpath =  mf->GetModulesFile("CMakeBackwardCompatibilityCXX.cmake");
-            mf->ReadListFile(0,ifpath.c_str()); 
-            }
-          
-          }
+        cmSystemTools::Error("Could not find cmake module file:", fpath.c_str());
         }
       }
-
+  
+    // **** Step 7, Test the compiler for the language just setup
+    // At this point we should have enough info for a try compile
+    // which is used in the backward stuff
+    if(!isLocal)
+      {
+      if(needTestLanguage)
+        {
+        if (!m_CMakeInstance->GetIsInTryCompile())
+          {
+          std::string testLang = "CMakeTest";
+          testLang += lang;
+          testLang += "Compiler.cmake";
+          std::string ifpath = mf->GetModulesFile(testLang.c_str());
+          if(!mf->ReadListFile(0,ifpath.c_str()))
+            {
+            cmSystemTools::Error("Could not find cmake module file:", ifpath.c_str());
+            }
+          // **** Step 8, load backwards compatibility stuff for C and CXX
+          // for old versions of CMake ListFiles C and CXX had some
+          // backwards compatibility files they have to load
+          const char* versionValue
+            = mf->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
+          if (atof(versionValue) <= 1.4)
+            {
+            if(strcmp(lang, "C") == 0)
+              {
+              ifpath =  mf->GetModulesFile("CMakeBackwardCompatibilityC.cmake");
+              mf->ReadListFile(0,ifpath.c_str()); 
+              }
+            if(strcmp(lang, "CXX") == 0)
+              {
+              ifpath =  mf->GetModulesFile("CMakeBackwardCompatibilityCXX.cmake");
+              mf->ReadListFile(0,ifpath.c_str()); 
+              }
+            
+            }
+          }
+        }
+      
+      }
     }
 }
 

@@ -24,7 +24,8 @@ cmGlobalBorlandMakefileGenerator::cmGlobalBorlandMakefileGenerator()
   m_ForceUnixPaths = false;
 }
 
-void cmGlobalBorlandMakefileGenerator::EnableLanguage(const char* l,
+
+void cmGlobalBorlandMakefileGenerator::EnableLanguage(std::vector<std::string>const& l,
                                                       cmMakefile *mf)
 {
   std::string outdir = m_CMakeInstance->GetStartOutputDirectory();

@@ -47,7 +47,7 @@ public:
    * Try to determine system infomation such as shared library
    * extension, pthreads, byte order etc.  
    */
-  virtual void EnableLanguage(const char*, cmMakefile *mf);
+  virtual void EnableLanguage(std::vector<std::string>const& languages, cmMakefile *);
 
   /**
    * Try running cmake and building a file. This is used for dynalically
