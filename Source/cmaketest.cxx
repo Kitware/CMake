@@ -172,8 +172,7 @@ int do_cmaketest (int argc, char **argv)
     std::cerr << "Error: cmaketest does not have a valid MAKEPROGRAM\n";
     }
   makeCommand = cmSystemTools::ConvertToOutputPath(makeCommand.c_str());
-  std::string lowerCaseCommand = makeCommand;
-  cmSystemTools::LowerCase(lowerCaseCommand);
+  std::string lowerCaseCommand = cmSystemTools::LowerCase(makeCommand);
   // if msdev is the make program then do the following
   // MSDEV 6.0
   if(lowerCaseCommand.find("msdev") != std::string::npos)
