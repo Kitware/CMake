@@ -122,7 +122,7 @@ cmLocalGenerator *cmGlobalVisualStudio7Generator::CreateLocalGenerator()
 void cmGlobalVisualStudio7Generator::SetupTests()
 {
   std::string ctest = 
-    m_LocalGenerators[0]->GetMakefile()->GetDefinition("CMAKE_COMMAND");
+    m_LocalGenerators[0]->GetMakefile()->GetRequiredDefinition("CMAKE_COMMAND");
   ctest = cmSystemTools::GetFilenamePath(ctest.c_str());
   ctest += "/";
   ctest += "ctest";
@@ -130,7 +130,7 @@ void cmGlobalVisualStudio7Generator::SetupTests()
   if(!cmSystemTools::FileExists(ctest.c_str()))
     {
     ctest =     
-      m_LocalGenerators[0]->GetMakefile()->GetDefinition("CMAKE_COMMAND");
+      m_LocalGenerators[0]->GetMakefile()->GetRequiredDefinition("CMAKE_COMMAND");
     ctest = cmSystemTools::GetFilenamePath(ctest.c_str());
     ctest += "/Debug/";
     ctest += "ctest";
@@ -139,7 +139,7 @@ void cmGlobalVisualStudio7Generator::SetupTests()
   if(!cmSystemTools::FileExists(ctest.c_str()))
     {
     ctest =     
-      m_LocalGenerators[0]->GetMakefile()->GetDefinition("CMAKE_COMMAND");
+      m_LocalGenerators[0]->GetMakefile()->GetRequiredDefinition("CMAKE_COMMAND");
     ctest = cmSystemTools::GetFilenamePath(ctest.c_str());
     ctest += "/Release/";
     ctest += "ctest";
@@ -166,7 +166,7 @@ void cmGlobalVisualStudio7Generator::SetupTests()
         if(gen.size())
           {
           gen[0]->GetMakefile()->
-            AddUtilityCommand("RUN_TESTS", ctest.c_str(), "-D $(IntDir)",false,srcs);
+            AddUtilityCommand("RUN_TESTS", ctest.c_str(), "-C $(IntDir)",false,srcs);
           }
         }
       }
@@ -258,7 +258,7 @@ void cmGlobalVisualStudio7Generator::Generate()
       gen[0]->GetMakefile()->
         AddUtilityCommand("ALL_BUILD", "echo","\"Build all projects\"",false,srcs);
       std::string cmake_command = 
-        m_LocalGenerators[0]->GetMakefile()->GetDefinition("CMAKE_COMMAND");
+        m_LocalGenerators[0]->GetMakefile()->GetRequiredDefinition("CMAKE_COMMAND");
       gen[0]->GetMakefile()->
         AddUtilityCommand("INSTALL", cmake_command.c_str(),
           "-DBUILD_TYPE=$(IntDir) -P cmake_install.cmake",false,srcs);

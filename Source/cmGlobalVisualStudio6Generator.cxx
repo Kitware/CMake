@@ -36,7 +36,7 @@ void cmGlobalVisualStudio6Generator::EnableLanguage(const char* lang,
 
 void cmGlobalVisualStudio6Generator::GenerateConfigurations(cmMakefile* mf)
 {
-  std::string fname= mf->GetDefinition("CMAKE_ROOT");
+  std::string fname= mf->GetRequiredDefinition("CMAKE_ROOT");
   const char* def= mf->GetDefinition( "MSPROJECT_TEMPLATE_DIRECTORY");
   if(def)
     {
@@ -172,7 +172,7 @@ void cmGlobalVisualStudio6Generator::Generate()
       gen[0]->GetMakefile()->
         AddUtilityCommand("ALL_BUILD", "echo","\"Build all projects\"",false,srcs);
       std::string cmake_command = 
-        m_LocalGenerators[0]->GetMakefile()->GetDefinition("CMAKE_COMMAND");
+        m_LocalGenerators[0]->GetMakefile()->GetRequiredDefinition("CMAKE_COMMAND");
       gen[0]->GetMakefile()->
         AddUtilityCommand("INSTALL", cmake_command.c_str(),
           "-DBUILD_TYPE=$(IntDir) -P cmake_install.cmake",false,srcs);
@@ -393,7 +393,7 @@ inline std::string removeQuotes(const std::string& s)
 void cmGlobalVisualStudio6Generator::SetupTests()
 {
   std::string ctest = 
-    m_LocalGenerators[0]->GetMakefile()->GetDefinition("CMAKE_COMMAND");
+    m_LocalGenerators[0]->GetMakefile()->GetRequiredDefinition("CMAKE_COMMAND");
   ctest = removeQuotes(ctest);
   ctest = cmSystemTools::GetFilenamePath(ctest.c_str());
   ctest += "/";
@@ -402,7 +402,7 @@ void cmGlobalVisualStudio6Generator::SetupTests()
   if(!cmSystemTools::FileExists(ctest.c_str()))
     {
     ctest =     
-      m_LocalGenerators[0]->GetMakefile()->GetDefinition("CMAKE_COMMAND");
+      m_LocalGenerators[0]->GetMakefile()->GetRequiredDefinition("CMAKE_COMMAND");
     ctest = cmSystemTools::GetFilenamePath(ctest.c_str());
     ctest += "/Debug/";
     ctest += "ctest";
@@ -411,7 +411,7 @@ void cmGlobalVisualStudio6Generator::SetupTests()
   if(!cmSystemTools::FileExists(ctest.c_str()))
     {
     ctest =     
-      m_LocalGenerators[0]->GetMakefile()->GetDefinition("CMAKE_COMMAND");
+      m_LocalGenerators[0]->GetMakefile()->GetRequiredDefinition("CMAKE_COMMAND");
     ctest = cmSystemTools::GetFilenamePath(ctest.c_str());
     ctest += "/Release/";
     ctest += "ctest";
@@ -438,7 +438,7 @@ void cmGlobalVisualStudio6Generator::SetupTests()
         if(gen.size())
           {
           gen[0]->GetMakefile()->
-            AddUtilityCommand("RUN_TESTS", ctest.c_str(), "-D $(IntDir)",false,srcs);
+            AddUtilityCommand("RUN_TESTS", ctest.c_str(), "-C $(IntDir)",false,srcs);
           }
         }
       }
