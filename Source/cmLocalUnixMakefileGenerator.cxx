@@ -1796,7 +1796,7 @@ void cmLocalUnixMakefileGenerator::OutputBuildTargetInDirWindows(std::ostream& f
     }
   jumpBack = this->ConvertToOutputForExisting(jumpBack.c_str());
   std::string wpath = this->ConvertToOutputForExisting(path);
-  std::string wfullpath = this->ConvertToOutputForExisting(fullpath);
+  std::string wfullpath = this->ConvertToRelativeOutputPath(fullpath);
   fout << wfullpath
        << ":\n\tcd " << wpath  << "\n"
        << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.depends\n"
