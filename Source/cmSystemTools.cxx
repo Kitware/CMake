@@ -45,6 +45,11 @@ std::string cmSystemTools::CleanUpName(const char* name)
     {
     className = className.substr(0, pos);
     }
+  pos = className.find('\t');
+  if(pos != std::string::npos)
+    {
+    className = className.substr(0, pos);
+    }
   return className;
 }
 
