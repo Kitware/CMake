@@ -665,7 +665,7 @@ IF(BUILD_TESTING)
         "${JNIPATH}/../java/include")
       IF(JNI_H)
         FILE(READ "${JNI_H}" JNI_FILE)
-        IF("${JNI_FILE}" MATCHES "JDK1_2|JNI_VERSION_1_2")
+        IF("${JNI_FILE}" MATCHES "JDK1_2")
           ADD_TEST(Java ${CMAKE_CTEST_COMMAND}
             --build-and-test 
             "${CMake_SOURCE_DIR}/Tests/Java"
@@ -676,9 +676,9 @@ IF(BUILD_TESTING)
             --build-two-config 
             --build-run-dir "${CMake_BINARY_DIR}/Tests/Java/"
             --test-command ${JAVA_RUNTIME} -classpath hello.jar HelloWorld)
-        ELSE("${JNI_FILE}" MATCHES "JDK1_2|JNI_VERSION_1_2")
+        ELSE("${JNI_FILE}" MATCHES "JDK1_2")
           MESSAGE("No Java Test because ${JNI_H} does not contain JDK1_2 define")
-        ENDIF("${JNI_FILE}" MATCHES "JDK1_2|JNI_VERSION_1_2")
+        ENDIF("${JNI_FILE}" MATCHES "JDK1_2")
       ELSE(JNI_H) 
         MESSAGE("No Java Test because jni.h could not be found. tried:\n${JNIPATH}/../include and ${JNIPATH}/../java/include")
       ENDIF(JNI_H) 
