@@ -30,7 +30,6 @@ bool cmWriteFileCommand::InitialPass(std::vector<std::string> const& argsIn)
   std::string message;
   std::vector<std::string>::const_iterator i = args.begin();
 
-  bool send_error = false;
   std::string fileName = *i;
   i++;
 
