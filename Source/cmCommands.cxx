@@ -27,6 +27,7 @@
 #include "cmFindPathCommand.cxx"
 #include "cmFindProgramCommand.cxx"
 #include "cmForEachCommand.cxx"
+#include "cmFLTKWrapUICommand.cxx"
 #include "cmGetFilenameComponentCommand.cxx"
 #include "cmIfCommand.cxx"
 #include "cmIncludeCommand.cxx"
@@ -90,6 +91,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmFindPathCommand);
   commands.push_back(new cmFindProgramCommand);
   commands.push_back(new cmForEachCommand);
+  commands.push_back(new cmFLTKWrapUICommand);
   commands.push_back(new cmGetFilenameComponentCommand);
   commands.push_back(new cmIfCommand);
   commands.push_back(new cmIncludeCommand);
