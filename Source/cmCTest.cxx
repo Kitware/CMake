@@ -4842,7 +4842,7 @@ void cmCTest::SetTestsToRunInformation(const char* in)
   int end = -1;
   int stride = -1;
   std::string::size_type pos = 0;
-  std::string::size_type pos2 = 0;
+  std::string::size_type pos2;
   // read start
   if(GetNextNumber(testArgs, start, pos, pos2))
     {
