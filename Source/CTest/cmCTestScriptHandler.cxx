@@ -451,8 +451,7 @@ int cmCTestScriptHandler::PerformExtraUpdates()
         {
         cmSystemTools::Error("Unable to perform extra cvs updates:\n", 
           output.c_str());
-        this->RestoreBackupDirectories();
-        return 8;
+        return 0;
         }
       }
     }
