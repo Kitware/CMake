@@ -4142,7 +4142,7 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
 
   std::vector<const char*> testCommand;
   testCommand.push_back(fullPath.c_str());
-  for(unsigned int k=0; k < m_TestCommandArgs.size(); ++k)
+  for(k=0; k < m_TestCommandArgs.size(); ++k)
     {
     out << m_TestCommandArgs[k].c_str() << "\n";
     testCommand.push_back(m_TestCommandArgs[k].c_str());
