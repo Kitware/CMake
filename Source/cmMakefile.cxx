@@ -1332,12 +1332,6 @@ void cmMakefile::ExpandSourceListArguments(
 int cmMakefile::TryCompile(const char *srcdir, const char *bindir, 
                            const char *projectName, const char *targetName)
 {
-  if (!m_LocalGenerator)
-    {
-    cmSystemTools::Error("Internal CMake error, Attempt to call Try Compile without the generator being set");
-    return 1;
-    }
-  
   // does the binary directory exist ? If not create it...
   if (!cmSystemTools::FileIsDirectory(bindir))
     {
@@ -1355,7 +1349,7 @@ int cmMakefile::TryCompile(const char *srcdir, const char *bindir,
   std::string cmakeCommand = this->GetDefinition("CMAKE_COMMAND");
   cmake cm;
   cmGlobalGenerator *gg = 
-    cm.CreateGlobalGenerator(this->GetDefinition("CMAKE_GENERATOR"));
+    cm.CreateGlobalGenerator(this->m_LocalGenerator->GetGlobalGenerator()->GetName());
   if (!gg)
     {
     cmSystemTools::Error(
@@ -1364,6 +1358,7 @@ int cmMakefile::TryCompile(const char *srcdir, const char *bindir,
     cmSystemTools::ChangeDirectory(cwd.c_str());
     return 1;
     }
+  cm.SetGlobalGenerator(gg);
   
   // do a configure
   cm.SetHomeDirectory(srcdir);
