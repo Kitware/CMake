@@ -98,6 +98,7 @@ ENDMACRO(CHECK_LIBRARY_EXISTS_CONCAT)
 
 # We do not need this because we do not use ldap.
 # CHECK_LIBRARY_EXISTS_CONCAT("dl"     dlopen       HAVE_LIBDL)
+SET(HAVE_LIBDL 0 CACHE INTERNAL "We do not need libdl.")
 
 CHECK_LIBRARY_EXISTS_CONCAT("ucb"    gethostname  HAVE_LIBUCB)
 CHECK_LIBRARY_EXISTS_CONCAT("socket" connect      HAVE_LIBSOCKET)
@@ -119,6 +120,7 @@ ENDIF(CMAKE_USE_OPENSSL)
 # Check for symbol dlopen (same as HAVE_LIBDL)
 # We do not need this because we do not use ldap.
 # CHECK_LIBRARY_EXISTS("${CURL_LIBS}" dlopen "" HAVE_DLOPEN)
+SET(HAVE_DLOPEN 0 CACHE INTERNAL "We do not need dlopen.")
 
 # For other tests to use the same libraries
 SET(CMAKE_REQUIRED_LIBRARIES ${CURL_LIBS})
