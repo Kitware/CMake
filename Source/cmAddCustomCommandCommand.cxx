@@ -131,6 +131,8 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
                                outputs, 
                                target.c_str());
 
+
+  // All this is a hack for now
   int cc = outputs.size()-1;
   while( cc >= 0 ) 
     {
@@ -151,7 +153,11 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
       m_Makefile->AddSource(file, target.c_str());
       cc--;
     }
-  m_Makefile->GetTargets()[target.c_str()].GetSourceLists().push_back(target);
+  if ( outputs.size() > 0 )
+    {
+    std::cout << "Target: " << target << std::endl;
+    m_Makefile->GetTargets()[target.c_str()].GetSourceLists().push_back(target);
+    }
   
   return true;
 }
