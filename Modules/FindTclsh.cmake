@@ -28,6 +28,7 @@ FIND_PROGRAM(TCL_TCLSH
   "${TK_INCLUDE_PATH}/../bin"
   "${TCL_LIBRARY_PATH}/../bin"
   "${TK_LIBRARY_PATH}/../bin"
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\ActiveState\\ActiveTcl\\8.4.6.0]/bin
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.4;Root]/bin
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.3;Root]/bin
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.2;Root]/bin
