@@ -2085,60 +2085,82 @@ void SystemTools::CheckTranslationPath(kwsys_stl::string & path)
   path.erase(path.end()-1, path.end());
 }
 
-kwsys_stl::string SystemTools::CollapseFullPath(const char* in_relative,
+void
+SystemToolsAppendComponents(
+  kwsys_stl::vector<kwsys_stl::string>& out_components,
+  kwsys_stl::vector<kwsys_stl::string>::const_iterator first,
+  kwsys_stl::vector<kwsys_stl::string>::const_iterator last)
+{
+  for(kwsys_stl::vector<kwsys_stl::string>::const_iterator i = first;
+      i != last; ++i)
+    {
+    if(*i == "..")
+      {
+      if(out_components.begin() != out_components.end())
+        {
+        out_components.erase(out_components.end()-1, out_components.end());
+        }
+      }
+    else if(*i != "." && *i != "")
+      {
+      out_components.push_back(*i);
+      }
+    }
+}
+
+kwsys_stl::string SystemTools::CollapseFullPath(const char* in_path,
                                                 const char* in_base)
 {
-  kwsys_stl::string orig;
-  
-  // Change to base of relative path.
-  if(in_base)
-    {
-    // Save original working directory.
-    orig = SystemTools::GetCurrentWorkingDirectory();
-    Chdir(in_base);
-    }
-  
-  kwsys_stl::string dir, file;
-  SystemTools::SplitProgramPath(in_relative, dir, file, false);
-  if(dir.size() == 0 && 
-      in_relative && strlen(in_relative) > 0 &&
-      in_relative[0] == '/')
-     {
-     dir = "/";
-     }
+  // Collect the output path components.
+  kwsys_stl::vector<kwsys_stl::string> out_components;
 
-  // Resolve relative path.
-  kwsys_stl::string newDir;
-  if(!(dir == ""))
-    {
-    Realpath(dir.c_str(), newDir);    
-    }
-  else
-    {
-    newDir = SystemTools::GetCurrentWorkingDirectory();
-    }
+  // Split the input path components.
+  kwsys_stl::vector<kwsys_stl::string> path_components;
+  SystemTools::SplitPath(in_path, path_components);
 
-  if(in_base)
+  // If the input path is relative, start with a base path.
+  if(path_components[0].length() == 0)
     {
-    // Restore original working directory.
-    Chdir(orig.c_str());
-    }
-  
-  // Construct and return the full path.
-  kwsys_stl::string newPath = newDir;
-  if(!(file == ""))
-    {
-    if(!(newDir.size() == 1 && newDir[0] ==  '/'))
+    kwsys_stl::vector<kwsys_stl::string> base_components;
+    if(in_base)
       {
-      newPath += "/";
+      // Use the given base path.
+      SystemTools::SplitPath(in_base, base_components);
       }
-    newPath += file;
+    else
+      {
+      // Use the current working directory as a base path.
+      char buf[2048];
+      if(const char* cwd = Getcwd(buf, 2048))
+        {
+        SystemTools::SplitPath(cwd, base_components);
+        }
+      else
+        {
+        // ??
+        }
+      }
+
+    // Append base path components to the output path.
+    out_components.push_back(base_components[0]);
+    SystemToolsAppendComponents(out_components,
+                                base_components.begin()+1,
+                                base_components.end());
     }
 
-  // Now we need to update the translation table with this potentially new path
-  SystemTools::AddTranslationPath(newPath.c_str(), in_relative);
+  // Append input path components to the output path.
+  SystemToolsAppendComponents(out_components,
+                              path_components.begin(),
+                              path_components.end());
+
+  // Transform the path back to a string.
+  kwsys_stl::string newPath = SystemTools::JoinPath(out_components);
+
+  // Update the translation table with this potentially new path.
+  SystemTools::AddTranslationPath(newPath.c_str(), in_path);
   SystemTools::CheckTranslationPath(newPath);
 
+  // Return the reconstructed path.
   return newPath;
 }
 
