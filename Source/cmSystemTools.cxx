@@ -209,7 +209,7 @@ bool cmSystemTools::ParseFunction(std::ifstream& fin,
   if(fin.getline(inbuffer, BUFFER_SIZE ) )
     {
     cmRegularExpression blankLine("^$");
-    cmRegularExpression comment("^#.*$");
+    cmRegularExpression comment("^[ \t]*#.*$");
     cmRegularExpression oneLiner("^[ \t]*([A-Za-z_0-9]*)[ \t]*\\((.*)\\)[ \t]*$");
     cmRegularExpression multiLine("^[ \t]*([A-Za-z_0-9]*)[ \t]*\\((.*)$");
     cmRegularExpression lastLine("^(.*)\\)[ \t]*$");
@@ -271,6 +271,10 @@ bool cmSystemTools::ParseFunction(std::ifstream& fin,
         // read lines until the end paren is found
         if(fin.getline(inbuffer, BUFFER_SIZE ) )
           {
+          // Check for comment lines and ignore them.
+          if(blankLine.find(inbuffer) || comment.find(inbuffer))
+            { continue; }
+          // Is this the last line?
           if(lastLine.find(inbuffer))
             {
             done = true;
