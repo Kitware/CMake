@@ -24,6 +24,26 @@ bool cmWrapTclCommand::Invoke(std::vector<std::string>& args)
     return false;
     }
 
+  // Now check and see if the value has been stored in the cache
+  // already, if so use that value and don't look for the program
+  const char* cacheValue
+    = cmCacheManager::GetInstance()->GetCacheValue("WRAP_TCL");
+  if(!cacheValue)
+    {
+    cmCacheManager::GetInstance()->AddCacheEntry("WRAP_TCL","1",
+                                                 cmCacheManager::BOOL);
+    m_Makefile->AddDefinition("WRAP_TCL", "1");
+    }
+  else
+    {
+    m_Makefile->AddDefinition("WRAP_TCL", cacheValue);
+    // if it is turned off then return
+    if (!strcmp(cacheValue,"0"))
+      {
+      return true;
+      }
+    }
+
   // get the list of classes for this library
   std::vector<cmClassFile> &classes = m_Makefile->GetClasses();
   
@@ -35,16 +55,19 @@ bool cmWrapTclCommand::Invoke(std::vector<std::string>& args)
   for(int classNum = 0; classNum < lastClass; classNum++)
     {
     cmClassFile &curr = classes[classNum];
-    cmClassFile file;
-    file.m_AbstractClass = curr.m_AbstractClass;
-    std::string newName = curr.m_ClassName + "Tcl";
-    file.SetName(newName.c_str(), m_Makefile->GetCurrentOutputDirectory(),
-                 "cxx",false);
-    m_WrapClasses.push_back(file);
-    std::string hname = cdir + "/" + curr.m_ClassName + ".h";
-    m_WrapHeaders.push_back(hname);
+    // if we should wrap the class
+    if (!curr.m_WrapExclude)
+      {
+      cmClassFile file;
+      file.m_AbstractClass = curr.m_AbstractClass;
+      std::string newName = curr.m_ClassName + "Tcl";
+      file.SetName(newName.c_str(), m_Makefile->GetCurrentOutputDirectory(),
+                   "cxx",false);
+      m_WrapClasses.push_back(file);
+      std::string hname = cdir + "/" + curr.m_ClassName + ".h";
+      m_WrapHeaders.push_back(hname);
+      }
     }
-  
   return true;
 }
 
@@ -55,14 +78,10 @@ void cmWrapTclCommand::FinalPass()
   std::vector<std::string> depends;
   std::string wtcl = "${WRAP_TCL_EXE}";
   std::string hints = "${WRAP_HINTS}";
-  std::string wti = "${WRAP_TCL_INIT_EXE}";
   
   m_Makefile->ExpandVariablesInString(wtcl);
   m_Makefile->ExpandVariablesInString(hints);
-  m_Makefile->ExpandVariablesInString(wti);
   
-  depends.push_back(wti);
-
   // Create the init file 
   std::string res = m_Makefile->GetLibraryName();
   res += "Init.cxx";
@@ -92,9 +111,6 @@ void cmWrapTclCommand::FinalPass()
   
 }
 
-char *names[1000];
-int anindex = 0;
-
 bool cmWrapTclCommand::CreateInitFile(std::string& res) 
 {
   unsigned int i;
@@ -115,14 +131,17 @@ bool cmWrapTclCommand::CreateInitFile(std::string& res)
   int classNum;
   for(classNum = 0; classNum < lastClass; classNum++)
     {
-    std::string cls = m_WrapHeaders[classNum];
-    cls = cls.substr(0,cls.size()-2);
-    std::string::size_type pos = cls.rfind('/');    
-    if(pos != std::string::npos)
+    if (!m_WrapClasses[classNum].m_AbstractClass)
       {
-      cls = cls.substr(pos+1);
+      std::string cls = m_WrapHeaders[classNum];
+      cls = cls.substr(0,cls.size()-2);
+      std::string::size_type pos = cls.rfind('/');    
+      if(pos != std::string::npos)
+        {
+        cls = cls.substr(pos+1);
+        }
+      classes.push_back(cls);
       }
-    classes.push_back(cls);
     }
   
   // open the init file
@@ -183,7 +202,7 @@ bool cmWrapTclCommand::WriteInit(const char *kitName, std::string& outFileName,
   
   fprintf(fout,"\n\nint VTK_EXPORT %s_Init(Tcl_Interp *interp)\n{\n",
           kitName);
-  if (!strcmp(kitName,"Vtkcommontcl"))
+  if (!strcmp(kitName,"Vtkcommon"))
     {
     fprintf(fout,
 	    "  vtkTclInterpStruct *info = new vtkTclInterpStruct;\n");
