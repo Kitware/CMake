@@ -13,7 +13,7 @@ IF (BUILD_DOCUMENTATION)
   #
   # Check for the tools
   #
-  INCLUDE(${CMAKE_ROOT}/Modules/FindCygwin.cmake)
+  INCLUDE(${CMAKE_ROOT}/Modules/FindUnixCommands.cmake)
   INCLUDE(${CMAKE_ROOT}/Modules/FindDoxygen.cmake)
   INCLUDE(${CMAKE_ROOT}/Modules/FindHhc.cmake)
   INCLUDE(${CMAKE_ROOT}/Modules/FindPerl.cmake)
@@ -29,6 +29,5 @@ IF (BUILD_DOCUMENTATION)
   # The documentation process is controled by a batch file.
   # We will probably need bash to create the custom target
   #
-  FIND_PROGRAM(BASH bash)
 
 ENDIF (BUILD_DOCUMENTATION)

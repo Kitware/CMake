@@ -1,5 +1,5 @@
 # 
-# this module looks for Cygwin and some usual commands
+# this module looks for Cygwin
 #
 
 FIND_PATH(CYGWIN_INSTALL_PATH
@@ -7,27 +7,3 @@ FIND_PATH(CYGWIN_INSTALL_PATH
   "C:/Cygwin" 
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Cygnus Solutions\\Cygwin\\mounts v2\\/;native]"
 )
-
-FIND_PROGRAM(GZIP
-   gzip
-   ${CYGWIN_INSTALL_PATH}/bin
-)
-
-FIND_PROGRAM(MV
-   mv
-   ${CYGWIN_INSTALL_PATH}/bin
-)
-
-FIND_PROGRAM(RM
-   rm
-   ${CYGWIN_INSTALL_PATH}/bin
-)
-
-FIND_PROGRAM(TAR
-   NAMES 
-   tar 
-   gtar
-   PATH
-   ${CYGWIN_INSTALL_PATH}/bin
-)
-
