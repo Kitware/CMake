@@ -1735,6 +1735,10 @@ void cmMakefile::SetHomeDirectory(const char* dir)
   m_cmHomeDirectory = dir;
   cmSystemTools::ConvertToUnixSlashes(m_cmHomeDirectory);
   this->AddDefinition("CMAKE_SOURCE_DIR", this->GetHomeDirectory());
+  if ( !this->GetDefinition("CMAKE_CURRENT_SOURCE_DIR") )
+    {
+    this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR", this->GetHomeDirectory());
+    }
 }
 
 void cmMakefile::SetHomeOutputDirectory(const char* lib)
@@ -1742,6 +1746,10 @@ void cmMakefile::SetHomeOutputDirectory(const char* lib)
   m_HomeOutputDirectory = lib;
   cmSystemTools::ConvertToUnixSlashes(m_HomeOutputDirectory);
   this->AddDefinition("CMAKE_BINARY_DIR", this->GetHomeOutputDirectory());
+  if ( !this->GetDefinition("CMAKE_CURRENT_BINARY_DIR") )
+    {
+    this->AddDefinition("CMAKE_CURRENT_BINARY_DIR", this->GetHomeOutputDirectory());
+    }
 }
 
 
