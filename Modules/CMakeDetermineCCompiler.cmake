@@ -27,7 +27,7 @@ IF(NOT CMAKE_C_COMPILER)
   # if no compiler has been specified yet, then look for one
   IF(NOT CMAKE_C_COMPILER_INIT)
   # if not in the envionment then search for the compiler in the path
-    SET(CMAKE_C_COMPILER_LIST gcc cc cl bcc )  
+    SET(CMAKE_C_COMPILER_LIST gcc cc cl bcc xlc)  
     FIND_PROGRAM(CMAKE_C_COMPILER_FULLPATH NAMES ${CMAKE_C_COMPILER_LIST} )
     GET_FILENAME_COMPONENT(CMAKE_C_COMPILER_INIT
                            ${CMAKE_C_COMPILER_FULLPATH} NAME)
