@@ -124,6 +124,7 @@ private:
   std::string m_LibraryOutputPath;
   std::string m_ExecutableOutputPath;
   cmLocalGenerator* m_CurrentLocalGenerator;
+  bool m_DoneAllBuild;
 };
 
 #endif

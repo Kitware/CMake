@@ -2538,3 +2538,17 @@ bool cmMakefile::GetPropertyAsBool(const char* prop) const
     }
   return false;
 }
+
+
+cmTarget* cmMakefile::FindTarget(const char* name)
+{
+  cmTargets& tgts = this->GetTargets();
+  for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); l++)
+    {
+    if(l->first == name)
+      {
+      return &l->second;
+      }
+    }
+  return 0;
+}

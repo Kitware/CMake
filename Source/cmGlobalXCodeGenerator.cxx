@@ -187,9 +187,33 @@ cmLocalGenerator *cmGlobalXCodeGenerator::CreateLocalGenerator()
 void cmGlobalXCodeGenerator::Generate()
 {
   this->cmGlobalGenerator::Generate();
+  std::vector<std::string> srcs;
   std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
   for(it = m_ProjectMap.begin(); it!= m_ProjectMap.end(); ++it)
     {
+    // add a ALL_BUILD target to the first makefile of each project
+    it->second[0]->GetMakefile()->
+      AddUtilityCommand("ALL_BUILD", "echo", 
+                        "\"Build all projects\"",false,srcs);
+    cmTarget* allbuild = 
+      it->second[0]->GetMakefile()->FindTarget("ALL_BUILD");
+    // now make the allbuild depend on all the non-utility targets
+    // in the project
+    for(std::vector<cmLocalGenerator*>::iterator i = it->second.begin();
+        i != it->second.end(); ++i)
+      {
+      cmLocalGenerator* lg = *i; 
+      cmTargets& tgts = lg->GetMakefile()->GetTargets();
+      for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); l++)
+        {
+        cmTarget& target = l->second;
+        if(target.GetType() < cmTarget::UTILITY)
+          {
+          allbuild->AddUtility(target.GetName());
+          }
+        }
+      }
+    // now create the project
     this->OutputXCodeProject(it->second[0], it->second);
     }
 }
@@ -294,6 +318,15 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
   for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); l++)
     { 
     cmTarget& cmtarget = l->second;
+    // make sure ALL_BUILD is only done once
+    if(l->first == "ALL_BUILD")
+      {
+      if(m_DoneAllBuild)
+        {
+        continue;
+        }
+      m_DoneAllBuild = true;
+      }
     if(cmtarget.GetType() == cmTarget::UTILITY ||
        cmtarget.GetType() == cmTarget::INSTALL_FILES ||
        cmtarget.GetType() == cmTarget::INSTALL_PROGRAMS)
@@ -646,8 +679,13 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
                                     this->CreateString
                                     (m_LibraryOutputPath.c_str()));
         }
+      
+      buildSettings->AddAttribute("EXECUTABLE_PREFIX", 
+                                  this->CreateString("lib"));
+      buildSettings->AddAttribute("EXECUTABLE_EXTENSION", 
+                                  this->CreateString("so"));
       buildSettings->AddAttribute("LIBRARY_STYLE", 
-                                  this->CreateString("DYNAMIC"));
+                                  this->CreateString("BUNDLE"));
       productName += ".so";
       std::string t = "lib";
       t += productName;
@@ -745,7 +783,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   buildSettings->AddAttribute("GCC_OPTIMIZATION_LEVEL", 
                               this->CreateString("0"));
   buildSettings->AddAttribute("INSTALL_PATH", 
-                              this->CreateString("/usr/local/bin"));
+                              this->CreateString(""));
   buildSettings->AddAttribute("OPTIMIZATION_CFLAGS", 
                               this->CreateString(""));
   buildSettings->AddAttribute("OTHER_CFLAGS", 
@@ -760,8 +798,14 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
                               this->CreateString(
                                 "-Wmost -Wno-four-char-constants"
                                 " -Wno-unknown-pragmas"));
+  std::string pname;
+  if(target.GetType() == cmTarget::SHARED_LIBRARY)
+    {
+    pname = "lib";
+    }
+  pname += target.GetName();
   buildSettings->AddAttribute("PRODUCT_NAME", 
-                              this->CreateString(target.GetName()));
+                              this->CreateString(pname.c_str()));
 }
 
 cmXCodeObject* 
@@ -932,6 +976,33 @@ void cmGlobalXCodeGenerator::AddLinkLibrary(cmXCodeObject* target,
     std::string libPath = library;
     cmXCodeObject* fileRef = 
       this->CreateObject(cmXCodeObject::PBXFileReference);
+    // add the library path to the search path for the target
+    cmXCodeObject* bset = target->GetObject("buildSettings");
+    if(bset)
+      {
+      std::string dir;
+      std::string file;
+      cmSystemTools::SplitProgramPath(library, dir, file);
+      cmXCodeObject* spath = bset->GetObject("LIBRARY_SEARCH_PATHS");
+      if(spath)
+        {
+        std::string libs = spath->GetString();
+        // remove double quotes
+        libs = libs.substr(1, libs.size()-2);
+        libs += " ";
+        libs += 
+          m_CurrentLocalGenerator->ConvertToOutputForExisting(dir.c_str());
+        spath->SetString(libs.c_str());
+        }
+      else
+        {
+        std::string libs =
+          m_CurrentLocalGenerator->ConvertToOutputForExisting(dir.c_str());
+        bset->AddAttribute("LIBRARY_SEARCH_PATHS",
+                           this->CreateString(libs.c_str()));
+        }
+      }
+    
     if(libPath[libPath.size()-1] == 'a')
       {
       fileRef->AddAttribute("lastKnownFileType", 
@@ -973,9 +1044,10 @@ void cmGlobalXCodeGenerator::AddLinkLibrary(cmXCodeObject* target,
     cmsys::RegularExpression reg("^([ \t]*\\-[lWRB])|([ \t]*\\-framework)|(\\${)|([ \t]*\\-pthread)|([ \t]*`)");
     // if the library is not already in the form required by the compiler
     // add a -l infront of the name
+    link += " ";
     if(!reg.find(library))
       {
-      link += " -l";
+      link += "-l";
       }
     link +=  library;
     ldflags->SetString(link.c_str());
@@ -1110,6 +1182,7 @@ void cmGlobalXCodeGenerator::CreateXCodeObjects(cmLocalGenerator* ,
   m_RootObject->AddAttribute("hasScannedForEncodings",
                              this->CreateString("0"));
   std::vector<cmXCodeObject*> targets;
+  m_DoneAllBuild = false;
   for(std::vector<cmLocalGenerator*>::iterator i = generators.begin();
       i != generators.end(); ++i)
     {

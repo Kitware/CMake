@@ -433,6 +433,7 @@ public:
   cmTargets &GetTargets() { return m_Targets; }
   const cmTargets &GetTargets() const { return m_Targets; }
 
+  cmTarget* FindTarget(const char* name);
   /**
    * Get a list of the build subdirectories.
    */
