@@ -390,11 +390,26 @@ void cmBorlandMakefileGenerator::OutputMakefile(const char* file)
           if (tgts.find(l->first)==tgts.end())
             {
             std::string path = cmSystemTools::FindFile(libname.c_str(),linkdirs);
-            if (path.size()) libname = path;
+            if (path.size())
+              {
+              libname = path;
+              }
+            else
+              // if we can't find it - and it's not a target - and it has no path
+              // already specified, it must be in OUTDIRLIB from another
+              // makefile in the same project !
+              {
+              std::string path = cmSystemTools::GetFilenamePath(libname);
+              if (path.size()==0)
+                {
+                libname = "$(OUTDIRLIB)\\" + libname;
+                }
+              // otherwise just leave it alone
+              }
             }
           else
             {
-            libname = "$(OUTDIRLIB)\\" + libname + ".bpi";
+            libname = "$(OUTDIRLIB)\\" + libname;
             }
           fout << " \\\n  " << cmBorlandMakefileGenerator::EscapeSpaces(libname.c_str());
           }
@@ -489,8 +504,8 @@ void cmBorlandMakefileGenerator::OutputTargets(std::ostream& fout)
       fout << "$(OUTDIRLIB)\\" << l->first << ".dll : ${" << l->first << "_SRC_OBJS} ${" << l->first << "_LINK_LIB} ${" << l->first << "_LINK_BPI} \n";
       fout << "  @ilink32.exe @&&| \n";
       fout << "    -L$(LINK_DIR) $(LINKFLAGS_DLL) $(LINKFLAGS_DEBUG) \"$(BCB)/lib/c0d32.obj\" ";
-      fout << "$(" << l->first << "_SRC_OBJS) ";
-      fout << "$(" << l->first << "_LINK_BPI) , $<, $*, ";
+      fout << "$(" << l->first << "_LINK_BPI) ";
+      fout << "$(" << l->first << "_SRC_OBJS) , $<, $*, ";
       fout << "$(" << l->first << "_LINK_LIB) import32.lib cw32mti.lib \n";
       fout << "| \n";
       fout << "  @implib -w " << "$(OUTDIRLIB)\\" << l->first << ".lib " << "$(OUTDIRLIB)\\" << l->first << ".dll \n\n";
@@ -501,7 +516,7 @@ void cmBorlandMakefileGenerator::OutputTargets(std::ostream& fout)
       fout << "$(OUTDIRLIB)\\" << l->first << ".bpl : ${" << l->first << "_SRC_OBJS} ${" << l->first << "_LINK_LIB} ${" << l->first << "_LINK_BPI} \n";
       fout << "  @ilink32.exe @&&| \n";
       fout << "    -L\"$(BCB)/lib\" -L$(LINK_DIR) $(LINKFLAGS_BPL) $(LINKFLAGS_DEBUG) \"$(BCB)/lib/c0pkg32.obj \" ";
-      fout << "$(" << l->first << "_LINK_BPI) memmgr.lib sysinit.obj ";
+      fout << "$(" << l->first << "_LINK_BPI) Memmgr.lib sysinit.obj ";
       fout << "$(" << l->first << "_SRC_OBJS) , $<, $*, ";
       fout << "$(" << l->first << "_LINK_LIB) import32.lib cp32mti.lib \n";
       fout << "| \n";
@@ -515,9 +530,9 @@ void cmBorlandMakefileGenerator::OutputTargets(std::ostream& fout)
       fout << l->first << ".exe : ${" << l->first << "_SRC_OBJS} ${" << l->first << "_LINK_LIB} ${" << l->first << "_LINK_BPI} \n";
       fout << "  @ilink32.exe @&&| \n";
       fout << "    -L\"$(BCB)/lib\" -L$(LINK_DIR) $(LINKFLAGS_EXE) $(LINKFLAGS_DEBUG) \"$(BCB)/lib/c0w32.obj\" ";
-      fout << "$(" << l->first << "_SRC_OBJS) ";
-      fout << "$(" << l->first << "_LINK_BPI) , $<, $*, ";
-      fout << "$(" << l->first << "_LINK_LIB) import32.lib cw32mti.lib \n";
+      fout << "$(" << l->first << "_LINK_BPI) Memmgr.lib sysinit.obj ";
+      fout << "$(" << l->first << "_SRC_OBJS) , $<, $*, ";
+      fout << "$(" << l->first << "_LINK_LIB) import32.lib cp32mti.lib \n";
       fout << "| \n\n";
       }
     else if (l->second.GetType()==cmTarget::EXECUTABLE)
