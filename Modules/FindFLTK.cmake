@@ -3,7 +3,6 @@
 #
 # The following settings are defined
 # FLTK_FLUID_EXECUTABLE, where to find the Fluid tool
-# FLTK_WRAP_UI, This allows the FLTK_WRAP_UI command to work.
 # FLTK_INCLUDE_DIR, where to find include files
 # FLTK_LIBRARIES, list of fltk libraries
 # FLTK_VERSION_1.0.11 Use this Version
@@ -103,10 +102,6 @@ ENDIF(FLTK_INCLUDE_DIR)
 FIND_PROGRAM(FLTK_FLUID_EXECUTABLE fluid
   ${path} ${FLTK_INCLUDE_DIR}/fluid
 )
-# Enable the Wrap UI command
-IF (FLTK_FLUID_EXECUTABLE)
-  SET ( FLTK_WRAP_UI 1 CACHE INTERNAL "Can we honour the FLTK_WRAP_UI command" )
-ENDIF (FLTK_FLUID_EXECUTABLE)
 
 #
 #  Set FLTK_FOUND

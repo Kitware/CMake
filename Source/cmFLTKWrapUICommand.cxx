@@ -27,22 +27,6 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args)
     return false;
     }
 
-  // Now check and see if the value has been stored in the cache
-  // already, if so use that value and don't look for the program
-  const char* FLTK_WRAP_UI_value = m_Makefile->GetDefinition("FLTK_WRAP_UI");
-  if (FLTK_WRAP_UI_value==0)
-    {
-    this->SetError("called with FLTK_WRAP_UI undefined");
-    return false;
-    }
-  
-  if(cmSystemTools::IsOff(FLTK_WRAP_UI_value))
-    {
-    this->SetError("called with FLTK_WRAP_UI off : ");
-    return false;
-    }
-
-
   // what is the current source dir
   std::string cdir = m_Makefile->GetCurrentDirectory();
   std::string fluid_exe = "${FLTK_FLUID_EXECUTABLE}";

@@ -4,8 +4,6 @@
 # QT_INCLUDE_DIR, where to find qt.h, etc.
 # QT_LIBRARIES, the libraries to link against to use Qt.
 # QT_DEFINITIONS, definitions to use when compiling code that uses Qt.
-# QT_WRAP_CPP, If false, don't use QT_WRAP_CPP command.
-# QT_WRAP_UI, If false, don't use QT_WRAP_UI command.
 # QT_FOUND, If false, don't try to use Qt.
 
 # also defined, but not for general use are
@@ -71,14 +69,6 @@ IF (WIN32)
     )
 ENDIF (WIN32)
 
-
-IF (QT_MOC_EXECUTABLE)
-  SET ( QT_WRAP_CPP "YES")
-ENDIF (QT_MOC_EXECUTABLE)
-
-IF (QT_UIC_EXECUTABLE)
-  SET ( QT_WRAP_UI "YES")
-ENDIF (QT_UIC_EXECUTABLE)
 
 
 IF(QT_INCLUDE_DIR)
