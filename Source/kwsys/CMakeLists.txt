@@ -216,11 +216,10 @@ SET(KWSYS_CLASSES)
 SET(KWSYS_H_FILES Configure)
 SET(KWSYS_HXX_FILES Configure)
 
-# Enforce component dependencies (none currently exists).
-#IF(KWSYS_USE_SystemTools)
-#  SET(KWSYS_USE_Directory 1)
-#  SET(KWSYS_USE_RegularExpression 1)
-#ENDIF(KWSYS_USE_SystemTools)
+# Enforce component dependencies.
+IF(KWSYS_USE_SystemTools)
+  SET(KWSYS_USE_Directory 1)
+ENDIF(KWSYS_USE_SystemTools)
 
 # Add selected C++ classes.
 FOREACH(c Directory RegularExpression SystemTools)
