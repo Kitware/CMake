@@ -52,6 +52,7 @@ CMAKE_CXX_SOURCES="\
   cmCacheManager \
   cmListFileCache \
   cmVariableWatch \
+  cmVersion \
   cmSourceGroup"
 
 CMAKE_C_SOURCES="\

@@ -22,6 +22,7 @@
 #include "cmMakefile.h"
 #include "cmLocalGenerator.h"
 #include "cmGlobalGenerator.h"
+#include "cmVersion.h"
 
 //#include <cmsys/RegularExpression.hxx>
 #include <cmsys/Process.h>
@@ -122,7 +123,8 @@ int cmCTestUpdateHandler::UpdateDirectory(cmCTest *ctest_inst)
     }
 
   os << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-     << "<Update mode=\"Client\" Generator=\"ctest-" << CMake_VERSION_FULL << "\">\n"
+     << "<Update mode=\"Client\" Generator=\"ctest-"
+     << cmVersion::GetCMakeVersion() << "\">\n"
      << "\t<Site>" << m_CTest->GetDartConfiguration("Site") << "</Site>\n"
      << "\t<BuildName>" << m_CTest->GetDartConfiguration("BuildName")
      << "</BuildName>\n"

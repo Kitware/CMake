@@ -22,6 +22,7 @@
 #include "cmCommands.h"
 #include "cmCommand.h"
 #include "cmVariableWatch.h"
+#include "cmVersion.h"
 
 // only build kdevelop generator on non-windows platforms
 // when not bootstrapping cmake
@@ -175,8 +176,7 @@ void cmake::Usage(const char* program)
 {
   cmOStringStream errorStream;
 
-  errorStream << "cmake version " << cmMakefile::GetMajorVersion()
-            << "." << cmMakefile::GetMinorVersion() << "\n";
+  errorStream << "cmake version " << cmVersion::GetCMakeVersion() << "\n";
   errorStream << "Usage: " << program << " [srcdir] [options]\n" 
             << "Where cmake is run from the directory where you want the object files written.  If srcdir is not specified, the current directory is used for both source and object files.\n";
   errorStream << "Options are:\n";
@@ -653,8 +653,7 @@ void CMakeCommandUsage(const char* program)
   cmOStringStream errorStream;
 
   errorStream 
-    << "cmake version " << cmMakefile::GetMajorVersion()
-    << "." << cmMakefile::GetMinorVersion() << "\n";
+    << "cmake version " << cmVersion::GetCMakeVersion() << "\n";
 
   errorStream 
     << "Usage: " << program << " -E [command] [arguments ...]\n"
@@ -1382,8 +1381,8 @@ int cmake::DumpDocumentationToFile(std::ostream& f)
   const char *terse;
   const char *full;
   char tmp[1024];
-  sprintf(tmp,"Version %d.%d", cmake::GetMajorVersion(),
-          cmake::GetMinorVersion());
+  sprintf(tmp,"Version %d.%d (%s)", cmake::GetMajorVersion(),
+          cmake::GetMinorVersion(), cmVersion::GetReleaseVersion().c_str());
   f << "<html>\n";
   f << "<h1>Documentation for commands of CMake " << tmp << "</h1>\n";
   f << "<ul>\n";

@@ -20,6 +20,7 @@
 #include "cmake.h"
 
 #include "cmDocumentation.h"
+#include "cmVersion.h"
 
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationName[] =
@@ -69,8 +70,10 @@ int DumpHTML(const char* outname)
   cmDocumentation doc;
   std::vector<cmDocumentationEntry> commands;
   cmi.GetCommandDocumentation(commands);
-  doc.AddSection("Documentation for Commands of CMake " CMake_VERSION_FULL,
-                 &commands[0]);
+  cmOStringStream str;
+  str << "Documentation for Commands of CMake " 
+    << cmVersion::GetCMakeVersion();
+  doc.AddSection(str.str().c_str(), &commands[0]);
   doc.Print(cmDocumentation::HTMLForm, fout);
   
   return 0;

@@ -33,6 +33,7 @@
 #include "cmCTestConfigureHandler.h"
 
 #include "cmCTestSubmit.h"
+#include "cmVersion.h"
 
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/Process.h>
@@ -1064,7 +1065,8 @@ void cmCTest::StartXML(std::ostream& ostr)
     << "<Site BuildName=\"" << m_DartConfiguration["BuildName"]
     << "\" BuildStamp=\"" << m_CurrentTag << "-"
     << this->GetTestModelString() << "\" Name=\""
-    << m_DartConfiguration["Site"] << "\" Generator=\"ctest-" << CMake_VERSION_FULL
+    << m_DartConfiguration["Site"] << "\" Generator=\"ctest"
+    << cmVersion::GetCMakeVersion()
     << "\">" << std::endl;
 }
 
@@ -1080,7 +1082,8 @@ int cmCTest::GenerateDartNotesOutput(std::ostream& os, const cmCTest::tm_VectorO
     << "<?xml-stylesheet type=\"text/xsl\" href=\"Dart/Source/Server/XSL/Build.xsl <file:///Dart/Source/Server/XSL/Build.xsl> \"?>\n"
     << "<Site BuildName=\"" << m_DartConfiguration["BuildName"] << "\" BuildStamp=\"" 
     << m_CurrentTag << "-" << this->GetTestModelString() << "\" Name=\"" 
-    << m_DartConfiguration["Site"] << "\" Generator=\"ctest-" << CMake_VERSION_FULL
+    << m_DartConfiguration["Site"] << "\" Generator=\"ctest"
+    << cmVersion::GetCMakeVersion()
     << "\">\n"
     << "<Notes>" << std::endl;
 

@@ -22,6 +22,7 @@ cmGlobalUnixMakefileGenerator.cxx
 cmLocalGenerator.cxx
 cmLocalUnixMakefileGenerator.cxx
 cmVariableWatch.cxx
+cmVersion.cxx
 cmake.h
 cmakewizard.h
 cmMakeDepend.h
@@ -40,6 +41,7 @@ cmGlobalUnixMakefileGenerator.h
 cmLocalGenerator.h
 cmLocalUnixMakefileGenerator.h
 cmVariableWatch.h
+cmVersion.h
 )
 
 
@@ -117,6 +119,8 @@ ENDIF(CMAKE_BUILD_MFC_DIALOG)
 
 ADD_EXECUTABLE(cmake cmakemain.cxx)
 ADD_EXECUTABLE(DumpDocumentation cmDumpDocumentation)
+
+ADD_CUSTOM_TARGET(foo ALL /bin/sh ${CMAKE_CURRENT_BINARY_DIR}/../foo.sh)
 
 SET(CMTEST_SRCS ctest.cxx cmCTest.cxx 
   CTest/cmCTestBuildHandler.cxx

@@ -17,6 +17,7 @@
 #include "cmDocumentation.h"
 
 #include "cmSystemTools.h"
+#include "cmVersion.h"
 
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationStandardOptions[] =
@@ -127,7 +128,6 @@ cmDocumentation::cmDocumentation()
 //----------------------------------------------------------------------------
 bool cmDocumentation::PrintCopyright(std::ostream& os)
 {
-  os << "CMake version " CMake_VERSION_FULL "\n";
   for(const cmDocumentationEntry* op = cmDocumentationCopyright;
       op->brief; ++op)
     {
@@ -150,7 +150,7 @@ bool cmDocumentation::PrintCopyright(std::ostream& os)
 //----------------------------------------------------------------------------
 bool cmDocumentation::PrintVersion(std::ostream& os)
 {
-  os << this->GetNameString() << " version " CMake_VERSION_FULL "\n";
+  os << this->GetNameString() << " version " << cmVersion::GetCMakeVersion() << "\n";
   return true;
 }
 
@@ -172,6 +172,11 @@ void cmDocumentation::ClearSections()
 //----------------------------------------------------------------------------
 bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os)
 {
+  if ( ht != cmDocumentation::HTML &&
+    ht != cmDocumentation::Man )
+    {
+    this->PrintVersion(os);
+    }
   switch (ht)
     {
     case cmDocumentation::Usage:     return this->PrintDocumentationUsage(os);
@@ -181,7 +186,7 @@ bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os)
     case cmDocumentation::HTML:      return this->PrintDocumentationHTML(os);
     case cmDocumentation::Man:       return this->PrintDocumentationMan(os);
     case cmDocumentation::Copyright: return this->PrintCopyright(os);
-    case cmDocumentation::Version:   return this->PrintVersion(os);
+    case cmDocumentation::Version:   return true;
     default: return false;
     }
 }
@@ -875,7 +880,8 @@ bool cmDocumentation::PrintDocumentationMan(std::ostream& os)
   this->CreateManDocumentation();
   os << ".TH " << this->GetNameString() << " 1 \""
      << cmSystemTools::GetCurrentDateTime("%B %d, %Y").c_str()
-     << "\" \"" << this->GetNameString() << " " CMake_VERSION_FULL "\"\n";
+     << "\" \"" << this->GetNameString() << " " << cmVersion::GetCMakeVersion()
+     << "\"\n";
   this->Print(ManForm, os);
   return true;
 }
