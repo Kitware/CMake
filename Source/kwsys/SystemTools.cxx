@@ -967,6 +967,11 @@ bool SystemTools::CopyFileAlways(const char* source, const char* destination)
     return false;
     }
 
+  if ( SystemTools::FileExists(destination) && !SystemTools::RemoveFile(destination) )
+    {
+    return false;
+    }
+
 #if defined(_WIN32) || defined(__CYGWIN__)
   kwsys_ios::ofstream fout(destination, 
                      kwsys_ios::ios::binary | kwsys_ios::ios::out | kwsys_ios::ios::trunc);
