@@ -165,6 +165,11 @@ IF(BUILD_TESTING)
       CustomCommand
       ${CMake_BINARY_DIR}/Tests/CustomCommand/bin)
 
+    ADD_TEST(FindPackageTest ${EXECUTABLE_OUTPUT_PATH}/cmaketest 
+      ${CMake_SOURCE_DIR}/Tests/FindPackageTest
+      ${CMake_BINARY_DIR}/Tests/FindPackageTest
+      FindPackageTest)
+
     ADD_TEST(SystemInformation ${EXECUTABLE_OUTPUT_PATH}/cmaketest 
       ${CMake_SOURCE_DIR}/Tests/SystemInformation
       ${CMake_BINARY_DIR}/Tests/SystemInformation 
