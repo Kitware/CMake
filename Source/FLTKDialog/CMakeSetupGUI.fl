@@ -25,7 +25,7 @@ class CMakeSetupGUI {open
       }
       Fl_Input binaryPathTextInput {
         label {Where do you want to build the binaries: }
-        callback {SetBinaryPath( binaryPathTextInput->value() );}
+        callback {SetBinaryPath( binaryPathTextInput->value() );} selected
         xywh {219 50 200 20} labelsize 11 when 8 textsize 11
       }
       Fl_Button {} {
@@ -50,7 +50,7 @@ class CMakeSetupGUI {open
           label {Cache Values} open
           xywh {40 98 485 190} type BOTH_ALWAYS box DOWN_FRAME labelsize 11 align 5 when 1 resizable
         } {
-          Fl_Pack propertyListPack {selected
+          Fl_Pack propertyListPack {
             xywh {40 99 485 185} resizable
           } {}
         }
@@ -72,8 +72,8 @@ class CMakeSetupGUI {open
   } {}
   Function {Show(void)} {return_type {virtual void}
   } {}
-  Function {SetBinaryPath(const char *)} {return_type {virtual void}
+  Function {SetBinaryPath(const char *)} {return_type {virtual bool}
   } {}
-  Function {SetSourcePath(const char *)} {return_type {virtual void}
+  Function {SetSourcePath(const char *)} {return_type {virtual bool}
   } {}
 } 

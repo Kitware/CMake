@@ -21,10 +21,9 @@ CMakeSetupGUIImplementation
 {
   m_BuildPathChanged = false;
   char fname[1024];
-  //::GetModuleFileName(NULL,fname,1023);
+  //::GetModuleFileName(NULL,fname,1023);  // Didn't found this method. (?)
   m_PathToExecutable = cmSystemTools::GetProgramPath(fname).c_str();
   m_PathToExecutable += "/cmake.exe";
-  std::cout << "Path to executable = " << m_PathToExecutable << std::endl;
 }
 
 
@@ -122,15 +121,28 @@ CMakeSetupGUIImplementation
 /**
  * Set the source path
  */
-void
+bool
 CMakeSetupGUIImplementation
 ::SetSourcePath( const char * path )
 {
-  if( VerifySourcePath( path ) )
+
+  if( !path || strlen(path)==0 )
   {
-    m_WhereSource = path;
-    sourcePathTextInput->value( path );
+    fl_alert("Please select the path to the sources");
+    return false; 
   }
+
+  string expandedAbsolutePath = ExpandPathAndMakeItAbsolute( path );
+  
+  sourcePathTextInput->value( expandedAbsolutePath.c_str() );
+    
+  if( VerifySourcePath( expandedAbsolutePath ) )
+  {
+    m_WhereSource = expandedAbsolutePath;
+    return true;
+  }
+
+  return false;
 
 }
 
@@ -138,24 +150,58 @@ CMakeSetupGUIImplementation
 
 
 /**
+ * Expand environment variables in the path and make it absolute
+ */
+string
+CMakeSetupGUIImplementation
+::ExpandPathAndMakeItAbsolute( const string & inputPath ) const
+{
+
+  char expandedPath[3000];
+  filename_expand( expandedPath, inputPath.c_str() );
+
+  char absolutePath[3000];
+  filename_absolute( absolutePath, expandedPath );
+  
+  string expandedAbsolutePath = absolutePath;
+
+  return expandedAbsolutePath;
+    
+}
+
+
+/**
  * Set the binary path
  */
-void
+bool
 CMakeSetupGUIImplementation
 ::SetBinaryPath( const char * path )
 {
 
-  if( VerifyBinaryPath( path ) )
+  if( !path || strlen(path)==0 )
   {
-    if( m_WhereBuild != path )
-    {
-      m_BuildPathChanged = true;
-      m_WhereBuild = path;
-    }
-    binaryPathTextInput->value( path );
+    fl_alert("Please select the path to the binaries");
+    return false;
   }
 
+  string expandedAbsolutePath = ExpandPathAndMakeItAbsolute( path );
+  
+  binaryPathTextInput->value( expandedAbsolutePath.c_str() );
+
+  if( !VerifyBinaryPath( expandedAbsolutePath.c_str() ) )
+  {
+    return false;
+  }
+
+  if( m_WhereBuild != expandedAbsolutePath )
+  {
+    m_BuildPathChanged = true;
+    m_WhereBuild = expandedAbsolutePath;
+  }
+  
   LoadCacheFromDiskToGUI();
+
+  return true;
 
 }
 
@@ -166,23 +212,36 @@ CMakeSetupGUIImplementation
  */
 bool
 CMakeSetupGUIImplementation
-::VerifyBinaryPath( const char * path )
+::VerifyBinaryPath( const string & path ) const
 {
 
-  if( !path || strlen(path)==0 )
+  bool pathIsOK = false;
+
+  if( filename_isdir( path.c_str() ) )
   {
-    fl_alert("Please select the path to the binaries");
-    return false; 
+    pathIsOK = true;
+  }
+  else
+  {
+    int userWantsToCreateDirectory = 
+      fl_ask("The directory \n %s \n Doesn't exist. Do you want to create it ?",
+              path.c_str() );
+    
+    if( userWantsToCreateDirectory  )
+    {
+      string command = "mkdir ";
+      command += path;
+      system( command.c_str() );
+      pathIsOK = true;
+    }
+    else
+    {
+      pathIsOK = false; 
+    }
   }
 
+  return pathIsOK;
 
-  if( !filename_isdir( path ) )
-  {
-    fl_alert("%s \n Doesn't exist or is not a directory",path);
-    return false; 
-  }
-
-  return true;
 }
 
 
@@ -192,19 +251,12 @@ CMakeSetupGUIImplementation
  */
 bool
 CMakeSetupGUIImplementation
-::VerifySourcePath( const char * path )
+::VerifySourcePath( const string & path ) const
 {
 
-  if( !path || strlen(path)==0 )
+  if( !filename_isdir( path.c_str() ) )
   {
-    fl_alert("Please select the path to the sources");
-    return false; 
-  }
-
-
-  if( !filename_isdir( path ) )
-  {
-    fl_alert("%s \n Doesn't exist or is not a directory",path);
+    fl_alert("The Source directory \n %s \n Doesn't exist or is not a directory", path.c_str() );
     return false; 
   }
 
@@ -222,17 +274,18 @@ CMakeSetupGUIImplementation
 ::BuildProjectFiles( void )
 {
 
-  // Verify that source path is a valid directory
-  if( !VerifySourcePath( sourcePathTextInput->value() ) )
+  // Take and verify the source path from the GUI
+  if( !SetSourcePath( sourcePathTextInput->value() ) )
   { 
     return;
   }
-
-  // Verify that binary path is a valid directory
-  if( !VerifyBinaryPath( binaryPathTextInput->value() ) )
-  { 
+  
+  // Take and verify the binary path from the GUI
+  if( !SetBinaryPath( binaryPathTextInput->value() ) )
+  {
     return;
   }
+  
 
   SaveCacheFromGUI();
   

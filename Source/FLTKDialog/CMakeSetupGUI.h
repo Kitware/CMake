@@ -41,7 +41,7 @@ public:
   virtual void BrowseForSourcePath(void);
   virtual void BrowseForBinaryPath(void);
   virtual void Show(void);
-  virtual void SetBinaryPath(const char *);
-  virtual void SetSourcePath(const char *);
+  virtual bool SetBinaryPath(const char *);
+  virtual bool SetSourcePath(const char *);
 };
 #endif

@@ -26,14 +26,17 @@ public:
   virtual void BuildProjectFiles( void );
   virtual void BrowseForBinaryPath( void );
   virtual void BrowseForSourcePath( void );
-  virtual void SetBinaryPath( const char * path );
-  virtual void SetSourcePath( const char * path );
-  virtual bool VerifyBinaryPath( const char * path );
-  virtual bool VerifySourcePath( const char * path );
+  virtual bool SetBinaryPath( const char * path );
+  virtual bool SetSourcePath( const char * path );
   virtual void SaveCacheFromGUI( void );
   virtual void LoadCacheFromDiskToGUI( void );
   virtual void FillCacheGUIFromCacheManager( void );
   virtual void FillCacheManagerFromCacheGUI( void );
+
+private:  
+  virtual bool VerifyBinaryPath( const string & path ) const;
+  virtual bool VerifySourcePath( const string & path ) const;
+  virtual string ExpandPathAndMakeItAbsolute( const string & inputPath ) const;
 
 private:
   fltk::PropertyList   m_CacheEntriesList;

@@ -126,8 +126,8 @@ void CMakeSetupGUI::BrowseForBinaryPath(void) {
 void CMakeSetupGUI::Show(void) {
 }
 
-void CMakeSetupGUI::SetBinaryPath(const char *) {
+bool CMakeSetupGUI::SetBinaryPath(const char *) {
 }
 
-void CMakeSetupGUI::SetSourcePath(const char *) {
+bool CMakeSetupGUI::SetSourcePath(const char *) {
 }

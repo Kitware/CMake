@@ -26,7 +26,8 @@ PropertyItemRow::PropertyItemRow( PropertyItem * pItem )
  
   Fl_Tile * group = new Fl_Tile(0,0,nameWidth+textWidth,rowHeight,"");
 
-  group->parent()->size( nameWidth + textWidth , 100 );
+  // Make the parent Fl_Pack widget at least a row wide.
+  group->parent()->size( nameWidth + textWidth , rowHeight );
 
   Fl_Button * name = new 
                 Fl_Button( firstColumn, 0, nameWidth, rowHeight, 
