@@ -834,7 +834,19 @@ void cmLocalUnixMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
     linkFlags += this->GetSafeDefinition(build.c_str());
     linkFlags += " ";
     }
-
+#ifdef _WIN32
+  const std::vector<cmSourceFile*>& sources = t.GetSourceFiles();
+  for(std::vector<cmSourceFile*>::const_iterator i = sources.begin();
+      i != sources.end(); ++i)
+    {
+    if((*i)->GetSourceExtension() == "def")
+      {
+      linkFlags += this->GetSafeDefinition("CMAKE_LINK_DEF_FILE_FLAG");
+      linkFlags += (*i)->GetFullPath();
+      linkFlags += " ";
+      }
+    }
+#endif
   this->OutputLibraryRule(fout, name, t,
                           this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_PREFIX"),
                           this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_SUFFIX"),
