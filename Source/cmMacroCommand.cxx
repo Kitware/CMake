@@ -87,13 +87,9 @@ IsFunctionBlocked(const char *name, const std::vector<std::string> &args,
 }
 
 bool cmMacroFunctionBlocker::
-ShouldRemove(const char *name, const std::vector<std::string> &args, 
+ShouldRemove(const char *, const std::vector<std::string> &, 
              cmMakefile &) 
 {
-  if (!strcmp(name,"ENDFOREACH") && args[0] == m_Args[0])
-    {
-    return true;
-    }
   return false;
 }
 
