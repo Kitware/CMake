@@ -492,7 +492,7 @@ void kwsysProcess_Delete(kwsysProcess* cp)
     }
   if(cp->Win9x)
     {
-    /* Close or handle to the forwarding executable file.  This will
+    /* Close our handle to the forwarding executable file.  This will
        cause it to be deleted.  */
     kwsysProcessCleanupHandle(&cp->Win9xHandle);
     }
