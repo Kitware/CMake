@@ -1096,7 +1096,8 @@ kwsys_stl::string SystemTools::FindFile(const char* name,
                                        const kwsys_stl::vector<kwsys_stl::string>& userPaths)
 {
   // Add the system search path to our path first
-  kwsys_stl::vector<kwsys_stl::string> path;
+  kwsys_stl::vector<kwsys_stl::string> path; 
+  SystemTools::GetPath(path, "CMAKE_FILE_PATH");
   SystemTools::GetPath(path);
   // now add the additional paths
   path.insert(path.end(), userPaths.begin(), userPaths.end());
@@ -1145,13 +1146,14 @@ kwsys_stl::string SystemTools::FindProgram(
     {
     return SystemTools::CollapseFullPath(tryPath.c_str());
     }
-
-  // Add the system search path to our path.
   kwsys_stl::vector<kwsys_stl::string> path;
+  SystemTools::GetPath(path, "CMAKE_PROGRAM_PATH");
+  // Add the system search path to our path.
   if (!no_system_path)
     {
     SystemTools::GetPath(path);
     }
+  
   // now add the additional paths
   path.insert(path.end(), userPaths.begin(), userPaths.end());
   
