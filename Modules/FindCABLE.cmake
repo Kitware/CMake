@@ -60,10 +60,10 @@ ELSE(CABLE_BUILD_DIR)
   # Find the cable include directory in a path relative to the cable
   # executable.
   FIND_PATH(CABLE_INCLUDE_DIR CableTclFacility/ctCalls.h
-            ${CABLE_ROOT_BIN}/../share/Cable/include)
+            ${CABLE_ROOT_BIN}/../include/Cable)
 
   # Find the WrapTclFacility library in a path relative to the cable
   # executable.
   FIND_LIBRARY(CABLE_TCL_LIBRARY NAMES CableTclFacility PATHS
-               ${CABLE_ROOT_BIN}/../lib)  
+               ${CABLE_ROOT_BIN}/../lib/Cable)
 ENDIF(CABLE_BUILD_DIR)
