@@ -4847,99 +4847,91 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
     }
 
   // now run the compiled test if we can find it
-  // See if the executable exists as written.
+  std::vector<std::string> attempted;
   std::vector<std::string> failed;
-  std::string fullPath;
-  if(cmSystemTools::FileExists(m_TestCommand.c_str())
-    && !cmSystemTools::FileIsDirectory(m_TestCommand.c_str()))
+  std::string tempPath;
+  std::string filepath = 
+    cmSystemTools::GetFilenamePath(m_TestCommand);
+  std::string filename = 
+    cmSystemTools::GetFilenameName(m_TestCommand);
+  // if full path specified then search that first
+  if (filepath.size())
     {
-    fullPath = cmSystemTools::CollapseFullPath(m_TestCommand.c_str());
+    tempPath = filepath;
+    tempPath += "/";
+    tempPath += filename;
+    attempted.push_back(tempPath);
+    if(m_ConfigType.size())
+      {
+      tempPath = filepath;
+      tempPath += "/";
+      tempPath += m_ConfigType;
+      tempPath += "/";
+      tempPath += filename;
+      attempted.push_back(tempPath);
+      }
     }
+  // otherwise search local dirs
   else
     {
-    failed.push_back(m_TestCommand);
-    std::string tryPath = m_TestCommand;
-    tryPath += cmSystemTools::GetExecutableExtension();
-    if(cmSystemTools::FileExists(tryPath.c_str())
-      && !cmSystemTools::FileIsDirectory(tryPath.c_str()))
+    attempted.push_back(filename);
+    if(m_ConfigType.size())
       {
-      fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
+      tempPath = m_ConfigType;
+      tempPath += "/";
+      tempPath += filename;
+      attempted.push_back(tempPath);
       }
+    }
+  // if m_ExecutableDirectory is set try that as well
+  if (m_ExecutableDirectory.size())
+    {
+    tempPath = m_ExecutableDirectory;
+    tempPath += "/";
+    tempPath += m_TestCommand;
+    attempted.push_back(tempPath);
+    if(m_ConfigType.size())
+      {
+      tempPath = m_ExecutableDirectory;
+      tempPath += "/";
+      tempPath += m_ConfigType;
+      tempPath += "/";
+      tempPath += filename;
+      attempted.push_back(tempPath);
+      }
+    }
+
+  // store the final location in fullPath
+  std::string fullPath;
+  
+  // now look in the paths we specified above
+  for(unsigned int ai=0; 
+      ai < attempted.size() && fullPath.size() == 0; ++ai)
+    {
+    // first check without exe extension
+    if(cmSystemTools::FileExists(attempted[ai].c_str())
+       && !cmSystemTools::FileIsDirectory(attempted[ai].c_str()))
+      {
+      fullPath = cmSystemTools::CollapseFullPath(attempted[ai].c_str());
+      }
+    // then try with the exe extension
     else
       {
-      failed.push_back(tryPath);
-      // try the Debug extension
-      tryPath = m_ConfigType + "/";
-      tryPath += cmSystemTools::GetFilenameName(m_TestCommand);
-      if(m_ConfigType.size() && cmSystemTools::FileExists(tryPath.c_str())
-        && !cmSystemTools::FileIsDirectory(tryPath.c_str()))
+      failed.push_back(attempted[ai].c_str());
+      tempPath = attempted[ai];
+      tempPath += cmSystemTools::GetExecutableExtension();
+      if(cmSystemTools::FileExists(tempPath.c_str())
+         && !cmSystemTools::FileIsDirectory(tempPath.c_str()))
         {
-        fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
+        fullPath = cmSystemTools::CollapseFullPath(tempPath.c_str());
         }
       else
         {
-        failed.push_back(tryPath);
-        tryPath += cmSystemTools::GetExecutableExtension();
-        if(m_ConfigType.size() && cmSystemTools::FileExists(tryPath.c_str())
-          && !cmSystemTools::FileIsDirectory(tryPath.c_str()))
-          {
-          fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
-          }
-        else
-          {
-          failed.push_back(tryPath);
-          tryPath = m_ExecutableDirectory;
-          tryPath += "/";
-          tryPath += m_TestCommand;
-          tryPath += cmSystemTools::GetExecutableExtension();
-          if(cmSystemTools::FileExists(tryPath.c_str())
-            && !cmSystemTools::FileIsDirectory(tryPath.c_str()))
-            {
-            fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
-            }
-          else
-            {
-            failed.push_back(tryPath);
-            tryPath = m_ExecutableDirectory;
-            tryPath += "/";
-            if(m_ConfigType.size())
-              {
-              tryPath += m_ConfigType + "/";
-              }
-            tryPath += m_TestCommand;
-            tryPath += cmSystemTools::GetExecutableExtension();
-            if(cmSystemTools::FileExists(tryPath.c_str())
-              && !cmSystemTools::FileIsDirectory(tryPath.c_str()))
-              {
-              fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
-              }
-            else
-              {
-              failed.push_back(tryPath);
-              std::string filepath = cmSystemTools::GetFilenamePath(m_TestCommand);
-              std::string filename = cmSystemTools::GetFilenameName(m_TestCommand);
-              tryPath = filepath + "/";
-              if(m_ConfigType.size())
-                {
-                tryPath += m_ConfigType;
-                tryPath += "/";
-                }
-              tryPath += filename;
-              if ( cmSystemTools::FileExists(tryPath.c_str()) &&
-                !cmSystemTools::FileIsDirectory(tryPath.c_str()) )
-                {
-                fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
-                }
-              else
-                {
-                failed.push_back(tryPath);
-                }
-              }
-            }
-          }
+        failed.push_back(tempPath.c_str());
         }
       }
     }
+
   if(!cmSystemTools::FileExists(fullPath.c_str()))
     {
     out << "Could not find path to executable, perhaps it was not built: " <<
