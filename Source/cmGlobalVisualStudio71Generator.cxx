@@ -41,6 +41,7 @@ cmLocalGenerator *cmGlobalVisualStudio71Generator::CreateLocalGenerator()
 
 // Write a SLN file to the stream
 void cmGlobalVisualStudio71Generator::WriteSLNFile(std::ostream& fout,
+                                                   cmLocalGenerator* root,
                                                    std::vector<cmLocalGenerator*>& generators)
 {
   // Write out the header for a SLN file
@@ -56,7 +57,11 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(std::ostream& fout,
   // add it to this SLN file
   unsigned int i;
   for(i = 0; i < generators.size(); ++i)
-    {
+    {  
+    if(this->IsExcluded(root, generators[i]))
+      {
+      continue;
+      }
     cmMakefile* mf = generators[i]->GetMakefile();
 
     // Get the source directory from the makefile
