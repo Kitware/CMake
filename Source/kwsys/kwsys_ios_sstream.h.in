@@ -34,6 +34,7 @@
 # ifdef _MSC_VER
 #  pragma warning (push, 1)
 #  pragma warning (disable: 4702)
+#  pragma warning (disable: 4995) /* Old streams are deprecated.  */
 # endif
 # if @KWSYS_NAMESPACE@_IOS_USE_ANSI
 #  include <strstream>
@@ -41,6 +42,11 @@
 #  include <strstream.h>
 # elif @KWSYS_NAMESPACE@_IOS_USE_STRSTREA_H
 #  include <strstrea.h>
+# endif
+# if @KWSYS_NAMESPACE@_IOS_USE_ANSI
+#  include <new> // Need placement operator new.
+# else
+#  include <new.h> // Need placement operator new.
 # endif
 # ifdef _MSC_VER
 #  pragma warning(pop)
@@ -50,7 +56,6 @@
 // ostringstream and istringstream classes.
 
 # include <@KWSYS_NAMESPACE@/stl/string>
-# include <new> // Need placement operator new.
 
 namespace @KWSYS_NAMESPACE@_ios
 {
