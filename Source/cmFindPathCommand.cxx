@@ -56,16 +56,13 @@ bool cmFindPathCommand::Invoke(std::vector<std::string>& args)
   helpString += args[1] + " can be found";
   const char* cacheValue
     = cmCacheManager::GetInstance()->GetCacheValue(args[0].c_str());
-  if(cacheValue)
+  if(cacheValue && strcmp(cacheValue, "NOTFOUND"))
     { 
-    if(strcmp(cacheValue, "NOTFOUND") != 0)
-      {
       m_Makefile->AddDefinition(args[0].c_str(), cacheValue);
       cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
                                                    cacheValue,
                                                    helpString.c_str(),
                                                    cmCacheManager::PATH);
-      }
     return true;
     }
 

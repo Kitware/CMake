@@ -544,3 +544,20 @@ bool cmSystemTools::IsOn(const char* val)
     }
   return (v == "ON" || v == "1" || v == "YES" || v == "TRUE" || v == "Y");
 }
+
+bool cmSystemTools::IsOff(const char* val)
+{
+  if (!val)
+    {
+    return true;
+    }
+  std::basic_string<char> v = val;
+  
+  for(std::basic_string<char>::iterator c = v.begin();
+      c != v.end(); c++)
+    {
+    *c = toupper(*c);
+    }
+  return (v == "OFF" || v == "0" || v == "NO" || v == "FALSE" || 
+	  v == "N" || v == "NOTFOUND");
+}

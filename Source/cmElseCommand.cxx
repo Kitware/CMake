@@ -51,7 +51,7 @@ bool cmElseCommand::Invoke(std::vector<std::string>& args)
 
   // check to see if the argument is defined first
   const char *def = m_Makefile->GetDefinition(args[0].c_str());
-  if(cmSystemTools::IsOn(def))
+  if(!cmSystemTools::IsOff(def))
     {
     // add block
     cmIfFunctionBlocker *f = new cmIfFunctionBlocker();

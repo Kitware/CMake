@@ -63,17 +63,14 @@ bool cmFindFileCommand::Invoke(std::vector<std::string>& args)
   helpString += args[1] + " file be found";
   const char* cacheValue
     = cmCacheManager::GetInstance()->GetCacheValue(define);
-  if(cacheValue)
+  if(cacheValue && strcmp(cacheValue, "NOTFOUND"))
     {
-    if(strcmp(cacheValue, "NOTFOUND") != 0)
-      {
       m_Makefile->AddDefinition(define, cacheValue);
       // update help string if changed
       cmCacheManager::GetInstance()->AddCacheEntry(define,
                                                    cacheValue,
                                                    helpString.c_str(),
                                                    cmCacheManager::FILEPATH);
-      }
     return true;
     }
   // if it is not in the cache, then search the system path

@@ -151,9 +151,21 @@ public:
   ///! Remove a file.
   static void RemoveFile(const char* source);
   
-  ///! does a string indicate a true or on value ?
+  /** 
+   * does a string indicate a true or on value ? This is not the same
+   * as ifdef. 
+   */ 
   static bool IsOn(const char* val);
   
+  /** 
+   * does a string indicate a false or off value ? Note that this is
+   * not the same as !IsOn(...) because there are a number of
+   * ambiguous values such as "/usr/local/bin" a path will result in
+   * IsON and IsOff both returning false. Note that the special path
+   * NOTFOUND will cause IsOff to return true. 
+   */
+   static bool IsOff(const char* val);
+
   static long int ModifiedTime(const char* filename);
 
 private:
