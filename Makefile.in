@@ -1,0 +1,10 @@
+srcdir        = @srcdir@
+VPATH         = @srcdir@
+
+CMAKE_CONFIG_DIR = @CMAKE_CONFIG_DIR@
+
+all:
+	cd Source; ${MAKE}
+
+
+
