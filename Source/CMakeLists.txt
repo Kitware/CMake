@@ -1,4 +1,4 @@
-INCLUDE (${CMAKE_ROOT}/Modules/FindFLTK.cmake)
+INCLUDE (${CMake_SOURCE_DIR}/Modules/FindFLTK.cmake)
 IF(FLTK_LIBRARY)
   IF(FLTK_INCLUDE_PATH)
     OPTION(BUILD_FLTK_GUI "Build FLTK CMake GUI." "OFF")
@@ -48,10 +48,10 @@ IF (WIN32)
 ENDIF (WIN32)
 
 IF (UNIX)
-  INCLUDE (${CMAKE_ROOT}/Modules/FindCurses.cmake OPTIONAL)
+  INCLUDE (${CMake_SOURCE_DIR}/Modules/FindCurses.cmake OPTIONAL)
   IF (CURSES_LIBRARY)
     SUBDIRS(CursesDialog/form)
-    INCLUDE(${CMAKE_ROOT}/Source/CursesDialog/CMakeLists.txt)
+    INCLUDE(${CMake_SOURCE_DIR}/Source/CursesDialog/CMakeLists.txt)
   ENDIF (CURSES_LIBRARY)
 ENDIF (UNIX)
 
