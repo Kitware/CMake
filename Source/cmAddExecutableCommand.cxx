@@ -69,10 +69,10 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args)
     if ( macdir.size() == 0 )
       {
       macdir = m_Makefile->GetCurrentOutputDirectory();
-      if(macdir.size() && macdir[macdir.size()-1] != '/')
-        {
-        macdir += "/";
-        }
+      }
+    if(macdir.size() && macdir[macdir.size()-1] != '/')
+      {
+      macdir += "/";
       }
     macdir += exename + ".app/Contents/";
     std::string f2 = macdir + "Info.plist";
