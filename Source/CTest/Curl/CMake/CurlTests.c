@@ -182,8 +182,11 @@ rc = gethostbyaddr_r(address, length, type, &h,
 #undef NULL
 #define NULL (void *)0
 
+#if 0
 int
 gethostbyname_r(const char *, struct hostent *, struct hostent_data *);
+#endif
+
 int
 main ()
 {
@@ -202,8 +205,11 @@ gethostbyname_r(NULL, NULL, NULL);
 #undef NULL
 #define NULL (void *)0
 
+#if 0
 int
 gethostbyname_r(const char *, struct hostent *, struct hostent_data *);
+#endif
+
 int
 main ()
 {
@@ -221,8 +227,11 @@ gethostbyname_r(NULL, NULL, NULL);
 #undef NULL
 #define NULL (void *)0
 
+#if 0
 struct hostent *
 gethostbyname_r(const char *, struct hostent *, char *, int, int *);
+#endif
+
 int
 main ()
 {
@@ -239,8 +248,11 @@ gethostbyname_r(NULL, NULL, NULL, 0, NULL);
 #undef NULL
 #define NULL (void *)0
 
+#if 0
 struct hostent *
 gethostbyname_r(const char *, struct hostent *, char *, int, int *);
+#endif
+
 int
 main ()
 {
@@ -256,9 +268,12 @@ gethostbyname_r(NULL, NULL, NULL, 0, NULL);
 #undef NULL
 #define NULL (void *)0
 
+#if 0
 int
 gethostbyname_r(const char *, struct hostent *, char *, size_t,
 struct hostent **, int *);
+#endif
+
 int
 main ()
 {
@@ -275,9 +290,12 @@ gethostbyname_r(NULL, NULL, NULL, 0, NULL, NULL);
 #undef NULL
 #define NULL (void *)0
 
+#if 0
 int
 gethostbyname_r(const char *, struct hostent *, char *, size_t,
 struct hostent **, int *);
+#endif
+
 int
 main ()
 {
