@@ -71,9 +71,14 @@ int main(int argc, char** argv)
       }
     }
 
+  std::string cacheDir = cmSystemTools::GetCurrentWorkingDirectory();
   for(i=1; i < args.size(); ++i)
     {
     std::string arg = args[i];
+    if(arg.find("-B",0) == 0)
+      {
+      cacheDir = arg.substr(2);
+      }
     if(arg.find("-help",0) != std::string::npos ||
        arg.find("--help",0) != std::string::npos ||
        arg.find("/?",0) != std::string::npos ||
@@ -86,7 +91,7 @@ int main(int argc, char** argv)
 
   cmSystemTools::DisableRunCommandOutput();
 
-  cmCacheManager::GetInstance()->LoadCache(cmSystemTools::GetCurrentWorkingDirectory().c_str());
+  cmCacheManager::GetInstance()->LoadCache(cacheDir.c_str());
 
   if (debug)
     {
