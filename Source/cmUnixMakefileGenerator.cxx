@@ -547,27 +547,41 @@ void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
   // Search the list of libraries that will be linked into
   // the executable
   emitted.clear();
+  bool dll = this->BuildingSharedLibs();
   for(lib2 = libs.begin(); lib2 != libs.end(); ++lib2)
     {
     if( ! emitted.insert(lib2->first).second ) continue;
 
     const char* cacheValue
       = cmCacheManager::GetInstance()->GetCacheValue(lib2->first.c_str());
-    if(cacheValue 
-       && (strcmp(m_Makefile->GetCurrentOutputDirectory(), cacheValue) != 0))
+    if(cacheValue )
       {
-      std::string libpath = cacheValue;
-      if(m_LibraryOutputPath.size())
+      // if there is a cache value then this is a library that cmake
+      // knows how to build, so we can depend on it
+      std::string libpath;
+      if (strcmp(m_Makefile->GetCurrentOutputDirectory(), cacheValue) != 0)
         {
-        libpath = m_LibraryOutputPath;
-        libpath += "lib";
+        // if the library is not in the current directory, then get the full
+        // path to it
+        std::string libpath = cacheValue;
+        if(m_LibraryOutputPath.size())
+          {
+          libpath = m_LibraryOutputPath;
+          libpath += "lib";
+          }
+        else
+          {
+          libpath += "/lib";
+          }
         }
       else
         {
-        libpath += "/lib";
+        // library is in current Makefile so use lib as a prefix
+        libpath = "lib";
         }
-      libpath += lib2->first; 
-      bool dll = this->BuildingSharedLibs();
+      // add the library name
+      libpath += lib2->first;
+      // add the correct extension
       if(dll)
         {
         libpath += m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
@@ -580,7 +594,6 @@ void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
       }
     }
   fout << "\n\n";
-
   emitted.clear();
   for(lib2 = libs.begin(); lib2 != libs.end(); ++lib2)
     {
@@ -1019,7 +1032,8 @@ void cmUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
 	  break;
 	case cmTarget::WIN32_EXECUTABLE:
 	case cmTarget::EXECUTABLE:
-	  fout << "\t$(INSTALL_PROGRAM) " << l->first 
+          fout << "\t$(INSTALL_PROGRAM) " << l->first
+               << cmSystemTools::GetExecutableExtension()
 	       << " " << prefix << l->second.GetInstallPath() << "\n";
 	  break;
 	case cmTarget::INSTALL:
@@ -1030,10 +1044,30 @@ void cmUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
 	    {
 	    fout << "\t@ echo \"Installing " << *i << " \"\n"; 
 	    fout << "\t@if [ -e " << *i << " ] ; then \\\n";
-	    fout << "\t   $(INSTALL) " << *i 
+            // avoid using install-sh to install install-sh
+            // does not work on windows.... 
+           if(*i == "install-sh")
+              {
+              fout << "\t   cp ";
+              }
+            else
+              {
+              fout << "\t   $(INSTALL) ";
+              }
+	    fout << *i
 		 << " " << prefix << l->second.GetInstallPath() << "; \\\n";
 	    fout << "\t elif [ -e ${srcdir}/" << *i << " ] ; then \\\n";
-	    fout << "\t   $(INSTALL) ${srcdir}/" << *i 
+            // avoid using install-sh to install install-sh
+            // does not work on windows....
+            if(*i == "install-sh")
+              {
+              fout << "\t   cp ";
+              }
+            else
+              {
+              fout << "\t   $(INSTALL) ";
+              }
+	    fout << "${srcdir}/" << *i 
 		 << " " << prefix << l->second.GetInstallPath() << "; \\\n";
 	    fout << "\telse \\\n";
 	    fout << "\t   echo \" ERROR!!! Unable to find: " << *i 
@@ -1103,11 +1137,15 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
 		       0,
                        "${CMAKE_COMMAND} "
                        "-H${CMAKE_SOURCE_DIR} -B${CMAKE_BINARY_DIR}");
-  this->OutputMakeRule(fout, 
-                       "Rebuild cmake dummy rule",
-                       "${CMAKE_COMMAND}",
-                       0,
-                       "echo \"cmake might be out of date\"");
+  // do not put this command in for the cmake project
+  if(strcmp(m_Makefile->GetProjectName(), "CMake") != 0)
+    {
+    this->OutputMakeRule(fout, 
+                         "Rebuild cmake dummy rule",
+                         "${CMAKE_COMMAND}",
+                         0,
+                         "echo \"cmake might be out of date\"");
+    }
   this->OutputMakeRule(fout, 
                        "Rule to keep make from removing Makefiles "
                        "if control-C is hit during a run of cmake.",

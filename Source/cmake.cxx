@@ -224,6 +224,11 @@ void cmake::AddCMakePaths(const std::vector<std::string>& args)
  
 int cmake::Generate(const std::vector<std::string>& args)
 {
+  if(args.size() == 1 && !cmSystemTools::FileExists("CMakeLists.txt"))
+    {
+    this->Usage(args[0].c_str());
+    return -1;
+    }
   // look for obvious request for help
   for(unsigned int i=1; i < args.size(); ++i)
     {

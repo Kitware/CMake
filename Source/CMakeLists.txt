@@ -10,7 +10,7 @@ IF(FLTK_LIBRARY)
 ENDIF(FLTK_LIBRARY)
 
 SOURCE_FILES(SRCS
-cmake
+cmake.cxx
 cmMakeDepend.cxx
 cmMakefile.cxx
 cmMakefileGenerator.cxx

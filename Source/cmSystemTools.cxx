@@ -125,7 +125,7 @@ void cmSystemTools::GetPath(std::vector<std::string>& path)
 
 const char* cmSystemTools::GetExecutableExtension()
 {
-#if defined(_WIN32)
+#if defined(_WIN32) || defined(__CYGWIN__)
   return ".exe";
 #else
   return "";

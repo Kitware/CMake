@@ -91,6 +91,15 @@ void foo() { std::list<int> l; }
   fi
 fi
 
+# find make to use to build cmake, prefer gmake
+AC_PATH_PROGS(RUNMAKE, gmake make)
 
 AC_OUTPUT(Makefile Source/Makefile)
+# build the CMakeBuildTargets program
+$RUNMAKE 
+./Source/cmake $fullSrcDir
+
+
+
+
 
