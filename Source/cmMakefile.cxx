@@ -1968,8 +1968,10 @@ cmSourceFile* cmMakefile::GetOrCreateSource(const char* sourceName,
     if ( ext.length() && ext[0] == '.' )
       {
       ext = ext.substr(1);
-      }
-    file.SetName(name_no_ext.c_str(), path.c_str(), ext.c_str(), false);
+      } 
+    bool headerFile = !(std::find( m_HeaderFileExtensions.begin(), m_HeaderFileExtensions.end(), ext ) ==
+                        m_HeaderFileExtensions.end());
+    file.SetName(name_no_ext.c_str(), path.c_str(), ext.c_str(), headerFile);
     }
   else
     {
