@@ -41,6 +41,7 @@
 #include "cmExportLibraryDependencies.cxx"
 #include "cmFindFileCommand.cxx"
 #include "cmFindLibraryCommand.cxx"
+#include "cmFindPackageCommand.cxx"
 #include "cmFindPathCommand.cxx"
 #include "cmFindProgramCommand.cxx"
 #include "cmForEachCommand.cxx"
@@ -126,6 +127,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmExportLibraryDependenciesCommand);
   commands.push_back(new cmFindFileCommand);
   commands.push_back(new cmFindLibraryCommand);
+  commands.push_back(new cmFindPackageCommand);
   commands.push_back(new cmFindPathCommand);
   commands.push_back(new cmFindProgramCommand);
   commands.push_back(new cmForEachCommand);
