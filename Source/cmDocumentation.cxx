@@ -342,6 +342,22 @@ void cmDocumentation::SetGeneratorsSection(const cmDocumentationEntry* section)
 }
 
 //----------------------------------------------------------------------------
+void cmDocumentation::SetSeeAlsoList(const cmDocumentationEntry* also)
+{
+  this->SeeAlsoString = ".B ";
+  for(const cmDocumentationEntry* i = also; i->brief; ++i)
+    {
+    this->SeeAlsoString += i->brief;
+    this->SeeAlsoString += (i+1)->brief? "(1), ":"(1)";    
+    }
+  cmDocumentationEntry e = {0, 0, 0};
+  e.brief = this->SeeAlsoString.c_str();
+  this->SeeAlsoSection.push_back(e);
+  e.brief = 0;
+  this->SeeAlsoSection.push_back(e);  
+}
+
+//----------------------------------------------------------------------------
 void cmDocumentation::PrintSection(std::ostream& os,
                                    const cmDocumentationEntry* section,
                                    const char* name)
@@ -362,6 +378,9 @@ void cmDocumentation::PrintSectionText(std::ostream& os,
 {
   if(name)
     {
+    os <<
+      "---------------------------------------"
+      "---------------------------------------\n";
     os << name << "\n\n";
     }
   if(!section) { return; }
@@ -772,10 +791,6 @@ void cmDocumentation::PrintDocumentationMan(std::ostream& os)
 void cmDocumentation::CreateUsageDocumentation()
 {
   this->ClearSections();
-  if(!this->NameSection.empty())
-    {
-    this->AddSection("Name", &this->NameSection[0]);
-    }
   if(!this->UsageSection.empty())
     {
     this->AddSection("Usage", &this->UsageSection[0]);
@@ -783,6 +798,10 @@ void cmDocumentation::CreateUsageDocumentation()
   if(!this->OptionsSection.empty())
     {
     this->AddSection("Command-Line Options", &this->OptionsSection[0]);
+    }
+  if(!this->GeneratorsSection.empty())
+    {
+    this->AddSection("Generators", &this->GeneratorsSection[0]);
     }
 }
 
@@ -802,13 +821,13 @@ void cmDocumentation::CreateFullDocumentation()
     {
     this->AddSection(0, &this->DescriptionSection[0]);
     }
-  if(!this->GeneratorsSection.empty())
-    {
-    this->AddSection("Generators", &this->GeneratorsSection[0]);
-    }
   if(!this->OptionsSection.empty())
     {
     this->AddSection("Command-Line Options", &this->OptionsSection[0]);
+    }
+  if(!this->GeneratorsSection.empty())
+    {
+    this->AddSection("Generators", &this->GeneratorsSection[0]);
     }
   if(!this->CommandsSection.empty())
     {
@@ -834,20 +853,24 @@ void cmDocumentation::CreateManDocumentation()
     {
     this->AddSection("DESCRIPTION", &this->DescriptionSection[0]);
     }
-  if(!this->GeneratorsSection.empty())
-    {
-    this->AddSection("GENERATORS", &this->GeneratorsSection[0]);
-    }
   if(!this->OptionsSection.empty())
     {
     this->AddSection("OPTIONS", &this->OptionsSection[0]);
+    }
+  if(!this->GeneratorsSection.empty())
+    {
+    this->AddSection("GENERATORS", &this->GeneratorsSection[0]);
     }
   if(!this->CommandsSection.empty())
     {
     this->AddSection("COMMANDS", &this->CommandsSection[0]);
     }
   this->AddSection("COPYRIGHT", cmDocumentationCopyright);
-  this->AddSection("MAILING LIST", cmDocumentationMailingList);
+  this->AddSection("MAILING LIST", cmDocumentationMailingList);  
+  if(!this->SeeAlsoSection.empty())
+    {
+    this->AddSection("SEE ALSO", &this->SeeAlsoSection[0]);
+    }
   this->AddSection("AUTHOR", cmDocumentationAuthor);
 }
 

@@ -41,7 +41,11 @@ static const cmDocumentationEntry cmDocumentationUsage[] =
 static const cmDocumentationEntry cmDocumentationDescription[] =
 {
   {0,
-   "CMake reads ... ", 0},
+   "The \"cmake\" executable is the CMake command-line interface.  It may "
+   "be used to configure projects in scripts.  Project configuration settings "
+   "may be specified on the command line with the -D option.  The -i option "
+   "will cause cmake to interactively prompt for such settings.", 0},
+  CMAKE_STANDARD_INTRODUCTION,
   {0,0,0}
 };
 
@@ -64,6 +68,14 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
   {"-N", "View mode only.",
    "Only load the cache. Do not actually run configure and generate steps."},
   {0,0,0}
+};
+
+//----------------------------------------------------------------------------
+static const cmDocumentationEntry cmDocumentationSeeAlso[] =
+{
+  {0, "ccmake", 0},
+  {0, "ctest", 0},
+  {0, 0, 0}
 };
 
 //----------------------------------------------------------------------------
@@ -107,6 +119,7 @@ int do_cmake(int ac, char** av)
     doc.SetGeneratorsSection(&generators[0]);
     doc.SetOptionsSection(cmDocumentationOptions);
     doc.SetCommandsSection(&commands[0]);
+    doc.SetSeeAlsoList(cmDocumentationSeeAlso);
     int result = doc.PrintRequestedDocumentation(std::cout)? 0:1;
     
     // If we were run with no arguments, but a CMakeLists.txt file

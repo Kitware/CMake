@@ -67,6 +67,9 @@ public:
   /** Set the generator descriptions for standard document generation.  */
   void SetGeneratorsSection(const cmDocumentationEntry*);
   
+  /** Set the see-also list of references to the other tools.  */
+  void SetSeeAlsoList(const cmDocumentationEntry*);
+  
   // Low-level interface for custom documents:
   
   /** Forms of documentation output.  */
@@ -136,6 +139,8 @@ private:
   std::vector<cmDocumentationEntry> OptionsSection;
   std::vector<cmDocumentationEntry> CommandsSection;
   std::vector<cmDocumentationEntry> GeneratorsSection;
+  std::vector<cmDocumentationEntry> SeeAlsoSection;
+  std::string SeeAlsoString;
   
   std::vector< const char* > Names;
   std::vector< const cmDocumentationEntry* > Sections;
