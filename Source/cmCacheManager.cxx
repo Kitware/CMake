@@ -213,6 +213,7 @@ bool cmCacheManager::LoadCache(const char* path,
 	  // not visible in the gui
 	  if (!internal)
 	    {
+            e.m_Type = INTERNAL;
             e.m_HelpString = "DO NOT EDIT, ";
             e.m_HelpString += entryKey;
             e.m_HelpString += " loaded from external file.  "
