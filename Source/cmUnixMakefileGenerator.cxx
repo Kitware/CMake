@@ -243,14 +243,18 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
   for(std::vector<std::string>::iterator libDir = libdirs.begin();
       libDir != libdirs.end(); ++libDir)
     { 
-    std::string::size_type pos = libDir->find("-L");
-    if((pos == std::string::npos || pos > 0)
-       && libDir->find("${") == std::string::npos)
+    std::string libpath = cmSystemTools::EscapeSpaces(libDir->c_str());
+    if(libpath != "/usr/lib")
       {
-      linkLibs += "-L";
+      std::string::size_type pos = libDir->find("-L");
+      if((pos == std::string::npos || pos > 0)
+         && libDir->find("${") == std::string::npos)
+        {
+        linkLibs += "-L";
+        }
+      linkLibs += libpath;
+      linkLibs += " ";
       }
-    linkLibs += cmSystemTools::EscapeSpaces(libDir->c_str());
-    linkLibs += " ";
     }
   std::string librariesLinked;
   const cmTarget::LinkLibraries& libs = tgt.GetLinkLibraries();
@@ -273,9 +277,13 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
       std::string dir, file;
       cmSystemTools::SplitProgramPath(lib->first.c_str(),
                                       dir, file);
-      linkLibs += "-L";
-      linkLibs += cmSystemTools::EscapeSpaces(dir.c_str());
-      linkLibs += " ";
+      std::string libpath = cmSystemTools::EscapeSpaces(dir.c_str());
+      if(libpath != "/usr/lib")
+        {
+        linkLibs += "-L";
+        linkLibs += libpath;
+        linkLibs += " ";
+        }
       librariesLinked += "-l";
       cmRegularExpression libname("lib(.*)\\.(.*)");
       if(libname.find(file))
