@@ -1272,7 +1272,6 @@ bool RunCommandViaWin32(const char* command,
     }
   if ( !resProc.StartProcess(command, dir, verbose) )
     {
-    std::cout << "Problem starting command" << std::endl;
     return false;
     }
   resProc.Wait(timeout);
