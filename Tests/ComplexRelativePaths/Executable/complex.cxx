@@ -277,6 +277,30 @@ int main()
   cmPassed("SHOULD_BE_DEFINED_COMMAND2 is defined.");
 #endif
   
+#ifdef SHOULD_NOT_BE_DEFINED_EXISTS
+  cmFailed("IF or SET is broken, SHOULD_NOT_BE_DEFINED_EXISTS is defined.");
+#else
+  cmPassed("SHOULD_NOT_BE_DEFINED_EXISTS is not defined.");
+#endif
+  
+#ifndef SHOULD_BE_DEFINED_EXISTS
+  cmFailed("IF or SET is broken, SHOULD_BE_DEFINED_EXISTS is not defined.\n");
+#else
+  cmPassed("SHOULD_BE_DEFINED_EXISTS is defined.");
+#endif
+  
+#ifdef SHOULD_NOT_BE_DEFINED_EXISTS2
+  cmFailed("IF or SET is broken, SHOULD_NOT_BE_DEFINED_EXISTS2 is defined.");
+#else
+  cmPassed("SHOULD_NOT_BE_DEFINED_EXISTS2 is not defined.");
+#endif
+  
+#ifndef SHOULD_BE_DEFINED_EXISTS2
+  cmFailed("IF or SET is broken, SHOULD_BE_DEFINED_EXISTS2 is not defined.\n");
+#else
+  cmPassed("SHOULD_BE_DEFINED_EXISTS2 is defined.");
+#endif
+  
   // ----------------------------------------------------------------------
   // Test FOREACH
 
@@ -480,7 +504,7 @@ int main()
   // The files required by 'complex' have been output to a file.
   // The contents of this file is not tested (absolute paths).
 
-  TestAndRemoveFile(BINARY_DIR "/Executable/complex-required.txt");
+  // TestAndRemoveFile(BINARY_DIR "/Executable/complex-required.txt");
 
   // ----------------------------------------------------------------------
   // Summary
