@@ -1185,14 +1185,14 @@ void *XML_GetBuffer(XML_Parser parser, int len)
       bufferLim = newBuf + bufferSize;
 #ifdef XML_CONTEXT_BYTES
       if (bufferPtr) {
-        int keep = bufferPtr - buffer;
-        if (keep > XML_CONTEXT_BYTES)
-          keep = XML_CONTEXT_BYTES;
-        memcpy(newBuf, &bufferPtr[-keep], bufferEnd - bufferPtr + keep);
+        int xmKeep = bufferPtr - buffer;
+        if (xmKeep > XML_CONTEXT_BYTES)
+          xmKeep = XML_CONTEXT_BYTES;
+        memcpy(newBuf, &bufferPtr[-xmKeep], bufferEnd - bufferPtr + xmKeep);
         FREE(buffer);
         buffer = newBuf;
-        bufferEnd = buffer + (bufferEnd - bufferPtr) + keep;
-        bufferPtr = buffer + keep;
+        bufferEnd = buffer + (bufferEnd - bufferPtr) + xmKeep;
+        bufferPtr = buffer + xmKeep;
       }
       else {
         bufferEnd = newBuf + (bufferEnd - bufferPtr);
