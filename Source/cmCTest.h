@@ -150,6 +150,7 @@ private:
     int         m_ReturnValue;
     std::string m_CompletionStatus;
     std::string m_Output;
+    std::string m_RegressionImages;
   };
 
   struct cmCTestBuildErrorWarning
@@ -215,7 +216,7 @@ private:
   /**
    * Generate the Dart compatible output
    */
-  void GenerateDartOutput(std::ostream& os);
+  void GenerateDartTestOutput(std::ostream& os);
   void GenerateDartBuildOutput(std::ostream& os, 
                                std::vector<cmCTestBuildErrorWarning>);
 
@@ -226,6 +227,8 @@ private:
 
   bool RunMakeCommand(const char* command, std::string* output,
     int* retVal, const char* dir, bool verbose, int timeout, std::ofstream& ofs);
+
+  std::string GenerateRegressionImages(const std::string& xml);
 };
 
 #endif
