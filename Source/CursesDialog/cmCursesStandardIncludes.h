@@ -35,20 +35,18 @@
 // This is a hack to prevent warnings about these functions being
 // declared but not referenced.
 #if defined(__sgi) && !defined(__GNUC__)
-/*REFERENCED*/ speed_t cfgetospeed (const struct termios *__t);
-/*REFERENCED*/ int cfsetospeed (struct termios *__t, speed_t __s); 
-/*REFERENCED*/ speed_t cfgetispeed (const struct termios *__t);
-/*REFERENCED*/ int cfsetispeed (struct termios *__t, speed_t __s);
-/*REFERENCED*/ int tcgetattr (int __fd, struct termios *__t);
-/*REFERENCED*/ int tcsetattr (int __fd, int __act, const struct termios *__t);
-enum
+class cmCursesStandardIncludesHack
 {
-  cmCursesStandardIncludesHackRef1 = sizeof(cfgetospeed(0)),
-  cmCursesStandardIncludesHackRef2 = sizeof(cfgetispeed(0)),
-  cmCursesStandardIncludesHackRef3 = sizeof(tcgetattr(0, 0)),
-  cmCursesStandardIncludesHackRef4 = sizeof(tcsetattr(0, 0, 0)),
-  cmCursesStandardIncludesHackRef5 = sizeof(cfsetospeed(0,0)),
-  cmCursesStandardIncludesHackRef6 = sizeof(cfsetispeed(0,0))
+public:
+  enum
+  {
+    Ref1 = sizeof(cfgetospeed(0)),
+    Ref2 = sizeof(cfgetispeed(0)),
+    Ref3 = sizeof(tcgetattr(0, 0)),
+    Ref4 = sizeof(tcsetattr(0, 0, 0)),
+    Ref5 = sizeof(cfsetospeed(0,0)),
+    Ref6 = sizeof(cfsetispeed(0,0))
+  };
 };
 #endif
 
