@@ -275,7 +275,7 @@ public:
   /**
    * Get the list of targets
    */
-  const cmTargets &GetTargets() { return m_Targets; }
+  cmTargets &GetTargets() { return m_Targets; }
 
   /**
    * Get a list of the build subdirectories.

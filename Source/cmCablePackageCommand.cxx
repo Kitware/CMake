@@ -15,6 +15,7 @@
 =========================================================================*/
 #include "cmCablePackageCommand.h"
 #include "cmCacheManager.h"
+#include "cmTarget.h"
 
 
 cmCablePackageCommand::~cmCablePackageCommand()
@@ -115,6 +116,9 @@ bool cmCablePackageCommand::Invoke(std::vector<std::string>& args)
                                depends,
                                outputs, m_TargetName.c_str());
   
+  // add the source list to the target
+  m_Makefile->GetTargets()[m_TargetName.c_str()].m_SourceLists.push_back(m_PackageName);
+
   return true;
 }
 
