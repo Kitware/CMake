@@ -80,6 +80,12 @@ public:
   ///! If ignore lib prefix is true, then do not strip lib from the name of a library.
   void SetIgnoreLibPrefix(bool s) { m_IgnoreLibPrefix = s; }
 
+  /**
+   * If true, then explicitly pass MAKEFLAGS on the make all target for makes
+   * that do not use environment variables.
+   *
+   */
+  void SetPassMakeflags(bool s){m_PassMakeflags = s;}
   
 protected:
   void AddDependenciesToSourceFile(cmDependInformation const*info,
@@ -227,6 +233,7 @@ protected:
   std::string m_ExecutableOutputPath;
   std::string m_LibraryOutputPath;
   bool m_WindowsShell;
+  bool m_PassMakeflags;
 private:
 };
 

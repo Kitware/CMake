@@ -55,7 +55,7 @@ cmLocalGenerator *cmGlobalBorlandMakefileGenerator::CreateLocalGenerator()
   lg->SetIncludeDirective("!include");
   lg->SetWindowsShell(true);
   lg->SetMakefileVariableSize(32);
-
+  lg->SetPassMakeflags(true);
   lg->SetGlobalGenerator(this);
   return lg;
 }

@@ -31,6 +31,7 @@ cmLocalUnixMakefileGenerator::cmLocalUnixMakefileGenerator()
   m_IncludeDirective = "include";
   m_MakefileVariableSize = 0;
   m_IgnoreLibPrefix = false;
+  m_PassMakeflags = false;
 }
 
 cmLocalUnixMakefileGenerator::~cmLocalUnixMakefileGenerator()
@@ -232,6 +233,14 @@ void cmLocalUnixMakefileGenerator::OutputMakefile(const char* file,
   std::string checkCache = m_Makefile->GetHomeOutputDirectory();
   checkCache += "/cmake.check_cache";
   checkCache = cmSystemTools::ConvertToOutputPath(checkCache.c_str());
+  // most unix makes will pass the command line flags to make down
+  // to sub invoked makes via an environment variable.  However, some
+  // makes do not support that, so you have to pass the flags explicitly
+  const char* allRule = "$(MAKE) $(MAKESILENT) all";
+  if(m_PassMakeflags)
+    {
+    allRule = "$(MAKE) $(MAKESILENT) -$(MAKEFLAGS) all";
+    }
   // Set up the default target as the VERY first target, so that make with no arguments will run it
   this->
     OutputMakeRule(fout, 
@@ -241,8 +250,8 @@ void cmLocalUnixMakefileGenerator::OutputMakefile(const char* file,
                    "$(MAKE) $(MAKESILENT) cmake.depends",
                    "$(MAKE) $(MAKESILENT) cmake.check_depends",
                    "$(MAKE) $(MAKESILENT) -f cmake.check_depends",
-                   "$(MAKE) $(MAKESILENT) all");
-  
+                   allRule);
+    
   // Generation of SILENT target must be after default_target.
   if(!m_Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"))
     {
