@@ -37,7 +37,9 @@ class CMakeSetupDialog : public CDialog
 // Construction
 public:
   CMakeSetupDialog(const CMakeCommandLineInfo& cmdInfo, 
-                   CWnd* pParent = NULL);       
+                   CWnd* pParent = NULL); 
+
+  ~CMakeSetupDialog();
   // return the cmake that is currently being used
   cmake *GetCMakeInstance() {
     return m_CMakeInstance; }

@@ -9,10 +9,12 @@
 #include "MakeHelp.h"
 #include "PathDialog.h"
 #include "CMakeSetupDialog.h"
-#include "CMakeCommandLineInfo.h" 
+#include "CMakeCommandLineInfo.h"
+#include "../cmListFileCache.h"
 #include "../cmCacheManager.h"
 #include "../cmake.h"
 #include "../cmGlobalGenerator.h"
+#include "../cmDynamicLoader.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -165,6 +167,14 @@ CMakeSetupDialog::CMakeSetupDialog(const CMakeCommandLineInfo& cmdInfo,
   m_CMakeInstance = new cmake;
   m_CMakeInstance->SetProgressCallback(updateProgress, (void *)this);
   
+}
+
+CMakeSetupDialog::~CMakeSetupDialog()
+{
+  delete m_CMakeInstance;
+  // clean up globals 
+  cmListFileCache::GetInstance()->ClearCache(); 
+  cmDynamicLoader::FlushCache();
 }
 
 void CMakeSetupDialog::DoDataExchange(CDataExchange* pDX)
