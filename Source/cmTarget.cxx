@@ -232,7 +232,7 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
   // missing.  Start from the back and keep adding.
   
   LinkLibraries newLinkLibraries = m_LinkLibraries;
-  std::set<std::string> done, visited;
+  std::set<cmStdString> done, visited;
   for(LinkLibraries::reverse_iterator lib = m_LinkLibraries.rbegin();
       lib != m_LinkLibraries.rend(); ++lib)
     {
@@ -297,8 +297,8 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
 
 void cmTarget::Emit( const std::string& lib,
                      const DependencyMap& dep_map,
-                     std::set<std::string>& emitted,
-                     std::set<std::string>& visited,
+                     std::set<cmStdString>& emitted,
+                     std::set<cmStdString>& visited,
                      std::vector<std::string>& link_line ) const
 {
   // It's already been emitted
@@ -317,8 +317,8 @@ void cmTarget::Emit( const std::string& lib,
     {
     if( dep_map.find(lib) != dep_map.end() ) // does it have dependencies?
       {
-      const std::set<std::string>& dep_on = dep_map.find( lib )->second;
-      std::set<std::string>::const_iterator i;
+      const std::set<cmStdString>& dep_on = dep_map.find( lib )->second;
+      std::set<cmStdString>::const_iterator i;
       for( i = dep_on.begin(); i != dep_on.end(); ++i )
         {
         Emit( *i, dep_map, emitted, visited, link_line );
@@ -373,7 +373,7 @@ void cmTarget::GatherDependencies( const cmMakefile& mf,
 
 bool cmTarget::DependsOn( const std::string& lib1, const std::string& lib2,
                           const DependencyMap& dep_map,
-                          std::set<std::string>& visited ) const
+                          std::set<cmStdString>& visited ) const
 {
   if( !visited.insert( lib1 ).second )
     {
@@ -391,7 +391,7 @@ bool cmTarget::DependsOn( const std::string& lib1, const std::string& lib2,
     return false; // lib1 doesn't have any dependencies
     }
 
-  const std::set<std::string>& dep_set = dep_map.find(lib1)->second;
+  const std::set<cmStdString>& dep_set = dep_map.find(lib1)->second;
 
   if( dep_set.end() != dep_set.find( lib2 )  )
     {
@@ -399,7 +399,7 @@ bool cmTarget::DependsOn( const std::string& lib1, const std::string& lib2,
     }
 
   // Do a recursive check: does lib1 depend on x which depends on lib2?
-  for( std::set<std::string>::const_iterator itr = dep_set.begin();
+  for( std::set<cmStdString>::const_iterator itr = dep_set.begin();
        itr != dep_set.end(); ++itr )
     {
       if( this->DependsOn( *itr, lib2, dep_map, visited ) )

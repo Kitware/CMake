@@ -249,7 +249,7 @@ void cmDSWWriter::WriteProject(std::ostream& fout,
       }
     }
 
-  std::set<std::string>::const_iterator i, end;
+  std::set<cmStdString>::const_iterator i, end;
   // write utility dependencies.
   i = target.GetUtilities().begin();
   end = target.GetUtilities().end();

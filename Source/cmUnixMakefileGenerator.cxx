@@ -907,8 +907,8 @@ void cmUnixMakefileGenerator::OutputDependLibs(std::ostream& fout)
         }
 
       // Now, look at all utilities specific to this target.
-      const std::set<std::string>& tutils = l->second.GetUtilities();
-      for(std::set<std::string>::const_iterator util = tutils.begin();
+      const std::set<cmStdString>& tutils = l->second.GetUtilities();
+      for(std::set<cmStdString>::const_iterator util = tutils.begin();
           util != tutils.end(); ++util)
         {
         // Record that this utility was used.

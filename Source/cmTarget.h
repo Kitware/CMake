@@ -113,7 +113,7 @@ public:
    */
   void AddUtility(const char* u) { m_Utilities.insert(u);}
   ///! Get the utilities used by this target
-  std::set<std::string>const& GetUtilities() const { return m_Utilities; }
+  std::set<cmStdString>const& GetUtilities() const { return m_Utilities; }
 
   void AnalyzeLibDependencies( const cmMakefile& mf );
 
@@ -122,12 +122,12 @@ private:
    * This map holds the dependency graph. map[x] returns a set of
    * direct dependencies of x.
    */
-  typedef std::map< std::string, std::set< std::string > > DependencyMap;
+  typedef std::map< cmStdString, std::set< cmStdString > > DependencyMap;
 
   /**
    * Maps a library name to its internal structure
    */
-  typedef std::map< std::string, std::pair<std::string,LinkLibraryType> > LibTypeMap;
+  typedef std::map< cmStdString, std::pair<cmStdString,LinkLibraryType> > LibTypeMap;
 
   /**
    * Emits the library \param lib and all its dependencies into
@@ -139,8 +139,8 @@ private:
    */
   void Emit( const std::string& lib,
              const DependencyMap& dep_map,
-             std::set<std::string>& emitted,
-             std::set<std::string>& visited,
+             std::set<cmStdString>& emitted,
+             std::set<cmStdString>& visited,
              std::vector<std::string>& link_line ) const;
 
   /**
@@ -161,7 +161,7 @@ private:
    */
   bool DependsOn( const std::string& lib1, const std::string& lib2,
                   const DependencyMap& dep_map,
-                  std::set<std::string>& visited ) const;
+                  std::set<cmStdString>& visited ) const;
 
 private:
   std::vector<cmCustomCommand> m_CustomCommands;
@@ -169,11 +169,11 @@ private:
   TargetType m_TargetType;
   std::vector<cmSourceFile*> m_SourceFiles;
   LinkLibraries m_LinkLibraries;
-  std::set<std::string> m_PrevLinkedLibraries;
+  std::set<cmStdString> m_PrevLinkedLibraries;
   std::vector<std::string> m_LinkDirectories;
   bool m_InAll;
   std::string m_InstallPath;
-  std::set<std::string> m_Utilities;
+  std::set<cmStdString> m_Utilities;
 };
 
 typedef std::map<cmStdString,cmTarget> cmTargets;
