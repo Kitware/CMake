@@ -68,7 +68,7 @@ void cmMakeDepend::SetMakefile(cmMakefile* makefile)
         info->m_FullPath = this->FullPath(i->m_FullPath.c_str());
         this->AddFileToSearchPath(info->m_FullPath.c_str());
         info->m_IncludeName = i->m_FullPath;
-        info->m_ClassFileIndex = i;
+        info->m_ClassFileIndex = &*i;
         m_DependInformation.push_back(info);
         }
       }
