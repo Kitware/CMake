@@ -551,7 +551,7 @@ case $system in
 	:
    else
       echo "Using $CXX -xar -o for creating .a libraries"
-      CMAKE_AR="$CXX -xar -o"
+      CMAKE_AR="$CXX"
       CMAKE_AR_ARGS="-xar -o"
    fi
 esac

@@ -1042,7 +1042,7 @@ void cmUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
 	  for (i = sf.begin(); i != sf.end(); ++i)
 	    {
 	    fout << "\t@ echo \"Installing " << *i << " \"\n"; 
-	    fout << "\t@if [ -e " << *i << " ] ; then \\\n";
+	    fout << "\t@if [ -f " << *i << " ] ; then \\\n";
             // avoid using install-sh to install install-sh
             // does not work on windows.... 
            if(*i == "install-sh")
@@ -1055,7 +1055,7 @@ void cmUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
               }
 	    fout << *i
 		 << " " << prefix << l->second.GetInstallPath() << "; \\\n";
-	    fout << "\t elif [ -e ${srcdir}/" << *i << " ] ; then \\\n";
+	    fout << "\t elif [ -f ${srcdir}/" << *i << " ] ; then \\\n";
             // avoid using install-sh to install install-sh
             // does not work on windows....
             if(*i == "install-sh")
