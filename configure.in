@@ -3,8 +3,7 @@ AC_INIT()
 
 AC_CONFIG_HEADER(Source/cmConfigure.h)
 
-CMAKE_CONFIG_DIR=`pwd`
-AC_SUBST(CMAKE_CONFIG_DIR)
+
 
 #
 # check for some programs we use
@@ -50,6 +49,17 @@ else
 	AC_MSG_RESULT($system)
     fi
 fi
+
+
+CMAKE_CONFIG_DIR=`pwd`
+AC_SUBST(CMAKE_CONFIG_DIR)
+case $system in 
+	CYGWIN_NT*)
+		CMAKE_CONFIG_DIR=`pwd`
+		CMAKE_CONFIG_DIR="\"$CMAKE_CONFIG_DIR\""
+	;;
+esac
+
 
 CMAKE_ANSI_CFLAGS=""
 CMAKE_ANSI_CXXFLAGS=""
