@@ -317,6 +317,7 @@ private:
   // log holds the output and results hold the different memmory errors.
   bool ProcessMemCheckOutput(const std::string& str, std::string& log, int* results);
   bool ProcessMemCheckValgrindOutput(const std::string& str, std::string& log, int* results);
+  bool ProcessMemCheckPurifyOutput(const std::string& str, std::string& log, int* results);
 
   //! Initialize memory checking subsystem.
   bool InitializeMemoryChecking();

@@ -586,7 +586,7 @@ int cmCTest::UpdateDirectory()
   std::ofstream os; 
   if ( !this->OpenOutputFile(m_CurrentTag, "Update.xml", os) )
     {
-    std::cout << "Cannot open log file" << std::endl;
+    std::cerr << "Cannot open log file" << std::endl;
     }
   std::string start_time = ::CurrentTime();
  
@@ -906,7 +906,7 @@ int cmCTest::ConfigureDirectory()
     std::ofstream os; 
     if ( !this->OpenOutputFile(m_CurrentTag, "Configure.xml", os) )
       {
-      std::cout << "Cannot open log file" << std::endl;
+      std::cerr << "Cannot open log file" << std::endl;
       }
     std::string start_time = ::CurrentTime();
 
@@ -1240,20 +1240,20 @@ int cmCTest::CoverageDirectory()
   
   if ( files.size() == 0 )
     {
-    std::cout << "Cannot find any coverage information files (.da)" << std::endl;
+    std::cerr << "Cannot find any coverage information files (.da)" << std::endl;
     return 1;
     }
 
   std::ofstream log; 
   if (!this->OpenOutputFile("Temporary", "Coverage.log", log))
     {
-    std::cout << "Cannot open log file" << std::endl;
+    std::cerr << "Cannot open log file" << std::endl;
     return 1;
     }
   log.close();
   if (!this->OpenOutputFile(m_CurrentTag, "Coverage.xml", log))
     {
-    std::cout << "Cannot open log file" << std::endl;
+    std::cerr << "Cannot open log file" << std::endl;
     return 1;
     }
 
@@ -1282,9 +1282,9 @@ int cmCTest::CoverageDirectory()
       }
     else
       {
-      std::cout << "Run gcov on " << files[cc] << std::flush;
-      std::cout << " [" << command << "]" << std::endl;
-      std::cout << " - fail" << std::endl;
+      std::cerr << "Run gcov on " << files[cc] << std::flush;
+      std::cerr << " [" << command << "]" << std::endl;
+      std::cerr << " - fail" << std::endl;
       }
     }
   
@@ -1292,7 +1292,7 @@ int cmCTest::CoverageDirectory()
   glob = opath + "/*";
   if ( !cmSystemTools::SimpleGlob(glob, cfiles, 1) )
     {
-    std::cout << "Cannot found any coverage files" << std::endl;
+    std::cerr << "Cannot found any coverage files" << std::endl;
     return 1;
     }
   std::map<std::string, cmCTest::tm_VectorOfStrings > sourcefiles;
@@ -1350,7 +1350,7 @@ int cmCTest::CoverageDirectory()
       std::ifstream ifile(gfiles[cc].c_str());
       if ( !ifile )
         {
-        std::cout << "Cannot open file: " << gfiles[cc].c_str() << std::endl;
+        std::cerr << "Cannot open file: " << gfiles[cc].c_str() << std::endl;
         }
 
       ifile.seekg (0, std::ios::end);
@@ -1462,7 +1462,7 @@ int cmCTest::CoverageDirectory()
       std::cout << "Open file: " << cfileoutputname << std::endl;
       if (!this->OpenOutputFile(m_CurrentTag, cfileoutputname, cfileoutput))
         {
-        std::cout << "Cannot open log file: " << cfileoutputname << std::endl;
+        std::cerr << "Cannot open log file: " << cfileoutputname << std::endl;
         return 1;
         }
       local_start_time = ::CurrentTime();
@@ -1605,7 +1605,7 @@ bool cmCTest::OpenOutputFile(const std::string& path,
   stream.open(filename.c_str());
   if( !stream )
     {
-    std::cout << "Problem opening file: " << filename << std::endl;
+    std::cerr << "Problem opening file: " << filename << std::endl;
     return false;
     }
   return true;
@@ -1906,7 +1906,7 @@ bool cmCTest::InitializeMemoryChecking()
     }
   else
     {
-    std::cout << "Memory checker (MemoryCheckCommand) not set, or cannot find the specified program." 
+    std::cerr << "Memory checker (MemoryCheckCommand) not set, or cannot find the specified program." 
       << std::endl;
     return false;
     }
@@ -1943,12 +1943,12 @@ bool cmCTest::InitializeMemoryChecking()
   else if ( m_MemoryTester.find("boundschecker") )
     {
     m_MemoryTesterStyle = cmCTest::BOUNDS_CHECKER;
-    std::cout << "Bounds checker not yet implemented" << std::endl;
+    std::cerr << "Bounds checker not yet implemented" << std::endl;
     return false;
     }
   else
     {
-    std::cout << "Do not understand memory checker: " << m_MemoryTester.c_str() << std::endl;
+    std::cerr << "Do not understand memory checker: " << m_MemoryTester.c_str() << std::endl;
     return false;
     }
 
@@ -2082,7 +2082,7 @@ int cmCTest::SubmitResults()
       }
     else
       {
-      std::cout << "Problem globbing" << std::endl;
+      std::cerr << "Problem globbing" << std::endl;
       }
     }
   if ( this->CTestFileExists("MemCheck.xml") )
@@ -2107,12 +2107,12 @@ int cmCTest::SubmitResults()
     if ( !submit.SubmitUsingFTP(m_ToplevelPath+"/Testing/"+m_CurrentTag, 
         files, prefix, url) )
       {
-      std::cout << "  Problems when submitting via FTP" << std::endl;
+      std::cerr << "  Problems when submitting via FTP" << std::endl;
       return 0;
       }
     if ( !submit.TriggerUsingHTTP(files, prefix, m_DartConfiguration["TriggerSite"]) )
       {
-      std::cout << "  Problems when triggering via HTTP" << std::endl;
+      std::cerr << "  Problems when triggering via HTTP" << std::endl;
       return 0;
       }
     std::cout << "  Submission successfull" << std::endl;
@@ -2134,12 +2134,12 @@ int cmCTest::SubmitResults()
     url += m_DartConfiguration["DropSite"] + m_DartConfiguration["DropLocation"];
     if ( !submit.SubmitUsingHTTP(m_ToplevelPath+"/Testing/"+m_CurrentTag, files, prefix, url) )
       {
-      std::cout << "  Problems when submitting via HTTP" << std::endl;
+      std::cerr << "  Problems when submitting via HTTP" << std::endl;
       return 0;
       }
     if ( !submit.TriggerUsingHTTP(files, prefix, m_DartConfiguration["TriggerSite"]) )
       {
-      std::cout << "  Problems when triggering via HTTP" << std::endl;
+      std::cerr << "  Problems when triggering via HTTP" << std::endl;
       return 0;
       }
     std::cout << "  Submission successfull" << std::endl;
@@ -2147,7 +2147,7 @@ int cmCTest::SubmitResults()
     }
   else
     {
-    std::cout << "SCP submit not yet implemented" << std::endl;
+    std::cerr << "SCP submit not yet implemented" << std::endl;
     }
                           
   return 0;
@@ -2234,7 +2234,7 @@ void cmCTest::GenerateDartMemCheckOutput(std::ostream& os)
       }
     os 
       << "\t\t</Results>\n"
-      << "\t<Log>\n" << cmCTest::MakeXMLSafe(memcheckstr) << std::endl
+      << "\t<Log>\n" << memcheckstr << std::endl
       << "\t</Log>\n"
       << "\t</Test>" << std::endl;
     }
@@ -2974,11 +2974,67 @@ void cmCTest::EndXML(std::ostream& ostr)
   ostr << "</Site>" << std::endl;
 }
 
-bool cmCTest::ProcessMemCheckValgrindOutput(const std::string& str, std::string& log, int* results)
+bool cmCTest::ProcessMemCheckPurifyOutput(const std::string&, std::string& log, 
+  int* results)
+{
+  if ( !cmSystemTools::FileExists(m_MemoryTesterOutputFile.c_str()) )
+    {
+    log = "Cannot find Purify output file: " + m_MemoryTesterOutputFile;
+    std::cerr << log.c_str() << std::endl;
+    return false;
+    }
+
+  std::ifstream ifs(m_MemoryTesterOutputFile.c_str());
+  if ( !ifs )
+    {
+    log = "Cannot read Purify output file: " + m_MemoryTesterOutputFile;
+    std::cerr << log.c_str() << std::endl;
+    return false;
+    }
+
+  cmOStringStream ostr;
+  log = "";
+
+  cmsys::RegularExpression pfW("^\\[W\\] ([A-Z][A-Z][A-Z][A-Z]*): ");
+
+  std::string line;
+  while ( cmSystemTools::GetLineFromStream(ifs, line) )
+    {
+    int failure = cmCTest::NO_MEMORY_FAULT;
+    if ( pfW.find(line) )
+      {
+      int cc;
+      for ( cc = 0; cc < cmCTest::NO_MEMORY_FAULT; cc ++ )
+        {
+        if ( pfW.match(1) == cmCTestMemCheckResultStrings[cc] )
+          {
+          failure = cc;
+          break;
+          }
+        }
+      if ( failure )
+        {
+        ostr << "<b>" << cmCTestMemCheckResultStrings[failure] << "</b> ";
+        results[failure] ++;
+        }
+      else
+        {
+        std::cerr<< "Unknown Purify memory fault: " << pfW.match(1) << std::endl;
+        ostr << "*** Unknown Purify memory fault: " << pfW.match(1) << std::endl;
+        }
+      }
+    ostr << line << std::endl;
+    }
+  
+  log = ostr.str();
+  return true;
+}
+
+bool cmCTest::ProcessMemCheckValgrindOutput(const std::string& str, std::string& log, 
+  int* results)
 {
   std::vector<cmStdString> lines;
   cmSystemTools::Split(str.c_str(), lines);
-
 
   std::string::size_type cc;
 
@@ -2987,37 +3043,54 @@ bool cmCTest::ProcessMemCheckValgrindOutput(const std::string& str, std::string&
 
   cmsys::RegularExpression valgrindLine("^==[0-9][0-9]*==");
 
-  cmsys::RegularExpression vgFIM("== .*Invalid free\\(\\) / delete / delete\\[\\]");
-  cmsys::RegularExpression vgFMM("== .*Mismatched free\\(\\) / delete / delete \\[\\]");
-  cmsys::RegularExpression vgMLK("== .*[0-9][0-9]* bytes in [0-9][0-9]* blocks are definitely lost in loss record [0-9][0-9]* of [0-9]");
-  cmsys::RegularExpression vgPAR("== .*Syscall param .* contains unaddressable byte\\(s\\)");
-  cmsys::RegularExpression vgMPK1("== .*[0-9][0-9]* bytes in [0-9][0-9]* blocks are possibly lost in loss record [0-9][0-9]* of [0-9]");
-  cmsys::RegularExpression vgMPK2("== .*[0-9][0-9]* bytes in [0-9][0-9]* blocks are still reachable in loss record [0-9][0-9]* of [0-9]");
-  cmsys::RegularExpression vgUMC("== .*Conditional jump or move depends on uninitialised value\\(s\\)");
+  cmsys::RegularExpression vgFIM(
+    "== .*Invalid free\\(\\) / delete / delete\\[\\]");
+  cmsys::RegularExpression vgFMM(
+    "== .*Mismatched free\\(\\) / delete / delete \\[\\]");
+  cmsys::RegularExpression vgMLK(
+    "== .*[0-9][0-9]* bytes in [0-9][0-9]* blocks are definitely lost"
+    " in loss record [0-9][0-9]* of [0-9]");
+  cmsys::RegularExpression vgPAR(
+    "== .*Syscall param .* contains unaddressable byte\\(s\\)");
+  cmsys::RegularExpression vgMPK1(
+    "== .*[0-9][0-9]* bytes in [0-9][0-9]* blocks are possibly lost in"
+    " loss record [0-9][0-9]* of [0-9]");
+  cmsys::RegularExpression vgMPK2(
+    "== .*[0-9][0-9]* bytes in [0-9][0-9]* blocks are still reachable"
+    " in loss record [0-9][0-9]* of [0-9]");
+  cmsys::RegularExpression vgUMC(
+    "== .*Conditional jump or move depends on uninitialised value\\(s\\)");
   cmsys::RegularExpression vgUMR1("== .*Use of uninitialised value of size [0-9][0-9]*");
   cmsys::RegularExpression vgUMR2("== .*Invalid read of size [0-9][0-9]*");
   cmsys::RegularExpression vgUMR3("== .*Jump to the invalid address ");
-  cmsys::RegularExpression vgUMR4("== .*Syscall param .* contains uninitialised or unaddressable byte\\(s\\)");
+  cmsys::RegularExpression vgUMR4(
+    "== .*Syscall param .* contains uninitialised or unaddressable byte\\(s\\)");
   cmsys::RegularExpression vgIPW("== .*Invalid write of size [0-9]");
 
   for ( cc = 0; cc < lines.size(); cc ++ )
     {
     if ( valgrindLine.find(lines[cc]) )
       {
-           if ( vgFIM.find(lines[cc]) )  { results[cmCTest::FIM] ++; ostr << "FIM"; }
-      else if ( vgFMM.find(lines[cc]) )  { results[cmCTest::FMM] ++; ostr << "FMM"; }
-      else if ( vgMLK.find(lines[cc]) )  { results[cmCTest::MLK] ++; ostr << "MLK"; }
-      else if ( vgPAR.find(lines[cc]) )  { results[cmCTest::PAR] ++; ostr << "PAR"; }
-      else if ( vgMPK1.find(lines[cc]) ) { results[cmCTest::MPK] ++; ostr << "MPK"; }
-      else if ( vgMPK2.find(lines[cc]) ) { results[cmCTest::MPK] ++; ostr << "MPK"; }
-      else if ( vgUMC.find(lines[cc]) )  { results[cmCTest::UMC] ++; ostr << "UMC"; }
-      else if ( vgUMR1.find(lines[cc]) ) { results[cmCTest::UMR] ++; ostr << "UMR"; }
-      else if ( vgUMR2.find(lines[cc]) ) { results[cmCTest::UMR] ++; ostr << "UMR"; }
-      else if ( vgUMR3.find(lines[cc]) ) { results[cmCTest::UMR] ++; ostr << "UMR"; }
-      else if ( vgUMR4.find(lines[cc]) ) { results[cmCTest::UMR] ++; ostr << "UMR"; }
-      else if ( vgIPW.find(lines[cc]) )  { results[cmCTest::IPW] ++; ostr << "IPW"; }
+      int failure = cmCTest::NO_MEMORY_FAULT;
+           if ( vgFIM.find(lines[cc]) ) { failure = cmCTest::FIM; }
+      else if ( vgFMM.find(lines[cc]) ) { failure = cmCTest::FMM; }
+      else if ( vgMLK.find(lines[cc]) ) { failure = cmCTest::MLK; }
+      else if ( vgPAR.find(lines[cc]) ) { failure = cmCTest::PAR; }
+      else if ( vgMPK1.find(lines[cc]) ){ failure = cmCTest::MPK; }
+      else if ( vgMPK2.find(lines[cc]) ){ failure = cmCTest::MPK; }
+      else if ( vgUMC.find(lines[cc]) ) { failure = cmCTest::UMC; }
+      else if ( vgUMR1.find(lines[cc]) ){ failure = cmCTest::UMR; }
+      else if ( vgUMR2.find(lines[cc]) ){ failure = cmCTest::UMR; }
+      else if ( vgUMR3.find(lines[cc]) ){ failure = cmCTest::UMR; }
+      else if ( vgUMR4.find(lines[cc]) ){ failure = cmCTest::UMR; }
+      else if ( vgIPW.find(lines[cc]) ) { failure = cmCTest::IPW; }
 
-      ostr << lines[cc] << std::endl;
+      if ( failure != cmCTest::NO_MEMORY_FAULT )
+        {
+        ostr << "<b>" << cmCTestMemCheckResultStrings[failure] << "</b> ";
+        results[failure] ++;
+        }
+      ostr << cmCTest::MakeXMLSafe(lines[cc]) << std::endl;
       }
     }
   log = ostr.str();
@@ -3038,8 +3111,7 @@ bool cmCTest::ProcessMemCheckOutput(const std::string& str, std::string& log, in
     }
   else if ( m_MemoryTesterStyle == cmCTest::PURIFY )
     {
-    log.append("\nMemory checking style used was: ");
-    log.append("Purify");
+    return ProcessMemCheckPurifyOutput(str, log, results);
     }
   else if ( m_MemoryTesterStyle == cmCTest::BOUNDS_CHECKER )
     {
