@@ -226,7 +226,13 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& args)
     {
     return true;
     }
-  
+
+  // Construct a variable to report what file was loaded, if any.
+  // Start by removing the definition in case of failure.
+  std::string reportVar = "CMAKE_LOADED_COMMAND_";
+  reportVar += args[0];
+  m_Makefile->RemoveDefinition(reportVar.c_str());
+
   // the file must exist
   std::string fullPath = cmDynamicLoader::LibPrefix();
   fullPath += "cm" + args[0] + cmDynamicLoader::LibExtension();
@@ -269,7 +275,10 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& args)
     this->SetError(err.c_str());
     return false;
     }
-  
+
+  // Report what file was loaded for this command.
+  m_Makefile->AddDefinition(reportVar.c_str(), fullPath.c_str());
+
   // find the init function
   std::string initFuncName = args[0] + "Init";
   CM_INIT_FUNCTION initFunction
