@@ -32,13 +32,13 @@
 #include "cmIncludeRegularExpressionCommand.cxx"
 #include "cmInstallFilesCommand.cxx"
 #include "cmInstallTargetsCommand.cxx"
-#include "cmOutputRequiredFilesCommand.cxx"
 #include "cmLinkDirectoriesCommand.cxx"
 #include "cmLinkLibrariesCommand.cxx"
 #include "cmLoadCacheCommand.cxx"
 #include "cmMakeDirectoryCommand.cxx"
 #include "cmMessageCommand.cxx"
 #include "cmOptionCommand.cxx"
+#include "cmOutputRequiredFilesCommand.cxx"
 #include "cmProjectCommand.cxx"
 #include "cmSetCommand.cxx"
 #include "cmSiteNameCommand.cxx"
@@ -84,13 +84,13 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmIncludeRegularExpressionCommand);
   commands.push_back(new cmInstallFilesCommand);
   commands.push_back(new cmInstallTargetsCommand);
-  commands.push_back(new cmOutputRequiredFilesCommand);  
   commands.push_back(new cmLinkDirectoriesCommand);
   commands.push_back(new cmLinkLibrariesCommand);
   commands.push_back(new cmLoadCacheCommand);
   commands.push_back(new cmMakeDirectoryCommand);
   commands.push_back(new cmMessageCommand);
   commands.push_back(new cmOptionCommand);
+  commands.push_back(new cmOutputRequiredFilesCommand);  
   commands.push_back(new cmProjectCommand);
   commands.push_back(new cmSetCommand);
   commands.push_back(new cmSiteNameCommand);
