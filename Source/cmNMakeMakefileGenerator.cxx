@@ -521,7 +521,9 @@ void cmNMakeMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
     if (lib->first.size() == 0) continue;
     if(emitted.insert(lib->first).second)
       {
-      std::string regexp = ".*\\" + m_StaticLibraryExtension + "$";
+      std::string regexp = ".*\\";
+      regexp += m_Makefile->GetDefinition("CMAKE_STATICLIB_SUFFIX");
+      regexp += "$";
       cmRegularExpression reg(regexp.c_str());
       // if it ends in .lib, then it is a full path and should
       // be escaped, and does not need .lib added
