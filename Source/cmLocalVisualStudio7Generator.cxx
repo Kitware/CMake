@@ -656,18 +656,26 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
   this->WriteConfigurations(fout, libName, target);
 
   fout << "\t<Files>\n";
+
+  // if we should add regen rule then...
+  const char *suppRegenRule = 
+    m_Makefile->GetDefinition("CMAKE_SUPPRESS_REGENERATION");
+
   // Find the group in which the CMakeLists.txt source belongs, and add
   // the rule to generate this VCProj file.
-  for(std::vector<cmSourceGroup>::reverse_iterator sg = sourceGroups.rbegin();
-      sg != sourceGroups.rend(); ++sg)
+  if (!cmSystemTools::IsOn(suppRegenRule))
     {
-    if(sg->Matches("CMakeLists.txt"))
+    for(std::vector<cmSourceGroup>::reverse_iterator sg = 
+          sourceGroups.rbegin();
+        sg != sourceGroups.rend(); ++sg)
       {
-      this->AddVCProjBuildRule(*sg);
-      break;
-      }    
+      if(sg->Matches("CMakeLists.txt"))
+        {
+        this->AddVCProjBuildRule(*sg);
+        break;
+        }    
+      }
     }
-  
 
   // Loop through every source group.
   for(std::vector<cmSourceGroup>::const_iterator sg = sourceGroups.begin();
