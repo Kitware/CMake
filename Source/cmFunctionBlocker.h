@@ -50,6 +50,8 @@ public:
   virtual void ScopeEnded(cmMakefile &mf) {}
 
   virtual ~cmFunctionBlocker() {}
+
+  virtual int NeedExpandedVariables () { return 1; };
 };
 
 #endif

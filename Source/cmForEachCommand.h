@@ -39,6 +39,8 @@ public:
                             cmMakefile &mf);
   virtual void ScopeEnded(cmMakefile &mf);
   
+  virtual int NeedExpandedVariables () { return 0; };
+
   std::vector<std::string> m_Args;
   std::vector<std::string> m_Commands;
   std::vector<std::vector<std::string> > m_CommandArguments;

@@ -1187,9 +1187,19 @@ bool cmMakefile::IsFunctionBlocked(const char *name,
   for (pos = m_FunctionBlockers.begin(); 
        pos != m_FunctionBlockers.end(); ++pos)
     {
-    if ((*pos)->IsFunctionBlocked(name, expandedArguments, *this))
+    if ((*pos)->NeedExpandedVariables()) 
       {
-      return true;
+      if ((*pos)->IsFunctionBlocked(name, expandedArguments, *this))
+        {
+        return true;
+        }
+      }
+    else
+      {
+      if ((*pos)->IsFunctionBlocked(name, args, *this))
+        {
+        return true;
+        }
       }
     }
   
