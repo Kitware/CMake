@@ -55,8 +55,7 @@ public:
   virtual const char* GetTerseDocumentation() 
     {
     return 
-      "Specify a list of libraries to be linked into\n"
-      "executables or shared objects.";
+      "Link a target to given libraries.";
     }
   
   /**
@@ -65,10 +64,12 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "TARGET_LINK_LIBRARIES(target library1 <debug | optimized> library2 ...)\n"
-      "Specify a list of libraries to be linked into the specified target\n"
-      "The debug and optimized strings may be used to indicate that\n"
-      "the next library listed is to be used only for that specific\n"
+      "  TARGET_LINK_LIBRARIES(target library1\n"
+      "                        <debug | optimized> library2\n"
+      "                        ...)\n"
+      "Specify a list of libraries to be linked into the specified target "
+      "The debug and optimized strings may be used to indicate that "
+      "the next library listed is to be used only for that specific "
       "type of build";
     }
   

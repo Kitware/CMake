@@ -55,17 +55,19 @@ public:
     return "Try compiling and then running some code.";
     }
   
-
   /**
    * More documentation.
    */
   virtual const char* GetFullDocumentation()
     {
     return
-      "TRY_RUN(RUN_RESULT_VAR COMPILE_RESULT_VAR bindir srcfile <CMAKE_FLAGS <Flags>> <COMPILE_DEFINITIONS <flags>> <ARGUMENTS <arg1> <arg2>...>)\n"
-      "Try compiling a srcfile. Return the success or failure in "
-      "COMPILE_RESULT_VAR. Then if the compile succeeded, run the "
-      "executable and return the result in RUN_RESULT_VAR. ";
+      "  TRY_RUN(RUN_RESULT_VAR COMPILE_RESULT_VAR\n"
+      "          bindir srcfile <CMAKE_FLAGS <Flags>>\n"
+      "          <COMPILE_DEFINITIONS <flags>>\n"
+      "          <ARGUMENTS <arg1> <arg2>...>)\n"
+      "Try compiling a srcfile.  Return the success or failure in "
+      "COMPILE_RESULT_VAR.  Then if the compile succeeded, run the "
+      "executable and return the result in RUN_RESULT_VAR.";
     }
   
   cmTypeMacro(cmTryRunCommand, cmCommand);

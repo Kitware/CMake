@@ -60,7 +60,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Create Python Wrappers.";
+    return "Deprecated.  For use only in VTK 4.0.";
     }
   
   /**
@@ -69,7 +69,9 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "VTK_WRAP_PYTHON(resultingLibraryName SourceListName SourceLists ...)";
+      "  VTK_WRAP_PYTHON(resultingLibraryName SourceListName\n"
+      "                  class1 class2 ...)\n"
+      "Create Python wrappers for VTK classes.";
     }
 
   /**

@@ -58,7 +58,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Load a command into a running CMake";
+    return "Load a command into a running CMake.";
     }
   
   /**
@@ -67,7 +67,11 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "LOAD_COMMAND(command)\n";
+      "  LOAD_COMMAND(COMMAND_NAME <loc1> [loc2 ...])\n"
+      "The given locations are searched for a library whose name is "
+      "cmCOMMAND_NAME.  If found, it is loaded as a module and the command "
+      "is added to the set of available CMake commands.  Usually, TRY_COMPILE "
+      "is used before this command to compile the module.";
     }
   
   cmTypeMacro(cmLoadCommandCommand, cmCommand);

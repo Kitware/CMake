@@ -44,7 +44,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Depricated command, see SET_SOURCE_FILES_PROPERTIES.";
+    return "Deprecated.  See SET_SOURCE_FILES_PROPERTIES.";
     }
   
   /**
@@ -53,7 +53,8 @@ public:
   virtual const char* GetFullDocumentation()
     {
       return
-        "ABSTRACT_FILES(file1 file2 ..).";
+        "  ABSTRACT_FILES(file1 file2 ...)\n"
+        "Marks files with the ABSTRACT property.";
     }
   
   cmTypeMacro(cmAbstractFilesCommand, cmCommand);

@@ -71,11 +71,12 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "UTILITY_SOURCE(cache_entry executable_name path_to_source [file1 file2 ...])\n"
-      "When a third-party utility's source is included in the distribution,\n"
-      "this command specifies its location and name.  The cache entry will\n"
-      "not be set unless the path_to_source and all listed files exist.  It\n"
-      "is assumed that the source tree of the utility will have been built\n"
+      "  UTILITY_SOURCE(cache_entry executable_name\n"
+      "                 path_to_source [file1 file2 ...])\n"
+      "When a third-party utility's source is included in the distribution, "
+      "this command specifies its location and name.  The cache entry will "
+      "not be set unless the path_to_source and all listed files exist.  It "
+      "is assumed that the source tree of the utility will have been built "
       "before it is needed.";
     }
   

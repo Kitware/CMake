@@ -58,7 +58,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Set a CMAKE variable to a value";
+    return "Set a CMAKE variable to a given value.";
     }
   
   /**
@@ -67,16 +67,16 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "SET(VAR [VALUE] [CACHE TYPE DOCSTRING [FORCE]])\n"
-      "Within CMAKE sets VAR to the value VALUE. VALUE is expanded before VAR "
-      "is set to it. If CACHE is present, then the VAR is put in the cache."
-      " TYPE and DOCSTRING are required.  TYPE may be BOOL, PATH, FILEPATH, STRING, INTERNAL, "
-      "or STATIC.  If TYPE is INTERNAL, then the "
-      " VALUE is Always written into the cache, replacing any values "
+      "  SET(VAR [VALUE] [CACHE TYPE DOCSTRING [FORCE]])\n"
+      "Within CMAKE sets VAR to the value VALUE.  VALUE is expanded before VAR "
+      "is set to it.  If CACHE is present, then the VAR is put in the cache.  "
+      "TYPE and DOCSTRING are required.  TYPE may be BOOL, PATH, FILEPATH, "
+      "STRING, INTERNAL, or STATIC.  If TYPE is INTERNAL, then the "
+      "VALUE is Always written into the cache, replacing any values "
       "existing in the cache.  If it is not a CACHE VAR, then this always "
       "writes into the current makefile. The FORCE option will overwrite"
       "the CACHE value removing any changes from the USER.\n"
-      "An optional syntax is SET(VAR VALUE1 ... VALUEN).\n"
+      "  SET(VAR VALUE1 ... VALUEN).\n"
       "In this case VAR is set to a ; separated list of values.";
     }
   

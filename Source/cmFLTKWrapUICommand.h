@@ -69,12 +69,11 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "FLTK_WRAP_UI(resultingLibraryName source1 source2 ... sourceN )\n"
-      "Produce .h and .cxx files for all the .fl and .fld file listed.\n"
-      "The .h files will be added to the library using the base name in\n"
-      "source list.\n"
-      "The .cxx files will be added to the library using the base name in \n"
-      "source list.";
+      "  FLTK_WRAP_UI(resultingLibraryName source1\n"
+      "               source2 ... sourceN )\n"
+      "Produce .h and .cxx files for all the .fl and .fld files listed.  "
+      "The resulting .h and .cxx files will be added to the specified "
+      "library.";
     }
   
 private:

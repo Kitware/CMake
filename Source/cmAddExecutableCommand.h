@@ -53,7 +53,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Add an executable to the project that uses the specified source files.";
+    return "Add an executable to the project using the specified source files.";
     }
   
   /**
@@ -62,10 +62,11 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "ADD_EXECUTABLE(exename [WIN32] source1 source2 ... sourceN)\n"
-      "This command adds an executable target to the current directory. "
+      "  ADD_EXECUTABLE(exename [WIN32] source1\n"
+      "                 source2 ... sourceN)\n"
+      "This command adds an executable target to the current directory.  "
       "The executable will be built from the list of source files "
-      "specified. The second argument to this command can be WIN32 "
+      "specified.  The second argument to this command can be WIN32 "
       "which indicates that the executable (when compiled on windows) "
       "is a windows app (using WinMain) not a console app (using main).";
     }

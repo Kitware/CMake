@@ -71,9 +71,9 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "SOURCE_GROUP(name regex)\n"
-      "Defines a new source group.  Any file whose name matches the regular\n"
-      "expression will be placed in this group.  The LAST regular expression\n"
+      "  SOURCE_GROUP(name regex)\n"
+      "Defines a new source group.  Any file whose name matches the regular "
+      "expression will be placed in this group.  The LAST regular expression "
       "of all defined SOURCE_GROUPs that matches the file will be selected.";
     }
   

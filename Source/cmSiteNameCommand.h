@@ -58,7 +58,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Set a CMAKE variable to the name of this computer.";
+    return "Set the given variable to the name of the computer.";
     }
   
   /**
@@ -67,8 +67,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "SITE_NAME(NAME)\n"
-      "Within CMAKE sets NAME to the host name of the computer.";
+      "  SITE_NAME(variable)\n";
     }
   
   cmTypeMacro(cmSiteNameCommand, cmCommand);

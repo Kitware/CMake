@@ -80,7 +80,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "start a foreach loop";
+    return "Evaluate a group of commands for each value in a list.";
     }
   
   /**
@@ -89,7 +89,17 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "FOREACH (define arg1 arg2 arg2) Starts a foreach block.";
+      "  FOREACH(loop_var arg1 arg2 ...)\n"
+      "    COMMAND1(ARGS ...)\n"
+      "    COMMAND2(ARGS ...)\n"
+      "    ...\n"
+      "  ENDFOREACH(loop_var)\n"
+      "All commands between FOREACH and the matching ENDFOREACH are recorded "
+      "without being invoked.  Once the ENDFOREACH is evaluated, the "
+      "recorded list of commands is invoked once for each argument listed "
+      "in the original FOREACH command.  Each recorded command is modified "
+      "before invocation to replace any occurrence of \"${loop_var}\" with "
+      "the current value in the list.";
     }
   
   cmTypeMacro(cmForEachCommand, cmCommand);

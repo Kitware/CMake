@@ -55,7 +55,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "load in the values from another cache.";
+    return "Load in the values from another project's CMake cache.";
     }
   
   /**
@@ -64,16 +64,23 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "LOAD_CACHE(pathToCacheFile [EXCLUDE entry1...] [INCLUDE_INTERNALS entry1...])\n"
-      "LOAD_CACHE(pathToCacheFile READ_WITH_PREFIX prefix entry1...)\n"
-      "Load in the values from another cache. This is useful for a project "
-      "that depends on another project built in a different tree."
-      "EXCLUDE option can be used to provide a list of entries to be excluded."
+      "  LOAD_CACHE(pathToCacheFile READ_WITH_PREFIX\n"
+      "             prefix entry1...)\n"
+      "Read the cache and store the requested entries in variables with "
+      "their name prefixed with the given prefix.  "
+      "This only reads the values, and does not create entries in the local "
+      "project's cache.\n"
+      "  LOAD_CACHE(pathToCacheFile [EXCLUDE entry1...]\n"
+      "             [INCLUDE_INTERNALS entry1...])\n"
+      "Load in the values from another cache and store them in the local "
+      "project's cache as internal entries.  This is useful for a project "
+      "that depends on another project built in a different tree.  "
+      "EXCLUDE option can be used to provide a list of entries to be "
+      "excluded.  "
       "INCLUDE_INTERNALS can be used to provide a list of internal entries"
-      "to be included. Normally, no internal entries are brougt in.\n"
-      "The READ_WITH_PREFIX form will read the cache and store the requested "
-      "entries in variables with their name prefixed with the given prefix.  "
-      "This form only reads the values, and does not create local cache entries.";
+      "to be included.  Normally, no internal entries are brougt in.  Use "
+      "of this form of the command is strongly discouraged, but it is "
+      "provided for backward compatability.";
     }
   
   cmTypeMacro(cmLoadCacheCommand, cmCommand);

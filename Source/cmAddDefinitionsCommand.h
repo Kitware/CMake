@@ -59,7 +59,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Add -D define flags to command line for  environments.";
+    return "Adds -D define flags to the command line of C and C++ compilers.";
     }
   
   /**
@@ -68,8 +68,11 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "ADD_DEFINITIONS(-DFOO -DBAR ...)\n"
-      "Add flags to command line of C and C++ compiles.  This command can be used to add any flag to a compile line, but the -D flag is accepted most C/C++ compilers.  Other flags may not be as portable.";
+      "  ADD_DEFINITIONS(-DFOO -DBAR ...)\n"
+      "Adds flags to command line of C and C++ compilers.  "
+      "This command can be used to add any flag to a compile line, "
+      "but the -D flag is accepted most C/C++ compilers.  "
+      "Other flags may not be as portable.";
     }
   
   cmTypeMacro(cmAddDefinitionsCommand, cmCommand);

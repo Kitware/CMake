@@ -67,12 +67,12 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "ADD_TEST(testname Exename arg1 arg2 arg3 ...)\n"
-      "If the ENABLE_TESTING command has been run, this command adds a"
-      "test target to the current directory. If ENABLE_TESTING has not"
-      "been run, this command does nothing.\n"
+      "  ADD_TEST(testname Exename arg1 arg2 ...)\n"
+      "If the ENABLE_TESTING command has been run, this command adds a "
+      "test target to the current directory. If ENABLE_TESTING has not "
+      "been run, this command does nothing.  "
       "The tests are run by the testing subsystem by executing Exename "
-      "with the specified arguments. Exename can be either an executable "
+      "with the specified arguments.  Exename can be either an executable "
       "built by built by this project or an arbitrary executable on the "
       "system (like tclsh).";
     }

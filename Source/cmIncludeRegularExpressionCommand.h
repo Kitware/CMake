@@ -72,13 +72,13 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "INCLUDE_REGULAR_EXPRESSION(regex_match [regex_complain])\n"
-      "Set the regular expressions used in dependency checking.  Only files\n"
-      "matching regex_match will be traced as dependencies.  Only files\n"
-      "matching regex_complain will generate warnings if they cannot be found\n"
+      "  INCLUDE_REGULAR_EXPRESSION(regex_match [regex_complain])\n"
+      "Set the regular expressions used in dependency checking.  Only files "
+      "matching regex_match will be traced as dependencies.  Only files "
+      "matching regex_complain will generate warnings if they cannot be found "
       "(standard header paths are not searched).  The defaults are:\n"
-      "    regex_match    = \"^.*$\" (match everything)\n"
-      "    regex_complain = \"^$\" (match empty string only)\n";
+      "  regex_match    = \"^.*$\" (match everything)\n"
+      "  regex_complain = \"^$\" (match empty string only)";
     }
   
   cmTypeMacro(cmIncludeRegularExpressionCommand, cmCommand);

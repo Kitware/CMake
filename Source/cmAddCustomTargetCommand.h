@@ -55,9 +55,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Add an extra target to the build system that "
-      "does not produce output, so it"
-      " is run each time the target is built.";
+    return "Add a target with no output so it will always be built.";
     }
   
   /**
@@ -66,8 +64,15 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "ADD_CUSTOM_TARGET(Name [ALL] [ command arg arg arg ... ])\n"
-      "If the ALL option is specified it indicates that this target should be added to the default build target. The command and arguments are optional. If not specified, it will create an empty target. The command cannot be called ALL.";
+      "  ADD_CUSTOM_TARGET(Name [ALL] [ command arg arg arg ... ])\n"
+      "Adds a target with the given name that executes the given command "
+      "every time the target is built.  If the ALL option is specified "
+      "it indicates that this target should be added to the default build "
+      "target so that it will be run every time.  "
+      "The command and arguments are optional.  If not specified, "
+      "it will create an empty target.  The ADD_DEPENDENCIES command can be "
+      "used in conjunction with this command to drive custom target "
+      "generation.  The command cannot be called ALL.";
     }
   
   cmTypeMacro(cmAddCustomTargetCommand, cmCommand);

@@ -56,8 +56,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Add all the source files found in the specified\n"
-           "directory to the variable name specified.";
+    return "Find all source files in a directory.";
     }
   
   /**
@@ -66,7 +65,9 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "AUX_SOURCE_DIRECTORY(dir VARIABLE)";
+      "  AUX_SOURCE_DIRECTORY(dir VARIABLE)\n"
+      "Collects the names of all the source files in the specified "
+      "directory and stores the list in the variable provided.";
     }
   
   cmTypeMacro(cmAuxSourceDirectoryCommand, cmCommand);

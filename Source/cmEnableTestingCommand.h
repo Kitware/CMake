@@ -74,7 +74,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Enable testing for this directory and below.";
+    return "Enable testing for current directory and below.";
     }
   
   /**
@@ -83,8 +83,11 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "ENABLE_TESTING()\n"
-      "Enables testing for this directory and below. See also the ADD_TEST command. Note that Dart expects to find this file in the build directory root; therefore, this command should be in the source directory root too.";
+      "  ENABLE_TESTING()\n"
+      "Enables testing for this directory and below.  "
+      "See also the ADD_TEST command.  Note that Dart expects to find "
+      "a test file in the build directory root.  Therefore, this command "
+      "should be in the source directory root too.";
     }
   
   cmTypeMacro(cmEnableTestingCommand, cmCommand);

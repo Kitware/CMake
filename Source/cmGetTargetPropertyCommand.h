@@ -44,7 +44,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Get a property for a file";
+    return "Get a property from a target.";
     }
   
   /**
@@ -53,10 +53,12 @@ public:
   virtual const char* GetFullDocumentation()
     {
       return
-        "GET_TARGET_PROPERTY(VAR target property) "
-        "Get a property from a source file.   The value of the property is " 
-        " stored in the variable VAR. If the property is not found, var "
-        "will be set to NOT_FOUND";
+        "  GET_TARGET_PROPERTY(VAR target property)\n"
+        "Get a property from a target.   The value of the property is " 
+        "stored in the variable VAR.  If the property is not found, var "
+        "will be set to NOT_FOUND.  Use SET_TARGET_PROPERTIES to set "
+        "property values.  Properties are usually used to control how "
+        "a target is built.";
     }
   
   cmTypeMacro(cmGetTargetPropertyCommand, cmCommand);

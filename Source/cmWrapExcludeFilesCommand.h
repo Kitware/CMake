@@ -44,7 +44,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "A list of classes, to exclude from wrapping.";
+    return "Deprecated.  See SET_SOURCE_FILES_PROPERTIES.";
     }
   
   /**
@@ -53,7 +53,8 @@ public:
   virtual const char* GetFullDocumentation()
     {
       return
-        "WRAP_EXCLUDE_FILES(file1 file2 ..)";
+        "  WRAP_EXCLUDE_FILES(file1 file2 ...)\n"
+        "Marks files with the WRAP_EXCLUDE property.";
     }
   
   cmTypeMacro(cmWrapExcludeFilesCommand, cmCommand);

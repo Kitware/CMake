@@ -69,9 +69,10 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "QT_WRAP_CPP(resultingLibraryName DestName SourceLists ...)\n"
-      "Produce moc files for all the .h file listed in the SourceLists.\n"
-      "The moc files will be added to the library using the DestName\n"
+      "  QT_WRAP_CPP(resultingLibraryName DestName\n"
+      "              SourceLists ...)\n"
+      "Produce moc files for all the .h file listed in the SourceLists.  "
+      "The moc files will be added to the library using the DestName "
       "source list.";
     }
   

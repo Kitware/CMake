@@ -67,10 +67,16 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "CREATE_TEST_SOURCELIST(SourceListName DriverName test1 test2 test3 "
-      "EXTRA_INCLUDE include.h FUNCTION function) The list of source files "
-      "needed to build the testdriver will be in SourceListName. "
-      "DriverName is the name of the test driver program. The rest of "
+      "  CREATE_TEST_SOURCELIST(SourceListName DriverName\n"
+      "                         test1 test2 test3\n"
+      "                         EXTRA_INCLUDE include.h\n"
+      "                         FUNCTION function)\n"
+      "A test driver is a program that links together many small tests into "
+      "a single executable.  This is useful when building static executables "
+      "with large libraries to shrink the total required size.  "
+      "The list of source files "
+      "needed to build the testdriver will be in SourceListName.  "
+      "DriverName is the name of the test driver program.  The rest of "
       "the arguments consist of a list of test source files, can be "
       "; separated.  Each test source file should have a function in it that "
       "is the same name as the file with no extension (foo.cxx should have "

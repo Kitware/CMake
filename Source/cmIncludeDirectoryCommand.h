@@ -68,7 +68,10 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "INCLUDE_DIRECTORIES([BEFORE] dir1 dir2 ...)";
+      "  INCLUDE_DIRECTORIES([BEFORE] dir1 dir2 ...)\n"
+      "Add the given directories to those searched by the compiler for "
+      "include files.  If BEFORE is specified, the directories are prepended "
+      "onto the current list of directories instead of appended.";
     }
   
   cmTypeMacro(cmIncludeDirectoryCommand, cmCommand);

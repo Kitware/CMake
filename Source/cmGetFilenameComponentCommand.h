@@ -67,19 +67,24 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "GET_FILENAME_COMPONENT(VarName FileName PATH|ABSOLUTE|NAME|EXT|NAME_WE|PROGRAM [PROGRAM_ARGS ArgVarName] [CACHE])\n"
+      "  GET_FILENAME_COMPONENT(VarName FileName\n"
+      "                         PATH|ABSOLUTE|NAME|EXT|NAME_WE\n"
+      "                         [CACHE])\n"
       "Set VarName to be the path (PATH), file name (NAME), file "
       "extension (EXT), file name without extension (NAME_WE) of FileName, "
       "or the full absolute (ABSOLUTE) file name without symlinks.  "
       "Note that the path is converted to Unix slashes format and has no "
-      "trailing slashes. The longest file extension is always considered.\n"
-      "Warning: as a utility command, the resulting value is not put in the "
-      "cache but in the definition list, unless you add the optional CACHE "
-      "parameter."
-      "For PROGRAM, the program in FileName will be found in the path or if it is "
-      "a full path.   If PROGRAM_ARGS is present with PROGRAM, then the arguments "
-      "are split from the program.   This is used to separate a program from its "
-      "arguments.";
+      "trailing slashes. The longest file extension is always considered.  If "
+      "the optional CACHE argument is specified, the result variable is "
+      "added to the cache.\n"
+      "  GET_FILENAME_COMPONENT(VarName FileName\n"
+      "                         PROGRAM [PROGRAM_ARGS ArgVar]\n"
+      "                         [CACHE])\n"
+      "The program in FileName will be found in the system search path or "
+      "left as a full path.  If PROGRAM_ARGS is present with PROGRAM, then "
+      "any command-line arguments present in the FileName string are split "
+      "from the program name and stored in ArgVar.  This is used to separate "
+      "a program name from its arguments in a command line string.";
     }
   
   cmTypeMacro(cmGetFilenameComponentCommand, cmCommand);

@@ -53,7 +53,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Create copies of mesa headers for use in combination with system gl.";
+    return "Copy mesa headers for use in combination with system GL.";
     }
   
   /**
@@ -62,8 +62,11 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "USE_MANGLED_MESA(PATH_TO_MESA OUTPUT_DIRECTORY)\n"
-      "The path to mesa includes, should contain gl_mangle.h. ";
+      "  USE_MANGLED_MESA(PATH_TO_MESA OUTPUT_DIRECTORY)\n"
+      "The path to mesa includes, should contain gl_mangle.h.  "
+      "The mesa headers are copied to the specified output directory.  "
+      "This allows mangled mesa headers to override other GL headers by "
+      "being added to the include directory path earlier.";
     }
 
 protected:

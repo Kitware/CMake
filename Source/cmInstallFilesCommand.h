@@ -53,7 +53,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Create install rules for files";
+    return "Create UNIX install rules for files.";
     }
   
   /**
@@ -70,20 +70,24 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "INSTALL_FILES(path extension file file ...)\n"
-      "INSTALL_FILES(path regexp)\n"
-      "INSTALL_FILES(path FILES file file ...)\n"
-      "Create rules to install the listed files into the path. Path is\n"
-      "relative to the variable CMAKE_INSTALL_PREFIX. There are three forms for\n"
-      "this command. In the first the files can be specified explicitly. If a\n"
-      "file specified already has an extension, that extension will be\n"
-      "removed first. This is useful for providing lists of source files such\n"
-      "as foo.cxx when you want the corresponding foo.h to be installed. A\n"
-      "typical extension is .h etc... In the second form any files in the\n"
-      "current directory that match the regular expression will be installed.\n"
-      "In the third form, any files listed after the FILES keyword will be\n"
-      "installed explicitly from the names given.  Full paths are allowed in\n"
-      "this form.";
+      "  INSTALL_FILES(<dir> extension file file ...)\n"      
+      "Create rules to install the listed files with the given extension "
+      "into the given directory.  "
+      "Only files existing in the current source tree or its corresponding "
+      "location in the binary tree may be listed.  "
+      "If a file specified already has an extension, that extension will be "
+      "removed first.  This is useful for providing lists of source files such "
+      "as foo.cxx when you want the corresponding foo.h to be installed. A"
+      "typical extension is '.h'.\n"
+      "  INSTALL_FILES(<dir> regexp)\n"
+      "Any files in the current source directory that match the regular "
+      "expression will be installed.\n"
+      "  INSTALL_FILES(<dir> FILES file file ...)\n"
+      "Any files listed after the FILES keyword will be "
+      "installed explicitly from the names given.  Full paths are allowed in "
+      "this form.\n\n"
+      "The directory <dir> is relative to the installation prefix, which "
+      "is stored in the variable CMAKE_INSTALL_PREFIX.";
     }
   
   cmTypeMacro(cmInstallFilesCommand, cmCommand);

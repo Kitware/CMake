@@ -79,7 +79,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "start an if block";
+    return "Conditionally execute a group of commands.";
     }
   
   /**
@@ -94,14 +94,53 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "IF (define) Starts an if block. Optionally it can be invoked "
-      "using (NOT define) (def AND def2) (def OR def2) (def MATCHES def2) "
-      "(COMMAND cmd) (EXISTS file) MATCHES checks if def matches the "
-      "regular expression def2. COMMAND checks if the cmake command cmd "
-      "is in this cmake executable. EXISTS file checks if file exists."
-      "Additionally you can do comparisons using LESS GREATER STRLESS "
-      "and STRGREATER. LESS and GREATER do numeric comparison while "
-      "STRLESS and STRGREATER do string comparisons.";
+      "  IF(expression)\n"
+      "    # THEN section.\n"
+      "    COMMAND1(ARGS ...)\n"
+      "    COMMAND2(ARGS ...)\n"
+      "    ...\n"
+      "  ELSE(expression)\n"
+      "    # ELSE section.\n"
+      "    COMMAND1(ARGS ...)\n"
+      "    COMMAND2(ARGS ...)\n"
+      "    ...\n"
+      "  ENDIF(expression)\n"
+      "Evaluates the given expression.  If the result is true, the commands "
+      "in the THEN section are invoked.  Otherwise, the commands in the "
+      "ELSE section are invoked.  The ELSE section is optional.  Note that "
+      "the same expression must be given to IF, ELSE, and ENDIF.  Possible "
+      "expressions are:\n"
+      "  IF(variable)\n"
+      "True if the variable's value is not empty, 0, FALSE, OFF, or NOTFOUND.\n"
+      "  IF(NOT variable)\n"
+      "True if the variable's value is empty, 0, FALSE, OFF, or NOTFOUND.\n"
+      "  IF(variable1 AND variable2)\n"
+      "True if both variables would be considered true individually.  Only "
+      "one AND is allowed to keep expressions short.\n"
+      "  IF(variable1 OR variable2)\n"
+      "True if either variable would be considered true individually.  Only "
+      "one OR is allowed to keep expressions short.\n"
+      "  IF(COMMAND command-name)\n"
+      "True if the given name is a command that can be invoked.\n"
+      "  IF(EXISTS file-name)\n"
+      "  IF(EXISTS directory-name)\n"
+      "True if the named file or directory exists.\n"
+      "  IF(variable MATCHES regex)\n"
+      "  IF(string MATCHES regex)\n"
+      "True if the given string or variable's value matches the given "
+      "regular expression.\n"
+      "  IF(variable LESS number)\n"
+      "  IF(string LESS number)\n"
+      "  IF(variable GREATER number)\n"
+      "  IF(string GREATER number)\n"
+      "True if the given string or variable's value is a valid number and "
+      "the inequality is true.\n"
+      "  IF(variable STRLESS string)\n"
+      "  IF(string STRLESS string)\n"
+      "  IF(variable STRGREATER string)\n"
+      "  IF(string STRGREATER string)\n"
+      "True if the given string or variable's value is lexicographically "
+      "less (or greater) than the string on the right.";
     }
 
   // this is a shared function for both If and Else to determine if

@@ -58,7 +58,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Depricated command.  Use ${CMAKE_SYSTEM} and ${CMAKE_CXX_COMPILER} instead..";
+    return "Depricated.  Use ${CMAKE_SYSTEM} and ${CMAKE_CXX_COMPILER} instead.";
     }
   
   /**
@@ -67,8 +67,10 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "BUILD_NAME(NAME)\n"
-      "Within CMAKE sets NAME to the build type.";
+      "  BUILD_NAME(variable)\n"
+      "Sets the specified variable to a string representing the platform "
+      "and compiler settings.  These values are now available through the "
+      "CMAKE_SYSTEM and CMAKE_CXX_COMPILER variables.";
     }
   
   cmTypeMacro(cmBuildNameCommand, cmCommand);

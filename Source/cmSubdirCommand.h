@@ -63,7 +63,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "SUBDIRS(dir1 dir2 ...)\n"
+      "  SUBDIRS(dir1 dir2 ...)\n"
       "Add a list of subdirectories to the build. "
       "This will cause any CMakeLists.txt files in the sub directories "
       "to be processed by CMake.";

@@ -53,7 +53,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Create install rules for programs";
+    return "Create UNIX install rules for programs.";
     }
   
   /**
@@ -70,9 +70,16 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "INSTALL_PROGRAMS(path file file ...)\n"
-      "INSTALL_PROGRAMS(path regexp)\n"
-      "Create rules to install the listed programs into the path. Path is relative to the variable CMAKE_INSTALL_PREFIX. There are two forms for this command. In the first the programs can be specified explicitly.  In the second form any program in the current directory that match the regular expression will be installed.";
+      "  INSTALL_PROGRAMS(<dir> file file ...)\n"
+      "Create rules to install the listed programs into the given directory.\n"
+      "  INSTALL_PROGRAMS(<dir> regexp)\n"
+      "In the second form any program in the current source directory that "
+      "matches the regular expression will be installed.\n\n"
+      "This command is intended to install programs that are not built "
+      "by cmake, such as shell scripts.  See INSTALL_TARGETS to "
+      "create installation rules for targets built by cmake.\n\n"
+      "The directory <dir> is relative to the installation prefix, which "
+      "is stored in the variable CMAKE_INSTALL_PREFIX.";
     }
   
   cmTypeMacro(cmInstallProgramsCommand, cmCommand);

@@ -57,7 +57,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "starts the else portion of an if block";
+    return "Starts the ELSE portion of an IF block.";
     }
   
   /**
@@ -66,7 +66,8 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "ELSE(args), Note that the args for the ELSE clause must match those of the IF clause. See the IF command for more information.";
+      "  ELSE(expression)\n"
+      "See IF command.";
     }
   
   cmTypeMacro(cmElseCommand, cmCommand);

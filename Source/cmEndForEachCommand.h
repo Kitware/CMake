@@ -64,7 +64,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "ends a foreach block";
+    return "Ends a list of commands in a FOREACH block.";
     }
   
   /**
@@ -72,7 +72,9 @@ public:
    */
   virtual const char* GetFullDocumentation()
     {
-    return "ENDFOREACH(define)";
+    return
+      "  ENDFOREACH(expression)\n"
+      "See FOREACH command.";
     }
   
   cmTypeMacro(cmEndForEachCommand, cmCommand);

@@ -53,7 +53,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Display an error message .";
+    return "Assert satisfaction of an option's required variables.";
     }
   
   /**
@@ -62,16 +62,17 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "VARIABLE_REQUIRES(TEST_VARIABLE RESULT_VARIABLE "
-      "REQUIRED_VARIABLE1 REQUIRED_VARIABLE2 ...) "
+      "  VARIABLE_REQUIRES(TEST_VARIABLE RESULT_VARIABLE\n"
+      "                    REQUIRED_VARIABLE1\n"
+      "                    REQUIRED_VARIABLE2 ...)\n"
       "The first argument (TEST_VARIABLE) is the name of the variable to be "
       "tested, if that variable is false nothing else is done. If "
       "TEST_VARIABLE is true, then "
       "the next arguemnt (RESULT_VARIABLE) is a vairable that is set to true "
-      "if all the "
-      "required variables are set." 
+      "if all the required variables are set." 
       "The rest of the arguments are variables that must be true or not "
-      "set to NOTFOUND to avoid an error.  ";
+      "set to NOTFOUND to avoid an error.  If any are not true, an error "
+      "is reported.";
     }
   
   cmTypeMacro(cmVariableRequiresCommand, cmCommand);

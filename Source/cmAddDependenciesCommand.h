@@ -61,8 +61,12 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "ADD_DEPENDENCIES(target-name depend-target depend-target)\n"
-      "Add a dependency to a target. This is only used to add dependencies between one executable and another. Regular build dependencies are handled automatically.";
+      "  ADD_DEPENDENCIES(target-name depend-target1\n"
+      "                   depend-target2 ...)\n"
+      "Add a dependency to a target.  This is only used to add dependencies "
+      "between targets that cannot be inferred from the library/executable "
+      "links that are specified.  Regular build dependencies are "
+      "handled automatically.";
     }
   
   cmTypeMacro(cmAddDependenciesCommand, cmCommand);

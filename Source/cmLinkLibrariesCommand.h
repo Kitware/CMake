@@ -60,9 +60,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return 
-      "Specify a list of libraries to be linked into\n"
-      "executables or shared objects.";
+    return "Link libraries to all targets added later.";
     }
   
   /**
@@ -71,14 +69,15 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "LINK_LIBRARIES(library1 <debug | optimized> library2 ...)\n"
+      "  LINK_LIBRARIES(library1 <debug | optimized> library2 ...)\n"
       "Specify a list of libraries to be linked into "
       "any following targets (typically added with the ADD_EXECUTABLE "
       "or ADD_LIBRARY calls).  This command is passed "
-      "down to all other commands. "
+      "down to all subdirectories.  "
       "The debug and optimized strings may be used to indicate that "
       "the next library listed is to be used only for that specific "
-      "type of build";
+      "type of build.  Considure using TARGET_LINK_LIBRARIES for more "
+      "specific linking control.";
     }
   
   cmTypeMacro(cmLinkLibrariesCommand, cmCommand);

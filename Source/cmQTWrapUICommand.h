@@ -69,13 +69,13 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "QT_WRAP_UI(resultingLibraryName HeadersDestName SourcesDestName "
-      "SourceLists ...)\n"
+      "  QT_WRAP_UI(resultingLibraryName HeadersDestName\n"
+      "             SourcesDestName SourceLists ...)\n"
       "Produce .h and .cxx files for all the .ui file listed "
-      "in the SourceLists.\n"
-      "The .h files will be added to the library using the HeadersDestName\n"
-      "source list.\n"
-      "The .cxx files will be added to the library using the SourcesDestName\n"
+      "in the SourceLists.  "
+      "The .h files will be added to the library using the HeadersDestName"
+      "source list.  "
+      "The .cxx files will be added to the library using the SourcesDestName"
       "source list.";
     }
   

@@ -67,7 +67,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Add a list of source files, associate them with a NAME.";
+    return "Deprecated.  Use SET to list sources in a variable.";
     }
   
   /**
@@ -76,7 +76,12 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "SOURCE_FILES(NAME file1 file2 ... [ GENERATED generated_file1 ... ])";
+      "  SOURCE_FILES(variable file1 file2 ...\n"
+      "               [ GENERATED generated_file1 ... ])\n"
+      "Adds the given sources to the list in the given variable.  Sources "
+      "listed after GENERATED will be given the GENERATED property.  See "
+      "SET_SOURCE_FILES_PROPERTIES to add the GENERATED property to any "
+      "source.";
     }
   
   cmTypeMacro(cmSourceFilesCommand, cmCommand);

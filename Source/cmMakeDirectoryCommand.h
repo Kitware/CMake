@@ -56,8 +56,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Create a directory in the build tree if it does not exist.\n"
-           "Parent directories will be created if the do not exist..";
+    return "Create a directory on the file system.";
     }
   
   /**
@@ -66,7 +65,10 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "MAKE_DIRECTORY(directory)";
+      "  MAKE_DIRECTORY(directory)\n"
+      "Creates the specified directory.  Full paths should be given.  Any "
+      "parent directories that do not exist will also be created.  Use with "
+      "care.";
     }
   
   cmTypeMacro(cmMakeDirectoryCommand, cmCommand);

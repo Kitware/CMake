@@ -58,7 +58,7 @@ public:
    */
   virtual const char* GetTerseDocumentation()
     {
-    return "Remove a list of source files - associated with NAME.";
+    return "Remove sources from those listed in the given variable.";
     }
 
   /**
@@ -69,7 +69,9 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "SOURCE_FILES_REMOVE(NAME file1 file2 ...)";
+      "  SOURCE_FILES_REMOVE(variable file1 file2 ...)\n"
+      "Removes the sources specified from the sources listed in the given "
+      "variable.";
     }
   
   cmTypeMacro(cmSourceFilesRemoveCommand, cmCommand);

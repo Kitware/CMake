@@ -57,7 +57,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "ends an if block";
+    return "Ends a list of commands in an IF block.";
     }
   
   /**
@@ -66,7 +66,8 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "ENDIF(define)";
+      "  ENDIF(expression)\n"
+      "See IF command.";
     }
   
   cmTypeMacro(cmEndIfCommand, cmCommand);

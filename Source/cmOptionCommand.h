@@ -58,7 +58,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Provides an option that the user can optionally select";
+    return "Provides an option that the user can optionally select.";
     }
   
   /**
@@ -67,8 +67,10 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "OPTION(USE_MPI \"help string decribing the option\" [initial value])\n"
-      "Provide an option for the user to select";
+      "  OPTION(OPTION_VAR \"help string decribing option\"\n"
+      "         [initial value])\n"
+      "Provide an option for the user to select as ON or OFF.  If no "
+      "initial value is provided, OFF is used.";
     }
   
   cmTypeMacro(cmOptionCommand, cmCommand);

@@ -61,7 +61,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Find a file.";
+    return "Find the full path to a file.";
     }
   
   /**
@@ -70,16 +70,15 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "FIND_FILE(NAME file extrapath extrapath ... [DOC docstring])"
-      "Find a file in the system PATH or in any extra paths specified in the command."
-      "A cache entry called NAME is created to store the result.  "
-      " NAME-NOTFOUND is the value used if the file was not found. "
-      "As long as NOTFOUND is the value each time cmake will continue to "
-      "try and find the file each time it is run. "
-      " If DOC is specified the next argument is the "
-      "documentation string for the cache entry NAME.  Since Executables, "
-      "can have different extensions on different platforms, FIND_PROGRAM,"
-      " should be used instead of FIND_FILE when looking for and executable.";
+      "  FIND_FILE(VAR fileName path1 path2 ... [DOC docstring])\n"
+      "If the file is found, then VAR is set to the path where it was found.  "
+      "A cache entry named by VAR is created to "
+      "store the result.  VAR-NOTFOUND is the value used if the file was "
+      "not found.  CMake will continue to look as long as the value "
+      "is not found.  If DOC is specified the next argument is the "
+      "documentation string for the cache entry VAR.  Since Executables "
+      "can have different extensions on different platforms, FIND_PROGRAM "
+      "should be used instead of FIND_FILE when looking for and executable.";
     }
   
   cmTypeMacro(cmFindFileCommand, cmCommand);

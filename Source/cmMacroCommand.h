@@ -78,7 +78,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "start defining a Macro.";
+    return "Start recording a macro for later invocation as a command.";
     }
   
   /**
@@ -87,7 +87,17 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "MACRO(name arg1 arg2 arg3 ...) Starts to define a macro named name that takes arguments named arg1 arg2 arg3...  When the macro is invoked the actual arguments passed replace the formal arguments. ";
+      "  MACRO(<name> [arg1 [arg2 [arg3 ...]]])\n"
+      "    COMMAND1(ARGS ...)\n"
+      "    COMMAND2(ARGS ...)\n"
+      "    ...\n"
+      "  ENDMACRO(<name>)\n"
+      "Define a macro named <name> that takes arguments named "
+      "arg1 arg2 arg3 (...).  Commands listed after MACRO, "
+      "but before the matching ENDMACRO, are not invoked until the macro "
+      "is invoked.  When it is invoked, the commands recorded in the "
+      "macro are first modified by replacing formal parameters (${arg1}) with "
+      "the arguments passed, and then invoked as normal commands.";
     }
   
   cmTypeMacro(cmMacroCommand, cmCommand);

@@ -61,10 +61,19 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "FIND_PACKAGE(<name> [major.minor])\n"
-      "Finds and loads settings from an external project.  <name>_FOUND will\n"
-      "be set to indicate whether the package was found.  Settings that\n"
-      "can be used when <name>_FOUND is true are package-specific.";
+      "  FIND_PACKAGE(<name> [major.minor])\n"
+      "Finds and loads settings from an external project.  <name>_FOUND will "
+      "be set to indicate whether the package was found.  Settings that "
+      "can be used when <name>_FOUND is true are package-specific.  The "
+      "package is found through several steps.  "
+      "Directories listed in CMAKE_MODULE_PATH are searched for files called "
+      "\"Find<name>.cmake\".  If such a file is found, it is read and "
+      "processed by CMake, and is responsible for finding the package.  "
+      "If no such file is found, it is expected that the package is another "
+      "project built by CMake that has a \"<name>Config.cmake\" file.  "
+      "A cache entry called <name>_DIR is created and is expected to be set "
+      "to the directory containing this file.  If the file is found, it is "
+      "read and processed by CMake to load the settings of the package.";
     }
   
   cmTypeMacro(cmFindPackageCommand, cmCommand);

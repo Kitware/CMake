@@ -70,13 +70,19 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "FIND_PROGRAM(DEFINE_NAME executableName [NAMES name1 name2 name3...] [PATHS path1 path2 path3...] [NO_SYSTEM_PATH] [DOC helpstring]) "
-      "Find the executable in the system PATH or in any extra paths specified in the command."
-      "A cache entry called DEFILE_NAME is created to store the result. DEFILE_NAME-NOTFOUND is the value"
-      " used if the program was not found.  CMake will continue to look as long as the value "
-      "is NOTFOUND If DOC is specified the next argument is the "
-      "documentation string for the cache entry NAME."
-      "If NO_SYSTEM_PATH is specified the contents of system PATH is not used";
+      "  FIND_PROGRAM(VAR executableName\n"
+      "               [NAMES name1 name2 ...]\n"
+      "               [PATHS path1 path2 ...]\n"
+      "               [NO_SYSTEM_PATH]\n"
+      "               [DOC helpstring])\n"
+      "Find the executable in the system PATH or in any extra paths "
+      "specified in the command.  A cache entry named by VAR is created to "
+      "store the result.  VAR-NOTFOUND is the value used if the program was "
+      "not found.  CMake will continue to look as long as the value "
+      "is not found.  If DOC is specified the next argument is the "
+      "documentation string for the cache entry VAR.  "
+      "If NO_SYSTEM_PATH is specified the contents of system PATH are not "
+      "used.";
     }
   
   cmTypeMacro(cmFindProgramCommand, cmCommand);

@@ -52,9 +52,11 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "ITK_WRAP_TCL(target-name config-file1 [config-file2 ...])\n"
-      "Run CABLE on all the configuration files to generate Tcl wrappers.\n"
-      "The generated sources are added to a target of the given name.";
+      "  ITK_WRAP_TCL(target-name config-file1 [config-file2 ...])\n"
+      "Run CABLE on all the configuration files to generate Tcl wrappers.  "
+      "The generated sources are added to a target of the given name.  This "
+      "command is provided for use by the Insight Toolkit (ITK) because it "
+      "was originally written before loaded commands were supported.";
     }
   
   cmTypeMacro(cmITKWrapTclCommand, cmCommand);

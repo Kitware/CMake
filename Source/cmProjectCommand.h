@@ -64,7 +64,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Set a name for the entire project. One argument.";
+    return "Set a name for the entire project.";
     }
   
   /**
@@ -73,7 +73,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "PROJECT(projectname [C++ C Java])\n"
+      "  PROJECT(projectname [C++] [C] [Java])\n"
       "Sets the name of the project.  "
       "This creates the variables projectname_BINARY_DIR and projectname_SOURCE_DIR.  "
       "Optionally you can specify which languages your project supports.  "

@@ -64,12 +64,16 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "EXEC_PROGRAM(Executable [Directory to run in] [ARGS arguments to executable] [OUTPUT_VARIABLE var] [RETURN_VALUE var])"
-      "The executable is run in the optionally specified Directory.  The executable "
-      "can include arguments if it is double quoted, but it is better to use the "
-      "optional ARGS argument to specify arguments to the program.   This is because "
-      "cmake will then be able to escape spaces in the Executable path.  An optiona "
-      "argument OUTPUT_VARIABLE specifies a variable to which the output will be set. "
+      "  EXEC_PROGRAM(Executable [directory in which to run]\n"
+      "               [ARGS <arguments to executable>]\n"
+      "               [OUTPUT_VARIABLE <var>]\n"
+      "               [RETURN_VALUE <var>])\n"
+      "The executable is run in the optionally specified Directory.  The "
+      "executable can include arguments if it is double quoted, but it is "
+      "better to use the optional ARGS argument to specify arguments to the "
+      "program.   This is because cmake will then be able to escape spaces "
+      "in the Executable path.  An optional argument OUTPUT_VARIABLE "
+      "specifies a variable in which to store the output. "
       "To capture the return value of the execution, use RETURN_VALUE variable. "
       "If OUTPUT_VARIABLE is specified, then no output will go to the stdout/stderr "
       "of the console running cmake.";

@@ -60,21 +60,28 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "STRING(REGEX MATCH <regular_expression> <output variable> <input> [<input>...])\n"
-      "STRING(REGEX MATCHALL <regular_expression> <output variable> <input> [<input>...])\n"
-      "STRING(REGEX REPLACE <regular_expression> <replace_expression> <output variable> <input> [<input>...])\n"
-      "STRING(COMPARE EQUAL <string1> <string2> <output variable>)\n"
-      "STRING(COMPARE NOTEQUAL <string1> <string2> <output variable>)\n"
-      "STRING(COMPARE LESS <string1> <string2> <output variable>)\n"
-      "STRING(COMPARE GREATER <string1> <string2> <output variable>)\n"
-      "STRING(ASCII <number> [<number> ...] <output variable>)\n"
-      "REGEX MATCH will match the regular expression once and store the match in the output variable.\n"  
-      "REGEX MATCHALL will match the regular expression as many times as possible and store the matches\n"
-      "               in the output variable as a list.\n"
-      "REGEX REPLACE will match the regular expression as many times as possible and substitute the\n"
-      "              replacement expression for the match in the output.\n"
-      "COMPARE EQUAL/NOTEQUAL/LESS/GREATER will compare the strings and store true or false in the output variable.\n"
-      "ASCII will convert all numbers into corresponding ASCII characters.\n";
+      "  STRING(REGEX MATCH <regular_expression>\n"
+      "         <output variable> <input> [<input>...])\n"
+      "  STRING(REGEX MATCHALL <regular_expression>\n"
+      "         <output variable> <input> [<input>...])\n"
+      "  STRING(REGEX REPLACE <regular_expression>\n"
+      "         <replace_expression> <output variable>\n"
+      "         <input> [<input>...])\n"
+      "  STRING(COMPARE EQUAL <string1> <string2> <output variable>)\n"
+      "  STRING(COMPARE NOTEQUAL <string1> <string2> <output variable>)\n"
+      "  STRING(COMPARE LESS <string1> <string2> <output variable>)\n"
+      "  STRING(COMPARE GREATER <string1> <string2> <output variable>)\n"
+      "  STRING(ASCII <number> [<number> ...] <output variable>)\n"
+      "REGEX MATCH will match the regular expression once and store the "
+      "match in the output variable.\n\n"
+      "REGEX MATCHALL will match the regular expression as many times as "
+      "possible and store the matches in the output variable as a list.\n\n"
+      "REGEX REPLACE will match the regular expression as many times as "
+      "possible and substitute the replacement expression for the match "
+      "in the output.\n\n"
+      "COMPARE EQUAL/NOTEQUAL/LESS/GREATER will compare the strings and "
+      "store true or false in the output variable.\n\n"
+      "ASCII will convert all numbers into corresponding ASCII characters.";
     }
   
   cmTypeMacro(cmStringCommand, cmCommand);

@@ -61,7 +61,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Find a path for a file.";
+    return "Find the directory containing a file.";
     }
   
   /**
@@ -70,10 +70,13 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "FIND_PATH(PATH_DEFINE fileName path1 path2 path3...)\n"
-      "If the file is found, then PATH_DEFINE is set to the path where it was found."
-      "If DOC is specified the next argument is the "
-      "documentation string for the cache entry NAME.";
+      "  FIND_PATH(VAR fileName path1 path2 ... [DOC docstring])\n"
+      "If the file is found, then VAR is set to the path where it was found.  "
+      "A cache entry named by VAR is created to "
+      "store the result.  VAR-NOTFOUND is the value used if the file was "
+      "not found.  CMake will continue to look as long as the value "
+      "is not found.  If DOC is specified the next argument is the "
+      "documentation string for the cache entry VAR.";
     }
   
   cmTypeMacro(cmFindPathCommand, cmCommand);

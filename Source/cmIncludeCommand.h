@@ -61,7 +61,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Basically identical to a C #include \"something\" command.";
+    return "Read CMake listfile code from the given file.";
     }
   
   /**
@@ -70,8 +70,11 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "INCLUDE(file1 [OPTIONAL])\nIf OPTIONAL is present, then do not complain "
-      "if the file does not exist.";
+      "  INCLUDE(file1 [OPTIONAL])\n"
+      "Reads CMake listfile code from the given file.  Commands in the file "
+      "are processed immediately as if they were written in place of the "
+      "INCLUDE command.  If OPTIONAL is present, then no error "
+      "is raised if the file does not exist.";
     }
   
   cmTypeMacro(cmIncludeCommand, cmCommand);

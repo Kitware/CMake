@@ -61,7 +61,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Specify link directories.";
+    return "Specify directories in which to search for libraries.";
     }
   
   /**
@@ -70,10 +70,8 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "LINK_DIRECTORIES(directory1 directory2 ...)\n"
-      "Specify the paths to the libraries that will be linked in.\n"
-      "The directories can use built in definitions like \n"
-      "CMAKE_BINARY_DIR and CMAKE_SOURCE_DIR.";
+      "  LINK_DIRECTORIES(directory1 directory2 ...)\n"
+      "Specify the paths in which the linker should search for libraries.";
     }
   
   cmTypeMacro(cmLinkDirectoriesCommand, cmCommand);

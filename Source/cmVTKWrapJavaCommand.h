@@ -60,7 +60,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Create Java Wrappers.";
+    return "Deprecated.  For use only in VTK 4.0.";
     }
   
   /**
@@ -69,7 +69,9 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "VTK_WRAP_JAVA(resultingLibraryName SourceListName SourceLists ...)";
+      "  VTK_WRAP_JAVA(resultingLibraryName SourceListName\n"
+      "                class1 class2 ...)\n"
+      "Create Java wrappers for VTK classes.";
     }
   
 private:

@@ -58,7 +58,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Determine the command line that will build this project.";
+    return "Get the command line that will build this project.";
     }
   
   /**
@@ -67,8 +67,12 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "BUILD_COMMAND(NAME MAKECOMMAND)\n"
-      "Within CMAKE set NAME to the command that will build this project from the command line using MAKECOMMAND.   MAKECOMMAND should be msdev, nmake, make or one of the end use build tools.   This command will construct the command line to use that will build all the targets in this project.   This is useful for testing systems.";
+      "  BUILD_COMMAND(variable MAKECOMMAND)\n"
+      "Sets the given variable to a string containing the command that "
+      "will build this project from the root of the build tree using the "
+      "build tool given by MAKECOMMAND.  MAKECOMMAND should be msdev, "
+      "nmake, make or one of the end user build tools.  "
+      "This is useful for configuring testing systems.";
     }
   
   cmTypeMacro(cmBuildCommand, cmCommand);

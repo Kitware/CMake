@@ -60,7 +60,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "WRITE_FILE(filename \"message to write\"... [APPEND])\n"
+      "  WRITE_FILE(filename \"message to write\"... [APPEND])\n"
       "The first argument is the file name, the rest of the arguments are "
       "messages to write. If the argument APPEND is specified, then "
       "the message will be appended.";

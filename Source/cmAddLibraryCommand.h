@@ -53,7 +53,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Add an library to the project that uses the specified source files.";
+    return "Add an library to the project using the specified source files.";
     }
   
   /**
@@ -62,13 +62,15 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "ADD_LIBRARY(libname [SHARED | STATIC | MODULE] source1 source2 ... sourceN)\n"
-      "Adds a library target.  SHARED, STATIC or MODULE keywords are used\n"
-      "to set the library type.  If the keywork MODULE appears, the library\n"
-      "type is set to MH_BUNDLE on systems which use dyld. Systems without\n"
-      "dyld MODULE is treated like SHARED. If no keywords appear as the second\n"
-      "argument, the type defaults to the current value of BUILD_SHARED_LIBS.\n"
-      "If this variable is not set, the type defaults to STATIC.";
+      "  ADD_LIBRARY(libname [SHARED | STATIC | MODULE]\n"
+      "              source1 source2 ... sourceN)\n"
+      "Adds a library target.  SHARED, STATIC or MODULE keywords are used "
+      "to set the library type.  If the keyword MODULE appears, the library "
+      "type is set to MH_BUNDLE on systems which use dyld.  On systems "
+      "without dyld, MODULE is treated like SHARED.  If no keywords appear "
+      " as the second argument, the type defaults to the current value of "
+      "BUILD_SHARED_LIBS.  If this variable is not set, the type defaults "
+      "to STATIC.";
     }
   
   cmTypeMacro(cmAddLibraryCommand, cmCommand);

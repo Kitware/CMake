@@ -63,7 +63,10 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "INCLUDE_EXTERNAL_MSPROJECT(projectname location dep1 dep2 ...) Includes an external Microsoft project in the workspace file. Does nothing on UNIX currently\n";
+      "  INCLUDE_EXTERNAL_MSPROJECT(projectname location\n"
+      "                             dep1 dep2 ...)\n"
+      "Includes an external Microsoft project in the generated workspace "
+      "file.  Currently does nothing on UNIX.";
     }
   
   cmTypeMacro(cmIncludeExternalMSProjectCommand, cmCommand);

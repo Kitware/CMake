@@ -61,7 +61,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Create Tcl Wrappers for VTK classes.";
+    return "Deprecated.  For use only in VTK 4.0.";
     }
   
   /**
@@ -70,7 +70,10 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "VTK_WRAP_TCL(resultingLibraryName [SOURCES] SourceListName SourceLists ... [COMMANDS CommandName1 CommandName2 ...])";
+      "  VTK_WRAP_TCL(resultingLibraryName [SOURCES]\n"
+      "               SourceListName class1 class2 ...\n"
+      "               [COMMANDS CommandName1 CommandName2 ...])\n"
+      "Create Tcl wrappers for VTK classes.";
     }
 
   /**

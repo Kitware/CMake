@@ -54,7 +54,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Create install rules for targets";
+    return "Create UNIX install rules for targets.";
     }
   
   /**
@@ -63,8 +63,10 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "INSTALL_TARGETS(path target target)\n"
-      "Create rules to install the listed targets into the path. Path is relative to the variable PREFIX";
+      "  INSTALL_TARGETS(<dir> target target)\n"
+      "Create rules to install the listed targets into the given directory.  "
+      "The directory <dir> is relative to the installation prefix, which "
+      "is stored in the variable CMAKE_INSTALL_PREFIX.";
     }
   
   cmTypeMacro(cmInstallTargetsCommand, cmCommand);

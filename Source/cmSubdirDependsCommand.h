@@ -63,8 +63,8 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "SUBDIR_DEPENDS(subdir dep1 dep2 ...)\n"
-      "Does not do anything.  This command used to help projects order\n"
+      "  SUBDIR_DEPENDS(subdir dep1 dep2 ...)\n"
+      "Does not do anything.  This command used to help projects order "
       "parallel builds correctly.  This functionality is now automatic.";
     }
   

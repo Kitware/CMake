@@ -52,7 +52,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Try compiling some code";
+    return "Try compiling some code.";
     }
 
   /**
@@ -75,14 +75,16 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "TRY_COMPILE(RESULT_VAR bindir srcdir projectName <CMAKE_FLAGS <Flags>>)\n"
-      "Try compiling a program. Return the success or failure in RESULT_VAR "
+      "  TRY_COMPILE(RESULT_VAR bindir srcdir\n"
+      "              projectName <CMAKE_FLAGS <Flags>>)\n"
+      "Try compiling a program.  Return the success or failure in RESULT_VAR.  "
       "If <target name> is specified then build just that target "
       "otherwise the all or ALL_BUILD target is built.\n"
-      "TRY_COMPILE(RESULT_VAR bindir srcfile\n"
-      "  <CMAKE_FLAGS <Flags>> <COMPILE_DEFINITIONS <flags> ...>)\n"
-      "Try compiling a srcfile. Return the success or failure in RESULT_VAR. "
-      "CMAKE_FLAGS can be used to pass -DVAR:TYPE=VALUE flags to cmake. The "
+      "  TRY_COMPILE(RESULT_VAR bindir srcfile\n"
+      "              <CMAKE_FLAGS <Flags>>\n"
+      "              <COMPILE_DEFINITIONS <flags> ...>)\n"
+      "Try compiling a srcfile.  Return the success or failure in RESULT_VAR.  "
+      "CMAKE_FLAGS can be used to pass -DVAR:TYPE=VALUE flags to cmake.  The "
       "COMPILE_DEFINITIONS are -Ddefinition that will be passed to the "
       "compile line. If srcfile is specified the files in bindir/CMakeTmp "
       "are cleaned.";

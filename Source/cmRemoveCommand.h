@@ -58,7 +58,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Remove a value from a CMAKE variable";
+    return "Remove a value from a list in a variable.";
     }
   
   /**
@@ -67,10 +67,10 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "REMOVE(VAR VALUE VALUE ...)\n"
-      "Removes VALUE from the CMAke variable VAR. "
+      "  REMOVE(VAR VALUE VALUE ...)\n"
+      "Removes VALUE from the variable VAR.  "
       "This is typically used to remove entries from a vector "
-      "(e.g. semicolon separated list). VALUE is expanded. ";
+      "(e.g. semicolon separated list).  VALUE is expanded.";
     }
   
   cmTypeMacro(cmRemoveCommand, cmCommand);

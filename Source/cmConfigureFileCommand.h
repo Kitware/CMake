@@ -44,7 +44,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Create a file from an autoconf style file.in file.";
+    return "Copy a file to another location and modify its contents.";
     }
   
   /**
@@ -53,19 +53,21 @@ public:
   virtual const char* GetFullDocumentation()
     {
       return
-        "CONFIGURE_FILE(InputFile OutputFile [COPYONLY] [ESCAPE_QUOTES] [IMMEDIATE] [@ONLY])\n"
-        "The Input and Ouput files have to have full paths.\n"
-        "They can also use variables like CMAKE_BINARY_DIR,CMAKE_SOURCE_DIR. "
-        "This command replaces any variables in the input file with their "
-        "values as determined by CMake. If a variables in not defined, it "
-        "will be replaced with nothing.  If COPYONLY is passed in, then "
-        "then no variable expansion will take place. If ESCAPE_QUOTES is "
-        "passed in then any substitued quotes will be C style escaped. "
+        "  CONFIGURE_FILE(InputFile OutputFile\n"
+        "                 [COPYONLY] [ESCAPE_QUOTES]\n"
+        "                 [IMMEDIATE] [@ONLY])\n"
+        "The Input and Ouput files have to have full paths.  "
+        "This command replaces any variables in the input file referenced as "
+        "${VAR} or @VAR@ with their values as determined by CMake.  If a "
+        "variable is not defined, it will be replaced with nothing.  "
+        "If COPYONLY is specified, then then no variable expansion will take "
+        "place.  If ESCAPE_QUOTES is specified in then any substitued quotes "
+        "will be C-style escaped.  "
         "If IMMEDIATE is specified, then the file will be configured with "
         "the current values of CMake variables instead of waiting until the "
-        "end of CMakeLists processing.  If @ONLY is present, only variables "
-        "of the form @var@ will be replaces and ${var} will be ignored. "
-        "This is useful for configuring tcl scripts that use ${var}.";
+        "end of CMakeLists processing.  If @ONLY is specified, only variables "
+        "of the form @VAR@ will be replaces and ${VAR} will be ignored.  "
+        "This is useful for configuring tcl scripts that use ${VAR}.";
     }
 
   virtual void FinalPass();

@@ -67,8 +67,10 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "SEPARATE_ARGUMENTS(VARIABLE)\n"
-      "Convert the value of VARIABLE to a semi-colon separated list.  All spaces are replaced with ;";
+      "  SEPARATE_ARGUMENTS(VARIABLE)\n"
+      "Convert the value of VARIABLE to a semi-colon separated list.  "
+      "All spaces are replaced with ';'.  This helps with generating "
+      "command lines.";
     }
   
   cmTypeMacro(cmSeparateArgumentsCommand, cmCommand);
