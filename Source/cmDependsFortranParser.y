@@ -45,6 +45,10 @@ Run bison like this:
 
 #include "cmDependsFortranLexer.h"  /* Interface to lexer object.  */
 #include "cmDependsFortranParser.h" /* Interface to parser object.  */
+#include "cmDependsFortranParserTokens.h" /* Need YYSTYPE for YY_DECL.  */
+
+/* Forward declare the lexer entry point.  */
+YY_DECL;
 
 /* Internal utility functions.  */
 static void cmDependsFortranError(yyscan_t yyscanner, const char* message);
