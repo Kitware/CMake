@@ -119,7 +119,6 @@ bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& args)
         m_WrapHeadersClasses.push_back(header_file);
         m_WrapSourcesClasses.push_back(source_file);
         m_WrapMocClasses.push_back(moc_file);
-        unsigned int last_files=m_WrapSourcesClasses.size()-1;
         m_Makefile->AddSource(header_file,
             m_HeaderList.c_str());
         m_Makefile->AddSource(source_file,

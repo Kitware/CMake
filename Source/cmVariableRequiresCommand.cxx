@@ -63,7 +63,7 @@ void cmVariableRequiresCommand::FinalPass()
   std::string resultVarible = m_Arguments[1];
   bool requirementsMet = true;
   std::string notSet;
-  for(int i = 2; i < m_Arguments.size(); ++i)
+  for(unsigned int i = 2; i < m_Arguments.size(); ++i)
     {
     if(!m_Makefile->IsOn(m_Arguments[i].c_str()))
       {
