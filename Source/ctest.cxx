@@ -178,6 +178,9 @@ int main (int argc, char *argv[])
     args.push_back(argv[i]);
     }
   // run ctest
-  return inst.Run(args);
+  int res = inst.Run(args);
+  cmListFileCache::ClearCache();
+
+  return res;
 }
 
