@@ -80,9 +80,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <list>
 #include <set>
 
+#include <string.h>
+
 #ifdef CMAKE_NO_STD_NAMESPACE
 #define std 
-# define for if (false) { } else for
 #endif
 
 
