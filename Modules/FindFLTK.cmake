@@ -60,6 +60,7 @@ IF(FLTK_INCLUDE_DIR)
   IF(FLTK_VERSION_1.0.11)
       FIND_LIBRARY(FLTK_BASE_LIBRARY  NAMES fltk fltkd
            PATHS /usr/lib /usr/local/lib
+           /usr/local/lib/fltk
            /usr/local/fltk/lib
            /usr/X11R6/lib ${FLTK_INCLUDE_DIR}/lib
       )
