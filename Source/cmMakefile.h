@@ -68,6 +68,8 @@ public:
    */
   static unsigned int GetMajorVersion() { return 1;}
   static unsigned int GetMinorVersion() { return 1;}
+  static const char *GetReleaseVersion() { return "development";}
+  
   /**
    * Return the major and minor version of the cmake that
    * was used to write the currently loaded cache, note
