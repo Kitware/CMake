@@ -901,6 +901,7 @@ void cmUnixMakefileGenerator::ComputeSystemInfo()
       cmd = root;
       cmd += "/Templates/configure";
       cmSystemTools::RunCommand(cmd.c_str(), output);
+      m_Makefile->AddDefinition("RUN_CONFIGURE", true);
     }
 
   // now load the settings
