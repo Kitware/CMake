@@ -96,6 +96,10 @@ bool cmFindFileCommand::InitialPass(std::vector<std::string>& args)
       return true;
       }
     }
-  return false;
+  m_Makefile->AddCacheDefinition(args[0].c_str(),
+                                 "NOTFOUND",
+                                 helpString.c_str(),
+                                 cmCacheManager::PATH);
+  return true;
 }
 
