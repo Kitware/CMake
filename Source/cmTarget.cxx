@@ -343,8 +343,23 @@ void cmTarget::GatherDependencies( const cmMakefile& mf,
       std::string l = depline.substr( start, end-start );
       if( l.size() != 0 )
         {
-        const std::string cname = l;
-        lib_map[ cname ] = std::make_pair(l,GENERAL); // ** FIXME: we need to store the correct type here
+        const std::string cname = l; 
+        std::string linkType = l;
+        linkType += "_LINK_TYPE";
+        cmTarget::LinkLibraryType llt = cmTarget::GENERAL;
+        const char* linkTypeString = mf.GetDefinition( linkType.c_str() );
+        if(linkTypeString)
+          {
+          if(strcmp(linkTypeString, "debug") == 0)
+            {
+            llt = cmTarget::DEBUG;
+            }
+          if(strcmp(linkTypeString, "optimized") == 0)
+            {
+            llt = cmTarget::OPTIMIZED;
+            }
+          }
+        lib_map[ cname ] = std::make_pair(l,llt); 
         dep_map[ lib ].insert( cname );
         GatherDependencies( mf, cname, dep_map, lib_map );
         }
