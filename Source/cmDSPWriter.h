@@ -38,24 +38,24 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =========================================================================*/
-#ifndef cmDSPMakefile_h
-#define cmDSPMakefile_h
+#ifndef cmDSPWriter_h
+#define cmDSPWriter_h
 
 #include "cmStandardIncludes.h"
 #include "cmMakefile.h"
 
-/** \class cmDSPMakefile
+/** \class cmDSPWriter
  * \brief Generate a Microsoft DSP project file.
  *
- * cmDSPMakefile generates a Microsoft DSP project file.
+ * cmDSPWriter generates a Microsoft DSP project file.
  * See the *.dsptemplate files for information on the templates
  * used for making the project files.
  */
-class cmDSPMakefile 
+class cmDSPWriter 
 {
 public:
-  cmDSPMakefile(cmMakefile*);
-  ~cmDSPMakefile();
+  cmDSPWriter(cmMakefile*);
+  ~cmDSPWriter();
   void OutputDSPFile();
   enum BuildType {STATIC_LIBRARY, DLL, EXECUTABLE, WIN32_EXECUTABLE, UTILITY};
 

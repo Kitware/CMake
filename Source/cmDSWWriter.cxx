@@ -38,21 +38,21 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =========================================================================*/
-#include "cmDSWMakefile.h"
+#include "cmDSWWriter.h"
 #include "cmStandardIncludes.h"
 #include "cmSystemTools.h"
-#include "cmDSPMakefile.h"
+#include "cmDSPWriter.h"
 #include "cmMSProjectGenerator.h"
 #include "cmCacheManager.h"
 
 
-cmDSWMakefile::cmDSWMakefile(cmMakefile* m)
+cmDSWWriter::cmDSWWriter(cmMakefile* m)
 {
   m_Makefile = m;
 }
 
 // output the DSW file
-void cmDSWMakefile::OutputDSWFile()
+void cmDSWWriter::OutputDSWFile()
 { 
   // if this is an out of source build, create the output directory
   if(strcmp(m_Makefile->GetStartOutputDirectory(),
@@ -82,7 +82,7 @@ void cmDSWMakefile::OutputDSWFile()
 
 
 // Write a DSW file to the stream
-void cmDSWMakefile::WriteDSWFile(std::ostream& fout)
+void cmDSWWriter::WriteDSWFile(std::ostream& fout)
 {
   // Write out the header for a DSW file
   this->WriteDSWHeader(fout);
@@ -127,12 +127,12 @@ void cmDSWMakefile::WriteDSWFile(std::ostream& fout)
     // this gives a relative path 
     cmSystemTools::ReplaceString(dir, homedir.c_str(), "");
 
-    // Get the list of create dsp files names from the cmDSPMakefile, more
+    // Get the list of create dsp files names from the cmDSPWriter, more
     // than one dsp could have been created per input CMakeLists.txt file
     // for each target
     std::vector<std::string> dspnames = 
-      pg->GetDSPMakefile()->GetCreatedProjectNames();
-    cmTargets &tgts = pg->GetDSPMakefile()->GetMakefile()->GetTargets();
+      pg->GetDSPWriter()->GetCreatedProjectNames();
+    cmTargets &tgts = pg->GetDSPWriter()->GetMakefile()->GetTargets();
     cmTargets::iterator l = tgts.begin();
     for(std::vector<std::string>::iterator si = dspnames.begin(); 
         l != tgts.end(); ++l)
@@ -167,7 +167,7 @@ void cmDSWMakefile::WriteDSWFile(std::ostream& fout)
       if (l->second.GetType() != cmTarget::INSTALL)
         {
         this->WriteProject(fout, si->c_str(), dir.c_str(), 
-                           pg->GetDSPMakefile(),l->second);
+                           pg->GetDSPWriter(),l->second);
         ++si;
         }
       }
@@ -185,10 +185,10 @@ void cmDSWMakefile::WriteDSWFile(std::ostream& fout)
 // Write a dsp file into the DSW file,
 // Note, that dependencies from executables to 
 // the libraries it uses are also done here
-void cmDSWMakefile::WriteProject(std::ostream& fout, 
+void cmDSWWriter::WriteProject(std::ostream& fout, 
 				 const char* dspname,
 				 const char* dir,
-                                 cmDSPMakefile* project,
+                                 cmDSPWriter* project,
                                  const cmTarget &l
                                  )
 {
@@ -209,7 +209,7 @@ void cmDSWMakefile::WriteProject(std::ostream& fout,
     if(j->first != dspname)
       {
       if (!(l.GetType() == cmTarget::LIBRARY) || 
-          project->GetLibraryBuildType() == cmDSPMakefile::DLL)
+          project->GetLibraryBuildType() == cmDSPWriter::DLL)
         {
         // is the library part of this DSW ? If so add dependency
         const char* cacheValue
@@ -241,7 +241,7 @@ void cmDSWMakefile::WriteProject(std::ostream& fout,
 }
 
 // Standard end of dsw file
-void cmDSWMakefile::WriteDSWFooter(std::ostream& fout)
+void cmDSWWriter::WriteDSWFooter(std::ostream& fout)
 {
   fout << "######################################################"
     "#########################\n\n";
@@ -254,7 +254,7 @@ void cmDSWMakefile::WriteDSWFooter(std::ostream& fout)
 
   
 // ouput standard header for dsw file
-void cmDSWMakefile::WriteDSWHeader(std::ostream& fout)
+void cmDSWWriter::WriteDSWHeader(std::ostream& fout)
 {
   fout << "Microsoft Developer Studio Workspace File, Format Version 6.00\n";
   fout << "# WARNING: DO NOT EDIT OR DELETE THIS WORKSPACE FILE!\n\n";

@@ -44,8 +44,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmStandardIncludes.h"
 #include "cmMakefileGenerator.h"
 
-class cmDSPMakefile;
-class cmDSWMakefile;
+class cmDSPWriter;
+class cmDSWWriter;
 
 /** \class cmMSProjectGenerator
  * \brief Write a Microsoft Visual C++ DSP (project) file.
@@ -87,16 +87,16 @@ public:
   void BuildDSWOn() {m_BuildDSW = true;}
 
   /**
-   * Retrieve a pointer to a cmDSWMakefile instance.
+   * Retrieve a pointer to a cmDSWWriter instance.
    */
-  cmDSWMakefile* GetDSWMakefile() 
-    {return m_DSWMakefile;}
+  cmDSWWriter* GetDSWWriter() 
+    {return m_DSWWriter;}
 
   /**
-   * Retrieve a pointer to a cmDSPMakefile instance.
+   * Retrieve a pointer to a cmDSPWriter instance.
    */
-  cmDSPMakefile* GetDSPMakefile() 
-    {return m_DSPMakefile;}
+  cmDSPWriter* GetDSPWriter() 
+    {return m_DSPWriter;}
 
   /**
    * Try to determine system infomation such as shared library
@@ -105,8 +105,8 @@ public:
   virtual void ComputeSystemInfo();
 
 private:
-  cmDSWMakefile* m_DSWMakefile;
-  cmDSPMakefile* m_DSPMakefile;
+  cmDSWWriter* m_DSWWriter;
+  cmDSPWriter* m_DSPWriter;
   bool m_BuildDSW;
 };
 

@@ -38,27 +38,27 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =========================================================================*/
-#ifndef cmDSWMakefile_h
-#define cmDSWMakefile_h
+#ifndef cmDSWWriter_h
+#define cmDSWWriter_h
 
 #include "cmStandardIncludes.h"
 #include "cmMakefile.h"
 
-class cmDSPMakefile;
+class cmDSPWriter;
 class cmMSProjectGenerator;
 
-/** \class cmDSWMakefile
+/** \class cmDSWWriter
  * \brief Write a Microsoft Visual C++ DSW (workspace) file.
  *
- * cmDSWMakefile produces a Microsoft Visual C++ DSW (workspace) file.
+ * cmDSWWriter produces a Microsoft Visual C++ DSW (workspace) file.
  */
-class cmDSWMakefile 
+class cmDSWWriter 
 {
 public:
   /**
    * Constructor.
    */
-  cmDSWMakefile(cmMakefile*);
+  cmDSWWriter(cmMakefile*);
   
   /**
    * Generate the DSW workspace file.
@@ -70,7 +70,7 @@ private:
   void WriteDSWHeader(std::ostream& fout);
   void WriteProject(std::ostream& fout, 
                     const char* name, const char* path,
-                    cmDSPMakefile* project, const cmTarget &t);
+                    cmDSPWriter* project, const cmTarget &t);
   void WriteDSWFooter(std::ostream& fout);
   cmMakefile* m_Makefile;
 };

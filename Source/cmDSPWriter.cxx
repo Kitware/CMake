@@ -38,23 +38,23 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =========================================================================*/
-#include "cmDSPMakefile.h"
+#include "cmDSPWriter.h"
 #include "cmStandardIncludes.h"
 #include "cmSystemTools.h"
 #include "cmRegularExpression.h"
 #include "cmCacheManager.h"
 
-cmDSPMakefile::~cmDSPMakefile()
+cmDSPWriter::~cmDSPWriter()
 {
 }
 
 
-cmDSPMakefile::cmDSPMakefile(cmMakefile*mf)
+cmDSPWriter::cmDSPWriter(cmMakefile*mf)
 {
   m_Makefile = mf;
 }
 
-void cmDSPMakefile::OutputDSPFile()
+void cmDSPWriter::OutputDSPFile()
 { 
   // If not an in source build, then create the output directory
   if(strcmp(m_Makefile->GetStartOutputDirectory(),
@@ -129,7 +129,7 @@ void cmDSPMakefile::OutputDSPFile()
     }
 }
 
-void cmDSPMakefile::CreateSingleDSP(const char *lname, cmTarget &target)
+void cmDSPWriter::CreateSingleDSP(const char *lname, cmTarget &target)
 {
   std::string fname;
   fname = m_Makefile->GetStartOutputDirectory();
@@ -147,7 +147,7 @@ void cmDSPMakefile::CreateSingleDSP(const char *lname, cmTarget &target)
 }
 
 
-void cmDSPMakefile::AddDSPBuildRule(cmSourceGroup& sourceGroup)
+void cmDSPWriter::AddDSPBuildRule(cmSourceGroup& sourceGroup)
 {
   std::string dspname = *(m_CreatedProjectNames.end()-1);
   dspname += ".dsp";
@@ -177,7 +177,7 @@ void cmDSPMakefile::AddDSPBuildRule(cmSourceGroup& sourceGroup)
 }
 
 
-void cmDSPMakefile::WriteDSPFile(std::ostream& fout, 
+void cmDSPWriter::WriteDSPFile(std::ostream& fout, 
                                  const char *libName,
                                  cmTarget &target)
 {
@@ -301,7 +301,7 @@ void cmDSPMakefile::WriteDSPFile(std::ostream& fout,
 }
 
 
-void cmDSPMakefile::WriteCustomRule(std::ostream& fout,
+void cmDSPWriter::WriteCustomRule(std::ostream& fout,
                                     const char* source,
                                     const char* command,
                                     const std::set<std::string>& depends,
@@ -359,7 +359,7 @@ void cmDSPMakefile::WriteCustomRule(std::ostream& fout,
 }
 
 
-void cmDSPMakefile::WriteDSPBeginGroup(std::ostream& fout, 
+void cmDSPWriter::WriteDSPBeginGroup(std::ostream& fout, 
 					const char* group,
 					const char* filter)
 {
@@ -368,7 +368,7 @@ void cmDSPMakefile::WriteDSPBeginGroup(std::ostream& fout,
 }
 
 
-void cmDSPMakefile::WriteDSPEndGroup(std::ostream& fout)
+void cmDSPWriter::WriteDSPEndGroup(std::ostream& fout)
 {
   fout << "# End Group\n";
 }
@@ -376,7 +376,7 @@ void cmDSPMakefile::WriteDSPEndGroup(std::ostream& fout)
 
 
 
-void cmDSPMakefile::SetBuildType(BuildType b, const char *libName)
+void cmDSPWriter::SetBuildType(BuildType b, const char *libName)
 {
   std::string root= cmCacheManager::GetInstance()->GetCacheValue("CMAKE_ROOT");
   const char *def= m_Makefile->GetDefinition( "MSPROJECT_TEMPLATE_DIRECTORY");
@@ -450,7 +450,7 @@ void cmDSPMakefile::SetBuildType(BuildType b, const char *libName)
     }
 }
   
-void cmDSPMakefile::WriteDSPHeader(std::ostream& fout, const char *libName,
+void cmDSPWriter::WriteDSPHeader(std::ostream& fout, const char *libName,
                                    const cmTarget &target)
 {
   // determine the link directories
@@ -638,7 +638,7 @@ void cmDSPMakefile::WriteDSPHeader(std::ostream& fout, const char *libName,
 }
 
 
-void cmDSPMakefile::WriteDSPFooter(std::ostream& fout)
+void cmDSPWriter::WriteDSPFooter(std::ostream& fout)
 {  
   std::ifstream fin(m_DSPFooterTemplate.c_str());
   if(!fin)

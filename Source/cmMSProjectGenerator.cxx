@@ -39,14 +39,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =========================================================================*/
 #include "cmMSProjectGenerator.h"
-#include "cmDSWMakefile.h"
-#include "cmDSPMakefile.h"
+#include "cmDSWWriter.h"
+#include "cmDSPWriter.h"
 #include "cmCacheManager.h"
 
 cmMSProjectGenerator::cmMSProjectGenerator()
 {
-  m_DSWMakefile = 0;
-  m_DSPMakefile = 0;
+  m_DSWWriter = 0;
+  m_DSPWriter = 0;
   BuildDSWOn();
 }
 
@@ -54,24 +54,24 @@ void cmMSProjectGenerator::GenerateMakefile()
 {
   if(m_BuildDSW)
     {
-    delete m_DSWMakefile;
-    m_DSWMakefile = 0;
-    m_DSWMakefile = new cmDSWMakefile(m_Makefile);
-    m_DSWMakefile->OutputDSWFile();
+    delete m_DSWWriter;
+    m_DSWWriter = 0;
+    m_DSWWriter = new cmDSWWriter(m_Makefile);
+    m_DSWWriter->OutputDSWFile();
     }
   else
     {
-    delete m_DSPMakefile;
-    m_DSPMakefile = 0;
-    m_DSPMakefile = new cmDSPMakefile(m_Makefile);
-    m_DSPMakefile->OutputDSPFile();
+    delete m_DSPWriter;
+    m_DSPWriter = 0;
+    m_DSPWriter = new cmDSPWriter(m_Makefile);
+    m_DSPWriter->OutputDSPFile();
     }
 }
 
 cmMSProjectGenerator::~cmMSProjectGenerator()
 {
-  delete m_DSPMakefile;
-  delete m_DSWMakefile;
+  delete m_DSPWriter;
+  delete m_DSWWriter;
 }
 
 void cmMSProjectGenerator::SetLocal(bool local)
