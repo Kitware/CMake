@@ -91,6 +91,21 @@ void foo() { std::list<int> l; }
   fi
 fi
 
+# check to see if for scoping is supported
+if test $ac_cv_prog_gxx = no; then
+  AC_MSG_CHECKING( ansi for scope support ) 
+  rm -rf conftest.*
+  cat > conftest.cc <<!
+void foo() { for(int i;;); for(int i;;); }
+!
+  if test -z "`${CXX} $CXXFLAGS $CPPFLAGS -c conftest.cc 2>&1`"; then
+    echo "$ac_t""yes" 1>&6
+  else
+    AC_DEFINE(CMAKE_NO_ANSI_FOR_SCOPE)
+    echo "$ac_t""no" 1>&6
+  fi
+fi
+
 # find make to use to build cmake, prefer gmake
 AC_PATH_PROGS(RUNMAKE, gmake make)
 

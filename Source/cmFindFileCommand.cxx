@@ -62,15 +62,9 @@ bool cmFindFileCommand::InitialPass(std::vector<std::string>& args)
   std::string helpString = "Where can the ";
   helpString += args[1] + " file be found";
   const char* cacheValue
-    = cmCacheManager::GetInstance()->GetCacheValue(define);
+    = m_Makefile->GetDefinition(define);
   if(cacheValue && strcmp(cacheValue, "NOTFOUND"))
     {
-      m_Makefile->AddDefinition(define, cacheValue);
-      // update help string if changed
-      cmCacheManager::GetInstance()->AddCacheEntry(define,
-                                                   cacheValue,
-                                                   helpString.c_str(),
-                                                   cmCacheManager::FILEPATH);
     return true;
     }
   // if it is not in the cache, then search the system path
@@ -95,11 +89,10 @@ bool cmFindFileCommand::InitialPass(std::vector<std::string>& args)
     if(cmSystemTools::FileExists(tryPath.c_str()))
       {
       // Save the value in the cache
-      m_Makefile->AddDefinition(define, tryPath.c_str());
-      cmCacheManager::GetInstance()->AddCacheEntry(define,
-                                                   tryPath.c_str(),
-                                                   helpString.c_str(),
-                                                   cmCacheManager::FILEPATH);
+      m_Makefile->AddCacheDefinition(define,
+                                     tryPath.c_str(),
+                                     helpString.c_str(),
+                                     cmCacheManager::FILEPATH);
       return true;
       }
     }

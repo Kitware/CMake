@@ -371,7 +371,7 @@ void cmDSPWriter::WriteDSPEndGroup(std::ostream& fout)
 
 void cmDSPWriter::SetBuildType(BuildType b, const char *libName)
 {
-  std::string root= cmCacheManager::GetInstance()->GetCacheValue("CMAKE_ROOT");
+  std::string root= m_Makefile->GetDefinition("CMAKE_ROOT");
   const char *def= m_Makefile->GetDefinition( "MSPROJECT_TEMPLATE_DIRECTORY");
 
   if( def)

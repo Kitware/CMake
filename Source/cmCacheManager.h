@@ -70,55 +70,55 @@ public:
    * can be different than just a path input
    */
   static CacheEntryType StringToType(const char*);
-  //! Singleton pattern get instance of the cmCacheManager.
+  ///! Singleton pattern get instance of the cmCacheManager.
   static cmCacheManager* GetInstance();
-
   
-  //! Load a cache for given makefile.  Loads from ouput home.
+  ///! Load a cache for given makefile.  Loads from ouput home.
   bool LoadCache(cmMakefile*); 
-  //! Load a cache for given makefile.  Loads from path/CMakeCache.txt.
+  ///! Load a cache for given makefile.  Loads from path/CMakeCache.txt.
   bool LoadCache(const char* path);
   bool LoadCache(const char* path, bool internal);
 
-  //! Put cache definitions into makefile
+  ///! Put cache definitions into makefile
   void DefineCache(cmMakefile*); 
   
-  //! Save cache for given makefile.  Saves to ouput home CMakeCache.txt.
+  ///! Save cache for given makefile.  Saves to ouput home CMakeCache.txt.
   bool SaveCache(cmMakefile*) ;
-  //! Save cache for given makefile.  Saves to ouput path/CMakeCache.txt
+  ///! Save cache for given makefile.  Saves to ouput path/CMakeCache.txt
   bool SaveCache(const char* path) ;
+
+  ///! Print the cache to a stream
+  void PrintCache(std::ostream&) const;
   
-  //! Add an entry into the cache
+  ///! Get the cache map ivar.
+  const CacheEntryMap &GetCacheMap() const { return m_Cache; }
+
+  ///! Get a cache entry object for a key
+  CacheEntry *GetCacheEntry(const char *key);
+  
+  ///! Remove an entry from the cache
+  void RemoveCacheEntry(const char* key);
+  
+protected:
+  ///! Add an entry into the cache
   void AddCacheEntry(const char* key, const char* value, 
                      const char* helpString, CacheEntryType type);
 
-  //! Add a BOOL entry into the cache
+  ///! Add a BOOL entry into the cache
   void AddCacheEntry(const char* key, bool, const char* helpString);
   
-  //! Remove an entry from the cache
-  void RemoveCacheEntry(const char* key);
-  
-  //! Print the cache to a stream
-  CacheEntry *GetCacheEntry(const char *key);
-  
-  //! Get a value from the cache given a key
+  ///! Get a value from the cache given a key
   const char* GetCacheValue(const char* key) const;
 
-  //! Test a boolean cache entry to see if it is true or false, returns false 
-  //  if no entry.
-  bool IsOn(const char*) const;
-  
-  //! Print the cache to a stream
-  void PrintCache(std::ostream&) const;
-  
-  //! Get the cache map ivar.
-  const CacheEntryMap &GetCacheMap() const { return m_Cache; }
-  
 private:
   static void OutputHelpString(std::ofstream& fout, 
                                const std::string& helpString);
   static cmCacheManager* s_Instance;
   CacheEntryMap m_Cache;
+  // Only cmake and cmMakefile should be able to add cache values
+  // the commands should never use the cmCacheManager directly
+  friend class cmMakefile; // allow access to add cache values
+  friend class cmake; // allow access to add cache values
 };
 
 #endif

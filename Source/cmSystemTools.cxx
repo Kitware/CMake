@@ -643,7 +643,18 @@ void cmSystemTools::Error(const char* m1, const char* m2,
 void cmSystemTools::Message(const char* m1, const char *title)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  ::MessageBox(0, m1, title, MB_OK);
+  static bool disableMessages = false;
+  if(disableMessages)
+    {
+    return;
+    }
+  std::string message = m1;
+  message += "\n\n(Press  Cancel to suppress any further messages.)";
+  if(::MessageBox(0, message.c_str(), title, 
+                  MB_OKCANCEL) == IDCANCEL)
+    {
+    disableMessages = true;
+    }
 #endif
   std::cerr << m1 << std::endl;
 }

@@ -115,7 +115,7 @@ bool cmSetCommand::InitialPass(std::vector<std::string>& args)
   m_Makefile->ExpandVariablesInString(value);
   // get the current cache value for the variable
   const char* cacheValue = 
-    cmCacheManager::GetInstance()->GetCacheValue(variable);
+    m_Makefile->GetDefinition(variable);
   if(cacheValue)
     {
     // if it is not a cached value, or it is a cached
@@ -126,15 +126,18 @@ bool cmSetCommand::InitialPass(std::vector<std::string>& args)
       return true;
       }
     }
-  // add the definition
-  m_Makefile->AddDefinition(variable, value.c_str());
   // if it is meant to be in the cache then define it in the cache
   if(cache)
     {
-    cmCacheManager::GetInstance()->AddCacheEntry(variable,
-                                                 value.c_str(),
-                                                 docstring,
-                                                 type);
+    m_Makefile->AddCacheDefinition(variable,
+                                   value.c_str(),
+                                   docstring,
+                                   type);
+    }
+  else
+    {
+    // add the definition
+    m_Makefile->AddDefinition(variable, value.c_str());
     }
   return true;
 }

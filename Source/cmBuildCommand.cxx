@@ -50,7 +50,7 @@ bool cmBuildCommand::InitialPass(std::vector<std::string>& args)
     }
   const char* define = args[0].c_str();
   const char* cacheValue
-    = cmCacheManager::GetInstance()->GetCacheValue(define);
+    = m_Makefile->GetDefinition(define);
   if(cacheValue)
     {
     return true;
@@ -73,12 +73,11 @@ bool cmBuildCommand::InitialPass(std::vector<std::string>& args)
     makecommand = makeprogram;
     makecommand += " -k";
     }
-  cmCacheManager::GetInstance()->
-    AddCacheEntry(define,
-                  makecommand.c_str(),
-                  "Command used to build entire project from the command line.",
-                  cmCacheManager::STRING);
-  m_Makefile->AddDefinition(define, makecommand.c_str());
+  m_Makefile->AddCacheDefinition(define,
+                                 makecommand.c_str(),
+                                 "Command used to build entire project "
+                                 "from the command line.",
+                                 cmCacheManager::STRING);
   return true;
 }
 

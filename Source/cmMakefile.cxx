@@ -571,11 +571,22 @@ void cmMakefile::AddIncludeDirectory(const char* inc)
     }
 }
 
+
 void cmMakefile::AddDefinition(const char* name, const char* value)
 {
   m_Definitions.erase( DefinitionMap::key_type(name));
   m_Definitions.insert(DefinitionMap::value_type(name, value));
 }
+
+
+void cmMakefile::AddCacheDefinition(const char* name, const char* value, 
+                                    const char* doc,
+                                    cmCacheManager::CacheEntryType type)
+{
+  cmCacheManager::GetInstance()->AddCacheEntry(name, value, doc, type);
+  this->AddDefinition(name, value);
+}
+
 
 void cmMakefile::AddDefinition(const char* name, bool value)
 {
@@ -589,6 +600,13 @@ void cmMakefile::AddDefinition(const char* name, bool value)
     m_Definitions.erase( DefinitionMap::key_type(name));
     m_Definitions.insert(DefinitionMap::value_type(name, "OFF"));
     }
+}
+
+
+void cmMakefile::AddCacheDefinition(const char* name, bool value, const char* doc)
+{
+  cmCacheManager::GetInstance()->AddCacheEntry(name, value, doc);
+  this->AddDefinition(name, value);
 }
 
 void cmMakefile::SetProjectName(const char* p)
@@ -769,6 +787,12 @@ void cmMakefile::ExpandVariables()
     }
 }
 
+bool cmMakefile::IsOn(const char* name)
+{
+  const char* value = this->GetDefinition(name);
+  return cmSystemTools::IsOn(value);
+}
+
 const char* cmMakefile::GetDefinition(const char* name)
 {
   DefinitionMap::iterator pos = m_Definitions.find(name);
@@ -776,7 +800,7 @@ const char* cmMakefile::GetDefinition(const char* name)
     {
     return (*pos).second.c_str();
     }
-  return 0;
+  return cmCacheManager::GetInstance()->GetCacheValue(name);
 }
 
 int cmMakefile::DumpDocumentationToFile(const char *fileName)

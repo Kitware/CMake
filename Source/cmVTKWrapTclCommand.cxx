@@ -49,15 +49,15 @@ bool cmVTKWrapTclCommand::InitialPass(std::vector<std::string>& args)
     return false;
     }
 
+  // keep the library name
+  m_LibraryName = args[0];
+
   // Now check and see if the value has been stored in the cache
   // already, if so use that value and don't look for the program
-  if(!cmCacheManager::GetInstance()->IsOn("VTK_WRAP_TCL"))
+  if(!m_Makefile->IsOn("VTK_WRAP_TCL"))
     {
     return true;
     }
-
-  // keep the library name
-  m_LibraryName = args[0];
 
   // extract the sources and commands parameters
   std::vector<std::string> sources;

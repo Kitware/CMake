@@ -55,14 +55,9 @@ bool cmFindPathCommand::InitialPass(std::vector<std::string>& args)
   std::string helpString = "What is the path where the file ";
   helpString += args[1] + " can be found";
   const char* cacheValue
-    = cmCacheManager::GetInstance()->GetCacheValue(args[0].c_str());
+    = m_Makefile->GetDefinition(args[0].c_str());
   if(cacheValue && strcmp(cacheValue, "NOTFOUND"))
     { 
-      m_Makefile->AddDefinition(args[0].c_str(), cacheValue);
-      cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
-                                                   cacheValue,
-                                                   helpString.c_str(),
-                                                   cmCacheManager::PATH);
     return true;
     }
 
@@ -88,19 +83,18 @@ bool cmFindPathCommand::InitialPass(std::vector<std::string>& args)
     if(cmSystemTools::FileExists(tryPath.c_str()))
       {
       path[k] = cmSystemTools::CollapseFullPath(path[k].c_str());
-      m_Makefile->AddDefinition(args[0].c_str(), path[k].c_str());  
-      cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
-                                                   path[k].c_str(),
-                                                   helpString.c_str(),
-                                                   cmCacheManager::PATH);
+      m_Makefile->AddCacheDefinition(args[0].c_str(),
+                                     path[k].c_str(),
+                                     helpString.c_str(),
+                                     cmCacheManager::PATH);
       return true;
       }
     }
   
-  cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
-                                               "NOTFOUND",
-                                               helpString.c_str(),
-                                               cmCacheManager::PATH);
+  m_Makefile->AddCacheDefinition(args[0].c_str(),
+                                 "NOTFOUND",
+                                 helpString.c_str(),
+                                 cmCacheManager::PATH);
   return true;
 }
 

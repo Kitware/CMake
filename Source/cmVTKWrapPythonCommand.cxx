@@ -51,7 +51,7 @@ bool cmVTKWrapPythonCommand::InitialPass(std::vector<std::string>& args)
 
   // Now check and see if the value has been stored in the cache
   // already, if so use that value and don't look for the program
-  if(!cmCacheManager::GetInstance()->IsOn("VTK_WRAP_PYTHON"))
+  if(!m_Makefile->IsOn("VTK_WRAP_PYTHON"))
     {
     return true;
     }

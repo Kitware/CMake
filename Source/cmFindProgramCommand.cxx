@@ -59,10 +59,9 @@ bool cmFindProgramCommand::InitialPass(std::vector<std::string>& args)
   // Now check and see if the value has been stored in the cache
   // already, if so use that value and don't look for the program
   const char* cacheValue
-    = cmCacheManager::GetInstance()->GetCacheValue(define);
+    = m_Makefile->GetDefinition(define);
   if(cacheValue && strcmp(cacheValue, "NOTFOUND"))
     {
-    m_Makefile->AddDefinition(define, cacheValue);
     return true;
     }
   std::vector<std::string> path;
@@ -120,18 +119,18 @@ bool cmFindProgramCommand::InitialPass(std::vector<std::string>& args)
     if(result != "")
       {
       // Save the value in the cache
-      cmCacheManager::GetInstance()->AddCacheEntry(define,
-                                                   result.c_str(),
-                                                   "Path to a program.",
-                                                   cmCacheManager::FILEPATH);
-      m_Makefile->AddDefinition(define, result.c_str());
+      m_Makefile->AddCacheDefinition(define,
+                                     result.c_str(),
+                                     "Path to a program.",
+                                     cmCacheManager::FILEPATH);
+      
       return true;
       }
     }
-  cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
-                                               "NOTFOUND",
-                                               "Path to a program",
-                                               cmCacheManager::FILEPATH);
+  m_Makefile->AddCacheDefinition(args[0].c_str(),
+                                 "NOTFOUND",
+                                 "Path to a program",
+                                 cmCacheManager::FILEPATH);
   return true;
 }
 

@@ -49,7 +49,7 @@ bool cmBuildNameCommand::InitialPass(std::vector<std::string>& args)
     return false;
     }
   const char* cacheValue
-    = cmCacheManager::GetInstance()->GetCacheValue("BUILDNAME");
+    = m_Makefile->GetDefinition("BUILDNAME");
   if(cacheValue)
     {
     // do we need to correct the value? 
@@ -60,16 +60,10 @@ bool cmBuildNameCommand::InitialPass(std::vector<std::string>& args)
       cmSystemTools::ReplaceString(cv,"/", "_");
       cmSystemTools::ReplaceString(cv,"(", "_");
       cmSystemTools::ReplaceString(cv,")", "_");
-      cmCacheManager::GetInstance()->
-        AddCacheEntry("BUILDNAME",
-                      cv.c_str(),
-                      "Name of build.",
-                      cmCacheManager::STRING);
-      m_Makefile->AddDefinition("BUILDNAME", cv.c_str());
-      }
-    else
-      {
-      m_Makefile->AddDefinition("BUILDNAME", cacheValue);
+      m_Makefile->AddCacheDefinition("BUILDNAME",
+                                     cv.c_str(),
+                                     "Name of build.",
+                                     cmCacheManager::STRING);
       }
     return true;
     }
@@ -101,13 +95,10 @@ bool cmBuildNameCommand::InitialPass(std::vector<std::string>& args)
   cmSystemTools::ReplaceString(buildname,
                                ")", "_");
   
-  cmCacheManager::GetInstance()->
-    AddCacheEntry("BUILDNAME",
-                  buildname.c_str(),
-                  "Name of build.",
-                  cmCacheManager::STRING);
-
-  m_Makefile->AddDefinition("BUILDNAME", buildname.c_str());
+  m_Makefile->AddCacheDefinition("BUILDNAME",
+                                 buildname.c_str(),
+                                 "Name of build.",
+                                 cmCacheManager::STRING);
   return true;
 }
 

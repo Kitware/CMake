@@ -49,19 +49,19 @@ bool cmSiteNameCommand::InitialPass(std::vector<std::string>& args)
     return false;
     }
   const char* cacheValue
-    = cmCacheManager::GetInstance()->GetCacheValue("SITE");
+    = m_Makefile->GetDefinition("SITE");
   if(cacheValue)
     {
     m_Makefile->AddDefinition("SITE", cacheValue);
     return true;
     }
   
-  const char* hostname = cmCacheManager::GetInstance()->GetCacheValue("HOSTNAME");
+  const char* hostname = m_Makefile->GetDefinition("HOSTNAME");
   if(!hostname)
     {
     hostname = "hostname";
     }
-  const char* nslookup = cmCacheManager::GetInstance()->GetCacheValue("NSLOOKUP");
+  const char* nslookup = m_Makefile->GetDefinition("NSLOOKUP");
   if(!nslookup)
     {
     nslookup = "nslookup";
@@ -101,13 +101,12 @@ bool cmSiteNameCommand::InitialPass(std::vector<std::string>& args)
       }
     }
 
-  cmCacheManager::GetInstance()->
-    AddCacheEntry("SITE",
-                  siteName.c_str(),
-                  "Name of the computer/site where compile is being run",
-                  cmCacheManager::STRING);
+  m_Makefile->
+    AddCacheDefinition("SITE",
+                       siteName.c_str(),
+                       "Name of the computer/site where compile is being run",
+                       cmCacheManager::STRING);
 
-  m_Makefile->AddDefinition("SITE", siteName.c_str());
   return true;
 }
 

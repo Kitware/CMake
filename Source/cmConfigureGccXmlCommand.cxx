@@ -61,7 +61,7 @@ bool cmConfigureGccXmlCommand::InitialPass(std::vector<std::string>& args)
   // If the cache entry already exists, we are done.
   std::string cacheName = args[1];
   const char* cacheValue =
-    cmCacheManager::GetInstance()->GetCacheValue(cacheName.c_str());
+    m_Makefile->GetDefinition(cacheName.c_str());
   if(cacheValue && (std::string(cacheValue) != ""))
     { return true; }
   
@@ -95,8 +95,7 @@ bool cmConfigureGccXmlCommand::InitialPass(std::vector<std::string>& args)
 #endif
   
   // Add the cache entry with the flags found.
-  m_Makefile->AddDefinition(cacheName.c_str(), m_Flags.c_str());
-  cmCacheManager::GetInstance()->AddCacheEntry(
+  m_Makefile->AddCacheDefinition(
     cacheName.c_str(),
     m_Flags.c_str(),
     "Flags to GCC-XML to get it to parse the native compiler's headers.",

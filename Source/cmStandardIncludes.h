@@ -54,8 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifdef _MSC_VER
 #pragma warning ( disable : 4786 )
 #pragma warning ( disable : 4503 )
-// for loop scoping hack
-#define for if(false) {} else for
+#define CMAKE_NO_ANSI_FOR_SCOPE
 #endif
 
 #ifdef __ICL
@@ -72,6 +71,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <strstream.h>
 #endif
 
+// we must have stl with the standard include style
 #include <vector>
 #include <string>
 #include <iterator>
@@ -81,13 +81,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <list>
 #include <set>
 
+// include the "c" string header
 #include <string.h>
 
+// if std:: is not supported, then just #define it away
 #ifdef CMAKE_NO_STD_NAMESPACE
 #define std 
-#define for if(false) {} else for
 #endif
 
+// if the compiler does not support ansi for scoping of vars use a 
+// #define hack
+#ifdef CMAKE_NO_ANSI_FOR_SCOPE
+#define for if(false) {} else for
+#endif
 
 // check for the 720 compiler on the SGI
 // which has some strange properties that I don't think are worth
@@ -99,7 +105,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #   define CM_SGI_CC_720
 #  endif
 #endif
-
 
 # ifdef CM_SGI_CC_720
 // the 720 sgi compiler has std:: but not for the stream library,
@@ -124,9 +129,6 @@ inline bool operator!=(std::string const& a, const char* b)
 
 inline bool operator==(std::string const& a, const char* b)
 { return (a==std::string(b)); }
-// for scoping is not ISO, so use the for hack
-#define for if(false) {} else for
-
-# endif
+# endif  // end CM_SGI_CC_720
 
 #endif

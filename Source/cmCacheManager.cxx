@@ -375,18 +375,6 @@ const char* cmCacheManager::GetCacheValue(const char* key) const
 }
 
 
-bool cmCacheManager::IsOn(const char* key) const
-{ 
-  if(!m_Cache.count(key))
-    {
-    return false;
-    }
-  const std::string &v = m_Cache.find(key)->second.m_Value;
-  return cmSystemTools::IsOn(v.c_str());
-}
-
-
-
 void cmCacheManager::PrintCache(std::ostream& out) const
 {
   out << "=================================================" << std::endl;

@@ -118,14 +118,9 @@ bool cmFindLibraryCommand::InitialPass(std::vector<std::string>& args)
     }
 
   const char* cacheValue
-    = cmCacheManager::GetInstance()->GetCacheValue(args[0].c_str());
+    = m_Makefile->GetDefinition(args[0].c_str());
   if(cacheValue && strcmp(cacheValue, "NOTFOUND"))
     { 
-    m_Makefile->AddDefinition(args[0].c_str(), cacheValue);
-    cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
-                                                 cacheValue,
-                                                 helpString.c_str(),
-                                                 cmCacheManager::FILEPATH);
     return true;
     }
 
@@ -137,18 +132,17 @@ bool cmFindLibraryCommand::InitialPass(std::vector<std::string>& args)
                                          path);
     if(library != "")
       {  
-      m_Makefile->AddDefinition(args[0].c_str(), library.c_str());  
-      cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
-                                                   library.c_str(),
-                                                   helpString.c_str(),
-                                                   cmCacheManager::FILEPATH);
+      m_Makefile->AddCacheDefinition(args[0].c_str(),
+                                     library.c_str(),
+                                     helpString.c_str(),
+                                     cmCacheManager::FILEPATH);
       return true;
       } 
     }
-  cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
-                                               "NOTFOUND",
-                                               helpString.c_str(),
-                                               cmCacheManager::FILEPATH);
+  m_Makefile->AddCacheDefinition(args[0].c_str(),
+                                 "NOTFOUND",
+                                 helpString.c_str(),
+                                 cmCacheManager::FILEPATH);
   return true;
 }
 

@@ -70,7 +70,7 @@ bool cmLinkLibrariesCommand::InitialPass(std::vector<std::string>& args)
       m_Makefile->AddLinkLibrary(i->c_str());  
       }
 
-    const char* dir = cmCacheManager::GetInstance()->GetCacheValue(i->c_str());
+    const char* dir = m_Makefile->GetDefinition(i->c_str());
     if( dir )
       {
       m_Makefile->AddLinkDirectory( dir );

@@ -52,7 +52,7 @@ bool cmOptionCommand::InitialPass(std::vector<std::string>& args)
   // Now check and see if the value has been stored in the cache
   // already, if so use that value and don't look for the program
   const char* cacheValue
-    = cmCacheManager::GetInstance()->GetCacheValue(args[0].c_str());
+    = m_Makefile->GetDefinition(args[0].c_str());
   if(!cacheValue)
     {
     const char* initialValue = "Off";
@@ -60,17 +60,14 @@ bool cmOptionCommand::InitialPass(std::vector<std::string>& args)
       {
       initialValue = args[2].c_str();
       }
-    cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
-                                                 cmSystemTools::IsOn(initialValue),
-                                                 args[1].c_str());
-    m_Makefile->AddDefinition(args[0].c_str(), initialValue);
+    m_Makefile->AddCacheDefinition(args[0].c_str(),
+                                   cmSystemTools::IsOn(initialValue),
+                                   args[1].c_str());
     }
   else
     {
-    m_Makefile->AddDefinition(args[0].c_str(), cacheValue);
-    cmCacheManager::GetInstance()->
-      AddCacheEntry(args[0].c_str(),
-                    cmSystemTools::IsOn(cacheValue), args[1].c_str());
+    m_Makefile->AddCacheDefinition(args[0].c_str(),
+                                   cmSystemTools::IsOn(cacheValue), args[1].c_str());
     }
 
   return true;

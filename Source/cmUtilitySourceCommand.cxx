@@ -54,7 +54,7 @@ bool cmUtilitySourceCommand::InitialPass(std::vector<std::string>& args)
   // The first argument is the cache entry name.
   std::string cacheEntry = *arg++;
   const char* cacheValue =
-    cmCacheManager::GetInstance()->GetCacheValue(cacheEntry.c_str());
+    m_Makefile->GetDefinition(cacheEntry.c_str());
   // If it exists already, we are done.
   // unless this is Major
   if(cacheValue && 
@@ -111,20 +111,17 @@ bool cmUtilitySourceCommand::InitialPass(std::vector<std::string>& args)
     +utilityName+cmSystemTools::GetExecutableExtension();
   
   // Enter the value into the cache.
-  cmCacheManager::GetInstance()->AddCacheEntry(cacheEntry.c_str(),
-                                               utilityExecutable.c_str(),
-                                               "Path to an internal program.",
-                                               cmCacheManager::FILEPATH);
+  m_Makefile->AddCacheDefinition(cacheEntry.c_str(),
+                                 utilityExecutable.c_str(),
+                                 "Path to an internal program.",
+                                 cmCacheManager::FILEPATH);
   // add a value into the cache that maps from the
   // full path to the name of the project
   cmSystemTools::ConvertToUnixSlashes(utilityExecutable);
-  cmCacheManager::GetInstance()->AddCacheEntry(utilityExecutable.c_str(),
-                                               utilityName.c_str(),
-                                               "Executable to project name.",
-                                               cmCacheManager::INTERNAL);
-  
-  // Set the definition in the makefile.
-  m_Makefile->AddDefinition(cacheEntry.c_str(), utilityExecutable.c_str());
+  m_Makefile->AddCacheDefinition(utilityExecutable.c_str(),
+                                 utilityName.c_str(),
+                                 "Executable to project name.",
+                                 cmCacheManager::INTERNAL);
   
   return true;
 }

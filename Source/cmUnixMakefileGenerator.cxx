@@ -555,7 +555,7 @@ void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
     if( ! emitted.insert(lib2->first).second ) continue;
 
     const char* cacheValue
-      = cmCacheManager::GetInstance()->GetCacheValue(lib2->first.c_str());
+      = m_Makefile->GetDefinition(lib2->first.c_str());
     if(cacheValue )
       {
       // if there is a cache value then this is a library that cmake
@@ -587,7 +587,7 @@ void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
       // add the correct extension
       std::string ltname = lib2->first+"_LIBRARY_TYPE";
       const char* libType
-        = cmCacheManager::GetInstance()->GetCacheValue(ltname.c_str());
+        = m_Makefile->GetDefinition(ltname.c_str());
       if(libType && std::string(libType) == "SHARED")
         {
         libpath += m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
@@ -609,7 +609,7 @@ void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
     if( ! emitted.insert(lib2->first).second ) continue;
 
     const char* cacheValue
-      = cmCacheManager::GetInstance()->GetCacheValue(lib2->first.c_str());
+      = m_Makefile->GetDefinition(lib2->first.c_str());
     // if cache and not the current directory add a rule, to
     // jump into the directory and build for the first time
     if(cacheValue 
@@ -621,7 +621,7 @@ void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
       // add the correct extension
       std::string ltname = lib2->first+"_LIBRARY_TYPE";
       const char* libType
-        = cmCacheManager::GetInstance()->GetCacheValue(ltname.c_str());
+        = m_Makefile->GetDefinition(ltname.c_str());
       if(libType && std::string(libType) == "SHARED")
         {
         library += m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
@@ -1002,7 +1002,7 @@ void cmUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
 void cmUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
 {
   const char* root
-    = cmCacheManager::GetInstance()->GetCacheValue("CMAKE_ROOT");
+    = m_Makefile->GetDefinition("CMAKE_ROOT");
   fout << "INSTALL = " << root << "/Templates/install-sh -c\n";
   fout << "INSTALL_PROGRAM = ${INSTALL}\n";
   fout << "INSTALL_DATA =    ${INSTALL} -m 644\n";
@@ -1012,7 +1012,7 @@ void cmUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
   fout << "\t@echo \"Installing ...\"\n";
   
   const char* prefix
-    = cmCacheManager::GetInstance()->GetCacheValue("CMAKE_INSTALL_PREFIX");
+    = m_Makefile->GetDefinition("CMAKE_INSTALL_PREFIX");
   if (!prefix)
     {
     prefix = "/usr/local";
@@ -1362,7 +1362,7 @@ void cmUnixMakefileGenerator::ComputeSystemInfo()
       cmd += m_Makefile->GetHomeOutputDirectory();
       cmd += "; ";
       const char* root
-	= cmCacheManager::GetInstance()->GetCacheValue("CMAKE_ROOT");
+	= m_Makefile->GetDefinition("CMAKE_ROOT");
       cmd += root;
       cmd += "/Templates/configure";
       cmSystemTools::RunCommand(cmd.c_str(), output);

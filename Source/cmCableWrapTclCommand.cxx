@@ -408,15 +408,14 @@ void cmCableWrapTclCommand::GenerateCableClassFiles(const char* name,
 std::string cmCableWrapTclCommand::GetGccXmlFromCache() const
 {
   const char* gccxml =
-    cmCacheManager::GetInstance()->GetCacheValue("GCCXML");
+    m_Makefile->GetDefinition("GCCXML");
   if(gccxml)
     { return gccxml; }
 
-  m_Makefile->AddDefinition("GCCXML","NOTFOUND");
-  cmCacheManager::GetInstance()->AddCacheEntry("GCCXML",
-					       "NOTFOUND",
-					       "Path to GCC-XML executable.",
-					       cmCacheManager::FILEPATH);
+  m_Makefile->AddCacheDefinition("GCCXML",
+                                 "NOTFOUND",
+                                 "Path to GCC-XML executable.",
+                                 cmCacheManager::FILEPATH);
   return "NOTFOUND";
 }
 
@@ -428,12 +427,11 @@ std::string cmCableWrapTclCommand::GetGccXmlFromCache() const
 std::string cmCableWrapTclCommand::GetGccXmlFlagsFromCache() const
 {
   const char* gccxmlFlags =
-    cmCacheManager::GetInstance()->GetCacheValue("GCCXML_FLAGS");
+    m_Makefile->GetDefinition("GCCXML_FLAGS");
   if(gccxmlFlags)
     { return gccxmlFlags; }
 
-  m_Makefile->AddDefinition("GCCXML_FLAGS","");
-  cmCacheManager::GetInstance()->AddCacheEntry(
+  m_Makefile->AddCacheDefinition(
     "GCCXML_FLAGS",
     "",
     "Flags to GCC-XML to get it to parse the native compiler's headers.",
@@ -449,14 +447,13 @@ std::string cmCableWrapTclCommand::GetGccXmlFlagsFromCache() const
 std::string cmCableWrapTclCommand::GetCableFromCache() const
 {
   const char* cable =
-    cmCacheManager::GetInstance()->GetCacheValue("CABLE");
+    m_Makefile->GetDefinition("CABLE");
   if(cable)
     { return cable; }
 
-  m_Makefile->AddDefinition("CABLE","NOTFOUND");
-  cmCacheManager::GetInstance()->AddCacheEntry("CABLE",
-					       "NOTFOUND",
-					       "Path to CABLE executable.",
-					       cmCacheManager::FILEPATH);
+  m_Makefile->AddCacheDefinition("CABLE",
+                                 "NOTFOUND",
+                                 "Path to CABLE executable.",
+                                 cmCacheManager::FILEPATH);
   return "NOTFOUND";
 }

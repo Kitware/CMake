@@ -55,18 +55,12 @@ bool cmProjectCommand::InitialPass(std::vector<std::string>& args)
   std::string srcdir = args[0];
   srcdir += "_SOURCE_DIR";
   
-  m_Makefile->AddDefinition(bindir.c_str(),
-	  m_Makefile->GetCurrentOutputDirectory());
-  cmCacheManager::GetInstance()->
-    AddCacheEntry(bindir.c_str(),
-		  m_Makefile->GetCurrentOutputDirectory(),
-		  "Value Computed by CMake", cmCacheManager::STATIC);
-  m_Makefile->AddDefinition(srcdir.c_str(),
-	  m_Makefile->GetCurrentDirectory());
-  cmCacheManager::GetInstance()->
-    AddCacheEntry(srcdir.c_str(),
-		  m_Makefile->GetCurrentDirectory(),
-		  "Value Computed by CMake", cmCacheManager::STATIC);
+  m_Makefile->AddCacheDefinition(bindir.c_str(),
+                                 m_Makefile->GetCurrentOutputDirectory(),
+                                 "Value Computed by CMake", cmCacheManager::STATIC);
+  m_Makefile->AddCacheDefinition(srcdir.c_str(),
+                                 m_Makefile->GetCurrentDirectory(),
+                                 "Value Computed by CMake", cmCacheManager::STATIC);
   
   bindir = "PROJECT_BINARY_DIR";
   srcdir = "PROJECT_SOURCE_DIR";

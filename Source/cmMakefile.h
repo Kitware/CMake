@@ -47,6 +47,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmSystemTools.h"
 #include "cmSourceGroup.h"
 #include "cmTarget.h"
+#include "cmCacheManager.h"
+
 class cmFunctionBlocker;
 class cmCommand;
 class cmMakefileGenerator;
@@ -213,11 +215,17 @@ public:
    * can be used in CMake to refer to lists, directories, etc.
    */
   void AddDefinition(const char* name, const char* value);
+  ///! Add a definition to this makefile and the global cmake cache.
+  void AddCacheDefinition(const char* name, const char* value, 
+                          const char* doc,
+                          cmCacheManager::CacheEntryType type);
 
   /**
    * Add bool variable definition to the build. 
    */
   void AddDefinition(const char* name, bool);
+  ///! Add a definition to this makefile and the global cmake cache.
+  void AddCacheDefinition(const char* name, bool, const char* doc);
 
   /**
    * Specify the name of the project for this build.
@@ -440,8 +448,15 @@ public:
 
   /**
    * Given a variable name, return its value (as a string).
+   * If the variable is not found in this makefile instance, the
+   * cache is then queried.
    */
   const char* GetDefinition(const char*);
+  
+  /** Test a boolean cache entry to see if it is true or false, 
+   *  returns false if no entry defined.
+   */
+  bool IsOn(const char* name);
 
   /**
    * Get a list of preprocessor define flags.
