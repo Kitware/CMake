@@ -79,12 +79,14 @@ int main (int argc, char *argv[])
     if(makeCommand.find(' ') != std::string::npos)
       {
       char *buffer = new char[makeCommand.size()+1];
+#if defined(_WIN32) && !defined(__CYGWIN__)      
       if(GetShortPathName(makeCommand.c_str(), buffer, 
                           makeCommand.size()+1) != 0)
         {
         makeCommand = buffer;
         delete [] buffer;
         }
+#endif
       }
     makeCommand += " ";
     makeCommand += executableName;
