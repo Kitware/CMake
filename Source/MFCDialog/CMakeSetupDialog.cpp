@@ -601,7 +601,7 @@ void CMakeSetupDialog::OnChangeWhereBuild()
 // copy from the cache manager to the cache edit list box
 void CMakeSetupDialog::FillCacheGUIFromCacheManager()
 { 
-  int size = m_CacheEntriesList.GetItems().size();
+  size_t size = m_CacheEntriesList.GetItems().size();
   bool reverseOrder = false;
   // if there are already entries in the cache, then
   // put the new ones in the top, so they show up first
@@ -830,8 +830,8 @@ void CMakeSetupDialog::OnSize(UINT nType, int cx, int cy)
     m_VersionDisplay.SetWindowPos(&wndTop, 5, cy-23, 0, 0,
                                   SWP_NOSIZE | SWP_NOZORDER);
 
-    deltax = deltax + m_deltaXRemainder;
-    m_deltaXRemainder = deltax%2;
+    deltax = int(deltax + m_deltaXRemainder);
+    m_deltaXRemainder = float(deltax%2);
     m_MouseHelp.GetWindowRect(&cRect);
     this->ScreenToClient(&cRect);
     m_MouseHelp.SetWindowPos(&wndTop, cRect.left + deltax/2, 

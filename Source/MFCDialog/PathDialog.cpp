@@ -293,7 +293,7 @@ int CPathDialog::Touch(LPCTSTR lpPath, BOOL bValidate)
 
   TCHAR szPath[MAX_PATH];
   _tcscpy(szPath, lpPath);
-  int nLen = _tcslen(szPath);
+  size_t nLen = _tcslen(szPath);
 
   int i;
   if(nLen==3)
@@ -355,7 +355,7 @@ int CPathDialog::ConcatPath(LPTSTR lpRoot, LPCTSTR lpMorePath)
     return 1;
     }
 
-  int nLen = _tcslen(lpRoot);
+  size_t nLen = _tcslen(lpRoot);
 
   if(nLen<3)
     {
