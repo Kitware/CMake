@@ -173,7 +173,6 @@ void cmMakefile::Print() const
 //   is "filename" and not "external".
 bool cmMakefile::ReadListFile(const char* filename, const char* external)
 {
-
   // keep track of the current file being read
   if (filename)
     {
@@ -444,16 +443,20 @@ void cmMakefile::AddIncludeDirectory(const char* inc)
 
 void cmMakefile::AddDefinition(const char* name, const char* value)
 {
+  m_Definitions.erase( DefinitionMap::key_type(name));
   m_Definitions.insert(DefinitionMap::value_type(name, value));
 }
+
 void cmMakefile::AddDefinition(const char* name, bool value)
 {
   if(value)
     {
+    m_Definitions.erase( DefinitionMap::key_type(name));
     m_Definitions.insert(DefinitionMap::value_type(name, "ON"));
     }
   else
     {
+    m_Definitions.erase( DefinitionMap::key_type(name));
     m_Definitions.insert(DefinitionMap::value_type(name, "OFF"));
     }
 }
