@@ -1884,7 +1884,8 @@ cmSourceFile* cmMakefile::GetSource(const char* sourceName) const
   for(std::vector<cmSourceFile*>::const_iterator i = m_SourceFiles.begin();
       i != m_SourceFiles.end(); ++i)
     {
-    if ((*i)->GetSourceName() == sname &&
+    if (cmSystemTools::GetFilenameWithoutLastExtension((*i)->GetFullPath()) 
+        == sname &&
         cmSystemTools::GetFilenamePath((*i)->GetFullPath()) == path &&
         (ext.size() == 0 || (ext == (*i)->GetSourceExtension())))
       {
@@ -2000,10 +2001,30 @@ cmSourceFile* cmMakefile::GetOrCreateSource(const char* sourceName,
     }
   else
     {
-    file.SetName(cmSystemTools::GetFilenameName(src.c_str()).c_str(), 
-                 path.c_str(),
-                 this->GetSourceExtensions(),
-                 this->GetHeaderExtensions());
+    std::string relPath = cmSystemTools::GetFilenamePath(sourceName);
+    if (relative && relPath.size())
+      {
+      // we need to keep the relative part of the filename
+      std::string fullPathLessRel = path;
+      std::string::size_type pos = fullPathLessRel.rfind(relPath);
+      if (pos == std::string::npos)
+        {
+        cmSystemTools::Error(
+          "CMake failed to properly look up relative cmSourceFile: ", 
+          sourceName);
+        }
+      fullPathLessRel.erase(pos-1);
+      file.SetName(sourceName, fullPathLessRel.c_str(),
+                   this->GetSourceExtensions(),
+                   this->GetHeaderExtensions());
+      }
+    else
+      {
+      file.SetName(cmSystemTools::GetFilenameName(src.c_str()).c_str(), 
+                   path.c_str(),
+                   this->GetSourceExtensions(),
+                   this->GetHeaderExtensions());
+      }
     }
   // add the source file to the makefile
   this->AddSource(file);
