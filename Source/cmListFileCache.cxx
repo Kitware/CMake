@@ -127,7 +127,7 @@ bool cmListFileCache::CacheFile(const char* path, bool requireProjectCommand)
       cmListFileFunction project;
       project.m_Name = "PROJECT";
       project.m_Arguments.push_back("Project");
-      inFile.m_Functions.push_back(project);
+      inFile.m_Functions.insert(inFile.m_Functions.begin(),project);
       }
     }
   m_ListFileCache[path] = inFile;
