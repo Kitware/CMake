@@ -35,12 +35,8 @@ IF(BUILD_TESTING)
   FIND_PROGRAM(PURIFYCOMMAND purify DOC "Path to Rational purify command, used for memory error detection.")
 
   # find a tcl shell command
-  IF (UNIX)
-    FIND_PROGRAM(TCL_TCLSH cygtclsh80 )
-  ENDIF(UNIX)
-  FIND_PROGRAM(TCL_TCLSH 
-               NAMES tclsh tclsh83 tclsh8.3 tclsh82 tclsh8.2 tclsh80 tclsh8.0 
-               )
+  INCLUDE(${CMAKE_ROOT}/Modules/FindTCL.cmake)
+
   FIND_PROGRAM(HOSTNAME hostname /usr/bsd /usr/sbin /usr/bin /bin /sbin)
   FIND_PROGRAM(NSLOOKUP nslookup /usr/bin /usr/sbin /usr/local/bin)
 
