@@ -278,7 +278,8 @@ void cmCursesMainForm::RunCMake(bool generateMakefiles)
 // copy from the list box to the cache manager
 void cmCursesMainForm::FillCacheManagerFromUI()
 { 
-
+  std::string tmpString;
+  
   cmCacheManager::GetInstance()->GetCacheMap();
   int size = m_Entries->size();
   for(int i=0; i < size; i++)
@@ -288,7 +289,9 @@ void cmCursesMainForm::FillCacheManagerFromUI()
 	(*m_Entries)[i]->m_Key.c_str());
     if (entry)
       {
-      entry->m_Value = (*m_Entries)[i]->m_Entry->GetValue();
+      tmpString = (*m_Entries)[i]->m_Entry->GetValue();
+      // Remove trailing spaces
+      entry->m_Value = tmpString.substr(0,tmpString.find_last_not_of(" ")+1);
       }
     }
 }

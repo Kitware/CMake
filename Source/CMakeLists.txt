@@ -46,12 +46,12 @@ IF (WIN32)
   ENDIF(NOT UNIX)
 ENDIF (WIN32)
 
-#IF (UNIX)
-#  INCLUDE (${CMAKE_ROOT}/Modules/FindCurses.cmake)
-#  IF (CURSES_LIBRARY)
-#    SUBDIRS(CursesDialog)
-#  ENDIF (CURSES_LIBRARY)
-#ENDIF (UNIX)
+IF (UNIX)
+  INCLUDE (${CMAKE_ROOT}/Modules/FindCurses.cmake)
+  IF (CURSES_LIBRARY)
+    SUBDIRS(CursesDialog)
+  ENDIF (CURSES_LIBRARY)
+ENDIF (UNIX)
 
 SOURCE_FILES(SRCS cmUnixMakefileGenerator.cxx)
 
