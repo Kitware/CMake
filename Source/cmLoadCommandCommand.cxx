@@ -28,6 +28,9 @@ public:
     this->info.CAPI = &cmStaticCAPI;
   }
   
+  ///! clean up any memory allocated by the plugin
+  ~cmLoadedCommand();
+    
   /**
    * This is a virtual constructor for the command.
    */
@@ -139,7 +142,14 @@ void cmLoadedCommand::FinalPass()
     {
     this->info.FinalPass((void *)&this->info,(void *)this->m_Makefile);
     }
-  
+}
+
+cmLoadedCommand::~cmLoadedCommand()
+{
+  if (this->info.Destructor)
+    {
+    this->info.Destructor((void *)&this->info);
+    }
 }
 
 // cmLoadCommandCommand

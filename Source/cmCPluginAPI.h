@@ -176,6 +176,7 @@ Finally we define the key data structures and function prototypes
   typedef int (*CM_INITIAL_PASS_FUNCTION)(void *info, void *mf, 
                                           int argc, char *[]);
   typedef void (*CM_FINAL_PASS_FUNCTION)(void *info, void *mf);
+  typedef void (*CM_DESTRUCTOR_FUNCTION)(void *info);
   
   typedef struct {
     unsigned char magic1;
@@ -184,6 +185,7 @@ Finally we define the key data structures and function prototypes
     int m_Inherited;
     CM_INITIAL_PASS_FUNCTION InitialPass;
     CM_FINAL_PASS_FUNCTION FinalPass;
+    CM_DESTRUCTOR_FUNCTION Destructor;
     CM_DOC_FUNCTION GetTerseDocumentation;
     CM_DOC_FUNCTION GetFullDocumentation;  
     void *ClientData;
