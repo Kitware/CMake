@@ -686,7 +686,7 @@ IF(BUILD_TESTING)
       --test-command VSExternalInclude)
   ENDIF(${CMAKE_GENERATOR} MATCHES "Visual Studio")
 
-  IF (APPLE)
+  IF (APPLE AND CMAKE_COMPILER_IS_GNUCXX)
     ADD_TEST(objc++ ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/Objc++"
@@ -696,7 +696,7 @@ IF(BUILD_TESTING)
       --build-project  objc++
       --test-command  objc++
       )
-  ENDIF (APPLE)
+  ENDIF (APPLE AND CMAKE_COMPILER_IS_GNUCXX)
 
   IF (CTEST_TEST_CTEST AND CMAKE_RUN_LONG_TESTS)
     CONFIGURE_FILE("${CMake_SOURCE_DIR}/Tests/CTestTest/test.cmake.in"
