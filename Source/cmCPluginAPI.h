@@ -25,6 +25,9 @@
 #ifndef cmCPluginAPI_h
 #define cmCPluginAPI_h
 
+#define CMAKE_VERSION_MAJOR 1
+#define CMAKE_VERSION_MINOR 5
+
 #ifdef  __cplusplus
 extern "C" {
 #endif
@@ -184,8 +187,8 @@ Finally we define the key data structures and function prototypes
   typedef void (*CM_DESTRUCTOR_FUNCTION)(void *info);
   
   typedef struct {
-    unsigned char magic1;
-    unsigned char magic2;
+    unsigned long reserved1; /* Reserved for future use.  DO NOT USE.  */
+    unsigned long reserved2; /* Reserved for future use.  DO NOT USE.  */
     cmCAPI *CAPI;
     int m_Inherited;
     CM_INITIAL_PASS_FUNCTION InitialPass;
