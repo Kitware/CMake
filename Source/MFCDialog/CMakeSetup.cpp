@@ -5,6 +5,8 @@
 #include "CMakeSetup.h"
 #include "CMakeSetupDialog.h"
 #include "CMakeCommandLineInfo.h" 
+#include "../cmListFileCache.h"
+#include "../cmMakefileGenerator.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -73,6 +75,9 @@ BOOL CMakeSetup::InitInstance()
     //  dismissed with Cancel
     }
 
+  // clean up globals 
+  cmListFileCache::GetInstance()->ClearCache(); 
+  cmMakefileGenerator::UnRegisterGenerators();
   // Since the dialog has been closed, return FALSE so that we exit the
   //  application, rather than start the application's message pump.
   return FALSE;
