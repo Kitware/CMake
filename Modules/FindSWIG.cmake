@@ -16,6 +16,7 @@ IF(EXISTS ${SWIG_DIR})
 
   IF(EXISTS ${SWIG_DIR}/SWIGConfig.cmake)
     INCLUDE(${SWIG_DIR}/SWIGConfig.cmake)
+    SET(SWIG_FOUND 1)
   ELSE(EXISTS ${SWIG_DIR}/SWIGConfig.cmake)
     FIND_PROGRAM(SWIG_EXECUTABLE
       NAMES swig-1.3 swig
