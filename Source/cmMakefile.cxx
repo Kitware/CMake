@@ -212,11 +212,17 @@ void cmMakefile::ExecuteCommand(std::string &name,
       // if the command is inherited then InitialPass it.
       if(!m_Inheriting || usedCommand->IsInherited())
         {
-        std::vector<std::string> expandedArguments = arguments;
-        for(std::vector<std::string>::iterator i = expandedArguments.begin();
-            i != expandedArguments.end(); ++i)
+        std::vector<std::string> expandedArguments;
+        for(std::vector<std::string>::const_iterator i = arguments.begin();
+            i != arguments.end(); ++i)
           {
-          this->ExpandVariablesInString(*i);
+          std::string tmps = *i;
+          this->ExpandVariablesInString(tmps);
+          if (tmps.find_first_not_of(" ") != std::string::npos)
+            {
+            // we found something in the args
+            expandedArguments.push_back(tmps);
+            }
           }
         if(!usedCommand->InitialPass(expandedArguments))
           {
@@ -1070,12 +1076,14 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
             result += var;
             result += "@";
             }
-          else
+          // do nothing, we remove the variable
+/*          else
             {
             result += (markerStartSize == 5 ? "$ENV{" : "${");
             result += var;
             result += "}";
             }
+*/
           }
         // lookup var, and replace it
         currentPos = endVariablePos+1;
@@ -1235,11 +1243,17 @@ bool cmMakefile::IsFunctionBlocked(const char *name,
 
   // loop over all function blockers to see if any block this command
   std::list<cmFunctionBlocker *>::iterator pos;
-  std::vector<std::string> expandedArguments = args;
-  for(std::vector<std::string>::iterator i = expandedArguments.begin();
-      i != expandedArguments.end(); ++i)
+  std::vector<std::string> expandedArguments;
+  for(std::vector<std::string>::const_iterator i = args.begin();
+      i != args.end(); ++i)
     {
-    this->ExpandVariablesInString(*i);
+    std::string tmps = *i;
+    this->ExpandVariablesInString(tmps);
+    if (tmps.find_first_not_of(" ") != std::string::npos)
+      {
+      // we found something in the args
+      expandedArguments.push_back(tmps);
+      }
     }
   for (pos = m_FunctionBlockers.begin(); 
        pos != m_FunctionBlockers.end(); ++pos)
