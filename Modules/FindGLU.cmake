@@ -7,7 +7,11 @@
 #
 
 IF (WIN32)
-  SET (GLU_LIBRARY glu32 CACHE STRING "GLU library for win32")
+  IF(BORLAND)
+    SET (GLU_LIBRARY import32 CACHE STRING "GLU library for win32")
+  ELSE(BORLAND)
+    SET (GLU_LIBRARY glu32 CACHE STRING "GLU library for win32")
+  ENDIF(BORLAND)
 ELSE (WIN32)
   FIND_PATH(GLU_INCLUDE_PATH GL/gl.h 
   /usr/include 
@@ -15,6 +19,9 @@ ELSE (WIN32)
   /usr/openwin/share/include 
   /opt/graphics/OpenGL/include 
   /usr/X11R6/include 
+  )
+  MARK_AS_ADVANCED(
+    GLU_INCLUDE_PATH
   )
 
   FIND_LIBRARY(GLU_LIBRARY GLU
@@ -26,3 +33,7 @@ ELSE (WIN32)
   )
 
 ENDIF (WIN32)
+
+MARK_AS_ADVANCED(
+  GLU_LIBRARY
+)

@@ -23,7 +23,10 @@ ELSE (WIN32)
      /opt/graphics/OpenGL/include 
      /usr/X11R6/include 
      )
-   
+     MARK_AS_ADVANCED(
+       OPENGL_INCLUDE_PATH
+     )
+
      FIND_LIBRARY(OPENGL_LIBRARY GL
      /usr/lib 
      /usr/local/lib 
@@ -33,3 +36,7 @@ ELSE (WIN32)
      )
    ENDIF (APPLE)
 ENDIF (WIN32)
+
+MARK_AS_ADVANCED(
+  OPENGL_LIBRARY
+)

@@ -18,6 +18,9 @@ ELSE (WIN32)
   /opt/graphics/OpenGL/include 
   /usr/X11R6/include 
   )
+  MARK_AS_ADVANCED(
+    GLUT_INCLUDE_PATH
+  )
 
   FIND_LIBRARY(GLUT_LIBRARY glut
   /usr/lib 
@@ -28,3 +31,7 @@ ELSE (WIN32)
   )
 
 ENDIF (WIN32)
+
+MARK_AS_ADVANCED(
+  GLUT_LIBRARY
+)
