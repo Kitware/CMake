@@ -1647,7 +1647,7 @@ SystemTools::GetFilenameWithoutLastExtension(const kwsys_stl::string& filename)
 bool SystemTools::FileIsFullPath(const char* in_name)
 {
   kwsys_stl::string name = in_name;
-#if defined(_WIN32)
+#if defined(_WIN32) || defined(__CYGWIN__)
   // On Windows, the name must be at least two characters long.
   if(name.length() < 2)
     {
