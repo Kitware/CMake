@@ -1066,19 +1066,19 @@ bool cmSystemTools::CreateSymlink(const char* origName, const char* newName)
 #endif
 
 
-std::vector<std::string> cmSystemTools::SplitString(const char* p, char sep)
+std::vector<cmStdString> cmSystemTools::SplitString(const char* p, char sep)
 {
   std::string path = p;
-  std::vector<std::string> paths;
+  std::vector<cmStdString> paths;
   std::string::size_type pos1 = 0;
   std::string::size_type pos2 = path.find(sep, pos1+1);
   while(pos2 != std::string::npos)
     {
-    paths.push_back(path.substr(pos1+1, pos2-pos1-1));
-    pos1 = pos2;
+    paths.push_back(path.substr(pos1, pos2-pos1));
+    pos1 = pos2+1;
     pos2 = path.find(sep, pos1+1);
     } 
-  paths.push_back(path.substr(pos1+1, pos2-pos1-1));
+  paths.push_back(path.substr(pos1, pos2-pos1));
   
   return paths;
 }
@@ -1104,8 +1104,8 @@ std::string cmSystemTools::RelativePath(const char* local, const char* remote)
     }
   std::string relativePath;     // result string
   // split up both paths into arrays of strings using / as a separator
-  std::vector<std::string> fileSplit = cmSystemTools::SplitString(local);
-  std::vector<std::string> relativeSplit = cmSystemTools::SplitString(remote);
+  std::vector<cmStdString> fileSplit = cmSystemTools::SplitString(local);
+  std::vector<cmStdString> relativeSplit = cmSystemTools::SplitString(remote);
   // count up how many mathing directory names there are from the start
   unsigned int sameCount = 0;
   while(sameCount < fileSplit.size()-1 && sameCount < relativeSplit.size()-1 && 

@@ -249,7 +249,7 @@ public:
   ///! compute the relative path from local to remote
   static std::string RelativePath(const char* local, const char* remote);
   ///! split a path by separator into an array of strings, default is /
-  static std::vector<std::string> SplitString(const char* s, char separator = '/');
+  static std::vector<cmStdString> SplitString(const char* s, char separator = '/');
 private:
   static bool s_ForceUnixPaths;
   static bool s_RunCommandHideConsole;
