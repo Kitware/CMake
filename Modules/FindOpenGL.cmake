@@ -19,6 +19,7 @@
 IF (APPLE)
   SET (OPENGL_gl_LIBRARY "-framework OpenGL" CACHE STRING "OpenGL lib for OSX")
   SET (OPENGL_glu_LIBRARY "-framework AGL" CACHE STRING "AGL lib for OSX")
+  SET (OPENGL_INCLUDE_DIR "" CACHE STRING "Include path for OpenGL is not required for OSX when -framework is being used")
 ENDIF (APPLE)
 
 IF (WIN32)

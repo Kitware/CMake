@@ -301,8 +301,8 @@ void cmGlobalGenerator::Configure()
         {
         if(cmSystemTools::IsNOTFOUND(lib->first.c_str()))
           {
-          std::string not = lib->first.substr(0, lib->first.size()-9);
-          notFoundMap.insert(not);
+          std::string varName = lib->first.substr(0, lib->first.size()-9);
+          notFoundMap.insert(varName);
           }
         }
       std::vector<std::string>& incs = 
@@ -313,8 +313,8 @@ void cmGlobalGenerator::Configure()
         {
         if(cmSystemTools::IsNOTFOUND(lib->c_str()))
           {
-          std::string not = lib->substr(0, lib->size()-9); 
-          notFoundMap.insert(not);
+          std::string varName = lib->substr(0, lib->size()-9); 
+          notFoundMap.insert(varName);
           }
         }
       m_CMakeInstance->UpdateProgress("Configuring", 
