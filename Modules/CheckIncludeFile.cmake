@@ -9,17 +9,15 @@
 MACRO(CHECK_INCLUDE_FILE INCLUDE VARIABLE)
   SET(CHECK_INCLUDE_FILE_VAR ${INCLUDE})
   CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CheckIncludeFile.c.in
-                 ${PROJECT_BINARY_DIR}/CheckIncludeFile.c IMMEDIATE)
-  TRY_COMPILE(COMPILE_OK
+                 ${PROJECT_BINARY_DIR}/CMakeTmp/CheckIncludeFile.c IMMEDIATE)
+  TRY_COMPILE(${VARIABLE}
              ${PROJECT_BINARY_DIR}
-             ${PROJECT_BINARY_DIR}/CheckIncludeFile.c
+             ${PROJECT_BINARY_DIR}/CMakeTmp/CheckIncludeFile.c
              OUTPUT_VARIABLE OUTPUT)
-  IF(COMPILE_OK)
-    SET(${VARIABLE} ${COMPILE_OK})
-  ELSE(COMPILE_OK)
+  IF(NOT ${VARIABLE})
     WRITE_FILE(${PROJECT_BINARY_DIR}/CMakeError.log 
       "Determining if the include file ${INCLUDE} "
       "exists failed with the following output:\n"
       "${OUTPUT}\n")
-  ENDIF(COMPILE_OK)
+  ENDIF(NOT ${VARIABLE})
 ENDMACRO(CHECK_INCLUDE_FILE)

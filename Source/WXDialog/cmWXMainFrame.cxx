@@ -601,7 +601,6 @@ void cmMainFrame::Initialize(cmCommandLineInfo* cmdInfo)
 
   if ( cmdInfo->m_ExitAfterLoad )
     {
-    std::cout << "Set timer" << std::endl;
     this->m_ExitTimer = new wxTimer(this, this->GetId());
     this->m_ExitTimer->Start(3000);
     }

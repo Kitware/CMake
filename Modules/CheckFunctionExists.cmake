@@ -7,16 +7,14 @@
 #
 
 MACRO(CHECK_FUNCTION_EXISTS FUNCTION VARIABLE)
-  TRY_COMPILE(COMPILE_OK
+  TRY_COMPILE(${VARIABLE}
              ${PROJECT_BINARY_DIR}
              ${CMAKE_ROOT}/Modules/CheckFunctionExists.c
              COMPILE_DEFINITIONS -DCHECK_FUNCTION_EXISTS=${FUNCTION} 
              OUTPUT_VARIABLE OUTPUT)
-  IF(COMPILE_OK)
-    SET(${VARIABLE} ${COMPILE_OK})
-  ELSE(COMPILE_OK)
+  IF(NOT ${VARIABLE})
     WRITE_FILE(${PROJECT_BINARY_DIR}/CMakeError.log 
       "Determining if the function ${FUNCTION} exists failed with the following output:\n"
       "${OUTPUT}\n")
-  ENDIF(COMPILE_OK)
+  ENDIF(NOT ${VARIABLE})
 ENDMACRO(CHECK_FUNCTION_EXISTS)
