@@ -193,6 +193,10 @@ void cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
         break;
       case cmTarget::UTILITY:
         break;
+      case cmTarget::INSTALL_FILES:
+        break;
+      case cmTarget::INSTALL_PROGRAMS:
+        break;
       }
     }
 }
