@@ -2,6 +2,7 @@
 # CMakeLocal.make.in should be in the directory where you run configure
 # in, which need not be the source directory
 #
+SET (CMAKE_INSTALL_PREFIX     @prefix@ CACHE_NO_REPLACE PATH)
 SET (CMAKE_WORDS_BIGENDIAN    @CMAKE_WORDS_BIGENDIAN@ )
 SET (CMAKE_USE_SPROC          @CMAKE_USE_SPROC@ CACHE_NO_REPLACE BOOL)
 SET (CMAKE_USE_PTHREADS       @CMAKE_USE_PTHREADS@ CACHE_NO_REPLACE BOOL)
