@@ -59,6 +59,10 @@ void cmCableData::OpenOutputFile(const std::string& name)
     {
     this->WriteConfigurationHeader();
     }
+  else
+    {
+    cmSystemTools::Error("Unable to open CABLE config file: ", name.c_str());
+    }
 }
 
 

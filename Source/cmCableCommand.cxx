@@ -64,11 +64,18 @@ void cmCableCommand::SetupCableData()
     if(m_CableData)
       { return; }
     }
-  
+
+  // We must make sure the output directory exists so that the CABLE
+  // configuration file can be opened by the cmCableData.
+  std::string pathName = m_Makefile->GetStartOutputDirectory();
+  if(!cmSystemTools::MakeDirectory(pathName.c_str()))
+    {
+    cmSystemTools::Error("Unable to make directory ", pathName.c_str());
+    }
+
   // We didn't find another cmCableCommand with a valid cmCableData.
   // We must allocate the new cmCableData ourselves, and with this
   // command as its owner.
-  std::string pathName = m_Makefile->GetStartOutputDirectory();
   pathName += "/cable_config.xml";
   m_CableData = new cmCableData(this, pathName);
 }
