@@ -1379,7 +1379,7 @@ void cmMakefile::ExpandSourceListArguments(
   
   // now expand the args
   std::vector<std::string> tmpArgs;
-  int i;
+  unsigned int i;
   for(i = 0; i < arguments.size(); ++i)
     {
     // is the arg defined ?, if so use the def
