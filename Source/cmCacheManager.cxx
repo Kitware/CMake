@@ -244,6 +244,25 @@ bool cmCacheManager::LoadCache(const char* path,
               }
             it.SetProperty("ADVANCED", value.c_str());
             }
+          else if ( e.m_Type == cmCacheManager::INTERNAL &&
+                    (entryKey.size() > strlen("-MODIFIED")) &&
+                    strcmp(entryKey.c_str() + (entryKey.size() - strlen("-MODIFIED")),
+                           "-MODIFIED") == 0 )
+            {
+            std::string value = e.m_Value;
+            std::string akey = entryKey.substr(0, (entryKey.size() - strlen("-MODIFIED")));
+            cmCacheManager::CacheIterator it = this->GetCacheIterator(akey.c_str());
+            if ( it.IsAtEnd() )
+              {
+              e.m_Type = cmCacheManager::UNINITIALIZED;
+              m_Cache[akey] = e;
+              }
+            if (!it.Find(akey.c_str()))
+              {
+              cmSystemTools::Error("Internal CMake error when reading cache");
+              }
+            it.SetProperty("MODIFIED", value.c_str());
+            }
           else
             {
             e.m_Initialized = true;
@@ -456,6 +475,34 @@ bool cmCacheManager::SaveCache(const char* path)
         }
       fout << key.c_str() << ":INTERNAL="
            << (i.GetPropertyAsBool("ADVANCED") ? "1" : "0") << "\n";
+      }
+    bool modified = i.PropertyExists("MODIFIED");
+    if ( modified )
+      {
+      // Format is key:type=value
+      std::string key;
+      std::string rkey = i.GetName();
+      std::string helpstring;
+      // If this is advanced variable, we have to do some magic for
+      // backward compatibility
+      helpstring = "Modified flag for variable: ";
+      helpstring += i.GetName();
+      rkey += "-MODIFIED";
+      cmCacheManager::OutputHelpString(fout, helpstring.c_str());
+      // support : in key name by double quoting 
+      if(rkey.find(':') != std::string::npos ||
+         rkey.find("//") == 0)
+        {
+        key = "\"";
+        key += rkey;
+        key += "\"";
+        }
+      else
+        {
+        key = rkey;
+        }
+      fout << key.c_str() << ":INTERNAL="
+           << (i.GetPropertyAsBool("MODIFIED") ? "1" : "0") << "\n";
       }
     if(t == cmCacheManager::INTERNAL)
       {

@@ -784,9 +784,7 @@ void cmCursesMainForm::RemoveEntry(const char* value)
 
 // copy from the list box to the cache manager
 void cmCursesMainForm::FillCacheManagerFromUI()
-{ 
-  std::string tmpString;
-  
+{   
   int size = m_Entries->size();
   for(int i=0; i < size; i++)
     {
@@ -795,17 +793,40 @@ void cmCursesMainForm::FillCacheManagerFromUI()
         (*m_Entries)[i]->m_Key.c_str());
     if (!it.IsAtEnd())
       {
-      tmpString = (*m_Entries)[i]->m_Entry->GetValue();
+      std::string oldValue = it.GetValue();
+      std::string newValue = (*m_Entries)[i]->m_Entry->GetValue();
+      std::string fixedOldValue;
+      std::string fixedNewValue;
+      this->FixValue(it.GetType(), oldValue, fixedOldValue);
+      this->FixValue(it.GetType(), newValue, fixedNewValue);
 
-      // Remove trailing spaces, convert path to unix slashes
-      std::string tmpSubString = 
-        tmpString.substr(0,tmpString.find_last_not_of(" ")+1);
-      if ( it.GetType() == cmCacheManager::PATH || 
-           it.GetType() == cmCacheManager::FILEPATH )
+      if(!(fixedOldValue == fixedNewValue))
         {
-        cmSystemTools::ConvertToUnixSlashes(tmpSubString);
+        // The user has changed the value.  Mark it as modified.
+        it.SetProperty("MODIFIED", true);
         }
-      it.SetValue(tmpSubString.c_str());
+      it.SetValue(fixedNewValue.c_str());
+      }
+    }
+}
+
+void cmCursesMainForm::FixValue(cmCacheManager::CacheEntryType type,
+                                const std::string& in, std::string& out) const
+{
+  out = in.substr(0,in.find_last_not_of(" ")+1);
+  if(type == cmCacheManager::PATH || type == cmCacheManager::FILEPATH)
+    {
+    cmSystemTools::ConvertToUnixSlashes(out);
+    }
+  if(type == cmCacheManager::BOOL)
+    {
+    if(cmSystemTools::IsOff(out.c_str()))
+      {
+      out = "OFF";
+      }
+    else
+      {
+      out = "ON";
       }
     }
 }
