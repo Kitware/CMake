@@ -50,9 +50,9 @@ IF ( CMAKE_WX_CAN_COMPILE )
     ADD_CUSTOM_COMMAND(
                 SOURCE CMake.app/Contents/MacOS/wxCMakeSetup
                 COMMAND ${CMAKE_COMMAND}
-                ARGS -E chdir ${EXECUTABLE_OUTPUT_PATH}/CMake.app/Contents/MacOS
+                ARGS -E chdir "\"${EXECUTABLE_OUTPUT_PATH}/CMake.app/Contents/MacOS\""
                 `${CMAKE_WX_CONFIG} --rezflags`
-                ${EXECUTABLE_OUTPUT_PATH}/CMake.app/Contents/MacOS/wxCMakeSetup
+                "\"${EXECUTABLE_OUTPUT_PATH}/CMake.app/Contents/MacOS/wxCMakeSetup\""
                 TARGET CMake.app/Contents/MacOS/wxCMakeSetup
                 )
   ENDIF(APPLE)
