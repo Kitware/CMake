@@ -407,7 +407,7 @@ static void hostcache_fixoffset(struct hostent *h, int offset);
 static struct hostent* pack_hostent(char** buf, struct hostent* orig)
 {
   char *bufptr;
-  char *newbuf;
+  struct hostent *newbuf;
   struct hostent* copy;
 
   int i;
@@ -415,7 +415,7 @@ static struct hostent* pack_hostent(char** buf, struct hostent* orig)
   size_t len;
 
   bufptr = *buf;
-  copy = (struct hostent*)bufptr;
+  memcpy(&copy, &bufptr, sizeof(struct hostent*));
 
   bufptr += sizeof(struct hostent);
   copy->h_name = bufptr;
@@ -429,7 +429,7 @@ static struct hostent* pack_hostent(char** buf, struct hostent* orig)
   /* This must be aligned properly to work on many CPU architectures! */
   bufptr = MEMALIGN(bufptr);
   
-  copy->h_aliases = (char**)bufptr;
+  memcpy(&copy->h_aliases, &bufptr, sizeof(char**));
 
   /* Figure out how many aliases there are */
   for (i = 0; orig->h_aliases[i] != NULL; ++i);
@@ -453,7 +453,7 @@ static struct hostent* pack_hostent(char** buf, struct hostent* orig)
   /* align it for (at least) 32bit accesses */
   bufptr = MEMALIGN(bufptr);
 
-  copy->h_addr_list = (char**)bufptr;
+  memcpy(&copy->h_addr_list, &bufptr, sizeof(char**));
 
   /* Figure out how many addresses there are */
   for (i = 0; orig->h_addr_list[i] != NULL; ++i);
@@ -474,7 +474,7 @@ static struct hostent* pack_hostent(char** buf, struct hostent* orig)
 
   /* now, shrink the allocated buffer to the size we actually need, which
      most often is only a fraction of the original alloc */
-  newbuf=(char *)realloc(*buf, (int)bufptr-(int)(*buf));
+  newbuf=(struct hostent *)realloc(*buf, (int)bufptr-(int)(*buf));
 
   /* if the alloc moved, we need to adjust things again */
   if(newbuf != *buf)

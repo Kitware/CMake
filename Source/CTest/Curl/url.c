@@ -2033,7 +2033,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
         /* Now, build <protocol>_proxy and check for such a one to use */
         while(*protop)
-          *envp++ = (char)tolower(*protop++);
+          *envp++ = (char)tolower((int)*protop++);
 
         /* append _proxy */
         strcpy(envp, "_proxy");
@@ -2056,7 +2056,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
         if(!prox && !strequal("http_proxy", proxy_env)) {
           /* There was no lowercase variable, try the uppercase version: */
           for(envp = proxy_env; *envp; envp++)
-            *envp = (char)toupper(*envp);
+            *envp = (char)toupper((int)*envp);
           prox=curl_getenv(proxy_env);
         }
 
@@ -2239,7 +2239,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     if(type) {
       char command;
       *type=0;                     /* it was in the middle of the hostname */
-      command = (char)toupper(type[6]);
+      command = (char)toupper((int)type[6]);
       switch(command) {
       case 'A': /* ASCII mode */
         data->set.ftp_ascii = 1;

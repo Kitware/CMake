@@ -80,13 +80,13 @@
 #if defined (STDC_HEADERS) || (!defined (isascii) && !defined (HAVE_ISASCII))
 # define IN_CTYPE_DOMAIN(c) 1
 #else
-# define IN_CTYPE_DOMAIN(c) isascii(c)
+# define IN_CTYPE_DOMAIN(c) isascii((int)(c))
 #endif
 
-#define ISSPACE(c) (IN_CTYPE_DOMAIN (c) && isspace (c))
-#define ISALPHA(c) (IN_CTYPE_DOMAIN (c) && isalpha (c))
-#define ISUPPER(c) (IN_CTYPE_DOMAIN (c) && isupper (c))
-#define ISDIGIT_LOCALE(c) (IN_CTYPE_DOMAIN (c) && isdigit (c))
+#define ISSPACE(c) (IN_CTYPE_DOMAIN (c) && isspace ((int)(c)))
+#define ISALPHA(c) (IN_CTYPE_DOMAIN (c) && isalpha ((int)(c)))
+#define ISUPPER(c) (IN_CTYPE_DOMAIN (c) && isupper ((int)(c)))
+#define ISDIGIT_LOCALE(c) (IN_CTYPE_DOMAIN (c) && isdigit ((int)(c)))
 
 /* ISDIGIT differs from ISDIGIT_LOCALE, as follows:
    - Its arg may be any int or unsigned int; it need not be an unsigned char.
