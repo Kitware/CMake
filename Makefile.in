@@ -7,4 +7,52 @@ all:
 	cd Source; ${MAKE}
 
 
+# Default top-level directories in which to install architecture-
+# specific files (exec_prefix) and machine-independent files such
+# as scripts (prefix).  The values specified here may be overridden
+# at configure-time with the --exec-prefix and --prefix options
+# to the "configure" script.
+
+prefix			= @prefix@
+exec_prefix		= @exec_prefix@
+
+# Directory in which to install the program cmake
+BIN_INSTALL_DIR = $(exec_prefix)/bin
+
+# Directory in which to install the templates and modules
+LIB_INSTALL_DIR = $(exec_prefix)/share/CMake
+
+INSTALL =		./install-sh -c
+INSTALL_PROGRAM =	${INSTALL}
+INSTALL_DATA =		${INSTALL} -m 644
+
+install:
+	@for i in $(LIB_INSTALL_DIR)/Modules $(LIB_INSTALL_DIR)/Templates $(BIN_INSTALL_DIR) ; \
+	    do \
+	    if [ ! -d $$i ] ; then \
+		echo "Making directory $$i"; \
+		mkdir -p $$i; \
+		chmod 755 $$i; \
+		else true; \
+		fi; \
+	    done;
+	@echo "Installing CMake"
+	chmod +x @srcdir@/install-sh
+	@echo "Installing cmake executable"
+	@$(INSTALL_PROGRAM) Source/cmake $(BIN_INSTALL_DIR)/cmake
+	@for i in @srcdir@/Modules/*.cmake; \
+	    do \
+	    echo "Installing $$i"; \
+	    $(INSTALL_DATA) $$i $(LIB_INSTALL_DIR)/Modules; \
+	    done;
+	@for i in @srcdir@/Templates/*.cmake; \
+	    do \
+	    echo "Installing $$i"; \
+	    $(INSTALL_DATA) $$i $(LIB_INSTALL_DIR)/Templates; \
+	    done;
+	@echo "Installing configure"
+	@$(INSTALL_PROGRAM) @srcdir@/Templates/configure $(LIB_INSTALL_DIR)/Templates
+	@echo "Installing install-sh"
+	@$(INSTALL_PROGRAM) @srcdir@/install-sh $(LIB_INSTALL_DIR)/Templates
+
 
