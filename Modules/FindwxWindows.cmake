@@ -357,9 +357,11 @@ IF (UNIX)
     ## remove prefix -L because we need the pure directory for LINK_DIRECTORIES
     ## replace -L by ; because the separator seems to be lost otherwise (bug or
     ## feature?)
-    STRING(REGEX REPLACE "[-][L]" ";" WXWINDOWS_LINK_DIRECTORIES ${WXWINDOWS_LINK_DIRECTORIES_WITH_PREFIX} )
-    #MESSAGE("DBG  WXWINDOWS_LINK_DIRECTORIES=${WXWINDOWS_LINK_DIRECTORIES}")
-    
+    IF(WXWINDOWS_LINK_DIRECTORIES_WITH_PREFIX)
+      STRING(REGEX REPLACE "[-][L]" ";" WXWINDOWS_LINK_DIRECTORIES ${WXWINDOWS_LINK_DIRECTORIES_WITH_PREFIX} )
+      #MESSAGE("DBG  WXWINDOWS_LINK_DIRECTORIES=${WXWINDOWS_LINK_DIRECTORIES}")
+    ENDIF(WXWINDOWS_LINK_DIRECTORIES_WITH_PREFIX)
+
     
     ## replace space separated string by semicolon separated vector to make it
     ## work with LINK_DIRECTORIES
