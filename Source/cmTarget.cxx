@@ -45,6 +45,7 @@ void cmTarget::TraceVSDependencies(std::string projFile,
   std::queue<std::string> srcFilesToProcess;
   std::set<std::string> srcFilesQueued;
   std::string name;
+  std::vector<cmSourceFile*> newClasses;
   for(std::vector<cmSourceFile*>::const_iterator i = classes.begin(); 
       i != classes.end(); ++i)
     {
@@ -56,7 +57,53 @@ void cmTarget::TraceVSDependencies(std::string projFile,
       }
     srcFilesToProcess.push(name);
     srcFilesQueued.insert(name);
+    // does this sourcefile have object depends on it?
+    // If so then add them as well
+    const char* additionalDeps = (*i)->GetProperty("OBJECT_DEPENDS");
+    if (additionalDeps)
+      {
+      std::vector<std::string> depends;
+      cmSystemTools::ExpandListArgument(additionalDeps, depends);
+      for(std::vector<std::string>::iterator id = depends.begin();
+          id != depends.end(); ++id)
+        {
+        // if there is a cutom rule to generate that dependency
+        // then add it to the list
+        cmSourceFile* outsf = 
+          makefile->GetSourceFileWithOutput(id->c_str());
+        // if a source file was found then add it
+        if (outsf && 
+            (std::find(classes.begin(),classes.end(),outsf) == classes.end()) &&
+            (std::find(newClasses.begin(),newClasses.end(),outsf) == newClasses.end()))
+          {
+          // then add the source to this target and add it to the queue
+          newClasses.push_back(outsf);
+          name = outsf->GetSourceName();
+          if (outsf->GetSourceExtension() != "rule")
+            {
+            name += ".";
+            name += outsf->GetSourceExtension();
+            }
+          std::string temp = 
+            cmSystemTools::GetFilenamePath(outsf->GetFullPath());
+          temp += "/";
+          temp += name;
+          // if it hasn't been processed
+          if (srcFilesQueued.find(temp) == srcFilesQueued.end())
+            {
+            srcFilesToProcess.push(temp);
+            srcFilesQueued.insert(temp);
+            }
+          }
+        }
+      }
     }
+  for(std::vector<cmSourceFile*>::const_iterator i = newClasses.begin(); 
+      i != newClasses.end(); ++i)
+    {
+    classes.push_back(*i);
+    }
+  
   // add in the project file itself
   srcFilesToProcess.push(projFile);
   srcFilesQueued.insert(projFile);
