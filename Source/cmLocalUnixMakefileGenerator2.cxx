@@ -370,6 +370,9 @@ cmLocalUnixMakefileGenerator2
   depEcho += " dependencies of ";
   depEcho += obj;
   depEcho += "...";
+
+  // Add a command to call CMake to scan dependencies.  CMake will
+  // touch the corresponding depends file after scanning dependencies.
   cmOStringStream depCmd;
   // TODO: Account for source file properties and directory-level
   // definitions when scanning for dependencies.
@@ -385,9 +388,8 @@ cmLocalUnixMakefileGenerator2
     }
   std::vector<std::string> commands;
   commands.push_back(depCmd.str());
-  std::string touchCmd = "@touch ";
-  touchCmd += this->ConvertToRelativeOutputPath(depTarget.c_str());
-  commands.push_back(touchCmd);
+
+  // Write the rule.
   this->WriteMakeRule(ruleFileStream, 0, depEcho.c_str(),
                       depTarget.c_str(), depends, commands);
   }
@@ -589,9 +591,9 @@ cmLocalUnixMakefileGenerator2
     makefileStream
       << "!IF \"$(OS)\" == \"Windows_NT\"\n"
       << "NULL=\n"
-      << "!ELSE \n"
+      << "!ELSE\n"
       << "NULL=nul\n"
-      << "!ENDIF \n";
+      << "!ENDIF\n";
     }
   else
     {
@@ -980,7 +982,8 @@ cmLocalUnixMakefileGenerator2
   const char* linkLanguage =
     target.GetLinkerLanguage(this->GetGlobalGenerator());
 
-  // Build a list of linker flags.
+  // Build a list of compiler flags and linker flags.
+  std::string flags;
   std::string linkFlags;
 
   // Add flags to create an executable.
@@ -997,14 +1000,14 @@ cmLocalUnixMakefileGenerator2
     }
 
   // Add language-specific flags.
-  this->AddLanguageFlags(linkFlags, linkLanguage);
+  this->AddLanguageFlags(flags, linkLanguage);
 
   // Add flags to deal with shared libraries.  Any library being
   // linked in might be shared, so always use shared flags for an
   // executable.
-  this->AddSharedFlags(linkFlags, linkLanguage, true);
+  this->AddSharedFlags(flags, linkLanguage, true);
 
-  // Add target-specific flags.
+  // Add target-specific linker flags.
   this->AppendFlags(linkFlags, target.GetProperty("LINK_FLAGS"));
 
   // TODO: Pre-build and pre-link rules.
@@ -1051,7 +1054,7 @@ cmLocalUnixMakefileGenerator2
                               linklibs.str().c_str(),
                               0,
                               0,
-                              /*flags.c_str() why?*/ "",
+                              flags.c_str(),
                               0,
                               0,
                               0,
@@ -1603,29 +1606,34 @@ cmLocalUnixMakefileGenerator2
         jump = m_JumpAndBuild.begin(); jump != m_JumpAndBuild.end(); ++jump)
     {
     const cmLocalUnixMakefileGenerator2::RemoteTarget& rt = jump->second;
-    const char* dest = rt.m_BuildDirectory.c_str();
-    commands.clear();
+    const char* destination = rt.m_BuildDirectory.c_str();
 
+    // Construct the dependency and build target names.
+    std::string dep = jump->first;
+    dep += ".dir/";
+    dep += jump->first;
+    dep += ".depends";
+    std::string tgt = jump->first;
+    tgt += ".requires";
+
+    // Build the jump-and-build command list.
+    commands.clear();
     if(m_WindowsShell)
       {
       // On Windows we must perform each step separately and then jump
       // back because the shell keeps the working directory between
       // commands.
       std::string cmd = "cd ";
-      cmd += this->ConvertToOutputForExisting(dest);
+      cmd += this->ConvertToOutputForExisting(destination);
       commands.push_back(cmd);
 
       // Check the build system in destination directory.
       commands.push_back(this->GetRecursiveMakeCall("cmake_check_rerun"));
 
       // Build the targets's dependencies.
-      std::string dep = jump->first;
-      dep += ".depends";
       commands.push_back(this->GetRecursiveMakeCall(dep.c_str()));
 
       // Build the target.
-      std::string tgt = jump->first;
-      tgt += ".requires";
       commands.push_back(this->GetRecursiveMakeCall(tgt.c_str()));
 
       // Jump back to the starting directory.
@@ -1638,23 +1646,17 @@ cmLocalUnixMakefileGenerator2
       // On UNIX we must construct a single shell command to jump and
       // build because make resets the directory between each command.
       std::string cmd = "cd ";
-      cmd += this->ConvertToOutputForExisting(dest);
+      cmd += this->ConvertToOutputForExisting(destination);
 
       // Check the build system in destination directory.
       cmd += " && ";
       cmd += this->GetRecursiveMakeCall("cmake_check_rerun");
 
       // Build the targets's dependencies.
-      std::string dep = jump->first;
-      dep += ".dir/";
-      dep += jump->first;
-      dep += ".depends";
       cmd += " && ";
       cmd += this->GetRecursiveMakeCall(dep.c_str());
 
       // Build the target.
-      std::string tgt = jump->first;
-      tgt += ".requires";
       cmd += " && ";
       cmd += this->GetRecursiveMakeCall(tgt.c_str());
 
@@ -1786,8 +1788,8 @@ cmLocalUnixMakefileGenerator2
         }
       }
 
-    // Scan the file if it has not been scanned already.
-    if(scanned.find(fullName) == scanned.end())
+    // Scan the file if it was found and has not been scanned already.
+    if(fullName.size() && (scanned.find(fullName) == scanned.end()))
       {
       // Record scanned files.
       scanned.insert(fullName);
@@ -1808,21 +1810,35 @@ cmLocalUnixMakefileGenerator2
     }
 
   // Write the dependencies to the output file.
+  std::string depMarkFile = objFile;
   std::string depMakeFile = objFile;
+  depMarkFile += ".depends";
   depMakeFile += ".depends.make";
   std::ofstream fout(depMakeFile.c_str());
   fout << "# Dependencies for " << objFile << std::endl;
   for(std::set<cmStdString>::iterator i=dependencies.begin();
       i != dependencies.end(); ++i)
     {
-    fout << objFile << " : " << i->c_str() << std::endl;
+    fout << objFile << ": "
+         << cmSystemTools::ConvertToOutputPath(i->c_str()).c_str()
+         << std::endl;
     }
   fout << std::endl;
-  fout << "# Dependencies for " << objFile << ".depends" << std::endl;
+  fout << "# Dependencies for " << depMarkFile.c_str() << std::endl;
   for(std::set<cmStdString>::iterator i=dependencies.begin();
       i != dependencies.end(); ++i)
     {
-    fout << objFile << ".depends : " << i->c_str() << std::endl;
+    fout << depMarkFile.c_str() << ": "
+         << cmSystemTools::ConvertToOutputPath(i->c_str()).c_str()
+         << std::endl;
+    }
+
+  // If we could write the dependencies, touch the corresponding
+  // depends file to mark dependencies up to date.
+  if(fout)
+    {
+    std::ofstream fmark(depMarkFile.c_str());
+    fmark << "Dependencies updated for " << objFile << "\n";
     }
 
   return true;
