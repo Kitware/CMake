@@ -91,6 +91,14 @@ public:
     }
 
   /**
+   * This determines if the command is invoked when in script mode.
+   */
+  virtual bool IsScriptable()
+    {
+    return false;
+    }
+
+  /**
    * This determines if the method is deprecated or not. 
    */
   virtual bool IsDeprecated(int /*major*/, int /*minor*/)
