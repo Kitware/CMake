@@ -150,6 +150,7 @@ private:
                        const char* libName,
                        const cmTarget &target);
   std::string ConvertToXMLOutputPath(const char* path);
+  std::string ConvertToXMLOutputPathSingle(const char* path);
 private:
   std::map<cmStdString, cmStdString> m_GUIDMap;
   bool m_BuildSLN;

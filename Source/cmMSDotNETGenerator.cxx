@@ -627,19 +627,19 @@ void cmMSDotNETGenerator::AddVCProjBuildRule(cmSourceGroup& sourceGroup)
   m_Makefile->ExpandVariablesInString(dsprule);
   dsprule = cmSystemTools::ConvertToOutputPath(dsprule.c_str());
   std::string args = makefileIn;
-  args += " -H\"";
+  args += " -H";
   args +=
     cmSystemTools::ConvertToOutputPath(m_Makefile->GetHomeDirectory());
-  args += "\" -S\"";
+  args += " -S";
   args += 
     cmSystemTools::ConvertToOutputPath(m_Makefile->GetStartDirectory());
-  args += "\" -O\"";
+  args += " -O";
   args += 
     cmSystemTools::ConvertToOutputPath(m_Makefile->GetStartOutputDirectory());
-  args += "\" -B\"";
+  args += " -B";
   args += 
     cmSystemTools::ConvertToOutputPath(m_Makefile->GetHomeOutputDirectory());
-  args += "\"";
+  args += "";
   m_Makefile->ExpandVariablesInString(args);
 
   std::string configFile = 
@@ -819,6 +819,7 @@ void cmMSDotNETGenerator::OutputBuildTool(std::ostream& fout,
                                           const char *libName,
                                           const cmTarget &target)
 { 
+  std::string temp;
   switch(target.GetType())
     {
     case cmTarget::STATIC_LIBRARY:
@@ -828,7 +829,7 @@ void cmMSDotNETGenerator::OutputBuildTool(std::ostream& fout,
       fout << "\t\t\t<Tool\n"
            << "\t\t\t\tName=\"VCLibrarianTool\"\n"
            << "\t\t\t\t\tOutputFile=\"" 
-           << this->ConvertToXMLOutputPath(libpath.c_str()) << ".\"/>\n";
+           << this->ConvertToXMLOutputPathSingle(libpath.c_str()) << ".\"/>\n";
       break;
     }
     case cmTarget::SHARED_LIBRARY:
@@ -839,17 +840,26 @@ void cmMSDotNETGenerator::OutputBuildTool(std::ostream& fout,
            << "\t\t\t\tAdditionalDependencies=\" odbc32.lib odbccp32.lib ";
       this->OutputLibraries(fout, configName, libName, target);
       fout << "\"\n";
+      temp = m_LibraryOutputPath;
+      temp += configName;
+      temp += "/";
+      temp += libName;
+      temp += ".dll";
       fout << "\t\t\t\tOutputFile=\"" 
-           << m_ExecutableOutputPath << configName << "/" 
-           << libName << ".dll\"\n";
+           << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
       fout << "\t\t\t\tLinkIncremental=\"1\"\n";
       fout << "\t\t\t\tSuppressStartupBanner=\"TRUE\"\n";
       fout << "\t\t\t\tAdditionalLibraryDirectories=\"";
       this->OutputLibraryDirectories(fout, configName, libName, target);
       fout << "\"\n";
       this->OutputModuleDefinitionFile(fout, target);
-      fout << "\t\t\t\tProgramDatabaseFile=\"" << m_LibraryOutputPath 
-           << "$(OutDir)\\" << libName << ".pdb\"\n";
+      temp = m_LibraryOutputPath;
+      temp += "$(OutDir)";
+      temp += "/";
+      temp += libName;
+      temp += ".pdb";
+      fout << "\t\t\t\tProgramDatabaseFile=\"" << 
+        this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
       if(strcmp(configName, "Debug") == 0
          || strcmp(configName, "RelWithDebInfo") == 0)
         {
@@ -857,9 +867,12 @@ void cmMSDotNETGenerator::OutputBuildTool(std::ostream& fout,
         }
       fout << "\t\t\t\tStackReserveSize=\"" 
            << m_Makefile->GetDefinition("CMAKE_CXX_STACK_SIZE") << "\"\n";
-      fout << "\t\t\t\tImportLibrary=\"" 
-           << m_ExecutableOutputPath << configName << "/" 
-           << libName << ".lib\"/>\n";
+      temp = m_ExecutableOutputPath;
+      temp += configName;
+      temp += "/";
+      temp += libName;
+      temp += ".lib";
+      fout << "\t\t\t\tImportLibrary=\"" << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"/>\n";
       break;
     case cmTarget::EXECUTABLE:
     case cmTarget::WIN32_EXECUTABLE:
@@ -870,8 +883,12 @@ void cmMSDotNETGenerator::OutputBuildTool(std::ostream& fout,
            << "\t\t\t\tAdditionalDependencies=\" odbc32.lib odbccp32.lib ";
       this->OutputLibraries(fout, configName, libName, target);
       fout << "\"\n";
-      fout << "\t\t\t\tOutputFile=\"" 
-           << m_ExecutableOutputPath << configName << "/" << libName << ".exe\"\n";
+      temp = m_ExecutableOutputPath;
+      temp += configName;
+      temp += "/";
+      temp += libName;
+      temp += ".exe";
+      fout << "\t\t\t\tOutputFile=\"" << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
       fout << "\t\t\t\tLinkIncremental=\"1\"\n";
       fout << "\t\t\t\tSuppressStartupBanner=\"TRUE\"\n";
       fout << "\t\t\t\tAdditionalLibraryDirectories=\"";
@@ -922,17 +939,24 @@ void cmMSDotNETGenerator::OutputLibraryDirectories(std::ostream& fout,
                                                    const char*,
                                                    const char*,
                                                    const cmTarget &tgt)
-{
+{ 
   bool hasone = false;
   if(m_LibraryOutputPath.size())
     {
     hasone = true;
-    fout << m_LibraryOutputPath << "$(INTDIR)," << m_LibraryOutputPath;
+    std::string temp = m_LibraryOutputPath;
+    temp += "$(INTDIR)";
+    
+    fout << this->ConvertToXMLOutputPath(temp.c_str()) << "," << 
+      this->ConvertToXMLOutputPath(m_LibraryOutputPath.c_str());
     }
   if(m_ExecutableOutputPath.size())
     {
     hasone = true;
-    fout << m_ExecutableOutputPath << "$(INTDIR)," << m_ExecutableOutputPath;
+    std::string temp = m_ExecutableOutputPath;
+    temp += "$(INTDIR)"; 
+    fout << this->ConvertToXMLOutputPath(temp.c_str()) << "," << 
+      this->ConvertToXMLOutputPath(m_ExecutableOutputPath.c_str());
     }
     
   std::set<std::string> pathEmitted;
@@ -1292,7 +1316,9 @@ void cmMSDotNETGenerator::OutputTargetRules(std::ostream& fout,
         fout << "\nCommandLine=\"";
         init = true;
         }
-      fout << cc.GetCommand() << " " << cc.GetArguments() << "\n";
+      std::string args = cc.GetArguments();
+      cmSystemTools::ReplaceString(args, "\"", "&quot;");
+      fout << this->ConvertToXMLOutputPath(cc.GetCommand().c_str()) << " " << args << "\n";
       }
     }
   if (init)
@@ -1331,5 +1357,12 @@ std::string cmMSDotNETGenerator::ConvertToXMLOutputPath(const char* path)
 {
   std::string ret = cmSystemTools::ConvertToOutputPath(path);
   cmSystemTools::ReplaceString(ret, "\"", "&quot;");
+  return ret;
+}
+
+std::string cmMSDotNETGenerator::ConvertToXMLOutputPathSingle(const char* path)
+{
+  std::string ret = cmSystemTools::ConvertToOutputPath(path);
+  cmSystemTools::ReplaceString(ret, "\"", "");
   return ret;
 }
