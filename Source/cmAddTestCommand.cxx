@@ -54,8 +54,9 @@ bool cmAddTestCommand::InitialPass(std::vector<std::string>& args)
     return false;
     }
   
-  // store the aruments for the final pass
-  std::copy(args.begin(),args.end(),m_Args.begin());
+  // store the arguments for the final pass
+  m_Args.erase(m_Args.begin(), m_Args.end());
+  std::copy(args.begin(),args.end(),std::back_inserter(m_Args));
   return true;
 }
 
@@ -78,7 +79,7 @@ void cmAddTestCommand::FinalPass()
   fname += "CMakeTestfile.txt";
   
   // Open the output Testfile
-  std::ofstream fout(fname.c_str());
+  std::ofstream fout(fname.c_str(), std::ios_base::app);
   if (!fout)
     {
     cmSystemTools::Error("Error Writing ", fname.c_str());
