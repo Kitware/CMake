@@ -19,7 +19,7 @@
 
 bool cmIfFunctionBlocker::
 IsFunctionBlocked(const char *name, const std::vector<std::string> &args, 
-                  cmMakefile &)
+                  cmMakefile &mf)
 {
   if (!strcmp(name,"ELSE") || !strcmp(name,"ENDIF"))
     {
@@ -32,7 +32,10 @@ IsFunctionBlocked(const char *name, const std::vector<std::string> &args,
         m_IsBlocking = !m_IsBlocking;
         return true;
         }
-      return false;
+      // otherwise it must be an ENDIF statement, in that case remove the
+      // function blocker
+      mf.RemoveFunctionBlocker("ENDIF",args);
+      return true;
       }
     else if(args.empty())
       {

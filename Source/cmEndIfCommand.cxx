@@ -19,14 +19,7 @@
 
 bool cmEndIfCommand::InitialPass(std::vector<std::string> const& args)
 {
-  if(args.size() < 1 )
-    {
-    this->SetError("called with incorrect number of arguments");
-    return false;
-    }
-  // remove any function blockers for this define
-  m_Makefile->RemoveFunctionBlocker("ENDIF",args);
-  
-  return true;
+  this->SetError("An ENDIF command was found outside of a proper IF ENDIF structure. Or its arguments did not match the opening IF command.");
+  return false;
 }
 
