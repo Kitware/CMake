@@ -73,10 +73,18 @@ int cmGlobalVisualStudio6Generator::TryCompile(const char *,
   // now build the test
   std::string makeCommand = 
     m_CMakeInstance->GetCacheManager()->GetCacheValue("CMAKE_MAKE_PROGRAM");
+  std::vector<std::string> mp;
+  mp.push_back("[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\6.0\\Setup;VsCommonDir]/MSDev98/Bin");
+  cmSystemTools::ExpandRegistryValues(mp[0]);
+  std::string originalCommand = makeCommand;
+  makeCommand = cmSystemTools::FindProgram(makeCommand.c_str(), mp);
   if(makeCommand.size() == 0)
     {
-    cmSystemTools::Error(
-      "Generator cannot find the appropriate make command.");
+    std::string e = "Generator cannot find make program \"";
+    e += originalCommand;
+    e += "\" specified by CMAKE_MAKE_PROGRAM cache entry.  ";
+    e += "Please fix the setting.";
+    cmSystemTools::Error(e.c_str());
     return 1;
     }
   makeCommand = cmSystemTools::ConvertToOutputPath(makeCommand.c_str());
@@ -112,7 +120,13 @@ int cmGlobalVisualStudio6Generator::TryCompile(const char *,
   int retVal;
   if (!cmSystemTools::RunCommand(makeCommand.c_str(), *output, retVal, 0, false))
     {
-    cmSystemTools::Error("Generator: execution of msdev failed.");
+    std::string e = "Error executing make program \"";
+    e += originalCommand;
+    e += "\" specified by CMAKE_MAKE_PROGRAM cache entry.  ";
+    e += "The command string used was \"";
+    e += makeCommand.c_str();
+    e += "\".";
+    cmSystemTools::Error(e.c_str());
     // return to the original directory
     cmSystemTools::ChangeDirectory(cwd.c_str());
     return 1;
