@@ -25,13 +25,31 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& args)
     this->SetError("called with incorrect number of arguments");
     return false;
     }
+
   std::string message;
   std::vector<std::string>::const_iterator i = args.begin();
+
+  bool send_error = false;
+  if (*i == "SEND_ERROR")
+    {
+    send_error = true;
+    ++i;
+    }
+
   for(;i != args.end(); ++i)
     {
     message += *i;
     }
-  cmSystemTools::Message(message.c_str());
+
+  if (send_error)
+    {
+    cmSystemTools::Error(message.c_str());
+    }
+  else
+    {
+    cmSystemTools::Message(message.c_str());
+    }
+
   return true;
 }
 

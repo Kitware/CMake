@@ -60,8 +60,8 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "MESSAGE(\"the message to display\" \"Title for dialog\")\n"
-      "The first argument is the message to display. The second argument is optional and is the title for the dialog box on windows.";
+      "MESSAGE([SEND_ERROR] \"message to display\"...)\n"
+      "The arguments are messages to display. If the first argument is SEND_ERROR then an error is raised.";
     }
   
   cmTypeMacro(cmMessageCommand, cmCommand);
