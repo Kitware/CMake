@@ -659,17 +659,21 @@ IF(BUILD_TESTING)
 
     INCLUDE(FindJava)
     IF(JAVA_COMPILE AND JAVA_RUNTIME AND JAVA_ARCHIVE)
-      ADD_TEST(Java ${CMAKE_CTEST_COMMAND}
-        --build-and-test 
-        "${CMake_SOURCE_DIR}/Tests/Java"
-        "${CMake_BINARY_DIR}/Tests/Java"
-        --build-generator ${CMAKE_GENERATOR}
-        --build-project hello
-        --build-makeprogram ${MAKEPROGRAM}
-        --build-two-config 
-        --build-run-dir "${CMake_BINARY_DIR}/Tests/Java/"
-#        --test-command ${JAVA_RUNTIME} -classpath hello.jar HelloWorld)
-        --test-command ${JAVA_RUNTIME} HelloWorld)
+      EXEC_PROGRAM(${CMAKE_Java_COMPILER} -version OUTPUT_VARIABLE OUT)
+      IF(OUT MATCHES "invalid flag")
+        MESSAGE("This java does not even know what version it is!")
+      ELSE(OUT MATCHES "invalid flag")
+        ADD_TEST(Java ${CMAKE_CTEST_COMMAND}
+          --build-and-test 
+          "${CMake_SOURCE_DIR}/Tests/Java"
+          "${CMake_BINARY_DIR}/Tests/Java"
+          --build-generator ${CMAKE_GENERATOR}
+          --build-project hello
+          --build-makeprogram ${MAKEPROGRAM}
+          --build-two-config 
+          --build-run-dir "${CMake_BINARY_DIR}/Tests/Java/"
+          --test-command ${JAVA_RUNTIME} -classpath hello.jar HelloWorld)
+      ENDIF(OUT MATCHES "invalid flag")
     ENDIF(JAVA_COMPILE AND JAVA_RUNTIME AND JAVA_ARCHIVE)
   ENDIF(CMAKE_GENERATOR MATCHES "Makefiles")
   
