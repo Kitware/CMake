@@ -43,6 +43,10 @@
 #include "cmUtilitySourceCommand.cxx"
 #include "cmIncludeRegularExpressionCommand.cxx"
 #include "cmSourceGroupCommand.cxx"
+#include "cmIfCommand.cxx"
+#include "cmElseCommand.cxx"
+#include "cmEndIfCommand.cxx"
+#include "cmAddDefinitionsCommand.cxx"
 
 void GetPredefinedCommands(std::list<cmCommand*>& commands)
 {
@@ -83,6 +87,10 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmUtilitySourceCommand);
   commands.push_back(new cmIncludeRegularExpressionCommand);
   commands.push_back(new cmSourceGroupCommand);
+  commands.push_back(new cmIfCommand);
+  commands.push_back(new cmElseCommand);
+  commands.push_back(new cmEndIfCommand);
+  commands.push_back(new cmAddDefinitionsCommand);
 }
 
   

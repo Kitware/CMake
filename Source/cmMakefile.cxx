@@ -22,6 +22,7 @@
 #include "cmMakefileGenerator.h"
 #include "cmCommands.h"
 #include "cmCacheManager.h"
+#include "cmFunctionBlocker.h"
 
 // default is not to be building executables
 cmMakefile::cmMakefile()
@@ -74,10 +75,10 @@ cmMakefile::~cmMakefile()
   delete m_MakefileGenerator;
 }
 
-void cmMakefile::PrintStringVector(const char* s, std::vector<std::string>& v)
+void cmMakefile::PrintStringVector(const char* s, const std::vector<std::string>& v) const
 {
   std::cout << s << ": ( \n";
-  for(std::vector<std::string>::iterator i = v.begin();
+  for(std::vector<std::string>::const_iterator i = v.begin();
       i != v.end(); ++i)
     {
     std::cout << (*i).c_str() << " ";
@@ -87,7 +88,7 @@ void cmMakefile::PrintStringVector(const char* s, std::vector<std::string>& v)
 
 
 // call print on all the classes in the makefile
-void cmMakefile::Print()
+void cmMakefile::Print() const
 {
   // print the class lists
   std::cout << "classes:\n";
@@ -178,7 +179,8 @@ bool cmMakefile::ReadListFile(const char* filename)
   std::vector<std::string> arguments;
   while ( fin )
     {
-    if(cmSystemTools::ParseFunction(fin, name, arguments) )
+    if(cmSystemTools::ParseFunction(fin, name, arguments) &&
+       !this->IsFunctionBlocked(name.c_str(),arguments))
       {
       // Special command that needs to be removed when 
       // ADD_COMMAND is implemented
@@ -681,3 +683,37 @@ cmMakefile::GetClassesFromSourceLists(
   return result;
 }
 
+bool cmMakefile::IsFunctionBlocked(const char *name,
+                                   std::vector<std::string> &args) const
+{
+  // loop over all function blockers to see if any block this command
+  std::set<cmFunctionBlocker *>::const_iterator pos;
+  for (pos = m_FunctionBlockers.begin(); 
+       pos != m_FunctionBlockers.end(); ++pos)
+    {
+    if ((*pos)->IsFunctionBlocked(name, args, *this))
+      {
+      return true;
+      }
+    }
+  
+  return false;
+}
+
+void cmMakefile::RemoveFunctionBlocker(const char *name,
+								       const std::vector<std::string> &args)
+{
+  // loop over all function blockers to see if any block this command
+  std::set<cmFunctionBlocker *>::const_iterator pos;
+  for (pos = m_FunctionBlockers.begin(); 
+       pos != m_FunctionBlockers.end(); ++pos)
+    {
+    if ((*pos)->ShouldRemove(name, args, *this))
+      {
+      m_FunctionBlockers.erase(*pos);
+      return;
+      }
+    }
+  
+  return;
+}

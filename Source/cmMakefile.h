@@ -21,6 +21,7 @@
 #include "cmSystemTools.h"
 #include "cmSourceGroup.h"
 #include "cmTarget.h"
+class cmFunctionBlocker;
 class cmCommand;
 class cmMakefileGenerator;
 
@@ -55,6 +56,15 @@ public:
   void AddCommand(cmCommand* );
 
   /**
+   * Add a function blocker to this makefile
+   */
+  void AddFunctionBlocker(cmFunctionBlocker *fb)
+    { m_FunctionBlockers.insert(fb);}
+  void RemoveFunctionBlocker(cmFunctionBlocker *fb)
+    { m_FunctionBlockers.erase(fb);}
+  void RemoveFunctionBlocker(const char *name, const std::vector<std::string> &args);
+  
+  /**
    * Specify the makefile generator. This is platform/compiler
    * dependent, although the interface is through a generic
    * superclass.
@@ -69,7 +79,7 @@ public:
   /**
    * Print the object state to std::cout.
    */
-  void Print();
+  void Print() const;
   
   /**
    * Add a custom command to the build.
@@ -465,7 +475,7 @@ protected:
   RegisteredCommandsMap m_Commands;
   std::vector<cmCommand*> m_UsedCommands;
   cmMakefileGenerator* m_MakefileGenerator;
-  
+  bool IsFunctionBlocked(const char *name, std::vector<std::string> &args) const;
   
 private:
   /**
@@ -477,10 +487,10 @@ private:
   void ReadClasses(std::ifstream& fin, bool t);
   friend class cmMakeDepend;	// make depend needs direct access 
 				// to the m_Classes array 
-  void PrintStringVector(const char* s, std::vector<std::string>& v);
+  void PrintStringVector(const char* s, const std::vector<std::string>& v) const;
   void AddDefaultCommands();
   void AddDefaultDefinitions();
-  
+  std::set<cmFunctionBlocker *> m_FunctionBlockers;
 };
 
 
