@@ -429,6 +429,14 @@ case $system in
     ;;
 esac
 
+# if running on darwin no explicit template instantiations
+case $system in 
+  Darwin*) 
+    CMAKE_NO_EXPLICIT_TEMPLATE_INSTANTIATION="1"
+    ;;
+esac
+AC_SUBST(CMAKE_NO_EXPLICIT_TEMPLATE_INSTANTIATION)
+
 # If the user has supplied C flags for compiling shared objects, use
 # those instead
 if test "${SHLIB_CFLAGS}" != ""; then
