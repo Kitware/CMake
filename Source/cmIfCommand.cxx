@@ -134,6 +134,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args, bool &isValid,
 
   if(args.size() < 1 )
     {
+    isValid = true;
     return false;
     }
 
