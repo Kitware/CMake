@@ -1626,11 +1626,12 @@ std::string cmSystemTools::FindLibrary(const char* name,
                                        const std::vector<std::string>& userPaths)
 {
   // See if the executable exists as written.
-  if(cmSystemTools::FileExists(name))
+  if(cmSystemTools::FileExists(name) &&
+     !cmSystemTools::FileIsDirectory(name))
     {
     return cmSystemTools::CollapseFullPath(name);
     }
-    
+  
   // Add the system search path to our path.
   std::vector<std::string> path = userPaths;
   cmSystemTools::GetPath(path);
