@@ -62,10 +62,16 @@ public:
    */
   static int CoreTryCompileCode(
     cmMakefile *mf, std::vector<std::string> const& argv, bool clean);
+
+  /** 
+   * This deletes all the files created by TRY_COMPILE or TRY_RUN
+   * code. This way we do not have to rely on the timing and
+   * dependencies of makefiles.
+   */
+  static void CleanupFiles(const char* binDir, bool recursive=true);
   
   /**
-   * More documentation.
-   */
+   * More documentation.  */
   virtual const char* GetFullDocumentation()
     {
     return

@@ -109,24 +109,10 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv)
     }
   
   // if we created a directory etc, then cleanup after ourselves  
-  cmDirectory dir;
-  dir.Load(binaryDirectory.c_str());
-  size_t fileNum;
-  for (fileNum = 0; fileNum <  dir.GetNumberOfFiles(); ++fileNum)
-    {
-    if (strcmp(dir.GetFile(fileNum),".") &&
-        strcmp(dir.GetFile(fileNum),".."))
-      {
-      std::string fullPath = binaryDirectory;
-      fullPath += "/";
-      fullPath += dir.GetFile(fileNum);
-      cmSystemTools::RemoveFile(fullPath.c_str());
-      }
-    }
   std::string cacheFile = binaryDirectory;
   cacheFile += "/CMakeLists.txt";
   cmListFileCache::GetInstance()->FlushCache(cacheFile.c_str());
-  
+  cmTryCompileCommand::CleanupFiles(binaryDirectory.c_str());
   return true;
 }
 

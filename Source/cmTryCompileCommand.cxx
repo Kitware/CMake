@@ -182,21 +182,8 @@ int cmTryCompileCommand::CoreTryCompileCode(
   // if They specified clean then we clean up what we can
   if (srcFileSignature && clean)
     {    
-    cmDirectory dir;
-    dir.Load(binaryDirectory);
-    size_t fileNum;
-    for (fileNum = 0; fileNum <  dir.GetNumberOfFiles(); ++fileNum)
-      {
-      if (strcmp(dir.GetFile(fileNum),".") &&
-          strcmp(dir.GetFile(fileNum),".."))
-        {
-        std::string fullPath = binaryDirectory;
-        fullPath += "/";
-        fullPath += dir.GetFile(fileNum);
-        cmSystemTools::RemoveFile(fullPath.c_str());
-        }
-      }    
     cmListFileCache::GetInstance()->FlushCache(outFileName.c_str());
+    cmTryCompileCommand::CleanupFiles(binaryDirectory);
     }
   
   return res;
@@ -219,6 +206,34 @@ bool cmTryCompileCommand::InitialPass(std::vector<std::string> const& argv)
   
   return true;
 }
+     
+void cmTryCompileCommand::CleanupFiles(const char* binDir, bool recursive)
+{
+  if ( !binDir )
+    {
+    return;
+    }
+#ifdef WIN32
+  if ( recursive )
+    {
+    std::string bdir = binDir;
+    bdir += "/Debug";
+    cmTryCompileCommand::CleanupFiles(bdir.c_str(), false);
+    }
+#endif
 
-
-      
+  cmDirectory dir;
+  dir.Load(binDir);
+  size_t fileNum;
+  for (fileNum = 0; fileNum <  dir.GetNumberOfFiles(); ++fileNum)
+    {
+    if (strcmp(dir.GetFile(fileNum),".") &&
+        strcmp(dir.GetFile(fileNum),".."))
+      {
+      std::string fullPath = binDir;
+      fullPath += "/";
+      fullPath += dir.GetFile(fileNum);
+      cmSystemTools::RemoveFile(fullPath.c_str());
+      }
+    }
+}
