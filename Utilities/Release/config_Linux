@@ -1,8 +1,10 @@
 PLATFORM="x86-linux"
-CURSES_LIBRARY="-Wl,-Bstatic -lcurses -Wl,-Bdynamic"
-FORM_LIBRARY="/usr/lib/libform.a"
-CC="gcc304s"
-CXX="c++304s"
+CURSES_LIBRARY="/usr/i686-gcc-322s/lib/libncurses.a"
+FORM_LIBRARY="/usr/i686-gcc-322s/lib/libform.a"
+CC="gcc322s"
+CXX="c++322s"
+CFLAGS="-I/usr/i686-gcc-322s/include/ncurses"
+CXXFLAGS="-I/usr/i686-gcc-322s/include/ncurses"
 
 # Write entries into the cache file before building cmake.
 write_cache()
