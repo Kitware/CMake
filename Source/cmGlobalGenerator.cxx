@@ -184,7 +184,7 @@ cmLocalGenerator *cmGlobalGenerator::CreateLocalGenerator()
 }
 
 void cmGlobalGenerator::EnableLanguagesFromGenerator(cmGlobalGenerator *gen, 
-                                                     cmMakefile *mf)
+                                                     cmMakefile *)
 {
   // create a temp generator
   cmLocalGenerator *lg = this->CreateLocalGenerator();
