@@ -40,19 +40,11 @@ void cmGlobalUnixMakefileGenerator::EnableLanguage(const char* lang,
       static char envCC[5000];
       if(mf->GetDefinition("CMAKE_C_COMPILER"))
         {
-#if !defined(_WIN32) && defined(__COMO__)
-        std::string env = "${CMAKE_C_COMPILER}";
-        mf->ExpandVariablesInString(env);
-        strncpy(envCC, env.c_str(), 4999);
-        envCC[4999] = 0;
-        setenv("CC", envCC, 1);        
-#else
         std::string env = "CC=${CMAKE_C_COMPILER}";
         mf->ExpandVariablesInString(env);
         strncpy(envCC, env.c_str(), 4999);
         envCC[4999] = 0;
         putenv(envCC);
-#endif
         }
       if (m_CMakeInstance->GetIsInTryCompile())
         {
@@ -80,7 +72,7 @@ void cmGlobalUnixMakefileGenerator::EnableLanguage(const char* lang,
         if (!versionValue || atof(versionValue) <= 1.4)
           {
           std::string fpath = root + "/Modules/CMakeBackwardCompatibilityC.cmake";
-          mf->ReadListFile(NULL,fpath.c_str());
+          mf->ReadListFile(0,fpath.c_str());
           }
         }
       }
@@ -91,19 +83,11 @@ void cmGlobalUnixMakefileGenerator::EnableLanguage(const char* lang,
       static char envCXX[5000];
       if(mf->GetDefinition("CMAKE_CXX_COMPILER"))
         {
-#if !defined(_WIN32) && defined(__COMO__)
-        std::string env = "${CMAKE_CXX_COMPILER}";
-        mf->ExpandVariablesInString(env);
-        strncpy(envCXX, env.c_str(), 4999);
-        envCXX[4999] = 0;
-        setenv("CXX", envCXX, 1);        
-#else
         std::string env = "CXX=${CMAKE_CXX_COMPILER}";
         mf->ExpandVariablesInString(env);
         strncpy(envCXX, env.c_str(), 4999);
         envCXX[4999] = 0;
         putenv(envCXX);
-#endif
         }
       std::string cmd = root;
       if (m_CMakeInstance->GetIsInTryCompile())
@@ -131,7 +115,7 @@ void cmGlobalUnixMakefileGenerator::EnableLanguage(const char* lang,
         if (!versionValue || atof(versionValue) <= 1.4)
           {
           fpath = root + "/Modules/CMakeBackwardCompatibilityCXX.cmake";
-          mf->ReadListFile(NULL,fpath.c_str());
+          mf->ReadListFile(0,fpath.c_str());
           }
         }
       }

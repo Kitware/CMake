@@ -27,10 +27,6 @@
 #include "cmConfigure.h"
 #endif
 
-#if !defined(_WIN32) && defined(__COMO__)
-# define _BSD_SOURCE
-#endif
-
 #ifdef _MSC_VER
 #pragma warning ( disable : 4786 )
 #pragma warning ( disable : 4503 )
@@ -69,6 +65,19 @@
 
 // include the "c" string header
 #include <string.h>
+
+#if !defined(_WIN32) && defined(__COMO__)
+// Hack for como strict mode to avoid defining _SVID_SOURCE or _BSD_SOURCE.
+extern "C"
+{
+extern FILE *popen (__const char *__command, __const char *__modes) __THROW;
+extern int pclose (FILE *__stream) __THROW;
+extern char *realpath (__const char *__restrict __name,
+                       char *__restrict __resolved) __THROW;
+extern char *strdup (__const char *__s) __THROW;
+extern int putenv (char *__string) __THROW;
+}
+#endif
 
 // if std:: is not supported, then just #define it away
 #ifdef CMAKE_NO_STD_NAMESPACE
