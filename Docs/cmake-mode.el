@@ -38,7 +38,7 @@
 (defconst cmake-regex-paren-left "(")
 (defconst cmake-regex-paren-right ")")
 (defconst cmake-regex-argument-quoted "\"\\([^\"\\\\]\\|\\\\\\(.\\|\n\\)\\)*\"")
-(defconst cmake-regex-argument-unquoted "\\([^ \t\r\n()#\"\\\\]\\|\\\\.\\)+")
+(defconst cmake-regex-argument-unquoted "\\([^ \t\r\n()#\"\\\\]\\|\\\\.\\)\\([^ \t\r\n()#\\\\]\\|\\\\.\\)*")
 
 (defconst cmake-regex-token (concat "\\(" cmake-regex-comment
                                     "\\|" cmake-regex-paren-left
