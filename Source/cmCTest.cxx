@@ -4609,7 +4609,7 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
       i++;
       m_BuildTarget = args[i];
       }
-    if(arg.find("--build-nocmake",0) == 0 && i < args.size() - 1)
+    if(arg.find("--build-nocmake",0) == 0)
       {
       m_BuildNoCMake = true;
       }
@@ -4618,7 +4618,7 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
       i++;
       m_BuildRunDir = args[i];
       }
-    if(arg.find("--build-two-config",0) == 0 && i < args.size() - 1)
+    if(arg.find("--build-two-config",0) == 0)
       {
       m_BuildTwoConfig = true;
       }
@@ -4642,7 +4642,7 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
       i++;
       m_BuildMakeProgram = args[i];
       }
-    if(arg.find("--build-noclean",0) == 0 && i < args.size() - 1)
+    if(arg.find("--build-noclean",0) == 0)
       {
       m_BuildNoClean = true;
       }
