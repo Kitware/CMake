@@ -636,23 +636,26 @@ IF(BUILD_TESTING)
       )
 
   ENDIF (CTEST_TEST_CTEST)
-  # see if we can find a fortran compiler on the machine
-  # if so, add the fortran test and see if it works.
-  SET(CMAKE_Fortran_COMPILER_LIST ifort ifc efc f95 pgf95 
-        lf95 xlf95 fort gfortran f90  pgf90   xlf90   epcf90 f77  fort77 frt pgf77  xlf  fl32 af77 g77  )
-  FIND_PROGRAM(CMAKE_Fortran_COMPILER_FULLPATH NAMES ${CMAKE_Fortran_COMPILER_LIST} )
-  MARK_AS_ADVANCED(CMAKE_Fortran_COMPILER_FULLPATH)
-  IF(CMAKE_Fortran_COMPILER_FULLPATH)
-    ADD_TEST(Fortran ${CMAKE_CTEST_COMMAND}
-      --build-and-test 
-      "${CMake_SOURCE_DIR}/Tests/Fortran"
-      "${CMake_BINARY_DIR}/Tests/Fortran"
-      --build-generator ${CMAKE_GENERATOR}
-      --build-project Simple
-      --build-makeprogram ${MAKEPROGRAM}
-      --build-two-config
-      --test-command testf)
-  ENDIF(CMAKE_Fortran_COMPILER_FULLPATH)
+  IF(CMAKE_GENERATOR MATCHES "Makefiles")
+    # see if we can find a fortran compiler on the machine
+    # if so, add the fortran test and see if it works.
+    SET(CMAKE_Fortran_COMPILER_LIST ifort ifc efc f95 pgf95 
+      lf95 xlf95 fort gfortran f90  pgf90   xlf90   epcf90 f77 
+      fort77 frt pgf77  xlf  fl32 af77 g77  )
+    FIND_PROGRAM(CMAKE_Fortran_COMPILER_FULLPATH NAMES ${CMAKE_Fortran_COMPILER_LIST} )
+    MARK_AS_ADVANCED(CMAKE_Fortran_COMPILER_FULLPATH)
+    IF(CMAKE_Fortran_COMPILER_FULLPATH)
+      ADD_TEST(Fortran ${CMAKE_CTEST_COMMAND}
+        --build-and-test 
+        "${CMake_SOURCE_DIR}/Tests/Fortran"
+        "${CMake_BINARY_DIR}/Tests/Fortran"
+        --build-generator ${CMAKE_GENERATOR}
+        --build-project Simple
+        --build-makeprogram ${MAKEPROGRAM}
+        --build-two-config
+        --test-command testf)
+    ENDIF(CMAKE_Fortran_COMPILER_FULLPATH)
+  ENDIF(CMAKE_GENERATOR MATCHES "Makefiles")
      
   IF (CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE OR WXWINDOWS_INCLUDE_DIR)
     # Will be set if the wxwindows gui is on
