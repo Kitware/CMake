@@ -1,0 +1,5 @@
+RELEASE_TAG="Release-1-4"
+VERSION="1.4"
+PLATFORM="x86-linux"
+CREATE_SOURCE_TARBALL="yes"
+
