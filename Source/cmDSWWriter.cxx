@@ -68,7 +68,14 @@ void cmDSWWriter::OutputDSWFile()
   std::string fname;
   fname = m_Makefile->GetStartOutputDirectory();
   fname += "/";
-  fname += m_Makefile->GetProjectName();
+  if(strlen(m_Makefile->GetProjectName()))
+    {
+    fname += m_Makefile->GetProjectName();
+    }
+  else
+    {
+    fname += "Project";
+    }
   fname += ".dsw";
   std::ofstream fout(fname.c_str());
   if(!fout)
