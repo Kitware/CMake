@@ -53,13 +53,12 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "FLTK_WRAP_UI(resultingLibraryName HeadersDestName SourcesDestName "
-      "SourceLists ...)\n"
+      "FLTK_WRAP_UI(resultingLibraryName SourceList)\n"
       "Produce .h and .cxx files for all the .fl and .fld file listed "
-      "in the SourceLists.\n"
-      "The .h files will be added to the library using the HeadersDestName\n"
+      "in the SourceList.\n"
+      "The .h files will be added to the library using the base name in\n"
       "source list.\n"
-      "The .cxx files will be added to the library using the SourcesDestName\n"
+      "The .cxx files will be added to the library using the base name in \n"
       "source list.";
     }
   
@@ -67,15 +66,15 @@ private:
   /**
    * List of produced files.
    */
-  std::vector<cmSourceFile> m_WrapSourcesClasses;
-  std::vector<cmSourceFile> m_WrapHeadersClasses;
+  std::vector<cmSourceFile> m_GeneratedSourcesClasses;
+  std::vector<cmSourceFile> m_GeneratedHeadersClasses;
   /**
-   * List of header files that pprovide the source for m_WrapClasses.
+   * List of Fluid files that provide the source 
+   * generating .cxx and .h files
    */
   std::vector<std::string> m_WrapUserInterface;
-  std::string m_LibraryName;
-  std::string m_HeaderList;
-  std::string m_SourceList;
+  std::string m_GUISourceList;
+  std::string m_GeneratedSourceList;
 };
 
 
