@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define cmCableWrapCommand_h
 
 #include "cmStandardIncludes.h"
-#include "cmCablePackageEntryCommand.h"
+#include "cmCableDefineSetCommand.h"
 
 /** \class cmCableWrapCommand
  * \brief Define a command that generates a rule for CABLE-generated wrappers.
@@ -50,7 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * cmCableWrapCommand is used to generate a rule in a CABLE
  * configuration file to create type wrappers.
  */
-class cmCableWrapCommand : public cmCablePackageEntryCommand
+class cmCableWrapCommand : public cmCableDefineSetCommand
 {
 public:
   /**
@@ -71,7 +71,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Define CABLE WrapSet in a package.";
+    return "Define CABLE WrapperSet in a package.";
     }
   
   /**
@@ -80,13 +80,19 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "CABLE_WRAP(member1 member2 ...)\n"
-      "Generates a WrapSet in the CABLE configuration.";
+      "CABLE_WRAP(name_of_set [[tag1]:]memeber1 [[tag2]:]member2 ...\n"
+      "           [SOURCE_FILES source1 source2 ...]] )\n"
+      "Generates a WrapperSet definition in the CABLE configuration.\n"
+      "If a the \"tag:\" syntax is not used, an attempt is made to\n"
+      "auto-generate a meaningful tag.  If the SOURCE_FILES keyword is\n"
+      "given, all arguments after it refer to header files to be included\n"
+      "in the package in which the set is defined.\n";
     }
-
-  virtual bool WriteConfiguration();
   
-  cmTypeMacro(cmCableWrapCommand, cmCablePackageCommand);
+  cmTypeMacro(cmCableWrapCommand, cmCableDefineSetCommand);
+
+protected:
+  virtual const char* GetXmlTag() const { return "WrapperSet"; }
 };
 
 

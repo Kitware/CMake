@@ -103,7 +103,7 @@ void cmCableDefineSetCommand::WriteConfiguration() const
   cmCableData::Indentation indent = m_CableData->GetIndentation();
   
   // Output the code.
-  os << indent << "<Set name=\"" << m_SetName.c_str() << "\">" << std::endl;
+  os << indent << "<" << this->GetXmlTag() << " name=\"" << m_SetName.c_str() << "\">" << std::endl;
   for(std::vector<std::string>::const_iterator e = m_SourceHeaders.begin();
       e != m_SourceHeaders.end(); ++e)
     {
@@ -135,7 +135,7 @@ void cmCableDefineSetCommand::WriteConfiguration() const
       }
     os << "</Element>" << std::endl;
     }
-  os << indent << "</Set>" << std::endl;
+  os << indent << "</" << this->GetXmlTag() << ">" << std::endl;
 }
 
 

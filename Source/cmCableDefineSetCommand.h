@@ -106,7 +106,8 @@ public:
 
   cmTypeMacro(cmCableDefineSetCommand, cmCableCommand);
   
-private:
+protected:
+  virtual const char* GetXmlTag() const { return "Set"; }
   void WriteConfiguration() const;
   bool AddElement(const std::string&);
   bool GenerateTag(const std::string&, std::string&);
