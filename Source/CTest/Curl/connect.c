@@ -619,14 +619,14 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   /* This is the loop that attempts to connect to all IP-addresses we
      know for the given host. One by one. */
   for(rc=-1, aliasindex=0;
-      rc && (struct in_addr *)remotehost->addr->h_addr_list[aliasindex];
+      rc && (void *)remotehost->addr->h_addr_list[aliasindex];
       aliasindex++) {
     struct sockaddr_in serv_addr;
 
     /* do this nasty work to do the connect */
     memset((char *) &serv_addr, '\0', sizeof(serv_addr));
-    memcpy((char *)&(serv_addr.sin_addr),
-           (struct in_addr *)remotehost->addr->h_addr_list[aliasindex],
+    memcpy(&(serv_addr.sin_addr),
+           remotehost->addr->h_addr_list[aliasindex],
            sizeof(struct in_addr));
     serv_addr.sin_family = remotehost->addr->h_addrtype;
     serv_addr.sin_port = htons((unsigned short)port);
@@ -706,8 +706,10 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   /* leave the socket in non-blocking mode */
 
   if(addr)
+    {
     /* this is the address we've connected to */
-    *addr = (struct in_addr *)remotehost->addr->h_addr_list[aliasindex];
+    memcpy(addr, &remotehost->addr->h_addr_list[aliasindex], sizeof(struct in_addr*));
+    }
 #endif
 
   /* allow NULL-pointers to get passed in */

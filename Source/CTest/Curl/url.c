@@ -1531,7 +1531,10 @@ static int handleSock5Proxy(
 #endif
   }
 
-  *((unsigned short*)&socksreq[8]) = htons(conn->remote_port);
+  {
+  unsigned short htons_res = htons(conn->remote_port);
+  memcpy(&socksreq[8], &htons_res, sizeof(unsigned short*));
+  }
 
   {
     const int packetsize = 10;
@@ -1554,11 +1557,13 @@ static int handleSock5Proxy(
       return 1;
     }
     if (socksreq[1] != 0) { /* Anything besides 0 is an error */
+        unsigned short ntohs_arg;
+        memcpy(&ntohs_arg, &socksreq[8], sizeof(unsigned short*));
         failf(conn->data,
               "Can't complete SOCKS5 connection to %d.%d.%d.%d:%d. (%d)",
               (unsigned char)socksreq[4], (unsigned char)socksreq[5],
               (unsigned char)socksreq[6], (unsigned char)socksreq[7],
-              (unsigned int)ntohs(*(unsigned short*)(&socksreq[8])),
+              (unsigned int)ntohs(ntohs_arg),
               socksreq[1]);
         return 1;
     }
