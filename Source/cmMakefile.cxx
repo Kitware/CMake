@@ -921,7 +921,20 @@ const char* cmMakefile::GetDefinition(const char* name) const
       }
     else 
       {
-      vv->VariableAccessed(name, cmVariableWatch::UNKNOWN_VARIABLE_READ_ACCESS);
+      // are unknown access allowed
+      DefinitionMap::const_iterator pos2 = 
+        m_Definitions.find("CMAKE_ALLOW_UNKNOWN_VARIABLE_READ_ACCESS");
+      if (pos2 != m_Definitions.end() && 
+          cmSystemTools::IsOn((*pos2).second.c_str())) 
+        {
+        vv->VariableAccessed(name, 
+                             cmVariableWatch::ALLOWED_UNKNOWN_VARIABLE_READ_ACCESS);
+        }
+      else
+        {
+        vv->VariableAccessed(name, cmVariableWatch::
+                             UNKNOWN_VARIABLE_READ_ACCESS);
+        }
       }
     }
   return def;
