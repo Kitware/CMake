@@ -14,6 +14,8 @@ SET (TRIGGER_SITE
 SET (PROJECT_URL "http://www.cmake.org/")
 
 # Dart server configuration 
+SET (ROLLUP_URL "http://${DROP_SITE}/cgi-bin/cmake-rollup-dashboard.sh")
+
 SET (CVS_WEB_URL "http://${DROP_SITE}/cgi-bin/cvsweb.cgi/CMake/")
 SET (CVS_WEB_CVSROOT "CMake")
 
