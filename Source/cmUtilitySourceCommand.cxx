@@ -62,10 +62,10 @@ bool cmUtilitySourceCommand::Invoke(std::vector<std::string>& args)
   
   // The source exists.  Construct the cache entry for the executable's
   // location.
-  std::string cmakeCFG = m_Makefile->GetDefinition("CMAKE_CFG");
+  std::string cmakeCFGout = m_Makefile->GetDefinition("CMAKE_CFG_OUTDIR");
   std::string utilityExecutable = m_Makefile->GetCurrentOutputDirectory();
   utilityExecutable =
-    (utilityExecutable+"/"+relativeSource+"/"+cmakeCFG+"/"
+    (utilityExecutable+"/"+relativeSource+"/"+cmakeCFGout+"/"
      +utilityName+cmSystemTools::GetExecutableExtension());
   
   // Enter the value into the cache.

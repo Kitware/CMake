@@ -533,8 +533,8 @@ void cmMakefile::GenerateCacheOnly()
 void cmMakefile::AddDefaultDefinitions()
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  this->AddDefinition("CMAKE_CFG","$(CFG)");
+  this->AddDefinition("CMAKE_CFG_OUTDIR","$(OUTDIR)");
 #else
-  this->AddDefinition("CMAKE_CFG",".");
+  this->AddDefinition("CMAKE_CFG_OUTDIR",".");
 #endif
 }
