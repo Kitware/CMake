@@ -122,8 +122,10 @@ using ::ofstream;
   
 #if !defined(CMAKE_NO_ANSI_STRING_STREAM)
   using ::ostringstream;
+  using ::istringstream;
 #else
   using ::ostrstream;
+  using ::istrstream;
 #endif
   
 using ::endl;
