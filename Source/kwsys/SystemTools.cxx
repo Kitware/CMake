@@ -518,7 +518,7 @@ void SystemTools::ExpandRegistryValues(kwsys_std::string& source)
   // The "[^]]" part of this expression will match any character except
   // a close square-bracket.  The ']' character must be the first in the
   // list of characters inside the [^...] block of the expression.
-  cmRegularExpression regEntry("\\[(HKEY[^]]*)\\]");
+  RegularExpression regEntry("\\[(HKEY[^]]*)\\]");
   
   // check for black line or comment
   while (regEntry.find(source))
