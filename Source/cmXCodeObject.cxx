@@ -50,14 +50,14 @@ void cmXCodeObject::Print(std::ostream& out)
       }
     else if(object->m_Type == OBJECT_LIST)
       {
-      out << i->first << " = {\n";
+      out << i->first << " = (\n";
       for(unsigned int k = 0; k < i->second->m_List.size(); k++)
         {
         cmXCodeObject::Indent(4, out);
         out << i->second->m_List[k]->m_Id << ",\n";
         } 
       cmXCodeObject::Indent(3, out);
-      out << "};\n";
+      out << ");\n";
       }
     else if(object->m_Type == ATTRIBUTE_GROUP)
       {
@@ -66,7 +66,14 @@ void cmXCodeObject::Print(std::ostream& out)
       for(j = object->m_ObjectAttributes.begin(); j != object->m_ObjectAttributes.end(); ++j)
         {
         cmXCodeObject::Indent(4, out);
-        out << j->first << " = " << j->second->m_String << ";\n";
+        if(object->m_String.size() )
+          {
+          out << j->first << " = " << j->second->m_String << ";\n";
+          }
+        else
+          {
+          out << j->first << " = " << "\"\";\n";
+          }
         }
       cmXCodeObject::Indent(3, out);
       out << "};\n";
@@ -77,7 +84,14 @@ void cmXCodeObject::Print(std::ostream& out)
       }
     else if(object->m_Type == STRING)
       {
-      out << i->first << " = " << object->m_String << ";\n";
+      if(object->m_String.size() )
+        {
+        out << i->first << " = " << object->m_String << ";\n";
+        }
+      else
+        {
+        out << i->first << " = " << "\"\";\n";
+        }
       }
     else
       {

@@ -113,11 +113,11 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
   cmXCodeObject* settings = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
   buildFile->AddAttribute("settings", settings);
   fileRef->AddAttribute("fileEncoding", this->CreateString("4"));
-  fileRef->AddAttribute("lastKnownFileType", this->CreateString("sourcecode.cpp.cpp;"));
+  fileRef->AddAttribute("lastKnownFileType", this->CreateString("sourcecode.cpp.cpp"));
   fileRef->AddAttribute("path", this->CreateString(
     lg->ConvertToRelativeOutputPath(sf->GetFullPath().c_str()).c_str()));
   fileRef->AddAttribute("refType", this->CreateString("4"));
-  fileRef->AddAttribute("sourceTree", this->CreateString("<group>"));
+  fileRef->AddAttribute("sourceTree", this->CreateString("\"<group>\""));
   return buildFile;
 }
 
