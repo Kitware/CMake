@@ -137,16 +137,6 @@ bool cmVTKWrapPythonCommand::CreateInitFile(std::string& res)
 {
   unsigned int i;
   
-  /* we have to make sure that the name is the correct case */
-  std::string kitName = m_LibraryName;
-  if (kitName[0] > 90) kitName[0] -= 32;
-  for (i = 1; i < kitName.size(); i++)
-    {
-    if ((kitName[i] > 64)&&(kitName[i] < 91))
-      {
-      kitName[i] += 32;
-      }
-    }
   
   std::vector<std::string> classes;
   int lastClass = m_WrapHeaders.size();
@@ -171,7 +161,7 @@ bool cmVTKWrapPythonCommand::CreateInitFile(std::string& res)
     m_Makefile->GetCurrentOutputDirectory();
   outFileName += "/" + res;
   
-  return this->WriteInit(kitName.c_str(), outFileName, classes);
+  return this->WriteInit(m_LibraryName.c_str(), outFileName, classes);
 }
 
 
@@ -207,15 +197,20 @@ bool cmVTKWrapPythonCommand::WriteInit(const char *kitName,
   
 #ifdef _WIN32
   fprintf(fout,"extern  \"C\" {__declspec( dllexport) void init%s();}\n\n",kitName);
+  fprintf(fout,"void init%s()\n{\n",kitName);
 #else
-  fprintf(fout,"extern  \"C\" {void init%s();}\n\n",kitName);
+  fprintf(fout,"extern  \"C\" {void initlib%s();}\n\n",kitName);
+  fprintf(fout,"void initlib%s()\n{\n",kitName);
 #endif
   
 
   /* module init function */
-  fprintf(fout,"void init%s()\n{\n",kitName);
   fprintf(fout,"  PyObject *m, *d, *c;\n\n");
+#ifdef _WIN32
+  fprintf(fout,"  static char modulename[] = \"lib%s\";\n",kitName);
+#else
   fprintf(fout,"  static char modulename[] = \"%s\";\n",kitName);
+#endif
   fprintf(fout,"  m = Py_InitModule(modulename, Py%s_ClassMethods);\n",
 	  kitName);
   
