@@ -30,6 +30,11 @@ FOREACH(f ${TOCLEAN_FILES})
   ENDIF(EXISTS "${f}")
 ENDFOREACH(f)
 
+# Enable ANSI flags for the C executable.
+IF(CMAKE_ANSI_CFLAGS)
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_ANSI_CFLAGS}")
+ENDIF(CMAKE_ANSI_CFLAGS)
+
 # Configure an executable to check that all the files are missing.
 SET(CHECK_FILES)
 FOREACH(f ${TOCLEAN_FILES})
