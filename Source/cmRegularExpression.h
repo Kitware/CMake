@@ -182,7 +182,7 @@ public:
   /**
    * Instantiate cmRegularExpression with program=NULL.
    */
-  inline cmRegularExpression ();	
+  inline cmRegularExpression ();        
 
   /**
    * Instantiate cmRegularExpression with compiled char*.
@@ -215,7 +215,7 @@ public:
    * Matches the regular expression to the given std string.
    * Returns true if found, and sets start and end indexes accordingly.
    */
-  bool find (std::string const&);		
+  bool find (std::string const&);               
 
   /**
    * Index to start of first find.
@@ -253,7 +253,7 @@ public:
   /**
    * Marks the regular expression as invalid.
    */
-  inline void set_invalid();		
+  inline void set_invalid();            
 
   /**
    * Destructor.
@@ -266,10 +266,10 @@ public:
 private: 
   const char* startp[NSUBEXP];
   const char* endp[NSUBEXP];
-  char  regstart;			// Internal use only
-  char  reganch;			// Internal use only
-  const char* regmust;			// Internal use only
-  int   regmlen;			// Internal use only
+  char  regstart;                       // Internal use only
+  char  reganch;                        // Internal use only
+  const char* regmust;                  // Internal use only
+  int   regmlen;                        // Internal use only
   char* program;   
   int   progsize;
   const char* searchstring;
@@ -290,7 +290,10 @@ inline cmRegularExpression::cmRegularExpression ()
 inline cmRegularExpression::cmRegularExpression (const char* s) 
 {  
   this->program = 0;
-  compile(s);
+  if ( s )
+    {
+    this->compile(s);
+    }
 }
 
 /**

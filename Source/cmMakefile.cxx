@@ -141,7 +141,7 @@ void cmMakefile::Print() const
     m_cmStartDirectory.c_str() << std::endl;
   std::cout << " m_cmHomeDirectory; " << 
     m_cmHomeDirectory.c_str() << std::endl;
-  std::cout << " m_ProjectName;	" <<  m_ProjectName.c_str() << std::endl;
+  std::cout << " m_ProjectName; " <<  m_ProjectName.c_str() << std::endl;
   this->PrintStringVector("m_SubDirectories ", m_SubDirectories); 
   this->PrintStringVector("m_IncludeDirectories;", m_IncludeDirectories);
   this->PrintStringVector("m_LinkDirectories", m_LinkDirectories);
@@ -193,12 +193,12 @@ void cmMakefile::ExecuteCommand(std::string const &name,
           }
         if(!usedCommand->InitialPass(expandedArguments))
           {
-	  std::string error;
-	  error = usedCommand->GetName();
-	  error += ": Error : \n";
-	  error += usedCommand->GetError();
-	  error += " from CMakeLists.txt file in directory: ";
-	  error += m_cmCurrentDirectory;
+          std::string error;
+          error = usedCommand->GetName();
+          error += ": Error : \n";
+          error += usedCommand->GetError();
+          error += " from CMakeLists.txt file in directory: ";
+          error += m_cmCurrentDirectory;
           cmSystemTools::Error(error.c_str());
           }
         else
@@ -271,27 +271,27 @@ bool cmMakefile::ReadListFile(const char* filename, const char* external)
       // Home directory? if so recurse and read in that List file 
       std::string parentList = this->GetParentListFileName(filename);
       if (parentList != "")
-	{
-	  std::string srcdir = m_cmCurrentDirectory;
+        {
+          std::string srcdir = m_cmCurrentDirectory;
           std::string bindir = m_CurrentOutputDirectory;
 
-	  std::string::size_type pos = parentList.rfind('/');
+          std::string::size_type pos = parentList.rfind('/');
 
           m_cmCurrentDirectory = parentList.substr(0, pos);
-	  m_CurrentOutputDirectory = m_HomeOutputDirectory + parentList.substr(m_cmHomeDirectory.size(), pos - m_cmHomeDirectory.size());
+          m_CurrentOutputDirectory = m_HomeOutputDirectory + parentList.substr(m_cmHomeDirectory.size(), pos - m_cmHomeDirectory.size());
 
-	  // if not found, oops
-	  if(pos == std::string::npos)
-	    {
+          // if not found, oops
+          if(pos == std::string::npos)
+            {
             cmSystemTools::Error("Trailing slash not found");
-	    }
+            }
 
-	  this->ReadListFile(parentList.c_str());
+          this->ReadListFile(parentList.c_str());
 
-	  // restore the current directory
-	  m_cmCurrentDirectory = srcdir;
-	  m_CurrentOutputDirectory = bindir;    
-	}
+          // restore the current directory
+          m_cmCurrentDirectory = srcdir;
+          m_CurrentOutputDirectory = bindir;    
+        }
     }
 
   // are we at the start CMakeLists file or are we processing a parent 
@@ -452,7 +452,7 @@ void cmMakefile::AddDefineFlag(const char* flag)
 void cmMakefile::AddLinkLibrary(const char* lib, cmTarget::LinkLibraryType llt)
 {
   m_LinkLibraries.push_back(
-	  std::pair<std::string, cmTarget::LinkLibraryType>(lib,llt));
+          std::pair<std::string, cmTarget::LinkLibraryType>(lib,llt));
 }
 
 void cmMakefile::AddLinkLibraryForTarget(const char *target,
@@ -665,29 +665,29 @@ void cmMakefile::AddLibrary(const char* lname, int shared,
     {
     case 0:
       this->GetCacheManager()->AddCacheEntry(ltname.c_str(),"STATIC",
-		      "Whether a library is static, shared or module.",
-		      cmCacheManager::INTERNAL);
+                      "Whether a library is static, shared or module.",
+                      cmCacheManager::INTERNAL);
       break;
     case 1:
       this->GetCacheManager()->
-	AddCacheEntry(ltname.c_str(),
-		      "SHARED",
-		      "Whether a library is static, shared or module.",
-		      cmCacheManager::INTERNAL);
+        AddCacheEntry(ltname.c_str(),
+                      "SHARED",
+                      "Whether a library is static, shared or module.",
+                      cmCacheManager::INTERNAL);
       break;
     case 2:
       this->GetCacheManager()->
-	AddCacheEntry(ltname.c_str(),
-		      "MODULE",
-		      "Whether a library is static, shared or module.",
-		      cmCacheManager::INTERNAL);
+        AddCacheEntry(ltname.c_str(),
+                      "MODULE",
+                      "Whether a library is static, shared or module.",
+                      cmCacheManager::INTERNAL);
       break;
     default:
       this->GetCacheManager()->
-	AddCacheEntry(ltname.c_str(),
-		      "STATIC",
-		      "Whether a library is static, shared or module.",
-		      cmCacheManager::INTERNAL);
+        AddCacheEntry(ltname.c_str(),
+                      "STATIC",
+                      "Whether a library is static, shared or module.",
+                      cmCacheManager::INTERNAL);
     }
 
 }
@@ -752,6 +752,20 @@ void cmMakefile::AddUtilityCommand(const char* utilityName,
   m_Targets.insert(cmTargets::value_type(utilityName,target));
 }
 
+cmSourceGroup* cmMakefile::GetSourceGroup(const char* name)
+{
+  // First see if the group exists.  If so, replace its regular expression.
+  for(std::vector<cmSourceGroup>::iterator sg = m_SourceGroups.begin();
+      sg != m_SourceGroups.end(); ++sg)
+    {
+    std::string sgName = sg->GetName();
+    if(sgName == name)
+      {
+      return &(*sg);
+      }
+    }
+  return 0;
+}
 
 void cmMakefile::AddSourceGroup(const char* name, const char* regex)
 {
@@ -762,9 +776,12 @@ void cmMakefile::AddSourceGroup(const char* name, const char* regex)
     std::string sgName = sg->GetName();
     if(sgName == name)
       {
-      // We only want to set the regular expression.  If there are already
-      // source files in the group, we don't want to remove them.
-      sg->SetGroupRegex(regex);
+      if ( regex )
+        {
+        // We only want to set the regular expression.  If there are already
+        // source files in the group, we don't want to remove them.
+        sg->SetGroupRegex(regex);
+        }
       return;
       }
     }
@@ -1180,7 +1197,7 @@ bool cmMakefile::IsFunctionBlocked(const char *name,
 }
 
 void cmMakefile::RemoveFunctionBlocker(const char *name,
-				       const std::vector<std::string> &args)
+                                       const std::vector<std::string> &args)
 {
   // loop over all function blockers to see if any block this command
   std::list<cmFunctionBlocker *>::reverse_iterator pos;

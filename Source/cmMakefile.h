@@ -239,7 +239,7 @@ public:
   /**
    * Add a source group for consideration when adding a new source.
    */
-  void AddSourceGroup(const char* name, const char* regex);
+  void AddSourceGroup(const char* name, const char* regex=0);
   
   /**
    * Add an auxiliary directory to the build.
@@ -452,6 +452,11 @@ public:
     { return m_SourceGroups; }
 
   /**
+   * Get the source group
+   */
+  cmSourceGroup* GetSourceGroup(const char* name); 
+
+  /**
    * Get the vector of list files on which this makefile depends
    */
   const std::vector<std::string>& GetListFiles() const
@@ -488,7 +493,6 @@ public:
    */
   cmSourceGroup& FindSourceGroup(const char* source,
                                  std::vector<cmSourceGroup> &groups);
-
   void RegisterData(cmData*);
   void RegisterData(const char*, cmData*);
   cmData* LookupData(const char*) const;
@@ -533,7 +537,7 @@ protected:
   std::string m_HomeOutputDirectory;
   std::string m_cmCurrentListFile;
 
-  std::string m_ProjectName;	// project name
+  std::string m_ProjectName;    // project name
 
   // libraries, classes, and executables
   cmTargets m_Targets;
@@ -574,8 +578,8 @@ private:
   std::string GetParentListFileName(const char *listFileName);
 
   void ReadSources(std::ifstream& fin, bool t);
-  friend class cmMakeDepend;	// make depend needs direct access 
-				// to the m_Sources array 
+  friend class cmMakeDepend;    // make depend needs direct access 
+                                // to the m_Sources array 
   void PrintStringVector(const char* s, const std::vector<std::string>& v) const;
   void AddDefaultDefinitions();
   std::list<cmFunctionBlocker *> m_FunctionBlockers;
