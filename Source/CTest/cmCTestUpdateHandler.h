@@ -39,7 +39,7 @@ public:
 
   enum {
     e_CVS,
-    e_SVN,
+    e_SVN
   };
   
 private:
