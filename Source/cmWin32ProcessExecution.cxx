@@ -655,7 +655,7 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
                                 hChildStdoutWr,
                                 &hProcess, m_HideWindows,
                                 m_Output))
-      return NULL;
+      return 0;
     }
   else 
     {
@@ -667,7 +667,7 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
                                 hChildStderrWr,
                                 &hProcess, m_HideWindows,
                                 m_Output))
-      return NULL;
+      return 0;
     }
 
   /*
@@ -882,9 +882,9 @@ int cmWin32ProcessExecution::Windows9xHack(const char* command)
 
   bRet = CreateProcess(
     app, cmd,
-    NULL, NULL,
+    0, 0,
     TRUE, 0,
-    NULL, NULL,
+    0, 0,
     &si, &pi
     );
   delete [] cmd;
