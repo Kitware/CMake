@@ -8,6 +8,8 @@ CVS_TAG="-r Release-1-4"
 PKG=cmake
 VER=1.4.6
 REL=1
+PREVER=1.4.5
+PREREL=1
 
 CVSROOT=":pserver:anonymous@www.cmake.org:/cvsroot/CMake"
 FULLPKG="${PKG}-${VER}-${REL}"
@@ -64,11 +66,14 @@ WriteSetupHint()
 cat > ${PKG}-${VER}/CYGWIN-PATCHES/setup.hint <<EOF
 # CMake setup.hint file for cygwin setup.exe program
 category: Devel 
-requires: libncurses5 cygwin 
+requires: libncurses6 cygwin 
 sdesc: "A cross platform build manger" 
 ldesc: "CMake is a cross platform build manager. It allows you to specify build parameters for C and C++ programs in a cross platform manner. For cygwin Makefiles will be generated. CMake is also capable of generating microsoft project files, nmake, and borland makefiles. CMake can also perform system inspection operations like finding installed libraries and header files." 
+prev: ${PREVER}-${PREREL}
 curr: ${VER}-${REL}
 EOF
+dos2unix ${PKG}-${VER}/CYGWIN-PATCHES/setup.hint
+cp ${PKG}-${VER}/CYGWIN-PATCHES/setup.hint ./setup.hint
 }
 
 SourceTarball()
