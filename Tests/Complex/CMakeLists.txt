@@ -50,4 +50,12 @@ ENDIF (EXECUTABLE_OUTPUT_PATH)
 SUBDIRS(Library Executable)
 SUBDIR_DEPENDS(Executable Library)
 
+#
+# Exec program
+# Increase coverage.
+#
+OPTION(EXEC_PROGRAM "Test EXEC_PROGRAM" ON)
+IF (EXEC_PROGRAM) 
+  EXEC_PROGRAM("echo EXEC_PROGRAM")
+ENDIF (EXEC_PROGRAM) 
 

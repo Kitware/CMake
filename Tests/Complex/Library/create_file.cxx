@@ -22,7 +22,7 @@ int main (int argc, char *argv[])
     return EXIT_FAILURE;
     }
 
-  fprintf(stdout, "Creating %s!\n", argv[1]);
+  fprintf(stdout, ">> Creating %s!\n", argv[1]);
   
   return EXIT_SUCCESS;
 }

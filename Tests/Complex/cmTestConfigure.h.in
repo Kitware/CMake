@@ -1,10 +1,30 @@
 #cmakedefine ONE_VAR
+#cmakedefine ONE_VAR_IS_DEFINED
 #cmakedefine ZERO_VAR
+
 #define STRING_VAR "${STRING_VAR}"
 
-#define BINARY_DIR "${Complex_BINARY_DIR}"
+#define FOREACH_VAR1 "${FOREACH_VAR1}"
+#define FOREACH_VAR2 "${FOREACH_VAR2}"
+
+#define FILENAME_VAR_PATH_NAME "${FILENAME_VAR_PATH_NAME}"
+#define FILENAME_VAR_NAME "${FILENAME_VAR_NAME}"
+#define FILENAME_VAR_EXT "${FILENAME_VAR_EXT}"
+#define FILENAME_VAR_NAME_WE "${FILENAME_VAR_NAME_WE}"
+
+#define PATH_VAR_NAME "${PATH_VAR_NAME}"
 
 #cmakedefine CMAKE_NO_STD_NAMESPACE
 #cmakedefine CMAKE_NO_ANSI_STREAM_HEADERS
 #cmakedefine CMAKE_NO_ANSI_FOR_SCOPE
+
+// Needed to check for files
+
+#define BINARY_DIR "${Complex_BINARY_DIR}"
+
+// Coverage only
+
+#define BUILD_COMMAND_VAR "${BUILD_COMMAND_VAR}"
+#define BUILD_NAME_VAR "${BUILD_NAME_VAR}"
+#define SITE_NAME_VAR "${SITE_NAME_VAR}"
 
