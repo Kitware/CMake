@@ -18,9 +18,11 @@ FIND_LIBRARY(PYTHON_DEBUG_LIBRARY
 )
 
 FIND_LIBRARY(PYTHON_LIBRARY 
-  NAMES python python21 python20
+  NAMES python python21 python2.1 python20 python2.0
   PATHS
   /usr/lib
+  /usr/lib/python2.1/config
+  /usr/lib/python2.0/config
   /usr/local/lib
   [HKEY_LOCAL_MACHINE\SOFTWARE\Python\PythonCore\2.1\InstallPath]/libs
   [HKEY_LOCAL_MACHINE\SOFTWARE\Python\PythonCore\2.0\InstallPath]/libs
@@ -28,6 +30,8 @@ FIND_LIBRARY(PYTHON_LIBRARY
   
 FIND_PATH(PYTHON_INCLUDE_PATH Python.h
   /usr/include
+  /usr/include/python2.1
+  /usr/include/python2.0
   /usr/local/include
   [HKEY_LOCAL_MACHINE\SOFTWARE\Python\PythonCore\2.1\InstallPath]/include
   [HKEY_LOCAL_MACHINE\SOFTWARE\Python\PythonCore\2.0\InstallPath]/include
