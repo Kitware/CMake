@@ -86,6 +86,8 @@ IF(BUILD_TESTING)
     ${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Test)
     ADD_CUSTOM_TARGET(NightlyCoverage 
     ${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Coverage)
+    ADD_CUSTOM_TARGET(NightlyPurify
+    ${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Purify)
     ADD_CUSTOM_TARGET(NightlySubmit 
     ${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Submit)
     ADD_CUSTOM_TARGET(NightlyDashboardStart 
@@ -98,6 +100,8 @@ IF(BUILD_TESTING)
     ${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Test)
     ADD_CUSTOM_TARGET(ExperimentalCoverage 
     ${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Coverage)
+    ADD_CUSTOM_TARGET(ExperimentalPurify
+    ${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Purify)
     ADD_CUSTOM_TARGET(ExperimentalSubmit 
     ${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Submit)
     ADD_CUSTOM_TARGET(Experimental 
