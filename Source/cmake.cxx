@@ -40,6 +40,7 @@
 #endif
 
 #include <stdlib.h> // required for atoi
+#include <fstream>
 
 #ifdef __APPLE__
 #include <sys/types.h>
@@ -983,6 +984,9 @@ int cmake::DoPreConfigureChecks()
 
 int cmake::Configure()
 {
+  // Construct right now our path conversion table before it's too late:
+  this->UpdateConversionPathTable();
+
   int res = 0;
   if ( !m_ScriptMode )
     {
@@ -1505,4 +1509,26 @@ bool cmake::HasWrittenFile(const char* file)
 void cmake::CleanupWrittenFiles()
 {
   m_WrittenFiles.clear();
+}
+
+void cmake::UpdateConversionPathTable()
+{
+  // Update the path conversion table with any specified file:
+  const char* tablepath = 
+    m_CacheManager->GetCacheValue("CMAKE_PATH_TRANSLATION_FILE");
+
+  if(tablepath)
+    {
+    std::ifstream table( tablepath );
+    std::string a, b;
+    if( table.is_open() && table.good() )
+      {
+      while(!table.eof())
+        {
+        // two entries per line
+        table >> a; table >> b;
+        cmSystemTools::AddTranslationPath( a.c_str(), b.c_str());
+        }
+      }
+    }
 }

@@ -1,5 +1,3 @@
-#ifndef cmake_h
-#define cmake_h
 /*=========================================================================
 
   Program:   CMake - Cross-Platform Makefile Generator
@@ -38,6 +36,9 @@
 // you must at a minimum redo steps 2 through 7. 
 //
 
+
+#ifndef cmake_h
+#define cmake_h
 
 #include "cmSystemTools.h"
 
@@ -309,6 +310,8 @@ private:
   std::string m_CXXEnvironment;
   std::string m_CCEnvironment;
   bool m_DebugTryCompile;
+  
+  void UpdateConversionPathTable();
 };
 
 #define CMAKE_STANDARD_OPTIONS_TABLE \

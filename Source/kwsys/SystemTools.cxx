@@ -68,6 +68,17 @@ inline int Chdir(const char* dir)
   return _chdir(dir);
   #endif
 }
+inline char *Realpath(const char *path, char *resolved_path)
+{
+  char *ptemp;
+  char fullpath[MAX_PATH];
+  if( GetFullPathName(path, sizeof(fullpath), fullpath, &ptemp) )
+    {
+    return strcpy(resolved_path, fullpath);
+    }
+
+  return 0;
+}
 #else
 #include <sys/types.h>
 #include <fcntl.h>
@@ -87,6 +98,10 @@ inline const char* Getcwd(char* buf, unsigned int len)
 inline int Chdir(const char* dir)
 {
   return chdir(dir);
+}
+inline char *Realpath(const char *path, char *resolved_path)
+{
+  return realpath(path, resolved_path);
 }
 #endif
 
@@ -753,12 +768,6 @@ void SystemTools::ConvertToUnixSlashes(kwsys_stl::string& path)
       path = kwsys_stl::string(getenv("HOME")) + path.substr(1);
       }
     }
-  
-  // if there is a /tmp_mnt in a path get rid of it!
-  if(path.find("/tmp_mnt") == 0)
-    {
-    path = path.substr(8);
-    }
 }
 
 // change // to /, and escape any spaces in the path
@@ -1346,7 +1355,8 @@ kwsys_stl::string SystemTools::GetCurrentWorkingDirectory()
     {
     path = cwd;
     }
-  return path;
+
+  return SystemTools::CollapseFullPath(path.c_str());
 }
 
 kwsys_stl::string SystemTools::GetProgramPath(const char* in_name)
@@ -1452,15 +1462,77 @@ kwsys_stl::string SystemTools::CollapseFullPath(const char* in_relative)
   return SystemTools::CollapseFullPath(in_relative, 0);
 }
 
-kwsys_stl::string SystemTools::CollapseFullPath(const char* in_relative,
-                                            const char* in_base)
+kwsys_stl::map<kwsys_stl::string,kwsys_stl::string> SystemTools::TranslationMap;
+
+void SystemTools::AddTranslationPath(const char * a, const char * b)
 {
-  // Save original working directory.
-  kwsys_stl::string orig = SystemTools::GetCurrentWorkingDirectory();
+  kwsys_stl::string path_a = a;
+  kwsys_stl::string path_b = b;
+  SystemTools::ConvertToUnixSlashes(path_a);
+  SystemTools::ConvertToUnixSlashes(path_b);
+  // First check this is a directory path, since we don't want the table to grow
+  // too fat
+  if( SystemTools::FileIsDirectory( path_a.c_str() ) )
+    {
+    // Make sure the path is a full path and does not contain no '..'
+    if( SystemTools::FileIsFullPath(path_b.c_str()) && path_b.find("..") == kwsys_stl::string::npos )
+      {
+      // Before inserting make sure path ends with '/'
+      path_a += '/'; path_b += '/';
+      if( !(path_a == path_b) )
+        {
+        TranslationMap.insert(
+            kwsys_stl::pair<kwsys_stl::string,kwsys_stl::string>(path_a, path_b));
+        }
+      }
+    }
+}
+
+void SystemTools::AddKeepPath(const char* dir)
+{
+  kwsys_stl::string cdir = SystemTools::CollapseFullPath(dir);
+  SystemTools::AddTranslationPath(cdir.c_str(), dir);
+}
+
+void SystemTools::CheckTranslationPath(kwsys_stl::string & path)
+{
+  // In case a file was specified we still have to go through this:
+  // Now convert any path found in the table back to the one desired:
+  kwsys_stl::map<kwsys_stl::string,kwsys_stl::string>::const_iterator it;
+  for(it  = TranslationMap.begin();
+      it != TranslationMap.end();
+      ++it )
+    {
+    // We need to check of the path is a substring of the other path
+    // But also check that the last character is a '/' otherwise we could
+    // have some weird case such as /tmp/VTK and /tmp/VTK-bin
+    if(path.size() > 1 && path[path.size()-1] != '/')
+      {
+      // Do not append '/' on a program name:
+      if( SystemTools::FileIsDirectory( path.c_str() ) )
+        {
+        path += "/";
+        }
+      }
+    if(path.find( it->first ) == 0)
+      {
+      path = path.replace( 0, it->first.size(), it->second);
+      }
+    }
+}
+
+kwsys_stl::string SystemTools::CollapseFullPath(const char* in_relative,
+                                                const char* in_base)
+{
+  static int initialized = 0;
+
+  kwsys_stl::string orig;
   
   // Change to base of relative path.
   if(in_base)
     {
+    // Save original working directory.
+    orig = SystemTools::GetCurrentWorkingDirectory();
     Chdir(in_base);
     }
   
@@ -1473,19 +1545,6 @@ kwsys_stl::string SystemTools::CollapseFullPath(const char* in_relative,
      dir = "/";
      }
   
-#ifdef _WIN32
-  // Follow relative path.
-  if(!(dir == ""))
-    {
-    Chdir(dir.c_str());
-    }
-  
-  // Get the resulting directory.
-  kwsys_stl::string newDir = SystemTools::GetCurrentWorkingDirectory();
-  
-  // Add the file back on to the directory.
-  SystemTools::ConvertToUnixSlashes(newDir);
-#else
 # ifdef MAXPATHLEN
   char resolved_name[MAXPATHLEN];
 # else
@@ -1493,29 +1552,26 @@ kwsys_stl::string SystemTools::CollapseFullPath(const char* in_relative,
   char resolved_name[PATH_MAX];
 #  else
   char resolved_name[5024];
-#  endif
-# endif
+#  endif  //PATH_MAX
+# endif //MAXPATHLEN
   
   // Resolve relative path.
   kwsys_stl::string newDir;
   if(!(dir == ""))
     {
-    realpath(dir.c_str(), resolved_name);
+    Realpath(dir.c_str(), resolved_name);
     newDir = resolved_name;
     }
   else
     {
     newDir = SystemTools::GetCurrentWorkingDirectory();
     }
-  // if there is a /tmp_mnt in a path get rid of it!
-  if(newDir.find("/tmp_mnt") == 0)
+
+  if(in_base)
     {
-    newDir = newDir.substr(8);
+    // Restore original working directory.
+    Chdir(orig.c_str());
     }
-#endif
-  
-  // Restore original working directory.
-  Chdir(orig.c_str());
   
   // Construct and return the full path.
   kwsys_stl::string newPath = newDir;
@@ -1527,6 +1583,23 @@ kwsys_stl::string SystemTools::CollapseFullPath(const char* in_relative,
       }
     newPath += file;
     }
+
+  // If the table has never been initialized, add default path:
+  if(!initialized)
+    {
+    initialized = 1;
+    //Also add some good default one:
+    // This one should always be there it fix a bug on sgi
+    SystemTools::AddTranslationPath("/tmp_mnt/", "/");
+  
+    //This is a good default also:
+    SystemTools::AddKeepPath("/tmp/");
+    }
+
+  // Now we need to update the translation table with this potentially new path
+  SystemTools::AddTranslationPath(newPath.c_str(), in_relative);
+  SystemTools::CheckTranslationPath(newPath);
+
   return newPath;
 }
 

@@ -17,6 +17,7 @@
 #include <@KWSYS_NAMESPACE@/ios/iosfwd>
 #include <@KWSYS_NAMESPACE@/stl/string>
 #include <@KWSYS_NAMESPACE@/stl/vector>
+#include <@KWSYS_NAMESPACE@/stl/map>
 
 #include <@KWSYS_NAMESPACE@/Configure.h>
 
@@ -291,6 +292,22 @@ public:
   static int GetTerminalWidth();
   
   /**
+   * Add an entry in the path translation table.
+   */
+  static void AddTranslationPath(const char * dir, const char * refdir);
+
+  /**
+   * If dir is different after CollapseFullPath is called,
+   * Then insert it into the path translation table
+   */
+  static void AddKeepPath(const char* dir);
+
+  /**
+   * Update path by going through the Path Translation table;
+   */
+  static void CheckTranslationPath(kwsys_stl::string & path);
+
+  /**
    * Get and set permissions of the file.
    */
   static bool GetPermissions(const char* file, mode_t& mode);
@@ -312,6 +329,12 @@ protected:
    */
   static kwsys_stl::string ConvertToWindowsOutputPath(const char*);
 
+private:
+  /**
+   * Path translation table from dir to refdir
+   * Each time 'dir' will be found it will be replace by 'refdir'
+   */
+  static kwsys_stl::map<kwsys_stl::string,kwsys_stl::string> TranslationMap;
 };
 
 } // namespace @KWSYS_NAMESPACE@
