@@ -27,6 +27,10 @@ public:
       m_String += s;
       m_String += "\"";
     }
+  const char* GetString() 
+    {
+      return m_String.c_str();
+    }
   
   void AddAttribute(const char* name, cmXCodeObject* value)
     {

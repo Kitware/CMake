@@ -25,17 +25,32 @@
 
 //TODO
 // per file flags
+// 115281011528101152810000 = {
+//    fileEncoding = 4;
+// isa = PBXFileReference;
+// lastKnownFileType = sourcecode.cpp.cpp;
+// path = /Users/kitware/Bill/CMake/Source/cmakemain.cxx;
+// refType = 0;
+// sourceTree = "<absolute>";
+// };
+// 115285011528501152850000 = {
+// fileRef = 115281011528101152810000;
+// isa = PBXBuildFile;
+// settings = {
+// COMPILER_FLAGS = "-Dcmakemakeindefflag";
+// };
+// };
+
 // custom commands and clean up custom targets
-// do I need an ALL_BUILD
-// link libraries stuff
+// do I need an ALL_BUILD yes
 // exe/lib output paths
-// PBXBuildFile can not be reused, or error occurs
 
 //----------------------------------------------------------------------------
 cmGlobalXCodeGenerator::cmGlobalXCodeGenerator()
 {
   m_FindMakeProgramFile = "CMakeFindXCode.cmake";
   m_RootObject = 0;
+  m_MainGroupChildren = 0;
 }
 
 //----------------------------------------------------------------------------
@@ -171,11 +186,10 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateObjectReference(cmXCodeObject* ref)
 
 cmXCodeObject* 
 cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg, 
-                                              cmSourceFile* sf,
-                                              cmXCodeObject* mainGroupChildren)
+                                              cmSourceFile* sf)
 {
   cmXCodeObject* fileRef = this->CreateObject(cmXCodeObject::PBXFileReference);
-  mainGroupChildren->AddObject(fileRef);
+  m_MainGroupChildren->AddObject(fileRef);
   cmXCodeObject* buildFile = this->CreateObject(cmXCodeObject::PBXBuildFile);
   buildFile->AddAttribute("fileRef", this->CreateObjectReference(fileRef));
   cmXCodeObject* settings = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
@@ -214,8 +228,7 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
 void 
 cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
                                            std::vector<cmXCodeObject*>& 
-                                           targets,
-                                           cmXCodeObject* mainGroupChildren)
+                                           targets)
 {
   m_CurrentLocalGenerator = gen;
   m_CurrentMakefile = gen->GetMakefile();
@@ -245,8 +258,7 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
     for(std::vector<cmSourceFile*>::iterator i = classes.begin(); 
         i != classes.end(); ++i)
       {
-      buildFiles->AddObject(this->CreateXCodeSourceFile(gen, *i, 
-                                                        mainGroupChildren));
+      buildFiles->AddObject(this->CreateXCodeSourceFile(gen, *i));
       }
     // create header build phase
     cmXCodeObject* headerBuildPhase = 
@@ -448,7 +460,6 @@ cmGlobalXCodeGenerator::CreateXCodeTarget(cmTarget& cmtarget,
   cmXCodeObject* fileRef = this->CreateObject(cmXCodeObject::PBXFileReference);
   fileRef->AddAttribute("explicitFileType", 
                         this->CreateString(fileTypeString.c_str()));
-//  fileRef->AddAttribute("includedInIndex", this->CreateString("0"));
   fileRef->AddAttribute("path", this->CreateString(productName.c_str()));
   fileRef->AddAttribute("refType", this->CreateString("3"));
   fileRef->AddAttribute("sourceTree",
@@ -535,9 +546,54 @@ void cmGlobalXCodeGenerator::AddLinkTarget(cmXCodeObject* target ,
   files->AddObject(buildfile);
 }
 
-void cmGlobalXCodeGenerator::AddLinkFlag(cmXCodeObject* ,
-                                         const char*)
+void cmGlobalXCodeGenerator::AddLinkFlag(cmXCodeObject* target,
+                                         const char* flag)
 {
+  if(cmSystemTools::FileIsFullPath(flag))
+    {
+    std::string libPath = flag;
+    cmXCodeObject* fileRef = 
+      this->CreateObject(cmXCodeObject::PBXFileReference);
+    if(libPath[libPath.size()-1] == 'a')
+      {
+      fileRef->AddAttribute("lastKnownFileType", 
+                            this->CreateString("archive.ar"));
+      }
+    else
+      {
+      fileRef->AddAttribute("lastKnownFileType", 
+                            this->CreateString("compiled.mach-o.dylib"));
+      }
+    fileRef->AddAttribute("name", 
+                          this->CreateString(
+                            cmSystemTools::GetFilenameName(libPath).c_str()));
+    
+    fileRef->AddAttribute("path", this->CreateString(libPath.c_str()));
+    fileRef->AddAttribute("refType", this->CreateString("0"));
+    fileRef->AddAttribute("sourceTree", this->CreateString("<absolute>"));
+    cmXCodeObject* buildfile = this->CreateObject(cmXCodeObject::PBXBuildFile);
+    buildfile->AddAttribute("fileRef", this->CreateObjectReference(fileRef));
+    cmXCodeObject* settings = 
+      this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
+    buildfile->AddAttribute("settings", settings);
+    // get the framework build phase from the target
+    cmXCodeObject* buildPhases = target->GetObject("buildPhases");
+    cmXCodeObject* frameworkBuildPhase = 
+      buildPhases->GetObject(cmXCodeObject::PBXFrameworksBuildPhase);
+    cmXCodeObject* files = frameworkBuildPhase->GetObject("files");
+    files->AddObject(buildfile);
+    m_MainGroupChildren->AddObject(fileRef);
+    }
+  else
+    {
+    cmXCodeObject* settings = target->GetObject("buildSettings");
+    cmXCodeObject* ldflags = settings->GetObject("OTHER_LDFLAGS");
+    std::string link = ldflags->GetString();
+    cmSystemTools::ReplaceString(link, "\"", "");
+    link += " -l";
+    link +=  flag;
+    ldflags->SetString(link.c_str());
+    }
 }
 
 void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
@@ -566,7 +622,10 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
       }
     else
       {
-      this->AddLinkFlag(target, j->first.c_str());
+      if(cmtarget->GetType() != cmTarget::STATIC_LIBRARY)
+        {
+        this->AddLinkFlag(target, j->first.c_str());
+        }
       }
     }
   std::set<cmStdString>::const_iterator i, end;
@@ -606,6 +665,7 @@ void cmGlobalXCodeGenerator::CreateXCodeObjects(cmLocalGenerator* ,
 {
   this->ClearXCodeObjects(); 
   m_RootObject = 0;
+  m_MainGroupChildren = 0;
   cmXCodeObject* group = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
   group->AddAttribute("COPY_PHASE_STRIP", this->CreateString("NO"));
   cmXCodeObject* developBuildStyle = this->CreateObject(cmXCodeObject::PBXBuildStyle);
@@ -623,9 +683,9 @@ void cmGlobalXCodeGenerator::CreateXCodeObjects(cmLocalGenerator* ,
   listObjs->AddObject(deployBuildStyle);
   
   cmXCodeObject* mainGroup = this->CreateObject(cmXCodeObject::PBXGroup);
-  cmXCodeObject* mainGroupChildren = 
+  m_MainGroupChildren = 
     this->CreateObject(cmXCodeObject::OBJECT_LIST);
-  mainGroup->AddAttribute("children", mainGroupChildren);
+  mainGroup->AddAttribute("children", m_MainGroupChildren);
   mainGroup->AddAttribute("refType", this->CreateString("4"));
   mainGroup->AddAttribute("sourceTree", this->CreateString("<group>"));
 
@@ -636,7 +696,7 @@ void cmGlobalXCodeGenerator::CreateXCodeObjects(cmLocalGenerator* ,
   cmXCodeObject* productGroupChildren = 
     this->CreateObject(cmXCodeObject::OBJECT_LIST);
   productGroup->AddAttribute("children", productGroupChildren);
-  mainGroupChildren->AddObject(productGroup);
+  m_MainGroupChildren->AddObject(productGroup);
   
   
   m_RootObject = this->CreateObject(cmXCodeObject::PBXProject);
@@ -651,7 +711,7 @@ void cmGlobalXCodeGenerator::CreateXCodeObjects(cmLocalGenerator* ,
   for(std::vector<cmLocalGenerator*>::iterator i = generators.begin();
       i != generators.end(); ++i)
     {
-    this->CreateXCodeTargets(*i, targets, mainGroupChildren);
+    this->CreateXCodeTargets(*i, targets);
     }
   cmXCodeObject* allTargets = this->CreateObject(cmXCodeObject::OBJECT_LIST);
   for(std::vector<cmXCodeObject*>::iterator i = targets.begin();

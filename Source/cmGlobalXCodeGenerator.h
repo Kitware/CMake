@@ -92,10 +92,9 @@ private:
   void  WriteXCodePBXProj(std::ostream& fout,
                           cmLocalGenerator* root,
                           std::vector<cmLocalGenerator*>& generators);
-  cmXCodeObject* CreateXCodeSourceFile(cmLocalGenerator* gen, cmSourceFile* sf,
-                                       cmXCodeObject* mainGroupChildren);
-  void CreateXCodeTargets(cmLocalGenerator* gen, std::vector<cmXCodeObject*>&,
-                          cmXCodeObject* mainGroupChildren);  
+  cmXCodeObject* CreateXCodeSourceFile(cmLocalGenerator* gen, 
+                                       cmSourceFile* sf);
+  void CreateXCodeTargets(cmLocalGenerator* gen, std::vector<cmXCodeObject*>&);
   void AddDependTarget(cmXCodeObject* target,
                        cmXCodeObject* dependTarget);
   void AddLinkTarget(cmXCodeObject* target,
@@ -105,6 +104,7 @@ private:
 private:
   std::vector<cmXCodeObject*> m_XCodeObjects;
   cmXCodeObject* m_RootObject;
+  cmXCodeObject* m_MainGroupChildren;
   cmMakefile* m_CurrentMakefile;
   cmLocalGenerator* m_CurrentLocalGenerator;
 };
