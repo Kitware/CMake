@@ -7,21 +7,20 @@
 #
 
 MACRO(CHECK_LIBRARY_EXISTS LIBRARY FUNCTION LOCATION VARIABLE)
-  SET(CHECK_LIBRARY_EXISTS_LIBRARY ${LIBRARY})
-  SET(CHECK_LIBRARY_EXISTS_FUNCTION ${FUNCTION})
-  SET(CHECK_LIBRARY_EXISTS_LOCATION ${LOCATION})
-  SET(CHECK_LIBRARY_EXISTS_VARIABLE ${VARIABLE})
-  SET(CHECK_LIBRARY_EXISTS_SOURCE ${CMAKE_ROOT}/Modules/CheckFunctionExists.c)
-  CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CheckLibraryExists.lists.in
-                 ${PROJECT_BINARY_DIR}/CMakeTmp/CheckLibraryExists/CMakeLists.txt
-                 IMMEDIATE)
+  SET(MACRO_CHECK_LIBRARY_EXISTS_DEFINITION -DCHECK_FUNCTION_EXISTS=${FUNCTION})
+
   TRY_COMPILE(${VARIABLE}
-             ${PROJECT_BINARY_DIR}/CMakeTmp/CheckLibraryExists
-             ${PROJECT_BINARY_DIR}/CMakeTmp/CheckLibraryExists
-             CHECK_LIBRARY_EXISTS OUTPUT_VARIABLE OUTPUT)
+             ${PROJECT_BINARY_DIR}/CheckIfLibraryExists
+             ${CMAKE_ROOT}/Modules/CheckFunctionExists.c
+             CMAKE_FLAGS 
+               -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_LIBRARY_EXISTS_DEFINITION}
+               -DLINK_DIRECTORIES:STRING=${LOCATION}
+               -DLINK_LIBRARIES:STRING=${LIBRARY}
+             OUTPUT_VARIABLE OUTPUT)
+
   IF(NOT ${VARIABLE})
     WRITE_FILE(${PROJECT_BINARY_DIR}/CMakeError.log 
-      "Determining if the function ${FUNCTION} exists failed with the following output:\n"
+      "Determining if the function ${FUNCTION} exists in the ${LIBRARY} failed with the following output:\n"
       "${OUTPUT}\n")
   ENDIF(NOT ${VARIABLE})
 ENDMACRO(CHECK_LIBRARY_EXISTS)
