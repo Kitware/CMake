@@ -7,6 +7,7 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DTEST_CXX_FLAGS")
 # Link to CMake lib
 LINK_DIRECTORIES(${Complex_BINARY_DIR}/../../Source)
 LINK_DIRECTORIES(${Complex_BINARY_DIR}/../../Source/kwsys)
+LINK_DIRECTORIES(${Complex_BINARY_DIR}/../../Utilities/cmexpat)
 # Use LINK_LIBRARIES instead of TARGET_LINK_LIBRARIES to 
 SET(COMPLEX_LIBS CMakeTestLibrary;CMakeTestLibraryShared;CMakeTestCLibraryShared)
 LINK_LIBRARIES(${COMPLEX_LIBS})
