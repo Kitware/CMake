@@ -364,9 +364,13 @@ static CURLcode bindlocal(struct connectdata *conn,
 
           bindworked = TRUE;
 
-          size = sizeof(add);
+#ifdef __hpux
+          int gsize = sizeof(add);
+#else
+          socklen_t gsize = sizeof(add);
+#endif
           if(getsockname(sockfd, (struct sockaddr *) &add,
-                         (socklen_t *)&size)<0) {
+                         &gsize)<0) {
             failf(data, "getsockname() failed");
             return CURLE_HTTP_PORT_FAILED;
           }
@@ -405,7 +409,12 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
   bool rc = TRUE;
 #ifdef SO_ERROR
   int err = 0;
+#ifdef __hpux
+  int errSize = sizeof(err);
+#else
   socklen_t errSize = sizeof(err);
+#endif
+
 
 #ifdef WIN32
   /*
