@@ -171,7 +171,9 @@ void cmake::AddCMakePaths(const std::vector<std::string>& args)
 	if (!cmSystemTools::FileIsDirectory(modules.c_str()))
 	  {
 	    // couldn't find modules
-	    cmSystemTools::Error("Could not find CMAKE_ROOT !!!");
+	    cmSystemTools::Error("Could not find CMAKE_ROOT !!!\n", 
+                                 "Modules directory not in directory:\n",
+                                 modules.c_str());
 	    return;  
 	  }
 	}
