@@ -149,6 +149,7 @@ private:
     INTERRUPT,
     NUMERICAL,
     OTHER_FAULT,
+    FAILED,
     BAD_COMMAND,
     COMPLETED
   };
