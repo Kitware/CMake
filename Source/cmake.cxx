@@ -226,7 +226,7 @@ void cmake::ReadListFile(const char *path)
     {
     cmLocalGenerator *lg = gg->CreateLocalGenerator();
     lg->SetGlobalGenerator(gg);
-    if (!lg->GetMakefile()->ReadListFile(path))
+    if (!lg->GetMakefile()->ReadListFile(0, path))
       {
       std::cerr << "Error in reading cmake initial cache file:"
                 << path << "\n";
