@@ -3941,7 +3941,7 @@ int cmCTest::GenerateDartNotesOutput(std::ostream& os, const cmCTest::tm_VectorO
     {
     std::cout << "\tAdd file: " << it->c_str() << std::endl;
     std::string note_time = ::CurrentTime();
-    os << "<Note>\n"
+    os << "<Note Name=\"" << this->MakeXMLSafe(it->c_str()) << "\">\n"
       << "<DateTime>" << note_time << "</DateTime>\n"
       << "<Text>" << std::endl;
     std::ifstream ifs(it->c_str());
