@@ -29,11 +29,7 @@
 #include <math.h>
 #include <float.h>
 
-#ifdef _WIN32
-# define FIXNUM(x) (_finite(x)?(x):(0))
-#else
-# define FIXNUM(x) (finite(x)?(x):(0))
-#endif
+#define SAFEDIV(x,y) (((y)!=0)?((x)/(y)):(0))
 
 #ifdef HAVE_CURL
 static struct tm* GetNightlyTime(std::string str)
@@ -1444,10 +1440,10 @@ int cmCTest::CoverageDirectory()
     float cmet = 0;
     if ( total_tested + total_untested > 0 && (cov.m_Tested + cov.m_UnTested) > 0)
       {
-      cper = (100 * static_cast<float>(cov.m_Tested)/
-        static_cast<float>(cov.m_Tested + cov.m_UnTested));
-      cmet = ( static_cast<float>(cov.m_Tested + 10) /
-        static_cast<float>(cov.m_Tested + cov.m_UnTested + 10));
+      cper = (100 * SAFEDIV(static_cast<float>(cov.m_Tested),
+        static_cast<float>(cov.m_Tested + cov.m_UnTested)));
+      cmet = ( SAFEDIV(static_cast<float>(cov.m_Tested + 10),
+        static_cast<float>(cov.m_Tested + cov.m_UnTested + 10)));
       }
 
     log << "\t<File Name=\"" << cit->first << "\" FullPath=\"" << cov.m_FullPath
@@ -1457,11 +1453,11 @@ int cmCTest::CoverageDirectory()
       << "\t\t<PercentCoverage>";
     log.setf(std::ios::fixed, std::ios::floatfield);
     log.precision(2);
-    log << FIXNUM(cper) << "</PercentCoverage>\n"
+    log << (cper) << "</PercentCoverage>\n"
       << "\t\t<CoverageMetric>";
     log.setf(std::ios::fixed, std::ios::floatfield);
     log.precision(2);
-    log << FIXNUM(cmet) << "</CoverageMetric>\n"
+    log << (cmet) << "</CoverageMetric>\n"
       << "\t</File>" << std::endl;
     ccount ++;
     }
@@ -1476,8 +1472,8 @@ int cmCTest::CoverageDirectory()
     }
 
   int total_lines = total_tested + total_untested;
-  float percent_coverage = 100 * static_cast<float>(total_tested) / 
-    static_cast<float>(total_lines);
+  float percent_coverage = 100 * SAFEDIV(static_cast<float>(total_tested),
+    static_cast<float>(total_lines));
   if ( total_lines == 0 )
     {
     percent_coverage = 0;
@@ -1491,7 +1487,7 @@ int cmCTest::CoverageDirectory()
       << "\t<PercentCoverage>";
   log.setf(std::ios::fixed, std::ios::floatfield);
   log.precision(2);
-  log << FIXNUM(percent_coverage)<< "</PercentCoverage>\n"
+  log << (percent_coverage)<< "</PercentCoverage>\n"
       << "\t<EndDateTime>" << end_time << "</EndDateTime>\n"
       << "</Coverage>\n"
       << "</Site>" << std::endl;
@@ -1503,7 +1499,7 @@ int cmCTest::CoverageDirectory()
 
   std::cout.setf(std::ios::fixed, std::ios::floatfield);
   std::cout.precision(2);
-  std::cout << FIXNUM(percent_coverage) << "%" << std::endl;
+  std::cout << (percent_coverage) << "%" << std::endl;
 
 
   return 1;
