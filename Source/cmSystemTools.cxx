@@ -820,6 +820,14 @@ std::string cmSystemTools::ConvertToWindowsOutputPath(const char* path)
   // Only if it is not the first position in the path which is a network
   // path on windows
   pos = 1; // start at position 1
+  if(ret[0] == '\"')
+    {
+    pos = 2;  // if the string is already quoted then start at 2
+    if(ret.size() < 3)
+      {
+      return ret;
+      }
+    }
   while((pos = ret.find("\\\\", pos)) != std::string::npos)
     {
     ret.erase(pos, 1);
