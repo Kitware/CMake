@@ -1,0 +1,372 @@
+#ifdef TIME_WITH_SYS_TIME
+/* Time with sys/time test */
+ 
+#include <sys/types.h>
+#include <sys/time.h>
+#include <time.h>
+
+int
+main ()
+{
+if ((struct tm *) 0)
+return 0;
+  ;
+  return 0;
+}
+
+#endif
+
+#ifdef HAVE_O_NONBLOCK
+
+#include <sys/types.h>
+#include <unistd.h>
+#include <fcntl.h>
+
+int
+main ()
+{
+
+/* try to compile O_NONBLOCK */
+
+#if defined(sun) || defined(__sun__) || defined(__SUNPRO_C) || defined(__SUNPRO_CC)
+# if defined(__SVR4) || defined(__srv4__)
+#  define PLATFORM_SOLARIS
+# else
+#  define PLATFORM_SUNOS4
+# endif
+#endif
+#if (defined(_AIX) || defined(__xlC__)) && !defined(_AIX4)
+# define PLATFORM_AIX_V3
+#endif
+
+#if defined(PLATFORM_SUNOS4) || defined(PLATFORM_AIX_V3)
+#error "O_NONBLOCK does not work on this platform"
+#endif
+  int socket;
+  int flags = fcntl(socket, F_SETFL, flags | O_NONBLOCK);
+
+  ;
+  return 0;
+}
+#endif
+
+#ifdef HAVE_GETHOSTBYADDR_R_5
+#include <sys/types.h>
+#include <netdb.h>
+int
+main ()
+{
+
+char * address;
+int length;
+int type;
+struct hostent h;
+struct hostent_data hdata;
+int rc;
+rc = gethostbyaddr_r(address, length, type, &h, &hdata);
+  ;
+  return 0;
+}
+#endif
+#ifdef HAVE_GETHOSTBYADDR_R_5_REENTRANT
+#define _REENTRANT
+#include <sys/types.h>
+#include <netdb.h>
+int
+main ()
+{
+
+char * address;
+int length;q
+int type;
+struct hostent h;
+struct hostent_data hdata;
+int rc;
+rc = gethostbyaddr_r(address, length, type, &h, &hdata);
+  ;
+  return 0;
+}
+#endif
+#ifdef HAVE_GETHOSTBYADDR_R_7
+#include <sys/types.h>
+#include <netdb.h>
+int
+main ()
+{
+
+char * address;
+int length;
+int type;
+struct hostent h;
+char buffer[8192];
+int h_errnop;
+struct hostent * hp;
+
+hp = gethostbyaddr_r(address, length, type, &h,
+                     buffer, 8192, &h_errnop);
+  ;
+  return 0;
+}
+#endif
+#ifdef HAVE_GETHOSTBYADDR_R_7_REENTRANT
+#define _REENTRANT
+#include <sys/types.h>
+#include <netdb.h>
+int
+main ()
+{
+
+char * address;
+int length;
+int type;
+struct hostent h;
+char buffer[8192];
+int h_errnop;
+struct hostent * hp;
+
+hp = gethostbyaddr_r(address, length, type, &h,
+                     buffer, 8192, &h_errnop);
+  ;
+  return 0;
+}
+#endif
+#ifdef HAVE_GETHOSTBYADDR_R_8
+#include <sys/types.h>
+#include <netdb.h>
+int
+main ()
+{
+
+char * address;
+int length;
+int type;
+struct hostent h;
+char buffer[8192];
+int h_errnop;
+struct hostent * hp;
+int rc;
+
+rc = gethostbyaddr_r(address, length, type, &h,
+                     buffer, 8192, &hp, &h_errnop);
+  ;
+  return 0;
+}
+#endif
+#ifdef HAVE_GETHOSTBYADDR_R_8_REENTRANT
+#define _REENTRANT
+#include <sys/types.h>
+#include <netdb.h>
+int
+main ()
+{
+
+char * address;
+int length;
+int type;
+struct hostent h;
+char buffer[8192];
+int h_errnop;
+struct hostent * hp;
+int rc;
+
+rc = gethostbyaddr_r(address, length, type, &h,
+                     buffer, 8192, &hp, &h_errnop);
+  ;
+  return 0;
+}
+#endif
+#ifdef HAVE_GETHOSTBYNAME_R_3
+#include <string.h>
+#include <sys/types.h>
+#include <netdb.h>
+#undef NULL
+#define NULL (void *)0
+
+int
+gethostbyname_r(const char *, struct hostent *, struct hostent_data *);
+int
+main ()
+{
+
+struct hostent_data data;
+gethostbyname_r(NULL, NULL, NULL);
+  ;
+  return 0;
+}
+#endif
+#ifdef HAVE_GETHOSTBYNAME_R_3_REENTRANT
+#define _REENTRANT
+#include <string.h>
+#include <sys/types.h>
+#include <netdb.h>
+#undef NULL
+#define NULL (void *)0
+
+int
+gethostbyname_r(const char *, struct hostent *, struct hostent_data *);
+int
+main ()
+{
+
+struct hostent_data data;
+gethostbyname_r(NULL, NULL, NULL);
+  ;
+  return 0;
+}
+#endif
+#ifdef HAVE_GETHOSTBYNAME_R_5
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#undef NULL
+#define NULL (void *)0
+
+struct hostent *
+gethostbyname_r(const char *, struct hostent *, char *, int, int *);
+int
+main ()
+{
+
+gethostbyname_r(NULL, NULL, NULL, 0, NULL);
+  ;
+  return 0;
+}
+#endif
+#ifdef HAVE_GETHOSTBYNAME_R_5_REENTRANT
+#define _REENTRANT
+#include <sys/types.h>
+#include <netdb.h>
+#undef NULL
+#define NULL (void *)0
+
+struct hostent *
+gethostbyname_r(const char *, struct hostent *, char *, int, int *);
+int
+main ()
+{
+
+gethostbyname_r(NULL, NULL, NULL, 0, NULL);
+  ;
+  return 0;
+}
+#endif
+#ifdef HAVE_GETHOSTBYNAME_R_6
+#include <sys/types.h>
+#include <netdb.h>
+#undef NULL
+#define NULL (void *)0
+
+int
+gethostbyname_r(const char *, struct hostent *, char *, size_t,
+struct hostent **, int *);
+int
+main ()
+{
+
+gethostbyname_r(NULL, NULL, NULL, 0, NULL, NULL);
+  ;
+  return 0;
+}
+#endif
+#ifdef HAVE_GETHOSTBYNAME_R_6_REENTRANT
+#define _REENTRANT
+#include <sys/types.h>
+#include <netdb.h>
+#undef NULL
+#define NULL (void *)0
+
+int
+gethostbyname_r(const char *, struct hostent *, char *, size_t,
+struct hostent **, int *);
+int
+main ()
+{
+
+gethostbyname_r(NULL, NULL, NULL, 0, NULL, NULL);
+  ;
+  return 0;
+}
+#endif
+#ifdef HAVE_SOCKLEN_T
+#include <sys/types.h>
+#include <sys/socket.h>
+
+int
+main ()
+{
+if ((socklen_t *) 0)
+  return 0;
+if (sizeof (socklen_t))
+  return 0;
+  ;
+  return 0;
+}
+#endif
+#ifdef HAVE_IN_ADDR_T
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+
+int
+main ()
+{
+if ((in_addr_t *) 0)
+  return 0;
+if (sizeof (in_addr_t))
+  return 0;
+  ;
+  return 0;
+}
+#endif
+#ifdef STDC_HEADERS
+#include <stdlib.h>
+#include <stdarg.h>
+#include <string.h>
+#include <float.h>
+int main() { return 0; }
+#endif
+#ifdef RETSIGTYPE_TEST
+#include <sys/types.h>
+#include <signal.h>
+#ifdef signal
+# undef signal
+#endif
+#ifdef __cplusplus
+extern "C" void (*signal (int, void (*)(int)))(int);
+#else
+void (*signal ()) ();
+#endif
+
+int
+main ()
+{
+int i;
+  ;
+  return 0;
+}
+#endif
+#ifdef HAVE_INET_NTOA_R_DECL
+#include <arpa/inet.h>
+
+typedef void (*func_type)();
+
+int main()
+{
+  func_type func;
+  func = (func_type)inet_ntoa_r;
+  return 0;
+}
+#endif
+#ifdef HAVE_INET_NTOA_R_DECL_REENTRANT
+#define _REENTRANT
+#include <arpa/inet.h>
+
+typedef void (*func_type)();
+
+int main()
+{
+  func_type func;
+  func = (func_type)&inet_ntoa_r;
+  return 0;
+}
+#endif
