@@ -124,9 +124,9 @@ bool cmCacheManager::LoadCache(const char* path,
   const int bsize = 4096;
   char buffer[bsize];
   // input line is:         key:type=value
-  cmRegularExpression reg("^([^:]*):([^=]*)=(.*)$");
+  cmRegularExpression reg("^([^:]*):([^=]*)=(.*[^\t ]|[\t ]*)[\t ]*$");
   // input line is:         "key":type=value
-  cmRegularExpression regQuoted("^\"([^\"]*)\":([^=]*)=(.*)$");
+  cmRegularExpression regQuoted("^\"([^\"]*)\":([^=]*)=(.*[^\t ]|[\t ]*)[\t ]*$");
   while(fin)
     {
     // Format is key:type=value
@@ -168,7 +168,8 @@ bool cmCacheManager::LoadCache(const char* path,
       }
     else
       {
-      cmSystemTools::Error("Parse error in cache file ", cacheFile.c_str());
+	cmSystemTools::Error("Parse error in cache file ", cacheFile.c_str(),
+			     ". Offending entry: ", buffer);
       }
     }
   // if CMAKE version not found in the list file
