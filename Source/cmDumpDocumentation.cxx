@@ -21,15 +21,40 @@
 
 #include "cmDocumentation.h"
 
-int main(int ac, char** av)
+//----------------------------------------------------------------------------
+static const cmDocumentationEntry cmDocumentationName[] =
 {
-  cmSystemTools::EnableMSVCDebugHook();
-  cmake cmi;
-  const char* outname = "cmake.html";
-  if(ac > 1)
-    {
-    outname = av[1];
-    }
+  {0,
+   "  DumpDocumentation - Dump documentation for CMake.", 0},
+  {0,0,0}
+};
+
+//----------------------------------------------------------------------------
+static const cmDocumentationEntry cmDocumentationUsage[] =
+{
+  {0,
+   "  DumpDocumentation [filename]", 0},
+  {0,0,0}
+};
+
+//----------------------------------------------------------------------------
+static const cmDocumentationEntry cmDocumentationDescription[] =
+{
+  {0,
+   "CMake reads ... ", 0},
+  {0,0,0}
+};
+
+//----------------------------------------------------------------------------
+static const cmDocumentationEntry cmDocumentationOptions[] =
+{
+  {"--all-for-coverage", "Dump all documentation to stdout.  For testing.", 0},
+  {0,0,0}
+};
+
+
+int DumpHTML(const char* outname)
+{
   std::ofstream fout(outname);
   if(!fout)
     {
@@ -37,6 +62,7 @@ int main(int ac, char** av)
     return -1;
     }
 
+  cmake cmi;
   cmDocumentation doc;
   std::vector<cmDocumentationEntry> commands;
   cmi.GetCommandDocumentation(commands);
@@ -45,4 +71,48 @@ int main(int ac, char** av)
   doc.Print(cmDocumentation::HTMLForm, fout);
   
   return 0;
+}
+
+int DumpForCoverage()
+{
+  cmake cmi;
+  cmDocumentation doc;
+  std::vector<cmDocumentationEntry> commands;
+  cmi.GetCommandDocumentation(commands);
+  doc.SetNameSection(cmDocumentationName);
+  doc.SetUsageSection(cmDocumentationUsage);
+  doc.SetDescriptionSection(cmDocumentationDescription);
+  doc.SetOptionsSection(cmDocumentationOptions);
+  doc.SetCommandsSection(&commands[0]);
+  doc.PrintDocumentation(cmDocumentation::Usage, std::cout);
+  doc.PrintDocumentation(cmDocumentation::Full, std::cout);
+  doc.PrintDocumentation(cmDocumentation::HTML, std::cout);
+  doc.PrintDocumentation(cmDocumentation::Man, std::cout);
+}
+
+int main(int ac, char** av)
+{
+  cmSystemTools::EnableMSVCDebugHook();
+  const char* outname = "cmake.html";
+  bool coverage = false;
+  if(ac > 1)
+    {
+    if(strcmp(av[1], "--all-for-coverage") == 0)
+      {
+      coverage = true;
+      }
+    else
+      {
+      outname = av[1];
+      }
+    }
+  
+  if(coverage)
+    {
+    return DumpForCoverage();
+    }
+  else
+    {
+    return DumpHTML(outname);
+    }
 }
