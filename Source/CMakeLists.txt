@@ -634,6 +634,8 @@ IF(BUILD_TESTING)
     ADD_TEST(CTestTest ${CMAKE_CTEST_COMMAND}
       -S "${CMake_BINARY_DIR}/Tests/CTestTest/test.cmake" -V
       )
+  ENDIF (CTEST_TEST_CTEST)
+
   IF(UNIX)
     ADD_TEST(BootstrapTest ${CMAKE_CTEST_COMMAND}
       --build-and-test
@@ -642,11 +644,8 @@ IF(BUILD_TESTING)
       --build-nocmake 
       --build-makeprogram ${CMake_SOURCE_DIR}/bootstrap
       --test-command ${CMake_BINARY_DIR}/Tests/BootstrapTest/Bootstrap.cmk/cmake --version)
-      
+
   ENDIF(UNIX)
-
-
-  ENDIF (CTEST_TEST_CTEST)
 
   IF(CMAKE_GENERATOR MATCHES "Makefiles")
     # see if we can find a fortran compiler on the machine
