@@ -127,3 +127,12 @@ CONFIGURE_FILE(
 #
 USE_MANGLED_MESA (${Wrapping_SOURCE_DIR} ${Wrapping_BINARY_DIR}/mangled_mesa)
 
+#
+# Instantiator
+#
+VTK_MAKE_INSTANTIATOR(vtkWraplibInstantiator 
+                      Instantiator_SRCS
+                      SRCS
+                      EXPORT_MACRO VTK_WRAPLIB_EXPORT
+                      HEADER_LOCATION ${Wrapping_BINARY_DIR}
+                      GROUP_SIZE 5)
