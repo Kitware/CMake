@@ -460,7 +460,7 @@ void kwsysProcess_SetCommand(kwsysProcess* cp, char const* const* command)
 
       /* Add the length of the argument, plus 3 for the double quotes
          and space separating the arguments.  */
-      length += strlen(*arg) + 3;
+      length += (int)strlen(*arg) + 3;
       
       /* Scan the string to find characters that need escaping.  */
       for(c=*arg; *c; ++c)
