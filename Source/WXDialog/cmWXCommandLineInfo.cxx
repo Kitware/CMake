@@ -95,16 +95,16 @@ void cmCommandLineInfo::ParseParam(const std::string& parameter,
     }
   else
     {
-    std::string sParam(parameter.c_str(), 1);
+    std::string sParam(parameter.c_str(), 1, parameter.npos);
     // Single letter valued flag like /B=value or /B:value
     std::string value;
     if (sParam[1] == '=' || sParam[1] == ':')
       {
-      value = std::string(parameter.c_str()+2);
+      value = std::string(parameter.c_str()+3);
       }
     else
       {
-      value = std::string(parameter.c_str()+1);
+      value = std::string(parameter.c_str()+2);
       }
     int res;
     switch (sParam[0])
