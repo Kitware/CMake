@@ -71,7 +71,7 @@ static struct tm* GetNightlyTime(std::string str)
   return lctime;
 }
 
-static std::string CleanString(std::string str)
+static std::string CleanString(const std::string& str)
 {
   std::string::size_type spos = str.find_first_not_of(" \n\t\r\f\v");
   std::string::size_type epos = str.find_last_not_of(" \n\t\r\f\v");
@@ -2648,7 +2648,7 @@ std::string cmCTest::GenerateRegressionImages(const std::string& xml)
       }
     else if ( measurementfile.find(cxml) )
       {
-      const std::string& filename = measurementfile.match(5);
+      const std::string& filename = ::CleanString(measurementfile.match(5));
       if ( cmSystemTools::FileExists(filename.c_str()) )
         {
         long len = cmSystemTools::FileLength(filename.c_str());
@@ -2697,6 +2697,7 @@ std::string cmCTest::GenerateRegressionImages(const std::string& xml)
           << " text=\"text/string\""
           << "><Value>File " << filename << " not found</Value></NamedMeasurement>" 
           << std::endl;
+        std::cout << "File \"" << filename.c_str() << "\" not found." << std::endl;
         }
       cxml.erase(measurementfile.start(), measurementfile.end() - measurementfile.start());
       }
