@@ -1093,9 +1093,21 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
   std::string buildType =  this->GetSafeDefinition("CMAKE_BUILD_TYPE");
   buildType = cmSystemTools::UpperCase(buildType);
   std::string flags;
-  std::string target = m_ExecutableOutputPath + name 
-    + cmSystemTools::GetExecutableExtension(); 
+  
+  // Construct the full path to the executable that will be generated.
+  std::string target = m_ExecutableOutputPath;
+  if(target.length() == 0)
+    {
+    target = m_Makefile->GetCurrentOutputDirectory();
+    if(target.size() && target[target.size()-1] != '/')
+      {
+      target += "/";
+      }
+    }
+  target += name;
+  target += cmSystemTools::GetExecutableExtension();
   target = cmSystemTools::ConvertToOutputPath(target.c_str());
+  
   std::string objs = "$(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
   std::string depend = "$(";
   depend += this->CreateMakeVariable(name, "_SRC_OBJS") 
@@ -1189,6 +1201,21 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
                        target.c_str(),
                        depend.c_str(),
                        commands);
+  
+  // If there is no executable output path, add a rule with the
+  // relative path to the executable.  This is necessary for
+  // try-compile to work in this case.
+  if(m_ExecutableOutputPath.length() == 0)
+    {
+    target = name;
+    target += cmSystemTools::GetExecutableExtension();
+    target = cmSystemTools::ConvertToOutputPath(target.c_str());
+    this->OutputMakeRule(fout, 
+                         comment.c_str(),
+                         target.c_str(),
+                         depend.c_str(),
+                         commands);
+    }
 }
 
 
