@@ -85,19 +85,22 @@ void cmTargetLinkLibrariesCommand::FinalPass()
 {
   std::vector<std::string>::size_type cc;
   std::string libPath;
-  for ( cc = 0; cc < m_HasLocation.size(); cc ++ )
+  if ( !m_Makefile->GetDefinition("CMAKE_IGNORE_DEPENDENCIES_ORDERING") )
     {
-    libPath = m_HasLocation[cc] + "_CMAKE_PATH";
-    const char* dir = m_Makefile->GetDefinition(libPath.c_str());
-    if ( dir )
+    for ( cc = 0; cc < m_HasLocation.size(); cc ++ )
       {
-      std::string str = "Library " + m_HasLocation[cc] + 
-        " is defined using ADD_LIBRARY after the library is used "
-        "using TARGET_LINK_LIBRARIES for the target " + m_TargetName +
-        ". This breaks CMake's dependency "
-        "handling. Please fix the CMakeLists.txt file.";
-      this->SetError(str.c_str());
-      cmSystemTools::Message(str.c_str(), "CMake Error");
+      libPath = m_HasLocation[cc] + "_CMAKE_PATH";
+      const char* dir = m_Makefile->GetDefinition(libPath.c_str());
+      if ( dir )
+        {
+        std::string str = "Library " + m_HasLocation[cc] + 
+          " is defined using ADD_LIBRARY after the library is used "
+          "using TARGET_LINK_LIBRARIES for the target " + m_TargetName +
+          ". This breaks CMake's dependency "
+          "handling. Please fix the CMakeLists.txt file.";
+        this->SetError(str.c_str());
+        cmSystemTools::Message(str.c_str(), "CMake Error");
+        }
       }
     }
 }
