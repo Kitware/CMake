@@ -856,9 +856,17 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
       flags = m_Makefile->GetDefinition("CMAKE_CXX_FLAGS_RELWITHDEBINFO");
       flags += " -DCMAKE_INTDIR=\\\"RelWithDebInfo\\\"";
       cmSystemTools::ReplaceString(line,"CMAKE_CXX_FLAGS_RELWITHDEBINFO", flags.c_str());
-      cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS",
-                                   m_Makefile->
-                                   GetDefinition("CMAKE_CXX_FLAGS"));
+      flags = "";
+      if ( m_Makefile->GetDefinition("CMAKE_C_FLAGS") )
+        {
+        flags += m_Makefile->GetDefinition("CMAKE_C_FLAGS");
+        }
+      if ( m_Makefile->GetDefinition("CMAKE_CXX_FLAGS") )
+        {
+        flags += m_Makefile->GetDefinition("CMAKE_CXX_FLAGS");
+        }
+
+      cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS", flags.c_str());
       }
     fout << line.c_str() << std::endl;
     }
