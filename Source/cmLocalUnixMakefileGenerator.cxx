@@ -742,7 +742,7 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
     // if a variable expands to nothing.
     if (lib->first.size() == 0) continue;
     // if it is a full path break it into -L and -l
-    cmsys::RegularExpression reg("^([ \t]*\\-l)|([ \t]*\\-framework)|(\\${)|([ \t]*\\-pthread)|([ \t]*`)");
+    cmsys::RegularExpression reg("^([ \t]*\\-[lWR])|([ \t]*\\-framework)|(\\${)|([ \t]*\\-pthread)|([ \t]*`)");
     if(lib->first.find('/') != std::string::npos
        && !reg.find(lib->first))
       {
