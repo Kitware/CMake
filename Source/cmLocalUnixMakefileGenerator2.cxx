@@ -556,11 +556,11 @@ cmLocalUnixMakefileGenerator2
 
   // Collect the commands.
   std::vector<std::string> commands;
-  this->AddCustomCommands(commands, cc);
+  this->AppendCustomCommand(commands, cc);
 
   // Collect the dependencies.
   std::vector<std::string> depends;
-  this->AddCustomDepends(depends, cc);
+  this->AppendCustomDepend(depends, cc);
 
   // Add a dependency on the rule file itself.
   depends.push_back(ruleFileName);
@@ -616,13 +616,11 @@ cmLocalUnixMakefileGenerator2
   std::vector<std::string> depends;
 
   // Utility targets store their rules in post-build commands.
-  for(std::vector<cmCustomCommand>::const_iterator
-        i = target.GetPostBuildCommands().begin();
-      i != target.GetPostBuildCommands().end(); ++i)
-    {
-    this->AddCustomCommands(commands, *i);
-    this->AddCustomDepends(depends, *i);
-    }
+  this->AppendCustomDepends(depends, target.GetPostBuildCommands());
+  this->AppendCustomCommands(commands, target.GetPostBuildCommands());
+
+  // Add dependencies on targets that must be built first.
+  this->AppendTargetDepends(depends, target);
 
   // Add a dependency on the rule file itself.
   depends.push_back(ruleFileName);
@@ -630,6 +628,12 @@ cmLocalUnixMakefileGenerator2
   // Write the rule.
   this->WriteMakeRule(ruleFileStream, 0, 0,
                       target.GetName(), depends, commands);
+
+  // Add this to the list of build rules in this directory.
+  if(target.IsInAll())
+    {
+    m_BuildTargets.push_back(target.GetName());
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -1326,8 +1330,8 @@ cmLocalUnixMakefileGenerator2
     depends.push_back(*obj);
     }
 
-  // Add dependencies on libraries that will be linked.
-  this->AppendLibDepends(target, depends);
+  // Add dependencies on targets that must be built first.
+  this->AppendTargetDepends(depends, target);
 
   // Add a dependency on the rule file itself.
   depends.push_back(ruleFileName);
@@ -1393,7 +1397,8 @@ cmLocalUnixMakefileGenerator2
   std::string linkRule = m_Makefile->GetRequiredDefinition(linkRuleVar.c_str());
   cmSystemTools::ExpandListArgument(linkRule, commands);
 
-  // TODO: Post-build rules.
+  // Add the post-build rules.
+  this->AppendCustomCommands(commands, target.GetPostBuildCommands());
 
   // Collect up flags to link in needed libraries.
   cmOStringStream linklibs;
@@ -1554,8 +1559,8 @@ cmLocalUnixMakefileGenerator2
     depends.push_back(*obj);
     }
 
-  // Add dependencies on libraries that will be linked.
-  this->AppendLibDepends(target, depends);
+  // Add dependencies on targets that must be built first.
+  this->AppendTargetDepends(depends, target);
 
   // Add a dependency on the rule file itself.
   depends.push_back(ruleFileName);
@@ -1648,7 +1653,8 @@ cmLocalUnixMakefileGenerator2
     commands.push_back(symlink);
     }
 
-  // TODO: Post-build rules.
+  // Add the post-build rules.
+  this->AppendCustomCommands(commands, target.GetPostBuildCommands());
 
   // Collect up flags to link in needed libraries.
   cmOStringStream linklibs;
@@ -2022,8 +2028,8 @@ void cmLocalUnixMakefileGenerator2::AppendFlags(std::string& flags,
 //----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator2
-::AppendLibDepends(const cmTarget& target,
-                   std::vector<std::string>& depends)
+::AppendTargetDepends(std::vector<std::string>& depends,
+                      const cmTarget& target)
 {
   // Do not bother with dependencies for static libraries.
   if(target.GetType() == cmTarget::STATIC_LIBRARY)
@@ -2037,7 +2043,7 @@ cmLocalUnixMakefileGenerator2
   // A target should not depend on itself.
   emitted.insert(target.GetName());
 
-  // Loop over all dependencies.
+  // Loop over all library dependencies.
   const cmTarget::LinkLibraries& tlibs = target.GetLinkLibraries();
   for(cmTarget::LinkLibraries::const_iterator lib = tlibs.begin();
       lib != tlibs.end(); ++lib)
@@ -2046,7 +2052,20 @@ cmLocalUnixMakefileGenerator2
     if(emitted.insert(lib->first).second)
       {
       // Add this dependency.
-      this->AppendLibDepend(depends, lib->first.c_str());
+      this->AppendAnyDepend(depends, lib->first.c_str());
+      }
+    }
+
+  // Loop over all utility dependencies.
+  const std::set<cmStdString>& tutils = target.GetUtilities();
+  for(std::set<cmStdString>::const_iterator util = tutils.begin();
+      util != tutils.end(); ++util)
+    {
+    // Don't emit the same utility twice for this target.
+    if(emitted.insert(*util).second)
+      {
+      // Add this dependency.
+      this->AppendAnyDepend(depends, util->c_str());
       }
     }
 }
@@ -2054,7 +2073,7 @@ cmLocalUnixMakefileGenerator2
 //----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator2
-::AppendLibDepend(std::vector<std::string>& depends, const char* name)
+::AppendAnyDepend(std::vector<std::string>& depends, const char* name)
 {
   // There are a few cases for the name of the target:
   //  - CMake target in this directory: depend on it.
@@ -2062,7 +2081,8 @@ cmLocalUnixMakefileGenerator2
   //  - Full path to an outside file: depend on it.
   //  - Other format (like -lm): do nothing.
 
-  // If it is a CMake target there will be a definition for it.
+  // If it is an executable or library target there will be a
+  // definition for it.
   std::string dirVar = name;
   dirVar += "_CMAKE_PATH";
   const char* dir = m_Makefile->GetDefinition(dirVar.c_str());
@@ -2071,68 +2091,94 @@ cmLocalUnixMakefileGenerator2
     // This is a CMake target somewhere in this project.
     bool jumpAndBuild = false;
 
-    // Get the path to  the library.
-    std::string libPath;
+    // Get the type of the library.  If it does not have a type then
+    // it is an executable.
+    std::string typeVar = name;
+    typeVar += "_LIBRARY_TYPE";
+    const char* libType = m_Makefile->GetSafeDefinition(typeVar.c_str());
+
+    // Get the output path for this target type.
+    std::string tgtOutputPath;
+    if(libType)
+      {
+      tgtOutputPath = m_LibraryOutputPath;
+      }
+    else
+      {
+      tgtOutputPath = m_ExecutableOutputPath;
+      }
+
+    // Get the path to the target.
+    std::string tgtPath;
     if(this->SamePath(m_Makefile->GetStartOutputDirectory(), dir))
       {
       // The target is in the current directory so this makefile will
       // know about it already.
-      libPath = m_LibraryOutputPath;
+      tgtPath = tgtOutputPath;
       }
     else
       {
       // The target is in another directory.  Get the path to it.
-      if(m_LibraryOutputPath.size())
+      if(tgtOutputPath.size())
         {
-        libPath = m_LibraryOutputPath;
+        tgtPath = tgtOutputPath;
         }
       else
         {
-        libPath = dir;
-        libPath += "/";
+        tgtPath = dir;
+        tgtPath += "/";
         }
 
       // We need to add a jump-and-build rule for this library.
       jumpAndBuild = true;
       }
 
-    // Add the name of the library's file.  This depends on the type
-    // of the library.
-    std::string typeVar = name;
-    typeVar += "_LIBRARY_TYPE";
-    std::string libType = m_Makefile->GetSafeDefinition(typeVar.c_str());
+    // Add the name of the targets's file.  This depends on the type
+    // of the target.
     std::string prefix;
     std::string suffix;
-    if(libType == "SHARED")
+    if(!libType)
+      {
+      suffix = cmSystemTools::GetExecutableExtension();
+      }
+    else if(strcmp(libType, "SHARED") == 0)
       {
       prefix = m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_PREFIX");
       suffix = m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_SUFFIX");
       }
-    else if(libType == "MODULE")
+    else if(strcmp(libType, "MODULE") == 0)
       {
       prefix = m_Makefile->GetSafeDefinition("CMAKE_SHARED_MODULE_PREFIX");
       suffix = m_Makefile->GetSafeDefinition("CMAKE_SHARED_MODULE_SUFFIX");
       }
-    else if(libType == "STATIC")
+    else if(strcmp(libType, "STATIC") == 0)
       {
       prefix = m_Makefile->GetSafeDefinition("CMAKE_STATIC_LIBRARY_PREFIX");
       suffix = m_Makefile->GetSafeDefinition("CMAKE_STATIC_LIBRARY_SUFFIX");
       }
-    libPath += prefix;
-    libPath += name;
-    libPath += suffix;
+    tgtPath += prefix;
+    tgtPath += name;
+    tgtPath += suffix;
 
     if(jumpAndBuild)
       {
-      // We need to add a jump-and-build rule for this library.
+      // We need to add a jump-and-build rule for this target.
       cmLocalUnixMakefileGenerator2::RemoteTarget rt;
       rt.m_BuildDirectory = dir;
-      rt.m_FilePath =libPath;
+      rt.m_FilePath = tgtPath;
       m_JumpAndBuild[name] = rt;
       }
 
-    // Add a dependency on the library.
-    depends.push_back(this->ConvertToRelativeOutputPath(libPath.c_str()));
+    // Add a dependency on the target.
+    depends.push_back(tgtPath.c_str());
+    }
+  else if(m_Makefile->GetTargets().find(name) !=
+          m_Makefile->GetTargets().end())
+    {
+    // This is a CMake target that is not an executable or library.
+    // It must be in this directory, so just depend on the name
+    // directly.
+    depends.push_back(name);
     }
   else
     {
@@ -2140,7 +2186,7 @@ cmLocalUnixMakefileGenerator2
     // can depend on it.
     if(cmSystemTools::FileExists(name) && cmSystemTools::FileIsFullPath(name))
       {
-      depends.push_back(this->ConvertToRelativeOutputPath(name));
+      depends.push_back(name);
       }
     }
 }
@@ -2148,46 +2194,48 @@ cmLocalUnixMakefileGenerator2
 //----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator2
-::AddCustomDepends(std::vector<std::string>& depends,
-                   const cmCustomCommand& cc)
+::AppendCustomDepends(std::vector<std::string>& depends,
+                      const std::vector<cmCustomCommand>& ccs)
 {
-  // TODO: Convert outputs/dependencies (arguments?) to relative paths.
+  for(std::vector<cmCustomCommand>::const_iterator i = ccs.begin();
+      i != ccs.end(); ++i)
+    {
+    this->AppendCustomDepend(depends, *i);
+    }
+}
+
+//----------------------------------------------------------------------------
+void
+cmLocalUnixMakefileGenerator2
+::AppendCustomDepend(std::vector<std::string>& depends,
+                     const cmCustomCommand& cc)
+{
   for(std::vector<std::string>::const_iterator d = cc.GetDepends().begin();
       d != cc.GetDepends().end(); ++d)
     {
-    // Get the dependency.
-    std::string dep = *d;
-
-    // If the dependency is a target CMake knows how to build, convert
-    // it to the path where it will be built.
-    std::string libPath = dep + "_CMAKE_PATH";
-    const char* cacheValue = m_Makefile->GetDefinition(libPath.c_str());
-    if(cacheValue && *cacheValue)
-      {
-      libPath = cacheValue;
-      if (m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH") &&
-          m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH")[0] != '\0')
-        {
-        libPath = m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
-        }
-      libPath += "/";
-      libPath += dep;
-      libPath += cmSystemTools::GetExecutableExtension();
-      dep = libPath;
-      }
-
-    // Cleanup the dependency and add it.
-    cmSystemTools::ReplaceString(dep, "/./", "/");
-    cmSystemTools::ReplaceString(dep, "/$(IntDir)/", "/");
-    depends.push_back(dep.c_str());
+    // Add this dependency.
+    this->AppendAnyDepend(depends, d->c_str());
     }
 }
 
 //----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator2
-::AddCustomCommands(std::vector<std::string>& commands,
-                    const cmCustomCommand& cc)
+::AppendCustomCommands(std::vector<std::string>& commands,
+                       const std::vector<cmCustomCommand>& ccs)
+{
+  for(std::vector<cmCustomCommand>::const_iterator i = ccs.begin();
+      i != ccs.end(); ++i)
+    {
+    this->AppendCustomCommand(commands, *i);
+    }
+}
+
+//----------------------------------------------------------------------------
+void
+cmLocalUnixMakefileGenerator2
+::AppendCustomCommand(std::vector<std::string>& commands,
+                      const cmCustomCommand& cc)
 {
   // TODO: Convert outputs/dependencies (arguments?) to relative paths.
 

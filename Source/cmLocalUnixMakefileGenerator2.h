@@ -143,13 +143,17 @@ protected:
   void AddSharedFlags(std::string& flags, const char* lang, bool shared);
   void AddConfigVariableFlags(std::string& flags, const char* var);
   void AppendFlags(std::string& flags, const char* newFlags);
-  void AppendLibDepends(const cmTarget& target,
-                        std::vector<std::string>& depends);
-  void AppendLibDepend(std::vector<std::string>& depends, const char* name);
-  void AddCustomDepends(std::vector<std::string>& depends,
-                        const cmCustomCommand& cc);
-  void AddCustomCommands(std::vector<std::string>& commands,
-                         const cmCustomCommand& cc);
+  void AppendTargetDepends(std::vector<std::string>& depends,
+                           const cmTarget& target);
+  void AppendAnyDepend(std::vector<std::string>& depends, const char* name);
+  void AppendCustomDepends(std::vector<std::string>& depends,
+                           const std::vector<cmCustomCommand>& ccs);
+  void AppendCustomDepend(std::vector<std::string>& depends,
+                          const cmCustomCommand& cc);
+  void AppendCustomCommands(std::vector<std::string>& commands,
+                            const std::vector<cmCustomCommand>& ccs);
+  void AppendCustomCommand(std::vector<std::string>& commands,
+                           const cmCustomCommand& cc);
   std::string GetRecursiveMakeCall(const char* tgt);
   void WriteJumpAndBuildRules(std::ostream& makefileStream);
 
