@@ -426,10 +426,18 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
           }
         }
       cmRegularExpression libname("lib(.*)\\.(.*)");
+      cmRegularExpression libname_noprefix("(.*)\\.(.*)");
       if(libname.find(file))
         {
         librariesLinked += "-l";
         file = libname.match(1);
+	librariesLinked += file;
+        librariesLinked += " ";
+        }
+      else if(libname_noprefix.find(file))
+        {
+        librariesLinked += "-l";
+        file = libname_noprefix.match(1);
 	librariesLinked += file;
         librariesLinked += " ";
         }
