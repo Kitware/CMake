@@ -73,6 +73,10 @@ private:
   cmXCodeObject* CreateObjectReference(cmXCodeObject*);
   cmXCodeObject* CreateExecutable(cmTarget& cmtarget,
                                   cmXCodeObject* buildPhases);
+  cmXCodeObject* CreateStaticLibrary(cmTarget& cmtarget,
+                                     cmXCodeObject* buildPhases);
+  cmXCodeObject* CreateSharedLibrary(cmTarget& cmtarget,
+                                     cmXCodeObject* buildPhases);
   // delete all objects in the m_XCodeObjects vector.
   void ClearXCodeObjects();
   void CreateXCodeObjects(cmLocalGenerator* root,

@@ -30,22 +30,67 @@ cmGlobalXCodeGenerator::cmGlobalXCodeGenerator()
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalXCodeGenerator::EnableLanguage(std::vector<std::string>const& ,
-                                                    cmMakefile *)
-{
-  //this->cmGlobalGenerator::EnableLanguage(lang, mf);
+void cmGlobalXCodeGenerator::EnableLanguage(std::vector<std::string>const& lang,
+                                            cmMakefile * mf)
+{ 
+  mf->AddDefinition("CMAKE_GENERATOR_CC", "gcc");
+  mf->AddDefinition("CMAKE_GENERATOR_CXX", "g++");
+  this->cmGlobalGenerator::EnableLanguage(lang, mf);
 }
 
 //----------------------------------------------------------------------------
 int cmGlobalXCodeGenerator::TryCompile(const char *, 
-                                               const char *, 
-                                               const char *,
-                                               const char *,
-                                               std::string *,
-                                               cmMakefile* )
+                                       const char * bindir, 
+                                       const char * projectName,
+                                       const char * targetName,
+                                       std::string * output,
+                                       cmMakefile* mf)
 {
-  // FIXME
-  return 1;
+  // now build the test
+  std::string makeCommand = 
+    m_CMakeInstance->GetCacheManager()->GetCacheValue("CMAKE_MAKE_PROGRAM");
+  if(makeCommand.size() == 0)
+    {
+    cmSystemTools::Error(
+      "Generator cannot find the appropriate make command.");
+    return 1;
+    }
+  makeCommand = cmSystemTools::ConvertToOutputPath(makeCommand.c_str());
+  std::string lowerCaseCommand = makeCommand;
+  cmSystemTools::LowerCase(lowerCaseCommand);
+
+  /**
+   * Run an executable command and put the stdout in output.
+   */
+  std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
+  cmSystemTools::ChangeDirectory(bindir);
+//  Usage: xcodebuild [-project <projectname>] [-activetarget] 
+//         [-alltargets] [-target <targetname>]... [-activebuildstyle] 
+//         [-buildstyle <buildstylename>] [-optionalbuildstyle <buildstylename>] 
+//         [<buildsetting>=<value>]... [<buildaction>]...
+//         xcodebuild [-list]
+
+  makeCommand += " -project ";
+  makeCommand += projectName;
+  makeCommand += " build ";
+  if (targetName)
+    {
+    makeCommand += "-target ";
+    makeCommand += targetName;
+    }
+  
+  int retVal;
+  int timeout = cmGlobalGenerator::s_TryCompileTimeout;
+  if (!cmSystemTools::RunSingleCommand(makeCommand.c_str(), output, &retVal, 
+                                       0, false, timeout))
+    {
+    cmSystemTools::Error("Generator: execution of xcodebuild failed.");
+    // return to the original directory
+    cmSystemTools::ChangeDirectory(cwd.c_str());
+    return 1;
+    }
+  cmSystemTools::ChangeDirectory(cwd.c_str());
+  return retVal;
 }
 
 //----------------------------------------------------------------------------
@@ -183,10 +228,13 @@ void cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
     switch(l->second.GetType())
       {
       case cmTarget::STATIC_LIBRARY:
+        targets.push_back(this->CreateStaticLibrary(l->second, buildPhases));
         break;
       case cmTarget::SHARED_LIBRARY:
+        targets.push_back(this->CreateSharedLibrary(l->second, buildPhases));
         break;
       case cmTarget::MODULE_LIBRARY:
+        targets.push_back(this->CreateSharedLibrary(l->second, buildPhases));
         break;
       case cmTarget::EXECUTABLE:  
         targets.push_back(this->CreateExecutable(l->second, buildPhases));
@@ -200,7 +248,16 @@ void cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
       }
     }
 }
-  
+
+// to force the location of a target
+//6FE4372B07AAF276004FB461 = {
+//buildSettings = {
+//COPY_PHASE_STRIP = NO;
+//SYMROOT = "/Users/kitware/Bill/CMake-build/test/build/bin";
+//};
+//isa = PBXBuildStyle;
+//name = Development;
+//};
 cmXCodeObject* cmGlobalXCodeGenerator::CreateExecutable(cmTarget& cmtarget,
                                                         cmXCodeObject* buildPhases)
 {
@@ -244,12 +301,115 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateExecutable(cmTarget& cmtarget,
   return target;
 }
 
+//----------------------------------------------------------------------------
+cmXCodeObject* cmGlobalXCodeGenerator::CreateStaticLibrary(cmTarget& cmtarget,
+                                                           cmXCodeObject* buildPhases)
+{
+  cmXCodeObject* target = this->CreateObject(cmXCodeObject::PBXNativeTarget);
+  target->AddAttribute("buildPhases", buildPhases);
+  cmXCodeObject* buildRules = this->CreateObject(cmXCodeObject::OBJECT_LIST);
+  target->AddAttribute("buildRules", buildRules);
+  cmXCodeObject* buildSettings =
+    this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
+  buildSettings->AddAttribute("INSTALL_PATH", 
+                              this->CreateString("/usr/local/bin"));
+  buildSettings->AddAttribute("LIBRARY_STYLE", 
+                              this->CreateString("STATIC"));
+  buildSettings->AddAttribute("OPTIMIZATION_CFLAGS", 
+                              this->CreateString(""));
+  buildSettings->AddAttribute("OTHER_CFLAGS", 
+                              this->CreateString(""));
+  buildSettings->AddAttribute("OTHER_LDFLAGS",
+                              this->CreateString(""));
+  buildSettings->AddAttribute("OTHER_REZFLAGS", 
+                              this->CreateString(""));
+  buildSettings->AddAttribute("PRODUCT_NAME", 
+                              this->CreateString(cmtarget.GetName()));
+  buildSettings->AddAttribute("SECTORDER_FLAGS",
+                              this->CreateString(""));
+  buildSettings->AddAttribute("WARNING_CFLAGS", 
+                              this->CreateString("-Wmost -Wno-four-char-constants -Wno-unknown-pragmas"));
+  target->AddAttribute("buildSettings", buildSettings);
+  cmXCodeObject* dependencies = this->CreateObject(cmXCodeObject::OBJECT_LIST);
+  target->AddAttribute("dependencies", dependencies);
+  target->AddAttribute("name", this->CreateString(cmtarget.GetName()));
+  target->AddAttribute("productName",this->CreateString(cmtarget.GetName()));
+  cmXCodeObject* fileRef = this->CreateObject(cmXCodeObject::PBXFileReference);
+  fileRef->AddAttribute("explicitFileType", 
+                        this->CreateString("\"compiled.mach-o.archive.ar\""));
+  fileRef->AddAttribute("includedInIndex", this->CreateString("0"));
+  fileRef->AddAttribute("path", this->CreateString(cmtarget.GetName()));
+  fileRef->AddAttribute("refType", this->CreateString("3"));
+  fileRef->AddAttribute("sourceTree", this->CreateString("BUILT_PRODUCTS_DIR"));
+  target->AddAttribute("productReference", this->CreateObjectReference(fileRef));
+  target->AddAttribute("productType", 
+                       this->CreateString("\"com.apple.product-type.library.static\""));
+  return target;
+}
+
+//----------------------------------------------------------------------------
+cmXCodeObject* cmGlobalXCodeGenerator::CreateSharedLibrary(cmTarget& cmtarget,
+                                                           cmXCodeObject* buildPhases)
+{
+  cmXCodeObject* target = this->CreateObject(cmXCodeObject::PBXNativeTarget);
+  target->AddAttribute("buildPhases", buildPhases);
+  cmXCodeObject* buildRules = this->CreateObject(cmXCodeObject::OBJECT_LIST);
+  target->AddAttribute("buildRules", buildRules);
+  cmXCodeObject* buildSettings =
+    this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
+  buildSettings->AddAttribute("DYLIB_COMPATIBILITY_VERSION", 
+                              this->CreateString("1"));
+  buildSettings->AddAttribute("DYLIB_CURRENT_VERSION", 
+                              this->CreateString("1"));
+  buildSettings->AddAttribute("INSTALL_PATH", 
+                              this->CreateString("/usr/local/lib"));
+  buildSettings->AddAttribute("LIBRARY_STYLE", 
+                              this->CreateString("DYNAMIC"));
+  buildSettings->AddAttribute("OPTIMIZATION_CFLAGS", 
+                              this->CreateString(""));
+  buildSettings->AddAttribute("OTHER_CFLAGS", 
+                              this->CreateString(""));
+  const char* libFlag = "-dynamiclib";
+  if(cmtarget.GetType() == cmTarget::MODULE_LIBRARY)
+    {
+    libFlag = "-bundle";
+    }
+  buildSettings->AddAttribute("OTHER_LDFLAGS",
+                              this->CreateString(libFlag));
+  
+  buildSettings->AddAttribute("OTHER_REZFLAGS", 
+                              this->CreateString(""));
+  buildSettings->AddAttribute("PRODUCT_NAME", 
+                              this->CreateString(cmtarget.GetName()));
+  buildSettings->AddAttribute("SECTORDER_FLAGS",
+                              this->CreateString(""));
+  buildSettings->AddAttribute("WARNING_CFLAGS", 
+                              this->CreateString("-Wmost -Wno-four-char-constants -Wno-unknown-pragmas"));
+  target->AddAttribute("buildSettings", buildSettings);
+  cmXCodeObject* dependencies = this->CreateObject(cmXCodeObject::OBJECT_LIST);
+  target->AddAttribute("dependencies", dependencies);
+  target->AddAttribute("name", this->CreateString(cmtarget.GetName()));
+  target->AddAttribute("productName",this->CreateString(cmtarget.GetName()));
+  cmXCodeObject* fileRef = this->CreateObject(cmXCodeObject::PBXFileReference);
+  fileRef->AddAttribute("explicitFileType", 
+                        this->CreateString("\"compiled.mach-o.dylib\""));
+  fileRef->AddAttribute("includedInIndex", this->CreateString("0"));
+  std::string path = cmtarget.GetName();
+  path += ".dylib";
+  fileRef->AddAttribute("path", this->CreateString(path.c_str()));
+  fileRef->AddAttribute("refType", this->CreateString("3"));
+  fileRef->AddAttribute("sourceTree", this->CreateString("BUILT_PRODUCTS_DIR"));
+  target->AddAttribute("productReference", this->CreateObjectReference(fileRef));
+  target->AddAttribute("productType", 
+                       this->CreateString("\"com.apple.product-type.library.dynamic\""));
+  return target;
+}
 
 //----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::CreateXCodeObjects(cmLocalGenerator* ,
                                                 std::vector<cmLocalGenerator*>&
                                                 generators
-                                                )
+  )
 {
   delete m_RootObject;
   this->ClearXCodeObjects(); 
@@ -327,7 +487,7 @@ void cmGlobalXCodeGenerator::OutputXCodeProject(cmLocalGenerator* root,
 void cmGlobalXCodeGenerator::WriteXCodePBXProj(std::ostream& fout,
                                                cmLocalGenerator* ,
                                                std::vector<cmLocalGenerator*>& 
-                                               )
+  )
 {
   fout << "// !$*UTF8*$!\n";
   fout << "{\n";
