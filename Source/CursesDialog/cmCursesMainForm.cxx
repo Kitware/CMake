@@ -793,6 +793,7 @@ const char* cmCursesMainForm::s_ConstHelpMessage =
 " C-e : go to the end of the field\n"
 " C-d : delete previous character\n"
 " C-k : kill the rest of the field\n"
+" Esc : Restore field (discard last changes)\n"
 "You can also delete an option by pressing 'd'\n\n"
 "Commands:\n"
 " q : quit ccmake without generating build files\n"
