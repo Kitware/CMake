@@ -40,6 +40,7 @@ ${CMake_BINARY_DIR}/Source/cmConfigure.h )
 
 # add the include path to find the .h 
 INCLUDE_DIRECTORIES(${CMake_BINARY_DIR}/Source)
+INCLUDE_DIRECTORIES(${CMake_SOURCE_DIR}/Source)
 
 # let cmake know it is supposed to use it
 ADD_DEFINITIONS(-DCMAKE_BUILD_WITH_CMAKE)
