@@ -240,6 +240,9 @@ public:
       s_ForceUnixPaths = v;
     }
   static std::string ConvertToOutputPath(const char* path);
+
+  //! Check if the first string ends with the second one.
+  static bool StringEndsWith(const char* str1, const char* str2);
   
 private:
   static bool s_ForceUnixPaths;

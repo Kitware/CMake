@@ -183,7 +183,7 @@ int do_cmake(int ac, char** av)
       list_all_cached = true;
       list_help = true;
       }
-    else if (strncmp(av[i], "-M", 2) == 0)
+    else if (strncmp(av[i], "--script", strlen("--script")) == 0)
       {
       script_mode = true;
       args.push_back(av[i]);
@@ -194,6 +194,21 @@ int do_cmake(int ac, char** av)
       }
     }
 
+  if ( args.size() > 0 )
+    {
+    std::string &arg = args[args.size()-1];
+    if ( cmSystemTools::StringEndsWith(arg.c_str(), ".cmake") &&
+      cmSystemTools::FileExists(arg.c_str()) && 
+      !cmSystemTools::FileIsDirectory(arg.c_str()) )
+      {
+      std::vector<std::string>::iterator it = args.end();
+      -- it;
+      std::string ar = "--script" + arg;
+      args.insert(it, ar);
+      script_mode = 1;
+      }
+    }
+    
   if(command)
     {
     int ret = cmake::CMakeCommand(args);
@@ -216,7 +231,7 @@ int do_cmake(int ac, char** av)
       {
       cmCacheManager::CacheEntryType t = it.GetType();
       if ( t != cmCacheManager::INTERNAL && t != cmCacheManager::STATIC &&
-           t != cmCacheManager::UNINITIALIZED )
+        t != cmCacheManager::UNINITIALIZED )
         {
         bool advanced = it.PropertyExists("ADVANCED");
         if ( list_all_cached || !advanced)

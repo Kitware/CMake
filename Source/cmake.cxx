@@ -215,9 +215,9 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
       std::cerr << "loading initial cache file " << path.c_str() << "\n";
       this->ReadListFile(path.c_str());
       }
-    else if(arg.find("-M",0) == 0)
+    else if(arg.find("--script",0) == 0)
       {
-      std::string path = arg.substr(2);
+      std::string path = arg.substr(strlen("--script"));
       if ( path.size() == 0 )
         {
         cmSystemTools::Error("No cmake scrpt provided.");
@@ -308,7 +308,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       {
       // skip for now
       }
-    else if(arg.find("-M",0) == 0)
+    else if(arg.find("--script",0) == 0)
       {
       // skip for now
       }
@@ -848,6 +848,7 @@ int cmake::DoPreConfigureChecks()
     cmSystemTools::Error(
       "The source directory does not appear to contain CMakeLists.txt.\n"
       "Specify --help for usage, or press the help button on the CMake GUI.");
+    abort();
     return -2;
     }
   
