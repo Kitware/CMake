@@ -9,7 +9,6 @@
 #include "FL/Fl_Color_Chooser.H"
 #include "FL/fl_ask.H"
 #include "FL/Fl_Button.H"
-#include <cstdio>
 #include "CMakeSetupGUIImplementation.h"
 
 

@@ -3,7 +3,6 @@
 #include "FL/fl_file_chooser.H"
 #include "FL/filename.H"
 #include "FL/fl_ask.H"
-#include "cstring"
 #include "../cmCacheManager.h"
 #include "../cmMakefile.h"
 #include <iostream>
