@@ -69,7 +69,7 @@ void cmXCodeObject::Print(std::ostream& out)
         out << j->first << " = " << j->second->m_String << ";\n";
         }
       cmXCodeObject::Indent(3, out);
-      out << "}\n";
+      out << "};\n";
       }
     else if(object->m_Type == OBJECT_REF)
       {
