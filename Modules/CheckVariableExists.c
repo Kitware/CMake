@@ -9,10 +9,8 @@ int main(){
 #else
 int main(int ac, char*av[]){
 #endif
-  int* p;
-  p = &CHECK_VARIABLE_EXISTS;
   if(ac > 1000){return *av[0];}
-  return 0;
+  return CHECK_VARIABLE_EXISTS;
 }
 
 #else  /* CHECK_VARIABLE_EXISTS */
