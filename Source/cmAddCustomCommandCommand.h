@@ -86,7 +86,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "ADD_CUSTOM_COMMAND(SOURCE source COMMAND command TARGET target "
+      "ADD_CUSTOM_COMMAND([SOURCE source] COMMAND command TARGET target "
       "[ARGS [args...]] [DEPENDS [depends...]] [OUTPUTS [outputs...]])\n"
       "Add a custom command.";
     }

@@ -21,10 +21,10 @@
 bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
   /* Let's complain at the end of this function about the lack of a particular
-     arg. For the moment, let's say that SOURCE, COMMAND, TARGET are always 
+     arg. For the moment, let's say that COMMAND, TARGET are always 
      required.
   */
-  if (argsIn.size() < 6)
+  if (argsIn.size() < 4)
     {
       this->SetError("called with wrong number of arguments.");
       return false;
@@ -106,15 +106,10 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
     }
 
   /* At this point we could complain about the lack of arguments.
-     For the moment, let's say that SOURCE, COMMAND, TARGET are always 
+     For the moment, let's say that COMMAND, TARGET are always 
      required.
   */
       
-  if(source.empty())
-    {
-    this->SetError("Wrong syntax. Empty SOURCE.");
-    return false;
-    }
   if(command.empty())
     {
     this->SetError("Wrong syntax. Empty COMMAND.");
@@ -125,6 +120,15 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
     this->SetError("Wrong syntax. Empty TARGET.");
     return false;
     }
+
+  // If source is empty, use target as source, so that this command
+  // can be used to just attach a commmand to a target
+
+  if(source.empty())
+    {
+    source = target;
+    }
+
   m_Makefile->AddCustomCommand(source.c_str(), 
                                command.c_str(), 
                                command_args, 
