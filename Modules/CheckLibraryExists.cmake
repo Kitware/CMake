@@ -23,7 +23,8 @@ MACRO(CHECK_LIBRARY_EXISTS LIBRARY FUNCTION LOCATION VARIABLE)
   ELSE(${VARIABLE})
     SET(${VARIABLE} "" CACHE INTERNAL "Have library ${LIBRARY}")
     WRITE_FILE(${PROJECT_BINARY_DIR}/CMakeError.log 
-      "Determining if the function ${FUNCTION} exists in the ${LIBRARY} failed with the following output:\n"
-      "${OUTPUT}\n")
+      "Determining if the function ${FUNCTION} exists in the ${LIBRARY} "
+      "failed with the following output:\n"
+      "${OUTPUT}\n" APPEND)
   ENDIF(${VARIABLE})
 ENDMACRO(CHECK_LIBRARY_EXISTS)

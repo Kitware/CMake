@@ -22,6 +22,7 @@ MACRO(CHECK_TYPE_SIZE TYPE VARIABLE)
           OUTPUT_VARIABLE OUTPUT)
   IF(NOT HAVE_${VARIABLE})
     WRITE_FILE(${PROJECT_BINARY_DIR}/CMakeError.log 
-      "Determining size of ${TYPE} failed with the following output:\n${OUTPUT}\n")
+      "Determining size of ${TYPE} failed with the following output:\n${OUTPUT}\n"
+      APPEND)
   ENDIF(NOT HAVE_${VARIABLE})
 ENDMACRO(CHECK_TYPE_SIZE)
