@@ -1310,11 +1310,19 @@ cmData* cmMakefile::LookupData(const char* name) const
 
 cmSourceFile* cmMakefile::GetSource(const char* sourceName)
 {
+  std::string s = sourceName;
+  std::string ext;
+  std::string::size_type pos = s.rfind('.');
+  if(pos != std::string::npos)
+    {
+    ext = s.substr(pos+1, s.size() - pos-1);
+    s = s.substr(0, pos);
+    }
   for(std::vector<cmSourceFile*>::iterator i = m_SourceFiles.begin();
       i != m_SourceFiles.end(); ++i)
     {
-    if((*i)->GetSourceName() == sourceName 
-       || (*i)->GetSourceName()+"."+(*i)->GetSourceExtension() == sourceName)
+    if((*i)->GetSourceName() == s 
+       && (ext.size() == 0 || (ext == (*i)->GetSourceExtension())))
       {
       return *i;
       }
