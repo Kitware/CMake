@@ -2692,8 +2692,21 @@ void cmLocalUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                          "",
                          cmd.c_str());
     }
-  this->OutputMakeRule(fout, "installation", "install", "", 
-    "$(CMAKE_COMMAND) -P cmake_install.cmake");
+  if(m_Makefile->GetDefinition("CMake_BINARY_DIR"))
+    {
+    // We are building CMake itself.  We cannot use the original
+    // executable to install over itself.
+    std::string rule = m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
+    rule += "/cmake";
+    rule = cmSystemTools::ConvertToOutputPath(rule.c_str());
+    rule += " -P cmake_install.cmake";
+    this->OutputMakeRule(fout, "installation", "install", "", rule.c_str());
+    }
+  else
+    {
+    this->OutputMakeRule(fout, "installation", "install", "", 
+      "$(CMAKE_COMMAND) -P cmake_install.cmake");
+    }
 
 }
 
