@@ -64,23 +64,24 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)
     "\n";
 
   std::vector<std::string>::iterator testsBegin = i;
-  std::vector<std::string> tests_filename;
+  std::vector<std::string> tests_func_name;
 
   // The rest of the arguments consist of a list of test source files.
-  // Sadly, they can be in directories. Let's modify each arg to get
-  // a unique function name for the corresponding test, and push the 
-  // real source filename to the tests_filename var (used at the end). 
+  // Sadly, they can be in directories. Let's find a unique function 
+  // name for the corresponding test, and push it to the tests_func_name
+  // list. 
   // For the moment:
   //   - replace spaces ' ', ':' and '/' with underscores '_'
 
   for(i = testsBegin; i != args.end(); ++i)
     {
-    tests_filename.push_back(*i);
-    cmSystemTools::ConvertToUnixSlashes(*i);
-    cmSystemTools::ReplaceString(*i, " ", "_");
-    cmSystemTools::ReplaceString(*i, "/", "_");
-    cmSystemTools::ReplaceString(*i, ":", "_");
-    fout << "int " << *i << "(int, char**);\n";
+    std::string func_name = *i;
+    cmSystemTools::ConvertToUnixSlashes(func_name);
+    cmSystemTools::ReplaceString(func_name, " ", "_");
+    cmSystemTools::ReplaceString(func_name, "/", "_");
+    cmSystemTools::ReplaceString(func_name, ":", "_");
+    tests_func_name.push_back(func_name);
+    fout << "int " << func_name << "(int, char**);\n";
     }
 
   fout << 
@@ -97,12 +98,13 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)
     "functionMapEntry cmakeGeneratedFunctionMapEntries[] = {\n";
 
   int numTests = 0;
-  for(i = testsBegin; i != args.end(); ++i)
+  std::vector<std::string>::iterator j;
+  for(i = testsBegin, j = tests_func_name.begin(); i != args.end(); ++i, ++j)
     {
     fout << 
       "  {\n"
       "    \"" << *i << "\",\n"
-      "    " << *i << "\n"
+      "    " << *j << "\n"
       "  },\n";
     numTests++;
     }
@@ -194,7 +196,7 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)
                 false);
   m_Makefile->AddSource(cfile, sourceList);
   
-  for (i = tests_filename.begin(); i != tests_filename.end(); ++i)
+  for(i = testsBegin; i != args.end(); ++i)
     {
     cmSourceFile cfile;
     cfile.SetIsAnAbstractClass(false);
