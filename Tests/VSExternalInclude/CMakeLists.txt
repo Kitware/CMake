@@ -17,11 +17,12 @@ MAKE_DIRECTORY("${LIB2_BINARY_DIR}")
 # generate lib1
 EXEC_PROGRAM("${CMAKE_COMMAND}" "${LIB1_BINARY_DIR}"  ARGS -G\"${CMAKE_GENERATOR}\" 
   \"${VSExternalInclude_SOURCE_DIR}/Lib1\" OUTPUT_VARIABLE OUT)
-
+MESSAGE("CMAKE Ran with the following output:\n\"${OUT}\"")
 
 # generate lib2
 EXEC_PROGRAM("${CMAKE_COMMAND}" "${LIB2_BINARY_DIR}"  ARGS -G\"${CMAKE_GENERATOR}\" 
   \"${VSExternalInclude_SOURCE_DIR}/Lib2\" OUTPUT_VARIABLE OUT)
+MESSAGE("CMAKE Ran with the following output:\n\"${OUT}\"")
 
 
 INCLUDE_EXTERNAL_MSPROJECT(lib1 ${VSExternalInclude_BINARY_DIR}/Lib1/LIB1.${PROJECT_EXT})
