@@ -63,7 +63,6 @@ int main(int argc, char** argv)
   bool debug = false;
   unsigned int i;
   int j;
-  cmake msg;
   std::vector<std::string> args;
   for(j =0; j < argc; ++j)
     {
@@ -90,6 +89,7 @@ int main(int argc, char** argv)
        arg.find("/?",0) != std::string::npos ||
        arg.find("-usage",0) != std::string::npos)
       {
+      cmake msg;
       msg.Usage(args[0].c_str());
       return -1;
       }
