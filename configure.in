@@ -81,21 +81,15 @@ case $system in
         CFLAGS="$CFLAGS_ORIG"
 	;;  
      IRIX-5* | IRIX-6* | IRIX64-6* | IRIX-64-6*)
-        CXXFLAGS_ORIG="$CXXFLAGS"
-        CXXFLAGS="-LANG:std $CXXFLAGS"
-        AC_MSG_CHECKING([whether ${CXX} accepts -LANG:std])
-        AC_LANG_SAVE
-        AC_LANG_CPLUSPLUS
-        AC_TRY_COMPILE([
-        void foo() {}
-        ],,[
-        AC_MSG_RESULT(yes)
-        CMAKE_ANSI_CXXFLAGS="-LANG:std"
-        ],[
-        AC_MSG_RESULT(no)
-        ])
-        AC_LANG_RESTORE
-        CXXFLAGS="$CXXFLAGS_ORIG"
+        echo $ac_n "checking whether ${CXX} accepts -LANG:std""... $ac_c" 1>&6
+        echo 'void f(){}' > conftest.cc
+        if test -z "`${CXX} -LANG:std -c conftest.cc 2>&1`"; then
+          echo "$ac_t""yes" 1>&6
+          CMAKE_ANSI_CXXFLAGS="-LANG:std"
+        else
+          echo "$ac_t""no" 1>&6
+        fi
+        rm -f conftest*
 	;;
      OSF1-*)
 
