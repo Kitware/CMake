@@ -613,7 +613,8 @@ bool cmCTestSubmit::SubmitUsingXMLRPC(const cmStdString& localprefix,
       }
 
     std::cout << "Buffer: [";
-    std::cout.write(encodedFileBuffer, realEncodedSize);
+    std::cout.write(reinterpret_cast<const char*>(encodedFileBuffer),
+      realEncodedSize);
     std::cout << "]" << std::endl;
 
     result = xmlrpc_client_call(&env, "http://betty.userland.com/RPC2",
