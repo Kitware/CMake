@@ -28,7 +28,7 @@
 
 
 cmLocalKdevelopGenerator::cmLocalKdevelopGenerator()
-  :cmLocalUnixMakefileGenerator()
+  :cmLocalUnixMakefileGenerator2()
 {
 }
 
@@ -39,6 +39,6 @@ cmLocalKdevelopGenerator::~cmLocalKdevelopGenerator()
 
 void cmLocalKdevelopGenerator::Generate(bool fromTheTop)
 {
-  cmLocalUnixMakefileGenerator::Generate(fromTheTop); 
+  cmLocalUnixMakefileGenerator2::Generate(fromTheTop); 
   return;
 }

@@ -18,7 +18,7 @@
 #ifndef cmLocalKdevelopGenerator_h
 #define cmLocalKdevelopGenerator_h
 
-#include "cmLocalUnixMakefileGenerator.h"
+#include "cmLocalUnixMakefileGenerator2.h"
 
 class cmDependInformation;
 class cmMakeDepend;
@@ -27,7 +27,7 @@ class cmSourceFile;
 
 /** \class cmLocalKdevelopGenerator
  */
-class cmLocalKdevelopGenerator : public cmLocalUnixMakefileGenerator
+class cmLocalKdevelopGenerator : public cmLocalUnixMakefileGenerator2
 {
 public:
   ///! Set cache only and recurse to false by default.
