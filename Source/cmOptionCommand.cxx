@@ -19,12 +19,33 @@
 // cmOptionCommand
 bool cmOptionCommand::InitialPass(std::vector<std::string> const& args)
 {
-  if(args.size() < 2 || args.size() > 3)
+  bool argError = false;
+  if(args.size() < 2)
     {
-    this->SetError("called with incorrect number of arguments");
+    argError = true;
+    }
+  // for VTK 4.0 we have to support the option command with more than 3 arguments
+  // if CMAKE_MINIMUM_REQUIRED_VERSION is not defined, if CMAKE_MINIMUM_REQUIRED_VERSION
+  // is defined, then we can have stricter checking.
+  if(m_Makefile->GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION"))
+    {
+    if(args.size() > 3)
+      {
+      argError = true;
+      }
+    }
+  if(argError)
+    {
+    std::string m = "called with incorrect number of arguments: ";
+    for(int i =0; i < args.size(); ++i)
+      {
+      m += args[i];
+      m += " ";
+      }
+    this->SetError(m.c_str());
     return false;
     }
-
+  
   // Now check and see if the value has been stored in the cache
   // already, if so use that value and don't look for the program
   const char* cacheValue

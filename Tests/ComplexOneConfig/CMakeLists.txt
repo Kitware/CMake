@@ -3,6 +3,9 @@
 #
 PROJECT (Complex)
 
+CMAKE_MINIMUM_REQUIRED(VERSION 1.3)
+
+  
 #
 # Use the ansi CXX compile flag for building cmake
 #

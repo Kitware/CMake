@@ -40,10 +40,14 @@ bool cmAbstractFilesCommand::InitialPass(std::vector<std::string> const& argsIn)
       }
     else
       {
-      m += *j;
-      m += "\n";
-      ret = false;
-      } 
+      // for VTK 4.0 we have to support missing abstract sources
+      if(m_Makefile->GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION"))
+        {
+        m += *j;
+        m += "\n";
+        ret = false;
+        } 
+      }
     }
   if(!ret)
     {

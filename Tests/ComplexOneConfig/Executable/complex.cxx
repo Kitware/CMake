@@ -647,6 +647,14 @@ int main()
 #endif
 #endif // defined(_WIN32) && !defined(__CYGWIN__)
 
+  if(strcmp(CMAKE_MINIMUM_REQUIRED_VERSION, "1.3") == 0)
+    {
+    cmPassed("CMAKE_MINIMUM_REQUIRED_VERSION is set to 1.3");
+    }
+  else
+    {
+    cmFailed("CMAKE_MINIMUM_REQUIRED_VERSION is not set to the expected 1.3");
+    }
   // ----------------------------------------------------------------------
   // Summary
 

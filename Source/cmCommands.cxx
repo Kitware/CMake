@@ -29,6 +29,7 @@
 #include "cmAuxSourceDirectoryCommand.cxx"
 #include "cmBuildCommand.cxx"
 #include "cmBuildNameCommand.cxx"
+#include "cmCMakeMinimumRequired.cxx"
 #include "cmConfigureFileCommand.cxx"
 #include "cmCreateTestSourceList.cxx"
 #include "cmElseCommand.cxx"
@@ -94,6 +95,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmAuxSourceDirectoryCommand);
   commands.push_back(new cmBuildCommand);
   commands.push_back(new cmBuildNameCommand);
+  commands.push_back(new cmCMakeMinimumRequired);
   commands.push_back(new cmConfigureFileCommand);
   commands.push_back(new cmCreateTestSourceList);
   commands.push_back(new cmElseCommand);
