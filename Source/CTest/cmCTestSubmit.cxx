@@ -618,9 +618,11 @@ bool cmCTestSubmit::SubmitUsingXMLRPC(const cmStdString& localprefix,
       realEncodedSize);
     std::cout << "]" << std::endl;
 
+    /*
     result = xmlrpc_client_call(&env, "http://betty.userland.com/RPC2",
       "examples.getStateName",
       "(i)", (xmlrpc_int32) cnt++);
+      */
     std::string remoteCommand = remoteprefix + ".put";
     result = xmlrpc_client_call(&env, url.c_str(),
       remoteCommand.c_str(),
@@ -649,7 +651,7 @@ bool cmCTestSubmit::SubmitUsingXMLRPC(const cmStdString& localprefix,
       return 0;
       }
 
-    printf("%s\n", state_name);
+    printf("%d: %s\n", cnt, state_name);
 
     /* Dispose of our result value. */
     xmlrpc_DECREF(result);
