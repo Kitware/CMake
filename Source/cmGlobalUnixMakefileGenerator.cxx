@@ -23,14 +23,19 @@
 void cmGlobalUnixMakefileGenerator::EnableLanguage(const char* lang, 
                                                    cmMakefile *mf)
 {
+  if(!mf->GetDefinition("CMAKE_MAKE_PROGRAM"))
+    {
+    std::string setMakeProgram = mf->GetDefinition("CMAKE_ROOT");
+    setMakeProgram += "/Modules/CMakeUnixFindMake.cmake";
+    mf->ReadListFile(0, setMakeProgram.c_str());
+    }
+  
   bool isLocal = m_CMakeInstance->GetLocal();
   // if no lang specified use CXX
   if(!lang )
     {
     lang = "CXX";
     }
-  //std::string root 
-  //  = cmSystemTools::ConvertToOutputPath(mf->GetDefinition("CMAKE_ROOT"));
   std::string root = mf->GetDefinition("CMAKE_ROOT");
   std::string rootBin = mf->GetHomeOutputDirectory();
   if(m_ConfiguredFilesPath.size())

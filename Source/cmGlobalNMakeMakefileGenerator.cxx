@@ -24,7 +24,10 @@ void cmGlobalNMakeMakefileGenerator::EnableLanguage(const char* l,
   // pick a default 
   mf->AddDefinition("CMAKE_GENERATOR_CC", "cl");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "cl");
-  
+  std::string setMakeProgram = mf->GetDefinition("CMAKE_ROOT");
+  setMakeProgram += "/Modules/CMakeNMakeFindMake.cmake";
+  mf->ReadListFile(0, setMakeProgram.c_str());
+
   this->cmGlobalUnixMakefileGenerator::EnableLanguage(l, mf);
 }
 

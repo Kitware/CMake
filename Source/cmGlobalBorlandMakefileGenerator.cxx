@@ -40,6 +40,11 @@ void cmGlobalBorlandMakefileGenerator::EnableLanguage(const char* l,
   mf->AddDefinition("BORLAND", "1");
   mf->AddDefinition("CMAKE_GENERATOR_CC", "bcc32");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "bcc32");
+  std::string setMakeProgram = mf->GetDefinition("CMAKE_ROOT");
+  setMakeProgram += "/Modules/CMakeBorlandFindMake.cmake";
+  mf->ReadListFile(0, setMakeProgram.c_str());
+  mf->AddDefinition("CMAKE_MAKE_PROGRAM", "make");
+  
   
   this->cmGlobalUnixMakefileGenerator::EnableLanguage(l, mf);
 }

@@ -65,9 +65,6 @@ SET (CMAKE_STANDARD_LIBRARIES "kernel32.lib user32.lib gdi32.lib winspool.lib co
      "Libraries linked by defalut with all applications.")
 MARK_AS_ADVANCED(CMAKE_STANDARD_LIBRARIES)
 
-FIND_PROGRAM(CMAKE_MAKE_PROGRAM NAMES nmake )
-
-
 # executable linker flags
 SET (CMAKE_LINK_DEF_FILE_FLAG "/DEF:")
 SET (CMAKE_EXE_LINKER_FLAGS_INIT "/STACK:10000000 /machine:I386 /INCREMENTAL:YES")

@@ -143,8 +143,6 @@ IF(CMAKE_USER_MAKE_RULES_OVERRIDE)
    INCLUDE(${CMAKE_USER_MAKE_RULES_OVERRIDE})
 ENDIF(CMAKE_USER_MAKE_RULES_OVERRIDE)
 
-FIND_PROGRAM(CMAKE_MAKE_PROGRAM NAMES nmake gmake make )
-
 SET(CMAKE_VERBOSE_MAKEFILE FALSE CACHE BOOL "If this value is on, makefiles will be generated without the .SILENT directive, and all commands will be echoed to the console during the make.  This is useful for debugging only.")
 # default build type is none
 SET (CMAKE_BUILD_TYPE "" CACHE STRING 
