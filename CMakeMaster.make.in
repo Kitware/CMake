@@ -16,6 +16,6 @@ CMAKE_LIB_EXT          = @CMAKE_LIB_EXT@
 
 #------------------------------------------------------------------------------
 # Include General Build Rules
-@MAKEINCLUDE@ @MAKEQUOTE@@CMAKE_CONFIG_DIR@/CMake/CMakeCommands.make@MAKEQUOTE@
+@MAKEINCLUDE@ @MAKEQUOTE@@CMAKE_CONFIG_DIR@/CMake/CMakeRules.make@MAKEQUOTE@
 
 
