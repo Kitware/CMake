@@ -621,7 +621,14 @@ case $system in
         echo 'void f(){}' > conftest.c
         if test -z "`${CC} -Aa -c conftest.c 2>&1`"; then
           echo "$ac_t""yes" 1>&6
-          CMAKE_ANSI_CFLAGS="-Aa"
+          CMAKE_ANSI_CFLAGS="$CMAKE_ANSI_CFLAGS -Aa"
+        else
+          echo "$ac_t""no" 1>&6
+        fi
+        echo $ac_n "checking whether ${CC} accepts -Ae""... $ac_c" 1>&6
+        if test -z "`${CC} -Ae -c conftest.c 2>&1`"; then
+          echo "$ac_t""yes" 1>&6
+          CMAKE_ANSI_CFLAGS="$CMAKE_ANSI_CFLAGS -Ae"
         else
           echo "$ac_t""no" 1>&6
         fi
