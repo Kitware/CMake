@@ -3622,8 +3622,8 @@ int cmCTest::RunConfigurationScript(const std::string& total_script_arg)
       }
     }
 
-  // make sure the binary directory exists
-  if (!cmSystemTools::FileExists(binDir))
+  // make sure the binary directory exists if it isn;t the srcdir
+  if (!cmSystemTools::FileExists(binDir) && strcmp(srcDir, binDir))
     {
     if (!cmSystemTools::MakeDirectory(binDir))
       {
