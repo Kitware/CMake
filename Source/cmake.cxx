@@ -1033,7 +1033,7 @@ int cmake::Configure()
       this->SetGlobalGenerator(new cmGlobalBorlandMakefileGenerator);
 #elif defined(_WIN32) && !defined(__CYGWIN__)  
       std::string installedCompiler;
-      std::string mp = "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\8.0\\Setup;Dbghelp_path";
+      std::string mp = "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\8.0\\Setup;Dbghelp_path]";
       cmSystemTools::ExpandRegistryValues(mp);
       if (!(mp == "/registry"))
         {

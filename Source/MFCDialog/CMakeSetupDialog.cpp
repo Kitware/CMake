@@ -322,7 +322,7 @@ BOOL CMakeSetupDialog::OnInitDialog()
     {
     // check for vs7 in registry then decide what default to use
     std::string mp;
-    mp = "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\8.0\\Setup;Dbghelp_path";
+    mp = "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\8.0\\Setup;Dbghelp_path]";
     cmSystemTools::ExpandRegistryValues(mp);
     if(mp != "/registry")
       {
