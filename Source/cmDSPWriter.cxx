@@ -151,6 +151,10 @@ void cmDSPWriter::CreateSingleDSP(const char *lname, cmTarget &target)
 void cmDSPWriter::AddDSPBuildRule(cmSourceGroup& sourceGroup)
 {
   std::string dspname = *(m_CreatedProjectNames.end()-1);
+  if(dspname == "ALL_BUILD")
+  {
+    return;
+  }
   dspname += ".dsp";
   std::string makefileIn = "\"";
   makefileIn += m_Makefile->GetStartDirectory();
