@@ -149,7 +149,15 @@ case $system in
 	CMAKE_SHLIB_LINK_FLAGS=""
 	CMAKE_MODULE_LINK_FLAGS=""
         CMAKE_SHLIB_RUNTIME_FLAG=""
-        CMAKE_SHLIB_RUNTIME_SEP=""
+        CMAKE_SHLIB_RUNTIME_SEP=""  
+        if test $ac_cv_prog_gxx = yes; then
+  	  CMAKE_SHLIB_BUILD_FLAGS='-shared -Wl,-G'
+  	  CMAKE_MODULE_BUILD_FLAGS='-shared -Wl,-G'
+	  CMAKE_SHLIB_LINK_FLAGS='-Wl,-brtl'
+	  CMAKE_MODULE_LINK_FLAGS='-Wl,-brtl'
+          CMAKE_MODULE_SUFFIX=".so"
+          CMAKE_SHLIB_SUFFIX=".so"
+        fi
 	;;
     Darwin-*)
 	CMAKE_SHLIB_CFLAGS=""
