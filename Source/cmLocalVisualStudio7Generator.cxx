@@ -381,6 +381,34 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     cmSystemTools::ReplaceString(flags, "/ML", "");
     runtime = 4;
     }
+  int debugFormat = 0;
+ 
+   // check the flags for the debug information format flag options
+  if(flags.find("Z7") != flags.npos)
+     {
+     cmSystemTools::ReplaceString(flags, "-Z7", "");
+     cmSystemTools::ReplaceString(flags, "/Z7", "");
+     debugFormat = 1;
+     }
+   else if (flags.find("Zd") != flags.npos)
+     {
+     cmSystemTools::ReplaceString(flags, "-Zd", "");
+     cmSystemTools::ReplaceString(flags, "/Zd", "");
+     debugFormat = 2;
+     }
+   else if (flags.find("Zi") != flags.npos)
+     {
+     cmSystemTools::ReplaceString(flags, "-Zi", "");
+     cmSystemTools::ReplaceString(flags, "/Zi", "");
+     debugFormat = 3;
+     }
+   else if (flags.find("ZI") != flags.npos)
+     {
+     cmSystemTools::ReplaceString(flags, "-ZI", "");
+     cmSystemTools::ReplaceString(flags, "/ZI", "");
+     debugFormat = 4;
+     }
+   
   fout << this->EscapeForXML(flags.c_str()).c_str();
 
   fout << " -DCMAKE_INTDIR=\\&quot;" << configName << "\\&quot;" 
@@ -428,7 +456,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     {
     fout << "\t\t\t\tWarningLevel=\"" << m_Makefile->GetDefinition("CMAKE_CXX_WARNING_LEVEL") << "\"\n";
     }
-  fout << "\t\t\t\tDebugInformationFormat=\"3\"";
+  fout << "\t\t\t\tDebugInformationFormat=\"" << debugFormat << "\"";
   fout << "/>\n";  // end of <Tool Name=VCCLCompilerTool
 
   fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCCustomBuildTool\"/>\n";
