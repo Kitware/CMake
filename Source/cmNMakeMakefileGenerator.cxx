@@ -459,10 +459,16 @@ void cmNMakeMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
     command += "<<\n";
     }
 
+  std::string customCommands = this->CreateTargetRules(t, name);
+  const char* cc = 0;
+  if(customCommands.size() > 0)
+    {
+    cc = customCommands.c_str();
+    }
   this->OutputMakeRule(fout, "rules for a shared library",
                        target.c_str(),
                        depend.c_str(),
-                       command.c_str());
+                       command.c_str(), cc);
 }
 
 void cmNMakeMakefileGenerator::OutputModuleLibraryRule(std::ostream& fout, 
@@ -474,7 +480,7 @@ void cmNMakeMakefileGenerator::OutputModuleLibraryRule(std::ostream& fout,
 
 void cmNMakeMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout, 
                                                        const char* name,
-                                                       const cmTarget &)
+                                                       const cmTarget &t)
 {
   std::string target = m_LibraryOutputPath + std::string(name) + m_StaticLibraryExtension;
   std::string depend = "$(";
@@ -498,11 +504,17 @@ void cmNMakeMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout,
   std::string comment = "rule to build static library: ";
   comment += name;
 
+  std::string customCommands = this->CreateTargetRules(t, name);
+  const char* cc = 0;
+  if(customCommands.size() > 0)
+    {
+    cc = customCommands.c_str();
+    }
   this->OutputMakeRule(fout,
                        comment.c_str(),
                        target.c_str(),
                        depend.c_str(),
-                       command.c_str());
+                       command.c_str(), cc);
 }
 
 void cmNMakeMakefileGenerator::OutputExecutableRule(std::ostream& fout,
@@ -541,11 +553,17 @@ void cmNMakeMakefileGenerator::OutputExecutableRule(std::ostream& fout,
   std::string comment = "rule to build executable: ";
   comment += name;
 
+  std::string customCommands = this->CreateTargetRules(t, name);
+  const char* cc = 0;
+  if(customCommands.size() > 0)
+    {
+    cc = customCommands.c_str();
+    }
   this->OutputMakeRule(fout, 
                        comment.c_str(),
                        target.c_str(),
                        depend.c_str(),
-                       command.c_str());
+                       command.c_str(), cc);
 }
 
   

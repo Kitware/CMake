@@ -69,6 +69,15 @@ void cmBorlandMakefileGenerator::ComputeSystemInfo()
       "CMAKE_ROOT has not been defined, bad GUI or driver program");
     return;
     }
+  std::string outdir = m_Makefile->GetCurrentOutputDirectory();
+  if(outdir.find('-') != std::string::npos)
+    {
+    std::string message = "The Borland command line tools do not support path names that have - in them.  Please re-name your output directory and use _ instead of -.";
+    message += "\nYour path currently is: ";
+    message += outdir;
+    cmSystemTools::Error(message.c_str());
+    }
+  
   std::string fpath = 
     m_Makefile->GetDefinition("CMAKE_ROOT");
   fpath += "/Templates/CMakeBorlandWindowsSystemConfig.cmake";
@@ -357,11 +366,18 @@ void cmBorlandMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
     }
   command += "\n|\n";
     
+  std::string customCommands = this->CreateTargetRules(t, name);
+  const char* cc = 0;
+  if(customCommands.size() > 0)
+    {
+    cc = customCommands.c_str();
+    }
   this->OutputMakeRule(fout, "rules for a shared library",
                        target.c_str(),
                        depend.c_str(),
                        command.c_str(),
-                       command2.c_str());
+                       command2.c_str(),
+                       cc);
 }
 
 void cmBorlandMakefileGenerator::OutputModuleLibraryRule(std::ostream& fout, 
@@ -373,7 +389,7 @@ void cmBorlandMakefileGenerator::OutputModuleLibraryRule(std::ostream& fout,
 
 void cmBorlandMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout, 
                                                        const char* name,
-                                                       const cmTarget &)
+                                                       const cmTarget &t)
 {
   std::string target = m_LibraryOutputPath + std::string(name) + ".lib";
   cmSystemTools::ConvertToWindowsSlashes(target);
@@ -391,12 +407,18 @@ void cmBorlandMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout,
   command += "\n|\n";
   std::string comment = "rule to build static library: ";
   comment += name;
+  std::string customCommands = this->CreateTargetRules(t, name);
+  const char* cc = 0;
+  if(customCommands.size() > 0)
+    {
+    cc = customCommands.c_str();
+    }
   this->OutputMakeRule(fout,
                        comment.c_str(),
                        target.c_str(),
                        depend.c_str(),
                        deleteCommand.c_str(),
-                       command.c_str());
+                       command.c_str(), cc);
 }
 
 void cmBorlandMakefileGenerator::OutputExecutableRule(std::ostream& fout,
@@ -428,11 +450,17 @@ void cmBorlandMakefileGenerator::OutputExecutableRule(std::ostream& fout,
   
   std::string comment = "rule to build executable: ";
   comment += name;
+  std::string customCommands = this->CreateTargetRules(t, name);
+  const char* cc = 0;
+  if(customCommands.size() > 0)
+    {
+    cc = customCommands.c_str();
+    }
   this->OutputMakeRule(fout, 
                        comment.c_str(),
                        target.c_str(),
                        depend.c_str(),
-                       command.c_str());
+                       command.c_str(), cc);
 }
 
   
