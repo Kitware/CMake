@@ -105,7 +105,7 @@ void cmLocalCodeWarriorGenerator::WriteFileList(std::ostream& fout,
     // Add the file to the list of sources.
     std::string source = (*i)->GetFullPath();
     fout << "<FILE>\n";
-    fout << "<PATHTYPE>PathAbsolute</PATHTYPE>\n";
+    fout << "<PATHTYPE>Absolute</PATHTYPE>\n";
     fout << "<PATHROOT>Absolute</PATHROOT>\n";
     //fout << "<ACCESSPATH>common</ACCESSPATH>\n";
     fout << "<PATH>" << source << "</PATH>\n";

@@ -19,7 +19,6 @@
 #include "cmMakefile.h"
 #include "cmake.h"
 #include "cmTarget.h"
-#include "windows.h"
 
 void cmGlobalCodeWarriorGenerator::EnableLanguage(const char*, 
                                                   cmMakefile *mf)
