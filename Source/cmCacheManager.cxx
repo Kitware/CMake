@@ -239,7 +239,7 @@ void cmCacheManager::DefineCache(cmMakefile *mf)
     }
   
   // add definition to the makefile
-  for( std::map<std::string, CacheEntry>::const_iterator i = m_Cache.begin();
+  for( std::map<cmStdString, CacheEntry>::const_iterator i = m_Cache.begin();
        i != m_Cache.end(); ++i)
     {
     const CacheEntry& ce = (*i).second;
@@ -293,7 +293,7 @@ bool cmCacheManager::SaveCache(const char* path)
   fout << "########################\n";
   fout << "\n";
 
-  for( std::map<std::string, CacheEntry>::const_iterator i = m_Cache.begin();
+  for( std::map<cmStdString, CacheEntry>::const_iterator i = m_Cache.begin();
        i != m_Cache.end(); ++i)
     {
     const CacheEntry& ce = (*i).second; 
@@ -326,7 +326,7 @@ bool cmCacheManager::SaveCache(const char* path)
   fout << "########################\n";
   fout << "\n";
 
-  for( std::map<std::string, CacheEntry>::const_iterator i = m_Cache.begin();
+  for( std::map<cmStdString, CacheEntry>::const_iterator i = m_Cache.begin();
        i != m_Cache.end(); ++i)
     {
     const CacheEntry& ce = (*i).second;
@@ -423,7 +423,7 @@ void cmCacheManager::PrintCache(std::ostream& out) const
 {
   out << "=================================================" << std::endl;
   out << "CMakeCache Contents:" << std::endl;
-  for(std::map<std::string, CacheEntry>::const_iterator i = m_Cache.begin();
+  for(std::map<cmStdString, CacheEntry>::const_iterator i = m_Cache.begin();
       i != m_Cache.end(); ++i)
     {
     if((*i).second.m_Type != INTERNAL)

@@ -177,7 +177,7 @@ protected:
   cmRegularExpression m_IncludeFileRegularExpression;
   cmRegularExpression m_ComplainFileRegularExpression;
   std::vector<std::string> m_IncludeDirectories;
-  typedef std::map<std::string, cmDependInformation*> DependInformationMap;
+  typedef std::map<cmStdString, cmDependInformation*> DependInformationMap;
   DependInformationMap m_DependInformationMap;
 };
 

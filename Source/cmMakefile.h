@@ -397,7 +397,7 @@ public:
   /**
    * Get the subdirectory dependencies for the given subdirectory.
    */
-  const std::set<std::string>& GetSubdirDepends(const char* subdir)
+  const std::set<cmStdString>& GetSubdirDepends(const char* subdir)
     { 
     return m_SubdirDepends[subdir];
     }
@@ -425,7 +425,7 @@ public:
   /**
    * Return a list of source files in this makefile.
    */
-  typedef std::map<std::string,std::vector<cmSourceFile> > SourceMap;
+  typedef std::map<cmStdString,std::vector<cmSourceFile> > SourceMap;
   const SourceMap &GetSources() const {return  m_Sources;}
   SourceMap &GetSources() {return  m_Sources;}
   cmSourceFile *GetSource(const char *srclist, const char *sourceName);
@@ -552,10 +552,11 @@ protected:
   SourceMap m_Sources; 
 
   std::vector<std::string> m_SubDirectories; // list of sub directories
-  struct StringSet : public std::set<std::string>
+  struct StringSet : public std::set<cmStdString>
   {
   };
-  std::map<std::string, StringSet >  m_SubdirDepends;
+  
+  std::map<cmStdString, StringSet >  m_SubdirDepends;
   
   // The include and link-library paths.  These may have order
   // dependency, so they must be vectors (not set).
@@ -573,8 +574,8 @@ protected:
   std::vector<std::string> m_HeaderFileExtensions;
   std::string m_DefineFlags;
   std::vector<cmSourceGroup> m_SourceGroups;
-  typedef std::map<std::string, cmCommand*> RegisteredCommandsMap;
-  typedef std::map<std::string, std::string> DefinitionMap;
+  typedef std::map<cmStdString, cmCommand*> RegisteredCommandsMap;
+  typedef std::map<cmStdString, cmStdString> DefinitionMap;
   DefinitionMap m_Definitions;
   RegisteredCommandsMap m_Commands;
   std::vector<cmCommand*> m_UsedCommands;
@@ -596,7 +597,7 @@ private:
   void AddDefaultDefinitions();
   std::set<cmFunctionBlocker *> m_FunctionBlockers;
   
-  typedef std::map<std::string, cmData*> DataMap;
+  typedef std::map<cmStdString, cmData*> DataMap;
   DataMap m_DataMap;
   bool m_Inheriting;
 };

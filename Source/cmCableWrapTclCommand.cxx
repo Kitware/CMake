@@ -119,7 +119,7 @@ void cmCableWrapTclCommand::GenerateCableFiles() const
   // use the tags to make easy-to-read, unique file names for each
   // class's wrapper.  Count the number of times each tag is used.
   // Warn if a tag is used more than once.
-  std::map<std::string, unsigned int> tagCounts;
+  std::map<cmStdString, unsigned int> tagCounts;
   for(cmCableClassSet::CableClassMap::const_iterator
         c = m_CableClassSet->Begin(); c != m_CableClassSet->End(); ++c)
     {
@@ -146,7 +146,7 @@ void cmCableWrapTclCommand::GenerateCableFiles() const
   // Write out the cable configuration files with one class per group.
   // Try to name the groups based on their class's tag, but use an
   // index to disambiguate tag repeats (mostly used for empty tags).
-  std::map<std::string, unsigned int> tagIndexes;
+  std::map<cmStdString, unsigned int> tagIndexes;
   for(cmCableClassSet::CableClassMap::const_iterator
         c = m_CableClassSet->Begin(); c != m_CableClassSet->End(); ++c)
     {

@@ -61,7 +61,7 @@ public:
     CacheEntryType m_Type;
   };
 public:
-  typedef  std::map<std::string, CacheEntry> CacheEntryMap;
+  typedef  std::map<cmStdString, CacheEntry> CacheEntryMap;
   /**
    * Types for the cache entries.  These are useful as
    * hints for a cache editor program.  Path should bring

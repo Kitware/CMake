@@ -131,4 +131,16 @@ inline bool operator==(std::string const& a, const char* b)
 { return (a==std::string(b)); }
 # endif  // end CM_SGI_CC_720
 
+
+struct cmStdString : public std::string
+{
+  typedef std::string Parent;
+  cmStdString(const char* s) : Parent(s)
+    {
+    }
+  cmStdString(std::string const&s) : Parent(s)
+    {
+    }
+};
+  
 #endif

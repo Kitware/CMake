@@ -90,7 +90,7 @@ public:
    * The set is stored internally as a map from class name to cmCableClass
    * instance.
    */
-  typedef std::map<std::string, cmCableClass*> CableClassMap;
+  typedef std::map<cmStdString, cmCableClass*> CableClassMap;
   
   void AddClass(const char*, cmCableClass*);
   void AddSource(const char* name);

@@ -730,8 +730,8 @@ OutputSubDirectoryVars(std::ostream& fout,
     {
     std::string subdir = FixDirectoryName(SubDirectories[i].c_str());
     fout << target << "_" << subdir.c_str() << ":";
-    const std::set<std::string>& subdirDepends = m_Makefile->GetSubdirDepends(SubDirectories[i].c_str());
-    for(std::set<std::string>::const_iterator d = subdirDepends.begin();
+    const std::set<cmStdString>& subdirDepends = m_Makefile->GetSubdirDepends(SubDirectories[i].c_str());
+    for(std::set<cmStdString>::const_iterator d = subdirDepends.begin();
         d != subdirDepends.end(); ++d)
       {
       std::string fixed_d = FixDirectoryName(d->c_str());
@@ -792,8 +792,8 @@ void cmUnixMakefileGenerator::OutputSubDirectoryRules(std::ostream& fout)
 void cmUnixMakefileGenerator::OutputObjectDepends(std::ostream& fout)
 {
   // Iterate over every target.
-  std::map<std::string, cmTarget>& targets = m_Makefile->GetTargets();
-  for(std::map<std::string, cmTarget>::const_iterator target = targets.begin(); 
+  std::map<cmStdString, cmTarget>& targets = m_Makefile->GetTargets();
+  for(std::map<cmStdString, cmTarget>::const_iterator target = targets.begin(); 
       target != targets.end(); ++target)
     {
     // Iterate over every source for this target.
@@ -1196,7 +1196,7 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
   // see if there is already a target for a cmake executable in this
   // makefile
   bool buildingCMake = false;
-  std::map<std::string, cmTarget>& targets = m_Makefile->GetTargets();
+  std::map<cmStdString, cmTarget>& targets = m_Makefile->GetTargets();
   for(cmTargets::const_iterator l = targets.begin(); 
       l != targets.end(); l++)
     {
@@ -1229,8 +1229,8 @@ void cmUnixMakefileGenerator::OutputSourceObjectBuildRules(std::ostream& fout)
   std::set<std::string> rules;
   
   // Iterate over every target.
-  std::map<std::string, cmTarget>& targets = m_Makefile->GetTargets();
-  for(std::map<std::string, cmTarget>::const_iterator target = targets.begin(); 
+  std::map<cmStdString, cmTarget>& targets = m_Makefile->GetTargets();
+  for(std::map<cmStdString, cmTarget>::const_iterator target = targets.begin(); 
       target != targets.end(); ++target)
     {
     bool shared = (target->second.GetType() == cmTarget::SHARED_LIBRARY);

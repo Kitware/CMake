@@ -139,6 +139,6 @@ private:
   std::set<std::string> m_Utilities;
 };
 
-typedef std::map<std::string,cmTarget> cmTargets;
+typedef std::map<cmStdString,cmTarget> cmTargets;
 
 #endif

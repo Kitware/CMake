@@ -74,12 +74,12 @@ public:
   /**
    * Map from command to its output/depends sets.
    */
-  typedef std::map<std::string, CommandFiles> Commands;
+  typedef std::map<cmStdString, CommandFiles> Commands;
 
   /**
    * Map from source to command map.
    */
-  typedef std::map<std::string, Commands>  BuildRules;
+  typedef std::map<cmStdString, Commands>  BuildRules;
 
   bool Matches(const char* name);
   void SetGroupRegex(const char* regex)
