@@ -1249,6 +1249,14 @@ kwsys_stl::string SystemTools::FindLibrary(const char* name,
       {
       return SystemTools::CollapseFullPath(tryPath.c_str());
       }
+    tryPath = *p;
+    tryPath += "/";
+    tryPath += name;
+    tryPath += ".dll";
+    if(SystemTools::FileExists(tryPath.c_str()))
+      {
+      return SystemTools::CollapseFullPath(tryPath.c_str());
+      }
 #endif
     }
   
