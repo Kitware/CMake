@@ -37,6 +37,9 @@ void cmLocalVisualStudio7Generator::Generate()
   std::set<cmStdString> lang;
   lang.insert("C");
   lang.insert("CXX");
+  lang.insert("RC");
+  lang.insert("IDL");
+  lang.insert("DEF");
   this->CreateCustomTargetsAndCommands(lang);
   this->OutputVCProjFile();
 }
@@ -343,24 +346,27 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
                            target.GetName());
       return;
       }
-    std::string baseFlagVar = "CMAKE_";
-    baseFlagVar += linkLanguage;
-    baseFlagVar += "_FLAGS";
-    flags = m_Makefile->GetRequiredDefinition(baseFlagVar.c_str());
-    
-    std::string flagVar = baseFlagVar + "_RELEASE";
-    flagsRelease += m_Makefile->GetRequiredDefinition(flagVar.c_str());
-
-    flagVar = baseFlagVar + "_MINSIZEREL";
-    flagsMinSize += m_Makefile->GetRequiredDefinition(flagVar.c_str());
-
-    flagVar = baseFlagVar + "_DEBUG";
-    flagsDebug += m_Makefile->GetRequiredDefinition(flagVar.c_str());
-
-    flagVar = baseFlagVar + "_RELWITHDEBINFO";
-    flagsDebugRel += m_Makefile->GetRequiredDefinition(flagVar.c_str());
+    if(!(strcmp(linkLanguage, "RC") == 0 || strcmp(linkLanguage, "DEF") == 0))
+      {    
+      std::string baseFlagVar = "CMAKE_";
+      baseFlagVar += linkLanguage;
+      baseFlagVar += "_FLAGS";
+      flags = m_Makefile->GetRequiredDefinition(baseFlagVar.c_str());
+      
+      std::string flagVar = baseFlagVar + "_RELEASE";
+      flagsRelease += m_Makefile->GetRequiredDefinition(flagVar.c_str());
+      
+      flagVar = baseFlagVar + "_MINSIZEREL";
+      flagsMinSize += m_Makefile->GetRequiredDefinition(flagVar.c_str());
+      
+      flagVar = baseFlagVar + "_DEBUG";
+      flagsDebug += m_Makefile->GetRequiredDefinition(flagVar.c_str());
+      
+      flagVar = baseFlagVar + "_RELWITHDEBINFO";
+      flagsDebugRel += m_Makefile->GetRequiredDefinition(flagVar.c_str());
+      }
     }
-
+  
   std::string programDatabase;
   const char* pre = "WIN32,_DEBUG,_WINDOWS";
   std::string debugPostfix = "";
@@ -1037,9 +1043,19 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
         else if(compileFlags.size() || additionalDeps.length())
           {
           const char* aCompilerTool = "VCCLCompilerTool";
-          if((*sf)->GetSourceExtension() == "idl")
+          std::string ext = (*sf)->GetSourceExtension();
+          ext = cmSystemTools::LowerCase(ext);
+          if(ext == "idl")
             {
             aCompilerTool = "VCMIDLTool";
+            }
+          if(ext == "rc")
+            {
+            aCompilerTool = "VCResourceCompilerTool";
+            }
+          if(ext == "def")
+            {
+            aCompilerTool = "VCCustomBuildTool";
             }
           for(std::vector<std::string>::iterator i = configs->begin(); 
               i != configs->end(); ++i)
