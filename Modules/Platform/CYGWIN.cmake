@@ -7,5 +7,3 @@ SET(CMAKE_SHARED_LIBRARY_C_FLAGS "")
 SET(CMAKE_SHARED_LIBRARY_CXX_FLAGS "")
 INCLUDE(${CMAKE_ROOT}/Modules/Platform/gcc.cmake)
 FIND_PROGRAM(CMAKE_MAKE_PROGRAM NAMES gmake make )
-SET(CMAKE_BUILD_TOOL ${CMAKE_MAKE_PROGRAM} CACHE INTERNAL 
-     "What is the target build tool cmake is generating for.")

@@ -55,9 +55,6 @@ SET (CMAKE_STANDARD_LIBRARIES "kernel32.lib user32.lib gdi32.lib winspool.lib co
 MARK_AS_ADVANCED(CMAKE_STANDARD_LIBRARIES)
 
 FIND_PROGRAM(CMAKE_MAKE_PROGRAM NAMES nmake )
-SET(CMAKE_BUILD_TOOL ${CMAKE_MAKE_PROGRAM} CACHE INTERNAL 
-     "What is the target build tool cmake is generating for.")
-
 
 
 # executable linker flags

@@ -72,7 +72,5 @@ SET (CMAKE_STANDARD_LIBRARIES "import32.lib" CACHE STRING
      "Libraries linked by defalut with all applications.")
 
 FIND_PROGRAM(CMAKE_MAKE_PROGRAM NAMES make )
-SET(CMAKE_BUILD_TOOL ${CMAKE_MAKE_PROGRAM} CACHE INTERNAL 
-     "What is the target build tool cmake is generating for.")
 MARK_AS_ADVANCED(CMAKE_STANDARD_LIBRARIES CMAKE_MAKE_PROGRAM)
 
