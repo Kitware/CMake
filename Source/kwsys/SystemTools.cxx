@@ -68,16 +68,15 @@ inline int Chdir(const char* dir)
   return _chdir(dir);
   #endif
 }
-inline char *Realpath(const char *path, char *resolved_path)
+inline void Realpath(const char *path, kwsys_stl::string & resolved_path)
 {
   char *ptemp;
   char fullpath[MAX_PATH];
   if( GetFullPathName(path, sizeof(fullpath), fullpath, &ptemp) )
     {
-    return strcpy(resolved_path, fullpath);
+    resolved_path = fullpath;
+    KWSYS_NAMESPACE::SystemTools::ConvertToUnixSlashes(resolved_path);
     }
-
-  return 0;
 }
 #else
 #include <sys/types.h>
@@ -99,9 +98,20 @@ inline int Chdir(const char* dir)
 {
   return chdir(dir);
 }
-inline char *Realpath(const char *path, char *resolved_path)
+inline void Realpath(const char *path, kwsys_stl::string & resolved_path)
 {
-  return realpath(path, resolved_path);
+# ifdef MAXPATHLEN
+  char resolved_name[MAXPATHLEN];
+# else
+#  ifdef PATH_MAX
+  char resolved_name[PATH_MAX];
+#  else
+  char resolved_name[5024];
+#  endif  //PATH_MAX
+# endif //MAXPATHLEN
+
+  realpath(path, resolved_name);
+  resolved_path = resolved_name;
 }
 #endif
 
@@ -1550,23 +1560,12 @@ kwsys_stl::string SystemTools::CollapseFullPath(const char* in_relative,
      {
      dir = "/";
      }
-  
-# ifdef MAXPATHLEN
-  char resolved_name[MAXPATHLEN];
-# else
-#  ifdef PATH_MAX
-  char resolved_name[PATH_MAX];
-#  else
-  char resolved_name[5024];
-#  endif  //PATH_MAX
-# endif //MAXPATHLEN
-  
+
   // Resolve relative path.
   kwsys_stl::string newDir;
   if(!(dir == ""))
     {
-    Realpath(dir.c_str(), resolved_name);
-    newDir = resolved_name;
+    Realpath(dir.c_str(), newDir);    
     }
   else
     {
