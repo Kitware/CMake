@@ -762,8 +762,8 @@ void cmUnixMakefileGenerator::OutputDependLibs(std::ostream& fout)
     const char* cacheValue = m_Makefile->GetDefinition(lib->c_str());
     // if cache and not the current directory add a rule, to
     // jump into the directory and build for the first time
-    if(cacheValue 
-       && (strcmp(m_Makefile->GetCurrentOutputDirectory(), cacheValue) != 0))
+    if(cacheValue &&
+       (!this->SamePath(m_Makefile->GetCurrentOutputDirectory(), cacheValue)))
       {
       std::string library = m_LibraryPrefix;
       library += *lib;
@@ -811,6 +811,12 @@ void cmUnixMakefileGenerator::OutputBuildLibraryInDir(std::ostream& fout,
        << ":\n\tcd " << cmSystemTools::EscapeSpaces(path)
            << "; $(MAKE) " << fullpath << "\n\n"; 
 }
+
+bool cmUnixMakefileGenerator::SamePath(const char* path1, const char* path2)
+{
+  return strcmp(path1, path2) == 0;
+}
+
 void cmUnixMakefileGenerator::OutputLibDepend(std::ostream& fout,
                                               const char* name)
 {
@@ -820,7 +826,7 @@ void cmUnixMakefileGenerator::OutputLibDepend(std::ostream& fout,
     // if there is a cache value, then this is a library that cmake
     // knows how to build, so we can depend on it
     std::string libpath;
-    if (strcmp(m_Makefile->GetCurrentOutputDirectory(), cacheValue) != 0)
+    if (!this->SamePath(m_Makefile->GetCurrentOutputDirectory(), cacheValue))
       {
       // if the library is not in the current directory, then get the full
       // path to it

@@ -549,7 +549,18 @@ void cmNMakeMakefileGenerator::OutputIncludeMakefile(std::ostream& fout,
   fout << "!include " << file << "\n";
 }
 
-
+bool cmNMakeMakefileGenerator::SamePath(const char* path1, const char* path2)
+{
+  // first check to see if they are the same anyway
+  if (strcmp(path1, path2) == 0)
+    {
+    return true;
+    }
+  // next short path and lower case both of them for the compare
+  return 
+    cmSystemTools::LowerCase(ShortPath(path1)) ==
+    cmSystemTools::LowerCase(ShortPath(path2));
+}
 
 void cmNMakeMakefileGenerator::OutputBuildLibraryInDir(std::ostream& fout,
 						       const char* path,

@@ -103,7 +103,9 @@ protected:
   virtual void OutputBuildLibraryInDir(std::ostream& fout,
 				       const char* path,
 				       const char* library,
-				       const char* fullpath);
+				       const char* fullpath); 
+  ///! return true if the two paths are the same (checks short paths)
+  virtual bool SamePath(const char* path1, const char* path2);
 private:
   bool m_QuoteNextCommand;      // if this is true, OutputMakeRule
                                 // will not quote the next commands

@@ -155,6 +155,8 @@ protected:
 				       const char* path,
 				       const char* library,
 				       const char* fullpath);
+  ///! return true if the two paths are the same
+  virtual bool SamePath(const char* path1, const char* path2);
   virtual std::string GetOutputExtension(const char* sourceExtension);
   virtual void OutputIncludeMakefile(std::ostream&, const char* file);
   void SetObjectFileExtension(const char* e) { m_ObjectFileExtension = e;}
