@@ -35,7 +35,6 @@ CXX=""
 CFLAGS=""
 CXXFLAGS=""
 PREFIX="/usr/local"
-INSTALL_SUBDIRS="bin share doc"
 DOC_DIR="/doc/cmake"
 
 #-----------------------------------------------------------------------------
@@ -334,7 +333,7 @@ manifest()
         rm -rf Install${PREFIX}${DOC_DIR}/MANIFEST &&
         touch Install${PREFIX}${DOC_DIR}/MANIFEST &&
         cd Install${PREFIX} &&
-        FILES=`find ${INSTALL_SUBDIRS} -type f |sed 's/^\.\///'` &&
+        FILES=`find . -type f |sed 's/^\.\///'` &&
         cd ${RELEASE_ROOT} &&
         (cat >> Install${PREFIX}${DOC_DIR}/MANIFEST <<EOF
 ${FILES}
@@ -368,7 +367,7 @@ binary_tarball()
         rm -rf Install/cmake-${VERSION}-${PLATFORM}-files.tar &&
         (
             cd Install${PREFIX} &&
-            tar cvf ${RELEASE_ROOT}/Install/cmake-${VERSION}-${PLATFORM}-files.tar ${INSTALL_SUBDIRS}
+            tar cvf ${RELEASE_ROOT}/Install/cmake-${VERSION}-${PLATFORM}-files.tar *
         ) &&
         rm -rf Tarballs/cmake-${VERSION}-${PLATFORM}.tar* &&
         (
