@@ -539,7 +539,7 @@ void cmRemoveFile(const char *name)
 void cmDisplayStatus(void *arg, const char* message)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
-  return mf->DisplayStatus(message, -1);
+  mf->DisplayStatus(message, -1);
 }
 
 void cmFree(void *data)
