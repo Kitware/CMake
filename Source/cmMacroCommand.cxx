@@ -20,20 +20,19 @@ bool cmMacroFunctionBlocker::
 IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf) 
 {
   // record commands until we hit the ENDMACRO
-  // at the ENDMACRO call we shift gears and start looking for invocations
-  if(lff.m_Name == "ENDMACRO")
-    {
-    std::vector<std::string> expandedArguments;
-    mf.ExpandArguments(lff.m_Arguments, expandedArguments);
-    if(!expandedArguments.empty() && (expandedArguments[0] == m_Args[0]))
-      {
-      m_Executing = true;
-      return true;
-      }
-    }
-  
   if (!m_Executing)
     {
+    // at the ENDMACRO call we shift gears and start looking for invocations
+    if(lff.m_Name == "ENDMACRO")
+      {
+      std::vector<std::string> expandedArguments;
+      mf.ExpandArguments(lff.m_Arguments, expandedArguments);
+      if(!expandedArguments.empty() && (expandedArguments[0] == m_Args[0]))
+        {
+        m_Executing = true;
+        return true;
+        }
+      }
     // if it wasn't an endmacro and we are not executing then we must be
     // recording
     m_Functions.push_back(lff);
@@ -63,10 +62,12 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
       }
     
     // Invoke all the functions that were collected in the block.
+    cmListFileFunction newLFF;
     for(unsigned int c = 0; c < m_Functions.size(); ++c)
       {
       // Replace the formal arguments and then invoke the command.
-      cmListFileFunction newLFF;
+      newLFF.m_Arguments.clear();
+      newLFF.m_Arguments.reserve(m_Functions[c].m_Arguments.size());
       newLFF.m_Name = m_Functions[c].m_Name;
       newLFF.m_FilePath = m_Functions[c].m_FilePath;
       newLFF.m_Line = m_Functions[c].m_Line;
