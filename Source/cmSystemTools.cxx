@@ -657,27 +657,54 @@ bool cmSystemTools::FilesDiffer(const char* source,
 }
 
 
-
+/**
+ * Copy a file named by "source" to the file named by "destination".  This
+ * implementation makes correct use of the C++ standard file streams to
+ * perfectly copy any file with lines of any length (even binary files).
+ */
 void cmSystemTools::cmCopyFile(const char* source,
-                             const char* destination)
+                               const char* destination)
 {
-  std::ifstream fin(source);
-  char buff[4096];
-  std::ofstream fout(destination);
-  if(!fout )
-    {
-    cmSystemTools::Error("CopyFile failed to open input file", source);
-    }
+  // Buffer length is only for block size.  Any file would still be copied
+  // correctly if this were as small as 2.
+  const int buffer_length = 4096;
+  char buffer[buffer_length];
+  std::ifstream fin(source,
+                    std::ios::binary | std::ios::in);
   if(!fin)
     {
-    cmSystemTools::Error("CopyFile failed to open output file", destination);
+    cmSystemTools::Error("CopyFile failed to open input file \"",
+                         source, "\"");
     }
-  while(fin)
+  std::ofstream fout(destination,
+                     std::ios::binary | std::ios::out | std::ios::trunc);
+  if(!fout)
     {
-    fin.getline(buff, 4096);
-    if(fin)
+    cmSystemTools::Error("CopyFile failed to open output file \"",
+                         destination, "\"");
+    }
+  while(fin.getline(buffer, buffer_length, '\n') || fin.gcount())
+    {
+    std::streamsize count = fin.gcount();
+    if(fin.eof())
       {
-      fout << buff << "\n";
+      // Final line, but with no newline.
+      fout.write(buffer, count);
+      }
+    else if(fin.fail())
+      {
+      // Part of a line longer than our buffer, clear the fail bit of
+      // the stream so that we can continue.
+      fin.clear(fin.rdstate() & ~std::ios::failbit);
+      fout.write(buffer, count);
+      }
+    else
+      {
+      // Line on which a newline was encountered.  It was read from
+      // the stream, but not stored.
+      --count;
+      fout.write(buffer, count);
+      fout << '\n';
       }
     }
 }
