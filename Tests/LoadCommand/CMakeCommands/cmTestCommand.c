@@ -54,11 +54,6 @@ void Destructor(void *inf)
   free(cdata);
 }
 
-CM_PLUGIN_EXPORT const char *cmGetName()
-{
-  return "CMAKE_TEST_COMMAND";
-}
-
 #ifdef MUCHO_MUDSLIDE
 void CM_PLUGIN_EXPORT cmInitializeCommand(cmLoadedCommandInfo *info)
 {
@@ -66,6 +61,7 @@ void CM_PLUGIN_EXPORT cmInitializeCommand(cmLoadedCommandInfo *info)
   info->FinalPass = FinalPass;
   info->Destructor = Destructor;
   info->m_Inherited = 0;
+  info->Name = "CMAKE_TEST_COMMAND";
 }
 #endif
 
