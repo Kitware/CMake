@@ -258,8 +258,8 @@ void cmLocalGenerator::GenerateInstallRules()
       std::string odir = mf->GetCurrentOutputDirectory();
       odir += "/" + (*i).first;
       cmSystemTools::ConvertToUnixSlashes(odir);
-      fout << "INCLUDE(" <<  odir.c_str() 
-           << "/cmake_install.cmake)" << std::endl;
+      fout << "INCLUDE(\"" <<  odir.c_str() 
+           << "/cmake_install.cmake\")" << std::endl;
       }
     fout << std::endl;;
     }
