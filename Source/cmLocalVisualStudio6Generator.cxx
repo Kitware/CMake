@@ -809,6 +809,10 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
     {
     extraLinkOptions = m_Makefile->GetDefinition("CMAKE_SHARED_LINKER_FLAGS");
     }
+  if(target.GetType() == cmTarget::MODULE_LIBRARY)
+    {
+    extraLinkOptions = m_Makefile->GetDefinition("CMAKE_MODULE_LINKER_FLAGS");
+    }
 
   if(extraLinkOptions.size())
     {
@@ -853,6 +857,7 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
                                  customRuleCode.c_str());
     cmSystemTools::ReplaceString(line, "CMAKE_MFC_FLAG",
                                  mfcFlag);
+
     cmSystemTools::ReplaceString(line, "CM_LIBRARIES",
                                  libOptions.c_str());
     cmSystemTools::ReplaceString(line, "CM_DEBUG_LIBRARIES",
