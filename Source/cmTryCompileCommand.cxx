@@ -228,8 +228,6 @@ bool cmTryCompileCommand::InitialPass(std::vector<std::string> const& argv)
   return true;
 }
 
-static void cmTryCompileCommandNotUsed(bool){}
-
 void cmTryCompileCommand::CleanupFiles(const char* binDir)
 {
   if ( !binDir )
