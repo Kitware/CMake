@@ -7,7 +7,7 @@ VPATH         = @srcdir@
 # command for changing into this directory
 
 @MAKEINCLUDE@ @MAKEQUOTE@@CMAKE_CONFIG_DIR@/CMake/CMakeVariables.make@MAKEQUOTE@
-@MAKEINCLUDE@ @MAKEQUOTE@@CMAKE_CONFIG_DIR@/CMake/CMakeSimpleCommands.make@MAKEQUOTE@
+@MAKEINCLUDE@ @MAKEQUOTE@@CMAKE_CONFIG_DIR@/CMake/CMakeSimpleRules.make@MAKEQUOTE@
 
 OBJS = \
 CMakeBuildTargets.o  \
