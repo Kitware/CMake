@@ -370,16 +370,23 @@ void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
 // in this makefile will depend on.
 void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
 {
+  // Each dependency should only be emitted once.
+  std::set<std::string> emitted;
+
   fout << "CMAKE_DEPEND_LIBS = ";
   cmTarget::LinkLibraries& libs = m_Makefile->GetLinkLibraries();
   cmTarget::LinkLibraries::const_iterator lib2;
+
   // Search the list of libraries that will be linked into
   // the executable
+  emitted.clear();
   for(lib2 = libs.begin(); lib2 != libs.end(); ++lib2)
     {
     // loop over the list of directories that the libraries might
     // be in, looking for an ADD_LIBRARY(lib...) line. This would
     // be stored in the cache
+    if( ! emitted.insert(lib2->first).second ) continue;
+
     const char* cacheValue
       = cmCacheManager::GetInstance()->GetCacheValue(lib2->first.c_str());
     if(cacheValue)
@@ -400,11 +407,15 @@ void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
       }
     }
   fout << "\n\n";
+
+  emitted.clear();
   for(lib2 = libs.begin(); lib2 != libs.end(); ++lib2)
     {
     // loop over the list of directories that the libraries might
     // be in, looking for an ADD_LIBRARY(lib...) line. This would
     // be stored in the cache
+    if( ! emitted.insert(lib2->first).second ) continue;
+
     const char* cacheValue
       = cmCacheManager::GetInstance()->GetCacheValue(lib2->first.c_str());
     if(cacheValue)
