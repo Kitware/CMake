@@ -132,7 +132,10 @@ void cmake::AddCMakePaths(const std::vector<std::string>& args)
   // Find our own executable.
   std::string cMakeSelf = args[0];
   cmSystemTools::ConvertToUnixSlashes(cMakeSelf);
-  cMakeSelf = cmSystemTools::FindProgram(cMakeSelf.c_str());
+  if(!cmSystemTools::FileExists(cMakeSelf.c_str()))
+    {
+    cMakeSelf = cmSystemTools::FindProgram(cMakeSelf.c_str());
+    }
   if(!cmSystemTools::FileExists(cMakeSelf.c_str()))
     {
 #ifdef CMAKE_BUILD_DIR
@@ -242,7 +245,6 @@ int cmake::Generate(const std::vector<std::string>& args, bool buildMakefiles)
       return -1;
       }
     }
-  
   // Create a makefile
   cmMakefile mf;
 

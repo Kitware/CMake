@@ -1,5 +1,7 @@
 #include "cmaketest.h"
 #include "cmSystemTools.h"
+#include "cmake.h"
+#include "cmListFileCache.h"
 
 // this is a test driver program for cmake.
 int main (int argc, char *argv[])
@@ -9,7 +11,6 @@ int main (int argc, char *argv[])
     std::cerr << "Usage: " << argv[0] << " test-src-dir test-bin-dir test-executable\n";
     return 1;
     }
-  
   // does the directory exist ?
   if (!cmSystemTools::FileIsDirectory(argv[2]))
     {
@@ -30,26 +31,34 @@ int main (int argc, char *argv[])
   std::string output;
   
   // change to the tests directory and run cmake
+  // use the cmake object instead of calling cmake
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
   cmSystemTools::ChangeDirectory(binaryDirectory);
-  std::string ccmd = CMAKE_COMMAND;
-  ccmd += " ";
-  ccmd += sourceDirectory;
-  if (!cmSystemTools::RunCommand(ccmd.c_str(), output))
+  cmake cm;
+  std::vector<std::string> args;
+  // use this program as the cmake to be run, it should not
+  // be run that way but the cmake object requires a vailid path
+  std::string cmakeCommand = CMAKE_COMMAND;
+  if(cmakeCommand[0] = '\"')
+    {
+    cmakeCommand = cmakeCommand.substr(1, cmakeCommand.size()-2);
+    }
+  args.push_back(cmakeCommand.c_str());
+  args.push_back(sourceDirectory);
+  if (cm.Generate(args) != 0)
     {
     std::cerr << "Error: cmake execution failed\n";
-    std::cerr << output.c_str() << "\n";
     // return to the original directory
     cmSystemTools::ChangeDirectory(cwd.c_str());
     return 1;
     }
-
+  cmListFileCache::GetInstance()->ClearCache();
   // now build the test
   std::string makeCommand = MAKEPROGRAM;
   makeCommand += " ";
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__CYGWIN__)
   makeCommand += executableName;
-  makeCommand += ".dsw /MAKE \"ALL_BUILD - Release\" /REBUILD";
+  makeCommand += ".dsw /MAKE \"ALL_BUILD - Debug\" /REBUILD";
 #else
   makeCommand += " all";
 #endif  
@@ -75,8 +84,8 @@ int main (int argc, char *argv[])
     {
     fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
     }
-  // try the release extension
-  tryPath = "Release/";
+  // try the Debug extension
+  tryPath = "Debug/";
   tryPath += cmSystemTools::GetFilenameName(executableName);
   if(cmSystemTools::FileExists(tryPath.c_str()))
     {
@@ -96,7 +105,7 @@ int main (int argc, char *argv[])
     fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
     }
   tryPath = executableDirectory;
-  tryPath += "/Release/";
+  tryPath += "/Debug/";
   tryPath += executableName;
   tryPath += cmSystemTools::GetExecutableExtension();
   if(cmSystemTools::FileExists(tryPath.c_str()))
