@@ -511,109 +511,134 @@ fi
 
 # Test C++ compiler features
 
-# If we are on IRIX, check for -LANG:std
-cmake_test_flags="-LANG:std"
-if [ "x${cmake_system}" = "xIRIX64" ]; then
-  TMPFILE=`cmake_tmp_file`
-  cat > ${TMPFILE}.cxx <<EOF
-  #include <iostream>
-  int main() { std::cout << "No need for ${cmake_test_flags}" << std::endl; return 0;}
+# Are we GCC?
+
+TMPFILE=`cmake_tmp_file`
+cat > ${TMPFILE}.cxx <<EOF
+#if defined(__GNUC__) && !defined(__INTEL_COMPILER)
+#include <iostream>
+int main() { std::cout << "This is GNU" << std::endl; return 0;}
+#endif
 EOF
-  cmake_need_lang_std=0
-  if cmake_try_run "${cmake_cxx_compiler}" \
-    "${cmake_cxx_flags}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
-    :
-  else
+cmake_cxx_compiler_is_gnu=0
+if cmake_try_run "${cmake_cxx_compiler}" \
+  "${cmake_cxx_flags}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
+  cmake_cxx_compiler_is_gnu=1
+fi
+if [ "x${cmake_cxx_compiler_is_gnu}" = "x1" ]; then
+  echo "${cmake_cxx_compiler} is GNU compiler"
+else
+  echo "${cmake_cxx_compiler} is not GNU compiler"
+fi
+rm -f "${TMPFILE}.cxx"
+
+if [ "x${cmake_cxx_compiler_is_gnu}" != "x1" ]; then
+  # Check for non-GNU compiler flags
+
+  # If we are on IRIX, check for -LANG:std
+  cmake_test_flags="-LANG:std"
+  if [ "x${cmake_system}" = "xIRIX64" ]; then
+    TMPFILE=`cmake_tmp_file`
+    cat > ${TMPFILE}.cxx <<EOF
+    #include <iostream>
+    int main() { std::cout << "No need for ${cmake_test_flags}" << std::endl; return 0;}
+EOF
+    cmake_need_lang_std=0
+    if cmake_try_run "${cmake_cxx_compiler}" \
+      "${cmake_cxx_flags}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
+      :
+    else
+      if cmake_try_run "${cmake_cxx_compiler}" \
+        "${cmake_cxx_flags} ${cmake_test_flags}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
+        cmake_need_lang_std=1
+      fi
+    fi
+    if [ "x${cmake_need_lang_std}" = "x1" ]; then
+      cmake_cxx_flags="${cmake_cxx_flags} ${cmake_test_flags}"
+      echo "${cmake_cxx_compiler} needs ${cmake_test_flags}"
+    else
+      echo "${cmake_cxx_compiler} does not need ${cmake_test_flags}"
+    fi
+    rm -f "${TMPFILE}.cxx"
+  fi
+  cmake_test_flags=
+
+  # If we are on OSF, check for -timplicit_local -no_implicit_include
+  cmake_test_flags="-timplicit_local -no_implicit_include"
+  if [ "x${cmake_system}" = "xOSF1" ]; then
+    TMPFILE=`cmake_tmp_file`
+    cat > ${TMPFILE}.cxx <<EOF
+    #include <iostream>
+    int main() { std::cout << "We need ${cmake_test_flags}" << std::endl; return 0;}
+EOF
+    cmake_need_flags=1
     if cmake_try_run "${cmake_cxx_compiler}" \
       "${cmake_cxx_flags} ${cmake_test_flags}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
-      cmake_need_lang_std=1
+      :
+    else
+      cmake_need_flags=0
     fi
-  fi
-  if [ "x${cmake_need_lang_std}" = "x1" ]; then
-    cmake_cxx_flags="${cmake_cxx_flags} ${cmake_test_flags}"
-    echo "${cmake_cxx_compiler} needs ${cmake_test_flags}"
-  else
-    echo "${cmake_cxx_compiler} does not need ${cmake_test_flags}"
-  fi
-  rm -f "${TMPFILE}.cxx"
-fi
-cmake_test_flags=
-
-# If we are on OSF, check for -timplicit_local -no_implicit_include
-cmake_test_flags="-timplicit_local -no_implicit_include"
-if [ "x${cmake_system}" = "xOSF1" ]; then
-  TMPFILE=`cmake_tmp_file`
-  cat > ${TMPFILE}.cxx <<EOF
-  #include <iostream>
-  int main() { std::cout << "We need ${cmake_test_flags}" << std::endl; return 0;}
-EOF
-  cmake_need_flags=1
-  if cmake_try_run "${cmake_cxx_compiler}" \
-    "${cmake_cxx_flags} ${cmake_test_flags}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
-    :
-  else
-    cmake_need_flags=0
-  fi
-  if [ "x${cmake_need_flags}" = "x1" ]; then
-    cmake_cxx_flags="${cmake_cxx_flags} ${cmake_test_flags}"
-    echo "${cmake_cxx_compiler} needs ${cmake_test_flags}"
-  else
-    echo "${cmake_cxx_compiler} does not need ${cmake_test_flags}"
-  fi
-  rm -f "${TMPFILE}.cxx"
-fi
-cmake_test_flags=
-
-# If we are on OSF, check for -std strict_ansi -nopure_cname
-cmake_test_flags="-std strict_ansi -nopure_cname"
-if [ "x${cmake_system}" = "xOSF1" ]; then
-  TMPFILE=`cmake_tmp_file`
-  cat > ${TMPFILE}.cxx <<EOF
-  #include <iostream>
-  int main() { std::cout << "We need ${cmake_test_flags}" << std::endl; return 0;}
-EOF
-  cmake_need_flags=1
-  if cmake_try_run "${cmake_cxx_compiler}" \
-    "${cmake_cxx_flags} ${cmake_test_flags}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
-    :
-  else
-    cmake_need_flags=0
-  fi
-  if [ "x${cmake_need_flags}" = "x1" ]; then
-    cmake_cxx_flags="${cmake_cxx_flags} ${cmake_test_flags}"
-    echo "${cmake_cxx_compiler} needs ${cmake_test_flags}"
-  else
-    echo "${cmake_cxx_compiler} does not need ${cmake_test_flags}"
-  fi
-  rm -f "${TMPFILE}.cxx"
-fi
-cmake_test_flags=
-
-# If we are on HP-UX, check for -Ae for the C compiler.
-cmake_test_flags="-Ae"
-if [ "x${cmake_system}" = "xHP-UX" ]; then
-  TMPFILE=`cmake_tmp_file`
-  cat > ${TMPFILE}.c <<EOF
-  int main(int argc, char** argv) { (void)argc; (void)argv; return 0; }
-EOF
-  cmake_need_Ae=0
-  if cmake_try_run "${cmake_c_compiler}" "${cmake_c_flags}" "${TMPFILE}.c" >> cmake_bootstrap.log 2>&1; then
-    :
-  else
-    if cmake_try_run "${cmake_c_compiler}" \
-      "${cmake_c_flags} ${cmake_test_flags}" "${TMPFILE}.c" >> cmake_bootstrap.log 2>&1; then
-      cmake_need_Ae=1
+    if [ "x${cmake_need_flags}" = "x1" ]; then
+      cmake_cxx_flags="${cmake_cxx_flags} ${cmake_test_flags}"
+      echo "${cmake_cxx_compiler} needs ${cmake_test_flags}"
+    else
+      echo "${cmake_cxx_compiler} does not need ${cmake_test_flags}"
     fi
+    rm -f "${TMPFILE}.cxx"
   fi
-  if [ "x${cmake_need_Ae}" = "x1" ]; then
-    cmake_c_flags="${cmake_c_flags} ${cmake_test_flags}"
-    echo "${cmake_c_compiler} needs ${cmake_test_flags}"
-  else
-    echo "${cmake_c_compiler} does not need ${cmake_test_flags}"
+  cmake_test_flags=
+
+  # If we are on OSF, check for -std strict_ansi -nopure_cname
+  cmake_test_flags="-std strict_ansi -nopure_cname"
+  if [ "x${cmake_system}" = "xOSF1" ]; then
+    TMPFILE=`cmake_tmp_file`
+    cat > ${TMPFILE}.cxx <<EOF
+    #include <iostream>
+    int main() { std::cout << "We need ${cmake_test_flags}" << std::endl; return 0;}
+EOF
+    cmake_need_flags=1
+    if cmake_try_run "${cmake_cxx_compiler}" \
+      "${cmake_cxx_flags} ${cmake_test_flags}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
+      :
+    else
+      cmake_need_flags=0
+    fi
+    if [ "x${cmake_need_flags}" = "x1" ]; then
+      cmake_cxx_flags="${cmake_cxx_flags} ${cmake_test_flags}"
+      echo "${cmake_cxx_compiler} needs ${cmake_test_flags}"
+    else
+      echo "${cmake_cxx_compiler} does not need ${cmake_test_flags}"
+    fi
+    rm -f "${TMPFILE}.cxx"
   fi
-  rm -f "${TMPFILE}.c"
+  cmake_test_flags=
+
+  # If we are on HP-UX, check for -Ae for the C compiler.
+  cmake_test_flags="-Ae"
+  if [ "x${cmake_system}" = "xHP-UX" ]; then
+    TMPFILE=`cmake_tmp_file`
+    cat > ${TMPFILE}.c <<EOF
+    int main(int argc, char** argv) { (void)argc; (void)argv; return 0; }
+EOF
+    cmake_need_Ae=0
+    if cmake_try_run "${cmake_c_compiler}" "${cmake_c_flags}" "${TMPFILE}.c" >> cmake_bootstrap.log 2>&1; then
+      :
+    else
+      if cmake_try_run "${cmake_c_compiler}" \
+        "${cmake_c_flags} ${cmake_test_flags}" "${TMPFILE}.c" >> cmake_bootstrap.log 2>&1; then
+        cmake_need_Ae=1
+      fi
+    fi
+    if [ "x${cmake_need_Ae}" = "x1" ]; then
+      cmake_c_flags="${cmake_c_flags} ${cmake_test_flags}"
+      echo "${cmake_c_compiler} needs ${cmake_test_flags}"
+    else
+      echo "${cmake_c_compiler} does not need ${cmake_test_flags}"
+    fi
+    rm -f "${TMPFILE}.c"
+  fi
+  cmake_test_flags=
 fi
-cmake_test_flags=
 
 # Test for kwsys features
 KWSYS_NAME_IS_KWSYS=0
