@@ -61,7 +61,7 @@ KWSYS_FILES="\
   RegularExpression.hxx \
   SystemTools.hxx"
 
-KWSYS_STD_FILES="
+KWSYS_IOS_FILES="
   fstream \
   iosfwd \
   iostream \
@@ -111,7 +111,8 @@ cmake_version()
   # Get CMake version
   CMAKE_VERSION=""
   for a in MAJOR MINOR PATCH; do
-    CMake_VERSION=`cat "${cmake_source_dir}/CMakeLists.txt" | grep "SET(CMake_VERSION_${a} *[0-9]*)" | sed "s/SET(CMake_VERSION_${a} *\([0-9]*\))/\1/"`
+    CMake_VERSION=`cat "${cmake_source_dir}/CMakeLists.txt" | \
+      grep "SET(CMake_VERSION_${a} *[0-9]*)" | sed "s/SET(CMake_VERSION_${a} *\([0-9]*\))/\1/"`
     CMAKE_VERSION="${CMAKE_VERSION}.${CMake_VERSION}" 
   done
   CMAKE_VERSION=`echo $CMAKE_VERSION | sed "s/\.\([0-9][0-9]*\)\.\([0-9][0-9]*\)\.\([0-9][0-9]*\)/\1.\2-\3/"`
@@ -121,16 +122,18 @@ cmake_version()
 # Display CMake bootstrap error, display the log file and exit
 cmake_error()
 {
+  res=$1
+  shift 1
   echo "---------------------------------------------"
   echo "Error when bootstrapping CMake:" 
   echo "$*"
   echo "---------------------------------------------"
   if [ -f cmake_bootstrap.log ]; then
-    echo "Log of errors:"
-    cat cmake_bootstrap.log
+    echo "Log of errors: `pwd`/cmake_bootstrap.log"
+    #cat cmake_bootstrap.log
     echo "---------------------------------------------"
   fi
-  exit 1
+  exit ${res}
 }
 
 # Replace KWSYS_NAMESPACE with cmsys
@@ -152,10 +155,40 @@ cmake_replace_string ()
       fi
     fi
   else
-    cmake_error "Cannot find file ${INFILE}"
+    cmake_error 1 "Cannot find file ${INFILE}"
   fi
 }
 
+cmake_kwsys_config_replace_string ()
+{
+  INFILE="$1"
+  OUTFILE="$2"
+  shift 2
+  APPEND="$*"
+  if [ -f "${INFILE}" ]; then
+    echo "${APPEND}" > "${OUTFILE}.tmp"
+    cat "${INFILE}" | 
+      sed "/./ {s/\@KWSYS_NAMESPACE\@/cmsys/g;
+                s/@KWSYS_BUILD_SHARED@/${KWSYS_BUILD_SHARED}/g;
+                s/@KWSYS_NAME_IS_KWSYS@/${KWSYS_NAME_IS_KWSYS}/g;
+                s/@KWSYS_IOS_HAVE_ANSI@/${KWSYS_IOS_HAVE_ANSI}/g;
+                s/@KWSYS_IOS_HAVE_STD@/${KWSYS_IOS_HAVE_STD}/g;
+                s/@KWSYS_IOS_HAVE_SSTREAM@/${KWSYS_IOS_HAVE_SSTREAM}/g;
+                s/@KWSYS_IOS_HAVE_STRSTREAM_H@/${KWSYS_IOS_HAVE_STRSTREAM_H}/g;
+                s/@KWSYS_IOS_HAVE_STRSTREA_H@/${KWSYS_IOS_HAVE_STRSTREA_H}/g;
+                s/@KWSYS_STL_HAVE_STD@/${KWSYS_STL_HAVE_STD}/g;}" >> "${OUTFILE}.tmp"
+    if [ -f "${OUTFILE}.tmp" ]; then
+      if diff "${OUTFILE}" "${OUTFILE}.tmp" > /dev/null 2> /dev/null ; then
+        #echo "Files are the same"
+        rm -f "${OUTFILE}.tmp"
+      else
+        mv -f "${OUTFILE}.tmp" "${OUTFILE}"
+      fi
+    fi
+  else
+    cmake_error 2 "Cannot find file ${INFILE}"
+  fi
+}
 # Write string into a file
 cmake_report ()
 {
@@ -202,20 +235,21 @@ cmake_try_run ()
   "${COMPILER}" ${FLAGS} "${TESTFILE}" -o "${TMPFILE}"
   RES=$?
   if [ "${RES}" -ne "0" ]; then
-    echo "${COMPILER} does not work";return 1
+    echo "Test failed to compile"
+    return 1
   fi
   if [ ! -f "${TMPFILE}" ] && [ ! -f "${TMPFILE}.exe" ]; then
-    echo "${COMPILER} does not produce output"
+    echo "Test failed to produce executable"
     return 2
   fi
   ./${TMPFILE}
   RES=$?
   rm -f "${TMPFILE}"
   if [ "${RES}" -ne "0" ]; then
-    echo "${COMPILER} produces strange executable"
+    echo "Test produced non-zero return code"
     return 3
   fi
-  echo "${COMPILER} works"
+  echo "Test succeded"
   return 0
 }
 
@@ -301,19 +335,21 @@ echo "`cmake_version`"
 # Make bootstrap directory
 [ -d "${cmake_bootstrap_dir}" ] || mkdir "${cmake_bootstrap_dir}"
 if [ ! -d "${cmake_bootstrap_dir}" ]; then
-  cmake_error "Cannot create directory ${cmake_bootstrap_dir} to bootstrap CMake."
+  cmake_error 3 "Cannot create directory ${cmake_bootstrap_dir} to bootstrap CMake."
 fi
 cd "${cmake_bootstrap_dir}"
 
 [ -d "cmsys" ] || mkdir "cmsys"
 if [ ! -d "cmsys" ]; then
-  cmake_error "Cannot create directory ${cmake_bootstrap_dir}/cmsys"
+  cmake_error 4 "Cannot create directory ${cmake_bootstrap_dir}/cmsys"
 fi
 
-[ -d "cmsys/std" ] || mkdir "cmsys/std"
-if [ ! -d "cmsys/std" ]; then
-  cmake_error "Cannot create directory ${cmake_bootstrap_dir}/cmsys/std"
-fi
+for a in stl ios; do
+  [ -d "cmsys/${a}" ] || mkdir "cmsys/${a}"
+  if [ ! -d "cmsys/${a}" ]; then
+    cmake_error 5 "Cannot create directory ${cmake_bootstrap_dir}/cmsys/${a}"
+  fi
+done
 
 # Delete all the bootstrap files
 rm -f "${cmake_bootstrap_dir}/cmake_bootstrap.log"
@@ -344,14 +380,15 @@ int main()
 }
 EOF
 for a in ${cmake_c_compilers}; do
-  if [ -z "${cmake_c_compiler}" ] && cmake_try_run "${a}" "${cmake_c_flags}" "${TMPFILE}.c" >> cmake_bootstrap.log 2>&1; then
+  if [ -z "${cmake_c_compiler}" ] && \
+    cmake_try_run "${a}" "${cmake_c_flags}" "${TMPFILE}.c" >> cmake_bootstrap.log 2>&1; then
     cmake_c_compiler="${a}"
   fi
 done
 rm -f "${TMPFILE}.c"
 
 if [ -z "${cmake_c_compiler}" ]; then
-  cmake_error "Cannot find apropriate C compiler on this system.
+  cmake_error 6 "Cannot find appropriate C compiler on this system.
 Please specify one using environment variable CC."
 fi
 echo "C compiler on this system is: ${cmake_c_compiler} ${cmake_c_flags}"
@@ -371,7 +408,12 @@ fi
 # Check if C++ compiler works
 TMPFILE=`cmake_tmp_file`
 cat > "${TMPFILE}.cxx" <<EOF
-#include <stdio.h>
+#if defined(TEST1)
+# include <iostream>
+#else
+# include <iostream.h>
+#endif
+
 class NeedCXX 
 {
 public:
@@ -383,19 +425,26 @@ private:
 int main()
 {
   NeedCXX c;
-  printf("%d\n", c.GetFoo());
+#ifdef TEST3
+  cout << c.GetFoo() << endl;
+#else
+  std::cout << c.GetFoo() << std::endl;
+#endif
   return 0;
 }
 EOF
 for a in ${cmake_cxx_compilers}; do
-  if [ -z "${cmake_cxx_compiler}" ] && cmake_try_run "${a}" "${cmake_cxx_flags}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
-    cmake_cxx_compiler="${a}"
-  fi
+  for b in 1 2 3; do
+    if [ -z "${cmake_cxx_compiler}" ] && \
+      cmake_try_run "${a}" "${cmake_cxx_flags} -DTEST${b}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
+      cmake_cxx_compiler="${a}"
+    fi
+  done
 done
 rm -f "${TMPFILE}.cxx"
 
 if [ -z "${cmake_cxx_compiler}" ]; then
-  cmake_error "Cannot find apropriate C++ compiler on this system.
+  cmake_error 7 "Cannot find appropriate C++ compiler on this system.
 Please specify one using environment variable CXX."
 fi
 echo "C++ compiler on this system is: ${cmake_cxx_compiler} ${cmake_cxx_flags}"
@@ -436,7 +485,7 @@ cd "${cmake_bootstrap_dir}"
 rm -rf "${cmake_bootstrap_dir}/${TMPFILE}"
 
 if [ -z "${cmake_make_processor}" ]; then
-  cmake_error "Cannot find apropriate Makefile processor on this system.
+  cmake_error 8 "Cannot find appropriate Makefile processor on this system.
 Please specify one using environment variable MAKE."
 fi
 echo "Make processor on this system is: ${cmake_make_processor}"
@@ -454,10 +503,12 @@ if [ "x${cmake_system}" = "xIRIX64" ]; then
   int main() { std::cout << "No need for ${cmake_test_flags}" << std::endl; return 0;}
 EOF
   cmake_need_lang_std=0
-  if cmake_try_run "${cmake_cxx_compiler}" "${cmake_cxx_flags}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
+  if cmake_try_run "${cmake_cxx_compiler}" \
+    "${cmake_cxx_flags}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
     :
   else
-    if cmake_try_run "${cmake_cxx_compiler}" "${cmake_cxx_flags} ${cmake_test_flags}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
+    if cmake_try_run "${cmake_cxx_compiler}" \
+      "${cmake_cxx_flags} ${cmake_test_flags}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
       cmake_need_lang_std=1
     fi
   fi
@@ -480,7 +531,8 @@ if [ "x${cmake_system}" = "xOSF1" ]; then
   int main() { std::cout << "We need ${cmake_test_flags}" << std::endl; return 0;}
 EOF
   cmake_need_flags=1
-  if cmake_try_run "${cmake_cxx_compiler}" "${cmake_cxx_flags} ${cmake_test_flags}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
+  if cmake_try_run "${cmake_cxx_compiler}" \
+    "${cmake_cxx_flags} ${cmake_test_flags}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
     :
   else
     cmake_need_flags=0
@@ -504,7 +556,8 @@ if [ "x${cmake_system}" = "xOSF1" ]; then
   int main() { std::cout << "We need ${cmake_test_flags}" << std::endl; return 0;}
 EOF
   cmake_need_flags=1
-  if cmake_try_run "${cmake_cxx_compiler}" "${cmake_cxx_flags} ${cmake_test_flags}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
+  if cmake_try_run "${cmake_cxx_compiler}" \
+    "${cmake_cxx_flags} ${cmake_test_flags}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
     :
   else
     cmake_need_flags=0
@@ -530,7 +583,8 @@ EOF
   if cmake_try_run "${cmake_c_compiler}" "${cmake_c_flags}" "${TMPFILE}.c" >> cmake_bootstrap.log 2>&1; then
     :
   else
-    if cmake_try_run "${cmake_c_compiler}" "${cmake_c_flags} ${cmake_test_flags}" "${TMPFILE}.c" >> cmake_bootstrap.log 2>&1; then
+    if cmake_try_run "${cmake_c_compiler}" \
+      "${cmake_c_flags} ${cmake_test_flags}" "${TMPFILE}.c" >> cmake_bootstrap.log 2>&1; then
       cmake_need_Ae=1
     fi
   fi
@@ -544,82 +598,134 @@ EOF
 fi
 cmake_test_flags=
 
+# Test for kwsys features
+KWSYS_NAME_IS_KWSYS=0
+KWSYS_BUILD_SHARED=0
+KWSYS_IOS_HAVE_STRSTREAM_H=0
+KWSYS_IOS_HAVE_STRSTREA_H=0
+KWSYS_IOS_HAVE_STD=0
+KWSYS_IOS_HAVE_SSTREAM=0
+KWSYS_IOS_HAVE_ANSI=0
+KWSYS_STL_HAVE_STD=0
+
+if cmake_try_run "${cmake_cxx_compiler}" \
+  "${cmake_cxx_flags} -DTEST_KWSYS_STL_HAVE_STD" \
+  "${cmake_source_dir}/Source/kwsys/kwsysPlatformCxxTests.cxx" >> cmake_bootstrap.log 2>&1; then
+  KWSYS_STL_HAVE_STD=1
+  echo "${cmake_cxx_compiler} has STL in std:: namespace"
+else
+  echo "${cmake_cxx_compiler} does not have STL in std:: namespace"
+fi
+
+if cmake_try_run "${cmake_cxx_compiler}" \
+  "${cmake_cxx_flags} -DTEST_KWSYS_IOS_HAVE_ANSI" \
+  "${cmake_source_dir}/Source/kwsys/kwsysPlatformCxxTests.cxx" >> cmake_bootstrap.log 2>&1; then
+  KWSYS_IOS_HAVE_ANSI=1
+  echo "${cmake_cxx_compiler} has ANSI streams"
+else
+  echo "${cmake_cxx_compiler} does not have ANSI streams"
+fi
+
+if [ "x$KWSYS_IOS_HAVE_ANSI" = "x1" ]; then
+  if cmake_try_run "${cmake_cxx_compiler}" \
+    "${cmake_cxx_flags} -DTEST_KWSYS_IOS_HAVE_STD" \
+    "${cmake_source_dir}/Source/kwsys/kwsysPlatformCxxTests.cxx" >> cmake_bootstrap.log 2>&1; then
+    KWSYS_IOS_HAVE_STD=1
+    echo "${cmake_cxx_compiler} has streams in std:: namespace"
+  else
+    echo "${cmake_cxx_compiler} does not have streams in std:: namespace"
+  fi
+  if cmake_try_run "${cmake_cxx_compiler}" \
+    "${cmake_cxx_flags} -DTEST_KWSYS_IOS_HAVE_SSTREAM" \
+    "${cmake_source_dir}/Source/kwsys/kwsysPlatformCxxTests.cxx" >> cmake_bootstrap.log 2>&1; then
+    KWSYS_IOS_HAVE_SSTREAM=1
+    echo "${cmake_cxx_compiler} has sstream"
+  else
+    echo "${cmake_cxx_compiler} does not have sstream"
+  fi
+fi
+
+if [ "x$KWSYS_IOS_HAVE_SSTREAM" = "x0" ]; then
+  if cmake_try_run "${cmake_cxx_compiler}" \
+    "${cmake_cxx_flags} -DTEST_KWSYS_IOS_HAVE_STRSTREAM_H" \
+    "${cmake_source_dir}/Source/kwsys/kwsysPlatformCxxTests.cxx" >> cmake_bootstrap.log 2>&1; then
+    KWSYS_IOS_HAVE_STRSTREAM_H=1
+    echo "${cmake_cxx_compiler} has strstream.h"
+  else
+    echo "${cmake_cxx_compiler} does not have strstream.h"
+  fi
+  if [ "x$KWSYS_IOS_HAVE_STRSTREAM_H" = "x0" ]; then
+    if cmake_try_run "${cmake_cxx_compiler}" \
+      "${cmake_cxx_flags} -DTEST_KWSYS_IOS_HAVE_STRSTREA_H" \
+      "${cmake_source_dir}/Source/kwsys/kwsysPlatformCxxTests.cxx" >> cmake_bootstrap.log 2>&1; then
+      KWSYS_IOS_HAVE_STRSTREA_H=1
+      echo "${cmake_cxx_compiler} has strstrea.h"
+    else
+      echo "${cmake_cxx_compiler} does not have strstrea.h"
+    fi
+  fi
+fi
+
 # Just to be safe, let us store compiler and flags to the header file
 
-cmake_report cmConfigure.h.tmp "/*"
-cmake_report cmConfigure.h.tmp " * Generated by ${cmake_source_dir}/bootstrap"
-cmake_report cmConfigure.h.tmp " * Binary directory: ${cmake_bootstrap_dir}"
-cmake_report cmConfigure.h.tmp " * C compiler:   ${cmake_c_compiler}"
-cmake_report cmConfigure.h.tmp " * C flags:      ${cmake_c_flags}"
-cmake_report cmConfigure.h.tmp " *"
-cmake_report cmConfigure.h.tmp " * C++ compiler: ${cmake_cxx_compiler}"
-cmake_report cmConfigure.h.tmp " * C++ flags:    ${cmake_cxx_flags}"
-cmake_report cmConfigure.h.tmp " *"
-cmake_report cmConfigure.h.tmp " * Make:         ${cmake_make_processor}"
-cmake_report cmConfigure.h.tmp " *"
-cmake_report cmConfigure.h.tmp " * Sources:"
-cmake_report cmConfigure.h.tmp " * ${CMAKE_CXX_SOURCES} ${CMAKE_C_SOURCES}"
-cmake_report cmConfigure.h.tmp " * kwSys Sources:"
-cmake_report cmConfigure.h.tmp " * ${KWSYS_CXX_SOURCES} ${KWSYS_C_SOURCES}"
-cmake_report cmConfigure.h.tmp " */"
+cmake_bootstrap_version='$Revision$'
+cmake_compiler_settings_comment="/*
+ * Generated by ${cmake_source_dir}/bootstrap
+ * Version:     ${cmake_bootstrap_version}
+ *
+ * Source directory: ${cmake_source_dir}
+ * Binary directory: ${cmake_bootstrap_dir}
+ *
+ * C compiler:   ${cmake_c_compiler}
+ * C flags:      ${cmake_c_flags}
+ *
+ * C++ compiler: ${cmake_cxx_compiler}
+ * C++ flags:    ${cmake_cxx_flags}
+ *
+ * Make:         ${cmake_make_processor}
+ *
+ * Sources:
+ * ${CMAKE_CXX_SOURCES} ${CMAKE_C_SOURCES}
+ * kwSys Sources:
+ * ${KWSYS_CXX_SOURCES} ${KWSYS_C_SOURCES}
+ */
+"
 
-# Test for STD namespace
-if cmake_try_run "${cmake_cxx_compiler}" "${cmake_cxx_flags}" "${cmake_source_dir}/Modules/TestForSTDNamespace.cxx" >> cmake_bootstrap.log 2>&1; then
+cmake_report cmConfigure.h.tmp "${cmake_compiler_settings_comment}"
+
+if [ "x$KWSYS_STL_HAVE_STD" = "x1" ]; then
   cmake_report cmConfigure.h.tmp "/* #undef CMAKE_NO_STD_NAMESPACE */"
-  cmake_report cmConfigure.h.tmp "#define cmsys_std std"
-  echo "${cmake_cxx_compiler} has STD namespace"
 else
   cmake_report cmConfigure.h.tmp "#define CMAKE_NO_STD_NAMESPACE 1"
-  cmake_report cmConfigure.h.tmp "#define KWSYS_NO_STD_NAMESPACE"
-  cmake_report cmConfigure.h.tmp "#define cmsys_std"
-  echo "${cmake_cxx_compiler} does not have STD namespace"
 fi
 
-# Test for ANSI stream headers
-if cmake_try_run "${cmake_cxx_compiler}" "${cmake_cxx_flags}" "${cmake_source_dir}/Modules/TestForANSIStreamHeaders.cxx" >> cmake_bootstrap.log 2>&1; then
+if [ "x$KWSYS_IOS_HAVE_ANSI" = "x1" ]; then
   cmake_report cmConfigure.h.tmp "/* #undef CMAKE_NO_ANSI_STREAM_HEADERS */"
-  echo "${cmake_cxx_compiler} has ANSI stream headers"
 else
   cmake_report cmConfigure.h.tmp "#define CMAKE_NO_ANSI_STREAM_HEADERS 1"
-  cmake_report cmConfigure.h.tmp "#define KWSYS_NO_ANSI_STREAM_HEADERS 1"
-  cmake_report cmConfigure.h.tmp "#define cmsys_NO_ANSI_STREAM_HEADERS"
-  echo "${cmake_cxx_compiler} does not have ANSI stream headers"
 fi
 
-# Test for ansi string streams
-TMPFILE=`cmake_tmp_file`
-cat>${TMPFILE}.cxx<<EOF
-#include <sstream>
-int main() { return 0;}
-EOF
-if cmake_try_run "${cmake_cxx_compiler}" "${cmake_cxx_flags}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
+if [ "x$KWSYS_IOS_HAVE_SSTREAM" = "x1" ]; then
   cmake_report cmConfigure.h.tmp "/* #undef CMAKE_NO_ANSI_STRING_STREAM */"
-  echo "${cmake_cxx_compiler} has ANSI string streams"
 else
   cmake_report cmConfigure.h.tmp "#define CMAKE_NO_ANSI_STRING_STREAM 1"
-  cmake_report cmConfigure.h.tmp "#define KWSYS_NO_ANSI_STRING_STREAM 1"
-  cmake_report cmConfigure.h.tmp "#define cmsys_NO_ANSI_STRING_STREAM 1"
-  echo "${cmake_cxx_compiler} does not have ANSI string streams"
 fi
-rm -f "${TMPFILE}.cxx"
 
 # Test for ansi FOR scope
-if cmake_try_run "${cmake_cxx_compiler}" "${cmake_cxx_flags}" "${cmake_source_dir}/Modules/TestForAnsiForScope.cxx" >> cmake_bootstrap.log 2>&1; then
+if cmake_try_run "${cmake_cxx_compiler}" \
+  "${cmake_cxx_flags}" \
+  "${cmake_source_dir}/Modules/TestForAnsiForScope.cxx" >> cmake_bootstrap.log 2>&1; then
   cmake_report cmConfigure.h.tmp "/* #undef CMAKE_NO_ANSI_FOR_SCOPE */"
   echo "${cmake_cxx_compiler} has ANSI for scoping"
 else
   cmake_report cmConfigure.h.tmp "#define CMAKE_NO_ANSI_FOR_SCOPE 1"
   echo "${cmake_cxx_compiler} does not have ANSI for scoping"
 fi
-cmake_report cmConfigure.h.tmp "/* Defined if std namespace is the GCC hack.  */"
-cmake_report cmConfigure.h.tmp "#if defined(__GNUC__) && (__GNUC__ < 3)"
-cmake_report cmConfigure.h.tmp "# define cmsys_FAKE_STD_NAMESPACE"
-cmake_report cmConfigure.h.tmp "#endif"
-cmake_report cmConfigure.h.tmp "#define kwsys_std cmsys_std"
 
 # Write CMake version
 for a in MAJOR MINOR PATCH; do
-  CMake_VERSION=`cat "${cmake_source_dir}/CMakeLists.txt" | grep "SET(CMake_VERSION_${a} *[0-9]*)" | sed "s/SET(CMake_VERSION_${a} *\([0-9]*\))/\1/"`
+  CMake_VERSION=`cat "${cmake_source_dir}/CMakeLists.txt" | \
+    grep "SET(CMake_VERSION_${a} *[0-9]*)" | sed "s/SET(CMake_VERSION_${a} *\([0-9]*\))/\1/"`
   cmake_report cmConfigure.h.tmp "#define CMake_VERSION_${a} ${CMake_VERSION}"
 done
 cmake_report cmConfigure.h.tmp "#define CMAKE_ROOT_DIR \"${cmake_source_dir}\""
@@ -631,31 +737,38 @@ if diff cmConfigure.h cmConfigure.h.tmp > /dev/null 2> /dev/null; then
   rm -f cmConfigure.h.tmp
 else
   mv -f cmConfigure.h.tmp cmConfigure.h
-  cp cmConfigure.h cmsys/Configure.hxx
 fi
 
 # Prepare KWSYS
+cmake_kwsys_config_replace_string \
+  "${cmake_source_dir}/Source/kwsys/Configure.hxx.in" \
+  "${cmake_bootstrap_dir}/cmsys/Configure.hxx" \
+  "${cmake_compiler_settings_comment}"
+cmake_kwsys_config_replace_string \
+  "${cmake_source_dir}/Source/kwsys/Configure.h.in" \
+  "${cmake_bootstrap_dir}/cmsys/Configure.h" \
+  "${cmake_compiler_settings_comment}"
+
 for a in ${KWSYS_FILES}; do 
   cmake_replace_string "${cmake_source_dir}/Source/kwsys/${a}.in" \
      "${cmake_bootstrap_dir}/cmsys/${a}" KWSYS_NAMESPACE cmsys
 done
-for a in ${KWSYS_STD_FILES}; do 
-  cmake_replace_string "${cmake_source_dir}/Source/kwsys/kwsys_std_${a}.h.in" \
-     "${cmake_bootstrap_dir}/cmsys/std/${a}" KWSYS_NAMESPACE cmsys
+
+for a in ${KWSYS_IOS_FILES}; do 
+  cmake_replace_string "${cmake_source_dir}/Source/kwsys/kwsys_ios_${a}.h.in" \
+     "${cmake_bootstrap_dir}/cmsys/ios/${a}" KWSYS_NAMESPACE cmsys
 done
-cmake_replace_string "${cmake_source_dir}/Source/kwsys/kwsys_std.h.in" \
-   "${cmake_bootstrap_dir}/cmsys/std/stl.h.in" KWSYS_NAMESPACE cmsys
-cmake_replace_string "${cmake_source_dir}/Source/kwsys/Configure.h.in" \
-   "${cmake_bootstrap_dir}/cmsys/Configure.h.in" KWSYS_NAMESPACE cmsys
-cmake_replace_string "${cmake_bootstrap_dir}/cmsys/Configure.h.in" \
-   "${cmake_bootstrap_dir}/cmsys/Configure.h" KWSYS_BUILD_SHARED 0
+
+cmake_replace_string "${cmake_source_dir}/Source/kwsys/kwsys_stl.h.in" \
+   "${cmake_bootstrap_dir}/cmsys/stl/stl.h.in" KWSYS_NAMESPACE cmsys
+
 for a in string vector; do
-  cmake_replace_string "${cmake_bootstrap_dir}/cmsys/std/stl.h.in" \
-    "${cmake_bootstrap_dir}/cmsys/std/${a}" KWSYS_STL_HEADER ${a}
+  cmake_replace_string "${cmake_bootstrap_dir}/cmsys/stl/stl.h.in" \
+    "${cmake_bootstrap_dir}/cmsys/stl/${a}" KWSYS_STL_HEADER ${a}
 done
 
 # Generate Makefile
-dep="cmConfigure.h `cmake_escape \"${cmake_source_dir}\"`/Source/*.h"
+dep="cmConfigure.h cmsys/Configure.hxx cmsys/Configure.h `cmake_escape \"${cmake_source_dir}\"`/Source/*.h"
 objs=""
 for a in ${CMAKE_CXX_SOURCES} ${CMAKE_C_SOURCES} ${KWSYS_CXX_SOURCES} ${KWSYS_C_SOURCES}; do
   objs="${objs} ${a}.o"
@@ -673,8 +786,10 @@ if [ "x${cmake_cxx_flags}" != "x" ]; then
   cmake_cxx_flags="${cmake_cxx_flags} "
 fi
 
-cmake_c_flags="${cmake_c_flags}-I`cmake_escape \"${cmake_source_dir}/Source\"` -I`cmake_escape \"${cmake_bootstrap_dir}\"`"
-cmake_cxx_flags="${cmake_cxx_flags}-I`cmake_escape \"${cmake_source_dir}/Source\"` -I`cmake_escape \"${cmake_bootstrap_dir}\"`"
+cmake_c_flags="${cmake_c_flags}-I`cmake_escape \"${cmake_source_dir}/Source\"` \
+  -I`cmake_escape \"${cmake_bootstrap_dir}\"`"
+cmake_cxx_flags="${cmake_cxx_flags}-I`cmake_escape \"${cmake_source_dir}/Source\"` \
+  -I`cmake_escape \"${cmake_bootstrap_dir}\"`"
 echo "cmake: ${objs}" > "${cmake_bootstrap_dir}/Makefile"
 echo "	${cmake_cxx_compiler} ${LDFLAGS} ${cmake_cxx_flags} ${objs} -o cmake" >> "${cmake_bootstrap_dir}/Makefile"
 for a in ${CMAKE_CXX_SOURCES}; do
@@ -731,7 +846,7 @@ else
 fi
 RES=$?
 if [ "${RES}" -ne "0" ]; then
-  cmake_error "Problem while bootstrapping CMake"
+  cmake_error 9 "Problem while running ${cmake_make_processor}"
 fi
 cd "${cmake_binary_dir}"
 
