@@ -41,6 +41,11 @@ public:
   virtual bool InitialPass(std::vector<std::string> const& args);
 
   /**
+   * This determines if the command is invoked when in script mode.
+   */
+  virtual bool IsScriptable() { return true; }
+
+  /**
    * The name of the command as specified in CMakeList.txt.
    */
   virtual const char* GetName() { return "WRITE_FILE";}

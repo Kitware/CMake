@@ -51,6 +51,11 @@ public:
   virtual bool IsInherited() {return false;}
 
   /**
+   * This determines if the command is invoked when in script mode.
+   */
+  virtual bool IsScriptable() { return true; }
+
+  /**
    * The name of the command as specified in CMakeList.txt.
    */
   virtual const char* GetName() {return "FIND_LIBRARY";}

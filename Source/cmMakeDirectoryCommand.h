@@ -51,6 +51,11 @@ public:
   virtual const char* GetName() { return "MAKE_DIRECTORY";}
   
   /**
+   * This determines if the command is invoked when in script mode.
+   */
+  virtual bool IsScriptable() { return true; }
+
+  /**
    * Succinct documentation.
    */
   virtual const char* GetTerseDocumentation() 

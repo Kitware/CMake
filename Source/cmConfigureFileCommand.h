@@ -39,6 +39,11 @@ public:
   virtual const char* GetName() { return "CONFIGURE_FILE";}
 
   /**
+   * This determines if the command is invoked when in script mode.
+   */
+  virtual bool IsScriptable() { return true; }
+
+  /**
    * Succinct documentation.
    */
   virtual const char* GetTerseDocumentation() 
