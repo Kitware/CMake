@@ -38,6 +38,7 @@ class cmGlobInternal
 public:
   std::vector<std::string> Files;
   std::vector<cmsys::RegularExpression> Expressions;
+  std::vector<std::string> TextExpressions;
 };
 
 cmGlob::cmGlob()
@@ -196,6 +197,7 @@ void cmGlob::RecurseDirectory(const std::string& dir, bool dir_only)
 void cmGlob::ProcessDirectory(std::string::size_type start, 
   const std::string& dir, bool dir_only)
 {
+  //std::cout << "ProcessDirectory: " << dir << std::endl;
   bool last = ( start == m_Internals->Expressions.size()-1 );
   if ( last && m_Recurse )
     {
@@ -233,6 +235,10 @@ void cmGlob::ProcessDirectory(std::string::size_type start,
       fullname = dir + "/" + fname;
       }
 
+    //std::cout << "Look at file: " << fname << std::endl;
+    //std::cout << "Match: " << m_Internals->TextExpressions[start].c_str() << std::endl;
+    //std::cout << "Full name: " << fullname << std::endl;
+
     if ( (!dir_only || !last) && !cmsys::SystemTools::FileIsDirectory(fullname.c_str()) )
       {
       continue;
@@ -246,7 +252,7 @@ void cmGlob::ProcessDirectory(std::string::size_type start,
         }
       else
         {
-        this->ProcessDirectory(start+1, fullname, dir_only);
+        this->ProcessDirectory(start+1, fullname + "/", dir_only);
         }
       }
     }
@@ -267,33 +273,61 @@ bool cmGlob::FindFiles(const std::string& inexpr)
     expr += "/" + inexpr;
     }
 
-#if defined( CM_GLOB_SUPPORT_NETWORK_PATHS )
   int skip = 0;
-  // Handle network paths
-  if ( expr[0] == '/' && expr[1] == '/' )
+
+  int last_slash = 0;
+  for ( cc = 0; cc < expr.size(); cc ++ )
     {
-    int cnt = 0;
-    for ( cc = 2; cc < expr.size(); cc ++ )
+    if ( cc > 0 && expr[cc] == '/' && expr[cc-1] != '\\' )
       {
-      if ( expr[cc] == '/' )
+      last_slash = cc;
+      }
+    if ( cc > 0 && 
+      (expr[cc] == '[' || expr[cc] == '?' || expr[cc] == '*') &&
+      expr[cc-1] != '\\' )
+      {
+      break;
+      }
+    }
+  if ( last_slash > 0 )
+    {
+    //std::cout << "I can skip: " << inexpr.substr(0, last_slash) << std::endl;
+    skip = last_slash;
+    }
+  if ( skip == 0 )
+    {
+#if defined( CM_GLOB_SUPPORT_NETWORK_PATHS )
+    // Handle network paths
+    if ( expr[0] == '/' && expr[1] == '/' )
+      {
+      int cnt = 0;
+      for ( cc = 2; cc < expr.size(); cc ++ )
         {
-        cnt ++;
-        if ( cnt == 2 )
+        if ( expr[cc] == '/' )
           {
-          break;
+          cnt ++;
+          if ( cnt == 2 )
+            {
+            break;
+            }
           }
         }
+      skip = cc + 1;
       }
-    skip = cc + 1;
+    else
+#endif
+      // Handle drive letters on Windows
+      if ( expr[1] == ':' && expr[0] != '/' )
+        {
+        skip = 2;
+        }
+    }
+
+  if ( skip > 0 )
+    {
     expr = expr.substr(skip);
     }
-  else
-#endif
 
-  if ( expr[1] == ':' && expr[0] != '/' )
-    {
-    expr = expr.substr(2);
-    }
   cexpr = "";
   for ( cc = 0; cc < expr.size(); cc ++ )
     {
@@ -316,29 +350,11 @@ bool cmGlob::FindFiles(const std::string& inexpr)
     this->AddExpression(cexpr.c_str());
     }
 
-#ifdef _WIN32
   // Handle network paths
   if ( skip > 0 )
     {
-    this->ProcessDirectory(0, inexpr.substr(0, skip),
+    this->ProcessDirectory(0, inexpr.substr(0, skip) + "/",
       true);     
-    }
-  else
-#endif
-
-  if ( inexpr[1] == ':' && inexpr[0] != '/' )
-    {
-    std::string startdir = "A:/";
-    if ( inexpr[0] >= 'a' && inexpr[0] <= 'z' ||
-      inexpr[0] >= 'A' && inexpr[0] <= 'Z')
-      {
-      startdir[0] = inexpr[0];
-      this->ProcessDirectory(0, startdir, true);
-      }
-    else 
-      {
-      return false;
-      }
     }
   else
     {
@@ -352,5 +368,6 @@ void cmGlob::AddExpression(const char* expr)
   m_Internals->Expressions.push_back(
     cmsys::RegularExpression(
       this->ConvertExpression(expr).c_str()));
+  m_Internals->TextExpressions.push_back(this->ConvertExpression(expr));
 }
 
