@@ -100,6 +100,10 @@ public:
   ///! Get the include flags for the current makefile and language
   const char* GetIncludeFlags(const char* lang); 
 
+  ///! for existing files convert to output path and short path if spaces
+  std::string ConvertToOutputForExisting(const char* p);
+  
+
 protected:
 
   ///! Fill out these strings for the given target.  Libraries to link, flags, and linkflags.
@@ -115,9 +119,6 @@ protected:
   /** Get the include flags for the current makefile and language.  */
   void GetIncludeDirectories(std::vector<std::string>& dirs);
 
-  ///! for existing files convert to output path and short path if spaces
-  std::string ConvertToOutputForExisting(const char* p);
-  
   // Expand rule variables in CMake of the type found in language rules
   void ExpandRuleVariables(std::string& string,
                            const char* language,

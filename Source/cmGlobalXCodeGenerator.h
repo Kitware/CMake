@@ -101,11 +101,16 @@ private:
                      cmXCodeObject* dependTarget);
   void AddLinkLibrary(cmXCodeObject* target,
                       const char*);
+  void ConfigureOutputPaths();
 private:
   std::vector<cmXCodeObject*> m_XCodeObjects;
   cmXCodeObject* m_RootObject;
   cmXCodeObject* m_MainGroupChildren;
+  cmXCodeObject* m_SourcesGroupChildren;
+  cmXCodeObject* m_ExternalGroupChildren;
   cmMakefile* m_CurrentMakefile;
+  std::string m_LibraryOutputPath;
+  std::string m_ExecutableOutputPath;
   cmLocalGenerator* m_CurrentLocalGenerator;
 };
 

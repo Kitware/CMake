@@ -1879,6 +1879,23 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
       makeCommand += "ALL_BUILD";
       }
     }
+  else if (lowerCaseCommand.find("xcode") != std::string::npos)
+    {
+     makeCommand += " -project ";
+     makeCommand += m_BuildProject;
+     makeCommand += ".xcode";
+     makeCommand += " build ";
+     if (m_BuildTarget.size())
+       {
+       makeCommand += "-target ";
+       makeCommand += m_BuildTarget;
+       }
+     else
+       {
+       makeCommand += "-alltargets ";
+       }
+     makeCommand += " -buildstyle Development ";
+    }
   else if (lowerCaseCommand.find("make") != std::string::npos)
     {
     // assume a make sytle program

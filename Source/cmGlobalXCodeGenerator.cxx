@@ -24,15 +24,14 @@
 
 
 //TODO
-// EXECUTABLE_OUTPUT_PATH/LIBRARY_OUTPUT_PATH
-// LinkDirectories
-// correct placment of include paths
 // custom commands
 // custom targets
 // ALL_BUILD
 // RUN_TESTS
+// add a group for Sources Headers, and other cmake group stuff
 
-
+// for each target create a custom build phase that is run first
+// it can have inputs and outputs should just be a makefile
 
 // per file flags howto
 // 115281011528101152810000 = {
@@ -61,6 +60,8 @@ cmGlobalXCodeGenerator::cmGlobalXCodeGenerator()
   m_FindMakeProgramFile = "CMakeFindXCode.cmake";
   m_RootObject = 0;
   m_MainGroupChildren = 0;
+  m_SourcesGroupChildren = 0;
+  m_ExternalGroupChildren = 0;
 }
 
 //----------------------------------------------------------------------------
@@ -130,6 +131,47 @@ int cmGlobalXCodeGenerator::TryCompile(const char *,
     }
   cmSystemTools::ChangeDirectory(cwd.c_str());
   return retVal;
+}
+
+
+void cmGlobalXCodeGenerator::ConfigureOutputPaths()
+{
+  // Format the library and executable output paths.
+  m_LibraryOutputPath = 
+    m_CurrentMakefile->GetSafeDefinition("LIBRARY_OUTPUT_PATH");
+  if(m_LibraryOutputPath.size() == 0)
+    {
+    m_LibraryOutputPath = m_CurrentMakefile->GetCurrentOutputDirectory();
+    }
+  // make sure there is a trailing slash
+  if(m_LibraryOutputPath.size() && 
+     m_LibraryOutputPath[m_LibraryOutputPath.size()-1] != '/')
+    {
+    m_LibraryOutputPath += "/";
+    if(!cmSystemTools::MakeDirectory(m_LibraryOutputPath.c_str()))
+      {
+      cmSystemTools::Error("Error creating directory ",
+                           m_LibraryOutputPath.c_str());
+      }
+    }
+  m_CurrentMakefile->AddLinkDirectory(m_LibraryOutputPath.c_str());
+  m_ExecutableOutputPath = 
+    m_CurrentMakefile->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
+  if(m_ExecutableOutputPath.size() == 0)
+    {
+    m_ExecutableOutputPath = m_CurrentMakefile->GetCurrentOutputDirectory();
+    }
+  // make sure there is a trailing slash
+  if(m_ExecutableOutputPath.size() && 
+     m_ExecutableOutputPath[m_ExecutableOutputPath.size()-1] != '/')
+    {
+    m_ExecutableOutputPath += "/";
+    if(!cmSystemTools::MakeDirectory(m_ExecutableOutputPath.c_str()))
+      {
+      cmSystemTools::Error("Error creating directory ",
+                           m_ExecutableOutputPath.c_str());
+      }
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -204,7 +246,7 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
     ->AppendFlags(flags, sf->GetProperty("COMPILE_FLAGS"));
 
   cmXCodeObject* fileRef = this->CreateObject(cmXCodeObject::PBXFileReference);
-  m_MainGroupChildren->AddObject(fileRef);
+  m_SourcesGroupChildren->AddObject(fileRef);
   cmXCodeObject* buildFile = this->CreateObject(cmXCodeObject::PBXBuildFile);
   buildFile->AddAttribute("fileRef", this->CreateObjectReference(fileRef));
   cmXCodeObject* settings = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
@@ -256,7 +298,10 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
        cmtarget.GetType() == cmTarget::INSTALL_FILES ||
        cmtarget.GetType() == cmTarget::INSTALL_PROGRAMS)
       {
-      targets.push_back(this->CreateUtilityTarget(cmtarget));
+      if(cmtarget.GetType() == cmTarget::UTILITY)
+        {
+        targets.push_back(this->CreateUtilityTarget(cmtarget));
+        }
       continue;
       }
 
@@ -313,6 +358,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
                                                  std::string& productType,
                                                  std::string& productName)
 {
+  this->ConfigureOutputPaths();
   std::string flags;
   bool shared = ((target.GetType() == cmTarget::SHARED_LIBRARY) ||
                  (target.GetType() == cmTarget::MODULE_LIBRARY));
@@ -340,23 +386,28 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     m_CurrentLocalGenerator->AddSharedFlags(flags, lang, shared);
     }
 
-    // Add include directory flags.
-  m_CurrentLocalGenerator->
-    AppendFlags(flags, m_CurrentLocalGenerator->GetIncludeFlags(lang));
-    
-  // Add include directory flags.
+  // Add define flags
   m_CurrentLocalGenerator->AppendFlags(flags,
                                        m_CurrentMakefile->GetDefineFlags());
   cmSystemTools::ReplaceString(flags, "\"", "\\\"");
   productName = target.GetName();
+  bool needLinkDirs = true;
+  
   switch(target.GetType())
     {
     case cmTarget::STATIC_LIBRARY:
       {
+      needLinkDirs = false;
+      if(m_LibraryOutputPath.size())
+        {
+        buildSettings->AddAttribute("SYMROOT", 
+                                    this->CreateString
+                                    (m_LibraryOutputPath.c_str()));
+        }
       productName += ".a";
       std::string t = "lib";
       t += productName;
-      productName = t;
+      productName = t;  
       productType = "com.apple.product-type.library.static";
       fileType = "archive.ar";
       buildSettings->AddAttribute("LIBRARY_STYLE", 
@@ -365,18 +416,39 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       }
     
     case cmTarget::MODULE_LIBRARY:
+      {
+      if(m_LibraryOutputPath.size())
+        {
+        buildSettings->AddAttribute("SYMROOT", 
+                                    this->CreateString
+                                    (m_LibraryOutputPath.c_str()));
+        }
       buildSettings->AddAttribute("LIBRARY_STYLE", 
                                   this->CreateString("DYNAMIC"));
       productName += ".so";
+      std::string t = "lib";
+      t += productName;
+      productName = t;
       buildSettings->AddAttribute("OTHER_LDFLAGS",
                                   this->CreateString("-bundle"));
       productType = "com.apple.product-type.library.dynamic";
       fileType = "compiled.mach-o.dylib";
       break;
+      }
     case cmTarget::SHARED_LIBRARY:
+      {
+      if(m_LibraryOutputPath.size())
+        {
+        buildSettings->AddAttribute("SYMROOT", 
+                                    this->CreateString
+                                    (m_LibraryOutputPath.c_str()));
+        }
       buildSettings->AddAttribute("LIBRARY_STYLE", 
                                   this->CreateString("DYNAMIC"));
       productName += ".dylib";
+      std::string t = "lib";
+      t += productName;
+      productName = t;
       buildSettings->AddAttribute("DYLIB_COMPATIBILITY_VERSION", 
                                   this->CreateString("1"));
       buildSettings->AddAttribute("DYLIB_CURRENT_VERSION", 
@@ -386,7 +458,14 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       productType = "com.apple.product-type.library.dynamic";
       fileType = "compiled.mach-o.dylib";
       break;
+      }
     case cmTarget::EXECUTABLE:
+      if(m_ExecutableOutputPath.size())
+        {
+        buildSettings->AddAttribute("SYMROOT", 
+                                    this->CreateString
+                                    (m_ExecutableOutputPath.c_str()));
+        }
       fileType = "compiled.mach-o.executable";
       productType = "com.apple.product-type.tool";
       break;
@@ -397,6 +476,48 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       break;
     case cmTarget::INSTALL_PROGRAMS:
       break;
+    }
+  
+  std::string dirs;
+  if(needLinkDirs)
+    {
+    // Try to emit each search path once
+    std::set<cmStdString> emitted;
+    // Some search paths should never be emitted
+    emitted.insert("");
+    emitted.insert("/usr/lib");
+    std::vector<std::string> const& linkdirs =
+      target.GetLinkDirectories();
+    for(std::vector<std::string>::const_iterator l = linkdirs.begin();
+        l != linkdirs.end(); ++l)
+      {
+      std::string libpath = 
+        m_CurrentLocalGenerator->ConvertToOutputForExisting(l->c_str());
+      if(emitted.insert(libpath).second)
+        {
+        dirs += libpath + " ";
+        }
+      }
+    if(dirs.size())
+      {
+      buildSettings->AddAttribute("LIBRARY_SEARCH_PATHS", 
+                                  this->CreateString(dirs.c_str()));
+      }
+    }
+  dirs = "";
+  std::vector<std::string>& includes =
+    m_CurrentMakefile->GetIncludeDirectories();
+  std::vector<std::string>::iterator i = includes.begin();
+  for(;i != includes.end(); ++i)
+    {
+    std::string incpath = 
+        m_CurrentLocalGenerator->ConvertToOutputForExisting(i->c_str());
+    dirs += incpath + " ";
+    }
+  if(dirs.size())
+    {
+    buildSettings->AddAttribute("HEADER_SEARCH_PATHS", 
+                                this->CreateString(dirs.c_str()));
     }
   buildSettings->AddAttribute("GCC_OPTIMIZATION_LEVEL", 
                               this->CreateString("0"));
@@ -492,7 +613,7 @@ cmGlobalXCodeGenerator::CreateXCodeTarget(cmTarget& cmtarget,
   fileRef->AddAttribute("explicitFileType", 
                         this->CreateString(fileTypeString.c_str()));
   fileRef->AddAttribute("path", this->CreateString(productName.c_str()));
-  fileRef->AddAttribute("refType", this->CreateString("3"));
+  fileRef->AddAttribute("refType", this->CreateString("0"));
   fileRef->AddAttribute("sourceTree",
                         this->CreateString("BUILT_PRODUCTS_DIR"));
   
@@ -616,7 +737,7 @@ void cmGlobalXCodeGenerator::AddLinkLibrary(cmXCodeObject* target,
       buildPhases->GetObject(cmXCodeObject::PBXFrameworksBuildPhase);
     cmXCodeObject* files = frameworkBuildPhase->GetObject("files");
     files->AddObject(buildfile);
-    m_MainGroupChildren->AddObject(fileRef);
+    m_ExternalGroupChildren->AddObject(fileRef);
     }
   else
     {
@@ -690,14 +811,7 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
 }
 
 // to force the location of a target
-//6FE4372B07AAF276004FB461 = {
-//buildSettings = {
-//COPY_PHASE_STRIP = NO;
-//SYMROOT = "/Users/kitware/Bill/CMake-build/test/build/bin";
-//};
-//isa = PBXBuildStyle;
-//name = Development;
-//};
+// add this to build settings of target SYMROOT = /tmp/;
 
 //----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::CreateXCodeObjects(cmLocalGenerator* ,
@@ -707,6 +821,8 @@ void cmGlobalXCodeGenerator::CreateXCodeObjects(cmLocalGenerator* ,
 {
   this->ClearXCodeObjects(); 
   m_RootObject = 0;
+  m_ExternalGroupChildren = 0;
+  m_SourcesGroupChildren = 0;
   m_MainGroupChildren = 0;
   cmXCodeObject* group = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
   group->AddAttribute("COPY_PHASE_STRIP", this->CreateString("NO"));
@@ -733,6 +849,25 @@ void cmGlobalXCodeGenerator::CreateXCodeObjects(cmLocalGenerator* ,
   mainGroup->AddAttribute("refType", this->CreateString("4"));
   mainGroup->AddAttribute("sourceTree", this->CreateString("<group>"));
 
+  cmXCodeObject* sourcesGroup = this->CreateObject(cmXCodeObject::PBXGroup);
+  m_SourcesGroupChildren = 
+    this->CreateObject(cmXCodeObject::OBJECT_LIST);
+  sourcesGroup->AddAttribute("name", this->CreateString("Sources"));
+  sourcesGroup->AddAttribute("children", m_SourcesGroupChildren);
+  sourcesGroup->AddAttribute("refType", this->CreateString("4"));
+  sourcesGroup->AddAttribute("sourceTree", this->CreateString("<group>"));
+  m_MainGroupChildren->AddObject(sourcesGroup);
+  
+  cmXCodeObject* externalGroup = this->CreateObject(cmXCodeObject::PBXGroup);
+  m_ExternalGroupChildren = 
+    this->CreateObject(cmXCodeObject::OBJECT_LIST);
+  externalGroup->AddAttribute("name", 
+                              this->CreateString("External Libraries and Frameworks"));
+  externalGroup->AddAttribute("children", m_ExternalGroupChildren);
+  externalGroup->AddAttribute("refType", this->CreateString("4"));
+  externalGroup->AddAttribute("sourceTree", this->CreateString("<group>"));
+  m_MainGroupChildren->AddObject(externalGroup);
+  
   cmXCodeObject* productGroup = this->CreateObject(cmXCodeObject::PBXGroup);
   productGroup->AddAttribute("name", this->CreateString("Products"));
   productGroup->AddAttribute("refType", this->CreateString("4"));
