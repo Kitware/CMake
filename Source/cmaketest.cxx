@@ -72,6 +72,10 @@ int main (int argc, char *argv[])
     {
     std::cerr << "Error: cmaketest does not have a valid MAKEPROGRAM\n";
     }
+  makeCommand = cmSystemTools::EscapeSpaces(makeCommand.c_str());
+#if defined(_WIN32) && !defined(__CYGWIN__)      
+  cmSystemTools::ConvertToWindowsSlashes(makeCommand);
+#endif
   std::string lowerCaseCommand = makeCommand;
   cmSystemTools::LowerCase(lowerCaseCommand);
   // if msdev is the make program then do the following
