@@ -304,6 +304,7 @@ bool TryExecutable(const char *dir, const char *file,
 
 cmCTest::cmCTest() 
 { 
+  m_BuildNoClean           = false;
   m_BuildTwoConfig         = false;
   m_UseIncludeRegExp       = false;
   m_UseExcludeRegExp       = false;
