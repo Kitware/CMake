@@ -26,6 +26,10 @@
 # include <sys/stat.h>
 #endif
 
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+# include <cmzlib/zlib.h>
+#endif
+
 //----------------------------------------------------------------------------
 cmGeneratedFileStream::cmGeneratedFileStream():
   cmGeneratedFileStreamBase(), Stream()
@@ -82,11 +86,18 @@ void cmGeneratedFileStream::SetCopyIfDifferent(bool copy_if_different)
 }
 
 //----------------------------------------------------------------------------
+void cmGeneratedFileStream::SetCompression(bool compression)
+{
+  m_Compress = compression;
+}
+
+//----------------------------------------------------------------------------
 cmGeneratedFileStreamBase::cmGeneratedFileStreamBase():
   m_Name(),
   m_TempName(),
   m_CopyIfDifferent(false),
-  m_Okay(false)
+  m_Okay(false),
+  m_Compress(false)
 {
 }
 
@@ -95,7 +106,8 @@ cmGeneratedFileStreamBase::cmGeneratedFileStreamBase(const char* name):
   m_Name(name),
   m_TempName(name),
   m_CopyIfDifferent(false),
-  m_Okay(false)
+  m_Okay(false),
+  m_Compress(false)
 {
   // Create the name of the temporary file.
   m_TempName += ".tmp";
@@ -107,22 +119,39 @@ cmGeneratedFileStreamBase::cmGeneratedFileStreamBase(const char* name):
 //----------------------------------------------------------------------------
 cmGeneratedFileStreamBase::~cmGeneratedFileStreamBase()
 {
+  std::string resname = m_Name;
+  if ( m_Compress )
+    {
+    resname += ".gz";
+    }
+
   // Only consider replacing the destination file if no error
   // occurred.
   if(m_Okay &&
-     (!m_CopyIfDifferent ||
-      cmSystemTools::FilesDiffer(m_TempName.c_str(), m_Name.c_str())))
+    (!m_CopyIfDifferent ||
+     cmSystemTools::FilesDiffer(m_TempName.c_str(), resname.c_str())))
     {
     // The destination is to be replaced.  Rename the temporary to the
     // destination atomically.
-    this->RenameFile(m_TempName.c_str(), m_Name.c_str());
+    if ( m_Compress )
+      {
+      std::string gzname = m_TempName + ".temp.gz";
+      if ( this->CompressFile(m_TempName.c_str(), gzname.c_str()) )
+        {
+        this->RenameFile(gzname.c_str(), resname.c_str());
+        }
+      cmSystemTools::RemoveFile(gzname.c_str());
+      }
+    else
+      {
+      this->RenameFile(m_TempName.c_str(), resname.c_str());
+      }
     }
-  else
-    {
-    // The destination was not replaced.  Just delete the temporary
-    // file.
-    cmSystemTools::RemoveFile(m_TempName.c_str());
-    }
+
+  // Else, the destination was not replaced.
+  //
+  // Always delete the temporary file. We never want it to stay around.
+  cmSystemTools::RemoveFile(m_TempName.c_str());
 }
 
 //----------------------------------------------------------------------------
@@ -137,6 +166,41 @@ void cmGeneratedFileStreamBase::Open(const char* name)
 
   // Make sure the temporary file that will be used is not present.
   cmSystemTools::RemoveFile(m_TempName.c_str());
+}
+
+//----------------------------------------------------------------------------
+int cmGeneratedFileStreamBase::CompressFile(const char* oldname,
+                                            const char* newname)
+{
+#ifdef CMAKE_BUILD_WITH_CMAKE
+  gzFile gf = cm_zlib_gzopen(newname, "w");
+  if ( !gf )
+    {
+    return 0;
+    }
+  FILE* ifs = fopen(oldname, "r");
+  if ( !ifs )
+    {
+    return 0;
+    }
+  size_t res;
+  const size_t BUFFER_SIZE = 1024;
+  char buffer[BUFFER_SIZE];
+  while ( (res = fread(buffer, 1, BUFFER_SIZE, ifs)) > 0 )
+    {
+    if ( !cm_zlib_gzwrite(gf, buffer, res) )
+      {
+      fclose(ifs);
+      cm_zlib_gzclose(gf);
+      return 0;
+      }
+    }
+  fclose(ifs);
+  cm_zlib_gzclose(gf);
+  return 1;
+#else
+  return 0;
+#endif
 }
 
 //----------------------------------------------------------------------------

@@ -41,6 +41,9 @@ protected:
   // Internal file replacement implementation.
   int RenameFile(const char* oldname, const char* newname);
 
+  // Internal file compression implementation.
+  int CompressFile(const char* oldname, const char* newname);
+
   // The name of the final destination file for the output.
   std::string m_Name;
 
@@ -52,6 +55,9 @@ protected:
 
   // Whether the destination file should be replaced.
   bool m_Okay;
+
+  // Whether the destionation file is compressed
+  bool m_Compress;
 };
 
 /** \class cmGeneratedFileStream
@@ -103,6 +109,11 @@ public:
    * Set whether copy-if-different is done.
    */
   void SetCopyIfDifferent(bool copy_if_different);
+
+  /**
+   * Set whether compression is done.
+   */
+  void SetCompression(bool compression);
 };
 
 #endif
