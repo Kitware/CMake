@@ -79,6 +79,8 @@ FIND_LIBRARY(TK_STUB_LIBRARY_DEBUG
 )
 
 SET (TCLTK_POSSIBLE_INCLUDE_PATHS
+  "${TCL_TCLSH_PATH}/../include"
+  "${TK_WISH_PATH}/../include"
   /usr/include 
   /usr/local/include
   /usr/include/tcl8.4
@@ -91,8 +93,6 @@ SET (TCLTK_POSSIBLE_INCLUDE_PATHS
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.3;Root]/include
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.2;Root]/include
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.0;Root]/include
-  "${TCL_TCLSH_PATH}/../include"
-  "${TK_WISH_PATH}/../include"
 )
 
 FIND_PATH(TCL_INCLUDE_PATH tcl.h 
