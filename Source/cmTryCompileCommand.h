@@ -58,7 +58,7 @@ public:
   /**
    * This is the core code for try compile. It is here so that other
    * commands, such as TryRun can access the same logic without
-   * dumplication. 
+   * duplication. 
    */
   static int CoreTryCompileCode(
     cmMakefile *mf, std::vector<std::string> const& argv, bool clean);

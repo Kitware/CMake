@@ -173,6 +173,12 @@ int cmTryCompileCommand::CoreTryCompileCode(
     fclose(fout);
     projectName = "CMAKE_TRY_COMPILE";
     targetName = "cmTryCompileExec";
+    // if the source is not in CMakeTmp 
+    if(source.find(argv[1] + "/CMakeTmp") == source.npos)
+      {
+      mf->AddCMakeDependFile(source.c_str());
+      }
+    
     }
   // else the srcdir bindir project target signature
   else
