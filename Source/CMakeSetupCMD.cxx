@@ -104,6 +104,7 @@ int main(int ac, char** av)
   makefile.SetMakefileGenerator(pg);
   makefile.MakeStartDirectoriesCurrent();
   cmCacheManager::GetInstance()->LoadCache(&makefile);
+  cmCacheManager::GetInstance()->DefineCache(&makefile);
   makefile.ReadListFile(av[1]);
   makefile.GenerateMakefile();
   cmCacheManager::GetInstance()->SaveCache(&makefile);

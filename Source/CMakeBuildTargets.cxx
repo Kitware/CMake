@@ -116,6 +116,7 @@ int main(int ac, char** av)
   // Read and parse the input makefile
   mf.MakeStartDirectoriesCurrent();
   cmCacheManager::GetInstance()->LoadCache(&mf);
+  cmCacheManager::GetInstance()->DefineCache(&mf);
   if(!mf.ReadListFile(av[1]))
     {
     Usage(av[0]);
