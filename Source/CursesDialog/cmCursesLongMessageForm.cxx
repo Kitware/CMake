@@ -4,6 +4,11 @@
 #include "cmCursesLongMessageForm.h"
 #include "cmCursesMainForm.h"
 
+inline int ctrl(int z)
+{
+    return (z&037);
+} 
+
 cmCursesLongMessageForm::cmCursesLongMessageForm(std::vector<std::string> 
 						 const& messages, const char* 
 						 title)
@@ -160,13 +165,21 @@ void cmCursesLongMessageForm::HandleInput()
       {
       break;
       }
-    else if ( key == KEY_DOWN )
+    else if ( key == KEY_DOWN || key == ctrl('n') )
       {
       form_driver(m_Form, REQ_SCR_FLINE);
       }
-    else if ( key == KEY_UP )
+    else if ( key == KEY_UP  || key == ctrl('p') )
       {
       form_driver(m_Form, REQ_SCR_BLINE);
+      }
+    else if ( key == KEY_NPAGE || key == ctrl('d') )
+      {
+      form_driver(m_Form, REQ_SCR_FPAGE);
+      }
+    else if ( key == KEY_PPAGE || key == ctrl('u') )
+      {
+      form_driver(m_Form, REQ_SCR_BPAGE);
       }
 
     this->UpdateStatusBar();

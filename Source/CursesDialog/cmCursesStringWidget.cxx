@@ -88,11 +88,6 @@ bool cmCursesStringWidget::HandleInput(int& key, FORM* form, WINDOW* w)
       form_driver(form, REQ_END_FIELD);
       }
     else if ( key == ctrl('d') || key == 127 || 
-	      key == KEY_BACKSPACE )
-      {
-      form_driver(form, REQ_DEL_PREV);
-      }
-    else if ( key == ctrl('d') || key == 127 || 
 	      key == KEY_BACKSPACE || key == KEY_DC )
       {
       form_driver(form, REQ_DEL_PREV);
