@@ -1340,7 +1340,7 @@ cmSourceFile* cmMakefile::GetSource(const char* sourceName) const
   for(std::vector<cmSourceFile*>::const_iterator i = m_SourceFiles.begin();
       i != m_SourceFiles.end(); ++i)
     {
-    if ((*i)->GetSourceNameReference() == s)
+    if ((*i)->GetSourceName() == s)
       {
       if ((ext.size() == 0 || (ext == (*i)->GetSourceExtension())))
         {
