@@ -19,6 +19,31 @@
 #include "cmCacheManager.h"
 #include "cmDynamicLoader.h"
 #include "cmListFileCache.h"
+#include "cmDocumentation.h"
+
+//----------------------------------------------------------------------------
+static const cmDocumentationEntry cmDocumentationName[] =
+{
+  {"cmake",
+   "- Cross-Platform Makefile Generator.", 0},
+  {0,0,0}
+};
+
+//----------------------------------------------------------------------------
+static const cmDocumentationEntry cmDocumentationUsage[] =
+{
+  {0,
+   "cmake <path-to-source>", 0},
+  {0,0,0}
+};
+
+//----------------------------------------------------------------------------
+static const cmDocumentationEntry cmDocumentationDescription[] =
+{
+  {0,
+   "CMake reads ... ", 0},
+  {0,0,0}
+};
 
 int do_cmake(int ac, char** av);
 void updateProgress(const char *msg, float prog, void *cd);
@@ -36,6 +61,20 @@ int main(int ac, char** av)
 
 int do_cmake(int ac, char** av)
 {
+  cmDocumentation doc;
+  if(cmDocumentation::Type ht = doc.CheckOptions(ac, av))
+    {
+    cmake hcm;
+    std::vector<cmDocumentationEntry> commands;
+    hcm.GetCommandDocumentation(commands);
+    doc.SetName(cmDocumentationName);
+    doc.SetUsage(cmDocumentationUsage);
+    doc.SetDescription(cmDocumentationDescription);
+    doc.SetCommands(&commands[0]);
+    doc.Print(ht, std::cout);
+    return 0;
+    }
+  
   bool wiz = false;
   bool command = false;
   std::vector<std::string> args;
@@ -45,16 +84,13 @@ int do_cmake(int ac, char** av)
       {
       wiz = true;
       }
-    else
+    else if (strcmp(av[i], "-E") == 0)
       {
-      if (strcmp(av[i], "-E") == 0)
-        {
-        command = true;
-        }
-      else 
-        {
-        args.push_back(av[i]);
-        }
+      command = true;
+      }
+    else 
+      {
+      args.push_back(av[i]);
       }
     }
 

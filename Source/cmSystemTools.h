@@ -352,6 +352,8 @@ public:
    */
   static FileFormat GetFileFormat(const char* ext);
 
+  static std::string GetCurrentDateTime(const char* format);
+
   /**
    * On Windows 9x we need a comspec (command.com) substitute to run
    * programs correctly. This string has to be constant available

@@ -244,4 +244,12 @@ private:
 };
 #endif
 
+/** Standard documentation entry for cmDocumentation's formatting.  */
+struct cmDocumentationEntry
+{
+  const char* name;
+  const char* brief;
+  const char* full;
+};
+
 #endif

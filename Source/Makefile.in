@@ -19,6 +19,7 @@ cmakewizard.o  \
 cmakemain.o \
 cmMakeDepend.o \
 cmMakefile.o \
+cmDocumentation.o \
 cmGlobalGenerator.o \
 cmLocalGenerator.o \
 cmRegularExpression.o \

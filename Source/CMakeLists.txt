@@ -9,6 +9,7 @@ cmRegularExpression.cxx
 cmSourceFile.cxx
 cmSystemTools.cxx
 cmDirectory.cxx
+cmDocumentation.cxx
 cmDynamicLoader.cxx
 cmCommands.cxx
 cmTarget.cxx

@@ -2363,6 +2363,15 @@ void cmSystemTools::SplitProgramFromArgs(const char* path,
   args = "";
 }
 
+std::string cmSystemTools::GetCurrentDateTime(const char* format)
+{
+  char buf[1024];
+  time_t t;
+  time(&t);
+  strftime(buf, sizeof(buf), format, localtime(&t));
+  return buf;
+}
+
 std::string cmSystemTools::MakeCindentifier(const char* s)
 {
   std::string str(s);

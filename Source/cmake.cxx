@@ -1120,3 +1120,20 @@ void cmake::UpdateProgress(const char *msg, float prog)
     return;
     }
 }
+
+void cmake::GetCommandDocumentation(std::vector<cmDocumentationEntry>& v) const
+{
+  for(RegisteredCommandsMap::const_iterator j = m_Commands.begin();
+      j != m_Commands.end(); ++j)
+    {
+    cmDocumentationEntry e =
+      {
+        (*j).second->GetName(),
+        (*j).second->GetTerseDocumentation(),
+        (*j).second->GetFullDocumentation()
+      };
+    v.push_back(e);
+    }
+  cmDocumentationEntry empty = {0,0,0};
+  v.push_back(empty);
+}

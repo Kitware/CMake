@@ -232,6 +232,8 @@ class cmake
   ///! Get the variable watch object
   cmVariableWatch* GetVariableWatch() { return m_VariableWatch; }
 
+  void GetCommandDocumentation(std::vector<cmDocumentationEntry>&) const;
+  
 protected:
   typedef std::map<cmStdString, cmCommand*> RegisteredCommandsMap;
   RegisteredCommandsMap m_Commands;

@@ -17,6 +17,7 @@
 #include "../cmCacheManager.h"
 #include "../cmSystemTools.h"
 #include "../cmake.h"
+#include "../cmDocumentation.h"
 
 #include <signal.h>
 #include <sys/ioctl.h>
@@ -25,6 +26,30 @@
 
 #include <curses.h>
 #include <form.h>
+
+//----------------------------------------------------------------------------
+static const cmDocumentationEntry cmDocumentationName[] =
+{
+  {"ccmake",
+   "- Curses Interface for CMake.", 0},
+  {0,0,0}
+};
+
+//----------------------------------------------------------------------------
+static const cmDocumentationEntry cmDocumentationUsage[] =
+{
+  {0,
+   "ccmake <path-to-source>", 0},
+  {0,0,0}
+};
+
+//----------------------------------------------------------------------------
+static const cmDocumentationEntry cmDocumentationDescription[] =
+{
+  {0,
+   "CMake reads ... ", 0},
+  {0,0,0}
+};
 
 cmCursesForm* cmCursesForm::CurrentForm=0;
 
@@ -60,6 +85,16 @@ void CMakeErrorHandler(const char* message, const char* title, bool&, void* clie
 
 int main(int argc, char** argv)
 {
+  cmDocumentation doc;
+  if(cmDocumentation::Type ht = doc.CheckOptions(argc, argv))
+    {
+    doc.SetName(cmDocumentationName);
+    doc.SetUsage(cmDocumentationUsage);
+    doc.SetDescription(cmDocumentationDescription);
+    doc.Print(ht, std::cout);
+    return 0;
+    }  
+  
   bool debug = false;
   unsigned int i;
   int j;
