@@ -3,9 +3,9 @@
 # include files and libraries are. It also determines what the name of
 # the library is. This code sets the following variables:
 #
-#  PYTHON_LIBRARY       = the full path to the library found
-#  PYTHON_INCLUDE_PATH  = the path to where tcl.h can be found
-#  PYTHON_DEBUG_LIBRARY = the full path to the debug library found
+#  PYTHON_LIBRARIES       = the full path to the library found
+#  PYTHON_INCLUDE_PATH    = the path to where Python.h can be found
+#  PYTHON_DEBUG_LIBRARIES = the full path to the debug library found
 #
 
 IF(WIN32)
@@ -28,8 +28,12 @@ IF(WIN32)
 ENDIF(WIN32)
 
 FIND_LIBRARY(PYTHON_LIBRARY
-  NAMES python23 python2.3 python22 python2.2 python21 python2.1
-        python20 python2.0 python16 python1.6 python15 python1.5
+  NAMES python23 python2.3 python2.3.dll
+        python22 python2.2 python2.2.dll
+        python21 python2.1 python2.1.dll
+        python20 python2.0 python2.0.dll
+        python16 python1.6 python1.6.dll
+        python15 python1.5 python1.5.dll
   PATHS
   /usr/lib/python2.3/config
   /usr/lib/python2.2/config
@@ -46,6 +50,18 @@ FIND_LIBRARY(PYTHON_LIBRARY
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\1.6\\InstallPath]/libs
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\1.5\\InstallPath]/libs
 )
+IF(CYGWIN)
+  FIND_LIBRARY(PYTHON_LIBRARY
+    NAMES python2.3.dll python2.2.dll python2.1.dll
+          python2.0.dll python1.6.dll python1.5.dll
+    PATHS
+    /usr/lib/python2.3/config
+    /usr/lib/python2.2/config
+    /usr/lib/python2.1/config
+    /usr/lib/python2.0/config
+    /usr/lib/python1.6/config
+    /usr/lib/python1.5/config
+   )
 
 FIND_PATH(PYTHON_INCLUDE_PATH Python.h
   ~/Library/Frameworks/Python.framework/Headers
@@ -107,3 +123,10 @@ IF (APPLE)
     ENDIF(NOT PYTHON_DEBUG_LIBRARY)
   ENDIF(PYTHON_HAVE_FRAMEWORK)
 ENDIF (APPLE)
+
+# We use PYTHON_LIBRARY and PYTHON_DEBUG_LIBRARY for the cache entries
+# because they are meant to specify the location of a single library.
+# We now set the variables listed by the documentation for this
+# module.
+SET(PYTHON_LIBRARIES "${PYTHON_LIBRARY}")
+SET(PYTHON_DEBUG_LIBRARIES "${PYTHON_DEBUG_LIBRARY}")
