@@ -1241,6 +1241,11 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
 {
   // Process the arguments
   this->SetArgs(args);
+  if(cmSystemTools::GetErrorOccuredFlag())
+    {
+    CMakeCommandUsage(args[0].c_str());
+    return -1;
+    }
   
   // set the cmake command
   m_CMakeCommand = args[0];
