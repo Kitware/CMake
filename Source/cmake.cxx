@@ -1012,6 +1012,9 @@ int cmake::Configure()
     if(genName)
       {
       m_GlobalGenerator = this->CreateGlobalGenerator(genName);
+      }
+    if(m_GlobalGenerator)
+      {
       // set the global flag for unix style paths on cmSystemTools as 
       // soon as the generator is set.  This allows gmake to be used
       // on windows.
