@@ -1118,11 +1118,6 @@ void cmMakefile::AddDefaultDefinitions()
   this->AddDefinition("APPLE", "1");
 #endif
 
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  this->AddDefinition("CMAKE_CFG_INTDIR","$(IntDir)");
-#else
-  this->AddDefinition("CMAKE_CFG_INTDIR",".");
-#endif
   char temp[1024];
   sprintf(temp, "%d", cmMakefile::GetMinorVersion());
   this->AddDefinition("CMAKE_MINOR_VERSION", temp);

@@ -1096,6 +1096,7 @@ void cmLocalUnixMakefileGenerator::OutputDependLibs(std::ostream& fout)
   
   // for each target
   const cmTargets &tgts = m_Makefile->GetTargets();
+  
   for(cmTargets::const_iterator l = tgts.begin(); 
       l != tgts.end(); l++)
     {
@@ -1103,6 +1104,7 @@ void cmLocalUnixMakefileGenerator::OutputDependLibs(std::ostream& fout)
     std::set<std::string> emitted;
     if ((l->second.GetType() == cmTarget::SHARED_LIBRARY)
         || (l->second.GetType() == cmTarget::MODULE_LIBRARY)
+        || (l->second.GetType() == cmTarget::STATIC_LIBRARY)
         || (l->second.GetType() == cmTarget::EXECUTABLE)
         || (l->second.GetType() == cmTarget::WIN32_EXECUTABLE))
       {
@@ -1110,28 +1112,31 @@ void cmLocalUnixMakefileGenerator::OutputDependLibs(std::ostream& fout)
       
       // A library should not depend on itself!
       emitted.insert(l->first);
-      
-      // Now, look at all link libraries specific to this target.
-      const cmTarget::LinkLibraries& tlibs = l->second.GetLinkLibraries();
-      for(cmTarget::LinkLibraries::const_iterator lib = tlibs.begin();
-          lib != tlibs.end(); ++lib)
+      // for static libraries do not depend on other libraries
+      if(l->second.GetType() != cmTarget::STATIC_LIBRARY)
         {
-        // Record that this library was used.
-        used.insert(lib->first);
-
-        // Don't emit the same library twice for this target.
-        if(emitted.insert(lib->first).second)
+        // Now, look at all link libraries specific to this target.
+        const cmTarget::LinkLibraries& tlibs = l->second.GetLinkLibraries();
+        for(cmTarget::LinkLibraries::const_iterator lib = tlibs.begin();
+            lib != tlibs.end(); ++lib)
           {
-          // Output this dependency.
-          this->OutputLibDepend(fout, lib->first.c_str());
+          // Record that this library was used.
+          used.insert(lib->first);
+          
+          // Don't emit the same library twice for this target.
+          if(emitted.insert(lib->first).second)
+            {
+            // Output this dependency.
+            this->OutputLibDepend(fout, lib->first.c_str());
+            }
           }
         }
-
+      // for all targets depend on utilities
       // Now, look at all utilities specific to this target.
       const std::set<cmStdString>& tutils = l->second.GetUtilities();
       for(std::set<cmStdString>::const_iterator util = tutils.begin();
           util != tutils.end(); ++util)
-        {
+        { 
         // Record that this utility was used.
         used.insert(*util);
 
@@ -1142,7 +1147,6 @@ void cmLocalUnixMakefileGenerator::OutputDependLibs(std::ostream& fout)
           this->OutputExeDepend(fout, util->c_str());
           }
         }
-      
       fout << "\n";
       }
     }
@@ -1161,6 +1165,7 @@ void cmLocalUnixMakefileGenerator::OutputDependLibs(std::ostream& fout)
     // be stored in the cache
     std::string libPath = *lib + "_CMAKE_PATH";
     const char* cacheValue = m_Makefile->GetDefinition(libPath.c_str());
+
     // if cache and not the current directory add a rule, to
     // jump into the directory and build for the first time
     if(cacheValue &&
@@ -1228,14 +1233,16 @@ void cmLocalUnixMakefileGenerator::OutputDependLibs(std::ostream& fout)
           {
           exepath += "/";
           }
-        exepath += *lib;
+        std::string fullName = lib->c_str();
+        fullName += cmSystemTools::GetExecutableExtension();
+        exepath += fullName;
         this->OutputBuildTargetInDir(fout,
-                                      cacheValue,
-                                      lib->c_str(),
-                                      exepath.c_str(),
-                                      m_Makefile->
+                                     cacheValue,
+                                     fullName.c_str(),
+                                     exepath.c_str(),
+                                     m_Makefile->
                                      GetDefinition("EXECUTABLE_OUTPUT_PATH")
-                                      );
+          );
         }
       }
     }
@@ -1761,8 +1768,9 @@ void cmLocalUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
         {
         // escape spaces and convert to native slashes path for
         // the command
-        std::string command = 
-          cmSystemTools::ConvertToOutputPath(c->second.m_Command.c_str());
+        std::string command = c->second.m_Command;
+        cmSystemTools::ReplaceString(command, "/./", "/");
+        command = cmSystemTools::ConvertToOutputPath(command.c_str());
         command += " ";
         // now add the arguments
         command += c->second.m_Arguments;
@@ -1776,9 +1784,12 @@ void cmLocalUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
           for(std::set<std::string>::const_iterator d =
                 commandFiles.m_Depends.begin();
               d != commandFiles.m_Depends.end(); ++d)
-            {
-            std::string dep = cmSystemTools::ConvertToOutputPath(d->c_str());
-            depends +=  " ";
+            { 
+            std::string dep = *d;
+            cmSystemTools::ReplaceString(dep, "/./", "/");
+            cmSystemTools::ReplaceString(dep, "/$(IntDir)/", "/");
+            dep = cmSystemTools::ConvertToOutputPath(dep.c_str());
+            depends += " ";
             depends += dep;
             }
           // output rule
@@ -1801,7 +1812,10 @@ void cmLocalUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
                 commandFiles.m_Depends.begin();
               d != commandFiles.m_Depends.end(); ++d)
             {
-            std::string dep = cmSystemTools::ConvertToOutputPath(d->c_str());
+            std::string dep = *d;
+            cmSystemTools::ReplaceString(dep, "/./", "/");
+            cmSystemTools::ReplaceString(dep, "/$(IntDir)/", "/");
+            dep = cmSystemTools::ConvertToOutputPath(dep.c_str());
             depends += " ";
             depends += dep;
             } 

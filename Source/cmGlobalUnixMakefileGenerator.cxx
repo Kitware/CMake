@@ -28,6 +28,7 @@ cmGlobalUnixMakefileGenerator::cmGlobalUnixMakefileGenerator()
 void cmGlobalUnixMakefileGenerator::EnableLanguage(const char* lang, 
                                                    cmMakefile *mf)
 {
+  mf->AddDefinition("CMAKE_CFG_INTDIR",".");
   this->cmGlobalGenerator::EnableLanguage(lang, mf);
 }
 

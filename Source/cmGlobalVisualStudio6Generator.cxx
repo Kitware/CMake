@@ -27,6 +27,7 @@ cmGlobalVisualStudio6Generator::cmGlobalVisualStudio6Generator()
 void cmGlobalVisualStudio6Generator::EnableLanguage(const char* lang, 
                                                     cmMakefile *mf)
 {
+  mf->AddDefinition("CMAKE_CFG_INTDIR","$(IntDir)");
   mf->AddDefinition("CMAKE_GENERATOR_CC", "cl");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "cl");
   this->cmGlobalGenerator::EnableLanguage(lang, mf);
