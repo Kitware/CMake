@@ -105,3 +105,14 @@ CONFIGURE_FILE(${CMake_SOURCE_DIR}/Tests/.NoDartCoverage
                ${CMake_BINARY_DIR}/Tests/.NoDartCoverage)
 CONFIGURE_FILE(${CMake_SOURCE_DIR}/Tests/.NoDartCoverage
                ${CMake_BINARY_DIR}/Modules/.NoDartCoverage)
+
+SET(CMAKE_BUILD_MFC_DIALOG 0)
+IF(WIN32)
+  IF(NOT UNIX)
+    IF(NOT BORLAND)
+      IF(NOT MINGW )
+        SET(CMAKE_BUILD_MFC_DIALOG 1)
+      ENDIF(NOT MINGW )
+    ENDIF(NOT BORLAND)
+  ENDIF(NOT UNIX)
+ENDIF(WIN32)
