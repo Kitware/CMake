@@ -4029,14 +4029,15 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
     }
   if ( retVal )
     {
-    cmSystemTools::Error("Building of project failed\n");
     if(outstring)
       {
+      *outstring += "Building of project failed\n";
       *outstring += output;
       *outstring += "\n";
       }
     else
       {
+      std::cerr << "Building of project failed\n";
       std::cout << output << "\n";
       }
     // return to the original directory
