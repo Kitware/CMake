@@ -611,57 +611,72 @@ cmLocalVisualStudio6Generator::CreateTargetRules(const cmTarget &target,
     }
     
   customRuleCode = "# Begin Special Build Tool\n";
-  
-  // Do the PreBuild and PreLink (VS6 does not support both)
-  bool init = false;
-  for (std::vector<cmCustomCommand>::const_iterator cr = 
-         target.GetPreBuildCommands().begin(); 
+
+  // Write the pre-build and pre-link together (VS6 does not support
+  // both).  Make sure no continuation character is put on the last
+  // line.
+  int prelink_total = (static_cast<int>(target.GetPreBuildCommands().size())+
+                       static_cast<int>(target.GetPreLinkCommands().size()));
+  int prelink_count = 0;
+  if(prelink_total > 0)
+    {
+    // header stuff
+    customRuleCode += "PreLink_Cmds=";
+    }
+  const char* prelink_newline = "\\\n\t";
+  for (std::vector<cmCustomCommand>::const_iterator cr =
+         target.GetPreBuildCommands().begin();
        cr != target.GetPreBuildCommands().end(); ++cr)
     {
-    if (!init)
+    if(++prelink_count == prelink_total)
       {
-      // header stuff
-      customRuleCode += "PreLink_Cmds=";
-      init = true;
+      prelink_newline = "";
       }
-    customRuleCode += this->ConstructScript(cr->GetCommandLines(), "\\\n\t");
+    customRuleCode += this->ConstructScript(cr->GetCommandLines(),
+                                            prelink_newline);
     }
-
-  for (std::vector<cmCustomCommand>::const_iterator cr = 
-         target.GetPreLinkCommands().begin(); 
+  for (std::vector<cmCustomCommand>::const_iterator cr =
+         target.GetPreLinkCommands().begin();
        cr != target.GetPreLinkCommands().end(); ++cr)
     {
-    if (!init)
+    if(++prelink_count == prelink_total)
       {
-      // header stuff
-      customRuleCode += "PreLink_Cmds=";
-      init = true;
+      prelink_newline = "";
       }
-    customRuleCode += this->ConstructScript(cr->GetCommandLines(), "\\\n\t");
+    customRuleCode += this->ConstructScript(cr->GetCommandLines(),
+                                            prelink_newline);
     }
-  // remove trailing \\\n\t and replace with \n as this
-  // is a new command and not a continuation 
-  if(init)
+  if(prelink_total > 0)
     {
-    customRuleCode.erase(customRuleCode.size()-3, 3);
     customRuleCode += "\n";
     }
-  // do the post build rules
-  init = false;
-  for (std::vector<cmCustomCommand>::const_iterator cr = 
-         target.GetPostBuildCommands().begin(); 
+
+  // Write the post-build rules.  Make sure no continuation character
+  // is put on the last line.
+  int postbuild_total = static_cast<int>(target.GetPostBuildCommands().size());
+  int postbuild_count = 0;
+  const char* postbuild_newline = "\\\n\t";
+  if(postbuild_total > 0)
+    {
+    customRuleCode += "PostBuild_Cmds=";
+    }
+  for (std::vector<cmCustomCommand>::const_iterator cr =
+         target.GetPostBuildCommands().begin();
        cr != target.GetPostBuildCommands().end(); ++cr)
     {
-    if (!init)
+    if(++postbuild_count == postbuild_total)
       {
-      // header stuff
-      customRuleCode += "PostBuild_Cmds=";
-      init = true;
+      postbuild_newline = "";
       }
-    customRuleCode += this->ConstructScript(cr->GetCommandLines(), "\\\n\t");
+    customRuleCode += this->ConstructScript(cr->GetCommandLines(),
+                                            postbuild_newline);
+    }
+  if(postbuild_total > 0)
+    {
+    customRuleCode += "\n";
     }
 
-  customRuleCode += "\n# End Special Build Tool\n";
+  customRuleCode += "# End Special Build Tool\n";
   return customRuleCode;
 }
 
