@@ -23,25 +23,20 @@
 void cmGlobalVisualStudio7Generator::EnableLanguage(const char*, 
                                                     cmMakefile *mf)
 {
-  if (!m_LanguagesEnabled)
+  // now load the settings
+  if(!mf->GetDefinition("CMAKE_ROOT"))
     {
-    m_LanguagesEnabled = true;
-
-    // now load the settings
-    if(!mf->GetDefinition("CMAKE_ROOT"))
-      {
-      cmSystemTools::Error(
-        "CMAKE_ROOT has not been defined, bad GUI or driver program");
-      return;
-      }
-    if(!this->GetLanguageEnabled("CXX"))
-      {
-      std::string fpath = 
-        mf->GetDefinition("CMAKE_ROOT");
-      fpath += "/Templates/CMakeDotNetSystemConfig.cmake";
-      mf->ReadListFile(NULL,fpath.c_str());
-      this->SetLanguageEnabled("CXX");
-      }
+    cmSystemTools::Error(
+      "CMAKE_ROOT has not been defined, bad GUI or driver program");
+    return;
+    }
+  if(!this->GetLanguageEnabled("CXX"))
+    {
+    std::string fpath = 
+      mf->GetDefinition("CMAKE_ROOT");
+    fpath += "/Templates/CMakeDotNetSystemConfig.cmake";
+    mf->ReadListFile(NULL,fpath.c_str());
+    this->SetLanguageEnabled("CXX");
     }
 }
 

@@ -1354,7 +1354,7 @@ int cmMakefile::TryCompile(const char *srcdir, const char *bindir,
   cmake cm;
   cm.SetIsInTryCompile(true);
   cmGlobalGenerator *gg = 
-    cm.CreateGlobalGenerator(this->m_LocalGenerator->GetGlobalGenerator()->GetName());
+    cm.CreateGlobalGenerator(m_LocalGenerator->GetGlobalGenerator()->GetName());
   if (!gg)
     {
     cmSystemTools::Error(
@@ -1370,6 +1370,10 @@ int cmMakefile::TryCompile(const char *srcdir, const char *bindir,
   cm.SetHomeOutputDirectory(bindir);
   cm.SetStartDirectory(srcdir);
   cm.SetStartOutputDirectory(bindir);
+  
+  // to save time we pass the EnableLanguage info directly
+  gg->EnableLanguagesFromGenerator(m_LocalGenerator->GetGlobalGenerator(),
+                                   this);
   
   if (cm.Configure(cmakeCommand.c_str()) != 0)
     {
@@ -1390,7 +1394,10 @@ int cmMakefile::TryCompile(const char *srcdir, const char *bindir,
     }
 
   // finally call the generator to actually build the resulting project
-  int ret = gg->TryCompile(srcdir,bindir,projectName, targetName);
+  int ret = 
+    m_LocalGenerator->GetGlobalGenerator()->TryCompile(srcdir,bindir,
+                                                       projectName, 
+                                                       targetName);
 
   cmSystemTools::ChangeDirectory(cwd.c_str());
   return ret;

@@ -23,32 +23,21 @@
 void cmGlobalUnixMakefileGenerator::EnableLanguage(const char* lang, 
                                                    cmMakefile *mf)
 {
-  if (!m_LanguagesEnabled)
+  // only do for global runs 
+  if (!m_CMakeInstance->GetLocal())
     {
-    m_LanguagesEnabled = true;
-    
-    // only do for global runs 
-    if (!m_CMakeInstance->GetLocal())
+    std::string output;
+    std::string root 
+      = cmSystemTools::ConvertToOutputPath(mf->GetDefinition("CMAKE_ROOT"));
+    // if no lang specified use CXX
+    if(!lang )
       {
-      // see man putenv for explaination of this stupid code....
-      static char envCXX[5000];
+      lang = "CXX";
+      }
+    // if CXX or C,  then enable C
+    if((!this->GetLanguageEnabled("C") && lang[0] == 'C'))
+      {
       static char envCC[5000];
-      if(mf->GetDefinition("CMAKE_CXX_COMPILER"))
-        {
-#if !defined(_WIN32) && defined(__COMO__)
-        std::string env = "${CMAKE_CXX_COMPILER}";
-        mf->ExpandVariablesInString(env);
-        strncpy(envCXX, env.c_str(), 4999);
-        envCXX[4999] = 0;
-        setenv("CXX", envCXX, 1);        
-#else
-        std::string env = "CXX=${CMAKE_CXX_COMPILER}";
-        mf->ExpandVariablesInString(env);
-        strncpy(envCXX, env.c_str(), 4999);
-        envCXX[4999] = 0;
-        putenv(envCXX);
-#endif
-        }
       if(mf->GetDefinition("CMAKE_C_COMPILER"))
         {
 #if !defined(_WIN32) && defined(__COMO__)
@@ -65,43 +54,57 @@ void cmGlobalUnixMakefileGenerator::EnableLanguage(const char* lang,
         putenv(envCC);
 #endif
         }
-      std::string output;
-      std::string root 
-        = cmSystemTools::ConvertToOutputPath(mf->GetDefinition("CMAKE_ROOT"));
-      // if no lang specified use CXX
-      if(!lang )
+      std::string cmd = root;
+      cmd += "/Templates/cconfigure";
+      cmSystemTools::RunCommand(cmd.c_str(), output, 
+                                cmSystemTools::ConvertToOutputPath(mf->GetHomeOutputDirectory()).c_str());
+      std::string fpath = mf->GetHomeOutputDirectory();
+      fpath += "/CCMakeSystemConfig.cmake";
+      mf->ReadListFile(0,fpath.c_str());
+      this->SetLanguageEnabled("C");
+      }
+    // if CXX 
+    if(!this->GetLanguageEnabled("CXX")  && strcmp(lang, "CXX") == 0)
+      {
+      // see man putenv for explaination of this stupid code....
+      static char envCXX[5000];
+      if(mf->GetDefinition("CMAKE_CXX_COMPILER"))
         {
-        lang = "CXX";
+#if !defined(_WIN32) && defined(__COMO__)
+        std::string env = "${CMAKE_CXX_COMPILER}";
+        mf->ExpandVariablesInString(env);
+        strncpy(envCXX, env.c_str(), 4999);
+        envCXX[4999] = 0;
+        setenv("CXX", envCXX, 1);        
+#else
+        std::string env = "CXX=${CMAKE_CXX_COMPILER}";
+        mf->ExpandVariablesInString(env);
+        strncpy(envCXX, env.c_str(), 4999);
+        envCXX[4999] = 0;
+        putenv(envCXX);
+#endif
         }
-      // if CXX or C,  then enable C
-      if((!this->GetLanguageEnabled(lang) && lang[0] == 'C'))
+      std::string cmd = root;
+      cmd += "/Templates/cxxconfigure";
+      cmSystemTools::RunCommand(cmd.c_str(), output, 
+                                cmSystemTools::ConvertToOutputPath(mf->GetHomeOutputDirectory()).c_str());
+      std::string fpath = mf->GetHomeOutputDirectory();
+      fpath += "/CXXCMakeSystemConfig.cmake";
+      mf->ReadListFile(0,fpath.c_str());
+      this->SetLanguageEnabled("CXX");
+      
+      // for old versions of CMake ListFiles
+      if (!m_CMakeInstance->GetIsInTryCompile())
         {
-        std::string cmd = root;
-        cmd += "/Templates/cconfigure";
-        cmSystemTools::RunCommand(cmd.c_str(), output, 
-                                  cmSystemTools::ConvertToOutputPath(mf->GetHomeOutputDirectory()).c_str());
-        std::string fpath = mf->GetHomeOutputDirectory();
-        fpath += "/CCMakeSystemConfig.cmake";
-        mf->ReadListFile(0,fpath.c_str());
-        this->SetLanguageEnabled("C");
-        }
-      // if CXX 
-      if(!this->GetLanguageEnabled(lang)  || strcmp(lang, "CXX") == 0)
-        {
-        std::string cmd = root;
-        cmd += "/Templates/cxxconfigure";
-        cmSystemTools::RunCommand(cmd.c_str(), output, 
-                                  cmSystemTools::ConvertToOutputPath(mf->GetHomeOutputDirectory()).c_str());
-        std::string fpath = mf->GetHomeOutputDirectory();
-        fpath += "/CXXCMakeSystemConfig.cmake";
-        mf->ReadListFile(0,fpath.c_str());
-        this->SetLanguageEnabled("CXX");
+        const char* versionValue
+          = mf->GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
+        if (!versionValue || atof(versionValue) <= 1.4)
+          {
+          fpath = root + "/Modules/TestForANSIStreamHeaders.cmake";
+          mf->ReadListFile(NULL,fpath.c_str());
+          }
         }
       }
-    }
-
-  if (!m_CMakeInstance->GetLocal())
-    {
     // if we are from the top, always define this
     mf->AddDefinition("RUN_CONFIGURE", true);
     }
@@ -115,3 +118,33 @@ cmLocalGenerator *cmGlobalUnixMakefileGenerator::CreateLocalGenerator()
   return lg;
 }
 
+void cmGlobalUnixMakefileGenerator::EnableLanguagesFromGenerator(
+  cmGlobalGenerator *gen, cmMakefile *mf)
+{
+  // for UNIX we just want to read in the configured files
+  cmLocalGenerator *lg = this->CreateLocalGenerator();
+  
+  // set the Start directories
+  lg->GetMakefile()->SetStartDirectory(m_CMakeInstance->GetStartDirectory());
+  lg->GetMakefile()->SetStartOutputDirectory(m_CMakeInstance->GetStartOutputDirectory());
+  lg->GetMakefile()->MakeStartDirectoriesCurrent();
+  
+  // if C,  then enable C
+  if(gen->GetLanguageEnabled("C"))
+    {
+    std::string fpath = mf->GetHomeOutputDirectory();
+    fpath += "/CCMakeSystemConfig.cmake";
+    lg->GetMakefile()->ReadListFile(0,fpath.c_str());
+    this->SetLanguageEnabled("C");
+    }
+  
+  // if CXX 
+  if(gen->GetLanguageEnabled("CXX"))
+    {
+    std::string fpath = mf->GetHomeOutputDirectory();
+    fpath += "/CXXCMakeSystemConfig.cmake";
+    lg->GetMakefile()->ReadListFile(0,fpath.c_str());
+    this->SetLanguageEnabled("CXX");
+    }
+  delete lg;
+}

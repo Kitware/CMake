@@ -40,6 +40,16 @@ public:
    * extension, pthreads, byte order etc.  
    */
   virtual void EnableLanguage(const char*,cmMakefile *mf);
+
+  /**
+   * Try to determine system infomation from another generator
+   */
+  virtual void EnableLanguagesFromGenerator(cmGlobalGenerator *gen, 
+                                            cmMakefile *mf) 
+    {
+      this->cmGlobalGenerator::EnableLanguageFromGenerator(gen,mf);
+    }
+      
 };
 
 #endif

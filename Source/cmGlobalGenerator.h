@@ -77,6 +77,12 @@ public:
   virtual void EnableLanguage(const char*, cmMakefile *) {};
 
   /**
+   * Try to determine system infomation, get it from another generator
+   */
+  virtual void EnableLanguagesFromGenerator(cmGlobalGenerator *gen, 
+                                            cmMakefile *mf);
+
+  /**
    * Try running cmake and building a file. This is used for dynalically
    * loaded commands, not as part of the usual build process.
    */
@@ -92,7 +98,6 @@ public:
     return this->m_CMakeInstance; };
 
 protected:
-  bool m_LanguagesEnabled;
   cmake *m_CMakeInstance;
   std::vector<cmLocalGenerator *> m_LocalGenerators;
 

@@ -21,7 +21,6 @@
 
 cmGlobalGenerator::cmGlobalGenerator()
 {
-  m_LanguagesEnabled = false;
 }
 
 cmGlobalGenerator::~cmGlobalGenerator()
@@ -52,9 +51,6 @@ void cmGlobalGenerator::ClearEnabledLanguages()
 
 void cmGlobalGenerator::Configure()
 {
-  // reset theLanguages
-  m_LanguagesEnabled = false;
-  
   // Delete any existing cmLocalGenerators
   unsigned int i;
   for (i = 0; i < m_LocalGenerators.size(); ++i)
@@ -186,3 +182,16 @@ cmLocalGenerator *cmGlobalGenerator::CreateLocalGenerator()
   lg->SetGlobalGenerator(this);
   return lg;
 }
+
+void cmGlobalGenerator::EnableLanguagesFromGenerator(cmGlobalGenerator *gen, 
+                                                     cmMakefile *mf)
+{
+  // for each existing language call enable Language
+  std::map<cmStdString, bool>::const_iterator i = 
+    gen->m_LanguageEnabled.begin();
+  for (;i != gen->m_LanguageEnabled.end(); ++i)
+    {
+    this->EnableLanguage(i->first.c_str(),mf);
+    }
+}
+

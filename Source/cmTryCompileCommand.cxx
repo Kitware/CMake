@@ -94,8 +94,13 @@ bool cmTryCompileCommand::InitialPass(std::vector<std::string> const& argv)
   m_Makefile->AddDefinition(argv[0].c_str(), (res == 0 ? "TRUE" : "FALSE"));
       
   // if we created a directory etc, then cleanup after ourselves  
-  // Actually right now lets not clean up after ourselves, removing
-  // a directory is tricky and putting that code in could be a risk
+  cmDirectory dir;
+  dir.Load(binaryDirectory);
+  size_t fileNum;
+  for (fileNum = 0; fileNum <  dir.GetNumberOfFiles(); ++fileNum)
+    {
+    cmSystemTools::RemoveFile(dir.GetFile(fileNum));
+    }
 
   return true;
 }

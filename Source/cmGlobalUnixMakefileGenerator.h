@@ -41,6 +41,11 @@ public:
    */
   virtual void EnableLanguage(const char*, cmMakefile *mf);
 
+  /**
+   * Try to determine system infomation, get it from another generator
+   */
+  virtual void EnableLanguagesFromGenerator(cmGlobalGenerator *, cmMakefile *);
+
 };
 
 #endif
