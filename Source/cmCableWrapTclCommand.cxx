@@ -118,15 +118,13 @@ void cmCableWrapTclCommand::GenerateCableFiles() const
   if(packageConfig)
     {
     packageConfig <<
-      "<CableConfiguration package=\"" << m_TargetName.c_str() << "\">\n"
-      "  <Groups>\n";
+      "<CableConfiguration package=\"" << m_TargetName.c_str() << "\">\n";
     for(unsigned int i=0; i < m_CableClassSet->Size(); ++i)
       {
       packageConfig <<
-        "  " << m_TargetName.c_str() << "_" << i << "\n";
+        "  <Group name=\"" << m_TargetName.c_str() << "_" << i << "\"/>\n";
       }
     packageConfig <<
-      "  </Groups>\n"
       "</CableConfiguration>\n";
   
     packageConfig.close();
@@ -203,9 +201,7 @@ void cmCableWrapTclCommand::GenerateCableClassFiles(const char* name,
         "  <Header name=\"" << source->c_str() << "\"/>\n";
       }
     classConfig <<
-      "  <WrapperSet>\n"
-      "  _wrap_::wrapper::Wrapper\n"
-      "  </WrapperSet>\n"
+      "  <Class name=\"_wrap_::wrapper::Wrapper\"/>\n"
       "</CableConfiguration>\n";
   
     classConfig.close();
