@@ -51,6 +51,7 @@ public:
   std::string m_GeneratorChoiceString;
   std::string m_LastUnknownParameter;
   std::string m_ExecutablePath;
+  bool m_ExitAfterLoad;
 
 protected:
   // Parse one argument

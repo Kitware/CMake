@@ -33,6 +33,7 @@ cmCommandLineInfo::cmCommandLineInfo()
   this->m_GeneratorChoiceString = "";
   this->m_LastUnknownParameter = "";
   this->m_ValidArguments = "";
+  this->m_ExitAfterLoad = false;
 } 
 
 ///////////////////////////////////////////////////////////////
@@ -124,6 +125,9 @@ void cmCommandLineInfo::ParseParam(const std::string& parameter,
         break;
       case 'G':
         this->m_GeneratorChoiceString = value;
+        break;
+      case 'Q':
+        this->m_ExitAfterLoad = true;
         break;
       case 'H':
         this->m_WhereSource = value;
