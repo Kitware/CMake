@@ -290,6 +290,7 @@ bool cmOrderLinkDirectories::DetermineLibraryPathOrder()
   this->PrepareLinkTargets();
   if(m_ImposibleDirectories.size())
     {
+    cmSystemTools::Message(this->GetWarnings().c_str());
     return false;
     }
   return true;
@@ -341,3 +342,13 @@ cmOrderLinkDirectories::PrintMap(const char* name,
     }
 }
 
+void cmOrderLinkDirectories::GetFullPathLibraries(std::vector<cmStdString>& 
+                                                  libs)
+{
+  for(std::map<cmStdString, Library>::iterator i = m_FullPathLibraries.begin();
+      i != m_FullPathLibraries.end(); ++i)
+    {
+    libs.push_back(i->first);
+    }
+  
+}

@@ -21,35 +21,11 @@
 #include "cmake.h"
 #include "cmGeneratedFileStream.h"
 #include "cmSourceFile.h"
-
+#include "cmOrderLinkDirectories.h"
 
 //TODO
-// RUN_TESTS
 // add a group for Sources Headers, and other cmake group stuff
-
-// for each target create a custom build phase that is run first
-// it can have inputs and outputs should just be a makefile
-
-// per file flags howto
-// 115281011528101152810000 = {
-//    fileEncoding = 4;
-// isa = PBXFileReference;
-// lastKnownFileType = sourcecode.cpp.cpp;
-// path = /Users/kitware/Bill/CMake/Source/cmakemain.cxx;
-// refType = 0;
-// sourceTree = "<absolute>";
-// };
-// 115285011528501152850000 = {
-// fileRef = 115281011528101152810000;
-// isa = PBXBuildFile;
-// settings = {
-// COMPILER_FLAGS = "-Dcmakemakeindefflag";
-// };
-// };
-
-// custom commands and clean up custom targets
-// do I need an ALL_BUILD yes
-// exe/lib output paths
+// add rebuild when cmake changes
 
 //----------------------------------------------------------------------------
 cmGlobalXCodeGenerator::cmGlobalXCodeGenerator()
@@ -196,7 +172,8 @@ void cmGlobalXCodeGenerator::Generate()
     this->SetCurrentLocalGenerator(root);
     m_OutputDir = m_CurrentMakefile->GetHomeOutputDirectory();
     m_OutputDir = cmSystemTools::CollapseFullPath(m_OutputDir.c_str());
-    cmSystemTools::SplitPath(m_OutputDir.c_str(), m_ProjectOutputDirectoryComponents);
+    cmSystemTools::SplitPath(m_OutputDir.c_str(),
+                             m_ProjectOutputDirectoryComponents);
     m_CurrentLocalGenerator = root;
     // add ALL_BUILD, INSTALL, etc
     this->AddExtraTargets(root, it->second);
@@ -411,7 +388,8 @@ void cmGlobalXCodeGenerator::SetCurrentLocalGenerator(cmLocalGenerator* gen)
   m_CurrentLocalGenerator = gen;
   m_CurrentMakefile = gen->GetMakefile();
   std::string outdir =
-    cmSystemTools::CollapseFullPath(m_CurrentMakefile->GetCurrentOutputDirectory());
+    cmSystemTools::CollapseFullPath(m_CurrentMakefile->
+                                    GetCurrentOutputDirectory());
   cmSystemTools::SplitPath(outdir.c_str(), m_CurrentOutputDirectoryComponents);
 }
 
@@ -734,7 +712,8 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
       makefileStream << "\n";
 
       // Add each command line to the set of commands.
-      for(cmCustomCommandLines::const_iterator cl = cc.GetCommandLines().begin();
+      for(cmCustomCommandLines::const_iterator cl = 
+            cc.GetCommandLines().begin();
           cl != cc.GetCommandLines().end(); ++cl)
         {
         // Build the command line in a single string.
@@ -895,32 +874,6 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     }
   
   std::string dirs;
-  if(needLinkDirs)
-    {
-    // Try to emit each search path once
-    std::set<cmStdString> emitted;
-    // Some search paths should never be emitted
-    emitted.insert("");
-    emitted.insert("/usr/lib");
-    std::vector<std::string> const& linkdirs =
-      target.GetLinkDirectories();
-    for(std::vector<std::string>::const_iterator l = linkdirs.begin();
-        l != linkdirs.end(); ++l)
-      {
-      std::string libpath = 
-        this->XCodeEscapePath(l->c_str());
-      if(emitted.insert(libpath).second)
-        {
-        dirs += libpath + " ";
-        }
-      }
-    if(dirs.size())
-      {
-      buildSettings->AddAttribute("LIBRARY_SEARCH_PATHS", 
-                                  this->CreateString(dirs.c_str()));
-      }
-    }
-  dirs = "";
   std::vector<std::string>& includes =
     m_CurrentMakefile->GetIncludeDirectories();
   std::vector<std::string>::iterator i = includes.begin();
@@ -1127,48 +1080,9 @@ void cmGlobalXCodeGenerator::AddLinkLibrary(cmXCodeObject* target,
                                             const char* library,
                                             cmTarget* dtarget)
 {
-  // if the library is a full path then create a file reference
-  // and build file and add them to the PBXFrameworksBuildPhase
-  // for the target
-  std::string file = library;
-  if(cmSystemTools::FileIsFullPath(library))
+  if(dtarget)
     {
-    target->AddDependLibrary(library);
-    std::string dir;
-    cmSystemTools::SplitProgramPath(library, dir, file);
-    // add the library path to the search path for the target
-    cmXCodeObject* bset = target->GetObject("buildSettings");
-    if(bset)
-      {
-      cmXCodeObject* spath = bset->GetObject("LIBRARY_SEARCH_PATHS");
-      if(spath)
-        {
-        std::string libs = spath->GetString();
-        // remove double quotes
-        libs = libs.substr(1, libs.size()-2);
-        libs += " ";
-        libs += this->XCodeEscapePath(dir.c_str());
-        spath->SetString(libs.c_str());
-        }
-      else
-        {
-        std::string libs = this->XCodeEscapePath(dir.c_str());
-        bset->AddAttribute("LIBRARY_SEARCH_PATHS",
-                           this->CreateString(libs.c_str()));
-        }
-      }
-    cmsys::RegularExpression libname("^lib([^/]*)(\\.a|\\.dylib).*");
-    if(libname.find(file))
-      {
-      file = libname.match(1);
-      }
-    }
-  else
-    {
-    if(dtarget)
-      {
-      target->AddDependLibrary(this->GetTargetFullPath(dtarget).c_str());
-      }
+    target->AddDependLibrary(this->GetTargetFullPath(dtarget).c_str());
     }
   
   // if the library is not a full path then add it with a -l flag
@@ -1181,11 +1095,11 @@ void cmGlobalXCodeGenerator::AddLinkLibrary(cmXCodeObject* target,
   // if the library is not already in the form required by the compiler
   // add a -l infront of the name
   link += " ";
-  if(!reg.find(file))
+  if(!reg.find(library))
     {
     link += "-l";
     }
-  link +=  file;
+  link += library;
   ldflags->SetString(link.c_str());
 }
 
@@ -1226,13 +1140,58 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
     std::cerr << "Error no target on xobject\n";
     return;
     }
-  
-  cmTarget::LinkLibraries::const_iterator j, jend;
-  j = cmtarget->GetLinkLibraries().begin();
-  jend = cmtarget->GetLinkLibraries().end();
-  for(;j!= jend; ++j)
+  // compute the correct order for link libraries
+  cmOrderLinkDirectories orderLibs;
+  std::string ext = 
+    m_CurrentMakefile->GetSafeDefinition("CMAKE_STATIC_LIBRARY_SUFFIX");
+  if(ext.size())
     {
-    cmTarget* t = this->FindTarget(j->first.c_str());
+    orderLibs.AddLinkExtension(ext.c_str());
+    }
+  ext = 
+    m_CurrentMakefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_SUFFIX");
+  if(ext.size())
+    {
+    orderLibs.AddLinkExtension(ext.c_str());
+    }
+  ext = 
+    m_CurrentMakefile->GetSafeDefinition("CMAKE_LINK_LIBRARY_SUFFIX");
+  if(ext.size())
+    {
+    orderLibs.AddLinkExtension(ext.c_str());
+    }
+  const char* targetLibrary = cmtarget->GetName();
+  if(cmtarget->GetType() == cmTarget::EXECUTABLE)
+    {
+    targetLibrary = 0;
+    }
+  orderLibs.SetLinkInformation(*cmtarget, cmTarget::GENERAL, targetLibrary);
+  orderLibs.DetermineLibraryPathOrder();
+  std::vector<cmStdString> libdirs;
+  std::vector<cmStdString> linkItems;
+  orderLibs.GetLinkerInformation(libdirs, linkItems);
+  std::string linkDirs;
+  // add the library search paths
+  for(std::vector<cmStdString>::const_iterator libDir = libdirs.begin();
+      libDir != libdirs.end(); ++libDir)
+    {
+    if(libDir->size() && *libDir != "/usr/lib")
+      {
+      linkDirs += " ";
+      linkDirs += this->XCodeEscapePath(libDir->c_str());
+      }
+    }
+  cmXCodeObject* bset = target->GetObject("buildSettings");
+  if(bset)
+    {
+    bset->AddAttribute("LIBRARY_SEARCH_PATHS", 
+                                this->CreateString(linkDirs.c_str()));
+    }
+  // now add the link libraries
+  for(std::vector<cmStdString>::iterator lib = linkItems.begin();
+      lib != linkItems.end(); ++lib)
+    {
+    cmTarget* t = this->FindTarget(lib->c_str());
     cmXCodeObject* dptarget = this->FindXCodeTarget(t);
     if(dptarget)
       {
@@ -1246,12 +1205,13 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
       {
       if(cmtarget->GetType() != cmTarget::STATIC_LIBRARY)
         {
-        this->AddLinkLibrary(target, j->first.c_str());
+        this->AddLinkLibrary(target, lib->c_str());
         }
       }
     }
-  std::set<cmStdString>::const_iterator i, end;
+  
   // write utility dependencies.
+  std::set<cmStdString>::const_iterator i, end;
   i = cmtarget->GetUtilities().begin();
   end = cmtarget->GetUtilities().end();
   for(;i!= end; ++i)
@@ -1270,6 +1230,13 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
       std::cerr << "Current project is "
                 << m_CurrentMakefile->GetProjectName() << "\n";
       }
+    } 
+  std::vector<cmStdString> fullPathLibs;
+  orderLibs.GetFullPathLibraries(fullPathLibs);
+  for(std::vector<cmStdString>::iterator i = fullPathLibs.begin();
+      i != fullPathLibs.end(); ++i)
+    {
+    target->AddDependLibrary(i->c_str());
     }
 }
 

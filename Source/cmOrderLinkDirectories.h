@@ -68,6 +68,8 @@ public:
   }
   // Return any warnings if the exist
   std::string GetWarnings();
+  // return a list of all full path libraries
+  void GetFullPathLibraries(std::vector<cmStdString>& libs);
 
   // structure to hold a full path library link item
   struct Library
