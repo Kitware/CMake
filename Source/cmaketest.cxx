@@ -2,7 +2,7 @@
 #include "cmSystemTools.h"
 
 // this is a test driver program for cmake.
-main (int argc, char *argv[])
+int main (int argc, char *argv[])
 {
   if (argc < 4)
     {
