@@ -55,21 +55,23 @@ void cmMakeDepend::SetMakefile(cmMakefile* makefile)
     this->AddSearchPath(j->c_str());
     }
   // Now create cmDependInformation objects for files in the directory
-  int index = 0;
-  std::vector<cmClassFile>::iterator i = makefile->m_Classes.begin();
-  while(i != makefile->m_Classes.end())
+  cmMakefile::ClassMap &Classes = m_Makefile->GetClasses();
+  for(cmMakefile::ClassMap::iterator l = Classes.begin(); 
+      l != Classes.end(); l++)
     {
-    if(!(*i).m_HeaderFileOnly)
+    for(std::vector<cmClassFile>::iterator i = l->second.begin(); 
+        i != l->second.end(); ++i)
       {
-      cmDependInformation* info = new cmDependInformation;
-      info->m_FullPath = this->FullPath((*i).m_FullPath.c_str());
-      this->AddFileToSearchPath(info->m_FullPath.c_str());
-      info->m_IncludeName = (*i).m_FullPath;
-      m_DependInformation.push_back(info);
-      info->m_ClassFileIndex = index;
+      if(!i->m_HeaderFileOnly)
+        {
+        cmDependInformation* info = new cmDependInformation;
+        info->m_FullPath = this->FullPath(i->m_FullPath.c_str());
+        this->AddFileToSearchPath(info->m_FullPath.c_str());
+        info->m_IncludeName = i->m_FullPath;
+        info->m_ClassFileIndex = i;
+        m_DependInformation.push_back(info);
+        }
       }
-    ++i;
-    index++;
     }
 }
 
@@ -99,9 +101,9 @@ void cmMakeDepend::DoDepends()
     // Remove duplicate depends
     info->RemoveDuplicateIndices();
     // find the class 
-    if(info->m_ClassFileIndex != -1)
+    if(info->m_ClassFileIndex != 0)
       {
-      cmClassFile& cfile = m_Makefile->m_Classes[info->m_ClassFileIndex];
+      cmClassFile& cfile = *(info->m_ClassFileIndex);
       for( std::vector<int>::iterator indx = info->m_Indices.begin();
 	   indx != info->m_Indices.end(); ++indx)
 	{
@@ -126,9 +128,9 @@ void cmMakeDepend::Depend(cmDependInformation* info)
     {
     // The cmClassFile may have had hints for dependencies.  Delete any that
     // exist since we can find the dependencies for real.
-    if(info->m_ClassFileIndex != -1)
+    if(info->m_ClassFileIndex != 0)
       {
-      cmClassFile& cFile = m_Makefile->m_Classes[info->m_ClassFileIndex];
+      cmClassFile& cFile = *(info->m_ClassFileIndex);
       cFile.m_Depends.erase(cFile.m_Depends.begin(), cFile.m_Depends.end());
       }
     
@@ -140,10 +142,10 @@ void cmMakeDepend::Depend(cmDependInformation* info)
   
   // The file doesn't exist.  See if the cmClassFile for it has any files
   // specified as dependency hints.
-  if(info->m_ClassFileIndex != -1)
+  if(info->m_ClassFileIndex != 0)
     {
     // Get the cmClassFile corresponding to this.
-    cmClassFile& cFile = m_Makefile->m_Classes[info->m_ClassFileIndex];
+    cmClassFile& cFile = *(info->m_ClassFileIndex);
     // See if there are any hints for finding dependencies for the missing
     // file.
     if(!cFile.m_Depends.empty())

@@ -36,17 +36,58 @@ cmCablePackageCommand::~cmCablePackageCommand()
 // cmCablePackageCommand
 bool cmCablePackageCommand::Invoke(std::vector<std::string>& args)
 {
-  if(args.size() != 1)
+  if(args.size() != 2)
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  
+
+  // setup this once. Really this should probably be moved somewhere else
+  // at some point. 
+  {  
+  // We must add a custom rule to cause the cable_config.xml to be re-built
+  // when it is removed.  Rebuilding it means re-running CMake.
+  std::string cMakeLists = m_Makefile->GetStartDirectory();
+  cMakeLists += "/";
+  cMakeLists += "CMakeLists.txt";
+
+  std::string command;
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  command = "\"";
+  command += m_Makefile->GetHomeDirectory();
+  command += "/CMake/Source/CMakeSetupCMD\" \"";
+  command += cMakeLists;
+  command += "\" -DSP";
+#else
+  command = "\"";
+  command += m_Makefile->GetHomeOutputDirectory();  
+  command += "/CMake/Source/CMakeBuildTargets\" \"";
+  command += cMakeLists;
+  command += "\"";
+#endif
+  command += " -H\"";
+  command += m_Makefile->GetHomeDirectory();
+  command += "\" -S\"";
+  command += m_Makefile->GetStartDirectory();
+  command += "\" -O\"";
+  command += m_Makefile->GetStartOutputDirectory();
+  command += "\" -B\"";
+  command += m_Makefile->GetHomeOutputDirectory();
+  command += "\"";
+
+  std::vector<std::string> depends;
+  m_Makefile->AddCustomCommand(cMakeLists.c_str(), 
+                               command.c_str(),
+                               depends,
+                               "cable_config.xml", args[1].c_str());
+  }
+
   // This command needs to access the Cable data.
   this->SetupCableData();
   
   // The argument is the package name.
   m_PackageName = args[0];
+  m_TargetName = args[1];
 
   // Ask the cable data to begin the package.  This may call another
   // cmCablePackageCommand's WritePackageFooter().  This will call
@@ -72,7 +113,7 @@ bool cmCablePackageCommand::Invoke(std::vector<std::string>& args)
   m_Makefile->AddCustomCommand("cable_config.xml",
                                command.c_str(),
                                depends,
-                               outputs);
+                               outputs, m_TargetName.c_str());
   
   return true;
 }
@@ -87,9 +128,7 @@ void cmCablePackageCommand::FinalPass()
   file.m_AbstractClass = false;
   file.m_HeaderFileOnly = false;
   file.SetName(fileName.c_str(), filePath.c_str(), "cxx", false);
-  
-  m_CableData->SetPackageClassIndex(m_Makefile->GetClasses().size());
-  m_Makefile->AddClass(file);
+  m_Makefile->AddClass(file, m_PackageName.c_str());
 }
 
 

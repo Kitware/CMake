@@ -22,6 +22,7 @@ cmSystemTools.o \
 cmDirectory.o \
 cmUnixMakefileGenerator.o \
 cmCommands.o \
+cmCustomCommand.o \
 cmCacheManager.o \
 cmSourceGroup.o
 
@@ -36,6 +37,7 @@ cmAuxSourceDirectoryCommand.o : $(DEPENDS)
 cmRegularExpression.o : $(DEPENDS)
 cmClassFile.o : $(DEPENDS)
 cmDirectory.o : $(DEPENDS)
+cmCustomCommand.o : $(DEPENDS)
 cmUnixMakefileGenerator.o : $(DEPENDS)
 cmCommands.o : $(DEPENDS)
 cmCacheManager.o : $(DEPENDS)

@@ -53,35 +53,32 @@ bool cmSourceGroup::Matches(const char* name)
  * If the command also already exists, the given dependencies and outputs
  * are added to it.
  */
-void cmSourceGroup::AddCustomCommand(const char* source,
-                                     const char* command,
-                                     const std::vector<std::string>& depends,
-                                     const std::vector<std::string>& outputs) 
+void cmSourceGroup::AddCustomCommand(const cmCustomCommand &cmd)
 {
-  CustomCommands::iterator s = m_CustomCommands.find(source);
+  CustomCommands::iterator s = m_CustomCommands.find(cmd.m_Source);
   if(s == m_CustomCommands.end())
     {
     // The source was not found.  Add it with this command.
-    m_CustomCommands[source][command].m_Depends.insert(depends.begin(),
-                                                       depends.end());
-    m_CustomCommands[source][command].m_Outputs.insert(outputs.begin(),
-                                                       outputs.end());
+    m_CustomCommands[cmd.m_Source][cmd.m_Command].
+      m_Depends.insert(cmd.m_Depends.begin(),cmd.m_Depends.end());
+    m_CustomCommands[cmd.m_Source][cmd.m_Command].
+      m_Outputs.insert(cmd.m_Outputs.begin(),cmd.m_Outputs.end());
     return;
     }
   
   // The source already exists.  See if the command exists.
   Commands& commands = s->second;
-  Commands::iterator c = commands.find(command);
+  Commands::iterator c = commands.find(cmd.m_Command);
   if(c == commands.end())
     {
     // The command did not exist.  Add it.
-    commands[command].m_Depends.insert(depends.begin(), depends.end());
-    commands[command].m_Outputs.insert(outputs.begin(), outputs.end());
+    commands[cmd.m_Command].m_Depends.insert(cmd.m_Depends.begin(), cmd.m_Depends.end());
+    commands[cmd.m_Command].m_Outputs.insert(cmd.m_Outputs.begin(), cmd.m_Outputs.end());
     return;
     }
   
   // The command already exists for this source.  Merge the sets.
   CommandFiles& commandFiles = c->second;
-  commandFiles.m_Depends.insert(depends.begin(), depends.end());
-  commandFiles.m_Outputs.insert(outputs.begin(), outputs.end());
+  commandFiles.m_Depends.insert(cmd.m_Depends.begin(), cmd.m_Depends.end());
+  commandFiles.m_Outputs.insert(cmd.m_Outputs.begin(), cmd.m_Outputs.end());
 }

@@ -20,19 +20,23 @@ void cmCableSourceFilesCommand::FinalPass()
 {
   // Get the index of the current package's cmClassFile.
   // If it doesn't exist, ignore this command.
-  int index = m_CableData->GetPackageClassIndex();
-  if(index < 0)
+  cmCablePackageCommand *cablePackage = m_CableData->GetCurrentPackage();
+  std::string fileName = "Cxx/";
+  fileName += cablePackage->GetPackageName();
+  fileName += "_cxx";
+  cmClassFile *ci = m_Makefile->GetClass(cablePackage->GetPackageName(),
+                                         fileName.c_str());
+  
+  if(ci == 0)
     { return; }
   
   // The package's file has not yet been generated yet.  The dependency
   // finder will need hints.  Add one for each source file.
-  cmClassFile& cFile = m_Makefile->GetClasses()[index];
-  
   for(Entries::const_iterator f = m_Entries.begin();
       f != m_Entries.end(); ++f)
     {
     std::string header = *f+".h";
-    cFile.m_Depends.push_back(header);
+    ci->m_Depends.push_back(header);
     }
 }
 

@@ -13,24 +13,21 @@
   See COPYRIGHT.txt for copyright details.
 
 =========================================================================*/
-#include "cmSourceFilesCommand.h"
+#include "cmAddLibraryCommand.h"
 
-// cmSourceFilesCommand
-bool cmSourceFilesCommand::Invoke(std::vector<std::string>& args)
+// cmLibraryCommand
+bool cmAddLibraryCommand::Invoke(std::vector<std::string>& args)
 {
- if(args.size() < 1 )
+  if(args.size() < 2 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  for(std::vector<std::string>::iterator i = (args.begin() + 1);
-      i != args.end(); ++i)
-    {
-    cmClassFile file;
-    file.m_AbstractClass = false;
-    file.SetName((*i).c_str(), m_Makefile->GetCurrentDirectory());
-    m_Makefile->AddClass(file, args[0].c_str());
-    }
+  
+  std::vector<std::string>::iterator s = args.begin();
+  std::vector<std::string> srclists(++s, args.end());
+  
+  m_Makefile->AddLibrary(args[0].c_str(),srclists);
   return true;
 }
 

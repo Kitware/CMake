@@ -73,84 +73,52 @@ void cmDSPMakefile::OutputDSPFile()
     m_LibraryOptions += "/$(OUTDIR)\" ";
     }
   m_LibraryOptions += "/STACK:10000000 ";
-  m_OutputLibName = m_Makefile->GetLibraryName();
   
   // Create the DSP or set of DSP's for libraries and executables
-  if(strlen(m_Makefile->GetLibraryName()) != 0)
+  const char* cacheValue
+    = cmCacheManager::GetInstance()->GetCacheValue("BUILD_SHARED_LIBS");
+  m_LibraryBuildType = STATIC_LIBRARY;
+  if(cacheValue && strcmp(cacheValue,"0"))
     {
-    const char* cacheValue
-      = cmCacheManager::GetInstance()->GetCacheValue("BUILD_SHARED_LIBS");
-    if(cacheValue && strcmp(cacheValue,"0"))
+    m_LibraryBuildType = DLL;
+    }
+
+  // clear project names
+  m_CreatedProjectNames.clear();
+
+  // build any targets
+  const cmTargets &tgts = m_Makefile->GetTargets();
+  for(cmTargets::const_iterator l = tgts.begin(); 
+      l != tgts.end(); l++)
+    {
+    if (l->second.m_IsALibrary)
       {
-      this->SetBuildType(DLL);
+      this->SetBuildType(m_LibraryBuildType, l->first.c_str());
       }
     else
       {
-      this->SetBuildType(STATIC_LIBRARY);
+      this->SetBuildType(EXECUTABLE,l->first.c_str());
       }
-    this->CreateSingleDSP();
-    }
-  // if there are executables build them
-  if (m_Makefile->HasExecutables())
-    {
-    this->CreateExecutableDSPFiles();
-    }
-}
-void cmDSPMakefile::CreateExecutableDSPFiles()
-{
-  std::vector<cmClassFile>& Classes = m_Makefile->GetClasses();
-  for(int i = 0; i < Classes.size(); ++i)
-    {
-    cmClassFile& classfile = Classes[i];
-    if (classfile.m_IsExecutable)
-      {
-      std::string fname = m_Makefile->GetStartOutputDirectory();
-      fname += "/";
-      fname += classfile.m_ClassName;
-      fname += ".dsp";
-      std::ofstream fout(fname.c_str());
-      if(!fout)
-        {
-        cmSystemTools::Error("Error Writing ",
-                             fname.c_str());
-        }
-      else
-        {
-//        m_Makefile->SetLibraryName(classfile.m_ClassName.c_str());
-        this->SetBuildType(EXECUTABLE);
-        m_OutputLibName = classfile.m_ClassName;
-        std::string pname = classfile.m_ClassName.c_str(); //m_Makefile->GetLibraryName();
-        m_CreatedProjectNames.push_back(pname);
-        
-        this->WriteDSPHeader(fout);
-        this->WriteDSPBeginGroup(fout, "Source Files", "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat");
-        this->WriteDSPBuildRule(fout, classfile.m_FullPath.c_str());
-        this->WriteDSPEndGroup(fout);
-        this->WriteDSPBuildRule(fout);
-        this->WriteDSPFooter(fout);
-        }
-      }
+    this->CreateSingleDSP(l->first.c_str(),l->second);
     }
 }
 
-
-void cmDSPMakefile::CreateSingleDSP()
+void cmDSPMakefile::CreateSingleDSP(const char *lname, 
+                                    const cmTarget &target)
 {
   std::string fname;
   fname = m_Makefile->GetStartOutputDirectory();
   fname += "/";
-  fname += m_Makefile->GetLibraryName();
+  fname += lname;
   fname += ".dsp";
-  m_CreatedProjectNames.clear();
-  std::string pname = m_Makefile->GetLibraryName();
+  std::string pname = lname;
   m_CreatedProjectNames.push_back(pname);
   std::ofstream fout(fname.c_str());
   if(!fout)
     {
-    cmSystemTools::Error("Error Writing ",
-                         fname.c_str());
+    cmSystemTools::Error("Error Writing ", fname.c_str());
     }
-  this->WriteDSPFile(fout);
+  this->WriteDSPFile(fout,lname,target);
 }
 
 void cmDSPMakefile::WriteDSPBuildRule(std::ostream& fout)
@@ -210,18 +178,50 @@ void cmDSPMakefile::AddDSPBuildRule(cmSourceGroup& sourceGroup)
   std::vector<std::string> depends;
   std::vector<std::string> outputs;
   outputs.push_back(dspname);
-  sourceGroup.AddCustomCommand(makefileIn.c_str(), dsprule.c_str(),
-                               depends, outputs);
+  cmCustomCommand cc(makefileIn.c_str(), dsprule.c_str(),
+                     depends, outputs);
+  sourceGroup.AddCustomCommand(cc);
 }
 
 
-void cmDSPMakefile::WriteDSPFile(std::ostream& fout)
+void cmDSPMakefile::WriteDSPFile(std::ostream& fout, 
+                                 const char *libName,
+                                 const cmTarget &target)
 {
   // Write the DSP file's header.
-  this->WriteDSPHeader(fout);
+  this->WriteDSPHeader(fout, libName);
   
   // We may be modifying the source groups temporarily, so make a copy.
   std::vector<cmSourceGroup> sourceGroups = m_Makefile->GetSourceGroups();
+  
+  // get the classes from the source lists then add them to the groups
+  std::vector<cmClassFile> classes = 
+    m_Makefile->GetClassesFromSourceLists(target.m_SourceLists);
+  for(std::vector<cmClassFile>::iterator i = classes.begin(); 
+      i != classes.end(); i++)
+    {
+    if(!i->m_HeaderFileOnly)
+      {
+      // Add the file to the list of sources.
+      std::string source = i->m_FullPath;
+      cmSourceGroup& sourceGroup = m_Makefile->FindSourceGroup(source.c_str(),
+                                                               sourceGroups);
+      sourceGroup.AddSource(source.c_str());
+      }
+    }
+  
+  // add any custom rules to the source groups
+  for (std::vector<cmCustomCommand>::const_iterator cr = 
+         target.m_CustomCommands.begin(); 
+       cr != target.m_CustomCommands.end(); ++cr)
+    {
+    cmSourceGroup& sourceGroup = 
+      m_Makefile->FindSourceGroup(cr->m_Source.c_str(),
+                                  sourceGroups);
+    cmCustomCommand cc(*cr);
+    cc.ExpandVariables(*m_Makefile);
+    sourceGroup.AddCustomCommand(cc);
+    }
   
   // Find the group in which the CMakeLists.txt source belongs, and add
   // the rule to generate this DSP file.
@@ -351,9 +351,8 @@ void cmDSPMakefile::WriteDSPEndGroup(std::ostream& fout)
 
 
 
-void cmDSPMakefile::SetBuildType(BuildType b)
+void cmDSPMakefile::SetBuildType(BuildType b, const char *libName)
 {
-  m_BuildType = b;
   switch(b)
     {
     case STATIC_LIBRARY:
@@ -393,8 +392,7 @@ void cmDSPMakefile::SetBuildType(BuildType b)
     {
     fin.getline(buffer, 2048);
     std::string line = buffer;
-    cmSystemTools::ReplaceString(line, "OUTPUT_LIBNAME", 
-                                 m_Makefile->GetLibraryName());
+    cmSystemTools::ReplaceString(line, "OUTPUT_LIBNAME",libName);
     if (reg.find(line))
       {
       m_Configurations.push_back(line.substr(reg.end()));
@@ -402,7 +400,7 @@ void cmDSPMakefile::SetBuildType(BuildType b)
     }
 }
   
-void cmDSPMakefile::WriteDSPHeader(std::ostream& fout)
+void cmDSPMakefile::WriteDSPHeader(std::ostream& fout, const char *libName)
 {
   std::ifstream fin(m_DSPHeaderTemplate.c_str());
   if(!fin)
@@ -419,8 +417,7 @@ void cmDSPMakefile::WriteDSPHeader(std::ostream& fout)
                                     m_LibraryOptions.c_str());
       cmSystemTools::ReplaceString(line, "BUILD_INCLUDES",
                                     m_IncludeOptions.c_str());
-      cmSystemTools::ReplaceString(line, "OUTPUT_LIBNAME", 
-                                    m_OutputLibName.c_str());
+      cmSystemTools::ReplaceString(line, "OUTPUT_LIBNAME",libName);
       cmSystemTools::ReplaceString(line, 
                                     "EXTRA_DEFINES", 
 				   m_Makefile->GetDefineFlags());
@@ -454,25 +451,4 @@ void cmDSPMakefile::WriteDSPBuildRule(std::ostream& fout, const char* path)
   fout << "# End Source File\n";
 }
 
-bool cmDSPMakefile::NeedsDependencies(const char* dspname)
-{
-  if(strcmp(m_Makefile->GetLibraryName(), dspname) == 0)
-    {
-    // only shared libs need depend info
-    const char* cacheValue
-      = cmCacheManager::GetInstance()->GetCacheValue("BUILD_SHARED_LIBS");
-    if(cacheValue && strcmp(cacheValue,"0"))
-      {
-      return true;
-      }
-    else
-      {
-      return false;
-      }
-    }
-  // must be an executable so it needs depends
-  return true;
-}
-
-  
   

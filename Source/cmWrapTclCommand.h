@@ -61,7 +61,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "WRAP_TCL()";
+      "WRAP_TCL(resultingLibraryName SourceListName SourceLists ...)";
     }
 
   /**
@@ -74,6 +74,8 @@ public:
 private:
   std::vector<cmClassFile> m_WrapClasses;
   std::vector<std::string> m_WrapHeaders;
+  std::string m_LibraryName;
+  std::string m_SourceList;
 };
 
 

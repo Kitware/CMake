@@ -35,7 +35,6 @@ public:
     {
     m_AbstractClass = false;
     m_HeaderFileOnly = false;
-    m_IsExecutable = false;
     m_WrapExclude = false;
     }
   
@@ -57,7 +56,7 @@ public:
   /**
    * Print the structure to std::cout.
    */
-  void Print();
+  void Print() const;
 
   /**
    * Indicate whether the class is abstract (non-instantiable).
@@ -73,11 +72,6 @@ public:
    * Indicate whether this class is defined with only the header file.
    */
   bool m_HeaderFileOnly;
-
-  /**
-   * Indicate whether this class is an executable file
-   */
-  bool m_IsExecutable;
 
   /**
    * The full path to the file.

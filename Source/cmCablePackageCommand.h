@@ -73,19 +73,21 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "CABLE_PACKAGE(package_name)\n"
+      "CABLE_PACKAGE(package_name target)\n"
       "Close current package (if any), and open a new package definition.";
     }  
 
   void WritePackageHeader() const;
   void WritePackageFooter() const;  
-  
+  const char *GetPackageName() {return m_PackageName.c_str();}
+      
   cmTypeMacro(cmCablePackageCommand, cmCableCommand);
 private:
   /**
    * The name of the package.
    */
   std::string m_PackageName;  
+  std::string m_TargetName;  
 };
 
 

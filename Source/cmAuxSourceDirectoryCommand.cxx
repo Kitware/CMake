@@ -19,9 +19,9 @@
 // cmAuxSourceDirectoryCommand
 bool cmAuxSourceDirectoryCommand::Invoke(std::vector<std::string>& args)
 {
-  if(args.size() < 1 || args.size() > 1)
+  if(args.size() < 2 || args.size() > 2)
     {
-    this->SetError("PROJECT called with incorrect number of arguments");
+    this->SetError("called with incorrect number of arguments");
     return false;
     }
   
@@ -52,7 +52,7 @@ bool cmAuxSourceDirectoryCommand::Invoke(std::vector<std::string>& args)
         cmClassFile cmfile;
         cmfile.SetName(fullname.c_str(), m_Makefile->GetCurrentDirectory());
         cmfile.m_AbstractClass = false;
-        m_Makefile->AddClass(cmfile);
+        m_Makefile->AddClass(cmfile,args[1].c_str());
         }
       }
     }

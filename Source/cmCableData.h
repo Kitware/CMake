@@ -71,8 +71,7 @@ public:
   void BeginPackage(cmCablePackageCommand*);
   void EndPackage();
   
-  void SetPackageClassIndex(int index) { m_PackageClassIndex = index; }
-  int GetPackageClassIndex() const { return m_PackageClassIndex; }
+  cmCablePackageCommand *GetCurrentPackage() { return m_Package; }
   
 private:
   /**
@@ -110,13 +109,6 @@ private:
    * This must be the level when the package is ended.
    */
   unsigned int m_PackageNamespaceDepth;
-  
-  /**
-   * During the final pass, this maintains the index into a cmMakefile's
-   * m_Classes corresponding to the cmClassFile for this package's generated
-   * file.
-   */
-  int m_PackageClassIndex;
 };
 
 std::ostream& operator<<(std::ostream&, const cmCableData::Indentation&);

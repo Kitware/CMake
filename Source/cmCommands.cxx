@@ -4,14 +4,14 @@
 // like to have CMake to build CMake.   
 #include "cmCommands.h"
 #include "cmAbstractFilesCommand.cxx"
+#include "cmAddExecutableCommand.cxx"
+#include "cmAddLibraryCommand.cxx"
 #include "cmAddTargetCommand.cxx"
 #include "cmAuxSourceDirectoryCommand.cxx"
-#include "cmExecutablesCommand.cxx"
 #include "cmFindIncludeCommand.cxx"
 #include "cmFindLibraryCommand.cxx"
 #include "cmFindProgramCommand.cxx"
 #include "cmIncludeDirectoryCommand.cxx"
-#include "cmLibraryCommand.cxx"
 #include "cmLinkDirectoriesCommand.cxx"
 #include "cmLinkLibrariesCommand.cxx"
 #include "cmProjectCommand.cxx"
@@ -47,14 +47,14 @@
 void GetPredefinedCommands(std::list<cmCommand*>& commands)
 {
   commands.push_back(new cmAbstractFilesCommand);
+  commands.push_back(new cmAddExecutableCommand);
+  commands.push_back(new cmAddLibraryCommand);
   commands.push_back(new cmAddTargetCommand);
   commands.push_back(new cmAuxSourceDirectoryCommand);
-  commands.push_back(new cmExecutablesCommand);
   commands.push_back(new cmFindIncludeCommand);
   commands.push_back(new cmFindLibraryCommand);
   commands.push_back(new cmFindProgramCommand);
   commands.push_back(new cmIncludeDirectoryCommand);
-  commands.push_back(new cmLibraryCommand);
   commands.push_back(new cmLinkDirectoriesCommand);
   commands.push_back(new cmLinkLibrariesCommand);
   commands.push_back(new cmProjectCommand);

@@ -13,22 +13,19 @@
   See COPYRIGHT.txt for copyright details.
 
 =========================================================================*/
-#ifndef cmAuxSourceDirectoryCommand_h
-#define cmAuxSourceDirectoryCommand_h
+#ifndef cmLibrarysCommand_h
+#define cmLibrarysCommand_h
 
 #include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
-/** \class cmAuxSourceDirectoryCommand
- * \brief Specify auxiliary source code directories.
+/** \class cmLibrarysCommand
+ * \brief Defines a list of executables to build.
  *
- * cmAuxSourceDirectoryCommand specifies source code directories
- * that must be built as part of this build process. This directories
- * are not recursively processed like the SUBDIR command (cmSubdirCommand).
- * A side effect of this command is to create a subdirectory in the build
- * directory structure.
+ * cmLibrarysCommand defines a list of executable (i.e., test)
+ * programs to create.
  */
-class cmAuxSourceDirectoryCommand : public cmCommand
+class cmAddLibraryCommand : public cmCommand
 {
 public:
   /**
@@ -36,7 +33,7 @@ public:
    */
   virtual cmCommand* Clone() 
     {
-    return new cmAuxSourceDirectoryCommand;
+    return new cmAddLibraryCommand;
     }
 
   /**
@@ -48,15 +45,14 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "AUX_SOURCE_DIRECTORY";}
-  
+  virtual const char* GetName() { return "ADD_LIBRARY";}
+
   /**
    * Succinct documentation.
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Add all the source files found in the specified\n"
-           "directory to the build as source list NAME.";
+    return "Add an library to the project that uses the specified srclists";
     }
   
   /**
@@ -65,12 +61,11 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "AUX_SOURCE_DIRECTORY(dir srcListName)";
+      "ADD_LIBRARY(libname srclist srclist srclist ...)";
     }
   
-  cmTypeMacro(cmAuxSourceDirectoryCommand, cmCommand);
+  cmTypeMacro(cmAddLibraryCommand, cmCommand);
 };
-
 
 
 #endif

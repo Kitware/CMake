@@ -18,6 +18,7 @@
 
 #include "cmStandardIncludes.h"
 #include "cmRegularExpression.h"
+#include "cmCustomCommand.h"
 #include <set>
 
 /** \class cmSourceGroup
@@ -58,10 +59,7 @@ public:
     { m_GroupRegex.compile(regex); }
   void AddSource(const char* name)
     { m_Sources.push_back(name); }
-  void AddCustomCommand(const char* source,
-                        const char* command,
-                        const std::vector<std::string>& depends,
-                        const std::vector<std::string>& outputs);
+  void AddCustomCommand(const cmCustomCommand &cmd);
   const char* GetName() const
     { return m_Name.c_str(); }
   const std::vector<std::string>& GetSources() const

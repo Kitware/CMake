@@ -103,19 +103,23 @@ void cmClassFile::SetName(const char* name, const char* dir, const char *ext,
   return;
 }
 
-void cmClassFile::Print()
+void cmClassFile::Print() const
 {
   if(m_AbstractClass)
+    {
     std::cout <<  "Abstract ";
+    }
   else
+    {
     std::cout << "Concrete ";
+    }
   if(m_HeaderFileOnly)
+    {
     std::cout << "Header file ";
+    }
   else
+    {
     std::cout << "CXX file ";
-  if(m_IsExecutable)
-    std::cout << "Executable ";
-  else
-    std::cout << "Non Executable ";
+    }
   std::cout << m_ClassName << std::endl;
 }

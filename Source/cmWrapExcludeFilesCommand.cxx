@@ -23,16 +23,21 @@ bool cmWrapExcludeFilesCommand::Invoke(std::vector<std::string>& args)
     this->SetError("called with incorrect number of arguments");
     return false;
     }
+
+  cmMakefile::ClassMap &Classes = m_Makefile->GetClasses();
   for(std::vector<std::string>::iterator j = args.begin();
       j != args.end(); ++j)
     {   
-    std::vector<cmClassFile>& Classes = m_Makefile->GetClasses();
-    for(unsigned int i = 0; i < Classes.size(); i++)
+    for(cmMakefile::ClassMap::iterator l = Classes.begin(); 
+        l != Classes.end(); l++)
       {
-      if(Classes[i].m_ClassName == (*j))
+      for(std::vector<cmClassFile>::iterator i = l->second.begin(); 
+          i != l->second.end(); i++)
         {
-        Classes[i].m_WrapExclude = true;
-        break;
+        if(i->m_ClassName == (*j))
+          {
+          i->m_WrapExclude = true;
+          }
         }
       }
     }

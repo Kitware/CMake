@@ -20,7 +20,7 @@
 #include "cmClassFile.h"
 #include "cmSystemTools.h"
 #include "cmSourceGroup.h"
-
+#include "cmTarget.h"
 class cmCommand;
 class cmMakefileGenerator;
 
@@ -77,12 +77,14 @@ public:
   void AddCustomCommand(const char* source,
                         const char* command,
                         const std::vector<std::string>& depends,
-                        const std::vector<std::string>& outputs);
+                        const std::vector<std::string>& outputs,
+                        const char *target);
 
   void AddCustomCommand(const char* source,
                         const char* command,
                         const std::vector<std::string>& depends,
-                        const char* output);
+                        const char* output,
+                        const char* target);
   
   /**
    * Add a define flag to the build.
@@ -92,7 +94,7 @@ public:
   /**
    * Add an executable to the build.
    */
-  void AddExecutable(cmClassFile&);
+  void AddExecutable(const char *exename, const std::vector<std::string> &srcs);
 
   /**
    * Add a utility on which this project depends.
@@ -146,12 +148,12 @@ public:
   /**
    * Set the name of the library.
    */
-  void SetLibraryName(const char*);
+  void AddLibrary(const char *libname, const std::vector<std::string> &srcs);
 
   /**
    * Add a class/source file to the build.
    */
-  void AddClass(cmClassFile& );
+  void AddClass(cmClassFile& ,const char *srcListName);
 
   /**
    * Add a source group for consideration when adding a new source.
@@ -269,12 +271,9 @@ public:
     }
 
   /**
-   * Specify the name of the library that is built by this makefile.
+   * Get the list of targets
    */
-  const char* GetLibraryName()
-    {
-    return m_LibraryName.c_str();
-    }
+  const cmTargets &GetTargets() { return m_Targets; }
 
   /**
    * Get a list of the build subdirectories.
@@ -283,12 +282,6 @@ public:
     { 
     return m_SubDirectories;
     }
-
-  /**
-   * Return a boolean flag indicating whether the build generates
-   * any executables.
-   */
-  bool HasExecutables();
 
   /**
    * Get a list of include directories in the build.
@@ -349,9 +342,17 @@ public:
   /**
    * Return a list of source files in this makefile.
    */
-  std::vector<cmClassFile>& GetClasses()
-    {return  m_Classes;}
-
+  typedef std::map<std::string,std::vector<cmClassFile> > ClassMap;
+  ClassMap &GetClasses() {return  m_Classes;}
+  cmClassFile *GetClass(const char *srclist, const char *className);
+  
+    
+  /**
+   * Return a list of classes in the passed source lists
+   */
+  std::vector<cmClassFile> GetClassesFromSourceLists(
+    const std::vector<std::string> &srcLists);
+  
   /**
    * Obtain a list of auxiliary source directories.
    */
@@ -400,7 +401,7 @@ public:
    * entry in the m_Definitions map.  Also @var@ is
    * expanded to match autoconf style expansions.
    */
-  void ExpandVariablesInString(std::string& source);
+  void ExpandVariablesInString(std::string& source) const;
 
   /**
    * Expand variables in the makefiles ivars such as link directories etc
@@ -421,6 +422,12 @@ public:
    */
   void GenerateCacheOnly();
 
+  /**
+   * find what source group this source is in
+   */
+  cmSourceGroup& FindSourceGroup(const char* source,
+                                 std::vector<cmSourceGroup> &groups);
+
 protected:
   std::string m_Prefix;
   std::vector<std::string> m_AuxSourceDirectories; // 
@@ -432,9 +439,12 @@ protected:
   std::string m_cmHomeDirectory; 
   std::string m_HomeOutputDirectory;
 
-  std::string m_LibraryName;	// library name
   std::string m_ProjectName;	// project name
-  std::vector<cmClassFile> m_Classes; // list of classes in makefile
+
+  // libraries, classes, and executables
+  cmTargets m_Targets;
+  ClassMap m_Classes; 
+
   std::vector<std::string> m_SubDirectories; // list of sub directories
   std::vector<std::string> m_MakeVerbatim; // lines copied from input file
   std::vector<std::string> m_IncludeDirectories;
@@ -454,6 +464,7 @@ protected:
   std::vector<cmCommand*> m_UsedCommands;
   cmMakefileGenerator* m_MakefileGenerator;
   
+  
 private:
   /**
    * Get the name of the parent directories CMakeLists file
@@ -468,7 +479,6 @@ private:
   void AddDefaultCommands();
   void AddDefaultDefinitions();
   
-  cmSourceGroup& FindSourceGroup(const char* source);
 };
 
 

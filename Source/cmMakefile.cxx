@@ -89,9 +89,26 @@ void cmMakefile::PrintStringVector(const char* s, std::vector<std::string>& v)
 // call print on all the classes in the makefile
 void cmMakefile::Print()
 {
+  // print the class lists
   std::cout << "classes:\n";
-  for(unsigned int i = 0; i < m_Classes.size(); i++)
-    m_Classes[i].Print();
+  for(ClassMap::const_iterator l = m_Classes.begin(); 
+      l != m_Classes.end(); l++)
+    {
+    std::cout << " Class list named: " << l->first << std::endl;
+    for(std::vector<cmClassFile>::const_iterator i = l->second.begin(); 
+        i != l->second.end(); i++)
+      {
+      i->Print();
+      }
+    }
+  
+  std::cout << " m_Targets: ";
+  for (cmTargets::const_iterator l = m_Targets.begin();
+       l != m_Targets.end(); l++)
+    {
+    std::cout << l->first << std::endl;
+    }
+
   std::cout << " m_CurrentOutputDirectory; " << 
     m_CurrentOutputDirectory.c_str() << std::endl;
   std::cout << " m_StartOutputDirectory; " << 
@@ -104,7 +121,6 @@ void cmMakefile::Print()
     m_cmStartDirectory.c_str() << std::endl;
   std::cout << " m_cmHomeDirectory; " << 
     m_cmHomeDirectory.c_str() << std::endl;
-  std::cout << " m_LibraryName;	" <<  m_LibraryName.c_str() << std::endl;
   std::cout << " m_ProjectName;	" <<  m_ProjectName.c_str() << std::endl;
   this->PrintStringVector("m_SubDirectories ", m_SubDirectories); 
   this->PrintStringVector("m_MakeVerbatim ", m_MakeVerbatim); 
@@ -192,7 +208,8 @@ bool cmMakefile::ReadListFile(const char* filename)
                 {
                 cmSystemTools::Error(usedCommand->GetName(),
                                      ": Error : \n",
-                                     usedCommand->GetError());
+                                     usedCommand->GetError(),
+                                     m_cmCurrentDirectory.c_str());
                 }
               else
                 {
@@ -220,6 +237,26 @@ bool cmMakefile::ReadListFile(const char* filename)
 }
 
   
+
+cmClassFile *cmMakefile::GetClass(const char *srclist, const char *cname)
+{
+  ClassMap::iterator sl = m_Classes.find(srclist);
+  // find the src list
+  if (sl == m_Classes.end())
+    {
+    return 0;
+    }
+  // find the class
+  for (std::vector<cmClassFile>::iterator i = sl->second.begin();
+       i != sl->second.end(); ++i)
+    {
+    if (i->m_ClassName == cname)
+      {
+      return &(*i);
+      }
+    }
+  return 0;
+}
 
 void cmMakefile::AddCommand(cmCommand* wg)
 {
@@ -252,60 +289,40 @@ void cmMakefile::GenerateMakefile()
   m_MakefileGenerator->GenerateMakefile();
 }
 
-void cmMakefile::AddClass(cmClassFile& cmfile)
+void cmMakefile::AddClass(cmClassFile& cmfile, const char *srclist)
 {
-  m_Classes.push_back(cmfile);
+  m_Classes[srclist].push_back(cmfile);
+}
 
-  if(!cmfile.m_IsExecutable && !cmfile.m_HeaderFileOnly)
+void cmMakefile::AddCustomCommand(const char* source,
+                                  const char* command,
+                                  const std::vector<std::string>& depends,
+                                  const std::vector<std::string>& outputs,
+                                  const char *target) 
+{
+  // find the target, 
+  if (m_Targets.find(target) != m_Targets.end())
     {
-    // Add the file to the list of sources.
-    std::string source = cmfile.m_FullPath;
-    cmSourceGroup& sourceGroup = this->FindSourceGroup(source.c_str());
-    sourceGroup.AddSource(source.c_str());
+    cmCustomCommand cc(source,command,depends,outputs);
+    m_Targets[target].m_CustomCommands.push_back(cc);
     }
 }
 
 void cmMakefile::AddCustomCommand(const char* source,
                                   const char* command,
                                   const std::vector<std::string>& depends,
-                                  const std::vector<std::string>& outputs) 
-{
-  cmSourceGroup& sourceGroup = this->FindSourceGroup(source);
-  sourceGroup.AddCustomCommand(source, command, depends, outputs);
-}
-
-void cmMakefile::AddCustomCommand(const char* source,
-                                  const char* command,
-                                  const std::vector<std::string>& depends,
-                                  const char* output) 
+                                  const char* output, 
+                                  const char *target) 
 {
   std::vector<std::string> outputs;
   outputs.push_back(output);
-  this->AddCustomCommand(source, command, depends, outputs);
+  this->AddCustomCommand(source, command, depends, outputs, target);
 }
 
 void cmMakefile::AddDefineFlag(const char* flag)
 {
   m_DefineFlags += " ";
   m_DefineFlags += flag;
-}
-
-void cmMakefile::AddExecutable(cmClassFile& cf)
-{
-  cf.m_IsExecutable = true;
-  m_Classes.push_back(cf);
-}
-
-bool cmMakefile::HasExecutables()
-{
-  for(unsigned int i = 0; i < m_Classes.size(); i++)
-    {
-    if (m_Classes[i].m_IsExecutable)
-      {
-      return true;
-      }
-    }
-  return false;
 }
 
 void cmMakefile::AddUtility(const char* util)
@@ -348,10 +365,23 @@ void cmMakefile::SetProjectName(const char* p)
   m_ProjectName = p;
 }
 
-void cmMakefile::SetLibraryName(const char* l)
+void cmMakefile::AddLibrary(const char* lname, const std::vector<std::string> &srcs)
 {
-  m_LibraryName = l;
+  cmTarget target;
+  target.m_IsALibrary = 1;
+  target.m_SourceLists = srcs;
+  m_Targets.insert(cmTargets::value_type(lname,target));
 }
+
+void cmMakefile::AddExecutable(const char *exeName, 
+                               const std::vector<std::string> &srcs)
+{
+  cmTarget target;
+  target.m_IsALibrary = 0;
+  target.m_SourceLists = srcs;
+  m_Targets.insert(cmTargets::value_type(exeName,target));
+}
+
 
 void cmMakefile::AddSourceGroup(const char* name, const char* regex)
 {
@@ -491,9 +521,9 @@ int cmMakefile::DumpDocumentationToFile(const char *fileName)
 }
 
 
-void cmMakefile::ExpandVariablesInString(std::string& source)
+void cmMakefile::ExpandVariablesInString(std::string& source) const
 {
-  for(DefinitionMap::iterator i = m_Definitions.begin();
+  for(DefinitionMap::const_iterator i = m_Definitions.begin();
       i != m_Definitions.end(); ++i)
     {
     std::string variable = "${";
@@ -594,7 +624,9 @@ void cmMakefile::AddDefaultDefinitions()
  * non-inherited SOURCE_GROUP commands will have precedence over
  * inherited ones.
  */
-cmSourceGroup& cmMakefile::FindSourceGroup(const char* source)
+cmSourceGroup& 
+cmMakefile::FindSourceGroup(const char* source,
+                            std::vector<cmSourceGroup> &groups)
 {
   std::string file = source;
   std::string::size_type pos = file.rfind('/');
@@ -603,8 +635,8 @@ cmSourceGroup& cmMakefile::FindSourceGroup(const char* source)
     file = file.substr(pos, file.length()-pos);
     }
 
-  for(std::vector<cmSourceGroup>::reverse_iterator sg = m_SourceGroups.rbegin();
-      sg != m_SourceGroups.rend(); ++sg)
+  for(std::vector<cmSourceGroup>::reverse_iterator sg = groups.rbegin();
+      sg != groups.rend(); ++sg)
     {
     if(sg->Matches(file.c_str()))
       {
@@ -613,5 +645,39 @@ cmSourceGroup& cmMakefile::FindSourceGroup(const char* source)
     }
   
   // Shouldn't get here, but just in case, return the default group.
-  return m_SourceGroups.front();
+  return groups.front();
 }
+
+// take srclists and put all the classes into a vector
+std::vector<cmClassFile> 
+cmMakefile::GetClassesFromSourceLists(
+  const std::vector<std::string> &srcLists)
+{
+  std::vector<cmClassFile> result;
+  
+  // for each src lists add the classes
+  for (std::vector<std::string>::const_iterator s = srcLists.begin();
+       s != srcLists.end(); ++s)
+    {
+    // replace any variables
+    std::string temps = *s;
+    this->ExpandVariablesInString(temps);
+    // look for a srclist
+    if (m_Classes.find(temps) != m_Classes.end())
+      {
+      const std::vector<cmClassFile> &clsList = 
+        m_Classes.find(temps)->second;
+      result.insert(result.end(), clsList.begin(), clsList.end());
+      }
+    // if one wasn't found then assume it is a single class
+    else
+      {
+      cmClassFile file;
+      file.m_AbstractClass = false;
+      file.SetName(temps.c_str(), this->GetCurrentDirectory());
+      result.push_back(file);
+      }
+    }
+  return result;
+}
+

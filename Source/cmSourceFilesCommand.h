@@ -57,7 +57,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Add a list of source files.";
+    return "Add a list of source files, associate them with a NAME.";
     }
   
   /**
@@ -66,7 +66,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "SOURCE_FILES(file1 file2 ...)";
+      "SOURCE_FILES(NAME file1 file2 ...)";
     }
   
   cmTypeMacro(cmSourceFilesCommand, cmCommand);

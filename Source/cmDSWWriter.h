@@ -47,7 +47,7 @@ private:
   void WriteDSWHeader(std::ostream& fout);
   void WriteProject(std::ostream& fout, 
                     const char* name, const char* path,
-                    cmDSPMakefile* project);
+                    cmDSPMakefile* project, const cmTarget &t);
   void WriteDSWFooter(std::ostream& fout);
   cmMakefile* m_Makefile;
 };

@@ -87,16 +87,19 @@ void cmDSWMakefile::WriteDSWFile(std::ostream& fout)
     // remove the home directory and / from the source directory
     // this gives a relative path 
     cmSystemTools::ReplaceString(dir, homedir.c_str(), "");
+
     // Get the list of create dsp files names from the cmDSPMakefile, more
     // than one dsp could have been created per input CMakeLists.txt file
-    std::vector<std::string> dspnames =
-      pg->GetDSPMakefile()->GetCreatedProjectNames();
-    for(std::vector<std::string>::iterator si = dspnames.begin();
-	si != dspnames.end(); ++si)
+    // for each target
+    std::vector<std::string> dspnames = pg->GetDSPMakefile()->GetCreatedProjectNames();
+    const cmTargets &tgts = pg->GetDSPMakefile()->GetMakefile()->GetTargets();
+    cmTargets::const_iterator l = tgts.begin();
+    for(std::vector<std::string>::iterator si = dspnames.begin(); 
+        l != tgts.end(); ++l, ++si)
       {
       // Write the project into the DSW file
       this->WriteProject(fout, si->c_str(), dir.c_str(), 
-                         pg->GetDSPMakefile());
+                         pg->GetDSPMakefile(),l->second);
       }
     // delete the cmMakefile which also deletes the cmMSProjectGenerator
     delete mf;
@@ -112,7 +115,8 @@ void cmDSWMakefile::WriteDSWFile(std::ostream& fout)
 void cmDSWMakefile::WriteProject(std::ostream& fout, 
 				 const char* dspname,
 				 const char* dir,
-                                 cmDSPMakefile* project)
+                                 cmDSPMakefile* project,
+                                 const cmTarget &l)
 {
   fout << "#########################################################"
     "######################\n\n";
@@ -126,11 +130,12 @@ void cmDSWMakefile::WriteProject(std::ostream& fout,
   std::vector<std::string>::iterator i, end;
   i = project->GetMakefile()->GetLinkLibraries().begin();
   end = project->GetMakefile()->GetLinkLibraries().end();
-  if(project->NeedsDependencies(dspname))
+  for(;i!= end; ++i)
     {
-    for(;i!= end; ++i)
+    if(*i != dspname)
       {
-      if(*i != dspname)
+      if (!l.m_IsALibrary || 
+          project->GetLibraryBuildType() == cmDSPMakefile::DLL)
         {
         fout << "Begin Project Dependency\n";
         fout << "Project_Dep_Name " << *i << "\n";
@@ -138,7 +143,7 @@ void cmDSWMakefile::WriteProject(std::ostream& fout,
         }
       }
     }
-
+  
   // write utility dependencies.
   i = project->GetMakefile()->GetUtilities().begin();
   end = project->GetMakefile()->GetUtilities().end();

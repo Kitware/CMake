@@ -55,8 +55,8 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Add a list of source files if the required \n"
-           "variables are set.";
+    return "Add a list of source files to the source file list NAME\n"
+      "if the required variables are set.";
     }
   
   /**
@@ -65,7 +65,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "SOURCE_FILES_REQUIRE(var1 var2 ... SOURCES_BEGIN file1 file2 ...)";
+      "SOURCE_FILES_REQUIRE(var1 var2 ... SOURCES_BEGIN NAME file1 file2 ...)";
     }
   
   cmTypeMacro(cmSourceFilesRequireCommand, cmCommand);

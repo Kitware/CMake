@@ -18,7 +18,7 @@
 // cmSourceFilesRequireCommand
 bool cmSourceFilesRequireCommand::Invoke(std::vector<std::string>& args)
 {
-  if(args.size() < 3 )
+  if(args.size() < 4 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;
@@ -42,12 +42,14 @@ bool cmSourceFilesRequireCommand::Invoke(std::vector<std::string>& args)
     }
   
   // Add the rest of the arguments as source files
+  const char *sname = (*i).c_str();
+  ++i;
   for(; i != args.end(); ++i)
     {
     cmClassFile file;
     file.m_AbstractClass = false;
     file.SetName((*i).c_str(), m_Makefile->GetCurrentDirectory());
-    m_Makefile->AddClass(file);
+    m_Makefile->AddClass(file, sname);
     }
   return true;
 }

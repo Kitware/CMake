@@ -44,8 +44,9 @@ protected:
   void OutputMakefile(const char* file);
   void OutputMakeFlags(std::ostream&);
   void OutputVerbatim(std::ostream&);
-  void OutputSourceToObjectList(std::ostream& fout);
-  void OutputExecutableRules(std::ostream&);
+  void OutputTargetRules(std::ostream& fout);
+  void OutputLinkLibs(std::ostream& fout);
+  void OutputTargets(std::ostream&);
   void OutputSubDirectoryRules(std::ostream&);
   void OutputDependInformation(std::ostream&);
   void OutputDependencies(std::ostream&);

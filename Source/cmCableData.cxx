@@ -29,8 +29,7 @@ cmCableData::cmCableData(const cmCableCommand* owner,
   m_OutputFile(configurationFile.c_str()),
   m_Indentation(0),
   m_Package(NULL),
-  m_PackageNamespaceDepth(0),
-  m_PackageClassIndex(-1)
+  m_PackageNamespaceDepth(0)
 {
   this->InitializeOutputFile();
 }

@@ -35,7 +35,7 @@ struct cmDependInformation
   cmDependInformation() 
     {
     m_DependDone = false;
-    m_ClassFileIndex = -1;
+    m_ClassFileIndex = 0;
     }
 
   /**
@@ -56,9 +56,9 @@ struct cmDependInformation
 
   /**
    * The index into the cmMakefile::m_Classes list.
-   * The index value of -1 indicates that it is not in the list.
+   * The index value of 0 indicates that it is not in the list.
    */
-  int m_ClassFileIndex;	
+  cmClassFile *m_ClassFileIndex;	
   
   /**
    * This flag indicates whether dependency checking has been

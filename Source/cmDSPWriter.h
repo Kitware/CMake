@@ -37,11 +37,11 @@ public:
   /**
    * Specify the type of the build: static, dll, or executable.
    */
-  void SetBuildType(BuildType);
+  void SetBuildType(BuildType,const char *name);
 
-  BuildType GetBuildType()
+  BuildType GetLibraryBuildType()
     {
-      return m_BuildType;
+      return m_LibraryBuildType;
     }
   
 
@@ -61,20 +61,20 @@ public:
     {
     return m_Makefile;
     }
-  bool NeedsDependencies(const char* dspname);
+
 private:
   std::string m_DSPHeaderTemplate;
   std::string m_DSPFooterTemplate;
   std::vector<std::string> m_CreatedProjectNames;
   
-  void CreateExecutableDSPFiles();
-  void CreateSingleDSP();
-  void WriteDSPFile(std::ostream& fout);
+  void CreateSingleDSP(const char *lname, const cmTarget &tgt);
+  void WriteDSPFile(std::ostream& fout, 
+                    const char *libName, const cmTarget &tgt);
   void WriteDSPBeginGroup(std::ostream& fout, 
 			  const char* group,
 			  const char* filter);
   void WriteDSPEndGroup(std::ostream& fout);
-  void WriteDSPHeader(std::ostream& fout);
+  void WriteDSPHeader(std::ostream& fout, const char *libName);
   void WriteDSPBuildRule(std::ostream& fout, const char*);
   void WriteDSPBuildRule(std::ostream& fout);
   void WriteDSPFooter(std::ostream& fout);
@@ -86,9 +86,8 @@ private:
 
   std::string m_IncludeOptions;
   std::string m_LibraryOptions;
-  std::string m_OutputLibName;
   cmMakefile* m_Makefile;
-  BuildType m_BuildType;
+  BuildType m_LibraryBuildType;
   std::vector<std::string> m_Configurations;
 };
 

@@ -18,7 +18,7 @@
 // cmWrapTclCommand
 bool cmWrapTclCommand::Invoke(std::vector<std::string>& args)
 {
-  if(args.size() > 0 )
+  if(args.size() < 3 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;
@@ -44,30 +44,43 @@ bool cmWrapTclCommand::Invoke(std::vector<std::string>& args)
       }
     }
 
-  // get the list of classes for this library
-  std::vector<cmClassFile> &classes = m_Makefile->GetClasses();
-  
-  // add in new classes for the wrappers
-  int lastClass = classes.size();
   // what is the current source dir
   std::string cdir = m_Makefile->GetCurrentDirectory();
+
+  // keep the library name
+  m_LibraryName = args[0];
+  m_SourceList = args[1];
   
-  for(int classNum = 0; classNum < lastClass; classNum++)
-    {
-    cmClassFile &curr = classes[classNum];
-    // if we should wrap the class
-    if (!curr.m_WrapExclude)
+  // get the list of classes for this library
+  cmMakefile::ClassMap &Classes = m_Makefile->GetClasses();
+  for(std::vector<std::string>::iterator j = (args.begin() + 2);
+      j != args.end(); ++j)
+    {   
+    for(cmMakefile::ClassMap::iterator l = Classes.begin(); 
+        l != Classes.end(); l++)
       {
-      cmClassFile file;
-      file.m_AbstractClass = curr.m_AbstractClass;
-      std::string newName = curr.m_ClassName + "Tcl";
-      file.SetName(newName.c_str(), m_Makefile->GetCurrentOutputDirectory(),
-                   "cxx",false);
-      m_WrapClasses.push_back(file);
-      std::string hname = cdir + "/" + curr.m_ClassName + ".h";
-      m_WrapHeaders.push_back(hname);
+      for(std::vector<cmClassFile>::iterator i = l->second.begin(); 
+          i != l->second.end(); i++)
+        {
+        cmClassFile &curr = *i;
+        // if we should wrap the class
+        if (!curr.m_WrapExclude)
+          {
+          cmClassFile file;
+          file.m_AbstractClass = curr.m_AbstractClass;
+          std::string newName = curr.m_ClassName + "Tcl";
+          file.SetName(newName.c_str(), m_Makefile->GetCurrentOutputDirectory(),
+                       "cxx",false);
+          std::string hname = cdir + "/" + curr.m_ClassName + ".h";
+          m_WrapHeaders.push_back(hname);
+          // add starting depends
+          file.m_Depends.push_back(hname);
+          m_WrapClasses.push_back(file);
+          }
+        }
       }
     }
+  
   return true;
 }
 
@@ -79,35 +92,31 @@ void cmWrapTclCommand::FinalPass()
   std::string wtcl = "${WRAP_TCL_EXE}";
   std::string hints = "${WRAP_HINTS}";
   
-  m_Makefile->ExpandVariablesInString(wtcl);
-  m_Makefile->ExpandVariablesInString(hints);
-  
   // Create the init file 
-  std::string res = m_Makefile->GetLibraryName();
+  std::string res = m_LibraryName;
   res += "Init.cxx";
   this->CreateInitFile(res);
   
   // add the init file
   cmClassFile cfile;
   cfile.m_AbstractClass = false;
-  std::string newName = m_Makefile->GetLibraryName();
+  std::string newName = m_LibraryName;
   newName += "Init";
   cfile.SetName(newName.c_str(), m_Makefile->GetCurrentOutputDirectory(),
                 "cxx",false);
-  m_Makefile->AddClass(cfile);
+  m_Makefile->AddClass(cfile,m_SourceList.c_str());
   
   // wrap all the .h files
   depends.push_back(wtcl);
   for(int classNum = 0; classNum < lastClass; classNum++)
     {
-    m_Makefile->AddClass(m_WrapClasses[classNum]);
+    m_Makefile->AddClass(m_WrapClasses[classNum],m_SourceList.c_str());
     std::string res = m_WrapClasses[classNum].m_ClassName + ".cxx";
     std::string cmd = wtcl + " " + m_WrapHeaders[classNum] + " "
 		+ hints + (m_WrapClasses[classNum].m_AbstractClass ? " 0 " : " 1 ") + " > " + m_WrapClasses[classNum].m_ClassName + ".cxx";
     m_Makefile->AddCustomCommand(m_WrapHeaders[classNum].c_str(),
-                                 cmd.c_str(),
-                                 depends,
-                                 res.c_str());
+                                 cmd.c_str(), depends, 
+                                 res.c_str(), m_LibraryName.c_str());
     }
   
 }
@@ -117,7 +126,7 @@ bool cmWrapTclCommand::CreateInitFile(std::string& res)
   unsigned int i;
   
   /* we have to make sure that the name is the correct case */
-  std::string kitName = m_Makefile->GetLibraryName();
+  std::string kitName = m_LibraryName;
   if (kitName[0] > 90) kitName[0] -= 32;
   for (i = 1; i < kitName.size(); i++)
     {

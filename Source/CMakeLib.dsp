@@ -97,6 +97,10 @@ SOURCE=.\cmCommands.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=.\cmCustomCommand.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=.\cmDirectory.cxx
 # End Source File
 # Begin Source File

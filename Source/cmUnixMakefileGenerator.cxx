@@ -54,49 +54,140 @@ void cmUnixMakefileGenerator::OutputMakefile(const char* file)
     return;
     }
   this->OutputMakeFlags(fout);
-  this->OutputSourceToObjectList(fout);
   this->OutputVerbatim(fout);
-  this->OutputExecutableRules(fout);
+  this->OutputTargetRules(fout);
+  this->OutputLinkLibs(fout);
+  this->OutputTargets(fout);
   this->OutputSubDirectoryRules(fout);
   this->OutputObjectDepends(fout);
   this->OutputCustomRules(fout);
 }
 
-// Output the LIBRARY and SRC_OBJS list based on
-// the library name and cmClassFile objects in the
-// makefile
-void cmUnixMakefileGenerator::OutputSourceToObjectList(std::ostream& fout)
+// Output the rules for any targets
+void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
 {
-  std::vector<cmClassFile>& Classes = m_Makefile->GetClasses();
-  if(Classes.size() == 0)
+  // for each target add to the list of targets
+  fout << "TARGETS = ";
+  const cmTargets &tgts = m_Makefile->GetTargets();
+  for(cmTargets::const_iterator l = tgts.begin(); 
+      l != tgts.end(); l++)
     {
-    return;
-    }
-  // Ouput Library name if there are SRC_OBJS
-  if(strlen(m_Makefile->GetLibraryName()) > 0)
-    {
-    fout << "LIBRARY = " <<  m_Makefile->GetLibraryName() << "\n\n";
-    fout << "BUILD_LIB_FILE = lib${LIBRARY}${CMAKE_LIB_EXT}\n\n";
-    }
-  // Output SRC_OBJ list for all the classes to be compiled
-  fout << "SRC_OBJ = \\\n";
-  for(unsigned int i = 0; i < Classes.size(); i++)
-    {
-    if(!Classes[i].m_AbstractClass && !Classes[i].m_HeaderFileOnly
-       && !Classes[i].m_IsExecutable)
+    if (l->second.m_IsALibrary)
       {
-      fout << Classes[i].m_ClassName << ".o ";
-      if(i ==  Classes.size() -1)
-        {
-        fout << "\n\n";
-        }
-      else
-        {
-        fout << "\\\n";
-        }
+      fout << " \\\nlib" << l->first.c_str() << "${CMAKE_LIB_EXT}";
+      }
+    else
+      {
+      fout << "\\\n" << l->first.c_str();
       }
     }
-  fout << "\n";
+  fout << "\n\n";
+  
+  // get the classes from the source lists then add them to the groups
+  for(cmTargets::const_iterator l = tgts.begin(); 
+      l != tgts.end(); l++)
+    {
+    std::vector<cmClassFile> classes = 
+      m_Makefile->GetClassesFromSourceLists(l->second.m_SourceLists);
+    fout << l->first << "_SRC_OBJS = ";
+    for(std::vector<cmClassFile>::iterator i = classes.begin(); 
+        i != classes.end(); i++)
+      {
+      if(!i->m_HeaderFileOnly)
+        {
+        fout << "\\\n" << i->m_ClassName << ".o ";
+        }
+      }
+    fout << "\n\n";
+    }
+}
+
+// Output the rules for any targets
+void cmUnixMakefileGenerator::OutputLinkLibs(std::ostream& fout)
+{
+  // collect all the flags needed for linking libraries
+  std::string linkLibs;        
+  std::vector<std::string>::iterator j;
+  std::vector<std::string>& libdirs = m_Makefile->GetLinkDirectories();
+  for(j = libdirs.begin(); j != libdirs.end(); ++j)
+    { 
+    std::string::size_type pos = (*j).find("-L");
+    if((pos == std::string::npos || pos > 0)
+       && (*j).find("${") == std::string::npos)
+      {
+      linkLibs += "-L";
+      }
+    linkLibs += *j;
+    linkLibs += " ";
+    }
+  std::string librariesLinked;
+  std::vector<std::string>& libs = m_Makefile->GetLinkLibraries();
+  for(j = libs.begin(); j != libs.end(); ++j)
+    {
+    std::string::size_type pos = (*j).find("-l");
+    if((pos == std::string::npos || pos > 0)
+       && (*j).find("${") == std::string::npos)
+      {
+      librariesLinked += "-l";
+      }
+    librariesLinked += *j;
+    librariesLinked += " ";
+    }
+  // Add these in twice so order does not matter
+  linkLibs += librariesLinked;
+  linkLibs += librariesLinked;
+  
+  std::vector<std::string>& libsUnix = m_Makefile->GetLinkLibrariesUnix();
+  for(j = libsUnix.begin(); j != libsUnix.end(); ++j)
+    {
+    linkLibs += *j;
+    linkLibs += " ";
+    }
+  linkLibs += " ${LOCAL_LINK_FLAGS} ";
+  fout << "CMAKE_LINK_LIBS = " << linkLibs << "\n\n";
+  // create and output a varible in the makefile that
+  // each executable will depend on.  This will have all the
+  // libraries that the executable uses
+  fout << "CMAKE_DEPEND_LIBS = ";
+  this->OutputDependencies(fout);
+}
+
+void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
+{
+  // for each target
+  const cmTargets &tgts = m_Makefile->GetTargets();
+  for(cmTargets::const_iterator l = tgts.begin(); 
+      l != tgts.end(); l++)
+    {
+    if (l->second.m_IsALibrary)
+      {
+      fout << "#---------------------------------------------------------\n";
+      fout << "# rules for a library\n";
+      fout << "#\n";
+      fout << "lib" << l->first << ".a: ${KIT_OBJ} ${" << 
+        l->first << "_SRC_OBJS} \n";
+      fout << "\t${AR} cr lib" << l->first << ".a ${KIT_OBJ} ${" << 
+        l->first << "_SRC_OBJS} \n";
+      fout << "\t${RANLIB} lib" << l->first << ".a\n";
+      fout << std::endl;
+
+      fout << "lib" << l->first << "$(SHLIB_SUFFIX): ${KIT_OBJ} ${" << 
+        l->first << "_SRC_OBJS} \n";
+      fout << "\trm -f lib" << l->first << "$(SHLIB_SUFFIX)\n";
+      fout << "\t$(CXX) ${CXX_FLAGS} ${CMAKE_SHLIB_BUILD_FLAGS} -o \\\n";
+      fout << "\t  lib" << l->first << "$(SHLIB_SUFFIX) \\\n";
+      fout << "\t  ${KIT_OBJ} ${" << l->first << 
+        "_SRC_OBJS} ${SHLIB_LD_LIBS}\n\n";
+      }
+    else
+      {
+      fout << l->first << ": ${" << 
+        l->first << "_SRC_OBJS} ${CMAKE_DEPEND_LIBS}\n";
+      fout << "\t${CXX}  ${CXX_FLAGS} ${" << 
+        l->first << "_SRC_OBJS} ${CMAKE_LINK_LIBS} -o " 
+           << l->first << "\n\n";
+      }
+    }
 }
 
 
@@ -171,7 +262,7 @@ void cmUnixMakefileGenerator::OutputMakeFlags(std::ostream& fout)
     }
   fout << m_Makefile->GetDefineFlags();
   fout << " ${LOCAL_INCLUDE_FLAGS} ";
-  fout << "\n";
+  fout << "\n\n";
   fout << "default_target: all\n\n";
   // see if there are files to compile in this makefile
   // These are used for both libraries and executables
@@ -188,92 +279,6 @@ void cmUnixMakefileGenerator::OutputVerbatim(std::ostream& fout)
     }
   fout << "\n\n";
   
-}
-
-// output executables
-void cmUnixMakefileGenerator::OutputExecutableRules(std::ostream& fout)
-{
-  if(!m_Makefile->HasExecutables())
-    {
-    return ;
-    }
-  // collect all the flags needed for linking libraries
-  std::string linkLibs;        
-  std::vector<std::string>::iterator j;
-  std::vector<std::string>& libdirs = m_Makefile->GetLinkDirectories();
-  for(j = libdirs.begin(); j != libdirs.end(); ++j)
-    { 
-    std::string::size_type pos = (*j).find("-L");
-    if((pos == std::string::npos || pos > 0)
-       && (*j).find("${") == std::string::npos)
-      {
-      linkLibs += "-L";
-      }
-    linkLibs += *j;
-    linkLibs += " ";
-    }
-  std::string librariesLinked;
-  std::vector<std::string>& libs = m_Makefile->GetLinkLibraries();
-  for(j = libs.begin(); j != libs.end(); ++j)
-    {
-    std::string::size_type pos = (*j).find("-l");
-    if((pos == std::string::npos || pos > 0)
-       && (*j).find("${") == std::string::npos)
-      {
-      librariesLinked += "-l";
-      }
-    librariesLinked += *j;
-    librariesLinked += " ";
-    }
-  // Add these in twice so order does not matter
-  linkLibs += librariesLinked;
-  linkLibs += librariesLinked;
-  
-  std::vector<std::string>& libsUnix = m_Makefile->GetLinkLibrariesUnix();
-  for(j = libsUnix.begin(); j != libsUnix.end(); ++j)
-    {
-    linkLibs += *j;
-    linkLibs += " ";
-    }
-  linkLibs += " ${LOCAL_LINK_FLAGS} ";
-  // create and output a varible in the makefile that
-  // each executable will depend on.  This will have all the
-  // libraries that the executable uses
-  fout << "CMAKE_DEPEND_LIBS = ";
-  this->OutputDependencies(fout);
-  // Now create rules for all of the executables to be built
-  std::vector<cmClassFile>& Classes = m_Makefile->GetClasses();
-  for(unsigned int i = 0; i < Classes.size(); i++)
-    {
-    if(!Classes[i].m_AbstractClass && !Classes[i].m_HeaderFileOnly
-       && Classes[i].m_IsExecutable)
-      { 
-      std::string DotO = Classes[i].m_ClassName;
-      DotO += ".o";
-      fout << Classes[i].m_ClassName << ": " << DotO << " ";
-      fout << "${CMAKE_DEPEND_LIBS}\n";
-      fout << "\t${CXX}  ${CXX_FLAGS}  "
-           << DotO.c_str() << " "
-           << linkLibs.c_str() 
-           << " -o $@ ""\n\n";
-      }
-    }
-  // ouput the list of executables
-  fout << "EXECUTABLES = \\\n";
-  for(unsigned int i = 0; i < Classes.size(); i++)
-    {
-    if(!Classes[i].m_AbstractClass && !Classes[i].m_HeaderFileOnly
-       && Classes[i].m_IsExecutable)
-      { 
-      fout << Classes[i].m_ClassName;
-      if(i < Classes.size()-1)
-        {
-        fout << " \\";
-        }
-      fout << "\n";
-      }
-    }
-  fout << "\n";
 }
 
 // fix up names of directories so they can be used
@@ -365,29 +370,34 @@ void cmUnixMakefileGenerator::OutputSubDirectoryRules(std::ostream& fout)
 // by the class cmMakeDepend GenerateMakefile
 void cmUnixMakefileGenerator::OutputObjectDepends(std::ostream& fout)
 {
-  std::vector<cmClassFile>& Classes = m_Makefile->GetClasses();
-  for(unsigned int i = 0; i < Classes.size(); i++)
+  cmMakefile::ClassMap &Classes = m_Makefile->GetClasses();
+  for(cmMakefile::ClassMap::iterator l = Classes.begin(); 
+      l != Classes.end(); l++)
     {
-    if(!Classes[i].m_AbstractClass && !Classes[i].m_HeaderFileOnly)
+    for(std::vector<cmClassFile>::iterator i = l->second.begin(); 
+        i != l->second.end(); i++)
       {
-      if( Classes[i].m_Depends.size())
-	{
-	fout << Classes[i].m_ClassName << ".o : \\\n";
-	for(std::vector<std::string>::iterator j =  
-	      Classes[i].m_Depends.begin();
-	    j != Classes[i].m_Depends.end(); ++j)
-	  {
-	  if(j+1 == Classes[i].m_Depends.end())
-	    {
-	    fout << *j << " \n";
-	    }
-	  else
-	    {
-	    fout << *j << " \\\n";
-	    }
-	  }
-	fout << "\n\n";
-	}
+      if(!i->m_HeaderFileOnly)
+        {
+        if(i->m_Depends.size())
+          {
+          fout << i->m_ClassName << ".o : \\\n";
+          for(std::vector<std::string>::iterator j =  
+                i->m_Depends.begin();
+              j != i->m_Depends.end(); ++j)
+            {
+            if(j+1 == i->m_Depends.end())
+              {
+              fout << *j << " \n";
+              }
+            else
+              {
+              fout << *j << " \\\n";
+              }
+            }
+          fout << "\n\n";
+          }
+        }
       }
     }
 }
@@ -398,12 +408,33 @@ void cmUnixMakefileGenerator::OutputObjectDepends(std::ostream& fout)
 //   (tab)   command...
 void cmUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
 {
+  // We may be modifying the source groups temporarily, so make a copy.
+  std::vector<cmSourceGroup> sourceGroups = m_Makefile->GetSourceGroups();
+  
+  const cmTargets &tgts = m_Makefile->GetTargets();
+  for(cmTargets::const_iterator tgt = tgts.begin(); 
+      tgt != tgts.end(); ++tgt)
+    {
+    // add any custom rules to the source groups
+    for (std::vector<cmCustomCommand>::const_iterator cr = 
+           tgt->second.m_CustomCommands.begin(); 
+         cr != tgt->second.m_CustomCommands.end(); ++cr)
+      {
+      cmSourceGroup& sourceGroup = 
+        m_Makefile->FindSourceGroup(cr->m_Source.c_str(),
+                                    sourceGroups);
+      cmCustomCommand cc(*cr);
+      cc.ExpandVariables(*m_Makefile);
+      sourceGroup.AddCustomCommand(cc);
+      }
+    }
+  
   // Loop through every source group.
   for(std::vector<cmSourceGroup>::const_iterator sg =
-        m_Makefile->GetSourceGroups().begin();
-      sg != m_Makefile->GetSourceGroups().end(); ++sg)
+        sourceGroups.begin(); sg != sourceGroups.end(); ++sg)
     {
-    const cmSourceGroup::CustomCommands& customCommands = sg->GetCustomCommands();
+    const cmSourceGroup::CustomCommands& customCommands = 
+      sg->GetCustomCommands();
     if(customCommands.empty())
       { continue; }
     
