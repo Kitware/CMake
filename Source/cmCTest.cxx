@@ -1713,10 +1713,8 @@ void cmCTest::ProcessDirectory(std::vector<std::string> &passed,
           }
         //std::cerr << "Testing " << args[0] << " ... ";
         // find the test executable
-        std::string testCommand = this->FindTheExecutable(args[1].Value.c_str());
-        testCommand = cmSystemTools::ConvertToOutputPath(testCommand.c_str());
-
-        std::string actualCommand = testCommand;
+        std::string actualCommand = this->FindTheExecutable(args[1].Value.c_str());
+        std::string testCommand = cmSystemTools::ConvertToOutputPath(actualCommand.c_str());
 
         // continue if we did not find the executable
         if (testCommand == "")
@@ -2472,8 +2470,14 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output, int *re
     }
   else if(result == cmsysProcess_State_Error)
     {
-    *output += "\n*** ERROR executing: ";
-    *output += cmsysProcess_GetErrorString(cp);
+    std::string outerr = "\n*** ERROR executing: ";
+    outerr += cmsysProcess_GetErrorString(cp);
+    *output += outerr;
+    if ( m_Verbose )
+      {
+      std::cout << outerr.c_str() << "\n";
+      std::cout.flush();
+      }
     }
   
   cmsysProcess_Delete(cp);
