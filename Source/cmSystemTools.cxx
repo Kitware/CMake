@@ -486,25 +486,3 @@ void cmSystemTools::RemoveFile(const char* source)
 {
   unlink(source);
 }
-
-
-const char* cmSystemTools::GetCMakeExecutableName()
-{
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  return "CMakeSetupCMD";
-#else
-  return "CMakeBuildTargets";
-#endif  
-}
-
-const char* cmSystemTools::GetCMakeExecutableOptions()
-{
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  return "-DSP";
-#else
-  return "";
-#endif  
-}
-
-
-

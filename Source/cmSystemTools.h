@@ -122,18 +122,6 @@ public:
   
   
   static long int ModifiedTime(const char* filename);
-  
-  /**
-   * Get the CMake executable name on the current platform.  This will
-   * be "CMakeBuildTargets" for unix, and "CMakeSetupCMD" for windows.
-   */
-  static const char* GetCMakeExecutableName();
-  
-  /**
-   * Get the CMake executable options for the current platform.  This will
-   * be "" for unix, and "-DSP" for windows.
-   */
-  static const char* GetCMakeExecutableOptions();
 
 private:
   static bool s_ErrorOccured;
