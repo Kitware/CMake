@@ -53,10 +53,9 @@ bool cmBuildCommand::InitialPass(std::vector<std::string> const& args)
     makecommand += m_Makefile->GetProjectName();
     makecommand += ".sln /build Release /project ALL_BUILD";
     }
-  else if(m_Makefile->GetDefinition("BORLAND"))
+  else if (makeprogram.find("xcodebuild") != std::string::npos)
     {
-    makecommand = makeprogram;
-    makecommand += " -i";
+    makecommand += makeprogram;
     }
   else
     {
