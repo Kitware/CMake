@@ -156,7 +156,7 @@ Curl_cookie_add(struct SessionHandle *data,
   struct Cookie *co;
   struct Cookie *lastc=NULL;
   time_t now = time(NULL);
-  bool replace_old = FALSE;
+  bool replace_old;
   bool badcookie = FALSE; /* cookies are good by default. mmmmm yummy */
 
   /* First, alloc and init a new struct for it */

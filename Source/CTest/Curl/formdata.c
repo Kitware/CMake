@@ -241,7 +241,7 @@ static FormInfo * AddFormInfo(char *value,
 static const char * ContentTypeForFilename (const char *filename,
                                             const char *prevtype)
 {
-  const char *contenttype = NULL;
+  const char *contenttype;
   unsigned int i;
   /*
    * No type was specified, we scan through a few well-known

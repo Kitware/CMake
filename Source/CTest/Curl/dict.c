@@ -87,7 +87,7 @@ CURLcode Curl_dict(struct connectdata *conn)
   char *strategy = NULL;
   char *nthdef = NULL; /* This is not part of the protocol, but required
                           by RFC 2229 */
-  CURLcode result=CURLE_OK;
+  CURLcode result;
   struct SessionHandle *data=conn->data;
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
 

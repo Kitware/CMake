@@ -219,7 +219,7 @@ CURLcode curl_global_init_mem(long flags, curl_malloc_callback m,
                               curl_free_callback f, curl_realloc_callback r,
                               curl_strdup_callback s, curl_calloc_callback c)
 {
-  CURLcode code = CURLE_OK;
+  CURLcode code;
 
   /* Invalid input, return immediately */
   if (!m || !f || !r || !s || !c)
@@ -300,12 +300,12 @@ typedef int (*func_T)(void);
 CURLcode curl_easy_setopt(CURL *curl, CURLoption tag, ...)
 {
   va_list arg;
-  func_T param_func = (func_T)0;
-  long param_long = 0;
-  void *param_obj = NULL;
-  curl_off_t param_offset = 0;
+  func_T param_func;
+  long param_long;
+  void *param_obj;
+  curl_off_t param_offset;
   struct SessionHandle *data = curl;
-  CURLcode ret=CURLE_FAILED_INIT;
+  CURLcode ret;
 
   if(!curl)
     return CURLE_BAD_FUNCTION_ARGUMENT;

@@ -43,7 +43,7 @@ char *curl_escape(const char *string, int inlength)
 {
   size_t alloc = (inlength?(size_t)inlength:strlen(string))+1;
   char *ns;
-  char *testing_ptr = NULL;
+  char *testing_ptr;
   unsigned char in;
   size_t newlen = alloc;
   int strindex=0;

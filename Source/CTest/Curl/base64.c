@@ -86,7 +86,7 @@ size_t Curl_base64_decode(const char *src, char *dest)
   int i;
   int numQuantums;
   unsigned char lastQuantum[3];
-  size_t rawlen=0;
+  size_t rawlen;
 
   while((src[length] != '=') && src[length])
     length++;

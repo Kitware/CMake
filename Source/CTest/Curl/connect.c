@@ -405,7 +405,7 @@ static CURLcode bindlocal(struct connectdata *conn,
  */
 static bool verifyconnect(curl_socket_t sockfd, int *error)
 {
-  bool rc = TRUE;
+  bool rc;
 #ifdef SO_ERROR
   int err = 0;
 #ifdef __hpux
