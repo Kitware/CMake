@@ -80,15 +80,13 @@ private:
   /**
    * List of produced files.
    */
-  std::vector<cmSourceFile> m_GeneratedSourcesClasses;
-  std::vector<cmSourceFile> m_GeneratedHeadersClasses;
+  std::vector<cmSourceFile *> m_GeneratedSourcesClasses;
+
   /**
    * List of Fluid files that provide the source 
    * generating .cxx and .h files
    */
-  std::vector<std::string> m_WrapUserInterface;
   std::string m_Target;
-  std::string m_GUISourceList;
 };
 
 

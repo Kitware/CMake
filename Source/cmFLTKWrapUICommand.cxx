@@ -43,10 +43,10 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args)
 
   // what is the current source dir
   std::string cdir = m_Makefile->GetCurrentDirectory();
+  std::string fluid_exe = "${FLTK_FLUID_EXECUTABLE}";
 
   // get parameter for the command
   m_Target              = args[0];  // Target that will use the generated files
-  m_GUISourceList       = args[1];  // Source List of the GUI source files 
 
   std::vector<std::string> newArgs;
   m_Makefile->ExpandSourceListArguments(args,newArgs, 1);
@@ -76,13 +76,37 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args)
                   outputDirectory.c_str(), "cxx",!headerFileOnly);
       std::string origname = cdir + "/" + *i;
       std::string hname   = header_file.GetFullPath();
-      m_WrapUserInterface.push_back(origname);
       // add starting depends
       source_file.GetDepends().push_back(hname);
+      std::vector<std::string> depends;
+      depends.push_back(origname);
       source_file.GetDepends().push_back(origname);
-      header_file.GetDepends().push_back(origname);
-      m_GeneratedHeadersClasses.push_back(header_file);
-      m_GeneratedSourcesClasses.push_back(source_file);
+
+      const char *cxxres = source_file.GetFullPath().c_str();
+      
+      std::vector<std::string> cxxargs;
+      cxxargs.push_back("-c"); // instructs Fluid to run in command line
+      cxxargs.push_back("-h"); // optionally rename .h files
+      cxxargs.push_back(hname);
+      cxxargs.push_back("-o"); // optionally rename .cxx files
+      cxxargs.push_back(cxxres);
+      cxxargs.push_back(origname);// name of the GUI fluid file
+      
+      // Add command for generating the .h and .cxx files
+      m_Makefile->AddCustomCommandToOutput(cxxres,
+                                           fluid_exe.c_str(),
+                                           cxxargs,
+                                           0,
+                                           depends);
+      
+      m_Makefile->AddCustomCommandToOutput(hname.c_str(),
+                                           fluid_exe.c_str(),
+                                           cxxargs,
+                                           0,
+                                           depends);
+                                           
+      cmSourceFile* sf = m_Makefile->AddSource(source_file);
+      m_GeneratedSourcesClasses.push_back(sf);
       }
     }
   
@@ -91,50 +115,14 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args)
 
 void cmFLTKWrapUICommand::FinalPass() 
 {
-
   // first we add the rules for all the .fl to .h and .cxx files
-  size_t lastHeadersClass = m_GeneratedHeadersClasses.size();
-  std::string fluid_exe = "${FLTK_FLUID_EXECUTABLE}";
-
-
-  std::string outputGUIDirectory = m_Makefile->GetCurrentOutputDirectory();
+  size_t lastHeadersClass = m_GeneratedSourcesClasses.size();
 
   // Generate code for all the .fl files
   for(size_t classNum = 0; classNum < lastHeadersClass; classNum++)
     {
-    // set up .fl to .h and .cxx command
-    std::string hres = outputGUIDirectory;
-    hres += "/";
-    hres += m_GeneratedHeadersClasses[classNum].GetSourceName() + "." +
-        m_GeneratedHeadersClasses[classNum].GetSourceExtension();
-
-    std::string cxxres = outputGUIDirectory;
-    cxxres += "/";
-    cxxres += m_GeneratedSourcesClasses[classNum].GetSourceName() + "." +
-        m_GeneratedSourcesClasses[classNum].GetSourceExtension();
-
-    std::vector<std::string> cxxargs;
-    cxxargs.push_back("-c"); // instructs Fluid to run in command line
-    cxxargs.push_back("-h"); // optionally rename .h files
-    cxxargs.push_back(hres);
-    cxxargs.push_back("-o"); // optionally rename .cxx files
-    cxxargs.push_back(cxxres);
-    cxxargs.push_back(m_WrapUserInterface[classNum]);// name of the GUI fluid file
-
-    std::vector<std::string> depends;
-
-    std::vector<std::string> outputs;
-    outputs.push_back( cxxres );
-    outputs.push_back( hres   );
-     
-    // Add command for generating the .h and .cxx files
-    m_Makefile->AddCustomCommand(m_WrapUserInterface[classNum].c_str(),
-                                 fluid_exe.c_str(), cxxargs, depends, 
-                                 outputs, m_Target.c_str() );
-    cmSourceFile* sf = m_Makefile->AddSource(m_GeneratedSourcesClasses[classNum]);
-    
-    m_Makefile->GetTargets()[m_Target].GetSourceFiles().push_back( sf );
-        
+    m_Makefile->GetTargets()[m_Target].GetSourceFiles().push_back( 
+      m_GeneratedSourcesClasses[classNum]);
     }
 }
 
