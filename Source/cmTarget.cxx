@@ -82,10 +82,7 @@ void cmTarget::MergeLibraries(const LinkLibraries &ll)
   LinkLibraries::const_iterator p = ll.begin();
   for (;p != ll.end(); ++p)
     {
-    if (std::find(m_LinkLibraries.begin(),m_LinkLibraries.end(),*p) == m_LinkLibraries.end())
-      {
-      m_LinkLibraries.push_back(*p);
-      }
+    m_LinkLibraries.push_back(*p);
     }
 
 }
