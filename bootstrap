@@ -141,15 +141,19 @@ cmake_try_make ()
 }
 
 cmake_verbose=
+cmake_parallel_make=
 cmake_prefix_dir="/usr/local"
 for a in "$@"; do
-  if echo $a | grep "^--prefix="; then
+  if echo $a | grep "^--prefix=" > /dev/null 2> /dev/null; then
     cmake_prefix_dir=`echo $a | sed "s/^--prefix=//"`
   fi
-  if echo $a | grep "^--help"; then
+  if echo $a | grep "^--parallel=" > /dev/null 2> /dev/null; then
+    cmake_parallel_make=`echo $a | sed "s/^--parallel=//" | grep "[0-9][0-9]*"`
+  fi
+  if echo $a | grep "^--help" > /dev/null 2> /dev/null; then
     cmake_usage
   fi
-  if echo $a | grep "^--verbose"; then
+  if echo $a | grep "^--verbose" > /dev/null 2> /dev/null; then
     cmake_verbose=TRUE
   fi
 done
@@ -160,6 +164,10 @@ if [ -n "${cmake_verbose}" ]; then
   echo "Binary directory: ${cmake_binary_dir}"
   echo "Prefix directory: ${cmake_prefix_dir}"
   echo "System:           ${cmake_system}"
+  if [ "x${cmake_parallel_make}" != "x" ]; then
+    echo "Doing parallel make: ${cmake_parallel_make}"
+  fi
+  echo ""
 fi
 
 echo "---------------------------------------------"
@@ -359,7 +367,11 @@ echo "SET (CMAKE_CONFIGURE_INSTALL_PREFIX \"${cmake_prefix_dir}\" CACHE PATH \"I
 
 echo "---------------------------------------------"
 
-${cmake_make_processor}
+if [ "x${cmake_parallel_make}" != "x" ]; then
+  ${cmake_make_processor} -j ${cmake_parallel_make}
+else
+  ${cmake_make_processor}
+fi
 RES=$?
 if [ "${RES}" -ne "0" ]; then
   cmake_error "Problem while bootstrapping CMake"
