@@ -1210,8 +1210,6 @@ void cmUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     "\n"
     "\n";
   std::string replaceVars = variables;
-  fout << ".SUFFIXES: .cxx .c .cpp .m \n";
-
   m_Makefile->ExpandVariablesInString(replaceVars);
   fout << replaceVars.c_str();
   fout << "CMAKE_CURRENT_SOURCE = " << 
