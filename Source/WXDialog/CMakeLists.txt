@@ -61,7 +61,7 @@ IF ( CMAKE_WX_CAN_COMPILE )
 
   IF(BUILD_TESTING)
     ADD_TEST(wxCMakeSetupRunTest 
-             ${CMake_BINARY_DIR}/Source/wxCMakeSetup 
+             ${EXECUTABLE_OUTPUT_PATH}/wxCMakeSetup 
              -Q -A:ON -B:${CMake_BINARY_DIR}/Tests/Simple 
              -H:${CMake_SOURCE_DIR}/Tests/Simple)
   ENDIF(BUILD_TESTING)
