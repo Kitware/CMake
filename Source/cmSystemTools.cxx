@@ -780,9 +780,14 @@ bool cmSystemTools::RunCommand(const char* command,
   std::ifstream fin(tempFile.c_str());
   if(!fin)
     {
-    cmSystemTools::Error(command, 
-                         " from RunCommand Failed to create output file: ",
-                         tempFile.c_str());
+    std::string errormsg = "RunCommand produced no output: command: \"";
+    errormsg += command;
+    errormsg += "\"";
+    errormsg += "\nOutput file: ";
+    errormsg += tempFile;
+    cmSystemTools::Error(errormsg.c_str());
+    fin.close();
+    cmSystemTools::RemoveFile(tempFile.c_str());
     return false;
     }
   while(fin)
@@ -790,6 +795,7 @@ bool cmSystemTools::RunCommand(const char* command,
     fin.getline(buffer, BUFFER_SIZE);
     output += buffer;
     }
+  fin.close();
   cmSystemTools::RemoveFile(tempFile.c_str());
   return true;
 #else
