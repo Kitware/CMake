@@ -1884,15 +1884,14 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
      makeCommand += " -project ";
      makeCommand += m_BuildProject;
      makeCommand += ".xcode";
-     makeCommand += " build ";
+     makeCommand += " build -target ";
      if (m_BuildTarget.size())
        {
-       makeCommand += "-target ";
        makeCommand += m_BuildTarget;
        }
      else
        {
-       makeCommand += "-alltargets ";
+       makeCommand += "ALL_BUILD ";
        }
      makeCommand += " -buildstyle Development ";
     }

@@ -110,11 +110,14 @@ int cmGlobalXCodeGenerator::TryCompile(const char *,
   makeCommand += " -project ";
   makeCommand += projectName;
   makeCommand += ".xcode";
-  makeCommand += " build ";
+  makeCommand += " build -target ";
   if (targetName)
     {
-    makeCommand += "-target ";
     makeCommand += targetName;
+    }
+  else
+    {
+    makeCommand += "ALL_BUILD";
     }
   makeCommand += " -buildstyle Development ";
   makeCommand += " SYMROOT=";
