@@ -374,8 +374,9 @@ void cmNMakeMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
   depend += "_SRC_OBJS) $(" + std::string(name) + "_DEPEND_LIBS)";
   std::string command = "link /dll @<<\n";
   command += "$(" + std::string(name) + "_SRC_OBJS) /out:";
-  std::string dllpath = m_LibraryOutputPath +  std::string(name) + ".dll ";
+  std::string dllpath = m_LibraryOutputPath +  std::string(name) + ".dll";
   command += cmSystemTools::EscapeSpaces(dllpath.c_str());
+  command += " ";
   std::strstream linklibs;
   this->OutputLinkLibraries(linklibs, name, t);
   linklibs << std::ends;
