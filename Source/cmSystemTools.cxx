@@ -2275,7 +2275,7 @@ bool cmSystemTools::SimpleGlob(const std::string& glob,
     path = "/";
     }
 
-  bool res;
+  bool res = false;
   cmDirectory d;
   if (d.Load(path.c_str()))
     {

@@ -39,7 +39,6 @@ void cmCursesPathWidget::OnType(int& key, cmCursesMainForm* fm, WINDOW* w)
 
 void cmCursesPathWidget::OnTab(cmCursesMainForm* fm, WINDOW* w)
 {
-  std::string::size_type cc;
   if ( !this->GetString() )
     {
     return;
