@@ -630,7 +630,7 @@ IF(BUILD_TESTING)
 
   IF (CTEST_TEST_CTEST)
     CONFIGURE_FILE("${CMake_SOURCE_DIR}/Tests/CTestTest/test.cmake.in"
-      "${CMake_BINARY_DIR}/Tests/CTestTest/test.cmake" @ONLY)
+      "${CMake_BINARY_DIR}/Tests/CTestTest/test.cmake" @ONLY ESCAPE_QUOTES)
     ADD_TEST(CTestTest ${CMAKE_CTEST_COMMAND}
       -S "${CMake_BINARY_DIR}/Tests/CTestTest/test.cmake" -V
       )
