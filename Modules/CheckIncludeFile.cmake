@@ -7,23 +7,25 @@
 #
 
 MACRO(CHECK_INCLUDE_FILE INCLUDE VARIABLE)
-  SET(CHECK_INCLUDE_FILE_VAR ${INCLUDE})
-  CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CheckIncludeFile.c.in
-                 ${PROJECT_BINARY_DIR}/CMakeTmp/CheckIncludeFile.c IMMEDIATE)
-  MESSAGE(STATUS "Looking for ${INCLUDE}")
-  TRY_COMPILE(${VARIABLE}
-             ${PROJECT_BINARY_DIR}
-             ${PROJECT_BINARY_DIR}/CMakeTmp/CheckIncludeFile.c
-             OUTPUT_VARIABLE OUTPUT)
-  IF(${VARIABLE})
-    MESSAGE(STATUS "Found ${INCLUDE}")
-    SET(${VARIABLE} 1 CACHE INTERNAL "Have include ${INCLUDE}")
-  ELSE(${VARIABLE})
-    MESSAGE(STATUS "${INCLUDE} not found.")
-    SET(${VARIABLE} "" CACHE INTERNAL "Have include ${INCLUDE}")
-    WRITE_FILE(${PROJECT_BINARY_DIR}/CMakeError.log 
-      "Determining if the include file ${INCLUDE} "
-      "exists failed with the following output:\n"
-      "${OUTPUT}\n" APPEND)
-  ENDIF(${VARIABLE})
+  IF(NOT ${VARIABLE})
+    SET(CHECK_INCLUDE_FILE_VAR ${INCLUDE})
+    CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CheckIncludeFile.c.in
+                   ${PROJECT_BINARY_DIR}/CMakeTmp/CheckIncludeFile.c IMMEDIATE)
+    MESSAGE(STATUS "Looking for ${INCLUDE}")
+    TRY_COMPILE(${VARIABLE}
+               ${PROJECT_BINARY_DIR}
+               ${PROJECT_BINARY_DIR}/CMakeTmp/CheckIncludeFile.c
+               OUTPUT_VARIABLE OUTPUT)
+    IF(${VARIABLE})
+      MESSAGE(STATUS "Looking for ${INCLUDE} - found")
+      SET(${VARIABLE} 1 CACHE INTERNAL "Have include ${INCLUDE}")
+    ELSE(${VARIABLE})
+      MESSAGE(STATUS "Looking for ${INCLUDE} - not found.")
+      SET(${VARIABLE} "" CACHE INTERNAL "Have include ${INCLUDE}")
+      WRITE_FILE(${PROJECT_BINARY_DIR}/CMakeError.log 
+        "Determining if the include file ${INCLUDE} "
+        "exists failed with the following output:\n"
+        "${OUTPUT}\n" APPEND)
+    ENDIF(${VARIABLE})
+  ENDIF(NOT ${VARIABLE})
 ENDMACRO(CHECK_INCLUDE_FILE)
