@@ -78,22 +78,40 @@ IF(BUILD_TESTING)
     CONFIGURE_FILE(
       ${CMake_SOURCE_DIR}/Source/cmaketest.h.in 
       ${CMake_BINARY_DIR}/Source/cmaketest.h ESCAPE_QUOTES)
+
     ADD_TEST(DumpDocumentation ${CMake_BINARY_DIR}/Source/DumpDocumentation
-      ${CMake_BINARY_DIR}/CMakeDoc.html )
+      ${CMake_BINARY_DIR}/CMakeDoc.html)
+
     ADD_TEST(simple ${CMake_BINARY_DIR}/Source/cmaketest 
       ${CMake_SOURCE_DIR}/Tests/Simple 
-      ${CMake_BINARY_DIR}/Tests/Simple simple )
+      ${CMake_BINARY_DIR}/Tests/Simple 
+      simple)
+
     ADD_TEST(complex ${CMake_BINARY_DIR}/Source/cmaketest 
       ${CMake_SOURCE_DIR}/Tests/Complex 
       ${CMake_BINARY_DIR}/Tests/Complex 
       complex 
-      ${CMake_BINARY_DIR}/Tests/Complex/bin )
+      ${CMake_BINARY_DIR}/Tests/Complex/bin)
+
     ADD_TEST(Example ${CMake_BINARY_DIR}/Source/cmaketest 
       ${CMake_SOURCE_DIR}/Example
       ${CMake_BINARY_DIR}/Example
       helloDemo
       ${CMake_BINARY_DIR}/Example/Demo
-      HELLO )
+      HELLO)
+
+    ADD_TEST(testing ${CMake_BINARY_DIR}/Source/cmaketest 
+      ${CMake_SOURCE_DIR}/Tests/Testing 
+      ${CMake_BINARY_DIR}/Tests/Testing
+      testing
+      ${CMake_BINARY_DIR}/Tests/Testing/bin)
+
+    ADD_TEST(wrapping ${CMake_BINARY_DIR}/Source/cmaketest 
+      ${CMake_SOURCE_DIR}/Tests/Wrapping 
+      ${CMake_BINARY_DIR}/Tests/Wrapping
+      wrapping
+      ${CMake_BINARY_DIR}/Tests/Wrapping/bin)
+
   ENDIF (DART_ROOT)
 ENDIF(BUILD_TESTING)
 
