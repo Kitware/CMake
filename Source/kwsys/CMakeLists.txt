@@ -304,11 +304,8 @@ IF(KWSYS_LIBRARY_INSTALL_DIR)
 ENDIF(KWSYS_LIBRARY_INSTALL_DIR)
 
 # For building kwsys itself, we use a macro defined on the command
-# line to configure the namespace in the C and C++ source files.  The
-# source files must also include their headers without the namespae
-# prefix, so we add the header directory to the include path directly.
+# line to configure the namespace in the C and C++ source files.
 ADD_DEFINITIONS("-DKWSYS_NAMESPACE=${KWSYS_NAMESPACE}")
-INCLUDE_DIRECTORIES(BEFORE ${KWSYS_HEADER_DIR})
 
 #-----------------------------------------------------------------------------
 # Process execution on windows needs to build a forwarding executable

@@ -14,10 +14,11 @@
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
-#include <SystemTools.hxx>
+#include "kwsysPrivate.h"
+#include KWSYS_HEADER(SystemTools.hxx)
 
-#include <std/iostream>
-#include <std/fstream>
+#include KWSYS_HEADER(std/iostream)
+#include KWSYS_HEADER(std/fstream)
 
 #ifdef _MSC_VER
 # pragma warning (disable: 4786)

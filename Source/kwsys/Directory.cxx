@@ -14,12 +14,13 @@
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
-#include <Directory.hxx>
+#include "kwsysPrivate.h"
+#include KWSYS_HEADER(Directory.hxx)
 
-#include <Configure.hxx>
+#include KWSYS_HEADER(Configure.hxx)
 
-#include <std/string>
-#include <std/vector>
+#include KWSYS_HEADER(std/string)
+#include KWSYS_HEADER(std/vector)
 
 namespace KWSYS_NAMESPACE
 {

@@ -33,7 +33,9 @@
 // Updated: DLS 03/22/91  New lite version
 //
 
-#include <RegularExpression.hxx>        // Include class specification 
+#include "kwsysPrivate.h"
+#include KWSYS_HEADER(RegularExpression.hxx)
+
 #include <stdio.h>
 
 namespace KWSYS_NAMESPACE
