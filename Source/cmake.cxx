@@ -87,23 +87,23 @@ void cmake::SetArgs(cmMakefile& builder, const std::vector<std::string>& args)
   for(unsigned int i=1; i < args.size(); ++i)
     {
     std::string arg = args[i];
-    if(arg.find("-H",0) != std::string::npos)
+    if(arg.find("-H",0) == 0)
       {
       std::string path = arg.substr(2);
       builder.SetHomeDirectory(path.c_str());
       }
-    if(arg.find("-S",0) != std::string::npos)
+    if(arg.find("-S",0) == 0)
       {
       m_Local = true;
       std::string path = arg.substr(2);
       builder.SetStartDirectory(path.c_str());
       }
-    if(arg.find("-O",0) != std::string::npos)
+    if(arg.find("-O",0) == 0)
       {
       std::string path = arg.substr(2);
       builder.SetStartOutputDirectory(path.c_str());
       }
-    if(arg.find("-B",0) != std::string::npos)
+    if(arg.find("-B",0) == 0)
       {
       std::string path = arg.substr(2);
       builder.SetHomeOutputDirectory(path.c_str());
