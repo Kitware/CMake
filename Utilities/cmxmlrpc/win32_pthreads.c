@@ -41,7 +41,7 @@ int pthread_create(pthread_t *new_thread_ID,
           pthread_func start_func, void *arg)
 {
         HANDLE hThread;
-        DWORD dwThreadID;
+        unsigned dwThreadID;
 
         XMLRPC_ASSERT (attr == NULL); /* unimplemented. */
     XMLRPC_ASSERT_PTR_OK(new_thread_ID);
