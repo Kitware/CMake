@@ -1,6 +1,6 @@
 # -------------------------------------------------------------------------
 # doxyfile for CMake
-# modified by S. Barre (Time-stamp: <2001-11-02 15:30:58 barre>
+# modified by S. Barre (Time-stamp: <2002-02-13 18:24:35 barre>
 # -------------------------------------------------------------------------
 
 PROJECT_NAME         = CMake
@@ -31,12 +31,13 @@ GRAPHICAL_HIERARCHY  = YES
 
 ALLEXTERNALS         = NO
 
-IMAGE_PATH           = 
+IMAGE_PATH           = "@CMAKE_BINARY_DIR@/Utilities/Doxygen/contrib"
 
 OUTPUT_DIRECTORY     = "@CMAKE_BINARY_DIR@/Utilities/Doxygen/doc"
 
 INPUT                = \
  "@CMAKE_SOURCE_DIR@/Source" \
+ "@CMAKE_BINARY_DIR@/Utilities/Doxygen/dox/doc_CMake_contributors.dox" \
 
 EXTRACT_ALL          = YES
 EXTRACT_PRIVATE      = NO
