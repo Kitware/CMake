@@ -54,13 +54,11 @@ bool cmFindLibraryCommand::Invoke(std::vector<std::string>& args)
   std::string helpString = "Where can the ";
   if(args[1] == "NAMES")
     {
-    int i = 2;
-    while(args[i] != "PATHS" && i < args.size())
+    for(unsigned int i=2; (args[i] != "PATHS" && i < args.size()); ++i)
       {
       helpString = "( ";
       helpString +=  args[i];
       helpString +=  " ";
-      i++;
       }
     }
   else
