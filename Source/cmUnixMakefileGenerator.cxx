@@ -808,7 +808,8 @@ void cmUnixMakefileGenerator::OutputUtilityRule(std::ostream& fout,
       for(std::vector<std::string>::const_iterator d = dep.begin();
 	  d != dep.end(); ++d)
 	{
-	  depends +=  *d + "\\\n";
+	  depends +=  "\\\n";
+	  depends += *d;
 	}
     }
   this->OutputMakeRule(fout, 
