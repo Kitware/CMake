@@ -27,7 +27,6 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args)
   
   // watch for ENV signatures
   const char* variable = args[0].c_str(); // VAR is always first
-  bool haveEnvVariable = false;
   if (!strncmp(variable,"ENV{",4) && strlen(variable) > 5)
     {
     // what is the variable name
