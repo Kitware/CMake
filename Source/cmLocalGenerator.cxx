@@ -420,7 +420,7 @@ void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
                                                       cmTarget& )
 { 
   std::string objectFile = this->ConvertToRelativeOutputPath(ofname);
-  std::string sourceFile = this->ConvertToRelativeOutputPath(source.GetFullPath().c_str());
+  std::string sourceFile = this->ConvertToOptionallyRelativeOutputPath(source.GetFullPath().c_str());
   std::string varString = "CMAKE_";
   varString += lang;
   varString += "_COMPILE_OBJECT";
@@ -746,7 +746,7 @@ cmLocalGenerator::ExpandRuleVariables(std::string& s,
 std::string 
 cmLocalGenerator::ConvertToOutputForExisting(const char* p)
 {
-  std::string ret = this->ConvertToRelativeOutputPath(p);
+  std::string ret = this->ConvertToOptionallyRelativeOutputPath(p);
   // if there are spaces in the path, then get the short path version
   // if there is one
   if(ret.find(' ') != std::string::npos)
@@ -755,7 +755,7 @@ cmLocalGenerator::ConvertToOutputForExisting(const char* p)
       {
       if(!cmSystemTools::GetShortPath(ret.c_str(), ret))
         {
-        ret = this->ConvertToRelativeOutputPath(p);
+        ret = this->ConvertToOptionallyRelativeOutputPath(p);
         }
       }
     }
