@@ -28,10 +28,11 @@ IF(BUILD_TESTING)
   # to be defined by cmake 
   SET(MAKEPROGRAM ${CMAKE_MAKE_PROGRAM})
   FIND_PROGRAM(CVSCOMMAND cvs )
-  FIND_PROGRAM(COMPRESSIONCOMMAND NAMES gzip compress zip )
-  FIND_PROGRAM(GUNZIPCOMMAND gunzip )
-  FIND_PROGRAM(JAVACOMMAND java )
-  FIND_PROGRAM(PURIFYCOMMAND purify )
+  FIND_PROGRAM(COMPRESSIONCOMMAND NAMES gzip compress zip 
+               DOC "Path to program used to compress files for transfer to the dart server")
+  FIND_PROGRAM(GUNZIPCOMMAND gunzip DOC "Path to gunzip executable")
+  FIND_PROGRAM(JAVACOMMAND java DOC "Path to java command, used by the Dart server to create html.")
+  FIND_PROGRAM(PURIFYCOMMAND purify DOC "Path to Rational purify command, used for memory error detection.")
 
   # find a tcl shell command
   IF (UNIX)

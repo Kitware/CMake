@@ -40,6 +40,7 @@
 #include "cmLinkLibrariesCommand.cxx"
 #include "cmLoadCacheCommand.cxx"
 #include "cmMakeDirectoryCommand.cxx"
+#include "cmMarkAsAdvancedCommand.cxx"
 #include "cmMessageCommand.cxx"
 #include "cmOptionCommand.cxx"
 #include "cmOutputRequiredFilesCommand.cxx"
@@ -102,6 +103,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmLinkLibrariesCommand);
   commands.push_back(new cmLoadCacheCommand);
   commands.push_back(new cmMakeDirectoryCommand);
+  commands.push_back(new cmMarkAsAdvancedCommand);
   commands.push_back(new cmMessageCommand);
   commands.push_back(new cmOptionCommand);
   commands.push_back(new cmOutputRequiredFilesCommand);  

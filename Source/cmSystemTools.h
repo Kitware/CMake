@@ -287,9 +287,13 @@ public:
     
   static void EnableMessages() { s_DisableMessages = false; }
   static void DisableMessages() { s_DisableMessages = true; }
+  static void DisableRunCommandOutput() {s_DisableRunCommandOutput = true; }
+  static void EnableRunCommandOutput() {s_DisableRunCommandOutput = false; }
+  
 private:
   static bool s_ErrorOccured;
   static bool s_DisableMessages;
+  static bool s_DisableRunCommandOutput;
   static ErrorCallback s_ErrorCallback;
 };
 

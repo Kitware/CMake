@@ -99,6 +99,8 @@ public:
   ///! Get a cache entry object for a key
   CacheEntry *GetCacheEntry(const char *key);
   
+  bool IsAdvanced(const char* key);
+  
   ///! Remove an entry from the cache
   void RemoveCacheEntry(const char* key);
   
@@ -128,6 +130,7 @@ private:
   // the commands should never use the cmCacheManager directly
   friend class cmMakefile; // allow access to add cache values
   friend class cmake; // allow access to add cache values
+  friend class cmakewizard; // allow access to add cache values
 };
 
 #endif

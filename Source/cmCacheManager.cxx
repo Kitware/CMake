@@ -524,3 +524,13 @@ void cmCacheManager::AddCacheEntry(const char* key, bool v,
     }
 }
 
+bool cmCacheManager::IsAdvanced(const char* key)
+{
+  std::string advancedVar = key;
+  advancedVar += "-ADVANCED";
+  if(cmCacheManager::GetInstance()->GetCacheEntry(advancedVar.c_str()))
+    {
+    return true;
+    }
+  return false;
+}

@@ -91,6 +91,7 @@ inline int Chdir(const char* dir)
 }
 #endif
 
+bool cmSystemTools::s_DisableRunCommandOutput = false;
 bool cmSystemTools::s_ErrorOccured = false;
 bool cmSystemTools::s_DisableMessages = false;
 
@@ -925,6 +926,10 @@ bool cmSystemTools::RunCommand(const char* command,
 {
   const int BUFFER_SIZE = 4096;
   char buffer[BUFFER_SIZE];
+  if(s_DisableRunCommandOutput)
+    {
+    verbose = false;
+    }
   
 #if defined(WIN32) && !defined(__CYGWIN__)
   std::string commandToFile = command;

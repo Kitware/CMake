@@ -67,6 +67,7 @@ LINK_LIBRARIES(CMakeLib)
 LINK_DIRECTORIES(${CMake_BINARY_DIR}/Source)
 
 ADD_EXECUTABLE(cmake cmakemain)
+ADD_EXECUTABLE(cmakewizard cmakewizard)
 ADD_EXECUTABLE(DumpDocumentation cmDumpDocumentation)
 
 ADD_EXECUTABLE(ctest ctest.cxx cmSystemTools.cxx cmRegularExpression.cxx)

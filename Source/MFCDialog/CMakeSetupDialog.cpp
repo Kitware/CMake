@@ -87,6 +87,7 @@ CMakeSetupDialog::CMakeSetupDialog(const CMakeCommandLineInfo& cmdInfo,
   m_WhereSource = cmdInfo.m_WhereSource;
   m_WhereBuild = cmdInfo.m_WhereBuild;
   m_GeneratorChoiceString = _T("");
+	m_AdvancedValues = FALSE;
 	//}}AFX_DATA_INIT
   // Note that LoadIcon does not require a subsequent DestroyIcon in Win32
   m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
@@ -121,6 +122,7 @@ void CMakeSetupDialog::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_CMAKE_VERSION, m_VersionDisplay);
 	DDX_Control(pDX, IDC_BuildProjects, m_Configure);
 	DDX_CBStringExact(pDX, IDC_Generator, m_GeneratorChoiceString);
+	DDX_Check(pDX, IDC_AdvancedValues, m_AdvancedValues);
 	//}}AFX_DATA_MAP
 }
 
@@ -140,8 +142,10 @@ BEGIN_MESSAGE_MAP(CMakeSetupDialog, CDialog)
   ON_WM_GETMINMAXINFO()
 	ON_BN_CLICKED(IDC_OK, OnOk)
 	ON_CBN_EDITCHANGE(IDC_Generator, OnEditchangeGenerator)
-  ON_BN_CLICKED(IDCANCEL, OnCancel)
 	ON_BN_CLICKED(IDC_HELP_BUTTON, OnHelpButton)
+  ON_BN_CLICKED(IDCANCEL, OnCancel)
+	ON_BN_CLICKED(IDC_AdvancedValues, OnAdvancedValues)
+	ON_BN_DOUBLECLICKED(IDC_AdvancedValues, OnDoubleclickedAdvancedValues)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -617,6 +621,15 @@ void CMakeSetupDialog::FillCacheGUIFromCacheManager()
     {
     const char* key = i->first.c_str();
     const cmCacheManager::CacheEntry& value = i->second;
+    if(!m_AdvancedValues)
+      {
+      std::string advancedVar = key;
+      advancedVar += "-ADVANCED";
+      if(cmCacheManager::GetInstance()->GetCacheEntry(advancedVar.c_str()))
+        {
+        continue;
+        }
+      }
     switch(value.m_Type )
       {
       case cmCacheManager::BOOL:
@@ -1005,4 +1018,106 @@ void CMakeSetupDialog::OnHelpButton()
 {
   CMakeHelp dialog;
   dialog.DoModal();
+}
+
+void CMakeSetupDialog::ShowAdvancedValues()
+{
+  const cmCacheManager::CacheEntryMap &cache =
+    cmCacheManager::GetInstance()->GetCacheMap();
+  
+  for(cmCacheManager::CacheEntryMap::const_iterator i = cache.begin();
+      i != cache.end(); ++i)
+    {
+    const char* key = i->first.c_str();
+    const cmCacheManager::CacheEntry& value = i->second;
+    if(!cmCacheManager::GetInstance()->IsAdvanced(key))
+      {
+      continue;
+      }
+    switch(value.m_Type )
+      {
+      case cmCacheManager::BOOL:
+        if(cmSystemTools::IsOn(value.m_Value.c_str()))
+          {
+          m_CacheEntriesList.AddProperty(key,
+                                         "ON",
+                                         value.m_HelpString.c_str(),
+                                         CPropertyList::COMBO,"ON|OFF",
+                                         true 
+            );
+          }
+        else
+          {
+          m_CacheEntriesList.AddProperty(key,
+                                         "OFF",
+                                         value.m_HelpString.c_str(),
+                                         CPropertyList::COMBO,"ON|OFF",
+                                         true
+            );
+          }
+        break;
+      case cmCacheManager::PATH:
+        m_CacheEntriesList.AddProperty(key, 
+                                       value.m_Value.c_str(),
+                                       value.m_HelpString.c_str(),
+                                       CPropertyList::PATH,"",
+                                       true
+          );
+        break;
+      case cmCacheManager::FILEPATH:
+        m_CacheEntriesList.AddProperty(key, 
+                                       value.m_Value.c_str(),
+                                       value.m_HelpString.c_str(),
+                                       CPropertyList::FILE,"",
+                                       true
+          );
+        break;
+      case cmCacheManager::STRING:
+        m_CacheEntriesList.AddProperty(key,
+                                       value.m_Value.c_str(),
+                                       value.m_HelpString.c_str(),
+                                       CPropertyList::EDIT,"",
+                                       true
+          );
+        break;
+      case cmCacheManager::INTERNAL:
+	m_CacheEntriesList.RemoveProperty(key);
+        break;
+      }
+    }
+}
+
+void CMakeSetupDialog::RemoveAdvancedValues()
+{
+  const cmCacheManager::CacheEntryMap &cache =
+    cmCacheManager::GetInstance()->GetCacheMap();
+  
+  for(cmCacheManager::CacheEntryMap::const_iterator i = cache.begin();
+      i != cache.end(); ++i)
+    {
+    const char* key = i->first.c_str();
+    const cmCacheManager::CacheEntry& value = i->second;
+    if(cmCacheManager::GetInstance()->IsAdvanced(key))
+      {
+      m_CacheEntriesList.RemoveProperty(key);
+      }
+    }
+}
+
+void CMakeSetupDialog::OnAdvancedValues() 
+{
+  this->UpdateData();
+  if(m_AdvancedValues)
+    {
+    this->ShowAdvancedValues();
+    }
+  else
+    {
+    this->RemoveAdvancedValues();
+    }
+}
+
+void CMakeSetupDialog::OnDoubleclickedAdvancedValues() 
+{
+  this->OnAdvancedValues();
 }

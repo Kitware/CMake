@@ -33,6 +33,8 @@ protected:
 			 CString *val,
 			 const char *key,
 			 const char *aadefault);
+  void ShowAdvancedValues();
+  void RemoveAdvancedValues();
 // Dialog Data
   //{{AFX_DATA(CMakeSetupDialog)
 	enum { IDD = IDD_CMakeSetupDialog_DIALOG };
@@ -51,6 +53,7 @@ protected:
   CStatic       m_VersionDisplay;
   CButton       m_Configure;
 	CString	m_GeneratorChoiceString;
+	BOOL	m_AdvancedValues;
 	//}}AFX_DATA
   
   // ClassWizard generated virtual function overrides
@@ -91,6 +94,8 @@ protected:
 	afx_msg void OnOk();
 	afx_msg void OnEditchangeGenerator();
 	afx_msg void OnHelpButton();
+	afx_msg void OnAdvancedValues();
+	afx_msg void OnDoubleclickedAdvancedValues();
 	//}}AFX_MSG
   DECLARE_MESSAGE_MAP()
     

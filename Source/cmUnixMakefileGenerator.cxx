@@ -1663,14 +1663,12 @@ void cmUnixMakefileGenerator::ComputeSystemInfo()
       {
       std::string env = "CXX=${CMAKE_CXX_COMPILER}";
       m_Makefile->ExpandVariablesInString(env);
-      std::cout << "Setting: " << env.c_str() << "\n";
       putenv(const_cast<char*>(env.c_str()));
       }
     if(m_Makefile->GetDefinition("CMAKE_C_COMPILER"))
       {
       std::string env = "CC=${CMAKE_C_COMPILER}";
       m_Makefile->ExpandVariablesInString(env);
-      std::cout << "Setting: " << env.c_str() << "\n";
       putenv(const_cast<char*>(env.c_str()));
       }
     // currently we run configure shell script here to determine the info
