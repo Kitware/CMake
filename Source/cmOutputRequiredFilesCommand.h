@@ -68,6 +68,10 @@ public:
     }
   
   cmTypeMacro(cmOutputRequiredFilesCommand, cmCommand);
+  void ListDependencies(cmDependInformation const *info,
+                        FILE *fout,
+                        std::set<cmDependInformation const*> *visited);
+
 private:
   std::string m_File;
   std::string m_OutputFile;
