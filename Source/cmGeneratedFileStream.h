@@ -61,6 +61,8 @@ class cmGeneratedFileStream: private cmGeneratedFileStreamBase,
                              public std::ofstream
 {
 public:
+  typedef std::ofstream Stream;
+
   /**
    * The constructor takes the name of the file to be generated.  It
    * automatically generates a name for the temporary file.  The

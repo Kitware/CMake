@@ -289,15 +289,12 @@ void cmGlobalVisualStudio7Generator::OutputSLNFile(cmLocalGenerator* root,
   fname += "/";
   fname += root->GetMakefile()->GetProjectName();
   fname += ".sln";
-  cmGeneratedFileStream fout(fname.c_str());
+  cmGeneratedFileStream fout(fname.c_str(), true);
   if(!fout)
     {
-    cmSystemTools::Error("Error can not open DSW file for write: ",
-                         fname.c_str());
-    cmSystemTools::ReportLastSystemError("");
     return;
     }
-  this->WriteSLNFile(fout.GetStream(), root, generators);
+  this->WriteSLNFile(fout, root, generators);
 }
 
 // output the SLN file

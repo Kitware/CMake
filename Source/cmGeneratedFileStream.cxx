@@ -31,7 +31,7 @@ cmGeneratedFileStream::cmGeneratedFileStream(const char* name,
                                              bool copy_if_different,
                                              bool quiet):
   cmGeneratedFileStreamBase(name, copy_if_different),
-  std::ofstream(m_TempName.c_str())
+  Stream(m_TempName.c_str())
 {
   // Check if the file opened.
   if(!*this && !quiet)
@@ -49,7 +49,7 @@ cmGeneratedFileStream::~cmGeneratedFileStream()
   // stream will be destroyed which will close the temporary file.
   // Finally the base destructor will be called to replace the
   // destination file.
-  m_Okay = *this;
+  m_Okay = (*this)?true:false;
 }
 
 //----------------------------------------------------------------------------
