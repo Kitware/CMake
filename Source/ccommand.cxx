@@ -25,9 +25,9 @@ void CMakeCommandUsage(const char* program)
   errorStream << "cmake version " << cmMakefile::GetMajorVersion()
 	      << "." << cmMakefile::GetMinorVersion() << "\n";
   errorStream << "Usage: " << program << " [command] [arguments ...]\n"
-	      << "  Available commands: \n"
-	      << "    copy file1 file2  - copy first file to the second one\n"
-	      << "    remove file1 file2 ... - remove the file(s)\n";
+	      << "Available commands: \n"
+	      << "  copy file destination  - copy file to destination (either file or directory)\n"
+	      << "  remove file1 file2 ... - remove the file(s)\n";
   errorStream << std::ends;
   cmSystemTools::Error(errorStream.str());
 }

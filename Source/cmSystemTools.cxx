@@ -872,6 +872,7 @@ void cmSystemTools::cmCopyFile(const char* source,
 {
   const int bufferSize = 4096;
   char buffer[bufferSize];
+
   std::ifstream fin(source,
 #ifdef _WIN32
                     std::ios::binary |
@@ -883,7 +884,31 @@ void cmSystemTools::cmCopyFile(const char* source,
                          source, "\"");
     return;
     }
-  std::ofstream fout(destination,
+
+  // If destination is a directory, try to create a file with the same
+  // name as the source in that directory.
+
+  const char* dest = destination;
+  
+  std::string new_destination;
+  if(cmSystemTools::FileExists(destination) &&
+     cmSystemTools::FileIsDirectory(destination))
+    {
+    new_destination = destination;
+    cmSystemTools::ConvertToUnixSlashes(new_destination);
+    new_destination += '/';
+    std::string source_name = source;
+    new_destination += cmSystemTools::GetFilenameName(source_name);
+    dest = new_destination.c_str();
+    }
+
+  // Create destination directory
+
+  std::string destination_dir = dest;
+  destination_dir = cmSystemTools::GetFilenamePath(destination_dir);
+  cmSystemTools::MakeDirectory(destination_dir.c_str());
+
+  std::ofstream fout(dest,
 #ifdef _WIN32
                      std::ios::binary |
 #endif
@@ -891,7 +916,7 @@ void cmSystemTools::cmCopyFile(const char* source,
   if(!fout)
     {
     cmSystemTools::Error("CopyFile failed to open output file \"",
-                         destination, "\"");
+                         dest, "\"");
     return;
     }
   
