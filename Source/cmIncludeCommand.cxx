@@ -34,7 +34,7 @@ bool cmIncludeCommand::InitialPass(std::vector<std::string>& args)
     }
   if(!exists)
     {
-    std::string error = "Include file not found: " + args[0];
+    std::string error = "Include file not found: " + args[0] + "\n";
     this->SetError(error.c_str());
     return false;
     }
