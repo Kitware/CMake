@@ -302,6 +302,46 @@ void cmGlobalVisualStudio71Generator::WriteProjectDepends(std::ostream& fout,
     }
 }
 
+// Write a dsp file into the SLN file,
+// Note, that dependencies from executables to 
+// the libraries it uses are also done here
+void cmGlobalVisualStudio71Generator::WriteExternalProject(std::ostream& fout, 
+                               const char* name,
+                               const char* location,
+                               const std::vector<std::string>& depends)
+{ 
+    std::string d = cmSystemTools::ConvertToOutputPath(location);
+  fout << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"" 
+       << name << "\", \""
+       << d << "\", \"{"
+       << this->GetGUID(name)
+       << "}\"\n";
+  
+  // write out the dependencies here
+  // VS 7.1 includes dependencies with the project instead of in the global section
+  if(!depends.empty())
+    {
+    fout << "\tProjectSection(ProjectDependencies) = postProject\n";
+    std::vector<std::string>::const_iterator it;
+    for(it = depends.begin(); it != depends.end(); ++it)
+      {
+      if(it->size() > 0)
+        {
+        fout << "\t\t{" 
+             << this->GetGUID(it->c_str()) 
+             << "} = {" 
+             << this->GetGUID(it->c_str()) 
+             << "}\n";
+        }
+      }
+    fout << "\tEndProjectSection\n";
+    }  
+
+  fout << "EndProject\n";
+  
+
+}
+
 
 // Write a dsp file into the SLN file,
 // Note, that dependencies from executables to 

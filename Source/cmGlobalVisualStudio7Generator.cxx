@@ -475,9 +475,22 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout,
     for(std::vector<std::string>::iterator si = dspnames.begin(); 
         l != tgts.end() && si != dspnames.end(); ++l)
       {
-       if ((l->second.GetType() != cmTarget::INSTALL_FILES)
-                && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS)
-                && (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) != 0) )
+       if (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
+         {
+         cmCustomCommand cc = l->second.GetPostBuildCommands()[0];
+         std::string name = cc.GetCommand();
+         std::vector<std::string> depends = cc.GetDepends();
+         std::vector<std::string>::iterator iter;
+         int depcount = 0;
+         for(iter = depends.begin(); iter != depends.end(); ++iter)
+           {
+           fout << "\t\t{" << this->GetGUID(name.c_str()) << "}." << depcount << " = {"
+                << this->GetGUID(iter->c_str()) << "}\n";
+           depcount++;
+           }
+         }
+       else if ((l->second.GetType() != cmTarget::INSTALL_FILES)
+                && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))
         {
         this->WriteProjectDepends(fout, si->c_str(), dir.c_str(),l->second);
         ++si;
@@ -630,7 +643,7 @@ cmGlobalVisualStudio7Generator::WriteProjectConfigurations(std::ostream& fout,
 void cmGlobalVisualStudio7Generator::WriteExternalProject(std::ostream& fout, 
                                const char* name,
                                const char* location,
-                               const std::vector<std::string>& depends)
+                               const std::vector<std::string>&)
 { 
   std::string d = cmSystemTools::ConvertToOutputPath(location);
   fout << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"" 
@@ -638,24 +651,6 @@ void cmGlobalVisualStudio7Generator::WriteExternalProject(std::ostream& fout,
        << d << "\", \"{"
        << this->GetGUID(name)
        << "}\"\n";
-  
-  if(!depends.empty())
-    {
-    fout << "\tProjectSection(ProjectDependencies) = postProject\n";
-    std::vector<std::string>::const_iterator it;
-    for(it = depends.begin(); it != depends.end(); ++it)
-      {
-      if(it->size() > 0)
-        {
-        fout << "\t\t{" 
-             << this->GetGUID(it->c_str()) 
-             << "} = {" 
-             << this->GetGUID(it->c_str()) 
-             << "}\n";
-        }
-      }
-    fout << "\tEndProjectSection\n";
-    }  
   fout << "EndProject\n";
 }
 
