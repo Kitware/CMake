@@ -121,7 +121,6 @@ void cmMakeDepend::GenerateDependInformation(cmDependInformation* info)
     // Make sure we don't visit the same file more than once.
     info->m_DependDone = true;
     }
-  
   const char* path = info->m_FullPath.c_str();
   if(!path)
     {
@@ -130,7 +129,7 @@ void cmMakeDepend::GenerateDependInformation(cmDependInformation* info)
     }
 
   bool found = false;
-  
+
   // If the file exists, use it to find dependency information.
   if(cmSystemTools::FileExists(path))
     {
@@ -138,11 +137,13 @@ void cmMakeDepend::GenerateDependInformation(cmDependInformation* info)
     this->DependWalk(info);
     found = true;
     }
-  
+
+ 
   // See if the cmSourceFile for it has any files specified as
   // dependency hints.
   if(info->m_cmSourceFile != 0)
     {
+
     // Get the cmSourceFile corresponding to this.
     const cmSourceFile& cFile = *(info->m_cmSourceFile);
     // See if there are any hints for finding dependencies for the missing
@@ -162,7 +163,43 @@ void cmMakeDepend::GenerateDependInformation(cmDependInformation* info)
       found = true;
       }
     }
-  
+
+  if(!found)
+    {
+    // Try to find the file amongst the sources
+    cmMakefile::SourceMap srcmap = m_Makefile->GetSources();
+    cmMakefile::SourceMap::iterator l;
+    for (l= srcmap.begin() ; l!=srcmap.end() ; l++)
+      {
+      for(std::vector<cmSourceFile>::iterator i = l->second.begin();
+          i != l->second.end(); i++)
+        {
+        if (i->GetFullPath() == path)
+          {
+          found=true;
+          }
+        else
+          {
+          //try to guess which include path to use
+          for(std::vector<std::string>::iterator t = 
+              m_IncludeDirectories.begin();
+              t != m_IncludeDirectories.end(); ++t)
+            {
+            std::string incpath = *t;
+            incpath = incpath + "/";
+            incpath = incpath + path;
+            if (i->GetFullPath() == incpath)
+              {
+              // set the path to the guessed path
+              info->m_FullPath = incpath; 
+              found=true;
+              }
+            }
+          }
+        }
+      }
+    }
+
   if(!found)
     {
     // Couldn't find any dependency information.
