@@ -460,12 +460,11 @@ const char* CommandLineArguments::GetHelp(const char* arg)
       = this->Internals->Callbacks.find(cs->Help);
     if ( hit == this->Internals->Callbacks.end() )
       {
-      return cs->Help;
+      break;
       }
     cs = &(hit->second);
     }
-  // Should never happened
-  return 0;
+  return cs->Help;
 }
 
 //----------------------------------------------------------------------------
