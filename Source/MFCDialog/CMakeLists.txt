@@ -7,8 +7,6 @@ PathDialog.cpp
 PropertyList.cpp
 StdAfx.cpp
 CMakeCommandLineInfo.cpp
-res/CMakeSetupDialog.ico
-res/CMakeSetupDialog.rc2
 )
 
 # add stuff to use MFC in this executable
