@@ -263,7 +263,7 @@ const char* kwsysProcess_GetErrorString(kwsysProcess* cp)
 {
   if(cp->State == kwsysProcess_State_Error)
     {
-    return cp->PipeBuffer;
+    return cp->ErrorMessage;
     }
   return 0;
 }
