@@ -191,7 +191,7 @@ void ctest::Finalize()
         }
       }
     std::string testxml = testingDir + "/Test.xml";
-    ofstream ofs(testxml.c_str());
+    std::ofstream ofs(testxml.c_str());
     if( !ofs )
       {
       std::cerr << "Cannot create testing XML file" << std::endl;
