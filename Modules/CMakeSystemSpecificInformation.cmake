@@ -44,7 +44,7 @@ IF(EXISTS ${CMAKE_SYSTEM_INFO_FILE})
 ELSE(EXISTS ${CMAKE_SYSTEM_INFO_FILE})
   MESSAGE("System is unknown to cmake, create:\n${CMAKE_SYSTEM_INFO_FILE}"
           " to use this system, please send your config file to "
-          "cmake@www.cmake.org so it can be added to cmake"")
+          "cmake@www.cmake.org so it can be added to cmake")
   IF(EXISTS ${CMAKE_BINARY_DIR}/CMakeCache.txt)
     CONFIGURE_FILE(${CMAKE_BINARY_DIR}/CMakeCache.txt
                    ${CMAKE_BINARY_DIR}/CopyOfCMakeCache.txt COPYONLY)
