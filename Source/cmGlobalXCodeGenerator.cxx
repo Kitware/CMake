@@ -947,6 +947,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
                               this->CreateString(""));
   buildSettings->AddAttribute("SECTORDER_FLAGS",
                               this->CreateString(""));
+  buildSettings->AddAttribute("USE_HEADERMAP",
+                              this->CreateString("NO"));
   buildSettings->AddAttribute("WARNING_CFLAGS",
                               this->CreateString(
                                 "-Wmost -Wno-four-char-constants"
