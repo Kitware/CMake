@@ -1,4 +1,12 @@
 #include "cm_zlib_mangle.h"
+
+/* Disable some warnings so that we do not have to change the code much.  */
+#if defined(CMZLIB_IN_C)
+# if defined(__BORLANDC__)
+#  pragma warn -8004 /* Variable assigned a value that is not used.  */
+# endif
+#endif
+
 /* zconf.h -- configuration of the zlib compression library
  * Copyright (C) 1995-2002 Jean-loup Gailly.
  * For conditions of distribution and use, see copyright notice in zlib.h 

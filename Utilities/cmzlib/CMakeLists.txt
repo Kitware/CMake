@@ -3,6 +3,14 @@ INCLUDE_REGULAR_EXPRESSION("^(deflate|inf|trees|zconf|zlib|zutil).*$")
 
 INCLUDE_DIRECTORIES(${CMZLIB_SOURCE_DIR})
 
+# Tell the header files included from the .c files that they are being
+# built.  Used to disable warnings since we do not want to change the
+# code much.
+ADD_DEFINITIONS(-DCMZLIB_IN_C)
+
+# Match all headers for dependencies but complain about none.
+INCLUDE_REGULAR_EXPRESSION("^.*$" "^$")
+
 # source files for zlib
 SET(ZLIB_SRCS
   adler32.c   gzio.c      inftrees.c  uncompr.c
