@@ -98,6 +98,7 @@ void cmBorlandMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     "CMAKE_EXECUTABLE_SUFFIX             = @CMAKE_EXECUTABLE_SUFFIX@\n"
     "CMAKE_STATICLIB_SUFFIX              = @CMAKE_STATICLIB_SUFFIX@\n"
     "CMAKE_SHLIB_SUFFIX                  = @CMAKE_SHLIB_SUFFIX@\n" 
+    "CMAKE_SHLIB_CFLAGS                  = -tWR\n" 
     "CMAKE_LINKER_FLAGS                  = @CMAKE_LINKER_FLAGS@ @LINKER_BUILD_FLAGS@\n"
     "CMAKE_CXX_FLAGS      = -P @CMAKE_CXX_FLAGS@ @BUILD_FLAGS@\n"
     "!IF \"$(OS)\" == \"Windows_NT\"\n"
@@ -179,6 +180,11 @@ OutputBuildObjectFromSource(std::ostream& fout,
                             const char* extraCompileFlags,
                             bool shared)
 {
+  // force shared flag if building shared libraries
+  if(cmSystemTools::IsOn(m_Makefile->GetDefinition("BUILD_SHARED_LIBS")))
+    {
+    shared = true;
+    }
   // Header files shouldn't have build rules.
   if(source.IsAHeaderFileOnly())
     return;
@@ -255,7 +261,7 @@ void cmBorlandMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
   std::string depend = "$(";
   depend += name;
   depend += "_SRC_OBJS) $(" + std::string(name) + "_DEPEND_LIBS)";
-  std::string command = "$(CMAKE_CXX_COMPILER) -tWD $(CMAKE_LINKER_FLAGS) @&&|\n";
+  std::string command = "$(CMAKE_CXX_COMPILER) -tWD $(CMAKE_SHLIB_CFLAGS) $(CMAKE_LINKER_FLAGS) @&&|\n";
   // must be executable name
   command += "-e";
   command += target;
@@ -351,6 +357,10 @@ void cmBorlandMakefileGenerator::OutputExecutableRule(std::ostream& fout,
   std::string command = 
     "$(CMAKE_CXX_COMPILER) ";
   command += " $(CMAKE_LINKER_FLAGS) -e" + target;
+  if(cmSystemTools::IsOn(m_Makefile->GetDefinition("BUILD_SHARED_LIBS")))
+    {
+    command += " $(CMAKE_SHLIB_CFLAGS) ";
+    }
   if(t.GetType() == cmTarget::WIN32_EXECUTABLE)
     {
     command +=  " -tWM ";
