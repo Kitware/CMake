@@ -264,15 +264,8 @@ OutputBuildObjectFromSource(std::ostream& fout,
     }
   else if (ext == "def")
     {
-    // *** do something here??
-    }
-  else if (ext == "ico")
-    {
-    // do something here??
-    }
-  else if (ext == "rc2")
-    {
-    // do something here??
+    // no rule to output for this one
+    return;
     }
   // assume c++ if not c rc or def
   else
@@ -312,6 +305,16 @@ void cmNMakeMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
   linklibs << std::ends;
   command += linklibs.str();
   delete [] linklibs.str();
+  const std::vector<cmSourceFile>& sources = t.GetSourceFiles();
+  for(std::vector<cmSourceFile>::const_iterator i = sources.begin();
+      i != sources.end(); ++i)
+    {
+    if(i->GetSourceExtension() == "def")
+      {
+      command += "/DEF:";
+      command += i->GetFullPath();
+      }
+    }
   command += "\n<<\n";
   m_QuoteNextCommand = false;
   this->OutputMakeRule(fout, "rules for a shared library",
@@ -429,15 +432,20 @@ void cmNMakeMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
       }
     linkLibs += librariesLinked;
 
-    fout << linkLibs << "$(CMAKE_STANDARD_WINDOWS_LIBRARIES) ";
+    fout << linkLibs;
     }
+  fout << "$(CMAKE_STANDARD_WINDOWS_LIBRARIES) ";
 }
 
 
 std::string cmNMakeMakefileGenerator::GetOutputExtension(const char* s)
 {
   std::string sourceExtension = s;
-  if(sourceExtension == "def" || sourceExtension == "ico" || sourceExtension == "rc2")
+  if(sourceExtension == "def")
+    {
+    return "";
+    }
+  if(sourceExtension == "ico" || sourceExtension == "rc2")
     {
     return "";
     }
