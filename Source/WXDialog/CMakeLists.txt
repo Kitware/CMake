@@ -1,0 +1,33 @@
+INCLUDE (${CMAKE_ROOT}/Modules/FindwxWindows.cmake)
+
+IF ( CMAKE_WX_CAN_COMPILE )
+
+  SET( WX_SRCS
+       cmWXCacheProperty.cxx
+       cmWXCommandLineInfo.cxx
+       cmWXMainFrame.cxx
+       wxCMakeSetup.cxx
+     )
+
+  IF(WXWINDOWS_INCLUDE_PATH)
+    INCLUDE_DIRECTORIES(${WXWINDOWS_INCLUDE_PATH})
+  ENDIF(WXWINDOWS_INCLUDE_PATH)
+
+  IF(CMAKE_WX_CXX_FLAGS)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_WX_CXX_FLAGS} ${CMAKE_CXX_FLAGS}")
+  ENDIF(CMAKE_WX_CXX_FLAGS)
+
+  INCLUDE_DIRECTORIES(${CMake_SOURCE_DIR}/Source)
+
+  ADD_EXECUTABLE(wxCMakeSetup ${WX_SRCS})
+  TARGET_LINK_LIBRARIES(wxCMakeSetup ${WXWINDOWS_LIBRARY})
+  TARGET_LINK_LIBRARIES(wxCMakeSetup CMakeLib)
+
+  INSTALL_TARGETS(/bin wxCMakeSetup)
+
+ELSE ( CMAKE_WX_CAN_COMPILE )
+
+  MESSAGE("Cannot find wxWindows libraries and/or header files")
+  MESSAGE("OLib: ${WXWINDOWS_LIBRARY} Inc: ${WXWINDOWS_INCLUDE_PATH} Flags: ${CMAKE_WX_CXX_FLAGS}")
+
+ENDIF ( CMAKE_WX_CAN_COMPILE )
