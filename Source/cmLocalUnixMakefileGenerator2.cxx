@@ -251,7 +251,8 @@ cmLocalUnixMakefileGenerator2
       source != sources.end(); ++source)
     {
     if(!(*source)->GetPropertyAsBool("HEADER_FILE_ONLY") &&
-       !(*source)->GetCustomCommand())
+       !(*source)->GetCustomCommand() &&
+       !m_GlobalGenerator->IgnoreFile((*source)->GetSourceExtension().c_str()))
       {
       // Generate this object file's rule file.
       this->GenerateObjectRuleFile(target, *(*source));
@@ -392,6 +393,16 @@ void
 cmLocalUnixMakefileGenerator2
 ::GenerateObjectRuleFile(const cmTarget& target, const cmSourceFile& source)
 {
+  // Identify the language of the source file.
+  const char* lang = this->GetSourceFileLanguage(source);
+  if(!lang)
+    {
+    // If language is not known, this is an error.
+    cmSystemTools::Error("Source file \"", source.GetFullPath().c_str(),
+                         "\" has unknown type.");
+    return;
+    }
+
   // Get the full path name of the object file.
   std::string objName = this->GetObjectFileName(source);
   std::string obj = this->GetTargetDirectory(target);
@@ -439,20 +450,28 @@ cmLocalUnixMakefileGenerator2
     << this->ConvertToOutputForExisting(depFileName.c_str()).c_str()
     << "\n\n";
 
-  // Identify the language of the source file.
-  const char* lang =
-    m_GlobalGenerator->GetLanguageFromExtension(source.GetSourceExtension().c_str());
+  // Create the list of dependencies known at cmake time.  These are
+  // shared between the object file and dependency scanning rule.
+  std::vector<std::string> depends;
+  depends.push_back(source.GetFullPath());
+  if(const char* objectDeps = source.GetProperty("OBJECT_DEPENDS"))
+    {
+    std::vector<std::string> deps;
+    cmSystemTools::ExpandListArgument(objectDeps, deps);
+    for(std::vector<std::string>::iterator i = deps.begin();
+        i != deps.end(); ++i)
+      {
+      depends.push_back(this->ConvertToRelativeOutputPath(i->c_str()));
+      }
+    }
+  depends.push_back(ruleFileName);
 
   // Write the dependency generation rule.
   std::string depTarget = obj;
   depTarget += ".depends";
   {
-  std::vector<std::string> depends;
-  std::vector<std::string> commands;
   std::string depComment = "dependencies for ";
   depComment += objName;
-  depends.push_back(source.GetFullPath());
-  depends.push_back(ruleFileName);
   cmOStringStream depCmd;
   // TODO: Account for source file properties and directory-level
   // definitions.
@@ -466,6 +485,7 @@ cmLocalUnixMakefileGenerator2
     {
     depCmd << " -I" << this->ConvertToRelativeOutputPath(i->c_str());
     }
+  std::vector<std::string> commands;
   commands.push_back(depCmd.str());
   std::string touchCmd = "@touch ";
   touchCmd += this->ConvertToRelativeOutputPath(depTarget.c_str());
@@ -476,16 +496,124 @@ cmLocalUnixMakefileGenerator2
 
   // Write the build rule.
   {
-  std::vector<std::string> depends;
+  // Build the set of compiler flags.
+  std::string flags;
+
+  // Add the export symbol definition for shared library objects.
+  bool shared = ((target.GetType() == cmTarget::SHARED_LIBRARY) ||
+                 (target.GetType() == cmTarget::MODULE_LIBRARY));
+  if(shared)
+    {
+    flags += "-D";
+    if(const char* custom_export_name = target.GetProperty("DEFINE_SYMBOL"))
+      {
+      flags += custom_export_name;
+      }
+    else
+      {
+      std::string in = target.GetName();
+      in += "_EXPORTS";
+      flags += cmSystemTools::MakeCindentifier(in.c_str());
+      }
+    }
+
+  // Add flags from source file properties.
+  if(const char* compileFlags = source.GetProperty("COMPILE_FLAGS"))
+    {
+    flags += " ";
+    flags += compileFlags;
+    }
+
+  // Add language-specific flags.
+  std::string langFlagsVar = "CMAKE_";
+  langFlagsVar += lang;
+  langFlagsVar += "_FLAGS";
+  const char* langFlags = m_Makefile->GetSafeDefinition(langFlagsVar.c_str());
+  if(*langFlags)
+    {
+    flags += " ";
+    flags += langFlags;
+    }
+  std::string buildType =  m_Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
+  if(buildType.size())
+    {
+    buildType = cmSystemTools::UpperCase(buildType);
+    langFlagsVar += "_";
+    langFlagsVar += buildType;
+    langFlags = m_Makefile->GetSafeDefinition(langFlagsVar.c_str());
+    if(*langFlags)
+      {
+      flags += " ";
+      flags += langFlags;
+      }
+    }
+
+  // Add shared-library flags if needed.
+  if(shared)
+    {
+    std::string sharedFlagsVar = "CMAKE_SHARED_LIBRARY_";
+    sharedFlagsVar += lang;
+    sharedFlagsVar += "_FLAGS";
+    const char* sharedFlags =
+      m_Makefile->GetSafeDefinition(sharedFlagsVar.c_str());
+    if(*sharedFlags)
+      {
+      flags += " ";
+      flags += sharedFlags;
+      }
+    }
+  if(cmSystemTools::IsOn(m_Makefile->GetDefinition("BUILD_SHARED_LIBS")))
+    {
+    std::string sharedFlagsVar = "CMAKE_SHARED_BUILD_";
+    sharedFlagsVar += lang;
+    sharedFlagsVar += "_FLAGS";
+    const char* sharedFlags =
+      m_Makefile->GetSafeDefinition(sharedFlagsVar.c_str());
+    if(*sharedFlags)
+      {
+      flags += " ";
+      flags += sharedFlags;
+      }
+    }
+
+  // Add include directory flags.
+  const char* includeFlags = this->GetIncludeFlags(lang);
+  if(includeFlags && *includeFlags)
+    {
+    flags += " ";
+    flags += includeFlags;
+    }
+
+  // Get the output paths for source and object files.
+  std::string sourceFile =
+    this->ConvertToRelativeOutputPath(source.GetFullPath().c_str());
+  std::string objectFile =
+    this->ConvertToRelativeOutputPath(obj.c_str());
+
+  // Construct the compile rules.
   std::vector<std::string> commands;
-  std::string buildComment = "object ";
-  buildComment += objName;
-  depends.push_back(source.GetFullPath());
-  depends.push_back(ruleFileName);
-  std::string touchCmd = "@touch ";
-  touchCmd += this->ConvertToRelativeOutputPath(obj.c_str());
-  // TODO: Construct build rule and append command.
-  commands.push_back(touchCmd);
+  std::string compileRuleVar = "CMAKE_";
+  compileRuleVar += lang;
+  compileRuleVar += "_COMPILE_OBJECT";
+  std::string compileRule =
+    m_Makefile->GetRequiredDefinition(compileRuleVar.c_str());
+  cmSystemTools::ExpandListArgument(compileRule, commands);
+  for(std::vector<std::string>::iterator i = commands.begin();
+      i != commands.end(); ++i)
+    {
+    this->ExpandRuleVariables(*i,
+                              lang,
+                              0, // no objects
+                              0, // no target
+                              0, // no link libs
+                              sourceFile.c_str(),
+                              objectFile.c_str(),
+                              flags.c_str());
+    }
+
+  // Write the rule.
+  std::string buildComment = lang;
+  buildComment += " object";
   this->OutputMakeRule(ruleFileStream, buildComment.c_str(), obj.c_str(),
                        depends, commands);
   }
@@ -542,7 +670,19 @@ cmLocalUnixMakefileGenerator2
   objectName +=
     m_GlobalGenerator->GetLanguageOutputExtensionFromExtension(
       source.GetSourceExtension().c_str());
-  return objectName;
+
+  // Convert to a safe name.
+  return this->CreateSafeUniqueObjectFileName(objectName.c_str());
+}
+
+//----------------------------------------------------------------------------
+const char*
+cmLocalUnixMakefileGenerator2
+::GetSourceFileLanguage(const cmSourceFile& source)
+{
+  // Identify the language of the source file.
+  return (m_GlobalGenerator
+          ->GetLanguageFromExtension(source.GetSourceExtension().c_str()));
 }
 
 //----------------------------------------------------------------------------

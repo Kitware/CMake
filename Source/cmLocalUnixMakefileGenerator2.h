@@ -61,6 +61,7 @@ protected:
 
   std::string GetTargetDirectory(const cmTarget& target);
   std::string GetObjectFileName(const cmSourceFile& source);
+  const char* GetSourceFileLanguage(const cmSourceFile& source);
 
   static bool ScanDependenciesC(const char* objFile, const char* srcFile,
                                 std::vector<std::string> const& includes);
