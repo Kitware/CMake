@@ -1,0 +1,5 @@
+PROJECT(LIB1)
+
+SET(SOURCES lib1.cpp)
+
+ADD_LIBRARY(lib1 ${SOURCES})

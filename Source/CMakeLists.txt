@@ -598,6 +598,18 @@ IF(BUILD_TESTING)
     "${CMake_BINARY_DIR}/Tests/SubDir/ShouldBeHere"
     "${CMake_BINARY_DIR}/Tests/SubDir/testfromsubdir.o"
     )
+    
+  IF(${CMAKE_GENERATOR} MATCHES "Visual Studio")
+    ADD_TEST(VSExternalInclude ${CMAKE_CTEST_COMMAND}
+      --build-and-test 
+      "${CMake_SOURCE_DIR}/Tests/VSExternalInclude"
+      "${CMake_BINARY_DIR}/Tests/VSExternalInclude"
+      --build-two-config
+      --build-generator ${CMAKE_GENERATOR}
+      --build-project VSExternalInclude
+      --build-makeprogram ${MAKEPROGRAM}
+      --test-command VSExternalInclude)
+  ENDIF(${CMAKE_GENERATOR} MATCHES "Visual Studio")
 
   IF (APPLE)
     ADD_TEST(objc++ ${CMAKE_CTEST_COMMAND}
