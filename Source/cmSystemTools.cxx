@@ -33,7 +33,7 @@ inline int Mkdir(const char* dir)
 #include <unistd.h>
 inline int Mkdir(const char* dir)
 {
-  return mkdir(dir, 00700);
+  return mkdir(dir, 00777);
 }
 #endif
 
