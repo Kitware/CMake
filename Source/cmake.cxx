@@ -78,7 +78,6 @@ void cmake::SetArgs(cmMakefile& builder, int ac, char** av)
   // watch for cmake and cmake srcdir invocations
   if (ac <= 2)
     {
-    std::string ;
     builder.SetHomeOutputDirectory
       (cmSystemTools::GetCurrentWorkingDirectory().c_str());
     builder.SetStartOutputDirectory
