@@ -253,7 +253,7 @@ bool cmConfigureGccXmlCommand::CompilerIsMipsPro() const
   std::string command = compiler;
   command += " -version 2>&1";
   std::string output;
-  if(!cmSystemTools::RunCommand(command.c_str(), output, false))
+  if(!cmSystemTools::RunCommand(command.c_str(), output, 0, false))
     { return false; }
   if(output.find("MIPSpro") != std::string::npos)
     {

@@ -29,12 +29,8 @@ bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& args)
   if(args.size() == 2)
     {
     cmSystemTools::MakeDirectory(args[1].c_str());
-    std::string command;
-    command = "cd ";
-    command += cmSystemTools::ConvertToOutputPath(args[1].c_str());
-    command += " && ";
-    command += args[0].c_str();
-    cmSystemTools::RunCommand(command.c_str(), output);
+    cmSystemTools::RunCommand(args[0].c_str(), output, 
+                              cmSystemTools::ConvertToOutputPath(args[1].c_str()).c_str());
     }
   else
     {

@@ -247,10 +247,10 @@ public:
    * If verbose is false, no user-viewable output from the program
    * being run will be generated.
    */
-  static bool RunCommand(const char* command, std::string& output,
+  static bool RunCommand(const char* command, std::string& output, const char* directory = 0,
                          bool verbose = true);
   static bool RunCommand(const char* command, std::string& output,
-                         int &retVal, bool verbose = true);
+                         int &retVal, const char* directory = 0, bool verbose = true);
   
   ///! change directory the the directory specified
   static int ChangeDirectory(const char* dir);

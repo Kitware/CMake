@@ -256,7 +256,7 @@ int main (int argc, char *argv[])
   fullPath = cmSystemTools::ConvertToOutputPath(fullPath.c_str());
   std::cout << "Running test executable: " << fullPath.c_str() << "\n";
   int ret = 0;
-  if (!cmSystemTools::RunCommand(fullPath.c_str(), output, ret, true))
+  if (!cmSystemTools::RunCommand(fullPath.c_str(), output, ret, 0, true))
     {
     std::cerr << "Error: " << fullPath.c_str() << "  execution failed\n";
     // return to the original directory
