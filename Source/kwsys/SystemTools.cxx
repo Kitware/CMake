@@ -21,8 +21,8 @@
 #include <SystemTools.hxx>
 #include <RegularExpression.hxx>
 #include <Directory.hxx>
-
-#include <fstream>
+#include <std/iostream>
+#include <std/fstream>
 
 #include <stdio.h>
 #include <sys/stat.h>

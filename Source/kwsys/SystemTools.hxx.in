@@ -17,10 +17,9 @@
 #ifndef @KWSYS_NAMESPACE@_SystemTools_hxx
 #define @KWSYS_NAMESPACE@_SystemTools_hxx
 
-#include <@KWSYS_NAMESPACE@/StandardIncludes.hxx>
-
-#include <string>
-#include <vector>
+#include <@KWSYS_NAMESPACE@/std/iosfwd>
+#include <@KWSYS_NAMESPACE@/std/string>
+#include <@KWSYS_NAMESPACE@/std/vector>
 
 namespace @KWSYS_NAMESPACE@
 {

@@ -14,19 +14,36 @@
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
-#ifndef @KWSYS_NAMESPACE@_Configure_hxx
-#define @KWSYS_NAMESPACE@_Configure_hxx
+#ifndef @KWSYS_NAMESPACE@_std_iosfwd
+#define @KWSYS_NAMESPACE@_std_iosfwd
 
-/* This configuration should match for all instances of kwsys.  */
-#cmakedefine KWSYS_NO_STD_NAMESPACE
-#cmakedefine KWSYS_NO_ANSI_STREAM_HEADERS
-#cmakedefine KWSYS_NO_ANSI_STRING_STREAM
-#cmakedefine KWSYS_NO_ANSI_FOR_SCOPE
+#include <@KWSYS_NAMESPACE@/Configure.hxx>
 
-#if defined(KWSYS_NO_STD_NAMESPACE)
-# define kwsys_std
+#ifdef _MSC_VER
+#pragma warning (push, 1)
+#pragma warning (disable: 4702)
+#endif
+
+#if !defined(KWSYS_NO_ANSI_STREAM_HEADERS)
+# include <iosfwd>
 #else
-# define kwsys_std std
+# if !defined(KWSYS_NO_STD_NAMESPACE)
+namespace std
+{
+# endif
+  class fstream;
+  class ifstream;
+  class ios;
+  class istream;
+  class ofstream;
+  class ostream;
+# if !defined(KWSYS_NO_STD_NAMESPACE)
+}
+# endif
+#endif
+
+#ifdef _MSC_VER
+#pragma warning(pop)
 #endif
 
 #endif

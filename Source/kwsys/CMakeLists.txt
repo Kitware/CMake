@@ -69,6 +69,16 @@ FOREACH(header algorithm deque iterator list map numeric queue set stack string
   ENDIF(KWSYS_INCLUDE_INSTALL_DIR)
 ENDFOREACH(header)
 
+FOREACH(header iostream fstream sstream iosfwd)
+  CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/kwsys_std_${header}.h.in
+                 ${PROJECT_BINARY_DIR}/../${KWSYS_NAMESPACE}/std/${header}
+                 @ONLY IMMEDIATE)
+  IF(KWSYS_INCLUDE_INSTALL_DIR)
+    INSTALL_FILES(${KWSYS_INCLUDE_INSTALL_DIR}/${KWSYS_NAMESPACE}
+      FILES ${PROJECT_BINARY_DIR}/../${KWSYS_NAMESPACE}/std/${header})
+  ENDIF(KWSYS_INCLUDE_INSTALL_DIR)
+ENDFOREACH(header)
+
 IF(KWSYS_DEFAULTS)
   INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/..)
   ADD_EXECUTABLE(test1 test1.cxx)
