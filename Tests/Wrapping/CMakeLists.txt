@@ -118,7 +118,7 @@ IF (QT_FOUND)
     ${CMAKE_CURRENT_BINARY_DIR}/foo.ui
     )
   QT_WRAP_UI (myqtlib QTUI_H_SRCS QTUI_S_SRCS ${QTUI_SRCS})
-  QT_WRAP_CPP (myqtlib QT_MOC_SRCS ${SRCS})
+  QT_WRAP_CPP (myqtlib QT_MOC_SRCS ${SRCS} vtkTestMoc.h)
 
   MESSAGE("QT files are ${QTUI_S_SRCS}")
   MESSAGE("QT other files are ${QTUI_H_SRCS}")

@@ -144,12 +144,15 @@ void cmQTWrapCPPCommand::FinalPass()
     args.push_back(res);
     args.push_back(m_WrapHeaders[classNum]);
 
+    std::vector<std::string> realdepends = depends;
+    realdepends.push_back(m_WrapHeaders[classNum]);
+
     m_Makefile->AddCustomCommandToOutput(
       res.c_str(),
       moc_exe.c_str(),
       args,
       0,
-      depends,
+      realdepends,
       "QT Wrapped File",
       0);
     }
