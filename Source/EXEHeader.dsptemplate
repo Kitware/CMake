@@ -32,6 +32,7 @@ CFG=OUTPUT_LIBNAME - Win32 Debug
 !MESSAGE 
 !MESSAGE "OUTPUT_LIBNAME - Win32 Release" (based on "Win32 (x86) Application")
 !MESSAGE "OUTPUT_LIBNAME - Win32 Debug" (based on "Win32 (x86) Application")
+!MESSAGE "OUTPUT_LIBNAME - Win32 Release MinSize" (based on "Win32 (x86) Application")
 !MESSAGE 
 
 # Begin Project
@@ -92,27 +93,25 @@ LINK32=link.exe
 
 !ELSEIF  "$(CFG)" == "OUTPUT_LIBNAME - Win32 Release MinSize"
 # PROP BASE Use_MFC 0
-# PROP BASE Use_Debug_Libraries 1
+# PROP BASE Use_Debug_Libraries 0
 # PROP BASE Output_Dir "ReleaseMinSize"
 # PROP BASE Intermediate_Dir "ReleaseMinSize"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
-# PROP Use_Debug_Libraries 1
+# PROP Use_Debug_Libraries 0
 # PROP Output_Dir "ReleaseMinSize"
 # PROP Intermediate_Dir "ReleaseMinSize"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MT /W3 /O1 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "_ATL_DLL" /FD /c
-# ADD CPP /nologo /GR /GX /Zm1000 /MT /W3 /O1 BUILD_INCLUDES EXTRA_DEFINES /D "NDEBUG" /D "_MBCS" /D "_ATL_DLL"  /D "WIN32" /D "_CONSOLE" /D "_USRDLL" /FD /c
-# ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
-# ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
-# ADD BASE RSC /l 0x409 /d "_DEBUG"
-# ADD RSC /l 0x409 /d "_DEBUG"
+# ADD BASE CPP /nologo /MD /W3 /GR /GX /Zm1000 /O1 /Gs /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS"  /FD /c
+# ADD CPP /nologo /MD /W3 /GR /GX /Zm1000 /O1 /Gs /D "WIN32" BUILD_INCLUDES EXTRA_DEFINES /D "NDEBUG" /D "_CONSOLE" /D "_MBCS"  /FD /c
+# ADD BASE RSC /l 0x409 /d "NDEBUG"
+# ADD RSC /l 0x409 /d "NDEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32   kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept /force
-# ADD LINK32 CM_DEBUG_LIBRARIES kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept /force
+# ADD BASE LINK32  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386 /force
+# ADD LINK32  CM_RELEASE_LIBRARIES kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386 /force
 
 !ENDIF 
 
@@ -120,3 +119,4 @@ LINK32=link.exe
 
 # Name "OUTPUT_LIBNAME - Win32 Release"
 # Name "OUTPUT_LIBNAME - Win32 Debug"
+# Name "OUTPUT_LIBNAME - Win32 Release MinSize"
