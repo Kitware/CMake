@@ -380,9 +380,29 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
   if (debug && m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX"))
     {
     debugPostfix = m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX");
+    }  
+  
+  std::string extraLinkOptions;
+  if(target.GetType() == cmTarget::EXECUTABLE)
+    {
+    extraLinkOptions = m_Makefile->GetDefinition("CMAKE_EXE_LINKER_FLAGS");
     }
+  if(target.GetType() == cmTarget::SHARED_LIBRARY)
+    {
+    extraLinkOptions = m_Makefile->GetDefinition("CMAKE_SHARED_LINKER_FLAGS");
+    }
+  if(target.GetType() == cmTarget::MODULE_LIBRARY)
+    {
+    extraLinkOptions = m_Makefile->GetDefinition("CMAKE_MODULE_LINKER_FLAGS");
+    }
+  
   const char* targetLinkFlags = target.GetProperty("LINK_FLAGS");
-
+  if(targetLinkFlags)
+    {
+    extraLinkOptions += " ";
+    extraLinkOptions += targetLinkFlags;
+    }
+  
   switch(target.GetType())
     {
     case cmTarget::STATIC_LIBRARY:
@@ -400,10 +420,10 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       fout << "\t\t\t<Tool\n"
            << "\t\t\t\tName=\"VCLinkerTool\"\n"
            << "\t\t\t\tAdditionalOptions=\"/MACHINE:I386";
-      if(targetLinkFlags)
+      if(extraLinkOptions.size())
         {
         fout << " " << cmLocalVisualStudio7Generator::EscapeForXML(
-          targetLinkFlags).c_str();
+          extraLinkOptions.c_str()).c_str();
         }
       fout << "\"\n"
            << "\t\t\t\tAdditionalDependencies=\" odbc32.lib odbccp32.lib ";
@@ -450,11 +470,11 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
 
       fout << "\t\t\t<Tool\n"
            << "\t\t\t\tName=\"VCLinkerTool\"\n"
-           << "\t\t\t\tAdditionalOptions=\"/MACHINE:I386";
-      if(targetLinkFlags)
+           << "\t\t\t\tAdditionalOptions=\"/MACHINE:I386"; 
+      if(extraLinkOptions.size())
         {
         fout << " " << cmLocalVisualStudio7Generator::EscapeForXML(
-          targetLinkFlags).c_str();
+          extraLinkOptions.c_str()).c_str();
         }
       fout << "\"\n"
            << "\t\t\t\tAdditionalDependencies=\" odbc32.lib odbccp32.lib ";
