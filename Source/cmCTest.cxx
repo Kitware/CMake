@@ -2397,12 +2397,24 @@ int cmCTest::TestDirectory(bool memcheck)
 
     if (failed.size()) 
       {
+      std::ofstream ofs;
+
       std::cerr << "\nThe following tests FAILED:\n";
-      for(cmCTest::tm_VectorOfStrings::iterator j = failed.begin();
-        j != failed.end(); ++j)
-        {   
-        std::cerr << "\t" << *j << "\n";
+      this->OpenOutputFile("Temporary", "LastTestsFailed.log", ofs);
+      std::cerr << "\nThe following tests FAILED:\n";
+
+      std::vector<cmCTest::cmCTestTestResult>::iterator ftit;
+      for(ftit = m_TestResults.begin();
+        ftit != m_TestResults.end(); ++ftit)
+        {
+        if ( ftit->m_Status != cmCTest::COMPLETED )
+          {
+          ofs << ftit->m_TestCount << ":" << ftit->m_Name << std::endl;
+          fprintf(stderr, "\t%3d - %s (%s)\n", ftit->m_TestCount, ftit->m_Name.c_str(),
+            this->GetTestStatus(ftit->m_Status));
+          }
         }
+
       }
     }
 
