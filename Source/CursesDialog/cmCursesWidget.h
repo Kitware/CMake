@@ -4,33 +4,61 @@
 #include "../cmCacheManager.h"
 #include "cmCursesStandardIncludes.h"
 
+class cmCursesMainForm;
+
 class cmCursesWidget
 {
 public:
   cmCursesWidget(int width, int height, int left, int top);
   virtual ~cmCursesWidget();
   
-  // Description:
-  // Handle user input. Called by the container of this widget
-  // when this widget has focus. Returns true if the input was
-  // handled
-  virtual bool HandleInput(int& key, FORM* form, WINDOW* w) = 0;
+  /**
+   * Handle user input. Called by the container of this widget
+   * when this widget has focus. Returns true if the input was
+   * handled
+   */
+  virtual bool HandleInput(int& key, cmCursesMainForm* fm, WINDOW* w) = 0;
 
-  // Description:
-  // Change the position of the widget. Set isNewPage to true
-  // if this widget marks the beginning of a new page.
+  /**
+   * Change the position of the widget. Set isNewPage to true
+   * if this widget marks the beginning of a new page.
+   */
   virtual void Move(int x, int y, bool isNewPage);
 
-  // Description:
-  // Set/Get the value (setting the value also changes the contents
-  // of the field buffer).
+  /**
+   * Set/Get the value (setting the value also changes the contents
+   * of the field buffer).
+   */
   virtual void SetValue(const char* value);
   virtual const char* GetValue();
 
-  // Description:
-  // Get the type of the widget (STRING, PATH etc...)
+  /**
+   * Get the type of the widget (STRING, PATH etc...)
+   */
   cmCacheManager::CacheEntryType GetType()
     { return m_Type; }
+
+  /**
+   * If there are any, print the widget specific commands
+   * in the toolbar and return true. Otherwise, return false
+   * and the parent widget will print.
+   */
+  virtual bool PrintKeys()
+    {
+      return false;
+    }
+
+  /**
+   * Set/Get the page this widget is in.
+   */
+  void SetPage(int page)
+    {
+      m_Page = page;
+    }
+  int GetPage()
+    {
+      return m_Page;
+    }
 
   friend class cmCursesMainForm;
 
@@ -41,6 +69,8 @@ protected:
   cmCacheManager::CacheEntryType m_Type;
   std::string m_Value;
   FIELD* m_Field;
+  // The page in the main form this widget is in
+  int m_Page;
 };
 
 #endif // __cmCursesWidget_h

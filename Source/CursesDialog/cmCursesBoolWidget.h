@@ -2,6 +2,7 @@
 #define __cmCursesBoolWidget_h
 
 #include "cmCursesWidget.h"
+class cmCursesMainForm;
 
 class cmCursesBoolWidget : public cmCursesWidget
 {
@@ -12,7 +13,7 @@ public:
   // Handle user input. Called by the container of this widget
   // when this widget has focus. Returns true if the input was
   // handled.
-  virtual bool HandleInput(int& key, FORM* form, WINDOW* w);
+  virtual bool HandleInput(int& key, cmCursesMainForm* fm, WINDOW* w);
 
   // Description:
   // Set/Get the value (on/off).

@@ -1,4 +1,5 @@
 #include "cmCursesBoolWidget.h"
+#include "cmCursesMainForm.h"
 
 cmCursesBoolWidget::cmCursesBoolWidget(int width, int height, 
 				       int left, int top) :
@@ -11,8 +12,10 @@ cmCursesBoolWidget::cmCursesBoolWidget(int width, int height,
   this->SetValueAsBool(false);
 }
 
-bool cmCursesBoolWidget::HandleInput(int& key, FORM* form, WINDOW* w)
+bool cmCursesBoolWidget::HandleInput(int& key, cmCursesMainForm* fm, WINDOW* w)
 {
+  FORM* form = fm->GetForm();
+
   // 10 == enter
   if (key == 10 || key == KEY_ENTER)
     {

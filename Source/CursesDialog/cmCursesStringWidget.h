@@ -3,30 +3,48 @@
 
 #include "cmCursesWidget.h"
 
+class cmCursesMainForm;
+
+/** \class cmCursesStringWidget
+ * \brief A simple entry widget.
+ *
+ * cmCursesStringWdiget is a simple text entry widget.
+ */
+
 class cmCursesStringWidget : public cmCursesWidget
 {
 public:
   cmCursesStringWidget(int width, int height, int left, int top);
   
-  // Description:
-  // Handle user input. Called by the container of this widget
-  // when this widget has focus. Returns true if the input was
-  // handled.
-  virtual bool HandleInput(int& key, FORM* form, WINDOW* w);
+  /**
+   * Handle user input. Called by the container of this widget
+   * when this widget has focus. Returns true if the input was
+   * handled.
+   */
+  virtual bool HandleInput(int& key, cmCursesMainForm* fm, WINDOW* w);
 
-  // Description:
-  // Set/Get the string.
+  /**
+   * Set/Get the string.
+   */
   void SetString(const char* value);
   const char* GetString();
   virtual const char* GetValue();
 
-  // Description:
-  // Set/Get InEdit flag. Can be used to tell the widget to leave
-  // edit mode (in case of a resize for example).
+  /**
+   * Set/Get InEdit flag. Can be used to tell the widget to leave
+   * edit mode (in case of a resize for example).
+   */
   void SetInEdit(bool inedit)
     { m_InEdit = inedit; }
   bool GetInEdit()
     { return m_InEdit; }
+
+  /**
+   * If there are any, print the widget specific commands
+   * in the toolbar and return true. Otherwise, return false
+   * and the parent widget will print.
+   */
+  virtual bool PrintKeys();
 
 protected:
   cmCursesStringWidget(const cmCursesStringWidget& from);

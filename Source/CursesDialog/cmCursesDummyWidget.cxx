@@ -8,7 +8,7 @@ cmCursesDummyWidget::cmCursesDummyWidget(int width, int height,
 }
 
 
-bool cmCursesDummyWidget::HandleInput(int& key, FORM* form, WINDOW* w)
+bool cmCursesDummyWidget::HandleInput(int& key, cmCursesMainForm*, WINDOW* )
 {
   return false;
 }

@@ -39,7 +39,14 @@ public:
   // Description:
   // Write a debugging message.
   static void LogMessage(const char* msg);
-  
+
+  // Description:
+  // Return the FORM. Should be only used by low-level methods.
+  FORM* GetForm()
+    {
+      return m_Form;
+    }
+
   static cmCursesForm* CurrentForm;
   
 

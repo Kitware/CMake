@@ -4,6 +4,7 @@
 #include "cmCursesWidget.h"
 #include "cmCursesStandardIncludes.h"
 
+class cmCursesMainForm;
 
 class cmCursesLabelWidget : public cmCursesWidget
 {
@@ -16,7 +17,7 @@ public:
   // Handle user input. Called by the container of this widget
   // when this widget has focus. Returns true if the input was
   // handled
-  virtual bool HandleInput(int& key, FORM* form, WINDOW* w);
+  virtual bool HandleInput(int& key, cmCursesMainForm* fm, WINDOW* w);
 
 protected:
   cmCursesLabelWidget(const cmCursesLabelWidget& from);

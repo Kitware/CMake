@@ -5,6 +5,7 @@ cmCursesWidget::cmCursesWidget(int width, int height, int left, int top)
   m_Field = new_field(height, width, top, left, 0, 0);
   set_field_userptr(m_Field, reinterpret_cast<char*>(this));
   field_opts_off(m_Field,  O_AUTOSKIP);
+  m_Page = 0;
 }
 
 cmCursesWidget::~cmCursesWidget()
