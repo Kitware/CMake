@@ -21,11 +21,19 @@
 #ifndef cmStandardIncludes_h
 #define cmStandardIncludes_h
 
+#define CMAKE_TO_STRING(x) CMAKE_TO_STRING0(x)
+#define CMAKE_TO_STRING0(x) #x
+
 // include configure generated  header to define
 // CMAKE_NO_ANSI_STREAM_HEADERS and CMAKE_NO_STD_NAMESPACE
 #if defined(CMAKE_HAS_AUTOCONF) || defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmConfigure.h"
 #endif
+
+#define CMake_VERSION_STRING \
+  CMAKE_TO_STRING(CMake_VERSION_MAJOR) "." \
+  CMAKE_TO_STRING(CMake_VERSION_MINOR) "." \
+  CMAKE_TO_STRING(CMake_VERSION_PATCH)
 
 #ifdef _MSC_VER
 #pragma warning ( disable : 4786 )

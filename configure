@@ -953,13 +953,34 @@ CXXFLAGS=$save_CXXFLAGS
 
 
 
+# Parse the cmake version number out of the top-level CMake listfile.
+
+CMake_VERSION_MAJOR=`cat $fullSrcDir/CMakeLists.txt | sed -n '/SET *( *CMake_VERSION_MAJOR/ {s/.*MAJOR *\([0-9][0-9]*\).*/\1/;p;}'`
+CMake_VERSION_MINOR=`cat $fullSrcDir/CMakeLists.txt | sed -n '/SET *( *CMake_VERSION_MINOR/ {s/.*MINOR *\([0-9][0-9]*\).*/\1/;p;}'`
+CMake_VERSION_PATCH=`cat $fullSrcDir/CMakeLists.txt | sed -n '/SET *( *CMake_VERSION_PATCH/ {s/.*PATCH *\([0-9][0-9]*\).*/\1/;p;}'`
+
+cat >> confdefs.h <<EOF
+#define CMake_VERSION_MAJOR ${CMake_VERSION_MAJOR}
+EOF
+
+cat >> confdefs.h <<EOF
+#define CMake_VERSION_MINOR ${CMake_VERSION_MINOR}
+EOF
+
+cat >> confdefs.h <<EOF
+#define CMake_VERSION_PATCH ${CMake_VERSION_PATCH}
+EOF
+
+
+
+
 
 # Step 1: set the variable "system" to hold the name and version number
 # for the system.  This can usually be done via the "uname" command, but
 # there are a few systems, like Next, where this doesn't work.
 
 echo $ac_n "checking system version (for dynamic loading)""... $ac_c" 1>&6
-echo "configure:963: checking system version (for dynamic loading)" >&5
+echo "configure:984: checking system version (for dynamic loading)" >&5
 if test -f /usr/lib/NextStep/software_version; then
   system=NEXTSTEP-`awk '/3/,/3/' /usr/lib/NextStep/software_version`
 else
@@ -998,9 +1019,9 @@ case $system in
         CFLAGS_ORIG="$FLAGS"
         CFLAGS="-Aa $CFLAGS"
         echo $ac_n "checking whether ${CC} accepts -Aa""... $ac_c" 1>&6
-echo "configure:1002: checking whether ${CC} accepts -Aa" >&5
+echo "configure:1023: checking whether ${CC} accepts -Aa" >&5
         cat > conftest.$ac_ext <<EOF
-#line 1004 "configure"
+#line 1025 "configure"
 #include "confdefs.h"
 
         void foo() {}
@@ -1009,7 +1030,7 @@ int main() {
 
 ; return 0; }
 EOF
-if { (eval echo configure:1013: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:1034: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   
         echo "$ac_t""yes" 1>&6
@@ -1042,7 +1063,7 @@ rm -f conftest*
         CXXFLAGS_ORIG="$CXXFLAGS"
         CXXFLAGS="-std strict_ansi -nopure_cname $CXXFLAGS"
         echo $ac_n "checking whether ${CXX} accepts -std strict_ansi -nopure_cname""... $ac_c" 1>&6
-echo "configure:1046: checking whether ${CXX} accepts -std strict_ansi -nopure_cname" >&5
+echo "configure:1067: checking whether ${CXX} accepts -std strict_ansi -nopure_cname" >&5
         
         ac_ext=C
 # CXXFLAGS is not in ac_cpp because -g, -O, etc. are not valid cpp options.
@@ -1052,7 +1073,7 @@ ac_link='${CXX-g++} -o conftest${ac_exeext} $CXXFLAGS $CPPFLAGS $LDFLAGS conftes
 cross_compiling=$ac_cv_prog_cxx_cross
 
         cat > conftest.$ac_ext <<EOF
-#line 1056 "configure"
+#line 1077 "configure"
 #include "confdefs.h"
 
         void foo() {}
@@ -1061,7 +1082,7 @@ int main() {
 
 ; return 0; }
 EOF
-if { (eval echo configure:1065: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:1086: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   
         echo "$ac_t""yes" 1>&6
@@ -1096,7 +1117,7 @@ if test $ac_cv_prog_gxx = no; then
   CXXFLAGS_ORIG="$CXXFLAGS"
   CXXFLAGS="$CMAKE_ANSI_CXXFLAGS $CXXFLAGS"
   echo $ac_n "checking ansi standard C++ stream headers ""... $ac_c" 1>&6
-echo "configure:1100: checking ansi standard C++ stream headers " >&5 
+echo "configure:1121: checking ansi standard C++ stream headers " >&5 
   
   ac_ext=C
 # CXXFLAGS is not in ac_cpp because -g, -O, etc. are not valid cpp options.
@@ -1106,7 +1127,7 @@ ac_link='${CXX-g++} -o conftest${ac_exeext} $CXXFLAGS $CPPFLAGS $LDFLAGS conftes
 cross_compiling=$ac_cv_prog_cxx_cross
 
   cat > conftest.$ac_ext <<EOF
-#line 1110 "configure"
+#line 1131 "configure"
 #include "confdefs.h"
 
   #include <iostream>
@@ -1115,7 +1136,7 @@ int main() {
 
 ; return 0; }
 EOF
-if { (eval echo configure:1119: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:1140: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   
   echo "$ac_t""yes" 1>&6
@@ -1147,7 +1168,7 @@ fi
 CXXFLAGS_ORIG="$CXXFLAGS"
 CXXFLAGS="$CMAKE_ANSI_CXXFLAGS $CXXFLAGS"
 echo $ac_n "checking for ansi standard C++ stringstream""... $ac_c" 1>&6
-echo "configure:1151: checking for ansi standard C++ stringstream" >&5
+echo "configure:1172: checking for ansi standard C++ stringstream" >&5
 
 ac_ext=C
 # CXXFLAGS is not in ac_cpp because -g, -O, etc. are not valid cpp options.
@@ -1157,7 +1178,7 @@ ac_link='${CXX-g++} -o conftest${ac_exeext} $CXXFLAGS $CPPFLAGS $LDFLAGS conftes
 cross_compiling=$ac_cv_prog_cxx_cross
 
 cat > conftest.$ac_ext <<EOF
-#line 1161 "configure"
+#line 1182 "configure"
 #include "confdefs.h"
 
 #include <sstream>
@@ -1166,7 +1187,7 @@ int main() {
 
 ; return 0; }
 EOF
-if { (eval echo configure:1170: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:1191: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   
 echo "$ac_t""yes" 1>&6
@@ -1198,7 +1219,7 @@ if test $ac_cv_prog_gxx = no; then
   CXXFLAGS_ORIG="$CXXFLAGS"
   CXXFLAGS="$CMAKE_ANSI_CXXFLAGS $CXXFLAGS"
   echo $ac_n "checking whether the std namespace is supported""... $ac_c" 1>&6
-echo "configure:1202: checking whether the std namespace is supported" >&5
+echo "configure:1223: checking whether the std namespace is supported" >&5
   
   ac_ext=C
 # CXXFLAGS is not in ac_cpp because -g, -O, etc. are not valid cpp options.
@@ -1208,7 +1229,7 @@ ac_link='${CXX-g++} -o conftest${ac_exeext} $CXXFLAGS $CPPFLAGS $LDFLAGS conftes
 cross_compiling=$ac_cv_prog_cxx_cross
 
   cat > conftest.$ac_ext <<EOF
-#line 1212 "configure"
+#line 1233 "configure"
 #include "confdefs.h"
 
   #include <list>
@@ -1218,7 +1239,7 @@ int main() {
 
 ; return 0; }
 EOF
-if { (eval echo configure:1222: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:1243: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   
   echo "$ac_t""yes" 1>&6
@@ -1251,7 +1272,7 @@ if test $ac_cv_prog_gxx = no; then
   CXXFLAGS_ORIG="$CXXFLAGS"
   CXXFLAGS="$CMAKE_ANSI_CXXFLAGS $CXXFLAGS"
   echo $ac_n "checking ansi for scope support""... $ac_c" 1>&6
-echo "configure:1255: checking ansi for scope support" >&5
+echo "configure:1276: checking ansi for scope support" >&5
   
   ac_ext=C
 # CXXFLAGS is not in ac_cpp because -g, -O, etc. are not valid cpp options.
@@ -1261,7 +1282,7 @@ ac_link='${CXX-g++} -o conftest${ac_exeext} $CXXFLAGS $CPPFLAGS $LDFLAGS conftes
 cross_compiling=$ac_cv_prog_cxx_cross
 
   cat > conftest.$ac_ext <<EOF
-#line 1265 "configure"
+#line 1286 "configure"
 #include "confdefs.h"
 
   void foo() { for(int i;;); for(int i;;); }
@@ -1270,7 +1291,7 @@ int main() {
 
 ; return 0; }
 EOF
-if { (eval echo configure:1274: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:1295: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   
   echo "$ac_t""yes" 1>&6
@@ -1435,6 +1456,9 @@ s%@RUNMAKE@%$RUNMAKE%g
 s%@CC@%$CC%g
 s%@CXX@%$CXX%g
 s%@CMAKE_ROOT_DIR@%$CMAKE_ROOT_DIR%g
+s%@CMake_VERSION_MAJOR@%$CMake_VERSION_MAJOR%g
+s%@CMake_VERSION_MINOR@%$CMake_VERSION_MINOR%g
+s%@CMake_VERSION_PATCH@%$CMake_VERSION_PATCH%g
 s%@CMAKE_CONFIG_DIR@%$CMAKE_CONFIG_DIR%g
 s%@CMAKE_ANSI_CFLAGS@%$CMAKE_ANSI_CFLAGS%g
 s%@CMAKE_ANSI_CXXFLAGS@%$CMAKE_ANSI_CXXFLAGS%g

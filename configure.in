@@ -30,6 +30,18 @@ CXXFLAGS=$save_CXXFLAGS
 
 AC_SUBST(CMAKE_ROOT_DIR)
 
+# Parse the cmake version number out of the top-level CMake listfile.
+[
+CMake_VERSION_MAJOR=`cat $fullSrcDir/CMakeLists.txt | sed -n '/SET *( *CMake_VERSION_MAJOR/ {s/.*MAJOR *\([0-9][0-9]*\).*/\1/;p;}'`
+CMake_VERSION_MINOR=`cat $fullSrcDir/CMakeLists.txt | sed -n '/SET *( *CMake_VERSION_MINOR/ {s/.*MINOR *\([0-9][0-9]*\).*/\1/;p;}'`
+CMake_VERSION_PATCH=`cat $fullSrcDir/CMakeLists.txt | sed -n '/SET *( *CMake_VERSION_PATCH/ {s/.*PATCH *\([0-9][0-9]*\).*/\1/;p;}'`
+]
+AC_DEFINE_UNQUOTED(CMake_VERSION_MAJOR, ${CMake_VERSION_MAJOR})
+AC_DEFINE_UNQUOTED(CMake_VERSION_MINOR, ${CMake_VERSION_MINOR})
+AC_DEFINE_UNQUOTED(CMake_VERSION_PATCH, ${CMake_VERSION_PATCH})
+AC_SUBST(CMake_VERSION_MAJOR)
+AC_SUBST(CMake_VERSION_MINOR)
+AC_SUBST(CMake_VERSION_PATCH)
 
 # Step 1: set the variable "system" to hold the name and version number
 # for the system.  This can usually be done via the "uname" command, but

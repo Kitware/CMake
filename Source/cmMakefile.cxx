@@ -57,6 +57,15 @@ cmMakefile::cmMakefile()
   this->AddDefaultDefinitions();
 }
 
+const char* cmMakefile::GetReleaseVersion()
+{
+#if CMake_VERSION_MINOR & 1
+  return "development";
+#else
+  return "patch " CMAKE_TO_STRING(CMake_VERSION_PATCH);
+#endif
+}
+
 unsigned int cmMakefile::GetCacheMajorVersion()
 {
   if(!this->GetCacheManager()->GetCacheValue("CMAKE_CACHE_MAJOR_VERSION"))
