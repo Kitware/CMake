@@ -87,6 +87,7 @@ bool cmFindPathCommand::Invoke(std::vector<std::string>& args)
     tryPath += args[1];
     if(cmSystemTools::FileExists(tryPath.c_str()))
       {
+      path[k] = cmSystemTools::CollapseFullPath(path[k].c_str());
       m_Makefile->AddDefinition(args[0].c_str(), path[k].c_str());  
       cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
                                                    path[k].c_str(),
