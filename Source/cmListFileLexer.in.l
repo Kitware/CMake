@@ -21,7 +21,7 @@ This file must be translated to C and modified to build everywhere.
 
 Run flex like this:
 
-  flex -ocmListFileLexer.c cmListFileLexer.l
+  flex -ocmListFileLexer.c cmListFileLexer.in.l
 
 Modify cmListFileLexer.c:
   - remove TABs
