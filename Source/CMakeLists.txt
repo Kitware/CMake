@@ -147,7 +147,7 @@ IF(BUILD_TESTING)
     ADD_TEST(X11 ${CMake_BINARY_DIR}/Source/cmaketest 
       ${CMake_SOURCE_DIR}/Tests/X11
       ${CMake_BINARY_DIR}/Tests/X11 
-      X11)
+      useX11)
 
     ADD_TEST(LoadedCommand ${CMake_BINARY_DIR}/Source/cmaketest 
       ${CMake_SOURCE_DIR}/Tests/LoadCommand 
