@@ -546,11 +546,27 @@ void cmDSPWriter::WriteDSPHeader(std::ostream& fout, const char *libName,
         lib += ".lib";
         }
       lib = cmSystemTools::EscapeSpaces(lib.c_str());
+      // watch for network paths, MSVC can't seem to load // 
+      if (strlen(lib.c_str()) > 2 && lib.c_str()[0] == '/' && 
+          lib.c_str()[1] == '/')
+        {
+        std::string lib2 = "\\\\";
+        lib2 += (lib.c_str() + 2);
+        lib = lib2;
+        }
+      if (strlen(lib.c_str()) > 3 && lib.c_str()[0] == '"' && 
+          lib.c_str()[1] == '/' && lib.c_str()[2] == '/')
+        {
+        std::string lib2 = "\"\\\\";
+        lib2 += (lib.c_str() + 3);
+        lib = lib2;
+        }
+
       if (j->second == cmTarget::GENERAL)
         {
         libOptions += " ";
-        libOptions +=  lib;
-
+        libOptions += lib;
+        
         libMultiLineOptions += "# ADD LINK32 ";
         libMultiLineOptions +=  lib;
         libMultiLineOptions += "\n";
@@ -567,7 +583,7 @@ void cmDSPWriter::WriteDSPHeader(std::ostream& fout, const char *libName,
       if (j->second == cmTarget::OPTIMIZED)
         {
         libOptimizedOptions += " ";
-        libOptimizedOptions +=  lib;
+        libOptimizedOptions += lib;
 
         libMultiLineOptimizedOptions += "# ADD LINK32 ";
         libMultiLineOptimizedOptions += lib;
