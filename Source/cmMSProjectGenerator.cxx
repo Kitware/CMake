@@ -41,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmMSProjectGenerator.h"
 #include "cmDSWMakefile.h"
 #include "cmDSPMakefile.h"
+#include "cmCacheManager.h"
 
 cmMSProjectGenerator::cmMSProjectGenerator()
 {
