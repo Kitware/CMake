@@ -42,6 +42,25 @@ cmLocalUnixMakefileGenerator::~cmLocalUnixMakefileGenerator()
 
 void cmLocalUnixMakefileGenerator::Generate(bool fromTheTop)
 {
+  this->ConfigureOutputPaths();
+  if (!fromTheTop)
+    {
+    // Generate depends 
+    cmMakeDepend md;
+    md.SetMakefile(m_Makefile);
+    md.GenerateMakefileDependencies();
+    this->ProcessDepends(md);
+    }
+  // output the makefile fragment
+  std::string dest = m_Makefile->GetStartOutputDirectory();
+  dest += "/Makefile";
+  this->OutputMakefile(dest.c_str(), !fromTheTop); 
+}
+
+//----------------------------------------------------------------------------
+void
+cmLocalUnixMakefileGenerator::ConfigureOutputPaths()
+{
   m_UseRelativePaths = m_Makefile->IsOn("CMAKE_USE_RELATIVE_PATHS");
   // suppoirt override in output directories
   if (m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH"))
@@ -81,19 +100,6 @@ void cmLocalUnixMakefileGenerator::Generate(bool fromTheTop)
       m_Makefile->AddLinkDirectory(m_ExecutableOutputPath.c_str());
       }
     }
-
-  if (!fromTheTop)
-    {
-    // Generate depends 
-    cmMakeDepend md;
-    md.SetMakefile(m_Makefile);
-    md.GenerateMakefileDependencies();
-    this->ProcessDepends(md);
-    }
-  // output the makefile fragment
-  std::string dest = m_Makefile->GetStartOutputDirectory();
-  dest += "/Makefile";
-  this->OutputMakefile(dest.c_str(), !fromTheTop); 
 }
 
 void 

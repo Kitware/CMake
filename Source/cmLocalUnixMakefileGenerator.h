@@ -88,7 +88,8 @@ public:
   void SetPassMakeflags(bool s){m_PassMakeflags = s;}
   
 protected:
-  
+
+  void ConfigureOutputPaths();
   void AddDependenciesToSourceFile(cmDependInformation const*info,
                                    cmSourceFile *i,
                                    std::set<cmDependInformation const*> *visited);
