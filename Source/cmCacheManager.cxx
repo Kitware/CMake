@@ -111,12 +111,13 @@ bool cmCacheManager::LoadCache(const char* path,
 			       bool internal)
 {
   std::set<std::string> emptySet;
-  return this->LoadCache(path, internal, emptySet);
+  return this->LoadCache(path, internal, emptySet, emptySet);
 }
 
 bool cmCacheManager::LoadCache(const char* path,
 			       bool internal,
-			       std::set<std::string>& excludes)
+			       std::set<std::string>& excludes,
+			       std::set<std::string>& includes)
 {
   std::string cacheFile = path;
   cacheFile += "/CMakeCache.txt";
@@ -164,8 +165,12 @@ bool cmCacheManager::LoadCache(const char* path,
       if ( excludes.find(entryKey) == excludes.end() )
 	{
 	e.m_Type = cmCacheManager::StringToType(regQuoted.match(2).c_str());
-	// only load internal values if internal is set
-	if (internal || e.m_Type != INTERNAL)
+	// Load internal values if internal is set.
+	// If the entry is not internal to the cache being loaded
+	// or if it is in the list of internal entries to be
+	// imported, load it.
+	if ( internal || (e.m_Type != INTERNAL) || 
+	     (includes.find(entryKey) != includes.end()) )
 	  {
 	  // If we are loading the cache from another project,
 	  // make all loaded entries internal so that it is
@@ -186,7 +191,12 @@ bool cmCacheManager::LoadCache(const char* path,
 	{
 	e.m_Type = cmCacheManager::StringToType(reg.match(2).c_str());
 	// only load internal values if internal is set
-	if (internal || e.m_Type != INTERNAL)
+	// Load internal values if internal is set.
+	// If the entry is not internal to the cache being loaded
+	// or if it is in the list of internal entries to be
+	// imported, load it.
+	if ( internal || (e.m_Type != INTERNAL) || 
+	     (includes.find(entryKey) != includes.end()) )
 	  {
 	  // If we are loading the cache from another project,
 	  // make all loaded entries internal so that it is

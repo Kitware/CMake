@@ -79,7 +79,8 @@ public:
   bool LoadCache(const char* path);
   bool LoadCache(const char* path, bool internal);
   bool LoadCache(const char* path, bool internal, 
-		 std::set<std::string>& excludes);
+		 std::set<std::string>& excludes,
+		 std::set<std::string>& includes);
 
   ///! Put cache definitions into makefile
   void DefineCache(cmMakefile*); 

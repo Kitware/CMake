@@ -88,8 +88,12 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "LOAD_CACHE(pathToCacheFile)\n"
-      "Load in the values from another cache. This is useful for a project that depends on another project built in a different tree.";
+      "LOAD_CACHE(pathToCacheFile [EXCLUDE entry1...] [INCLUDE_INTERNALS entry1...])\n"
+      "Load in the values from another cache. This is useful for a project "
+      "that depends on another project built in a different tree."
+      "EXCLUDE option can be used to provide a list of entries to be included."
+      "INCLUDE_INTERNALS can be used to provide a list of internal entries"
+      "to be included. Normally, no internal entries are brougt in.";
     }
   
   cmTypeMacro(cmLoadCacheCommand, cmCommand);
