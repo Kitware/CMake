@@ -186,7 +186,9 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args)
       "  },\n";
     numTests++;
     }
-
+  // end with an empty struct
+  fout << "  {0,0}\n";
+  
   fout << 
     "};\n"
     "\n"
