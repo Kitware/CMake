@@ -183,6 +183,14 @@ public:
     }
 
   /**
+   * Get a list of link libraries in the build.
+   */
+  const cmTarget::LinkLibraries& GetLinkLibraries() const
+    { 
+    return m_LinkLibraries;
+    }
+
+  /**
    * Add a link library to the build.
    */
   void AddLinkLibrary(const char*);
