@@ -39,7 +39,7 @@ const char* cmCacheManagerTypes[] =
 
 const char* cmCacheManager::TypeToString(cmCacheManager::CacheEntryType type)
 {
-  if ( type > 6 || type < 0 )
+  if ( type > 6 )
     {
     return cmCacheManagerTypes[6];
     }
