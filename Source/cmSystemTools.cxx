@@ -208,7 +208,7 @@ bool cmSystemTools::ParseFunction(std::ifstream& fin,
   
   if(fin.getline(inbuffer, BUFFER_SIZE ) )
     {
-    cmRegularExpression blankLine("^$");
+    cmRegularExpression blankLine("^[ \t]*$");
     cmRegularExpression comment("^[ \t]*#.*$");
     cmRegularExpression oneLiner("^[ \t]*([A-Za-z_0-9]*)[ \t]*\\((.*)\\)[ \t]*$");
     cmRegularExpression multiLine("^[ \t]*([A-Za-z_0-9]*)[ \t]*\\((.*)$");
