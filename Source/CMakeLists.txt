@@ -53,8 +53,16 @@ LINK_LIBRARIES(CMakeLib)
 LINK_DIRECTORIES(${CMake_BINARY_DIR}/Sources)
 
 ADD_EXECUTABLE(cmake cmakemain)
+ADD_EXECUTABLE(cmaketest cmaketest.cxx cmSystemTools.cxx)
 
-ADD_TEST(burn cmake)
+CONFIGURE_FILE(
+${CMake_SOURCE_DIR}/Source/cmaketest.h.in 
+${CMake_BINARY_DIR}/Source/cmaketest.h )
+ADD_TEST(simple ${CMake_BINARY_DIR}/Source/cmaketest 
+  ${CMake_SOURCE_DIR}/Tests/Simple 
+  ${CMake_BINARY_DIR}/Tests/Simple 
+  ${CMake_BINARY_DIR}/Tests/Simple/simple
+)
 
 INSTALL_TARGETS(/bin cmake)
 
