@@ -206,7 +206,10 @@ BOOL CMakeSetupDialog::OnInitDialog()
     {
     m_GeneratorChoice.AddString(i->c_str());
     }
-  m_GeneratorChoiceString = "Visual Studio 6";
+  if (m_GeneratorChoiceString == _T("")) 
+    {
+    m_GeneratorChoiceString = "Visual Studio 6";
+    }
 
   // try to load the cmake cache from disk
   this->LoadCacheFromDiskToGUI();
