@@ -9,6 +9,9 @@
 #include <FL/Fl_Button.H>
 
 
+class CMakeSetupGUIImplementation;  
+
+
 namespace fltk {
   
 
@@ -30,15 +33,16 @@ class PropertyItemRow  : public Fl_Tile
  
   public:
 
-    PropertyItemRow( PropertyItem * );
+    PropertyItemRow( PropertyItem *);
     ~PropertyItemRow();
-    
+
   private:
     
     PropertyItem * m_PropertyItem;
     ItemValue    * m_ItemValue;
     Fl_Button    * m_NameButton;
 
+    static CMakeSetupGUIImplementation * m_CMakeSetup;
 
     static void CheckButtonCallback( Fl_Widget *, void *);
     static void NameButtonCallback( Fl_Widget *, void *);
@@ -46,6 +50,11 @@ class PropertyItemRow  : public Fl_Tile
     static void BrowsePathCallback(  Fl_Widget *, void *);
     static void ColorSelectionCallback(   Fl_Widget * widget, void * data);
 
+
+  public:
+    
+    static void SetCMakeSetupGUI( CMakeSetupGUIImplementation * );
+    static void SaveCacheFromGUI( void );
 };
 
 

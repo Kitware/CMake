@@ -17,7 +17,7 @@
  * Constructor
  */
 CMakeSetupGUIImplementation
-::CMakeSetupGUIImplementation()
+::CMakeSetupGUIImplementation():m_CacheEntriesList( this )
 {
   m_BuildPathChanged = false;
 }
@@ -387,14 +387,12 @@ void
 CMakeSetupGUIImplementation
 ::SaveCacheFromGUI( void )
 {
-  std::cout << "Saving cache from GUI ...";
   this->FillCacheManagerFromCacheGUI();
   if( m_WhereBuild != "" )
   {
     cmCacheManager::GetInstance()->SaveCache( 
                                   m_WhereBuild.c_str() );
   }
-  std::cout << "   Done ! " << std::endl;
 }
 
 

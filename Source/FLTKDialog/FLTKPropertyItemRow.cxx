@@ -10,17 +10,26 @@
 #include <FL/Fl_Color_Chooser.H>
 #include <FL/Fl_Menu_Button.H>
 #include "../cmCacheManager.h"
+#include "FLTKPropertyList.h"
+#include "CMakeSetupGUIImplementation.h"
 #include <cstdio>
+
 
 namespace fltk {
 
 
-PropertyItemRow::PropertyItemRow( PropertyItem * pItem ):Fl_Tile(0,0,10,10,"")
+
+CMakeSetupGUIImplementation * PropertyItemRow::m_CMakeSetup = 0;
+
+
+
+
+PropertyItemRow
+::PropertyItemRow( PropertyItem * pItem ):Fl_Tile(0,0,10,10,"")
 {
    
   m_PropertyItem =     pItem;
-  m_ItemValue    = new ItemValue;
-
+  m_ItemValue    =     new ItemValue;
 
   const unsigned int fontsize     =         11;
   const unsigned int nameWidth    =        200;
@@ -162,6 +171,12 @@ PropertyItemRow::~PropertyItemRow( )
 
 
 
+void PropertyItemRow
+::SetCMakeSetupGUI( CMakeSetupGUIImplementation * cmakeSetup )
+{
+  m_CMakeSetup   =     cmakeSetup;
+}
+
 
   
 void 
@@ -205,15 +220,18 @@ NameButtonCallback( Fl_Widget * widget, void * data)
         // Remove the entry from the cache
         cmCacheManager::GetInstance()->RemoveCacheEntry( propertyName );
         // Get the parent: Fl_Tile that manages the whole row in the GUI
-        Fl_Group * parentGroup      = (Fl_Group *) (button->parent());
+        Fl_Group * parentGroup      = dynamic_cast<Fl_Group *>(button->parent());
         // Get the grandParent: Fl_Pack with the property list
-        Fl_Group * grandParentGroup = (Fl_Group *) parentGroup->parent();
+        Fl_Group * grandParentGroup = dynamic_cast<Fl_Group *>( parentGroup->parent() );
         // Remove the row from the list
         grandParentGroup->remove( *parentGroup );
         // Destroy the row
         delete parentGroup;  // Patricide... ?
         // Redraw the list
         grandParentGroup->redraw();
+        
+        SaveCacheFromGUI();
+
         return;
       }
       break;
@@ -223,6 +241,17 @@ NameButtonCallback( Fl_Widget * widget, void * data)
   }
 }
   
+
+
+void
+PropertyItemRow::
+SaveCacheFromGUI( void )
+{
+  if( m_CMakeSetup )
+  {
+    m_CMakeSetup->SaveCacheFromGUI();
+  }
+}
 
 
 
@@ -246,6 +275,9 @@ CheckButtonCallback( Fl_Widget * widget, void * data)
     pItem->m_curValue = "OFF";
   }
   button->redraw();
+  
+  SaveCacheFromGUI();
+
 }
 
 
@@ -258,6 +290,8 @@ InputTextCallback(   Fl_Widget * widget, void * data)
   PropertyItem * item   = (PropertyItem *)data;
   
   item->m_curValue      = input->value();
+
+  SaveCacheFromGUI();
 
 }
 
@@ -290,6 +324,8 @@ ColorSelectionCallback(   Fl_Widget * widget, void * data)
 
   colorButton->redraw();
  
+  SaveCacheFromGUI();
+
 }
 
 
@@ -313,6 +349,8 @@ BrowsePathCallback(   Fl_Widget * widget, void * data)
     propertyItem->m_curValue = newpath;
     inputText->value( newpath );
   }
+
+  SaveCacheFromGUI();
 
 }
 

@@ -5,6 +5,9 @@
 #include <string>
 
 
+class CMakeSetupGUIImplementation;  
+
+
 namespace fltk {
 
 
@@ -36,6 +39,10 @@ public:
     }
 };
 
+
+
+
+
 /////////////////////////////////////////////////////////////////////////////
 // PropertyList window
 
@@ -53,7 +60,8 @@ public:
       CHECKBOX,
       PATH
     };
-  PropertyList();
+
+  PropertyList( CMakeSetupGUIImplementation * );
   
 // Attributes
 public:
@@ -93,18 +101,9 @@ protected:
 
   int AddPropItem(PropertyItem* pItem);
 
-  /*
-  bool m_Dirty;
-  int m_curSel;
-  int m_prevSel;
-  int m_nDivider;
-  int m_nDivTop;
-  int m_nDivBtm;
-  int m_nOldDivX;
-  int m_nLastBox;
-  */
-
   std::set<PropertyItem*> m_PropertyItems;
+
+  CMakeSetupGUIImplementation * m_CMakeSetup;
 
 };
 

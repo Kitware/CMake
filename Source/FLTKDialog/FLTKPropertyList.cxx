@@ -10,14 +10,18 @@
 #include "FL/fl_ask.H"
 #include "FL/Fl_Button.H"
 #include <cstdio>
+#include "CMakeSetupGUIImplementation.h"
+
 
 namespace fltk {
 
 /////////////////////////////////////////////////////////////////////////////
 // PropertyList
 
-PropertyList::PropertyList()
+PropertyList::PropertyList( CMakeSetupGUIImplementation * cmakeSetup )
 {
+  m_CMakeSetup = cmakeSetup;
+  PropertyItemRow::SetCMakeSetupGUI( cmakeSetup );
 }
 
 
