@@ -78,6 +78,7 @@ public:
   bool LoadCache(cmMakefile*); 
   //! Load a cache for given makefile.  Loads from path/CMakeCache.txt.
   bool LoadCache(const char* path);
+  bool LoadCache(const char* path, bool internal);
 
   //! Put cache definitions into makefile
   void DefineCache(cmMakefile*); 

@@ -90,6 +90,11 @@ bool cmCacheManager::LoadCache(cmMakefile* mf)
 
 bool cmCacheManager::LoadCache(const char* path)
 {
+  this->LoadCache(path,true);
+}
+bool cmCacheManager::LoadCache(const char* path,
+			       bool internal)
+{
   std::string cacheFile = path;
   cacheFile += "/CMakeCache.txt";
   // clear the old cache
@@ -125,8 +130,12 @@ bool cmCacheManager::LoadCache(const char* path)
     if(reg.find(buffer))
       {
       e.m_Type = cmCacheManager::StringToType(reg.match(2).c_str());
-      e.m_Value = reg.match(3);
-      m_Cache[reg.match(1)] = e;
+      // only load internal values if internal is set
+      if (internal || e.m_Type != INTERNAL)
+	{
+	  e.m_Value = reg.match(3);
+	  m_Cache[reg.match(1)] = e;
+	}
       }
     else
       {
