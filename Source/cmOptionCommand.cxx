@@ -55,6 +55,7 @@ bool cmOptionCommand::InitialPass(std::vector<std::string> const& args)
     {
     if ( it.GetType() != cmCacheManager::UNINITIALIZED )
       {
+      it.SetProperty("HELPSTRING", args[1].c_str());
       return true;
       }
     if ( it.GetValue() )
