@@ -836,7 +836,8 @@ void cmMSDotNETGenerator::OutputBuildTool(std::ostream& fout,
       this->OutputModuleDefinitionFile(fout, target);
       fout << "\t\t\t\tProgramDatabaseFile=\"" << m_LibraryOutputPath 
            << "$(OutDir)\\" << libName << ".pdb\"\n";
-      if(strcmp(configName, "Debug") == 0)
+      if(strcmp(configName, "Debug") == 0
+         || strcmp(configName, "RelWithDebInfo") == 0)
         {
         fout << "\t\t\t\tGenerateDebugInformation=\"TRUE\"\n";
         }
@@ -864,7 +865,8 @@ void cmMSDotNETGenerator::OutputBuildTool(std::ostream& fout,
       fout << "\"\n";
       fout << "\t\t\t\tProgramDatabaseFile=\"" << m_LibraryOutputPath 
            << "$(OutDir)\\" << libName << ".pdb\"\n";
-      if(strcmp(configName, "Debug") == 0)
+      if(strcmp(configName, "Debug") == 0 
+         || strcmp(configName, "RelWithDebInfo") == 0)
         {
         fout << "\t\t\t\tGenerateDebugInformation=\"TRUE\"\n";
         }
