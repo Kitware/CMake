@@ -36,8 +36,26 @@
 
 #include <stdio.h>
 
+#ifdef __APPLE__
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/resource.h>
+#endif
+
 cmake::cmake()
 {
+#ifdef __APPLE__
+  struct rlimit rlp;
+  if(!getrlimit(RLIMIT_STACK, &rlp))
+    {
+    if(rlp.rlim_cur != rlp.rlim_max)
+      {
+        rlp.rlim_cur = rlp.rlim_max;
+         setrlimit(RLIMIT_STACK, &rlp);
+      }
+    }
+#endif
+
   m_Local = false;
   m_Verbose = false;
   m_InTryCompile = false;
