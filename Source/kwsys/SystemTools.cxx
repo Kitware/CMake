@@ -23,16 +23,17 @@
 # pragma warning (disable: 4786)
 #endif
 
-#include <stdio.h>
-#include <sys/stat.h>
 #include <ctype.h>
 #include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
 #include <time.h>
 
 // support for realpath call
 #ifndef _WIN32
 #include <limits.h>
-#include <stdlib.h>
 #include <sys/param.h>
 #include <sys/wait.h>
 #include <sys/ioctl.h>
@@ -42,9 +43,6 @@
 
 #if defined(_WIN32) && (defined(_MSC_VER) || defined(__BORLANDC__) || defined(__MINGW32__))
 #include <io.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <windows.h>
 #include <direct.h>
 #define _unlink unlink

@@ -34,6 +34,7 @@
 #include KWSYS_HEADER(RegularExpression.hxx)
 
 #include <stdio.h>
+#include <string.h>
 
 namespace KWSYS_NAMESPACE
 {
