@@ -43,6 +43,7 @@ main ()
 #endif
   int socket;
   int flags = fcntl(socket, F_SETFL, flags | O_NONBLOCK);
+  return 0;
 }
 #endif
 
@@ -394,7 +395,7 @@ int main()
 #include <sys/types.h>
 #include <sys/socket.h>
 
-void main(void) {
+int main(void) {
     struct addrinfo hints, *ai;
     int error;
 
@@ -406,11 +407,9 @@ void main(void) {
 #endif
     error = getaddrinfo("127.0.0.1", "8080", &hints, &ai);
     if (error) {
-        exit(1);
+        return 1;
     }
-    else {
-        exit(0);
-    }
+    return 0;
 }
 #endif
 #ifdef _FILE_OFFSET_BITS
