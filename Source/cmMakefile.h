@@ -515,6 +515,9 @@ public:
    */
   cmCacheManager *GetCacheManager() const;
 
+  //! Determine wether this is a local or global build.
+  bool GetLocal() const;
+
 protected:
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(const char* name, cmTarget& target);

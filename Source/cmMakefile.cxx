@@ -1421,3 +1421,8 @@ cmCacheManager *cmMakefile::GetCacheManager() const
 {
   return m_LocalGenerator->GetGlobalGenerator()->GetCMakeInstance()->GetCacheManager();
 }
+
+bool cmMakefile::GetLocal() const
+{
+  return m_LocalGenerator->GetGlobalGenerator()->GetCMakeInstance()->GetLocal();
+}

@@ -26,6 +26,11 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv)
     return false;
     }
 
+  if ( m_Makefile->GetLocal() )
+    {
+    return true;
+    }
+
   // build an arg list for TryCompile and extract the runArgs
   std::vector<std::string> tryCompile;
   std::string runArgs;
@@ -98,7 +103,8 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv)
       // set the run var
       char retChar[1000];
       sprintf(retChar,"%i",retVal);
-      m_Makefile->AddDefinition(argv[0].c_str(), retChar);
+      m_Makefile->AddCacheDefinition(argv[0].c_str(), retChar,
+                                      "Result of TRY_RUN", cmCacheManager::INTERNAL);
       }
     }
   

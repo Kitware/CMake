@@ -94,7 +94,7 @@ int cmTryCompileCommand::CoreTryCompileCode(
       break;
       }
     }
-  
+
   // compute the binary dir when TRY_COMPILE is called with a src file
   // signature
   if (srcFileSignature)
@@ -170,7 +170,9 @@ int cmTryCompileCommand::CoreTryCompileCode(
                            projectName, targetName, &cmakeFlags, &output);
   
   // set the result var to the return value to indicate success or failure
-  mf->AddDefinition(argv[0].c_str(), (res == 0 ? "TRUE" : "FALSE"));
+  mf->AddCacheDefinition(argv[0].c_str(), (res == 0 ? "TRUE" : "FALSE"),
+                         "Result of TRY_COMPILE",
+                         cmCacheManager::INTERNAL);
 
   if ( outputVariable.size() > 0 )
     {
@@ -206,6 +208,11 @@ bool cmTryCompileCommand::InitialPass(std::vector<std::string> const& argv)
   if(argv.size() < 3)
     {
     return false;
+    }
+
+  if ( m_Makefile->GetLocal() )
+    {
+    return true;
     }
 
   cmTryCompileCommand::CoreTryCompileCode(m_Makefile,argv,true);
