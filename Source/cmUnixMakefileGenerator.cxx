@@ -901,6 +901,7 @@ void cmUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
 	    }
 	  fout << " " << prefix << l->second.GetInstallPath() << "\n";
 	  break;
+	case cmTarget::WIN32_EXECUTABLE:
 	case cmTarget::EXECUTABLE:
 	  fout << "\t$(INSTALL_PROGRAM) " << l->first 
 	       << " " << prefix << l->second.GetInstallPath() << "\n";
@@ -925,6 +926,9 @@ void cmUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
 	    }
 	  }
 	  break;
+        case cmTarget::UTILITY:
+        default:
+          break;
 	}
       }
     }
