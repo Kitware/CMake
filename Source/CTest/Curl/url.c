@@ -1337,6 +1337,7 @@ ConnectionKillOne(struct SessionHandle *data)
 
     /* the winner gets the honour of being disconnected */
     result = Curl_disconnect(data->state.connects[connindex]);
+    (void)result;
 
     /* clean the array entry */
     data->state.connects[connindex] = NULL;
@@ -1924,6 +1925,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   }
 
   buf = data->state.buffer; /* this is our buffer */
+  (void)buf;
 
   /*
    * So if the URL was A://B/C,

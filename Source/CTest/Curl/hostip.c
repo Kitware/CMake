@@ -549,6 +549,7 @@ static Curl_addrinfo *my_getaddrinfo(struct SessionHandle *data,
    * Stevens' Unix Network Programming 2nd editor, p. 304: 8192 bytes! */
   port=0; /* unused in IPv4 code */
   ret = 0; /* to prevent the compiler warning */
+  (void)ret;
 
   if ( (in=inet_addr(hostname)) != INADDR_NONE ) {
     struct in_addr *addrentry;

@@ -867,6 +867,7 @@ static void suboption(struct connectdata *conn)
       printsub(data, '>', &temp[2], len-2);
       break;
   }
+  (void)subchar;
   return;
 }
 

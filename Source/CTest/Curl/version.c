@@ -114,7 +114,7 @@ char *curl_version(void)
   sprintf(ptr, " zlib/%s", zlibVersion());
   ptr += strlen(ptr);
 #endif
-
+  (void)ptr;
   return version;
 }
 

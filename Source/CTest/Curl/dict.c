@@ -228,7 +228,7 @@ CURLcode Curl_dict(struct connectdata *conn)
         return result;
     }
   }
-
+  (void)nth;
   return CURLE_OK;
 }
 
