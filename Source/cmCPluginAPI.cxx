@@ -70,27 +70,27 @@ void cmAddCacheDefinition(void *arg, const char* name, const char* value,
     {
     case CM_CACHE_BOOL:
       mf->AddCacheDefinition(name,value,doc,
-                             cmCacheManager::CacheEntryType::BOOL);
+                             cmCacheManager::BOOL);
       break;
     case CM_CACHE_PATH:
       mf->AddCacheDefinition(name,value,doc,
-                             cmCacheManager::CacheEntryType::PATH);
+                             cmCacheManager::PATH);
       break;
     case CM_CACHE_FILEPATH:
       mf->AddCacheDefinition(name,value,doc,
-                             cmCacheManager::CacheEntryType::FILEPATH);
+                             cmCacheManager::FILEPATH);
       break;
     case CM_CACHE_STRING:
       mf->AddCacheDefinition(name,value,doc,
-                             cmCacheManager::CacheEntryType::STRING);
+                             cmCacheManager::STRING);
       break;
     case CM_CACHE_INTERNAL:
       mf->AddCacheDefinition(name,value,doc,
-                             cmCacheManager::CacheEntryType::INTERNAL);
+                             cmCacheManager::INTERNAL);
       break;
     case CM_CACHE_STATIC:
       mf->AddCacheDefinition(name,value,doc,
-                             cmCacheManager::CacheEntryType::STATIC);
+                             cmCacheManager::STATIC);
       break;
     }
 }
@@ -236,16 +236,13 @@ void cmAddLinkLibraryForTarget(void *arg, const char *tgt, const char*value,
   switch (libtype)
     {
     case CM_LIBRARY_GENERAL:
-      mf->AddLinkLibraryForTarget(tgt,value,
-                                  cmTarget::LinkLibraryType::GENERAL);
+      mf->AddLinkLibraryForTarget(tgt,value, cmTarget::GENERAL);
       break;
     case CM_LIBRARY_DEBUG:
-      mf->AddLinkLibraryForTarget(tgt,value,
-                                  cmTarget::LinkLibraryType::DEBUG);
+      mf->AddLinkLibraryForTarget(tgt,value, cmTarget::DEBUG);
       break;
     case CM_LIBRARY_OPTIMIZED:
-      mf->AddLinkLibraryForTarget(tgt,value,
-                                  cmTarget::LinkLibraryType::OPTIMIZED);
+      mf->AddLinkLibraryForTarget(tgt,value, cmTarget::OPTIMIZED);
       break;
     }
 }
@@ -267,8 +264,9 @@ char *cmExpandVariablesInString(void *arg, const char *source,
                                 int escapeQuotes, int atOnly)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
+  std::string barf = source;
   std::string result = 
-    mf->ExpandVariablesInString(std::string(source), 
+    mf->ExpandVariablesInString(barf, 
                                 (escapeQuotes ? true : false),
                                 (atOnly ? true : false));
   char *res = static_cast<char *>(malloc(result.size() + 1));

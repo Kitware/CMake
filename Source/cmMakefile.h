@@ -500,7 +500,7 @@ public:
   /**
    * execute a single CMake command
    */
-  void ExecuteCommand(std::string &name, std::vector<std::string> const& args);
+  void ExecuteCommand(std::string const &name, std::vector<std::string> const& args);
   
   /** Check if a command exists. */
   bool CommandExists(const char* name) const;

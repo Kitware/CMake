@@ -190,7 +190,7 @@ bool cmMakefile::CommandExists(const char* name) const
   return (m_Commands.find(name) != m_Commands.end());
 }
       
-void cmMakefile::ExecuteCommand(std::string &name,
+void cmMakefile::ExecuteCommand(std::string const &name,
                                 std::vector<std::string> const& arguments)
 {
   // quick return if blocked
