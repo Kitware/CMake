@@ -23,8 +23,9 @@ Run bison like this:
 
   bison --yacc --name-prefix=cmDependsJava_yy --defines=cmDependsJavaParserTokens.h -ocmDependsJavaParser.cxx cmDependsJavaParser.y
 
-Modify cmDependsJavaParser.c:
+Modify cmDependsJavaParser.cxx:
   - remove TABs
+  - add __HP_aCC to the #if test for yyerrorlab warning suppression
 
 */
 
