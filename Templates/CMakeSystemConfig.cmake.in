@@ -2,7 +2,8 @@
 # CMakeLocal.make.in should be in the directory where you run configure
 # in, which need not be the source directory
 #
-SET (CMAKE_WORDS_BIGENDIAN    @CMAKE_WORDS_BIGENDIAN@)
+SET (CMAKE_WORDS_BIGENDIAN    @CMAKE_WORDS_BIGENDIAN@ CACHE BOOL
+     "The system uses big endian byte ordering.")
 
 SET (CMAKE_USE_SPROC          @CMAKE_USE_SPROC@ CACHE BOOL 
      "Use sproc libs.")
