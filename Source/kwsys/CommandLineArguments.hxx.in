@@ -71,17 +71,6 @@ public:
     void* call_data);
   typedef int(*ErrorCallbackType)(const char* argument, void* client_data);
 
-  struct CallbackStructure
-    {
-    const char* Argument;
-    int ArgumentType;
-    CallbackType Callback;
-    void* CallData;
-    void* Variable;
-    int VariableType;
-    const char* Help;
-    };
- 
   /**
    * Initialize internal data structures. This should be called before parsing.
    */

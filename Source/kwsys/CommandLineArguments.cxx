@@ -25,6 +25,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifdef _MSC_VER
+# pragma warning (disable: 4786)
+#endif
+
 namespace KWSYS_NAMESPACE
 {
 
@@ -41,13 +45,24 @@ public:
     StdString(s, pos, n) {}
 };
 
+struct CommandLineArgumentsCallbackStructure
+{
+  const char* Argument;
+  int ArgumentType;
+  CommandLineArguments::CallbackType Callback;
+  void* CallData;
+  void* Variable;
+  int VariableType;
+  const char* Help;
+};
+ 
 class CommandLineArgumentsVectorOfStrings : 
   public kwsys_stl::vector<CommandLineArgumentsString> {};
 class CommandLineArgumentsSetOfStrings :
   public kwsys_stl::set<CommandLineArgumentsString> {};
 class CommandLineArgumentsMapOfStrucs : 
   public kwsys_stl::map<CommandLineArgumentsString,
-    CommandLineArguments::CallbackStructure> {};
+    CommandLineArgumentsCallbackStructure> {};
 
 class CommandLineArgumentsInternal
 {
@@ -143,7 +158,7 @@ int CommandLineArguments::Parse()
       it ++ )
       {
       const CommandLineArguments::Internal::String& parg = it->first;
-      CommandLineArguments::CallbackStructure *cs = &it->second;
+      CommandLineArgumentsCallbackStructure *cs = &it->second;
       if (cs->ArgumentType == CommandLineArguments::NO_ARGUMENT ||
         cs->ArgumentType == CommandLineArguments::SPACE_ARGUMENT) 
         {
@@ -175,7 +190,7 @@ int CommandLineArguments::Parse()
       // So, the longest one is probably the right one. Now see if it has any
       // additional value
       const char* value = 0;
-      CommandLineArguments::CallbackStructure *cs 
+      CommandLineArgumentsCallbackStructure *cs 
         = &this->Internals->Callbacks[matches[maxidx]];
       const CommandLineArguments::Internal::String& sarg = matches[maxidx];
       if ( cs->ArgumentType == NO_ARGUMENT )
@@ -328,7 +343,7 @@ void CommandLineArguments::GetRemainingArguments(int* argc, char*** argv)
 void CommandLineArguments::AddCallback(const char* argument, ArgumentTypeEnum type, 
   CallbackType callback, void* call_data, const char* help)
 {
-  CommandLineArguments::CallbackStructure s;
+  CommandLineArgumentsCallbackStructure s;
   s.Argument     = argument;
   s.ArgumentType = type;
   s.Callback     = callback;
@@ -345,7 +360,7 @@ void CommandLineArguments::AddCallback(const char* argument, ArgumentTypeEnum ty
 void CommandLineArguments::AddArgument(const char* argument, ArgumentTypeEnum type,
   VariableTypeEnum vtype, void* variable, const char* help)
 {
-  CommandLineArguments::CallbackStructure s;
+  CommandLineArgumentsCallbackStructure s;
   s.Argument     = argument;
   s.ArgumentType = type;
   s.Callback     = 0;
@@ -434,7 +449,7 @@ const char* CommandLineArguments::GetHelp(const char* arg)
 
   // Since several arguments may point to the same argument, find the one this
   // one point to if this one is pointing to another argument.
-  CommandLineArguments::CallbackStructure *cs = &(it->second);
+  CommandLineArgumentsCallbackStructure *cs = &(it->second);
   while ( 1 )
     {
     CommandLineArguments::Internal::CallbacksMap::iterator hit 
@@ -465,7 +480,7 @@ void CommandLineArguments::GenerateHelp()
     it != this->Internals->Callbacks.end();
     it ++ )
     {
-    CommandLineArguments::CallbackStructure *cs = &(it->second);
+    CommandLineArgumentsCallbackStructure *cs = &(it->second);
     mpit = mp.find(cs->Help);
     if ( mpit != mp.end() )
       {
@@ -481,7 +496,7 @@ void CommandLineArguments::GenerateHelp()
     it != this->Internals->Callbacks.end();
     it ++ )
     {
-    CommandLineArguments::CallbackStructure *cs = &(it->second);
+    CommandLineArgumentsCallbackStructure *cs = &(it->second);
     mpit = mp.find(cs->Help);
     if ( mpit != mp.end() )
       {
