@@ -2632,6 +2632,11 @@ int cmCTest::RunConfigurationScript()
     res = cmSystemTools::RunSingleCommand(command.c_str(), &output, 
                                           &retVal, binDir,
                                           m_Verbose, 0 /*m_TimeOut*/);
+    if (!res || retVal != 0)
+      {
+      cmSystemTools::Error("Unable to perform cvs update");    
+      return -5;
+      }
     }
   
   // put the initial cache into the bin dir
@@ -2660,6 +2665,11 @@ int cmCTest::RunConfigurationScript()
     res = cmSystemTools::RunSingleCommand(command.c_str(), &output, 
                                           &retVal, binDir,
                                           m_Verbose, 0 /*m_TimeOut*/);
+    if (!res || retVal != 0)
+      {
+      cmSystemTools::Error("Unable to run cmake");    
+      return -6;
+      }
     }
   
   // run ctest
@@ -2669,6 +2679,11 @@ int cmCTest::RunConfigurationScript()
   res = cmSystemTools::RunSingleCommand(command.c_str(), &output, 
                                         &retVal, binDir,
                                         m_Verbose, 0 /*m_TimeOut*/);
+  if (!res || retVal != 0)
+    {
+    cmSystemTools::Error("Unable to run ctest");    
+    return -6;
+    }
 
   return 0;  
 }
