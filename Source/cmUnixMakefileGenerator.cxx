@@ -370,7 +370,7 @@ void cmUnixMakefileGenerator::OutputDepends(std::ostream& fout)
 
 
 // Output each custom rule in the following format:
-// m_Result: m_Depends[0] m_Depends[1] ...
+// m_Result: m_Source m_Depends[0] m_Depends[1] ...
 //   (tab)   m_Command
 void cmUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
 {
@@ -378,7 +378,7 @@ void cmUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
         m_Makefile->GetCustomCommands().begin();
       c != m_Makefile->GetCustomCommands().end(); ++c)
     {
-    fout << c->m_Result.c_str() << ":";
+    fout << c->m_Result.c_str() << ": " << c->m_Source.c_str();
     for(std::vector<std::string>::const_iterator d = c->m_Depends.begin();
         d != c->m_Depends.end(); ++ d)
       {
