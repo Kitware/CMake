@@ -40,13 +40,15 @@ void cmSystemTools::ReplaceString(std::string& source,
                                    const char* replace,
                                    const char* with)
 {
-  std::string line = source;
-  size_t start = line.find(replace);
+  int lengthReplace = strlen(replace);
+  std::string rest;
+  size_t start = source.find(replace);
   while(start != std::string::npos)
     {
-    source = line.substr(0, start);
+    rest = source.substr(start+lengthReplace);
+    source = source.substr(0, start);
     source += with;
-    source += line.substr(start + strlen(replace));
-    start = line.find(replace, start + strlen(replace) );
+    source += rest;
+    start = source.find(replace, start + lengthReplace );
     }
 }
