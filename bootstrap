@@ -131,7 +131,14 @@ cmake_version()
       grep "SET(CMake_VERSION_${a} *[0-9]*)" | sed "s/SET(CMake_VERSION_${a} *\([0-9]*\))/\1/"`
     CMAKE_VERSION="${CMAKE_VERSION}.${CMake_VERSION}" 
   done
-  CMAKE_VERSION=`echo $CMAKE_VERSION | sed "s/\.\([0-9][0-9]*\)\.\([0-9][0-9]*\)\.\([0-9][0-9]*\)/\1.\2-\3/"`
+  if echo "$CMAKE_VERSION" | grep "\.[0-9][0-9]*\.[0-9]*[13579]\.[0-9]" > /dev/null 2>&1; then
+
+    CMake_DATE=`cat "${cmake_source_dir}/Source/cmVersion.cxx" | grep "\"\\\$Date$"`
+    CMake_DATE=`echo "${CMake_DATE}" | sed "s/.*Date: \([0-9][0-9]*\)\/\([0-9][0-9]*\)\/\([0-9][0-9]*\) .*/\1\2\3/" `
+    CMAKE_VERSION=`echo $CMAKE_VERSION | sed "s/\.\([0-9][0-9]*\)\.\([0-9][0-9]*\)\.\([0-9][0-9]*\)/\1.\2-${CMake_DATE}/"`
+  else
+    CMAKE_VERSION=`echo $CMAKE_VERSION | sed "s/\.\([0-9][0-9]*\)\.\([0-9][0-9]*\)\.\([0-9][0-9]*\)/\1.\2-\3/"`
+  fi
   echo "CMake ${CMAKE_VERSION}, Copyright (c) 2002 Kitware, Inc., Insight Consortium"
 }
 
