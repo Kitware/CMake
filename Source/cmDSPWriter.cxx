@@ -474,6 +474,46 @@ void cmDSPMakefile::WriteDSPHeader(std::ostream& fout, const char *libName,
     exePath = m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
     }
 
+  if(libPath.size())
+    {
+    // make sure there is a trailing slash
+    if(libPath[libPath.size()-1] != '/')
+      {
+      libPath += "/";
+      }
+    libOptions += " /LIBPATH:\"";
+    libOptions += libPath;
+    libOptions += "$(IntDir)\" ";
+    libOptions += " /LIBPATH:\"";
+    libOptions += libPath;
+    libOptions += "\" ";
+    libMultiLineOptions += "# ADD LINK32 /LIBPATH:\"";
+    libMultiLineOptions += libPath; 
+    libMultiLineOptions += "$(IntDir)\" ";
+    libMultiLineOptions += " /LIBPATH:\"";
+    libMultiLineOptions += libPath;
+    libMultiLineOptions += "\" \n";
+    }
+  if(exePath.size())
+    {
+    // make sure there is a trailing slash
+    if(exePath[exePath.size()-1] != '/')
+      {
+      exePath += "/";
+      }
+    libOptions += " /LIBPATH:\"";
+    libOptions += exePath;
+    libOptions += "$(IntDir)\" ";
+    libOptions += " /LIBPATH:\"";
+    libOptions += exePath;
+    libOptions += "\" ";
+    libMultiLineOptions += "# ADD LINK32 /LIBPATH:\"";
+    libMultiLineOptions += exePath; 
+    libMultiLineOptions += "$(IntDir)\" ";
+    libMultiLineOptions += " /LIBPATH:\"";
+    libMultiLineOptions += exePath;
+    libMultiLineOptions += "\" \n";
+    }
   std::vector<std::string>::iterator i;
   std::vector<std::string>& libdirs = m_Makefile->GetLinkDirectories();
   for(i = libdirs.begin(); i != libdirs.end(); ++i)
@@ -486,7 +526,7 @@ void cmDSPMakefile::WriteDSPHeader(std::ostream& fout, const char *libName,
     libOptions += "\" ";
 
     libMultiLineOptions += "# ADD LINK32 /LIBPATH:\"";
-    libMultiLineOptions += *i;
+    libMultiLineOptions += *i; 
     libMultiLineOptions += "/$(OUTDIR)\" ";
     libMultiLineOptions += " /LIBPATH:\"";
     libMultiLineOptions += *i;
