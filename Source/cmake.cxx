@@ -84,7 +84,7 @@ void cmake::SetArgs(cmMakefile& builder, const std::vector<std::string>& args)
       }
     }
 
-  for(int i =1; i < args.size(); i++)
+  for(unsigned int i=1; i < args.size(); ++i)
     {
     std::string arg = args[i];
     if(arg.find("-H",0) != std::string::npos)
