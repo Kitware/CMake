@@ -315,6 +315,8 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
     srcFilesToProcess.pop();
     }
 
+  // now all of the source files have been properly assigned to the target
+  // now stick them into source groups using the reg expressions
   for(std::vector<cmSourceFile*>::iterator i = classes.begin(); 
       i != classes.end(); i++)
     {
@@ -323,6 +325,27 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
     cmSourceGroup& sourceGroup = m_Makefile->FindSourceGroup(source.c_str(),
                                                              sourceGroups);
     sourceGroup.AddSource(source.c_str(), *i);
+    // while we are at it, if it is a .rule file then for visual studio 6 we
+    // must generate it
+    if ((*i)->GetSourceExtension() == "rule")
+      {
+      if(!cmSystemTools::FileExists(source.c_str()))
+        {
+#if defined(_WIN32) || defined(__CYGWIN__)
+        std::ofstream fout(source.c_str(), 
+                           std::ios::binary | std::ios::out | std::ios::trunc);
+#else
+        std::ofstream fout(source.c_str(), 
+                           std::ios::out | std::ios::trunc);
+#endif
+        if(fout)
+          {
+          fout.write("# generated from CMake",22);
+          fout.flush();
+          fout.close();
+          }
+        }
+      }
     }
   
   // Write the DSP file's header.
