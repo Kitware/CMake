@@ -73,9 +73,10 @@ bool cmCablePackageCommand::Invoke(std::vector<std::string>& args)
   {  
   // We must add a custom rule to cause the cable_config.xml to be re-built
   // when it is removed.  Rebuilding it means re-running CMake.
-  std::string cMakeLists = m_Makefile->GetStartDirectory();
+  std::string cMakeLists = "\"";
+  cMakeLists += m_Makefile->GetStartDirectory();
   cMakeLists += "/";
-  cMakeLists += "CMakeLists.txt";
+  cMakeLists += "CMakeLists.txt\"";
 
   std::string command;
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -147,20 +148,25 @@ bool cmCablePackageCommand::Invoke(std::vector<std::string>& args)
   {
   std::string command = "${GCCXML}";
   m_Makefile->ExpandVariablesInString(command);
-  std::vector<std::string> depends;
-  depends.push_back(command);
-  std::string input = "Cxx/"+m_PackageName+"_cxx.cxx";
-  std::string output = "Cxx/"+m_PackageName+"_cxx.xml";
-  command = "\""+command+"\" ${CXX_FLAGS} -fsyntax-only -fxml=" + output + " -c " + input;
-  
-  std::vector<std::string> outputs;
-  outputs.push_back("Cxx/"+m_PackageName+"_cxx.xml");
-  
-  // A rule for the package's source files.
-  m_Makefile->AddCustomCommand(input.c_str(),
-                               command.c_str(),
-                               depends,
-                               outputs, m_TargetName.c_str());
+  // Only add the rule if GCC-XML is available.
+  if((command != "") && (command != "${GCCXML}"))
+    {
+    std::vector<std::string> depends;
+    depends.push_back(command);
+    std::string input = m_Makefile->GetStartOutputDirectory();
+    input = input + "/Cxx/"+m_PackageName+"_cxx.cxx";
+    std::string output = "Cxx/"+m_PackageName+"_cxx.xml";
+    command = "\""+command+"\" ${CXX_FLAGS} -fsyntax-only -fxml=" + output + " -c " + input;
+    
+    std::vector<std::string> outputs;
+    outputs.push_back("Cxx/"+m_PackageName+"_cxx.xml");
+    
+    // A rule for the package's source files.
+    m_Makefile->AddCustomCommand(input.c_str(),
+                                 command.c_str(),
+                                 depends,
+                                 outputs, m_TargetName.c_str());
+    }
   }  
   
   // add the source list to the target
