@@ -98,6 +98,14 @@ cmMakefile::~cmMakefile()
     {
     delete (*j).second;
     }
+  for(DataMap::const_iterator d = m_DataMap.begin();
+      d != m_DataMap.end(); ++d)
+    {
+    if(d->second)
+      {
+      delete d->second;
+      }
+    }
   delete m_MakefileGenerator;
 }
 
@@ -863,3 +871,52 @@ void cmMakefile::SetHomeOutputDirectory(const char* lib)
   this->ReadListFile(NULL,fpath.c_str());
 #endif
 }
+
+
+/**
+ * Register the given cmData instance with its own name.
+ */
+void cmMakefile::RegisterData(cmData* data)
+{
+  std::string name = data->GetName();
+  DataMap::const_iterator d = m_DataMap.find(name);
+  if((d != m_DataMap.end()) && (d->second != NULL) && (d->second != data))
+    {
+    delete d->second;
+    }
+  m_DataMap[name] = data;
+}
+
+
+/**
+ * Register the given cmData instance with the given name.  This can be used
+ * to register a NULL pointer.
+ */
+void cmMakefile::RegisterData(const char* name, cmData* data)
+{
+  DataMap::const_iterator d = m_DataMap.find(name);
+  if((d != m_DataMap.end()) && (d->second != NULL) && (d->second != data))
+    {
+    delete d->second;
+    }
+  m_DataMap[name] = data;
+}
+
+
+/**
+ * Lookup a cmData instance previously registered with the given name.  If
+ * the instance cannot be found, return NULL.
+ */
+cmData* cmMakefile::LookupData(const char* name) const
+{
+  DataMap::const_iterator d = m_DataMap.find(name);
+  if(d != m_DataMap.end())
+    {
+    return d->second;
+    }
+  else
+    {
+    return NULL;
+    }
+}
+

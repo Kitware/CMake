@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define cmMakefile_h
 
 #include "cmStandardIncludes.h"
+#include "cmData.h"
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
 #include "cmSourceGroup.h"
@@ -475,6 +476,10 @@ public:
   cmSourceGroup& FindSourceGroup(const char* source,
                                  std::vector<cmSourceGroup> &groups);
 
+  void RegisterData(cmData*);
+  void RegisterData(const char*, cmData*);
+  cmData* LookupData(const char*) const;
+  
 protected:
   std::string m_Prefix;
   std::vector<std::string> m_AuxSourceDirectories; // 
@@ -528,6 +533,9 @@ private:
   void AddDefaultCommands();
   void AddDefaultDefinitions();
   std::set<cmFunctionBlocker *> m_FunctionBlockers;
+  
+  typedef std::map<std::string, cmData*> DataMap;
+  DataMap m_DataMap;
 };
 
 
