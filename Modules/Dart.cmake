@@ -77,27 +77,10 @@ IF(BUILD_TESTING)
 
   # add testing targets
   IF(TCL_TCLSH)
-    ADD_CUSTOM_TARGET(Nightly 
-    ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Start Build Test Submit)
-    ADD_CUSTOM_TARGET(NightlyBuild   
-    ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Start Build)
-    ADD_CUSTOM_TARGET(NightlyTest 
-    ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Test)
-    ADD_CUSTOM_TARGET(NightlySubmit 
-    ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Submit)
-    ADD_CUSTOM_TARGET(NightlyDashboardStart 
-    ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly DashboardStart)
-    ADD_CUSTOM_TARGET(NightlyDashboardEnd 
-    ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly DashboardEnd)
-    ADD_CUSTOM_TARGET(ExperimentalBuild 
-    ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Start Build)
-    ADD_CUSTOM_TARGET(ExperimentalTest 
-    ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Test)
+    ADD_CUSTOM_TARGET(Experimental 
+    ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Start Build Test)
     ADD_CUSTOM_TARGET(ExperimentalSubmit 
     ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Submit)
-    ADD_CUSTOM_TARGET(Experimental 
-    ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Start Build Test Submit)
-
   ELSE(TCL_TCLSH)
     MESSAGE("Could not find TCL_TCLSH, disabling testing." "Error")   
   ENDIF(TCL_TCLSH)
