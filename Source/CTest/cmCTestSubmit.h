@@ -34,10 +34,14 @@ public:
   /**
    * Submit file using various ways
    */
-  bool SubmitUsingFTP(const std::vector<std::string>& files,
-                      const std::string& prefix, const std::string& url);
-  bool SubmitUsingSCP(const std::vector<std::string>& files,
-                      const std::string& prefix, const std::string& url);
+  bool SubmitUsingFTP(const std::string& localprefix, 
+                      const std::vector<std::string>& files,
+                      const std::string& remoteprefix, 
+                      const std::string& url);
+  bool SubmitUsingSCP(const std::string& localprefix, 
+                      const std::vector<std::string>& files,
+                      const std::string& remoteprefix, 
+                      const std::string& url);
 };
 
 #endif
