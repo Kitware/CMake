@@ -66,6 +66,13 @@ void cmTarget::GenerateSourceFilesFromSourceLists(const cmMakefile &mf)
       m_SourceFiles.push_back(file);
       }
     }
+
+  // expand any link library variables whle we are at it
+  LinkLibraries::iterator p = m_LinkLibraries.begin();
+  for (;p != m_LinkLibraries.end(); ++p)
+    {
+    mf.ExpandVariablesInString(p->first);    
+    }
 }
 
 void cmTarget::MergeLibraries(const LinkLibraries &ll)
@@ -75,10 +82,11 @@ void cmTarget::MergeLibraries(const LinkLibraries &ll)
   LinkLibraries::const_iterator p = ll.begin();
   for (;p != ll.end(); ++p)
     {
-	  if (std::find(m_LinkLibraries.begin(),m_LinkLibraries.end(),*p) == m_LinkLibraries.end())
+    if (std::find(m_LinkLibraries.begin(),m_LinkLibraries.end(),*p) == m_LinkLibraries.end())
       {
       m_LinkLibraries.push_back(*p);
       }
     }
+
 }
 
