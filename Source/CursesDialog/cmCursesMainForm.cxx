@@ -518,8 +518,17 @@ void cmCursesMainForm::FillCacheManagerFromUI()
     if (entry)
       {
       tmpString = (*m_Entries)[i]->m_Entry->GetValue();
-      // Remove trailing spaces
-      entry->m_Value = tmpString.substr(0,tmpString.find_last_not_of(" ")+1);
+
+      // Remove trailing spaces, convert path to unix slashes
+      string tmpSubString = 
+	tmpString.substr(0,tmpString.find_last_not_of(" ")+1);
+      if ( entry->m_Type == cmCacheManager::PATH || 
+	   entry->m_Type == cmCacheManager::FILEPATH )
+	{
+	cmSystemTools::ConvertToUnixSlashes(tmpSubString);
+	}
+      entry->m_Value = tmpSubString;
+
       }
     }
 }
