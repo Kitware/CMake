@@ -21,7 +21,7 @@ bool cmAddCustomTargetCommand::InitialPass(std::vector<std::string> const& args)
 {
   bool all = false;
   
-  if(args.size() < 2 )
+  if(args.size() < 1 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;
