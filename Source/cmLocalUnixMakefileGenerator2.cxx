@@ -21,6 +21,8 @@
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 
+#include <queue>
+
 //----------------------------------------------------------------------------
 cmLocalUnixMakefileGenerator2::cmLocalUnixMakefileGenerator2()
 {
@@ -414,8 +416,8 @@ cmLocalUnixMakefileGenerator2
       << "# This may be replaced when dependencies are built.\n";
     }
 
-  // Open the rule file.  This should be copy-if-different because the
-  // rules may depend on this file itself.
+  // Open the rule file for writing.  This should be copy-if-different
+  // because the rules may depend on this file itself.
   std::string ruleFileName = obj;
   ruleFileName += ".make";
   cmGeneratedFileStream ruleFile(ruleFileName.c_str());
@@ -437,6 +439,10 @@ cmLocalUnixMakefileGenerator2
     << this->ConvertToOutputForExisting(depFileName.c_str()).c_str()
     << "\n\n";
 
+  // Identify the language of the source file.
+  const char* lang =
+    m_GlobalGenerator->GetLanguageFromExtension(source.GetSourceExtension().c_str());
+
   // Write the dependency generation rule.
   std::string depTarget = obj;
   depTarget += ".depends";
@@ -447,9 +453,22 @@ cmLocalUnixMakefileGenerator2
   depComment += objName;
   depends.push_back(source.GetFullPath());
   depends.push_back(ruleFileName);
+  cmOStringStream depCmd;
+  // TODO: Account for source file properties and directory-level
+  // definitions.
+  depCmd << "$(CMAKE_COMMAND) -E cmake_depends " << lang << " "
+         << this->ConvertToRelativeOutputPath(obj.c_str()) << " "
+         << this->ConvertToRelativeOutputPath(source.GetFullPath().c_str());
+  std::vector<std::string> includeDirs;
+  this->GetIncludeDirectories(includeDirs);
+  for(std::vector<std::string>::iterator i = includeDirs.begin();
+      i != includeDirs.end(); ++i)
+    {
+    depCmd << " -I" << this->ConvertToRelativeOutputPath(i->c_str());
+    }
+  commands.push_back(depCmd.str());
   std::string touchCmd = "@touch ";
   touchCmd += this->ConvertToRelativeOutputPath(depTarget.c_str());
-  // TODO: Construct dependency generation rule and append command.
   commands.push_back(touchCmd);
   this->OutputMakeRule(ruleFileStream, depComment.c_str(), depTarget.c_str(),
                        depends, commands);
@@ -461,7 +480,7 @@ cmLocalUnixMakefileGenerator2
   std::vector<std::string> commands;
   std::string buildComment = "object ";
   buildComment += objName;
-  depends.push_back(depTarget);
+  depends.push_back(source.GetFullPath());
   depends.push_back(ruleFileName);
   std::string touchCmd = "@touch ";
   touchCmd += this->ConvertToRelativeOutputPath(obj.c_str());
@@ -524,4 +543,155 @@ cmLocalUnixMakefileGenerator2
     m_GlobalGenerator->GetLanguageOutputExtensionFromExtension(
       source.GetSourceExtension().c_str());
   return objectName;
+}
+
+//----------------------------------------------------------------------------
+bool
+cmLocalUnixMakefileGenerator2
+::ScanDependencies(std::vector<std::string> const& args)
+{
+  // Format of arguments is:
+  // $(CMAKE_COMMAND), cmake_depends, <lang>, <obj>, <src>, [include-flags]
+  // The caller has ensured that all required arguments exist.
+
+  // The file to which to write dependencies.
+  const char* objFile = args[3].c_str();
+
+  // The source file at which to start the scan.
+  const char* srcFile = args[4].c_str();
+
+  // Convert the include flags to full paths.
+  std::vector<std::string> includes;
+  for(unsigned int i=5; i < args.size(); ++i)
+    {
+    if(args[i].substr(0, 2) == "-I")
+      {
+      // Get the include path without the -I flag.
+      std::string inc = args[i].substr(2);
+      includes.push_back(cmSystemTools::CollapseFullPath(inc.c_str()));
+      }
+    }
+
+  // Dispatch the scan for each language.
+  std::string const& lang = args[2];
+  if(lang == "C" || lang == "CXX")
+    {
+    return cmLocalUnixMakefileGenerator2::ScanDependenciesC(objFile, srcFile,
+                                                            includes);
+    }
+  return false;
+}
+
+//----------------------------------------------------------------------------
+void
+cmLocalUnixMakefileGenerator2ScanDependenciesC(
+  std::ifstream& fin,
+  std::set<cmStdString>& encountered,
+  std::queue<cmStdString>& unscanned)
+{
+  // Regular expression to identify C preprocessor include directives.
+  cmsys::RegularExpression
+    includeLine("^[ \t]*#[ \t]*include[ \t]*[<\"]([^\">]+)[\">]");
+
+  // Read one line at a time.
+  std::string line;
+  while(cmSystemTools::GetLineFromStream(fin, line))
+    {
+    // Match include directives.
+    if(includeLine.find(line.c_str()))
+      {
+      // Get the file being included.
+      std::string includeFile = includeLine.match(1);
+
+      // Queue the file if it has not yet been encountered.
+      if(encountered.find(includeFile) == encountered.end())
+        {
+        encountered.insert(includeFile);
+        unscanned.push(includeFile);
+        }
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
+bool
+cmLocalUnixMakefileGenerator2
+::ScanDependenciesC(const char* objFile, const char* srcFile,
+                    std::vector<std::string> const& includes)
+{
+  // Walk the dependency graph starting with the source file.
+  std::set<cmStdString> dependencies;
+  std::set<cmStdString> encountered;
+  std::set<cmStdString> scanned;
+  std::queue<cmStdString> unscanned;
+  unscanned.push(srcFile);
+  encountered.insert(srcFile);
+  while(!unscanned.empty())
+    {
+    // Get the next file to scan.
+    std::string fname = unscanned.front();
+    unscanned.pop();
+
+    // If not a full path, find the file in the include path.
+    std::string fullName;
+    if(cmSystemTools::FileIsFullPath(fname.c_str()))
+      {
+      fullName = fname;
+      }
+    else
+      {
+      for(std::vector<std::string>::const_iterator i = includes.begin();
+          i != includes.end(); ++i)
+        {
+        std::string temp = *i;
+        temp += "/";
+        temp += fname;
+        if(cmSystemTools::FileExists(temp.c_str()))
+          {
+          fullName = temp;
+          break;
+          }
+        }
+      }
+
+    // Scan the file if it has not been scanned already.
+    if(scanned.find(fullName) == scanned.end())
+      {
+      // Record scanned files.
+      scanned.insert(fullName);
+
+      // Try to scan the file.  Just leave it out if we cannot find
+      // it.
+      std::ifstream fin(fullName.c_str());
+      if(fin)
+        {
+        // Add this file as a dependency.
+        dependencies.insert(fullName);
+
+        // Scan this file for new dependencies.
+        cmLocalUnixMakefileGenerator2ScanDependenciesC(fin, encountered,
+                                                       unscanned);
+        }
+      }
+    }
+
+  // Write the dependencies to the output file.
+  std::string depMakeFile = objFile;
+  depMakeFile += ".depends.make";
+  std::ofstream fout(depMakeFile.c_str());
+  fout << "# Dependencies for " << objFile << endl;
+  for(std::set<cmStdString>::iterator i=dependencies.begin();
+      i != dependencies.end(); ++i)
+    {
+    fout << objFile << " : " << i->c_str() << endl;
+    }
+  fout << endl;
+  fout << "# Dependencies for " << objFile << ".depends" << endl;
+  for(std::set<cmStdString>::iterator i=dependencies.begin();
+      i != dependencies.end(); ++i)
+    {
+    fout << objFile << ".depends : " << i->c_str() << endl;
+    }
+
+  return true;
 }

@@ -46,6 +46,10 @@ public:
    * makefiles. This is done by a direct invocation from make.
    */
   virtual void Generate(bool fromTheTop);
+
+  /** Called from command-line hook to scan dependencies.  */
+  static bool ScanDependencies(std::vector<std::string> const& args);
+
 protected:
 
   void GenerateMakefile();
@@ -57,6 +61,9 @@ protected:
 
   std::string GetTargetDirectory(const cmTarget& target);
   std::string GetObjectFileName(const cmSourceFile& source);
+
+  static bool ScanDependenciesC(const char* objFile, const char* srcFile,
+                                std::vector<std::string> const& includes);
 private:
 };
 
