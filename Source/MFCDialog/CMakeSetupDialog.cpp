@@ -5,6 +5,7 @@
 #include "CMakeSetup.h"
 #include "PathDialog.h"
 #include "CMakeSetupDialog.h"
+#include "CMakeCommandLineInfo.h" 
 #include "../cmCacheManager.h"
 #include "../cmake.h"
 #ifdef _DEBUG
@@ -62,14 +63,15 @@ BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
 /////////////////////////////////////////////////////////////////////////////
 // CMakeSetupDialog dialog
 
-CMakeSetupDialog::CMakeSetupDialog(CWnd* pParent /*=NULL*/)
+CMakeSetupDialog::CMakeSetupDialog(const CMakeCommandLineInfo& cmdInfo,
+                                   CWnd* pParent /*=NULL*/)
   : CDialog(CMakeSetupDialog::IDD, pParent)
 {
   m_RegistryKey  = "Software\\Kitware\\CMakeSetup\\Settings\\StartPath";
   
   //{{AFX_DATA_INIT(CMakeSetupDialog)
-	m_WhereSource = _T("");
-	m_WhereBuild = _T("");
+	m_WhereSource = cmdInfo.m_WhereSource;
+	m_WhereBuild = cmdInfo.m_WhereBuild;
 	//}}AFX_DATA_INIT
   // Note that LoadIcon does not require a subsequent DestroyIcon in Win32
   m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
@@ -339,8 +341,14 @@ void CMakeSetupDialog::LoadFromRegistry()
   else
     {
     // load some values
-    this->ReadRegistryValue(hKey, &(m_WhereSource),"WhereSource","C:\\");
-    this->ReadRegistryValue(hKey, &(m_WhereBuild),"WhereBuild","C:\\");
+    if (m_WhereSource.IsEmpty()) 
+      {
+      this->ReadRegistryValue(hKey, &(m_WhereSource),"WhereSource","C:\\");
+      }
+    if (m_WhereBuild.IsEmpty()) 
+      {
+      this->ReadRegistryValue(hKey, &(m_WhereBuild),"WhereBuild","C:\\");
+      }
     m_WhereSourceControl.AddString(m_WhereSource);
     m_WhereBuildControl.AddString(m_WhereBuild);
 

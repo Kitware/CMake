@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "CMakeSetup.h"
 #include "CMakeSetupDialog.h"
+#include "CMakeCommandLineInfo.h" 
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -54,7 +55,11 @@ BOOL CMakeSetup::InitInstance()
   Enable3dControlsStatic();	// Call this when linking to MFC statically
 #endif
 
-  CMakeSetupDialog dlg;
+  CMakeCommandLineInfo cmdInfo;
+  ParseCommandLine(cmdInfo);
+
+  CMakeSetupDialog dlg(cmdInfo);
+
   m_pMainWnd = &dlg;
   int nResponse = dlg.DoModal();
   if (nResponse == IDOK)

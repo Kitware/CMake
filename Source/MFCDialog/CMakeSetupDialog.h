@@ -13,11 +13,14 @@
 /////////////////////////////////////////////////////////////////////////////
 // CMakeSetupDialog dialog
 
+class CMakeCommandLineInfo;
+
 class CMakeSetupDialog : public CDialog
 {
 // Construction
 public:
-  CMakeSetupDialog(CWnd* pParent = NULL);	// standard constructor
+  CMakeSetupDialog(const CMakeCommandLineInfo& cmdInfo, 
+                   CWnd* pParent = NULL);	
 protected:
   //! Load cache file from m_WhereBuild and display in GUI editor
   void LoadCacheFromDiskToGUI();
