@@ -285,6 +285,7 @@ void kwsysProcess_Execute(kwsysProcess* cp)
   
   /* We want no special handling of SIGCHLD.  Repeat call until it is
      not interrupted.  */
+  memset(&newSigChldAction, 0, sizeof(struct sigaction));
   newSigChldAction.sa_handler = SIG_DFL;
   while((sigaction(SIGCHLD, &newSigChldAction, &cp->OldSigChldAction) < 0) &&
         (errno == EINTR));
@@ -901,6 +902,7 @@ static void kwsysProcessChildErrorExit(kwsysProcess* cp)
 static void kwsysProcessRestoreDefaultSignalHandlers()
 {
   struct sigaction act;
+  memset(&act, 0, sizeof(struct sigaction));
   act.sa_handler = SIG_DFL;
 #ifdef SIGHUP
   sigaction(SIGHUP, &act, 0);
