@@ -14,15 +14,17 @@
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
+#include <SystemTools.hxx>
+
+#include <RegularExpression.hxx>
+#include <Directory.hxx>
+
+#include <std/iostream>
+#include <std/fstream>
+
 #ifdef _MSC_VER
 # pragma warning (disable: 4786)
 #endif
-
-#include <SystemTools.hxx>
-#include <RegularExpression.hxx>
-#include <Directory.hxx>
-#include <std/iostream>
-#include <std/fstream>
 
 #include <stdio.h>
 #include <sys/stat.h>
