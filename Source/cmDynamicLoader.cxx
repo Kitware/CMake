@@ -90,16 +90,15 @@ int cmDynamicLoader::CloseLibrary(cmLibHandle lib)
 
 void* cmDynamicLoader::GetSymbolAddress(cmLibHandle lib, const char* sym)
 {
-    void *result=0;
-    if(NSIsSymbolNameDefined(sym)){
-         cout << sym << " is defined!" << endl;
-         NSSymbol symbol= NSLookupAndBindSymbol(sym);
-         if(symbol){
-                result = NSAddressOfSymbol(symbol);
-         }
-  }else{
-        cout << sym << " is not defined!" << endl;
- }
+  void *result=0;
+  if(NSIsSymbolNameDefined(sym))
+    {
+    NSSymbol symbol= NSLookupAndBindSymbol(sym);
+    if(symbol)
+      {
+      result = NSAddressOfSymbol(symbol);
+      }
+    }
   return result;
 }
 
