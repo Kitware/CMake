@@ -392,13 +392,13 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
                         this->CreateString(sourcecode.c_str()));
   std::string path = 
     this->ConvertToRelativeForXCode(sf->GetFullPath().c_str());
-  std::string file = 
-    cmSystemTools::RelativePath(m_CurrentMakefile->GetHomeDirectory(),
-                                sf->GetFullPath().c_str());
-//   std::string dir;
-//   std::string file;
-//   cmSystemTools::SplitProgramPath(sf->GetFullPath().c_str(),
-//                                   dir, file);
+//  std::string file = 
+//    cmSystemTools::RelativePath(m_CurrentMakefile->GetHomeDirectory(),
+//                                sf->GetFullPath().c_str());
+  std::string dir;
+  std::string file;
+  cmSystemTools::SplitProgramPath(sf->GetFullPath().c_str(),
+                                  dir, file);
   
   fileRef->AddAttribute("name", this->CreateString(file.c_str()));
   fileRef->AddAttribute("path", this->CreateString(path.c_str()));
