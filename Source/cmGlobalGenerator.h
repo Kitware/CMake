@@ -109,6 +109,8 @@ protected:
   
 private:
   std::map<cmStdString, bool> m_LanguageEnabled;
+  const char* m_CXXEnvironment;
+  const char* m_CCEnvironment;
 };
 
 #endif

@@ -21,10 +21,46 @@
 
 cmGlobalGenerator::cmGlobalGenerator()
 {
+  // Save the environment variables CXX and CC
+  m_CXXEnvironment = getenv("CXX");
+  m_CCEnvironment = getenv("CC");
 }
 
 cmGlobalGenerator::~cmGlobalGenerator()
-{
+{ 
+  // restore the original environment variables CXX and CC
+  // Restor CC
+  static char envCC[5000];
+  std::string env = "CC=";
+  if(m_CCEnvironment)
+    {
+    env += m_CCEnvironment;
+    }
+  unsigned int size = env.size();
+  if(size > 4999)
+    {
+    size = 4999;
+    }
+  strncpy(envCC, env.c_str(), size);
+  envCC[4999] = 0;
+  putenv(envCC); 
+  
+  // Restore CXX
+  static char envCXX[5000];
+  env = "CXX=";
+  if(m_CXXEnvironment)
+    {
+    env += m_CXXEnvironment;
+    }
+  size = env.size();
+  if(size > 4999)
+    {
+    size = 4999;
+    }
+  strncpy(envCXX, env.c_str(), size);
+  envCXX[4999] = 0;
+  putenv(envCXX);
+
   // Delete any existing cmLocalGenerators
   unsigned int i;
   for (i = 0; i < m_LocalGenerators.size(); ++i)
@@ -118,8 +154,13 @@ void cmGlobalGenerator::EnableLanguage(const char* lang,
       static char envCC[5000];
       std::string env = "CC=${CMAKE_C_COMPILER}";
       mf->ExpandVariablesInString(env);
-      strncpy(envCC, env.c_str(), 4999);
-      envCC[4999] = 0;
+      unsigned int size = env.size();
+      if(size > 4999)
+        {
+        size = 4999;
+        }
+      strncpy(envCC, env.c_str(), size);
+      envCC[size] = 0;
       putenv(envCC);
       }
     } 
@@ -141,8 +182,13 @@ void cmGlobalGenerator::EnableLanguage(const char* lang,
     if(mf->GetDefinition("CMAKE_CXX_COMPILER"))
       {
       std::string env = "CXX=${CMAKE_CXX_COMPILER}";
-      mf->ExpandVariablesInString(env);
-      strncpy(envCXX, env.c_str(), 4999);
+      mf->ExpandVariablesInString(env); 
+      unsigned int size = env.size();
+      if(size > 4999)
+        {
+        size = 4999;
+        }
+      strncpy(envCXX, env.c_str(), size);
       envCXX[4999] = 0;
       putenv(envCXX);
       }
