@@ -293,7 +293,6 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv)
       }
     else if((strcmp(argv[i], "--version") == 0) || 
             (strcmp(argv[i], "-version") == 0) || 
-            (strcmp(argv[i], "-V") == 0) || 
             (strcmp(argv[i], "/V") == 0))
       {
       type = cmDocumentation::Version;
