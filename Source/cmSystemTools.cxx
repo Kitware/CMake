@@ -888,7 +888,8 @@ void cmSystemTools::SplitProgramPath(const char* in_name,
     std::string oldDir = in_name;
     cmSystemTools::ConvertToUnixSlashes(oldDir);
     cmSystemTools::Error("Error splitting file name off end of path:\n",
-                         oldDir.c_str());
+                         oldDir.c_str(), "\nDirectory not found: ", 
+                         dir.c_str());
     dir = in_name;
     return;
     }
