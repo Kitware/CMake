@@ -5,6 +5,226 @@
    cvs2cl.pl.  See http://www.red-bean.com/~kfogel/cvs2cl.shtml for more.
   -+- -+- -+- -+- -+- -+- -+- -+- -+- -+- -+- -+- -+- -+- -+- -+- -+- -+-
 
+2001-10-01 15:55  hoffman
+
+	* Source/cmaketest.cxx: BUG: add missing include
+
+2001-10-01 14:14  hoffman
+
+	* Source/cmaketest.cxx, Source/MFCDialog/CMakeSetupDialog.cpp: ENH:
+	change checkboxes back to pull down menus, remove leak
+
+2001-09-29 15:12  hoffman
+
+	* Source/cmSystemTools.cxx: BUG: fix full path for file in current
+	directory
+
+2001-09-28 17:35  berk
+
+	* Source/cmSystemTools.cxx: BUG: fix realpath problem again...
+
+2001-09-28 16:14  berk
+
+	* Source/cmSystemTools.cxx: BUG: separate path from file name
+	before calling realpath
+
+2001-09-28 14:40  hoffman
+
+	* Source/cmSystemTools.cxx, Source/cmUnixMakefileGenerator.cxx:
+	BUG: get correct library name
+
+2001-09-28 14:34  hoffman
+
+	* CMakeLists.txt: BUG: optional in wrong order
+
+2001-09-28 13:57  hoffman
+
+	* CMakeLists.txt: make the include of the initial config flags
+	optional, for builds that do not use configure
+
+2001-09-27 20:50  hoffman
+
+	* Source/cmSystemTools.cxx, Source/cmUnixMakefileGenerator.cxx:
+	BUG: use realpath instead of cd/pwd
+
+2001-09-27 19:54  hoffman
+
+	* CMakeLists.txt, Source/CMakeLists.txt: BUG: fix install prefix
+
+2001-09-27 18:58  hoffman
+
+	* configure, configure.in, Source/CMakeLists.txt,
+	Source/InitialConfigureFlags.cmake.in: ENH: pass prefix from
+	configure into cmake
+
+2001-09-26 20:23  berk
+
+	* Modules/Dart.cmake: Typo.
+
+2001-09-25 18:39  martink
+
+	* Source/MFCDialog/CMakeSetupDialog.cpp: improved registry handling
+
+2001-09-25 18:39  martink
+
+	* Modules/FindVTK.cmake: changes to chamghe
+
+2001-09-25 15:06  martink
+
+	* Source/cmVTKWrapTclCommand.cxx: memory leak
+
+2001-09-21 15:48  martink
+
+	* Modules/FindVTK.cmake: better install targets
+
+2001-09-21 13:40  king
+
+	* Source/cmSystemTools.cxx: BUG: CopyFile should return immediately
+	after an error occurs.
+
+2001-09-20 21:31  martink
+
+	* Modules/FindVTK.cmake: updates
+
+2001-09-20 20:43  berk
+
+	* Source/ctest.cxx: handle spaces in commands and args
+
+2001-09-20 19:29  martink
+
+	* Source/MFCDialog/CMakeSetupDialog.cpp,
+	Source/MFCDialog/PropertyList.cpp, Source/MFCDialog/PropertyList.h:
+	ENH: check for values that switch to internal, can happen with a
+	load cache command
+
+2001-09-20 19:08  hoffman
+
+	* Source/cmAbstractFilesCommand.cxx,
+	Source/cmAbstractFilesCommand.h,
+	Source/cmAddCustomTargetCommand.cxx,
+	Source/cmAddCustomTargetCommand.h,
+	Source/cmAddDefinitionsCommand.cxx,
+	Source/cmAddDefinitionsCommand.h,
+	Source/cmAddDependenciesCommand.cxx,
+	Source/cmAddDependenciesCommand.h,
+	Source/cmAddExecutableCommand.cxx, Source/cmAddExecutableCommand.h,
+	Source/cmAddLibraryCommand.cxx, Source/cmAddLibraryCommand.h,
+	Source/cmAddTestCommand.cxx, Source/cmAddTestCommand.h,
+	Source/cmAuxSourceDirectoryCommand.cxx,
+	Source/cmAuxSourceDirectoryCommand.h, Source/cmBuildCommand.cxx,
+	Source/cmBuildCommand.h, Source/cmBuildNameCommand.cxx,
+	Source/cmBuildNameCommand.h, Source/cmCableClassSetCommand.cxx,
+	Source/cmCableClassSetCommand.h, Source/cmCableWrapTclCommand.cxx,
+	Source/cmCableWrapTclCommand.h, Source/cmCommand.h,
+	Source/cmConfigureFileCommand.cxx, Source/cmConfigureFileCommand.h,
+	Source/cmConfigureGccXmlCommand.cxx,
+	Source/cmConfigureGccXmlCommand.h, Source/cmElseCommand.cxx,
+	Source/cmElseCommand.h, Source/cmEnableTestingCommand.h,
+	Source/cmEndForEachCommand.cxx, Source/cmEndForEachCommand.h,
+	Source/cmEndIfCommand.cxx, Source/cmEndIfCommand.h,
+	Source/cmExecProgramCommand.cxx, Source/cmExecProgramCommand.h,
+	Source/cmFindFileCommand.cxx, Source/cmFindFileCommand.h,
+	Source/cmFindLibraryCommand.cxx, Source/cmFindLibraryCommand.h,
+	Source/cmFindPathCommand.cxx, Source/cmFindPathCommand.h,
+	Source/cmFindProgramCommand.cxx, Source/cmFindProgramCommand.h,
+	Source/cmForEachCommand.cxx, Source/cmForEachCommand.h,
+	Source/cmGetFilenameComponentCommand.cxx,
+	Source/cmGetFilenameComponentCommand.h, Source/cmIfCommand.cxx,
+	Source/cmIfCommand.h, Source/cmIncludeCommand.cxx,
+	Source/cmIncludeCommand.h, Source/cmIncludeDirectoryCommand.cxx,
+	Source/cmIncludeDirectoryCommand.h,
+	Source/cmIncludeRegularExpressionCommand.cxx,
+	Source/cmIncludeRegularExpressionCommand.h,
+	Source/cmInstallFilesCommand.cxx, Source/cmInstallFilesCommand.h,
+	Source/cmInstallProgramsCommand.cxx,
+	Source/cmInstallProgramsCommand.h,
+	Source/cmInstallTargetsCommand.cxx,
+	Source/cmInstallTargetsCommand.h, Source/cmLibraryCommand.h,
+	Source/cmLinkDirectoriesCommand.cxx,
+	Source/cmLinkDirectoriesCommand.h,
+	Source/cmLinkLibrariesCommand.cxx, Source/cmLinkLibrariesCommand.h,
+	Source/cmLoadCacheCommand.cxx, Source/cmLoadCacheCommand.h,
+	Source/cmMakeDirectoryCommand.cxx, Source/cmMakeDirectoryCommand.h,
+	Source/cmMakefile.cxx, Source/cmMakefile.h,
+	Source/cmMessageCommand.cxx, Source/cmMessageCommand.h,
+	Source/cmOptionCommand.cxx, Source/cmOptionCommand.h,
+	Source/cmOutputRequiredFilesCommand.cxx,
+	Source/cmOutputRequiredFilesCommand.h, Source/cmProjectCommand.cxx,
+	Source/cmProjectCommand.h, Source/cmSetCommand.cxx,
+	Source/cmSetCommand.h, Source/cmSiteNameCommand.cxx,
+	Source/cmSiteNameCommand.h, Source/cmSourceFilesCommand.cxx,
+	Source/cmSourceFilesCommand.h,
+	Source/cmSourceFilesRemoveCommand.cxx,
+	Source/cmSourceFilesRemoveCommand.h,
+	Source/cmSourceGroupCommand.cxx, Source/cmSourceGroupCommand.h,
+	Source/cmSubdirCommand.cxx, Source/cmSubdirCommand.h,
+	Source/cmSubdirDependsCommand.cxx, Source/cmSubdirDependsCommand.h,
+	Source/cmTargetLinkLibrariesCommand.cxx,
+	Source/cmTargetLinkLibrariesCommand.h,
+	Source/cmUseMangledMesaCommand.cxx,
+	Source/cmUseMangledMesaCommand.h,
+	Source/cmUtilitySourceCommand.cxx, Source/cmUtilitySourceCommand.h,
+	Source/cmVTKWrapJavaCommand.cxx, Source/cmVTKWrapJavaCommand.h,
+	Source/cmVTKWrapPythonCommand.cxx, Source/cmVTKWrapPythonCommand.h,
+	Source/cmVTKWrapTclCommand.cxx, Source/cmVTKWrapTclCommand.h,
+	Source/cmWrapExcludeFilesCommand.cxx,
+	Source/cmWrapExcludeFilesCommand.h: ENH: change InitialPass to take
+	a const reference to the argument string, to avoid changes to the
+	file cache
+
+2001-09-20 17:44  martink
+
+	* Source/cmMakefile.cxx: BUG: make a copy of the arguments before
+	passing them to Execute
+
+2001-09-20 16:00  martink
+
+	* CMake.rtf: fixed some problems
+
+2001-09-20 14:57  king
+
+	* Modules/FindCABLE.cmake: ENH: Added support for finding cable
+	when it is built in a configuration subdirectory by MSVC.
+
+2001-09-20 14:53  king
+
+	* Source/cmFindFileCommand.cxx, Source/cmFindLibraryCommand.cxx,
+	Source/cmFindPathCommand.cxx, Source/cmFindProgramCommand.cxx,
+	Source/cmSystemTools.cxx, Source/cmSystemTools.h: ENH: Added
+	cmSystemTools::GlobDirs function to allow wildcards in paths (like
+	/foo/bar/*).
+
+2001-09-20 14:53  king
+
+	* Source/cmSetCommand.cxx: ENH: Added extra newline in an error
+	message to improve readability.
+
+2001-09-20 14:27  martink
+
+	* Modules/FindVTK.cmake: minor changes
+
+2001-09-20 13:11  martink
+
+	* Modules/FindVTK.cmake, Modules/UseVTKIncludes.cmake,
+	Modules/UseVTKLibraries.cmake: removed some VTK stuff
+
+2001-09-19 18:52  martink
+
+	* Modules/FindVTK.cmake, Modules/UseVTKIncludes.cmake,
+	Modules/UseVTKLibraries.cmake: updated to how FindVTK works
+
+2001-09-19 18:20  martink
+
+	* Source/cmMakefile.h: version rev to 94
+
+2001-09-19 18:20  martink
+
+	* Source/cmMakefile.h: version rev to 95
+
+2001-09-18 14:45  hoffman
+
+	* ChangeLog.txt: [no log message]
+
 2001-09-18 14:38  will
 
 	* CMake.pdf: ENH:Updated documentation
