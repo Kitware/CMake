@@ -44,11 +44,11 @@ IF(FLTK_INCLUDE_PATH)
      PATHS /usr/lib /usr/local/lib /usr/local/fltk/lib H:/usr/local/fltk/lib /usr/X11R6/lib
            ${FLTK_INCLUDE_PATH}/lib
     )
-   FIND_LIBRARY(FLTK_GL_LIBRARY fltkgl
+   FIND_LIBRARY(FLTK_GL_LIBRARY NAMES fltkgl fltk_gl
      PATHS /usr/lib /usr/local/lib /usr/local/fltk/lib H:/usr/local/fltk/lib /usr/X11R6/lib
            ${FLTK_INCLUDE_PATH}/lib
     )
-   FIND_LIBRARY(FLTK_FORMS_LIBRARY fltkforms
+   FIND_LIBRARY(FLTK_FORMS_LIBRARY NAMES fltkforms fltk_forms
      PATHS /usr/lib /usr/local/lib /usr/local/fltk/lib H:/usr/local/fltk/lib /usr/X11R6/lib
            ${FLTK_INCLUDE_PATH}/lib
     )
