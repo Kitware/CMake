@@ -457,7 +457,7 @@ std::string cmLocalGenerator::ConvertToRelativeOutputPath(const char* p)
 void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname, 
                                                       const char* lang, 
                                                       cmSourceFile& source,
-                                                      cmTarget& target)
+                                                      cmTarget& )
 { 
   std::string objectFile = this->ConvertToRelativeOutputPath(ofname);
   std::string sourceFile = this->ConvertToRelativeOutputPath(source.GetFullPath().c_str());
