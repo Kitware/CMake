@@ -51,13 +51,23 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 void cmSourceFile::SetName(const char* name, const char* dir)
 {
   m_HeaderFileOnly = true;
+
   m_SourceName = name;
   std::string pathname = dir;
+
+  // the name might include the full path already, so
+  // check for this case
+  if (name &&  (name[0] == '/' || 
+		(name[0] != '\0' && name[1] == ':')))
+    {
+    pathname = "";
+    }
   if(pathname != "")
     {
     pathname += "/";
     }
-  
+
+
   // First try and see whether the listed file can be found
   // as is without extensions added on.
   pathname += m_SourceName;

@@ -39,6 +39,7 @@
 #include "cmIncludeRegularExpressionCommand.cxx"
 #include "cmLinkDirectoriesCommand.cxx"
 #include "cmLinkLibrariesCommand.cxx"
+#include "cmLoadCacheCommand.cxx"
 #include "cmMakeDirectoryCommand.cxx"
 #include "cmOptionCommand.cxx"
 #include "cmProjectCommand.cxx"
@@ -54,7 +55,6 @@
 #include "cmVTKWrapPythonCommand.cxx"
 #include "cmVTKWrapTclCommand.cxx"
 #include "cmWrapExcludeFilesCommand.cxx"
-
 
 void GetPredefinedCommands(std::list<cmCommand*>& commands)
 {
@@ -91,6 +91,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmIncludeRegularExpressionCommand);
   commands.push_back(new cmLinkDirectoriesCommand);
   commands.push_back(new cmLinkLibrariesCommand);
+  commands.push_back(new cmLoadCacheCommand);
   commands.push_back(new cmMakeDirectoryCommand);
   commands.push_back(new cmOptionCommand);
   commands.push_back(new cmProjectCommand);
@@ -105,7 +106,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmVTKWrapJavaCommand);
   commands.push_back(new cmVTKWrapPythonCommand);
   commands.push_back(new cmVTKWrapTclCommand);
-  commands.push_back(new cmWrapExcludeFilesCommand);  
+  commands.push_back(new cmWrapExcludeFilesCommand);
 }
 
   
