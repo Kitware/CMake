@@ -270,6 +270,15 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[] =
   {0,0,0,0 }
 };
 
+
+cmVS7FlagTable cmLocalVisualStudio7GeneratorLinkFlagTable[] =
+{
+  // option flags (some flags map to the same option) 
+  {"LinkIncremental", "INCREMENTAL:NO", "link incremental", "1"},
+  {"LinkIncremental", "INCREMENTAL:YES", "link incremental", "2"},
+  {0,0,0,0 }
+};
+
   
 
 
@@ -583,7 +592,12 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     extraLinkOptions += " ";
     extraLinkOptions += targetLinkFlags;
     }
-  
+
+  std::map<cmStdString, cmStdString> flagMap;
+  this->
+    FillFlagMapFromCommandFlags(flagMap, 
+                                &cmLocalVisualStudio7GeneratorLinkFlagTable[0],
+                                extraLinkOptions);
   switch(target.GetType())
     {
     case cmTarget::STATIC_LIBRARY:
@@ -623,7 +637,12 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       temp += ".dll";
       fout << "\t\t\t\tOutputFile=\"" 
            << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
-      fout << "\t\t\t\tLinkIncremental=\"1\"\n";
+      for(std::map<cmStdString, cmStdString>::iterator i = flagMap.begin();
+          i != flagMap.end(); ++i)
+        {
+        fout << "\t\t\t\t" << i->first << "=\"" << i->second << "\"\n";
+        }
+      
       if(m_Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"))
         {
         fout << "\t\t\t\tSuppressStartupBanner=\"FALSE\"\n";
@@ -696,7 +715,11 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       temp += libName;
       temp += ".exe";
       fout << "\t\t\t\tOutputFile=\"" << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
-      fout << "\t\t\t\tLinkIncremental=\"1\"\n";
+      for(std::map<cmStdString, cmStdString>::iterator i = flagMap.begin();
+          i != flagMap.end(); ++i)
+        {
+        fout << "\t\t\t\t" << i->first << "=\"" << i->second << "\"\n";
+        }
       if(m_Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"))
         {
         fout << "\t\t\t\tSuppressStartupBanner=\"FALSE\"\n";
