@@ -260,6 +260,10 @@ bool cmFileCommand::HandleInstallCommand(
 
   const char* debug_postfix
     = m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX");
+  if(!debug_postfix)
+    {
+    debug_postfix = "";
+    }
   const char* destdir = cmSystemTools::GetEnv("DESTDIR");
 
   std::string extra_dir = "";
