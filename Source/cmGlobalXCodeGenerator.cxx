@@ -24,7 +24,7 @@
 #include "cmOrderLinkDirectories.h"
 
 //TODO
-// add a group for Sources Headers, and other cmake group stuff
+// add OSX application stuff
 
 //----------------------------------------------------------------------------
 cmGlobalXCodeGenerator::cmGlobalXCodeGenerator()
@@ -35,7 +35,6 @@ cmGlobalXCodeGenerator::cmGlobalXCodeGenerator()
   m_SourcesGroupChildren = 0;
   m_CurrentMakefile = 0;
   m_CurrentLocalGenerator = 0;
-  m_ExternalGroupChildren = 0;
 }
 
 //----------------------------------------------------------------------------
@@ -302,6 +301,9 @@ void cmGlobalXCodeGenerator::ClearXCodeObjects()
     delete m_XCodeObjects[i];
     }
   m_XCodeObjects.clear();
+  m_GroupMap.clear();
+  m_GroupNameMap.clear();
+  m_TargetGroup.clear();
 }
 
 //----------------------------------------------------------------------------
@@ -349,7 +351,10 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
   lg->AppendFlags(flags, sf->GetProperty("COMPILE_FLAGS"));
 
   cmXCodeObject* fileRef = this->CreateObject(cmXCodeObject::PBXFileReference);
-  m_SourcesGroupChildren->AddObject(fileRef);
+  cmXCodeObject* group = m_GroupMap[sf];
+  cmXCodeObject* children = group->GetObject("children");
+  children->AddObject(fileRef);
+//  m_SourcesGroupChildren->AddObject(fileRef);
   cmXCodeObject* buildFile = this->CreateObject(cmXCodeObject::PBXBuildFile);
   buildFile->AddAttribute("fileRef", this->CreateObjectReference(fileRef));
   cmXCodeObject* settings = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
@@ -1291,6 +1296,82 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
     }
 }
 
+//----------------------------------------------------------------------------
+void cmGlobalXCodeGenerator::CreateGroups(cmLocalGenerator* root,
+                                          std::vector<cmLocalGenerator*>&
+                                          generators)
+{
+  for(std::vector<cmLocalGenerator*>::iterator i = generators.begin();
+      i != generators.end(); ++i)
+    {
+    if(this->IsExcluded(root, *i))
+      {
+      continue;
+      }
+    cmMakefile* mf = (*i)->GetMakefile();
+    std::vector<cmSourceGroup> sourceGroups = mf->GetSourceGroups();
+    cmTargets &tgts = mf->GetTargets();
+    for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); l++)
+      { 
+      cmTarget& cmtarget = l->second;
+      std::vector<cmSourceFile*> & classes = cmtarget.GetSourceFiles();
+      for(std::vector<cmSourceFile*>::const_iterator s = classes.begin(); 
+          s != classes.end(); s++)
+        {
+        cmSourceFile* sf = *s;
+        // Add the file to the list of sources.
+        std::string const& source = sf->GetFullPath();
+        cmSourceGroup& sourceGroup = 
+          mf->FindSourceGroup(source.c_str(), sourceGroups);
+        cmXCodeObject* pbxgroup = this->CreateOrGetPBXGroup(cmtarget, &sourceGroup);
+        m_GroupMap[sf] = pbxgroup;
+        }
+      }
+    } 
+}
+//----------------------------------------------------------------------------
+cmXCodeObject* cmGlobalXCodeGenerator::CreateOrGetPBXGroup(cmTarget& cmtarget,
+                                                           cmSourceGroup* sg)
+{
+  cmStdString s = cmtarget.GetName();
+  s += "/";
+  s += sg->GetName();
+  std::map<cmStdString, cmXCodeObject* >::iterator i =  m_GroupNameMap.find(s);
+  if(i != m_GroupNameMap.end())
+    {
+    return i->second;
+    }
+  i = m_TargetGroup.find(cmtarget.GetName());
+  cmXCodeObject* tgroup = 0;
+  if(i != m_TargetGroup.end())
+    {
+    tgroup = i->second;
+    }
+  else
+    {
+    tgroup = this->CreateObject(cmXCodeObject::PBXGroup);
+    m_TargetGroup[cmtarget.GetName()] = tgroup;
+    cmXCodeObject* tgroupChildren = 
+      this->CreateObject(cmXCodeObject::OBJECT_LIST);
+    tgroup->AddAttribute("name", this->CreateString(cmtarget.GetName()));
+    tgroup->AddAttribute("children", tgroupChildren);
+    tgroup->AddAttribute("refType", this->CreateString("4"));
+    tgroup->AddAttribute("sourceTree", this->CreateString("<group>"));
+    m_SourcesGroupChildren->AddObject(tgroup);
+    }
+  
+  cmXCodeObject* tgroupChildren = tgroup->GetObject("children");
+  cmXCodeObject* group = this->CreateObject(cmXCodeObject::PBXGroup);
+  cmXCodeObject* groupChildren = 
+    this->CreateObject(cmXCodeObject::OBJECT_LIST);
+  group->AddAttribute("name", this->CreateString(sg->GetName()));
+  group->AddAttribute("children", groupChildren);
+  group->AddAttribute("refType", this->CreateString("4"));
+  group->AddAttribute("sourceTree", this->CreateString("<group>"));
+  tgroupChildren->AddObject(group);
+  m_GroupNameMap[s] = group;
+  return group;
+}
 
 //----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::CreateXCodeObjects(cmLocalGenerator* root,
@@ -1300,7 +1381,6 @@ void cmGlobalXCodeGenerator::CreateXCodeObjects(cmLocalGenerator* root,
 {
   this->ClearXCodeObjects(); 
   m_RootObject = 0;
-  m_ExternalGroupChildren = 0;
   m_SourcesGroupChildren = 0;
   m_MainGroupChildren = 0;
   cmXCodeObject* group = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
@@ -1336,16 +1416,8 @@ void cmGlobalXCodeGenerator::CreateXCodeObjects(cmLocalGenerator* root,
   sourcesGroup->AddAttribute("refType", this->CreateString("4"));
   sourcesGroup->AddAttribute("sourceTree", this->CreateString("<group>"));
   m_MainGroupChildren->AddObject(sourcesGroup);
-  
-  cmXCodeObject* externalGroup = this->CreateObject(cmXCodeObject::PBXGroup);
-  m_ExternalGroupChildren = 
-    this->CreateObject(cmXCodeObject::OBJECT_LIST);
-  externalGroup->AddAttribute("name", 
-                              this->CreateString("External Libraries and Frameworks"));
-  externalGroup->AddAttribute("children", m_ExternalGroupChildren);
-  externalGroup->AddAttribute("refType", this->CreateString("4"));
-  externalGroup->AddAttribute("sourceTree", this->CreateString("<group>"));
-  m_MainGroupChildren->AddObject(externalGroup);
+  // now create the cmake groups 
+  this->CreateGroups(root, generators);
   
   cmXCodeObject* productGroup = this->CreateObject(cmXCodeObject::PBXGroup);
   productGroup->AddAttribute("name", this->CreateString("Products"));

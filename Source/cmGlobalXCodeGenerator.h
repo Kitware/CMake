@@ -22,6 +22,8 @@
 #include "cmCustomCommand.h"
 class cmTarget;
 class cmSourceFile;
+class cmSourceGroup;
+
 
 /** \class cmGlobalXCodeGenerator
  * \brief Write a Unix makefiles.
@@ -69,6 +71,11 @@ public:
   virtual void Generate();
 
 private: 
+  cmXCodeObject* CreateOrGetPBXGroup(cmTarget& cmtarget,
+                                     cmSourceGroup* sg);
+  void CreateGroups(cmLocalGenerator* root,
+                    std::vector<cmLocalGenerator*>&
+                    generators);
   void SetCurrentLocalGenerator(cmLocalGenerator*);
   std::string XCodeEscapePath(const char* p);
   std::string ConvertToRelativeForXCode(const char* p);
@@ -133,20 +140,20 @@ private:
   cmXCodeObject* m_RootObject;
   cmXCodeObject* m_MainGroupChildren;
   cmXCodeObject* m_SourcesGroupChildren;
-  cmXCodeObject* m_ExternalGroupChildren;
   cmMakefile* m_CurrentMakefile;
-  std::string m_LibraryOutputPath;
-  std::string m_ExecutableOutputPath;
   cmLocalGenerator* m_CurrentLocalGenerator;
-  std::set<cmStdString> m_TargetDoneSet;
-  bool m_DoneAllBuild;
-  bool m_DoneXCodeHack;
   std::string m_CurrentReRunCMakeMakefile;
   std::string m_CurrentXCodeHackMakefile;
   std::string m_CurrentProject;
   std::string m_OutputDir; 
+  std::string m_LibraryOutputPath;
+  std::string m_ExecutableOutputPath;
+  std::set<cmStdString> m_TargetDoneSet;
   std::vector<std::string> m_CurrentOutputDirectoryComponents;
   std::vector<std::string> m_ProjectOutputDirectoryComponents;
+  std::map<cmSourceFile*, cmXCodeObject* > m_GroupMap;
+  std::map<cmStdString, cmXCodeObject* > m_GroupNameMap;
+  std::map<cmStdString, cmXCodeObject* > m_TargetGroup;
 };
 
 #endif
