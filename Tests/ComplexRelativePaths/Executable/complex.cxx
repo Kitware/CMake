@@ -19,7 +19,7 @@ void Passed(const char* Message, const char* m2="")
   passed++;
 }
 
-main()
+int main()
 {
   if(sharedFunction() != 1)
     {
