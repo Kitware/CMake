@@ -653,8 +653,15 @@ void cmDSPWriter::WriteDSPHeader(std::ostream& fout, const char *libName,
         }      
       }
     }
-  libOptions += " /STACK:10000000 ";
-  libMultiLineOptions += "# ADD LINK32 /STACK:10000000 \n";
+  std::string extraLinkOptions = 
+    m_Makefile->GetDefinition("CMAKE_EXTRA_LINK_FLAGS");
+  if(extraLinkOptions.size())
+    {
+    libOptions += extraLinkOptions;
+    libMultiLineOptions += "# ADD LINK32 ";
+    libMultiLineOptions +=  extraLinkOptions;
+    libMultiLineOptions += " \n";
+    }
   
   // are there any custom rules on the target itself
   // only if the target is a lib or exe

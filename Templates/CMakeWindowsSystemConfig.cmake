@@ -19,6 +19,9 @@ SET (CMAKE_CXX_FLAGS_DEBUG "/MDd /Zi /Od /GZ" CACHE STRING
 SET (CMAKE_CXX_FLAGS "/W3 /Zm1000 /GX /GR" CACHE STRING
      "Flags used by the compiler during all build types, /GX /GR are for exceptions and rtti in VC++, /Zm1000 increases the compiler's memory allocation to support ANSI C++/stdlib")
 
+SET (CMAKE_EXTRA_LINK_FLAGS "/STACK:10000000" CACHE STRING
+     "Extra flags added to the link line for creation of exe and dlls.")
+
 SET (CMAKE_USE_WIN32_THREADS 1 CACHE BOOL 
      "Use the win32 thread library")
 
@@ -47,6 +50,7 @@ CMAKE_CXX_FLAGS_MINSIZEREL
 CMAKE_CXX_FLAGS_DEBUG
 CMAKE_USE_WIN32_THREADS
 CMAKE_MAKE_PROGRAM
+CMAKE_EXTRA_LINK_FLAGS
 )
 
 
