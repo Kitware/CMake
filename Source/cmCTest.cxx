@@ -991,16 +991,16 @@ int cmCTest::UpdateDirectory()
         }
       os << "\t</Author>" << std::endl;
       }
+    }
 
-    //std::cout << "End" << std::endl;
-    std::string end_time = ::CurrentTime();
-    os << "\t<EndDateTime>" << end_time << "</EndDateTime>\n"
-      << "</Update>" << std::endl;
+  //std::cout << "End" << std::endl;
+  std::string end_time = ::CurrentTime();
+  os << "\t<EndDateTime>" << end_time << "</EndDateTime>\n"
+    << "</Update>" << std::endl;
 
-    if ( ofs )
-      {
-      ofs.close();
-      }
+  if ( ofs )
+    {
+    ofs.close();
     }
 
   if (! res || retVal )
