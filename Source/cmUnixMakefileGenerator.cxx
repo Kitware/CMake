@@ -1025,10 +1025,10 @@ void cmUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
 	    {
 	    fout << "\t@ echo \"Installing " << *i << " \"\n"; 
 	    fout << "\t@if [ -e " << *i << " ] ; then \\\n";
-	    fout << "\t   $(INSTALL_DATA) " << *i 
+	    fout << "\t   $(INSTALL) " << *i 
 		 << " " << prefix << l->second.GetInstallPath() << "; \\\n";
 	    fout << "\t elif [ -e ${srcdir}/" << *i << " ] ; then \\\n";
-	    fout << "\t   $(INSTALL_DATA) ${srcdir}/" << *i 
+	    fout << "\t   $(INSTALL) ${srcdir}/" << *i 
 		 << " " << prefix << l->second.GetInstallPath() << "; \\\n";
 	    fout << "\telse \\\n";
 	    fout << "\t   echo \" ERROR!!! Unable to find: " << *i 
