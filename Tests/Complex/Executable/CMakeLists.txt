@@ -20,7 +20,7 @@ LINK_DIRECTORIES(${Complex_BINARY_DIR}/../../Source)
 TARGET_LINK_LIBRARIES(complex 
                       CMakeLib
                       debug CMakeLib
-                      optimized CgMakeLib)
+                      optimized CMakeLib)
 
 #
 # Output the files required by 'complex' to a file.
