@@ -176,7 +176,7 @@ const int NSUBEXP = 10;
  *      the line.  It would match "drepa qrepb" in "rep drepa qrepb".
  *
  */
-class cmRegularExpression 
+class CM_EXPORT cmRegularExpression 
 {
 public:
   /**
