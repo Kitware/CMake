@@ -82,6 +82,8 @@ public:
       "  STRING(COMPARE LESS <string1> <string2> <output variable>)\n"
       "  STRING(COMPARE GREATER <string1> <string2> <output variable>)\n"
       "  STRING(ASCII <number> [<number> ...] <output variable>)\n"
+      "  STRING(CONFIGURE <string1> <output variable>\n"
+      "         [@ONLY] [ESCAPE_QUOTES])\n"
       "  STRING(TOUPPER <string1> <output variable>)\n"
       "  STRING(TOLOWER <string1> <output variable>)\n"
       "REGEX MATCH will match the regular expression once and store the "
@@ -94,11 +96,14 @@ public:
       "COMPARE EQUAL/NOTEQUAL/LESS/GREATER will compare the strings and "
       "store true or false in the output variable.\n"
       "ASCII will convert all numbers into corresponding ASCII characters.\n"
+      "CONFIGURE will transform a string like CONFIGURE_FILE transforms "
+      "a file.\n"
       "TOUPPER/TOLOWER will convert string to upper/lower characters.";
     }
   
   cmTypeMacro(cmStringCommand, cmCommand);
 protected:
+  bool HandleConfigureCommand(std::vector<std::string> const& args);
   bool HandleAsciiCommand(std::vector<std::string> const& args);
   bool HandleRegexCommand(std::vector<std::string> const& args);
   bool RegexMatch(std::vector<std::string> const& args);

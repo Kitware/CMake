@@ -55,6 +55,11 @@ FOREACH(var
   FILE(APPEND "${file}" "#define ${var} \"${${var}}\"\n")
 ENDFOREACH(var)
 
+# Test configuration of the string
+SET(TEST_DEFINED 123)
+SET(TEST_NOT_DEFINED)
+STRING(CONFIGURE "${infile}" infile @ONLY)
+
 # Write include file to a file
 STRING(REGEX REPLACE "includefile" "${file}" outfile "${infile}")
 FILE(WRITE "${CMAKE_CURRENT_BINARY_DIR}/OutputFile.h" "${outfile}")

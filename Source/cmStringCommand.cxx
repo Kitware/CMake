@@ -49,6 +49,10 @@ bool cmStringCommand::InitialPass(std::vector<std::string> const& args)
     {
     return this->HandleAsciiCommand(args);
     }
+  else if(subCommand == "CONFIGURE")
+    {
+    return this->HandleConfigureCommand(args);
+    }
   
   std::string e = "does not recognize sub-command "+subCommand;
   this->SetError(e.c_str());
@@ -111,6 +115,53 @@ bool cmStringCommand::HandleAsciiCommand(std::vector<std::string> const& args)
     }
   // Store the output in the provided variable.
   m_Makefile->AddDefinition(outvar.c_str(), output.c_str());
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmStringCommand::HandleConfigureCommand(
+  std::vector<std::string> const& args)
+{
+  if ( args.size() < 2 )
+    {
+    this->SetError("No input string specified.");
+    return false;
+    }
+  else if ( args.size() < 3 )
+    {
+    this->SetError("No output variable specified.");
+    return false;
+    }
+
+  // Parse options.
+  bool escapeQuotes = false;
+  bool atOnly = false;
+  for(unsigned int i = 3; i < args.size(); ++i)
+    {
+    if(args[i] == "@ONLY")
+      {
+      atOnly = true;
+      }
+    else if(args[i] == "ESCAPE_QUOTES")
+      {
+      escapeQuotes = true;
+      }
+    else
+      {
+      cmOStringStream err;
+      err << "Unrecognized argument \"" << args[i] << "\"";
+      this->SetError(err.str().c_str());
+      return false;
+      }
+    }
+
+  // Configure the string.
+  std::string output;
+  m_Makefile->ConfigureString(args[1], output, atOnly, escapeQuotes);
+
+  // Store the output in the provided variable.
+  m_Makefile->AddDefinition(args[2].c_str(), output.c_str());
+
   return true;
 }
 
