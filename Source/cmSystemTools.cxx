@@ -2282,7 +2282,8 @@ cmSystemTools::FileFormat cmSystemTools::GetFileFormat(const char* cext)
     {
     return cmSystemTools::NO_FILE_FORMAT;
     }
-  std::string ext = cmSystemTools::LowerCase(cext);
+  //std::string ext = cmSystemTools::LowerCase(cext);
+  std::string ext = cext;
   if ( ext == "c" || ext == ".c" ) { return cmSystemTools::C_FILE_FORMAT; }
   if ( 
     ext == "C" || ext == ".C" ||
@@ -2296,6 +2297,7 @@ cmSystemTools::FileFormat cmSystemTools::GetFileFormat(const char* cext)
     ) { return cmSystemTools::CXX_FILE_FORMAT; }
   if ( ext == "java" || ext == ".java" ) { return cmSystemTools::JAVA_FILE_FORMAT; }
   if ( 
+    ext == "H" || ext == ".H" || 
     ext == "h" || ext == ".h" || 
     ext == "h++" || ext == ".h++" ||
     ext == "hm" || ext == ".hm" || 
