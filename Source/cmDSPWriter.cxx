@@ -89,7 +89,7 @@ void cmDSPWriter::OutputDSPFile()
   
   // Create the DSP or set of DSP's for libraries and executables
   m_LibraryBuildType = STATIC_LIBRARY;
-  if(cmCacheManager::GetInstance()->IsOn("BUILD_SHARED_LIBS"))
+  if(!cmSystemTools::IsOff(m_Makefile->GetDefinition("BUILD_SHARED_LIBS")))
     {
     m_LibraryBuildType = DLL;
     }
