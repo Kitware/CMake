@@ -8,7 +8,7 @@
 IF(NOT CMAKE_CXX_COMPILER)
   SET(CMAKE_CXX_COMPILER_INIT NOTFOUND)
 
-  # if the user has specified CC via the environment, then use that without checking
+  # prefer the environment variable CXX
   IF($ENV{CXX} MATCHES ".+")
     GET_FILENAME_COMPONENT(CMAKE_CXX_COMPILER_INIT $ENV{CXX} PROGRAM PROGRAM_ARGS CMAKE_CXX_FLAGS_ENV_INIT)
     IF(EXISTS ${CMAKE_CXX_COMPILER_INIT})
@@ -17,12 +17,14 @@ IF(NOT CMAKE_CXX_COMPILER)
     ENDIF(EXISTS ${CMAKE_CXX_COMPILER_INIT})
   ENDIF($ENV{CXX} MATCHES ".+")
 
+  # next prefer the generator specified compiler
   IF(CMAKE_GENERATOR_CXX)
     IF(NOT CMAKE_CXX_COMPILER_INIT)
       SET(CMAKE_CXX_COMPILER_INIT ${CMAKE_GENERATOR_CXX})
     ENDIF(NOT CMAKE_CXX_COMPILER_INIT)
   ENDIF(CMAKE_GENERATOR_CXX)
 
+  # if no compiler has been found yet, then try to find one
   IF(NOT CMAKE_CXX_COMPILER_INIT)
   # if not in the envionment then search for the compiler in the path
     SET(CMAKE_CXX_COMPILER_LIST c++ g++ CC aCC cl bcc )
@@ -34,10 +36,6 @@ IF(NOT CMAKE_CXX_COMPILER)
       CACHE STRING "C++ compiler") 
 ENDIF(NOT CMAKE_CXX_COMPILER)
 MARK_AS_ADVANCED(CMAKE_CXX_COMPILER)
-
-# set this to notfound right after so that it is searched for each time this
-# file is included
-SET(CMAKE_CXX_COMPILER_FULLPATH NOTFOUND CACHE INTERNAL "full path to cxx compiler" FORCE)
 
 
 # test to see if the cxx compiler is gnu

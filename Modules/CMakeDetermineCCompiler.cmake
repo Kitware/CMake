@@ -8,7 +8,7 @@
 IF(NOT CMAKE_C_COMPILER)
   SET(CMAKE_CXX_COMPILER_INIT NOTFOUND)
 
-  # if the user has specified CC via the environment, then use that without checking
+  # prefer the environment variable CC
   IF($ENV{CC} MATCHES ".+")
     GET_FILENAME_COMPONENT(CMAKE_C_COMPILER_INIT $ENV{CC} PROGRAM PROGRAM_ARGS CMAKE_C_FLAGS_ENV_INIT)
     IF(EXISTS ${CMAKE_C_COMPILER_INIT})
@@ -17,12 +17,14 @@ IF(NOT CMAKE_C_COMPILER)
     ENDIF(EXISTS ${CMAKE_C_COMPILER_INIT})
   ENDIF($ENV{CC} MATCHES ".+")
 
+  # next try prefer the compiler specified by the generator
   IF(CMAKE_GENERATOR_CC) 
     IF(NOT CMAKE_CC_COMPILER_INIT)
       SET(CMAKE_CC_COMPILER_INIT ${CMAKE_GENERATOR_CC})
     ENDIF(NOT CMAKE_CC_COMPILER_INIT)
   ENDIF(CMAKE_GENERATOR_CC)
 
+  # if no compiler has been specified yet, then look for one
   IF(NOT CMAKE_CC_COMPILER_INIT)
   # if not in the envionment then search for the compiler in the path
     SET(CMAKE_C_COMPILER_LIST gcc cc cl bcc )  
@@ -30,16 +32,11 @@ IF(NOT CMAKE_C_COMPILER)
     GET_FILENAME_COMPONENT(CMAKE_C_COMPILER_INIT
                            ${CMAKE_C_COMPILER_FULLPATH} NAME)
   ENDIF(NOT CMAKE_CC_COMPILER_INIT)
-  # set this to notfound right after so that it is searched for each time this
-  # file is included
+
   SET(CMAKE_C_COMPILER ${CMAKE_C_COMPILER_INIT} CACHE STRING "C compiler")
-  IF($ENV{CC} MATCHES ".+")
-    IF(NOT CMAKE_C_COMPILER)
-       MESSAGE(SEND_ERROR "Could not find compiler set in environment variable CC:\n$ENV{CC}, make sure CC does not have flags in it, use CFLAGS instead.")
-    ENDIF(NOT CMAKE_C_COMPILER) 
-  ENDIF($ENV{CC} MATCHES ".+")
 ENDIF(NOT CMAKE_C_COMPILER)
 MARK_AS_ADVANCED(CMAKE_C_COMPILER)  
+
 FIND_PROGRAM(CMAKE_AR NAMES ar PATHS /bin /usr/bin /usr/local/bin)
 
 FIND_PROGRAM(CMAKE_RANLIB NAMES ranlib PATHS /bin /usr/bin /usr/local/bin)
@@ -47,6 +44,7 @@ IF(NOT CMAKE_RANLIB)
    SET(CMAKE_RANLIB : CACHE INTERNAL "noop for ranlib")
 ENDIF(NOT CMAKE_RANLIB)
 MARK_AS_ADVANCED(CMAKE_RANLIB)
+
 # test to see if the c compiler is gnu
 EXEC_PROGRAM(${CMAKE_C_COMPILER} ARGS -E ${CMAKE_ROOT}/Modules/CMakeTestGNU.c OUTPUT_VARIABLE CMAKE_COMPILER_OUTPUT RETURN_VALUE CMAKE_COMPILER_RETURN)
 IF(NOT CMAKE_COMPILER_RETURN)
