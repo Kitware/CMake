@@ -16,7 +16,7 @@
 =========================================================================*/
 #include "cmIfCommand.h"
 #include <stdlib.h> // required for atof
-
+#include <deque>
 #include <cmsys/RegularExpression.hxx>
 
 bool cmIfFunctionBlocker::
@@ -131,167 +131,307 @@ bool cmIfCommand::InvokeInitialPass(const std::vector<cmListFileArgument>& args)
   return true;
 }
 
+// order of operations, 
+// EXISTS COMMAND DEFINED 
+// MATCHES LESS GREATER EQUAL STRLESS STRGREATER
+// AND OR
+//
+// There is an issue on whether the arguments should be values of references,
+// for example IF (FOO AND BAR) should that compare the strings FOO and BAR
+// or should it really do IF (${FOO} AND ${BAR}) Currently EXISTS COMMAND and
+// DEFINED all take values. EQUAL, LESS and GREATER can take numeric values or
+// variable names. STRLESS and STRGREATER take variable names but if the
+// variable name is not found it will use the name directly. AND OR take
+// variables or the values 0 or 1.
+
+
 bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
                          bool &isValid, const cmMakefile *makefile)
 {
   // check for the different signatures
-  bool isTrue = true;
   isValid = false;
   const char *def;
   const char *def2;
+
+  // store the reduced args in this vector
+  std::deque<std::string> newArgs;
+  int reducible = 1;
+  unsigned int i;
   
-  if(args.size() < 1 )
+  // copy to the list structure
+  for(i = 0; i < args.size(); ++i)
+    {   
+    newArgs.push_back(args[i]);
+    }
+  
+  // now loop through the arguments and see if we can reduce any of them
+  // we do this multiple times. Once for each level of precedence
+  do
+    {
+    reducible = 0;
+    std::deque<std::string>::iterator arg = newArgs.begin();
+    while (arg != newArgs.end())
+      {
+      // does a file exist
+      if (*arg == "EXISTS" && arg + 1  != newArgs.end())
+        {
+        if(cmSystemTools::FileExists((arg + 1)->c_str()))
+          {
+          *arg = "1";
+          }
+        else 
+          {
+          *arg = "0";
+          }
+        newArgs.erase(arg+1);
+        reducible = 1;
+        }
+      // does a command exist
+      if (*arg == "COMMAND" && arg + 1  != newArgs.end())
+        {
+        if(makefile->CommandExists((arg + 1)->c_str()))
+          {
+          *arg = "1";
+          }
+        else 
+          {
+          *arg = "0";
+          }
+        newArgs.erase(arg+1);
+        reducible = 1;
+        }
+      // is a variable defined
+      if (*arg == "DEFINED" && arg + 1  != newArgs.end())
+        {
+        def = makefile->GetDefinition((arg + 1)->c_str());
+        if(def)
+          {
+          *arg = "1";
+          }
+        else 
+          {
+          *arg = "0";
+          }
+        newArgs.erase(arg+1);
+        reducible = 1;
+        }
+      ++arg;
+      }
+    }
+  while (reducible);
+  
+  
+  // now loop through the arguments and see if we can reduce any of them
+  // we do this multiple times. Once for each level of precedence
+  do
+    {
+    reducible = 0;
+    std::deque<std::string>::iterator arg = newArgs.begin();
+    while (arg != newArgs.end())
+      {
+      if (arg + 1 != newArgs.end() && arg + 2 != newArgs.end() &&
+          *(arg + 1) == "MATCHES") 
+        {
+        def = cmIfCommand::GetVariableOrString(arg->c_str(), makefile);
+        cmsys::RegularExpression regEntry((arg+2)->c_str());
+        if (regEntry.find(def))
+          {
+          *arg = "1";
+          }
+        else
+          {
+          *arg = "0";
+          }
+        newArgs.erase(arg+2);
+        newArgs.erase(arg+1);
+        reducible = 1;
+        }
+
+      if (arg + 1 != newArgs.end() && *arg == "MATCHES") 
+        {
+        *arg = "0";
+        newArgs.erase(arg+1);
+        reducible = 1;
+        }
+
+      if (arg + 1 != newArgs.end() && arg + 2 != newArgs.end() &&
+          (*(arg + 1) == "LESS" || *(arg + 1) == "GREATER" || 
+           *(arg + 1) == "EQUAL")) 
+        {
+        def = cmIfCommand::GetVariableOrString(arg->c_str(), makefile);
+        def2 = cmIfCommand::GetVariableOrString((arg + 2)->c_str(), makefile);
+        if (*(arg + 1) == "LESS")
+          {
+          if(atof(def) < atof(def2))
+            {
+            *arg = "1";
+            }
+          else
+            {
+            *arg = "0";
+            }
+          }
+        else if (*(arg + 1) == "GREATER")
+          {
+          if(atof(def) > atof(def2))
+            {
+            *arg = "1";
+            }
+          else
+            {
+            *arg = "0";
+            }
+          }          
+        else
+          {
+          if(atof(def) == atof(def2))
+            {
+            *arg = "1";
+            }
+          else
+            {
+            *arg = "0";
+            }
+          }          
+        newArgs.erase(arg+2);
+        newArgs.erase(arg+1);
+        reducible = 1;
+        }
+
+      if (arg + 1 != newArgs.end() && arg + 2 != newArgs.end() &&
+          (*(arg + 1) == "STRLESS" || *(arg + 1) == "STRGREATER")) 
+        {
+        def = cmIfCommand::GetVariableOrString(arg->c_str(), makefile);
+        def2 = cmIfCommand::GetVariableOrString((arg + 2)->c_str(), makefile);
+        if (*(arg + 1) == "STRLESS")
+          {
+          if(strcmp(def,def2) < 0)
+            {
+            *arg = "1";
+            }
+          else
+            {
+            *arg = "0";
+            }
+          }
+        else
+          {
+          if(strcmp(def,def2) > 0)
+            {
+            *arg = "1";
+            }
+          else
+            {
+            *arg = "0";
+            }
+          }          
+        newArgs.erase(arg+2);
+        newArgs.erase(arg+1);
+        reducible = 1;
+        }
+
+      ++arg;
+      }
+    }
+  while (reducible);
+
+  
+  // now loop through the arguments and see if we can reduce any of them
+  // we do this multiple times. Once for each level of precedence
+  do
+    {
+    reducible = 0;
+    std::deque<std::string>::iterator arg = newArgs.begin();
+    while (arg != newArgs.end())
+      {
+      if (arg + 1 != newArgs.end() && *arg == "NOT")
+        {
+        def = cmIfCommand::GetVariableOrNumber((arg + 1)->c_str(), makefile);
+        if(!cmSystemTools::IsOff(def))
+          {
+          *arg = "0";
+          }
+        else
+          {
+          *arg = "1";
+          }
+        newArgs.erase(arg+1);
+        reducible = 1;
+        }
+      ++arg;
+      }
+    }
+  while (reducible);
+  
+  // now loop through the arguments and see if we can reduce any of them
+  // we do this multiple times. Once for each level of precedence
+  do
+    {
+    reducible = 0;
+    std::deque<std::string>::iterator arg = newArgs.begin();
+    while (arg != newArgs.end())
+      {
+      if (arg + 1 != newArgs.end() && *(arg + 1) == "AND" && 
+          arg + 2 != newArgs.end())
+        {
+        def = cmIfCommand::GetVariableOrNumber(arg->c_str(), makefile);
+        def2 = cmIfCommand::GetVariableOrNumber((arg + 2)->c_str(), makefile);
+        if(cmSystemTools::IsOff(def) || cmSystemTools::IsOff(def2))
+          {
+          *arg = "0";
+          }
+        else
+          {
+          *arg = "1";
+          }
+        newArgs.erase(arg+2);
+        newArgs.erase(arg+1);
+        reducible = 1;
+        }
+
+      if (arg + 1 != newArgs.end() && *(arg + 1) == "OR" && 
+          arg + 2 != newArgs.end())
+        {
+        def = cmIfCommand::GetVariableOrNumber(arg->c_str(), makefile);
+        def2 = cmIfCommand::GetVariableOrNumber((arg + 2)->c_str(), makefile);
+        if(cmSystemTools::IsOff(def) && cmSystemTools::IsOff(def2))
+          {
+          *arg = "0";
+          }
+        else
+          {
+          *arg = "1";
+          }
+        newArgs.erase(arg+2);
+        newArgs.erase(arg+1);
+        reducible = 1;
+        }
+  
+      ++arg;
+      }
+    }
+  while (reducible);
+
+  // now at the end there should only be one argument left
+  if (newArgs.size() == 1)
     {
     isValid = true;
-    return false;
-    }
-
-  if (args.size() == 1)
-    {
+    if (newArgs[0] == "0")
+      {
+      return false;
+      }
+    if (newArgs[0] == "1")
+      {
+      return true;
+      }
     def = makefile->GetDefinition(args[0].c_str());
     if(cmSystemTools::IsOff(def))
       {
-      isTrue = false;
+      return false;
       }
-    isValid = true;
     }
 
-  if (args.size() == 2 && (args[0] == "NOT"))
-    {
-    def = makefile->GetDefinition(args[1].c_str());
-    if(!cmSystemTools::IsOff(def))
-      {
-      isTrue = false;
-      }
-    isValid = true;
-
-    }
-
-  if (args.size() == 2 && (args[0] == "COMMAND"))
-    {
-    if(!makefile->CommandExists(args[1].c_str()))
-      {
-      isTrue = false;
-      }
-    isValid = true;
-    }
-
-  if (args.size() == 2 && (args[0] == "EXISTS"))
-    {
-    if(!cmSystemTools::FileExists(args[1].c_str()))
-      {
-      isTrue = false;
-      }
-    isValid = true;
-    }
-
-  if (args.size() == 2 && (args[0] == "MATCHES"))
-    {
-    if(!cmSystemTools::FileExists(args[1].c_str()))
-      {
-      isTrue = false;
-      }
-    isValid = true;
-    }
-
-  if (args.size() == 3 && (args[1] == "AND"))
-    {
-    def = makefile->GetDefinition(args[0].c_str());
-    def2 = makefile->GetDefinition(args[2].c_str());
-    if(cmSystemTools::IsOff(def) || cmSystemTools::IsOff(def2))
-      {
-      isTrue = false;
-      }
-    isValid = true;
-    }
-  
-  if (args.size() == 3 && (args[1] == "OR"))
-    {
-    def = makefile->GetDefinition(args[0].c_str());
-    def2 = makefile->GetDefinition(args[2].c_str());
-    if(cmSystemTools::IsOff(def) && cmSystemTools::IsOff(def2))
-      {
-      isTrue = false;
-      }
-    isValid = true;
-    }
-
-  if (args.size() == 3 && (args[1] == "MATCHES"))
-    {
-    def = cmIfCommand::GetVariableOrString(args[0].c_str(), makefile);
-    cmsys::RegularExpression regEntry(args[2].c_str());
-    
-    // check for black line or comment
-    if (!regEntry.find(def))
-      {
-      isTrue = false;
-      }
-    isValid = true;
-    }
-  
-  if (args.size() == 3 && (args[1] == "LESS"))
-    {
-    def = cmIfCommand::GetVariableOrString(args[0].c_str(), makefile);
-    def2 = cmIfCommand::GetVariableOrString(args[2].c_str(), makefile);
-    if (!def)
-      {
-      def = args[0].c_str();
-      }
-    if (!def2)
-      {
-      def2 = args[2].c_str();
-      }    
-    if(atof(def) >= atof(def2))
-      {
-      isTrue = false;
-      }
-    isValid = true;
-    }
-
-  if (args.size() == 3 && (args[1] == "GREATER"))
-    {
-    def = cmIfCommand::GetVariableOrString(args[0].c_str(), makefile);
-    def2 = cmIfCommand::GetVariableOrString(args[2].c_str(), makefile);
-    if(atof(def) <= atof(def2))
-      {
-      isTrue = false;
-      }
-    isValid = true;
-    }
-
-  if (args.size() == 3 && (args[1] == "EQUAL"))
-    {
-    def = cmIfCommand::GetVariableOrString(args[0].c_str(), makefile);
-    def2 = cmIfCommand::GetVariableOrString(args[2].c_str(), makefile);
-    if(atof(def) != atof(def2))
-      {
-      isTrue = false;
-      }
-    isValid = true;
-    }
-
-  if (args.size() == 3 && (args[1] == "STRLESS"))
-    {
-    def = cmIfCommand::GetVariableOrString(args[0].c_str(), makefile);
-    def2 = cmIfCommand::GetVariableOrString(args[2].c_str(), makefile);
-    if(strcmp(def,def2) >= 0)
-      {
-      isTrue = false;
-      }
-    isValid = true;
-    }
-
-  if (args.size() == 3 && (args[1] == "STRGREATER"))
-    {
-    def = cmIfCommand::GetVariableOrString(args[0].c_str(), makefile);
-    def2 = cmIfCommand::GetVariableOrString(args[2].c_str(), makefile);
-    if(strcmp(def,def2) <= 0)
-      {
-      isTrue = false;
-      }
-    isValid = true;
-    }
-  return isTrue;
+  return true;
 }
 
 const char* cmIfCommand::GetVariableOrString(const char* str,
@@ -301,6 +441,20 @@ const char* cmIfCommand::GetVariableOrString(const char* str,
   if(!def)
     {
     def = str;
+    }
+  return def;
+}
+
+const char* cmIfCommand::GetVariableOrNumber(const char* str,
+                                             const cmMakefile* mf)
+{
+  const char* def = mf->GetDefinition(str);
+  if(!def)
+    {
+    if (atoi(str))
+      {
+      def = str;
+      }
     }
   return def;
 }

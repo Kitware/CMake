@@ -112,8 +112,12 @@ public:
       "Evaluates the given expression.  If the result is true, the commands "
       "in the THEN section are invoked.  Otherwise, the commands in the "
       "ELSE section are invoked.  The ELSE section is optional.  Note that "
-      "the same expression must be given to IF, ELSE, and ENDIF.  Possible "
-      "expressions are:\n"
+      "the same expression must be given to IF, ELSE, and ENDIF.  Long "
+      "exressions can be used and the order or precidence is that the "
+      "EXISTS, COMMAND, and DEFINED operators will be evaluated first. "
+      "Then any EQUAL, LESS, GREATER, STRLESS, STRGREATER, MATCHES will be "
+      "evaluated. Then NOT operators and finally AND, OR operators will be "
+      "evaluated. Possible expressions are:\n"
       "  IF(variable)\n"
       "True if the variable's value is not empty, 0, FALSE, OFF, or NOTFOUND.\n"
       "  IF(NOT variable)\n"
@@ -146,7 +150,10 @@ public:
       "  IF(variable STRGREATER string)\n"
       "  IF(string STRGREATER string)\n"
       "True if the given string or variable's value is lexicographically "
-      "less (or greater) than the string on the right.";
+      "less (or greater) than the string on the right.\n"
+      "  IF(DEFINED variable)\n"
+      "True if the given variable is defined. It does not matter if the "
+      "variable is true or false just if it has been set.";
     }
 
   // this is a shared function for both If and Else to determine if
@@ -158,6 +165,9 @@ public:
   // return the original string.
   static const char* GetVariableOrString(const char* str,
                                          const cmMakefile* mf);
+  static const char* GetVariableOrNumber(const char* str,
+                                         const cmMakefile* mf);
+  
   
   cmTypeMacro(cmIfCommand, cmCommand);
 };
