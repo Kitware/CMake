@@ -27,7 +27,6 @@
 #include "hash.h"
 
 struct addrinfo;
-struct hostent;
 struct SessionHandle;
 
 void Curl_global_host_cache_init(void);
