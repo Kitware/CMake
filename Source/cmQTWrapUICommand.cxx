@@ -118,8 +118,8 @@ void cmQTWrapUICommand::FinalPass()
   // first we add the rules for all the .ui to .h and .cxx files
   size_t lastHeadersClass = m_WrapHeadersClasses.size();
   std::vector<std::string> depends;
-  std::string uic_exe = "${QT_UIC_EXE}";
-  std::string moc_exe = "${QT_MOC_EXE}";
+  std::string uic_exe = "${QT_UIC_EXECUTABLE}";
+  std::string moc_exe = "${QT_MOC_EXECUTABLE}";
 
 
   // wrap all the .h files

@@ -99,7 +99,7 @@ void cmQTWrapCPPCommand::FinalPass()
   // first we add the rules for all the .h to Moc files
   size_t lastClass = m_WrapClasses.size();
   std::vector<std::string> depends;
-  std::string moc_exe = "${QT_MOC_EXE}";
+  std::string moc_exe = "${QT_MOC_EXECUTABLE}";
 
   // wrap all the .h files
   depends.push_back(moc_exe);

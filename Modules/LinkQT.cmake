@@ -1,10 +1,4 @@
-# Link in QT
+# Use of this file is deprecated.
+# Replace any lines that include this file with the line below.
 
-
-IF (WIN32)
-  LINK_LIBRARIES( imm32.lib ws2_32.lib)
-#Ensure that qt.lib is last
-ENDIF (WIN32)
-
-
-LINK_LIBRARIES( ${QT_QT_LIBRARY})
+LINK_LIBRARIES( ${QT_LIBRARIES})
