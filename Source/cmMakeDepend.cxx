@@ -241,6 +241,10 @@ void cmDependInformation::RemoveDuplicateIndices()
 // add the depend information from info to the m_Indices varible of this class.
 void cmDependInformation::MergeInfo(cmDependInformation* info)
 {
+  if(this == info)
+    {
+      return;
+    }
   std::vector<int>::iterator i = info->m_Indices.begin();
   for(; i!= info->m_Indices.end(); ++i)
     {
