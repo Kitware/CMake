@@ -41,6 +41,15 @@ cmUnixMakefileGenerator::~cmUnixMakefileGenerator()
 
 void cmUnixMakefileGenerator::GenerateMakefile()
 {
+  // for backwards compatibility if niether c or cxx is
+  // enabled, the enable cxx
+  if(! (this->GetLanguageEnabled("C") || 
+        this->GetLanguageEnabled("CXX")))
+    {
+    this->EnableLanguage("CXX");
+    }
+  
+
   // suppoirt override in output directories
   if (m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH"))
     {

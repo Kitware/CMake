@@ -34,6 +34,7 @@ cmMSDotNETGenerator::cmMSDotNETGenerator()
 
 void cmMSDotNETGenerator::GenerateMakefile()
 {
+  this->EnableLanguage("CXX");
   std::string configTypes = m_Makefile->GetDefinition("CMAKE_CONFIGURATION_TYPES");
   std::string::size_type start = 0;
   std::string::size_type endpos = 0;

@@ -28,6 +28,7 @@ cmMSProjectGenerator::cmMSProjectGenerator()
 
 void cmMSProjectGenerator::GenerateMakefile()
 {
+  this->EnableLanguage("CXX");
   if(m_BuildDSW)
     {
     delete m_DSWWriter;
@@ -64,8 +65,13 @@ void cmMSProjectGenerator::EnableLanguage(const char*)
       "CMAKE_ROOT has not been defined, bad GUI or driver program");
     return;
     }
-  std::string fpath = 
-    m_Makefile->GetDefinition("CMAKE_ROOT");
-  fpath += "/Templates/CMakeWindowsSystemConfig.cmake";
-  m_Makefile->ReadListFile(NULL,fpath.c_str());
+  if(!this->GetLanguageEnabled("CXX"))
+    {
+    std::string fpath = 
+      m_Makefile->GetDefinition("CMAKE_ROOT");
+    fpath += "/Templates/CMakeWindowsSystemConfig.cmake";
+    m_Makefile->ReadListFile(NULL,fpath.c_str());
+    this->SetLanguageEnabled("CXX");
+    }
 }
+
