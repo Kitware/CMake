@@ -164,7 +164,7 @@ CMakeSetupDialog::CMakeSetupDialog(const CMakeCommandLineInfo& cmdInfo,
   m_CMakeInstance->SetProgressCallback(updateProgress, (void *)this);
 
   //{{AFX_DATA_INIT(CMakeSetupDialog)
-	//}}AFX_DATA_INIT
+        //}}AFX_DATA_INIT
 
   // Get the parameters from the command line info
   // If an unknown parameter is found, try to interpret it too, since it
@@ -212,26 +212,27 @@ void CMakeSetupDialog::DoDataExchange(CDataExchange* pDX)
 {
   CDialog::DoDataExchange(pDX);
   //{{AFX_DATA_MAP(CMakeSetupDialog)
-	DDX_Control(pDX, IDC_AdvancedValues, m_AdvancedValuesControl);
-	DDX_Control(pDX, IDC_BuildForLabel, m_BuildForLabel);
-	DDX_Control(pDX, IDC_BROWSE_SOURCE, m_BrowseSource);
-	DDX_Control(pDX, IDC_BROWSE_BUILD, m_BrowseBuild);
-	DDX_Control(pDX, IDC_HELP_BUTTON, m_HelpButton);
-	DDX_Control(pDX, IDC_Generator, m_GeneratorChoice);
-	DDX_Control(pDX, IDC_OK, m_OKButton);
-	DDX_Control(pDX, IDCANCEL, m_CancelButton);
-	DDX_CBStringExact(pDX, IDC_WhereSource, m_WhereSource);
-	DDX_CBStringExact(pDX, IDC_WhereBuild, m_WhereBuild);
-	DDX_Control(pDX, IDC_FRAME, m_ListFrame);
-	DDX_Control(pDX, IDC_WhereSource, m_WhereSourceControl);
-	DDX_Control(pDX, IDC_WhereBuild, m_WhereBuildControl);
-	DDX_Control(pDX, IDC_LIST2, m_CacheEntriesList);
-	DDX_Control(pDX, IDC_MouseHelpCaption, m_MouseHelp);
-	DDX_Control(pDX, IDC_PROGRESS, m_StatusDisplay);
-	DDX_Control(pDX, IDC_BuildProjects, m_Configure);
-	DDX_CBStringExact(pDX, IDC_Generator, m_GeneratorChoiceString);
-	DDX_Check(pDX, IDC_AdvancedValues, m_AdvancedValues);
-	//}}AFX_DATA_MAP
+        DDX_Control(pDX, IDC_AdvancedValues, m_AdvancedValuesControl);
+        DDX_Control(pDX, IDC_BuildForLabel, m_BuildForLabel);
+        DDX_Control(pDX, IDC_BROWSE_SOURCE, m_BrowseSource);
+        DDX_Control(pDX, IDC_BROWSE_BUILD, m_BrowseBuild);
+        DDX_Control(pDX, IDC_DELETE_BUTTON, m_DeleteButton);
+        DDX_Control(pDX, IDC_HELP_BUTTON, m_HelpButton);
+        DDX_Control(pDX, IDC_Generator, m_GeneratorChoice);
+        DDX_Control(pDX, IDC_OK, m_OKButton);
+        DDX_Control(pDX, IDCANCEL, m_CancelButton);
+        DDX_CBStringExact(pDX, IDC_WhereSource, m_WhereSource);
+        DDX_CBStringExact(pDX, IDC_WhereBuild, m_WhereBuild);
+        DDX_Control(pDX, IDC_FRAME, m_ListFrame);
+        DDX_Control(pDX, IDC_WhereSource, m_WhereSourceControl);
+        DDX_Control(pDX, IDC_WhereBuild, m_WhereBuildControl);
+        DDX_Control(pDX, IDC_LIST2, m_CacheEntriesList);
+        DDX_Control(pDX, IDC_MouseHelpCaption, m_MouseHelp);
+        DDX_Control(pDX, IDC_PROGRESS, m_StatusDisplay);
+        DDX_Control(pDX, IDC_BuildProjects, m_Configure);
+        DDX_CBStringExact(pDX, IDC_Generator, m_GeneratorChoiceString);
+        DDX_Check(pDX, IDC_AdvancedValues, m_AdvancedValues);
+        //}}AFX_DATA_MAP
 }
 
 BEGIN_MESSAGE_MAP(CMakeSetupDialog, CDialog)
@@ -250,13 +251,14 @@ BEGIN_MESSAGE_MAP(CMakeSetupDialog, CDialog)
   ON_WM_GETMINMAXINFO()
   ON_BN_CLICKED(IDC_OK, OnOk)
   ON_CBN_EDITCHANGE(IDC_Generator, OnEditchangeGenerator)
+  ON_BN_CLICKED(IDC_DELETE_BUTTON, OnDeleteButton)
   ON_BN_CLICKED(IDC_HELP_BUTTON, OnHelpButton)
   ON_BN_CLICKED(IDC_AdvancedValues, OnAdvancedValues)
   ON_BN_DOUBLECLICKED(IDC_AdvancedValues, OnDoubleclickedAdvancedValues)
   ON_WM_DROPFILES()
   ON_BN_CLICKED(IDCANCEL, OnCancel)
-	ON_WM_SETCURSOR()
-	//}}AFX_MSG_MAP
+        ON_WM_SETCURSOR()
+        //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -305,8 +307,8 @@ BOOL CMakeSetupDialog::OnInitDialog()
 
   // Set the icon for this dialog.  The framework does this automatically
   //  when the application's main window is not a dialog
-  SetIcon(m_hIcon, TRUE);			// Set big icon
-  SetIcon(m_hIcon, FALSE);		// Set small icon
+  SetIcon(m_hIcon, TRUE);                        // Set big icon
+  SetIcon(m_hIcon, FALSE);                // Set small icon
   // Load source and build dirs from registry
   this->LoadFromRegistry();
   std::vector<std::string> names;
@@ -438,9 +440,9 @@ void CMakeSetupDialog::SaveToRegistry()
   DWORD dwDummy;
 
   if(RegCreateKeyEx(HKEY_CURRENT_USER, 
-		    m_RegistryKey,
-		    0, "", REG_OPTION_NON_VOLATILE, KEY_READ|KEY_WRITE, 
-		    NULL, &hKey, &dwDummy) != ERROR_SUCCESS) 
+                    m_RegistryKey,
+                    0, "", REG_OPTION_NON_VOLATILE, KEY_READ|KEY_WRITE, 
+                    NULL, &hKey, &dwDummy) != ERROR_SUCCESS) 
     {
     return;
     }
@@ -540,7 +542,7 @@ void CMakeSetupDialog::ReadRegistryValue(HKEY hKey,
   pb = val->GetBuffer(MAX_PATH);
   dwSize = MAX_PATH;
   if(RegQueryValueEx(hKey,_T(key), NULL, &dwType, 
-		     (BYTE *)pb, &dwSize) != ERROR_SUCCESS)
+                     (BYTE *)pb, &dwSize) != ERROR_SUCCESS)
     {
     val->ReleaseBuffer();
     *val = _T(adefault);
@@ -556,8 +558,8 @@ void CMakeSetupDialog::LoadFromRegistry()
 { 
   HKEY hKey;
   if(RegOpenKeyEx(HKEY_CURRENT_USER, 
-		  m_RegistryKey, 
-		  0, KEY_READ, &hKey) != ERROR_SUCCESS)
+                  m_RegistryKey, 
+                  0, KEY_READ, &hKey) != ERROR_SUCCESS)
     {
     return;
     }
@@ -767,6 +769,7 @@ void CMakeSetupDialog::OnChangeWhereBuild()
 void CMakeSetupDialog::FillCacheGUIFromCacheManager()
 { 
   cmCacheManager *cachem = this->m_CMakeInstance->GetCacheManager();
+  cmCacheManager::CacheIterator it = cachem->NewIterator();
   size_t size = m_CacheEntriesList.GetItems().size();
   // if there are already entries in the cache, then
   // put the new ones in the top, so they show up first
@@ -776,8 +779,17 @@ void CMakeSetupDialog::FillCacheGUIFromCacheManager()
   for(std::set<CPropertyItem*>::iterator i = items.begin();
       i != items.end(); ++i)
     {
+    // first check to see if it is still in the cache
     CPropertyItem* item = *i;
-    item->m_NewValue = false;
+    if ( !it.Find((const char*)item->m_propName) )
+      {
+      m_CacheEntriesList.RemoveProperty((const char*)item->m_propName);
+      }
+    else
+      {
+      // if it is still in the cache then it is no longer new
+      item->m_NewValue = false;
+      }
     }
   for(cmCacheManager::CacheIterator i = cachem->NewIterator();
       !i.IsAtEnd(); i.Next())
@@ -842,7 +854,7 @@ void CMakeSetupDialog::FillCacheGUIFromCacheManager()
           );
         break;
       case cmCacheManager::INTERNAL:
-	m_CacheEntriesList.RemoveProperty(key);
+        m_CacheEntriesList.RemoveProperty(key);
         break;
       }
     }
@@ -913,7 +925,7 @@ void CMakeSetupDialog::FillCacheManagerFromCacheGUI()
           item->m_curValue[item->m_curValue.GetLength() - 1] == '\'') 
         {
         it.SetValue(item->m_curValue.Mid(
-	  1, item->m_curValue.GetLength() - 2));
+          1, item->m_curValue.GetLength() - 2));
         }
       else
         {
@@ -1079,6 +1091,12 @@ void CMakeSetupDialog::OnSize(UINT nType, int cx, int cy)
                             cRect.top + deltay, 
                             0, 0,
                             SWP_NOCOPYBITS | SWP_NOSIZE);
+    m_DeleteButton.GetWindowRect(&cRect);
+    this->ScreenToClient(&cRect);
+    m_DeleteButton.SetWindowPos(&wndTop, cRect.left + deltax/2, 
+                                cRect.top + deltay, 
+                                0, 0,
+                                SWP_NOCOPYBITS | SWP_NOSIZE);
     m_HelpButton.GetWindowRect(&cRect);
     this->ScreenToClient(&cRect);
     m_HelpButton.SetWindowPos(&wndTop, cRect.left + deltax/2, 
@@ -1112,8 +1130,8 @@ void CMakeSetupDialog::OnCancel()
   if(m_CacheEntriesList.IsDirty())
     {
     if(MessageBox("You have changed options but not rebuilt, "
-		  "are you sure you want to exit?", "Confirm Exit",
-		  MB_YESNO) == IDYES)
+                  "are you sure you want to exit?", "Confirm Exit",
+                  MB_YESNO) == IDYES)
       {
       CDialog::OnOK();
       }
@@ -1138,8 +1156,8 @@ void CMakeSetupDialog::OnOk()
 
 void CMakeSetupDialog::OnEditchangeGenerator() 
 {
-	// TODO: Add your control notification handler code here
-	
+        // TODO: Add your control notification handler code here
+        
 }
 
 
@@ -1151,7 +1169,7 @@ int CMakeSetupDialog::CreateShortcut()
   HKEY hKey;
   if(RegOpenKeyEx(HKEY_CURRENT_USER, 
       "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders", 
-		  0, KEY_READ, &hKey) != ERROR_SUCCESS)
+                  0, KEY_READ, &hKey) != ERROR_SUCCESS)
     {
     AfxMessageBox ("Create shortcut: unable to find 'Shell Folders' key in registry!");
     return 1;
@@ -1278,6 +1296,19 @@ void CMakeSetupDialog::OnHelpButton()
 {
   CMakeHelp dialog;
   dialog.DoModal();
+}
+
+void CMakeSetupDialog::OnDeleteButton() 
+{
+  if(m_WhereBuild != "" && this->m_CMakeInstance)
+    {
+    this->m_CMakeInstance->GetCacheManager()->DeleteCache(m_WhereBuild);
+    }
+  
+  // Make sure we are working from the cache on disk
+  this->LoadCacheFromDiskToGUI(); 
+  
+  m_OKButton.EnableWindow(false);
 }
 
 void CMakeSetupDialog::ShowAdvancedValues()

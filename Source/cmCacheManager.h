@@ -111,6 +111,9 @@ public:
   ///! Save cache for given makefile.  Saves to ouput path/CMakeCache.txt
   bool SaveCache(const char* path) ;
 
+  ///! Delete the cache given
+  bool DeleteCache(const char* path);
+
   ///! Print the cache to a stream
   void PrintCache(std::ostream&) const;
   

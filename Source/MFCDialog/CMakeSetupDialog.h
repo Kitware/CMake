@@ -65,6 +65,7 @@ protected:
   CButton       m_BrowseSource;
   CButton       m_BrowseBuild;
   CButton m_HelpButton;
+  CButton m_DeleteButton;
   CComboBox       m_GeneratorChoice;
   CButton m_OKButton;
   CButton m_CancelButton;
@@ -123,6 +124,7 @@ protected:
   afx_msg void OnOk();
   afx_msg void OnEditchangeGenerator();
   afx_msg void OnHelpButton();
+  afx_msg void OnDeleteButton();
   afx_msg void OnAdvancedValues();
   afx_msg void OnDoubleclickedAdvancedValues();
   afx_msg void OnDropFiles(HDROP);

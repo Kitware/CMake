@@ -1,5 +1,5 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Developer Studio generated include file.
+// Microsoft Visual C++ generated include file.
 // Used by CMakeSetup.rc
 //
 #define IDM_ABOUTBOX                    0x0010
@@ -26,6 +26,8 @@
 #define IDC_Generator                   1019
 #define IDC_GeneratorLabel              1020
 #define IDC_HELP_BUTTON                 1021
+#define IDC_HELP_BUTTON2                1022
+#define IDC_DELETE_BUTTON               1022
 #define IDC_EDIT1                       1025
 #define IDC_AdvancedValues              1027
 #define IDC_PROGRESS                    1028

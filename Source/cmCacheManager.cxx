@@ -520,6 +520,14 @@ bool cmCacheManager::SaveCache(const char* path)
   return true;
 }
 
+bool cmCacheManager::DeleteCache(const char* path) 
+{
+  std::string cacheFile = path;
+  cacheFile += "/CMakeCache.txt";
+  cmSystemTools::RemoveFile(cacheFile.c_str());
+  return true;
+}
+
 void cmCacheManager::OutputHelpString(std::ofstream& fout, 
                                       const std::string& helpString)
 {
