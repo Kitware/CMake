@@ -49,6 +49,14 @@ public:
   
   void PopulateCustomVectors(cmMakefile *mf);
 
+  struct cmCTestCompileErrorWarningRex
+    {
+    char* m_RegularExpressionString;
+    int m_FileIndex;
+    int m_LineIndex;
+    cmsys::RegularExpression m_RegularExpression;
+    };
+
 private:
   struct cmCTestBuildErrorWarning
   {
@@ -61,14 +69,6 @@ private:
     std::string m_PreContext;
     std::string m_PostContext;
   };
-
-  struct cmCTestCompileErrorWarningRex
-    {
-    char* m_RegularExpressionString;
-    int m_FileIndex;
-    int m_LineIndex;
-    cmsys::RegularExpression m_RegularExpression;
-    };
 
   // generate the XML output
   void GenerateDartBuildOutput(std::ostream& os, 
