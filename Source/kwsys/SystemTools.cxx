@@ -1540,7 +1540,14 @@ void SystemTools::AddTranslationPath(const char * a, const char * b)
         == kwsys_stl::string::npos )
       {
       // Before inserting make sure path ends with '/'
-      path_a += '/'; path_b += '/';
+      if(path_a.size() && path_a[path_a.size() -1] != '/')
+        {
+        path_a += '/'; 
+        }
+      if(path_b.size() && path_b[path_b.size() -1] != '/')
+        {
+        path_b += '/';
+        }
       if( !(path_a == path_b) )
         {
         SystemTools::TranslationMap->insert(
