@@ -678,6 +678,22 @@ int cmCTest::SubmitResults()
     ofs << "  Submission succesfull" << std::endl;
     return 1;
     }
+  else if ( m_DartConfiguration["DropMethod"] == "xmlrpc" )
+    {
+    ofs << "Using drop method: XML-RPC" << std::endl;
+    std::cout << "  Using XML-RPC submit method" << std::endl;
+    std::string url = m_DartConfiguration["DropSite"];
+    prefix = m_DartConfiguration["DropLocation"];
+    if ( !submit.SubmitUsingXMLRPC(m_BinaryDir+"/Testing/"+m_CurrentTag, files, prefix, url) )
+      {
+      std::cerr << "  Problems when submitting via XML-RPC" << std::endl;
+      ofs << "  Problems when submitting via XML-RPC" << std::endl;
+      return 0;
+      }
+    std::cout << "  Submission successfull" << std::endl;
+    ofs << "  Submission succesfull" << std::endl;
+    return 1;
+    }
   else
     {
     std::string url;

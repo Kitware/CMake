@@ -61,6 +61,11 @@ public:
                         const cmStdString& remoteprefix, 
                         const cmStdString& url);
 
+  bool SubmitUsingXMLRPC(const cmStdString& localprefix, 
+                       const std::vector<cmStdString>& files,
+                       const cmStdString& remoteprefix, 
+                       const cmStdString& url);
+
 private:
   cmStdString   m_HTTPProxy;
   int           m_HTTPProxyType;

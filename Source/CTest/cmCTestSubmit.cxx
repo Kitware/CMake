@@ -17,11 +17,18 @@ PURPOSE.  See the above copyright notices for more information.
 
 #include "cmCTestSubmit.h"
 #include "cmSystemTools.h"
+#include "cmVersion.h"
 
 #include <cmsys/Process.h>
+#include <cmsys/Base64.h>
+#include "xmlrpc.h"
+#include "xmlrpc_client.h"
+
 #include "CTest/Curl/curl/curl.h"
+
 #include <sys/stat.h>
 
+//----------------------------------------------------------------------------
 cmCTestSubmit::cmCTestSubmit() : m_HTTPProxy(), m_FTPProxy()
 {
   m_Verbose = false;
@@ -103,6 +110,7 @@ cmCTestSubmit::cmCTestSubmit() : m_HTTPProxy(), m_FTPProxy()
     }
 }
 
+//----------------------------------------------------------------------------
 bool cmCTestSubmit::SubmitUsingFTP(const cmStdString& localprefix, 
   const std::vector<cmStdString>& files,
   const cmStdString& remoteprefix, 
@@ -198,6 +206,7 @@ bool cmCTestSubmit::SubmitUsingFTP(const cmStdString& localprefix,
   return true;
 }
 
+//----------------------------------------------------------------------------
 // Uploading files is simpler
 bool cmCTestSubmit::SubmitUsingHTTP(const cmStdString& localprefix, 
   const std::vector<cmStdString>& files,
@@ -333,6 +342,7 @@ bool cmCTestSubmit::SubmitUsingHTTP(const cmStdString& localprefix,
   return true;
 }
 
+//----------------------------------------------------------------------------
 bool cmCTestSubmit::TriggerUsingHTTP(const std::vector<cmStdString>& files,
   const cmStdString& remoteprefix, 
   const cmStdString& url)
@@ -432,6 +442,7 @@ bool cmCTestSubmit::TriggerUsingHTTP(const std::vector<cmStdString>& files,
   return true;
 }
 
+//----------------------------------------------------------------------------
 bool cmCTestSubmit::SubmitUsingSCP(
   const cmStdString& scp_command, 
   const cmStdString& localprefix, 
@@ -538,4 +549,114 @@ bool cmCTestSubmit::SubmitUsingSCP(
     return false;
     }
   return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmCTestSubmit::SubmitUsingXMLRPC(const cmStdString& localprefix, 
+  const std::vector<cmStdString>& files,
+  const cmStdString& remoteprefix, 
+  const cmStdString& url)
+{
+  xmlrpc_env env;
+  xmlrpc_value *result;
+  std::string ctestVersion = cmVersion::GetCMakeVersion();
+  const char *state_name;
+
+  /* Start up our XML-RPC client library. */
+  xmlrpc_client_init(XMLRPC_CLIENT_NO_FLAGS, "CTest", ctestVersion.c_str());
+
+  /* Initialize our error-handling environment. */
+  xmlrpc_env_init(&env);
+
+  /* Call the famous server at UserLand. */
+  std::cout << "RemotePrefix: " << remoteprefix.c_str() << std::endl;
+  std::cout << "RemoteURL: " << url.c_str() << std::endl;
+  std::cout << "Files: " << files.size() << std::endl;
+  std::vector<cmStdString>::const_iterator it;
+  int cnt = 32;
+  for ( it = files.begin(); it != files.end(); ++it )
+    {
+    std::string local_file = localprefix + "/" + *it;
+    std::cout << "Submit file: " << local_file.c_str() << std::endl;
+    struct stat st;
+    if ( ::stat(local_file.c_str(), &st) )
+      {
+      return false;
+      }
+
+    size_t fileSize = st.st_size;
+    size_t encodedSize = static_cast<size_t>(fileSize * 1.5); // Enough space for base64
+
+    FILE* fp = fopen(local_file.c_str(), "r");
+    if ( !fp )
+      {
+      return false;
+      }
+    
+    unsigned char *fileBuffer = new unsigned char[fileSize];
+    unsigned char *encodedFileBuffer = new unsigned char[encodedSize];
+    if ( fread(fileBuffer, 1, fileSize, fp) != fileSize )
+      {
+      delete [] fileBuffer;
+      delete [] encodedFileBuffer;
+      return false;
+      fclose(fp);
+      }
+    fclose(fp);
+
+    size_t realEncodedSize = cmsysBase64_Encode(
+      fileBuffer, fileSize,
+      encodedFileBuffer, 1);
+    if ( realEncodedSize < fileSize )
+      {
+      return false;
+      }
+
+    std::cout << "Buffer: [";
+    std::cout.write(encodedFileBuffer, realEncodedSize);
+    std::cout << "]" << std::endl;
+
+    result = xmlrpc_client_call(&env, "http://betty.userland.com/RPC2",
+      "examples.getStateName",
+      "(i)", (xmlrpc_int32) cnt++);
+    std::string remoteCommand = remoteprefix + ".put";
+    result = xmlrpc_client_call(&env, url.c_str(),
+      remoteCommand.c_str(),
+      "(6)", encodedFileBuffer, (xmlrpc_int32) realEncodedSize);
+
+    delete [] fileBuffer;
+    delete [] encodedFileBuffer;
+
+    if ( env.fault_occurred )
+      {
+      std::cerr << "XML-RPC Fault: " << env.fault_string << " (" << env.fault_code << ")" << std::endl;
+      xmlrpc_env_clean(&env);
+      xmlrpc_client_cleanup();
+      return 0;
+      }
+
+
+    /* Get our state name and print it out. */
+    xmlrpc_parse_value(&env, result, "s", &state_name);
+    if ( env.fault_occurred )
+      {
+      std::cerr << "XML-RPC Fault: " << env.fault_string << " (" << env.fault_code << ")" << std::endl;
+      xmlrpc_DECREF(result);
+      xmlrpc_env_clean(&env);
+      xmlrpc_client_cleanup();
+      return 0;
+      }
+
+    printf("%s\n", state_name);
+    }
+
+  /* Dispose of our result value. */
+  xmlrpc_DECREF(result);
+
+  /* Clean up our error-handling environment. */
+  xmlrpc_env_clean(&env);
+
+  /* Shutdown our XML-RPC client library. */
+  xmlrpc_client_cleanup();
+  return 1;
 }
