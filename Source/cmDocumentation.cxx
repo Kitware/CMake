@@ -101,7 +101,10 @@ void cmDocumentation::PrintManSection(std::ostream& os,
       os << ".TP\n"
          << ".B " << op->name << "\n"
          << op->brief << "\n\n";
-      if(op->full) { os << op->full << "\n"; }
+      if(op->full)
+        {
+        this->PrintFull(os, op->full, 0, 0);
+        }
       }
     else
       {
@@ -171,47 +174,11 @@ void cmDocumentation::PrintHTMLEscapes(std::ostream& os, const char* text)
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentation::PrintHTMLFull(std::ostream& os, const char* text)
+void cmDocumentation::PrintHTMLPreformatted(std::ostream& os, const char* text)
 {
-  const char* line = text;
-  while(*line)
-    {
-    // Any lines starting in a space are treated as a preformatted
-    // section.
-    std::string preformatted;
-    while(*line == ' ')
-      {
-      for(char ch = *line; ch && ch != '\n'; ++line, ch = *line)
-        {
-        preformatted.append(1, ch);
-        }
-      if(*line)
-        {
-        ++line;
-        preformatted.append(1, '\n');
-        }
-      }
-    if(preformatted.length())
-      {
-      os << "<pre>";
-      this->PrintHTMLEscapes(os, preformatted.c_str());
-      os << "</pre>";
-      }
-    std::string normal;
-    for(char ch = *line; ch && ch != '\n'; ++line, ch = *line)
-      {
-      normal.append(1, ch);
-      }
-    if(*line)
-      {
-      ++line;
-      normal.append(1, '\n');
-      }
-    if(normal.length())
-      {
-      this->PrintHTMLEscapes(os, normal.c_str());
-      }
-    }
+  os << "<pre>";
+  cmDocumentation::PrintHTMLEscapes(os, text);
+  os << "</pre>";
 }
 
 //----------------------------------------------------------------------------
@@ -239,7 +206,9 @@ void cmDocumentation::PrintHelpHTMLSection(std::ostream& os,
         if(op->full)
           {
           os << "<br>";
-          this->PrintHTMLFull(os, op->full);
+          this->PrintFull(os, op->full,
+                          &cmDocumentation::PrintHTMLPreformatted,
+                          &cmDocumentation::PrintHTMLEscapes);
           }
         os << "\n";
         os << "  </li>\n";
@@ -379,7 +348,8 @@ void cmDocumentation::PrintColumn(std::ostream& os, int width,
   int column = 0;
   bool newSentence = false;
   bool firstLine = true;
-
+  bool lastHadBlanks = false;
+  
   // Count leading blanks in the text.
   int blanks = 0;
   for(const char* b = l; *b == ' '; ++b) { ++blanks; }
@@ -414,6 +384,22 @@ void cmDocumentation::PrintColumn(std::ostream& os, int width,
           }
         else
           {
+          // If this is the first line not beginning in a blank after
+          // a sequence of lines beginning in blanks, add an extra
+          // newline.
+          if(blanks)
+            {
+            lastHadBlanks = true;
+            }
+          else
+            {
+            if(lastHadBlanks)
+              {
+              os << "\n";
+              }
+            lastHadBlanks = false;
+            }
+            
           // First word on line.  Print indentation unless this is the
           // first line.
           os << (firstLine?"":indent);
@@ -467,6 +453,65 @@ void cmDocumentation::PrintColumn(std::ostream& os, int width,
     // Move to beginning of next word.  Skip over whitespace.
     l = r;
     while(*l && (*l == ' ')) { ++l; }    
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmDocumentation::PrintFull(std::ostream& os, const char* text,
+                                void (*pPreform)(std::ostream&, const char*),
+                                void (*pNormal)(std::ostream&, const char*))
+{
+  const char* line = text;
+  while(*line)
+    {
+    // Any lines starting in a space are treated as preformatted text.
+    std::string preformatted;
+    while(*line == ' ')
+      {
+      for(char ch = *line; ch && ch != '\n'; ++line, ch = *line)
+        {
+        preformatted.append(1, ch);
+        }
+      if(*line)
+        {
+        ++line;
+        preformatted.append(1, '\n');
+        }
+      }
+    if(preformatted.length())
+      {
+      if(pPreform)
+        {
+        pPreform(os, preformatted.c_str());
+        }
+      else
+        {
+        os << preformatted << "\n";
+        }
+      }
+    
+    // Other lines are treated as normal text.
+    std::string normal;
+    for(char ch = *line; ch && ch != '\n'; ++line, ch = *line)
+      {
+      normal.append(1, ch);
+      }
+    if(*line)
+      {
+      ++line;
+      normal.append(1, '\n');
+      }
+    if(normal.length())
+      {
+      if(pNormal)
+        {
+        pNormal(os, normal.c_str());
+        }
+      else
+        {
+        os << normal << "\n";
+        }
+      }
     }
 }
 

@@ -48,8 +48,11 @@ private:
   void PrintManSection(std::ostream& os, const cmDocumentationEntry* section,
                        const char* name);
   void PrintHelpSection(std::ostream& os, const cmDocumentationEntry* section);
-  void PrintHTMLEscapes(std::ostream& os, const char* text);
-  void PrintHTMLFull(std::ostream& os, const char* text);
+  static void PrintHTMLEscapes(std::ostream& os, const char* text);
+  static void PrintHTMLPreformatted(std::ostream& os, const char* text);
+  void PrintFull(std::ostream& os, const char* text,
+                 void (*pPreform)(std::ostream&, const char*),
+                 void (*pNormal)(std::ostream&, const char*));
   void PrintHelpHTMLSection(std::ostream& os,
                             const cmDocumentationEntry* section,
                             const char* header);
