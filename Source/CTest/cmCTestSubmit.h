@@ -28,7 +28,7 @@
 class cmCTestSubmit
 {
 public:
-  cmCTestSubmit() {}
+  cmCTestSubmit();
   ~cmCTestSubmit() {}
   
   /**
@@ -38,6 +38,10 @@ public:
                       const std::vector<std::string>& files,
                       const std::string& remoteprefix, 
                       const std::string& url);
+  bool SubmitUsingHTTP(const std::string& localprefix, 
+                       const std::vector<std::string>& files,
+                       const std::string& remoteprefix, 
+                       const std::string& url);
   bool SubmitUsingSCP(const std::string& localprefix, 
                       const std::vector<std::string>& files,
                       const std::string& remoteprefix, 
@@ -46,6 +50,12 @@ public:
   bool TriggerUsingHTTP(const std::vector<std::string>& files,
                         const std::string& remoteprefix, 
                         const std::string& url);
+
+private:
+  std::string m_HTTPProxy;
+  int         m_HTTPProxyType;
+  std::string m_FTPProxy;
+  int         m_FTPProxyType;
 };
 
 #endif
