@@ -4,14 +4,17 @@ PROJECT(CTEST CXX)
 SUBDIRS(Curl)
 
 FIND_LIBRARY(CMAKE_LIBRARY NAMES CMakeLib PATHS 
-             ${CTEST_BINARY_DIR}/..)
+             ${CTEST_BINARY_DIR}/..
+	     ${CTEST_BINARY_DIR}/../Source
+	     ${CTEST_BINARY_DIR}/../../Source)
 
 SET(CTEST_SRCS
     ../ctest.cxx
     ../cmCTest.cxx
     cmCTestSubmit.cxx)
 
-INCLUDE_DIRECTORIES(${CTEST_SOURCE_DIR}/..)
+INCLUDE_DIRECTORIES(${CTEST_SOURCE_DIR}/..
+	            ${CTEST_SOURCE_DIR}/Curl)
 
 ADD_DEFINITIONS(-DHAVE_CURL)
 ADD_EXECUTABLE(ctest ${CTEST_SRCS})
