@@ -1323,11 +1323,21 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
   target += name;
   target += cmSystemTools::GetExecutableExtension();  
   target = this->ConvertToRelativeOutputPath(target.c_str());
+  cmSystemTools::ConvertToUnixSlashes(target);
   bool needsLocalTarget = false;
-  if(target.find('/', 2) != target.npos)
+  unsigned int startPos = 2;
+  if(m_Makefile->GetDefinition("BORLAND"))
+    {
+    // the borland makefiles treat .\target and target as different
+    // targets.  All other makes treat them the same
+    startPos = 0;
+    }
+  if(target.find('/', startPos) != target.npos)
     {
     needsLocalTarget = true;
     }
+  target = cmSystemTools::ConvertToOutputPath(target.c_str());
+
 
   std::string objs = "$(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
   std::string depend = "$(";

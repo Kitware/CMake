@@ -106,13 +106,16 @@ std::string cmLocalGenerator::ConvertToRelativeOutputPath(const char* p)
 
   // Do the work of converting to a relative path 
   std::string pathIn = p;
-  bool ispath = false;
   if(pathIn.find('/') == pathIn.npos)
     {
     return pathIn;
     }
   
-
+  if(pathIn.size() && pathIn[0] == '\"')
+    {
+    pathIn = pathIn.substr(1, pathIn.size()-2);
+    }
+  
   std::string ret = pathIn;
   if(m_CurrentOutputDirectory.size() <= ret.size())
     {
@@ -180,7 +183,8 @@ std::string cmLocalGenerator::ConvertToRelativeOutputPath(const char* p)
     {
     ret = relpath;
     }
-  if(ret.size() && ret[0] != '/' && ret[0] != '.')
+  if(ret.size() 
+     && ret[0] != '\"' && ret[0] != '/' && ret[0] != '.')
     {
     if(ret.size() > 1 && ret[1] != ':')
       {
