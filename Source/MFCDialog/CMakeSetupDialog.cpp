@@ -261,11 +261,9 @@ void CMakeSetupDialog::OnOK()
   configSrc += "/CMakeSetupConfig.MSC";
   if(!config.Configure(configSrc.c_str()))
     { 
-    std::string error = "Error: in configuring system from: ";
+    std::string error = "Warning: MSC configure input not found: ";
     error += configSrc;
-    error += "\nProject NOT created!";
     ::MessageBox(0, error.c_str(), "config ERROR", MB_OK);
-    return;
     }
   
   
