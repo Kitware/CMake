@@ -1218,7 +1218,7 @@ void cmMakefile::RemoveFunctionBlocker(const char *name,
     if ((*pos)->ShouldRemove(name, args, *this))
       {
       cmFunctionBlocker* b = *pos;
-      m_FunctionBlockers.remove(*pos);
+      m_FunctionBlockers.remove(b);
       delete b;
       break;
       }
