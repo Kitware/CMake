@@ -44,6 +44,7 @@ SET(SRCS
   cmMakeDepend.h
   cmMakefile.cxx
   cmMakefile.h
+  cmOrderLinkDirectories.cxx
   cmSourceFile.cxx
   cmSourceFile.h
   cmSourceGroup.cxx

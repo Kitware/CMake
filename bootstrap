@@ -54,6 +54,7 @@ CMAKE_CXX_SOURCES="\
   cmCustomCommand \
   cmCacheManager \
   cmListFileCache \
+  cmOrderLinkDirectories \
   cmSourceGroup"
 
 CMAKE_C_SOURCES="\

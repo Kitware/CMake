@@ -20,6 +20,7 @@
 #include "cmMakefile.h"
 #include "cmGeneratedFileStream.h"
 #include "cmSourceFile.h"
+#include "cmOrderLinkDirectories.h"
 
 cmLocalGenerator::cmLocalGenerator()
 {
@@ -1077,6 +1078,16 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
 }
 
 
+void 
+cmLocalGenerator::DetermineLibraryPathOrder(const cmTarget& target,
+                                            std::vector<std::string>& 
+                                            linkPaths,
+                                            std::vector<std::string>&
+                                            linkLibs)
+{ 
+
+}
+
 /**
  * Output the linking rules on a command line.  For executables,
  * targetLibrary should be a NULL pointer.  For libraries, it should point
@@ -1088,7 +1099,6 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
 {
   // Try to emit each search path once
   std::set<cmStdString> emitted;
-
   // Embed runtime search paths if possible and if required.
   bool outputRuntime = true;
   std::string runtimeFlag;
@@ -1097,12 +1107,21 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
 
   std::string buildType =  m_Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   buildType = cmSystemTools::UpperCase(buildType);
-
+  cmTarget::LinkLibraryType cmakeBuildType = cmTarget::GENERAL;
+  if(buildType == "DEBUG")
+    {
+    cmakeBuildType = cmTarget::DEBUG;
+    }
+  if(buildType.size())
+    {
+    cmakeBuildType = cmTarget::OPTIMIZED;
+    }
   const char* linkLanguage = tgt.GetLinkerLanguage(this->GetGlobalGenerator());
   if(!linkLanguage)
     {
-    cmSystemTools::Error("CMake can not determine linker language for target:",
-                         tgt.GetName());
+    cmSystemTools::
+      Error("CMake can not determine linker language for target:",
+            tgt.GetName());
     return;
     }
   std::string runTimeFlagVar = "CMAKE_SHARED_LIBRARY_RUNTIME_";
@@ -1137,8 +1156,32 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
     linkLibs += " ";
     }
   
-  const std::vector<std::string>& libdirs = tgt.GetLinkDirectories();
-  for(std::vector<std::string>::const_iterator libDir = libdirs.begin();
+  cmOrderLinkDirectories orderLibs;
+  std::string ext = 
+    m_Makefile->GetSafeDefinition("CMAKE_STATIC_LIBRARY_SUFFIX");
+  if(ext.size())
+    {
+    orderLibs.AddLinkExtension(ext.c_str());
+    }
+  ext = 
+    m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_SUFFIX");
+  if(ext.size())
+    {
+    orderLibs.AddLinkExtension(ext.c_str());
+    }
+  ext = 
+    m_Makefile->GetSafeDefinition("CMAKE_LINK_LIBRARY_SUFFIX");
+  if(ext.size())
+    {
+    orderLibs.AddLinkExtension(ext.c_str());
+    }
+  // compute the correct order for -L paths
+  orderLibs.SetLinkInformation(tgt, cmakeBuildType, targetLibrary);
+  orderLibs.DetermineLibraryPathOrder();
+  std::vector<cmStdString> libdirs;
+  std::vector<cmStdString> linkItems;
+  orderLibs.GetLinkerInformation(libdirs, linkItems);
+  for(std::vector<cmStdString>::const_iterator libDir = libdirs.begin();
       libDir != libdirs.end(); ++libDir)
     { 
     std::string libpath = this->ConvertToOutputForExisting(libDir->c_str());
@@ -1169,103 +1212,30 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
       }
     }
 
-  std::string linkSuffix = m_Makefile->GetSafeDefinition("CMAKE_LINK_LIBRARY_SUFFIX");
+  std::string linkSuffix =
+    m_Makefile->GetSafeDefinition("CMAKE_LINK_LIBRARY_SUFFIX");
   std::string regexp = ".*\\";
   regexp += linkSuffix;
   regexp += "$";
   cmsys::RegularExpression hasSuffix(regexp.c_str());
   std::string librariesLinked;
-  const cmTarget::LinkLibraries& libs = tgt.GetLinkLibraries();
-  for(cmTarget::LinkLibraries::const_iterator lib = libs.begin();
-      lib != libs.end(); ++lib)
+  for(std::vector<cmStdString>::iterator lib = linkItems.begin();
+      lib != linkItems.end(); ++lib)
     {
-    // Don't link the library against itself!
-    if(targetLibrary && (lib->first == targetLibrary)) continue;
-    // use the correct lib for the current configuration
-    if (lib->second == cmTarget::DEBUG && buildType != "DEBUG")
-      {
-      continue;
-      }
-    if (lib->second == cmTarget::OPTIMIZED && buildType == "DEBUG")
-      {
-      continue;
-      }
-    // skip zero size library entries, this may happen
-    // if a variable expands to nothing.
-    if (lib->first.size() == 0) continue;
-    // if it is a full path break it into -L and -l
+    cmStdString& linkItem = *lib;
+    // check to see if the link item has a -l already
     cmsys::RegularExpression reg("^([ \t]*\\-[lWRB])|([ \t]*\\-framework)|(\\${)|([ \t]*\\-pthread)|([ \t]*`)");
-    if(lib->first.find('/') != std::string::npos
-       && !reg.find(lib->first))
+    if(!reg.find(linkItem))
       {
-      std::string dir, file;
-      cmSystemTools::SplitProgramPath(lib->first.c_str(),
-                                      dir, file);
-      std::string libpath = this->ConvertToOutputForExisting(dir.c_str());
-      if(emitted.insert(libpath).second)
-        {
-        linkLibs += libPathFlag;
-        linkLibs += libpath;
-        linkLibs += " ";
-        if(outputRuntime)
-          {
-          runtimeDirs.push_back( libpath );
-          }
-        }  
-      cmsys::RegularExpression libname("^lib([^/]*)(\\.so|\\.lib|\\.dll|\\.sl|\\.a|\\.dylib).*");
-      cmsys::RegularExpression libname_noprefix("([^/]*)(\\.so|\\.lib|\\.dll|\\.sl|\\.a|\\.dylib).*");
-      if(libname.find(file))
-        {
-        // Library had "lib" prefix.
-        librariesLinked += libLinkFlag;
-        file = libname.match(1);
-        // if ignore libprefix is on,
-        // then add the lib prefix back into the name
-        if(m_IgnoreLibPrefix)
-          {
-          file = "lib" + file;
-          }
-        librariesLinked += file;
-        if(linkSuffix.size() && !hasSuffix.find(file))
-          {
-          librariesLinked += linkSuffix;
-          }
-        librariesLinked += " ";
-        }
-      else if(libname_noprefix.find(file))
-        {
-        // Library had no "lib" prefix.
-        librariesLinked += libLinkFlag;
-        file = libname_noprefix.match(1);
-        librariesLinked += file;
-        if(linkSuffix.size() && !hasSuffix.find(file))
-          {
-          librariesLinked +=  linkSuffix;
-          }
-        librariesLinked += " ";
-        }
-      else
-        {
-        // Error parsing the library name.  Just use the full path.
-        // The linker will give an error if it is invalid.
-        librariesLinked += lib->first;
-        librariesLinked += " ";
-        }
+      librariesLinked += libLinkFlag;
       }
-    // not a full path, so add -l name
-    else
+    librariesLinked += linkItem;
+    
+    if(linkSuffix.size() && !hasSuffix.find(linkItem))
       {
-      if(!reg.find(lib->first))
-        {
-        librariesLinked += libLinkFlag;
-        }
-      librariesLinked += lib->first;
-      if(linkSuffix.size() && !hasSuffix.find(lib->first))
-        {
-        librariesLinked += linkSuffix;
-        }
-      librariesLinked += " ";
+      librariesLinked += linkSuffix;
       }
+    librariesLinked += " ";
     }
 
   linkLibs += librariesLinked;
