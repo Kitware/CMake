@@ -780,7 +780,8 @@ bool cmSystemTools::RunCommand(const char* command,
   std::ifstream fin(tempFile.c_str());
   if(!fin)
     {
-    cmSystemTools::Error(command, " from RunCommand Faild to create output file",
+    cmSystemTools::Error(command, 
+                         " from RunCommand Failed to create output file: ",
                          tempFile.c_str());
     return false;
     }

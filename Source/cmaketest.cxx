@@ -37,19 +37,51 @@ main (int argc, char *argv[])
     }
 
   // now build the test
-  if (!cmSystemTools::RunCommand(MAKECOMMAND, output))
+  std::string makeCommand = MAKEPROGRAM;
+  makeCommand += " ";
+  makeCommand += argv[3];
+#ifdef _WIN32
+  makeCommand += ".dsw /MAKE \"ALL_BUILD - Release\" /REBUILD";
+#endif  
+  if (!cmSystemTools::RunCommand(makeCommand.c_str(), output))
     {
-    std::cerr << "Error: " MAKECOMMAND "  execution failed\n";
+    std::cerr << "Error: " << makeCommand.c_str() <<  "  execution failed\n";
     std::cerr << output.c_str() << "\n";
     // return to the original directory
     cmSystemTools::ChangeDirectory(cwd.c_str());
     return 1;
     }
 
-  // now run the compiled test
-  if (!cmSystemTools::RunCommand(argv[3], output))
+  // now run the compiled test if we can find it
+  // See if the executable exists as written.
+  std::string fullPath;
+  if(cmSystemTools::FileExists(argv[3]))
     {
-    std::cerr << "Error: " << argv[3] << "  execution failed\n";
+    fullPath = cmSystemTools::CollapseFullPath(argv[3]);
+    }
+  std::string tryPath = argv[3];
+  tryPath += cmSystemTools::GetExecutableExtension();
+  if(cmSystemTools::FileExists(tryPath.c_str()))
+    {
+    fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
+    }
+  
+  // try the release extension
+  tryPath = "Release/";
+  tryPath += cmSystemTools::GetFilenameName(argv[3]);
+  if(cmSystemTools::FileExists(tryPath.c_str()))
+    {
+    fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
+    }
+  tryPath += cmSystemTools::GetExecutableExtension();
+  if(cmSystemTools::FileExists(tryPath.c_str()))
+    {
+    fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
+    }
+
+  if (!cmSystemTools::RunCommand(fullPath.c_str(), output))
+    {
+    std::cerr << "Error: " << fullPath.c_str() << "  execution failed\n";
     // return to the original directory
     cmSystemTools::ChangeDirectory(cwd.c_str());
     return 1;
