@@ -113,19 +113,17 @@ if test $ac_cv_prog_gxx = no; then
 fi
 AC_SUBST(CMAKE_NO_ANSI_STREAM_HEADERS)
 
-# check non-g++ compilers to see if they have std::stringstream
-if test $ac_cv_prog_gxx = no; then
-  AC_MSG_CHECKING( for ansi standard C++ stringstream ) 
-  rm -rf conftest.*
-  cat > conftest.cc <<!
+# check compilers to see if they have std::stringstream
+AC_MSG_CHECKING( for ansi standard C++ stringstream ) 
+rm -rf conftest.*
+cat > conftest.cc <<!
 #include <sstream>
 !
-  if test -z "`${CXX} ${CMAKE_ANSI_CXXFLAGS} $CXXFLAGS $CPPFLAGS -c conftest.cc 2>&1`"; then
-    echo "$ac_t""yes" 1>&6
-  else
-    CMAKE_NO_ANSI_STRING_STREAM="1"
-    echo "$ac_t""no" 1>&6
-  fi
+if test -z "`${CXX} ${CMAKE_ANSI_CXXFLAGS} $CXXFLAGS $CPPFLAGS -c conftest.cc 2>&1`"; then
+  echo "$ac_t""yes" 1>&6
+else
+  CMAKE_NO_ANSI_STRING_STREAM="1"
+  echo "$ac_t""no" 1>&6
 fi
 AC_SUBST(CMAKE_NO_ANSI_STRING_STREAM)
 
