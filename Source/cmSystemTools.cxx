@@ -1670,6 +1670,14 @@ std::string cmSystemTools::FindLibrary(const char* name,
       {
       return cmSystemTools::CollapseFullPath(tryPath.c_str());
       }
+    tryPath = *p;
+    tryPath += "/lib";
+    tryPath += name;
+    tryPath += ".dylib";
+    if(cmSystemTools::FileExists(tryPath.c_str()))
+      {
+      return cmSystemTools::CollapseFullPath(tryPath.c_str());
+      }
 #endif
     }
   
