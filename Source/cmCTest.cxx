@@ -3603,6 +3603,10 @@ int cmCTest::RunConfigurationScript(const std::string& total_script_arg)
       }
     double duration = 60.0*atof(mf->GetDefinition("CTEST_CONTINUOUS_DURATION"));
     double clock_start = cmSystemTools::GetTime();
+    if (mf->IsOn("CTEST_START_WITH_EMPTY_BINARY_DIRECTORY_ONCE"))
+      {
+      mf->AddDefinition("CTEST_START_WITH_EMPTY_BINARY_DIRECTORY","1");
+      }
     while (cmSystemTools::GetTime() < clock_start + duration)
       {
       double clock_recent_start = cmSystemTools::GetTime();
@@ -3618,6 +3622,10 @@ int cmCTest::RunConfigurationScript(const std::string& total_script_arg)
 #else
         sleep(secondsToWait);
 #endif
+        }
+      if (mf->IsOn("CTEST_START_WITH_EMPTY_BINARY_DIRECTORY_ONCE"))
+        {
+        mf->AddDefinition("CTEST_START_WITH_EMPTY_BINARY_DIRECTORY","0");
         }
       }
     }
