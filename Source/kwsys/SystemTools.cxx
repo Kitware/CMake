@@ -725,7 +725,7 @@ void SystemTools::ConvertToUnixSlashes(kwsys_stl::string& path)
     }
   
   // remove any trailing slash
-  if(path.size() && path[path.size()-1] == '/')
+  if(path.size() > 1 && path[path.size()-1] == '/')
     {
     path = path.substr(0, path.size()-1);
     }
@@ -1364,6 +1364,12 @@ kwsys_stl::string SystemTools::CollapseFullPath(const char* in_relative,
   
   kwsys_stl::string dir, file;
   SystemTools::SplitProgramPath(in_relative, dir, file, false);
+  if(dir.size() == 0 && 
+      in_relative && strlen(in_relative) > 0 &&
+      in_relative[0] == '/')
+     {
+     dir = "/";
+     }
   
 #ifdef _WIN32
   // Follow relative path.
@@ -1413,7 +1419,10 @@ kwsys_stl::string SystemTools::CollapseFullPath(const char* in_relative,
   kwsys_stl::string newPath = newDir;
   if(!(file == ""))
     {
-    newPath += "/";
+    if(!(newDir.size() == 1 && newDir[0] ==  '/'))
+      {
+      newPath += "/";
+      }
     newPath += file;
     }
   return newPath;
