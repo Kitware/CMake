@@ -242,6 +242,12 @@ bool cmSystemTools::ParseFunction(std::ifstream& fin,
             cmSystemTools::GetArguments(line, arguments);
             }
           }
+	else
+	  {
+	  cmSystemTools::Error("Parse error in read function missing end )",
+			       inbuffer);
+	  return false;
+	  }
         }
       return true;
       }
