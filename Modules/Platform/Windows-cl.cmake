@@ -73,28 +73,21 @@ IF(CMAKE_GENERATOR MATCHES "NMake Makefiles")
       SET(CMAKE_COMPILER_2005 1)
     ENDIF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*VERSION=1[4-9][0-9][0-9].*" )
   ENDIF(NOT CMAKE_COMPILER_RETURN)
+  MAKE_DIRECTORY("${CMAKE_BINARY_DIR}/CMakeTmp")
   # try to figure out if we are running the free command line
   # tools from Microsoft.  These tools do not provide debug libraries,
   # so the link flags used have to be different.
-  FILE(WRITE ${CMAKE_BINARY_DIR}/CMakeTmp/testForFreeVC.cxx
-    "#include<iostream>\n int main(){return 0;}\n")
   EXEC_PROGRAM(${CMAKE_CXX_COMPILER} ${CMAKE_BINARY_DIR}/CMakeTmp
     ARGS /nologo /MD /EHsc
-    \"${CMAKE_BINARY_DIR}/CMakeTmp/testForFreeVC.cxx\" 
+    \"${CMAKE_ROOT}/Modules/CMakeTestForFreeVC.cxx\"
     OUTPUT_VARIABLE CMAKE_COMPILER_OUTPUT 
     RETURN_VALUE CMAKE_COMPILER_RETURN
     )
-  MESSAGE("OUTPUT_VARIABLE ${OUTPUT_VARIABLE}")
   IF(CMAKE_COMPILER_RETURN)
-    IF("${CMAKE_COMPILER_RETURN}" EQUAL "2")
-      SET(CMAKE_USING_VC_FREE_TOOLS 1)
-    ELSE("${CMAKE_COMPILER_RETURN}" EQUAL "2")
-      SET(CMAKE_USING_VC_FREE_TOOLS 0)
-    ENDIF("${CMAKE_COMPILER_RETURN}" EQUAL "2")
+    SET(CMAKE_USING_VC_FREE_TOOLS 1)
   ELSE(CMAKE_COMPILER_RETURN)
     SET(CMAKE_USING_VC_FREE_TOOLS 0)
   ENDIF(CMAKE_COMPILER_RETURN)
-
 
 ENDIF(CMAKE_GENERATOR MATCHES "NMake Makefiles")
 
