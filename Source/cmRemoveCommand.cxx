@@ -51,10 +51,10 @@ bool cmRemoveCommand::InitialPass(std::vector<std::string> const& args)
   
   // now create the new value
   std::string value;
-  for(unsigned int j = 1; j < varArgsExpanded.size(); ++j)
+  for(unsigned int j = 0; j < varArgsExpanded.size(); ++j)
     {
     int found = 0;
-    for(unsigned int k = 1; k < argsExpanded.size(); ++k)
+    for(unsigned int k = 0; k < argsExpanded.size(); ++k)
       {
       if (varArgsExpanded[j] == argsExpanded[k])
         {
