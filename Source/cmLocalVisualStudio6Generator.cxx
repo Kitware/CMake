@@ -467,9 +467,21 @@ void cmLocalVisualStudio6Generator::WriteCustomRule(std::ostream& fout,
       const char* cacheValue = m_Makefile->GetDefinition(libPath.c_str());
       if (cacheValue)
         {
-        libPath = cacheValue;
+        std::string exePath = "";
+        if (m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH"))
+          {
+          exePath = m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
+          }
+        if(exePath.size())
+          {
+          libPath = exePath;
+          }
+        else
+          {
+          libPath = cacheValue;
+          }
         libPath += "/";
-        libPath += "$(INTDIR)";
+        libPath += "$(INTDIR)/";
         libPath += dep;
         libPath += ".exe";
         fout << "\\\n\t" << 
