@@ -274,7 +274,11 @@ cmDynamicLoader::GetSymbolAddress(cmLibHandle lib, const char* sym)
 
 const char* cmDynamicLoader::LibPrefix()
 { 
+#if defined( __MINGW32__ )
+  return "lib";
+#else
   return "";
+#endif
 }
 
 const char* cmDynamicLoader::LibExtension()
