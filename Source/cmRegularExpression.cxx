@@ -300,7 +300,7 @@ static int strcspn ();
 // compile -- compile a regular expression into internal code
 // for later pattern matching.
 
-void cmRegularExpression::compile (const char* exp) {
+bool cmRegularExpression::compile (const char* exp) {
     register const char* scan;
     register const char* longest;
     register unsigned long len;
@@ -309,7 +309,7 @@ void cmRegularExpression::compile (const char* exp) {
     if (exp == 0) {
       //RAISE Error, SYM(cmRegularExpression), SYM(No_Expr),
       printf ("cmRegularExpression::compile(): No expression supplied.\n");
-      return;
+      return false;
     }
 
     // First pass: determine size, legality.
@@ -321,7 +321,7 @@ void cmRegularExpression::compile (const char* exp) {
     if(!reg(0, &flags))
       {
         printf ("cmRegularExpression::compile(): Error in compile.\n");
-        return;
+        return false;
       }
     this->startp[0] = this->endp[0] = this->searchstring = 0;
 
@@ -329,7 +329,7 @@ void cmRegularExpression::compile (const char* exp) {
     if (regsize >= 32767L) {    // Probably could be 65535L. 
       //RAISE Error, SYM(cmRegularExpression), SYM(Expr_Too_Big),
       printf ("cmRegularExpression::compile(): Expression too big.\n");
-      return;
+      return false;
     }
 
     // Allocate space. 
@@ -342,7 +342,7 @@ void cmRegularExpression::compile (const char* exp) {
     if (this->program == 0) {
       //RAISE Error, SYM(cmRegularExpression), SYM(Out_Of_Memory),
       printf ("cmRegularExpression::compile(): Out of memory.\n"); 
-      return;
+      return false;
     }
 
     // Second pass: emit code.
@@ -387,6 +387,7 @@ void cmRegularExpression::compile (const char* exp) {
             this->regmlen = len;
         }
     }
+    return true;
 }
 
 

@@ -203,7 +203,7 @@ public:
    * Compile a regular expression into internal code
    * for later pattern matching.
    */
-  void compile (char const*);
+  bool compile (char const*);
 
   /**
    * Matches the regular expression to the given string.
