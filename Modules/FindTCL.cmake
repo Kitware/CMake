@@ -19,7 +19,7 @@ IF(UNIX)
 ENDIF(UNIX)
 
 FIND_PROGRAM(TCL_TCLSH
-  NAMES tclsh tclsh84 tclsh83 tclsh82 tclsh80 cygtclsh80
+  NAMES tclsh tclsh84 tclsh8.4 tclsh83 tclsh8.3 tclsh82 tclsh80 cygtclsh80
 )
 
 # if UNIX is defined, then look for the cygwin version first
@@ -28,7 +28,7 @@ IF(UNIX)
 ENDIF(UNIX)
 
 FIND_PROGRAM(TK_WISH
-  NAMES wish wish84 wish83 wish82 wish80
+  NAMES wish wish84 wish8.4 wish83 wish8.3 wish82 wish80
 )
 
 GET_FILENAME_COMPONENT(TCL_TCLSH_PATH ${TCL_TCLSH} PATH)
