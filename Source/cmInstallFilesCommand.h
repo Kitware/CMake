@@ -85,7 +85,7 @@ public:
       "  INSTALL_FILES(<dir> FILES file file ...)\n"
       "Any files listed after the FILES keyword will be "
       "installed explicitly from the names given.  Full paths are allowed in "
-      "this form.\n\n"
+      "this form.\n"
       "The directory <dir> is relative to the installation prefix, which "
       "is stored in the variable CMAKE_INSTALL_PREFIX.";
     }

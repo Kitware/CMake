@@ -74,10 +74,10 @@ public:
       "Create rules to install the listed programs into the given directory.\n"
       "  INSTALL_PROGRAMS(<dir> regexp)\n"
       "In the second form any program in the current source directory that "
-      "matches the regular expression will be installed.\n\n"
+      "matches the regular expression will be installed.\n"
       "This command is intended to install programs that are not built "
       "by cmake, such as shell scripts.  See INSTALL_TARGETS to "
-      "create installation rules for targets built by cmake.\n\n"
+      "create installation rules for targets built by cmake.\n"
       "The directory <dir> is relative to the installation prefix, which "
       "is stored in the variable CMAKE_INSTALL_PREFIX.";
     }
