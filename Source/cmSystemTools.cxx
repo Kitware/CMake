@@ -420,7 +420,7 @@ bool cmSystemTools::RunSingleCommand(
   int *retVal, 
   const char* dir,
   bool verbose,
-  int timeout)
+  double timeout)
 {
   if(s_DisableRunCommandOutput)
     {

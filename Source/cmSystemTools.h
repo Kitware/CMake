@@ -191,7 +191,7 @@ public:
    * function will return false.
    */
   static bool RunSingleCommand(const char* command, std::string* output = 0,
-    int* retVal = 0, const char* dir = 0, bool verbose = true, int timeout = 0);
+    int* retVal = 0, const char* dir = 0, bool verbose = true, double timeout = 0.0);
 
   /**
    * Parse arguments out of a single string command
