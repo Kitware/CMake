@@ -1972,6 +1972,7 @@ kwsys_stl::string SystemTools::GetCurrentWorkingDirectory()
 {
   char buf[2048];
   const char* cwd = Getcwd(buf, 2048);
+  std::cerr << cwd << "\n";
   kwsys_stl::string path;
   if ( cwd )
     {
@@ -2170,7 +2171,7 @@ SystemToolsAppendComponents(
         out_components.erase(out_components.end()-1, out_components.end());
         }
       }
-    else if(!(*i == ".") && !(*i != ""))
+    else if(!(*i == ".") && !(*i == ""))
       {
       out_components.push_back(*i);
       }
@@ -2180,6 +2181,9 @@ SystemToolsAppendComponents(
 kwsys_stl::string SystemTools::CollapseFullPath(const char* in_path,
                                                 const char* in_base)
 {
+  if(in_path) std::cerr << "CollapseFullPath inpath: " << in_path << "\n";
+  if(in_base) std::cerr << "CollapseFullPath inbase: " << in_base << "\n";
+  
   // Collect the output path components.
   kwsys_stl::vector<kwsys_stl::string> out_components;
 
@@ -2187,6 +2191,7 @@ kwsys_stl::string SystemTools::CollapseFullPath(const char* in_path,
   kwsys_stl::vector<kwsys_stl::string> path_components;
   SystemTools::SplitPath(in_path, path_components);
 
+  std::cerr << path_components.size() << "\n";
   // If the input path is relative, start with a base path.
   if(path_components[0].length() == 0)
     {
@@ -2228,7 +2233,7 @@ kwsys_stl::string SystemTools::CollapseFullPath(const char* in_path,
   // Update the translation table with this potentially new path.
   SystemTools::AddTranslationPath(newPath.c_str(), in_path);
   SystemTools::CheckTranslationPath(newPath);
-
+  std::cerr << "NewPath : " << newPath << "\n";
   // Return the reconstructed path.
   return newPath;
 }
