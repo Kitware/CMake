@@ -167,6 +167,7 @@ void kwsysProcess_Delete(kwsysProcess* cp)
   
   /* Free memory.  */
   kwsysProcess_SetCommand(cp, 0);
+  kwsysProcess_SetWorkingDirectory(cp, 0);
   free(cp);
 }
 
@@ -227,7 +228,7 @@ void kwsysProcess_SetWorkingDirectory(kwsysProcess* cp, const char* dir)
     }
   if(dir)
     {
-    cp->WorkingDirectory = (char*) malloc(strlen(dir) + 1);
+    cp->WorkingDirectory = (char*)malloc(strlen(dir) + 1);
     strcpy(cp->WorkingDirectory, dir);
     }
 }
@@ -344,6 +345,20 @@ void kwsysProcess_Execute(kwsysProcess* cp)
     
     /* Restore all default signal handlers. */
     kwsysProcessRestoreDefaultSignalHandlers();
+    
+    /* Change to the working directory specified, if any.  */
+    if(cp->WorkingDirectory)
+      {
+      /* Some platforms specify that the chdir call may be
+         interrupted.  Repeat the call until it finishes.  */
+      int r;
+      while(((r = chdir(cp->WorkingDirectory)) < 0) && (errno == EINTR));
+      if(r < 0)
+        {
+        /* Failure.  Report error to parent and terminate.  */
+        kwsysProcessChildErrorExit(cp);
+        }
+      }
     
     /* Execute the real process.  If successful, this does not return.  */
     execvp(cp->Command[0], cp->Command);

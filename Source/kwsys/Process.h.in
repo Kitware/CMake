@@ -99,10 +99,11 @@ kwsysEXPORT void kwsysProcess_SetCommand(kwsysProcess* cp,
 kwsysEXPORT void kwsysProcess_SetTimeout(kwsysProcess* cp, double timeout);
 
 /**
- * Set the working directory for the child process. The working directory can
- * be absolute or relative to the current directory. 
+ * Set the working directory for the child process.  The working
+ * directory can be absolute or relative to the current directory.
  */
-kwsysEXPORT void kwsysProcess_SetWorkingDirectory(kwsysProcess* cp, const char* dir);
+kwsysEXPORT void kwsysProcess_SetWorkingDirectory(kwsysProcess* cp,
+                                                  const char* dir);
 
 /**
  * Get the current state of the Process instance.  Possible states are:
