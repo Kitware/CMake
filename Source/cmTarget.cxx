@@ -421,6 +421,10 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
 
 bool cmTarget::HasCxx() const
 {
+  if(this->GetProperty("HAS_CXX"))
+    {
+    return true;
+    }
   for(std::vector<cmSourceFile*>::const_iterator i =  m_SourceFiles.begin();
       i != m_SourceFiles.end(); ++i)
     {
