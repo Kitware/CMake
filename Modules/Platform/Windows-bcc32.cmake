@@ -67,9 +67,9 @@ SET (CMAKE_BUILD_TYPE Debug CACHE STRING
      "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel.")
 
 # extra flags for a win32 exe
-SET(CMAKE_CREATE_WIN32_EXE -tW -tWM )
+SET(CMAKE_CREATE_WIN32_EXE "-tW -tWM" )
 # extra flags for a console app
-SET(CMAKE_CREATE_CONSOLE_EXE -tWC )
+SET(CMAKE_CREATE_CONSOLE_EXE "-tWC" )
 
 SET (CMAKE_CXX_FLAGS_INIT "-w- -whid -waus -wpar -tWM")
 SET (CMAKE_CXX_FLAGS_DEBUG_INIT "-Od -v")
