@@ -939,14 +939,19 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
     linkFlags += this->GetSafeDefinition(build.c_str());
     linkFlags += " ";
     }
+
   if(t.HasCxx())
     {
     rules.push_back(m_Makefile->GetDefinition("CMAKE_CXX_LINK_EXECUTABLE"));
     flags += this->GetSafeDefinition("CMAKE_CXX_FLAGS");
     flags += " ";
+    flags += this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_CXX_FLAGS");
+    flags += " ";
     }
   else
     {
+    flags += this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_LINK_FLAGS");
+    flags += " ";
     rules.push_back(m_Makefile->GetDefinition("CMAKE_C_LINK_EXECUTABLE"));
     flags += this->GetSafeDefinition("CMAKE_C_FLAGS");
     flags += " ";
@@ -962,6 +967,12 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
     {
     commands.push_back(customCommands.c_str());
     }
+  if(cmSystemTools::IsOn(m_Makefile->GetDefinition("BUILD_SHARED_LIBS")))
+    {
+    linkFlags += this->GetSafeDefinition("CMAKE_SHARED_BUILD_CXX_FLAGS");
+    linkFlags += " ";
+   }
+  
   if(t.GetType() == cmTarget::WIN32_EXECUTABLE)
     {
     linkFlags +=  this->GetSafeDefinition("CMAKE_CREATE_WIN32_EXE");
@@ -973,7 +984,7 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
     linkFlags += " ";
     }
   
-    
+
   for(std::vector<std::string>::iterator i = commands.begin();
       i != commands.end(); ++i)
     {
@@ -2212,6 +2223,11 @@ OutputBuildObjectFromSource(std::ostream& fout,
       }
     case cmSystemTools::CXX_FILE_FORMAT:
       {
+      if(cmSystemTools::IsOn(m_Makefile->GetDefinition("BUILD_SHARED_LIBS")))
+        {
+        flags += this->GetSafeDefinition("CMAKE_SHARED_BUILD_CXX_FLAGS");
+        flags += " ";
+        }
       rules.push_back(m_Makefile->GetDefinition("CMAKE_CXX_COMPILE_OBJECT"));
       flags += this->GetSafeDefinition("CMAKE_CXX_FLAGS");
       flags += " "; 
