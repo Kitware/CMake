@@ -276,7 +276,7 @@ IF(BUILD_TESTING)
     ADD_TEST(curl ${CMake_BINARY_DIR}/Source/cmaketest 
              ${CMake_SOURCE_DIR}/Source/CTest/Curl
              ${CMake_BINARY_DIR}/Tests/Curl
-             curltest)
+             LIBCURL)
 
     IF (APPLE)
       ADD_TEST(objc++ ${CMake_BINARY_DIR}/Source/cmaketest
