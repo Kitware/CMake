@@ -45,9 +45,6 @@
 
 #define cmMAX(x,y) (((x)<(y))?(y):(x))
 
-#define win32_error(x,y) std::cout << "Win32_Error(" << x << ", " << y << ")" << std::endl, false
-
-
 void DisplayErrorMessage()
 {
   LPVOID lpMsgBuf;
@@ -434,7 +431,9 @@ static BOOL RealPopenCreateProcess(const char *cmdstring,
     //std::cout << "Process created..." << std::endl;
     return TRUE;
     }
-  win32_error("CreateProcess", s2);
+  m_Output += "CreateProcessError ";
+  m_Output += s2;
+  m_Output += "\n";
   return FALSE;
 }
 
@@ -460,7 +459,8 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
 
   if (!CreatePipe(&hChildStdinRd, &hChildStdinWr, &saAttr, 0))
     {
-    return win32_error("CreatePipe", NULL);
+    m_Output += "CreatePipeError\n";
+    return false;
     }
     
   /* Create new output read handle and the input write handle. Set
@@ -472,7 +472,10 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
                              FALSE,
                              DUPLICATE_SAME_ACCESS);
   if (!fSuccess)
-    return win32_error("DuplicateHandle", NULL);
+    {
+    m_Output += "DuplicateHandleError\n";
+    return false;
+    }
 
 
   /* Close the inheritable version of ChildStdin
@@ -480,13 +483,19 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
   CloseHandle(hChildStdinWr);
 
   if (!CreatePipe(&hChildStdoutRd, &hChildStdoutWr, &saAttr, 0))
-    return win32_error("CreatePipe", NULL);
+    {
+    m_Output += "CreatePipeError\n";
+    return false;
+    }
 
   fSuccess = DuplicateHandle(GetCurrentProcess(), hChildStdoutRd,
                              GetCurrentProcess(), &hChildStdoutRdDup, 0,
                              FALSE, DUPLICATE_SAME_ACCESS);
   if (!fSuccess)
-    return win32_error("DuplicateHandle", NULL);
+    {
+    m_Output += "DuplicateHandleError\n";
+    return false;
+    }
 
   /* Close the inheritable version of ChildStdout
      that we're using. */
@@ -495,14 +504,20 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
   if (n != POPEN_4) 
     {
     if (!CreatePipe(&hChildStderrRd, &hChildStderrWr, &saAttr, 0))
-      return win32_error("CreatePipe", NULL);
+      {
+      m_Output += "CreatePipeError\n";
+      return false;
+      }
    fSuccess = DuplicateHandle(GetCurrentProcess(),
                                hChildStderrRd,
                                GetCurrentProcess(),
                                &hChildStderrRdDup, 0,
                                FALSE, DUPLICATE_SAME_ACCESS);
     if (!fSuccess)
-      return win32_error("DuplicateHandle", NULL);
+      {
+      m_Output += "DuplicateHandleError\n";
+      return false;
+      }
     /* Close the inheritable version of ChildStdErr that we're using. */
     CloseHandle(hChildStderrRd);
 
@@ -660,13 +675,22 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
    * when the child process exits and the ReadFile will hang. */
 
   if (!CloseHandle(hChildStdinRd))
-    return win32_error("CloseHandle", NULL);
+    {
+    m_Output += "CloseHandleError\n";
+    return false;
+    }
           
   if (!CloseHandle(hChildStdoutWr))
-    return win32_error("CloseHandle", NULL);
+    {
+    m_Output += "CloseHandleError\n";
+    return false;
+    }
           
   if ((n != 4) && (!CloseHandle(hChildStderrWr)))
-    return win32_error("CloseHandle", NULL);
+    {
+    m_Output += "CloseHandleError\n";
+    return false;
+    }
   
   this->m_ProcessHandle = hProcess;
   if ( fd1 >= 0 )
