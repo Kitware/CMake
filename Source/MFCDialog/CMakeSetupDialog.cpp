@@ -1454,6 +1454,10 @@ void CMakeSetupDialog::OnDropFiles(HDROP hDropInfo)
 
 BOOL CMakeSetupDialog::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message) 
 {
-   ::SetCursor(m_Cursor);
+  CDialog::OnSetCursor(pWnd, nHitTest, message);
+  if(m_Cursor == LoadCursor(NULL, IDC_WAIT))
+    {
+    ::SetCursor(m_Cursor);
+    }
    return true;
 }
