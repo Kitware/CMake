@@ -1594,7 +1594,10 @@ OutputBuildObjectFromSource(std::ostream& fout,
                             const char* extraCompileFlags,
                             bool shared)
 {
-            
+  // Header files shouldn't have build rules.
+  if(source.IsAHeaderFileOnly())
+    return;
+
   std::string comment = "Build ";
   std::string objectFile = std::string(shortName) + m_ObjectFileExtension;
   comment += objectFile + "  From ";
