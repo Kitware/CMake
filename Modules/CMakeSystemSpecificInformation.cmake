@@ -143,7 +143,7 @@ IF(CMAKE_USER_MAKE_RULES_OVERRIDE)
    INCLUDE(${CMAKE_USER_MAKE_RULES_OVERRIDE})
 ENDIF(CMAKE_USER_MAKE_RULES_OVERRIDE)
 
-SET(CMAKE_VERBOSE_MAKEFILE FALSE CACHE BOOL "If this value is on, makefiles will be generated without the .SILENT directive, and all commands will be echoed to the console during the make.  This is useful for debugging only.")
+SET(CMAKE_VERBOSE_MAKEFILE FALSE CACHE BOOL "If this value is on, makefiles will be generated without the .SILENT directive, and all commands will be echoed to the console during the make.  This is useful for debugging only. With Visual Studio IDE projects all commands are done without /nologo.")
 
 SET (CMAKE_INSTALL_PREFIX    /usr/local CACHE PATH 
      "Install path prefix, prepended onto install directories.")

@@ -468,6 +468,11 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     {
     fout << "\t\t\t\tWarningLevel=\"" << m_Makefile->GetDefinition("CMAKE_CXX_WARNING_LEVEL") << "\"\n";
     }
+  if(m_Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"))
+    {
+     fout << "\t\t\t\tSuppressStartupBanner=\"FALSE\"\n";
+    }
+  
   if(programDatabase.size())
     {
     fout << programDatabase << "\n";
@@ -566,7 +571,15 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       fout << "\t\t\t\tOutputFile=\"" 
            << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
       fout << "\t\t\t\tLinkIncremental=\"1\"\n";
-      fout << "\t\t\t\tSuppressStartupBanner=\"TRUE\"\n";
+      if(m_Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"))
+        {
+        fout << "\t\t\t\tSuppressStartupBanner=\"FALSE\"\n";
+        }
+      else
+        {
+        fout << "\t\t\t\tSuppressStartupBanner=\"TRUE\"\n";
+        }
+      
       fout << "\t\t\t\tAdditionalLibraryDirectories=\"";
       this->OutputLibraryDirectories(fout, configName, libName, target);
       fout << "\"\n";
@@ -614,7 +627,15 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       temp += ".exe";
       fout << "\t\t\t\tOutputFile=\"" << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
       fout << "\t\t\t\tLinkIncremental=\"1\"\n";
-      fout << "\t\t\t\tSuppressStartupBanner=\"TRUE\"\n";
+      if(m_Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"))
+        {
+        fout << "\t\t\t\tSuppressStartupBanner=\"FALSE\"\n";
+        }
+      else
+        {
+        fout << "\t\t\t\tSuppressStartupBanner=\"TRUE\"\n";
+        }
+        
       fout << "\t\t\t\tAdditionalLibraryDirectories=\"";
       this->OutputLibraryDirectories(fout, configName, libName, target);
       fout << "\"\n";
