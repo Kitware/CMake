@@ -52,5 +52,5 @@ cmSourceGroup.o : $(DEPENDS)
 
 
 cmake: ${OBJS}
-	${CXX} ${OBJS} ${CXX_FLAGS}  -o cmake
+	${CXX} ${OBJS} ${CXXFLAGS}  -o cmake
 
