@@ -164,7 +164,8 @@ void cmCableClassSet::ParseAndAddElement(const char* element,
     {
     std::string setName = setDereference.match(1);
     cmData* d = makefile->LookupData(setName.c_str());
-    cmCableClassSet* classSet = dynamic_cast<cmCableClassSet*>(d);
+    // This should be a dynamic_cast, but we don't want to require RTTI.
+    cmCableClassSet* classSet = static_cast<cmCableClassSet*>(d);
     if(classSet)
       {
       this->AddCableClassSet(*classSet, sources);
