@@ -41,14 +41,14 @@ IF(APPLE)
     SET(JAVA_HAVE_FRAMEWORK 1)
   ENDIF(EXISTS /System/Library/Frameworks/JavaEmbedding.framework)
   IF(JAVA_HAVE_FRAMEWORK)
-    IF(NOT JAVA_LIBRARY)
-      SET (JAVA_LIBRARY "-framework JavaVM -framework JavaEmbedding" CACHE FILEPATH "Java Frameworks" FORCE)
+    IF(NOT JAVA_AWT_LIBRARY)
+      SET (JAVA_AWT_LIBRARY "-framework JavaVM -framework JavaEmbedding" CACHE FILEPATH "Java Frameworks" FORCE)
       SET(JAVA_AWT_INCLUDE_DIRECTORIES
         ~/Library/Frameworks/JavaEmbedding.framework/Headers
         /Library/Frameworks/JavaEmbedding.framework/Headers
         /System/Library/Frameworks/JavaEmbedding.framework/Headers
         )
-    ENDIF(NOT JAVA_LIBRARY)
+    ENDIF(NOT JAVA_AWT_LIBRARY)
   ENDIF(JAVA_HAVE_FRAMEWORK)
 ENDIF(APPLE)
 
