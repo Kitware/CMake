@@ -91,8 +91,8 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "BUILD_COMMAND(NAME)\n"
-      "Within CMAKE set NAME to the command that will build this project from the command line.";
+      "BUILD_COMMAND(NAME MAKECOMMAND)\n"
+      "Within CMAKE set NAME to the command that will build this project from the command line using MAKECOMMAND.";
     }
   
   cmTypeMacro(cmBuildCommand, cmCommand);
