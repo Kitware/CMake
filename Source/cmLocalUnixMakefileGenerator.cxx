@@ -2194,11 +2194,11 @@ void cmLocalUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
             // does not work on windows.... 
             if(*i == "install-sh")
               {
-              fout << "\t   @cp ";
+              fout << "\tcp ";
               }
             else
               {
-              fout << "\t   @$(INSTALL_DATA) ";
+              fout << "\t$(INSTALL_DATA) ";
               }
             
             fout << cmSystemTools::ConvertToOutputPath(i->c_str())
