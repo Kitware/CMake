@@ -62,7 +62,7 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
 }
 
 bool cmWhileFunctionBlocker::
-ShouldRemove(const cmListFileFunction& lff, cmMakefile& mf)
+ShouldRemove(const cmListFileFunction& lff, cmMakefile& )
 {
   if(lff.m_Name == "ENDWHILE")
     {
