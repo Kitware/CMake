@@ -86,6 +86,62 @@ bool cmElseCommand::InitialPass(std::vector<std::string> const& args)
       }
     }
 
+  if (args.size() == 3 && (args[1] == "LESS"))
+    {
+    def = m_Makefile->GetDefinition(args[0].c_str());
+    def2 = m_Makefile->GetDefinition(args[2].c_str());
+    if (!def)
+      {
+      def = args[0].c_str();
+      }
+    if (!def2)
+      {
+      def2 = args[2].c_str();
+      }    
+    if(atof(def) < atof(def2))
+      {
+      f = new cmIfFunctionBlocker();
+      }
+    }
+
+  if (args.size() == 3 && (args[1] == "GREATER"))
+    {
+    def = m_Makefile->GetDefinition(args[0].c_str());
+    def2 = m_Makefile->GetDefinition(args[2].c_str());
+    if (!def)
+      {
+      def = args[0].c_str();
+      }
+    if (!def2)
+      {
+      def2 = args[2].c_str();
+      }    
+    if(atof(def) > atof(def2))
+      {
+      f = new cmIfFunctionBlocker();
+      }
+    }
+
+  if (args.size() == 3 && (args[1] == "STRLESS"))
+    {
+    def = m_Makefile->GetDefinition(args[0].c_str());
+    def2 = m_Makefile->GetDefinition(args[2].c_str());
+    if(strcmp(def,def2) < 0)
+      {
+      f = new cmIfFunctionBlocker();
+      }
+    }
+
+  if (args.size() == 3 && (args[1] == "STRGREATER"))
+    {
+    def = m_Makefile->GetDefinition(args[0].c_str());
+    def2 = m_Makefile->GetDefinition(args[2].c_str());
+    if(strcmp(def,def2) > 0)
+      {
+      f = new cmIfFunctionBlocker();
+      }
+    }
+
   if (args.size() == 3 && (args[1] == "MATCHES"))
     {
     def = m_Makefile->GetDefinition(args[0].c_str());

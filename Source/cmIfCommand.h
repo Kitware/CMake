@@ -93,7 +93,10 @@ public:
       "using (NOT define) (def AND def2) (def OR def2) (def MATCHES def2) "
       "(COMMAND cmd) (EXISTS file) MATCHES checks if def matches the "
       "regular expression def2. COMMAND checks if the cmake command cmd "
-      "is in this cmake executable. EXISTS file checks if file exists";
+      "is in this cmake executable. EXISTS file checks if file exists."
+      "Additionally you can do comparisons using LESS GREATER STRLESS "
+      "and STRGREATER. LESS and GREATER do numeric comparison while "
+      "STRLESS and STRGREATER do string comparisons.";
     }
   
   cmTypeMacro(cmIfCommand, cmCommand);
