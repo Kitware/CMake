@@ -42,6 +42,12 @@ cmVTKMakeInstantiatorCommand
   std::string filePath = m_Makefile->GetCurrentOutputDirectory();
   std::string headerPath = filePath;
   
+  // Check whether to use the old or new form.
+  if(m_Makefile->GetDefinition("VTK_USE_INSTANTIATOR_NEW"))
+    {
+    oldVersion = false;
+    }
+  
   for(unsigned int i=2;i < args.size();++i)
     {
     if(args[i] == "HEADER_LOCATION")
@@ -56,11 +62,6 @@ cmVTKMakeInstantiatorCommand
         this->SetError("HEADER_LOCATION option used without value.");
         return false;
         }
-      }
-    else if(args[i] == "USE_INSTANTIATOR_NEW")
-      {
-      includesMode = false;
-      oldVersion = false;
       }
     else if(args[i] == "EXPORT_MACRO")
       {
