@@ -64,6 +64,7 @@ cmMakefile::cmMakefile()
   m_SourceFileExtensions.push_back( "c" );
   m_SourceFileExtensions.push_back( "M" );
   m_SourceFileExtensions.push_back( "m" );
+  m_SourceFileExtensions.push_back( "mm" );
 
   m_HeaderFileExtensions.push_back( "h" );
   
