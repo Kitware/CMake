@@ -35,7 +35,7 @@ public:
   /*
    * The main entry point for this class
    */
-  int CoverageDirectory();
+  int ProcessHandler();
   
   cmCTestCoverageHandler();
   

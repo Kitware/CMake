@@ -24,12 +24,7 @@
 #include <time.h>
 
 class cmMakefile;
-class cmCTestBuildHandler;
-class cmCTestConfigureHandler;
-class cmCTestCoverageHandler;
-class cmCTestScriptHandler;
-class cmCTestTestHandler;
-class cmCTestUpdateHandler;
+class cmCTestGenericHandler;
 class cmGeneratedFileStream;
 
 class cmCTest
@@ -194,12 +189,8 @@ public:
 
 private:
   // these are helper classes
-  cmCTestBuildHandler     *BuildHandler;
-  cmCTestCoverageHandler  *CoverageHandler;
-  cmCTestScriptHandler    *ScriptHandler;
-  cmCTestTestHandler      *TestHandler;
-  cmCTestUpdateHandler    *UpdateHandler;
-  cmCTestConfigureHandler *ConfigureHandler;
+  typedef std::map<cmStdString,cmCTestGenericHandler*> t_TestingHandlers;
+  t_TestingHandlers m_TestingHandlers;
   
   bool m_ShowOnly;
 

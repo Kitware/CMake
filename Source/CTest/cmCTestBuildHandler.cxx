@@ -192,20 +192,20 @@ void cmCTestBuildHandler::PopulateCustomVectors(cmMakefile *mf)
 //----------------------------------------------------------------------
 //clearly it would be nice if this were broken up into a few smaller
 //functions and commented...
-int cmCTestBuildHandler::BuildDirectory()
+int cmCTestBuildHandler::ProcessHandler()
 {
   std::cout << "Build project" << std::endl;
   std::string makeCommand = m_CTest->GetDartConfiguration("MakeCommand");
   if ( makeCommand.size() == 0 )
     {
     std::cerr << "Cannot find MakeCommand key in the DartConfiguration.tcl" << std::endl;
-    return 1;
+    return -1;
     }
   std::string buildDirectory = m_CTest->GetDartConfiguration("BuildDirectory");
   if ( buildDirectory.size() == 0 )
     {
     std::cerr << "Cannot find BuildDirectory  key in the DartConfiguration.tcl" << std::endl;
-    return 1;
+    return -1;
     }
 
   cmGeneratedFileStream ofs;
@@ -438,7 +438,7 @@ int cmCTestBuildHandler::BuildDirectory()
   if( !m_CTest->OpenOutputFile(m_CTest->GetCurrentTag(), "Build.xml", xofs, true) )
     {
     std::cerr << "Cannot create build XML file" << std::endl;
-    return 1;
+    return -1;
     }
   this->GenerateDartBuildOutput(xofs, errorsWarnings, elapsed_build_time);
   return 0;

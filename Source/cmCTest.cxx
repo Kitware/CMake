@@ -27,11 +27,12 @@
 #include "cmGeneratedFileStream.h"
 
 #include "cmCTestBuildHandler.h"
+#include "cmCTestConfigureHandler.h"
 #include "cmCTestCoverageHandler.h"
+#include "cmCTestMemCheckHandler.h"
 #include "cmCTestScriptHandler.h"
 #include "cmCTestTestHandler.h"
 #include "cmCTestUpdateHandler.h"
-#include "cmCTestConfigureHandler.h"
 
 #include "cmCTestSubmit.h"
 #include "cmVersion.h"
@@ -240,29 +241,29 @@ cmCTest::cmCTest()
     }
   m_ShortDateFormat        = true;
 
-  this->BuildHandler     = new cmCTestBuildHandler;
-  this->CoverageHandler  = new cmCTestCoverageHandler;
-  this->ScriptHandler    = new cmCTestScriptHandler;
-  this->TestHandler      = new cmCTestTestHandler;
-  this->UpdateHandler    = new cmCTestUpdateHandler;
-  this->ConfigureHandler = new cmCTestConfigureHandler;
+  m_TestingHandlers["build"]     = new cmCTestBuildHandler;
+  m_TestingHandlers["coverage"]  = new cmCTestCoverageHandler;
+  m_TestingHandlers["script"]    = new cmCTestScriptHandler;
+  m_TestingHandlers["test"]      = new cmCTestTestHandler;
+  m_TestingHandlers["update"]    = new cmCTestUpdateHandler;
+  m_TestingHandlers["configure"] = new cmCTestConfigureHandler;
+  m_TestingHandlers["memcheck"]  = new cmCTestMemCheckHandler;
 
-  this->BuildHandler->SetCTestInstance(this);
-  this->CoverageHandler->SetCTestInstance(this);
-  this->ScriptHandler->SetCTestInstance(this);
-  this->TestHandler->SetCTestInstance(this);
-  this->UpdateHandler->SetCTestInstance(this);
-  this->ConfigureHandler->SetCTestInstance(this);
+  cmCTest::t_TestingHandlers::iterator it;
+  for ( it = m_TestingHandlers.begin(); it != m_TestingHandlers.end(); ++ it )
+    {
+    it->second->SetCTestInstance(this);
+    }
 }
 
 cmCTest::~cmCTest() 
 { 
-  delete this->BuildHandler;
-  delete this->CoverageHandler;
-  delete this->ScriptHandler;
-  delete this->TestHandler;
-  delete this->UpdateHandler;
-  delete this->ConfigureHandler;
+  cmCTest::t_TestingHandlers::iterator it;
+  for ( it = m_TestingHandlers.begin(); it != m_TestingHandlers.end(); ++ it )
+    {
+    delete it->second;
+    it->second = 0;
+    }
 }
 
 int cmCTest::Initialize()
@@ -727,7 +728,7 @@ int cmCTest::ProcessTests()
     }
   if ( m_Tests[UPDATE_TEST] || m_Tests[ALL_TEST] )
     {
-    update_count = this->UpdateHandler->UpdateDirectory(); 
+    update_count = m_TestingHandlers["update"]->ProcessHandler(); 
     if ( update_count < 0 )
       {
       res |= cmCTest::UPDATE_ERRORS;
@@ -739,7 +740,7 @@ int cmCTest::ProcessTests()
     }
   if ( m_Tests[CONFIGURE_TEST] || m_Tests[ALL_TEST] )
     {
-    if (this->ConfigureHandler->ConfigureDirectory())
+    if (m_TestingHandlers["configure"]->ProcessHandler() < 0)
       {
       res |= cmCTest::CONFIGURE_ERRORS;
       }
@@ -747,7 +748,7 @@ int cmCTest::ProcessTests()
   if ( m_Tests[BUILD_TEST] || m_Tests[ALL_TEST] )
     {
     this->UpdateCTestConfiguration();
-    if (this->BuildHandler->BuildDirectory())
+    if (m_TestingHandlers["build"]->ProcessHandler() < 0)
       {
       res |= cmCTest::BUILD_ERRORS;
       }
@@ -755,7 +756,7 @@ int cmCTest::ProcessTests()
   if ( m_Tests[TEST_TEST] || m_Tests[ALL_TEST] || notest )
     {
     this->UpdateCTestConfiguration();
-    if (this->TestHandler->TestDirectory(false))
+    if (m_TestingHandlers["test"]->ProcessHandler() < 0)
       {
       res |= cmCTest::TEST_ERRORS;
       }
@@ -763,7 +764,7 @@ int cmCTest::ProcessTests()
   if ( m_Tests[COVERAGE_TEST] || m_Tests[ALL_TEST] )
     {
     this->UpdateCTestConfiguration();
-    if (this->CoverageHandler->CoverageDirectory())
+    if (m_TestingHandlers["coverage"]->ProcessHandler() < 0)
       {
       res |= cmCTest::COVERAGE_ERRORS;
       }
@@ -771,7 +772,7 @@ int cmCTest::ProcessTests()
   if ( m_Tests[MEMCHECK_TEST] || m_Tests[ALL_TEST] )
     {
     this->UpdateCTestConfiguration();
-    if (this->TestHandler->TestDirectory(true))
+    if (m_TestingHandlers["memcheck"]->ProcessHandler() < 0)
       {
       res |= cmCTest::MEMORY_ERRORS;
       }
@@ -1181,12 +1182,11 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
     if( arg.find("-V",0) == 0 || arg.find("--verbose",0) == 0 )
       {
       this->m_Verbose = true;
-      this->BuildHandler->SetVerbose(this->m_Verbose);
-      this->ConfigureHandler->SetVerbose(this->m_Verbose);
-      this->CoverageHandler->SetVerbose(this->m_Verbose);
-      this->ScriptHandler->SetVerbose(this->m_Verbose);
-      this->TestHandler->SetVerbose(this->m_Verbose);
-      this->UpdateHandler->SetVerbose(this->m_Verbose);
+      cmCTest::t_TestingHandlers::iterator it;
+      for ( it = m_TestingHandlers.begin(); it != m_TestingHandlers.end(); ++ it )
+        {
+        it->second->SetVerbose(this->m_Verbose);
+        }
       }
 
     if( arg.find("-N",0) == 0 || arg.find("--show-only",0) == 0 )
@@ -1198,7 +1198,8 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
       {
       this->m_RunConfigurationScript = true;
       i++;
-      this->ScriptHandler->AddConfigurationScript(args[i].c_str());
+      cmCTestScriptHandler* ch = static_cast<cmCTestScriptHandler*>(m_TestingHandlers["script"]);
+      ch->AddConfigurationScript(args[i].c_str());
       }
 
     if( arg.find("--tomorrow-tag",0) == 0 )
@@ -1468,24 +1469,28 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
     if(arg.find("-I",0) == 0 && i < args.size() - 1)
       {
       i++;
-      this->TestHandler->SetTestsToRunInformation(args[i].c_str());
-      }
-    if(arg.find("-U",0) == 0)
-      {
-      this->TestHandler->SetUseUnion(true);
-      }
-    if(arg.find("-R",0) == 0 && i < args.size() - 1)
-      {
-      this->TestHandler->UseIncludeRegExp();
+      cmCTestTestHandler* th = static_cast<cmCTestTestHandler*>(m_TestingHandlers["test"]);
+      th->SetTestsToRunInformation(args[i].c_str());          
+      }                                                       
+    if(arg.find("-U",0) == 0)                                 
+      {                                                       
+      cmCTestTestHandler* th = static_cast<cmCTestTestHandler*>(m_TestingHandlers["test"]);
+      th->SetUseUnion(true);                                  
+      }                                                       
+    if(arg.find("-R",0) == 0 && i < args.size() - 1)          
+      {                                                       
+      cmCTestTestHandler* th = static_cast<cmCTestTestHandler*>(m_TestingHandlers["test"]);
+      th->UseIncludeRegExp();                                 
+      i++;                                                    
+      th->SetIncludeRegExp(args[i].c_str());                  
+      }                                                       
+                                                              
+    if(arg.find("-E",0) == 0 && i < args.size() - 1)          
+      {                                                       
+      cmCTestTestHandler* th = static_cast<cmCTestTestHandler*>(m_TestingHandlers["test"]);
+      th->UseExcludeRegExp();
       i++;
-      this->TestHandler->SetIncludeRegExp(args[i].c_str());
-      }
-
-    if(arg.find("-E",0) == 0 && i < args.size() - 1)
-      {
-      this->TestHandler->UseExcludeRegExp();
-      i++;
-      this->TestHandler->SetExcludeRegExp(args[i].c_str());
+      th->SetExcludeRegExp(args[i].c_str());
       }
 
     if(arg.find("-A",0) == 0 && i < args.size() - 1)
@@ -1607,7 +1612,7 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
     // call process directory
     if (this->m_RunConfigurationScript)
       {
-      res = this->ScriptHandler->RunConfigurationScript();
+      res = m_TestingHandlers["script"]->ProcessHandler();
       }
     else
       {
@@ -2138,8 +2143,11 @@ int cmCTest::ReadCustomConfigurationFileTree(const char* dir)
     dirs.insert(dirs.end(), ndirs.begin(), ndirs.end());
     }
 
-  this->BuildHandler->PopulateCustomVectors(mf);
-  this->TestHandler->PopulateCustomVectors(mf);
+  cmCTest::t_TestingHandlers::iterator it;
+  for ( it = m_TestingHandlers.begin(); it != m_TestingHandlers.end(); ++ it )
+    {
+    it->second->PopulateCustomVectors(mf);
+    }
   
   return 1;
 }

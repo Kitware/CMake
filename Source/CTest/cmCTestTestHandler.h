@@ -32,18 +32,21 @@ class cmCTestTestHandler : public cmCTestGenericHandler
 {
 public:
 
-  /*
+  /**
    * The main entry point for this class
    */
-  int TestDirectory(bool memcheck);
+  int ProcessHandler();
   
-  /*
+  /**
    * When both -R and -I are used should te resulting test list be the
    * intersection or the union of the lists. By default it is the
    * intersection.
    */
   void SetUseUnion(bool val) { m_UseUnion = val; }
 
+  /**
+   * This method is called when reading CTest custom file
+   */
   void PopulateCustomVectors(cmMakefile *mf);
   
   ///! Control the use of the regular expresisons, call these methods to turn
@@ -53,69 +56,13 @@ public:
   void SetIncludeRegExp(const char *);
   void SetExcludeRegExp(const char *);
   
-  cmCTestTestHandler();
 
   ///! pass the -I argument down
   void SetTestsToRunInformation(const char*);
 
-  typedef std::vector<cmListFileArgument> tm_VectorOfListFileArgs;
-  
-private:
+  cmCTestTestHandler();
 
-  enum { // Memory checkers
-    UNKNOWN = 0,
-    VALGRIND,
-    PURIFY,
-    BOUNDS_CHECKER
-  };
-
-  enum { // Memory faults
-    ABR = 0,
-    ABW,
-    ABWL,
-    COR,
-    EXU,
-    FFM,
-    FIM,
-    FMM,
-    FMR,
-    FMW,
-    FUM,
-    IPR,
-    IPW,
-    MAF,
-    MLK,
-    MPK,
-    NPR,
-    ODS,
-    PAR,
-    PLK,
-    UMC,
-    UMR,
-    NO_MEMORY_FAULT
-  };
-  
-  enum { // Program statuses
-    NOT_RUN = 0,
-    TIMEOUT,
-    SEGFAULT,
-    ILLEGAL,
-    INTERRUPT,
-    NUMERICAL,
-    OTHER_FAULT,
-    FAILED,
-    BAD_COMMAND,
-    COMPLETED
-  };
-
-  std::string              m_MemoryTester;
-  std::vector<cmStdString> m_MemoryTesterOptionsParsed;
-  std::string              m_MemoryTesterOptions;
-  int                      m_MemoryTesterStyle;
-  std::string              m_MemoryTesterOutputFile;
-  int                      m_MemoryTesterGlobalResults[NO_MEMORY_FAULT];
-
-  
+protected:
   struct cmCTestTestResult
   {
     std::string m_Name;
@@ -130,26 +77,48 @@ private:
     int         m_TestCount;
   };
 
+  typedef std::vector<cmListFileArgument> tm_VectorOfListFileArgs;
+
+  virtual int PreProcessHandler();
+  virtual int PostProcessHandler();
+  virtual void GenerateTestCommand(std::vector<const char*>& args);
+  int ExecuteCommands(std::vector<cmStdString>& vec);
+
+  double                  m_ElapsedTestingTime;
+
   typedef std::vector<cmCTestTestResult> tm_TestResultsVector;
   tm_TestResultsVector    m_TestResults;
 
-  int ExecuteCommands(std::vector<cmStdString>& vec);
+  std::vector<cmStdString> m_CustomTestsIgnore;
+  std::string             m_StartTest;
+  std::string             m_EndTest;
+  bool m_MemCheck;
 
-  ///! Initialize memory checking subsystem.
-  bool InitializeMemoryChecking();
+private:
+  enum { // Program statuses
+    NOT_RUN = 0,
+    TIMEOUT,
+    SEGFAULT,
+    ILLEGAL,
+    INTERRUPT,
+    NUMERICAL,
+    OTHER_FAULT,
+    FAILED,
+    BAD_COMMAND,
+    COMPLETED
+  };
+
 
   /**
    * Generate the Dart compatible output
    */
-  void GenerateDartTestOutput(std::ostream& os);
-  void GenerateDartMemCheckOutput(std::ostream& os);
+  virtual void GenerateDartOutput(std::ostream& os);
 
   /**
    * Run the test for a directory and any subdirectories
    */
   void ProcessDirectory(std::vector<cmStdString> &passed, 
-                        std::vector<cmStdString> &failed,
-                        bool memcheck);
+                        std::vector<cmStdString> &failed);
   
   struct cmCTestTestProperties
   {
@@ -163,7 +132,7 @@ private:
   /**
    * Get the list of tests in directory and subdirectories.
    */
-  void GetListOfTests(tm_ListOfTests* testlist, bool memcheck);
+  void GetListOfTests(tm_ListOfTests* testlist);
 
   /**
    * Find the executable for a test
@@ -175,17 +144,10 @@ private:
 
   std::vector<cmStdString> m_CustomPreTest;
   std::vector<cmStdString> m_CustomPostTest;
-  std::vector<cmStdString> m_CustomPreMemCheck;
-  std::vector<cmStdString> m_CustomPostMemCheck;
-  std::vector<cmStdString> m_CustomTestsIgnore;
-  std::vector<cmStdString> m_CustomMemCheckIgnore;
 
   int m_CustomMaximumPassedTestOutputSize;
   int m_CustomMaximumFailedTestOutputSize;
 
-  std::string             m_StartTest;
-  std::string             m_EndTest;
-  double                  m_ElapsedTestingTime;
   std::vector<int>        m_TestsToRun;
 
   bool m_UseIncludeRegExp;
@@ -195,16 +157,6 @@ private:
   std::string m_ExcludeRegExp;
 
   std::string GenerateRegressionImages(const std::string& xml);
-
-  //! Parse Valgrind/Purify/Bounds Checker result out of the output
-  //string. After running, log holds the output and results hold the
-  //different memmory errors.
-  bool ProcessMemCheckOutput(const std::string& str, 
-                             std::string& log, int* results);
-  bool ProcessMemCheckValgrindOutput(const std::string& str, 
-                                     std::string& log, int* results);
-  bool ProcessMemCheckPurifyOutput(const std::string& str, 
-                                   std::string& log, int* results);
 
   //! Clean test output to specified length
   bool CleanTestOutput(std::string& output, size_t length);

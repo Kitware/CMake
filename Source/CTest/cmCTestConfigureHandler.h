@@ -33,7 +33,7 @@ public:
   /*
    * The main entry point for this class
    */
-  int ConfigureDirectory();
+  int ProcessHandler();
   
   cmCTestConfigureHandler();
 };

@@ -70,11 +70,11 @@ public:
    * Add a script to run
    */
   void AddConfigurationScript(const char *);
-  
+
   /**
    * Run a dashboard using a specified confiuration script
    */
-  int RunConfigurationScript();
+  int ProcessHandler();
 
   /*
    * Run a script

@@ -34,7 +34,7 @@ cmCTestConfigureHandler::cmCTestConfigureHandler()
 //----------------------------------------------------------------------
 //clearly it would be nice if this were broken up into a few smaller
 //functions and commented...
-int cmCTestConfigureHandler::ConfigureDirectory()
+int cmCTestConfigureHandler::ProcessHandler()
 {
   std::cout << "Configure project" << std::endl;
   std::string cCommand = m_CTest->GetDartConfiguration("ConfigureCommand");
@@ -42,14 +42,14 @@ int cmCTestConfigureHandler::ConfigureDirectory()
     {
     std::cerr << "Cannot find ConfigureCommand key in the DartConfiguration.tcl" 
               << std::endl;
-    return 1;
+    return -1;
     }
 
   std::string buildDirectory = m_CTest->GetDartConfiguration("BuildDirectory");
   if ( buildDirectory.size() == 0 )
     {
     std::cerr << "Cannot find BuildDirectory  key in the DartConfiguration.tcl" << std::endl;
-    return 1;
+    return -1;
     }
 
   double elapsed_time_start = cmSystemTools::GetTime();
@@ -107,7 +107,7 @@ int cmCTestConfigureHandler::ConfigureDirectory()
   if (! res || retVal )
     {
     std::cerr << "Error(s) when updating the project" << std::endl;
-    return 1;
+    return -1;
     }
   return 0;
 }

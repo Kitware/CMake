@@ -37,7 +37,7 @@ public:
   /*
    * The main entry point for this class
    */
-  int BuildDirectory();
+  int ProcessHandler();
   
   cmCTestBuildHandler();
   

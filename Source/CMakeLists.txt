@@ -149,6 +149,7 @@ SET(CMTEST_SRCS ctest.cxx cmCTest.cxx
   CTest/cmCTestEmptyBinaryDirectoryCommand.cxx
   CTest/cmCTestRunScriptCommand.cxx
   CTest/cmCTestSleepCommand.cxx
+  CTest/cmCTestMemCheckHandler.cxx
   )
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/Source/CTest)

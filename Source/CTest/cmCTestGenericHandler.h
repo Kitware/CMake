@@ -39,7 +39,13 @@ public:
   /**
    * Populate internals from CTest custom scripts
    */
-  void PopulateCustomVectors(cmMakefile *) {}
+  virtual void PopulateCustomVectors(cmMakefile *) {}
+
+  /**
+   * Do the actual processing. Subclass has to override it.
+   * Return < 0 if error.
+   */
+  virtual int ProcessHandler() = 0;
 
   /**
    * Set the CTest instance
@@ -50,6 +56,7 @@ public:
    * Construct handler
    */
   cmCTestGenericHandler();
+  virtual ~cmCTestGenericHandler();
 
 protected:
   bool m_Verbose;

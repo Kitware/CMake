@@ -23,3 +23,8 @@ cmCTestGenericHandler::cmCTestGenericHandler()
   m_CTest = 0;
 }
 
+cmCTestGenericHandler::~cmCTestGenericHandler()
+{
+}
+
+

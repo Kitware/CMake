@@ -49,7 +49,7 @@ cmCTestUpdateHandler::cmCTestUpdateHandler()
 //----------------------------------------------------------------------
 //clearly it would be nice if this were broken up into a few smaller
 //functions and commented...
-int cmCTestUpdateHandler::UpdateDirectory()
+int cmCTestUpdateHandler::ProcessHandler()
 {
   int count = 0;
   std::string::size_type cc, kk;

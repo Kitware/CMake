@@ -124,7 +124,7 @@ void cmCTestScriptHandler::AddConfigurationScript(const char *script)
 //----------------------------------------------------------------------
 // the generic entry point for handling scripts, this routine will run all
 // the scripts provides a -S arguments
-int cmCTestScriptHandler::RunConfigurationScript()
+int cmCTestScriptHandler::ProcessHandler()
 {
   int res = 0;
   std::vector<cmStdString>::iterator it;
@@ -136,7 +136,11 @@ int cmCTestScriptHandler::RunConfigurationScript()
     res += this->RunConfigurationScript(
       cmSystemTools::CollapseFullPath(it->c_str()));
     }
-  return res;
+  if ( res )
+    {
+    return -1;
+    }
+  return 0;
 }
 
 void cmCTestScriptHandler::UpdateElapsedTime()
@@ -761,7 +765,7 @@ bool cmCTestScriptHandler::RunScript(cmCTest* ctest, const char *sname)
   cmCTestScriptHandler* sh = new cmCTestScriptHandler();
   sh->SetCTestInstance(ctest);
   sh->AddConfigurationScript(sname);
-  sh->RunConfigurationScript();
+  sh->ProcessHandler();
   delete sh;
   return true;
 }

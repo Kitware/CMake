@@ -154,7 +154,7 @@ bool cmCTestCoverageHandler::ShouldIDoCoverage(const char* file, const char* src
 //----------------------------------------------------------------------
 //clearly it would be nice if this were broken up into a few smaller
 //functions and commented...
-int cmCTestCoverageHandler::CoverageDirectory()
+int cmCTestCoverageHandler::ProcessHandler()
 {
   int error = 0;
 
@@ -330,7 +330,7 @@ int cmCTestCoverageHandler::CoverageDirectory()
       "Coverage.xml", covSumFile, true))
     {
     std::cerr << "Cannot open coverage summary file: Coverage.xml" << std::endl;
-    return 1;
+    return -1;
     }
 
   m_CTest->StartXML(covSumFile);
@@ -341,7 +341,7 @@ int cmCTestCoverageHandler::CoverageDirectory()
   int logFileCount = 0;
   if ( !this->StartLogFile(covLogFile, logFileCount) )
     {
-    return 1;
+    return -1;
     }
   totalCoverageMap::iterator fileIterator;
   int cnt = 0;
@@ -360,7 +360,7 @@ int cmCTestCoverageHandler::CoverageDirectory()
       logFileCount ++;
       if ( !this->StartLogFile(covLogFile, logFileCount) )
         {
-        return 1;
+        return -1;
         }
       }
     const std::string fullFileName = fileIterator->first;
@@ -503,5 +503,9 @@ int cmCTestCoverageHandler::CoverageDirectory()
 
   cmSystemTools::ChangeDirectory(currentDirectory.c_str());
 
-  return error;
+  if ( error )
+    {
+    return -1;
+    }
+  return 0;
 }
