@@ -17,6 +17,7 @@
 
 #include KWSYS_HEADER(ios/iostream)
 #include KWSYS_HEADER(ios/fstream)
+#include KWSYS_HEADER(ios/sstream)
 
 #ifdef _MSC_VER
 # pragma warning (disable: 4786)
@@ -1357,6 +1358,64 @@ bool SystemTools::SplitProgramPath(const char* in_name,
     }
   return true;
 }
+
+bool SystemTools::FindProgramPath(const char* argv0, 
+                                  kwsys_stl::string& pathOut,
+                                  kwsys_stl::string& errorMsg,
+                                  const char* exeName,
+                                  const char* buildDir,         
+                                  const char* installPrefix )
+{
+  kwsys_stl::vector<kwsys_stl::string> failures;
+  kwsys_stl::string self = argv0;
+  SystemTools::ConvertToUnixSlashes(self);
+  failures.push_back(argv0);
+  self = SystemTools::FindProgram(self.c_str());
+  if(!SystemTools::FileExists(self.c_str()))
+    {
+    if(buildDir)
+      {
+      kwsys_stl::string intdir = ".";
+#ifdef  CMAKE_INTDIR
+      intdir = CMAKE_INTDIR;
+#endif
+      self = buildDir;
+      self += "/bin/";
+      self += intdir;
+      self += "/";
+      self += exeName;
+      self += SystemTools::GetExecutableExtension();
+      }
+    }
+  if(installPrefix)
+    {
+    if(!SystemTools::FileExists(self.c_str()))
+      {
+      failures.push_back(self);
+      self = installPrefix;
+      self += "/bin/";
+      self +=  exeName;
+      }
+    }
+  if(!SystemTools::FileExists(self.c_str()))
+    {
+    failures.push_back(self);
+    kwsys_ios::ostringstream msg;
+    msg << "Can not find the command line program " << exeName << "\n";
+    msg << "  argv[0] = \"" << argv0 << "\"\n";
+    msg << "  Attempted paths:\n";
+    kwsys_stl::vector<kwsys_stl::string>::iterator i;
+    for(i=failures.begin(); i != failures.end(); ++i)
+      {
+      msg << "    \"" << i->c_str() << "\"\n";
+      }
+    errorMsg = msg.str();
+    return false;
+    }
+  pathOut = self;
+  return true;
+}
+
 
 kwsys_stl::string SystemTools::CollapseFullPath(const char* in_relative)
 {

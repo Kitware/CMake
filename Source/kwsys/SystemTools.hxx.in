@@ -188,6 +188,26 @@ public:
                                kwsys_stl::string& file,
                                bool errorReport = true);
   
+  /** 
+   *  Given argv[0] for a unix program find the full path to a running
+   *  executable.  argv0 can be null for windows WinMain programs
+   *  in this case GetModuleFileName will be used to find the path
+   *  to the running executable.  If argv0 is not a full path,
+   *  then this will try to find the full path.  If the path is not
+   *  found false is returned, if found true is returned.  An error
+   *  message of the attempted paths is stored in errorMsg.  
+   *  exeName is the name of the executable.
+   *  buildDir is a possibly null path to the build directory.
+   *  installPrefix is a possibly null pointer to the install directory.
+   
+   */
+  static bool FindProgramPath(const char* argv0, 
+                              kwsys_stl::string& pathOut,
+                              kwsys_stl::string& errorMsg,
+                              const char* exeName = 0,
+                              const char* buildDir = 0,         
+                              const char* installPrefix = 0);
+  
   /**
    * Given a path to a file or directory, convert it to a full path.
    * This collapses away relative paths relative to the cwd argument
