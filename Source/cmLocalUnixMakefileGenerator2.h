@@ -57,7 +57,22 @@ protected:
   void GenerateTargetRuleFile(const cmTarget& target);
   void GenerateObjectRuleFile(const cmTarget& target,
                               const cmSourceFile& source);
+  void WriteMakeRule(std::ostream& os,
+                     const char* comment,
+                     const char* preEcho,
+                     const char* target,
+                     const std::vector<std::string>& depends,
+                     const std::vector<std::string>& commands,
+                     const char* postEcho=0);
+  void WriteDivider(std::ostream& os);
   void WriteDisclaimer(std::ostream& os);
+  void WriteMakeVariables(std::ostream& makefileStream);
+  void WriteSpecialTargetsTop(std::ostream& makefileStream);
+  void WriteSpecialTargetsBottom(std::ostream& makefileStream);
+  void WriteTargetIncludes(std::ostream& makefileStream);
+  void WriteAllRule(std::ostream& makefileStream);
+  void WriteRequiresRule(std::ostream& ruleFileStream, const cmTarget& target,
+                         const char* targetFullPath);
   void WriteExecutableRule(std::ostream& ruleFileStream,
                            const char* ruleFileName,
                            const cmTarget& target,
