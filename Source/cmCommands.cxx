@@ -29,6 +29,7 @@
 #include "cmConfigureFileCommand.cxx"
 #include "cmConfigureFileNoAutoconf.cxx"
 #include "cmElseCommand.cxx"
+#include "cmEnableTestingCommand.cxx"
 #include "cmEndIfCommand.cxx"
 #include "cmExecProgramCommand.cxx"
 #include "cmFindFileCommand.cxx"
@@ -87,6 +88,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmConfigureFileCommand);
   commands.push_back(new cmConfigureFileNoAutoconf);
   commands.push_back(new cmElseCommand);
+  commands.push_back(new cmEnableTestingCommand);  
   commands.push_back(new cmEndIfCommand);
   commands.push_back(new cmExecProgramCommand);
   commands.push_back(new cmFindFileCommand);

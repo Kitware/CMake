@@ -43,14 +43,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // cmConfigureFileNoAutoconf
 bool cmConfigureFileNoAutoconf::InitialPass(std::vector<std::string>& args)
 {
-  if(args.size() != 2 )
-    {
-    this->SetError("called with incorrect number of arguments, expected 2");
-    return false;
-    }
-  m_InputFile = args[0];
-  m_OuputFile = args[1];
-  return true;
+  this->SetError("The CONFIGURE_FILE_NO_AUTOCONF method is deprecated, please use CONFIGURE_FILE instead.");
+  return false;
 }
 
 void cmConfigureFileNoAutoconf::FinalPass()

@@ -38,39 +38,13 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =========================================================================*/
-#include "cmAddTestCommand.h"
+#include "cmEnableTestingCommand.h"
 #include "cmCacheManager.h"
 
-// cmExecutableCommand
-bool cmAddTestCommand::InitialPass(std::vector<std::string>& args)
+// we do this in the final pass so that we now the subdirs have all 
+// been defined
+void cmEnableTestingCommand::FinalPass()
 {
-  // First argument is the name of the test
-  // Second argument is the name of the executable to run (a target or external
-  //    program)
-  // Remaining arguments are the arguments to pass to the executable
-  if(args.size() < 2 )
-    {
-    this->SetError("called with incorrect number of arguments");
-    return false;
-    }
-  
-  // store the aruments for the final pass
-  std::copy(args.begin(),args.end(),m_Args.begin());
-  return true;
-}
-
-// we append to the file in the final pass because Enable Testing command
-// creates the file in the final pass.
-void cmAddTestCommand::FinalPass()
-{
-
-  // Expand any CMake variables
-  std::vector<std::string>::iterator s;
-  for (s = m_Args.begin(); s != m_Args.end(); ++s)
-    {
-    m_Makefile->ExpandVariablesInString(*s);
-    }
-
   // Create a full path filename for output Testfile
   std::string fname;
   fname = m_Makefile->GetStartOutputDirectory();
@@ -84,21 +58,39 @@ void cmAddTestCommand::FinalPass()
     cmSystemTools::Error("Error Writing ", fname.c_str());
     return;
     }
-
-  std::vector<std::string>::iterator it;
-
-  // for each arg in the test
-  fout << "ADD_TEST(";
-  it = m_Args.begin();
-  fout << (*it).c_str();
-  ++it;
-  for (; it != m_Args.end(); ++it)
-    {
-    fout << " " << (*it).c_str();
-    }
-  fout << ")" << std::endl;
-  fout.close();
   
+  fout << "# CMake generated Testfile for " << std::endl
+       << "#\tSource directory: "
+       << m_Makefile->GetStartDirectory()
+       << std::endl
+       << "#\tBuild directory: " << m_Makefile->GetStartOutputDirectory()
+       << std::endl
+       << "# " << std::endl
+       << "# This file replicates the SUBDIRS() and ADD_TEST() commands from the source"
+       << std::endl
+       << "# tree CMakeLists.txt file, skipping any SUBDIRS() or ADD_TEST() commands"
+       << std::endl
+       << "# that are excluded by CMake control structures, i.e. IF() commands."
+       << std::endl
+       << "#" 
+       << std::endl << std::endl;
+
+  // write out the subdirs for the current directory
+  if (!m_Makefile->GetSubDirectories().empty())
+    {
+    fout << "SUBDIRS(";
+    const std::vector<std::string>& subdirs = m_Makefile->GetSubDirectories();
+    std::vector<std::string>::const_iterator i = subdirs.begin();
+    fout << (*i).c_str();
+    ++i;
+    for(; i != subdirs.end(); ++i)
+      {
+      fout << " " << (*i).c_str();
+      }
+    fout << ")" << std::endl << std::endl;;
+    }
+  fout.close();  
+
   return;
 }
 

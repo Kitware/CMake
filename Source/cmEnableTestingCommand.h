@@ -38,18 +38,24 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =========================================================================*/
-#ifndef cmAddTestCommand_h
-#define cmAddTestCommand_h
+#ifndef cmEnableTestingCommand_h
+#define cmEnableTestingCommand_h
 
 #include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
-/** \class cmAddTestCommand
- * \brief Add a test to the lists of tests to run.
+/** \class cmEnableTestingCommand
+ * \brief Enable testing for this directory and below.
  *
- * cmAddTestCommand adds a test to the list of tests to run .
+ * Produce the output testfile. This produces a file in the build directory
+ * called CMakeTestfile with a syntax similar to CMakeLists.txt.  It contains
+ * the SUBDIRS() and ADD_TEST() commands from the source CMakeLists.txt
+ * file with CMake variables expanded.  Only the subdirs and tests
+ * within the valid control structures are replicated in Testfile
+ * (i.e. SUBDIRS() and ADD_TEST() commands within IF() commands that are
+ * not entered by CMake are not replicated in Testfile).
  */
-class cmAddTestCommand : public cmCommand
+class cmEnableTestingCommand : public cmCommand
 {
 public:
   /**
@@ -57,32 +63,41 @@ public:
    */
   virtual cmCommand* Clone() 
     {
-    return new cmAddTestCommand;
+    return new cmEnableTestingCommand;
     }
+
+  /**
+   * This determines if the command gets propagated down
+   * to makefiles located in subdirectories.
+   */
+  virtual bool IsInherited() {return true;}
 
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool InitialPass(std::vector<std::string>& args);
+  virtual bool InitialPass(std::vector<std::string>& args) {
+    return true;};
 
   /**
    * This is called at the end after all the information
-   * specified by the command is accumulated. 
+   * specified by the command is accumulated. Most commands do
+   * not implement this method.  At this point, reading and
+   * writing to the cache can be done.
    */
   virtual void FinalPass();
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "ADD_TEST";}
+  virtual const char* GetName() { return "ENABLE_TESTING";}
 
   /**
    * Succinct documentation.
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Add a test to the project with the specified arguments.";
+    return "Enable testing for this directory and below.";
     }
   
   /**
@@ -91,18 +106,11 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "ADD_TEST(testname exename arg1 arg2 arg3 ...)\n"
-      "This command adds a test target to the current directory. "
-      "The tests are run by the testing subsystem by executing exename "
-      "with the specified arguments. exename can be either an executable "
-      "built by built by this project or an arbitrary executable on the "
-      "system (like tclsh).";
+      "ENABLE_TESTING()\n"
+      "Enables testing for this directory and below. See also the ADD_TEST command.";
     }
   
-  cmTypeMacro(cmAddTestCommand, cmCommand);
-
-private:
-  std::vector<std::string> m_Args;
+  cmTypeMacro(cmEnableTestingCommand, cmCommand);
 };
 
 

@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 bool cmTestsCommand::InitialPass(std::vector<std::string>& args)
 {
   // does nothing in CMake
+  this->SetError("The TEST command is deprecated, please use ADD_TEST instead.");  
   return true;
 }
 
