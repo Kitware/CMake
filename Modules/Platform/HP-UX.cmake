@@ -21,7 +21,7 @@ ELSE(CMAKE_COMPILER_IS_GNUCC)
   SET(CMAKE_SHARED_LIBRARY_C_FLAGS "+Z")            # -pic 
   SET(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "-E -b -L/usr/lib")       # -shared
   SET(CMAKE_SHARED_LIBRARY_LINK_FLAGS "-Wl,+s")         # +s, flag for exe link to use shared lib
-  SET(CMAKE_SHARED_LIBRARY_RUNTIME_FLAG "-Wl,+b")       # -rpath
+  SET(CMAKE_SHARED_LIBRARY_RUNTIME_FLAG "+b")       # -rpath
 ENDIF(CMAKE_COMPILER_IS_GNUCC)
 
 # CXX compiler
