@@ -668,12 +668,10 @@ struct RuleVariables
 
 static RuleVariables ruleReplaceVars[] =
 {
-  {"<CMAKE_CXX_COMPILER>", "CMAKE_CXX_COMPILER"},
   {"<CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS>", "CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS"},
   {"<CMAKE_SHARED_MODULE_CREATE_CXX_FLAGS>", "CMAKE_SHARED_MODULE_CREATE_CXX_FLAGS"}, 
   {"<CMAKE_CXX_LINK_FLAGS>", "CMAKE_CXX_LINK_FLAGS"},
 
-  {"<CMAKE_C_COMPILER>", "CMAKE_C_COMPILER"},
   {"<CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS>", "CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS"},
   {"<CMAKE_SHARED_MODULE_CREATE_C_FLAGS>", "CMAKE_SHARED_MODULE_CREATE_C_FLAGS"}, 
   {"<CMAKE_C_LINK_FLAGS>", "CMAKE_C_LINK_FLAGS"},
@@ -698,6 +696,12 @@ cmLocalUnixMakefileGenerator::ExpandRuleVariables(std::string& s,
                                                   const char* targetBase,
                                                   const char* linkFlags)
 { 
+  std::string cxxcompiler = this->ConvertToOutputForExisting(
+    this->GetSafeDefinition("CMAKE_CXX_COMPILER"));
+  std::string ccompiler = this->ConvertToOutputForExisting(
+    this->GetSafeDefinition("CMAKE_C_COMPILER"));
+  cmSystemTools::ReplaceString(s, "<CMAKE_CXX_COMPILER>", cxxcompiler.c_str());
+  cmSystemTools::ReplaceString(s, "<CMAKE_C_COMPILER>", ccompiler.c_str());
   if(linkFlags)
     {
     cmSystemTools::ReplaceString(s, "<LINK_FLAGS>", linkFlags);
@@ -1767,7 +1771,12 @@ std::string
 cmLocalUnixMakefileGenerator::ConvertToOutputForExisting(const char* p)
 {
   std::string ret = cmSystemTools::ConvertToOutputPath(p);
-  cmSystemTools::GetShortPath(ret.c_str(), ret);
+  // if there are spaces in the path, then get the short path version
+  // if there is one
+  if(ret.find(' ') != std::string::npos)
+    {
+    cmSystemTools::GetShortPath(ret.c_str(), ret);
+    }
   return ret;
 }
 
