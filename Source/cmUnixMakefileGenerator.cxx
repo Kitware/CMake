@@ -397,15 +397,6 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
       libDir != libdirs.end(); ++libDir)
     { 
     std::string libpath = cmSystemTools::EscapeSpaces(libDir->c_str());
-    if (m_LibraryOutputPath.size())
-      {
-      if(m_LibraryOutputPath != libpath 
-         && (libpath.find(m_Makefile->GetHomeOutputDirectory()) 
-             != std::string::npos))
-        {
-        emitted.insert(libpath);
-        }
-      }
     if(emitted.insert(libpath).second)
       {
       std::string::size_type pos = libDir->find("-L");
@@ -422,7 +413,7 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
       linkLibs += " ";
       }
     }
-  
+
   std::string librariesLinked;
   const cmTarget::LinkLibraries& libs = tgt.GetLinkLibraries();
   for(cmTarget::LinkLibraries::const_iterator lib = libs.begin();
@@ -646,8 +637,11 @@ void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
         this->OutputExecutableRule(fout, l->first.c_str(), l->second);
         break;
       case cmTarget::UTILITY:
+        // This is handled by the OutputCustomRules method
       case cmTarget::INSTALL_FILES:
+        // This is handled by the OutputInstallRules method
       case cmTarget::INSTALL_PROGRAMS:
+        // This is handled by the OutputInstallRules method
 	break;
       }
     }
@@ -1061,7 +1055,6 @@ void cmUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
       fout << "# End of source group \"" << name.c_str() << "\"\n\n";
       }
     }  
-
 }
 
 
@@ -1387,6 +1380,55 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
     }
 }
 
+void 
+cmUnixMakefileGenerator::
+OutputBuildObjectFromSource(std::ostream& fout,
+                            const char* shortName,
+                            const cmSourceFile& source,
+                            const char* extraCompileFlags,
+                            bool shared)
+{
+            
+  std::string comment = "Build ";
+  std::string objectFile = std::string(shortName) + ".o";
+  comment += objectFile + "  From ";
+  comment += source.GetFullPath();
+  std::string compileCommand;
+  std::string ext = source.GetSourceExtension();
+  if(ext == "c" )
+    {
+    compileCommand = "$(CMAKE_C_COMPILER) $(CMAKE_CFLAGS) ";
+    compileCommand += extraCompileFlags;
+    if(shared)
+      {
+      compileCommand += "$(CMAKE_SHLIB_CFLAGS) ";
+      }
+    compileCommand += "$(INCLUDE_FLAGS) -c ";
+    compileCommand += source.GetFullPath();
+    compileCommand += " -o ";
+    compileCommand += objectFile;
+    }
+  else
+    {
+    compileCommand = "$(CMAKE_CXX_COMPILER) $(CMAKE_CXXFLAGS) ";
+    compileCommand += extraCompileFlags;
+    if(shared)
+      {
+      compileCommand += "$(CMAKE_SHLIB_CFLAGS) ";
+      }
+    compileCommand += "$(INCLUDE_FLAGS) -c ";
+    compileCommand += source.GetFullPath();
+    compileCommand += " -o ";
+    compileCommand += objectFile;
+    }
+  this->OutputMakeRule(fout,
+                       comment.c_str(),
+                       objectFile.c_str(),
+                       source.GetFullPath().c_str(),
+                       compileCommand.c_str());
+}
+
+
 
 void cmUnixMakefileGenerator::OutputSourceObjectBuildRules(std::ostream& fout)
 {
@@ -1446,43 +1488,11 @@ void cmUnixMakefileGenerator::OutputSourceObjectBuildRules(std::ostream& fout)
         // Only output a rule for each .o once.
         if(rules.find(shortName) == rules.end())
           {
-          std::string comment = "Build ";
-          std::string objectFile = shortName + ".o";
-          comment += objectFile + "  From ";
-          comment += source->GetFullPath();
-          std::string compileCommand;
-          std::string ext = source->GetSourceExtension();
-          if(ext == "c" )
-            {
-            compileCommand = "$(CMAKE_C_COMPILER) $(CMAKE_CFLAGS) ";
-            compileCommand += exportsDef;
-            if(shared)
-              {
-              compileCommand += "$(CMAKE_SHLIB_CFLAGS) ";
-              }
-            compileCommand += "$(INCLUDE_FLAGS) -c ";
-            compileCommand += source->GetFullPath();
-            compileCommand += " -o ";
-            compileCommand += objectFile;
-            }
-          else
-            {
-            compileCommand = "$(CMAKE_CXX_COMPILER) $(CMAKE_CXXFLAGS) ";
-            compileCommand += exportsDef;
-            if(shared)
-              {
-              compileCommand += "$(CMAKE_SHLIB_CFLAGS) ";
-              }
-            compileCommand += "$(INCLUDE_FLAGS) -c ";
-            compileCommand += source->GetFullPath();
-            compileCommand += " -o ";
-            compileCommand += objectFile;
-            }
-          this->OutputMakeRule(fout,
-                               comment.c_str(),
-                               objectFile.c_str(),
-                               source->GetFullPath().c_str(),
-                               compileCommand.c_str());
+          this->OutputBuildObjectFromSource(fout,
+                                            shortName.c_str(),
+                                            *source,
+                                            exportsDef.c_str(),
+                                            shared);
           rules.insert(shortName);
           }
         }

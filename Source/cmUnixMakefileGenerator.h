@@ -56,7 +56,7 @@ public:
   ///! Set cache only and recurse to false by default.
   cmUnixMakefileGenerator();
 
-  ~cmUnixMakefileGenerator();
+  virtual ~cmUnixMakefileGenerator();
   
   ///! Get the name for the generator.
   virtual const char* GetName() {return "Unix Makefiles";}
@@ -91,7 +91,7 @@ public:
    * in the makefile.  These would have been generated
    * by the class cmMakeDepend.
    */
-  void OutputObjectDepends(std::ostream&);
+  virtual void OutputObjectDepends(std::ostream&);
 
   /**
    * Try to determine system infomation such as shared library
@@ -99,36 +99,46 @@ public:
    */
   virtual void ComputeSystemInfo();
 
-private:
-  void RecursiveGenerateCacheOnly();
-  void ProcessDepends(const cmMakeDepend &md);
-  void GenerateCacheOnly();
-  void OutputMakefile(const char* file);
-  void OutputTargetRules(std::ostream& fout);
-  void OutputLinkLibraries(std::ostream&, const char* name, const cmTarget &);
+protected:
+  virtual void RecursiveGenerateCacheOnly();
+  virtual void ProcessDepends(const cmMakeDepend &md);
+  virtual void GenerateCacheOnly();
+  virtual void OutputMakefile(const char* file);
+  virtual void OutputTargetRules(std::ostream& fout);
+  virtual void OutputLinkLibraries(std::ostream&, const char* name, const cmTarget &);
 
-  void OutputSharedLibraryRule(std::ostream&, const char* name, const cmTarget &);
-  void OutputModuleLibraryRule(std::ostream&, const char* name, const cmTarget &);
-  void OutputStaticLibraryRule(std::ostream&, const char* name, const cmTarget &);
-  void OutputExecutableRule(std::ostream&, const char* name, const cmTarget &);
+  virtual void OutputSharedLibraryRule(std::ostream&, const char* name,
+                                       const cmTarget &);
+  virtual void OutputModuleLibraryRule(std::ostream&, const char* name, 
+                                       const cmTarget &);
+  virtual void OutputStaticLibraryRule(std::ostream&, const char* name,
+                                       const cmTarget &);
+  virtual void OutputExecutableRule(std::ostream&, const char* name,
+                                    const cmTarget &);
   
-  void OutputTargets(std::ostream&);
-  void OutputSubDirectoryRules(std::ostream&);
-  void OutputDependInformation(std::ostream&);
-  void OutputDependLibs(std::ostream&);
-  void OutputLibDepend(std::ostream&, const char*);
-  void OutputCustomRules(std::ostream&);
-  void OutputMakeVariables(std::ostream&);
-  void OutputMakeRules(std::ostream&);
-  void OutputInstallRules(std::ostream&);
-  void OutputSourceObjectBuildRules(std::ostream& fout);
-  void OutputSubDirectoryVars(std::ostream& fout,
-                              const char* var,
-                              const char* target,
-                              const char* target1,
-                              const char* target2,
-                              const std::vector<std::string>& SubDirectories);
-  void OutputMakeRule(std::ostream&, 
+  virtual void OutputTargets(std::ostream&);
+  virtual void OutputSubDirectoryRules(std::ostream&);
+  virtual void OutputDependLibs(std::ostream&);
+  virtual void OutputLibDepend(std::ostream&, const char*);
+  virtual void OutputCustomRules(std::ostream&);
+  virtual void OutputMakeVariables(std::ostream&);
+  virtual void OutputMakeRules(std::ostream&);
+  virtual void OutputInstallRules(std::ostream&);
+  virtual void OutputSourceObjectBuildRules(std::ostream& fout);
+  virtual void OutputBuildObjectFromSource(std::ostream& fout,
+                                           const char* shortName,
+                                           const cmSourceFile& source,
+                                           const char* extraCompileFlags,
+                                           bool sharedTarget);
+  
+  virtual void OutputSubDirectoryVars(std::ostream& fout,
+                                      const char* var,
+                                      const char* target,
+                                      const char* target1,
+                                      const char* target2,
+                                      const std::vector<std::string>&
+                                      SubDirectories);
+  virtual void OutputMakeRule(std::ostream&, 
                       const char* comment,
                       const char* target,
                       const char* depends, 
