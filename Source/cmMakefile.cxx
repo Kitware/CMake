@@ -1342,8 +1342,6 @@ int cmMakefile::TryCompile(const char *srcdir, const char *bindir,
                            const char *projectName, const char *targetName,
                            const std::vector<std::string> *cmakeArgs)
 {
-  bool output = cmSystemTools::GetRunCommandOutput();
-  cmSystemTools::DisableRunCommandOutput();
   // does the binary directory exist ? If not create it...
   if (!cmSystemTools::FileIsDirectory(bindir))
     {
@@ -1369,10 +1367,6 @@ int cmMakefile::TryCompile(const char *srcdir, const char *bindir,
       "Internal CMake error, TryCompile bad GlobalGenerator");
     // return to the original directory
     cmSystemTools::ChangeDirectory(cwd.c_str());
-    if ( output )
-      {
-      cmSystemTools::EnableRunCommandOutput();
-      }
     return 1;
     }
   cm.SetGlobalGenerator(gg);
@@ -1399,10 +1393,6 @@ int cmMakefile::TryCompile(const char *srcdir, const char *bindir,
       "Internal CMake error, TryCompile configure of cmake failed");
     // return to the original directory
     cmSystemTools::ChangeDirectory(cwd.c_str());
-    if ( output )
-      {
-      cmSystemTools::EnableRunCommandOutput();
-      }
     return 1;
     }
 
@@ -1412,10 +1402,6 @@ int cmMakefile::TryCompile(const char *srcdir, const char *bindir,
       "Internal CMake error, TryCompile generation of cmake failed");
     // return to the original directory
     cmSystemTools::ChangeDirectory(cwd.c_str());
-    if ( output )
-      {
-      cmSystemTools::EnableRunCommandOutput();
-      }
     return 1;
     }
 
@@ -1426,10 +1412,6 @@ int cmMakefile::TryCompile(const char *srcdir, const char *bindir,
                                                        targetName);
 
   cmSystemTools::ChangeDirectory(cwd.c_str());
-  if ( output )
-    {
-    cmSystemTools::EnableRunCommandOutput();
-    }
   return ret;
 }
 
