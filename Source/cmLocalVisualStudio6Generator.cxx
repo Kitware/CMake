@@ -1051,7 +1051,6 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
       = m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX");
     cmSystemTools::ReplaceString(line, "DEBUG_POSTFIX", 
       debugPostfix?debugPostfix:"");
-    cmGlobalGenerator* gen = this->GetGlobalGenerator();
     // store flags for each configuration
     std::string flags = " ";
     std::string flagsRelease = " ";
