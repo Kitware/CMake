@@ -46,6 +46,7 @@ CMAKE_CXX_SOURCES="\
   cmSystemTools \
   cmGlobalUnixMakefileGenerator \
   cmLocalUnixMakefileGenerator \
+  cmLocalUnixMakefileGenerator2 \
   cmCommands \
   cmTarget \
   cmCustomCommand \

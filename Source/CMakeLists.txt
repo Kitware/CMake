@@ -21,6 +21,7 @@ cmGlobalGenerator.cxx
 cmGlobalUnixMakefileGenerator.cxx
 cmLocalGenerator.cxx
 cmLocalUnixMakefileGenerator.cxx
+cmLocalUnixMakefileGenerator2.cxx
 cmVariableWatch.cxx
 cmVersion.cxx
 cmake.h
