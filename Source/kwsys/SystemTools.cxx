@@ -1157,7 +1157,23 @@ kwsys_stl::string SystemTools::GetLastSystemError()
 
 bool SystemTools::RemoveFile(const char* source)
 {
-  return unlink(source) != 0 ? false : true;
+#ifdef _WIN32
+  mode_t mode;
+  if ( !SystemTools::GetPermissions(source, mode) )
+    {
+    return false;
+    }
+  /* Win32 unlink is stupid --- it fails if the file is read-only  */
+  SystemTools::SetPermissions(source, S_IWRITE);
+#endif
+  bool res = unlink(source) != 0 ? false : true;
+#ifdef _WIN32
+  if ( !res )
+    {
+    SystemTools::SetPermissions(source, mode);
+    }
+#endif
+  return res;
 }
 
 bool SystemTools::RemoveADirectory(const char* source)
