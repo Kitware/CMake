@@ -1565,6 +1565,18 @@ void SystemTools::AddKeepPath(const char* dir)
 
 void SystemTools::CheckTranslationPath(kwsys_stl::string & path)
 {
+  // Do not translate paths that are too short to have meaningful
+  // translations.
+  if(path.size() < 2)
+    {
+    return;
+    }
+
+  // Always add a trailing slash before translation.  It does not
+  // matter if this adds an extra slash, but we do not want to
+  // translate part of a directory (like the foo part of foo-dir).
+  path += "/";
+
   // In case a file was specified we still have to go through this:
   // Now convert any path found in the table back to the one desired:
   kwsys_stl::map<kwsys_stl::string,kwsys_stl::string>::const_iterator it;
@@ -1573,21 +1585,14 @@ void SystemTools::CheckTranslationPath(kwsys_stl::string & path)
       ++it )
     {
     // We need to check of the path is a substring of the other path
-    // But also check that the last character is a '/' otherwise we could
-    // have some weird case such as /tmp/VTK and /tmp/VTK-bin
-    if(path.size() > 1 && path[path.size()-1] != '/')
-      {
-      // Do not append '/' on a program name:
-      if( SystemTools::FileIsDirectory( path.c_str() ) )
-        {
-        path += "/";
-        }
-      }
     if(path.find( it->first ) == 0)
       {
       path = path.replace( 0, it->first.size(), it->second);
       }
     }
+
+  // Remove the trailing slash we added before.
+  path.erase(path.end()-1, path.end());
 }
 
 kwsys_stl::string SystemTools::CollapseFullPath(const char* in_relative,
