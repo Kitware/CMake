@@ -40,7 +40,7 @@ SET(EXECUTABLE_OUTPUT_PATH ${CMake_BINARY_DIR}/Source CACHE PATH
 
 INCLUDE_REGULAR_EXPRESSION("^(\\.\\./)?(cm|CMake|form|ctest).*")
 
-INSTALL_FILES(/man/man1 "cmake\\.1")
+INSTALL_FILES(/man/man1 "^cmake\\.1$")
 
 CONFIGURE_FILE(${CMake_SOURCE_DIR}/Tests/.NoDartCoverage
                ${CMake_BINARY_DIR}/Tests/.NoDartCoverage)
