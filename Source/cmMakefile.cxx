@@ -2310,6 +2310,7 @@ void cmMakefile::ConfigureString(const std::string& input,
 int cmMakefile::ConfigureFile(const char* infile, const char* outfile, 
   bool copyonly, bool atOnly, bool escapeQuotes)
 {
+  int res = 1;
   if ( !cmSystemTools::FileExists(infile) )
     {
     cmSystemTools::Error("File ", infile, " does not exist.");
@@ -2369,12 +2370,18 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
     // close the files before attempting to copy
     fin.close();
     fout.close();
-    cmSystemTools::CopyFileIfDifferent(tempOutputFile.c_str(),
-      soutfile.c_str());
+    if ( !cmSystemTools::CopyFileIfDifferent(tempOutputFile.c_str(),
+      soutfile.c_str()) )
+      {
+      res = 0;
+      }
+    else
+      {
+      cmSystemTools::SetPermissions(soutfile.c_str(), perm);
+      }
     cmSystemTools::RemoveFile(tempOutputFile.c_str());
-    cmSystemTools::SetPermissions(soutfile.c_str(), perm);
     }
-  return 1;
+  return res;
 }
 
 void cmMakefile::AddWrittenFile(const char* file)
