@@ -101,7 +101,9 @@ IF(BUILD_TESTING)
     ADD_CUSTOM_TARGET(ExperimentalSubmit 
     ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Submit)
 
-  IF (UNIX)
+# for non IDE based builds nmake and make 
+# add all these extra targets 
+  IF(${CMAKE_BUILD_TOOL} MATCH make)
     # Make targets for Experimental builds
     ADD_CUSTOM_TARGET(ExperimentalStart
     ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Start)
