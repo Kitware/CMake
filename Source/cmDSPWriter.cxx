@@ -73,7 +73,7 @@ void cmDSPWriter::OutputDSPFile()
   for(i = includes.begin(); i != includes.end(); ++i)
     {
     m_IncludeOptions +=  " /I ";
-    m_IncludeOptions += cmSystemTools::EscapeSpaces(i->c_str());
+    m_IncludeOptions += cmSystemTools::ConvertToWindowsSlashesAndCleanUp(cmSystemTools::EscapeSpaces(i->c_str()));
     }
   
   // Create the DSP or set of DSP's for libraries and executables
