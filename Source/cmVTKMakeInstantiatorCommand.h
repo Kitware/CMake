@@ -69,13 +69,10 @@ public:
       "The generated class implementation files always go in the build\n"
       "directory corresponding to the CMakeLists.txt file containing\n"
       "the command.  This is the default location for the header.\n"
-      "The GROUP_SIZE option must be followed by a positive integer.\n"
-      "As an implementation detail, the registered creation functions may\n"
-      "be split up into multiple files.  The groupSize option specifies\n"
-      "the number of classes per file.  Its default is 10.  The INCLUDES\n"
-      "option can be followed by a list of zero or more files.  These files\n"
-      "will be #included by the generated instantiator header, and can be\n"
-      "used to gain access to the specified exportMacro in the C++ code.";
+      "The INCLUDES option can be followed by a list of zero or more files.\n"
+      "These files will be #included by the generated instantiator header,\n"
+      "and can be used to gain access to the specified exportMacro in the\n"
+      " C++ code.";
     }
   
   cmTypeMacro(cmVTKMakeInstantiatorCommand, cmCommand);
@@ -86,12 +83,8 @@ protected:
   std::vector<cmStdString> m_Includes;
   std::vector<cmStdString> m_Classes;
   
-  std::string GenerateCreationFileName(unsigned int group);
-  
   void GenerateHeaderFile(std::ostream&);
   void GenerateImplementationFile(std::ostream&);
-  void GenerateCreationFile(std::ostream&, unsigned int groupStart,
-                            unsigned int groupSize);
 };
 
 

@@ -35,7 +35,6 @@ cmVTKMakeInstantiatorCommand
   
   std::vector<cmStdString> inSourceLists;
   m_ExportMacro = "-";
-  unsigned int groupSize = 10;
   bool includesMode = false;
   
   // Find the path of the files to be generated.
@@ -44,20 +43,7 @@ cmVTKMakeInstantiatorCommand
   
   for(unsigned int i=2;i < args.size();++i)
     {
-    if(args[i] == "GROUP_SIZE")
-      {
-      includesMode = false;
-      if(++i < args.size())
-        {
-        groupSize = atoi(args[i].c_str());
-        }
-      else
-        {
-        this->SetError("GROUP_SIZE option used without value.");
-        return false;
-        }
-      }
-    else if(args[i] == "HEADER_LOCATION")
+    if(args[i] == "HEADER_LOCATION")
       {
       includesMode = false;
       if(++i < args.size())
@@ -160,54 +146,9 @@ cmVTKMakeInstantiatorCommand
   m_Makefile->AddSource(file);
   sourceListValue += file.GetSourceName() + ".cxx";
   }
-
-  size_t numClasses = m_Classes.size();
-  size_t numFullBlocks = numClasses / groupSize;
-  size_t lastBlockSize = numClasses % groupSize;
-  size_t numBlocks = numFullBlocks + ((lastBlockSize>0)? 1:0);
-
-  // Generate the files with the ::New() calls to each class.  These
-  // are done in groups to keep the translation unit size smaller.
-  for(unsigned int block=0; block < numBlocks;++block)
-    {
-    std::string fileName = this->GenerateCreationFileName(block);    
-    std::string fullName = filePath+"/"+fileName;
-    
-    // Generate the output file with copy-if-different.
-    {
-    cmGeneratedFileStream fout(fullName.c_str());
-    
-    unsigned int thisBlockSize =
-      (block < numFullBlocks)? groupSize:lastBlockSize;
-    
-    // Actually generate the code in the file.
-    this->GenerateCreationFile(fout.GetStream(),
-                               block*groupSize, thisBlockSize);
-    }
-    
-    // Add the generated source file into the source list.
-    cmSourceFile file;
-    file.SetWrapExclude(true);
-    file.SetIsAnAbstractClass(false);
-    file.SetName(fileName.c_str(), filePath.c_str(),
-                 m_Makefile->GetSourceExtensions(),
-                 m_Makefile->GetHeaderExtensions());
-    m_Makefile->AddSource(file);
-    sourceListValue += ";";
-    sourceListValue += file.GetSourceName() + ".cxx";
-    }
-
+  
   m_Makefile->AddDefinition(args[1].c_str(), sourceListValue.c_str());  
   return true;
-}
-
-std::string
-cmVTKMakeInstantiatorCommand::GenerateCreationFileName(unsigned int block)
-{
-  cmStringStream nameStr;
-  nameStr << m_ClassName.c_str() << block << ".cxx";
-  std::string result = nameStr.str();
-  return result;
 }
 
 // Generates the class header file with the definition of the class
@@ -225,38 +166,28 @@ cmVTKMakeInstantiatorCommand
     {
     os << "#include \"" << m_Includes[i].c_str() << "\"\n";
     }
+  
+  // Write the instantiator class definition.
   os <<
-    "\n"
-    "class " << m_ClassName.c_str() << "Initialize;\n"
     "\n"
     "class " << m_ExportMacro.c_str() << " " << m_ClassName.c_str() << "\n"
     "{\n"
-    "  friend class " << m_ClassName.c_str() << "Initialize;\n"
-    "\n"
+    "public:\n"
+    "  " << m_ClassName.c_str() << "();\n"
+    "  ~" << m_ClassName.c_str() << "();\n"
+    "private:\n"
     "  static void ClassInitialize();\n"
     "  static void ClassFinalize();\n"
-    "\n";
-  
-  for(unsigned int i=0;i < m_Classes.size();++i)
-    {
-    os << "  static vtkObject* Create_" << m_Classes[i].c_str() << "();\n";
-    }
-  
-  // Write the initializer class to make sure the creation functions
-  // get registered when this generated header is included.
-  os <<
-    "};\n"
-    "\n"
-    "class " << m_ExportMacro.c_str() << " " << m_ClassName.c_str() << "Initialize\n"
-    "{\n"
-    "public:\n"
-    "  " << m_ClassName.c_str() << "Initialize();\n"
-    "  ~" << m_ClassName.c_str() << "Initialize();\n"
-    "private:\n"
     "  static unsigned int Count;\n"
     "};\n"
-    "\n"
-    "static " << m_ClassName.c_str() << "Initialize " << m_ClassName.c_str() << "Initializer;\n"
+    "\n";
+  
+  // Write the initialization instance to make sure the creation
+  // functions get registered when this generated header is included.
+  os <<
+    "static "
+     << m_ClassName.c_str() << " "
+     << m_ClassName.c_str() << "Initializer;\n"
     "\n"
     "#endif\n";  
 }
@@ -268,18 +199,28 @@ void
 cmVTKMakeInstantiatorCommand
 ::GenerateImplementationFile(std::ostream& os)
 {
-  // Write the ClassInitialize method to register all the creation functions.
+  // Include the instantiator class header.
   os <<
     "#include \"" << m_ClassName.c_str() << ".h\"\n"
+    "\n";
+  
+  // Write the extern declarations for all the creation functions.
+  for(unsigned int i=0;i < m_Classes.size();++i)
+    {
+    os << "extern vtkObject* vtkInstantiator" << m_Classes[i].c_str() << "New();\n";
+    }
+  
+  // Write the ClassInitialize method to register all the creation functions.
+  os <<
     "\n"
     "void " << m_ClassName.c_str() << "::ClassInitialize()\n"
     "{\n";
-    
+  
   for(unsigned int i=0;i < m_Classes.size();++i)
     {
     os << "  vtkInstantiator::RegisterInstantiator(\""
-       << m_Classes[i].c_str() << "\", " << m_ClassName.c_str() << "::Create_"
-       << m_Classes[i].c_str() << ");\n";
+       << m_Classes[i].c_str() << "\", vtkInstantiator"
+       << m_Classes[i].c_str() << "New);\n";
     }
   
   // Write the ClassFinalize method to unregister all the creation functions.
@@ -292,8 +233,8 @@ cmVTKMakeInstantiatorCommand
   for(unsigned int i=0;i < m_Classes.size();++i)
     {
     os << "  vtkInstantiator::UnRegisterInstantiator(\""
-       << m_Classes[i].c_str() << "\", " << m_ClassName.c_str() << "::Create_"
-       << m_Classes[i].c_str() << ");\n";
+       << m_Classes[i].c_str() << "\", vtkInstantiator"
+       << m_Classes[i].c_str() << "New);\n";
     }
   
   // Write the constructor and destructor of the initializer class to
@@ -302,50 +243,19 @@ cmVTKMakeInstantiatorCommand
   os <<
     "}\n"
     "\n" <<
-    m_ClassName.c_str() << "Initialize::" << m_ClassName.c_str() << "Initialize()\n"
+    m_ClassName.c_str() << "::" << m_ClassName.c_str() << "()\n"
     "{\n"
-    "  if(++" << m_ClassName.c_str() << "Initialize::Count == 1)\n"
+    "  if(++" << m_ClassName.c_str() << "::Count == 1)\n"
     "    { " << m_ClassName.c_str() << "::ClassInitialize(); }\n"
     "}\n"
     "\n" <<
-    m_ClassName.c_str() << "Initialize::~" << m_ClassName.c_str() << "Initialize()\n"
+    m_ClassName.c_str() << "::~" << m_ClassName.c_str() << "()\n"
     "{\n"
-    "  if(--" << m_ClassName.c_str() << "Initialize::Count == 0)\n"
+    "  if(--" << m_ClassName.c_str() << "::Count == 0)\n"
     "    { " << m_ClassName.c_str() << "::ClassFinalize(); }\n"
     "}\n"
     "\n"
     "// Number of translation units that include this class's header.\n"
     "// Purposely not initialized.  Default is static initialization to 0.\n"
-    "unsigned int " << m_ClassName.c_str() << "Initialize::Count;\n";
-}
-
-// Generates a file that includes the headers of the classes it knows
-// how to create and provides functions which create the classes with
-// the New() method.
-void
-cmVTKMakeInstantiatorCommand
-::GenerateCreationFile(std::ostream& os, unsigned int groupStart,
-                       unsigned int groupSize)
-{
-  // Need to include header of generated class.
-  os <<
-    "#include \"" << m_ClassName.c_str() << ".h\"\n"
-    "\n";
-  
-  // Include class files.
-  for(unsigned int i=0;i < groupSize;++i)
-    {
-    os << "#include \"" << m_Classes[groupStart+i].c_str() << ".h\"\n";
-    }
-
-  os <<
-    "\n";
-
-  // Write the create function implementations.
-  for(unsigned int i=0;i < groupSize;++i)
-    {
-    os << "vtkObject* " << m_ClassName.c_str() << "::Create_"
-       << m_Classes[groupStart+i].c_str() << "() { return "
-       << m_Classes[groupStart+i].c_str() << "::New(); }\n";
-    }
+    "unsigned int " << m_ClassName.c_str() << "::Count;\n";
 }
