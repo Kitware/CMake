@@ -194,6 +194,11 @@ bool cmCacheManager::SaveCache(const char* path) const
        << "# TYPE is a hint to GUI's for the type of VALUE, DO NOT EDIT TYPE!.\n"
        << "# VALUE is the current value for the KEY.\n\n";
 
+  fout << "########################\n";
+  fout << "# EXTERNAL cache entries\n";
+  fout << "########################\n";
+  fout << "\n";
+
   for( std::map<std::string, CacheEntry>::const_iterator i = m_Cache.begin();
        i != m_Cache.end(); ++i)
     {
@@ -205,9 +210,16 @@ bool cmCacheManager::SaveCache(const char* path) const
       cmCacheManager::OutputHelpString(fout, ce.m_HelpString);
       fout << (*i).first.c_str() << ":"
            << cmCacheManagerTypes[t] << "="
-           << ce.m_Value << "\n";
+           << ce.m_Value << "\n\n";
       }
     }
+
+  fout << "\n";
+  fout << "########################\n";
+  fout << "# INTERNAL cache entries\n";
+  fout << "########################\n";
+  fout << "\n";
+
   for( std::map<std::string, CacheEntry>::const_iterator i = m_Cache.begin();
        i != m_Cache.end(); ++i)
     {
