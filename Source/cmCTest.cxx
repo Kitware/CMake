@@ -174,7 +174,7 @@ static const char* cmCTestWarningExceptions[] = {
   "IceFlush",
   "warning LNK4089: all references to [^ \\t]+ discarded by .OPT:REF",
   "ld32: WARNING 85: definition of dataKey in",
-  "cc: warning 422: Unknown option \"\\+b\\.\" ignored", 
+  "cc: warning 422: Unknown option \"\\+b",
   "_with_warning_C",
   0
 };
