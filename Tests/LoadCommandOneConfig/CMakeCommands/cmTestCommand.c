@@ -6,6 +6,8 @@
 typedef struct 
 {
   char *LibraryName;
+  int Argc;
+  char** Argv;
 } cmVTKWrapTclData;
 
 
@@ -22,6 +24,8 @@ static int InitialPass(void *inf, void *mf, int argc, char *argv[])
   cmVTKWrapTclData *cdata = 
     (cmVTKWrapTclData *)malloc(sizeof(cmVTKWrapTclData));
   cdata->LibraryName = "BOO";
+  cdata->Argc = argc;
+  cdata->Argv = argv;
   info->CAPI->SetClientData(info,cdata);
   
   /* Now check and see if the value has been stored in the cache */
