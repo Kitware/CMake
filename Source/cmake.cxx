@@ -784,7 +784,7 @@ void cmake::SetGlobalGenerator(cmGlobalGenerator *gg)
   gg->SetCMakeInstance(this);
 }
 
-int cmake::Configure()
+int cmake::DoPreConfigureChecks()
 {
   // do a sanity check on some values
   if(m_CacheManager->GetCacheValue("CMAKE_HOME_DIRECTORY"))
@@ -806,6 +806,20 @@ int cmake::Configure()
       }
     }
   else
+    {
+    return 0;
+    }
+  return 1;
+}
+
+int cmake::Configure()
+{
+  int res = this->DoPreConfigureChecks();
+  if ( res < 0 )
+    {
+    return -2;
+    }
+  if ( !res )
     {
     m_CacheManager->AddCacheEntry("CMAKE_HOME_DIRECTORY", 
                                   this->GetHomeDirectory(),

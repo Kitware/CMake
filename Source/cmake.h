@@ -235,6 +235,9 @@ class cmake
   cmVariableWatch* GetVariableWatch() { return m_VariableWatch; }
 
   void GetCommandDocumentation(std::vector<cmDocumentationEntry>&) const;
+
+  ///! Do all the checks before running configure
+  int DoPreConfigureChecks();
   
 protected:
   typedef std::map<cmStdString, cmCommand*> RegisteredCommandsMap;
