@@ -550,12 +550,11 @@ void CommandLineArguments::GenerateHelp()
       }
     }
 
-  maxlen += 2; // For the space after option
-
   // Create format for that string
   char format[80];
-  sprintf(format, "%%%ds  ", static_cast<unsigned int>(maxlen-2));
+  sprintf(format, "  %%-%ds  ", static_cast<unsigned int>(maxlen));
 
+  maxlen += 4; // For the space before and after the option
 
   // Print help for each option
   for ( mpit = mp.begin();
