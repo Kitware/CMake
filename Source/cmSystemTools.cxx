@@ -1250,6 +1250,10 @@ std::string cmSystemTools::CollapseFullPath(const char* in_name)
     {
     dir = cmSystemTools::GetCurrentWorkingDirectory();
     }
+  if(file == "")
+    {
+    return dir;
+    }
   return dir + "/" + file;
 #endif
 }
