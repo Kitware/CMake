@@ -2333,6 +2333,18 @@ cmLocalUnixMakefileGenerator2::ConvertToQuotedOutputPath(const char* p)
     return "\"\"";
     }
 
+  // Fix root component slash direction for windows.
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  for(std::string::iterator i = components[0].begin();
+      i != components[0].end(); ++i)
+    {
+    if(*i == '/')
+      {
+      *i = '\\';
+      }
+    }
+#endif
+
   // Begin the quoted result with the root component.
   std::string result = "\"";
   result += components[0];
