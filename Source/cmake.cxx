@@ -637,7 +637,6 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
     else if (args[1] == "time" && args.size() > 2)
       {
       std::string command = args[2];
-      std::string output;
       for (std::string::size_type cc = 3; cc < args.size(); cc ++)
         {
         command += " ";
