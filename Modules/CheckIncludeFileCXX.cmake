@@ -22,6 +22,6 @@ MACRO(CHECK_INCLUDE_FILE_CXX INCLUDE VARIABLE)
     WRITE_FILE(${PROJECT_BINARY_DIR}/CMakeError.log 
       "Determining if the include file ${INCLUDE} "
       "exists failed with the following output:\n"
-      "${OUTPUT}\n")
+      "${OUTPUT}\n" APPEND)
   ENDIF(${VARIABLE})
 ENDMACRO(CHECK_INCLUDE_FILE_CXX)
