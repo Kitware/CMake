@@ -31,7 +31,7 @@ cmCursesForm* cmCursesForm::CurrentForm=0;
 extern "C"
 {
 
-void onsig(int sig)
+void onsig(int)
 {
   if (cmCursesForm::CurrentForm)
     {
@@ -52,7 +52,7 @@ void onsig(int sig)
  
 }
 
-void CMakeErrorHandler(const char* message, const char* title, bool& disable)
+void CMakeErrorHandler(const char* message, const char* title, bool&)
 {
   cmCursesForm::CurrentForm->AddError(message, title);
 }

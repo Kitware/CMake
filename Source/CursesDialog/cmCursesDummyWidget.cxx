@@ -24,7 +24,7 @@ cmCursesDummyWidget::cmCursesDummyWidget(int width, int height,
 }
 
 
-bool cmCursesDummyWidget::HandleInput(int& key, cmCursesMainForm*, WINDOW* )
+bool cmCursesDummyWidget::HandleInput(int&, cmCursesMainForm*, WINDOW* )
 {
   return false;
 }

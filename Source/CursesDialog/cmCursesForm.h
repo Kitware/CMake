@@ -42,7 +42,7 @@ public:
   // Description:
   // During a CMake run, an error handle should add errors
   // to be displayed afterwards.
-  virtual void AddError(const char* message, const char* title) {};
+  virtual void AddError(const char*, const char*) {}
 
   // Description:
   // Turn debugging on. This will create ccmakelog.txt.

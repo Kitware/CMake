@@ -31,7 +31,7 @@ cmCursesLabelWidget::~cmCursesLabelWidget()
 {
 }
 
-bool cmCursesLabelWidget::HandleInput(int& key, cmCursesMainForm*, WINDOW* )
+bool cmCursesLabelWidget::HandleInput(int&, cmCursesMainForm*, WINDOW* )
 {
   // Static text. No input is handled here.
   return false;

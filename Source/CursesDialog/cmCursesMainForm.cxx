@@ -586,7 +586,7 @@ int cmCursesMainForm::RunCMake(bool generateMakefiles)
   return 0;
 }
 
-void cmCursesMainForm::AddError(const char* message, const char* title)
+void cmCursesMainForm::AddError(const char* message, const char*)
 {
   m_Errors.push_back(message);
 }
