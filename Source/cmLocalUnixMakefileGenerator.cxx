@@ -679,7 +679,7 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
 }
 
 std::string cmLocalUnixMakefileGenerator::CreatePreBuildRules(
-  const cmTarget &target, const char* targetName)
+  const cmTarget &target, const char* /* targetName */)
 {
   std::string customRuleCode = "";
   bool initNext = false;
@@ -704,7 +704,7 @@ std::string cmLocalUnixMakefileGenerator::CreatePreBuildRules(
 }
 
 std::string cmLocalUnixMakefileGenerator::CreatePreLinkRules(
-  const cmTarget &target, const char* targetName)
+  const cmTarget &target, const char* /* targetName */)
 {
   std::string customRuleCode = "";
   bool initNext = false;
@@ -729,7 +729,7 @@ std::string cmLocalUnixMakefileGenerator::CreatePreLinkRules(
 }
 
 std::string cmLocalUnixMakefileGenerator::CreatePostBuildRules(
-  const cmTarget &target, const char* targetName)
+  const cmTarget &target, const char* /* targetName */)
 {
   std::string customRuleCode = "";
   bool initNext = false;

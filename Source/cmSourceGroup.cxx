@@ -50,7 +50,7 @@ bool cmSourceGroup::Matches(const char* name)
 /**
  * Add a source to the group that the compiler will know how to build.
  */
-void cmSourceGroup::AddSource(const char* name, const cmSourceFile* sf)
+void cmSourceGroup::AddSource(const char* /* name */, const cmSourceFile* sf)
 {
   m_SourceFiles.push_back(sf);
 }

@@ -1663,7 +1663,6 @@ cmSourceFile* cmMakefile::GetOrCreateSource(const char* sourceName,
     {
     cmSystemTools::Error(
       "CMake failed to properly look up cmSourceFile: ", sourceName);
-    int i = *(int *)0x0;
     }
   return ret;
 }

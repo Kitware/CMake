@@ -48,8 +48,8 @@ cmCustomCommand::cmCustomCommand(const cmCustomCommand& r):
   m_Command(r.m_Command),
   m_Arguments(r.m_Arguments),
   m_Comment(r.m_Comment),
-  m_Depends(r.m_Depends),
-  m_Output(r.m_Output)
+  m_Output(r.m_Output),
+  m_Depends(r.m_Depends)
 {
 }
 
