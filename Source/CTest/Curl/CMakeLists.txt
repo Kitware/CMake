@@ -63,7 +63,6 @@ SET(libCurl_SRCS
   inet_ntop.c
   inet_pton.c
   krb4.c
-  ldap.c
   llist.c
   md5.c
   memdebug.c
@@ -85,6 +84,14 @@ SET(libCurl_SRCS
   url.c
   version.c
   )
+
+SET(CURL_DISABLE_LDAP 1)
+IF(NOT CURL_DISABLE_LDAP)
+  SET(libCurl_SRCS
+    ${libCurl_SRCS}
+    ldap.c
+    )
+ENDIF(NOT CURL_DISABLE_LDAP)
 
 # if we have Kerberos 4, right now this is never on
 #OPTION(CURL_KRB4 "Use Kerberos 4" OFF)
