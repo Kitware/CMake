@@ -208,25 +208,25 @@ xmlrpc_env_set_fault_formatted (xmlrpc_env * const envP,
 /* This version must *not* interpret 'str' as a format string, to avoid
 ** several evil attacks. */
 #define XMLRPC_FAIL(env,code,str) \
-    do { xmlrpc_env_set_fault((env),(code),(str)); goto cleanup; } while (0)
+    do { xmlrpc_env_set_fault((env),(code),(str)); if (str) goto cleanup; } while (0)
 
 #define XMLRPC_FAIL1(env,code,str,arg1) \
     do { \
         xmlrpc_env_set_fault_formatted((env),(code),(str),(arg1)); \
-        goto cleanup; \
+        if (str) goto cleanup; \
     } while (0)
 
 #define XMLRPC_FAIL2(env,code,str,arg1,arg2) \
     do { \
         xmlrpc_env_set_fault_formatted((env),(code),(str),(arg1),(arg2)); \
-        goto cleanup; \
+        if (str) goto cleanup; \
     } while (0)
 
 #define XMLRPC_FAIL3(env,code,str,arg1,arg2,arg3) \
     do { \
         xmlrpc_env_set_fault_formatted((env),(code), \
                                        (str),(arg1),(arg2),(arg3)); \
-        goto cleanup; \
+        if (str) goto cleanup; \
     } while (0)
 
 #define XMLRPC_FAIL_IF_NULL(ptr,env,code,str) \
