@@ -1158,6 +1158,7 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
      if(!source->IsAHeaderFileOnly())
         {
         std::string shortName;
+        std::string sourceName;
         // If the full path to the source file includes this
         // directory, we want to use the relative path for the
         // filename of the object file.  Otherwise, we will use just
@@ -1165,6 +1166,7 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
         if((cmSystemTools::GetFilenamePath(source->GetFullPath()).find(m_Makefile->GetCurrentDirectory()) == 0)
            || (cmSystemTools::GetFilenamePath(source->GetFullPath()).find(m_Makefile->GetCurrentOutputDirectory()) == 0))
           {
+          sourceName = source->GetSourceName()+"."+source->GetSourceExtension();
           shortName = source->GetSourceName();
           
           // The path may be relative.  See if a directory needs to be
@@ -1181,13 +1183,14 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
           }
         else
           {
+          sourceName = source->GetFullPath();
           shortName = cmSystemTools::GetFilenameName(source->GetSourceName());
           }
         // Only output a rule for each .o once.
         if(rules.find(shortName) == rules.end())
           {
           rules.insert(shortName);
-          fout << shortName.c_str() << ".o : " << source->GetFullPath() << "\n";
+          fout << shortName.c_str() << ".o : " << sourceName.c_str() << "\n";
           std::string ext = source->GetSourceExtension();
           if ( ext == "cxx" || ext == "cc" || ext == "cpp" || ext == "C" )
             {
