@@ -1064,12 +1064,13 @@ void cmSystemTools::cmCopyFile(const char* source,
   std::ifstream fin(source);
 #endif
   if(!fin)
-    { 
-    std::string m = "CopyFile failed to open input file \"";
+    {
+    int e = errno;
+    std::string m = "CopyFile failed to open source file \"";
     m += source;
     m += "\"";
     m += " System Error: ";
-    m += strerror(errno);
+    m += strerror(e);
     cmSystemTools::Error(m.c_str());
     return;
     }
@@ -1083,11 +1084,12 @@ void cmSystemTools::cmCopyFile(const char* source,
 #endif
   if(!fout)
     {
-    std::string m = "CopyFile failed to open output file \"";
+    int e = errno;
+    std::string m = "CopyFile failed to open destination file \"";
     m += destination;
     m += "\"";
     m += " System Error: ";
-    m += strerror(errno);
+    m += strerror(e);
     cmSystemTools::Error(m.c_str());
     return;
     }
@@ -1114,23 +1116,37 @@ void cmSystemTools::cmCopyFile(const char* source,
   fin.close();
   fout.close();
 
-  // More checks
-
+  // More checks.
   struct stat statSource, statDestination;
-  if (stat(source, &statSource) != 0 ||
-      stat(destination, &statDestination) != 0)
+  statSource.st_size = 12345;
+  statDestination.st_size = 12345;
+  if(stat(source, &statSource) != 0)
     {
-    cmSystemTools::Error("CopyFile failed to copy files!");
+    int e = errno;
+    std::string m = "CopyFile failed to stat source file \"";
+    m += source;
+    m += "\"";
+    m += " System Error: ";
+    m += strerror(e);
+    cmSystemTools::Error(m.c_str());
     }
-  else
+  else if(stat(destination, &statDestination) != 0)
     {
-    if (statSource.st_size != statDestination.st_size)
-      {
-      cmOStringStream msg;
-      msg << "CopyFile failed to copy files (sizes differ, source: " 
-          << statSource.st_size << " , dest: " << statDestination.st_size;
-      cmSystemTools::Error(msg.str().c_str());
-      }
+    int e = errno;
+    std::string m = "CopyFile failed to stat destination file \"";
+    m += source;
+    m += "\"";
+    m += " System Error: ";
+    m += strerror(e);
+    cmSystemTools::Error(m.c_str());
+    }
+  else if(statSource.st_size != statDestination.st_size)
+    {
+    cmOStringStream msg;
+    msg << "CopyFile failed to copy files: source \""
+        << source << "\", size " << statSource.st_size << ", destination \""
+        << destination << "\", size " << statDestination.st_size;
+    cmSystemTools::Error(msg.str().c_str());
     }
 }
 
