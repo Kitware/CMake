@@ -17,13 +17,15 @@
 #include "cmProjectCommand.h"
 
 // cmProjectCommand
-bool cmProjectCommand::InitialPass(std::vector<std::string> const& args)
+bool cmProjectCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
-  if(args.size() < 1 )
+  if(argsIn.size() < 1 )
     {
     this->SetError("PROJECT called with incorrect number of arguments");
     return false;
-    }
+    } 
+  std::vector<std::string> args;
+  cmSystemTools::ExpandListArguments(argsIn, args);
   m_Makefile->SetProjectName(args[0].c_str());
 
   std::string bindir = args[0];
