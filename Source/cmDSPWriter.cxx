@@ -318,7 +318,6 @@ void cmDSPWriter::WriteCustomRule(std::ostream& fout,
       {
       fout << "!ELSEIF  \"$(CFG)\" == " << i->c_str() << std::endl;
       }
-    fout << "# Begin Custom Build\n\n";
     
     // Write out the dependencies (this seems to be the only way to
     //  get VC6 to actually take these dependencies into account.
