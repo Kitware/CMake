@@ -186,7 +186,7 @@ void cmLocalUnixMakefileGenerator::OutputMakefile(const char* file,
   // Create a stream that writes to a temporary file
   // then does a copy at the end.   This is to allow users
   // to hit control-c during the make of the makefile
-  cmGeneratedFileStream fout(file, false);
+  cmGeneratedFileStream fout(file);
   if(!fout)
     {
     return;

@@ -73,7 +73,8 @@ void cmExportLibraryDependenciesCommand::FinalPass()
   else
     {
     std::auto_ptr<cmGeneratedFileStream> ap(
-      new cmGeneratedFileStream(fname.c_str(), true, true));
+      new cmGeneratedFileStream(fname.c_str(), true));
+    ap->SetCopyIfDifferent(true);
     foutNew = ap;
     foutPtr = foutNew.get();
     }

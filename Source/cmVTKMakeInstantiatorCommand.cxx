@@ -127,7 +127,8 @@ cmVTKMakeInstantiatorCommand
   std::string fullName = headerPath+"/"+fileName;
   
   // Generate the output file with copy-if-different.
-  cmGeneratedFileStream fout(fullName.c_str(), true);
+  cmGeneratedFileStream fout(fullName.c_str());
+  fout.SetCopyIfDifferent(true);
   
   // Actually generate the code in the file.
   if(!oldVersion)
@@ -147,7 +148,8 @@ cmVTKMakeInstantiatorCommand
   
   // Generate the output file with copy-if-different.
   {
-  cmGeneratedFileStream fout(fullName.c_str(), true);
+  cmGeneratedFileStream fout(fullName.c_str());
+  fout.SetCopyIfDifferent(true);
   
   // Actually generate the code in the file.
   if(!oldVersion)
@@ -188,7 +190,8 @@ cmVTKMakeInstantiatorCommand
     
       // Generate the output file with copy-if-different.
       {
-      cmGeneratedFileStream fout(fullName.c_str(), true);
+      cmGeneratedFileStream fout(fullName.c_str());
+      fout.SetCopyIfDifferent(true);
     
       size_t thisBlockSize =
         (block < numFullBlocks)? groupSize:lastBlockSize;

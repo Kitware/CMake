@@ -289,7 +289,8 @@ void cmGlobalVisualStudio7Generator::OutputSLNFile(cmLocalGenerator* root,
   fname += "/";
   fname += root->GetMakefile()->GetProjectName();
   fname += ".sln";
-  cmGeneratedFileStream fout(fname.c_str(), true);
+  cmGeneratedFileStream fout(fname.c_str());
+  fout.SetCopyIfDifferent(true);
   if(!fout)
     {
     return;

@@ -27,10 +27,8 @@
 #endif
 
 //----------------------------------------------------------------------------
-cmGeneratedFileStream::cmGeneratedFileStream(const char* name,
-                                             bool copy_if_different,
-                                             bool quiet):
-  cmGeneratedFileStreamBase(name, copy_if_different),
+cmGeneratedFileStream::cmGeneratedFileStream(const char* name, bool quiet):
+  cmGeneratedFileStreamBase(name),
   Stream(m_TempName.c_str())
 {
   // Check if the file opened.
@@ -53,11 +51,16 @@ cmGeneratedFileStream::~cmGeneratedFileStream()
 }
 
 //----------------------------------------------------------------------------
-cmGeneratedFileStreamBase::cmGeneratedFileStreamBase(const char* name,
-                                                     bool copy_if_different):
+void cmGeneratedFileStream::SetCopyIfDifferent(bool copy_if_different)
+{
+  m_CopyIfDifferent = copy_if_different;
+}
+
+//----------------------------------------------------------------------------
+cmGeneratedFileStreamBase::cmGeneratedFileStreamBase(const char* name):
   m_Name(name),
   m_TempName(name),
-  m_CopyIfDifferent(copy_if_different),
+  m_CopyIfDifferent(false),
   m_Okay(false)
 {
   // Create the name of the temporary file.

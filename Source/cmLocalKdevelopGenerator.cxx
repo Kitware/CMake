@@ -120,7 +120,7 @@ void cmLocalKdevelopGenerator::MergeProjectFiles(const std::string& outputDir,
     }
   oldProjectFile.close();
 
-  cmGeneratedFileStream fout(filename.c_str(), false);
+  cmGeneratedFileStream fout(filename.c_str());
   if(!fout)
     {
     return;
@@ -171,7 +171,7 @@ void cmLocalKdevelopGenerator::CreateNewProjectFile(const std::string& outputDir
                                                     const std::string& cmakeFilePattern)
 {
 
-  cmGeneratedFileStream fout(filename.c_str(), false);
+  cmGeneratedFileStream fout(filename.c_str());
   if(!fout)
     {
     return;
@@ -364,7 +364,7 @@ bool cmLocalKdevelopGenerator::CreateFilelistFile(const std::string& outputDir, 
     }
 
   //now write the new filename
-  cmGeneratedFileStream fout(filename.c_str(), false);
+  cmGeneratedFileStream fout(filename.c_str());
   if(!fout)
     {
     return false;

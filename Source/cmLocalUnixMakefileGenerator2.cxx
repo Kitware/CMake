@@ -46,8 +46,6 @@ void cmLocalUnixMakefileGenerator2::SetEmptyCommand(const char* cmd)
 //----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator2::Generate(bool fromTheTop)
 {
-  // TODO: Account for control-c during Makefile generation.
-
   // TODO: Think about unifying generation of "@" for silent commands.
 
   // Generate old style for now.
@@ -88,15 +86,14 @@ void cmLocalUnixMakefileGenerator2::Generate(bool fromTheTop)
 //----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator2::GenerateMakefile()
 {
-  // Open the output file.
+  // Open the output file.  This should not be copy-if-different
+  // because the check-build-system step compares the makefile time to
+  // see if the build system must be regenerated.
   std::string makefileName = m_Makefile->GetStartOutputDirectory();
   makefileName += "/Makefile2";
-  std::ofstream makefileStream(makefileName.c_str());
+  cmGeneratedFileStream makefileStream(makefileName.c_str());
   if(!makefileStream)
     {
-    cmSystemTools::Error("Error can not open for write: ",
-                         makefileName.c_str());
-    cmSystemTools::ReportLastSystemError("");
     return;
     }
 
@@ -134,12 +131,9 @@ void cmLocalUnixMakefileGenerator2::GenerateCMakefile()
   cmakefileName += ".cmake";
 
   // Open the output file.
-  std::ofstream cmakefileStream(cmakefileName.c_str());
+  cmGeneratedFileStream cmakefileStream(cmakefileName.c_str());
   if(!cmakefileStream)
     {
-    cmSystemTools::Error("Error can not open for write: ",
-                         cmakefileName.c_str());
-    cmSystemTools::ReportLastSystemError("");
     return;
     }
 
@@ -237,7 +231,8 @@ cmLocalUnixMakefileGenerator2
   // Open the rule file.  This should be copy-if-different because the
   // rules may depend on this file itself.
   std::string ruleFileNameFull = this->ConvertToFullPath(ruleFileName);
-  cmGeneratedFileStream ruleFileStream(ruleFileNameFull.c_str(), true);
+  cmGeneratedFileStream ruleFileStream(ruleFileNameFull.c_str());
+  ruleFileStream.SetCopyIfDifferent(true);
   if(!ruleFileStream)
     {
     return;
@@ -351,7 +346,8 @@ cmLocalUnixMakefileGenerator2
   std::string ruleFileName = obj;
   ruleFileName += ".make";
   std::string ruleFileNameFull = this->ConvertToFullPath(ruleFileName);
-  cmGeneratedFileStream ruleFileStream(ruleFileNameFull.c_str(), true);
+  cmGeneratedFileStream ruleFileStream(ruleFileNameFull.c_str());
+  ruleFileStream.SetCopyIfDifferent(true);
   if(!ruleFileStream)
     {
     return;
@@ -526,7 +522,8 @@ cmLocalUnixMakefileGenerator2
   // Open the rule file.  This should be copy-if-different because the
   // rules may depend on this file itself.
   std::string ruleFileNameFull = this->ConvertToFullPath(ruleFileName);
-  cmGeneratedFileStream ruleFileStream(ruleFileNameFull.c_str(), true);
+  cmGeneratedFileStream ruleFileStream(ruleFileNameFull.c_str());
+  ruleFileStream.SetCopyIfDifferent(true);
   if(!ruleFileStream)
     {
     return;
@@ -2228,7 +2225,7 @@ cmLocalUnixMakefileGenerator2
   std::string depMakeFile = objFile;
   depMarkFile += ".depends";
   depMakeFile += ".depends.make";
-  std::ofstream fout(depMakeFile.c_str());
+  cmGeneratedFileStream fout(depMakeFile.c_str());
   fout << "# Dependencies for " << objFile << std::endl;
   for(std::set<cmStdString>::iterator i=dependencies.begin();
       i != dependencies.end(); ++i)
@@ -2406,7 +2403,7 @@ cmLocalUnixMakefileGenerator2
   cmSystemTools::RemoveFile(depMarkFileFull);
 
   // Write an empty dependency file.
-  std::ofstream depFileStream(depMakeFileFull);
+  cmGeneratedFileStream depFileStream(depMakeFileFull);
   depFileStream
     << "# Empty dependencies file for " << file << ".\n"
     << "# This may be replaced when dependencies are built.\n";

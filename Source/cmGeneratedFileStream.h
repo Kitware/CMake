@@ -26,7 +26,7 @@ class cmGeneratedFileStreamBase
 {
 protected:
   // The constructor prepares the temporary output file.
-  cmGeneratedFileStreamBase(const char* name, bool copy_if_different);
+  cmGeneratedFileStreamBase(const char* name);
 
   // The destructor renames the temporary output file to the real name.
   ~cmGeneratedFileStreamBase();
@@ -65,13 +65,11 @@ public:
 
   /**
    * The constructor takes the name of the file to be generated.  It
-   * automatically generates a name for the temporary file.  The
-   * second argument specifies whether the copy-if-different check
-   * should be done.  If the file cannot be opened an error message is
-   * produced unless the third argument is set to true.
+   * automatically generates a name for the temporary file.  If the
+   * file cannot be opened an error message is produced unless the
+   * second argument is set to true.
    */
-  cmGeneratedFileStream(const char* name, bool copy_if_different,
-                        bool quiet = false);
+  cmGeneratedFileStream(const char* name, bool quiet=false);
 
   /**
    * The destructor checks the stream status to be sure the temporary
@@ -79,6 +77,11 @@ public:
    * replaced.
    */
   ~cmGeneratedFileStream();
+
+  /**
+   * Set whether copy-if-different is done.
+   */
+  void SetCopyIfDifferent(bool copy_if_different);
 };
 
 #endif
