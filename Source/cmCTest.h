@@ -35,6 +35,7 @@ public:
    * Run a dashboard using a specified confiuration script
    */
   int RunConfigurationScript();
+  int RunConfigurationScript(const std::string& script);
   
   /**
    * Initialize and finalize testing
@@ -140,7 +141,7 @@ public:
   bool m_ShowOnly;
 
   bool m_RunConfigurationScript;
-  std::string m_ConfigurationScript;
+  tm_VectorOfStrings m_ConfigurationScripts;
 
   enum {
     EXPERIMENTAL,

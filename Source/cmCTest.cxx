@@ -673,255 +673,262 @@ int cmCTest::UpdateDirectory()
   os << "\t<StartDateTime>" << start_time << "</StartDateTime>\n"
      << "\t<UpdateCommand>" << command << "</UpdateCommand>\n"
      << "\t<UpdateReturnStatus>";
-  if ( retVal )
+  int failed = 0;
+  if ( !res || retVal )
     {
+    os << "Update error: ";
     os << goutput;
+    std::cerr << "Update with command: " << command << " failed" << std::endl;
+    failed = 1;
     }
   os << "</UpdateReturnStatus>" << std::endl;
-
-  std::vector<cmStdString> lines;
-  cmSystemTools::Split(goutput.c_str(), lines);
-  std::cout << "Updated; gathering version information" << std::endl;
-  cmsys::RegularExpression date_author("^date: +([^;]+); +author: +([^;]+); +state: +[^;]+;");
-  cmsys::RegularExpression revision("^revision +([^ ]*) *$");
-  cmsys::RegularExpression end_of_file("^=============================================================================$");
-  cmsys::RegularExpression end_of_comment("^----------------------------$");
-  std::string current_path = "";
-  bool first_file = true;
-
-  cmCTest::AuthorsToUpdatesMap authors_files_map;
-  int num_updated = 0;
-  int num_modified = 0;
-  int num_conflicting = 0;
-  for ( cc= 0 ; cc < lines.size(); cc ++ )
+  if ( !failed )
     {
-    const char* line = lines[cc].c_str();
-    char mod = line[0];
-    if ( line[1] == ' ' && mod != '?' )
+
+    std::vector<cmStdString> lines;
+    cmSystemTools::Split(goutput.c_str(), lines);
+    std::cout << "Updated; gathering version information" << std::endl;
+    cmsys::RegularExpression date_author("^date: +([^;]+); +author: +([^;]+); +state: +[^;]+;");
+    cmsys::RegularExpression revision("^revision +([^ ]*) *$");
+    cmsys::RegularExpression end_of_file("^=============================================================================$");
+    cmsys::RegularExpression end_of_comment("^----------------------------$");
+    std::string current_path = "";
+    bool first_file = true;
+
+    cmCTest::AuthorsToUpdatesMap authors_files_map;
+    int num_updated = 0;
+    int num_modified = 0;
+    int num_conflicting = 0;
+    for ( cc= 0 ; cc < lines.size(); cc ++ )
       {
-      count ++;
-      const char* file = line + 2;
-      //std::cout << "Line" << cc << ": " << mod << " - " << file << std::endl;
-      std::string logcommand = cvsCommand + " -z3 log -N " + file;
-      //std::cout << "Do log: " << logcommand << std::endl;
-      std::string output;
-      res = cmSystemTools::RunSingleCommand(logcommand.c_str(), &output, 
-        &retVal, sourceDirectory.c_str(),
-        m_Verbose, 0 /*m_TimeOut*/);
-      if ( ofs )
+      const char* line = lines[cc].c_str();
+      char mod = line[0];
+      if ( line[1] == ' ' && mod != '?' )
         {
-        ofs << output << std::endl;
-        }
-      if ( res && retVal == 0)
-        {
-        //std::cout << output << std::endl;
-        std::vector<cmStdString> ulines;
-        cmSystemTools::Split(output.c_str(), ulines);
-        std::string::size_type sline = 0;
-        std::string srevision1 = "Unknown";
-        std::string sdate1     = "Unknown";
-        std::string sauthor1   = "Unknown";
-        std::string semail1    = "Unknown";
-        std::string comment1   = "";
-        std::string srevision2 = "Unknown";
-        std::string sdate2     = "Unknown";
-        std::string sauthor2   = "Unknown";
-        std::string comment2   = "";
-        std::string semail2    = "Unknown";
-        bool have_first = false;
-        bool have_second = false;
-        for ( kk = 0; kk < ulines.size(); kk ++ )
+        count ++;
+        const char* file = line + 2;
+        //std::cout << "Line" << cc << ": " << mod << " - " << file << std::endl;
+        std::string logcommand = cvsCommand + " -z3 log -N " + file;
+        //std::cout << "Do log: " << logcommand << std::endl;
+        std::string output;
+        res = cmSystemTools::RunSingleCommand(logcommand.c_str(), &output, 
+          &retVal, sourceDirectory.c_str(),
+          m_Verbose, 0 /*m_TimeOut*/);
+        if ( ofs )
           {
-          const char* clp = ulines[kk].c_str();
-          if ( !have_second && !sline && revision.find(clp) )
+          ofs << output << std::endl;
+          }
+        if ( res && retVal == 0)
+          {
+          //std::cout << output << std::endl;
+          std::vector<cmStdString> ulines;
+          cmSystemTools::Split(output.c_str(), ulines);
+          std::string::size_type sline = 0;
+          std::string srevision1 = "Unknown";
+          std::string sdate1     = "Unknown";
+          std::string sauthor1   = "Unknown";
+          std::string semail1    = "Unknown";
+          std::string comment1   = "";
+          std::string srevision2 = "Unknown";
+          std::string sdate2     = "Unknown";
+          std::string sauthor2   = "Unknown";
+          std::string comment2   = "";
+          std::string semail2    = "Unknown";
+          bool have_first = false;
+          bool have_second = false;
+          for ( kk = 0; kk < ulines.size(); kk ++ )
             {
-            if ( !have_first )
+            const char* clp = ulines[kk].c_str();
+            if ( !have_second && !sline && revision.find(clp) )
               {
-              srevision1 = revision.match(1);
+              if ( !have_first )
+                {
+                srevision1 = revision.match(1);
+                }
+              else
+                {
+                srevision2 = revision.match(1);
+                }
+              }
+            else if ( !have_second && !sline && date_author.find(clp) )
+              {
+              sline = kk + 1;
+              if ( !have_first )
+                {
+                sdate1 = date_author.match(1);
+                sauthor1 = date_author.match(2);
+                }
+              else
+                {
+                sdate2 = date_author.match(1);
+                sauthor2 = date_author.match(2);
+                }
+              }
+            else if ( sline && end_of_comment.find(clp) || end_of_file.find(clp))
+              {
+              if ( !have_first )
+                {
+                have_first = true;
+                }
+              else if ( !have_second )
+                {
+                have_second = true;
+                }
+              sline = 0;
+              }
+            else if ( sline )
+              {
+              if ( !have_first )
+                {
+                comment1 += clp;
+                comment1 += "\n";
+                }
+              else
+                {
+                comment2 += clp;
+                comment2 += "\n";
+                }
+              }
+            }
+          if ( mod == 'M' )
+            {
+            comment1 = "Locally modified file\n";
+            }
+          if ( mod == 'C' )
+            {
+            comment1 = "Conflict while updating\n";
+            }
+          std::string path = cmSystemTools::GetFilenamePath(file);
+          std::string fname = cmSystemTools::GetFilenameName(file);
+          if ( path != current_path )
+            {
+            if ( !first_file )
+              {
+              os << "\t</Directory>" << std::endl;
               }
             else
               {
-              srevision2 = revision.match(1);
+              first_file = false;
               }
+            os << "\t<Directory>\n"
+              << "\t\t<Name>" << path << "</Name>" << std::endl;
             }
-          else if ( !have_second && !sline && date_author.find(clp) )
+          if ( mod == 'C' )
             {
-            sline = kk + 1;
-            if ( !have_first )
-              {
-              sdate1 = date_author.match(1);
-              sauthor1 = date_author.match(2);
-              }
-            else
-              {
-              sdate2 = date_author.match(1);
-              sauthor2 = date_author.match(2);
-              }
+            num_conflicting ++;
+            os << "\t<Conflicting>" << std::endl;
             }
-          else if ( sline && end_of_comment.find(clp) || end_of_file.find(clp))
+          else if ( mod == 'M' )
             {
-            if ( !have_first )
-              {
-              have_first = true;
-              }
-            else if ( !have_second )
-              {
-              have_second = true;
-              }
-            sline = 0;
-            }
-          else if ( sline )
-            {
-            if ( !have_first )
-              {
-              comment1 += clp;
-              comment1 += "\n";
-              }
-            else
-              {
-              comment2 += clp;
-              comment2 += "\n";
-              }
-            }
-          }
-        if ( mod == 'M' )
-          {
-          comment1 = "Locally modified file\n";
-          }
-        if ( mod == 'C' )
-          {
-          comment1 = "Conflict while updating\n";
-          }
-        std::string path = cmSystemTools::GetFilenamePath(file);
-        std::string fname = cmSystemTools::GetFilenameName(file);
-        if ( path != current_path )
-          {
-          if ( !first_file )
-            {
-            os << "\t</Directory>" << std::endl;
+            num_modified ++;
+            os << "\t<Modified>" << std::endl;
             }
           else
             {
-            first_file = false;
+            num_updated ++;
+            os << "\t<Updated>" << std::endl;
             }
-          os << "\t<Directory>\n"
-             << "\t\t<Name>" << path << "</Name>" << std::endl;
-          }
-        if ( mod == 'C' )
-          {
-          num_conflicting ++;
-          os << "\t<Conflicting>" << std::endl;
-          }
-        else if ( mod == 'M' )
-          {
-          num_modified ++;
-          os << "\t<Modified>" << std::endl;
-          }
-        else
-          {
-          num_updated ++;
-          os << "\t<Updated>" << std::endl;
-          }
-        if ( srevision2 == "Unknown" )
-          {
-          srevision2 = srevision1;
-          }
-        os << "\t\t<File Directory=\"" << path << "\">" << fname 
-           << "</File>\n"
-           << "\t\t<Directory>" << path << "</Directory>\n"
-           << "\t\t<FullName>" << file << "</FullName>\n"
-           << "\t\t<CheckinDate>" << sdate1 << "</CheckinDate>\n"
-           << "\t\t<Author>" << sauthor1 << "</Author>\n"
-           << "\t\t<Email>" << semail1 << "</Email>\n"
-           << "\t\t<Log>" << this->MakeXMLSafe(comment1) << "</Log>\n"
-           << "\t\t<Revision>" << srevision1 << "</Revision>\n"
-           << "\t\t<PriorRevision>" << srevision2 << "</PriorRevision>"
-           << std::endl;
-        if ( srevision2 != srevision1 )
-          {
-          os
-            << "\t\t<Revisions>\n"
-            << "\t\t\t<Revision>" << srevision1 << "</Revision>\n"
-            << "\t\t\t<PreviousRevision>" << srevision2 << "</PreviousRevision>\n"
-            << "\t\t\t<Author>" << sauthor1<< "</Author>\n"
-            << "\t\t\t<Date>" << sdate1 << "</Date>\n"
-            << "\t\t\t<Comment>" << this->MakeXMLSafe(comment1) << "</Comment>\n"
-            << "\t\t\t<Email>" << semail1 << "</Email>\n"
-            << "\t\t</Revisions>\n"
-            << "\t\t<Revisions>\n"
-            << "\t\t\t<Revision>" << srevision2 << "</Revision>\n"
-            << "\t\t\t<PreviousRevision>" << srevision2 << "</PreviousRevision>\n"
-            << "\t\t\t<Author>" << sauthor2<< "</Author>\n"
-            << "\t\t\t<Date>" << sdate2 << "</Date>\n"
-            << "\t\t\t<Comment>" << this->MakeXMLSafe(comment2) << "</Comment>\n"
-            << "\t\t\t<Email>" << semail2 << "</Email>\n"
-            << "\t\t</Revisions>" << std::endl;
-          }
-        if ( mod == 'C' )
-          {
-          os << "\t</Conflicting>" << std::endl;
-          }
-        else if ( mod == 'M' )
-          {
-          os << "\t</Modified>" << std::endl;
-          }
-        else
-          {
-          os << "\t</Updated>" << std::endl;
-          }
-        cmCTest::UpdateFiles *u = &authors_files_map[sauthor1];
-        cmCTest::StringPair p;
-        p.first = path;
-        p.second = fname;
-        u->push_back(p);
+          if ( srevision2 == "Unknown" )
+            {
+            srevision2 = srevision1;
+            }
+          os << "\t\t<File Directory=\"" << path << "\">" << fname 
+            << "</File>\n"
+            << "\t\t<Directory>" << path << "</Directory>\n"
+            << "\t\t<FullName>" << file << "</FullName>\n"
+            << "\t\t<CheckinDate>" << sdate1 << "</CheckinDate>\n"
+            << "\t\t<Author>" << sauthor1 << "</Author>\n"
+            << "\t\t<Email>" << semail1 << "</Email>\n"
+            << "\t\t<Log>" << this->MakeXMLSafe(comment1) << "</Log>\n"
+            << "\t\t<Revision>" << srevision1 << "</Revision>\n"
+            << "\t\t<PriorRevision>" << srevision2 << "</PriorRevision>"
+            << std::endl;
+          if ( srevision2 != srevision1 )
+            {
+            os
+              << "\t\t<Revisions>\n"
+              << "\t\t\t<Revision>" << srevision1 << "</Revision>\n"
+              << "\t\t\t<PreviousRevision>" << srevision2 << "</PreviousRevision>\n"
+              << "\t\t\t<Author>" << sauthor1<< "</Author>\n"
+              << "\t\t\t<Date>" << sdate1 << "</Date>\n"
+              << "\t\t\t<Comment>" << this->MakeXMLSafe(comment1) << "</Comment>\n"
+              << "\t\t\t<Email>" << semail1 << "</Email>\n"
+              << "\t\t</Revisions>\n"
+              << "\t\t<Revisions>\n"
+              << "\t\t\t<Revision>" << srevision2 << "</Revision>\n"
+              << "\t\t\t<PreviousRevision>" << srevision2 << "</PreviousRevision>\n"
+              << "\t\t\t<Author>" << sauthor2<< "</Author>\n"
+              << "\t\t\t<Date>" << sdate2 << "</Date>\n"
+              << "\t\t\t<Comment>" << this->MakeXMLSafe(comment2) << "</Comment>\n"
+              << "\t\t\t<Email>" << semail2 << "</Email>\n"
+              << "\t\t</Revisions>" << std::endl;
+            }
+          if ( mod == 'C' )
+            {
+            os << "\t</Conflicting>" << std::endl;
+            }
+          else if ( mod == 'M' )
+            {
+            os << "\t</Modified>" << std::endl;
+            }
+          else
+            {
+            os << "\t</Updated>" << std::endl;
+            }
+          cmCTest::UpdateFiles *u = &authors_files_map[sauthor1];
+          cmCTest::StringPair p;
+          p.first = path;
+          p.second = fname;
+          u->push_back(p);
 
-        current_path = path;
+          current_path = path;
+          }
         }
       }
-    }
-  if ( num_updated )
-    {
-    std::cout << "Found " << num_updated << " updated files" << std::endl;
-    }
-  if ( num_modified )
-    {
-    std::cout << "Found " << num_modified << " locally modified files" 
-              << std::endl;
-    }
-  if ( num_conflicting )
-    {
-    std::cout << "Found " << num_conflicting << " conflicting files" 
-              << std::endl;
-    }
-  if ( !first_file )
-    {
-    os << "\t</Directory>" << std::endl;
-    }
-  
-  cmCTest::AuthorsToUpdatesMap::iterator it;
-  for ( it = authors_files_map.begin();
-        it != authors_files_map.end();
-        it ++ )
-    {
-    os << "\t<Author>\n"
-       << "\t\t<Name>" << it->first << "</Name>" << std::endl;
-    cmCTest::UpdateFiles *u = &(it->second);
-    for ( cc = 0; cc < u->size(); cc ++ )
+    if ( num_updated )
       {
-      os << "\t\t<File Directory=\"" << (*u)[cc].first << "\">"
-         << (*u)[cc].second << "</File>" << std::endl;
+      std::cout << "Found " << num_updated << " updated files" << std::endl;
       }
-    os << "\t</Author>" << std::endl;
-    }
-  
-  //std::cout << "End" << std::endl;
-  std::string end_time = ::CurrentTime();
-  os << "\t<EndDateTime>" << end_time << "</EndDateTime>\n"
-     << "</Update>" << std::endl;
+    if ( num_modified )
+      {
+      std::cout << "Found " << num_modified << " locally modified files" 
+        << std::endl;
+      }
+    if ( num_conflicting )
+      {
+      std::cout << "Found " << num_conflicting << " conflicting files" 
+        << std::endl;
+      }
+    if ( !first_file )
+      {
+      os << "\t</Directory>" << std::endl;
+      }
 
-  if ( ofs )
-    {
-    ofs.close();
+    cmCTest::AuthorsToUpdatesMap::iterator it;
+    for ( it = authors_files_map.begin();
+      it != authors_files_map.end();
+      it ++ )
+      {
+      os << "\t<Author>\n"
+        << "\t\t<Name>" << it->first << "</Name>" << std::endl;
+      cmCTest::UpdateFiles *u = &(it->second);
+      for ( cc = 0; cc < u->size(); cc ++ )
+        {
+        os << "\t\t<File Directory=\"" << (*u)[cc].first << "\">"
+          << (*u)[cc].second << "</File>" << std::endl;
+        }
+      os << "\t</Author>" << std::endl;
+      }
+
+    //std::cout << "End" << std::endl;
+    std::string end_time = ::CurrentTime();
+    os << "\t<EndDateTime>" << end_time << "</EndDateTime>\n"
+      << "</Update>" << std::endl;
+
+    if ( ofs )
+      {
+      ofs.close();
+      }
     }
 
   if (! res || retVal )
@@ -1376,7 +1383,10 @@ int cmCTest::CoverageDirectory()
     std::string command = coverageCommand + " -o \"" + currPath + "\" -l \"" + files[cc] + "\"";
     std::string output;
     int retVal = 0;
-    std::cerr << "Run gcov on " << files[cc] << " in directory: " << currPath.c_str() << std::endl;
+    if ( m_Verbose )
+      {
+      std::cerr << "Run gcov on " << files[cc] << " in directory: " << currPath.c_str() << std::endl;
+      }
     //std::cout << "   --- Run [" << command << "]" << std::endl;
     bool res = true;
     if ( !m_ShowOnly )
@@ -1450,13 +1460,16 @@ int cmCTest::CoverageDirectory()
   //     {
   //     std::cout << "File: " << files[cc] << std::endl;
   //     }
-  std::cout << "---------------------------------------------------------------" << std::endl;
-  std::cout << "The following files were missing:" << std::endl;
-  for ( cc = 0; cc < missing_files.size(); cc ++ )
+  if ( missing_files.size() > 0 )
     {
-    std::cout << "File: " << missing_files[cc] << std::endl;
+    std::cout << "---------------------------------------------------------------" << std::endl;
+    std::cout << "The following files were missing:" << std::endl;
+    for ( cc = 0; cc < missing_files.size(); cc ++ )
+      {
+      std::cout << "File: " << missing_files[cc] << std::endl;
+      }
+    std::cout << "---------------------------------------------------------------" << std::endl;
     }
-  std::cout << "---------------------------------------------------------------" << std::endl;
 
   std::map<std::string, cmCTest::tm_VectorOfStrings >::iterator it;
   cmCTest::tm_CoverageMap coverageresults;
@@ -3144,14 +3157,27 @@ void cmCTest::RestoreBackupDirectories(bool backup,
 
 int cmCTest::RunConfigurationScript()
 {
-  m_ConfigurationScript = 
-    cmSystemTools::CollapseFullPath(m_ConfigurationScript.c_str());
-
-  // make sure the file exists
-  if (!cmSystemTools::FileExists(m_ConfigurationScript.c_str()))
+  int res = 0;
+  cmCTest::tm_VectorOfStrings::iterator it;
+  for ( it = m_ConfigurationScripts.begin();
+    it != m_ConfigurationScripts.end();
+    it ++ )
     {
+    res += this->RunConfigurationScript(
+      cmSystemTools::CollapseFullPath(it->c_str()));
+    }
+  return res;
+}
+
+int cmCTest::RunConfigurationScript(const std::string& script)
+{
+  // make sure the file exists
+  if (!cmSystemTools::FileExists(script.c_str()))
+    {
+    std::cerr << "Cannot find file: " << script.c_str() << std::endl;
     return 1;
     }
+
 
   // create a cmake instance to read the configuration script
   cmake cm;
@@ -3165,11 +3191,11 @@ int cmCTest::RunConfigurationScript()
   // set a variable with the path to the current script
   lg->GetMakefile()->AddDefinition("CTEST_SCRIPT_DIRECTORY",
     cmSystemTools::GetFilenamePath(
-      m_ConfigurationScript).c_str());
+      script).c_str());
   lg->GetMakefile()->AddDefinition("CTEST_SCRIPT_NAME",
     cmSystemTools::GetFilenameName(
-      m_ConfigurationScript).c_str());
-  if (!lg->GetMakefile()->ReadListFile(0, m_ConfigurationScript.c_str()))
+      script).c_str());
+  if (!lg->GetMakefile()->ReadListFile(0, script.c_str()))
     {
     return 2;
     }
@@ -3693,7 +3719,7 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
       {
       this->m_RunConfigurationScript = true;
       i++;
-      this->m_ConfigurationScript = args[i];
+      this->m_ConfigurationScripts.push_back(args[i]);
       }
 
     if( arg.find("-D",0) == 0 && i < args.size() - 1 )
