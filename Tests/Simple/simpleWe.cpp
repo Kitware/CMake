@@ -7,10 +7,11 @@ public:
     {
       printf("This one has nonstandard extension\n");
     }
+  int getnum() { return 0; }
 };
 
 int bar()
 {
   Foo f;
-  return 0;
+  return f.getnum();
 }
