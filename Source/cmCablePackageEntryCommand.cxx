@@ -61,5 +61,7 @@ bool cmCablePackageEntryCommand::Invoke(std::vector<std::string>& args)
     }  
   
   // Write this command's configuration.
-  return this->WriteConfiguration();
+  this->WriteConfiguration();
+  
+  return true;
 }

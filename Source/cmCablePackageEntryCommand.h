@@ -67,7 +67,7 @@ public:
 
   cmTypeMacro(cmCablePackageEntryCommand, cmCableCommand);
 
-  virtual bool WriteConfiguration() =0;
+  virtual void WriteConfiguration() const =0;
 protected:
   typedef std::vector<std::string>  Entries;
   

@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /**
  * Write the CABLE configuration code to define this InstantiationSet.
  */
-bool cmCableInstantiateCommand::WriteConfiguration()
+void cmCableInstantiateCommand::WriteConfiguration() const
 {
   std::ostream& os = m_CableData->GetOutputStream();
   cmCableData::Indentation indent = m_CableData->GetIndentation();
@@ -70,6 +70,4 @@ bool cmCableInstantiateCommand::WriteConfiguration()
     os << "</Element>" << std::endl;
     }
   os << indent << "</InstantiationSet>" << std::endl;
-  
-  return true;
 }

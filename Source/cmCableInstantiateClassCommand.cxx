@@ -48,7 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * Write the CABLE configuration code to define this InstantiationSet.
  * This includes the "class" keyword to do class template instantiations.
  */
-bool cmCableInstantiateClassCommand::WriteConfiguration()
+void cmCableInstantiateClassCommand::WriteConfiguration() const
 {
   std::ostream& os = m_CableData->GetOutputStream();
   cmCableData::Indentation indent = m_CableData->GetIndentation();
@@ -71,6 +71,4 @@ bool cmCableInstantiateClassCommand::WriteConfiguration()
     os << "</Element>" << std::endl;
     }
   os << indent << "</InstantiationSet>" << std::endl;
-  
-  return true;
 }

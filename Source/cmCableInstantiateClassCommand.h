@@ -88,7 +88,7 @@ public:
       "template classes (not functions, operators, etc).";
     }
 
-  virtual bool WriteConfiguration();
+  virtual void WriteConfiguration() const;
 
   cmTypeMacro(cmCableInstantiateClassCommand, cmCableInstantiateCommand);
 protected:
