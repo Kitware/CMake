@@ -223,7 +223,6 @@ int do_cmaketest (int argc, char **argv)
       }
     
     // now build
-    makeCommand += " all";
     }
 
   std::cout << "Running make command: " << makeCommand.c_str() << " ...\n";
