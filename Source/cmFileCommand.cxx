@@ -251,7 +251,6 @@ bool cmFileCommand::HandleInstallCommand(std::vector<std::string> const& args)
   std::vector<std::string>::size_type i = 0;
   i++; // Get rid of subcommand
 
-  std::string expr;
   bool in_files = false;
   bool optional = false;
   for ( ; i != args.size(); ++i )
