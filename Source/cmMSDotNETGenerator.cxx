@@ -837,6 +837,7 @@ void cmMSDotNETGenerator::OutputBuildTool(std::ostream& fout,
       fout << "\t\t\t\tAdditionalLibraryDirectories=\"";
       this->OutputLibraryDirectories(fout, configName, libName, target);
       fout << "\"\n";
+      this->OutputModuleDefinitionFile(fout, target);
       fout << "\t\t\t\tProgramDatabaseFile=\"" << m_LibraryOutputPath 
            << "$(OutDir)\\" << libName << ".pdb\"\n";
       if(strcmp(configName, "Debug") == 0)
@@ -885,6 +886,24 @@ void cmMSDotNETGenerator::OutputBuildTool(std::ostream& fout,
     case cmTarget::UTILITY:
       break;
     }
+}
+
+void cmMSDotNETGenerator::OutputModuleDefinitionFile(std::ostream& fout,
+                                                     const cmTarget &target)
+{
+  std::vector<cmSourceFile> const& classes = target.GetSourceFiles();
+  for(std::vector<cmSourceFile>::const_iterator i = classes.begin(); 
+      i != classes.end(); i++)
+    {  
+    if(cmSystemTools::UpperCase(i->GetSourceExtension()) == "DEF")
+      {
+      fout << "\t\t\t\tModuleDefinitionFile=\""
+           << this->ConvertToXMLOutputPath(i->GetFullPath().c_str())
+           << "\"\n";
+      return;
+      }
+    }
+  
 }
 
 void cmMSDotNETGenerator::OutputLibraryDirectories(std::ostream& fout,
@@ -992,12 +1011,17 @@ void cmMSDotNETGenerator::WriteVCProjFile(std::ostream& fout,
   std::vector<cmSourceGroup> sourceGroups = m_Makefile->GetSourceGroups();
   
   // get the classes from the source lists then add them to the groups
-  std::vector<cmSourceFile> classes = target.GetSourceFiles();
-  for(std::vector<cmSourceFile>::iterator i = classes.begin(); 
+  std::vector<cmSourceFile> const& classes = target.GetSourceFiles();
+  for(std::vector<cmSourceFile>::const_iterator i = classes.begin(); 
       i != classes.end(); i++)
     {
     // Add the file to the list of sources.
     std::string source = i->GetFullPath();
+    if(cmSystemTools::UpperCase(i->GetSourceExtension()) == "DEF")
+      {
+      m_ModuleDefinitionFile = i->GetFullPath();
+      }
+    
     cmSourceGroup& sourceGroup = m_Makefile->FindSourceGroup(source.c_str(),
                                                              sourceGroups);
     sourceGroup.AddSource(source.c_str(), &(*i));

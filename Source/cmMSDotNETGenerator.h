@@ -143,6 +143,8 @@ private:
                                 const char* configName,
                                 const char* libName,
                                 const cmTarget &target);
+  void OutputModuleDefinitionFile(std::ostream& fout,
+                                  const cmTarget &target);
   void OutputLibraries(std::ostream& fout,
                        const char* configName,
                        const char* libName,
@@ -153,6 +155,7 @@ private:
   bool m_BuildSLN;
   std::string m_LibraryOutputPath;
   std::string m_ExecutableOutputPath;
+  std::string m_ModuleDefinitionFile;
   std::vector<std::string> m_Configurations;
   std::string m_VCProjHeaderTemplate;
   std::string m_VCProjFooterTemplate;
