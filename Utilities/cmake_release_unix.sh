@@ -22,9 +22,6 @@ fi
 # Set some defaults here.  They can be changed by the configuration
 # file.
 CVSROOT=":pserver:anonymous@www.cmake.org:/cvsroot/CMake"
-CURSES_LIBRARY="/usr/lib/libcurses.a"
-FORM_LIBRARY="/usr/lib/libform.a"
-STATIC_LINK_FLAGS="-static"
 RELEASE_ROOT=`pwd`
 CREATE_SOURCE_TARBALL="no"
 CMAKE="cmake"
@@ -39,6 +36,7 @@ CC="gcc"
 CXX="c++"
 CFLAGS=""
 CXXFLAGS=""
+CMAKE_CACHE_ENTRIES=""
 
 #-----------------------------------------------------------------------------
 # Configuration options (could be in separate file)
@@ -54,7 +52,7 @@ export CC CXX CFLAGS CXXFLAGS
 # Select directories.
 INSTALL_DIR="${RELEASE_ROOT}/Install"
 TARBALL_DIR="${RELEASE_ROOT}/Tarballs"
-BUILD_DIR="${RELEASE_ROOT}/CMake-$VERSION-static"
+BUILD_DIR="${RELEASE_ROOT}/CMake-$VERSION-$PLATFORM-build"
 LOG_DIR="${RELEASE_ROOT}/Logs"
 
 # Cleanup from possible previous run.
@@ -97,14 +95,10 @@ fi
 # Build the release.
 cd ${BUILD_DIR}
 echo "Writing CMakeCache.txt..."
-${CAT} >> CMakeCache.txt <<EOF
+${CAT} > CMakeCache.txt <<EOF
 BUILD_TESTING:BOOL=OFF
-CMAKE_CXX_SHLIB_LINK_FLAGS:STRING=${STATIC_LINK_FLAGS}
-CMAKE_CXX_SHLIB_BUILD_FLAGS:STRING=
-CMAKE_CXX_SHLIB_RUNTIME_FLAG:STRING=
 CMAKE_INSTALL_PREFIX:PATH=${INSTALL_DIR}
-CURSES_LIBRARY:FILEPATH=${CURSES_LIBRARY}
-FORM_LIBRARY:FILEPATH=${FORM_LIBRARY}
+${CMAKE_CACHE_ENTRIES}
 EOF
 
 echo "Running CMake..."
@@ -138,20 +132,20 @@ fi
 echo "Writing README"
 FILES=`${FIND} bin share -type f |sed 's/^\.\///'`
 ${CAT} >> README <<EOF
-CMake $VERSION binary for $PLATFORM - statically linked
+CMake $VERSION binary for $PLATFORM
 
-Extract the file "cmake-$VERSION-$PLATFORM.tar" into your destination directory.
-The following files will be extracted:
+Extract the file "cmake-$VERSION-$PLATFORM.tar" into your
+destination directory.  The following files will be extracted:
 
 ${FILES}
 
 EOF
 
-TARBALL="${TARBALL_DIR}/CMake$VERSION-$PLATFORM-static.tar"
-echo "Creating CMake$VERSION-$PLATFORM-static.tar"
+TARBALL="${TARBALL_DIR}/CMake$VERSION-$PLATFORM.tar"
+echo "Creating CMake$VERSION-$PLATFORM.tar"
 if ${TAR} cvf $TARBALL README cmake-$VERSION-$PLATFORM.tar \
-     > ${LOG_DIR}/CMake$VERSION-$PLATFORM-static.log 2>&1 ; then : ; else
-  "Error, see ${LOG_DIR}/CMake$VERSION-$PLATFORM-static.log"
+     > ${LOG_DIR}/CMake$VERSION-$PLATFORM.log 2>&1 ; then : ; else
+  "Error, see ${LOG_DIR}/CMake$VERSION-$PLATFORM.log"
   exit 1
 fi
 
