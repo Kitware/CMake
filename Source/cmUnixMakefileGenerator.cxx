@@ -150,7 +150,20 @@ void cmUnixMakefileGenerator::OutputMakefile(const char* file)
     for(std::vector<std::string>::iterator i = auxSourceDirs.begin();
         i != auxSourceDirs.end(); ++i)
       {
-      cmSystemTools::MakeDirectory(i->c_str());
+      if(i->c_str()[0] != '/')
+        {
+        std::string dir = m_Makefile->GetCurrentOutputDirectory();
+        if(dir.size() && dir[dir.size()-1] != '/')
+          {
+          dir += "/";
+          }
+        dir += *i;
+        cmSystemTools::MakeDirectory(dir.c_str());
+        }
+      else
+        {
+        cmSystemTools::MakeDirectory(i->c_str());
+        }
       }
     }
   // Create a stream that writes to a temporary file
