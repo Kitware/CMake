@@ -36,6 +36,8 @@
 #include "cmDynamicLoader.h"
 
 #define SAFEDIV(x,y) (((y)!=0)?((x)/(y)):(0))
+#define DEBUGOUT std::cout << __LINE__ << " "; std::cout
+#define DEBUGERR std::cerr << __LINE__ << " "; std::cerr
 
 // provide some more detailed info on the return code for ctest
 #define CTEST_UPDATE_ERRORS 0x01
@@ -4488,7 +4490,7 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
         }
       else
         {
-        std::cerr << out << "\n";
+        std::cerr << out.str() << "\n";
         }
       return 1;
       }
