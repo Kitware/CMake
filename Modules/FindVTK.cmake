@@ -22,6 +22,7 @@ FIND_PATH(VTK_SOURCE_PATH Common/vtkObject.h
     [HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\Settings\\StartPath;WhereSource4]
     ../VTK
     VTK
+    $ENV{HOME}/VTK
   )
 
 #
@@ -41,6 +42,8 @@ IF (VTK_SOURCE_PATH)
     ../vtkbin
     VTKBIN
     vtkbin
+    $ENV{HOME}/VTKBIN
+    $ENV{HOME}/vtkbin
     )
 ELSE (VTK_SOURCE_PATH)
   # look for the vtk header files in installed places
