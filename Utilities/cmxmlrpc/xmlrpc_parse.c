@@ -123,7 +123,7 @@ xmlrpc_atoi(xmlrpc_env *env, char *str, size_t stringLength,
     i = 0;
 
     /* Check for leading white space. */
-    if (isspace(str[0]))
+    if (isspace((int)(str[0])))
     XMLRPC_FAIL1(env, XMLRPC_PARSE_ERROR,
                  "\"%s\" must not contain whitespace", str);
 
@@ -171,7 +171,7 @@ xmlrpc_atod(xmlrpc_env *env, char *str, size_t stringLength)
     d = 0.0;
 
     /* Check for leading white space. */
-    if (isspace(str[0]))
+    if (isspace((int)(str[0])))
         XMLRPC_FAIL1(env, XMLRPC_PARSE_ERROR,
                      "\"%s\" must not contain whitespace", str);
     

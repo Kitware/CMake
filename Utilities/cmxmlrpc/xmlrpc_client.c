@@ -373,7 +373,7 @@ xmlrpc_client_call_va(xmlrpc_env * const envP,
                       va_list            args) {
 
     xmlrpc_value * argP;
-    xmlrpc_value * retval;
+    xmlrpc_value * retval = 0;
     xmlrpc_env argenv;
     const char * suffix;
 
@@ -805,7 +805,7 @@ asynchComplete(call_info *        const callInfoP,
    failed the request.
 -----------------------------------------------------------------------------*/
     xmlrpc_env env;
-    xmlrpc_value * responseP;
+    xmlrpc_value * responseP = 0;
 
     xmlrpc_env_init(&env);
 
