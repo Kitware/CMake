@@ -1281,7 +1281,12 @@ int SystemTools::ChangeDirectory(const char *dir)
 kwsys_stl::string SystemTools::GetCurrentWorkingDirectory()
 {
   char buf[2048];
-  kwsys_stl::string path = Getcwd(buf, 2048);
+  const char* cwd = Getcwd(buf, 2048);
+  kwsys_stl::string path;
+  if ( cwd )
+    {
+    path = cwd;
+    }
   return path;
 }
 
