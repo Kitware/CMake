@@ -2356,10 +2356,10 @@ OutputBuildObjectFromSource(std::ostream& fout,
   sourceAndDeps.push_back(sourceFile);
   
   // Check for extra object-file dependencies.
+  std::vector<std::string> depends;
   const char* additionalDeps = source.GetProperty("OBJECT_DEPENDS");
   if(additionalDeps)
     {
-    std::vector<std::string> depends;
     cmSystemTools::ExpandListArgument(additionalDeps, depends);
     for(std::vector<std::string>::iterator i = depends.begin();
         i != depends.end(); ++i)
@@ -2371,7 +2371,7 @@ OutputBuildObjectFromSource(std::ostream& fout,
   this->OutputMakeRule(fout,
                        comment.c_str(),
                        objectFile.c_str(),
-                       sourceFile.c_str(),
+                       sourceAndDeps,
                        commands);
 }
 
