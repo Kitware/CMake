@@ -13,26 +13,26 @@
 
     <td width="550" valign="top" bgcolor="#FFFFFF">
     <div align="left">
-        <font size=5>
-
-        If you would like to contribute to the CMake project by building a
+    <font size=5>Help improve the quality of CMake</font> by running a 
+    nightly dashboard build on your machine.  If you would like to contribute
+ to the CMake project by building a
          nightly dashboard build, you can follow these instructions.
          <ul>
-         <li>Obtain a copy of the Dart client. http://public.kitware.com/Dart
+         <li>Obtain a copy of the Dart (<a href="http://public.kitware.com/Dart">http://public.kitware.com/Dart</a>) client from cvs.
          <br>
          cvs -d :pserver:anonymous@public.kitware.com:/Dart/cvsroot login
          (password is dart)
          <br>
          cvs -d :pserver:anonymous@public.kitware.com:/Dart/cvsroot co Dart
          <br>
-         <li> install tcl.
-         <li> configure your CMake build to find Tcl and Dart.
-         <li> test your setup by typing make Experimental, then check the CMake dashboard in the next hour to see if your results are availiable.
+         <li> Install tcl.
+         <li> Configure your CMake build to find Tcl and Dart.
+         <li> Test your setup by typing make Experimental, then check the CMake dashboard in the next hour to see if your results are available.
          </ul>
          
          Once you are able to submit experimental builds, the next step is setting up a nightly build.   The nightly build works in almost the same way, but 
 needs to be run each night by crontab or some other scheduling program.  Getting environment variables correct can be difficult.   Several examples are included here.
-
+<h2>Examples</h2>
      <ul>
      <li> Windows Visual C++ 6.0 Nightly build
 <br>
@@ -55,6 +55,8 @@ cmakeNightlyVC.bat - A windows batch file that can run cmakeNightlyVC.sh and be 
 <PRE>
 bash --login //c/Hoffman/cmakeNightlyVC.sh
 </PRE>
+<br>
+<li> Solaris CC crontab scripts
 <br>
 dashboardCMake.csh -- a csh script to build cmake for a sun
 <PRE>
@@ -89,7 +91,7 @@ csh ${HOME}/dashboardCMake.csh > nightlyBuild.out
 <PRE>
 <PRE>
 # do a nightly cmake
-0 4 * * * /disk2/home/hoffman/cronRunTests
+0 4 * * * /disk2/home/hoffman/dashboardCronEntry.csh
 </PRE>
 </PRE>
     </div>
