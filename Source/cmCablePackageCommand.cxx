@@ -66,6 +66,7 @@ void cmCablePackageCommand::FinalPass()
   std::string filePath = m_Makefile->GetStartOutputDirectory();
   cmClassFile file;
   file.m_AbstractClass = false;
+  file.m_HeaderFileOnly = false;
   file.SetName(fileName.c_str(), filePath.c_str(), "cxx", false);
   
   m_CableData->SetPackageClassIndex(m_Makefile->GetClasses().size());
