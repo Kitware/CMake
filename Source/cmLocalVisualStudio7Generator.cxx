@@ -133,10 +133,6 @@ void cmLocalVisualStudio7Generator::CreateSingleVCProj(const char *lname, cmTarg
 void cmLocalVisualStudio7Generator::AddVCProjBuildRule()
 {
   std::string dspname = *(m_CreatedProjectNames.end()-1);
-  if(dspname == "ALL_BUILD")
-  {
-    return;
-  }
   dspname += ".vcproj.cmake";
   std::string makefileIn = m_Makefile->GetStartDirectory();
   makefileIn += "/";

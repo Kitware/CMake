@@ -160,10 +160,6 @@ void cmLocalVisualStudio6Generator::CreateSingleDSP(const char *lname, cmTarget 
 void cmLocalVisualStudio6Generator::AddDSPBuildRule()
 {
   std::string dspname = *(m_CreatedProjectNames.end()-1);
-  if(dspname == "ALL_BUILD")
-  {
-    return;
-  }
   dspname += ".dsp.cmake";
   std::string makefileIn = m_Makefile->GetStartDirectory();
   makefileIn += "/";
