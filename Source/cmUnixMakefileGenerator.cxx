@@ -146,6 +146,7 @@ void cmUnixMakefileGenerator::OutputMakeFlags(std::ostream& fout)
     std::string include = *i;
     fout << "-I" << i->c_str() << " ";
     }
+  fout << m_Makefile->GetDefineFlags();
   fout << " ${LOCAL_INCLUDE_FLAGS} ";
   fout << "\n";
   fout << "default_target: all\n\n";
@@ -228,7 +229,7 @@ void cmUnixMakefileGenerator::OutputExecutableRules(std::ostream& fout)
       DotO += ".o";
       fout << Classes[i].m_ClassName << ": " << DotO << " ";
       fout << "${CMAKE_DEPEND_LIBS}\n";
-      fout << "\t${CXX}  ${CXX_FLAGS}  " << m_Makefile->GetDefineFlags()
+      fout << "\t${CXX}  ${CXX_FLAGS}  "
            << DotO.c_str() << " "
            << linkLibs.c_str() 
            << " -o $@ ""\n\n";
