@@ -212,6 +212,23 @@ CONFIGURE_FILE(
   ${Complex_SOURCE_DIR}/cmTestConfigureEscape.h.in
   ${Complex_BINARY_DIR}/cmTestConfigureEscape.h ESCAPE_QUOTES)
 
+# Test regular expression commands.
+STRING(REGEX MATCH "b" RESULT "abc")
+IF(NOT RESULT)
+  MESSAGE(SEND_ERROR "STRING(REGEX MATCH ... ) test failed.")
+ENDIF(NOT RESULT)
+STRING(REGEX MATCHALL "b" RESULT "abcb")
+IF(NOT RESULT)
+  MESSAGE(SEND_ERROR "STRING(REGEX MATCHALL ... ) test failed.")
+ENDIF(NOT RESULT)
+STRING(REGEX REPLACE "(b)" "[\\1]" RESULT "abcde")
+IF("x${RESULT}" MATCHES "^xa\\[b\\]cde$")
+  SET(STRING_REGEX_PASSED 1)
+ENDIF("x${RESULT}" MATCHES "^xa\\[b\\]cde$")
+IF(NOT STRING_REGEX_PASSED)
+  MESSAGE(SEND_ERROR "STRING(REGEX REPLACE ... ) test failed.")
+ENDIF(NOT STRING_REGEX_PASSED)
+
 #
 # Create the libs and the main exe
 #

@@ -73,6 +73,7 @@
 #include "cmSourceFilesCommand.cxx"
 #include "cmSourceFilesRemoveCommand.cxx"
 #include "cmSourceGroupCommand.cxx"
+#include "cmStringCommand.cxx"
 #include "cmSubdirCommand.cxx"
 #include "cmSubdirDependsCommand.cxx"
 #include "cmTargetLinkLibrariesCommand.cxx"
@@ -157,6 +158,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmSourceFilesCommand);
   commands.push_back(new cmSourceFilesRemoveCommand);
   commands.push_back(new cmSourceGroupCommand);
+  commands.push_back(new cmStringCommand);
   commands.push_back(new cmSubdirCommand);
   commands.push_back(new cmSubdirDependsCommand);
   commands.push_back(new cmTargetLinkLibrariesCommand);
