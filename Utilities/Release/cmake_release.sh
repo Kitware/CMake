@@ -289,9 +289,9 @@ EOF
 }
 
 #-----------------------------------------------------------------------------
-package()
+binary_tarball()
 {
-    [ -z "${DONE_package}" ] || return 0 ; DONE_package="yes"
+    [ -z "${DONE_binary_tarball}" ] || return 0 ; DONE_binary_tarball="yes"
     config || return 1
     strip || return 1
     manifest || return 1
@@ -313,7 +313,7 @@ package()
             gzip -c cmake-${VERSION}-${PLATFORM}.tar >cmake-${VERSION}-${PLATFORM}.tar.gz &&
             compress cmake-${VERSION}-${PLATFORM}.tar
         )
-    ) >Logs/package.log 2>&1 || error_log Logs/package.log
+    ) >Logs/binary_tarball.log 2>&1 || error_log Logs/binary_tarball.log
 }
 
 if [ -z "$TASK" ]; then
