@@ -1480,7 +1480,7 @@ bool RunCommandViaWin32(const char* command,
                         int& retVal,
                         bool verbose)
 {
-#if defined(__BORLANDC__)
+#if (1) // defined(__BORLANDC__)
   return ::WindowsRunCommand(command, dir, output, retVal, verbose);
 #else // Visual studio
   ::SetLastError(ERROR_SUCCESS);
