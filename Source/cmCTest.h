@@ -216,6 +216,7 @@ private:
   bool OpenOutputFile(const std::string& path, 
                       const std::string& name, std::ofstream& stream);  
   std::string MakeXMLSafe(const std::string&);
+  std::string MakeURLSafe(const std::string&);
 };
 
 #endif

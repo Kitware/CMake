@@ -188,6 +188,33 @@ std::string cmCTest::MakeXMLSafe(const std::string& str)
   return ost.str();
 }
 
+std::string cmCTest::MakeURLSafe(const std::string& str)
+{
+  std::string::size_type pos = 0;
+  cmOStringStream ost;
+  char buffer[10];
+  for ( pos = 0; pos < str.size(); pos ++ )
+    {
+    unsigned char ch = str[pos];
+    if ( ( ch > 126 || ch < 32 ||
+           ch == '&' ||
+           ch == '%' ||
+           ch == '+' ||
+           ch == '=' || 
+           ch == '@'
+          ) && ch != 9 )
+      {
+      sprintf(buffer, "%02x;", (unsigned int)ch);
+      ost << buffer;
+      }
+    else
+      {
+      ost << ch;
+      }
+    }
+  return ost.str();
+}
+
 bool TryExecutable(const char *dir, const char *file,
                    std::string *fullPath, const char *subdir)
 {
@@ -1831,10 +1858,10 @@ int cmCTest::SubmitResults()
     {
     std::cout << "FTP submit method" << std::endl;
     std::string url = "ftp://";
-    url += m_DartConfiguration["DropSiteUser"] + ":" + 
-      m_DartConfiguration["DropSitePassword"] + "@" + 
+    url += cmCTest::MakeURLSafe(m_DartConfiguration["DropSiteUser"]) + ":" + 
+      cmCTest::MakeURLSafe(m_DartConfiguration["DropSitePassword"]) + "@" + 
       m_DartConfiguration["DropSite"] + 
-      m_DartConfiguration["DropLocation"];
+      cmCTest::MakeURLSafe(m_DartConfiguration["DropLocation"]);
     if ( !submit.SubmitUsingFTP(m_ToplevelPath+"/Testing/"+m_CurrentTag, 
         files, prefix, url) )
       {
