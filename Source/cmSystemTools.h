@@ -188,6 +188,11 @@ public:
    * exit code will be stored. If the retVal is not specified and 
    * the program exits with a code other than 0, then the this 
    * function will return false.
+   *
+   * If the command has spaces in the path the caller MUST call
+   * cmSystemTools::ConvertToRunCommandPath on the command before passing
+   * it into this function or it will not work.  The command must be correctly
+   * escaped for this to with spaces.  
    */
   static bool RunSingleCommand(const char* command, std::string* output = 0,
     int* retVal = 0, const char* dir = 0, bool verbose = true, double timeout = 0.0);

@@ -117,7 +117,8 @@ int main()
   exe += "A";
   exe += cmSystemTools::GetExecutableExtension();
   int ret;
-  std::string errorMessage;
+  std::string errorMessage; 
+  exe = cmSystemTools::ConvertToRunCommandPath(exe.c_str());
   if(cmSystemTools::RunSingleCommand(exe.c_str(), 0, &ret))
     {
     if(ret != 10)
