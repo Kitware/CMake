@@ -1386,12 +1386,15 @@ void cmUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
            tgt->second.GetCustomCommands().begin(); 
          cr != tgt->second.GetCustomCommands().end(); ++cr)
       {
-      cmSourceGroup& sourceGroup = 
-        m_Makefile->FindSourceGroup(cr->GetSourceName().c_str(),
-                                    sourceGroups);
-      cmCustomCommand cc(*cr);
-      cc.ExpandVariables(*m_Makefile);
-      sourceGroup.AddCustomCommand(cc);
+      if ( cr->GetSourceName() != tgt->first )
+	{
+	cmSourceGroup& sourceGroup = 
+	  m_Makefile->FindSourceGroup(cr->GetSourceName().c_str(),
+				      sourceGroups);
+	cmCustomCommand cc(*cr);
+	cc.ExpandVariables(*m_Makefile);
+	sourceGroup.AddCustomCommand(cc);
+	}
       }
     }
 
@@ -2044,7 +2047,9 @@ void cmUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
     if(replace[0] != '-' && replace.find("echo") != 0  
        && replace.find("$(MAKE)") != 0)
       {
-      fout << "\t" << "echo \"" << replace.c_str() << "\"\n";
+      std::string echostring = replace;
+      cmSystemTools::ReplaceString(echostring, "\n", "\\n");
+      fout << "\t" << "echo \"" << echostring.c_str() << "\"\n";
       }
     fout << "\t" << replace.c_str() << "\n";
     }
@@ -2055,7 +2060,9 @@ void cmUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
     if(replace[0] != '-' && replace.find("echo") != 0  
        && replace.find("$(MAKE)") != 0)
       {
-      fout << "\t" << "echo \"" << replace.c_str() << "\"\n";
+      std::string echostring = replace;
+      cmSystemTools::ReplaceString(echostring, "\n", "\\n");
+      fout << "\t" << "echo \"" << echostring.c_str() << "\"\n";
       }
     fout << "\t" << replace.c_str() << "\n";
     }
@@ -2066,7 +2073,9 @@ void cmUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
     if(replace[0] != '-' && replace.find("echo") != 0  
        && replace.find("$(MAKE)") != 0)
       {
-      fout << "\t" << "echo \"" << replace.c_str() << "\"\n";
+      std::string echostring = replace;
+      cmSystemTools::ReplaceString(echostring, "\n", "\\n");
+      fout << "\t" << "echo \"" << echostring.c_str() << "\"\n";
       }
     fout << "\t" << replace.c_str() << "\n";
     }
@@ -2077,7 +2086,9 @@ void cmUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
     if(replace[0] != '-' && replace.find("echo") != 0  
        && replace.find("$(MAKE)") != 0)
       {
-      fout << "\t" << "echo \"" << replace.c_str() << "\"\n";
+      std::string echostring = replace;
+      cmSystemTools::ReplaceString(echostring, "\n", "\\n");
+      fout << "\t" << "echo \"" << echostring.c_str() << "\"\n";
       }
     fout << "\t" << replace.c_str() << "\n";
     }
