@@ -149,6 +149,14 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
     this->SetError("Wrong syntax. A TARGET or OUTPUT must be specified.");
     return false;
     }
+
+  if (source.empty() 
+      && !target.empty() 
+      && !output.empty())
+    {
+    this->SetError("Wrong syntax. A TARGET and OUTPUT can not both be specified.");
+    return false;
+    }
   
   // If source is empty, use the target 
   if(source.empty() && output.empty())
