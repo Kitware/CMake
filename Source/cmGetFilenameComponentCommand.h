@@ -48,7 +48,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * cmGetFilenameComponentCommand is a utility command used to get the path,
  * name, extension or name without extension of a full filename. 
- * Warning: as a utility command, the resulting value is not put in the cache.
  */
 class cmGetFilenameComponentCommand : public cmCommand
 {
@@ -92,11 +91,14 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "GET_FILENAME_COMPONENT(VarName FileName PATH|NAME|EXT|NAME_WE)\n"
+      "GET_FILENAME_COMPONENT(VarName FileName PATH|NAME|EXT|NAME_WE [CACHE])\n"
       "Set VarName to be the path (PATH), file name (NAME), file "
       "extension (EXT) or file name without extension (NAME_WE) of FileName.\n"
       "Note that the path is converted to Unix slashes format and has no "
-      "trailing slashes. The longest file extension is always considered.";
+      "trailing slashes. The longest file extension is always considered.\n"
+      "Warning: as a utility command, the resulting value is not put in the "
+      "cache but in the definition list, unless you add the optional CACHE "
+      "parameter.";
     }
   
   cmTypeMacro(cmGetFilenameComponentCommand, cmCommand);

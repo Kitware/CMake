@@ -50,6 +50,17 @@ bool cmGetFilenameComponentCommand::InitialPass(std::vector<std::string> const& 
     return false;
     }
 
+  // Check and see if the value has been stored in the cache
+  // already, if so use that value
+  if(args.size() == 4 && args[3] == "CACHE")
+    {
+    const char* cacheValue = m_Makefile->GetDefinition(args[0].c_str());
+    if(cacheValue && strcmp(cacheValue, "NOTFOUND"))
+      {
+      return true;
+      }
+    }
+  
   std::string result;
   std::string filename = args[1];
   m_Makefile->ExpandVariablesInString(filename);
@@ -77,7 +88,18 @@ bool cmGetFilenameComponentCommand::InitialPass(std::vector<std::string> const& 
     return false;
     }
 
-  m_Makefile->AddDefinition(args[0].c_str(), result.c_str());
+  if(args.size() == 4 && args[3] == "CACHE")
+    {
+    m_Makefile->AddCacheDefinition(args[0].c_str(),
+                                   result.c_str(),
+                                   "",
+                                   args[2] == "PATH" ? cmCacheManager::FILEPATH
+                                                     : cmCacheManager::STRING);
+    }
+  else 
+    {
+    m_Makefile->AddDefinition(args[0].c_str(), result.c_str());
+    }
 
   return true;
 }
