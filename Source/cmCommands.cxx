@@ -83,7 +83,6 @@
 #include "cmIncludeExternalMSProjectCommand.cxx"
 #include "cmLinkLibrariesCommand.cxx"
 #include "cmLoadCacheCommand.cxx"
-#include "cmLoadCommandCommand.cxx"
 #include "cmOutputRequiredFilesCommand.cxx"
 #include "cmRemoveCommand.cxx"
 #include "cmSeparateArgumentsCommand.cxx"
@@ -101,6 +100,12 @@
 #include "cmUseMangledMesaCommand.cxx"
 #include "cmUtilitySourceCommand.cxx"
 #include "cmWrapExcludeFilesCommand.cxx"
+
+// This one must be last because it includes windows.h and
+// windows.h #defines GetCurrentDirectory which is a member
+// of cmMakefile
+#include "cmLoadCommandCommand.cxx"
+
 #endif
 
 void GetPredefinedCommands(std::list<cmCommand*>& commands)
