@@ -18,8 +18,6 @@
 #include "cmRegularExpression.h"
 #include "cmSystemTools.h"
 
-#include <strstream>
-
 #include <stdio.h>
 #include <time.h>
 
@@ -477,7 +475,7 @@ int ctest::BuildDirectory()
   // 1 - error
   // > 1 - warning
   std::vector<int>         markedLines;
-  std::istrstream istr(coutput);
+  cmInputStringStream istr(coutput);
   while(istr)
     {
     char buffer[1024];

@@ -173,6 +173,15 @@ private:
   cmStringStream(const cmStringStream&);
   void operator=(const cmStringStream&);
 };
+class cmInputStringStream: public std::istringstream
+{
+public:
+  cmInputStringStream() {}
+  cmInputStringStream(const char* c) : std::istringstream(c) {}
+private:
+  cmInputStringStream(const cmInputStringStream&);
+  void operator=(const cmInputStringStream&);
+};
 #else
 class cmStrStreamCleanup
 {
@@ -201,6 +210,16 @@ private:
   cmStringStream(const cmStringStream&);
   void operator=(const cmStringStream&);
 };
+class cmInputStringStream: public std::istrstream
+{
+public:
+  typedef std::istrstream Superclass;
+  cmInputStringStream(const char* c) : Superclass(c) {}
+private:
+  cmInputStringStream(const cmInputStringStream&);
+  void operator=(const cmInputStringStream&);
+};
 #endif
+
 
 #endif
