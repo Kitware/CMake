@@ -13,9 +13,6 @@
 # VTK_LIBRARY_DIRS   - Link directories for VTK libraries.
 # VTK_KITS           - List of VTK kits, in all CAPS (COMMON, IO, ...).
 # VTK_LANGUAGES      - List of wrapped languages, in all CAPS (TCL, ...).
-# VTK_SETTINGS       - List of all CMake variable settings provided by
-#                      the version of VTK that was found.  This list
-#                      may include settings that are not listed here.
 #
 # The following cache entries must be set by the user to locate VTK:
 #
