@@ -177,18 +177,32 @@ void cmSystemTools::ReplaceString(std::string& source,
 }
 
 #ifdef _WIN32
+
+// Get the data of key value.
+// Example : 
+//      HKEY_LOCAL_MACHINE\SOFTWARE\Python\PythonCore\2.1\InstallPath
+//      =>  will return the data of the "default" value of the key
+//      HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.4:Root
+//      =>  will return the data of the "Root" value of the key
 bool ReadAValue(std::string &res, const char *key)
 {
   // find the primary key
   std::string primary = key;
-  std::string second = key;
+  std::string second;
+  std::string valuename;
+ 
   size_t start = primary.find("\\");
   if (start == std::string::npos)
     {
     return false;
     }
-  primary = primary.substr(0,start);
-  second = second.substr(++start);
+  size_t valuenamepos = primary.find("§");
+  if (valuenamepos != std::string::npos)
+    {
+    valuename = primary.substr(valuenamepos+1);
+    }
+  second = primary.substr(start+1, valuenamepos-start-1);
+  primary = primary.substr(0, start);
   
   HKEY primaryKey;
   if (primary == "HKEY_CURRENT_USER")
@@ -222,13 +236,13 @@ bool ReadAValue(std::string &res, const char *key)
     {
     DWORD dwType, dwSize;
     dwSize = 1023;
-    char val[1024];
-    if(RegQueryValueEx(hKey, NULL, NULL, &dwType, 
-                       (BYTE *)val, &dwSize) == ERROR_SUCCESS)
+    char data[1024];
+    if(RegQueryValueEx(hKey, (LPTSTR)valuename.c_str(), NULL, &dwType, 
+                       (BYTE *)data, &dwSize) == ERROR_SUCCESS)
       {
       if (dwType == REG_SZ)
         {
-        res = val;
+        res = data;
         return true;
         }
       }
@@ -242,7 +256,7 @@ bool ReadAValue(std::string &res, const char *key)
 void cmSystemTools::ExpandRegistryValues(std::string& source)
 {
 #if _WIN32  
-  cmRegularExpression regEntry("\\[(HKEY[A-Za-z_0-9\\.\\\\]*)\\]");
+  cmRegularExpression regEntry("\\[(HKEY[A-Za-z_ §0-9\\.\\\\]*)\\]");
   
   // check for black line or comment
   while (regEntry.find(source))
@@ -687,7 +701,7 @@ bool cmSystemTools::RunCommand(const char* command,
   fgets(buffer, BUFFER_SIZE, cpipe);
   while(!feof(cpipe))
     {
-    std::cout << buffer << std::flush;
+    std::cout << buffer;
     output += buffer;
     fgets(buffer, BUFFER_SIZE, cpipe);
     }
@@ -779,23 +793,23 @@ std::string cmSystemTools::FindLibrary(const char* name,
     tryPath = *p;
     tryPath += "/lib";
     tryPath += name;
-    tryPath += ".so";
+    tryPath + ".so";
     if(cmSystemTools::FileExists(tryPath.c_str()))
       {
       return cmSystemTools::CollapseFullPath(tryPath.c_str());
       }
     tryPath = *p;
-    tryPath += "/lib";
+    tryPath = "/lib";
     tryPath += name;
-    tryPath += ".a";
+    tryPath + ".a";
     if(cmSystemTools::FileExists(tryPath.c_str()))
       {
       return cmSystemTools::CollapseFullPath(tryPath.c_str());
       }
     tryPath = *p;
-    tryPath += "/lib";
+    tryPath = "/lib";
     tryPath += name;
-    tryPath += ".sl";
+    tryPath + ".sl";
     if(cmSystemTools::FileExists(tryPath.c_str()))
       {
       return cmSystemTools::CollapseFullPath(tryPath.c_str());
@@ -886,6 +900,7 @@ void cmSystemTools::SplitProgramPath(const char* in_name,
  */
 std::string cmSystemTools::CollapseFullPath(const char* in_name)
 {
+  std::cerr << "CollapseFullPath " << in_name << "\n";
   std::string dir, file;
   cmSystemTools::SplitProgramPath(in_name, dir, file);
   // Ultra-hack warning:
