@@ -98,36 +98,36 @@ bool cmCTestSubmit::SubmitUsingFTP(const std::string& localprefix,
   /* In windows, this will init the winsock stuff */
   ::curl_global_init(CURL_GLOBAL_ALL);
   
-  /* get a curl handle */
-  curl = curl_easy_init();
-  if(curl) 
+  std::string::size_type cc;
+  for ( cc = 0; cc < files.size(); cc ++ )
     {
-    // Using proxy
-    if ( m_FTPProxyType > 0 )
+    /* get a curl handle */
+    curl = curl_easy_init();
+    if(curl) 
       {
-      curl_easy_setopt(curl, CURLOPT_PROXY, m_FTPProxy.c_str()); 
-      switch (m_FTPProxyType)
+      // Using proxy
+      if ( m_FTPProxyType > 0 )
         {
-        case 2:
-          curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS4);
-          break;
-        case 3:
-          curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
-          break;
-        default:
-          curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);           
+        curl_easy_setopt(curl, CURLOPT_PROXY, m_FTPProxy.c_str()); 
+        switch (m_FTPProxyType)
+          {
+          case 2:
+            curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS4);
+            break;
+          case 3:
+            curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
+            break;
+          default:
+            curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);           
+          }
         }
-      }
-
-    // enable uploading
-    ::curl_easy_setopt(curl, CURLOPT_UPLOAD, TRUE) ;
-    
-    std::string::size_type cc;
-    for ( cc = 0; cc < files.size(); cc ++ )
-      {
+      
+      // enable uploading
+      ::curl_easy_setopt(curl, CURLOPT_UPLOAD, TRUE) ;
+      
       std::string local_file = localprefix + "/" + files[cc];
       std::string upload_as = url + "/" + remoteprefix + files[cc];
-
+      
       struct stat st;
       if ( ::stat(local_file.c_str(), &st) )
         {
@@ -158,9 +158,9 @@ bool cmCTestSubmit::SubmitUsingFTP(const std::string& localprefix,
         ::curl_global_cleanup(); 
         return false;
         }
+      // always cleanup
+      ::curl_easy_cleanup(curl);
       }
-    // always cleanup
-    ::curl_easy_cleanup(curl);
     }
   ::curl_global_cleanup(); 
   return true;
