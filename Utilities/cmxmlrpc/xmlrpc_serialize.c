@@ -258,7 +258,7 @@ xmlrpc_serialize_base64_data (xmlrpc_env *env,
     size_t size;
 
     /* Encode the data. */
-    encoded = xmlrpc_base64_encode(env, data, len);
+    encoded = xmlrpc_base64_encode_without_newlines(env, data, len);
     XMLRPC_FAIL_IF_FAULT(env);
     contents = XMLRPC_TYPED_MEM_BLOCK_CONTENTS(unsigned char, encoded);
     size = XMLRPC_TYPED_MEM_BLOCK_SIZE(unsigned char, encoded);
