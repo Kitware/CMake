@@ -108,7 +108,7 @@ static const char* cmCTestWarningMatches[] = {
   ".*file: .* has no symbols",
   "([^ :]+):([0-9]+): Warning",
   "\\([0-9]*\\): remark #[0-9]*",
-  "\".*\", line [0-9]+: remark([0-9]):",
+  "\".*\", line [0-9]+: remark\\([0-9]*\\):",
   0
 };
 
@@ -307,10 +307,13 @@ int cmCTestBuildHandler::BuildDirectory(cmCTest *ctest_inst)
     {
     cmsys::RegularExpression re(m_CustomErrorMatches[cc].c_str());
     std::vector<cmStdString>::size_type kk;
+    //cout << "error Line: " << m_CustomErrorMatches[cc] << endl;
     for ( kk = 0; kk < lines.size(); kk ++ )
       {
+      //cout << "  Line: " << lines[kk] << endl;
       if ( re.find(lines[kk]) )
         {
+        //cout << "******************************" << endl;
         markedLines[kk] = 1;
         }
       }    
@@ -320,10 +323,13 @@ int cmCTestBuildHandler::BuildDirectory(cmCTest *ctest_inst)
     {
     cmsys::RegularExpression re(m_CustomWarningMatches[cc].c_str());
     std::vector<cmStdString>::size_type kk;
+    //cout << "warning Line: " << m_CustomWarningMatches[cc] << endl;
     for ( kk = 0; kk < lines.size(); kk ++ )
       {
+      //cout << "  Line: " << lines[kk] << endl;
       if ( re.find(lines[kk]) )
         {
+        //cout << "******************************" << endl;
         markedLines[kk] += 2;
         }
       }    
