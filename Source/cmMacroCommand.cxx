@@ -43,8 +43,7 @@ public:
    */
   virtual bool InvokeInitialPass(const std::vector<cmListFileArgument>& args);
 
-  virtual bool InitialPass(std::vector<std::string> const& args) 
-  { return false; };
+  virtual bool InitialPass(std::vector<std::string> const&) { return false; };
   
   /**
    * The name of the command as specified in CMakeList.txt.
