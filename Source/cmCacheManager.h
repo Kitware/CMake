@@ -28,6 +28,15 @@ class cmMakefile;
 class cmCacheManager
 {
 public:
+  enum CacheEntryType{ BOOL=0, PATH, FILEPATH, STRING, INTERNAL  };
+  class CacheEntry
+  {
+  public:
+    std::string m_Value;
+    CacheEntryType m_Type;
+  };
+  typedef  std::map<std::string, CacheEntry> CacheEntryMap;
+public:
   /**
    * Types for the cache entries.  These are useful as
    * hints for a cache editor program.  Path should bring
@@ -35,7 +44,6 @@ public:
    * text entry box, FILEPATH is a full path to a file which
    * can be different than just a path input
    */
-  enum CacheEntryType{ BOOL=0, PATH, FILEPATH, STRING, INTERNAL  };
   static CacheEntryType StringToType(const char*);
   //! Singleton pattern get instance of the cmCacheManager.
   static cmCacheManager* GetInstance();
@@ -49,20 +57,21 @@ public:
   //! Add an entry into the cache
   void AddCacheEntry(const char* key, const char* value, CacheEntryType type);
   
+  //! Remove an entry from the cache
+  void RemoveCacheEntry(const char* key);
+  
   //! Get a value from the cache given a key
   const char* GetCacheValue(const char* key);
   
   //! Print the cache to a stream
   void PrintCache(std::ostream&);
+
+  //! Get the cache map ivar.
+  CacheEntryMap GetCacheMap()    {      return m_Cache;    }
+
 private:
   static cmCacheManager* s_Instance;
-  class CacheEntry
-  {
-  public:
-    std::string m_Value;
-    CacheEntryType m_Type;
-  };
-  std::map<std::string, CacheEntry> m_Cache;
+  CacheEntryMap m_Cache;
 };
 
 #endif

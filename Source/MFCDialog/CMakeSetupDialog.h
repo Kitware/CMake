@@ -7,7 +7,8 @@
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
-
+#include "../cmMakefile.h"
+#include "PropertyList.h"
 /////////////////////////////////////////////////////////////////////////////
 // CMakeSetupDialog dialog
 
@@ -20,6 +21,7 @@ protected:
   bool Browse(CString&, const char* title);
   void SaveToRegistry();
   void LoadFromRegistry();
+  void InitMakefile();
   void ReadRegistryValue(HKEY hKey,
 			 CString *val,
 			 const char *key,
@@ -27,8 +29,11 @@ protected:
 // Dialog Data
   //{{AFX_DATA(CMakeSetupDialog)
   enum { IDD = IDD_CMakeSetupDialog_DIALOG };
+  cmMakefile    m_Makefile;
+  bool          m_InitMakefile;
   CString	m_WhereSource;
   CString	m_WhereBuild;
+  CPropertyList m_CacheEntriesList;
   //}}AFX_DATA
   
   // ClassWizard generated virtual function overrides
@@ -39,6 +44,7 @@ protected:
   
 // Implementation
 protected:
+  
   HICON m_hIcon;
   CString m_RegistryKey;
   // Generated message map functions
@@ -50,7 +56,13 @@ protected:
   afx_msg void OnChangeEdit1();
   afx_msg void OnBrowse();
   virtual void OnOK();
+  virtual void OnBuildProjects();
   afx_msg void OnButton3();
+  
+  // copy from the cache manager to the cache edit list box
+  void FillCacheEditorFromCacheManager();
+  // copy from the list box to the cache manager
+  void FillCacheManagerFromCacheEditor();
   
   //}}AFX_MSG
   DECLARE_MESSAGE_MAP()

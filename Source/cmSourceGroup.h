@@ -19,7 +19,7 @@
 #include "cmStandardIncludes.h"
 #include "cmRegularExpression.h"
 #include "cmCustomCommand.h"
-#include <set>
+
 
 /** \class cmSourceGroup
  * \brief Hold a group of sources as specified by a SOURCE_GROUP command.

@@ -26,10 +26,11 @@ protected:
 			 char *adefault);
 // Dialog Data
   //{{AFX_DATA(CMakeSetupDialog)
-  enum { IDD = IDD_CMakeSetupDialog_DIALOG };
+	enum { IDD = IDD_CMakeSetupDialog_DIALOG };
+	CListBox	m_CacheEntriesList;
   CString	m_WhereITK;
   CString	m_WhereBuildITK;
-  //}}AFX_DATA
+	//}}AFX_DATA
   
   // ClassWizard generated virtual function overrides
   //{{AFX_VIRTUAL(CMakeSetupDialog)
@@ -51,8 +52,8 @@ protected:
   afx_msg void OnBrowse();
   virtual void OnOK();
   afx_msg void OnButton3();
-  
-  //}}AFX_MSG
+	afx_msg void OnBuildProjects();
+	//}}AFX_MSG
   DECLARE_MESSAGE_MAP()
 };
 

@@ -136,6 +136,11 @@ bool cmCacheManager::SaveCache(cmMakefile* mf)
   return true;
 }
 
+void cmCacheManager::RemoveCacheEntry(const char* key)
+{
+  m_Cache.erase(key);
+}
+
 void cmCacheManager::AddCacheEntry(const char* key, 
 				   const char* value, 
 				   CacheEntryType type)

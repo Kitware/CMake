@@ -18,7 +18,6 @@
 #include "cmSystemTools.h"
 #include "cmDSPMakefile.h"
 #include "cmMSProjectGenerator.h"
-//#include <windows.h>
 
 
 cmDSWMakefile::cmDSWMakefile(cmMakefile* m)

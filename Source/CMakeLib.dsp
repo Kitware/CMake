@@ -135,10 +135,6 @@ SOURCE=.\cmSourceGroup.cxx
 
 SOURCE=.\cmSystemTools.cxx
 # End Source File
-# Begin Source File
-
-SOURCE=.\cmWindowsConfigure.cxx
-# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -414,14 +410,6 @@ SOURCE=..\cmWin32LibrariesCommand.h
 # Begin Source File
 
 SOURCE=.\cmWin32LibrariesCommand.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmWindowsConfigure.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\cmWindowsConfigure.h
 # End Source File
 # End Group
 # End Target

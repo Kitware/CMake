@@ -85,21 +85,25 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,178,7,50,14,WS_GROUP
 END
 
-IDD_CMakeSetupDialog_DIALOG DIALOGEX 0, 0, 320, 200
+IDD_CMakeSetupDialog_DIALOG DIALOGEX 0, 0, 375, 226
 STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
 CAPTION "CMakeSetupDialog"
-FONT 8, "MS Sans Serif", 0, 0, 0x1
+FONT 8, "MS Sans Serif"
 BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,260,7,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,260,23,50,14
-    EDITTEXT        IDC_WhereSource,13,27,135,13,ES_AUTOHSCROLL
-    PUSHBUTTON      "Browse...",IDC_BUTTON2,150,28,43,13
-    LTEXT           "Where is the source code:",IDC_STATIC,15,15,104,9
-    EDITTEXT        IDC_WhereBuild,14,67,133,13,ES_AUTOHSCROLL
-    PUSHBUTTON      "Browse...",IDC_BUTTON3,151,66,43,13
-    LTEXT           "Where do you want to build the binaries:",IDC_STATIC,16,
-                    56,128,9
+    DEFPUSHBUTTON   "Close",IDOK,319,39,50,14
+    EDITTEXT        IDC_WhereSource,129,4,135,13,ES_AUTOHSCROLL
+    PUSHBUTTON      "Browse...",IDC_BUTTON2,269,5,43,13
+    LTEXT           "Where is the source code:",IDC_STATIC,39,6,86,9
+    EDITTEXT        IDC_WhereBuild,129,25,133,13,ES_AUTOHSCROLL
+    PUSHBUTTON      "Browse...",IDC_BUTTON3,268,25,43,13
+    LTEXT           "Where do you want to build the binaries:",IDC_STATIC,1,
+                    27,128,9
+    PUSHBUTTON      "Build Project Files",IDC_BuildProjects,6,39,67,15
+    GROUPBOX        "Cache Values",IDC_STATIC,2,67,370,156
+    LISTBOX         IDC_LIST2,13,84,344,122,LBS_OWNERDRAWVARIABLE | 
+                    LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | 
+                    WS_TABSTOP
 END
 
 
@@ -160,6 +164,11 @@ BEGIN
         RIGHTMARGIN, 228
         TOPMARGIN, 7
         BOTTOMMARGIN, 48
+    END
+
+    IDD_CMakeSetupDialog_DIALOG, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 215
     END
 END
 #endif    // APSTUDIO_INVOKED
