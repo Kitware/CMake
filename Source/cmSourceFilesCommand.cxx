@@ -51,9 +51,21 @@ bool cmSourceFilesCommand::InitialPass(std::vector<std::string>& args)
   for(std::vector<std::string>::iterator i = (args.begin() + 1);
       i != args.end(); ++i)
     {
+    std::string copy = *i;
+    m_Makefile->ExpandVariablesInString(copy);
     cmSourceFile file;
     file.SetIsAnAbstractClass(false);
-    file.SetName((*i).c_str(), m_Makefile->GetCurrentDirectory());
+    std::string path = cmSystemTools::GetFilenamePath(copy);
+    if (path == "")
+      {
+      file.SetName(cmSystemTools::GetFilenameName(copy.c_str()).c_str(), 
+                   m_Makefile->GetCurrentDirectory());
+      }
+    else
+      {
+      file.SetName(cmSystemTools::GetFilenameName(copy.c_str()).c_str(), 
+                   path.c_str());
+      }
     m_Makefile->AddSource(file, args[0].c_str());
     }
   return true;
