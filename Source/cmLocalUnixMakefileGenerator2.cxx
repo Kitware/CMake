@@ -67,6 +67,17 @@ void cmLocalUnixMakefileGenerator2::Generate(bool fromTheTop)
       }
     }
 
+  // Generate the rule files for each custom command.
+  const std::vector<cmSourceFile*>& sources = m_Makefile->GetSourceFiles();
+  for(std::vector<cmSourceFile*>::const_iterator i = sources.begin();
+      i != sources.end(); ++i)
+    {
+    if((*i)->GetCustomCommand())
+      {
+      this->GenerateCustomRuleFile(*(*i));
+      }
+    }
+
   // Generate the main makefile.
   this->GenerateMakefile();
 
@@ -104,8 +115,8 @@ void cmLocalUnixMakefileGenerator2::GenerateMakefile()
   // Write the subdirectory driver rules.
   this->WriteSubdirRules(makefileStream, "all");
 
-  // Write include statements to get rules for each target.
-  this->WriteTargetIncludes(makefileStream);
+  // Write include statements to get rules for this directory.
+  this->WriteRuleFileIncludes(makefileStream);
 
   // Write jump-and-build rules that were recorded in the map.
   this->WriteJumpAndBuildRules(makefileStream);
@@ -196,6 +207,11 @@ cmLocalUnixMakefileGenerator2
   for(std::vector<cmSourceFile*>::const_iterator source = sources.begin();
       source != sources.end(); ++source)
     {
+    if((*source)->GetCustomCommand())
+      {
+      // Generate this custom command's rule file.
+      std::cout << "Found custom command!" << std::endl;
+      }
     if(!(*source)->GetPropertyAsBool("HEADER_FILE_ONLY") &&
        !(*source)->GetCustomCommand() &&
        !m_GlobalGenerator->IgnoreFile((*source)->GetSourceExtension().c_str()))
@@ -214,12 +230,17 @@ cmLocalUnixMakefileGenerator2
   depBase += target.GetName();
   std::string depMakeFile = this->GenerateDependsMakeFile(depBase.c_str());
 
-  // Open the rule file.  This should be copy-if-different because the
-  // rules may depend on this file itself.
+  // Construct the rule file name.
   std::string ruleFileName = dir;
   ruleFileName += "/";
   ruleFileName += target.GetName();
   ruleFileName += ".make";
+
+  // The rule file must be included by the makefile.
+  m_IncludeRuleFiles.push_back(ruleFileName);
+
+  // Open the rule file.  This should be copy-if-different because the
+  // rules may depend on this file itself.
   std::string ruleFileNameFull = this->ConvertToFullPath(ruleFileName);
   cmGeneratedFileStream ruleFile(ruleFileNameFull.c_str());
   std::ostream& ruleFileStream = ruleFile.GetStream();
@@ -479,6 +500,115 @@ cmLocalUnixMakefileGenerator2
   this->WriteMakeRule(ruleFileStream, 0, buildEcho.c_str(),
                       obj.c_str(), depends, commands);
   }
+}
+
+//----------------------------------------------------------------------------
+void
+cmLocalUnixMakefileGenerator2
+::GenerateCustomRuleFile(const cmSourceFile& source)
+{
+  // Get the custom command for the source.
+  if(!source.GetCustomCommand())
+    {
+    cmSystemTools::Error("GenerateCustomRuleFile called for non-custom source.");
+    return;
+    }
+  const cmCustomCommand& cc = *source.GetCustomCommand();
+
+  // Construct the name of the rule file.
+  std::string customName = this->GetCustomBaseName(cc);
+  std::string ruleFileName = customName;
+  ruleFileName += ".make";
+
+  // If this is a duplicate rule produce an error.
+  if(m_CustomRuleFiles.find(ruleFileName) != m_CustomRuleFiles.end())
+    {
+    cmSystemTools::Error("An output was found with multiple rules on how to build it for output: ",
+                         cc.GetOutput().c_str());
+    return;
+    }
+  m_CustomRuleFiles.insert(ruleFileName);
+
+  // This rule should be included by the makefile.
+  m_IncludeRuleFiles.push_back(ruleFileName);
+
+  // TODO: Convert outputs/dependencies (arguments?) to relative paths.
+
+  // Open the rule file.  This should be copy-if-different because the
+  // rules may depend on this file itself.
+  std::string ruleFileNameFull = this->ConvertToFullPath(ruleFileName);
+  cmGeneratedFileStream ruleFile(ruleFileNameFull.c_str());
+  std::ostream& ruleFileStream = ruleFile.GetStream();
+  if(!ruleFileStream)
+    {
+    // TODO: Produce error message that accounts for generated stream
+    // .tmp.
+    return;
+    }
+  this->WriteDisclaimer(ruleFileStream);
+  ruleFileStream
+    << "# Custom command rule file for " << customName.c_str() << ".\n\n";
+
+  // Build the command line in a single string.
+  std::vector<std::string> commands;
+  std::string cmd = cc.GetCommand();
+  cmSystemTools::ReplaceString(cmd, "/./", "/");
+  cmd = this->ConvertToRelativeOutputPath(cmd.c_str());
+  if(cc.GetArguments().size() > 0)
+    {
+    cmd += " ";
+    cmd += cc.GetArguments();
+    }
+  commands.push_back(cmd);
+
+  // Collect the dependencies.
+  std::vector<std::string> depends;
+  for(std::vector<std::string>::const_iterator d = cc.GetDepends().begin();
+      d != cc.GetDepends().end(); ++d)
+    {
+    // Get the dependency with variables expanded.
+    std::string dep = *d;
+    m_Makefile->ExpandVariablesInString(dep);
+
+    // If the rule depends on a target CMake knows how to build,
+    // convert it to the path where it will be built.
+    std::string libPath = dep + "_CMAKE_PATH";
+    const char* cacheValue = m_Makefile->GetDefinition(libPath.c_str());
+    if(cacheValue && *cacheValue)
+      {
+      libPath = cacheValue;
+      if (m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH") &&
+          m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH")[0] != '\0')
+        {
+        libPath = m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
+        }
+      libPath += "/";
+      libPath += dep;
+      libPath += cmSystemTools::GetExecutableExtension();
+      dep = libPath;
+      }
+
+    // Cleanup the dependency and add it.
+    cmSystemTools::ReplaceString(dep, "/./", "/");
+    cmSystemTools::ReplaceString(dep, "/$(IntDir)/", "/");
+    dep = this->ConvertToRelativeOutputPath(dep.c_str());
+    depends.push_back(dep.c_str());
+    }
+
+  // Add a dependency on the rule file itself.
+  depends.push_back(ruleFileName);
+
+  // Write the rule.
+  const char* comment = 0;
+  if(cc.GetComment().size())
+    {
+    comment = cc.GetComment().c_str();
+    }
+  std::string preEcho = "Generating ";
+  preEcho += customName;
+  preEcho += "...";
+  this->WriteMakeRule(ruleFileStream, comment, preEcho.c_str(),
+                      cc.GetOutput().c_str(), depends, commands);
 }
 
 //----------------------------------------------------------------------------
@@ -790,7 +920,7 @@ cmLocalUnixMakefileGenerator2
     std::vector<std::string> no_depends;
     std::vector<std::string> commands;
     commands.push_back(
-      "$(CMAKE_EDIT_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)");
+      "@$(CMAKE_EDIT_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)");
     this->WriteMakeRule(makefileStream,
                         "Special rule to re-run CMake cache editor using make.",
                         "Running CMake cache editor...",
@@ -1105,43 +1235,30 @@ cmLocalUnixMakefileGenerator2
 //----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator2
-::WriteTargetIncludes(std::ostream& makefileStream)
+::WriteRuleFileIncludes(std::ostream& makefileStream)
 {
-  bool first = true;
-  const cmTargets& targets = m_Makefile->GetTargets();
-  for(cmTargets::const_iterator t = targets.begin(); t != targets.end(); ++t)
+  // Make sure we have some rules to include.
+  if(m_IncludeRuleFiles.empty())
     {
-    // TODO: Handle the rest of the target types.
-    if((t->second.GetType() == cmTarget::EXECUTABLE) ||
-       (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
-       (t->second.GetType() == cmTarget::SHARED_LIBRARY) ||
-       (t->second.GetType() == cmTarget::MODULE_LIBRARY))
-      {
-      // Write the header for this section.
-      if(first)
-        {
-        this->WriteDivider(makefileStream);
-        makefileStream
-          << "# Include rule files for each target in this directory.\n"
-          << "\n";
-        first = false;
-        }
+    return;
+    }
 
-      // Construct the rule file name for this target.
-      std::string ruleFileName = this->GetTargetDirectory(t->second);
-      ruleFileName += "/";
-      ruleFileName += t->first;
-      ruleFileName += ".make";
-      makefileStream
-        << m_IncludeDirective << " "
-        << this->ConvertToOutputForExisting(ruleFileName.c_str()).c_str()
-        << "\n";
-      }
-    }
-  if(!first)
+  // Write section header.
+  this->WriteDivider(makefileStream);
+  makefileStream
+    << "# Include rule files for this directory.\n"
+    << "\n";
+
+  // Write the include rules.
+  for(std::vector<std::string>::const_iterator i = m_IncludeRuleFiles.begin();
+      i != m_IncludeRuleFiles.end(); ++i)
     {
-    makefileStream << "\n";
+    makefileStream
+      << m_IncludeDirective << " "
+      << this->ConvertToOutputForExisting(i->c_str()).c_str()
+      << "\n";
     }
+  makefileStream << "\n";
 }
 
 //----------------------------------------------------------------------------
@@ -1618,6 +1735,30 @@ cmLocalUnixMakefileGenerator2
   obj += "/";
   obj += objectName;
   return obj;
+}
+
+//----------------------------------------------------------------------------
+std::string
+cmLocalUnixMakefileGenerator2
+::GetCustomBaseName(const cmCustomCommand& cc)
+{
+  // If the full path to the output file includes this build
+  // directory, we want to use the relative path for the filename of
+  // the custom file.  Otherwise, we will use just the filename
+  // portion.
+  std::string customName;
+  if(cmSystemTools::FileIsFullPath(cc.GetOutput().c_str()) &&
+     (cc.GetOutput().find(m_Makefile->GetStartOutputDirectory()) == 0))
+    {
+    customName =
+      cmSystemTools::RelativePath(m_Makefile->GetStartOutputDirectory(),
+                                  cc.GetOutput().c_str());
+    }
+  else
+    {
+    customName = cmSystemTools::GetFilenameName(cc.GetOutput().c_str());
+    }
+  return customName;
 }
 
 //----------------------------------------------------------------------------

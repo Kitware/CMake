@@ -19,6 +19,7 @@
 
 #include "cmLocalUnixMakefileGenerator.h"
 
+class cmCustomCommand;
 class cmDependInformation;
 class cmMakeDepend;
 class cmTarget;
@@ -65,6 +66,7 @@ protected:
   void GenerateTargetRuleFile(const cmTarget& target);
   void GenerateObjectRuleFile(const cmTarget& target,
                               const cmSourceFile& source);
+  void GenerateCustomRuleFile(const cmSourceFile& source);
   std::string GenerateDependsMakeFile(const char* file);
   void WriteMakeRule(std::ostream& os,
                      const char* comment,
@@ -78,7 +80,7 @@ protected:
   void WriteMakeVariables(std::ostream& makefileStream);
   void WriteSpecialTargetsTop(std::ostream& makefileStream);
   void WriteSpecialTargetsBottom(std::ostream& makefileStream);
-  void WriteTargetIncludes(std::ostream& makefileStream);
+  void WriteRuleFileIncludes(std::ostream& makefileStream);
   void WriteAllRule(std::ostream& makefileStream);
   void WriteSubdirRules(std::ostream& makefileStream, const char* pass);
   void WriteSubdirRule(std::ostream& makefileStream, const char* pass,
@@ -114,6 +116,7 @@ protected:
   std::string GetSubdirTargetName(const char* pass, const char* subdir);
   std::string GetObjectFileName(const cmTarget& target,
                                 const cmSourceFile& source);
+  std::string GetCustomBaseName(const cmCustomCommand& cc);
   const char* GetSourceFileLanguage(const cmSourceFile& source);
   std::string ConvertToFullPath(const std::string& localPath);
 
@@ -146,6 +149,12 @@ private:
 
   // Command used when a rule has no dependencies or commands.
   std::vector<std::string> m_EmptyCommands;
+
+  // List of make rule files that need to be included by the makefile.
+  std::vector<std::string> m_IncludeRuleFiles;
+
+  // Set of custom rule files that have been generated.
+  std::set<cmStdString> m_CustomRuleFiles;
 };
 
 #endif
