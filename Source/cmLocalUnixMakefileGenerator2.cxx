@@ -46,10 +46,6 @@
 // TODO: Add "help" target.
 // TODO: Identify remaining relative path violations.
 // TODO: Need test for separate executable/library output path.
-// TODO: Add registered files for cleaning:
-//       $(GENERATED_QT_FILES) $(GENERATED_FLTK_FILES)
-//       What about cleaning custom command outputs?
-
 
 //----------------------------------------------------------------------------
 cmLocalUnixMakefileGenerator2::cmLocalUnixMakefileGenerator2()
@@ -706,6 +702,35 @@ cmLocalUnixMakefileGenerator2
   preEcho += "...";
   this->WriteMakeRule(ruleFileStream, comment, preEcho.c_str(),
                       cc.GetOutput().c_str(), depends, commands);
+
+  // Write the clean rule for this custom command.
+  std::string cleanTarget = customName;
+  cleanTarget += ".clean";
+  commands.clear();
+  depends.clear();
+  std::vector<std::string> cleanFiles;
+  cleanFiles.push_back(cc.GetOutput().c_str());
+  this->AppendCleanCommand(commands, cleanFiles);
+  this->WriteMakeRule(ruleFileStream,
+                      "Clean the output of this custom command.", 0,
+                      cleanTarget.c_str(), depends, commands);
+
+  // Check whether to attach the clean rule.
+  bool attach = true;
+  if(const char* clean_no_custom =
+     m_Makefile->GetProperty("CLEAN_NO_CUSTOM"))
+    {
+    if(!cmSystemTools::IsOff(clean_no_custom))
+      {
+      attach = false;
+      }
+    }
+
+  // Attach the clean rule to the directory-level clean rule.
+  if(attach)
+    {
+    this->WriteLocalRule(ruleFileStream, "clean", cleanTarget.c_str());
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -1797,23 +1822,17 @@ cmLocalUnixMakefileGenerator2
 
   // Add a command to remove any existing files for this library.
   std::vector<std::string> cleanFiles;
-  std::string remove = "$(CMAKE_COMMAND) -E remove -f ";
-  remove += targetOutPathReal;
-  cleanFiles.push_back(targetOutPathReal);
+  cleanFiles.push_back(targetFullPathReal);
   if(targetOutPathSO != targetOutPathReal)
     {
-    remove += " ";
-    remove += targetOutPathSO;
-    cleanFiles.push_back(targetOutPathSO);
+    cleanFiles.push_back(targetFullPathSO);
     }
   if(targetOutPath != targetOutPathSO &&
      targetOutPath != targetOutPathReal)
     {
-    remove += " ";
-    remove += targetOutPath;
-    cleanFiles.push_back(targetOutPath);
+    cleanFiles.push_back(targetFullPath);
     }
-  commands.push_back(remove);
+  this->AppendCleanCommand(commands, cleanFiles);
 
   // TODO: Pre-build and pre-link rules.
 
@@ -2008,14 +2027,7 @@ cmLocalUnixMakefileGenerator2
   cleanTarget += ".clean";
 
   // Construct the clean command.
-  std::string remove = "$(CMAKE_COMMAND) -E remove -f";
-  for(std::vector<std::string>::const_iterator f = files.begin();
-      f != files.end(); ++f)
-    {
-    remove += " ";
-    remove += *f;
-    }
-  commands.push_back(remove);
+  this->AppendCleanCommand(commands, files);
 
   // Write the rule.
   this->WriteMakeRule(ruleFileStream, 0, 0, cleanTarget.c_str(),
@@ -2110,16 +2122,9 @@ cmLocalUnixMakefileGenerator2
   else
     {
     // Have extra files to clean.  Write the action to remove them.
-    std::string remove = "$(CMAKE_COMMAND) -E remove -f";
-    for(std::vector<std::string>::iterator i = files.begin();
-        i != files.end(); ++i)
-      {
-      remove += " ";
-      remove += this->ConvertToRelativeOutputPath(i->c_str());
-      }
     std::vector<std::string> no_depends;
     std::vector<std::string> commands;
-    commands.push_back(remove);
+    this->AppendCleanCommand(commands, files);
     this->WriteMakeRule(makefileStream,
                         "Clean extra files in this directory.", 0,
                         "clean.local", no_depends, commands);
@@ -2717,6 +2722,25 @@ cmLocalUnixMakefileGenerator2
     cmd += cc.GetArguments();
     }
   commands.push_back(cmd);
+}
+
+//----------------------------------------------------------------------------
+void
+cmLocalUnixMakefileGenerator2
+::AppendCleanCommand(std::vector<std::string>& commands,
+                     const std::vector<std::string>& files)
+{
+  if(!files.empty())
+    {
+    std::string remove = "$(CMAKE_COMMAND) -E remove -f";
+    for(std::vector<std::string>::const_iterator f = files.begin();
+        f != files.end(); ++f)
+      {
+      remove += " ";
+      remove += this->ConvertToRelativeOutputPath(f->c_str());
+      }
+    commands.push_back(remove);
+    }
 }
 
 //----------------------------------------------------------------------------

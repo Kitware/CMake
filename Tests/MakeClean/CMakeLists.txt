@@ -5,7 +5,6 @@ TRY_COMPILE(TOCLEAN_BUILT
   ${MakeClean_BINARY_DIR}/ToClean
   ${MakeClean_SOURCE_DIR}/ToClean
   ToClean
-  toclean
   OUTPUT_VARIABLE OUTPUT
   )
 IF(TOCLEAN_BUILT)

@@ -3,6 +3,10 @@
 #
 PROJECT (Wrapping)
 
+# Disable cleaning of custom command outputs to preserve the hacks
+# used to generate the files using CONFIGURE_FILE.
+SET_DIRECTORY_PROPERTIES(PROPERTIES CLEAN_NO_CUSTOM 1)
+
 #
 # Lib and exe path
 #
