@@ -147,8 +147,7 @@ void cmGlobalGenerator::EnableLanguage(const char* lang,
       putenv(envCXX);
       }
     }
- 
-   // check for a Java compiler and configure it
+    // check for a Java compiler and configure it
   if(!isLocal &&
      !this->GetLanguageEnabled("JAVA") &&
      strcmp(lang, "JAVA") == 0)
@@ -171,18 +170,22 @@ void cmGlobalGenerator::EnableLanguage(const char* lang,
     fpath = rootBin;
     fpath += "/CMakeCCompiler.cmake";
     mf->ReadListFile(0,fpath.c_str());
+    this->SetLanguageEnabled("C");
     }
   if(strcmp(lang, "CXX") == 0 && !mf->GetDefinition("CMAKE_CXX_COMPILER_LOADED"))
     {
     fpath = rootBin;
     fpath += "/CMakeCXXCompiler.cmake";
     mf->ReadListFile(0,fpath.c_str());
+    this->SetLanguageEnabled("CXX");
+
     }
   if(strcmp(lang, "JAVA") == 0 && !mf->GetDefinition("CMAKE_JAVA_COMPILER_LOADED"))
     {
     fpath = rootBin;
     fpath += "/CMakeJavaCompiler.cmake";
     mf->ReadListFile(0,fpath.c_str());
+    this->SetLanguageEnabled("JAVA");
     }
   if ( lang[0] == 'C' && !mf->GetDefinition("CMAKE_SYSTEM_SPECIFIC_INFORMATION_LOADED"))
     {
