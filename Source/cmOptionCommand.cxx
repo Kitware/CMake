@@ -55,13 +55,14 @@ bool cmOptionCommand::InitialPass(std::vector<std::string>& args)
     = m_Makefile->GetDefinition(args[0].c_str());
   if(!cacheValue)
     {
-    const char* initialValue = "Off";
+    std::string initialValue = "Off";
     if(args.size() == 3)
       {
-      initialValue = args[2].c_str();
+      initialValue = args[2];
+      m_Makefile->ExpandVariablesInString(initialValue);
       }
     m_Makefile->AddCacheDefinition(args[0].c_str(),
-                                   cmSystemTools::IsOn(initialValue),
+                                   cmSystemTools::IsOn(initialValue.c_str()),
                                    args[1].c_str());
     }
   else
