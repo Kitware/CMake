@@ -27,6 +27,34 @@ IF ( CMAKE_WX_CAN_COMPILE )
   TARGET_LINK_LIBRARIES(wxCMakeSetup ${WXWINDOWS_LIBRARY})
   TARGET_LINK_LIBRARIES(wxCMakeSetup CMakeLib)
 
+  IF(APPLE)
+    SET(APPLE_GUI_EXECUTABLE wxCMakeSetup)
+    SET(APPLE_GUI_INFO_STRING "CMake version 1.5.0, (c) 2002 Kitware Inc.")
+    SET(APPLE_GUI_IDENTIFIER "com.kitware.wxCMakeSetup")
+    SET(APPLE_GUI_LONG_VERSION_STRING "1.5.0, (c) 2002 Kitware Inc.")
+    SET(APPLE_GUI_BUNDLE_NAME "CMake")
+    SET(APPLE_GUI_SHORT_VERSION_STRING "1.5.0")
+    SET(APPLE_GUI_BUNDLE_VERSION "1.5.0")
+    SET(APPLE_GUI_COPYRIGHT "Copyright 2002 Kitware Inc.")
+    CONFIGURE_FILE(${CMAKE_ROOT}/Templates/AppleInfo.plist
+                   ${EXECUTABLE_OUTPUT_PATH}/CMake.app/Contents/Info.plist)
+    WRITE_FILE(${EXECUTABLE_OUTPUT_PATH}/CMake.app/Contents/PkgInfo "APPL????")
+    
+    ADD_CUSTOM_COMMAND(
+                SOURCE wxCMakeSetup
+                COMMAND ${CMAKE_COMMAND}
+                ARGS -E copy
+                ${EXECUTABLE_OUTPUT_PATH}/wxCMakeSetup
+                ${EXECUTABLE_OUTPUT_PATH}/CMake.app/Contents/MacOS/wxCMakeSetup
+                TARGET wxCMakeSetup)
+    ADD_CUSTOM_COMMAND(
+                SOURCE wxCMakeSetup
+                COMMAND ${CMAKE_COMMAND}
+                ARGS -E chdir ${EXECUTABLE_OUTPUT_PATH}/CMake.app/Contents/MacOS
+                `${CMAKE_WX_CONFIG} --rezflags`
+                ${EXECUTABLE_OUTPUT_PATH}/CMake.app/Contents/MacOS/wxCMakeSetup)             
+  ENDIF(APPLE)
+
   INSTALL_TARGETS(/bin wxCMakeSetup)
 
   IF(BUILD_TESTING)
