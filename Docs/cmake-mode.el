@@ -139,21 +139,16 @@
   (kill-all-local-variables)
   (setq major-mode 'cmake-mode)
   (setq mode-name "CMAKE")
-  
-  ; Create the syntax table if it doesn't exist.
-  (if (not cmake-mode-syntax-table)
-      (progn
-        (setq cmake-mode-syntax-table (make-syntax-table))
-        (set-syntax-table cmake-mode-syntax-table)
-        
-        ; Define comment syntax.
-        (modify-syntax-entry ?_  "w" cmake-mode-syntax-table)
-        (modify-syntax-entry ?\(  "()" cmake-mode-syntax-table)
-        (modify-syntax-entry ?\)  ")(" cmake-mode-syntax-table)
-        (modify-syntax-entry ?# "<" cmake-mode-syntax-table)
-        (modify-syntax-entry ?\n ">" cmake-mode-syntax-table)
-        )
-    )
+
+  ; Create the syntax table 
+  (setq cmake-mode-syntax-table (make-syntax-table))
+  (set-syntax-table cmake-mode-syntax-table)
+  (modify-syntax-entry ?_  "w" cmake-mode-syntax-table)
+  (modify-syntax-entry ?\(  "()" cmake-mode-syntax-table)
+  (modify-syntax-entry ?\)  ")(" cmake-mode-syntax-table)
+  (modify-syntax-entry ?# "<" cmake-mode-syntax-table)
+  (modify-syntax-entry ?\n ">" cmake-mode-syntax-table)
+
   
   ; Setup font-lock mode.
   (make-local-variable 'font-lock-defaults)
