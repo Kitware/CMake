@@ -71,147 +71,19 @@ ScopeEnded(cmMakefile &mf)
 
 bool cmIfCommand::InitialPass(std::vector<std::string> const& args)
 {
-  if(args.size() < 1 )
+  bool isValid;
+  bool isTrue = cmIfCommand::IsTrue(args,isValid,m_Makefile);
+  
+  if (!isValid)
     {
-    this->SetError("called with incorrect number of arguments");
+    this->SetError("An IF command had incorrect arguments");
     return false;
     }
-  // create a function blocker
-  cmIfFunctionBlocker *f = NULL;
-
-  // check for the different signatures
-  const char *def;
-  const char *def2;
-
-  if (args.size() == 1)
-    {
-    def = m_Makefile->GetDefinition(args[0].c_str());
-    if(cmSystemTools::IsOff(def))
-      {
-      f = new cmIfFunctionBlocker();
-      }
-    }
-
-  if (args.size() == 2 && (args[0] == "NOT"))
-    {
-    def = m_Makefile->GetDefinition(args[1].c_str());
-    if(!cmSystemTools::IsOff(def))
-      {
-      f = new cmIfFunctionBlocker();
-      }
-    }
-
-  if (args.size() == 2 && (args[0] == "COMMAND"))
-    {
-    if(!m_Makefile->CommandExists(args[1].c_str()))
-      {
-      f = new cmIfFunctionBlocker();
-      }
-    }
-
-  if (args.size() == 2 && (args[0] == "EXISTS"))
-    {
-    if(!cmSystemTools::FileExists(args[1].c_str()))
-      {
-      f = new cmIfFunctionBlocker();
-      }
-    }
-
-  if (args.size() == 3 && (args[1] == "AND"))
-    {
-    def = m_Makefile->GetDefinition(args[0].c_str());
-    def2 = m_Makefile->GetDefinition(args[2].c_str());
-    if(cmSystemTools::IsOff(def) || cmSystemTools::IsOff(def2))
-      {
-      f = new cmIfFunctionBlocker();
-      }
-    }
   
-  if (args.size() == 3 && (args[1] == "OR"))
+  // if is isn't true create a blocker
+  if (!isTrue)
     {
-    def = m_Makefile->GetDefinition(args[0].c_str());
-    def2 = m_Makefile->GetDefinition(args[2].c_str());
-    if(cmSystemTools::IsOff(def) && cmSystemTools::IsOff(def2))
-      {
-      f = new cmIfFunctionBlocker();
-      }
-    }
-
-  if (args.size() == 3 && (args[1] == "MATCHES"))
-    {
-    def = m_Makefile->GetDefinition(args[0].c_str());
-    if (!def)
-      {
-      def = args[0].c_str();
-      }
-    cmRegularExpression regEntry(args[2].c_str());
-    
-    // check for black line or comment
-    if (!regEntry.find(def))
-      {
-      f = new cmIfFunctionBlocker();
-      }
-    }
-  
-  if (args.size() == 3 && (args[1] == "LESS"))
-    {
-    def = m_Makefile->GetDefinition(args[0].c_str());
-    def2 = m_Makefile->GetDefinition(args[2].c_str());
-    if (!def)
-      {
-      def = args[0].c_str();
-      }
-    if (!def2)
-      {
-      def2 = args[2].c_str();
-      }    
-    if(atof(def) >= atof(def2))
-      {
-      f = new cmIfFunctionBlocker();
-      }
-    }
-
-  if (args.size() == 3 && (args[1] == "GREATER"))
-    {
-    def = m_Makefile->GetDefinition(args[0].c_str());
-    def2 = m_Makefile->GetDefinition(args[2].c_str());
-    if (!def)
-      {
-      def = args[0].c_str();
-      }
-    if (!def2)
-      {
-      def2 = args[2].c_str();
-      }    
-    if(atof(def) <= atof(def2))
-      {
-      f = new cmIfFunctionBlocker();
-      }
-    }
-
-  if (args.size() == 3 && (args[1] == "STRLESS"))
-    {
-    def = m_Makefile->GetDefinition(args[0].c_str());
-    def2 = m_Makefile->GetDefinition(args[2].c_str());
-    if(strcmp(def,def2) >= 0)
-      {
-      f = new cmIfFunctionBlocker();
-      }
-    }
-
-  if (args.size() == 3 && (args[1] == "STRGREATER"))
-    {
-    def = m_Makefile->GetDefinition(args[0].c_str());
-    def2 = m_Makefile->GetDefinition(args[2].c_str());
-    if(strcmp(def,def2) <= 0)
-      {
-      f = new cmIfFunctionBlocker();
-      }
-    }
-
-  // if we created a function blocker then set its args
-  if (f)
-    {
+    cmIfFunctionBlocker *f = new cmIfFunctionBlocker();
     for(std::vector<std::string>::const_iterator j = args.begin();
         j != args.end(); ++j)
       {   
@@ -223,3 +95,157 @@ bool cmIfCommand::InitialPass(std::vector<std::string> const& args)
   return true;
 }
 
+bool cmIfCommand::IsTrue(const std::vector<std::string> &args, bool &isValid,
+                         const cmMakefile *makefile)
+{
+  // check for the different signatures
+  bool isTrue = true;
+  isValid = false;
+  const char *def;
+  const char *def2;
+
+  if(args.size() < 1 )
+    {
+    return false;
+    }
+
+  if (args.size() == 1)
+    {
+    def = makefile->GetDefinition(args[0].c_str());
+    if(cmSystemTools::IsOff(def))
+      {
+      isTrue = false;
+      }
+    isValid = true;
+    }
+
+  if (args.size() == 2 && (args[0] == "NOT"))
+    {
+    def = makefile->GetDefinition(args[1].c_str());
+    if(!cmSystemTools::IsOff(def))
+      {
+      isTrue = false;
+      }
+    isValid = true;
+
+    }
+
+  if (args.size() == 2 && (args[0] == "COMMAND"))
+    {
+    if(!makefile->CommandExists(args[1].c_str()))
+      {
+      isTrue = false;
+      }
+    isValid = true;
+    }
+
+  if (args.size() == 2 && (args[0] == "EXISTS"))
+    {
+    if(!cmSystemTools::FileExists(args[1].c_str()))
+      {
+      isTrue = false;
+      }
+    isValid = true;
+    }
+
+  if (args.size() == 3 && (args[1] == "AND"))
+    {
+    def = makefile->GetDefinition(args[0].c_str());
+    def2 = makefile->GetDefinition(args[2].c_str());
+    if(cmSystemTools::IsOff(def) || cmSystemTools::IsOff(def2))
+      {
+      isTrue = false;
+      }
+    isValid = true;
+    }
+  
+  if (args.size() == 3 && (args[1] == "OR"))
+    {
+    def = makefile->GetDefinition(args[0].c_str());
+    def2 = makefile->GetDefinition(args[2].c_str());
+    if(cmSystemTools::IsOff(def) && cmSystemTools::IsOff(def2))
+      {
+      isTrue = false;
+      }
+    isValid = true;
+    }
+
+  if (args.size() == 3 && (args[1] == "MATCHES"))
+    {
+    def = makefile->GetDefinition(args[0].c_str());
+    if (!def)
+      {
+      def = args[0].c_str();
+      }
+    cmRegularExpression regEntry(args[2].c_str());
+    
+    // check for black line or comment
+    if (!regEntry.find(def))
+      {
+      isTrue = false;
+      }
+    isValid = true;
+    }
+  
+  if (args.size() == 3 && (args[1] == "LESS"))
+    {
+    def = makefile->GetDefinition(args[0].c_str());
+    def2 = makefile->GetDefinition(args[2].c_str());
+    if (!def)
+      {
+      def = args[0].c_str();
+      }
+    if (!def2)
+      {
+      def2 = args[2].c_str();
+      }    
+    if(atof(def) >= atof(def2))
+      {
+      isTrue = false;
+      }
+    isValid = true;
+    }
+
+  if (args.size() == 3 && (args[1] == "GREATER"))
+    {
+    def = makefile->GetDefinition(args[0].c_str());
+    def2 = makefile->GetDefinition(args[2].c_str());
+    if (!def)
+      {
+      def = args[0].c_str();
+      }
+    if (!def2)
+      {
+      def2 = args[2].c_str();
+      }    
+    if(atof(def) <= atof(def2))
+      {
+      isTrue = false;
+      }
+    isValid = true;
+    }
+
+  if (args.size() == 3 && (args[1] == "STRLESS"))
+    {
+    def = makefile->GetDefinition(args[0].c_str());
+    def2 = makefile->GetDefinition(args[2].c_str());
+    if(strcmp(def,def2) >= 0)
+      {
+      isTrue = false;
+      }
+    isValid = true;
+    }
+
+  if (args.size() == 3 && (args[1] == "STRGREATER"))
+    {
+    def = makefile->GetDefinition(args[0].c_str());
+    def2 = makefile->GetDefinition(args[2].c_str());
+    if(strcmp(def,def2) <= 0)
+      {
+      isTrue = false;
+      }
+    isValid = true;
+    }
+
+  return isTrue;
+}

@@ -98,6 +98,11 @@ public:
       "and STRGREATER. LESS and GREATER do numeric comparison while "
       "STRLESS and STRGREATER do string comparisons.";
     }
+
+  // this is a shared function for both If and Else to determine if
+  // the arguments were valid, and if so, was the response true
+  static bool IsTrue(const std::vector<std::string> &args, 
+                     bool &isValid, const cmMakefile *mf);
   
   cmTypeMacro(cmIfCommand, cmCommand);
 };
