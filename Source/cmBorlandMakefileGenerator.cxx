@@ -23,7 +23,7 @@
 #include "cmCacheManager.h"
 #include "cmGeneratedFileStream.h"
 #include "windows.h"
-
+#include <stdio.h>
 
 cmBorlandMakefileGenerator::cmBorlandMakefileGenerator()
 {
@@ -235,8 +235,8 @@ void cmBorlandMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
   target = cmSystemTools::EscapeSpaces(target.c_str());
   libpath = cmSystemTools::EscapeSpaces(libpath.c_str());
   std::string depend = "$(";
-  depend += name;
-  depend += "_SRC_OBJS) $(" + std::string(name) + "_DEPEND_LIBS)";
+  depend += this->CreateMakeVariable(name, "_SRC_OBJS");
+  depend += ") $(" + this->CreateMakeVariable(name, "_DEPEND_LIBS") + ")";
   std::string command = "$(CMAKE_CXX_COMPILER) -tWD $(CMAKE_SHLIB_CFLAGS) $(CMAKE_LINKER_FLAGS) @&&|\n";
   // must be executable name
   command += "-e";
@@ -248,8 +248,8 @@ void cmBorlandMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
   // then the linker options -L and libraries (any other order will fail!)
   command += linklibs.str();
   delete [] linklibs.str();
-  // then list of object files
-  command += " $(" + std::string(name) + "_SRC_OBJS) ";
+  // then list of object files 
+  command += " $(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
   std::string command2 = "implib -w ";
   command2 += libpath + " " + target;
   const std::vector<cmSourceFile>& sources = t.GetSourceFiles();
@@ -293,7 +293,7 @@ void cmBorlandMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout,
   cmSystemTools::ConvertToWindowsSlashes(target);
   target = cmSystemTools::EscapeSpaces(target.c_str());
   std::string depend = "$(";
-  depend += std::string(name) + "_SRC_OBJS)";
+  depend += this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
   std::string command = "tlib  @&&|\n\t /p512 /a ";
   command += target;
   command += " ";
@@ -303,7 +303,7 @@ void cmBorlandMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout,
   deleteCommand += target;
 
   command += " $(";
-  command += std::string(name) + "_SRC_OBJS_QUOTED)";
+  command += this->CreateMakeVariable(name, "_SRC_OBJS_QUOTED") + ")";
   command += "\n|\n";
   std::string comment = "rule to build static library: ";
   comment += name;
@@ -329,7 +329,8 @@ void cmBorlandMakefileGenerator::OutputExecutableRule(std::ostream& fout,
   cmSystemTools::ConvertToWindowsSlashes(target);
   target = cmSystemTools::EscapeSpaces(target.c_str());
   std::string depend = "$(";
-  depend += std::string(name) + "_SRC_OBJS) $(" + std::string(name) + "_DEPEND_LIBS)";
+  depend += this->CreateMakeVariable(name, "_SRC_OBJS") + ") $(" + 
+    this->CreateMakeVariable(name, "_DEPEND_LIBS") + ")";
   std::string command = 
     "$(CMAKE_CXX_COMPILER) ";
   command += " $(CMAKE_LINKER_FLAGS) -e" + target;
@@ -350,7 +351,7 @@ void cmBorlandMakefileGenerator::OutputExecutableRule(std::ostream& fout,
   linklibs << std::ends;
   command += linklibs.str();
   delete [] linklibs.str();
-  command += " $(" + std::string(name) + "_SRC_OBJS) ";
+  command += " $(" +  this->CreateMakeVariable(name, "_SRC_OBJS") + ")";
   
   std::string comment = "rule to build executable: ";
   comment += name;
@@ -403,4 +404,55 @@ bool cmBorlandMakefileGenerator::SamePath(const char* path1, const char* path2)
     cmSystemTools::LowerCase(ShortPath(path2));
 }
 
+
+// borland make does not support variables that are longer than 32
+// so use this function to rename any long ones
+std::string cmBorlandMakefileGenerator::CreateMakeVariable(const char* s, const char* s2)
+{
+  std::string unmodified = s;
+  unmodified += s2;
+  // see if th
+  if(m_MakeVariableMap.count(unmodified))
+    {
+    return m_MakeVariableMap[unmodified];
+    }
+  std::string ret = unmodified;
+  // if the string is greater the 32 chars it is an invalid vairable name
+  // for borland make
+  if(ret.size() > 32)
+    {
+    std::string str1 = s;
+    std::string str2 = s2;
+    // we must shorten the combined string by 4 charactors
+    // keep no more than 24 charactors from the second string
+    if(str2.size() > 24)
+      {
+      str2 = str2.substr(0, 24);
+      }
+    if(str1.size() + str2.size() > 27)
+      {
+      str1 = str1.substr(0, 27 - str2.size());
+      }
+    char buffer[5];
+    int i = 0;
+    sprintf(buffer, "%04d", i);
+    ret = str1 + str2 + buffer;
+    while(m_ShortMakeVariableMap.count(ret) && i < 1000)
+      {
+      ++i;
+      sprintf(buffer, "%04d", i);
+      ret = str1 + str2 + buffer;
+      }
+    if(i == 1000)
+      {
+      cmSystemTools::Error("Borland makefile varible length too long");
+      return unmodified;
+      }
+    // once an unused variable is found 
+    m_ShortMakeVariableMap[ret] = "1";
+    }
+  // always make an entry into the unmodified to varible map
+  m_MakeVariableMap[unmodified] = ret;
+  return ret;
+}
 

@@ -61,6 +61,9 @@ protected:
   virtual std::string GetOutputExtension(const char* sourceExtension); 
   ///! return true if the two paths are the same (checks short paths)
   virtual bool SamePath(const char* path1, const char* path2);
+  virtual std::string CreateMakeVariable(const char* s, const char* s2);
+  std::map<cmStdString, cmStdString> m_MakeVariableMap;
+  std::map<cmStdString, cmStdString> m_ShortMakeVariableMap;
 };
 
 #endif

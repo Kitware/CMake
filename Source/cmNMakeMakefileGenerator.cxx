@@ -420,8 +420,8 @@ void cmNMakeMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
 {
   std::string target = m_LibraryOutputPath + name + m_SharedLibraryExtension;
   std::string depend = "$(";
-  depend += name;
-  depend += "_SRC_OBJS) $(" + std::string(name) + "_DEPEND_LIBS)";
+  depend += this->CreateMakeVariable(name, "_SRC_OBJS");
+  depend += ") $(" + this->CreateMakeVariable(name, "_DEPEND_LIBS") + ")";
 
   // Need to get the definition here because this value might have
   // trailing space (since it is directly prepended to the filename)
@@ -442,7 +442,7 @@ void cmNMakeMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
   std::string dllpath = m_LibraryOutputPath +  std::string(name) + m_SharedLibraryExtension;
   command += cmSystemTools::EscapeSpaces(dllpath.c_str());
 
-  command += " $(" + std::string(name) + "_SRC_OBJS) ";
+  command += " $(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
 
   std::strstream linklibs;
   this->OutputLinkLibraries(linklibs, name, t);
@@ -492,7 +492,7 @@ void cmNMakeMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout,
 {
   std::string target = m_LibraryOutputPath + std::string(name) + m_StaticLibraryExtension;
   std::string depend = "$(";
-  depend += std::string(name) + "_SRC_OBJS)";
+  depend += this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
 
   // Need to get the definition here because this value might have
   // trailing space (since it is directly prepended to the filename)
@@ -506,7 +506,7 @@ void cmNMakeMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout,
   command += cmSystemTools::EscapeSpaces(libpath.c_str());
 
   command += " $(";
-  command += std::string(name) + "_SRC_OBJS)";
+  command += this->CreateMakeVariable(name, "_SRC_OBJS") + ")";
   command += "\n<<\n";
 
   std::string comment = "rule to build static library: ";
@@ -532,10 +532,11 @@ void cmNMakeMakefileGenerator::OutputExecutableRule(std::ostream& fout,
   std::string target = m_ExecutableOutputPath + name;
   target += m_ExecutableExtension;
   std::string depend = "$(";
-  depend += std::string(name) + "_SRC_OBJS) $(" + std::string(name) + "_DEPEND_LIBS)";
+  depend += this->CreateMakeVariable(name, "_SRC_OBJS") + ") $(" + 
+    this->CreateMakeVariable(name, "_DEPEND_LIBS") +  ")";
   std::string command = 
     "$(CMAKE_CXX_COMPILER) $(CMAKE_CXX_FLAGS) ";
-  command += "$(" + std::string(name) + "_SRC_OBJS) ";
+  command += "$(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
   std::string path = m_ExecutableOutputPath + name + m_ExecutableExtension;
 
   // Need to get the definition here because this value might have

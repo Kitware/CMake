@@ -363,36 +363,36 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
     std::vector<cmSourceFile> classes = l->second.GetSourceFiles();
     if (classes.begin() != classes.end())
       {
-	fout << l->first << "_SRC_OBJS = ";
-	for(std::vector<cmSourceFile>::iterator i = classes.begin(); 
-	    i != classes.end(); i++)
-	  {
-	    if(!i->IsAHeaderFileOnly())
-	      {
-              std::string outExt(this->GetOutputExtension(i->GetSourceExtension().c_str()));
-              if(outExt.size())
-                {
-                fout << "\\\n" << this->ConvertToNativePath(i->GetSourceName().c_str())
-                     << outExt.c_str() << " ";
-                }
-              }
-	  }
-	fout << "\n\n";
-	fout << l->first << "_SRC_OBJS_QUOTED = ";
-	for(std::vector<cmSourceFile>::iterator i = classes.begin(); 
-	    i != classes.end(); i++)
-	  {
-	    if(!i->IsAHeaderFileOnly())
-	      {
-              std::string outExt(this->GetOutputExtension(i->GetSourceExtension().c_str()));
-              if(outExt.size())
-                {
-                fout << "\\\n\"" << this->ConvertToNativePath(i->GetSourceName().c_str())
-                     << outExt.c_str() << "\" ";
-                }
-              }
-	  }
-	fout << "\n\n";
+      fout << this->CreateMakeVariable(l->first.c_str(), "_SRC_OBJS") << " = ";
+      for(std::vector<cmSourceFile>::iterator i = classes.begin(); 
+          i != classes.end(); i++)
+        {
+        if(!i->IsAHeaderFileOnly())
+          {
+          std::string outExt(this->GetOutputExtension(i->GetSourceExtension().c_str()));
+          if(outExt.size())
+            {
+            fout << "\\\n" << this->ConvertToNativePath(i->GetSourceName().c_str())
+                 << outExt.c_str() << " ";
+            }
+          }
+        }
+      fout << "\n\n";
+      fout << this->CreateMakeVariable(l->first.c_str(), "_SRC_OBJS_QUOTED") << " = ";
+      for(std::vector<cmSourceFile>::iterator i = classes.begin(); 
+          i != classes.end(); i++)
+        {
+        if(!i->IsAHeaderFileOnly())
+          {
+          std::string outExt(this->GetOutputExtension(i->GetSourceExtension().c_str()));
+          if(outExt.size())
+            {
+            fout << "\\\n\"" << this->ConvertToNativePath(i->GetSourceName().c_str())
+                 << outExt.c_str() << "\" ";
+            }
+          }
+        }
+      fout << "\n\n";
       }
     }
   fout << "CLEAN_OBJECT_FILES = ";
@@ -402,7 +402,8 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
     std::vector<cmSourceFile> classes = l->second.GetSourceFiles();
     if (classes.begin() != classes.end())
       {
-      fout << "$(" << l->first << "_SRC_OBJS) ";
+      fout << "$(" << this->CreateMakeVariable(l->first.c_str(), "_SRC_OBJS")
+           << ") ";
       }
     }
   fout << "\n\n";
@@ -600,8 +601,8 @@ void cmUnixMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
 {
   std::string target = m_LibraryOutputPath + "lib" + name + "$(SHLIB_SUFFIX)";
   std::string depend = "$(";
-  depend += name;
-  depend += "_SRC_OBJS) $(" + std::string(name) + "_DEPEND_LIBS)";
+  depend += this->CreateMakeVariable(name, "_SRC_OBJS");
+  depend += ") $(" + this->CreateMakeVariable(name, "_DEPEND_LIBS") + ")";
   std::string command = "$(RM) lib";
   command += name;
   command += "$(SHLIB_SUFFIX)";
@@ -609,7 +610,7 @@ void cmUnixMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
     "$(CMAKE_SHLIB_BUILD_FLAGS) $(CMAKE_CXX_FLAGS) -o \\\n";
   command2 += "\t  ";
   command2 += m_LibraryOutputPath + "lib" + std::string(name) + "$(SHLIB_SUFFIX) \\\n";
-  command2 += "\t  $(" + std::string(name) + "_SRC_OBJS) ";
+  command2 += "\t  $(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
   std::strstream linklibs;
   this->OutputLinkLibraries(linklibs, name, t);
   linklibs << std::ends;
@@ -635,13 +636,14 @@ void cmUnixMakefileGenerator::OutputModuleLibraryRule(std::ostream& fout,
 {
   std::string target = m_LibraryOutputPath + "lib" + std::string(name) + "$(MODULE_SUFFIX)";
   std::string depend =  "$(";
-  depend += std::string(name) + "_SRC_OBJS) $(" + std::string(name) + "_DEPEND_LIBS)";
+  depend += this->CreateMakeVariable(name, "_SRC_OBJS") 
+    + ") $(" + this->CreateMakeVariable(name, "_DEPEND_LIBS") + ")";
   std::string command = "$(RM) lib" + std::string(name) + "$(MODULE_SUFFIX)";
   std::string command2 = "$(CMAKE_CXX_COMPILER)  $(CMAKE_MODULE_LINK_FLAGS) "
     "$(CMAKE_MODULE_BUILD_FLAGS) $(CMAKE_CXX_FLAGS) -o \\\n";
   command2 += "\t  ";
   command2 += m_LibraryOutputPath + "lib" + std::string(name) + "$(MODULE_SUFFIX) \\\n";
-  command2 += "\t  $(" + std::string(name) + "_SRC_OBJS) ";
+  command2 += "\t  $(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
   std::strstream linklibs;
   this->OutputLinkLibraries(linklibs, std::string(name).c_str(), t);
   linklibs << std::ends;
@@ -668,13 +670,13 @@ void cmUnixMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout,
 {
   std::string target = m_LibraryOutputPath + "lib" + std::string(name) + ".a";
   std::string depend = "$(";
-  depend += std::string(name) + "_SRC_OBJS)";
+  depend += this->CreateMakeVariable(name, "_SRC_OBJS") + ")";
   std::string command = "$(CMAKE_AR) $(CMAKE_AR_ARGS) ";
   command += m_LibraryOutputPath;
   command += "lib";
   command += name;
   command += ".a $(";
-  command += std::string(name) + "_SRC_OBJS)";
+  command += this->CreateMakeVariable(name, "_SRC_OBJS") + ")";
   std::string command2 = "$(CMAKE_RANLIB) ";
   command2 += m_LibraryOutputPath;
   command2 += "lib";
@@ -702,10 +704,11 @@ void cmUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
 {
   std::string target = m_ExecutableOutputPath + name;
   std::string depend = "$(";
-  depend += std::string(name) + "_SRC_OBJS) $(" + std::string(name) + "_DEPEND_LIBS)";
+  depend += this->CreateMakeVariable(name, "_SRC_OBJS") 
+    + ") $(" + this->CreateMakeVariable(name, "_DEPEND_LIBS") + ")";
   std::string command = 
     "$(CMAKE_CXX_COMPILER) $(CMAKE_SHLIB_LINK_FLAGS) $(CMAKE_CXX_FLAGS) ";
-  command += "$(" + std::string(name) + "_SRC_OBJS) ";
+  command += "$(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
   std::strstream linklibs;
   this->OutputLinkLibraries(linklibs, 0, t);
   linklibs << std::ends;
@@ -785,7 +788,7 @@ void cmUnixMakefileGenerator::OutputDependLibs(std::ostream& fout)
         || (l->second.GetType() == cmTarget::EXECUTABLE)
         || (l->second.GetType() == cmTarget::WIN32_EXECUTABLE))
       {
-      fout << l->first << "_DEPEND_LIBS = ";
+      fout << this->CreateMakeVariable(l->first.c_str(), "_DEPEND_LIBS") << " = ";
       
       // A library should not depend on itself!
       emitted.insert(l->first);
