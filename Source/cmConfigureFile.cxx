@@ -93,7 +93,9 @@ void cmConfigureFile::FinalPass()
       {
       inLine = buffer;
       m_Makefile->ExpandVariablesInString(inLine);
-      m_Makefile->RemoveVariablesInString(inLine);
+      // This call will remove all tcl variable substitutions of the form ${Foo}
+      // m_Makefile->RemoveVariablesInString(inLine);
+      
       // look for special cmakedefine symbol and handle it
       // is the symbol defined
       if (cmdefine.find(inLine))
