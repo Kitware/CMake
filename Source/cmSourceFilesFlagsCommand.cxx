@@ -37,7 +37,7 @@ bool cmSourceFilesFlagsCommand::InitialPass(std::vector<std::string> const&
       for(std::vector<cmSourceFile>::iterator i = l->second.begin(); 
           i != l->second.end(); i++)
         {
-        if(i->GetSourceName() == (*j))
+        if(i->GetSourceName() == (*j) || i->GetSourceName()+"."+i->GetSourceExtension() == (*j))
           {
           i->SetCompileFlags(flags.c_str());
           }
