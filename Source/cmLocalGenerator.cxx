@@ -127,6 +127,16 @@ void cmLocalGenerator::GenerateInstallRules()
         }
       }
     }
+  if ( libOutPath.size() == 0 )
+    {
+    // LIBRARY_OUTPUT_PATH not defined
+    libOutPath = currdir + "/";
+    }
+  if ( exeOutPath.size() == 0 )
+    {
+    // EXECUTABLE_OUTPUT_PATH not defined
+    exeOutPath = currdir + "/";
+    }
 
   std::string destination;
   for(cmTargets::const_iterator l = tgts.begin(); 
