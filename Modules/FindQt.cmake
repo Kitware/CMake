@@ -53,7 +53,9 @@ IF (WIN32)
     ${QTDIR}/lib C:/Progra~1/qt/lib )
 
   FIND_LIBRARY(QT_QTMAIN_LIBRARY qtmain
-    ${QTDIR}/lib C:/Progra~1/qt/lib )
+    ${QTDIR}/lib C:/Progra~1/qt/lib
+    DOC "This Library is only needed by and included with Qt3 on MSWindows. It should be NOTFOUND, undefined or IGNORE otherwise."
+  )
 
   FIND_FILE(QT_MOC_EXECUTABLE moc.exe
     ${QTDIR}/bin C:/Progra~1/qt/bin
