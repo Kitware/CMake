@@ -8,6 +8,7 @@ SET(CTEST_CUSTOM_WARNING_EXCEPTION
   "warning: To disable this warning use"
   "could not be inlined"
   "libCurl.*has no symbols"
+  "stl_deque.h:479"
   )
 
 
