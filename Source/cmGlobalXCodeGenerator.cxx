@@ -230,16 +230,16 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
   mf->AddUtilityCommand("install", cmake_command.c_str(),
                         "-P cmake_install.cmake", false, srcs);
   // Add XCODE depend helper 
-  std::string dir = this->ConvertToRelativeOutputPath(
-    mf->GetCurrentOutputDirectory());
+  std::string dir = mf->GetCurrentOutputDirectory();
   m_CurrentXCodeHackMakefile = dir;
   m_CurrentXCodeHackMakefile += "/CMakeScripts";
   cmSystemTools::MakeDirectory(m_CurrentXCodeHackMakefile.c_str());
   m_CurrentXCodeHackMakefile += "/XCODE_DEPEND_HELPER.make";
   std::string makecommand = "make -C ";
-  makecommand += dir;
+  makecommand += this->ConvertToRelativeOutputPath(dir.c_str());
   makecommand += " -f ";
-  makecommand += m_CurrentXCodeHackMakefile;
+  makecommand += this->ConvertToRelativeOutputPath(
+    m_CurrentXCodeHackMakefile.c_str());
   mf->AddUtilityCommand("XCODE_DEPEND_HELPER", makecommand.c_str(), 
                         "",
                         false,srcs);
@@ -714,7 +714,8 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
   std::string makecmd = "make -C ";
   makecmd += cdir;
   makecmd += " -f ";
-  makecmd += makefile;
+  makecmd += this->ConvertToRelativeOutputPath(makefile.c_str());
+  cmSystemTools::ReplaceString(makecmd, "\\ ", "\\\\ ");
   buildphase->AddAttribute("shellScript", this->CreateString(makecmd.c_str()));
 }
 
