@@ -447,6 +447,30 @@ IF(BUILD_TESTING)
     --test-command exec4
     )
 
+  ADD_TEST(JumpWithLibOut  ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/Jump"
+    "${CMake_BINARY_DIR}/Tests/Jump/WithLibOut"
+    --build-exe-dir "${CMake_BINARY_DIR}/Tests/Jump/WithLibOut/Executable"
+    --build-project Dependency 
+    --build-generator ${CMAKE_GENERATOR}
+    --build-makeprogram ${MAKEPROGRAM}
+    --build-options
+    -DLIBRARY_OUTPUT_PATH:PATH=${CMake_BINARY_DIR}/Tests/Jump/WithLibOut/Lib
+    --test-command jumpExecutable
+     )
+
+  ADD_TEST(JumpNoLibOut  ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/Jump"
+    "${CMake_BINARY_DIR}/Tests/Jump/NoLibOut"
+    --build-exe-dir "${CMake_BINARY_DIR}/Tests/Jump/NoLibOut/Executable"
+    --build-project Dependency 
+    --build-generator ${CMAKE_GENERATOR}
+    --build-makeprogram ${MAKEPROGRAM}
+    --test-command jumpExecutable
+     )
+
   ADD_TEST(linkline   ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/LinkLine"
