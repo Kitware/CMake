@@ -455,7 +455,7 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
          (l->second.GetType() == cmTarget::SHARED_LIBRARY) ||
          (l->second.GetType() == cmTarget::MODULE_LIBRARY))
         {
-        std::string path = m_LibraryOutputPath;
+        path = m_LibraryOutputPath;
         path += this->GetFullTargetName(l->first.c_str(), l->second);
         fout << " \\\n" 
              << cmSystemTools::ConvertToOutputPath(path.c_str());
@@ -470,7 +470,7 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
          l->second.GetType() == cmTarget::WIN32_EXECUTABLE) &&
         l->second.IsInAll())
       {
-      std::string path = m_ExecutableOutputPath;
+      path = m_ExecutableOutputPath;
       path += this->GetFullTargetName(l->first.c_str(), l->second);
       fout << " \\\n" << cmSystemTools::ConvertToOutputPath(path.c_str());
       }
