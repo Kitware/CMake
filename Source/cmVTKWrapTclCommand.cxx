@@ -166,7 +166,10 @@ void cmVTKWrapTclCommand::FinalPass()
     m_Makefile->AddSource(m_WrapClasses[classNum],m_SourceList.c_str());
     std::vector<std::string> args;
     args.push_back(m_WrapHeaders[classNum]);
-    args.push_back(hints);
+    if (strcmp("${VTK_WRAP_HINTS}",hints.c_str()))
+      {
+      args.push_back(hints);
+      }
     args.push_back((m_WrapClasses[classNum].IsAnAbstractClass() ? "0" : "1"));
     std::string res = m_Makefile->GetCurrentOutputDirectory();
     res += "/";
