@@ -108,9 +108,9 @@ using ::ifstream;
 using ::ofstream;
   
 #if !defined(CMAKE_NO_ANSI_STRING_STREAM)
-  using ::stringstream;
+  using ::ostringstream;
 #else
-  using ::strstream;
+  using ::ostrstream;
 #endif
   
 using ::endl;
