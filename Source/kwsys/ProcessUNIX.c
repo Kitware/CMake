@@ -621,13 +621,9 @@ int kwsysProcess_WaitForExit(kwsysProcess* cp, double* userTimeout)
 #ifdef SIGINT
       case SIGINT:  cp->ExitException = kwsysProcess_Exception_Interrupt; break;
 #endif
-#ifdef SIGABRT
-      case SIGABRT: cp->ExitException = kwsysProcess_Exception_Abort; break;
-#endif
       default: cp->ExitException = kwsysProcess_Exception_Other; break;
       }
     cp->ExitCode = status;
-    cp->ExitValue = (int)WTERMSIG(status);
     }
   else
     {
