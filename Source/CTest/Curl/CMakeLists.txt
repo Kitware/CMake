@@ -356,3 +356,5 @@ IF(CURL_TESTING)
   SUBDIRS(Testing)
 ENDIF(CURL_TESTING)
 
+ADD_EXECUTABLE(curltest Testing/curltest.c)
+TARGET_LINK_LIBRARIES(curltest Curl)
