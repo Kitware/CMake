@@ -41,7 +41,8 @@ INPUT                = \
  "@CMAKE_SOURCE_DIR@/Source/CursesDialog" \
  "@CMAKE_SOURCE_DIR@/Source/MFCDialog" \
  "@CMAKE_SOURCE_DIR@/Source/WXDialog" \
- "@CMAKE_SOURCE_DIR@/Source/kwsys" \
+ "@CMAKE_BINARY_DIR@/Source/kwsys" \
+ "@CMAKE_BINARY_DIR@/Source/cmsys" \
  "@CMAKE_BINARY_DIR@/Utilities/Doxygen/dox/doc_CMake_contributors.dox" \
 
 EXTRACT_ALL          = YES
@@ -60,7 +61,7 @@ SORT_MEMBER_DOCS     = NO
 DISTRIBUTE_GROUP_DOC = YES
 TAB_SIZE             = 3
 
-FILE_PATTERNS        = *.h
+FILE_PATTERNS        = *.h *.hxx
 RECURSIVE            = NO
 EXCLUDE_PATTERNS     =
 
