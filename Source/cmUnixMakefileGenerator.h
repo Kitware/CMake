@@ -165,7 +165,7 @@ protected:
   void SetSharedLibraryExtension(const char* e) {m_SharedLibraryExtension = e;}
   void SetLibraryPrefix(const char* e) { m_LibraryPrefix = e;}
   virtual std::string ConvertToNativePath(const char* s) { return s;  }
-  std::string cmUnixMakefileGenerator::CreateTargetRules(const cmTarget &target,
+  std::string CreateTargetRules(const cmTarget &target,
                                                          const char* targetName);
 protected:
   std::string m_ExecutableOutputPath;
