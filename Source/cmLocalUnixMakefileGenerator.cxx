@@ -2371,17 +2371,19 @@ void cmLocalUnixMakefileGenerator::OutputSourceObjectBuildRules(std::ostream& fo
         std::string shortNameWithExt = shortName +
           (*source)->GetSourceExtension();
         // Only output a rule for each .o once.
+        std::string compileFlags = exportsDef;
+        compileFlags += " ";
         if(rules.find(shortNameWithExt) == rules.end())
           {
+          
           if((*source)->GetProperty("COMPILE_FLAGS"))
             {
-            exportsDef += (*source)->GetProperty("COMPILE_FLAGS");
-            exportsDef += " ";
+            compileFlags += (*source)->GetProperty("COMPILE_FLAGS");
             }
           this->OutputBuildObjectFromSource(fout,
                                             shortName.c_str(),
                                             *(*source),
-                                            exportsDef.c_str(),
+                                            compileFlags.c_str(),
                                             shared);
           rules.insert(shortNameWithExt);
           }
