@@ -7,6 +7,14 @@ SET(CMake_VERSION_PATCH 0)
 SET(CMake_VERSION "${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}")
 SET(CMake_VERSION_FULL "${CMake_VERSION}.${CMake_VERSION_PATCH}")
 
+SET(CMAKE_DATA_DIR "/share/CMake" CACHE STRING 
+  "Install location for data (relative to prefix).")
+SET(CMAKE_DOC_DIR "/doc/CMake" CACHE STRING
+  "Install location for documentation (relative to prefix).")
+SET(CMAKE_MAN_DIR "/man" CACHE STRING
+  "Install location for man pages (relative to prefix).")
+MARK_AS_ADVANCED(CMAKE_DATA_DIR CMAKE_DOC_DIR CMAKE_MAN_DIR)
+
 IF(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 1.4)
   IF(CMAKE_GENERATOR MATCHES "Visual Studio 7")
     SET(CMAKE_SKIP_COMPATIBILITY_TESTS 1)
@@ -52,14 +60,6 @@ ENABLE_TESTING()
 
 # Include the standard Dart testing module
 INCLUDE (${CMAKE_ROOT}/Modules/Dart.cmake)
-INCLUDE (${CMake_BINARY_DIR}/Bootstrap.cmk/Source/InitialConfigureFlags.cmake
-         OPTIONAL)
-INCLUDE (${CMake_BINARY_DIR}/Bootstrap.cmk/InitialConfigureFlags.cmake
-         OPTIONAL)
-
-IF(CMAKE_CONFIGURE_INSTALL_PREFIX)
-  SET(CMAKE_INSTALL_PREFIX ${CMAKE_CONFIGURE_INSTALL_PREFIX} )
-ENDIF(CMAKE_CONFIGURE_INSTALL_PREFIX)
 
 # use the ansi CXX compile flag for building cmake
 
@@ -83,8 +83,6 @@ SET(EXECUTABLE_OUTPUT_PATH ${CMake_BINARY_DIR}/bin CACHE PATH
 )
 
 INCLUDE_REGULAR_EXPRESSION("^(\\.\\./)?(cm|CMake|form|ctest).*")
-
-INSTALL_FILES(/man/man1 "^cmake\\.1$")
 
 CONFIGURE_FILE(${CMake_SOURCE_DIR}/Tests/.NoDartCoverage
                ${CMake_BINARY_DIR}/Tests/.NoDartCoverage)

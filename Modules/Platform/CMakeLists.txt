@@ -1,2 +1,2 @@
 # just install the modules
-INSTALL_FILES(/share/CMake/Modules/Platform .*\\.cmake$)
+INSTALL_FILES(${CMAKE_DATA_DIR}/Modules/Platform .*\\.cmake$)

@@ -445,7 +445,7 @@ int cmake::AddCMakePaths(const char *arg0)
   if (!cmSystemTools::FileExists(modules.c_str()))
     {
     // try exe/../share/cmake
-    cMakeRoot += "/share/CMake";
+    cMakeRoot += CMAKE_DATA_DIR;
     modules = cMakeRoot + "/Modules/CMakeDefaultMakeRuleVariables.cmake";
     }
 #ifdef CMAKE_ROOT_DIR
@@ -460,7 +460,7 @@ int cmake::AddCMakePaths(const char *arg0)
   if (!cmSystemTools::FileExists(modules.c_str()))
     {
     // try compiled in install prefix
-    cMakeRoot = CMAKE_PREFIX "/share/CMake";
+    cMakeRoot = CMAKE_PREFIX CMAKE_DATA_DIR;
     modules = cMakeRoot + "/Modules/CMakeDefaultMakeRuleVariables.cmake";
     }
 #endif
@@ -468,7 +468,7 @@ int cmake::AddCMakePaths(const char *arg0)
     {
     // try 
     cMakeRoot  = cmSystemTools::GetProgramPath(cMakeSelf.c_str());
-    cMakeRoot += "/share/CMake";
+    cMakeRoot += CMAKE_DATA_DIR;
     modules = cMakeRoot +  "/Modules/CMakeDefaultMakeRuleVariables.cmake";
     }
   if(!cmSystemTools::FileExists(modules.c_str()))

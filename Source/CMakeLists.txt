@@ -356,22 +356,7 @@ ENDIF(BUILD_TESTING)
 INCLUDE (${CMAKE_BINARY_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
 INCLUDE (${CMAKE_SOURCE_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
 
-IF(WIN32)
-  SET(CMD ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/cmake.exe)
-ELSE(WIN32)
-  SET(CMD ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/cmake)
-ENDIF(WIN32)
-
-MAKE_DIRECTORY(${CMake_BINARY_DIR}/Docs)
-ADD_CUSTOM_TARGET(documentation ALL ${CMD}
-  --copyright ${CMake_BINARY_DIR}/Docs/Copyright.txt
-  --help-full ${CMake_BINARY_DIR}/Docs/cmake.txt
-  --help-html ${CMake_BINARY_DIR}/Docs/cmake.html
-  --help-man ${CMake_BINARY_DIR}/Docs/cmake.1
-  )
-ADD_DEPENDENCIES(documentation cmake)
-
 INSTALL_TARGETS(/bin cmake)
 INSTALL_TARGETS(/bin ctest)
 INSTALL_TARGETS(/bin cmaketest)
-INSTALL_FILES(/share/CMake/include cmCPluginAPI.h)
+INSTALL_FILES(${CMAKE_DATA_DIR}/include cmCPluginAPI.h)

@@ -1,3 +1,3 @@
 # just install the modules
-INSTALL_PROGRAMS(/share/CMake/Templates install-sh)
+INSTALL_PROGRAMS(${CMAKE_DATA_DIR}/Templates install-sh)
 

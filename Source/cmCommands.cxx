@@ -19,6 +19,7 @@
 // This is sort of a boot strapping approach since you would
 // like to have CMake to build CMake.   
 #include "cmCommands.h"
+#include "cmAddCustomCommandCommand.cxx"
 #include "cmAddCustomTargetCommand.cxx"
 #include "cmAddDefinitionsCommand.cxx"
 #include "cmAddDependenciesCommand.cxx"
@@ -74,7 +75,6 @@
 // support etc, which makes the bootstrap configure file a mess
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmAbstractFilesCommand.cxx"
-#include "cmAddCustomCommandCommand.cxx"
 #include "cmAuxSourceDirectoryCommand.cxx"
 #include "cmExportLibraryDependencies.cxx"
 #include "cmFLTKWrapUICommand.cxx"
@@ -111,6 +111,7 @@
 
 void GetPredefinedCommands(std::list<cmCommand*>& commands)
 {
+  commands.push_back(new cmAddCustomCommandCommand);
   commands.push_back(new cmAddCustomTargetCommand);
   commands.push_back(new cmAddDefinitionsCommand);
   commands.push_back(new cmAddDependenciesCommand);
@@ -163,7 +164,6 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   commands.push_back(new cmAbstractFilesCommand);
-  commands.push_back(new cmAddCustomCommandCommand);
   commands.push_back(new cmAuxSourceDirectoryCommand);
   commands.push_back(new cmExportLibraryDependenciesCommand);
   commands.push_back(new cmFLTKWrapUICommand);
