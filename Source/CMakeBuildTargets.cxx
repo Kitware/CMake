@@ -23,19 +23,19 @@ main(int ac, char** av)
       {
       std::string arg = av[i];
       // Set the current source directory with a -S dir options
-      if(arg.find("-S",0) != std::string::npos)
+      if(arg.find("-S",0) == 0)
 	{
 	std::string path = arg.substr(2);
 	mf.SetCurrentDirectory(path.c_str());
 	}
       // Set the output or binary directory with a -B dir option
-      if(arg.find("-B",0) != std::string::npos)
+      if(arg.find("-B",0) == 0)
 	{
 	std::string path = arg.substr(2);
 	mf.SetOutputHomeDirectory(path.c_str());
 	}
       // Set the source home directory with a -H dir option
-      if(arg.find("-H",0) != std::string::npos)
+      if(arg.find("-H",0) == 0)
 	{
 	std::string path = arg.substr(2);
 	mf.SetHomeDirectory(path.c_str());
