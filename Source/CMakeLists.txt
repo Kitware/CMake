@@ -56,6 +56,15 @@ INCLUDE_DIRECTORIES(${CMake_SOURCE_DIR}/Source)
 # let cmake know it is supposed to use it
 ADD_DEFINITIONS(-DCMAKE_BUILD_WITH_CMAKE)
 
+IF (APPLE)
+  SET(SRCS ${SRCS}
+    cmGlobalCodeWarriorGenerator.cxx
+    cmLocalCodeWarriorGenerator.cxx
+    cmGlobalCodeWarriorGenerator.h
+    cmLocalCodeWarriorGenerator.h
+    )
+ENDIF (APPLE)
+
 IF (WIN32)
   IF(NOT UNIX)
     SET(SRCS ${SRCS}

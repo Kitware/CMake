@@ -70,7 +70,12 @@ private:
                       const char *ext, const char *comp,
                       const char *edit, bool precomp,
                       bool launch, bool res, bool ignored);
-  
+
+private:
+  // lists the names of the output files of the various targets
+  std::map<std::string, std::string> m_TargetOutputFiles;
+  // lists which target first references another target's output
+  std::map<std::string, std::string> m_TargetReferencingList;
 };
 
 #endif
