@@ -21,6 +21,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
+#include "cmake.h"
 
 // Include dependency scanners for supported languages.  Only the
 // C/C++ scanner is needed for bootstrapping CMake.
@@ -44,7 +45,6 @@
 
 // TODO: Add "help" target.
 // TODO: Identify remaining relative path violations.
-// TODO: Add test to drive installation through native build system.
 // TODO: Need test for separate executable/library output path.
 
 //----------------------------------------------------------------------------
@@ -121,6 +121,9 @@ void cmLocalUnixMakefileGenerator2::Generate(bool fromTheTop)
 
   // Generate the cmake file that keeps the makefile up to date.
   this->GenerateCMakefile();
+
+  // Generate the cmake file with information for this directory.
+  this->GenerateDirectoryInformationFile();
 }
 
 //----------------------------------------------------------------------------
@@ -181,8 +184,6 @@ void cmLocalUnixMakefileGenerator2::GenerateCMakefile()
   makefileName += "/" CMLUMG_MAKEFILE_NAME;
   std::string cmakefileName = makefileName;
   cmakefileName += ".cmake";
-
-  // TODO: Use relative paths in this generated file.
 
   // Open the output file.
   cmGeneratedFileStream cmakefileStream(cmakefileName.c_str());
@@ -264,6 +265,62 @@ void cmLocalUnixMakefileGenerator2::GenerateCMakefile()
     cmakefileStream
       << "  )\n";
     }
+}
+
+//----------------------------------------------------------------------------
+void cmLocalUnixMakefileGenerator2::GenerateDirectoryInformationFile()
+{
+  std::string infoFileName = m_Makefile->GetStartOutputDirectory();
+  infoFileName += "/CMakeDirectoryInformation.cmake";
+
+  // Open the output file.
+  cmGeneratedFileStream infoFileStream(infoFileName.c_str());
+  if(!infoFileStream)
+    {
+    return;
+    }
+
+  // Write the do not edit header.
+  this->WriteDisclaimer(infoFileStream);
+
+  // Store the include search path for this directory.
+  infoFileStream
+    << "# The C and CXX include file search paths:\n";
+  infoFileStream
+    << "SET(CMAKE_C_INCLUDE_PATH\n";
+  std::vector<std::string> includeDirs;
+  this->GetIncludeDirectories(includeDirs);
+  for(std::vector<std::string>::iterator i = includeDirs.begin();
+      i != includeDirs.end(); ++i)
+    {
+    infoFileStream
+      << "  \"" << this->ConvertToRelativePath(i->c_str()).c_str() << "\"\n";
+    }
+  infoFileStream
+    << "  )\n";
+  infoFileStream
+    << "SET(CMAKE_CXX_INCLUDE_PATH ${CMAKE_C_INCLUDE_PATH})\n";
+
+  // Store the include regular expressions for this directory.
+  infoFileStream
+    << "\n"
+    << "# The C and CXX include file regular expressions for this directory.\n";
+  infoFileStream
+    << "SET(CMAKE_C_INCLUDE_REGEX_SCAN ";
+  this->WriteCMakeArgument(infoFileStream,
+                           m_Makefile->GetIncludeRegularExpression());
+  infoFileStream
+    << ")\n";
+  infoFileStream
+    << "SET(CMAKE_C_INCLUDE_REGEX_COMPLAIN ";
+  this->WriteCMakeArgument(infoFileStream,
+                           m_Makefile->GetComplainRegularExpression());
+  infoFileStream
+    << ")\n";
+  infoFileStream
+    << "SET(CMAKE_CXX_INCLUDE_REGEX_SCAN ${CMAKE_C_INCLUDE_REGEX_SCAN})\n";
+  infoFileStream
+    << "SET(CMAKE_CXX_INCLUDE_REGEX_COMPLAIN ${CMAKE_C_INCLUDE_REGEX_COMPLAIN})\n";
 }
 
 //----------------------------------------------------------------------------
@@ -468,17 +525,11 @@ cmLocalUnixMakefileGenerator2
   // touch the corresponding depends file after scanning dependencies.
   cmOStringStream depCmd;
   // TODO: Account for source file properties and directory-level
-  // definitions when scanning for dependencies.
+  // definitions when scanning for dependencies.  Also account for
+  // include/ignore regular expressions.
   depCmd << "$(CMAKE_COMMAND) -E cmake_depends " << lang << " "
          << this->ConvertToRelativeOutputPath(obj.c_str()) << " "
          << this->ConvertToRelativeOutputPath(source.GetFullPath().c_str());
-  std::vector<std::string> includeDirs;
-  this->GetIncludeDirectories(includeDirs);
-  for(std::vector<std::string>::iterator i = includeDirs.begin();
-      i != includeDirs.end(); ++i)
-    {
-    depCmd << " -I" << this->ConvertToRelativeOutputPath(i->c_str());
-    }
   std::vector<std::string> commands;
   commands.push_back(depCmd.str());
 
@@ -2020,6 +2071,32 @@ cmLocalUnixMakefileGenerator2
 }
 
 //----------------------------------------------------------------------------
+void
+cmLocalUnixMakefileGenerator2
+::WriteCMakeArgument(std::ostream& os, const char* s)
+{
+  // Write the given string to the stream with escaping to get it back
+  // into CMake through the lexical scanner.
+  os << "\"";
+  for(const char* c = s; *c; ++c)
+    {
+    if(*c == '\\')
+      {
+      os << "\\\\";
+      }
+    else if(*c == '"')
+      {
+      os << "\\\"";
+      }
+    else
+      {
+      os << *c;
+      }
+    }
+  os << "\"";
+}
+
+//----------------------------------------------------------------------------
 std::string
 cmLocalUnixMakefileGenerator2
 ::GetTargetDirectory(const cmTarget& target)
@@ -2738,8 +2815,11 @@ cmLocalUnixMakefileGenerator2
 ::ScanDependencies(std::vector<std::string> const& args)
 {
   // Format of arguments is:
-  // $(CMAKE_COMMAND), cmake_depends, <lang>, <obj>, <src>, [include-flags]
+  // $(CMAKE_COMMAND), cmake_depends, <lang>, <obj>, <src>
   // The caller has ensured that all required arguments exist.
+
+  // The language for which we are scanning dependencies.
+  std::string const& lang = args[2];
 
   // The file to which to write dependencies.
   const char* objFile = args[3].c_str();
@@ -2747,20 +2827,34 @@ cmLocalUnixMakefileGenerator2
   // The source file at which to start the scan.
   const char* srcFile = args[4].c_str();
 
-  // Convert the include flags to full paths.
-  std::vector<std::string> includes;
-  for(unsigned int i=5; i < args.size(); ++i)
+  // Read the directory information file.
+  cmake cm;
+  cmGlobalGenerator gg;
+  gg.SetCMakeInstance(&cm);
+  std::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
+  lg->SetGlobalGenerator(&gg);
+  cmMakefile* mf = lg->GetMakefile();
+  bool haveDirectoryInfo = false;
+  if(mf->ReadListFile(0, "CMakeDirectoryInformation.cmake") &&
+     !cmSystemTools::GetErrorOccuredFlag())
     {
-    if(args[i].substr(0, 2) == "-I")
+    haveDirectoryInfo = true;
+    }
+
+  // Get the set of include directories.
+  std::vector<std::string> includes;
+  if(haveDirectoryInfo)
+    {
+    std::string includePathVar = "CMAKE_";
+    includePathVar += lang;
+    includePathVar += "_INCLUDE_PATH";
+    if(const char* includePath = mf->GetDefinition(includePathVar.c_str()))
       {
-      // Get the include path without the -I flag.
-      std::string inc = args[i].substr(2);
-      includes.push_back(cmSystemTools::CollapseFullPath(inc.c_str()));
+      cmSystemTools::ExpandListArgument(includePath, includes);
       }
     }
 
   // Dispatch the scan for each language.
-  std::string const& lang = args[2];
   if(lang == "C" || lang == "CXX" || lang == "RC")
     {
     // TODO: Handle RC (resource files) dependencies correctly.

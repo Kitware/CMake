@@ -64,6 +64,7 @@ protected:
 
   void GenerateMakefile();
   void GenerateCMakefile();
+  void GenerateDirectoryInformationFile();
   void GenerateTargetRuleFile(const cmTarget& target);
   void GenerateObjectRuleFile(const cmTarget& target,
                               const cmSourceFile& source,
@@ -153,6 +154,7 @@ protected:
   void WriteTargetRequiresRule(std::ostream& ruleFileStream,
                                const cmTarget& target,
                                const std::vector<std::string>& provides_requires);
+  void WriteCMakeArgument(std::ostream& os, const char* s);
   std::string GetTargetDirectory(const cmTarget& target);
   std::string GetSubdirTargetName(const char* pass, const char* subdir);
   std::string GetObjectFileName(const cmTarget& target,
