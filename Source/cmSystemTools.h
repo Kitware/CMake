@@ -290,6 +290,12 @@ public:
       of the form var=value */
   static bool PutEnv(const char* value);
 
+  /** Compare file modification times.
+      Returns true for successful comparison and false for error.
+      When true is returned, result has -1, 0, +1 for
+      f1 older, same, or newer than f2.  */
+  static bool FileTimeCompare(const char* f1, const char* f2,
+                              int* result);
 private:
   static bool s_ForceUnixPaths;
   static bool s_RunCommandHideConsole;

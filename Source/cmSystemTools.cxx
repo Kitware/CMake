@@ -1317,3 +1317,33 @@ bool cmSystemTools::PutEnv(const char* value)
   return ret == 0;
 }
 
+bool cmSystemTools::FileTimeCompare(const char* f1, const char* f2,
+                                    int* result)
+{
+  struct stat stat1, stat2;
+  if(stat(f1, &stat1) == 0 && stat(f2, &stat2) == 0)
+    {
+    *result = 0;
+    if(stat1.st_mtime < stat2.st_mtime)
+      {
+      *result = -1;
+      }
+    else if(stat1.st_mtime > stat2.st_mtime)
+      {
+      *result = 1;
+      }
+#if 0
+    // TODO: Support resolution higher than one second.
+    // Use st_mtim.tv_nsec if available and GetFileTime on Windows.
+    else if(stat1.st_mtim.tv_nsec < stat2.st_mtim.tv_nsec)
+      {
+      *result = 1;
+      }
+#endif
+    return true;
+    }
+  else
+    {
+    return false;
+    }
+}
