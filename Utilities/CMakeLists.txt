@@ -49,7 +49,7 @@ IF(UNIX)
       SOURCE ${CMake_SOURCE_DIR}/Utilities/Doxygen/authors.txt
       OUTPUTS ${CMake_BINARY_DIR}/Docs/ccmake.txt
       )
-    ADD_DEPENDENCIES(documentation ccmake)  
+    ADD_DEPENDENCIES(documentation ccmake)
     INSTALL_FILES(${CMAKE_MAN_DIR}/man1 FILES
       ${CMake_BINARY_DIR}/Docs/ccmake.1
       )
@@ -60,6 +60,33 @@ IF(UNIX)
     SET(DOC_FILES ${DOC_FILES} ${CMake_BINARY_DIR}/Docs/ccmake.txt)
   ENDIF(CURSES_LIBRARY)
 ENDIF(UNIX)
+
+IF(WIN32)
+  IF(NOT UNIX)
+    IF(NOT BORLAND)
+      SET(CMD ${CMD_DIR}/CMakeSetup${CMD_EXT})
+      ADD_CUSTOM_COMMAND(
+        TARGET documentation
+        COMMAND ${CMD}
+        ARGS --help-full ${CMake_BINARY_DIR}/Docs/CMakeSetup.txt
+             --help-html ${CMake_BINARY_DIR}/Docs/CMakeSetup.html
+             --help-man ${CMake_BINARY_DIR}/Docs/CMakeSetup.1
+        DEPENDS ${CMD}
+        SOURCE ${CMake_SOURCE_DIR}/Utilities/Doxygen/doxyfile.in
+        OUTPUTS ${CMake_BINARY_DIR}/Docs/CMakeSetup.txt
+        )
+      ADD_DEPENDENCIES(documentation CMakeSetup)
+      INSTALL_FILES(${CMAKE_MAN_DIR}/man1 FILES
+        ${CMake_BINARY_DIR}/Docs/CMakeSetup.1
+        )
+      INSTALL_FILES(${CMAKE_DOC_DIR} FILES
+        ${CMake_BINARY_DIR}/Docs/CMakeSetup.txt
+        ${CMake_BINARY_DIR}/Docs/CMakeSetup.html
+        )
+      SET(DOC_FILES ${DOC_FILES} ${CMake_BINARY_DIR}/Docs/CMakeSetup.txt)
+    ENDIF(NOT BORLAND)
+  ENDIF(NOT UNIX)
+ENDIF(WIN32)
 
 # Drive documentation generation.
 ADD_CUSTOM_COMMAND(
