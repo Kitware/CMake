@@ -1,17 +1,17 @@
 /*=========================================================================
 
-  Program:   CMake - Cross-Platform Makefile Generator
-  Module:    $RCSfile$
-  Language:  C++
-  Date:      $Date$
-  Version:   $Revision$
+Program:   CMake - Cross-Platform Makefile Generator
+Module:    $RCSfile$
+Language:  C++
+Date:      $Date$
+Version:   $Revision$
 
-  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
-  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
+Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
+See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
-     PURPOSE.  See the above copyright notices for more information.
+This software is distributed WITHOUT ANY WARRANTY; without even 
+the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
 // CMakeSetupDialogDlg.h : header file
@@ -59,7 +59,7 @@ protected:
   void RemoveAdvancedValues();
   // Dialog Data
   //{{AFX_DATA(CMakeSetupDialog)
-        enum { IDD = IDD_CMakeSetupDialog_DIALOG };
+  enum { IDD = IDD_CMakeSetupDialog_DIALOG };
   CButton       m_AdvancedValuesControl;
   CStatic       m_BuildForLabel;
   CButton       m_BrowseSource;
@@ -80,7 +80,7 @@ protected:
   CButton       m_Configure;
   CString m_GeneratorChoiceString;
   BOOL    m_AdvancedValues;
-        //}}AFX_DATA
+  //}}AFX_DATA
   
   // ClassWizard generated virtual function overrides
   //{{AFX_VIRTUAL(CMakeSetupDialog)
@@ -125,13 +125,16 @@ protected:
   afx_msg void OnAdvancedValues();
   afx_msg void OnDoubleclickedAdvancedValues();
   afx_msg void OnDropFiles(HDROP);
+  afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
   //}}AFX_MSG
   DECLARE_MESSAGE_MAP()
     
-    int m_oldCX;
+  int m_oldCX;
   int m_oldCY;
   float m_deltaXRemainder;
   cmake *m_CMakeInstance;
+  HCURSOR m_Cursor;
+  bool m_RunningConfigure;
 };
 
 //{{AFX_INSERT_LOCATION}}
