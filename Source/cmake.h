@@ -181,6 +181,11 @@ class cmake
   ///! Is this cmake running as a result of a TRY_COMPILE command
   void SetIsInTryCompile(bool i) { m_InTryCompile = i; }
   
+  /**
+   * Generate CMAKE_ROOT and CMAKE_COMMAND cache entries
+   */
+  int AddCMakePaths(const char *arg0);
+
 protected:
   typedef std::map<cmStdString, cmCommand*> RegisteredCommandsMap;
   RegisteredCommandsMap m_Commands;
@@ -199,11 +204,6 @@ protected:
   ///! read in a cmake list file to initialize the cache
   void ReadListFile(const char *path);
   
-  /**
-   * Generate CMAKE_ROOT and CMAKE_COMMAND cache entries
-   */
-  int AddCMakePaths(const char *arg0);
-
   ///! used by Run
   int LocalGenerate();
 

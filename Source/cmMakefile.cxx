@@ -1352,6 +1352,7 @@ int cmMakefile::TryCompile(const char *srcdir, const char *bindir,
   // be run that way but the cmake object requires a vailid path
   std::string cmakeCommand = this->GetDefinition("CMAKE_COMMAND");
   cmake cm;
+  cm.AddCMakePaths(cmakeCommand.c_str());
   cm.SetIsInTryCompile(true);
   cmGlobalGenerator *gg = 
     cm.CreateGlobalGenerator(m_LocalGenerator->GetGlobalGenerator()->GetName());

@@ -186,12 +186,19 @@ cmLocalGenerator *cmGlobalGenerator::CreateLocalGenerator()
 void cmGlobalGenerator::EnableLanguagesFromGenerator(cmGlobalGenerator *gen, 
                                                      cmMakefile *mf)
 {
+  // create a temp generator
+  cmLocalGenerator *lg = this->CreateLocalGenerator();
+  lg->GetMakefile()->SetStartDirectory(m_CMakeInstance->GetStartDirectory());
+  lg->GetMakefile()->SetStartOutputDirectory(m_CMakeInstance->GetStartOutputDirectory());
+  lg->GetMakefile()->MakeStartDirectoriesCurrent();
+
   // for each existing language call enable Language
   std::map<cmStdString, bool>::const_iterator i = 
     gen->m_LanguageEnabled.begin();
   for (;i != gen->m_LanguageEnabled.end(); ++i)
     {
-    this->EnableLanguage(i->first.c_str(),mf);
+    this->EnableLanguage(i->first.c_str(),lg->GetMakefile());
     }
+  delete lg;
 }
 
