@@ -100,7 +100,7 @@ public:
   
   ///! Get the number of entries in the cache
   CM_EXPORT int GetSize() {
-    return m_Cache.size(); }
+    return static_cast<int>(m_Cache.size()); }
   
   ///! Break up a line like VAR:type="value" into var, type and value
   static bool ParseEntry(const char* entry, 

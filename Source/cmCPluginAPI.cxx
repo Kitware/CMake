@@ -306,7 +306,7 @@ void cmExpandSourceListArguments(void *arg,
     args2.push_back(args[i]);
     }
   mf->ExpandSourceListArguments(args2, result, startArgumentIndex);
-  int resargc = result.size();
+  int resargc = static_cast<int>(result.size());
   char **resargv = NULL;
   if (resargc)
     {
@@ -341,7 +341,7 @@ int cmGetTotalArgumentSize(int argc, char **argv)
     {
     if (argv[i])
       {
-      result = result + strlen(argv[i]);
+      result = result + static_cast<int>(strlen(argv[i]));
       }
     }
   return result;

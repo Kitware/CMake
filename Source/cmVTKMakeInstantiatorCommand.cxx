@@ -193,7 +193,8 @@ cmVTKMakeInstantiatorCommand
     
       // Actually generate the code in the file.
       this->OldGenerateCreationFile(fout.GetStream(),
-                                    block*groupSize, thisBlockSize);
+                                    block*groupSize, 
+                                    static_cast<int>(thisBlockSize));
       }
       
       // Add the generated source file into the source list.
