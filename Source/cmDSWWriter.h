@@ -71,6 +71,9 @@ private:
   void WriteProject(std::ostream& fout, 
                     const char* name, const char* path,
                     cmDSPWriter* project, const cmTarget &t);
+  void WriteExternalProject(std::ostream& fout, 
+                    const char* name, const char* path,
+                    const std::vector<std::string>& dependencies);
   void WriteDSWFooter(std::ostream& fout);
   cmMakefile* m_Makefile;
 };

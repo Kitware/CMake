@@ -31,6 +31,7 @@
 #include "cmIfCommand.cxx"
 #include "cmIncludeCommand.cxx"
 #include "cmIncludeDirectoryCommand.cxx"
+#include "cmIncludeExternalMSProjectCommand.cxx"
 #include "cmIncludeRegularExpressionCommand.cxx"
 #include "cmInstallFilesCommand.cxx"
 #include "cmInstallProgramsCommand.cxx"
@@ -89,6 +90,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmIfCommand);
   commands.push_back(new cmIncludeCommand);
   commands.push_back(new cmIncludeDirectoryCommand);
+  commands.push_back(new cmIncludeExternalMSProjectCommand);
   commands.push_back(new cmIncludeRegularExpressionCommand);
   commands.push_back(new cmInstallFilesCommand);
   commands.push_back(new cmInstallProgramsCommand);

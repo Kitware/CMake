@@ -172,7 +172,18 @@ void cmDSWWriter::WriteDSWFile(std::ostream& fout)
           }
         }
       // Write the project into the DSW file
-      if ((l->second.GetType() != cmTarget::INSTALL_FILES)
+      if (l->first == "INCLUDE_EXTERNAL_MSPROJECT")
+      {
+        cmCustomCommand cc = l->second.GetCustomCommands()[0];
+        
+        // dodgy use of the cmCustomCommand's members to store the 
+        // arguments from the INCLUDE_EXTERNAL_MSPROJECT command
+        std::vector<std::string> stuff = cc.GetDepends();
+        std::vector<std::string> depends = cc.GetOutputs();
+        this->WriteExternalProject(fout, stuff[0].c_str(), stuff[1].c_str(), depends);
+        ++si;
+      }
+      else if ((l->second.GetType() != cmTarget::INSTALL_FILES)
           && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))
         {
         this->WriteProject(fout, si->c_str(), dir.c_str(), 
@@ -186,6 +197,7 @@ void cmDSWWriter::WriteDSWFile(std::ostream& fout)
       delete mf;
       }
     }
+
   // Write the footer for the DSW file
   this->WriteDSWFooter(fout);
 }
@@ -247,6 +259,39 @@ void cmDSWWriter::WriteProject(std::ostream& fout,
     }
   fout << "}}}\n\n";
 }
+
+
+// Write a dsp file into the DSW file,
+// Note, that dependencies from executables to 
+// the libraries it uses are also done here
+void cmDSWWriter::WriteExternalProject(std::ostream& fout, 
+			       const char* name,
+			       const char* location,
+                               const std::vector<std::string>& dependencies)
+{
+ fout << "#########################################################"
+    "######################\n\n";
+  fout << "Project: \"" << name << "\"=" 
+       << location << " - Package Owner=<4>\n\n";
+  fout << "Package=<5>\n{{{\n}}}\n\n";
+  fout << "Package=<4>\n";
+  fout << "{{{\n";
+
+  
+  std::vector<std::string>::const_iterator i, end;
+  // write dependencies.
+  i = dependencies.begin();
+  end = dependencies.end();
+  for(;i!= end; ++i)
+  {
+    fout << "Begin Project Dependency\n";
+    fout << "Project_Dep_Name " << *i << "\n";
+    fout << "End Project Dependency\n";
+  }
+  fout << "}}}\n\n";
+}
+
+
 
 // Standard end of dsw file
 void cmDSWWriter::WriteDSWFooter(std::ostream& fout)

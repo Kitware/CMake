@@ -124,8 +124,11 @@ void cmDSPWriter::OutputDSPFile()
 	cmSystemTools::Error("Bad target type", l->first.c_str());
 	break;
       }
+    // INCLUDE_EXTERNAL_MSPROJECT command only affects the workspace
+    // so don't build a projectfile for it
     if ((l->second.GetType() != cmTarget::INSTALL_FILES)
-        && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))
+        && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS)
+        && (l->first != "INCLUDE_EXTERNAL_MSPROJECT"))
       {
       this->CreateSingleDSP(l->first.c_str(),l->second);
       }
