@@ -103,7 +103,7 @@ std::string ctest::FindExecutable(const char *exe)
 }
 
 
-void ctest::ProcessDirectory(int &passed, int &failed)
+void ctest::ProcessDirectory(int &passed, std::vector<std::string> &failed)
 {
   // does the DartTestfile.txt exist ?
   if(!cmSystemTools::FileExists("DartTestfile.txt"))
@@ -141,7 +141,7 @@ void ctest::ProcessDirectory(int &passed, int &failed)
             {
             std::cerr << "Changing directory into " << nwd.c_str() << "\n";
             cmSystemTools::ChangeDirectory(nwd.c_str());
-            this->ProcessDirectory(passed,failed);
+            this->ProcessDirectory(passed, failed);
             }
           }
         // return to the original directory
@@ -200,7 +200,7 @@ void ctest::ProcessDirectory(int &passed, int &failed)
               std::cerr << output.c_str() << "\n";
               }
             }
-          failed++;
+          failed.push_back(args[0]); 
           }
         else
           {
@@ -230,7 +230,7 @@ void ctest::ProcessDirectory(int &passed, int &failed)
 int main (int argc, char *argv[])
 {
   int passed = 0;
-  int failed = 0;
+  std::vector<std::string> failed;
   int total;
   
   ctest inst;
@@ -254,7 +254,7 @@ int main (int argc, char *argv[])
 
   // call process directory
   inst.ProcessDirectory(passed, failed);
-  total = passed + failed;
+  total = passed + failed.size();
 
   if (total == 0)
     {
@@ -264,8 +264,17 @@ int main (int argc, char *argv[])
     {
     float percent = passed * 100.0 / total;
     fprintf(stderr,"%.0f%% tests passed, %i tests failed out of %i\n",
-            percent,failed, total);
+            percent, failed.size(), total);
+    if (failed.size()) 
+      {
+      std::cerr << "The following tests failed:\n";
+      for(std::vector<std::string>::iterator j = failed.begin();
+          j != failed.end(); ++j)
+        {   
+        std::cerr << "\t" << *j << "\n";
+        }
+      }
     }
   
-  return failed;
+  return failed.size();
 }
