@@ -18,12 +18,13 @@
 #include "cmSystemTools.h"
 #include "cmListFileCache.h"
 
-#include <cmsys/RegularExpression.hxx>
-
 #ifdef HAVE_CURL
 # include "cmCTestSubmit.h"
 # include "curl/curl.h"
 #endif
+
+#include <cmsys/RegularExpression.hxx>
+#include <cmsys/Process.h>
 
 #include <stdlib.h> // required for atoi
 #include <stdio.h>
@@ -931,15 +932,20 @@ int cmCTest::BuildDirectory()
     return 1;
     }
 
+  std::ofstream ofs;
+  if ( !this->OpenOutputFile("Temporary", "LastBuild.log", ofs) )
+    {
+    std::cerr << "Cannot create LastBuild.log file" << std::endl;    
+    }
   m_StartBuild = ::CurrentTime();
   std::string output;
   int retVal = 0;
   bool res = true;
   if ( !m_ShowOnly )
     {
-    res = cmSystemTools::RunSingleCommand(makeCommand.c_str(), &output, 
+    res = this->RunMakeCommand(makeCommand.c_str(), &output, 
       &retVal, buildDirectory.c_str(), 
-      m_Verbose, m_TimeOut);
+      m_Verbose, m_TimeOut, ofs);
     }
   else
     {
@@ -950,22 +956,16 @@ int cmCTest::BuildDirectory()
     {
     std::cerr << "Error(s) when building project" << std::endl;
     }
+  if ( ofs )
+    {
+    ofs.close();
+    }
 
   // Parsing of output for errors and warnings.
 
   std::vector<cmStdString> lines;
   cmSystemTools::Split(output.c_str(), lines);
 
-  std::ofstream ofs;
-  if ( this->OpenOutputFile("Temporary", "LastBuild.log", ofs) )
-    {
-    ofs << output;
-    ofs.close();
-    }
-  else
-    {
-    std::cerr << "Cannot create LastBuild.log file" << std::endl;    
-    }
   
   // Lines are marked: 
   // 0 - nothing
@@ -1042,13 +1042,13 @@ int cmCTest::BuildDirectory()
     bool found = false;
     if ( markedLines[kk] == 1 )
       {
-      std::cout << "Error: " << lines[kk] << std::endl;
+      //std::cout << "Error: " << lines[kk] << std::endl;
       errorwarning.m_Error = true;
       found = true;
       }
     else if ( markedLines[kk] > 1 )
       {
-      std::cout << "Warning: " << lines[kk] << std::endl;
+      //std::cout << "Warning: " << lines[kk] << std::endl;
       errorwarning.m_Error = false;
       found = true;
       }
@@ -2098,5 +2098,97 @@ std::string cmCTest::GetTestModelString()
       return "Continuous";
     }
   return "Experimental";
+}
+bool cmCTest::RunMakeCommand(const char* command, std::string* output,
+    int* retVal, const char* dir, bool verbose, int timeout, std::ofstream& ofs)
+{
+  std::vector<cmStdString> args = cmSystemTools::ParseArguments(command);
+
+  if(args.size() < 1)
+    {
+    return false;
+    }
+  
+  std::vector<const char*> argv;
+  for(std::vector<cmStdString>::const_iterator a = args.begin();
+      a != args.end(); ++a)
+    {
+    argv.push_back(a->c_str());
+    }
+  argv.push_back(0);
+
+  if ( output )
+    {
+    *output = "";
+    }
+
+  cmsysProcess* cp = cmsysProcess_New();
+  cmsysProcess_SetCommand(cp, &*argv.begin());
+  cmsysProcess_SetWorkingDirectory(cp, dir);
+  cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
+  cmsysProcess_SetTimeout(cp, timeout);
+  cmsysProcess_Execute(cp);
+  
+  std::string::size_type tick = 0;
+  std::string::size_type tick_len = 1024;
+
+  char* data;
+  int length;
+  if ( !verbose )
+    {
+    std::cout << "   Each . represents 1024 bytes of output" << std::endl;
+    std::cout << "    " << std::flush;
+    }
+  while(cmsysProcess_WaitForData(cp, (cmsysProcess_Pipe_STDOUT |
+                                      cmsysProcess_Pipe_STDERR),
+                                 &data, &length, 0))
+    {
+    if ( output )
+      {
+      output->append(data, length);
+      while ( output->size() > (tick * tick_len) )
+        {
+        tick ++;
+        std::cout << "." << std::flush;
+        }
+      }
+    if(verbose)
+      {
+      std::cout.write(data, length);
+      }
+    if ( ofs )
+      {
+      ofs.write(data, length);
+      }
+    }
+  std::cout << " Size of output: ";
+  std::cout.precision(2);
+  std::cout << (output->size() / 1024.0) << "K" << std::endl;
+  
+  cmsysProcess_WaitForExit(cp, 0);
+  
+  bool result = true;
+  if(cmsysProcess_GetState(cp) == cmsysProcess_State_Exited)
+    {
+    if ( retVal )
+      {
+      *retVal = cmsysProcess_GetExitValue(cp);
+      }
+    else
+      {
+      if ( cmsysProcess_GetExitValue(cp) !=  0 )
+        {
+        result = false;
+        }
+      }
+    }
+  else
+    {
+    result = false;
+    }
+  
+  cmsysProcess_Delete(cp);
+  
+  return result;
 }
 

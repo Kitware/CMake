@@ -223,6 +223,9 @@ private:
                       const std::string& name, std::ofstream& stream);  
   std::string MakeXMLSafe(const std::string&);
   std::string MakeURLSafe(const std::string&);
+
+  bool RunMakeCommand(const char* command, std::string* output,
+    int* retVal, const char* dir, bool verbose, int timeout, std::ofstream& ofs);
 };
 
 #endif
