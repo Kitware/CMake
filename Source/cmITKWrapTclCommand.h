@@ -17,7 +17,6 @@
 #ifndef cmITKWrapTclCommand_h
 #define cmITKWrapTclCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 class cmDependInformation;
 class cmMakeDepend;

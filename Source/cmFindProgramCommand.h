@@ -17,7 +17,6 @@
 #ifndef cmFindProgramCommand_h
 #define cmFindProgramCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmFindProgramCommand

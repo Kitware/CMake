@@ -17,7 +17,6 @@
 #ifndef cmOptionCommand_h
 #define cmOptionCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmOptionCommand

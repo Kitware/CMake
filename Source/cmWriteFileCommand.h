@@ -17,7 +17,6 @@
 #ifndef cmWriteFileCommand_h
 #define cmWriteFileCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmWriteFileCommand

@@ -17,7 +17,6 @@
 #ifndef cmFLTKWrapUICommand_h
 #define cmFLTKWrapUICommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmFLTKWrapUICommand

@@ -17,7 +17,6 @@
 #ifndef cmGetCMakePropertyCommand_h
 #define cmGetCMakePropertyCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 class cmGetCMakePropertyCommand : public cmCommand

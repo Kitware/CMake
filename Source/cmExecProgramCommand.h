@@ -17,7 +17,6 @@
 #ifndef cmExecProgramCommand_h
 #define cmExecProgramCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmExecProgramCommand

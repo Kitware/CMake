@@ -17,7 +17,6 @@
 #ifndef cmAbstractFilesCommand_h
 #define cmAbstractFilesCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 class cmAbstractFilesCommand : public cmCommand

@@ -17,7 +17,6 @@
 #ifndef cmConfigureFileCommand_h
 #define cmConfigureFileCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 class cmConfigureFileCommand : public cmCommand

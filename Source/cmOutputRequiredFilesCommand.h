@@ -17,7 +17,6 @@
 #ifndef cmOutputRequiredFilesCommand_h
 #define cmOutputRequiredFilesCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmOutputRequiredFilesCommand

@@ -17,7 +17,6 @@
 #ifndef cmBuildNameCommand_h
 #define cmBuildNameCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmBuildNameCommand

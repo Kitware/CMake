@@ -17,7 +17,6 @@
 #ifndef cmVariableRequiresCommand_h
 #define cmVariableRequiresCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmVariableRequiresCommand

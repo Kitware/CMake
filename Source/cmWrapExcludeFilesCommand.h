@@ -17,7 +17,6 @@
 #ifndef cmWrapExcludeFilesCommand_h
 #define cmWrapExcludeFilesCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 class cmWrapExcludeFilesCommand : public cmCommand

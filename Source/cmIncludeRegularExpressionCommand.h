@@ -17,7 +17,6 @@
 #ifndef cmIncludeRegularExpressionCommand_h
 #define cmIncludeRegularExpressionCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmIncludeRegularExpressionCommand

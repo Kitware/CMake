@@ -17,7 +17,6 @@
 #ifndef cmCMakeMinimumRequired_h
 #define cmCMakeMinimumRequired_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmCMakeMinimumRequired

@@ -17,7 +17,6 @@
 #ifndef cmCreateTestSourceList_h
 #define cmCreateTestSourceList_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmCreateTestSourceList

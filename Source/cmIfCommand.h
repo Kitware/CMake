@@ -17,7 +17,6 @@
 #ifndef cmIfCommand_h
 #define cmIfCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 #include "cmFunctionBlocker.h"
 

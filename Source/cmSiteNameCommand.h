@@ -17,7 +17,6 @@
 #ifndef cmSiteNameCommand_h
 #define cmSiteNameCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmSiteNameCommand

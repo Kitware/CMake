@@ -17,7 +17,6 @@
 #ifndef cmAddDefinitionsCommand_h
 #define cmAddDefinitionsCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmAddDefinitionsCommand

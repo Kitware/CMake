@@ -18,11 +18,6 @@
 #include "cmake.h"
 #include "cmCacheManager.h"
 
-
-// On Mac OSX getline looks like it is broken, so we have to use
-// fgets. This is why we are including stdio.h.
-#include <stdio.h>
-
 cmakewizard::cmakewizard()
 {
   m_ShowAdvanced = false;

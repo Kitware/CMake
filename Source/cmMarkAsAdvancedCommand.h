@@ -17,7 +17,6 @@
 #ifndef cmMarkAsAdvancedCommand_h
 #define cmMarkAsAdvancedCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmMarkAsAdvancedCommand

@@ -17,7 +17,6 @@
 #ifndef cmExportLibraryDependenciesCommand_h
 #define cmExportLibraryDependenciesCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmExportLibraryDependenciesCommand

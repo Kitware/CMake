@@ -17,7 +17,6 @@
 #ifndef cmSubdirDependsCommand_h
 #define cmSubdirDependsCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmSubdirDependsCommand

@@ -21,7 +21,6 @@
 #include <malloc.h>
 #include <io.h>
 #include <fcntl.h>
-#include <stdio.h>
 #include <sys/stat.h>
 #include <windows.h>
 

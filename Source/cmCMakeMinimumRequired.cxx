@@ -15,7 +15,6 @@
 
 =========================================================================*/
 #include "cmCMakeMinimumRequired.h"
-#include "stdio.h"
 
 // cmCMakeMinimumRequired
 bool cmCMakeMinimumRequired::InitialPass(std::vector<std::string> const& args)

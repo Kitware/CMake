@@ -17,7 +17,6 @@
 #ifndef cmVTKWrapJavaCommand_h
 #define cmVTKWrapJavaCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmVTKWrapJavaCommand

@@ -17,7 +17,6 @@
 #ifndef cmTarget_h
 #define cmTarget_h
 
-#include "cmStandardIncludes.h"
 #include "cmCustomCommand.h"
 class cmSourceFile;
 

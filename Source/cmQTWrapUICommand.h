@@ -17,7 +17,6 @@
 #ifndef cmQTWrapUICommand_h
 #define cmQTWrapUICommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmQTWrapUICommand

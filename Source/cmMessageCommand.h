@@ -17,7 +17,6 @@
 #ifndef cmMessageCommand_h
 #define cmMessageCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmMessageCommand

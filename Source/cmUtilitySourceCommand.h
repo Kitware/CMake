@@ -17,7 +17,6 @@
 #ifndef cmUtilitySourceCommand_h
 #define cmUtilitySourceCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmUtilitySourceCommand

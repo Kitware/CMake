@@ -17,7 +17,6 @@
 #ifndef cmTryCompileCommand_h
 #define cmTryCompileCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmTryCompileCommand

@@ -17,7 +17,6 @@
 #include "cmFindFileCommand.h"
 #include "cmCacheManager.h"
 #include <stdlib.h>
-#include <stdio.h>
   
 
 // cmFindFileCommand

@@ -17,7 +17,6 @@
 #ifndef cmSourceFilesRemoveCommand_h
 #define cmSourceFilesRemoveCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmSourceFilesRemoveCommand

@@ -24,7 +24,6 @@
 #include "cmGeneratedFileStream.h"
 
 #include <cmsys/RegularExpression.hxx>
-#include <stdio.h>
 
 cmLocalUnixMakefileGenerator::cmLocalUnixMakefileGenerator()
 {

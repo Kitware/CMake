@@ -20,7 +20,6 @@
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/SystemTools.hxx>
 
-#include <stdio.h>
 #include <ctype.h>
 
 #if defined( _WIN32 ) || defined( APPLE ) || defined( __CYGWIN__ )

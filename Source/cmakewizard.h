@@ -17,7 +17,6 @@
 
 
 #include "cmMakefile.h"
-#include "cmStandardIncludes.h"
 
 class cmakewizard
 {

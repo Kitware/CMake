@@ -17,7 +17,6 @@
 #ifndef cmInstallTargetsCommand_h
 #define cmInstallTargetsCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmInstallTargetsCommand

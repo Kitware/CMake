@@ -17,7 +17,6 @@
 #ifndef cmMakefile_h
 #define cmMakefile_h
 
-#include "cmStandardIncludes.h"
 #include "cmData.h"
 #include "cmSystemTools.h"
 #include "cmSourceGroup.h"

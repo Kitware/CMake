@@ -17,7 +17,6 @@
 #ifndef cmSeparateArgumentsCommand_h
 #define cmSeparateArgumentsCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmSeparateArgumentsCommand

@@ -17,7 +17,6 @@
 #ifndef cmAddCustomCommandCommand_h
 #define cmAddCustomCommandCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmAddCustomCommandCommand

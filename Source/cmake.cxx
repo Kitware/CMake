@@ -35,7 +35,6 @@
 #include "cmGlobalUnixMakefileGenerator.h"
 #endif
 
-#include <stdio.h>
 #include <stdlib.h> // required for atoi
 
 #ifdef __APPLE__

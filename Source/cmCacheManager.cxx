@@ -19,7 +19,6 @@
 #include "cmSystemTools.h"
 #include "cmCacheManager.h"
 #include "cmMakefile.h"
-#include "stdio.h"
 
 #include <cmsys/RegularExpression.hxx>
 

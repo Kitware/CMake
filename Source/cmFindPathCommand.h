@@ -17,7 +17,6 @@
 #ifndef cmFindPathCommand_h
 #define cmFindPathCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 

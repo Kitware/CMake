@@ -28,7 +28,6 @@
 #include <cmsys/Base64.h>
 
 #include <stdlib.h> // required for atoi
-#include <stdio.h>
 #include <time.h>
 #include <math.h>
 #include <float.h>

@@ -17,7 +17,6 @@
 #ifndef cmForEachCommand_h
 #define cmForEachCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 #include "cmFunctionBlocker.h"
 #include "cmListFileCache.h"

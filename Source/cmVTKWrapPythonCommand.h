@@ -17,7 +17,6 @@
 #ifndef cmVTKWrapPythonCommand_h
 #define cmVTKWrapPythonCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmVTKWrapPythonCommand

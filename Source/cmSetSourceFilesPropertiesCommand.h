@@ -17,7 +17,6 @@
 #ifndef cmSetSourceFilesPropertiesCommand_h
 #define cmSetSourceFilesPropertiesCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 class cmSetSourceFilesPropertiesCommand : public cmCommand

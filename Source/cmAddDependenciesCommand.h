@@ -17,7 +17,6 @@
 #ifndef cmDependenciessCommand_h
 #define cmDependenciessCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmAddDependenciesCommand

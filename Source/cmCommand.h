@@ -17,7 +17,6 @@
 #ifndef cmCommand_h
 #define cmCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 

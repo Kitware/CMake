@@ -17,7 +17,6 @@
 #ifndef cmFindLibraryCommand_h
 #define cmFindLibraryCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 

@@ -17,7 +17,6 @@
 #ifndef cmMacroCommand_h
 #define cmMacroCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 #include "cmFunctionBlocker.h"
 

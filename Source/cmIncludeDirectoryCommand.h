@@ -17,7 +17,6 @@
 #ifndef cmIncludeDirectoryCommand_h
 #define cmIncludeDirectoryCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmIncludeDirectoryCommand

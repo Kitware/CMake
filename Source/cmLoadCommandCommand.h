@@ -17,7 +17,6 @@
 #ifndef cmLoadCommandCommand_h
 #define cmLoadCommandCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmLoadCommandCommand

@@ -17,7 +17,6 @@
 #ifndef cmSetCommand_h
 #define cmSetCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmSetCommand

@@ -17,7 +17,6 @@
 #ifndef cmVTKWrapTclCommand_h
 #define cmVTKWrapTclCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmVTKWrapTclCommand

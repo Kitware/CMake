@@ -17,7 +17,6 @@
 #ifndef cmAuxSourceDirectoryCommand_h
 #define cmAuxSourceDirectoryCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmAuxSourceDirectoryCommand

@@ -17,7 +17,6 @@
 #ifndef cmExecutablesCommand_h
 #define cmExecutablesCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmExecutablesCommand

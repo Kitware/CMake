@@ -17,7 +17,6 @@
 #ifndef cmEndForEachCommand_h
 #define cmEndForEachCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmEndForEachCommand

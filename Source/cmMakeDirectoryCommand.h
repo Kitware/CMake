@@ -17,7 +17,6 @@
 #ifndef cmMakeDirectoryCommand_h
 #define cmMakeDirectoryCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmMakeDirectoryCommand

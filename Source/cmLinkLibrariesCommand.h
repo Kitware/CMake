@@ -17,7 +17,6 @@
 #ifndef cmLinkLibrariesCommand_h
 #define cmLinkLibrariesCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmLinkLibrariesCommand

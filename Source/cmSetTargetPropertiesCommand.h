@@ -17,7 +17,6 @@
 #ifndef cmSetTargetsPropertiesCommand_h
 #define cmSetTargetsPropertiesCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 class cmSetTargetPropertiesCommand : public cmCommand

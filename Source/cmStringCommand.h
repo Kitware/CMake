@@ -17,7 +17,6 @@
 #ifndef cmStringCommand_h
 #define cmStringCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmStringCommand

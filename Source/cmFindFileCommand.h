@@ -17,7 +17,6 @@
 #ifndef cmFindFileCommand_h
 #define cmFindFileCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmFindFileCommand

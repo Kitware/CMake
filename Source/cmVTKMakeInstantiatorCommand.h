@@ -17,7 +17,6 @@
 #ifndef cmVTKMakeInstantiatorCommand_h
 #define cmVTKMakeInstantiatorCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmVTKMakeInstantiatorCommand

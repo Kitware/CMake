@@ -26,7 +26,6 @@
 #include "cmListFileCache.h"
 #include "cmVariableWatch.h"
 #include "cmake.h"
-#include <stdio.h>  // required for sprintf
 #include <stdlib.h> // required for atoi
 
 #include <cmsys/RegularExpression.hxx>

@@ -17,7 +17,6 @@
 #ifndef cmIncludeExternalMSProjectCommand_h
 #define cmIncludeExternalMSProjectCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmIncludeExternalMSProjectCommand

@@ -17,7 +17,6 @@
 #ifndef cmSourceGroupCommand_h
 #define cmSourceGroupCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmSourceGroupCommand

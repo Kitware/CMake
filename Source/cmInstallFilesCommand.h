@@ -17,7 +17,6 @@
 #ifndef cmInstallFilesCommand_h
 #define cmInstallFilesCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmInstallFilesCommand

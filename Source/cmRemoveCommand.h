@@ -17,7 +17,6 @@
 #ifndef cmRemoveCommand_h
 #define cmRemoveCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 /** \class cmRemoveCommand

@@ -17,7 +17,6 @@
 #ifndef cmGetSourceFilePropertyCommand_h
 #define cmGetSourceFilePropertyCommand_h
 
-#include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
 class cmGetSourceFilePropertyCommand : public cmCommand
