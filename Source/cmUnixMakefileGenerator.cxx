@@ -755,7 +755,7 @@ void cmUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     "THREAD_LIBS          = @CMAKE_THREAD_LIBS@\n"
     "\n"
     "# set up the path to the rulesgen program\n"
-    "CMAKE_COMMAND = ${CMAKE_BINARY_DIR}/CMake/Source/CMakeBuildTargets\n"
+    "CMAKE_COMMAND = ${CMAKE_COMMAND}\n"
     "\n"
     "\n"
     "\n";
@@ -794,12 +794,6 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                        "Makefile cmake.depends ${TARGETS} ${SUBDIR_BUILD} ${CMAKE_COMMAND}",
                        0);
   this->OutputMakeRule(fout, 
-                       "rule to build cmake from source",
-                       "${CMAKE_COMMAND}", "${CMAKE_SOURCE_DIR}/CMake/Source/*.cxx "
-                       "${CMAKE_SOURCE_DIR}/CMake/Source/*.h",
-                       "cd ${CMAKE_BINARY_DIR}/CMake/Source; "
-                       "${MAKE} CMakeBuildTargets");
-  this->OutputMakeRule(fout, 
                        "remove generated files",
                        "clean",
                        "${SUBDIR_CLEAN}",
@@ -830,7 +824,7 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                        "rebuild_cache",
                        "${CMAKE_BINARY_DIR}/CMakeCache.txt",
                        "${CMAKE_COMMAND} ${CMAKE_SOURCE_DIR}/CMakeLists.txt "
-                       "-MakeCache -S${CMAKE_SOURCE_DIR} -O${CMAKE_BINARY_DIR} "
+                       "-S${CMAKE_SOURCE_DIR} -O${CMAKE_BINARY_DIR} "
                        "-H${CMAKE_SOURCE_DIR} -B${CMAKE_BINARY_DIR}");
   
 }
@@ -888,4 +882,24 @@ void cmUnixMakefileGenerator::SetLocal (bool local)
     m_CacheOnly = true;
     m_Recurse = true;
     }
+}
+
+void cmUnixMakefileGenerator::ComputeSystemInfo()
+{
+  if (m_CacheOnly)
+    {
+      // currently we run configure shell script here to determine the info
+      std::string output;
+      std::string cmd;
+      const char* root
+	= cmCacheManager::GetInstance()->GetCacheValue("CMAKE_ROOT");
+      cmd = root;
+      cmd += "/Templates/configure";
+      cmSystemTools::RunCommand(cmd.c_str(), output);
+    }
+
+  // now load the settings
+  std::string fpath = m_Makefile->GetHomeOutputDirectory();
+  fpath += "/CMakeSystemConfig.cmake";
+  m_Makefile->ReadListFile(NULL,fpath.c_str());
 }

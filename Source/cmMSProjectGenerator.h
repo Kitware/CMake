@@ -98,6 +98,12 @@ public:
   cmDSPMakefile* GetDSPMakefile() 
     {return m_DSPMakefile;}
 
+  /**
+   * Try to determine system infomation such as shared library
+   * extension, pthreads, byte order etc.  
+   */
+  virtual void ComputeSystemInfo();
+
 private:
   cmDSWMakefile* m_DSWMakefile;
   cmDSPMakefile* m_DSPMakefile;

@@ -76,6 +76,12 @@ public:
    */
   virtual void SetLocal(bool ) {};
 
+  /**
+   * Try to determine system infomation such as shared library
+   * extension, pthreads, byte order etc.  
+   */
+  virtual void ComputeSystemInfo() = 0;
+
 protected:
   cmMakefile* m_Makefile;
 };

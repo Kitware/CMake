@@ -84,6 +84,12 @@ public:
    */
   void OutputObjectDepends(std::ostream&);
 
+  /**
+   * Try to determine system infomation such as shared library
+   * extension, pthreads, byte order etc.  
+   */
+  virtual void ComputeSystemInfo();
+
 private:
   void RecursiveGenerateCacheOnly();
   void GenerateCacheOnly();
