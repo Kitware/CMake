@@ -33,6 +33,14 @@
 #define KWSYS_HEADER0(x) KWSYS_HEADER1(x)
 #define KWSYS_HEADER1(x) <x>
 
+/*
+  Define KWSYS_NAMESPACE_STRING to be a string constant containing the
+  name configured for this instance of the kwsys library.
+*/
+#define KWSYS_NAMESPACE_STRING KWSYS_NAMESPACE_STRING0(KWSYS_NAMESPACE)
+#define KWSYS_NAMESPACE_STRING0(x) KWSYS_NAMESPACE_STRING1(x)
+#define KWSYS_NAMESPACE_STRING1(x) #x
+
 #else
 # error "kwsysPrivate.h included multiple times."
 #endif
