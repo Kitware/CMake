@@ -1339,7 +1339,8 @@ void cmMakefile::ExpandSourceListArguments(
 }
 
 int cmMakefile::TryCompile(const char *srcdir, const char *bindir, 
-                           const char *projectName, const char *targetName)
+                           const char *projectName, const char *targetName,
+                           const std::vector<std::string> *cmakeArgs)
 {
   // does the binary directory exist ? If not create it...
   if (!cmSystemTools::FileIsDirectory(bindir))
@@ -1377,7 +1378,11 @@ int cmMakefile::TryCompile(const char *srcdir, const char *bindir,
   cm.SetStartOutputDirectory(bindir);
   cm.SetCMakeCommand(cmakeCommand.c_str());
   cm.LoadCache();
-  
+  // if cmake args were provided then pass them in
+  if (cmakeArgs)
+    {
+    cm.SetCacheArgs(*cmakeArgs);
+    }
   // to save time we pass the EnableLanguage info directly
   gg->EnableLanguagesFromGenerator(m_LocalGenerator->GetGlobalGenerator(),
                                    this);

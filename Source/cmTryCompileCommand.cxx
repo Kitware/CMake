@@ -25,6 +25,27 @@ bool cmTryCompileCommand::InitialPass(std::vector<std::string> const& argv)
     return false;
     }
 
+  // which signature were we called with ?
+  bool srcFileSignature = true;
+  
+  // look for CMAKE_FLAGS and store them
+  std::vector<std::string> cmakeFlags;
+  int i;
+  for (i = 3; i < argv.size(); ++i)
+    {
+    if (argv[i] == "CMAKE_FLAGS")
+      {
+      for (; i < argv.size(); ++i)
+        {
+        cmakeFlags.push_back(argv[i]);
+        }
+      }
+    else
+      {
+      srcFileSignature = false;
+      }
+    }
+  
   // where will the binaries be stored
   const char* binaryDirectory = argv[1].c_str();
   const char* sourceDirectory = argv[2].c_str();
@@ -34,12 +55,11 @@ bool cmTryCompileCommand::InitialPass(std::vector<std::string> const& argv)
 
   // compute the binary dir when TRY_COMPILE is called with a src file
   // signature
-  if (argv.size() == 3)
+  if (srcFileSignature)
     {
     tmpString = argv[1] + "/CMakeTmp";
     binaryDirectory = tmpString.c_str();
     }
-  
   // make sure the binary directory exists
   cmSystemTools::MakeDirectory(binaryDirectory);
   
@@ -52,7 +72,7 @@ bool cmTryCompileCommand::InitialPass(std::vector<std::string> const& argv)
     }
       
   // which signature are we using? If we are using var srcfile bindir
-  if (argv.size() == 3)
+  if (srcFileSignature)
     {
     // remove any CMakeCache.txt files so we will have a clean test
     std::string ccFile = tmpString + "/CMakeCache.txt";
@@ -93,13 +113,13 @@ bool cmTryCompileCommand::InitialPass(std::vector<std::string> const& argv)
   
   // actually do the try compile now that everything is setup
   int res = m_Makefile->TryCompile(sourceDirectory, binaryDirectory,
-                                   projectName, targetName);
+                                   projectName, targetName, &cmakeFlags);
   
   // set the result var to the return value to indicate success or failure
   m_Makefile->AddDefinition(argv[0].c_str(), (res == 0 ? "TRUE" : "FALSE"));
       
   // if we created a directory etc, then cleanup after ourselves  
-  if (argv.size() == 3)
+  if (srcFileSignature)
     {
     cmDirectory dir;
     dir.Load(binaryDirectory);

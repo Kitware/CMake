@@ -84,7 +84,8 @@ public:
    * loaded commands, not as part of the usual build process.
    */
   int TryCompile(const char *srcdir, const char *bindir, 
-                 const char *projectName, const char *targetName);
+                 const char *projectName, const char *targetName,
+                 const std::vector<std::string> *cmakeArgs);
     
   /**
    * Specify the makefile generator. This is platform/compiler
