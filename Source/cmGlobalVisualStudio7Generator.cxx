@@ -43,23 +43,19 @@ void cmGlobalVisualStudio7Generator::EnableLanguage(std::vector<std::string>cons
   this->cmGlobalGenerator::EnableLanguage(lang, mf);
 }
 
-int cmGlobalVisualStudio7Generator::TryCompile(const char *, 
-                                               const char *bindir, 
-                                               const char *projectName,
-                                               const char *targetName,
-                                               std::string *output,
-                                               cmMakefile* mf)
+int cmGlobalVisualStudio7Generator::Build(
+  const char *, 
+  const char *bindir, 
+  const char *projectName,
+  const char *targetName,
+  std::string *output,
+  const char *makeCommandCSTR,
+  const char *config,
+  bool clean)
 {
   // now build the test
   std::string makeCommand = 
-    m_CMakeInstance->GetCacheManager()->GetCacheValue("CMAKE_MAKE_PROGRAM");
-  if(makeCommand.size() == 0)
-    {
-    cmSystemTools::Error(
-      "Generator cannot find the appropriate make command.");
-    return 1;
-    }
-  makeCommand = cmSystemTools::ConvertToOutputPath(makeCommand.c_str());
+    cmSystemTools::ConvertToOutputPath(makeCommandCSTR);
   std::string lowerCaseCommand = makeCommand;
   cmSystemTools::LowerCase(lowerCaseCommand);
 
@@ -80,8 +76,17 @@ int cmGlobalVisualStudio7Generator::TryCompile(const char *,
 #endif
   makeCommand += " ";
   makeCommand += projectName;
-  makeCommand += ".sln /build ";
-  if(const char* config = mf->GetDefinition("CMAKE_TRY_COMPILE_CONFIGURATION"))
+  makeCommand += ".sln ";
+  if(clean)
+    {
+    makeCommand += "/rebuild ";
+    }
+  else
+    {
+    makeCommand += "/build ";
+    }
+
+  if(config && strlen(config))
     {
     makeCommand += config;
     }
@@ -90,7 +95,8 @@ int cmGlobalVisualStudio7Generator::TryCompile(const char *,
     makeCommand += "Debug";
     }
   makeCommand += " /project ";
-  if (targetName)
+
+  if (targetName && strlen(targetName))
     {
     makeCommand += targetName;
     }
@@ -109,6 +115,7 @@ int cmGlobalVisualStudio7Generator::TryCompile(const char *,
     cmSystemTools::ChangeDirectory(cwd.c_str());
     return 1;
     }
+  *output += makeCommand;
   cmSystemTools::ChangeDirectory(cwd.c_str());
   return retVal;
 }

@@ -23,6 +23,7 @@
 #include "cmListFileCache.h"
 #include <time.h>
 
+class cmake;
 class cmMakefile;
 class cmCTestGenericHandler;
 class cmGeneratedFileStream;
@@ -279,6 +280,10 @@ private:
 
   ///! Run CMake and build a test and then run it as a single test.
   int RunCMakeAndTest(std::string* output);
+  int RunCMake(std::string* outstring, cmOStringStream &out, 
+               std::string &cmakeOutString,
+               std::string &cwd, cmake *cm);
+  
   ///! Find the running cmake
   void FindRunningCMake(const char* arg0);
 

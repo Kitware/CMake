@@ -100,18 +100,25 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
    "When both -R and -I are specified by default the intersection of "
    "tests are run. By specifying -U the union of tests is run instead."},
   {"--interactive-debug-mode [0|1]", "Set the interactive mode to 0 or 1.",
-   "This option causes ctest to run tests in either an interactive mode or a non-interactive mode. "
-   "On Windows this means that in non-interactive mode, all system debug pop up windows are blocked. "
-   "In dashboard mode (Experimental, Nightly, Continuous), the default is non-interactive.  "
-   "When just running tests not for a dashboard the default is to allow popups and interactive "
+
+   "This option causes ctest to run tests in either an interactive mode or "
+   "a non-interactive mode. On Windows this means that in non-interactive "
+   "mode, all system debug pop up windows are blocked. In dashboard mode "
+   "(Experimental, Nightly, Continuous), the default is non-interactive.  "
+   "When just running tests not for a dashboard the default is to allow "
+   "popups and interactive "
    "debugging."},
-  {"--build-and-test", "Build and run a test.",
-   "This option allows a test to be compiled and then run. "
-   "CMake is run on the source tree and then based on the generator the build is run. "
-   "The arguments to this command line are the source and binary directories. "
-   "Other options that affect this mode are --build-target --build-nocmake, --build-run-dir, "
-   "--build-two-config, --build-exe-dir, --build-generator, --build-project," 
-   "--build-makeprogram "
+  {"--build-and-test", "Configure, build and run a test.",
+   "This option tells ctest to configure (i.e. run cmake on), build, and or "
+   "execute a test. The configure and test steps are optional. The arguments "
+   "to this command line are the source and binary directories. By default "
+   "this will run CMake on the Source/Bin directories specified unless "
+   "--build-nocmake is specified. Both --build-makeprogram and "
+   "--build-generator MUST be provided to use --built-and-test. If "
+   "--test-command is specified then that will be run after the build is "
+   "complete. Other options that affect this mode are --build-target "
+   "--build-nocmake, --build-run-dir, "
+   "--build-two-config, --build-exe-dir, --build-project," 
    "--build-noclean, --build-options"},
   {"--build-target", "Specify a specific target to build.", 
    "This option goes with the --build-and-test option, if left out the all target is built." },
@@ -126,6 +133,7 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
   {"--build-makeprogram", "Specify the make program to use.", "" },
   {"--build-noclean", "Skip the make clean step.", "" },
   {"--build-options", "Add extra options to the build step.", "" },
+  {"--test-command", "The test to run with the --build-and-test option.", "" },
   {"--tomorrow-tag", "Nightly or experimental starts with next day tag.", 
    "This is useful if the build will not finish in one day." },
   {0,0,0}
@@ -191,7 +199,12 @@ int main (int argc, char *argv[])
     args.push_back(argv[i]);
     }
   // run ctest
-  int res = inst.Run(args);
+  std::string output;
+  int res = inst.Run(args,&output);
+  if (res)
+    {
+    std::cout << output;
+    }
   cmListFileCache::ClearCache();
 
   return res;

@@ -76,23 +76,25 @@ void cmGlobalXCodeGenerator::EnableLanguage(std::vector<std::string>const&
 }
 
 //----------------------------------------------------------------------------
-int cmGlobalXCodeGenerator::TryCompile(const char *, 
-                                       const char * bindir, 
-                                       const char * projectName,
-                                       const char * targetName,
-                                       std::string * output,
-                                       cmMakefile*)
+int cmGlobalXCodeGenerator::Build(
+  const char *, 
+  const char *bindir, 
+  const char *projectName,
+  const char *targetName,
+  std::string *output,
+  const char *makeCommandCSTR,
+  const char *,
+  bool )
 {
   // now build the test
-  std::string makeCommand = 
-    m_CMakeInstance->GetCacheManager()->GetCacheValue("CMAKE_MAKE_PROGRAM");
-  if(makeCommand.size() == 0)
+  if(makeCommandCSTR == 0 || !strlen(makeCommandCSTR))
     {
     cmSystemTools::Error(
       "Generator cannot find the appropriate make command.");
     return 1;
     }
-  makeCommand = cmSystemTools::ConvertToOutputPath(makeCommand.c_str());
+  std::string makeCommand = 
+    cmSystemTools::ConvertToOutputPath(makeCommandCSTR);
   std::string lowerCaseCommand = makeCommand;
   cmSystemTools::LowerCase(lowerCaseCommand);
 

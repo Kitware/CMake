@@ -93,6 +93,19 @@ public:
                          const char *projectName, const char *targetName,
                          std::string *output, cmMakefile* mf);
 
+  
+  /**
+   * Build a file given the following information. This is a more direct call
+   * that is used by both CTest and TryCompile. If target name is NULL or
+   * empty then all is assumed. clean indicates if a "make clean" should be
+   * done first.
+   */
+  virtual int Build(const char *srcdir, const char *bindir,
+                    const char *projectName, const char *targetName,
+                    std::string *output, 
+                    const char *makeProgram, const char *config,
+                    bool clean);
+
   ///! Set the CMake instance
   void SetCMakeInstance(cmake *cm) {
     this->m_CMakeInstance = cm; };

@@ -1733,53 +1733,50 @@ void CMakeStdoutCallback(const char* m, int len, void* s)
   out->append(m, len);
 }
 
-
-int cmCTest::RunCMakeAndTest(std::string* outstring)
-{  
+int cmCTest::RunCMake(std::string* outstring, cmOStringStream &out,
+                      std::string &cmakeOutString, std::string &cwd,
+                      cmake *cm)
+{
   unsigned int k;
-  std::string cmakeOutString;
-  cmSystemTools::SetErrorCallback(CMakeMessageCallback, &cmakeOutString);
-  cmSystemTools::SetStdoutCallback(CMakeStdoutCallback, &cmakeOutString);
-  cmOStringStream out;
-  cmake cm;
-  double timeout = m_TimeOut;
-  // default to the build type of ctest itself
-  if(m_ConfigType.size() == 0)
+  std::vector<std::string> args;
+  args.push_back(m_CMakeSelf);
+  args.push_back(m_SourceDir);
+  if(m_BuildGenerator.size())
     {
-#ifdef  CMAKE_INTDIR
-    m_ConfigType = CMAKE_INTDIR;
-#endif
+    std::string generator = "-G";
+    generator += m_BuildGenerator;
+    args.push_back(generator);
+    }
+  if ( m_ConfigType.size() > 0 )
+    {
+    std::string btype = "-DBUILD_TYPE:STRING=" + m_ConfigType;
+    args.push_back(btype);
     }
 
-  std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-  out << "Internal cmake changing into directory: " << m_BinaryDir << "\n";  
-  if (!cmSystemTools::FileIsDirectory(m_BinaryDir.c_str()))
+  for(k=0; k < m_BuildOptions.size(); ++k)
     {
-    cmSystemTools::MakeDirectory(m_BinaryDir.c_str());
+    args.push_back(m_BuildOptions[k]);
     }
-  cmSystemTools::ChangeDirectory(m_BinaryDir.c_str());
-  if(!m_BuildNoCMake)
+  if (cm->Run(args) != 0)
     {
-    std::vector<std::string> args;
-    args.push_back(m_CMakeSelf);
-    args.push_back(m_SourceDir);
-    if(m_BuildGenerator.size())
+    out << "Error: cmake execution failed\n";
+    out << cmakeOutString << "\n";
+    // return to the original directory
+    cmSystemTools::ChangeDirectory(cwd.c_str());
+    if(outstring)
       {
-      std::string generator = "-G";
-      generator += m_BuildGenerator;
-      args.push_back(generator);
+      *outstring = out.str();
       }
-    if ( m_ConfigType.size() > 0 )
+    else
       {
-      std::string btype = "-DBUILD_TYPE:STRING=" + m_ConfigType;
-      args.push_back(btype);
+      std::cerr << out.str() << "\n";
       }
-
-    for(k=0; k < m_BuildOptions.size(); ++k)
-      {
-      args.push_back(m_BuildOptions[k]);
-      }
-    if (cm.Run(args) != 0)
+    return 1;
+    }
+  // do another config?
+  if(m_BuildTwoConfig)
+    {
+    if (cm->Run(args) != 0)
       {
       out << "Error: cmake execution failed\n";
       out << cmakeOutString << "\n";
@@ -1795,222 +1792,76 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
         }
       return 1;
       }
-    if(m_BuildTwoConfig)
-      {
-      if (cm.Run(args) != 0)
-        {
-        out << "Error: cmake execution failed\n";
-        out << cmakeOutString << "\n";
-        // return to the original directory
-        cmSystemTools::ChangeDirectory(cwd.c_str());
-        if(outstring)
-          {
-          *outstring = out.str();
-          }
-        else
-          {
-          std::cerr << out.str() << "\n";
-          }
-        return 1;
-        }
-      } 
-    }
+    } 
+  return 0;
+}
 
-  cmSystemTools::SetErrorCallback(0, 0);
-  out << cmakeOutString << "\n";
-  if(m_BuildMakeProgram.size() == 0)
-    {
-    out << "Error: cmake does not have a valid MAKEPROGRAM\n";
-    out << "Did you specify a --build-makeprogram and a --build-generator?\n";
-    if(outstring)
-      {
-      *outstring = out.str();
-      }
-    else
-      {
-      std::cerr << out.str() << "\n";
-      }
-    return 1;
-    }
+int cmCTest::RunCMakeAndTest(std::string* outstring)
+{  
+  unsigned int k;
+  std::string cmakeOutString;
+  cmSystemTools::SetErrorCallback(CMakeMessageCallback, &cmakeOutString);
+  cmSystemTools::SetStdoutCallback(CMakeStdoutCallback, &cmakeOutString);
+  cmOStringStream out;
+  double timeout = m_TimeOut;
   int retVal = 0;
-  std::string makeCommand = cmSystemTools::ConvertToOutputPath(m_BuildMakeProgram.c_str());
-  std::string lowerCaseCommand = cmSystemTools::LowerCase(makeCommand);
-  // if msdev is the make program then do the following
-  // MSDEV 6.0
-  if(lowerCaseCommand.find("msdev") != std::string::npos)
+  
+  // default to the build type of ctest itself
+  if(m_ConfigType.size() == 0)
     {
-    // if there are spaces in the makeCommand, assume a full path
-    // and convert it to a path with no spaces in it as the
-    // RunSingleCommand does not like spaces
-#if defined(_WIN32) && !defined(__CYGWIN__)      
-    if(makeCommand.find(' ') != std::string::npos)
-      {
-      cmSystemTools::GetShortPath(makeCommand.c_str(), makeCommand);
-      }
+#ifdef  CMAKE_INTDIR
+    m_ConfigType = CMAKE_INTDIR;
 #endif
-    makeCommand += " ";
-    makeCommand += m_BuildProject;
-    makeCommand += ".dsw /MAKE \"";
-    if(m_BuildTarget.size())
-      {
-      makeCommand += m_BuildTarget;
-      }
-    else
-      {
-      makeCommand += "ALL_BUILD";
-      }
-    makeCommand += " - ";
-    makeCommand += m_ConfigType;
-    if(m_BuildNoClean)
-      {
-      makeCommand += "\" /BUILD";
-      }
-    else
-      {
-      makeCommand += "\" /REBUILD";
-      }
     }
-  // MSDEV 7.0 .NET
-  else if (lowerCaseCommand.find("devenv") != std::string::npos)
-    {
-#if defined(_WIN32) && !defined(__CYGWIN__)      
-    if(makeCommand.find(' ') != std::string::npos)
-      {
-      cmSystemTools::GetShortPath(makeCommand.c_str(), makeCommand);
-      }
-#endif
-    makeCommand += " ";
-    makeCommand += m_BuildProject;
-    makeCommand += ".sln ";
-    if(m_BuildNoClean)
-      {
-      makeCommand += "/build ";
-      }
-    else
-      {
-      makeCommand += "/rebuild ";
-      }
-    makeCommand += m_ConfigType + " /project ";
-    if(m_BuildTarget.size())
-      {
-      makeCommand += m_BuildTarget;
-      }
-    else
-      {
-      makeCommand += "ALL_BUILD";
-      }
-    }
-  else if (lowerCaseCommand.find("xcode") != std::string::npos)
-    {
-     makeCommand += " -project ";
-     makeCommand += m_BuildProject;
-     makeCommand += ".xcode";
-     makeCommand += " build -target ";
-     if (m_BuildTarget.size())
-       {
-       makeCommand += m_BuildTarget;
-       }
-     else
-       {
-       makeCommand += "ALL_BUILD ";
-       }
-     makeCommand += " -buildstyle Development ";
-    }
-  else if (lowerCaseCommand.find("make") != std::string::npos)
-    {
-    // assume a make sytle program
-    // clean first
-    if(!m_BuildNoClean)
-      {
-      std::string cleanCommand = makeCommand;
-      cleanCommand += " clean";
-      out << "Running make clean command: " << cleanCommand.c_str() << " ...\n";
-      retVal = 0;
-      std::string output;
-      if (!cmSystemTools::RunSingleCommand(cleanCommand.c_str(), &output, &retVal, 0,
-                                           false, timeout) ||
-        retVal)
-        {
-        out << "Error: " << cleanCommand.c_str() << "  execution failed\n";
-        out << output.c_str() << "\n";
-        // return to the original directory
-        cmSystemTools::ChangeDirectory(cwd.c_str());
-        out << "Return value: " << retVal << std::endl;
-        if(outstring)
-          {
-          *outstring = out.str();
-          }
-        else
-          {
-          std::cerr << out.str() << "\n";
-          }
-        return 1;
-        }
-      out << output;
-      }
 
-    if(m_BuildTarget.size())
+  // make sure the binary dir is there
+  std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
+  out << "Internal cmake changing into directory: " << m_BinaryDir << "\n";  
+  if (!cmSystemTools::FileIsDirectory(m_BinaryDir.c_str()))
+    {
+    cmSystemTools::MakeDirectory(m_BinaryDir.c_str());
+    }
+  cmSystemTools::ChangeDirectory(m_BinaryDir.c_str());
+
+  // should we cmake?
+  cmake cm;
+  cm.SetGlobalGenerator(cm.CreateGlobalGenerator(m_BuildGenerator.c_str()));
+    
+  if(!m_BuildNoCMake)
+    {
+    // do the cmake step
+    if (this->RunCMake(outstring,out,cmakeOutString,cwd,&cm))
       {
-      makeCommand +=  " ";
-      makeCommand += m_BuildTarget;
+      return 1;
       }
     }
 
-  // command line make program
-
-  out << "Running make command: " << makeCommand.c_str() << "\n";
-  retVal = 0;
+  // do the build
   std::string output;
-  if (!cmSystemTools::RunSingleCommand(makeCommand.c_str(), &output, &retVal, 0, false, timeout))
-    {
-    out << "Error: " << makeCommand.c_str() <<  "  execution failed\n";
-    out << output.c_str() << "\n";
-    // return to the original directory
-    cmSystemTools::ChangeDirectory(cwd.c_str());
-    out << "Return value: " << retVal << std::endl;
-    if(outstring)
-      {
-      *outstring = out.str();
-      }
-    else
-      {
-      std::cerr << out.str() << "\n";
-      }
-    return 1;
-    }
-  if ( retVal )
-    {
-    if(outstring)
-      {
-      *outstring = out.str();
-      *outstring += "Building of project failed\n";
-      *outstring += output;
-      *outstring += "\n";
-      }
-    else
-      {
-      std::cerr << "Building of project failed\n";
-      std::cerr << out.str() << output << "\n";
-      }
-    // return to the original directory
-    cmSystemTools::ChangeDirectory(cwd.c_str());
-    return 1;
-    }
+  retVal = cm.GetGlobalGenerator()->Build(
+    m_SourceDir.c_str(), m_BinaryDir.c_str(),
+    m_BuildProject.c_str(), m_BuildTarget.c_str(),
+    &output, m_BuildMakeProgram.c_str(),
+    m_ConfigType.c_str(),!m_BuildNoClean);
+  
   out << output;
-
-  if(m_TestCommand.size() == 0)
+  if(outstring)
     {
-    if(outstring)
-      {
-      *outstring = out.str();
-      }
-    else
-      {
-      std::cout << out.str() << "\n";
-      }
-    return retVal;
+    *outstring =  out.str();
     }
-
+  
+  // if the build failed then return
+  if (retVal)
+    {
+    return 1;
+    }
+    
+  // if not test was specified then we are done
+  if (!m_TestCommand.size())
+    {
+    return 0;
+    }
+  
   // now run the compiled test if we can find it
   std::vector<std::string> attempted;
   std::vector<std::string> failed;

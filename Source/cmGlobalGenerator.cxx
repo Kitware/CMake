@@ -637,11 +637,11 @@ void cmGlobalGenerator::LocalGenerate()
   delete lg;
 }
 
-int cmGlobalGenerator::TryCompile(const char *, const char *bindir, 
-                                  const char *, const char *target,
-                                  std::string *output, cmMakefile*)
+int cmGlobalGenerator::TryCompile(const char *srcdir, const char *bindir, 
+                                  const char *projectName, 
+                                  const char *target,
+                                  std::string *output, cmMakefile *mf)
 {
-  // now build the test
   std::string makeCommand = 
     m_CMakeInstance->GetCacheManager()->GetCacheValue("CMAKE_MAKE_PROGRAM");
   if(makeCommand.size() == 0)
@@ -650,6 +650,41 @@ int cmGlobalGenerator::TryCompile(const char *, const char *bindir,
       "Generator cannot find the appropriate make command.");
     return 1;
     }
+
+  std::string newTarget;
+  if (target && strlen(target))
+    {
+    newTarget += target;
+#if 0
+#if defined(_WIN32) || defined(__CYGWIN__)
+    std::string tmp = target;
+    // if the target does not already end in . something 
+    // then assume .exe
+    if(tmp.size() < 4 || tmp[tmp.size()-4] != '.')
+      {
+      newTarget += ".exe";
+      }
+#endif // WIN32
+#endif
+    }
+  const char* config = mf->GetDefinition("CMAKE_TRY_COMPILE_CONFIGURATION");
+  return this->Build(srcdir,bindir,projectName,
+                     newTarget.c_str(),
+                     output,makeCommand.c_str(),config,false);
+}
+  
+int cmGlobalGenerator::Build(
+  const char *, const char *bindir, 
+  const char *, const char *target,
+  std::string *output, 
+  const char *makeCommandCSTR,
+  const char *config,
+  bool clean)
+{
+  *output += "\nTesting TryCompileWithoutMakefile\n";
+  
+  // now build the test
+  std::string makeCommand = makeCommandCSTR;
   makeCommand = cmSystemTools::ConvertToOutputPath(makeCommand.c_str());
 
   /**
@@ -664,39 +699,58 @@ int cmGlobalGenerator::TryCompile(const char *, const char *bindir,
     {
     makeCommand += " /NOLOGO ";
     }
+
+  int retVal;
+  int timeout = cmGlobalGenerator::s_TryCompileTimeout;
+  bool hideconsole = cmSystemTools::GetRunCommandHideConsole();
+  cmSystemTools::SetRunCommandHideConsole(true);
+
+  // should we do a clean first?
+  if (clean)
+    {
+    std::string cleanCommand = makeCommand + " clean";
+    if (!cmSystemTools::RunSingleCommand(cleanCommand.c_str(), output, 
+                                         &retVal, 0, false, timeout))
+      {
+      cmSystemTools::SetRunCommandHideConsole(hideconsole);
+      cmSystemTools::Error("Generator: execution of make clean failed.");
+      if (output)
+        {
+        *output += "\nGenerator: execution of make clean failed.\n";
+        }
+      
+      // return to the original directory
+      cmSystemTools::ChangeDirectory(cwd.c_str());
+      return 1;
+      }
+    }
   
   // now build
-  if (target)
+  if (target && strlen(target))
     {
     makeCommand += " ";
     makeCommand += target;
-#if defined(_WIN32) || defined(__CYGWIN__)
-    std::string tmp = target;
-    // if the target does not already end in . something 
-    // then assume .exe
-    if(tmp.size() < 4 || tmp[tmp.size()-4] != '.')
-      {
-      makeCommand += ".exe";
-      }
-#endif // WIN32
     }
   else
     {
     makeCommand += " all";
     }
-  int retVal;
-  int timeout = cmGlobalGenerator::s_TryCompileTimeout;
-  bool hideconsole = cmSystemTools::GetRunCommandHideConsole();
-  cmSystemTools::SetRunCommandHideConsole(true);
+
   if (!cmSystemTools::RunSingleCommand(makeCommand.c_str(), output, 
-      &retVal, 0, false, timeout))
+                                       &retVal, 0, false, timeout))
     {
     cmSystemTools::SetRunCommandHideConsole(hideconsole);
     cmSystemTools::Error("Generator: execution of make failed.");
+    if (output)
+      {
+      *output += "\nGenerator: execution of make failed.\n";
+      }
+    
     // return to the original directory
     cmSystemTools::ChangeDirectory(cwd.c_str());
     return 1;
     }
+
   cmSystemTools::SetRunCommandHideConsole(hideconsole);
   
   // The SGI MipsPro 7.3 compiler does not return an error code when

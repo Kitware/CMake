@@ -67,21 +67,23 @@ void cmGlobalVisualStudio6Generator::GenerateConfigurations(cmMakefile* mf)
     }
 }
 
-int cmGlobalVisualStudio6Generator::TryCompile(const char *, 
-                                               const char *bindir, 
-                                               const char *projectName,
-                                               const char *targetName,
-                                               std::string *output,
-                                               cmMakefile* mf)
+int cmGlobalVisualStudio6Generator::Build(
+  const char *, 
+  const char *bindir, 
+  const char *projectName,
+  const char *targetName,
+  std::string *output,
+  const char *makeCommandCSTR,
+  const char *config,
+  bool clean)
 {
   // now build the test
-  std::string makeCommand = 
-    m_CMakeInstance->GetCacheManager()->GetCacheValue("CMAKE_MAKE_PROGRAM");
   std::vector<std::string> mp;
   mp.push_back("[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\6.0\\Setup;VsCommonDir]/MSDev98/Bin");
   cmSystemTools::ExpandRegistryValues(mp[0]);
-  std::string originalCommand = makeCommand;
-  makeCommand = cmSystemTools::FindProgram(makeCommand.c_str(), mp);
+  std::string originalCommand = makeCommandCSTR;
+  std::string makeCommand = 
+    cmSystemTools::FindProgram(makeCommandCSTR, mp);
   if(makeCommand.size() == 0)
     {
     std::string e = "Generator cannot find Visual Studio 6 msdev program \"";
@@ -119,7 +121,7 @@ int cmGlobalVisualStudio6Generator::TryCompile(const char *,
     makeCommand += "ALL_BUILD";
     }
   makeCommand += " - ";
-  if(const char* config = mf->GetDefinition("CMAKE_TRY_COMPILE_CONFIGURATION"))
+  if(config)
     {
     makeCommand += config;
     }
@@ -127,7 +129,14 @@ int cmGlobalVisualStudio6Generator::TryCompile(const char *,
     {
     makeCommand += "Debug";
     }
-  makeCommand += "\"";
+  if(clean)
+    {
+    makeCommand += "\" /REBUILD";
+    }
+  else
+    {
+    makeCommand += "\" /BUILD";
+    }
   int retVal;
   int timeout = cmGlobalGenerator::s_TryCompileTimeout;
   if (!cmSystemTools::RunSingleCommand(makeCommand.c_str(), output, 
