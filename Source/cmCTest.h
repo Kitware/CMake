@@ -137,6 +137,8 @@ public:
     CONTINUOUS
   };
 
+  int GenerateNotesFile(const char* files);
+
 private:
   enum {
     FIRST_TEST     = 0,
@@ -148,8 +150,9 @@ private:
     COVERAGE_TEST  = 6,
     MEMCHECK_TEST  = 7,
     SUBMIT_TEST    = 8,
-    ALL_TEST       = 9,
-    LAST_TEST      = 10
+    NOTES_TEST     = 9,
+    ALL_TEST       = 10,
+    LAST_TEST      = 11
   };
   
   enum { // Program statuses
@@ -312,6 +315,9 @@ private:
 
   //! End CTest XML output file
   void EndXML(std::ostream& ostr);
+
+  //! Create not from files.
+  int GenerateDartNotesOutput(std::ostream& os, const tm_VectorOfStrings& files);
 
   //! Parse Valgrind/Purify/Bounds Checker result out of the output string. After running,
   // log holds the output and results hold the different memmory errors.

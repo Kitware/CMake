@@ -79,6 +79,8 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
    "ctest will do what is required to create and run a dashboard. This "
    "option basically sets up a dashboard and then runs ctest -D with the "
    "appropriate options."},
+  {"-A <Notes file>", "Add a notes file with submission",
+   "This option tells ctest to include a notes file when submitting dashboard. "},
   {0,0,0}
 };
 
@@ -375,6 +377,16 @@ int main (int argc, char *argv[])
       inst.m_UseExcludeRegExp = true;
       inst.m_ExcludeRegExp  = args[i+1];
       inst.m_UseExcludeRegExpFirst = inst.m_UseIncludeRegExp ? false : true;
+      }
+
+    if(arg.find("-A",0) == 0 && i < args.size() - 1)
+      {
+      inst.m_DartMode = true;
+      inst.SetTest("Notes");
+      inst.Initialize();
+      int ires = inst.GenerateNotesFile(args[i+1].c_str());
+      inst.Finalize();
+      return ires;
       }
     }
 

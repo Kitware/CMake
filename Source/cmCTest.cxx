@@ -470,6 +470,10 @@ bool cmCTest::SetTest(const char* ttype)
     {
     m_Tests[cmCTest::MEMCHECK_TEST] = 1;
     }
+  else if ( cmSystemTools::LowerCase(ttype) == "notes" )
+    {
+    m_Tests[cmCTest::NOTES_TEST] = 1;
+    }
   else if ( cmSystemTools::LowerCase(ttype) == "submit" )
     {
     m_Tests[cmCTest::SUBMIT_TEST] = 1;
@@ -924,7 +928,8 @@ int cmCTest::ConfigureDirectory()
     std::ofstream os; 
     if ( !this->OpenOutputFile(m_CurrentTag, "Configure.xml", os) )
       {
-      std::cerr << "Cannot open log file" << std::endl;
+      std::cerr << "Cannot open configure file" << std::endl;
+      return 1;
       }
     std::string start_time = ::CurrentTime();
 
@@ -2194,6 +2199,10 @@ int cmCTest::SubmitResults()
     {
     files.push_back("Purify.xml");
     }
+  if ( this->CTestFileExists("Notes.xml") )
+    {
+    files.push_back("Notes.xml");
+    }
   cmCTestSubmit submit;
   submit.SetVerbose(m_Verbose);
   if ( m_DartConfiguration["DropMethod"] == "" ||
@@ -3259,3 +3268,81 @@ bool cmCTest::ProcessMemCheckOutput(const std::string& str, std::string& log, in
 
   return true;
 }
+
+int cmCTest::GenerateDartNotesOutput(std::ostream& os, const cmCTest::tm_VectorOfStrings& files)
+{
+  cmCTest::tm_VectorOfStrings::const_iterator it;
+  for ( it = files.begin(); it != files.end(); it ++ )
+    {
+    if ( !cmSystemTools::FileExists(it->c_str()) )
+      {
+      std::cerr << "Error creating notes. File " << it->c_str() << " does not exists" << std::endl;
+      return 0;
+      }
+    }
+
+  os << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+    << "<?xml-stylesheet type=\"text/xsl\" href=\"Dart/Source/Server/XSL/Build.xsl <file:///Dart/Source/Server/XSL/Build.xsl> \"?>\n"
+    << "<Site BuildName=\"" << m_DartConfiguration["BuildName"] << "\" BuildStamp=\"" 
+    << m_CurrentTag << "-" << this->GetTestModelString() << "\" Name=\"" 
+    << m_DartConfiguration["Site"] << "\">\n"
+    << "<Notes>" << std::endl;
+
+  for ( it = files.begin(); it != files.end(); it ++ )
+    {
+    std::cout << "\tAdd file: " << it->c_str() << std::endl;
+    std::string note_time = ::CurrentTime();
+    os << "<Note>\n"
+      << "<DateTime>" << note_time << "</DateTime>\n"
+      << "<Text>" << std::endl;
+    std::ifstream ifs(it->c_str());
+    if ( ifs )
+      {
+      std::string line;
+      while ( cmSystemTools::GetLineFromStream(ifs, line) )
+        {
+        os << this->MakeXMLSafe(line) << std::endl;
+        }
+      ifs.close();
+      }
+    else
+      {
+      os << "Problem reading file: " << it->c_str() << std::endl;
+      std::cerr << "Problem reading file: " << it->c_str() << " while creating notes" << std::endl;
+      }
+    os << "</Text>\n"
+      << "</Note>" << std::endl;
+    }
+  os << "</Notes>\n"
+    << "</Site>" << std::endl;
+  return 1;
+}
+
+int cmCTest::GenerateNotesFile(const char* cfiles)
+{
+  if ( !cfiles )
+    {
+    return 1;
+    }
+
+  std::vector<cmStdString> files;
+
+  std::cout << "Create notes file" << std::endl;
+
+  files = cmSystemTools::SplitString(cfiles, ';');
+  if ( files.size() == 0 )
+    {
+    return 1;
+    }
+
+  std::ofstream ofs;
+  if ( !this->OpenOutputFile(m_CurrentTag, "Notes.xml", ofs) )
+    {
+    std::cerr << "Cannot open notes file" << std::endl;
+    return 1;
+    }
+
+  this->GenerateDartNotesOutput(ofs, files);
+  return 0;
+}
+
