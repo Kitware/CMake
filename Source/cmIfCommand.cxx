@@ -106,7 +106,7 @@ bool cmIfCommand::InitialPass(std::vector<std::string>& args)
     {
     def = m_Makefile->GetDefinition(args[0].c_str());
     def2 = m_Makefile->GetDefinition(args[2].c_str());
-    if(!cmSystemTools::IsOff(def) && !cmSystemTools::IsOff(def2))
+    if(cmSystemTools::IsOff(def) || cmSystemTools::IsOff(def2))
       {
       f = new cmIfFunctionBlocker();
       }
@@ -116,7 +116,7 @@ bool cmIfCommand::InitialPass(std::vector<std::string>& args)
     {
     def = m_Makefile->GetDefinition(args[0].c_str());
     def2 = m_Makefile->GetDefinition(args[2].c_str());
-    if(!cmSystemTools::IsOff(def) || !cmSystemTools::IsOff(def2))
+    if(cmSystemTools::IsOff(def) && cmSystemTools::IsOff(def2))
       {
       f = new cmIfFunctionBlocker();
       }
