@@ -63,7 +63,7 @@ bool cmCacheManager::LoadCache(const char* path)
 }
 
 bool cmCacheManager::LoadCache(const char* path,
-			       bool internal)
+                               bool internal)
 {
   std::set<std::string> emptySet;
   return this->LoadCache(path, internal, emptySet, emptySet);
@@ -109,9 +109,9 @@ bool cmCacheManager::ParseEntry(const char* entry,
 }
 
 bool cmCacheManager::LoadCache(const char* path,
-			       bool internal,
-			       std::set<std::string>& excludes,
-			       std::set<std::string>& includes)
+                               bool internal,
+                               std::set<std::string>& excludes,
+                               std::set<std::string>& includes)
 {
   std::string cacheFile = path;
   cacheFile += "/CMakeCache.txt";
@@ -159,33 +159,33 @@ bool cmCacheManager::LoadCache(const char* path,
     if(cmCacheManager::ParseEntry(realbuffer, entryKey, e.m_Value, e.m_Type))
       {
       if ( excludes.find(entryKey) == excludes.end() )
-	{
-	// Load internal values if internal is set.
-	// If the entry is not internal to the cache being loaded
-	// or if it is in the list of internal entries to be
-	// imported, load it.
-	if ( internal || (e.m_Type != INTERNAL) || 
-	     (includes.find(entryKey) != includes.end()) )
-	  {
-	  // If we are loading the cache from another project,
-	  // make all loaded entries internal so that it is
-	  // not visible in the gui
-	  if (!internal)
-	    {
+        {
+        // Load internal values if internal is set.
+        // If the entry is not internal to the cache being loaded
+        // or if it is in the list of internal entries to be
+        // imported, load it.
+        if ( internal || (e.m_Type != INTERNAL) || 
+             (includes.find(entryKey) != includes.end()) )
+          {
+          // If we are loading the cache from another project,
+          // make all loaded entries internal so that it is
+          // not visible in the gui
+          if (!internal)
+            {
             e.m_Type = INTERNAL;
             e.m_Properties["HELPSTRING"] = "DO NOT EDIT, ";
             e.m_Properties["HELPSTRING"] += entryKey;
             e.m_Properties["HELPSTRING"] += " loaded from external file.  "
               "To change this value edit this file: ";
             e.m_Properties["HELPSTRING"] += path;
-            e.m_Properties["HELPSTRING"] += "/CMakeCache.txt"	;
-	    }
+            e.m_Properties["HELPSTRING"] += "/CMakeCache.txt"   ;
+            }
           if ( e.m_Type == cmCacheManager::INTERNAL &&
                (entryKey.size() > strlen("-ADVANCED")) &&
                strcmp(entryKey.c_str() + (entryKey.size() - strlen("-ADVANCED")),
                       "-ADVANCED") == 0 )
             {
-	    std::string value = e.m_Value;
+            std::string value = e.m_Value;
             std::string akey = entryKey.substr(0, (entryKey.size() - strlen("-ADVANCED")));
             cmCacheManager::CacheIterator it = this->GetCacheIterator(akey.c_str());
             if ( it.IsAtEnd() )
@@ -193,23 +193,23 @@ bool cmCacheManager::LoadCache(const char* path,
               e.m_Type = cmCacheManager::UNINITIALIZED;
               m_Cache[akey] = e;
               }
-	    if (!it.Find(akey.c_str()))
-	      {
-	      cmSystemTools::Error("Internal CMake error when reading cache");
-	      }
-	    it.SetProperty("ADVANCED", value.c_str());
+            if (!it.Find(akey.c_str()))
+              {
+              cmSystemTools::Error("Internal CMake error when reading cache");
+              }
+            it.SetProperty("ADVANCED", value.c_str());
             }
           else
             {
             m_Cache[entryKey] = e;
             }
-	  }
-	}
+          }
+        }
       }
     else
       {
       cmSystemTools::Error("Parse error in cache file ", cacheFile.c_str(),
-			   ". Offending entry: ", realbuffer);
+                           ". Offending entry: ", realbuffer);
       }
     }
   // if CMAKE version not found in the list file
@@ -316,7 +316,7 @@ bool cmCacheManager::SaveCache(const char* path)
     if(t == cmCacheManager::UNINITIALIZED)
       {
       /*
-	// This should be added in, but is not for now.
+        // This should be added in, but is not for now.
       cmSystemTools::Error("Cache entry \"", (*i).first.c_str(), 
                            "\" is uninitialized");
       */
@@ -337,7 +337,7 @@ bool cmCacheManager::SaveCache(const char* path)
       std::string key;
       // support : in key name by double quoting 
       if((*i).first.find(':') != std::string::npos ||
-	(*i).first.find("//") == 0)
+        (*i).first.find("//") == 0)
         {
         key = "\"";
         key += i->first;
@@ -550,7 +550,7 @@ void cmCacheManager::PrintCache(std::ostream& out) const
 void cmCacheManager::AddCacheEntry(const char* key, 
                                    const char* value, 
                                    const char* helpString,
-				   CacheEntryType type)
+                                   CacheEntryType type)
 {
   CacheEntry& e = m_Cache[key];
   if ( value )
