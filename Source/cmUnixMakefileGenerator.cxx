@@ -367,7 +367,7 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
               std::string outExt(this->GetOutputExtension(i->GetSourceExtension().c_str()));
               if(outExt.size())
                 {
-                fout << "\\\n" << i->GetSourceName() 
+                fout << "\\\n" << this->ConvertToNativePath(i->GetSourceName().c_str())
                      << outExt.c_str() << " ";
                 }
               }

@@ -164,6 +164,7 @@ protected:
   void SetStaticLibraryExtension(const char* e) {m_StaticLibraryExtension = e;}
   void SetSharedLibraryExtension(const char* e) {m_SharedLibraryExtension = e;}
   void SetLibraryPrefix(const char* e) { m_LibraryPrefix = e;}
+  virtual std::string ConvertToNativePath(const char* s) { return s;  }
 protected:
   std::string m_ExecutableOutputPath;
   std::string m_LibraryOutputPath;

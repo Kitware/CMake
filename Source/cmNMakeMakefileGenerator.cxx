@@ -482,6 +482,7 @@ void cmNMakeMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
     if(emitted.insert(libpath).second)
       {
       linkLibs += m_LibraryPathOption;
+      cmSystemTools::ConvertToWindowsSlashes(libpath);
       linkLibs += libpath;
       linkLibs += " ";
       }
@@ -514,6 +515,7 @@ void cmNMakeMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
 	}
       else
 	{
+        librariesLinked += m_LibraryLinkOption;
 	librariesLinked += lib->first;
 	librariesLinked += ".lib ";
 	}

@@ -52,6 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 cmBorlandMakefileGenerator2::cmBorlandMakefileGenerator2()
 {
   this->SetLibraryPathOption("-L");
+  this->SetLibraryLinkOption("");
 }
 
 cmBorlandMakefileGenerator2::~cmBorlandMakefileGenerator2()
@@ -85,9 +86,6 @@ void cmBorlandMakefileGenerator2::OutputMakeVariables(std::ostream& fout)
     "# Path to cmake\n"
     "CMAKE_COMMAND = ${CMAKE_COMMAND}\n"    
     "CMAKE_STANDARD_WINDOWS_LIBRARIES = @CMAKE_STANDARD_WINDOWS_LIBRARIES@\n"
-    "FLAGS_LINK_EXE    = @FLAGS_LINK_EXE@ \n"
-    "FLAGS_LINK_LIB    = @FLAGS_LINK_LIB@ \n"
-    "FLAGS_LINK_STATIC    = @FLAGS_LINK_STATIC@ \n"
     "CMAKE_C_COMPILER    = @CMAKE_C_COMPILER@ \n"
     "CMAKE_CFLAGS        = @CMAKE_CFLAGS@ @BUILD_FLAGS@\n"
     "CMAKE_CXX_COMPILER  = @CMAKE_CXX_COMPILER@\n"
@@ -244,7 +242,7 @@ OutputBuildObjectFromSource(std::ostream& fout,
   std::string comment = "Build ";
   std::string objectFile = std::string(shortName) + 
     this->GetOutputExtension(source.GetSourceExtension().c_str());
-  
+  cmSystemTools::ConvertToWindowsSlashes(objectFile);
   comment += objectFile + "  From ";
   comment += source.GetFullPath();
   std::string compileCommand;
@@ -257,15 +255,15 @@ OutputBuildObjectFromSource(std::ostream& fout,
       {
       compileCommand += "$(CMAKE_SHLIB_CFLAGS) ";
       }
-    compileCommand += "$(INCLUDE_FLAGS) -c ";
+    compileCommand += " -o";
+    compileCommand += objectFile;
+    compileCommand += " $(INCLUDE_FLAGS) -c ";
     compileCommand += 
       cmSystemTools::EscapeSpaces(source.GetFullPath().c_str());
-    compileCommand += " /Fo";
-    compileCommand += objectFile;
     }
   else if (ext == "rc")
     {
-    compileCommand = "$(RC) /fo\"";
+    compileCommand = "$(RC) -o\"";
     compileCommand += objectFile;
     compileCommand += "\" ";
     compileCommand += 
@@ -285,11 +283,11 @@ OutputBuildObjectFromSource(std::ostream& fout,
       {
       compileCommand += "$(CMAKE_SHLIB_CFLAGS) ";
       }
-    compileCommand += "$(INCLUDE_FLAGS) -c ";
+    compileCommand += " -o";
+    compileCommand += objectFile;
+    compileCommand += " $(INCLUDE_FLAGS) -c ";
     compileCommand += 
       cmSystemTools::EscapeSpaces(source.GetFullPath().c_str());
-    compileCommand += " /Fo";
-    compileCommand += objectFile;
     }
   m_QuoteNextCommand = false;
   this->OutputMakeRule(fout,
@@ -308,32 +306,43 @@ void cmBorlandMakefileGenerator2::OutputSharedLibraryRule(std::ostream& fout,
   std::string depend = "$(";
   depend += name;
   depend += "_SRC_OBJS) $(" + std::string(name) + "_DEPEND_LIBS)";
-  std::string command = "ilink32 /dll $(FLAGS_LINK_LIB) @&&|\n";
-  command += "$(" + std::string(name) + "_SRC_OBJS) /out:";
-  std::string dllpath = m_LibraryOutputPath +  std::string(name) + ".dll ";
+  std::string command = "$(CMAKE_CXX_COMPILER) -tWD  @&&|\n";
+  std::string dllpath = m_LibraryOutputPath +  std::string(name);
+  std::string libpath = dllpath + ".lib";
+  dllpath += ".dll";
   cmSystemTools::ConvertToWindowsSlashes(dllpath);
+  // must be executable name
+  command += "-e";
   command += cmSystemTools::EscapeSpaces(dllpath.c_str());
+  command += " ";
+  // then list of object files
+  command += " $(" + std::string(name) + "_SRC_OBJS) ";
   std::strstream linklibs;
   this->OutputLinkLibraries(linklibs, name, t);
   linklibs << std::ends;
+  // then the linker options -L and libraries (any other order will fail!)
   command += linklibs.str();
   delete [] linklibs.str();
+  std::string command2 = "implib -w ";
+  command2 += libpath + " " + dllpath;
   const std::vector<cmSourceFile>& sources = t.GetSourceFiles();
   for(std::vector<cmSourceFile>::const_iterator i = sources.begin();
       i != sources.end(); ++i)
     {
     if(i->GetSourceExtension() == "def")
       {
-      command += "/DEF:";
+      command += "";
       command += i->GetFullPath();
       }
     }
   command += "\n|\n";
   m_QuoteNextCommand = false;
+    
   this->OutputMakeRule(fout, "rules for a shared library",
                        target.c_str(),
                        depend.c_str(),
-                       command.c_str());
+                       command.c_str(),
+                       command2.c_str());
 }
 
 void cmBorlandMakefileGenerator2::OutputModuleLibraryRule(std::ostream& fout, 
@@ -350,12 +359,14 @@ void cmBorlandMakefileGenerator2::OutputStaticLibraryRule(std::ostream& fout,
   std::string target = m_LibraryOutputPath + std::string(name) + ".lib";
   std::string depend = "$(";
   depend += std::string(name) + "_SRC_OBJS)";
-  std::string command = "tlib $(FLAGS_LINK_STATIC)  @&&|\n\t /u ";
-  std::string deleteCommand = "del ";
-  deleteCommand += target;
+  std::string command = "tlib  @&&|\n\t /u ";
   std::string libpath = m_LibraryOutputPath + std::string(name) + ".lib";
   cmSystemTools::ConvertToWindowsSlashes(libpath);
   command += cmSystemTools::EscapeSpaces(libpath.c_str());
+  std::string deleteCommand = "if exist ";
+  deleteCommand +=  libpath;
+  deleteCommand += " del ";
+  deleteCommand += libpath;
   command += " $(";
   command += std::string(name) + "_SRC_OBJS)";
   command += "\n|\n";
@@ -380,7 +391,6 @@ void cmBorlandMakefileGenerator2::OutputExecutableRule(std::ostream& fout,
   depend += std::string(name) + "_SRC_OBJS) $(" + std::string(name) + "_DEPEND_LIBS)";
   std::string command = 
     "$(CMAKE_CXX_COMPILER) ";
-  command += "$(" + std::string(name) + "_SRC_OBJS) ";
   std::string path = m_ExecutableOutputPath + name + ".exe";
   command += " -e" + 
     cmSystemTools::EscapeSpaces(path.c_str());
@@ -392,11 +402,13 @@ void cmBorlandMakefileGenerator2::OutputExecutableRule(std::ostream& fout,
     {
     command += " -tWC ";
     }
-  
   std::strstream linklibs;
   this->OutputLinkLibraries(linklibs, 0, t);
   linklibs << std::ends;
   command += linklibs.str();
+  delete [] linklibs.str();
+  command += " $(" + std::string(name) + "_SRC_OBJS) ";
+  
   std::string comment = "rule to build executable: ";
   comment += name;
   m_QuoteNextCommand = false;
@@ -450,3 +462,12 @@ void cmBorlandMakefileGenerator2::OutputBuildLibraryInDir(std::ostream& fout,
 {
   cmNMakeMakefileGenerator::OutputBuildLibraryInDir(fout, path, s, fullpath);
 }
+
+
+std::string cmBorlandMakefileGenerator2::ConvertToNativePath(const char* s)
+{
+  std::string ret = s;
+  cmSystemTools::ConvertToWindowsSlashes(ret);
+  return ret;
+}
+

@@ -99,6 +99,10 @@ SOURCE=.\cmBorlandMakefileGenerator.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\cmBorlandMakefileGenerator2.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=.\cmCableClassSet.cxx
 # End Source File
 # Begin Source File
