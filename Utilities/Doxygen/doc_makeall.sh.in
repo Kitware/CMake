@@ -1,6 +1,6 @@
 # -------------------------------------------------------------------------
 # Doxygen documentation batch
-# modified by S. Barre (Time-stamp: <2001-11-02 15:58:40 barre>
+# modified by S. Barre (Time-stamp: <2001-11-02 16:40:58 barre>
 # -------------------------------------------------------------------------
 
 # Path to several tools (_PROG to avoid the typical GZIP env var pb)
@@ -74,7 +74,7 @@ export DOXYFILE=$DOXTEMP/doxyfile
 # Path to the Doxygen output directory (where the resulting doc is stored).
 # Note: should be the same as your doxyfile's OUTPUT_DIRECTORY
 # If ON, allows the output directory to be erased when some advanced output
-# file have been produced (HTML Help, or TAR archive for example).
+# file have been produced (HTML Help for example).
 # Example: 
 #   OUTPUT_DIRECTORY=$DOXTEMP/doc
 #   ALLOW_ERASE_OUTPUT_DIRECTORY=ON
@@ -104,9 +104,6 @@ export RESULTING_HTML_HELP_FILE=$DOXTEMP/$PROJECT_NAME.chm
 # CREATE_HTML_TARZ_ARCHIVE RESULTING_HTML_TARZ_ARCHIVE_FILE:
 # Create a compressed (gzip) tar archive of the html directory (located
 # under the OUTPUT_DIRECTORY), and name of the resulting archive file. 
-# Note: if ON, the whole $OUTPUT_DIRECTORY will be erased at the end of
-#       this script, since this file is considered to be one of the 
-#       advanced final output, unless ALLOW_ERASE_OUTPUT_DIRECTORY is OFF
 # Note: your doxyfile should be configured to enable HTML creation 
 #       (using GENERATE_HTML = YES)
 # Example: 
@@ -116,13 +113,17 @@ export RESULTING_HTML_HELP_FILE=$DOXTEMP/$PROJECT_NAME.chm
 #   RESULTING_HTML_TARZ_ARCHIVE_FILE=$DOXTEMP/$PROJECT_NAME-html.tar.gz
 #
 export CREATE_HTML_TARZ_ARCHIVE=@DOCUMENTATION_HTML_TARZ@
-export RESULTING_HTML_TARZ_ARCHIVE_FILE=$DOXTEMP/vtk4-html.tar.gz
 export RESULTING_HTML_TARZ_ARCHIVE_FILE=$DOXTEMP/$PROJECT_NAME-html.tar.gz
 
 # ----------------------------------------------------------------------------
 # Create the Doxygen doc.
 
 if test "x$DOXYGEN_PROG" != "xNOTFOUND" ; then
+
+    if test "x$RM_PROG" != "xNOTFOUND" ; then
+        $RM_PROG -fr $OUTPUT_DIRECTORY
+    fi
+
     $DOXYGEN_PROG $DOXYFILE
 fi
 
@@ -176,14 +177,6 @@ if test "x$RM_PROG" != "xNOTFOUND" ; then
 
     if test "x$COMPILE_HTML_HELP" == "xON" ; then
         if test "x$RESULTING_HTML_HELP_FILE" != "x" ; then
-            if test "x$ALLOW_ERASE_OUTPUT_DIRECTORY" == "xON" ; then
-                $RM_PROG -fr $OUTPUT_DIRECTORY
-            fi
-        fi
-    fi
-
-    if test "x$CREATE_HTML_TARZ_ARCHIVE" == "xON" ; then
-        if test "x$RESULTING_HTML_TARZ_ARCHIVE_FILE" != "x" ; then
             if test "x$ALLOW_ERASE_OUTPUT_DIRECTORY" == "xON" ; then
                 $RM_PROG -fr $OUTPUT_DIRECTORY
             fi
