@@ -927,8 +927,8 @@ static void kwsysProcessCleanupDescriptor(int* pfd)
 }
 
 /*--------------------------------------------------------------------------*/
-int kwsysProcessCreate(kwsysProcess* cp, int index,
-                       kwsysProcessCreateInformation* si, int* readEnd)
+static int kwsysProcessCreate(kwsysProcess* cp, int index,
+                              kwsysProcessCreateInformation* si, int* readEnd)
 {
   /* Setup the process's stdin.  */
   if(index > 0)
