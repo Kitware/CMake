@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmSubdirDependsCommand.h"
 
 // cmSubdirDependsCommand
-bool cmSubdirDependsCommand::InitialPass(std::vector<std::string> const& args)
+bool cmSubdirDependsCommand::InitialPass(std::vector<std::string> const& )
 {
   return true;
 }
