@@ -139,14 +139,14 @@ protected:
    * Get an instance of cmDependInformation corresponding to the given file
    * name.
    */
-  cmDependInformation* GetDependInformation(const char* file);  
+  cmDependInformation* GetDependInformation(const char* file, const char *extraPath);  
   
   /** 
    * Find the full path name for the given file name.
    * This uses the include directories.
    * TODO: Cache path conversions to reduce FileExists calls.
    */
-  std::string FullPath(const char*);
+  std::string FullPath(const char *filename, const char *extraPath);
 
   const cmMakefile* m_Makefile;
   bool m_Verbose;
