@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // cmFindFileCommand
 bool cmFindFileCommand::Invoke(std::vector<std::string>& args)
 {
-  if(args.size() < 2 )
+  if(args.size() < 2)
     {
     this->SetError("called with incorrect number of arguments");
     return false;
@@ -59,6 +59,8 @@ bool cmFindFileCommand::Invoke(std::vector<std::string>& args)
   i++; // move iterator to next arg
   // Now check and see if the value has been stored in the cache
   // already, if so use that value and don't look for the program
+  std::string helpString = "Where can the ";
+  helpString += args[1] + " file be found";
   const char* cacheValue
     = cmCacheManager::GetInstance()->GetCacheValue(define);
   if(cacheValue)
@@ -66,6 +68,11 @@ bool cmFindFileCommand::Invoke(std::vector<std::string>& args)
     if(strcmp(cacheValue, "NOTFOUND") != 0)
       {
       m_Makefile->AddDefinition(define, cacheValue);
+      // update help string if changed
+      cmCacheManager::GetInstance()->AddCacheEntry(define,
+                                                   cacheValue,
+                                                   helpString.c_str(),
+                                                   cmCacheManager::FILEPATH);
       }
     return true;
     }
@@ -91,11 +98,11 @@ bool cmFindFileCommand::Invoke(std::vector<std::string>& args)
     if(cmSystemTools::FileExists(tryPath.c_str()))
       {
       // Save the value in the cache
+      m_Makefile->AddDefinition(define, tryPath.c_str());
       cmCacheManager::GetInstance()->AddCacheEntry(define,
                                                    tryPath.c_str(),
-                                                   "Path to a file.",
+                                                   helpString.c_str(),
                                                    cmCacheManager::FILEPATH);
-      m_Makefile->AddDefinition(define, tryPath.c_str());
       return true;
       }
     }

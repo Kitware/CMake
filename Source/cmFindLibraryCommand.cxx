@@ -51,6 +51,8 @@ bool cmFindLibraryCommand::Invoke(std::vector<std::string>& args)
     }
   // Now check and see if the value has been stored in the cache
   // already, if so use that value and don't look for the program
+  std::string helpString = "Where can the ";
+  helpString += args[1] + " library be found";
   const char* cacheValue
     = cmCacheManager::GetInstance()->GetCacheValue(args[0].c_str());
   if(cacheValue)
@@ -58,6 +60,10 @@ bool cmFindLibraryCommand::Invoke(std::vector<std::string>& args)
     if(strcmp(cacheValue, "NOTFOUND") != 0)
       {
       m_Makefile->AddDefinition(args[0].c_str(), cacheValue);
+      cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
+                                                   cacheValue,
+                                                   helpString.c_str(),
+                                                   cmCacheManager::PATH);
       }
     return true;
     }
@@ -86,7 +92,7 @@ bool cmFindLibraryCommand::Invoke(std::vector<std::string>& args)
       m_Makefile->AddDefinition(args[0].c_str(), path[k].c_str());  
       cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
                                                    path[k].c_str(),
-                                                   "Path to a library",
+                                                   helpString.c_str(),
                                                    cmCacheManager::PATH);
       return true;
       }
@@ -96,7 +102,7 @@ bool cmFindLibraryCommand::Invoke(std::vector<std::string>& args)
       m_Makefile->AddDefinition(args[0].c_str(), path[k].c_str());  
       cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
                                                    path[k].c_str(),
-                                                   "Path to a library",
+                                                   helpString.c_str(),
                                                    cmCacheManager::PATH);
       return true;
       }
@@ -106,7 +112,7 @@ bool cmFindLibraryCommand::Invoke(std::vector<std::string>& args)
       m_Makefile->AddDefinition(args[0].c_str(), path[k].c_str());  
       cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
                                                    path[k].c_str(),
-                                                   "Path to a library",
+                                                   helpString.c_str(),
                                                    cmCacheManager::PATH);
       return true;
       }
@@ -117,25 +123,15 @@ bool cmFindLibraryCommand::Invoke(std::vector<std::string>& args)
       cmCacheManager::GetInstance()->
         AddCacheEntry(args[0].c_str(),
                       path[k].c_str(),
-                      "Path to a library.",
+                      helpString.c_str(),
                       cmCacheManager::PATH);
       return true;
       }
     }
   cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
                                                "NOTFOUND",
-                                               "Path to a library",
+                                               helpString.c_str(),
                                                cmCacheManager::PATH);
-  std::string message = "Library not found: ";
-  message += args[1];
-  message += "\n";
-  message += "looked in ";
-  for(k=0; k < path.size(); k++)
-    {
-    message += path[k];
-    message += "\n";
-    }
-  this->SetError(message.c_str());
   return false;
 }
 
