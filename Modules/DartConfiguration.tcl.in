@@ -7,12 +7,6 @@
 SourceDirectory: @PROJECT_SOURCE_DIR@
 BuildDirectory: @PROJECT_BINARY_DIR@
 
-# Dart options
-
-# CVS options
-# Default is "-d -P -A"
-CVSUpdateOptions: @CVS_UPDATE_OPTIONS@
-
 # Site is something like machine.domain, i.e. pragmatic.crd
 Site: @SITE@
 
@@ -27,16 +21,30 @@ DropSitePassword: @DROP_SITE_PASSWORD@
 DropSiteMode: @DROP_SITE_MODE@
 DropMethod: @DROP_METHOD@
 TriggerSite: @TRIGGER_SITE@
+ScpCommand: @SCPCOMMAND@
 
 # Dashboard start time
 NightlyStartTime: @NIGHTLY_START_TIME@
 
 # Commands for the build/test/submit cycle
 ConfigureCommand: "@CMAKE_COMMAND@" "@PROJECT_SOURCE_DIR@"
-CMakeCommand: @CMAKE_COMMAND@
 MakeCommand: @MAKECOMMAND@
+
+# CVS options
+# Default is "-d -P -A"
 CVSCommand: @CVSCOMMAND@
-ScpCommand: @SCPCOMMAND@
+CVSUpdateOptions: @CVS_UPDATE_OPTIONS@
+
+# Subversion options
+SVNCommand: @SVNCOMMAND@
+SVNUpdateOptions: @SVN_UPDATE_OPTIONS@
+
+# Generic update command
+UpdateCommand: @UPDATE_COMMAND@
+UpdateOptions: @UPDATE_OPTIONS@
+UpdateType: @UPDATE_TYPE@
+
+# Dynamic analisys and coverage
 PurifyCommand: @PURIFYCOMMAND@
 ValgrindCommand: @VALGRIND_COMMAND@
 ValgrindCommandOptions: @VALGRIND_COMMAND_OPTIONS@
@@ -44,11 +52,6 @@ MemoryCheckCommand: @MEMORYCHECK_COMMAND@
 MemoryCheckCommandOptions: @MEMORYCHECK_COMMAND_OPTIONS@
 MemoryCheckSuppressionFile: @MEMORYCHECK_SUPPRESSIONS_FILE@
 CoverageCommand: @COVERAGE_COMMAND@
-# Compression commands
-GunzipCommand: @GUNZIPCOMMAND@
-CompressionCommand: @COMPRESSIONCOMMAND@
-CompressionType: @COMPRESSIONCOMMAND@
-CompressSubmission: @COMPRESS_SUBMISSION@
 
 # Testing options
 # TimeOut is the amount of time in seconds to wait for processes
