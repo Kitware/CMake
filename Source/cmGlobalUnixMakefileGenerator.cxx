@@ -22,6 +22,8 @@
 
 cmGlobalUnixMakefileGenerator::cmGlobalUnixMakefileGenerator()
 {
+  // This type of makefile always requires unix style paths
+  m_ForceUnixPaths = true;
   m_FindMakeProgramFile = "CMakeUnixFindMake.cmake";
 }
 

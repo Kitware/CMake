@@ -2117,7 +2117,7 @@ cmLocalUnixMakefileGenerator::ConvertToOutputForExisting(const char* p)
       {
       if(!cmSystemTools::GetShortPath(ret.c_str(), ret))
         {
-        ret = p;
+        ret = cmSystemTools::ConvertToOutputPath(p);
         }
       }
     }

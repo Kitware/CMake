@@ -26,10 +26,13 @@
 // include the generator
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #include "cmGlobalVisualStudio6Generator.h"
+#if !defined(__MINGW32__)
 #include "cmGlobalVisualStudio7Generator.h"
 #include "cmGlobalVisualStudio71Generator.h"
+#endif
 #include "cmGlobalBorlandMakefileGenerator.h"
 #include "cmGlobalNMakeMakefileGenerator.h"
+#include "cmGlobalUnixMakefileGenerator.h"
 #include "cmWin32ProcessExecution.h"
 #else
 #include "cmGlobalUnixMakefileGenerator.h"
@@ -795,6 +798,10 @@ void cmake::SetGlobalGenerator(cmGlobalGenerator *gg)
 
   // set the new
   m_GlobalGenerator = gg;
+  // set the global flag for unix style paths on cmSystemTools as 
+  // soon as the generator is set.  This allows gmake to be used
+  // on windows.
+  cmSystemTools::SetForceUnixPaths(m_GlobalGenerator->GetForceUnixPaths());
   // Save the environment variables CXX and CC
   m_CXXEnvironment = getenv("CXX");
   m_CCEnvironment = getenv("CC");    
@@ -877,6 +884,10 @@ int cmake::Configure()
     if(genName)
       {
       m_GlobalGenerator = this->CreateGlobalGenerator(genName);
+      // set the global flag for unix style paths on cmSystemTools as 
+      // soon as the generator is set.  This allows gmake to be used
+      // on windows.
+      cmSystemTools::SetForceUnixPaths(m_GlobalGenerator->GetForceUnixPaths());
       }
     else
       {
@@ -1065,6 +1076,10 @@ int cmake::LocalGenerate()
   if(genName)
     {
     m_GlobalGenerator = this->CreateGlobalGenerator(genName);
+    // set the global flag for unix style paths on cmSystemTools as 
+    // soon as the generator is set.  This allows gmake to be used
+    // on windows.
+    cmSystemTools::SetForceUnixPaths(m_GlobalGenerator->GetForceUnixPaths());
     }
   else
     {
@@ -1151,10 +1166,12 @@ void cmake::AddDefaultGenerators()
 #if defined(_WIN32) && !defined(__CYGWIN__)
   m_Generators[cmGlobalVisualStudio6Generator::GetActualName()] =
     &cmGlobalVisualStudio6Generator::New;
+#if !defined(__MINGW32__)
   m_Generators[cmGlobalVisualStudio7Generator::GetActualName()] =
     &cmGlobalVisualStudio7Generator::New;
   m_Generators[cmGlobalVisualStudio71Generator::GetActualName()] =
     &cmGlobalVisualStudio71Generator::New;
+#endif
   m_Generators[cmGlobalBorlandMakefileGenerator::GetActualName()] =
     &cmGlobalBorlandMakefileGenerator::New;
   m_Generators[cmGlobalNMakeMakefileGenerator::GetActualName()] =
@@ -1164,9 +1181,9 @@ void cmake::AddDefaultGenerators()
   m_Generators[cmGlobalCodeWarriorGenerator::GetActualName()] =
     &cmGlobalCodeWarriorGenerator::New;
 # endif
+#endif
   m_Generators[cmGlobalUnixMakefileGenerator::GetActualName()] =
     &cmGlobalUnixMakefileGenerator::New;
-#endif
 }
 
 int cmake::LoadCache()

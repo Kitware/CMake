@@ -38,7 +38,7 @@
 #include <sys/wait.h>
 #endif
 
-#if defined(_WIN32) && (defined(_MSC_VER) || defined(__BORLANDC__))
+#if defined(_WIN32) && (defined(_MSC_VER) || defined(__BORLANDC__) || defined(__MINGW32__))
 #include <string.h>
 #include <windows.h>
 #include <direct.h>

@@ -235,8 +235,14 @@ public:
   /** Split a string on its newlines into multiple lines.  Returns
       false only if the last line stored had no newline.  */
   static bool Split(const char* s, std::vector<cmStdString>& l);  
-
+  static void SetForceUnixPaths(bool v)
+    {
+      s_ForceUnixPaths = v;
+    }
+  static std::string ConvertToOutputPath(const char* path);
+  
 private:
+  static bool s_ForceUnixPaths;
   static bool s_RunCommandHideConsole;
   static bool s_ErrorOccured;
   static bool s_FatalErrorOccured;

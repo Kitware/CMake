@@ -104,7 +104,9 @@ public:
   void GetLocalGenerators(std::vector<cmLocalGenerator *>&g) { g = m_LocalGenerators;}
   static int s_TryCompileTimeout;
   
+  bool GetForceUnixPaths() {return m_ForceUnixPaths;}
 protected:
+  bool m_ForceUnixPaths;
   cmStdString m_FindMakeProgramFile;
   cmStdString m_ConfiguredFilesPath;
   cmake *m_CMakeInstance;

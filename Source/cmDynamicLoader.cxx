@@ -266,7 +266,7 @@ cmDynamicLoader::GetSymbolAddress(cmLibHandle lib, const char* sym)
   delete [] wsym;
   void* result = ret;
 #else
-  void* result = GetProcAddress(lib, sym);
+  void* result = (void*)GetProcAddress(lib, sym);
 #endif
   // Hack to cast pointer-to-data to pointer-to-function.
   return *reinterpret_cast<cmDynamicLoaderFunction*>(&result);

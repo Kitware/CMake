@@ -65,22 +65,25 @@ ENDIF (APPLE)
 IF (WIN32)
   IF(NOT UNIX)
     SET(SRCS ${SRCS}
-                    cmGlobalBorlandMakefileGenerator.cxx
-                    cmGlobalNMakeMakefileGenerator.cxx
-                    cmGlobalVisualStudio6Generator.cxx
-                    cmLocalVisualStudio6Generator.cxx
-                    cmGlobalVisualStudio71Generator.cxx
-                    cmGlobalVisualStudio7Generator.cxx
-                    cmLocalVisualStudio7Generator.cxx
-                    cmGlobalBorlandMakefileGenerator.h
-                    cmGlobalNMakeMakefileGenerator.h
-                    cmGlobalVisualStudio6Generator.h
-                    cmLocalVisualStudio6Generator.h
-                    cmGlobalVisualStudio7Generator.h
-                    cmLocalVisualStudio7Generator.h
-		    cmWin32ProcessExecution.cxx
-		    cmWin32ProcessExecution.h
-                    )
+      cmGlobalBorlandMakefileGenerator.cxx
+      cmGlobalNMakeMakefileGenerator.cxx
+      cmGlobalVisualStudio6Generator.cxx
+      cmLocalVisualStudio6Generator.cxx
+      cmGlobalBorlandMakefileGenerator.h
+      cmGlobalNMakeMakefileGenerator.h
+      cmGlobalVisualStudio6Generator.h
+      cmLocalVisualStudio6Generator.h
+      cmWin32ProcessExecution.cxx
+      cmWin32ProcessExecution.h
+      )
+    IF(NOT MINGW)
+      SET(SRCS ${SRCS}
+        cmGlobalVisualStudio7Generator.h
+        cmLocalVisualStudio7Generator.h
+        cmGlobalVisualStudio71Generator.cxx
+        cmGlobalVisualStudio7Generator.cxx
+        cmLocalVisualStudio7Generator.cxx)
+    ENDIF(NOT MINGW)
   ENDIF(NOT UNIX)
 ENDIF (WIN32)
 
@@ -95,10 +98,12 @@ LINK_DIRECTORIES(${CMake_BINARY_DIR}/Source)
 IF (WIN32)
   IF(NOT UNIX)
     IF( NOT BORLAND )
-      LINK_LIBRARIES( rpcrt4.lib )
-      ADD_EXECUTABLE(cmw9xcom cmw9xcom.cxx)
-      TARGET_LINK_LIBRARIES(cmw9xcom CMakeLib)
-      SUBDIRS(MFCDialog)
+      IF(NOT MINGW )
+        LINK_LIBRARIES( rpcrt4.lib )
+        ADD_EXECUTABLE(cmw9xcom cmw9xcom.cxx)
+        TARGET_LINK_LIBRARIES(cmw9xcom CMakeLib)
+        SUBDIRS(MFCDialog)
+      ENDIF(NOT MINGW )
     ENDIF( NOT BORLAND )
   ENDIF(NOT UNIX)
 ENDIF (WIN32)

@@ -28,7 +28,8 @@ int cmGlobalGenerator::s_TryCompileTimeout = 0;
 
 cmGlobalGenerator::cmGlobalGenerator()
 {
-// do nothing duh
+  // by default use the native paths
+  m_ForceUnixPaths = false;
 }
 
 cmGlobalGenerator::~cmGlobalGenerator()

@@ -22,6 +22,7 @@
 cmGlobalNMakeMakefileGenerator::cmGlobalNMakeMakefileGenerator()
 {
   m_FindMakeProgramFile = "CMakeNMakeFindMake.cmake";
+  m_ForceUnixPaths = false;
 }
 
 void cmGlobalNMakeMakefileGenerator::EnableLanguage(const char* l,

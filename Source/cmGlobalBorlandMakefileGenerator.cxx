@@ -21,6 +21,7 @@
 cmGlobalBorlandMakefileGenerator::cmGlobalBorlandMakefileGenerator()
 {
   m_FindMakeProgramFile = "CMakeBorlandFindMake.cmake";
+  m_ForceUnixPaths = false;
 }
 
 void cmGlobalBorlandMakefileGenerator::EnableLanguage(const char* l,

@@ -48,6 +48,7 @@ bool cmSystemTools::s_DisableRunCommandOutput = false;
 bool cmSystemTools::s_ErrorOccured = false;
 bool cmSystemTools::s_FatalErrorOccured = false;
 bool cmSystemTools::s_DisableMessages = false;
+bool cmSystemTools::s_ForceUnixPaths = false;
 
 std::string cmSystemTools::s_Windows9xComspecSubstitute = "command.com";
 void cmSystemTools::SetWindows9xComspecSubstitute(const char* str)
@@ -1032,3 +1033,17 @@ bool cmSystemTools::Split(const char* s, std::vector<cmStdString>& l)
     }
   return true;
 }
+
+std::string cmSystemTools::ConvertToOutputPath(const char* path)
+{
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  if(s_ForceUnixPaths)
+    {
+    return cmSystemTools::ConvertToUnixOutputPath(path);
+    }
+  return cmSystemTools::ConvertToWindowsOutputPath(path);
+#else
+  return cmSystemTools::ConvertToUnixOutputPath(path);
+#endif
+}
+
