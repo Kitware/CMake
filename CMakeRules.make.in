@@ -1,4 +1,4 @@
-# include simple rules for building .o files from source files
+# rules for building .o files from source files
 @MAKEINCLUDE@ @MAKEQUOTE@@CMAKE_CONFIG_DIR@/CMake/CMakeSimpleRules.make@MAKEQUOTE@
 
 #
@@ -26,15 +26,15 @@ CMakeTargets.make: ${CMAKE} ${srcdir}/CMakeLists.txt
 #------------------------------------------------------------------------------
 # rules for the normal library
 #
-lib${ME}.a: ${SRC_OBJ} ${KIT_OBJ}
-	${AR} cr lib${ME}.a ${KIT_OBJ}
-	${RANLIB} lib$(ME).a
+lib${LIBRARY}.a: ${SRC_OBJ} ${KIT_OBJ}
+	${AR} cr lib${LIBRARY}.a ${KIT_OBJ}
+	${RANLIB} lib$(LIBRARY).a
 
 
-lib$(ME)$(SHLIB_SUFFIX): ${KIT_OBJ}
-	rm -f lib$(ME)$(SHLIB_SUFFIX)
-	$(CXX) ${CXX_FLAGS} ${ITK_SHLIB_BUILD_FLAGS} -o \
-	lib$(ME)$(SHLIB_SUFFIX) \
+lib$(LIBRARY)$(SHLIB_SUFFIX): ${KIT_OBJ}
+	rm -f lib$(LIBRARY)$(SHLIB_SUFFIX)
+	$(CXX) ${CXX_FLAGS} ${CMAKE_SHLIB_BUILD_FLAGS} -o \
+	lib$(LIBRARY)$(SHLIB_SUFFIX) \
 	   ${KIT_OBJ} ${SHLIB_LD_LIBS}
 
 install: ${BUILD_LIB_FILE} 

@@ -1,4 +1,8 @@
 #------------------------------------------------------------------------------
+# move this from CMakeVariables.make.in so that depends can be done in CMakeTargets.make
+CMAKE_LIB_EXT          = @CMAKE_LIB_EXT@
+
+#------------------------------------------------------------------------------
 # Include generated rules
 @MAKEINCLUDE@ @MAKEQUOTE@CMakeTargets.make@MAKEQUOTE@
 

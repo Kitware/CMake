@@ -30,6 +30,7 @@ public:
    */
   void OutputMakefile(const char* file);
 protected:
+  void OutputDependLibraries(std::ostream&);
   void OutputDepends(std::ostream&);
 };
 

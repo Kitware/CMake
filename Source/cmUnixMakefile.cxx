@@ -101,8 +101,8 @@ void cmUnixMakefile::OutputMakefile(const char* file)
     // Ouput Library name if there are SRC_OBJS
     if(strlen(this->GetLibraryName()) > 0)
       {
-      fout << "ME = " <<  this->GetLibraryName() << "\n\n";
-      fout << "BUILD_LIB_FILE = lib${ME}${ITK_LIB_EXT}\n\n";
+      fout << "LIBRARY = " <<  this->GetLibraryName() << "\n\n";
+      fout << "BUILD_LIB_FILE = lib${LIBRARY}${CMAKE_LIB_EXT}\n\n";
       }
     // Output SRC_OBJ list for all the classes to be compiled
     fout << "SRC_OBJ = \\\n";
@@ -157,6 +157,11 @@ void cmUnixMakefile::OutputMakefile(const char* file)
       linkLibs += " ";
       }
     linkLibs += " ${LOCAL_LINK_FLAGS} ";
+    // create and output a varible in the makefile that
+    // each executable will depend on.  This will have all the
+    // libraries that the executable uses
+    fout << "CMAKE_DEPEND_LIBS = ";
+    this->OutputDependLibraries(fout);
     // Now create rules for all of the executables to be built
     for(int i = 0; i < m_Classes.size(); i++)
       {
@@ -164,7 +169,9 @@ void cmUnixMakefile::OutputMakefile(const char* file)
 	{ 
         std::string DotO = m_Classes[i].m_ClassName;
         DotO += ".o";
-        fout << m_Classes[i].m_ClassName << ": " << DotO << "\n";
+        
+        fout << m_Classes[i].m_ClassName << ": " << DotO << " ";
+        fout << "${CMAKE_DEPEND_LIBS}\n";
 	fout << "\t${CXX}  ${CXX_FLAGS}  " 
 	     << DotO.c_str() << " "
              << linkLibs.c_str() 
@@ -238,4 +245,30 @@ void cmUnixMakefile::OutputMakefile(const char* file)
       }
     }
   this->OutputDepends(fout);
+}
+
+void cmUnixMakefile::OutputDependLibraries(std::ostream& fout)
+{
+  std::vector<std::string>& libs = m_BuildFlags.GetLinkLibraries();
+  std::vector<std::string>& libdirs = m_BuildFlags.GetLinkDirectories();
+  std::vector<std::string>::iterator dir, lib, endlibs, enddirs;
+  for(lib = libs.begin(); lib != libs.end(); ++lib)
+    {
+    bool found = false;
+    for(dir = libdirs.begin(); dir != libdirs.end() && !found; ++dir)
+      {
+      std::string expression = "LIBRARY.*=.*";
+      expression += lib->c_str();
+      if(cmSystemTools::Grep(dir->c_str(), "CMakeTargets.make", expression.c_str()))
+        {
+        std::string libpath = *dir;
+        libpath += "/lib";
+        libpath += *lib;
+        libpath += "${CMAKE_LIB_EXT}";
+        fout << libpath << " ";
+        found = true;
+        }
+      }
+    }
+  fout << "\n";
 }

@@ -56,6 +56,17 @@ public:
    */
   static bool FileExists(const char* filename);
   /**
+   * Return the number of times expression occurs in file in dir
+   */
+  static int Grep(const char* dir, const char* file, const char* expression);
+  
+  /**
+   * Extract the right hand side of an asignment varibale = value
+   */
+  static std::string ExtractVariable(const char* varible,
+                                     const char* line);
+  
+  /**
    * Read a list from a file into the array of strings.
    * This function assumes that the first line of the
    * list has been read.  For example: NAME = \ was already

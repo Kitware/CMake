@@ -68,13 +68,13 @@ make
 
 TODO:
 
-
+FEATURES:
 Add include and directories to the build on windows.
 For unix just add them to the CMakeLocal.make.in
-
 Add a --with idea, sets a #define in the config.h file
 
+CLEANUP:
 Change ME to LIBRARY, and add PROJECT=
-
-
+Remove the rest of the ITK_* stuff
+move the libs used from the top into the testing...
 

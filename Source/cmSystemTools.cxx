@@ -1,6 +1,7 @@
 #include "cmSystemTools.h"
 #include "errno.h"
 #include <sys/stat.h>
+#include "cmRegularExpression.h"
 
 #ifdef _MSC_VER
 #include <windows.h>
@@ -125,7 +126,7 @@ void cmSystemTools::ReadList(std::vector<std::string>& stringList,
   bool done = false;
   while ( !done )
     {
-    fin.getline(inbuffer, 2047 );
+    fin.getline(inbuffer, sizeof(inbuffer) );
     std::string inname = inbuffer;
     if(inname.find('\\') == std::string::npos)
       {
@@ -154,3 +155,45 @@ void cmSystemTools::ConvertToUnixSlashes(std::string& path)
     path = path.substr(0, path.size()-1);
     }
 }
+
+
+int cmSystemTools::Grep(const char* dir, const char* file, const char* expression)
+{
+  std::string path = dir;
+  path += "/";
+  path += file;
+  std::ifstream fin(path.c_str());
+  char buffer[2056];
+  int count = 0;
+  cmRegularExpression reg(expression);
+  while(fin)
+    {
+    fin.getline(buffer, sizeof(buffer));
+    count += reg.find(buffer);
+    }
+  return count;
+}
+
+std::string cmSystemTools::ExtractVariable(const char* variable,
+                                           const char* l)
+{
+  std::string line = l;
+  size_t varstart = line.find(variable);
+  size_t start = line.find("=");
+  if(start != std::string::npos && start > varstart )
+    {
+    start++;
+    while(line[start] == ' ' && start < line.size())
+      {
+      start++;
+      }
+    size_t end = line.size()-1;
+    while(line[end] == ' ' && end > start)
+      {
+      end--;
+      }
+    return line.substr(start, end).c_str();
+    }
+  return std::string("");
+}
+

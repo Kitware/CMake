@@ -109,24 +109,17 @@ bool cmMakefile::ReadMakefile(const char* filename)
           }
         }
       }
-    else if(line.find("ME") != std::string::npos)
+    else if(line.find("LIBRARY") != std::string::npos)
       {
-      size_t mestart = line.find("ME");
-      size_t start = line.find("=");
-      if(start != std::string::npos && start > mestart )
-	{
-	start++;
-	while(line[start] == ' ' && start < line.size())
-	  {
-	  start++;
-	  }
-	size_t end = line.size()-1;
-	while(line[end] == ' ' && end > start)
-	  {
-	  end--;
-	  }
-	this->SetLibraryName(line.substr(start, end).c_str());
-	}
+      std::string libname = cmSystemTools::ExtractVariable("LIBRARY", 
+                                                           line.c_str());
+      this->SetLibraryName(libname.c_str());
+      }
+    else if(line.find("PROJECT") != std::string::npos)
+      {
+      std::string libname = cmSystemTools::ExtractVariable("PROJECT", 
+                                                           line.c_str());
+      this->SetProjectName(libname.c_str());
       }
     }
   return true;

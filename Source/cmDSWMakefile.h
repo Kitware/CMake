@@ -37,7 +37,8 @@ private:
   void WriteDSWFile(std::ostream& fout);
   void WriteDSWHeader(std::ostream& fout);
   void WriteProject(std::ostream& fout, 
-		     const char* name, const char* path);
+		     const char* name, const char* path,
+                    cmMakefile* project);
   void WriteDSWFooter(std::ostream& fout);
 };
 

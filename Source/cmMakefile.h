@@ -64,6 +64,15 @@ public:
     {
       return m_LibraryName.c_str();
     }
+  // Set the name of the library that is built by this makefile
+  void SetProjectName(const char* lib)
+    {
+      m_ProjectName = lib;
+    }
+  const char* GetProjectName()
+    {
+      return m_ProjectName.c_str();
+    }
   
   // Set the name of the library that is built by this makefile
   void SetOutputDirectory(const char* lib)
@@ -93,6 +102,11 @@ public:
       return m_SubDirectories;
     }
   
+  bool HasExecutables() 
+    {
+      return m_Executables;
+    }
+  
 private:
   void ReadTemplateInstanceDirectory(std::string&);
   void ReadClasses(std::ifstream& fin, bool t);
@@ -107,6 +121,7 @@ protected:
   std::string m_cmHomeDirectory; // Home directory for source
   std::string m_cmCurrentDirectory; // current directory in source
   std::string m_LibraryName;	// library name
+  std::string m_ProjectName;	// project name
   std::vector<cmClassFile> m_Classes; // list of classes in makefile
   std::vector<std::string> m_SubDirectories; // list of sub directories
   std::vector<std::string> m_MakeVerbatim; // lines copied from input file

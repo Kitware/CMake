@@ -33,7 +33,7 @@ void cmDSWMakefile::OutputDSWFile()
   std::string fname;
   fname = m_OutputDirectory;
   fname += "/";
-  fname += this->m_LibraryName;
+  fname += this->m_ProjectName;
   fname += ".dsw";
   std::cerr << "writting dsw file " << fname.c_str() << std::endl;
   std::ofstream fout(fname.c_str());
@@ -149,7 +149,7 @@ void cmDSWMakefile::WriteDSWFile(std::ostream& fout)
 	si != dspnames.end(); ++si)
       {
       // Write the project into the DSW file
-      this->WriteProject(fout, si->c_str(), dir.c_str());
+      this->WriteProject(fout, si->c_str(), dir.c_str(), *k);
       }
     // delete the cmDSPMakefile object once done with it to avoid
     // leaks
@@ -162,7 +162,8 @@ void cmDSWMakefile::WriteDSWFile(std::ostream& fout)
 
 void cmDSWMakefile::WriteProject(std::ostream& fout, 
 				 const char* dspname,
-				 const char* dir)
+				 const char* dir,
+                                 cmMakefile* project)
 {
   fout << "###############################################################################\n\n";
   fout << "Project: \"" << dspname << "\"=" 
@@ -170,7 +171,19 @@ void cmDSWMakefile::WriteProject(std::ostream& fout,
   fout << "Package=<5>\n{{{\n}}}\n\n";
   fout << "Package=<4>\n";
   fout << "{{{\n";
-  // insert Begin Project Dependency  Project_Dep_Name project stuff here
+  if(project->HasExecutables())
+    {
+    // insert Begin Project Dependency  Project_Dep_Name project stuff here 
+    std::vector<std::string>::iterator i, end;
+    i = project->GetBuildFlags().GetLinkLibraries().begin();
+    end = project->GetBuildFlags().GetLinkLibraries().end();
+    for(;i!= end; ++i)
+      {
+      fout << "Begin Project Dependency\n";
+      fout << "Project_Dep_Name " << *i << "\n";
+      fout << "End Project Dependency\n";
+      }
+    }
   fout << "}}}\n\n";
 }
 
