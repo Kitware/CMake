@@ -60,3 +60,7 @@
 
 // Test Remove command
 #define REMOVE_STRING "${REMOVE_STRING}"
+
+// Test IF inside FOREACH
+#cmakedefine IF_INSIDE_FOREACH_THEN_EXECUTED
+#cmakedefine IF_INSIDE_FOREACH_ELSE_EXECUTED

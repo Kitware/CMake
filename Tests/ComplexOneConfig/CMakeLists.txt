@@ -161,6 +161,20 @@ SET(removeVar1 c e)
 REMOVE(REMOVE_STRING ${removeVar1} f)
 
 #
+# Test an IF inside a FOREACH.
+#
+FOREACH(x "a")
+  IF(1)
+    # Should always execute.
+    SET(IF_INSIDE_FOREACH_THEN_EXECUTED 1)
+  ELSE(1)
+    # Should never execute.
+    SET(IF_INSIDE_FOREACH_ELSE_EXECUTED 1)
+  ENDIF(1)
+ENDFOREACH(x)
+
+
+#
 # Configure file 
 # (plug vars to #define so that they can be tested)
 #

@@ -799,8 +799,16 @@ int main()
   else
     {
     cmFailed("cmSystemTools::UpperCase is working");
-    }
-    
+    }    
+  
+  // ----------------------------------------------------------------------
+  // Test if IF command inside a FOREACH works.
+#if defined(IF_INSIDE_FOREACH_THEN_EXECUTED) && !defined(IF_INSIDE_FOREACH_ELSE_EXECUTED)
+  cmPassed("IF inside a FOREACH block works");
+#else
+  cmFailed("IF inside a FOREACH block is broken");
+#endif
+  
   // ----------------------------------------------------------------------
   // Summary
 
