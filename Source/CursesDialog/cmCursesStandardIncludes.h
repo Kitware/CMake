@@ -21,15 +21,26 @@
 #endif
 
 #if defined(__hpux)
- #define _BOOL_DEFINED
- #include <sys/time.h>
- #define _XOPEN_SOURCE_EXTENDED
- #include <curses.h>
- #include <form.h>
- #undef _XOPEN_SOURCE_EXTENDED
+# define _BOOL_DEFINED
+# include <sys/time.h>
+# define _XOPEN_SOURCE_EXTENDED
+# include <curses.h>
+# include <form.h>
+# undef _XOPEN_SOURCE_EXTENDED
 #else
- #include <curses.h>
- #include <form.h>
+# include <curses.h>
+# include <form.h>
+#endif
+
+// This is a hack to prevent warnings about these functions being
+// declared but not referenced.
+#if defined(__sgi) && !defined(__GNUC__)
+/*REFERENCED*/ speed_t cfgetospeed (const struct termios *__t);
+/*REFERENCED*/ int cfsetospeed (struct termios *__t, speed_t __s); 
+/*REFERENCED*/ speed_t cfgetispeed (const struct termios *__t);
+/*REFERENCED*/ int cfsetispeed (struct termios *__t, speed_t __s);
+/*REFERENCED*/ int tcgetattr (int __fd, struct termios *__t);
+/*REFERENCED*/ int tcsetattr (int __fd, int __act, const struct termios *__t);
 #endif
 
 #ifndef getmaxyx
