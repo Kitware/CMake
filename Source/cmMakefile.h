@@ -300,6 +300,12 @@ public:
   const char* GetDefineFlags()
     {return m_DefineFlags.c_str();}
 
+  /**
+   * Dump documentation to a file. If 0 is returned, the
+   * operation failed.
+   */
+  int DumpDocumentationToFile(const char *fileName);
+
 protected:
   bool m_Executables;
   std::string m_Prefix;

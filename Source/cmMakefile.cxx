@@ -372,3 +372,34 @@ const char* cmMakefile::GetDefinition(const char* name)
     }
   return 0;
 }
+
+int cmMakefile::DumpDocumentationToFile(const char *fileName)
+{
+  // Open the supplied filename
+  std::ofstream f;
+  f.open(fileName, std::ios::out);
+  
+  if ( f.fail() )
+    {
+    return 0;
+    }
+  
+  // Loop over all registered rules and print out documentation
+  const char *name;
+  const char *terse;
+  const char *full;
+
+  for(StringRuleMakerMap::iterator j = m_RuleMakers.begin();
+      j != m_RuleMakers.end(); ++j)
+    {
+    name = (*j).second->GetName();
+    terse = (*j).second->TerseDocumentation();
+    full = (*j).second->FullDocumentation();
+    f << name << " - " << terse << std::endl
+      << "\t" << full << std::endl << std::endl;
+    }
+  
+
+  return 1;
+}
+
