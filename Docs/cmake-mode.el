@@ -22,6 +22,10 @@
 	   '(("CMakeLists\\.txt\\'" . cmake-mode))
 	   '(("\\.cmake\\'" . cmake-mode))
 	   auto-mode-alist))
+; Note, add the above setq auto-mode-alist to your .emacs
+; along with the following to have the mode loaded when
+; a CMakeLists.txt or *.cmake file is loaded in emacs.
+; (autoload 'cmake-mode "~/CMake/Docs/cmake-mode.el" t)
 
 ; Default indentation increment.
 (defvar cmake-tab-width 2)
