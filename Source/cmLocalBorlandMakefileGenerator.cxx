@@ -315,7 +315,7 @@ void cmLocalBorlandMakefileGenerator::OutputExecutableRule(std::ostream& fout,
     }
   if(t.GetType() == cmTarget::WIN32_EXECUTABLE)
     {
-    command +=  " -tWM ";
+    command +=  "-tW -tWM ";
     }
   else
     {
