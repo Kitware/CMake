@@ -59,6 +59,11 @@ IF (UNIX)
     ENDIF(X11_LIBRARIES)
   ENDIF(X11_X11_INCLUDE_PATH)
 
+  SET(X11_LIBRARY_DIR "")
+  IF(X11_X11_LIB)
+    GET_FILENAME_COMPONENT(X11_LIBRARY_DIR ${X11_X11_LIB} PATH)
+  ENDIF(X11_X11_LIB)
+
   IF(X11_FOUND)
     INCLUDE(${CMAKE_ROOT}/Modules/CheckFunctionExists.cmake)
     INCLUDE(${CMAKE_ROOT}/Modules/CheckLibraryExists.cmake)
@@ -71,7 +76,7 @@ IF (UNIX)
       SET(X11_X_EXTRA_LIBS "")
 
       # See if XOpenDisplay in X11 works by itself.
-      CHECK_LIBRARY_EXISTS("${X11_LIBRARIES}" "XOpenDisplay" "" X11_LIB_X11_SOLO)
+      CHECK_LIBRARY_EXISTS("${X11_LIBRARIES}" "XOpenDisplay" "${X11_LIBRARY_DIR}" X11_LIB_X11_SOLO)
       IF(NOT X11_LIB_X11_SOLO)
         # Find library needed for dnet_ntoa.
         CHECK_LIBRARY_EXISTS("dnet" "dnet_ntoa" "" X11_LIB_DNET_HAS_DNET_NTOA) 
@@ -127,7 +132,7 @@ IF (UNIX)
       ENDIF(NOT CMAKE_HAVE_SHMAT)
     ENDIF($ENV{ISC} MATCHES "^yes$")
 
-    CHECK_LIBRARY_EXISTS("ICE" "IceConnectionNumber" ""
+    CHECK_LIBRARY_EXISTS("ICE" "IceConnectionNumber" "${X11_LIBRARY_DIR}"
                          CMAKE_LIB_ICE_HAS_ICECONNECTIONNUMBER)
     IF(CMAKE_LIB_ICE_HAS_ICECONNECTIONNUMBER)
       SET (X11_X_PRE_LIBS -lSM -lICE)
