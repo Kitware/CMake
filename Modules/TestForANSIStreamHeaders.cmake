@@ -4,7 +4,8 @@
 # CMAKE_NO_ANSI_STREAM_HEADERS - defined accoreding to the results
 #
 
-TRY_COMPILE(CMAKE_ANSI_STREAM_HEADERS ${CMAKE_ROOT}/Modules/TestForANSIStreamHeaders.cxx ${PROJECT_BINARY_DIR})
+TRY_COMPILE(CMAKE_ANSI_STREAM_HEADERS  ${PROJECT_BINARY_DIR} 
+  ${CMAKE_ROOT}/Modules/TestForANSIStreamHeaders.cxx)
 IF (CMAKE_ANSI_STREAM_HEADERS)
   SET (CMAKE_NO_ANSI_STREAM_HEADERS 0 CACHE INTERNAL 
        "Does the compiler support headers like iostream.")
