@@ -1216,17 +1216,16 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
   // If there is no executable output path, add a rule with the
   // relative path to the executable.  This is necessary for
   // try-compile to work in this case.
-  if(m_ExecutableOutputPath.length() == 0)
-    {
-    target = name;
-    target += cmSystemTools::GetExecutableExtension();
-    target = cmSystemTools::ConvertToOutputPath(target.c_str());
-    this->OutputMakeRule(fout, 
-                         comment.c_str(),
-                         target.c_str(),
-                         depend.c_str(),
-                         commands);
-    }
+  depend = target;
+  target = name;
+  target += cmSystemTools::GetExecutableExtension();
+  target = cmSystemTools::ConvertToOutputPath(target.c_str());
+  commands.resize(0);
+  this->OutputMakeRule(fout, 
+                       comment.c_str(),
+                       target.c_str(),
+                       depend.c_str(),
+                       commands);
 }
 
 
