@@ -273,7 +273,7 @@ void cmCableWrapTclCommand::GenerateCableClassFiles(const char* name,
       commandArgs += cmSystemTools::EscapeSpaces(i->c_str());
     }
   
-  commandArgs += " -fsyntax-only -fxml="+classXmlName+" "+classCxxName;
+  commandArgs += " -fxml="+classXmlName+" "+classCxxName;
   
   std::vector<std::string> outputs;
   outputs.push_back(classXmlName);
