@@ -3592,9 +3592,24 @@ int cmCTest::RunConfigurationScript(const std::string& total_script_arg)
       }
     }
 
+  // if the dashboard root isn't specified then we can compute it from the
+  // srcDir
+  char *ctestRoot;
+  if (mf->GetDefinition("CTEST_DASHBOARD_ROOT"))
+    {
+    ctestRoot = new char [strlen(mf->GetDefinition("CTEST_DASHBOARD_ROOT"))+1];
+    strcpy(ctestRoot,mf->GetDefinition("CTEST_DASHBOARD_ROOT"));
+    }
+  else
+    {
+    ctestRoot = new char [cmSystemTools::GetFilenamePath(srcDir).size()+1];
+    strcpy(ctestRoot,cmSystemTools::GetFilenamePath(srcDir).c_str());
+    }
+  
   // now that we have done most of the error checking finally run the
   // dashboard, we may be asked to repeatedly run this dashboard, such as
   // for a continuous
+  int returnValue = 0;
   if (mf->GetDefinition("CTEST_CONTINUOUS_DURATION"))
     {
     // the *60 is becuase the settings are in minutes but GetTime is seconds
@@ -3613,8 +3628,9 @@ int cmCTest::RunConfigurationScript(const std::string& total_script_arg)
     while (cmSystemTools::GetTime() < clock_start + duration)
       {
       double clock_recent_start = cmSystemTools::GetTime();
-      this->RunConfigurationDashboard(mf, srcDir, binDir, backup, 
-                                      cvsCheckOut, ctestCmd);
+      returnValue = 
+        this->RunConfigurationDashboard(mf, srcDir, binDir, ctestRoot, 
+                                        backup, cvsCheckOut, ctestCmd);
       double interval = cmSystemTools::GetTime() - clock_recent_start;
       if (interval < minimumInterval)
         {
@@ -3635,20 +3651,23 @@ int cmCTest::RunConfigurationScript(const std::string& total_script_arg)
   // otherwise just run it once
   else
     {
-    return this->RunConfigurationDashboard(mf, srcDir, binDir, 
-                                           backup, cvsCheckOut, ctestCmd);
+    returnValue = 
+      this->RunConfigurationDashboard(mf, srcDir, binDir, ctestRoot,
+                                      backup, cvsCheckOut, ctestCmd);
     }
-  return 0;
+
+  delete [] ctestRoot;
+  return returnValue;
 }
 
 int cmCTest::RunConfigurationDashboard(cmMakefile *mf, 
                                        const char *srcDir, const char *binDir,
+                                       const char *ctestRoot,
                                        bool backup, const char *cvsCheckOut,
                                        const char *ctestCmd)
 {
-  const char *ctestRoot = mf->GetDefinition("CTEST_DASHBOARD_ROOT");
   const char *cvsCmd = mf->GetDefinition("CTEST_CVS_COMMAND");
-
+  
   // local variables
   std::string command;
   std::string output;
@@ -3844,38 +3863,44 @@ int cmCTest::RunConfigurationDashboard(cmMakefile *mf,
       }
     }
 
-  // run ctest
-  command = ctestCmd;
-  output = "";
-  retVal = 0;
-  if ( m_Verbose )
+  // run cteste may be more than one command in here
+  std::vector<std::string> ctestCommands;
+  cmSystemTools::ExpandListArgument(ctestCmd,ctestCommands);
+  // for each variable/argument do a putenv
+  for (unsigned i = 0; i < ctestCommands.size(); ++i)
     {
-    std::cerr << "Run ctest command: " << command.c_str() << std::endl;
-    }
-  res = cmSystemTools::RunSingleCommand(command.c_str(), &output, 
-    &retVal, binDir,
-    m_Verbose, 0 /*m_TimeOut*/);
-
-  // did something critical fail in ctest
-  if (!res || cmakeFailed ||
-    retVal & CTEST_BUILD_ERRORS)
-    {
-    this->RestoreBackupDirectories(backup, srcDir, binDir,
-      backupSrcDir.c_str(), 
-      backupBinDir.c_str());
-    if (cmakeFailed)
+    command = ctestCommands[i];
+    output = "";
+    retVal = 0;
+    if ( m_Verbose )
       {
-      cmSystemTools::Error("Unable to run cmake");    
-      return 10;
+      std::cerr << "Run ctest command: " << command.c_str() << std::endl;
       }
-    cmSystemTools::Error("Unable to run ctest");    
-    if (!res)
-      {
-      return 11;
-      }
-    return retVal * 100;
-    }
+    res = cmSystemTools::RunSingleCommand(command.c_str(), &output, 
+                                          &retVal, binDir,
+                                          m_Verbose, 0 /*m_TimeOut*/);
 
+    // did something critical fail in ctest
+    if (!res || cmakeFailed ||
+        retVal & CTEST_BUILD_ERRORS)
+      {
+      this->RestoreBackupDirectories(backup, srcDir, binDir,
+                                     backupSrcDir.c_str(), 
+                                     backupBinDir.c_str());
+      if (cmakeFailed)
+        {
+        cmSystemTools::Error("Unable to run cmake");    
+        return 10;
+        }
+      cmSystemTools::Error("Unable to run ctest");    
+      if (!res)
+        {
+        return 11;
+        }
+      return retVal * 100;
+      }
+    }
+  
   // if all was succesful, delete the backup dirs to free up disk space
   if (backup)
     {

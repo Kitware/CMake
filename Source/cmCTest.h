@@ -40,6 +40,7 @@ public:
   int RunConfigurationScript(const std::string& script);
   int RunConfigurationDashboard(cmMakefile *mf, 
                                 const char *srcDir, const char *binDir,
+                                const char *ctestRoot,
                                 bool backup, const char *cvsCheckOut,
                                 const char *ctestCmd);
   
