@@ -1218,7 +1218,7 @@ std::string cmSystemTools::RelativePath(const char* local, const char* remote)
     }
   if(!cmSystemTools::FileIsFullPath(remote))
     {
-    cmSystemTools::Error("RelativePath must be passed a full path to local: ", remote);
+    cmSystemTools::Error("RelativePath must be passed a full path to remote: ", remote);
     }
   
   // check for driveletter: as the start of the path
@@ -1230,54 +1230,55 @@ std::string cmSystemTools::RelativePath(const char* local, const char* remote)
       return remote;
       }
     }
-  std::string relativePath;     // result string
   // split up both paths into arrays of strings using / as a separator
   std::string localString = local;
-  std::vector<cmStdString> fileSplit = cmSystemTools::SplitString(local, '/', true); 
-  std::vector<cmStdString> relativeSplit = cmSystemTools::SplitString(remote, '/', true);
-  std::vector<cmStdString> commonPath;
-  std::vector<cmStdString> finalPath;
+  std::vector<cmStdString> localSplit = cmSystemTools::SplitString(local, '/', true); 
+  std::vector<cmStdString> remoteSplit = cmSystemTools::SplitString(remote, '/', true);
+  std::vector<cmStdString> commonPath; // store shared parts of path in this array
+  std::vector<cmStdString> finalPath;  // store the final relative path here
   // count up how many matching directory names there are from the start
   unsigned int sameCount = 0;
   while(
-    ((sameCount <= (fileSplit.size()-1)) && (sameCount <= (relativeSplit.size()-1)))
+    ((sameCount <= (localSplit.size()-1)) && (sameCount <= (remoteSplit.size()-1)))
     && 
 // for windows and apple do a case insensitive string compare    
 #if defined(_WIN32) || defined(__APPLE__)
-    cmSystemTools::Strucmp(fileSplit[sameCount].c_str(),
-                              relativeSplit[sameCount].c_str()) == 0
+    cmSystemTools::Strucmp(localSplit[sameCount].c_str(),
+                           remoteSplit[sameCount].c_str()) == 0
 #else
-    fileSplit[sameCount] == relativeSplit[sameCount]
+    localSplit[sameCount] == remoteSplit[sameCount]
 #endif
     )
     {
     // put the common parts of the path into the commonPath array
-    commonPath.push_back(fileSplit[sameCount]);
+    commonPath.push_back(localSplit[sameCount]);
     // erase the common parts of the path from the original path arrays
-    fileSplit[sameCount] = "";
-    relativeSplit[sameCount] = "";
+    localSplit[sameCount] = "";
+    remoteSplit[sameCount] = "";
     sameCount++;
     }
 
-  // for each entry that is not common in the local or file path 
-  // add a ../ to the finalpath array
-  for(unsigned int i = 0; i < fileSplit.size(); ++i)
+  // for each entry that is not common in the local path
+  // add a ../ to the finalpath array, this gets us out of the local
+  // path into the remote dir
+  for(unsigned int i = 0; i < localSplit.size(); ++i)
     {
-    if(fileSplit[i].size())
+    if(localSplit[i].size())
       {
       finalPath.push_back("../");
       }
     }
   // for each entry that is not common in the remote path add it
-  // to the final path
-  for(std::vector<cmStdString>::iterator i = relativeSplit.begin();
-      i != relativeSplit.end(); ++i)
+  // to the final path.
+  for(std::vector<cmStdString>::iterator i = remoteSplit.begin();
+      i != remoteSplit.end(); ++i)
     {
     if(i->size())
       {
       finalPath.push_back(*i);
       }
     }
+  std::string relativePath;     // result string
   // now turn the array of directories into a unix path by puttint / 
   // between each entry that does not already have one
   for(std::vector<cmStdString>::iterator i = finalPath.begin();
