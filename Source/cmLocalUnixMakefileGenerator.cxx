@@ -1578,7 +1578,6 @@ void cmLocalUnixMakefileGenerator::OutputDependLibs(std::ostream& fout)
     if(cacheValue && *cacheValue &&
        (!this->SamePath(m_Makefile->GetCurrentOutputDirectory(), cacheValue)))
       {
-      std::cout << "Cache Value: " << cacheValue << std::endl;
       // add the correct extension
       std::string ltname = *lib+"_LIBRARY_TYPE";
       const char* libType
