@@ -2605,7 +2605,7 @@ fi
         CMAKE_SHLIB_RUNTIME_FLAG=""
         CMAKE_SHLIB_RUNTIME_SEP=":"
 	;;
-    HP-UX-*.08.*|HP-UX-*.09.*|HP-UX-*.10.*)
+    HP-UX-*)
 	CMAKE_SHLIB_CFLAGS="+Z"
 	CMAKE_SHLIB_LD_LIBS=""
 	CMAKE_SHLIB_SUFFIX=".sl"
@@ -3255,7 +3255,7 @@ fi
 # on dec alphas we have had problems as well
 if test "$use_pthreads" = "yes"; then
 case $system in
-    HP-UX-*.10.*)
+    HP-UX-*)
 	CMAKE_THREAD_LIBS="-lcma"
 	CMAKE_USE_PTHREADS=1 
 	CMAKE_HP_PTHREADS=1
@@ -3288,7 +3288,7 @@ CMAKE_ANSI_CXXFLAGS=""
 # on hp use -Aa for ansi
 if test $ac_cv_prog_gxx = no; then
 case $system in
-    HP-UX-*.08.*|HP-UX-*.09.*|HP-UX-*.10.*)
+    HP-UX-*)
         echo $ac_n "checking whether ${CC} accepts -Aa""... $ac_c" 1>&6
         echo 'void f(){}' > conftest.c
         if test -z "`${CC} -Aa -c conftest.c 2>&1`"; then
