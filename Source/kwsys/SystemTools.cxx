@@ -1405,7 +1405,7 @@ unsigned long SystemTools::FileLength(const char* filename)
     }
   else
     {
-      return fs.st_size;
+      return static_cast<unsigned long>(fs.st_size);
     }
 }
 
@@ -2310,7 +2310,7 @@ SystemTools::GetFilenameWithoutLastExtension(const kwsys_stl::string& filename)
 
 bool SystemTools::FileHasSignature(const char *filename,
                                    const char *signature, 
-                                   unsigned long offset)
+                                   long offset)
 {
   if (!filename || !signature)
     {

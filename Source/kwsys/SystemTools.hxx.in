@@ -268,7 +268,7 @@ public:
   static kwsys_stl::string GetCurrentWorkingDirectory();
 
   ///! return true if the file has a given signature (first set of bytes)
-  static bool FileHasSignature(const char* filename, const char *signature, unsigned long offset = 0);
+  static bool FileHasSignature(const char* filename, const char *signature, long offset = 0);
 
   /**
   *  Try to locate the file 'filename' in the directory 'dir'.
