@@ -21,7 +21,7 @@ bool cmIncludeExternalMSProjectCommand::InitialPass(std::vector<std::string> con
     
     std::vector<std::string> depends;
     if (args.size() > 2) {
-      for (int i=2; i<args.size(); ++i) {
+      for (unsigned int i=2; i<args.size(); ++i) {
         depends.push_back(args[i]); 
       }
     }

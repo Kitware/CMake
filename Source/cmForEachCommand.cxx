@@ -58,7 +58,7 @@ IsFunctionBlocked(const char *name, const std::vector<std::string> &args,
     for( ; j != m_Args.end(); ++j)
       {   
       // perform string replace
-      for(int c = 0; c < m_Commands.size(); ++c)
+	for(unsigned int c = 0; c < m_Commands.size(); ++c)
         {
         std::vector<std::string> newArgs;
         for (std::vector<std::string>::const_iterator k = 

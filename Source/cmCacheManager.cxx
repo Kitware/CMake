@@ -139,7 +139,6 @@ bool cmCacheManager::LoadCache(const char* path,
   // input line is:         "key":type=value
   cmRegularExpression regQuoted("^\"([^\"]*)\":([^=]*)=(.*[^\t ]|[\t ]*)[\t ]*$");
 
-  std::set<std::string>::const_iterator iter;
   std::string entryKey;
   while(fin)
     {

@@ -1349,7 +1349,7 @@ void cmSystemTools::GlobDirs(const char *fullPath,
                              std::vector<std::string>& files)
 {
   std::string path = fullPath;
-  int pos = path.find("/*");
+  std::string::size_type pos = path.find("/*");
   if(pos == std::string::npos)
     {
     files.push_back(fullPath);

@@ -645,7 +645,10 @@ void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
       case cmTarget::WIN32_EXECUTABLE:
         this->OutputExecutableRule(fout, l->first.c_str(), l->second);
         break;
-        
+      case cmTarget::UTILITY:
+      case cmTarget::INSTALL_FILES:
+      case cmTarget::INSTALL_PROGRAMS:
+	break;
       }
     }
 }

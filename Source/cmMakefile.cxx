@@ -474,7 +474,7 @@ void cmMakefile::AddCustomCommand(const char* source,
     std::string c = cmSystemTools::EscapeSpaces(command);
 
     std::string combinedArgs;
-    int i;
+    unsigned int i;
     
     for (i = 0; i < commandArgs.size(); ++i)
       {

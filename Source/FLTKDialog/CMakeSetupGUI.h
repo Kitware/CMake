@@ -67,7 +67,7 @@ private:
   inline void cb_m_OKButton_i(Fl_Button*, void*);
   static void cb_m_OKButton(Fl_Button*, void*);
 public:
-  ~CMakeSetupGUI();
+  virtual ~CMakeSetupGUI();
   virtual void Close(void);
   virtual void BrowseForSourcePath(void);
   virtual void BrowseForBinaryPath(void);

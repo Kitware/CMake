@@ -518,6 +518,7 @@ CMakeSetupGUIImplementation
                                        reverseOrder);
         break;
       case cmCacheManager::INTERNAL:
+      case cmCacheManager::STATIC:
         // These entries should not be seen by the user
         m_CacheEntriesList.RemoveProperty(key);
         break;
