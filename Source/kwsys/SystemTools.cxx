@@ -1614,6 +1614,66 @@ kwsys_stl::string SystemTools::CollapseFullPath(const char* in_relative,
   return newPath;
 }
 
+//----------------------------------------------------------------------------
+void SystemTools::SplitPath(const char* p,
+                            kwsys_stl::vector<kwsys_stl::string>& components)
+{
+  // Identify the root component.
+  const char* c = p;
+  if(c[0] == '/' && c[1] == '/')
+    {
+    // Network path.
+    components.push_back("//");
+    c += 2;
+    }
+  else if(c[0] == '/')
+    {
+    // Unix path.
+    components.push_back("/");
+    c += 1;
+    }
+  else if(c[0] && c[1] == ':' && c[2] == '/')
+    {
+    // Windows path.
+    std::string root = "_:/";
+    root[0] = c[0];
+    components.push_back(root);
+    c += 3;
+    }
+  else if(c[0] && c[1] == ':')
+    {
+    // Path relative to a windows drive working directory.
+    std::string root = "_:";
+    root[0] = c[0];
+    components.push_back(root);
+    c += 2;
+    }
+  else
+    {
+    // Relative path.
+    components.push_back("");
+    }
+
+  // Parse the remaining components.
+  const char* first = c;
+  const char* last = first;
+  for(;*last; ++last)
+    {
+    if(*last == '/')
+      {
+      // End of a component.  Save it.
+      components.push_back(std::string(first, last-first));
+      first = last+1;
+      }
+    }
+
+  // Save the last component unless there were no components.
+  if(last != c)
+    {
+    components.push_back(std::string(first, last-first));
+    }
+}
+
 bool SystemTools::Split(const char* str, kwsys_stl::vector<kwsys_stl::string>& lines)
 {
   kwsys_stl::string data(str);

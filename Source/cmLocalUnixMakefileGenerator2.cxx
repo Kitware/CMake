@@ -2306,7 +2306,7 @@ cmLocalUnixMakefileGenerator2::ConvertToRelativePath(const char* p)
   // Identify the longest shared path component between the given path
   // and the current output directory.
   std::vector<std::string> path;
-  this->SplitFullPath(p, path);
+  cmSystemTools::SplitPath(p, path);
   unsigned int common=0;
   while(common < path.size() &&
         common < m_CurrentOutputDirectoryComponents.size() &&
@@ -2397,8 +2397,8 @@ cmLocalUnixMakefileGenerator2::ConfigureOutputPaths()
   // directory and the build directory.
   std::vector<std::string> source;
   std::vector<std::string> binary;
-  this->SplitFullPath(m_HomeDirectory.c_str(), source);
-  this->SplitFullPath(m_HomeOutputDirectory.c_str(), binary);
+  cmSystemTools::SplitPath(m_HomeDirectory.c_str(), source);
+  cmSystemTools::SplitPath(m_HomeOutputDirectory.c_str(), binary);
   unsigned int common=0;
   while(common < source.size() && common < binary.size() &&
         this->ComparePath(source[common].c_str(), binary[common].c_str()))
@@ -2427,68 +2427,8 @@ cmLocalUnixMakefileGenerator2::ConfigureOutputPaths()
 
     // Split the current output directory now to save time when
     // converting paths.
-    this->SplitFullPath(m_CurrentOutputDirectory.c_str(),
-                        m_CurrentOutputDirectoryComponents);
-    }
-}
-
-//----------------------------------------------------------------------------
-void
-cmLocalUnixMakefileGenerator2
-::SplitFullPath(const char* p, std::vector<std::string>& components)
-{
-  // The path is split into its basic components.  This starts with a
-  // root ("/" for UNIX, "c:/" for Windows, "//" for Network) and is
-  // followed by the directory names.  If there is a trailing slash
-  // then the last component is the empty string.  The components can
-  // be recombined as "c[0]c[1]/c[2]/.../c[n]".
-  assert(cmSystemTools::FileIsFullPath(p));
-
-  // Identify the root component.
-  const char* c = p;
-  if(c[0] == '/' && c[1] == '/')
-    {
-    // Network path.
-    components.push_back("//");
-    c += 2;
-    }
-  else if(c[0] == '/')
-    {
-    // Unix path.
-    components.push_back("/");
-    c += 1;
-    }
-  else if(c[0] && c[1] == ':' && c[2] == '/')
-    {
-    // Windows path.
-    std::string root = "_:/";
-    root[0] = c[0];
-    components.push_back(root);
-    c += 3;
-    }
-  else
-    {
-    // Already a relative path.
-    cmSystemTools::Error("SplitFullPath called with path ", p);
-    return;
-    }
-
-  // Parse the remaining components.
-  const char* first = c;
-  const char* last = first;
-  for(;*last; ++last)
-    {
-    if(*last == '/')
-      {
-      // End of a component.  Save it.
-      components.push_back(std::string(first, last-first));
-      first = last+1;
-      }
-    }
-  // Save the last component unless there were no components.
-  if(last != c)
-    {
-    components.push_back(std::string(first, last-first));
+    cmSystemTools::SplitPath(m_CurrentOutputDirectory.c_str(),
+                             m_CurrentOutputDirectoryComponents);
     }
 }
 

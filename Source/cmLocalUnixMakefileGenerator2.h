@@ -166,7 +166,6 @@ protected:
   std::string ConvertToRelativePath(const char* p);
   std::string ConvertToRelativeOutputPath(const char* p);
   virtual void ConfigureOutputPaths();
-  void SplitFullPath(const char* p, std::vector<std::string>& components);
   bool ComparePath(const char* c1, const char* c2);
 
   void AppendTargetDepends(std::vector<std::string>& depends,
