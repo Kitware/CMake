@@ -342,7 +342,7 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
         }
       const char* lang = 
         m_GlobalGenerator->GetLanguageFromExtension((*sf)->GetSourceExtension().c_str());
-      if(strcmp(lang, "CXX") == 0)
+      if(lang && strcmp(lang, "CXX") == 0)
         {
         // force a C++ file type
         compileFlags += " /TP ";
@@ -1057,30 +1057,33 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
     std::string flagsMinSize = " ";
     std::string flagsDebug = " ";
     std::string flagsDebugRel = " ";
-    // if CXX is on and the target contains cxx code then add the cxx flags
-    std::string baseFlagVar = "CMAKE_";
-    const char* linkLanguage = target.GetLinkerLanguage(this->GetGlobalGenerator());
-    baseFlagVar += "CMAKE_";
-    baseFlagVar += linkLanguage;
-    baseFlagVar += "_FLAGS";
-    flags = m_Makefile->GetRequiredDefinition(baseFlagVar.c_str());
+    if(target.GetType() >= cmTarget::EXECUTABLE && 
+       target.GetType() <= cmTarget::MODULE_LIBRARY)
+      {
+      const char* linkLanguage = target.GetLinkerLanguage(this->GetGlobalGenerator());
+      // if CXX is on and the target contains cxx code then add the cxx flags
+      std::string baseFlagVar = "CMAKE_";
+      baseFlagVar += linkLanguage;
+      baseFlagVar += "_FLAGS";
+      flags = m_Makefile->GetRequiredDefinition(baseFlagVar.c_str());
+      
+      std::string flagVar = baseFlagVar + "_RELEASE";
+      flagsRelease = m_Makefile->GetRequiredDefinition(flagVar.c_str());
+      flagsRelease += " -DCMAKE_INTDIR=\\\"Release\\\" ";
+      
+      flagVar = baseFlagVar + "_MINSIZEREL";
+      flagsMinSize = m_Makefile->GetRequiredDefinition(flagVar.c_str());
+      flagsMinSize += " -DCMAKE_INTDIR=\\\"MinSizeRel\\\" ";
+      
+      flagVar = baseFlagVar + "_DEBUG";
+      flagsDebug = m_Makefile->GetRequiredDefinition(flagVar.c_str());
+      flagsDebug += " -DCMAKE_INTDIR=\\\"Debug\\\" ";
+      
+      flagVar = baseFlagVar + "_RELWITHDEBINFO";
+      flagsDebugRel = m_Makefile->GetRequiredDefinition(flagVar.c_str());
+      flagsDebugRel += " -DCMAKE_INTDIR=\\\"RelWithDebInfo\\\" ";
+      }
     
-    std::string flagVar = baseFlagVar + "_RELEASE";
-    flagsRelease = m_Makefile->GetRequiredDefinition(flagVar.c_str());
-    flagsRelease += " -DCMAKE_INTDIR=\\\"Release\\\" ";
-
-    flagVar = baseFlagVar + "_MINSIZEREL";
-    flagsMinSize = m_Makefile->GetRequiredDefinition(flagVar.c_str());
-    flagsMinSize += " -DCMAKE_INTDIR=\\\"MinSizeRel\\\" ";
-
-    flagVar = baseFlagVar + "_DEBUG";
-    flagsDebug = m_Makefile->GetRequiredDefinition(flagVar.c_str());
-    flagsDebug += " -DCMAKE_INTDIR=\\\"Debug\\\" ";
-
-    flagVar = baseFlagVar + "_RELWITHDEBINFO";
-    flagsDebugRel = m_Makefile->GetRequiredDefinition(flagVar.c_str());
-    flagsDebugRel += " -DCMAKE_INTDIR=\\\"RelWithDebInfo\\\" ";
-
     // if unicode is not found, then add -D_MBCS
     std::string defs = m_Makefile->GetDefineFlags();
     if(flags.find("D_UNICODE") == flags.npos &&
