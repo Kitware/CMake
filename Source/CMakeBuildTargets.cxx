@@ -107,7 +107,7 @@ int main(int ac, char** av)
   cmCacheManager::GetInstance()->SaveCache(&mf);
   if(makeCache)
     {
-    cmCacheManager::GetInstance()->PrintCache(cout);
+    cmCacheManager::GetInstance()->PrintCache(std::cout);
     }
   
   if(cmSystemTools::GetErrorOccuredFlag())
