@@ -751,7 +751,7 @@ bool cmSystemTools::RunCommand(const char* command,
   cmSystemTools::RemoveFile(tempFile.c_str());
   return true;
 #else
-  std::cout << "runing " << command << std::endl;
+  std::cout << "running " << command << std::endl;
   FILE* cpipe = popen(command, "r");
   if(!cpipe)
     {
@@ -764,7 +764,7 @@ bool cmSystemTools::RunCommand(const char* command,
     output += buffer;
     fgets(buffer, BUFFER_SIZE, cpipe);
     }
-  fclose(cpipe);
+  pclose(cpipe);
   return true;
 #endif
 }
