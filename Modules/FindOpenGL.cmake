@@ -92,11 +92,14 @@ ELSE (WIN32)
   # On Unix OpenGL most certainly always requires X11.
   # Feel free to tighten up these conditions if you don't 
   # think this is always true.
+  # It's not true on OSX.
 
   IF (OPENGL_gl_LIBRARY)
     INCLUDE( ${CMAKE_ROOT}/Modules/FindX11.cmake )
     IF (X11_FOUND)
-      SET (OPENGL_LIBRARIES ${X11_LIBRARIES})
+      IF (NOT APPLE)
+        SET (OPENGL_LIBRARIES ${X11_LIBRARIES})
+      ENDIF (NOT APPLE)
     ENDIF (X11_FOUND)
   ENDIF (OPENGL_gl_LIBRARY)
 
