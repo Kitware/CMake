@@ -37,6 +37,9 @@
 #endif
 
 #if defined(_WIN32) && (defined(_MSC_VER) || defined(__BORLANDC__) || defined(__MINGW32__))
+#include <io.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <windows.h>
 #include <direct.h>
@@ -626,8 +629,10 @@ bool SystemTools::SameFile(const char* file1, const char* file2)
 // return true if the file exists
 bool SystemTools::FileExists(const char* filename)
 {
-//  struct stat fs;
-//  if (stat(filename, &fs) != 0) 
+#ifdef _MSC_VER
+# define access _access
+# define F_OK 0
+#endif
   if ( access(filename, F_OK) != 0 )
     {
     return false;
