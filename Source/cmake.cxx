@@ -215,9 +215,9 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
       std::cerr << "loading initial cache file " << path.c_str() << "\n";
       this->ReadListFile(path.c_str());
       }
-    else if(arg.find("--script",0) == 0)
+    else if(arg.find("-P",0) == 0)
       {
-      std::string path = arg.substr(strlen("--script"));
+      std::string path = arg.substr(strlen("-P"));
       if ( path.size() == 0 )
         {
         cmSystemTools::Error("No cmake scrpt provided.");
