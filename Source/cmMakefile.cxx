@@ -60,8 +60,8 @@ cmMakefile::cmMakefile()
   m_LocalGenerator = 0;
   this->AddSourceGroup("", "^.*$");
   this->AddSourceGroup("Source Files", 
-                       "\\.(C|M|c|c++|cc|cpp|cxx|m|mm|rc|def|r|odl|idl|hpj|bat)$");
-  this->AddSourceGroup("Header Files", "\\.(h|h++|hm|hpp|hxx|in|txx|inl)$");
+                       "\\.(C|M|c|c\\+\\+|cc|cpp|cxx|m|mm|rc|def|r|odl|idl|hpj|bat)$");
+  this->AddSourceGroup("Header Files", "\\.(h|h\\+\\+|hm|hpp|hxx|in|txx|inl)$");
   this->AddDefaultDefinitions();
 }
 
