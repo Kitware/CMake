@@ -30,7 +30,9 @@
 #include "cmCabilInstantiateCommand.cxx"
 #include "cmCabilInstantiateClassCommand.cxx"
 #include "cmFindFileCommand.cxx"
+#include "cmWrapExcludeFilesCommand.cxx"
 #include "cmWrapTclCommand.cxx"
+#include "cmBuildSharedLibrariesCommand.cxx"
 
 void GetPredefinedCommands(std::list<cmCommand*>& commands)
 {
@@ -59,7 +61,9 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmCabilInstantiateCommand);
   commands.push_back(new cmCabilInstantiateClassCommand);
   commands.push_back(new cmFindFileCommand);
+  commands.push_back(new cmWrapExcludeFilesCommand);  
   commands.push_back(new cmWrapTclCommand);
+  commands.push_back(new cmBuildSharedLibrariesCommand);
 }
 
   
