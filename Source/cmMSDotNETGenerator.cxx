@@ -24,18 +24,43 @@
 #include "cmSourceGroup.h"
 
 
+
 cmMSDotNETGenerator::cmMSDotNETGenerator()
 {
-  m_Configurations.push_back("Debug");
-  m_Configurations.push_back("Release");
-//  m_Configurations.push_back("MinSizeRel");
-//  m_Configurations.push_back("RelWithDebInfo");
   // default to building a sln project file
   BuildProjOn();
 }
 
 void cmMSDotNETGenerator::GenerateMakefile()
 {
+  std::string configTypes = m_Makefile->GetDefinition("CMAKE_CONFIGURATION_TYPES");
+  std::string::size_type start = 0;
+  std::string::size_type endpos = 0;
+  while(endpos != std::string::npos)
+    {
+    endpos = configTypes.find(' ', start);
+    if(endpos != std::string::npos)
+      {
+      std::string config = configTypes.substr(start, endpos - start);
+      if(config == "Debug" || config == "Release" ||
+         config == "MinSizeRel" || config == "RelWithDebInfo")
+        {
+        m_Configurations.push_back(config);
+        }
+      else
+        {
+        cmSystemTools::Error("Invalid configuration type in CMAKE_CONFIGURATION_TYPES: ",
+                             config.c_str(),
+                             " (Valid types are Debug,Release,MinSizeRel,RelWithDebInfo)");
+        }
+      }
+    start = endpos+1;
+    }
+  if(m_Configurations.size() == 0)
+    {
+    m_Configurations.push_back("Debug");
+    m_Configurations.push_back("Release");
+    }
   if(m_BuildSLN)
     {
     this->OutputSLNFile();
@@ -675,7 +700,7 @@ void cmMSDotNETGenerator::WriteConfiguration(std::ostream& fout,
     }
   fout << "\t\t<Configuration\n"
        << "\t\t\tName=\"" << configName << "|Win32\"\n"
-       << "\t\t\tOutputDirectory=\"";
+       << "\t\t\tOutputDirectory=\"" << configName << "\"\n";
   // This is an internal type to Visual Studio, it seems that:
   // 4 == static library
   // 2 == dll
@@ -686,22 +711,18 @@ void cmMSDotNETGenerator::WriteConfiguration(std::ostream& fout,
     { 
     case cmTarget::STATIC_LIBRARY:
       configType = "4";
-      fout << m_LibraryOutputPath << configName << "\"\n";
       break;
     case cmTarget::SHARED_LIBRARY:
     case cmTarget::MODULE_LIBRARY:
-      fout << m_LibraryOutputPath << configName << "\"\n";
       configType = "2";
       break;
     case cmTarget::EXECUTABLE: 
     case cmTarget::WIN32_EXECUTABLE:  
-      fout << m_ExecutableOutputPath << configName << "\"\n";
       configType = "1";
       break; 
     case cmTarget::UTILITY:
       configType = "10";
     default:
-      fout << configName << "\"\n";
       break;
     }
   
@@ -720,47 +741,66 @@ void cmMSDotNETGenerator::WriteConfiguration(std::ostream& fout,
   std::vector<std::string>::iterator i = includes.begin();
   if(i != includes.end())
     {
-    fout << "&quot;" <<  *i << "&quot;";
+    fout << "&quot;" <<  cmSystemTools::ConvertToOutputPath(i->c_str()) << "&quot;";
     }
   for(;i != includes.end(); ++i)
     {
-    fout << ";&quot;" << *i << "&quot;";
+    fout << ";&quot;" << cmSystemTools::ConvertToOutputPath(i->c_str()) << "&quot;";
     }
   fout << "\"\n";
   
+// Optimization = 0  None Debug  /O0
+// Optimization = 1  MinSize     /O1
+// Optimization = 2  MaxSpeed    /O2
+// Optimization = 3  Max Optimization   /O3
+// RuntimeLibrary = 0 /MT   multithread
+// RuntimeLibrary = 1 /MTd  multithread debug
+// RuntimeLibrary = 2 /MD   multithread dll
+// RuntimeLibrary = 3 /MDd  multithread dll debug
+// RuntimeLibrary = 4 /ML   single thread
+// RuntimeLibrary = 5 /MLd  single thread debug
+// InlineFunctionExpansion = 0 none
+// InlineFunctionExpansion = 1 when inline keyword
+// InlineFunctionExpansion = 2 any time you can
+
+
   if(strcmp(configName, "Debug") == 0)
     {
     fout << "\t\t\t\tOptimization=\"0\"\n"
          << "\t\t\t\tRuntimeLibrary=\"3\"\n"
+         << "\t\t\t\tInlineFunctionExpansion=\"0\"\n"
          << "\t\t\t\tPreprocessorDefinitions=\"WIN32,_DEBUG,_WINDOWS";
     }
   else if(strcmp(configName, "Release") == 0)
     {
     fout << "\t\t\t\tOptimization=\"2\"\n"
-         << "\t\t\t\tRuntimeLibrary=\"0\"\n"
+         << "\t\t\t\tRuntimeLibrary=\"2\"\n"
          << "\t\t\t\tInlineFunctionExpansion=\"1\"\n"
          << "\t\t\t\tPreprocessorDefinitions=\"WIN32,NDEBUG,_WINDOWS";
     }
   else if(strcmp(configName, "MinSizeRel") == 0)
     {
     fout << "\t\t\t\tOptimization=\"1\"\n"
-         << "\t\t\t\tRuntimeLibrary=\"0\"\n"
+         << "\t\t\t\tRuntimeLibrary=\"2\"\n"
          << "\t\t\t\tInlineFunctionExpansion=\"1\"\n"
          << "\t\t\t\tPreprocessorDefinitions=\"WIN32,NDEBUG,_WINDOWS";
     }
   else if(strcmp(configName, "RelWithDebInfo") == 0)
     {
     fout << "\t\t\t\tOptimization=\"2\"\n"
+         << "\t\t\t\tRuntimeLibrary=\"2\"\n"
          << "\t\t\t\tInlineFunctionExpansion=\"1\"\n"
          << "\t\t\t\tPreprocessorDefinitions=\"WIN32,NDEBUG,_WINDOWS";
     }
   this->OutputDefineFlags(fout);
   fout << "\"\n";
-  fout << "\t\t\t\tRuntimeTypeInfo=\"TRUE\"\n";
+  if(m_Makefile->IsOn("CMAKE_CXX_USE_RTTI"))
+    {
+    fout << "\t\t\t\tRuntimeTypeInfo=\"TRUE\"\n";
+    }
   fout << "\t\t\t\tAssemblerListingLocation=\"" << configName << "\"\n";
   fout << "\t\t\t\tObjectFile=\"" << configName << "\\\"\n";
-  fout << "\t\t\t\tProgramDataBaseFileName=\"" << configName << "\"\n";
-  fout << "\t\t\t\tWarningLevel=\"3\"\n";
+  fout << "\t\t\t\tWarningLevel=\"" << m_Makefile->GetDefinition("CMAKE_CXX_WARNING_LEVEL") << "\"\n";
   fout << "\t\t\t\tDetect64BitPortabilityProblems=\"TRUE\"\n"
        << "\t\t\t\tDebugInformationFormat=\"3\"";
   fout << "/>\n";  // end of <Tool Name=VCCLCompilerTool
@@ -785,48 +825,48 @@ void cmMSDotNETGenerator::OutputBuildTool(std::ostream& fout,
     case cmTarget::STATIC_LIBRARY:
       fout << "\t\t\t<Tool\n"
            << "\t\t\t\tName=\"VCLibrarianTool\"\n"
-           << "\t\t\t\t\tOutputFile=\"" << m_LibraryOutputPath << configName 
+           << "\t\t\t\t\tOutputFile=\"" << m_LibraryOutputPath << "$(OutDir)"
            << "/" << libName << ".lib\"/>\n";
       break;
     case cmTarget::SHARED_LIBRARY:
     case cmTarget::MODULE_LIBRARY:
       break;
     case cmTarget::EXECUTABLE:
-      fout << "\t\t\t<Tool\n"
-           << "\t\t\t\tName=\"VCLinkerTool\"\n"
-           << "\t\t\t\tAdditionalOptions=\"/MACHINE:I386\"\n"
-           << "\t\t\t\tAdditionalDependencies=\" odbc32.lib odbccp32.lib ";
-      this->OutputLibraries(fout, configName, libName, target);
-      fout << "\"\n";
-      fout << "\t\t\t\tOutputFile=\"" << m_ExecutableOutputPath <<
-        configName << "/" << libName << ".exe\"\n";
-      fout << "\t\t\t\tLinkIncremental=\"1\"\n";
-      fout << "\t\t\t\tSuppressStartupBanner=\"TRUE\"\n";
-      fout << "\t\t\t\tAdditionalLibraryDirectories=\"";
-      this->OutputLibraryDirectories(fout, configName, libName, target);
-      fout << "\"\n";
-      fout << "\t\t\t\tProgramDatabaseFile=\"" << m_LibraryOutputPath << libName << ".pdb\"\n";
-      fout << "\t\t\t\tSubSystem=\"1\"\n";
-      fout << "\t\t\t\tStackReserveSize=\"10000000\"/>\n";
-      break;
     case cmTarget::WIN32_EXECUTABLE:
+
       fout << "\t\t\t<Tool\n"
            << "\t\t\t\tName=\"VCLinkerTool\"\n"
            << "\t\t\t\tAdditionalOptions=\"/MACHINE:I386\"\n"
            << "\t\t\t\tAdditionalDependencies=\" odbc32.lib odbccp32.lib ";
       this->OutputLibraries(fout, configName, libName, target);
       fout << "\"\n";
-      fout << "\t\t\t\tOutputFile=\"" << m_ExecutableOutputPath <<
-        configName << "/" << libName << ".exe\"\n";
+      fout << "\t\t\t\tOutputFile=\"" 
+           << m_ExecutableOutputPath << configName << "/" << libName << ".exe\"\n";
       fout << "\t\t\t\tLinkIncremental=\"1\"\n";
       fout << "\t\t\t\tSuppressStartupBanner=\"TRUE\"\n";
       fout << "\t\t\t\tAdditionalLibraryDirectories=\"";
       this->OutputLibraryDirectories(fout, configName, libName, target);
       fout << "\"\n";
-      fout << "\t\t\t\tProgramDatabaseFile=\"" << m_LibraryOutputPath << libName << ".pdb\"\n";
-      fout << "\t\t\t\tSubSystem=\"2\"\n";
-      fout << "\t\t\t\tStackReserveSize=\"10000000\"/>\n";
+      fout << "\t\t\t\tProgramDatabaseFile=\"" << m_LibraryOutputPath 
+           << "$(OutDir)\\" << libName << ".pdb\"\n";
+      if(strcmp(configName, "Debug") == 0)
+        {
+        fout << "\t\t\t\tGenerateDebugInformation=\"TRUE\"\n";
+        }
+      if( target.GetType() == cmTarget::EXECUTABLE)
+        {
+        fout << "\t\t\t\tSubSystem=\"1\"\n";
+        }
+      else
+        {      
+        fout << "\t\t\t\tSubSystem=\"2\"\n";
+        }
+      fout << "\t\t\t\tStackReserveSize=\"" 
+           << m_Makefile->GetDefinition("CMAKE_CXX_STACK_SIZE") << "\"/>\n";
       break;
+
+      fout << "\t\t\t\tSubSystem=\"2\"\n";
+
     case cmTarget::UTILITY:
       break;
     }

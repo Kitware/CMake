@@ -636,7 +636,7 @@ void cmSystemTools::GetArguments(std::string& line,
   while(!done)
     {
     std::string arg;
-    long endpos;
+    unsigned int endpos;
     bool foundQuoted = quotedArgument.find(line.c_str());
     bool foundNormal = normalArgument.find(line.c_str());
 
@@ -1411,7 +1411,7 @@ void cmSystemTools::Glob(const char *directory, const char *regexp,
   
   if (d.Load(directory))
     {
-    int i, numf;
+    unsigned int i, numf;
     numf = d.GetNumberOfFiles();
     for (i = 0; i < numf; i++)
       {
@@ -1441,7 +1441,7 @@ void cmSystemTools::GlobDirs(const char *fullPath,
   cmDirectory d;
   if (d.Load(startPath.c_str()))
     {
-    for (int i = 0; i < d.GetNumberOfFiles(); ++i)
+    for (unsigned int i = 0; i < d.GetNumberOfFiles(); ++i)
       {
       if((std::string(d.GetFile(i)) != ".")
          && (std::string(d.GetFile(i)) != ".."))
