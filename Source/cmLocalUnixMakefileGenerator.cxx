@@ -498,6 +498,9 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
   std::string runtimeSep;
   std::vector<std::string> runtimeDirs;
 
+  std::string buildType =  this->GetSafeDefinition("CMAKE_BUILD_TYPE");
+  buildType = cmSystemTools::UpperCase(buildType);
+
   bool cxx = tgt.HasCxx(); 
   if(!cxx )
     {
@@ -577,8 +580,15 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
     {
     // Don't link the library against itself!
     if(targetLibrary && (lib->first == targetLibrary)) continue;
-    // don't look at debug libraries
-    if (lib->second == cmTarget::DEBUG) continue;
+    // use the correct lib for the current configuration
+    if (lib->second == cmTarget::DEBUG && buildType != "DEBUG")
+      {
+      continue;
+      }
+    if (lib->second == cmTarget::OPTIMIZED && buildType == "DEBUG")
+      {
+      continue;
+      }
     // skip zero size library entries, this may happen
     // if a variable expands to nothing.
     if (lib->first.size() == 0) continue;
