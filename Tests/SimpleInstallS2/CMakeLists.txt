@@ -71,7 +71,7 @@ ADD_CUSTOM_COMMAND(
   POST_BUILD
   COMMAND ${CMAKE_COMMAND}
   ARGS ${EXTRA_INSTALL_FLAGS} 
-  "-P${CMAKE_CURRENT_BINARY_DIR}/cmake_install.cmake"
+  -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_install.cmake"
   COMMENT "Install Project"
   )
 

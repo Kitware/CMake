@@ -217,7 +217,8 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
       }
     else if(arg.find("-P",0) == 0)
       {
-      std::string path = arg.substr(strlen("-P"));
+      i++;
+      std::string path = args[i];
       if ( path.size() == 0 )
         {
         cmSystemTools::Error("No cmake scrpt provided.");
