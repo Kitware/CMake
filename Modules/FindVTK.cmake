@@ -1,23 +1,30 @@
 #
 # Find a VTK installation or build tree.
 #
-# When VTK is found, the VTKConfig.cmake file is sourced to setup the
-# location and configuration of VTK.  Please read this file, or
-# VTKConfig.cmake.in from the VTK source tree for the full list of
-# definitions.  Of particular interest is
+# The following variables are set if VTK is found.  If VTK is not
+# found, VTK_FOUND is set to false.
 #
-# VTK_USE_FILE          - A CMake source file that can be included
-#                         to set the include directories, library
-#                         directories, and preprocessor macros.
+# VTK_FOUND          - Set to true when VTK is found.
+# VTK_USE_FILE       - CMake source file to setup a project to use VTK.
+# VTK_MAJOR_VERSION  - The VTK major version number.
+# VTK_MINOR_VERSION  - The VTK minor version number (odd for non-release).
+# VTK_BUILD_VERSION  - The VTK patch level (meaningless for odd minor).
+# VTK_INCLUDE_DIRS   - Include directories for VTK headers.
+# VTK_LIBRARY_DIRS   - Link directories for VTK libraries.
+# VTK_KITS           - List of VTK kits, in all CAPS (COMMON, IO, ...).
+# VTK_LANGUAGES      - List of wrapped languages, in all CAPS (TCL, ...).
+# VTK_SETTINGS       - List of all CMake variable settings provided by
+#                      the version of VTK that was found.  This list
+#                      may include settings that are not listed here.
 #
-# In addition to the variables read from VTKConfig.cmake, this find
-# module also defines
+# The following cache entries must be set by the user to locate VTK:
 #
 # VTK_DIR      - The directory containing VTKConfig.cmake.  This is either
 #                the root of the build tree, or the lib/vtk
 #                directory.  This is the only cache entry.
 #
-# VTK_FOUND    - Whether VTK was found.  If this is true, VTK_DIR is okay.
+# The following variables are set for backward compatability and
+# should not be used in new code:
 #
 # USE_VTK_FILE - The full path to the UseVTK.cmake file.  This is provided
 #                for backward compatability.  Use VTK_USE_FILE instead.
@@ -100,23 +107,8 @@ IF(VTK_DIR)
     IF(EXISTS ${VTK_DIR}/UseVTK.cmake)
       # We found VTK 4.0 (UseVTK.cmake exists, but not VTKConfig.cmake).
       SET(VTK_FOUND 1)
-      SET(VTK_USE_FILE ${VTK_DIR}/UseVTK.cmake)
-
-      # Hard-code the version number since it isn't provided by VTK 4.0.
-      SET(VTK_MAJOR_VERSION 4)
-      SET(VTK_MINOR_VERSION 0)
-      SET(VTK_BUILD_VERSION 2)
-
-      # Make sure old UseVTK.cmake will work.
-      IF(EXISTS ${VTK_DIR}/Common)
-        # This is a VTK 4.0 build tree.
-        SET(USE_BUILT_VTK 1)
-        SET(VTK_BINARY_PATH ${VTK_DIR})
-      ELSE(EXISTS ${VTK_DIR}/Common)
-        # This is a VTK 4.0 install tree.
-        SET(USE_INSTALLED_VTK 1)
-        SET(VTK_INSTALL_PATH ${VTK_DIR}/../..)
-      ENDIF(EXISTS ${VTK_DIR}/Common)
+      # Load settings for VTK 4.0.
+      INCLUDE(${CMAKE_ROOT}/Modules/UseVTKConfig40.cmake)
     ELSE(EXISTS ${VTK_DIR}/UseVTK.cmake)
       # We did not find VTK.
       SET(VTK_FOUND 0)
@@ -127,6 +119,7 @@ ELSE(VTK_DIR)
   SET(VTK_FOUND 0)
 ENDIF(VTK_DIR)
 
+#-----------------------------------------------------------------------------
 IF(VTK_FOUND)
   # Set USE_VTK_FILE for backward-compatability.
   SET(USE_VTK_FILE ${VTK_USE_FILE})
