@@ -236,7 +236,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       (cmSystemTools::GetCurrentWorkingDirectory().c_str());
     this->SetStartOutputDirectory
       (cmSystemTools::GetCurrentWorkingDirectory().c_str());
-    if (args.size() == 2)
+    if (args.size() == 2 && args[1].find("-G") != 0)
       {
       this->SetHomeDirectory
         (cmSystemTools::CollapseFullPath(args[1].c_str()).c_str());
