@@ -2022,14 +2022,16 @@ cmLocalUnixMakefileGenerator2::ConvertToRelativePath(const char* p)
     }
 
   // If the entire path is in common then just return a ".".
-  if(common == path.size())
+  if(common == path.size() &&
+     common == m_CurrentOutputDirectoryComponents.size())
     {
     return ".";
     }
 
   // If the entire path is in common except for a trailing slash then
   // just return a "./".
-  if(common+1 == path.size() && path[common].size() == 0)
+  if(common+1 == path.size() && path[common].size() == 0 &&
+     common == m_CurrentOutputDirectoryComponents.size())
     {
     return "./";
     }
