@@ -23,6 +23,7 @@ cmSystemTools.obj \
 cmDirectory.obj \
 cmUnixMakefileGenerator.obj \
 cmMSProjectGenerator.obj \
+cmMSDotNETGenerator.obj \
 cmDSPWriter.obj \
 cmDSWWriter.obj \
 cmNMakeMakefileGenerator.obj \
@@ -36,7 +37,7 @@ cmListFileCache.obj \
 cmSourceGroup.obj
 
 cmake: ${OBJS}
-	bcc32 -ecmake ${OBJS}
+	bcc32 -ecmake ${OBJS} 
 
 
 
