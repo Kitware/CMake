@@ -15,16 +15,18 @@
 
 =========================================================================*/
 #include "cmLoadCommandCommand.h"
-#include "cmDynamicLoader.h"
 #include "cmCPluginAPI.h"
-
+#include "cmCPluginAPI.cxx"
+#include "cmDynamicLoader.h"
 
 // a class for loadabple commands
 class cmLoadedCommand : public cmCommand
 {
 public:
   cmLoadedCommand() {
-    memset(&this->info,0,sizeof(this->info)); }
+    memset(&this->info,0,sizeof(this->info)); 
+    this->info.CAPI = &cmStaticCAPI;
+  }
   
   /**
    * This is a virtual constructor for the command.

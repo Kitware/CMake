@@ -87,6 +87,8 @@
 #include "cmQTWrapUICommand.cxx"
 #include "cmWrapExcludeFilesCommand.cxx"
 
+#include "cmLoadCommandCommand.cxx"
+
 void GetPredefinedCommands(std::list<cmCommand*>& commands)
 {
   commands.push_back(new cmAbstractFilesCommand);
@@ -128,6 +130,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmLinkDirectoriesCommand);
   commands.push_back(new cmLinkLibrariesCommand);
   commands.push_back(new cmLoadCacheCommand);
+  commands.push_back(new cmLoadCommandCommand);
   commands.push_back(new cmMacroCommand);
   commands.push_back(new cmMakeDirectoryCommand);
   commands.push_back(new cmMarkAsAdvancedCommand);

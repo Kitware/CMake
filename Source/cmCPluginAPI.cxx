@@ -451,3 +451,53 @@ void cmRemoveFile(const char *name)
   cmSystemTools::RemoveFile(name);
 }
 
+cmCAPI cmStaticCAPI =
+{
+  cmGetClientData,
+    cmGetTotalArgumentSize,
+    cmFreeArguments,
+    cmSetClientData,
+    cmAddCacheDefinition,
+    cmAddCustomCommand,
+    cmAddDefineFlag,
+    cmAddDefinition,
+    cmAddExecutable,
+    cmAddLibrary,
+    cmAddLinkDirectoryForTarget,
+    cmAddLinkLibraryForTarget,
+    cmAddUtilityCommand,
+    cmCommandExists,
+    cmExecuteCommand,
+    cmExpandSourceListArguments,
+    cmExpandVariablesInString,
+    cmGetCacheMajorVersion,
+    cmGetCacheMinorVersion,
+    cmGetCurrentDirectory,
+    cmGetCurrentOutputDirectory,
+    cmGetDefinition,
+    cmGetHomeDirectory,
+    cmGetHomeOutputDirectory,
+    cmGetMajorVersion,
+    cmGetMinorVersion,
+    cmGetProjectName,
+    cmGetStartDirectory,
+    cmGetStartOutputDirectory,
+    cmIsOn,
+  
+    cmAddSource,
+    cmCreateSourceFile,
+    cmGetSource,
+    cmSourceFileAddDepend,
+    cmSourceFileGetProperty,
+    cmSourceFileGetPropertyAsBool,
+    cmSourceFileGetSourceName,
+    cmSourceFileSetName,
+    cmSourceFileSetName2,
+    cmSourceFileSetProperty,
+    
+    cmCapitalized,
+    cmCopyFileIfDifferent,
+    cmGetFilenameWithoutExtension,
+    cmRemoveFile,
+};
+

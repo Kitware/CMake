@@ -22,42 +22,155 @@
      loosely into four groups 1) Utility 2) cmMakefile 3) cmSourceFile 4)
      cmSystemTools. Within each grouping functions are listed alphabetically */
 /*=========================================================================*/
+#ifndef cmCPluginAPI_h
+#define cmCPluginAPI_h
 
-     
+#ifdef  __cplusplus
+extern "C" {
+#endif
+  
+/*=========================================================================
+this is the structure of function entry points that a plugin may call. This
+structure must be kept in sync with the static decaled at the bottom of
+cmCPLuginAPI.cxx
+=========================================================================*/
+typedef struct 
+{
+  /*=========================================================================
+  Here we define the set of functions that a plugin may call. The first goup
+  of functions are utility functions that are specific to the plugin API
+  =========================================================================*/
+  /* set/Get the ClientData in the cmLoadedCommandInfo structure, this is how
+     information is passed from the InitialPass to FInalPass for commands
+     that need a FinalPass and need information from the InitialPass */
+  void *(*GetClientData) (void *info);
+  /* return the summed size in characters of all the arguments */
+  int   (*GetTotalArgumentSize) (int argc, char **argv);
+  /* free all the memory associated with an argc, argv pair */
+  void  (*FreeArguments) (int argc, char **argv);
+  /* set/Get the ClientData in the cmLoadedCommandInfo structure, this is how
+     information is passed from the InitialPass to FInalPass for commands
+     that need a FinalPass and need information from the InitialPass */
+  void  (*SetClientData) (void *info, void *cd);
+
+  /*=========================================================================
+  The following functions all directly map to methods in the cmMakefile
+  class. See cmMakefile.h for descriptions of what each method does. All of
+  these methods take the void * makefile pointer as their first argument.
+  =========================================================================*/
+  void  (*AddCacheDefinition) (void *mf, const char* name, 
+                               const char* value, 
+                               const char* doc, int cachetype);
+  void  (*AddCustomCommand) (void *mf, const char* source,
+                             const char* command,
+                             int numArgs, const char **args,
+                             int numDepends, const char **depends,
+                             int numOutputs, const char **outputs,
+                             const char *target);
+  void  (*AddDefineFlag) (void *mf, const char* definition);
+  void  (*AddDefinition) (void *mf, const char* name, const char* value);
+  void  (*AddExecutable) (void *mf, const char *exename, 
+                         int numSrcs, const char **srcs, int win32);
+  void  (*AddLibrary) (void *mf, const char *libname, 
+                       int shared, int numSrcs, const char **srcs);
+  void  (*AddLinkDirectoryForTarget) (void *mf, const char *tgt, 
+                                      const char* d);
+  void  (*AddLinkLibraryForTarget) (void *mf, const char *tgt, 
+                                    const char *libname, int libtype);
+  void  (*AddUtilityCommand) (void *mf, const char* utilityName,
+                              const char *command, const char *arguments,
+                              int all, int numDepends, const char **depends,
+                              int numOutputs, const char **outputs);
+  int   (*CommandExists) (void *mf, const char* name);
+  void  (*ExecuteCommand) (void *mf, const char *name, 
+                           int numArgs, const char **args);
+  void  (*ExpandSourceListArguments) (void *mf,int argc, const char **argv,
+                                      int *resArgc, char ***resArgv,
+                                      unsigned int startArgumentIndex);
+  char *(*ExpandVariablesInString) (void *mf, const char *source, 
+                                    int escapeQuotes, int atOnly);
+  unsigned int (*GetCacheMajorVersion) (void *mf);
+  unsigned int (*GetCacheMinorVersion) (void *mf);
+  const char*  (*GetCurrentDirectory) (void *mf);
+  const char*  (*GetCurrentOutputDirectory) (void *mf);
+  const char*  (*GetDefinition) (void *mf, const char *def);
+  const char*  (*GetHomeDirectory) (void *mf);
+  const char*  (*GetHomeOutputDirectory) (void *mf);
+  unsigned int (*GetMajorVersion) (void *mf);
+  unsigned int (*GetMinorVersion) (void *mf);
+  const char*  (*GetProjectName) (void *mf);
+  const char*  (*GetStartDirectory) (void *mf);
+  const char*  (*GetStartOutputDirectory) (void *mf);
+  int          (*IsOn) (void *mf, const char* name);
+  
+  
+  /*=========================================================================
+  The following functions are designed to operate or manipulate
+  cmSourceFiles. Please see cmSourceFile.h for additional information on many
+  of these methods. Some of these methods are in cmMakefile.h.
+  =========================================================================*/
+  void *(*AddSource) (void *mf, void *sf); 
+  void *(*CreateSourceFile) ();
+  void *(*GetSource) (void *mf, const char* sourceName);
+  void  (*SourceFileAddDepend) (void *sf, const char *depend);
+  const char *(*SourceFileGetProperty) (void *sf, const char *prop);
+  int   (*SourceFileGetPropertyAsBool) (void *sf, const char *prop);
+  const char *(*SourceFileGetSourceName) (void *sf);
+  void  (*SourceFileSetName) (void *sf, const char* name, const char* dir,
+                             int numSourceExtensions,
+                             const char **sourceExtensions,
+                             int numHeaderExtensions,
+                             const char **headerExtensions);
+  void  (*SourceFileSetName2) (void *sf, const char* name, const char* dir, 
+                               const char *ext, int headerFileOnly);
+  void  (*SourceFileSetProperty) (void *sf, const char *prop,
+                                  const char *value);
+  
+  
+  /*=========================================================================
+  The following methods are from cmSystemTools.h see that file for specific
+  documentaiton on each method.
+  =========================================================================*/
+  char  *(*Capitalized)(const char *);
+  void   (*CopyFileIfDifferent)(const char *f1, const char *f2);
+  char  *(*GetFilenameWithoutExtension)(const char *);
+  void   (*RemoveFile)(const char *f1);
+  
+  /* this is the end of the C function stub API structure */ 
+} cmCAPI;
+
    
-/*=========================================================================*/
-/* CM_PLUGIN_EXPORT should be used by plugins */
-/*=========================================================================*/
+/*=========================================================================
+CM_PLUGIN_EXPORT should be used by plugins
+=========================================================================*/
 #ifdef _WIN32
 #define CM_PLUGIN_EXPORT  __declspec( dllexport )
 #else
 #define CM_PLUGIN_EXPORT 
 #endif
 
-/*=========================================================================*/
-/* define the different types of cache entries, see cmCacheManager.h for more
-   information */
-/*=========================================================================*/#define CM_CACHE_BOOL 0
+/*=========================================================================
+define the different types of cache entries, see cmCacheManager.h for more
+information
+=========================================================================*/
+#define CM_CACHE_BOOL 0
 #define CM_CACHE_PATH 1
 #define CM_CACHE_FILEPATH 2
 #define CM_CACHE_STRING 3
 #define CM_CACHE_INTERNAL 4
 #define CM_CACHE_STATIC 5
 
-/*=========================================================================*/
-/* define the different types of compiles a library may be */
-/*=========================================================================*/
+/*=========================================================================
+define the different types of compiles a library may be
+=========================================================================*/
 #define CM_LIBRARY_GENERAL 0
 #define CM_LIBRARY_DEBUG 1
 #define CM_LIBRARY_OPTIMIZED 2
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
   
-/*=========================================================================*/
-/* first we define the key data structures and function prototypes */
-/*=========================================================================*/
+/*=========================================================================
+Finally we define the key data structures and function prototypes
+=========================================================================*/
   typedef const char* (*CM_DOC_FUNCTION)();
   typedef const char* (*CM_NAME_FUNCTION)();
   typedef int (*CM_INITIAL_PASS_FUNCTION)(void *info, void *mf, 
@@ -65,6 +178,9 @@ extern "C" {
   typedef void (*CM_FINAL_PASS_FUNCTION)(void *info, void *mf);
   
   typedef struct {
+    unsigned char magic1;
+    unsigned char magic2;
+    cmCAPI *CAPI;
     int m_Inherited;
     CM_INITIAL_PASS_FUNCTION InitialPass;
     CM_FINAL_PASS_FUNCTION FinalPass;
@@ -75,128 +191,8 @@ extern "C" {
 
   typedef void (*CM_INIT_FUNCTION)(cmLoadedCommandInfo *);
   
-  /*=========================================================================*/
-  /* Finally we define the set of functions that a plugin may call. The first
-     goup of functions are utility functions that are specific to the plugin
-     API */
-  /*=========================================================================*/
-  /* set/Get the ClientData in the cmLoadedCommandInfo structure, this is how
-     information is passed from the InitialPass to FInalPass for commands
-     that need a FinalPass and need information from the InitialPass */
-  extern void *cmGetClientData(void *info);
-  /* return the summed size in characters of all the arguments */
-  extern int cmGetTotalArgumentSize(int argc, char **argv);
-  /* free all the memory associated with an argc, argv pair */
-  extern void cmFreeArguments(int argc, char **argv);
-  /* set/Get the ClientData in the cmLoadedCommandInfo structure, this is how
-     information is passed from the InitialPass to FInalPass for commands
-     that need a FinalPass and need information from the InitialPass */
-  extern void cmSetClientData(void *info, void *cd);
-
-  /*=========================================================================*/
-  /* The following functions all directly map to methods in the cmMakefile
-     class. See cmMakefile.h for descriptions of what each method does. All
-     of these methods take the void * makefile pointer as their first
-     argument. */
-  /*=========================================================================*/
-  extern void cmAddCacheDefinition(void *mf, const char* name, 
-                                             const char* value, 
-                                             const char* doc,
-                                             int cachetype);
-  extern void cmAddCustomCommand(void *mf, const char* source,
-                                           const char* command,
-                                           int numArgs,
-                                           const char **args,
-                                           int numDepends,
-                                           const char **depends,
-                                           int numOutputs,
-                                           const char **outputs,
-                                           const char *target);
-  extern void cmAddDefineFlag(void *mf, const char* definition);
-  extern void cmAddDefinition(void *mf, const char* name, 
-                                        const char* value);
-  extern void cmAddExecutable(void *mf, const char *exename, 
-                                        int numSrcs, const char **srcs, 
-                                        int win32);
-  extern void cmAddLibrary(void *mf, const char *libname, 
-                                     int shared, int numSrcs, 
-                                     const char **srcs);
-  extern void cmAddLinkDirectoryForTarget(void *mf,
-                                                    const char *tgt, 
-                                                    const char* d);
-  extern void cmAddLinkLibraryForTarget(void *mf,
-                                                  const char *tgt, 
-                                                  const char *libname, 
-                                                  int libtype);
-  extern void cmAddUtilityCommand(void *mf, const char* utilityName,
-                                            const char *command,
-                                            const char *arguments,
-                                            int all, int numDepends,
-                                            const char **depends,
-                                            int numOutputs,
-                                            const char **outputs);
-  extern int cmCommandExists(void *mf, const char* name);
-  extern void cmExecuteCommand(void *mf, const char *name, 
-                                         int numArgs, const char **args);
-  extern 
-  void cmExpandSourceListArguments(void *mf,int argc, const char **argv,
-                                   int *resArgc, char ***resArgv,
-                                   unsigned int startArgumentIndex);
-  extern char *cmExpandVariablesInString(void *mf,
-                                                   const char *source, 
-                                                   int escapeQuotes,
-                                                   int atOnly);
-  extern unsigned int cmGetCacheMajorVersion(void *mf);
-  extern unsigned int cmGetCacheMinorVersion(void *mf);
-  extern const char*  cmGetCurrentDirectory(void *mf);
-  extern const char*  cmGetCurrentOutputDirectory(void *mf);
-  extern const char*  cmGetDefinition(void *mf, const char *def);
-  extern const char*  cmGetHomeDirectory(void *mf);
-  extern const char*  cmGetHomeOutputDirectory(void *mf);
-  extern unsigned int cmGetMajorVersion(void *mf);
-  extern unsigned int cmGetMinorVersion(void *mf);
-  extern const char*  cmGetProjectName(void *mf);
-  extern const char*  cmGetStartDirectory(void *mf);
-  extern const char*  cmGetStartOutputDirectory(void *mf);
-  extern int cmIsOn(void *mf, const char* name);
-  
-  
-  /*=========================================================================*/
-  /* The following functions are designed to operate or manipulate
-  cmSourceFiles. Please see cmSourceFile.h for additional information on many
-  of these methods. Some of these methods are in cmMakefile.h. */
-  /*=========================================================================*/
-  extern void *cmAddSource(void *mf, void *sf); 
-  extern void *cmCreateSourceFile();
-  extern void *cmGetSource(void *mf, const char* sourceName);
-  extern void  cmSourceFileAddDepend(void *sf, const char *depend);
-  extern const char *cmSourceFileGetProperty(void *sf, 
-                                                       const char *prop);
-  extern int cmSourceFileGetPropertyAsBool(void *sf, 
-                                                     const char *prop);
-  extern const char *cmSourceFileGetSourceName(void *sf);
-  extern 
-  void cmSourceFileSetName(void *sf, const char* name, const char* dir,
-                           int numSourceExtensions,
-                           const char **sourceExtensions,
-                           int numHeaderExtensions,
-                           const char **headerExtensions);
-  extern 
-  void cmSourceFileSetName2(void *sf, const char* name, const char* dir, 
-                            const char *ext, int headerFileOnly);
-  extern void cmSourceFileSetProperty(void *sf, const char *prop, 
-                                                const char *value);
-  
-  
-  /*=========================================================================*/
-  /* the following methods are from cmSystemTools.h see that file for
-     specific documentaiton on each method. */
-  /*=========================================================================*/
-  extern char *cmCapitalized(const char *);
-  extern void cmCopyFileIfDifferent(const char *f1, const char *f2);
-  extern char *cmGetFilenameWithoutExtension(const char *);
-  extern void cmRemoveFile(const char *f1);
-  
 #ifdef  __cplusplus
 }
+#endif
+
 #endif
