@@ -428,7 +428,7 @@ CMakeSetupGUIImplementation
     switch(value.m_Type )
       {
       case cmCacheManager::BOOL:
-        if(cmCacheManager::GetInstance()->IsOn(key))
+        if(cmSystemTools::IsOn(value.m_Value.c_str()))
           {
           m_CacheEntriesList.AddProperty(key,
                                          "ON",
