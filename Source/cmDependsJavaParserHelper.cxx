@@ -197,7 +197,7 @@ void cmDependsJavaParserHelper::PrepareElement(cmDependsJavaParserHelper::Parser
 }
 
 void cmDependsJavaParserHelper::AllocateParserType(cmDependsJavaParserHelper::ParserType* pt, 
-  const char* str, int len = 0)
+  const char* str, int len)
 {
   pt->str = 0;
   if ( len == 0 )
