@@ -1639,10 +1639,6 @@ cmSourceFile* cmMakefile::GetSource(const char* sourceName) const
   std::string sname = 
     cmSystemTools::GetFilenameWithoutLastExtension(s);
 
-  /* unfortunately old CMakeList files sometimes use sources with providing
-   * their extensions. If this is the case then we must 
-   */
-
   // compute the extension
   std::string ext;
   ext = cmSystemTools::GetFilenameLastExtension(s);
@@ -1662,6 +1658,37 @@ cmSourceFile* cmMakefile::GetSource(const char* sourceName) const
       return *i;
       }
     }
+
+  // geeze, if it wasn't found maybe it is listed under the output dir
+  if (!cmSystemTools::GetFilenamePath(sourceName).empty())
+    {
+    return 0;
+    }
+    
+  s = this->GetCurrentOutputDirectory();
+  s += "/";
+  s += cmSystemTools::GetFilenameName(sourceName);
+  path = this->GetCurrentOutputDirectory();
+
+  // compute the extension
+  ext = cmSystemTools::GetFilenameLastExtension(s);
+  s = s.substr(0, s.length()-ext.length());
+  if ( ext.length() && ext[0] == '.' )
+    {
+    ext = ext.substr(1);
+    }
+
+  for(std::vector<cmSourceFile*>::const_iterator i = m_SourceFiles.begin();
+      i != m_SourceFiles.end(); ++i)
+    {
+    if ((*i)->GetSourceName() == sname &&
+        cmSystemTools::GetFilenamePath((*i)->GetFullPath()) == path &&
+        (ext.size() == 0 || (ext == (*i)->GetSourceExtension())))
+      {
+      return *i;
+      }
+    }  
+  
   return 0;
 }
 
@@ -1680,6 +1707,20 @@ cmSourceFile* cmMakefile::GetOrCreateSource(const char* sourceName,
   
   // check to see if it exists
   cmSourceFile* ret = this->GetSource(src.c_str());
+  if (ret)
+    {
+    return ret;
+    }
+
+  // OK a source file object doesn't exist for the source
+  // maybe we made a bad call on assuming it was in the src tree
+  if (generated && path.empty())
+    {
+    src = this->GetCurrentOutputDirectory();
+    src += "/";
+    src += cmSystemTools::GetFilenameName(sourceName);
+    }
+  ret = this->GetSource(src.c_str());
   if (ret)
     {
     return ret;
