@@ -86,6 +86,7 @@ ELSE (WIN32)
           /opt/graphics/OpenGL/lib
           /usr/openwin/lib
           /usr/X11R6/lib
+          /usr/shlib
   )
 
   # On Unix OpenGL most certainly always requires X11.
@@ -110,6 +111,7 @@ ELSE (WIN32)
           /opt/graphics/OpenGL/lib
           /usr/openwin/lib
           /usr/X11R6/lib
+          /usr/shlib
   )
 
 ENDIF (WIN32)
