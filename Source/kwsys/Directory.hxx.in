@@ -17,6 +17,10 @@
 #ifndef @KWSYS_NAMESPACE@_Directory_hxx
 #define @KWSYS_NAMESPACE@_Directory_hxx
 
+#ifdef _MSC_VER
+#pragma warning ( disable : 4786 )
+#endif
+
 #include <@KWSYS_NAMESPACE@/StandardIncludes.hxx>
 
 #include <string>
