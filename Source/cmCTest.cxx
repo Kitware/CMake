@@ -134,6 +134,7 @@ static const char* cmCTestErrorMatches[] = {
   ": syntax error ",
   "^collect2: ld returned 1 exit status",
   "Unsatisfied symbols:",
+  "^Unresolved:",
   "Undefined symbols:",
   "^Undefined[ \\t]+first referenced",
   "^CMake Error:",
@@ -5192,16 +5193,14 @@ void cmCTest::ExpandTestsToRunInformation(int numTests)
       }
     }
 
-  // if start and specific tests are not specified then we assume we start at
-  // 1
-  if(start == -1 && !m_TestsToRun.size())
+  // if start is not specified then we assume we start at 1
+  if(start == -1)
     {
     start = 1;
     }
 
-  // if end and specific tests are not specified then we assume we end with
-  // the last test
-  if(end == -1 && !m_TestsToRun.size())
+  // if end isnot specified then we assume we end with the last test
+  if(end == -1)
     {
     end = numTests;
     }
