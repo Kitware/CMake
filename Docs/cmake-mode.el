@@ -12,13 +12,14 @@
 (defvar cmake-tab-width 2)
 
 ; Regular expressions used by line indentation function.
-(defconst cmake-regex-quoted "\"\\([^\n\"\\\\]\\|\\\\.\\)*\"")
-(defconst cmake-regex-arguments (concat "\\(" cmake-regex-quoted
-                                        "\\|" "[^\n()#\\\\]"
-                                        "\\|" "\\\\."
-                                        "\\)*"))
 (defconst cmake-regex-comment "#.*")
 (defconst cmake-regex-identifier "[A-Za-z][A-Za-z0-9_]*")
+(defconst cmake-regex-quoted "\"\\([^\n\"\\\\]\\|\\\\.\\)*\"")
+(defconst cmake-regex-arguments (concat "\\(" cmake-regex-quoted
+                                        "\\|" "[^\n()#\"\\\\]"
+                                        "\\|" "\\\\."
+                                        "\\|" "\\$(" cmake-regex-identifier ")"
+                                        "\\)*"))
 (defconst cmake-indent-comment-line (concat "^[ \t]*" cmake-regex-comment))
 (defconst cmake-indent-blank-regex "^[ \t]*$")
 (defconst cmake-indent-open-regex (concat "^[ \t]*" cmake-regex-identifier
