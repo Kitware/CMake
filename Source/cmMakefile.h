@@ -233,6 +233,11 @@ public:
   void AddSource(cmSourceFile& ,const char *srcListName);
 
   /**
+   * Remove a class/source file from the build.
+   */
+  void RemoveSource(cmSourceFile& ,const char *srcListName);
+
+  /**
    * Add a source group for consideration when adding a new source.
    */
   void AddSourceGroup(const char* name, const char* regex);

@@ -164,17 +164,17 @@ void cmMakefile::Print() const
 {
   // print the class lists
   std::cout << "classes:\n";
-  for(SourceMap::const_iterator l = m_Sources.begin(); 
+  for(SourceMap::const_iterator l = m_Sources.begin();
       l != m_Sources.end(); l++)
     {
     std::cout << " Class list named: " << l->first << std::endl;
-    for(std::vector<cmSourceFile>::const_iterator i = l->second.begin(); 
+    for(std::vector<cmSourceFile>::const_iterator i = l->second.begin();
         i != l->second.end(); i++)
       {
       i->Print();
       }
     }
-  
+
   std::cout << " m_Targets: ";
   for (cmTargets::const_iterator l = m_Targets.begin();
        l != m_Targets.end(); l++)
@@ -411,6 +411,27 @@ void cmMakefile::GenerateMakefile()
 void cmMakefile::AddSource(cmSourceFile& cmfile, const char *srclist)
 {
   m_Sources[srclist].push_back(cmfile);
+}
+
+struct FindSrcByName : std::binary_function<cmSourceFile, cmSourceFile, bool>
+{
+  public:
+    bool operator () (const cmSourceFile &f, const cmSourceFile &test) const
+    {
+      return !stricmp(f.GetSourceName().c_str(),test.GetSourceName().c_str());
+    }
+};
+
+void cmMakefile::RemoveSource(cmSourceFile& cmfile,const char *srclist)
+{
+  std::vector<cmSourceFile> &maplist = m_Sources[srclist];
+  std::vector<cmSourceFile>::iterator f =
+    std::find_if(maplist.begin(), maplist.end(), std::bind2nd(FindSrcByName(),cmfile));
+//  std::vector<cmSourceFile>::iterator f = find_if(maplist.begin(), maplist.end(), matches(srclist);
+  if (f!=maplist.end())
+    {
+      maplist.erase(f);
+    }
 }
 
 void cmMakefile::AddCustomCommand(const char* source,
