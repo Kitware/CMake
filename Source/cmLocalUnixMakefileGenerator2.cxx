@@ -1177,10 +1177,6 @@ cmLocalUnixMakefileGenerator2
 
   std::vector<std::string> no_depends;
   std::vector<std::string> commands;
-  std::string preEcho = "Checking build system in ";
-  preEcho += m_Makefile->GetStartOutputDirectory();
-  preEcho += "...";
-  this->AppendEcho(commands, preEcho.c_str());
   commands.push_back(runRule);
   this->WriteMakeRule(makefileStream,
                       "Special rule to run CMake to check the build system "
