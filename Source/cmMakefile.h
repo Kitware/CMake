@@ -71,11 +71,6 @@ public:
   bool ReadListFile(const char* listfile, const char* external= 0); 
 
   /**
-   * Add a wrapper generator.
-   */
-  void AddCommand(cmCommand* );
-
-  /**
    * Add a function blocker to this makefile
    */
   void AddFunctionBlocker(cmFunctionBlocker *fb)
@@ -89,7 +84,7 @@ public:
    * loaded commands, not as part of the usual build process.
    */
   int TryCompile(const char *srcdir, const char *bindir, 
-                 const char *projectName);
+                 const char *projectName, const char *targetName);
     
   /**
    * Specify the makefile generator. This is platform/compiler
@@ -458,12 +453,6 @@ public:
     { m_ListFiles.push_back(file);}
   
   /**
-   * Dump documentation to a file. If 0 is returned, the
-   * operation failed.
-   */
-  int DumpDocumentationToFile(std::ostream&);
-
-  /**
    * Expand all defined varibles in the string.  
    * Defined varibles come from the m_Definitions map.
    * They are expanded with ${var} where var is the
@@ -503,6 +492,11 @@ public:
   /** Check if a command exists. */
   bool CommandExists(const char* name) const;
     
+  /**
+   * Add a command to this cmake instance
+   */
+  void AddCommand(cmCommand* );
+
   ///! Enable support for the named language, if null then all languages are enabled.
   void EnableLanguage(const char* );
 
@@ -554,10 +548,8 @@ protected:
   std::vector<std::string> m_HeaderFileExtensions;
   std::string m_DefineFlags;
   std::vector<cmSourceGroup> m_SourceGroups;
-  typedef std::map<cmStdString, cmCommand*> RegisteredCommandsMap;
   typedef std::map<cmStdString, cmStdString> DefinitionMap;
   DefinitionMap m_Definitions;
-  RegisteredCommandsMap m_Commands;
   std::vector<cmCommand*> m_UsedCommands;
   cmLocalGenerator* m_LocalGenerator;
   bool IsFunctionBlocked(const char *name, std::vector<std::string> const& args);
@@ -573,7 +565,6 @@ private:
   friend class cmMakeDepend;	// make depend needs direct access 
 				// to the m_Sources array 
   void PrintStringVector(const char* s, const std::vector<std::string>& v) const;
-  void AddDefaultCommands();
   void AddDefaultDefinitions();
   std::list<cmFunctionBlocker *> m_FunctionBlockers;
   
