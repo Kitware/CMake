@@ -16,14 +16,14 @@
 # FLTK_GL_LIBRARY, the full path to fltk_gl.lib
 # FLTK_FORMS_LIBRARY, the full path to fltk_forms.lib
 
-OPTION(FLTK_VERSION_1.0.11 "Use FLTK version 1.0.11" 1)
-OPTION(FLTK_VERSION_1.1 "Use FLTK version 1.1" 0)
+OPTION(FLTK_VERSION_1.1    "Use FLTK version 1.1"    1)
+OPTION(FLTK_VERSION_1.0.11 "Use FLTK version 1.0.11" 0)
 
 # Exclusion between the two version
 
-IF(FLTK_VERSION_1.0.11)
-  SET(FLTK_VERSION_1.1 0)
-ENDIF(FLTK_VERSION_1.0.11)
+IF(FLTK_VERSION_1.1)
+  SET(FLTK_VERSION_1.0.11 0)
+ENDIF(FLTK_VERSION_1.1)
 
 FIND_PATH(FLTK_INCLUDE_DIR FL/Fl.h
   /usr/local/include
