@@ -4,10 +4,7 @@
 #include "stdafx.h"
 #include "CMakeSetup.h"
 #include "CMakeSetupDialog.h"
-#include "../cmDSWMakefile.h"
-#include "../cmMSProjectGenerator.h"
 #include "../cmCacheManager.h"
-#include "../cmMakefile.h"
 #include "../cmake.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
