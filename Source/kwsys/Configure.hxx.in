@@ -35,6 +35,12 @@
 /* Whether STL is in std namespace.  */
 #define @KWSYS_NAMESPACE@_STL_HAVE_STD @KWSYS_STL_HAVE_STD@
 
+/* Whether the STL string has operator<< for ostream.  */
+#define @KWSYS_NAMESPACE@_STL_STRING_HAVE_OSTREAM @KWSYS_STL_STRING_HAVE_OSTREAM@
+
+/* Whether the STL string has operator>> for istream.  */
+#define @KWSYS_NAMESPACE@_STL_STRING_HAVE_ISTREAM @KWSYS_STL_STRING_HAVE_ISTREAM@
+
 /* Define the stl namespace macro.  */
 #if @KWSYS_NAMESPACE@_STL_HAVE_STD
 # define @KWSYS_NAMESPACE@_stl std

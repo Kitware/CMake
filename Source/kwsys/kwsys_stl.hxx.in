@@ -28,4 +28,5 @@
 # pragma warning(pop)
 #endif
 
+@KWSYS_STL_HEADER_EXTRA@
 #endif
