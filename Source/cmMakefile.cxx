@@ -840,8 +840,17 @@ void cmMakefile::AddLinkDirectory(const char* dir)
     }
 }
 
-void cmMakefile::AddSubDirectory(const char* sub, bool topLevel)
+bool cmMakefile::IsDirectoryPreOrder(const char* dir)
 {
+  return (m_SubDirectoryOrder.find(dir) != m_SubDirectoryOrder.end());
+}
+
+void cmMakefile::AddSubDirectory(const char* sub, bool topLevel, bool preorder)
+{
+  if(preorder)
+    {
+    m_SubDirectoryOrder[sub] = preorder;
+    }
   std::pair<cmStdString, bool> p(sub, topLevel);
   // make sure it isn't already there
   if (std::find(m_SubDirectories.begin(),

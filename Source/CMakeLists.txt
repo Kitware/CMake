@@ -228,6 +228,16 @@ IF(BUILD_TESTING)
     --build-two-config
     --test-command simple)
 
+  ADD_TEST(PreOrder ${CMAKE_CTEST_COMMAND}
+    --build-and-test 
+      "${CMake_SOURCE_DIR}/Tests/PreOrder"
+      "${CMake_BINARY_DIR}/Tests/PreOrder"
+    --build-generator ${CMAKE_GENERATOR}
+    --build-project PreOrder
+    --build-makeprogram ${MAKEPROGRAM}
+    --build-two-config
+    --test-command simple)
+
   ADD_TEST(conly  ${CMAKE_CTEST_COMMAND}
     --build-and-test 
     "${CMake_SOURCE_DIR}/Tests/COnly"

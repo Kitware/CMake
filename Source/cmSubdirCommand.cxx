@@ -26,6 +26,7 @@ bool cmSubdirCommand::InitialPass(std::vector<std::string> const& args)
     }
   bool res = true;
   bool intoplevel = true;
+  bool preorder = false;
 
   for(std::vector<std::string>::const_iterator i = args.begin();
       i != args.end(); ++i)
@@ -35,11 +36,16 @@ bool cmSubdirCommand::InitialPass(std::vector<std::string> const& args)
       intoplevel = false;
       continue;
       }
+    if(*i == "PREORDER")
+      {
+      preorder = true;
+      continue;
+      }
     std::string directory = std::string(m_Makefile->GetCurrentDirectory()) + 
       "/" + i->c_str();
     if ( cmSystemTools::FileIsDirectory(directory.c_str()) )
       {
-      m_Makefile->AddSubDirectory(i->c_str(), intoplevel);
+      m_Makefile->AddSubDirectory(i->c_str(), intoplevel, preorder);
       }
     else
       {

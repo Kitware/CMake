@@ -151,7 +151,7 @@ protected:
                                           const char* target1,
                                           const char* target2,
                                           bool silent = false);
-  
+  ///! order == 0, then all subdirs are output, 1 = post order, 2 = preorder
   virtual void OutputSubDirectoryVars(std::ostream& fout,
                                       const char* var,
                                       const char* target,
@@ -160,7 +160,7 @@ protected:
                                       const char* depend,
                                       const std::vector<std::pair<cmStdString, bool> >&
                                       SubDirectories,
-                                      bool silent = false);
+                                      bool silent = false, int order = 0);
 
   virtual void OutputMakeRule(std::ostream&, 
                               const char* comment,

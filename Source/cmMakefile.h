@@ -216,7 +216,7 @@ public:
   /**
    * Add a subdirectory to the build.
    */
-  void AddSubDirectory(const char*, bool includeTopLevel=true);
+  void AddSubDirectory(const char*, bool includeTopLevel=true, bool preorder = false);
 
   /**
    * Add an include directory to the build.
@@ -274,16 +274,6 @@ public:
    */
   void AddLibrary(const char *libname, int shared,
                   const std::vector<std::string> &srcs);
-
-  /**
-   * Add a class/source file to the build.
-   */
-  //void AddSource(cmSourceFile& ,const char *srcListName);
-
-  /**
-   * Remove a class/source file from the build.
-   */
-  //void RemoveSource(cmSourceFile& ,const char *srcListName);
 
   /**
    * Add a source group for consideration when adding a new source.
@@ -648,6 +638,9 @@ public:
    * Return a location of a file in cmake or custom modules directory
    */
   std::string GetModulesFile(const char* name);
+
+  ///! Return true if the directory is preorder.
+  bool IsDirectoryPreOrder(const char* dir);
   
 protected:
   // add link libraries and directories to the target
@@ -720,6 +713,7 @@ private:
   typedef std::map<cmStdString, cmStdString> StringStringMap;
   StringStringMap m_MacrosMap;
 
+  std::map<cmStdString, bool> m_SubDirectoryOrder;
   // used in AddDefinition for performance improvement
   DefinitionMap::key_type  m_TemporaryDefinitionKey;
 

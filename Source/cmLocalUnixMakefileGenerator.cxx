@@ -1781,13 +1781,20 @@ void cmLocalUnixMakefileGenerator::OutputBuildTargetInDirWindows(std::ostream& f
                                                                  const char* library,
                                                                  const char* fullpath)
 {
-  std::string jumpBack =
-    cmSystemTools::RelativePath(cmSystemTools::GetProgramPath(path).c_str(),
-                                m_Makefile->GetCurrentOutputDirectory());
+  std::string jumpBack;
+  if(m_UseRelativePaths)
+    {
+    cmSystemTools::Message("using relative paths??");
+    jumpBack = cmSystemTools::RelativePath(cmSystemTools::GetProgramPath(path).c_str(),
+                                           m_Makefile->GetCurrentOutputDirectory());
+    }
+  else
+    {
+    jumpBack = m_Makefile->GetCurrentOutputDirectory();
+    }
   jumpBack = this->ConvertToOutputForExisting(jumpBack.c_str());
   std::string wpath = this->ConvertToOutputForExisting(path);
   std::string wfullpath = this->ConvertToOutputForExisting(fullpath);
-
   fout << wfullpath
        << ":\n\tcd " << wpath  << "\n"
        << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.depends\n"
@@ -2008,23 +2015,32 @@ BuildInSubDirectoryWindows(std::ostream& fout,
       }
     fout << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) " << target2 << "\n";
     } 
-  std::string currentDir = dir;
-  cmSystemTools::ConvertToUnixSlashes(currentDir);
-  std::string cdback = "..";
-  unsigned int i = 0;
-  if(currentDir.size() > 2 && currentDir[0] == '.' && currentDir[1] == '/')
+  std::string currentDir;
+  if(m_UseRelativePaths)
     {
-    // start past ./ if it starts with ./
-    i = 2;
-    }
-  for(; i < currentDir.size(); ++i)
-    {
-    if(currentDir[i] == '/')
+    currentDir = dir;
+    cmSystemTools::ConvertToUnixSlashes(currentDir);
+    std::string cdback = "..";
+    unsigned int i = 0;
+    if(currentDir.size() > 2 && currentDir[0] == '.' && currentDir[1] == '/')
       {
-      cdback += "/..";
+      // start past ./ if it starts with ./
+      i = 2;
       }
+    for(; i < currentDir.size(); ++i)
+      {
+      if(currentDir[i] == '/')
+        {
+        cdback += "/..";
+        }
+      }
+    fout << "\tcd " << this->ConvertToOutputForExisting(cdback.c_str()) << "\n\n";
     }
-  fout << "\tcd " << this->ConvertToOutputForExisting(cdback.c_str()) << "\n\n";
+  else
+    {
+    currentDir = m_Makefile->GetCurrentOutputDirectory();  
+    fout << "\tcd " << this->ConvertToOutputForExisting(currentDir.c_str()) << "\n\n";
+    }
 }
 
 
@@ -2074,7 +2090,7 @@ OutputSubDirectoryVars(std::ostream& fout,
                        const char* target2,
                        const char* depend,
                        const std::vector<std::pair<cmStdString, bool> >& SubDirectories,
-                       bool silent)
+                       bool silent, int order)
 {
   if(!depend)
     {
@@ -2087,27 +2103,68 @@ OutputSubDirectoryVars(std::ostream& fout,
   fout << "# Variable for making " << target << " in subdirectories.\n";
   fout << var << " = ";
   unsigned int ii;
+  
+  // make sure all the pre-order subdirectories are fist
+  // other than that keep the same order that the user specified
+  std::vector<std::pair<cmStdString, bool> > orderedDirs;
+  // collect pre-order first
   for(ii =0; ii < SubDirectories.size(); ii++)
+    {
+    if(m_Makefile->IsDirectoryPreOrder(SubDirectories[ii].first.c_str()))
+      {
+      orderedDirs.push_back(SubDirectories[ii]);
+      }
+    }
+  // now collect post order dirs
+  for(ii =0; ii < SubDirectories.size(); ii++)
+    {
+    if(!m_Makefile->IsDirectoryPreOrder(SubDirectories[ii].first.c_str()))
+      {
+      orderedDirs.push_back(SubDirectories[ii]);
+      }
+    }
+  
+  for(ii =0; ii < orderedDirs.size(); ii++)
     { 
-    if(!SubDirectories[ii].second)
+    if(!orderedDirs[ii].second)
       {
       continue;
       }
+    if(order == 1 && m_Makefile->IsDirectoryPreOrder(orderedDirs[ii].first.c_str()))
+      {
+      continue;
+      }
+    if(order == 2 && !m_Makefile->IsDirectoryPreOrder(orderedDirs[ii].first.c_str()))
+      {
+      continue;
+      }
+    
     fout << " \\\n";
-    std::string subdir = FixDirectoryName(SubDirectories[ii].first.c_str());
+    std::string subdir = FixDirectoryName(orderedDirs[ii].first.c_str());
     fout << target << "_" << subdir.c_str();
     }
   fout << " \n\n";
 
   fout << "# Targets for making " << target << " in subdirectories.\n";
   std::string last = "";
-  for(unsigned int cc =0; cc < SubDirectories.size(); cc++)
+  for(unsigned int cc =0; cc < orderedDirs.size(); cc++)
     {
-    if(!SubDirectories[cc].second)
+    if(!orderedDirs[cc].second)
       {
       continue;
+      } 
+    std::string subdir = FixDirectoryName(orderedDirs[cc].first.c_str());
+    if(order == 1 && m_Makefile->IsDirectoryPreOrder(orderedDirs[cc].first.c_str()))
+      {
+      last = subdir;
+      continue;
       }
-    std::string subdir = FixDirectoryName(SubDirectories[cc].first.c_str());
+    if(order == 2 && !m_Makefile->IsDirectoryPreOrder(orderedDirs[cc].first.c_str()))
+      {
+      last = subdir;
+      continue;
+      }
+    
     fout << target << "_" << subdir.c_str() << ": " << depend;
     
     // Make each subdirectory depend on previous one.  This forces
@@ -2122,7 +2179,7 @@ OutputSubDirectoryVars(std::ostream& fout,
     last = subdir;
     std::string dir = m_Makefile->GetCurrentOutputDirectory();
     dir += "/";
-    dir += SubDirectories[cc].first;
+    dir += orderedDirs[cc].first;
     this->BuildInSubDirectory(fout, dir.c_str(),
                               target1, target2, silent);
     }
@@ -2148,7 +2205,14 @@ void cmLocalUnixMakefileGenerator::OutputSubDirectoryRules(std::ostream& fout)
                                "default_target",
                                0, "$(TARGETS)",
                                SubDirectories,
-                               false);
+                               false, 1);
+  this->OutputSubDirectoryVars(fout, 
+                               "SUBDIR_PREORDER_BUILD",
+                               "default_target",
+                               "default_target",
+                               0, "$(TARGETS)",
+                               SubDirectories,
+                               false, 2);
   this->OutputSubDirectoryVars(fout, "SUBDIR_CLEAN", "clean",
                                "clean",
                                0, 0,
@@ -2442,7 +2506,7 @@ void cmLocalUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
   this->OutputMakeRule(fout, 
                        "default build rule",
                        "all",
-                       "cmake.depends $(TARGETS) $(SUBDIR_BUILD)",
+                       "cmake.depends $(SUBDIR_PREORDER_BUILD) $(TARGETS) $(SUBDIR_BUILD)",
                        0);
   this->OutputMakeRule(fout, 
                        "clean generated files",
