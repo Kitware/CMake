@@ -1102,6 +1102,7 @@ void ctest::ProcessDirectory(std::vector<std::string> &passed,
     }
 
   int firstTest = 1;
+  long line = 0;
   
   std::string name;
   std::vector<std::string> args;
@@ -1113,7 +1114,8 @@ void ctest::ProcessDirectory(std::vector<std::string> &passed,
   while ( fin )
     {
     cmListFileFunction lff;
-    if(cmListFileCache::ParseFunction(fin, lff, "DartTestfile.txt", parseError))
+    if(cmListFileCache::ParseFunction(fin, lff, "DartTestfile.txt",
+                                      parseError, line))
       {
       const std::string& name = lff.m_Name;
       const std::vector<cmListFileArgument>& args = lff.m_Arguments;

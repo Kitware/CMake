@@ -156,13 +156,15 @@ bool cmMakefile::CommandExists(const char* name) const
 {
   return m_LocalGenerator->GetGlobalGenerator()->GetCMakeInstance()->CommandExists(name);
 }
-      
-void cmMakefile::ExecuteCommand(const cmListFileFunction& lff)
+
+bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff)
 {
+  bool result = true;
   // quick return if blocked
   if(this->IsFunctionBlocked(lff))
     {
-    return;
+    // No error.
+    return result;
     }
   std::string name = lff.m_Name;
   // execute the command
@@ -186,6 +188,7 @@ void cmMakefile::ExecuteCommand(const cmListFileFunction& lff)
                 << lff.m_FilePath << ":" << lff.m_Line << ":\n"
                 << usedCommand->GetError();
           cmSystemTools::Error(error.str().c_str());
+          result = false;
           }
         else
           {
@@ -209,7 +212,10 @@ void cmMakefile::ExecuteCommand(const cmListFileFunction& lff)
           << lff.m_FilePath << ":" << lff.m_Line << ":\n"
           << "Unknown CMake command \"" << lff.m_Name.c_str() << "\".";
     cmSystemTools::Error(error.str().c_str());
+    result = false;
     }
+  
+  return result;
 }
 
 // Parse the given CMakeLists.txt file into a list of classes.

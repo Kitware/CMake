@@ -84,7 +84,7 @@ public:
    */
   static bool ParseFunction(std::ifstream&, cmListFileFunction& function,
                             const char* filename, bool& parseError,
-                            long* line = 0);
+                            long& line);
 
   /**
    *  Extract white-space separated arguments from a string.

@@ -510,9 +510,10 @@ public:
   cmData* LookupData(const char*) const;
   
   /**
-   * execute a single CMake command
+   * Execute a single CMake command.  Returns true if the command
+   * succeeded or false if it failed.
    */
-  void ExecuteCommand(const cmListFileFunction& lff);
+  bool ExecuteCommand(const cmListFileFunction& lff);
   
   /** Check if a command exists. */
   bool CommandExists(const char* name) const;

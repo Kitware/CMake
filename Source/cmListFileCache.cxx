@@ -97,7 +97,7 @@ bool cmListFileCache::CacheFile(const char* path, bool requireProjectCommand)
     {
     cmListFileFunction inFunction;
     if(cmListFileCache::ParseFunction(fin, inFunction, path, parseError,
-                                      &line))
+                                      line))
       {
       inFunction.m_FilePath = path;
       inFile.m_Functions.push_back(inFunction);
@@ -162,7 +162,7 @@ bool cmListFileCache::ParseFunction(std::ifstream& fin,
                                     cmListFileFunction& function,
                                     const char* filename,
                                     bool& parseError,
-                                    long* line)
+                                    long& line)
 {
   parseError = false;
   std::string& name = function.m_Name;
@@ -177,7 +177,7 @@ bool cmListFileCache::ParseFunction(std::ifstream& fin,
     }
   if(fin.getline(inbuffer, BUFFER_SIZE ) )
     {
-    if(line) { ++*line; }
+    ++line;
     RemoveComments(inbuffer);
     cmRegularExpression blankLine("^[ \t\r]*$");
     cmRegularExpression oneLiner("^[ \t]*([A-Za-z_0-9]*)[ \t]*\\((.*)\\)[ \t\r]*$");
@@ -197,10 +197,7 @@ bool cmListFileCache::ParseFunction(std::ifstream& fin,
       name = oneLiner.match(1);
       // break up the arguments
       cmListFileCache::GetArguments(args, arguments);
-      if(line)
-        {
-        function.m_Line = *line;
-        }
+        function.m_Line = line;
       return true;
       }
     // look for a start of a multiline with no trailing ")"  fun(arg arg2 
@@ -209,10 +206,7 @@ bool cmListFileCache::ParseFunction(std::ifstream& fin,
       name = multiLine.match(1);
       std::string args = multiLine.match(2);
       cmListFileCache::GetArguments(args, arguments);
-      if(line)
-        {
-        function.m_Line = *line;
-        }
+      function.m_Line = line;
       // Read lines until the closing paren is hit
       bool done = false;
       while(!done)
@@ -220,7 +214,7 @@ bool cmListFileCache::ParseFunction(std::ifstream& fin,
         // read lines until the end paren is found
         if(fin.getline(inbuffer, BUFFER_SIZE ) )
           {
-          if(line) { ++*line; }
+          ++line;
           RemoveComments(inbuffer);
           // Check for comment lines and ignore them.
           if(blankLine.find(inbuffer))
@@ -234,15 +228,18 @@ bool cmListFileCache::ParseFunction(std::ifstream& fin,
             }
           else
             {
-            std::string line = inbuffer;
-            cmListFileCache::GetArguments(line, arguments);
+            std::string lineB = inbuffer;
+            cmListFileCache::GetArguments(lineB, arguments);
             }
           }
         else
           {
           parseError = true;
-          cmSystemTools::Error("Parse error in read function missing end )\nIn File: ",
-                               filename, "\nCurrent line:", inbuffer);
+          cmOStringStream error;
+          error << "Error in cmake code at\n"
+                << filename << ":" << line << ":\n"
+                << "Parse error.  Function missing ending \")\".";
+          cmSystemTools::Error(error.str().c_str());
           return false;
           }
         }
@@ -251,8 +248,11 @@ bool cmListFileCache::ParseFunction(std::ifstream& fin,
     else
       {
       parseError = true;
-      cmSystemTools::Error("Parse error in read function\nIn file:", 
-                           filename, "\nCurrent line:", inbuffer);
+      cmOStringStream error;
+      error << "Error in cmake code at\n"
+            << filename << ":" << line << ":\n"
+            << "Parse error.";
+      cmSystemTools::Error(error.str().c_str());
       return false;
       }
     }

@@ -59,6 +59,8 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
       // Replace the formal arguments and then invoke the command.
       cmListFileFunction newLFF;
       newLFF.m_Name = m_Functions[c].m_Name;
+      newLFF.m_FilePath = m_Functions[c].m_FilePath;
+      newLFF.m_Line = m_Functions[c].m_Line;
       for (std::vector<cmListFileArgument>::const_iterator k = 
              m_Functions[c].m_Arguments.begin();
            k != m_Functions[c].m_Arguments.end(); ++k)
@@ -74,10 +76,16 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
           }
         cmListFileArgument arg(tmps, k->Quoted);
         newLFF.m_Arguments.push_back(arg);
-        newLFF.m_FilePath = m_Functions[c].m_FilePath;
-        newLFF.m_Line = m_Functions[c].m_Line;
         }
-      mf.ExecuteCommand(newLFF);
+      if(!mf.ExecuteCommand(newLFF))
+        {
+        cmOStringStream error;
+        error << "Error in cmake code at\n"
+              << lff.m_FilePath << ":" << lff.m_Line << ":\n"
+              << "A command failed during the invocation of macro \""
+              << lff.m_Name.c_str() << "\".";
+        cmSystemTools::Error(error.str().c_str());
+        }
       }
     return true;
     }
