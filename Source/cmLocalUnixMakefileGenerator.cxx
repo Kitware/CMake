@@ -717,7 +717,7 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
   // Some search paths should never be emitted
   emitted.insert("");
   emitted.insert("/usr/lib");
-  std::string libPathFlag = m_Makefile->GetDefinition("CMAKE_LIBRARY_PATH_FLAG");
+  std::string libPathFlag = m_Makefile->GetRequiredDefinition("CMAKE_LIBRARY_PATH_FLAG");
   std::string libLinkFlag = m_Makefile->GetSafeDefinition("CMAKE_LINK_LIBRARY_FLAG");
   // collect all the flags needed for linking libraries
   std::string linkLibs;
@@ -984,17 +984,23 @@ static RuleVariables ruleReplaceVars[] =
 {
   {"<CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS>", "CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS"},
   {"<CMAKE_SHARED_MODULE_CREATE_CXX_FLAGS>", "CMAKE_SHARED_MODULE_CREATE_CXX_FLAGS"}, 
+  {"<CMAKE_SHARED_MODULE_CREATE_FORTAN_FLAGS>", "CMAKE_SHARED_MODULE_CREATE_FORTAN_FLAGS"}, 
   {"<CMAKE_SHARED_MODULE_C_FLAGS>", "CMAKE_SHARED_MODULE_C_FLAGS"},
+  {"<CMAKE_SHARED_MODULE_FORTRAN_FLAGS>", "CMAKE_SHARED_MODULE_FORTRAN_FLAGS"},
   {"<CMAKE_SHARED_MODULE_CXX_FLAGS>", "CMAKE_SHARED_MODULE_CXX_FLAGS"},
   {"<CMAKE_SHARED_LIBRARY_C_FLAGS>", "CMAKE_SHARED_LIBRARY_C_FLAGS"},
+  {"<CMAKE_SHARED_LIBRARY_FORTRAN_FLAGS>", "CMAKE_SHARED_LIBRARY_FORTRAN_FLAGS"},
   {"<CMAKE_SHARED_LIBRARY_CXX_FLAGS>", "CMAKE_SHARED_LIBRARY_CXX_FLAGS"},
   {"<CMAKE_CXX_LINK_FLAGS>", "CMAKE_CXX_LINK_FLAGS"},
 
   {"<CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS>", "CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS"},
+  {"<CMAKE_SHARED_LIBRARY_CREATE_FORTRAN_FLAGS>", "CMAKE_SHARED_LIBRARY_CREATE_FORTRAN_FLAGS"},
   {"<CMAKE_SHARED_MODULE_CREATE_C_FLAGS>", "CMAKE_SHARED_MODULE_CREATE_C_FLAGS"},
   {"<CMAKE_SHARED_LIBRARY_SONAME_C_FLAG>", "CMAKE_SHARED_LIBRARY_SONAME_C_FLAG"},
+  {"<CMAKE_SHARED_LIBRARY_SONAME_FORTRAN_FLAG>", "CMAKE_SHARED_LIBRARY_SONAME_FORTRAN_FLAG"},
   {"<CMAKE_SHARED_LIBRARY_SONAME_CXX_FLAG>", "CMAKE_SHARED_LIBRARY_SONAME_CXX_FLAG"},
   {"<CMAKE_C_LINK_FLAGS>", "CMAKE_C_LINK_FLAGS"},
+  {"<CMAKE_FORTRAN_LINK_FLAGS>", "CMAKE_FORTRAN_LINK_FLAGS"},
 
   {"<CMAKE_AR>", "CMAKE_AR"},
   {"<CMAKE_RANLIB>", "CMAKE_RANLIB"},
@@ -1021,6 +1027,9 @@ cmLocalUnixMakefileGenerator::ExpandRuleVariables(std::string& s,
     m_Makefile->GetSafeDefinition("CMAKE_CXX_COMPILER"));
   std::string ccompiler = this->ConvertToOutputForExisting(
     m_Makefile->GetSafeDefinition("CMAKE_C_COMPILER"));
+  std::string fcompiler = this->ConvertToOutputForExisting(
+    m_Makefile->GetSafeDefinition("CMAKE_FORTRAN_COMPILER"));
+  cmSystemTools::ReplaceString(s, "<CMAKE_FORTRAN_COMPILER>", fcompiler.c_str());
   cmSystemTools::ReplaceString(s, "<CMAKE_CXX_COMPILER>", cxxcompiler.c_str());
   cmSystemTools::ReplaceString(s, "<CMAKE_C_COMPILER>", ccompiler.c_str());
   if(linkFlags)
@@ -1165,7 +1174,7 @@ void cmLocalUnixMakefileGenerator::OutputLibraryRule(std::ostream& fout,
 
   std::vector<std::string> commands;
   std::string cmakecommand = this->ConvertToOutputForExisting(
-    m_Makefile->GetDefinition("CMAKE_COMMAND"));
+    m_Makefile->GetRequiredDefinition("CMAKE_COMMAND"));
 
   // Remove any existing files for this library.
   std::string remove = cmakecommand;
@@ -1199,7 +1208,7 @@ void cmLocalUnixMakefileGenerator::OutputLibraryRule(std::ostream& fout,
 
   // collect up the build rules
   std::vector<std::string> rules;
-  rules.push_back(m_Makefile->GetDefinition(createVariable));
+  rules.push_back(m_Makefile->GetRequiredDefinition(createVariable));
   // expand multi-command semi-colon separated lists
   // of commands into separate commands
   cmSystemTools::ExpandList(rules, commands);
@@ -1261,9 +1270,9 @@ void cmLocalUnixMakefileGenerator::OutputLibraryRule(std::ostream& fout,
                          depend.c_str(),
                          commands);
     }
+  // Add a target with the canonical name (no prefix, suffix or path). 
+  this->OutputMakeRule(fout, comment, name, tgt.c_str(), 0); 
 
-  // Add a target with the canonical name (no prefix, suffix or path).
-  this->OutputMakeRule(fout, comment, name, tgt.c_str(), 0);
 }
 
 void cmLocalUnixMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,  
@@ -1274,11 +1283,19 @@ void cmLocalUnixMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
   if(t.HasCxx())
     {
     createRule = "CMAKE_CXX_CREATE_SHARED_LIBRARY";
-    }
+    } 
   else
     {
-    createRule = "CMAKE_C_CREATE_SHARED_LIBRARY";
+    if(t.HasFortran())
+      { 
+      createRule = "CMAKE_FORTRAN_CREATE_SHARED_LIBRARY";
+      }
+    else
+      {
+      createRule = "CMAKE_C_CREATE_SHARED_LIBRARY";
+      }
     }
+  
   std::string buildType =  m_Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   buildType = cmSystemTools::UpperCase(buildType); 
   std::string linkFlags = m_Makefile->GetSafeDefinition("CMAKE_SHARED_LINKER_FLAGS");
@@ -1427,7 +1444,8 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
     {
     needsLocalTarget = true;
     }
-  std::string objs = "$(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") $(" + this->CreateMakeVariable(name, "_EXTERNAL_OBJS") + ") ";
+  std::string objs = "$(" + this->CreateMakeVariable(name, "_SRC_OBJS") + 
+    ") $(" + this->CreateMakeVariable(name, "_EXTERNAL_OBJS") + ") ";
   std::string depend = "$(";
   depend += this->CreateMakeVariable(name, "_SRC_OBJS") 
     + ") $(" + this->CreateMakeVariable(name, "_EXTERNAL_OBJS") 
@@ -1445,7 +1463,7 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
 
   if(t.HasCxx())
     {
-    rules.push_back(m_Makefile->GetDefinition("CMAKE_CXX_LINK_EXECUTABLE"));
+    rules.push_back(m_Makefile->GetRequiredDefinition("CMAKE_CXX_LINK_EXECUTABLE"));
     flags += m_Makefile->GetSafeDefinition("CMAKE_CXX_FLAGS");
     flags += " ";
     flags += m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_CXX_FLAGS");
@@ -1453,11 +1471,22 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
     }
   else
     {
-    rules.push_back(m_Makefile->GetDefinition("CMAKE_C_LINK_EXECUTABLE"));
-    flags += m_Makefile->GetSafeDefinition("CMAKE_C_FLAGS");
-    flags += " ";
-    flags += m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_C_FLAGS");
-    flags += " ";
+    if(t.HasFortran())
+      {
+      rules.push_back(m_Makefile->GetRequiredDefinition("CMAKE_FORTRAN_LINK_EXECUTABLE"));
+      flags += m_Makefile->GetSafeDefinition("CMAKE_FORTRAN_FLAGS");
+      flags += " ";
+      flags += m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_FORTRAN_FLAGS");
+      flags += " ";
+      }
+    else
+      {
+      rules.push_back(m_Makefile->GetRequiredDefinition("CMAKE_C_LINK_EXECUTABLE"));
+      flags += m_Makefile->GetSafeDefinition("CMAKE_C_FLAGS");
+      flags += " ";
+      flags += m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_C_FLAGS");
+      flags += " ";
+      }
     }
   cmOStringStream linklibs;
   this->OutputLinkLibraries(linklibs, 0, t);
@@ -1540,15 +1569,14 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
                          depend.c_str(),
                          commands);
     }
-
-  // Add a target with the canonical name (no prefix, suffix or path).
-  // Note that on some platforms the "local target" added above will
-  // actually be the canonical name and will have set "target"
-  // correctly.  Do not duplicate this target.
-  if(target != name)
-    {
-    this->OutputMakeRule(fout, comment.c_str(), name, target.c_str(), 0);
-    }
+  // Add a target with the canonical name (no prefix, suffix or path). 
+  // Note that on some platforms the "local target" added above will 
+  // actually be the canonical name and will have set "target" 
+  // correctly.  Do not duplicate this target. 
+  if(target != name) 
+    { 
+    this->OutputMakeRule(fout, comment.c_str(), name, target.c_str(), 0); 
+    } 
 }
 
 
@@ -2476,7 +2504,7 @@ void cmLocalUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     }
   
   std::string cmakecommand = this->ConvertToOutputForExisting(
-    m_Makefile->GetDefinition("CMAKE_COMMAND"));
+    m_Makefile->GetRequiredDefinition("CMAKE_COMMAND"));
   fout << "CMAKE_COMMAND = "
        << cmakecommand
        << "\n";
@@ -2699,14 +2727,14 @@ void cmLocalUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
   
   this->OutputSourceObjectBuildRules(fout);
   // find ctest
-  std::string ctest = m_Makefile->GetDefinition("CMAKE_COMMAND");
+  std::string ctest = m_Makefile->GetRequiredDefinition("CMAKE_COMMAND");
   ctest = cmSystemTools::GetFilenamePath(ctest.c_str());
   ctest += "/";
   ctest += "ctest";
   ctest += cmSystemTools::GetExecutableExtension();
   if(!cmSystemTools::FileExists(ctest.c_str()))
     {
-    ctest = m_Makefile->GetDefinition("CMAKE_COMMAND");
+    ctest = m_Makefile->GetRequiredDefinition("CMAKE_COMMAND");
     ctest = cmSystemTools::GetFilenamePath(ctest.c_str());
     ctest += "/Debug/";
     ctest += "ctest";
@@ -2714,7 +2742,7 @@ void cmLocalUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
     }
   if(!cmSystemTools::FileExists(ctest.c_str()))
     {
-    ctest = m_Makefile->GetDefinition("CMAKE_COMMAND");
+    ctest = m_Makefile->GetRequiredDefinition("CMAKE_COMMAND");
     ctest = cmSystemTools::GetFilenamePath(ctest.c_str());
     ctest += "/Release/";
     ctest += "ctest";
@@ -2727,7 +2755,7 @@ void cmLocalUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
       {
       return;
       }
-    ctest = m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
+    ctest = m_Makefile->GetRequiredDefinition("EXECUTABLE_OUTPUT_PATH");
     ctest += "/ctest";
     }
   if (m_Makefile->IsOn("CMAKE_TESTING_ENABLED"))
@@ -2745,7 +2773,7 @@ void cmLocalUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
     {
     // We are building CMake itself.  We cannot use the original
     // executable to install over itself.
-    std::string rule = m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
+    std::string rule = m_Makefile->GetRequiredDefinition("EXECUTABLE_OUTPUT_PATH");
     rule += "/cmake";
     rule = cmSystemTools::ConvertToOutputPath(rule.c_str());
     rule += " -P cmake_install.cmake";
@@ -2794,7 +2822,7 @@ OutputBuildObjectFromSource(std::ostream& fout,
     {
     case cmSystemTools::C_FILE_FORMAT:
       {
-      rules.push_back(m_Makefile->GetDefinition("CMAKE_C_COMPILE_OBJECT"));
+      rules.push_back(m_Makefile->GetRequiredDefinition("CMAKE_C_COMPILE_OBJECT"));
       flags += m_Makefile->GetSafeDefinition("CMAKE_C_FLAGS");
       flags += " ";
       if(buildType.size())
@@ -2818,7 +2846,7 @@ OutputBuildObjectFromSource(std::ostream& fout,
       }
     case cmSystemTools::CXX_FILE_FORMAT:
       {
-      rules.push_back(m_Makefile->GetDefinition("CMAKE_CXX_COMPILE_OBJECT"));
+      rules.push_back(m_Makefile->GetRequiredDefinition("CMAKE_CXX_COMPILE_OBJECT"));
       flags += m_Makefile->GetSafeDefinition("CMAKE_CXX_FLAGS");
       flags += " "; 
       if(buildType.size())
@@ -2840,6 +2868,30 @@ OutputBuildObjectFromSource(std::ostream& fout,
         }
       break;
       }
+    case cmSystemTools::FORTRAN_FILE_FORMAT:
+       {
+       rules.push_back(m_Makefile->GetRequiredDefinition("CMAKE_FORTRAN_COMPILE_OBJECT"));
+       flags += m_Makefile->GetSafeDefinition("CMAKE_FORTRAN_FLAGS");
+       flags += " "; 
+       if(buildType.size())
+         {
+         std::string build = "CMAKE_FORTRAN_FLAGS_";
+         build += buildType;
+         flags +=  m_Makefile->GetSafeDefinition(build.c_str());
+         flags += " ";
+         }
+       if(shared)
+         {
+         flags += m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_FORTRAN_FLAGS");
+         flags += " ";
+         }
+       if(cmSystemTools::IsOn(m_Makefile->GetDefinition("BUILD_SHARED_LIBS")))
+         {
+         flags += m_Makefile->GetSafeDefinition("CMAKE_SHARED_BUILD_FORTRAN_FLAGS");
+         flags += " ";
+         }
+       break;
+       }
     case cmSystemTools::HEADER_FILE_FORMAT:
       return;
     case cmSystemTools::DEFINITION_FILE_FORMAT:

@@ -1095,6 +1095,11 @@ cmSystemTools::FileFormat cmSystemTools::GetFileFormat(const char* cext)
     ext == "m" || ext == ".m" ||
     ext == "mm" || ext == ".mm"
     ) { return cmSystemTools::CXX_FILE_FORMAT; }
+  if ( 
+    ext == "f" || ext == ".f" ||
+    ext == "F" || ext == ".F" ||
+    ext == "f77" || ext == ".f77" 
+    ) { return cmSystemTools::FORTRAN_FILE_FORMAT; }
   if ( ext == "java" || ext == ".java" ) { return cmSystemTools::JAVA_FILE_FORMAT; }
   if ( 
     ext == "H" || ext == ".H" || 

@@ -108,10 +108,10 @@ void cmGlobalGenerator::EnableLanguage(const char* lang,
     }
   bool needCBackwards = false;
   bool needCXXBackwards = false;
-
+  bool needTestFortran = false;
   if (!isLocal &&
       !this->GetLanguageEnabled("C") && !this->GetLanguageEnabled("CXX") &&
-      !this->GetLanguageEnabled("JAVA"))
+      !this->GetLanguageEnabled("JAVA") && !this->GetLanguageEnabled("FORTRAN"))
     {
 #if defined(_WIN32) && !defined(__CYGWIN__) 
     /* Windows version number data.  */
@@ -186,6 +186,17 @@ void cmGlobalGenerator::EnableLanguage(const char* lang,
     mf->ReadListFile(0,determineCFile.c_str());
     this->SetLanguageEnabled("JAVA");
     }
+  // check for a Fortran compiler and configure it
+  if(!isLocal &&
+     !this->GetLanguageEnabled("FORTRAN") &&
+     strcmp(lang, "FORTRAN") == 0)
+    {
+    needTestFortran = true;
+    std::string determineCFile = root;
+    determineCFile += "/Modules/CMakeDetermineFortranCompiler.cmake";
+    mf->ReadListFile(0,determineCFile.c_str());
+    this->SetLanguageEnabled("FORTRAN");
+    }
    
   std::string fpath = rootBin;
   if(!mf->GetDefinition("CMAKE_SYSTEM_LOADED"))
@@ -216,7 +227,14 @@ void cmGlobalGenerator::EnableLanguage(const char* lang,
     mf->ReadListFile(0,fpath.c_str());
     this->SetLanguageEnabled("JAVA");
     }
-  if ( lang[0] == 'C' && !mf->GetDefinition("CMAKE_SYSTEM_SPECIFIC_INFORMATION_LOADED"))
+  if(strcmp(lang, "FORTRAN") == 0 && !mf->GetDefinition("CMAKE_FORTRAN_COMPILER_LOADED"))
+    {
+    fpath = rootBin; 
+    fpath += "/CMakeFortranCompiler.cmake";
+    mf->ReadListFile(0,fpath.c_str());
+    this->SetLanguageEnabled("FORTRAN");
+    }
+  if ( (lang[0] == 'C' || lang[0] == 'F') && !mf->GetDefinition("CMAKE_SYSTEM_SPECIFIC_INFORMATION_LOADED"))
     {
     fpath = root;
     fpath += "/Modules/CMakeSystemSpecificInformation.cmake";
@@ -259,6 +277,16 @@ void cmGlobalGenerator::EnableLanguage(const char* lang,
           }
         }
       }
+    if(needTestFortran)
+      {
+      if (!m_CMakeInstance->GetIsInTryCompile()) 
+        {
+        std::string ifpath = root + "/Modules/CMakeTestFortranCompiler.cmake";
+        mf->ReadListFile(0,ifpath.c_str());
+        }
+      }
+    
+
     // if we are from the top, always define this
     mf->AddDefinition("RUN_CONFIGURE", true);
     }
@@ -479,6 +507,15 @@ int cmGlobalGenerator::TryCompile(const char *, const char *bindir,
     {
     makeCommand += " ";
     makeCommand += target;
+#if defined(_WIN32) || defined(__CYGWIN__)
+    std::string tmp = target;
+    // if the target does not already end in . something 
+    // then assume .exe
+    if(tmp.size() < 4 || tmp[tmp.size()-4] != '.')
+      {
+      makeCommand += ".exe";
+      }
+#endif // WIN32
     }
   else
     {

@@ -156,10 +156,14 @@ int cmTryCompileCommand::CoreTryCompileCode(
       {
       fprintf(fout, "PROJECT(CMAKE_TRY_COMPILE CXX)\n");      
       }
+    else if ( format == cmSystemTools::FORTRAN_FILE_FORMAT )
+      {
+      fprintf(fout, "PROJECT(CMAKE_TRY_COMPILE FORTRAN)\n");      
+      }
     else
       {
       cmSystemTools::Error("Unknown file format for file: ", source.c_str(), 
-                           "; TRY_COMPILE only works for C and CXX files");
+                           "; TRY_COMPILE only works for C, CXX, and FORTRAN files");
       return -1;
       }
     const char* cflags = mf->GetDefinition("CMAKE_C_FLAGS"); 
@@ -178,6 +182,16 @@ int cmTryCompileCommand::CoreTryCompileCode(
       if(cxxflags)
         {
         fprintf(fout, " %s ", cxxflags);
+        }
+      fprintf(fout, " ${COMPILE_DEFINITIONS}\")\n");
+      }
+    if(format == cmSystemTools::FORTRAN_FILE_FORMAT )
+      {
+      const char* fflags = mf->GetDefinition("CMAKE_FORTRAN_FLAGS");
+      fprintf(fout, "SET(CMAKE_FORTRAN_FLAGS \"${CMAKE_FORTRAN_FLAGS} ");
+      if(fflags)
+        {
+        fprintf(fout, " %s ", fflags);
         }
       fprintf(fout, " ${COMPILE_DEFINITIONS}\")\n");
       }

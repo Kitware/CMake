@@ -87,6 +87,9 @@ public:
 
   ///! does this target have a cxx file in it
   bool HasCxx() const;
+
+  ///! does this target have a fortran file in it
+  bool HasFortran() const;
   /**
    * Get the list of the source files used by this target
    */

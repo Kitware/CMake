@@ -1346,6 +1346,19 @@ bool cmMakefile::IsOn(const char* name) const
   return cmSystemTools::IsOn(value);
 }
 
+const char* cmMakefile::GetRequiredDefinition(const char* name) const
+{
+  const char* ret = this->GetDefinition(name);
+  if(!ret)
+    {
+    cmSystemTools::Error("Error required internal CMake variable not set, cmake may be not be built correctly.\n",
+                         "Missing variable is:\n",
+                         name);
+    return "";
+    }
+  return ret;
+}
+
 const char* cmMakefile::GetDefinition(const char* name) const
 {
   const char* def = 0;

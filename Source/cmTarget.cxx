@@ -437,6 +437,24 @@ bool cmTarget::HasCxx() const
   return false;
 }
 
+bool cmTarget::HasFortran() const
+{
+  if(this->GetProperty("HAS_FORTRAN"))
+    {
+    return true;
+    }
+  for(std::vector<cmSourceFile*>::const_iterator i =  m_SourceFiles.begin();
+      i != m_SourceFiles.end(); ++i)
+    {
+    if(cmSystemTools::GetFileFormat((*i)->GetSourceExtension().c_str())
+       == cmSystemTools::FORTRAN_FILE_FORMAT)
+      {
+      return true;
+      }
+    }
+  return false;
+}
+
 
 
 

@@ -503,7 +503,7 @@ public:
    */
   const char* GetDefinition(const char*) const;
   const char* GetSafeDefinition(const char*) const;
-
+  const char* GetRequiredDefinition(const char* name) const;
   /**
    * Get the list of all variables in the current space. If argument
    * cacheonly is specified and is greater than 0, then only cache
