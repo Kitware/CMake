@@ -359,6 +359,7 @@ std::vector<cmStdString> cmSystemTools::ParseArguments(const char* command)
 
   if ( command[0] != '/' && command[1] == ':' && command[2] == '\\' ||
        command[0] == '\"' && command[1] != '/' && command[2] == ':' && command[3] == '\\' || 
+       command[0] == '\'' && command[1] != '/' && command[2] == ':' && command[3] == '\\' || 
        command[0] == '\\' && command[1] == '\\')
     {
     win_path = true;
@@ -377,6 +378,21 @@ std::vector<cmStdString> cmSystemTools::ParseArguments(const char* command)
       // Parse a quoted argument.
       ++c;
       while(*c && *c != '"')
+        {
+        arg.append(1, *c);
+        ++c;
+        }
+      if(*c)
+        {
+        ++c;
+        }
+      args.push_back(arg);
+      }
+    else if(*c == '\'')
+      {
+      // Parse a quoted argument.
+      ++c;
+      while(*c && *c != '\'')
         {
         arg.append(1, *c);
         ++c;
