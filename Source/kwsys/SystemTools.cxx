@@ -2010,15 +2010,15 @@ bool SystemTools::SetPermissions(const char* file, mode_t mode)
   return true;
 }
 
-std::string SystemTools::GetParentDirectory(const char* fileOrDir)
+kwsys_stl::string SystemTools::GetParentDirectory(const char* fileOrDir)
 {
   if ( !fileOrDir || !*fileOrDir )
     {
     return "";
     }
-  std::string res = fileOrDir;
+  kwsys_stl::string res = fileOrDir;
   SystemTools::ConvertToUnixSlashes(res);
-  std::string::size_type cc = res.size()-1;
+  kwsys_stl::string::size_type cc = res.size()-1;
   if ( res[cc] == '/' )
     {
     cc --;
@@ -2035,10 +2035,10 @@ std::string SystemTools::GetParentDirectory(const char* fileOrDir)
 
 bool SystemTools::IsSubDirectory(const char* cSubdir, const char* cDir)
 {
-  std::string subdir = cSubdir;
-  std::string dir = cDir;
+  kwsys_stl::string subdir = cSubdir;
+  kwsys_stl::string dir = cDir;
   SystemTools::ConvertToUnixSlashes(dir);
-  std::string path = subdir;
+  kwsys_stl::string path = subdir;
   do
     {
     path = SystemTools::GetParentDirectory(path.c_str());
