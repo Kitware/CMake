@@ -458,3 +458,20 @@ main ()
   return 0;
 }
 #endif
+#ifdef HAVE_FIONBIO
+/* headers for FIONBIO test */
+#include <unistd.h>
+#include <stropts.h>
+
+int
+main ()
+{
+
+/* FIONBIO source test (old-style unix) */
+ int socket;
+ int flags = ioctl(socket, FIONBIO, &flags);
+
+  ;
+  return 0;
+}
+#endif
