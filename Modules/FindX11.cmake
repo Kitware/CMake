@@ -2,19 +2,13 @@
 # try to find X11 on UNIX systems.
 #
 # The following values are defined
-# CMAKE_X11_INCLUDE_PATH  - where to find X11.h
-# CMAKE_X_LIBS            - link against these to use X11
-# CMAKE_HAS_X             - True if X11 is available
-# CMAKE_X11_LIBDIR        - Directory with X11 library
-# CMAKE_Xext_LIBDIR       - Directory with Xext library
+# CMAKE_HAS_X           - True if X11 is available
+# CMAKE_X_INCLUDE_DIRS  - include directories to use X11
+# CMAKE_X_LIBS          - link against these to use X11
 
 IF (UNIX)
-  SET(CMAKE_X_PRE_LIBS "")
-  SET(CMAKE_X_REAL_LIBS "")
-  SET(CMAKE_X_EXTRA_LIBS "")
-  SET(CMAKE_X_EXTRA_LIBS "")
   SET(CMAKE_HAS_X 0)
-  
+
   FIND_PATH(CMAKE_X11_INCLUDE_PATH X11/X.h
     /usr/include 
     /usr/local/include 
@@ -45,70 +39,129 @@ IF (UNIX)
     /opt/graphics/OpenGL/include
   )
 
+  FIND_LIBRARY(CMAKE_X11_LIB X11
+    /usr/lib 
+    /usr/local/lib 
+    /usr/openwin/lib 
+    /usr/X11R6/lib
+  )
+
+  FIND_LIBRARY(CMAKE_Xext_LIB Xext
+    /usr/lib 
+    /usr/local/lib 
+    /usr/openwin/lib 
+    /usr/X11R6/lib
+  )
+
   IF(CMAKE_X11_INCLUDE_PATH)
-    SET(CMAKE_X11_INCLUDES "${CMAKE_X11_INCLUDES};${CMAKE_X11_INCLUDE_PATH}")
+    SET(CMAKE_X_INCLUDE_DIRS ${CMAKE_X_INCLUDE_DIRS} ${CMAKE_X11_INCLUDE_PATH})
   ENDIF(CMAKE_X11_INCLUDE_PATH)
+
   IF(CMAKE_Xlib_INCLUDE_PATH)
-    SET(CMAKE_X11_INCLUDES "${CMAKE_X11_INCLUDES};${CMAKE_Xlib_INCLUDE_PATH}")
+    SET(CMAKE_X_INCLUDE_DIRS ${CMAKE_X_INCLUDE_DIRS} ${CMAKE_Xlib_INCLUDE_PATH})
   ENDIF(CMAKE_Xlib_INCLUDE_PATH)
+
   IF(CMAKE_Xutil_INCLUDE_PATH)
-    SET(CMAKE_X11_INCLUDES "${CMAKE_X11_INCLUDES};${CMAKE_Xutil_INCLUDE_PATH}")
+    SET(CMAKE_X_INCLUDE_DIRS ${CMAKE_X_INCLUDE_DIRS} ${CMAKE_Xutil_INCLUDE_PATH})
   ENDIF(CMAKE_Xutil_INCLUDE_PATH)
 
-  FIND_LIBRARY(CMAKE_X11_LIBDIR X11
-    /usr/lib 
-    /usr/local/lib 
-    /usr/openwin/lib 
-    /usr/X11R6/lib
-  )
+  IF(CMAKE_X11_LIB)
+    SET(CMAKE_X_LIBS ${CMAKE_X_LIBS} ${CMAKE_X11_LIB})
+  ENDIF(CMAKE_X11_LIB)
 
-  FIND_LIBRARY(CMAKE_Xext_LIBDIR Xext
-    /usr/lib 
-    /usr/local/lib 
-    /usr/openwin/lib 
-    /usr/X11R6/lib
-  )
+  IF(CMAKE_Xext_LIB)
+    SET(CMAKE_X_LIBS ${CMAKE_X_LIBS} ${CMAKE_Xext_LIB})
+  ENDIF(CMAKE_Xext_LIB)
 
-  IF(CMAKE_X11_INCLUDE_PATH)
-
-    IF(CMAKE_X11_LIBDIR)
-      SET( CMAKE_X_LIBS "${CMAKE_X_LIBS};${CMAKE_X11_LIBDIR}" )
-    ENDIF(CMAKE_X11_LIBDIR)
-
-    IF(CMAKE_Xext_LIBDIR)
-      SET( CMAKE_X_LIBS "${CMAKE_X_LIBS};${CMAKE_Xext_LIBDIR}" )
-    ENDIF(CMAKE_Xext_LIBDIR)
-
-  ENDIF(CMAKE_X11_INCLUDE_PATH)
-
-  # Deprecated variable fro backwards compatibility with CMake 1.4
+  # Deprecated variable for backwards compatibility with CMake 1.4
   IF(CMAKE_X11_INCLUDE_PATH)
     IF(CMAKE_X_LIBS)
       SET(CMAKE_HAS_X 1)
     ENDIF(CMAKE_X_LIBS)
   ENDIF(CMAKE_X11_INCLUDE_PATH)
-  IF(CMAKE_HAS_X)
-    INCLUDE (${CMAKE_ROOT}/Modules/CheckLibraryExists.cmake)
-    CHECK_LIBRARY_EXISTS("nsl" "gethostbyname" "" CMAKE_HAVE_GETHOSTBYNAME) 
-    IF (CMAKE_HAVE_GETHOSTBYNAME)
-      SET (CMAKE_X_EXTRA_LIBS "${CMAKE_X_EXTRA_LIBS};-lnsl")
-    ENDIF (CMAKE_HAVE_GETHOSTBYNAME)
-    CHECK_LIBRARY_EXISTS("socket" "connect" "" CMAKE_HAVE_SOCKET_LIBRARY)
-    IF (CMAKE_HAVE_SOCKET_LIBRARY)
-      SET (CMAKE_X_EXTRA_LIBS "${CMAKE_X_EXTRA_LIBS};-lsocket")
-    ENDIF (CMAKE_HAVE_SOCKET_LIBRARY)
-    SET (CMAKE_X_LIBS "${CMAKE_X_PRE_LIBS};${CMAKE_X_LIBS};${CMAKE_X_EXTRA_LIBS}" 
-         CACHE STRING 
-         "Libraries and options used in X11 programs.")
 
-    SET (CMAKE_X_CFLAGS           "${CMAKE_X_CFLAGS}" CACHE STRING 
-         "X11 extra flags.")
+  IF(CMAKE_HAS_X)
+    INCLUDE(${CMAKE_ROOT}/Modules/CheckFunctionExists.cmake)
+    INCLUDE(${CMAKE_ROOT}/Modules/CheckLibraryExists.cmake)
+
+    # Translated from an autoconf-generated configure script.
+    # See libs.m4 in autoconf's m4 directory.
+    IF($ENV{ISC} MATCHES "^yes$")
+      SET(CMAKE_X_EXTRA_LIBS -lnsl_s -linet)
+    ELSE($ENV{ISC} MATCHES "^yes$")
+      SET(CMAKE_X_EXTRA_LIBS "")
+
+      # See if XOpenDisplay in X11 works by itself.
+      CHECK_LIBRARY_EXISTS("${CMAKE_X_LIBS}" "XOpenDisplay" "" CMAKE_LIB_X11_SOLO)
+      IF(NOT CMAKE_LIB_X11_SOLO)
+        # Find library needed for dnet_ntoa.
+        CHECK_LIBRARY_EXISTS("dnet" "dnet_ntoa" "" CMAKE_LIB_DNET_HAS_DNET_NTOA) 
+        IF (CMAKE_LIB_DNET_HAS_DNET_NTOA)
+          SET (CMAKE_X_EXTRA_LIBS ${CMAKE_X_EXTRA_LIBS} -ldnet)
+        ELSE (CMAKE_LIB_DNET_HAS_DNET_NTOA)
+          CHECK_LIBRARY_EXISTS("dnet_stub" "dnet_ntoa" "" CMAKE_LIB_DNET_STUB_HAS_DNET_NTOA) 
+          IF (CMAKE_LIB_DNET_STUB_HAS_DNET_NTOA)
+            SET (CMAKE_X_EXTRA_LIBS ${CMAKE_X_EXTRA_LIBS} -ldnet_stub)
+          ENDIF (CMAKE_LIB_DNET_STUB_HAS_DNET_NTOA)
+        ENDIF (CMAKE_LIB_DNET_HAS_DNET_NTOA)
+      ENDIF(NOT CMAKE_LIB_X11_SOLO)
+
+      # Find library needed for gethostbyname.
+      CHECK_FUNCTION_EXISTS("gethostbyname" CMAKE_HAVE_GETHOSTBYNAME)
+      IF(NOT CMAKE_HAVE_GETHOSTBYNAME)
+        CHECK_LIBRARY_EXISTS("nsl" "gethostbyname" "" CMAKE_LIB_NSL_HAS_GETHOSTBYNAME) 
+        IF (CMAKE_LIB_NSL_HAS_GETHOSTBYNAME)
+          SET (CMAKE_X_EXTRA_LIBS ${CMAKE_X_EXTRA_LIBS} -lnsl)
+        ELSE (CMAKE_LIB_NSL_HAS_GETHOSTBYNAME)
+          CHECK_LIBRARY_EXISTS("bsd" "gethostbyname" "" CMAKE_LIB_BSD_HAS_GETHOSTBYNAME) 
+          IF (CMAKE_LIB_BSD_HAS_GETHOSTBYNAME)
+            SET (CMAKE_X_EXTRA_LIBS ${CMAKE_X_EXTRA_LIBS} -lbsd)
+          ENDIF (CMAKE_LIB_BSD_HAS_GETHOSTBYNAME)
+        ENDIF (CMAKE_LIB_NSL_HAS_GETHOSTBYNAME)
+      ENDIF(NOT CMAKE_HAVE_GETHOSTBYNAME)
+
+      # Find library needed for connect.
+      CHECK_FUNCTION_EXISTS("connect" CMAKE_HAVE_CONNECT)
+      IF(NOT CMAKE_HAVE_CONNECT)
+        CHECK_LIBRARY_EXISTS("socket" "connect" "" CMAKE_LIB_SOCKET_HAS_CONNECT) 
+        IF (CMAKE_LIB_SOCKET_HAS_CONNECT)
+          SET (CMAKE_X_EXTRA_LIBS -lsocket ${CMAKE_X_EXTRA_LIBS})
+        ENDIF (CMAKE_LIB_SOCKET_HAS_CONNECT)
+      ENDIF(NOT CMAKE_HAVE_CONNECT)
+
+      # Find library needed for remove.
+      CHECK_FUNCTION_EXISTS("remove" CMAKE_HAVE_REMOVE)
+      IF(NOT CMAKE_HAVE_REMOVE)
+        CHECK_LIBRARY_EXISTS("posix" "remove" "" CMAKE_LIB_POSIX_HAS_REMOVE) 
+        IF (CMAKE_LIB_POSIX_HAS_REMOVE)
+          SET (CMAKE_X_EXTRA_LIBS ${CMAKE_X_EXTRA_LIBS} -lposix)
+        ENDIF (CMAKE_LIB_POSIX_HAS_REMOVE)
+      ENDIF(NOT CMAKE_HAVE_REMOVE)
+
+      # Find library needed for shmat.
+      CHECK_FUNCTION_EXISTS("shmat" CMAKE_HAVE_SHMAT)
+      IF(NOT CMAKE_HAVE_SHMAT)
+        CHECK_LIBRARY_EXISTS("ipc" "shmat" "" CMAKE_LIB_IPS_HAS_SHMAT) 
+        IF (CMAKE_LIB_IPS_HAS_SHMAT)
+          SET (CMAKE_X_EXTRA_LIBS ${CMAKE_X_EXTRA_LIBS} -lipc)
+        ENDIF (CMAKE_LIB_IPS_HAS_SHMAT)
+      ENDIF(NOT CMAKE_HAVE_SHMAT)
+    ENDIF($ENV{ISC} MATCHES "^yes$")
+
+    CHECK_LIBRARY_EXISTS("ICE" "IceConnectionNumber" ""
+                         CMAKE_LIB_ICE_HAS_ICECONNECTIONNUMBER)
+    IF(CMAKE_LIB_ICE_HAS_ICECONNECTIONNUMBER)
+      SET (CMAKE_X_PRE_LIBS -lSM -lICE)
+    ENDIF(CMAKE_LIB_ICE_HAS_ICECONNECTIONNUMBER)
+
+    # Build the final list of libraries.
+    SET (CMAKE_X_LIBS ${CMAKE_X_PRE_LIBS} ${CMAKE_X_LIBS} ${CMAKE_X_EXTRA_LIBS})
   ENDIF(CMAKE_HAS_X)
-  SET (CMAKE_HAS_X ${CMAKE_HAS_X} CACHE INTERNAL "Is X11 around.")
+
   MARK_AS_ADVANCED(
     CMAKE_X11_INCLUDE_PATH
-    CMAKE_X11_LIBDIR
-    CMAKE_Xext_LIBDIR
+    CMAKE_X11_LIB
+    CMAKE_Xext_LIB
     CMAKE_Xlib_INCLUDE_PATH
     CMAKE_Xutil_INCLUDE_PATH
     )
