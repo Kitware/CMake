@@ -497,14 +497,6 @@ if test $ac_cv_prog_gxx = no; then
     echo "$ac_t""no" 1>&6
   fi
   rm -f conftest*
-  echo $ac_n "checking whether ${CXX} accepts -instances=semiexplicit""... $ac_c" 1>&6
-  echo 'void f(){}' > conftest.cc
-  if test -z "`${CXX} -instances=static -c conftest.cc 2>&1`"; then
-    echo "$ac_t""yes" 1>&6
-    CMAKE_TEMPLATE_FLAGS="-instances=static"
-  else
-    echo "$ac_t""no" 1>&6
-  fi
 fi
 AC_SUBST(CMAKE_TEMPLATE_FLAGS)
 
@@ -549,7 +541,18 @@ fi
 
 # find make to use to build cmake, prefer gmake
 AC_PATH_PROGS(RUNMAKE, gmake make)
-AC_PATH_PROGS(CMAKE_AR, ar)
+AC_PATH_PROGS(CMAKE_AR_TMP, ar)
+CMAKE_AR="$CMAKE_AR_TMP cr"
+# if on SunOS and not using gXX then use the compiler to make .a libs
+case $system in 
+   SunOS-5*)
+   if test $ac_cv_prog_gxx = yes; then
+	:
+   else
+      echo "Using $CXX -xar -o for creating .a libraries"
+      CMAKE_AR="$CXX -xar -o"
+   fi
+esac
 AC_SUBST(CMAKE_AR)
 
 # generate output files.

@@ -501,7 +501,7 @@ void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
       fout << "#\n";
       fout << m_LibraryOutputPath << "lib" << l->first << ".a: ${" << 
         l->first << "_SRC_OBJS} \n";
-      fout << "\t${CMAKE_AR} cr "
+      fout << "\t${CMAKE_AR} "
            << m_LibraryOutputPath << "lib" << l->first << ".a ${" << 
         l->first << "_SRC_OBJS} \n";
       fout << "\t${CMAKE_RANLIB} "

@@ -748,7 +748,7 @@ bool cmSystemTools::IsOn(const char* val)
 
 bool cmSystemTools::IsOff(const char* val)
 {
-  if (!val)
+  if (!val || strlen(val) == 0)
     {
     return true;
     }
