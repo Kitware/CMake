@@ -118,6 +118,7 @@ IF (QT_FOUND)
     )
   QT_WRAP_UI (qtwrapping QTUI_H_SRCS QTUI_S_SRCS QTUI_SRCS)
 
+  MESSAGE("QT files are ${QTUI_S_SRCS}")
   ADD_EXECUTABLE (qtwrapping qtwrappingmain.cxx QTUI_S_SRCS)
 
   TARGET_LINK_LIBRARIES( qtwrapping ${QT_LIBRARIES} )
