@@ -275,7 +275,8 @@ int cert_stuff(struct connectdata *conn,
       if (SSL_CTX_use_PrivateKey_file(conn->ssl.ctx,
                                       key_file,
                                       file_type) != 1) {
-        failf(data, "unable to set private key file\n");
+        failf(data, "unable to set private key file: '%s' type %s\n",
+              key_file, key_type?key_type:"PEM");
         return 0;
       }
       break;
@@ -324,10 +325,15 @@ int cert_stuff(struct connectdata *conn,
 
     ssl=SSL_new(conn->ssl.ctx);
     x509=SSL_get_certificate(ssl);
-    
-    if (x509 != NULL)
-      EVP_PKEY_copy_parameters(X509_get_pubkey(x509),
-                               SSL_get_privatekey(ssl));
+
+    /* This version was provided by Evan Jordan and is supposed to not
+       leak memory as the previous version: */
+    if (x509 != NULL) {
+      EVP_PKEY *pktmp = X509_get_pubkey(x509);
+      EVP_PKEY_copy_parameters(pktmp,SSL_get_privatekey(ssl));
+      EVP_PKEY_free(pktmp);
+    }
+
     SSL_free(ssl);
 
     /* If we are using DSA, we can copy the parameters from
@@ -667,6 +673,44 @@ static int Curl_ASN1_UTCTIME_output(struct connectdata *conn,
 #endif  
 
 /* ====================================================== */
+static int
+cert_hostcheck(const char *certname, const char *hostname)
+{
+  char *tmp;
+  const char *certdomain;
+  
+  if(!certname ||
+     strlen(certname)<3 ||
+     !hostname ||
+     !strlen(hostname)) /* sanity check */
+    return 0;
+
+  if(strequal(certname, hostname)) /* trivial case */
+    return 1;
+
+  certdomain = certname + 1;
+
+  if((certname[0] != '*') || (certdomain[0] != '.'))
+    return 0; /* not a wildcard certificate, check failed */
+  
+  if(!strchr(certdomain+1, '.'))
+    return 0; /* the certificate must have at least another dot in its name */
+
+  /* find 'certdomain' within 'hostname' */
+  tmp = strstr(hostname, certdomain);
+  if(tmp) {
+    /* ok the certname's domain matches the hostname, let's check that it's a
+       tail-match */
+    if(strequal(tmp, certdomain))
+      /* looks like a match. Just check we havent swallowed a '.' */
+      return tmp == strchr(hostname, '.');
+    else
+      return 0;
+  }
+  return 0;
+}
+
+/* ====================================================== */
 CURLcode
 Curl_SSLConnect(struct connectdata *conn)
 {
@@ -904,7 +948,7 @@ Curl_SSLConnect(struct connectdata *conn)
       return CURLE_SSL_PEER_CERTIFICATE;
     }
 
-    if (!strequal(peer_CN, conn->hostname)) {
+    if (!cert_hostcheck(peer_CN, conn->hostname)) {
       if (data->set.ssl.verifyhost > 1) {
         failf(data, "SSL: certificate subject name '%s' does not match "
               "target host name '%s'",

@@ -1,5 +1,5 @@
-#ifndef __HTTP_H
-#define __HTTP_H
+#ifndef __CURL_SHARE_H
+#define __CURL_SHARE_H
 
 /***************************************************************************
  *                                  _   _ ____  _     
@@ -23,24 +23,30 @@
  *
  * $Id$
  ***************************************************************************/
-#ifndef CURL_DISABLE_HTTP
-bool Curl_compareheader(char *headerline,     /* line to check */
-                        const char *header,   /* header keyword _with_ colon */
-                        const char *content); /* content string to find */
 
-/* ftp can use this as well */
-CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
-                                     int tunnelsocket,
-                                     char *hostname, int remote_port);
+#include "setup.h"
+#include <curl/curl.h>
 
-/* protocol-specific functions set up to be called by the main engine */
-CURLcode Curl_http(struct connectdata *conn);
-CURLcode Curl_http_done(struct connectdata *conn);
-CURLcode Curl_http_connect(struct connectdata *conn);
+/* this struct is libcurl-private, don't export details */
+struct Curl_share {
+  unsigned int specifier;
+  unsigned int locked;
+  unsigned int dirty;
+  
+  curl_lock_function lockfunc;
+  curl_unlock_function unlockfunc;
+  void *clientdata;
+};
 
-/* The following functions are defined in http_chunks.c */
-void Curl_httpchunk_init(struct connectdata *conn);
-CHUNKcode Curl_httpchunk_read(struct connectdata *conn, char *datap,
-                              ssize_t length, ssize_t *wrote);
-#endif
-#endif
+CURLSHcode Curl_share_aquire_lock (struct SessionHandle *, curl_lock_data);
+CURLSHcode Curl_share_release_lock (struct SessionHandle *, curl_lock_data);
+
+#endif /* __CURL_SHARE_H */
+
+/*
+ * local variables:
+ * eval: (load-file "../curl-mode.el")
+ * end:
+ * vim600: fdm=marker
+ * vim: et sw=2 ts=2 sts=2 tw=78
+ */

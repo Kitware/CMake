@@ -66,9 +66,9 @@ struct curl_httppost {
   char *contents; /* pointer to allocated data contents */
   long contentslength; /* length of contents field */
 
-        /* CMC: Added support for buffer uploads */
-        char *buffer; /* pointer to allocated buffer contents */
-        long bufferlength; /* length of buffer field */
+  /* CMC: Added support for buffer uploads */
+  char *buffer; /* pointer to allocated buffer contents */
+  long bufferlength; /* length of buffer field */
 
   char *contenttype; /* Content-Type */
   struct curl_slist* contentheader; /* list of extra headers for this form */
@@ -96,7 +96,9 @@ typedef int (*curl_progress_callback)(void *clientp,
                                       double ultotal,
                                       double ulnow);
 
-#define CURL_MAX_WRITE_SIZE 20480
+  /* Tests have proven that 20K is a very bad buffer size for uploads on
+     Windows, while 16K for some odd reason performed a lot better. */
+#define CURL_MAX_WRITE_SIZE 16384
 
 typedef size_t (*curl_write_callback)(char *buffer,
                                       size_t size,
@@ -160,7 +162,7 @@ typedef enum {
   CURLE_FTP_COULDNT_RETR_FILE,   /* 19 */
   CURLE_FTP_WRITE_ERROR,         /* 20 */
   CURLE_FTP_QUOTE_ERROR,         /* 21 */
-  CURLE_HTTP_NOT_FOUND,          /* 22 */
+  CURLE_HTTP_RETURNED_ERROR,     /* 22 */
   CURLE_WRITE_ERROR,             /* 23 */
   CURLE_MALFORMAT_USER,          /* 24 - user name is illegally specified */
   CURLE_FTP_COULDNT_STOR_FILE,   /* 25 - failed FTP upload */
@@ -207,6 +209,7 @@ typedef enum {
 
 /* Make a spelling correction for the operation timed-out define */
 #define CURLE_OPERATION_TIMEDOUT CURLE_OPERATION_TIMEOUTED
+#define CURLE_HTTP_NOT_FOUND CURLE_HTTP_RETURNED_ERROR
 
 typedef enum {
   CURLPROXY_HTTP = 0,
@@ -610,6 +613,11 @@ typedef enum {
      the response to be compressed. */
   CINIT(ENCODING, OBJECTPOINT, 102),
  
+  /* Set pointer to private data */
+  CINIT(PRIVATE, OBJECTPOINT, 103),
+
+  /* Set aliases for HTTP 200 in the HTTP Response header */
+  CINIT(HTTP200ALIASES, OBJECTPOINT, 104),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
@@ -803,8 +811,8 @@ CURLcode curl_global_init(long flags);
 void curl_global_cleanup(void);
 
 /* This is the version number */
-#define LIBCURL_VERSION "7.10.2"
-#define LIBCURL_VERSION_NUM 0x070a02
+#define LIBCURL_VERSION "7.10.3"
+#define LIBCURL_VERSION_NUM 0x070a03
 
 /* linked-list structure for the CURLOPT_QUOTE option (and other) */
 struct curl_slist {
@@ -861,15 +869,12 @@ typedef enum {
   CURLINFO_REDIRECT_TIME   = CURLINFO_DOUBLE + 19,
   CURLINFO_REDIRECT_COUNT  = CURLINFO_LONG + 20,
 
+  CURLINFO_PRIVATE = CURLINFO_STRING + 21,
+
   /* Fill in new entries here! */
 
-  CURLINFO_LASTONE          = 21
+  CURLINFO_LASTONE          = 22
 } CURLINFO;
-
-/* unfortunately, the easy.h and multi.h include files need options and info
-  stuff before they can be included! */
-#include "easy.h" /* nothing in curl is fun without the easy stuff */
-#include "multi.h"
 
 typedef enum {
   CURLCLOSEPOLICY_NONE, /* first, never use this */
@@ -894,35 +899,56 @@ typedef enum {
  * Setup defines, protos etc for the sharing stuff.
  */
 
-/* Different types of locks that a share can aquire */
+/* Different data locks for a single share */
 typedef enum {
-  CURL_LOCK_TYPE_NONE = 0,
-  CURL_LOCK_TYPE_COOKIE = 1<<0,
-  CURL_LOCK_TYPE_DNS = 1<<1,
-  CURL_LOCK_TYPE_SSL_SESSION = 2<<1,
-  CURL_LOCK_TYPE_CONNECT = 2<<2,
-  CURL_LOCK_TYPE_LAST
-} curl_lock_type;
+  CURL_LOCK_DATA_NONE = 0,
+  CURL_LOCK_DATA_COOKIE = 1,
+  CURL_LOCK_DATA_DNS = 2,
+  CURL_LOCK_DATA_SSL_SESSION = 3,
+  CURL_LOCK_DATA_CONNECT = 4,
+  CURL_LOCK_DATA_LAST
+} curl_lock_data;
 
-typedef void (*curl_lock_function)(CURL *, curl_lock_type, void *);
-typedef void (*curl_unlock_function)(CURL *, curl_lock_type, void *);
+/* Different lock access types */
+typedef enum {
+  CURL_LOCK_ACCESS_NONE = 0,   /* unspecified action */
+  CURL_LOCK_ACCESS_SHARED = 1, /* for read perhaps */
+  CURL_LOCK_ACCESS_SINGLE = 2, /* for write perhaps */
+  CURL_LOCK_ACCESS_LAST        /* never use */
+} curl_lock_access;
 
-typedef struct {
-  unsigned int specifier;
-  unsigned int locked;
-  unsigned int dirty;
-  
-  curl_lock_function lockfunc;
-  curl_unlock_function unlockfunc;
-  void *clientdata;
-} curl_share;
+typedef void (*curl_lock_function)(CURL *handle,
+                                   curl_lock_data data,
+                                   curl_lock_access access,
+                                   void *userptr);
+typedef void (*curl_unlock_function)(CURL *handle,
+                                     curl_lock_data data,
+                                     void *userptr);
 
-curl_share *curl_share_init (void);
-CURLcode curl_share_setopt (curl_share *, curl_lock_type, int);
-CURLcode curl_share_set_lock_function (curl_share *, curl_lock_function);
-CURLcode curl_share_set_unlock_function (curl_share *, curl_unlock_function);
-CURLcode curl_share_set_lock_data (curl_share *, void *);
-CURLcode curl_share_destroy (curl_share *);
+typedef void CURLSH;
+
+typedef enum {
+  CURLSHE_OK,  /* all is fine */
+  CURLSHE_BAD_OPTION, /* 1 */
+  CURLSHE_IN_USE,     /* 2 */
+  CURLSHE_INVALID,    /* 3 */
+  CURLSHE_LAST /* never use */
+} CURLSHcode;
+
+typedef enum {
+  CURLSHOPT_NONE,  /* don't use */
+  CURLSHOPT_SHARE,   /* specify a data type to share */
+  CURLSHOPT_UNSHARE, /* specify shich data type to stop sharing */
+  CURLSHOPT_LOCKFUNC,   /* pass in a 'curl_lock_function' pointer */
+  CURLSHOPT_UNLOCKFUNC, /* pass in a 'curl_unlock_function' pointer */
+  CURLSHOPT_USERDATA,   /* pass in a user data pointer used in the lock/unlock
+                           callback functions */
+  CURLSHOPT_LAST  /* never use */
+} CURLSHoption;
+
+CURLSH *curl_share_init(void);
+CURLSHcode curl_share_setopt(CURLSH *, CURLSHoption option, ...);
+CURLSHcode curl_share_cleanup(CURLSH *);
 
 /****************************************************************************
  * Structures for querying information about the curl library at runtime.
@@ -964,5 +990,10 @@ curl_version_info_data *curl_version_info(CURLversion);
 #ifdef  __cplusplus
 }
 #endif
+
+/* unfortunately, the easy.h and multi.h include files need options and info
+  stuff before they can be included! */
+#include "easy.h" /* nothing in curl is fun without the easy stuff */
+#include "multi.h"
 
 #endif /* __CURL_CURL_H */

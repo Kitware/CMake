@@ -157,6 +157,8 @@ struct ssl_config_data {
 struct HTTP {
   struct FormData *sendit;
   int postsize;
+  char *postdata;
+
   const char *p_pragma;      /* Pragma: string */
   const char *p_accept;      /* Accept: string */
   long readbytecount; 
@@ -164,10 +166,24 @@ struct HTTP {
 
   /* For FORM posting */
   struct Form form;
-  curl_read_callback storefread;
-  FILE *in;
-
   struct Curl_chunker chunk;
+
+  struct back {
+    curl_read_callback fread; /* backup storage for fread pointer */
+    void *fread_in;           /* backup storage for fread_in pointer */
+    char *postdata;
+    int postsize;
+  } backup;
+
+  enum {
+    HTTPSEND_NADA,    /* init */
+    HTTPSEND_REQUEST, /* sending a request */
+    HTTPSEND_BODY,    /* sending body */
+    HTTPSEND_LAST     /* never use this */
+  } sending;
+
+  void *send_buffer; /* used if the request couldn't be sent in one chunk,
+                        points to an allocated send_buffer struct */
 };
 
 /****************************************************************************
@@ -190,7 +206,9 @@ struct FTP {
                        read the line, just ignore the result. */
   bool no_transfer; /* nothing was transfered, (possibly because a resumed
                        transfer already was complete) */
-
+  long response_time; /* When no timeout is given, this is the amount of
+                         seconds we await for an FTP response. Initialized
+                         in Curl_ftp_connect() */
 };
 
 /****************************************************************************
@@ -220,8 +238,14 @@ struct ConnectBits {
 
   bool upload_chunky; /* set TRUE if we are doing chunked transfer-encoding
                          on upload */
+  bool getheader;     /* TRUE if header parsing is wanted */
 
-  bool getheader;        /* TRUE if header parsing is wanted */
+  bool forbidchunk;   /* used only to explicitly forbid chunk-upload for
+                         specific upload buffers. See readmoredata() in
+                         http.c for details. */
+  bool tcpconnect;    /* the tcp stream (or simimlar) is connected, this
+                         is set the first time on the first connect function
+                         call */
 };
 
 /*
@@ -456,6 +480,9 @@ struct connectdata {
       and the 'upload_present' contains the number of bytes available at this
       position */
   char *upload_fromhere;
+
+  curl_read_callback fread; /* function that reads the input */
+  void *fread_in;           /* pointer to pass to the fread() above */
 };
 
 /* The end of connectdata. 08/27/02 jhrg */
@@ -542,6 +569,9 @@ struct UrlState {
   char passwd[MAX_CURL_PASSWORD_LENGTH];
   char proxyuser[MAX_CURL_USER_LENGTH];
   char proxypasswd[MAX_CURL_PASSWORD_LENGTH];
+
+  bool passwdgiven; /* set TRUE if an application-provided password has been
+                       set */
 
   struct timeval keeps_speed; /* for the progress meter really */
 
@@ -631,7 +661,7 @@ struct UserDefined {
   bool free_referer; /* set TRUE if 'referer' points to a string we
                         allocated */
   char *useragent;   /* User-Agent string */
-  char *encoding;    /* Accept-Encoding string 08/28/02 jhrg */
+  char *encoding;    /* Accept-Encoding string */
   char *postfields;  /* if POST, set the fields' values here */
   size_t postfieldsize; /* if POST, this might have a size to use instead of
                            strlen(), and then the data *may* be binary (contain
@@ -686,6 +716,10 @@ struct UserDefined {
 
   int dns_cache_timeout; /* DNS cache timeout */
   long buffer_size;      /* size of receive buffer to use */
+
+  char *private; /* Private data */
+
+  struct curl_slist *http200aliases; /* linked list of aliases for http200 */
   
 /* Here follows boolean settings that define how to behave during
    this session. They are STATIC, set by libcurl users or at least initially
@@ -734,7 +768,7 @@ struct UserDefined {
 
 struct SessionHandle {
   curl_hash *hostcache;
-  curl_share *share;           /* Share, handles global variable mutexing */
+  struct Curl_share *share;    /* Share, handles global variable mutexing */
   struct UserDefined set;      /* values set by the libcurl user */
   struct DynamicStatic change; /* possibly modified userdefined data */
 

@@ -88,7 +88,7 @@ static Curl_addrinfo *my_getaddrinfo(struct SessionHandle *data,
 void Curl_global_host_cache_init(void)
 {
   if (!host_cache_initialized) {
-    Curl_hash_init(&hostname_cache, 7, Curl_freeaddrinfo);
+    Curl_hash_init(&hostname_cache, 7, Curl_freednsinfo);
     host_cache_initialized = 1;
   }
 }
@@ -287,17 +287,25 @@ struct Curl_dns_entry *Curl_resolv(struct SessionHandle *data,
 /*
  * This is a wrapper function for freeing name information in a protocol
  * independent way. This takes care of using the appropriate underlaying
- * proper function.
+ * function.
  */
-void Curl_freeaddrinfo(void *freethis)
+void Curl_freeaddrinfo(Curl_addrinfo *p)
+{
+#ifdef ENABLE_IPV6
+  freeaddrinfo(p);
+#else
+  free(p);
+#endif
+}
+
+/*
+ * Free a cache dns entry.
+ */
+void Curl_freednsinfo(void *freethis)
 {
   struct Curl_dns_entry *p = (struct Curl_dns_entry *) freethis;
 
-#ifdef ENABLE_IPV6
-  freeaddrinfo(p->addr);
-#else
-  free(p->addr);
-#endif
+  Curl_freeaddrinfo(p->addr);
 
   free(p);
 }
@@ -623,16 +631,28 @@ static Curl_addrinfo *my_getaddrinfo(struct SessionHandle *data,
                           &h, /* DIFFERENCE */
                           &h_errnop);
       /* Redhat 8, using glibc 2.2.93 changed the behavior. Now all of a
-         sudden this function seems to be setting EAGAIN if the given buffer
-         size is too small. Previous versions are known to return ERANGE for
-         the same. */
+         sudden this function returns EAGAIN if the given buffer size is too
+         small. Previous versions are known to return ERANGE for the same
+         problem.
+
+         This wouldn't be such a big problem if older versions wouldn't
+         sometimes return EAGAIN on a common failure case. Alas, we can't
+         assume that EAGAIN *or* ERANGE means ERANGE for any given version of
+         glibc.
+
+         For now, we do that and thus we may call the function repeatedly and
+         fail for older glibc versions that return EAGAIN, until we run out
+         of buffer size (step_size grows beyond CURL_NAMELOOKUP_SIZE).
+
+         If anyone has a better fix, please tell us!
+      */
 
       if((ERANGE == res) || (EAGAIN == res)) {
         step_size+=200;
         continue;
       }
       break;
-    } while(1);
+    } while(step_size <= CURL_NAMELOOKUP_SIZE);
 
     if(!h) /* failure */
       res=1;

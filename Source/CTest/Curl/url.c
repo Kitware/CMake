@@ -101,6 +101,7 @@
 #include "strequal.h"
 #include "escape.h"
 #include "strtok.h"
+#include "share.h"
 
 /* And now for the protocols */
 #include "ftp.h"
@@ -1071,8 +1072,8 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
 
   case CURLOPT_SHARE:
     {
-      curl_share *set;
-      set = va_arg(param, curl_share *);
+      struct Curl_share *set;
+      set = va_arg(param, struct Curl_share *);
       if(data->share)
         data->share->dirty--;
 
@@ -1088,6 +1089,20 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     data->set.proxytype = va_arg(param, long);
     break;
 
+  case CURLOPT_PRIVATE:
+    /*
+     * Set private data pointer.
+     */
+    data->set.private = va_arg(param, char *);
+    break;
+
+  case CURLOPT_HTTP200ALIASES:
+    /*
+     * Set a list of aliases for HTTP 200 in response header
+     */
+    data->set.http200aliases = va_arg(param, struct curl_slist *);
+    break;
+      
   default:
     /* unknown tag and its companion, just ignore: */
     return CURLE_FAILED_INIT; /* correct this */
@@ -1603,6 +1618,9 @@ static CURLcode ConnectPlease(struct connectdata *conn,
   return result;
 }
 
+/*
+ * ALERT! The 'dns' pointer being passed in here might be NULL at times.
+ */
 static void verboseconnect(struct connectdata *conn,
                            struct Curl_dns_entry *dns)
 {
@@ -1667,6 +1685,12 @@ CURLcode Curl_protocol_connect(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   CURLcode result=CURLE_OK;
   
+  if(conn->bits.tcpconnect)
+    /* We already are connected, get back. This may happen when the connect
+       worked fine in the first call, like when we connect to a local server
+       or proxy. */
+    return CURLE_OK;
+
   Curl_pgrsTime(data, TIMER_CONNECT); /* connect done */
 
   if(data->set.verbose)
@@ -1778,6 +1802,9 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     TRUE:
   /* else, no chunky upload */
   FALSE;
+
+  conn->fread = data->set.fread;
+  conn->fread_in = data->set.in;
 
   /***********************************************************
    * We need to allocate memory to store the path in. We get the size of the
@@ -2286,6 +2313,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
     /* Setup a "faked" transfer that'll do nothing */
     if(CURLE_OK == result) {
+      conn->bits.tcpconnect = TRUE; /* we are "connected */
       result = Curl_Transfer(conn, -1, -1, FALSE, NULL, /* no download */
                              -1, NULL); /* no upload */
     }
@@ -2463,6 +2491,9 @@ static CURLcode CreateConnection(struct SessionHandle *data,
           /* no name given, get the password only */
           sscanf(userpass, ":%127[^@]", data->state.passwd);
 
+        /* we have set the password */
+        data->state.passwdgiven = TRUE;
+
         if(data->state.user[0]) {
           char *newname=curl_unescape(data->state.user, 0);
           if(strlen(newname) < sizeof(data->state.user)) {
@@ -2498,14 +2529,17 @@ static CURLcode CreateConnection(struct SessionHandle *data,
       /* the name is given, get user+password */
       sscanf(data->set.userpwd, "%127[^:]:%127[^\n]",
              data->state.user, data->state.passwd);
+      if(strchr(data->set.userpwd, ':'))
+        /* a colon means the password was given, even if blank */
+        data->state.passwdgiven = TRUE;
     }
     else
-      /* no name given, get the password only */
+      /* no name given, starts with a colon, get the password only */
       sscanf(data->set.userpwd+1, "%127[^\n]", data->state.passwd);
   }
 
   if (data->set.use_netrc != CURL_NETRC_IGNORED &&
-      data->state.passwd[0] == '\0' ) {  /* need passwd */
+      !data->state.passwdgiven) {  /* need passwd */
     if(Curl_parsenetrc(conn->hostname,
                        data->state.user,
                        data->state.passwd)) {
@@ -2516,8 +2550,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   }
 
   /* if we have a user but no password, ask for one */
-  if(conn->bits.user_passwd &&
-     !data->state.passwd[0] ) {
+  if(conn->bits.user_passwd && !data->state.passwdgiven ) {
     if(data->set.fpasswd(data->set.passwd_client,
                          "password:", data->state.passwd,
                          sizeof(data->state.passwd)))
@@ -2528,9 +2561,12 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
   /* If our protocol needs a password and we have none, use the defaults */
   if ( (conn->protocol & (PROT_FTP|PROT_HTTP)) &&
-       !conn->bits.user_passwd) {
+       !conn->bits.user_passwd &&
+       !data->state.passwdgiven) {
+
     strcpy(data->state.user, CURL_DEFAULT_USER);
     strcpy(data->state.passwd, CURL_DEFAULT_PASSWORD);
+
     /* This is the default password, so DON'T set conn->bits.user_passwd */
   }
 
@@ -2782,14 +2818,21 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     /* Connect only if not already connected! */
     result = ConnectPlease(conn, hostaddr, &connected);
 
-    if(connected)
+    if(connected) {
       result = Curl_protocol_connect(conn, hostaddr);
+      if(CURLE_OK == result)
+        conn->bits.tcpconnect = TRUE;
+    }
+    else
+      conn->bits.tcpconnect = FALSE;
+
 
     if(CURLE_OK != result)
       return result;
   }
   else {
     Curl_pgrsTime(data, TIMER_CONNECT); /* we're connected already */
+    conn->bits.tcpconnect = TRUE;
     if(data->set.verbose)
       verboseconnect(conn, hostaddr);
   }
