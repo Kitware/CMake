@@ -502,6 +502,7 @@ public:
    * cache is then queried.
    */
   const char* GetDefinition(const char*) const;
+  const char* GetSafeDefinition(const char*) const;
 
   /**
    * Get the list of all variables in the current space. If argument

@@ -1378,6 +1378,16 @@ const char* cmMakefile::GetDefinition(const char* name) const
   return def;
 }
 
+const char* cmMakefile::GetSafeDefinition(const char* def) const
+{
+  const char* ret = this->GetDefinition(def);
+  if(!ret)
+    {
+    return "";
+    }
+  return ret;
+}
+
 std::vector<std::string> cmMakefile::GetDefinitions(int cacheonly /* = 0 */) const
 {
   std::map<std::string, int> definitions;
