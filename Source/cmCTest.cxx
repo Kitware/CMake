@@ -2994,7 +2994,7 @@ int cmCTest::RunConfigurationScript()
 
   // did something critical fail in ctest
   if (!res || 
-      retVal | CTEST_BUILD_ERRORS)
+      retVal & CTEST_BUILD_ERRORS)
     {
     // if we backed up the dirs and the build failed, then restore
     // the backed up dirs
@@ -3014,7 +3014,11 @@ int cmCTest::RunConfigurationScript()
       rename(backupBinDir.c_str(), binDir);
       }
     cmSystemTools::Error("Unable to run ctest");    
-    return -8;
+    if (!res)
+      {
+      return -8;
+      }
+    return retVal;
     }
 
   return 0;  
