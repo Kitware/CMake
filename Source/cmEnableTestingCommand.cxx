@@ -51,6 +51,8 @@ void cmEnableTestingCommand::FinalPass()
   fname += "/";
   fname += "CMakeTestfile.txt";
   
+  cmSystemTools::MakeDirectory(m_Makefile->GetStartOutputDirectory());
+
   // Open the output Testfile
   std::ofstream fout(fname.c_str());
   if (!fout)
