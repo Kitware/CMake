@@ -37,7 +37,7 @@ bool cmOptionCommand::InitialPass(std::vector<std::string> const& args)
   if(argError)
     {
     std::string m = "called with incorrect number of arguments: ";
-    for(int i =0; i < args.size(); ++i)
+    for(size_t i =0; i < args.size(); ++i)
       {
       m += args[i];
       m += " ";
