@@ -491,6 +491,29 @@ cygwin_package()
     ) >Logs/cygwin_package.log 2>&1 || error_log Logs/cygwin_package.log
 }
 
+#-----------------------------------------------------------------------------
+osx_install()
+{
+    [ -z "${DONE_osx_install}" ] || return 0 ; DONE_osx_install="yes"
+    config || return 1
+    [ -f "cmake-${VERSION}-${PLATFORM}/Source/ccmake" ] || build || return 1
+    echo "Running make install for OSX package ..." &&
+    (
+        rm -rf OSX &&
+        mkdir -p OSX/Package_Root/Applications &&
+        mkdir -p OSX/Resources/PreFlight &&
+        mkdir -p OSX/Resources/PostFlight &&
+        (
+            cd "cmake-${VERSION}-${PLATFORM}" &&
+            make install DESTDIR="${RELEASE_ROOT}/OSX/Package_Root"
+        ) &&
+        cp cmake-${VERSION}/Copyright.txt OSX/Resources/License.txt &&
+        cp -r cmake-${VERSION}-${PLATFORM}/Source/CMake.app OSX/Package_Root/Applications &&
+        echo "APPL????" > OSX/Package_Root/Applications/CMake.app/Contents/PkgInfo &&
+        cp "${WX_RESOURCES}" OSX/Package_Root/Applications/CMake.app/Contents/Resources/wxCMakeSetup.rsrc
+    ) >Logs/osx_install.log 2>&1 || error_log Logs/osx_install.log
+}
+
 if [ -z "$TASK" ]; then
     [ -z "$REMOTE" ] && TASK="$@"
 fi
