@@ -1,0 +1,46 @@
+/*=========================================================================
+
+  Program:   KWSys - Kitware System Library
+  Module:    $RCSfile$
+
+  Copyright (c) Kitware, Inc., Insight Consortium.  All rights reserved.
+  See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
+
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+     PURPOSE.  See the above copyright notices for more information.
+
+=========================================================================*/
+#ifndef @KWSYS_NAMESPACE@_ProcessWin32Kill_h
+#define @KWSYS_NAMESPACE@_ProcessWin32Kill_h
+
+#include <@KWSYS_NAMESPACE@/Configure.h>
+
+/* Redefine all public interface symbol names to be in the proper
+   namespace.  These macros are used internally to kwsys only, and are
+   not visible to user code.  Use kwsysHeaderDump.pl to reproduce
+   these macros after making changes to the interface.  */
+#define kwsys(x) @KWSYS_NAMESPACE@##x
+#define kwsysEXPORT                      @KWSYS_NAMESPACE@_EXPORT
+#define kwsysProcessWin32Kill            kwsys(ProcessWin32Kill)
+
+#if defined(__cplusplus)
+extern "C"
+{
+#endif
+
+kwsysEXPORT int kwsysProcessWin32Kill(int pid);
+
+#if defined(__cplusplus)
+} /* extern "C" */
+#endif
+
+/* If we are building a kwsysProcess .c file, let it use these macros.
+   Otherwise, undefine them to keep the namespace clean.  */
+#if !defined(KWSYS_IN_PROCESS_C)
+# undef kwsys
+# undef kwsysEXPORT
+# undef kwsysProcessWin32Kill
+#endif
+
+#endif

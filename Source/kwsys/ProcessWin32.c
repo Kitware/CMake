@@ -14,6 +14,7 @@
 #define KWSYS_IN_PROCESS_C
 #include "kwsysPrivate.h"
 #include KWSYS_HEADER(Process.h)
+#include KWSYS_HEADER(ProcessWin32Kill.h)
 
 /*
 
@@ -1403,7 +1404,10 @@ void kwsysProcess_Kill(kwsysProcess* cp)
     /* Not Windows 9x.  Just terminate the children.  */
     for(i=0; i < cp->NumberOfCommands; ++i)
       {
-      TerminateProcess(cp->ProcessInformation[i].hProcess, 255);
+      if(!kwsysProcessWin32Kill(cp->ProcessInformation[i].dwProcessId))
+        {
+        TerminateProcess(cp->ProcessInformation[i].hProcess, 255);
+        }
       }
     }
 
