@@ -96,10 +96,10 @@ bool cmSiteNameCommand::InitialPass(std::vector<std::string>& args)
     cmRegularExpression reg( RegExp.c_str() );
     if(reg.find(nsOutput.c_str()))
       {
-      siteName = reg.match(1);
+      siteName = cmSystemTools::LowerCase(reg.match(1));
       }
     }
-
+  
   m_Makefile->
     AddCacheDefinition("SITE",
                        siteName.c_str(),
