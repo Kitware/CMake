@@ -792,7 +792,7 @@ cmLocalGenerator::ConvertToOutputForExisting(const char* p)
 }
 
 const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
-{ 
+{
   if(!lang)
     {
     return "";
@@ -801,11 +801,56 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
     {
     return m_LanguageToIncludeFlags[lang].c_str();
     }
-    // Output Include paths
   cmOStringStream includeFlags;
-  std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();
+  std::vector<std::string> includes;
+  this->GetIncludeDirectories(includes);
   std::vector<std::string>::iterator i;
-  std::map<cmStdString, cmStdString> implicitIncludes;
+
+  std::string flagVar = "CMAKE_INCLUDE_FLAG_";
+  flagVar += lang;
+  const char* includeFlag = m_Makefile->GetDefinition(flagVar.c_str());
+  flagVar = "CMAKE_INCLUDE_FLAG_SEP_";
+  flagVar += lang;
+  const char* sep = m_Makefile->GetDefinition(flagVar.c_str());
+
+  bool repeatFlag = true; // should the include flag be repeated like ie. -IA -IB
+  if(!sep)
+    {
+    sep = " ";
+    }
+  else
+    {
+    // if there is a separator then the flag is not repeated but is only given once
+    // i.e.  -classpath a:b:c
+    repeatFlag = false;
+    }
+  bool flagUsed = false;
+  for(i = includes.begin(); i != includes.end(); ++i)
+    {
+    std::string include = *i;
+    if(!flagUsed || repeatFlag)
+      {
+      includeFlags << includeFlag;
+      flagUsed = true;
+      }
+    includeFlags << this->ConvertToOutputForExisting(i->c_str()) << sep;
+    }
+  std::string flags = includeFlags.str();
+  // remove trailing separators
+  if((sep[0] != ' ') && flags[flags.size()-1] == sep[0])
+    {
+    flags[flags.size()-1] = ' ';
+    }
+  flags += m_Makefile->GetDefineFlags();
+  m_LanguageToIncludeFlags[lang] = flags;
+  return m_LanguageToIncludeFlags[lang].c_str();
+}
+
+//----------------------------------------------------------------------------
+void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs)
+{
+  // Output Include paths
+  std::set<cmStdString> implicitIncludes;
 
   // CMake versions below 2.0 would add the source tree to the -I path
   // automatically.  Preserve compatibility.
@@ -838,34 +883,16 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
       includeSourceDir = true;
       }
     }
-  std::string flagVar = "CMAKE_INCLUDE_FLAG_";
-  flagVar += lang;
-  const char* includeFlag = m_Makefile->GetDefinition(flagVar.c_str());
-  flagVar = "CMAKE_INCLUDE_FLAG_SEP_";
-  flagVar += lang;
-  const char* sep = m_Makefile->GetDefinition(flagVar.c_str());
 
-  bool repeatFlag = true; // should the include flag be repeated like ie. -IA -IB
-  if(!sep)
-    {
-    sep = " ";
-    }
-  else
-    {
-    // if there is a separator then the flag is not repeated but is only given once
-    // i.e.  -classpath a:b:c
-    repeatFlag = false;
-    }
-  bool flagUsed = false;
   if(includeSourceDir)
     {
-    includeFlags << includeFlag
-         << this->ConvertToOutputForExisting(m_Makefile->GetStartDirectory())
-         << sep;
-    flagUsed = true;
+    dirs.push_back(m_Makefile->GetStartDirectory());
     }
 
-  implicitIncludes["/usr/include"] = "/usr/include";
+  // Do not explicitly add the standard include path "/usr/include".
+  // This can cause problems with certain standard library
+  // implementations because the wrong headers may be found first.
+  implicitIncludes.insert("/usr/include");
   if(m_Makefile->GetDefinition("CMAKE_PLATFORM_IMPLICIT_INCLUDE_DIRECTORIES"))
     {
     std::string arg = m_Makefile->GetDefinition("CMAKE_PLATFORM_IMPLICIT_INCLUDE_DIRECTORIES");
@@ -873,38 +900,21 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
     cmSystemTools::ExpandListArgument(arg, implicitIncludeVec);
     for(unsigned int k =0; k < implicitIncludeVec.size(); k++)
       {
-      implicitIncludes[implicitIncludeVec[k]] = implicitIncludeVec[k];
+      implicitIncludes.insert(implicitIncludeVec[k]);
       }
     }
-  
-  for(i = includes.begin(); i != includes.end(); ++i)
+
+  // Construct the ordered list.
+  std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();
+  for(std::vector<std::string>::iterator i = includes.begin();
+      i != includes.end(); ++i)
     {
-    std::string include = *i;
-    // Don't output a -I for the standard include path "/usr/include".
-    // This can cause problems with certain standard library
-    // implementations because the wrong headers may be found first.
-    if(implicitIncludes.find(include) == implicitIncludes.end())
+    if(implicitIncludes.find(*i) == implicitIncludes.end())
       {
-      if(!flagUsed || repeatFlag)
-        {
-        includeFlags << includeFlag;
-        flagUsed = true;
-        }
-      includeFlags << this->ConvertToOutputForExisting(i->c_str()) << sep;
+      dirs.push_back(*i);
       }
     }
-  std::string flags = includeFlags.str();
-  // remove trailing separators
-  if((sep[0] != ' ') && flags[flags.size()-1] == sep[0])
-    {
-    flags[flags.size()-1] = ' ';
-    }
-  flags += m_Makefile->GetDefineFlags();
-  m_LanguageToIncludeFlags[lang] = flags;
-  return m_LanguageToIncludeFlags[lang].c_str();
-
 }
-
 
 void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
                                  std::string& flags,

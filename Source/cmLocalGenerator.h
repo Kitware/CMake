@@ -105,6 +105,10 @@ protected:
 
   ///! Get the include flags for the current makefile and language
   const char* GetIncludeFlags(const char* lang); 
+
+  /** Get the include flags for the current makefile and language.  */
+  void GetIncludeDirectories(std::vector<std::string>& dirs);
+
   ///! for existing files convert to output path and short path if spaces
   std::string ConvertToOutputForExisting(const char* p);
   
