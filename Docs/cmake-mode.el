@@ -148,7 +148,6 @@
   (modify-syntax-entry ?\)  ")(" cmake-mode-syntax-table)
   (modify-syntax-entry ?# "<" cmake-mode-syntax-table)
   (modify-syntax-entry ?\n ">" cmake-mode-syntax-table)
-
   
   ; Setup font-lock mode.
   (make-local-variable 'font-lock-defaults)
@@ -157,6 +156,10 @@
   ; Setup indentation function.
   (make-local-variable 'indent-line-function)
   (setq indent-line-function 'cmake-indent)
+  
+  ; Setup comment syntax.
+  (make-local-variable 'comment-start)
+  (setq comment-start "#")
   
   (run-hooks 'cmake-mode-hook))
 
