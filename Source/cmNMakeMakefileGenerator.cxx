@@ -157,6 +157,11 @@ void cmNMakeMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     "CMAKE_EXECUTABLE_SUFFIX                = @CMAKE_EXECUTABLE_SUFFIX@\n"
     "CMAKE_STATICLIB_SUFFIX                 = @CMAKE_STATICLIB_SUFFIX@\n"
     "CMAKE_SHLIB_SUFFIX                     = @CMAKE_SHLIB_SUFFIX@\n"
+    "!IF \"$(OS)\" == \"Windows_NT\"\n"
+    "NULL=\n"
+    "!ELSE \n"
+    "NULL=nul\n"
+    "!ENDIF \n"
     "RM = del\n";
 
   std::string buildType = "CMAKE_CXX_FLAGS_";
@@ -241,7 +246,7 @@ void cmNMakeMakefileGenerator::BuildInSubDirectory(std::ostream& fout,
     std::string dir = directory;
     cmSystemTools::ConvertToWindowsSlashes(dir);
     dir = cmSystemTools::EscapeSpaces(dir.c_str());
-    fout << "\tif not exist " << dir
+    fout << "\tif not exist \"" << dir << "\\$(NULL)\""
          << " " 
          << "$(MAKE) $(MAKESILENT) rebuild_cache\n"
          << "\techo Building " << target1 << " in directory " << directory << "\n"
