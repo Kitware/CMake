@@ -4,18 +4,16 @@
 ###################################################################
 
 # this is the cvs module name that should be checked out
-SET (CTEST_MODULE_NAME CMake)
+SET (CTEST_MODULE_NAME kwsys)
 
 # these are the the name of the source and binary directory on disk. 
 # They will be appended to DASHBOARD_ROOT
-SET (CTEST_SOURCE_NAME CMake)
-SET (CTEST_BINARY_NAME CMakeBin)
-
-SET (CTEST_NOTES_FILE "@CMAKE_CURRENT_BINARY_DIR@/Note.txt")
+SET (CTEST_SOURCE_NAME kwsys)
+SET (CTEST_BINARY_NAME kwsysBin)
 
 # which ctest command to use for running the dashboard
 SET (CTEST_COMMAND 
-  "\"@CTEST_COMMAND@\" -T Start -T Configure -T Build -T Test -T Submit -M Experimental -A ${CTEST_NOTES_FILE} -R SystemInformation -E CTestTest"
+  "\"@CMAKE_CTEST_COMMAND@\" -D Experimental -A ${CTEST_SCRIPT_DIRECTORY}/${CTEST_SCRIPT_NAME}"
   )
 
 # what cmake command to use for configuring this dashboard
@@ -35,8 +33,9 @@ SET (CTEST_START_WITH_EMPTY_BINARY_DIRECTORY TRUE)
 # this is the initial cache to use for the binary tree, be careful to escape
 # any quotes inside of this string if you use it
 SET (CTEST_INITIAL_CACHE "
-SITE:STRING=TestingOfCTest
+SITE:STRING=@SITE@
 BUILDNAME:STRING=@BUILDNAME@
+CMAKE_GENERATOR:INTERNAL=@CMAKE_GENERATOR@
 CMAKE_CXX_FLAGS:STRING=@CMAKE_CXX_FLAGS@
 CMAKE_C_FLAGS:STRING=@CMAKE_C_FLAGS@
 DART_ROOT:PATH=
@@ -47,15 +46,12 @@ MEMORYCHECK_COMMAND:STRING=
 # if you do not want to use the default location for a 
 # dashboard then set this variable to the directory
 # the dashboard should be in
-SET (CTEST_DASHBOARD_ROOT "@CMAKE_CURRENT_BINARY_DIR@")
+SET (CTEST_DASHBOARD_ROOT "@CMAKE_CURRENT_BINARY_DIR@/Tests/CTestTest")
 
 
 # set any extra envionment varibles here
 SET (CTEST_ENVIRONMENT
 )
 
-FILE(WRITE "${CTEST_NOTES_FILE}"
-  "This is a test of CTest\n")
- 
-SET (CTEST_SOURCE_DIRECTORY "@CMAKE_ROOT@")
-SET (CTEST_BINARY_DIRECTORY "@CMAKE_CURRENT_BINARY_DIR@/${CTEST_BINARY_NAME}")
+SET (CTEST_SOURCE_DIRECTORY "@CMAKE_ROOT@/Source/kwsys")
+SET (CTEST_BINARY_DIRECTORY "@CMake_BINARY_DIR@/Tests/CTestTest/${CTEST_BINARY_NAME}")
