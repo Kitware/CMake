@@ -30,12 +30,8 @@ void cmSourceFile::SetName(const char* name, const char* dir,
 
   this->SetProperty("HEADER_FILE_ONLY","1");
 
-  m_SourceName = cmSystemTools::GetFilenamePath(name);
-  if ( m_SourceName.size() > 0 )
-    {
-    m_SourceName += "/";
-    }
-  m_SourceName += cmSystemTools::GetFilenameWithoutLastExtension(name);
+
+  m_SourceName = name;
 
   std::string pathname = dir;
 
@@ -58,6 +54,12 @@ void cmSourceFile::SetName(const char* name, const char* dir,
   std::string hname = pathname;
   if(cmSystemTools::FileExists(hname.c_str()))
     {
+    m_SourceName = cmSystemTools::GetFilenamePath(name);
+    if ( m_SourceName.size() > 0 )
+      {
+      m_SourceName += "/";
+      }
+    m_SourceName += cmSystemTools::GetFilenameWithoutLastExtension(name);
     std::string::size_type pos = hname.rfind('.');
     if(pos != std::string::npos)
       {
@@ -74,7 +76,7 @@ void cmSourceFile::SetName(const char* name, const char* dir,
 
     // See if the file is a header file
     if(std::find( headerExts.begin(), headerExts.end(), m_SourceExtension ) ==
-       headerExts.end())
+      headerExts.end())
       {
       this->SetProperty("HEADER_FILE_ONLY","0");
       }
