@@ -48,8 +48,10 @@ IF(NOT CMAKE_CXX_FLAGS)
   SET (CMAKE_CXX_FLAGS_MINSIZEREL "/MD /O1")
   SET (CMAKE_CXX_FLAGS_RELEASE "/MD /O2")
   SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO "/MD /Zi /O2")
-  SET (CMAKE_C_FLAGS "/nologo /W3 /Zm1000")
 ENDIF(NOT CMAKE_CXX_FLAGS)
+IF(NOT CMAKE_C_FLAGS)
+  SET (CMAKE_C_FLAGS "/nologo /W3 /Zm1000")
+ENDIF(NOT CMAKE_C_FLAGS)
 
 
 SET (CMAKE_STANDARD_LIBRARIES "kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib" CACHE STRING 
