@@ -18,6 +18,7 @@
 #include "stdio.h"
 #include <sys/stat.h>
 #include "cmRegularExpression.h"
+#include <ctype.h>
 
 #if defined(_MSC_VER) || defined(__BORLANDC__)
 #include <windows.h>
@@ -501,4 +502,20 @@ long int cmSystemTools::ModifiedTime(const char* filename)
 void cmSystemTools::RemoveFile(const char* source)
 {
   unlink(source);
+}
+
+bool cmSystemTools::IsOn(const char* val)
+{
+  if (!val)
+    {
+    return false;
+    }
+  std::basic_string<char> v = val;
+  
+  for(std::basic_string<char>::iterator c = v.begin();
+      c != v.end(); c++)
+    {
+    *c = toupper(*c);
+    }
+  return (v == "ON" || v == "1" || v == "YES" || v == "TRUE" || v == "Y");
 }

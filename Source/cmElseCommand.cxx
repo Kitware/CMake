@@ -26,8 +26,7 @@ bool cmElseCommand::Invoke(std::vector<std::string>& args)
 
   // check to see if the argument is defined first
   const char *def = m_Makefile->GetDefinition(args[0].c_str());
-  if(def && strcmp(def,"0") && strcmp(def,"false") && strcmp(def,"") && 
-     strcmp(def,"NOTFOUND"))
+  if(cmSystemTools::IsOn(def))
     {
     // add block
     cmIfFunctionBlocker *f = new cmIfFunctionBlocker();

@@ -126,6 +126,8 @@ public:
   ///! Remove a file.
   static void RemoveFile(const char* source);
   
+  ///! does a string indicate a true or on value ?
+  static bool IsOn(const char* val);
   
   static long int ModifiedTime(const char* filename);
 

@@ -190,8 +190,7 @@ bool cmCacheManager::IsOn(const char* key) const
     return false;
     }
   const std::string &v = m_Cache.find(key)->second.m_Value;
-  return (v == "ON" || v == "on" || v == "1" || v == "true" || v == "yev"
-          || v == "TRUE" || v == "True" || v == "y" || v == "Y");
+  return cmSystemTools::IsOn(v.c_str());
 }
 
 
