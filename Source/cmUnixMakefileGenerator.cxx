@@ -659,7 +659,13 @@ void cmUnixMakefileGenerator::OutputMakeFlags(std::ostream& fout)
   for(i = includes.begin(); i != includes.end(); ++i)
     {
     std::string include = *i;
-    fout << "-I" << cmSystemTools::EscapeSpaces(i->c_str()).c_str() << " ";
+    // Don't output a -I for the standard include path "/usr/include".
+    // This can cause problems with certain standard library
+    // implementations because the wrong headers may be found first.
+    if(include != "/usr/include")
+      {
+      fout << "-I" << cmSystemTools::EscapeSpaces(i->c_str()).c_str() << " ";
+      }
     }
   fout << m_Makefile->GetDefineFlags();
   fout << "\n\n";
