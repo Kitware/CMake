@@ -41,8 +41,9 @@ int cmTryCompileCommand::CoreTryCompileCode(
     {
     if (argv[i] == "CMAKE_FLAGS")
       {
-      extraArgs++;
-      ++i;
+     // CMAKE_FLAGS is the first argument because we need an argv[0] that
+     // is not used, so it matches regular command line parsing which has
+     // the program name as arg 0
       for (; i < argv.size() && argv[i] != "COMPILE_DEFINITIONS" && 
              argv[i] != "OUTPUT_VARIABLE"; 
            ++i)
