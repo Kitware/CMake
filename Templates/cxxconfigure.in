@@ -132,28 +132,6 @@ if test $ac_cv_prog_gxx = no; then
 fi
 AC_SUBST(CMAKE_TEMPLATE_FLAGS)
 
-
-# check non-g++ compilers to see if they have the standard 
-# ansi stream files (without the .h)
-if test $ac_cv_prog_gxx = no; then
-  CXXFLAGS_ORIG="$CXXFLAGS"
-  CXXFLAGS="$CMAKE_ANSI_CXXFLAGS $CXXFLAGS"
-  AC_MSG_CHECKING( ansi standard C++ stream headers ) 
-  AC_LANG_SAVE
-  AC_LANG_CPLUSPLUS
-  AC_TRY_COMPILE([
-  #include <iostream>
-  ],,[
-  AC_MSG_RESULT(yes)
-  ],[
-  CMAKE_NO_ANSI_STREAM_HEADERS=1
-  AC_MSG_RESULT(no)
-  ])
-  AC_LANG_RESTORE
-  CXXFLAGS="$CXXFLAGS_ORIG"
-fi
-AC_SUBST(CMAKE_NO_ANSI_STREAM_HEADERS)
-
 # check compilers to see if they have std::stringstream
 CXXFLAGS_ORIG="$CXXFLAGS"
 CXXFLAGS="$CMAKE_ANSI_CXXFLAGS $CXXFLAGS"
