@@ -50,7 +50,9 @@ IF(STAGE2)
 
   INSTALL_TARGETS(/bin SimpleInstallS2)
 ELSE(STAGE2)
-  SUBDIRS(PREORDER TestSubDir)
+  IF(CMAKE_GENERATOR MATCHES "Makefiles")
+    SUBDIRS(PREORDER TestSubDir)
+  ENDIF(CMAKE_GENERATOR MATCHES "Makefiles")
   
   # this is stage 1, so create libraries and modules and install everything
   ADD_LIBRARY(test1 STATIC lib1.cxx)
@@ -61,7 +63,6 @@ ELSE(STAGE2)
   TARGET_LINK_LIBRARIES(SimpleInstall test1 test2)
   SET(install_target SimpleInstall)
 
-  ADD_DEPENDENCIES(test2 TSD)
   ADD_DEPENDENCIES(SimpleInstall test3)
   ADD_DEPENDENCIES(test2 test3)
 
