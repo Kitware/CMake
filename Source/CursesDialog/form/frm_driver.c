@@ -30,7 +30,9 @@
  *   Author: Juergen Pfeifer <juergen.pfeifer@gmx.net> 1995,1997            *
  ****************************************************************************/
 #define _XOPEN_SOURCE_EXTENDED
-#define _WCHAR_T
+#ifdef __FreeBSD__
+ #define _WCHAR_T
+#endif /* __FreeBSD__ */
 #include "form.priv.h"
 #undef _XOPEN_SOURCE_EXTENDED
 
