@@ -42,6 +42,10 @@ ELSE (VTK_BINARY_PATH)
     /usr/local
     /usr
     [HKEY_LOCAL_MACHINE\\SOFTWARE\\Kitware\\VTK\\Nightly]
+    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Kitware\\VTK\\43]
+    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Kitware\\VTK\\42]
+    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Kitware\\VTK\\41]
+    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Kitware\\VTK\\40]
     )
   IF (VTK_INSTALL_PATH)
     SET (USE_INSTALLED_VTK 1 CACHE BOOL "Is an installed (versus source) version of VTK used")
@@ -54,6 +58,10 @@ IF (USE_INSTALLED_VTK)
     /usr/local
     /usr
     [HKEY_LOCAL_MACHINE\\SOFTWARE\\Kitware\\VTK\\Nightly]
+    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Kitware\\VTK\\43]
+    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Kitware\\VTK\\42]
+    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Kitware\\VTK\\41]
+    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Kitware\\VTK\\40]
     )
   IF (VTK_INSTALL_PATH)
     SET (USE_INSTALLED_VTK 1 CACHE BOOL "Is an installed (versus source) version of VTK used")
