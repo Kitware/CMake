@@ -222,17 +222,17 @@ void cmLocalUnixMakefileGenerator::OutputMakefile(const char* file,
   for(std::vector<std::string>::const_iterator i = lfiles.begin();
       i !=  lfiles.end(); ++i)
     {
-    fout << " " << cmSystemTools::ConvertToOutputPath(i->c_str());
+    fout << " " << this->ConvertToMakefilePath(i->c_str());
     }
   // Add the cache to the list
   std::string cacheFile = m_Makefile->GetHomeOutputDirectory();
   cacheFile += "/CMakeCache.txt";
-  fout << " " << cmSystemTools::ConvertToOutputPath(cacheFile.c_str());
+  fout << " " << this->ConvertToMakefilePath(cacheFile.c_str());
   fout << "\n\n\n";
   this->OutputMakeVariables(fout);  
   std::string checkCache = m_Makefile->GetHomeOutputDirectory();
   checkCache += "/cmake.check_cache";
-  checkCache = cmSystemTools::ConvertToOutputPath(checkCache.c_str());
+  checkCache = this->ConvertToMakefilePath(checkCache.c_str());
   // most unix makes will pass the command line flags to make down
   // to sub invoked makes via an environment variable.  However, some
   // makes do not support that, so you have to pass the flags explicitly
@@ -445,7 +445,7 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
       std::string path2 = m_LibraryOutputPath;
       path2 += this->GetFullTargetName(l->first.c_str(), l->second);
       path = "... ";
-      path += cmSystemTools::ConvertToOutputPath(path2.c_str());
+      path += this->ConvertToMakefilePath(path2.c_str());
       this->OutputEcho(fout,path.c_str());
       }
     }
@@ -490,7 +490,7 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
         path = m_LibraryOutputPath;
         path += this->GetFullTargetName(l->first.c_str(), l->second);
         fout << " \\\n" 
-             << cmSystemTools::ConvertToOutputPath(path.c_str());
+             << this->ConvertToMakefilePath(path.c_str());
         }
       }
     }
@@ -504,7 +504,7 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
       {
       path = m_ExecutableOutputPath;
       path += this->GetFullTargetName(l->first.c_str(), l->second);
-      fout << " \\\n" << cmSystemTools::ConvertToOutputPath(path.c_str());
+      fout << " \\\n" << this->ConvertToMakefilePath(path.c_str());
       }
     }
   // list utilities last
@@ -537,7 +537,7 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
           if(outExt.size())
             {
             fout << "\\\n" 
-                 << cmSystemTools::ConvertToOutputPath((*i)->GetSourceName().c_str())
+                 << this->ConvertToMakefilePath((*i)->GetSourceName().c_str())
                  << outExt.c_str() << " ";
             }
           }
@@ -553,7 +553,7 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
           std::string outExt(this->GetOutputExtension((*i)->GetSourceExtension().c_str()));
           if(outExt.size())
             {
-            fout << "\\\n\"" << cmSystemTools::ConvertToOutputPath((*i)->GetSourceName().c_str())
+            fout << "\\\n\"" << this->ConvertToMakefilePath((*i)->GetSourceName().c_str())
                  << outExt.c_str() << "\" ";
             }
           }
@@ -585,7 +585,7 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
           path = m_LibraryOutputPath;
           path += targetNameSO;
           fout << " \\\n"
-               << cmSystemTools::ConvertToOutputPath(path.c_str());
+               << this->ConvertToMakefilePath(path.c_str());
           }
         if(targetNameReal != targetName &&
            targetNameReal != targetNameSO)
@@ -593,7 +593,7 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
           path = m_LibraryOutputPath;
           path += targetNameReal;
           fout << " \\\n"
-               << cmSystemTools::ConvertToOutputPath(path.c_str());
+               << this->ConvertToMakefilePath(path.c_str());
           }
         }
       }
@@ -861,7 +861,7 @@ std::string cmLocalUnixMakefileGenerator::CreatePreBuildRules(
       {
       initNext = true;
       }
-    std::string command = cmSystemTools::ConvertToOutputPath(cc.GetCommand().c_str());
+    std::string command = this->ConvertToMakefilePath(cc.GetCommand().c_str());
     customRuleCode += command + " " + cc.GetArguments();
     }
   return customRuleCode;
@@ -886,7 +886,7 @@ std::string cmLocalUnixMakefileGenerator::CreatePreLinkRules(
       {
       initNext = true;
       }
-    std::string command = cmSystemTools::ConvertToOutputPath(cc.GetCommand().c_str());
+    std::string command = this->ConvertToMakefilePath(cc.GetCommand().c_str());
     customRuleCode += command + " " + cc.GetArguments();
     }
   return customRuleCode;
@@ -911,7 +911,7 @@ std::string cmLocalUnixMakefileGenerator::CreatePostBuildRules(
       {
       initNext = true;
       }
-    std::string command = cmSystemTools::ConvertToOutputPath(cc.GetCommand().c_str());
+    std::string command = this->ConvertToMakefilePath(cc.GetCommand().c_str());
     customRuleCode += command + " " + cc.GetArguments();
     }
   return customRuleCode;
@@ -1065,10 +1065,10 @@ void cmLocalUnixMakefileGenerator::OutputLibraryRule(std::ostream& fout,
   std::string targetFullPathSO = m_LibraryOutputPath + targetNameSO;
   std::string targetFullPathReal = m_LibraryOutputPath + targetNameReal;
   std::string targetFullPathBase = m_LibraryOutputPath + targetNameBase;
-  targetFullPath = cmSystemTools::ConvertToOutputPath(targetFullPath.c_str());
-  targetFullPathSO = cmSystemTools::ConvertToOutputPath(targetFullPathSO.c_str());
-  targetFullPathReal = cmSystemTools::ConvertToOutputPath(targetFullPathReal.c_str());
-  targetFullPathBase = cmSystemTools::ConvertToOutputPath(targetFullPathBase.c_str());
+  targetFullPath = this->ConvertToMakefilePath(targetFullPath.c_str());
+  targetFullPathSO = this->ConvertToMakefilePath(targetFullPathSO.c_str());
+  targetFullPathReal = this->ConvertToMakefilePath(targetFullPathReal.c_str());
+  targetFullPathBase = this->ConvertToMakefilePath(targetFullPathBase.c_str());
 
   // get the objects that are used to link this library
   std::string objs = "$(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
@@ -1192,7 +1192,7 @@ void cmLocalUnixMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
       if((*i)->GetSourceExtension() == "def")
         {
         linkFlags += this->GetSafeDefinition("CMAKE_LINK_DEF_FILE_FLAG");
-        linkFlags += cmSystemTools::ConvertToOutputPath((*i)->GetFullPath().c_str());
+        linkFlags += this->ConvertToMakefilePath((*i)->GetFullPath().c_str());
         linkFlags += " ";
         }
       }
@@ -1296,7 +1296,7 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
     }
   target += name;
   target += cmSystemTools::GetExecutableExtension();
-  target = cmSystemTools::ConvertToOutputPath(target.c_str());
+  target = this->ConvertToMakefilePath(target.c_str());
   
   std::string objs = "$(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
   std::string depend = "$(";
@@ -1399,7 +1399,7 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
   depend = target;
   target = name;
   target += cmSystemTools::GetExecutableExtension();
-  target = cmSystemTools::ConvertToOutputPath(target.c_str());
+  target = this->ConvertToMakefilePath(target.c_str());
   commands.resize(0);
   this->OutputMakeRule(fout, 
                        comment.c_str(),
@@ -1445,7 +1445,7 @@ void cmLocalUnixMakefileGenerator::OutputUtilityRule(std::ostream& fout,
       depends +=  " \\\n";
       replaceVars = *d;
       m_Makefile->ExpandVariablesInString(replaceVars);
-      depends += cmSystemTools::ConvertToOutputPath(replaceVars.c_str());
+      depends += this->ConvertToMakefilePath(replaceVars.c_str());
       }
     }
   this->OutputMakeRule(fout, comment.c_str(), name,
@@ -1662,7 +1662,7 @@ void cmLocalUnixMakefileGenerator::OutputBuildTargetInDirWindows(std::ostream& f
 {
   const char* makeTarget = library;
   std::string currentDir = 
-    cmSystemTools::ConvertToOutputPath(m_Makefile->GetCurrentOutputDirectory());
+    this->ConvertToMakefilePath(m_Makefile->GetCurrentOutputDirectory());
   std::string wpath = this->ConvertToOutputForExisting(path);
   std::string wfullpath = this->ConvertToOutputForExisting(fullpath);
   if(libOutPath && strcmp( libOutPath, "" ) != 0)
@@ -1700,7 +1700,7 @@ void cmLocalUnixMakefileGenerator::OutputBuildTargetInDir(std::ostream& fout,
        << "; $(MAKE) $(MAKESILENT) cmake.check_depends"
        << "; $(MAKE) $(MAKESILENT) -f cmake.check_depends"
        << "; $(MAKE) $(MAKESILENT) "
-       << cmSystemTools::ConvertToOutputPath(makeTarget) << "\n\n"; 
+       << this->ConvertToMakefilePath(makeTarget) << "\n\n"; 
 }
 
 
@@ -1771,7 +1771,7 @@ void cmLocalUnixMakefileGenerator::OutputLibDepend(std::ostream& fout,
       libpath += name;
       libpath += this->GetSafeDefinition("CMAKE_STATIC_LIBRARY_SUFFIX");
       }
-    fout << cmSystemTools::ConvertToOutputPath(libpath.c_str()) << " ";
+    fout << this->ConvertToMakefilePath(libpath.c_str()) << " ";
     }
 }
 
@@ -1810,7 +1810,7 @@ void cmLocalUnixMakefileGenerator::OutputExeDepend(std::ostream& fout,
     exepath += name;
     // add the correct extension
     exepath += cmSystemTools::GetExecutableExtension();
-    fout << cmSystemTools::ConvertToOutputPath(exepath.c_str()) << " ";
+    fout << this->ConvertToMakefilePath(exepath.c_str()) << " ";
     }
   // if it isn't in the cache, it might still be a utility target
   // so check for that
@@ -1898,7 +1898,7 @@ void cmLocalUnixMakefileGenerator::BuildInSubDirectory(std::ostream& fout,
     return;
     }
   
-  std::string directory = cmSystemTools::ConvertToOutputPath(dir);
+  std::string directory = this->ConvertToMakefilePath(dir);
   if(target1)
     {
     fout << "\t@if test ! -d " << directory 
@@ -2045,8 +2045,8 @@ bool cmLocalUnixMakefileGenerator::OutputObjectDepends(std::ostream& fout)
             {
             std::string s = (*source)->GetSourceName();
             s += this->GetOutputExtension((*source)->GetSourceExtension().c_str());
-            fout << cmSystemTools::ConvertToOutputPath(s.c_str()) << " : "
-                 << cmSystemTools::ConvertToOutputPath(dep->c_str()) << "\n";
+            fout << this->ConvertToMakefilePath(s.c_str()) << " : "
+                 << this->ConvertToMakefilePath(dep->c_str()) << "\n";
             ret = true;
             }
           fout << "\n\n";
@@ -2097,7 +2097,7 @@ void cmLocalUnixMakefileGenerator::OutputCheckDepends(std::ostream& fout)
             // has been done because m_FullPath on cmDependInformation
             // always is it called.  If it is called here, network builds are
             // very slow because of the number of stats
-            std::string dependfile = cmSystemTools::ConvertToOutputPath(dep->c_str());
+            std::string dependfile = this->ConvertToMakefilePath(dep->c_str());
             // use the lower path function to create uniqe names
             std::string lowerpath = this->LowerCasePath(dependfile.c_str());
             if(emittedLowerPath.insert(lowerpath).second)
@@ -2151,7 +2151,7 @@ void cmLocalUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
       std::string comment = c->GetComment();
       std::string command = c->GetCommand();
       cmSystemTools::ReplaceString(command, "/./", "/");
-      command = cmSystemTools::ConvertToOutputPath(command.c_str());
+      command = this->ConvertToMakefilePath(command.c_str());
       command += " ";
       // now add the arguments
       command += c->GetArguments();
@@ -2182,7 +2182,7 @@ void cmLocalUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
           }
         cmSystemTools::ReplaceString(dep, "/./", "/");
         cmSystemTools::ReplaceString(dep, "/$(IntDir)/", "/");
-        dep = cmSystemTools::ConvertToOutputPath(dep.c_str());
+        dep = this->ConvertToMakefilePath(dep.c_str());
         depends += " ";
         depends += dep;
         } 
@@ -2208,7 +2208,7 @@ void cmLocalUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
 std::string 
 cmLocalUnixMakefileGenerator::ConvertToOutputForExisting(const char* p)
 {
-  std::string ret = cmSystemTools::ConvertToOutputPath(p);
+  std::string ret = this->ConvertToMakefilePath(p);
   // if there are spaces in the path, then get the short path version
   // if there is one
   if(ret.find(' ') != std::string::npos)
@@ -2217,7 +2217,7 @@ cmLocalUnixMakefileGenerator::ConvertToOutputForExisting(const char* p)
       {
       if(!cmSystemTools::GetShortPath(ret.c_str(), ret))
         {
-        ret = cmSystemTools::ConvertToOutputPath(p);
+        ret = this->ConvertToMakefilePath(p);
         }
       }
     }
@@ -2264,13 +2264,13 @@ void cmLocalUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     }
 
   fout << "CMAKE_CURRENT_SOURCE = " << 
-    cmSystemTools::ConvertToOutputPath(m_Makefile->GetStartDirectory()) 
+    this->ConvertToMakefilePath(m_Makefile->GetStartDirectory()) 
        << "\n";
   fout << "CMAKE_CURRENT_BINARY = " << 
-    cmSystemTools::ConvertToOutputPath(m_Makefile->GetStartOutputDirectory())
+    this->ConvertToMakefilePath(m_Makefile->GetStartOutputDirectory())
        << "\n";
   fout << "CMAKE_SOURCE_DIR = " << 
-    cmSystemTools::ConvertToOutputPath(m_Makefile->GetHomeDirectory())
+     cmSystemTools::ConvertToOutputPath(m_Makefile->GetHomeDirectory())
        << "\n";
   fout << "CMAKE_BINARY_DIR = " << 
     cmSystemTools::ConvertToOutputPath(m_Makefile->GetHomeOutputDirectory())
@@ -2366,7 +2366,7 @@ void cmLocalUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
           installNameReal += targetNameReal;
           fname = m_LibraryOutputPath;
           fname += targetNameReal;
-          fout << "\t$(INSTALL_DATA) " << cmSystemTools::ConvertToOutputPath(fname.c_str())
+          fout << "\t$(INSTALL_DATA) " << this->ConvertToMakefilePath(fname.c_str())
                << " \"$(DESTDIR)" << prefix << l->second.GetInstallPath() << "\"\n";
           fout << "\t" << cmakecommand << " -E cmake_symlink_library \""
                << installNameReal << "\" \"" << installNameSO << "\" \"" << installName
@@ -2376,7 +2376,7 @@ void cmLocalUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
         case cmTarget::EXECUTABLE:
           fname = m_ExecutableOutputPath;
           fname += this->GetFullTargetName(l->first.c_str(), l->second);
-          fout << "\t$(INSTALL_PROGRAM) " << cmSystemTools::ConvertToOutputPath(fname.c_str())
+          fout << "\t$(INSTALL_PROGRAM) " << this->ConvertToMakefilePath(fname.c_str())
                << " \"$(DESTDIR)" << prefix << l->second.GetInstallPath() << "\"\n";
           break;
         case cmTarget::INSTALL_FILES:
@@ -2410,7 +2410,7 @@ void cmLocalUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
               fout << "\t$(INSTALL_DATA) ";
               }
             
-            fout << cmSystemTools::ConvertToOutputPath(i->c_str())
+            fout << this->ConvertToMakefilePath(i->c_str())
                  << " \"$(DESTDIR)" << prefix << l->second.GetInstallPath() << "\"\n";
             }
           }
@@ -2445,7 +2445,7 @@ void cmLocalUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
               {
               fout << "\t   @$(INSTALL_PROGRAM) ";
               }
-            fout << cmSystemTools::ConvertToOutputPath(i->c_str())
+            fout << this->ConvertToMakefilePath(i->c_str())
                  << " \"$(DESTDIR)" << prefix << l->second.GetInstallPath() << "\"\n";
             }
           }
@@ -2485,14 +2485,14 @@ void cmLocalUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
       {
       if(!(*source)->GetPropertyAsBool("HEADER_FILE_ONLY"))
         {
-          allsources.push_back(cmSystemTools::ConvertToOutputPath((*source)->GetFullPath().c_str()));
+          allsources.push_back(this->ConvertToMakefilePath((*source)->GetFullPath().c_str()));
         }
       }
     }
 
   std::string checkCache = m_Makefile->GetHomeOutputDirectory();
   checkCache += "/cmake.check_cache";
-  checkCache = cmSystemTools::ConvertToOutputPath(checkCache.c_str());
+  checkCache = this->ConvertToMakefilePath(checkCache.c_str());
   std::vector<std::string> cmake_depends;
   cmake_depends.push_back(checkCache);
   cmake_depends.push_back("$(CMAKE_MAKEFILE_SOURCES)");
@@ -2537,7 +2537,7 @@ void cmLocalUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
   std::vector<std::string> check_cache_depends;
   std::string CMakeCache = m_Makefile->GetHomeOutputDirectory();
   CMakeCache += "/CMakeCache.txt";
-  CMakeCache = cmSystemTools::ConvertToOutputPath(CMakeCache.c_str());
+  CMakeCache = this->ConvertToMakefilePath(CMakeCache.c_str());
   check_cache_depends.push_back(CMakeCache);
   check_cache_depends.push_back("$(CMAKE_MAKEFILE_SOURCES)");
 
@@ -2642,7 +2642,7 @@ OutputBuildObjectFromSource(std::ostream& fout,
   std::string comment = "object file";
   std::string objectFile = std::string(shortName) + 
     this->GetOutputExtension(source.GetSourceExtension().c_str());
-  objectFile = cmSystemTools::ConvertToOutputPath(objectFile.c_str());
+  objectFile = this->ConvertToMakefilePath(objectFile.c_str());
   cmSystemTools::FileFormat format = 
     cmSystemTools::GetFileFormat(source.GetSourceExtension().c_str());
   std::vector<std::string> rules;
@@ -2652,7 +2652,7 @@ OutputBuildObjectFromSource(std::ostream& fout,
     flags += extraCompileFlags;
     }
   std::string sourceFile = 
-    cmSystemTools::ConvertToOutputPath(source.GetFullPath().c_str()); 
+    this->ConvertToMakefilePath(source.GetFullPath().c_str()); 
   std::string buildType =  this->GetSafeDefinition("CMAKE_BUILD_TYPE");
   buildType = cmSystemTools::UpperCase(buildType);
   switch(format)
@@ -2760,7 +2760,7 @@ OutputBuildObjectFromSource(std::ostream& fout,
     for(std::vector<std::string>::iterator i = depends.begin();
         i != depends.end(); ++i)
       {
-      sourceAndDeps.push_back(cmSystemTools::ConvertToOutputPath(i->c_str()));
+      sourceAndDeps.push_back(this->ConvertToMakefilePath(i->c_str()));
       }
     }
   
@@ -2956,7 +2956,7 @@ void cmLocalUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
   replace = target;
   m_Makefile->ExpandVariablesInString(replace);
   
-  std::string tgt = cmSystemTools::ConvertToOutputPath(replace.c_str());
+  std::string tgt = this->ConvertToMakefilePath(replace.c_str());
   if(depends.empty())
     {
     fout << tgt.c_str() << ":\n";
@@ -3154,4 +3154,14 @@ void cmLocalUnixMakefileGenerator::GetLibraryNames(const char* n,
 
   // The library name without extension.
   baseName = this->GetBaseTargetName(n, t);
+}
+
+
+std::string cmLocalUnixMakefileGenerator::ConvertToMakefilePath(const char* p)
+{
+  std::string ret = p;
+  cmSystemTools::ReplaceString(ret, m_Makefile->GetHomeDirectory(), "$(CMAKE_SOURCE_DIR)");
+  cmSystemTools::ReplaceString(ret, m_Makefile->GetHomeOutputDirectory(), "$(CMAKE_BINARY_DIR)");
+  ret = cmSystemTools::ConvertToOutputPath(ret.c_str());
+  return ret;
 }
