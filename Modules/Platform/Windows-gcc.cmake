@@ -12,3 +12,5 @@ SET(CMAKE_SHARED_LIBRARY_RUNTIME_FLAG_SEP "")   # : or empty
 SET(CMAKE_LIBRARY_PATH_FLAG "-L")
 SET(CMAKE_LINK_LIBRARY_FLAG "-l")
 
+# include the gcc flags 
+INCLUDE(${CMAKE_ROOT}/Modules/Platform/gcc.cmake)

@@ -26,7 +26,6 @@ ENDIF(CMAKE_COMPILER_IS_GNUCC)
 
 # CXX compiler
 IF(CMAKE_COMPILER_IS_GNUCXX) 
-  INCLUDE(${CMAKE_ROOT}/Modules/Platform/gcc.cmake)
   # for gnu C++
   SET(CMAKE_SHARED_LIBRARY_CXX_FLAGS "-fPIC")            # -pic 
   SET(CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS "-shared -Wl,-E -Wl,-b")       # -shared
@@ -47,3 +46,5 @@ ELSE(CMAKE_COMPILER_IS_GNUCXX)
   SET (CMAKE_C_FLAGS_INIT "")
 
 ENDIF(CMAKE_COMPILER_IS_GNUCXX)
+# set flags for gcc support
+INCLUDE(${CMAKE_ROOT}/Modules/Platform/gcc.cmake)
