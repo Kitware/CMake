@@ -10,7 +10,7 @@ class cmCursesCacheEntryComposite;
 class cmCursesLongMessageForm : public cmCursesForm
 {
 public:
-  cmCursesLongMessageForm(std::vector<string> const& messages, 
+  cmCursesLongMessageForm(std::vector<std::string> const& messages, 
 			  const char* title);
   virtual ~cmCursesLongMessageForm();
   

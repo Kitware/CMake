@@ -4,12 +4,12 @@
 #include "cmCursesLongMessageForm.h"
 #include "cmCursesMainForm.h"
 
-cmCursesLongMessageForm::cmCursesLongMessageForm(std::vector<string> const&
-						 messages, const char* 
+cmCursesLongMessageForm::cmCursesLongMessageForm(std::vector<std::string> 
+						 const& messages, const char* 
 						 title)
 {
   // Append all messages into on big string
-  std::vector<string>::const_iterator it;
+  std::vector<std::string>::const_iterator it;
   for(it=messages.begin(); it != messages.end(); it++)
     {
     m_Messages += (*it);
