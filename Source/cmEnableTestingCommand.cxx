@@ -15,6 +15,7 @@
 
 =========================================================================*/
 #include "cmEnableTestingCommand.h"
+#include "cmSubDirectory.h"
 
 // we do this in the final pass so that we now the subdirs have all 
 // been defined
@@ -64,18 +65,19 @@ void cmEnableTestingCommand::FinalPass()
   if (!m_Makefile->GetSubDirectories().empty())
     {
     fout << "SUBDIRS(";
-    const std::vector<std::pair<cmStdString, bool> >& subdirs = m_Makefile->GetSubDirectories();
-    std::vector<std::pair<cmStdString, bool> >::const_iterator i = subdirs.begin();
-    fout << (*i).first.c_str();
+    const std::vector<cmSubDirectory>& subdirs 
+      = m_Makefile->GetSubDirectories();
+    std::vector<cmSubDirectory>::const_iterator i = subdirs.begin();
+    fout << (*i).SourcePath.c_str();
     ++i;
     for(; i != subdirs.end(); ++i)
       {
-      fout << " " << i->first.c_str();
+      fout << " " << i->SourcePath.c_str();
       }
     fout << ")" << std::endl << std::endl;;
     }
   fout.close();  
-
+  
   return;
 }
 

@@ -41,16 +41,33 @@ bool cmSubdirCommand::InitialPass(std::vector<std::string> const& args)
       preorder = true;
       continue;
       }
-    std::string directory = std::string(m_Makefile->GetCurrentDirectory()) + 
-      "/" + i->c_str();
-    if ( cmSystemTools::FileIsDirectory(directory.c_str()) )
+
+    // if they specified a relative path then compute the full
+    std::string srcPath = std::string(m_Makefile->GetCurrentDirectory()) + 
+        "/" + i->c_str();
+    if (cmSystemTools::FileIsDirectory(srcPath.c_str()))
       {
-      m_Makefile->AddSubDirectory(i->c_str(), intoplevel, preorder);
+      std::string binPath = 
+        std::string(m_Makefile->GetCurrentOutputDirectory()) + 
+        "/" + i->c_str();
+      m_Makefile->AddSubDirectory(srcPath.c_str(), binPath.c_str(),
+                                  intoplevel, preorder);
+      }
+    // otherwise it is a full path
+    else if ( cmSystemTools::FileIsDirectory(i->c_str()) )
+      {
+      // we must compute the binPath from the srcPath, we just take the last
+      // element from the source path and use that
+      std::string binPath = 
+        std::string(m_Makefile->GetCurrentOutputDirectory()) + 
+        "/" + cmSystemTools::GetFilenameName(i->c_str());
+      m_Makefile->AddSubDirectory(i->c_str(), binPath.c_str(),
+                                  intoplevel, preorder);
       }
     else
       {
       std::string error = "Incorrect SUBDIRS command. Directory: ";
-      error += directory + " does not exists.";
+      error += *i + " does not exists.";
       this->SetError(error.c_str());   
       res = false;
       }

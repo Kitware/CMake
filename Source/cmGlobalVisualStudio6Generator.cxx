@@ -210,7 +210,7 @@ void cmGlobalVisualStudio6Generator::WriteDSWFile(std::ostream& fout,
   this->WriteDSWHeader(fout);
   
   // Get the home directory with the trailing slash
-  std::string homedir = root->GetMakefile()->GetCurrentDirectory();
+  std::string homedir = root->GetMakefile()->GetStartOutputDirectory();
   homedir += "/";
     
   unsigned int i;
@@ -227,7 +227,7 @@ void cmGlobalVisualStudio6Generator::WriteDSWFile(std::ostream& fout,
     cmMakefile* mf = generators[i]->GetMakefile();
     
     // Get the source directory from the makefile
-    std::string dir = mf->GetStartDirectory();
+    std::string dir = mf->GetStartOutputDirectory();
     // remove the home directory and / from the source directory
     // this gives a relative path 
     cmSystemTools::ReplaceString(dir, homedir.c_str(), "");

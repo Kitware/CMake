@@ -22,6 +22,7 @@
 #include "cmMakeDepend.h"
 #include "cmCacheManager.h"
 #include "cmGeneratedFileStream.h"
+#include "cmSubDirectory.h"
 
 #include <cmsys/RegularExpression.hxx>
 
@@ -1738,15 +1739,15 @@ void cmLocalUnixMakefileGenerator::BuildInSubDirectory(std::ostream& fout,
 
 
 void 
-cmLocalUnixMakefileGenerator::
-OutputSubDirectoryVars(std::ostream& fout,
-                       const char* var,
-                       const char* target,
-                       const char* target1,
-                       const char* target2,
-                       const char* depend,
-                       const std::vector<std::pair<cmStdString, bool> >& SubDirectories,
-                       bool silent, int order)
+cmLocalUnixMakefileGenerator
+::OutputSubDirectoryVars(std::ostream& fout,
+                         const char* var,
+                         const char* target,
+                         const char* target1,
+                         const char* target2,
+                         const char* depend,
+                         const std::vector<cmSubDirectory>& SubDirectories,
+                         bool silent, int order)
 {
   if(!depend)
     {
@@ -1762,7 +1763,7 @@ OutputSubDirectoryVars(std::ostream& fout,
   
   // make sure all the pre-order subdirectories are fist
   // other than that keep the same order that the user specified
-  std::vector<std::pair<cmStdString, bool> > orderedDirs;
+  std::vector<cmStdString> orderedDirs;
   // collect pre-order first
   for(ii =0; ii < SubDirectories.size(); ii++)
     {
@@ -1847,7 +1848,7 @@ OutputSubDirectoryVars(std::ostream& fout,
 void cmLocalUnixMakefileGenerator::OutputSubDirectoryRules(std::ostream& fout)
 {
     // Output Sub directory build rules
-  const std::vector<std::pair<cmStdString, bool> >& SubDirectories
+  const std::map<std::string, cmSubDirectory>& SubDirectories
     = m_Makefile->GetSubDirectories();
     
   if( SubDirectories.size() == 0)

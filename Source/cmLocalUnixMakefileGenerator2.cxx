@@ -21,6 +21,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
+#include "cmSubDirectory.h"
 #include "cmake.h"
 
 // Include dependency scanners for supported languages.  Only the
@@ -1313,23 +1314,24 @@ cmLocalUnixMakefileGenerator2
   // boolean is true should be included.  Keep track of the last
   // pre-order and last post-order rule created so that ordering can
   // be enforced.
-  const std::vector<std::pair<cmStdString, bool> >&
-    subdirs = m_Makefile->GetSubDirectories();
+  const std::vector<cmSubDirectory>& subdirs = m_Makefile->GetSubDirectories();
   std::string lastPre = "";
   std::string lastPost = "";
-  for(std::vector<std::pair<cmStdString, bool> >::const_iterator
+  for(std::vector<cmSubDirectory>::const_iterator
         i = subdirs.begin(); i != subdirs.end(); ++i)
     {
-    if(i->second)
+    if(i->IncludeTopLevel)
       {
       // Add the subdirectory rule either for pre-order or post-order.
-      if(m_Makefile->IsDirectoryPreOrder(i->first.c_str()))
+      if(i->PreOrder)
         {
-        this->WriteSubdirRule(makefileStream, pass, i->first.c_str(), lastPre);
+        this->WriteSubdirRule(makefileStream, pass, 
+                              i->BinaryPath.c_str(), lastPre);
         }
       else
         {
-        this->WriteSubdirRule(makefileStream, pass, i->first.c_str(), lastPost);
+        this->WriteSubdirRule(makefileStream, pass, 
+                              i->BinaryPath.c_str(), lastPost);
         }
       }
     }
@@ -1366,11 +1368,8 @@ cmLocalUnixMakefileGenerator2
 
     // Change back to the starting directory.  Any trailing slash must
     // be removed to avoid problems with Borland Make.
-    std::string destFull = m_Makefile->GetStartOutputDirectory();
-    destFull += "/";
-    destFull += subdir;
     std::string back =
-      cmSystemTools::RelativePath(destFull.c_str(),
+      cmSystemTools::RelativePath(subdir,
                                   m_Makefile->GetStartOutputDirectory());
     if(back.size() && back[back.size()-1] == '/')
       {
@@ -2254,6 +2253,13 @@ cmLocalUnixMakefileGenerator2
     {
     s.replace(pos, 1, "_");
     }
+
+  // Replace ":" drive specifier with a single underscore
+  while((pos = s.find(':')) != std::string::npos)
+    {
+    s.replace(pos, 1, "_");
+    }
+
   return s;
 }
 

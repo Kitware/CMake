@@ -177,7 +177,6 @@ protected:
   virtual void AddInstallRule(std::ostream& fout, const char* dest, int type, 
     const char* files, bool optional = false, const char* properties = 0);
   
-  bool m_FromTheTop;
   cmMakefile *m_Makefile;
   cmGlobalGenerator *m_GlobalGenerator;
   // members used for relative path function ConvertToMakefilePath

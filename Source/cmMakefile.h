@@ -24,6 +24,8 @@
 #include "cmListFileCache.h"
 #include "cmCacheManager.h"
 
+#include "cmSubDirectory.h"
+
 #include <cmsys/RegularExpression.hxx>
 
 class cmFunctionBlocker;
@@ -212,6 +214,8 @@ public:
    * Add a subdirectory to the build.
    */
   void AddSubDirectory(const char*, bool includeTopLevel=true, bool preorder = false);
+  void AddSubDirectory(const char* fullSrcDir,const char *fullBinDir, 
+                       bool includeTopLevel=true, bool preorder = false);
 
   /**
    * Add an include directory to the build.
@@ -416,7 +420,7 @@ public:
   /**
    * Get a list of the build subdirectories.
    */
-  const std::vector<std::pair<cmStdString, bool> >& GetSubDirectories()
+  const std::vector<cmSubDirectory>& GetSubDirectories()
     { 
     return m_SubDirectories;
     }
@@ -653,9 +657,6 @@ public:
    */
   std::string GetModulesFile(const char* name);
 
-  ///! Return true if the directory is preorder.
-  bool IsDirectoryPreOrder(const char* dir);
-  
   ///! Set/Get a property of this directory 
   void SetProperty(const char *prop, const char *value);
   const char *GetProperty(const char *prop) const;
@@ -683,7 +684,8 @@ protected:
   cmTargets m_Targets;
   std::vector<cmSourceFile*> m_SourceFiles;
 
-  std::vector<std::pair<cmStdString, bool> > m_SubDirectories; // list of sub directories
+  // list of sub directories
+  std::vector<cmSubDirectory> m_SubDirectories; 
   struct StringSet : public std::set<cmStdString>
   {
   };
@@ -712,10 +714,9 @@ protected:
   
 private:
   /**
-   * Get the name of the parent directories CMakeLists file
-   * given a current CMakeLists file name
+   * Get the name of the parent generator's CMakeLists file
    */
-  std::string GetParentListFileName(const char *listFileName);
+  std::string GetParentListFileName();
 
   void ReadSources(std::ifstream& fin, bool t);
   friend class cmMakeDepend;    // make depend needs direct access 

@@ -20,6 +20,7 @@
 #include "cmMakefile.h"
 #include "cmGeneratedFileStream.h"
 #include "cmSourceFile.h"
+#include "cmSubDirectory.h"
 #include "cmOrderLinkDirectories.h"
 
 cmLocalGenerator::cmLocalGenerator()
@@ -318,12 +319,11 @@ void cmLocalGenerator::GenerateInstallRules()
   cmMakefile* mf = this->GetMakefile();
   if ( !mf->GetSubDirectories().empty() )
     {
-    const std::vector<std::pair<cmStdString, bool> >& subdirs = mf->GetSubDirectories();
-    std::vector<std::pair<cmStdString, bool> >::const_iterator i = subdirs.begin();
+    const std::vector<cmSubDirectory>& subdirs = mf->GetSubDirectories();
+    std::vector<cmSubDirectory>::const_iterator i = subdirs.begin();
     for(; i != subdirs.end(); ++i)
       {
-      std::string odir = mf->GetCurrentOutputDirectory();
-      odir += "/" + (*i).first;
+      std::string odir = i->BinaryPath;
       cmSystemTools::ConvertToUnixSlashes(odir);
       fout << "INCLUDE(\"" <<  odir.c_str() 
            << "/cmake_install.cmake\")" << std::endl;

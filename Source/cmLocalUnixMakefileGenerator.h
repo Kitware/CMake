@@ -23,6 +23,7 @@ class cmDependInformation;
 class cmMakeDepend;
 class cmTarget;
 class cmSourceFile;
+class cmSubDirectory;
 
 /** \class cmLocalUnixMakefileGenerator
  * \brief Write a LocalUnix makefiles.
@@ -148,8 +149,8 @@ protected:
                                       const char* target1,
                                       const char* target2,
                                       const char* depend,
-                                      const std::vector<std::pair<cmStdString, bool> >&
-                                      SubDirectories,
+                                      const std::map<std::string, 
+                                      cmSubDirectory>& SubDirectories,
                                       bool silent = false, int order = 0);
 
   virtual void OutputMakeRule(std::ostream&, 

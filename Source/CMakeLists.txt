@@ -56,8 +56,6 @@ SET(SRCS
   cmListFileLexer.c
   cmLocalGenerator.cxx
   cmLocalGenerator.h
-  cmLocalUnixMakefileGenerator.cxx
-  cmLocalUnixMakefileGenerator.h
   cmLocalUnixMakefileGenerator2.cxx
   cmLocalXCodeGenerator.cxx
   cmMakeDepend.cxx
@@ -291,6 +289,17 @@ IF(BUILD_TESTING)
     --build-makeprogram ${MAKEPROGRAM}
     --build-two-config
     --test-command simple)
+
+  ADD_TEST(OutOfSource ${CMAKE_CTEST_COMMAND}
+    --build-and-test 
+    "${CMake_SOURCE_DIR}/Tests/OutOfSource"
+    "${CMake_BINARY_DIR}/Tests/OutOfSource"
+    --build-generator ${CMAKE_GENERATOR}
+    --build-project OutOfSource
+    --build-makeprogram ${MAKEPROGRAM}
+    --build-two-config
+    --test-command 
+    "${CMake_BINARY_DIR}/Tests/OutOfSource/SubDir/OutOfSourceSubdir/simple")
 
   ADD_TEST(PreOrder ${CMAKE_CTEST_COMMAND}
     --build-and-test 

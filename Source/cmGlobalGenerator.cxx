@@ -18,6 +18,8 @@
 #include "cmLocalGenerator.h"
 #include "cmake.h"
 #include "cmMakefile.h"
+#include "cmSubDirectory.h"
+
 #include <stdlib.h> // required for atof
 
 #if defined(_WIN32) && !defined(__CYGWIN__) 
@@ -580,32 +582,29 @@ void cmGlobalGenerator::RecursiveConfigure(cmLocalGenerator *lg,
   lg->Configure();
                                   
   // get all the subdirectories
-  std::vector<std::pair<cmStdString, bool> > subdirs = lg->GetMakefile()->GetSubDirectories();
+  std::vector<cmSubDirectory> subdirs = 
+    lg->GetMakefile()->GetSubDirectories();
+  
   float progressPiece = (endProgress - startProgress)/(1.0f+subdirs.size());
   m_CMakeInstance->UpdateProgress("Configuring",
                                   startProgress + progressPiece);
   
   // for each subdir recurse
-  unsigned int i;
-  for (i = 0; i < subdirs.size(); ++i)
+  std::vector<cmSubDirectory>::const_iterator sdi = subdirs.begin();
+  int i;
+  for (i = 0; sdi != subdirs.end(); ++sdi, ++i)
     {
     cmLocalGenerator *lg2 = this->CreateLocalGenerator();
     lg2->SetParent(lg);
     m_LocalGenerators.push_back(lg2);
     
     // add the subdir to the start output directory
-    std::string outdir = lg->GetMakefile()->GetStartOutputDirectory();
-    outdir += "/";
-    outdir += subdirs[i].first;
-    lg2->GetMakefile()->SetStartOutputDirectory(outdir.c_str());
-    lg2->SetExcludeAll(!subdirs[i].second);
+    lg2->GetMakefile()->SetStartOutputDirectory(sdi->BinaryPath.c_str());
+    lg2->SetExcludeAll(!sdi->IncludeTopLevel);
     // add the subdir to the start source directory
-    std::string currentDir = lg->GetMakefile()->GetStartDirectory();
-    currentDir += "/";
-    currentDir += subdirs[i].first;
-    lg2->GetMakefile()->SetStartDirectory(currentDir.c_str());
+    lg2->GetMakefile()->SetStartDirectory(sdi->SourcePath.c_str());
     lg2->GetMakefile()->MakeStartDirectoriesCurrent();
-  
+    
     this->RecursiveConfigure(lg2, 
                              startProgress + (i+1.0f)*progressPiece,
                              startProgress + (i+2.0f)*progressPiece);

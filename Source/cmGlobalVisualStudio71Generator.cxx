@@ -48,9 +48,9 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(std::ostream& fout,
   // Write out the header for a SLN file
   this->WriteSLNHeader(fout);
   
-  // Get the home directory with the trailing slash
-  std::string homedir = root->GetMakefile()->GetCurrentDirectory();
-  homedir += "/";
+  // Get the start directory with the trailing slash
+  std::string rootdir = root->GetMakefile()->GetStartOutputDirectory();
+  rootdir += "/";
   bool doneAllBuild = false;
   bool doneRunTests = false;
   bool doneInstall  = false;
@@ -67,10 +67,10 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(std::ostream& fout,
     cmMakefile* mf = generators[i]->GetMakefile();
 
     // Get the source directory from the makefile
-    std::string dir = mf->GetStartDirectory();
+    std::string dir = mf->GetStartOutputDirectory();
     // remove the home directory and / from the source directory
     // this gives a relative path 
-    cmSystemTools::ReplaceString(dir, homedir.c_str(), "");
+    cmSystemTools::ReplaceString(dir, rootdir.c_str(), "");
 
     // Get the list of create dsp files names from the cmVCProjWriter, more
     // than one dsp could have been created per input CMakeLists.txt file
