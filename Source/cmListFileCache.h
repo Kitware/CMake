@@ -77,7 +77,7 @@ public:
   cmListFile* GetFileCache(const char* path);
 private:
   // Cache the file
-  bool cmListFileCache::CacheFile(const char* path);
+  bool CacheFile(const char* path);
   // private data
   typedef std::map<cmStdString, cmListFile> ListFileMap;
   ListFileMap m_ListFileCache;  // file name to ListFile map
