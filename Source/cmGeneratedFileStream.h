@@ -80,7 +80,7 @@ public:
   /**
    * Allow a test for whether the file is open.
    */
-  operator bool() const { return m_Stream; }
+  operator bool() const { return m_Stream.is_open(); }
   
   /**
    * Close the file stream.  This will cause the copy-if-different to the
