@@ -32,24 +32,24 @@ cmDSWMakefile::cmDSWMakefile(cmMakefile* m)
 // output the DSW file
 void cmDSWMakefile::OutputDSWFile()
 { 
-  if(m_Makefile->GetOutputDirectory() == "")
+  if(m_Makefile->GetStartOutputDirectory() == "")
     {
     // default to build in place
-    m_Makefile->SetOutputDirectory(m_Makefile->GetHomeDirectory());
+    m_Makefile->SetStartOutputDirectory(m_Makefile->GetHomeDirectory());
     }
   // If the output directory is not the m_cmHomeDirectory
   // then create it.
-  if(strcmp(m_Makefile->GetOutputDirectory(),
+  if(strcmp(m_Makefile->GetStartOutputDirectory(),
             m_Makefile->GetHomeDirectory()) != 0)
     {
-    if(!cmSystemTools::MakeDirectory(m_Makefile->GetOutputDirectory()))
+    if(!cmSystemTools::MakeDirectory(m_Makefile->GetStartOutputDirectory()))
       {
       MessageBox(0, "Error creating directory ", 0, MB_OK);
-      MessageBox(0, m_Makefile->GetOutputDirectory(), 0, MB_OK);
+      MessageBox(0, m_Makefile->GetStartOutputDirectory(), 0, MB_OK);
       }
     }
   std::string fname;
-  fname = m_Makefile->GetOutputDirectory();
+  fname = m_Makefile->GetStartOutputDirectory();
   fname += "/";
   fname += m_Makefile->GetProjectName();
   fname += ".dsw";
@@ -91,22 +91,23 @@ cmDSWMakefile
     // add it to the vector
     makefiles.push_back(pg);
     // Set up the file with the current context
-    mf->SetOutputHomeDirectory(m_Makefile->GetOutputDirectory());
+    mf->SetHomeOutputDirectory(m_Makefile->GetStartOutputDirectory());
     mf->SetHomeDirectory(m_Makefile->GetHomeDirectory());
-    // set the current directory in the Source as a full
-    // path
-    std::string currentDir = m_Makefile->GetCurrentDirectory();
-    currentDir += "/";
-    currentDir += subdir;
-    mf->SetCurrentDirectory(currentDir.c_str());
-    // Parse the CMakeLists.txt file
-    currentDir += "/CMakeLists.txt";
-    mf->ReadMakefile(currentDir.c_str());
     // Set the output directory which may be different than the source
-    std::string outdir = m_Makefile->GetOutputDirectory();
+    std::string outdir = m_Makefile->GetStartOutputDirectory();
     outdir += "/";
     outdir += subdir;
-    mf->SetOutputDirectory(outdir.c_str());
+    mf->SetStartOutputDirectory(outdir.c_str());
+    // set the current directory in the Source as a full
+    // path
+    std::string currentDir = m_Makefile->GetStartDirectory();
+    currentDir += "/";
+    currentDir += subdir;
+    mf->SetStartDirectory(currentDir.c_str());
+    // Parse the CMakeLists.txt file
+    currentDir += "/CMakeLists.txt";
+    mf->MakeStartDirectoriesCurrent();
+    mf->ReadListFile(currentDir.c_str());
     // Create the DSP file
     mf->GenerateMakefile();
     // Look at any sub directories parsed (SUBDIRS) and 

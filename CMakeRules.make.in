@@ -21,7 +21,7 @@ clean: ${SUBDIR_CLEAN}
 	rm -f ${SRC_OBJ} ${EXECUTABLES} 
 
 CMakeTargets.make: ${CMAKE} ${srcdir}/CMakeLists.txt
-	${CMAKE} ${srcdir}/CMakeLists.txt -S${currentdir} -H${topdir} -B${CMAKE_CONFIG_DIR}
+	${CMAKE} ${srcdir}/CMakeLists.txt -S${currentdir} -O${currentbindir} -H${topdir} -B${CMAKE_CONFIG_DIR}
 
 #------------------------------------------------------------------------------
 # rules for the normal library

@@ -90,5 +90,9 @@ void cmClassFile::Print()
     std::cout << "Header file ";
   else
     std::cout << "CXX file ";
+  if(m_IsExecutable)
+    std::cout << "Executable ";
+  else
+    std::cout << "Non Executable ";
   std::cout << m_ClassName << std::endl;
 }

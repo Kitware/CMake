@@ -26,7 +26,6 @@
 cmMakefile::cmMakefile()
 {
   m_DefineFlags = " ";
-  m_Executables = false;
   m_MakefileGenerator = 0;
   this->AddDefaultCommands();
 }
@@ -84,14 +83,18 @@ void cmMakefile::Print()
   std::cout << "classes:\n";
   for(unsigned int i = 0; i < m_Classes.size(); i++)
     m_Classes[i].Print();
-  std::cout << " m_OutputDirectory; " << 
-    m_OutputDirectory.c_str() << std::endl;
-  std::cout << " m_OutputHomeDirectory; " << 
-    m_OutputHomeDirectory.c_str() << std::endl;
-  std::cout << " m_cmHomeDirectory; " << 
-    m_cmHomeDirectory.c_str() << std::endl;
+  std::cout << " m_CurrentOutputDirectory; " << 
+    m_CurrentOutputDirectory.c_str() << std::endl;
+  std::cout << " m_StartOutputDirectory; " << 
+    m_StartOutputDirectory.c_str() << std::endl;
+  std::cout << " m_HomeOutputDirectory; " << 
+    m_HomeOutputDirectory.c_str() << std::endl;
   std::cout << " m_cmCurrentDirectory; " << 
     m_cmCurrentDirectory.c_str() << std::endl;
+  std::cout << " m_cmStartDirectory; " << 
+    m_cmStartDirectory.c_str() << std::endl;
+  std::cout << " m_cmHomeDirectory; " << 
+    m_cmHomeDirectory.c_str() << std::endl;
   std::cout << " m_LibraryName;	" <<  m_LibraryName.c_str() << std::endl;
   std::cout << " m_ProjectName;	" <<  m_ProjectName.c_str() << std::endl;
   this->PrintStringVector("m_SubDirectories ", m_SubDirectories); 
@@ -104,22 +107,39 @@ void cmMakefile::Print()
 }
 
 // Parse the given CMakeLists.txt file into a list of classes.
-bool cmMakefile::ReadMakefile(const char* filename, bool inheriting)
+// Reads in current CMakeLists file and all parent CMakeLists files
+// executing all inherited commands in the parents
+bool cmMakefile::ReadListFile(const char* filename)
 {
-  // If not being called from ParseDirectory which
-  // sets the inheriting flag, then parse up the
-  // tree and collect inherited parameters
-  if(!inheriting)
+  // is there a parent CMakeLists file that does not go beyond the
+  // Home directory? if so recurse and read in that List file 
+  std::string parentList = this->GetParentListFileName(filename);
+  if (parentList != "")
     {
-    cmSystemTools::ConvertToUnixSlashes(m_cmCurrentDirectory);
-    m_SourceHomeDirectory = m_cmHomeDirectory;
-    cmSystemTools::ConvertToUnixSlashes(m_SourceHomeDirectory);
-    // if this is already the top level directory then 
-    if(m_SourceHomeDirectory != m_cmCurrentDirectory)
+    // save the current directory
+    std::string srcdir = m_cmCurrentDirectory;
+    std::string bindir = m_CurrentOutputDirectory;    
+    // compute the new current directories
+    std::string::size_type pos = m_cmCurrentDirectory.rfind('/');
+    if(pos != std::string::npos)
       {
-      this->ParseDirectory(m_cmCurrentDirectory.c_str());
+      m_cmCurrentDirectory = m_cmCurrentDirectory.substr(0, pos);
       }
+    pos = m_CurrentOutputDirectory.rfind('/');
+    if(pos != std::string::npos)
+      {
+      m_CurrentOutputDirectory = m_CurrentOutputDirectory.substr(0, pos);
+      }
+    this->ReadListFile(parentList.c_str());
+    // restore the current directory
+    m_cmCurrentDirectory = srcdir;
+    m_CurrentOutputDirectory = bindir;    
     }
+
+  // are we at the start CMakeLists file or are we processing a parent 
+  // lists file
+  bool inheriting = (m_cmCurrentDirectory != m_cmStartDirectory);
+                    
   // Now read the input file
   std::ifstream fin(filename);
   if(!fin)
@@ -137,7 +157,7 @@ bool cmMakefile::ReadMakefile(const char* filename, bool inheriting)
       // ADD_COMMAND is implemented
       if(name == "VERBATIM")
         {
-        if(!inheriting)
+        if (!inheriting)
           {
           m_MakeVerbatim = arguments;
           }
@@ -248,8 +268,20 @@ void cmMakefile::AddDefineFlag(const char* flag)
 
 void cmMakefile::AddExecutable(cmClassFile& cf)
 {
+  cf.m_IsExecutable = true;
   m_Classes.push_back(cf);
-  m_Executables = true;
+}
+
+bool cmMakefile::HasExecutables()
+{
+  for(unsigned int i = 0; i < m_Classes.size(); i++)
+    {
+    if (m_Classes[i].m_IsExecutable)
+      {
+      return true;
+      }
+    }
+  return false;
 }
 
 void cmMakefile::AddLinkLibrary(const char* lib)
@@ -294,32 +326,49 @@ void cmMakefile::AddExtraDirectory(const char* dir)
 }
 
 
-// Go until directory == m_cmHomeDirectory 
-// 1. fix slashes
-// 2. peal off /dir until home found, go no higher
-void cmMakefile::ParseDirectory(const char* dir)
+// return the file name for the parent CMakeLists file to the 
+// one passed in. Zero is returned if the CMakeLists file is the
+// one in the home directory or if for some reason a parent cmake lists 
+// file cannot be found.
+std::string cmMakefile::GetParentListFileName(const char *currentFileName)
 {
-  std::string listsFile = dir;
-  listsFile += "/CMakeLists.txt";
-  if(cmSystemTools::FileExists(listsFile.c_str()))
+  // extract the directory name
+  std::string parentFile;
+  std::string listsDir = currentFileName;
+  std::string::size_type pos = listsDir.rfind('/');
+  // if we could not find the directory return 0
+  if(pos == std::string::npos)
     {
-    this->ReadMakefile(listsFile.c_str(), true);
+    return parentFile;
     }
-  if(m_SourceHomeDirectory == dir)
+  listsDir = listsDir.substr(0, pos);
+  
+  // if we are in the home directory then stop, return 0
+  if(m_cmHomeDirectory == listsDir)
     {
-    return;
+    return parentFile;
     }
-
-
-  std::string dotdotDir = dir;
-  std::string::size_type pos = dotdotDir.rfind('/');
-  if(pos != std::string::npos)
+  
+  // is there a parent directory we can check
+  pos = listsDir.rfind('/');
+  // if we could not find the directory return 0
+  if(pos == std::string::npos)
     {
-    dotdotDir = dotdotDir.substr(0, pos);
-    this->ParseDirectory(dotdotDir.c_str());
+    return parentFile;
     }
+  listsDir = listsDir.substr(0, pos);
+  
+  // is there a CMakeLists.txt file in the parent directory ?
+  parentFile = listsDir;
+  parentFile += "/CMakeLists.txt";
+  if(!cmSystemTools::FileExists(parentFile.c_str()))
+    {
+    parentFile = "";
+    return parentFile;
+    }
+  
+  return parentFile;
 }
-
 
 // expance CMAKE_BINARY_DIR and CMAKE_SOURCE_DIR in the
 // include and library directories.
@@ -327,7 +376,7 @@ void cmMakefile::ParseDirectory(const char* dir)
 void cmMakefile::ExpandVaribles()
 {
   // make sure binary and source dir are defined
-  this->AddDefinition("CMAKE_BINARY_DIR", this->GetOutputHomeDirectory());
+  this->AddDefinition("CMAKE_BINARY_DIR", this->GetHomeOutputDirectory());
   this->AddDefinition("CMAKE_SOURCE_DIR", this->GetHomeDirectory());
 
    // Now expand varibles in the include and link strings

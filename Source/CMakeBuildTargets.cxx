@@ -36,18 +36,17 @@ int main(int ac, char** av)
     for(int i =2; i < ac; i++)
       {
       std::string arg = av[i];
-      // Set the current source directory with a -S dir options
+      // Set the start source directory with a -S dir options
       if(arg.find("-S",0) == 0)
 	{
 	std::string path = arg.substr(2);
-	mf.SetCurrentDirectory(path.c_str());
+	mf.SetStartDirectory(path.c_str());
 	}
-      // Set the output or binary directory with a -B dir option
-      if(arg.find("-B",0) == 0)
+      // Set the start output directory with a -O dir options
+      if(arg.find("-O",0) == 0)
 	{
 	std::string path = arg.substr(2);
-	mf.SetOutputHomeDirectory(path.c_str());
-	mf.SetOutputDirectory(path.c_str());
+	mf.SetStartOutputDirectory(path.c_str());
 	}
       // Set the source home directory with a -H dir option
       if(arg.find("-H",0) == 0)
@@ -55,12 +54,19 @@ int main(int ac, char** av)
 	std::string path = arg.substr(2);
 	mf.SetHomeDirectory(path.c_str());
 	}
+      // Set the output or binary directory with a -B dir option
+      if(arg.find("-B",0) == 0)
+	{
+	std::string path = arg.substr(2);
+	mf.SetHomeOutputDirectory(path.c_str());
+	}
       }
     }
   mf.SetMakefileGenerator(new cmUnixMakefileGenerator);
 
   // Read and parse the input makefile
-  if(!mf.ReadMakefile(av[1]))
+  mf.MakeStartDirectoriesCurrent();
+  if(!mf.ReadListFile(av[1]))
     {
     std::cerr << "Usage: " << av[0] << " Makefile.in  -Ipath ..." << std::endl;
     return -1;

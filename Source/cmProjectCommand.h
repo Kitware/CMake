@@ -24,7 +24,8 @@
  *
  * cmProjectCommand is used to specify a name for this build project.
  * It is defined once per set of CMakeList.txt files (including
- * all subdirectories).
+ * all subdirectories). Currently it just sets the name of the workspace
+ * file for Microsoft Visual C++
  */
 class cmProjectCommand : public cmCommand
 {
@@ -49,6 +50,15 @@ public:
   virtual const char* GetName() {return "PROJECT";}
 
   /**
+   * This determines if the command gets propagated down
+   * to makefiles located in subdirectories.
+   */
+  virtual bool IsInherited() 
+    {
+    return true;
+    }
+
+  /**
    * Succinct documentation.
    */
   virtual const char* GetTerseDocumentation() 
@@ -62,7 +72,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "PROJECT(projectname)\n";
+      "PROJECT(projectname) Sets the name of the Microsoft workspace .dsw file. Does nothing on UNIX currently\n";
     }
 };
 

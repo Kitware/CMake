@@ -257,15 +257,16 @@ void CMakeSetupDialog::OnOK()
   mf.SetHomeDirectory(m_WhereSource);
 
   // Set the output directory
-  mf.SetOutputDirectory(m_WhereBuild);
-  mf.SetOutputHomeDirectory(m_WhereBuild);
+  mf.SetStartOutputDirectory(m_WhereBuild);
+  mf.SetHomeOutputDirectory(m_WhereBuild);
   // set the directory which contains the CMakeLists.txt
-  mf.SetCurrentDirectory(m_WhereSource);
+  mf.SetStartDirectory(m_WhereSource);
   // Create the master DSW file and all children dsp files for ITK
   // Set the CMakeLists.txt file
   CString makefileIn = m_WhereSource;
   makefileIn += "/CMakeLists.txt";
-  mf.ReadMakefile(makefileIn);
+  mf.MakeStartDirectoriesCurrent();
+  mf.ReadListFile(makefileIn);
   // Move this to the cache editor
   mf.GenerateMakefile();
   CDialog::OnOK();

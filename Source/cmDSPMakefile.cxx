@@ -79,28 +79,25 @@ void cmDSPMakefile::OutputDSPFile()
   cmSystemTools::ReplaceString(m_ReleaseLibraryOptions, "Debug", "Release");
   // If the output directory is not the m_cmHomeDirectory
   // then create it.
-  if(strcmp(m_Makefile->GetOutputDirectory(),
+  if(strcmp(m_Makefile->GetStartOutputDirectory(),
             m_Makefile->GetHomeDirectory()) != 0)
     {
-    if(!cmSystemTools::MakeDirectory(m_Makefile->GetOutputDirectory()))
+    if(!cmSystemTools::MakeDirectory(m_Makefile->GetStartOutputDirectory()))
       {
       std::string message = "Error creating directory ";
-      message += m_Makefile->GetOutputDirectory();
+      message += m_Makefile->GetStartOutputDirectory();
       Die(message.c_str());
       }
     }
   
-  if(!m_Makefile->HasExecutables())
+  // if there is a library, build it
+  if(strlen(m_Makefile->GetLibraryName()) != 0)
     {
-    if(strlen(m_Makefile->GetLibraryName()) == 0)
-      {
-      // if no library silently give up
-      return;
-      }
     this->SetBuildType(STATIC_LIBRARY);
     this->CreateSingleDSP();
     }
-  else
+  // if there are executables build them
+  if (m_Makefile->HasExecutables())
     {
     this->CreateExecutableDSPFiles();
     }
@@ -111,32 +108,34 @@ void cmDSPMakefile::CreateExecutableDSPFiles()
   for(int i = 0; i < Classes.size(); ++i)
     {
     cmClassFile& classfile = Classes[i];
-    std::string fname = m_Makefile->GetOutputDirectory();
-    fname += "/";
-    fname += classfile.m_ClassName;
-    fname += ".dsp";
-    std::ofstream fout(fname.c_str());
-    if(!fout)
+    if (classfile.m_IsExecutable)
       {
-      std::string message = "Error Writing ";
-      message += fname;
-      Die(message.c_str());
+      std::string fname = m_Makefile->GetStartOutputDirectory();
+      fname += "/";
+      fname += classfile.m_ClassName;
+      fname += ".dsp";
+      std::ofstream fout(fname.c_str());
+      if(!fout)
+        {
+        std::string message = "Error Writing ";
+        message += fname;
+        Die(message.c_str());
+        }
+      else
+        {
+        m_Makefile->SetLibraryName(classfile.m_ClassName.c_str());
+        this->SetBuildType(EXECUTABLE);
+        std::string pname = m_Makefile->GetLibraryName();
+        m_CreatedProjectNames.push_back(pname);
+        
+        this->WriteDSPHeader(fout);
+        this->WriteDSPBeginGroup(fout, "Source Files", "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat");
+        this->WriteDSPBuildRule(fout, classfile.m_FullPath.c_str());
+        this->WriteDSPEndGroup(fout);
+        this->WriteDSPBuildRule(fout);
+        this->WriteDSPFooter(fout);
+        }
       }
-    else
-      {
-      m_Makefile->SetLibraryName(classfile.m_ClassName.c_str());
-      this->SetBuildType(EXECUTABLE);
-      std::string pname = m_Makefile->GetLibraryName();
-      m_CreatedProjectNames.push_back(pname);
-
-      this->WriteDSPHeader(fout);
-      this->WriteDSPBeginGroup(fout, "Source Files", "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat");
-      this->WriteDSPBuildRule(fout, classfile.m_FullPath.c_str());
-      this->WriteDSPEndGroup(fout);
-      this->WriteDSPBuildRule(fout);
-      this->WriteDSPFooter(fout);
-      }
-    
     }
 }
 
@@ -144,7 +143,7 @@ void cmDSPMakefile::CreateExecutableDSPFiles()
 void cmDSPMakefile::CreateSingleDSP()
 {
   std::string fname;
-  fname = m_Makefile->GetOutputDirectory();
+  fname = m_Makefile->GetStartOutputDirectory();
   fname += "/";
   fname += m_Makefile->GetLibraryName();
   fname += ".dsp";
@@ -165,7 +164,7 @@ void cmDSPMakefile::WriteDSPBuildRule(std::ostream& fout)
 {
   std::string dspname = *(m_CreatedProjectNames.end()-1);
   dspname += ".dsp";
-  std::string makefileIn = m_Makefile->GetCurrentDirectory();
+  std::string makefileIn = m_Makefile->GetStartDirectory();
   makefileIn += "/";
   makefileIn += "CMakeLists.txt";
   std::string dsprule = m_Makefile->GetHomeDirectory();
@@ -173,12 +172,12 @@ void cmDSPMakefile::WriteDSPBuildRule(std::ostream& fout)
   dsprule += makefileIn;
   dsprule += " -DSP -H";
   dsprule += m_Makefile->GetHomeDirectory();
-  dsprule += " -D";
-  dsprule += m_Makefile->GetCurrentDirectory();
+  dsprule += " -S";
+  dsprule += m_Makefile->GetStartDirectory();
   dsprule += " -O";
-  dsprule += m_Makefile->GetOutputDirectory();
+  dsprule += m_Makefile->GetStartOutputDirectory();
   dsprule += " -B";
-  dsprule += m_Makefile->GetOutputHomeDirectory();
+  dsprule += m_Makefile->GetHomeOutputDirectory();
   this->WriteCustomRule(fout, makefileIn.c_str(), 
 			dspname.c_str(),
 			dsprule.c_str());
@@ -307,7 +306,8 @@ void cmDSPMakefile::WriteDSPBuildRules(std::ostream& fout)
   std::vector<cmClassFile>& Classes = m_Makefile->GetClasses();
   for(int i = 0; i < Classes.size(); ++i)
     {
-    if(!Classes[i].m_AbstractClass && !Classes[i].m_HeaderFileOnly)
+    if(!Classes[i].m_IsExecutable && !Classes[i].m_AbstractClass && 
+       !Classes[i].m_HeaderFileOnly)
       {
       this->WriteDSPBuildRule(fout, Classes[i].m_FullPath.c_str());
       }

@@ -35,6 +35,7 @@ public:
     {
     m_AbstractClass = false;
     m_HeaderFileOnly = false;
+    m_IsExecutable = false;
     }
   
   /**
@@ -58,6 +59,11 @@ public:
    * Indicate whether this class is defined with only the header file.
    */
   bool m_HeaderFileOnly;
+
+  /**
+   * Indicate whether this class is an executable file
+   */
+  bool m_IsExecutable;
 
   /**
    * The full path to the file.

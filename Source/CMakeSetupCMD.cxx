@@ -34,20 +34,20 @@ void SetArgs(cmMakefile& builder, int ac, char** av)
       std::string path = arg.substr(2);
       builder.SetHomeDirectory(path.c_str());
       }
-    if(arg.find("-D",0) != std::string::npos)
+    if(arg.find("-S",0) != std::string::npos)
       {
       std::string path = arg.substr(2);
-      builder.SetCurrentDirectory(path.c_str());
+      builder.SetStartDirectory(path.c_str());
       }
     if(arg.find("-O",0) != std::string::npos)
       {
       std::string path = arg.substr(2);
-      builder.SetOutputDirectory(path.c_str());
+      builder.SetStartOutputDirectory(path.c_str());
       }
     if(arg.find("-B",0) != std::string::npos)
       {
       std::string path = arg.substr(2);
-      builder.SetOutputHomeDirectory(path.c_str());
+      builder.SetHomeOutputDirectory(path.c_str());
       std::cout << "set output home to " << path.c_str() << std::endl;
       }
     }
@@ -76,7 +76,8 @@ int main(int ac, char** av)
     pg->BuildDSWOn();
     }
   builder.SetMakefileGenerator(pg);
-  builder.ReadMakefile(av[1]);
+  builder.MakeStartDirectoriesCurrent();
+  builder.ReadListFile(av[1]);
   builder.GenerateMakefile();
   return 0;
 }

@@ -55,7 +55,8 @@ public:
         "CONFIGURE_HEADER(InputFile OutputFile)\n"
 	"The Input and Ouput files have to have full paths.\n"
 	"They can also use variables like CMAKE_BINARY_DIR,CMAKE_SOURCE_DIR.\n"
-        "This command is only run if autoconf was not used.\n";
+        "This command is only run if configure was not used. In other\n";
+        "words it is only run for non UNIX style builds.\n";
     }
 
   /**

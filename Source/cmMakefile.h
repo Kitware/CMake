@@ -46,7 +46,7 @@ public:
   /**
    * Read and parse a CMakeLists.txt file.
    */
-  bool ReadMakefile(const char* makefile, bool inheriting = false); 
+  bool ReadListFile(const char* listfile); 
 
   /**
    * Add a wrapper generator.
@@ -141,77 +141,106 @@ public:
    */
   void AddExtraDirectory(const char* dir);
   
+
   /**
-   * Specify the home directory for the build.
+   * Add an auxiliary directory to the build.
+   */
+  void MakeStartDirectoriesCurrent()
+    {
+      m_cmCurrentDirectory = m_cmStartDirectory;
+      m_CurrentOutputDirectory = m_StartOutputDirectory;
+    }
+  
+  //@{
+  /**
+   * Set/Get the home directory (or output directory) in the project. The
+   * home directory is the top directory of the project. It is where
+   * CMakeSetup or configure was run. Remember that CMake processes
+   * CMakeLists files by recursing up the tree starting at the StartDirectory
+   * and going up until it reaches the HomeDirectory.  
    */
   void SetHomeDirectory(const char* dir) 
     {
     m_cmHomeDirectory = dir;
     cmSystemTools::ConvertToUnixSlashes(m_cmHomeDirectory);
     }
-
-  /**
-   * Get the home directory for the build.
-   */
   const char* GetHomeDirectory() 
     {
     return m_cmHomeDirectory.c_str();
     }
-
+  void SetHomeOutputDirectory(const char* lib)
+    {
+    m_HomeOutputDirectory = lib;
+    cmSystemTools::ConvertToUnixSlashes(m_HomeOutputDirectory);
+    }
+  const char* GetHomeOutputDirectory()
+    {
+    return m_HomeOutputDirectory.c_str();
+    }
+  //@}
+  
+  //@{
   /**
-   * Set the current directory in the project.
+   * Set/Get the start directory (or output directory). The start directory
+   * is the directory of the CMakeLists.txt file that started the current
+   * round of processing. Remember that CMake processes CMakeLists files by
+   * recursing up the tree starting at the StartDirectory and going up until
+   * it reaches the HomeDirectory.  
+   */
+  void SetStartDirectory(const char* dir) 
+    {
+      m_cmStartDirectory = dir;
+      cmSystemTools::ConvertToUnixSlashes(m_cmStartDirectory);
+    }
+  const char* GetStartDirectory() 
+    {
+      return m_cmStartDirectory.c_str();
+    }
+  void SetStartOutputDirectory(const char* lib)
+    {
+      m_StartOutputDirectory = lib;
+      cmSystemTools::ConvertToUnixSlashes(m_StartOutputDirectory);
+    }
+  const char* GetStartOutputDirectory()
+    {
+      return m_StartOutputDirectory.c_str();
+    }
+  //@}
+
+  //@{
+  /**
+   * Set/Get the current directory (or output directory) in the project. The
+   * current directory is the directory of the CMakeLists.txt file that is
+   * currently being processed. Remember that CMake processes CMakeLists
+   * files by recursing up the tree starting at the StartDirectory and going
+   * up until it reaches the HomeDirectory.  
    */
   void SetCurrentDirectory(const char* dir) 
     {
-    m_cmCurrentDirectory = dir;
+      m_cmCurrentDirectory = dir;
+      cmSystemTools::ConvertToUnixSlashes(m_cmCurrentDirectory);
     }
-
-  /**
-   * Get the current directory in the project.
-   */
   const char* GetCurrentDirectory() 
     {
-    return m_cmCurrentDirectory.c_str();
+      return m_cmCurrentDirectory.c_str();
     }
-
+  void SetCurrentOutputDirectory(const char* lib)
+    {
+      m_CurrentOutputDirectory = lib;
+      cmSystemTools::ConvertToUnixSlashes(m_CurrentOutputDirectory);
+    }
+  const char* GetCurrentOutputDirectory()
+    {
+      return m_CurrentOutputDirectory.c_str();
+    }
+  //@}
+  
   /**
    * Specify the name of the library that is built by this makefile.
    */
   const char* GetLibraryName()
     {
     return m_LibraryName.c_str();
-    }
-
-  /**
-   * Set the name of the library that is built by this makefile.
-   */
-  void SetOutputDirectory(const char* lib)
-    {
-    m_OutputDirectory = lib;
-    }
-
-  /**
-   * Get the name of the library that is built by this makefile.
-   */
-  const char* GetOutputDirectory()
-    {
-    return m_OutputDirectory.c_str();
-    }
-
-  /**
-   * Set the name of the current output directory.
-   */
-  void SetOutputHomeDirectory(const char* lib)
-    {
-    m_OutputHomeDirectory = lib;
-    }
-
-  /**
-   * Get the name of the current output directory.
-   */
-  const char* GetOutputHomeDirectory()
-    {
-    return m_OutputHomeDirectory.c_str();
     }
 
   /**
@@ -226,10 +255,7 @@ public:
    * Return a boolean flag indicating whether the build generates
    * any executables.
    */
-  bool HasExecutables() 
-    {
-    return m_Executables;
-    }
+  bool HasExecutables();
 
   /**
    * Get a list of include directories in the build.
@@ -315,13 +341,16 @@ public:
    */
   void ExpandVariblesInString(std::string& source);
 protected:
-  bool m_Executables;
   std::string m_Prefix;
   std::vector<std::string> m_AuxSourceDirectories; // 
-  std::string m_OutputDirectory; // Current output directory for makefile
-  std::string m_OutputHomeDirectory; // Top level output directory
-  std::string m_cmHomeDirectory; // Home directory for source
-  std::string m_cmCurrentDirectory; // current directory in source
+
+  std::string m_cmCurrentDirectory; 
+  std::string m_CurrentOutputDirectory; 
+  std::string m_cmStartDirectory; 
+  std::string m_StartOutputDirectory; 
+  std::string m_cmHomeDirectory; 
+  std::string m_HomeOutputDirectory;
+
   std::string m_LibraryName;	// library name
   std::string m_ProjectName;	// project name
   std::vector<cmClassFile> m_Classes; // list of classes in makefile
@@ -333,7 +362,6 @@ protected:
   std::vector<std::string> m_LinkLibrariesWin32;
   std::vector<std::string> m_LinkLibrariesUnix;
   std::string m_DefineFlags;
-  std::string m_SourceHomeDirectory;
   struct customCommand
   {
     std::string m_Source;
@@ -350,12 +378,11 @@ protected:
   cmMakefileGenerator* m_MakefileGenerator;
   
 private:
-   /**
-   * Look for CMakeLists.txt files to parse in dir,
-   * then in dir's parents, until the SourceHome directory
-   * is found.
+  /**
+   * Get the name of the parent directories CMakeLists file
+   * given a current CMakeLists file name
    */
-  void ParseDirectory(const char* dir);
+  std::string GetParentListFileName(const char *listFileName);
 
   /**
    * Parse a file for includes links and libs

@@ -24,6 +24,17 @@ bool cmProjectCommand::Invoke(std::vector<std::string>& args)
     return false;
     }
   m_Makefile->SetProjectName(args[0].c_str());
+
+  std::string bindir = args[0];
+  bindir += "_BINARY_DIR";
+  std::string srcdir = args[0];
+  srcdir += "_SOURCE_DIR";
+  
+  m_Makefile->AddDefinition(bindir.c_str(),
+	  m_Makefile->GetCurrentOutputDirectory());
+  m_Makefile->AddDefinition(srcdir.c_str(),
+	  m_Makefile->GetCurrentDirectory());
+  
   return true;
 }
 
