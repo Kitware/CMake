@@ -48,21 +48,31 @@ ENDIF (WIN32)
 FIND_PROGRAM(LATEX_COMPILER
   NAMES latex
   PATHS ${MIKTEX_BINARY_PATH}
+        /usr/bin
 )
 
 FIND_PROGRAM(BIBTEX_COMPILER
   NAMES bibtex
   PATHS ${MIKTEX_BINARY_PATH}
+        /usr/bin
 )
 
 FIND_PROGRAM(MAKEINDEX_COMPILER
   NAMES makeindex
   PATHS ${MIKTEX_BINARY_PATH}
+        /usr/bin
 )
 
 FIND_PROGRAM(DVIPS_CONVERTER
   NAMES dvips
   PATHS ${MIKTEX_BINARY_PATH}
+        /usr/bin
+)
+
+FIND_PROGRAM(DVIPDF_CONVERTER
+  NAMES dvipdfm dvipdft dvipdf
+  PATHS ${MIKTEX_BINARY_PATH}
+        /usr/bin
 )
 
 IF (WIN32)
