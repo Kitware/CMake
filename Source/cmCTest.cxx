@@ -1626,7 +1626,7 @@ void cmCTest::FindRunningCMake(const char* arg0)
     {
     failures.push_back(m_CTestSelf);
     cmOStringStream msg;
-    msg << "CTEST can not find the command line program cmake.\n";
+    msg << "CTEST can not find the command line program ctest.\n";
     msg << "  argv[0] = \"" << arg0 << "\"\n";
     msg << "  Attempted paths:\n";
     std::vector<cmStdString>::iterator i;
@@ -1639,22 +1639,40 @@ void cmCTest::FindRunningCMake(const char* arg0)
   std::string dir;
   std::string file;
   if(cmSystemTools::SplitProgramPath(m_CTestSelf.c_str(),
-      dir,
-      file,
-      true))
+                                     dir, file, true))
     {
     m_CMakeSelf = dir += "/cmake";
     m_CMakeSelf += cmSystemTools::GetExecutableExtension();
-    if(!cmSystemTools::FileExists(m_CMakeSelf.c_str()))
+    if(cmSystemTools::FileExists(m_CMakeSelf.c_str()))
       {
-      cmOStringStream msg;
-      failures.push_back(m_CMakeSelf);
-      msg << "CTEST can not find the command line program cmake.\n";
-      msg << "  argv[0] = \"" << arg0 << "\"\n";
-      msg << "  Attempted path:\n";
-      msg << "    \"" << m_CMakeSelf.c_str() << "\"\n"; 
-      cmSystemTools::Error(msg.str().c_str());
+      return;
       }
+    }
+  failures.push_back(m_CMakeSelf);
+#ifdef CMAKE_BUILD_DIR
+  std::string intdir = ".";
+#ifdef  CMAKE_INTDIR
+  intdir = CMAKE_INTDIR;
+#endif
+  m_CMakeSelf = CMAKE_BUILD_DIR;
+  m_CMakeSelf += "/bin/";
+  m_CMakeSelf += intdir;
+  m_CMakeSelf += "/cmake";
+  m_CMakeSelf += cmSystemTools::GetExecutableExtension();
+#endif
+  if(!cmSystemTools::FileExists(m_CMakeSelf.c_str()))
+    {
+    failures.push_back(m_CMakeSelf);
+    cmOStringStream msg;
+    msg << "CTEST can not find the command line program cmake.\n";
+    msg << "  argv[0] = \"" << arg0 << "\"\n";
+    msg << "  Attempted paths:\n";
+    std::vector<cmStdString>::iterator i;
+    for(i=failures.begin(); i != failures.end(); ++i)
+      {
+      msg << "    \"" << i->c_str() << "\"\n";
+      }
+    cmSystemTools::Error(msg.str().c_str());
     }
 }
 
