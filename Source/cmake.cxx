@@ -126,7 +126,7 @@ void cmake::SetArgs(cmMakefile& builder, const std::vector<std::string>& args)
     }
 }
 
-// at the end of this CMAKE_ROOT and CMAAKE_COMMAND should be added to the cache
+// at the end of this CMAKE_ROOT and CMAKE_COMMAND should be added to the cache
 void cmake::AddCMakePaths(const std::vector<std::string>& args)
 {
   // Find our own executable.
@@ -183,7 +183,8 @@ void cmake::AddCMakePaths(const std::vector<std::string>& args)
   if (!cmSystemTools::FileExists(modules.c_str()))
     {
     // try exe/../share/cmake
-    modules = cMakeRoot + "/share/CMake/Modules/FindVTK.cmake";
+    cMakeRoot += "/share/CMake";
+    modules = cMakeRoot + "/Modules/FindVTK.cmake";
     }
 #ifdef CMAKE_ROOT_DIR
   if (!cmSystemTools::FileExists(modules.c_str()))
