@@ -14,16 +14,19 @@
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
-// This file is actually 4 different implementations.
-// 1. HP machines which uses shl_load
-// 2. Apple OSX which uses NSLinkModule
-// 3. Windows which uses LoadLibrary
-// 4. Most unix systems which use dlopen (default )
-// Each part of the ifdef contains a complete implementation for
-// the static methods of cmDynamicLoader.  
 
-// Ugly stuff for library handles
-// They are different on several different OS's
+/*
+ * This file is actually 4 different implementations.
+ * 1. HP machines which uses shl_load
+ * 2. Apple OSX which uses NSLinkModule
+ * 3. Windows which uses LoadLibrary
+ * 4. Most unix systems which use dlopen (default )
+ * Each part of the ifdef contains a complete implementation for
+ * the static methods of cmDynamicLoader.  
+ */
+
+/* Ugly stuff for library handles.  They are different on several
+   different OS's */
 #if defined(__hpux)
 # include <dl.h>
   typedef shl_t cmLibHandle;
@@ -36,8 +39,8 @@
 
 typedef void (*cmDynamicLoaderFunction)();
 
-// ---------------------------------------------------------------
-// 1. Implementation for HPUX  machines
+/* --------------------------------------------------------------- */
+/* 1. Implementation for HPUX  machines */
 #ifdef __hpux
 #define CMDYNAMICLOADER_DEFINED 1
 #include <dl.h>
@@ -54,8 +57,8 @@ cmDynamicLoaderFunction cmDynamicLoaderGetSymbolAddress(cmLibHandle lib,
 #endif
 
 
-// ---------------------------------------------------------------
-// 2. Implementation for Darwin (including OSX) Machines
+/* --------------------------------------------------------------- */
+/* 2. Implementation for Darwin (including OSX) Machines */
 
 #ifdef __APPLE__
 #define CMDYNAMICLOADER_DEFINED
@@ -78,8 +81,8 @@ cmDynamicLoaderFunction cmDynamicLoaderGetSymbolAddress(cmLibHandle lib,
 #endif
 
 
-// ---------------------------------------------------------------
-// 3. Implementation for Windows win32 code
+/* --------------------------------------------------------------- */
+/* 3. Implementation for Windows win32 code */
 #ifdef _WIN32
 #include <windows.h>
 #define CMDYNAMICLOADER_DEFINED 1
@@ -99,12 +102,12 @@ cmDynamicLoaderFunction cmDynamicLoaderGetSymbolAddress(cmLibHandle lib,
 }
 #endif
 
-// ---------------------------------------------------------------
-// 4. Implementation for default UNIX machines.
-// if nothing has been defined then use this
+/* --------------------------------------------------------------- */
+/* 4. Implementation for default UNIX machines.
+   if nothing has been defined then use this  */
 #ifndef CMDYNAMICLOADER_DEFINED
 #define CMDYNAMICLOADER_DEFINED
-// Setup for most unix machines
+/* Setup for most unix machines */
 #include <dlfcn.h>
 
 cmDynamicLoaderFunction cmDynamicLoaderGetSymbolAddress(cmLibHandle lib,
