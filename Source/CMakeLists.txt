@@ -602,6 +602,17 @@ IF(BUILD_TESTING)
     --test-command Exec2
     )
 
+  ADD_TEST(ExternalOBJ ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/ExternalOBJ"
+    "${CMake_BINARY_DIR}/Tests/ExternalOBJ"
+    --build-generator ${CMAKE_GENERATOR}
+    --build-project ExternalOBJ
+    --build-makeprogram ${MAKEPROGRAM}
+    --build-exe-dir "${CMake_BINARY_DIR}/ExternalOBJ"
+    --test-command executable
+    )
+
   ADD_TEST(curl ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Source/CTest/Curl"
