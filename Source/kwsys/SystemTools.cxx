@@ -816,14 +816,13 @@ kwsys_stl::string SystemTools::ConvertToWindowsOutputPath(const char* path)
 }
 
 bool SystemTools::CopyFileIfDifferent(const char* source,
-                                        const char* destination)
+                                      const char* destination)
 {
   if(SystemTools::FilesDiffer(source, destination))
     {
-    SystemTools::CopyFileAlways(source, destination);
-    return true;
+    return SystemTools::CopyFileAlways(source, destination);
     }
-  return false;
+  return true;
 }
 
   

@@ -660,15 +660,26 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
     // Copy file
     if (args[1] == "copy" && args.size() == 4)
       {
-      cmSystemTools::cmCopyFile(args[2].c_str(), args[3].c_str());
-      return cmSystemTools::GetErrorOccuredFlag();
+      if(!cmSystemTools::cmCopyFile(args[2].c_str(), args[3].c_str()))
+        {
+        std::cerr << "Error copying file \"" << args[2].c_str()
+                  << "\" to \"" << args[3].c_str() << "\".\n";
+        return 1;
+        }
+      return 0;
       }
 
     // Copy file if different.
     if (args[1] == "copy_if_different" && args.size() == 4)
       {
-      cmSystemTools::CopyFileIfDifferent(args[2].c_str(), args[3].c_str());
-      return cmSystemTools::GetErrorOccuredFlag();
+      if(!cmSystemTools::CopyFileIfDifferent(args[2].c_str(), args[3].c_str()))
+        {
+        std::cerr << "Error copying file (if different) from \""
+                  << args[2].c_str() << "\" to \"" << args[3].c_str()
+                  << "\".\n";
+        return 1;
+        }
+      return 0;
       }
 
     // Echo string
