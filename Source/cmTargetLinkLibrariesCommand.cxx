@@ -50,8 +50,9 @@ bool cmTargetLinkLibrariesCommand::Invoke(std::vector<std::string>& args)
     }
   // add libraries, nothe that there is an optional prefix 
   // of debug and optimized than can be used
-  for(std::vector<std::string>::iterator i = args.begin();
-      i != args.end(); ++i)
+  std::vector<std::string>::iterator i = args.begin();
+  
+  for(++i; i != args.end(); ++i)
     {
     if (*i == "debug")
       {
