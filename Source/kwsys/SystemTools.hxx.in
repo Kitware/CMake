@@ -124,6 +124,10 @@ public:
    */
   static void GetPath(kwsys_std::vector<kwsys_std::string>& path);
 
+  /** Read an environment variable.  */
+  static const char* GetEnv(const char* key);
+  static bool GetEnv(const char* key, std::string& result);
+
   /**
    *  Get the file extension (including ".") needed for an executable
    *  on the current platform ("" for unix, ".exe" for Windows).

@@ -190,6 +190,24 @@ void SystemTools::GetPath(kwsys_std::vector<kwsys_std::string>& path)
     }
 }
 
+const char* SystemTools::GetEnv(const char* key)
+{
+  return getenv(key);
+}
+
+bool SystemTools::GetEnv(const char* key, kwsys_std::string& result)
+{
+  const char* v = getenv(key);
+  if(v)
+    {
+    result = v;
+    return true;
+    }
+  else
+    {
+    return false;
+    }
+}
 
 const char* SystemTools::GetExecutableExtension()
 {
