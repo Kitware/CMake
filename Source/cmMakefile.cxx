@@ -147,7 +147,7 @@ cmMakefile::~cmMakefile()
     }
   std::set<cmFunctionBlocker *>::const_iterator pos;
   for (pos = m_FunctionBlockers.begin(); 
-       pos != m_FunctionBlockers.end(); ++pos)
+       pos != m_FunctionBlockers.end(); pos = m_FunctionBlockers.begin())
     {
     cmFunctionBlocker* b = *pos;
     m_FunctionBlockers.erase(*pos);
