@@ -130,11 +130,6 @@ public:
   
   static unsigned long FileLength(const char *filename);
   /**
-   * given a (possibly) relative path, return the completely
-   * qualified path to a file system entity
-   */
-  static char *RealPath(const char *path, char *resolved_path);
-  /**
    *  Add the paths from the environment variable PATH to the 
    *  string vector passed in.
    */

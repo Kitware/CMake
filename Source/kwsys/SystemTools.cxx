@@ -1032,14 +1032,18 @@ unsigned long SystemTools::FileLength(const char* filename)
 
 int SystemTools::Strucmp(const char *s1, const char *s2)
 {
-#if defined(_WIN32)
-#ifdef __BORLANDC__
-  return stricmp(s1,s2);
-#else
-  return _stricmp(s1,s2);
-#endif
-#else
-  return strcasecmp(s1,s2);
+//  return strcasecmp(s1,s2);
+//
+// lifted from Graphvis http://www.graphviz.org 
+  while ((*s1 != '\0') 
+         && (tolower(*(unsigned char *)s1) == tolower(*(unsigned char *)s2)))
+    {
+      s1++;
+      s2++;
+    }
+ 
+  return tolower(*(unsigned char *) s1) - tolower(*(unsigned char *) s2);
+
 #endif
 }
 
@@ -1069,44 +1073,6 @@ bool SystemTools::RemoveFile(const char* source)
   return unlink(source) != 0 ? false : true;
 }
 
-char *SystemTools
-::RealPath(const char *path, char *resolved_path)
-{
-#if defined(_WIN32)
-  char pathpart[4096];
-  strcpy(pathpart,path);
-  char fnamepart[4096];
-  char *slash;
-
-  if((slash = strrchr(pathpart,'/')) == NULL)
-    {
-      slash = strrchr(pathpart,'\\');
-    }
-
-  if(slash == NULL) // no path part, so just use current dir.
-    {
-      Getcwd(pathpart,sizeof(pathpart));
-      strcpy(fnamepart,path);
-    } 
-  else // change directory to path part, getcwd to find OS resolved path
-    {
-      *slash = '\0';
-      strcpy(fnamepart,slash+1);
-
-      char savedir[4096];
-      Getcwd(savedir,sizeof(savedir));
-      Chdir(pathpart);
-      Getcwd(pathpart,sizeof(pathpart));
-      Chdir(savedir);
-    }
-  strcpy(resolved_path,pathpart);
-  strcat(resolved_path,"/");
-  strcat(resolved_path,fnamepart);
-  return resolved_path;
-#else
-  return realpath(path,resolved_path);
-#endif
-}
 
 /**
  * Find the file the given name.  Searches the given path and then
