@@ -99,8 +99,8 @@ CHECK_LIBRARY_EXISTS_CONCAT("nsl"    gethostname  HAVE_LIBNSL)
 CHECK_LIBRARY_EXISTS_CONCAT("dl"     dlopen       HAVE_LIBDL)
 CHECK_LIBRARY_EXISTS_CONCAT("ucb"    gethostname  HAVE_LIBUCB)
 CHECK_LIBRARY_EXISTS_CONCAT("socket" connect      HAVE_LIBSOCKET)
-CHECK_LIBRARY_EXISTS_CONCAT("ws2_32" printf       HAVE_LIBWS2_32)
-CHECK_LIBRARY_EXISTS_CONCAT("winmm"  printf       HAVE_LIBWINMM)
+CHECK_LIBRARY_EXISTS_CONCAT("ws2_32" getch        HAVE_LIBWS2_32)
+CHECK_LIBRARY_EXISTS_CONCAT("winmm"  getch        HAVE_LIBWINMM)
 CHECK_LIBRARY_EXISTS_CONCAT("z"      inflateEnd   HAVE_LIBZ)
 CHECK_LIBRARY_EXISTS_CONCAT("crypto" CRYPTO_lock  HAVE_LIBCRYPTO)
 CHECK_LIBRARY_EXISTS_CONCAT("ssl"    SSL_connect  HAVE_LIBSSL)
@@ -114,7 +114,21 @@ SET(CMAKE_REQUIRED_LIBRARIES ${CURL_LIBS})
 # If we have features.h, then do the _BSD_SOURCE magic
 CHECK_INCLUDE_FILE("features.h"       HAVE_FEATURES_H)
 IF(HAVE_FEATURES_H)
-  SET_SOURCE_FILES_PROPERTIES(if2ip.c COMPILE_FLAGS -D_BSD_SOURCE)
+  SET_SOURCE_FILES_PROPERTIES(
+    cookie.c
+    easy.c
+    formdata.c
+    getenv.c
+    hash.c
+    http.c
+    if2ip.c 
+    mprintf.c
+    multi.c
+    sendf.c
+    telnet.c
+    transfer.c
+    url.c
+    COMPILE_FLAGS -D_BSD_SOURCE)
 ENDIF(HAVE_FEATURES_H)
 
 # Check if header file exists and add it to the list.
