@@ -491,7 +491,7 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
         path = m_LibraryOutputPath;
         path += this->GetFullTargetName(l->first.c_str(), l->second);
         fout << " \\\n" 
-             << this->ConvertToRelativeOutputPath(path.c_str());
+             << this->ConvertToMakeTarget(this->ConvertToRelativeOutputPath(path.c_str()).c_str());
         }
       }
     }
@@ -505,7 +505,7 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
       {
       path = m_ExecutableOutputPath;
       path += this->GetFullTargetName(l->first.c_str(), l->second);
-      fout << " \\\n" << this->ConvertToRelativeOutputPath(path.c_str());
+      fout << " \\\n" <<  this->ConvertToMakeTarget(this->ConvertToRelativeOutputPath(path.c_str()).c_str());
       }
     }
   // list utilities last
@@ -1498,7 +1498,7 @@ void cmLocalUnixMakefileGenerator::OutputUtilityRule(std::ostream& fout,
       depends +=  " \\\n";
       replaceVars = *d;
       m_Makefile->ExpandVariablesInString(replaceVars);
-      depends += this->ConvertToRelativeOutputPath(replaceVars.c_str());
+      depends += this->ConvertToMakeTarget(this->ConvertToRelativeOutputPath(replaceVars.c_str()).c_str());
       }
     }
   this->OutputMakeRule(fout, comment.c_str(), name,
