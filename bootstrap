@@ -34,6 +34,7 @@ cmake_source_dir=`(cd "${cmake_source_dir}";pwd)`
 cmake_binary_dir=`pwd`
 cmake_bootstrap_dir="${cmake_binary_dir}/Bootstrap.cmk"
 
+# Display CMake bootstrap usage
 cmake_usage()
 {
   cat<<EOF
@@ -41,7 +42,11 @@ Usage: $0 [options]
 Options: [defaults in brackets after descriptions]
 Configuration:
   --help                  print this message
+  --version               only print version information
   --verbose               display more information
+  --parallel=n            bootstrap cmake in parallel, where n is
+                          number of nodes [1]
+
 Directory and file names:
   --prefix=PREFIX         install architecture-independent files in PREFIX
                           [/usr/local]
@@ -49,6 +54,20 @@ EOF
   exit 10
 }
 
+# Display CMake bootstrap usage
+cmake_version()
+{
+  # Get CMake version
+  CMAKE_VERSION=""
+  for a in MAJOR MINOR PATCH; do
+    CMake_VERSION=`cat "${cmake_source_dir}/CMakeLists.txt" | grep "SET(CMake_VERSION_${a} *[0-9]*)" | sed "s/SET(CMake_VERSION_${a} *\([0-9]*\))/\1/"`
+    CMAKE_VERSION="${CMAKE_VERSION}.${CMake_VERSION}" 
+  done
+  CMAKE_VERSION=`echo $CMAKE_VERSION | sed "s/\.\([0-9][0-9]*\)\.\([0-9][0-9]*\)\.\([0-9][0-9]*\)/\1.\2-\3/"`
+  echo "CMake ${CMAKE_VERSION}, Copyright (c) 2002 Kitware, Inc., Insight Consortium"
+}
+
+# Display CMake bootstrap error, display the log file and exit
 cmake_error()
 {
   echo "---------------------------------------------"
@@ -63,6 +82,7 @@ cmake_error()
   exit 1
 }
 
+# Write string into a file
 cmake_report ()
 {
   FILE=$1
@@ -70,21 +90,26 @@ cmake_report ()
   echo "$*" >> ${FILE}
 }
 
+# Escape spaces in strings
 cmake_escape ()
 {
   echo $1 | sed "s/ /\\\\ /g"
 }
 
+# Write message to the log
 cmake_log ()
 {
   echo "$*" >> cmake_bootstrap.log
 }
 
+# Return temp file
 cmake_tmp_file ()
 {
   echo "cmake_bootstrap_$$.test"
 }
 
+# Run a compiler test. First argument is compiler, second one are compiler
+# flags, third one is test source file to be compiled
 cmake_try_run ()
 {
   COMPILER=$1
@@ -116,6 +141,7 @@ cmake_try_run ()
   return 0
 }
 
+# Run a make test. First argument is the make interpreter.
 cmake_try_make ()
 {
   MAKE_PROC=$1
@@ -140,6 +166,7 @@ cmake_try_make ()
   return 0
 }
 
+# Parse arguments
 cmake_verbose=
 cmake_parallel_make=
 cmake_prefix_dir="/usr/local"
@@ -153,11 +180,16 @@ for a in "$@"; do
   if echo $a | grep "^--help" > /dev/null 2> /dev/null; then
     cmake_usage
   fi
+  if echo $a | grep "^--version" > /dev/null 2> /dev/null; then
+    cmake_version
+    exit 2
+  fi
   if echo $a | grep "^--verbose" > /dev/null 2> /dev/null; then
     cmake_verbose=TRUE
   fi
 done
 
+# If verbose, display some information about bootstrap
 if [ -n "${cmake_verbose}" ]; then
   echo "---------------------------------------------"
   echo "Source directory: ${cmake_source_dir}"
@@ -171,28 +203,35 @@ if [ -n "${cmake_verbose}" ]; then
 fi
 
 echo "---------------------------------------------"
+# Get CMake version
+echo "`cmake_version`"
 
+# Make bootstrap directory
 [ -d "${cmake_bootstrap_dir}" ] || mkdir "${cmake_bootstrap_dir}"
 if [ ! -d "${cmake_bootstrap_dir}" ]; then
   cmake_error "Cannot create directory ${cmake_bootstrap_dir} to bootstrap CMake."
 fi
 cd "${cmake_bootstrap_dir}"
 
+# Delete all the bootstrap files
 rm -f "${cmake_bootstrap_dir}/cmake_bootstrap.log"
 rm -f "${cmake_bootstrap_dir}/cmConfigure.h"
 
+# If exist compiler flags, set them
 cmake_c_flags=${CFLAGS}
 cmake_cxx_flags=${CXXFLAGS}
 
 # Test C compiler
 cmake_c_compiler=
 
+# If CC is set, use that for compiler, otherwise use list of known compilers
 if [ -n "${CC}" ]; then
   cmake_c_compilers="${CC}"
 else
   cmake_c_compilers="${CMAKE_KNOWN_C_COMPILERS}"
 fi
 
+# Check if C compiler works
 TMPFILE=`cmake_tmp_file`
 cat>"${TMPFILE}.c"<<EOF
 #include<stdio.h>
@@ -217,12 +256,15 @@ echo "C compiler on this system is: ${cmake_c_compiler} ${cmake_c_flags}"
 
 # Test CXX compiler
 cmake_cxx_compiler=
+
+# If CC is set, use that for compiler, otherwise use list of known compilers
 if [ -n "${CXX}" ]; then
   cmake_cxx_compilers="${CXX}"
 else
   cmake_cxx_compilers="${CMAKE_KNOWN_CXX_COMPILERS}"
 fi
 
+# Check if C++ compiler works
 TMPFILE=`cmake_tmp_file`
 cat>"${TMPFILE}.cxx"<<EOF
 #include<iostream.h>
@@ -239,8 +281,6 @@ for a in ${cmake_cxx_compilers}; do
 done
 rm -f "${TMPFILE}.cxx"
 
-
-
 if [ -z "${cmake_cxx_compiler}" ]; then
   cmake_error "Cannot find apropriate C++ compiler on this system.
 Please specify one using environment variable CXX."
@@ -250,6 +290,8 @@ echo "C++ compiler on this system is: ${cmake_cxx_compiler} ${cmake_cxx_flags}"
 # Test Make
 
 cmake_make_processor=
+
+# If MAKE is set, use that for make processor, otherwise use list of known make
 if [ -n "${MAKE}" ]; then
   cmake_make_processors="${MAKE}"
 else
@@ -278,8 +320,11 @@ rm -rf "${cmake_bootstrap_dir}/${TMPFILE}"
 
 echo "Make processor on this system is: ${cmake_make_processor}"
 
+# Ok, we have CC, CXX, and MAKE.
+
 # Test C++ compiler features
 
+# If we are on IRIX, check for -LANG:std
 if [ "x${cmake_system}" = "xIRIX64" ]; then
   TMPFILE=`cmake_tmp_file`
   cat>${TMPFILE}.cxx<<EOF
@@ -303,6 +348,7 @@ EOF
   rm -f "${TMPFILE}.cxx"
 fi
 
+# Test for STD namespace
 if cmake_try_run "${cmake_cxx_compiler}" "${cmake_cxx_flags}" "${cmake_source_dir}/Modules/TestForSTDNamespace.cxx" >> cmake_bootstrap.log 2>&1; then
   cmake_report cmConfigure.h "/* #undef CMAKE_NO_STD_NAMESPACE */"
   echo "${cmake_cxx_compiler} has STD namespace"
@@ -311,6 +357,7 @@ else
   echo "${cmake_cxx_compiler} does not have STD namespace"
 fi
 
+# Test for ANSI stream headers
 if cmake_try_run "${cmake_cxx_compiler}" "${cmake_cxx_flags}" "${cmake_source_dir}/Modules/TestForANSIStreamHeaders.cxx" >> cmake_bootstrap.log 2>&1; then
   cmake_report cmConfigure.h "/* #undef CMAKE_NO_ANSI_STREAM_HEADERS */"
   echo "${cmake_cxx_compiler} has ANSI stream headers"
@@ -319,6 +366,7 @@ else
   echo "${cmake_cxx_compiler} does not have ANSI stream headers"
 fi
 
+# Test for ansi string streams
 TMPFILE=`cmake_tmp_file`
 cat>${TMPFILE}.cxx<<EOF
 #include <sstream>
@@ -333,6 +381,7 @@ else
 fi
 rm -f "${TMPFILE}.cxx"
 
+# Test for ansi FOR scope
 if cmake_try_run "${cmake_cxx_compiler}" "${cmake_cxx_flags}" "${cmake_source_dir}/Modules/TestForAnsiForScope.cxx" >> cmake_bootstrap.log 2>&1; then
   cmake_report cmConfigure.h "/* #undef CMAKE_NO_ANSI_FOR_SCOPE */"
   echo "${cmake_cxx_compiler} has ANSI for scoping"
@@ -341,11 +390,13 @@ else
   echo "${cmake_cxx_compiler} does not have ANSI for scoping"
 fi
 
-# Get CMake version
+# Write CMake version
 for a in MAJOR MINOR PATCH; do
   CMake_VERSION=`cat "${cmake_source_dir}/CMakeLists.txt" | grep "SET(CMake_VERSION_${a} *[0-9]*)" | sed "s/SET(CMake_VERSION_${a} *\([0-9]*\))/\1/"`
   cmake_report cmConfigure.h "#define CMake_VERSION_${a} ${CMake_VERSION}"
 done
+cmake_report cmConfigure.h "#define CMAKE_ROOT_DIR \"${cmake_source_dir}\""
+cmake_report cmConfigure.h "#define CMAKE_BOOTSTRAP"
 
 # Generate Makefile
 dep="cmConfigure.h `cmake_escape \"${cmake_source_dir}\"`/Source/*.h"
@@ -353,7 +404,7 @@ objs=""
 for a in ${CMAKE_SOURCES}; do
   objs="${objs} ${a}.o"
 done
-cmake_cxx_flags="${cmake_ansi_cxx_flags} ${cmake_cxx_flags} -DCMAKE_ROOT_DIR='\"${cmake_source_dir}\"' -DCMAKE_BOOTSTRAP -I`cmake_escape \"${cmake_source_dir}/Source\"` -I`cmake_escape \"${cmake_bootstrap_dir}\"`"
+cmake_cxx_flags="${cmake_ansi_cxx_flags} ${cmake_cxx_flags} -I`cmake_escape \"${cmake_source_dir}/Source\"` -I`cmake_escape \"${cmake_bootstrap_dir}\"`"
 echo "cmake: ${objs}" > "${cmake_bootstrap_dir}/Makefile"
 echo "	${cmake_cxx_compiler} ${LDFLAGS} ${cmake_cxx_flags} ${objs} -o cmake" >> "${cmake_bootstrap_dir}/Makefile"
 for a in ${CMAKE_SOURCES}; do
@@ -367,6 +418,7 @@ echo "SET (CMAKE_CONFIGURE_INSTALL_PREFIX \"${cmake_prefix_dir}\" CACHE PATH \"I
 
 echo "---------------------------------------------"
 
+# Run make to build bootstrap cmake
 if [ "x${cmake_parallel_make}" != "x" ]; then
   ${cmake_make_processor} -j ${cmake_parallel_make}
 else
@@ -377,7 +429,20 @@ if [ "${RES}" -ne "0" ]; then
   cmake_error "Problem while bootstrapping CMake"
 fi
 cd "${cmake_binary_dir}"
+
+# Set C, CXX, and MAKE environment variables, so that real real cmake will be
+# build with same compiler and make
+CC="${cmake_c_compiler}"
+CXX="${cmake_cxx_compiler}"
+MAKE="${cmake_make_processor}"
+export CC
+export CXX
+export MAKE
+
+# Run bootstrap CMake to configure real CMake
 "${cmake_bootstrap_dir}/cmake" "${cmake_source_dir}"
 
 echo "---------------------------------------------"
 
+# And we are done. Now just run make
+echo "CMake ${CMAKE_VERSION} is configured. Now just run ${cmake_make_processor}."
