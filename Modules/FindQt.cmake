@@ -21,6 +21,7 @@ FIND_PATH(QT_INCLUDE_DIR qt.h
     $ENV{QTDIR}/include
     /usr/local/qt/include
     /usr/local/include
+    /usr/include/qt
     /usr/include 
     C:/Progra~1/qt/include
   )
