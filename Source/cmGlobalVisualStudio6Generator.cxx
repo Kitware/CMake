@@ -159,14 +159,11 @@ cmLocalGenerator *cmGlobalVisualStudio6Generator::CreateLocalGenerator()
 
 void cmGlobalVisualStudio6Generator::Generate()
 {
-  // collect sub-projects
-  this->CollectSubprojects();
-  
   // add a special target that depends on ALL projects for easy build
   // of one configuration only.  
   std::vector<std::string> srcs;
   std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
-  for(it = m_SubProjectMap.begin(); it!= m_SubProjectMap.end(); ++it)
+  for(it = m_ProjectMap.begin(); it!= m_ProjectMap.end(); ++it)
     {
     std::vector<cmLocalGenerator*>& gen = it->second;
     // add the ALL_BUILD to the first local generator of each project
@@ -191,24 +188,6 @@ void cmGlobalVisualStudio6Generator::Generate()
   // Now write out the DSW
   this->OutputDSWFile();
 }
-
-// populate the m_SubProjectMap 
-void cmGlobalVisualStudio6Generator::CollectSubprojects()
-{
-  unsigned int i;
-  for(i = 0; i < m_LocalGenerators.size(); ++i)
-    {
-    std::string name = m_LocalGenerators[i]->GetMakefile()->GetProjectName();
-    m_SubProjectMap[name].push_back(m_LocalGenerators[i]);
-    std::vector<std::string> const& pprojects 
-      = m_LocalGenerators[i]->GetMakefile()->GetParentProjects();
-    for(unsigned int k =0; k < pprojects.size(); ++k)
-      {
-      m_SubProjectMap[pprojects[k]].push_back(m_LocalGenerators[i]);
-      }
-    }
-}
-
 
 // Write a DSW file to the stream
 void cmGlobalVisualStudio6Generator::WriteDSWFile(std::ostream& fout,
@@ -373,7 +352,7 @@ void cmGlobalVisualStudio6Generator::OutputDSWFile(cmLocalGenerator* root,
 void cmGlobalVisualStudio6Generator::OutputDSWFile()
 { 
   std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
-  for(it = m_SubProjectMap.begin(); it!= m_SubProjectMap.end(); ++it)
+  for(it = m_ProjectMap.begin(); it!= m_ProjectMap.end(); ++it)
     {
     this->OutputDSWFile(it->second[0], it->second);
     }
@@ -431,7 +410,7 @@ void cmGlobalVisualStudio6Generator::SetupTests()
       {
       std::vector<std::string> srcs;
       std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
-      for(it = m_SubProjectMap.begin(); it!= m_SubProjectMap.end(); ++it)
+      for(it = m_ProjectMap.begin(); it!= m_ProjectMap.end(); ++it)
         {
         std::vector<cmLocalGenerator*>& gen = it->second;
         // add the ALL_BUILD to the first local generator of each project

@@ -554,6 +554,9 @@ void cmGlobalGenerator::Configure()
                          "Please set the following variables:\n",
                          notFoundVars.c_str());
     }
+  // at this point m_LocalGenerators has been filled,
+  // so create the map from project name to vector of local generators
+  this->FillProjectMap();
   if ( !m_CMakeInstance->GetScriptMode() )
     {
     m_CMakeInstance->UpdateProgress("Configuring done", -1);
@@ -773,4 +776,25 @@ const char* cmGlobalGenerator::GetLinkerPreference(const char* lang)
     return m_LanguageToLinkerPreference[lang].c_str();
     }
   return "None";
+}
+
+
+void cmGlobalGenerator::FillProjectMap()
+{  
+  unsigned int i;
+  for(i = 0; i < m_LocalGenerators.size(); ++i)
+    {
+    std::string name = m_LocalGenerators[i]->GetMakefile()->GetProjectName();
+    // for each local generator add the local generator to the project that
+    // it is in
+    m_ProjectMap[name].push_back(m_LocalGenerators[i]);
+    // now add the local generator to any parent project it is part of
+    std::vector<std::string> const& pprojects 
+      = m_LocalGenerators[i]->GetMakefile()->GetParentProjects();
+    for(unsigned int k =0; k < pprojects.size(); ++k)
+      {
+      m_ProjectMap[pprojects[k]].push_back(m_LocalGenerators[i]);
+      }
+    }
+  
 }

@@ -88,7 +88,6 @@ public:
   virtual void Configure();
 protected:
   std::string GetGUID(const char* name); 
-  void CollectSubprojects();
   virtual void OutputSLNFile(cmLocalGenerator* root, 
                              std::vector<cmLocalGenerator*>& generators);
   virtual void WriteSLNFile(std::ostream& fout, cmLocalGenerator* root,
@@ -112,7 +111,6 @@ protected:
 
   std::vector<std::string> m_Configurations;
   std::map<cmStdString, cmStdString> m_GUIDMap;
-  std::map<cmStdString, std::vector<cmLocalGenerator*> > m_SubProjectMap;
 };
 
 #endif

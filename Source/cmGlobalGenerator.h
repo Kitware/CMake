@@ -116,6 +116,8 @@ public:
   ///! What is the output extension for a given source file extension.
   const char* GetLanguageOutputExtensionFromExtension(const char* lang);
 protected:
+  // Fill the m_ProjectMap, this must be called after m_LocalGenerators has been populated.
+  void FillProjectMap();
   bool IsExcluded(cmLocalGenerator* root, cmLocalGenerator* gen);
   void FindMakeProgram(cmMakefile*);
   
@@ -124,6 +126,8 @@ protected:
   cmStdString m_ConfiguredFilesPath;
   cmake *m_CMakeInstance;
   std::vector<cmLocalGenerator *> m_LocalGenerators;
+  // map from project name to vector of local generators in that project
+  std::map<cmStdString, std::vector<cmLocalGenerator*> > m_ProjectMap;
 
   ///! used by Configure()
   void RecursiveConfigure(cmLocalGenerator *lg, float start, float end);
@@ -136,7 +140,7 @@ private:
   std::map<cmStdString, cmStdString> m_OutputExtensions;
   std::map<cmStdString, cmStdString> m_LanguageToOutputExtension;
   std::map<cmStdString, cmStdString> m_ExtensionToLanguage;
-  std::map<cmStdString, cmStdString> m_LanguageToLinkerPreference;
+  std::map<cmStdString, cmStdString> m_LanguageToLinkerPreference; 
 };
 
 #endif

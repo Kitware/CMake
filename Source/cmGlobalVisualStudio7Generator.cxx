@@ -162,7 +162,7 @@ void cmGlobalVisualStudio7Generator::SetupTests()
       {
       std::vector<std::string> srcs;
       std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
-      for(it = m_SubProjectMap.begin(); it!= m_SubProjectMap.end(); ++it)
+      for(it = m_ProjectMap.begin(); it!= m_ProjectMap.end(); ++it)
         {
         std::vector<cmLocalGenerator*>& gen = it->second;
         // add the ALL_BUILD to the first local generator of each project
@@ -246,13 +246,11 @@ void cmGlobalVisualStudio7Generator::GenerateConfigurations(cmMakefile* mf)
 
 void cmGlobalVisualStudio7Generator::Generate()
 {
-  // collect sub-projects
-  this->CollectSubprojects();
   // add a special target that depends on ALL projects for easy build
   // of Debug only
   std::vector<std::string> srcs;
   std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
-  for(it = m_SubProjectMap.begin(); it!= m_SubProjectMap.end(); ++it)
+  for(it = m_ProjectMap.begin(); it!= m_ProjectMap.end(); ++it)
     {
     std::vector<cmLocalGenerator*>& gen = it->second;
     // add the ALL_BUILD to the first local generator of each project
@@ -302,7 +300,7 @@ void cmGlobalVisualStudio7Generator::OutputSLNFile(cmLocalGenerator* root,
 void cmGlobalVisualStudio7Generator::OutputSLNFile()
 { 
   std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
-  for(it = m_SubProjectMap.begin(); it!= m_SubProjectMap.end(); ++it)
+  for(it = m_ProjectMap.begin(); it!= m_ProjectMap.end(); ++it)
     {
     this->OutputSLNFile(it->second[0], it->second);
     }
@@ -722,23 +720,6 @@ void cmGlobalVisualStudio7Generator::GetDocumentation(cmDocumentationEntry& entr
   entry.name = this->GetName();
   entry.brief = "Generates Visual Studio .NET 2002 project files.";
   entry.full = "";
-}
-
-// populate the m_SubProjectMap 
-void cmGlobalVisualStudio7Generator::CollectSubprojects()
-{
-  unsigned int i;
-  for(i = 0; i < m_LocalGenerators.size(); ++i)
-    {
-    std::string name = m_LocalGenerators[i]->GetMakefile()->GetProjectName();
-    m_SubProjectMap[name].push_back(m_LocalGenerators[i]);
-    std::vector<std::string> const& pprojects 
-      = m_LocalGenerators[i]->GetMakefile()->GetParentProjects();
-    for(unsigned int k =0; k < pprojects.size(); ++k)
-      {
-      m_SubProjectMap[pprojects[k]].push_back(m_LocalGenerators[i]);
-      }
-    }
 }
 
 // make sure "special" targets have GUID's
