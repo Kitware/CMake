@@ -842,39 +842,50 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
                                  "EXTRA_DEFINES", 
                                  m_Makefile->GetDefineFlags());
     cmGlobalGenerator* gen = this->GetGlobalGenerator();
-    if ( gen->GetLanguageEnabled("C") ||gen->GetLanguageEnabled("CXX") )
+    // stroe flags for each configuration
+    std::string flags = " ";
+    std::string flagsRelease = " ";
+    std::string flagsMinSize = " ";
+    std::string flagsDebug = " ";
+    std::string flagsDebugRel = " ";
+    // if CXX is on and the target contains cxx code then add the cxx flags
+    if ( gen->GetLanguageEnabled("CXX") && target.HasCxx() )
       {
-      std::string flags = m_Makefile->GetDefinition("CMAKE_CXX_FLAGS_RELEASE");
-      flags += " -DCMAKE_INTDIR=\\\"Release\\\"";
-      cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_RELEASE", flags.c_str());
-      flags = m_Makefile->GetDefinition("CMAKE_CXX_FLAGS_MINSIZEREL");
-      flags += " -DCMAKE_INTDIR=\\\"MinSizeRel\\\"";
-      cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_MINSIZEREL", flags.c_str());
-      flags = m_Makefile->GetDefinition("CMAKE_CXX_FLAGS_DEBUG");
-      flags += " -DCMAKE_INTDIR=\\\"Debug\\\"";
-      cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_DEBUG", flags.c_str());
-      flags = m_Makefile->GetDefinition("CMAKE_CXX_FLAGS_RELWITHDEBINFO");
-      flags += " -DCMAKE_INTDIR=\\\"RelWithDebInfo\\\"";
-      cmSystemTools::ReplaceString(line,"CMAKE_CXX_FLAGS_RELWITHDEBINFO", flags.c_str());
-      flags = "";
-      if ( m_Makefile->GetDefinition("CMAKE_C_FLAGS") )
-        {
-        flags += m_Makefile->GetDefinition("CMAKE_C_FLAGS");
-        }
-      if ( m_Makefile->GetDefinition("CMAKE_CXX_FLAGS") )
-        {
-        if ( flags.size() > 0 )
-          {
-          flags += " ";
-          }
-        flags += m_Makefile->GetDefinition("CMAKE_CXX_FLAGS");
-        }
-
-      cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS", flags.c_str());
+      flagsRelease = m_Makefile->GetDefinition("CMAKE_CXX_FLAGS_RELEASE");
+      flagsRelease += " -DCMAKE_INTDIR=\\\"Release\\\" ";
+      flagsMinSize = m_Makefile->GetDefinition("CMAKE_CXX_FLAGS_MINSIZEREL");
+      flagsMinSize += " -DCMAKE_INTDIR=\\\"MinSizeRel\\\" ";
+      flagsDebug = m_Makefile->GetDefinition("CMAKE_CXX_FLAGS_DEBUG");
+      flagsDebug += " -DCMAKE_INTDIR=\\\"Debug\\\" ";
+      flagsDebugRel = m_Makefile->GetDefinition("CMAKE_CXX_FLAGS_RELWITHDEBINFO");
+      flagsDebugRel += " -DCMAKE_INTDIR=\\\"RelWithDebInfo\\\" ";
+      flags = " ";
+      flags = m_Makefile->GetDefinition("CMAKE_CXX_FLAGS");
+      flags += " ";
       }
+    // if C and the target is not CXX
+    else if(gen->GetLanguageEnabled("C") && !target.HasCxx())
+      {
+      flagsRelease += m_Makefile->GetDefinition("CMAKE_CXX_FLAGS_RELEASE");
+      flagsRelease += " -DCMAKE_INTDIR=\\\"Release\\\"";
+      flagsMinSize += m_Makefile->GetDefinition("CMAKE_CXX_FLAGS_MINSIZEREL");
+      flagsMinSize += " -DCMAKE_INTDIR=\\\"MinSizeRel\\\"";
+      flagsDebug += m_Makefile->GetDefinition("CMAKE_CXX_FLAGS_DEBUG");
+      flagsDebug += " -DCMAKE_INTDIR=\\\"Debug\\\"";
+      flagsDebugRel += m_Makefile->GetDefinition("CMAKE_CXX_FLAGS_RELWITHDEBINFO");
+      flagsDebugRel += " -DCMAKE_INTDIR=\\\"RelWithDebInfo\\\"";
+      flags = " ";
+      flags = m_Makefile->GetDefinition("CMAKE_C_FLAGS");
+      }
+    cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_RELEASE", flagsRelease.c_str());
+    cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_MINSIZEREL", flagsMinSize.c_str());
+    cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_DEBUG", flagsDebug.c_str());
+    cmSystemTools::ReplaceString(line,"CMAKE_CXX_FLAGS_RELWITHDEBINFO", flagsDebugRel.c_str());
+    cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS", flags.c_str());
     fout << line.c_str() << std::endl;
     }
 }
+
 
 
 void cmLocalVisualStudio6Generator::WriteDSPFooter(std::ostream& fout)
