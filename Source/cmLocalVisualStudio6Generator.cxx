@@ -299,7 +299,9 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
           std::string totalCommandStr;
           totalCommandStr = this->CombineCommands(commands, totalCommand,
                                                   source.c_str());
+          const char* comment = totalCommand.m_Comment.c_str();
           this->WriteCustomRule(fout, source.c_str(), totalCommandStr.c_str(), 
+                                (*comment?comment:"Custom Rule"),
                                 totalCommand.m_Depends, 
                                 totalCommand.m_Outputs, compileFlags);
           }
@@ -339,6 +341,7 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
 void cmLocalVisualStudio6Generator::WriteCustomRule(std::ostream& fout,
                                   const char* source,
                                   const char* command,
+                                  const char* comment,
                                   const std::set<std::string>& depends,
                                   const std::set<std::string>& outputs,
                                   const char* flags
@@ -370,7 +373,8 @@ void cmLocalVisualStudio6Generator::WriteCustomRule(std::ostream& fout,
     fout << "\n";
 
     fout << "# PROP Ignore_Default_Tool 1\n";
-    fout << "# Begin Custom Build\n\n";
+    fout << "# Begin Custom Build - Building " << comment 
+         << " $(InputPath)\n\n";
     if(outputs.size() == 0)
       {
       fout << source << "_force :  \"$(SOURCE)\" \"$(INTDIR)\" \"$(OUTDIR)\"";
@@ -505,6 +509,7 @@ cmLocalVisualStudio6Generator::CombineCommands(const cmSourceGroup::Commands &co
     totalCommandStr += " ";
     totalCommandStr += c->second.m_Arguments;
     totalCommand.Merge(c->second);
+    totalCommand.m_Comment = c->second.m_Comment.c_str();
     }      
   // Create a dummy file with the name of the source if it does
   // not exist

@@ -88,6 +88,7 @@ private:
   void WriteCustomRule(std::ostream& fout,
                        const char* source,
                        const char* command,
+                       const char* comment,
                        const std::set<std::string>& depends,
                        const std::set<std::string>& outputs,
                        const char* flags);
