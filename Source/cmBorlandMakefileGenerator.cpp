@@ -52,7 +52,15 @@ void cmBorlandMakefileGenerator::GenerateMakefile()
       m_Makefile->AddLinkDirectory(m_ExecutableOutputPath.c_str());
       }
     }
-  
+  if(m_ExecutableOutputPath.size() == 0)
+    {
+    m_ExecutableOutputPath = ".";
+    }
+  if(m_LibraryOutputPath.size() == 0)
+    {
+    m_LibraryOutputPath = ".";
+    }
+
   if (m_CacheOnly) 
     {
     // Generate the cache only stuff
@@ -129,11 +137,13 @@ void cmBorlandMakefileGenerator::OutputMakefile(const char* file)
   fout << m_Makefile->ExpandVariablesInString(replace);
   replace = "BCB              = $(BCBBINPATH)/.. \n";
   fout << m_Makefile->ExpandVariablesInString(replace);
-  replace = "OUTDIRLIB        = @LIBRARY_OUTPUT_PATH@ \n";
-  m_Makefile->ExpandVariablesInString(replace);
+  replace = "OUTDIRLIB        = ";
+  replace += m_LibraryOutputPath;
+  replace += "\n";
   fout << cmSystemTools::ConvertToWindowsSlashes(replace);
-  replace = "OUTDIREXE        = @EXECUTABLE_OUTPUT_PATH@ \n";
-  m_Makefile->ExpandVariablesInString(replace);
+  replace = "OUTDIREXE        = ";
+  replace += m_ExecutableOutputPath;
+  replace += "\n";
   fout << cmSystemTools::ConvertToWindowsSlashes(replace);
   replace = "USERDEFINES      = @DEFS_USER@ \n";
   fout << m_Makefile->ExpandVariablesInString(replace);
