@@ -8,14 +8,23 @@
 #  JAVA_AWT_INCLUDE_PATH = the path to where jni.h can be found
 # 
         
-FIND_LIBRARY(JAVA_AWT_LIBRARY jawt PATHS /usr/lib /usr/local/lib)
+FIND_LIBRARY(JAVA_AWT_LIBRARY jawt 
+  PATHS /usr/lib /usr/local/lib
+  "[HKEY_LOCAL_MACHINE\SOFTWARE\JavaSoft\Java Development Kit\1.3;JavaHome]/lib"
+)
 
 # add in the include path    
-FIND_PATH(JAVA_INCLUDE_PATH jni.h /usr/include /usr/local/include)
+FIND_PATH(JAVA_INCLUDE_PATH jni.h 
+  /usr/include 
+  /usr/local/include
+  "[HKEY_LOCAL_MACHINE\SOFTWARE\JavaSoft\Java Development Kit\1.3;JavaHome]/include"
+)
+
 FIND_PATH(JAVA_INCLUDE_PATH2 jni_md.h 
   ${JAVA_INCLUDE_PATH}/win32
   ${JAVA_INCLUDE_PATH}/linux
 )
-FIND_PATH(JAVE_AWT_INCLUDE_PATH jawt.h /usr/include /usr/local/include)
+
+FIND_PATH(JAVE_AWT_INCLUDE_PATH jawt.h ${JAVA_INCLUDE_PATH} )
 
 
