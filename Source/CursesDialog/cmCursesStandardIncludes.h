@@ -1,20 +1,11 @@
-#ifdef __hpux
- #define _BOOL_DEFINED
- #ifndef _XOPEN_SOURCE_EXTENDED
-  #include <sys/time.h>
-  #define _XOPEN_SOURCE_EXTENDED
-  #include <curses.h>
-  #include <form.h>
-  #undef _XOPEN_SOURCE_EXTENDED
- #else
-  #include <curses.h>
-  #include <form.h>
- #endif  
-#else  /* __hpux */
- #include <curses.h>
- #include <form.h>
-#endif /* __hpux */
-
-#ifndef getmaxyx
- #define getmaxyx(w,y,x) ((y) = getmaxy(w), (x) = getmaxx(w))
+#if defined(__sun__) && defined(__GNUC__)
+ #define _MSE_INT_H
 #endif
+
+#define _BOOL_DEFINED
+#include <sys/time.h>
+#define _XOPEN_SOURCE_EXTENDED
+#include <curses.h>
+#include <form.h>
+#undef _XOPEN_SOURCE_EXTENDED
+
