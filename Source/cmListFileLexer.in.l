@@ -165,12 +165,18 @@ static void cmListFileLexerDestroy(cmListFileLexer* lexer);
   lexer->column += yyleng;
 }
 
+<STRING><<EOF>> {
+  lexer->token.type = cmListFileLexer_Token_BadString;
+  BEGIN(INITIAL);
+  return 1;
+}
+
 [ \t\r] {
   lexer->column += yyleng;
 }
 
 . {
-  lexer->token.type = cmListFileLexer_Token_Error;
+  lexer->token.type = cmListFileLexer_Token_BadCharacter;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
   lexer->column += yyleng;
   return 1;
@@ -407,4 +413,24 @@ long cmListFileLexer_GetCurrentColumn(cmListFileLexer* lexer)
     {
     return 0;
     }
+}
+
+/*--------------------------------------------------------------------------*/
+const char* cmListFileLexer_GetTypeAsString(cmListFileLexer* lexer,
+                                            cmListFileLexer_Type type)
+{
+  (void)lexer;
+  switch(type)
+    {
+    case cmListFileLexer_Token_None: return "nothing";
+    case cmListFileLexer_Token_Newline: return "newline";
+    case cmListFileLexer_Token_Identifier: return "identifier";
+    case cmListFileLexer_Token_ParenLeft: return "left paren";
+    case cmListFileLexer_Token_ParenRight: return "right paren";
+    case cmListFileLexer_Token_ArgumentUnquoted: return "unquoted argument";
+    case cmListFileLexer_Token_ArgumentQuoted: return "quoted argument";
+    case cmListFileLexer_Token_BadCharacter: return "bad character";
+    case cmListFileLexer_Token_BadString: return "unterminated string";
+    }
+  return "unknown token";
 }

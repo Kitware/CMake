@@ -26,7 +26,8 @@ typedef enum cmListFileLexer_Type_e
   cmListFileLexer_Token_ParenRight,
   cmListFileLexer_Token_ArgumentUnquoted,
   cmListFileLexer_Token_ArgumentQuoted,
-  cmListFileLexer_Token_Error
+  cmListFileLexer_Token_BadCharacter,
+  cmListFileLexer_Token_BadString
 } cmListFileLexer_Type;
 
 typedef struct cmListFileLexer_Token_s cmListFileLexer_Token;
@@ -52,6 +53,8 @@ int cmListFileLexer_SetString(cmListFileLexer*, const char*);
 cmListFileLexer_Token* cmListFileLexer_Scan(cmListFileLexer*);
 long cmListFileLexer_GetCurrentLine(cmListFileLexer*);
 long cmListFileLexer_GetCurrentColumn(cmListFileLexer*);
+const char* cmListFileLexer_GetTypeAsString(cmListFileLexer*,
+                                            cmListFileLexer_Type);
 void cmListFileLexer_Delete(cmListFileLexer*);
 
 #ifdef __cplusplus

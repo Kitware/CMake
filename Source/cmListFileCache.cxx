@@ -144,8 +144,9 @@ bool cmListFileCache::CacheFile(const char* path, bool requireProjectCommand)
         cmOStringStream error;
         error << "Error in cmake code at\n"
               << filename << ":" << token->line << ":\n"
-              << "Parse error.  Expected a newline, got \""
-              << token->text << "\".";
+              << "Parse error.  Expected a newline, got "
+              << cmListFileLexer_GetTypeAsString(lexer, token->type)
+              << " with text \"" << token->text << "\".";
         cmSystemTools::Error(error.str().c_str());
         parseError = true;
         }
@@ -155,7 +156,9 @@ bool cmListFileCache::CacheFile(const char* path, bool requireProjectCommand)
       cmOStringStream error;
       error << "Error in cmake code at\n"
             << filename << ":" << token->line << ":\n"
-            << "Parse error.  Expected a command name, got \""
+            << "Parse error.  Expected a command name, got "
+            << cmListFileLexer_GetTypeAsString(lexer, token->type)
+            << " with text \""
             << token->text << "\".";
       cmSystemTools::Error(error.str().c_str());
       parseError = true;
@@ -226,8 +229,9 @@ bool cmListFileCacheParseFunction(cmListFileLexer* lexer,
     cmOStringStream error;
     error << "Error in cmake code at\n"
           << filename << ":" << cmListFileLexer_GetCurrentLine(lexer) << ":\n"
-          << "Parse error.  Expected \"(\", got \""
-          << token->text << "\".";
+          << "Parse error.  Expected \"(\", got "
+          << cmListFileLexer_GetTypeAsString(lexer, token->type)
+          << " with text \"" << token->text << "\".";
     cmSystemTools::Error(error.str().c_str());
     return false;
     }
@@ -259,7 +263,9 @@ bool cmListFileCacheParseFunction(cmListFileLexer* lexer,
       error << "Error in cmake code at\n"
             << filename << ":" << cmListFileLexer_GetCurrentLine(lexer) << ":\n"
             << "Parse error.  Function missing ending \")\".  "
-            << "Instead found \"" << token->text << "\".";
+            << "Instead found "
+            << cmListFileLexer_GetTypeAsString(lexer, token->type)
+            << " with text \"" << token->text << "\".";
       cmSystemTools::Error(error.str().c_str());
       return false;
       }

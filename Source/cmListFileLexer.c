@@ -192,8 +192,6 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
                 } \
         while ( 0 )
 
-#define unput(c) yyunput( c, yyg->yytext_ptr , yyscanner )
-
 /* The following is because we cannot portably get our hands on size_t
  * (without autoconf's help, which isn't available because we want
  * flex-generated scanners to compile on their own).
@@ -962,25 +960,31 @@ YY_RULE_SETUP
   lexer->column += yyleng;
 }
         YY_BREAK
+case YY_STATE_EOF(STRING):
+#line 168 "cmListFileLexer.in.l"
+{
+  lexer->token.type = cmListFileLexer_Token_BadString;
+  BEGIN(INITIAL);
+  return 1;
+}
 case 12:
 YY_RULE_SETUP
-#line 168 "cmListFileLexer.in.l"
+#line 174 "cmListFileLexer.in.l"
 {
   lexer->column += yyleng;
 }
         YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 172 "cmListFileLexer.in.l"
+#line 178 "cmListFileLexer.in.l"
 {
-  lexer->token.type = cmListFileLexer_Token_Error;
+  lexer->token.type = cmListFileLexer_Token_BadCharacter;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
   lexer->column += yyleng;
   return 1;
 }
 case YY_STATE_EOF(INITIAL):
-case YY_STATE_EOF(STRING):
-#line 179 "cmListFileLexer.in.l"
+#line 185 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_None;
   cmListFileLexerSetToken(lexer, 0, 0);
@@ -988,10 +992,10 @@ case YY_STATE_EOF(STRING):
 }
 case 14:
 YY_RULE_SETUP
-#line 185 "cmListFileLexer.in.l"
+#line 191 "cmListFileLexer.in.l"
 ECHO;
         YY_BREAK
-#line 1005 "cmListFileLexer.c"
+#line 1012 "cmListFileLexer.c"
 
         case YY_END_OF_BUFFER:
                 {
@@ -2075,7 +2079,7 @@ void yyfree (void * ptr , yyscan_t yyscanner)
 #undef YY_DECL_IS_OURS
 #undef YY_DECL
 #endif
-#line 185 "cmListFileLexer.in.l"
+#line 191 "cmListFileLexer.in.l"
 
 
 
@@ -2303,3 +2307,24 @@ long cmListFileLexer_GetCurrentColumn(cmListFileLexer* lexer)
     return 0;
     }
 }
+
+/*--------------------------------------------------------------------------*/
+const char* cmListFileLexer_GetTypeAsString(cmListFileLexer* lexer,
+                                            cmListFileLexer_Type type)
+{
+  (void)lexer;
+  switch(type)
+    {
+    case cmListFileLexer_Token_None: return "nothing";
+    case cmListFileLexer_Token_Newline: return "newline";
+    case cmListFileLexer_Token_Identifier: return "identifier";
+    case cmListFileLexer_Token_ParenLeft: return "left paren";
+    case cmListFileLexer_Token_ParenRight: return "right paren";
+    case cmListFileLexer_Token_ArgumentUnquoted: return "unquoted argument";
+    case cmListFileLexer_Token_ArgumentQuoted: return "quoted argument";
+    case cmListFileLexer_Token_BadCharacter: return "bad character";
+    case cmListFileLexer_Token_BadString: return "unterminated string";
+    }
+  return "unknown token";
+}
+
