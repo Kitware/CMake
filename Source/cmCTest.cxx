@@ -4976,7 +4976,7 @@ void cmCTest::ExpandTestsToRunInformation(int numTests)
     return;
     }
   
-  int start = -1;
+  int start;
   int end = -1;
   int stride = -1;
   std::string::size_type pos = 0;
