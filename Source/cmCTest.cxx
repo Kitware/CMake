@@ -2946,7 +2946,11 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output, int *re
         args.push_back(argv[i]);
         }
       }
+    std::string oldpath = cmSystemTools::GetCurrentWorkingDirectory();
+    
     *retVal = inst.Run(args, output);
+    cmSystemTools::ChangeDirectory(oldpath.c_str());
+    
     if(m_Verbose)
       {
       std::cout << "Internal cmCTest object used to run test.\n";
