@@ -956,7 +956,7 @@ void cmMakefile::AddUtilityCommand(const char* utilityName,
     }
   else
     {
-    cmCustomCommand cc(command, arguments, dep, NULL);
+    cmCustomCommand cc(command, arguments, dep, (const char *)0);
     target.GetPostBuildCommands().push_back(cc);
     }
   m_Targets.insert(cmTargets::value_type(utilityName,target));
@@ -986,7 +986,7 @@ cmSourceFile *cmMakefile::GetSourceFileWithOutput(const char *cname)
     }
   
   // otherwise return NULL
-  return NULL;
+  return 0;
 }
 
 
