@@ -33,7 +33,7 @@ bool cmAddCustomTargetCommand::InitialPass(std::vector<std::string> const& argsI
   std::string arguments;
   std::vector<std::string>::const_iterator s = args.begin();
   ++s; // move past args[0] as it is already to be used
-  if (args.size() >= 3)
+  if (args.size() >= 2)
     {
     if (args[1] == "ALL")
       {

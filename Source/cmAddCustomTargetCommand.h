@@ -66,8 +66,8 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "ADD_CUSTOM_TARGET(Name [ALL] command arg arg arg ...)\n"
-      "The ALL option is optional. If it is specified it indicates that this target should be added to the Build all target.";
+      "ADD_CUSTOM_TARGET(Name [ALL] [ command arg arg arg ... ])\n"
+      "The ALL option is optional. If it is specified it indicates that this target should be added to the Build all target. The command and arguments are optional. If not specified, it will create an empy target. Command cannot be called ALL.";
     }
   
   cmTypeMacro(cmAddCustomTargetCommand, cmCommand);
