@@ -82,15 +82,6 @@ SET(CMAKE_C_LINK_SHARED "@CMAKE_C_LINK_SHARED@" CACHE STRING
   "program used to link c shared libraries")
 # support for X11
 
-SET (CMAKE_X_LIBS             "@X_PRE_LIBS@ @X_LIBS@ -lX11 -lXext @X_EXTRA_LIBS@" CACHE STRING 
-     "Libraries and options used in X11 programs.")
-
-SET (CMAKE_X_CFLAGS           "@X_CFLAGS@" CACHE STRING 
-     "X11 extra flags.")
-
-SET (CMAKE_HAS_X              @CMAKE_HAS_X@ CACHE INTERNAL 
-     "Is X11 around.")
-
 SET (CMAKE_SYSTEM @CMAKE_SYSTEM@ CACHE INTERNAL 
      "What system is this.  Result of uname.")
 
@@ -139,6 +130,4 @@ CMAKE_THREAD_LIBS
 CMAKE_USE_PTHREADS
 CMAKE_USE_SPROC
 CMAKE_WORDS_BIGENDIAN
-CMAKE_X_CFLAGS
-CMAKE_X_LIBS
 )
