@@ -481,7 +481,7 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
     // Echo string
     else if (args[1] == "echo" )
       {
-      int cc;
+      unsigned int cc;
       for ( cc = 2; cc < args.size(); cc ++ )
 	{
 	std::cout << args[cc] << " ";
@@ -580,7 +580,7 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
     // Remove file
     else if (args[1] == "comspec" && args.size() > 2)
       {
-      int cc;
+      unsigned int cc;
       std::string command = args[2];
       for ( cc = 3; cc < args.size(); cc ++ )
 	{
