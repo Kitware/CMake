@@ -578,7 +578,7 @@ void CPropertyList::OnMouseMove(UINT nFlags, CPoint point)
     { 
     BOOL loc;
     int curSel = ItemFromPoint(point,loc);
-    if(!loc)
+    if(!loc && curSel < 65535)
       {
       CPropertyItem* pItem = (CPropertyItem*) GetItemDataPtr(curSel);
       m_CMakeSetupDialog->SetDlgItemText(IDC_PROGRESS, pItem->m_HelpString);
