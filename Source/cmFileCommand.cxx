@@ -249,6 +249,15 @@ bool cmFileCommand::HandleInstallCommand(
   std::string destination = "";
   std::string stype = "FILES";
   const char* build_type = m_Makefile->GetDefinition("BUILD_TYPE");
+  if ( build_type && strcmp(build_type, ".") == 0 )
+    {
+    build_type = 0;
+    }
+  if ( build_type && strncmp(build_type, ".\\", 2) == 0 )
+    {
+    build_type += 2;
+    }
+
   const char* debug_postfix
     = m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX");
   const char* destdir = cmSystemTools::GetEnv("DESTDIR");
@@ -259,7 +268,7 @@ bool cmFileCommand::HandleInstallCommand(
     {
     extra_dir = build_type;
     std::string btype = cmSystemTools::LowerCase(build_type);
-    if ( btype == "debug" )
+    if ( strncmp(btype.c_str(), "debug", strlen("debug")) == 0 )
       {
       debug = 1;
       }
@@ -441,13 +450,19 @@ bool cmFileCommand::HandleInstallCommand(
 
   for ( i = 0; i < files.size(); i ++ )
     {
-    std::string destfile 
-      = destination + "/" + cmSystemTools::GetFilenameName(files[i]);
+    std::string destfilewe
+      = destination + "/"
+      + cmSystemTools::GetFilenameWithoutExtension(files[i]);
     std::string ctarget = files[i].c_str();
     std::string fname = cmSystemTools::GetFilenameName(ctarget);
     std::string ext = cmSystemTools::GetFilenameExtension(ctarget);
     std::string fnamewe 
       = cmSystemTools::GetFilenameWithoutExtension(ctarget);
+    std::string destfile = destfilewe;
+    if ( ext.size() )
+      {
+       destfile + "." + ext;
+      }
     switch( itype )
       {
     case cmTarget::MODULE_LIBRARY:
@@ -456,6 +471,7 @@ bool cmFileCommand::HandleInstallCommand(
       if ( debug )
         {
         fname = fnamewe + debug_postfix + ext;
+        destfile = destfilewe + debug_postfix + ext;
         }
         {
         // Handle shared library versioning
@@ -564,7 +580,7 @@ bool cmFileCommand::HandleInstallCommand(
         ) )
           {
           cmOStringStream err;
-          err << "Program setting permissions on file: " << destfile.c_str();
+          err << "Problem setting permissions on file: " << destfile.c_str();
           perror(err.str().c_str());
           }
         }
