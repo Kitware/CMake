@@ -672,6 +672,9 @@ int kwsysProcess_WaitForExit(kwsysProcess* cp, double* userTimeout)
 #ifdef SIGSEGV
       case SIGSEGV: cp->ExitException = kwsysProcess_Exception_Fault; break;
 #endif
+#ifdef SIGBUS
+      case SIGBUS: cp->ExitException = kwsysProcess_Exception_Fault; break;
+#endif
 #ifdef SIGFPE
       case SIGFPE:  cp->ExitException = kwsysProcess_Exception_Numerical; break;
 #endif
