@@ -140,7 +140,10 @@ bool cmSystemTools::MakeDirectory(const char* path)
     return true;
     }
   std::string dir = path;
-
+  if(dir.size() == 0)
+    {
+    return false;
+    }
   cmSystemTools::ConvertToUnixSlashes(dir);
 
   std::string::size_type pos = dir.find(':');
@@ -155,7 +158,7 @@ bool cmSystemTools::MakeDirectory(const char* path)
     Mkdir(topdir.c_str());
     pos++;
     }
-  if(topdir[dir.size()] == '/')
+  if(dir[dir.size()-1] == '/')
     {
     topdir = dir.substr(0, dir.size());
     }
