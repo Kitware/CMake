@@ -133,7 +133,7 @@ cmake_version()
   done
   if echo "$CMAKE_VERSION" | grep "\.[0-9][0-9]*\.[0-9]*[13579]\.[0-9]" > /dev/null 2>&1; then
 
-    CMake_DATE=`cat "${cmake_source_dir}/Source/cmVersion.cxx" | grep "\"\\\$Date$"`
+    CMake_DATE=`cat "${cmake_source_dir}/Source/cmVersion.cxx" | grep "\".Date: [0-9][0-9]*/[0-9][0-9]*/[0-9][0-9]* [0-9][0-9]*:[0-9][0-9]*:[0-9][0-9]* .\";"`
     CMake_DATE=`echo "${CMake_DATE}" | sed "s/.*Date: \([0-9][0-9]*\)\/\([0-9][0-9]*\)\/\([0-9][0-9]*\) .*/\1\2\3/" `
     CMAKE_VERSION=`echo $CMAKE_VERSION | sed "s/\.\([0-9][0-9]*\)\.\([0-9][0-9]*\)\.\([0-9][0-9]*\)/\1.\2-${CMake_DATE}/"`
   else
