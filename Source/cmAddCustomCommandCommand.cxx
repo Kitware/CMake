@@ -17,71 +17,122 @@
 
 
 // cmAddCustomCommandCommand
-bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& argsIn)
+bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args)
 {
-  if (argsIn.size() < 6)
+  /* No control on the number of arguments for now since everything can
+     be optional in that implementation. Should be fixed but this command
+     is so flexible that too much constraint could prevent user to achieve
+     a particular task.
+     Let's complain at the end of this function about the lack of a particular
+     arg. For the moment, let's say that SOURCE, COMMAND, TARGET are always 
+     required
+  */
+  if (args.size() < 6)
     {
       this->SetError("called with wrong number of arguments.");
       return false;
     }
 
-  std::vector<std::string> args = argsIn;
-  
-  if(args[2] != "ARGS")
+  std::string source, command, target;
+  std::vector<std::string> command_args, depends, outputs;
+
+  enum tdoing {
+    doing_source,
+    doing_command,
+    doing_target,
+    doing_args,
+    doing_depends,
+    doing_outputs,
+    doing_nothing
+  };
+
+  tdoing doing = doing_nothing;
+
+  for (unsigned int j = 0; j < args.size(); ++j)
     {
-    this->SetError("Wrong syntax. The third argument should be ARGS");
+    std::string copy = args[j];
+    m_Makefile->ExpandVariablesInString(copy);
+
+    if(copy == "SOURCE")
+      {
+      doing = doing_source;
+      }
+    else if(copy == "COMMAND")
+      {
+      doing = doing_command;
+      }
+    else if(copy == "TARGET")
+      {
+      doing = doing_target;
+      }
+    else if(copy == "ARGS")
+      {
+      doing = doing_args;
+      }
+    else if (copy == "DEPENDS")
+      {
+      doing = doing_depends;
+      }
+    else if (copy == "OUTPUTS")
+      {
+      doing = doing_outputs;
+      }
+    else
+      {
+      switch (doing)
+        {
+        case doing_source:
+          source = copy;
+          break;
+        case doing_command:
+          command = copy;
+          break;
+        case doing_target:
+          target = copy;
+          break;
+        case doing_args:
+          command_args.push_back(copy);
+          break;
+        case doing_depends:
+          depends.push_back(copy);
+          break;
+        case doing_outputs:
+          outputs.push_back(copy);
+          break;
+        default:
+          this->SetError("Wrong syntax. Unknow type of argument.");
+          return false;
+        }
+      }
+    }
+
+  /* At this point we could complain about the lack of arguments.
+     For the moment, let's say that SOURCE, COMMAND, TARGET are always 
+     required.
+  */
+      
+  if(source.empty())
+    {
+    this->SetError("Wrong syntax. Empty SOURCE.");
     return false;
     }
-  int cc=3;
-
-  std::vector<std::string> commandArgs;
-  while(args[cc] != "DEPENDS" && cc < argsIn.size())
+  if(command.empty())
     {
-    m_Makefile->ExpandVariablesInString(args[cc]);
-    commandArgs.push_back(args[cc]);
-    cc++;
-    }
-
-  if(cc == argsIn.size()-1)
-    {
-    this->SetError("Wrong syntax. Missing DEPENDS.");
+    this->SetError("Wrong syntax. Empty COMMAND.");
     return false;
     }
-  cc++ ; // Skip DEPENDS
-
-  std::vector<std::string> depends;
-  while(args[cc] != "OUTPUTS" && cc < argsIn.size())
+  if(target.empty())
     {
-    m_Makefile->ExpandVariablesInString(args[cc]);
-    depends.push_back(args[cc]);
-    cc++;
-    }
-
-  if(cc == argsIn.size()-1)
-    {
-    this->SetError("Wrong syntax. Missing OUTPUTS.");
+    this->SetError("Wrong syntax. Empty TARGET.");
     return false;
     }
-  cc ++; // Skip OUTPUTS
 
-  std::vector<std::string> outputs;
-  while(cc < argsIn.size()-1)
-    {
-    m_Makefile->ExpandVariablesInString(args[cc]);
-    outputs.push_back(args[cc]);
-    cc++;
-    }
-
-  m_Makefile->ExpandVariablesInString(args[0]);
-  m_Makefile->ExpandVariablesInString(args[1]);
-  m_Makefile->ExpandVariablesInString(args[argsIn.size()-1]);
-
-  m_Makefile->AddCustomCommand(args[0].c_str(), 
-                               args[1].c_str(), 
-                               commandArgs, 
+  m_Makefile->AddCustomCommand(source.c_str(), 
+                               command.c_str(), 
+                               command_args, 
 			       depends, 
                                outputs, 
-                               args[argsIn.size()-1].c_str());
+                               target.c_str());
   return true;
 }
 

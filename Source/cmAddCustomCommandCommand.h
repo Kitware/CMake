@@ -67,8 +67,9 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "ADD_CUSTOM_COMMAND(source, command ARGS [args] DEPENDS [depends] "
-      "OUTPUTS [outputs] target)\nAdd a custom command.";
+      "ADD_CUSTOM_COMMAND([SOURCE source] [COMMAND command] [TARGET target] "
+      "[ARGS [args...]] [DEPENDS [depends...]] [OUTPUTS [outputs...]])\n"
+      "Add a custom command.";
     }
   
   cmTypeMacro(cmAddCustomCommandCommand, cmCommand);
