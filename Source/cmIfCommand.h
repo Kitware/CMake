@@ -159,9 +159,10 @@ public:
     }
 
   // this is a shared function for both If and Else to determine if
-  // the arguments were valid, and if so, was the response true
+  // the arguments were valid, and if so, was the response true. If there is an
+  // error, the errorString will be set.
   static bool IsTrue(const std::vector<std::string> &args, 
-                     bool &isValid, const cmMakefile *mf);
+    char** errorString, const cmMakefile *mf);
   
   // Get a definition from the makefile.  If it doesn't exist,
   // return the original string.

@@ -101,15 +101,15 @@ ScopeEnded(cmMakefile &mf)
 
 bool cmIfCommand::InvokeInitialPass(const std::vector<cmListFileArgument>& args)
 {
-  bool isValid;
+  char* errorString = 0;
   
   std::vector<std::string> expandedArguments;
   m_Makefile->ExpandArguments(args, expandedArguments);
-  bool isTrue = cmIfCommand::IsTrue(expandedArguments,isValid,m_Makefile);
+  bool isTrue = cmIfCommand::IsTrue(expandedArguments,&errorString,m_Makefile);
   
-  if (!isValid)
+  if (errorString)
     {
-    std::string err = "An IF command had incorrect arguments: ";
+    std::string err = "had incorrect arguments: ";
     unsigned int i;
     for(i =0; i < args.size(); ++i)
       {
@@ -118,6 +118,9 @@ bool cmIfCommand::InvokeInitialPass(const std::vector<cmListFileArgument>& args)
       err += (args[i].Quoted?"\"":"");
       err += " ";
       }
+    err += "(";
+    err += errorString;
+    err += ").";
     this->SetError(err.c_str());
     return false;
     }
@@ -146,17 +149,17 @@ bool cmIfCommand::InvokeInitialPass(const std::vector<cmListFileArgument>& args)
 
 
 bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
-                         bool &isValid, const cmMakefile *makefile)
+                         char **errorString, const cmMakefile *makefile)
 {
   // check for the different signatures
-  isValid = false;
+  *errorString = "Unknown arguments specified";
   const char *def;
   const char *def2;
 
   // handle empty invocation
   if (args.size() < 1)
     {
-    isValid = true;
+    *errorString = 0;
     return false;
     }
 
@@ -171,7 +174,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
       args[0] == "CMAKE_MINOR_VERSION" &&
       args[1] == "MATCHES")
     {
-    isValid = true;
+    *errorString = 0;
     return true;
     }
   
@@ -279,7 +282,16 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
           *(argP1) == "MATCHES") 
         {
         def = cmIfCommand::GetVariableOrString(arg->c_str(), makefile);
-        cmsys::RegularExpression regEntry((argP2)->c_str());
+        const char* rex = (argP2)->c_str();
+        cmsys::RegularExpression regEntry;
+        if ( !regEntry.compile(rex) )
+          {
+          cmOStringStream error;
+          error << "Regular expression \"" << rex << "\" cannot compile";
+          *errorString = new char[error.str().size() + 1];
+          strcpy(*errorString, error.str().c_str());
+          return false;
+          }
         if (regEntry.find(def))
           {
           *arg = "1";
@@ -499,7 +511,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
   // now at the end there should only be one argument left
   if (newArgs.size() == 1)
     {
-    isValid = true;
+    *errorString = 0;
     if (*newArgs.begin() == "0")
       {
       return false;
