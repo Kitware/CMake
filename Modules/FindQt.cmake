@@ -14,30 +14,31 @@
 # QT_QT_LIBRARY, where to find the Qt library.
 # QT_QTMAIN_LIBRARY, where to find the qtmain library. This is only required by Qt3 on Windows.
 
+
+
+
 IF (UNIX)
 
   FIND_PATH(QT_INCLUDE_DIR qt.h
-    ${QTDIR}/include
+    $ENV{QTDIR}/include
     /usr/local/qt/include
     /usr/local/include
     /usr/include
   )
 
   FIND_LIBRARY(QT_QT_LIBRARY qt
-    ${QTDIR}/lib
+    $ENV{QTDIR}/lib
     /usr/local/qt/lib
     /usr/local/lib
     /usr/lib
   )
 
   FIND_FILE(QT_MOC_EXECUTABLE moc
-    ${QTDIR}/bin
-    ${path}
+    $ENV{QTDIR}/bin
   )
 
   FIND_FILE(QT_UIC_EXECUTABLE uic
-    ${QTDIR}/bin
-    ${path}
+    $ENV{QTDIR}/bin
   )
 
 ENDIF (UNIX)
@@ -47,23 +48,23 @@ IF (WIN32)
   # Assume that QTDIR has been set
 
   FIND_PATH(QT_INCLUDE_DIR qt.h
-    ${QTDIR}/include C:/Progra~1/qt/include) )
+    $ENV{QTDIR}/include C:/Progra~1/qt/include) )
 
   FIND_LIBRARY(QT_QT_LIBRARY qt
-    ${QTDIR}/lib C:/Progra~1/qt/lib )
+    $ENV{QTDIR}/lib C:/Progra~1/qt/lib )
 
   FIND_LIBRARY(QT_QTMAIN_LIBRARY qtmain
-    ${QTDIR}/lib C:/Progra~1/qt/lib
+    $ENV{QTDIR}/lib C:/Progra~1/qt/lib
     DOC "This Library is only needed by and included with Qt3 on MSWindows. It should be NOTFOUND, undefined or IGNORE otherwise."
   )
 
   FIND_FILE(QT_MOC_EXECUTABLE moc.exe
-    ${QTDIR}/bin C:/Progra~1/qt/bin
-    ${path} )
+    $ENV{QTDIR}/bin C:/Progra~1/qt/bin
+  )
 
   FIND_FILE(QT_UIC_EXECUTABLE uic.exe
-    ${QTDIR}/bin C:/Progra~1/qt/bin
-    ${path} )
+    $ENV{QTDIR}/bin C:/Progra~1/qt/bin
+  )
 
 ENDIF (WIN32)
 
@@ -102,5 +103,3 @@ IF(QT_INCLUDE_DIR)
 
   ENDIF(QT_QT_LIBRARY)
 ENDIF(QT_INCLUDE_DIR)
-
-
