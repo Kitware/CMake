@@ -1892,6 +1892,7 @@ bool cmLocalUnixMakefileGenerator::OutputObjectDepends(std::ostream& fout)
               m_GlobalGenerator->GetLanguageOutputExtensionFromExtension(
                 (*source)->GetSourceExtension().c_str());
             s += outExt;
+            s = this->CreateSafeUniqueObjectFileName(s.c_str());
             fout << this->ConvertToRelativeOutputPath(s.c_str()) << " : "
                  << this->ConvertToRelativeOutputPath(dep->c_str()) << "\n";
             ret = true;
