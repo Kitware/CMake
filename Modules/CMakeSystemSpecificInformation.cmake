@@ -231,11 +231,11 @@ ENDIF(NOT CMAKE_NOT_USING_CONFIG_FLAGS)
 
 # shared linker flags
 SET (CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS_INIT}
-     CACHE STRING "Flags used by the linker.")
+     CACHE STRING "Flags used by the linker during the creation of dll's.")
 
 # module linker flags
 SET (CMAKE_MODULE_LINKER_FLAGS ${CMAKE_MODULE_LINKER_FLAGS_INIT}
-     CACHE STRING "Flags used by the linker.")
+     CACHE STRING "Flags used by the linker during the creation of modules.")
 
 SET(CMAKE_BUILD_TOOL ${CMAKE_MAKE_PROGRAM} CACHE INTERNAL 
      "What is the target build tool cmake is generating for.")
