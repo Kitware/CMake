@@ -139,6 +139,7 @@ if test $ac_cv_prog_gxx = no; then
   AC_LANG_RESTORE
   CXXFLAGS="$CXXFLAGS_ORIG"
 fi
+AC_SUBST(CMAKE_NO_ANSI_STREAM_HEADERS)
 
 # check non-g++ compilers to see if they have std::stringstream
 CXXFLAGS_ORIG="$CXXFLAGS"
@@ -156,6 +157,7 @@ AC_MSG_RESULT(no)
 ])
 AC_LANG_RESTORE
 CXXFLAGS="$CXXFLAGS_ORIG"
+AC_SUBST(CMAKE_NO_ANSI_STRING_STREAM)
 
 # check to see if stl is in the std namespace
 if test $ac_cv_prog_gxx = no; then
@@ -176,6 +178,7 @@ if test $ac_cv_prog_gxx = no; then
   AC_LANG_RESTORE
   CXXFLAGS="$CXXFLAGS_ORIG"
 fi
+AC_SUBST(CMAKE_NO_STD_NAMESPACE)
 
 # check to see if for scoping is supported
 if test $ac_cv_prog_gxx = no; then
@@ -195,6 +198,7 @@ if test $ac_cv_prog_gxx = no; then
   AC_LANG_RESTORE
   CXXFLAGS="$CXXFLAGS_ORIG"
 fi
+AC_SUBST(CMAKE_NO_ANSI_FOR_SCOPE)
 
 # find make to use to build cmake, prefer gmake
 AC_PATH_PROGS(RUNMAKE, gmake make)
