@@ -104,7 +104,7 @@ if test $ac_cv_prog_gxx = no; then
   cat > conftest.cc <<!
 #include <iostream>
 !
-  if test -z "`${CXX} $CMAKE_ANSI_CFLAGS $CXXFLAGS $CPPFLAGS  -c conftest.cc 2>&1`"; then
+  if test -z "`${CXX} $CMAKE_ANSI_CXXFLAGS $CXXFLAGS $CPPFLAGS  -c conftest.cc 2>&1`"; then
     echo "$ac_t""yes" 1>&6
   else
     AC_DEFINE(CMAKE_NO_ANSI_STREAM_HEADERS)
@@ -120,7 +120,7 @@ if test $ac_cv_prog_gxx = no; then
 #include <list>
 void foo() { std::list<int> l; }
 !
-  if test -z "`${CXX} $CMAKE_ANSI_CFLAGS $CXXFLAGS $CPPFLAGS -c conftest.cc 2>&1`"; then
+  if test -z "`${CXX} $CMAKE_ANSI_CXXFLAGS $CXXFLAGS $CPPFLAGS -c conftest.cc 2>&1`"; then
     echo "$ac_t""yes" 1>&6
   else
     AC_DEFINE(CMAKE_NO_STD_NAMESPACE)
@@ -135,7 +135,7 @@ if test $ac_cv_prog_gxx = no; then
   cat > conftest.cc <<!
 void foo() { for(int i;;); for(int i;;); }
 !
-  if test -z "`${CXX} $CMAKE_ANSI_CFLAGS $CXXFLAGS $CPPFLAGS -c conftest.cc 2>&1`"; then
+  if test -z "`${CXX} $CMAKE_ANSI_CXXFLAGS $CXXFLAGS $CPPFLAGS -c conftest.cc 2>&1`"; then
     echo "$ac_t""yes" 1>&6
   else
     AC_DEFINE(CMAKE_NO_ANSI_FOR_SCOPE)
