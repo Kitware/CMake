@@ -52,7 +52,7 @@ void cmOrderLinkDirectories::FindLibrariesInSeachPaths()
       {
       if(lib->second.Path != *dir)
         {
-        if(LibraryInDirectory(dir->c_str(), lib->second.File.c_str()))
+        if(this->LibraryInDirectory(dir->c_str(), lib->second.File.c_str()))
           {
           m_LibraryToDirectories[lib->second.FullPath].push_back(*dir);
           }
@@ -120,80 +120,68 @@ void cmOrderLinkDirectories::PrepareLinkTargets()
 }
 
 //-------------------------------------------------------------------
-bool cmOrderLinkDirectories::CanBeBefore(const cmStdString& d1,
-                                         const cmStdString& d2)
+bool cmOrderLinkDirectories::FindPathNotInDirectoryToAfterList(
+  cmStdString& path)
 {
-  if(m_DirectoryToAfterList.count(d2) == 0)
+  for(std::map<cmStdString, std::vector<cmStdString> >::iterator i
+        = m_DirectoryToAfterList.begin();
+      i != m_DirectoryToAfterList.end(); ++i)
     {
-    return true;
-    }
-  std::vector<cmStdString>& d2dirs = m_DirectoryToAfterList[d2];
-  // is d1 in the d2's list of directories that d2 must be before
-  // if so, then d1 can not come before d2
-  for(std::vector<cmStdString>::iterator i = d2dirs.begin();
-      i != d2dirs.end(); ++i)
-    {
-    if(*i == d1)
+    const cmStdString& p = i->first;
+    bool found = false;
+    for(std::map<cmStdString, std::vector<cmStdString> >::iterator j 
+          = m_DirectoryToAfterList.begin(); j != m_DirectoryToAfterList.end() 
+          && !found; ++j)
       {
-      return false;
+      if(j != i)
+        {
+        found = (std::find(j->second.begin(), j->second.end(), p) != j->second.end());
+        }
+      }
+    if(!found)
+      {
+      path = p;
+      m_DirectoryToAfterList.erase(i);
+      return true;
       }
     }
-  return true;
+  return false;
 }
 
-// This is a stl function object used to sort
-// the vector of library paths.  It returns true
-// if left directory can be before right directory (no swap).
-// It also checks for the impossible case of two libraries and
-// two directories that have both libraries.
-struct cmOrderLinkDirectoriesCompare
-  : public std::binary_function <cmStdString, cmStdString, bool> 
-{
-  cmOrderLinkDirectoriesCompare() 
-  {
-    This = 0;
-  }
-  bool operator()(
-                  const cmStdString& left, 
-                  const cmStdString& right
-                  ) const
-  {
-    bool LBeforeR= This->CanBeBefore(left, right);
-    bool RBeforeL= This->CanBeBefore(right, left);
-
-    if ( !LBeforeR && !RBeforeL )
-      {
-      // check for the case when both libraries have to come
-      // before each other 
-      This->AddImpossible(right, left);
-      }
-    if ( LBeforeR == RBeforeL )
-      {
-      return strcmp(left.c_str(), right.c_str()) < 0;
-      }
-    return LBeforeR;
-  }
-  cmOrderLinkDirectories* This;
-};
-
-//-------------------------------------------------------------------
-void cmOrderLinkDirectories::AddImpossible(const cmStdString& d1,
-                                           const cmStdString& d2)
-{
-  m_ImposibleDirectories.insert(d1);
-  m_ImposibleDirectories.insert(d2);
-}
 
 //-------------------------------------------------------------------
 void cmOrderLinkDirectories::OrderPaths(std::vector<cmStdString>&
                                         orderedPaths)
 {
-  cmOrderLinkDirectoriesCompare comp;
-  comp.This = this;
-  // for some reason when cmake is run on InsightApplication 
-  // if std::sort is used here cmake crashes, but stable_sort works
-  //
-  std::sort(orderedPaths.begin(), orderedPaths.end(), comp);
+  cmStdString path;
+  // This is a topological sort implementation
+  // One at a time find paths that are not in any other paths after list
+  // and put them into the orderedPaths vector in that order
+  // FindPathNotInDirectoryToAfterList removes the path from the
+  // m_DirectoryToAfterList once it is found
+  while(this->FindPathNotInDirectoryToAfterList(path))
+    {
+    orderedPaths.push_back(path);
+    }
+  // at this point if there are still paths in m_DirectoryToAfterList
+  // then there is a cycle and we are stuck
+  if(m_DirectoryToAfterList.size())
+    {
+    for(std::map<cmStdString, std::vector<cmStdString> >::iterator i
+          = m_DirectoryToAfterList.begin();
+        i != m_DirectoryToAfterList.end(); ++i)
+      {
+      m_ImposibleDirectories.insert(i->first);
+      }
+    // if it failed, then fall back to original order
+    orderedPaths.clear();
+    for(std::set<cmStdString>::iterator dir = m_LinkPathSet.begin();
+        dir != m_LinkPathSet.end(); ++dir)
+      {
+      orderedPaths.push_back(*dir);
+      }
+    
+    }
 }
 
 //-------------------------------------------------------------------
@@ -204,9 +192,11 @@ void cmOrderLinkDirectories::SetLinkInformation(const cmTarget& target,
 {
     // collect the search paths from the target into paths set
   const std::vector<std::string>& searchPaths = target.GetLinkDirectories();
+  std::vector<cmStdString> empty;
   for(std::vector<std::string>::const_iterator p = searchPaths.begin();
       p != searchPaths.end(); ++p)
     {
+    m_DirectoryToAfterList[*p] = empty;
     m_LinkPathSet.insert(*p);
     }
   // collect the link items from the target and put it into libs
@@ -284,12 +274,6 @@ bool cmOrderLinkDirectories::DetermineLibraryPathOrder()
     }
   this->FindIndividualLibraryOrders();
   m_SortedSearchPaths.clear();
-  for(std::set<cmStdString>::iterator i = m_LinkPathSet.begin();
-      i != m_LinkPathSet.end(); ++i)
-    {
-    m_SortedSearchPaths.push_back(*i);
-    }
-  
   this->OrderPaths(m_SortedSearchPaths);
   // now turn libfoo.a into foo and foo.a into foo
   // This will prepare the link items for -litem 
@@ -310,7 +294,7 @@ std::string cmOrderLinkDirectories::GetWarnings()
     {
     warning += "Directory: ";
     warning += *i;
-    warning += " contains ";
+    warning += " contains:\n";
     std::map<cmStdString, std::vector<cmStdString> >::iterator j;
     for(j = m_LibraryToDirectories.begin(); 
         j != m_LibraryToDirectories.end(); ++j)
@@ -323,6 +307,7 @@ std::string cmOrderLinkDirectories::GetWarnings()
         warning += "\n";
         }
       }
+    warning += "\n";
     }
   warning += "\n";
   return warning;

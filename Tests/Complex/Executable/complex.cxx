@@ -11,6 +11,8 @@ extern "C" {
 #include "cmStandardIncludes.h"
 #include "cmSystemTools.h"
 #include "cmDynamicLoader.h"
+#include "cmSystemTools.h"
+#include "cmOrderLinkDirectories.h"
 
 int cm_passed = 0;
 int cm_failed = 0;
@@ -21,6 +23,77 @@ This is a problem. Looks like ADD_DEFINITIONS and REMOVE_DEFINITIONS does not wo
 // Here is a stupid function that tries to use std::string methods
 // so that the dec cxx compiler will instantiate the stuff that
 // we are using from the CMakeLib library....
+bool TestLibraryOrder(bool shouldFail)
+{ 
+  std::string Adir = std::string(BINARY_DIR) + std::string("/A");
+  std::string Bdir = std::string(BINARY_DIR) + std::string("/B");
+  std::string Cdir = std::string(BINARY_DIR) + std::string("/C");
+  
+  if(!shouldFail)
+    {
+    std::string rm = Bdir;
+    rm += "/libA.a";
+    cmSystemTools::RemoveFile(rm.c_str());
+    }
+  cmTarget target;
+  target.AddLinkDirectory(Adir.c_str());
+  target.AddLinkDirectory(Bdir.c_str());
+  target.AddLinkDirectory(Cdir.c_str());
+  target.AddLinkDirectory("/lib/extra/stuff");
+  
+  Adir += "/libA.a";
+  Bdir += "/libB.a";
+  Cdir += "/libC.a";
+  
+  target.AddLinkLibrary(Adir.c_str(), cmTarget::GENERAL);
+  target.AddLinkLibrary(Bdir.c_str(), cmTarget::GENERAL);
+  target.AddLinkLibrary(Cdir.c_str(), cmTarget::GENERAL);
+  target.AddLinkLibrary("-lm", cmTarget::GENERAL);
+  std::vector<cmStdString> sortedpaths;
+  std::vector<cmStdString> linkItems;
+  cmOrderLinkDirectories orderLibs;
+  orderLibs.AddLinkExtension(".so");
+  orderLibs.AddLinkExtension(".a");
+  orderLibs.SetLinkInformation(target, cmTarget::GENERAL, "A");
+  bool ret = orderLibs.DetermineLibraryPathOrder();
+  orderLibs.GetLinkerInformation(sortedpaths, linkItems);
+  std::cerr << "Sorted Link Paths:\n";
+  for(std::vector<cmStdString>::iterator i = sortedpaths.begin();
+      i != sortedpaths.end(); ++i)
+    {
+    std::cerr << *i << "\n";
+    }
+  std::cerr << "Link Items: \n";
+  for(std::vector<cmStdString>::iterator i = linkItems.begin();
+      i != linkItems.end(); ++i)
+    {
+    std::cerr << *i << "\n";
+    }
+  if(!(linkItems[0] == "A" && 
+       linkItems[1] == "B" && 
+       linkItems[2] == "C" && 
+       linkItems[3] == "-lm" ))
+    {
+    std::cerr << "fail because link items should be A B C -lm and the are not\n";
+    return shouldFail;
+    }
+  
+     
+  // if this is not the fail test then the order should be f B C A
+  if(!shouldFail)
+    {
+    if(!(sortedpaths[0][sortedpaths[0].size()-1] == 'f' &&
+         sortedpaths[1][sortedpaths[1].size()-1] == 'B' &&
+         sortedpaths[2][sortedpaths[2].size()-1] == 'C' &&
+         sortedpaths[3][sortedpaths[3].size()-1] == 'A' ))
+      {
+      std::cerr << "fail because order should be /lib/extra/stuff B C A and it is not\n";
+      return false;
+      }
+    }
+  
+  return ret;
+}
 
 void ForceStringUse()
 {
@@ -927,6 +1000,28 @@ int main()
   cmPassed("CMake SET CACHE FORCE");
 #endif
 
+  // first run with shouldFail = true, this will
+  // run with A B C as set by the CMakeList.txt file.
+  if(!TestLibraryOrder(true))
+    {
+    cmPassed("CMake cmOrderLinkDirectories worked.");
+    }
+  else
+    {
+    cmFailed("CMake cmOrderLinkDirectories failed to fail when given an impossible set of paths.");
+    }
+  // next run with shouldPass = true, this will 
+  // run with B/libA.a removed and should create the order
+  // B C A
+  if(TestLibraryOrder(false))
+    {
+    cmPassed("CMake cmOrderLinkDirectories worked.");
+    }
+  else
+    {
+    cmFailed("CMake cmOrderLinkDirectories failed.");
+    }
+  
   // ----------------------------------------------------------------------
   // Summary
 
@@ -936,6 +1031,5 @@ int main()
     std::cout << "Failed: " << cm_failed << "\n";
     return cm_failed;
     }
-
   return 0;
 }
