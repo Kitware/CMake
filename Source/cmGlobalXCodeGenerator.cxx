@@ -79,7 +79,8 @@ void cmGlobalXCodeGenerator::ClearXCodeObjects()
 }
 
 //----------------------------------------------------------------------------
-cmXCodeObject* cmGlobalXCodeGenerator::CreateObject(cmXCodeObject::PBXType ptype)
+cmXCodeObject* 
+cmGlobalXCodeGenerator::CreateObject(cmXCodeObject::PBXType ptype)
 {
   cmXCodeObject* obj = new cmXCodeObject(ptype, cmXCodeObject::OBJECT);
   m_XCodeObjects.push_back(obj);
@@ -87,14 +88,16 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateObject(cmXCodeObject::PBXType ptype
 }
 
 //----------------------------------------------------------------------------
-cmXCodeObject* cmGlobalXCodeGenerator::CreateObject(cmXCodeObject::Type type)
+cmXCodeObject* 
+cmGlobalXCodeGenerator::CreateObject(cmXCodeObject::Type type)
 {
   cmXCodeObject* obj = new cmXCodeObject(cmXCodeObject::None, type);
   m_XCodeObjects.push_back(obj);
   return obj;
 }
 
-cmXCodeObject* cmGlobalXCodeGenerator::CreateString(const char* s)
+cmXCodeObject*
+cmGlobalXCodeGenerator::CreateString(const char* s)
 {
   cmXCodeObject* obj = this->CreateObject(cmXCodeObject::STRING);
   obj->SetString(s);
@@ -119,7 +122,8 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
   cmXCodeObject* settings = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
   buildFile->AddAttribute("settings", settings);
   fileRef->AddAttribute("fileEncoding", this->CreateString("4"));
-  fileRef->AddAttribute("lastKnownFileType", this->CreateString("sourcecode.cpp.cpp"));
+  fileRef->AddAttribute("lastKnownFileType", 
+                        this->CreateString("sourcecode.cpp.cpp"));
   fileRef->AddAttribute("path", this->CreateString(
     lg->ConvertToRelativeOutputPath(sf->GetFullPath().c_str()).c_str()));
   fileRef->AddAttribute("refType", this->CreateString("4"));
@@ -136,79 +140,106 @@ void cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
   for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); l++)
     { 
     // create source build phase
-    cmXCodeObject* sourceBuildPhase = this->CreateObject(cmXCodeObject::PBXSourcesBuildPhase);
-    sourceBuildPhase->AddAttribute("buildActionMask", this->CreateString("2147483647"));
+    cmXCodeObject* sourceBuildPhase = 
+      this->CreateObject(cmXCodeObject::PBXSourcesBuildPhase);
+    sourceBuildPhase->AddAttribute("buildActionMask", 
+                                   this->CreateString("2147483647"));
     cmXCodeObject* buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
     sourceBuildPhase->AddAttribute("files", buildFiles);
-    sourceBuildPhase->AddAttribute("runOnlyForDeploymentPostprocessing", this->CreateString("0"));
+    sourceBuildPhase->AddAttribute("runOnlyForDeploymentPostprocessing", 
+                                   this->CreateString("0"));
     std::vector<cmSourceFile*> &classes = l->second.GetSourceFiles();
     // add all the sources
     for(std::vector<cmSourceFile*>::iterator i = classes.begin(); 
         i != classes.end(); ++i)
       {
-      buildFiles->AddObject(this->CreateXCodeSourceFile(gen, *i, mainGroupChildren));
+      buildFiles->AddObject(this->CreateXCodeSourceFile(gen, *i, 
+                                                        mainGroupChildren));
       }
     // create header build phase
-    cmXCodeObject* headerBuildPhase = this->CreateObject(cmXCodeObject::PBXHeadersBuildPhase);
-    headerBuildPhase->AddAttribute("buildActionMask", this->CreateString("2147483647"));
+    cmXCodeObject* headerBuildPhase = 
+      this->CreateObject(cmXCodeObject::PBXHeadersBuildPhase);
+    headerBuildPhase->AddAttribute("buildActionMask",
+                                   this->CreateString("2147483647"));
     buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
     headerBuildPhase->AddAttribute("files", buildFiles);
-    headerBuildPhase->AddAttribute("runOnlyForDeploymentPostprocessing", this->CreateString("0"));
+    headerBuildPhase->AddAttribute("runOnlyForDeploymentPostprocessing",
+                                   this->CreateString("0"));
     
     // create framework build phase
-    cmXCodeObject* frameworkBuildPhase = this->CreateObject(cmXCodeObject::PBXFrameworksBuildPhase);
-    frameworkBuildPhase->AddAttribute("buildActionMask", this->CreateString("2147483647"));
+    cmXCodeObject* frameworkBuildPhase =
+      this->CreateObject(cmXCodeObject::PBXFrameworksBuildPhase);
+    frameworkBuildPhase->AddAttribute("buildActionMask",
+                                      this->CreateString("2147483647"));
     buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
     frameworkBuildPhase->AddAttribute("files", buildFiles);
-    frameworkBuildPhase->AddAttribute("runOnlyForDeploymentPostprocessing", this->CreateString("0"));
+    frameworkBuildPhase->AddAttribute("runOnlyForDeploymentPostprocessing", 
+                                      this->CreateString("0"));
 
     cmXCodeObject* buildPhases = this->CreateObject(cmXCodeObject::OBJECT_LIST);
     buildPhases->AddObject(sourceBuildPhase);
     buildPhases->AddObject(headerBuildPhase);
     buildPhases->AddObject(frameworkBuildPhase);
-    
-    if((l->second.GetType() == cmTarget::STATIC_LIBRARY) ||
-       (l->second.GetType() == cmTarget::SHARED_LIBRARY) ||
-       (l->second.GetType() == cmTarget::MODULE_LIBRARY))
+    switch(l->second.GetType())
       {
-      }
-    else if ( l->second.GetType() == cmTarget::EXECUTABLE )
-      {
-      cmXCodeObject* target = this->CreateObject(cmXCodeObject::PBXNativeTarget);
-      targets.push_back(target);
-      target->AddAttribute("buildPhases", buildPhases);
-      cmXCodeObject* buildRules = this->CreateObject(cmXCodeObject::OBJECT_LIST);
-      target->AddAttribute("buildRules", buildRules);
-      cmXCodeObject* buildSettings = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
-      buildSettings->AddAttribute("INSTALL_PATH", this->CreateString("/usr/local/bin"));
-      buildSettings->AddAttribute("OPTIMIZATION_CFLAGS", this->CreateString(""));
-      buildSettings->AddAttribute("OTHER_CFLAGS", this->CreateString(""));
-      buildSettings->AddAttribute("OTHER_LDFLAGS", this->CreateString(""));
-      buildSettings->AddAttribute("OTHER_REZFLAGS", this->CreateString(""));
-      buildSettings->AddAttribute("PRODUCT_NAME", this->CreateString(l->first.c_str()));
-      buildSettings->AddAttribute("SECTORDER_FLAGS", this->CreateString(""));
-      buildSettings->AddAttribute("WARNING_CFLAGS", 
-                                  this->CreateString("-Wmost -Wno-four-char-constants -Wno-unknown-pragmas"));
-      target->AddAttribute("buildSettings", buildSettings);
-      cmXCodeObject* dependencies = this->CreateObject(cmXCodeObject::OBJECT_LIST);
-      target->AddAttribute("dependencies", dependencies);
-      target->AddAttribute("name", this->CreateString(l->first.c_str()));
-      target->AddAttribute("productName",this->CreateString(l->first.c_str()));
-      cmXCodeObject* fileRef = this->CreateObject(cmXCodeObject::PBXFileReference);
-      fileRef->AddAttribute("explicitFileType", this->CreateString("\"compiled.mach-o.executable\""));
-      fileRef->AddAttribute("includedInIndex", this->CreateString("0"));
-      fileRef->AddAttribute("path", this->CreateString(l->first.c_str()));
-      fileRef->AddAttribute("refType", this->CreateString("3"));
-      fileRef->AddAttribute("sourceTree", this->CreateString("BUILT_PRODUCTS_DIR"));
-      target->AddAttribute("productReference", this->CreateObjectReference(fileRef));
-      target->AddAttribute("productType", this->CreateString("\"com.apple.product-type.tool\""));
-      }
-    else if (l->second.GetType() == cmTarget::UTILITY)
-      {
+      case cmTarget::STATIC_LIBRARY:
+        break;
+      case cmTarget::SHARED_LIBRARY:
+        break;
+      case cmTarget::MODULE_LIBRARY:
+        break;
+      case cmTarget::EXECUTABLE:  
+        targets.push_back(this->CreateExecutable(l->second, buildPhases));
+        break;
+      case cmTarget::UTILITY:
+        break;
       }
     }
-  
 }
+  
+cmXCodeObject* cmGlobalXCodeGenerator::CreateExecutable(cmTarget& cmtarget,
+                                                        cmXCodeObject* buildPhases)
+{
+  cmXCodeObject* target = this->CreateObject(cmXCodeObject::PBXNativeTarget);
+  target->AddAttribute("buildPhases", buildPhases);
+  cmXCodeObject* buildRules = this->CreateObject(cmXCodeObject::OBJECT_LIST);
+  target->AddAttribute("buildRules", buildRules);
+  cmXCodeObject* buildSettings =
+    this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
+  buildSettings->AddAttribute("INSTALL_PATH", 
+                              this->CreateString("/usr/local/bin"));
+  buildSettings->AddAttribute("OPTIMIZATION_CFLAGS", 
+                              this->CreateString(""));
+  buildSettings->AddAttribute("OTHER_CFLAGS", 
+                              this->CreateString(""));
+  buildSettings->AddAttribute("OTHER_LDFLAGS",
+                              this->CreateString(""));
+  buildSettings->AddAttribute("OTHER_REZFLAGS", 
+                              this->CreateString(""));
+  buildSettings->AddAttribute("PRODUCT_NAME", 
+                              this->CreateString(cmtarget.GetName()));
+  buildSettings->AddAttribute("SECTORDER_FLAGS",
+                              this->CreateString(""));
+  buildSettings->AddAttribute("WARNING_CFLAGS", 
+                              this->CreateString("-Wmost -Wno-four-char-constants -Wno-unknown-pragmas"));
+  target->AddAttribute("buildSettings", buildSettings);
+  cmXCodeObject* dependencies = this->CreateObject(cmXCodeObject::OBJECT_LIST);
+  target->AddAttribute("dependencies", dependencies);
+  target->AddAttribute("name", this->CreateString(cmtarget.GetName()));
+  target->AddAttribute("productName",this->CreateString(cmtarget.GetName()));
+  cmXCodeObject* fileRef = this->CreateObject(cmXCodeObject::PBXFileReference);
+  fileRef->AddAttribute("explicitFileType", 
+                        this->CreateString("\"compiled.mach-o.executable\""));
+  fileRef->AddAttribute("includedInIndex", this->CreateString("0"));
+  fileRef->AddAttribute("path", this->CreateString(cmtarget.GetName()));
+  fileRef->AddAttribute("refType", this->CreateString("3"));
+  fileRef->AddAttribute("sourceTree", this->CreateString("BUILT_PRODUCTS_DIR"));
+  target->AddAttribute("productReference", this->CreateObjectReference(fileRef));
+  target->AddAttribute("productType", 
+                       this->CreateString("\"com.apple.product-type.tool\""));
+  return target;
+}
+
 
 //----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::CreateXCodeObjects(cmLocalGenerator* ,

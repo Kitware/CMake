@@ -71,7 +71,8 @@ private:
   cmXCodeObject* CreateObject(cmXCodeObject::Type type);
   cmXCodeObject* CreateString(const char* s);
   cmXCodeObject* CreateObjectReference(cmXCodeObject*);
-  
+  cmXCodeObject* CreateExecutable(cmTarget& cmtarget,
+                                  cmXCodeObject* buildPhases);
   // delete all objects in the m_XCodeObjects vector.
   void ClearXCodeObjects();
   void CreateXCodeObjects(cmLocalGenerator* root,
