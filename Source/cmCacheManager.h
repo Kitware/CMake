@@ -60,6 +60,7 @@ public:
     void SetProperty(const char* property, const char* value);
     void SetProperty(const char* property, bool value);
     const char* GetValue() const { return this->GetEntry().m_Value.c_str(); }
+    bool GetValueAsBool() const;
     void SetValue(const char*);
     CacheEntryType GetType() const { return this->GetEntry().m_Type; }
     bool Initialized() { return this->GetEntry().m_Initialized; }

@@ -743,6 +743,11 @@ void cmCacheManager::CacheIterator::SetProperty(const char* p, const char* v)
   ent->m_Properties[p] = v;
 }
 
+bool cmCacheManager::CacheIterator::GetValueAsBool() const 
+{ 
+  return cmSystemTools::IsOn(this->GetEntry().m_Value.c_str()); 
+}
+
 bool cmCacheManager::CacheIterator::GetPropertyAsBool(const char* property) const
 {
   // make sure it is not at the end
