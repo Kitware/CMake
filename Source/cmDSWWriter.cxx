@@ -125,7 +125,7 @@ void cmDSWMakefile::WriteDSWFile(std::ostream& fout)
     cmTargets &tgts = pg->GetDSPMakefile()->GetMakefile()->GetTargets();
     cmTargets::iterator l = tgts.begin();
     for(std::vector<std::string>::iterator si = dspnames.begin(); 
-        l != tgts.end(); ++l, ++si)
+        l != tgts.end(); ++l)
       {
       // special handling for the current makefile
       if(mf == m_Makefile)
@@ -154,8 +154,12 @@ void cmDSWMakefile::WriteDSWFile(std::ostream& fout)
           }
         }
       // Write the project into the DSW file
-      this->WriteProject(fout, si->c_str(), dir.c_str(), 
-                         pg->GetDSPMakefile(),l->second);
+      if (l->second.GetType() != cmTarget::INSTALL)
+        {
+        this->WriteProject(fout, si->c_str(), dir.c_str(), 
+                           pg->GetDSPMakefile(),l->second);
+        ++si;
+        }
       }
     // delete the cmMakefile which also deletes the cmMSProjectGenerator
     if(mf != m_Makefile)

@@ -107,7 +107,10 @@ void cmDSPMakefile::OutputDSPFile()
         this->SetBuildType(UTILITY, l->first.c_str());
         break;
       }
-    this->CreateSingleDSP(l->first.c_str(),l->second);
+    if (l->second.GetType() != cmTarget::INSTALL)
+      {
+      this->CreateSingleDSP(l->first.c_str(),l->second);
+      }
     }
 }
 
