@@ -2585,9 +2585,16 @@ void cmLocalUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
   
   std::string tgt = this->ConvertToRelativeOutputPath(replace.c_str());
   tgt = this->ConvertToMakeTarget(tgt.c_str());
+  const char* space = "";
+  if(tgt.size() == 1)
+    {
+    // Add a space before the ":" to avoid drive letter confusion on
+    // Windows.
+    space = " ";
+    }
   if(depends.empty())
     {
-    fout << tgt.c_str() << " :\n";
+    fout << tgt.c_str() << space << ":\n";
     }
   else
     {
@@ -2599,7 +2606,7 @@ void cmLocalUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
       replace = *dep;
       m_Makefile->ExpandVariablesInString(replace);
       replace = this->ConvertToMakeTarget(replace.c_str());
-      fout << tgt.c_str() << " : " << replace.c_str() << "\n";
+      fout << tgt.c_str() << space << ": " << replace.c_str() << "\n";
       }
     }
   
