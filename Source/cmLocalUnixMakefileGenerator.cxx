@@ -2017,7 +2017,7 @@ void cmLocalUnixMakefileGenerator::OutputCheckDepends(std::ostream& fout)
             if(emittedLowerPath.insert(lowerpath).second)
               {
               emitted.insert(dependfile);
-              fout << "all:: " << dependfile << "\n";
+              fout << "all: " << dependfile << "\n";
               }
             }
           }
@@ -2028,9 +2028,10 @@ void cmLocalUnixMakefileGenerator::OutputCheckDepends(std::ostream& fout)
   std::set<std::string>::iterator i;
   for(i = emitted.begin(); i != emitted.end(); ++i)
     {
-    fout << "cmake.depends:: " << *i << 
-      "\n\t$(MAKE) $(MAKESILENT) dependlocal\n\n";
+    fout << "cmake.depends: " << *i << "\n";
     }
+  fout << "cmake.depends: \n"
+       << "\t$(MAKE) $(MAKESILENT) dependlocal\n\n";
   fout << "\n\n";
   fout << "# if a .h file is removed then run make dependlocal\n\n";
   for(std::set<std::string>::iterator it = emitted.begin();
