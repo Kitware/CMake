@@ -1396,14 +1396,16 @@ int cmCTest::CoverageDirectory()
         cov.m_Show = true;
         }
       std::string::size_type kk;
-      for ( kk = 0; kk < lines.size(); kk ++ )
       //      std::cerr << "number of lines " << lines.size() << "\n";
+      for ( kk = 0; kk < lines.size(); kk ++ )
+        {
         std::string& line = lines[kk];
         //std::cerr << line << "\n";
-        std::string sub = line.substr(0, strlen("      ######"));
-        int count = atoi(sub.c_str());
-        if ( sub.compare(0, strlen("    #####"), "    #####") == 0 
-             || sub.compare("      ######") == 0 )
+        std::string sub1 = line.substr(0, strlen("    #####"));
+        std::string sub2 = line.substr(0, strlen("      ######"));
+        int count = atoi(sub2.c_str());
+        if ( sub1.compare("    #####") == 0 ||
+             sub2.compare("      ######") == 0 )
           {
           if ( covlines[kk] == -1 )
             {
