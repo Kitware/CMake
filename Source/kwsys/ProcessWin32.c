@@ -1268,6 +1268,7 @@ int kwsysProcess_WaitForData(kwsysProcess* cp, char** data, int* length,
       {
       /* The process timeout has expired.  Kill the child now.  */
       kwsysProcess_Kill(cp);
+      cp->State = kwsysProcess_State_Expired;
       cp->TimeoutExpired = 1;
       cp->Killed = 0;
       return kwsysProcess_Pipe_None;
