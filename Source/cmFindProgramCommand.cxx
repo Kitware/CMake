@@ -60,40 +60,77 @@ bool cmFindProgramCommand::Invoke(std::vector<std::string>& args)
   // already, if so use that value and don't look for the program
   const char* cacheValue
     = cmCacheManager::GetInstance()->GetCacheValue(define);
-  if(cacheValue)
+  if(cacheValue && strcmp(cacheValue, "NOTFOUND"))
     {
     m_Makefile->AddDefinition(define, cacheValue);
     return true;
     }
-
-  // if it is not in the cache, then search the system path
-  // add any user specified paths
   std::vector<std::string> path;
-  for (unsigned int j = 2; j < args.size(); j++)
+  std::vector<std::string> names;
+  bool namePathStyle = false;
+  bool foundName = false;
+  bool foundPath = false;
+  bool doingNames = true;
+  for (unsigned int j = 1; j < args.size(); ++j)
     {
-    // expand variables
-    std::string exp = args[j];
-    m_Makefile->ExpandVariablesInString(exp);
-    path.push_back(exp);
+    if(args[j] == "NAMES")
+      {
+      doingNames = true;
+      foundName = true;
+      }
+    else if (args[j] == "PATHS")
+      {
+      doingNames = false;
+      foundPath = true;
+      }
+    else
+      { 
+      m_Makefile->ExpandVariablesInString(args[j]);
+      if(doingNames)
+        {
+        names.push_back(args[j]);
+        }
+      else
+        {
+        path.push_back(args[j]);
+        }
+      }
     }
-  
-  // Try to find the program.
-  std::string result = cmSystemTools::FindProgram(i->c_str(), path);
-  
-  if(result != "")
+  // if it is not in the cache, then search the system path
+  // add any user specified paths 
+  if(!foundPath && !foundName)
     {
-    // Save the value in the cache
-    cmCacheManager::GetInstance()->AddCacheEntry(define,
-                                                 result.c_str(),
-                                                 "Path to a program.",
-                                                 cmCacheManager::FILEPATH);
-    m_Makefile->AddDefinition(define, result.c_str());
-    return true;
+    path.clear();
+    names.clear();
+    names.push_back(args[1]);
+    for (unsigned int j = 2; j < args.size(); j++)
+      {
+      // expand variables
+      std::string exp = args[j];
+      m_Makefile->ExpandVariablesInString(exp);
+      path.push_back(exp);
+      }
     }
-  std::string error = "Faild to find program: \"";
-  error += *i;
-  error += "\" ";
-  this->SetError(error.c_str());
+  for(std::vector<std::string>::iterator i = names.begin();
+      i != names.end() ; ++i)
+    {
+    // Try to find the program.
+    std::string result = cmSystemTools::FindProgram(i->c_str(), path);
+    if(result != "")
+      {
+      // Save the value in the cache
+      cmCacheManager::GetInstance()->AddCacheEntry(define,
+                                                   result.c_str(),
+                                                   "Path to a program.",
+                                                   cmCacheManager::FILEPATH);
+      m_Makefile->AddDefinition(define, result.c_str());
+      return true;
+      }
+    }
+  cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
+                                               "NOTFOUND",
+                                               "Path to a program",
+                                               cmCacheManager::FILEPATH);
   return true;
 }
 

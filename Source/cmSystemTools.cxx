@@ -613,8 +613,6 @@ std::string cmSystemTools::TemporaryFileName()
 {
   return tempnam(0, "cmake");
 }
-
-  
   
 
 
@@ -654,6 +652,63 @@ std::string cmSystemTools::FindProgram(const char* name,
     }
   
   // Couldn't find the program.
+  return "";
+}
+
+
+/**
+ * Find the library with the given name.  Searches the given path and then
+ * the system search path.  Returns the full path to the library if it is
+ * found.  Otherwise, the empty string is returned.
+ */
+std::string cmSystemTools::FindLibrary(const char* name,
+				       const std::vector<std::string>& userPaths)
+{
+  // See if the executable exists as written.
+  if(cmSystemTools::FileExists(name))
+    {
+    return cmSystemTools::CollapseFullPath(name);
+    }
+    
+  // Add the system search path to our path.
+  std::vector<std::string> path = userPaths;
+  cmSystemTools::GetPath(path);
+  std::string tryPath;
+  for(std::vector<std::string>::const_iterator p = path.begin();
+      p != path.end(); ++p)
+    {
+    tryPath = *p;
+    tryPath += "/";
+    tryPath += name;
+    tryPath += ".lib";
+    if(cmSystemTools::FileExists(tryPath.c_str()))
+      {
+      return cmSystemTools::CollapseFullPath(tryPath.c_str());
+      }
+    tryPath = "lib";
+    tryPath += *p;
+    tryPath + ".so";
+    if(cmSystemTools::FileExists(tryPath.c_str()))
+      {
+      return cmSystemTools::CollapseFullPath(tryPath.c_str());
+      }
+    tryPath = "lib";
+    tryPath += *p;
+    tryPath + ".a";
+    if(cmSystemTools::FileExists(tryPath.c_str()))
+      {
+      return cmSystemTools::CollapseFullPath(tryPath.c_str());
+      }
+    tryPath = "lib";
+    tryPath += *p;
+    tryPath + ".sl";
+    if(cmSystemTools::FileExists(tryPath.c_str()))
+      {
+      return cmSystemTools::CollapseFullPath(tryPath.c_str());
+      }
+    }
+  
+  // Couldn't find the library.
   return "";
 }
 
@@ -737,6 +792,7 @@ void cmSystemTools::SplitProgramPath(const char* in_name,
  */
 std::string cmSystemTools::CollapseFullPath(const char* in_name)
 {
+  std::cerr << "CollapseFullPath " << in_name << "\n";
   std::string dir, file;
   cmSystemTools::SplitProgramPath(in_name, dir, file);
   // Ultra-hack warning:

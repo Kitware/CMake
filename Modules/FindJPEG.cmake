@@ -8,8 +8,7 @@ FIND_PATH(NATIVE_JPEG_INCLUDE_PATH jpeglib.h
 /usr/include
 )
 
-FIND_LIBRARY(NATIVE_JPEG_LIB_PATH jpeg
-/usr/lib
-/usr/local/lib
+FIND_LIBRARY(NATIVE_JPEG_LIB_PATH  jpeg
+PATHS /usr/lib /usr/local/lib
 )
 

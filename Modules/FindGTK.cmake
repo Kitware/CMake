@@ -11,14 +11,11 @@ IF (UNIX)
   /usr/openwin/share/include
   )
 
-  FIND_LIBRARY(GTK_LIB_PATH gtk
-  /usr/lib
-  /usr/local/lib
-  /usr/openwin/lib
-  /usr/X11R6/lib
+  FIND_LIBRARY(GTK_LIB_PATH  gtk
+  PATHS /usr/lib  /usr/local/lib  /usr/openwin/lib  /usr/X11R6/lib
   )
 
-  FIND_LIBRARY(GTK_GLIB_INCLUDE_PATH glibconfig.h
+  FIND_PATH(GTK_GLIB_INCLUDE_PATH glibconfig.h
   /usr/include
   /usr/local/include
   /usr/openwin/share/include

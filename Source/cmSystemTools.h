@@ -164,11 +164,15 @@ public:
    * IsON and IsOff both returning false. Note that the special path
    * NOTFOUND will cause IsOff to return true. 
    */
-   static bool IsOff(const char* val);
+  static bool IsOff(const char* val);
 
+  ///! Find an executable in the system PATH, with optional extra paths.
   static std::string FindProgram(const char* name,
-				 const std::vector<std::string>& = std::vector<std::string>());
-  
+				 const std::vector<std::string>& path= std::vector<std::string>());
+  ///! Find a library in the system PATH, with optional extra paths.
+  static std::string FindLibrary(const char* name,
+				 const std::vector<std::string>& path);
+  ///! return true if the file is a directory.
   static bool FileIsDirectory(const char* name);
   static std::string GetCurrentWorkingDirectory();
   static std::string GetProgramPath(const char*);

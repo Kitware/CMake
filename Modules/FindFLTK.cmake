@@ -10,10 +10,7 @@ FIND_PATH(FLTK_INCLUDE_PATH FL/FL.H
 H:/usr/local/fltk
 )
 
-FIND_LIBRARY(FLTK_LIB_PATH fltk
-/usr/lib
-/usr/local/lib
-/usr/local/fltk/lib
-H:/usr/local/fltk/lib
+FIND_LIBRARY(FLTK_LIB_PATH  fltk
+PATHS /usr/lib /usr/local/lib /usr/local/fltk/lib H:/usr/local/fltk/lib
 )
 

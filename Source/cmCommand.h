@@ -148,7 +148,7 @@ public:
     {
       if(m_Error.length() == 0)
         {
-        std::string m_Error = this->GetName();
+        m_Error = this->GetName();
         m_Error += " uknown error.";
         }
       return m_Error.c_str();

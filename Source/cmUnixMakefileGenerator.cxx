@@ -187,7 +187,7 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
       {
       linkLibs += "-L";
       }
-    linkLibs += *j;
+    linkLibs += cmSystemTools::EscapeSpaces(j->c_str());
     linkLibs += " ";
     }
   std::string librariesLinked;
@@ -199,14 +199,31 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
     if(targetLibrary && (j2->first == targetLibrary)) continue;
     // don't look at debug libraries
     if (j2->second == cmTarget::DEBUG) continue;
-    std::string::size_type pos = j2->first.find("-l");
-    if((pos == std::string::npos || pos > 0)
-       && j2->first.find("${") == std::string::npos)
+    std::cerr << j2->first.c_str() << "\n";
+    
+    if(j2->first.find('/') != std::string::npos)
       {
+      std::string dir, file;
+      cmSystemTools::SplitProgramPath(j2->first.c_str(),
+                                      dir, file);
+      linkLibs += "-L";
+      linkLibs += cmSystemTools::EscapeSpaces(dir.c_str());
+      linkLibs += " ";
       librariesLinked += "-l";
+      librariesLinked += file;
+      librariesLinked += " ";
       }
-    librariesLinked += j2->first;
-    librariesLinked += " ";
+    else
+      {
+      std::string::size_type pos = j2->first.find("-l");
+      if((pos == std::string::npos || pos > 0)
+         && j2->first.find("${") == std::string::npos)
+        {
+        librariesLinked += "-l";
+        }
+      librariesLinked += j2->first;
+      librariesLinked += " ";
+      }
     }
   linkLibs += librariesLinked;
 
@@ -325,7 +342,7 @@ void cmUnixMakefileGenerator::OutputMakeFlags(std::ostream& fout)
   for(i = includes.begin(); i != includes.end(); ++i)
     {
     std::string include = *i;
-    fout << "-I" << i->c_str() << " ";
+    fout << "-I" << cmSystemTools::EscapeSpaces(i->c_str()).c_str() << " ";
     }
   fout << m_Makefile->GetDefineFlags();
   fout << " ${LOCAL_INCLUDE_FLAGS} ";

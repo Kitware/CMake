@@ -57,78 +57,79 @@ bool cmFindLibraryCommand::Invoke(std::vector<std::string>& args)
     = cmCacheManager::GetInstance()->GetCacheValue(args[0].c_str());
   if(cacheValue && strcmp(cacheValue, "NOTFOUND"))
     { 
-      m_Makefile->AddDefinition(args[0].c_str(), cacheValue);
-      cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
-                                                   cacheValue,
-                                                   helpString.c_str(),
-                                                   cmCacheManager::PATH);
+    m_Makefile->AddDefinition(args[0].c_str(), cacheValue);
+    cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
+                                                 cacheValue,
+                                                 helpString.c_str(),
+                                                 cmCacheManager::FILEPATH);
     return true;
     }
-
   std::vector<std::string> path;
-  // add any user specified paths
-  for (unsigned int j = 2; j < args.size(); j++)
+  std::vector<std::string> names;
+  bool namePathStyle = false;
+  bool foundName = false;
+  bool foundPath = false;
+  bool doingNames = true;
+  for (unsigned int j = 1; j < args.size(); ++j)
     {
-    // expand variables
-    std::string exp = args[j];
-    m_Makefile->ExpandVariablesInString(exp);
-    path.push_back(exp);
+    if(args[j] == "NAMES")
+      {
+      doingNames = true;
+      foundName = true;
+      }
+    else if (args[j] == "PATHS")
+      {
+      doingNames = false;
+      foundPath = true;
+      }
+    else
+      { 
+      m_Makefile->ExpandVariablesInString(args[j]);
+      if(doingNames)
+        {
+        names.push_back(args[j]);
+        }
+      else
+        {
+        path.push_back(args[j]);
+        }
+      }
     }
-
-  // add the standard path
-  cmSystemTools::GetPath(path);
-  unsigned int k;
-  for(k=0; k < path.size(); k++)
+  // old style name path1 path2 path3
+  if(!foundPath && !foundName)
     {
-    std::string tryPath = path[k];
-    tryPath += "/";
-    std::string testF;
-    testF = tryPath + args[1] + ".lib";
-    if(cmSystemTools::FileExists(testF.c_str()))
+    names.clear();
+    path.clear();
+    names.push_back(args[1]);
+    // add any user specified paths
+    for (unsigned int j = 2; j < args.size(); j++)
       {
-      m_Makefile->AddDefinition(args[0].c_str(), path[k].c_str());  
+      // expand variables
+      std::string exp = args[j];
+      m_Makefile->ExpandVariablesInString(exp);
+      path.push_back(exp);
+      }
+    }
+  std::string library;
+  for(std::vector<std::string>::iterator i = names.begin();
+      i != names.end() ; ++i)
+    {
+    library = cmSystemTools::FindLibrary(i->c_str(),
+                                         path);
+    if(library != "")
+      {  
+      m_Makefile->AddDefinition(args[0].c_str(), library.c_str());  
       cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
-                                                   path[k].c_str(),
+                                                   library.c_str(),
                                                    helpString.c_str(),
-                                                   cmCacheManager::PATH);
+                                                   cmCacheManager::FILEPATH);
       return true;
-      }
-    testF = tryPath + "lib" + args[1] + ".so";
-    if(cmSystemTools::FileExists(testF.c_str()))
-      {
-      m_Makefile->AddDefinition(args[0].c_str(), path[k].c_str());  
-      cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
-                                                   path[k].c_str(),
-                                                   helpString.c_str(),
-                                                   cmCacheManager::PATH);
-      return true;
-      }
-    testF = tryPath + "lib" + args[1] + ".a";
-    if(cmSystemTools::FileExists(testF.c_str()))
-      {
-      m_Makefile->AddDefinition(args[0].c_str(), path[k].c_str());  
-      cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
-                                                   path[k].c_str(),
-                                                   helpString.c_str(),
-                                                   cmCacheManager::PATH);
-      return true;
-      }
-    testF = tryPath + "lib" + args[1] + ".sl";
-    if(cmSystemTools::FileExists(testF.c_str()))
-      {
-      m_Makefile->AddDefinition(args[0].c_str(), path[k].c_str());  
-      cmCacheManager::GetInstance()->
-        AddCacheEntry(args[0].c_str(),
-                      path[k].c_str(),
-                      helpString.c_str(),
-                      cmCacheManager::PATH);
-      return true;
-      }
+      } 
     }
   cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
                                                "NOTFOUND",
                                                helpString.c_str(),
-                                               cmCacheManager::PATH);
+                                               cmCacheManager::FILEPATH);
   return true;
 }
 
