@@ -1996,7 +1996,7 @@ void cmCTest::ProcessDirectory(cmCTest::tm_VectorOfStrings &passed,
     cres.m_Status = cmCTest::NOT_RUN;
     cres.m_TestCount = cnt;
 
-    if (last_directory != it->m_Directory)
+    if (!(last_directory == it->m_Directory))
       {
       if ( m_Verbose )
         {
