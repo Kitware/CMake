@@ -1,10 +1,10 @@
 void testProccessArgs(int* ac, char***av)
 {
+  char** argv = *av;
   if(*ac < 2)
     {
     return;
     }
-  char** argv = *av;
   if(strcmp(argv[1], "--with-threads") == 0)
     {
     printf("number of threads is %s\n", argv[2]);
