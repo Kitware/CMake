@@ -6,7 +6,9 @@ SUBDIRS(Source Modules Templates)
 INCLUDE (${CMAKE_ROOT}/Modules/Dart.cmake)
 
 # use the ansi CXX compile flag for building cmake
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_ANSI_CXXFLAGS}")  
+IF (CMAKE_ANSI_CXXFLAGS)
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_ANSI_CXXFLAGS}")  
+ENDIF (CMAKE_ANSI_CXXFLAGS)
 # add some testing dependencies
 IF(BUILD_TESTING)
   IF (DART_ROOT)
