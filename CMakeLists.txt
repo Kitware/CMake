@@ -63,7 +63,6 @@ SUBDIRS(Source/kwsys)
 
 #-----------------------------------------------------------------------------
 # Build Curl library for CTest.
-SET(CMAKE_BUILD_WITH_CURL 1)
 SUBDIRS(Source/CTest/Curl)
 
 #-----------------------------------------------------------------------------

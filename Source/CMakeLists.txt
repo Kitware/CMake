@@ -134,7 +134,7 @@ ENDIF(CMAKE_BUILD_MFC_DIALOG)
 ADD_EXECUTABLE(cmake cmakemain.cxx)
 ADD_EXECUTABLE(DumpDocumentation cmDumpDocumentation)
 
-SET(CMTEST_SRCS ctest.cxx cmCTest.cxx 
+SET(CMTEST_SRCS cmCTest.cxx 
   CTest/cmCTestGenericHandler.cxx
   CTest/cmCTestBuildHandler.cxx
   CTest/cmCTestConfigureHandler.cxx
@@ -148,6 +148,7 @@ SET(CMTEST_SRCS ctest.cxx cmCTest.cxx
   CTest/cmCTestStartCommand.cxx
   CTest/cmCTestUpdateCommand.cxx
   CTest/cmCTestMemCheckHandler.cxx
+  CTest/cmCTestSubmit.cxx
   )
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/Source/CTest)
@@ -159,19 +160,8 @@ ENDIF (UNIX)
 TARGET_LINK_LIBRARIES(cmake CMakeLib)
 TARGET_LINK_LIBRARIES(DumpDocumentation CMakeLib)
 
-IF(CMAKE_BUILD_WITH_CURL)
-  # Don't even look for this as we don't use that part of curl
-  # and linking in the the library can cause problems.
-  SUBDIRS(CTest)
-  SET(CMTEST_SRCS ${CMTEST_SRCS} CTest/cmCTestSubmit.cxx)
-  ADD_DEFINITIONS(-DHAVE_CURL)
-ENDIF(CMAKE_BUILD_WITH_CURL)
-
-ADD_EXECUTABLE(ctest ${CMTEST_SRCS})
-TARGET_LINK_LIBRARIES(ctest CMakeLib)
-IF(CMAKE_BUILD_WITH_CURL)
-  TARGET_LINK_LIBRARIES(ctest Curl)
-ENDIF(CMAKE_BUILD_WITH_CURL)
+ADD_EXECUTABLE(ctest ctest.cxx ${CMTEST_SRCS})
+TARGET_LINK_LIBRARIES(ctest CMakeLib ${CMAKE_CURL_LIBRARIES})
 
 IF (UNIX)
   INCLUDE (${CMake_SOURCE_DIR}/Modules/FindCurses.cmake OPTIONAL)
