@@ -283,7 +283,14 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   int runtime = 0;
   int optimized = 0;
   int inlineFunctions = 0;
+  std::string programDatabase;
   const char* pre = "WIN32,_DEBUG,_WINDOWS";
+  std::string debugPostfix = "";
+  bool debug = !strcmp(configName,"Debug");
+  if (debug && m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX"))
+    {
+    debugPostfix = m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX");
+    }  
   // set the flags and defaults for
   // runtime, optimized, and inlineFunctions , and
   // default pre processor flags
@@ -293,7 +300,12 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     flags += flagsDebug;
     optimized = 0;
     runtime = 3;
-    pre = "WIN32,_DEBUG,_WINDOWS";
+    pre = "WIN32,_DEBUG,_WINDOWS"; 
+    std::string libpath = m_LibraryOutputPath + 
+        "$(OutDir)/" + libName + debugPostfix + ".pdb";
+    programDatabase = "\t\t\t\tProgramDatabaseFileName=\"";
+    programDatabase += libpath;
+    programDatabase += "\"";
     }
   else if (strcmp(configName, "Release") == 0)
     {
@@ -318,6 +330,11 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     runtime = 2;
     pre = "WIN32,NDEBUG,_WINDOWS";
     flags += flagsDebugRel;
+    std::string libpath = m_LibraryOutputPath + 
+        "$(OutDir)/" + libName + debugPostfix + ".pdb";
+    programDatabase = "\t\t\t\tProgramDatabaseFileName=\"";
+    programDatabase += libpath;
+    programDatabase += "\"";
     }
   
   fout << "\t\t\tIntermediateDirectory=\".\\" << configName << "\"\n"
@@ -455,7 +472,11 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     {
     fout << "\t\t\t\tWarningLevel=\"" << m_Makefile->GetDefinition("CMAKE_CXX_WARNING_LEVEL") << "\"\n";
     }
-  fout << "\t\t\t\tDebugInformationFormat=\"" << debugFormat << "\"";
+  if(programDatabase.size())
+    {
+    fout << programDatabase << "\n";
+    }
+  fout << "\t\t\t\tDebugInformationFormat=\"" << debugFormat << "\"";   
   fout << "/>\n";  // end of <Tool Name=VCCLCompilerTool
 
   fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCCustomBuildTool\"/>\n";
