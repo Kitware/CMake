@@ -26,14 +26,6 @@ LOAD_CACHE(${Complex_SOURCE_DIR}/Cache
              CACHE_TEST_VAR_INTERNAL)
 
 #
-# Configure file 
-# (plug vars to #define so that they can be tested)
-#
-CONFIGURE_FILE(
-  ${Complex_SOURCE_DIR}/cmTestConfigure.h.in
-  ${Complex_BINARY_DIR}/cmTestConfigure.h)
-
-#
 # Specify include and lib dirs 
 # (BEFORE is for coverage)
 #
@@ -64,16 +56,10 @@ SET (EXECUTABLE_OUTPUT_PATH
      "Single output directory for building all executables.")
 
 #
-# Create the libs and the main exe
-#
-SUBDIRS(Library Executable)
-SUBDIR_DEPENDS(Executable Library)
-
-#
 # Exec program (TODO: test a result)
 # Increase coverage.
 #
-MESSAGE("Trying to increase coverage...")
+MESSAGE("\nIgnore this message")
 OPTION(NO_EXEC_PROGRAM "Do not test EXEC_PROGRAM" 0)
 IF (NOT NO_EXEC_PROGRAM)
   EXEC_PROGRAM("echo NO_EXEC_PROGRAM" "${Complex_BINARY_DIR}")
@@ -90,3 +76,46 @@ MARK_AS_ADVANCED(CLEAR NO_EXEC_PROGRAM)
 # sadly it won't be able to remove it.
 #
 MAKE_DIRECTORY("${Complex_BINARY_DIR}/make_dir")
+
+#
+# Test FIND_LIBARY
+# Create a dummy empty lib
+#
+FOREACH (ext "${CMAKE_SHLIB_SUFFIX};.lib;.so")
+  CONFIGURE_FILE(
+    ${Complex_SOURCE_DIR}/Library/dummy
+    ${Complex_BINARY_DIR}/Library/dummylib${ext}
+    COPYONLY IMMEDIATE)
+ENDFOREACH (ext)
+
+FIND_LIBRARY(FIND_DUMMY_LIB
+             dummylib
+             PATHS
+             ${Complex_BINARY_DIR}/Library)
+
+#
+# Test SET_SOURCE_FILES_PROPERTIES 
+#
+SET_SOURCE_FILES_PROPERTIES(nonexisting_file2 
+	                    GENERATED 
+	                    ABSTRACT 
+                            WRAP_EXCLUDE 
+                            COMPILE_FLAGS "-foo -bar")
+
+GET_SOURCE_FILE_PROPERTY(FILE_HAS_ABSTRACT nonexisting_file2 ABSTRACT)
+GET_SOURCE_FILE_PROPERTY(FILE_HAS_WRAP_EXCLUDE nonexisting_file2 WRAP_EXCLUDE)
+GET_SOURCE_FILE_PROPERTY(FILE_COMPILE_FLAGS nonexisting_file2 COMPILE_FLAGS)
+
+#
+# Configure file 
+# (plug vars to #define so that they can be tested)
+#
+CONFIGURE_FILE(
+  ${Complex_SOURCE_DIR}/cmTestConfigure.h.in
+  ${Complex_BINARY_DIR}/cmTestConfigure.h)
+
+#
+# Create the libs and the main exe
+#
+SUBDIRS(Library Executable)
+SUBDIR_DEPENDS(Executable Library)

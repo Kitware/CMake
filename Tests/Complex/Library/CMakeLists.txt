@@ -23,27 +23,7 @@ ADD_LIBRARY(CMakeTestLibrary LibrarySources)
 #
 # Create shared library
 #
-
-# test SET_SOURCE_FILES_PROPERTIES 
-SET_SOURCE_FILES_PROPERTIES(nonexisting_file2 GENERATED ABSTRACT WRAP_EXCLUDE COMPILE_FLAGS "-foo -bar")
-GET_SOURCE_FILE_PROPERTY(ISABS nonexisting_file2 ABSTRACT)
-GET_SOURCE_FILE_PROPERTY(WRAPEX nonexisting_file2 WRAP_EXCLUDE)
-GET_SOURCE_FILE_PROPERTY(FLAGS nonexisting_file2 COMPILE_FLAGS)
-MESSAGE("ISABS = ${ISABS}   WRAPEX =   ${WRAPEX}   FLAGS = ${FLAGS}")
-
-CONFIGURE_FILE(
-  ${Complex_SOURCE_DIR}/Library/cmTestLibraryConfigure.h.in
-  ${Complex_BINARY_DIR}/Library/cmTestLibraryConfigure.h)
-
-
-  
-
-SOURCE_FILES(SharedLibrarySources nonexisting_file2)
-SOURCE_FILES_REMOVE(SharedLibrarySources GENERATED nonexisting_file2)
-
-
-SET_SOURCE_FILES_PROPERTIES(fileFlags COMPILE_FLAGS "-DEXTRA_FLAG" )
-SOURCE_FILES(SharedLibrarySources sharedFile fileFlags)
+SOURCE_FILES(SharedLibrarySources sharedFile)
 ADD_LIBRARY(CMakeTestLibraryShared SHARED SharedLibrarySources)
 
 #
@@ -60,7 +40,6 @@ ADD_CUSTOM_COMMAND(SOURCE CMakeTestLibraryShared
 
 #
 # Add a custom target.
-# It runs ${CREATE_FILE_EXE} which will create the file
 # It runs ${CREATE_FILE_EXE} which will create a file.
 # The 'complex' executable will then test if this file exists and remove it.
 #

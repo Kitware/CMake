@@ -38,3 +38,13 @@
 // Needed to check for files
 
 #define BINARY_DIR "${Complex_BINARY_DIR}"
+
+// Test FIND_LIBRARY
+
+#define FIND_DUMMY_LIB "${FIND_DUMMY_LIB}"
+
+// Test SET_SOURCE_FILES_PROPERTIES
+
+#cmakedefine FILE_HAS_ABSTRACT
+#cmakedefine FILE_HAS_WRAP_EXCLUDE
+#define FILE_COMPILE_FLAGS "${FILE_COMPILE_FLAGS}"

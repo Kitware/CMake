@@ -37,7 +37,7 @@ void ForceStringUse()
 
 void cmFailed(const char* Message, const char* m2= "")
 {
-  std::cerr << "Failed: " << Message << m2 << "\n"; 
+  std::cerr << "FAILED: " << Message << m2 << "\n"; 
   cm_failed++;
 }
 
@@ -95,11 +95,6 @@ void TestDir(const char* filename)
 
 int main()
 {
-#ifdef SET_SOURCE_FILES_PROPERTIES
-  cmPassed("SET_SOURCE_FILES_PROPERTIES set FLAGS passed on an ADD_EXECUTABLE source");
-#else
-  cmFailed("SET_SOURCE_FILES_PROPERTIES set FLAGS passed on an ADD_EXECUTABLE source");
-#endif
   if(sharedFunction() != 1)
     {
     cmFailed("Call to sharedFunction from shared library failed.");
@@ -125,14 +120,6 @@ int main()
   else
     {
     cmPassed("Call to file2 function returned 1.");
-    }
-  if(PropertyTest() != 1)
-    {
-    cmFailed("Call to PropertyTest function from library failed.");
-    }
-  else
-    {
-    cmPassed("Call to PropertyTest function returned 1.");
     }
 
   // ----------------------------------------------------------------------
@@ -571,6 +558,59 @@ int main()
   // only created during a build.
 
   TestAndRemoveFile(BINARY_DIR "/Executable/Temp/complex-required.txt");
+
+  // ----------------------------------------------------------------------
+  // Test FIND_LIBRARY
+
+#ifndef FIND_DUMMY_LIB
+  cmFailed("the CONFIGURE_FILE command is broken, "
+         "FIND_DUMMY_LIB is not defined.");
+#else
+  if(strstr(FIND_DUMMY_LIB, "dummylib") == NULL)
+    {
+    cmFailed("the FIND_LIBRARY or CONFIGURE_FILE command is broken, "
+           "FIND_DUMMY_LIB == ", FIND_DUMMY_LIB);
+    }
+  else
+    {
+    cmPassed("FIND_DUMMY_LIB == ", FIND_DUMMY_LIB);
+    }
+#endif
+
+  // ----------------------------------------------------------------------
+  // Test SET_SOURCE_FILES_PROPERTIES
+
+#ifndef FILE_HAS_EXTRA_COMPILE_FLAGS
+  cmFailed("SET_SOURCE_FILES_PROPERTIES failed at setting FILE_HAS_EXTRA_COMPILE_FLAGS flag");
+#else
+  cmPassed("SET_SOURCE_FILES_PROPERTIES succeeded in setting FILE_HAS_EXTRA_COMPILE_FLAGS flag");
+#endif
+
+#ifndef FILE_HAS_ABSTRACT
+  cmFailed("SET_SOURCE_FILES_PROPERTIES failed at setting ABSTRACT flag");
+#else
+  cmPassed("SET_SOURCE_FILES_PROPERTIES succeeded in setting ABSTRACT flag");
+#endif
+
+#ifndef FILE_HAS_WRAP_EXCLUDE
+  cmFailed("FILE_HAS_WRAP_EXCLUDE failed at setting WRAP_EXCLUDE flag");
+#else
+  cmPassed("FILE_HAS_WRAP_EXCLUDE succeeded in setting WRAP_EXCLUDE flag");
+#endif
+
+#ifndef FILE_COMPILE_FLAGS
+  cmFailed("the CONFIGURE_FILE command is broken, FILE_COMPILE_FLAGS is not defined.");
+#else
+  if(strcmp(FILE_COMPILE_FLAGS, "-foo -bar") != 0)
+    {
+    cmFailed("the SET_SOURCE_FILES_PROPERTIES or CONFIGURE_FILE command is broken. FILE_COMPILE_FLAGS == ", 
+             FILE_COMPILE_FLAGS);
+    }
+  else
+    {
+    cmPassed("SET_SOURCE_FILES_PROPERTIES succeeded in setting extra flags == ", FILE_COMPILE_FLAGS);
+    }
+#endif
 
   // ----------------------------------------------------------------------
   // Summary

@@ -1,4 +1,0 @@
-#cmakedefine ISABS
-#cmakedefine WRAPEX
-#define FLAGS "${FLAGS}"
-
