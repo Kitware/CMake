@@ -1,5 +1,20 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 1.5)
 
+# configure the .h file
+CONFIGURE_FILE(
+  ${CMake_SOURCE_DIR}/Source/cmConfigure.cmake.h.in 
+  ${CMake_BINARY_DIR}/Source/cmConfigure.h )
+
+# add the include path to find the .h 
+INCLUDE_DIRECTORIES(${CMake_BINARY_DIR}/Source)
+INCLUDE_DIRECTORIES(${CMake_SOURCE_DIR}/Source)
+
+# let cmake know it is supposed to use it
+ADD_DEFINITIONS(-DCMAKE_BUILD_WITH_CMAKE)
+
+#
+# Sources for CMakeLib
+#
 SET(SRCS
   cmBootstrapCommands.cxx
   cmCacheManager.cxx
@@ -68,18 +83,6 @@ SET(SRCS
   cmakewizard.h
   )
 
-# configure the .h file
-CONFIGURE_FILE(
-  ${CMake_SOURCE_DIR}/Source/cmConfigure.cmake.h.in 
-  ${CMake_BINARY_DIR}/Source/cmConfigure.h )
-
-# add the include path to find the .h 
-INCLUDE_DIRECTORIES(${CMake_BINARY_DIR}/Source)
-INCLUDE_DIRECTORIES(${CMake_SOURCE_DIR}/Source)
-
-# let cmake know it is supposed to use it
-ADD_DEFINITIONS(-DCMAKE_BUILD_WITH_CMAKE)
-
 # Kdevelop only works on UNIX and not windows
 IF(UNIX)
   SET(SRCS ${SRCS}
@@ -119,21 +122,21 @@ ENDIF (WIN32)
 # create a library used by the command line and the GUI
 ADD_LIBRARY(CMakeLib ${SRCS})
 TARGET_LINK_LIBRARIES(CMakeLib cmsys cmexpat cmzlib)
+IF (UNIX)
+  TARGET_LINK_LIBRARIES(CMakeLib ${CMAKE_DL_LIBS})
+ENDIF (UNIX)
+IF(CMAKE_BUILD_ON_VISUAL_STUDIO)
+  # On Visual Studio we need rpcrt4.lib for cmVisualStudio7 generator.
+  TARGET_LINK_LIBRARIES(CMakeLib rpcrt4.lib)
+ENDIF(CMAKE_BUILD_ON_VISUAL_STUDIO)
 
-# always link in the library
-# the library is found here
-LINK_DIRECTORIES(${CMake_BINARY_DIR}/Source)
-
-IF(CMAKE_BUILD_MFC_DIALOG)
-  LINK_LIBRARIES( rpcrt4.lib )
-  ADD_EXECUTABLE(cmw9xcom cmw9xcom.cxx)
-  TARGET_LINK_LIBRARIES(cmw9xcom CMakeLib)
-  SUBDIRS(MFCDialog)
-ENDIF(CMAKE_BUILD_MFC_DIALOG)
-
-ADD_EXECUTABLE(cmake cmakemain.cxx)
-ADD_EXECUTABLE(DumpDocumentation cmDumpDocumentation)
-
+#
+# CTestLib
+#
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/Source/CTest)
+#
+# Sources for CTestLib
+#
 SET(CMTEST_SRCS cmCTest.cxx 
   CTest/cmCTestGenericHandler.cxx
   CTest/cmCTestBuildHandler.cxx
@@ -151,18 +154,27 @@ SET(CMTEST_SRCS cmCTest.cxx
   CTest/cmCTestSubmit.cxx
   )
 
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/Source/CTest)
+# Build CTestLib
+ADD_LIBRARY(CTestLib ${CMTEST_SRCS})
+TARGET_LINK_LIBRARIES(CTestLib CMakeLib ${CMAKE_CURL_LIBRARIES})
 
-IF (UNIX)
-  TARGET_LINK_LIBRARIES(CMakeLib ${CMAKE_DL_LIBS})
-ENDIF (UNIX)
-
+# Build CMake executable
+ADD_EXECUTABLE(cmake cmakemain.cxx)
 TARGET_LINK_LIBRARIES(cmake CMakeLib)
+ADD_EXECUTABLE(DumpDocumentation cmDumpDocumentation)
 TARGET_LINK_LIBRARIES(DumpDocumentation CMakeLib)
 
-ADD_EXECUTABLE(ctest ctest.cxx ${CMTEST_SRCS})
-TARGET_LINK_LIBRARIES(ctest CMakeLib ${CMAKE_CURL_LIBRARIES})
+# Build special executable for running programs on Windows 98
+IF(WIN32)
+  ADD_EXECUTABLE(cmw9xcom cmw9xcom.cxx)
+  TARGET_LINK_LIBRARIES(cmw9xcom CMakeLib)
+ENDIF(WIN32)
 
+# Build CTest executable
+ADD_EXECUTABLE(ctest ctest.cxx)
+TARGET_LINK_LIBRARIES(ctest CTestLib)
+
+# Curses GUI
 IF (UNIX)
   INCLUDE (${CMake_SOURCE_DIR}/Modules/FindCurses.cmake OPTIONAL)
   IF (CURSES_LIBRARY)
@@ -170,12 +182,20 @@ IF (UNIX)
   ENDIF (CURSES_LIBRARY)
 ENDIF (UNIX)
 
-OPTION(CMAKE_BUILD_WX_DIALOG "Build wxWindows dialog for CMake" FALSE)
+# MFC GUI
+# MFC libraries are only available on Visual Studio
+IF(CMAKE_BUILD_ON_VISUAL_STUDIO)
+  SUBDIRS(MFCDialog)
+ENDIF(CMAKE_BUILD_ON_VISUAL_STUDIO)
+
+# WX Widgets GUI
+OPTION(CMAKE_BUILD_WX_DIALOG "Build wxWidgets dialog for CMake" FALSE)
 MARK_AS_ADVANCED(CMAKE_BUILD_WX_DIALOG)
 IF(CMAKE_BUILD_WX_DIALOG)
   SUBDIRS(WXDialog)
 ENDIF(CMAKE_BUILD_WX_DIALOG)
 
+# Testing
 IF (NOT DART_ROOT)
   SET(MAKEPROGRAM ${CMAKE_MAKE_PROGRAM})
 ENDIF (NOT DART_ROOT)
