@@ -53,10 +53,14 @@
 #define CTEST_TEST_ERRORS 0x08
 #define CTEST_MEMORY_ERRORS 0x10
 
-static struct tm* GetNightlyTime(std::string str, bool tomorrowtag)
+static struct tm* GetNightlyTime(std::string str, bool verbose, bool tomorrowtag)
 {
   struct tm* lctime;
   time_t tctime = time(0);
+  if ( verbose )
+    {
+    std::cout << "Determine Nightly Start Time" << std::endl;
+    }
   //Convert the nightly start time to seconds. Since we are
   //providing only a time and a timezone, the current date of
   //the local machine is assumed. Consequently, nightlySeconds
@@ -64,7 +68,17 @@ static struct tm* GetNightlyTime(std::string str, bool tomorrowtag)
   //will be opened on the date of the current client machine.
   //As such, this time may be in the past or in the future.
   time_t ntime = curl_getdate(str.c_str(), &tctime);
+  if ( verbose )
+    {
+    std::cout << "   Get curl time: " << ntime << std::endl;
+    }
   tctime = time(0);
+  if ( verbose )
+    {
+    std::cout << "   Get the current time: " << ntime << std::endl;
+    }
+
+  const int dayLength = 24 * 60 * 60;
   //std::cout << "Seconds: " << tctime << std::endl;
   if ( ntime > tctime )
     {
@@ -73,14 +87,31 @@ static struct tm* GetNightlyTime(std::string str, bool tomorrowtag)
     // nightlySeconds is in the future, this is the next
     // dashboard to be opened, so subtract 24 hours to get the
     // time of the current open dashboard
-    ntime -= ( 24 * 60 * 60 );
+    ntime -= dayLength;
     //std::cout << "Pick yesterday" << std::endl;
+    if ( verbose )
+      {
+      std::cout << "   Future time, subtract day: " << ntime << std::endl;
+      }
+    }
+  if ( (ntime - tctime) >  dayLength )
+    {
+    ntime += dayLength;
+    if ( verbose )
+      {
+      std::cout << "   Past time, subtract day: " << ntime << std::endl;
+      }
     }
   //std::cout << "nightlySeconds: " << ntime << std::endl;
+  if ( verbose )
+    {
+    std::cout << "   Current time: " << tctime
+              << " Nightly time: " << ntime << std::endl;
+    }
   if ( tomorrowtag )
     {
-    std::cout << "Add a day" << std::endl;
-    ntime += ( 24 * 60 * 60 );
+    std::cout << "Use future tag, Add a day" << std::endl;
+    ntime += dayLength;
     }
   lctime = gmtime(&ntime);
   return lctime;
@@ -456,6 +487,7 @@ int cmCTest::Initialize()
       if ( m_TestModel == cmCTest::NIGHTLY )
         {
         lctime = ::GetNightlyTime(m_DartConfiguration["NightlyStartTime"],
+          m_Verbose,
           m_TomorrowTag);
         }
       char datestring[100];
@@ -700,6 +732,7 @@ int cmCTest::UpdateDirectory()
   if ( m_TestModel == cmCTest::NIGHTLY )
     {
     struct tm* t = ::GetNightlyTime(m_DartConfiguration["NightlyStartTime"],
+      m_Verbose,
       m_TomorrowTag);
     char current_time[1024];
     sprintf(current_time, "%04d-%02d-%02d %02d:%02d:%02d UTC",
