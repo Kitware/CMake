@@ -1206,7 +1206,8 @@ cmLocalUnixMakefileGenerator2
                       ".SUFFIXES",
                       depends,
                       no_commands);
-  depends.push_back(".hpux_make_must_have_suffixes_list");
+  // Add a fake suffix to keep HP happy.  Must be max 32 chars for SGI make.
+  depends.push_back(".hpux_make_needs_suffix_list");
   this->WriteMakeRule(makefileStream, 0,
                       ".SUFFIXES", depends, no_commands);
 }
