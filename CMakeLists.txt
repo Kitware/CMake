@@ -82,7 +82,7 @@ SUBDIRS(Source Modules Templates Utilities)
 ENABLE_TESTING()
 
 # Include the standard Dart testing module
-SET(DART_ROOT "" CACHE INTERNAL "" FORCE)
+#SET(DART_ROOT "" CACHE INTERNAL "" FORCE)
 INCLUDE (${CMAKE_ROOT}/Modules/Dart.cmake)
 
 # use the ansi CXX compile flag for building cmake
