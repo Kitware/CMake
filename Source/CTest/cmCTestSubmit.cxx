@@ -23,6 +23,7 @@
 
 cmCTestSubmit::cmCTestSubmit() : m_HTTPProxy(), m_FTPProxy()
 {
+  m_Verbose = false;
   std::cout << "Setup proxy" << std::endl;
   m_HTTPProxy = "";
   m_HTTPProxyType = 0;
@@ -135,10 +136,15 @@ bool cmCTestSubmit::SubmitUsingFTP(const std::string& localprefix,
         }
 
       ftpfile = ::fopen(local_file.c_str(), "rb");
-      std::cout << "upload file: " << local_file.c_str() << " to " 
-                << upload_as.c_str() << std::endl;
+      //std::cout << "upload file: " << local_file.c_str() << " to " 
+      //          << upload_as.c_str() << std::endl;
 
-      ::curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
+      //std::cout << "File is opened: " << ftpfile << std::endl;
+
+      if ( m_Verbose )
+        {
+        ::curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
+        }
       // specify target
       ::curl_easy_setopt(curl,CURLOPT_URL, upload_as.c_str());
       
@@ -210,7 +216,10 @@ bool cmCTestSubmit::SubmitUsingHTTP(const std::string& localprefix,
 
       /* HTTP PUT please */
       curl_easy_setopt(curl, CURLOPT_PUT, TRUE);
-      ::curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
+      if ( m_Verbose )
+        {
+        ::curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
+        }
 
       std::string local_file = localprefix + "/" + files[cc];
       std::string remote_file = remoteprefix + files[cc];
@@ -247,9 +256,11 @@ bool cmCTestSubmit::SubmitUsingHTTP(const std::string& localprefix,
         }
 
       ftpfile = ::fopen(local_file.c_str(), "rb");
-      
-      std::cout << "upload file: " << local_file.c_str() << " to " 
-                << upload_as.c_str() << " Size: " << st.st_size << std::endl;
+      if ( m_Verbose )
+        {
+        std::cout << "upload file: " << local_file.c_str() << " to " 
+          << upload_as.c_str() << " Size: " << st.st_size << std::endl;
+        }
 
                 
       // specify target
@@ -315,7 +326,11 @@ bool cmCTestSubmit::TriggerUsingHTTP(const std::vector<std::string>& files,
           }
         }
 
-      curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
+      ::curl_easy_setopt(curl, CURLOPT_VERBOSE, 0);
+      if ( m_Verbose )
+        {
+        ::curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
+        }
       std::string file = remoteprefix + files[cc];
       std::string ofile = "";
       for ( kk = 0; kk < file.size(); kk ++ )
@@ -342,7 +357,10 @@ bool cmCTestSubmit::TriggerUsingHTTP(const std::vector<std::string>& files,
           }
         }
       std::string turl = url + "?xmlfile=" + ofile;
-      std::cout << "Trigger url: " << turl.c_str() << std::endl;
+      if ( m_Verbose )
+        {
+        std::cout << "Trigger url: " << turl.c_str() << std::endl;
+        }
       curl_easy_setopt(curl, CURLOPT_URL, turl.c_str());
       res = curl_easy_perform(curl);
       if ( res )

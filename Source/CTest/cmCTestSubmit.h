@@ -30,6 +30,13 @@ class cmCTestSubmit
 public:
   cmCTestSubmit();
   ~cmCTestSubmit() {}
+
+  /**
+   * Set verbosity of send
+   */
+  void SetVerbose(bool i) { m_Verbose = i; }
+  void VerboseOn() { this->SetVerbose(1); }
+  void VerboseOff() { this->SetVerbose(0); }
   
   /**
    * Submit file using various ways
@@ -56,6 +63,7 @@ private:
   int         m_HTTPProxyType;
   std::string m_FTPProxy;
   int         m_FTPProxyType;
+  bool        m_Verbose;
 };
 
 #endif
