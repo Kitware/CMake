@@ -121,20 +121,18 @@ void cmDSWMakefile::WriteProject(std::ostream& fout,
   fout << "Package=<5>\n{{{\n}}}\n\n";
   fout << "Package=<4>\n";
   fout << "{{{\n";
-  if(project->GetMakefile()->HasExecutables())
+
+  // insert Begin Project Dependency  Project_Dep_Name project stuff here 
+  std::vector<std::string>::iterator i, end;
+  i = project->GetMakefile()->GetLinkLibraries().begin();
+  end = project->GetMakefile()->GetLinkLibraries().end();
+  for(;i!= end; ++i)
     {
-    // insert Begin Project Dependency  Project_Dep_Name project stuff here 
-    std::vector<std::string>::iterator i, end;
-    i = project->GetMakefile()->GetLinkLibraries().begin();
-    end = project->GetMakefile()->GetLinkLibraries().end();
-    for(;i!= end; ++i)
+    if (strcmp(i->c_str(),dspname))
       {
-      if (strcmp(i->c_str(),dspname))
-        {
-        fout << "Begin Project Dependency\n";
-        fout << "Project_Dep_Name " << *i << "\n";
-        fout << "End Project Dependency\n";
-        }
+      fout << "Begin Project Dependency\n";
+      fout << "Project_Dep_Name " << *i << "\n";
+      fout << "End Project Dependency\n";
       }
     }
   fout << "}}}\n\n";

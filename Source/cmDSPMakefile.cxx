@@ -17,6 +17,7 @@
 #include "cmStandardIncludes.h"
 #include "cmSystemTools.h"
 #include "cmRegularExpression.h"
+#include "cmCacheManager.h"
 
 cmDSPMakefile::~cmDSPMakefile()
 {
@@ -81,13 +82,27 @@ void cmDSPMakefile::OutputDSPFile()
   // add any extra define flags 
   m_ReleaseLibraryOptions = m_DebugLibraryOptions;
   cmSystemTools::ReplaceString(m_ReleaseLibraryOptions, "Debug", "Release");
-  
-
+  m_DebugDLLLibraryOptions = m_DebugLibraryOptions;
+  cmSystemTools::ReplaceString(m_DebugDLLLibraryOptions, "Debug", "DebugDLL");
+  m_ReleaseDLLLibraryOptions = m_DebugDLLLibraryOptions;
+  cmSystemTools::ReplaceString(m_ReleaseDLLLibraryOptions, "Debug", "Release");
+  m_ReleaseMinSizeLibraryOptions = m_ReleaseLibraryOptions;
+  cmSystemTools::ReplaceString(m_ReleaseMinSizeLibraryOptions, 
+                               "Release", "ReleaseMinSize");
   
   // Create the DSP or set of DSP's for libraries and executables
   if(strlen(m_Makefile->GetLibraryName()) != 0)
     {
-    this->SetBuildType(STATIC_LIBRARY);
+    const char* cacheValue
+      = cmCacheManager::GetInstance()->GetCacheValue("BUILD_SHARED_LIBS");
+    if(cacheValue && strcmp(cacheValue,"0"))
+      {
+      this->SetBuildType(DLL);
+      }
+    else
+      {
+      this->SetBuildType(STATIC_LIBRARY);
+      }
     this->CreateSingleDSP();
     }
   // if there are executables build them
@@ -305,8 +320,14 @@ void cmDSPMakefile::WriteDSPHeader(std::ostream& fout)
       std::string line = buffer;
       cmSystemTools::ReplaceString(line, "CM_RELEASE_LIBRARIES",
                                     m_ReleaseLibraryOptions.c_str());
+      cmSystemTools::ReplaceString(line, "CM_RELEASEMINSIZE_LIBRARIES",
+                                   m_ReleaseMinSizeLibraryOptions.c_str());
       cmSystemTools::ReplaceString(line, "CM_DEBUG_LIBRARIES",
                                     m_DebugLibraryOptions.c_str());
+      cmSystemTools::ReplaceString(line, "CM_RELEASEDLL_LIBRARIES",
+                                    m_ReleaseDLLLibraryOptions.c_str());
+      cmSystemTools::ReplaceString(line, "CM_DEBUGDLL_LIBRARIES",
+                                    m_DebugDLLLibraryOptions.c_str());
       cmSystemTools::ReplaceString(line, "BUILD_INCLUDES",
                                     m_IncludeOptions.c_str());
       cmSystemTools::ReplaceString(line, "OUTPUT_LIBNAME", 
@@ -357,8 +378,7 @@ void cmDSPMakefile::WriteDSPBuildRules(std::ostream& fout, const char *ext)
   std::vector<cmClassFile>& Classes = m_Makefile->GetClasses();
   for(int i = 0; i < Classes.size(); ++i)
     {
-    if(!Classes[i].m_IsExecutable && !Classes[i].m_AbstractClass && 
-       !Classes[i].m_HeaderFileOnly)
+    if(!Classes[i].m_IsExecutable && !Classes[i].m_HeaderFileOnly)
       {
       // is this class of the appropriate type ?
       if (std::find(exts.begin(),exts.end(),Classes[i].m_ClassExtension)
