@@ -842,7 +842,7 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
                                  "EXTRA_DEFINES", 
                                  m_Makefile->GetDefineFlags());
     cmGlobalGenerator* gen = this->GetGlobalGenerator();
-    // stroe flags for each configuration
+    // store flags for each configuration
     std::string flags = " ";
     std::string flagsRelease = " ";
     std::string flagsMinSize = " ";
