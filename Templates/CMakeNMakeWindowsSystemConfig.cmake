@@ -62,16 +62,16 @@ SET (CMAKE_C_FLAGS "/W3 /Zm1000" CACHE STRING
      "Flags for C compiler.")
 
 SET (CMAKE_C_LIBPATH_FLAG "-LIBPATH:" CACHE STRING
-     "Flags used to specify a link path. No space will be appended.")
+     "Flags used to specify a link path. No space will be appended (use single quotes around value to insert trailing space).")
 
 SET (CMAKE_C_LINK_EXECUTABLE_FLAG "/link" CACHE STRING
      "Flags used to create an executable.")
 
 SET (CMAKE_C_OUTPUT_EXECUTABLE_FILE_FLAG "/Fe" CACHE STRING
-     "Flags used to specify executable filename. No space will be appended.")
+     "Flags used to specify executable filename. No space will be appended (use single quotes around value to insert trailing space).")
 
 SET (CMAKE_C_OUTPUT_OBJECT_FILE_FLAG "/Fo" CACHE STRING
-     "Flags used to specify output filename. No space will be appended.")
+     "Flags used to specify output filename. No space will be appended (use single quotes around value to insert trailing space).")
 
 # Library manager
 
@@ -82,7 +82,7 @@ SET (CMAKE_LIBRARY_MANAGER_FLAGS "/nologo" CACHE STRING
      "Flags used by the library manager.")
 
 SET (CMAKE_LIBRARY_MANAGER_OUTPUT_FILE_FLAG "/out:" CACHE STRING
-     "Flags used to specify output filename by the library manager. No space will be appended.")
+     "Flags used to specify output filename by the library manager. No space will be appended (use single quotes around value to insert trailing space).")
 
 # Linker (DLL/exe)
 
@@ -105,7 +105,7 @@ SET (CMAKE_LINKER_FLAGS_RELWITHDEBINFO "/debug /pdbtype:sept" CACHE STRING
      "Flags used by the linker during Release with Debug Info builds.")
 
 SET (CMAKE_LINKER_OUTPUT_FILE_FLAG "/out:" CACHE STRING
-     "Flags used to specify output filename by the linker. No space will be appended.")
+     "Flags used to specify output filename by the linker. No space will be appended (use single quotes around value to insert trailing space).")
 
 SET (CMAKE_LINKER_SHARED_LIBRARY_FLAG "/dll" CACHE STRING
      "Flags used to create a shared library.")
