@@ -150,6 +150,7 @@ static const char* cmCTestErrorMatches[] = {
   "^could not be found and will not be loaded.",
   "s:616 string too big",
   "make: Fatal error: ",
+  "ld: 0711-993 Error occurred while writing to the output file:",
   0
 };
 
