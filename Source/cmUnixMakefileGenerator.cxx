@@ -1423,7 +1423,8 @@ void cmUnixMakefileGenerator::OutputSourceObjectBuildRules(std::ostream& fout)
         // filename of the object file.  Otherwise, we will use just
         // the filename portion.
         if((cmSystemTools::GetFilenamePath(source->GetFullPath()).find(m_Makefile->GetCurrentDirectory()) == 0)
-           || (cmSystemTools::GetFilenamePath(source->GetFullPath()).find(m_Makefile->GetCurrentOutputDirectory()) == 0))
+           || (cmSystemTools::GetFilenamePath(source->GetFullPath()).find(m_Makefile->
+                                                                          GetCurrentOutputDirectory()) == 0))
           {
           sourceName = source->GetSourceName()+"."+source->GetSourceExtension();
           shortName = source->GetSourceName();
@@ -1448,21 +1449,41 @@ void cmUnixMakefileGenerator::OutputSourceObjectBuildRules(std::ostream& fout)
         // Only output a rule for each .o once.
         if(rules.find(shortName) == rules.end())
           {
-          rules.insert(shortName);
-          fout << shortName.c_str() << ".o : " << source->GetFullPath().c_str() << "\n";
+          std::string comment = "Build ";
+          std::string objectFile = shortName + ".o";
+          comment += objectFile + "  From ";
+          comment += source->GetFullPath();
+          std::string compileCommand;
           std::string ext = source->GetSourceExtension();
-          if ( ext == "cxx" || ext == "cc" || ext == "cpp" || ext == "C" || 
-	       ext =="m"    || ext == "M"  || ext == "mm")
+          if(ext == "c" )
             {
-            fout << "\t$(CMAKE_CXX_COMPILER) $(CMAKE_CXXFLAGS) " << exportsDef.c_str()
-                 << (shared? "$(CMAKE_SHLIB_CFLAGS) ":"") 
-                 << "$(INCLUDE_FLAGS) -c $< -o $@\n\n ";
+            compileCommand = "$(CMAKE_C_COMPILER) $(CMAKE_CFLAGS) ";
+            compileCommand += exportsDef;
+            if(shared)
+              {
+              compileCommand += "$(CMAKE_SHLIB_CFLAGS) ";
+              }
+            compileCommand += "$(INCLUDE_FLAGS) -c $< -o $@";
             }
-          else if ( ext == "c" )
+          else
             {
-            fout << "\t$(CMAKE_C_COMPILER) $(CMAKE_CFLAGS) " << exportsDef.c_str()
-                 << (shared? "$(CMAKE_SHLIB_CFLAGS) ":"") << "$(INCLUDE_FLAGS) -c $< -o $@\n\n";
+            compileCommand = "$(CMAKE_CXX_COMPILER) $(CMAKE_CXXFLAGS) ";
+            compileCommand += exportsDef;
+            if(shared)
+              {
+              compileCommand += "$(CMAKE_SHLIB_CFLAGS) ";
+              }
+            compileCommand += "$(INCLUDE_FLAGS) -c ";
+            compileCommand += source->GetFullPath();
+            compileCommand += " -o ";
+            compileCommand += objectFile;
             }
+          this->OutputMakeRule(fout,
+                               comment.c_str(),
+                               objectFile.c_str(),
+                               source->GetFullPath().c_str(),
+                               compileCommand.c_str());
+          rules.insert(shortName);
           }
         }
       }
