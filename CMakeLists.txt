@@ -117,6 +117,9 @@ CONFIGURE_FILE(${CMake_SOURCE_DIR}/Tests/.NoDartCoverage
 CONFIGURE_FILE(${CMake_SOURCE_DIR}/Tests/.NoDartCoverage
   ${CMake_BINARY_DIR}/Modules/.NoDartCoverage)
 
+CONFIGURE_FILE(${CMake_SOURCE_DIR}/CTestCustom.ctest.in
+  ${CMake_BINARY_DIR}/CTestCustom.ctest @ONLY)
+
 SET(CMAKE_BUILD_MFC_DIALOG 0)
 IF(WIN32)
   IF(NOT UNIX)
