@@ -2198,6 +2198,7 @@ std::string cmMakefile::GetModulesFile(const char* filename)
     {
     std::string itempl = *i;
     cmSystemTools::ConvertToUnixSlashes(itempl);
+    itempl += "/";
     itempl += filename;
     if(cmSystemTools::FileExists(itempl.c_str()))
       {
