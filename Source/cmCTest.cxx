@@ -3473,15 +3473,25 @@ int cmCTest::RunConfigurationScript()
   return res;
 }
 
-int cmCTest::RunConfigurationScript(const std::string& script)
+int cmCTest::RunConfigurationScript(const std::string& total_script_arg)
 {
+  // if the argument has a , in it then it needs to be broken into the fist
+  // argument (which is the script) and the second argument which will be passed 
+  // into the scripts as S_ARG
+  std::string script = total_script_arg;
+  std::string script_arg;
+  if (total_script_arg.find(",") != std::string::npos)
+    {
+    script = total_script_arg.substr(0,total_script_arg.find(","));
+    script_arg = total_script_arg.substr(total_script_arg.find(",")+1);
+    }
+  
   // make sure the file exists
   if (!cmSystemTools::FileExists(script.c_str()))
     {
     std::cerr << "Cannot find file: " << script.c_str() << std::endl;
     return 1;
     }
-
 
   // create a cmake instance to read the configuration script
   cmake cm;
@@ -3499,6 +3509,12 @@ int cmCTest::RunConfigurationScript(const std::string& script)
   lg->GetMakefile()->AddDefinition("CTEST_SCRIPT_NAME",
     cmSystemTools::GetFilenameName(
       script).c_str());
+  // add the script arg if defined
+  if (script_arg.size())
+    {
+    lg->GetMakefile()->AddDefinition("CTEST_SCRIPT_ARG",
+                                     script_arg.c_str());
+    }
   if (!lg->GetMakefile()->ReadListFile(0, script.c_str()))
     {
     return 2;
@@ -3617,7 +3633,38 @@ int cmCTest::RunConfigurationScript(const std::string& script)
       }
     }
 
-
+  // if the binary directory and the source directory are the same,
+  // and we are starting with an empty binary directory, then that means
+  // we must check out the source tree
+  if (mf->IsOn("CTEST_START_WITH_EMPTY_BINARY_DIRECTORY") &&
+      !strcmp(srcDir, binDir))
+    {
+    // make sure we have the required info
+    if (!cvsCheckOut)
+      {
+      cmSystemTools::Error("You have specified the source and binary directories to be the same (an in source build). You have also specified that the binary directory is to be erased. This means that the source will have to be checked out from CVS. But you have not specified CTEST_CVS_CHECKOUT");    
+      return 8;
+      }
+    
+    // we must now checkout the src dir
+    output = "";
+    if ( m_Verbose )
+      {
+      std::cerr << "Run cvs: " << cvsCheckOut << std::endl;
+      }
+    res = cmSystemTools::RunSingleCommand(cvsCheckOut, &output, 
+                                          &retVal, ctestRoot,
+                                          m_Verbose, 0 /*m_TimeOut*/);
+    if (!res || retVal != 0)
+      {
+      cmSystemTools::Error("Unable to perform cvs checkout ");    
+      this->RestoreBackupDirectories(backup, srcDir, binDir,
+                                     backupSrcDir.c_str(), 
+                                     backupBinDir.c_str());
+      return 6;
+      }
+    }
+  
   // do an initial cvs update as required
   if (cvsCmd)
     {
