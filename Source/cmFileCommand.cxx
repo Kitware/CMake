@@ -549,51 +549,54 @@ bool cmFileCommand::HandleInstallCommand(
       break;
       }
 
-    if ( cmSystemTools::FileExists(ctarget.c_str()) )
+    if ( !cmSystemTools::SameFile(ctarget.c_str(), destfile.c_str()) )
       {
-      cmSystemTools::RemoveFile(destfile.c_str());
-      if ( !cmSystemTools::CopyFileAlways(ctarget.c_str(), 
-          destination.c_str()) )
+      if ( cmSystemTools::FileExists(ctarget.c_str()) )
         {
-        std::string errstring = "cannot copy file: " + ctarget + 
-          " to directory : " + destination + ".";
-        this->SetError(errstring.c_str());
-        return false;
-        }
-      switch( itype )
-        {
-      case cmTarget::MODULE_LIBRARY:
-      case cmTarget::SHARED_LIBRARY:
-      case cmTarget::EXECUTABLE:
-      case cmTarget::INSTALL_PROGRAMS:
-
-        if ( !cmSystemTools::SetPermissions(destfile.c_str(), 
-#if defined( _MSC_VER ) || defined( __MINGW32__ )
-            S_IREAD | S_IWRITE | S_IEXEC
-#elif defined( __BORLANDC__ )
-            S_IRUSR | S_IWUSR | S_IXUSR
-#else
-            S_IRUSR | S_IWUSR | S_IXUSR | 
-            S_IRGRP | S_IXGRP | 
-            S_IROTH | S_IXOTH 
-#endif
-        ) )
+        cmSystemTools::RemoveFile(destfile.c_str());
+        if ( !cmSystemTools::CopyFileAlways(ctarget.c_str(), 
+            destination.c_str()) )
           {
-          cmOStringStream err;
-          err << "Problem setting permissions on file: " << destfile.c_str();
-          perror(err.str().c_str());
+          std::string errstring = "cannot copy file: " + ctarget + 
+            " to directory : " + destination + ".";
+          this->SetError(errstring.c_str());
+          return false;
           }
+        switch( itype )
+          {
+        case cmTarget::MODULE_LIBRARY:
+        case cmTarget::SHARED_LIBRARY:
+        case cmTarget::EXECUTABLE:
+        case cmTarget::INSTALL_PROGRAMS:
+
+          if ( !cmSystemTools::SetPermissions(destfile.c_str(), 
+#if defined( _MSC_VER ) || defined( __MINGW32__ )
+              S_IREAD | S_IWRITE | S_IEXEC
+#elif defined( __BORLANDC__ )
+              S_IRUSR | S_IWUSR | S_IXUSR
+#else
+              S_IRUSR | S_IWUSR | S_IXUSR | 
+              S_IRGRP | S_IXGRP | 
+              S_IROTH | S_IXOTH 
+#endif
+          ) )
+            {
+            cmOStringStream err;
+            err << "Problem setting permissions on file: " << destfile.c_str();
+            perror(err.str().c_str());
+            }
+          }
+        smanifest_files += ";" + destfile;
         }
-      smanifest_files += ";" + destfile;
-      }
-    else
-      {
-      if ( !optional )
+      else
         {
-        std::string errstring = "cannot find file: " + 
-          ctarget + " to install.";
-        this->SetError(errstring.c_str());
-        return false;
+        if ( !optional )
+          {
+          std::string errstring = "cannot find file: " + 
+            ctarget + " to install.";
+          this->SetError(errstring.c_str());
+          return false;
+          }
         }
       }
     }
