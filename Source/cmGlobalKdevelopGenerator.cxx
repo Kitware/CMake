@@ -94,14 +94,13 @@ void cmGlobalKdevelopGenerator::Generate()
 }
 
 bool cmGlobalKdevelopGenerator
-::CreateFilelistFile(cmLocalGenerator* lg,
+::CreateFilelistFile(cmLocalGenerator* ,
                      std::vector<cmLocalGenerator*>& lgs,
                      const std::string& outputDir, 
                      const std::string& projectDirIn,
                      const std::string& projectname,
                      std::string& cmakeFilePattern) 
 {
-  cmMakefile* mf =lg->GetMakefile();
   std::string projectDir = projectDirIn + "/";
   std::string filename = outputDir+ "/" + projectname +".kdevelop.filelist";
 
