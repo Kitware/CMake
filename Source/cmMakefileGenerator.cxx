@@ -52,7 +52,7 @@ void cmMakefileGenerator::SetMakefile(cmMakefile* mf)
 
 void cmMakefileGenerator::UnRegisterGenerators()
 {
-   for(std::map<cmStdString, cmMakefileGenerator*>::iterator i
+  for(std::map<cmStdString, cmMakefileGenerator*>::iterator i
         = s_RegisteredGenerators.begin(); 
       i != s_RegisteredGenerators.end(); ++i)
     {

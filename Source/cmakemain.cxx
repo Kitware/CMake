@@ -1,4 +1,5 @@
 #include "cmake.h"
+#include "cmMakefileGenerator.h"
 
 int main(int ac, char** av)
 {
@@ -8,5 +9,7 @@ int main(int ac, char** av)
     {
     args.push_back(av[i]);
     }
-  return cm.Generate(args);
+  int ret = cm.Generate(args);
+  cmMakefileGenerator::UnRegisterGenerators();
+  return ret;
 }

@@ -56,6 +56,8 @@ public:
   ///! Set cache only and recurse to false by default.
   cmUnixMakefileGenerator();
 
+  ~cmUnixMakefileGenerator();
+  
   ///! Get the name for the generator.
   virtual const char* GetName() {return "Unix Makefiles";}
 

@@ -53,6 +53,11 @@ cmUnixMakefileGenerator::cmUnixMakefileGenerator()
   m_Recurse = false;
 }
 
+cmUnixMakefileGenerator::~cmUnixMakefileGenerator()
+{
+}
+
+
 void cmUnixMakefileGenerator::GenerateMakefile()
 {
   // suppoirt override in output directories

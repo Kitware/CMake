@@ -773,6 +773,7 @@ void CMakeSetupDialog::OnOk()
 {
   m_CacheEntriesList.ClearDirty();
   this->RunCMake(true);
+  cmMakefileGenerator::UnRegisterGenerators();
   CDialog::OnOK();
 }
 
