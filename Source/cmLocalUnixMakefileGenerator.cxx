@@ -2209,6 +2209,7 @@ OutputBuildObjectFromSource(std::ostream& fout,
       if(shared)
         {
         flags += this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_C_FLAGS");
+        flags += " ";
         flags += this->GetSafeDefinition("CMAKE_C_FLAGS");
         flags += " ";
         if(buildType.size())
