@@ -1681,7 +1681,7 @@ void cmLocalUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
               {
               f = f.substr(binaryPath.length());
               }
-	    fout << "\t@ echo \"Installing " << f.c_str() << " \"\n"; 
+	    fout << "\t@echo \"Installing " << f.c_str() << " \"\n"; 
             // avoid using install-sh to install install-sh
             // does not work on windows.... 
            if(*i == "install-sh")
@@ -1716,7 +1716,7 @@ void cmLocalUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
               {
               f = f.substr(binaryPath.length());
               }
-	    fout << "\t@ echo \"Installing " << f.c_str() << " \"\n"; 
+	    fout << "\t@echo \"Installing " << f.c_str() << " \"\n"; 
             // avoid using install-sh to install install-sh
             // does not work on windows.... 
            if(*i == "install-sh")
@@ -1725,7 +1725,7 @@ void cmLocalUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
               }
             else
               {
-              fout << "\t   @$(INSTALL_PROGRAMS) ";
+              fout << "\t   @$(INSTALL_PROGRAM) ";
               }
 	    fout << *i
 		 << " $(DESTDIR)" << prefix << l->second.GetInstallPath() << "\n";
