@@ -2206,19 +2206,17 @@ OutputBuildObjectFromSource(std::ostream& fout,
       rules.push_back(m_Makefile->GetDefinition("CMAKE_C_COMPILE_OBJECT"));
       flags += this->GetSafeDefinition("CMAKE_C_FLAGS");
       flags += " ";
+      if(buildType.size())
+        {
+        std::string build = "CMAKE_C_FLAGS_";
+        build += buildType;
+        flags +=  this->GetSafeDefinition(build.c_str());
+        flags += " ";
+        }
       if(shared)
         {
         flags += this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_C_FLAGS");
         flags += " ";
-        flags += this->GetSafeDefinition("CMAKE_C_FLAGS");
-        flags += " ";
-        if(buildType.size())
-          {
-          std::string build = "CMAKE_C_FLAGS_";
-          build += buildType;
-          flags +=  this->GetSafeDefinition(build.c_str());
-          flags += " ";
-          }
         }
       break;
       }
