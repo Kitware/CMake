@@ -329,12 +329,14 @@ ENDFOREACH(h)
 
 #-----------------------------------------------------------------------------
 # Add the library with the configured name and list of sources.
-ADD_LIBRARY(${KWSYS_NAMESPACE} ${KWSYS_LIBRARY_TYPE} ${KWSYS_SRCS})
+IF(KWSYS_SRCS)
+  ADD_LIBRARY(${KWSYS_NAMESPACE} ${KWSYS_LIBRARY_TYPE} ${KWSYS_SRCS})
 
-# Create an install target for the library.
-IF(KWSYS_LIBRARY_INSTALL_DIR)
-  INSTALL_TARGETS(${KWSYS_LIBRARY_INSTALL_DIR} ${KWSYS_NAMESPACE})
-ENDIF(KWSYS_LIBRARY_INSTALL_DIR)
+  # Create an install target for the library.
+  IF(KWSYS_LIBRARY_INSTALL_DIR)
+    INSTALL_TARGETS(${KWSYS_LIBRARY_INSTALL_DIR} ${KWSYS_NAMESPACE})
+  ENDIF(KWSYS_LIBRARY_INSTALL_DIR)
+ENDIF(KWSYS_SRCS)
 
 # For building kwsys itself, we use a macro defined on the command
 # line to configure the namespace in the C and C++ source files.
