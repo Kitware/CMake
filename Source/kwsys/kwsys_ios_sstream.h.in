@@ -50,6 +50,7 @@
 // ostringstream and istringstream classes.
 
 # include <@KWSYS_NAMESPACE@/stl/string>
+# include <new> // Need placement operator new.
 
 namespace @KWSYS_NAMESPACE@_ios
 {
