@@ -58,10 +58,30 @@ protected:
   void GenerateObjectRuleFile(const cmTarget& target,
                               const cmSourceFile& source);
   void WriteDisclaimer(std::ostream& os);
+  void WriteExecutableRule(std::ostream& ruleFileStream,
+                           const char* ruleFileName,
+                           const cmTarget& target,
+                           std::vector<std::string>& objects);
+  void WriteStaticLibraryRule(std::ostream& ruleFileStream,
+                              const char* ruleFileName,
+                              const cmTarget& target,
+                              std::vector<std::string>& objects);
+  void WriteLibraryRule(std::ostream& ruleFileStream,
+                        const char* ruleFileName,
+                        const cmTarget& target,
+                        std::vector<std::string>& objects,
+                        const char* linkRuleVar,
+                        const char* flagsPropertyName);
 
   std::string GetTargetDirectory(const cmTarget& target);
-  std::string GetObjectFileName(const cmSourceFile& source);
+  std::string GetObjectFileName(const cmTarget& target,
+                                const cmSourceFile& source);
   const char* GetSourceFileLanguage(const cmSourceFile& source);
+
+  void AddLanguageFlags(std::string& flags, const char* lang);
+  void AddSharedFlags(std::string& flags, const char* lang, bool shared);
+  void AddConfigVariableFlags(std::string& flags, const char* var);
+  void AppendFlags(std::string& flags, const char* newFlags);
 
   static bool ScanDependenciesC(const char* objFile, const char* srcFile,
                                 std::vector<std::string> const& includes);
