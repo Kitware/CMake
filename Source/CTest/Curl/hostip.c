@@ -477,11 +477,11 @@ static struct hostent* pack_hostent(char** buf, struct hostent* orig)
   newbuf=(struct hostent *)realloc(*buf, (int)bufptr-(int)(*buf));
 
   /* if the alloc moved, we need to adjust things again */
-  if(newbuf != *buf)
+  if((char*)newbuf != *buf)
     hostcache_fixoffset((struct hostent*)newbuf, (int)newbuf-(int)*buf);
 
   /* setup the return */
-  *buf = newbuf;
+  *buf = (char*)newbuf;
   copy = (struct hostent*)newbuf;
 
   return copy;
