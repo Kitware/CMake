@@ -1245,8 +1245,9 @@ std::string cmSystemTools::RelativePath(const char* local, const char* remote)
     remoteSplit[sameCount] = "";
     sameCount++;
     }
-  // If there is nothing in common with the paths, then just return the remote
-  if(sameCount == 0)
+  // If there is nothing in common but the root directory, then just
+  // return the full path.
+  if(sameCount <= 1)
     {
     return remote;
     }
