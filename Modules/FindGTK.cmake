@@ -7,7 +7,7 @@
 # GTK_FOUND         - If false, don't try to use GTK
 
 # don't even bother under WIN32
-IF (UNIX)
+IF(UNIX)
 
   FIND_PATH( GTK_gtk_INCLUDE_PATH gtk/gtk.h
     /usr/include
@@ -141,8 +141,8 @@ IF (UNIX)
 
   ENDIF(GTK_glib_LIBRARY)
   ENDIF(GTK_gtk_LIBRARY)
+  ENDIF(GTK_glib_INCLUDE_PATH) 
   ENDIF(GTK_glibconfig_INCLUDE_PATH)
-  ENDIF(GTK_glib_INCLUDE_PATH)
   ENDIF(GTK_gtk_INCLUDE_PATH)
 
   MARK_AS_ADVANCED(
@@ -153,5 +153,5 @@ IF (UNIX)
     GTK_gtk_INCLUDE_PATH
   )
 
-ENDIF (UNIX)
+ENDIF(UNIX)
 
