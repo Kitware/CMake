@@ -467,6 +467,7 @@ void cmMakefile::AddLibrary(const char* lname, const std::vector<std::string> &s
 {
   cmTarget target;
   target.SetType(cmTarget::LIBRARY);
+  target.SetInAll(true);
   target.GetSourceLists() = srcs;
   m_Targets.insert(cmTargets::value_type(lname,target));
 }
@@ -476,6 +477,7 @@ void cmMakefile::AddExecutable(const char *exeName,
 {
   cmTarget target;
   target.SetType(cmTarget::EXECUTABLE);
+  target.SetInAll(true);
   target.GetSourceLists() = srcs;
   m_Targets.insert(cmTargets::value_type(exeName,target));
 }
