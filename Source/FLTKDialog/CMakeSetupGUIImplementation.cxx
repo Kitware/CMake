@@ -16,7 +16,7 @@ void FLTKMessageCallback(const char* message, const char* title, bool& nomore)
 {
   std::string msg = message;
   msg += "\nPress cancel to suppress any further messages.";
-  int choice = fl_choice( msg.c_str(), "Cancel","Ok","");
+  int choice = fl_choice( msg.c_str(), "Cancel","Ok",0);
   if(choice==0)
     {
     nomore = true;
