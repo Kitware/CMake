@@ -723,7 +723,15 @@ OutputSubDirectoryVars(std::ostream& fout,
   for(unsigned int i =0; i < SubDirectories.size(); i++)
     {
     std::string subdir = FixDirectoryName(SubDirectories[i].c_str());
-    fout << target << "_" << subdir.c_str() << ":\n";
+    fout << target << "_" << subdir.c_str() << ":";
+    const std::set<std::string>& subdirDepends = m_Makefile->GetSubdirDepends(SubDirectories[i].c_str());
+    for(std::set<std::string>::const_iterator d = subdirDepends.begin();
+        d != subdirDepends.end(); ++d)
+      {
+      std::string fixed_d = FixDirectoryName(d->c_str());
+      fout << " " << target << "_" << fixed_d.c_str();
+      }
+    fout << "\n";
     if(target1)
       {
 	fout << "\t@if test ! -d " << SubDirectories[i].c_str() << "; then ${MAKE} rebuild_cache; fi\n"

@@ -49,6 +49,7 @@
 #include "cmSourceFilesRemoveCommand.cxx"
 #include "cmSourceGroupCommand.cxx"
 #include "cmSubdirCommand.cxx"
+#include "cmSubdirDependsCommand.cxx"
 #include "cmTargetLinkLibrariesCommand.cxx"
 #include "cmUtilitySourceCommand.cxx"
 #include "cmVTKWrapJavaCommand.cxx"
@@ -104,6 +105,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmSourceFilesRemoveCommand);
   commands.push_back(new cmSourceGroupCommand);
   commands.push_back(new cmSubdirCommand);
+  commands.push_back(new cmSubdirDependsCommand);
   commands.push_back(new cmTargetLinkLibrariesCommand);
   commands.push_back(new cmUtilitySourceCommand);
   commands.push_back(new cmVTKWrapJavaCommand);

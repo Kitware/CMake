@@ -552,6 +552,12 @@ void cmMakefile::AddSubDirectory(const char* sub)
   m_SubDirectories.push_back(sub);
 }
 
+void cmMakefile::AddSubdirDependency(const char* subdir,
+                                     const char* dependency)
+{
+  m_SubdirDepends[subdir].insert(dependency);
+}
+
 void cmMakefile::AddIncludeDirectory(const char* inc)
 {
   // Don't add an include directory that is already present.  Yes,

@@ -199,6 +199,11 @@ public:
   void AddSubDirectory(const char*);
 
   /**
+   * Add a subdirectory dependency.
+   */
+  void AddSubdirDependency(const char* subdir, const char* dependency);
+
+  /**
    * Add an include directory to the build.
    */
   void AddIncludeDirectory(const char*);
@@ -381,6 +386,14 @@ public:
     }
 
   /**
+   * Get the subdirectory dependencies for the given subdirectory.
+   */
+  const std::set<std::string>& GetSubdirDepends(const char* subdir)
+    { 
+    return m_SubdirDepends[subdir];
+    }
+
+  /**
    * Get a list of include directories in the build.
    */
   std::vector<std::string>& GetIncludeDirectories()
@@ -523,6 +536,7 @@ protected:
   SourceMap m_Sources; 
 
   std::vector<std::string> m_SubDirectories; // list of sub directories
+  std::map<std::string, std::set<std::string> >  m_SubdirDepends;
   
   // The include and link-library paths.  These may have order
   // dependency, so they must be vectors (not set).
