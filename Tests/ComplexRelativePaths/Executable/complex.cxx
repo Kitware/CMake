@@ -485,12 +485,20 @@ int main()
   // ----------------------------------------------------------------------
   // A post-build custom-command has been attached to the lib (see Library/).
   // It runs ${CREATE_FILE_EXE} which will create a file.
+  //
+  // WARNING: if you run 'complex' manually, this *will* fail, because
+  // the file was removed the last time 'complex' was run, and it is
+  // only created during a build.
 
   TestAndRemoveFile(BINARY_DIR "/Library/postbuild.txt");
 
   // ----------------------------------------------------------------------
   // A custom target has been created (see Library/).
   // It runs ${CREATE_FILE_EXE} which will create a file.
+  //
+  // WARNING: if you run 'complex' manually, this *will* fail, because
+  // the file was removed the last time 'complex' was run, and it is
+  // only created during a build.
 
   TestAndRemoveFile(BINARY_DIR "/Library/custom_target1.txt");
 
@@ -503,6 +511,10 @@ int main()
   // Test OUTPUT_REQUIRED_FILES
   // The files required by 'complex' have been output to a file.
   // The contents of this file is not tested (absolute paths).
+  //
+  // WARNING: if you run 'complex' manually, this *will* fail, because
+  // the file was removed the last time 'complex' was run, and it is
+  // only created during a build.
 
   // TestAndRemoveFile(BINARY_DIR "/Executable/complex-required.txt");
 
