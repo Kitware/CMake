@@ -25,7 +25,7 @@ MACRO(CHECK_TYPE_SIZE TYPE VARIABLE)
             ${CMAKE_BINARY_DIR}
             ${CMAKE_ROOT}/Modules/CheckTypeSize.c
             CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_TYPE_SIZE_FLAGS}
-                        ${CHECK_TYPE_SIZE_ADD_LIBRARIES}
+                        "${CHECK_TYPE_SIZE_ADD_LIBRARIES}"
             OUTPUT_VARIABLE OUTPUT)
     IF(HAVE_${VARIABLE})
       MESSAGE(STATUS "Check size of ${TYPE} - done")
