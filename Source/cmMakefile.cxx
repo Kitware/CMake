@@ -494,6 +494,10 @@ void cmMakefile::AddLinkLibraryForTarget(const char *target,
       push_back(
         std::pair<std::string, cmTarget::LinkLibraryType>(lib,llt));
     }
+  else
+    {
+    cmSystemTools::Error("Attempt to add link libraries to non-existant target: ",  target, " for lib ", lib);
+    }
 }
 
 void cmMakefile::AddLinkLibrary(const char* lib)
