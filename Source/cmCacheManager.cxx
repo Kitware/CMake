@@ -133,6 +133,7 @@ bool cmCacheManager::LoadCache(const char* path,
     }
   const int bsize = 4096;
   char buffer[bsize];
+  char *realbuffer;
   // input line is:         key:type=value
   cmRegularExpression reg("^([^:]*):([^=]*)=(.*[^\t ]|[\t ]*)[\t ]*$");
   // input line is:         "key":type=value
@@ -145,21 +146,29 @@ bool cmCacheManager::LoadCache(const char* path,
     // Format is key:type=value
     CacheEntry e;
     fin.getline(buffer, bsize);
+    realbuffer = buffer;
+    while(*realbuffer != '0' &&
+          (*realbuffer == ' ' ||
+           *realbuffer == '\t' ||
+           *realbuffer == '\n'))
+    {
+      realbuffer++;
+    }
     // skip blank lines and comment lines
-    if(buffer[0] == '#' || buffer[0] == 0)
+    if(realbuffer[0] == '#' || realbuffer[0] == 0)
       {
       continue;
       }
-    while(buffer[0] == '/')
+    while(realbuffer[0] == '/')
       {
-      e.m_HelpString += &buffer[2];
-      fin.getline(buffer, bsize);
+      e.m_HelpString += &realbuffer[2];
+      fin.getline(realbuffer, bsize);
       if(!fin)
         {
         continue;
         }
       }
-    if(regQuoted.find(buffer))
+    if(regQuoted.find(realbuffer))
       {
       entryKey = regQuoted.match(1);
       if ( excludes.find(entryKey) == excludes.end() )
@@ -189,7 +198,7 @@ bool cmCacheManager::LoadCache(const char* path,
 	  }
 	}
       }
-    else if (reg.find(buffer))
+    else if (reg.find(realbuffer))
       {
       entryKey = reg.match(1);
       if ( excludes.find(entryKey) == excludes.end() )
@@ -224,7 +233,7 @@ bool cmCacheManager::LoadCache(const char* path,
     else
       {
 	cmSystemTools::Error("Parse error in cache file ", cacheFile.c_str(),
-			     ". Offending entry: ", buffer);
+			     ". Offending entry: ", realbuffer);
       }
     }
   // if CMAKE version not found in the list file
