@@ -15,14 +15,22 @@
 
 =========================================================================*/
 #include "cmMSDotNETGenerator.h"
-#include "cmSLNWriter.h"
-#include "cmVCProjWriter.h"
+#include "cmStandardIncludes.h"
+#include "cmMakefile.h"
 #include "cmCacheManager.h"
+#include "windows.h"
+#include "cmSystemTools.h"
+#include "cmRegularExpression.h"
+#include "cmSourceGroup.h"
+
 
 cmMSDotNETGenerator::cmMSDotNETGenerator()
 {
-  m_SLNWriter = 0;
-  m_VCProjWriter = 0;
+  m_Configurations.push_back("Debug");
+  m_Configurations.push_back("Release");
+  m_Configurations.push_back("MinSizeRel");
+  m_Configurations.push_back("RelWithDebInfo");
+  // default to building a sln project file
   BuildProjOn();
 }
 
@@ -30,24 +38,16 @@ void cmMSDotNETGenerator::GenerateMakefile()
 {
   if(m_BuildSLN)
     {
-    delete m_SLNWriter;
-    m_SLNWriter = 0;
-    m_SLNWriter = new cmSLNWriter(m_Makefile);
-    m_SLNWriter->OutputSLNFile();
+    this->OutputSLNFile();
     }
   else
     {
-    delete m_VCProjWriter;
-    m_VCProjWriter = 0;
-    m_VCProjWriter = new cmVCProjWriter(m_Makefile);
-    m_VCProjWriter->OutputVCProjFile();
+    this->OutputVCProjFile();
     }
 }
 
 cmMSDotNETGenerator::~cmMSDotNETGenerator()
 {
-  delete m_VCProjWriter;
-  delete m_SLNWriter;
 }
 
 void cmMSDotNETGenerator::SetLocal(bool local)
@@ -68,4 +68,997 @@ void cmMSDotNETGenerator::ComputeSystemInfo()
     m_Makefile->GetDefinition("CMAKE_ROOT");
   fpath += "/Templates/CMakeWindowsSystemConfig.cmake";
   m_Makefile->ReadListFile(NULL,fpath.c_str());
+}
+
+
+
+// output the SLN file
+void cmMSDotNETGenerator::OutputSLNFile()
+{ 
+  // if this is an out of source build, create the output directory
+  if(strcmp(m_Makefile->GetStartOutputDirectory(),
+            m_Makefile->GetHomeDirectory()) != 0)
+    {
+    if(!cmSystemTools::MakeDirectory(m_Makefile->GetStartOutputDirectory()))
+      {
+      cmSystemTools::Error("Error creating output directory for SLN file",
+                           m_Makefile->GetStartOutputDirectory());
+      }
+    }
+  // create the dsw file name
+  std::string fname;
+  fname = m_Makefile->GetStartOutputDirectory();
+  fname += "/";
+  if(strlen(m_Makefile->GetProjectName()) == 0)
+    {
+    m_Makefile->SetProjectName("Project");
+    }
+  fname += m_Makefile->GetProjectName();
+  fname += ".sln";
+  std::ofstream fout(fname.c_str());
+  if(!fout)
+    {
+    cmSystemTools::Error("Error can not open SLN file for write: "
+                         ,fname.c_str());
+    return;
+    }
+  this->WriteSLNFile(fout);
+}
+
+
+// Write a SLN file to the stream
+void cmMSDotNETGenerator::WriteSLNFile(std::ostream& fout)
+{
+  // Write out the header for a SLN file
+  this->WriteSLNHeader(fout);
+  
+  // Create a list of cmMakefile created from all the
+  // CMakeLists.txt files that are in sub directories of
+  // this one.
+  std::vector<cmMakefile*> allListFiles;
+  // add this makefile to the list
+  allListFiles.push_back(m_Makefile);
+  // add a special target that depends on ALL projects for easy build
+  // of Debug only
+  m_Makefile->AddUtilityCommand("ALL_BUILD", "echo", "\"Build all projects\"",
+                                false);
+  m_Makefile->FindSubDirectoryCMakeListsFiles(allListFiles);
+  // For each cmMakefile, create a VCProj for it, and
+  // add it to this SLN file
+  std::vector<cmMakefile*>::iterator k;
+  for(k = allListFiles.begin();
+      k != allListFiles.end(); ++k)
+    {
+    cmMakefile* mf = *k;
+    cmMSDotNETGenerator* pg = 0;
+    // if not this makefile, then create a new generator
+    if(m_Makefile != mf)
+      {
+      // Create an MS generator with SLN off, so it only creates dsp files
+      pg = new cmMSDotNETGenerator;
+      }
+    else
+      {
+      pg = static_cast<cmMSDotNETGenerator*>(m_Makefile->GetMakefileGenerator());
+      }
+    // make sure the generator is building dsp files
+    pg->BuildSLNOff();
+    mf->SetMakefileGenerator(pg);
+    mf->GenerateMakefile();
+    // Get the source directory from the makefile
+    std::string dir = mf->GetStartDirectory();
+    // Get the home directory with the trailing slash
+    std::string homedir = m_Makefile->GetHomeDirectory();
+    homedir += "/";
+    // remove the home directory and / from the source directory
+    // this gives a relative path 
+    cmSystemTools::ReplaceString(dir, homedir.c_str(), "");
+
+    // Get the list of create dsp files names from the cmVCProjWriter, more
+    // than one dsp could have been created per input CMakeLists.txt file
+    // for each target
+    std::vector<std::string> dspnames = 
+      pg->GetCreatedProjectNames();
+    cmTargets &tgts = pg->GetMakefile()->GetTargets();
+    cmTargets::iterator l = tgts.begin();
+    for(std::vector<std::string>::iterator si = dspnames.begin(); 
+        l != tgts.end(); ++l)
+      {
+      // special handling for the current makefile
+      if(mf == m_Makefile)
+        {
+        dir = "."; // no subdirectory for project generated
+        // if this is the special ALL_BUILD utility, then
+        // make it depend on every other non UTILITY project.
+        // This is done by adding the names to the GetUtilities
+        // vector on the makefile
+        if(l->first == "ALL_BUILD")
+          {
+          for(std::vector<cmMakefile*>::iterator a = allListFiles.begin();
+              a != allListFiles.end(); ++a)
+            {
+            const cmTargets &atgts = (*a)->GetTargets();
+            for(cmTargets::const_iterator al = atgts.begin();
+                al != atgts.end(); ++al)
+              {
+              if (al->second.IsInAll())
+                {
+                if (al->second.GetType() == cmTarget::UTILITY)
+                  {
+                  l->second.AddUtility(al->first.c_str());
+                  }
+                else
+                  {
+                  l->second.GetLinkLibraries().push_back(
+                    cmTarget::LinkLibraries::value_type(al->first,
+                                                        cmTarget::GENERAL));
+                  }
+                }
+              }
+            }
+          }
+        }
+      // Write the project into the SLN file
+      if (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
+      {
+        cmCustomCommand cc = l->second.GetCustomCommands()[0];
+        
+        // dodgy use of the cmCustomCommand's members to store the 
+        // arguments from the INCLUDE_EXTERNAL_MSPROJECT command
+        std::vector<std::string> stuff = cc.GetDepends();
+        std::vector<std::string> depends = cc.GetOutputs();
+        this->WriteExternalProject(fout, stuff[0].c_str(), stuff[1].c_str(), depends);
+        ++si;
+      }
+      else if ((l->second.GetType() != cmTarget::INSTALL_FILES)
+          && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))
+        {
+        this->WriteProject(fout, si->c_str(), dir.c_str(), 
+                           pg,l->second);
+        ++si;
+        }
+      }
+    }
+  fout << "Global\n"
+       << "\tGlobalSection(SolutionConfiguration) = preSolution\n"
+       << "\t\tConfigName.0 = Debug\n"
+       << "\t\tConfigName.1 = MinSizeRel\n"
+       << "\t\tConfigName.2 = Release\n"
+       << "\t\tConfigName.3 = RelWithDebInfo\n"
+       << "\tEndGlobalSection\n"
+       << "\tGlobalSection(ProjectDependencies) = postSolution\n";
+  // loop over again and compute the depends
+  for(k = allListFiles.begin(); k != allListFiles.end(); ++k)
+    {
+    cmMakefile* mf = *k;
+    cmMSDotNETGenerator* pg =  
+      static_cast<cmMSDotNETGenerator*>(mf->GetMakefileGenerator());
+        // Get the list of create dsp files names from the cmVCProjWriter, more
+    // than one dsp could have been created per input CMakeLists.txt file
+    // for each target
+    std::vector<std::string> dspnames = 
+      pg->GetCreatedProjectNames();
+    cmTargets &tgts = pg->GetMakefile()->GetTargets();
+    cmTargets::iterator l = tgts.begin();
+    std::string dir = mf->GetStartDirectory();
+    for(std::vector<std::string>::iterator si = dspnames.begin(); 
+        l != tgts.end(); ++l)
+      {
+      if ((l->second.GetType() != cmTarget::INSTALL_FILES)
+          && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))
+        {
+        this->WriteProjectDepends(fout, si->c_str(), dir.c_str(), 
+                                  pg,l->second);
+        ++si;
+        }
+      }
+    }
+  fout << "\tEndGlobalSection\n";
+  fout << "\tGlobalSection(ProjectConfiguration) = postSolution\n";
+    // loop over again and compute the depends
+  for(k = allListFiles.begin(); k != allListFiles.end(); ++k)
+    {
+    cmMakefile* mf = *k;
+    cmMSDotNETGenerator* pg =  
+      static_cast<cmMSDotNETGenerator*>(mf->GetMakefileGenerator());
+        // Get the list of create dsp files names from the cmVCProjWriter, more
+    // than one dsp could have been created per input CMakeLists.txt file
+    // for each target
+    std::vector<std::string> dspnames = 
+      pg->GetCreatedProjectNames();
+    cmTargets &tgts = pg->GetMakefile()->GetTargets();
+    cmTargets::iterator l = tgts.begin();
+    std::string dir = mf->GetStartDirectory();
+    for(std::vector<std::string>::iterator si = dspnames.begin(); 
+        l != tgts.end(); ++l)
+      {
+      if ((l->second.GetType() != cmTarget::INSTALL_FILES)
+          && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))
+        {
+        this->WriteProjectConfigurations(fout, si->c_str());
+        ++si;
+        }
+      }
+    // delete the cmMakefile which also deletes the cmMSProjectGenerator
+    if(mf != m_Makefile)
+      {
+      delete mf;
+      }
+    }
+  fout << "\tEndGlobalSection\n";
+
+  // Write the footer for the SLN file
+  this->WriteSLNFooter(fout);
+}
+
+
+// Write a dsp file into the SLN file,
+// Note, that dependencies from executables to 
+// the libraries it uses are also done here
+void cmMSDotNETGenerator::WriteProject(std::ostream& fout, 
+                               const char* dspname,
+                               const char* dir,
+                               cmMSDotNETGenerator*,
+                               const cmTarget& target
+  )
+{
+  std::string d = dir;
+  cmSystemTools::ConvertToWindowsSlashes(d);
+  fout << "Project(\"{" << this->CreateGUID(m_Makefile->GetProjectName()) 
+       << "}\") = \"" << dspname << "\", \""
+       << d << "\\" << dspname << ".vcproj\", \"{"
+       << this->CreateGUID(dspname) << "}\"\nEndProject\n";
+}
+
+
+
+// Write a dsp file into the SLN file,
+// Note, that dependencies from executables to 
+// the libraries it uses are also done here
+void cmMSDotNETGenerator::WriteProjectDepends(std::ostream& fout, 
+                                      const char* dspname,
+                                      const char* dir,
+                                      cmMSDotNETGenerator*,
+                                      const cmTarget& target
+  )
+{
+  int depcount = 0;
+  // insert Begin Project Dependency  Project_Dep_Name project stuff here 
+  if (target.GetType() != cmTarget::STATIC_LIBRARY)
+    {
+    cmTarget::LinkLibraries::const_iterator j, jend;
+    j = target.GetLinkLibraries().begin();
+    jend = target.GetLinkLibraries().end();
+    for(;j!= jend; ++j)
+      {
+      if(j->first != dspname)
+	{
+        // is the library part of this SLN ? If so add dependency
+        const char* cacheValue
+          = m_Makefile->GetDefinition(j->first.c_str());
+        if(cacheValue)
+          {
+          fout << "\t\t{" << this->CreateGUID(dspname) << "}." << depcount << " = {"
+               << this->CreateGUID(j->first.c_str()) << "}\n";
+          depcount++;
+          }
+        }
+      }
+    }
+
+  std::set<std::string>::const_iterator i, end;
+  // write utility dependencies.
+  i = target.GetUtilities().begin();
+  end = target.GetUtilities().end();
+  for(;i!= end; ++i)
+    {
+    if(*i != dspname)
+      {
+      fout << "\t\t{" << this->CreateGUID(dspname) << "}." << depcount << " = {"
+           << this->CreateGUID(i->c_str()) << "}\n";
+      depcount++;
+      }
+    }
+}
+
+
+// Write a dsp file into the SLN file,
+// Note, that dependencies from executables to 
+// the libraries it uses are also done here
+void cmMSDotNETGenerator::WriteProjectConfigurations(std::ostream& fout, const char* name)
+{
+  std::string guid = this->CreateGUID(name);
+  fout << "\t\t{" << guid << "}.Debug.ActiveCfg = Debug|Win32\n"
+       << "\t\t{" << guid << "}.Debug.Build.0 = Debug|Win32\n"
+       << "\t\t{" << guid << "}.MinSizeRel.ActiveCfg = Debug|Win32\n"
+       << "\t\t{" << guid << "}.MinSizeRel.Build.0 = Debug|Win32\n"
+       << "\t\t{" << guid << "}.Release.ActiveCfg = Debug|Win32\n"
+       << "\t\t{" << guid << "}.Release.Build.0 = Debug|Win32\n"
+       << "\t\t{" << guid << "}.RelWithDebInfo.ActiveCfg = Debug|Win32\n"
+       << "\t\t{" << guid << "}.RelWithDebInfo.Build.0 = Debug|Win32\n";
+}
+
+
+// Write a dsp file into the SLN file,
+// Note, that dependencies from executables to 
+// the libraries it uses are also done here
+void cmMSDotNETGenerator::WriteExternalProject(std::ostream& fout, 
+			       const char* name,
+			       const char* location,
+                               const std::vector<std::string>& dependencies)
+{
+  cmSystemTools::Error("WriteExternalProject not implemented");
+//  fout << "#########################################################"
+//     "######################\n\n";
+//   fout << "Project: \"" << name << "\"=" 
+//        << location << " - Package Owner=<4>\n\n";
+//   fout << "Package=<5>\n{{{\n}}}\n\n";
+//   fout << "Package=<4>\n";
+//   fout << "{{{\n";
+
+  
+//   std::vector<std::string>::const_iterator i, end;
+//   // write dependencies.
+//   i = dependencies.begin();
+//   end = dependencies.end();
+//   for(;i!= end; ++i)
+//   {
+//     fout << "Begin Project Dependency\n";
+//     fout << "Project_Dep_Name " << *i << "\n";
+//     fout << "End Project Dependency\n";
+//   }
+//   fout << "}}}\n\n";
+}
+
+
+
+// Standard end of dsw file
+void cmMSDotNETGenerator::WriteSLNFooter(std::ostream& fout)
+{
+  fout << "\tGlobalSection(ExtensibilityGlobals) = postSolution\n"
+       << "\tEndGlobalSection\n"
+       << "\tGlobalSection(ExtensibilityAddIns) = postSolution\n"
+       << "\tEndGlobalSection\n"
+       << "EndGlobal\n";
+}
+
+  
+// ouput standard header for dsw file
+void cmMSDotNETGenerator::WriteSLNHeader(std::ostream& fout)
+{
+  fout << "Microsoft Visual Studio Solution File, Format Version 7.00\n";
+}
+
+
+std::string cmMSDotNETGenerator::CreateGUID(const char* name)
+{
+  std::map<cmStdString, cmStdString>::iterator i = m_GUIDMap.find(name);
+  if(i != m_GUIDMap.end())
+    {
+    return i->second;
+    }
+  std::string ret;
+  UUID uid;
+  unsigned char *uidstr;
+  UuidCreate(&uid);
+  UuidToString(&uid,&uidstr);
+  ret = reinterpret_cast<char*>(uidstr);
+  RpcStringFree(&uidstr);
+  m_GUIDMap[name] = ret;
+  return ret;
+}
+
+
+
+
+// TODO
+// for CommandLine= need to repleace quotes with &quot
+// write out configurations
+
+
+void cmMSDotNETGenerator::OutputVCProjFile()
+{ 
+  // If not an in source build, then create the output directory
+  if(strcmp(m_Makefile->GetStartOutputDirectory(),
+            m_Makefile->GetHomeDirectory()) != 0)
+    {
+    if(!cmSystemTools::MakeDirectory(m_Makefile->GetStartOutputDirectory()))
+      {
+      cmSystemTools::Error("Error creating directory ",
+                           m_Makefile->GetStartOutputDirectory());
+      }
+    }
+
+  // Setup /I and /LIBPATH options for the resulting VCProj file
+  std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();
+  std::vector<std::string>::iterator i;
+  for(i = includes.begin(); i != includes.end(); ++i)
+    {
+    std::string tmp = cmSystemTools::EscapeSpaces(i->c_str());
+    cmSystemTools::ConvertToWindowsSlashesAndCleanUp(tmp);
+    m_IncludeOptions += ",";
+    // quote if not already quoted
+    if (tmp[0] != '"')
+      {
+      m_IncludeOptions += tmp;
+      }
+    else
+      {
+      m_IncludeOptions += tmp;
+      }
+    }
+  
+  // Create the VCProj or set of VCProj's for libraries and executables
+
+  // clear project names
+  m_CreatedProjectNames.clear();
+
+  // build any targets
+  cmTargets &tgts = m_Makefile->GetTargets();
+  for(cmTargets::iterator l = tgts.begin(); 
+      l != tgts.end(); l++)
+    {
+    switch(l->second.GetType())
+      {
+      case cmTarget::STATIC_LIBRARY:
+        this->SetBuildType(STATIC_LIBRARY, l->first.c_str());
+        break;
+      case cmTarget::SHARED_LIBRARY:
+        this->SetBuildType(DLL, l->first.c_str());
+        break;
+      case cmTarget::EXECUTABLE:
+        this->SetBuildType(EXECUTABLE,l->first.c_str());
+        break;
+      case cmTarget::WIN32_EXECUTABLE:
+        this->SetBuildType(WIN32_EXECUTABLE,l->first.c_str());
+        break;
+      case cmTarget::UTILITY:
+        this->SetBuildType(UTILITY, l->first.c_str());
+        break;
+      case cmTarget::INSTALL_FILES:
+	break;
+      case cmTarget::INSTALL_PROGRAMS:
+	break;
+      default:
+	cmSystemTools::Error("Bad target type", l->first.c_str());
+	break;
+      }
+    // INCLUDE_EXTERNAL_MSPROJECT command only affects the workspace
+    // so don't build a projectfile for it
+    if ((l->second.GetType() != cmTarget::INSTALL_FILES)
+        && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS)
+        && (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) != 0))
+      {
+      this->CreateSingleVCProj(l->first.c_str(),l->second);
+      }
+    }
+}
+
+void cmMSDotNETGenerator::CreateSingleVCProj(const char *lname, cmTarget &target)
+{
+  // add to the list of projects
+  std::string pname = lname;
+  m_CreatedProjectNames.push_back(pname);
+  // create the dsp.cmake file
+  std::string fname;
+  fname = m_Makefile->GetStartOutputDirectory();
+  fname += "/";
+  fname += lname;
+  fname += ".vcproj";
+  // save the name of the real dsp file
+  std::string realVCProj = fname;
+  fname += ".cmake";
+  std::ofstream fout(fname.c_str());
+  if(!fout)
+    {
+    cmSystemTools::Error("Error Writing ", fname.c_str());
+    }
+  this->WriteVCProjFile(fout,lname,target);
+  fout.close();
+  // if the dsp file has changed, then write it.
+  cmSystemTools::CopyFileIfDifferent(fname.c_str(), realVCProj.c_str());
+}
+
+
+void cmMSDotNETGenerator::AddVCProjBuildRule(cmSourceGroup& sourceGroup)
+{
+  std::string dspname = *(m_CreatedProjectNames.end()-1);
+  if(dspname == "ALL_BUILD")
+  {
+    return;
+  }
+  dspname += ".vcproj.cmake";
+  std::string makefileIn = m_Makefile->GetStartDirectory();
+  makefileIn += "/";
+  makefileIn += "CMakeLists.txt";
+  makefileIn = cmSystemTools::HandleNetworkPaths(makefileIn.c_str());
+  makefileIn = cmSystemTools::EscapeSpaces(makefileIn.c_str());
+  std::string dsprule = "${CMAKE_COMMAND}";
+  m_Makefile->ExpandVariablesInString(dsprule);
+  dsprule = cmSystemTools::HandleNetworkPaths(dsprule.c_str());
+  std::string args = makefileIn;
+  args += " -H\"";
+  args += cmSystemTools::HandleNetworkPaths(m_Makefile->GetHomeDirectory());
+  args += "\" -S\"";
+  args += cmSystemTools::HandleNetworkPaths(m_Makefile->GetStartDirectory());
+  args += "\" -O\"";
+  args += cmSystemTools::HandleNetworkPaths(m_Makefile->GetStartOutputDirectory());
+  args += "\" -B\"";
+  args += cmSystemTools::HandleNetworkPaths(m_Makefile->GetHomeOutputDirectory());
+  args += "\"";
+  m_Makefile->ExpandVariablesInString(args);
+
+  std::string configFile = 
+    m_Makefile->GetDefinition("CMAKE_ROOT");
+  configFile += "/Templates/CMakeWindowsSystemConfig.cmake";
+  std::vector<std::string> listFiles = m_Makefile->GetListFiles();
+  bool found = false;
+  for(std::vector<std::string>::iterator i = listFiles.begin();
+      i != listFiles.end(); ++i)
+    {
+    if(*i == configFile)
+      {
+      found  = true;
+      }
+    }
+  if(!found)
+    {
+    listFiles.push_back(configFile);
+    }
+  
+  std::vector<std::string> outputs;
+  outputs.push_back(dspname);
+  cmCustomCommand cc(makefileIn.c_str(), dsprule.c_str(),
+                     args.c_str(),
+		     listFiles, 
+		     outputs);
+  sourceGroup.AddCustomCommand(cc);
+}
+
+
+void cmMSDotNETGenerator::WriteConfigurations(std::ostream& fout, 
+                                         const char *libName,
+                                         const cmTarget &target)
+{
+  fout << "\t<Configurations>\n";
+  for( std::vector<std::string>::iterator i = m_Configurations.begin();
+       i != m_Configurations.end(); ++i)
+    {
+    this->WriteConfiguration(fout, i->c_str(), libName, target);
+    }
+  fout << "\t</Configurations>\n";
+}
+
+void cmMSDotNETGenerator::WriteConfiguration(std::ostream& fout, 
+                                             const char* configName,
+                                             const char *libName,
+                                             const cmTarget &target)
+{
+  fout << "\t\t<Configuration>\n"
+       << "\t\t\tName=\"" << configName << "|Win32\"\n"
+       << "\t\t\tOutputDirectory=\"" << configName << "\"\n"
+       << "\t\t\tIntermediateDirectory=\"" << configName << "\"\n"
+       << "\t\t\tConfigurationType=\"2\"\n"
+       << "\t\t\tCharacterSet=\"2\">\n";
+  fout << "\t\t\t<Tool\n"
+       << "\t\t\t\tName=\"VCCLCompilerTool\"\n"
+       << "\t\t\t\tAdditionalOptions=\"" << 
+    m_Makefile->GetDefinition("CMAKE_CXX_FLAGS") << "\"\n";
+  
+  
+  if(strcmp(configName, "Debug") == 0)
+    {
+    fout << "\t\t\t\tOptimization=\"0\"\n"
+         << "\t\t\t\tPreprocessorDefinitions=\"WIN32;_DEBUG;_WINDOWS";
+    }
+  else if(strcmp(configName, "Release") == 0)
+    {
+    fout << "\t\t\t\tOptimization=\"2\"\n"
+         << "\t\t\t\tInlineFunctionExpansion=\"1\"\n"
+         << "\t\t\t\tPreprocessorDefinitions=\"WIN32;NDEBUG;_WINDOWS";
+    }
+  else if(strcmp(configName, "MinSizeRel") == 0)
+    {
+    fout << "\t\t\t\tOptimization=\"1\"\n"
+         << "\t\t\t\tInlineFunctionExpansion=\"1\"\n"
+         << "\t\t\t\tPreprocessorDefinitions=\"WIN32;NDEBUG;_WINDOWS";
+    }
+  else if(strcmp(configName, "RelWithDebInfo") == 0)
+    {
+    fout << "\t\t\t\tOptimization=\"2\"\n"
+         << "\t\t\t\tInlineFunctionExpansion=\"1\"\n"
+         << "\t\t\t\tPreprocessorDefinitions=\"WIN32;NDEBUG;_WINDOWS";
+    }
+  this->OutputDefineFlags(fout);
+  fout << "\"\n";
+  fout << "\t\t\t\tAdditionalIncludeDirectories=\"";
+  std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();
+  std::vector<std::string>::iterator i = includes.begin();
+  if(i != includes.end())
+    {
+    fout << "&quot;" <<  *i << "&quot;";
+    }
+  for(;i != includes.end(); ++i)
+    {
+    fout << ";&quot;" << *i << "&quot;";
+    }
+  fout << "\"\n";
+  fout << "\t\t\t\tWarningLevel=\"3\"\n";
+  fout << "\t\t\t\tDetect64BitPortabilityProblems=\"TRUE\"\n"
+       << "\t\t\t\tDebugInformationFormat=\"3\"";
+  fout << "/>\n";  // end of <Tool Name=VCCLCompilerTool
+
+  fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCCustomBuildTool\"/>\n";
+  this->OutputBuildTool(fout, libName, target);
+  fout << "\t\t</Configuration>\n";
+}
+
+void cmMSDotNETGenerator::OutputBuildTool(std::ostream& fout,
+                                          const char *libName,
+                                          const cmTarget &target)
+{ 
+  std::string libPath = "";
+  if (m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH"))
+    {
+    libPath = m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH");
+    }
+  if(libPath.size())
+    {
+    // make sure there is a trailing slash
+    if(libPath[libPath.size()-1] != '/')
+      {
+      libPath += "/";
+      }
+    libPath = cmSystemTools::HandleNetworkPaths(libPath.c_str());
+    }
+  std::string exePath = "";
+  if (m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH"))
+    {
+    exePath = m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
+    }
+  if(exePath.size())
+    {
+    // make sure there is a trailing slash
+    if(exePath[exePath.size()-1] != '/')
+      {
+      exePath += "/";
+      }
+    }
+  exePath = cmSystemTools::HandleNetworkPaths(exePath.c_str());
+  
+  switch(m_BuildType)
+    {
+    case STATIC_LIBRARY:
+      fout << "\t\t\t<Tool\n"
+           << "\t\t\t\tName=\"VCLibrarianTool\"\n"
+           << "\t\t\t\t\tOutputFile=\"" << exePath << libName << ".lib\"/>\n";
+      break;
+    case DLL:
+      break;
+    case EXECUTABLE:
+      fout << "\t\t\t<Tool\n"
+           << "\t\t\t\tName=\"VCLinkerTool\"\n"
+           << "AdditionalOptions=\"/MACHINE:I386\"\n"
+           << "AdditionalDependencies=\" odbc32.lib odbccp32.lib ";
+      fout << "**** FINISH cmMSDotNETGenerator **** \n";
+      break;
+    case WIN32_EXECUTABLE:
+      break;
+    case UTILITY:
+      break;
+    }
+}
+
+
+void cmMSDotNETGenerator::OutputDefineFlags(std::ostream& fout)
+{
+  std::string defs = m_Makefile->GetDefineFlags();
+  std::string::size_type pos = defs.find("-D");
+  bool done = pos == std::string::npos;
+  while(!done)
+    {
+    std::string::size_type nextpos = defs.find("-D", pos+2);
+    std::string define;
+    if(nextpos != std::string::npos)
+      {
+      define = defs.substr(pos+2, nextpos - pos -2);
+      }
+    else
+      {
+      define = defs.substr(pos+2);
+      done = true;
+      }
+    fout << define << ";";
+    if(!done)
+      {
+      pos = defs.find("-D", nextpos);
+      }
+    } 
+}
+
+void cmMSDotNETGenerator::WriteVCProjFile(std::ostream& fout, 
+                                 const char *libName,
+                                 cmTarget &target)
+{
+  // We may be modifying the source groups temporarily, so make a copy.
+  std::vector<cmSourceGroup> sourceGroups = m_Makefile->GetSourceGroups();
+  
+  // get the classes from the source lists then add them to the groups
+  std::vector<cmSourceFile> classes = target.GetSourceFiles();
+  for(std::vector<cmSourceFile>::iterator i = classes.begin(); 
+      i != classes.end(); i++)
+    {
+    // Add the file to the list of sources.
+    std::string source = i->GetFullPath();
+    cmSourceGroup& sourceGroup = m_Makefile->FindSourceGroup(source.c_str(),
+                                                             sourceGroups);
+    sourceGroup.AddSource(source.c_str());
+    }
+  
+  // add any custom rules to the source groups
+  for (std::vector<cmCustomCommand>::const_iterator cr = 
+         target.GetCustomCommands().begin(); 
+       cr != target.GetCustomCommands().end(); ++cr)
+    {
+    cmSourceGroup& sourceGroup = 
+      m_Makefile->FindSourceGroup(cr->GetSourceName().c_str(),
+                                  sourceGroups);
+    cmCustomCommand cc(*cr);
+    cc.ExpandVariables(*m_Makefile);
+    sourceGroup.AddCustomCommand(cc);
+    }
+  
+  // open the project
+  this->WriteProjectStart(fout, libName, target, sourceGroups);
+  // write the configuration information
+  this->WriteConfigurations(fout, libName, target);
+
+  fout << "\t<Files>\n";
+  // Find the group in which the CMakeLists.txt source belongs, and add
+  // the rule to generate this VCProj file.
+  for(std::vector<cmSourceGroup>::reverse_iterator sg = sourceGroups.rbegin();
+      sg != sourceGroups.rend(); ++sg)
+    {
+    if(sg->Matches("CMakeLists.txt"))
+      {
+      this->AddVCProjBuildRule(*sg);
+      break;
+      }    
+    }
+  
+
+  // Loop through every source group.
+  for(std::vector<cmSourceGroup>::const_iterator sg = sourceGroups.begin();
+      sg != sourceGroups.end(); ++sg)
+    {
+    const cmSourceGroup::BuildRules& buildRules = sg->GetBuildRules();
+    // If the group is empty, don't write it at all.
+    if(buildRules.empty())
+      { continue; }
+    
+    // If the group has a name, write the header.
+    std::string name = sg->GetName();
+    if(name != "")
+      {
+      this->WriteVCProjBeginGroup(fout, name.c_str(), "");
+      }
+    
+    // Loop through each build rule in the source group.
+    for(cmSourceGroup::BuildRules::const_iterator cc =
+          buildRules.begin(); cc != buildRules.end(); ++ cc)
+      {
+      std::string source = cc->first;
+      const cmSourceGroup::Commands& commands = cc->second;
+
+      if (source != libName || target.GetType() == cmTarget::UTILITY)
+        {
+        fout << "\t\t\t<File\n";
+        
+        // Tell MS-Dev what the source is.  If the compiler knows how to
+        // build it, then it will.
+        fout << "\t\t\t\tRelativePath=\"" << cmSystemTools::EscapeSpaces(source.c_str()) << "\">\n";
+        if (!commands.empty())
+          {
+          cmSourceGroup::CommandFiles totalCommand;
+          std::string totalCommandStr;
+          totalCommandStr = this->CombineCommands(commands, totalCommand,
+                                                  source.c_str());
+          this->WriteCustomRule(fout, source.c_str(), totalCommandStr.c_str(), 
+                                totalCommand.m_Depends, 
+                                totalCommand.m_Outputs);
+          }
+        fout << "\t\t\t</File>\n";
+        }
+      }
+    
+    // If the group has a name, write the footer.
+    if(name != "")
+      {
+      this->WriteVCProjEndGroup(fout);
+      }
+    }  
+  fout << "\t</Files>\n";
+
+  // Write the VCProj file's footer.
+  this->WriteVCProjFooter(fout);
+}
+
+
+void cmMSDotNETGenerator::WriteCustomRule(std::ostream& fout,
+                                    const char* source,
+                                    const char* command,
+                                    const std::set<std::string>& depends,
+                                    const std::set<std::string>& outputs)
+{
+  std::string cmd = command;
+  cmSystemTools::ReplaceString(cmd, "\"", "&quot;");
+  std::vector<std::string>::iterator i;
+  for(i = m_Configurations.begin(); i != m_Configurations.end(); ++i)
+    {
+    fout << "\t\t\t\t<FileConfiguration\n";
+    fout << "\t\t\t\t\tName=\"" << *i << "|Win32\">\n";
+    fout << "\t\t\t\t\t<Tool\n"
+         << "\t\t\t\t\tName=\"VCCustomBuildTool\"\n"
+         << "\t\t\t\t\tCommandLine=\"" << cmd << "\n\"\n"
+         << "\t\t\t\t\tAdditionalDependencies=\"";
+    // Write out the dependencies for the rule.
+    std::string temp;
+    for(std::set<std::string>::const_iterator d = depends.begin();
+	d != depends.end(); ++d)
+      {
+      temp = *d;
+      fout << cmSystemTools::EscapeSpaces(cmSystemTools::ConvertToWindowsSlashes(temp))
+           << ";";
+      }
+    fout << "\"\n";
+    fout << "\t\t\t\t\tOutputs=\"";
+    bool first = true;
+    // Write a rule for every output generated by this command.
+    for(std::set<std::string>::const_iterator output = outputs.begin();
+        output != outputs.end(); ++output)
+      {
+      if(!first)
+        {
+        fout << ";";
+        }
+      else
+        {
+        first = true;
+        }
+      fout << output->c_str();
+      }
+    fout << "\"/>\n";
+    fout << "\t\t\t\t</FileConfiguration>\n";
+    }
+}
+
+
+void cmMSDotNETGenerator::WriteVCProjBeginGroup(std::ostream& fout, 
+					const char* group,
+					const char* filter)
+{
+  fout << "\t\t<Filter\n"
+       << "\t\t\tName=\"" << group << "\"\n"
+       << "\t\t\tFilter=\"\">\n";
+}
+
+
+void cmMSDotNETGenerator::WriteVCProjEndGroup(std::ostream& fout)
+{
+  fout << "\t\t</Filter>\n";
+}
+
+
+
+
+void cmMSDotNETGenerator::SetBuildType(BuildType b, const char *libName)
+{
+  m_BuildType = b;
+}
+
+std::string
+cmMSDotNETGenerator::CombineCommands(const cmSourceGroup::Commands &commands,
+                                cmSourceGroup::CommandFiles &totalCommand,
+                                const char *source)
+  
+{
+  // Loop through every custom command generating code from the
+  // current source.
+  // build up the depends and outputs and commands 
+  std::string totalCommandStr = "";
+  std::string temp;
+  for(cmSourceGroup::Commands::const_iterator c = commands.begin();
+      c != commands.end(); ++c)
+    {
+    temp= c->second.m_Command; 
+    cmSystemTools::ConvertToWindowsSlashes(temp);
+    temp = cmSystemTools::EscapeSpaces(temp.c_str());
+    totalCommandStr += temp;
+    totalCommandStr += " ";
+    totalCommandStr += c->second.m_Arguments;
+    totalCommand.Merge(c->second);
+    }      
+  // Create a dummy file with the name of the source if it does
+  // not exist
+  if(totalCommand.m_Outputs.empty())
+    { 
+    std::string dummyFile = m_Makefile->GetStartOutputDirectory();
+    dummyFile += "/";
+    dummyFile += source;
+    if(!cmSystemTools::FileExists(dummyFile.c_str()))
+      {
+      std::ofstream fout(dummyFile.c_str());
+      fout << "Dummy file created by cmake as unused source for utility command.\n";
+      }
+    }
+  return totalCommandStr;
+}
+
+
+// look for custom rules on a target and collect them together
+std::string 
+cmMSDotNETGenerator::CreateTargetRules(const cmTarget &target, 
+                               const char *libName)
+{
+  std::string customRuleCode = "";
+
+  if (target.GetType() >= cmTarget::UTILITY)
+    {
+    return customRuleCode;
+    }
+  
+  // Find the group in which the lix exe custom rules belong
+  bool init = false;
+  for (std::vector<cmCustomCommand>::const_iterator cr = 
+         target.GetCustomCommands().begin(); 
+       cr != target.GetCustomCommands().end(); ++cr)
+    {
+    cmCustomCommand cc(*cr);
+    cc.ExpandVariables(*m_Makefile);
+    if (cc.GetSourceName() == libName)
+      {
+      if (!init)
+        {
+        // header stuff
+        customRuleCode = "# Begin Special Build Tool\nPostBuild_Cmds=";
+        init = true;
+        }
+      else
+        {
+        customRuleCode += "\t";
+        }
+      customRuleCode += cc.GetCommand() + " " + cc.GetArguments();
+      }
+    }
+
+  if (init)
+    {
+    customRuleCode += "\n# End Special Build Tool\n";
+    }
+  return customRuleCode;
+}
+
+void cmMSDotNETGenerator::WriteProjectStart(std::ostream& fout, const char *libName,
+                                       const cmTarget &target, 
+                                       std::vector<cmSourceGroup> &)
+{
+  fout << "<?xml version=\"1.0\" encoding = \"Windows-1252\"?>\n"
+       << "<VisualStudioProject\n"
+       << "\tProjectType=\"Visual C++\"\n"
+       << "\tVersion=\"7.00\"\n"
+       << "\tName=\"" << libName << "\"\n"
+       << "\tSccProjectName=\"\"\n"
+       << "\tSccLocalPath=\"\"\n"
+       << "\tKeyword=\"AtlProj\">\n"
+       << "\t<Platforms>\n"
+       << "\t\t<Platform\n\t\t\tName=\"Win32\"/>\n"
+       << "\t</Platforms>\n";
+}
+
+
+void cmMSDotNETGenerator::WriteVCProjFooter(std::ostream& fout)
+{
+  fout << "\t<Globals>\n"
+       << "\t</Globals>\n"
+       << "</VisualStudioProject>\n";
 }
