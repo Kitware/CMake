@@ -153,7 +153,7 @@ public:
   
   void Generate();
   
-private:  
+public:  
   /**
    * Represent a substitution.
    */
