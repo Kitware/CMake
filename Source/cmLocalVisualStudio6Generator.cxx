@@ -555,7 +555,7 @@ cmLocalVisualStudio6Generator::CreateTargetRules(const cmTarget &target,
         {
         customRuleCode += "\t";
         }
-      customRuleCode += cc.GetCommand() + " " + cc.GetArguments();
+      customRuleCode += cmSystemTools::ConvertToOutputPath(cc.GetCommand().c_str()) + " " + cc.GetArguments();
       }
     }
 
