@@ -276,6 +276,13 @@ IF(BUILD_TESTING)
       Exec2
       ${CMake_BINARY_DIR}/Tests/LinkLineOrder
       LinkLineOrder)
+
+    IF (APPLE)
+      ADD_TEST(objc++ ${CMake_BINARY_DIR}/Source/cmaketest
+		        ${CMake_SOURCE_DIR}/Tests/Objc++
+			${CMake_BINARY_DIR}/Tests/Objc++
+			objc++)
+    ENDIF (APPLE)
 ENDIF(BUILD_TESTING)
 
 
