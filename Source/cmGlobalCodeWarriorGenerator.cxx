@@ -287,3 +287,12 @@ void cmGlobalCodeWarriorGenerator::LocalGenerate()
 {
   this->cmGlobalGenerator::LocalGenerate();
 }
+
+
+//----------------------------------------------------------------------------
+void cmGlobalCodeWarriorGenerator::GetDocumentation(cmDocumentationEntry& entry) const
+{
+  entry.name = this->GetName();
+  entry.brief = "Generates CodeWarrior project files.";
+  entry.full = "";
+}

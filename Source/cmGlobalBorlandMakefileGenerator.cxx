@@ -58,3 +58,12 @@ cmLocalGenerator *cmGlobalBorlandMakefileGenerator::CreateLocalGenerator()
   lg->SetGlobalGenerator(this);
   return lg;
 }
+
+
+//----------------------------------------------------------------------------
+void cmGlobalBorlandMakefileGenerator::GetDocumentation(cmDocumentationEntry& entry) const
+{
+  entry.name = this->GetName();
+  entry.brief = "Generates Borland makefiles.";
+  entry.full = "";
+}

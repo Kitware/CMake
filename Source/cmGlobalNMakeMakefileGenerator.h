@@ -28,11 +28,15 @@ class cmGlobalNMakeMakefileGenerator : public cmGlobalUnixMakefileGenerator
 {
 public:
   cmGlobalNMakeMakefileGenerator();
+  static cmGlobalGenerator* New() { return new cmGlobalNMakeMakefileGenerator; }
   ///! Get the name for the generator.
-  virtual const char* GetName() {
+  virtual const char* GetName() const {
     return cmGlobalNMakeMakefileGenerator::GetActualName();}
   static const char* GetActualName() {return "NMake Makefiles";}
 
+  /** Get the documentation entry for this generator.  */
+  virtual void GetDocumentation(cmDocumentationEntry& entry) const;
+  
   ///! Create a local generator appropriate to this Global Generator
   virtual cmLocalGenerator *CreateLocalGenerator();
 

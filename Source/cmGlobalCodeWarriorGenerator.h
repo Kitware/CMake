@@ -29,11 +29,16 @@ class cmTarget;
 class cmGlobalCodeWarriorGenerator : public cmGlobalGenerator
 {
 public:
+  static cmGlobalGenerator* New() { return new cmGlobalCodeWarriorGenerator; }
+  
   ///! Get the name for the generator.
-  virtual const char* GetName() {
+  virtual const char* GetName() const {
     return cmGlobalCodeWarriorGenerator::GetActualName();}
   static const char* GetActualName() {return "Code Warrior Not Working";}
 
+  /** Get the documentation entry for this generator.  */
+  virtual void GetDocumentation(cmDocumentationEntry& entry) const;
+  
   ///! Create a local generator appropriate to this Global Generator
   virtual cmLocalGenerator *CreateLocalGenerator();
 

@@ -282,4 +282,10 @@ void cmGlobalVisualStudio71Generator::WriteSLNHeader(std::ostream& fout)
   fout << "Microsoft Visual Studio Solution File, Format Version 8.00\n";
 }
 
-
+//----------------------------------------------------------------------------
+void cmGlobalVisualStudio71Generator::GetDocumentation(cmDocumentationEntry& entry) const
+{
+  entry.name = this->GetName();
+  entry.brief = "Generates Visual Studio .NET 2003 project files.";
+  entry.full = "";
+}

@@ -235,14 +235,19 @@ class cmake
   cmVariableWatch* GetVariableWatch() { return m_VariableWatch; }
 
   void GetCommandDocumentation(std::vector<cmDocumentationEntry>&) const;
+  void GetGeneratorDocumentation(std::vector<cmDocumentationEntry>&);
 
   ///! Do all the checks before running configure
   int DoPreConfigureChecks();
   
 protected:
+  typedef cmGlobalGenerator* (*CreateGeneratorFunctionType)();
   typedef std::map<cmStdString, cmCommand*> RegisteredCommandsMap;
+  typedef std::map<cmStdString, CreateGeneratorFunctionType> RegisteredGeneratorsMap;
   RegisteredCommandsMap m_Commands;
+  RegisteredGeneratorsMap m_Generators;
   void AddDefaultCommands();
+  void AddDefaultGenerators();
 
   cmGlobalGenerator *m_GlobalGenerator;
   cmCacheManager *m_CacheManager;

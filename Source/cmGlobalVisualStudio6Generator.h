@@ -30,12 +30,16 @@ class cmGlobalVisualStudio6Generator : public cmGlobalGenerator
 {
 public:
   cmGlobalVisualStudio6Generator();
+  static cmGlobalGenerator* New() { return new cmGlobalVisualStudio6Generator; }
   
   ///! Get the name for the generator.
-  virtual const char* GetName() {
+  virtual const char* GetName() const {
     return cmGlobalVisualStudio6Generator::GetActualName();}
   static const char* GetActualName() {return "Visual Studio 6";}
 
+  /** Get the documentation entry for this generator.  */
+  virtual void GetDocumentation(cmDocumentationEntry& entry) const;
+  
   ///! Create a local generator appropriate to this Global Generator
   virtual cmLocalGenerator *CreateLocalGenerator();
 

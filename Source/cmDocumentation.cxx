@@ -45,6 +45,14 @@ static const cmDocumentationEntry cmDocumentationCommandsHeader[] =
 };
 
 //----------------------------------------------------------------------------
+static const cmDocumentationEntry cmDocumentationGeneratorsHeader[] =
+{
+  {0,
+   "The following generators are available on this platform:", 0},
+  {0,0,0}
+};
+
+//----------------------------------------------------------------------------
 const cmDocumentationEntry cmDocumentationMailingList[] =
 {
   {0,
@@ -257,6 +265,13 @@ void cmDocumentation::SetCommandsSection(const cmDocumentationEntry* section)
 {
   this->SetSection(cmDocumentationCommandsHeader, section, 0,
                    this->CommandsSection);
+}
+
+//----------------------------------------------------------------------------
+void cmDocumentation::SetGeneratorsSection(const cmDocumentationEntry* section)
+{
+  this->SetSection(cmDocumentationGeneratorsHeader, section, 0,
+                   this->GeneratorsSection);
 }
 
 //----------------------------------------------------------------------------
@@ -720,6 +735,10 @@ void cmDocumentation::CreateFullDocumentation()
     {
     this->AddSection(0, &this->DescriptionSection[0]);
     }
+  if(!this->GeneratorsSection.empty())
+    {
+    this->AddSection("Generators", &this->GeneratorsSection[0]);
+    }
   if(!this->OptionsSection.empty())
     {
     this->AddSection("Command-Line Options", &this->OptionsSection[0]);
@@ -747,6 +766,10 @@ void cmDocumentation::CreateManDocumentation()
   if(!this->DescriptionSection.empty())
     {
     this->AddSection("DESCRIPTION", &this->DescriptionSection[0]);
+    }
+  if(!this->GeneratorsSection.empty())
+    {
+    this->AddSection("GENERATORS", &this->GeneratorsSection[0]);
     }
   if(!this->OptionsSection.empty())
     {

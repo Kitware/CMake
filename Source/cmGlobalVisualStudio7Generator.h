@@ -30,14 +30,19 @@ class cmGlobalVisualStudio7Generator : public cmGlobalGenerator
 {
 public:
   cmGlobalVisualStudio7Generator();
+  static cmGlobalGenerator* New() { return new cmGlobalVisualStudio7Generator; }
+  
   ///! Get the name for the generator.
-  virtual const char* GetName() {
+  virtual const char* GetName() const {
     return cmGlobalVisualStudio7Generator::GetActualName();}
   static const char* GetActualName() {return "Visual Studio 7";}
 
   ///! Create a local generator appropriate to this Global Generator
   virtual cmLocalGenerator *CreateLocalGenerator();
 
+  /** Get the documentation entry for this generator.  */
+  virtual void GetDocumentation(cmDocumentationEntry& entry) const;
+  
   /**
    * Try to determine system infomation such as shared library
    * extension, pthreads, byte order etc.  

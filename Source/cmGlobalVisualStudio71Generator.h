@@ -29,11 +29,16 @@ class cmGlobalVisualStudio71Generator : public cmGlobalVisualStudio7Generator
 {
 public:
   cmGlobalVisualStudio71Generator();
+  static cmGlobalGenerator* New() { return new cmGlobalVisualStudio71Generator; }
+  
   ///! Get the name for the generator.
-  virtual const char* GetName() {
+  virtual const char* GetName() const {
     return cmGlobalVisualStudio71Generator::GetActualName();}
   static const char* GetActualName() {return "Visual Studio 7 .NET 2003";}
 
+  /** Get the documentation entry for this generator.  */
+  virtual void GetDocumentation(cmDocumentationEntry& entry) const;
+  
   ///! Create a local generator appropriate to this Global Generator
   virtual cmLocalGenerator *CreateLocalGenerator();
 

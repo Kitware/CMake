@@ -447,3 +447,11 @@ void cmGlobalVisualStudio6Generator::WriteDSWHeader(std::ostream& fout)
   fout << "Microsoft Developer Studio Workspace File, Format Version 6.00\n";
   fout << "# WARNING: DO NOT EDIT OR DELETE THIS WORKSPACE FILE!\n\n";
 }
+
+//----------------------------------------------------------------------------
+void cmGlobalVisualStudio6Generator::GetDocumentation(cmDocumentationEntry& entry) const
+{
+  entry.name = this->GetName();
+  entry.brief = "Generates Visual Studio 6 project files.";
+  entry.full = "";
+}

@@ -94,3 +94,10 @@ cmLocalGenerator *cmGlobalUnixMakefileGenerator::CreateLocalGenerator()
   return lg;
 }
 
+//----------------------------------------------------------------------------
+void cmGlobalUnixMakefileGenerator::GetDocumentation(cmDocumentationEntry& entry) const
+{
+  entry.name = this->GetName();
+  entry.brief = "Generates standard UNIX makefiles.";
+  entry.full = "full UNIX!";
+}

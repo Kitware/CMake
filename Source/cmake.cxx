@@ -94,6 +94,7 @@ cmake::cmake()
   m_ProgressCallbackClientData = 0;
   m_VariableWatch = new cmVariableWatch;
 
+  this->AddDefaultGenerators();
   this->AddDefaultCommands();
 
   m_VariableWatch->AddWatch("CMAKE_WORDS_BIGENDIAN",
@@ -662,64 +663,26 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
 
 void cmake::GetRegisteredGenerators(std::vector<std::string>& names)
 {
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  names.push_back(cmGlobalVisualStudio6Generator::GetActualName());
-  names.push_back(cmGlobalVisualStudio7Generator::GetActualName());
-  names.push_back(cmGlobalVisualStudio71Generator::GetActualName());
-  names.push_back(cmGlobalBorlandMakefileGenerator::GetActualName());
-  names.push_back(cmGlobalNMakeMakefileGenerator::GetActualName());
-#else
-#if defined(__APPLE__) && defined(CMAKE_BUILD_WITH_CMAKE)
-  names.push_back(cmGlobalCodeWarriorGenerator::GetActualName());
-#endif
-  names.push_back(cmGlobalUnixMakefileGenerator::GetActualName());
-#endif
+  for(RegisteredGeneratorsMap::const_iterator i = m_Generators.begin();
+      i != m_Generators.end(); ++i)
+    {
+    names.push_back(i->first);
+    }
 }
 
 cmGlobalGenerator* cmake::CreateGlobalGenerator(const char* name)
 {
-  cmGlobalGenerator *ret = 0;
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  if (!strcmp(name,cmGlobalNMakeMakefileGenerator::GetActualName()))
+  RegisteredGeneratorsMap::const_iterator i = m_Generators.find(name);
+  if(i != m_Generators.end())
     {
-    ret = new cmGlobalNMakeMakefileGenerator;
-    ret->SetCMakeInstance(this);
+    cmGlobalGenerator* generator = (i->second)();
+    generator->SetCMakeInstance(this);
+    return generator;
     }
-  if (!strcmp(name,cmGlobalVisualStudio6Generator::GetActualName()))
+  else
     {
-    ret = new cmGlobalVisualStudio6Generator;
-    ret->SetCMakeInstance(this);
+    return 0;
     }
-  if (!strcmp(name,cmGlobalVisualStudio7Generator::GetActualName()))
-    {
-    ret = new cmGlobalVisualStudio7Generator;
-    ret->SetCMakeInstance(this);
-    } 
-  if (!strcmp(name,cmGlobalVisualStudio71Generator::GetActualName()))
-    {
-    ret = new cmGlobalVisualStudio71Generator;
-    ret->SetCMakeInstance(this);
-    } 
-  if (!strcmp(name,cmGlobalBorlandMakefileGenerator::GetActualName()))
-    {
-    ret = new cmGlobalBorlandMakefileGenerator;
-    ret->SetCMakeInstance(this);
-    }
-#else
-#if defined(__APPLE__) && defined(CMAKE_BUILD_WITH_CMAKE)
-  if (!strcmp(name,cmGlobalCodeWarriorGenerator::GetActualName()))
-    {
-    ret = new cmGlobalCodeWarriorGenerator;
-    ret->SetCMakeInstance(this);
-    }
-#endif
-  if (!strcmp(name,cmGlobalUnixMakefileGenerator::GetActualName()))
-    {
-    ret = new cmGlobalUnixMakefileGenerator;
-    ret->SetCMakeInstance(this);
-    }
-#endif
-  return ret;
 }
 
 void cmake::SetHomeDirectory(const char* dir) 
@@ -1126,6 +1089,29 @@ void cmake::AddDefaultCommands()
     }
 }
 
+void cmake::AddDefaultGenerators()
+{
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  m_Generators[cmGlobalVisualStudio6Generator::GetActualName()] =
+    &cmGlobalVisualStudio6Generator::New;
+  m_Generators[cmGlobalVisualStudio7Generator::GetActualName()] =
+    &cmGlobalVisualStudio7Generator::New;
+  m_Generators[cmGlobalVisualStudio71Generator::GetActualName()] =
+    &cmGlobalVisualStudio71Generator::New;
+  m_Generators[cmGlobalBorlandMakefileGenerator::GetActualName()] =
+    &cmGlobalBorlandMakefileGenerator::New;
+  m_Generators[cmGlobalNMakeMakefileGenerator::GetActualName()] =
+    &cmGlobalNMakeMakefileGenerator::New;
+#else
+# if defined(__APPLE__) && defined(CMAKE_BUILD_WITH_CMAKE)
+  m_Generators[cmGlobalCodeWarriorGenerator::GetActualName()] =
+    &cmGlobalCodeWarriorGenerator::New;
+# endif
+  m_Generators[cmGlobalUnixMakefileGenerator::GetActualName()] =
+    &cmGlobalUnixMakefileGenerator::New;
+#endif
+}
+
 int cmake::LoadCache()
 {
   m_CacheManager->LoadCache(this->GetHomeOutputDirectory());
@@ -1183,6 +1169,21 @@ void cmake::GetCommandDocumentation(std::vector<cmDocumentationEntry>& v) const
         (*j).second->GetTerseDocumentation(),
         (*j).second->GetFullDocumentation()
       };
+    v.push_back(e);
+    }
+  cmDocumentationEntry empty = {0,0,0};
+  v.push_back(empty);
+}
+
+void cmake::GetGeneratorDocumentation(std::vector<cmDocumentationEntry>& v)
+{
+  for(RegisteredGeneratorsMap::const_iterator i = m_Generators.begin();
+      i != m_Generators.end(); ++i)
+    {
+    cmDocumentationEntry e;
+    cmGlobalGenerator* generator = (i->second)();
+    generator->GetDocumentation(e);
+    delete generator;
     v.push_back(e);
     }
   cmDocumentationEntry empty = {0,0,0};

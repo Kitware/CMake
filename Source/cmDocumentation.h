@@ -56,6 +56,9 @@ public:
   /** Set the listfile commands for standard document generation.  */
   void SetCommandsSection(const cmDocumentationEntry*);
   
+  /** Set the generator descriptions for standard document generation.  */
+  void SetGeneratorsSection(const cmDocumentationEntry*);
+  
   // Low-level interface for custom documents:
   
   /** Forms of documentation output.  */
@@ -124,6 +127,7 @@ private:
   std::vector<cmDocumentationEntry> DescriptionSection;
   std::vector<cmDocumentationEntry> OptionsSection;
   std::vector<cmDocumentationEntry> CommandsSection;
+  std::vector<cmDocumentationEntry> GeneratorsSection;
   
   std::vector< const char* > Names;
   std::vector< const cmDocumentationEntry* > Sections;
