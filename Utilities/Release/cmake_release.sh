@@ -23,8 +23,8 @@
 #
 
 # Release version number.
-TAG="Release-1-6-3"
-VERSION="1.6.3"
+TAG="Release-1-6-4"
+VERSION="1.6.4"
 RELEASE="1"
 PREVIOUS_VERSION="1.4.7"
 PREVIOUS_RELEASE="1"
