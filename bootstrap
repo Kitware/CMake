@@ -28,6 +28,7 @@ CMAKE_SOURCES="\
   cmMakeDepend \
   cmMakefile \
   cmDocumentation \
+  cmGlob \
   cmGlobalGenerator \
   cmLocalGenerator \
   cmSourceFile \

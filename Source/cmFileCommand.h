@@ -69,19 +69,23 @@ public:
       "  FILE(WRITE filename \"message to write\"... )\n"
       "  FILE(APPEND filename \"message to write\"... )\n"
       "  FILE(READ filename variable)\n"
+      "  FILE(GLOB variable [globbing expressions]...)\n"
       "WRITE will write a message into a file called 'filename'. It "
       "overwrites the file if it already exists, and creates the file "
       "if it does not exists.\n\n"
       "APPEND will write a message into a file same as WRITE, except "
       "it will append it to the end of the file\n\n"
-      "READ will read the content of a file and store it into a "
-      "variable.\n\n"; }
+      "READ will read the content of a file and store it into the "
+      "variable.\n\n"
+      "GLOB will generate a list of all files that match the expressions "
+      "and store it into the variable.\n\n"; }
   
   cmTypeMacro(cmFileCommand, cmCommand);
 
 protected:
   bool HandleWriteCommand(std::vector<std::string> const& args, bool append);
   bool HandleReadCommand(std::vector<std::string> const& args);
+  bool HandleGlobCommand(std::vector<std::string> const& args);
 };
 
 
