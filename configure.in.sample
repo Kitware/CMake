@@ -629,18 +629,23 @@ CMake/Source/Makefile
 )
 
 
-# force a rebuild of rulesgen which will rebuild CMakeTargets.make
-# this has to be done because configure generates empty CMakeTargets.make files
-# for makes other than gnu.
-rm -f CMake/Source/CMakeBuildTargets
-rm -f CMake/Source/CMakeBuildTargets.exe
+
+
+
+
 # build the CMakeBuildTargets program
-(cd CMake/Source; make CMakeBuildTargets)
+(cd CMake/Source; $MAKECOMMAND CMakeBuildTargets)
 # if there is no cache file then create one
 if test ! -f $CMAKE_CONFIG_DIR/CMakeCache.txt; then
-        echo  CMake/Source/CMakeBuildTargets.exe ${fullSrcDir}/CMakeLists.txt -MakeCache -S${fullSrcDir} -O${CMAKE_CONFIG_DIR} -H${fullSrcDir} -B${CMAKE_CONFIG_DIR}
-        CMake/Source/CMakeBuildTargets.exe ${fullSrcDir}/CMakeLists.txt -MakeCache -S${fullSrcDir} -O${CMAKE_CONFIG_DIR} -H${fullSrcDir} -B${CMAKE_CONFIG_DIR}
+        echo  CMake/Source/CMakeBuildTargets ${fullSrcDir}/CMakeLists.txt -MakeCache -S${fullSrcDir} -O${CMAKE_CONFIG_DIR} -H${fullSrcDir} -B${CMAKE_CONFIG_DIR}
+        CMake/Source/CMakeBuildTargets ${fullSrcDir}/CMakeLists.txt -MakeCache -S${fullSrcDir} -O${CMAKE_CONFIG_DIR} -H${fullSrcDir} -B${CMAKE_CONFIG_DIR}
 fi
 echo CMakeCache.txt location: ${CMAKE_CONFIG_DIR}/CMakeCache.txt
 
 
+# force a rebuild of CMakeBuildTargets which will rebuild CMakeTargets.make
+# this has to be done because configure generates empty CMakeTargets.make files
+# and make programs other than gnu do not like to include make file fragments
+# that do not exist, even if they know how to create them.
+rm -f CMake/Source/CMakeBuildTargets
+rm -f CMake/Source/CMakeBuildTargets.exe
