@@ -890,6 +890,14 @@ int cmake::Configure()
                                   cmCacheManager::PATH);
     }  
   
+  if(cmSystemTools::GetFatalErrorOccured() &&
+     (!this->m_CacheManager->GetCacheValue("CMAKE_MAKE_PROGRAM") ||
+      cmSystemTools::IsOff(this->m_CacheManager->GetCacheValue("CMAKE_MAKE_PROGRAM"))))
+    {
+    // We must have a bad generator selection.  Wipe the cache entry so the
+    // user can select another.
+    m_CacheManager->RemoveCacheEntry("CMAKE_GENERATOR");
+    }
   this->m_CacheManager->SaveCache(this->GetHomeOutputDirectory());
   if(cmSystemTools::GetErrorOccuredFlag())
     {

@@ -57,11 +57,11 @@ void cmGlobalGenerator::EnableLanguage(const char* lang,
   if(!mf->GetDefinition("CMAKE_MAKE_PROGRAM")
      || cmSystemTools::IsOff(mf->GetDefinition("CMAKE_MAKE_PROGRAM")))
     {
-    cmSystemTools::Error("CMake was unable to find a build program "
-                         "corresponding to the generator you have selected.  "
-                         "CMAKE_MAKE_PROGRAM is not set.  You probably "
-                         "need to re-run CMake and select a different "
-                         "generator.");
+    cmOStringStream err;
+    err << "CMake was unable to find a build program corresponding to \""
+        << this->GetName() << "\".  CMAKE_MAKE_PROGRAM is not set.  You "
+        << "probably need to select a different build tool.";
+    cmSystemTools::Error(err.str().c_str());
     cmSystemTools::SetFatalErrorOccured();
     return;
     }
