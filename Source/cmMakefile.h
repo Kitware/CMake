@@ -241,16 +241,7 @@ public:
     {
     return m_cmHomeDirectory.c_str();
     }
-<<<<<<< cmMakefile.h
-  void SetHomeOutputDirectory(const char* lib)
-    {
-    m_HomeOutputDirectory = lib;
-    cmSystemTools::ConvertToUnixSlashes(m_HomeOutputDirectory);
-    this->AddDefinition("CMAKE_BINARY_DIR", this->GetHomeOutputDirectory());
-    }
-=======
   void SetHomeOutputDirectory(const char* lib);
->>>>>>> 1.31
   const char* GetHomeOutputDirectory() const
     {
     return m_HomeOutputDirectory.c_str();
