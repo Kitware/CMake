@@ -8,16 +8,14 @@ TARGET_LINK_LIBRARIES(complex ${COMPLEX_LIBS})
 
 #
 # Link to CMake lib
-#
-FIND_LIBRARY(CMAKE_LIB
-              CMakeLib 
-              ${Wrapping_BINARY_DIR}/../../Source/${CMAKE_CFG_INTDIR})
-
 # Specify the same one for debug/optimized to increase coverage
+#
+LINK_DIRECTORIES(${Complex_BINARY_DIR}/../../Source)
+
 TARGET_LINK_LIBRARIES(complex 
-                      ${CMAKE_LIB}
-                      debug ${CMAKE_LIB}
-                      optimized ${CMAKE_LIB})
+                      CMakeLib
+                      debug CMakeLib
+                      optimized CMakeLib)
 
 #
 # Output the files required by 'complex' to a file.
@@ -35,4 +33,3 @@ INSTALL_TARGETS(/tmp complex)
 INSTALL_PROGRAMS(/tmp complex)
 
 SOURCE_GROUP(A_GROUP ".cxx")
-
