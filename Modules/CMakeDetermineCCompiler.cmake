@@ -56,5 +56,5 @@ ENDIF(NOT CMAKE_COMPILER_RETURN)
 
 # configure variables set in this file for fast reload later on
 CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeCCompiler.cmake.in 
-               ${PROJECT_BINARY_DIR}/CMakeCCompiler.cmake IMMEDIATE)
+               ${CMAKE_BINARY_DIR}/CMakeCCompiler.cmake IMMEDIATE)
 MARK_AS_ADVANCED(CMAKE_AR CMAKE_C_COMPILER_FULLPATH)

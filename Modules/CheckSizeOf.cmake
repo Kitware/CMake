@@ -18,7 +18,7 @@ MACRO(CHECK_TYPE_SIZE TYPE VARIABLE)
     ENDIF(HAVE_STDINT_H)
     MESSAGE(STATUS "Check size of ${TYPE}")
     TRY_RUN(${VARIABLE} HAVE_${VARIABLE}
-            ${PROJECT_BINARY_DIR}
+            ${CMAKE_BINARY_DIR}
             ${CMAKE_ROOT}/Modules/CheckSizeOf.c
             CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_TYPE_SIZE_FLAGS}
             OUTPUT_VARIABLE OUTPUT)
@@ -26,7 +26,7 @@ MACRO(CHECK_TYPE_SIZE TYPE VARIABLE)
       MESSAGE(STATUS "Check size of ${TYPE} - done")
     ELSE(HAVE_${VARIABLE})
       MESSAGE(STATUS "Check size of ${TYPE} - failed")
-      WRITE_FILE(${PROJECT_BINARY_DIR}/CMakeError.log 
+      WRITE_FILE(${CMAKE_BINARY_DIR}/CMakeError.log 
         "Determining size of ${TYPE} failed with the following output:\n${OUTPUT}\n"
         APPEND)
     ENDIF(HAVE_${VARIABLE})

@@ -6,11 +6,11 @@
 
 MACRO(TEST_BIG_ENDIAN VARIABLE)
   TRY_RUN(${VARIABLE} HAVE_${VARIABLE}
-          ${PROJECT_BINARY_DIR}
+          ${CMAKE_BINARY_DIR}
           ${CMAKE_ROOT}/Modules/TestBigEndian.c
           OUTPUT_VARIABLE OUTPUT)
   IF(NOT HAVE_${VARIABLE})
-    WRITE_FILE(${PROJECT_BINARY_DIR}/CMakeError.log 
+    WRITE_FILE(${CMAKE_BINARY_DIR}/CMakeError.log 
       "Determining the endianes of the system failed with the following output:\n${OUTPUT}\n"
       APPEND)
   ENDIF(NOT HAVE_${VARIABLE})

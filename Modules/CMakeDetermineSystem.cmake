@@ -63,5 +63,5 @@ ENDIF(CMAKE_SYSTEM_VERSION)
 
 # configure variables set in this file for fast reload
 CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeSystem.cmake.in 
-               ${PROJECT_BINARY_DIR}/CMakeSystem.cmake IMMEDIATE)
+               ${CMAKE_BINARY_DIR}/CMakeSystem.cmake IMMEDIATE)
 

@@ -11,7 +11,7 @@ MACRO(CHECK_FUNCTION_EXISTS FUNCTION VARIABLE)
     SET(MACRO_CHECK_FUNCTION_DEFINITIONS -DCHECK_FUNCTION_EXISTS=${FUNCTION})
     MESSAGE(STATUS "Looking for ${FUNCTION}")
     TRY_COMPILE(${VARIABLE}
-            ${PROJECT_BINARY_DIR}
+            ${CMAKE_BINARY_DIR}
             ${CMAKE_ROOT}/Modules/CheckFunctionExists.c
             CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_FUNCTION_DEFINITIONS}
             OUTPUT_VARIABLE OUTPUT)
@@ -21,7 +21,7 @@ MACRO(CHECK_FUNCTION_EXISTS FUNCTION VARIABLE)
     ELSE(${VARIABLE})
       MESSAGE(STATUS "Looking for ${FUNCTION} - not found")
       SET(${VARIABLE} "" CACHE INTERNAL "Have function ${FUNCTION}")
-      WRITE_FILE(${PROJECT_BINARY_DIR}/CMakeError.log 
+      WRITE_FILE(${CMAKE_BINARY_DIR}/CMakeError.log 
         "Determining if the function ${FUNCTION} exists failed with the following output:\n"
         "${OUTPUT}\n" APPEND)
     ENDIF(${VARIABLE})

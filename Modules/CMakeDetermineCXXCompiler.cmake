@@ -48,5 +48,5 @@ ENDIF(NOT CMAKE_COMPILER_RETURN)
 
 # configure all variables set in this file
 CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeCXXCompiler.cmake.in 
-               ${PROJECT_BINARY_DIR}/CMakeCXXCompiler.cmake IMMEDIATE)
+               ${CMAKE_BINARY_DIR}/CMakeCXXCompiler.cmake IMMEDIATE)
 MARK_AS_ADVANCED(CMAKE_CXX_COMPILER_FULLPATH)
