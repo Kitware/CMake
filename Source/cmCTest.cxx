@@ -2389,6 +2389,7 @@ bool cmCTest::InitializeMemoryChecking()
 
 int cmCTest::TestDirectory(bool memcheck)
 {
+  m_TestResults.clear();
   std::cout << (memcheck ? "Memory check" : "Test") << " project" << std::endl;
   if ( memcheck )
     {
