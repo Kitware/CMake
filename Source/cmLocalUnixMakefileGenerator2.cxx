@@ -2882,7 +2882,6 @@ cmLocalUnixMakefileGenerator2
     cmDependsC scanner(".", objFile, srcFile, includes,
                        includeRegexScan.c_str(), includeRegexComplain.c_str());
     return scanner.Write();
-    true;
     }
 #ifdef CMAKE_BUILD_WITH_CMAKE
   else if(lang == "Fortran")
