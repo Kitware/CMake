@@ -96,9 +96,9 @@ public:
       "  PRE_BUILD - run before all other dependencies\n"
       "  PRE_LINK - run after other dependencies\n"
       "  POST_BUILD - run after the target has been built\n"
-      "Note that the PRE_BUILD option is only supported on Visual\n"
-      "Studio 7 or later. For all other generators PRE_BUILD\n"
-      "will be treated as PRE_LINK";
+      "Note that the PRE_BUILD option is only supported on Visual "
+      "Studio 7 or later. For all other generators PRE_BUILD "
+      "will be treated as PRE_LINK.";
     }
   
   cmTypeMacro(cmAddCustomCommandCommand, cmCommand);
