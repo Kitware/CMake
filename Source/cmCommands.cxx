@@ -27,6 +27,12 @@
 #include "cmCableCommand.cxx"
 #include "cmCableData.cxx"
 #include "cmCableDefineSetCommand.cxx"
+#include "cmCableOpenNamespaceCommand.cxx"
+#include "cmCableCloseNamespaceCommand.cxx"
+#include "cmCablePackageCommand.cxx"
+#include "cmCablePackageEntryCommand.cxx"
+#include "cmCableSourceFilesCommand.cxx"
+#include "cmCableWrapCommand.cxx"
 #include "cmCableInstantiateCommand.cxx"
 #include "cmCableInstantiateClassCommand.cxx"
 #include "cmFindFileCommand.cxx"
@@ -58,6 +64,11 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmWin32LibrariesCommand);
   commands.push_back(new cmConfigureFileNoAutoconf);
   commands.push_back(new cmCableDefineSetCommand);
+  commands.push_back(new cmCableOpenNamespaceCommand);
+  commands.push_back(new cmCableCloseNamespaceCommand);
+  commands.push_back(new cmCablePackageCommand);
+  commands.push_back(new cmCableSourceFilesCommand);
+  commands.push_back(new cmCableWrapCommand);
   commands.push_back(new cmCableInstantiateCommand);
   commands.push_back(new cmCableInstantiateClassCommand);
   commands.push_back(new cmFindFileCommand);

@@ -17,7 +17,7 @@
 #define cmCableInstantiateClassCommand_h
 
 #include "cmStandardIncludes.h"
-#include "cmCableInstantiateCommand.h"
+#include "cmCablePackageEntryCommand.h"
 
 /** \class cmCableInstantiateClassCommand
  * \brief Define a command that generates a rule for explicit template
@@ -27,7 +27,7 @@
  * configuration file to create explicit template instantiations of
  * classes.
  */
-class cmCableInstantiateClassCommand : public cmCableInstantiateCommand
+class cmCableInstantiateClassCommand : public cmCablePackageEntryCommand
 {
 public:
   /**
@@ -48,7 +48,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Define CABLE InstantiationSet of classes.";
+    return "Define CABLE InstantiationSet of classes in a package.";
     }
   
   /**
@@ -57,17 +57,17 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "CABLE_INSTANTIATE_CLASS(cable_config_file member1 member2 ...)\n"
+      "CABLE_INSTANTIATE_CLASS(package_name member1 member2 ...)\n"
       "Generates an InstantiationSet in the CABLE configuration.  It is\n"
       "assumed that all members of the set are explicit instantiations of\n"
       "template classes (not functions, operators, etc).";
     }
 
-  virtual void WriteConfiguration(std::ostream&) const;  
+  virtual void WriteConfiguration() const;  
 
   cmTypeMacro(cmCableInstantiateClassCommand, cmCableInstantiateCommand);
 protected:
-  typedef cmCableInstantiateCommand::Elements  Elements;
+  typedef cmCablePackageEntryCommand::Entries  Entries;
 };
 
 

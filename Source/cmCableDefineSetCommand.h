@@ -48,7 +48,7 @@ public:
    * to makefiles located in subdirectories.
    */
   virtual bool IsInherited() 
-    {return true;}
+    { return true; }
 
   /**
    * The name of the command as specified in CMakeList.txt.
@@ -75,13 +75,11 @@ public:
       "commands by a '$' immediately followed by the set name (ex. $SetName).";
     }
 
-  virtual void WriteConfiguration(std::ostream&) const;
-  
   cmTypeMacro(cmCableDefineSetCommand, cmCableCommand);
   
 private:
+  void WriteConfiguration() const;
   std::string GenerateTag(const std::string&) const;
-
 private:  
   typedef std::pair<std::string, std::string>  Element;
   typedef std::vector<Element>  Elements;

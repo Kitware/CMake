@@ -13,36 +13,25 @@
   See COPYRIGHT.txt for copyright details.
 
 =========================================================================*/
-#include "cmCableInstantiateCommand.h"
+#include "cmCableSourceFilesCommand.h"
 #include "cmCacheManager.h"
 
-#include "cmRegularExpression.h"
-
-
 /**
- * Write the CABLE configuration code to define this InstantiationSet.
+ * Write the CABLE configuration code to indicate header dependencies for
+ * a package.
  */
-void cmCableInstantiateCommand::WriteConfiguration() const
+void cmCableSourceFilesCommand::WriteConfiguration() const
 {
   std::ostream& os = m_CableData->GetOutputStream();
   cmCableData::Indentation indent = m_CableData->GetIndentation();
-
+  
   cmRegularExpression needCdataBlock("[&<>]");
   
-  os << indent << "<InstantiationSet>" << std::endl;
-  for(Entries::const_iterator e = m_Entries.begin();
-      e != m_Entries.end(); ++e)
+  os << indent << "<Headers>" << std::endl;
+  for(Entries::const_iterator f = m_Entries.begin();
+      f != m_Entries.end(); ++f)
     {
-    os << indent << "  <Element>";
-    if(needCdataBlock.find(e->c_str()))
-      {
-      os << "<![CDATA[" << e->c_str() << "]]>";
-      }
-    else
-      {
-      os << e->c_str();
-      }
-    os << "</Element>" << std::endl;
+    os << indent << "  <File name=\"" << f->c_str() << ".h\"/>" << std::endl;
     }
-  os << indent << "</InstantiationSet>" << std::endl;
+  os << indent << "</Headers>" << std::endl;
 }

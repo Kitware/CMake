@@ -40,25 +40,6 @@ cmCableCommand::~cmCableCommand()
 
 
 /**
- * Write a CABLE configuration file header.
- */
-void cmCableCommand::WriteConfigurationHeader(std::ostream& os) const
-{
-  os << "<?xml version=\"1.0\"?>" << std::endl
-     << "<CableConfiguration>" << std::endl;
-}
-
-
-/**
- * Write a CABLE configuration file footer.
- */
-void cmCableCommand::WriteConfigurationFooter(std::ostream& os) const
-{
-  os << "</CableConfiguration>" << std::endl;
-}
-
-
-/**
  * Ensure that this cmCableCommand has a valid m_CableData pointer.
  */
 void cmCableCommand::SetupCableData()

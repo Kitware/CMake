@@ -20,6 +20,7 @@
 #include "cmCommand.h"
 
 class cmCableCommand;
+class cmCablePackageCommand;
 
 /** \class cmCableData
  * \brief Hold data in one location for all cmCableCommand subclasses.
@@ -27,12 +28,7 @@ class cmCableCommand;
 class cmCableData
 {
 public:
-  /**
-   * The cmCableData instance is owned by one cmCableCommand, which is given
-   * to this constructor.
-   */
-  cmCableData(const cmCableCommand* owner): m_Owner(owner) {}
-  
+  cmCableData(const cmCableCommand*);
   ~cmCableData();
   
   /**
@@ -41,41 +37,73 @@ public:
    */
   bool OwnerIs(const cmCableCommand* owner) const
     { return (owner == m_Owner); }  
+
+  std::ostream& GetOutputStream()
+    { return m_OutputFile; }
+
+  void OpenOutputFile(const std::string&);
+  void CloseOutputFile();
+  
+  void WriteConfigurationHeader();
+  void WriteConfigurationFooter();
   
   /**
-   * Hold an output stream for all commands that use it.  Maintain the
-   * first and last commands that reference it so that they can write the
-   * header/footer lines, if necessary.
+   * Class to simplify indentation printing.
    */
-  class OutputFile
+  class Indentation
   {
   public:
-    OutputFile(std::string, const cmCableCommand*);
-    ~OutputFile();
-    std::ostream& GetStream();
-    void SetLastReferencingCommand(const cmCableCommand*);
-    bool FirstReferencingCommandIs(const cmCableCommand*) const;
-    bool LastReferencingCommandIs(const cmCableCommand*) const;
+    Indentation(int indent): m_Indent(indent) {}
+    void Print(std::ostream& os) const;
+    Indentation Next() const { return Indentation(m_Indent+2); }
+    Indentation Previous() const { return Indentation(m_Indent-2); }
   private:
-    std::ofstream m_FileStream;
-    const cmCableCommand* m_FirstReferencingCommand;
-    const cmCableCommand* m_LastReferencingCommand;
+    int m_Indent;
   };
   
-  OutputFile* GetOutputFile(const std::string&, const cmCableCommand*);
+  void Indent() { m_Indentation = m_Indentation.Next(); }
+  void Unindent() { m_Indentation = m_Indentation.Previous(); }
+  const Indentation& GetIndentation() const { return m_Indentation; }
+  
+  void OpenNamespace(const std::string&);
+  void CloseNamespace(const std::string&);
+
+  void BeginPackage(cmCablePackageCommand*);
+  void EndPackage();
   
 private:
-  typedef std::map<std::string, OutputFile*>  OutputFiles;
-  
   /**
    * The cmCableCommand which created this instance of cmCableCommand.
    */
   const cmCableCommand* m_Owner;
   
   /**
-   * Hold all output streams by file name.
+   * Current indentation for output.
    */
-  OutputFiles m_OutputFiles;  
+  Indentation m_Indentation;
+  
+  /**
+   * The output file to which the configuration is written.
+   */
+  std::ofstream m_OutputFile;
+  
+  /**
+   * The stack of namespaces.
+   */
+  std::list<std::string>  m_NamespaceStack;
+  
+  /**
+   * The command that created the package currently being defined.
+   */
+  cmCablePackageCommand*  m_Package;
+  
+  /**
+   * The namespace level at which the current package was created.
+   * This must be the level when the package is ended.
+   */
+  unsigned int m_PackageNamespaceDepth;
 };
+
+std::ostream& operator<<(std::ostream&, const cmCableData::Indentation&);
 
 #endif

@@ -23,16 +23,18 @@
  * Write the CABLE configuration code to define this InstantiationSet.
  * This includes the "class" keyword to do class template instantiations.
  */
-void cmCableInstantiateClassCommand::WriteConfiguration(std::ostream& os) const
+void cmCableInstantiateClassCommand::WriteConfiguration() const
 {
+  std::ostream& os = m_CableData->GetOutputStream();
+  cmCableData::Indentation indent = m_CableData->GetIndentation();
+
   cmRegularExpression needCdataBlock("[&<>]");
   
-  os << std::endl
-     << "  <InstantiationSet>" << std::endl;
-  for(Elements::const_iterator e = m_Elements.begin();
-      e != m_Elements.end(); ++e)
+  os << indent << "<InstantiationSet>" << std::endl;
+  for(Entries::const_iterator e = m_Entries.begin();
+      e != m_Entries.end(); ++e)
     {
-    os << "    <Element>class ";
+    os << indent << "  <Element>class ";
     if(needCdataBlock.find(e->c_str()))
       {
       os << "<![CDATA[" << e->c_str() << "]]>";
@@ -43,5 +45,5 @@ void cmCableInstantiateClassCommand::WriteConfiguration(std::ostream& os) const
       }
     os << "</Element>" << std::endl;
     }
-  os << "  </InstantiationSet>" << std::endl;
+  os << indent << "</InstantiationSet>" << std::endl;
 }

@@ -16,104 +16,196 @@
 #include "cmCableData.h"
 #include "cmCacheManager.h"
 
+#include "cmCablePackageCommand.h"
 
 /**
- * Free all data that was stored here.
+ * The cmCableData instance is owned by one cmCableCommand, which is given
+ * to this constructor.
+ */
+cmCableData::cmCableData(const cmCableCommand* owner):
+  m_Owner(owner),
+  m_Indentation(0),
+  m_Package(NULL),
+  m_PackageNamespaceDepth(0)
+{
+  this->OpenOutputFile("cable_config.xml");
+}
+
+
+/**
+ * Free all data that was stored here.  Also close the output file.
  */
 cmCableData::~cmCableData()
 {
-  for(OutputFiles::iterator i = m_OutputFiles.begin();
-      i != m_OutputFiles.end(); ++i)
+  // End last package, if any.
+  this->EndPackage();
+  
+  // Finish up the output file.
+  this->CloseOutputFile();
+}
+
+
+/**
+ * Open the configuration output file with the given name.  This
+ * writes the configuration header.
+ */
+void cmCableData::OpenOutputFile(const std::string& name)
+{
+  m_OutputFile.open(name.c_str());
+  
+  if(m_OutputFile)
     {
-    delete i->second;
+    this->WriteConfigurationHeader();
     }
 }
 
 
 /**
- * The constructor attempts to open the file for writing.
+ * Close the configuration output file.  This writes the configuration
+ * footer.
  */
-cmCableData::OutputFile
-::OutputFile(std::string file, const cmCableCommand* command):
-  m_FileStream(file.c_str()),
-  m_FirstReferencingCommand(command),
-  m_LastReferencingCommand(command)
+void cmCableData::CloseOutputFile()
 {
-  if(!m_FileStream)
+  if(m_OutputFile)
     {
-    cmSystemTools::Error("Error can not open for write: ", file.c_str());
+    this->WriteConfigurationFooter();
+    m_OutputFile.close();
     }
 }
 
 
 /**
- * Destructor closes the file, if it was open.
+ * Write a CABLE configuration file header.
  */
-cmCableData::OutputFile
-::~OutputFile()
+void cmCableData::WriteConfigurationHeader()
 {
-  if(m_FileStream)
-    m_FileStream.close();
+  m_OutputFile << m_Indentation << "<?xml version=\"1.0\"?>" << std::endl
+               << m_Indentation << "<CableConfiguration>" << std::endl;  
+  this->Indent();
 }
 
 
 /**
- * Get the output stream associated with this OutputFile.
+ * Write a CABLE configuration file footer.
  */
-std::ostream&
-cmCableData::OutputFile
-::GetStream()
+void cmCableData::WriteConfigurationFooter()
 {
-  return m_FileStream;
+  this->Unindent();
+  m_OutputFile << m_Indentation << "</CableConfiguration>" << std::endl;
 }
 
 
+/**
+ * Print indentation spaces.
+ */
 void
-cmCableData::OutputFile
-::SetLastReferencingCommand(const cmCableCommand* command)
+cmCableData::Indentation
+::Print(std::ostream& os) const
 {
-  m_LastReferencingCommand = command;
-}
-
-
-bool
-cmCableData::OutputFile
-::FirstReferencingCommandIs(const cmCableCommand* command) const
-{
-  return (m_FirstReferencingCommand == command);
-}
-
-
-bool
-cmCableData::OutputFile
-::LastReferencingCommandIs(const cmCableCommand* command) const
-{
-  return (m_LastReferencingCommand == command);
+  if(m_Indent <= 0)
+    { return; }
+  
+  // Use blocks of 8 spaces to speed up big indents.
+  unsigned int blockCount = m_Indent >> 3;
+  unsigned int singleCount = m_Indent & 7;
+  while(blockCount-- > 0)
+    {
+    os << "        ";
+    }
+  while(singleCount-- > 0)
+    {
+    os << " ";
+    }
 }
 
 
 /**
- * Get the OutputFile for the file with the given name.  Automatically
- * maintains first and last referencing commands.
+ * Open a namespace with the given name.
  */
-cmCableData::OutputFile*
-cmCableData::GetOutputFile(const std::string& name,
-                           const cmCableCommand* command)
+void cmCableData::OpenNamespace(const std::string& name)
 {
-  OutputFiles::iterator f = m_OutputFiles.find(name);
-  // If the file hasn't yet been opened, create an entry for it.
-  if(f == m_OutputFiles.end())
+  m_NamespaceStack.push_back(name);
+}
+
+
+/**
+ * Close the current namespace, checking whether it has the given name.
+ */
+void cmCableData::CloseNamespace(const std::string& name)
+{
+  if(m_NamespaceStack.empty())
     {
-    OutputFile* outputFile = new OutputFile(name, command);
-    m_OutputFiles[name] = outputFile;
-    
-    return outputFile;
+    cmSystemTools::Error("Unbalanced close-namespace = ", name.c_str());
+    return;
+    }
+  if(m_NamespaceStack.back() != name)
+    {
+    cmSystemTools::Error("Wrong name on close-namespace = ", name.c_str());
     }
   
-  // The file has already been opened.  Set the command as the last
-  // referencing command.
-  f->second->SetLastReferencingCommand(command);
+  // If this closes the namespace where the current package was opened,
+  // the package must end as well.
+  if(m_Package && (m_PackageNamespaceDepth == m_NamespaceStack.size()))
+    {
+    this->EndPackage();
+    }
   
-  return f->second;
+  m_NamespaceStack.pop_back();
+}
+
+
+/**
+ * Begin a new package definition.  If there is a current one, it
+ * will be ended.
+ */
+void cmCableData::BeginPackage(cmCablePackageCommand* command)
+{
+  // Close the current package, if any.
+  this->EndPackage();
+  
+  // Open this package.
+  m_Package = command;
+  
+  // Save the package's opening namespace depth for later verification
+  // on the end of the package.
+  m_PackageNamespaceDepth = m_NamespaceStack.size();
+}
+
+
+/**
+ * End a package definition.
+ */
+void cmCableData::EndPackage()
+{
+  // Make sure we have an open package.
+  if(!m_Package)
+    {
+    return;
+    }
+  
+  // Make sure the namespace nesting depth matches the opening depth
+  // of the package.
+  if(m_PackageNamespaceDepth != m_NamespaceStack.size())
+    {
+    cmSystemTools::Error("Package ended at different namespace depth than"
+                         "it was created!", "");
+    }
+  // Write out the package's footer.
+  m_Package->WritePackageFooter();
+  
+  // Done with the package.
+  m_Package = NULL;
+}
+
+
+/**
+ * Simplify indentation printing by allowing Indentation objects to be added
+ * to streams.
+ */
+std::ostream& operator<<(std::ostream& os,
+                         const cmCableData::Indentation& indent)
+{  
+  indent.Print(os);
+  return os;
 }
 

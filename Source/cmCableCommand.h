@@ -37,9 +37,6 @@ public:
   cmCableCommand();
   virtual ~cmCableCommand();
   
-  void WriteConfigurationHeader(std::ostream&) const;
-  void WriteConfigurationFooter(std::ostream&) const;
-  
   cmTypeMacro(cmCableCommand, cmCommand);
 protected:
   void SetupCableData();

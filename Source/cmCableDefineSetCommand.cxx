@@ -28,6 +28,9 @@ bool cmCableDefineSetCommand::Invoke(std::vector<std::string>& args)
     return false;
     }
   
+  // This command needs access to the Cable data.
+  this->SetupCableData();
+  
   std::vector<std::string>::const_iterator arg = args.begin();
   
   // The first argument is the name of the set.
@@ -39,6 +42,9 @@ bool cmCableDefineSetCommand::Invoke(std::vector<std::string>& args)
     m_Elements.push_back(Element(this->GenerateTag(*arg), *arg));
     }
   
+  // Write this command's configuration output.
+  this->WriteConfiguration();
+  
   return true;
 }
 
@@ -46,15 +52,20 @@ bool cmCableDefineSetCommand::Invoke(std::vector<std::string>& args)
 /**
  * Write the CABLE configuration code to define this Set.
  */
-void cmCableDefineSetCommand::WriteConfiguration(std::ostream& os) const
+void cmCableDefineSetCommand::WriteConfiguration() const
 {
   cmRegularExpression needCdataBlock("[&<>]");
   
-  os << "  <Set name=\"" << m_SetName.c_str() << "\">" << std::endl;
+  // Get the ouptut information from the cmCableData.
+  std::ostream& os = m_CableData->GetOutputStream();
+  cmCableData::Indentation indent = m_CableData->GetIndentation();
+  
+  // Output the code.
+  os << indent << "<Set name=\"" << m_SetName.c_str() << "\">" << std::endl;
   for(Elements::const_iterator e = m_Elements.begin();
       e != m_Elements.end(); ++e)
     {
-    os << "    <Element";
+    os << indent << "  <Element";
     // Only output the tag if it is not the empty string.
     if(e->first.length() > 0)
       {
@@ -71,7 +82,7 @@ void cmCableDefineSetCommand::WriteConfiguration(std::ostream& os) const
       }
     os << "</Element>" << std::endl;
     }
-  os << "  </Set>" << std::endl;
+  os << indent << "</Set>" << std::endl;
 }
 
 

@@ -13,20 +13,19 @@
   See COPYRIGHT.txt for copyright details.
 
 =========================================================================*/
-#ifndef cmCableInstantiateCommand_h
-#define cmCableInstantiateCommand_h
+#ifndef cmCableSourceFilesCommand_h
+#define cmCableSourceFilesCommand_h
 
 #include "cmStandardIncludes.h"
 #include "cmCablePackageEntryCommand.h"
 
-/** \class cmCableInstantiateCommand
- * \brief Define a command that generates a rule for explicit template
- * instantiations.
+/** \class cmCableSourceFilesCommand
+ * \brief Define a command that generates a rule for a CABLE Headers block.
  *
- * cmCableInstantiateCommand is used to generate a rule in a CABLE
- * configuration file to create explicit template instantiations.
+ * cmCableSourceFilesCommand is used to generate a rule in a CABLE
+ * configuration file to setup a Package's include files.
  */
-class cmCableInstantiateCommand : public cmCablePackageEntryCommand
+class cmCableSourceFilesCommand : public cmCablePackageEntryCommand
 {
 public:
   /**
@@ -34,20 +33,20 @@ public:
    */
   virtual cmCommand* Clone() 
     {
-    return new cmCableInstantiateCommand;
+    return new cmCableSourceFilesCommand;
     }
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "CABLE_INSTANTIATE";}
+  virtual const char* GetName() { return "CABLE_SOURCE_FILES";}
 
   /**
    * Succinct documentation.
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Define CABLE InstantiationSet in a package.";
+    return "Define CABLE header file dependencies in a package.";
     }
   
   /**
@@ -56,15 +55,13 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "CABLE_INSTANTIATE(member1 member2 ...)\n"
-      "Generates an InstantiationSet in the CABLE configuration.  It is\n"
-      "assumed that all members of the set are explicit instantiations of\n"
-      "template non-classes (functions, operators, etc).";
+      "CABLE_SOURCE_FILES(file1 file2 ...)"
+      "Generates a Package's Headers block in the CABLE configuration.";
     }
 
-  virtual void WriteConfiguration() const;  
+  virtual void WriteConfiguration() const;
 
-  cmTypeMacro(cmCableInstantiateCommand, cmCablePackageCommand);
+  cmTypeMacro(cmCableSourceFilesCommand, cmCableCommand);
 protected:
   typedef cmCablePackageEntryCommand::Entries  Entries;
 };

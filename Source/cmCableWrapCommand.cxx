@@ -13,23 +13,20 @@
   See COPYRIGHT.txt for copyright details.
 
 =========================================================================*/
-#include "cmCableInstantiateCommand.h"
+#include "cmCableWrapCommand.h"
 #include "cmCacheManager.h"
 
-#include "cmRegularExpression.h"
-
-
 /**
- * Write the CABLE configuration code to define this InstantiationSet.
+ * Write the CABLE configuration code to define this WrapperSet.
  */
-void cmCableInstantiateCommand::WriteConfiguration() const
+void cmCableWrapCommand::WriteConfiguration() const
 {
   std::ostream& os = m_CableData->GetOutputStream();
   cmCableData::Indentation indent = m_CableData->GetIndentation();
-
+  
   cmRegularExpression needCdataBlock("[&<>]");
   
-  os << indent << "<InstantiationSet>" << std::endl;
+  os << indent << "<WrapperSet>" << std::endl;
   for(Entries::const_iterator e = m_Entries.begin();
       e != m_Entries.end(); ++e)
     {
@@ -44,5 +41,5 @@ void cmCableInstantiateCommand::WriteConfiguration() const
       }
     os << "</Element>" << std::endl;
     }
-  os << indent << "</InstantiationSet>" << std::endl;
+  os << indent << "</WrapperSet>" << std::endl;
 }
