@@ -123,7 +123,7 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
   fileRef->AddAttribute("path", this->CreateString(
     lg->ConvertToRelativeOutputPath(sf->GetFullPath().c_str()).c_str()));
   fileRef->AddAttribute("refType", this->CreateString("4"));
-  fileRef->AddAttribute("sourceTree", this->CreateString("\"<group>\""));
+  fileRef->AddAttribute("sourceTree", this->CreateString("\"<absolute>\""));
   return buildFile;
 }
 
