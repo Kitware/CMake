@@ -50,9 +50,6 @@ SET (CMAKE_EXECUTABLE_SUFFIX ".exe" CACHE INTERNAL
 SET (CMAKE_MODULE_SUFFIX ".dll" CACHE INTERNAL 
      "Module library suffix.")
 
-SET (CMAKE_OBJECT_FILE_SUFFIX ".obj" CACHE INTERNAL 
-     "Object file suffix.")
-
 SET (CMAKE_SHLIB_SUFFIX ".dll" CACHE INTERNAL 
      "Shared library suffix.")
 
