@@ -658,7 +658,7 @@ IF(BUILD_TESTING)
     ENDIF(CMAKE_Fortran_COMPILER_FULLPATH)
 
     INCLUDE(FindJava)
-    IF(JAVA_COMPILE)
+    IF(JAVA_COMPILE AND JAVA_RUNTIME AND JAVA_ARCHIVE)
       ADD_TEST(Java ${CMAKE_CTEST_COMMAND}
         --build-and-test 
         "${CMake_SOURCE_DIR}/Tests/Java"
@@ -670,7 +670,7 @@ IF(BUILD_TESTING)
         --build-run-dir "${CMake_BINARY_DIR}/Tests/Java/"
 #        --test-command ${JAVA_RUNTIME} -classpath hello.jar HelloWorld)
         --test-command ${JAVA_RUNTIME} HelloWorld)
-    ENDIF(JAVA_COMPILE)
+    ENDIF(JAVA_COMPILE AND JAVA_RUNTIME AND JAVA_ARCHIVE)
   ENDIF(CMAKE_GENERATOR MATCHES "Makefiles")
   
   IF (CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE OR WXWINDOWS_INCLUDE_DIR)
