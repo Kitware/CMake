@@ -139,6 +139,14 @@ public:
   static bool FileExists(const char* filename);
   
   static unsigned long FileLength(const char *filename);
+
+  /** Compare file modification times.
+      Returns true for successful comparison and false for error.
+      When true is returned, result has -1, 0, +1 for
+      f1 older, same, or newer than f2.  */
+  static bool FileTimeCompare(const char* f1, const char* f2,
+                              int* result);
+
   /**
    *  Add the paths from the environment variable PATH to the 
    *  string vector passed in.  If env is set then the value

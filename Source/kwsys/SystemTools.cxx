@@ -693,6 +693,90 @@ bool SystemTools::FileExists(const char* filename)
 }
 
 
+bool SystemTools::FileTimeCompare(const char* f1, const char* f2,
+                                  int* result)
+{
+  // Default to same time.
+  *result = 0;
+#if !defined(_WIN32) || defined(__CYGWIN__)
+  // POSIX version.  Use stat function to get file modification time.
+  struct stat s1;
+  if(stat(f1, &s1) != 0)
+    {
+    return false;
+    }
+  struct stat s2;
+  if(stat(f2, &s2) != 0)
+    {
+    return false;
+    }
+# if KWSYS_STAT_HAS_ST_MTIM
+  // Compare using nanosecond resolution.
+  if(s1.st_mtim.tv_sec < s2.st_mtim.tv_sec)
+    {
+    *result = -1;
+    }
+  else if(s1.st_mtim.tv_sec > s2.st_mtim.tv_sec)
+    {
+    *result = 1;
+    }
+  else if(s1.st_mtim.tv_nsec < s2.st_mtim.tv_nsec)
+    {
+    *result = -1;
+    }
+  else if(s1.st_mtim.tv_nsec > s2.st_mtim.tv_nsec)
+    {
+    *result = 1;
+    }
+# else
+  // Compare using 1 second resolution.
+  if(s1.st_mtime < s2.st_mtime)
+    {
+    *result = -1;
+    }
+  else if(s1.st_mtime > s2.st_mtime)
+    {
+    *result = 1;
+    }
+# endif
+#else
+  // Windows version.  Create file handles and get the modification times.
+  HANDLE hf1 = CreateFile(f1, GENERIC_READ, FILE_SHARE_READ,
+                          NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS,
+                          NULL);
+  if(hf1 == INVALID_HANDLE_VALUE)
+    {
+    return false;
+    }
+  FILETIME tf1;
+  if(!GetFileTime(hf1, 0, 0, &tf1))
+    {
+    CloseHandle(hf1);
+    return false;
+    }
+  CloseHandle(hf1);
+  HANDLE hf2 = CreateFile(f2, GENERIC_READ, FILE_SHARE_READ,
+                          NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS,
+                          NULL);
+  if(hf2 == INVALID_HANDLE_VALUE)
+    {
+    return false;
+    }
+  FILETIME tf2;
+  if(!GetFileTime(hf2, 0, 0, &tf2))
+    {
+    CloseHandle(hf2);
+    return false;
+    }
+  CloseHandle(hf2);
+
+  // Compare the file times using resolution provided by system call.
+  *result = (int)CompareFileTime(&tf1, &tf2);
+#endif
+  return true;
+}
+
+
 // Return a capitalized string (i.e the first letter is uppercased, all other
 // are lowercased)
 kwsys_stl::string SystemTools::Capitalized(const kwsys_stl::string& s)
