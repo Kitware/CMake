@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "CMakeCommandLineInfo.h" 
+#include "cmSystemTools.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -118,14 +119,20 @@ void CMakeCommandLineInfo::ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast)
           }
         break;
       case 'B':
-        this->m_WhereBuild = value;
+      {
+        std::string path = cmSystemTools::CollapseFullPath((const char*)value);
+        this->m_WhereBuild = path.c_str();
         break;
+      }
       case 'G':
         this->m_GeneratorChoiceString = value;
         break;
       case 'H':
-        this->m_WhereSource = value;
+      {
+        std::string path = cmSystemTools::CollapseFullPath((const char*)value);
+        this->m_WhereSource = path.c_str();
         break;
+      }
       }
     }
 
