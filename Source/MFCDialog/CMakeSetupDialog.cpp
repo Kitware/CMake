@@ -434,19 +434,11 @@ void CMakeSetupDialog::FillCacheManagerFromCacheGUI()
       i != items.end(); ++i)
     {
     CPropertyItem* item = *i; 
-    // check to see if the editor has removed the cache entry
-    if(item->m_Removed)
-      {
-      cmCacheManager::GetInstance()->RemoveCacheEntry((*i)->m_propName);
-      }
-    else
-      {
-	  cmCacheManager::CacheEntry *entry = 
+    cmCacheManager::CacheEntry *entry = 
       cmCacheManager::GetInstance()->GetCacheEntry((const char*)item->m_propName);
-      if (entry)
-        {
-        entry->m_Value = item->m_curValue;
-        }
+    if (entry)
+      {
+      entry->m_Value = item->m_curValue;
       }
     }
 }

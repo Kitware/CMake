@@ -461,7 +461,7 @@ void cmDSPMakefile::WriteDSPHeader(std::ostream& fout, const char *libName,
     {
     // add libraries to executables and dlls (but never include
     // a library in a library, bad recursion)
-    if (!target.GetType() == cmTarget::LIBRARY || 
+    if (!(target.GetType() == cmTarget::LIBRARY) || 
         (m_LibraryBuildType == DLL && libName != j->first))
       {
       std::string lib = j->first;

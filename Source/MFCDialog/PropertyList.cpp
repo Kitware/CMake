@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "PropertyList.h"
+#include "../cmCacheManager.h"
 
 #define IDC_PROPCMBBOX   712
 #define IDC_PROPEDITBOX  713
@@ -146,28 +147,11 @@ int CPropertyList::AddProperty(const char* name,
       return i;
       }
     }
-  // if it is not in the displayed list, then
-  // check for it in the m_PropertyItems list as
-  // a removed item
-  for(std::set<CPropertyItem*>::iterator 
-        p = m_PropertyItems.begin();
-      p != m_PropertyItems.end(); ++p)
-    {
-    if((*p)->m_propName == name)
-      {
-      pItem = *p;
-      pItem->m_Removed = false;
-      pItem->m_curValue = value; 
-      pItem->m_HelpString = helpString;
-      Invalidate();
-      }
-    }
   // if it is not found, then create a new one
   if(!pItem)
     {
     pItem = new CPropertyItem(name, value, helpString, type, comboItems);
     }
-  
   return this->AddPropItem(pItem);
 }
 
@@ -671,7 +655,9 @@ void CPropertyList::OnDelete()
     return;
     }
   CPropertyItem* pItem = (CPropertyItem*) GetItemDataPtr(m_curSel);
-  pItem->m_Removed = true;
+  cmCacheManager::GetInstance()->RemoveCacheEntry(pItem->m_propName);
+  m_PropertyItems.erase(pItem);
+  delete pItem;
   this->DeleteString(m_curSel);
   Invalidate();
 }
@@ -692,7 +678,9 @@ void CPropertyList::RemoveAll()
   for(int i =0; i < c; ++i)
     {
     CPropertyItem* pItem = (CPropertyItem*) GetItemDataPtr(0);
-    pItem->m_Removed = true;
+    cmCacheManager::GetInstance()->RemoveCacheEntry(pItem->m_propName);
+    m_PropertyItems.erase(pItem);
+    delete pItem;
     this->DeleteString(0);
     }
   Invalidate();
