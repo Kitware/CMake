@@ -60,7 +60,7 @@ public:
         "to change, and then provide the values you want to set next.  "
         "Properties that cmake knows about are PREFIX and SUFFIX for Unix "
         "systems and libraries.   CMake also knows about LINK_FLAGS, which "
-        "can be used to add extra flags to the link step of a target."
+        "can be used to add extra flags to the link step of a target. "
         "DEFINE_SYMBOL is a symbol that is defined when compiling C or C++ "
         "sources.  PRE_INSTALL_SCRIPT specifies CMake script that is run "
         "prior to installing the target. POST_INSTALL_SCRIPT specifies "

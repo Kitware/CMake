@@ -81,7 +81,7 @@ public:
       "INCLUDE command.  If OPTIONAL is present, then no error "
       "is raised if the file does not exist.\n"
       "If module is specified instead of file, the file with name "
-      "module.cmake is searched in the CMAKE_MODULE_PATH.";
+      "<modulename>.cmake is searched in the CMAKE_MODULE_PATH.";
     }
   
   cmTypeMacro(cmIncludeCommand, cmCommand);
