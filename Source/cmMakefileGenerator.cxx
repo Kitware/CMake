@@ -1,4 +1,4 @@
-#include "cmMakeFileGenerator.h"
+#include "cmMakefileGenerator.h"
 
 void cmMakefileGenerator::SetMakefile(cmMakefile* mf)
 {
