@@ -87,7 +87,7 @@ void cmBorlandMakefileGenerator2::OutputMakeVariables(std::ostream& fout)
     "CMAKE_COMMAND = ${CMAKE_COMMAND}\n"    
     "CMAKE_STANDARD_WINDOWS_LIBRARIES = @CMAKE_STANDARD_WINDOWS_LIBRARIES@\n"
     "CMAKE_C_COMPILER    = @CMAKE_C_COMPILER@ \n"
-    "CMAKE_CFLAGS        = @CMAKE_CFLAGS@ @BUILD_FLAGS@\n"
+    "CMAKE_C_FLAGS        = @CMAKE_C_FLAGS@ @BUILD_FLAGS@\n"
     "CMAKE_CXX_COMPILER  = @CMAKE_CXX_COMPILER@\n"
     "CMAKE_CXXFLAGS      = -P @CMAKE_CXX_FLAGS@ @BUILD_FLAGS@\n";
   std::string buildType = "CMAKE_CXX_FLAGS_";
@@ -249,7 +249,7 @@ OutputBuildObjectFromSource(std::ostream& fout,
   std::string ext = source.GetSourceExtension();
   if(ext == "c" )
     {
-    compileCommand = "$(CMAKE_C_COMPILER) $(CMAKE_CFLAGS) ";
+    compileCommand = "$(CMAKE_C_COMPILER) $(CMAKE_C_FLAGS) ";
     compileCommand += extraCompileFlags;
     if(shared)
       {

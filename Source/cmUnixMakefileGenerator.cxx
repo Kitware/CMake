@@ -1187,7 +1187,7 @@ void cmUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     "CMAKE_AR            = @CMAKE_AR@\n"
     "CMAKE_AR_ARGS       = @CMAKE_AR_ARGS@\n"
     "CMAKE_C_COMPILER    = @CMAKE_C_COMPILER@\n"
-    "CMAKE_CFLAGS        = @CMAKE_C_FLAGS@\n"
+    "CMAKE_C_FLAGS       = @CMAKE_C_FLAGS@\n"
     "CMAKE_SHLIB_CFLAGS  = @CMAKE_SHLIB_CFLAGS@\n"
     "\n"
     "CMAKE_CXX_COMPILER  = @CMAKE_CXX_COMPILER@\n"
@@ -1490,7 +1490,7 @@ OutputBuildObjectFromSource(std::ostream& fout,
   std::string ext = source.GetSourceExtension();
   if(ext == "c" )
     {
-    compileCommand = "$(CMAKE_C_COMPILER) $(CMAKE_CFLAGS) ";
+    compileCommand = "$(CMAKE_C_COMPILER) $(CMAKE_C_FLAGS) ";
     compileCommand += extraCompileFlags;
     if(shared)
       {
