@@ -18,6 +18,8 @@
 #define cmTarget_h
 
 #include "cmCustomCommand.h"
+
+class cmMakefile;
 class cmSourceFile;
 class cmGlobalGenerator;
 
