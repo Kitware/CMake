@@ -749,13 +749,15 @@ void cmSystemTools::Message(const char* m1, const char *title)
 }
 
 
-void cmSystemTools::CopyFileIfDifferent(const char* source,
+bool cmSystemTools::CopyFileIfDifferent(const char* source,
                                         const char* destination)
 {
   if(cmSystemTools::FilesDiffer(source, destination))
     {
     cmSystemTools::cmCopyFile(source, destination);
+    return true;
     }
+  return false;
 }
 
   

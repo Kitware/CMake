@@ -174,7 +174,7 @@ public:
    * Copy the source file to the destination file only
    * if the two files differ.  
    */
-  static void CopyFileIfDifferent(const char* source,
+  static bool CopyFileIfDifferent(const char* source,
                                   const char* destination);
   
   ///! Compare the contents of two files.  Return true if different.
