@@ -247,13 +247,16 @@ void cmUnixMakefileGenerator::OutputMakefile(const char* file)
   fout << "\n\n\n";
   this->OutputMakeVariables(fout);
   // Set up the default target as the VERY first target, so that make with no arguments will run it
-  this->OutputMakeRule(fout, 
-                       "Default target executed when no arguments are given to make",
-                       "default_target",
-                       0,
-                       "$(MAKE) -$(MAKEFLAGS)  $(MAKESILENT) cmake.depends_mark",
-                       "$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) all");
-
+  this->
+    OutputMakeRule(fout, 
+                   "Default target executed when no arguments are given to make, first make sure cmake.depends is up-to-date, then check the sources, then build the all target",
+                   "default_target",
+                   0,
+                   "$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.depends",
+                   "$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.check_depends",
+                   "$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) -f cmake.check_depends",
+                   "$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) all");
+  
   this->OutputTargetRules(fout);
   this->OutputDependLibs(fout);
   this->OutputTargets(fout);
@@ -269,7 +272,26 @@ void cmUnixMakefileGenerator::OutputMakefile(const char* file)
        return;
       }
     dependout << "# .o dependencies in this directory." << std::endl;
-    this->OutputObjectDepends(dependout);
+
+    std::string checkDepend = m_Makefile->GetStartOutputDirectory();
+    checkDepend += "/cmake.check_depends";
+    std::ofstream checkdependout(checkDepend.c_str());
+    if(!checkdependout)
+      {
+       cmSystemTools::Error("Error can not open for write: ", checkDepend.c_str());
+       return;
+      }
+    checkdependout << "# This file is used as a tag file, that all sources depend on.  If a source changes, then the rule to rebuild this file will cause cmake.depends to be rebuilt." << std::endl;
+    // if there were any depends output, then output the check depends
+    // information inot checkdependout
+    if(this->OutputObjectDepends(dependout))
+      {
+      this->OutputCheckDepends(checkdependout);
+      }
+    else
+      {
+      checkdependout << "all:\n\tcd .\n";
+      }
     }
   this->OutputCustomRules(fout);
   this->OutputMakeRules(fout);
@@ -878,7 +900,10 @@ void cmUnixMakefileGenerator::OutputBuildLibraryInDir(std::ostream& fout,
     }
   fout << cmSystemTools::EscapeSpaces(fullpath)
        << ":\n\tcd " << cmSystemTools::EscapeSpaces(path)
-           << "; $(MAKE) $(MAKESILENT) " << makeTarget << "\n\n"; 
+       << "; $(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.depends"
+       << "; $(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.check_depends"
+       << "; $(MAKE) -$(MAKEFLAGS) $(MAKESILENT) -f cmake.check_depends"
+       << "; $(MAKE) $(MAKESILENT) " << makeTarget << "\n\n"; 
 }
 
 bool cmUnixMakefileGenerator::SamePath(const char* path1, const char* path2)
@@ -984,6 +1009,7 @@ void cmUnixMakefileGenerator::BuildInSubDirectory(std::ostream& fout,
     fout << "\t@cd " << directory
          << "; $(MAKE) -$(MAKEFLAGS) " << target2 << "\n";
     }
+  fout << "\n";
 }
 
 
@@ -1054,9 +1080,11 @@ void cmUnixMakefileGenerator::OutputSubDirectoryRules(std::ostream& fout)
     {
     return;
     }
-  this->OutputSubDirectoryVars(fout, "SUBDIR_BUILD", "build",
-                               "cmake.depends_mark",
-                               "all",
+  this->OutputSubDirectoryVars(fout, 
+                               "SUBDIR_BUILD",
+                               "default_target",
+                               "default_target",
+                               0,
                                SubDirectories);
   this->OutputSubDirectoryVars(fout, "SUBDIR_CLEAN", "clean",
                                "clean",
@@ -1078,8 +1106,9 @@ void cmUnixMakefileGenerator::OutputSubDirectoryRules(std::ostream& fout)
 // Output the depend information for all the classes 
 // in the makefile.  These would have been generated
 // by the class cmMakeDepend GenerateMakefile
-void cmUnixMakefileGenerator::OutputObjectDepends(std::ostream& fout)
+bool cmUnixMakefileGenerator::OutputObjectDepends(std::ostream& fout)
 {
+  bool ret = false;
   // Iterate over every target.
   std::map<cmStdString, cmTarget>& targets = m_Makefile->GetTargets();
   for(std::map<cmStdString, cmTarget>::const_iterator target = targets.begin(); 
@@ -1100,15 +1129,79 @@ void cmUnixMakefileGenerator::OutputObjectDepends(std::ostream& fout)
                 source->GetDepends().begin();
               dep != source->GetDepends().end(); ++dep)
             {
-            fout << " \\\n" << cmSystemTools::EscapeSpaces(dep->c_str());
+            fout << " \\\n" 
+                 << this->ConvertToNativePath(cmSystemTools::EscapeSpaces(
+                   dep->c_str()).c_str());
+            ret = true;
             }
           fout << "\n\n";
           }
         }
       }
     }
+  return ret;
 }
 
+
+
+// Output the depend information for all the classes 
+// in the makefile.  These would have been generated
+// by the class cmMakeDepend GenerateMakefile
+void cmUnixMakefileGenerator::OutputCheckDepends(std::ostream& fout)
+{
+  std::set<std::string> emitted;
+  // Iterate over every target.
+  std::map<cmStdString, cmTarget>& targets = m_Makefile->GetTargets();
+  this->OutputMakeVariables(fout);
+  fout << "default:\n";
+  fout << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) -f cmake.check_depends all\n"
+       << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) -f cmake.check_depends cmake.depends\n\n";
+  fout << "all: ";
+  for(std::map<cmStdString, cmTarget>::const_iterator target = targets.begin(); 
+      target != targets.end(); ++target)
+    {
+    // Iterate over every source for this target.
+    const std::vector<cmSourceFile>& sources = target->second.GetSourceFiles();
+    for(std::vector<cmSourceFile>::const_iterator source = sources.begin(); 
+        source != sources.end(); ++source)
+      {
+      if(!source->IsAHeaderFileOnly())
+        {
+        if(!source->GetDepends().empty())
+          {
+          for(std::vector<std::string>::const_iterator dep =
+                source->GetDepends().begin();
+              dep != source->GetDepends().end(); ++dep)
+            {
+            std::string dependfile = 
+              this->ConvertToNativePath(cmSystemTools::EscapeSpaces(
+                dep->c_str()).c_str());
+            if(emitted.insert(dependfile).second)
+              {
+              fout << " \\\n" << dependfile ;
+              }
+            }
+          }
+        }
+      }
+    }
+  fout << "\n\n# if any of these files changes run make dependlocal\n";
+  fout << "cmake.depends: ";
+  std::set<std::string>::iterator i;
+  for(i = emitted.begin(); i != emitted.end(); ++i)
+    {
+    fout << " \\\n" << *i;
+    }
+  fout << "\n\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) dependlocal\n\n";
+  fout << "\n\n";
+  fout << "# if a .h file is removed then run make dependlocal\n\n";
+  for(std::set<std::string>::iterator i = emitted.begin();
+      i != emitted.end(); ++i)
+    {
+    fout << *i << ":\n"
+         << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) dependlocal\n\n";
+    }
+}
 
 // Output each custom rule in the following format:
 // output: source depends...
@@ -1482,7 +1575,7 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
   this->OutputMakeRule(fout, 
                        "Default build rule",
                        "all",
-                       "cmake.depends_mark $(TARGETS) $(SUBDIR_BUILD)",
+                       "cmake.depends $(TARGETS) $(SUBDIR_BUILD)",
                        0);
   if (m_Makefile->IsOn("QT_WRAP_CPP") || 
       m_Makefile->IsOn("QT_WRAP_UI")  ||
@@ -1506,33 +1599,56 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                          "-@ $(RM) $(CLEAN_OBJECT_FILES) $(EXECUTABLES)"
                          " $(TARGETS)");
     }
-  fout << "\n#Rule to build the cmake.depends and Makefile as side effect\n";
-  fout << "cmake.depends_mark: $(CMAKE_MAKEFILE_SOURCES)\n";
-  this->BuildInSubDirectory(fout, 
-                            m_Makefile->GetHomeOutputDirectory(),
-                            "depend", 0);
-  const char* depend_subdirs = 0;
-  if(!m_Makefile->GetSubDirectories().empty())
-    {
-    this->OutputMakeRule(fout, 
-                         "Rule to force build of cmake.depend in subdirectories",
-                         "depend_subdirs",
-                         "$(SUBDIR_DEPEND)",
-                         0
-      );
-    depend_subdirs = "$(MAKE) -$(MAKEFLAGS)  $(MAKESILENT) depend_subdirs";
-    }
+  this->OutputMakeRule(fout, 
+                       "Rule to build the cmake.depends and Makefile as side effect, if a source cmakelist file is out of date.",
+                       "cmake.depends",
+                       "$(CMAKE_MAKEFILE_SOURCES) ",
+                       "$(CMAKE_COMMAND) "
+                       "-S$(CMAKE_CURRENT_SOURCE) -O$(CMAKE_CURRENT_BINARY) "
+                       "-H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)"
+    );
   this->OutputMakeRule(fout, 
                        "Rule to force the build of cmake.depends",
                        "depend",
+                       "$(SUBDIR_DEPEND)",
+                       "$(CMAKE_COMMAND) "
+                       "-S$(CMAKE_CURRENT_SOURCE) -O$(CMAKE_CURRENT_BINARY) "
+                       "-H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)");  
+  this->OutputMakeRule(fout, 
+                       "Rule to force the build of cmake.depends "
+                       "in the current directory only.",
+                       "dependlocal",
                        0,
                        "$(CMAKE_COMMAND) "
                        "-S$(CMAKE_CURRENT_SOURCE) -O$(CMAKE_CURRENT_BINARY) "
-                       "-H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)",
-                       "-$(RM) cmake.depends_mark",
-                       "echo mark > cmake.depends_mark",
-                       depend_subdirs
-    );
+                       "-H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)");  
+
+  // collect up all the sources
+  std::string allsources;
+  std::map<cmStdString, cmTarget>& targets = m_Makefile->GetTargets();
+  for(std::map<cmStdString, cmTarget>::const_iterator target = targets.begin(); 
+      target != targets.end(); ++target)
+    {
+    // Iterate over every source for this target.
+    const std::vector<cmSourceFile>& sources = target->second.GetSourceFiles();
+    for(std::vector<cmSourceFile>::const_iterator source = sources.begin(); 
+        source != sources.end(); ++source)
+      {
+      if(!source->IsAHeaderFileOnly())
+        {
+          allsources += source->GetFullPath();
+          allsources += " ";
+        }
+      }
+    }
+  this->OutputMakeRule(fout, 
+                       "rule to rebuild cmake.depends if a source file is changed.",
+                       "cmake.check_depends",
+                       allsources.c_str(),
+                       "$(CMAKE_COMMAND) "
+                       "-S$(CMAKE_CURRENT_SOURCE) -O$(CMAKE_CURRENT_BINARY) "
+                       "-H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)");
+
   this->OutputMakeRule(fout, 
                        "Rebuild CMakeCache.txt file",
                        "rebuild_cache",

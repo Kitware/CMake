@@ -91,7 +91,14 @@ public:
    * in the makefile.  These would have been generated
    * by the class cmMakeDepend.
    */
-  virtual void OutputObjectDepends(std::ostream&);
+  virtual bool OutputObjectDepends(std::ostream&);
+
+  /**
+   * Output the check depend information for all the classes 
+   * in the makefile.  These would have been generated
+   * by the class cmMakeDepend.
+   */
+  virtual void OutputCheckDepends(std::ostream&);
 
   /**
    * Try to determine system infomation such as shared library
