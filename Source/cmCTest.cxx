@@ -263,6 +263,7 @@ cmCTest::cmCTest()
   m_DartMode              = false;
   m_ShowOnly              = false;
   m_TestModel             = cmCTest::EXPERIMENTAL;
+  m_TimeOut               = 0;
   int cc; 
   for ( cc=0; cc < cmCTest::LAST_TEST; cc ++ )
     {
@@ -315,6 +316,7 @@ void cmCTest::Initialize()
   fin.close();
   if ( m_DartMode )
     {
+    m_TimeOut = atoi(m_DartConfiguration["TimeOut"].c_str());
     std::string testingDir = m_ToplevelPath + "/Testing";
     if ( cmSystemTools::FileExists(testingDir.c_str()) )
       {
@@ -559,9 +561,9 @@ int cmCTest::UpdateDirectory()
   std::ofstream ofs;
   if ( !m_ShowOnly )
     {
-    res = cmSystemTools::RunCommand(command.c_str(), goutput, 
-                                    retVal, sourceDirectory.c_str(),
-                                    m_Verbose);
+    res = cmSystemTools::RunSingleCommand(command.c_str(), &goutput, 
+      &retVal, sourceDirectory.c_str(),
+      m_Verbose, m_TimeOut);
     if ( this->OpenOutputFile("Temporary", "LastUpdate.log", ofs) )
       {
       ofs << goutput << std::endl;; 
@@ -614,9 +616,9 @@ int cmCTest::UpdateDirectory()
       std::string logcommand = cvsCommand + " -z3 log -N " + file;
       //std::cout << "Do log: " << logcommand << std::endl;
       std::string output;
-      res = cmSystemTools::RunCommand(logcommand.c_str(), output, 
-                                      retVal, sourceDirectory.c_str(),
-                                      m_Verbose);
+      res = cmSystemTools::RunSingleCommand(logcommand.c_str(), &output, 
+        &retVal, sourceDirectory.c_str(),
+        m_Verbose, m_TimeOut);
       if ( ofs )
         {
         ofs << output << std::endl;
@@ -868,9 +870,9 @@ int cmCTest::ConfigureDirectory()
       }
     std::string start_time = ::CurrentTime();
 
-    res = cmSystemTools::RunCommand(cCommand.c_str(), output, 
-                                    retVal, buildDirectory.c_str(),
-                                    m_Verbose);
+    res = cmSystemTools::RunSingleCommand(cCommand.c_str(), &output, 
+      &retVal, buildDirectory.c_str(),
+      m_Verbose, m_TimeOut);
     std::ofstream ofs;
     if ( this->OpenOutputFile("Temporary", "LastConfigure.log", ofs) )
       {
@@ -935,9 +937,9 @@ int cmCTest::BuildDirectory()
   bool res = true;
   if ( !m_ShowOnly )
     {
-    res = cmSystemTools::RunCommand(makeCommand.c_str(), output, 
-                                    retVal, buildDirectory.c_str(), 
-                                    m_Verbose);
+    res = cmSystemTools::RunSingleCommand(makeCommand.c_str(), &output, 
+      &retVal, buildDirectory.c_str(), 
+      m_Verbose, m_TimeOut);
     }
   else
     {
@@ -1211,9 +1213,9 @@ int cmCTest::CoverageDirectory()
     bool res = true;
     if ( !m_ShowOnly )
       {
-      res = cmSystemTools::RunCommand(command.c_str(), output, 
-                                      retVal, opath.c_str(),
-                                      m_Verbose);
+      res = cmSystemTools::RunSingleCommand(command.c_str(), &output, 
+        &retVal, opath.c_str(),
+        m_Verbose, m_TimeOut);
       }
     if ( res && retVal == 0 )
       {
@@ -1721,8 +1723,8 @@ void cmCTest::ProcessDirectory(std::vector<std::string> &passed,
         bool res = true;
         if ( !m_ShowOnly )
           {
-          res = cmSystemTools::RunCommand(testCommand.c_str(), output, 
-                                          retVal, 0, false);
+          res = cmSystemTools::RunSingleCommand(testCommand.c_str(), &output, 
+            &retVal, 0, false, m_TimeOut);
           }
         clock_finish = cmSystemTools::GetTime();
 

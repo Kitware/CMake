@@ -210,6 +210,8 @@ private:
 
   int                     m_TestModel;
 
+  int                     m_TimeOut;
+
   /**
    * Generate the Dart compatible output
    */
