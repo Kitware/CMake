@@ -340,6 +340,7 @@ bool cmFileCommand::HandleInstallCommand(
     return false;
     }
 
+  int destDirLength = 0;
   if ( destdir && *destdir )
     {
     std::string sdestdir = destdir;
@@ -393,6 +394,7 @@ bool cmFileCommand::HandleInstallCommand(
         }
       }
     destination = sdestdir + (destination.c_str() + skip);
+    destDirLength = int(sdestdir.size());
     }
 
   if ( files.size() == 0 )
@@ -517,6 +519,8 @@ bool cmFileCommand::HandleInstallCommand(
             this->SetError(errstring.c_str());
             return false;
             }
+          smanifest_files += ";";
+          smanifest_files += libname.substr(destDirLength);;
           if ( destfile != soname )
             {
             if ( !cmSystemTools::CreateSymlink(fname.c_str(), soname.c_str()) )
@@ -525,6 +529,8 @@ bool cmFileCommand::HandleInstallCommand(
               this->SetError(errstring.c_str());
               return false;
               }
+            smanifest_files += ";";
+            smanifest_files += soname.substr(destDirLength);
             }
           }
         cmOStringStream str;
@@ -586,7 +592,8 @@ bool cmFileCommand::HandleInstallCommand(
             perror(err.str().c_str());
             }
           }
-        smanifest_files += ";" + destfile;
+        smanifest_files += ";";
+        smanifest_files += destfile.substr(destDirLength);
         }
       else
         {
