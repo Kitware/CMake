@@ -95,13 +95,9 @@ fi
 AC_PATH_PROGS(RUNMAKE, gmake make)
 
 AC_OUTPUT(Makefile Source/Makefile)
-# build the CMakeBuildTargets program
+# build cmake
 $RUNMAKE 
+# run cmake 
 ./Source/cmake $fullSrcDir
-
-
-
-
-
-
-
+# run cmake depends
+$RUNMAKE depend

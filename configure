@@ -1378,13 +1378,9 @@ chmod +x $CONFIG_STATUS
 rm -fr confdefs* $ac_clean_files
 test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
 
-# build the CMakeBuildTargets program
+# build cmake
 $RUNMAKE 
+# run cmake 
 ./Source/cmake $fullSrcDir
-
-
-
-
-
-
-
+# run cmake depends
+$RUNMAKE depend
