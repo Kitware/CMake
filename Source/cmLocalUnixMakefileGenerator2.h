@@ -84,6 +84,7 @@ protected:
   void WriteAllRules(std::ostream& makefileStream);
   void WriteDependRules(std::ostream& makefileStream);
   void WriteBuildRules(std::ostream& makefileStream);
+  void WriteCleanRules(std::ostream& makefileStream);
   void WriteDriverRules(std::ostream& makefileStream, const char* pass,
                         const char* local1, const char* local2=0);
   void WriteSubdirRules(std::ostream& makefileStream, const char* pass);
@@ -119,7 +120,9 @@ protected:
                         std::vector<std::string>& objects,
                         const char* linkRuleVar,
                         const char* extraLinkFlags);
-
+  void WriteObjectsVariable(std::ostream& ruleFileStream,
+                            const cmTarget& target,
+                            std::vector<std::string>& objects);
   std::string GetTargetDirectory(const cmTarget& target);
   std::string GetSubdirTargetName(const char* pass, const char* subdir);
   std::string GetObjectFileName(const cmTarget& target,

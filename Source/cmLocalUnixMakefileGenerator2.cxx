@@ -54,9 +54,6 @@ void cmLocalUnixMakefileGenerator2::SetEmptyCommand(const char* cmd)
 //----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator2::Generate(bool fromTheTop)
 {
-  // TODO: Handle EXECUTABLE_OUTPUT_PATH and LIBRARY_OUTPUT_PATH when
-  // superclass generator is not called.
-
 #ifdef CMLUMG_WRITE_OLD_MAKEFILE
   // Generate old style for now.
   this->cmLocalUnixMakefileGenerator::Generate(fromTheTop);
@@ -68,6 +65,10 @@ void cmLocalUnixMakefileGenerator2::Generate(bool fromTheTop)
                          m_Makefile->GetStartOutputDirectory());
     return;
     }
+
+  // Handle EXECUTABLE_OUTPUT_PATH and LIBRARY_OUTPUT_PATH since
+  // superclass generator is not called.
+  this->ConfigureOutputPaths();
 #endif
 
   // Generate the rule files for each target.
@@ -134,8 +135,8 @@ void cmLocalUnixMakefileGenerator2::GenerateMakefile()
   // Write main build rules.
   this->WriteBuildRules(makefileStream);
 
-  // Write clean rules. TODO: CONTINUE HERE
-  //this->WriteCleanRules(makefileStream);
+  // Write clean rules.
+  this->WriteCleanRules(makefileStream);
 
   // TODO: Write install rules.
   //this->WriteInstallRules(makefileStream);
@@ -1009,6 +1010,11 @@ cmLocalUnixMakefileGenerator2::WriteDependRules(std::ostream& makefileStream)
     << "# Rules for computing dependencies.\n"
     << "\n";
 
+  // TODO: Unify WriteDependRules, WriteBuildRules, WriteCleanRules,
+  // etc.  They are mostly duplicate code.
+
+  // TODO: Add registered files for cleaning.
+
   // Write rules to traverse the directory tree building dependencies.
   this->WriteDriverRules(makefileStream, "depend", "depend.local");
 
@@ -1095,6 +1101,56 @@ cmLocalUnixMakefileGenerator2::WriteBuildRules(std::ostream& makefileStream)
                       "Build targets in this directory.",
                       0,
                       "build.local",
+                      depends,
+                      commands);
+}
+
+//----------------------------------------------------------------------------
+void
+cmLocalUnixMakefileGenerator2::WriteCleanRules(std::ostream& makefileStream)
+{
+  // Write section header.
+  this->WriteDivider(makefileStream);
+  makefileStream
+    << "# Rules for cleaning targets.\n"
+    << "\n";
+
+  // Write rules to traverse the directory tree cleaning targets.
+  this->WriteDriverRules(makefileStream, "clean", "clean.local");
+
+  // Write the rule to clean targets in this directory.  It just
+  // depends on all targets' clean rules.
+  const cmTargets& targets = m_Makefile->GetTargets();
+  std::vector<std::string> depends;
+  std::vector<std::string> commands;
+  for(cmTargets::const_iterator t = targets.begin(); t != targets.end(); ++t)
+    {
+    // TODO: Dispatch generation of each target type.
+    if((t->second.GetType() == cmTarget::EXECUTABLE) ||
+       (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
+       (t->second.GetType() == cmTarget::SHARED_LIBRARY) ||
+       (t->second.GetType() == cmTarget::MODULE_LIBRARY))
+      {
+      if(t->second.IsInAll())
+        {
+        std::string clean = t->first;
+        clean += ".clean";
+        depends.push_back(clean);
+        }
+      }
+    }
+
+  // If there are no dependencies, use empty commands.
+  if(depends.empty())
+    {
+    commands = m_EmptyCommands;
+    }
+
+  // Write the rule.
+  this->WriteMakeRule(makefileStream,
+                      "Clean targets in this directory.",
+                      0,
+                      "clean.local",
                       depends,
                       commands);
 }
@@ -1459,22 +1515,14 @@ cmLocalUnixMakefileGenerator2
   this->OutputLinkLibraries(linklibs, 0, target);
 
   // Construct object file lists that may be needed to expand the
-  // rule.  TODO: Store these in make variables with line continuation
-  // to avoid excessively long lines.
-  std::string objs;
-  std::string objsQuoted;
-  const char* space = "";
-  for(std::vector<std::string>::iterator i = objects.begin();
-      i != objects.end(); ++i)
-    {
-    objs += space;
-    objs += this->ConvertToRelativeOutputPath(i->c_str());
-    objsQuoted += space;
-    objsQuoted += "\"";
-    objsQuoted += this->ConvertToRelativeOutputPath(i->c_str());
-    objsQuoted += "\"";
-    space = " ";
-    }
+  // rule.
+  this->WriteObjectsVariable(ruleFileStream, target, objects);
+  std::string objs = "$(";
+  objs += target.GetName();
+  objs += "_OBJECTS)";
+  std::string objsQuoted = "$(";
+  objsQuoted += target.GetName();
+  objsQuoted += "_OBJECTS_QUOTED)";
 
   // Expand placeholders in the commands.
   for(std::vector<std::string>::iterator i = commands.begin();
@@ -1505,6 +1553,20 @@ cmLocalUnixMakefileGenerator2
 
   // Write convenience targets.
   this->WriteConvenienceRules(ruleFileStream, target, targetFullPath.c_str());
+
+  // Write clean target.  TODO: Unify with all target and object file
+  // cleaning rules.
+  std::string remove = "$(CMAKE_COMMAND) -E remove -f ";
+  remove += this->ConvertToRelativeOutputPath(targetFullPath.c_str());
+  remove += " ";
+  remove += objs;
+  std::string cleanTarget = target.GetName();
+  cleanTarget += ".clean";
+  commands.clear();
+  depends.clear();
+  commands.push_back(remove);
+  this->WriteMakeRule(ruleFileStream, 0, 0, cleanTarget.c_str(),
+                      depends, commands);
 }
 
 //----------------------------------------------------------------------------
@@ -1703,22 +1765,14 @@ cmLocalUnixMakefileGenerator2
   this->OutputLinkLibraries(linklibs, target.GetName(), target);
 
   // Construct object file lists that may be needed to expand the
-  // rule.  TODO: Store these in make variables with line continuation
-  // to avoid excessively long lines.
-  std::string objs;
-  std::string objsQuoted;
-  const char* space = "";
-  for(std::vector<std::string>::iterator i = objects.begin();
-      i != objects.end(); ++i)
-    {
-    objs += space;
-    objs += this->ConvertToRelativeOutputPath(i->c_str());
-    objsQuoted += space;
-    objsQuoted += "\"";
-    objsQuoted += this->ConvertToRelativeOutputPath(i->c_str());
-    objsQuoted += "\"";
-    space = " ";
-    }
+  // rule.
+  this->WriteObjectsVariable(ruleFileStream, target, objects);
+  std::string objs = "$(";
+  objs += target.GetName();
+  objs += "_OBJECTS)";
+  std::string objsQuoted = "$(";
+  objsQuoted += target.GetName();
+  objsQuoted += "_OBJECTS_QUOTED)";
 
   // Expand placeholders in the commands.
   for(std::vector<std::string>::iterator i = commands.begin();
@@ -1756,6 +1810,56 @@ cmLocalUnixMakefileGenerator2
 
   // Write convenience targets.
   this->WriteConvenienceRules(ruleFileStream, target, targetFullPath.c_str());
+
+  // Write clean target.  TODO: Unify with all target and object file
+  // cleaning rules.
+  std::string cleanTarget = target.GetName();
+  cleanTarget += ".clean";
+  commands.clear();
+  depends.clear();
+  remove += " ";
+  remove += objs;
+  commands.push_back(remove);
+  this->WriteMakeRule(ruleFileStream, 0, 0, cleanTarget.c_str(),
+                      depends, commands);
+}
+
+//----------------------------------------------------------------------------
+void
+cmLocalUnixMakefileGenerator2
+::WriteObjectsVariable(std::ostream& ruleFileStream,
+                       const cmTarget& target,
+                       std::vector<std::string>& objects)
+{
+  // Write a make variable assignment that lists all objects for the
+  // target.
+  ruleFileStream
+    << "# Object files for target " << target.GetName() << "\n"
+    << target.GetName() << "_OBJECTS =";
+  for(std::vector<std::string>::iterator i = objects.begin();
+      i != objects.end(); ++i)
+    {
+    ruleFileStream
+      << " \\\n"
+      << this->ConvertToRelativeOutputPath(i->c_str());
+    }
+  ruleFileStream
+    << "\n"
+    << "\n";
+
+  ruleFileStream
+    << "# Object files for target " << target.GetName() << "\n"
+    << target.GetName() << "_OBJECTS_QUOTED =";
+  for(std::vector<std::string>::iterator i = objects.begin();
+      i != objects.end(); ++i)
+    {
+    ruleFileStream
+      << " \\\n"
+      << "\"" << this->ConvertToRelativeOutputPath(i->c_str()) << "\"";
+    }
+  ruleFileStream
+    << "\n"
+    << "\n";
 }
 
 //----------------------------------------------------------------------------
