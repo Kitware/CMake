@@ -58,7 +58,7 @@ void cmake::Usage(const char* program)
     {
     errorStream << "\"" << i->c_str() << "\" ";
     }
-  errorStream << ")\n";
+	  errorStream << ")\n" << std::ends;
 
   cmSystemTools::Error(errorStream.str());
 }
