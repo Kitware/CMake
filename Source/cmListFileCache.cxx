@@ -39,14 +39,15 @@ void cmListFileCache::ClearCache()
 
 
 
-cmListFile* cmListFileCache::GetFileCache(const char* path)
+cmListFile* cmListFileCache::GetFileCache(const char* path,
+                                          bool requireProjectCommand)
 {
   ListFileMap::iterator sl = m_ListFileCache.find(path);
   if (sl == m_ListFileCache.end())
     {
     // if not already in the map, then parse and store the 
     // file
-    if(!this->CacheFile(path))
+    if(!this->CacheFile(path, requireProjectCommand))
       {
       return 0;
       }
@@ -61,7 +62,7 @@ cmListFile* cmListFileCache::GetFileCache(const char* path)
   cmListFile& ret = sl->second;
   if(cmSystemTools::ModifiedTime(path) > ret.m_ModifiedTime )
     {
-    if(!this->CacheFile(path))
+    if(!this->CacheFile(path, requireProjectCommand))
       {
       return 0;
       }
@@ -75,7 +76,7 @@ cmListFile* cmListFileCache::GetFileCache(const char* path)
 }
 
 
-bool cmListFileCache::CacheFile(const char* path)
+bool cmListFileCache::CacheFile(const char* path, bool requireProjectCommand)
 {
   if(!cmSystemTools::FileExists(path))
     {
@@ -104,6 +105,30 @@ bool cmListFileCache::CacheFile(const char* path)
     if (parseError)
       {
       inFile.m_ModifiedTime = 0;
+      }
+    }
+  if(requireProjectCommand)
+    {
+    bool hasProject = false;
+    // search for a project command
+    for(std::vector<cmListFileFunction>::iterator i 
+          = inFile.m_Functions.begin();
+        i != inFile.m_Functions.end(); ++i)
+      {
+      if(i->m_Name == "PROJECT")
+        {
+        hasProject = true;
+        break;
+        }
+      }
+    // if no project command is found, add one
+    if(!hasProject)
+      {
+      cmListFileFunction project;
+      project.m_Name = "PROJECT";
+      project.m_Arguments.push_back("Project");
+      inFile.m_Functions.push_back(project);
+      std::cerr << "adding project command to file " << path << "\n";
       }
     }
   m_ListFileCache[path] = inFile;

@@ -52,16 +52,18 @@ public:
   /** Return the cached version of the given file.
    *  If the file is not already in the cache, a cache entry
    *  will be made.  If there is an error loading the file,
-   *  NULL is returned.
+   *  NULL is returned.  If requireProjectCommand is true,
+   *  then a PROJECT(Project) command will be added to the file
+   *  if it does not have a PROJECT command in it.
    */
-  cmListFile* GetFileCache(const char* path);
+  cmListFile* GetFileCache(const char* path, bool requireProjectCommand);
 
   //! Flush cache file out of cache.
   void FlushCache(const char* path);
 
 private:
   // Cache the file
-  bool CacheFile(const char* path);
+  bool CacheFile(const char* path, bool requireProjectCommand);
   // private data
   typedef std::map<cmStdString, cmListFile> ListFileMap;
   ListFileMap m_ListFileCache;  // file name to ListFile map

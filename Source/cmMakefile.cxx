@@ -308,9 +308,26 @@ bool cmMakefile::ReadListFile(const char* filename, const char* external)
     {
     filenametoread= external;
     }
-
+  // try to see if the list file is the top most
+  // list file for a project, and if it is, then it
+  // must have a project command.   If there is not
+  // one, then cmake will provide one via the 
+  // cmListFileCache class.
+  bool requireProjectCommand = false;
+  if(!m_Inheriting && !external
+    && m_cmCurrentDirectory == m_cmHomeDirectory)
+    {
+    if(cmSystemTools::LowerCase(
+         cmSystemTools::GetFilenameName(filename)) == "cmakelists.txt")
+      {
+      requireProjectCommand = true;
+      std::cerr << "Require project command " << filename << "\n";
+      }
+    }
+      
   cmListFile* lf = 
-    cmListFileCache::GetInstance()->GetFileCache(filenametoread);
+    cmListFileCache::GetInstance()->GetFileCache(filenametoread,
+                                                 requireProjectCommand);
   if(!lf)
     {
     return false;
