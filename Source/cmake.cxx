@@ -28,6 +28,7 @@
 #include "cmGlobalVisualStudio7Generator.h"
 #include "cmGlobalBorlandMakefileGenerator.h"
 #include "cmGlobalNMakeMakefileGenerator.h"
+#include "cmWin32ProcessExecution.h"
 #else
 #include "cmGlobalUnixMakefileGenerator.h"
 #endif
@@ -430,6 +431,11 @@ int cmake::AddCMakePaths(const char *arg0)
   this->m_CacheManager->AddCacheEntry
     ("CMAKE_ROOT", cMakeRoot.c_str(),
      "Path to CMake installation.", cmCacheManager::INTERNAL);
+
+#ifdef _WIN32
+  cmSystemTools::SetWindows9xComspecSubstitute(
+    (cMakeSelf + " -E comspec").c_str());
+#endif
   return 1;
 }
 
@@ -448,12 +454,14 @@ void CMakeCommandUsage(const char* program)
     << "Available commands: \n"
     << "  chdir dir cmd [args]... - run command in a given directory\n"
     << "  copy file destination   - copy file to destination (either file or directory)\n"
+    << "  echo [string]...        - displays arguments as text\n"
     << "  remove file1 file2 ...  - remove the file(s)\n"
     << "  time command [args] ... - run command and return elapsed time\n";
 #if defined(_WIN32) && !defined(__CYGWIN__)
   errorStream
     << "  write_regv key value    - write registry value\n"
-    << "  delete_regv key         - delete registry value\n";
+    << "  delete_regv key         - delete registry value\n"
+    << "  comspec                 - on windows 9x use this for RunCommand\n";
 #endif
 
   cmSystemTools::Error(errorStream.str().c_str());
@@ -468,6 +476,18 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
       {
       cmSystemTools::cmCopyFile(args[2].c_str(), args[3].c_str());
       return cmSystemTools::GetErrorOccuredFlag();
+      }
+
+    // Echo string
+    else if (args[1] == "echo" )
+      {
+      int cc;
+      for ( cc = 2; cc < args.size(); cc ++ )
+	{
+	std::cout << args[cc] << " ";
+	}
+      std::cout << std::endl;
+      return 0;
       }
 
     // Remove file
@@ -522,7 +542,7 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
     }
 
     // Clock command
-    else if (args[1] == "chdir" && args.size() > 2)
+    else if (args[1] == "chdir" && args.size() == 4)
       {
       std::string directory = args[2];
       std::string command = args[3];
@@ -556,6 +576,17 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
     else if (args[1] == "delete_regv" && args.size() > 2)
       {
       return cmSystemTools::DeleteRegistryValue(args[2].c_str()) ? 0 : 1;
+      }
+    // Remove file
+    else if (args[1] == "comspec" && args.size() > 2)
+      {
+      int cc;
+      std::string command = args[2];
+      for ( cc = 3; cc < args.size(); cc ++ )
+	{
+	command += " " + args[cc];
+	}
+      return cmWin32ProcessExecution::Windows9xHack(command.c_str());
       }
 #endif
     }

@@ -74,6 +74,19 @@ bool cmSystemTools::s_DisableRunCommandOutput = false;
 bool cmSystemTools::s_ErrorOccured = false;
 bool cmSystemTools::s_DisableMessages = false;
 
+std::string cmSystemTools::s_Windows9xComspecSubstitute = "command.com";
+void cmSystemTools::SetWindows9xComspecSubstitute(const char* str)
+{
+  if ( str )
+    {
+    cmSystemTools::s_Windows9xComspecSubstitute = str;
+    }
+}
+const char* cmSystemTools::GetWindows9xComspecSubstitute()
+{
+  return cmSystemTools::s_Windows9xComspecSubstitute.c_str();
+}
+
 void (*cmSystemTools::s_ErrorCallback)(const char*, const char*, bool&, void*);
 void* cmSystemTools::s_ErrorCallbackClientData = 0;
 
@@ -1004,7 +1017,7 @@ void cmSystemTools::Message(const char* m1, const char *title)
     }
   else
     {
-    std::cerr << m1 << std::endl;
+    std::cerr << m1 << std::endl << std::flush;
     }
   
 }
@@ -1249,6 +1262,250 @@ bool cmSystemTools::RunCommand(const char* command,
 }
 
 #if defined(WIN32) && !defined(__CYGWIN__)
+// Code from a Borland web site with the following explaination : 
+/* In this article, I will explain how to spawn a console application
+ * and redirect its standard input/output using anonymous pipes. An
+ * anonymous pipe is a pipe that goes only in one direction (read
+ * pipe, write pipe, etc.). Maybe you are asking, "why would I ever
+ * need to do this sort of thing?" One example would be a Windows
+ * telnet server, where you spawn a shell and listen on a port and
+ * send and receive data between the shell and the socket
+ * client. (Windows does not really have a built-in remote
+ * shell). First, we should talk about pipes. A pipe in Windows is
+ * simply a method of communication, often between process. The SDK
+ * defines a pipe as "a communication conduit with two ends;
+ a process
+ * with a handle to one end can communicate with a process having a
+ * handle to the other end." In our case, we are using "anonymous"
+ * pipes, one-way pipes that "transfer data between a parent process
+ * and a child process or between two child processes of the same
+ * parent process." It's easiest to imagine a pipe as its namesake. An
+ * actual pipe running between processes that can carry data. We are
+ * using anonymous pipes because the console app we are spawning is a
+ * child process. We use the CreatePipe function which will create an
+ * anonymous pipe and return a read handle and a write handle. We will
+ * create two pipes, on for stdin and one for stdout. We will then
+ * monitor the read end of the stdout pipe to check for display on our
+ * child process. Every time there is something availabe for reading,
+ * we will display it in our app. Consequently, we check for input in
+ * our app and send it off to the write end of the stdin pipe. */ 
+
+inline bool IsWinNT() 
+//check if we're running NT 
+{
+  OSVERSIONINFO osv;
+  osv.dwOSVersionInfoSize = sizeof(osv);
+  GetVersionEx(&osv);
+  return (osv.dwPlatformId == VER_PLATFORM_WIN32_NT); 
+}
+
+void DisplayErrorMessage()
+{
+  LPVOID lpMsgBuf;
+  FormatMessage( 
+    FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+    FORMAT_MESSAGE_FROM_SYSTEM | 
+    FORMAT_MESSAGE_IGNORE_INSERTS,
+    NULL,
+    GetLastError(),
+    MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
+    (LPTSTR) &lpMsgBuf,
+    0,
+    NULL 
+    );
+  // Process any inserts in lpMsgBuf.
+  // ... 
+  // Display the string.
+  MessageBox( NULL, (LPCTSTR)lpMsgBuf, "Error", MB_OK | MB_ICONINFORMATION );
+  // Free the buffer.
+  LocalFree( lpMsgBuf );
+}
+ 
+//--------------------------------------------------------------------------- 
+bool WindowsRunCommand(const char* command, const char* dir, 
+                       std::string& output, int& retVal, bool verbose) 
+{
+  //verbose = true;
+  std::cerr << std::endl 
+	    << "WindowsRunCommand(" << command << ")" << std::endl 
+	    << std::flush;
+  const int BUFFER_SIZE = 4096;
+  char buf[BUFFER_SIZE];
+ 
+//i/o buffer 
+  STARTUPINFO si;
+  SECURITY_ATTRIBUTES sa;
+  SECURITY_DESCRIPTOR sd;
+ 
+//security information for pipes 
+  PROCESS_INFORMATION pi;
+  HANDLE newstdin,newstdout,read_stdout,write_stdin;
+ 
+//pipe handles 
+  if (IsWinNT()) 
+//initialize security descriptor (Windows NT) 
+    {
+    InitializeSecurityDescriptor(&sd,SECURITY_DESCRIPTOR_REVISION);
+    SetSecurityDescriptorDacl(&sd, true, NULL, false);
+    sa.lpSecurityDescriptor = &sd;
+ 
+    }
+  else sa.lpSecurityDescriptor = NULL;
+
+  sa.nLength = sizeof(SECURITY_ATTRIBUTES);
+  sa.bInheritHandle = true;
+ 
+//allow inheritable handles 
+  if (!CreatePipe(&newstdin,&write_stdin,&sa,0)) 
+//create stdin pipe 
+    {
+    std::cerr << "CreatePipe" << std::endl;
+    return false;
+ 
+    }
+  if (!CreatePipe(&read_stdout,&newstdout,&sa,0)) 
+//create stdout pipe 
+    {
+    std::cerr << "CreatePipe" << std::endl;
+    CloseHandle(newstdin);
+    CloseHandle(write_stdin);
+    return false;
+ 
+    }
+  GetStartupInfo(&si);
+ 
+//set startupinfo for the spawned process 
+  /* The dwFlags member tells CreateProcess how to make the
+   * process. STARTF_USESTDHANDLES validates the hStd*
+   * members. STARTF_USESHOWWINDOW validates the wShowWindow
+   * member. */ 
+  
+  si.dwFlags = STARTF_USESTDHANDLES|STARTF_USESHOWWINDOW;
+  si.wShowWindow = SW_HIDE;
+  si.hStdOutput = newstdout;
+  si.hStdError = newstdout;
+ 
+//set the new handles for the child process si.hStdInput = newstdin;
+  char* commandAndArgs = strcpy(new char[strlen(command)+1], command);
+  if (!CreateProcess(NULL,commandAndArgs,NULL,NULL,TRUE,CREATE_NEW_CONSOLE, 
+                     NULL,dir,&si,&pi)) 
+    {
+    std::cerr << "CreateProcess failed " << commandAndArgs << std::endl;
+    CloseHandle(newstdin);
+    CloseHandle(newstdout);
+    CloseHandle(read_stdout);
+    CloseHandle(write_stdin);
+    delete [] commandAndArgs;
+    return false;
+ 
+    }
+  delete [] commandAndArgs;
+  unsigned long exit=0;
+ 
+//process exit code unsigned 
+  unsigned long bread;
+ 
+//bytes read unsigned 
+  unsigned long avail;
+ 
+//bytes available 
+  memset(buf, 0, sizeof(buf));
+  for(;;) 
+//main program loop 
+    {
+    Sleep(10);
+    //std::cout << "Check for process..." << std::endl;
+    GetExitCodeProcess(pi.hProcess,&exit);
+ 
+//while the process is running 
+    if (exit != STILL_ACTIVE) break;
+ 
+//check to see if there is any data to read from stdout 
+    //std::cout << "Peek for data..." << std::endl;
+    PeekNamedPipe(read_stdout,buf,1023,&bread,&avail,NULL);
+    if (bread != 0) 
+      {
+      memset(buf, 0, sizeof(buf));
+      if (avail > 1023) 
+        {
+        while (bread >= 1023) 
+          {
+	  //std::cout << "Read data..." << std::endl;
+          ReadFile(read_stdout,buf,1023,&bread,NULL);
+ 
+//read the stdout pipe 
+          printf("%s",buf);
+          memset(buf, 0, sizeof(buf));
+ 
+          }
+ 
+        }
+      else 
+        {
+        ReadFile(read_stdout,buf,1023,&bread,NULL);
+        output += buf;
+        output += "\n";
+        if(verbose) 
+          {
+          std::cerr << verbose << " [{" << buf << "}]" 
+		    << std::endl << std::flush;
+ 
+          }
+ 
+        }
+ 
+      }
+ 
+    }
+  CloseHandle(pi.hThread);
+  CloseHandle(pi.hProcess);
+  CloseHandle(newstdin);
+ 
+//clean stuff up 
+  CloseHandle(newstdout);
+  CloseHandle(read_stdout);
+  CloseHandle(write_stdin);
+  retVal = exit;
+  std::cerr << std::endl << "End of WindowsRunCommand(" << command << ")" << std::endl << std::flush;
+  return true;
+ 
+}
+
+#include "cmWin32ProcessExecution.h"
+// use this for shell commands like echo and dir
+bool RunCommandViaWin32(const char* command,
+			const char* dir,
+			std::string& output,
+			int& retVal,
+			bool verbose)
+{
+  if ( ! command )
+    {
+    cmSystemTools::Error("No command specified");
+    return false;
+    }
+  //std::cout << "Command: " << command << std::endl;
+  if ( dir )
+    {
+    //std::cout << "Dir: " << dir << std::endl;
+    }
+
+  cmWin32ProcessExecution resProc;
+  if ( cmSystemTools::GetWindows9xComspecSubstitute() )
+    {
+    resProc.SetConsoleSpawn(cmSystemTools::GetWindows9xComspecSubstitute() );
+    }
+  if ( !resProc.StartProcess(command, dir, verbose) )
+    {
+    std::cout << "Problem starting command" << std::endl;
+    return false;
+    }
+  resProc.Wait(INFINITE);
+  output = resProc.GetOutput();
+  retVal = resProc.GetExitValue();
+  return true;
+}
+
 // use this for shell commands like echo and dir
 bool RunCommandViaSystem(const char* command,
                          const char* dir,
@@ -1256,6 +1513,8 @@ bool RunCommandViaSystem(const char* command,
                          int& retVal,
                          bool verbose)
 {  
+  std::cout << "@@ " << command << std::endl;
+
   const int BUFFER_SIZE = 4096;
   char buffer[BUFFER_SIZE];
   std::string commandInDir;
@@ -1366,8 +1625,13 @@ bool cmSystemTools::RunCommand(const char* command,
           }
         shortCmd += " ";
         shortCmd += args;
-        return RunCommandViaSystem(shortCmd.c_str(), dir, 
-                                   output, retVal, verbose);
+
+        //return RunCommandViaSystem(shortCmd.c_str(), dir, 
+        //                           output, retVal, verbose);
+        //return WindowsRunCommand(shortCmd.c_str(), dir, 
+	//output, retVal, verbose);
+        return RunCommandViaWin32(shortCmd.c_str(), dir, 
+				  output, retVal, verbose);
         }
       else
         {
@@ -1377,7 +1641,9 @@ bool cmSystemTools::RunCommand(const char* command,
       }
     }
   // if there is only one set of quotes or no quotes then just run the command
-  return RunCommandViaSystem(command, dir, output, retVal, verbose);
+  //return RunCommandViaSystem(command, dir, output, retVal, verbose);
+  //return WindowsRunCommand(command, dir, output, retVal, verbose);
+  return RunCommandViaWin32(command, dir, output, retVal, verbose);
 #else
   // if only popen worked on windows.....
   std::string commandInDir;

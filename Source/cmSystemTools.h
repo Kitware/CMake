@@ -311,6 +311,14 @@ public:
    */
   static e_FileFormat GetFileFormat(const char* ext);
 
+  /**
+   * On Windows 9x we need a comspec (command.com) substitute to run
+   * programs correctly. This string has to be constant available
+   * through the running of program. This method does not create a copy.
+   */
+  static void SetWindows9xComspecSubstitute(const char*);
+  static const char* GetWindows9xComspecSubstitute();
+
 protected:
   // these two functions can be called from ConvertToOutputPath
   /**
@@ -333,6 +341,8 @@ private:
   static bool s_DisableRunCommandOutput;
   static ErrorCallback s_ErrorCallback;
   static void* s_ErrorCallbackClientData;
+
+  static std::string s_Windows9xComspecSubstitute;
 };
 
 
