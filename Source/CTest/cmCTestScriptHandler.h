@@ -49,6 +49,7 @@ public:
   void SetVerbose(bool val) { m_Verbose = val; }
   
   cmCTestScriptHandler();
+  ~cmCTestScriptHandler();
   
 private:
   // reads in a script
