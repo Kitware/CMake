@@ -270,21 +270,22 @@ bool cmMakefile::ReadListFile(const char* filename, const char* external)
       std::string parentList = this->GetParentListFileName(filename);
       if (parentList != "")
 	{
-	  // save the current directory
 	  std::string srcdir = m_cmCurrentDirectory;
-	  std::string bindir = m_CurrentOutputDirectory;    
-	  // compute the new current directories
-	  std::string::size_type pos = m_cmCurrentDirectory.rfind('/');
-	  if(pos != std::string::npos)
+          std::string bindir = m_CurrentOutputDirectory;
+
+	  std::string::size_type pos = parentList.rfind('/');
+
+          m_cmCurrentDirectory = parentList.substr(0, pos);
+	  m_CurrentOutputDirectory = m_HomeOutputDirectory + parentList.substr(m_cmHomeDirectory.size(), pos - m_cmHomeDirectory.size());
+
+	  // if not found, oops
+	  if(pos == std::string::npos)
 	    {
-	      m_cmCurrentDirectory = m_cmCurrentDirectory.substr(0, pos);
+            cmSystemTools::Error("Trailing slash not found");
 	    }
-	  pos = m_CurrentOutputDirectory.rfind('/');
-	  if(pos != std::string::npos)
-	    {
-	      m_CurrentOutputDirectory = m_CurrentOutputDirectory.substr(0, pos);
-	    }
+
 	  this->ReadListFile(parentList.c_str());
+
 	  // restore the current directory
 	  m_cmCurrentDirectory = srcdir;
 	  m_CurrentOutputDirectory = bindir;    
@@ -803,7 +804,7 @@ std::string cmMakefile::GetParentListFileName(const char *currentFileName)
     parentFile = listsDir;
     parentFile += "/CMakeLists.txt";
     }
-    
+
   return parentFile;
 }
 
