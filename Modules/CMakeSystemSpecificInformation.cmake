@@ -45,6 +45,12 @@ ELSE(EXISTS ${CMAKE_SYSTEM_INFO_FILE})
   MESSAGE("System is unknown to cmake, create:\n${CMAKE_SYSTEM_INFO_FILE}"
           " to use this system, please send your config file to "
           "cmake@www.cmake.org so it can be added to cmake"")
+  IF(EXISTS ${PROJECT_BINARY_DIR}/CMakeCache.txt)
+    CONFIGURE_FILE(${PROJECT_BINARY_DIR}/CMakeCache.txt
+                   ${PROJECT_BINARY_DIR}/CopyOfCMakeCache.txt COPYONLY)
+    MESSAGE("You CMakeCache.txt file was copied to CopyOfCMakeCache.txt. " 
+            "Please send that file to cmake@www.cmake.org.")
+  ENDIF(EXISTS ${PROJECT_BINARY_DIR}/CMakeCache.txt)
 ENDIF(EXISTS ${CMAKE_SYSTEM_INFO_FILE})
 
 # 3. include optional systemname-compiler.cmake files
