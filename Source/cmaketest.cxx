@@ -6,7 +6,7 @@ main (int argc, char *argv[])
 {
   if (argc < 4)
     {
-    cerr << "Usage: " << argv[0] << " test-src-dir test-bin-dir test-executable\n";
+    std::cerr << "Usage: " << argv[0] << " test-src-dir test-bin-dir test-executable\n";
     return 1;
     }
   
@@ -29,8 +29,8 @@ main (int argc, char *argv[])
   ccmd += argv[1];
   if (!cmSystemTools::RunCommand(ccmd.c_str(), output))
     {
-    cerr << "Error: cmake execution failed\n";
-    cerr << output.c_str() << "\n";
+    std::cerr << "Error: cmake execution failed\n";
+    std::cerr << output.c_str() << "\n";
     // return to the original directory
     cmSystemTools::ChangeDirectory(cwd.c_str());
     return 1;
@@ -39,8 +39,8 @@ main (int argc, char *argv[])
   // now build the test
   if (!cmSystemTools::RunCommand(MAKECOMMAND, output))
     {
-    cerr << "Error: " MAKECOMMAND "  execution failed\n";
-    cerr << output.c_str() << "\n";
+    std::cerr << "Error: " MAKECOMMAND "  execution failed\n";
+    std::cerr << output.c_str() << "\n";
     // return to the original directory
     cmSystemTools::ChangeDirectory(cwd.c_str());
     return 1;
@@ -49,7 +49,7 @@ main (int argc, char *argv[])
   // now run the compiled test
   if (!cmSystemTools::RunCommand(argv[3], output))
     {
-    cerr << "Error: " << argv[3] << "  execution failed\n";
+    std::cerr << "Error: " << argv[3] << "  execution failed\n";
     // return to the original directory
     cmSystemTools::ChangeDirectory(cwd.c_str());
     return 1;
