@@ -243,7 +243,8 @@ CMakeSetupGUIImplementation
   {
     m_BuildPathChanged  = true;
     m_WhereBuild        = expandedAbsolutePath;
-    LoadCacheFromDiskToGUI();
+    m_CacheEntriesList.RemoveAll(); // remove data from other project
+    this->LoadCacheFromDiskToGUI();
   }
   else 
   {
@@ -409,7 +410,7 @@ CMakeSetupGUIImplementation
     {
     cmCacheManager::GetInstance()->LoadCache( m_WhereBuild.c_str() );
     this->FillCacheGUIFromCacheManager();
-  }
+    }
 }
    
 
@@ -635,6 +636,7 @@ CMakeSetupGUIImplementation
       input >> onedirectory;
       m_WhereBuild = onedirectory;
       binaryPathTextInput->value( m_WhereBuild.c_str() );
+      LoadCacheFromDiskToGUI();
     } else
     if( key == "Binary" )
     {
@@ -753,6 +755,8 @@ CMakeSetupGUIImplementation
            recentBinaryDirectoriesBrowser->data( selected ));
   binaryPathTextInput->value( m_WhereBuild.c_str() );
   recentBinaryDirectoriesBrowser->Fl_Widget::hide();
+  m_CacheEntriesList.RemoveAll(); // remove data from other project
+  LoadCacheFromDiskToGUI();
 }
 
 
