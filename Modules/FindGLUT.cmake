@@ -6,9 +6,9 @@
 # GLUT_FOUND, If false, do not try to use GLUT.
 
 # also defined, but not for general use are
-# GLUT_glut_LIBRARY, where to find the glut library.
-# GLUT_Xmu_LIBRARY, where to find the Xmu library if available.
-# GLUT_Xi_LIBRARY, where to find the Xi Library if available.
+# GLUT_glut_LIBRARY = the full path to the glut library.
+# GLUT_Xmu_LIBRARY  = the full path to the Xmu library if available.
+# GLUT_Xi_LIBRARY   = the full path to the Xi Library if available.
 
 IF (WIN32)
 
