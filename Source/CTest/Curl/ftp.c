@@ -142,7 +142,7 @@ static CURLcode AllowServerConnect(struct SessionHandle *data,
     /* we have received data here */
     {
       int s;
-      size_t size = sizeof(struct sockaddr_in);
+      socklen_t size = sizeof(struct sockaddr_in);
       struct sockaddr_in add;
 
       getsockname(sock, (struct sockaddr *) &add, (socklen_t *)&size);
@@ -592,7 +592,7 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
 {
   struct SessionHandle *data = conn->data;
   struct FTP *ftp = conn->proto.ftp;
-  ssize_t nread;
+  int nread;
   int ftpcode;
   CURLcode result=CURLE_OK;
 
@@ -682,7 +682,7 @@ static
 CURLcode ftp_sendquote(struct connectdata *conn, struct curl_slist *quote)
 {
   struct curl_slist *item;
-  ssize_t nread;
+  int nread;
   int ftpcode;
   CURLcode result;
 
@@ -717,7 +717,7 @@ CURLcode ftp_sendquote(struct connectdata *conn, struct curl_slist *quote)
 static 
 CURLcode ftp_cwd(struct connectdata *conn, char *path)
 {
-  ssize_t nread;
+  int nread;
   int     ftpcode;
   CURLcode result;
   
@@ -745,7 +745,7 @@ CURLcode ftp_getfiletime(struct connectdata *conn, char *file)
 {
   CURLcode result=CURLE_OK;
   int ftpcode; /* for ftp status */
-  ssize_t nread;
+  int nread;
   char *buf = conn->data->state.buffer;
 
   /* we have requested to get the modified-time of the file, this is yet
@@ -796,7 +796,7 @@ static CURLcode ftp_transfertype(struct connectdata *conn,
 {
   struct SessionHandle *data = conn->data;
   int ftpcode;
-  ssize_t nread;
+  int nread;
   CURLcode result;
 
   FTPSENDF(conn, "TYPE %s", ascii?"A":"I");
@@ -827,7 +827,7 @@ CURLcode ftp_getsize(struct connectdata *conn, char *file,
 {
   struct SessionHandle *data = conn->data;
   int ftpcode;
-  ssize_t nread;
+  int nread;
   char *buf=data->state.buffer;
   CURLcode result;
 
@@ -992,7 +992,7 @@ CURLcode ftp_use_port(struct connectdata *conn)
 {
   struct SessionHandle *data=conn->data;
   int portsock=-1;
-  ssize_t nread;
+  int nread;
   int ftpcode; /* receive FTP response codes in this */
   CURLcode result;
 
@@ -1345,7 +1345,7 @@ CURLcode ftp_use_pasv(struct connectdata *conn,
                       bool *connected)
 {
   struct SessionHandle *data = conn->data;
-  ssize_t nread;
+  int nread;
   char *buf = data->state.buffer; /* this is our buffer */
   int ftpcode; /* receive FTP response codes in this */
   CURLcode result;
@@ -1536,7 +1536,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
   struct SessionHandle *data=conn->data;
   char *buf = data->state.buffer; /* this is our buffer */
   CURLcode result;
-  ssize_t nread;
+  int nread;
   int ftpcode; /* for ftp status */
 
   /* the ftp struct is already inited in Curl_ftp_connect() */
