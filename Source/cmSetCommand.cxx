@@ -84,6 +84,21 @@ bool cmSetCommand::Invoke(std::vector<std::string>& args)
     value = args[1];
     cacheStart = 2;
     }
+  else
+    {
+    std::string message;
+    message += "Syntax error in SET:\n";
+    message += "CACHE requires TYPE and document string SET command:\n";
+    message += "SET (";
+    for(std::vector<std::string>::iterator i = args.begin();
+        i != args.end(); ++i)
+      {
+      message += *i;
+      }
+    message += ")\n";
+    this->SetError(message.c_str());
+    return false;
+    }
   if(cache)
     {
     if(args[cacheStart] != "CACHE")
