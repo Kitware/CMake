@@ -46,6 +46,7 @@ MACRO(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
   GET_FILENAME_COMPONENT(swig_source_file_name_we "${infile}" NAME_WE)
   GET_SOURCE_FILE_PROPERTY(swig_source_file_generated ${infile} GENERATED)
   GET_SOURCE_FILE_PROPERTY(swig_source_file_cplusplus ${infile} CPLUSPLUS)
+  GET_SOURCE_FILE_PROPERTY(swig_source_file_flags ${infile} SWIG_FLAGS)
   SET(swig_source_file_fullname "${infile}")
   IF(${swig_source_file_path} MATCHES "^${CMAKE_CURRENT_SOURCE_DIR}")
     STRING(REGEX REPLACE 
@@ -114,6 +115,7 @@ MACRO(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
     OUTPUT "${swig_generated_file_fullname}"
     COMMAND "${SWIG_EXECUTABLE}"
     ARGS "-${SWIG_MODULE_${name}_SWIG_LANGUAGE_FLAG}"
+    ${swig_source_file_flags}
     ${swig_special_flags}
     ${swig_extra_flags}
     ${swig_include_dirs}
