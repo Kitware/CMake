@@ -25,8 +25,7 @@ return 0;
 int
 main ()
 {
-
-/* try to compile O_NONBLOCK */
+  /* try to compile O_NONBLOCK */
 
 #if defined(sun) || defined(__sun__) || defined(__SUNPRO_C) || defined(__SUNPRO_CC)
 # if defined(__SVR4) || defined(__srv4__)
@@ -39,17 +38,11 @@ main ()
 # define PLATFORM_AIX_V3
 #endif
 
-#if defined(PLATFORM_SUNOS4) || defined(PLATFORM_AIX_V3)
+#if defined(PLATFORM_SUNOS4) || defined(PLATFORM_AIX_V3) || defined(__BEOS__)
 #error "O_NONBLOCK does not work on this platform"
 #endif
   int socket;
-#ifndef fcntl
-  (void)fcntl;
-#endif
   int flags = fcntl(socket, F_SETFL, flags | O_NONBLOCK);
-
-  ;
-  return 0;
 }
 #endif
 
@@ -419,4 +412,18 @@ void main(void) {
         exit(0);
     }
 }
+#endif
+#ifdef _FILE_OFFSET_BITS
+#undef _FILE_OFFSET_BITS
+#define _FILE_OFFSET_BITS 64
+#include <sys/types.h>
+ /* Check that off_t can represent 2**63 - 1 correctly.
+    We can't simply define LARGE_OFF_T to be 9223372036854775807,
+    since some C++ compilers masquerading as C compilers
+    incorrectly reject 9223372036854775807.  */
+#define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
+  int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
+                       && LARGE_OFF_T % 2147483647 == 1)
+                      ? 1 : -1];
+int main () { ; return 0; }
 #endif
