@@ -263,7 +263,7 @@ case $system in
 	CMAKE_SHLIB_LD_LIBS=""
 	CMAKE_SHLIB_SUFFIX=".so"
 	CMAKE_DL_LIBS=""
-	CMAKE_SHLIB_BUILD_FLAGS='-shared -Wl,-expect_unresolved,"*"'
+	CMAKE_SHLIB_BUILD_FLAGS='-shared -Wl,-expect_unresolved,\*'
 	CMAKE_SHLIB_LINK_FLAGS=''
         CMAKE_SHLIB_RUNTIME_FLAG="-Wl,-rpath,"
         CMAKE_SHLIB_RUNTIME_SEP=":"
