@@ -95,7 +95,7 @@ SET (CMAKE_LINKER_FLAGS "/nologo /STACK:10000000 /machine:I386" CACHE STRING
 SET (CMAKE_LINKER_FLAGS_DEBUG "/debug /pdbtype:sept" CACHE STRING
      "Flags used by the linker during debug builds.")
 
-SET (CMAKE_LINKER_FLAGS_MINSIZEREL "/stack:0x989680" CACHE STRING
+SET (CMAKE_LINKER_FLAGS_MINSIZEREL "" CACHE STRING
      "Flags used by the linker during release minsize builds.")
 
 SET (CMAKE_LINKER_FLAGS_RELEASE "" CACHE STRING
