@@ -76,6 +76,7 @@ static const char* cmCTestErrorMatches[] = {
   "s:616 string too big",
   "make: Fatal error: ",
   "ld: 0711-993 Error occurred while writing to the output file:",
+  "ld: fatal: ",
   "make: \\*\\*\\*.*Error",
   0
 };
