@@ -1,4 +1,9 @@
 link flags
+.def file in link shared 
+
+
+CMAKE_CXX_FLAGS are used to link executables
+
 
 Variables:
 
@@ -52,3 +57,53 @@ CMAKE_X_LIBS
 CMAKE_X_CFLAGS
 CMAKE_HAS_X
 
+# executable linker flags
+
+SET (CMAKE_EXE_LINKER_FLAGS "/nologo /STACK:10000000 /machine:I386 /INCREMENTAL:YES"
+     CACHE STRING "Flags used by the linker.")
+
+SET (CMAKE_EXE_LINKER_FLAGS_DEBUG "/debug /pdbtype:sept" CACHE STRING
+     "Flags used by the linker during debug builds.")
+
+SET (CMAKE_EXE_LINKER_FLAGS_MINSIZEREL "" CACHE STRING
+     "Flags used by the linker during release minsize builds.")
+
+SET (CMAKE_EXE_LINKER_FLAGS_RELEASE "" CACHE STRING
+     "Flags used by the linker during release builds.")
+
+SET (CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "/debug /pdbtype:sept" CACHE STRING
+     "Flags used by the linker during Release with Debug Info builds.")
+
+# shared linker flags
+
+SET (CMAKE_SHARED_LINKER_FLAGS "/nologo /STACK:10000000 /machine:I386 /INCREMENTAL:YES"
+     CACHE STRING "Flags used by the linker.")
+
+SET (CMAKE_SHARED_LINKER_FLAGS_DEBUG "/debug /pdbtype:sept" CACHE STRING
+     "Flags used by the linker during debug builds.")
+
+SET (CMAKE_SHARED_LINKER_FLAGS_MINSIZEREL "" CACHE STRING
+     "Flags used by the linker during release minsize builds.")
+
+SET (CMAKE_SHARED_LINKER_FLAGS_RELEASE "" CACHE STRING
+     "Flags used by the linker during release builds.")
+
+SET (CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO "/debug /pdbtype:sept" CACHE STRING
+     "Flags used by the linker during Release with Debug Info builds.")
+
+
+# module linker flags
+SET (CMAKE_MODULE_LINKER_FLAGS "/nologo /STACK:10000000 /machine:I386 /INCREMENTAL:YES"
+     CACHE STRING "Flags used by the linker.")
+
+SET (CMAKE_MODULE_LINKER_FLAGS_DEBUG "/debug /pdbtype:sept" CACHE STRING
+     "Flags used by the linker during debug builds.")
+
+SET (CMAKE_MODULE_LINKER_FLAGS_MINSIZEREL "" CACHE STRING
+     "Flags used by the linker during release minsize builds.")
+
+SET (CMAKE_MODULE_LINKER_FLAGS_RELEASE "" CACHE STRING
+     "Flags used by the linker during release builds.")
+
+SET (CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO "/debug /pdbtype:sept" CACHE STRING
+     "Flags used by the linker during Release with Debug Info builds.")

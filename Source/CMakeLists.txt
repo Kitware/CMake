@@ -135,6 +135,11 @@ IF(BUILD_TESTING)
     ADD_TEST(DumpDocumentation ${CMake_BINARY_DIR}/Source/DumpDocumentation
       ${CMake_BINARY_DIR}/CMakeDoc.html)
 
+    ADD_TEST(SystemInformation ${CMake_BINARY_DIR}/Source/cmaketest 
+      ${CMake_SOURCE_DIR}/Tests/SystemInformation
+      ${CMake_BINARY_DIR}/Tests/SystemInformation 
+      DumpInformation)
+
     ADD_TEST(simple ${CMake_BINARY_DIR}/Source/cmaketest 
       ${CMake_SOURCE_DIR}/Tests/Simple 
       ${CMake_BINARY_DIR}/Tests/Simple 

@@ -88,7 +88,8 @@ protected:
                          const char* prefix,
                          const char* suffix,
                          const char* createRule,
-                         const char* comment
+                         const char* comment,
+                         const char* linkFlags
     );
   void ExpandRuleVariables(std::string& string,
                            const char* objects=0,
@@ -98,7 +99,8 @@ protected:
                            const char* object =0,
                            const char* flags = 0,
                            const char* objectsquoted = 0,
-                           const char* targetBase = 0);
+                           const char* targetBase = 0,
+                           const char* linkFlags = 0);
   virtual void OutputSharedLibraryRule(std::ostream&, const char* name,
                                        const cmTarget &);
   virtual void OutputModuleLibraryRule(std::ostream&, const char* name, 
