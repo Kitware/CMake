@@ -3000,6 +3000,14 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output, int *re
   else if(result == cmsysProcess_State_Exception)
     {
     *retVal = cmsysProcess_GetExitException(cp);
+    std::string outerr = "\n*** Exception executing: ";
+    outerr += cmsysProcess_GetExceptionString(cp);
+    *output += outerr;
+    if ( m_Verbose )
+      {
+      std::cout << outerr.c_str() << "\n";
+      std::cout.flush();
+      }
     }
   else if(result == cmsysProcess_State_Error)
     {
