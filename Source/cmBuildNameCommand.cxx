@@ -50,8 +50,7 @@ bool cmBuildNameCommand::InitialPass(std::vector<std::string> const& args)
   if(m_Makefile->GetDefinition("UNIX"))
     {
     buildname = "";
-    cmSystemTools::RunCommand("uname -a",
-                              buildname);
+    cmSystemTools::RunSingleCommand("uname -a", &buildname);
     if(buildname.length())
       {
       std::string RegExp = "([^ ]*) [^ ]* ([^ ]*) ";

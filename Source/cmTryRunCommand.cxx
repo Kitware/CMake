@@ -99,7 +99,9 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv)
         {
         finalCommand += runArgs;
         }
-      cmSystemTools::RunCommand(finalCommand.c_str(), output, retVal, 0, false);
+      int timeout = 0;
+      cmSystemTools::RunSingleCommand(finalCommand.c_str(), &output, &retVal, 
+        0, false, timeout);
       // set the run var
       char retChar[1000];
       sprintf(retChar,"%i",retVal);
