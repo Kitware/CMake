@@ -13,20 +13,10 @@ SET (CMAKE_CXX_COMPILER  "Borland_BCB_5.5.1" CACHE STRING "C++ compiler used.")
 
 FIND_PATH(BCB_BIN_PATH bcc32.exe
   "C:/Program Files/Borland/CBuilder5/Bin"
+  "C:/Borland/Bcc55/Bin"
+  "/Borland/Bcc55/Bin"
   [HKEY_LOCAL_MACHINE/SOFTWARE/Borland/C++Builder/5.0/RootDir]/Bin
 )
-
-#
-# Set default exe and lib directories
-#
-
-IF (NOT LIBRARY_OUTPUT_PATH)
-  SET (LIBRARY_OUTPUT_PATH "c:/bin" CACHE STRING "Directory for libraries to be built into.")
-ENDIF (NOT LIBRARY_OUTPUT_PATH)
-
-IF (NOT EXECUTABLE_OUTPUT_PATH)
-  SET (EXECUTABLE_OUTPUT_PATH "" CACHE STRING "Directory for executables to be built into.")
-ENDIF (NOT EXECUTABLE_OUTPUT_PATH)
 
 #
 # override opengl library as it is bound to import32.lib already

@@ -56,6 +56,13 @@ public:
   ///! Set cache only and recurse to false by default.
   cmUnixMakefileGenerator();
 
+  ///! Get the name for the generator.
+  virtual const char* GetName() {return "Unix Makefiles";}
+
+  ///! virtual copy constructor
+  virtual cmMakefileGenerator* CreateObject() 
+    { return new cmUnixMakefileGenerator;}
+  
   //! just sets the Cache Only and Recurse flags
   virtual void SetLocal(bool local);
 

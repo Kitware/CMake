@@ -55,22 +55,23 @@ class cmDSWWriter;
 class cmMSProjectGenerator : public cmMakefileGenerator
 {
 public:
-  /**
-   * Constructor sets the generation of DSW files on.
-   */
+  ///! Constructor sets the generation of DSW files on.
   cmMSProjectGenerator();
 
-  /**
-   * Destructor.
-   */
+  ///! Destructor.
   ~cmMSProjectGenerator();
+  
+  ///! Get the name for the generator.
+  virtual const char* GetName() {return "Visual Studio 6";}
 
-  /**
-   * Produce the makefile (in this case a Microsoft Visual C++ project).
-   */
+  ///! virtual copy constructor
+  virtual cmMakefileGenerator* CreateObject() 
+    { return new cmMSProjectGenerator;}
+  
+  ///! Produce the makefile (in this case a Microsoft Visual C++ project).
   virtual void GenerateMakefile();
 
-  //! controls the DSW/DSP settings
+  ///! controls the DSW/DSP settings
   virtual void SetLocal(bool);
 
   /**
@@ -81,20 +82,14 @@ public:
    */
   void BuildDSWOff()  {m_BuildDSW = false;}
 
-  /**
-   * Turn on the generation of a Microsoft Visual C++ DSW file.
-   */
+  ///! Turn on the generation of a Microsoft Visual C++ DSW file.
   void BuildDSWOn() {m_BuildDSW = true;}
 
-  /**
-   * Retrieve a pointer to a cmDSWWriter instance.
-   */
+  ///! Retrieve a pointer to a cmDSWWriter instance.
   cmDSWWriter* GetDSWWriter() 
     {return m_DSWWriter;}
 
-  /**
-   * Retrieve a pointer to a cmDSPWriter instance.
-   */
+  ///! Retrieve a pointer to a cmDSPWriter instance.
   cmDSPWriter* GetDSPWriter() 
     {return m_DSPWriter;}
 

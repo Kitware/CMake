@@ -55,9 +55,20 @@ class cmClassFile;
 class cmMakefileGenerator
 {
 public:
-  /**
-   * Set the cmMakefile instance from which to generate the makefile.
-   */
+  ///! Create a named generator
+  static cmMakefileGenerator* CreateGenerator(const char* name);
+  ///! Register a generator
+  static void RegisterGenerator(cmMakefileGenerator*);
+  ///! Get the names of the current registered generators
+  static void GetRegisteredGenerators(std::vector<std::string>& names);
+  
+  ///! Get the name for the generator.
+  virtual const char* GetName() = 0;
+
+  ///! virtual copy constructor
+  virtual cmMakefileGenerator* CreateObject() = 0;
+  
+  ///! Set the cmMakefile instance from which to generate the makefile.
   void SetMakefile(cmMakefile*);
 
   /**
@@ -84,6 +95,7 @@ public:
 
   virtual ~cmMakefileGenerator(){};
 protected:
+  static std::map<cmStdString, cmMakefileGenerator*> s_RegisteredGenerators;
   cmMakefile* m_Makefile;
 };
 

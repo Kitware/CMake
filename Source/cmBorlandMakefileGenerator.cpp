@@ -5,62 +5,113 @@
 #include "cmSourceFile.h"
 #include "cmMakeDepend.h"
 #include "cmCacheManager.h"
-#include <Sysutils.hpp>
-using namespace std;
 //---------------------------------------------------------------------------
-cmBorlandMakefileGenerator::cmBorlandMakefileGenerator() {
+cmBorlandMakefileGenerator::cmBorlandMakefileGenerator() 
+{
   m_CacheOnly = false;
   m_Recurse   = false;
 }
 //---------------------------------------------------------------------------
-void cmBorlandMakefileGenerator::GenerateMakefile() {
-  if (m_CacheOnly) {
+void cmBorlandMakefileGenerator::GenerateMakefile() 
+{
+  // suppoirt override in output directories
+  if (m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH"))
+    {
+    m_LibraryOutputPath = m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH");
+    if(m_LibraryOutputPath.size())
+      {
+      if(m_LibraryOutputPath[m_LibraryOutputPath.size() -1] != '/')
+        {
+        m_LibraryOutputPath += "/";
+        }
+      if(!cmSystemTools::MakeDirectory(m_LibraryOutputPath.c_str()))
+        {
+        cmSystemTools::Error("Error failed create "
+                             "LIBRARY_OUTPUT_PATH directory:",
+                             m_LibraryOutputPath.c_str());
+        }
+      m_Makefile->AddLinkDirectory(m_LibraryOutputPath.c_str());
+      }
+    }
+  if (m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH"))
+    {
+    m_ExecutableOutputPath =
+      m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
+    if(m_ExecutableOutputPath.size())
+      {
+      if(m_ExecutableOutputPath[m_ExecutableOutputPath.size() -1] != '/')
+        {
+        m_ExecutableOutputPath += "/";
+        }
+      if(!cmSystemTools::MakeDirectory(m_ExecutableOutputPath.c_str()))
+        {
+        cmSystemTools::Error("Error failed to create " 
+                             "EXECUTABLE_OUTPUT_PATH directory:",
+                             m_ExecutableOutputPath.c_str());
+        }
+      m_Makefile->AddLinkDirectory(m_ExecutableOutputPath.c_str());
+      }
+    }
+  
+  if (m_CacheOnly) 
+    {
     // Generate the cache only stuff
     this->GenerateCacheOnly();
     // if recurse then generate for all sub- makefiles
-    if (m_Recurse) {
+    if (m_Recurse)
+      {
       this->RecursiveGenerateCacheOnly();
+      }
     }
-  }
 }
 //---------------------------------------------------------------------------
-void cmBorlandMakefileGenerator::GenerateCacheOnly() {
+void cmBorlandMakefileGenerator::GenerateCacheOnly()
+{
   cmSystemTools::MakeDirectory(m_Makefile->GetStartOutputDirectory());
-  string dest = m_Makefile->GetStartOutputDirectory();
+  std::string dest = m_Makefile->GetStartOutputDirectory();
   dest += "/makefile.mak";
   this->OutputMakefile(dest.c_str());
 }
 //---------------------------------------------------------------------------
-void cmBorlandMakefileGenerator::RecursiveGenerateCacheOnly() {
-  vector<cmMakefile*> makefiles;
+void cmBorlandMakefileGenerator::RecursiveGenerateCacheOnly()
+{
+  std::vector<cmMakefile*> makefiles;
   m_Makefile->FindSubDirectoryCMakeListsFiles(makefiles);
-  for (vector<cmMakefile*>::iterator i=makefiles.begin(); i!=makefiles.end(); ++i) {
+  for (std::vector<cmMakefile*>::iterator i=makefiles.begin();
+       i!=makefiles.end(); ++i) 
+    {
     cmMakefile* mf = *i;
     cmBorlandMakefileGenerator* gen = new cmBorlandMakefileGenerator;
     gen->SetCacheOnlyOn();
     gen->SetRecurseOff();
     mf->SetMakefileGenerator(gen);
     mf->GenerateMakefile();
-  }
+    }
   // CLEAN up the makefiles created
-  for (unsigned int i=0; i<makefiles.size(); ++i) {
+  for (unsigned int i=0; i<makefiles.size(); ++i) 
+    {
     delete makefiles[i];
-  }
+    }
 }
 //---------------------------------------------------------------------------
-void cmBorlandMakefileGenerator::OutputMakefile(const char* file) {
+void cmBorlandMakefileGenerator::OutputMakefile(const char* file) 
+{
   //
   // Create sub directories for aux source directories
   //
-  vector<string>& auxSourceDirs = m_Makefile->GetAuxSourceDirectories();
-  if ( auxSourceDirs.size() ) {
+  std::vector<std::string>& auxSourceDirs =
+    m_Makefile->GetAuxSourceDirectories();
+  if ( auxSourceDirs.size() ) 
+    {
     // For the case when this is running as a remote build
     // on unix, make the directory
-    for (vector<string>::iterator i=auxSourceDirs.begin(); i!=auxSourceDirs.end(); ++i) {
+    for (std::vector<std::string>::iterator i=auxSourceDirs.begin();
+         i!=auxSourceDirs.end(); ++i) 
+      {
       cmSystemTools::MakeDirectory(i->c_str());
+      }
     }
-  }
-  ostrstream fout;
+  std::ostrstream fout;
   //
   // Begin writing to makefile.mak
   //
@@ -72,16 +123,18 @@ void cmBorlandMakefileGenerator::OutputMakefile(const char* file) {
   //
   // Define all our compile and make flags/variables
   //
-  string replace;
+  std::string replace;
   // Careful with these directory paths....\ vs /
   replace = "BCBBINPATH       = @BCB_BIN_PATH@ \n";
   fout << m_Makefile->ExpandVariablesInString(replace);
   replace = "BCB              = $(BCBBINPATH)/.. \n";
   fout << m_Makefile->ExpandVariablesInString(replace);
   replace = "OUTDIRLIB        = @LIBRARY_OUTPUT_PATH@ \n";
-  fout << cmSystemTools::ConvertToWindowsSlashes(m_Makefile->ExpandVariablesInString(replace));
+  m_Makefile->ExpandVariablesInString(replace);
+  fout << cmSystemTools::ConvertToWindowsSlashes(replace);
   replace = "OUTDIREXE        = @EXECUTABLE_OUTPUT_PATH@ \n";
-  fout << m_Makefile->ExpandVariablesInString(replace);
+  m_Makefile->ExpandVariablesInString(replace);
+  fout << cmSystemTools::ConvertToWindowsSlashes(replace);
   replace = "USERDEFINES      = @DEFS_USER@ \n";
   fout << m_Makefile->ExpandVariablesInString(replace);
   replace = "SYSDEFINES       = @DEFS_SYS@ \n";
@@ -111,19 +164,22 @@ void cmBorlandMakefileGenerator::OutputMakefile(const char* file) {
   //
   // create a make variable with all of the sources for this makefile for depend purposes.
   //
-  vector<string> lfiles = m_Makefile->GetListFiles();
+  std::vector<std::string> lfiles = m_Makefile->GetListFiles();
   // sort the array
-  sort(lfiles.begin(), lfiles.end(), less<string>());
+  std::sort(lfiles.begin(), lfiles.end(), std::less<std::string>());
   // remove duplicates
-  vector<string>::iterator new_end = unique(lfiles.begin(), lfiles.end());
+  std::vector<std::string>::iterator new_end = 
+    std::unique(lfiles.begin(), lfiles.end());
   lfiles.erase(new_end, lfiles.end());
   fout << "CMAKE_MAKEFILE_SOURCES = \\ \n";
-  string dir;
-  for (vector<string>::const_iterator i=lfiles.begin(); i!=lfiles.end(); ++i) {
+  std::string dir;
+  for (std::vector<std::string>::const_iterator i=lfiles.begin();
+       i!=lfiles.end(); ++i) 
+    {
     dir = *i;
     cmSystemTools::ConvertToWindowsSlashes(dir);
     fout << "  " << dir << " \\\n";
-  }
+    }
   dir = m_Makefile->GetHomeOutputDirectory();
   dir += "/CMakeCache.txt";
   cmSystemTools::ConvertToWindowsSlashes(dir);
@@ -131,125 +187,156 @@ void cmBorlandMakefileGenerator::OutputMakefile(const char* file) {
   //
   // Output Include paths
   //
-  vector<string>& includes = m_Makefile->GetIncludeDirectories();
+  std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();
   fout << "INCLUDEPATH =";
-  for (vector<string>::iterator i=includes.begin(); i!=includes.end(); ++i) {
-    string include = *i;
+  for (std::vector<std::string>::iterator i=includes.begin();
+       i!=includes.end(); ++i) 
+    {
+    std::string include = *i;
     fout << "-I" << cmSystemTools::EscapeSpaces(i->c_str()) << "; \\\n  ";
-  }
-  fout << "-I" << cmSystemTools::EscapeSpaces(m_Makefile->GetStartDirectory()) << "\n\n";
+    }
+  fout << "-I" << 
+    cmSystemTools::EscapeSpaces(m_Makefile->GetStartDirectory()) << "\n\n";
   //
   // for each target add to the list of targets
   //
   fout << "TARGETS = ";
   const cmTargets &tgts = m_Makefile->GetTargets();
   // list libraries first
-  for (cmTargets::const_iterator l=tgts.begin(); l!=tgts.end(); l++) {
-    if ((l->second.GetType() == cmTarget::STATIC_LIBRARY) && l->second.IsInAll()) {
+  for (cmTargets::const_iterator l=tgts.begin();
+       l!=tgts.end(); ++l) 
+    {
+    if ((l->second.GetType() == cmTarget::STATIC_LIBRARY)
+        && l->second.IsInAll()) 
+      {
       fout << " \\\n  $(OUTDIRLIB)\\" << l->first.c_str() << ".lib";
-    }
-    if ((l->second.GetType() == cmTarget::SHARED_LIBRARY) && l->second.IsInAll()) {
+      }
+    if ((l->second.GetType() == cmTarget::SHARED_LIBRARY) && l->second.IsInAll()) 
+      {
       fout << " \\\n  $(OUTDIRLIB)\\" << l->first.c_str() << ".dll";
-    }
-    if ((l->second.GetType() == cmTarget::MODULE_LIBRARY) && l->second.IsInAll()) {
+      }
+    if ((l->second.GetType() == cmTarget::MODULE_LIBRARY) && l->second.IsInAll()) 
+      {
       fout << " \\\n  $(OUTDIRLIB)\\" << l->first.c_str() << ".bpl";
+      }
     }
-  }
   // executables
-  for (cmTargets::const_iterator l=tgts.begin(); l!=tgts.end(); l++) {
-    if ((l->second.GetType() == cmTarget::EXECUTABLE || l->second.GetType() == cmTarget::WIN32_EXECUTABLE) && l->second.IsInAll()) {
+  for (cmTargets::const_iterator l=tgts.begin(); l!=tgts.end(); l++) 
+    {
+    if ((l->second.GetType() == cmTarget::EXECUTABLE
+         || l->second.GetType() == cmTarget::WIN32_EXECUTABLE) && l->second.IsInAll())
+      {
       fout << " \\\n  " << l->first.c_str() << ".exe";
+      }
     }
-  }
   // list utilities last
-  for (cmTargets::const_iterator l=tgts.begin(); l!=tgts.end(); l++) {
-    if (l->second.GetType() == cmTarget::UTILITY && l->second.IsInAll()) {
+  for (cmTargets::const_iterator l=tgts.begin(); l!=tgts.end(); l++) 
+    {
+    if (l->second.GetType() == cmTarget::UTILITY && l->second.IsInAll()) 
+      {
       fout << " \\\n  " << l->first.c_str();
+      }
     }
-  }
   fout << "\n\n";
   //
   // Now create the source file groups for each target
   //
-  for (cmTargets::const_iterator l=tgts.begin(); l!=tgts.end(); l++) {
-    vector<cmSourceFile> classes = l->second.GetSourceFiles();
-    if (classes.begin() != classes.end()) {
-        fout << l->first << "_SRC_OBJS = ";
-        for (vector<cmSourceFile>::iterator i=classes.begin(); i!=classes.end(); i++) {
-        string ext = i->GetSourceExtension();
-          if (!i->IsAHeaderFileOnly() && (ext!="def" && ext!="rc")) {
-          fout << " \\\n  " << cmSystemTools::ConvertToWindowsSlashes(i->GetSourceName()) << ".obj ";
+  for (cmTargets::const_iterator l=tgts.begin(); l!=tgts.end(); l++) 
+    {
+    std::vector<cmSourceFile> classes = l->second.GetSourceFiles();
+    if (classes.begin() != classes.end()) 
+      {
+      fout << l->first << "_SRC_OBJS = ";
+      for (std::vector<cmSourceFile>::iterator i=classes.begin(); i!=classes.end(); i++) 
+        {
+        std::string ext = i->GetSourceExtension();
+        if (!i->IsAHeaderFileOnly() && (ext!="def" && ext!="rc")) 
+          {
+          fout << " \\\n  " << 
+            cmSystemTools::ConvertToWindowsSlashes(i->GetSourceName()) 
+               << ".obj ";
+          }
         }
+      fout << "\n\n";
       }
-        fout << "\n\n";
     }
-  }
   //
   // Create the link lib list for each target
   //
   // do .lib files
-  string libname;
-  for (cmTargets::const_iterator t=tgts.begin(); t!=tgts.end(); t++) {
-    cmTarget::LinkLibraries& libs = t->second.GetLinkLibraries();
-
+  std::string libname;
+  for (cmTargets::const_iterator t=tgts.begin(); t!=tgts.end(); t++) 
+    {
+    cmTarget::LinkLibraries const& libs = t->second.GetLinkLibraries();
+    
     if ((t->second.GetType() == cmTarget::STATIC_LIBRARY)   ||
         (t->second.GetType() == cmTarget::SHARED_LIBRARY)   ||
         (t->second.GetType() == cmTarget::MODULE_LIBRARY)   ||
         (t->second.GetType() == cmTarget::EXECUTABLE)       ||
         (t->second.GetType() == cmTarget::WIN32_EXECUTABLE))
-    {
-        fout << t->first << "_LINK_LIB = ";
-        for (cmTarget::LinkLibraries::const_iterator l=libs.begin(); l!=libs.end(); l++) {
-          if ((t->first!=l->first) &&
-              (t->second.GetType()!=cmTarget::INSTALL_FILES || t->second.GetType()!=cmTarget::INSTALL_PROGRAMS)) {
-            // if this lib is not a target then don't add OUTDIRLIB to it
-            if (tgts.find(l->first)==tgts.end())
-              libname = l->first;
-            else
-              libname = "$(OUTDIRLIB)\\" + l->first;
-            if (libname.find(".bpi")!=string::npos) continue;
-            cmSystemTools::ReplaceString(libname, ".lib", "");
-            libname += ".lib";
-            fout << " \\\n  " << cmSystemTools::EscapeSpaces(libname.c_str());
+      {
+      fout << t->first << "_LINK_LIB = ";
+      for (cmTarget::LinkLibraries::const_iterator l=libs.begin();
+           l!=libs.end(); l++) 
+        {
+        if ((t->first!=l->first) &&
+            (t->second.GetType()!=cmTarget::INSTALL_FILES
+             || t->second.GetType()!=cmTarget::INSTALL_PROGRAMS)) 
+          {
+          // if this lib is not a target then don't add OUTDIRLIB to it
+          if (tgts.find(l->first)==tgts.end())
+            libname = l->first;
+          else
+            libname = "$(OUTDIRLIB)\\" + l->first;
+          if (libname.find(".bpi")!=std::string::npos) continue;
+          cmSystemTools::ReplaceString(libname, ".lib", "");
+          libname += ".lib";
+          fout << " \\\n  " << cmSystemTools::EscapeSpaces(libname.c_str());
           }
         }
-        fout << "\n\n";
+      fout << "\n\n";
+      }
     }
-  }
   // do .bpi package files
-  for (cmTargets::const_iterator t=tgts.begin(); t!=tgts.end(); t++) {
-    cmTarget::LinkLibraries& libs = t->second.GetLinkLibraries();
+  for (cmTargets::const_iterator t=tgts.begin(); t!=tgts.end(); t++)
+    {
+    cmTarget::LinkLibraries const& libs = t->second.GetLinkLibraries();
     if ((t->second.GetType() == cmTarget::STATIC_LIBRARY)   ||
         (t->second.GetType() == cmTarget::SHARED_LIBRARY)   ||
         (t->second.GetType() == cmTarget::MODULE_LIBRARY)   ||
         (t->second.GetType() == cmTarget::EXECUTABLE)       ||
         (t->second.GetType() == cmTarget::WIN32_EXECUTABLE))
-    {
-        fout << t->first << "_LINK_BPI = ";
-        for (cmTarget::LinkLibraries::const_iterator l=libs.begin(); l!=libs.end(); l++) {
-          if ((t->first!=l->first) &&
-              (t->second.GetType()!=cmTarget::INSTALL_FILES || t->second.GetType()!=cmTarget::INSTALL_PROGRAMS)) {
-            // if this lib is not a target then don't add OUTDIRLIB to it
-            if (tgts.find(l->first)==tgts.end())
-              libname = l->first;
-            else
-              libname = "$(OUTDIRLIB)\\" + l->first;
-            if (libname.find(".bpi")==string::npos) continue;
-            fout << " \\\n  " << cmSystemTools::EscapeSpaces(libname.c_str());
+      {
+      fout << t->first << "_LINK_BPI = ";
+      for (cmTarget::LinkLibraries::const_iterator l=libs.begin(); 
+           l!=libs.end(); l++) 
+        {
+        if ((t->first!=l->first) &&
+            (t->second.GetType()!=cmTarget::INSTALL_FILES 
+             || t->second.GetType()!=cmTarget::INSTALL_PROGRAMS)) 
+          {
+          // if this lib is not a target then don't add OUTDIRLIB to it
+          if (tgts.find(l->first)==tgts.end())
+            libname = l->first;
+          else
+            libname = "$(OUTDIRLIB)\\" + l->first;
+          if (libname.find(".bpi")==std::string::npos) continue;
+          fout << " \\\n  " << cmSystemTools::EscapeSpaces(libname.c_str());
           }
         }
-        fout << "\n\n";
+      fout << "\n\n";
+      }
     }
-  }
   //
   // Create the link dir list - use same for all targets
   //
-  vector<string> dirs = m_Makefile->GetLinkDirectories();
+  std::vector<std::string> dirs = m_Makefile->GetLinkDirectories();
   fout << "LINK_DIR =";
-  for (vector<string>::const_iterator d=dirs.begin(); d!=dirs.end(); d++) {
-    string temp = cmSystemTools::EscapeSpaces(d->c_str());
+  for (std::vector<std::string>::const_iterator d=dirs.begin(); d!=dirs.end(); d++) 
+    {
+    std::string temp = cmSystemTools::EscapeSpaces(d->c_str());
     fout << temp << ";";
-  }
+    }
   fout << "$(OUTDIRLIB)\n\n";
 
   //
@@ -278,67 +365,81 @@ void cmBorlandMakefileGenerator::OutputMakefile(const char* file) {
   this->OutputMakeRules(fout);
   //
   // We'll omit current dir in path where possible
-  string fullname, outpath = m_Makefile->GetStartOutputDirectory();
+  std::string fullname, outpath = m_Makefile->GetStartOutputDirectory();
   outpath += "/";
   //
-  for (cmTargets::const_iterator l=tgts.begin(); l!=tgts.end(); l++) {
-    vector<cmSourceFile> classes = l->second.GetSourceFiles();
-    if (classes.begin() != classes.end()) {
-        for (vector<cmSourceFile>::iterator i=classes.begin(); i!=classes.end(); i++) {
-          if (!i->IsAHeaderFileOnly()) {
+  for (cmTargets::const_iterator l=tgts.begin(); l!=tgts.end(); l++) 
+    {
+    std::vector<cmSourceFile> classes = l->second.GetSourceFiles();
+    if (classes.begin() != classes.end()) 
+      {
+      for (std::vector<cmSourceFile>::iterator i=classes.begin(); i!=classes.end(); i++) 
+        {
+        if (!i->IsAHeaderFileOnly()) 
+          {
           fullname = i->GetFullPath();
           cmSystemTools::ReplaceString(fullname, outpath.c_str(), "");
-          fout << "" << cmSystemTools::ConvertToWindowsSlashes(i->GetSourceName()) << ".obj : " << fullname << "\n";
+          fout << "" 
+               << cmSystemTools::ConvertToWindowsSlashes(i->GetSourceName()) 
+               << ".obj : " << fullname << "\n";
+          }
         }
       }
     }
-  }
   //
   //
   //
-  ofstream ffout(file);
-  if (!ffout) {
+  std::ofstream ffout(file);
+  if (!ffout) 
+    {
     cmSystemTools::Error("Error can not open for write: ", file);
     return;
-  }
-  string makefileastext = fout.str();
+    }
+  fout << std::ends;
+  std::string makefileastext = fout.str();
 //  cmSystemTools::CleanUpWindowsSlashes(makefileastext);
 //  makefileastext = StringReplace(makefileastext.c_str(), "¬", "/", TReplaceFlags()<<rfReplaceAll).c_str();
   ffout << makefileastext << "\n# End of File\n";
 }
 //---------------------------------------------------------------------------
 // output the list of libraries that the executables in this makefile will depend on.
-void cmBorlandMakefileGenerator::OutputDependencies(ostream& fout) {
-    // Each dependency should only be emitted once.
-    set<string> emitted;
-    //
-    // Output/Search the list of libraries that will be linked into the executable
-    //
-    fout << "DEPEND_LIBS = ";
-    cmTarget::LinkLibraries& libs = m_Makefile->GetLinkLibraries();
-    emitted.clear();
-    for (cmTarget::LinkLibraries::const_iterator lib2=libs.begin(); lib2!=libs.end(); ++lib2) {
+void cmBorlandMakefileGenerator::OutputDependencies(std::ostream& fout) 
+{
+  // Each dependency should only be emitted once.
+  std::set<std::string> emitted;
+  //
+  // Output/Search the list of libraries that will be linked into the executable
+  //
+  fout << "DEPEND_LIBS = ";
+  cmTarget::LinkLibraries& libs = m_Makefile->GetLinkLibraries();
+  emitted.clear();
+  for (cmTarget::LinkLibraries::const_iterator lib2=libs.begin(); 
+       lib2!=libs.end(); ++lib2) 
+    {
 
-      // loop over the list of directories that the libraries might
-      // be in, looking for an ADD_LIBRARY(lib...) line. This would
-      // be stored in the cache
-      if( ! emitted.insert(lib2->first).second ) continue;
+    // loop over the list of directories that the libraries might
+    // be in, looking for an ADD_LIBRARY(lib...) line. This would
+    // be stored in the cache
+    if( ! emitted.insert(lib2->first).second ) continue;
 
-      const char* cacheValue = m_Makefile->GetDefinition(lib2->first.c_str());
-      if (cacheValue) {
-        fout << "\\\n  $(OUTDIRLIB)\\" << lib2->first << ".lib ";
+    const char* cacheValue = m_Makefile->GetDefinition(lib2->first.c_str());
+    if (cacheValue) 
+      {
+      fout << "\\\n  $(OUTDIRLIB)\\" << lib2->first << ".lib ";
       }
     }
-    fout << "\n\n";
-    //
-    // Same list, but this time output a rule to rebuild if they are out of date
-    //
-    emitted.clear();
-    for (cmTarget::LinkLibraries::const_iterator lib2=libs.begin(); lib2!=libs.end(); ++lib2) {
-      // loop over the list of directories that the libraries might
-      // be in, looking for an ADD_LIBRARY(lib...) line. This would
-      // be stored in the cache
-      if ( ! emitted.insert(lib2->first).second ) continue;
+  fout << "\n\n";
+  //
+  // Same list, but this time output a rule to rebuild if they are out of date
+  //
+  emitted.clear();
+  for (cmTarget::LinkLibraries::const_iterator lib2=libs.begin(); 
+       lib2!=libs.end(); ++lib2) 
+    {
+    // loop over the list of directories that the libraries might
+    // be in, looking for an ADD_LIBRARY(lib...) line. This would
+    // be stored in the cache
+    if ( ! emitted.insert(lib2->first).second ) continue;
 
 //      const char* cacheValue = cmCacheManager::GetInstance()->GetCacheValue(lib2->first.c_str());
 //      if (cacheValue) {
@@ -349,74 +450,84 @@ void cmBorlandMakefileGenerator::OutputDependencies(ostream& fout) {
     }
 //    fout << "\n";
 }
-void cmBorlandMakefileGenerator::OutputTargets(ostream& fout) {
-    // Do Libraries first as executables may depend on them
-    const cmTargets &tgts = m_Makefile->GetTargets();
-    for (cmTargets::const_iterator l=tgts.begin(); l!=tgts.end(); l++) {
-      if (l->second.GetType() == cmTarget::STATIC_LIBRARY) {
-        //
-        // at the moment, static and shared are treated the same
-        // WARNING. TLIB fails with Unix style Forward slashes - use $(OUTDIRLIB)\\
-        // WARNING. IMPLIB works better with Forward slashes - use $(OUTDIRLIB)\\
-        //
-        fout << "# this should be a static library \n";
-        fout << "$(OUTDIRLIB)\\" << l->first << ".lib : ${" << l->first << "_SRC_OBJS} \n";
-        string Libname = "$(OUTDIRLIB)\\" + l->first + ".lib";
-        fout << "  TLib.exe $(LINKFLAGS_STATIC) /u " << Libname.c_str() << " @&&| \n";
-        fout << "    $? \n";
-        fout << "| \n\n";
+void cmBorlandMakefileGenerator::OutputTargets(std::ostream& fout) 
+{
+  // Do Libraries first as executables may depend on them
+  const cmTargets &tgts = m_Makefile->GetTargets();
+  for (cmTargets::const_iterator l=tgts.begin(); l!=tgts.end(); l++) 
+    {
+    if (l->second.GetType() == cmTarget::STATIC_LIBRARY) 
+      {
+      //
+      // at the moment, static and shared are treated the same
+      // WARNING. TLIB fails with Unix style Forward slashes - use $(OUTDIRLIB)\\
+      // WARNING. IMPLIB works better with Forward slashes - use $(OUTDIRLIB)\\
+      //
+      fout << "# this should be a static library \n";
+      fout << "$(OUTDIRLIB)\\" << l->first << ".lib : ${" << l->first << "_SRC_OBJS} \n";
+      std::string Libname = "$(OUTDIRLIB)\\" + l->first + ".lib";
+      fout << "  TLib.exe $(LINKFLAGS_STATIC) /u " << Libname.c_str() << " @&&| \n";
+      fout << "    $? \n";
+      fout << "| \n\n";
       }
-      if (l->second.GetType() == cmTarget::SHARED_LIBRARY) {
-        fout << "# this should be a shared (DLL) library \n";
-        fout << "$(OUTDIRLIB)\\" << l->first << ".dll : ${" << l->first << "_SRC_OBJS} \n";
-        fout << "  @ilink32.exe @&&| \n";
-        fout << "    -L\"$(BCB)/lib\" -L$(LINK_DIR) $(LINKFLAGS_DLL) $(LINKFLAGS_DEBUG) \"$(BCB)/lib/c0d32.obj\" ";
-        fout << "$(" << l->first << "_SRC_OBJS) ";
-        fout << "$(" << l->first << "_LINK_BPI) , $<, $*, ";
-        fout << "$(" << l->first << "_LINK_LIB) $(LINK_LIB) \n";
-        fout << "| \n";
-        fout << "  @implib -w " << "$(OUTDIRLIB)\\" << l->first << ".lib " << "$(OUTDIRLIB)\\" << l->first << ".dll \n\n";
+    if (l->second.GetType() == cmTarget::SHARED_LIBRARY) 
+      {
+      fout << "# this should be a shared (DLL) library \n";
+      fout << "$(OUTDIRLIB)\\" << l->first << ".dll : ${" << l->first << "_SRC_OBJS} \n";
+      fout << "  @ilink32.exe @&&| \n";
+      fout << "    -L\"$(BCB)/lib\" -L$(LINK_DIR) $(LINKFLAGS_DLL) $(LINKFLAGS_DEBUG) \"$(BCB)/lib/c0d32.obj\" ";
+      fout << "$(" << l->first << "_SRC_OBJS) ";
+      fout << "$(" << l->first << "_LINK_BPI) , $<, $*, ";
+      fout << "$(" << l->first << "_LINK_LIB) $(LINK_LIB) \n";
+      fout << "| \n";
+      fout << "  @implib -w " << "$(OUTDIRLIB)\\" << l->first << ".lib " << "$(OUTDIRLIB)\\" << l->first << ".dll \n\n";
       }
-      if (l->second.GetType() == cmTarget::MODULE_LIBRARY) {
-        fout << "# this should be a Borland Package library \n";
-        fout << "$(OUTDIRLIB)\\" << l->first << ".bpl : ${" << l->first << "_SRC_OBJS} \n";
-        fout << "  @ilink32.exe @&&| \n";
-        fout << "    -L\"$(BCB)/lib\" -L$(LINK_DIR) $(LINKFLAGS_BPL) $(LINKFLAGS_DEBUG) \"$(BCB)/lib/c0pkg32.obj\" ";
-        fout << "$(" << l->first << "_SRC_OBJS) ";
-        fout << "$(" << l->first << "_LINK_BPI) , $<, $*, ";
-        fout << "$(" << l->first << "_LINK_LIB) $(LINK_LIB) \n";
-        fout << "| \n";
+    if (l->second.GetType() == cmTarget::MODULE_LIBRARY) 
+      {
+      fout << "# this should be a Borland Package library \n";
+      fout << "$(OUTDIRLIB)\\" << l->first << ".bpl : ${" << l->first << "_SRC_OBJS} \n";
+      fout << "  @ilink32.exe @&&| \n";
+      fout << "    -L\"$(BCB)/lib\" -L$(LINK_DIR) $(LINKFLAGS_BPL) $(LINKFLAGS_DEBUG) \"$(BCB)/lib/c0pkg32.obj\" ";
+      fout << "$(" << l->first << "_SRC_OBJS) ";
+      fout << "$(" << l->first << "_LINK_BPI) , $<, $*, ";
+      fout << "$(" << l->first << "_LINK_LIB) $(LINK_LIB) \n";
+      fout << "| \n";
       }
     }
-    // Do Executables
-    for (cmTargets::const_iterator l=tgts.begin(); l!=tgts.end(); l++) {
-      if (l->second.GetType()==cmTarget::WIN32_EXECUTABLE) {
-        fout << l->first << ".exe : ${" << l->first << "_SRC_OBJS} \n";
-        fout << "  @ilink32.exe @&&| \n";
-        fout << "    -L\"$(BCB)/lib\" -L$(LINK_DIR) $(LINKFLAGS_EXE) $(LINKFLAGS_DEBUG) \"$(BCB)/lib/c0w32.obj\" ";
-        fout << "$(" << l->first << "_SRC_OBJS) ";
-        fout << "$(" << l->first << "_LINK_BPI) , $<, $*, ";
-        fout << "$(" << l->first << "_LINK_LIB) $(LINK_LIB) \n";
-        fout << "| \n\n";
+  // Do Executables
+  for (cmTargets::const_iterator l=tgts.begin(); l!=tgts.end(); l++) 
+    {
+    if (l->second.GetType()==cmTarget::WIN32_EXECUTABLE) 
+      {
+      fout << l->first << ".exe : ${" << l->first << "_SRC_OBJS} \n";
+      fout << "  @ilink32.exe @&&| \n";
+      fout << "    -L\"$(BCB)/lib\" -L$(LINK_DIR) $(LINKFLAGS_EXE) $(LINKFLAGS_DEBUG) \"$(BCB)/lib/c0w32.obj\" ";
+      fout << "$(" << l->first << "_SRC_OBJS) ";
+      fout << "$(" << l->first << "_LINK_BPI) , $<, $*, ";
+      fout << "$(" << l->first << "_LINK_LIB) $(LINK_LIB) \n";
+      fout << "| \n\n";
       }
-      else if (l->second.GetType()==cmTarget::EXECUTABLE) {
-        fout << l->first << ".exe : ${" << l->first << "_SRC_OBJS} \n";
-        fout << "  @ilink32.exe @&&| \n";
-        fout << "    -L\"$(BCB)/lib\" -L$(LINK_DIR) $(LINKFLAGS_EXE) $(LINKFLAGS_DEBUG) \"$(BCB)/lib/c0x32.obj\" ";
-        fout << "$(" << l->first << "_SRC_OBJS) , $<, $*, ";
-        fout << "$(" << l->first << "_LINK_LIB) $(LINK_LIB) \n";
-        fout << "| \n\n";
+    else if (l->second.GetType()==cmTarget::EXECUTABLE) 
+      {
+      fout << l->first << ".exe : ${" << l->first << "_SRC_OBJS} \n";
+      fout << "  @ilink32.exe @&&| \n";
+      fout << "    -L\"$(BCB)/lib\" -L$(LINK_DIR) $(LINKFLAGS_EXE) $(LINKFLAGS_DEBUG) \"$(BCB)/lib/c0x32.obj\" ";
+      fout << "$(" << l->first << "_SRC_OBJS) , $<, $*, ";
+      fout << "$(" << l->first << "_LINK_LIB) $(LINK_LIB) \n";
+      fout << "| \n\n";
       }
     }
 }
 //---------------------------------------------------------------------------
-void cmBorlandMakefileGenerator::OutputSubDirectoryRules(ostream& fout) {
+void cmBorlandMakefileGenerator::OutputSubDirectoryRules(std::ostream& fout) 
+{
   // output rules for decending into sub directories
-  const vector<string>& SubDirectories = m_Makefile->GetSubDirectories();
+  const std::vector<std::string>& SubDirectories = m_Makefile->GetSubDirectories();
   //
-  if ( SubDirectories.size() == 0) {
+  if ( SubDirectories.size() == 0) 
+    {
     return;
-  }
+    }
   //
   this->OutputSubDirectoryVars(fout, "SUBDIR_BUILD", "build",
                                0,
@@ -426,18 +537,18 @@ void cmBorlandMakefileGenerator::OutputSubDirectoryRules(ostream& fout) {
 //---------------------------------------------------------------------------
 // fix up names of directories so they can be used
 // as targets in makefiles.
-inline string FixDirectoryName(const char* dir)
+inline std::string FixDirectoryName(const char* dir)
 {
-  string s = dir;
+  std::string s = dir;
   // replace ../ with 3 under bars
   size_t pos = s.find("../");
-  if (pos != string::npos)
+  if (pos != std::string::npos)
     {
     s.replace(pos, 3, "___");
     }
   // replace / directory separators with a single under bar
   pos = s.find("/");
-  while(pos != string::npos)
+  while(pos != std::string::npos)
     {
     s.replace(pos, 1, "_");
     pos = s.find("/");
@@ -445,36 +556,41 @@ inline string FixDirectoryName(const char* dir)
   return s;
 }
 
-void cmBorlandMakefileGenerator::OutputSubDirectoryVars(ostream& fout,
-                       const char* var,
-                       const char* target,
-                       const char* target1,
-                       const char* target2,
-                       const vector<string>& SubDirectories)
+void cmBorlandMakefileGenerator::OutputSubDirectoryVars(std::ostream& fout,
+                                                        const char* var,
+                                                        const char* target,
+                                                        const char* target1,
+                                                        const char* target2,
+                                                        const std::vector<std::string>& SubDirectories)
 {
   if (!SubDirectories.size()) return;
   //
   fout << "# Variable for making " << target << " in subdirectories.\n";
   fout << var << " = \\\n";
   unsigned int i;
-  for (i =0; i < SubDirectories.size(); i++) {
-    string subdir = FixDirectoryName(SubDirectories[i].c_str());
+  for (i =0; i < SubDirectories.size(); i++) 
+    {
+    std::string subdir = FixDirectoryName(SubDirectories[i].c_str());
     fout << "  " << target << "_" << subdir.c_str();
-    if (i == SubDirectories.size()-1) {
+    if (i == SubDirectories.size()-1) 
+      {
       fout << " \n\n";
-    }
-    else {
+      }
+    else 
+      {
       fout << " \\\n";
+      }
     }
-  }
   //
   fout << "# Targets for making " << target << " in subdirectories.\n";
-  for (unsigned int i=0; i<SubDirectories.size(); i++) {
-    string subdir = FixDirectoryName(SubDirectories[i].c_str());
+  for (unsigned int i=0; i<SubDirectories.size(); i++) 
+    {
+    std::string subdir = FixDirectoryName(SubDirectories[i].c_str());
     fout << target << "_" << subdir.c_str() << ":\n";
     fout << "  cd " << m_Makefile->GetStartOutputDirectory() << "/" << SubDirectories[i] << " \n";
-    fout << "  make -fmakefile.mak \n\n";
-  }
+    fout << "  make makefile.mak\n";
+    fout << "  make \n\n";
+    }
 }
 
 
@@ -484,7 +600,8 @@ void cmBorlandMakefileGenerator::OutputSubDirectoryVars(ostream& fout,
 //   (tab)   command...
 
 // This routine is copied direct from unix makefile generator
-void cmBorlandMakefileGenerator::OutputCustomRules(ostream& fout) {
+void cmBorlandMakefileGenerator::OutputCustomRules(std::ostream& fout) 
+{
   // We may be modifying the source groups temporarily, so make a copy.
   std::vector<cmSourceGroup> sourceGroups = m_Makefile->GetSourceGroups();
 
@@ -512,7 +629,9 @@ void cmBorlandMakefileGenerator::OutputCustomRules(ostream& fout) {
     {
     const cmSourceGroup::BuildRules& buildRules = sg->GetBuildRules();
     if(buildRules.empty())
-      { continue; }
+      {
+      continue;
+      }
     
     std::string name = sg->GetName();
     if(name != "")
@@ -536,16 +655,16 @@ void cmBorlandMakefileGenerator::OutputCustomRules(ostream& fout) {
         // with no outputs
         if(commandFiles.m_Outputs.size() == 0)
           {
-        fout << source.c_str() << ": ";
-        // Write out all the dependencies for this rule.
-        for(std::set<std::string>::const_iterator d =
-          commandFiles.m_Depends.begin();
-        d != commandFiles.m_Depends.end(); ++d)
-          {
-        std::string dep = cmSystemTools::EscapeSpaces(d->c_str());
-        fout << " " << dep.c_str();
-          }
-        fout << "\n\t" << command.c_str() << "\n\n";
+          fout << source.c_str() << ": ";
+          // Write out all the dependencies for this rule.
+          for(std::set<std::string>::const_iterator d =
+                commandFiles.m_Depends.begin();
+              d != commandFiles.m_Depends.end(); ++d)
+            {
+            std::string dep = cmSystemTools::EscapeSpaces(d->c_str());
+            fout << " " << dep.c_str();
+            }
+          fout << "\n\t" << command.c_str() << "\n\n";
           }
         // Write a rule for every output generated by this command.
         for(std::set<std::string>::const_iterator output =
@@ -576,7 +695,8 @@ void cmBorlandMakefileGenerator::OutputCustomRules(ostream& fout) {
 }
 
 
-void cmBorlandMakefileGenerator::OutputMakeRules(ostream& fout) {
+void cmBorlandMakefileGenerator::OutputMakeRules(std::ostream& fout) 
+{
   this->OutputMakeRule(fout,
                        "Rule to build c file(s)",
                        ".c.obj",
@@ -617,56 +737,64 @@ void cmBorlandMakefileGenerator::OutputMakeRules(ostream& fout) {
   
 }
 
-void cmBorlandMakefileGenerator::OutputMakeRule(ostream& fout,
-                                             const char* comment,
-                                             const char* target,
-                                             const char* depends,
-                                             const char* command)
+void cmBorlandMakefileGenerator::OutputMakeRule(std::ostream& fout,
+                                                const char* comment,
+                                                const char* target,
+                                                const char* depends,
+                                                const char* command)
 {
-  string replace;
-  if (comment) {
+  std::string replace;
+  if (comment) 
+    {
     replace = comment;
     m_Makefile->ExpandVariablesInString(replace);
     fout << "# " << comment << " \n";
-  }
+    }
   //
   replace = target;
   m_Makefile->ExpandVariablesInString(replace);
   fout << replace.c_str() << ": ";
-  if (depends) {
+  if (depends) 
+    {
     replace = depends;
     m_Makefile->ExpandVariablesInString(replace);
     fout << replace.c_str();
-  }
+    }
   fout << "\n";
   //
-  if (command) {
+  if (command) 
+    {
     replace = command;
     m_Makefile->ExpandVariablesInString(replace);
     fout << "  " << replace.c_str() << " \n";
-  }
+    }
   fout << "\n";
 }
 
 
-void cmBorlandMakefileGenerator::SetLocal (bool local) {
-  if (local) {
+void cmBorlandMakefileGenerator::SetLocal (bool local) 
+{
+  if (local) 
+    {
     m_CacheOnly = false;
     m_Recurse = false;
-  }
-  else {
+    }
+  else 
+    {
     m_CacheOnly = true;
     m_Recurse = true;
-  }
+    }
 }
 
-void cmBorlandMakefileGenerator::ComputeSystemInfo() {
+void cmBorlandMakefileGenerator::ComputeSystemInfo() 
+{
   // now load the settings
-  if (!m_Makefile->GetDefinition("CMAKE_ROOT")) {
+  if (!m_Makefile->GetDefinition("CMAKE_ROOT")) 
+    {
     cmSystemTools::Error("CMAKE_ROOT has not been defined, bad GUI or driver program");
     return;
-  }
-  string fpath = m_Makefile->GetDefinition("CMAKE_ROOT");
+    }
+  std::string fpath = m_Makefile->GetDefinition("CMAKE_ROOT");
   fpath += "/Templates/CMakeWindowsBorlandConfig.cmake";
   m_Makefile->ReadListFile(NULL,fpath.c_str());
 }

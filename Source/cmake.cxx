@@ -44,9 +44,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // include the generator
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #include "cmMSProjectGenerator.h"
+#include "cmBorlandMakefileGenerator.h"
 #else
 #include "cmUnixMakefileGenerator.h"
 #endif
+
+cmake::cmake()
+{
+  m_Verbose = false;
+#if defined(_WIN32) && !defined(__CYGWIN__)  
+  cmMakefileGenerator::RegisterGenerator(new cmMSProjectGenerator);
+  cmMakefileGenerator::RegisterGenerator(new cmBorlandMakefileGenerator);
+#else
+  cmMakefileGenerator::RegisterGenerator(new cmUnixMakefileGenerator);
+#endif
+}
 
 void cmake::Usage(const char* program)
 {
@@ -54,16 +66,26 @@ void cmake::Usage(const char* program)
             << "." << cmMakefile::GetMinorVersion() << "\n";
   std::cerr << "Usage: " << program << " srcdir \n" 
             << "Where cmake is run from the directory where you want the object files written\n";
+  std::cerr << "[-GgeneratorName] (where generator name can be: ";
+  std::vector<std::string> names;
+  cmMakefileGenerator::GetRegisteredGenerators(names);
+  for(std::vector<std::string>::iterator i =names.begin();
+      i != names.end(); ++i)
+    {
+    std::cerr << i->c_str() << " ";
+    }
+  std::cerr << ")\n";
 }
 
 // Parse the args
 void cmake::SetArgs(cmMakefile& builder, const std::vector<std::string>& args)
 {
   m_Local = false;
-
+  bool directoriesSet = false;
   // watch for cmake and cmake srcdir invocations
   if (args.size() <= 2)
     {
+    directoriesSet = true;
     builder.SetHomeOutputDirectory
       (cmSystemTools::GetCurrentWorkingDirectory().c_str());
     builder.SetStartOutputDirectory
@@ -89,36 +111,78 @@ void cmake::SetArgs(cmMakefile& builder, const std::vector<std::string>& args)
     std::string arg = args[i];
     if(arg.find("-H",0) == 0)
       {
+      directoriesSet = true;
       std::string path = arg.substr(2);
       builder.SetHomeDirectory(path.c_str());
       }
-    if(arg.find("-S",0) == 0)
+    else if(arg.find("-S",0) == 0)
       {
+      directoriesSet = true;
       m_Local = true;
       std::string path = arg.substr(2);
       builder.SetStartDirectory(path.c_str());
       }
-    if(arg.find("-O",0) == 0)
+    else if(arg.find("-O",0) == 0)
       {
+      directoriesSet = true;
       std::string path = arg.substr(2);
       builder.SetStartOutputDirectory(path.c_str());
       }
-    if(arg.find("-B",0) == 0)
+    else if(arg.find("-B",0) == 0)
       {
+      directoriesSet = true;
       std::string path = arg.substr(2);
       builder.SetHomeOutputDirectory(path.c_str());
       }
-    if(arg.find("-D",0) == 0)
+    else if(arg.find("-D",0) == 0)
       {
 	std::string value = arg.substr(2);
 	builder.AddDefinition(value.c_str(), true);
       }
-    if(arg.find("-V",0) == 0)
+    else if(arg.find("-V",0) == 0)
       {
 	m_Verbose = true;
       }
+    else if(arg.find("-G",0) == 0)
+      {
+      std::string value = arg.substr(2);
+      cmMakefileGenerator* gen = 
+        cmMakefileGenerator::CreateGenerator(value.c_str());
+      if(!gen)
+        {
+        cmSystemTools::Error("Could not create named generator ",
+                             value.c_str());
+        }
+      else
+        {
+        builder.SetMakefileGenerator(gen);
+        }
+      }
+    // no option assume it is the path to the source
+    else
+      {
+      directoriesSet = true;
+      builder.SetHomeOutputDirectory
+        (cmSystemTools::GetCurrentWorkingDirectory().c_str());
+      builder.SetStartOutputDirectory
+        (cmSystemTools::GetCurrentWorkingDirectory().c_str());
+      builder.SetHomeDirectory
+        (cmSystemTools::CollapseFullPath(args[1].c_str()).c_str());
+      builder.SetStartDirectory
+        (cmSystemTools::CollapseFullPath(args[1].c_str()).c_str());
+      }
     }
-  
+  if(!directoriesSet)
+    {
+    builder.SetHomeOutputDirectory
+      (cmSystemTools::GetCurrentWorkingDirectory().c_str());
+    builder.SetStartOutputDirectory
+      (cmSystemTools::GetCurrentWorkingDirectory().c_str());
+    builder.SetHomeDirectory
+      (cmSystemTools::GetCurrentWorkingDirectory().c_str());
+    builder.SetStartDirectory
+      (cmSystemTools::GetCurrentWorkingDirectory().c_str());
+    }
   if (!m_Local)
     {
     builder.SetStartDirectory(builder.GetHomeDirectory());
@@ -244,23 +308,46 @@ int cmake::Generate(const std::vector<std::string>& args, bool buildMakefiles)
     }
   // Create a makefile
   cmMakefile mf;
-
-  // extract the directory arguments
-  cmake::SetArgs(mf, args);
-
-  // create the generator
-#if defined(_WIN32) && !defined(__CYGWIN__)  
-  cmMSProjectGenerator* gen = new cmMSProjectGenerator;
-#else
-  cmUnixMakefileGenerator* gen = new cmUnixMakefileGenerator;
-#endif
-  
-  gen->SetLocal(m_Local);
-
+  // extract the directory arguments, could create a Generator
+  this->SetArgs(mf, args);
   // Read and parse the input makefile
-  mf.SetMakefileGenerator(gen);
   mf.MakeStartDirectoriesCurrent();
   cmCacheManager::GetInstance()->LoadCache(&mf);
+  // no generator specified on the command line
+  if(!mf.GetMakefileGenerator())
+    {
+    cmMakefileGenerator* gen;
+    const char* genName = mf.GetDefinition("CMAKE_GENERATOR");
+    if(genName)
+      {
+      gen = cmMakefileGenerator::CreateGenerator(genName);
+      }
+    else
+      {
+#if defined(_WIN32) && !defined(__CYGWIN__)  
+      gen = new cmMSProjectGenerator;
+#else
+      gen = new cmUnixMakefileGenerator;
+#endif
+      }
+    if(!gen)
+      {
+      cmSystemTools::Error("Could not create generator");
+      return -1;
+      }
+    mf.SetMakefileGenerator(gen);
+    // add the 
+    }
+  cmMakefileGenerator* gen = mf.GetMakefileGenerator();
+  gen->SetLocal(m_Local);
+  if(!mf.GetDefinition("CMAKE_GENERATOR"))
+    {
+    mf.AddCacheDefinition("CMAKE_GENERATOR",
+                          gen->GetName(),
+                          "Name of generator.",
+                          cmCacheManager::INTERNAL);
+    }
+  
 
   // setup CMAKE_ROOT and CMAKE_COMMAND
   this->AddCMakePaths(args);

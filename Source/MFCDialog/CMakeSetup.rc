@@ -85,32 +85,34 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,178,7,50,14,WS_GROUP
 END
 
-IDD_CMakeSetupDialog_DIALOG DIALOGEX 0, 0, 376, 225
+IDD_CMakeSetupDialog_DIALOG DIALOGEX 0, 0, 389, 225
 STYLE WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | 
     WS_SYSMENU | WS_THICKFRAME
 EXSTYLE WS_EX_APPWINDOW
 CAPTION "CMakeSetupDialog"
 FONT 8, "MS Sans Serif"
 BEGIN
-    COMBOBOX        IDC_WhereSource,147,6,135,66,CBS_DROPDOWN | 
+    COMBOBOX        IDC_WhereSource,96,6,133,66,CBS_DROPDOWN | 
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
-    PUSHBUTTON      "Browse...",IDC_BUTTON2,286,5,43,13
-    COMBOBOX        IDC_WhereBuild,148,26,133,68,CBS_DROPDOWN | 
+    PUSHBUTTON      "Browse...",IDC_BUTTON2,230,6,34,13
+    COMBOBOX        IDC_WhereBuild,96,26,133,68,CBS_DROPDOWN | 
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
-    PUSHBUTTON      "Browse...",IDC_BUTTON3,286,25,43,13
+    PUSHBUTTON      "Browse...",IDC_BUTTON3,230,25,34,13
     DEFPUSHBUTTON   "Configure",IDC_BuildProjects,88,202,67,15
     PUSHBUTTON      "Cancel",IDCANCEL,220,201,67,15
-    LISTBOX         IDC_LIST2,15,55,344,122,LBS_OWNERDRAWVARIABLE | 
+    LISTBOX         IDC_LIST2,15,55,356,122,LBS_OWNERDRAWVARIABLE | 
                     LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | 
                     WS_HSCROLL
-    RTEXT           "Where is the source code:",IDC_STATIC,52,6,86,9
-    RTEXT           "Where do you want to build the binaries:",IDC_STATIC,10,
-                    27,128,9
-    GROUPBOX        "Cache Values",IDC_FRAME,9,43,356,141
+    RTEXT           "Where is the source code:",IDC_STATIC,6,7,86,9
+    RTEXT           "Where to build the binaries:",IDC_STATIC,5,27,90,9
+    GROUPBOX        "Cache Values",IDC_FRAME,9,43,369,141
     CTEXT           "Right click on cache entries for additional options",
                     IDC_MouseHelpCaption,106,189,156,8
     LTEXT           "Static",IDC_CMAKE_VERSION,3,211,58,13,SS_CENTERIMAGE
     PUSHBUTTON      "OK",IDC_OK,160,202,56,14
+    COMBOBOX        IDC_Generator,275,25,103,50,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Build For:",IDC_GeneratorLabel,279,10,103,12
 END
 
 
@@ -175,7 +177,7 @@ BEGIN
 
     IDD_CMakeSetupDialog_DIALOG, DIALOG
     BEGIN
-        RIGHTMARGIN, 375
+        RIGHTMARGIN, 388
     END
 END
 #endif    // APSTUDIO_INVOKED

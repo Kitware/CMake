@@ -36,6 +36,7 @@ protected:
 // Dialog Data
   //{{AFX_DATA(CMakeSetupDialog)
 	enum { IDD = IDD_CMakeSetupDialog_DIALOG };
+	CComboBox	m_GeneratorChoice;
 	CButton	m_OKButton;
 	CButton	m_CancelButton;
   CString	m_WhereSource;
@@ -48,6 +49,7 @@ protected:
   CStatic       m_MouseHelp;
   CStatic       m_VersionDisplay;
   CButton       m_Configure;
+	CString	m_GeneratorChoiceString;
 	//}}AFX_DATA
   
   // ClassWizard generated virtual function overrides
@@ -85,6 +87,7 @@ protected:
   afx_msg void OnSize(UINT nType, int cx, int cy);
   afx_msg void OnGetMinMaxInfo( MINMAXINFO FAR* lpMMI );
 	afx_msg void OnOk();
+	afx_msg void OnEditchangeGenerator();
 	//}}AFX_MSG
   DECLARE_MESSAGE_MAP()
     

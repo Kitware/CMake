@@ -79,9 +79,9 @@ class cmake
   /**
    * constructor
    */
-  cmake() {m_Verbose = false;}
+  cmake();
 
- private:
+private:
   bool m_Verbose;
   bool m_Local;
 };
