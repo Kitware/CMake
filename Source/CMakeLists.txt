@@ -361,14 +361,14 @@ IF(BUILD_TESTING)
   ENDIF (APPLE)
 
   IF(UNIX)
-    IF("x${CMAKE_INSTALL_PREFIX}" MATCHES "^x${CMake_BINARY_DIR}/InstallTest$")
+    IF("x${CMAKE_INSTALL_PREFIX}" MATCHES "^x${CMake_BINARY_DIR}/Tests/TestInstall/Prefix$")
       CONFIGURE_FILE(
         ${CMake_SOURCE_DIR}/Tests/TestInstall.sh.in
         ${CMake_BINARY_DIR}/Tests/TestInstall/TestInstall.sh
         @ONLY IMMEDIATE
         )
       ADD_TEST(Install /bin/sh ${CMake_BINARY_DIR}/Tests/TestInstall/TestInstall.sh)
-    ENDIF("x${CMAKE_INSTALL_PREFIX}" MATCHES "^x${CMake_BINARY_DIR}/InstallTest$")
+    ENDIF("x${CMAKE_INSTALL_PREFIX}" MATCHES "^x${CMake_BINARY_DIR}/Tests/TestInstall/Prefix$")
   ENDIF(UNIX)
 
 ENDIF(BUILD_TESTING)
