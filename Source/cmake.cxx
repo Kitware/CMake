@@ -1032,7 +1032,41 @@ int cmake::Configure()
 #if defined(__BORLANDC__) && defined(_WIN32)
       this->SetGlobalGenerator(new cmGlobalBorlandMakefileGenerator);
 #elif defined(_WIN32) && !defined(__CYGWIN__)  
-      this->SetGlobalGenerator(new cmGlobalVisualStudio6Generator);
+      std::string installedCompiler;
+      std::string mp = "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\8.0\\Setup;Dbghelp_path";
+      cmSystemTools::ExpandRegistryValues(mp);
+      if (!(mp == "/registry"))
+        {
+        installedCompiler = "Visual Studio 8 2005";
+        }
+      else
+        {
+        mp = "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\7.1;InstallDir]";
+        cmSystemTools::ExpandRegistryValues(mp);
+        if (!(mp == "/registry"))
+          {
+          installedCompiler = "Visual Studio 7 .NET 2003";
+          }
+        else
+          {
+          mp = "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\7.0;InstallDir]";
+          cmSystemTools::ExpandRegistryValues(mp);
+          if (!(mp == "/registry"))
+            {
+            installedCompiler = "Visual Studio 7";
+            }
+          else
+            {
+            installedCompiler = "Visual Studio 6";
+            }
+          }
+        }
+      cmGlobalGenerator* gen = this->CreateGlobalGenerator(installedCompiler.c_str());
+      if(!gen)
+        {
+        gen = new cmGlobalNMakeMakefileGenerator;
+        }
+      this->SetGlobalGenerator(gen);
 #else
       this->SetGlobalGenerator(new cmGlobalUnixMakefileGenerator);
 #endif
