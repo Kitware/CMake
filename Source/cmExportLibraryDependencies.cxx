@@ -17,6 +17,7 @@
 #include "cmExportLibraryDependencies.h"
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
+#include "cmGeneratedFileStream.h"
 #include "cmake.h"
 
 // cmExecutableCommand
@@ -49,7 +50,7 @@ void cmExportLibraryDependenciesCommand::FinalPass()
     }
     
 
-  // Create a full path filename for output Testfile
+  // Create a full path filename for output
   std::string fname = m_Args[0];
   bool append = false;
   if(m_Args.size() > 1)
@@ -59,16 +60,23 @@ void cmExportLibraryDependenciesCommand::FinalPass()
       append = true;
       }
     }
-  // Open the output Testfile
-  std::ofstream fout;
+
+  // Use copy-if-different if not appending.
+  std::ostream* foutPtr;
+  std::auto_ptr<cmGeneratedFileStream> foutNew;
   if(append)
     {
-    fout.open(fname.c_str(), std::ios::app);
+    foutPtr = new std::ofstream(fname.c_str(), std::ios::app);
     }
   else
     {
-      fout.open(fname.c_str());
+    std::auto_ptr<cmGeneratedFileStream> ap(
+      new cmGeneratedFileStream(fname.c_str()));
+    foutNew = ap;
+    foutPtr = &foutNew->GetStream();
     }
+  std::ostream& fout = *foutPtr;
+
   if (!fout)
     {
     cmSystemTools::Error("Error Writing ", fname.c_str());
@@ -116,6 +124,5 @@ void cmExportLibraryDependenciesCommand::FinalPass()
         }
       }
     }
-  fout.close();
   return;
 }
