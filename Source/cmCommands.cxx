@@ -34,6 +34,7 @@
 #include "cmEndForEachCommand.cxx"
 #include "cmEndIfCommand.cxx"
 #include "cmExecProgramCommand.cxx"
+#include "cmFileCommand.cxx"
 #include "cmFindFileCommand.cxx"
 #include "cmFindLibraryCommand.cxx"
 #include "cmFindPackageCommand.cxx"
@@ -125,6 +126,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmEndForEachCommand);
   commands.push_back(new cmEndIfCommand);
   commands.push_back(new cmExecProgramCommand);
+  commands.push_back(new cmFileCommand);
   commands.push_back(new cmFindFileCommand);
   commands.push_back(new cmFindLibraryCommand);
   commands.push_back(new cmFindPackageCommand);
