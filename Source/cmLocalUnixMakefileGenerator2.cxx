@@ -1266,7 +1266,7 @@ cmLocalUnixMakefileGenerator2
 {
   std::vector<std::string> commands;
 
-  // Build list of dependencies.  TODO: depend on other targets.
+  // Build list of dependencies.
   std::vector<std::string> depends;
   for(std::vector<std::string>::const_iterator obj = objects.begin();
       obj != objects.end(); ++obj)
@@ -1275,19 +1275,9 @@ cmLocalUnixMakefileGenerator2
     }
 
   // Add dependencies on libraries that will be linked.
-  std::set<cmStdString> emitted;
-  emitted.insert(target.GetName());
-  const cmTarget::LinkLibraries& tlibs = target.GetLinkLibraries();
-  for(cmTarget::LinkLibraries::const_iterator lib = tlibs.begin();
-      lib != tlibs.end(); ++lib)
-    {
-    // Don't emit the same library twice for this target.
-    if(emitted.insert(lib->first).second)
-      {
-      // Add this dependency.
-      this->AppendLibDepend(depends, lib->first.c_str());
-      }
-    }
+  this->AppendLibDepends(target, depends);
+
+  // Add a dependency on the rule file itself.
   depends.push_back(ruleFileName);
 
   // Construct the full path to the executable that will be generated.
@@ -1500,13 +1490,18 @@ cmLocalUnixMakefileGenerator2
   // code duplication.
   std::vector<std::string> commands;
 
-  // Build list of dependencies.  TODO: depend on other targets.
+  // Build list of dependencies.
   std::vector<std::string> depends;
   for(std::vector<std::string>::const_iterator obj = objects.begin();
       obj != objects.end(); ++obj)
     {
     depends.push_back(*obj);
     }
+
+  // Add dependencies on libraries that will be linked.
+  this->AppendLibDepends(target, depends);
+
+  // Add a dependency on the rule file itself.
   depends.push_back(ruleFileName);
 
   const char* linkLanguage =
@@ -1843,6 +1838,38 @@ void cmLocalUnixMakefileGenerator2::AppendFlags(std::string& flags,
       flags += " ";
       }
     flags += newFlags;
+    }
+}
+
+//----------------------------------------------------------------------------
+void
+cmLocalUnixMakefileGenerator2
+::AppendLibDepends(const cmTarget& target,
+                   std::vector<std::string>& depends)
+{
+  // Do not bother with dependencies for static libraries.
+  if(target.GetType() == cmTarget::STATIC_LIBRARY)
+    {
+    return;
+    }
+
+  // Keep track of dependencies already listed.
+  std::set<cmStdString> emitted;
+
+  // A target should not depend on itself.
+  emitted.insert(target.GetName());
+
+  // Loop over all dependencies.
+  const cmTarget::LinkLibraries& tlibs = target.GetLinkLibraries();
+  for(cmTarget::LinkLibraries::const_iterator lib = tlibs.begin();
+      lib != tlibs.end(); ++lib)
+    {
+    // Don't emit the same library twice for this target.
+    if(emitted.insert(lib->first).second)
+      {
+      // Add this dependency.
+      this->AppendLibDepend(depends, lib->first.c_str());
+      }
     }
 }
 
