@@ -72,6 +72,8 @@ IF (UNIX)
   INCLUDE (${CMake_SOURCE_DIR}/Modules/FindCurses.cmake OPTIONAL)
   IF (CURSES_LIBRARY)
     SUBDIRS(Source/CursesDialog/form)
+  ELSE (CURSES_LIBRARY)
+    MESSAGE("Curses libraries were not found. Curses GUI for CMake will not be build.")
   ENDIF (CURSES_LIBRARY)
 ENDIF (UNIX)
 
