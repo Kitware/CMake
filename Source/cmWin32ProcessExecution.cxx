@@ -685,6 +685,52 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
   return true;
 }
 
+bool cmWin32ProcessExecution::CloseHandles()
+{
+  bool ret = true;
+  if (this->hChildStdinRd && !CloseHandle(this->hChildStdinRd))
+    {
+    m_Output += "CloseHandleError\n";
+    ret = false;
+    }
+  this->hChildStdinRd = 0;
+  if(this->hChildStdoutRdDup && !CloseHandle(this->hChildStdoutRdDup))
+    {
+    m_Output += "CloseHandleError\n";
+    ret = false;
+    }
+  this->hChildStdoutRdDup = 0;
+  if(this->hChildStderrRdDup && !CloseHandle(this->hChildStderrRdDup))
+    {
+    m_Output += "CloseHandleError\n";
+    ret = false;
+    }
+  this->hChildStderrRdDup = 0;
+  if(this->hChildStdinWrDup && !CloseHandle(this->hChildStdinWrDup))
+    {
+    m_Output += "CloseHandleError\n";
+    ret = false;
+    }
+  this->hChildStdinWrDup = 0;
+  if (this->hChildStdoutWr && !CloseHandle(this->hChildStdoutWr))
+    {
+    m_Output += "CloseHandleError\n";
+    ret = false;
+    }
+  this->hChildStdoutWr = 0;
+  if (this->hChildStderrWr && !CloseHandle(this->hChildStderrWr))
+    {
+    m_Output += "CloseHandleError\n";
+    ret = false;
+    }
+  this->hChildStderrWr = 0;
+  return ret;
+}
+cmWin32ProcessExecution::~cmWin32ProcessExecution()
+{
+  this->CloseHandles();
+}
+
 /*
  * Wrapper for fclose() to use for popen* files, so we can retrieve the
  * exit code for the child process and return as a result of the close.
@@ -806,41 +852,8 @@ bool cmWin32ProcessExecution::PrivateClose(int /* timeout */)
   CloseHandle(hProcess);
   m_ExitValue = result;
   m_Output += output;
-
-  if (this->hChildStdinRd && !CloseHandle(this->hChildStdinRd))
-    {
-    m_Output += "CloseHandleError\n";
-    return false;
-    }
-  if(this->hChildStdoutRdDup && !CloseHandle(this->hChildStdoutRdDup))
-    {
-    m_Output += "CloseHandleError\n";
-    return false;
-    }
-  if(this->hChildStderrRdDup && !CloseHandle(this->hChildStderrRdDup))
-    {
-    m_Output += "CloseHandleError\n";
-    return false;
-    }
-  if(this->hChildStdinWrDup && !CloseHandle(this->hChildStdinWrDup))
-    {
-    m_Output += "CloseHandleError\n";
-    return false;
-    }
-  if (this->hChildStdoutWr && !CloseHandle(this->hChildStdoutWr))
-    {
-    m_Output += "CloseHandleError\n";
-    return false;
-    }
-          
-  if (this->hChildStderrWr && !CloseHandle(this->hChildStderrWr))
-    {
-    m_Output += "CloseHandleError\n";
-    return false;
-    }
-
-
-  if ( result < 0 )
+  bool ret = this->CloseHandles();
+  if ( result < 0 || !ret)
     {
     return false;
     }

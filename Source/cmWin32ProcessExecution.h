@@ -49,6 +49,7 @@ public:
     this->SetConsoleSpawn("w9xpopen.exe");
     this->Initialize();
     }
+  ~cmWin32ProcessExecution();
   ///! If true windows will be created hidden.
   void SetHideWindows(bool v) { m_HideWindows = v;  }
   
@@ -139,6 +140,7 @@ public:
                                 int timeout, bool hideWindows);
 
 private:
+  bool CloseHandles();
   bool PrivateOpen(const char*, const char*, int, int);
   bool PrivateClose(int timeout);
 
