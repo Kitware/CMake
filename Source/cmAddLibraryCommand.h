@@ -53,7 +53,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Add an library to the project that uses the specified srclists";
+    return "Add an library to the project that uses the specified source files.";
     }
   
   /**
@@ -62,7 +62,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "ADD_LIBRARY(libname [SHARED | STATIC | MODULE] srclist srclist ...)\n"
+      "ADD_LIBRARY(libname [SHARED | STATIC | MODULE] source1 source2 ... sourceN)\n"
       "Adds a library target.  SHARED, STATIC or MODULE keywords are used\n"
       "to set the library type.  If the keywork MODULE appears, the library\n"
       "type is set to MH_BUNDLE on systems which use dyld. Systems without\n"
