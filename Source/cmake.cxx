@@ -133,7 +133,25 @@ void cmake::AddCMakePaths(const std::vector<std::string>& args)
   std::string cMakeSelf = args[0];
   cmSystemTools::ConvertToUnixSlashes(cMakeSelf);
   cMakeSelf = cmSystemTools::FindProgram(cMakeSelf.c_str());
-
+#ifdef CMAKE_BUILD_DIR
+  if(!cmSystemTools::FileExists(cMakeSelf.c_str()))
+    {
+      cMakeSelf = CMAKE_BUILD_DIR;
+      cMakeSelf += "/Source/cmake";
+    }
+#endif
+#ifdef CMAKE_PREFIX
+  if(!cmSystemTools::FileExists(cMakeSelf.c_str()))
+    {
+      cMakeSelf = CMAKE_PREFIX "/bin/cmake";
+    }
+#endif
+  if(!cmSystemTools::FileExists(cMakeSelf.c_str()))
+    {
+      cmSystemTools::Error("CMAKE can not find the command line program cmake. "
+			   "Attempted path: ", cMakeSelf.c_str());
+      return;
+    }
    // Save the value in the cache
   cmCacheManager::GetInstance()->AddCacheEntry
     ("CMAKE_COMMAND",
