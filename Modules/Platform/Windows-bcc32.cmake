@@ -28,7 +28,7 @@ SET(CMAKE_C_CREATE_STATIC_LIBRARY ${CMAKE_CXX_CREATE_STATIC_LIBRARY})
 
 # compile a C++ file into an object file
 SET(CMAKE_CXX_COMPILE_OBJECT
-    "<CMAKE_CXX_COMPILER>  @&&|\n-DWIN32 -o<OBJECT> <FLAGS> -c <SOURCE>\n|")
+    "<CMAKE_CXX_COMPILER>  @&&|\n-DWIN32 -P -o<OBJECT> <FLAGS> -c <SOURCE>\n|")
 
 # compile a C file into an object file
 SET(CMAKE_C_COMPILE_OBJECT
@@ -50,7 +50,7 @@ SET(CMAKE_CREATE_WIN32_EXE -tW -tWM )
 # extra flags for a console app
 SET(CMAKE_CREATE_CONSOLE_EXE -tWC )
 
-SET (CMAKE_CXX_FLAGS_INIT "-w- -whid -waus -wpar -tWM -P")
+SET (CMAKE_CXX_FLAGS_INIT "-w- -whid -waus -wpar -tWM")
 SET (CMAKE_CXX_FLAGS_DEBUG_INIT "-Od -v")
 SET (CMAKE_CXX_FLAGS_MINSIZEREL_INIT "-O1")
 SET (CMAKE_CXX_FLAGS_RELEASE_INIT "-O2")
