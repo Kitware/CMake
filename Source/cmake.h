@@ -65,11 +65,10 @@ class cmake
    */
   int Generate(const std::vector<std::string>&, bool buildMakefiles = true);
 
-  /**
-   * Generate the SourceFilesList from the SourceLists. This should only be
-   * done once to be safe.  
-   */
+  ///! Parse command line arguments
   void SetArgs(cmMakefile& builder, const std::vector<std::string>&);
+  ///! Parse command line arguments that might set cache values
+  void SetCacheArgs(cmMakefile& builder, const std::vector<std::string>&);
 
   /**
    * Generate CMAKE_ROOT and CMAKE_COMMAND cache entries

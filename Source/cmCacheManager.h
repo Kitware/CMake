@@ -102,6 +102,12 @@ public:
   ///! Remove an entry from the cache
   void RemoveCacheEntry(const char* key);
   
+  ///! Break up a line like VAR:type="value" into var, type and value
+  static bool ParseEntry(const char* entry, 
+                         std::string& var,
+                         std::string& value,
+                         CacheEntryType& type);
+  
 protected:
   ///! Add an entry into the cache
   void AddCacheEntry(const char* key, const char* value, 

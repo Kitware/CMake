@@ -80,6 +80,35 @@ void cmake::Usage(const char* program)
 }
 
 // Parse the args
+void cmake::SetCacheArgs(cmMakefile& builder, const std::vector<std::string>& args)
+{ 
+  for(unsigned int i=1; i < args.size(); ++i)
+    {
+    std::string arg = args[i];
+    if(arg.find("-D",0) == 0)
+      {
+      std::string entry = arg.substr(2);
+      std::string var, value;
+      cmCacheManager::CacheEntryType type;
+      if(cmCacheManager::ParseEntry(entry.c_str(), var, value, type))
+        {
+          cmCacheManager::GetInstance()->AddCacheEntry(
+            var.c_str(), 
+            cmSystemTools::EscapeSpaces(value.c_str()).c_str(),
+            "No help, variable specified on the command line.",
+            type);
+          std::cerr << "parse entry " << var.c_str()<< " " << value.c_str() << "\n";
+        }
+      else
+        {
+        std::cerr << "Parse error in command line argument: " << arg << "\n"
+                  << "Should be: VAR:type=value\n";
+        }        
+      }
+    }
+}
+
+// Parse the args
 void cmake::SetArgs(cmMakefile& builder, const std::vector<std::string>& args)
 {
   m_Local = false;
@@ -135,11 +164,6 @@ void cmake::SetArgs(cmMakefile& builder, const std::vector<std::string>& args)
       directoriesSet = true;
       std::string path = arg.substr(2);
       builder.SetHomeOutputDirectory(path.c_str());
-      }
-    else if(arg.find("-D",0) == 0)
-      {
-	std::string value = arg.substr(2);
-	builder.AddDefinition(value.c_str(), true);
       }
     else if(arg.find("-V",0) == 0)
       {
@@ -315,6 +339,8 @@ int cmake::Generate(const std::vector<std::string>& args, bool buildMakefiles)
   // Read and parse the input makefile
   mf.MakeStartDirectoriesCurrent();
   cmCacheManager::GetInstance()->LoadCache(&mf);
+  // extract command line arguments that might add cache entries
+  this->SetCacheArgs(mf, args);
   // no generator specified on the command line
   if(!mf.GetMakefileGenerator())
     {

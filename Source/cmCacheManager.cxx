@@ -114,6 +114,32 @@ bool cmCacheManager::LoadCache(const char* path,
   return this->LoadCache(path, internal, emptySet, emptySet);
 }
 
+bool cmCacheManager::ParseEntry(const char* entry, 
+                                std::string& var,
+                                std::string& value,
+                                CacheEntryType& type)
+{
+  // input line is:         key:type=value
+  cmRegularExpression reg("^([^:]*):([^=]*)=(.*[^\t ]|[\t ]*)[\t ]*$");
+  // input line is:         "key":type=value
+  cmRegularExpression regQuoted("^\"([^\"]*)\":([^=]*)=(.*[^\t ]|[\t ]*)[\t ]*$");
+  if(regQuoted.find(entry))
+    {
+    var = regQuoted.match(1);
+    type = cmCacheManager::StringToType(regQuoted.match(2).c_str());
+    value = regQuoted.match(3);
+    return true;
+    }
+  else if (reg.find(entry))
+    {
+    var = reg.match(1);
+    type = cmCacheManager::StringToType(reg.match(2).c_str());
+    value = reg.match(3);
+    return true;
+    }
+  return false;
+}
+
 bool cmCacheManager::LoadCache(const char* path,
 			       bool internal,
 			       std::set<std::string>& excludes,
@@ -167,12 +193,10 @@ bool cmCacheManager::LoadCache(const char* path,
         continue;
         }
       }
-    if(regQuoted.find(realbuffer))
+    if(cmCacheManager::ParseEntry(realbuffer, entryKey, e.m_Value, e.m_Type))
       {
-      entryKey = regQuoted.match(1);
       if ( excludes.find(entryKey) == excludes.end() )
 	{
-	e.m_Type = cmCacheManager::StringToType(regQuoted.match(2).c_str());
 	// Load internal values if internal is set.
 	// If the entry is not internal to the cache being loaded
 	// or if it is in the list of internal entries to be
@@ -192,42 +216,9 @@ bool cmCacheManager::LoadCache(const char* path,
             e.m_HelpString += path;
             e.m_HelpString += "/CMakeCache.txt"	;
 	    }
-	  e.m_Value = regQuoted.match(3);
 	  m_Cache[entryKey] = e;
 	  }
 	}
-      }
-    else if (reg.find(realbuffer))
-      {
-      entryKey = reg.match(1);
-      if ( excludes.find(entryKey) == excludes.end() )
-        { 
-        e.m_Type = cmCacheManager::StringToType(reg.match(2).c_str());
-        // only load internal values if internal is set
-        // Load internal values if internal is set.
-        // If the entry is not internal to the cache being loaded
-        // or if it is in the list of internal entries to be
-        // imported, load it.
-        if ( internal || (e.m_Type != INTERNAL) || 
-             (includes.find(entryKey) != includes.end()) )
-          {
-          // If we are loading the cache from another project,
-          // make all loaded entries internal so that it is
-          // not visible in the gui
-          if (!internal)
-            {
-            e.m_Type = INTERNAL;
-	    e.m_HelpString = "DO NOT EDIT, ";
-            e.m_HelpString += entryKey;
-            e.m_HelpString += " loaded from external file.  "
-              "To change this value edit this file: ";
-            e.m_HelpString += path;
-            e.m_HelpString += "/CMakeCache.txt";
-            }
-          e.m_Value = reg.match(3);
-          m_Cache[entryKey] = e;
-          }
-        }
       }
     else
       {
@@ -247,6 +238,8 @@ bool cmCacheManager::LoadCache(const char* path,
                         "current loaded cache", cmCacheManager::INTERNAL);
     
     }
+  // check to make sure the cache directory has not
+  // been moved
   if ( internal && this->GetCacheValue("CMAKE_CACHEFILE_DIR") )
     {
     std::string currentcwd = path;
