@@ -2,11 +2,13 @@
 
 void NoDepBFunction();
 void NoDepCFunction();
-void FiveFunction();
+void SixAFunction();
+void SixBFunction();
 
 int main( )
 {
-  FiveFunction();
+  SixAFunction();
+  SixBFunction();
   NoDepBFunction();
   NoDepCFunction();
 

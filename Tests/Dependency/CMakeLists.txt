@@ -15,11 +15,13 @@ SET( CMAKE_ANALYZE_LIB_DEPENDS "ON" )
 #                    ^                                 |
 #                    |                                 |
 #      One  <------ Four ----->  Two  <----- Five  <---+
-#                                 |
-#       ^            ^            |
-#       |            |            |
-#       +--------- Three  <-------+
-#
+#                                |           
+#       ^           ^  ^         | ^         ^  ^
+#       |           |  +-----+   | |         |  +----+
+#       |           |        |   | |         |       |
+#       +--------- Three  <------+ +------- SixA    SixB
+#                            |                       |
+#                            +-----------------------+
 # NoDepA:
 # NoDepB: NoDepA
 # NoDepC: NoDepA
@@ -28,11 +30,16 @@ SET( CMAKE_ANALYZE_LIB_DEPENDS "ON" )
 # Three: One Four
 # Four: One Two A
 # Five: Two
-# Exec: NoDepB NoDepC Five
+# SixA: Two Five
+# SixB: Four Five
+# Exec: NoDepB NoDepC SixA SixB
 #
 # The libraries One,...,Five have their dependencies explicitly
 # encoded. The libraries NoDepA,...,NoDepC do not.
+#
+# Although SixB does not depend on Two, there is a dependency listed
+# in the corresponding CMakeLists.txt just because of commands used.
 
 SUBDIRS( NoDepA NoDepB NoDepC )
-SUBDIRS( One Two Three Four Five )
+SUBDIRS( One Two Three Four Five Six )
 SUBDIRS( Exec )
