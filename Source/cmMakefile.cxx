@@ -390,7 +390,6 @@ void cmMakefile::AddCommand(cmCommand* wg)
 {
   std::string name = wg->GetName();
   m_Commands.insert( RegisteredCommandsMap::value_type(name, wg));
-  this->AddDefinition(name.c_str(), true);
 }
 
   // Set the make file 
