@@ -41,6 +41,12 @@ public:
   virtual bool Invoke(std::vector<std::string>& args);
 
   /**
+   * This determines if the command gets propagated down
+   * to makefiles located in subdirectories.
+   */
+  virtual bool IsInherited() {return true;}
+
+  /**
    * The name of the command as specified in CMakeList.txt.
    */
   virtual const char* GetName() { return "ELSE";}

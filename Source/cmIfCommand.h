@@ -72,6 +72,12 @@ public:
     }
   
   /**
+   * This determines if the command gets propagated down
+   * to makefiles located in subdirectories.
+   */
+  virtual bool IsInherited() {return true;}
+
+  /**
    * More documentation.
    */
   virtual const char* GetFullDocumentation()
