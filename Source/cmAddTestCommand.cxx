@@ -31,8 +31,18 @@ bool cmAddTestCommand::InitialPass(std::vector<std::string> const& args)
     }
   
   // store the arguments for the final pass
+  // also expand any CMake variables
+
   m_Args.erase(m_Args.begin(), m_Args.end());
-  std::copy(args.begin(),args.end(),std::back_inserter(m_Args));
+  std::string temp;
+  for (std::vector<std::string>::const_iterator j = args.begin(); 
+       j != args.end(); ++j)
+    {
+    temp = *j;
+    m_Makefile->ExpandVariablesInString(temp);
+    m_Args.push_back(temp);
+    }
+  
   return true;
 }
 
@@ -40,14 +50,6 @@ bool cmAddTestCommand::InitialPass(std::vector<std::string> const& args)
 // creates the file in the final pass.
 void cmAddTestCommand::FinalPass()
 {
-
-  // Expand any CMake variables
-  std::vector<std::string>::iterator s;
-  for (s = m_Args.begin(); s != m_Args.end(); ++s)
-    {
-    m_Makefile->ExpandVariablesInString(*s);
-    }
-
   // Create a full path filename for output Testfile
   std::string fname;
   fname = m_Makefile->GetStartOutputDirectory();
