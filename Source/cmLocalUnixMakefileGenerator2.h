@@ -38,6 +38,11 @@ public:
 
   virtual ~cmLocalUnixMakefileGenerator2();
 
+  /** Set the command used when there are no dependencies or rules for
+      a target.  This is used to avoid errors on some make
+      implementations.  */
+  void SetEmptyCommand(const char* cmd);
+
   /**
    * Generate the makefile for this directory. fromTheTop indicates if this
    * is being invoked as part of a global Generate or specific to this
@@ -78,6 +83,8 @@ protected:
   void WriteSubdirRules(std::ostream& makefileStream, const char* pass);
   void WriteSubdirRule(std::ostream& makefileStream, const char* pass,
                        const char* subdir, std::string& last);
+  void WriteSubdirDriverRule(std::ostream& makefileStream, const char* pass,
+                             const char* order, const std::string& last);
   void WriteRequiresRule(std::ostream& ruleFileStream, const cmTarget& target,
                          const char* targetFullPath);
   void WriteExecutableRule(std::ostream& ruleFileStream,
@@ -115,7 +122,7 @@ protected:
   void AddConfigVariableFlags(std::string& flags, const char* var);
   void AppendFlags(std::string& flags, const char* newFlags);
   void AppendLibDepend(std::vector<std::string>& depends, const char* name);
-  std::string GetRecursiveMakeCall(const char* tgt);
+  std::string GetRecursiveMakeCall(const char* tgt, bool silent);
   void WriteJumpAndBuildRules(std::ostream& makefileStream);
 
   static bool ScanDependenciesC(const char* objFile, const char* srcFile,
@@ -136,6 +143,9 @@ private:
 
   // List the files for which to check dependency integrity.
   std::set<cmStdString> m_CheckDependFiles;
+
+  // Command used when a rule has no dependencies or commands.
+  std::vector<std::string> m_EmptyCommands;
 };
 
 #endif

@@ -34,9 +34,21 @@ cmLocalUnixMakefileGenerator2::~cmLocalUnixMakefileGenerator2()
 }
 
 //----------------------------------------------------------------------------
+void cmLocalUnixMakefileGenerator2::SetEmptyCommand(const char* cmd)
+{
+  m_EmptyCommands.clear();
+  if(cmd)
+    {
+    m_EmptyCommands.push_back(cmd);
+    }
+}
+
+//----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator2::Generate(bool fromTheTop)
 {
   // TODO: Account for control-c during Makefile generation.
+
+  // TODO: Think about unifying generation of "@" for silent commands.
 
   // Generate old style for now.
   this->cmLocalUnixMakefileGenerator::Generate(fromTheTop);
@@ -376,7 +388,7 @@ cmLocalUnixMakefileGenerator2
   cmOStringStream depCmd;
   // TODO: Account for source file properties and directory-level
   // definitions when scanning for dependencies.
-  depCmd << "$(CMAKE_COMMAND) -E cmake_depends " << lang << " "
+  depCmd << "@$(CMAKE_COMMAND) -E cmake_depends " << lang << " "
          << this->ConvertToRelativeOutputPath(obj.c_str()) << " "
          << this->ConvertToRelativeOutputPath(source.GetFullPath().c_str());
   std::vector<std::string> includeDirs;
@@ -710,16 +722,16 @@ cmLocalUnixMakefileGenerator2
   depends.push_back("cmake_check_build_system");
 
   // Recursively build pre-order directories.
-  commands.push_back(this->GetRecursiveMakeCall("all.subdirs.pre"));
+  commands.push_back(this->GetRecursiveMakeCall("all.subdirs.pre", true));
 
   // Recursively build dependencies.
-  commands.push_back(this->GetRecursiveMakeCall("all.depends"));
+  commands.push_back(this->GetRecursiveMakeCall("all.depends", true));
 
   // Recursively build targets.
-  commands.push_back(this->GetRecursiveMakeCall("all.build"));
+  commands.push_back(this->GetRecursiveMakeCall("all.build", true));
 
   // Recursively build post-order directories.
-  commands.push_back(this->GetRecursiveMakeCall("all.subdirs.post"));
+  commands.push_back(this->GetRecursiveMakeCall("all.subdirs.post", true));
 
   // Write the rule.
   std::string preEcho = "Entering directory ";
@@ -762,7 +774,7 @@ cmLocalUnixMakefileGenerator2
   std::vector<std::string> no_depends;
   std::vector<std::string> commands;
   commands.push_back(
-    "$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)");
+    "@$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)");
   this->WriteMakeRule(makefileStream,
                       "Special rule to re-run CMake using make.",
                       "Running CMake to regenerate build system...",
@@ -791,7 +803,7 @@ cmLocalUnixMakefileGenerator2
     std::vector<std::string> no_depends;
     std::vector<std::string> commands;
     commands.push_back(
-      "$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) -i");
+      "@$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) -i");
     this->WriteMakeRule(makefileStream,
                         "Special rule to re-run CMake cache editor using make.",
                         "Running interactive CMake command-line interface...",
@@ -872,6 +884,14 @@ cmLocalUnixMakefileGenerator2
         }
       }
     }
+
+  // If there are no dependencies, use empty commands.
+  if(depends.empty())
+    {
+    commands = m_EmptyCommands;
+    }
+
+  // Write the rule.
   this->WriteMakeRule(makefileStream,
                       "Main dependencies target for this directory.",
                       0,
@@ -898,6 +918,14 @@ cmLocalUnixMakefileGenerator2
         }
       }
     }
+
+  // If there are no dependencies, use empty commands.
+  if(depends.empty())
+    {
+    commands = m_EmptyCommands;
+    }
+
+  // Write the rule.
   this->WriteMakeRule(makefileStream,
                       "Main build target for this directory.",
                       0,
@@ -945,29 +973,8 @@ cmLocalUnixMakefileGenerator2
 
   // Write the subdir driver rules.  Hook them to the last
   // subdirectory of their corresponding order.
-  std::vector<std::string> pre_depends;
-  std::vector<std::string> post_depends;
-  std::vector<std::string> no_commands;
-  if(lastPre.size())
-    {
-    pre_depends.push_back(lastPre);
-    }
-  if(lastPost.size())
-    {
-    post_depends.push_back(lastPost);
-    }
-  std::string preComment = "Pre-order subdirectory driver target for ";
-  preComment += pass;
-  std::string postComment = "Post-order subdirectory driver target for ";
-  postComment += pass;
-  std::string preTarget = pass;
-  preTarget += ".subdirs.pre";
-  std::string postTarget = pass;
-  postTarget += ".subdirs.post";
-  this->WriteMakeRule(makefileStream, preComment.c_str(), 0,
-                      preTarget.c_str(), pre_depends, no_commands);
-  this->WriteMakeRule(makefileStream,  postComment.c_str(), 0,
-                      postTarget.c_str(), post_depends, no_commands);
+  this->WriteSubdirDriverRule(makefileStream, pass, "pre", lastPre);
+  this->WriteSubdirDriverRule(makefileStream, pass, "post", lastPost);
 }
 
 //----------------------------------------------------------------------------
@@ -992,15 +999,20 @@ cmLocalUnixMakefileGenerator2
     commands.push_back(cmd);
 
     // Build the target for this pass.
-    commands.push_back(this->GetRecursiveMakeCall(pass));
+    commands.push_back(this->GetRecursiveMakeCall(pass, true));
 
-    // Change back to the starting directory.
+    // Change back to the starting directory.  Any trailing slash must
+    // be removed to avoid problems with Borland Make.
     std::string destFull = m_Makefile->GetStartOutputDirectory();
     destFull += "/";
     destFull += subdir;
     std::string back =
       cmSystemTools::RelativePath(destFull.c_str(),
                                   m_Makefile->GetStartOutputDirectory());
+    if(back.size() && back[back.size()-1] == '/')
+      {
+      back = back.substr(0, back.size()-1);
+      }
     cmd = "@cd ";
     cmd += this->ConvertToOutputForExisting(back.c_str());
     commands.push_back(cmd);
@@ -1015,7 +1027,7 @@ cmLocalUnixMakefileGenerator2
 
     // Build the target for this pass.
     cmd += " && ";
-    cmd += this->GetRecursiveMakeCall(pass);
+    cmd += this->GetRecursiveMakeCall(pass, false);
 
     // Add the command as a single line.
     commands.push_back(cmd);
@@ -1032,6 +1044,45 @@ cmLocalUnixMakefileGenerator2
 
   // This rule is now the last one written.
   last = tgt;
+}
+
+//----------------------------------------------------------------------------
+void
+cmLocalUnixMakefileGenerator2
+::WriteSubdirDriverRule(std::ostream& makefileStream, const char* pass,
+                        const char* order, const std::string& last)
+{
+  // This rule corresponds to a particular pass (all, clean, etc).  It
+  // dispatches the build into subdirectories in pre- or post-order.
+  std::vector<std::string> depends;
+  std::vector<std::string> commands;
+  if(last.size())
+    {
+    // Use the dependency to drive subdirectory processing.
+    depends.push_back(last);
+    }
+  else
+    {
+    // There are no subdirectories.  Use the empty commands to avoid
+    // make errors on some platforms.
+    commands = m_EmptyCommands;
+    }
+
+  // Build comment to describe purpose.
+  std::string comment = "Driver target for ";
+  comment += order;
+  comment += "-order subdirectories during ";
+  comment += pass;
+  comment += ".";
+
+  // Build the make target name.
+  std::string tgt = pass;
+  tgt += ".subdirs.";
+  tgt += order;
+
+  // Write the rule.
+  this->WriteMakeRule(makefileStream, comment.c_str(), 0,
+                      tgt.c_str(), depends, commands);
 }
 
 //----------------------------------------------------------------------------
@@ -1397,7 +1448,7 @@ cmLocalUnixMakefileGenerator2
     }
 
   // Add a command to remove any existing files for this library.
-  std::string remove = "$(CMAKE_COMMAND) -E remove -f ";
+  std::string remove = "@$(CMAKE_COMMAND) -E remove -f ";
   remove += targetFullPathReal;
   if(targetFullPathSO != targetFullPathReal)
     {
@@ -1421,7 +1472,7 @@ cmLocalUnixMakefileGenerator2
   // Add a rule to create necessary symlinks for the library.
   if(targetFullPath != targetFullPathReal)
     {
-    std::string symlink = "$(CMAKE_COMMAND) -E cmake_symlink_library ";
+    std::string symlink = "@$(CMAKE_COMMAND) -E cmake_symlink_library ";
     symlink += targetFullPathReal;
     symlink += " ";
     symlink += targetFullPathSO;
@@ -1756,10 +1807,15 @@ cmLocalUnixMakefileGenerator2
 //----------------------------------------------------------------------------
 std::string
 cmLocalUnixMakefileGenerator2
-::GetRecursiveMakeCall(const char* tgt)
+::GetRecursiveMakeCall(const char* tgt, bool silent)
 {
   // Call make on the given file.
-  std::string cmd = "$(MAKE) -f Makefile2 ";
+  std::string cmd;
+  if(silent)
+    {
+    cmd += "@";
+    }
+  cmd += "$(MAKE) -f Makefile2 ";
 
   // Pass down verbosity level.
   if(m_MakeSilentFlag.size())
@@ -1828,13 +1884,14 @@ cmLocalUnixMakefileGenerator2
       commands.push_back(cmd);
 
       // Check the build system in destination directory.
-      commands.push_back(this->GetRecursiveMakeCall("cmake_check_build_system"));
+      commands.push_back(this->GetRecursiveMakeCall("cmake_check_build_system",
+                                                    true));
 
       // Build the targets's dependencies.
-      commands.push_back(this->GetRecursiveMakeCall(dep.c_str()));
+      commands.push_back(this->GetRecursiveMakeCall(dep.c_str(), true));
 
       // Build the target.
-      commands.push_back(this->GetRecursiveMakeCall(tgt.c_str()));
+      commands.push_back(this->GetRecursiveMakeCall(tgt.c_str(), true));
 
       // Jump back to the starting directory.
       cmd = "@cd ";
@@ -1850,15 +1907,15 @@ cmLocalUnixMakefileGenerator2
 
       // Check the build system in destination directory.
       cmd += " && ";
-      cmd += this->GetRecursiveMakeCall("cmake_check_build_system");
+      cmd += this->GetRecursiveMakeCall("cmake_check_build_system", false);
 
       // Build the targets's dependencies.
       cmd += " && ";
-      cmd += this->GetRecursiveMakeCall(dep.c_str());
+      cmd += this->GetRecursiveMakeCall(dep.c_str(), false);
 
       // Build the target.
       cmd += " && ";
-      cmd += this->GetRecursiveMakeCall(tgt.c_str());
+      cmd += this->GetRecursiveMakeCall(tgt.c_str(), false);
 
       // Add the command as a single line.
       commands.push_back(cmd);
