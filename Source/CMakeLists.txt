@@ -262,6 +262,20 @@ IF(BUILD_TESTING)
       Exec
       ${CMake_BINARY_DIR}/Tests/LinkLine
       LinkLine)
+
+    ADD_TEST(linkorder1 ${CMake_BINARY_DIR}/Source/cmaketest 
+      ${CMake_SOURCE_DIR}/Tests/LinkLineOrder
+      ${CMake_BINARY_DIR}/Tests/LinkLineOrder
+      Exec1
+      ${CMake_BINARY_DIR}/Tests/LinkLineOrder
+      LinkLineOrder)
+
+    ADD_TEST(linkorder2 ${CMake_BINARY_DIR}/Source/cmaketest 
+      ${CMake_SOURCE_DIR}/Tests/LinkLineOrder
+      ${CMake_BINARY_DIR}/Tests/LinkLineOrder
+      Exec2
+      ${CMake_BINARY_DIR}/Tests/LinkLineOrder
+      LinkLineOrder)
 ENDIF(BUILD_TESTING)
 
 

@@ -22,6 +22,18 @@
 #include <set>
 
 
+void cmTarget::SetType(TargetType type)
+{
+  // only add dependency information for library targets
+  m_TargetType = type;
+  if(m_TargetType >= STATIC_LIBRARY && m_TargetType <= MODULE_LIBRARY) {
+    m_RecordDependencies = true;
+  } else {
+    m_RecordDependencies = false;
+  }
+}
+
+
 void cmTarget::GenerateSourceFilesFromSourceLists( cmMakefile &mf)
 {
   // this is only done for non install targets
@@ -136,6 +148,33 @@ void cmTarget::AddLinkDirectory(const char* d)
 }
 
 
+void cmTarget::ClearDependencyInformation( cmMakefile& mf, const char* target )
+{
+  // Clear the dependencies. The cache variable must exist iff we are
+  // recording dependency information for this target.
+  std::string depname = target;
+  depname += "_LIB_DEPENDS";
+  if (m_RecordDependencies)
+    {
+    mf.AddCacheDefinition(depname.c_str(), "",
+                          "Dependencies for target", cmCacheManager::STATIC);
+    }
+  else
+    {
+    if (mf.GetDefinition( depname.c_str() ))
+      {
+      std::string message = "Target ";
+      message += target;
+      message += " has dependency information when it shouldn't.\n";
+      message += "Your cache is probably stale. Please remove the entry\n  ";
+      message += depname;
+      message += "\nfrom the cache.";
+      cmSystemTools::Error( message.c_str() );  
+      }
+    }
+}
+
+
 
 void cmTarget::AddLinkLibrary(const std::string& lib, 
                               LinkLibraryType llt)
@@ -178,8 +217,11 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
   // simply a set of libraries separated by ";". There should always
   // be a trailing ";". These library names are not canonical, in that
   // they may be "-framework x", "-ly", "/path/libz.a", etc.
-  // only add depend information for library targets
-  if(m_TargetType >= STATIC_LIBRARY && m_TargetType <= MODULE_LIBRARY)
+  // We shouldn't remove duplicates here because external libraries
+  // may be purposefully duplicated to handle recursive dependencies,
+  // and we removing one instance will break the link line. Duplicates
+  // will be appropriately eliminated at emit time.
+  if(m_RecordDependencies)
     {
     std::string targetEntry = target;
     targetEntry += "_LIB_DEPENDS";
@@ -189,11 +231,8 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
       {
       dependencies += old_val;
       }
-    if( dependencies.find( lib ) == std::string::npos )
-      {
-      dependencies += lib;
-      dependencies += ";";
-      }
+    dependencies += lib;
+    dependencies += ";";
     mf.AddCacheDefinition( targetEntry.c_str(), dependencies.c_str(),
                            "Dependencies for the target", 
                            cmCacheManager::STATIC );
@@ -250,44 +289,82 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
   //
   // Also, we will leave the original link line intact; we will just add any
   // dependencies that were missing.
+  //
+  // There is a problem with recursive external libraries
+  // (i.e. libraries with no dependency information that are
+  // recursively dependent). We must make sure that the we emit one of
+  // the libraries twice to satisfy the recursion, but we shouldn't
+  // emit it more times than necessary. In particular, we must make
+  // sure that handling this improbable case doesn't cost us when
+  // dealing with the common case of non-recursive libraries. The
+  // solution is to assume that the recursion is satisfied at one node
+  // of the dependency tree. To illustrate, assume libA and libB are
+  // extrenal and mutually dependent. Suppose libX depends on
+  // libA, and libY on libA and libX. Then
+  //   TARGET_LINK_LIBRARIES( Y X A B A )
+  //   TARGET_LINK_LIBRARIES( X A B A )
+  //   TARGET_LINK_LIBRARIES( Exec Y )
+  // would result in "-lY -lX -lA -lB -lA". This is the correct way to
+  // specify the dependencies, since the mutual dependency of A and B
+  // is resolved *every time libA is specified*.
+  //
+  // Something like
+  //   TARGET_LINK_LIBRARIES( Y X A B A )
+  //   TARGET_LINK_LIBRARIES( X A B )
+  //   TARGET_LINK_LIBRARIES( Exec Y )
+  // would result in "-lY -lX -lA -lB", and the mutual dependency
+  // information is lost. This is because in some case (Y), the mutual
+  // dependency of A and B is listed, while in another other case (X),
+  // it is not. Depending on which line actually emits A, the mutual
+  // dependency may or may not be on the final link line.  We can't
+  // handle this pathalogical case cleanly without emitting extra
+  // libraries for the normal cases. Besides, the dependency
+  // information for X is wrong anyway: if we build an executable
+  // depending on X alone, we would not have the mutual dependency on
+  // A and B resolved.
+  //
+  // IMPROVEMENTS:
+  // -- The current algorithm will not always pick the "optimal" link line
+  //    when recursive dependencies are present. It will instead break the
+  //    cycles at an aribtrary point. The majority of projects won't have
+  //    cyclic dependencies, so this is probably not a big deal. Note that
+  //    the link line is always correct, just not necessary optimal.
 
   typedef std::vector< std::string > LinkLine;
 
   // The dependency map.
   DependencyMap dep_map;
-  
-  // Keeps track of which dependencies have already been emitted for a given
-  // target. This could be via this function, or because they were already
-  // satisfied on the original link line.
-  DependencyMap satisfied;
 
   // If LIBRARY_OUTPUT_PATH is not set, then we must add search paths
   // for all the new libraries added by the dependency analysis.
   const char* libOutPath = mf.GetDefinition("LIBRARY_OUTPUT_PATH");
   bool addLibDirs = (libOutPath==0 || strcmp(libOutPath,"")==0);
 
-  // 1. Determine the dependencies already satisfied by the original link
-  // line.
+  // 1. Build the dependency graph
+  //
+  for(LinkLibraries::reverse_iterator lib = m_LinkLibraries.rbegin();
+      lib != m_LinkLibraries.rend(); ++lib)
+    {
+    this->GatherDependencies( mf, lib->first, dep_map );
+    }
+
+  // 2. Remove any dependencies that are already satisfied in the original
+  // link line.
+  //
   for(LinkLibraries::iterator lib = m_LinkLibraries.begin();
       lib != m_LinkLibraries.end(); ++lib)
     {
     for( LinkLibraries::iterator lib2 = lib;
       lib2 != m_LinkLibraries.end(); ++lib2)
       {
-      satisfied[ lib->first ].insert( lib2->first );
+      DeleteDependency( dep_map, lib->first, lib2->first );
       }
     }
-  
-  // 2. Build the explicit dependency map
-  for(LinkLibraries::reverse_iterator lib = m_LinkLibraries.rbegin();
-      lib != m_LinkLibraries.rend(); ++lib)
-    {
-    this->GatherDependencies( mf, lib->first, dep_map );
-    }
+
   
   // 3. Create the new link line by simply emitting any dependencies that are
   // missing.  Start from the back and keep adding.
-  
+  //
   std::set<cmStdString> done, visited;
   std::vector<std::string> newLinkLibraries;
   for(LinkLibraries::reverse_iterator lib = m_LinkLibraries.rbegin();
@@ -295,26 +372,15 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
     {
     // skip zero size library entries, this may happen
     // if a variable expands to nothing.
-    if (lib->first.size() == 0) continue;
-
-    // Emit all the dependencies that are not already satisfied on the
-    // original link line.
-    if( dep_map.find(lib->first) != dep_map.end() ) // does it have dependencies?
+    if (lib->first.size() != 0)
       {
-      const std::set<cmStdString>& dep_on = dep_map.find( lib->first )->second;
-      std::set<cmStdString>::const_iterator i;
-      for( i = dep_on.begin(); i != dep_on.end(); ++i )
-        {
-        if( satisfied[lib->first].end() == satisfied[lib->first].find( *i ) )
-          {
-          Emit( *i, dep_map, done, visited, newLinkLibraries );
-          }
-        }
+      Emit( lib->first, dep_map, done, visited, newLinkLibraries );
       }
     }
 
-  // 4. Add the new libraries to the link line.
 
+  // 4. Add the new libraries to the link line.
+  //
   for( std::vector<std::string>::reverse_iterator k = newLinkLibraries.rbegin();
        k != newLinkLibraries.rend(); ++k )
     {
@@ -322,6 +388,8 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
       {
       // who the hell knows what this is, I think that K contains the
       // name of a library but ... Ken
+      // k contains the same stuff that are on the LINK_LIBRARIES
+      // commands. Normally, they would just be library names. -- Amitha.
       std::string libPathStr = *k + "_CMAKE_PATH";
       const char* libpath = mf.GetDefinition( libPathStr.c_str() );
       if( libpath )
@@ -354,7 +422,31 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
 }
 
 
+void cmTarget::InsertDependency( DependencyMap& depMap,
+                                 const cmStdString& lib,
+                                 const cmStdString& dep ) const
+{
+  depMap[lib].push_back(dep);
+}
 
+void cmTarget::DeleteDependency( DependencyMap& depMap,
+                                 const cmStdString& lib,
+                                 const cmStdString& dep ) const
+{
+  // Make sure there is an entry in the map for lib. If so, delete all
+  // dependencies to dep. There may be repeated entries because of
+  // external libraries that are specified multiple times.
+  DependencyMap::iterator map_itr = depMap.find( lib );
+  if( map_itr != depMap.end() )
+    {
+    DependencyList& depList = map_itr->second;
+    DependencyList::iterator itr;
+    while( (itr = std::find(depList.begin(), depList.end(), dep)) != depList.end() )
+      {
+      depList.erase( itr );
+      }
+    }
+}
 
 void cmTarget::Emit( const std::string& lib,
                      const DependencyMap& dep_map,
@@ -364,30 +456,56 @@ void cmTarget::Emit( const std::string& lib,
 {
   // It's already been emitted
   if( emitted.find(lib) != emitted.end() )
-    {
     return;
-    }
 
-  // If this library hasn't been visited before, then emit all its
-  // dependencies before emitting the library itself. If it has been
-  // visited before, then there is a dependency cycle. Just emit the
-  // library itself, and let the recursion that got us here deal with
-  // emitting the dependencies for the library.
+  // Emit the dependencies only if this library node hasn't been
+  // visited before. If it has, then we have a cycle. The recursion
+  // that got us here should take care of everything.
 
   if( visited.insert(lib).second )
     {
     if( dep_map.find(lib) != dep_map.end() ) // does it have dependencies?
       {
-      const std::set<cmStdString>& dep_on = dep_map.find( lib )->second;
-      std::set<cmStdString>::const_iterator i;
-      for( i = dep_on.begin(); i != dep_on.end(); ++i )
+      const DependencyList& dep_on = dep_map.find( lib )->second;
+      DependencyList::const_reverse_iterator i;
+
+      // To cater for recursive external libraries, we must emit
+      // duplicates on this link line *unless* they were emitted by
+      // some other node, in which case we assume that the recursion
+      // was resolved then. We making the simplifying assumption that
+      // any duplicates on a single link line are on purpose, and must
+      // be preserved.
+
+      // This variable will keep track of the libraries that were
+      // emitted directory from the current node, and not from a
+      // recursive call. This way, if we come across a library that
+      // has already been emitted, we repeat it iff it has been
+      // emitted here.
+      std::set<cmStdString> emitted_here;
+      for( i = dep_on.rbegin(); i != dep_on.rend(); ++i )
         {
-        Emit( *i, dep_map, emitted, visited, link_line );
+        if( emitted_here.find(*i) != emitted_here.end() )
+          {
+          // a repeat. Must emit.
+          emitted.insert(*i);
+          link_line.push_back( *i );
+          }
+        else
+          {
+          // Emit only if no-one else has
+          if( emitted.find(*i) == emitted.end() )
+            {
+            // emit dependencies
+            Emit( *i, dep_map, emitted, visited, link_line );
+            // emit self
+            emitted.insert(*i);
+            emitted_here.insert(*i);
+            link_line.push_back( *i );
+            }
+          }
         }
       }
     }
-  link_line.push_back( lib );
-  emitted.insert(lib);
 }
 
 
@@ -419,55 +537,12 @@ void cmTarget::GatherDependencies( const cmMakefile& mf,
       std::string l = depline.substr( start, end-start );
       if( l.size() != 0 )
         {
-        dep_map[ lib ].insert( l );
+        InsertDependency( dep_map, lib, l );
         GatherDependencies( mf, l, dep_map );
         }
       start = end+1; // skip the ;
       end = depline.find( ";", start );
       }
-    dep_map[lib].erase(lib); // cannot depend on itself
+    DeleteDependency( dep_map, lib, lib); // cannot depend on itself
     }
-}
-
-
-// return true if lib1 depends on lib2
-
-bool cmTarget::DependsOn( const std::string& lib1, const std::string& lib2,
-                          const DependencyMap& dep_map,
-                          std::set<cmStdString>& visited ) const
-{
-  if( !visited.insert( lib1 ).second )
-    {
-    return false; // already visited here
-    }
-  
-
-  if( lib1 == lib2 )
-    {
-    return false;
-    }
-
-  if( dep_map.find(lib1) == dep_map.end() )
-    {
-    return false; // lib1 doesn't have any dependencies
-    }
-
-  const std::set<cmStdString>& dep_set = dep_map.find(lib1)->second;
-
-  if( dep_set.end() != dep_set.find( lib2 )  )
-    {
-    return true; // lib1 doesn't directly depend on lib2.
-    }
-
-  // Do a recursive check: does lib1 depend on x which depends on lib2?
-  for( std::set<cmStdString>::const_iterator itr = dep_set.begin();
-       itr != dep_set.end(); ++itr )
-    {
-      if( this->DependsOn( *itr, lib2, dep_map, visited ) )
-        {
-        return true;
-        }
-    }
-
-  return false;
 }

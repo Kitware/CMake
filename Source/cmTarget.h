@@ -42,8 +42,11 @@ public:
       return m_TargetType;
     }
   
-  void SetType(TargetType f) { m_TargetType = f; }
-  
+  /**
+   * Set the target type
+   */
+  void SetType(TargetType f);
+
   /**
    * Indicate whether the target is part of the all target
    */
@@ -79,6 +82,11 @@ public:
   enum LinkLibraryType {GENERAL, DEBUG, OPTIMIZED};
   typedef std::vector<std::pair<std::string,LinkLibraryType> > LinkLibraries;
   const LinkLibraries &GetLinkLibraries() const {return m_LinkLibraries;}
+
+  /**
+   * Clear the dependency information recorded for this target, if any.
+   */
+  void ClearDependencyInformation(cmMakefile& mf, const char* target);
 
   void AddLinkLibrary(cmMakefile& mf,
                       const char *target, const char* lib, 
@@ -119,10 +127,17 @@ public:
 
 private:
   /**
-   * This map holds the dependency graph. map[x] returns a set of
-   * direct dependencies of x.
+   * A list of direct dependencies. Use in conjunction with DependencyMap.
    */
-  typedef std::map< cmStdString, std::set< cmStdString > > DependencyMap;
+  typedef std::vector<cmStdString> DependencyList;
+
+  /**
+   * This map holds the dependency graph. map[x] returns a set of
+   * direct dependencies of x. Note that the direct depenencies are
+   * ordered. This is necessary to handle direct dependencies that
+   * themselves have no dependency information.
+   */
+  typedef std::map< cmStdString, std::vector< cmStdString > > DependencyMap;
 
   /**
    * Maps a library name to its internal structure
@@ -130,12 +145,26 @@ private:
   typedef std::map< cmStdString, std::pair<cmStdString,LinkLibraryType> > LibTypeMap;
 
   /**
-   * Emits the library \param lib and all its dependencies into
-   * link_line.  \param emitted keeps track of the libraries that have
-   * been emitted to avoid duplicates--it is more efficient than
-   * searching link_line. \param visited is used detect cycles. Note
-   * that \param link_line is in reverse order, in that the
-   * dependencies of a library are listed before the library itself.
+   * Inserts \a dep at the end of the dependency list of \a lib.
+   */
+  void InsertDependency( DependencyMap& depMap,
+                         const cmStdString& lib,
+                         const cmStdString& dep ) const;
+
+  /*
+   * Deletes \a dep from the dependency list of \a lib.
+   */
+  void DeleteDependency( DependencyMap& depMap,
+                         const cmStdString& lib,
+                         const cmStdString& dep ) const;
+
+  /**
+   * Emits the library \a lib and all its dependencies into link_line.
+   * \a emitted keeps track of the libraries that have been emitted to
+   * avoid duplicates--it is more efficient than searching
+   * link_line. \a visited is used detect cycles. Note that \a
+   * link_line is in reverse order, in that the dependencies of a
+   * library are listed before the library itself.
    */
   void Emit( const std::string& lib,
              const DependencyMap& dep_map,
@@ -144,24 +173,11 @@ private:
              std::vector<std::string>& link_line ) const;
 
   /**
-   * Finds the explicit dependencies for \param lib, if they have been
-   * specified, and inserts them into \param dep_map. It also adds the
-   * maps from the library names to internal structures for any
-   * libraries introduced by the analysis. \param addLibDirs is true
-   * if paths to newly found libraries should be added to the search
-   * path.
+   * Finds the dependencies for \a lib and inserts them into \a
+   * dep_map.
    */
   void GatherDependencies( const cmMakefile& mf, const std::string& lib,
                            DependencyMap& dep_map );
-
-  /**
-   * Returns true if lib1 depends on lib2 according to \param
-   * dep_map. \param visited is used to prevent infinite loops when
-   * cycles are present.
-   */
-  bool DependsOn( const std::string& lib1, const std::string& lib2,
-                  const DependencyMap& dep_map,
-                  std::set<cmStdString>& visited ) const;
 
 private:
   std::vector<cmCustomCommand> m_CustomCommands;
@@ -174,6 +190,7 @@ private:
   bool m_InAll;
   std::string m_InstallPath;
   std::set<cmStdString> m_Utilities;
+  bool m_RecordDependencies;
 };
 
 typedef std::map<cmStdString,cmTarget> cmTargets;

@@ -636,15 +636,11 @@ void cmMakefile::AddLibrary(const char* lname, int shared,
     default:
       target.SetType(cmTarget::STATIC_LIBRARY);
     }
+
   // Clear its dependencies. Otherwise, dependencies might persist
   // over changes in CMakeLists.txt, making the information stale and
   // hence useless.
-  std::string depname = lname;
-  depname += "_LIB_DEPENDS";
-  this->GetCacheManager()->
-    AddCacheEntry(depname.c_str(), "",
-                  "Dependencies for target", cmCacheManager::STATIC);
-
+  target.ClearDependencyInformation( *this, lname );
   
   target.SetInAll(true);
   target.GetSourceLists() = srcs;
@@ -690,7 +686,6 @@ void cmMakefile::AddLibrary(const char* lname, int shared,
                       "Whether a library is static, shared or module.",
                       cmCacheManager::INTERNAL);
     }
-
 }
 
 void cmMakefile::AddExecutable(const char *exeName, 
