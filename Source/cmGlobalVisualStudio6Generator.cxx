@@ -85,7 +85,7 @@ int cmGlobalVisualStudio6Generator::TryCompile(const char *,
     {
     makeCommand += "ALL_BUILD";
     }
-  makeCommand += " - Debug\" /REBUILD";
+  makeCommand += " - Debug\"";
   
   int retVal;
   if (!cmSystemTools::RunCommand(makeCommand.c_str(), output, retVal))
@@ -96,6 +96,10 @@ int cmGlobalVisualStudio6Generator::TryCompile(const char *,
     return 1;
     }
   cmSystemTools::ChangeDirectory(cwd.c_str());
+  if (retVal)
+    {
+    cmSystemTools::Error("Generator: msdev returned a failure.");
+    }
   return retVal;
 }
 

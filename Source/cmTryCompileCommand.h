@@ -62,11 +62,11 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "TRY_COMPILE(RESULT_VAR srcdir bindir projectName <targetName>)\n"
+      "TRY_COMPILE(RESULT_VAR bindir srcdir projectName <targetName>)\n"
       "Try compiling a program. Return the success or failure in RESULT_VAR "
       "If <target name> is specified then build just that target "
       "otherwise the all or ALL_BUILD target is built.\n"
-      "TRY_COMPILE(RESULT_VAR srcfile bindir)\n"
+      "TRY_COMPILE(RESULT_VAR bindir srcfile)\n"
       "Try compiling a srcfile. Return the success or failure in RESULT_VAR.";
     }
   

@@ -26,8 +26,8 @@ bool cmTryCompileCommand::InitialPass(std::vector<std::string> const& argv)
     }
 
   // where will the binaries be stored
-  const char* binaryDirectory = argv[2].c_str();
-  const char* sourceDirectory = argv[1].c_str();
+  const char* binaryDirectory = argv[1].c_str();
+  const char* sourceDirectory = argv[2].c_str();
   const char* projectName = 0;
   const char* targetName = 0;
   std::string tmpString;
@@ -36,9 +36,12 @@ bool cmTryCompileCommand::InitialPass(std::vector<std::string> const& argv)
   // signature
   if (argv.size() == 3)
     {
-    tmpString = argv[2] + "/CMakeTmp";
+    tmpString = argv[1] + "/CMakeTmp";
     binaryDirectory = tmpString.c_str();
     }
+  
+  // make sure the binary directory exists
+  cmSystemTools::MakeDirectory(binaryDirectory);
   
   // do not allow recursive try Compiles
   if (!strcmp(binaryDirectory,m_Makefile->GetHomeOutputDirectory()))
@@ -58,7 +61,6 @@ bool cmTryCompileCommand::InitialPass(std::vector<std::string> const& argv)
     // we need to create a directory and CMakeList file etc...
     // first create the directories
     sourceDirectory = binaryDirectory;
-    cmSystemTools::MakeDirectory(binaryDirectory);
 
     // now create a CMakeList.txt file in that directory
     std::string outFileName = tmpString + "/CMakeLists.txt";
@@ -70,7 +72,7 @@ bool cmTryCompileCommand::InitialPass(std::vector<std::string> const& argv)
       return false;
       }
     fprintf(fout,"PROJECT(CMAKE_TRY_COMPILE)\n");
-    fprintf(fout,"ADD_EXECUTABLE(cmTryCompileExec \"%s\")\n",argv[1].c_str());
+    fprintf(fout,"ADD_EXECUTABLE(cmTryCompileExec \"%s\")\n",argv[2].c_str());
     fclose(fout);
     projectName = "CMAKE_TRY_COMPILE";
     targetName = "cmTryCompileExec";
