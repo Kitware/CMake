@@ -74,8 +74,9 @@ void cmEnableTestingCommand::FinalPass()
        << std::endl
        << "# that are excluded by CMake control structures, i.e. IF() commands."
        << std::endl
-       << "#" 
-       << std::endl << std::endl;
+       << "#" << std::endl 
+       << "# The next line is critical for Dart to work" << std::endl 
+       << "# Duh :-)" << std::endl << std::endl;
 
   // write out the subdirs for the current directory
   if (!m_Makefile->GetSubDirectories().empty())
