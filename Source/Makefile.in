@@ -32,7 +32,6 @@ cmTarget.o \
 cmCustomCommand.o \
 cmCacheManager.o \
 cmListFileCache.o \
-cmDynamicLoader.o \
 cmSourceGroup.o
 
 DEPENDS = cmConfigure.h
@@ -54,7 +53,6 @@ cmLocalUnixMakefileGenerator.o : $(DEPENDS)
 cmCommands.o : $(DEPENDS) $(srcdir)/*Command*.cxx
 cmTarget.o : $(DEPENDS)
 cmCacheManager.o : $(DEPENDS)
-cmDynamicLoader.o : $(DEPENDS)
 cmSourceGroup.o : $(DEPENDS)
 
 

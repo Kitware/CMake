@@ -25,7 +25,9 @@ int do_cmake(int ac, char** av);
 int main(int ac, char** av)
 {
   int ret = do_cmake(ac, av);
+#ifdef CMAKE_BUILD_WITH_CMAKE
   cmDynamicLoader::FlushCache();
+#endif
   cmListFileCache::GetInstance()->ClearCache(); 
   return ret;
 }
