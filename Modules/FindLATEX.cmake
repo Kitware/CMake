@@ -3,10 +3,12 @@
 # executables are. This code sets the following variables:
 #
 #  LATEX_COMPILER        = the full path to the LaTeX compiler
+#  PDFLATEX_COMPILER     = the full path to the PdfLaTeX compiler
 #  BIBTEX_COMPILER       = the full path to the BibTeX compiler
 #  MAKEINDEX_COMPILER    = the full path to the MakeIndex compiler
 #  DVIPS_CONVERTER       = the full path to the DVIPS converter
 #  PS2PDF_CONVERTER      = the full path to the PS2PDF converter
+#  LATEX2HTML_CONVERTER  = the full path to the LaTeX2Html converter 
 #
 
 IF (WIN32)
@@ -51,6 +53,12 @@ FIND_PROGRAM(LATEX_COMPILER
         /usr/bin
 )
 
+FIND_PROGRAM(PDFLATEX_COMPILER
+  NAMES pdflatex
+  PATHS ${MIKTEX_BINARY_PATH}
+        /usr/bin
+)
+
 FIND_PROGRAM(BIBTEX_COMPILER
   NAMES bibtex
   PATHS ${MIKTEX_BINARY_PATH}
@@ -86,10 +94,19 @@ ELSE (WIN32)
   )
 ENDIF (WIN32)
 
+FIND_PROGRAM(LATEX2HTML_CONVERTER
+  NAMES latex2html
+  PATHS ${MIKTEX_BINARY_PATH}
+        /usr/bin
+)
+
+
 MARK_AS_ADVANCED(
   LATEX_COMPILER
+  PDFLATEX_COMPILER
   BIBTEX_COMPILER
   MAKEINDEX_COMPILER
   DVIPS_CONVERTER
   PS2PDF_CONVERTER
+  LATEX2HTML_CONVERTER
 )
