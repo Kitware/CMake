@@ -27,12 +27,18 @@ IF(BUILD_TESTING)
   # make program just needs to use CMAKE_MAKE_PROGRAM which is required
   # to be defined by cmake 
   SET(MAKEPROGRAM ${CMAKE_MAKE_PROGRAM})
+
   FIND_PROGRAM(CVSCOMMAND cvs )
+  SET(CVS_UPDATE_OPTIONS "-d -A -P" CACHE STRING "Options passed to the cvs update command.")
+
+  SET(DART_TESTING_TIMEOUT 1500 CACHE STRING "Time alloted for a test before Dart will kill the test.")
+
   FIND_PROGRAM(COMPRESSIONCOMMAND NAMES gzip compress zip 
                DOC "Path to program used to compress files for transfer to the dart server")
   FIND_PROGRAM(GUNZIPCOMMAND gunzip DOC "Path to gunzip executable")
   FIND_PROGRAM(JAVACOMMAND java DOC "Path to java command, used by the Dart server to create html.")
   FIND_PROGRAM(PURIFYCOMMAND purify DOC "Path to Rational purify command, used for memory error detection.")
+  FIND_PROGRAM(SCPCOMMAND scp DOC "Path to scp command, used by some Dart clients for submitting results to a Dart server (when not using ftp for submissions)")
 
   # find a tcl shell command
   INCLUDE(${CMAKE_ROOT}/Modules/FindTclsh.cmake)
@@ -60,6 +66,9 @@ IF(BUILD_TESTING)
     GUNZIPCOMMAND
     COMPRESSIONCOMMAND
     CVSCOMMAND
+    CVS_UPDATE_OPTIONS
+    DART_TESTING_TIMEOUT
+    SCPCOMMAND
     DELIVER_CONTINUOUS_EMAIL
   )
 
