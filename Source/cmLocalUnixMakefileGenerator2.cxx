@@ -1924,9 +1924,11 @@ cmLocalUnixMakefileGenerator2
   if(cmSystemTools::FileIsFullPath(cc.GetOutput().c_str()) &&
      (cc.GetOutput().find(m_Makefile->GetStartOutputDirectory()) == 0))
     {
+    // Use the relative path but convert it to a valid file name.
     customName =
       cmSystemTools::RelativePath(m_Makefile->GetStartOutputDirectory(),
                                   cc.GetOutput().c_str());
+    cmSystemTools::ReplaceString(customName, "/", "_");
     }
   else
     {
