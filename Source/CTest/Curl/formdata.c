@@ -876,10 +876,10 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
       {
         /* this "cast increases required alignment of target type" but
            we consider it OK anyway */
-        struct curl_slist* list;
+        struct curl_slist* list=0;
         if ( array_state )
           {
-          memcpy(list, array_value, sizeof(struct curl_slist*));
+          memcpy(&list, &array_value, sizeof(struct curl_slist*));
           }
         else
           {
