@@ -286,8 +286,8 @@ void cmLocalUnixMakefileGenerator::OutputMakefile(const char* file,
 std::string 
 cmLocalUnixMakefileGenerator::GetOutputExtension(const char* s)
 {
-  std::string sourceExtension = s;
 #if defined(_WIN32) && ! defined(__CYGWIN__) 
+  std::string sourceExtension = s;
   if(sourceExtension == "def")
     {
     return "";
@@ -558,7 +558,6 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
           runtimeDirs.push_back( libpath );
           }
         }  
-      cmRegularExpression reg(regexp.c_str()); 
       cmRegularExpression libname("lib([^/]*)(\\.so|\\.lib|\\.dll|\\.sl|\\.a|\\.dylib).*");
       cmRegularExpression libname_noprefix("([^/]*)(\\.so|\\.lib|\\.dll|\\.sl|\\.a|\\.dylib).*");
       if(libname.find(file))
@@ -2185,7 +2184,6 @@ OutputBuildObjectFromSource(std::ostream& fout,
   std::string objectFile = std::string(shortName) + 
     this->GetOutputExtension(source.GetSourceExtension().c_str());
   objectFile = cmSystemTools::ConvertToOutputPath(objectFile.c_str());
-  std::string compileCommand;
   cmSystemTools::FileFormat format = 
     cmSystemTools::GetFileFormat(source.GetSourceExtension().c_str());
   std::vector<std::string> rules;
@@ -2250,10 +2248,8 @@ OutputBuildObjectFromSource(std::ostream& fout,
       }
     case cmSystemTools::HEADER_FILE_FORMAT:
       return;
-      break;
     case cmSystemTools::DEFINITION_FILE_FORMAT:
       return;
-      break;
     case cmSystemTools::RESOURCE_FILE_FORMAT:
       {
       flags = " $(INCLUDE_FLAGS) ";
