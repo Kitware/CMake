@@ -746,15 +746,15 @@ cmLocalUnixMakefileGenerator2
 
   // Write the requires rule.
   {
-  std::vector<std::string> depends;
-  std::vector<std::string> commands;
+  std::vector<std::string> depends2;
+  std::vector<std::string> commands2;
   std::string reqComment = "requirements for ";
   reqComment += target.GetName();
   std::string reqTarget = target.GetName();
   reqTarget += ".requires";
-  depends.push_back(targetFullPath);
+  depends2.push_back(targetFullPath);
   this->OutputMakeRule(ruleFileStream, reqComment.c_str(), reqTarget.c_str(),
-                       depends, commands);
+                       depends2, commands2);
   }
 }
 
@@ -990,15 +990,15 @@ cmLocalUnixMakefileGenerator2
 
   // Write the requires rule.
   {
-  std::vector<std::string> depends;
-  std::vector<std::string> commands;
+  std::vector<std::string> depends2;
+  std::vector<std::string> commands2;
   std::string reqComment = "requirements for ";
   reqComment += target.GetName();
   std::string reqTarget = target.GetName();
   reqTarget += ".requires";
-  depends.push_back(targetFullPath);
+  depends2.push_back(targetFullPath);
   this->OutputMakeRule(ruleFileStream, reqComment.c_str(), reqTarget.c_str(),
-                       depends, commands);
+                       depends2, commands2);
   }
 }
 
