@@ -1535,9 +1535,9 @@ yyerrhandle:
 #include "getdate.h"
 
 #ifndef WIN32 /* the windows dudes don't need these, does anyone really? */
-extern struct tm        *gmtime ();
-extern struct tm        *localtime ();
-extern time_t           mktime ();
+extern struct tm        *gmtime (const time_t *timer);
+extern struct tm        *localtime (const time_t *timer);
+extern time_t           mktime (struct tm *timeptr);
 #endif
 
 /* Month and day table. */
