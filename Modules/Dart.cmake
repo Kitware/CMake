@@ -47,9 +47,6 @@ IF(BUILD_TESTING)
   # find a tcl shell command
   INCLUDE(${CMAKE_ROOT}/Modules/FindTclsh.cmake)
 
-  FIND_PROGRAM(HOSTNAME hostname /usr/bsd /usr/sbin /usr/bin /bin /sbin)
-  FIND_PROGRAM(NSLOOKUP nslookup /usr/bin /usr/sbin /usr/local/bin)
-
   # set the site name
   SITE_NAME(SITE)
   # set the build name
@@ -64,8 +61,6 @@ IF(BUILD_TESTING)
     SITE 
     BUILDNAME 
     MAKECOMMAND 
-    HOSTNAME 
-    NSLOOKUP 
     JAVACOMMAND 
     PURIFYCOMMAND
     GUNZIPCOMMAND

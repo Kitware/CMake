@@ -44,9 +44,17 @@ bool cmSiteNameCommand::InitialPass(std::vector<std::string> const& args)
     }
   
   std::string siteName = "unknown";
-  
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  std::string host;
+  if(cmSystemTools::ReadRegistryValue(
+    "HKEY_LOCAL_MACHINE\\System\\CurrentControlSet\\Control\\ComputerName\\ComputerName;ComputerName",
+    host))
+    {
+    siteName = host;
+    }
+#else
   // try to find the hostname for this computer
-  if (hostname_cmd.length()) 
+  if (!cmSystemTools::IsOff(hostname_cmd.c_str()))
     {
     std::string host;
     cmSystemTools::RunCommand(hostname_cmd.c_str(),
@@ -80,7 +88,7 @@ bool cmSiteNameCommand::InitialPass(std::vector<std::string> const& args)
           }
 
         // try to find the domain name for this computer
-        if (nslookup_cmd.length())
+        if (!cmSystemTools::IsOff(nslookup_cmd.c_str()))
           {
           nslookup_cmd += " ";
           nslookup_cmd += host;
@@ -104,7 +112,7 @@ bool cmSiteNameCommand::InitialPass(std::vector<std::string> const& args)
         }
       }
     }
-  
+#endif
   m_Makefile->
     AddCacheDefinition(args[0].c_str(),
                        siteName.c_str(),
