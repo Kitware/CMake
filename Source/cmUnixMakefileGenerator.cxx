@@ -1364,7 +1364,7 @@ void cmUnixMakefileGenerator::OutputCheckDepends(std::ostream& fout)
               dep != (*source)->GetDepends().end(); ++dep)
             {
             std::string dependfile = 
-              this->ConvertToOutputPath(dep->c_str());
+              this->ConvertToOutputPath(cmSystemTools::CollapseFullPath(dep->c_str()).c_str());
             if(emitted.insert(dependfile).second)
               {
               fout << " \\\n" << dependfile ;
