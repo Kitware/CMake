@@ -17,11 +17,33 @@ CMakeCommandLineInfo::CMakeCommandLineInfo()
 {
   m_WhereSource = _T("");
   m_WhereBuild = _T("");
+  m_AdvancedValues = FALSE;
+  m_GeneratorChoiceString = _T("");
 } 
 
 CMakeCommandLineInfo::~CMakeCommandLineInfo()
 {
 } 
+
+int CMakeCommandLineInfo::GetBoolValue(const CString& v) {
+  CString value = v;
+  value.MakeLower();
+  if (value == "1" || 
+      value == "on" || 
+      value == "true" || 
+      value == "yes")
+    {
+    return 1;
+    }
+  else if (value == "0" || 
+           value == "off" || 
+           value == "false" || 
+           value == "no")
+    {
+    return -1;
+    }
+  return 0;
+}
 
 ///////////////////////////////////////////////////////////////
 // Parse param
@@ -35,13 +57,28 @@ void CMakeCommandLineInfo::ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast)
     if (sParam[1] == '=' || sParam[1] == ':')
       {
       CString value(sParam.Right(sParam.GetLength() - 2));
+      int res;
       switch (sParam[0])
         {
-        case 'H':
-          m_WhereSource = value;
+        case 'A':
+          res = CMakeCommandLineInfo::GetBoolValue(value);
+          if (res == 1)
+            {
+            m_AdvancedValues = TRUE;
+            }
+          else if (res == -1)
+            {
+            m_AdvancedValues = FALSE;
+            }
           break;
         case 'B':
           m_WhereBuild = value;
+          break;
+        case 'G':
+          m_GeneratorChoiceString = value;
+          break;
+        case 'H':
+          m_WhereSource = value;
           break;
         }
       }

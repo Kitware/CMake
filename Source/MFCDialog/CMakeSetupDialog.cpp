@@ -86,9 +86,9 @@ CMakeSetupDialog::CMakeSetupDialog(const CMakeCommandLineInfo& cmdInfo,
   //{{AFX_DATA_INIT(CMakeSetupDialog)
   m_WhereSource = cmdInfo.m_WhereSource;
   m_WhereBuild = cmdInfo.m_WhereBuild;
-  m_GeneratorChoiceString = _T("");
-	m_AdvancedValues = FALSE;
-	//}}AFX_DATA_INIT
+  m_GeneratorChoiceString = cmdInfo.m_GeneratorChoiceString;
+  m_AdvancedValues = cmdInfo.m_AdvancedValues;
+  //}}AFX_DATA_INIT
   // Note that LoadIcon does not require a subsequent DestroyIcon in Win32
   m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
   m_BuildPathChanged = false;
@@ -977,7 +977,8 @@ int CMakeSetupDialog::CreateShortcut()
       }
     
     // Set the arguments of the shortcut.
-    CString args = " /H=" + m_WhereSource + " /B=" + m_WhereBuild;
+    CString args = " /H=\"" + m_WhereSource + "\" /B=\"" + m_WhereBuild + "\" /G=\"" + m_GeneratorChoiceString + "\" /A=\"" + (m_AdvancedValues ? "TRUE" : "FALSE") + "\"";
+    
     hres = psl->SetArguments(args);
 
     if (! SUCCEEDED (hres))

@@ -27,6 +27,8 @@ public:
 public:
   CString m_WhereSource;
   CString m_WhereBuild;
+  BOOL m_AdvancedValues;
+  CString m_GeneratorChoiceString;
 
   // Operations
 public:
@@ -35,6 +37,8 @@ public:
   // Implementation
 public:
   virtual ~CMakeCommandLineInfo();
+protected:
+  static int GetBoolValue(const CString&);
 };
 
 #endif // !defined(CMAKECOMMANDLINEINFO_H)
