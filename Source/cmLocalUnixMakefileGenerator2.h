@@ -75,6 +75,9 @@ protected:
   void WriteSpecialTargetsBottom(std::ostream& makefileStream);
   void WriteTargetIncludes(std::ostream& makefileStream);
   void WriteAllRule(std::ostream& makefileStream);
+  void WriteSubdirRules(std::ostream& makefileStream);
+  void WriteSubdirRule(std::ostream& makefileStream, const char* tgt,
+                       const char* last);
   void WriteRequiresRule(std::ostream& ruleFileStream, const cmTarget& target,
                          const char* targetFullPath);
   void WriteExecutableRule(std::ostream& ruleFileStream,
@@ -101,6 +104,7 @@ protected:
                         const char* extraLinkFlags);
 
   std::string GetTargetDirectory(const cmTarget& target);
+  std::string GetSubdirTargetName(const char* subdir);
   std::string GetObjectFileName(const cmTarget& target,
                                 const cmSourceFile& source);
   const char* GetSourceFileLanguage(const cmSourceFile& source);

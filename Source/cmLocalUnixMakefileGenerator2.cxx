@@ -89,6 +89,9 @@ void cmLocalUnixMakefileGenerator2::GenerateMakefile()
   // Write the directory-level build rules.
   this->WriteAllRule(makefileStream);
 
+  // Write the subdirectory driver rules.
+  this->WriteSubdirRules(makefileStream);
+
   // Write include statements to get rules for each target.
   this->WriteTargetIncludes(makefileStream);
 
@@ -695,18 +698,28 @@ cmLocalUnixMakefileGenerator2
   runRule += this->ConvertToRelativeOutputPath(cmakefileName.c_str());
 
   // Write the main entry point target.  This must be the VERY first
-  // target so that make with no arguments will run it.
+  // target so that make with no arguments will run it.  The
+  // dependencies and commands generated for this rule must not depend
+  // on listfile contents because the build system check might
+  // regenerate the makefile but it might not get read again by make
+  // before the commands run.
   {
   std::vector<std::string> depends;
   std::vector<std::string> commands;
   // Check the build system in this directory.
   depends.push_back("cmake_check_build_system");
 
+  // Recursively build pre-order directories.
+  commands.push_back(this->GetRecursiveMakeCall("all.subdirs.pre"));
+
   // Recursively build dependencies.
   commands.push_back(this->GetRecursiveMakeCall("all.depends"));
 
   // Recursively build targets.
   commands.push_back(this->GetRecursiveMakeCall("all.build"));
+
+  // Recursively build post-order directories.
+  commands.push_back(this->GetRecursiveMakeCall("all.subdirs.post"));
 
   // Write the rule.
   std::string preEcho = "Entering directory ";
@@ -886,6 +899,88 @@ cmLocalUnixMakefileGenerator2
                       depends,
                       commands);
   }
+}
+
+//----------------------------------------------------------------------------
+void
+cmLocalUnixMakefileGenerator2
+::WriteSubdirRules(std::ostream& makefileStream)
+{
+  // Write the section header.
+  this->WriteDivider(makefileStream);
+  makefileStream
+    << "# Subdirectory driver targets.\n"
+    << "\n";
+
+  // Iterate through subdirectories.  Only entries in which the
+  // boolean is true should be included.  Keep track of the last
+  // pre-order and last post-order rule created so that ordering can
+  // be enforced.
+  const std::vector<std::pair<cmStdString, bool> >&
+    subdirs = m_Makefile->GetSubDirectories();
+  std::string lastPre = "";
+  std::string lastPost = "";
+  for(std::vector<std::pair<cmStdString, bool> >::const_iterator
+        i = subdirs.begin(); i != subdirs.end(); ++i)
+    {
+    if(i->second)
+      {
+      // Construct the name of the subdirectory rule.
+      std::string tgt = this->GetSubdirTargetName(i->first.c_str());
+
+      // Add the subdirectory rule either for pre-order or post-order.
+      if(m_Makefile->IsDirectoryPreOrder(i->first.c_str()))
+        {
+        this->WriteSubdirRule(makefileStream, tgt.c_str(), lastPre.c_str());
+        lastPre = tgt;
+        }
+      else
+        {
+        this->WriteSubdirRule(makefileStream, tgt.c_str(), lastPost.c_str());
+        lastPost = tgt;
+        }
+      }
+    }
+
+  // Write the subdir driver rules.  Hook them to the last
+  // subdirectory of their corresponding order.
+  std::vector<std::string> pre_depends;
+  std::vector<std::string> post_depends;
+  std::vector<std::string> no_commands;
+  if(lastPre.size())
+    {
+    pre_depends.push_back(lastPre);
+    }
+  if(lastPost.size())
+    {
+    post_depends.push_back(lastPost);
+    }
+  this->WriteMakeRule(makefileStream,
+                      "Pre-order subdirectory driver target.", 0,
+                      "all.subdirs.pre", pre_depends, no_commands);
+  this->WriteMakeRule(makefileStream,
+                      "Post-order subdirectory driver target.", 0,
+                      "all.subdirs.post", post_depends, no_commands);
+}
+
+//----------------------------------------------------------------------------
+void
+cmLocalUnixMakefileGenerator2
+::WriteSubdirRule(std::ostream& makefileStream, const char* tgt,
+                  const char* last)
+{
+  // TODO: Generate commands to cd into subdir (CONTINUE HERE).
+  std::vector<std::string> depends;
+  std::vector<std::string> no_commands;
+
+  // Depend on the last directory written out to enforce ordering.
+  if(last && *last)
+    {
+    depends.push_back(last);
+    }
+
+  // Write the rule.
+  this->WriteMakeRule(makefileStream, 0, 0, tgt, depends, no_commands);
 }
 
 //----------------------------------------------------------------------------
@@ -1356,6 +1451,30 @@ cmLocalUnixMakefileGenerator2
   std::string dir = target.GetName();
   dir += ".dir";
   return dir;
+}
+
+//----------------------------------------------------------------------------
+std::string
+cmLocalUnixMakefileGenerator2
+::GetSubdirTargetName(const char* subdir)
+{
+  // Convert the subdirectory name to a valid make target name.
+  std::string s = "subdir_";
+  s += subdir;
+
+  // Replace "../" with 3 underscores.  This allows one .. at the beginning.
+  size_t pos = s.find("../");
+  if(pos != std::string::npos)
+    {
+    s.replace(pos, 3, "___");
+    }
+
+  // Replace "/" directory separators with a single underscore.
+  while((pos = s.find('/')) != std::string::npos)
+    {
+    s.replace(pos, 1, "_");
+    }
+  return s;
 }
 
 //----------------------------------------------------------------------------
