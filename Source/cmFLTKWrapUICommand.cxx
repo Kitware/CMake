@@ -64,25 +64,22 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args)
     cmSourceFile *curr = m_Makefile->GetSource(i->c_str());
     // if we should use the source GUI 
     // to generate .cxx and .h files
-    if (!curr && !curr->GetPropertyAsBool("WRAP_EXCLUDE"))
+    if (!curr || !curr->GetPropertyAsBool("WRAP_EXCLUDE"))
       {
       cmSourceFile header_file;
-      cmSourceFile source_file;
       std::string srcName = cmSystemTools::GetFilenameWithoutExtension(*i);
       const bool headerFileOnly = true;
       header_file.SetName(srcName.c_str(), 
                   outputDirectory.c_str(), "h",headerFileOnly);
-      source_file.SetName(srcName.c_str(), 
-                  outputDirectory.c_str(), "cxx",!headerFileOnly);
       std::string origname = cdir + "/" + *i;
       std::string hname   = header_file.GetFullPath();
       // add starting depends
-      source_file.GetDepends().push_back(hname);
       std::vector<std::string> depends;
       depends.push_back(origname);
-      source_file.GetDepends().push_back(origname);
 
-      const char *cxxres = source_file.GetFullPath().c_str();
+      std::string cxxres = outputDirectory.c_str();
+      cxxres += "/" + srcName;
+      cxxres += ".cxx";
       
       std::vector<std::string> cxxargs;
       cxxargs.push_back("-c"); // instructs Fluid to run in command line
@@ -93,7 +90,7 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args)
       cxxargs.push_back(origname);// name of the GUI fluid file
       
       // Add command for generating the .h and .cxx files
-      m_Makefile->AddCustomCommandToOutput(cxxres,
+      m_Makefile->AddCustomCommandToOutput(cxxres.c_str(),
                                            fluid_exe.c_str(),
                                            cxxargs,
                                            0,
@@ -105,7 +102,9 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args)
                                            0,
                                            depends);
                                            
-      cmSourceFile* sf = m_Makefile->AddSource(source_file);
+      cmSourceFile *sf = m_Makefile->GetSource(cxxres.c_str());
+      sf->GetDepends().push_back(hname);
+      sf->GetDepends().push_back(origname);
       m_GeneratedSourcesClasses.push_back(sf);
       }
     }
