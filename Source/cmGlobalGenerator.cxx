@@ -873,11 +873,17 @@ void cmGlobalGenerator::FillProjectMap()
 }
 
 
-cmTarget* cmGlobalGenerator::FindTarget(const char* name)
+cmTarget* cmGlobalGenerator::FindTarget(const char* project, 
+                                        const char* name)
 {
-  for(unsigned int i = 0; i < m_LocalGenerators.size(); ++i)
+  std::vector<cmLocalGenerator*>* gens = &m_LocalGenerators;
+  if(project)
     {
-    cmTarget* ret = m_LocalGenerators[i]->GetMakefile()->FindTarget(name);
+    gens = &m_ProjectMap[project];
+    }
+  for(unsigned int i = 0; i < gens->size(); ++i)
+    {
+    cmTarget* ret = (*gens)[i]->GetMakefile()->FindTarget(name);
     if(ret)
       {
       return ret;

@@ -722,7 +722,8 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
       for(std::vector<std::string>::const_iterator d = cc.GetDepends().begin();
           d != cc.GetDepends().end(); ++d)
         {
-        if(!this->FindTarget(d->c_str()))
+        if(!this->FindTarget(m_CurrentMakefile->GetProjectName(),
+                             d->c_str()))
           {
           makefileStream << "\\\n" << this
             ->ConvertToRelativeForMake(d->c_str());
@@ -963,7 +964,6 @@ cmGlobalXCodeGenerator::CreateUtilityTarget(cmTarget& cmtarget)
                                    "# shell script goes here\nexit 0"));
   cmXCodeObject* target = 
     this->CreateObject(cmXCodeObject::PBXAggregateTarget);
-
   cmXCodeObject* buildPhases = 
     this->CreateObject(cmXCodeObject::OBJECT_LIST);
   this->CreateCustomCommands(buildPhases, 0, 0, 0, cmtarget);
@@ -992,7 +992,6 @@ cmGlobalXCodeGenerator::CreateXCodeTarget(cmTarget& cmtarget,
 {
   cmXCodeObject* target = 
     this->CreateObject(cmXCodeObject::PBXNativeTarget);
-  
   target->AddAttribute("buildPhases", buildPhases);
   cmXCodeObject* buildRules = this->CreateObject(cmXCodeObject::OBJECT_LIST);
   target->AddAttribute("buildRules", buildRules);
@@ -1091,7 +1090,9 @@ void cmGlobalXCodeGenerator::AddDependTarget(cmXCodeObject* target,
   cmXCodeObject* depends = target->GetObject("dependencies");
   if(!depends)
     {
-    std::cerr << "target does not have dependencies attribute error...\n";
+    cmSystemTools::
+      Error("target does not have dependencies attribute error..");
+    
     }
   else
     {
@@ -1161,7 +1162,7 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
   cmTarget* cmtarget = target->GetcmTarget();
   if(!cmtarget)
     {
-    std::cerr << "Error no target on xobject\n";
+    cmSystemTools::Error("Error no target on xobject\n");
     return;
     }
   // compute the correct order for link libraries
@@ -1215,7 +1216,8 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
   for(std::vector<cmStdString>::iterator lib = linkItems.begin();
       lib != linkItems.end(); ++lib)
     {
-    cmTarget* t = this->FindTarget(lib->c_str());
+    cmTarget* t = this->FindTarget(m_CurrentMakefile->GetProjectName(),
+                                   lib->c_str());
     cmXCodeObject* dptarget = this->FindXCodeTarget(t);
     if(dptarget)
       {
@@ -1239,7 +1241,8 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
         = cmtarget->GetUtilities().begin();
       i != cmtarget->GetUtilities().end(); ++i)
     {
-    cmTarget* t = this->FindTarget(i->c_str());
+    cmTarget* t = this->FindTarget(m_CurrentMakefile->GetProjectName(),
+                                   i->c_str());
     cmXCodeObject* dptarget = this->FindXCodeTarget(t);
     if(dptarget)
       {
@@ -1247,12 +1250,19 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
       }
     else
       {
-      std::cerr << "Error Utility: " << i->c_str() << "\n";
-      std::cerr << "cmtarget " << t << "\n";
-      std::cerr << "Is on the target " << cmtarget->GetName() << "\n";
-      std::cerr << "But it has no xcode target created yet??\n";
-      std::cerr << "Current project is "
-                << m_CurrentMakefile->GetProjectName() << "\n";
+      std::string m = "Error Utility: ";
+      m += i->c_str();
+      m += "\n";
+      m += "cmtarget ";
+      m += t->GetName();
+      m += "\n";
+      m += "Is on the target ";
+      m += cmtarget->GetName();
+      m += "\n";
+      m += "But it has no xcode target created yet??\n";
+      m += "Current project is ";
+      m += m_CurrentMakefile->GetProjectName();
+      cmSystemTools::Error(m.c_str());
       }
     } 
   std::vector<cmStdString> fullPathLibs;
@@ -1467,7 +1477,6 @@ cmGlobalXCodeGenerator::OutputXCodeProject(cmLocalGenerator* root,
     {
     return;
     }
-
   this->CreateXCodeObjects(root,
                            generators);
   std::string xcodeDir = root->GetMakefile()->GetStartOutputDirectory();
