@@ -212,7 +212,7 @@ void cmGlobalVisualStudio6Generator::WriteDSWFile(std::ostream& fout)
   std::string homedir = m_CMakeInstance->GetHomeDirectory();
   homedir += "/";
     
-  int i;
+  unsigned int i;
   for(i = 0; i < m_LocalGenerators.size(); ++i)
     {
     cmMakefile* mf = m_LocalGenerators[i]->GetMakefile();
@@ -244,7 +244,7 @@ void cmGlobalVisualStudio6Generator::WriteDSWFile(std::ostream& fout)
         // vector on the makefile
         if(l->first == "ALL_BUILD")
           {
-          int j;
+          unsigned int j;
           for(j = 0; j < m_LocalGenerators.size(); ++j)
             {
             const cmTargets &atgts = 

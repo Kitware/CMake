@@ -260,7 +260,7 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout)
     
   // For each cmMakefile, create a VCProj for it, and
   // add it to this SLN file
-  int i;
+  unsigned int i;
   for(i = 0; i < m_LocalGenerators.size(); ++i)
     {
     cmMakefile* mf = m_LocalGenerators[i]->GetMakefile();
@@ -292,7 +292,7 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout)
         // vector on the makefile
         if(l->first == "ALL_BUILD")
           {
-          int j;
+          unsigned int j;
           for(j = 0; j < m_LocalGenerators.size(); ++j)
             {
             const cmTargets &atgts = 

@@ -27,7 +27,7 @@ cmGlobalGenerator::cmGlobalGenerator()
 cmGlobalGenerator::~cmGlobalGenerator()
 {
   // Delete any existing cmLocalGenerators
-  int i;
+  unsigned int i;
   for (i = 0; i < m_LocalGenerators.size(); ++i)
     {
     delete m_LocalGenerators[i];
@@ -56,7 +56,7 @@ void cmGlobalGenerator::Configure()
   m_LanguagesEnabled = false;
   
   // Delete any existing cmLocalGenerators
-  int i;
+  unsigned int i;
   for (i = 0; i < m_LocalGenerators.size(); ++i)
     {
     delete m_LocalGenerators[i];
@@ -86,7 +86,7 @@ void cmGlobalGenerator::RecursiveConfigure(cmLocalGenerator *lg)
   std::vector<std::string> subdirs = lg->GetMakefile()->GetSubDirectories();
   
   // for each subdir recurse
-  int i;
+  unsigned int i;
   for (i = 0; i < subdirs.size(); ++i)
     {
     cmLocalGenerator *lg2 = this->CreateLocalGenerator();
@@ -112,7 +112,7 @@ void cmGlobalGenerator::RecursiveConfigure(cmLocalGenerator *lg)
 void cmGlobalGenerator::Generate()
 {
   // For each existing cmLocalGenerator
-  int i;
+  unsigned int i;
   for (i = 0; i < m_LocalGenerators.size(); ++i)
     {
     m_LocalGenerators[i]->Generate(true);
