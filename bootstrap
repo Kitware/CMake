@@ -42,7 +42,10 @@ CMAKE_SOURCES="\
   cmVariableWatch \
   cmSourceGroup"
 
-KWSYS_SOURCES="\
+KWSYS_C_SOURCES="\
+  ProcessUNIX"
+
+KWSYS_CXX_SOURCES="\
   Directory \
   RegularExpression \
   SystemTools"
@@ -494,7 +497,7 @@ cmake_report cmConfigure.h.tmp " *"
 cmake_report cmConfigure.h.tmp " * Sources:"
 cmake_report cmConfigure.h.tmp " * ${CMAKE_SOURCES}"
 cmake_report cmConfigure.h.tmp " * kwSys Sources:"
-cmake_report cmConfigure.h.tmp " * ${KWSYS_SOURCES}"
+cmake_report cmConfigure.h.tmp " * ${KWSYS_CXX_SOURCES} ${KWSYS_C_SOURCES}"
 cmake_report cmConfigure.h.tmp " */"
 
 # Test for STD namespace
@@ -590,7 +593,7 @@ done
 # Generate Makefile
 dep="cmConfigure.h `cmake_escape \"${cmake_source_dir}\"`/Source/*.h"
 objs=""
-for a in ${CMAKE_SOURCES} ${KWSYS_SOURCES}; do
+for a in ${CMAKE_SOURCES} ${KWSYS_CXX_SOURCES} ${KWSYS_C_SOURCES}; do
   objs="${objs} ${a}.o"
 done
 
@@ -610,7 +613,12 @@ for a in ${CMAKE_SOURCES}; do
   echo "${a}.o : ${src} ${dep}" >> "${cmake_bootstrap_dir}/Makefile"
   echo "	${cmake_cxx_compiler} ${cmake_cxx_flags} -c ${src} -o ${a}.o" >> "${cmake_bootstrap_dir}/Makefile"
 done
-for a in ${KWSYS_SOURCES}; do
+for a in ${KWSYS_C_SOURCES}; do
+  src=`cmake_escape "${cmake_source_dir}/Source/kwsys/${a}.c"`
+  echo "${a}.o : ${src} ${dep}" >> "${cmake_bootstrap_dir}/Makefile"
+  echo "	${cmake_cxx_compiler} ${cmake_cxx_flags} -I`cmake_escape \"${cmake_bootstrap_dir}/cmsys\"` -DKWSYS_NAMESPACE=cmsys -c ${src} -o ${a}.o" >> "${cmake_bootstrap_dir}/Makefile"
+done
+for a in ${KWSYS_CXX_SOURCES}; do
   src=`cmake_escape "${cmake_source_dir}/Source/kwsys/${a}.cxx"`
   echo "${a}.o : ${src} ${dep}" >> "${cmake_bootstrap_dir}/Makefile"
   echo "	${cmake_cxx_compiler} ${cmake_cxx_flags} -I`cmake_escape \"${cmake_bootstrap_dir}/cmsys\"` -DKWSYS_NAMESPACE=cmsys -c ${src} -o ${a}.o" >> "${cmake_bootstrap_dir}/Makefile"
