@@ -346,19 +346,46 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
 
   if(llt != cmTarget::GENERAL)
     {
+    // Store the library's link type in the cache.  If it is a
+    // conflicting type then assume it is always used.  This is the
+    // case when the user sets the cache entries for debug and
+    // optimized versions of the library to the same value.
     std::string linkTypeName = lib;
     linkTypeName += "_LINK_TYPE";
     switch(llt)
       {
       case cmTarget::DEBUG:
-        mf.AddCacheDefinition(linkTypeName.c_str(),
-                              "debug", "Library is used for debug links only", 
-                              cmCacheManager::STATIC);
-        break;
+        {
+        const char* def = mf.GetDefinition(linkTypeName.c_str());
+        if(!def || strcmp(def, "debug") == 0)
+          {
+          mf.AddCacheDefinition(linkTypeName.c_str(),
+                                "debug", "Library is used for debug links only",
+                                cmCacheManager::STATIC);
+          }
+        else
+          {
+          mf.AddCacheDefinition(linkTypeName.c_str(),
+                                "general", "Library is used for both debug and optimized links",
+                                cmCacheManager::STATIC);
+          }
+        } break;
       case cmTarget::OPTIMIZED:
-        mf.AddCacheDefinition(linkTypeName.c_str(),
-                              "optimized", "Library is used for debug links only", 
-                              cmCacheManager::STATIC);
+        {
+        const char* def = mf.GetDefinition(linkTypeName.c_str());
+        if(!def || strcmp(def, "optimized") == 0)
+          {
+          mf.AddCacheDefinition(linkTypeName.c_str(),
+                                "optimized", "Library is used for debug links only",
+                                cmCacheManager::STATIC);
+          }
+        else
+          {
+          mf.AddCacheDefinition(linkTypeName.c_str(),
+                                "general", "Library is used for both debug and optimized links",
+                                cmCacheManager::STATIC);
+          }
+        } break;
         break;
       case cmTarget::GENERAL: break;
       }
