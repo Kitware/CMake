@@ -2148,3 +2148,41 @@ bool cmSystemTools::GetShortPath(const char* path, std::string& shortPath)
   return true;
 #endif
 }
+
+cmSystemTools::e_FileFormat cmSystemTools::GetFileFormat(const char* cext)
+{
+  if ( ! cext || *cext == 0 )
+    {
+    return cmSystemTools::NO_FILE_FORMAT;
+    }
+  std::string ext = cmSystemTools::LowerCase(cext);
+  if ( ext == "c" || ext == ".c" ) { return cmSystemTools::C_FILE_FORMAT; }
+  if ( ext == "cxx" || ext == ".cxx" ||
+       ext == "cpp" || ext == ".cpp" ||
+       ext == "c++" || ext == ".c++" ||
+       ext == "cc" || ext == ".cc" ) { return cmSystemTools::CXX_FILE_FORMAT; }
+  if ( ext == "java" || ext == ".java" ) { return cmSystemTools::JAVA_FILE_FORMAT; }
+  if ( ext == "h" || ext == ".h" || 
+       ext == "hpp" || ext == ".hpp" || 
+       ext == "h++" || ext == ".h++" ||
+       ext == "hxx" || ext == ".hxx" ) { return cmSystemTools::HEADER_FILE_FORMAT; }
+  if ( ext == "rc" || ext == ".rc" ) { return cmSystemTools::RESOURCE_FILE_FORMAT; }
+  if ( ext == "def" || ext == ".def" ) { return cmSystemTools::DEFINITION_FILE_FORMAT; }
+  if ( ext == "lib" || ext == ".lib" ||
+       ext == "a" || ext == ".a") { return cmSystemTools::STATIC_LIBRARY_FILE_FORMAT; }
+  if ( ext == "o" || ext == ".o" ||
+       ext == "obj" || ext == ".obj") { return cmSystemTools::OBJECT_FILE_FORMAT; }
+#ifdef __APPLE__
+  if ( ext == "dylib" || ext == ".dylib" ) 
+    { return cmSystemTools::SHARED_LIBRARY_FILE_FORMAT; }
+  if ( ext == "so" || ext == ".so" || 
+       ext == "bundle" || ext == ".bundle" ) 
+    { return cmSystemTools::MODULE_FILE_FORMAT; } 
+#else // __APPLE__
+  if ( ext == "so" || ext == ".so" || 
+       ext == "sl" || ext == ".sl" || 
+       ext == "dll" || ext == ".dll" ) 
+    { return cmSystemTools::SHARED_LIBRARY_FILE_FORMAT; }
+#endif // __APPLE__
+  return cmSystemTools::UNKNOWN_FILE_FORMAT;
+}

@@ -287,6 +287,30 @@ public:
   static void DisableRunCommandOutput() {s_DisableRunCommandOutput = true; }
   static void EnableRunCommandOutput() {s_DisableRunCommandOutput = false; }
   static bool GetRunCommandOutput() { return s_DisableRunCommandOutput; }
+
+  /**
+   * Come constants for different file formats.
+   */
+  enum e_FileFormat {
+    NO_FILE_FORMAT = 0,
+    C_FILE_FORMAT,
+    CXX_FILE_FORMAT,
+    JAVA_FILE_FORMAT,
+    HEADER_FILE_FORMAT,
+    RESOURCE_FILE_FORMAT,
+    DEFINITION_FILE_FORMAT,
+    STATIC_LIBRARY_FILE_FORMAT,
+    SHARED_LIBRARY_FILE_FORMAT,
+    MODULE_FILE_FORMAT,
+    OBJECT_FILE_FORMAT,
+    UNKNOWN_FILE_FORMAT
+  };
+
+  /**
+   * Determine the file type based on the extension
+   */
+  static e_FileFormat GetFileFormat(const char* ext);
+
 protected:
   // these two functions can be called from ConvertToOutputPath
   /**
@@ -302,7 +326,6 @@ protected:
    * if there are spaces in the string it is double quoted.
    */
   static std::string ConvertToWindowsOutputPath(const char*);
-  
 
 private:
   static bool s_ErrorOccured;
