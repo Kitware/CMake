@@ -33,6 +33,7 @@
 
 #cmakedefine CMAKE_NO_STD_NAMESPACE
 #cmakedefine CMAKE_NO_ANSI_STREAM_HEADERS
+#cmakedefine CMAKE_NO_ANSI_STRING_STREAM
 #cmakedefine CMAKE_NO_ANSI_FOR_SCOPE
 
 // Needed to check for files
