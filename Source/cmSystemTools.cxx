@@ -59,7 +59,11 @@ inline const char* Getcwd(char* buf, unsigned int len)
 }
 inline int Chdir(const char* dir)
 {
+  #if defined(__BORLANDC__)
+  return chdir(dir);
+  #else
   return _chdir(dir);
+  #endif
 }
 #else
 #include <sys/types.h>
@@ -147,12 +151,21 @@ bool cmSystemTools::MakeDirectory(const char* path)
     }
   if(Mkdir(path) != 0)
     {
+    // There is a bug in the Borland Run time library which makes MKDIR
+    // return EACCES when it should return EEXISTS
+    #ifdef __BORLANDC__
+    if( (errno != EEXIST) && (errno != EACCES) )
+      {
+      return false;
+      }
+    #else
     // if it is some other error besides directory exists
     // then return false
     if(errno != EEXIST)
       {
       return false;
       }
+    #endif
     }
   return true;
 }
@@ -329,7 +342,7 @@ std::string cmSystemTools::Capitalized(const std::string& s)
     n[i] = tolower(s[i]);
     }
   return n;
-}  
+}
 
 
 // convert windows slashes to unix slashes \ with /
@@ -348,8 +361,30 @@ void cmSystemTools::ConvertToUnixSlashes(std::string& path)
     }
 }
 
+// convert windows slashes to unix slashes \ with /
+void cmSystemTools::CleanUpWindowsSlashes(std::string& path)
+{
+  std::string::size_type pos = 0;
+  while((pos = path.find('/', pos)) != std::string::npos)
+    {
+    path[pos] = '\\';
+    pos++;
+    }
+  // remove any trailing slash
+  if(path[path.size()-1] == '\\')
+    {
+    path = path.substr(0, path.size()-1);
+    }
+  // remove any duplicate // slashes
+  pos = 0;
+  while((pos = path.find("\\\\", pos)) != std::string::npos)
+    {
+    path.erase(pos, 1);
+    }
+}
 
-int cmSystemTools::Grep(const char* dir, const char* file, 
+
+int cmSystemTools::Grep(const char* dir, const char* file,
                         const char* expression)
 {
   std::string path = dir;

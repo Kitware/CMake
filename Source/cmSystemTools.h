@@ -88,7 +88,13 @@ public:
    * Replace Windows file system slashes with Unix-style slashes.
    */
   static void ConvertToUnixSlashes(std::string& path);
- 
+
+  /**
+   * Replace Unix file system slashes with Windows-style slashes and
+   * remove any duplicate slashes to clean the path.
+   */
+  static void CleanUpWindowsSlashes(std::string& path);
+
   ///! Return true if a file exists in the current directory.
   static bool FileExists(const char* filename);
 
