@@ -15,10 +15,11 @@ static char THIS_FILE[] = __FILE__;
 
 CMakeCommandLineInfo::CMakeCommandLineInfo()
 {
-  m_WhereSource = _T("");
-  m_WhereBuild = _T("");
-  m_AdvancedValues = FALSE;
-  m_GeneratorChoiceString = _T("");
+  this->m_WhereSource = _T("");
+  this->m_WhereBuild = _T("");
+  this->m_AdvancedValues = FALSE;
+  this->m_GeneratorChoiceString = _T("");
+  this->m_LastUnknownParameter = _T("");
 } 
 
 CMakeCommandLineInfo::~CMakeCommandLineInfo()
@@ -50,7 +51,11 @@ int CMakeCommandLineInfo::GetBoolValue(const CString& v) {
 
 void CMakeCommandLineInfo::ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast)
 {
-  if(bFlag) 
+  if(!bFlag)
+    {
+    this->m_LastUnknownParameter = lpszParam;
+    }
+  else
     {
     CString sParam(lpszParam);
     // Single letter valued flag like /B=value or /B:value
@@ -70,21 +75,21 @@ void CMakeCommandLineInfo::ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast)
         res = CMakeCommandLineInfo::GetBoolValue(value);
         if (res == 1)
           {
-          m_AdvancedValues = TRUE;
+          this->m_AdvancedValues = TRUE;
           }
         else if (res == -1)
           {
-          m_AdvancedValues = FALSE;
+          this->m_AdvancedValues = FALSE;
           }
         break;
       case 'B':
-        m_WhereBuild = value;
+        this->m_WhereBuild = value;
         break;
       case 'G':
-        m_GeneratorChoiceString = value;
+        this->m_GeneratorChoiceString = value;
         break;
       case 'H':
-        m_WhereSource = value;
+        this->m_WhereSource = value;
         break;
       }
     }

@@ -45,6 +45,7 @@ public:
   CString m_WhereBuild;
   BOOL m_AdvancedValues;
   CString m_GeneratorChoiceString;
+  CString m_LastUnknownParameter;
 
   // Operations
 public:

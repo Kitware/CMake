@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#include "shellapi.h"
 // a fun undef for DOT NET
 #undef DEBUG
 #include "CMakeSetup.h"
@@ -82,15 +83,30 @@ CMakeSetupDialog::CMakeSetupDialog(const CMakeCommandLineInfo& cmdInfo,
                                    CWnd* pParent /*=NULL*/)
   : CDialog(CMakeSetupDialog::IDD, pParent)
 {
-   cmSystemTools::SetErrorCallback(MFCMessageCallback);
+  cmSystemTools::SetErrorCallback(MFCMessageCallback);
   m_RegistryKey  = "Software\\Kitware\\CMakeSetup\\Settings\\StartPath";
   
   //{{AFX_DATA_INIT(CMakeSetupDialog)
-  m_WhereSource = cmdInfo.m_WhereSource;
-  m_WhereBuild = cmdInfo.m_WhereBuild;
-  m_GeneratorChoiceString = cmdInfo.m_GeneratorChoiceString;
-  m_AdvancedValues = cmdInfo.m_AdvancedValues;
+  // Get the parameters from the command line info
+  // If an unknown parameter is found, try to interpret it too, since it
+  // is likely to be a file dropped on the shortcut :)
+  if (cmdInfo.m_LastUnknownParameter.IsEmpty())
+    {
+    this->m_WhereSource = cmdInfo.m_WhereSource;
+    this->m_WhereBuild = cmdInfo.m_WhereBuild;
+    this->m_GeneratorChoiceString = cmdInfo.m_GeneratorChoiceString;
+    this->m_AdvancedValues = cmdInfo.m_AdvancedValues;
+    }
+  else
+    {
+    this->m_WhereSource = _T("");
+    this->m_WhereBuild = _T("");
+    this->m_AdvancedValues = FALSE;
+    this->m_GeneratorChoiceString = _T("");
+    this->ChangeDirectoriesFromFile((LPCTSTR)cmdInfo.m_LastUnknownParameter);
+    }
   //}}AFX_DATA_INIT
+
   // Note that LoadIcon does not require a subsequent DestroyIcon in Win32
   m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
   m_BuildPathChanged = false;
@@ -101,7 +117,7 @@ CMakeSetupDialog::CMakeSetupDialog(const CMakeCommandLineInfo& cmdInfo,
   m_PathToExecutable = cmSystemTools::GetProgramPath(fname).c_str();
   // add the cmake.exe to the path
   m_PathToExecutable += "/cmake.exe";
-  
+
   m_oldCX = -1;
   m_deltaXRemainder = 0;
 }
@@ -133,6 +149,7 @@ BEGIN_MESSAGE_MAP(CMakeSetupDialog, CDialog)
   ON_WM_SYSCOMMAND()
   ON_WM_PAINT()
   ON_WM_QUERYDRAGICON()
+  ON_WM_DROPFILES()
   ON_BN_CLICKED(IDC_BUTTON2, OnBrowseWhereSource)
   ON_BN_CLICKED(IDC_BuildProjects, OnConfigure)
   ON_BN_CLICKED(IDC_BUTTON3, OnBrowseWhereBuild)
@@ -157,6 +174,7 @@ END_MESSAGE_MAP()
 BOOL CMakeSetupDialog::OnInitDialog()
 {
   CDialog::OnInitDialog();
+  this->DragAcceptFiles(true);
 
   // Add "Create shortcut" menu item to system menu.
 
@@ -914,9 +932,6 @@ void CMakeSetupDialog::OnEditchangeGenerator()
 // Create a shortcut on the desktop with the current Source/Build dir.
 int CMakeSetupDialog::CreateShortcut() 
 {
-  //  m_WhereSource = cmdInfo.m_WhereSource;
-  //  m_WhereBuild = cmdInfo.m_WhereBuild;
-
   // Find the desktop folder and create the link name
 
   HKEY hKey;
@@ -1151,4 +1166,65 @@ void CMakeSetupDialog::OnAdvancedValues()
 void CMakeSetupDialog::OnDoubleclickedAdvancedValues() 
 {
   this->OnAdvancedValues();
+}
+
+// Handle param or single dropped file.
+// If it's a directory, use it as source and build dirs
+// otherwise, if it's a CMakeCache, get source dir from cache
+// otherwise use file's dir to set source and build dirs.
+
+void CMakeSetupDialog::ChangeDirectoriesFromFile(const char* buffer)
+{
+  std::string file = buffer;
+  if (cmSystemTools::FileIsDirectory(file.c_str()))
+    {
+    this->m_WhereSource = this->m_WhereBuild = file.c_str();
+    }
+  else
+    {
+    std::string name = cmSystemTools::GetFilenameName(file);
+    std::string path = cmSystemTools::GetFilenamePath(file);
+    this->m_WhereBuild = path.c_str();
+
+    cmCacheManager *cache = cmCacheManager::GetInstance();
+    if (name == "CMakeCache.txt" &&
+        cache->LoadCache(path.c_str()) &&
+        cache->GetCacheEntry("CMAKE_HOME_DIRECTORY"))
+      {
+      this->m_WhereSource = 
+        cache->GetCacheEntry("CMAKE_HOME_DIRECTORY")->m_Value.c_str();
+      }
+    else
+      {
+      this->m_WhereSource = path.c_str();
+      }
+    }
+}
+
+// The framework calls this member function when the user releases the
+// left mouse button over a window that has registered itself as the 
+// recipient of dropped files. 
+
+void CMakeSetupDialog::OnDropFiles(HDROP hDropInfo)
+{
+  UINT nb_files = DragQueryFile(hDropInfo, 0xFFFFFFFF, NULL, 0);
+  if (nb_files > 0)
+    {
+    UINT buffer_size = DragQueryFile(hDropInfo, 0, NULL, 0);
+    char *buffer = new char [buffer_size + 1];
+    DragQueryFile(hDropInfo, 0, buffer, buffer_size + 1);
+
+    this->ChangeDirectoriesFromFile(buffer);
+    delete [] buffer;
+
+    this->m_WhereSourceControl.SetWindowText(this->m_WhereSource);
+    this->m_WhereBuildControl.SetWindowText(this->m_WhereBuild);
+
+    this->UpdateData(FALSE);
+
+    this->OnChangeWhereSource();
+    this->OnChangeWhereBuild();
+    }
+
+  DragFinish(hDropInfo);
 }

@@ -87,6 +87,8 @@ protected:
   void FillCacheManagerFromCacheGUI();
   // Create a shortcut on the desktop with the current Source/Build dir.
   int CreateShortcut();
+  // Handle param or single dropped file.
+  void ChangeDirectoriesFromFile(const char *file);
   
   HICON m_hIcon;
   CString m_RegistryKey;
@@ -107,12 +109,13 @@ protected:
   afx_msg void OnSelendokWhereSource();
   afx_msg void OnSize(UINT nType, int cx, int cy);
   afx_msg void OnGetMinMaxInfo( MINMAXINFO FAR* lpMMI );
-	afx_msg void OnOk();
-	afx_msg void OnEditchangeGenerator();
-	afx_msg void OnHelpButton();
-	afx_msg void OnAdvancedValues();
-	afx_msg void OnDoubleclickedAdvancedValues();
-	//}}AFX_MSG
+  afx_msg void OnOk();
+  afx_msg void OnEditchangeGenerator();
+  afx_msg void OnHelpButton();
+  afx_msg void OnAdvancedValues();
+  afx_msg void OnDoubleclickedAdvancedValues();
+  afx_msg void OnDropFiles(HDROP);
+  //}}AFX_MSG
   DECLARE_MESSAGE_MAP()
     
     int m_oldCX;
