@@ -3809,7 +3809,8 @@ int set_field_buffer(FIELD * field, int buffer, const char * value)
     p[s-value] = *s;
   if (s < (value+len))
     {
-      p[s-value] = *s++;
+      int off = s-value;
+      p[off] = *s++;
       s = p + (s-value);
     }
   else 
