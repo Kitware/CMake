@@ -84,7 +84,7 @@ public:
   /**
    * The full path to the file.
    */
-  std::string GetFullPath() const {return m_FullPath;}
+  const std::string &GetFullPath() const {return m_FullPath;}
   void SetFullPath(const char *name) {m_FullPath = name;}
 
   /**
@@ -98,7 +98,7 @@ public:
    * The file name associated with stripped off directory and extension.
    * (In most cases this is the name of the class.)
    */
-  std::string GetSourceExtension() const {return m_SourceExtension;}
+  const std::string &GetSourceExtension() const {return m_SourceExtension;}
   void SetSourceExtension(const char *name) {m_SourceExtension = name;}
 
   /**
