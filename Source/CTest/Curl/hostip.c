@@ -178,6 +178,16 @@ int Curl_num_addresses(const Curl_addrinfo *addr)
   return i;
 }
 
+#define GET_SIN_ADDR_FROM_CURL_ADDRINFO(ai_addr, si, sin, sinaddr, ip) \
+  { \
+  union { \
+    struct si* vsi; \
+    struct sin* vsin;\
+  } vi; \
+  vi.vsi = ai_addr; \
+  ip = &(vi.vsin->sinaddr); \
+  }
+
 /*
  * Curl_printable_address() returns a printable version of the 1st address
  * given in the 'ip' argument. The result will be stored in the buf that is
@@ -188,13 +198,17 @@ int Curl_num_addresses(const Curl_addrinfo *addr)
 const char *Curl_printable_address(const Curl_addrinfo *ip,
                                    char *buf, size_t bufsize)
 {
-  const void *ip4 = &((const struct sockaddr_in*)ip->ai_addr)->sin_addr;
   int af = ip->ai_family;
+  const void *ip4;
 #ifdef CURLRES_IPV6
-  const void *ip6 = &((const struct sockaddr_in6*)ip->ai_addr)->sin6_addr;
+  const void *ip6;
+  GET_SIN_ADDR_FROM_CURL_ADDRINFO(ip->ai_addr, sockaddr, sockaddr_in6,
+    sin6_addr, ip6);
 #else
   const void *ip6 = NULL;
 #endif
+  GET_SIN_ADDR_FROM_CURL_ADDRINFO(ip->ai_addr, sockaddr, sockaddr_in,
+    sin_addr, ip4);
 
   return Curl_inet_ntop(af, af == AF_INET ? ip4 : ip6, buf, bufsize);
 }
