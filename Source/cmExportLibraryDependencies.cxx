@@ -84,6 +84,8 @@ void cmExportLibraryDependenciesCommand::FinalPass()
     {
     cmLocalGenerator* gen = *i;
     cmTargets &tgts = gen->GetMakefile()->GetTargets();  
+    std::vector<std::string> depends;
+    const char *defType;
     for(cmTargets::const_iterator l = tgts.begin();
         l != tgts.end(); ++l)
       {
@@ -96,6 +98,20 @@ void cmExportLibraryDependenciesCommand::FinalPass()
         if(def)
           {
           fout << "SET(" << libDepName << " \"" << def << "\")\n";
+          // now for each dependency, check for link type
+          cmSystemTools::ExpandListArgument(def, depends);
+          for(std::vector<std::string>::const_iterator d = depends.begin();
+              d != depends.end(); ++d)
+            {
+            libDepName = *d;
+            libDepName += "_LINK_TYPE";
+            defType = m_Makefile->GetDefinition(libDepName.c_str());
+            libDepName = cmSystemTools::EscapeSpaces(libDepName.c_str());
+            if(defType)
+              {
+              fout << "SET(" << libDepName << " \"" << defType << "\")\n";
+              }
+            }
           }
         }
       }
