@@ -624,9 +624,8 @@ void cmCursesMainForm::UpdateProgress(const char *msg, float prog, void* vp)
   refresh();
 }
 
-int cmCursesMainForm::Configure()
+int cmCursesMainForm::Configure(int noconfigure)
 {
-
   int xi,yi;
   getmaxyx(stdscr, yi, xi);
 
@@ -648,7 +647,19 @@ int cmCursesMainForm::Configure()
 
   // run the generate process
   m_OkToGenerate = true;
-  int retVal = this->m_CMakeInstance->Configure();
+  int retVal;
+  if ( noconfigure )
+    {
+    retVal = this->m_CMakeInstance->DoPreConfigureChecks();
+    if ( retVal > 0 )
+      {
+      retVal = 0;
+      }
+    }
+  else
+    {
+    retVal = this->m_CMakeInstance->Configure();
+    }
   this->m_CMakeInstance->SetProgressCallback(0, 0);
 
   keypad(stdscr,TRUE); /* Use key symbols as 

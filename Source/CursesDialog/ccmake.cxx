@@ -189,8 +189,11 @@ int main(int argc, char** argv)
   cmCursesForm::CurrentForm = myform;
 
   myform->InitializeUI();
-  myform->Render(1, 1, x, y);
-  myform->HandleInput();
+  if ( myform->Configure(1) == 0 )
+    {
+    myform->Render(1, 1, x, y);
+    myform->HandleInput();
+    }
   
   // Need to clean-up better
   curses_clear();

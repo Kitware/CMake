@@ -89,9 +89,10 @@ public:
   virtual void AddError(const char* message, const char* title);
 
   /**
-   * Used to do a configure.
+   * Used to do a configure. If argument is specified, it does only the check
+   * and not configure.
    */
-  int Configure();
+  int Configure(int noconfigure=0);
 
   /**
    * Used to generate 
