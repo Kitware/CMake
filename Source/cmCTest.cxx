@@ -1068,15 +1068,6 @@ void cmCTest::EndXML(std::ostream& ostr)
 int cmCTest::GenerateDartNotesOutput(std::ostream& os, const cmCTest::tm_VectorOfStrings& files)
 {
   cmCTest::tm_VectorOfStrings::const_iterator it;
-  for ( it = files.begin(); it != files.end(); it ++ )
-    {
-    if ( !cmSystemTools::FileExists(it->c_str()) )
-      {
-      std::cerr << "Error creating notes. File " << it->c_str() << " does not exists" << std::endl;
-      return 0;
-      }
-    }
-
   os << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
     << "<?xml-stylesheet type=\"text/xsl\" href=\"Dart/Source/Server/XSL/Build.xsl <file:///Dart/Source/Server/XSL/Build.xsl> \"?>\n"
     << "<Site BuildName=\"" << m_DartConfiguration["BuildName"] << "\" BuildStamp=\"" 
