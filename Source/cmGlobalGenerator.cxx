@@ -823,19 +823,20 @@ void cmGlobalGenerator::FillProjectMap()
   unsigned int i;
   for(i = 0; i < m_LocalGenerators.size(); ++i)
     {
-    std::string name = m_LocalGenerators[i]->GetMakefile()->GetProjectName();
-    // for each local generator add the local generator to the project that
-    // it is in
-    m_ProjectMap[name].push_back(m_LocalGenerators[i]);
-    // now add the local generator to any parent project it is part of
-    std::vector<std::string> const& pprojects 
-      = m_LocalGenerators[i]->GetMakefile()->GetParentProjects();
-    for(unsigned int k =0; k < pprojects.size(); ++k)
+    // for each local generator add all projects 
+    cmLocalGenerator *lg = m_LocalGenerators[i];
+    std::string name;
+    do 
       {
-      m_ProjectMap[pprojects[k]].push_back(m_LocalGenerators[i]);
+      if (name != lg->GetMakefile()->GetProjectName())
+        {
+        name = lg->GetMakefile()->GetProjectName();
+        m_ProjectMap[name].push_back(m_LocalGenerators[i]);
+        }
+      lg = lg->GetParent();
       }
+    while (lg);
     }
-  
 }
 
 
