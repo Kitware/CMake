@@ -26,7 +26,8 @@ public:
   /**
    * Run the test for a directory and any subdirectories
    */
-  void ProcessDirectory(int &passed, std::vector<std::string> &failed);
+  void ProcessDirectory(std::vector<std::string> &passed, 
+                        std::vector<std::string> &failed);
 
   /**
    * Find the executable for a test

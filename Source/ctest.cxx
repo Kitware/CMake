@@ -117,7 +117,8 @@ std::string ctest::FindExecutable(const char *exe)
 }
 
 
-void ctest::ProcessDirectory(int &passed, std::vector<std::string> &failed)
+void ctest::ProcessDirectory(std::vector<std::string> &passed, 
+                             std::vector<std::string> &failed)
 {
   // does the DartTestfile.txt exist ?
   if(!cmSystemTools::FileExists("DartTestfile.txt"))
@@ -250,7 +251,7 @@ void ctest::ProcessDirectory(int &passed, std::vector<std::string> &failed)
               std::cerr << output.c_str() << "\n";
               }
             }
-          passed++;
+          passed.push_back(args[0]); 
           }
         }
       }
@@ -262,7 +263,7 @@ void ctest::ProcessDirectory(int &passed, std::vector<std::string> &failed)
 // this is a test driver program for cmake.
 int main (int argc, char *argv[])
 {
-  int passed = 0;
+  std::vector<std::string> passed;
   std::vector<std::string> failed;
   int total;
   
@@ -299,7 +300,7 @@ int main (int argc, char *argv[])
 
   // call process directory
   inst.ProcessDirectory(passed, failed);
-  total = passed + int(failed.size());
+  total = int(passed.size()) + int(failed.size());
 
   if (total == 0)
     {
@@ -307,12 +308,23 @@ int main (int argc, char *argv[])
     }
   else
     {
-    float percent = passed * 100.0f / total;
-    fprintf(stderr,"%.0f%% tests passed, %i tests failed out of %i\n",
+    if (passed.size() && (inst.m_UseIncludeRegExp || inst.m_UseExcludeRegExp)) 
+      {
+      std::cerr << "\nThe following tests passed:\n";
+      for(std::vector<std::string>::iterator j = passed.begin();
+          j != passed.end(); ++j)
+        {   
+        std::cerr << "\t" << *j << "\n";
+        }
+      }
+
+    float percent = float(passed.size()) * 100.0f / total;
+    fprintf(stderr,"\n%.0f%% tests passed, %i tests failed out of %i\n",
             percent, failed.size(), total);
+
     if (failed.size()) 
       {
-      std::cerr << "The following tests failed:\n";
+      std::cerr << "\nThe following tests FAILED:\n";
       for(std::vector<std::string>::iterator j = failed.begin();
           j != failed.end(); ++j)
         {   
