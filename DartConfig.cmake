@@ -21,7 +21,8 @@ SET (PROJECT_URL "http://www.cmake.org")
 
 # Dart server configuration 
 SET (ROLLUP_URL "http://${DROP_SITE}/cgi-bin/cmake-rollup-dashboard.sh")
-SET (CVS_WEB_URL "http://${DROP_SITE}/cgi-bin/cvsweb.cgi/CMake/")
+#SET (CVS_WEB_URL "http://${DROP_SITE}/cgi-bin/cvsweb.cgi/CMake/")
+SET (CVS_WEB_URL "http://${DROP_SITE}/cgi-bin/viewcvs.cgi/")
 SET (CVS_WEB_CVSROOT "CMake")
 SET (USE_DOXYGEN "On")
 SET (DOXYGEN_URL "${PROJECT_URL}/doc/nightly/html/" )
