@@ -23,7 +23,8 @@ ADD_LIBRARY(CMakeTestLibrary LibrarySources)
 #
 # Create shared library
 #
-SOURCE_FILES(SharedLibrarySources sharedFile)
+SOURCE_FILES(SharedLibrarySources sharedFile fileFlags)
+SOURCE_FILES_FLAGS("-DEXTRA_FLAG" fileFlags )
 ADD_LIBRARY(CMakeTestLibraryShared SHARED SharedLibrarySources)
 
 #
