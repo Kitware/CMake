@@ -22,6 +22,7 @@
 #include "cmCursesStandardIncludes.h"
 
 class cmCursesCacheEntryComposite;
+class cmCursesWidget;
 class cmake;
 
 /** \class cmCursesMainForm
@@ -65,17 +66,21 @@ public:
   };
 
   /**
-   * This method should normally  called only by the form.
-   * The only exception is during a resize.
+   * This method should normally be called only by the form.  The only
+   * exception is during a resize. The optional argument specifies the
+   * string to be displayed in the status bar.
    */
-  virtual void UpdateStatusBar();
+  virtual void UpdateStatusBar() { this->UpdateStatusBar(0); } 
+  virtual void UpdateStatusBar(const char* message);
 
   /**
-   * Display current commands and their keys on the toolbar.
-   * This method should normally  called only by the form.
-   * The only exception is during a resize.
+   * Display current commands and their keys on the toolbar.  This
+   * method should normally called only by the form.  The only
+   * exception is during a resize. If the optional argument process is
+   * specified and is either 1 (configure) or 2 (generate), then keys
+   * will be displayed accordingly.
    */
-  void PrintKeys();
+  void PrintKeys(int process = 0);
 
   /**
    * During a CMake run, an error handle should add errors
@@ -101,6 +106,7 @@ public:
   /**
    * Progress callback
    */
+  static void UpdateProgressOld(const char *msg, float prog, void*);
   static void UpdateProgress(const char *msg, float prog, void*);
 
 protected:
