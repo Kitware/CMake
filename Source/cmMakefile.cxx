@@ -824,25 +824,109 @@ void cmMakefile::ExpandVariablesInString(std::string& source) const
 void cmMakefile::ExpandVariablesInString(std::string& source, 
                                          bool escapeQuotes) const
 {
-  for(DefinitionMap::const_iterator i = m_Definitions.begin();
-      i != m_Definitions.end(); ++i)
+  // This method replaces ${VAR} and @VAR@ where VAR is looked up
+  // in the m_Definitions map, if not found in the map, nothing is expanded.
+  
+  // start by look for $ or @ in the string
+  std::string::size_type markerPos = source.find_first_of("$@");
+  // if not found then leave quick as nothing needs to be expanded
+  if(markerPos == std::string::npos && markerPos > source.size()-1)
     {
-    std::string replace = (*i).second;
-    if (escapeQuotes)
-      {
-      replace = cmSystemTools::EscapeQuotes(replace.c_str());
-      }
-    std::string variable = "${";
-    variable += (*i).first;
-    variable += "}";
-    cmSystemTools::ReplaceString(source, variable.c_str(),
-                                 replace.c_str());
-    variable = "@";
-    variable += (*i).first;
-    variable += "@";
-    cmSystemTools::ReplaceString(source, variable.c_str(),
-                                 replace.c_str());
+    return;
     }
+  // current position
+  std::string::size_type currentPos =0; // start at 0 
+  std::string result; // string with replacements
+  // go until the the end of the string
+  while(markerPos != std::string::npos)
+    {
+    // grab string from currentPos to the start of the variable
+    // and add it to the result
+    result += source.substr(currentPos, markerPos - currentPos);
+    char endVariableMarker;     // what is the end of the variable @ or }
+    int markerStartSize = 1;    // size of the start marker 1 or 2
+    if(source[markerPos] == '$' )
+      {
+      // ${var} case
+      if(source[markerPos+1] == '{')
+        {
+        endVariableMarker = '}';
+        markerStartSize = 2;
+        }
+      else
+        {
+        // bogus $ with no { so add $ to result and move on
+        result += '$'; // add bogus $ back into string
+        currentPos = markerPos+1; // move on
+        endVariableMarker = ' '; // set end var to space so we can tell bogus
+        }
+      }
+    else
+      {
+      // @VAR case
+      endVariableMarker = '@';
+      }
+    // if it was a valid variable (started with @ or ${ )
+    if(endVariableMarker != ' ')
+      {
+      markerPos += markerStartSize; // move past marker
+      // find the end variable marker starting at the markerPos
+      std::string::size_type endVariablePos = 
+        source.find(endVariableMarker, markerPos);
+      if(endVariablePos == std::string::npos)
+        {
+        // no end marker found so add the bogus start
+        if(endVariableMarker == '@')
+          {
+          result += '@';
+          }
+        else
+          {
+          result += "${";
+          }
+        currentPos = markerPos;
+        }
+      else
+        {
+        // good variable remove it
+        std::string var = source.substr(markerPos, endVariablePos - markerPos);
+        DefinitionMap::const_iterator pos = m_Definitions.find(var.c_str());
+        // if found add to result, if not, then it gets blanked
+        if(pos != m_Definitions.end())
+          {
+          if (escapeQuotes)
+            {
+            result += cmSystemTools::EscapeQuotes((*pos).second.c_str());
+            }
+          else
+            {
+            result += (*pos).second;
+            }
+          }
+        else
+          {
+          // if no definition is found then add the var back
+          if(endVariableMarker == '@')
+            {
+            result += "@";
+            result += var;
+            result += "@";
+            }
+          else
+            {
+            result += "${";
+            result += var;
+            result += "}";
+            }
+          }
+        // lookup var, and replace it
+        currentPos = endVariablePos+1;
+        }
+      }
+    markerPos = source.find_first_of("$@", currentPos);
+    } 
+  result += source.substr(currentPos); // pick up the rest of the string
+  source = result;
 }
 
 void cmMakefile::RemoveVariablesInString(std::string& source) const
