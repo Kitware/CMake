@@ -1537,7 +1537,7 @@ void cmUnixMakefileGenerator::OutputSourceObjectBuildRules(std::ostream& fout)
                                             *source,
                                             exportsDef.c_str(),
                                             shared);
-          rules.insert(shortName);
+          rules.insert(shortNameWithExt);
           }
         }
       }
