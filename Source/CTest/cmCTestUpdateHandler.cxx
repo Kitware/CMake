@@ -453,11 +453,7 @@ int cmCTestUpdateHandler::ProcessHandler()
     }
 
   std::cout << "   Gathering version information (each . represents one updated file):" << std::endl;
-  if ( !m_Verbose )
-    {
-    std::cout << "    ";
-    std::cout.flush();
-    }
+  int file_count = 0;
   for ( cc= 0 ; cc < lines.size(); cc ++ )
     {
     const char* line = lines[cc].c_str();
@@ -465,13 +461,18 @@ int cmCTestUpdateHandler::ProcessHandler()
       {
       if ( !m_Verbose )
         {
+        if ( file_count == 0 )
+          {
+          std::cout << "    ";
+          std::cout.flush();
+          }
         std::cout << ".";
         }
       std::cout.flush();
       std::string upChar = file_update_line.match(1);
       std::string upFile = file_update_line.match(2);
       char mod = upChar[0];
-      if ( mod != 'M' && mod != 'C' )
+      if ( mod != 'M' && mod != 'C' && mod != 'G' )
         {
         count ++;
         }
@@ -676,6 +677,11 @@ int cmCTestUpdateHandler::ProcessHandler()
           num_conflicting ++;
           os << "\t<Conflicting>" << std::endl;
           }
+        else if ( mod == 'G' )
+          {
+          num_conflicting ++;
+          os << "\t<Conflicting>" << std::endl;
+          }
         else if ( mod == 'M' )
           {
           num_modified ++;
@@ -731,6 +737,10 @@ int cmCTestUpdateHandler::ProcessHandler()
           {
           os << "\t</Conflicting>" << std::endl;
           }
+        else if ( mod == 'G' )
+          {
+          os << "\t</Conflicting>" << std::endl;
+          }
         else if ( mod == 'M' )
           {
           os << "\t</Modified>" << std::endl;
@@ -747,9 +757,13 @@ int cmCTestUpdateHandler::ProcessHandler()
 
         current_path = path;
         }
+      file_count ++;
       }
     }
-  std::cout << std::endl;
+  if ( file_count )
+    {
+    std::cout << std::endl;
+    }
   if ( num_updated )
     {
     std::cout << "   Found " << num_updated << " updated files" << std::endl;
@@ -763,6 +777,10 @@ int cmCTestUpdateHandler::ProcessHandler()
     {
     std::cout << "   Found " << num_conflicting << " conflicting files" 
       << std::endl;
+    }
+  if ( num_modified == 0 && num_conflicting == 0 && num_updated == 0 )
+    {
+    std::cout << "   Project is up-to-date" << std::endl;
     }
   if ( !first_file )
     {
