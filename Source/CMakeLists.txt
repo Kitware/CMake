@@ -238,6 +238,20 @@ IF(BUILD_TESTING)
     --build-two-config
     --test-command   conly)
 
+  SET(SimpleInstallInstallDir 
+    "${CMake_BINARY_DIR}/Tests/SimpleInstall/Install Directory")
+  ADD_TEST(SimpleInstall ${CMAKE_CTEST_COMMAND}
+    --build-and-test 
+    "${CMake_SOURCE_DIR}/Tests/SimpleInstall"
+    "${CMake_BINARY_DIR}/Tests/SimpleInstall"
+    --build-generator ${CMAKE_GENERATOR}
+    --build-project TestSimpleInstall
+    --build-makeprogram ${MAKEPROGRAM}
+    --build-two-config
+    --build-options
+     "-DCMAKE_INSTALL_PREFIX:PATH=${SimpleInstallInstallDir}"
+    --test-command   ${SimpleInstallInstallDir}/bin/SimpleInstall)
+
   ADD_TEST(X11  ${CMAKE_CTEST_COMMAND}
     --build-and-test 
     "${CMake_SOURCE_DIR}/Tests/X11"
@@ -554,14 +568,14 @@ IF(BUILD_TESTING)
   ENDIF (CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE OR WXWINDOWS_INCLUDE_DIR)
 
   IF(UNIX)
-    IF("x${CMAKE_INSTALL_PREFIX}" MATCHES "^x${CMake_BINARY_DIR}/Tests/TestInstall/Prefix$")
+    IF("x${CMAKE_INSTALL_PREFIX}" MATCHES "^x${CMake_BINARY_DIR}/Tests/TestShellInstall/Prefix$")
       CONFIGURE_FILE(
         ${CMake_SOURCE_DIR}/Tests/TestInstall.sh.in
-        ${CMake_BINARY_DIR}/Tests/TestInstall/TestInstall.sh
+        ${CMake_BINARY_DIR}/Tests/TestShellInstall/TestInstall.sh
         @ONLY IMMEDIATE
         )
-      ADD_TEST(Install /bin/sh ${CMake_BINARY_DIR}/Tests/TestInstall/TestInstall.sh)
-    ENDIF("x${CMAKE_INSTALL_PREFIX}" MATCHES "^x${CMake_BINARY_DIR}/Tests/TestInstall/Prefix$")
+      ADD_TEST(ShellInstall /bin/sh ${CMake_BINARY_DIR}/Tests/TestShellInstall/TestShellInstall.sh)
+    ENDIF("x${CMAKE_INSTALL_PREFIX}" MATCHES "^x${CMake_BINARY_DIR}/Tests/TestShellInstall/Prefix$")
   ENDIF(UNIX)
 
 ENDIF(BUILD_TESTING)
