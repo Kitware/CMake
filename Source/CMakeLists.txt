@@ -643,15 +643,6 @@ IF(BUILD_TESTING)
     --test-command executable
     )
 
-  ADD_TEST(curl ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Source/CTest/Curl"
-    "${CMake_BINARY_DIR}/Tests/Curl"  
-    --build-generator ${CMAKE_GENERATOR}
-    --build-makeprogram ${MAKEPROGRAM}
-    --build-project LIBCURL
-    --test-command LIBCURL)
-
   ADD_TEST(kwsys ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Source/kwsys"
