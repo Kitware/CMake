@@ -26,10 +26,6 @@ SET(JAVA_AWT_INCLUDE_DIRECTORIES
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.3;JavaHome]/include"
   )
 
-FIND_LIBRARY(JAVA_AWT_LIBRARY jawt 
-  PATHS ${JAVA_AWT_LIBRARY_DIRECTORIES}
-)
-
 IF(APPLE)
   IF(EXISTS ~/Library/Frameworks/JavaEmbedding.framework)
     SET(JAVA_HAVE_FRAMEWORK 1)
@@ -43,13 +39,20 @@ IF(APPLE)
   IF(JAVA_HAVE_FRAMEWORK)
     IF(NOT JAVA_AWT_LIBRARY)
       SET (JAVA_AWT_LIBRARY "-framework JavaVM -framework JavaEmbedding" CACHE FILEPATH "Java Frameworks" FORCE)
-      SET(JAVA_AWT_INCLUDE_DIRECTORIES
-        ~/Library/Frameworks/JavaEmbedding.framework/Headers
-        /Library/Frameworks/JavaEmbedding.framework/Headers
-        /System/Library/Frameworks/JavaEmbedding.framework/Headers
-        )
     ENDIF(NOT JAVA_AWT_LIBRARY)
+    SET(JAVA_AWT_INCLUDE_DIRECTORIES ${JAVA_AWT_INCLUDE_DIRECTORIES}
+      ~/Library/Frameworks/JavaVM.framework/Headers
+      /Library/Frameworks/JavaVM.framework/Headers
+      /System/Library/Frameworks/JavaVM.framework/Headers
+      ~/Library/Frameworks/JavaEmbedding.framework/Headers
+      /Library/Frameworks/JavaEmbedding.framework/Headers
+      /System/Library/Frameworks/JavaEmbedding.framework/Headers
+      )
   ENDIF(JAVA_HAVE_FRAMEWORK)
+ELSE(APPLE)
+  FIND_LIBRARY(JAVA_AWT_LIBRARY jawt 
+    PATHS ${JAVA_AWT_LIBRARY_DIRECTORIES}
+  )
 ENDIF(APPLE)
 
 # add in the include path    
@@ -63,7 +66,8 @@ FIND_PATH(JAVA_INCLUDE_PATH2 jni_md.h
   ${JAVA_INCLUDE_PATH}/linux
 )
 
-FIND_PATH(JAVA_AWT_INCLUDE_PATH jawt.h ${JAVA_INCLUDE_PATH} )
+FIND_PATH(JAVA_AWT_INCLUDE_PATH jawt.h 
+          ${JAVA_AWT_INCLUDE_DIRECTORIES} ${JAVA_INCLUDE_PATH} )
 
 MARK_AS_ADVANCED(
   JAVA_AWT_LIBRARY
