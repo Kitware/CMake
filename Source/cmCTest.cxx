@@ -3835,7 +3835,7 @@ void cmCTest::FindRunningCMake(const char* arg0)
     }
 }
 
-void CMakeMessageCallback(const char* m, const char* title, bool& nomore, void* s)
+void CMakeMessageCallback(const char* m, const char*, bool&, void* s)
 {
   std::string* out = (std::string*)s;
   *out += m;
@@ -3920,8 +3920,6 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
     std::cerr << "Did you specify a --build-makeprogram and a --build-generator?\n";
     }
   int retVal = 0;
-  int ret = 0;
-
   std::string makeCommand = cmSystemTools::ConvertToOutputPath(m_BuildMakeProgram.c_str());
   std::string lowerCaseCommand = cmSystemTools::LowerCase(makeCommand);
   // if msdev is the make program then do the following
@@ -4046,7 +4044,7 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
       }
     // return to the original directory
     cmSystemTools::ChangeDirectory(cwd.c_str());
-    ret = 1;
+    retVal = 1;
     }
 
   if(outstring)
