@@ -24,6 +24,10 @@
 #include <cmsys/Base64.h>
 #include "cmMakefile.h"
 
+#include <stdlib.h> 
+#include <math.h>
+#include <float.h>
+
 static const char* cmCTestMemCheckResultStrings[] = {
   "ABR",
   "ABW",
