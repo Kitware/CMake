@@ -866,12 +866,12 @@ void cmUnixMakefileGenerator::OutputDependLibs(std::ostream& fout)
 
 void cmUnixMakefileGenerator::OutputBuildLibraryInDir(std::ostream& fout,
 						      const char* path,
-						      const char* ,
+						      const char* library,
 						      const char* fullpath)
 {
   fout << cmSystemTools::EscapeSpaces(fullpath)
        << ":\n\tcd " << cmSystemTools::EscapeSpaces(path)
-           << "; $(MAKE) " << fullpath << "\n\n"; 
+           << "; $(MAKE) " << library << "\n\n"; 
 }
 
 bool cmUnixMakefileGenerator::SamePath(const char* path1, const char* path2)
