@@ -735,6 +735,7 @@ void CPropertyList::InvalidateList()
 
 void CPropertyList::ShowAdvanced()
 {
+  this->SetRedraw(FALSE);
   this->ResetContent();
   m_ShowAdvanced = true; 
   std::map<std::string, CPropertyItem*> sortProps;
@@ -761,12 +762,14 @@ void CPropertyList::ShowAdvanced()
       this->AddPropItem(item, 2);
       }
     }
+  this->SetRedraw(TRUE);
   this->InvalidateList();
 }
 
 
 void CPropertyList::HideAdvanced()
 {
+  this->SetRedraw(FALSE);
   this->ResetContent();
   m_ShowAdvanced = false;
   std::map<std::string, CPropertyItem*> sortProps;
@@ -793,6 +796,7 @@ void CPropertyList::HideAdvanced()
       this->AddPropItem(item, 2);
       }
     }
+  this->SetRedraw(TRUE);
   this->InvalidateList();
 }
 
