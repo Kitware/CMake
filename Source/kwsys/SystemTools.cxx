@@ -708,7 +708,14 @@ void SystemTools::ConvertToUnixSlashes(kwsys_stl::string& path)
   kwsys_stl::string::size_type pos = 0;
   while((pos = path.find('\\', pos)) != kwsys_stl::string::npos)
     {
-    path[pos] = '/';
+    // make sure we don't convert an escaped space to a unix slash
+    if(pos < path.size()-2)
+      {
+      if(path[pos+1] != ' ')
+        {
+        path[pos] = '/';
+        }
+      }
     pos++;
     }
   // Remove all // from the path just like most unix shells

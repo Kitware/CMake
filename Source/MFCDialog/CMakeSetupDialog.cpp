@@ -131,8 +131,13 @@ std::string ConvertToWindowsPath(const char* path)
   // Remove the "" around it (if any) since it's an output path for
   // the shell. If another shell-oriented feature is not designed 
   // for a GUI use, then we are in trouble.
-
+  // save the value of the force to unix path option
+  bool saveForce = cmSystemTools::GetForceUnixPaths();
+  // make sure we get windows paths no matter what for the GUI
+  cmSystemTools::SetForceUnixPaths(false);
   std::string s = cmSystemTools::ConvertToOutputPath(path);
+  // now restore the force unix path to its previous value
+  cmSystemTools::SetForceUnixPaths(saveForce);
   if (s.size())
     {
     std::string::iterator i = s.begin();

@@ -253,6 +253,11 @@ public:
     {
       s_ForceUnixPaths = v;
     }
+  static bool GetForceUnixPaths()
+    {
+      return s_ForceUnixPaths;
+    }
+
   // ConvertToOutputPath use s_ForceUnixPaths
   static std::string ConvertToOutputPath(const char* path);
   // ConvertToRunCommandPath does not use s_ForceUnixPaths and should
