@@ -105,13 +105,15 @@ bool cmVTKWrapTclCommand::InitialPass(std::vector<std::string> const& argsIn)
       if (!curr || !curr->GetPropertyAsBool("WRAP_EXCLUDE"))
         {
         cmSourceFile file;
+        std::string srcDir = cdir;
         if (curr)
           {
           file.SetProperty("ABSTRACT",curr->GetProperty("ABSTRACT"));
+          srcDir  = cmSystemTools::GetFilenamePath(curr->GetFullPath());
           }
         std::string srcName = cmSystemTools::GetFilenameWithoutExtension(*j);
         std::string newName = srcName + "Tcl";
-        std::string hname = cdir + "/" + srcName + ".h";
+        std::string hname = srcDir + "/" + srcName + ".h";
         file.SetName(newName.c_str(), m_Makefile->GetCurrentOutputDirectory(),
                      "cxx",false);
         m_WrapHeaders.push_back(hname);
