@@ -132,7 +132,9 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
   {"--build-project", "Specify the name of the project to build.", "" },
   {"--build-makeprogram", "Specify the make program to use.", "" },
   {"--build-noclean", "Skip the make clean step.", "" },
-  {"--build-options", "Add extra options to the build step.", "" },
+  {"--build-options", "Add extra options to the build step.", 
+   "This option must be the last option with the exception of --test-command" },
+
   {"--test-command", "The test to run with the --build-and-test option.", "" },
   {"--tomorrow-tag", "Nightly or experimental starts with next day tag.", 
    "This is useful if the build will not finish in one day." },
