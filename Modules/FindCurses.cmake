@@ -6,7 +6,7 @@ FIND_PATH(CURSES_INCLUDE_PATH curses.h
 /usr/local/include /usr/include
 )
 
-FIND_LIBRARY(CURSES_LIBRARY curses
+FIND_LIBRARY(CURSES_LIBRARY NAMES curses ncurses
 PATHS /usr/local/lib /usr/lib /lib
 )
 
