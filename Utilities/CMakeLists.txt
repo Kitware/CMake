@@ -35,6 +35,26 @@ INSTALL_FILES(${CMAKE_DOC_DIR} FILES
   )
 SET(DOC_FILES ${DOC_FILES} ${CMake_BINARY_DIR}/Docs/cmake.txt)
 
+# Generate documentation for "ctest" executable.
+SET(CMD ${CMD_DIR}/ctest${CMD_EXT})
+ADD_CUSTOM_COMMAND(
+  TARGET documentation
+  COMMAND ${CMD}
+  ARGS --help-full ${CMake_BINARY_DIR}/Docs/ctest.txt
+       --help-html ${CMake_BINARY_DIR}/Docs/ctest.html
+       --help-man ${CMake_BINARY_DIR}/Docs/ctest.1
+  DEPENDS ${CMD}
+  SOURCE ${CMake_SOURCE_DIR}/Utilities/Doxygen/authors.txt
+  OUTPUTS ${CMake_BINARY_DIR}/Docs/ctest.txt
+  )
+ADD_DEPENDENCIES(documentation ctest)
+INSTALL_FILES(${CMAKE_MAN_DIR}/man1 FILES ${CMake_BINARY_DIR}/Docs/ctest.1)
+INSTALL_FILES(${CMAKE_DOC_DIR} FILES
+  ${CMake_BINARY_DIR}/Docs/ctest.txt
+  ${CMake_BINARY_DIR}/Docs/ctest.html
+  )
+SET(DOC_FILES ${DOC_FILES} ${CMake_BINARY_DIR}/Docs/ctest.txt)
+
 # Generate documentation for "ccmake" executable.
 IF(UNIX)
   IF(CURSES_LIBRARY)
