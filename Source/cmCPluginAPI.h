@@ -180,7 +180,7 @@ extern "C" {
   /*=========================================================================*/
   /* The following functions are designed to operate or manipulate
   cmSourceFiles. Please see cmSourceFile.h for additional information on many
-  of these methods. Some of these methods are in cmMakefile.h.
+  of these methods. Some of these methods are in cmMakefile.h. */
   /*=========================================================================*/
   extern CM_EXPORT void *cmAddSource(void *mf, void *sf); 
   extern CM_EXPORT void *cmCreateSourceFile();
