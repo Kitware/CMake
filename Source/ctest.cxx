@@ -109,7 +109,7 @@ void ctest::ProcessDirectory(int &passed, int &failed)
 
   while ( fin )
     {
-    if(cmSystemTools::ParseFunction(fin, name, args))
+    if(cmSystemTools::ParseFunction(fin, name, args, "DartTestfile.txt"))
       {
       if (name == "SUBDIRS")
         {

@@ -76,7 +76,8 @@ bool cmListFileCache::CacheFile(const char* path)
     cmListFileFunction inFunction;
     if(cmSystemTools::ParseFunction(fin, 
                                     inFunction.m_Name,
-                                    inFunction.m_Arguments))
+                                    inFunction.m_Arguments,
+                                    path))
       {
       inFile.m_Functions.push_back(inFunction);
       }

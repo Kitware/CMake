@@ -122,11 +122,13 @@ public:
   /**
    * Read a CMake command (or function) from an input file.  This
    * returns the name of the function and a list of its 
-   * arguments.
+   * arguments.  The last argument is the name of the file that 
+   * the ifstream points to, and is used for debug info only.
    */
   static bool ParseFunction(std::ifstream&, 
                             std::string& name,
-                            std::vector<std::string>& arguments);
+                            std::vector<std::string>& arguments,
+                            const char* filename);
 
   /**
    *  Extract white-space separated arguments from a string.

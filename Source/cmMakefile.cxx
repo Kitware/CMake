@@ -256,7 +256,9 @@ void cmMakefile::ExecuteCommand(std::string &name,
     }
   else
     {
-    cmSystemTools::Error("unknown CMake command ", name.c_str());
+    cmSystemTools::Error("unknown CMake command:", name.c_str(), 
+                         "\nReading cmake file in directory:" , 
+                         m_cmCurrentDirectory.c_str());
     }
 }
 

@@ -486,7 +486,8 @@ const char *cmSystemTools::ConvertToWindowsSlashesAndCleanUp(std::string& path)
 
 bool cmSystemTools::ParseFunction(std::ifstream& fin,
                                   std::string& name,
-                                  std::vector<std::string>& arguments)
+                                  std::vector<std::string>& arguments,
+                                  const char* filename)
 {
   name = "";
   arguments = std::vector<std::string>();
@@ -551,8 +552,8 @@ bool cmSystemTools::ParseFunction(std::ifstream& fin,
           }
 	else
 	  {
-	  cmSystemTools::Error("Parse error in read function missing end )",
-			       inbuffer);
+	  cmSystemTools::Error("Parse error in read function missing end )\nIn File: ",
+			       filename, "\nCurrent line:", inbuffer);
 	  return false;
 	  }
         }
@@ -560,7 +561,8 @@ bool cmSystemTools::ParseFunction(std::ifstream& fin,
       }
     else
       {
-      cmSystemTools::Error("Parse error in read function ", inbuffer);
+      cmSystemTools::Error("Parse error in read function\nIn file:", 
+                           filename, "\nCurrent line:", inbuffer);
       return false;
       }
     }
