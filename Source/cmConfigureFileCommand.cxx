@@ -70,9 +70,7 @@ void cmConfigureFileCommand::FinalPass()
 
 void cmConfigureFileCommand::ConfigureFile()
 {
-  m_Makefile->ExpandVariablesInString(m_InputFile);
   m_Makefile->AddCMakeDependFile(m_InputFile.c_str());
-  m_Makefile->ExpandVariablesInString(m_OuputFile);
   cmSystemTools::ConvertToUnixSlashes(m_OuputFile);
   std::string::size_type pos = m_OuputFile.rfind('/');
   if(pos != std::string::npos)

@@ -29,10 +29,8 @@ cmVTKMakeInstantiatorCommand
     }
   
   m_ClassName = args[0];
-  m_Makefile->ExpandVariablesInString(m_ClassName);
   
   std::string outSourceList = args[1];
-  m_Makefile->ExpandVariablesInString(outSourceList);
   
   std::vector<cmStdString> inSourceLists;
   m_ExportMacro = "-";
@@ -50,9 +48,7 @@ cmVTKMakeInstantiatorCommand
       includesMode = false;
       if(++i < args.size())
         {
-        std::string gSize = args[i].c_str();
-        m_Makefile->ExpandVariablesInString(gSize);
-        groupSize = atoi(gSize.c_str());
+        groupSize = atoi(args[i].c_str());
         }
       else
         {
@@ -66,7 +62,6 @@ cmVTKMakeInstantiatorCommand
       if(++i < args.size())
         {
         headerPath = args[i];
-        m_Makefile->ExpandVariablesInString(headerPath);
         }
       else
         {
@@ -80,7 +75,6 @@ cmVTKMakeInstantiatorCommand
       if(++i < args.size())
         {
         m_ExportMacro = args[i];
-        m_Makefile->ExpandVariablesInString(m_ExportMacro);
         }
       else
         {
@@ -96,15 +90,13 @@ cmVTKMakeInstantiatorCommand
     // an include file.
     else
       {
-      std::string s = args[i];
-      m_Makefile->ExpandVariablesInString(s);
       if(!includesMode)
         {
-        inSourceLists.push_back(s);
+        inSourceLists.push_back(args[i]);
         }
       else
         {
-        m_Includes.push_back(s);
+        m_Includes.push_back(args[i]);
         }
       }
     }

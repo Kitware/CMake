@@ -210,7 +210,13 @@ void cmMakefile::ExecuteCommand(std::string &name,
       // if the command is inherited then InitialPass it.
       if(!m_Inheriting || usedCommand->IsInherited())
         {
-        if(!usedCommand->InitialPass(arguments))
+        std::vector<std::string> expandedArguments = arguments;
+        for(std::vector<std::string>::iterator i = expandedArguments.begin();
+            i != expandedArguments.end(); ++i)
+          {
+          this->ExpandVariablesInString(*i);
+          }
+        if(!usedCommand->InitialPass(expandedArguments))
           {
           cmSystemTools::Error(usedCommand->GetName(),
                                ": Error : \n",
@@ -1171,10 +1177,16 @@ bool cmMakefile::IsFunctionBlocked(const char *name,
 {
   // loop over all function blockers to see if any block this command
   std::set<cmFunctionBlocker *>::const_iterator pos;
+  std::vector<std::string> expandedArguments = args;
+  for(std::vector<std::string>::iterator i = expandedArguments.begin();
+      i != expandedArguments.end(); ++i)
+    {
+    this->ExpandVariablesInString(*i);
+    }
   for (pos = m_FunctionBlockers.begin(); 
        pos != m_FunctionBlockers.end(); ++pos)
     {
-    if ((*pos)->IsFunctionBlocked(name, args, *this))
+    if ((*pos)->IsFunctionBlocked(name, expandedArguments, *this))
       {
       return true;
       }

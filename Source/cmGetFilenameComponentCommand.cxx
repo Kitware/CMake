@@ -39,7 +39,6 @@ bool cmGetFilenameComponentCommand::InitialPass(std::vector<std::string> const& 
   
   std::string result;
   std::string filename = args[1];
-  m_Makefile->ExpandVariablesInString(filename);
 
   if (args[2] == "PATH")
     {

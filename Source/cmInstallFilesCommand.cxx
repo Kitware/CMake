@@ -61,7 +61,6 @@ void cmInstallFilesCommand::FinalPass()
       {
       // replace any variables
       std::string temps = *s;
-      m_Makefile->ExpandVariablesInString(temps);
       // look for a srclist
       if (m_Makefile->GetSources().find(temps) != m_Makefile->GetSources().end())
         {
@@ -88,7 +87,6 @@ void cmInstallFilesCommand::FinalPass()
     {
     std::vector<std::string> files;
     std::string regex = m_FinalArgs[0].c_str();
-    m_Makefile->ExpandVariablesInString(regex);
     cmSystemTools::Glob(m_Makefile->GetCurrentDirectory(),
                         regex.c_str(), files);
     

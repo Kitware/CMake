@@ -25,9 +25,7 @@ bool cmMakeDirectoryCommand::InitialPass(std::vector<std::string> const& args)
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  std::string arg = args[0];
-  m_Makefile->ExpandVariablesInString(arg);
-  cmSystemTools::MakeDirectory(arg.c_str());
+  cmSystemTools::MakeDirectory(args[0].c_str());
   return true;
 }
 

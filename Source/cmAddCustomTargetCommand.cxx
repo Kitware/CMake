@@ -17,9 +17,8 @@
 #include "cmAddCustomTargetCommand.h"
 
 // cmAddCustomTargetCommand
-bool cmAddCustomTargetCommand::InitialPass(std::vector<std::string> const& argsIn)
+bool cmAddCustomTargetCommand::InitialPass(std::vector<std::string> const& args)
 {
-  std::vector<std::string> args = argsIn;
   bool all = false;
   
   if(args.size() < 2 )
@@ -27,11 +26,10 @@ bool cmAddCustomTargetCommand::InitialPass(std::vector<std::string> const& argsI
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  m_Makefile->ExpandVariablesInString(args[0]);
 
   // all target option
   std::string arguments;
-  std::vector<std::string>::iterator s = args.begin();
+  std::vector<std::string>::const_iterator s = args.begin();
   ++s; // move past args[0] as it is already to be used
   if (args.size() >= 3)
     {
@@ -44,12 +42,11 @@ bool cmAddCustomTargetCommand::InitialPass(std::vector<std::string> const& argsI
   std::string command;
   if(s != args.end())
     {
-    command = m_Makefile->ExpandVariablesInString(*s);
+    command = *s;
     ++s;
     }
   for (;s != args.end(); ++s)
     {
-    m_Makefile->ExpandVariablesInString(*s);
     arguments += cmSystemTools::EscapeSpaces(s->c_str());
     arguments += " ";
     }

@@ -18,19 +18,16 @@
 #include "cmSystemTools.h"
 
 // cmExecProgramCommand
-bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& argsIn)
+bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& args)
 {
-  std::vector<std::string>  args = argsIn;
   if(args.size() < 1 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
   std::string output;
-  m_Makefile->ExpandVariablesInString(args[0]);
   if(args.size() == 2)
     {
-    m_Makefile->ExpandVariablesInString(args[1]);
     cmSystemTools::MakeDirectory(args[1].c_str());
     std::string command;
     command = "cd ";

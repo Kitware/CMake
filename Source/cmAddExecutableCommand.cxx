@@ -29,7 +29,6 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args)
   std::vector<std::string>::const_iterator s = args.begin();
 
   std::string exename = *s;
-  m_Makefile->ExpandVariablesInString(exename);
 
   ++s;
   bool use_win32 = false;
@@ -41,12 +40,6 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args)
     }
 
   std::vector<std::string> srclists(s, args.end());
-  for(std::vector<std::string>::iterator j = srclists.begin();
-      j != srclists.end(); ++j)
-    {
-    m_Makefile->ExpandVariablesInString(*j);
-    }
-
   m_Makefile->AddExecutable(exename.c_str(), srclists, use_win32); 
   
   return true;

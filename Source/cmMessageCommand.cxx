@@ -31,7 +31,6 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& args)
     {
     message += *i;
     }
-  m_Makefile->ExpandVariablesInString(message);
   cmSystemTools::Message(message.c_str());
   return true;
 }

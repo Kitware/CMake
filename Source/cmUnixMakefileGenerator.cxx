@@ -1796,7 +1796,7 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                          "run any tests",
                          "test",
                          "",
-                         ctest.c_str());
+                         this->ConvertToOutputPath(ctest.c_str()).c_str());
     }
 }
 

@@ -88,8 +88,6 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args)
     type = cmCacheManager::StringToType(args[cacheStart+1].c_str());
     docstring = args[cacheStart+2].c_str();
     }
-  // always expand the first argument
-  m_Makefile->ExpandVariablesInString(value);
   // get the current cache value for the variable
   const char* cacheValue = 
     m_Makefile->GetDefinition(variable);

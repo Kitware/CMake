@@ -185,10 +185,6 @@ void cmOutputRequiredFilesCommand::FinalPass()
   cmLBDepend md;
   md.SetMakefile(m_Makefile);
 
-  // always expand the first argument
-  m_Makefile->ExpandVariablesInString(m_File);
-  m_Makefile->ExpandVariablesInString(m_OutputFile);
-
   // find the depends for a file
   const cmDependInformation *info = md.FindDependencies(m_File.c_str());
   if (info)

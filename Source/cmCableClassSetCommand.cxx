@@ -19,21 +19,14 @@
 #include "cmTarget.h"
 
 // cmCableClassSetCommand
-bool cmCableClassSetCommand::InitialPass(std::vector<std::string> const& argsIn)
+bool cmCableClassSetCommand::InitialPass(std::vector<std::string> const& args)
 {
-  if(argsIn.size() < 2)
+  if(args.size() < 2)
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  std::vector<std::string> args = argsIn;
-  // First, we want to expand all CMAKE variables in all arguments.
-  for(std::vector<std::string>::iterator a = args.begin();
-      a != args.end(); ++a)
-    {
-    m_Makefile->ExpandVariablesInString(*a);
-    }
-  
+
   // The first argument is the name of the set.
   std::vector<std::string>::const_iterator arg = args.begin();
   m_ClassSetName = *arg++;

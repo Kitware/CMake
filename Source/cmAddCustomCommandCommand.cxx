@@ -48,8 +48,7 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
 
   for (unsigned int j = 0; j < args.size(); ++j)
     {
-    std::string copy = args[j];
-    m_Makefile->ExpandVariablesInString(copy);
+    std::string const& copy = args[j];
 
     if(copy == "SOURCE")
       {
@@ -124,7 +123,6 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
     this->SetError("Wrong syntax. Empty TARGET.");
     return false;
     }
-
   m_Makefile->AddCustomCommand(source.c_str(), 
                                command.c_str(), 
                                command_args, 

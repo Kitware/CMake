@@ -29,7 +29,6 @@ bool cmIncludeExternalMSProjectCommand::InitialPass(std::vector<std::string> con
   if(m_Makefile->GetDefinition("WIN32")) {
     
     std::string location = args[1];
-    m_Makefile->ExpandVariablesInString(location);
 
     std::vector<std::string> name_and_location;
     name_and_location.push_back(args[0]);

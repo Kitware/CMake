@@ -76,7 +76,6 @@ bool cmIfCommand::InitialPass(std::vector<std::string> const& args)
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-
   // create a function blocker
   cmIfFunctionBlocker *f = NULL;
 
@@ -112,9 +111,7 @@ bool cmIfCommand::InitialPass(std::vector<std::string> const& args)
 
   if (args.size() == 2 && (args[0] == "EXISTS"))
     {
-    std::string tmp = args[1];
-    m_Makefile->ExpandVariablesInString(tmp);
-    if(!cmSystemTools::FileExists(tmp.c_str()))
+    if(!cmSystemTools::FileExists(args[1].c_str()))
       {
       f = new cmIfFunctionBlocker();
       }

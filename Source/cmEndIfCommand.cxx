@@ -24,7 +24,6 @@ bool cmEndIfCommand::InitialPass(std::vector<std::string> const& args)
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-
   // remove any function blockers for this define
   m_Makefile->RemoveFunctionBlocker("ENDIF",args);
   

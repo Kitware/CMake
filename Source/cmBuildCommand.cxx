@@ -33,7 +33,6 @@ bool cmBuildCommand::InitialPass(std::vector<std::string> const& args)
     }
   std::string makecommand;
   std::string makeprogram = args[1];
-  m_Makefile->ExpandVariablesInString(makeprogram);
   if(makeprogram.find("msdev") != std::string::npos ||
      makeprogram.find("MSDEV") != std::string::npos )
     {

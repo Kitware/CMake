@@ -24,12 +24,10 @@ bool cmSubdirCommand::InitialPass(std::vector<std::string> const& args)
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  std::string temp;
   for(std::vector<std::string>::const_iterator i = args.begin();
       i != args.end(); ++i)
     {
-    temp = *i;
-    m_Makefile->AddSubDirectory(m_Makefile->ExpandVariablesInString(temp));
+    m_Makefile->AddSubDirectory(i->c_str());
     }
   return true;
 }

@@ -68,7 +68,6 @@ bool cmFindPathCommand::InitialPass(std::vector<std::string> const& argsIn)
     {
     // expand variables
     std::string exp = args[j];
-    m_Makefile->ExpandVariablesInString(exp);
     cmSystemTools::ExpandRegistryValues(exp);      
 
     // Glob the entry in case of wildcards.

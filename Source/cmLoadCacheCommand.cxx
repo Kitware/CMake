@@ -18,13 +18,12 @@
 
 
 // cmLoadcacheCommand
-bool cmLoadCacheCommand::InitialPass(std::vector<std::string> const& argsIn)
+bool cmLoadCacheCommand::InitialPass(std::vector<std::string> const& args)
 {
-  if (argsIn.size()< 1)
+  if (args.size()< 1)
     {
     this->SetError("called with wrong number of arguments.");
     }
-  std::vector<std::string> args = argsIn;
   
   // Cache entries to be excluded from the import list.
   // If this set is empty, all cache entries are brought in
@@ -37,7 +36,6 @@ bool cmLoadCacheCommand::InitialPass(std::vector<std::string> const& argsIn)
     {
     if (excludeFiles)
       {
-      m_Makefile->ExpandVariablesInString(args[i]);
       excludes.insert(args[i]);
       }
     if (args[i] == "EXCLUDE")
@@ -60,7 +58,6 @@ bool cmLoadCacheCommand::InitialPass(std::vector<std::string> const& argsIn)
     {
     if (includeFiles)
       {
-      m_Makefile->ExpandVariablesInString(args[i]);
       includes.insert(args[i]);
       }
     if (args[i] == "INCLUDE_INTERNALS")
@@ -81,7 +78,6 @@ bool cmLoadCacheCommand::InitialPass(std::vector<std::string> const& argsIn)
       {
       break;
       }
-    m_Makefile->ExpandVariablesInString(args[i]);
     cmCacheManager::GetInstance()->LoadCache(args[i].c_str(), false,
 					     excludes, includes);
     }

@@ -55,11 +55,8 @@ void cmInstallProgramsCommand::FinalPass()
     for (std::vector<std::string>::iterator s = m_FinalArgs.begin();
          s != m_FinalArgs.end(); ++s)
       {
-      // replace any variables
-      std::string temps = *s;
-      m_Makefile->ExpandVariablesInString(temps);
       // add to the result
-      targetSourceLists.push_back(temps);
+      targetSourceLists.push_back(*s);
       }
     }
   else     // reg exp list

@@ -1040,7 +1040,6 @@ bool cmSystemTools::RunCommand(const char* command,
 
   retVal = pclose(cpipe);
   retVal = WEXITSTATUS(retVal);
-  std::cout << "*** cmSystemTools: return value from " << command << " is "<< retVal << "\n";
   return true;
 #endif
 }

@@ -18,15 +18,13 @@
 
 
 // cmIncludeCommand
-bool cmIncludeCommand::InitialPass(std::vector<std::string> const& argsIn)
+bool cmIncludeCommand::InitialPass(std::vector<std::string> const& args)
 {
-  if (argsIn.size()< 1 || argsIn.size() > 2)
+  if (args.size()< 1 || args.size() > 2)
     {
       this->SetError("called with wrong number of arguments.  "
                      "Include only takes one file.");
     }
-  std::vector<std::string> args = argsIn;
-  m_Makefile->ExpandVariablesInString( args[0]);
   bool exists = cmSystemTools::FileExists(args[0].c_str());
   if(args.size() == 2 && args[1] == "OPTIONAL" && !exists)
     {

@@ -18,19 +18,16 @@
 #include "cmSystemTools.h"
 
 // cmUseMangledMesaCommand
-bool cmUseMangledMesaCommand::InitialPass(std::vector<std::string> const& argsIn)
+bool cmUseMangledMesaCommand::InitialPass(std::vector<std::string> const& args)
 { 
   // expected two arguments:
   // arguement one: the full path to gl_mangle.h
   // arguement two : directory for output of edited headers
-  if(argsIn.size() < 2)
+  if(args.size() < 2)
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  std::vector<std::string>  args = argsIn;
-  m_Makefile->ExpandVariablesInString(args[0]);
-  m_Makefile->ExpandVariablesInString(args[1]);
   const char* inputDir = args[0].c_str();
   const char* destDir = args[1].c_str();
   std::vector<std::string> files;

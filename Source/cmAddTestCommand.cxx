@@ -38,9 +38,7 @@ bool cmAddTestCommand::InitialPass(std::vector<std::string> const& args)
   for (std::vector<std::string>::const_iterator j = args.begin(); 
        j != args.end(); ++j)
     {
-    temp = *j;
-    m_Makefile->ExpandVariablesInString(temp);
-    m_Args.push_back(temp);
+    m_Args.push_back(*j);
     }
   
   return true;

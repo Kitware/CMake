@@ -33,7 +33,6 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args)
   std::vector<std::string>::const_iterator s = args.begin();
 
   std::string libname = *s;
-  m_Makefile->ExpandVariablesInString(libname);
 
   ++s;
   
@@ -43,7 +42,6 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args)
   if(s != args.end())
     {
     std::string libType = *s;
-    m_Makefile->ExpandVariablesInString(libType);
     if(libType == "STATIC")
       {
       ++s;
@@ -64,9 +62,7 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args)
   std::vector<std::string> srclists;
   while (s != args.end()) 
     {
-    std::string copy = *s;
-    m_Makefile->ExpandVariablesInString(copy);
-    srclists.push_back(copy);  
+    srclists.push_back(*s);  
     ++s;
     }
 

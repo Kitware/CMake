@@ -35,7 +35,6 @@ bool cmOptionCommand::InitialPass(std::vector<std::string> const& args)
     if(args.size() == 3)
       {
       initialValue = args[2];
-      m_Makefile->ExpandVariablesInString(initialValue);
       }
     m_Makefile->AddCacheDefinition(args[0].c_str(),
                                    cmSystemTools::IsOn(initialValue.c_str()),

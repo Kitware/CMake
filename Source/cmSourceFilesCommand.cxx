@@ -26,7 +26,6 @@ bool cmSourceFilesCommand::InitialPass(std::vector<std::string> const& args)
     }
   
   std::string name = args[0];
-  m_Makefile->ExpandVariablesInString(name);
   
   int generated = 0;
 
@@ -42,7 +41,6 @@ bool cmSourceFilesCommand::InitialPass(std::vector<std::string> const& args)
       continue;
       }
     cmSourceFile file;
-    m_Makefile->ExpandVariablesInString(copy);
     file.SetIsAnAbstractClass(false);
     std::string path = cmSystemTools::GetFilenamePath(copy);
     if ( generated )
