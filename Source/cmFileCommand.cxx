@@ -18,6 +18,9 @@
 
 #include "cmGlob.h"
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
 // cmLibraryCommand
 bool cmFileCommand::InitialPass(std::vector<std::string> const& args)
 {
@@ -51,10 +54,14 @@ bool cmFileCommand::InitialPass(std::vector<std::string> const& args)
     {
     return this->HandleMakeDirectoryCommand(args);
     }
+  else if ( subCommand == "INSTALL" )
+    {
+    return this->HandleInstallCommand(args);
+    }
 
   std::string e = "does not recognize sub-command "+subCommand;
   this->SetError(e.c_str());
-  return true;
+  return false;
 }
 
 //----------------------------------------------------------------------------
@@ -216,5 +223,135 @@ bool cmFileCommand::HandleMakeDirectoryCommand(std::vector<std::string> const& a
       return false;
       }
     }
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmFileCommand::HandleInstallCommand(std::vector<std::string> const& args)
+{
+  if ( args.size() < 6 )
+    {
+    this->SetError("called with incorrect number of arguments");
+    return false;
+    }
+
+  std::string destination = "";
+  std::string stype = "FILES";
+  std::vector<std::string> files;
+  int itype = cmTarget::INSTALL_FILES;
+
+  std::vector<std::string>::size_type i;
+  i++; // Get rid of subcommand
+
+  std::string expr;
+  bool in_files = false;
+  for ( ; i != args.size(); ++i )
+    {
+    const std::string* cstr = &args[i];
+    if ( *cstr == "DESTINATION" && i < args.size()-1 )
+      {
+      i++;
+      destination = args[i];
+      in_files = false;
+      }
+    else if ( *cstr == "TYPE" && i < args.size()-1 )
+      {
+      i++;
+      stype = args[i];
+      in_files = false;
+      }
+    else if ( *cstr == "FILES" && !in_files)
+      {
+      in_files = true;
+      }
+    else if ( in_files )
+      {
+      files.push_back(*cstr);
+      }
+    else
+      {
+      this->SetError("called with inappropriate arguments");
+      return false;
+      }
+    }
+
+  if ( destination.size() == 0 )
+    {
+    this->SetError("called with inapropriate arguments. No DESTINATION provided.");
+    return false;
+    }
+  if ( files.size() == 0 )
+    {
+    this->SetError("called with inapropriate arguments. No FILES provided.");
+    return false;
+    }
+  if ( stype == "EXECUTABLE" )
+    {
+    itype = cmTarget::EXECUTABLE;
+    }
+  else if ( stype == "STATIC_LIBRARY" ) 
+    {
+    itype = cmTarget::STATIC_LIBRARY;
+    }
+  else if ( stype == "SHARED_LIBRARY" )
+    {
+    itype = cmTarget::SHARED_LIBRARY;
+    }
+  else if ( stype == "MODULE" )
+    {
+    itype = cmTarget::MODULE_LIBRARY;
+    }
+
+  for ( i = 0; i < files.size(); i ++ )
+    {
+    std::cout << " " << files[i];
+    }
+  std::cout << std::endl;
+
+  if ( !cmSystemTools::FileExists(destination.c_str()) )
+    {
+    if ( !cmSystemTools::MakeDirectory(destination.c_str()) )
+      {
+      std::string errstring = "cannot create directory: " + destination +
+        ". Maybe need administrative privileges.";
+      this->SetError(errstring.c_str());
+      return false;
+      }
+    }
+  if ( !cmSystemTools::FileIsDirectory(destination.c_str()) )
+    {
+    std::string errstring = "found file: " + destination +
+      " where expecting directory with the same name.";
+    this->SetError(errstring.c_str());
+    return false;
+    }
+
+  for ( i = 0; i < files.size(); i ++ )
+    {
+    std::string destfile = destination + "/" + cmSystemTools::GetFilenameName(files[i]);
+
+    if ( !cmSystemTools::CopyFileAlways(files[i].c_str(), destination.c_str()) )
+      {
+      std::string errstring = "cannot copy file: " + files[i] + 
+        " to directory : " + destination + ".";
+      this->SetError(errstring.c_str());
+      return false;
+      }
+    switch( itype )
+      {
+    case cmTarget::MODULE_LIBRARY:
+    case cmTarget::SHARED_LIBRARY:
+    case cmTarget::EXECUTABLE:
+
+      if ( !cmSystemTools::SetPermissions(destfile.c_str(), 
+          S_IRUSR | S_IWUSR | S_IXUSR | 
+          S_IRGRP | S_IXGRP | 
+          S_IROTH | S_IXOTH ) )
+        {
+        perror("problem doing chmod.");
+        }
+      }
+    }
+
   return true;
 }
