@@ -312,7 +312,7 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
           }
         else
           {
-          srcFilesToProcess.push(dep);
+          srcFilesToProcess.push(outsf->GetCustomCommand()->GetDepends()[i]);
           }
         }
       }
