@@ -407,10 +407,8 @@ void cmCursesMainForm::HandleInput()
       // if not end of page, next field otherwise next page
       else if ( key == KEY_DOWN || key == ctrl('n') )
 	{
-	int x,y;
-	getmaxyx(m_Window, y, x);
 	FIELD* cur = current_field(m_Form);
-	int index = field_index(cur);
+	unsigned int index = field_index(cur);
 	if ( index == 3*m_Entries->size()-1 )
 	  {
 	  continue;
@@ -427,8 +425,6 @@ void cmCursesMainForm::HandleInput()
       // if not beginning of page, previous field, otherwise previous page
       else if ( key == KEY_UP || key == ctrl('p') )
 	{
-	int x,y;
-	getmaxyx(m_Window, y, x);
 	FIELD* cur = current_field(m_Form);
 	int index = field_index(cur);
 	if ( index == 2 )
@@ -470,7 +466,7 @@ void cmCursesMainForm::HandleInput()
       else if ( key == 'd' )
 	{
 	FIELD* cur = current_field(m_Form);
-	int index = field_index(cur);
+	unsigned int index = field_index(cur);
 
 	// make the next or prev. current field after deletion
 	FIELD* nextCur;
