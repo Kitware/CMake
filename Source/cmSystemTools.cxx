@@ -486,6 +486,13 @@ const char *cmSystemTools::ConvertToUnixSlashes(std::string& path)
     {
     path = path.substr(0, path.size()-1);
     }
+  // if there is a /tmp_mnt in a path get rid of it!
+  // stupid sgi's 
+  if(path.find("/tmp_mnt") == 0)
+    {
+    path = path.substr(8);
+    }
+  
   return path.c_str();
 }
 
