@@ -158,11 +158,16 @@ IF(UNIX)
   ENDIF(GTK_gtk_INCLUDE_PATH)
 
   MARK_AS_ADVANCED(
-    GTK_glib_LIBRARY
-    GTK_gtk_LIBRARY
-    GTK_glibconfig_INCLUDE_PATH
+    GTK_gdk_LIBRARY
     GTK_glib_INCLUDE_PATH
+    GTK_glib_LIBRARY
+    GTK_glibconfig_INCLUDE_PATH
+    GTK_gmodule_LIBRARY
+    GTK_gthread_LIBRARY
     GTK_gtk_INCLUDE_PATH
+    GTK_gtk_LIBRARY
+    GTK_gtkgl_INCLUDE_PATH
+    GTK_gtkgl_LIBRARY
   )
 
 ENDIF(UNIX)
