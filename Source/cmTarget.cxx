@@ -311,7 +311,7 @@ void cmTarget::GatherDependencies( const cmMakefile& mf,
     return;
 
   const char* deps = mf.GetDefinition( (lib+"_LIB_DEPENDS").c_str() );
-  if( deps )
+  if( deps && strcmp(deps,"") != 0 )
     {
     // Make sure this library is in the map, even if it has an empty
     // set of dependencies. This distinguishes the case of explicitly
