@@ -24,6 +24,7 @@ class cmTarget;
 class cmSourceFile;
 class cmCustomCommand;
 class cmSourceGroup;
+struct cmVS7FlagTable;
 
 /** \class cmLocalVisualStudio7Generator
  * \brief Write a LocalUnix makefiles.
@@ -67,6 +68,9 @@ public:
   void SetVersion8() {m_Version = 8;}
   virtual void ConfigureFinalPass();
 private:
+  void FillFlagMapFromCommandFlags(std::map<cmStdString, cmStdString>& flagMap,
+                                   cmVS7FlagTable* flagTable,
+                                   std::string& flags);
   void OutputVCProjFile();
   void WriteVCProjHeader(std::ostream& fout, const char *libName,
                          const cmTarget &tgt, std::vector<cmSourceGroup> &sgs);

@@ -194,11 +194,91 @@ void cmLocalVisualStudio7Generator::WriteConfigurations(std::ostream& fout,
   fout << "\t</Configurations>\n";
 }
 
+// This is a table mapping XML tag IDE names to command line options
+struct cmVS7FlagTable
+{
+  const char* IDEName;  // name used in the IDE xml file
+  const char* commandFlag; // command line flag
+  const char* comment;     // comment
+  const char* value; // string value
+};
+
+// fill the table here
+// currently the comment field is not used for anything other than documentation
+cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[] =
+{
+  {"Optimization", "Od", "Non Debug",        "0"},
+  {"Optimization", "O1", "Min Size",         "1"},
+  {"Optimization", "O2", "Max Speed",        "2"},
+  {"Optimization", "Ox", "Max Optimization", "3"},
+  {"BasicRuntimeChecks", "GZ", "Stack frame checks",     "1"},
+  {"BasicRuntimeChecks", "RTCs", "Stack frame checks",     "1"},
+  {"BasicRuntimeChecks", "RTCu", "Uninitialized Variables ",     "2"},
+  {"BasicRuntimeChecks", "RTC1", "Both stack and uninitialized checks ",     "3"},
+  {"BasicRuntimeChecks", "RTCsu", "Both stack and uninitialized checks ",     "3"},
+  {"StructMemberAlignment", "Zp1", "struct align 1 byte ",     "1"},
+  {"StructMemberAlignment", "Zp2", "struct align 2 byte ",     "2"},
+  {"StructMemberAlignment", "Zp4", "struct align 4 byte ",     "3"},
+  {"StructMemberAlignment", "Zp8", "struct align 8 byte ",     "4"},
+  {"StructMemberAlignment", "Zp16", "struct align 16 byte ",     "5"},
+  {"RuntimeLibrary", "MTd", "Multithreded debug",     "1"},
+  {"RuntimeLibrary", "MT", "Multithreded", "0"},
+  {"RuntimeLibrary", "MDd", "Multithreded dll debug", "3"},
+  {"RuntimeLibrary", "MD", "Multithreded dll",        "2"},
+  {"RuntimeLibrary", "MLd", "Sinble Thread debug",    "5"},
+  {"RuntimeLibrary", "ML", "Sinble Thread",           "4"},
+  {"InlineFunctionExpansion", "Ob0", "no inlines",              "0"},
+  {"InlineFunctionExpansion", "Ob1", "when inline keyword",     "1"},
+  {"InlineFunctionExpansion", "Ob2", "any time you can inline", "2"},
+  {"GlobalOptimizations", "Og", "Global Optimize", "TRUE"},
+  {"EnableIntrinsicFunctions", "Oi", "EnableIntrinsicFunctions", "TRUE"},
+  {"ExceptionHandling", "EHsc", "enable c++ exceptions", "TRUE"},
+  {"ExceptionHandling", "GX", "enable c++ exceptions", "TRUE"},
+  {"ImproveFloatingPointConsistency", "Op", "ImproveFloatingPointConsistency", "TRUE"},
+  {"FavorSizeOrSpeed",  "Ot", "Favor fast code",  "1"},
+  {"FavorSizeOrSpeed",  "Os", "Favor small code", "2"},
+  {"OmitFramePointers", "Oy", "OmitFramePointers", "TRUE"},
+  {"EnableFibreSafeOptimization", "GT", "OmitFramePointers", "TRUE"},
+  {"WarningLevel", "W1", "Warning level", "1"},
+  {"WarningLevel", "W2", "Warning level", "2"},
+  {"WarningLevel", "W3", "Warning level", "3"},
+  {"WarningLevel", "W4", "Warning level", "4"},
+  {"DebugInformationFormat", "Z7", "debug format", "1"},
+  {"DebugInformationFormat", "Zd", "debug format", "2"},
+  {"DebugInformationFormat", "Zi", "debug format", "3"},
+  {"DebugInformationFormat", "ZI", "debug format", "4"},
+  {"OptimizeForProcessor", "GB", "Blended processor mode", "0"},
+  {"OptimizeForProcessor", "G5", "Pentium",                "1"},
+  {"OptimizeForProcessor", "G6", "PPro PII PIII",          "2"},
+  {"OptimizeForProcessor", "G7", "Pentium 4 or Athlon",    "3"},
+  {"BufferSecurityCheck", "GS", "Buffer security check", "TRUE"},
+  {"OptimizeForWindowsApplication", "GA", "Optimize for windows", "TRUE"},
+  {"EnableEnhancedInstructionSet", "arch:sse", "Use sse instructions",   "1"},
+  {"EnableEnhancedInstructionSet", "arch:sse2", "Use sse2 instructions", "2"},
+  {"WarnAsError", "WX", "Treat warnings as errors", "TRUE"},
+  {"RuntimeTypeInfo", "GR", "Turn on Run time type information for c++", "TRUE"},
+  {0,0,0,0 }
+};
+
+  
+
+
+
+  
+
+  
 void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout, 
                                              const char* configName,
                                              const char *libName,
                                              const cmTarget &target)
 { 
+  // create a map of xml tags to the values they should have in the output
+  // for example, "BufferSecurityCheck" = "TRUE"
+  // first fill this table with the values for the configuration Debug, Release, etc,
+  // Then parse the command line flags specified in CMAKE_CXX_FLAGS and CMAKE_C_FLAGS
+  // and overwrite or add new values to this map
+  std::map<cmStdString, cmStdString> flagMap;
+
   const char* mfcFlag = m_Makefile->GetDefinition("CMAKE_MFC_FLAG");
   if(!mfcFlag)
     {
@@ -252,20 +332,6 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     flagsDebug += m_Makefile->GetDefinition("CMAKE_C_FLAGS_DEBUG");
     flagsDebugRel += m_Makefile->GetDefinition("CMAKE_C_FLAGS_RELWITHDEBINFO");
     }
-  
-// Optimization = 0  None Debug  /O0
-// Optimization = 1  MinSize     /O1
-// Optimization = 2  MaxSpeed    /O2
-// Optimization = 3  Max Optimization   /O3
-// RuntimeLibrary = 0 /MT   multithread
-// RuntimeLibrary = 1 /MTd  multithread debug
-// RuntimeLibrary = 2 /MD   multithread dll
-// RuntimeLibrary = 3 /MDd  multithread dll debug
-// RuntimeLibrary = 4 /ML   single thread
-// RuntimeLibrary = 5 /MLd  single thread debug
-// InlineFunctionExpansion = 0 none
-// InlineFunctionExpansion = 1 when inline keyword
-// InlineFunctionExpansion = 2 any time you can
 
 
   int runtime = 0;
@@ -279,15 +345,14 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     {
     debugPostfix = m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX");
     }  
-  // set the flags and defaults for
-  // runtime, optimized, and inlineFunctions , and
-  // default pre processor flags
+  // fill the flagMap for Debug, Release, MinSizeRel, and RelWithDebInfo
+  // also set the flags, and pre-defined macros
   if(strcmp(configName, "Debug") == 0)
     {
-    inlineFunctions = 0;
+    flagMap["InlineFunctionExpansion"] = "0";
+    flagMap["Optimization"] = "0";
+    flagMap["RuntimeLibrary"] = "3";
     flags += flagsDebug;
-    optimized = 0;
-    runtime = 3;
     pre = "WIN32,_DEBUG,_WINDOWS"; 
     std::string libpath = m_LibraryOutputPath + 
         "$(OutDir)/" + libName + debugPostfix + ".pdb";
@@ -297,25 +362,26 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     }
   else if (strcmp(configName, "Release") == 0)
     {
-    inlineFunctions = 1;
-    optimized =2;
+    flagMap["InlineFunctionExpansion"] = "1";
+    flagMap["Optimization"] = "2";
+    flagMap["RuntimeLibrary"] = "2";
+    flags += flagsRelease;
     pre = "WIN32,_WINDOWS";
     flags += flagsRelease;
-    runtime = 2;
     }
   else if(strcmp(configName, "MinSizeRel") == 0)
     {
-    inlineFunctions = 1;
-    runtime = 2;
-    optimized = 1;
+    flagMap["InlineFunctionExpansion"] = "1";
+    flagMap["Optimization"] = "1";
+    flagMap["RuntimeLibrary"] = "2";
     pre = "WIN32,_WINDOWS";
     flags += flagsMinSize;
     }
   else if(strcmp(configName, "RelWithDebInfo") == 0)
     {
-    inlineFunctions = 1;
-    optimized = 2;
-    runtime = 2;
+    flagMap["InlineFunctionExpansion"] = "1";
+    flagMap["Optimization"] = "2";
+    flagMap["RuntimeLibrary"] = "2"; 
     pre = "WIN32,_WINDOWS";
     flags += flagsDebugRel;
     std::string libpath = m_LibraryOutputPath + 
@@ -346,78 +412,14 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   fout << "\t\t\t<Tool\n"
        << "\t\t\t\tName=\"VCCLCompilerTool\"\n"
        << "\t\t\t\tAdditionalOptions=\"";
-
-  // check the flags for the run time library flag options
-  // if there is a match set the run time flag
-  if(flags.find("MTd") != flags.npos)
-    {
-    cmSystemTools::ReplaceString(flags, "-MTd", "");
-    cmSystemTools::ReplaceString(flags, "/MTd", "");
-    runtime = 1;
-    }
-  else if (flags.find("MDd") != flags.npos)
-    {
-    cmSystemTools::ReplaceString(flags, "-MDd", "");
-    cmSystemTools::ReplaceString(flags, "/MDd", "");
-    runtime = 3;
-    }
-  else if (flags.find("MLd") != flags.npos)
-    {
-    cmSystemTools::ReplaceString(flags, "-MLd", "");
-    cmSystemTools::ReplaceString(flags, "/MLd", "");
-    runtime = 5;
-    }
-  else if (flags.find("MT") != flags.npos)
-    {
-    cmSystemTools::ReplaceString(flags, "-MT", "");
-    cmSystemTools::ReplaceString(flags, "/MT", "");
-    runtime = 0;
-    }
-  else if (flags.find("MD") != flags.npos)
-    {
-    cmSystemTools::ReplaceString(flags, "-MD", "");
-    cmSystemTools::ReplaceString(flags, "/MD", "");
-    runtime = 2;
-    }
-  else if (flags.find("ML") != flags.npos)
-    {
-    cmSystemTools::ReplaceString(flags, "-ML", "");
-    cmSystemTools::ReplaceString(flags, "/ML", "");
-    runtime = 4;
-    }
-  int debugFormat = 0;
- 
-   // check the flags for the debug information format flag options
-  if(flags.find("Z7") != flags.npos)
-     {
-     cmSystemTools::ReplaceString(flags, "-Z7", "");
-     cmSystemTools::ReplaceString(flags, "/Z7", "");
-     debugFormat = 1;
-     }
-   else if (flags.find("Zd") != flags.npos)
-     {
-     cmSystemTools::ReplaceString(flags, "-Zd", "");
-     cmSystemTools::ReplaceString(flags, "/Zd", "");
-     debugFormat = 2;
-     }
-   else if (flags.find("Zi") != flags.npos)
-     {
-     cmSystemTools::ReplaceString(flags, "-Zi", "");
-     cmSystemTools::ReplaceString(flags, "/Zi", "");
-     debugFormat = 3;
-     }
-   else if (flags.find("ZI") != flags.npos)
-     {
-     cmSystemTools::ReplaceString(flags, "-ZI", "");
-     cmSystemTools::ReplaceString(flags, "/ZI", "");
-     debugFormat = 4;
-     }
-   
+  // now fill the flagMap from the command line flags, and
+  // if a flag is used, it will be removed from the flags string by
+  // this function call
+  this->FillFlagMapFromCommandFlags(flagMap, &cmLocalVisualStudio7GeneratorFlagTable[0], flags);
+  // output remaining flags that were not mapped to anything
   fout << this->EscapeForXML(flags.c_str()).c_str();
-
   fout << " -DCMAKE_INTDIR=\\&quot;" << configName << "\\&quot;" 
        << "\"\n";
-
   fout << "\t\t\t\tAdditionalIncludeDirectories=\"";
   std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();
   std::vector<std::string>::iterator i = includes.begin();
@@ -427,11 +429,23 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     fout << ipath << ";";
     }
   fout << "\"\n";
+  // set a few cmake specific flags
+  if(m_Makefile->IsOn("CMAKE_CXX_USE_RTTI"))
+    {
+    flagMap["RuntimeTypeInfo"] = "TRUE";
+    }
+  if ( m_Makefile->GetDefinition("CMAKE_CXX_WARNING_LEVEL") )
+    {
+    flagMap["WarningLevel"] = m_Makefile->GetDefinition("CMAKE_CXX_WARNING_LEVEL");
+    }
 
-  fout << "\t\t\t\tOptimization=\"" << optimized << "\"\n"
-       << "\t\t\t\tRuntimeLibrary=\"" << runtime << "\"\n"
-       << "\t\t\t\tInlineFunctionExpansion=\"" << inlineFunctions << "\"\n"
-       << "\t\t\t\tPreprocessorDefinitions=\"" << pre;
+  // Now copy the flag map into the xml for the file
+  for(std::map<cmStdString, cmStdString>::iterator m = flagMap.begin();
+      m != flagMap.end(); ++m)
+    {
+    fout << "\t\t\t\t" << m->first << "=\"" << m->second << "\"\n";
+    }
+  fout << "\t\t\t\tPreprocessorDefinitions=\"" << pre;
   if(target.GetType() == cmTarget::SHARED_LIBRARY
      || target.GetType() == cmTarget::MODULE_LIBRARY)
     {
@@ -450,16 +464,8 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     }
   this->OutputDefineFlags(fout);
   fout << "\"\n";
-  if(m_Makefile->IsOn("CMAKE_CXX_USE_RTTI"))
-    {
-    fout << "\t\t\t\tRuntimeTypeInfo=\"TRUE\"\n";
-    }
   fout << "\t\t\t\tAssemblerListingLocation=\"" << configName << "\"\n";
   fout << "\t\t\t\tObjectFile=\"" << configName << "\\\"\n";
-  if ( m_Makefile->GetDefinition("CMAKE_CXX_WARNING_LEVEL") )
-    {
-    fout << "\t\t\t\tWarningLevel=\"" << m_Makefile->GetDefinition("CMAKE_CXX_WARNING_LEVEL") << "\"\n";
-    }
   if(m_Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"))
     {
      fout << "\t\t\t\tSuppressStartupBanner=\"FALSE\"\n";
@@ -469,9 +475,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     {
     fout << programDatabase << "\n";
     }
-  fout << "\t\t\t\tDebugInformationFormat=\"" << debugFormat << "\"";   
   fout << "/>\n";  // end of <Tool Name=VCCLCompilerTool
-
   fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCCustomBuildTool\"/>\n";
   fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCResourceCompilerTool\"\n"
        << "\t\t\t\tAdditionalIncludeDirectories=\"";
@@ -489,6 +493,31 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   this->OutputBuildTool(fout, configName, libName, target);
   fout << "\t\t</Configuration>\n";
 }
+
+void cmLocalVisualStudio7Generator::FillFlagMapFromCommandFlags(
+  std::map<cmStdString, cmStdString>& flagMap,
+  cmVS7FlagTable* flagTable,
+  std::string& flags)
+{
+  std::string replace;
+  while(flagTable->IDEName)
+    {
+    if(flags.find(flagTable->commandFlag) != flags.npos)
+      {
+      // replace -flag
+      replace = "-";
+      replace += flagTable->commandFlag;
+      cmSystemTools::ReplaceString(flags, replace.c_str(), "");
+      // now replace /flag
+      replace[0] = '/';
+      cmSystemTools::ReplaceString(flags, replace.c_str(), "");
+      // now put value into flag map
+      flagMap[flagTable->IDEName] = flagTable->value;
+      }
+    flagTable++;
+    }
+}
+
 
 void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
                                           const char* configName,
