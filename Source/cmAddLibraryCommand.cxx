@@ -84,7 +84,14 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args)
       shared = 2;
       }
     }
-  std::vector<std::string> srclists(s, args.end());  
+
+  std::vector<std::string> srclists;
+  while (s != args.end()) 
+    {
+    std::string copy = *s;
+    m_Makefile->ExpandVariablesInString(copy);
+    srclists.push_back(copy);  
+    }
 
   m_Makefile->AddLibrary(libname.c_str(), shared, srclists);
   
