@@ -22,7 +22,6 @@
 
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/Directory.hxx>
-#include <cmsys/Process.h>
 
 // support for realpath call
 #ifndef _WIN32
@@ -302,116 +301,283 @@ bool cmSystemTools::RunCommand(const char* command,
                                    dir, verbose, timeout);
 }
 
+#if defined(WIN32) && !defined(__CYGWIN__)
+#include "cmWin32ProcessExecution.h"
+// use this for shell commands like echo and dir
+bool RunCommandViaWin32(const char* command,
+                        const char* dir,
+                        std::string& output,
+                        int& retVal,
+                        bool verbose,
+                        int timeout)
+{
+#if defined(__BORLANDC__)
+  return cmWin32ProcessExecution::BorlandRunCommand(command, dir, output, 
+                                                    retVal, 
+                                                    verbose, timeout, 
+                                                    cmSystemTools::GetRunCommandHideConsole());
+#else // Visual studio
+  ::SetLastError(ERROR_SUCCESS);
+  if ( ! command )
+    {
+    cmSystemTools::Error("No command specified");
+    return false;
+    }
+
+  cmWin32ProcessExecution resProc;
+  if(cmSystemTools::GetRunCommandHideConsole())
+    {
+    resProc.SetHideWindows(true);
+    }
+  
+  if ( cmSystemTools::GetWindows9xComspecSubstitute() )
+    {
+    resProc.SetConsoleSpawn(cmSystemTools::GetWindows9xComspecSubstitute() );
+    }
+  if ( !resProc.StartProcess(command, dir, verbose) )
+    {
+    return false;
+    }
+  resProc.Wait(timeout);
+  output = resProc.GetOutput();
+  retVal = resProc.GetExitValue();
+  return true;
+#endif
+}
+
+// use this for shell commands like echo and dir
+bool RunCommandViaSystem(const char* command,
+                         const char* dir,
+                         std::string& output,
+                         int& retVal,
+                         bool verbose)
+{  
+  std::cout << "@@ " << command << std::endl;
+
+  std::string commandInDir;
+  if(dir)
+    {
+    commandInDir = "cd ";
+    commandInDir += cmSystemTools::ConvertToOutputPath(dir);
+    commandInDir += " && ";
+    commandInDir += command;
+    }
+  else
+    {
+    commandInDir = command;
+    }
+  command = commandInDir.c_str();
+  std::string commandToFile = command;
+  commandToFile += " > ";
+  std::string tempFile;
+  tempFile += _tempnam(0, "cmake");
+
+  commandToFile += tempFile;
+  retVal = system(commandToFile.c_str());
+  std::ifstream fin(tempFile.c_str());
+  if(!fin)
+    {
+    if(verbose)
+      {
+      std::string errormsg = "RunCommand produced no output: command: \"";
+      errormsg += command;
+      errormsg += "\"";
+      errormsg += "\nOutput file: ";
+      errormsg += tempFile;
+      cmSystemTools::Error(errormsg.c_str());
+      }
+    fin.close();
+    cmSystemTools::RemoveFile(tempFile.c_str());
+    return false;
+    }
+  bool multiLine = false;
+  std::string line;
+  while(cmSystemTools::GetLineFromStream(fin, line))
+    {
+    output += line;
+    if(multiLine)
+      {
+      output += "\n";
+      }
+    multiLine = true;
+    }
+  fin.close();
+  cmSystemTools::RemoveFile(tempFile.c_str());
+  return true;
+}
+
+#else // We have popen
+
+bool RunCommandViaPopen(const char* command,
+                        const char* dir,
+                        std::string& output,
+                        int& retVal,
+                        bool verbose,
+                        int /*timeout*/)
+{
+  // if only popen worked on windows.....
+  std::string commandInDir;
+  if(dir)
+    {
+    commandInDir = "cd \"";
+    commandInDir += dir;
+    commandInDir += "\" && ";
+    commandInDir += command;
+    }
+  else
+    {
+    commandInDir = command;
+    }
+  commandInDir += " 2>&1";
+  command = commandInDir.c_str();
+  const int BUFFER_SIZE = 4096;
+  char buffer[BUFFER_SIZE];
+  if(verbose)
+    {
+    std::cout << "running " << command << std::endl;
+    }
+  fflush(stdout);
+  fflush(stderr);
+  FILE* cpipe = popen(command, "r");
+  if(!cpipe)
+    {
+    return false;
+    }
+  fgets(buffer, BUFFER_SIZE, cpipe);
+  while(!feof(cpipe))
+    {
+    if(verbose)
+      {
+      std::cout << buffer << std::flush;
+      }
+    output += buffer;
+    fgets(buffer, BUFFER_SIZE, cpipe);
+    }
+
+  retVal = pclose(cpipe);
+  if (WIFEXITED(retVal))
+    {
+    retVal = WEXITSTATUS(retVal);
+    return true;
+    }
+  if (WIFSIGNALED(retVal))
+    {
+    retVal = WTERMSIG(retVal);
+    cmOStringStream error;
+    error << "\nProcess terminated due to ";
+    switch (retVal)
+      {
+#ifdef SIGKILL
+      case SIGKILL:
+        error << "SIGKILL";
+        break;
+#endif
+#ifdef SIGFPE
+      case SIGFPE:
+        error << "SIGFPE";
+        break;
+#endif
+#ifdef SIGBUS
+      case SIGBUS:
+        error << "SIGBUS";
+        break;
+#endif
+#ifdef SIGSEGV
+      case SIGSEGV:
+        error << "SIGSEGV";
+        break;
+#endif
+      default:
+        error << "signal " << retVal;
+        break;
+      }
+    output += error.str();
+    }
+  return false;
+}
+
+#endif  // endif WIN32 not CYGWIN
+
+
+// run a command unix uses popen (easy)
+// windows uses system and ShortPath
 bool cmSystemTools::RunCommand(const char* command, 
                                std::string& output,
                                int &retVal, 
                                const char* dir,
                                bool verbose,
-                               int)
+                               int timeout)
 {
   if(s_DisableRunCommandOutput)
     {
     verbose = false;
     }
   
-  std::vector<std::string> args;
-  std::string arg;
-  
-  // Split the command into an argv array.
-  for(const char* c = command; *c;)
+#if defined(WIN32) && !defined(__CYGWIN__)
+  // if the command does not start with a quote, then
+  // try to find the program, and if the program can not be
+  // found use system to run the command as it must be a built in
+  // shell command like echo or dir
+  int count = 0;
+  if(command[0] == '\"')
     {
-    // Skip over whitespace.
-    while(*c == ' ' || *c == '\t')
+    // count the number of quotes
+    for(const char* s = command; *s != 0; ++s)
       {
-      ++c;
-      }
-    arg = "";
-    if(*c == '"')
-      {
-      // Parse a quoted argument.
-      ++c;
-      while(*c && *c != '"')
+      if(*s == '\"')
         {
-        if(*c == '\\')
+        count++;
+        if(count > 2)
           {
-          ++c;
-          if(*c)
-            {
-            arg.append(1, *c);
-            ++c;
-            }
+          break;
           }
-        else
+        }      
+      }
+    // if there are more than two double quotes use 
+    // GetShortPathName, the cmd.exe program in windows which
+    // is used by system fails to execute if there are more than
+    // one set of quotes in the arguments
+    if(count > 2)
+      {
+      cmsys::RegularExpression quoted("^\"([^\"]*)\"[ \t](.*)");
+      if(quoted.find(command))
+        {
+        std::string shortCmd;
+        std::string cmd = quoted.match(1);
+        std::string args = quoted.match(2);
+        if(! cmSystemTools::FileExists(cmd.c_str()) )
           {
-          arg.append(1, *c);
-          ++c;
+          shortCmd = cmd;
           }
+        else if(!cmSystemTools::GetShortPath(cmd.c_str(), shortCmd))
+          {
+         cmSystemTools::Error("GetShortPath failed for " , cmd.c_str());
+          return false;
+          }
+        shortCmd += " ";
+        shortCmd += args;
+
+        //return RunCommandViaSystem(shortCmd.c_str(), dir, 
+        //                           output, retVal, verbose);
+        //return WindowsRunCommand(shortCmd.c_str(), dir, 
+        //output, retVal, verbose);
+        return RunCommandViaWin32(shortCmd.c_str(), dir, 
+                                  output, retVal, verbose, timeout);
         }
-      if(*c)
+      else
         {
-        ++c;
+        cmSystemTools::Error("Could not parse command line with quotes ", 
+                             command);
         }
-      args.push_back(arg);
-      }
-    else if(*c)
-      {
-      // Parse an unquoted argument.
-      while(*c && *c != ' ' && *c != '\t')
-        {
-        arg.append(1, *c);
-        ++c;
-        }
-      args.push_back(arg);
       }
     }
-  
-  std::vector<const char*> argv;
-  for(std::vector<std::string>::const_iterator a = args.begin();
-      a != args.end(); ++a)
-    {
-    argv.push_back(a->c_str());
-    }
-  argv.push_back(0);
-  
-  if(argv.size() < 2)
-    {
-    return false;
-    }
-  
-  output = "";
-  cmsysProcess* cp = cmsysProcess_New();
-  cmsysProcess_SetCommand(cp, &*argv.begin());
-  cmsysProcess_SetWorkingDirectory(cp, dir);
-  cmsysProcess_Execute(cp);
-  
-  char* data;
-  int length;
-  while(cmsysProcess_WaitForData(cp, (cmsysProcess_Pipe_STDOUT |
-                                      cmsysProcess_Pipe_STDERR),
-                                 &data, &length, 0))
-    {
-    output.append(data, length);
-    if(verbose)
-      {
-      std::cout.write(data, length);
-      }
-    }
-  
-  cmsysProcess_WaitForExit(cp, 0);
-  
-  bool result = true;
-  if(cmsysProcess_GetState(cp) == cmsysProcess_State_Exited)
-    {
-    retVal = cmsysProcess_GetExitValue(cp);
-    }
-  else
-    {
-    result = false;
-    }
-  
-  cmsysProcess_Delete(cp);
-  
-  return result;
+  // if there is only one set of quotes or no quotes then just run the command
+  //return RunCommandViaSystem(command, dir, output, retVal, verbose);
+  //return WindowsRunCommand(command, dir, output, retVal, verbose);
+  return ::RunCommandViaWin32(command, dir, output, retVal, verbose, timeout);
+#else
+  return ::RunCommandViaPopen(command, dir, output, retVal, verbose, timeout);
+#endif
 }
 
 bool cmSystemTools::DoesFileExistWithExtensions(
