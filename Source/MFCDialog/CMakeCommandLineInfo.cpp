@@ -54,33 +54,38 @@ void CMakeCommandLineInfo::ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast)
     {
     CString sParam(lpszParam);
     // Single letter valued flag like /B=value or /B:value
+    CString value;
     if (sParam[1] == '=' || sParam[1] == ':')
       {
-      CString value(sParam.Right(sParam.GetLength() - 2));
-      int res;
-      switch (sParam[0])
-        {
-        case 'A':
-          res = CMakeCommandLineInfo::GetBoolValue(value);
-          if (res == 1)
-            {
-            m_AdvancedValues = TRUE;
-            }
-          else if (res == -1)
-            {
-            m_AdvancedValues = FALSE;
-            }
-          break;
-        case 'B':
-          m_WhereBuild = value;
-          break;
-        case 'G':
-          m_GeneratorChoiceString = value;
-          break;
-        case 'H':
-          m_WhereSource = value;
-          break;
-        }
+      value = sParam.Right(sParam.GetLength() - 2);
+      }
+    else
+      {
+      value = sParam.Right(sParam.GetLength()-1);
+      }
+    int res;
+    switch (sParam[0])
+      {
+      case 'A':
+        res = CMakeCommandLineInfo::GetBoolValue(value);
+        if (res == 1)
+          {
+          m_AdvancedValues = TRUE;
+          }
+        else if (res == -1)
+          {
+          m_AdvancedValues = FALSE;
+          }
+        break;
+      case 'B':
+        m_WhereBuild = value;
+        break;
+      case 'G':
+        m_GeneratorChoiceString = value;
+        break;
+      case 'H':
+        m_WhereSource = value;
+        break;
       }
     }
 
