@@ -2007,7 +2007,7 @@ echo $ECHO_N "checking ansi standard C++ stream headers ... $ECHO_C" >&6
   cat > conftest.cc <<!
 #include <iostream>
 !
-  if test -z "`${CXX} $CXXFLAGS $CPPFLAGS  -c conftest.cc 2>&1`"; then
+  if test -z "`${CXX} $CMAKE_TEMPLATE_FLAGS $CXXFLAGS $CPPFLAGS  -c conftest.cc 2>&1`"; then
     echo "$ac_t""yes" 1>&6
   else
     cat >>confdefs.h <<\EOF
@@ -2027,7 +2027,7 @@ echo $ECHO_N "checking ansi standard namespace support ... $ECHO_C" >&6
 #include <list>
 void foo() { std::list<int> l; }
 !
-  if test -z "`${CXX} $CXXFLAGS $CPPFLAGS -c conftest.cc 2>&1`"; then
+  if test -z "`${CXX} $CMAKE_TEMPLATE_FLAGS $CXXFLAGS $CPPFLAGS -c conftest.cc 2>&1`"; then
     echo "$ac_t""yes" 1>&6
   else
     cat >>confdefs.h <<\EOF
@@ -2046,7 +2046,7 @@ echo $ECHO_N "checking ansi for scope support ... $ECHO_C" >&6
   cat > conftest.cc <<!
 void foo() { for(int i;;); for(int i;;); }
 !
-  if test -z "`${CXX} $CXXFLAGS $CPPFLAGS -c conftest.cc 2>&1`"; then
+  if test -z "`${CXX} $CMAKE_TEMPLATE_FLAGS $CXXFLAGS $CPPFLAGS -c conftest.cc 2>&1`"; then
     echo "$ac_t""yes" 1>&6
   else
     cat >>confdefs.h <<\EOF
