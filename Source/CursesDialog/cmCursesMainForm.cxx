@@ -651,6 +651,7 @@ int cmCursesMainForm::Configure(int noconfigure)
   if ( noconfigure )
     {
     retVal = this->m_CMakeInstance->DoPreConfigureChecks();
+    m_OkToGenerate = false;
     if ( retVal > 0 )
       {
       retVal = 0;
