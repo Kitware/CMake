@@ -2598,7 +2598,7 @@ cmLocalUnixMakefileGenerator2
   else if(cmSystemTools::FileIsFullPath(name))
     {
     // This is a path to a file.  Just trust that it will be present.
-    depends.push_back(name);
+    depends.push_back(cmSystemTools::CollapseFullPath(name));
     }
 }
 
