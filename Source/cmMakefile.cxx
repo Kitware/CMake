@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmCommands.h"
 #include "cmCacheManager.h"
 #include "cmFunctionBlocker.h"
+#include "stdio.h"
 
 // default is not to be building executables
 cmMakefile::cmMakefile()
@@ -65,6 +66,29 @@ cmMakefile::cmMakefile()
   this->AddDefaultDefinitions();
   cmCacheManager::GetInstance()->DefineCache(this);
 }
+
+unsigned int cmMakefile::GetCacheMajorVersion()
+{
+  if(!cmCacheManager::GetInstance()->
+     GetCacheValue("CMAKE_CACHE_MAJOR_VERSION"))
+    {
+    return 0;
+    }
+  return atoi(cmCacheManager::GetInstance()->
+              GetCacheValue("CMAKE_CACHE_MAJOR_VERSION"));
+}
+
+unsigned int cmMakefile::GetCacheMinorVersion()
+{
+  if(!cmCacheManager::GetInstance()->
+     GetCacheValue("Cmake_Cache_MINOR_VERSION"))
+    {
+    return 0;
+    }
+  return atoi(cmCacheManager::GetInstance()->
+              GetCacheValue("CMAKE_CACHE_MINOR_VERSION"));
+}
+
 
 void cmMakefile::AddDefaultCommands()
 {
@@ -171,11 +195,8 @@ void cmMakefile::Print() const
     m_cmHomeDirectory.c_str() << std::endl;
   std::cout << " m_ProjectName;	" <<  m_ProjectName.c_str() << std::endl;
   this->PrintStringVector("m_SubDirectories ", m_SubDirectories); 
-  this->PrintStringVector("m_MakeVerbatim ", m_MakeVerbatim); 
   this->PrintStringVector("m_IncludeDirectories;", m_IncludeDirectories);
   this->PrintStringVector("m_LinkDirectories", m_LinkDirectories);
-  this->PrintStringVector("m_Utilities", m_Utilities);
-  this->PrintStringVector("m_UtilityDirectories", m_UtilityDirectories);
   for( std::vector<cmSourceGroup>::const_iterator i = m_SourceGroups.begin();
        i != m_SourceGroups.end(); ++i)
     {
@@ -393,6 +414,7 @@ void cmMakefile::AddSource(cmSourceFile& cmfile, const char *srclist)
 
 void cmMakefile::AddCustomCommand(const char* source,
                                   const char* command,
+                                  const char* commandArgs,
                                   const std::vector<std::string>& depends,
                                   const std::vector<std::string>& outputs,
                                   const char *target) 
@@ -400,20 +422,31 @@ void cmMakefile::AddCustomCommand(const char* source,
   // find the target, 
   if (m_Targets.find(target) != m_Targets.end())
     {
-    cmCustomCommand cc(source,command,depends,outputs);
+    std::string c = cmSystemTools::EscapeSpaces(command);
+    c += " ";
+    c += commandArgs;
+    cmCustomCommand cc(source,c.c_str(),depends,outputs);
     m_Targets[target].GetCustomCommands().push_back(cc);
+    std::string cacheCommand = command;
+    this->ExpandVariablesInString(cacheCommand);
+    if(cmCacheManager::GetInstance()->GetCacheValue(cacheCommand.c_str()))
+      {
+      m_Targets[target].AddUtility(
+        cmCacheManager::GetInstance()->GetCacheValue(cacheCommand.c_str()));
+      }
     }
 }
 
 void cmMakefile::AddCustomCommand(const char* source,
                                   const char* command,
+                                  const char* commandArgs,
                                   const std::vector<std::string>& depends,
                                   const char* output, 
                                   const char *target) 
 {
   std::vector<std::string> outputs;
   outputs.push_back(output);
-  this->AddCustomCommand(source, command, depends, outputs, target);
+  this->AddCustomCommand(source, command, commandArgs, depends, outputs, target);
 }
 
 void cmMakefile::AddDefineFlag(const char* flag)
@@ -422,15 +455,6 @@ void cmMakefile::AddDefineFlag(const char* flag)
   m_DefineFlags += flag;
 }
 
-void cmMakefile::AddUtility(const char* util)
-{
-  m_Utilities.push_back(util);
-}
-
-void cmMakefile::AddUtilityDirectory(const char* dir)
-{
-  m_UtilityDirectories.push_back(dir);
-}
 
 void cmMakefile::AddLinkLibrary(const char* lib, cmTarget::LinkLibraryType llt)
 {
@@ -796,10 +820,15 @@ cmMakefile::FindSubDirectoryCMakeListsFiles(std::vector<cmMakefile*>&
 void cmMakefile::AddDefaultDefinitions()
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  this->AddDefinition("CMAKE_CFG_OUTDIR","$(OUTDIR)");
+  this->AddDefinition("CMAKE_CFG_INTDIR","$(IntDir)");
 #else
-  this->AddDefinition("CMAKE_CFG_OUTDIR",".");
+  this->AddDefinition("CMAKE_CFG_INTDIR",".");
 #endif
+  char temp[1024];
+  sprintf(temp, "%d", cmMakefile::GetMinorVersion());
+  this->AddDefinition("CMAKE_MINOR_VERSION", temp);
+  sprintf(temp, "%d", cmMakefile::GetMajorVersion());
+  this->AddDefinition("CMAKE_MAJOR_VERSION", temp);
 }
 
 /**

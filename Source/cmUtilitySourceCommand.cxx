@@ -56,7 +56,10 @@ bool cmUtilitySourceCommand::InitialPass(std::vector<std::string>& args)
   const char* cacheValue =
     cmCacheManager::GetInstance()->GetCacheValue(cacheEntry.c_str());
   // If it exists already, we are done.
-  if(cacheValue)
+  // unless this is Major
+  if(cacheValue && 
+     (m_Makefile->GetCacheMajorVersion() != 0 
+      && m_Makefile->GetCacheMinorVersion() != 0 ))
     {
     // Set the makefile's definition with the cache value.
     m_Makefile->AddDefinition(cacheEntry.c_str(), cacheValue);
@@ -86,12 +89,21 @@ bool cmUtilitySourceCommand::InitialPass(std::vector<std::string>& args)
     }
   
   // The source exists.
-  std::string cmakeCFGout = m_Makefile->GetDefinition("CMAKE_CFG_OUTDIR");
+  std::string cmakeCFGout = m_Makefile->GetDefinition("CMAKE_CFG_INTDIR");
   std::string utilityDirectory = m_Makefile->GetCurrentOutputDirectory();
-  utilityDirectory += "/"+relativeSource;
-  
-  // Tell the makefile where to look for this utility.
-  m_Makefile->AddUtilityDirectory(utilityDirectory.c_str());
+  std::string exePath;
+  if (m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH"))
+    {
+    exePath = m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
+    }
+  if(exePath.size())
+    {
+    utilityDirectory = exePath;
+    }
+  else
+    {
+    utilityDirectory += "/"+relativeSource;
+    }
   
   // Construct the cache entry for the executable's location.
   std::string utilityExecutable =
@@ -103,6 +115,13 @@ bool cmUtilitySourceCommand::InitialPass(std::vector<std::string>& args)
                                                utilityExecutable.c_str(),
                                                "Path to an internal program.",
                                                cmCacheManager::FILEPATH);
+  // add a value into the cache that maps from the
+  // full path to the name of the project
+  cmSystemTools::ConvertToUnixSlashes(utilityExecutable);
+  cmCacheManager::GetInstance()->AddCacheEntry(utilityExecutable.c_str(),
+                                               utilityName.c_str(),
+                                               "Executable to project name.",
+                                               cmCacheManager::INTERNAL);
   
   // Set the definition in the makefile.
   m_Makefile->AddDefinition(cacheEntry.c_str(), utilityExecutable.c_str());

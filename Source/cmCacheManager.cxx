@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmCacheManager.h"
 #include "cmMakefile.h"
 #include "cmRegularExpression.h"
+#include "stdio.h"
 
 const char* cmCacheManagerTypes[] = 
 { "BOOL",
@@ -124,6 +125,8 @@ bool cmCacheManager::LoadCache(const char* path,
   char buffer[bsize];
   // input line is:         key:type=value
   cmRegularExpression reg("^([^:]*):([^=]*)=(.*)$");
+  // input line is:         "key":type=value
+  cmRegularExpression regQuoted("^\"([^\"]*)\":([^=]*)=(.*)$");
   while(fin)
     {
     // Format is key:type=value
@@ -143,7 +146,17 @@ bool cmCacheManager::LoadCache(const char* path,
         continue;
         }
       }
-    if(reg.find(buffer))
+    if(regQuoted.find(buffer))
+      {
+      e.m_Type = cmCacheManager::StringToType(regQuoted.match(2).c_str());
+      // only load internal values if internal is set
+      if (internal || e.m_Type != INTERNAL)
+	{
+	  e.m_Value = regQuoted.match(3);
+	  m_Cache[regQuoted.match(1)] = e;
+	}
+      }
+    else if (reg.find(buffer))
       {
       e.m_Type = cmCacheManager::StringToType(reg.match(2).c_str());
       // only load internal values if internal is set
@@ -157,6 +170,18 @@ bool cmCacheManager::LoadCache(const char* path,
       {
       cmSystemTools::Error("Parse error in cache file ", cacheFile.c_str());
       }
+    }
+  // if CMAKE version not found in the list file
+  // add them as version 0.0
+  if(!this->GetCacheValue("CMAKE_CACHE_MINOR_VERSION"))
+    {
+    this->AddCacheEntry("CMAKE_CACHE_MINOR_VERSION", "0",
+                        "Minor version of cmake used to create the "
+                        "current loaded cache", cmCacheManager::INTERNAL);
+    this->AddCacheEntry("CMAKE_CACHE_MAJOR_VERSION", "0",
+                        "Major version of cmake used to create the "
+                        "current loaded cache", cmCacheManager::INTERNAL);
+    
     }
   return true;
 }
@@ -177,13 +202,13 @@ void cmCacheManager::DefineCache(cmMakefile *mf)
     }
 }
 
-bool cmCacheManager::SaveCache(cmMakefile* mf) const
+bool cmCacheManager::SaveCache(cmMakefile* mf) 
 {
   return this->SaveCache(mf->GetHomeOutputDirectory());
 }
 
 
-bool cmCacheManager::SaveCache(const char* path) const
+bool cmCacheManager::SaveCache(const char* path) 
 {
   std::string cacheFile = path;
   cacheFile += "/CMakeCache.txt";
@@ -196,6 +221,17 @@ bool cmCacheManager::SaveCache(const char* path) const
                          cacheFile.c_str());
     return false;
     }
+  // before writting the cache, update the version numbers
+  // to the 
+  char temp[1024];
+  sprintf(temp, "%d", cmMakefile::GetMinorVersion());
+  this->AddCacheEntry("CMAKE_CACHE_MINOR_VERSION", temp,
+                      "Minor version of cmake used to create the "
+                      "current loaded cache", cmCacheManager::INTERNAL);
+  sprintf(temp, "%d", cmMakefile::GetMajorVersion());
+  this->AddCacheEntry("CMAKE_CACHE_MAJOR_VERSION", temp,
+                      "Major version of cmake used to create the "
+                      "current loaded cache", cmCacheManager::INTERNAL);
   fout << "# This is the CMakeCache file.\n"
        << "# For build in directory: " << path << "\n"
        << "# You can edit this file to change values found and used by cmake.\n"
@@ -221,7 +257,19 @@ bool cmCacheManager::SaveCache(const char* path) const
       {
       // Format is key:type=value
       cmCacheManager::OutputHelpString(fout, ce.m_HelpString);
-      fout << (*i).first.c_str() << ":"
+      std::string key;
+      // support : in key name by double quoting 
+      if((*i).first.find(':') != std::string::npos)
+        {
+        key = "\"";
+        key += i->first;
+        key += "\"";
+        }
+      else
+        {
+        key = i->first;
+        }
+      fout << key.c_str() << ":"
            << cmCacheManagerTypes[t] << "="
            << ce.m_Value << "\n\n";
       }
@@ -242,7 +290,19 @@ bool cmCacheManager::SaveCache(const char* path) const
       {
       // Format is key:type=value
       cmCacheManager::OutputHelpString(fout, ce.m_HelpString);
-      fout << (*i).first.c_str() << ":"
+      std::string key;
+      // support : in key name by double quoting 
+      if((*i).first.find(':') != std::string::npos)
+        {
+        key = "\"";
+        key += i->first;
+        key += "\"";
+        }
+      else
+        {
+        key = i->first;
+        }
+      fout << key.c_str() << ":"
            << cmCacheManagerTypes[t] << "="
            << ce.m_Value << "\n";
       }

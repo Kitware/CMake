@@ -56,10 +56,6 @@ bool cmVTKWrapJavaCommand::InitialPass(std::vector<std::string>& args)
     return true;
     }
 
-  // add in a depend in the vtkVTKWrapJava executable
-  m_Makefile->AddUtility("vtkWrapJava");
-  m_Makefile->AddUtility("vtkParseJava");
-  
   // what is the current source dir
   std::string cdir = m_Makefile->GetCurrentDirectory();
 
@@ -123,16 +119,16 @@ void cmVTKWrapJavaCommand::FinalPass()
     std::string res2 = resultDirectory + "/" + 
       m_OriginalNames[classNum] + ".java";
     
-    std::string cmd = wjava + " " + m_WrapHeaders[classNum] + " "
+    std::string cmd =  " " + m_WrapHeaders[classNum] + " "
       + hints + (m_WrapClasses[classNum].IsAnAbstractClass() ? " 0 " : " 1 ") + " > " + m_WrapClasses[classNum].GetSourceName() + ".cxx";
     m_Makefile->AddCustomCommand(m_WrapHeaders[classNum].c_str(),
-                                 cmd.c_str(), depends, 
+                                 wjava.c_str(), cmd.c_str(), depends, 
                                  res.c_str(), m_LibraryName.c_str());
 
-    cmd = pjava + " " + m_WrapHeaders[classNum] + " "
+    cmd =  " " + m_WrapHeaders[classNum] + " "
       + hints + (m_WrapClasses[classNum].IsAnAbstractClass() ? " 0 " : " 1 ") + " > " + res2;
     m_Makefile->AddCustomCommand(m_WrapHeaders[classNum].c_str(),
-                                 cmd.c_str(), depends2, 
+                                 pjava.c_str(), cmd.c_str(), depends2, 
                                  res2.c_str(), m_LibraryName.c_str());
     alldepends.push_back(res2);
     }

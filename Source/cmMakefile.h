@@ -62,9 +62,17 @@ class cmMakefile
 {
 public:
   /**
-   * Return a string version number for CMake 
+   * Return major and minor version numbers for cmake.
    */
-  static const char *GetVersion() {return "0.1";}
+  static unsigned int GetMajorVersion() { return 0;}
+  static unsigned int GetMinorVersion() { return 1;}
+  /**
+   * Return the major and minor version of the cmake that
+   * was used to write the currently loaded cache, note
+   * this method will not work before the cache is loaded.
+   */
+  static unsigned int GetCacheMajorVersion();
+  static unsigned int GetCacheMinorVersion();
   
   /**
    * Construct an empty makefile.
@@ -121,12 +129,14 @@ public:
    */
   void AddCustomCommand(const char* source,
                         const char* command,
+                        const char* commandArgs,
                         const std::vector<std::string>& depends,
                         const std::vector<std::string>& outputs,
                         const char *target);
 
   void AddCustomCommand(const char* source,
                         const char* command,
+                        const char* commandArgs,
                         const std::vector<std::string>& depends,
                         const char* output,
                         const char* target);
@@ -156,18 +166,6 @@ public:
                          bool all,
                          const std::vector<std::string> &depends,
                          const std::vector<std::string> &outputs);
-
-  /**
-   * Add a utility on which this project depends. A utility is an executable
-   * name as would be specified to the ADD_EXECUTABLE or UTILITY_SOURCE
-   * commands. It is not a full path nor does it have an extension.  
-   */
-  void AddUtility(const char*);
-
-  /**
-   * Add a directory in which a utility may be built.
-   */
-  void AddUtilityDirectory(const char*);
 
   /**
    * Get a list of link libraries in the build.
@@ -378,22 +376,6 @@ public:
     }
   
   /**
-   * Get a list of utilities on which the project depends.
-   */
-  std::vector<std::string>& GetUtilities()
-    { 
-    return m_Utilities;
-    }
-
-  /**
-   * Get a list of directories that may contain the Utilities.
-   */
-  std::vector<std::string>& GetUtilityDirectories()
-    { 
-    return m_UtilityDirectories;
-    }
-
-  /**
    * Return a list of source files in this makefile.
    */
   typedef std::map<std::string,std::vector<cmSourceFile> > SourceMap;
@@ -406,12 +388,6 @@ public:
    */
   std::vector<std::string>& GetAuxSourceDirectories()
     {return m_AuxSourceDirectories;}
-
-  /**
-   * Do not use this.
-   */
-  std::vector<std::string>& GetMakeVerbatim() 
-    {return m_MakeVerbatim;}
 
   /**
    * Given a variable name, return its value (as a string).
@@ -504,11 +480,8 @@ protected:
   SourceMap m_Sources; 
 
   std::vector<std::string> m_SubDirectories; // list of sub directories
-  std::vector<std::string> m_MakeVerbatim; // lines copied from input file
   std::vector<std::string> m_IncludeDirectories;
   std::vector<std::string> m_LinkDirectories;
-  std::vector<std::string> m_Utilities;
-  std::vector<std::string> m_UtilityDirectories;
   std::vector<std::string> m_ListFiles; // list of command files loaded
   
   

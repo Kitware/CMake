@@ -50,7 +50,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 void cmake::Usage(const char* program)
 {
-  std::cerr << "cmake version " << cmMakefile::GetVersion() << "\n";
+  std::cerr << "cmake version " << cmMakefile::GetMajorVersion()
+            << "." << cmMakefile::GetMinorVersion() << "\n";
   std::cerr << "Usage: " << program << " srcdir \n" 
             << "Where cmake is run from the directory where you want the object files written\n";
 }
@@ -237,6 +238,7 @@ int cmake::Generate(const std::vector<std::string>& args)
   
   if(cmSystemTools::GetErrorOccuredFlag())
     {
+    cmSystemTools::ResetErrorOccuredFlag();
     return -1;
     }
   return 0;

@@ -155,6 +155,12 @@ public:
     {
       return cmSystemTools::s_ErrorOccured;
     }
+
+  ///! Set the error occured flag back to false
+  static void ResetErrorOccuredFlag()
+    {
+      cmSystemTools::s_ErrorOccured = false;
+    }
   
   /**
    * Copy the source file to the destination file only

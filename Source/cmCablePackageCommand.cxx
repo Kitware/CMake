@@ -78,24 +78,27 @@ bool cmCablePackageCommand::InitialPass(std::vector<std::string>& args)
   cMakeLists += "CMakeLists.txt";
   cMakeLists = cmSystemTools::EscapeSpaces(cMakeLists.c_str());
 
-  std::string command = "${CMAKE_COMMAND} "+cMakeLists;
+  std::string command = "${CMAKE_COMMAND}";
+  std::string commandArgs = cMakeLists;
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  command += " -DSP";
+  commandArgs += " -DSP";
 #endif
-  command += " -H\"";
-  command += m_Makefile->GetHomeDirectory();
-  command += "\" -S\"";
-  command += m_Makefile->GetStartDirectory();
-  command += "\" -O\"";
-  command += m_Makefile->GetStartOutputDirectory();
-  command += "\" -B\"";
-  command += m_Makefile->GetHomeOutputDirectory();
-  command += "\"";
+  commandArgs += " -H\"";
+  commandArgs += m_Makefile->GetHomeDirectory();
+  commandArgs += "\" -S\"";
+  commandArgs += m_Makefile->GetStartDirectory();
+  commandArgs += "\" -O\"";
+  commandArgs += m_Makefile->GetStartOutputDirectory();
+  commandArgs += "\" -B\"";
+  commandArgs += m_Makefile->GetHomeOutputDirectory();
+  commandArgs += "\"";
+  m_Makefile->ExpandVariablesInString(commandArgs);
   m_Makefile->ExpandVariablesInString(command);
 
   std::vector<std::string> depends;
   m_Makefile->AddCustomCommand(cMakeLists.c_str(), 
                                command.c_str(),
+                               commandArgs.c_str(),
                                depends,
                                "cable_config.xml", args[1].c_str());
   }
@@ -112,9 +115,6 @@ bool cmCablePackageCommand::InitialPass(std::vector<std::string>& args)
   // this cmCablePackageCommand's WritePackageHeader().
   m_CableData->BeginPackage(this);
 
-  // Tell the makefile that it needs the "cable" utility.  
-  m_Makefile->AddUtility("cable");
-
   // Add custom rules to the makefile to generate this package's source
   // files.
   {
@@ -122,7 +122,7 @@ bool cmCablePackageCommand::InitialPass(std::vector<std::string>& args)
   m_Makefile->ExpandVariablesInString(command);
   std::vector<std::string> depends;
   depends.push_back(command);
-  command = "\""+command+"\" cable_config.xml";
+  std::string commandArgs = " cable_config.xml";
   
   std::vector<std::string> outputs;
   outputs.push_back("Cxx/"+m_PackageName+"_cxx.cxx");
@@ -131,6 +131,7 @@ bool cmCablePackageCommand::InitialPass(std::vector<std::string>& args)
   // A rule for the package's source files.
   m_Makefile->AddCustomCommand("cable_config.xml",
                                command.c_str(),
+                               commandArgs.c_str(),
                                depends,
                                outputs, m_TargetName.c_str());
   }
@@ -155,6 +156,7 @@ bool cmCablePackageCommand::InitialPass(std::vector<std::string>& args)
     // A rule for the package's source files.
     m_Makefile->AddCustomCommand(input.c_str(),
                                  command.c_str(),
+                                 "",
                                  depends,
                                  outputs, m_TargetName.c_str());
     }

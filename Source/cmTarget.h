@@ -119,6 +119,13 @@ public:
    */
   void GenerateSourceFilesFromSourceLists(const cmMakefile &mf);
 
+  /** Add a utility on which this project depends. A utility is an executable
+   * name as would be specified to the ADD_EXECUTABLE or UTILITY_SOURCE
+   * commands. It is not a full path nor does it have an extension.  
+   */
+  void AddUtility(const char* u) { m_Utilities.insert(u);}
+  ///! Get the utilities used by this target
+  std::set<std::string>const& GetUtilities() const { return m_Utilities; }
 private:
   std::vector<cmCustomCommand> m_CustomCommands;
   std::vector<std::string> m_SourceLists;
@@ -127,6 +134,7 @@ private:
   LinkLibraries m_LinkLibraries;
   bool m_InAll;
   std::string m_InstallPath;
+  std::set<std::string> m_Utilities;
 };
 
 typedef std::map<std::string,cmTarget> cmTargets;

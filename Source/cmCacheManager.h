@@ -84,9 +84,9 @@ public:
   void DefineCache(cmMakefile*); 
   
   //! Save cache for given makefile.  Saves to ouput home CMakeCache.txt.
-  bool SaveCache(cmMakefile*) const;
+  bool SaveCache(cmMakefile*) ;
   //! Save cache for given makefile.  Saves to ouput path/CMakeCache.txt
-  bool SaveCache(const char* path) const;
+  bool SaveCache(const char* path) ;
   
   //! Add an entry into the cache
   void AddCacheEntry(const char* key, const char* value, 

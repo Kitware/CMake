@@ -189,7 +189,7 @@ void cmDSWWriter::WriteProject(std::ostream& fout,
 				 const char* dspname,
 				 const char* dir,
                                  cmDSPWriter* project,
-                                 const cmTarget &l
+                                 const cmTarget& target
                                  )
 {
   fout << "#########################################################"
@@ -202,13 +202,13 @@ void cmDSWWriter::WriteProject(std::ostream& fout,
 
   // insert Begin Project Dependency  Project_Dep_Name project stuff here 
   cmTarget::LinkLibraries::const_iterator j, jend;
-  j = l.GetLinkLibraries().begin();
-  jend = l.GetLinkLibraries().end();
+  j = target.GetLinkLibraries().begin();
+  jend = target.GetLinkLibraries().end();
   for(;j!= jend; ++j)
     {
     if(j->first != dspname)
       {
-      if (!(l.GetType() == cmTarget::LIBRARY) || 
+      if (!(target.GetType() == cmTarget::LIBRARY) || 
           project->GetLibraryBuildType() == cmDSPWriter::DLL)
         {
         // is the library part of this DSW ? If so add dependency
@@ -224,10 +224,10 @@ void cmDSWWriter::WriteProject(std::ostream& fout,
       }
     }
 
-  std::vector<std::string>::iterator i, end;
+  std::set<std::string>::const_iterator i, end;
   // write utility dependencies.
-  i = project->GetMakefile()->GetUtilities().begin();
-  end = project->GetMakefile()->GetUtilities().end();
+  i = target.GetUtilities().begin();
+  end = target.GetUtilities().end();
   for(;i!= end; ++i)
     {
     if(*i != dspname)

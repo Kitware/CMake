@@ -79,7 +79,7 @@ void cmAddTestCommand::FinalPass()
   fname += "CMakeTestfile.txt";
   
   // Open the output Testfile
-  std::ofstream fout(fname.c_str(), std::ios_base::app);
+  std::ofstream fout(fname.c_str(), std::ios::app);
   if (!fout)
     {
     cmSystemTools::Error("Error Writing ", fname.c_str());

@@ -457,30 +457,6 @@ void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
            << "; make " << library.c_str() << "\n\n";
       }
     }
-
-  std::vector<std::string>& utils = m_Makefile->GetUtilities();
-  std::vector<std::string>& utildirs = m_Makefile->GetUtilityDirectories();
-  std::vector<std::string>::iterator dir, util;
-  // Search the list of utilities that may be used to generate code for
-  // this project.
-  for(util = utils.begin(); util != utils.end(); ++util)
-    {
-    bool found = false;
-    // loop over the list of directories that the utilities might
-    // be in, looking for an ADD_EXECUTABLE(util ...) line.
-    for(dir = utildirs.begin(); dir != utildirs.end() && !found; ++dir)
-      {
-      std::string expression = "TARGETS =.*";
-      expression += util->c_str();
-      if(cmSystemTools::Grep(dir->c_str(), "Makefile",
-                             expression.c_str()))
-        {
-        fout << *util << " ";
-        found = true;
-        }
-      }
-    }
-  fout << "\n";
 }
 
 

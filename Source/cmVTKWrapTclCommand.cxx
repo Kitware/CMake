@@ -93,9 +93,6 @@ bool cmVTKWrapTclCommand::InitialPass(std::vector<std::string>& args)
     // what is the current source dir
     std::string cdir = m_Makefile->GetCurrentDirectory();
 
-    // add in a depend in the vtkVTKWrapTcl executable
-    m_Makefile->AddUtility("vtkWrapTcl");
-
     // get the resulting source list name
     m_SourceList = sources[0];
 
@@ -157,10 +154,10 @@ void cmVTKWrapTclCommand::FinalPass()
     {
     m_Makefile->AddSource(m_WrapClasses[classNum],m_SourceList.c_str());
     std::string res = m_WrapClasses[classNum].GetSourceName() + ".cxx";
-    std::string cmd = wtcl + " " + m_WrapHeaders[classNum] + " "
+    std::string cmd = m_WrapHeaders[classNum] + " "
 		+ hints + (m_WrapClasses[classNum].IsAnAbstractClass() ? " 0 " : " 1 ") + " > " + m_WrapClasses[classNum].GetSourceName() + ".cxx";
     m_Makefile->AddCustomCommand(m_WrapHeaders[classNum].c_str(),
-                                 cmd.c_str(), depends, 
+                                 wtcl.c_str(), cmd.c_str(), depends, 
                                  res.c_str(), m_LibraryName.c_str());
     }
   
