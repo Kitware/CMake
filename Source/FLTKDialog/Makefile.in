@@ -22,6 +22,7 @@ CMakeSetupGUIImplementation.o \
 FLTKDialog.o \
 FLTKPropertyItemRow.o \
 FLTKPropertyList.o \
+FLTKPropertyNameButtonWithHelp.o \
 ../cmCableClassSet.o \
 ../cmCacheManager.o \
 ../cmCommands.o \
