@@ -90,9 +90,20 @@ bool cmDependsC::WriteDependencies(std::ostream& os)
       for(std::vector<std::string>::const_iterator i = m_IncludePath->begin();
           i != m_IncludePath->end(); ++i)
         {
+        // Construct the name of the file as if it were in the current
+        // include directory.  Avoid using a leading "./".
         std::string temp = *i;
-        temp += "/";
+        if(temp == ".")
+          {
+          temp = "";
+          }
+        else
+          {
+          temp += "/";
+          }
         temp += fname;
+
+        // Look for the file in this location.
         if(cmSystemTools::FileExists(temp.c_str()))
           {
           fullName = temp;
