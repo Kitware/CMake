@@ -131,15 +131,22 @@ static const char* cmCTestWarningExceptions[] = {
   0
 };
 
-static cmCTestBuildHandler::cmCTestCompileErrorWarningRex
+struct cmCTestBuildCompileErrorWarningRex
+{
+  const char* m_RegularExpressionString;
+  int m_FileIndex;
+  int m_LineIndex;
+};
+
+static cmCTestBuildCompileErrorWarningRex
 cmCTestWarningErrorFileLine[] = {
-    { "^Warning W[0-9]+ ([a-zA-Z.\\:/0-9_+ ~-]+) ([0-9]+):", 1, 2, 0 },
-    { "^([a-zA-Z./0-9_+ ~-]+):([0-9]+):", 1, 2, 0 },
-    { "^([a-zA-Z.\\:/0-9_+ ~-]+)\\(([0-9]+)\\)", 1, 2, 0 },
-    { "^([a-zA-Z./0-9_+ ~-]+)\\(([0-9]+)\\)", 1, 2, 0 },
-    { "\"([a-zA-Z./0-9_+ ~-]+)\", line ([0-9]+)", 1, 2, 0 },
-    { "File = ([a-zA-Z./0-9_+ ~-]+), Line = ([0-9]+)", 1, 2, 0 },
-    { 0, 0, 0, 0 }
+    { "^Warning W[0-9]+ ([a-zA-Z.\\:/0-9_+ ~-]+) ([0-9]+):", 1, 2 },
+    { "^([a-zA-Z./0-9_+ ~-]+):([0-9]+):", 1, 2 },
+    { "^([a-zA-Z.\\:/0-9_+ ~-]+)\\(([0-9]+)\\)", 1, 2 },
+    { "^([a-zA-Z./0-9_+ ~-]+)\\(([0-9]+)\\)", 1, 2 },
+    { "\"([a-zA-Z./0-9_+ ~-]+)\", line ([0-9]+)", 1, 2 },
+    { "File = ([a-zA-Z./0-9_+ ~-]+), Line = ([0-9]+)", 1, 2 },
+    { 0, 0, 0 }
 };
 
 //----------------------------------------------------------------------
@@ -150,8 +157,14 @@ cmCTestBuildHandler::cmCTestBuildHandler()
   int cc;
   for ( cc = 0; cmCTestWarningErrorFileLine[cc].m_RegularExpressionString; ++ cc )
     {
-    if ( !cmCTestWarningErrorFileLine[cc].m_RegularExpression.compile(
+    cmCTestBuildHandler::cmCTestCompileErrorWarningRex r;
+    if ( r.m_RegularExpression.compile(
         cmCTestWarningErrorFileLine[cc].m_RegularExpressionString) )
+      {
+      r.m_FileIndex = cmCTestWarningErrorFileLine[cc].m_FileIndex;
+      r.m_LineIndex = cmCTestWarningErrorFileLine[cc].m_LineIndex;
+      }
+    else
       {
       std::cout << "Problem Compiling regular expression: "
        << cmCTestWarningErrorFileLine[cc].m_RegularExpressionString << std::endl;
@@ -442,14 +455,15 @@ void cmCTestBuildHandler::GenerateDartBuildOutput(
        << "\t\t<BuildLogLine>" << cm->m_LogLine << "</BuildLogLine>\n"
        << "\t\t<Text>" << m_CTest->MakeXMLSafe(cm->m_Text) 
        << "\n</Text>" << std::endl;
-    int cc;
-    for ( cc = 0; cmCTestWarningErrorFileLine[cc].m_RegularExpressionString; ++ cc )
+    std::vector<cmCTestCompileErrorWarningRex>::iterator rit;
+    for ( rit = m_ErrorWarningFileLineRegex.begin();
+      rit != m_ErrorWarningFileLineRegex.end(); ++ rit )
       {
-      cmsys::RegularExpression* re = &cmCTestWarningErrorFileLine[cc].m_RegularExpression;
+      cmsys::RegularExpression* re = &rit->m_RegularExpression;
       if ( re->find(cm->m_Text.c_str() ) )
         {
-        cm->m_SourceFile = re->match(cmCTestWarningErrorFileLine[cc].m_FileIndex);
-        cm->m_LineNumber = atoi(re->match(cmCTestWarningErrorFileLine[cc].m_LineIndex).c_str());
+        cm->m_SourceFile = re->match(rit->m_FileIndex);
+        cm->m_LineNumber = atoi(re->match(rit->m_LineIndex).c_str());
         break;
         }
       }

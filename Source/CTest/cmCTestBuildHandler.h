@@ -49,15 +49,16 @@ public:
   
   void PopulateCustomVectors(cmMakefile *mf);
 
-  struct cmCTestCompileErrorWarningRex
+private:
+  class cmCTestCompileErrorWarningRex
     {
-    char* m_RegularExpressionString;
+  public:
+    cmCTestCompileErrorWarningRex() {}
     int m_FileIndex;
     int m_LineIndex;
     cmsys::RegularExpression m_RegularExpression;
     };
 
-private:
   struct cmCTestBuildErrorWarning
   {
     bool        m_Error;
@@ -86,6 +87,7 @@ private:
   std::vector<cmStdString> m_CustomErrorExceptions;
   std::vector<cmStdString> m_CustomWarningMatches;
   std::vector<cmStdString> m_CustomWarningExceptions;
+  std::vector<cmCTestCompileErrorWarningRex> m_ErrorWarningFileLineRegex;
 };
 
 #endif
