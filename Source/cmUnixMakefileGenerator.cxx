@@ -1382,14 +1382,17 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                        "all",
                        "cmake.depends $(TARGETS) $(SUBDIR_BUILD)",
                        0);
-  if (m_Makefile->IsOn("QT_WRAP_CPP") || m_Makefile->IsOn("QT_WRAP_UI"))
+  if (m_Makefile->IsOn("QT_WRAP_CPP") || 
+      m_Makefile->IsOn("QT_WRAP_UI")  ||
+      m_Makefile->IsOn("FLTK_WRAP_UI")  )
     { 
     this->OutputMakeRule(fout, 
                          "remove generated files and dependency file",
                          "clean",
                          "$(SUBDIR_CLEAN)",
                          "rm -f $(CLEAN_OBJECT_FILES) $(EXECUTABLES)"
-                         " $(TARGETS) ${GENERATED_QT_FILES}",
+                         " $(TARGETS) ${GENERATED_QT_FILES}"
+                         " ${GENERATED_FLTK_FILES}",
                          "make depend");
     }
   else  
