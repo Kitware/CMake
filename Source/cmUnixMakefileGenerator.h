@@ -153,7 +153,10 @@ protected:
   void SetStaticLibraryExtension(const char* e) {m_StaticLibraryExtension = e;}
   void SetSharedLibraryExtension(const char* e) {m_SharedLibraryExtension = e;}
   void SetLibraryPrefix(const char* e) { m_LibraryPrefix = e;}
-  virtual std::string ConvertToNativePath(const char* s) { return s;  }
+  // convert a path to an output path for unix this will call
+  // ConvertToUnixOutputPath
+  virtual std::string ConvertToOutputPath(const char* s) 
+    { return cmSystemTools::ConvertToOutputPath(s);  }
   std::string CreateTargetRules(const cmTarget &target,
                                 const char* targetName);
   virtual std::string CreateMakeVariable(const char* s, const char* s2)

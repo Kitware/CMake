@@ -216,13 +216,12 @@ void cmUnixMakefileGenerator::OutputMakefile(const char* file)
   for(std::vector<std::string>::const_iterator i = lfiles.begin();
       i !=  lfiles.end(); ++i)
     {
-    fout << " " << this->ConvertToNativePath(cmSystemTools::EscapeSpaces(i->c_str()).c_str());
+    fout << " " << this->ConvertToOutputPath(i->c_str());
     }
   // Add the cache to the list
   std::string cacheFile = m_Makefile->GetHomeOutputDirectory();
   cacheFile += "/CMakeCache.txt";
-  fout << " " << 
-    this->ConvertToNativePath(cmSystemTools::EscapeSpaces(cacheFile.c_str()).c_str());
+  fout << " " << this->ConvertToOutputPath(cacheFile.c_str());
   fout << "\n\n\n";
   this->OutputMakeVariables(fout);
   // Set up the default target as the VERY first target, so that make with no arguments will run it
@@ -314,21 +313,21 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
         {
         path = path + l->first + m_StaticLibraryExtension;
         fout << " \\\n" 
-             << this->ConvertToNativePath(cmSystemTools::EscapeSpaces(path.c_str()).c_str());
+             << this->ConvertToOutputPath(path.c_str());
         }
       else if(l->second.GetType() == cmTarget::SHARED_LIBRARY)
         {
         path = path + l->first + 
           m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
         fout << " \\\n" 
-             << this->ConvertToNativePath(cmSystemTools::EscapeSpaces(path.c_str()).c_str());
+             << this->ConvertToOutputPath(path.c_str());
         }
       else if(l->second.GetType() == cmTarget::MODULE_LIBRARY)
         {
         path = path + l->first + 
           m_Makefile->GetDefinition("CMAKE_MODULE_SUFFIX");
         fout << " \\\n" 
-             << this->ConvertToNativePath(cmSystemTools::EscapeSpaces(path.c_str()).c_str());
+             << this->ConvertToOutputPath(path.c_str());
         }
       }
     }
@@ -342,7 +341,7 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
       {
       std::string path = m_ExecutableOutputPath + l->first +
         m_ExecutableExtension;
-      fout << " \\\n" << this->ConvertToNativePath(cmSystemTools::EscapeSpaces(path.c_str()).c_str());
+      fout << " \\\n" << this->ConvertToOutputPath(path.c_str());
       }
     }
   // list utilities last
@@ -372,7 +371,7 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
           std::string outExt(this->GetOutputExtension(i->GetSourceExtension().c_str()));
           if(outExt.size())
             {
-            fout << "\\\n" << this->ConvertToNativePath(i->GetSourceName().c_str())
+            fout << "\\\n" << this->ConvertToOutputPath(i->GetSourceName().c_str())
                  << outExt.c_str() << " ";
             }
           }
@@ -387,7 +386,7 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
           std::string outExt(this->GetOutputExtension(i->GetSourceExtension().c_str()));
           if(outExt.size())
             {
-            fout << "\\\n\"" << this->ConvertToNativePath(i->GetSourceName().c_str())
+            fout << "\\\n\"" << this->ConvertToOutputPath(i->GetSourceName().c_str())
                  << outExt.c_str() << "\" ";
             }
           }
@@ -454,7 +453,7 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
   for(std::vector<std::string>::iterator libDir = libdirs.begin();
       libDir != libdirs.end(); ++libDir)
     { 
-    std::string libpath = cmSystemTools::EscapeSpaces(libDir->c_str());
+    std::string libpath = this->ConvertToOutputPath(libDir->c_str());
     if(emitted.insert(libpath).second)
       {
       std::string::size_type pos = libDir->find("-L");
@@ -492,7 +491,7 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
       std::string dir, file;
       cmSystemTools::SplitProgramPath(lib->first.c_str(),
                                       dir, file);
-      std::string libpath = cmSystemTools::EscapeSpaces(dir.c_str());
+      std::string libpath = this->ConvertToOutputPath(dir.c_str());
       if(emitted.insert(libpath).second)
         {
         linkLibs += "-L";
@@ -586,8 +585,7 @@ std::string cmUnixMakefileGenerator::CreateTargetRules(const cmTarget &target,
         {
         initNext = true;
         }
-      std::string command = cmSystemTools::EscapeSpaces(cc.GetCommand().c_str());
-      command = this->ConvertToNativePath(command.c_str());
+      std::string command = this->ConvertToOutputPath(cc.GetCommand().c_str());
       customRuleCode += command + " " + cc.GetArguments();
       }
     }
@@ -938,8 +936,8 @@ void cmUnixMakefileGenerator::OutputBuildLibraryInDir(std::ostream& fout,
     {
     makeTarget = fullpath;
     }
-  fout << cmSystemTools::EscapeSpaces(fullpath)
-       << ":\n\tcd " << cmSystemTools::EscapeSpaces(path)
+  fout << this->ConvertToOutputPath(fullpath)
+       << ":\n\tcd " << this->ConvertToOutputPath(path)
        << "; $(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.depends"
        << "; $(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.check_depends"
        << "; $(MAKE) -$(MAKEFLAGS) $(MAKESILENT) -f cmake.check_depends"
@@ -957,8 +955,8 @@ void cmUnixMakefileGenerator::OutputBuildExecutableInDir(std::ostream& fout,
     {
     makeTarget = fullpath;
     }
-  fout << cmSystemTools::EscapeSpaces(fullpath)
-       << ":\n\tcd " << cmSystemTools::EscapeSpaces(path)
+  fout << this->ConvertToOutputPath(fullpath)
+       << ":\n\tcd " << this->ConvertToOutputPath(path)
        << "; $(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.depends"
        << "; $(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.check_depends"
        << "; $(MAKE) -$(MAKEFLAGS) $(MAKESILENT) -f cmake.check_depends"
@@ -1019,8 +1017,7 @@ void cmUnixMakefileGenerator::OutputLibDepend(std::ostream& fout,
       {
       libpath += m_StaticLibraryExtension;
       }
-    fout << this->ConvertToNativePath(cmSystemTools::EscapeSpaces(libpath.c_str()).c_str())
-         << " ";
+    fout << this->ConvertToOutputPath(libpath.c_str()) << " ";
     }
 }
 
@@ -1066,8 +1063,7 @@ void cmUnixMakefileGenerator::OutputExeDepend(std::ostream& fout,
         }
       exepath += replaceVars;
       }
-    fout << this->ConvertToNativePath(cmSystemTools::EscapeSpaces(exepath.c_str()).c_str())
-         << " ";
+    fout << this->ConvertToOutputPath(exepath.c_str()) << " ";
     }
 }
 
@@ -1100,7 +1096,7 @@ void cmUnixMakefileGenerator::BuildInSubDirectory(std::ostream& fout,
                                                   const char* target1,
                                                   const char* target2)
 {
-  std::string directory = cmSystemTools::EscapeSpaces(dir);
+  std::string directory = this->ConvertToOutputPath(dir);
   if(target1)
     {
     fout << "\t@if test ! -d " << directory 
@@ -1241,8 +1237,7 @@ bool cmUnixMakefileGenerator::OutputObjectDepends(std::ostream& fout)
               dep != source->GetDepends().end(); ++dep)
             {
             fout << " \\\n" 
-                 << this->ConvertToNativePath(cmSystemTools::EscapeSpaces(
-                   dep->c_str()).c_str());
+                 << this->ConvertToOutputPath(dep->c_str());
             ret = true;
             }
           fout << "\n\n";
@@ -1290,8 +1285,7 @@ void cmUnixMakefileGenerator::OutputCheckDepends(std::ostream& fout)
               dep != source->GetDepends().end(); ++dep)
             {
             std::string dependfile = 
-              this->ConvertToNativePath(cmSystemTools::EscapeSpaces(
-                dep->c_str()).c_str());
+              this->ConvertToOutputPath(dep->c_str());
             if(emitted.insert(dependfile).second)
               {
               fout << " \\\n" << dependfile ;
@@ -1371,9 +1365,8 @@ void cmUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
         {
         // escape spaces and convert to native slashes path for
         // the command
-        std::string command =
-          cmSystemTools::EscapeSpaces(c->second.m_Command.c_str());
-        command = this->ConvertToNativePath(command.c_str());
+        std::string command = 
+          this->ConvertToOutputPath(c->second.m_Command.c_str());
         command += " ";
         // now add the arguments
         command += c->second.m_Arguments;
@@ -1388,7 +1381,7 @@ void cmUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
                 commandFiles.m_Depends.begin();
               d != commandFiles.m_Depends.end(); ++d)
             {
-            std::string dep = cmSystemTools::EscapeSpaces(d->c_str());
+            std::string dep = this->ConvertToOutputPath(d->c_str());
             depends +=  " ";
             depends += dep;
             }
@@ -1404,7 +1397,7 @@ void cmUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
               commandFiles.m_Outputs.begin();
             output != commandFiles.m_Outputs.end(); ++output)
           {
-          std::string src = cmSystemTools::EscapeSpaces(source.c_str());
+          std::string src = this->ConvertToOutputPath(source.c_str());
           std::string depends;
           depends +=  src;
           // Collect out all the dependencies for this rule.
@@ -1412,7 +1405,7 @@ void cmUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
                 commandFiles.m_Depends.begin();
               d != commandFiles.m_Depends.end(); ++d)
             {
-            std::string dep = cmSystemTools::EscapeSpaces(d->c_str());
+            std::string dep = this->ConvertToOutputPath(d->c_str());
             depends += " ";
             depends += dep;
             } 
@@ -1506,19 +1499,19 @@ void cmUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
   m_Makefile->ExpandVariablesInString(replaceVars);
   fout << replaceVars.c_str();
   fout << "CMAKE_CURRENT_SOURCE = " << 
-    cmSystemTools::EscapeSpaces(m_Makefile->GetStartDirectory()) << "\n";
+    this->ConvertToOutputPath(m_Makefile->GetStartDirectory()) << "\n";
   fout << "CMAKE_CURRENT_BINARY = " << 
-    cmSystemTools::EscapeSpaces(m_Makefile->GetStartOutputDirectory()) << "\n";
+    this->ConvertToOutputPath(m_Makefile->GetStartOutputDirectory()) << "\n";
   fout << "CMAKE_SOURCE_DIR = " << 
-    cmSystemTools::EscapeSpaces(m_Makefile->GetHomeDirectory()) << "\n";
+    this->ConvertToOutputPath(m_Makefile->GetHomeDirectory()) << "\n";
   fout << "CMAKE_BINARY_DIR = " << 
-    cmSystemTools::EscapeSpaces(m_Makefile->GetHomeOutputDirectory()) << "\n";
+    this->ConvertToOutputPath(m_Makefile->GetHomeOutputDirectory()) << "\n";
   // Output Include paths
   fout << "INCLUDE_FLAGS = ";
   std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();
   std::vector<std::string>::iterator i;
   fout << "-I" << 
-    cmSystemTools::EscapeSpaces(m_Makefile->GetStartDirectory()) << " ";
+    this->ConvertToOutputPath(m_Makefile->GetStartDirectory()) << " ";
   for(i = includes.begin(); i != includes.end(); ++i)
     {
     std::string include = *i;
@@ -1527,7 +1520,7 @@ void cmUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     // implementations because the wrong headers may be found first.
     if(include != "/usr/include")
       {
-      fout << "-I" << cmSystemTools::EscapeSpaces(i->c_str()).c_str() << " ";
+      fout << "-I" << this->ConvertToOutputPath(i->c_str()) << " ";
       }
     }
   fout << m_Makefile->GetDefineFlags();
@@ -1833,7 +1826,7 @@ OutputBuildObjectFromSource(std::ostream& fout,
       }
     compileCommand += "$(INCLUDE_FLAGS) -c ";
     compileCommand += 
-      cmSystemTools::EscapeSpaces(source.GetFullPath().c_str());
+      this->ConvertToOutputPath(source.GetFullPath().c_str());
     compileCommand += " -o ";
     compileCommand += objectFile;
     }
@@ -1847,15 +1840,15 @@ OutputBuildObjectFromSource(std::ostream& fout,
       }
     compileCommand += "$(INCLUDE_FLAGS) -c ";
     compileCommand += 
-      cmSystemTools::EscapeSpaces(source.GetFullPath().c_str());
+      this->ConvertToOutputPath(source.GetFullPath().c_str());
     compileCommand += " -o ";
     compileCommand += objectFile;
     }
   this->OutputMakeRule(fout,
                        comment.c_str(),
                        objectFile.c_str(),
-                       cmSystemTools::EscapeSpaces(source.GetFullPath().
-                                                   c_str()).c_str(),
+                       this->ConvertToOutputPath(source.GetFullPath().
+                                                 c_str()).c_str(),
                        compileCommand.c_str());
 }
 
@@ -2057,7 +2050,7 @@ void cmUnixMakefileGenerator::ComputeSystemInfo()
     // currently we run configure shell script here to determine the info
     std::string output;
     std::string cmd = "cd ";
-    cmd += cmSystemTools::EscapeSpaces(m_Makefile->GetHomeOutputDirectory());
+    cmd += this->ConvertToOutputPath(m_Makefile->GetHomeOutputDirectory());
     cmd += "; ";
     const char* root
       = m_Makefile->GetDefinition("CMAKE_ROOT");

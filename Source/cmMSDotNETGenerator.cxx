@@ -306,8 +306,7 @@ void cmMSDotNETGenerator::WriteProject(std::ostream& fout,
                                const cmTarget& target
   )
 {
-  std::string d = dir;
-  cmSystemTools::ConvertToWindowsSlashes(d);
+  std::string d = cmSystemTools::ConvertToOutputPath(dir);
   fout << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\" = \"" 
        << dspname << "\", \""
        << d << "\\" << dspname << ".vcproj\", \"{"
@@ -485,7 +484,8 @@ void cmMSDotNETGenerator::OutputVCProjFile()
       {
       m_LibraryOutputPath += "/";
       }
-    m_LibraryOutputPath = cmSystemTools::HandleNetworkPaths(m_LibraryOutputPath.c_str());
+    m_LibraryOutputPath = 
+      cmSystemTools::ConvertToOutputPath(m_LibraryOutputPath.c_str());
     }
   m_ExecutableOutputPath = "";
   if (m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH"))
@@ -500,14 +500,14 @@ void cmMSDotNETGenerator::OutputVCProjFile()
       m_ExecutableOutputPath += "/";
       }
     }
-  m_ExecutableOutputPath = cmSystemTools::HandleNetworkPaths(m_ExecutableOutputPath.c_str());
+  m_ExecutableOutputPath =
+    cmSystemTools::ConvertToOutputPath(m_ExecutableOutputPath.c_str());
   
   std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();
   std::vector<std::string>::iterator i;
   for(i = includes.begin(); i != includes.end(); ++i)
     {
-    std::string tmp = cmSystemTools::EscapeSpaces(i->c_str());
-    cmSystemTools::ConvertToWindowsSlashesAndCleanUp(tmp);
+    std::string tmp = cmSystemTools::ConvertToOutputPath(i->c_str());
     m_IncludeOptions += ",";
     // quote if not already quoted
     if (tmp[0] != '"')
@@ -578,20 +578,23 @@ void cmMSDotNETGenerator::AddVCProjBuildRule(cmSourceGroup& sourceGroup)
   std::string makefileIn = m_Makefile->GetStartDirectory();
   makefileIn += "/";
   makefileIn += "CMakeLists.txt";
-  makefileIn = cmSystemTools::HandleNetworkPaths(makefileIn.c_str());
-  makefileIn = cmSystemTools::EscapeSpaces(makefileIn.c_str());
+  makefileIn = cmSystemTools::ConvertToOutputPath(makefileIn.c_str());
   std::string dsprule = "${CMAKE_COMMAND}";
   m_Makefile->ExpandVariablesInString(dsprule);
-  dsprule = cmSystemTools::HandleNetworkPaths(dsprule.c_str());
+  dsprule = cmSystemTools::ConvertToOutputPath(dsprule.c_str());
   std::string args = makefileIn;
   args += " -H\"";
-  args += cmSystemTools::HandleNetworkPaths(m_Makefile->GetHomeDirectory());
+  args +=
+    cmSystemTools::ConvertToOutputPath(m_Makefile->GetHomeDirectory());
   args += "\" -S\"";
-  args += cmSystemTools::HandleNetworkPaths(m_Makefile->GetStartDirectory());
+  args += 
+    cmSystemTools::ConvertToOutputPath(m_Makefile->GetStartDirectory());
   args += "\" -O\"";
-  args += cmSystemTools::HandleNetworkPaths(m_Makefile->GetStartOutputDirectory());
+  args += 
+    cmSystemTools::ConvertToOutputPath(m_Makefile->GetStartOutputDirectory());
   args += "\" -B\"";
-  args += cmSystemTools::HandleNetworkPaths(m_Makefile->GetHomeOutputDirectory());
+  args += 
+    cmSystemTools::ConvertToOutputPath(m_Makefile->GetHomeOutputDirectory());
   args += "\"";
   m_Makefile->ExpandVariablesInString(args);
 
@@ -824,7 +827,7 @@ void cmMSDotNETGenerator::OutputLibraryDirectories(std::ostream& fout,
   std::vector<std::string>& libdirs = m_Makefile->GetLinkDirectories();
   for(i = libdirs.begin(); i != libdirs.end(); ++i)
     {
-    std::string lpath = cmSystemTools::HandleNetworkPaths(i->c_str());
+    std::string lpath = cmSystemTools::ConvertToOutputPath(i->c_str());
     if(lpath[lpath.size()-1] != '/')
       {
       lpath += "/";
@@ -855,7 +858,7 @@ void cmMSDotNETGenerator::OutputLibraries(std::ostream& fout,
       {
       lib += ".lib";
       }
-    lib = cmSystemTools::EscapeSpaces(lib.c_str());
+    lib = cmSystemTools::ConvertToOutputPath(lib.c_str());
      if (j->second == cmTarget::GENERAL
          || (j->second == cmTarget::DEBUG && strcmp(configName, "DEBUG") == 0)
          || (j->second == cmTarget::OPTIMIZED && strcmp(configName, "DEBUG") != 0))
@@ -968,11 +971,10 @@ void cmMSDotNETGenerator::WriteVCProjFile(std::ostream& fout,
       if (source != libName || target.GetType() == cmTarget::UTILITY)
         {
         fout << "\t\t\t<File\n";
-        std::string d = source;
-        cmSystemTools::ConvertToWindowsSlashes(d);
+        std::string d = cmSystemTools::ConvertToOutputPath(source.c_str());
         // Tell MS-Dev what the source is.  If the compiler knows how to
         // build it, then it will.
-        fout << "\t\t\t\tRelativePath=\"" << cmSystemTools::EscapeSpaces(d.c_str()) << "\">\n";
+        fout << "\t\t\t\tRelativePath=\"" << d << "\">\n";
         if (!commands.empty())
           {
           cmSourceGroup::CommandFiles totalCommand;
@@ -1022,8 +1024,7 @@ void cmMSDotNETGenerator::WriteCustomRule(std::ostream& fout,
     for(std::set<std::string>::const_iterator d = depends.begin();
 	d != depends.end(); ++d)
       {
-      temp = *d;
-      fout << cmSystemTools::EscapeSpaces(cmSystemTools::ConvertToWindowsSlashes(temp))
+      fout << cmSystemTools::ConvertToOutputPath(d->c_str())
            << ";";
       }
     fout << "\"\n";
@@ -1087,9 +1088,8 @@ cmMSDotNETGenerator::CombineCommands(const cmSourceGroup::Commands &commands,
   for(cmSourceGroup::Commands::const_iterator c = commands.begin();
       c != commands.end(); ++c)
     {
-    temp= c->second.m_Command; 
-    cmSystemTools::ConvertToWindowsSlashes(temp);
-    temp = cmSystemTools::EscapeSpaces(temp.c_str());
+    temp= 
+      cmSystemTools::ConvertToOutputPath(c->second.m_Command.c_str()); 
     totalCommandStr += temp;
     totalCommandStr += " ";
     totalCommandStr += c->second.m_Arguments;

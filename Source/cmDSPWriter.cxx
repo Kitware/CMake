@@ -48,8 +48,7 @@ void cmDSPWriter::OutputDSPFile()
   for(i = includes.begin(); i != includes.end(); ++i)
     {
     m_IncludeOptions +=  " /I ";
-    std::string tmp = cmSystemTools::EscapeSpaces(i->c_str());
-    cmSystemTools::ConvertToWindowsSlashesAndCleanUp(tmp);
+    std::string tmp = cmSystemTools::ConvertToOutputPath(i->c_str());
 
     // quote if not already quoted
     if (tmp[0] != '"')
@@ -147,20 +146,23 @@ void cmDSPWriter::AddDSPBuildRule(cmSourceGroup& sourceGroup)
   std::string makefileIn = m_Makefile->GetStartDirectory();
   makefileIn += "/";
   makefileIn += "CMakeLists.txt";
-  makefileIn = cmSystemTools::HandleNetworkPaths(makefileIn.c_str());
-  makefileIn = cmSystemTools::EscapeSpaces(makefileIn.c_str());
+  makefileIn = cmSystemTools::ConvertToOutputPath(makefileIn.c_str());
   std::string dsprule = "${CMAKE_COMMAND}";
   m_Makefile->ExpandVariablesInString(dsprule);
-  dsprule = cmSystemTools::HandleNetworkPaths(dsprule.c_str());
+  dsprule = cmSystemTools::ConvertToOutputPath(dsprule.c_str());
   std::string args = makefileIn;
   args += " -H\"";
-  args += cmSystemTools::HandleNetworkPaths(m_Makefile->GetHomeDirectory());
+  args +=
+    cmSystemTools::ConvertToOutputPath(m_Makefile->GetHomeDirectory());
   args += "\" -S\"";
-  args += cmSystemTools::HandleNetworkPaths(m_Makefile->GetStartDirectory());
+  args +=
+    cmSystemTools::ConvertToOutputPath(m_Makefile->GetStartDirectory());
   args += "\" -O\"";
-  args += cmSystemTools::HandleNetworkPaths(m_Makefile->GetStartOutputDirectory());
+  args += 
+    cmSystemTools::ConvertToOutputPath(m_Makefile->GetStartOutputDirectory());
   args += "\" -B\"";
-  args += cmSystemTools::HandleNetworkPaths(m_Makefile->GetHomeOutputDirectory());
+  args += 
+    cmSystemTools::ConvertToOutputPath(m_Makefile->GetHomeOutputDirectory());
   args += "\"";
   m_Makefile->ExpandVariablesInString(args);
 
@@ -268,7 +270,8 @@ void cmDSPWriter::WriteDSPFile(std::ostream& fout,
         
         // Tell MS-Dev what the source is.  If the compiler knows how to
         // build it, then it will.
-        fout << "SOURCE=" << cmSystemTools::EscapeSpaces(source.c_str()) << "\n\n";
+        fout << "SOURCE=" << 
+          cmSystemTools::ConvertToOutputPath(source.c_str()) << "\n\n";
         if (!commands.empty())
           {
           cmSourceGroup::CommandFiles totalCommand;
@@ -315,12 +318,11 @@ void cmDSPWriter::WriteCustomRule(std::ostream& fout,
     
     // Write out the dependencies for the rule.
     fout << "USERDEP__HACK=";
-    std::string temp;
     for(std::set<std::string>::const_iterator d = depends.begin();
 	d != depends.end(); ++d)
       {
-      temp = *d;
-      fout << "\\\n\t" << cmSystemTools::EscapeSpaces(cmSystemTools::ConvertToWindowsSlashes(temp));
+      fout << "\\\n\t" << 
+        cmSystemTools::ConvertToOutputPath(d->c_str());
       }
     fout << "\n";
 
@@ -455,8 +457,7 @@ cmDSPWriter::CombineCommands(const cmSourceGroup::Commands &commands,
     {
     totalCommandStr += "\n\t";
     temp= c->second.m_Command; 
-    cmSystemTools::ConvertToWindowsSlashes(temp);
-    temp = cmSystemTools::EscapeSpaces(temp.c_str());
+    temp = cmSystemTools::ConvertToOutputPath(temp.c_str());
     totalCommandStr += temp;
     totalCommandStr += " ";
     totalCommandStr += c->second.m_Arguments;
@@ -556,7 +557,8 @@ void cmDSPWriter::WriteDSPHeader(std::ostream& fout, const char *libName,
       {
       libPath += "/";
       }
-    std::string lpath = cmSystemTools::HandleNetworkPaths(libPath.c_str());
+    std::string lpath = 
+      cmSystemTools::ConvertToOutputPath(libPath.c_str());
     if(pathEmitted.insert(lpath).second)
       {
       libOptions += " /LIBPATH:\"";
@@ -580,7 +582,8 @@ void cmDSPWriter::WriteDSPHeader(std::ostream& fout, const char *libName,
       {
       exePath += "/";
       }
-    std::string lpath = cmSystemTools::HandleNetworkPaths(exePath.c_str());
+    std::string lpath = 
+      cmSystemTools::ConvertToOutputPath(exePath.c_str());
     if(pathEmitted.insert(lpath).second)
       {
       libOptions += " /LIBPATH:\"";
@@ -601,7 +604,8 @@ void cmDSPWriter::WriteDSPHeader(std::ostream& fout, const char *libName,
   std::vector<std::string>& libdirs = m_Makefile->GetLinkDirectories();
   for(i = libdirs.begin(); i != libdirs.end(); ++i)
     {
-    std::string lpath = cmSystemTools::HandleNetworkPaths(i->c_str());
+    std::string lpath = 
+      cmSystemTools::ConvertToOutputPath(i->c_str());
     if(lpath[lpath.size()-1] != '/')
       {
       lpath += "/";
@@ -640,7 +644,7 @@ void cmDSPWriter::WriteDSPHeader(std::ostream& fout, const char *libName,
         {
         lib += ".lib";
         }
-      lib = cmSystemTools::EscapeSpaces(lib.c_str());
+      lib = cmSystemTools::ConvertToOutputPath(lib.c_str());
 
       if (j->second == cmTarget::GENERAL)
         {
@@ -725,9 +729,9 @@ void cmDSPWriter::WriteDSPHeader(std::ostream& fout, const char *libName,
                                    m_IncludeOptions.c_str());
       cmSystemTools::ReplaceString(line, "OUTPUT_LIBNAME",libName);
       cmSystemTools::ReplaceString(line, "LIBRARY_OUTPUT_PATH",
-                                   cmSystemTools::HandleNetworkPaths(libPath.c_str()).c_str());
+                                   cmSystemTools::ConvertToOutputPath(libPath.c_str()).c_str());
       cmSystemTools::ReplaceString(line, "EXECUTABLE_OUTPUT_PATH",
-                                   cmSystemTools::HandleNetworkPaths(exePath.c_str()).c_str());
+                                   cmSystemTools::ConvertToOutputPath(exePath.c_str()).c_str());
       cmSystemTools::ReplaceString(line, 
                                    "EXTRA_DEFINES", 
 				   m_Makefile->GetDefineFlags());

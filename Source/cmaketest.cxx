@@ -116,10 +116,7 @@ int main (int argc, char *argv[])
     {
     std::cerr << "Error: cmaketest does not have a valid MAKEPROGRAM\n";
     }
-  makeCommand = cmSystemTools::EscapeSpaces(makeCommand.c_str());
-#if defined(_WIN32) && !defined(__CYGWIN__)      
-  cmSystemTools::ConvertToWindowsSlashes(makeCommand);
-#endif
+  makeCommand = cmSystemTools::ConvertToOutputPath(makeCommand.c_str());
   std::string lowerCaseCommand = makeCommand;
   cmSystemTools::LowerCase(lowerCaseCommand);
 
@@ -246,10 +243,7 @@ int main (int argc, char *argv[])
     cmSystemTools::ChangeDirectory(cwd.c_str());
     return 1;
     }
-  fullPath = cmSystemTools::EscapeSpaces(fullPath.c_str());
-#if defined(_WIN32) && !defined(__CYGWIN__)      
-  cmSystemTools::ConvertToWindowsSlashes(fullPath);
-#endif
+  fullPath = cmSystemTools::ConvertToOutputPath(fullPath.c_str());
   std::cout << "Running test executable: " << fullPath.c_str() << "\n";
   int ret = 0;
   if (!cmSystemTools::RunCommand(fullPath.c_str(), output, ret, true))

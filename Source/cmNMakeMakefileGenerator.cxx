@@ -44,11 +44,11 @@ cmNMakeMakefileGenerator::~cmNMakeMakefileGenerator()
 std::string cmNMakeMakefileGenerator::ShortPath(const char* path)
 {
   std::string ret = path;
-  cmSystemTools::ConvertToWindowsSlashes(ret);
-  // if there are no spaces in path, then just return path
+  // if there are no spaces in path, then just 
+  // call ConvertToOutputPath
   if(ret.find(' ') == std::string::npos)
     {
-    return ret;
+    return this->ConvertToOutputPath(path);
     }
     
   // if there are spaces then call GetShortPathName to get rid of them
@@ -61,8 +61,8 @@ std::string cmNMakeMakefileGenerator::ShortPath(const char* path)
   else
     {
     // if GetShortPathName failed for some reason use
-    // EscapeSpaces instead
-    ret = cmSystemTools::EscapeSpaces(path);
+    // ConvertToOutputPath instead which will at least escape the spaces
+    ret = this->ConvertToOutputPath(path);
     }
   delete [] buffer;
   return ret;
@@ -87,7 +87,7 @@ std::string cmNMakeMakefileGenerator::ShortPathCommand(const char* command)
       {
 	c = removeIntDir.match(1) + removeIntDir.match(2);
       }
-    c = ShortPath(c.c_str());
+    c = this->ShortPath(c.c_str());
     std::string ret = c;
     std::string args = reg.match(2);
     ret += args;
@@ -159,24 +159,24 @@ void cmNMakeMakefileGenerator::OutputMakeVariables(std::ostream& fout)
   fout << replaceVars.c_str();
 
   std::string ccompiler = m_Makefile->GetDefinition("CMAKE_C_COMPILER");
-  cmSystemTools::ConvertToWindowsSlashes(ccompiler);
-  fout << "CMAKE_C_COMPILER                       = " << cmSystemTools::EscapeSpaces(ccompiler.c_str()) << "\n";
+  fout << "CMAKE_C_COMPILER                       = " 
+       << this->ConvertToOutputPath(ccompiler.c_str()) << "\n";
 
   std::string cxxcompiler = m_Makefile->GetDefinition("CMAKE_CXX_COMPILER");
-  cmSystemTools::ConvertToWindowsSlashes(cxxcompiler);
-  fout << "CMAKE_CXX_COMPILER                     = " << cmSystemTools::EscapeSpaces(cxxcompiler.c_str()) << "\n";
+  fout << "CMAKE_CXX_COMPILER                     = " 
+       << this->ConvertToOutputPath(cxxcompiler.c_str()) << "\n";
 
   std::string linker = m_Makefile->GetDefinition("CMAKE_LINKER");
-  cmSystemTools::ConvertToWindowsSlashes(linker);
-  fout << "CMAKE_LINKER                           = " << cmSystemTools::EscapeSpaces(linker.c_str()) << "\n";
+  fout << "CMAKE_LINKER                           = " << 
+    this->ConvertToOutputPath(linker.c_str()) << "\n";
 
   std::string lib_manager = m_Makefile->GetDefinition("CMAKE_LIBRARY_MANAGER");
-  cmSystemTools::ConvertToWindowsSlashes(lib_manager);
-  fout << "CMAKE_LIBRARY_MANAGER                  = " << cmSystemTools::EscapeSpaces(lib_manager.c_str()) << "\n";
+  fout << "CMAKE_LIBRARY_MANAGER                  = " 
+       << this->ConvertToOutputPath(lib_manager.c_str()) << "\n";
 
   std::string cmakecommand = m_Makefile->GetDefinition("CMAKE_COMMAND");
-  cmSystemTools::ConvertToWindowsSlashes(cmakecommand);
-  fout << "CMAKE_COMMAND                          = " << cmSystemTools::EscapeSpaces(cmakecommand.c_str()) << "\n";
+  fout << "CMAKE_COMMAND                          = "
+       << this->ConvertToOutputPath(cmakecommand.c_str()) << "\n";
 
   fout << "CMAKE_CURRENT_SOURCE                   = " 
        << ShortPath(m_Makefile->GetStartDirectory() )
@@ -194,17 +194,15 @@ void cmNMakeMakefileGenerator::OutputMakeVariables(std::ostream& fout)
   fout << "INCLUDE_FLAGS                          = ";
   std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();
   std::vector<std::string>::iterator i;
-  fout << "-I" << cmSystemTools::EscapeSpaces(m_Makefile->GetStartDirectory()) << " ";
+  fout << "-I" << 
+    this->ConvertToOutputPath(m_Makefile->GetStartDirectory()) << " ";
   for(i = includes.begin(); i != includes.end(); ++i)
     {
     std::string include = *i;
     // Don't output a -I for the standard include path "/usr/include".
     // This can cause problems with certain standard library
     // implementations because the wrong headers may be found first.
-    if(include != "/usr/include")
-      {
-      fout << "-I" << cmSystemTools::EscapeSpaces(i->c_str()).c_str() << " ";
-      }
+    fout << "-I" << this->ConvertToOutputPath(i->c_str()).c_str() << " ";
     } 
 
   fout << m_Makefile->GetDefineFlags();
@@ -219,9 +217,7 @@ void cmNMakeMakefileGenerator::BuildInSubDirectory(std::ostream& fout,
 {
   if(target1)
     {
-    std::string dir = directory;
-    cmSystemTools::ConvertToWindowsSlashes(dir);
-    dir = cmSystemTools::EscapeSpaces(dir.c_str());
+    std::string dir = this->ConvertToOutputPath(directory);
     fout << "\tif not exist \"" << dir << "\\$(NULL)\""
          << " " 
          << "$(MAKE) $(MAKESILENT) rebuild_cache\n"
@@ -235,8 +231,7 @@ void cmNMakeMakefileGenerator::BuildInSubDirectory(std::ostream& fout,
     fout << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) " << target2 << "\n";
     }
   std::string currentDir = m_Makefile->GetCurrentOutputDirectory();
-  cmSystemTools::ConvertToWindowsSlashes(currentDir);
-  fout << "\tcd " << cmSystemTools::EscapeSpaces(currentDir.c_str()) << "\n\n";
+  fout << "\tcd " << this->ConvertToOutputPath(currentDir.c_str()) << "\n\n";
 }
 
 
@@ -272,7 +267,7 @@ void cmNMakeMakefileGenerator::OutputMakeRule(std::ostream& fout,
   fout << "\n";
   replace = target;
   m_Makefile->ExpandVariablesInString(replace);
-  replace = cmSystemTools::EscapeSpaces(replace.c_str());
+  replace = this->ConvertToOutputPath(replace.c_str());
   fout << replace.c_str() << ": ";
   if(depends)
     {
@@ -358,7 +353,7 @@ OutputBuildObjectFromSource(std::ostream& fout,
       }
     compileCommand += "$(INCLUDE_FLAGS) -c ";
     compileCommand += 
-      cmSystemTools::EscapeSpaces(source.GetFullPath().c_str());
+      this->ConvertToOutputPath(source.GetFullPath().c_str());
 
     // Need to get the definition here because this value might have
     // trailing space (since it is directly prepended to the filename)
@@ -375,7 +370,7 @@ OutputBuildObjectFromSource(std::ostream& fout,
     compileCommand += objectFile;
     compileCommand += "\" ";
     compileCommand += 
-      cmSystemTools::EscapeSpaces(source.GetFullPath().c_str());
+      this->ConvertToOutputPath(source.GetFullPath().c_str());
     }
   else if (ext == "def")
     {
@@ -394,7 +389,7 @@ OutputBuildObjectFromSource(std::ostream& fout,
       }
     compileCommand += "$(INCLUDE_FLAGS) -c ";
     compileCommand += 
-      cmSystemTools::EscapeSpaces(source.GetFullPath().c_str());
+      this->ConvertToOutputPath(source.GetFullPath().c_str());
 
     // Need to get the definition here because this value might have
     // trailing space (since it is directly prepended to the filename)
@@ -409,7 +404,7 @@ OutputBuildObjectFromSource(std::ostream& fout,
   this->OutputMakeRule(fout,
                        comment.c_str(),
                        objectFile.c_str(),
-                       cmSystemTools::EscapeSpaces(
+                       this->ConvertToOutputPath(
                          source.GetFullPath().c_str()).c_str(),
                        compileCommand.c_str());
 }
@@ -440,7 +435,7 @@ void cmNMakeMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
   command += " $(CMAKE_LINKER_FLAGS) " + linker_output_file_flag;
 
   std::string dllpath = m_LibraryOutputPath +  std::string(name) + m_SharedLibraryExtension;
-  command += cmSystemTools::EscapeSpaces(dllpath.c_str());
+  command += this->ConvertToOutputPath(dllpath.c_str());
 
   command += " $(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
 
@@ -503,7 +498,7 @@ void cmNMakeMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout,
   std::string command = "$(CMAKE_LIBRARY_MANAGER) $(CMAKE_LIBRARY_MANAGER_FLAGS) @<<\n\t " + library_manager_output_file_flag;
 
   std::string libpath = m_LibraryOutputPath + std::string(name) + m_StaticLibraryExtension;
-  command += cmSystemTools::EscapeSpaces(libpath.c_str());
+  command += this->ConvertToOutputPath(libpath.c_str());
 
   command += " $(";
   command += this->CreateMakeVariable(name, "_SRC_OBJS") + ")";
@@ -546,7 +541,7 @@ void cmNMakeMakefileGenerator::OutputExecutableRule(std::ostream& fout,
   m_Makefile->ExpandVariablesInString(output_executable_file_flag);
 
   command += " " + output_executable_file_flag + 
-    cmSystemTools::EscapeSpaces(path.c_str());
+    this->ConvertToOutputPath(path.c_str());
 
   command += " $(CMAKE_C_LINK_EXECUTABLE_FLAG) ";
   if(t.GetType() == cmTarget::WIN32_EXECUTABLE)
@@ -605,7 +600,7 @@ void cmNMakeMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
       if(emitted.insert(libpath).second)
         {
         linkLibs += lib_path_opt;
-        cmSystemTools::ConvertToWindowsSlashes(libpath);
+        this->ConvertToOutputPath(libpath.c_str());
         linkLibs += libpath;
         linkLibs += " ";
         }
@@ -698,26 +693,21 @@ void cmNMakeMakefileGenerator::OutputBuildLibraryInDir(std::ostream& fout,
 						       const char* fullpath)
 {
 
-  std::string currentDir = m_Makefile->GetCurrentOutputDirectory();
-  cmSystemTools::ConvertToWindowsSlashes(currentDir);
-  std::string wpath = cmSystemTools::EscapeSpaces(path);
-  cmSystemTools::ConvertToWindowsSlashes(wpath);
-  std::string wfullpath = cmSystemTools::EscapeSpaces(fullpath);
-  cmSystemTools::ConvertToWindowsSlashes(wfullpath);
+  std::string currentDir = 
+    this->ConvertToOutputPath(m_Makefile->GetCurrentOutputDirectory());
+  std::string wpath = this->ConvertToOutputPath(path);
+  std::string wfullpath = this->ConvertToOutputPath(fullpath);
   fout << wfullpath
        << ":\n\tcd " << wpath  << "\n"
        << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.depends\n"
        << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.check_depends\n"
        << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) -f cmake.check_depends\n"
        << "\t$(MAKE) $(MAKESILENT) " << wfullpath
-       << "\n\tcd " <<
-    cmSystemTools::EscapeSpaces(currentDir.c_str()) << "\n";
+       << "\n\tcd " << currentDir << "\n";
 }
 
 
-std::string cmNMakeMakefileGenerator::ConvertToNativePath(const char* s)
+std::string cmNMakeMakefileGenerator::ConvertToOutputPath(const char* s)
 {
-  std::string ret = s;
-  cmSystemTools::ConvertToWindowsSlashes(ret);
-  return ret;
+  return cmSystemTools::ConvertToOutputPath(s);
 }

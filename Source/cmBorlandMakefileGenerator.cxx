@@ -101,18 +101,18 @@ void cmBorlandMakefileGenerator::OutputMakeVariables(std::ostream& fout)
   m_Makefile->ExpandVariablesInString(replaceVars);
   
   std::string ccompiler = m_Makefile->GetDefinition("CMAKE_C_COMPILER");
-  cmSystemTools::ConvertToWindowsSlashes(ccompiler);
-  fout << "CMAKE_C_COMPILER  = " << cmSystemTools::EscapeSpaces(ccompiler.c_str())
+  fout << "CMAKE_C_COMPILER  = " 
+       << this->ConvertToOutputPath(ccompiler.c_str())
        << "\n";
   std::string cxxcompiler = m_Makefile->GetDefinition("CMAKE_CXX_COMPILER");
-  cmSystemTools::ConvertToWindowsSlashes(cxxcompiler);
-  fout << "CMAKE_CXX_COMPILER  = " << cmSystemTools::EscapeSpaces(cxxcompiler.c_str())
+  fout << "CMAKE_CXX_COMPILER  = "
+       << this->ConvertToOutputPath(cxxcompiler.c_str())
        << "\n";
 
   
   std::string cmakecommand = m_Makefile->GetDefinition("CMAKE_COMMAND");
-  cmSystemTools::ConvertToWindowsSlashes(cmakecommand);
-  fout << "CMAKE_COMMAND = " << cmSystemTools::EscapeSpaces(cmakecommand.c_str()) << "\n";
+  fout << "CMAKE_COMMAND = " 
+       << this->ConvertToOutputPath(cmakecommand.c_str()) << "\n";
 
   fout << replaceVars.c_str();
   fout << "CMAKE_CURRENT_SOURCE = " 
@@ -130,17 +130,15 @@ void cmBorlandMakefileGenerator::OutputMakeVariables(std::ostream& fout)
   fout << "INCLUDE_FLAGS = ";
   std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();
   std::vector<std::string>::iterator i;
-  fout << "-I" << cmSystemTools::EscapeSpaces(m_Makefile->GetStartDirectory()) << " ";
+  fout << "-I" << 
+    this->ConvertToOutputPath(m_Makefile->GetStartDirectory()) << " ";
   for(i = includes.begin(); i != includes.end(); ++i)
     {
     std::string include = *i;
     // Don't output a -I for the standard include path "/usr/include".
     // This can cause problems with certain standard library
     // implementations because the wrong headers may be found first.
-    if(include != "/usr/include")
-      {
-      fout << "-I" << cmSystemTools::EscapeSpaces(i->c_str()).c_str() << " ";
-      }
+    fout << "-I" << this->ConvertToOutputPath(i->c_str()).c_str() << " ";
     } 
   fout << m_Makefile->GetDefineFlags();
   fout << "\n\n";
@@ -168,7 +166,7 @@ OutputBuildObjectFromSource(std::ostream& fout,
   std::string comment = "Build ";
   std::string objectFile = std::string(shortName) + 
     this->GetOutputExtension(source.GetSourceExtension().c_str());
-  cmSystemTools::ConvertToWindowsSlashes(objectFile);
+  objectFile = this->ConvertToOutputPath(objectFile.c_str());
   comment += objectFile + "  From ";
   comment += source.GetFullPath();
   std::string compileCommand;
@@ -185,7 +183,7 @@ OutputBuildObjectFromSource(std::ostream& fout,
     compileCommand += objectFile;
     compileCommand += " $(INCLUDE_FLAGS) -c ";
     compileCommand += 
-      cmSystemTools::EscapeSpaces(source.GetFullPath().c_str());
+      this->ConvertToOutputPath(source.GetFullPath().c_str());
     }
   else if (ext == "rc")
     {
@@ -193,7 +191,7 @@ OutputBuildObjectFromSource(std::ostream& fout,
     compileCommand += objectFile;
     compileCommand += "\" ";
     compileCommand += 
-      cmSystemTools::EscapeSpaces(source.GetFullPath().c_str());
+      this->ConvertToOutputPath(source.GetFullPath().c_str());
     }
   else if (ext == "def")
     {
@@ -213,12 +211,12 @@ OutputBuildObjectFromSource(std::ostream& fout,
     compileCommand += objectFile;
     compileCommand += " $(INCLUDE_FLAGS) -c ";
     compileCommand += 
-      cmSystemTools::EscapeSpaces(source.GetFullPath().c_str());
+      this->ConvertToOutputPath(source.GetFullPath().c_str());
     }
   this->OutputMakeRule(fout,
                        comment.c_str(),
                        objectFile.c_str(),
-                       cmSystemTools::EscapeSpaces(
+                       this->ConvertToOutputPath(
                          source.GetFullPath().c_str()).c_str(),
                        compileCommand.c_str());
 }
@@ -230,10 +228,8 @@ void cmBorlandMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
   std::string target = m_LibraryOutputPath + name;
   std::string libpath = target + ".lib";
   target += ".dll";
-  cmSystemTools::ConvertToWindowsSlashes(libpath);
-  cmSystemTools::ConvertToWindowsSlashes(target);
-  target = cmSystemTools::EscapeSpaces(target.c_str());
-  libpath = cmSystemTools::EscapeSpaces(libpath.c_str());
+  target = this->ConvertToOutputPath(target.c_str());
+  libpath = this->ConvertToOutputPath(libpath.c_str());
   std::string depend = "$(";
   depend += this->CreateMakeVariable(name, "_SRC_OBJS");
   depend += ") $(" + this->CreateMakeVariable(name, "_DEPEND_LIBS") + ")";
@@ -290,8 +286,7 @@ void cmBorlandMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout,
                                                        const cmTarget &t)
 {
   std::string target = m_LibraryOutputPath + std::string(name) + ".lib";
-  cmSystemTools::ConvertToWindowsSlashes(target);
-  target = cmSystemTools::EscapeSpaces(target.c_str());
+  target = this->ConvertToOutputPath(target.c_str());
   std::string depend = "$(";
   depend += this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
   std::string command = "tlib  @&&|\n\t /p512 /a ";
@@ -326,8 +321,7 @@ void cmBorlandMakefileGenerator::OutputExecutableRule(std::ostream& fout,
                                                     const cmTarget &t)
 {
   std::string target = m_ExecutableOutputPath + name + m_ExecutableExtension;
-  cmSystemTools::ConvertToWindowsSlashes(target);
-  target = cmSystemTools::EscapeSpaces(target.c_str());
+  target = this->ConvertToOutputPath(target.c_str());
   std::string depend = "$(";
   depend += this->CreateMakeVariable(name, "_SRC_OBJS") + ") $(" + 
     this->CreateMakeVariable(name, "_DEPEND_LIBS") + ")";

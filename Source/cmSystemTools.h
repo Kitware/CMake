@@ -49,23 +49,6 @@ public:
   static void ExpandRegistryValues(std::string& source);
 
   /**
-   * make sure on windows that paths with // are converted to \\
-   */
-  static std::string HandleNetworkPaths(const char*);
-
-  /**
-   * Return a string equivalent to the input string, but with all " " replaced
-   * with "\ " to escape the spaces.
-   */
-  static std::string EscapeSpaces(const char*);
-  
-  /**
-   * Return a string equivalent to the input string, but with all " replaced
-   * with \"  to escape the quote
-   */
-  static std::string EscapeQuotes(const char*);
-
-  /**
    * Return a capitalized string (i.e the first letter is uppercased, all other
    * are lowercased).
    */
@@ -84,19 +67,23 @@ public:
   /**
    * Replace Windows file system slashes with Unix-style slashes.
    */
-  static const char *ConvertToUnixSlashes(std::string& path);
+  static void ConvertToUnixSlashes(std::string& path);
+  
+  /**
+   * Platform independent escape spaces, unix uses backslash,
+   * windows double quotes the string.
+   */
+  static std::string EscapeSpaces(const char* str);
+
+  ///! Escape quotes in a string.
+  static std::string EscapeQuotes(const char* str);
 
   /**
-   * Replace Unix file system slashes with Windows-style slashes
+   * For windows this calles ConvertToWindowsOutputPath and for unix
+   * it calls ConvertToUnixOutputPath
    */
-  static const char *ConvertToWindowsSlashes(std::string& path);
-
-  /**
-   * Replace Unix file system slashes with Windows-style slashes and
-   * remove any duplicate \\ slashes to clean the path.
-   */
-  static const char *ConvertToWindowsSlashesAndCleanUp(std::string& path);
-
+  static std::string ConvertToOutputPath(const char*);
+  
   ///! Return true if a file exists in the current directory.
   static bool FileExists(const char* filename);
 
@@ -265,7 +252,23 @@ public:
   static void DisableMessages() { s_DisableMessages = true; }
   static void DisableRunCommandOutput() {s_DisableRunCommandOutput = true; }
   static void EnableRunCommandOutput() {s_DisableRunCommandOutput = false; }
+protected:
+  // these two functions can be called from ConvertToOutputPath
+  /**
+   * Convert the path to a string that can be used in a unix makefile.
+   * double slashes are removed, and spaces are escaped.
+   */
+  static std::string ConvertToUnixOutputPath(const char*);
   
+  /**
+   * Convert the path to string that can be used in a windows project or
+   * makefile.   Double slashes are removed if they are not at the start of
+   * the string, the slashes are converted to windows style backslashes, and
+   * if there are spaces in the string it is double quoted.
+   */
+  static std::string ConvertToWindowsOutputPath(const char*);
+  
+
 private:
   static bool s_ErrorOccured;
   static bool s_DisableMessages;

@@ -303,62 +303,7 @@ void cmSystemTools::ExpandRegistryValues(std::string& source)
 }
 
 
-std::string cmSystemTools::HandleNetworkPaths(const char* str)
-{
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  std::string result;
-  // watch for network paths, MSVC can't seem to load // 
-  if (strlen(str) > 2 && str[0] == '/' && str[1] == '/')
-    {
-    result = "\\\\";
-    result += (str + 2);
-    }
-  else
-    {
-    result += str;
-    }
-#else
-  std::string result = "";
-#endif
-  return result;
-}
 
-std::string cmSystemTools::EscapeSpaces(const char* str)
-{
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  std::string result;
-  
-  // if there are spaces
-  std::string temp = str;
-  if (temp.find(" ") != std::string::npos)
-    {
-    // don't add quotes if they're already there
-    if (temp.find("\"")==std::string::npos)
-      {
-      result = "\"";
-      }
-    result += cmSystemTools::HandleNetworkPaths(str);
-    if (temp.find("\"")==std::string::npos)
-      {
-      result += "\"";
-      }
-    return result;
-    }
-  return cmSystemTools::HandleNetworkPaths(str);
-  
-#else
-  std::string result = "";
-  for(const char* ch = str; *ch != '\0'; ++ch)
-    {
-    if(*ch == ' ')
-      {
-      result += '\\';
-      }
-    result += *ch;
-    }
-  return result;
-#endif
-}
 
 std::string cmSystemTools::EscapeQuotes(const char* str)
 {
@@ -449,7 +394,7 @@ std::string cmSystemTools::UpperCase(const std::string& s)
 
 
 // convert windows slashes to unix slashes \ with /
-const char *cmSystemTools::ConvertToUnixSlashes(std::string& path)
+void cmSystemTools::ConvertToUnixSlashes(std::string& path)
 {
   std::string::size_type pos = 0;
   while((pos = path.find('\\', pos)) != std::string::npos)
@@ -478,41 +423,113 @@ const char *cmSystemTools::ConvertToUnixSlashes(std::string& path)
     {
     path = path.substr(8);
     }
-  
-  return path.c_str();
 }
 
-// convert windows slashes to unix slashes 
-const char *cmSystemTools::ConvertToWindowsSlashes(std::string& path)
+
+// change // to /, and escape any spaces in the path
+std::string cmSystemTools::ConvertToUnixOutputPath(const char* path)
 {
+  std::string ret = path;
+  
+  // remove //
   std::string::size_type pos = 0;
-  while((pos = path.find('/', pos)) != std::string::npos)
+  while((pos = ret.find("//", pos)) != std::string::npos)
     {
-    path[pos] = '\\';
+    ret.erase(pos, 1);
+    }
+  // now escape spaces if there is a space in the path
+  if(ret.find(" ") != std::string::npos)
+    {
+    std::string result = "";
+    for(const char* ch = ret.c_str(); *ch != '\0'; ++ch)
+      {
+      if(*ch == ' ')
+        {
+        result += '\\';
+        }
+      result += *ch;
+      }
+    ret = result;
+    }
+  return ret;
+}
+
+
+
+std::string cmSystemTools::EscapeSpaces(const char* str)
+{
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  std::string result;
+  
+  // if there are spaces
+  std::string temp = str;
+  if (temp.find(" ") != std::string::npos && 
+      temp.find("\"")==std::string::npos)
+    {
+    result = "\"";
+    result += str;
+    result += "\"";
+    return result;
+    }
+  return str;
+#else
+  std::string result = "";
+  for(const char* ch = str; *ch != '\0'; ++ch)
+    {
+    if(*ch == ' ')
+      {
+      result += '\\';
+      }
+    result += *ch;
+    }
+  return result;
+#endif
+}
+
+std::string cmSystemTools::ConvertToOutputPath(const char* path)
+{
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  return cmSystemTools::ConvertToWindowsOutputPath(path);
+#else
+  return cmSystemTools::ConvertToUnixOutputPath(path);
+#endif
+}
+
+
+// remove double slashes not at the start
+std::string cmSystemTools::ConvertToWindowsOutputPath(const char* path)
+{  
+  std::string ret = path;
+  std::string::size_type pos = 0;
+  // first convert all of the slashes
+  while((pos = ret.find('/', pos)) != std::string::npos)
+    {
+    ret[pos] = '\\';
     pos++;
     }
-  // remove any trailing slash
-  if(path[path.size()-1] == '\\')
+  // check for really small paths
+  if(ret.size() < 2)
     {
-    path = path.substr(0, path.size()-1);
+    return ret;
     }
-  return path.c_str();
-}
-
-// convert Unix slashes to Windows slashes and cleanup double slashes
-const char *cmSystemTools::ConvertToWindowsSlashesAndCleanUp(std::string& path)
-{
-  cmSystemTools::ConvertToWindowsSlashes(path);
-  std::string::size_type pos = 0;
-  if(path.size() > 1)
+  // now clean up a bit and remove double slashes
+  // Only if it is not the first position in the path which is a network
+  // path on windows
+  pos = 1; // start at position 1
+  while((pos = ret.find("\\\\", pos)) != std::string::npos)
     {
-      pos = 1;
-      while((pos = path.find("\\\\", pos)) != std::string::npos)
-	{
-	  path.erase(pos, 1);
-	}
+    ret.erase(pos, 1);
     }
-  return path.c_str();
+  // now double quote the path if it has spaces in it
+  // and is not already double quoted
+  if(ret.find(" ") != std::string::npos
+     && ret[0] != '\"')
+    {
+    std::string result;
+    result = "\"" + ret + "\"";
+    ret = result;
+    }
+  return ret;
 }
 
 bool cmSystemTools::ParseFunction(std::ifstream& fin,
