@@ -251,6 +251,9 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
                                                   const char* targetLibrary,
                                                   const cmTarget &tgt)
 {
+  // Try to emit each search path once
+  std::set<std::string> emitted;
+
   // collect all the flags needed for linking libraries
   std::string linkLibs;        
   std::vector<std::string>& libdirs = m_Makefile->GetLinkDirectories();
@@ -260,16 +263,20 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
     std::string libpath = cmSystemTools::EscapeSpaces(libDir->c_str());
     if(libpath != "/usr/lib")
       {
-      std::string::size_type pos = libDir->find("-L");
-      if((pos == std::string::npos || pos > 0)
-         && libDir->find("${") == std::string::npos)
+      if(emitted.insert(libpath).second)
         {
-        linkLibs += "-L";
+        std::string::size_type pos = libDir->find("-L");
+        if((pos == std::string::npos || pos > 0)
+           && libDir->find("${") == std::string::npos)
+          {
+          linkLibs += "-L";
+          }
+        linkLibs += libpath;
+        linkLibs += " ";
         }
-      linkLibs += libpath;
-      linkLibs += " ";
       }
     }
+
   std::string librariesLinked;
   const cmTarget::LinkLibraries& libs = tgt.GetLinkLibraries();
   cmRegularExpression reg("lib(.*)(\\.so$|\\.a|\\.sl$)");
@@ -294,9 +301,12 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
       std::string libpath = cmSystemTools::EscapeSpaces(dir.c_str());
       if(libpath != "/usr/lib")
         {
-        linkLibs += "-L";
-        linkLibs += libpath;
-        linkLibs += " ";
+        if(emitted.insert(libpath).second)
+          {
+          linkLibs += "-L";
+          linkLibs += libpath;
+          linkLibs += " ";
+          }
         }
       cmRegularExpression libname("lib(.*)\\.(.*)");
       if(libname.find(file))
@@ -318,6 +328,7 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
       librariesLinked += " ";
       }
     }
+
   linkLibs += librariesLinked;
 
   if(!targetLibrary)
