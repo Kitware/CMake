@@ -14,33 +14,33 @@
 
 =========================================================================*/
 #include "cmMakefile.h"
-#include "cmRuleMaker.h"
+#include "cmCommand.h"
 #include "cmStandardIncludes.h"
 #include "cmClassFile.h"
 #include "cmDirectory.h"
 #include "cmSystemTools.h"
 #include "cmMakefileGenerator.h"
 
-#include "cmAbstractFilesRule.h"
-#include "cmAddTargetRule.h"
-#include "cmAuxSourceDirectoryRule.h"
-#include "cmExecutablesRule.h"
-#include "cmFindIncludeRule.h"
-#include "cmFindLibraryRule.h"
-#include "cmFindProgramRule.h"
-#include "cmIncludeDirectoryRule.h"
-#include "cmLibraryRule.h"
-#include "cmLinkDirectoriesRule.h"
-#include "cmLinkLibrariesRule.h"
-#include "cmProjectRule.h"
-#include "cmSourceFilesRule.h"
-#include "cmSourceFilesRequireRule.h"
-#include "cmSubdirRule.h"
-#include "cmUnixDefinesRule.h"
-#include "cmUnixLibrariesRule.h"
-#include "cmWin32DefinesRule.h"
-#include "cmWin32LibrariesRule.h"
-#include "cmTestsRule.h"
+#include "cmAbstractFilesCommand.h"
+#include "cmAddTargetCommand.h"
+#include "cmAuxSourceDirectoryCommand.h"
+#include "cmExecutablesCommand.h"
+#include "cmFindIncludeCommand.h"
+#include "cmFindLibraryCommand.h"
+#include "cmFindProgramCommand.h"
+#include "cmIncludeDirectoryCommand.h"
+#include "cmLibraryCommand.h"
+#include "cmLinkDirectoriesCommand.h"
+#include "cmLinkLibrariesCommand.h"
+#include "cmProjectCommand.h"
+#include "cmSourceFilesCommand.h"
+#include "cmSourceFilesRequireCommand.h"
+#include "cmSubdirCommand.h"
+#include "cmUnixDefinesCommand.h"
+#include "cmUnixLibrariesCommand.h"
+#include "cmWin32DefinesCommand.h"
+#include "cmWin32LibrariesCommand.h"
+#include "cmTestsCommand.h"
 
 // default is not to be building executables
 cmMakefile::cmMakefile()
@@ -48,37 +48,37 @@ cmMakefile::cmMakefile()
   m_DefineFlags = " ";
   m_Executables = false;
   m_MakefileGenerator = 0;
-  this->AddDefaultRules();
+  this->AddDefaultCommands();
 }
 
-void cmMakefile::AddDefaultRules()
+void cmMakefile::AddDefaultCommands()
 {
-  this->AddRuleMaker(new cmAbstractFilesRule);
-  this->AddRuleMaker(new cmAddTargetRule);
-  this->AddRuleMaker(new cmAuxSourceDirectoryRule);
-  this->AddRuleMaker(new cmExecutablesRule);
-  this->AddRuleMaker(new cmFindIncludeRule);
-  this->AddRuleMaker(new cmFindLibraryRule);
-  this->AddRuleMaker(new cmFindProgramRule);
-  this->AddRuleMaker(new cmIncludeDirectoryRule);
-  this->AddRuleMaker(new cmLibraryRule);
-  this->AddRuleMaker(new cmLinkDirectoriesRule);
-  this->AddRuleMaker(new cmLinkLibrariesRule);
-  this->AddRuleMaker(new cmProjectRule);
-  this->AddRuleMaker(new cmSourceFilesRule);
-  this->AddRuleMaker(new cmSourceFilesRequireRule);
-  this->AddRuleMaker(new cmSubdirRule);
-  this->AddRuleMaker(new cmUnixLibrariesRule);
-  this->AddRuleMaker(new cmUnixDefinesRule);
-  this->AddRuleMaker(new cmWin32LibrariesRule);
-  this->AddRuleMaker(new cmWin32DefinesRule);
-  this->AddRuleMaker(new cmTestsRule);
+  this->AddCommand(new cmAbstractFilesCommand);
+  this->AddCommand(new cmAddTargetCommand);
+  this->AddCommand(new cmAuxSourceDirectoryCommand);
+  this->AddCommand(new cmExecutablesCommand);
+  this->AddCommand(new cmFindIncludeCommand);
+  this->AddCommand(new cmFindLibraryCommand);
+  this->AddCommand(new cmFindProgramCommand);
+  this->AddCommand(new cmIncludeDirectoryCommand);
+  this->AddCommand(new cmLibraryCommand);
+  this->AddCommand(new cmLinkDirectoriesCommand);
+  this->AddCommand(new cmLinkLibrariesCommand);
+  this->AddCommand(new cmProjectCommand);
+  this->AddCommand(new cmSourceFilesCommand);
+  this->AddCommand(new cmSourceFilesRequireCommand);
+  this->AddCommand(new cmSubdirCommand);
+  this->AddCommand(new cmUnixLibrariesCommand);
+  this->AddCommand(new cmUnixDefinesCommand);
+  this->AddCommand(new cmWin32LibrariesCommand);
+  this->AddCommand(new cmWin32DefinesCommand);
+  this->AddCommand(new cmTestsCommand);
 #ifdef _WIN32
   this->AddDefinition("WIN32", "1");
 #else
   this->AddDefinition("UNIX", "1");
 #endif
-  // Cygwin is more like unix so enable the unix rules
+  // Cygwin is more like unix so enable the unix commands
 #if defined(__CYGWIN__)
   this->AddDefinition("UNIX", "1");
 #endif
@@ -87,12 +87,12 @@ void cmMakefile::AddDefaultRules()
 
 cmMakefile::~cmMakefile()
 {
-  for(int i=0; i < m_UsedRuleMakers.size(); i++)
+  for(int i=0; i < m_UsedCommands.size(); i++)
     {
-    delete m_UsedRuleMakers[i];
+    delete m_UsedCommands[i];
     }
-  for(StringRuleMakerMap::iterator j = m_RuleMakers.begin();
-      j != m_RuleMakers.end(); ++j)
+  for(RegisteredCommandsMap::iterator j = m_Commands.begin();
+      j != m_Commands.end(); ++j)
     {
     delete (*j).second;
     }
@@ -162,8 +162,8 @@ bool cmMakefile::ReadMakefile(const char* filename, bool inheriting)
     {
     if(cmSystemTools::ParseFunction(fin, name, arguments) )
       {
-      // Special rule that needs to be removed when 
-      // ADD_RULE is implemented
+      // Special command that needs to be removed when 
+      // ADD_COMMAND is implemented
       if(name == "VERBATIM")
         {
         if(!inheriting)
@@ -173,23 +173,23 @@ bool cmMakefile::ReadMakefile(const char* filename, bool inheriting)
         }
       else
         {
-        StringRuleMakerMap::iterator pos = m_RuleMakers.find(name);
-        if(pos != m_RuleMakers.end())
+        RegisteredCommandsMap::iterator pos = m_Commands.find(name);
+        if(pos != m_Commands.end())
           {
-          cmRuleMaker* rm = (*pos).second;
-          cmRuleMaker* usedMaker = rm->Clone();
-          usedMaker->SetMakefile(this);
-          usedMaker->LoadCache();
-          m_UsedRuleMakers.push_back(usedMaker);
-          if(usedMaker->GetEnabled())
+          cmCommand* rm = (*pos).second;
+          cmCommand* usedCommand = rm->Clone();
+          usedCommand->SetMakefile(this);
+          usedCommand->LoadCache();
+          m_UsedCommands.push_back(usedCommand);
+          if(usedCommand->GetEnabled())
             {
             // if not running in inherit mode or
-            // if the rule is inherited then Invoke it.
-            if(!inheriting || usedMaker->IsInherited())
+            // if the command is inherited then Invoke it.
+            if(!inheriting || usedCommand->IsInherited())
               {
-              if(!usedMaker->Invoke(arguments))
+              if(!usedCommand->Invoke(arguments))
                 {
-                cmSystemTools::Error(usedMaker->GetError());
+                cmSystemTools::Error(usedCommand->GetError());
                 }
               }
             }
@@ -205,10 +205,10 @@ bool cmMakefile::ReadMakefile(const char* filename, bool inheriting)
 }
   
 
-void cmMakefile::AddRuleMaker(cmRuleMaker* wg)
+void cmMakefile::AddCommand(cmCommand* wg)
 {
   std::string name = wg->GetName();
-  m_RuleMakers.insert( StringRuleMakerMap::value_type(name, wg));
+  m_Commands.insert( RegisteredCommandsMap::value_type(name, wg));
 }
 
   // Set the make file 
@@ -225,10 +225,10 @@ void cmMakefile::GenerateMakefile()
   this->ExpandVaribles();
   // set the makefile on the generator
   m_MakefileGenerator->SetMakefile(this);
-  // give all the rules a chance to do something
+  // give all the commands a chance to do something
   // after the file has been parsed before generation
-  for(std::vector<cmRuleMaker*>::iterator i = m_UsedRuleMakers.begin();
-      i != m_UsedRuleMakers.end(); ++i)
+  for(std::vector<cmCommand*>::iterator i = m_UsedCommands.begin();
+      i != m_UsedCommands.end(); ++i)
     {
     (*i)->FinalPass();
     }
@@ -243,17 +243,17 @@ void cmMakefile::AddClass(cmClassFile& cmfile)
 
 
 
-void cmMakefile::AddCustomRule(const char* source,
+void cmMakefile::AddCustomCommand(const char* source,
                                const char* result,
                                const char* command,
                                std::vector<std::string>& depends)
 {
-  cmMakefile::customRule rule;
-  rule.m_Source = source;
-  rule.m_Result = result;
-  rule.m_Command = command;
-  rule.m_Depends = depends;
-  m_CustomRules.push_back(rule);
+  cmMakefile::customCommand customCommand;
+  customCommand.m_Source = source;
+  customCommand.m_Result = result;
+  customCommand.m_Command = command;
+  customCommand.m_Depends = depends;
+  m_CustomCommands.push_back(customCommand);
 }
 
 void cmMakefile::AddDefineFlag(const char* flag)
@@ -384,13 +384,13 @@ int cmMakefile::DumpDocumentationToFile(const char *fileName)
     return 0;
     }
   
-  // Loop over all registered rules and print out documentation
+  // Loop over all registered commands and print out documentation
   const char *name;
   const char *terse;
   const char *full;
 
-  for(StringRuleMakerMap::iterator j = m_RuleMakers.begin();
-      j != m_RuleMakers.end(); ++j)
+  for(RegisteredCommandsMap::iterator j = m_Commands.begin();
+      j != m_Commands.end(); ++j)
     {
     name = (*j).second->GetName();
     terse = (*j).second->GetTerseDocumentation();

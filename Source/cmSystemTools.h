@@ -65,7 +65,7 @@ public:
   static void ConvertCygwinPath(std::string& pathname);
 
   /**
-   * Read a CMake rule (or function) from an input file.  This
+   * Read a CMake command (or function) from an input file.  This
    * returns the name of the function and a list of its 
    * arguments.
    */

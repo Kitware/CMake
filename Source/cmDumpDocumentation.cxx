@@ -1,4 +1,4 @@
-// Program extracts documentation describing rules from
+// Program extracts documentation describing commands from
 // the CMake system.
 // 
 #include "cmMakefile.h"

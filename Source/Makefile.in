@@ -4,73 +4,73 @@ VPATH         = @srcdir@
 
 # DO NOT INCLUDE CMakeMaster.make here!
 # This will cause an infinite loop as it will add the
-# rule for changing into this directory
+# command for changing into this directory
 
 @MAKEINCLUDE@ @MAKEQUOTE@@CMAKE_CONFIG_DIR@/CMake/CMakeVariables.make@MAKEQUOTE@
-@MAKEINCLUDE@ @MAKEQUOTE@@CMAKE_CONFIG_DIR@/CMake/CMakeSimpleRules.make@MAKEQUOTE@
+@MAKEINCLUDE@ @MAKEQUOTE@@CMAKE_CONFIG_DIR@/CMake/CMakeSimpleCommands.make@MAKEQUOTE@
 
 OBJS = \
 CMakeBuildTargets.o  \
 cmMakeDepend.o \
 cmMakefile.o \
-cmAbstractFilesRule.o \
+cmAbstractFilesCommand.o \
 cmMakefileGenerator.o \
-cmAddTargetRule.o  \
-cmProjectRule.o \
-cmAuxSourceDirectoryRule.o \
+cmAddTargetCommand.o  \
+cmProjectCommand.o \
+cmAuxSourceDirectoryCommand.o \
 cmRegularExpression.o \
 cmClassFile.o \
-cmSourceFilesRule.o \
-cmSourceFilesRequireRule.o \
-cmSubdirRule.o \
+cmSourceFilesCommand.o \
+cmSourceFilesRequireCommand.o \
+cmSubdirCommand.o \
 cmSystemTools.o \
 cmDirectory.o \
-cmUnixDefinesRule.o \
-cmExecutablesRule.o \
-cmTestsRule.o \
-cmUnixLibrariesRule.o \
-cmFindIncludeRule.o \
-cmFindLibraryRule.o \
+cmUnixDefinesCommand.o \
+cmExecutablesCommand.o \
+cmTestsCommand.o \
+cmUnixLibrariesCommand.o \
+cmFindIncludeCommand.o \
+cmFindLibraryCommand.o \
 cmUnixMakefileGenerator.o \
-cmFindProgramRule.o \
-cmIncludeDirectoryRule.o \
-cmWin32DefinesRule.o \
-cmLibraryRule.o \
-cmWin32LibrariesRule.o \
-cmLinkDirectoriesRule.o \
-cmLinkLibrariesRule.o 
+cmFindProgramCommand.o \
+cmIncludeDirectoryCommand.o \
+cmWin32DefinesCommand.o \
+cmLibraryCommand.o \
+cmWin32LibrariesCommand.o \
+cmLinkDirectoriesCommand.o \
+cmLinkLibrariesCommand.o 
 
 
 cmCollectFlags.o : $(srcdir)/*.h 
 CMakeBuildTargets.o  : $(srcdir)/*.h
 cmMakeDepend.o : $(srcdir)/*.h
 cmMakefile.o : $(srcdir)/*.h
-cmAbstractFilesRule.o : $(srcdir)/*.h
+cmAbstractFilesCommand.o : $(srcdir)/*.h
 cmMakefileGenerator.o : $(srcdir)/*.h
-cmAddTargetRule.o  : $(srcdir)/*.h
-cmProjectRule.o : $(srcdir)/*.h
-cmAuxSourceDirectoryRule.o : $(srcdir)/*.h
+cmAddTargetCommand.o  : $(srcdir)/*.h
+cmProjectCommand.o : $(srcdir)/*.h
+cmAuxSourceDirectoryCommand.o : $(srcdir)/*.h
 cmRegularExpression.o : $(srcdir)/*.h
 cmClassFile.o : $(srcdir)/*.h
-cmSourceFilesRule.o : $(srcdir)/*.h
-cmSourceFilesRequireRule.o : $(srcdir)/*.h
-cmSubdirRule.o : $(srcdir)/*.h
+cmSourceFilesCommand.o : $(srcdir)/*.h
+cmSourceFilesRequireCommand.o : $(srcdir)/*.h
+cmSubdirCommand.o : $(srcdir)/*.h
 cmSystemTools.o : $(srcdir)/*.h
 cmDirectory.o : $(srcdir)/*.h
-cmUnixDefinesRule.o : $(srcdir)/*.h
-cmExecutablesRule.o : $(srcdir)/*.h
-cmTestsRule.o : $(srcdir)/*.h
-cmUnixLibrariesRule.o : $(srcdir)/*.h
-cmFindIncludeRule.o : $(srcdir)/*.h
-cmFindLibraryRule.o : $(srcdir)/*.h
+cmUnixDefinesCommand.o : $(srcdir)/*.h
+cmExecutablesCommand.o : $(srcdir)/*.h
+cmTestsCommand.o : $(srcdir)/*.h
+cmUnixLibrariesCommand.o : $(srcdir)/*.h
+cmFindIncludeCommand.o : $(srcdir)/*.h
+cmFindLibraryCommand.o : $(srcdir)/*.h
 cmUnixMakefileGenerator.o : $(srcdir)/*.h
-cmFindProgramRule.o : $(srcdir)/*.h
-cmIncludeDirectoryRule.o : $(srcdir)/*.h
-cmWin32DefinesRule.o : $(srcdir)/*.h
-cmLibraryRule.o : $(srcdir)/*.h
-cmWin32LibrariesRule.o : $(srcdir)/*.h
-cmLinkDirectoriesRule.o : $(srcdir)/*.h 
-cmLinkLibrariesRule.o  : $(srcdir)/*.h 
+cmFindProgramCommand.o : $(srcdir)/*.h
+cmIncludeDirectoryCommand.o : $(srcdir)/*.h
+cmWin32DefinesCommand.o : $(srcdir)/*.h
+cmLibraryCommand.o : $(srcdir)/*.h
+cmWin32LibrariesCommand.o : $(srcdir)/*.h
+cmLinkDirectoriesCommand.o : $(srcdir)/*.h 
+cmLinkLibrariesCommand.o  : $(srcdir)/*.h 
 
 
 CMakeBuildTargets: ${OBJS}

@@ -91,11 +91,11 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=.\cmAbstractFilesRule.cxx
+SOURCE=.\cmAbstractFilesCommand.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmAddTargetRule.cxx
+SOURCE=.\cmAddTargetCommand.cxx
 # End Source File
 # Begin Source File
 
@@ -103,7 +103,7 @@ SOURCE=.\CMakeSetupCMD.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmAuxSourceDirectoryRule.cxx
+SOURCE=.\cmAuxSourceDirectoryCommand.cxx
 # End Source File
 # Begin Source File
 
@@ -123,35 +123,35 @@ SOURCE=.\cmDSWMakefile.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmExecutablesRule.cxx
+SOURCE=.\cmExecutablesCommand.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmFindIncludeRule.cxx
+SOURCE=.\cmFindIncludeCommand.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmFindLibraryRule.cxx
+SOURCE=.\cmFindLibraryCommand.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmFindProgramRule.cxx
+SOURCE=.\cmFindProgramCommand.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmIncludeDirectoryRule.cxx
+SOURCE=.\cmIncludeDirectoryCommand.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmLibraryRule.cxx
+SOURCE=.\cmLibraryCommand.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmLinkDirectoriesRule.cxx
+SOURCE=.\cmLinkDirectoriesCommand.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmLinkLibrariesRule.cxx
+SOURCE=.\cmLinkLibrariesCommand.cxx
 # End Source File
 # Begin Source File
 
@@ -171,7 +171,7 @@ SOURCE=.\cmMSProjectGenerator.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmProjectRule.cxx
+SOURCE=.\cmProjectCommand.cxx
 # End Source File
 # Begin Source File
 
@@ -179,15 +179,15 @@ SOURCE=.\cmRegularExpression.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmSourceFilesRequireRule.cxx
+SOURCE=.\cmSourceFilesRequireCommand.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmSourceFilesRule.cxx
+SOURCE=.\cmSourceFilesCommand.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmSubdirRule.cxx
+SOURCE=.\cmSubdirCommand.cxx
 # End Source File
 # Begin Source File
 
@@ -195,23 +195,23 @@ SOURCE=.\cmSystemTools.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmTestsRule.cxx
+SOURCE=.\cmTestsCommand.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmUnixDefinesRule.cxx
+SOURCE=.\cmUnixDefinesCommand.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmUnixLibrariesRule.cxx
+SOURCE=.\cmUnixLibrariesCommand.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmWin32DefinesRule.cxx
+SOURCE=.\cmWin32DefinesCommand.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmWin32LibrariesRule.cxx
+SOURCE=.\cmWin32LibrariesCommand.cxx
 # End Source File
 # Begin Source File
 
@@ -223,15 +223,15 @@ SOURCE=.\cmWindowsConfigure.cxx
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
-SOURCE=.\cmAbstractFilesRule.h
+SOURCE=.\cmAbstractFilesCommand.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmAddTargetRule.h
+SOURCE=.\cmAddTargetCommand.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmAuxSourceDirectoryRule.h
+SOURCE=.\cmAuxSourceDirectoryCommand.h
 # End Source File
 # Begin Source File
 
@@ -251,35 +251,35 @@ SOURCE=.\cmDSWMakefile.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmExecutablesRule.h
+SOURCE=.\cmExecutablesCommand.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmFindIncludeRule.h
+SOURCE=.\cmFindIncludeCommand.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmFindLibraryRule.h
+SOURCE=.\cmFindLibraryCommand.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmFindProgramRule.h
+SOURCE=.\cmFindProgramCommand.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmIncludeDirectoryRule.h
+SOURCE=.\cmIncludeDirectoryCommand.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmLibraryRule.h
+SOURCE=.\cmLibraryCommand.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmLinkDirectoriesRule.h
+SOURCE=.\cmLinkDirectoriesCommand.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmLinkLibrariesRule.h
+SOURCE=.\cmLinkLibrariesCommand.h
 # End Source File
 # Begin Source File
 
@@ -303,7 +303,7 @@ SOURCE=.\cmMSProjectGenerator.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmProjectRule.h
+SOURCE=.\cmProjectCommand.h
 # End Source File
 # Begin Source File
 
@@ -311,11 +311,11 @@ SOURCE=.\cmRegularExpression.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmRuleMaker.h
+SOURCE=.\cmCommand.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmSourceFilesRule.h
+SOURCE=.\cmSourceFilesCommand.h
 # End Source File
 # Begin Source File
 
@@ -323,7 +323,7 @@ SOURCE=.\cmStandardIncludes.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmSubdirRule.h
+SOURCE=.\cmSubdirCommand.h
 # End Source File
 # Begin Source File
 
@@ -331,23 +331,23 @@ SOURCE=.\cmSystemTools.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmTestsRule.h
+SOURCE=.\cmTestsCommand.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmUnixDefinesRule.h
+SOURCE=.\cmUnixDefinesCommand.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmUnixLibrariesRule.h
+SOURCE=.\cmUnixLibrariesCommand.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmWin32DefinesRule.h
+SOURCE=.\cmWin32DefinesCommand.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmWin32LibrariesRule.h
+SOURCE=.\cmWin32LibrariesCommand.h
 # End Source File
 # Begin Source File
 

@@ -36,7 +36,7 @@ public:
   void SetMakefile(cmMakefile*);
 
   /**
-   * Generate the makefile using the m_Makefile, m_CustomRules, 
+   * Generate the makefile using the m_Makefile, m_CustomCommands, 
    * and m_ExtraSourceFiles. All subclasses of cmMakefileGenerator
    * must implement this method.
    */

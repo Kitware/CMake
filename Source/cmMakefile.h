@@ -20,14 +20,14 @@
 #include "cmClassFile.h"
 #include "cmSystemTools.h"
 
-class cmRuleMaker;
+class cmCommand;
 class cmMakefileGenerator;
 
 /** \class cmMakefile
  * \brief Process the input CMakeLists.txt file.
  *
  * Process and store into memory the input CMakeLists.txt file.
- * Each CMakeLists.txt file is parsed and the rules found there
+ * Each CMakeLists.txt file is parsed and the commands found there
  * are added into the build process.
  */
 class cmMakefile
@@ -51,7 +51,7 @@ public:
   /**
    * Add a wrapper generator.
    */
-  void AddRuleMaker(cmRuleMaker* );
+  void AddCommand(cmCommand* );
 
   /**
    * Specify the makefile generator. This is platform/compiler
@@ -71,9 +71,9 @@ public:
   void Print();
   
   /**
-   * Add a custom rule to the build.
+   * Add a custom command to the build.
    */
-  void AddCustomRule(const char* source,
+  void AddCustomCommand(const char* source,
                      const char* result,
                      const char* command,
                      std::vector<std::string>& depends);
@@ -326,19 +326,19 @@ protected:
   std::vector<std::string> m_LinkLibrariesUnix;
   std::string m_DefineFlags;
   std::string m_SourceHomeDirectory;
-  struct customRule
+  struct customCommand
   {
     std::string m_Source;
     std::string m_Result;
     std::string m_Command;
     std::vector<std::string> m_Depends;
   };
-  std::vector<customRule> m_CustomRules;
-  typedef std::map<std::string, cmRuleMaker*> StringRuleMakerMap;
+  std::vector<customCommand> m_CustomCommands;
+  typedef std::map<std::string, cmCommand*> RegisteredCommandsMap;
   typedef std::map<std::string, std::string> DefinitionMap;
   DefinitionMap m_Definitions;
-  StringRuleMakerMap m_RuleMakers;
-  std::vector<cmRuleMaker*> m_UsedRuleMakers;
+  RegisteredCommandsMap m_Commands;
+  std::vector<cmCommand*> m_UsedCommands;
   cmMakefileGenerator* m_MakefileGenerator;
   
 private:
@@ -358,7 +358,7 @@ private:
   friend class cmMakeDepend;	// make depend needs direct access 
 				// to the m_Classes array 
   void PrintStringVector(const char* s, std::vector<std::string>& v);
-  void AddDefaultRules();
+  void AddDefaultCommands();
   
 };
 
