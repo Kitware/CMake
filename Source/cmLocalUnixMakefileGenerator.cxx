@@ -2836,7 +2836,6 @@ OutputBuildObjectFromSource(std::ostream& fout,
       return;
     case cmSystemTools::RESOURCE_FILE_FORMAT:
       {
-      flags = " $(INCLUDE_FLAGS) ";
       // use rc rule here if it is defined
       const char* rule = m_Makefile->GetDefinition("CMAKE_COMPILE_RESOURCE");
       if(rule)
