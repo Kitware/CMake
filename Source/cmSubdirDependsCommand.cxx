@@ -43,18 +43,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // cmSubdirDependsCommand
 bool cmSubdirDependsCommand::InitialPass(std::vector<std::string> const& args)
 {
-  if(args.size() < 2)
-    {
-    this->SetError("called with incorrect number of arguments");
-    return false;
-    }
-  std::vector<std::string>::const_iterator i = args.begin();
-  std::string subdir = *i;
-  
-  for(++i; i != args.end(); ++i)
-    {
-    m_Makefile->AddSubdirDependency(subdir.c_str(), i->c_str());
-    }
   return true;
 }
 

@@ -45,15 +45,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmCommand.h"
 
 /** \class cmSubdirDependsCommand
- * \brief Specify a set of subdirectories which must be built before the
- * given subdirectory.
+ * \brief Legacy command.  Do not use.
  *
- * cmSubdirDependsCommand specifies for one entry of a SUBDIRS command
- * a set of the other entries that must be built before it.  CMake
- * will still walk the subdirectories in the order in which they
- * appear in a SUBDIRS command, but the generated makefiles will be
- * setup to be sure one directory is finished before another begins.
- * This allows parallel builds to work correctly.
+ * cmSubdirDependsCommand has been left in CMake for compatability with
+ * projects already using it.  Its functionality in supporting parallel
+ * builds is now automatic.  The command does not do anything.
  */
 class cmSubdirDependsCommand : public cmCommand
 {
@@ -82,7 +78,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Add a set of subdirectories on which another subdirectory depends.";
+    return "Legacy command.  Does nothing.";
     }
   
   /**
@@ -92,9 +88,8 @@ public:
     {
     return
       "SUBDIR_DEPENDS(subdir dep1 dep2 ...)\n"
-      "Add a set of subdirectories on which \"subdir\" depends.\n"
-      "This sets up the generated makefiles to build the subdirectries dep1, "
-      "dep2, ... before \"subdir\" itself.";
+      "Does not do anything.  This command used to help projects order\n"
+      "parallel builds correctly.  This functionality is now automatic.";
     }
   
   cmTypeMacro(cmSubdirDependsCommand, cmCommand);

@@ -1013,18 +1013,22 @@ OutputSubDirectoryVars(std::ostream& fout,
       }
     }
   fout << "# Targets for making " << target << " in subdirectories.\n";
+  std::string last = "";
   for(unsigned int i =0; i < SubDirectories.size(); i++)
     {
     std::string subdir = FixDirectoryName(SubDirectories[i].c_str());
     fout << target << "_" << subdir.c_str() << ":";
-    const std::set<cmStdString>& subdirDepends = m_Makefile->GetSubdirDepends(SubDirectories[i].c_str());
-    for(std::set<cmStdString>::const_iterator d = subdirDepends.begin();
-        d != subdirDepends.end(); ++d)
+    
+    // Make each subdirectory depend on previous one.  This forces
+    // parallel builds (make -j 2) to build in same order as a single
+    // threaded build to avoid dependency problems.
+    if(i > 0)
       {
-      std::string fixed_d = FixDirectoryName(d->c_str());
-      fout << " " << target << "_" << fixed_d.c_str();
+      fout << " " << target << "_" << last.c_str();
       }
+    
     fout << "\n";
+    last = subdir;
     this->BuildInSubDirectory(fout, SubDirectories[i].c_str(),
                               target1, target2);
     }

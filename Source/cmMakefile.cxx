@@ -560,12 +560,6 @@ void cmMakefile::AddSubDirectory(const char* sub)
   m_SubDirectories.push_back(sub);
 }
 
-void cmMakefile::AddSubdirDependency(const char* subdir,
-                                     const char* dependency)
-{
-  m_SubdirDepends[subdir].insert(dependency);
-}
-
 void cmMakefile::AddIncludeDirectory(const char* inc, bool before)
 {
   // Don't add an include directory that is already present.  Yes,
@@ -812,12 +806,26 @@ std::string cmMakefile::GetParentListFileName(const char *currentFileName)
   // is there a CMakeLists.txt file in the parent directory ?
   parentFile = listsDir;
   parentFile += "/CMakeLists.txt";
-  if(!cmSystemTools::FileExists(parentFile.c_str()))
+  while(!cmSystemTools::FileExists(parentFile.c_str()))
     {
-    parentFile = "";
-    return parentFile;
+    // There is no CMakeLists.txt file in the parent directory.  This
+    // can occur when coming out of a subdirectory resulting from a
+    // SUBDIRS(Foo/Bar) command (coming out of Bar into Foo).  Try
+    // walking up until a CMakeLists.txt is found or the home
+    // directory is hit.
+    
+    // if we are in the home directory then stop, return 0
+    if(m_cmHomeDirectory == listsDir) { return ""; }
+    
+    // is there a parent directory we can check
+    pos = listsDir.rfind('/');
+    // if we could not find the directory return 0
+    if(pos == std::string::npos) { return ""; }
+    listsDir = listsDir.substr(0, pos);
+    parentFile = listsDir;
+    parentFile += "/CMakeLists.txt";
     }
-  
+    
   return parentFile;
 }
 
