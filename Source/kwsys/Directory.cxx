@@ -81,6 +81,11 @@ namespace KWSYS_NAMESPACE
 
 bool Directory::Load(const char* name)
 {
+#if _MSC_VER < 1300
+  long srchHandle;
+#else
+  intptr_t srchHandle;
+#endif
   char* buf;
   size_t n = strlen(name);
   if ( name[n - 1] == '/' ) 
@@ -96,7 +101,7 @@ bool Directory::Load(const char* name)
   struct _finddata_t data;      // data of current file
   
   // Now put them into the file array
-  intptr_t srchHandle = _findfirst(buf, &data);
+  srchHandle = _findfirst(buf, &data);
   delete [] buf;
   
   if ( srchHandle == -1 )
