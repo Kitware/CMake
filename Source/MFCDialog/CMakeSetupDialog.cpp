@@ -8,6 +8,7 @@
 #include "../cmMSProjectGenerator.h"
 #include "../cmCacheManager.h"
 #include "../cmMakefile.h"
+#include "../cmake.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -75,6 +76,13 @@ CMakeSetupDialog::CMakeSetupDialog(CWnd* pParent /*=NULL*/)
   // Note that LoadIcon does not require a subsequent DestroyIcon in Win32
   m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
   m_BuildPathChanged = false;
+  // Find the path to the cmake.exe executable
+  char fname[1024];
+  ::GetModuleFileName(NULL,fname,1023);
+  // extract just the path part
+  m_PathToExecutable = cmSystemTools::GetProgramPath(fname).c_str();
+  // add the cmake.exe to the path
+  m_PathToExecutable += "/cmake.exe";
 }
 
 void CMakeSetupDialog::DoDataExchange(CDataExchange* pDX)
@@ -412,8 +420,9 @@ void CMakeSetupDialog::OnBuildProjects()
       return;
       }
     }
+  // set the wait cursor
   ::SetCursor(LoadCursor(NULL, IDC_WAIT));
-  // get all the info from the screen
+  // get all the info from the dialog
   this->UpdateData();
   if(!m_BuildPathChanged)
     {
@@ -423,34 +432,32 @@ void CMakeSetupDialog::OnBuildProjects()
     }
   // Make sure we are working from the cache on disk
   this->LoadCacheFromDiskToGUI();
-
-// duh
-  // Create a makefile object
-  cmMakefile makefile;
-  makefile.SetMakefileGenerator(new cmMSProjectGenerator);
-  makefile.GetMakefileGenerator()->ComputeSystemInfo();
-  makefile.SetHomeDirectory(m_WhereSource);
-  makefile.SetStartOutputDirectory(m_WhereBuild);
-  makefile.SetHomeOutputDirectory(m_WhereBuild);
-  makefile.SetStartDirectory(m_WhereSource);
-  makefile.MakeStartDirectoriesCurrent();
-  CString makefileIn = m_WhereSource;
-  makefileIn += "/CMakeLists.txt";
-  makefile.ReadListFile(makefileIn); 
-  // Generate the project files
-  makefile.GenerateMakefile();
-  // Save the cache
-  cmCacheManager::GetInstance()->SaveCache(&makefile);
-// end duh
-  
+  // create a cmake object
+  cmake make;
+  // create the arguments for the cmake object
+  std::vector<std::string> args;
+  args.push_back((const char*)m_PathToExecutable);
+  std::string arg;
+  arg = "-H";
+  arg += m_WhereSource;
+  args.push_back(arg);
+  arg = "-B";
+  arg += m_WhereBuild;
+  args.push_back(arg);
+  // run the generate process
+  if(make.Generate(args) != 0)
+    {
+    cmSystemTools::Error(
+      "Error in generation process, project files may be invalid");
+    }
   // update the GUI with any new values in the caused by the
   // generation process
   this->LoadCacheFromDiskToGUI();
-  cmCacheManager::GetInstance()->DefineCache(&makefile);
   // save source and build paths to registry
   this->SaveToRegistry();
-  // path is not up-to-date
+  // path is up-to-date now
   m_BuildPathChanged = false;
+  // put the cursor back
   ::SetCursor(LoadCursor(NULL, IDC_ARROW));
 }
 
@@ -460,7 +467,8 @@ void CMakeSetupDialog::OnBuildProjects()
 // callback for combo box menu where build selection
 void CMakeSetupDialog::OnSelendokWhereBuild() 
 {
-  m_WhereBuildControl.GetLBText(m_WhereBuildControl.GetCurSel(), m_WhereBuild);
+  m_WhereBuildControl.GetLBText(m_WhereBuildControl.GetCurSel(), 
+                                m_WhereBuild);
   this->UpdateData(FALSE);
   this->OnChangeWhereBuild();
 }
@@ -468,7 +476,8 @@ void CMakeSetupDialog::OnSelendokWhereBuild()
 // callback for combo box menu where source selection
 void CMakeSetupDialog::OnSelendokWhereSource() 
 {
-  m_WhereSourceControl.GetLBText(m_WhereSourceControl.GetCurSel(), m_WhereSource);
+  m_WhereSourceControl.GetLBText(m_WhereSourceControl.GetCurSel(), 
+                                 m_WhereSource);
   this->UpdateData(FALSE);
   this->OnChangeWhereSource();
 }
@@ -557,7 +566,8 @@ void CMakeSetupDialog::FillCacheManagerFromCacheGUI()
     {
     CPropertyItem* item = *i; 
     cmCacheManager::CacheEntry *entry = 
-      cmCacheManager::GetInstance()->GetCacheEntry((const char*)item->m_propName);
+      cmCacheManager::GetInstance()->GetCacheEntry(
+        (const char*)item->m_propName);
     if (entry)
       {
       entry->m_Value = item->m_curValue;
@@ -573,27 +583,6 @@ void CMakeSetupDialog::LoadCacheFromDiskToGUI()
   if(m_WhereBuild != "")
     {
     cmCacheManager::GetInstance()->LoadCache(m_WhereBuild);
-    
-    // Find our own exectuable.
-    char fname[1024];
-    ::GetModuleFileName(NULL,fname,1023);
-    std::string root = cmSystemTools::GetProgramPath(fname);
-    std::string::size_type slashPos = root.rfind("/");
-    if(slashPos != std::string::npos)      
-      {
-      root = root.substr(0, slashPos);
-      }
-    cmCacheManager::GetInstance()->AddCacheEntry
-      ("CMAKE_ROOT", root.c_str(),
-       "Path to CMake installation.", cmCacheManager::INTERNAL);
-    std::string cMakeCMD = "\""+cmSystemTools::GetProgramPath(fname);
-    cMakeCMD += "/cmake.exe\"";
-    
-    // Save the value in the cache
-    cmCacheManager::GetInstance()->AddCacheEntry("CMAKE_COMMAND",
-                                                 cMakeCMD.c_str(),
-                                                 "Path to CMake executable.",
-                                                 cmCacheManager::INTERNAL);
     this->FillCacheGUIFromCacheManager();
     }
 }

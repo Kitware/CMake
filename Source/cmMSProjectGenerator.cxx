@@ -78,6 +78,12 @@ void cmMSProjectGenerator::SetLocal(bool local)
 void cmMSProjectGenerator::ComputeSystemInfo()
 {
   // now load the settings
+  if(!cmCacheManager::GetInstance()->GetCacheValue("CMAKE_ROOT"))
+    {
+    cmSystemTools::Error(
+      "CMAKE_ROOT has not been defined, bad GUI or driver program");
+    return;
+    }
   std::string fpath = 
     cmCacheManager::GetInstance()->GetCacheValue("CMAKE_ROOT");
   fpath += "/Templates/CMakeWindowsSystemConfig.cmake";

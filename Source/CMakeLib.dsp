@@ -85,6 +85,10 @@ LIB32=link.exe -lib
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=.\cmake.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=.\cmCableClassSet.cxx
 # End Source File
 # Begin Source File

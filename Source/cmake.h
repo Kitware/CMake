@@ -55,20 +55,24 @@ class cmake
 
   /**
    * Generate the SourceFilesList from the SourceLists. This should only be
-   * done once to be safe.  
+   * done once to be safe.  The argument is a list of command line
+   * arguments.  The first argument should be the name or full path
+   * to the command line version of cmake.  For building a GUI,
+   * you would pass in the following arguments:
+   * /path/to/cmake -H/path/to/source -B/path/to/build 
    */
-  int Generate(int ac, char **av);
+  int Generate(const std::vector<std::string>&);
 
   /**
    * Generate the SourceFilesList from the SourceLists. This should only be
    * done once to be safe.  
    */
-  void SetArgs(cmMakefile& builder, int ac, char** av);
+  void SetArgs(cmMakefile& builder, const std::vector<std::string>&);
 
   /**
    * Generate CMAKE_ROOT and CMAKE_COMMAND cache entries
    */
-  void AddCMakePaths(char **av);
+  void AddCMakePaths(const std::vector<std::string>&);
 
   /**
    * constructor

@@ -58,6 +58,7 @@ protected:
   
   HICON m_hIcon;
   CString m_RegistryKey;
+  CString m_PathToExecutable;
   // Generated message map functions
   //{{AFX_MSG(CMakeSetupDialog)
   virtual BOOL OnInitDialog();

@@ -48,17 +48,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmUnixMakefileGenerator.h"
 #endif
 
-int main(int ac, char** av)
-{
-  cmake foo;
-  if(ac < 2)
-    {
-      foo.Usage(av[0]);
-      return -1;
-    }
-  return foo.Generate(ac,av);
-}
-
 void cmake::Usage(const char* program)
 {
   std::cerr << "cmake version " << cmMakefile::GetVersion() << "\n";
@@ -67,23 +56,23 @@ void cmake::Usage(const char* program)
 }
 
 // Parse the args
-void cmake::SetArgs(cmMakefile& builder, int ac, char** av)
+void cmake::SetArgs(cmMakefile& builder, const std::vector<std::string>& args)
 {
   m_Local = false;
 
   // watch for cmake and cmake srcdir invocations
-  if (ac <= 2)
+  if (args.size() <= 2)
     {
     builder.SetHomeOutputDirectory
       (cmSystemTools::GetCurrentWorkingDirectory().c_str());
     builder.SetStartOutputDirectory
       (cmSystemTools::GetCurrentWorkingDirectory().c_str());
-    if (ac == 2)
+    if (args.size() == 2)
       {
       builder.SetHomeDirectory
-	(cmSystemTools::CollapseFullPath(av[1]).c_str());
+	(cmSystemTools::CollapseFullPath(args[1].c_str()).c_str());
       builder.SetStartDirectory
-	(cmSystemTools::CollapseFullPath(av[1]).c_str());
+	(cmSystemTools::CollapseFullPath(args[1].c_str()).c_str());
       }
     else
       {
@@ -94,9 +83,9 @@ void cmake::SetArgs(cmMakefile& builder, int ac, char** av)
       }
     }
 
-  for(int i =1; i < ac; i++)
+  for(int i =1; i < args.size(); i++)
     {
-    std::string arg = av[i];
+    std::string arg = args[i];
     if(arg.find("-H",0) != std::string::npos)
       {
       std::string path = arg.substr(2);
@@ -137,10 +126,10 @@ void cmake::SetArgs(cmMakefile& builder, int ac, char** av)
 }
 
 // at the end of this CMAKE_ROOT and CMAAKE_COMMAND should be added to the cache
-void cmake::AddCMakePaths(char **av)
+void cmake::AddCMakePaths(const std::vector<std::string>& args)
 {
   // Find our own exectuable.
-  std::string cMakeSelf = av[0];
+  std::string cMakeSelf = args[0];
   cmSystemTools::ConvertToUnixSlashes(cMakeSelf);
   cMakeSelf = cmSystemTools::FindProgram(cMakeSelf.c_str());
 
@@ -198,13 +187,13 @@ void cmake::AddCMakePaths(char **av)
      "Path to CMake installation.", cmCacheManager::INTERNAL);
 }
  
-int cmake::Generate(int ac, char **av)
+int cmake::Generate(const std::vector<std::string>& args)
 {
   // Create a makefile
   cmMakefile mf;
 
   // extract the directory arguments
-  cmake::SetArgs(mf, ac, av);
+  cmake::SetArgs(mf, args);
 
   // create the generator
 #if defined(_WIN32) && !defined(__CYGWIN__)  
@@ -221,7 +210,7 @@ int cmake::Generate(int ac, char **av)
   cmCacheManager::GetInstance()->LoadCache(&mf);
 
   // setup CMAKE_ROOT and CMAKE_COMMAND
-  this->AddCMakePaths(av);
+  this->AddCMakePaths(args);
 
   // compute system info
   gen->ComputeSystemInfo();
@@ -233,7 +222,7 @@ int cmake::Generate(int ac, char **av)
   lf +=  "/CMakeLists.txt";
   if(!mf.ReadListFile(lf.c_str()))
     {
-      this->Usage(av[0]);
+      this->Usage(args[0].c_str());
       return -1;
     }
   mf.GenerateMakefile();
