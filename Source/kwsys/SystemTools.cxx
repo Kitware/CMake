@@ -1318,9 +1318,6 @@ kwsys_stl::string SystemTools::CollapseFullPath(const char* in_relative)
 kwsys_stl::string SystemTools::CollapseFullPath(const char* in_relative,
                                             const char* in_base)
 {
-  kwsys_stl::string dir, file;
-  SystemTools::SplitProgramPath(in_relative, dir, file, false);
-  
   // Save original working directory.
   kwsys_stl::string orig = SystemTools::GetCurrentWorkingDirectory();
   
@@ -1329,6 +1326,9 @@ kwsys_stl::string SystemTools::CollapseFullPath(const char* in_relative,
     {
     Chdir(in_base);
     }
+  
+  kwsys_stl::string dir, file;
+  SystemTools::SplitProgramPath(in_relative, dir, file, false);
   
 #ifdef _WIN32
   // Follow relative path.
