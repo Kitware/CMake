@@ -33,15 +33,26 @@ FIND_PATH(VTK_BINARY_PATH UseVTK.cmake
   [HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\Settings\\StartPath;WhereBuild8]
   [HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\Settings\\StartPath;WhereBuild9]
   [HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\Settings\\StartPath;WhereBuild10]
+  VTKBIN
   ../VTKBIN
+  ../../VTKBIN
+  $ENV{HOME}/VTKBIN
+  VTK-bin
   ../VTK-bin
   ../../VTK-bin
-  ../vtkbin
-  VTKBIN
-  VTK-bin
+  $ENV{HOME}/VTK-bin
   vtkbin
-  $ENV{HOME}/VTKBIN
+  ../vtkbin
+  ../../vtkbin
   $ENV{HOME}/vtkbin
+  VTK-vc
+  ../VTK-vc
+  ../../VTK-vc
+  $ENV{HOME}/VTK-vc
+  VTK-nmake
+  ../VTK-nmake
+  ../../VTK-nmake
+  $ENV{HOME}/VTK-nmake
 )
 
 #
