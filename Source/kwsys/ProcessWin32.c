@@ -757,7 +757,6 @@ void kwsysProcess_Execute(kwsysProcess* cp)
                                   DUPLICATE_SAME_ACCESS)))
       {
       kwsysProcessCleanup(cp, 1);
-      CloseHandle(writeEnd);
       return;
       }
     }
