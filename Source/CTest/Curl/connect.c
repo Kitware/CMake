@@ -271,7 +271,6 @@ static CURLcode bindlocal(struct connectdata *conn,
    *************************************************************/
   if (strlen(data->set.device)<255) {
     struct Curl_dns_entry *h=NULL;
-    size_t size;
     char myhost[256] = "";
     in_addr_t in;
     int rc;
@@ -362,13 +361,13 @@ static CURLcode bindlocal(struct connectdata *conn,
           struct sockaddr_in add;
 #endif
 
-          bindworked = TRUE;
-
 #ifdef __hpux
           int gsize = sizeof(add);
 #else
           socklen_t gsize = sizeof(add);
 #endif
+          bindworked = TRUE;
+
           if(getsockname(sockfd, (struct sockaddr *) &add,
                          &gsize)<0) {
             failf(data, "getsockname() failed");
