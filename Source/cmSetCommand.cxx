@@ -65,7 +65,13 @@ bool cmSetCommand::Invoke(std::vector<std::string>& args)
   cmCacheManager::CacheEntryType type = cmCacheManager::STRING; // required if cache
   const char* docstring = 0; // required if cache
   std::string::size_type cacheStart = 0;
-  if(args.size() == 4)
+
+  if(args.size() == 2)
+    {
+      // SET (VAR value )
+      value= args[1];
+    }
+  else if(args.size() == 4)
     {
     // SET (VAR CACHE TYPE "doc String")
     cache = true;
