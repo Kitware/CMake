@@ -1,23 +1,12 @@
 /* Check for size of types */
 #cmakedefine SIZEOF_CHAR      ${SIZEOF_CHAR}
-#cmakedefine SIZEOF_SHORT     ${SIZEOF_SHORT}
-#cmakedefine SIZEOF_INT       ${SIZEOF_INT}
-#cmakedefine SIZEOF_LONG      ${SIZEOF_LONG}
-#cmakedefine SIZEOF_LONG_LONG ${SIZEOF_LONG_LONG}
-#cmakedefine SIZEOF___INT64   ${SIZEOF___INT64}
 
 /* Check for functions */
-#cmakedefine HAVE_VSPRINTF
-#cmakedefine HAVE_VSNPRINTF
+#cmakedefine HAVE_PRINTF
 #cmakedefine HAVE_VSBLABLA
-#cmakedefine HAVE_GETHOSTBYNAME
-#cmakedefine HAVE_CONNECT
-#cmakedefine HAVE_REMOVE
-#cmakedefine HAVE_SHMAT
 
 /* Check for headers */
 #cmakedefine HAVE_SYS_PRCTL_H
-#cmakedefine HAVE_SYS_PRAFASDFCTL_H
 
 /* Check for libraries */
 #cmakedefine HAVE_LIBM
