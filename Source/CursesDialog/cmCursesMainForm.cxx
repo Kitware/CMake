@@ -241,6 +241,11 @@ void cmCursesMainForm::RePost()
   // Assign the fields: 3 for each entry: label, new entry marker
   // ('*' or ' ') and entry widget
   m_Fields = new FIELD*[3*m_NumberOfVisibleEntries+1];
+  int cc;
+  for ( cc = 0; cc < 3 * m_NumberOfVisibleEntries+1; cc ++ )
+    {
+    m_Fields[cc] = 0;
+    }
 
   // Assign fields
   int j=0;
@@ -1096,37 +1101,41 @@ void cmCursesMainForm::HandleInput()
         // each entry consists of fields: label, isnew, value
         // therefore, the label field for the is findex-2
         // (findex always corresponds to the value field)
-        cmCursesWidget* lbl = reinterpret_cast<cmCursesWidget*>(field_userptr(
-          m_Fields[findex-2]));
-        this->m_CMakeInstance->GetCacheManager()->RemoveCacheEntry(lbl->GetValue());
-
-        std::string nextVal;
-        if (nextCur)
+        cmCursesWidget* lbl 
+          = reinterpret_cast<cmCursesWidget*>(
+            field_userptr(m_Fields[findex-2]));
+        if ( lbl )
           {
-          nextVal = (reinterpret_cast<cmCursesWidget*>(field_userptr(nextCur))->GetValue());
-          }
+          this->m_CMakeInstance->GetCacheManager()->RemoveCacheEntry(lbl->GetValue());
 
-        getmaxyx(stdscr, y, x);
-        this->RemoveEntry(lbl->GetValue());
-        this->RePost();
-        this->Render(1, 1, x, y);
-
-        if (nextCur)
-          {
-          // make the next or prev. current field after deletion
-          nextCur = 0;
-          std::vector<cmCursesCacheEntryComposite*>::iterator it;
-          for (it = m_Entries->begin(); it != m_Entries->end(); ++it)
-            {
-            if (nextVal == (*it)->m_Key)
-              {
-              nextCur = (*it)->m_Entry->m_Field;
-              }
-            }
-          
+          std::string nextVal;
           if (nextCur)
             {
-            set_current_field(m_Form, nextCur);
+            nextVal = (reinterpret_cast<cmCursesWidget*>(field_userptr(nextCur))->GetValue());
+            }
+
+          getmaxyx(stdscr, y, x);
+          this->RemoveEntry(lbl->GetValue());
+          this->RePost();
+          this->Render(1, 1, x, y);
+
+          if (nextCur)
+            {
+            // make the next or prev. current field after deletion
+            nextCur = 0;
+            std::vector<cmCursesCacheEntryComposite*>::iterator it;
+            for (it = m_Entries->begin(); it != m_Entries->end(); ++it)
+              {
+              if (nextVal == (*it)->m_Key)
+                {
+                nextCur = (*it)->m_Entry->m_Field;
+                }
+              }
+
+            if (nextCur)
+              {
+              set_current_field(m_Form, nextCur);
+              }
             }
           }
         }
