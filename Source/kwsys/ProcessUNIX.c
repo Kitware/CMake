@@ -1739,7 +1739,7 @@ static void kwsysProcessKill(pid_t process_id)
     char fname[4096];
 #endif
     const int bufferSize = 1024;
-    char buffer[bufferSize+1];
+    char buffer[1025];  // should be buffersize +1 but fails to build on hp cc
     struct dirent* d;
 
     /* Each process has a directory in /proc whose name is the pid.
