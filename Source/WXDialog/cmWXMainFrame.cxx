@@ -78,7 +78,7 @@ cmMainFrame::cmMainFrame(const wxString& title, const wxSize& size)
   tgrid->AddGrowableCol(2);
   this->m_GeneratorFrame = tgrid;
   this->m_BuildFor = new wxStaticText(this->m_MainPanel, -1, "Build For:");
-  this->m_GeneratorMenu = new wxComboBox(this->m_MainPanel, -1, "Generator", 
+  this->m_GeneratorMenu = new wxComboBox(this->m_MainPanel, -1, "", 
                                          wxDefaultPosition, wxDefaultSize,
                                          0, 0, wxCB_READONLY);
 
