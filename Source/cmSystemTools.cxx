@@ -478,17 +478,32 @@ bool cmSystemTools::RunSingleCommand(
     }
   else if(cmsysProcess_GetState(cp) == cmsysProcess_State_Exception)
     {
-    std::cerr << cmsysProcess_GetExceptionString(cp) << "\n";
+    const char* exception_str = cmsysProcess_GetExceptionString(cp);
+    if ( verbose )
+      {
+      std::cerr << exception_str << std::endl;
+      }
+    output->append(exception_str, strlen(exception_str));
     result = false;
     }
   else if(cmsysProcess_GetState(cp) == cmsysProcess_State_Error)
     {
-    std::cerr << cmsysProcess_GetErrorString(cp) << "\n";
+    const char* error_str = cmsysProcess_GetErrorString(cp);
+    if ( verbose )
+      {
+      std::cerr << error_str << std::endl;
+      }
+    output->append(error_str, strlen(error_str));
     result = false;
     }
   else if(cmsysProcess_GetState(cp) == cmsysProcess_State_Expired)
     {
-    std::cerr << "Process terminated due to timeout\n";
+    const char* error_str = "Process terminated due to timeout\n";
+    if ( verbose )
+      {
+      std::cerr << error_str << std::endl;
+      }
+    output->append(error_str, strlen(error_str));
     result = false;
     }
   
