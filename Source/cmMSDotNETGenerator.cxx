@@ -55,7 +55,12 @@ void cmMSDotNETGenerator::GenerateMakefile()
     if(config == "Debug" || config == "Release" ||
        config == "MinSizeRel" || config == "RelWithDebInfo")
       {
-      m_Configurations.push_back(config);
+      // only add unique configurations
+      if(std::find(m_Configurations.begin(),
+                   m_Configurations.end(), config) == m_Configurations.end())
+        {
+        m_Configurations.push_back(config);
+        }
       }
     else
       {
