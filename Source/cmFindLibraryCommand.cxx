@@ -66,7 +66,6 @@ bool cmFindLibraryCommand::Invoke(std::vector<std::string>& args)
     }
   std::vector<std::string> path;
   std::vector<std::string> names;
-  bool namePathStyle = false;
   bool foundName = false;
   bool foundPath = false;
   bool doingNames = true;
