@@ -1005,6 +1005,12 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
       flags = " ";
       flags = m_Makefile->GetDefinition("CMAKE_C_FLAGS");
       }
+    // if unicode is not found, then add -D_MBCS
+    if(flags.find("D_UNICODE") == flags.npos)
+      {
+      flags += " /D \"_MBCS\"";
+      }
+    
     // The template files have CXX FLAGS in them, that need to be replaced.
     // There are not separate CXX and C template files, so we use the same
     // variable names.   The previous code sets up flags* variables to contain
