@@ -310,8 +310,8 @@ void cmCursesMainForm::Render(int left, int top, int width, int height)
   post_form(m_Form);
   // Update toolbar
   this->UpdateStatusBar();
-  this->PrintKeys()
-;
+  this->PrintKeys();
+
   touchwin(stdscr); 
   refresh();
 }
@@ -517,7 +517,15 @@ void cmCursesMainForm::RunCMake(bool generateMakefiles)
 
   // run the generate process
   m_OkToGenerate = true;
-  if(make.Generate(m_Args, generateMakefiles) != 0 || !m_Errors.empty())
+  int retVal = make.Generate(m_Args, generateMakefiles);
+
+  initscr(); /* Initialization */ 
+  noecho(); /* Echo off */ 
+  cbreak(); /* nl- or cr not needed */ 
+  keypad(stdscr,TRUE); /* Use key symbols as 
+			  KEY_DOWN*/ 
+
+  if( retVal != 0 || !m_Errors.empty())
     {
     // see if there was an error
     if(cmSystemTools::GetErrorOccuredFlag())
@@ -537,11 +545,6 @@ void cmCursesMainForm::RunCMake(bool generateMakefiles)
     this->Render(1,1,x,y);
     }
 
-  initscr(); /* Initialization */ 
-  noecho(); /* Echo off */ 
-  cbreak(); /* nl- or cr not needed */ 
-  keypad(stdscr,TRUE); /* Use key symbols as 
-			  KEY_DOWN*/ 
    
   this->InitializeUI();
   this->Render(1, 1, x, y);
