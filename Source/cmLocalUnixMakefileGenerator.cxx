@@ -38,15 +38,6 @@ cmLocalUnixMakefileGenerator::~cmLocalUnixMakefileGenerator()
 
 void cmLocalUnixMakefileGenerator::Generate(bool fromTheTop)
 {
-  // for backwards compatibility if niether c or cxx is
-  // enabled, the enable cxx
-  if(! (m_GlobalGenerator->GetLanguageEnabled("C") || 
-        m_GlobalGenerator->GetLanguageEnabled("CXX")))
-    {
-    m_GlobalGenerator->EnableLanguage("CXX",m_Makefile);
-    }
-  
-
   // suppoirt override in output directories
   if (m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH"))
     {
