@@ -51,6 +51,7 @@
 #include "cmSubdirCommand.cxx"
 #include "cmSubdirDependsCommand.cxx"
 #include "cmTargetLinkLibrariesCommand.cxx"
+#include "cmUseMangledMesaCommand.cxx"
 #include "cmUtilitySourceCommand.cxx"
 #include "cmVTKWrapJavaCommand.cxx"
 #include "cmVTKWrapPythonCommand.cxx"
@@ -107,6 +108,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmSubdirCommand);
   commands.push_back(new cmSubdirDependsCommand);
   commands.push_back(new cmTargetLinkLibrariesCommand);
+  commands.push_back(new cmUseMangledMesaCommand);
   commands.push_back(new cmUtilitySourceCommand);
   commands.push_back(new cmVTKWrapJavaCommand);
   commands.push_back(new cmVTKWrapPythonCommand);
