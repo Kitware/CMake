@@ -106,6 +106,42 @@ int main()
   Passed("SHOULD_BE_DEFINED is defined.");
 #endif
   
+#ifdef SHOULD_NOT_BE_DEFINED_AND
+  Failed("IF or SET is broken, SHOULD_NOT_BE_DEFINED_AND is defined.");
+#else
+  Passed("SHOULD_NOT_BE_DEFINED_AND is not defined.");
+#endif
+  
+#ifndef SHOULD_BE_DEFINED_AND
+  Failed("IF or SET is broken, SHOULD_BE_DEFINED_AND is not defined.\n");
+#else
+  Passed("SHOULD_BE_DEFINED_AND is defined.");
+#endif
+  
+#ifdef SHOULD_NOT_BE_DEFINED_OR
+  Failed("IF or SET is broken, SHOULD_NOT_BE_DEFINED_OR is defined.");
+#else
+  Passed("SHOULD_NOT_BE_DEFINED_OR is not defined.");
+#endif
+  
+#ifndef SHOULD_BE_DEFINED_OR
+  Failed("IF or SET is broken, SHOULD_BE_DEFINED_OR is not defined.\n");
+#else
+  Passed("SHOULD_BE_DEFINED_OR is defined.");
+#endif
+  
+#ifdef SHOULD_NOT_BE_DEFINED_MATCHES
+  Failed("IF or SET is broken, SHOULD_NOT_BE_DEFINED_MATCHES is defined.");
+#else
+  Passed("SHOULD_NOT_BE_DEFINED_MATCHES is not defined.");
+#endif
+  
+#ifndef SHOULD_BE_DEFINED_MATCHES
+  Failed("IF or SET is broken, SHOULD_BE_DEFINED_MATCHES is not defined.\n");
+#else
+  Passed("SHOULD_BE_DEFINED_MATCHES is defined.");
+#endif
+  
 #ifndef ONE_VAR
   Failed("cmakedefine is broken, ONE_VAR is not defined.");
 #else
@@ -188,7 +224,7 @@ int main()
   Failed("the FIND_FILE or GET_FILENAME_COMPONENT command is broken, "
          "FILENAME_VAR_NAME is not defined.");
 #else
-  if(strcmp(FILENAME_VAR_NAME, "VarTests.txt") != 0)
+  if(strcmp(FILENAME_VAR_NAME, "VarTests.cmake") != 0)
     {
     Failed("the FIND_FILE or GET_FILENAME_COMPONENT command is broken, "
            "FILENAME_VAR_NAME == ", FILENAME_VAR_NAME);
@@ -203,7 +239,7 @@ int main()
   Failed("the FIND_FILE or GET_FILENAME_COMPONENT command is broken, "
          "FILENAME_VAR_EXT is not defined.");
 #else
-  if(strcmp(FILENAME_VAR_EXT, ".txt") != 0)
+  if(strcmp(FILENAME_VAR_EXT, ".cmake") != 0)
     {
     Failed("the FIND_FILE or GET_FILENAME_COMPONENT command is broken, "
            "FILENAME_VAR_EXT == ", FILENAME_VAR_EXT);

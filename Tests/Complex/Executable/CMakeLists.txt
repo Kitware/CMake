@@ -14,7 +14,13 @@ FIND_LIBRARY(CMAKE_LIB
 TARGET_LINK_LIBRARIES(complex ${CMAKE_LIB})
 LINK_LIBRARIES(${CMAKE_LIB})
 
-# More coverage
+#
+# Testing
+#
+ADD_TEST(complex ${Complex_BINARY_DIR}/bin/complex)
 
+#
+# More coverage
+#
 INSTALL_TARGETS(/tmp complex)
 INSTALL_PROGRAMS(/tmp complex)

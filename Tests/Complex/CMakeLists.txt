@@ -12,7 +12,9 @@ ENDIF (CMAKE_ANSI_CXXFLAGS)
 
 ADD_DEFINITIONS(-DCMAKE_IS_FUN)
 
-INCLUDE(${Complex_SOURCE_DIR}/VarTests.txt)
+IF (EXISTS ${Complex_SOURCE_DIR}/VarTests.cmake)
+  INCLUDE(${Complex_SOURCE_DIR}/VarTests.cmake)
+ENDIF (EXISTS ${Complex_SOURCE_DIR}/VarTests.cmake)
 
 LOAD_CACHE(${Complex_SOURCE_DIR})
 
@@ -53,13 +55,18 @@ SUBDIRS(Library Executable)
 SUBDIR_DEPENDS(Executable Library)
 
 #
-# Exec program
+# Exec program (TODO: test a result)
 # Increase coverage.
 #
-OPTION(EXEC_PROGRAM "Test EXEC_PROGRAM" ON)
-IF (EXEC_PROGRAM) 
-  EXEC_PROGRAM("echo EXEC_PROGRAM")
-ENDIF (EXEC_PROGRAM) 
+OPTION(NO_EXEC_PROGRAM "Do not test EXEC_PROGRAM" 0)
+IF (NOT NO_EXEC_PROGRAM)
+  EXEC_PROGRAM("echo NO_EXEC_PROGRAM" "${Complex_BINARY_DIR}")
+ELSE (NOT NO_EXEC_PROGRAM) 
+  MESSAGE("Set this option ON")
+ENDIF (NOT NO_EXEC_PROGRAM) 
+
+MARK_AS_ADVANCED(NO_EXEC_PROGRAM)
+MARK_AS_ADVANCED(CLEAR NO_EXEC_PROGRAM)
 
 #
 # More coverage
@@ -76,6 +83,11 @@ INSTALL_FILES(/tmp .h ${Complex_BINARY_DIR}/cmTestConfigure.h)
 # sadly it won't be able to remove it.
 #
 MAKE_DIRECTORY("${Complex_BINARY_DIR}/make_dir")
+
+#
+# Testing
+#
+ENABLE_TESTING()
 
 #
 # Test Cable
