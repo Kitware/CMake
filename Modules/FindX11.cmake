@@ -45,7 +45,7 @@ IF (UNIX)
       SET( X11_Xext_FOUND "YES")
     ENDIF(X11_Xext_LIBRARY)
 
-  ENDIF(X11_INCLUDE_PATH)
+  ENDIF(X11_INCLUDE_DIR)
 
   # Deprecated variable fro backwards compatibility with CMake 1.4
   SET (X11_LIBRARY ${X11_X11_LIBRARY})
