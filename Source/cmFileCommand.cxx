@@ -249,6 +249,8 @@ bool cmFileCommand::HandleInstallCommand(
   std::string destination = "";
   std::string stype = "FILES";
   const char* build_type = m_Makefile->GetDefinition("BUILD_TYPE");
+  const char* debug_postfix
+    = m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX");
   const char* destdir = cmSystemTools::GetEnv("DESTDIR");
 
   std::string extra_dir = "";
@@ -451,6 +453,10 @@ bool cmFileCommand::HandleInstallCommand(
     case cmTarget::MODULE_LIBRARY:
     case cmTarget::STATIC_LIBRARY:
     case cmTarget::SHARED_LIBRARY:
+      if ( debug )
+        {
+        fname = fnamewe + debug_postfix + ext;
+        }
         {
         // Handle shared library versioning
         const char* lib_version = 0;
@@ -506,11 +512,15 @@ bool cmFileCommand::HandleInstallCommand(
             }
           }
         cmOStringStream str;
-        str << cmSystemTools::GetFilenamePath(ctarget) 
-          << "/" << extra_dir << "/" 
-          << fname;
+        str << cmSystemTools::GetFilenamePath(ctarget) << "/";
+        if ( extra_dir.size() > 0 )
+          {
+          str << extra_dir << "/";
+          }
+        str << fname;
         ctarget = str.str();
         }
+      break;
     case cmTarget::EXECUTABLE:
       if ( extra_dir.size() > 0 )
         {

@@ -482,14 +482,18 @@ int cmGlobalGenerator::TryCompile(const char *, const char *bindir,
     }
   int retVal;
   int timeout = cmGlobalGenerator::s_TryCompileTimeout;
+  bool hideconsole = cmSystemTools::GetRunCommandHideConsole();
+  cmSystemTools::SetRunCommandHideConsole(true);
   if (!cmSystemTools::RunSingleCommand(makeCommand.c_str(), output, 
       &retVal, 0, false, timeout))
     {
+    cmSystemTools::SetRunCommandHideConsole(hideconsole);
     cmSystemTools::Error("Generator: execution of make failed.");
     // return to the original directory
     cmSystemTools::ChangeDirectory(cwd.c_str());
     return 1;
     }
+  cmSystemTools::SetRunCommandHideConsole(hideconsole);
   
   // The SGI MipsPro 7.3 compiler does not return an error code when
   // the source has a #error in it!  This is a work-around for such
