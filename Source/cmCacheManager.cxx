@@ -90,7 +90,7 @@ bool cmCacheManager::LoadCache(cmMakefile* mf)
 
 bool cmCacheManager::LoadCache(const char* path)
 {
-  this->LoadCache(path,true);
+  return this->LoadCache(path,true);
 }
 bool cmCacheManager::LoadCache(const char* path,
 			       bool internal)
