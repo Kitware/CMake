@@ -9,6 +9,10 @@
 # FLTK_VERSION_1.1 Use this Version
 # FLTK_FOUND, Don't use FLTK if false.
 
+# this is around for backwards compatibility 
+# FLTK_WRAP_UI set to true if FLTK_FLUID_EXECUTABLE is found
+
+
 
 # The following settings should not be used in general.
 # FLTK_BASE_LIBRARY    = the full path to fltk.lib
@@ -125,7 +129,13 @@ IF(FLTK_FLUID_EXECUTABLE)
   ENDIF(FLTK_INCLUDE_DIR)
 ENDIF(FLTK_FLUID_EXECUTABLE)
 
+
+IF (FLTK_FLUID_EXECUTABLE)   
+  SET ( FLTK_WRAP_UI 1 CACHE INTERNAL "Do we have the fluid executable" )   
+ENDIF (FLTK_FLUID_EXECUTABLE) 
+
 MARK_AS_ADVANCED(
   FLTK_VERSION_1.0.11
   FLTK_VERSION_1.1
+  FLTK_WRAP_UI
 )

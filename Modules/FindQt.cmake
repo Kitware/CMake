@@ -14,6 +14,12 @@
 # QT_QT_LIBRARY, where to find the Qt library.
 # QT_QTMAIN_LIBRARY, where to find the qtmain library. This is only required by Qt3 on Windows.
 
+# These are around for backwards compatibility 
+# they will be set
+# QT_WRAP_CPP, set true if QT_MOC_EXECUTABLE is found
+# QT_WRAP_UI set true if QT_UIC_EXECUTABLE is found
+
+
 MESSAGE(STATUS "Checking for Qt")
 
 FIND_PATH(QT_INCLUDE_DIR qt.h
@@ -226,6 +232,14 @@ IF(QT_FOUND)
 ENDIF(QT_FOUND)
 
 
+IF (QT_MOC_EXECUTABLE)   
+  SET ( QT_WRAP_CPP "YES")   
+ENDIF (QT_MOC_EXECUTABLE)   
+    
+IF (QT_UIC_EXECUTABLE)   
+  SET ( QT_WRAP_UI "YES")   
+ENDIF (QT_UIC_EXECUTABLE)   
+  
 
 
 MARK_AS_ADVANCED(
