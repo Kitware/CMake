@@ -31,7 +31,7 @@ extern "C"
   YY_BUFFER_STATE cmDependsFortranLexer_GetCurrentBuffer(yyscan_t yyscanner);
 
   // The parser entry point.
-  int cmDependsFortranParser_yyparse(yyscan_t);
+  int cmDependsFortran_yyparse(yyscan_t);
 }
 
 // Define parser object internal structure.
@@ -114,7 +114,7 @@ bool cmDependsFortran::WriteDependencies(std::ostream& os)
   cmDependsFortranParser_FilePush(&parser, m_SourceFile.c_str());
 
   // Parse the translation unit.
-  if(cmDependsFortranParser_yyparse(parser.Scanner) != 0)
+  if(cmDependsFortran_yyparse(parser.Scanner) != 0)
     {
     // Failed to parse the file.  Report failure to write dependencies.
     return false;
@@ -188,20 +188,20 @@ cmDependsFortranParser_s::cmDependsFortranParser_s(cmDependsFortran* self):
   this->InInterface = 0;
 
   // Initialize the lexical scanner.
-  cmDependsFortranLexer_yylex_init(&this->Scanner);
-  cmDependsFortranLexer_yyset_extra(this, this->Scanner);
+  cmDependsFortran_yylex_init(&this->Scanner);
+  cmDependsFortran_yyset_extra(this, this->Scanner);
 
   // Create a dummy buffer that is never read but is the fallback
   // buffer when the last file is popped off the stack.
   YY_BUFFER_STATE buffer =
-    cmDependsFortranLexer_yy_create_buffer(0, 4, this->Scanner);
-  cmDependsFortranLexer_yy_switch_to_buffer(buffer, this->Scanner);
+    cmDependsFortran_yy_create_buffer(0, 4, this->Scanner);
+  cmDependsFortran_yy_switch_to_buffer(buffer, this->Scanner);
 }
 
 //----------------------------------------------------------------------------
 cmDependsFortranParser_s::~cmDependsFortranParser_s()
 {
-  cmDependsFortranLexer_yylex_destroy(this->Scanner);
+  cmDependsFortran_yylex_destroy(this->Scanner);
 }
 
 //----------------------------------------------------------------------------
@@ -217,8 +217,8 @@ int cmDependsFortranParser_FilePush(cmDependsFortranParser* parser,
     std::string dir = cmSystemTools::GetParentDirectory(fname);
     cmDependsFortranFile f = {file, current, dir};
     YY_BUFFER_STATE buffer =
-      cmDependsFortranLexer_yy_create_buffer(0, 16384, parser->Scanner);
-    cmDependsFortranLexer_yy_switch_to_buffer(buffer, parser->Scanner);
+      cmDependsFortran_yy_create_buffer(0, 16384, parser->Scanner);
+    cmDependsFortran_yy_switch_to_buffer(buffer, parser->Scanner);
     parser->FileStack.push(f);
     return 1;
     }
@@ -243,8 +243,8 @@ int cmDependsFortranParser_FilePop(cmDependsFortranParser* parser)
     fclose(f.File);
     YY_BUFFER_STATE current =
       cmDependsFortranLexer_GetCurrentBuffer(parser->Scanner);
-    cmDependsFortranLexer_yy_delete_buffer(current, parser->Scanner);
-    cmDependsFortranLexer_yy_switch_to_buffer(f.Buffer, parser->Scanner);
+    cmDependsFortran_yy_delete_buffer(current, parser->Scanner);
+    cmDependsFortran_yy_switch_to_buffer(f.Buffer, parser->Scanner);
     return 1;
     }
 }
