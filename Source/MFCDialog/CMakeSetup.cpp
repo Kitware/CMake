@@ -6,7 +6,6 @@
 #include "CMakeSetupDialog.h"
 #include "CMakeCommandLineInfo.h" 
 #include "../cmListFileCache.h"
-#include "../cmMakefileGenerator.h"
 #include "../cmCacheManager.h"
 
 #ifdef _DEBUG
