@@ -178,9 +178,6 @@ void cmLocalVisualStudio6Generator::AddDSPBuildRule()
   args +=
     this->ConvertToRelativeOutputPath(m_Makefile->GetHomeDirectory());
   argv.push_back(args);
-  args += 
-    this->ConvertToRelativeOutputPath(m_Makefile->GetStartOutputDirectory());
-  argv.push_back(args);
   args = "-B";
   args += 
     this->ConvertToRelativeOutputPath(m_Makefile->GetHomeOutputDirectory());
