@@ -186,6 +186,10 @@ bool cmSystemTools::MakeDirectory(const char* path)
       return false;
       }
     }
+  if(!cmSystemTools::FileExists(path))
+    {
+    return false;
+    }
   return true;
 }
 
