@@ -1414,6 +1414,30 @@ int cmCTest::SubmitResults()
       }
     return 1;
     }
+  else if ( m_DartConfiguration["DropMethod"] == "http" )
+    {
+    std::cout << "HTTP submit method" << std::endl;
+    std::string url = "http://";
+    if ( m_DartConfiguration["DropSiteUser"].size() > 0 )
+      {
+      url += m_DartConfiguration["DropSiteUser"];
+      if ( m_DartConfiguration["DropSitePassword"].size() > 0 )
+        {
+        url += ":" + m_DartConfiguration["DropSitePassword"];
+        }
+      url += "@";
+      }
+    url += m_DartConfiguration["DropSite"] + m_DartConfiguration["DropLocation"];
+    if ( !submit.SubmitUsingHTTP(m_ToplevelPath+"/Testing/CDart", files, prefix, url) )
+      {
+      return 0;
+      }
+    if ( !submit.TriggerUsingHTTP(files, prefix, m_DartConfiguration["TriggerSite"]) )
+      {
+      return 0;
+      }
+    return 1;
+    }
   else
     {
     std::cout << "SCP submit not yet implemented" << std::endl;
