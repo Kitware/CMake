@@ -1528,7 +1528,7 @@ void cmUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     "CMAKE_AR_ARGS       = @CMAKE_AR_ARGS@\n"
     "CMAKE_CXX_AR            = @CMAKE_CXX_AR@\n"
     "CMAKE_CXX_AR_ARGS       = @CMAKE_CXX_AR_ARGS@\n"
-    "CMAKE_C_COMPILER    = @CMAKE_C_COMPILER@\n"
+    "CMAKE_C_FLAGS    =    @CMAKE_C_FLAGS@\n"
     "CMAKE_C_COMPILER    = @CMAKE_C_COMPILER@\n"
     "CMAKE_C_LINK_SHARED    = @CMAKE_C_LINK_SHARED@\n"
     "CMAKE_CXX_LINK_SHARED       = @CMAKE_CXX_LINK_SHARED@\n"
