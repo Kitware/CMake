@@ -2931,6 +2931,30 @@ const char* cmCTest::GetTestStatus(int status)
   return statuses[status];
 }
 
+void cmCTest::RestoreBackupDirectories(bool backup, 
+                                       const char *srcDir, 
+                                       const char *binDir,
+                                       const char *backupSrcDir,
+                                       const char *backupBinDir)
+{
+  // if we backed up the dirs and the build failed, then restore
+  // the backed up dirs
+  if (backup)
+    {
+      // if for some reason those directories exist then first delete them
+      if (cmSystemTools::FileExists(srcDir))
+        {
+        cmSystemTools::RemoveADirectory(srcDir);
+        }
+      if (cmSystemTools::FileExists(binDir))
+        {
+        cmSystemTools::RemoveADirectory(binDir);
+        }
+      // rename the src and binary directories 
+      rename(backupSrcDir, srcDir);
+      rename(backupBinDir, binDir);
+    }
+}
 
 int cmCTest::RunConfigurationScript()
 {
@@ -2940,7 +2964,7 @@ int cmCTest::RunConfigurationScript()
   // make sure the file exists
   if (!cmSystemTools::FileExists(m_ConfigurationScript.c_str()))
     {
-    return -1;
+    return 1;
     }
   
   // create a cmake instance to read the configuration script
@@ -2961,7 +2985,7 @@ int cmCTest::RunConfigurationScript()
                                      m_ConfigurationScript).c_str());
   if (!lg->GetMakefile()->ReadListFile(0, m_ConfigurationScript.c_str()))
     {
-    return -2;
+    return 2;
     }
 
   // no popup widows
@@ -2973,13 +2997,23 @@ int cmCTest::RunConfigurationScript()
   const char *binDir = mf->GetDefinition("CTEST_BINARY_DIRECTORY");
   const char *ctestCmd = mf->GetDefinition("CTEST_COMMAND");
   const char *ctestEnv = mf->GetDefinition("CTEST_ENVIRONMENT");
+  const char *ctestRoot = mf->GetDefinition("CTEST_DASHBOARD_ROOT");
   bool backup = mf->IsOn("CTEST_BACKUP_AND_RESTORE");
-    
+  
+  // in order to back we also must have the cvs root
+  const char *cvsCmd = mf->GetDefinition("CTEST_CVS_COMMAND");
+  const char *cvsCheckOut = mf->GetDefinition("CTEST_CVS_CHECKOUT");
+  if (backup && !cvsCheckOut)
+    {
+    cmSystemTools::Error("Backup was requested without a cvs checkout");    
+    return 3;
+    }
+  
   // make sure the required info is here
   if (!srcDir || !binDir || !ctestCmd)
     {
     cmSystemTools::Error("Some required settings in the configuration file were missing");    
-    return -3;
+    return 4;
     }
   
   // set any environment variables
@@ -3010,6 +3044,12 @@ int cmCTest::RunConfigurationScript()
       }
     }
 
+  // local variables
+  std::string command;
+  std::string output;
+  int retVal = 0;
+  bool res; 
+
   // compute the backup names
   std::string backupSrcDir = srcDir;
   backupSrcDir += "_CMakeBackup";
@@ -3032,6 +3072,30 @@ int cmCTest::RunConfigurationScript()
     // first rename the src and binary directories 
     rename(srcDir, backupSrcDir.c_str());
     rename(binDir, backupBinDir.c_str());
+
+    // we must now checkout the src dir, first make the dir
+    if (!cmSystemTools::MakeDirectory(srcDir))
+      {
+      cmSystemTools::Error("Unable to create the src directory");    
+      this->RestoreBackupDirectories(backup, srcDir, binDir,
+                                     backupSrcDir.c_str(), 
+                                     backupBinDir.c_str());
+      return 5;
+      }
+    
+    // then do the checkout
+    output = "";
+    res = cmSystemTools::RunSingleCommand(cvsCheckOut, &output, 
+                                          &retVal, ctestRoot,
+                                          m_Verbose, 0 /*m_TimeOut*/);
+    if (!res || retVal != 0)
+      {
+      cmSystemTools::Error("Unable to perform cvs checkout ");    
+      this->RestoreBackupDirectories(backup, srcDir, binDir,
+                                     backupSrcDir.c_str(), 
+                                     backupBinDir.c_str());
+      return 6;
+      }
     }
 
   // clear the binary directory?
@@ -3052,17 +3116,15 @@ int cmCTest::RunConfigurationScript()
     if (!cmSystemTools::MakeDirectory(binDir))
       {
       cmSystemTools::Error("Unable to create the binary directory");    
-      return -4;
+      this->RestoreBackupDirectories(backup, srcDir, binDir,
+                                     backupSrcDir.c_str(), 
+                                     backupBinDir.c_str());
+      return 7;
       }
     }
   
-  std::string command;
-  std::string output;
-  int retVal = 0;
-  bool res; 
   
   // do an initial cvs update as required
-  const char *cvsCmd = mf->GetDefinition("CTEST_CVS_COMMAND");
   if (cvsCmd)
     {
     command = cvsCmd;
@@ -3089,7 +3151,10 @@ int cmCTest::RunConfigurationScript()
           if (!res || retVal != 0)
             {
             cmSystemTools::Error("Unable to perform extra cvs updates");    
-            return -5;
+            this->RestoreBackupDirectories(backup, srcDir, binDir,
+                                           backupSrcDir.c_str(), 
+                                           backupBinDir.c_str());
+            return 8;
             }
           }
         }
@@ -3105,7 +3170,10 @@ int cmCTest::RunConfigurationScript()
     std::ofstream fout(cacheFile.c_str());
     if(!fout)
       {
-      return -6;
+      this->RestoreBackupDirectories(backup, srcDir, binDir,
+                                     backupSrcDir.c_str(), 
+                                     backupBinDir.c_str());
+      return 9;
       }
     
     fout.write(initCache, strlen(initCache));
@@ -3150,36 +3218,29 @@ int cmCTest::RunConfigurationScript()
   if (!res || cmakeFailed ||
       retVal & CTEST_BUILD_ERRORS)
     {
-    // if we backed up the dirs and the build failed, then restore
-    // the backed up dirs
-    if (backup)
-      {
-      // if for some reason those directories exist then first delete them
-      if (cmSystemTools::FileExists(srcDir))
-        {
-        cmSystemTools::RemoveADirectory(srcDir);
-        }
-      if (cmSystemTools::FileExists(binDir))
-        {
-        cmSystemTools::RemoveADirectory(binDir);
-        }
-      // rename the src and binary directories 
-      rename(backupSrcDir.c_str(), srcDir);
-      rename(backupBinDir.c_str(), binDir);
-      }
+    this->RestoreBackupDirectories(backup, srcDir, binDir,
+                                   backupSrcDir.c_str(), 
+                                   backupBinDir.c_str());
     if (cmakeFailed)
       {
       cmSystemTools::Error("Unable to run cmake");    
-      return -7;
+      return 10;
       }
     cmSystemTools::Error("Unable to run ctest");    
     if (!res)
       {
-      return -8;
+      return 11;
       }
-    return retVal;
+    return retVal * 100;
     }
 
+  // if all was succesful, delete the backup dirs to free up disk space
+  if (backup)
+    {
+    cmSystemTools::RemoveADirectory(backupSrcDir.c_str());
+    cmSystemTools::RemoveADirectory(backupBinDir.c_str());
+    }
+  
   return 0;  
 }
 

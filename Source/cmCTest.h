@@ -147,6 +147,10 @@ public:
 
   int GenerateNotesFile(const char* files);
 
+  void RestoreBackupDirectories(bool backup, 
+                                const char *srcDir, const char *binDir,
+                                const char *backupSrc, const char *backupBin);
+
 private:
   enum {
     FIRST_TEST     = 0,
