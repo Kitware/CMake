@@ -1756,6 +1756,7 @@ kwsys_stl::string SystemTools::CollapseFullPath(const char* in_relative,
 void SystemTools::SplitPath(const char* p,
                             kwsys_stl::vector<kwsys_stl::string>& components)
 {
+  components.clear();
   // Identify the root component.
   const char* c = p;
   if(c[0] == '/' && c[1] == '/')

@@ -69,8 +69,10 @@ public:
   virtual void Generate();
 
 private: 
+  void SetCurrentLocalGenerator(cmLocalGenerator*);
   std::string XCodeEscapePath(const char* p);
-  std::string ConvertToRelativeOutputPath(const char* p);
+  std::string ConvertToRelativeForXCode(const char* p);
+  std::string ConvertToRelativeForMake(const char* p);
   void CreateCustomCommands(cmXCodeObject* buildPhases,
                             cmXCodeObject* sourceBuildPhase,
                             cmXCodeObject* headerBuildPhase,
@@ -135,7 +137,9 @@ private:
   bool m_DoneAllBuild;
   bool m_DoneXCodeHack;
   std::string m_CurrentXCodeHackMakefile;
-  std::string m_OutputDir;
+  std::string m_OutputDir; 
+  std::vector<std::string> m_CurrentOutputDirectoryComponents;
+  std::vector<std::string> m_ProjectOutputDirectoryComponents;
 };
 
 #endif

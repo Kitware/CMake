@@ -84,7 +84,7 @@ int cmGlobalXCodeGenerator::Build(
   std::string *output,
   const char *makeCommandCSTR,
   const char *,
-  bool )
+  bool clean)
 {
   // now build the test
   if(makeCommandCSTR == 0 || !strlen(makeCommandCSTR))
@@ -107,8 +107,12 @@ int cmGlobalXCodeGenerator::Build(
   makeCommand += " -project ";
   makeCommand += projectName;
   makeCommand += ".xcode";
+  if(clean)
+    {
+    makeCommand += " clean ";
+    }
   makeCommand += " build -target ";
-  if (targetName)
+  if (targetName && strlen(targetName))
     {
     makeCommand += targetName;
     }
@@ -117,8 +121,6 @@ int cmGlobalXCodeGenerator::Build(
     makeCommand += "ALL_BUILD";
     }
   makeCommand += " -buildstyle Development ";
-  makeCommand += " SYMROOT=";
-  makeCommand += cmSystemTools::ConvertToOutputPath(bindir);
   int retVal;
   int timeout = cmGlobalGenerator::s_TryCompileTimeout;
   if (!cmSystemTools::RunSingleCommand(makeCommand.c_str(), output, &retVal, 
@@ -191,9 +193,10 @@ void cmGlobalXCodeGenerator::Generate()
   for(it = m_ProjectMap.begin(); it!= m_ProjectMap.end(); ++it)
     { 
     cmLocalGenerator* root = it->second[0];
-    m_CurrentMakefile = root->GetMakefile();
+    this->SetCurrentLocalGenerator(root);
     m_OutputDir = m_CurrentMakefile->GetHomeOutputDirectory();
     m_OutputDir = cmSystemTools::CollapseFullPath(m_OutputDir.c_str());
+    cmSystemTools::SplitPath(m_OutputDir.c_str(), m_ProjectOutputDirectoryComponents);
     m_CurrentLocalGenerator = root;
     // add ALL_BUILD, INSTALL, etc
     this->AddExtraTargets(root, it->second);
@@ -372,7 +375,7 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
   fileRef->AddAttribute("lastKnownFileType", 
                         this->CreateString(sourcecode.c_str()));
   std::string path = 
-    this->ConvertToRelativeOutputPath(sf->GetFullPath().c_str());
+    this->ConvertToRelativeForXCode(sf->GetFullPath().c_str());
   fileRef->AddAttribute("path", this->CreateString(path.c_str()));
   fileRef->AddAttribute("refType", this->CreateString("4"));
   if(path.size() > 1 && path[0] == '.' && path[1] == '.')
@@ -402,15 +405,24 @@ bool cmGlobalXCodeGenerator::SpecialTargetEmitted(std::string const& tname)
   return false;
 }
 
-  
+
+void cmGlobalXCodeGenerator::SetCurrentLocalGenerator(cmLocalGenerator* gen)
+{
+  m_CurrentLocalGenerator = gen;
+  m_CurrentMakefile = gen->GetMakefile();
+  std::string outdir =
+    cmSystemTools::CollapseFullPath(m_CurrentMakefile->GetCurrentOutputDirectory());
+  cmSystemTools::SplitPath(outdir.c_str(), m_CurrentOutputDirectoryComponents);
+}
+
+
 //----------------------------------------------------------------------------
 void 
 cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
                                            std::vector<cmXCodeObject*>& 
                                            targets)
 {
-  m_CurrentLocalGenerator = gen;
-  m_CurrentMakefile = gen->GetMakefile();
+  this->SetCurrentLocalGenerator(gen);
   cmTargets &tgts = gen->GetMakefile()->GetTargets();
   for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); l++)
     { 
@@ -663,7 +675,7 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
       if(cc.GetOutput()[0])
         {
         makefileStream << "\\\n\t"  << this->
-          ConvertToRelativeOutputPath(cc.GetOutput());
+          ConvertToRelativeForMake(cc.GetOutput());
         }
       else
         {
@@ -687,7 +699,7 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
       if(cc.GetOutput()[0])
         {
         makefileStream << this
-          ->ConvertToRelativeOutputPath(cc.GetOutput()) << ": ";
+          ->ConvertToRelativeForMake(cc.GetOutput()) << ": ";
         }
       else
         {
@@ -699,7 +711,7 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
         if(!this->FindTarget(d->c_str()))
           {
           makefileStream << "\\\n" << this
-            ->ConvertToRelativeOutputPath(d->c_str());
+            ->ConvertToRelativeForMake(d->c_str());
           }
         else
           {
@@ -719,7 +731,7 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
         const cmCustomCommandLine& commandLine = *cl;
         std::string cmd = commandLine[0];
         cmSystemTools::ReplaceString(cmd, "/./", "/");
-        cmd = this->ConvertToRelativeOutputPath(cmd.c_str());
+        cmd = this->ConvertToRelativeForMake(cmd.c_str());
         for(unsigned int j=1; j < commandLine.size(); ++j)
           {
           cmd += " ";
@@ -730,11 +742,11 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
       }
     }
   std::string cdir = m_CurrentMakefile->GetCurrentOutputDirectory();
-  cdir = this->ConvertToRelativeOutputPath(cdir.c_str());
+  cdir = this->ConvertToRelativeForXCode(cdir.c_str());
   std::string makecmd = "make -C ";
   makecmd += cdir;
   makecmd += " -f ";
-  makecmd += this->ConvertToRelativeOutputPath(makefile.c_str());
+  makecmd += this->ConvertToRelativeForMake(makefile.c_str());
   cmSystemTools::ReplaceString(makecmd, "\\ ", "\\\\ ");
   buildphase->AddAttribute("shellScript", this->CreateString(makecmd.c_str()));
 }
@@ -1125,12 +1137,12 @@ void cmGlobalXCodeGenerator::AddLinkLibrary(cmXCodeObject* target,
         // remove double quotes
         libs = libs.substr(1, libs.size()-2);
         libs += " ";
-        libs += this->ConvertToRelativeOutputPath(dir.c_str());
+        libs += this->XCodeEscapePath(dir.c_str());
         spath->SetString(libs.c_str());
         }
       else
         {
-        std::string libs = this->ConvertToRelativeOutputPath(dir.c_str());
+        std::string libs = this->XCodeEscapePath(dir.c_str());
         bset->AddAttribute("LIBRARY_SEARCH_PATHS",
                            this->CreateString(libs.c_str()));
         }
@@ -1391,7 +1403,7 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
       {
       makefileStream << "\\\n\t"
                      << this->
-        ConvertToRelativeOutputPath(this->GetTargetFullPath(target->GetcmTarget()).c_str());
+        ConvertToRelativeForMake(this->GetTargetFullPath(target->GetcmTarget()).c_str());
       }
     }
   makefileStream << "\n\n"; 
@@ -1409,7 +1421,7 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
       {
       if(emitted.insert(*d).second)
         {
-        makefileStream << this->ConvertToRelativeOutputPath(d->c_str()) << ":\n";
+        makefileStream << this->ConvertToRelativeForMake(d->c_str()) << ":\n";
         }
       }
     }
@@ -1430,15 +1442,15 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
       {
       std::vector<cmStdString> const& deplibs = target->GetDependLibraries();
       std::string tfull = this->GetTargetFullPath(target->GetcmTarget());
-      makefileStream << this->ConvertToRelativeOutputPath(tfull.c_str()) << ": ";
+      makefileStream << this->ConvertToRelativeForMake(tfull.c_str()) << ": ";
       for(std::vector<cmStdString>::const_iterator d = deplibs.begin();
           d != deplibs.end(); ++d)
         {
-        makefileStream << "\\\n\t" << this->ConvertToRelativeOutputPath(d->c_str());
+        makefileStream << "\\\n\t" << this->ConvertToRelativeForMake(d->c_str());
         }
       makefileStream << "\n";
       makefileStream << "\t/bin/rm -f "
-                     << this->ConvertToRelativeOutputPath(tfull.c_str()) << "\n";
+                     << this->ConvertToRelativeForMake(tfull.c_str()) << "\n";
       makefileStream << "\n\n";
       }
     }
@@ -1505,59 +1517,31 @@ void cmGlobalXCodeGenerator::GetDocumentation(cmDocumentationEntry& entry)
 }
 
 //----------------------------------------------------------------------------
-std::string cmGlobalXCodeGenerator::ConvertToRelativeOutputPath(const char* p)
+std::string cmGlobalXCodeGenerator::ConvertToRelativeForMake(const char* p)
 {
   if ( !m_CurrentMakefile->IsOn("CMAKE_USE_RELATIVE_PATHS") )
     {
     return cmSystemTools::ConvertToOutputPath(p);
     }
-  // NOTE, much of this was copied from 
-  // cmLocalGenerator::ConvertToRelativeOutputPath
-  // fixes here should be made there as well.
-  //
-  // copy to a string class
-  std::string pathIn = p;
-  // check to see if the path is already relative, it is
-  // considered relative if one of the following is true
-  // - has no / in it at all
-  // - does not start with / or drive leter :
-  // - starts with a ".."
-  if(pathIn.find('/') == pathIn.npos ||        
-     (pathIn[0] != '/' && pathIn[1] != ':') || 
-     pathIn.find("..") == 0)
+  else
+    {
+    std::string ret = this->ConvertToRelativePath(m_CurrentOutputDirectoryComponents, p);
+    return cmSystemTools::ConvertToOutputPath(ret.c_str());
+    }
+}
+
+//----------------------------------------------------------------------------
+std::string cmGlobalXCodeGenerator::ConvertToRelativeForXCode(const char* p)
+{
+  if ( !m_CurrentMakefile->IsOn("CMAKE_USE_RELATIVE_PATHS") )
     {
     return cmSystemTools::ConvertToOutputPath(p);
-    } 
-  // Given that we are in m_CurrentOutputDirectory how to we
-  // get to pathIn with a relative path, store in ret
-  std::string ret = 
-    cmSystemTools::RelativePath(m_OutputDir.c_str(), pathIn.c_str());
-  
-  // If the path is 0 sized make it a .
-  // this happens when pathIn is the same as m_CurrentOutputDirectory
-  if(ret.size() == 0)
-    {
-    ret = ".";
     }
-  // if there was a trailing / there still is one, and
-  // if there was not one, there still is not one
-  if(ret[ret.size()-1] == '/' && 
-     pathIn[pathIn.size()-1] != '/')
+  else
     {
-    ret.erase(ret.size()-1, 1);
+    std::string ret = this->ConvertToRelativePath(m_ProjectOutputDirectoryComponents, p);
+    return cmSystemTools::ConvertToOutputPath(ret.c_str());
     }
-  if(ret[ret.size()-1] != '/' && 
-     pathIn[pathIn.size()-1] == '/')
-    {
-    ret += "/";
-    }
-  // Now convert the relative path to an output path
-  ret = cmSystemTools::ConvertToOutputPath(ret.c_str());
-  // finally return the path 
-  // at this point it should be relative and in the correct format
-  // for the native build system.  (i.e. \ for windows and / for unix,
-  // and correct escaping/quoting of spaces in the path
-  return ret;
 }
 
 std::string cmGlobalXCodeGenerator::XCodeEscapePath(const char* p)
