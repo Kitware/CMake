@@ -106,6 +106,15 @@ IF(UNIX)
            /opt/gnome/lib
   )
 
+  FIND_LIBRARY( GTK_gthread_LIBRARY
+    NAMES  gthread gthread12
+    PATHS  /usr/lib
+           /usr/local/lib
+           /usr/openwin/lib
+           /usr/X11R6/lib
+           /opt/gnome/lib
+  )
+
   IF(GTK_gtk_INCLUDE_PATH)
   IF(GTK_glibconfig_INCLUDE_PATH)
   IF(GTK_glib_INCLUDE_PATH)
@@ -123,6 +132,9 @@ IF(UNIX)
                         ${GTK_gdk_LIBRARY}
                         ${GTK_gmodule_LIBRARY}
                         ${GTK_glib_LIBRARY} )
+    IF(GTK_gthread_LIBRARY)
+      SET(GTK_LIBRARIES ${GTK_LIBRARIES} ${GTK_gthread_LIBRARY})
+    ENDIF(GTK_gthread_LIBRARY)
 
   IF(GTK_gtkgl_INCLUDE_PATH)
   IF(GTK_gtkgl_LIBRARY)
