@@ -669,7 +669,7 @@ void CPropertyList::OnHelp()
     return;
     }
   CPropertyItem* pItem = (CPropertyItem*) GetItemDataPtr(m_curSel);
-  MessageBox(pItem->m_HelpString);
+  MessageBox(pItem->m_HelpString, pItem->m_propName, MB_OK|MB_ICONINFORMATION);
 }
 
 void CPropertyList::RemoveAll()
