@@ -668,6 +668,17 @@ void cmMakefile::GenerateCacheOnly()
       }
     fout << "include "
          << mf->GetHomeOutputDirectory() << "/CMake/CMakeMaster.make\n";
+    dest = mf->GetStartOutputDirectory();
+    dest += "/CMakeTargets.make";
+    std::cout << "cmake: creating : " << dest.c_str() << "\n";
+    std::ofstream fout2(dest.c_str());
+    if(!fout2)
+      { 
+      cmSystemTools::Error("Failed to open file for write " , dest.c_str());
+      }
+    fout2 << "#Initial CMakeTargets.make file created only to keep \n";
+    fout2 << "#certain makes happy that don't like to include makefiles\n";
+    fout2 << "#that do not exist\n";
     }
   
   for(unsigned int i =0; i < makefiles.size(); ++i)
