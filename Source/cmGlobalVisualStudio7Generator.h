@@ -86,7 +86,7 @@ private:
   void WriteProjectDepends(std::ostream& fout, 
                            const char* name, const char* path,
                            const cmTarget &t);
-  void WriteProjectConfigurations(std::ostream& fout, const char* name);
+  void WriteProjectConfigurations(std::ostream& fout, const char* name, bool in_all);
   void WriteExternalProject(std::ostream& fout, 
                             const char* name, const char* path,
                             const std::vector<std::string>& dependencies);
