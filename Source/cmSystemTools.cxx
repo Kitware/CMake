@@ -969,6 +969,11 @@ bool cmSystemTools::FilesDiffer(const char* source,
     return true;
     }
 
+  if(statSource.st_size == 0)
+    {
+    return false;
+    }
+
 #if defined(_WIN32) || defined(__CYGWIN__)
   std::ifstream finSource(source, 
                           std::ios::binary | std::ios::in);
@@ -984,19 +989,7 @@ bool cmSystemTools::FilesDiffer(const char* source,
     }
 
   char* source_buf = new char[statSource.st_size];
-  if (!source_buf)
-    {
-    cmSystemTools::Error("FilesDiffer failed to allocate memory for source!");
-    return false;
-    }
-
   char* dest_buf = new char[statSource.st_size];
-  if (!dest_buf)
-    {
-    cmSystemTools::Error("FilesDiffer failed to allocate memory for dest!");
-    delete [] source_buf;
-    return false;
-    }
 
   finSource.read(source_buf, statSource.st_size);
   finDestination.read(dest_buf, statSource.st_size);
