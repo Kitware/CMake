@@ -65,11 +65,19 @@ public:
 
   ///! Set the Global Generator, done on creation by the GlobalGenerator
   void SetGlobalGenerator(cmGlobalGenerator *gg);
-  
+  std::string ConvertToRelativeOutputPath(const char* p);
 protected:
   bool m_FromTheTop;
   cmMakefile *m_Makefile;
   cmGlobalGenerator *m_GlobalGenerator;
+  // members used for relative path function ConvertToMakefilePath
+  std::string m_RelativePathToSourceDir;
+  std::string m_RelativePathToBinaryDir;
+  std::string m_CurrentOutputDirectory;
+  std::string m_HomeOutputDirectory;
+  std::string m_HomeDirectory;
+  std::string m_HomeOutputDirectoryNoSlash;
+
 };
 
 #endif
