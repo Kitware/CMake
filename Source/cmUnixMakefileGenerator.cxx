@@ -48,10 +48,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmGeneratedFileStream.h"
 
 cmUnixMakefileGenerator::cmUnixMakefileGenerator()
-  :m_ObjectFileExtension(".o"),
+  :m_SharedLibraryExtension("$(SHLIB_SUFFIX)"),
+   m_ObjectFileExtension(".o"),
    m_ExecutableExtension(""),
    m_StaticLibraryExtension(".a"),
-   m_SharedLibraryExtension("$(SHLIB_SUFFIX)"),
    m_LibraryPrefix("lib")
 {
   m_CacheOnly = false;
