@@ -23,7 +23,7 @@ static const cmDocumentationEntry cmDocumentationUsage[] =
   {0,
    "  CMakeSetup [options]\n"
    "  CMakeSetup [options] <path-to-source>\n"
-   "  CMakeSetup [options] <path-to-build>", 0},
+   "  CMakeSetup [options] <path-to-existing-build>", 0},
   {0,0,0}
 };
 

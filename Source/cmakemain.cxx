@@ -33,7 +33,8 @@ static const cmDocumentationEntry cmDocumentationName[] =
 static const cmDocumentationEntry cmDocumentationUsage[] =
 {
   {0,
-   "  cmake [options] <path-to-source>", 0},
+   "  cmake [options] <path-to-source>\n"
+   "  cmake [options] <path-to-existing-build>", 0},
   {0,0,0}
 };
 
