@@ -1829,7 +1829,16 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
 #endif
     makeCommand += " ";
     makeCommand += m_BuildProject;
-    makeCommand += ".dsw /MAKE \"ALL_BUILD - ";
+    makeCommand += ".dsw /MAKE \"";
+    if(m_BuildTarget.size())
+      {
+      makeCommand += m_BuildTarget;
+      }
+    else
+      {
+      makeCommand += "ALL_BUILD";
+      }
+    makeCommand += " - ";
     makeCommand += m_ConfigType;
     if(m_BuildNoClean)
       {
@@ -1860,7 +1869,15 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
       {
       makeCommand += "/rebuild ";
       }
-    makeCommand += m_ConfigType + " /project ALL_BUILD";
+    makeCommand += m_ConfigType + " /project ";
+    if(m_BuildTarget.size())
+      {
+      makeCommand += m_BuildTarget;
+      }
+    else
+      {
+      makeCommand += "ALL_BUILD";
+      }
     }
   else if (lowerCaseCommand.find("make") != std::string::npos)
     {
