@@ -2574,6 +2574,14 @@ int cmCTest::RunConfigurationScript()
   // read in the list file to fill the cache
   cmLocalGenerator *lg = gg.CreateLocalGenerator();
   lg->SetGlobalGenerator(&gg);
+
+  // set a variable with the path to the current script
+  lg->GetMakefile()->AddDefinition("CTEST_SCRIPT_DIRECTORY",
+                                   cmSystemTools::GetFilenamePath(
+                                     m_ConfigurationScript).c_str());
+  lg->GetMakefile()->AddDefinition("CTEST_SCRIPT_NAME",
+                                   cmSystemTools::GetFilenameName(
+                                     m_ConfigurationScript).c_str());
   if (!lg->GetMakefile()->ReadListFile(0, m_ConfigurationScript.c_str()))
     {
     return -2;
@@ -2658,9 +2666,10 @@ int cmCTest::RunConfigurationScript()
   if (cmakeCmd)
     {
     command = cmakeCmd;
-    command += " ";
+    command += " \"";
     command += srcDir;
     output.empty();
+    command += "\"";
     retVal = 0;
     res = cmSystemTools::RunSingleCommand(command.c_str(), &output, 
                                           &retVal, binDir,
@@ -2679,7 +2688,9 @@ int cmCTest::RunConfigurationScript()
   res = cmSystemTools::RunSingleCommand(command.c_str(), &output, 
                                         &retVal, binDir,
                                         m_Verbose, 0 /*m_TimeOut*/);
-  if (!res || retVal != 0)
+
+  // the main ctest return values need to be fixed
+  if (!res /* || retVal != 0 */)
     {
     cmSystemTools::Error("Unable to run ctest");    
     return -6;
