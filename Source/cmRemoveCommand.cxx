@@ -19,10 +19,9 @@
 // cmRemoveCommand
 bool cmRemoveCommand::InitialPass(std::vector<std::string> const& args)
 {
-  if(args.size() < 2 )
+  if(args.size() < 1)
     {
-    this->SetError("called with incorrect number of arguments");
-    return false;
+    return true;
     }
 
   const char* variable = args[0].c_str(); // VAR is always first
@@ -30,6 +29,12 @@ bool cmRemoveCommand::InitialPass(std::vector<std::string> const& args)
   const char* cacheValue
     = m_Makefile->GetDefinition(variable);
 
+  // if there is no old value then return
+  if (!cacheValue)
+    {
+    return true;
+    }
+  
   // expand the variable
   std::vector<std::string> varArgsExpanded;
   std::vector<std::string> temp;
