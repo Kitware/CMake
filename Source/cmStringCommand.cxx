@@ -90,7 +90,7 @@ bool cmStringCommand::RegexMatch(std::vector<std::string> const& args)
   
   // Concatenate all the last arguments together.
   std::string input = args[4];
-  for(int i=5; i < args.size(); ++i)
+  for(unsigned int i=5; i < args.size(); ++i)
     {
     input += args[i];
     }
@@ -133,7 +133,7 @@ bool cmStringCommand::RegexMatchAll(std::vector<std::string> const& args)
   
   // Concatenate all the last arguments together.
   std::string input = args[4];
-  for(int i=5; i < args.size(); ++i)
+  for(unsigned int i=5; i < args.size(); ++i)
     {
     input += args[i];
     }
@@ -231,7 +231,7 @@ bool cmStringCommand::RegexReplace(std::vector<std::string> const& args)
   
   // Concatenate all the last arguments together.
   std::string input = args[5];
-  for(int i=6; i < args.size(); ++i)
+  for(unsigned int i=6; i < args.size(); ++i)
     {
     input += args[i];
     }
@@ -265,7 +265,7 @@ bool cmStringCommand::RegexReplace(std::vector<std::string> const& args)
       }
     
     // Concatenate the replacement for the match.
-    for(int i=0; i < replacement.size(); ++i)
+    for(unsigned int i=0; i < replacement.size(); ++i)
       {
       if(replacement[i].number < 0)
         {
@@ -280,7 +280,7 @@ bool cmStringCommand::RegexReplace(std::vector<std::string> const& args)
         std::string::size_type end = re.end(n);
         std::string::size_type len = input.length()-base;
         if((start != std::string::npos) && (end != std::string::npos) &&
-           (start >= 0) && (start <= len) && (end >= 0) && (end <= len))
+           (start <= len) && (end <= len))
           {
           output += input.substr(base+start, end-start);
           }
