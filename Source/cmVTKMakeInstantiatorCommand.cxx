@@ -187,7 +187,7 @@ cmVTKMakeInstantiatorCommand
       {
       cmGeneratedFileStream fout(fullName.c_str());
     
-      unsigned int thisBlockSize =
+      size_t thisBlockSize =
         (block < numFullBlocks)? groupSize:lastBlockSize;
     
       // Actually generate the code in the file.
