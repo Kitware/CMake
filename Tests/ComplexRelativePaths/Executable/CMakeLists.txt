@@ -1,6 +1,7 @@
 #
 # Create exe. 
 #
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DTEST_CXX_FLAGS")
 SET_SOURCE_FILES_PROPERTIES(complex 
                             COMPILE_FLAGS "-DFILE_HAS_EXTRA_COMPILE_FLAGS")
 ADD_EXECUTABLE(complex complex)

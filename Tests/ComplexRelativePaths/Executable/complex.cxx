@@ -132,7 +132,10 @@ int main()
     {
     cmPassed("Call to file2 function returned 1.");
     }
-
+#ifndef TEST_CXX_FLAGS
+  cmFailed("CMake CMAKE_CXX_FLAGS is not being passed to the compiler!");
+#else
+  cmPassed("CMake CMAKE_CXX_FLAGS is being passed to the compiler.");
   // ----------------------------------------------------------------------
   // Test ADD_DEFINITIONS
 

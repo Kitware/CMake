@@ -25,7 +25,7 @@ ADD_LIBRARY(CMakeTestLibrary LibrarySources)
 #
 SOURCE_FILES(SharedLibrarySources sharedFile)
 ADD_LIBRARY(CMakeTestLibraryShared SHARED SharedLibrarySources)
-
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DTEST_C_FLAGS")
 ADD_LIBRARY(CMakeTestCLibraryShared SHARED testConly.c)
 
 #
