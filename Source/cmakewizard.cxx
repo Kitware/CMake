@@ -24,6 +24,11 @@ void cmakewizard::AskUser(const char* key, cmCacheManager::CacheEntry & entry)
     if(entry)
       {
       entry->m_Value = buffer;
+      if(entry->m_Type == cmCacheManager::PATH ||
+         entry->m_Type == cmCacheManager::FILEPATH)
+        {
+        cmSystemTools::ConvertToUnixSlashes(entry->m_Value);
+        }
       }
     else
       {
