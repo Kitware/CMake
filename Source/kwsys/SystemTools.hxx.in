@@ -245,9 +245,11 @@ public:
    * Read line from file. Make sure to get everything. Due to a buggy stream
    * library on the HP and another on Mac OSX, we need this very carefully
    * written version of getline. Returns true if any data were read before the
-   * end-of-file was reached.
+   * end-of-file was reached. If the has_newline argument is specified, it will
+   * be true when the line read had a newline character.
    */
-  static bool GetLineFromStream(kwsys_std::istream& istr, kwsys_std::string& line);
+  static bool GetLineFromStream(kwsys_std::istream& istr, kwsys_std::string& line,
+                                bool* has_newline=0);
   
 protected:
   // these two functions can be called from ConvertToOutputPath
