@@ -83,8 +83,7 @@ public:
       
 protected:
   void CollectSubprojects();
-  void OutputSLNFile(const char* projectName,
-                     std::vector<cmLocalGenerator*>& generators);
+  virtual void OutputSLNFile(std::vector<cmLocalGenerator*>& generators);
   virtual void WriteSLNFile(std::ostream& fout, std::vector<cmLocalGenerator*>& generators);
   virtual void WriteProject(std::ostream& fout, 
                             const char* name, const char* path,

@@ -269,8 +269,7 @@ void cmGlobalVisualStudio7Generator::Generate()
   this->OutputSLNFile();
 }
 
-void cmGlobalVisualStudio7Generator::OutputSLNFile(const char* projectName,
-                                                   std::vector<cmLocalGenerator*>& generators)
+void cmGlobalVisualStudio7Generator::OutputSLNFile(std::vector<cmLocalGenerator*>& generators)
 {
   if(generators.size() == 0)
     {
@@ -297,7 +296,7 @@ void cmGlobalVisualStudio7Generator::OutputSLNFile()
   for(it = m_SubProjectMap.begin(); it!= m_SubProjectMap.end(); ++it)
     {
     std::vector<cmLocalGenerator*>& gen = it->second;
-    this->OutputSLNFile(it->first.c_str(), it->second);
+    this->OutputSLNFile(it->second);
     }
 }
 

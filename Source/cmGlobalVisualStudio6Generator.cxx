@@ -325,8 +325,7 @@ void cmGlobalVisualStudio6Generator::WriteDSWFile(std::ostream& fout,
   this->WriteDSWFooter(fout);
 }
 
-void cmGlobalVisualStudio6Generator::OutputDSWFile(const char* projectName,
-                                                   std::vector<cmLocalGenerator*>& generators)
+void cmGlobalVisualStudio6Generator::OutputDSWFile(std::vector<cmLocalGenerator*>& generators)
 {
   if(generators.size() == 0)
     {
@@ -353,7 +352,7 @@ void cmGlobalVisualStudio6Generator::OutputDSWFile()
   for(it = m_SubProjectMap.begin(); it!= m_SubProjectMap.end(); ++it)
     {
     std::vector<cmLocalGenerator*>& gen = it->second;
-    this->OutputDSWFile(it->first.c_str(), it->second);
+    this->OutputDSWFile(it->second);
     }
 }
 

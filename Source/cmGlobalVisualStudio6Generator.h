@@ -68,7 +68,7 @@ public:
    * Generate the DSW workspace file.
    */
   virtual void OutputDSWFile();
-  virtual void OutputDSWFile(const char* projectName, std::vector<cmLocalGenerator*>& generators);
+  virtual void OutputDSWFile(std::vector<cmLocalGenerator*>& generators);
   virtual void WriteDSWFile(std::ostream& fout,
                             std::vector<cmLocalGenerator*>& generators);
 private:
