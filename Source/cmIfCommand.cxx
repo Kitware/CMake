@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 bool cmIfFunctionBlocker::
 IsFunctionBlocked(const char *name, const std::vector<std::string> &args, 
-                  cmMakefile &mf)
+                  cmMakefile &)
 {
   if (!strcmp(name,"ELSE") || !strcmp(name,"ENDIF"))
     {
