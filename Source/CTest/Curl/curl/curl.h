@@ -23,6 +23,8 @@
  * $Id$
  ***************************************************************************/
 
+#include "setup.h"
+
 #include <stdio.h>
 /* The include stuff here is mainly for time_t! */
 #ifdef vms
