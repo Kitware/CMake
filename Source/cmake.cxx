@@ -544,6 +544,7 @@ void CMakeCommandUsage(const char* program)
   errorStream 
     << "Usage: " << program << " -E [command] [arguments ...]\n"
     << "Available commands: \n"
+    << "  chdir dir cmd [args]... - run command in a given directory\n"
     << "  copy file destination   - copy file to destination (either file or directory)\n"
     << "  remove file1 file2 ...  - remove the file(s)\n"
     << "  time command [args] ... - run command and return elapsed time\n";
@@ -615,6 +616,32 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
                 << (double)(clock_finish - clock_start) / clocks_per_sec 
                 << " s. (clock)"
                 << "\n";
+      return 0;
+    }
+
+    // Clock command
+    else if (args[1] == "chdir" && args.size() > 2)
+      {
+      std::string directory = args[2];
+      std::string command = args[3];
+      std::string output;
+      for (std::string::size_type cc = 4; cc < args.size(); cc ++)
+	{
+        command += " ";
+        command += args[cc];
+	}
+
+      if ( cmSystemTools::ChangeDirectory( directory.c_str() ) == 0 )
+	{
+	std::cout << "Change directory to: " << directory << std::endl;
+	cmSystemTools::RunCommand(command.c_str(), output, 0, true);	
+	std::cout << output.c_str();
+	}
+      else
+	{
+	std::cout << "Cannot change directory to: " << directory << std::endl;
+	}
+
       return 0;
     }
 
