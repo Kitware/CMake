@@ -52,7 +52,7 @@
                                        "\\|" "[ \t\r\n]"
                                        "\\)*"))
 
-(defconst cmake-regex-block-open "^\\(IF\\|MACRO\\|FOREACH\\|ELSE\\)")
+(defconst cmake-regex-block-open "^\\(IF\\|MACRO\\|FOREACH\\|ELSE\\)$")
 (defconst cmake-regex-block-close "^[ \t]*\\(ENDIF\\|ENDFOREACH\\|ENDMACRO\\|ELSE\\)[ \t]*(")
 
 (defun cmake-line-starts-inside-string ()
@@ -113,7 +113,10 @@
             (if (string-match (concat "^" cmake-regex-paren-right "$") token)
                 (setq cur-indent (- cur-indent cmake-tab-width))
               )
-            (if (string-match cmake-regex-block-open token)
+            (if (and
+                 (string-match cmake-regex-block-open token)
+                 (looking-at (concat "[ \t]*" cmake-regex-paren-left))
+                 )
                 (setq cur-indent (+ cur-indent cmake-tab-width))
               )
             )
