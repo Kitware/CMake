@@ -121,6 +121,30 @@ void cmMSDotNETGenerator::WriteSLNFile(std::ostream& fout)
   // add a special target that depends on ALL projects for easy build
   // of Debug only
   m_Makefile->AddUtilityCommand("ALL_BUILD", "echo", "\"Build all projects\"",
+                                false); 
+  
+  std::string ctest = m_Makefile->GetDefinition("CMAKE_COMMAND");
+  ctest = cmSystemTools::GetFilenamePath(ctest.c_str());
+  ctest += "/";
+  ctest += "ctest";
+  ctest += cmSystemTools::GetExecutableExtension();
+  if(!cmSystemTools::FileExists(ctest.c_str()))
+    {
+    ctest = m_Makefile->GetDefinition("CMAKE_COMMAND");
+    ctest = cmSystemTools::GetFilenamePath(ctest.c_str());
+    ctest += "/Debug/";
+    ctest += "ctest";
+    ctest += cmSystemTools::GetExecutableExtension();
+    }
+  if(!cmSystemTools::FileExists(ctest.c_str()))
+    {
+    ctest = m_Makefile->GetDefinition("CMAKE_COMMAND");
+    ctest = cmSystemTools::GetFilenamePath(ctest.c_str());
+    ctest += "/Release/";
+    ctest += "ctest";
+    ctest += cmSystemTools::GetExecutableExtension();
+    }
+  m_Makefile->AddUtilityCommand("RUN_TESTS", ctest.c_str(), "-D $(IntDir)",
                                 false);
   m_Makefile->FindSubDirectoryCMakeListsFiles(allListFiles);
   // For each cmMakefile, create a VCProj for it, and
@@ -732,6 +756,7 @@ void cmMSDotNETGenerator::WriteConfiguration(std::ostream& fout,
     }
   this->OutputDefineFlags(fout);
   fout << "\"\n";
+  fout << "\t\t\t\tRuntimeTypeInfo=\"TRUE\"\n";
   fout << "\t\t\t\tAssemblerListingLocation=\"" << configName << "\"\n";
   fout << "\t\t\t\tObjectFile=\"" << configName << "\\\"\n";
   fout << "\t\t\t\tProgramDataBaseFileName=\"" << configName << "\"\n";
