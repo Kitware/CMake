@@ -231,8 +231,8 @@ void cmLocalGenerator::AddInstallRule(std::ostream& fout, const char* dest, int 
     }
   fout 
     << "MESSAGE(STATUS \"Install " << stype << ": " << sfiles.c_str() << "\")\n" 
-    << "FILE(INSTALL DESTINATION " << destination.c_str() 
-    << " TYPE " << stype.c_str() << " FILES " << sfiles.c_str() << ")\n";
+    << "FILE(INSTALL DESTINATION \"" << destination.c_str() 
+    << "\" TYPE " << stype.c_str() << " FILES \"" << sfiles.c_str() << "\")\n";
 }
 
 const char* cmLocalGenerator::GetSafeDefinition(const char* def)
