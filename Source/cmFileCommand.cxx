@@ -244,8 +244,7 @@ bool cmFileCommand::HandleInstallCommand(std::vector<std::string> const& args)
   if ( build_type )
     {
     extra_dir = build_type;
-    std::string btype = build_type;
-    cmSystemTools::LowerCase(btype);
+    std::string btype = cmSystemTools::LowerCase(build_type);
     if ( btype == "debug" )
       {
       debug = 1;
@@ -359,7 +358,7 @@ bool cmFileCommand::HandleInstallCommand(std::vector<std::string> const& args)
     case cmTarget::SHARED_LIBRARY:
       if ( debug )
         {
-        fname = fnamewe + debug_postfix + "." + ext;
+        fname = fnamewe + debug_postfix + ext;
         }
     case cmTarget::EXECUTABLE:
       if ( extra_dir.size() > 0 )
