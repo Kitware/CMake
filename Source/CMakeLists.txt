@@ -562,6 +562,19 @@ IF(BUILD_TESTING)
       )
   ENDIF (APPLE)
 
+  IF (UNIX)
+    CONFIGURE_FILE(
+      "${CMake_SOURCE_DIR}/Tests/CTestTest/ctest.cmake.in"
+      "${CMake_BINARY_DIR}/Tests/CTestTest/ctest.cmake"
+      @ONLY
+      )
+    ADD_TEST(CTestTest ${CMAKE_CTEST_COMMAND}
+      -S "${CMake_BINARY_DIR}/Tests/CTestTest/ctest.cmake" -V
+      )
+
+  ENDIF (UNIX)
+
+
   IF (CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE OR WXWINDOWS_INCLUDE_DIR)
     # Will be set if the wxwindows gui is on
     ADD_TEST(UseWX ${CMAKE_CTEST_COMMAND}
