@@ -51,10 +51,10 @@ bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& argsIn)
     return false;
     }
   std::string output;
-    m_Makefile->ExpandVariablesInString(args[0]);
-    m_Makefile->ExpandVariablesInString(args[1]);
+  m_Makefile->ExpandVariablesInString(args[0]);
   if(args.size() == 2)
     {
+    m_Makefile->ExpandVariablesInString(args[1]);
     cmSystemTools::MakeDirectory(args[1].c_str());
     std::string command;
     command = "cd ";
