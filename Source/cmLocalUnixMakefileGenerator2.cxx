@@ -86,6 +86,10 @@ void cmLocalUnixMakefileGenerator2::Generate(bool fromTheTop)
       {
       this->GenerateTargetRuleFile(t->second);
       }
+    else if(t->second.GetType() == cmTarget::UTILITY)
+      {
+      this->GenerateUtilityRuleFile(t->second);
+      }
     }
 
   // Generate the rule files for each custom command.
@@ -93,9 +97,9 @@ void cmLocalUnixMakefileGenerator2::Generate(bool fromTheTop)
   for(std::vector<cmSourceFile*>::const_iterator i = sources.begin();
       i != sources.end(); ++i)
     {
-    if((*i)->GetCustomCommand())
+    if(const cmCustomCommand* cc = (*i)->GetCustomCommand())
       {
-      this->GenerateCustomRuleFile(*(*i));
+      this->GenerateCustomRuleFile(*cc);
       }
     }
 
@@ -512,18 +516,10 @@ cmLocalUnixMakefileGenerator2
 //----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator2
-::GenerateCustomRuleFile(const cmSourceFile& source)
+::GenerateCustomRuleFile(const cmCustomCommand& cc)
 {
-  // Get the custom command for the source.
-  if(!source.GetCustomCommand())
-    {
-    cmSystemTools::Error("GenerateCustomRuleFile called for non-custom source.");
-    return;
-    }
-  const cmCustomCommand& cc = *source.GetCustomCommand();
-
   // Create a directory for custom rule files.
-  std::string dir = "CMakeCustomCommands.dir";
+  std::string dir = "CMakeCustomRules.dir";
   cmSystemTools::MakeDirectory(this->ConvertToFullPath(dir).c_str());
 
   // Construct the name of the rule file.
@@ -545,8 +541,6 @@ cmLocalUnixMakefileGenerator2
   // This rule should be included by the makefile.
   m_IncludeRuleFiles.push_back(ruleFileName);
 
-  // TODO: Convert outputs/dependencies (arguments?) to relative paths.
-
   // Open the rule file.  This should be copy-if-different because the
   // rules may depend on this file itself.
   std::string ruleFileNameFull = this->ConvertToFullPath(ruleFileName);
@@ -560,51 +554,13 @@ cmLocalUnixMakefileGenerator2
   ruleFileStream
     << "# Custom command rule file for " << customName.c_str() << ".\n\n";
 
-  // Build the command line in a single string.
+  // Collect the commands.
   std::vector<std::string> commands;
-  std::string cmd = cc.GetCommand();
-  cmSystemTools::ReplaceString(cmd, "/./", "/");
-  cmd = this->ConvertToRelativeOutputPath(cmd.c_str());
-  if(cc.GetArguments().size() > 0)
-    {
-    cmd += " ";
-    cmd += cc.GetArguments();
-    }
-  commands.push_back(cmd);
+  this->AddCustomCommands(commands, cc);
 
   // Collect the dependencies.
   std::vector<std::string> depends;
-  for(std::vector<std::string>::const_iterator d = cc.GetDepends().begin();
-      d != cc.GetDepends().end(); ++d)
-    {
-    // Get the dependency with variables expanded.
-    std::string dep = *d;
-    m_Makefile->ExpandVariablesInString(dep);
-
-    // If the rule depends on a target CMake knows how to build,
-    // convert it to the path where it will be built.
-    std::string libPath = dep + "_CMAKE_PATH";
-    const char* cacheValue = m_Makefile->GetDefinition(libPath.c_str());
-    if(cacheValue && *cacheValue)
-      {
-      libPath = cacheValue;
-      if (m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH") &&
-          m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH")[0] != '\0')
-        {
-        libPath = m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
-        }
-      libPath += "/";
-      libPath += dep;
-      libPath += cmSystemTools::GetExecutableExtension();
-      dep = libPath;
-      }
-
-    // Cleanup the dependency and add it.
-    cmSystemTools::ReplaceString(dep, "/./", "/");
-    cmSystemTools::ReplaceString(dep, "/$(IntDir)/", "/");
-    dep = this->ConvertToRelativeOutputPath(dep.c_str());
-    depends.push_back(dep.c_str());
-    }
+  this->AddCustomDepends(depends, cc);
 
   // Add a dependency on the rule file itself.
   depends.push_back(ruleFileName);
@@ -620,6 +576,60 @@ cmLocalUnixMakefileGenerator2
   preEcho += "...";
   this->WriteMakeRule(ruleFileStream, comment, preEcho.c_str(),
                       cc.GetOutput().c_str(), depends, commands);
+}
+
+//----------------------------------------------------------------------------
+void
+cmLocalUnixMakefileGenerator2
+::GenerateUtilityRuleFile(const cmTarget& target)
+{
+  // Create a directory for utility rule files.
+  std::string dir = "CMakeCustomRules.dir";
+  cmSystemTools::MakeDirectory(this->ConvertToFullPath(dir).c_str());
+
+  // Construct the name of the rule file.
+  std::string ruleFileName = dir;
+  ruleFileName += "/";
+  ruleFileName += target.GetName();
+  ruleFileName += ".make";
+
+  // This rule should be included by the makefile.
+  m_IncludeRuleFiles.push_back(ruleFileName);
+
+  // Open the rule file.  This should be copy-if-different because the
+  // rules may depend on this file itself.
+  std::string ruleFileNameFull = this->ConvertToFullPath(ruleFileName);
+  cmGeneratedFileStream ruleFileStream(ruleFileNameFull.c_str());
+  ruleFileStream.SetCopyIfDifferent(true);
+  if(!ruleFileStream)
+    {
+    return;
+    }
+  this->WriteDisclaimer(ruleFileStream);
+  ruleFileStream
+    << "# Utility rule file for " << target.GetName() << ".\n\n";
+
+  // TODO: Pre-build and pre-link rules.
+
+  // Collect the commands and dependencies.
+  std::vector<std::string> commands;
+  std::vector<std::string> depends;
+
+  // Utility targets store their rules in post-build commands.
+  for(std::vector<cmCustomCommand>::const_iterator
+        i = target.GetPostBuildCommands().begin();
+      i != target.GetPostBuildCommands().end(); ++i)
+    {
+    this->AddCustomCommands(commands, *i);
+    this->AddCustomDepends(depends, *i);
+    }
+
+  // Add a dependency on the rule file itself.
+  depends.push_back(ruleFileName);
+
+  // Write the rule.
+  this->WriteMakeRule(ruleFileStream, 0, 0,
+                      target.GetName(), depends, commands);
 }
 
 //----------------------------------------------------------------------------
@@ -2133,6 +2143,64 @@ cmLocalUnixMakefileGenerator2
       depends.push_back(this->ConvertToRelativeOutputPath(name));
       }
     }
+}
+
+//----------------------------------------------------------------------------
+void
+cmLocalUnixMakefileGenerator2
+::AddCustomDepends(std::vector<std::string>& depends,
+                   const cmCustomCommand& cc)
+{
+  // TODO: Convert outputs/dependencies (arguments?) to relative paths.
+  for(std::vector<std::string>::const_iterator d = cc.GetDepends().begin();
+      d != cc.GetDepends().end(); ++d)
+    {
+    // Get the dependency.
+    std::string dep = *d;
+
+    // If the dependency is a target CMake knows how to build, convert
+    // it to the path where it will be built.
+    std::string libPath = dep + "_CMAKE_PATH";
+    const char* cacheValue = m_Makefile->GetDefinition(libPath.c_str());
+    if(cacheValue && *cacheValue)
+      {
+      libPath = cacheValue;
+      if (m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH") &&
+          m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH")[0] != '\0')
+        {
+        libPath = m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
+        }
+      libPath += "/";
+      libPath += dep;
+      libPath += cmSystemTools::GetExecutableExtension();
+      dep = libPath;
+      }
+
+    // Cleanup the dependency and add it.
+    cmSystemTools::ReplaceString(dep, "/./", "/");
+    cmSystemTools::ReplaceString(dep, "/$(IntDir)/", "/");
+    depends.push_back(dep.c_str());
+    }
+}
+
+//----------------------------------------------------------------------------
+void
+cmLocalUnixMakefileGenerator2
+::AddCustomCommands(std::vector<std::string>& commands,
+                    const cmCustomCommand& cc)
+{
+  // TODO: Convert outputs/dependencies (arguments?) to relative paths.
+
+  // Build the command line in a single string.
+  std::string cmd = cc.GetCommand();
+  cmSystemTools::ReplaceString(cmd, "/./", "/");
+  cmd = this->ConvertToRelativeOutputPath(cmd.c_str());
+  if(cc.GetArguments().size() > 0)
+    {
+    cmd += " ";
+    cmd += cc.GetArguments();
+    }
+  commands.push_back(cmd);
 }
 
 //----------------------------------------------------------------------------

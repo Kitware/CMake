@@ -66,7 +66,8 @@ protected:
   void GenerateTargetRuleFile(const cmTarget& target);
   void GenerateObjectRuleFile(const cmTarget& target,
                               const cmSourceFile& source);
-  void GenerateCustomRuleFile(const cmSourceFile& source);
+  void GenerateCustomRuleFile(const cmCustomCommand& cc);
+  void GenerateUtilityRuleFile(const cmTarget& target);
   std::string GenerateDependsMakeFile(const char* file);
   void WriteMakeRule(std::ostream& os,
                      const char* comment,
@@ -145,6 +146,10 @@ protected:
   void AppendLibDepends(const cmTarget& target,
                         std::vector<std::string>& depends);
   void AppendLibDepend(std::vector<std::string>& depends, const char* name);
+  void AddCustomDepends(std::vector<std::string>& depends,
+                        const cmCustomCommand& cc);
+  void AddCustomCommands(std::vector<std::string>& commands,
+                         const cmCustomCommand& cc);
   std::string GetRecursiveMakeCall(const char* tgt);
   void WriteJumpAndBuildRules(std::ostream& makefileStream);
 
