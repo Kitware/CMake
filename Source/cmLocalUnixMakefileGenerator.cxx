@@ -529,7 +529,8 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
   std::string linkLibs;
   
   // Flags to link an executable to shared libraries.
-  if( tgt.GetType() == cmTarget::EXECUTABLE)
+  if( tgt.GetType() == cmTarget::EXECUTABLE ||
+      tgt.GetType() == cmTarget::WIN32_EXECUTABLE )
     {
     if(cxx)
       {
