@@ -446,17 +446,8 @@ void CPropertyList::OnButton()
     }
    else if (pItem->m_nItemType == CPropertyList::PATH)
     {
-    CString initialDir;
-    CString currPath = pItem->m_curValue;
-    if (currPath.GetLength() > 0)
-      {
-      int endSlash = currPath.ReverseFind('\\');
-      if(endSlash == -1)
-        {
-        endSlash = currPath.ReverseFind('/');
-        }
-      initialDir = currPath.Left(endSlash);
-      }
+    CString initialDir = pItem->m_curValue;
+    // convert back to windos style path
     initialDir.Replace("/", "\\");
     CString title = "Setting Cache Value: ";
     title += pItem->m_propName;
