@@ -1,17 +1,17 @@
 
 SOURCE_FILES( CURSES_SRCS
-              cmCursesBoolWidget
-              cmCursesCacheEntryComposite
-              cmCursesDummyWidget
-              cmCursesFilePathWidget
-              cmCursesForm
-              cmCursesLabelWidget
-              cmCursesLongMessageForm
-              cmCursesMainForm
-              cmCursesPathWidget
-              cmCursesStringWidget
-              cmCursesWidget
-              ccmake
+              CursesDialog/cmCursesBoolWidget
+              CursesDialog/cmCursesCacheEntryComposite
+              CursesDialog/cmCursesDummyWidget
+              CursesDialog/cmCursesFilePathWidget
+              CursesDialog/cmCursesForm
+              CursesDialog/cmCursesLabelWidget
+              CursesDialog/cmCursesLongMessageForm
+              CursesDialog/cmCursesMainForm
+              CursesDialog/cmCursesPathWidget
+              CursesDialog/cmCursesStringWidget
+              CursesDialog/cmCursesWidget
+              CursesDialog/ccmake
             )
 
 INCLUDE_DIRECTORIES(${CMake_SOURCE_DIR}/Source/CursesDialog/form)
