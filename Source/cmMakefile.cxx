@@ -190,48 +190,75 @@ void cmMakefile::Print() const
 // Parse the given CMakeLists.txt file into a list of classes.
 // Reads in current CMakeLists file and all parent CMakeLists files
 // executing all inherited commands in the parents
-bool cmMakefile::ReadListFile(const char* filename)
+//
+//   if external is non-zero, this means that we have branched to grab some
+//   commands from a remote list-file (that is, the equivalent of a
+//   #include has been called).  We DO NOT look at the parents of this
+//   list-file, and for all other purposes, the name of this list-file
+//   is "filename" and not "external".
+bool cmMakefile::ReadListFile(const char* filename, const char* external)
 {
-  // is there a parent CMakeLists file that does not go beyond the
-  // Home directory? if so recurse and read in that List file 
-  std::string parentList = this->GetParentListFileName(filename);
-  if (parentList != "")
+
+  // keep track of the current file being read
+  m_cmCurrentListFile= filename;
+
+  // if this is not a remote makefile
+  //  (if it were, this would be called from the "filename" call,
+  //   rather than the "external" call)
+  if (!external)
     {
-    // save the current directory
-    std::string srcdir = m_cmCurrentDirectory;
-    std::string bindir = m_CurrentOutputDirectory;    
-    // compute the new current directories
-    std::string::size_type pos = m_cmCurrentDirectory.rfind('/');
-    if(pos != std::string::npos)
-      {
-      m_cmCurrentDirectory = m_cmCurrentDirectory.substr(0, pos);
-      }
-    pos = m_CurrentOutputDirectory.rfind('/');
-    if(pos != std::string::npos)
-      {
-      m_CurrentOutputDirectory = m_CurrentOutputDirectory.substr(0, pos);
-      }
-    this->ReadListFile(parentList.c_str());
-    // restore the current directory
-    m_cmCurrentDirectory = srcdir;
-    m_CurrentOutputDirectory = bindir;    
+      // is there a parent CMakeLists file that does not go beyond the
+      // Home directory? if so recurse and read in that List file 
+      std::string parentList = this->GetParentListFileName(filename);
+      if (parentList != "")
+	{
+	  // save the current directory
+	  std::string srcdir = m_cmCurrentDirectory;
+	  std::string bindir = m_CurrentOutputDirectory;    
+	  // compute the new current directories
+	  std::string::size_type pos = m_cmCurrentDirectory.rfind('/');
+	  if(pos != std::string::npos)
+	    {
+	      m_cmCurrentDirectory = m_cmCurrentDirectory.substr(0, pos);
+	    }
+	  pos = m_CurrentOutputDirectory.rfind('/');
+	  if(pos != std::string::npos)
+	    {
+	      m_CurrentOutputDirectory = m_CurrentOutputDirectory.substr(0, pos);
+	    }
+	  this->ReadListFile(parentList.c_str());
+	  // restore the current directory
+	  m_cmCurrentDirectory = srcdir;
+	  m_CurrentOutputDirectory = bindir;    
+	}
     }
 
   // are we at the start CMakeLists file or are we processing a parent 
   // lists file
+  //
+  //   this might, or might not be true, irrespective if we are
+  //   off looking at an external makefile.
   bool inheriting = (m_cmCurrentDirectory != m_cmStartDirectory);
                     
   // Now read the input file
-  std::ifstream fin(filename);
+  const char *filenametoread= filename;
+
+  if( external)
+    filenametoread= external;
+
+  std::ifstream fin(filenametoread);
   if(!fin)
     {
-    cmSystemTools::Error("error can not open file ", filename);
+    cmSystemTools::Error("error can not open file ", filenametoread);
     return false;
     }
   std::string name;
   std::vector<std::string> arguments;
   while ( fin )
     {
+      // add this list file to the list of dependencies
+      m_ListFiles.push_back( filenametoread);
+
     if(cmSystemTools::ParseFunction(fin, name, arguments) &&
        !this->IsFunctionBlocked(name.c_str(),arguments))
       {

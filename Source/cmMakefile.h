@@ -73,7 +73,7 @@ public:
   /**
    * Read and parse a CMakeLists.txt file.
    */
-  bool ReadListFile(const char* listfile); 
+  bool ReadListFile(const char* listfile, const char* external= 0); 
 
   /**
    * Add a wrapper generator.
@@ -241,7 +241,16 @@ public:
     {
     return m_cmHomeDirectory.c_str();
     }
+<<<<<<< cmMakefile.h
+  void SetHomeOutputDirectory(const char* lib)
+    {
+    m_HomeOutputDirectory = lib;
+    cmSystemTools::ConvertToUnixSlashes(m_HomeOutputDirectory);
+    this->AddDefinition("CMAKE_BINARY_DIR", this->GetHomeOutputDirectory());
+    }
+=======
   void SetHomeOutputDirectory(const char* lib);
+>>>>>>> 1.31
   const char* GetHomeOutputDirectory() const
     {
     return m_HomeOutputDirectory.c_str();
@@ -302,6 +311,15 @@ public:
     {
       return m_CurrentOutputDirectory.c_str();
     }
+
+  /* Get the current CMakeLists.txt file that is being processed.  This
+   * is just used in order to be able to 'branch' from one file to a second
+   * transparently */
+  const char* GetCurrentListFile() const
+    {
+      return m_cmCurrentListFile.c_str();
+    }
+
   //@}
 
   /** 
@@ -400,6 +418,12 @@ public:
    */
   const std::vector<cmSourceGroup>& GetSourceGroups() const
     { return m_SourceGroups; }
+
+  /**
+   * Get the vector of list files on which this makefile depends
+   */
+  const std::vector<std::string>& GetListFiles() const
+    { return m_ListFiles; }
   
   /**
    * Dump documentation to a file. If 0 is returned, the
@@ -462,6 +486,7 @@ protected:
   std::string m_StartOutputDirectory; 
   std::string m_cmHomeDirectory; 
   std::string m_HomeOutputDirectory;
+  std::string m_cmCurrentListFile;
 
   std::string m_ProjectName;	// project name
 
@@ -475,7 +500,10 @@ protected:
   std::vector<std::string> m_LinkDirectories;
   std::vector<std::string> m_Utilities;
   std::vector<std::string> m_UtilityDirectories;
+  std::vector<std::string> m_ListFiles; // list of command files loaded
+
   cmTarget::LinkLibraries m_LinkLibraries;
+
   std::string m_IncludeFileRegularExpression;
   std::string m_DefineFlags;
   std::vector<cmSourceGroup> m_SourceGroups;
