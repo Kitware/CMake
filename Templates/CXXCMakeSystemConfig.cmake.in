@@ -77,6 +77,9 @@ SET (CMAKE_TEMPLATE_FLAGS     "@CMAKE_TEMPLATE_FLAGS@" CACHE STRING
 SET (CMAKE_NO_ANSI_STREAM_HEADERS @CMAKE_NO_ANSI_STREAM_HEADERS@ CACHE INTERNAL 
      "Does the compiler support headers like iostream.")
 
+SET (CMAKE_NO_ANSI_STRING_STREAM @CMAKE_NO_ANSI_STRING_STREAM@ CACHE INTERNAL 
+     "Does the compiler support the ansi stringstream class.")
+
 SET (CMAKE_NO_STD_NAMESPACE   @CMAKE_NO_STD_NAMESPACE@  CACHE INTERNAL 
      "Does the compiler support std::.")
 
