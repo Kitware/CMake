@@ -52,7 +52,9 @@ typedef struct
      information is passed from the InitialPass to FInalPass for commands
      that need a FinalPass and need information from the InitialPass */
   void  (*SetClientData) (void *info, void *cd);
-
+  /* when an error occurs, call this function to set the error string */
+  void  (*SetError) (void *info, const char *err);
+  
   /*=========================================================================
   The following functions all directly map to methods in the cmMakefile
   class. See cmMakefile.h for descriptions of what each method does. All of
@@ -188,6 +190,7 @@ Finally we define the key data structures and function prototypes
     CM_DOC_FUNCTION GetTerseDocumentation;
     CM_DOC_FUNCTION GetFullDocumentation;  
     const char *Name;
+    char *Error;
     void *ClientData;
   } cmLoadedCommandInfo;
 

@@ -110,6 +110,12 @@ bool cmLoadedCommand::InitialPass(std::vector<std::string> const& args)
     {
     return true;
     }
+
+  // clear the error string
+  if (this->info.Error)
+    {
+    free(this->info.Error);
+    }
   
   // create argc and argv and then invoke the command
   int argc = static_cast<int> (args.size());
@@ -125,9 +131,16 @@ bool cmLoadedCommand::InitialPass(std::vector<std::string> const& args)
     }
   int result = info.InitialPass((void *)&info,(void *)this->m_Makefile,argc,argv);
   cmFreeArguments(argc,argv);
+  
   if (result)
     {
     return true;
+    }
+
+  /* Initial Pass must have failed so set the error string */
+  if (this->info.Error)
+    {
+    this->SetError(this->info.Error);
     }
   return false;
 }
@@ -145,6 +158,10 @@ cmLoadedCommand::~cmLoadedCommand()
   if (this->info.Destructor)
     {
     this->info.Destructor((void *)&this->info);
+    }
+  if (this->info.Error)
+    {
+    free(this->info.Error);
     }
 }
 
@@ -187,16 +204,18 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& argsIn)
   cmLibHandle lib = cmDynamicLoader::OpenLibrary(fullPath.c_str());
   if(lib)
     {
-    // Look for the symbol cmLoad, cmGetFactoryCompilerUsed,
-    // and cmGetFactoryVersion in the library
+    // find the init function
+    std::string initFuncName = args[0] + "Init";
     CM_INIT_FUNCTION initFunction
       = (CM_INIT_FUNCTION)
-      cmDynamicLoader::GetSymbolAddress(lib, "cmInitializeCommand");
+      cmDynamicLoader::GetSymbolAddress(lib, initFuncName.c_str());
     if ( !initFunction )
       {
-      initFunction = 
-	(CM_INIT_FUNCTION)(
-	  cmDynamicLoader::GetSymbolAddress(lib, "_cmInitializeCommand"));
+      initFuncName = "_";
+      initFuncName += args[0];
+      initFuncName += "Init";
+      initFunction = (CM_INIT_FUNCTION)(
+        cmDynamicLoader::GetSymbolAddress(lib, initFuncName.c_str()));
       }
     // if the symbol is found call it to set the name on the 
     // function blocker

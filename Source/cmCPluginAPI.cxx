@@ -35,6 +35,15 @@ void cmSetClientData(void *info, void *cd)
   ((cmLoadedCommandInfo *)info)->ClientData = cd;
 }
 
+void cmSetError(void *info, const char *err)
+{
+  if (((cmLoadedCommandInfo *)info)->Error)
+    {
+    free(((cmLoadedCommandInfo *)info)->Error);
+    }
+  ((cmLoadedCommandInfo *)info)->Error = strdup(err);
+}
+
 unsigned int cmGetCacheMajorVersion(void *arg)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
@@ -461,50 +470,51 @@ void cmRemoveFile(const char *name)
 cmCAPI cmStaticCAPI =
 {
   cmGetClientData,
-    cmGetTotalArgumentSize,
-    cmFreeArguments,
-    cmSetClientData,
-    cmAddCacheDefinition,
-    cmAddCustomCommand,
-    cmAddDefineFlag,
-    cmAddDefinition,
-    cmAddExecutable,
-    cmAddLibrary,
-    cmAddLinkDirectoryForTarget,
-    cmAddLinkLibraryForTarget,
-    cmAddUtilityCommand,
-    cmCommandExists,
-    cmExecuteCommand,
-    cmExpandSourceListArguments,
-    cmExpandVariablesInString,
-    cmGetCacheMajorVersion,
-    cmGetCacheMinorVersion,
-    cmGetCurrentDirectory,
-    cmGetCurrentOutputDirectory,
-    cmGetDefinition,
-    cmGetHomeDirectory,
-    cmGetHomeOutputDirectory,
-    cmGetMajorVersion,
-    cmGetMinorVersion,
-    cmGetProjectName,
-    cmGetStartDirectory,
-    cmGetStartOutputDirectory,
-    cmIsOn,
+  cmGetTotalArgumentSize,
+  cmFreeArguments,
+  cmSetClientData,
+  cmSetError,
+  cmAddCacheDefinition,
+  cmAddCustomCommand,
+  cmAddDefineFlag,
+  cmAddDefinition,
+  cmAddExecutable,
+  cmAddLibrary,
+  cmAddLinkDirectoryForTarget,
+  cmAddLinkLibraryForTarget,
+  cmAddUtilityCommand,
+  cmCommandExists,
+  cmExecuteCommand,
+  cmExpandSourceListArguments,
+  cmExpandVariablesInString,
+  cmGetCacheMajorVersion,
+  cmGetCacheMinorVersion,
+  cmGetCurrentDirectory,
+  cmGetCurrentOutputDirectory,
+  cmGetDefinition,
+  cmGetHomeDirectory,
+  cmGetHomeOutputDirectory,
+  cmGetMajorVersion,
+  cmGetMinorVersion,
+  cmGetProjectName,
+  cmGetStartDirectory,
+  cmGetStartOutputDirectory,
+  cmIsOn,
   
-    cmAddSource,
-    cmCreateSourceFile,
-    cmGetSource,
-    cmSourceFileAddDepend,
-    cmSourceFileGetProperty,
-    cmSourceFileGetPropertyAsBool,
-    cmSourceFileGetSourceName,
-    cmSourceFileSetName,
-    cmSourceFileSetName2,
-    cmSourceFileSetProperty,
-    
-    cmCapitalized,
-    cmCopyFileIfDifferent,
-    cmGetFilenameWithoutExtension,
-    cmRemoveFile,
+  cmAddSource,
+  cmCreateSourceFile,
+  cmGetSource,
+  cmSourceFileAddDepend,
+  cmSourceFileGetProperty,
+  cmSourceFileGetPropertyAsBool,
+  cmSourceFileGetSourceName,
+  cmSourceFileSetName,
+  cmSourceFileSetName2,
+  cmSourceFileSetProperty,
+  
+  cmCapitalized,
+  cmCopyFileIfDifferent,
+  cmGetFilenameWithoutExtension,
+  cmRemoveFile,
 };
 
