@@ -542,21 +542,21 @@ void cmLocalVisualStudio7Generator::FillFlagMapFromCommandFlags(
   std::string replace;
   while(flagTable->IDEName)
     {
-    if(flags.find(flagTable->commandFlag) != flags.npos)
+    std::string regex = "((/|-)";
+    regex += flagTable->commandFlag;
+    regex += ")";
+    cmsys::RegularExpression reg(regex.c_str());
+    while(reg.find(flags))
       {
-      // replace -flag
-      replace = "-";
-      replace += flagTable->commandFlag;
-      cmSystemTools::ReplaceString(flags, replace.c_str(), "");
-      // now replace /flag
-      replace[0] = '/';
-      cmSystemTools::ReplaceString(flags, replace.c_str(), "");
+      // replace the flag 
+      cmSystemTools::ReplaceString(flags, reg.match(1).c_str(), "");
       // now put value into flag map
       flagMap[flagTable->IDEName] = flagTable->value;
       }
     flagTable++;
     }
 }
+
 
 
 void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
