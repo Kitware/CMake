@@ -187,13 +187,8 @@ bool cmITKWrapTclCommand::CreateCableRule(const char* configFile)
     this->AddDependencies(info, depends, visited);
     }
   
-  std::vector<std::string> outputs;
-  outputs.push_back(outDir+"/"+tclFile+".cxx");
-  
-  m_Makefile->AddCustomCommand(inFile.c_str(),
-                               command.c_str(),
-                               commandArgs, depends,
-                               outputs, m_TargetName.c_str());
+  std::string output;
+  output = outDir+"/"+tclFile+".cxx";
   
   // Add the source to the makefile.
   cmSourceFile file;
@@ -202,10 +197,15 @@ bool cmITKWrapTclCommand::CreateCableRule(const char* configFile)
   file.GetDepends().push_back(inFile.c_str());
   file.GetDepends().push_back("CableTclFacility/ctCalls.h");
   m_Makefile->AddSource(file);
+
+  m_Makefile->AddCustomCommandToOutput(output.c_str(),
+                                       command.c_str(),
+                                       commandArgs, 
+                                       inFile.c_str(),
+                                       depends);
   
   // Add the generated source to the package's source list.
-  std::string srcname = file.GetSourceName() + ".cxx";
-  m_Target->GetSourceLists().push_back(srcname);
+  m_Target->GetSourceLists().push_back(output);
   
   return true;
 }
