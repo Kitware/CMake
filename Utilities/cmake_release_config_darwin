@@ -1,4 +1,4 @@
-RELEASE_TAG="Release-1-4-4"
+RELEASE_TAG="Release-1-4"
 VERSION="1.4.4"
 PLATFORM="darwin"
 CC="cc"
