@@ -69,7 +69,8 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "INCLUDE(file1 file2)\n";
+      "INCLUDE(file1 [OPTIONAL])\nIf OPTIONAL is present, then do not complain "
+      "if the file does not exist.";
     }
   
   cmTypeMacro(cmIncludeCommand, cmCommand);
