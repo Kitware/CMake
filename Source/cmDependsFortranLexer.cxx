@@ -1,6 +1,6 @@
-#line 2 "cmDependsFortranLexer.c"
+#line 2 "cmDependsFortranLexer.cxx"
 
-#line 4 "cmDependsFortranLexer.c"
+#line 4 "cmDependsFortranLexer.cxx"
 
 #define  YY_INT_ALIGNED short int
 
@@ -626,30 +626,22 @@ This file must be translated to C and modified to build everywhere.
 
 Run flex like this:
 
-  flex --prefix=cmDependsFortran_yy --header-file=cmDependsFortranLexer.h -ocmDependsFortranLexer.c cmDependsFortranLexer.in.l
+  flex --prefix=cmDependsFortran_yy --header-file=cmDependsFortranLexer.h -ocmDependsFortranLexer.cxx cmDependsFortranLexer.in.l
 
-Modify cmDependsFortranLexer.c:
+Modify cmDependsFortranLexer.cxx:
   - remove TABs
-  - add a statement "(void)yyscanner;" to the top of these methods:
+  - remove "yyscanner" argument from these methods:
       yy_fatal_error, cmDependsFortran_yyalloc, cmDependsFortran_yyrealloc, cmDependsFortran_yyfree
-  - remove all YY_BREAK lines occurring right after return statements
 
 Modify cmDependsFortranLexer.h:
   - remove TABs
   - remove the yy_init_globals function
-  - add these lines around all function declarations:
-      #ifdef __cplusplus
-      extern "C"
-      {
-      #endif
-      ...
-      #ifdef __cplusplus
-      }
-      #endif
   - remove the block that includes unistd.h
+  - remove #line directives (avoids bogus warning on old Sun)
 
 */
 
+#define cmDependsFortranLexer_cxx
 #include "cmDependsFortranParser.h" /* Interface to parser object.  */
 
 /* Disable some warnings.  */
@@ -667,17 +659,21 @@ Modify cmDependsFortranLexer.h:
 
 /* Disable features we do not need. */
 #define YY_NEVER_INTERACTIVE 1
-#define YY_NO_UNISTD_H 1
 #define ECHO
-
-/* Setup the proper cmDependsFortran_yylex declaration.  */
-#define YY_EXTRA_TYPE cmDependsFortranParser*
-#define YY_DECL int cmDependsFortran_yylex(YYSTYPE* yylvalp, yyscan_t yyscanner)
 
 /* Replace the lexer input function.  */
 #undef YY_INPUT
 #define YY_INPUT(buf, result, max_size) \
   { result = cmDependsFortranParser_Input(yyextra, buf, max_size); }
+
+/* Provide isatty on Windows.  */
+#if defined( _WIN32 ) && !defined( __CYGWIN__ )
+# include <io.h>
+# if defined( _MSC_VER )
+#  define isatty _isatty
+# endif
+# define YY_NO_UNISTD_H 1
+#endif
 
 /* Include the set of tokens from the parser.  */
 #include "cmDependsFortranParserTokens.h"
@@ -685,7 +681,7 @@ Modify cmDependsFortranLexer.h:
 /*--------------------------------------------------------------------------*/
 
 
-#line 689 "cmDependsFortranLexer.c"
+#line 685 "cmDependsFortranLexer.cxx"
 
 #define INITIAL 0
 #define free_fmt 1
@@ -907,10 +903,10 @@ YY_DECL
         register int yy_act;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-#line 100 "cmDependsFortranLexer.in.l"
+#line 96 "cmDependsFortranLexer.in.l"
 
 
-#line 914 "cmDependsFortranLexer.c"
+#line 910 "cmDependsFortranLexer.cxx"
 
         if ( yyg->yy_init )
                 {
@@ -996,7 +992,7 @@ do_action:      /* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 102 "cmDependsFortranLexer.in.l"
+#line 98 "cmDependsFortranLexer.in.l"
 {
   cmDependsFortranParser_StringStart(yyextra);
   BEGIN(str_dq);
@@ -1004,48 +1000,50 @@ YY_RULE_SETUP
         YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 107 "cmDependsFortranLexer.in.l"
+#line 103 "cmDependsFortranLexer.in.l"
 {
   cmDependsFortranParser_StringStart(yyextra);
   BEGIN(str_sq);
 }
         YY_BREAK
 case 3:
-#line 113 "cmDependsFortranLexer.in.l"
+#line 109 "cmDependsFortranLexer.in.l"
 case 4:
 YY_RULE_SETUP
-#line 113 "cmDependsFortranLexer.in.l"
+#line 109 "cmDependsFortranLexer.in.l"
 {
   yylvalp->string = strdup(cmDependsFortranParser_StringEnd(yyextra));
   return STRING;
 }
+        YY_BREAK
 case 5:
 /* rule 5 can match eol */
-#line 119 "cmDependsFortranLexer.in.l"
+#line 115 "cmDependsFortranLexer.in.l"
 case 6:
 /* rule 6 can match eol */
 YY_RULE_SETUP
-#line 119 "cmDependsFortranLexer.in.l"
+#line 115 "cmDependsFortranLexer.in.l"
 /* Ignore (continued strings, free fmt) */
         YY_BREAK
 case 7:
 /* rule 7 can match eol */
 YY_RULE_SETUP
-#line 121 "cmDependsFortranLexer.in.l"
+#line 117 "cmDependsFortranLexer.in.l"
 /*Ignore (cont. strings, fixed fmt) */
         YY_BREAK
 case 8:
 /* rule 8 can match eol */
 YY_RULE_SETUP
-#line 123 "cmDependsFortranLexer.in.l"
+#line 119 "cmDependsFortranLexer.in.l"
 {
   unput ('\n');
   BEGIN(INITIAL);
   return UNTERMINATED_STRING;
 }
+        YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 129 "cmDependsFortranLexer.in.l"
+#line 125 "cmDependsFortranLexer.in.l"
 {
   cmDependsFortranParser_StringAppend(yyextra, yytext[0]);
 }
@@ -1053,55 +1051,62 @@ YY_RULE_SETUP
 case 10:
 /* rule 10 can match eol */
 YY_RULE_SETUP
-#line 133 "cmDependsFortranLexer.in.l"
+#line 129 "cmDependsFortranLexer.in.l"
 { return EOSTMT; } /* Treat comments like */
+        YY_BREAK
 case 11:
 /* rule 11 can match eol */
 YY_RULE_SETUP
-#line 134 "cmDependsFortranLexer.in.l"
+#line 130 "cmDependsFortranLexer.in.l"
 { return EOSTMT; } /* empty lines */
+        YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 136 "cmDependsFortranLexer.in.l"
+#line 132 "cmDependsFortranLexer.in.l"
 { return CPP_INCLUDE; }
+        YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 137 "cmDependsFortranLexer.in.l"
+#line 133 "cmDependsFortranLexer.in.l"
 { return F90PPR_INCLUDE; }
+        YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 138 "cmDependsFortranLexer.in.l"
+#line 134 "cmDependsFortranLexer.in.l"
 { return COCO_INCLUDE; }
+        YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 139 "cmDependsFortranLexer.in.l"
+#line 135 "cmDependsFortranLexer.in.l"
 { return F_INCLUDE; }
+        YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 140 "cmDependsFortranLexer.in.l"
+#line 136 "cmDependsFortranLexer.in.l"
 { return USE; }
+        YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 142 "cmDependsFortranLexer.in.l"
+#line 138 "cmDependsFortranLexer.in.l"
 {
   cmDependsFortranParser_SetInInterface(yyextra, 0);
 }
         YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 145 "cmDependsFortranLexer.in.l"
+#line 141 "cmDependsFortranLexer.in.l"
 {
   cmDependsFortranParser_SetInInterface(yyextra, 1);
 }
         YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 149 "cmDependsFortranLexer.in.l"
+#line 145 "cmDependsFortranLexer.in.l"
 /* Ignore */
         YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 150 "cmDependsFortranLexer.in.l"
+#line 146 "cmDependsFortranLexer.in.l"
 {
  if(!cmDependsFortranParser_GetInInterface(yyextra))
    {
@@ -1111,102 +1116,120 @@ YY_RULE_SETUP
         YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 157 "cmDependsFortranLexer.in.l"
+#line 153 "cmDependsFortranLexer.in.l"
 { return CPP_DEFINE; }
+        YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 158 "cmDependsFortranLexer.in.l"
+#line 154 "cmDependsFortranLexer.in.l"
 { return F90PPR_DEFINE; }
+        YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 160 "cmDependsFortranLexer.in.l"
+#line 156 "cmDependsFortranLexer.in.l"
 { return CPP_UNDEF; }
+        YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 161 "cmDependsFortranLexer.in.l"
+#line 157 "cmDependsFortranLexer.in.l"
 { return F90PPR_UNDEF; }
+        YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 163 "cmDependsFortranLexer.in.l"
+#line 159 "cmDependsFortranLexer.in.l"
 { return CPP_IFDEF; }
+        YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 164 "cmDependsFortranLexer.in.l"
+#line 160 "cmDependsFortranLexer.in.l"
 { return CPP_IFNDEF; }
+        YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 165 "cmDependsFortranLexer.in.l"
+#line 161 "cmDependsFortranLexer.in.l"
 { return CPP_IF; }
+        YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 166 "cmDependsFortranLexer.in.l"
+#line 162 "cmDependsFortranLexer.in.l"
 { return CPP_ELIF; }
+        YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 167 "cmDependsFortranLexer.in.l"
+#line 163 "cmDependsFortranLexer.in.l"
 { return CPP_ELSE; }
+        YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 168 "cmDependsFortranLexer.in.l"
+#line 164 "cmDependsFortranLexer.in.l"
 { return CPP_ENDIF; }
+        YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 170 "cmDependsFortranLexer.in.l"
+#line 166 "cmDependsFortranLexer.in.l"
 { return F90PPR_IFDEF; }
+        YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 171 "cmDependsFortranLexer.in.l"
+#line 167 "cmDependsFortranLexer.in.l"
 { return F90PPR_IFNDEF; }
+        YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 172 "cmDependsFortranLexer.in.l"
+#line 168 "cmDependsFortranLexer.in.l"
 { return F90PPR_IF; }
+        YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 173 "cmDependsFortranLexer.in.l"
+#line 169 "cmDependsFortranLexer.in.l"
 { return F90PPR_ELIF; }
+        YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 174 "cmDependsFortranLexer.in.l"
+#line 170 "cmDependsFortranLexer.in.l"
 { return F90PPR_ELSE; }
+        YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 175 "cmDependsFortranLexer.in.l"
+#line 171 "cmDependsFortranLexer.in.l"
 { return F90PPR_ENDIF; }
+        YY_BREAK
 case 37:
 /* rule 37 can match eol */
-#line 178 "cmDependsFortranLexer.in.l"
+#line 174 "cmDependsFortranLexer.in.l"
 case 38:
 /* rule 38 can match eol */
 YY_RULE_SETUP
-#line 178 "cmDependsFortranLexer.in.l"
+#line 174 "cmDependsFortranLexer.in.l"
 /* Ignore */
         YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 181 "cmDependsFortranLexer.in.l"
+#line 177 "cmDependsFortranLexer.in.l"
 { yylvalp->string = strdup(yytext); return WORD; }
         YY_BREAK
 case 40:
 /* rule 40 can match eol */
 YY_RULE_SETUP
-#line 183 "cmDependsFortranLexer.in.l"
+#line 179 "cmDependsFortranLexer.in.l"
 { return EOSTMT; }
+        YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 185 "cmDependsFortranLexer.in.l"
+#line 181 "cmDependsFortranLexer.in.l"
 /* Ignore */
         YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 187 "cmDependsFortranLexer.in.l"
+#line 183 "cmDependsFortranLexer.in.l"
 { return *yytext; }
+        YY_BREAK
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(free_fmt):
 case YY_STATE_EOF(fixed_fmt):
 case YY_STATE_EOF(str_sq):
 case YY_STATE_EOF(str_dq):
-#line 189 "cmDependsFortranLexer.in.l"
+#line 185 "cmDependsFortranLexer.in.l"
 {
  if(!cmDependsFortranParser_FilePop(yyextra))
    {
@@ -1216,10 +1239,10 @@ case YY_STATE_EOF(str_dq):
         YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 196 "cmDependsFortranLexer.in.l"
+#line 192 "cmDependsFortranLexer.in.l"
 ECHO;
         YY_BREAK
-#line 1250 "cmDependsFortranLexer.c"
+#line 1246 "cmDependsFortranLexer.cxx"
 
         case YY_END_OF_BUFFER:
                 {
@@ -2019,9 +2042,8 @@ YY_BUFFER_STATE cmDependsFortran_yy_scan_bytes  (yyconst char * bytes, int  len 
 #define YY_EXIT_FAILURE 2
 #endif
 
-static void yy_fatal_error (yyconst char* msg , yyscan_t yyscanner)
+static void yy_fatal_error (yyconst char* msg , yyscan_t)
 {
-        (void)yyscanner;
         (void) fprintf( stderr, "%s\n", msg );
         exit( YY_EXIT_FAILURE );
 }
@@ -2298,15 +2320,13 @@ static int yy_flex_strlen (yyconst char * s , yyscan_t yyscanner)
 }
 #endif
 
-void *cmDependsFortran_yyalloc (yy_size_t  size , yyscan_t yyscanner)
+void *cmDependsFortran_yyalloc (yy_size_t  size , yyscan_t)
 {
-        (void)yyscanner;
         return (void *) malloc( size );
 }
 
-void *cmDependsFortran_yyrealloc  (void * ptr, yy_size_t  size , yyscan_t yyscanner)
+void *cmDependsFortran_yyrealloc  (void * ptr, yy_size_t  size , yyscan_t)
 {
-        (void)yyscanner;
         /* The cast to (char *) in the following accommodates both
          * implementations that use char* generic pointers, and those
          * that use void* generic pointers.  It works with the latter
@@ -2317,9 +2337,8 @@ void *cmDependsFortran_yyrealloc  (void * ptr, yy_size_t  size , yyscan_t yyscan
         return (void *) realloc( (char *) ptr, size );
 }
 
-void cmDependsFortran_yyfree (void * ptr , yyscan_t yyscanner)
+void cmDependsFortran_yyfree (void * ptr , yyscan_t)
 {
-        (void)yyscanner;
         free( (char *) ptr );   /* see cmDependsFortran_yyrealloc() for (char *) cast */
 }
 
@@ -2337,7 +2356,7 @@ void cmDependsFortran_yyfree (void * ptr , yyscan_t yyscanner)
 #undef YY_DECL_IS_OURS
 #undef YY_DECL
 #endif
-#line 196 "cmDependsFortranLexer.in.l"
+#line 192 "cmDependsFortranLexer.in.l"
 
 
 
@@ -2348,4 +2367,3 @@ YY_BUFFER_STATE cmDependsFortranLexer_GetCurrentBuffer(yyscan_t yyscanner)
   struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
   return YY_CURRENT_BUFFER;
 }
-

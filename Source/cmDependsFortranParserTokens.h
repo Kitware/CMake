@@ -90,7 +90,7 @@
 
 
 #if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
-#line 71 "cmDependsFortranParser.y"
+#line 75 "cmDependsFortranParser.y"
 typedef union YYSTYPE {
   char* string;
 } YYSTYPE;

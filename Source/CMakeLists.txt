@@ -14,8 +14,8 @@ SET(SRCS
   cmDependsC.h
   cmDependsFortran.cxx
   cmDependsFortran.h
-  cmDependsFortranLexer.c
-  cmDependsFortranParser.c
+  cmDependsFortranLexer.cxx
+  cmDependsFortranParser.cxx
   cmDependsFortranParser.h
   cmDependsJavaLexer.cxx
   cmDependsJavaParser.cxx

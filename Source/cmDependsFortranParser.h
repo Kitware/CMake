@@ -17,13 +17,10 @@
 #ifndef cmDependsFortranParser_h
 #define cmDependsFortranParser_h
 
+#include <stddef.h> /* size_t */
+
 /* Forward declare parser object type.  */
 typedef struct cmDependsFortranParser_s cmDependsFortranParser;
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
 
 /* Functions to enter/exit #include'd files in order.  */
 int cmDependsFortranParser_FilePush(cmDependsFortranParser* parser,
@@ -63,8 +60,26 @@ void cmDependsFortranParser_RuleElif(cmDependsFortranParser* parser);
 void cmDependsFortranParser_RuleElse(cmDependsFortranParser* parser);
 void cmDependsFortranParser_RuleEndif(cmDependsFortranParser* parser);
 
-#ifdef __cplusplus
-} /* extern "C" */
+/* Define the parser stack element type.  */
+typedef union cmDependsFortran_yystype_u cmDependsFortran_yystype;
+union cmDependsFortran_yystype_u
+{
+  char* string;
+};
+
+/* Setup the proper yylex interface.  */
+#define YY_EXTRA_TYPE cmDependsFortranParser*
+#define YY_DECL int cmDependsFortran_yylex(YYSTYPE* yylvalp, yyscan_t yyscanner)
+#define YYSTYPE cmDependsFortran_yystype
+#define YYSTYPE_IS_DECLARED 1
+#if !defined(cmDependsFortranLexer_cxx)
+# include "cmDependsFortranLexer.h"
+#endif
+#if !defined(cmDependsFortranLexer_cxx) && !defined(cmDependsFortranParser_cxx)
+# undef YY_EXTRA_TYPE
+# undef YY_DECL
+# undef YYSTYPE
+# undef YYSTYPE_IS_DECLARED
 #endif
 
 #endif

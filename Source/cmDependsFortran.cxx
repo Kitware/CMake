@@ -18,7 +18,6 @@
 
 #include "cmSystemTools.h"
 
-#include "cmDependsFortranLexer.h"  /* Interface to lexer object.  */
 #include "cmDependsFortranParser.h" /* Interface to parser object.  */
 
 #include <assert.h>
@@ -26,15 +25,14 @@
 
 //----------------------------------------------------------------------------
 // Parser methods not included in generated interface.
-extern "C"
-{
-  // Get the current buffer processed by the lexer.
-  YY_BUFFER_STATE cmDependsFortranLexer_GetCurrentBuffer(yyscan_t yyscanner);
 
-  // The parser entry point.
-  int cmDependsFortran_yyparse(yyscan_t);
-}
+// Get the current buffer processed by the lexer.
+YY_BUFFER_STATE cmDependsFortranLexer_GetCurrentBuffer(yyscan_t yyscanner);
 
+// The parser entry point.
+int cmDependsFortran_yyparse(yyscan_t);
+
+//----------------------------------------------------------------------------
 // Define parser object internal structure.
 struct cmDependsFortranFile
 {

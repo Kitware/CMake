@@ -31,30 +31,22 @@ This file must be translated to C and modified to build everywhere.
 
 Run flex like this:
 
-  flex --prefix=cmDependsFortran_yy --header-file=cmDependsFortranLexer.h -ocmDependsFortranLexer.c cmDependsFortranLexer.in.l
+  flex --prefix=cmDependsFortran_yy --header-file=cmDependsFortranLexer.h -ocmDependsFortranLexer.cxx cmDependsFortranLexer.in.l
 
-Modify cmDependsFortranLexer.c:
+Modify cmDependsFortranLexer.cxx:
   - remove TABs
-  - add a statement "(void)yyscanner;" to the top of these methods:
+  - remove "yyscanner" argument from these methods:
       yy_fatal_error, yyalloc, yyrealloc, yyfree
-  - remove all YY_BREAK lines occurring right after return statements
 
 Modify cmDependsFortranLexer.h:
   - remove TABs
   - remove the yy_init_globals function
-  - add these lines around all function declarations:
-      #ifdef __cplusplus
-      extern "C"
-      {
-      #endif
-      ...
-      #ifdef __cplusplus
-      }
-      #endif
   - remove the block that includes unistd.h
+  - remove #line directives (avoids bogus warning on old Sun)
 
 */
 
+#define cmDependsFortranLexer_cxx
 #include "cmDependsFortranParser.h" /* Interface to parser object.  */
 
 /* Disable some warnings.  */
@@ -72,17 +64,21 @@ Modify cmDependsFortranLexer.h:
 
 /* Disable features we do not need. */
 #define YY_NEVER_INTERACTIVE 1
-#define YY_NO_UNISTD_H 1
 #define ECHO
-
-/* Setup the proper yylex declaration.  */
-#define YY_EXTRA_TYPE cmDependsFortranParser*
-#define YY_DECL int cmDependsFortran_yylex(YYSTYPE* yylvalp, yyscan_t yyscanner)
 
 /* Replace the lexer input function.  */
 #undef YY_INPUT
 #define YY_INPUT(buf, result, max_size) \
   { result = cmDependsFortranParser_Input(yyextra, buf, max_size); }
+
+/* Provide isatty on Windows.  */
+#if defined( _WIN32 ) && !defined( __CYGWIN__ )
+# include <io.h>
+# if defined( _MSC_VER )
+#  define isatty _isatty
+# endif
+# define YY_NO_UNISTD_H 1
+#endif
 
 /* Include the set of tokens from the parser.  */
 #include "cmDependsFortranParserTokens.h"

@@ -31,31 +31,34 @@ This file must be translated to C and modified to build everywhere.
 
 Run bison like this:
 
-  bison --yacc --name-prefix=cmDependsFortran_yy --defines=cmDependsFortranParserTokens.h -ocmDependsFortranParser.c cmDependsFortranParser.y
+  bison --yacc --name-prefix=cmDependsFortran_yy --defines=cmDependsFortranParserTokens.h -ocmDependsFortranParser.cxx cmDependsFortranParser.y
 
-Modify cmDependsFortranParser.c:
+Modify cmDependsFortranParser.cxx:
   - remove TABs
 
 */
 
+/*-------------------------------------------------------------------------*/
+#define cmDependsFortranParser_cxx
+#include "cmDependsFortranParser.h" /* Interface to parser object.  */
+#include "cmDependsFortranParserTokens.h" /* Need YYSTYPE for YY_DECL.  */
+
 /* Configure the parser to use a lexer object.  */
 #define YYPARSE_PARAM yyscanner
 #define YYLEX_PARAM yyscanner
-#define YY_DECL int cmDependsFortran_yylex(YYSTYPE* yylvalp, yyscan_t yyscanner)
 #define YYERROR_VERBOSE 1
 #define cmDependsFortran_yyerror(x) \
         cmDependsFortranError(yyscanner, x)
 
-/*-------------------------------------------------------------------------*/
-#include "cmDependsFortranLexer.h"  /* Interface to lexer object.  */
-#include "cmDependsFortranParser.h" /* Interface to parser object.  */
-#include "cmDependsFortranParserTokens.h" /* Need YYSTYPE for YY_DECL.  */
-
 /* Forward declare the lexer entry point.  */
 YY_DECL;
 
-/* Internal utility functions.  */
-static void cmDependsFortranError(yyscan_t yyscanner, const char* message);
+/* Helper function to forward error callback.  */
+static void cmDependsFortranError(yyscan_t yyscanner, const char* message)
+{
+  cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
+  cmDependsFortranParser_Error(parser, message);
+}
 
 /* Disable some warnings in the generated code.  */
 #ifdef __BORLANDC__
@@ -176,10 +179,3 @@ misc_code:
 
 %%
 /* End of grammar */
-
-/*--------------------------------------------------------------------------*/
-void cmDependsFortranError(yyscan_t yyscanner, const char* message)
-{
-  cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
-  cmDependsFortranParser_Error(parser, message);
-}
