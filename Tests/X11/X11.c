@@ -23,20 +23,20 @@ char **argv;
   int i;
   char text[10];
   int done;
+  char* display = ":0";
 
-  mydisplay=XOpenDisplay("");
-/*
-  myscreen=DefaultScreen(mydisplay);
-  myforeground=BlackPixel(mydisplay, myscreen);
 
-  mywindow=XCreateSimpleWindow(mydisplay,
-                               DefaultRootWindow(mydisplay),
-                               myhint.x, myhint.y, myhint.width, 
-                               myhint.height, 5,
-                               myforeground, mybackground );
-  XDestroyWindow(mydisplay, mywindow);
-*/
-  XCloseDisplay(mydisplay);
+  if ( getenv("DISPLAY") )
+    {
+    display = getenv("DISPLAY");
+    }
+
+  mydisplay=XOpenDisplay(display);
+  if ( mydisplay )
+    {
+    printf("Opened...\n");
+    XCloseDisplay(mydisplay);
+    }
   exit(0);
 }
 
