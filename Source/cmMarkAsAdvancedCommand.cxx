@@ -48,7 +48,7 @@ bool cmMarkAsAdvancedCommand::InitialPass(std::vector<std::string> const& args)
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  for(int i =0; i < args.size(); ++i)
+  for(unsigned int i =0; i < args.size(); ++i)
     {
     std::string variable = args[i];
     variable += "-ADVANCED";
