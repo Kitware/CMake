@@ -45,13 +45,24 @@ void cmInstallProgramsCommand::FinalPass()
 {
   std::vector<std::string>& targetSourceLists =
     m_Makefile->GetTargets()[m_TargetName].GetSourceLists();
+
+  bool files_mode = false;
+  if(!m_FinalArgs.empty() && m_FinalArgs[0] == "FILES")
+    {
+    files_mode = true;
+    }
   
   // two different options
-  if (m_FinalArgs.size() > 1)
+  if (m_FinalArgs.size() > 1 || files_mode)
     {
     // for each argument, get the programs 
-    for (std::vector<std::string>::iterator s = m_FinalArgs.begin();
-         s != m_FinalArgs.end(); ++s)
+    std::vector<std::string>::iterator s = m_FinalArgs.begin();
+    if(files_mode)
+      {
+      // Skip the FILES argument in files mode.
+      ++s;
+      }
+    for(;s != m_FinalArgs.end(); ++s)
       {
       // add to the result
       targetSourceLists.push_back(this->FindInstallSource(s->c_str()));

@@ -69,8 +69,11 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  INSTALL_PROGRAMS(<dir> file file ...)\n"
-      "Create rules to install the listed programs into the given directory.\n"
+      "  INSTALL_PROGRAMS(<dir> file1 file2 [file3 ...])\n"
+      "  INSTALL_PROGRAMS(<dir> FILES file1 [file2 ...])\n"
+      "Create rules to install the listed programs into the given directory.  "
+      "Use the FILES argument to guarantee that the file list version of "
+      "the command will be used even when there is only one argument.\n"
       "  INSTALL_PROGRAMS(<dir> regexp)\n"
       "In the second form any program in the current source directory that "
       "matches the regular expression will be installed.\n"
