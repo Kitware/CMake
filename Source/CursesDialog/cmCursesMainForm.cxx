@@ -53,6 +53,7 @@ cmCursesMainForm::cmCursesMainForm(std::vector<std::string> const& args,
   whereCMake += "/cmake";
   m_Args[0] = whereCMake;
   m_CMakeInstance->SetArgs(m_Args);
+  m_CMakeInstance->SetCMakeCommand(whereCMake.c_str());
 }
 
 cmCursesMainForm::~cmCursesMainForm()
@@ -571,7 +572,7 @@ int cmCursesMainForm::Configure()
 
   // run the generate process
   m_OkToGenerate = true;
-  int retVal = this->m_CMakeInstance->Configure(m_Args[0].c_str(), &m_Args);
+  int retVal = this->m_CMakeInstance->Configure();
 
   initscr(); /* Initialization */ 
   noecho(); /* Echo off */ 
@@ -992,6 +993,7 @@ void cmCursesMainForm::LoadCache(const char *dir)
 
 {
   m_CMakeInstance->GetCacheManager()->LoadCache(dir); 
+  m_CMakeInstance->SetCacheArgs(m_Args);
 }
   
 
