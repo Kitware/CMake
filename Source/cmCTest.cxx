@@ -66,8 +66,8 @@ static struct tm* GetNightlyTime(std::string str)
 
 static std::string CleanString(std::string str)
 {
-  std::string::size_type spos = str.find_first_not_of(" \n\t");
-  std::string::size_type epos = str.find_last_not_of(" \n\t");
+  std::string::size_type spos = str.find_first_not_of(" \n\t\r\f\v");
+  std::string::size_type epos = str.find_last_not_of(" \n\t\r\f\v");
   if ( spos == str.npos )
     {
     return std::string();
