@@ -2813,7 +2813,7 @@ fi
         if test $ac_cv_prog_gxx = yes; then
           CMAKE_SHLIB_RUNTIME_FLAG="-Wl,-rpath,"
         else
-          CMAKE_SHLIB_RUNTIME_FLAG="-rpath,"
+          CMAKE_SHLIB_RUNTIME_FLAG="-rpath "
         fi
         CMAKE_SHLIB_RUNTIME_SEP=":"
 	;;
