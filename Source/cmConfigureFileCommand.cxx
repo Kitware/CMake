@@ -110,33 +110,12 @@ void cmConfigureFileCommand::ConfigureFile()
     // now copy input to output and expand variables in the
     // input file at the same time
     std::string inLine;
-    cmsys::RegularExpression cmdefine("#cmakedefine[ \t]*([A-Za-z_0-9]*)");
+    std::string outLine;
     while( cmSystemTools::GetLineFromStream(fin, inLine) )
       {
-      m_Makefile->ExpandVariablesInString(inLine, m_EscapeQuotes, m_AtOnly);
-      m_Makefile->RemoveVariablesInString(inLine, m_AtOnly);
-      // look for special cmakedefine symbol and handle it
-      // is the symbol defined
-      if (cmdefine.find(inLine))
-        {
-        const char *def = m_Makefile->GetDefinition(cmdefine.match(1).c_str());
-        if(!cmSystemTools::IsOff(def))
-          {
-          cmSystemTools::ReplaceString(inLine,
-            "#cmakedefine", "#define");
-          fout << inLine << "\n";
-          }
-        else
-          {
-          cmSystemTools::ReplaceString(inLine,
-            "#cmakedefine", "#undef");
-          fout << "/* " << inLine << " */\n";
-          }
-        }
-      else
-        {
-        fout << inLine << "\n";
-        }
+      outLine = "";
+      m_Makefile->ConfigureString(inLine, outLine, m_AtOnly, m_EscapeQuotes);
+      fout << outLine.c_str() << "\n";
       }
     // close the files before attempting to copy
     fin.close();

@@ -67,7 +67,8 @@ cmMakefile::cmMakefile()
   this->AddSourceGroup("Header Files", "\\.(h|h\\+\\+|hm|hpp|hxx|in|txx|inl)$");
   this->AddSourceGroup("CMake Rules", "\\.rule$");
   this->AddDefaultDefinitions();
-}
+  m_cmDefineRegex.compile("#cmakedefine[ \t]*([A-Za-z_0-9]*)");
+  }
 
 const char* cmMakefile::GetReleaseVersion()
 {
@@ -2206,4 +2207,65 @@ std::string cmMakefile::GetModulesFile(const char* filename)
       }
     }
   return "";
+}
+
+void cmMakefile::ConfigureString(const std::string& input,
+                                 std::string& output, bool atOnly,
+                                 bool escapeQuotes)
+{
+  // Split input to handle one line at a time.
+  std::string::const_iterator lineStart = input.begin();  
+  while(lineStart != input.end())
+    {
+    // Find the end of this line.
+    std::string::const_iterator lineEnd = lineStart;
+    while(lineEnd != input.end() && *lineEnd != '\n')
+      {
+      ++lineEnd;
+      }
+
+    // Copy the line.
+    std::string line(lineStart, lineEnd);
+
+    // Skip the newline character.
+    bool haveNewline = (lineEnd != input.end());
+    if(haveNewline)
+      {
+      ++lineEnd;
+      }
+
+    // Replace #cmakedefine instances.
+    if(m_cmDefineRegex.find(line))
+      {
+      const char* def = this->GetDefinition(m_cmDefineRegex.match(1).c_str());
+      if(!cmSystemTools::IsOff(def))
+        {
+        cmSystemTools::ReplaceString(line, "#cmakedefine", "#define");
+        output += line;
+        }
+      else
+        {
+        cmSystemTools::ReplaceString(line, "#cmakedefine", "#undef");
+        output += "/* ";
+        output += line;
+        output += " */";
+        }
+      }
+    else
+      {
+      output += line;
+      }
+
+    if(haveNewline)
+      {
+      output += "\n";
+      }
+
+    // Move to the next line.
+    lineStart = lineEnd;
+    }
+
+  // Perform variable replacements.
+  this->ExpandVariablesInString(output, escapeQuotes, atOnly);
+  this->RemoveVariablesInString(output, atOnly);
 }

@@ -24,6 +24,8 @@
 #include "cmListFileCache.h"
 #include "cmCacheManager.h"
 
+#include <cmsys/RegularExpression.hxx>
+
 class cmFunctionBlocker;
 class cmCommand;
 class cmLocalGenerator;
@@ -541,7 +543,14 @@ public:
    */
   void ExpandVariables();  
   void ExpandVariablesInCustomCommands();
-  
+
+  /**
+   * Replace variables and #cmakedefine lines in the given string.
+   * See cmConfigureFileCommand for details.
+   */
+  void ConfigureString(const std::string& input, std::string& output,
+                       bool atOnly, bool escapeQuotes);
+
   /**
    * find what source group this source is in
    */
@@ -693,6 +702,8 @@ private:
 
   // used in AddDefinition for performance improvement
   DefinitionMap::key_type  m_TemporaryDefinitionKey;
+
+  cmsys::RegularExpression m_cmDefineRegex;
 };
 
 
