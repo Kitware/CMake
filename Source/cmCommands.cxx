@@ -56,7 +56,6 @@
 #include "cmSourceGroupCommand.cxx"
 #include "cmSubdirCommand.cxx"
 #include "cmTargetLinkLibrariesCommand.cxx"
-#include "cmTestsCommand.cxx"
 #include "cmUtilitySourceCommand.cxx"
 #include "cmVTKWrapJavaCommand.cxx"
 #include "cmVTKWrapPythonCommand.cxx"
@@ -115,7 +114,6 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmSourceGroupCommand);
   commands.push_back(new cmSubdirCommand);
   commands.push_back(new cmTargetLinkLibrariesCommand);
-  commands.push_back(new cmTestsCommand);
   commands.push_back(new cmUtilitySourceCommand);
   commands.push_back(new cmVTKWrapJavaCommand);
   commands.push_back(new cmVTKWrapPythonCommand);
