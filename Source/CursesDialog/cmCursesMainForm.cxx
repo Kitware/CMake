@@ -418,10 +418,10 @@ void cmCursesMainForm::PrintKeys(int process /* = 0 */)
     }
 
   curses_move(y-4,0);
-  char *fmt = "Press [enter] to edit option";
+  char fmt[512] = "Press [enter] to edit option";
   if ( process )
     {
-    fmt = "                           ";
+    strcpy(fmt, "                           ");
     }
   printw(fmt);
   curses_move(y-3,0);
@@ -581,7 +581,8 @@ void cmCursesMainForm::UpdateStatusBar(const char* message)
   // Now print both lines
   curses_move(y-5,0);
   attron(A_STANDOUT);
-  printw("%s", bar);
+  char s[] = "%s";
+  printw(s, bar);
   attroff(A_STANDOUT);  
   curses_move(y-4,0);
   printw(version);
