@@ -661,6 +661,19 @@ IF(BUILD_TESTING)
       )
   ENDIF (WIN32)    
 
+  IF("${CMAKE_GENERATOR}" MATCHES "Makefile")
+    ADD_TEST(MakeClean ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/MakeClean"
+      "${CMake_BINARY_DIR}/Tests/MakeClean"
+      --build-generator ${CMAKE_GENERATOR}
+      --build-project MakeClean
+      --build-makeprogram ${MAKEPROGRAM}
+      --build-exe-dir "${CMake_BINARY_DIR}/MakeClean"
+      --test-command check_clean
+      )
+  ENDIF("${CMAKE_GENERATOR}" MATCHES "Makefile")
+
   IF(${CMAKE_GENERATOR} MATCHES "Visual Studio")
     ADD_TEST(VSExternalInclude ${CMAKE_CTEST_COMMAND}
       --build-and-test 
