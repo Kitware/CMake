@@ -53,14 +53,14 @@
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
-
-#define DYNA_GET_FUNCTION(type, fnc)          \
-  {                                           \
-  void* dyna_get_res = DynaGetFunction(#fnc); \
-  (fnc) = *((type)&dyna_get_res);             \
-  if ((fnc) == NULL) {                        \
-    return CURLE_FUNCTION_NOT_FOUND;          \
-  }                                           \
+#define DYNA_GET_FUNCTION(type, fnc) \
+  {                                  \
+  union { void* ptr; type; } u;      \
+  u.ptr = DynaGetFunction(#fnc);     \
+  (fnc) = u.fptr;                    \
+  if ((fnc) == NULL) {               \
+    return CURLE_FUNCTION_NOT_FOUND; \
+  }                                  \
   }
 
 /***********************************************************************
@@ -166,15 +166,15 @@ CURLcode Curl_ldap(struct connectdata *conn)
   /* The types are needed because ANSI C distinguishes between
    * pointer-to-object (data) and pointer-to-function.
    */
-  DYNA_GET_FUNCTION(void *(**)(char *, int), ldap_open);
-  DYNA_GET_FUNCTION(int (**)(void *, char *, char *), ldap_simple_bind_s);
-  DYNA_GET_FUNCTION(int (**)(void *), ldap_unbind_s);
-  DYNA_GET_FUNCTION(int (**)(void *, char *, int, void **), ldap_url_search_s);
-  DYNA_GET_FUNCTION(void *(**)(void *, void *), ldap_first_entry);
-  DYNA_GET_FUNCTION(void *(**)(void *, void *), ldap_next_entry);
-  DYNA_GET_FUNCTION(char *(**)(int), ldap_err2string);
-  DYNA_GET_FUNCTION(int (**)(void *, char *, void *, void *, char **, char **, int (*)(void *, char *, int), void *, char *, int, unsigned long), ldap_entry2text);
-  DYNA_GET_FUNCTION(int (**)(void *, char *, void *, void *, char **, char **, int (*)(void *, char *, int), void *, char *, int, unsigned long, char *, char *), ldap_entry2html);
+  DYNA_GET_FUNCTION(void *(*fptr)(char *, int), ldap_open);
+  DYNA_GET_FUNCTION(int (*fptr)(void *, char *, char *), ldap_simple_bind_s);
+  DYNA_GET_FUNCTION(int (*fptr)(void *), ldap_unbind_s);
+  DYNA_GET_FUNCTION(int (*fptr)(void *, char *, int, void **), ldap_url_search_s);
+  DYNA_GET_FUNCTION(void *(*fptr)(void *, void *), ldap_first_entry);
+  DYNA_GET_FUNCTION(void *(*fptr)(void *, void *), ldap_next_entry);
+  DYNA_GET_FUNCTION(char *(*fptr)(int), ldap_err2string);
+  DYNA_GET_FUNCTION(int (*fptr)(void *, char *, void *, void *, char **, char **, int (*)(void *, char *, int), void *, char *, int, unsigned long), ldap_entry2text);
+  DYNA_GET_FUNCTION(int (*fptr)(void *, char *, void *, void *, char **, char **, int (*)(void *, char *, int), void *, char *, int, unsigned long, char *, char *), ldap_entry2html);
   
   server = ldap_open(conn->hostname, conn->port);
   if (server == NULL) {
