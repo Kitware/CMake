@@ -146,13 +146,12 @@ private:
                        const char* configName,
                        const char* libName,
                        const cmTarget &target);
-  
+  std::string ConvertToXMLOutputPath(const char* path);
 private:
   std::map<cmStdString, cmStdString> m_GUIDMap;
   bool m_BuildSLN;
   std::string m_LibraryOutputPath;
   std::string m_ExecutableOutputPath;
-  std::string m_IncludeOptions;
   std::vector<std::string> m_Configurations;
   std::string m_VCProjHeaderTemplate;
   std::string m_VCProjFooterTemplate;

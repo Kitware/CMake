@@ -25,6 +25,7 @@
 
 
 
+
 cmMSDotNETGenerator::cmMSDotNETGenerator()
 {
   // default to building a sln project file
@@ -533,8 +534,6 @@ void cmMSDotNETGenerator::OutputVCProjFile()
       {
       m_LibraryOutputPath += "/";
       }
-    m_LibraryOutputPath = 
-      cmSystemTools::ConvertToOutputPath(m_LibraryOutputPath.c_str());
     }
   m_ExecutableOutputPath = "";
   if (m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH"))
@@ -547,25 +546,6 @@ void cmMSDotNETGenerator::OutputVCProjFile()
     if(m_ExecutableOutputPath[m_ExecutableOutputPath.size()-1] != '/')
       {
       m_ExecutableOutputPath += "/";
-      }
-    }
-  m_ExecutableOutputPath =
-    cmSystemTools::ConvertToOutputPath(m_ExecutableOutputPath.c_str());
-  
-  std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();
-  std::vector<std::string>::iterator i;
-  for(i = includes.begin(); i != includes.end(); ++i)
-    {
-    std::string tmp = cmSystemTools::ConvertToOutputPath(i->c_str());
-    m_IncludeOptions += ",";
-    // quote if not already quoted
-    if (tmp[0] != '"')
-      {
-      m_IncludeOptions += tmp;
-      }
-    else
-      {
-      m_IncludeOptions += tmp;
       }
     }
   
@@ -739,13 +719,10 @@ void cmMSDotNETGenerator::WriteConfiguration(std::ostream& fout,
   fout << "\t\t\t\tAdditionalIncludeDirectories=\"";
   std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();
   std::vector<std::string>::iterator i = includes.begin();
-  if(i != includes.end())
-    {
-    fout << "&quot;" <<  cmSystemTools::ConvertToOutputPath(i->c_str()) << "&quot;";
-    }
   for(;i != includes.end(); ++i)
     {
-    fout << ";&quot;" << cmSystemTools::ConvertToOutputPath(i->c_str()) << "&quot;";
+    std::string ipath = this->ConvertToXMLOutputPath(i->c_str());
+    fout << ipath << ";";
     }
   fout << "\"\n";
   
@@ -823,11 +800,13 @@ void cmMSDotNETGenerator::OutputBuildTool(std::ostream& fout,
   switch(target.GetType())
     {
     case cmTarget::STATIC_LIBRARY:
+    {
+      std::string libpath = m_LibraryOutputPath + "$(OutDir)/" + libName + ".lib";
       fout << "\t\t\t<Tool\n"
            << "\t\t\t\tName=\"VCLibrarianTool\"\n"
-           << "\t\t\t\t\tOutputFile=\"" << m_LibraryOutputPath << "$(OutDir)"
-           << "/" << libName << ".lib\"/>\n";
+           << "\t\t\t\t\tOutputFile=\"" << this->ConvertToXMLOutputPath(libpath.c_str()) << ".\"/>\n";
       break;
+    }
     case cmTarget::SHARED_LIBRARY:
     case cmTarget::MODULE_LIBRARY:
       break;
@@ -894,7 +873,7 @@ void cmMSDotNETGenerator::OutputLibraryDirectories(std::ostream& fout,
   std::vector<std::string>& libdirs = m_Makefile->GetLinkDirectories();
   for(i = libdirs.begin(); i != libdirs.end(); ++i)
     {
-    std::string lpath = cmSystemTools::ConvertToOutputPath(i->c_str());
+    std::string lpath = *i;
     if(lpath[lpath.size()-1] != '/')
       {
       lpath += "/";
@@ -905,7 +884,8 @@ void cmMSDotNETGenerator::OutputLibraryDirectories(std::ostream& fout,
         {
         fout << ",";
         }
-      fout << lpath << "\\$(INTDIR)," << lpath;
+      std::string lpathi = lpath + "$(INTDIR)";
+	  fout << this->ConvertToXMLOutputPath(lpathi.c_str()) << "," << lpath;
       hasone = true;
       }
     }
@@ -925,7 +905,7 @@ void cmMSDotNETGenerator::OutputLibraries(std::ostream& fout,
       {
       lib += ".lib";
       }
-    lib = cmSystemTools::ConvertToOutputPath(lib.c_str());
+    lib = this->ConvertToXMLOutputPath(lib.c_str());
      if (j->second == cmTarget::GENERAL
          || (j->second == cmTarget::DEBUG && strcmp(configName, "DEBUG") == 0)
          || (j->second == cmTarget::OPTIMIZED && strcmp(configName, "DEBUG") != 0))
@@ -1042,7 +1022,7 @@ void cmMSDotNETGenerator::WriteVCProjFile(std::ostream& fout,
       if (source != libName || target.GetType() == cmTarget::UTILITY)
         {
         fout << "\t\t\t<File\n";
-        std::string d = cmSystemTools::ConvertToOutputPath(source.c_str());
+        std::string d = this->ConvertToXMLOutputPath(source.c_str());
         // Tell MS-Dev what the source is.  If the compiler knows how to
         // build it, then it will.
         fout << "\t\t\t\tRelativePath=\"" << d << "\">\n";
@@ -1095,7 +1075,7 @@ void cmMSDotNETGenerator::WriteCustomRule(std::ostream& fout,
     for(std::set<std::string>::const_iterator d = depends.begin();
 	d != depends.end(); ++d)
       {
-      fout << cmSystemTools::ConvertToOutputPath(d->c_str())
+      fout << this->ConvertToXMLOutputPath(d->c_str())
            << ";";
       }
     fout << "\"\n";
@@ -1241,4 +1221,12 @@ void cmMSDotNETGenerator::WriteVCProjFooter(std::ostream& fout)
   fout << "\t<Globals>\n"
        << "\t</Globals>\n"
        << "</VisualStudioProject>\n";
+}
+
+
+std::string cmMSDotNETGenerator::ConvertToXMLOutputPath(const char* path)
+{
+  std::string ret = cmSystemTools::ConvertToOutputPath(path);
+  cmSystemTools::ReplaceString(ret, "\"", "&quot;");
+  return ret;
 }
