@@ -254,16 +254,6 @@ public:
                                std::string& file);
   static std::string CollapseFullPath(const char*);
 
-  /**
-   * all file path prefixes matching \arg from will be replaced by
-   * \arg to.  Affects the return value of CollapseFullPath and
-   * GetCurrentWorkingDirectory.
-   */
-  static void AddPathTranslation( const std::string& from, const std::string& to );
-
-  ///! Apply the current path translations to \arg path.
-  static void ApplyPathTranslation( std::string& path );
-
   ///! return path of a full filename (no trailing slashes).
   static std::string GetFilenamePath(const std::string&);
   
@@ -305,9 +295,6 @@ private:
   static bool s_DisableMessages;
   static bool s_DisableRunCommandOutput;
   static ErrorCallback s_ErrorCallback;
-
-  typedef std::map<cmStdString, cmStdString> PathMap;
-  static PathMap s_PathMap;
 };
 
 

@@ -53,7 +53,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 cmake::cmake()
 {
   m_Verbose = false;
-  m_UsePathTranslation = false;
 #if defined(_WIN32) && !defined(__CYGWIN__)  
   cmMakefileGenerator::RegisterGenerator(new cmMSProjectGenerator);
   cmMakefileGenerator::RegisterGenerator(new cmNMakeMakefileGenerator);
@@ -68,9 +67,8 @@ void cmake::Usage(const char* program)
   std::cerr << "cmake version " << cmMakefile::GetMajorVersion()
             << "." << cmMakefile::GetMinorVersion() << " - " 
             << cmMakefile::GetReleaseVersion() << "\n";
-  std::cerr << "Usage: " << program << " [srcdir] [outdir] [options]\n" 
+  std::cerr << "Usage: " << program << " [srcdir] [options]\n" 
             << "Where cmake is run from the directory where you want the object files written.  If srcdir is not specified, the current directory is used for both source and object files.\n";
-  std::cerr << "If outdir is specified, pathname translation is enabled, and srcdir and outdir are used as given to access the roots of source and output directories.\n";
   std::cerr << "Options are:\n";
   std::cerr << "\n-i (puts cmake in wizard mode, not available for ccmake)\n";
   std::cerr << "\n-DVAR:TYPE=VALUE (create a cache file entry)\n";
@@ -130,9 +128,29 @@ void cmake::SetArgs(cmMakefile& builder, const std::vector<std::string>& args)
 {
   m_Local = false;
   bool directoriesSet = false;
-
-  std::string srcdir;
-  std::string outdir;
+  // watch for cmake and cmake srcdir invocations
+  if (args.size() <= 2)
+    {
+    directoriesSet = true;
+    builder.SetHomeOutputDirectory
+      (cmSystemTools::GetCurrentWorkingDirectory().c_str());
+    builder.SetStartOutputDirectory
+      (cmSystemTools::GetCurrentWorkingDirectory().c_str());
+    if (args.size() == 2)
+      {
+      builder.SetHomeDirectory
+	(cmSystemTools::CollapseFullPath(args[1].c_str()).c_str());
+      builder.SetStartDirectory
+	(cmSystemTools::CollapseFullPath(args[1].c_str()).c_str());
+      }
+    else
+      {
+      builder.SetHomeDirectory
+	(cmSystemTools::GetCurrentWorkingDirectory().c_str());
+      builder.SetStartDirectory
+	(cmSystemTools::GetCurrentWorkingDirectory().c_str());
+      }
+    }
 
   for(unsigned int i=1; i < args.size(); ++i)
     {
@@ -141,12 +159,6 @@ void cmake::SetArgs(cmMakefile& builder, const std::vector<std::string>& args)
       {
       directoriesSet = true;
       std::string path = arg.substr(2);
-      if( cmSystemTools::CollapseFullPath(path.c_str()) != path &&
-          path.size() > 0 && path[0] != '.' )
-        {
-        cmSystemTools::AddPathTranslation( cmSystemTools::CollapseFullPath(path.c_str()), path );
-        m_UsePathTranslation = true;
-        }
       builder.SetHomeDirectory(path.c_str());
       }
     else if(arg.find("-S",0) == 0)
@@ -166,12 +178,6 @@ void cmake::SetArgs(cmMakefile& builder, const std::vector<std::string>& args)
       {
       directoriesSet = true;
       std::string path = arg.substr(2);
-      if( cmSystemTools::CollapseFullPath(path.c_str()) != path &&
-          path.size() > 0 && path[0] != '.' )
-        {
-        cmSystemTools::AddPathTranslation( cmSystemTools::CollapseFullPath(path.c_str()), path );
-        m_UsePathTranslation = true;
-        }
       builder.SetHomeOutputDirectory(path.c_str());
       }
     else if(arg.find("-V",0) == 0)
@@ -201,66 +207,31 @@ void cmake::SetArgs(cmMakefile& builder, const std::vector<std::string>& args)
         builder.SetMakefileGenerator(gen);
         }
       }
-    // no option assume it is the path to the source or to the output
+    // no option assume it is the path to the source
     else
       {
-      if( srcdir.size() == 0 )
-        {
-        srcdir = arg;
-        }
-      else if( outdir.size() == 0 )
-        {
-        // Make sure the symbolic output directory specified matches
-        // the current directory, and that the symbolic path is
-        // absolute. Even if not, set the outdir variable so that
-        // further attempts to set the output directory (with
-        // another command line argument) fails.
-        if( cmSystemTools::CollapseFullPath( arg.c_str() ) == cmSystemTools::GetCurrentWorkingDirectory() )
-          {
-          outdir = arg;
-          if( srcdir.size() > 0 && srcdir[0] != '.' && outdir.size() > 0 && outdir[0] != '.' )
-            {
-            cmSystemTools::AddPathTranslation( cmSystemTools::GetCurrentWorkingDirectory(), outdir );
-            cmSystemTools::AddPathTranslation( cmSystemTools::CollapseFullPath(srcdir.c_str()), srcdir );
-            m_UsePathTranslation = true;
-            }
-          else
-            {
-            std::cerr << "Symbolic paths must be absolute for path translation. One of \"" << srcdir
-                      << "\" or \"" << outdir << "\" is not.\n"
-                      << "Not performing path name translation." << std::endl;
-            outdir = cmSystemTools::GetCurrentWorkingDirectory();
-            }
-          }
-        else
-          {
-          std::cerr << "The current working directory (" << cmSystemTools::GetCurrentWorkingDirectory() << ")\n"
-                    << "does not match the binary directory (" << (cmSystemTools::CollapseFullPath(arg.c_str())) << ")\n"
-                    << "[ given as " << arg << " ].\n"
-                    << "Not performing path name translation." << std::endl;
-          outdir = cmSystemTools::GetCurrentWorkingDirectory();
-          }
-        }
-      else
-        {
-        std::cerr << "Ignoring parameter " << arg << std::endl;
-        }
+      directoriesSet = true;
+      builder.SetHomeOutputDirectory
+        (cmSystemTools::GetCurrentWorkingDirectory().c_str());
+      builder.SetStartOutputDirectory
+        (cmSystemTools::GetCurrentWorkingDirectory().c_str());
+      builder.SetHomeDirectory
+        (cmSystemTools::CollapseFullPath(arg.c_str()).c_str());
+      builder.SetStartDirectory
+        (cmSystemTools::CollapseFullPath(arg.c_str()).c_str());
       }
     }
-
   if(!directoriesSet)
     {
-    if( srcdir.size() == 0 )  srcdir = cmSystemTools::GetCurrentWorkingDirectory();
-
-    outdir = cmSystemTools::GetCurrentWorkingDirectory();
-    srcdir = cmSystemTools::CollapseFullPath( srcdir.c_str() );
-
-    builder.SetHomeOutputDirectory( outdir.c_str() );
-    builder.SetStartOutputDirectory( outdir.c_str() );
-    builder.SetHomeDirectory( srcdir.c_str() );
-    builder.SetStartDirectory( srcdir.c_str() );
+    builder.SetHomeOutputDirectory
+      (cmSystemTools::GetCurrentWorkingDirectory().c_str());
+    builder.SetStartOutputDirectory
+      (cmSystemTools::GetCurrentWorkingDirectory().c_str());
+    builder.SetHomeDirectory
+      (cmSystemTools::GetCurrentWorkingDirectory().c_str());
+    builder.SetStartDirectory
+      (cmSystemTools::GetCurrentWorkingDirectory().c_str());
     }
-
   if (!m_Local)
     {
     builder.SetStartDirectory(builder.GetHomeDirectory());
@@ -271,13 +242,10 @@ void cmake::SetArgs(cmMakefile& builder, const std::vector<std::string>& args)
 // at the end of this CMAKE_ROOT and CMAKE_COMMAND should be added to the cache
 void cmake::AddCMakePaths(const std::vector<std::string>& args)
 {
-  // Find our own executable. If path translations are enabled and the
-  // user supplies the full path to cmake, use it as the canonical
-  // name (i.e. don't translate to a local disk path).
+  // Find our own executable.
   std::string cMakeSelf = args[0];
   cmSystemTools::ConvertToUnixSlashes(cMakeSelf);
-  if(!(m_UsePathTranslation && cmSystemTools::FileExists(cMakeSelf.c_str()) && cMakeSelf[0]!='.'))
-    cMakeSelf = cmSystemTools::FindProgram(cMakeSelf.c_str());
+  cMakeSelf = cmSystemTools::FindProgram(cMakeSelf.c_str());
   if(!cmSystemTools::FileExists(cMakeSelf.c_str()))
     {
 #ifdef CMAKE_BUILD_DIR

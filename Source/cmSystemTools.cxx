@@ -94,7 +94,6 @@ inline int Chdir(const char* dir)
 bool cmSystemTools::s_DisableRunCommandOutput = false;
 bool cmSystemTools::s_ErrorOccured = false;
 bool cmSystemTools::s_DisableMessages = false;
-cmSystemTools::PathMap cmSystemTools::s_PathMap;
 
 void (*cmSystemTools::s_ErrorCallback)(const char*, const char*, bool&);
 
@@ -1177,7 +1176,6 @@ std::string cmSystemTools::GetCurrentWorkingDirectory()
 {
   char buf[2048];
   std::string path = Getcwd(buf, 2048);
-  ApplyPathTranslation( path );
   return path;
 }
 
@@ -1239,7 +1237,6 @@ void cmSystemTools::SplitProgramPath(const char* in_name,
 std::string cmSystemTools::CollapseFullPath(const char* in_name)
 {
   std::string dir, file;
-  std::string return_value;
   cmSystemTools::SplitProgramPath(in_name, dir, file);
 #ifdef _WIN32
   // Ultra-hack warning:
@@ -1251,7 +1248,8 @@ std::string cmSystemTools::CollapseFullPath(const char* in_name)
   Chdir(cwd.c_str());
 
   cmSystemTools::ConvertToUnixSlashes(newDir);
-  return_value = newDir;
+  std::string newPath = newDir+"/"+file;
+  return newPath;
 #else
 # ifdef MAXPATHLEN
   char resolved_name[MAXPATHLEN];
@@ -1271,13 +1269,8 @@ std::string cmSystemTools::CollapseFullPath(const char* in_name)
     {
     dir = cmSystemTools::GetCurrentWorkingDirectory();
     }
-  return_value = dir;
+  return dir + "/" + file;
 #endif
-  if(file != "")
-    return_value += "/" + file;
-
-  ApplyPathTranslation( return_value );
-  return return_value;
 }
 
 /**
@@ -1428,27 +1421,6 @@ void cmSystemTools::GlobDirs(const char *fullPath,
           cmSystemTools::GlobDirs(fname.c_str(), files);
           }
         }
-      }
-    }
-}
-
-
-void cmSystemTools::AddPathTranslation( const std::string& from, const std::string& to )
-{
-  s_PathMap[from] = to;
-}
-
-void cmSystemTools::ApplyPathTranslation( std::string& path )
-{
-  PathMap::iterator i;
-
-  // For each key in the map, see if path starts with it. If so, perform the substitution.
-  for( i = s_PathMap.begin(); i != s_PathMap.end(); ++i )
-    {
-    if( path.substr( 0, i->first.length() ) == i->first )
-      {
-      path.replace( 0, i->first.length(), i->second );
-      return;
       }
     }
 }
