@@ -2285,6 +2285,11 @@ void cmMakefile::ConfigureString(const std::string& input,
 int cmMakefile::ConfigureFile(const char* infile, const char* outfile, 
   bool copyonly, bool atOnly, bool escapeQuotes)
 {
+  if ( !cmSystemTools::FileExists(infile) )
+    {
+    cmSystemTools::Error("File ", infile, " does not exist.");
+    return 0;
+    }
   std::string soutfile = outfile;
   std::string sinfile = infile;
   this->AddCMakeDependFile(infile);

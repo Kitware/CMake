@@ -56,7 +56,11 @@ bool cmConfigureFileCommand::InitialPass(std::vector<std::string> const& args)
   // first pass (now).
   if(m_Immediate)
     {
-    this->ConfigureFile();
+    if ( !this->ConfigureFile() )
+      {
+      this->SetError("Problem configuring file");
+      return false;
+      }
     }
   
   return true;
@@ -70,9 +74,9 @@ void cmConfigureFileCommand::FinalPass()
     }
 }
 
-void cmConfigureFileCommand::ConfigureFile()
+int cmConfigureFileCommand::ConfigureFile()
 {
-  m_Makefile->ConfigureFile(m_InputFile.c_str(),
+  return m_Makefile->ConfigureFile(m_InputFile.c_str(),
     m_OuputFile.c_str(),
     m_CopyOnly,
     m_AtOnly,

@@ -76,7 +76,7 @@ public:
 
   virtual void FinalPass();
 private:
-  void ConfigureFile();
+  int ConfigureFile();
   
   std::string m_InputFile;
   std::string m_OuputFile;
