@@ -847,6 +847,16 @@ int cmake::Run(const std::vector<std::string>& args)
   // Process the arguments
   this->SetArgs(args);
   
+  // make sure rthe Start directory contains a CMakeLists.txt file
+  std::string srcList = this->GetHomeDirectory();
+  srcList += "/CMakeLists.txt";
+  if(!cmSystemTools::FileExists(srcList.c_str()))
+    {
+    cmSystemTools::Error("The source directory does not appear to contain CMakeLists.txt\n");
+    this->Usage(args[0].c_str());
+    return -1;
+    }
+  
   // set the cmake command
   m_CMakeCommand = args[0];
   
