@@ -35,13 +35,11 @@ ADD_LIBRARY(CMakeTestCLibraryShared SHARED testConly.c)
 #
 ADD_DEPENDENCIES(CMakeTestLibraryShared create_file)
 
-ADD_CUSTOM_COMMAND(SOURCE CMakeTestLibraryShared
-                   COMMAND ${CREATE_FILE_EXE}
+ADD_CUSTOM_COMMAND(COMMAND ${CREATE_FILE_EXE}
                    ARGS "${Complex_BINARY_DIR}/Library/postbuild.txt"
                    TARGET CMakeTestLibraryShared)
 
-ADD_CUSTOM_COMMAND(SOURCE CMakeTestLibraryShared
-	           COMMAND ${CCOMMAND_COMMAND}
+ADD_CUSTOM_COMMAND(COMMAND ${CCOMMAND_COMMAND}
                    ARGS copy
                         "${Complex_BINARY_DIR}/Library/postbuild.txt"
                         "${Complex_BINARY_DIR}/Library/postbuild2.txt"
