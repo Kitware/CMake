@@ -894,9 +894,9 @@ long int cmSystemTools::ModifiedTime(const char* filename)
 
 
   
-void cmSystemTools::RemoveFile(const char* source)
+bool cmSystemTools::RemoveFile(const char* source)
 {
-  unlink(source);
+  return unlink(source) != 0 ? false : true;
 }
 
 bool cmSystemTools::IsOn(const char* val)

@@ -212,7 +212,7 @@ public:
                        const char* destination);
   
   ///! Remove a file.
-  static void RemoveFile(const char* source);
+  static bool RemoveFile(const char* source);
   
   /** 
    * does a string indicate a true or on value ? This is not the same
