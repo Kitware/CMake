@@ -38,9 +38,12 @@ cmMakefile::cmMakefile()
   // Setup the default include complaint regular expression (match nothing).
   m_ComplainFileRegularExpression = "^$";
   // Source and header file extensions that we can handle
-  m_SourceFileExtensions.push_back( "C" );
-  m_SourceFileExtensions.push_back( "M" );
+
+  // The "c" extension MUST precede the "C" extension.
   m_SourceFileExtensions.push_back( "c" );
+  m_SourceFileExtensions.push_back( "C" );
+  
+  m_SourceFileExtensions.push_back( "M" );
   m_SourceFileExtensions.push_back( "c++" );
   m_SourceFileExtensions.push_back( "cc" );
   m_SourceFileExtensions.push_back( "cpp" );
