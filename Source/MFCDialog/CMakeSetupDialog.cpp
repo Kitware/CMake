@@ -635,6 +635,7 @@ void CMakeSetupDialog::FillCacheGUIFromCacheManager()
       {
       if(cmCacheManager::GetInstance()->IsAdvanced(key))
         {
+	m_CacheEntriesList.RemoveProperty(key);
         continue;
         }
       }
