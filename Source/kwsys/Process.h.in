@@ -30,6 +30,7 @@
 #define kwsysProcess_New                 kwsys(Process_New)
 #define kwsysProcess_Delete              kwsys(Process_Delete)
 #define kwsysProcess_SetCommand          kwsys(Process_SetCommand)
+#define kwsysProcess_AddCommand          kwsys(Process_AddCommand)
 #define kwsysProcess_SetTimeout          kwsys(Process_SetTimeout)
 #define kwsysProcess_SetWorkingDirectory kwsys(Process_SetWorkingDirectory)
 #define kwsysProcess_Option_HideWindow   kwsys(Process_Option_HideWindow)
@@ -89,10 +90,21 @@ kwsysEXPORT void kwsysProcess_Delete(kwsysProcess* cp);
 /**
  * Set the command line to be executed.  Argument is an array of
  * pointers to the command and each argument.  Ths array must end with
- * a NULL pointer.
+ * a NULL pointer.  Any previous command lines are removed.  Returns
+ * 1 for success and 0 otherwise.
  */
-kwsysEXPORT void kwsysProcess_SetCommand(kwsysProcess* cp,
-                                         char const* const* command);
+kwsysEXPORT int kwsysProcess_SetCommand(kwsysProcess* cp,
+                                        char const* const* command);
+
+/**
+ * Add a command line to be executed.  Argument is an array of
+ * pointers to the command and each argument.  Ths array must end with
+ * a NULL pointer.  If this is not the first command added, its
+ * standard input will be connected to the standard output of the
+ * previous command.  Returns 1 for success and 0 otherwise.
+ */
+kwsysEXPORT int kwsysProcess_AddCommand(kwsysProcess* cp,
+                                        char const* const* command);
 
 /**
  * Set the timeout for the child process.  The timeout period begins
@@ -280,6 +292,7 @@ kwsysEXPORT void kwsysProcess_Kill(kwsysProcess* cp);
 # undef kwsysProcess_New
 # undef kwsysProcess_Delete
 # undef kwsysProcess_SetCommand
+# undef kwsysProcess_AddCommand
 # undef kwsysProcess_SetTimeout
 # undef kwsysProcess_SetWorkingDirectory
 # undef kwsysProcess_Option_HideWindow
