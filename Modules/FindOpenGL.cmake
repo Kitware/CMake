@@ -14,8 +14,8 @@
 #
 
 # On OSX default to using the framework version of opengl
-# People will have to change the cache values of OPENGL_glu_LIBRARY and OPENGL_gl_LIBRARY
-# to use OpenGL with X11 on OSX
+# People will have to change the cache values of OPENGL_glu_LIBRARY 
+# and OPENGL_gl_LIBRARY to use OpenGL with X11 on OSX
 IF (APPLE)
   SET (OPENGL_gl_LIBRARY "-framework OpenGL" CACHE STRING "OpenGL lib for OSX")
   SET (OPENGL_glu_LIBRARY "-framework AGL" CACHE STRING "AGL lib for OSX")
@@ -138,8 +138,6 @@ ENDIF(OPENGL_gl_LIBRARY)
 
 # This deprecated setting is for backward compatibility with CMake1.4
 SET(OPENGL_INCLUDE_PATH ${OPENGL_INCLUDE_DIR})
-
-
 
 MARK_AS_ADVANCED(
   OPENGL_INCLUDE_DIR
