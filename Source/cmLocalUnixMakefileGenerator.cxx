@@ -1072,16 +1072,27 @@ void cmLocalUnixMakefileGenerator::OutputLibraryRule(std::ostream& fout,
                         targetName, targetNameSO,
                         targetNameReal, targetNameBase);
 
+  std::string outpath;
+  std::string outdir = this->ConvertToRelativeOutputPath(m_LibraryOutputPath.c_str());
+  if(!m_WindowsShell && outdir.size())
+    {
+    outpath =  "\"`cd ";
+    }
+  outpath += outdir;
+  if(!m_WindowsShell && outdir.size())
+    {
+    outpath += ";pwd`\"/";
+    }
+  if(outdir.size() == 0 && !m_WindowsShell)
+    {
+    outpath = "\"`pwd`\"/";
+    }
   // The full path versions of the names.
-  std::string targetFullPath = m_LibraryOutputPath + targetName;
-  std::string targetFullPathSO = m_LibraryOutputPath + targetNameSO;
-  std::string targetFullPathReal = m_LibraryOutputPath + targetNameReal;
-  std::string targetFullPathBase = m_LibraryOutputPath + targetNameBase;
-  targetFullPath = this->ConvertToRelativeOutputPath(targetFullPath.c_str());
-  targetFullPathSO = this->ConvertToRelativeOutputPath(targetFullPathSO.c_str());
-  targetFullPathReal = this->ConvertToRelativeOutputPath(targetFullPathReal.c_str());
-  targetFullPathBase = this->ConvertToRelativeOutputPath(targetFullPathBase.c_str());
-
+  std::string targetFullPath = outpath + targetName;
+  std::string targetFullPathSO = outpath + targetNameSO;
+  std::string targetFullPathReal = outpath + targetNameReal;
+  std::string targetFullPathBase = outpath + targetNameBase;
+  
   // get the objects that are used to link this library
   std::string objs = "$(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
   std::string objsQuoted = "$(" + this->CreateMakeVariable(name, "_SRC_OBJS_QUOTED") + ") ";
@@ -1165,6 +1176,9 @@ void cmLocalUnixMakefileGenerator::OutputLibraryRule(std::ostream& fout,
                               targetNameSO.c_str(),
                               linkFlags);
     }
+  
+  targetFullPath = m_LibraryOutputPath + targetName;
+  targetFullPath = this->ConvertToRelativeOutputPath(targetFullPath.c_str());
   this->OutputMakeRule(fout, comment,
                        targetFullPath.c_str(),
                        depend.c_str(),
