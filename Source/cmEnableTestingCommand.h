@@ -54,6 +54,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * within the valid control structures are replicated in Testfile
  * (i.e. SUBDIRS() and ADD_TEST() commands within IF() commands that are
  * not entered by CMake are not replicated in Testfile).
+ * Note that Dart expects to find this file in the build directory root; 
+ * therefore, this command should be in the source directory root too.
  */
 class cmEnableTestingCommand : public cmCommand
 {
@@ -107,7 +109,7 @@ public:
     {
     return
       "ENABLE_TESTING()\n"
-      "Enables testing for this directory and below. See also the ADD_TEST command.";
+      "Enables testing for this directory and below. See also the ADD_TEST command. Note that Dart expects to find this file in the build directory root; therefore, this command should be in the source directory root too.";
     }
   
   cmTypeMacro(cmEnableTestingCommand, cmCommand);
