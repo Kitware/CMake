@@ -26,6 +26,8 @@ GET_FILENAME_COMPONENT(TCL_TCLSH_PATH ${TCL_TCLSH} PATH)
 GET_FILENAME_COMPONENT(TK_WISH_PATH ${TK_WISH} PATH)
 
 SET (TCLTK_POSSIBLE_LIB_PATHS
+  "${TCL_TCLSH_PATH}/../lib"
+  "${TK_WISH_PATH}/../lib"
   /usr/lib 
   /usr/local/lib
   "C:/Program Files/Tcl/lib" 
@@ -34,8 +36,6 @@ SET (TCLTK_POSSIBLE_LIB_PATHS
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.3;Root]/lib
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.2;Root]/lib
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.0;Root]/lib
-  "${TCL_TCLSH_PATH}/../lib"
-  "${TK_WISH_PATH}/../lib"
 )
 
 FIND_LIBRARY(TCL_LIBRARY
