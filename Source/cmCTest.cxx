@@ -4513,7 +4513,7 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
     else
       {
       std::cerr << "Building of project failed\n";
-      std::cerr << out << output << "\n";
+      std::cerr << out.str() << output << "\n";
       }
     // return to the original directory
     cmSystemTools::ChangeDirectory(cwd.c_str());
