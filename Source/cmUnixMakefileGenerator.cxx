@@ -1356,6 +1356,7 @@ bool cmUnixMakefileGenerator::OutputObjectDepends(std::ostream& fout)
 // by the class cmMakeDepend GenerateMakefile
 void cmUnixMakefileGenerator::OutputCheckDepends(std::ostream& fout)
 {
+  std::set<std::string> emittedShortPath;
   std::set<std::string> emitted;
   // Iterate over every target.
   std::map<cmStdString, cmTarget>& targets = m_Makefile->GetTargets();
@@ -1393,8 +1394,9 @@ void cmUnixMakefileGenerator::OutputCheckDepends(std::ostream& fout)
               {
               shortpath = dependfile;
               }
-            if(emitted.insert(shortpath).second)
+            if(emittedShortPath.insert(shortpath).second)
               {
+              emitted.insert(dependfile);
               fout << " \\\n" << dependfile ;
               }
             }
