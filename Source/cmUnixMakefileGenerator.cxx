@@ -93,6 +93,11 @@ void cmUnixMakefileGenerator::ProcessDepends(const cmMakeDepend &md)
         // get the depends
         const cmDependInformation *info = 
           md.GetDependInformationForSourceFile(*i);
+        
+        // Delete any hints from the source file's dependencies.
+        i->GetDepends().erase(i->GetDepends().begin(), i->GetDepends().end());
+        
+        // Now add the real dependencies for the file.
         if (info)
           {
           for( cmDependInformation::IndexSet::const_iterator indx = 

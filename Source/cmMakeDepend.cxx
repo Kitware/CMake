@@ -169,15 +169,6 @@ void cmMakeDepend::Depend(cmDependInformation* info)
   // If the file exists, use it to find dependency information.
   if(cmSystemTools::FileExists(path))
     {
-    // The cmSourceFile may have had hints for dependencies.  Delete any that
-    // exist since we can find the dependencies for real.
-    if(info->m_ClassFileIndex != 0)
-      {
-      const cmSourceFile& cFile = *(info->m_ClassFileIndex);
-      //cFile.GetDepends().erase(cFile.GetDepends().begin(), 
-      //                         cFile.GetDepends().end());
-      }
-    
     // Use the real file to find its dependencies.
     this->DependWalk(info, path);
     info->m_DependDone = true;
@@ -202,11 +193,6 @@ void cmMakeDepend::Depend(cmDependInformation* info)
         {
         this->AddDependency(info, file->c_str());
         }
-      
-      // Erase the dependency hints from the cmSourceFile.  They will be
-      // put in again as real dependencies later.
-      //cFile.GetDepends().erase(cFile.GetDepends().begin(), 
-      //                         cFile.GetDepends().end());
       
       // Found dependency information.  We are done.
       return;
