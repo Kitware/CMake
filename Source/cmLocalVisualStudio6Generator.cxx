@@ -472,13 +472,13 @@ void cmLocalVisualStudio6Generator::WriteCustomRule(std::ostream& fout,
         libPath += "$(INTDIR)";
         libPath += dep;
         libPath += ".exe";
-        fout << cmSystemTools::ConvertToOutputPath(libPath.c_str())
-             << ";";
+        fout << "\\\n\t" << 
+          cmSystemTools::ConvertToOutputPath(libPath.c_str());
         }
       else
         {
-        fout << cmSystemTools::ConvertToOutputPath(d->c_str())
-             << ";";
+        fout << "\\\n\t" << 
+          cmSystemTools::ConvertToOutputPath(d->c_str());
         }
       }
     fout << "\n";
