@@ -2824,7 +2824,7 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output, int *re
     {
     cmCTest inst;
     std::vector<std::string> args;
-    for(int i =0; i < argv.size(); ++i)
+    for(unsigned int i =0; i < argv.size(); ++i)
       {
       if(argv[i])
         {
@@ -3881,7 +3881,7 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
     args.push_back(generator);
     }
   
-  int k;
+  unsigned int k;
   for(k=0; k < m_BuildOptions.size(); ++k)
     {
     args.push_back(m_BuildOptions[k]);
@@ -4145,7 +4145,7 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
 
   std::vector<const char*> testCommand;
   testCommand.push_back(fullPath.c_str());
-  for(int k=0; k < m_TestCommandArgs.size(); ++k)
+  for(unsigned int k=0; k < m_TestCommandArgs.size(); ++k)
     {
     out << m_TestCommandArgs[k].c_str() << "\n";
     testCommand.push_back(m_TestCommandArgs[k].c_str());
