@@ -301,7 +301,7 @@ public:
 
   /** Split a string on its newlines into multiple lines.  Returns
       false only if the last line stored had no newline.  */
-  static bool Split(const char* str, std::vector<cmStdString>& lines);
+  static bool Split(const char* s, std::vector<cmStdString>& l);
   
   /**
    * Come constants for different file formats.
