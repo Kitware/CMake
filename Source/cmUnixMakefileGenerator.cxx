@@ -517,7 +517,8 @@ OutputSubDirectoryVars(std::ostream& fout,
     fout << target << "_" << subdir.c_str() << ":\n";
     if(target1)
       {
-      fout << "\tcd " << SubDirectories[i].c_str()
+	fout << "\tif test ! -d " << SubDirectories[i].c_str() << "; then ${MAKE} rebuild_cache; fi\n"
+	  "\tcd " << SubDirectories[i].c_str()
            << "; ${MAKE} -${MAKEFLAGS} " << target1 << "\n";
       }
     if(target2)
@@ -802,43 +803,35 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                        "Rule to build the Makefile",
                        "Makefile",
                        "${CMAKE_COMMAND} ${CMAKE_MAKEFILE_SOURCES} ",
-                       "${CMAKE_COMMAND} ${CMAKE_CURRENT_SOURCE}/CMakeLists.txt "
+                       "${CMAKE_COMMAND} "
                        "-S${CMAKE_CURRENT_SOURCE} -O${CMAKE_CURRENT_BINARY} "
                        "-H${CMAKE_SOURCE_DIR} -B${CMAKE_BINARY_DIR}");  
   this->OutputMakeRule(fout, 
                        "Rule to build the cmake.depends",
                        "cmake.depends",
                        "${CMAKE_COMMAND} ${CMAKE_MAKEFILE_SOURCES} ",
-                       "${CMAKE_COMMAND} ${CMAKE_CURRENT_SOURCE}/CMakeLists.txt "
+                       "${CMAKE_COMMAND} "
                        "-S${CMAKE_CURRENT_SOURCE} -O${CMAKE_CURRENT_BINARY} "
                        "-H${CMAKE_SOURCE_DIR} -B${CMAKE_BINARY_DIR}");
   this->OutputMakeRule(fout, 
                        "Rule to force the build of cmake.depends",
                        "depend",
                        "${SUBDIR_DEPEND}",
-                       "${CMAKE_COMMAND} ${CMAKE_CURRENT_SOURCE}/CMakeLists.txt "
+                       "${CMAKE_COMMAND} "
                        "-S${CMAKE_CURRENT_SOURCE} -O${CMAKE_CURRENT_BINARY} "
                        "-H${CMAKE_SOURCE_DIR} -B${CMAKE_BINARY_DIR}");  
-
-  this->OutputMakeRule(fout, 
-		       "rule to build cmake from source",
-		       "${CMAKE_COMMAND}", "${CMAKE_SOURCE_DIR}/CMake/Source/*.cxx "
-		       "${CMAKE_SOURCE_DIR}/CMake/Source/*.h",
-		       "cd ${CMAKE_BINARY_DIR}/CMake/Source; "
-		       "${MAKE} CMakeBuildTargets");
   this->OutputMakeRule(fout, 
                        "Rebuild the cache",
                        "rebuild_cache",
                        "${CMAKE_BINARY_DIR}/CMakeCache.txt",
-                       "${CMAKE_COMMAND} ${CMAKE_SOURCE_DIR}/CMakeLists.txt "
-                       "-MakeCache -S${CMAKE_SOURCE_DIR} -O${CMAKE_BINARY_DIR} "
+                       "${CMAKE_COMMAND} "
                        "-H${CMAKE_SOURCE_DIR} -B${CMAKE_BINARY_DIR}");
-  //  this->OutputMakeRule(fout, 
-  //                     "Rebuild cmake dummy rule",
-  //                     "${CMAKE_COMMAND}",
-  //                     0,
-  //                     "echo \"cmake might be out of date\"");
-    
+  this->OutputMakeRule(fout, 
+                       "Rebuild cmake dummy rule",
+                       "${CMAKE_COMMAND}",
+                       0,
+                       "echo \"cmake might be out of date\"");
+  
 }
 
 void cmUnixMakefileGenerator::OutputMakeRule(std::ostream& fout, 

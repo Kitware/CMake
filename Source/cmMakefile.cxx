@@ -64,13 +64,6 @@ cmMakefile::cmMakefile()
   this->AddDefaultCommands();
   this->AddDefaultDefinitions();
   cmCacheManager::GetInstance()->DefineCache(this);
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  const char* cacheValue
-    = cmCacheManager::GetInstance()->GetCacheValue("CMAKE_ROOT");
-  std::string fpath = cacheValue;
-  fpath += "/Templates/CMakeWindowsSystemConfig.cmake";
-  this->ReadListFile(NULL,fpath.c_str());
-#endif
 }
 
 void cmMakefile::AddDefaultCommands()
@@ -346,6 +339,7 @@ void cmMakefile::SetMakefileGenerator(cmMakefileGenerator* mf)
 {
   delete m_MakefileGenerator;
   m_MakefileGenerator = mf;
+  mf->SetMakefile(this);
 }
 
   // Generate the output file
@@ -353,8 +347,6 @@ void cmMakefile::GenerateMakefile()
 {
   // do all the variable expansions here
   this->ExpandVariables();
-  // set the makefile on the generator
-  m_MakefileGenerator->SetMakefile(this);
   // give all the commands a chance to do something
   // after the file has been parsed before generation
   for(std::vector<cmCommand*>::iterator i = m_UsedCommands.begin();
@@ -868,11 +860,6 @@ void cmMakefile::SetHomeOutputDirectory(const char* lib)
   m_HomeOutputDirectory = lib;
   cmSystemTools::ConvertToUnixSlashes(m_HomeOutputDirectory);
   this->AddDefinition("CMAKE_BINARY_DIR", this->GetHomeOutputDirectory());
-#if !defined(_WIN32) || defined(__CYGWIN__)
-  std::string fpath = lib;
-  fpath += "/CMakeSystemConfig.cmake";
-  this->ReadListFile(NULL,fpath.c_str());
-#endif
 }
 
 

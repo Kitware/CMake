@@ -134,6 +134,12 @@ void cmake::SetArgs(cmMakefile& builder, int ac, char** av)
 	m_Verbose = true;
       }
     }
+  
+  if (!m_Local)
+    {
+    builder.SetStartDirectory(builder.GetHomeDirectory());
+    builder.SetStartOutputDirectory(builder.GetHomeOutputDirectory());
+    }
 }
 
 // at the end of this CMAKE_ROOT and CMAAKE_COMMAND should be added to the cache

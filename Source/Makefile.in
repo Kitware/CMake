@@ -7,12 +7,14 @@ CXXFLAGS      = -DCMAKE_ROOT_DIR='"@CMAKE_ROOT_DIR@"' @CXXFLAGS@ -DCMAKE_HAS_AUT
 
 .SUFFIXES: .cxx .java .class
 
+all: cmake
+
 .cxx.o:
 	${CXX} ${CXXFLAGS} -c $< -o $@
 
 
 OBJS = \
-CMakeBuildTargets.o  \
+cmake.o  \
 cmMakeDepend.o \
 cmMakefile.o \
 cmMakefileGenerator.o \
@@ -28,10 +30,10 @@ cmCacheManager.o \
 cmCableClassSet.o \
 cmSourceGroup.o
 
-DEPENDS = $(srcdir)/*.h  ${CMAKE_CONFIG_DIR}/CMake/Source/cmConfigure.h
+DEPENDS = $(srcdir)/*.h  cmConfigure.h
 
 cmCollectFlags.o : $(DEPENDS)
-CMakeBuildTargets.o  : $(DEPENDS)
+cmake.o  : $(DEPENDS)
 cmMakeDepend.o : $(DEPENDS)
 cmMakefile.o : $(DEPENDS)
 cmMakefileGenerator.o : $(DEPENDS)
@@ -49,6 +51,6 @@ cmSourceGroup.o : $(DEPENDS)
 
 
 
-CMakeBuildTargets: ${OBJS}
-	${CXX} ${OBJS} ${CXX_FLAGS}  -o CMakeBuildTargets
+cmake: ${OBJS}
+	${CXX} ${OBJS} ${CXX_FLAGS}  -o cmake
 
