@@ -15,9 +15,10 @@
 
 =========================================================================*/
 #include "cmGlobalBorlandMakefileGenerator.h"
-#include "cmLocalUnixMakefileGenerator.h"
+#include "cmLocalUnixMakefileGenerator2.h"
 #include "cmMakefile.h"
 #include "cmake.h"
+
 cmGlobalBorlandMakefileGenerator::cmGlobalBorlandMakefileGenerator()
 {
   m_FindMakeProgramFile = "CMakeBorlandFindMake.cmake";
@@ -29,6 +30,7 @@ void cmGlobalBorlandMakefileGenerator::EnableLanguage(std::vector<std::string>co
                                                       cmMakefile *mf)
 {
   std::string outdir = m_CMakeInstance->GetStartOutputDirectory();
+  mf->AddDefinition("CMAKE_GENERATOR_NEW", "1");
   mf->AddDefinition("BORLAND", "1");
   mf->AddDefinition("CMAKE_GENERATOR_CC", "bcc32");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "bcc32"); 
@@ -38,7 +40,9 @@ void cmGlobalBorlandMakefileGenerator::EnableLanguage(std::vector<std::string>co
 ///! Create a local generator appropriate to this Global Generator
 cmLocalGenerator *cmGlobalBorlandMakefileGenerator::CreateLocalGenerator()
 {
-  cmLocalUnixMakefileGenerator *lg = new cmLocalUnixMakefileGenerator;
+  cmLocalUnixMakefileGenerator2* lg = new cmLocalUnixMakefileGenerator2;
+  lg->SetEmptyCommand("@REM Borland Make needs a command here.");
+  lg->SetEchoNeedsQuote(false);
   lg->SetIncludeDirective("!include");
   lg->SetWindowsShell(true);
   lg->SetMakefileVariableSize(32);
