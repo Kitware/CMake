@@ -42,7 +42,7 @@ bool cmMakefile::ReadMakefile(const char* filename)
     {
     std::string line = inbuffer;
     cmClassFile file;
-    if(line.find("COMPILE_CLASSES") != std::string::npos)
+    if(line.find("SOURCE_FILES") != std::string::npos)
       {
       if(line.find("\\") != std::string::npos)
 	{
@@ -50,7 +50,7 @@ bool cmMakefile::ReadMakefile(const char* filename)
 	}
       }
 #ifdef _WIN32
-    else if(line.find("WIN32_CLASSES") != std::string::npos)
+    else if(line.find("WIN32_SOURCE_FILES") != std::string::npos)
       {
       if(line.find("\\") != std::string::npos)
 	{
@@ -58,7 +58,7 @@ bool cmMakefile::ReadMakefile(const char* filename)
 	}
       }
 #else
-    else if(line.find("UNIX_CLASSES") != std::string::npos)
+    else if(line.find("UNIX_SOURCE_FILES") != std::string::npos)
       {
       if(line.find("\\") != std::string::npos)
 	{
@@ -73,7 +73,7 @@ bool cmMakefile::ReadMakefile(const char* filename)
 	this->ReadClasses(fin, true);
 	}
       }
-    else if(line.find("TEMPLATE_INSTANCE_DIRECTORY") != std::string::npos)
+    else if(line.find("AUX_SOURCE_DIRECTORY") != std::string::npos)
       {
       this->ReadTemplateInstanceDirectory(line);
       }
@@ -173,7 +173,7 @@ void cmMakefile::ReadClasses(std::ifstream& fin,
 }
 
 // Find all of the files in dir as specified from this line:
-// TEMPLATE_INSTANCE_DIRECTORY = dir
+// AUX_SOURCE_DIRECTORY = dir
 // Add all the files to the m_Classes array.
 
 void cmMakefile::ReadTemplateInstanceDirectory(std::string& line)

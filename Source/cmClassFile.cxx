@@ -21,8 +21,19 @@ void cmClassFile::SetName(const char* name, const char* dir)
     pathname += "/";
     }
   
+  // First try and see whether the listed file can be found
+  // as is without extensions added on.
   pathname += m_ClassName;
   std::string hname = pathname;
+  if(cmSystemTools::FileExists(hname.c_str()))
+    {
+    m_HeaderFileOnly = false;
+    m_FullPath = hname;
+    return;
+    }
+  
+  // Try various extentions
+  hname = pathname;
   hname += ".cxx";
   if(cmSystemTools::FileExists(hname.c_str()))
     {

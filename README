@@ -2,8 +2,8 @@
 CMakeLists.txt        -> File in each directory that contains classes, exe, etc
 CMakeLists.txt contains the following:
 # build targets
-WIN32_CLASSES =
-UNIX_CLASSES  = 
+WIN32_SOURCE_FILES =
+UNIX_SOURCE_FILES  = 
 ABSTRACT_CLASSES =
 SUBDIRS =
 EXECUTABLES =
@@ -25,7 +25,7 @@ BEGIN MAKE VERBATIM
 ... # copy stuff into CMakeTargets.make directly
 LOCAL_BUILD_TARGETS = // These are done first before anything else
 END MAKE VERBATIM
-TEMPLATE_INSTANCE_DIR = 
+AUX_SOURCE_DIR = 
 
 Windows / Visual Studio 6.0 programs
 CMakeSetup.exe      -> window MFC based GUI for configure on windows
