@@ -1,0 +1,334 @@
+#!/bin/sh
+
+CMAKE_KNOWN_C_COMPILERS="cc gcc xlc icc tcc"
+CMAKE_KNOWN_CXX_COMPILERS="CC g++ c++ xlC icc como aCC"
+CMAKE_KNOWN_MAKE_PROCESSORS="make gmake"
+
+CMAKE_SOURCES="\
+  cmake  \
+  cmakewizard  \
+  cmakemain \
+  cmMakeDepend \
+  cmMakefile \
+  cmDocumentation \
+  cmGlobalGenerator \
+  cmLocalGenerator \
+  cmRegularExpression \
+  cmSourceFile \
+  cmSystemTools \
+  cmDirectory \
+  cmGlobalUnixMakefileGenerator \
+  cmLocalUnixMakefileGenerator \
+  cmCommands \
+  cmTarget \
+  cmCustomCommand \
+  cmCacheManager \
+  cmListFileCache \
+  cmVariableWatch \
+  cmSourceGroup"
+
+cmake_source_dir=`echo $0 | sed -n '/\//{s/\/[^\/]*$//;p;}'`
+cmake_source_dir=`(cd "${cmake_source_dir}";pwd)`
+cmake_binary_dir=`pwd`
+cmake_bootstrap_dir="${cmake_binary_dir}/Bootstrap"
+
+cmake_usage()
+{
+  cat<<EOF
+Usage: $0 [options]
+Options: [defaults in brackets after descriptions]
+Configuration:
+  --help                  print this message
+  --verbose               display more information
+Directory and file names:
+  --prefix=PREFIX         install architecture-independent files in PREFIX
+                          [/usr/local]
+EOF
+  exit 10
+}
+
+cmake_verbose=
+cmake_prefix_dir="/usr/local"
+for a in "$@"; do
+  if echo $a | grep "^--prefix="; then
+    cmake_prefix_dir=`echo $a | sed "s/^--prefix=//"`
+  fi
+  if echo $a | grep "^--help"; then
+    cmake_usage
+  fi
+  if echo $a | grep "^--verbose"; then
+    cmake_verbose=TRUE
+  fi
+done
+
+if [ -n "${cmake_verbose}" ]; then
+  echo "---------------------------------------------"
+  echo "Source directory: ${cmake_source_dir}"
+  echo "Binary directory: ${cmake_binary_dir}"
+  echo "Prefix directory: ${cmake_prefix_dir}"
+fi
+
+echo "---------------------------------------------"
+
+[ -d "${cmake_bootstrap_dir}" ] || mkdir "${cmake_bootstrap_dir}"
+if [ ! -d "${cmake_bootstrap_dir}" ]; then
+  echo "Cannot create directory ${cmake_bootstrap_dir} to bootstrap CMake."
+  exit 5
+fi
+cd "${cmake_bootstrap_dir}"
+
+rm -f "${cmake_bootstrap_dir}/cmake_bootstrap.log"
+rm -f "${cmake_bootstrap_dir}/cmConfigure.h"
+
+cmake_report ()
+{
+  FILE=$1
+  shift
+  echo "$*" >> ${FILE}
+}
+
+cmake_escape ()
+{
+  echo $1 | sed "s/ /\\\\ /g"
+}
+
+cmake_log ()
+{
+  echo "$*" >> cmake_bootstrap.log
+}
+
+cmake_tmp_file ()
+{
+  echo "cmake_bootstrap_$$.test"
+}
+
+cmake_try_run ()
+{
+  COMPILER=$1
+  FLAGS=$2
+  TESTFILE=$3
+  if [ ! -f "${TESTFILE}" ]; then
+    echo "Test file ${TESTFILE} missing. Please verify your CMake source tree."
+    exit 4
+  fi
+  TMPFILE=`cmake_tmp_file`
+  echo "Try: ${COMPILER}"
+  "${COMPILER}" ${FLAGS} "${TESTFILE}" -o "${TMPFILE}"
+  RES=$?
+  if [ "${RES}" -ne "0" ]; then
+    echo "${COMPILER} does not work";return 1
+  fi
+  if [ ! -f "${TMPFILE}" ] && [ ! -f "${TMPFILE}.exe" ]; then
+    echo "${COMPILER} does not produce output"
+    return 2
+  fi
+  ./${TMPFILE}
+  RES=$?
+  rm -f "${TMPFILE}"
+  if [ "${RES}" -ne "0" ]; then
+    echo "${COMPILER} produces strange executable"
+    return 3
+  fi
+  echo "${COMPILER} works"
+  return 0
+}
+
+cmake_try_make ()
+{
+  MAKE_PROC=$1
+  echo "Try: ${MAKE_PROC}"
+  ${MAKE_PROC}
+  RES=$?
+  if [ "${RES}" -ne "0" ]; then
+    echo "${MAKE_PROC} does not work";return 1
+  fi
+  if [ ! -f "test" ] && [ ! -f "test.exe" ]; then
+    echo "${COMPILER} does not produce output"
+    return 2
+  fi
+  ./test
+  RES=$?
+  rm -f "test"
+  if [ "${RES}" -ne "0" ]; then
+    echo "${MAKE_PROC} produces strange executable"
+    return 3
+  fi
+  echo "${MAKE_PROC} works"
+  return 0
+}
+
+cmake_c_flags=${CFLAGS}
+cmake_cxx_flags=${CXXFLAGS}
+
+# Test C compiler
+cmake_c_compiler=
+
+if [ -n "${CC}" ]; then
+  cmake_c_compilers="${CC}"
+else
+  cmake_c_compilers="${CMAKE_KNOWN_C_COMPILERS}"
+fi
+
+TMPFILE=`cmake_tmp_file`
+cat>"${TMPFILE}.c"<<EOF
+#include<stdio.h>
+int main()
+{
+  printf("1\n");
+  return 0;
+}
+EOF
+for a in ${cmake_c_compilers}; do
+  if [ -z "${cmake_c_compiler}" ] && cmake_try_run "${a}" "${cmake_c_flags}" "${TMPFILE}.c" >> cmake_bootstrap.log 2>&1; then
+    cmake_c_compiler="${a}"
+  fi
+done
+rm -f "${TMPFILE}.c"
+
+if [ -z "${cmake_c_compiler}" ]; then
+  echo "Cannot find apropriate C compiler on this system."
+  echo "Please specify one using environment variable CC."
+  exit 1
+fi
+echo "C compiler on this system is: ${cmake_c_compiler} ${cmake_c_flags}"
+
+# Test CXX compiler
+cmake_cxx_compiler=
+if [ -n "${CXX}" ]; then
+  cmake_cxx_compilers="${CXX}"
+else
+  cmake_cxx_compilers="${CMAKE_KNOWN_CXX_COMPILERS}"
+fi
+
+TMPFILE=`cmake_tmp_file`
+cat>"${TMPFILE}.cxx"<<EOF
+#include<iostream.h>
+int main()
+{
+  cout << 1 << endl;
+  return 0;
+}
+EOF
+for a in ${cmake_cxx_compilers}; do
+  if [ -z "${cmake_cxx_compiler}" ] && cmake_try_run "${a}" "${cmake_cxx_flags}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
+    cmake_cxx_compiler="${a}"
+  fi
+done
+rm -f "${TMPFILE}.cxx"
+
+
+
+if [ -z "${cmake_cxx_compiler}" ]; then
+  echo "Cannot find apropriate C++ compiler on this system."
+  echo "Please specify one using environment variable CXX."
+  exit 1
+fi
+echo "C++ compiler on this system is: ${cmake_cxx_compiler} ${cmake_cxx_flags}"
+
+# Test Make
+
+cmake_make_processor=
+if [ -n "${MAKE}" ]; then
+  cmake_make_processors="${MAKE}"
+else
+  cmake_make_processors="${CMAKE_KNOWN_MAKE_PROCESSORS}"
+fi
+
+TMPFILE="`cmake_tmp_file`_dir"
+rm -rf "${cmake_bootstrap_dir}/${TMPFILE}"
+mkdir "${cmake_bootstrap_dir}/${TMPFILE}"
+cd "${cmake_bootstrap_dir}/${TMPFILE}"
+cat>"Makefile"<<EOF
+test: test.c
+	${cmake_c_compiler} -o test test.c
+EOF
+cat>"test.c"<<EOF
+#include <stdio.h>
+int main(){ printf("1\n"); return 0; }
+EOF
+for a in ${cmake_make_processors}; do
+  if [ -z "${cmake_make_processor}" ] && cmake_try_make "${a}" >> cmake_bootstrap.log 2>&1; then
+    cmake_make_processor="${a}"
+  fi
+done
+cd "${cmake_bootstrap_dir}"
+rm -rf "${cmake_bootstrap_dir}/${TMPFILE}"
+
+echo "Make processor on this system is: ${cmake_make_processor}"
+
+# Test C++ compiler features
+if cmake_try_run "${cmake_cxx_compiler}" "${cmake_cxx_flags}" "${cmake_source_dir}/Modules/TestForSTDNamespace.cxx" >> cmake_bootstrap.log 2>&1; then
+  cmake_report cmConfigure.h "/* #undef CMAKE_NO_STD_NAMESPACE */"
+  echo "${cmake_cxx_compiler} has STD namespace"
+else
+  cmake_report cmConfigure.h "#define CMAKE_NO_STD_NAMESPACE 1"
+  echo "${cmake_cxx_compiler} does not have STD namespace"
+fi
+
+if cmake_try_run "${cmake_cxx_compiler}" "${cmake_cxx_flags}" "${cmake_source_dir}/Modules/TestForANSIStreamHeaders.cxx" >> cmake_bootstrap.log 2>&1; then
+  cmake_report cmConfigure.h "/* #undef CMAKE_NO_ANSI_STREAM_HEADERS */"
+  echo "${cmake_cxx_compiler} has ANSI stream headers"
+else
+  cmake_report cmConfigure.h "#define CMAKE_NO_ANSI_STREAM_HEADERS 1"
+  echo "${cmake_cxx_compiler} does not have ANSI stream headers"
+fi
+
+TMPFILE=`cmake_tmp_file`
+cat>${TMPFILE}.cxx<<EOF
+#include <sstream>
+int main() { return 0;}
+EOF
+if cmake_try_run "${cmake_cxx_compiler}" "${cmake_cxx_flags}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
+  cmake_report cmConfigure.h "/* #undef CMAKE_NO_ANSI_STRING_STREAM */"
+  echo "${cmake_cxx_compiler} has ANSI string streams"
+else
+  cmake_report cmConfigure.h "#define CMAKE_NO_ANSI_STRING_STREAM 1"
+  echo "${cmake_cxx_compiler} does not have ANSI string streams"
+fi
+rm -f "${TMPFILE}.cxx"
+
+if cmake_try_run "${cmake_cxx_compiler}" "${cmake_cxx_flags}" "${cmake_source_dir}/Modules/TestForAnsiForScope.cxx" >> cmake_bootstrap.log 2>&1; then
+  cmake_report cmConfigure.h "/* #undef CMAKE_NO_ANSI_FOR_SCOPE */"
+  echo "${cmake_cxx_compiler} has ANSI for scoping"
+else
+  cmake_report cmConfigure.h "#define CMAKE_NO_ANSI_FOR_SCOPE 1"
+  echo "${cmake_cxx_compiler} does not have ANSI for scoping"
+fi
+
+# Get CMake version
+for a in MAJOR MINOR PATCH; do
+  CMake_VERSION=`cat "${cmake_source_dir}/CMakeLists.txt" | grep "SET(CMake_VERSION_${a} *[0-9]*)" | sed "s/SET(CMake_VERSION_${a} *\([0-9]*\))/\1/"`
+  cmake_report cmConfigure.h "#define CMake_VERSION_${a} ${CMake_VERSION}"
+done
+
+# Generate Makefile
+dep="cmConfigure.h `cmake_escape \"${cmake_source_dir}\"`/Source/*.h"
+objs=""
+for a in ${CMAKE_SOURCES}; do
+  objs="${objs} ${a}.o"
+done
+cmake_cxx_flags="${cmake_ansi_cxx_flags} ${cmake_cxx_flags} -DCMAKE_ROOT_DIR='\"`cmake_escape \"${cmake_source_dir}\"`\"' -DCMAKE_BOOTSTRAP -I`cmake_escape \"${cmake_source_dir}/Source\"` -I${cmake_bootstrap_dir}"
+echo "cmake: ${objs}" > "${cmake_bootstrap_dir}/Makefile"
+echo "	${cmake_cxx_compiler} ${cmake_cxx_flags} ${objs} -o cmake" >> "${cmake_bootstrap_dir}/Makefile"
+for a in ${CMAKE_SOURCES}; do
+  src=`cmake_escape "${cmake_source_dir}/Source/${a}.cxx"`
+  echo "${a}.o : ${src} ${dep}" >> "${cmake_bootstrap_dir}/Makefile"
+  echo "	${cmake_cxx_compiler} ${cmake_cxx_flags} -c ${src} -o ${a}.o" >> "${cmake_bootstrap_dir}/Makefile"
+done
+
+# Write prefix to Bootstrap/InitialConfigureFlags.cmake
+echo "SET (CMAKE_CONFIGURE_INSTALL_PREFIX \"${cmake_prefix_dir}\" CACHE PATH \"Install path prefix, prepended onto install directories, For CMake this will always override CMAKE_INSTALL_PREFIX in the cache.\")" > "${cmake_bootstrap_dir}/InitialConfigureFlags.cmake"
+
+echo "---------------------------------------------"
+
+${cmake_make_processor}
+RES=$?
+if [ "${RES}" -ne "0" ]; then
+  echo "Problem while bootstrapping CMake"
+  exit 8
+fi
+cd "${cmake_binary_dir}"
+"${cmake_bootstrap_dir}/cmake" "${cmake_source_dir}"
+
+echo "---------------------------------------------"
+
