@@ -2,14 +2,19 @@
 # try to find X11 on UNIX systems.
 #
 # The following values are defined
-# X11_INCLUDE_DIR  - where to find X11.h
-# X11_LIBRARIES    - link against these to use X11
-# X11_FOUND        - True if X11 is available
-# X11_Xext_FOUND   - True if the X11 extensions are available.
+# CMAKE_X11_INCLUDE_PATH  - where to find X11.h
+# CMAKE_X_LIBS            - link against these to use X11
+# CMAKE_HAS_X             - True if X11 is available
+# CMAKE_X11_LIBDIR        - Directory with X11 library
+# CMAKE_Xext_LIBDIR       - Directory with Xext library
 
 IF (UNIX)
+  SET(CMAKE_X_PRE_LIBS "")
+  SET(CMAKE_X_REAL_LIBS "")
+  SET(CMAKE_X_EXTRA_LIBS "")
+  SET(CMAKE_HAS_X 0)
   
-  FIND_PATH(X11_INCLUDE_DIR X11/X.h
+  FIND_PATH(CMAKE_X11_INCLUDE_PATH X11/X.h
     /usr/include 
     /usr/local/include 
     /usr/openwin/include 
@@ -20,41 +25,44 @@ IF (UNIX)
   )
 
 
-  FIND_LIBRARY(X11_X11_LIBRARY X11
+  FIND_LIBRARY(CMAKE_X11_LIBDIR X11
     /usr/lib 
     /usr/local/lib 
     /usr/openwin/lib 
     /usr/X11R6/lib
   )
 
-  FIND_LIBRARY(X11_Xext_LIBRARY Xext
+  FIND_LIBRARY(CMAKE_Xext_LIBDIR Xext
     /usr/lib 
     /usr/local/lib 
     /usr/openwin/lib 
     /usr/X11R6/lib
   )
 
-  IF(X11_INCLUDE_DIR)
+  SET (CMAKE_X_LIBS "${CMAKE_X_PRE_LIBS} ${CMAKE_X_LIBS} ${CMAKE_X_EXTRA_LIBS}" 
+       CACHE STRING 
+       "Libraries and options used in X11 programs.")
 
-    IF(X11_X11_LIBRARY)
-      SET( X11_FOUND "YES" )
-      SET( X11_LIBRARIES ${X11_X11_LIBRARY} )
-    ENDIF(X11_X11_LIBRARY)
+  SET (CMAKE_X_CFLAGS           "${CMAKE_X_CFLAGS}" CACHE STRING 
+       "X11 extra flags.")
 
-    IF(X11_Xext_LIBRARY)
-      SET( X11_LIBRARIES ${X11_LIBRARIES} ${X11_Xext_LIBRARY} )
-      SET( X11_Xext_FOUND "YES")
-    ENDIF(X11_Xext_LIBRARY)
+  IF(CMAKE_X11_INCLUDE_PATH)
 
-  ENDIF(X11_INCLUDE_DIR)
+    IF(CMAKE_X11_LIBDIR)
+      SET( CMAKE_X_LIBS ${CMAKE_X_LIBS} ${CMAKE_X11_LIBDIR} )
+    ENDIF(CMAKE_X11_LIBDIR)
+
+    IF(CMAKE_Xext_LIBDIR)
+      SET( CMAKE_X_LIBS ${CMAKE_X_LIBS} ${CMAKE_Xext_LIBDIR} )
+    ENDIF(CMAKE_Xext_LIBDIR)
+
+  ENDIF(CMAKE_X11_INCLUDE_PATH)
 
   # Deprecated variable fro backwards compatibility with CMake 1.4
-  SET (X11_LIBRARY ${X11_X11_LIBRARY})
-
-MARK_AS_ADVANCED(
-  X11_X11_LIBRARY
-  X11_Xext_LIBRARY
-  X11_INCLUDE_DIR
-)
-
+  IF(CMAKE_X11_INCLUDE_PATH)
+    IF(CMAKE_X_LIBS)
+      SET(CMAKE_HAS_X 1)
+    ENDIF(CMAKE_X_LIBS)
+  ENDIF(CMAKE_X11_INCLUDE_PATH)
+  SET (CMAKE_HAS_X ${CMAKE_HAS_X} CACHE INTERNAL "Is X11 around.")
 ENDIF (UNIX)
