@@ -87,8 +87,6 @@ protected:
                        const char* subdir, std::string& last);
   void WriteSubdirDriverRule(std::ostream& makefileStream, const char* pass,
                              const char* order, const std::string& last);
-  void WriteRequiresRule(std::ostream& ruleFileStream, const cmTarget& target,
-                         const char* targetFullPath);
   void WriteConvenienceRules(std::ostream& ruleFileStream,
                              const cmTarget& target,
                              const char* targetFullPath);

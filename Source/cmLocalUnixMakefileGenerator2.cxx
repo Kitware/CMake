@@ -974,13 +974,15 @@ cmLocalUnixMakefileGenerator2
 
   // Special target to cleanup operation of make tool.
   std::vector<std::string> depends;
-  depends.push_back(".hpux_make_must_have_this_dependency_here");
   this->WriteMakeRule(makefileStream,
-                      "Disable some common implicit rules to speed things up.",
+                      "Disable implicit rules so canoncical targets will work.",
                       0,
                       ".SUFFIXES",
                       depends,
                       no_commands);
+  depends.push_back(".hpux_make_must_have_suffixes_list");
+  this->WriteMakeRule(makefileStream, 0, 0,
+                      ".SUFFIXES", depends, no_commands);
 }
 
 //----------------------------------------------------------------------------
@@ -1048,7 +1050,7 @@ cmLocalUnixMakefileGenerator2
       {
       if(t->second.IsInAll())
         {
-        depends.push_back(t->first+".requires");
+        depends.push_back(t->first);
         }
       }
     }
@@ -1217,25 +1219,6 @@ cmLocalUnixMakefileGenerator2
   // Write the rule.
   this->WriteMakeRule(makefileStream, comment.c_str(), 0,
                       tgt.c_str(), depends, commands);
-}
-
-//----------------------------------------------------------------------------
-void
-cmLocalUnixMakefileGenerator2
-::WriteRequiresRule(std::ostream& ruleFileStream, const cmTarget& target,
-                    const char* targetFullPath)
-{
-  // TODO: Avoid using requires target except when needed for
-  // Fortran/Java dependencies.
-  std::vector<std::string> depends;
-  std::vector<std::string> no_commands;
-  std::string reqComment = "Requirements for target ";
-  reqComment += target.GetName();
-  std::string reqTarget = target.GetName();
-  reqTarget += ".requires";
-  depends.push_back(targetFullPath);
-  this->WriteMakeRule(ruleFileStream, reqComment.c_str(), 0,
-                      reqTarget.c_str(), depends, no_commands);
 }
 
 //----------------------------------------------------------------------------
@@ -1448,9 +1431,6 @@ cmLocalUnixMakefileGenerator2
 
   // Write convenience targets.
   this->WriteConvenienceRules(ruleFileStream, target, targetFullPath.c_str());
-
-  // Write driver rule for this target.
-  this->WriteRequiresRule(ruleFileStream, target, targetFullPath.c_str());
 }
 
 //----------------------------------------------------------------------------
@@ -1702,9 +1682,6 @@ cmLocalUnixMakefileGenerator2
 
   // Write convenience targets.
   this->WriteConvenienceRules(ruleFileStream, target, targetFullPath.c_str());
-
-  // Write driver rule for this target.
-  this->WriteRequiresRule(ruleFileStream, target, targetFullPath.c_str());
 }
 
 //----------------------------------------------------------------------------
@@ -2087,7 +2064,6 @@ cmLocalUnixMakefileGenerator2
     dep += ".depends";
     dep = this->ConvertToRelativeOutputPath(dep.c_str());
     std::string tgt = jump->first;
-    tgt += ".requires";
     tgt = this->ConvertToRelativeOutputPath(tgt.c_str());
 
     // Build the jump-and-build command list.
