@@ -107,6 +107,25 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
       }
     fout << "\n\n";
     }
+
+  // get the classes from the source lists then add them to the SRC_OBJ list
+  fout << "SRC_OBJ = ";
+  for(cmTargets::const_iterator l = tgts.begin(); 
+      l != tgts.end(); l++)
+    {
+    std::vector<cmClassFile> classes = 
+      m_Makefile->GetClassesFromSourceLists(l->second.GetSourceLists());
+    for(std::vector<cmClassFile>::iterator i = classes.begin(); 
+        i != classes.end(); i++)
+      {
+      if(!i->m_HeaderFileOnly)
+        {
+        fout << "\\\n" << i->m_ClassName << ".o ";
+        }
+      }
+    }
+    fout << "\n\n";
+
 }
 
 

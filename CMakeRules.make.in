@@ -18,7 +18,7 @@ depend: ${CMAKE} ${SUBDIR_DEPEND}
 
 
 clean: ${SUBDIR_CLEAN}
-	rm -f ${SRC_OBJ} ${EXECUTABLES} 
+	rm -f ${SRC_OBJ} ${EXECUTABLES} ${TARGETS}
 
 CMakeTargets.make: ${CMAKE} ${srcdir}/CMakeLists.txt 
 	${CMAKE} ${currentdir}/CMakeLists.txt -S${currentdir} -O${currentbindir} -H${topdir} -B${CMAKE_CONFIG_DIR}
