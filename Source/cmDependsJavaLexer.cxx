@@ -704,7 +704,9 @@ Modify cmDependsJavaLexer.h:
 #if defined( _WIN32 ) && !defined( __CYGWIN__ )
 /* Handle Windows properly */
 #  include <io.h>
-#  define isatty _isatty
+#  if defined( _MSC_VER )
+#    define isatty _isatty
+#  endif
 #  define YY_NO_UNISTD_H 1
 #endif
 
