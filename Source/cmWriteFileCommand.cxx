@@ -45,16 +45,43 @@ bool cmWriteFileCommand::InitialPass(std::vector<std::string> const& args)
   std::string dir = cmSystemTools::GetFilenamePath(fileName);
   cmSystemTools::MakeDirectory(dir.c_str());
 
+  mode_t mode =
+#if defined( _MSC_VER ) || defined( __MINGW32__ )
+    S_IREAD | S_IWRITE
+#elif defined( __BORLANDC__ )
+    S_IRUSR | S_IWUSR
+#else
+    S_IRUSR | S_IWUSR |
+    S_IRGRP |
+    S_IROTH
+#endif
+    ;
+
+  // Set permissions to writable
+  if ( cmSystemTools::GetPermissions(fileName.c_str(), mode) )
+    {
+    cmSystemTools::SetPermissions(fileName.c_str(),
+#if defined( _MSC_VER ) || defined( __MINGW32__ )
+      S_IREAD | S_IWRITE
+#else
+      S_IRUSR | S_IWUSR
+#endif
+    );
+    }
+  // If GetPermissions fails, pretend like it is ok. File open will fail if
+  // the file is not writable
   std::ofstream file(fileName.c_str(), overwrite?std::ios::out : std::ios::app);
   if ( !file )
     {
     std::string error = "Internal CMake error when trying to open file: ";
     error += fileName.c_str();
+    error += " for writting.";
     this->SetError(error.c_str());
     return false;
     }
   file << message << std::endl;
   file.close();
+  cmSystemTools::SetPermissions(fileName.c_str(), mode);
   m_Makefile->AddWrittenFile(fileName.c_str());
 
   return true;
