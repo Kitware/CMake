@@ -74,9 +74,6 @@ ADD_EXECUTABLE(ctest ctest.cxx cmSystemTools.cxx cmRegularExpression.cxx)
 IF(BUILD_TESTING)
   IF (DART_ROOT)
     ADD_EXECUTABLE(cmaketest cmaketest.cxx cmSystemTools.cxx)
-    ADD_DEPENDENCIES(cmaketest cmake)
-    ADD_DEPENDENCIES(Nightly cmaketest cmake)
-    ADD_DEPENDENCIES(Experimental cmaketest cmake)
 
     CONFIGURE_FILE(
       ${CMake_SOURCE_DIR}/Source/cmaketest.h.in 
