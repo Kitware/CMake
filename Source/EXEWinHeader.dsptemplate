@@ -14,7 +14,7 @@
 # EXTRA_DEFINES == compiler defines
 # OUTPUT_LIBNAME  == name of output library
 # CM_LIBRARIES == libraries linked in 
-# TARGTYPE "Win32 (x86) Application" 0x0103
+# TARGTYPE "Win32 (x86) Application" 0x0101
 
 CFG=OUTPUT_LIBNAME - Win32 Debug
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
@@ -54,16 +54,18 @@ RSC=rc.exe
 # PROP Output_Dir "Release"
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /W3 /GR /GX /Zm1000 /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS"  /FD /c
-# ADD CPP /nologo /MD /W3 /GR /GX /Zm1000 /O2 /D "WIN32" BUILD_INCLUDES EXTRA_DEFINES /D "NDEBUG" /D "_CONSOLE" /D "_MBCS"  /FD /c
+# ADD BASE CPP /nologo /W3 /GR /GX /Zm1000 /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS"  /FD /c
+# ADD CPP /nologo /MD /W3 /GR /GX /Zm1000 /O2 /D "WIN32" BUILD_INCLUDES EXTRA_DEFINES /D "NDEBUG" /D "_WINDOWS" /D "_MBCS"  /FD /c
+# ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
+# ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386 /IGNORE:4089
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386 /IGNORE:4089
+# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /machine:I386  /IGNORE:4089
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /machine:I386  /IGNORE:4089
 CM_MULTILINE_OPTIMIZED_LIBRARIES
 CM_MULTILINE_LIBRARIES
 
@@ -79,8 +81,8 @@ CM_MULTILINE_LIBRARIES
 # PROP Output_Dir "Debug"
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
-# ADD BASE CPP  /W3 /GR /Zm1000 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS"  /FD /GZ /c
-# ADD CPP /nologo /W3 /MDd /GR /Gm /GX /Zm1000 /ZI /Od /D "WIN32" BUILD_INCLUDES EXTRA_DEFINES /D "_DEBUG" /D "_CONSOLE" /D "_MBCS"  /FD /GZ /c
+# ADD BASE CPP  /W3 /GR /Zm1000 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS"  /FD /GZ /c
+# ADD CPP /nologo /W3 /MDd /GR /Gm /GX /Zm1000 /ZI /Od /D "WIN32" BUILD_INCLUDES EXTRA_DEFINES /D "_DEBUG" /D "_WINDOWS" /D "_MBCS"  /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
@@ -89,10 +91,11 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32   kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept /IGNORE:4089
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept /IGNORE:4089
+# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept /IGNORE:4089
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept /IGNORE:4089
 CM_MULTILINE_DEBUG_LIBRARIES
 CM_MULTILINE_LIBRARIES
+
 
 !ELSEIF  "$(CFG)" == "OUTPUT_LIBNAME - Win32 Release MinSize"
 # PROP BASE Use_MFC 0
@@ -105,16 +108,16 @@ CM_MULTILINE_LIBRARIES
 # PROP Output_Dir "ReleaseMinSize"
 # PROP Intermediate_Dir "ReleaseMinSize"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MD /W3 /GR /GX /Zm1000 /O1 /Gs /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS"  /FD /c
-# ADD CPP /nologo /MD /W3 /GR /GX /Zm1000 /O1 /Gs /D "WIN32" BUILD_INCLUDES EXTRA_DEFINES /D "NDEBUG" /D "_CONSOLE" /D "_MBCS"  /FD /c
+# ADD BASE CPP /nologo /MD /W3 /GR /GX /Zm1000 /O1 /Gs /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS"  /FD /c
+# ADD CPP /nologo /MD /W3 /GR /GX /Zm1000 /O1 /Gs /D "WIN32" BUILD_INCLUDES EXTRA_DEFINES /D "NDEBUG" /D "_WINDOWS" /D "_MBCS"  /FD /c
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386 /IGNORE:4089
-# ADD LINK32  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386 /IGNORE:4089
+# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept /IGNORE:4089
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept /IGNORE:4089
 CM_MULTILINE_OPTIMIZED_LIBRARIES
 CM_MULTILINE_LIBRARIES
 

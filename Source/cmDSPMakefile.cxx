@@ -100,6 +100,9 @@ void cmDSPMakefile::OutputDSPFile()
       case cmTarget::EXECUTABLE:
         this->SetBuildType(EXECUTABLE,l->first.c_str());
         break;
+      case cmTarget::WIN32_EXECUTABLE:
+        this->SetBuildType(WIN32_EXECUTABLE,l->first.c_str());
+        break;
       case cmTarget::UTILITY:
         this->SetBuildType(UTILITY, l->first.c_str());
         break;
@@ -390,6 +393,12 @@ void cmDSPMakefile::SetBuildType(BuildType b, const char *libName)
       m_DSPFooterTemplate = root;
       m_DSPFooterTemplate += "/EXEFooter.dsptemplate";
       break;
+    case WIN32_EXECUTABLE:
+      m_DSPHeaderTemplate = m_Makefile->GetHomeDirectory();
+      m_DSPHeaderTemplate += "/CMake/Source/EXEWinHeader.dsptemplate";
+      m_DSPFooterTemplate = m_Makefile->GetHomeDirectory();
+      m_DSPFooterTemplate += "/CMake/Source/EXEFooter.dsptemplate";
+      break;
     case UTILITY:
       m_DSPHeaderTemplate = root;
       m_DSPHeaderTemplate += "/UtilityHeader.dsptemplate";
@@ -461,7 +470,7 @@ void cmDSPMakefile::WriteDSPHeader(std::ostream& fout, const char *libName,
     {
     // add libraries to executables and dlls (but never include
     // a library in a library, bad recursion)
-    if (!(target.GetType() == cmTarget::LIBRARY) || 
+    if (target.GetType() != cmTarget::LIBRARY || 
         (m_LibraryBuildType == DLL && libName != j->first))
       {
       std::string lib = j->first;

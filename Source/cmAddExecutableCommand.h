@@ -86,7 +86,13 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "ADD_EXECUTABLE(exename srclist srclist srclist ...)";
+      "ADD_EXECUTABLE(exename srclist srclist srclist ...)\n"
+      "ADD_EXECUTABLE(exename WIN32 srclist srclist srclist ...)"
+      "This command adds an executable target to the current directory. "
+      "The executable will be built from the source files / source lists "
+      "specified. The second argument to this command can be WIN32 "
+      "which indicates that the executable (when compiled on windows) "
+      "is a windows app (using WinMain)not a console app (using main).";
     }
   
   cmTypeMacro(cmAddExecutableCommand, cmCommand);

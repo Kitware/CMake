@@ -57,7 +57,7 @@ public:
   cmDSPMakefile(cmMakefile*);
   ~cmDSPMakefile();
   void OutputDSPFile();
-  enum BuildType {STATIC_LIBRARY, DLL, EXECUTABLE, UTILITY};
+  enum BuildType {STATIC_LIBRARY, DLL, EXECUTABLE, WIN32_EXECUTABLE, UTILITY};
 
   /**
    * Specify the type of the build: static, dll, or executable.

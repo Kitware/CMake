@@ -133,7 +133,10 @@ public:
   /**
    * Add an executable to the build.
    */
-  void AddExecutable(const char *exename, const std::vector<std::string> &srcs);
+  void AddExecutable(const char *exename, 
+                     const std::vector<std::string> &srcs);
+  void AddExecutable(const char *exename, 
+                     const std::vector<std::string> &srcs, bool win32);
 
   /**
    * Add a utility to the build.  A utiltity target is

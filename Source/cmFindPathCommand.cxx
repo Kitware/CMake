@@ -73,6 +73,7 @@ bool cmFindPathCommand::Invoke(std::vector<std::string>& args)
     // expand variables
     std::string exp = args[j];
     m_Makefile->ExpandVariablesInString(exp);
+    cmSystemTools::ExpandRegistryValues(exp);
     path.push_back(exp);
     }
 

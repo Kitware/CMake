@@ -90,6 +90,7 @@ bool cmFindLibraryCommand::Invoke(std::vector<std::string>& args)
         }
       else
         {
+        cmSystemTools::ExpandRegistryValues(args[j]);
         path.push_back(args[j]);
         }
       }
@@ -106,6 +107,7 @@ bool cmFindLibraryCommand::Invoke(std::vector<std::string>& args)
       // expand variables
       std::string exp = args[j];
       m_Makefile->ExpandVariablesInString(exp);
+      cmSystemTools::ExpandRegistryValues(exp);
       path.push_back(exp);
       }
     }

@@ -68,6 +68,11 @@ public:
                             const char* with);
 
   /**
+   * Look for and replace registry values in a string
+   */
+  static void ExpandRegistryValues(std::string& source);
+
+  /**
    * Return a string equivalent to the input string, but with all " " replaced
    * with "\ " to escape the spaces.
    */

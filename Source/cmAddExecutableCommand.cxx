@@ -49,11 +49,21 @@ bool cmAddExecutableCommand::Invoke(std::vector<std::string>& args)
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  
+
   std::vector<std::string>::iterator s = args.begin();
-  std::vector<std::string> srclists(++s, args.end());
+  ++s;
+  if (*s == "WIN32")
+    {
+    ++s;
+    std::vector<std::string> srclists(s, args.end());
+    m_Makefile->AddExecutable(args[0].c_str(),srclists, true); 
+    }
+  else
+    {
+    std::vector<std::string> srclists(s, args.end());
+    m_Makefile->AddExecutable(args[0].c_str(),srclists, false); 
+    }
   
-  m_Makefile->AddExecutable(args[0].c_str(),srclists); 
   return true;
 }
 

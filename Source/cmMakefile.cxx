@@ -484,8 +484,22 @@ void cmMakefile::AddLibrary(const char* lname, const std::vector<std::string> &s
 void cmMakefile::AddExecutable(const char *exeName, 
                                const std::vector<std::string> &srcs)
 {
+  this->AddExecutable(exeName,srcs,false);
+}
+
+void cmMakefile::AddExecutable(const char *exeName, 
+                               const std::vector<std::string> &srcs,
+                               bool win32)
+{
   cmTarget target;
-  target.SetType(cmTarget::EXECUTABLE);
+  if (win32)
+    {
+    target.SetType(cmTarget::WIN32_EXECUTABLE);
+    }
+  else
+    {
+    target.SetType(cmTarget::EXECUTABLE);
+    }
   target.SetInAll(true);
   target.GetSourceLists() = srcs;
   m_Targets.insert(cmTargets::value_type(exeName,target));

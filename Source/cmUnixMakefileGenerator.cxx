@@ -129,8 +129,9 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
   for(cmTargets::const_iterator l = tgts.begin(); 
       l != tgts.end(); l++)
     {
-    if (l->second.GetType() == cmTarget::EXECUTABLE &&
-	l->second.IsInAll())
+    if ((l->second.GetType() == cmTarget::EXECUTABLE ||
+         l->second.GetType() == cmTarget::WIN32_EXECUTABLE) &&
+        l->second.IsInAll())
       {
       fout << " \\\n" << l->first.c_str();
       }

@@ -176,6 +176,96 @@ void cmSystemTools::ReplaceString(std::string& source,
     }
 }
 
+#ifdef _WIN32
+bool ReadAValue(std::string &res, const char *key)
+{
+  // find the primary key
+  std::string primary = key;
+  std::string second = key;
+  size_t start = primary.find("\\");
+  if (start == std::string::npos)
+    {
+    return false;
+    }
+  primary = primary.substr(0,start);
+  second = second.substr(++start);
+  
+  HKEY primaryKey;
+  if (primary == "HKEY_CURRENT_USER")
+    {
+    primaryKey = HKEY_CURRENT_USER;
+    }
+  if (primary == "HKEY_CURRENT_CONFIG")
+    {
+    primaryKey = HKEY_CURRENT_CONFIG;
+    }
+  if (primary == "HKEY_CLASSES_ROOT")
+    {
+    primaryKey = HKEY_CLASSES_ROOT;
+    }
+  if (primary == "HKEY_LOCAL_MACHINE")
+    {
+    primaryKey = HKEY_LOCAL_MACHINE;
+    }
+  if (primary == "HKEY_USERS")
+    {
+    primaryKey = HKEY_USERS;
+    }
+  
+  HKEY hKey;
+  if(RegOpenKeyEx(primaryKey, second.c_str(), 
+		  0, KEY_READ, &hKey) != ERROR_SUCCESS)
+    {
+    return false;
+    }
+  else
+    {
+    DWORD dwType, dwSize;
+    dwSize = 1023;
+    char val[1024];
+    if(RegQueryValueEx(hKey, NULL, NULL, &dwType, 
+                       (BYTE *)val, &dwSize) == ERROR_SUCCESS)
+      {
+      if (dwType == REG_SZ)
+        {
+        res = val;
+        return true;
+        }
+      }
+    }
+  return false;
+}
+#endif
+
+// replace replace with with as many times as it shows up in source.
+// write the result into source.
+void cmSystemTools::ExpandRegistryValues(std::string& source)
+{
+#if _WIN32  
+  cmRegularExpression regEntry("\\[(HKEY[A-Za-z_0-9\\.\\\\]*)\\]");
+  
+  // check for black line or comment
+  while (regEntry.find(source))
+    {
+    // the arguments are the second match
+    std::string key = regEntry.match(1);
+    std::string val;
+    if (ReadAValue(val,key.c_str()))
+      {
+      std::string reg = "[";
+      reg += key + "]";
+      cmSystemTools::ReplaceString(source, reg.c_str(), val.c_str());
+      }
+    else
+      {
+      std::string reg = "[";
+      reg += key + "]";
+      cmSystemTools::ReplaceString(source, reg.c_str(), "/registry");
+      }
+    }
+#endif  
+}
+
 
 std::string cmSystemTools::EscapeSpaces(const char* str)
 {
