@@ -38,7 +38,10 @@ IF(BUILD_TESTING)
                DOC "Path to program used to compress files for transfer to the dart server")
   FIND_PROGRAM(GUNZIPCOMMAND gunzip DOC "Path to gunzip executable")
   FIND_PROGRAM(JAVACOMMAND java DOC "Path to java command, used by the Dart server to create html.")
-  FIND_PROGRAM(PURIFYCOMMAND purify DOC "Path to Rational purify command, used for memory error detection.")
+  FIND_PROGRAM(PURIFYCOMMAND purify 
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Rational Software\\Purify\\Setup;InstallFolder]"
+    DOC "Path to Rational purify command, used for memory error detection."
+    )
   FIND_PROGRAM(SCPCOMMAND scp DOC "Path to scp command, used by some Dart clients for submitting results to a Dart server (when not using ftp for submissions)")
 
   # find a tcl shell command
