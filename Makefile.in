@@ -22,7 +22,7 @@ BIN_INSTALL_DIR = $(exec_prefix)/bin
 # Directory in which to install the templates and modules
 LIB_INSTALL_DIR = $(exec_prefix)/share/CMake
 
-INSTALL =		./install-sh -c
+INSTALL =		@srcdir@/install-sh -c
 INSTALL_PROGRAM =	${INSTALL}
 INSTALL_DATA =		${INSTALL} -m 644
 
@@ -40,12 +40,12 @@ install:
 	chmod +x @srcdir@/install-sh
 	@echo "Installing cmake executable"
 	@$(INSTALL_PROGRAM) Source/cmake $(BIN_INSTALL_DIR)/cmake
-	@for i in @srcdir@/Modules/*.cmake; \
+	@for i in @srcdir@/Modules/*.cmake*; \
 	    do \
 	    echo "Installing $$i"; \
 	    $(INSTALL_DATA) $$i $(LIB_INSTALL_DIR)/Modules; \
 	    done;
-	@for i in @srcdir@/Templates/*.cmake; \
+	@for i in @srcdir@/Templates/*.cmake*; \
 	    do \
 	    echo "Installing $$i"; \
 	    $(INSTALL_DATA) $$i $(LIB_INSTALL_DIR)/Templates; \
