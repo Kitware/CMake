@@ -40,7 +40,7 @@ bool cmSourceGroupCommand::InitialPass(std::vector<std::string> const& args)
       sg =  m_Makefile->GetSourceGroup(args[0].c_str());
       }
     unsigned int cc;
-    for ( cc = 3; cc < args.size(); cc ++ )
+    for ( cc = 2; cc < args.size(); cc ++ )
       {
       sg->AddSource(args[cc].c_str(), 0);
       }
