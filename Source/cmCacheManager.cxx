@@ -367,7 +367,8 @@ bool cmCacheManager::SaveCache(const char* path)
       cmCacheManager::OutputHelpString(fout, ce.m_HelpString);
       std::string key;
       // support : in key name by double quoting 
-      if((*i).first.find(':') != std::string::npos)
+      if((*i).first.find(':') != std::string::npos ||
+	(*i).first.find("//") == 0)
         {
         key = "\"";
         key += i->first;
@@ -411,7 +412,8 @@ bool cmCacheManager::SaveCache(const char* path)
       cmCacheManager::OutputHelpString(fout, ce.m_HelpString);
       std::string key;
       // support : in key name by double quoting 
-      if((*i).first.find(':') != std::string::npos)
+      if((*i).first.find(':') != std::string::npos ||
+	(*i).first.find("//") == 0)
         {
         key = "\"";
         key += i->first;
