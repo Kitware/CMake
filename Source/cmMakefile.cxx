@@ -536,7 +536,7 @@ void cmMakefile::AddCustomCommand(const char* source,
 }
 
 void cmMakefile::
-AddCustomCommandToOutput(const char* output,
+AddCustomCommandToOutput(const char* outputIn,
                          const char* inCommand,
                          const std::vector<std::string>& commandArgs,
                          const char *main_dependency,
@@ -563,9 +563,10 @@ AddCustomCommandToOutput(const char* output,
   cmSourceFile *file = 0;
 
   // setup the output name and make sure we expand any variables
+  std::string output = outputIn;
+  this->ExpandVariablesInString(output);  
   std::string outName = output;
   outName += ".rule";
-  this->ExpandVariablesInString(outName);
 
   // setup the main dependency name and expand vars of course
   std::string mainDepend;
@@ -615,7 +616,7 @@ AddCustomCommandToOutput(const char* output,
       // produce error if two different commands are given to produce
       // the same output
       cmSystemTools::Error("Attempt to add a custom rule to an output that already"
-                           " has a custom rule. For output: ",  output);
+                           " has a custom rule. For output: ",  outputIn);
       return;
       }
     // create a cmSourceFile for the output
@@ -625,7 +626,7 @@ AddCustomCommandToOutput(const char* output,
     }
   
   // always create the output and mark it generated
-  cmSourceFile *out = this->GetOrCreateSource(output, true);
+  cmSourceFile *out = this->GetOrCreateSource(output.c_str(), true);
   out->SetProperty("GENERATED","1");
   
   std::vector<std::string> depends2(depends);
@@ -634,7 +635,8 @@ AddCustomCommandToOutput(const char* output,
     depends2.push_back(mainDepend.c_str());
     }
   cmCustomCommand *cc = 
-    new cmCustomCommand(command.c_str(),combinedArgs.c_str(),depends2, output);
+    new cmCustomCommand(command.c_str(),combinedArgs.c_str(),depends2, 
+                        output.c_str());
   if ( comment && comment[0] )
     {
     cc->SetComment(comment);
