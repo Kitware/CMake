@@ -72,14 +72,14 @@ ADD_EXECUTABLE(DumpDocumentation cmDumpDocumentation)
 
 ADD_EXECUTABLE(ctest ctest.cxx cmSystemTools.cxx cmRegularExpression.cxx)
 
+CONFIGURE_FILE(
+  ${CMake_SOURCE_DIR}/Source/cmaketest.h.in 
+  ${CMake_BINARY_DIR}/Source/cmaketest.h ESCAPE_QUOTES)
+
+ADD_EXECUTABLE(cmaketest cmaketest.cxx cmSystemTools.cxx)
+
 IF(BUILD_TESTING)
   IF (DART_ROOT)
-    ADD_EXECUTABLE(cmaketest cmaketest.cxx cmSystemTools.cxx)
-    INSTALL_TARGETS(/bin cmaketest)
-
-    CONFIGURE_FILE(
-      ${CMake_SOURCE_DIR}/Source/cmaketest.h.in 
-      ${CMake_BINARY_DIR}/Source/cmaketest.h ESCAPE_QUOTES)
 
     ADD_TEST(DumpDocumentation ${CMake_BINARY_DIR}/Source/DumpDocumentation
       ${CMake_BINARY_DIR}/CMakeDoc.html)
@@ -123,4 +123,5 @@ INCLUDE (${CMAKE_SOURCE_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
 
 INSTALL_TARGETS(/bin cmake)
 INSTALL_TARGETS(/bin ctest)
+INSTALL_TARGETS(/bin cmaketest)
 
