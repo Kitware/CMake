@@ -1,0 +1,42 @@
+# bootstrap makefile for borland
+# to build make sure borland make and bcc32 are in your path and
+# bcc32 works from the command line (i.e. bcc32.cfg and ilink32.cfg are
+# in place and working.)
+# then just run make -f Makefile.borland
+#
+
+# Rule to build cxx file(s) 
+.cxx.obj: 
+  bcc32 -Pcxx -c -DCMAKE_ROOT_DIR='"."' {$< } 
+
+
+OBJS = \
+cmake.obj  \
+cmakemain.obj \
+cmMakeDepend.obj \
+cmMakefile.obj \
+cmMakefileGenerator.obj \
+cmRegularExpression.obj \
+cmSourceFile.obj \
+cmSystemTools.obj \
+cmDirectory.obj \
+cmUnixMakefileGenerator.obj \
+cmMSProjectGenerator.obj \
+cmDSPWriter.obj \
+cmDSWWriter.obj \
+cmNMakeMakefileGenerator.obj \
+cmBorlandMakefileGenerator2.obj \
+cmBorlandMakefileGenerator.obj \
+cmCommands.obj \
+cmTarget.obj \
+cmCustomCommand.obj \
+cmCacheManager.obj \
+cmCableClassSet.obj \
+cmListFileCache.obj \
+cmSourceGroup.obj
+
+cmake: ${OBJS}
+	bcc32 -ecmake ${OBJS}
+
+
+
