@@ -1,0 +1,8 @@
+AUX_SOURCE_DIRECTORY(ExtraSources LibrarySources)
+
+SOURCE_FILES(LibrarySources file2)
+ADD_LIBRARY(CMakeTestLibrary LibrarySources)
+SOURCE_FILES(SharedLibrarySources sharedFile)
+ADD_LIBRARY(CMakeTestLibraryShared SHARED SharedLibrarySources)
+
+

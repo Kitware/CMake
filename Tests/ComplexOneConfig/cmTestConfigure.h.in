@@ -1,0 +1,5 @@
+#cmakedefine ONE_VAR
+#cmakedefine ZERO_VAR
+#define STRING_VAR "${STRING_VAR}"
+
+

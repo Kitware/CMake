@@ -1,0 +1,4 @@
+ADD_EXECUTABLE(complex complex)
+TARGET_LINK_LIBRARIES(complex CMakeTestLibrary)
+TARGET_LINK_LIBRARIES(complex CMakeTestLibraryShared)
+
