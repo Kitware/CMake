@@ -64,6 +64,16 @@ void cmDSWWriter::OutputDSWFile()
 }
 
 
+inline std::string removeQuotes(const std::string& s)
+{
+  if(s[0] == '\"' && s[s.size()-1] == '\"')
+    {
+    return s.substr(1, s.size()-2);
+    }
+  return s;
+}
+
+
 // Write a DSW file to the stream
 void cmDSWWriter::WriteDSWFile(std::ostream& fout)
 {
@@ -81,6 +91,7 @@ void cmDSWWriter::WriteDSWFile(std::ostream& fout)
   m_Makefile->AddUtilityCommand("ALL_BUILD", "echo", "\"Build all projects\"",
                                 false);
   std::string ctest = m_Makefile->GetDefinition("CMAKE_COMMAND");
+  ctest = removeQuotes(ctest);
   ctest = cmSystemTools::GetFilenamePath(ctest.c_str());
   ctest += "/";
   ctest += "ctest";

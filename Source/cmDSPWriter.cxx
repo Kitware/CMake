@@ -549,6 +549,17 @@ cmDSPWriter::CreateTargetRules(const cmTarget &target,
   return customRuleCode;
 }
 
+
+inline std::string removeQuotes(const std::string& s)
+{
+  if(s[0] == '\"' && s[s.size()-1] == '\"')
+    {
+    return s.substr(1, s.size()-2);
+    }
+  return s;
+}
+
+  
 void cmDSPWriter::WriteDSPHeader(std::ostream& fout, const char *libName,
                                    const cmTarget &target, 
                                  std::vector<cmSourceGroup> &)
@@ -585,20 +596,22 @@ void cmDSPWriter::WriteDSPHeader(std::ostream& fout, const char *libName,
       }
     std::string lpath = 
       cmSystemTools::ConvertToOutputPath(libPath.c_str());
+    std::string lpathIntDir = libPath + "$(INTDIR)";
+    lpathIntDir =  cmSystemTools::ConvertToOutputPath(lpathIntDir.c_str());
     if(pathEmitted.insert(lpath).second)
       {
-      libOptions += " /LIBPATH:\"";
+      libOptions += " /LIBPATH:";
+      libOptions += lpathIntDir;
+      libOptions += " ";
+      libOptions += " /LIBPATH:";
       libOptions += lpath;
-      libOptions += "$(INTDIR)\" ";
-      libOptions += " /LIBPATH:\"";
-      libOptions += lpath;
-      libOptions += "\" ";
-      libMultiLineOptions += "# ADD LINK32 /LIBPATH:\"";
+      libOptions += " ";
+      libMultiLineOptions += "# ADD LINK32 /LIBPATH:";
+      libMultiLineOptions += lpathIntDir;
+      libMultiLineOptions += " ";
+      libMultiLineOptions += " /LIBPATH:";
       libMultiLineOptions += lpath;
-      libMultiLineOptions += "$(INTDIR)\" ";
-      libMultiLineOptions += " /LIBPATH:\"";
-      libMultiLineOptions += lpath;
-      libMultiLineOptions += "\" \n";
+      libMultiLineOptions += " \n";
       }
     }
   if(exePath.size())
@@ -610,47 +623,53 @@ void cmDSPWriter::WriteDSPHeader(std::ostream& fout, const char *libName,
       }
     std::string lpath = 
       cmSystemTools::ConvertToOutputPath(exePath.c_str());
+    std::string lpathIntDir = exePath + "$(INTDIR)";
+    lpathIntDir =  cmSystemTools::ConvertToOutputPath(lpathIntDir.c_str());
+    
     if(pathEmitted.insert(lpath).second)
       {
-      libOptions += " /LIBPATH:\"";
+      libOptions += " /LIBPATH:";
+      libOptions += lpathIntDir;
+      libOptions += " ";
+      libOptions += " /LIBPATH:";
       libOptions += lpath;
-      libOptions += "$(INTDIR)\" ";
-      libOptions += " /LIBPATH:\"";
-      libOptions += lpath;
-      libOptions += "\" ";
-      libMultiLineOptions += "# ADD LINK32 /LIBPATH:\"";
+      libOptions += " ";
+      libMultiLineOptions += "# ADD LINK32 /LIBPATH:";
+      libMultiLineOptions += lpathIntDir;
+      libMultiLineOptions += " ";
+      libMultiLineOptions += " /LIBPATH:";
       libMultiLineOptions += lpath;
-      libMultiLineOptions += "$(INTDIR)\" ";
-      libMultiLineOptions += " /LIBPATH:\"";
-      libMultiLineOptions += lpath;
-      libMultiLineOptions += "\" \n";
+      libMultiLineOptions += " \n";
       }
     }
   std::vector<std::string>::iterator i;
   std::vector<std::string>& libdirs = m_Makefile->GetLinkDirectories();
   for(i = libdirs.begin(); i != libdirs.end(); ++i)
     {
-    std::string lpath = 
-      cmSystemTools::ConvertToOutputPath(i->c_str());
-    if(lpath[lpath.size()-1] != '/')
+    std::string path = *i;
+    if(path[path.size()-1] != '/')
       {
-      lpath += "/";
+      path += "/";
       }
+    std::string lpath = 
+      cmSystemTools::ConvertToOutputPath(path.c_str());
+    std::string lpathIntDir = path + "$(INTDIR)";
+    lpathIntDir =  cmSystemTools::ConvertToOutputPath(lpathIntDir.c_str());
     if(pathEmitted.insert(lpath).second)
       {
-      libOptions += " /LIBPATH:\"";
+      libOptions += " /LIBPATH:";
+      libOptions += lpathIntDir;
+      libOptions += " ";
+      libOptions += " /LIBPATH:";
       libOptions += lpath;
-      libOptions += "/$(INTDIR)\" ";
-      libOptions += " /LIBPATH:\"";
-      libOptions += lpath;
-      libOptions += "\" ";
+      libOptions += " ";
       
-      libMultiLineOptions += "# ADD LINK32 /LIBPATH:\"";
+      libMultiLineOptions += "# ADD LINK32 /LIBPATH:";
+      libMultiLineOptions += lpathIntDir;
+      libMultiLineOptions += " ";
+      libMultiLineOptions += " /LIBPATH:";
       libMultiLineOptions += lpath;
-      libMultiLineOptions += "/$(INTDIR)\" ";
-      libMultiLineOptions += " /LIBPATH:\"";
-      libMultiLineOptions += lpath;
-      libMultiLineOptions += "\" \n";
+      libMultiLineOptions += " \n";
       }
     }
   
@@ -754,10 +773,16 @@ void cmDSPWriter::WriteDSPHeader(std::ostream& fout, const char *libName,
       cmSystemTools::ReplaceString(line, "BUILD_INCLUDES",
                                    m_IncludeOptions.c_str());
       cmSystemTools::ReplaceString(line, "OUTPUT_LIBNAME",libName);
+      // because LIBRARY_OUTPUT_PATH and EXECUTABLE_OUTPUT_PATH 
+      // are already quoted in the template file,
+      // we need to remove the quotes here, we still need
+      // to convert to output path for unix to win32 conversion
       cmSystemTools::ReplaceString(line, "LIBRARY_OUTPUT_PATH",
-                                   cmSystemTools::ConvertToOutputPath(libPath.c_str()).c_str());
+                                   removeQuotes(
+                                     cmSystemTools::ConvertToOutputPath(libPath.c_str())).c_str());
       cmSystemTools::ReplaceString(line, "EXECUTABLE_OUTPUT_PATH",
-                                   cmSystemTools::ConvertToOutputPath(exePath.c_str()).c_str());
+                                   removeQuotes(
+                                     cmSystemTools::ConvertToOutputPath(exePath.c_str())).c_str());
       cmSystemTools::ReplaceString(line, 
                                    "EXTRA_DEFINES", 
 				   m_Makefile->GetDefineFlags());
