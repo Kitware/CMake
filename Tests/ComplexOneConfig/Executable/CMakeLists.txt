@@ -22,7 +22,7 @@ IF(WIN32)
   IF (CMAKE_DLL)
     CONFIGURE_FILE(
         ${CMAKE_DLL}
-        ${Complex_BINARY_DIR}/CMakeLib.dll COPYONLY)
+        ${Complex_BINARY_DIR}/bin/CMakeLib.dll COPYONLY)
   ENDIF (CMAKE_DLL)
 ENDIF (WIN32)
 
