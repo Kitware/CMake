@@ -547,6 +547,7 @@ void kwsysProcess_Execute(kwsysProcess* cp)
     if(r < 0)
       {
       kwsysProcessCleanup(cp, 1);
+      return;
       }
     }
 
