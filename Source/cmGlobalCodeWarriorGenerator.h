@@ -32,7 +32,7 @@ public:
   ///! Get the name for the generator.
   virtual const char* GetName() {
     return cmGlobalCodeWarriorGenerator::GetActualName();}
-  static const char* GetActualName() {return "Code Warrior";}
+  static const char* GetActualName() {return "Code Warrior Not Working";}
 
   ///! Create a local generator appropriate to this Global Generator
   virtual cmLocalGenerator *CreateLocalGenerator();
