@@ -144,10 +144,14 @@ void cmQTWrapCPPCommand::FinalPass()
     args.push_back(res);
     args.push_back(m_WrapHeaders[classNum]);
 
-    m_Makefile->AddCustomCommand(m_WrapHeaders[classNum].c_str(),
-                                 moc_exe.c_str(), args, depends, 
-                                 res.c_str(), m_LibraryName.c_str());
-
+    m_Makefile->AddCustomCommandToOutput(
+      res.c_str(),
+      moc_exe.c_str(),
+      args,
+      0,
+      depends,
+      "QT Wrapped File",
+      0);
     }
 
   m_Makefile->AddDefinition("GENERATED_QT_FILES",moc_list.c_str());
