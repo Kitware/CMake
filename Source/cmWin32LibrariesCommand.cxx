@@ -26,11 +26,9 @@ cmWin32LibrariesCommand::cmWin32LibrariesCommand()
 // cmWin32LibrariesCommand
 bool cmWin32LibrariesCommand::Invoke(std::vector<std::string>& args)
 {
-  if(args.size() < 1 )
-    {
-    this->SetError("Called with incorrect number of arguments");
-    return false;
-    }
+  this->SetError(" deprecated - use LIBRARY command inside an IF block ");
+  return false;
+
   for(std::vector<std::string>::iterator i = args.begin();
       i != args.end(); ++i)
     {

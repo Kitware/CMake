@@ -96,7 +96,7 @@ bool cmCacheManager::LoadCache(cmMakefile* mf)
   return true;
 }
 
-bool cmCacheManager::SaveCache(cmMakefile* mf)
+bool cmCacheManager::SaveCache(cmMakefile* mf) const
 {
   std::string cacheFile = mf->GetHomeOutputDirectory();
   cacheFile += "/CMakeCache.txt";
@@ -119,7 +119,7 @@ bool cmCacheManager::SaveCache(cmMakefile* mf)
        << "# TYPE is a hint to GUI's for the type of VALUE, DO NOT EDIT TYPE!.\n"
        << "# VALUE is the current value for the KEY.\n\n";
 
-  for( std::map<std::string, CacheEntry>::iterator i = m_Cache.begin();
+  for( std::map<std::string, CacheEntry>::const_iterator i = m_Cache.begin();
        i != m_Cache.end(); ++i)
     {
     CacheEntryType t = (*i).second.m_Type;
@@ -151,34 +151,43 @@ void cmCacheManager::AddCacheEntry(const char* key,
   m_Cache[key] = e;
 }
 
-const char* cmCacheManager::GetCacheValue(const char* key) 
+cmCacheManager::CacheEntry *cmCacheManager::GetCacheEntry(const char* key)
 {
   if(m_Cache.count(key))
     {
-    return m_Cache[key].m_Value.c_str();
+    return &(m_Cache.find(key)->second);
+    }
+  return 0;
+}
+
+const char* cmCacheManager::GetCacheValue(const char* key) const
+{
+  if(m_Cache.count(key))
+    {
+    return m_Cache.find(key)->second.m_Value.c_str();
     }
   return 0;
 }
 
 
-bool cmCacheManager::IsOn(const char* key)  
+bool cmCacheManager::IsOn(const char* key) const
 { 
   if(!m_Cache.count(key))
     {
     return false;
     }
-  std::string &v = m_Cache[key].m_Value;
+  const std::string &v = m_Cache.find(key)->second.m_Value;
   return (v == "ON" || v == "on" || v == "1" || v == "true" || v == "yev"
           || v == "TRUE" || v == "True" || v == "y" || v == "Y");
 }
 
 
 
-void cmCacheManager::PrintCache(std::ostream& out)
+void cmCacheManager::PrintCache(std::ostream& out) const
 {
   out << "=================================================" << std::endl;
   out << "CMakeCache Contents:" << std::endl;
-  for(std::map<std::string, CacheEntry>::iterator i = m_Cache.begin();
+  for(std::map<std::string, CacheEntry>::const_iterator i = m_Cache.begin();
       i != m_Cache.end(); ++i)
     {
     out << (*i).first.c_str() << " = " << (*i).second.m_Value.c_str() << std::endl;

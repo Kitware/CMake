@@ -87,8 +87,8 @@ void cmDSPMakefile::OutputDSPFile()
   m_CreatedProjectNames.clear();
 
   // build any targets
-  const cmTargets &tgts = m_Makefile->GetTargets();
-  for(cmTargets::const_iterator l = tgts.begin(); 
+  cmTargets &tgts = m_Makefile->GetTargets();
+  for(cmTargets::iterator l = tgts.begin(); 
       l != tgts.end(); l++)
     {
     if (l->second.IsALibrary())
@@ -103,8 +103,7 @@ void cmDSPMakefile::OutputDSPFile()
     }
 }
 
-void cmDSPMakefile::CreateSingleDSP(const char *lname, 
-                                    const cmTarget &target)
+void cmDSPMakefile::CreateSingleDSP(const char *lname, cmTarget &target)
 {
   std::string fname;
   fname = m_Makefile->GetStartOutputDirectory();
@@ -186,7 +185,7 @@ void cmDSPMakefile::AddDSPBuildRule(cmSourceGroup& sourceGroup)
 
 void cmDSPMakefile::WriteDSPFile(std::ostream& fout, 
                                  const char *libName,
-                                 const cmTarget &target)
+                                 cmTarget &target)
 {
   // Write the DSP file's header.
   this->WriteDSPHeader(fout, libName);
@@ -195,15 +194,15 @@ void cmDSPMakefile::WriteDSPFile(std::ostream& fout,
   std::vector<cmSourceGroup> sourceGroups = m_Makefile->GetSourceGroups();
   
   // get the classes from the source lists then add them to the groups
-  std::vector<cmClassFile> classes = 
-    m_Makefile->GetClassesFromSourceLists(target.GetSourceLists());
-  for(std::vector<cmClassFile>::iterator i = classes.begin(); 
+  target.GenerateSourceFilesFromSourceLists(*m_Makefile);
+  std::vector<cmSourceFile> classes = target.GetSourceFiles();
+  for(std::vector<cmSourceFile>::iterator i = classes.begin(); 
       i != classes.end(); i++)
     {
-    if(!i->m_HeaderFileOnly)
+    if(!i->IsAHeaderFileOnly())
       {
       // Add the file to the list of sources.
-      std::string source = i->m_FullPath;
+      std::string source = i->GetFullPath();
       cmSourceGroup& sourceGroup = m_Makefile->FindSourceGroup(source.c_str(),
                                                                sourceGroups);
       sourceGroup.AddSource(source.c_str());

@@ -49,10 +49,10 @@ bool cmAuxSourceDirectoryCommand::Invoke(std::vector<std::string>& args)
         fullname += file;
         // add the file as a class file so 
         // depends can be done
-        cmClassFile cmfile;
+        cmSourceFile cmfile;
         cmfile.SetName(fullname.c_str(), m_Makefile->GetCurrentDirectory());
-        cmfile.m_AbstractClass = false;
-        m_Makefile->AddClass(cmfile,args[1].c_str());
+        cmfile.SetIsAnAbstractClass(false);
+        m_Makefile->AddSource(cmfile,args[1].c_str());
         }
       }
     }

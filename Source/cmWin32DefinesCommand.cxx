@@ -25,11 +25,9 @@ cmWin32DefinesCommand::cmWin32DefinesCommand()
 // cmWin32DefinesCommand
 bool cmWin32DefinesCommand::Invoke(std::vector<std::string>& args)
 {
-  if(args.size() < 1 )
-    {
-    this->SetError("called with incorrect number of arguments");
-    return false;
-    }
+  this->SetError(" deprecated - use AddDefinitions inside an If block ");
+  return false;
+
   for(std::vector<std::string>::iterator i = args.begin();
       i != args.end(); ++i)
     {

@@ -17,11 +17,12 @@ cmMakeDepend.o \
 cmMakefile.o \
 cmMakefileGenerator.o \
 cmRegularExpression.o \
-cmClassFile.o \
+cmSourceFile.o \
 cmSystemTools.o \
 cmDirectory.o \
 cmUnixMakefileGenerator.o \
 cmCommands.o \
+cmTarget.o \
 cmCustomCommand.o \
 cmCacheManager.o \
 cmSourceGroup.o
@@ -35,11 +36,12 @@ cmMakefile.o : $(DEPENDS)
 cmMakefileGenerator.o : $(DEPENDS)
 cmAuxSourceDirectoryCommand.o : $(DEPENDS)
 cmRegularExpression.o : $(DEPENDS)
-cmClassFile.o : $(DEPENDS)
+cmSourceFile.o : $(DEPENDS)
 cmDirectory.o : $(DEPENDS)
 cmCustomCommand.o : $(DEPENDS)
 cmUnixMakefileGenerator.o : $(DEPENDS)
 cmCommands.o : $(DEPENDS)
+cmTarget.o : $(DEPENDS)
 cmCacheManager.o : $(DEPENDS)
 cmSourceGroup.o : $(DEPENDS)
 

@@ -54,20 +54,23 @@ void cmMakeDepend::SetMakefile(cmMakefile* makefile)
     {
     this->AddSearchPath(j->c_str());
     }
+
   // Now create cmDependInformation objects for files in the directory
-  cmMakefile::ClassMap &Classes = m_Makefile->GetClasses();
-  for(cmMakefile::ClassMap::iterator l = Classes.begin(); 
-      l != Classes.end(); l++)
+  cmTargets &tgts = m_Makefile->GetTargets();
+  for(cmTargets::iterator l = tgts.begin(); 
+      l != tgts.end(); l++)
     {
-    for(std::vector<cmClassFile>::iterator i = l->second.begin(); 
-        i != l->second.end(); ++i)
+    l->second.GenerateSourceFilesFromSourceLists(*m_Makefile);
+    std::vector<cmSourceFile> &classes = l->second.GetSourceFiles();
+    for(std::vector<cmSourceFile>::iterator i = classes.begin(); 
+        i != classes.end(); ++i)
       {
-      if(!i->m_HeaderFileOnly)
+      if(!i->GetIsAHeaderFileOnly())
         {
         cmDependInformation* info = new cmDependInformation;
-        info->m_FullPath = this->FullPath(i->m_FullPath.c_str());
+        info->m_FullPath = this->FullPath(i->GetFullPath().c_str());
         this->AddFileToSearchPath(info->m_FullPath.c_str());
-        info->m_IncludeName = i->m_FullPath;
+        info->m_IncludeName = i->GetFullPath();
         info->m_ClassFileIndex = &*i;
         m_DependInformation.push_back(info);
         }
@@ -101,11 +104,11 @@ void cmMakeDepend::DoDepends()
     // find the class 
     if(info->m_ClassFileIndex != 0)
       {
-      cmClassFile& cfile = *(info->m_ClassFileIndex);
+      cmSourceFile& cfile = *(info->m_ClassFileIndex);
       for( cmDependInformation::IndexSet::const_iterator indx = info->m_IndexSet.begin();
 	   indx != info->m_IndexSet.end(); ++indx)
 	{
-	cfile.m_Depends.push_back(m_DependInformation[*indx]->m_FullPath);
+	cfile.GetDepends().push_back(m_DependInformation[*indx]->m_FullPath);
 	}
       }
     }
@@ -128,8 +131,9 @@ void cmMakeDepend::Depend(cmDependInformation* info)
     // exist since we can find the dependencies for real.
     if(info->m_ClassFileIndex != 0)
       {
-      cmClassFile& cFile = *(info->m_ClassFileIndex);
-      cFile.m_Depends.erase(cFile.m_Depends.begin(), cFile.m_Depends.end());
+      cmSourceFile& cFile = *(info->m_ClassFileIndex);
+      cFile.GetDepends().erase(cFile.GetDepends().begin(), 
+                               cFile.GetDepends().end());
       }
     
     // Use the real file to find its dependencies.
@@ -143,22 +147,24 @@ void cmMakeDepend::Depend(cmDependInformation* info)
   if(info->m_ClassFileIndex != 0)
     {
     // Get the cmClassFile corresponding to this.
-    cmClassFile& cFile = *(info->m_ClassFileIndex);
+    cmSourceFile& cFile = *(info->m_ClassFileIndex);
     // See if there are any hints for finding dependencies for the missing
     // file.
-    if(!cFile.m_Depends.empty())
+    if(!cFile.GetDepends().empty())
       {
       // Initial dependencies have been given.  Use them to begin the
       // recursion.
       for(std::vector<std::string>::iterator file =
-            cFile.m_Depends.begin(); file != cFile.m_Depends.end(); ++file)
+            cFile.GetDepends().begin(); file != cFile.GetDepends().end(); 
+          ++file)
         {
         this->AddDependency(info, file->c_str());
         }
       
       // Erase the dependency hints from the cmClassFile.  They will be
       // put in again as real dependencies later.
-      cFile.m_Depends.erase(cFile.m_Depends.begin(), cFile.m_Depends.end());
+      cFile.GetDepends().erase(cFile.GetDepends().begin(), 
+                               cFile.GetDepends().end());
       
       // Found dependency information.  We are done.
       return;

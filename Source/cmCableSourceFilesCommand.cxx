@@ -24,8 +24,8 @@ void cmCableSourceFilesCommand::FinalPass()
   std::string fileName = "Cxx/";
   fileName += cablePackage->GetPackageName();
   fileName += "_cxx";
-  cmClassFile *ci = m_Makefile->GetClass(cablePackage->GetPackageName(),
-                                         fileName.c_str());
+  cmSourceFile *ci = m_Makefile->GetSource(cablePackage->GetPackageName(),
+                                           fileName.c_str());
   
   if(ci == 0)
     { return; }
@@ -36,7 +36,7 @@ void cmCableSourceFilesCommand::FinalPass()
       f != m_Entries.end(); ++f)
     {
     std::string header = *f+".h";
-    ci->m_Depends.push_back(header);
+    ci->GetDepends().push_back(header);
     }
 }
 

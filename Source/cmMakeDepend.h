@@ -17,7 +17,7 @@
 #define cmMakeDepend_h
 
 #include "cmMakefile.h"
-#include "cmClassFile.h"
+#include "cmSourceFile.h"
 #include "cmRegularExpression.h"
 #include "cmStandardIncludes.h"
 
@@ -60,7 +60,7 @@ struct cmDependInformation
    * The index into the cmMakefile::m_Classes list.
    * The index value of 0 indicates that it is not in the list.
    */
-  cmClassFile *m_ClassFileIndex;	
+  cmSourceFile *m_ClassFileIndex;	
   
   /**
    * This flag indicates whether dependency checking has been

@@ -16,7 +16,7 @@
 #include "cmMakefile.h"
 #include "cmCommand.h"
 #include "cmStandardIncludes.h"
-#include "cmClassFile.h"
+#include "cmSourceFile.h"
 #include "cmDirectory.h"
 #include "cmSystemTools.h"
 #include "cmMakefileGenerator.h"
@@ -92,11 +92,11 @@ void cmMakefile::Print() const
 {
   // print the class lists
   std::cout << "classes:\n";
-  for(ClassMap::const_iterator l = m_Classes.begin(); 
-      l != m_Classes.end(); l++)
+  for(SourceMap::const_iterator l = m_Sources.begin(); 
+      l != m_Sources.end(); l++)
     {
     std::cout << " Class list named: " << l->first << std::endl;
-    for(std::vector<cmClassFile>::const_iterator i = l->second.begin(); 
+    for(std::vector<cmSourceFile>::const_iterator i = l->second.begin(); 
         i != l->second.end(); i++)
       {
       i->Print();
@@ -240,19 +240,19 @@ bool cmMakefile::ReadListFile(const char* filename)
 
   
 
-cmClassFile *cmMakefile::GetClass(const char *srclist, const char *cname)
+cmSourceFile *cmMakefile::GetSource(const char *srclist, const char *cname)
 {
-  ClassMap::iterator sl = m_Classes.find(srclist);
+  SourceMap::iterator sl = m_Sources.find(srclist);
   // find the src list
-  if (sl == m_Classes.end())
+  if (sl == m_Sources.end())
     {
     return 0;
     }
   // find the class
-  for (std::vector<cmClassFile>::iterator i = sl->second.begin();
+  for (std::vector<cmSourceFile>::iterator i = sl->second.begin();
        i != sl->second.end(); ++i)
     {
-    if (i->m_ClassName == cname)
+    if (i->GetSourceName() == cname)
       {
       return &(*i);
       }
@@ -291,9 +291,9 @@ void cmMakefile::GenerateMakefile()
   m_MakefileGenerator->GenerateMakefile();
 }
 
-void cmMakefile::AddClass(cmClassFile& cmfile, const char *srclist)
+void cmMakefile::AddSource(cmSourceFile& cmfile, const char *srclist)
 {
-  m_Classes[srclist].push_back(cmfile);
+  m_Sources[srclist].push_back(cmfile);
 }
 
 void cmMakefile::AddCustomCommand(const char* source,
@@ -661,38 +661,6 @@ cmMakefile::FindSourceGroup(const char* source,
   return groups.front();
 }
 
-// take srclists and put all the classes into a vector
-std::vector<cmClassFile> 
-cmMakefile::GetClassesFromSourceLists(
-  const std::vector<std::string> &srcLists)
-{
-  std::vector<cmClassFile> result;
-  
-  // for each src lists add the classes
-  for (std::vector<std::string>::const_iterator s = srcLists.begin();
-       s != srcLists.end(); ++s)
-    {
-    // replace any variables
-    std::string temps = *s;
-    this->ExpandVariablesInString(temps);
-    // look for a srclist
-    if (m_Classes.find(temps) != m_Classes.end())
-      {
-      const std::vector<cmClassFile> &clsList = 
-        m_Classes.find(temps)->second;
-      result.insert(result.end(), clsList.begin(), clsList.end());
-      }
-    // if one wasn't found then assume it is a single class
-    else
-      {
-      cmClassFile file;
-      file.m_AbstractClass = false;
-      file.SetName(temps.c_str(), this->GetCurrentDirectory());
-      result.push_back(file);
-      }
-    }
-  return result;
-}
 
 bool cmMakefile::IsFunctionBlocked(const char *name,
                                    std::vector<std::string> &args) const

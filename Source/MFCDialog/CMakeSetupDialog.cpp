@@ -289,7 +289,7 @@ bool CMakeSetupDialog::Browse(CString &result, const char *title)
 
   LPITEMIDLIST pidl = SHBrowseForFolder(&bi);
 
-  bool bSuccess = (bool)SHGetPathFromIDList(pidl, szPathName);
+  bool bSuccess = (SHGetPathFromIDList(pidl, szPathName) ? true : false);
   if(bSuccess)
     {
     result = szPathName;
@@ -406,17 +406,17 @@ void CMakeSetupDialog::OnBuildProjects()
  // copy from the cache manager to the cache edit list box
 void CMakeSetupDialog::FillCacheEditorFromCacheManager()
 {
-  cmCacheManager::CacheEntryMap cache =
+  const cmCacheManager::CacheEntryMap &cache =
     cmCacheManager::GetInstance()->GetCacheMap();
-  for(cmCacheManager::CacheEntryMap::iterator i = cache.begin();
+  for(cmCacheManager::CacheEntryMap::const_iterator i = cache.begin();
       i != cache.end(); ++i)
     {
     const char* key = i->first.c_str();
-    cmCacheManager::CacheEntry& value = i->second;
+    const cmCacheManager::CacheEntry& value = i->second;
     switch(value.m_Type )
       {
       case cmCacheManager::BOOL:
-        if(cmCacheManager::GetInstance()->IsOn(value.m_Value.c_str()))
+        if(cmCacheManager::GetInstance()->IsOn(key))
           {
           m_CacheEntriesList.AddProperty(key,
                                          "ON",
@@ -451,7 +451,6 @@ void CMakeSetupDialog::FillCacheEditorFromCacheManager()
   // copy from the list box to the cache manager
 void CMakeSetupDialog::FillCacheManagerFromCacheEditor()
 { 
-  cmCacheManager::CacheEntryMap cache =
     cmCacheManager::GetInstance()->GetCacheMap();
   std::set<CPropertyItem*> items = m_CacheEntriesList.GetItems();
   for(std::set<CPropertyItem*>::iterator i = items.begin();
@@ -465,9 +464,12 @@ void CMakeSetupDialog::FillCacheManagerFromCacheEditor()
       }
     else
       {
-      cmCacheManager::CacheEntryMap::iterator p = 
-        cache.find((const char*)item->m_propName);
-      (*p).second.m_Value = item->m_curValue;
+	  cmCacheManager::CacheEntry *entry = 
+      cmCacheManager::GetInstance()->GetCacheEntry((const char*)item->m_propName);
+      if (entry)
+        {
+        entry->m_Value = item->m_curValue;
+        }
       }
     }
 }

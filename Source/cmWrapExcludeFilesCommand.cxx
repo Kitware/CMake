@@ -24,19 +24,19 @@ bool cmWrapExcludeFilesCommand::Invoke(std::vector<std::string>& args)
     return false;
     }
 
-  cmMakefile::ClassMap &Classes = m_Makefile->GetClasses();
+  cmMakefile::SourceMap &Classes = m_Makefile->GetSources();
   for(std::vector<std::string>::iterator j = args.begin();
       j != args.end(); ++j)
     {   
-    for(cmMakefile::ClassMap::iterator l = Classes.begin(); 
+    for(cmMakefile::SourceMap::iterator l = Classes.begin(); 
         l != Classes.end(); l++)
       {
-      for(std::vector<cmClassFile>::iterator i = l->second.begin(); 
+      for(std::vector<cmSourceFile>::iterator i = l->second.begin(); 
           i != l->second.end(); i++)
         {
-        if(i->m_ClassName == (*j))
+        if(i->GetSourceName() == (*j))
           {
-          i->m_WrapExclude = true;
+          i->SetWrapExclude(true);
           }
         }
       }

@@ -38,7 +38,8 @@
 #include "cmCableInstantiateClassCommand.cxx"
 #include "cmFindFileCommand.cxx"
 #include "cmWrapExcludeFilesCommand.cxx"
-#include "cmWrapTclCommand.cxx"
+#include "cmVTKWrapPythonCommand.cxx"
+#include "cmVTKWrapTclCommand.cxx"
 #include "cmBuildSharedLibrariesCommand.cxx"
 #include "cmUtilitySourceCommand.cxx"
 #include "cmIncludeRegularExpressionCommand.cxx"
@@ -83,7 +84,8 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmCableInstantiateClassCommand);
   commands.push_back(new cmFindFileCommand);
   commands.push_back(new cmWrapExcludeFilesCommand);  
-  commands.push_back(new cmWrapTclCommand);
+  commands.push_back(new cmVTKWrapPythonCommand);
+  commands.push_back(new cmVTKWrapTclCommand);
   commands.push_back(new cmBuildSharedLibrariesCommand);
   commands.push_back(new cmUtilitySourceCommand);
   commands.push_back(new cmIncludeRegularExpressionCommand);

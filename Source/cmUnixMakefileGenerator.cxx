@@ -94,38 +94,18 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
   for(cmTargets::const_iterator l = tgts.begin(); 
       l != tgts.end(); l++)
     {
-    std::vector<cmClassFile> classes = 
-      m_Makefile->GetClassesFromSourceLists(l->second.GetSourceLists());
+    std::vector<cmSourceFile> classes = l->second.GetSourceFiles();
     fout << l->first << "_SRC_OBJS = ";
-    for(std::vector<cmClassFile>::iterator i = classes.begin(); 
+    for(std::vector<cmSourceFile>::iterator i = classes.begin(); 
         i != classes.end(); i++)
       {
-      if(!i->m_HeaderFileOnly)
+      if(!i->IsAHeaderFileOnly())
         {
-        fout << "\\\n" << i->m_ClassName << ".o ";
+        fout << "\\\n" << i->GetSourceName() << ".o ";
         }
       }
     fout << "\n\n";
     }
-
-  // get the classes from the source lists then add them to the SRC_OBJ list
-  fout << "SRC_OBJ = ";
-  for(cmTargets::const_iterator l = tgts.begin(); 
-      l != tgts.end(); l++)
-    {
-    std::vector<cmClassFile> classes = 
-      m_Makefile->GetClassesFromSourceLists(l->second.GetSourceLists());
-    for(std::vector<cmClassFile>::iterator i = classes.begin(); 
-        i != classes.end(); i++)
-      {
-      if(!i->m_HeaderFileOnly)
-        {
-        fout << "\\\n" << i->m_ClassName << ".o ";
-        }
-      }
-    }
-    fout << "\n\n";
-
 }
 
 
@@ -404,23 +384,23 @@ void cmUnixMakefileGenerator::OutputSubDirectoryRules(std::ostream& fout)
 // by the class cmMakeDepend GenerateMakefile
 void cmUnixMakefileGenerator::OutputObjectDepends(std::ostream& fout)
 {
-  cmMakefile::ClassMap &Classes = m_Makefile->GetClasses();
-  for(cmMakefile::ClassMap::iterator l = Classes.begin(); 
-      l != Classes.end(); l++)
+  cmMakefile::SourceMap &Sources = m_Makefile->GetSources();
+  for(cmMakefile::SourceMap::iterator l = Sources.begin(); 
+      l != Sources.end(); l++)
     {
-    for(std::vector<cmClassFile>::iterator i = l->second.begin(); 
+    for(std::vector<cmSourceFile>::iterator i = l->second.begin(); 
         i != l->second.end(); i++)
       {
-      if(!i->m_HeaderFileOnly)
+      if(!i->IsAHeaderFileOnly())
         {
-        if(i->m_Depends.size())
+        if(i->GetDepends().size())
           {
-          fout << i->m_ClassName << ".o : \\\n";
+          fout << i->GetSourceName() << ".o : \\\n";
           for(std::vector<std::string>::iterator j =  
-                i->m_Depends.begin();
-              j != i->m_Depends.end(); ++j)
+                i->GetDepends().begin();
+              j != i->GetDepends().end(); ++j)
             {
-            if(j+1 == i->m_Depends.end())
+            if(j+1 == i->GetDepends().end())
               {
               fout << *j << " \n";
               }

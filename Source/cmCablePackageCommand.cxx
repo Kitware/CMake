@@ -128,11 +128,11 @@ void cmCablePackageCommand::FinalPass()
   // Add a rule to build the generated package.
   std::string fileName = "Cxx/"+m_PackageName+"_cxx";
   std::string filePath = m_Makefile->GetStartOutputDirectory();
-  cmClassFile file;
-  file.m_AbstractClass = false;
-  file.m_HeaderFileOnly = false;
+  cmSourceFile file;
+  file.SetIsAnAbstractClass(false);
+  file.SetIsAHeaderFileOnly(false);
   file.SetName(fileName.c_str(), filePath.c_str(), "cxx", false);
-  m_Makefile->AddClass(file, m_PackageName.c_str());
+  m_Makefile->AddSource(file, m_PackageName.c_str());
 }
 
 

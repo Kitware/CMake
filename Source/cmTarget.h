@@ -18,6 +18,7 @@
 
 #include "cmStandardIncludes.h"
 #include "cmCustomCommand.h"
+#include "cmSourceFile.h"
 
 /** \class cmTarget
  * \brief Represent a library or executable target loaded from a makefile.
@@ -44,13 +45,28 @@ public:
   /**
    * Get the list of the source lists used by this target
    */
-  const std::vector<std::string> &GetSourceLists() const {return m_SourceLists;}
+  const std::vector<std::string> &GetSourceLists() const 
+    {return m_SourceLists;}
   std::vector<std::string> &GetSourceLists() {return m_SourceLists;}
   
+  /**
+   * Get the list of the source files used by this target
+   */
+  const std::vector<cmSourceFile> &GetSourceFiles() const 
+    {return m_SourceFiles;}
+  std::vector<cmSourceFile> &GetSourceFiles() {return m_SourceFiles;}
+
+  /**
+   * Generate the SourceFilesList from the SourceLists. This should only be
+   * done once to be safe.  
+   */
+  void GenerateSourceFilesFromSourceLists(const cmMakefile &mf);
+
 private:
   std::vector<cmCustomCommand> m_CustomCommands;
   std::vector<std::string> m_SourceLists;
   bool m_IsALibrary;
+  std::vector<cmSourceFile> m_SourceFiles;
 };
 
 typedef std::map<std::string,cmTarget> cmTargets;

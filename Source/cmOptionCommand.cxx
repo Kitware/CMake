@@ -35,7 +35,7 @@ bool cmOptionCommand::Invoke(std::vector<std::string>& args)
     }
   else
     {
-    m_Makefile->AddDefinition("WRAP_TCL", cacheValue);
+    m_Makefile->AddDefinition(args[0].c_str(), cacheValue);
     }
 
   return true;

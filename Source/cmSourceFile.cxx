@@ -13,7 +13,7 @@
   See COPYRIGHT.txt for copyright details.
 
 =========================================================================*/
-#include "cmClassFile.h"
+#include "cmSourceFile.h"
 #include "cmStandardIncludes.h"
 #include "cmSystemTools.h"
 
@@ -23,10 +23,10 @@
 // The class must be found in dir and end in name.cxx, name.txx, 
 // name.c or it will be considered a header file only class
 // and not included in the build process
-void cmClassFile::SetName(const char* name, const char* dir)
+void cmSourceFile::SetName(const char* name, const char* dir)
 {
   m_HeaderFileOnly = true;
-  m_ClassName = name;
+  m_SourceName = name;
   std::string pathname = dir;
   if(pathname != "")
     {
@@ -35,7 +35,7 @@ void cmClassFile::SetName(const char* name, const char* dir)
   
   // First try and see whether the listed file can be found
   // as is without extensions added on.
-  pathname += m_ClassName;
+  pathname += m_SourceName;
   std::string hname = pathname;
   if(cmSystemTools::FileExists(hname.c_str()))
     {
@@ -49,7 +49,7 @@ void cmClassFile::SetName(const char* name, const char* dir)
   hname += ".cxx";
   if(cmSystemTools::FileExists(hname.c_str()))
     {
-    m_ClassExtension = "cxx";
+    m_SourceExtension = "cxx";
     m_HeaderFileOnly = false;
     m_FullPath = hname;
     return;
@@ -60,7 +60,7 @@ void cmClassFile::SetName(const char* name, const char* dir)
   if(cmSystemTools::FileExists(hname.c_str()))
   {
     m_HeaderFileOnly = false;
-    m_ClassExtension = "c";
+    m_SourceExtension = "c";
     m_FullPath = hname;
     return;
   }
@@ -69,7 +69,7 @@ void cmClassFile::SetName(const char* name, const char* dir)
   if(cmSystemTools::FileExists(hname.c_str()))
   {
     m_HeaderFileOnly = false;
-    m_ClassExtension = "txx";
+    m_SourceExtension = "txx";
     m_FullPath = hname;
     return;
   }
@@ -77,7 +77,7 @@ void cmClassFile::SetName(const char* name, const char* dir)
   hname += ".h";
   if(cmSystemTools::FileExists(hname.c_str()))
     {
-    m_ClassExtension = "h";
+    m_SourceExtension = "h";
     m_FullPath = hname;
     return;
     }
@@ -86,24 +86,24 @@ void cmClassFile::SetName(const char* name, const char* dir)
   cmSystemTools::Error("Tried .txx .cxx .c for ", hname.c_str());
 }
 
-void cmClassFile::SetName(const char* name, const char* dir, const char *ext,
+void cmSourceFile::SetName(const char* name, const char* dir, const char *ext,
                           bool hfo)
 {
   m_HeaderFileOnly = hfo;
-  m_ClassName = name;
+  m_SourceName = name;
   std::string pathname = dir;
   if(pathname != "")
     {
     pathname += "/";
     }
   
-  pathname += m_ClassName + "." + ext;
+  pathname += m_SourceName + "." + ext;
   m_FullPath = pathname;
-  m_ClassExtension = ext;
+  m_SourceExtension = ext;
   return;
 }
 
-void cmClassFile::Print() const
+void cmSourceFile::Print() const
 {
   if(m_AbstractClass)
     {
@@ -121,5 +121,5 @@ void cmClassFile::Print() const
     {
     std::cout << "CXX file ";
     }
-  std::cout << m_ClassName << std::endl;
+  std::cout << m_SourceName << std::endl;
 }

@@ -13,10 +13,10 @@
   See COPYRIGHT.txt for copyright details.
 
 =========================================================================*/
-#include "cmWrapTclCommand.h"
+#include "cmVTKWrapTclCommand.h"
 
-// cmWrapTclCommand
-bool cmWrapTclCommand::Invoke(std::vector<std::string>& args)
+// cmVTKWrapTclCommand
+bool cmVTKWrapTclCommand::Invoke(std::vector<std::string>& args)
 {
   if(args.size() < 3 )
     {
@@ -26,12 +26,12 @@ bool cmWrapTclCommand::Invoke(std::vector<std::string>& args)
 
   // Now check and see if the value has been stored in the cache
   // already, if so use that value and don't look for the program
-  if(!cmCacheManager::GetInstance()->IsOn("WRAP_TCL"))
+  if(!cmCacheManager::GetInstance()->IsOn("VTK_WRAP_TCL"))
     {
     return true;
     }
-  
-  // add in a depend in the vtkWrapTcl executable
+
+  // add in a depend in the vtkVTKWrapTcl executable
   m_Makefile->AddUtility("vtkWrapTcl");
   
   // what is the current source dir
@@ -42,29 +42,29 @@ bool cmWrapTclCommand::Invoke(std::vector<std::string>& args)
   m_SourceList = args[1];
   
   // get the list of classes for this library
-  cmMakefile::ClassMap &Classes = m_Makefile->GetClasses();
+  cmMakefile::SourceMap &Classes = m_Makefile->GetSources();
   for(std::vector<std::string>::iterator j = (args.begin() + 2);
       j != args.end(); ++j)
     {   
-    for(cmMakefile::ClassMap::iterator l = Classes.begin(); 
+    for(cmMakefile::SourceMap::iterator l = Classes.begin(); 
         l != Classes.end(); l++)
       {
-      for(std::vector<cmClassFile>::iterator i = l->second.begin(); 
+      for(std::vector<cmSourceFile>::iterator i = l->second.begin(); 
           i != l->second.end(); i++)
         {
-        cmClassFile &curr = *i;
+        cmSourceFile &curr = *i;
         // if we should wrap the class
-        if (!curr.m_WrapExclude)
+        if (!curr.GetWrapExclude())
           {
-          cmClassFile file;
-          file.m_AbstractClass = curr.m_AbstractClass;
-          std::string newName = curr.m_ClassName + "Tcl";
+          cmSourceFile file;
+          file.SetIsAnAbstractClass(curr.IsAnAbstractClass());
+          std::string newName = curr.GetSourceName() + "Tcl";
           file.SetName(newName.c_str(), m_Makefile->GetCurrentOutputDirectory(),
                        "cxx",false);
-          std::string hname = cdir + "/" + curr.m_ClassName + ".h";
+          std::string hname = cdir + "/" + curr.GetSourceName() + ".h";
           m_WrapHeaders.push_back(hname);
           // add starting depends
-          file.m_Depends.push_back(hname);
+          file.GetDepends().push_back(hname);
           m_WrapClasses.push_back(file);
           }
         }
@@ -74,13 +74,13 @@ bool cmWrapTclCommand::Invoke(std::vector<std::string>& args)
   return true;
 }
 
-void cmWrapTclCommand::FinalPass() 
+void cmVTKWrapTclCommand::FinalPass() 
 {
   // first we add the rules for all the .h to Tcl.cxx files
   int lastClass = m_WrapClasses.size();
   std::vector<std::string> depends;
-  std::string wtcl = "${WRAP_TCL_EXE}";
-  std::string hints = "${WRAP_HINTS}";
+  std::string wtcl = "${VTK_WRAP_TCL_EXE}";
+  std::string hints = "${VTK_WRAP_HINTS}";
   
   // Create the init file 
   std::string res = m_LibraryName;
@@ -88,22 +88,22 @@ void cmWrapTclCommand::FinalPass()
   this->CreateInitFile(res);
   
   // add the init file
-  cmClassFile cfile;
-  cfile.m_AbstractClass = false;
+  cmSourceFile cfile;
+  cfile.SetIsAnAbstractClass(false);
   std::string newName = m_LibraryName;
   newName += "Init";
   cfile.SetName(newName.c_str(), m_Makefile->GetCurrentOutputDirectory(),
                 "cxx",false);
-  m_Makefile->AddClass(cfile,m_SourceList.c_str());
+  m_Makefile->AddSource(cfile,m_SourceList.c_str());
   
   // wrap all the .h files
   depends.push_back(wtcl);
   for(int classNum = 0; classNum < lastClass; classNum++)
     {
-    m_Makefile->AddClass(m_WrapClasses[classNum],m_SourceList.c_str());
-    std::string res = m_WrapClasses[classNum].m_ClassName + ".cxx";
+    m_Makefile->AddSource(m_WrapClasses[classNum],m_SourceList.c_str());
+    std::string res = m_WrapClasses[classNum].GetSourceName() + ".cxx";
     std::string cmd = wtcl + " " + m_WrapHeaders[classNum] + " "
-		+ hints + (m_WrapClasses[classNum].m_AbstractClass ? " 0 " : " 1 ") + " > " + m_WrapClasses[classNum].m_ClassName + ".cxx";
+		+ hints + (m_WrapClasses[classNum].IsAnAbstractClass() ? " 0 " : " 1 ") + " > " + m_WrapClasses[classNum].GetSourceName() + ".cxx";
     m_Makefile->AddCustomCommand(m_WrapHeaders[classNum].c_str(),
                                  cmd.c_str(), depends, 
                                  res.c_str(), m_LibraryName.c_str());
@@ -111,7 +111,7 @@ void cmWrapTclCommand::FinalPass()
   
 }
 
-bool cmWrapTclCommand::CreateInitFile(std::string& res) 
+bool cmVTKWrapTclCommand::CreateInitFile(std::string& res) 
 {
   unsigned int i;
   
@@ -131,7 +131,7 @@ bool cmWrapTclCommand::CreateInitFile(std::string& res)
   int classNum;
   for(classNum = 0; classNum < lastClass; classNum++)
     {
-    if (!m_WrapClasses[classNum].m_AbstractClass)
+    if (!m_WrapClasses[classNum].IsAnAbstractClass())
       {
       std::string cls = m_WrapHeaders[classNum];
       cls = cls.substr(0,cls.size()-2);
@@ -154,8 +154,9 @@ bool cmWrapTclCommand::CreateInitFile(std::string& res)
 
 
 /* warning this code is also in getclasses.cxx under pcmaker */
-bool cmWrapTclCommand::WriteInit(const char *kitName, std::string& outFileName,
-                                 std::vector<std::string>& classes)
+bool cmVTKWrapTclCommand::WriteInit(const char *kitName, 
+                                    std::string& outFileName,
+                                    std::vector<std::string>& classes)
 {
   unsigned int i;
   FILE *fout = fopen(outFileName.c_str(),"w");

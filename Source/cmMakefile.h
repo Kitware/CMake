@@ -17,7 +17,7 @@
 #define cmMakefile_h
 
 #include "cmStandardIncludes.h"
-#include "cmClassFile.h"
+#include "cmSourceFile.h"
 #include "cmSystemTools.h"
 #include "cmSourceGroup.h"
 #include "cmTarget.h"
@@ -170,7 +170,7 @@ public:
   /**
    * Add a class/source file to the build.
    */
-  void AddClass(cmClassFile& ,const char *srcListName);
+  void AddSource(cmSourceFile& ,const char *srcListName);
 
   /**
    * Add a source group for consideration when adding a new source.
@@ -206,7 +206,7 @@ public:
     cmSystemTools::ConvertToUnixSlashes(m_cmHomeDirectory);
     this->AddDefinition("CMAKE_SOURCE_DIR", this->GetHomeDirectory());
     }
-  const char* GetHomeDirectory() 
+  const char* GetHomeDirectory() const
     {
     return m_cmHomeDirectory.c_str();
     }
@@ -216,7 +216,7 @@ public:
     cmSystemTools::ConvertToUnixSlashes(m_HomeOutputDirectory);
     this->AddDefinition("CMAKE_BINARY_DIR", this->GetHomeOutputDirectory());
     }
-  const char* GetHomeOutputDirectory()
+  const char* GetHomeOutputDirectory() const
     {
     return m_HomeOutputDirectory.c_str();
     }
@@ -235,7 +235,7 @@ public:
       m_cmStartDirectory = dir;
       cmSystemTools::ConvertToUnixSlashes(m_cmStartDirectory);
     }
-  const char* GetStartDirectory() 
+  const char* GetStartDirectory() const
     {
       return m_cmStartDirectory.c_str();
     }
@@ -244,7 +244,7 @@ public:
       m_StartOutputDirectory = lib;
       cmSystemTools::ConvertToUnixSlashes(m_StartOutputDirectory);
     }
-  const char* GetStartOutputDirectory()
+  const char* GetStartOutputDirectory() const
     {
       return m_StartOutputDirectory.c_str();
     }
@@ -263,7 +263,7 @@ public:
       m_cmCurrentDirectory = dir;
       cmSystemTools::ConvertToUnixSlashes(m_cmCurrentDirectory);
     }
-  const char* GetCurrentDirectory() 
+  const char* GetCurrentDirectory() const 
     {
       return m_cmCurrentDirectory.c_str();
     }
@@ -272,7 +272,7 @@ public:
       m_CurrentOutputDirectory = lib;
       cmSystemTools::ConvertToUnixSlashes(m_CurrentOutputDirectory);
     }
-  const char* GetCurrentOutputDirectory()
+  const char* GetCurrentOutputDirectory() const
     {
       return m_CurrentOutputDirectory.c_str();
     }
@@ -359,16 +359,10 @@ public:
   /**
    * Return a list of source files in this makefile.
    */
-  typedef std::map<std::string,std::vector<cmClassFile> > ClassMap;
-  ClassMap &GetClasses() {return  m_Classes;}
-  cmClassFile *GetClass(const char *srclist, const char *className);
-  
-    
-  /**
-   * Return a list of classes in the passed source lists
-   */
-  std::vector<cmClassFile> GetClassesFromSourceLists(
-    const std::vector<std::string> &srcLists);
+  typedef std::map<std::string,std::vector<cmSourceFile> > SourceMap;
+  const SourceMap &GetSources() const {return  m_Sources;}
+  SourceMap &GetSources() {return  m_Sources;}
+  cmSourceFile *GetSource(const char *srclist, const char *sourceName);
   
   /**
    * Obtain a list of auxiliary source directories.
@@ -460,7 +454,7 @@ protected:
 
   // libraries, classes, and executables
   cmTargets m_Targets;
-  ClassMap m_Classes; 
+  SourceMap m_Sources; 
 
   std::vector<std::string> m_SubDirectories; // list of sub directories
   std::vector<std::string> m_MakeVerbatim; // lines copied from input file
@@ -489,9 +483,9 @@ private:
    */
   std::string GetParentListFileName(const char *listFileName);
 
-  void ReadClasses(std::ifstream& fin, bool t);
+  void ReadSources(std::ifstream& fin, bool t);
   friend class cmMakeDepend;	// make depend needs direct access 
-				// to the m_Classes array 
+				// to the m_Sources array 
   void PrintStringVector(const char* s, const std::vector<std::string>& v) const;
   void AddDefaultCommands();
   void AddDefaultDefinitions();

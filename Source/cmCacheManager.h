@@ -35,8 +35,8 @@ public:
     std::string m_Value;
     CacheEntryType m_Type;
   };
-  typedef  std::map<std::string, CacheEntry> CacheEntryMap;
 public:
+  typedef  std::map<std::string, CacheEntry> CacheEntryMap;
   /**
    * Types for the cache entries.  These are useful as
    * hints for a cache editor program.  Path should bring
@@ -53,7 +53,7 @@ public:
   bool LoadCache(cmMakefile*);
   
   //! Save cache for given makefile.  Saves to ouput home CMakeCache.txt
-  bool SaveCache(cmMakefile*);
+  bool SaveCache(cmMakefile*) const;
   
   //! Add an entry into the cache
   void AddCacheEntry(const char* key, const char* value, CacheEntryType type);
@@ -64,18 +64,22 @@ public:
   //! Remove an entry from the cache
   void RemoveCacheEntry(const char* key);
   
+  //! Print the cache to a stream
+  CacheEntry *GetCacheEntry(const char *key);
+  
   //! Get a value from the cache given a key
-  const char* GetCacheValue(const char* key);
+  const char* GetCacheValue(const char* key) const;
+
   //! Test a boolean cache entry to see if it is true or false, returns false 
   //  if no entry.
-  bool IsOn(const char*);
+  bool IsOn(const char*) const;
   
   //! Print the cache to a stream
-  void PrintCache(std::ostream&);
-
+  void PrintCache(std::ostream&) const;
+  
   //! Get the cache map ivar.
-  CacheEntryMap GetCacheMap()    {      return m_Cache;    }
-
+  const CacheEntryMap &GetCacheMap() const { return m_Cache; }
+  
 private:
   static cmCacheManager* s_Instance;
   CacheEntryMap m_Cache;

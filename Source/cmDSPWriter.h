@@ -67,9 +67,9 @@ private:
   std::string m_DSPFooterTemplate;
   std::vector<std::string> m_CreatedProjectNames;
   
-  void CreateSingleDSP(const char *lname, const cmTarget &tgt);
+  void CreateSingleDSP(const char *lname, cmTarget &tgt);
   void WriteDSPFile(std::ostream& fout, 
-                    const char *libName, const cmTarget &tgt);
+                    const char *libName, cmTarget &tgt);
   void WriteDSPBeginGroup(std::ostream& fout, 
 			  const char* group,
 			  const char* filter);

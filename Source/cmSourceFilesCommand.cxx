@@ -26,10 +26,10 @@ bool cmSourceFilesCommand::Invoke(std::vector<std::string>& args)
   for(std::vector<std::string>::iterator i = (args.begin() + 1);
       i != args.end(); ++i)
     {
-    cmClassFile file;
-    file.m_AbstractClass = false;
+    cmSourceFile file;
+    file.SetIsAnAbstractClass(false);
     file.SetName((*i).c_str(), m_Makefile->GetCurrentDirectory());
-    m_Makefile->AddClass(file, args[0].c_str());
+    m_Makefile->AddSource(file, args[0].c_str());
     }
   return true;
 }

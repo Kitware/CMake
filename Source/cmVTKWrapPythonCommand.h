@@ -1,16 +1,15 @@
-#ifndef cmWrapTclCommand_h
-#define cmWrapTclCommand_h
+#ifndef cmVTKWrapPythonCommand_h
+#define cmVTKWrapPythonCommand_h
 
 #include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
-/** \class cmWrapTclCommand
- * \brief Define a command that searches for an include file.
+/** \class cmVTKWrapPythonCommand
+ * \brief Create Python Language bindings for classes
  *
- * cmWrapTclCommand is used to define a CMake variable include
- * path location by specifying a file and list of directories.
+ * cmVTKWrapPythonCommand is used to create wrappers for classes into Python
  */
-class cmWrapTclCommand : public cmCommand
+class cmVTKWrapPythonCommand : public cmCommand
 {
 public:
   /**
@@ -18,7 +17,7 @@ public:
    */
   virtual cmCommand* Clone() 
     {
-    return new cmWrapTclCommand;
+    return new cmVTKWrapPythonCommand;
     }
 
   /**
@@ -45,14 +44,14 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "WRAP_TCL";}
+  virtual const char* GetName() { return "VTK_WRAP_PYTHON";}
 
   /**
    * Succinct documentation.
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Create Tcl Wrappers.";
+    return "Create Python Wrappers.";
     }
   
   /**
@@ -61,7 +60,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "WRAP_TCL(resultingLibraryName SourceListName SourceLists ...)";
+      "VTK_WRAP_PYTHON(resultingLibraryName SourceListName SourceLists ...)";
     }
 
   /**
@@ -72,7 +71,7 @@ public:
                          std::vector<std::string>& classes);
   
 private:
-  std::vector<cmClassFile> m_WrapClasses;
+  std::vector<cmSourceFile> m_WrapClasses;
   std::vector<std::string> m_WrapHeaders;
   std::string m_LibraryName;
   std::string m_SourceList;
