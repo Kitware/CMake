@@ -627,8 +627,14 @@ void cmake::SetGlobalGenerator(cmGlobalGenerator *gg)
 
 int cmake::Configure(const char *arg0, const std::vector<std::string>* args)
 {
-  // Read in the cache
-  m_CacheManager->LoadCache(this->GetHomeOutputDirectory());
+  // Read in the cache, but not for a try compile 
+  // because there will be no cache
+  if (!m_InTryCompile)
+    {
+    m_CacheManager->LoadCache(this->GetHomeOutputDirectory());
+    }
+
+  // do a sanity check on some values
   if(m_CacheManager->GetCacheValue("CMAKE_HOME_DIRECTORY"))
     {
     std::string cacheStart = 
@@ -715,9 +721,14 @@ int cmake::Configure(const char *arg0, const std::vector<std::string>* args)
                                   cmCacheManager::INTERNAL);
     }
 
-  // reset any system configuration information
-  m_GlobalGenerator->ClearEnabledLanguages();
-
+  // reset any system configuration information, except for when we are
+  // InTryCompile. With TryCompile the system info is taken from the parent's
+  // info to save time
+  if (!m_InTryCompile)
+    {
+    m_GlobalGenerator->ClearEnabledLanguages();
+    }
+  
   // actually do the configure
   m_GlobalGenerator->Configure();
   
