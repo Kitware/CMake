@@ -35,7 +35,6 @@ Run bison like this:
 
 Modify cmDependsFortranParser.c:
   - remove TABs
-  - remove the yyerrorlab label and associated code
 
 */
 
@@ -57,6 +56,13 @@ YY_DECL;
 /* Internal utility functions.  */
 static void cmDependsFortranError(yyscan_t yyscanner, const char* message);
 
+/* Disable some warnings in the generated code.  */
+#ifdef __BORLANDC__
+# pragma warn -8004 /* Variable assigned a value that is not used.  */
+#endif
+#ifdef _MSC_VER
+# pragma warning (disable: 4102) /* Unused goto label.  */
+#endif
 %}
 
 /* Generate a reentrant parser object.  */

@@ -161,7 +161,6 @@ Run bison like this:
 
 Modify cmDependsFortranParser.c:
   - remove TABs
-  - remove the yyerrorlab label and associated code
 
 */
 
@@ -183,6 +182,13 @@ YY_DECL;
 /* Internal utility functions.  */
 static void cmDependsFortranError(yyscan_t yyscanner, const char* message);
 
+/* Disable some warnings in the generated code.  */
+#ifdef __BORLANDC__
+# pragma warn -8004 /* Variable assigned a value that is not used.  */
+#endif
+#ifdef _MSC_VER
+# pragma warning (disable: 4102) /* Unused goto label.  */
+#endif
 
 
 /* Enabling traces.  */
@@ -199,12 +205,12 @@ static void cmDependsFortranError(yyscan_t yyscanner, const char* message);
 #endif
 
 #if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
-#line 65 "cmDependsFortranParser.y"
+#line 71 "cmDependsFortranParser.y"
 typedef union YYSTYPE {
   char* string;
 } YYSTYPE;
 /* Line 191 of yacc.c.  */
-#line 208 "cmDependsFortranParser.c"
+#line 214 "cmDependsFortranParser.c"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
@@ -216,7 +222,7 @@ typedef union YYSTYPE {
 
 
 /* Line 214 of yacc.c.  */
-#line 220 "cmDependsFortranParser.c"
+#line 226 "cmDependsFortranParser.c"
 
 #if ! defined (yyoverflow) || YYERROR_VERBOSE
 
@@ -406,11 +412,11 @@ static const yysigned_char yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const unsigned char yyrline[] =
 {
-       0,    79,    79,    79,    82,    88,    94,    95,   101,   107,
-     113,   119,   125,   130,   135,   140,   145,   148,   148,   149,
-     149,   149,   149,   150,   150,   151,   151,   152,   152,   153,
-     153,   154,   154,   155,   155,   156,   156,   157,   157,   158,
-     158,   161,   162,   163
+       0,    85,    85,    85,    88,    94,   100,   101,   107,   113,
+     119,   125,   131,   136,   141,   146,   151,   154,   154,   155,
+     155,   155,   155,   156,   156,   157,   157,   158,   158,   159,
+     159,   160,   160,   161,   161,   162,   162,   163,   163,   164,
+     164,   167,   168,   169
 };
 #endif
 
@@ -1155,7 +1161,7 @@ yyreduce:
   switch (yyn)
     {
         case 4:
-#line 83 "cmDependsFortranParser.y"
+#line 89 "cmDependsFortranParser.y"
     {
     cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
     cmDependsFortranParser_RuleUse(parser, yyvsp[-2].string);
@@ -1164,7 +1170,7 @@ yyreduce:
     break;
 
   case 5:
-#line 89 "cmDependsFortranParser.y"
+#line 95 "cmDependsFortranParser.y"
     {
     cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
     cmDependsFortranParser_RuleInclude(parser, yyvsp[-2].string);
@@ -1173,7 +1179,7 @@ yyreduce:
     break;
 
   case 7:
-#line 96 "cmDependsFortranParser.y"
+#line 102 "cmDependsFortranParser.y"
     {
     cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
     cmDependsFortranParser_RuleModule(parser, yyvsp[-1].string);
@@ -1182,7 +1188,7 @@ yyreduce:
     break;
 
   case 8:
-#line 102 "cmDependsFortranParser.y"
+#line 108 "cmDependsFortranParser.y"
     {
     cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
     cmDependsFortranParser_RuleDefine(parser, yyvsp[-2].string);
@@ -1191,7 +1197,7 @@ yyreduce:
     break;
 
   case 9:
-#line 108 "cmDependsFortranParser.y"
+#line 114 "cmDependsFortranParser.y"
     {
     cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
     cmDependsFortranParser_RuleUndef(parser, yyvsp[-2].string);
@@ -1200,7 +1206,7 @@ yyreduce:
     break;
 
   case 10:
-#line 114 "cmDependsFortranParser.y"
+#line 120 "cmDependsFortranParser.y"
     {
     cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
     cmDependsFortranParser_RuleIfdef(parser, yyvsp[-2].string);
@@ -1209,7 +1215,7 @@ yyreduce:
     break;
 
   case 11:
-#line 120 "cmDependsFortranParser.y"
+#line 126 "cmDependsFortranParser.y"
     {
     cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
     cmDependsFortranParser_RuleIfndef(parser, yyvsp[-2].string);
@@ -1218,7 +1224,7 @@ yyreduce:
     break;
 
   case 12:
-#line 126 "cmDependsFortranParser.y"
+#line 132 "cmDependsFortranParser.y"
     {
     cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
     cmDependsFortranParser_RuleIf(parser);
@@ -1226,7 +1232,7 @@ yyreduce:
     break;
 
   case 13:
-#line 131 "cmDependsFortranParser.y"
+#line 137 "cmDependsFortranParser.y"
     {
     cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
     cmDependsFortranParser_RuleElif(parser);
@@ -1234,7 +1240,7 @@ yyreduce:
     break;
 
   case 14:
-#line 136 "cmDependsFortranParser.y"
+#line 142 "cmDependsFortranParser.y"
     {
     cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
     cmDependsFortranParser_RuleElse(parser);
@@ -1242,7 +1248,7 @@ yyreduce:
     break;
 
   case 15:
-#line 141 "cmDependsFortranParser.y"
+#line 147 "cmDependsFortranParser.y"
     {
     cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
     cmDependsFortranParser_RuleEndif(parser);
@@ -1250,12 +1256,12 @@ yyreduce:
     break;
 
   case 41:
-#line 161 "cmDependsFortranParser.y"
+#line 167 "cmDependsFortranParser.y"
     { free (yyvsp[0].string); }
     break;
 
   case 42:
-#line 162 "cmDependsFortranParser.y"
+#line 168 "cmDependsFortranParser.y"
     { free (yyvsp[0].string); }
     break;
 
@@ -1263,7 +1269,7 @@ yyreduce:
     }
 
 /* Line 1010 of yacc.c.  */
-#line 1267 "cmDependsFortranParser.c"
+#line 1273 "cmDependsFortranParser.c"
 
   yyvsp -= yylen;
   yyssp -= yylen;
@@ -1393,6 +1399,25 @@ yyerrlab:
      token.  */
   goto yyerrlab1;
 
+
+/*---------------------------------------------------.
+| yyerrorlab -- error raised explicitly by YYERROR.  |
+`---------------------------------------------------*/
+yyerrorlab:
+
+#ifdef __GNUC__
+  /* Pacify GCC when the user code never invokes YYERROR and the label
+     yyerrorlab therefore never appears in user code.  */
+  if (0)
+     goto yyerrorlab;
+#endif
+
+  yyvsp -= yylen;
+  yyssp -= yylen;
+  yystate = *yyssp;
+  goto yyerrlab1;
+
+
 /*-------------------------------------------------------------.
 | yyerrlab1 -- common code for both syntax error and YYERROR.  |
 `-------------------------------------------------------------*/
@@ -1469,7 +1494,7 @@ yyreturn:
 }
 
 
-#line 166 "cmDependsFortranParser.y"
+#line 172 "cmDependsFortranParser.y"
 
 
 /*--------------------------------------------------------------------------*/
@@ -1478,4 +1503,3 @@ void cmDependsFortranError(yyscan_t yyscanner, const char* message)
   cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
   cmDependsFortranParser_Error(parser, message);
 }
-
