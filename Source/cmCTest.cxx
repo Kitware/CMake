@@ -47,8 +47,8 @@
 #define DEBUGERR std::cerr << __LINE__ << " "; std::cerr
 
 struct tm* cmCTest::GetNightlyTime(std::string str, 
-                                          bool verbose, 
-                                          bool tomorrowtag)
+                                   bool verbose, 
+                                   bool tomorrowtag)
 {
   struct tm* lctime;
   time_t tctime = time(0);
