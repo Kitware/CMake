@@ -98,18 +98,22 @@ void cmNMakeMakefileGenerator::OutputMakeVariables(std::ostream& fout)
   std::string replaceVars = variables;
   m_Makefile->ExpandVariablesInString(replaceVars);
   fout << replaceVars.c_str();
-   fout << "CMAKE_CURRENT_SOURCE = " << m_Makefile->GetStartDirectory() 
+  fout << "CMAKE_CURRENT_SOURCE = " << 
+    cmSystemTools::EscapeSpaces(m_Makefile->GetStartDirectory() )
         << "\n";
-  fout << "CMAKE_CURRENT_BINARY = " << m_Makefile->GetStartOutputDirectory()
+  fout << "CMAKE_CURRENT_BINARY = " 
+       << cmSystemTools::EscapeSpaces(m_Makefile->GetStartOutputDirectory())
        << "\n";
-  fout << "CMAKE_SOURCE_DIR = " << m_Makefile->GetHomeDirectory() << "\n";
-  fout << "CMAKE_BINARY_DIR = " << m_Makefile->GetHomeOutputDirectory() 
+  fout << "CMAKE_SOURCE_DIR = " << 
+    cmSystemTools::EscapeSpaces(m_Makefile->GetHomeDirectory()) << "\n";
+  fout << "CMAKE_BINARY_DIR = " << 
+    cmSystemTools::EscapeSpaces(m_Makefile->GetHomeOutputDirectory() )
        << "\n";
   // Output Include paths
   fout << "INCLUDE_FLAGS = ";
   std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();
   std::vector<std::string>::iterator i;
-  fout << "-I" << m_Makefile->GetStartDirectory() << " ";
+  fout << "-I" << cmSystemTools::EscapeSpaces(m_Makefile->GetStartDirectory()) << " ";
   for(i = includes.begin(); i != includes.end(); ++i)
     {
     std::string include = *i;
@@ -179,6 +183,7 @@ void cmNMakeMakefileGenerator::OutputMakeRule(std::ostream& fout,
   fout << "\n";
   replace = target;
   m_Makefile->ExpandVariablesInString(replace);
+  replace = cmSystemTools::EscapeSpaces(replace.c_str());
   fout << replace.c_str() << ": ";
   if(depends)
     {
