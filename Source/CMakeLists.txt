@@ -177,6 +177,34 @@ IF(BUILD_TESTING)
       ${CMake_BINARY_DIR}/Tests/Dependency/WOLibOut/Exec
       Dependency)
 
+    ADD_TEST(dependency2 ${CMake_BINARY_DIR}/Source/cmaketest 
+      ${CMake_SOURCE_DIR}/Tests/Dependency 
+      ${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut
+      exec2
+      ${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut/Exec2
+      Dependency CMAKE_ARGS -DLIBRARY_OUTPUT_PATH:PATH=${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut/Lib)
+
+    ADD_TEST(dependency3 ${CMake_BINARY_DIR}/Source/cmaketest 
+      ${CMake_SOURCE_DIR}/Tests/Dependency 
+      ${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut
+      exec3
+      ${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut/Exec3
+      Dependency CMAKE_ARGS -DLIBRARY_OUTPUT_PATH:PATH=${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut/Lib)
+
+    ADD_TEST(dependency4 ${CMake_BINARY_DIR}/Source/cmaketest 
+      ${CMake_SOURCE_DIR}/Tests/Dependency 
+      ${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut
+      exec4
+      ${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut/Exec4
+      Dependency CMAKE_ARGS -DLIBRARY_OUTPUT_PATH:PATH=${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut/Lib)
+
+    ADD_TEST(linkline ${CMake_BINARY_DIR}/Source/cmaketest 
+      ${CMake_SOURCE_DIR}/Tests/LinkLine
+      ${CMake_BINARY_DIR}/Tests/LinkLine
+      Exec
+      ${CMake_BINARY_DIR}/Tests/LinkLine
+      LinkLine)
+
   ENDIF (DART_ROOT)
 ENDIF(BUILD_TESTING)
 

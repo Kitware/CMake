@@ -19,7 +19,7 @@
 
 #include <map>
 #include <set>
-
+#include <cassert>
 
 
 void cmTarget::GenerateSourceFilesFromSourceLists( cmMakefile &mf)
@@ -73,15 +73,17 @@ void cmTarget::MergeLinkLibraries( cmMakefile& mf,
                                    const char *selfname,
                                    const LinkLibraries& libs )
 {
-  for( LinkLibraries::const_iterator i = libs.begin();
-       i != libs.end(); ++i )
+  // Only add on libraries we haven't added on before.
+  // Assumption: the global link libraries could only grow, never shrink
+  assert( libs.size() >= m_PrevLinkedLibraries.size() );
+  LinkLibraries::const_iterator i = libs.begin();
+  i += m_PrevLinkedLibraries.size();
+  for( ; i != libs.end(); ++i )
     {
-    if(m_PrevLinkedLibraries.insert(i->first).second)
-      {
-      // We call this so that the dependencies get written to the cache
-      this->AddLinkLibrary( mf, selfname, i->first.c_str(), i->second );
-      }
+    // We call this so that the dependencies get written to the cache
+    this->AddLinkLibrary( mf, selfname, i->first.c_str(), i->second );
     }
+  m_PrevLinkedLibraries = libs;
 }
 
 void cmTarget::AddLinkDirectory(const char* d)
@@ -231,8 +233,8 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
   // 3. Create the new link line by simply emitting any dependencies that are
   // missing.  Start from the back and keep adding.
   
-  LinkLibraries newLinkLibraries = m_LinkLibraries;
   std::set<cmStdString> done, visited;
+  std::vector<std::string> newLinkLibraries;
   for(LinkLibraries::reverse_iterator lib = m_LinkLibraries.rbegin();
       lib != m_LinkLibraries.rend(); ++lib)
     {
@@ -240,56 +242,57 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
     // if a variable expands to nothing.
     if (lib->first.size() == 0) continue;
 
-    std::vector<std::string> link_line;
-    Emit( lib->first, dep_map, done, visited, link_line );
-    if( link_line.size() == 0 )
+    // Emit all the dependencies that are not already satisfied on the
+    // original link line.
+    if( dep_map.find(lib->first) != dep_map.end() ) // does it have dependencies?
       {
-      // everything for this library is already on the link line, but since
-      // we are not going to touch the user's link line, we will output the
-      // library anyway.
-      newLinkLibraries.push_back( *lib );
-      }
-    else
-      {
-      for( std::vector<std::string>::reverse_iterator k = link_line.rbegin();
-           k != link_line.rend(); ++k )
+      const std::set<cmStdString>& dep_on = dep_map.find( lib->first )->second;
+      std::set<cmStdString>::iterator i;
+      for( i = dep_on.begin(); i != dep_on.end(); ++i )
         {
-        if( satisfied[lib->first].insert( *k ).second )
+        if( satisfied[lib->first].end() == satisfied[lib->first].find( *i ) )
           {
-          if( addLibDirs )
-            {
-            const char* libpath = mf.GetDefinition( k->c_str() );
-            if( libpath )
-              {
-              // Don't add a link directory that is already present.
-              if(std::find(m_LinkDirectories.begin(),
-                           m_LinkDirectories.end(), libpath) == m_LinkDirectories.end())
-                {
-                m_LinkDirectories.push_back(libpath);
-                }
-              }
-            }
-          std::string linkType = *k;
-          linkType += "_LINK_TYPE";
-          cmTarget::LinkLibraryType llt = cmTarget::GENERAL;
-          const char* linkTypeString = mf.GetDefinition( linkType.c_str() );
-          if(linkTypeString)
-            {
-            if(strcmp(linkTypeString, "debug") == 0)
-              {
-              llt = cmTarget::DEBUG;
-              }
-            if(strcmp(linkTypeString, "optimized") == 0)
-              {
-              llt = cmTarget::OPTIMIZED;
-              }
-            }
-          newLinkLibraries.push_back( std::make_pair(*k,llt) );
+          Emit( *i, dep_map, done, visited, newLinkLibraries );
           }
         }
       }
     }
-  m_LinkLibraries = newLinkLibraries;
+
+  // 4. Add the new libraries to the link line.
+
+  for( std::vector<std::string>::reverse_iterator k = newLinkLibraries.rbegin();
+       k != newLinkLibraries.rend(); ++k )
+    {
+    if( addLibDirs )
+      {
+      const char* libpath = mf.GetDefinition( k->c_str() );
+      if( libpath )
+        {
+        // Don't add a link directory that is already present.
+        if(std::find(m_LinkDirectories.begin(),
+                     m_LinkDirectories.end(), libpath) == m_LinkDirectories.end())
+          {
+          m_LinkDirectories.push_back(libpath);
+          }
+        }
+      }
+    std::string linkType = *k;
+    linkType += "_LINK_TYPE";
+    cmTarget::LinkLibraryType llt = cmTarget::GENERAL;
+    const char* linkTypeString = mf.GetDefinition( linkType.c_str() );
+    if(linkTypeString)
+      {
+      if(strcmp(linkTypeString, "debug") == 0)
+        {
+        llt = cmTarget::DEBUG;
+        }
+      if(strcmp(linkTypeString, "optimized") == 0)
+        {
+        llt = cmTarget::OPTIMIZED;
+        }
+      }
+    m_LinkLibraries.push_back( std::make_pair(*k,llt) );
+    }
 }
 
 

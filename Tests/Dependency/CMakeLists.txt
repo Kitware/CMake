@@ -3,23 +3,6 @@ PROJECT( Dependency )
 # There is one executable that depends on eight libraries. The
 # system has the following dependency graph:
 #
-#                    +----------- NoDepC  <----  EXECUTABLE ---+
-#                    |                            |    |       |
-#                    V                            |    |       |
-#                                                 |    |       |
-#                  NoDepA  <----- NoDepB  <-------+    |       |
-#                                                      |       |
-#                    ^                                 |       V
-#                    |                                 |
-#      One  <------ Four ----->  Two  <----- Five  <---|----- SixB
-#                                |                     |       |
-#       ^           ^  ^         |  ^         ^        |       |
-#       |           |  +-----+   |   \        |        |       |
-#       |           |        |   |    \       |        |       |
-#       +--------- Three  <------+      --- SixA  <----+       |
-#                            |                                 |
-#                            |                                 |
-#                            +---------------------------------+
 # NoDepA:
 # NoDepB: NoDepA
 # NoDepC: NoDepA
@@ -30,14 +13,20 @@ PROJECT( Dependency )
 # Five: Two
 # SixA: Two Five
 # SixB: Four Five
-# Exec: NoDepB NoDepC SixA SixB
+# Seven: Two
+# Eight: Seven
 #
-# The libraries One,...,Five have their dependencies explicitly
+# Exec: NoDepB NoDepC SixA SixB
+# Exec2: Eight Five
+# Exec3: Eight Five
+# Exec4: Five Two
+#
+# The libraries One,...,Eight have their dependencies explicitly
 # encoded. The libraries NoDepA,...,NoDepC do not.
 #
 # Although SixB does not depend on Two, there is a dependency listed
 # in the corresponding CMakeLists.txt just because of commands used.
 
 SUBDIRS( NoDepA NoDepB NoDepC )
-SUBDIRS( One Two Three Four Five Six )
-SUBDIRS( Exec )
+SUBDIRS( One Two Three Four Five Six Seven Eight )
+SUBDIRS( Exec Exec2 Exec3 Exec4 )

@@ -169,7 +169,7 @@ private:
   TargetType m_TargetType;
   std::vector<cmSourceFile*> m_SourceFiles;
   LinkLibraries m_LinkLibraries;
-  std::set<cmStdString> m_PrevLinkedLibraries;
+  LinkLibraries m_PrevLinkedLibraries;
   std::vector<std::string> m_LinkDirectories;
   bool m_InAll;
   std::string m_InstallPath;
