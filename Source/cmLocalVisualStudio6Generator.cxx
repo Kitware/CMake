@@ -85,6 +85,7 @@ void cmLocalVisualStudio6Generator::OutputDSPFile()
         this->SetBuildType(STATIC_LIBRARY, l->first.c_str());
         break;
       case cmTarget::SHARED_LIBRARY:
+      case cmTarget::MODULE_LIBRARY:
         this->SetBuildType(DLL, l->first.c_str());
         break;
       case cmTarget::EXECUTABLE:
@@ -725,8 +726,10 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
     // add libraries to executables and dlls (but never include
     // a library in a library, bad recursion)
     if ((target.GetType() != cmTarget::SHARED_LIBRARY
-         && target.GetType() != cmTarget::STATIC_LIBRARY) || 
-        (target.GetType() == cmTarget::SHARED_LIBRARY && libName != j->first))
+         && target.GetType() != cmTarget::STATIC_LIBRARY 
+         && target.GetType() != cmTarget::MODULE_LIBRARY) || 
+        (target.GetType()==cmTarget::SHARED_LIBRARY && libName != j->first) ||
+        (target.GetType()==cmTarget::MODULE_LIBRARY && libName != j->first))
       {
       std::string lib = j->first;
       if(j->first.find(".lib") == std::string::npos)
