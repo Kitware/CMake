@@ -122,6 +122,7 @@ bool cmIfCommand::InvokeInitialPass(const std::vector<cmListFileArgument>& args)
     err += errorString;
     err += ").";
     this->SetError(err.c_str());
+    delete [] errorString;
     return false;
     }
   
@@ -152,13 +153,16 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
                          char **errorString, const cmMakefile *makefile)
 {
   // check for the different signatures
-  *errorString = "Unknown arguments specified";
   const char *def;
   const char *def2;
+  const char* msg = "Unknown arguments specified";
+  *errorString = new char[strlen(msg) + 1];
+  strcpy(*errorString, msg);
 
   // handle empty invocation
   if (args.size() < 1)
     {
+    delete [] *errorString;
     *errorString = 0;
     return false;
     }
@@ -169,21 +173,22 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
   // test started failing because the minor version went to zero this causes
   // the test to pass
   if (args.size() == 3 &&
-      (makefile->GetDefinition("VTKTIFF_SOURCE_DIR") ||
-       makefile->GetDefinition("ITKTIFF_SOURCE_DIR")) &&
-      args[0] == "CMAKE_MINOR_VERSION" &&
-      args[1] == "MATCHES")
+    (makefile->GetDefinition("VTKTIFF_SOURCE_DIR") ||
+     makefile->GetDefinition("ITKTIFF_SOURCE_DIR")) &&
+    args[0] == "CMAKE_MINOR_VERSION" &&
+    args[1] == "MATCHES")
     {
+    delete [] *errorString;
     *errorString = 0;
     return true;
     }
-  
-  
+
+
   // store the reduced args in this vector
   std::list<std::string> newArgs;
   int reducible;
   unsigned int i;
-  
+
   // copy to the list structure
   for(i = 0; i < args.size(); ++i)
     {   
@@ -191,7 +196,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
     }
   std::list<std::string>::iterator argP1;
   std::list<std::string>::iterator argP2;
-  
+
   // now loop through the arguments and see if we can reduce any of them
   // we do this multiple times. Once for each level of precedence
   do
@@ -263,15 +268,15 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
       }
     }
   while (reducible);
-  
-  
+
+
   // now loop through the arguments and see if we can reduce any of them
   // we do this multiple times. Once for each level of precedence
   do
     {
     reducible = 0;
     std::list<std::string>::iterator arg = newArgs.begin();
-    
+
     while (arg != newArgs.end())
       {
       argP1 = arg;
@@ -279,7 +284,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
       argP2 = argP1;
       argP2++;
       if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
-          *(argP1) == "MATCHES") 
+        *(argP1) == "MATCHES") 
         {
         def = cmIfCommand::GetVariableOrString(arg->c_str(), makefile);
         const char* rex = (argP2)->c_str();
@@ -288,6 +293,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
           {
           cmOStringStream error;
           error << "Regular expression \"" << rex << "\" cannot compile";
+          delete [] *errorString;
           *errorString = new char[error.str().size() + 1];
           strcpy(*errorString, error.str().c_str());
           return false;
@@ -321,8 +327,8 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
         }
 
       if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
-          (*(argP1) == "LESS" || *(argP1) == "GREATER" || 
-           *(argP1) == "EQUAL")) 
+        (*(argP1) == "LESS" || *(argP1) == "GREATER" || 
+         *(argP1) == "EQUAL")) 
         {
         def = cmIfCommand::GetVariableOrString(arg->c_str(), makefile);
         def2 = cmIfCommand::GetVariableOrString((argP2)->c_str(), makefile);
@@ -369,9 +375,9 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
         }
 
       if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
-          (*(argP1) == "STRLESS" || 
-           *(argP1) == "STREQUAL" || 
-           *(argP1) == "STRGREATER")) 
+        (*(argP1) == "STRLESS" || 
+         *(argP1) == "STREQUAL" || 
+         *(argP1) == "STRGREATER")) 
         {
         def = cmIfCommand::GetVariableOrString(arg->c_str(), makefile);
         def2 = cmIfCommand::GetVariableOrString((argP2)->c_str(), makefile);
@@ -411,7 +417,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
     }
   while (reducible);
 
-  
+
   // now loop through the arguments and see if we can reduce any of them
   // we do this multiple times. Once for each level of precedence
   do
@@ -446,7 +452,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
       }
     }
   while (reducible);
-  
+
   // now loop through the arguments and see if we can reduce any of them
   // we do this multiple times. Once for each level of precedence
   do
@@ -460,7 +466,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
       argP2 = argP1;
       argP2++;
       if (argP1 != newArgs.end() && *(argP1) == "AND" && 
-          argP2 != newArgs.end())
+        argP2 != newArgs.end())
         {
         def = cmIfCommand::GetVariableOrNumber(arg->c_str(), makefile);
         def2 = cmIfCommand::GetVariableOrNumber((argP2)->c_str(), makefile);
@@ -482,7 +488,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
         }
 
       if (argP1 != newArgs.end() && *(argP1) == "OR" && 
-          argP2 != newArgs.end())
+        argP2 != newArgs.end())
         {
         def = cmIfCommand::GetVariableOrNumber(arg->c_str(), makefile);
         def2 = cmIfCommand::GetVariableOrNumber((argP2)->c_str(), makefile);
@@ -502,7 +508,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
         argP2++;
         reducible = 1;
         }
-  
+
       ++arg;
       }
     }
@@ -511,6 +517,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
   // now at the end there should only be one argument left
   if (newArgs.size() == 1)
     {
+    delete [] *errorString;
     *errorString = 0;
     if (*newArgs.begin() == "0")
       {
