@@ -12,7 +12,7 @@ IF(UNIX)
 ENDIF(UNIX)
 
 FIND_PROGRAM(TK_WISH
-  NAMES wish wish84 wish8.4 wish83 wish8.3 wish82 wish80
+  NAMES wish wish84 wish8.4 wish83 wish8.3 wish82 wish8.2 wish80
 )
 
 IF (WIN32)
