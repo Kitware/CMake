@@ -107,7 +107,8 @@ void cmVTKWrapJavaCommand::FinalPass()
   std::string wjava = "${VTK_WRAP_JAVA_EXE}";
   std::string pjava = "${VTK_PARSE_JAVA_EXE}";
   std::string hints = "${VTK_WRAP_HINTS}";
-  
+  std::string resultDirectory = "${VTK_JAVA_HOME}";
+
   // wrap all the .h files
   depends.push_back(wjava);
   depends2.push_back(pjava);
@@ -126,7 +127,7 @@ void cmVTKWrapJavaCommand::FinalPass()
                                  res.c_str(), m_LibraryName.c_str());
 
     cmd = pjava + " " + m_WrapHeaders[classNum] + " "
-      + hints + (m_WrapClasses[classNum].IsAnAbstractClass() ? " 0 " : " 1 ") + " > " + m_OriginalNames[classNum] + ".java";
+      + hints + (m_WrapClasses[classNum].IsAnAbstractClass() ? " 0 " : " 1 ") + " > " + resultDirectory + "/" + m_OriginalNames[classNum] + ".java";
     m_Makefile->AddCustomCommand(m_WrapHeaders[classNum].c_str(),
                                  cmd.c_str(), depends2, 
                                  res2.c_str(), m_LibraryName.c_str());
