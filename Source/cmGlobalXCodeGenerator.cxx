@@ -753,6 +753,7 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
           // if the depend is a target then make 
           // the target with the source that is a custom command
           // depend on the that target via a AddUtility call
+          std::cerr << "AddUtility " << target.GetName() << " " << *d << "\n";
           target.AddUtility(d->c_str());
           }
         }
@@ -1265,17 +1266,10 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
     {
     cmTarget* t = this->FindTarget(m_CurrentProject.c_str(),
                                    i->c_str());
-    if(!t)
-      {
-      std::string m = "Error Utility: ";
-      m += *i;
-      m += " not found in project ";
-      m += m_CurrentProject.c_str();
-      m += " it is a utility of ";
-      m += cmtarget->GetName();
-      cmSystemTools::Error(m.c_str());
-      }
-    else
+    // if the target is in this project then make target depend
+    // on it.  It may not be in this project if this is a sub
+    // project from the top.
+    if(t)
       {
       cmXCodeObject* dptarget = this->FindXCodeTarget(t);
       if(dptarget)
