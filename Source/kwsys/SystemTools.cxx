@@ -719,12 +719,14 @@ void SystemTools::ConvertToUnixSlashes(kwsys_stl::string& path)
     pos++;
     }
   // Remove all // from the path just like most unix shells
-  int start_find = 0;
+  int start_find;
 
 #ifdef _WIN32
   // However, on windows if the first characters are both slashes,
   // then keep them that way, so that network paths can be handled.
   start_find = 1;
+#else
+  start_find = 0;
 #endif
 
   while((pos = path.find("//", start_find)) != kwsys_stl::string::npos)
