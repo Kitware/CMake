@@ -123,9 +123,8 @@ int main (int argc, char **argv)
     }
   std::cout << "Done Generating build files.\n";
 
-  cmake cm2;
   std::cout << "Generating build files (again)...\n";
-  if (cm2.Run(args) != 0)
+  if (cm.Run(args) != 0)
     {
     std::cerr << "Error: cmake execution failed\n";
     // return to the original directory
