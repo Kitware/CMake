@@ -31,7 +31,6 @@
 #include "cmEndIfCommand.cxx"
 #include "cmExecProgramCommand.cxx"
 #include "cmFindFileCommand.cxx"
-#include "cmFindIncludeCommand.cxx"
 #include "cmFindLibraryCommand.cxx"
 #include "cmFindPathCommand.cxx"
 #include "cmFindProgramCommand.cxx"
@@ -46,6 +45,7 @@
 #include "cmLinkLibrariesCommand.cxx"
 #include "cmLoadCacheCommand.cxx"
 #include "cmMakeDirectoryCommand.cxx"
+#include "cmMessageCommand.cxx"
 #include "cmOptionCommand.cxx"
 #include "cmProjectCommand.cxx"
 #include "cmSetCommand.cxx"
@@ -88,7 +88,6 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmEndIfCommand);
   commands.push_back(new cmExecProgramCommand);
   commands.push_back(new cmFindFileCommand);
-  commands.push_back(new cmFindIncludeCommand);
   commands.push_back(new cmFindLibraryCommand);
   commands.push_back(new cmFindPathCommand);
   commands.push_back(new cmFindProgramCommand);
@@ -103,6 +102,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmLinkLibrariesCommand);
   commands.push_back(new cmLoadCacheCommand);
   commands.push_back(new cmMakeDirectoryCommand);
+  commands.push_back(new cmMessageCommand);
   commands.push_back(new cmOptionCommand);
   commands.push_back(new cmProjectCommand);
   commands.push_back(new cmSetCommand);
