@@ -13,18 +13,18 @@
   See COPYRIGHT.txt for copyright details.
 
 =========================================================================*/
-#ifndef cmConfigureHeaderCommand_h
-#define cmConfigureHeaderCommand_h
+#ifndef cmConfigureFileNoAutoconf_h
+#define cmConfigureFileNoAutoconf_h
 
 #include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
-class cmConfigureHeaderCommand : public cmCommand
+class cmConfigureFileNoAutoconf : public cmCommand
 {
 public:
   virtual cmCommand* Clone() 
     {
-      return new cmConfigureHeaderCommand;
+      return new cmConfigureFileNoAutoconf;
     }
 
   /**
@@ -36,7 +36,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "CONFIGURE_HEADER";}
+  virtual const char* GetName() { return "CONFIGURE_FILE_NOAUTOCONF";}
 
   /**
    * Succinct documentation.
@@ -54,7 +54,8 @@ public:
       return
         "CONFIGURE_HEADER(InputFile OutputFile)\n"
 	"The Input and Ouput files have to have full paths.\n"
-	"They can also use variables like CMAKE_BINARY_DIR, CMAKE_SOURCE_DIR\n";
+	"They can also use variables like CMAKE_BINARY_DIR,CMAKE_SOURCE_DIR.\n"
+        "This command is only run if autoconf was not used.\n";
     }
 
   /**
@@ -62,6 +63,9 @@ public:
    * all varibles can be expaned.
    */
   virtual void FinalPass();
+private:
+  std::string m_InputFile;
+  std::string m_OuputFile;
 };
 
 

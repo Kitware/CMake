@@ -1,3 +1,8 @@
+// This file is used to compile all the commands
+// that CMake knows about at compile time.
+// This is sort of a boot strapping approach since you would
+// like to have CMake to build CMake.   
+#include "cmCommands.h"
 #include "cmAbstractFilesCommand.cxx"
 #include "cmAddTargetCommand.cxx"
 #include "cmAuxSourceDirectoryCommand.cxx"
@@ -18,3 +23,31 @@
 #include "cmUnixLibrariesCommand.cxx"
 #include "cmWin32DefinesCommand.cxx"
 #include "cmWin32LibrariesCommand.cxx"
+#include "cmConfigureFileNoAutoconf.cxx"
+
+void GetPredefinedCommands(std::list<cmCommand*>& commands)
+{
+  commands.push_back(new cmAbstractFilesCommand);
+  commands.push_back(new cmAddTargetCommand);
+  commands.push_back(new cmAuxSourceDirectoryCommand);
+  commands.push_back(new cmExecutablesCommand);
+  commands.push_back(new cmFindIncludeCommand);
+  commands.push_back(new cmFindLibraryCommand);
+  commands.push_back(new cmFindProgramCommand);
+  commands.push_back(new cmIncludeDirectoryCommand);
+  commands.push_back(new cmLibraryCommand);
+  commands.push_back(new cmLinkDirectoriesCommand);
+  commands.push_back(new cmLinkLibrariesCommand);
+  commands.push_back(new cmProjectCommand);
+  commands.push_back(new cmSourceFilesCommand);
+  commands.push_back(new cmSourceFilesRequireCommand);
+  commands.push_back(new cmSubdirCommand);
+  commands.push_back(new cmTestsCommand);
+  commands.push_back(new cmUnixDefinesCommand);
+  commands.push_back(new cmUnixLibrariesCommand);
+  commands.push_back(new cmWin32DefinesCommand);
+  commands.push_back(new cmWin32LibrariesCommand);
+  commands.push_back(new cmConfigureFileNoAutoconf);
+}
+
+  

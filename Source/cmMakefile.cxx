@@ -20,27 +20,7 @@
 #include "cmDirectory.h"
 #include "cmSystemTools.h"
 #include "cmMakefileGenerator.h"
-
-#include "cmAbstractFilesCommand.h"
-#include "cmAddTargetCommand.h"
-#include "cmAuxSourceDirectoryCommand.h"
-#include "cmExecutablesCommand.h"
-#include "cmFindIncludeCommand.h"
-#include "cmFindLibraryCommand.h"
-#include "cmFindProgramCommand.h"
-#include "cmIncludeDirectoryCommand.h"
-#include "cmLibraryCommand.h"
-#include "cmLinkDirectoriesCommand.h"
-#include "cmLinkLibrariesCommand.h"
-#include "cmProjectCommand.h"
-#include "cmSourceFilesCommand.h"
-#include "cmSourceFilesRequireCommand.h"
-#include "cmSubdirCommand.h"
-#include "cmUnixDefinesCommand.h"
-#include "cmUnixLibrariesCommand.h"
-#include "cmWin32DefinesCommand.h"
-#include "cmWin32LibrariesCommand.h"
-#include "cmTestsCommand.h"
+#include "cmCommands.h"
 
 // default is not to be building executables
 cmMakefile::cmMakefile()
@@ -53,26 +33,13 @@ cmMakefile::cmMakefile()
 
 void cmMakefile::AddDefaultCommands()
 {
-  this->AddCommand(new cmAbstractFilesCommand);
-  this->AddCommand(new cmAddTargetCommand);
-  this->AddCommand(new cmAuxSourceDirectoryCommand);
-  this->AddCommand(new cmExecutablesCommand);
-  this->AddCommand(new cmFindIncludeCommand);
-  this->AddCommand(new cmFindLibraryCommand);
-  this->AddCommand(new cmFindProgramCommand);
-  this->AddCommand(new cmIncludeDirectoryCommand);
-  this->AddCommand(new cmLibraryCommand);
-  this->AddCommand(new cmLinkDirectoriesCommand);
-  this->AddCommand(new cmLinkLibrariesCommand);
-  this->AddCommand(new cmProjectCommand);
-  this->AddCommand(new cmSourceFilesCommand);
-  this->AddCommand(new cmSourceFilesRequireCommand);
-  this->AddCommand(new cmSubdirCommand);
-  this->AddCommand(new cmUnixLibrariesCommand);
-  this->AddCommand(new cmUnixDefinesCommand);
-  this->AddCommand(new cmWin32LibrariesCommand);
-  this->AddCommand(new cmWin32DefinesCommand);
-  this->AddCommand(new cmTestsCommand);
+  std::list<cmCommand*> commands;
+  GetPredefinedCommands(commands);
+  for(std::list<cmCommand*>::iterator i = commands.begin();
+      i != commands.end(); ++i)
+    {
+    this->AddCommand(*i);
+    }
 #ifdef _WIN32
   this->AddDefinition("WIN32", "1");
 #else
@@ -147,7 +114,11 @@ bool cmMakefile::ReadMakefile(const char* filename, bool inheriting)
     cmSystemTools::ConvertToUnixSlashes(m_cmCurrentDirectory);
     m_SourceHomeDirectory = m_cmHomeDirectory;
     cmSystemTools::ConvertToUnixSlashes(m_SourceHomeDirectory);
-    this->ParseDirectory(m_cmCurrentDirectory.c_str());
+    // if this is already the top level directory then 
+    if(m_SourceHomeDirectory != m_cmCurrentDirectory)
+      {
+      this->ParseDirectory(m_cmCurrentDirectory.c_str());
+      }
     }
   // Now read the input file
   std::ifstream fin(filename);
@@ -180,7 +151,7 @@ bool cmMakefile::ReadMakefile(const char* filename, bool inheriting)
           cmCommand* usedCommand = rm->Clone();
           usedCommand->SetMakefile(this);
           usedCommand->LoadCache();
-          m_UsedCommands.push_back(usedCommand);
+          bool keepCommand = false;
           if(usedCommand->GetEnabled())
             {
             // if not running in inherit mode or
@@ -191,7 +162,19 @@ bool cmMakefile::ReadMakefile(const char* filename, bool inheriting)
                 {
                 cmSystemTools::Error(usedCommand->GetError());
                 }
+              else
+                {
+                // use the command
+                keepCommand = true;
+                m_UsedCommands.push_back(usedCommand);
+                }
               }
+            }
+          // if the Cloned command was not used 
+          // then delete it
+          if(!keepCommand)
+            {
+            delete usedCommand;
             }
           }
         else
@@ -203,6 +186,7 @@ bool cmMakefile::ReadMakefile(const char* filename, bool inheriting)
     }
   return true;
 }
+
   
 
 void cmMakefile::AddCommand(cmCommand* wg)
@@ -326,6 +310,7 @@ void cmMakefile::ParseDirectory(const char* dir)
     return;
     }
 
+
   std::string dotdotDir = dir;
   std::string::size_type pos = dotdotDir.rfind('/');
   if(pos != std::string::npos)
@@ -341,25 +326,23 @@ void cmMakefile::ParseDirectory(const char* dir)
 
 void cmMakefile::ExpandVaribles()
 {
-   // Now replace varibles
+  // make sure binary and source dir are defined
+  this->AddDefinition("CMAKE_BINARY_DIR", this->GetOutputDirectory());
+  this->AddDefinition("CMAKE_SOURCE_DIR", this->GetHomeDirectory());
+
+   // Now expand varibles in the include and link strings
   std::vector<std::string>::iterator j, begin, end;
   begin = m_IncludeDirectories.begin();
   end = m_IncludeDirectories.end();
   for(j = begin; j != end; ++j)
     {
-    cmSystemTools::ReplaceString(*j, "${CMAKE_BINARY_DIR}",
-				 this->GetOutputHomeDirectory() );
-    cmSystemTools::ReplaceString(*j, "${CMAKE_SOURCE_DIR}",
-				 this->GetHomeDirectory() );
+    this->ExpandVariblesInString(*j);
     }
   begin = m_LinkDirectories.begin();
   end = m_LinkDirectories.end();
   for(j = begin; j != end; ++j)
     {
-    cmSystemTools::ReplaceString(*j, "${CMAKE_BINARY_DIR}",
-				 this->GetOutputHomeDirectory() );
-    cmSystemTools::ReplaceString(*j, "${CMAKE_SOURCE_DIR}",
-                                 this->GetHomeDirectory() );
+    this->ExpandVariblesInString(*j);
     }
 }
 
@@ -401,5 +384,19 @@ int cmMakefile::DumpDocumentationToFile(const char *fileName)
   
 
   return 1;
+}
+
+
+void cmMakefile::ExpandVariblesInString(std::string& source)
+{
+  for(DefinitionMap::iterator i = m_Definitions.begin();
+      i != m_Definitions.end(); ++i)
+    {
+    std::string variable = "${";
+    variable += (*i).first;
+    variable += "}";
+    cmSystemTools::ReplaceString(source, variable.c_str(),
+                                 (*i).second.c_str());
+    }
 }
 

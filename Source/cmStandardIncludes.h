@@ -39,6 +39,7 @@
 #include <algorithm>
 #include <functional>
 #include <map>
+#include <list>
 
 #ifdef CMAKE_NO_STD_NAMESPACE
 #define std 

@@ -306,6 +306,13 @@ public:
    */
   int DumpDocumentationToFile(const char *fileName);
 
+  /**
+   * Expand all defined varibles in the string.  
+   * Defined varibles come from the m_Definitions map.
+   * They are expanded with ${var} where var is the
+   * entry in the m_Definitions map.
+   */
+  void ExpandVariblesInString(std::string& source);
 protected:
   bool m_Executables;
   std::string m_Prefix;

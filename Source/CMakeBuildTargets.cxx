@@ -47,6 +47,7 @@ int main(int ac, char** av)
 	{
 	std::string path = arg.substr(2);
 	mf.SetOutputHomeDirectory(path.c_str());
+	mf.SetOutputDirectory(path.c_str());
 	}
       // Set the source home directory with a -H dir option
       if(arg.find("-H",0) == 0)
@@ -57,6 +58,7 @@ int main(int ac, char** av)
       }
     }
   mf.SetMakefileGenerator(new cmUnixMakefileGenerator);
+
   // Read and parse the input makefile
   if(!mf.ReadMakefile(av[1]))
     {

@@ -252,20 +252,6 @@ void CMakeSetupDialog::OnOK()
     m_WhereBuild = m_WhereSource;
     }
   
-  // configure the system for VC60
-  cmWindowsConfigure config;
-  config.SetWhereSource(m_WhereSource);
-  config.SetWhereBuild(m_WhereBuild);
-  std::string configSrc;
-  configSrc = m_WhereSource;
-  configSrc += "/CMakeSetupConfig.MSC";
-  if(!config.Configure(configSrc.c_str()))
-    { 
-    std::string error = "Warning: MSC configure input not found: ";
-    error += configSrc;
-    ::MessageBox(0, error.c_str(), "config ERROR", MB_OK);
-    }
-
   cmMakefile mf;
   mf.SetMakefileGenerator(new cmMSProjectGenerator);
   mf.SetHomeDirectory(m_WhereSource);

@@ -264,8 +264,8 @@ bool cmSystemTools::ParseFunction(std::ifstream& fin,
 void cmSystemTools::GetArguments(std::string& line,
                                  std::vector<std::string>& arguments)
 {
-  cmRegularExpression argument("[\t ]*([-/\\\\{}\\$A-Za-z_0-9]+)[\t ]*");
-  cmRegularExpression argumentWithSpaces("[\t ]*\"([- /\\\\{}\\$A-Za-z_0-9]+)\"[\t ]*");
+  cmRegularExpression argument("[\t ]*([-/\\.\\\\{}\\$A-Za-z_0-9]+)[\t ]*");
+  cmRegularExpression argumentWithSpaces("[\t ]*\"([-\\. /\\\\{}\\$A-Za-z_0-9]+)\"[\t ]*");
   std::string arg(" ");
   while(arg.length() )
     {
@@ -308,3 +308,4 @@ void cmSystemTools::Error(const char* m1, const char* m2)
   std::cerr << message.c_str() << std::endl;
 #endif
 }
+
