@@ -184,11 +184,11 @@ int cmCTestScriptHandler::ExtractVariables()
       this->m_CTestCmd.empty())
     {
     std::string message = "CTEST_SOURCE_DIRECTORY = ";
-    message += (!m_SourceDir.empty()) ? m_SourceDir : "(Null)";
+    message += (!m_SourceDir.empty()) ? m_SourceDir.c_str() : "(Null)";
     message += "\nCTEST_BINARY_DIRECTORY = ";
-    message += (!m_BinaryDir.empty()) ? m_BinaryDir : "(Null)";
+    message += (!m_BinaryDir.empty()) ? m_BinaryDir.c_str() : "(Null)";
     message += "\nCTEST_CMAKE_COMMAND = ";
-    message += (!m_CTestCmd.empty()) ? m_CTestCmd : "(Null)";
+    message += (!m_CTestCmd.empty()) ? m_CTestCmd.c_str() : "(Null)";
     cmSystemTools::Error(
       "Some required settings in the configuration file were missing:\n",
       message.c_str());
