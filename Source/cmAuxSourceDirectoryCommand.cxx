@@ -32,6 +32,14 @@ bool cmAuxSourceDirectoryCommand::InitialPass(std::vector<std::string> const& ar
   std::string tdir = m_Makefile->GetCurrentDirectory();
   tdir += "/";
   tdir += templateDirectory;
+
+  // was the list already populated
+  const char *def = m_Makefile->GetDefinition(args[1].c_str());  
+  if (def)
+    {
+    sourceListValue = def;
+    }
+  
   // Load all the files in the directory
   cmDirectory dir;
   if(dir.Load(tdir.c_str()))
