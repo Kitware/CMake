@@ -11,6 +11,7 @@ class CPropertyItem
 {
 // Attributes
 public:
+  CString m_HelpString;
   CString m_propName;
   CString m_curValue;
   int m_nItemType;
@@ -18,8 +19,10 @@ public:
   bool m_Removed;
 public:
   CPropertyItem(CString propName, CString curValue,
+                CString helpString,
                 int nItemType, CString cmbItems)
     {
+      m_HelpString = helpString;
       m_Removed = false;
       m_propName = propName;
       m_curValue = curValue;
@@ -55,6 +58,7 @@ public:
   int AddItem(CString txt);
   int AddProperty(const char* name,
                   const char* value,
+                  const char* helpString,
                   int type,
                   const char* comboItems);
   std::set<CPropertyItem*> GetItems() 
@@ -95,6 +99,7 @@ protected:
   afx_msg void OnChangeEditBox();
   afx_msg void OnButton();
   afx_msg void OnDelete();
+  afx_msg void OnHelp();
   afx_msg void OnCheckBox();
 
   DECLARE_MESSAGE_MAP()

@@ -388,25 +388,33 @@ void CMakeSetupDialog::FillCacheGUIFromCacheManager()
           {
           m_CacheEntriesList.AddProperty(key,
                                          "ON",
+                                         value.m_HelpString.c_str(),
                                          CPropertyList::CHECKBOX,"");
           }
         else
           {
           m_CacheEntriesList.AddProperty(key,
                                          "OFF",
+                                         value.m_HelpString.c_str(),
                                          CPropertyList::CHECKBOX,"");
           }
         break;
       case cmCacheManager::PATH:
-        m_CacheEntriesList.AddProperty(key, value.m_Value.c_str(),
+        m_CacheEntriesList.AddProperty(key, 
+                                       value.m_Value.c_str(),
+                                       value.m_HelpString.c_str(),
                                        CPropertyList::PATH,"");
         break;
       case cmCacheManager::FILEPATH:
-        m_CacheEntriesList.AddProperty(key, value.m_Value.c_str(),
+        m_CacheEntriesList.AddProperty(key, 
+                                       value.m_Value.c_str(),
+                                       value.m_HelpString.c_str(),
                                        CPropertyList::FILE,"");
         break;
       case cmCacheManager::STRING:
-        m_CacheEntriesList.AddProperty(key, value.m_Value.c_str(),
+        m_CacheEntriesList.AddProperty(key,
+                                       value.m_Value.c_str(),
+                                       value.m_HelpString.c_str(),
                                        CPropertyList::EDIT,"");
         break;
       case cmCacheManager::INTERNAL:

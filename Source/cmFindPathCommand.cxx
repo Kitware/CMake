@@ -61,6 +61,7 @@ bool cmFindPathCommand::Invoke(std::vector<std::string>& args)
       m_Makefile->AddDefinition(args[0].c_str(), path[k].c_str());  
       cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
                                                    path[k].c_str(),
+                                                   "Find a path.",
                                                    cmCacheManager::PATH);
       return true;
       }
@@ -68,6 +69,7 @@ bool cmFindPathCommand::Invoke(std::vector<std::string>& args)
   
   cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
                                                "NOTFOUND",
+                                               "Find a path.",
                                                cmCacheManager::PATH);
   return true;
 }

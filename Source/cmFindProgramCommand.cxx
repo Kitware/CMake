@@ -66,6 +66,7 @@ bool cmFindProgramCommand::Invoke(std::vector<std::string>& args)
       // Save the value in the cache
       cmCacheManager::GetInstance()->AddCacheEntry(define,
                                                    tryPath.c_str(),
+                                                   "Path to a program.",
                                                    cmCacheManager::FILEPATH);
       m_Makefile->AddDefinition(define, tryPath.c_str());
       return true;

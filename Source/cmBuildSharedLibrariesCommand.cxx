@@ -24,7 +24,11 @@ bool cmBuildSharedLibrariesCommand::Invoke(std::vector<std::string>& args)
     = cmCacheManager::GetInstance()->GetCacheValue("BUILD_SHARED_LIBS");
   if(!cacheValue)
     {
-    cmCacheManager::GetInstance()->AddCacheEntry("BUILD_SHARED_LIBS",false);
+    cmCacheManager::GetInstance()->
+      AddCacheEntry("BUILD_SHARED_LIBS",
+                    false,
+                    "If ON, the resulting project or makefiles will "
+                    "produce shared libraries.");
     m_Makefile->AddDefinition("BUILD_SHARED_LIBS", false);
     }
   else

@@ -44,6 +44,7 @@ BEGIN_MESSAGE_MAP(CPropertyList, CListBox)
   ON_BN_CLICKED(IDC_PROPBTNCTRL, OnButton)
   ON_BN_CLICKED(IDC_PROPCHECKBOXCTRL, OnCheckBox)
   ON_COMMAND(42, OnDelete)
+  ON_COMMAND(43, OnHelp)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -123,6 +124,7 @@ int CPropertyList::AddPropItem(CPropertyItem* pItem)
 
 int CPropertyList::AddProperty(const char* name,
                                const char* value,
+                               const char* helpString,
                                int type,
                                const char* comboItems)
 { 
@@ -136,6 +138,7 @@ int CPropertyList::AddProperty(const char* name,
       if(pItem->m_curValue != value)
         {
         pItem->m_curValue = value;
+        pItem->m_HelpString = helpString;
         m_Dirty = true;
         Invalidate();
         }
@@ -154,13 +157,14 @@ int CPropertyList::AddProperty(const char* name,
       pItem = *p;
       pItem->m_Removed = false;
       pItem->m_curValue = value; 
+      pItem->m_HelpString = helpString;
       Invalidate();
       }
     }
   // if it is not found, then create a new one
   if(!pItem)
     {
-    pItem = new CPropertyItem(name, value, type, comboItems);
+    pItem = new CPropertyItem(name, value, helpString, type, comboItems);
     }
   
   return this->AddPropItem(pItem);
@@ -615,6 +619,7 @@ void CPropertyList::OnRButtonUp( UINT nFlags, CPoint point )
   m_curSel = ItemFromPoint(point,loc);
   menu.CreatePopupMenu();
   menu.AppendMenu(MF_STRING | MF_ENABLED, 42, "Delete Cache Entry");
+  menu.AppendMenu(MF_STRING | MF_ENABLED, 43, "Help For Cache Entry");
   menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, 
                       rect.TopLeft().x + point.x,
                       rect.TopLeft().y + point.y, this, NULL);
@@ -627,6 +632,12 @@ void CPropertyList::OnDelete()
   pItem->m_Removed = true;
   this->DeleteString(m_curSel);
   Invalidate();
+}
+
+void CPropertyList::OnHelp()
+{ 
+  CPropertyItem* pItem = (CPropertyItem*) GetItemDataPtr(m_curSel);
+  MessageBox(pItem->m_HelpString);
 }
 
 void CPropertyList::RemoveAll()

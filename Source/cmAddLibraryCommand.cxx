@@ -34,7 +34,7 @@ bool cmAddLibraryCommand::Invoke(std::vector<std::string>& args)
   cmCacheManager::GetInstance()->
     AddCacheEntry(args[0].c_str(),
                   m_Makefile->GetCurrentOutputDirectory(),
-                  cmCacheManager::INTERNAL);
+                  "Path to a library", cmCacheManager::INTERNAL);
   return true;
 }
 

@@ -30,7 +30,9 @@ bool cmOptionCommand::Invoke(std::vector<std::string>& args)
     = cmCacheManager::GetInstance()->GetCacheValue(args[0].c_str());
   if(!cacheValue)
     {
-    cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),false);
+    cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
+                                                 false,
+                                                 "Option command");
     m_Makefile->AddDefinition(args[0].c_str(), "0");
     }
   else

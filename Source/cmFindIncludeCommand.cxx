@@ -69,19 +69,23 @@ bool cmFindIncludeCommand::Invoke(std::vector<std::string>& args)
       m_Makefile->AddDefinition(args[0].c_str(), path[k].c_str());
       cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
                                                    path[k].c_str(),
+                                                   "Find an include path.",
                                                    cmCacheManager::PATH);
       m_Makefile->AddDefinition(args[1].c_str(), args[2].c_str());
       cmCacheManager::GetInstance()->AddCacheEntry(args[1].c_str(),
                                                    args[2].c_str(),
+                                                   "Find an include path.",
                                                    cmCacheManager::PATH);
       return true;
       }
     }
   cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
                                                "NOTFOUND",
+                                               "Find an include path.",
                                                cmCacheManager::PATH);
   cmCacheManager::GetInstance()->AddCacheEntry(args[1].c_str(),
                                                "NOTFOUND",
+                                               "Find an include path.",
                                                cmCacheManager::PATH);
   std::string message = "Include not found: ";
   message += args[1];

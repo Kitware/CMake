@@ -88,6 +88,15 @@ bool cmCacheManager::LoadCache(const char* path)
       {
       continue;
       }
+    while(buffer[0] == '/')
+      {
+      e.m_HelpString += &buffer[2];
+      fin.getline(buffer, bsize);
+      if(!fin)
+        {
+        continue;
+        }
+      }
     if(reg.find(buffer))
       {
       e.m_Type = cmCacheManager::StringToType(reg.match(2).c_str());
@@ -135,11 +144,13 @@ bool cmCacheManager::SaveCache(const char* path) const
   for( std::map<std::string, CacheEntry>::const_iterator i = m_Cache.begin();
        i != m_Cache.end(); ++i)
     {
-    CacheEntryType t = (*i).second.m_Type;
+    const CacheEntry& ce = (*i).second;
+    CacheEntryType t = ce.m_Type;
     // Format is key:type=value
+    cmCacheManager::OutputHelpString(fout, ce.m_HelpString);
     fout << (*i).first.c_str() << ":"
          << cmCacheManagerTypes[t] << "="
-         << (*i).second.m_Value << "\n";
+         << ce.m_Value << "\n";
     }
   fout << "\n";
   fout.close();
@@ -149,20 +160,45 @@ bool cmCacheManager::SaveCache(const char* path) const
   return true;
 }
 
+void cmCacheManager::OutputHelpString(std::ofstream& fout, 
+                                      const std::string& helpString)
+{
+  std::string::size_type end = helpString.size();
+  if(end == 0)
+    {
+    return;
+    }
+  std::string oneLine;
+  std::string::size_type pos = 0;
+  std::string::size_type nextBreak = 60;
+  bool done = false;
+
+  while(!done)
+    {
+    if(nextBreak >= end)
+      {
+      nextBreak = end;
+      done = true;
+      }
+    else
+      {
+      while(nextBreak < end && helpString[nextBreak] != ' ')
+        {
+        nextBreak++;
+        }
+      }
+    oneLine = helpString.substr(pos, nextBreak - pos);
+    fout << "//" << oneLine.c_str() << "\n";
+    pos = nextBreak;
+    nextBreak += 60;
+    }
+}
+
 void cmCacheManager::RemoveCacheEntry(const char* key)
 {
   m_Cache.erase(key);
 }
 
-void cmCacheManager::AddCacheEntry(const char* key, 
-				   const char* value, 
-				   CacheEntryType type)
-{
-  CacheEntry e;
-  e.m_Value = value;
-  e.m_Type = type;
-  m_Cache[key] = e;
-}
 
 cmCacheManager::CacheEntry *cmCacheManager::GetCacheEntry(const char* key)
 {
@@ -210,15 +246,28 @@ void cmCacheManager::PrintCache(std::ostream& out) const
 }
 
 
-void cmCacheManager::AddCacheEntry(const char* key, bool v)
+void cmCacheManager::AddCacheEntry(const char* key, 
+                                   const char* value, 
+                                   const char* helpString,
+				   CacheEntryType type)
+{
+  CacheEntry e;
+  e.m_Value = value;
+  e.m_Type = type;
+  e.m_HelpString = helpString;
+  m_Cache[key] = e;
+}
+
+void cmCacheManager::AddCacheEntry(const char* key, bool v, 
+                                   const char* helpString)
 {
   if(v)
     {
-    this->AddCacheEntry(key, "ON", cmCacheManager::BOOL);
+    this->AddCacheEntry(key, "ON", helpString, cmCacheManager::BOOL);
     }
   else
     {
-    this->AddCacheEntry(key, "OFF", cmCacheManager::BOOL);
+    this->AddCacheEntry(key, "OFF", helpString, cmCacheManager::BOOL);
     }
 }
 

@@ -29,10 +29,10 @@ class cmCacheManager
 {
 public:
   enum CacheEntryType{ BOOL=0, PATH, FILEPATH, STRING, INTERNAL  };
-  class CacheEntry
+  struct CacheEntry
   {
-  public:
     std::string m_Value;
+    std::string m_HelpString;
     CacheEntryType m_Type;
   };
 public:
@@ -60,10 +60,11 @@ public:
   bool SaveCache(const char* path) const;
   
   //! Add an entry into the cache
-  void AddCacheEntry(const char* key, const char* value, CacheEntryType type);
+  void AddCacheEntry(const char* key, const char* value, 
+                     const char* helpString, CacheEntryType type);
 
   //! Add a BOOL entry into the cache
-  void AddCacheEntry(const char* key, bool);
+  void AddCacheEntry(const char* key, bool, const char* helpString);
   
   //! Remove an entry from the cache
   void RemoveCacheEntry(const char* key);
@@ -85,6 +86,8 @@ public:
   const CacheEntryMap &GetCacheMap() const { return m_Cache; }
   
 private:
+  static void OutputHelpString(std::ofstream& fout, 
+                               const std::string& helpString);
   static cmCacheManager* s_Instance;
   CacheEntryMap m_Cache;
 };

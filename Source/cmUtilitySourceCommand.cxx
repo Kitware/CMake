@@ -76,6 +76,7 @@ bool cmUtilitySourceCommand::Invoke(std::vector<std::string>& args)
   // Enter the value into the cache.
   cmCacheManager::GetInstance()->AddCacheEntry(cacheEntry.c_str(),
                                                utilityExecutable.c_str(),
+                                               "Path to an internal program.",
                                                cmCacheManager::FILEPATH);
   
   // Set the definition in the makefile.
