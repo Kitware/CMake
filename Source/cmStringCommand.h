@@ -79,14 +79,14 @@ public:
       "  STRING(COMPARE GREATER <string1> <string2> <output variable>)\n"
       "  STRING(ASCII <number> [<number> ...] <output variable>)\n"
       "REGEX MATCH will match the regular expression once and store the "
-      "match in the output variable.\n\n"
+      "match in the output variable.\n"
       "REGEX MATCHALL will match the regular expression as many times as "
-      "possible and store the matches in the output variable as a list.\n\n"
+      "possible and store the matches in the output variable as a list.\n"
       "REGEX REPLACE will match the regular expression as many times as "
       "possible and substitute the replacement expression for the match "
-      "in the output.\n\n"
+      "in the output.\n"
       "COMPARE EQUAL/NOTEQUAL/LESS/GREATER will compare the strings and "
-      "store true or false in the output variable.\n\n"
+      "store true or false in the output variable.\n"
       "ASCII will convert all numbers into corresponding ASCII characters.";
     }
   
