@@ -10,7 +10,7 @@ ENABLE_TESTING()
 
 # Include the standard Dart testing module
 INCLUDE (${CMake_SOURCE_DIR}/Modules/Dart.cmake)
-INCLUDE (${CMAKE_BINARY_DIR}/Source/InitialConfigureFlags.cmake OPTIONAL)
+INCLUDE (${CMake_BINARY_DIR}/Source/InitialConfigureFlags.cmake OPTIONAL)
 
 IF(CMAKE_CONFIGURE_INSTALL_PREFIX)
   SET(CMAKE_INSTALL_PREFIX ${CMAKE_CONFIGURE_INSTALL_PREFIX} )
@@ -40,3 +40,8 @@ SET(EXECUTABLE_OUTPUT_PATH ${CMake_BINARY_DIR}/Source CACHE PATH
 INCLUDE_REGULAR_EXPRESSION("^(\\.\\./)?(cm|CMake|form|ctest).*")
 
 INSTALL_FILES(/man/man1 "cmake\\.1")
+
+CONFIGURE_FILE(${CMake_SOURCE_DIR}/Tests/.NoDartCoverage
+               ${CMake_BINARY_DIR}/Tests/.NoDartCoverage)
+CONFIGURE_FILE(${CMake_SOURCE_DIR}/Tests/.NoDartCoverage
+               ${CMake_BINARY_DIR}/Modules/.NoDartCoverage)
