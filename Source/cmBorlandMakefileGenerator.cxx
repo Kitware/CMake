@@ -312,7 +312,7 @@ void cmBorlandMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout,
   target = cmSystemTools::EscapeSpaces(target.c_str());
   std::string depend = "$(";
   depend += std::string(name) + "_SRC_OBJS)";
-  std::string command = "tlib  @&&|\n\t /p256 /a ";
+  std::string command = "tlib  @&&|\n\t /p512 /a ";
   command += target;
   command += " ";
   std::string deleteCommand = "if exist ";
