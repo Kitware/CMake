@@ -620,8 +620,11 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
         {
         fout << "\t\t\t\tGenerateDebugInformation=\"TRUE\"\n";
         }
-      fout << "\t\t\t\tStackReserveSize=\"" 
-           << m_Makefile->GetDefinition("CMAKE_CXX_STACK_SIZE") << "\"\n";
+      if(const char* stacksize = m_Makefile->GetDefinition("CMAKE_CXX_STACK_SIZE"))
+        {
+        fout << "\t\t\t\tStackReserveSize=\"" 
+             << stacksize << "\"\n";
+        }
       temp = m_LibraryOutputPath;
       temp += configName;
       temp += "/";
@@ -680,8 +683,11 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
         {      
         fout << "\t\t\t\tSubSystem=\"1\"\n";
         }
-      fout << "\t\t\t\tStackReserveSize=\"" 
-           << m_Makefile->GetDefinition("CMAKE_CXX_STACK_SIZE") << "\"/>\n";
+      if(const char* stacksize = m_Makefile->GetDefinition("CMAKE_CXX_STACK_SIZE"))
+        {
+        fout << "\t\t\t\tStackReserveSize=\"" 
+             << stacksize << "\"/>\n";
+        }
       break;
     case cmTarget::UTILITY:
       break;
