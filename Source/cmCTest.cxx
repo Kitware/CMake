@@ -90,6 +90,8 @@ static const char* cmCTestErrorMatches[] = {
   "([^ :]+):([0-9]+): ([^ \\t])",
   "([^:]+): error[ \\t]*[0-9]+[ \\t]*:",
   "^Error ([0-9]+):",
+  "^Fatal",
+  "^Error: ",
   "^Error ",
   "^\"[^\"]+\", line [0-9]+: [^Ww]",
   "^cc[^C]*CC: ERROR File = ([^,]+), Line = ([0-9]+)",
@@ -106,10 +108,21 @@ static const char* cmCTestErrorMatches[] = {
   "^Undefined[ \\t]+first referenced",
   "^CMake Error:",
   ":[ \\t]cannot find",
+  ":[ \\t]can't find",
+  ": \\*\\*\\* No rule to make target \\`.*\\'.  Stop",
+  ": Invalid loader fixup for symbol",
+  ": internal link edit command failed",
+  ": Unrecognized option \\`.*\\'",
   0
 };
 
 static const char* cmCTestErrorExceptions[] = {
+  "instantiated from ",
+  "candidates are:",
+  ": warning",
+  "makefile:",
+  "Makefile:",
+  ":[ \\t]+Where:",
   0
 };
 
@@ -141,9 +154,9 @@ static const char* cmCTestWarningExceptions[] = {
   "bind_at_load",
   "XrmQGetResource",
   "IceFlush",
-  "warning LNK4089: all references to .GDI32.dll. discarded by .OPT:REF",
-  "warning LNK4089: all references to .USER32.dll. discarded by .OPT:REF",
+  "warning LNK4089: all references to [^ \\t]+ discarded by .OPT:REF",
   "ld32: WARNING 85: definition of dataKey in",
+  "cc: warning 422: Unknown option \"\\+b\\.\" ignored", 
   0
 };
 
