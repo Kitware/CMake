@@ -376,6 +376,10 @@ void cmDSPMakefile::SetBuildType(BuildType b)
     {
     cmSystemTools::Error("Error Reading ", m_DSPHeaderTemplate.c_str());
     }
+
+  // reset m_Configurations
+  m_Configurations.erase(m_Configurations.begin(), m_Configurations.end());
+  // now add all the configurations possible
   char buffer[2048];
   while(fin)
     {
