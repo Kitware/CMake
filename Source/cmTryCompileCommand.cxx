@@ -15,9 +15,9 @@
 
 =========================================================================*/
 #include "cmTryCompileCommand.h"
+#include "cmake.h"
 #include "cmCacheManager.h"
 #include "cmListFileCache.h"
-
 #include <cmsys/Directory.hxx>
 
 int cmTryCompileCommand::CoreTryCompileCode(
@@ -236,9 +236,11 @@ int cmTryCompileCommand::CoreTryCompileCode(
   if (srcFileSignature && clean)
     {    
     cmListFileCache::GetInstance()->FlushCache(outFileName.c_str());
-    cmTryCompileCommand::CleanupFiles(binaryDirectory);
+    if(!mf->GetCMakeInstance()->GetDebugTryCompile())
+      {
+      cmTryCompileCommand::CleanupFiles(binaryDirectory);
+      }
     }
-  
   return res;
 }
 
@@ -266,6 +268,7 @@ void cmTryCompileCommand::CleanupFiles(const char* binDir)
     {
     return;
     }
+  
   std::string bdir = binDir;
   if(bdir.find("CMakeTmp") == std::string::npos)
     {

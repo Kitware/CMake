@@ -73,11 +73,6 @@ std::string cmLocalGenerator::ConvertToRelativeOutputPath(const char* p)
     m_CurrentOutputDirectory = m_Makefile->GetCurrentOutputDirectory();
     m_HomeOutputDirectory =  m_Makefile->GetHomeOutputDirectory();
     m_HomeDirectory = m_Makefile->GetHomeDirectory();
-#if defined(_WIN32) || defined(__APPLE__)
-    m_CurrentOutputDirectory = cmSystemTools::LowerCase(m_CurrentOutputDirectory);
-    m_HomeOutputDirectory = cmSystemTools::LowerCase(m_HomeOutputDirectory);
-    m_HomeDirectory = cmSystemTools::LowerCase(m_HomeDirectory);
-#endif
     if(m_RelativePathToSourceDir.size() == 0)
       {
       m_RelativePathToSourceDir = cmSystemTools::RelativePath(
@@ -102,16 +97,53 @@ std::string cmLocalGenerator::ConvertToRelativeOutputPath(const char* p)
 
   // Do the work of converting to a relative path 
   std::string pathIn = p;
-#if defined(_WIN32) || defined(__APPLE__)
-  pathIn = cmSystemTools::LowerCase(pathIn);
-#endif
-
   std::string ret = pathIn;
-  cmSystemTools::ReplaceString(ret, m_CurrentOutputDirectory.c_str(), "");
-  cmSystemTools::ReplaceString(ret, m_HomeDirectory.c_str(),
-                               m_RelativePathToSourceDir.c_str());
-  cmSystemTools::ReplaceString(ret, m_HomeOutputDirectory.c_str(),
-                               m_RelativePathToBinaryDir.c_str());
+  if(m_CurrentOutputDirectory.size() <= ret.size())
+    {
+    std::string sub = ret.substr(0, m_CurrentOutputDirectory.size());
+    if(
+#if defined(_WIN32) || defined(__APPLE__)
+      cmSystemTools::LowerCase(sub) ==
+      cmSystemTools::LowerCase(m_CurrentOutputDirectory)
+#else
+      sub == m_CurrentOutputDirectory
+#endif
+      )
+      {
+      ret = ret.substr(m_CurrentOutputDirectory.size(), ret.npos);
+      }
+    }
+  if(m_HomeDirectory.size() <= ret.size())
+    {
+    std::string sub = ret.substr(0, m_HomeDirectory.size());
+    if(
+#if defined(_WIN32) || defined(__APPLE__)
+      cmSystemTools::LowerCase(sub) ==
+      cmSystemTools::LowerCase(m_HomeDirectory)
+#else
+      sub == m_HomeDirectory
+#endif
+      )
+      {
+      ret = m_RelativePathToSourceDir + ret.substr(m_HomeDirectory.size(), ret.npos);
+      }
+    }
+  if(m_HomeOutputDirectory.size() <= ret.size())
+    {
+    std::string sub = ret.substr(0, m_HomeOutputDirectory.size());
+    if(
+#if defined(_WIN32) || defined(__APPLE__)
+      cmSystemTools::LowerCase(sub) ==
+      cmSystemTools::LowerCase(m_HomeOutputDirectory)
+#else
+      sub == m_HomeOutputDirectory
+#endif
+      )
+      {
+      ret = m_RelativePathToBinaryDir + ret.substr(m_HomeOutputDirectory.size(), ret.npos);
+      }
+    }
+  
   std::string relpath = m_RelativePathToBinaryDir;
   if(relpath.size())
     {
@@ -121,7 +153,14 @@ std::string cmLocalGenerator::ConvertToRelativeOutputPath(const char* p)
     {
     relpath = ".";
     }
-  if(ret == m_HomeOutputDirectoryNoSlash)
+  if(
+#if defined(_WIN32) || defined(__APPLE__)
+    cmSystemTools::LowerCase(ret) ==
+    cmSystemTools::LowerCase(m_HomeOutputDirectoryNoSlash)
+#else
+    ret == m_HomeOutputDirectoryNoSlash
+#endif
+    )
     {
     ret = relpath;
     }

@@ -64,6 +64,7 @@ void cmNeedBackwardsCompatibility(const std::string& variable,
 
 cmake::cmake()
 {
+  m_DebugTryCompile = false;
 #ifdef __APPLE__
   struct rlimit rlp;
   if(!getrlimit(RLIMIT_STACK, &rlp))
@@ -319,6 +320,11 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     else if(arg.find("--script",0) == 0)
       {
       // skip for now
+      }
+    else if(arg.find("--debug-trycompile",0) == 0)
+      {
+      std::cout << "debug trycompile on\n";
+      this->DebugTryCompileOn();
       }
     else if(arg.find("-G",0) == 0)
       {

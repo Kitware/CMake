@@ -1,3 +1,5 @@
+#ifndef cmake_h
+#define cmake_h
 /*=========================================================================
 
   Program:   CMake - Cross-Platform Makefile Generator
@@ -252,6 +254,10 @@ class cmake
   void SetScriptMode(bool mode) { m_ScriptMode = mode; }
   bool GetScriptMode() { return m_ScriptMode; }
   
+  ///! Debug the try compile stuff by not delelting the files
+  bool GetDebugTryCompile(){return m_DebugTryCompile;}
+  void DebugTryCompileOn(){m_DebugTryCompile = true;}
+  
 protected:
   typedef cmGlobalGenerator* (*CreateGeneratorFunctionType)();
   typedef std::map<cmStdString, CreateGeneratorFunctionType> RegisteredGeneratorsMap;
@@ -294,6 +300,7 @@ private:
   std::string m_CMakeCommand;
   const char* m_CXXEnvironment;
   const char* m_CCEnvironment;
+  bool m_DebugTryCompile;
 };
 
 #define CMAKE_STANDARD_OPTIONS_TABLE \
@@ -323,3 +330,4 @@ private:
    "included in each directory of a source tree with the name CMakeLists.txt.  " \
    "Users build a project by using CMake to generate a build system " \
    "for a native tool on their platform.", 0}
+#endif
