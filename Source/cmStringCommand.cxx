@@ -18,6 +18,7 @@
 #include <cmsys/RegularExpression.hxx>
 
 #include <stdlib.h> // required for atoi
+#include <ctype.h>
 //----------------------------------------------------------------------------
 bool cmStringCommand::InitialPass(std::vector<std::string> const& args)
 {
@@ -31,7 +32,15 @@ bool cmStringCommand::InitialPass(std::vector<std::string> const& args)
   if(subCommand == "REGEX")
     {
     return this->HandleRegexCommand(args);
-    }  
+    }
+  else if(subCommand == "TOLOWER")
+    {
+    return this->HandleToUpperLowerCommand(args, false);
+    }
+  else if(subCommand == "TOUPPER")
+    {
+    return this->HandleToUpperLowerCommand(args, true);
+    }
   else if(subCommand == "COMPARE")
     {
     return this->HandleCompareCommand(args);
@@ -44,6 +53,35 @@ bool cmStringCommand::InitialPass(std::vector<std::string> const& args)
   std::string e = "does not recognize sub-command "+subCommand;
   this->SetError(e.c_str());
   return false;
+}
+
+//----------------------------------------------------------------------------
+bool cmStringCommand::HandleToUpperLowerCommand(
+  std::vector<std::string> const& args, bool toUpper)
+{
+  if ( args.size() <= 1 )
+    {
+    this->SetError("no output variable specified");
+    return false;
+    }
+
+  std::string outvar = args[2];
+  std::string output;
+
+  bool first = true;
+
+  if (toUpper) 
+    {
+    output = cmSystemTools::UpperCase(args[1]);
+    } 
+  else 
+    {
+    output = cmSystemTools::LowerCase(args[1]);
+    }
+
+  // Store the output in the provided variable.
+  m_Makefile->AddDefinition(outvar.c_str(), output.c_str());
+  return true;
 }
 
 //----------------------------------------------------------------------------

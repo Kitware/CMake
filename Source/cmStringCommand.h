@@ -78,6 +78,8 @@ public:
       "  STRING(COMPARE LESS <string1> <string2> <output variable>)\n"
       "  STRING(COMPARE GREATER <string1> <string2> <output variable>)\n"
       "  STRING(ASCII <number> [<number> ...] <output variable>)\n"
+      "  STRING(TOUPPER <string1> <output variable>)\n"
+      "  STRING(TOLOWER <string1> <output variable>)\n"
       "REGEX MATCH will match the regular expression once and store the "
       "match in the output variable.\n"
       "REGEX MATCHALL will match the regular expression as many times as "
@@ -87,7 +89,8 @@ public:
       "in the output.\n"
       "COMPARE EQUAL/NOTEQUAL/LESS/GREATER will compare the strings and "
       "store true or false in the output variable.\n"
-      "ASCII will convert all numbers into corresponding ASCII characters.";
+      "ASCII will convert all numbers into corresponding ASCII characters.\n"
+      "TOUPPER/TOLOWER will convert string to upper/lower characters.";
     }
   
   cmTypeMacro(cmStringCommand, cmCommand);
@@ -97,6 +100,7 @@ protected:
   bool RegexMatch(std::vector<std::string> const& args);
   bool RegexMatchAll(std::vector<std::string> const& args);
   bool RegexReplace(std::vector<std::string> const& args);
+  bool HandleToUpperLowerCommand(std::vector<std::string> const& args, bool toUpper);
   bool HandleCompareCommand(std::vector<std::string> const& args);
   
   class RegexReplacement
