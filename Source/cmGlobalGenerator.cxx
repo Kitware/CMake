@@ -21,46 +21,11 @@
 
 cmGlobalGenerator::cmGlobalGenerator()
 {
-  // Save the environment variables CXX and CC
-  m_CXXEnvironment = getenv("CXX");
-  m_CCEnvironment = getenv("CC");
+// do nothing duh
 }
 
 cmGlobalGenerator::~cmGlobalGenerator()
 { 
-  // restore the original environment variables CXX and CC
-  // Restor CC
-  static char envCC[5000];
-  std::string env = "CC=";
-  if(m_CCEnvironment)
-    {
-    env += m_CCEnvironment;
-    }
-  std::string::size_type size = env.size();
-  if(size > 4999)
-    {
-    size = 4999;
-    }
-  strncpy(envCC, env.c_str(), size);
-  envCC[4999] = 0;
-  putenv(envCC); 
-  
-  // Restore CXX
-  static char envCXX[5000];
-  env = "CXX=";
-  if(m_CXXEnvironment)
-    {
-    env += m_CXXEnvironment;
-    }
-  size = env.size();
-  if(size > 4999)
-    {
-    size = 4999;
-    }
-  strncpy(envCXX, env.c_str(), size);
-  envCXX[4999] = 0;
-  putenv(envCXX);
-
   // Delete any existing cmLocalGenerators
   unsigned int i;
   for (i = 0; i < m_LocalGenerators.size(); ++i)

@@ -708,9 +708,46 @@ void cmake::SetGlobalGenerator(cmGlobalGenerator *gg)
   if (m_GlobalGenerator)
     {
     delete m_GlobalGenerator;
+    // restore the original environment variables CXX and CC
+    // Restor CC
+    static char envCC[5000];
+    std::string env = "CC=";
+    if(m_CCEnvironment)
+      {
+      env += m_CCEnvironment;
+      }
+    std::string::size_type size = env.size();
+    if(size > 4999)
+      {
+      size = 4999;
+      }
+    strncpy(envCC, env.c_str(), size);
+    envCC[4999] = 0;
+    putenv(envCC); 
+    
+    // Restore CXX
+    static char envCXX[5000];
+    env = "CXX=";
+    if(m_CXXEnvironment)
+      {
+      env += m_CXXEnvironment;
+      }
+    size = env.size();
+    if(size > 4999)
+      {
+      size = 4999;
+      }
+    strncpy(envCXX, env.c_str(), size);
+    envCXX[4999] = 0;
+    putenv(envCXX);
     }
+
   // set the new
   m_GlobalGenerator = gg;
+  // Save the environment variables CXX and CC
+  m_CXXEnvironment = getenv("CXX");
+  m_CCEnvironment = getenv("CC");    
+  
   // set the cmake instance just to be sure
   gg->SetCMakeInstance(this);
 }

@@ -266,5 +266,7 @@ private:
   bool m_Local;
   bool m_InTryCompile;
   std::string m_CMakeCommand;
+  const char* m_CXXEnvironment;
+  const char* m_CCEnvironment;
 };
 
