@@ -2,6 +2,7 @@
 
 void secondone();
 void pair_stuff();
+void pair_p_stuff();
 void vcl_stuff();
 
 int main()
