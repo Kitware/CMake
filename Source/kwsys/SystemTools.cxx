@@ -821,10 +821,10 @@ bool SystemTools::FilesDiffer(const char* source,
     }
 
 #if defined(_WIN32) || defined(__CYGWIN__)
-  kwsys_std::ifstream finSource(source, 
-                          kwsys_std::ios::binary | kwsys_std::ios::in);
-  kwsys_std::ifstream finDestination(destination, 
-                               kwsys_std::ios::binary | kwsys_std::ios::in);
+  kwsys_std::ifstream finSource(source, (kwsys_std::ios::binary |
+                                         kwsys_std::ios::in));
+  kwsys_std::ifstream finDestination(destination, (kwsys_std::ios::binary |
+                                                   kwsys_std::ios::in));
 #else
   kwsys_std::ifstream finSource(source);
   kwsys_std::ifstream finDestination(destination);
