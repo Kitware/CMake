@@ -156,9 +156,14 @@ void cmCursesLongMessageForm::HandleInput()
     return;
     }
 
+  char debugMessage[128];
+
   while(1)
     {
     int key = getch();
+
+    sprintf(debugMessage, "Message widget handling input, key: %d", key);
+    cmCursesForm::LogMessage(debugMessage);
 
     // quit
     if ( key == 'o' )

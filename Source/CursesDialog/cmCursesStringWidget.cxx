@@ -1,4 +1,6 @@
 #include "cmCursesStringWidget.h"
+#include "cmCursesForm.h"
+
 inline int ctrl(int z)
 {
     return (z&037);
@@ -26,9 +28,13 @@ bool cmCursesStringWidget::HandleInput(int& key, FORM* form, WINDOW* w)
 
   char* originalStr=0;
 
+  char debugMessage[128];
+
   // <Enter> is used to change edit mode (like <Esc> in vi).
   while(1) 
     {
+    sprintf(debugMessage, "String widget handling input, key: %d", key);
+    cmCursesForm::LogMessage(debugMessage);
     // If resize occured during edit, move out of edit mode
     if (!m_InEdit && ( key != 10 && key != KEY_ENTER ) )
       {
@@ -39,6 +45,7 @@ bool cmCursesStringWidget::HandleInput(int& key, FORM* form, WINDOW* w)
       {
       if (m_InEdit)
 	{
+	cmCursesForm::LogMessage("String widget leaving edit.");
 	m_InEdit = false;
 	delete[] originalStr;	
 	// trick to force forms to update the field buffer
@@ -48,6 +55,7 @@ bool cmCursesStringWidget::HandleInput(int& key, FORM* form, WINDOW* w)
 	}
       else
 	{
+	cmCursesForm::LogMessage("String widget entering edit.");
 	m_InEdit = true;
 	char* buf = field_buffer(m_Field, 0);
 	originalStr = new char[strlen(buf)+1];

@@ -539,6 +539,9 @@ void cmCursesMainForm::HandleInput()
 
   FIELD* currentField;
   cmCursesWidget* currentWidget;
+
+  char debugMessage[128];
+
   while(1)
     {
     this->UpdateStatusBar();
@@ -551,6 +554,8 @@ void cmCursesMainForm::HandleInput()
 
     if (!currentWidget || !currentWidget->HandleInput(key, m_Form, stdscr))
       {
+      sprintf(debugMessage, "Main form handling input, key: %d", key);
+      cmCursesForm::LogMessage(debugMessage);
       // quit
       if ( key == 'q' )
 	{

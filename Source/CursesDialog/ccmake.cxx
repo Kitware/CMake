@@ -38,13 +38,21 @@ void CMakeErrorHandler(const char* message, const char* title, bool& disable)
 
 int main(int argc, char** argv)
 {
+  bool debug = false;
   unsigned int i;
   int j;
   cmake msg;
   std::vector<std::string> args;
   for(j =0; j < argc; ++j)
     {
-    args.push_back(argv[j]);
+    if(strcmp(argv[j], "-debug") == 0)
+      {
+      debug = true;
+      }
+    else
+      {
+      args.push_back(argv[j]);
+      }
     }
 
   for(i=1; i < args.size(); ++i)
@@ -63,6 +71,11 @@ int main(int argc, char** argv)
   cmSystemTools::DisableRunCommandOutput();
 
   cmCacheManager::GetInstance()->LoadCache(cmSystemTools::GetCurrentWorkingDirectory().c_str());
+
+  if (debug)
+    {
+    cmCursesForm::DebugStart();
+    }
 
   initscr(); /* Initialization */ 
   noecho(); /* Echo off */ 
