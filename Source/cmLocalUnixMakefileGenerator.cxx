@@ -134,7 +134,6 @@ void cmLocalUnixMakefileGenerator::ProcessDepends(const cmMakeDepend &md)
         
         // Delete any hints from the source file's dependencies.
         (*i)->GetDepends().erase((*i)->GetDepends().begin(), (*i)->GetDepends().end());
-        std::cerr << "get depends for " << (*i)->GetFullPath() << "\n";
 
         // Now add the real dependencies for the file.
         if (info)
