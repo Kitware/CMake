@@ -47,7 +47,7 @@ public:
   virtual void EnableLanguagesFromGenerator(cmGlobalGenerator *gen, 
                                             cmMakefile *mf) 
     {
-      this->cmGlobalGenerator::EnableLanguageFromGenerator(gen,mf);
+      this->cmGlobalGenerator::EnableLanguagesFromGenerator(gen,mf);
     }
       
 };
