@@ -24,7 +24,8 @@ IF(NOT CMAKE_Fortran_COMPILER)
   
   # if no compiler has been specified yet, then look for one
   IF(NOT CMAKE_Fortran_COMPILER_INIT)
-    # if not in the envionment then search for the compiler in the path# Known compilers:
+    # if not in the envionment then search for the compiler in the path
+    # Known compilers:
     #  f77/f90/f95: generic compiler names
     #  g77: GNU Fortran 77 compiler
     #  gfortran: putative GNU Fortran 95+ compiler (in progress)
@@ -39,14 +40,20 @@ IF(NOT CMAKE_Fortran_COMPILER)
     #  fort: Compaq (now HP) Fortran 90/95 compiler for Tru64 and Linux/Alpha
     #  ifc: Intel Fortran 95 compiler for Linux/x86
     #  efc: Intel Fortran 95 compiler for IA64
-    #  the order is 95 or newer compilers first, then 90, then 77 or older compilers, gnu is always last in the group,
-    #  so if you paid for a compiler it is picked by default
+    #
+    #  The order is 95 or newer compilers first, then 90, 
+    #  then 77 or older compilers, gnu is always last in the group,
+    #  so if you paid for a compiler it is picked by default.
+    # NOTE for testing purposes this list is DUPLICATED in
+    # CMake/Source/CMakeLists.txt, IF YOU CHANGE THIS LIST,
+    # PLEASE UPDATE THAT FILE AS WELL!
     SET(CMAKE_Fortran_COMPILER_LIST ifort ifc efc f95 pgf95
           lf95 xlf95 fort gfortran f90  pgf90   xlf90   epcf90 f77  fort77 frt pgf77  xlf  fl32 af77 g77  )
     FIND_PROGRAM(CMAKE_Fortran_COMPILER_FULLPATH NAMES ${CMAKE_Fortran_COMPILER_LIST} )
     GET_FILENAME_COMPONENT(CMAKE_Fortran_COMPILER_INIT
       ${CMAKE_Fortran_COMPILER_FULLPATH} NAME)
-    SET(CMAKE_Fortran_COMPILER_FULLPATH "${CMAKE_Fortran_COMPILER_FULLPATH}" CACHE INTERNAL "full path to the compiler cmake found")
+    SET(CMAKE_Fortran_COMPILER_FULLPATH "${CMAKE_Fortran_COMPILER_FULLPATH}" 
+      CACHE INTERNAL "full path to the compiler cmake found")
   ENDIF(NOT CMAKE_Fortran_COMPILER_INIT)
 
   SET(CMAKE_Fortran_COMPILER ${CMAKE_Fortran_COMPILER_INIT} CACHE STRING "Fortran compiler")
