@@ -47,11 +47,18 @@ IF ( CMAKE_WX_CAN_COMPILE )
     TARGET_LINK_LIBRARIES(CMake.app/Contents/MacOS/wxCMakeSetup ${WXWINDOWS_LIBRARY})
     TARGET_LINK_LIBRARIES(CMake.app/Contents/MacOS/wxCMakeSetup CMakeLib)
 
+    # Support building by both CMake 1.6 and 1.8.
+    IF(NOT CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE)
+      IF(CMAKE_WX_CONFIG)
+        SET(CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE ${CMAKE_WX_CONFIG})
+      ENDIF(CMAKE_WX_CONFIG)
+    ENDIF(NOT CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE)
+
     ADD_CUSTOM_COMMAND(
                 SOURCE CMake.app/Contents/MacOS/wxCMakeSetup
                 COMMAND ${CMAKE_COMMAND}
                 ARGS -E chdir "\"${EXECUTABLE_OUTPUT_PATH}/CMake.app/Contents/MacOS\""
-                `${CMAKE_WX_CONFIG} --rezflags`
+                `${CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE} --rezflags`
                 "\"${EXECUTABLE_OUTPUT_PATH}/CMake.app/Contents/MacOS/wxCMakeSetup\""
                 TARGET CMake.app/Contents/MacOS/wxCMakeSetup
                 )
