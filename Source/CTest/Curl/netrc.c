@@ -181,7 +181,7 @@ int Curl_parsenetrc(char *host,
           /* we are now parsing sub-keywords concerning "our" host */
           if(state_login) {
             if (specific_login) {
-              state_our_login = strequal(login, tok);
+              state_our_login = (char)strequal(login, tok);
             }else{
               strncpy(login, tok, LOGINSIZE-1);
 #ifdef _NETRC_DEBUG

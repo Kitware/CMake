@@ -200,7 +200,7 @@ char *getpass_r(const char *prompt, char *buffer, int buflen)
   printf("%s", prompt);
  
   for(i=0; i<buflen; i++) {
-    buffer[i] = getch();
+    buffer[i] = (char)getch();
     if ( buffer[i] == '\r' ) {
       buffer[i] = 0;
       break;

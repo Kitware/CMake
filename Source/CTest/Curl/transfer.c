@@ -1095,7 +1095,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   }
 
   /* Now update the "done" boolean we return */
-  *done = !k->keepon;
+  *done = (bool)!k->keepon;
 
   return CURLE_OK;
 }
@@ -1310,6 +1310,7 @@ CURLcode Curl_pretransfer(struct SessionHandle *data)
 
 CURLcode Curl_posttransfer(struct SessionHandle *data)
 {
+  (void)data;
 #if defined(HAVE_SIGNAL) && defined(SIGPIPE)
   /* restore the signal handler for SIGPIPE before we get back */
   if(!data->set.no_signal)

@@ -1,3 +1,4 @@
+struct _RPC_ASYNC_STATE;
 #include "curl/curl.h"
 #include <stdlib.h>
 
