@@ -427,14 +427,27 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
   std::string runtimeSep;
   std::vector<std::string> runtimeDirs;
 
-  bool cxx = tgt.HasCxx();
-  if(!cxx)
+  bool cxx = tgt.HasCxx(); 
+  // this may look strange, but the only reason for CXX and C SHLIB flags
+  // is for the hp where ld is used for linking shared libraries 
+  // but we still need to use the compiler version of the flags for the hp
+  // So for EXECUTABLE targets we want to use the CXX Flags for run time path stuff
+  if(!cxx )
     {
-    if(m_Makefile->GetDefinition("CMAKE_SHLIB_RUNTIME_FLAG"))
+    if( tgt.GetType() == cmTarget::EXECUTABLE)
       {
-      runtimeFlag = m_Makefile->GetDefinition("CMAKE_SHLIB_RUNTIME_FLAG");
+      if(m_Makefile->GetDefinition("CMAKE_C_SHLIB_RUNTIME_FLAG"))
+        {
+        runtimeFlag = m_Makefile->GetDefinition("CMAKE_C_SHLIB_RUNTIME_FLAG");
+        }
       }
-  
+    else
+      {
+      if(m_Makefile->GetDefinition("CMAKE_SHLIB_RUNTIME_FLAG"))
+        {
+        runtimeFlag = m_Makefile->GetDefinition("CMAKE_SHLIB_RUNTIME_FLAG");
+        }
+      }
     if(m_Makefile->GetDefinition("CMAKE_SHLIB_RUNTIME_SEP"))
       {
       runtimeSep = m_Makefile->GetDefinition("CMAKE_SHLIB_RUNTIME_SEP");
@@ -759,7 +772,7 @@ void cmUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
   else
     {
     command = 
-      "$(CMAKE_C_COMPILER) $(CMAKE_SHLIB_LINK_FLAGS) $(CMAKE_C_FLAGS) ";
+      "$(CMAKE_C_COMPILER) $(CMAKE_C_SHLIB_LINK_FLAGS) $(CMAKE_C_FLAGS) ";
     }
   command += "$(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
   std::strstream linklibs;
@@ -1600,8 +1613,12 @@ void cmUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     "\n"
     "CMAKE_SHLIB_BUILD_FLAGS  = @CMAKE_SHLIB_BUILD_FLAGS@\n"
     "CMAKE_SHLIB_LINK_FLAGS   = @CMAKE_SHLIB_LINK_FLAGS@\n"
+    "CMAKE_C_SHLIB_LINK_FLAGS   = @CMAKE_C_SHLIB_LINK_FLAGS@\n"
     "CMAKE_MODULE_BUILD_FLAGS = @CMAKE_MODULE_BUILD_FLAGS@\n"
     "CMAKE_MODULE_LINK_FLAGS  = @CMAKE_MODULE_LINK_FLAGS@\n"
+    "CMAKE_C_SHLIB_RUNTIME_FLAG = @CMAKE_C_SHLIB_RUNTIME_FLAG@\n"
+    "CMAKE_SHLIB_RUNTIME_FLAG = @CMAKE_SHLIB_RUNTIME_FLAG@\n"
+    "CMAKE_SHLIB_RUNTIME_SEP = @CMAKE_SHLIB_RUNTIME_SEP@\n"
     "DL_LIBS                  = @CMAKE_DL_LIBS@\n"
     "SHLIB_LD_LIBS            = @CMAKE_SHLIB_LD_LIBS@\n"
     "SHLIB_SUFFIX             = @CMAKE_SHLIB_SUFFIX@\n"
