@@ -392,7 +392,24 @@ void cmake::SetDirectoriesFromFile(const char* arg)
       listPath = cmSystemTools::GetFilenamePath(fullPath.c_str());
       }
     }
-  
+  else
+    {
+    // Specified file or directory does not exist.  Try to set things
+    // up to produce a meaningful error message.
+    std::string fullPath = cmSystemTools::CollapseFullPath(arg);
+    std::string name = cmSystemTools::GetFilenameName(fullPath.c_str());
+    name = cmSystemTools::LowerCase(name);
+    if(name == "cmakecache.txt" || name == "cmakelists.txt")
+      {
+      argIsFile = true;
+      listPath = cmSystemTools::GetFilenamePath(fullPath.c_str());
+      }
+    else
+      {
+      listPath = fullPath;
+      }
+    }
+
   // If there is a CMakeCache.txt file, use its settings.
   if(cachePath.length() > 0)
     {
@@ -880,9 +897,22 @@ int cmake::DoPreConfigureChecks()
   if(!cmSystemTools::FileExists(srcList.c_str()))
     {
     cmOStringStream err;
-    err << "The source directory \"" << this->GetHomeDirectory()
-        << "\" does not appear to contain CMakeLists.txt.\n"
-        << "Specify --help for usage, or press the help button on the CMake GUI.";
+    if(cmSystemTools::FileIsDirectory(this->GetHomeDirectory()))
+      {
+      err << "The source directory \"" << this->GetHomeDirectory()
+          << "\" does not appear to contain CMakeLists.txt.\n";
+      }
+    else if(cmSystemTools::FileExists(this->GetHomeDirectory()))
+      {
+      err << "The source directory \"" << this->GetHomeDirectory()
+          << "\" is a file, not a directory.\n";
+      }
+    else
+      {
+      err << "The source directory \"" << this->GetHomeDirectory()
+          << "\" does not exist.\n";
+      }
+    err << "Specify --help for usage, or press the help button on the CMake GUI.";
     cmSystemTools::Error(err.str().c_str());
     return -2;
     }
