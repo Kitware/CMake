@@ -853,11 +853,12 @@ int cmake::DoPreConfigureChecks()
     currentStart += "/CMakeLists.txt";
     if(!cmSystemTools::SameFile(cacheStart.c_str(), currentStart.c_str()))
       {
-      std::string message = "Error: source : ";
+      std::string message = "The source \"";
       message += currentStart;
-      message += "\nDoes not match source used to generate cache: ";
+      message += "\" does not match the source \"";
       message += cacheStart;
-      message += "\nRe-run cmake with a different source directory.";
+      message += "\" used to generate cache.  ";
+      message += "Re-run cmake with a different source directory.";
       cmSystemTools::Error(message.c_str());
       return -2;
       }
