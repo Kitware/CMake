@@ -250,6 +250,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   if(target.HasCxx())
     {
     flags = m_Makefile->GetDefinition("CMAKE_CXX_FLAGS");
+    flags += " -TP ";
     }
   else
     {
