@@ -25,7 +25,7 @@ SET (CVS_WEB_URL "http://${DROP_SITE}/cgi-bin/cvsweb.cgi/CMake/")
 SET (CVS_WEB_CVSROOT "CMake")
 SET (USE_DOXYGEN "On")
 SET (DOXYGEN_URL "http://www.cmake.org/doc/nightly/html/" )
-SET (GNATS_WEB_URL "http://public.kitware.com/Bug/bug.php")
+SET (GNATS_WEB_URL "http://public.kitware.com/Bug/index.php")
 SET (USE_GNATS "On")
 
 OPTION(BUILD_DOXYGEN "Build source documentation using doxygen" "Off")
