@@ -182,7 +182,7 @@ int main (int argc, char *argv[])
   else
     {
     float percent = passed * 100.0 / total;
-    fprintf(stderr,"%f.0%% tests passed, %i tests failed out of %i\n",
+    fprintf(stderr,"%.0f%% tests passed, %i tests failed out of %i\n",
             percent,failed, total);
     }
   
