@@ -58,9 +58,15 @@ public:
   cmCTestGenericHandler();
   virtual ~cmCTestGenericHandler();
 
+  typedef std::map<cmStdString,cmStdString> t_StringToString;
+
+  void SetOption(const char* op, const char* value);
+  const char* GetOption(const char* op);
+
 protected:
   bool m_Verbose;
   cmCTest *m_CTest;
+  t_StringToString m_Options;
 };
 
 #endif

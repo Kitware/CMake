@@ -27,4 +27,34 @@ cmCTestGenericHandler::~cmCTestGenericHandler()
 {
 }
 
+void cmCTestGenericHandler::SetOption(const char* op, const char* value)
+{
+  if ( !op )
+    {
+    return;
+    }
+  if ( !value )
+    {
+    cmCTestGenericHandler::t_StringToString::iterator remit 
+      = m_Options.find(op);
+    if ( remit != m_Options.end() )
+      {
+      m_Options.erase(remit);
+      }
+    return;
+    }
+
+  m_Options[op] = value;
+}
+
+const char* cmCTestGenericHandler::GetOption(const char* op)
+{
+  cmCTestGenericHandler::t_StringToString::iterator remit 
+    = m_Options.find(op);
+  if ( remit == m_Options.end() )
+    {
+    return 0;
+    }
+  return remit->second.c_str();
+}
 
