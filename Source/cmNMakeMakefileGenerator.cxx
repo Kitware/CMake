@@ -723,12 +723,16 @@ void cmNMakeMakefileGenerator::OutputBuildLibraryInDir(std::ostream& fout,
 
   std::string currentDir = m_Makefile->GetCurrentOutputDirectory();
   cmSystemTools::ConvertToWindowsSlashes(currentDir);
-  fout << cmSystemTools::EscapeSpaces(fullpath)
-       << ":\n\tcd " << cmSystemTools::EscapeSpaces(path)  << "\n"
+  std::string wpath = cmSystemTools::EscapeSpaces(path);
+  cmSystemTools::ConvertToWindowsSlashes(wpath);
+  std::string wfullpath = cmSystemTools::EscapeSpaces(fullpath);
+  cmSystemTools::ConvertToWindowsSlashes(wfullpath);
+  fout << wfullpath
+       << ":\n\tcd " << wpath  << "\n"
        << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.depends\n"
        << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.check_depends\n"
        << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) -f cmake.check_depends\n"
-       << "\t$(MAKE) $(MAKESILENT) " << cmSystemTools::EscapeSpaces(fullpath)
+       << "\t$(MAKE) $(MAKESILENT) " << wfullpath
        << "\n\tcd " <<
     cmSystemTools::EscapeSpaces(currentDir.c_str()) << "\n";
 }
