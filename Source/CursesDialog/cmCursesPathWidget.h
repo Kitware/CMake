@@ -24,10 +24,22 @@ class cmCursesPathWidget : public cmCursesStringWidget
 public:
   cmCursesPathWidget(int width, int height, int left, int top);
 
+  /**
+   * This method is called when different keys are pressed. The
+   * subclass can have a special implementation handler for this.
+   */
+  virtual void OnTab(cmCursesMainForm* fm, WINDOW* w);
+  virtual void OnReturn(cmCursesMainForm* fm, WINDOW* w);
+  virtual void OnType(int& key, cmCursesMainForm* fm, WINDOW* w);
+
 protected:
   cmCursesPathWidget(const cmCursesPathWidget& from);
   void operator=(const cmCursesPathWidget&);
 
+  std::string m_LastString;
+  std::string m_LastGlob;
+  bool m_Cycle;
+  std::string::size_type m_CurrentIndex;
 };
 
 #endif // __cmCursesPathWidget_h

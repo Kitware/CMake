@@ -56,6 +56,14 @@ public:
     { return m_InEdit; }
 
   /**
+   * This method is called when different keys are pressed. The
+   * subclass can have a special implementation handler for this.
+   */
+  virtual void OnTab(cmCursesMainForm* fm, WINDOW* w);
+  virtual void OnReturn(cmCursesMainForm* fm, WINDOW* w);
+  virtual void OnType(int& key, cmCursesMainForm* fm, WINDOW* w);
+
+  /**
    * If there are any, print the widget specific commands
    * in the toolbar and return true. Otherwise, return false
    * and the parent widget will print.
@@ -68,6 +76,8 @@ protected:
 
   // true if the widget is in edit mode
   bool m_InEdit;
+  char* m_OriginalString;
+  bool m_Done;
 };
 
 #endif // __cmCursesStringWidget_h
