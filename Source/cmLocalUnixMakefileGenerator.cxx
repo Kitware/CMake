@@ -2477,7 +2477,18 @@ void cmLocalUnixMakefileGenerator::OutputSourceObjectBuildRules(std::ostream& fo
     std::string exportsDef = "";
     if(shared)
       {
-      exportsDef = "-D"+target->first+"_EXPORTS ";
+      std::string export_symbol;
+      if (const char* custom_export_name = target->second.GetProperty("DEFINE_SYMBOL"))
+        {
+        export_symbol = custom_export_name;
+        }
+      else
+        {
+        std::string in = target->first + "_EXPORTS";
+        export_symbol = cmSystemTools::MakeCindentifier(in.c_str());
+        }
+    
+      exportsDef = "-D"+ export_symbol;
       }
     // Iterate over every source for this target.
     const std::vector<cmSourceFile*>& sources = target->second.GetSourceFiles();

@@ -29,6 +29,15 @@ class cmSystemTools
 {
 public:
   /**
+   * Replace symbols in str that are not valid in C identifiers as
+   * defined by the 1999 standard, ie. anything except [A-Za-z0-9_].
+   * They are replaced with `_' and if the first character is a digit
+   * then an underscore is prepended.  Note that this can produce
+   * identifiers that the standard reserves (_[A-Z].* and __.*).
+   */
+  static std::string MakeCindentifier(const char* s);
+  
+  /**
    * Make a new directory if it is not there.  This function
    * can make a full path even if none of the directories existed
    * prior to calling this function.  
@@ -256,8 +265,10 @@ public:
   static void SplitProgramPath(const char* in_name, 
                                std::string& dir, 
                                std::string& file);
-  static std::string CollapseFullPath(const char*);
-
+  static std::string CollapseFullPath(const char* in_relative);
+  static std::string CollapseFullPath(const char* in_relative,
+                                      const char* in_base);
+  
   ///! return path of a full filename (no trailing slashes).
   static std::string GetFilenamePath(const std::string&);
 

@@ -81,6 +81,7 @@ private:
                           const char* configName,
                           const char* libName,
                           const cmTarget &tgt); 
+  std::string EscapeForXML(const char* s);
   std::string ConvertToXMLOutputPath(const char* path);
   std::string ConvertToXMLOutputPathSingle(const char* path);
   void OutputDefineFlags(std::ostream& fout);

@@ -56,7 +56,7 @@ public:
   /**
    * Specify the type of the build: static, dll, or executable.
    */
-  void SetBuildType(BuildType,const char *name);
+  void SetBuildType(BuildType, const char* libName, const cmTarget&);
 
   /**
    * Return array of created DSP names in a STL vector.

@@ -67,9 +67,10 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "GET_FILENAME_COMPONENT(VarName FileName PATH|NAME|EXT|NAME_WE|PROGRAM [PROGRAM_ARGS ArgVarName] [CACHE])\n"
+      "GET_FILENAME_COMPONENT(VarName FileName PATH|ABSOLUTE|NAME|EXT|NAME_WE|PROGRAM [PROGRAM_ARGS ArgVarName] [CACHE])\n"
       "Set VarName to be the path (PATH), file name (NAME), file "
-      "extension (EXT) or file name without extension (NAME_WE) of FileName.\n"
+      "extension (EXT), file name without extension (NAME_WE) of FileName, "
+      "or the full absolute (ABSOLUTE) file name without symlinks.  "
       "Note that the path is converted to Unix slashes format and has no "
       "trailing slashes. The longest file extension is always considered.\n"
       "Warning: as a utility command, the resulting value is not put in the "

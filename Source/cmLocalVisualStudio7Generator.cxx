@@ -320,7 +320,18 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   if(target.GetType() == cmTarget::SHARED_LIBRARY
      || target.GetType() == cmTarget::MODULE_LIBRARY)
     {
-    fout << "," << libName << "_EXPORTS";
+    std::string exportSymbol;
+    if (const char* custom_export_name = target.GetProperty("DEFINE_SYMBOL"))
+      {
+      exportSymbol = custom_export_name;
+      }
+    else
+      {
+      std::string id = libName;
+      id += "_EXPORTS";
+      exportSymbol = cmSystemTools::MakeCindentifier(id.c_str());
+      }
+    fout << "," << exportSymbol;
     }
   this->OutputDefineFlags(fout);
   fout << "\"\n";
@@ -368,6 +379,8 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     {
     debugPostfix = m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX");
     }
+  const char* targetLinkFlags = target.GetProperty("LINK_FLAGS");
+
   switch(target.GetType())
     {
     case cmTarget::STATIC_LIBRARY:
@@ -384,7 +397,13 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     case cmTarget::MODULE_LIBRARY:
       fout << "\t\t\t<Tool\n"
            << "\t\t\t\tName=\"VCLinkerTool\"\n"
-           << "\t\t\t\tAdditionalOptions=\"/MACHINE:I386\"\n"
+           << "\t\t\t\tAdditionalOptions=\"/MACHINE:I386";
+      if(targetLinkFlags)
+        {
+        fout << " " << cmLocalVisualStudio7Generator::EscapeForXML(
+          targetLinkFlags).c_str();
+        }
+      fout << "\"\n"
            << "\t\t\t\tAdditionalDependencies=\" odbc32.lib odbccp32.lib ";
       this->OutputLibraries(fout, configName, libName, target);
       fout << "\"\n";
@@ -429,7 +448,13 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
 
       fout << "\t\t\t<Tool\n"
            << "\t\t\t\tName=\"VCLinkerTool\"\n"
-           << "\t\t\t\tAdditionalOptions=\"/MACHINE:I386\"\n"
+           << "\t\t\t\tAdditionalOptions=\"/MACHINE:I386";
+      if(targetLinkFlags)
+        {
+        fout << " " << cmLocalVisualStudio7Generator::EscapeForXML(
+          targetLinkFlags).c_str();
+        }
+      fout << "\"\n"
            << "\t\t\t\tAdditionalDependencies=\" odbc32.lib odbccp32.lib ";
       this->OutputLibraries(fout, configName, libName, target);
       fout << "\"\n";
@@ -980,11 +1005,17 @@ void cmLocalVisualStudio7Generator::WriteVCProjFooter(std::ostream& fout)
 }
 
 
+std::string cmLocalVisualStudio7Generator::EscapeForXML(const char* s)
+{
+  std::string ret = s;
+  cmSystemTools::ReplaceString(ret, "\"", "&quot;");
+  return ret;
+}
+
 std::string cmLocalVisualStudio7Generator::ConvertToXMLOutputPath(const char* path)
 {
   std::string ret = cmSystemTools::ConvertToOutputPath(path);
-  cmSystemTools::ReplaceString(ret, "\"", "&quot;");
-  return ret;
+  return cmLocalVisualStudio7Generator::EscapeForXML(ret.c_str());
 }
 
 std::string cmLocalVisualStudio7Generator::ConvertToXMLOutputPathSingle(const char* path)

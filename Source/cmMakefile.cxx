@@ -231,12 +231,34 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff)
 //   #include has been called).  We DO NOT look at the parents of this
 //   list-file, and for all other purposes, the name of this list-file
 //   is "filename" and not "external".
-bool cmMakefile::ReadListFile(const char* filename, const char* external)
+bool cmMakefile::ReadListFile(const char* filename_in, const char* external_in)
 {
   // used to watch for blockers going out of scope
   // e.g. mismatched IF statement
   std::set<cmFunctionBlocker *> originalBlockers;
 
+
+  const char* external = 0;
+  std::string external_abs;
+
+  const char* filename = filename_in;
+  std::string filename_abs;
+
+  if (external_in)
+    {
+    external_abs =
+      cmSystemTools::CollapseFullPath(external_in,
+                                      m_cmCurrentDirectory.c_str());
+    external = external_abs.c_str();
+    if (filename_in)
+      {
+      filename_abs =
+        cmSystemTools::CollapseFullPath(filename_in,
+                                        m_cmCurrentDirectory.c_str());
+      filename = filename_abs.c_str();
+      }
+    }
+  
       // keep track of the current file being read
   if (filename)
     {

@@ -1768,24 +1768,42 @@ void cmSystemTools::SplitProgramPath(const char* in_name,
 
 /**
  * Given a path to a file or directory, convert it to a full path.
- * This collapses away relative paths.  The full path is returned.
+ * This collapses away relative paths relative to the cwd argument
+ * (which defaults to the current working directory).  The full path
+ * is returned.
  */
-std::string cmSystemTools::CollapseFullPath(const char* in_name)
+std::string cmSystemTools::CollapseFullPath(const char* in_relative)
+{
+  return cmSystemTools::CollapseFullPath(in_relative, 0);
+}
+
+std::string cmSystemTools::CollapseFullPath(const char* in_relative,
+                                            const char* in_base)
 {
   std::string dir, file;
-  cmSystemTools::SplitProgramPath(in_name, dir, file);
+  cmSystemTools::SplitProgramPath(in_relative, dir, file);
+  
+  // Save original working directory.
+  std::string orig = cmSystemTools::GetCurrentWorkingDirectory();
+  
+  // Change to base of relative path.
+  if(in_base)
+    {
+    Chdir(in_base);
+    }
+  
 #ifdef _WIN32
-  // Ultra-hack warning:
-  // This changes to the target directory, saves the working directory,
-  // and then changes back to the original working directory.
-  std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-  if(dir != "") { Chdir(dir.c_str()); }
+  // Follow relative path.
+  if(dir != "")
+    {
+    Chdir(dir.c_str());
+    }
+  
+  // Get the resulting directory.
   std::string newDir = cmSystemTools::GetCurrentWorkingDirectory();
-  Chdir(cwd.c_str());
-
+  
+  // Add the file back on to the directory.
   cmSystemTools::ConvertToUnixSlashes(newDir);
-  std::string newPath = newDir+"/"+file;
-  return newPath;
 #else
 # ifdef MAXPATHLEN
   char resolved_name[MAXPATHLEN];
@@ -1796,21 +1814,31 @@ std::string cmSystemTools::CollapseFullPath(const char* in_name)
   char resolved_name[5024];
 #  endif
 # endif
+  
+  // Resolve relative path.
+  std::string newDir;
   if(dir != "")
     {
     realpath(dir.c_str(), resolved_name);
-    dir = resolved_name;
+    newDir = resolved_name;
     }
   else
     {
-    dir = cmSystemTools::GetCurrentWorkingDirectory();
+    newDir = cmSystemTools::GetCurrentWorkingDirectory();
     }
-  if(file == "")
-    {
-    return dir;
-    }
-  return dir + "/" + file;
 #endif
+  
+  // Restore original working directory.
+  Chdir(orig.c_str());
+  
+  // Construct and return the full path.
+  std::string newPath = newDir;
+  if(file != "")
+    {
+    newPath += "/";
+    newPath += file;
+    }
+  return newPath;
 }
 
 bool cmSystemTools::Split(const char* str, std::vector<cmStdString>& lines)
@@ -2328,6 +2356,26 @@ void cmSystemTools::SplitProgramFromArgs(const char* path,
     }
   program = "";
   args = "";
+}
+
+std::string cmSystemTools::MakeCindentifier(const char* s)
+{
+  std::string str(s);
+  if (str.find_first_of("0123456789") == 0)
+    {
+    str = "_" + str;
+    }
+
+  std::string permited_chars("_"
+                             "abcdefghijklmnopqrstuvwxyz"
+                             "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                             "0123456789");
+  std::string::size_type pos = 0;
+  while ((pos = str.find_first_not_of(permited_chars, pos)) != std::string::npos)
+    {
+    str[pos] = '_';
+    }
+  return str;
 }
 
 #if defined(_MSC_VER) && defined(_DEBUG)

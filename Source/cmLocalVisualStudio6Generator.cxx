@@ -82,20 +82,20 @@ void cmLocalVisualStudio6Generator::OutputDSPFile()
     switch(l->second.GetType())
       {
       case cmTarget::STATIC_LIBRARY:
-        this->SetBuildType(STATIC_LIBRARY, l->first.c_str());
+        this->SetBuildType(STATIC_LIBRARY, l->first.c_str(), l->second);
         break;
       case cmTarget::SHARED_LIBRARY:
       case cmTarget::MODULE_LIBRARY:
-        this->SetBuildType(DLL, l->first.c_str());
+        this->SetBuildType(DLL, l->first.c_str(), l->second);
         break;
       case cmTarget::EXECUTABLE:
-        this->SetBuildType(EXECUTABLE,l->first.c_str());
+        this->SetBuildType(EXECUTABLE,l->first.c_str(), l->second);
         break;
       case cmTarget::WIN32_EXECUTABLE:
-        this->SetBuildType(WIN32_EXECUTABLE,l->first.c_str());
+        this->SetBuildType(WIN32_EXECUTABLE,l->first.c_str(), l->second);
         break;
       case cmTarget::UTILITY:
-        this->SetBuildType(UTILITY, l->first.c_str());
+        this->SetBuildType(UTILITY, l->first.c_str(), l->second);
         break;
       case cmTarget::INSTALL_FILES:
         break;
@@ -444,10 +444,24 @@ void cmLocalVisualStudio6Generator::WriteDSPEndGroup(std::ostream& fout)
 
 
 
-void cmLocalVisualStudio6Generator::SetBuildType(BuildType b, const char *libName)
+void cmLocalVisualStudio6Generator::SetBuildType(BuildType b,
+                                                 const char* libName,
+                                                 const cmTarget& target)
 {
   std::string root= m_Makefile->GetDefinition("CMAKE_ROOT");
   const char *def= m_Makefile->GetDefinition( "MSPROJECT_TEMPLATE_DIRECTORY");
+
+  std::string exportSymbol;
+  if (const char* custom_export_name = target.GetProperty("DEFINE_SYMBOL"))
+    {
+    exportSymbol = custom_export_name;
+    }
+  else
+    {
+    std::string in = libName;
+    in += "_EXPORTS";
+    exportSymbol = cmSystemTools::MakeCindentifier(in.c_str());
+    }
 
   if( def)
     {
@@ -510,6 +524,8 @@ void cmLocalVisualStudio6Generator::SetBuildType(BuildType b, const char *libNam
     {
     fin.getline(buffer, 2048);
     std::string line = buffer;
+    cmSystemTools::ReplaceString(line, "OUTPUT_LIBNAME_EXPORTS",
+                                 exportSymbol.c_str());
     cmSystemTools::ReplaceString(line, "OUTPUT_LIBNAME",libName);
     if (reg.find(line))
       {
@@ -793,6 +809,17 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
     libMultiLineOptions +=  extraLinkOptions;
     libMultiLineOptions += " \n";
     }
+
+  if(const char* targetLinkFlags = target.GetProperty("LINK_FLAGS"))
+    {
+    libOptions += " ";
+    libOptions += targetLinkFlags;
+    libOptions += " ";
+    libMultiLineOptions += "# ADD LINK32 ";
+    libMultiLineOptions +=  targetLinkFlags;
+    libMultiLineOptions += " \n";
+    }
+
   
   // are there any custom rules on the target itself
   // only if the target is a lib or exe

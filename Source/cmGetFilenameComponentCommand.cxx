@@ -73,9 +73,13 @@ bool cmGetFilenameComponentCommand::InitialPass(std::vector<std::string> const& 
     {
     result = cmSystemTools::GetFilenameWithoutExtension(filename);
     }
+  else if (args[2] == "ABSOLUTE")
+    {
+    result = cmSystemTools::CollapseFullPath(filename.c_str());
+    }
   else 
     {
-    std::string err = "unknow component " + args[2];
+    std::string err = "unknown component " + args[2];
     this->SetError(err.c_str());
     return false;
     }
