@@ -68,6 +68,9 @@ cmLocalUnixMakefileGenerator::ConfigureOutputPaths()
     m_LibraryOutputPath = m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH");
     if(m_LibraryOutputPath.size())
       {
+      m_LibraryOutputPath =
+        cmSystemTools::CollapseFullPath(m_LibraryOutputPath.c_str(),
+                                        m_Makefile->GetStartOutputDirectory());
       if(m_LibraryOutputPath[m_LibraryOutputPath.size() -1] != '/')
         {
         m_LibraryOutputPath += "/";
@@ -87,6 +90,9 @@ cmLocalUnixMakefileGenerator::ConfigureOutputPaths()
       m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
     if(m_ExecutableOutputPath.size())
       {
+      m_ExecutableOutputPath =
+        cmSystemTools::CollapseFullPath(m_ExecutableOutputPath.c_str(),
+                                        m_Makefile->GetStartOutputDirectory());
       if(m_ExecutableOutputPath[m_ExecutableOutputPath.size() -1] != '/')
         {
         m_ExecutableOutputPath += "/";
