@@ -61,8 +61,6 @@ bool cmUtilitySourceCommand::InitialPass(std::vector<std::string>& args)
      (m_Makefile->GetCacheMajorVersion() != 0 
       && m_Makefile->GetCacheMinorVersion() != 0 ))
     {
-    // Set the makefile's definition with the cache value.
-    m_Makefile->AddDefinition(cacheEntry.c_str(), cacheValue);
     return true;
     }
   

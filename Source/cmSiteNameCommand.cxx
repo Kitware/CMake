@@ -52,7 +52,6 @@ bool cmSiteNameCommand::InitialPass(std::vector<std::string>& args)
     = m_Makefile->GetDefinition("SITE");
   if(cacheValue)
     {
-    m_Makefile->AddDefinition("SITE", cacheValue);
     return true;
     }
   
