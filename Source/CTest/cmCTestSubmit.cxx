@@ -586,8 +586,6 @@ bool cmCTestSubmit::SubmitUsingXMLRPC(const cmStdString& localprefix,
       }
 
     size_t fileSize = st.st_size;
-    size_t encodedSize = static_cast<size_t>(fileSize * 1.5); // Enough space for base64
-
     FILE* fp = fopen(local_file.c_str(), "r");
     if ( !fp )
       {
@@ -595,41 +593,20 @@ bool cmCTestSubmit::SubmitUsingXMLRPC(const cmStdString& localprefix,
       }
 
     unsigned char *fileBuffer = new unsigned char[fileSize];
-    unsigned char *encodedFileBuffer = new unsigned char[encodedSize];
     if ( fread(fileBuffer, 1, fileSize, fp) != fileSize )
       {
       delete [] fileBuffer;
-      delete [] encodedFileBuffer;
       fclose(fp);
       return false;
       }
     fclose(fp);
 
-    size_t realEncodedSize = cmsysBase64_Encode(
-      fileBuffer, fileSize,
-      encodedFileBuffer, 1);
-    if ( realEncodedSize < fileSize )
-      {
-      return false;
-      }
-
-    std::cout << "Buffer: [";
-    std::cout.write(reinterpret_cast<const char*>(encodedFileBuffer),
-      realEncodedSize);
-    std::cout << "]" << std::endl;
-
-    /*
-    result = xmlrpc_client_call(&env, "http://betty.userland.com/RPC2",
-      "examples.getStateName",
-      "(i)", (xmlrpc_int32) cnt++);
-      */
     std::string remoteCommand = remoteprefix + ".put";
     result = xmlrpc_client_call(&env, url.c_str(),
       remoteCommand.c_str(),
-      "(6)", encodedFileBuffer, (xmlrpc_int32) realEncodedSize);
+      "(6)", fileBuffer, (xmlrpc_int32)fileSize );
 
     delete [] fileBuffer;
-    delete [] encodedFileBuffer;
 
     if ( env.fault_occurred )
       {
