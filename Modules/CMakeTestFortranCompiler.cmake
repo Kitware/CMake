@@ -5,10 +5,11 @@
 # any makefiles or projects.
 IF(NOT CMAKE_FORTRAN_COMPILER_WORKS)
   MESSAGE(STATUS "Check for working Fortran compiler: ${CMAKE_FORTRAN_COMPILER}")
-  FILE(WRITE ${CMAKE_BINARY_DIR}/CMakeTmp/testFortranCompiler.f
-    "\tPROGRAM TESTFORTRAN\n"
-    "\tPRINT *, 'Hello'\n"
-    "\tEND\n")
+  FILE(WRITE ${CMAKE_BINARY_DIR}/CMakeTmp/testFortranCompiler.f "
+        PROGRAM TESTFORTRAN
+        PRINT *, 'Hello'
+        END
+  ")
   TRY_COMPILE(CMAKE_FORTRAN_COMPILER_WORKS ${CMAKE_BINARY_DIR} 
     ${CMAKE_BINARY_DIR}/CMakeTmp/testFortranCompiler.f
     OUTPUT_VARIABLE OUTPUT)
