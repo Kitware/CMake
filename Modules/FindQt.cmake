@@ -6,7 +6,7 @@
 # QT_DEFINITIONS, definitions to use when compiling code that uses Qt.
 # QT_WRAP_CPP, If false, don't use QT_WRAP_CPP command.
 # QT_WRAP_UI, If false, don't use QT_WRAP_UI command.
-# QT_FOUND, If false, do try to use Qt.
+# QT_FOUND, If false, don't try to use Qt.
 
 # also defined, but not for general use are
 # QT_MOC_EXECUTABLE, where to find the moc tool.
