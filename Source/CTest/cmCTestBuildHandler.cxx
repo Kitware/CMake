@@ -465,8 +465,8 @@ void cmCTestBuildHandler::GenerateDartBuildOutput(
   std::vector<cmCTestBuildErrorWarning>::iterator it;
   
   // only report the first 50 warnings and first 50 errors
-  unsigned short numErrorsAllowed = 2;
-  unsigned short numWarningsAllowed = 10;
+  unsigned short numErrorsAllowed = 50;
+  unsigned short numWarningsAllowed = 50;
 
   for ( it = ew.begin(); 
         it != ew.end() && (numErrorsAllowed || numWarningsAllowed); it++ )
