@@ -211,7 +211,7 @@ case $system in
 	    SHLIB_LD_LIBS=""
 	    SHLIB_SUFFIX=".so"
 	    DL_LIBS=""
-	    CMAKE_SHLIB_LINK_FLAGS="-shared"
+	    CMAKE_SHLIB_BUILD_FLAGS="-shared"
 	else
 	    SHLIB_CFLAGS=""
 	    SHLIB_LD_LIBS=""
@@ -606,6 +606,7 @@ AC_SUBST(JAVACOMMAND)
 AC_OUTPUT(
 Makefile:CMake/CMakeTopMakefileTemplate.in
 CMakeTargets.make:CMake/CMakeTargets.make.in 
+CMakeSystemConfig.cmake:CMake/CMakeSystemConfig.cmake.in
 CMake/CMakeSimpleRules.make 
 CMake/CMakeMaster.make 
 CMake/CMakeVariables.make
