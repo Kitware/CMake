@@ -75,10 +75,32 @@ void cmLocalGenerator::GenerateInstallRules()
   const cmTargets &tgts = m_Makefile->GetTargets();
   const char* prefix
     = m_Makefile->GetDefinition("CMAKE_INSTALL_PREFIX");
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  std::string prefix_win32;
+  if(!prefix)
+    {
+    if(!cmSystemTools::GetEnv("SystemDrive", prefix_win32))
+      {
+      prefix_win32 = "C:";
+      }
+    const char* project_name = m_Makefile->GetDefinition("PROJECT_NAME");
+    if(project_name && project_name[0])
+      {
+      prefix_win32 += "/Program Files/";
+      prefix_win32 += project_name;
+      }
+    else
+      {
+      prefix_win32 += "/InstalledCMakeProject";
+      }
+    prefix = prefix_win32.c_str();
+    }
+#else
   if (!prefix)
     {
     prefix = "/usr/local";
     }
+#endif
 
   std::string file = m_Makefile->GetStartOutputDirectory();
   std::string homedir = m_Makefile->GetHomeOutputDirectory();

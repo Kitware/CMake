@@ -23,16 +23,27 @@ ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
 SET (CMAKE_SKIP_RPATH "NO" CACHE BOOL
      "If set, runtime paths are not added when using shared libraries.")
-SET (CMAKE_INSTALL_PREFIX    /usr/local CACHE PATH 
-     "Install path prefix, prepended onto install directories.")
+
+# Choose a default install prefix for this platform.
+IF(UNIX)
+  SET(CMAKE_INSTALL_PREFIX "/usr/local"
+    CACHE PATH "Install path prefix, prepended onto install directories.")
+ELSE(UNIX)
+  IF("$ENV{SystemDrive}" MATCHES "^$")
+    SET(CMAKE_GENERIC_SYSTEM_DRIVE "C:")
+  ELSE("$ENV{SystemDrive}" MATCHES "^$")
+    SET(CMAKE_GENERIC_SYSTEM_DRIVE "$ENV{SystemDrive}")
+  ENDIF("$ENV{SystemDrive}" MATCHES "^$")
+  SET(CMAKE_INSTALL_PREFIX
+    "${CMAKE_GENERIC_SYSTEM_DRIVE}/Program Files/${PROJECT_NAME}"
+    CACHE PATH "Install path prefix, prepended onto install directories.")
+  SET(CMAKE_GENERIC_SYSTEM_DRIVE)
+  MARK_AS_ADVANCED(CMAKE_INSTALL_PREFIX)
+ENDIF(UNIX)
 
 MARK_AS_ADVANCED(
 CMAKE_SKIP_RPATH
 )
-
-IF(NOT UNIX)
-  MARK_AS_ADVANCED(CMAKE_INSTALL_PREFIX)
-ENDIF(NOT UNIX)
 
 # always include the gcc compiler information
 INCLUDE(Platform/gcc)
