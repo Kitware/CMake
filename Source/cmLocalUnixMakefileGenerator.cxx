@@ -2223,11 +2223,6 @@ OutputBuildObjectFromSource(std::ostream& fout,
       }
     case cmSystemTools::CXX_FILE_FORMAT:
       {
-      if(cmSystemTools::IsOn(m_Makefile->GetDefinition("BUILD_SHARED_LIBS")))
-        {
-        flags += this->GetSafeDefinition("CMAKE_SHARED_BUILD_CXX_FLAGS");
-        flags += " ";
-        }
       rules.push_back(m_Makefile->GetDefinition("CMAKE_CXX_COMPILE_OBJECT"));
       flags += this->GetSafeDefinition("CMAKE_CXX_FLAGS");
       flags += " "; 
@@ -2241,6 +2236,11 @@ OutputBuildObjectFromSource(std::ostream& fout,
       if(shared)
         {
         flags += this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_CXX_FLAGS");
+        flags += " ";
+        }
+      if(cmSystemTools::IsOn(m_Makefile->GetDefinition("BUILD_SHARED_LIBS")))
+        {
+        flags += this->GetSafeDefinition("CMAKE_SHARED_BUILD_CXX_FLAGS");
         flags += " ";
         }
       break;
