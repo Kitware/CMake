@@ -60,6 +60,13 @@ SUBDIRS(Source/kwsys)
 SET(CMAKE_BUILD_WITH_CURL 1)
 SUBDIRS(Source/CTest/Curl)
 
+IF (UNIX)
+  INCLUDE (${CMake_SOURCE_DIR}/Modules/FindCurses.cmake OPTIONAL)
+  IF (CURSES_LIBRARY)
+    SUBDIRS(Source/CursesDialog/form)
+  ENDIF (CURSES_LIBRARY)
+ENDIF (UNIX)
+
 SUBDIRS(Source Modules Templates Utilities)
 ENABLE_TESTING()
 
