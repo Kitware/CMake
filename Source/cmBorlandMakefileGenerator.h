@@ -102,13 +102,6 @@ protected:
 				       const char* fullpath); 
   ///! return true if the two paths are the same (checks short paths)
   virtual bool SamePath(const char* path1, const char* path2);
-  virtual std::string ConvertToNativePath(const char* s);
-
-private:
-  bool m_QuoteNextCommand;      // if this is true, OutputMakeRule
-                                // will not quote the next commands
-                                // it is reset to false after each
-                                // call to OutputMakeRule
 };
 
 #endif

@@ -248,11 +248,6 @@ void cmBorlandMakefileGenerator::OutputMakeRule(std::ostream& fout,
     fout << startCommand << replace.c_str() << endCommand;
     }
   fout << "\n";
-  // reset m_QuoteNextCommand, as the default should be to quote the 
-  // commands.   We need the quotes when the command has a full path
-  // to an executable.  However, the quotes break things like the
-  // linker command.
-  m_QuoteNextCommand = true;
 }
 
 void 
@@ -313,7 +308,6 @@ OutputBuildObjectFromSource(std::ostream& fout,
     compileCommand += 
       cmSystemTools::EscapeSpaces(source.GetFullPath().c_str());
     }
-  m_QuoteNextCommand = false;
   this->OutputMakeRule(fout,
                        comment.c_str(),
                        objectFile.c_str(),
@@ -362,7 +356,6 @@ void cmBorlandMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
       }
     }
   command += "\n|\n";
-  m_QuoteNextCommand = false;
     
   this->OutputMakeRule(fout, "rules for a shared library",
                        target.c_str(),
@@ -398,7 +391,6 @@ void cmBorlandMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout,
   command += "\n|\n";
   std::string comment = "rule to build static library: ";
   comment += name;
-  m_QuoteNextCommand = false;
   this->OutputMakeRule(fout,
                        comment.c_str(),
                        target.c_str(),
@@ -436,7 +428,6 @@ void cmBorlandMakefileGenerator::OutputExecutableRule(std::ostream& fout,
   
   std::string comment = "rule to build executable: ";
   comment += name;
-  m_QuoteNextCommand = false;
   this->OutputMakeRule(fout, 
                        comment.c_str(),
                        target.c_str(),
@@ -489,10 +480,4 @@ void cmBorlandMakefileGenerator::OutputBuildLibraryInDir(std::ostream& fout,
 }
 
 
-std::string cmBorlandMakefileGenerator::ConvertToNativePath(const char* s)
-{
-  std::string ret = s;
-  cmSystemTools::ConvertToWindowsSlashes(ret);
-  return ret;
-}
 

@@ -110,11 +110,8 @@ protected:
   virtual bool SamePath(const char* path1, const char* path2);
   void SetLibraryPathOption(const char* lib){ m_LibraryPathOption = lib;}
   void SetLibraryLinkOption(const char* lib){ m_LibraryLinkOption = lib;}
+  virtual std::string ConvertToNativePath(const char* s);
 private:
-  bool m_QuoteNextCommand;      // if this is true, OutputMakeRule
-                                // will not quote the next commands
-                                // it is reset to false after each
-                                // call to OutputMakeRule
   std::string m_LibraryPathOption;// option to specifiy a link path -LIBPATH 
   std::string m_LibraryLinkOption; // option to specify a library (like -l, empty for nmake)
 };
