@@ -24,7 +24,7 @@
    not visible to user code.  Use kwsysHeaderDump.pl to reproduce
    these macros after making changes to the interface.  */
 #define kwsys(x) @KWSYS_NAMESPACE@##x
-#define kwsysEXPORT          kwsys(_EXPORT)
+#define kwsysEXPORT          @KWSYS_NAMESPACE@_EXPORT
 #define kwsysBase64          kwsys(Base64)
 #define kwsysBase64_Decode   kwsys(Base64_Decode)
 #define kwsysBase64_Decode3  kwsys(Base64_Decode3)
