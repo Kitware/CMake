@@ -574,7 +574,7 @@ int ctest::BuildDirectory()
       }
     if ( found )
       {
-      errorwarning.m_LogLine     = kk;
+      errorwarning.m_LogLine     = static_cast<int>(kk);
       errorwarning.m_Text        = lines[kk];
       errorwarning.m_PreContext  = "";
       errorwarning.m_PostContext = "";
