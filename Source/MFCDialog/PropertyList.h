@@ -16,12 +16,14 @@ public:
   CString m_curValue;
   int m_nItemType;
   CString m_cmbItems;
+  bool m_NewValue;
   bool m_Removed;
 public:
   CPropertyItem(CString propName, CString curValue,
                 CString helpString,
                 int nItemType, CString cmbItems)
     {
+      m_NewValue = true;
       m_HelpString = helpString;
       m_Removed = false;
       m_propName = propName;
@@ -63,7 +65,9 @@ public:
                   const char* value,
                   const char* helpString,
                   int type,
-                  const char* comboItems);
+                  const char* comboItems,
+                  bool reverseOrder);
+  void HideControls();
   std::set<CPropertyItem*> GetItems() 
     {
       return m_PropertyItems;
@@ -111,7 +115,7 @@ protected:
 
   void InvertLine(CDC* pDC,CPoint ptFrom,CPoint ptTo);
   void DisplayButton(CRect region);
-  int AddPropItem(CPropertyItem* pItem);
+  int AddPropItem(CPropertyItem* pItem, bool top);
   void InvalidateList();
   
   CComboBox m_cmbBox;

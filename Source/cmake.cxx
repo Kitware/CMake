@@ -222,7 +222,7 @@ void cmake::AddCMakePaths(const std::vector<std::string>& args)
      "Path to CMake installation.", cmCacheManager::INTERNAL);
 }
  
-int cmake::Generate(const std::vector<std::string>& args)
+int cmake::Generate(const std::vector<std::string>& args, bool buildMakefiles)
 {
   if(args.size() == 1 && !cmSystemTools::FileExists("CMakeLists.txt"))
     {
@@ -279,7 +279,25 @@ int cmake::Generate(const std::vector<std::string>& args)
     this->Usage(args[0].c_str());
     return -1;
     }
-  mf.GenerateMakefile();
+  // if buildMakefiles, then call GenerateMakefile
+  if(buildMakefiles)
+    {
+    mf.GenerateMakefile();
+    }
+  else  // do not build, but let the commands finalize
+    {
+    std::vector<cmMakefile*> makefiles;
+    mf.FindSubDirectoryCMakeListsFiles(makefiles);
+    for(std::vector<cmMakefile*>::iterator i = makefiles.begin();
+      i != makefiles.end(); ++i)
+      {
+      cmMakefile* mf = *i;
+      mf->FinalPass();
+      delete mf;
+      }
+    mf.FinalPass();
+    }
+  
   
   // Before saving the cache
   // if the project did not define one of the entries below, add them now

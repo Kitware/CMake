@@ -32,7 +32,9 @@ protected:
 			 const char *aadefault);
 // Dialog Data
   //{{AFX_DATA(CMakeSetupDialog)
-  enum { IDD = IDD_CMakeSetupDialog_DIALOG };
+	enum { IDD = IDD_CMakeSetupDialog_DIALOG };
+	CButton	m_OKButton;
+	CButton	m_CancelButton;
   CString	m_WhereSource;
   CString	m_WhereBuild;
   CButton	m_ListFrame;
@@ -42,9 +44,8 @@ protected:
   CPropertyList m_CacheEntriesList;
   CStatic       m_MouseHelp;
   CStatic       m_VersionDisplay;
-  CButton       m_BuildProjects;
-  CButton       m_CancelButton;
-  //}}AFX_DATA
+  CButton       m_Configure;
+	//}}AFX_DATA
   
   // ClassWizard generated virtual function overrides
   //{{AFX_VIRTUAL(CMakeSetupDialog)
@@ -54,7 +55,7 @@ protected:
   
 // Implementation
 protected:
-  
+  void RunCMake(bool generateProjectFiles);
   // copy from the cache manager to the cache edit list box
   void FillCacheGUIFromCacheManager();
   // copy from the list box to the cache manager
@@ -68,11 +69,11 @@ protected:
   //{{AFX_MSG(CMakeSetupDialog)
   virtual BOOL OnInitDialog();
   afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
-  afx_msg void OnOK();
+  afx_msg void OnCancel();
   afx_msg void OnPaint();
   afx_msg HCURSOR OnQueryDragIcon();
   afx_msg void OnBrowseWhereSource();
-  virtual void OnBuildProjects();
+  virtual void OnConfigure();
   afx_msg void OnBrowseWhereBuild();
   afx_msg void OnChangeWhereBuild();
   afx_msg void OnSelendokWhereBuild();
@@ -80,9 +81,10 @@ protected:
   afx_msg void OnSelendokWhereSource();
   afx_msg void OnSize(UINT nType, int cx, int cy);
   afx_msg void OnGetMinMaxInfo( MINMAXINFO FAR* lpMMI );
-  //}}AFX_MSG
+	afx_msg void OnOk();
+	//}}AFX_MSG
   DECLARE_MESSAGE_MAP()
-
+    
     int m_oldCX;
     int m_oldCY;
   float m_deltaXRemainder;

@@ -68,8 +68,8 @@ CMakeSetupDialog::CMakeSetupDialog(CWnd* pParent /*=NULL*/)
   m_RegistryKey  = "Software\\Kitware\\CMakeSetup\\Settings\\StartPath";
   
   //{{AFX_DATA_INIT(CMakeSetupDialog)
-	m_WhereBuild = _T("");
 	m_WhereSource = _T("");
+	m_WhereBuild = _T("");
 	//}}AFX_DATA_INIT
   // Note that LoadIcon does not require a subsequent DestroyIcon in Win32
   m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
@@ -90,16 +90,17 @@ void CMakeSetupDialog::DoDataExchange(CDataExchange* pDX)
 {
   CDialog::DoDataExchange(pDX);
   //{{AFX_DATA_MAP(CMakeSetupDialog)
-	DDX_Control(pDX, IDOK, m_CancelButton);
-	DDX_Control(pDX, IDC_MouseHelpCaption, m_MouseHelp);
-	DDX_Control(pDX, IDC_CMAKE_VERSION, m_VersionDisplay);
-	DDX_Control(pDX, IDC_BuildProjects, m_BuildProjects);
+	DDX_Control(pDX, IDC_OK, m_OKButton);
+	DDX_Control(pDX, IDCANCEL, m_CancelButton);
+	DDX_CBStringExact(pDX, IDC_WhereSource, m_WhereSource);
+	DDX_CBStringExact(pDX, IDC_WhereBuild, m_WhereBuild);
 	DDX_Control(pDX, IDC_FRAME, m_ListFrame);
 	DDX_Control(pDX, IDC_WhereSource, m_WhereSourceControl);
 	DDX_Control(pDX, IDC_WhereBuild, m_WhereBuildControl);
 	DDX_Control(pDX, IDC_LIST2, m_CacheEntriesList);
-	DDX_CBStringExact(pDX, IDC_WhereBuild, m_WhereBuild);
-	DDX_CBStringExact(pDX, IDC_WhereSource, m_WhereSource);
+	DDX_Control(pDX, IDC_MouseHelpCaption, m_MouseHelp);
+	DDX_Control(pDX, IDC_CMAKE_VERSION, m_VersionDisplay);
+	DDX_Control(pDX, IDC_BuildProjects, m_Configure);
 	//}}AFX_DATA_MAP
 }
 
@@ -108,16 +109,17 @@ BEGIN_MESSAGE_MAP(CMakeSetupDialog, CDialog)
   ON_WM_SYSCOMMAND()
   ON_WM_PAINT()
   ON_WM_QUERYDRAGICON()
-  ON_BN_CLICKED(IDOK, OnOK)
-  ON_BN_CLICKED(IDC_BuildProjects, OnBuildProjects)
-  ON_CBN_EDITCHANGE(IDC_WhereBuild, OnChangeWhereBuild)
-  ON_CBN_EDITCHANGE(IDC_WhereSource, OnChangeWhereSource)
-  ON_CBN_SELCHANGE(IDC_WhereBuild, OnSelendokWhereBuild)
   ON_BN_CLICKED(IDC_BUTTON2, OnBrowseWhereSource)
+  ON_BN_CLICKED(IDC_BuildProjects, OnConfigure)
   ON_BN_CLICKED(IDC_BUTTON3, OnBrowseWhereBuild)
+  ON_CBN_EDITCHANGE(IDC_WhereBuild, OnChangeWhereBuild)
+  ON_CBN_SELCHANGE(IDC_WhereBuild, OnSelendokWhereBuild)
+  ON_CBN_EDITCHANGE(IDC_WhereSource, OnChangeWhereSource)
   ON_CBN_SELENDOK(IDC_WhereSource, OnSelendokWhereSource)
 	ON_WM_SIZE()
   ON_WM_GETMINMAXINFO()
+  ON_BN_CLICKED(IDCANCEL, OnCancel)
+	ON_BN_CLICKED(IDC_OK, OnOk)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -162,6 +164,7 @@ BOOL CMakeSetupDialog::OnInitDialog()
           cmMakefile::GetMinorVersion());
   SetDlgItemText(IDC_CMAKE_VERSION, tmp);
   this->UpdateData(FALSE);
+  m_OKButton.EnableWindow(false);
   return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
@@ -386,10 +389,9 @@ void CMakeSetupDialog::OnBrowseWhereBuild()
   this->OnChangeWhereBuild();
 }
 
-// Callback for build projects button
-void CMakeSetupDialog::OnBuildProjects() 
+void CMakeSetupDialog::RunCMake(bool generateProjectFiles)
 {
-  if(!cmSystemTools::FileExists(m_WhereBuild))
+    if(!cmSystemTools::FileExists(m_WhereBuild))
     {
     std::string message =
       "Build directory does not exist, should I create it?\n\n"
@@ -431,7 +433,7 @@ void CMakeSetupDialog::OnBuildProjects()
   arg += m_WhereBuild;
   args.push_back(arg);
   // run the generate process
-  if(make.Generate(args) != 0)
+  if(make.Generate(args, generateProjectFiles) != 0)
     {
     cmSystemTools::Error(
       "Error in generation process, project files may be invalid");
@@ -446,7 +448,15 @@ void CMakeSetupDialog::OnBuildProjects()
   m_BuildPathChanged = false;
   // put the cursor back
   ::SetCursor(LoadCursor(NULL, IDC_ARROW));
-  m_CacheEntriesList.ClearDirty();
+}
+
+
+// Callback for build projects button
+void CMakeSetupDialog::OnConfigure() 
+{
+  this->RunCMake(false);
+  // if cache has values then enb
+  m_OKButton.EnableWindow(true);
 }
 
 
@@ -489,7 +499,24 @@ void CMakeSetupDialog::OnChangeWhereBuild()
 
 // copy from the cache manager to the cache edit list box
 void CMakeSetupDialog::FillCacheGUIFromCacheManager()
-{
+{ 
+  int size = m_CacheEntriesList.GetItems().size();
+  bool reverseOrder = false;
+  // if there are already entries in the cache, then
+  // put the new ones in the top, so they show up first
+  if(size)
+    {
+    reverseOrder = true;
+    }
+  
+  // all the current values are not new any more
+  std::set<CPropertyItem*> items = m_CacheEntriesList.GetItems();
+  for(std::set<CPropertyItem*>::iterator i = items.begin();
+      i != items.end(); ++i)
+    {
+    CPropertyItem* item = *i;
+    item->m_NewValue = false;
+    }
   const cmCacheManager::CacheEntryMap &cache =
     cmCacheManager::GetInstance()->GetCacheMap();
   for(cmCacheManager::CacheEntryMap::const_iterator i = cache.begin();
@@ -505,38 +532,51 @@ void CMakeSetupDialog::FillCacheGUIFromCacheManager()
           m_CacheEntriesList.AddProperty(key,
                                          "ON",
                                          value.m_HelpString.c_str(),
-                                         CPropertyList::CHECKBOX,"");
+                                         CPropertyList::CHECKBOX,"",
+                                         reverseOrder 
+            );
           }
         else
           {
           m_CacheEntriesList.AddProperty(key,
                                          "OFF",
                                          value.m_HelpString.c_str(),
-                                         CPropertyList::CHECKBOX,"");
+                                         CPropertyList::CHECKBOX,"",
+                                         reverseOrder
+            );
           }
         break;
       case cmCacheManager::PATH:
         m_CacheEntriesList.AddProperty(key, 
                                        value.m_Value.c_str(),
                                        value.m_HelpString.c_str(),
-                                       CPropertyList::PATH,"");
+                                       CPropertyList::PATH,"",
+                                       reverseOrder
+          );
         break;
       case cmCacheManager::FILEPATH:
         m_CacheEntriesList.AddProperty(key, 
                                        value.m_Value.c_str(),
                                        value.m_HelpString.c_str(),
-                                       CPropertyList::FILE,"");
+                                       CPropertyList::FILE,"",
+                                       reverseOrder
+          );
         break;
       case cmCacheManager::STRING:
         m_CacheEntriesList.AddProperty(key,
                                        value.m_Value.c_str(),
                                        value.m_HelpString.c_str(),
-                                       CPropertyList::EDIT,"");
+                                       CPropertyList::EDIT,"",
+                                       reverseOrder
+          );
         break;
       case cmCacheManager::INTERNAL:
         break;
       }
     }
+  // redraw the list
+  m_CacheEntriesList.SetTopIndex(0);
+  m_CacheEntriesList.Invalidate();
 }
 
 // copy from the list box to the cache manager
@@ -633,9 +673,9 @@ void CMakeSetupDialog::OnSize(UINT nType, int cx, int cy)
                              0, 0,
                              SWP_NOSIZE | SWP_NOZORDER);
 
-    m_BuildProjects.GetWindowRect(&cRect);
+    m_Configure.GetWindowRect(&cRect);
     this->ScreenToClient(&cRect);
-    m_BuildProjects.SetWindowPos(&wndTop, cRect.left + deltax/2, 
+    m_Configure.SetWindowPos(&wndTop, cRect.left + deltax/2, 
                                  cRect.top + deltay, 
                                  0, 0,
                                  SWP_NOSIZE | SWP_NOZORDER);
@@ -645,6 +685,12 @@ void CMakeSetupDialog::OnSize(UINT nType, int cx, int cy)
                                 cRect.top + deltay, 
                                 0, 0,
                                 SWP_NOSIZE | SWP_NOZORDER);
+    m_OKButton.GetWindowRect(&cRect);
+    this->ScreenToClient(&cRect);
+    m_OKButton.SetWindowPos(&wndTop, cRect.left + deltax/2, 
+                            cRect.top + deltay, 
+                            0, 0,
+                            SWP_NOSIZE | SWP_NOZORDER);
     }
   
 }
@@ -656,9 +702,9 @@ void CMakeSetupDialog::OnGetMinMaxInfo( MINMAXINFO FAR* lpMMI )
   lpMMI->ptMinTrackSize.y = 272;
 }
 
-void CMakeSetupDialog::OnOK()
+void CMakeSetupDialog::OnCancel()
 {
-  if(m_CacheEntriesList.IsDirty())
+  if(m_OKButton.IsWindowEnabled())
     {
     if(MessageBox("You have changed options but not rebuilt, "
 		  "are you sure you want to exit?", "Confirm Exit",
@@ -671,4 +717,11 @@ void CMakeSetupDialog::OnOK()
     {
     CDialog::OnOK();
     }
+}
+
+void CMakeSetupDialog::OnOk() 
+{
+  m_CacheEntriesList.ClearDirty();
+  this->RunCMake(true);
+  CDialog::OnOK();
 }

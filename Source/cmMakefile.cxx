@@ -404,8 +404,7 @@ void cmMakefile::SetMakefileGenerator(cmMakefileGenerator* mf)
   mf->SetMakefile(this);
 }
 
-  // Generate the output file
-void cmMakefile::GenerateMakefile()
+void cmMakefile::FinalPass()
 {
   // do all the variable expansions here
   this->ExpandVariables();
@@ -416,6 +415,13 @@ void cmMakefile::GenerateMakefile()
     {
     (*i)->FinalPass();
     }
+
+}
+
+  // Generate the output file
+void cmMakefile::GenerateMakefile()
+{
+  this->FinalPass();
   // merge libraries
   for (cmTargets::iterator l = m_Targets.begin();
        l != m_Targets.end(); l++)

@@ -118,7 +118,12 @@ public:
    * Produce the output makefile.
    */
   void GenerateMakefile();
-
+  
+  /**
+   * run the final pass on all commands.
+   */
+  void FinalPass();
+  
   /**
    * Print the object state to std::cout.
    */

@@ -60,8 +60,10 @@ class cmake
    * to the command line version of cmake.  For building a GUI,
    * you would pass in the following arguments:
    * /path/to/cmake -H/path/to/source -B/path/to/build 
+   * If you only want to parse the CMakeLists.txt files,
+   * but not actually generate the makefiles, use buildMakefiles = false.
    */
-  int Generate(const std::vector<std::string>&);
+  int Generate(const std::vector<std::string>&, bool buildMakefiles = true);
 
   /**
    * Generate the SourceFilesList from the SourceLists. This should only be

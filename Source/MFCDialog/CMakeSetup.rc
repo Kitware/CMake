@@ -98,8 +98,8 @@ BEGIN
     COMBOBOX        IDC_WhereBuild,148,26,133,68,CBS_DROPDOWN | 
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
     PUSHBUTTON      "Browse...",IDC_BUTTON3,286,25,43,13
-    DEFPUSHBUTTON   "Build Project Files",IDC_BuildProjects,112,206,67,15
-    PUSHBUTTON      "Close",IDOK,190,206,67,15
+    DEFPUSHBUTTON   "Configure",IDC_BuildProjects,88,202,67,15
+    PUSHBUTTON      "Cancel",IDCANCEL,220,201,67,15
     LISTBOX         IDC_LIST2,15,55,344,122,LBS_OWNERDRAWVARIABLE | 
                     LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | 
                     WS_HSCROLL
@@ -110,6 +110,7 @@ BEGIN
     CTEXT           "Right click on cache entries for additional options",
                     IDC_MouseHelpCaption,106,189,156,8
     LTEXT           "Static",IDC_CMAKE_VERSION,3,211,58,13,SS_CENTERIMAGE
+    PUSHBUTTON      "OK",IDC_OK,160,202,56,14
 END
 
 

@@ -91,13 +91,21 @@ void CPropertyList::DrawItem(LPDRAWITEMSTRUCT lpDIS)
 
   if (nIndex != (UINT) -1)
     {
+    //get the CPropertyItem for the current row
+    CPropertyItem* pItem = (CPropertyItem*) GetItemDataPtr(nIndex);
     //draw two rectangles, one for each row column
-    dc.FillSolidRect(rect2,RGB(192,192,192));
+    if(pItem->m_NewValue)
+      {
+      dc.FillSolidRect(rect2,RGB(255,100, 100));
+      }
+    else
+      {
+      dc.FillSolidRect(rect2,RGB(192,192,192));
+      }
+    
     dc.DrawEdge(rect2,EDGE_SUNKEN,BF_BOTTOMRIGHT);
     dc.DrawEdge(rect,EDGE_SUNKEN,BF_BOTTOM);
 
-    //get the CPropertyItem for the current row
-    CPropertyItem* pItem = (CPropertyItem*) GetItemDataPtr(nIndex);
 
     //write the property name in the first rectangle
     dc.SetBkMode(TRANSPARENT);
@@ -119,9 +127,18 @@ int CPropertyList::AddItem(CString txt)
   return nIndex;
 }
 
-int CPropertyList::AddPropItem(CPropertyItem* pItem)
+int CPropertyList::AddPropItem(CPropertyItem* pItem, bool reverseOrder)
 {
-  int nIndex = AddString(_T(""));
+  this->HideControls();
+  int nIndex;
+  if(reverseOrder)
+    {
+    nIndex = InsertString(0, _T(""));
+    }
+  else
+    {
+    nIndex = AddString(_T(""));
+    }
   SetItemDataPtr(nIndex,pItem);
   m_PropertyItems.insert(pItem);
   return nIndex;
@@ -131,7 +148,7 @@ int CPropertyList::AddProperty(const char* name,
                                const char* value,
                                const char* helpString,
                                int type,
-                               const char* comboItems)
+                               const char* comboItems, bool reverseOrder)
 { 
   CPropertyItem* pItem = 0;
   for(int i =0; i < this->GetCount(); ++i)
@@ -153,8 +170,9 @@ int CPropertyList::AddProperty(const char* name,
   if(!pItem)
     {
     pItem = new CPropertyItem(name, value, helpString, type, comboItems);
+    pItem->m_NewValue = true;
     }
-  return this->AddPropItem(pItem);
+  return this->AddPropItem(pItem, reverseOrder);
 }
 
 int CPropertyList::OnCreate(LPCREATESTRUCT lpCreateStruct) 
@@ -357,7 +375,7 @@ void CPropertyList::OnChangeEditBox()
     }
 }
 
-void CPropertyList::OnVScroll( UINT nSBCode, UINT nPos, CScrollBar* pScrollBar )
+void CPropertyList::HideControls()
 {
   if(m_editBox)
     {
@@ -375,6 +393,11 @@ void CPropertyList::OnVScroll( UINT nSBCode, UINT nPos, CScrollBar* pScrollBar )
     {
     m_btnCtrl.ShowWindow(SW_HIDE);
     }
+}
+
+void CPropertyList::OnVScroll( UINT nSBCode, UINT nPos, CScrollBar* pScrollBar )
+{
+  this->HideControls();
   CListBox::OnVScroll(nSBCode, nPos, pScrollBar);
 }
 
@@ -601,8 +624,10 @@ void CPropertyList::OnDelete()
   CPropertyItem* pItem = (CPropertyItem*) GetItemDataPtr(m_curSel);
   cmCacheManager::GetInstance()->RemoveCacheEntry(pItem->m_propName);
   m_PropertyItems.erase(pItem);
-  delete pItem;
+  delete pItem; 
   this->DeleteString(m_curSel);
+  this->HideControls();
+  this->SetTopIndex(0);
   InvalidateList();
 }
 
@@ -627,6 +652,7 @@ void CPropertyList::RemoveAll()
     delete pItem;
     this->DeleteString(0);
     }
+  this->HideControls();
   InvalidateList();
 }
 
