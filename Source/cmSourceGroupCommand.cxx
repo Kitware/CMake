@@ -37,20 +37,8 @@ bool cmSourceGroupCommand::InitialPass(std::vector<std::string> const& args)
   // command is being invoked.
   if(args.size() == 2 && args[1] != "FILES")
     {
-    const char* versionValue =
-      m_Makefile->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
-    if(atof(versionValue) > 1.6)
-      {
-      this->SetError("no longer accepts a two-argument form.  Use the "
-                     "REGULAR_EXPRESSION argument form instead, or set "
-                     "CMAKE_BACKWARDS_COMPATIBILITY to 1.6 or less.\n");
-      return false;
-      }
-    else
-      {
-      sg->SetGroupRegex(args[1].c_str());
-      return true;
-      }
+    sg->SetGroupRegex(args[1].c_str());
+    return true;
     }
   
   // Process arguments.

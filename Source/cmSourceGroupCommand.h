@@ -78,7 +78,8 @@ public:
       "be placed in this group.  If a file matches multiple groups, the LAST "
       "group that explicitly lists the file will be favored, if any.  If no "
       "group explicitly lists the file, the LAST group whose regular "
-      "expression matches the file will be favored.";
+      "expression matches the file will be favored. For backwards compatibility,"
+      "this command is also supports the format SOURCE_GROUP(name regex).";
     }
   
   cmTypeMacro(cmSourceGroupCommand, cmCommand);
