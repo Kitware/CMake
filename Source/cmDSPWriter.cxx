@@ -263,7 +263,7 @@ void cmDSPWriter::WriteDSPFile(std::ostream& fout,
       std::string source = cc->first;
       const cmSourceGroup::Commands& commands = cc->second;
 
-      if (source != libName)
+      if (source != libName || target.GetType() == cmTarget::UTILITY)
         {
         fout << "# Begin Source File\n\n";
         
