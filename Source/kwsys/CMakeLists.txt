@@ -96,6 +96,14 @@ IF(NOT EXECUTABLE_OUTPUT_PATH)
       "Output directory for executables.")
 ENDIF(NOT EXECUTABLE_OUTPUT_PATH)
 
+# Generated source files will need this header.
+STRING(COMPARE EQUAL "${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}"
+  KWSYS_IN_SOURCE_BUILD)
+IF(NOT KWSYS_IN_SOURCE_BUILD)
+  CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/kwsysPrivate.h
+    ${PROJECT_BINARY_DIR}/kwsysPrivate.h COPY_ONLY IMMEDIATE)
+ENDIF(NOT KWSYS_IN_SOURCE_BUILD)
+
 #-----------------------------------------------------------------------------
 # We require ANSI support from the C compiler.  Add any needed flags.
 IF(CMAKE_ANSI_CFLAGS)
@@ -238,9 +246,10 @@ IF(KWSYS_USE_Process)
   IF(NOT UNIX)
     # Use the Windows implementation.  We need the encoded forwarding executable.
     SET(KWSYS_SRCS ${KWSYS_SRCS} ProcessWin32.c
-        ${CMAKE_CURRENT_BINARY_DIR}/${KWSYS_NAMESPACE}ProcessFwd9xEnc.c)
-    SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/${KWSYS_NAMESPACE}ProcessFwd9xEnc.c
-                                PROPERTIES GENERATED 1)
+      ${PROJECT_BINARY_DIR}/${KWSYS_NAMESPACE}ProcessFwd9xEnc.c)
+    SET_SOURCE_FILES_PROPERTIES(
+      ${PROJECT_BINARY_DIR}/${KWSYS_NAMESPACE}ProcessFwd9xEnc.c
+      PROPERTIES GENERATED 1)
   ELSE(NOT UNIX)
     # Use the UNIX implementation.
     SET(KWSYS_SRCS ${KWSYS_SRCS} ProcessUNIX.c)
