@@ -264,7 +264,8 @@ public:
   static std::string GetProgramPath(const char*);
   static void SplitProgramPath(const char* in_name, 
                                std::string& dir, 
-                               std::string& file);
+                               std::string& file,
+                               bool errorReport = true);
   static std::string CollapseFullPath(const char* in_relative);
   static std::string CollapseFullPath(const char* in_relative,
                                       const char* in_base);

@@ -1734,7 +1734,8 @@ std::string cmSystemTools::GetProgramPath(const char* in_name)
  */
 void cmSystemTools::SplitProgramPath(const char* in_name,
                                      std::string& dir,
-                                     std::string& file)
+                                     std::string& file,
+                                     bool errorReport)
 {
   dir = in_name;
   file = "";
@@ -1758,9 +1759,13 @@ void cmSystemTools::SplitProgramPath(const char* in_name,
     {
     std::string oldDir = in_name;
     cmSystemTools::ConvertToUnixSlashes(oldDir);
-    cmSystemTools::Error("Error splitting file name off end of path:\n",
-                         oldDir.c_str(), "\nDirectory not found: ", 
-                         dir.c_str());
+    if(errorReport)
+      {
+      cmSystemTools::Error("Error splitting file name off end of path:\n",
+                           oldDir.c_str(), "\nDirectory not found: ", 
+                           dir.c_str());
+      }
+    
     dir = in_name;
     return;
     }
@@ -1781,7 +1786,7 @@ std::string cmSystemTools::CollapseFullPath(const char* in_relative,
                                             const char* in_base)
 {
   std::string dir, file;
-  cmSystemTools::SplitProgramPath(in_relative, dir, file);
+  cmSystemTools::SplitProgramPath(in_relative, dir, file, false);
   
   // Save original working directory.
   std::string orig = cmSystemTools::GetCurrentWorkingDirectory();
