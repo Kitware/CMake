@@ -1077,17 +1077,6 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
     }
 }
 
-
-void 
-cmLocalGenerator::DetermineLibraryPathOrder(const cmTarget& target,
-                                            std::vector<std::string>& 
-                                            linkPaths,
-                                            std::vector<std::string>&
-                                            linkLibs)
-{ 
-
-}
-
 /**
  * Output the linking rules on a command line.  For executables,
  * targetLibrary should be a NULL pointer.  For libraries, it should point

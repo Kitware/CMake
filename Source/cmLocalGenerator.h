@@ -103,9 +103,6 @@ public:
   ///! for existing files convert to output path and short path if spaces
   std::string ConvertToOutputForExisting(const char* p);
   
-  void DetermineLibraryPathOrder(const cmTarget& target,
-                                 std::vector<std::string>& linkPaths,
-                                 std::vector<std::string>& linkLibs);
 protected:
   /** Construct a script from the given list of command lines.  */
   std::string ConstructScript(const cmCustomCommandLines& commandLines,
