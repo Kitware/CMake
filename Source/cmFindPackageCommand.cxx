@@ -50,6 +50,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   this->Name = args[0];
   
   bool quiet = false;
+  bool required = false;
   if(args.size() > 1)
     {
     cmsys::RegularExpression version("^[0-9.]+$");
@@ -64,6 +65,10 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
         {
         quiet = true;
         }
+      else if(args[i] == "REQUIRED")
+        {
+        required = true;
+        }
       else
         {
         cmOStringStream e;
@@ -76,7 +81,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   
   // See if there is a Find<name>.cmake module.
   bool foundModule = false;
-  if(!this->FindModule(foundModule, quiet))
+  if(!this->FindModule(foundModule, quiet, required))
     {
     return false;
     }
@@ -155,16 +160,24 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
       e << this->Variable << " is set to \"" << def << "\", which is "
         << "not a directory containing " << this->Config;
       cmSystemTools::Error(e.str().c_str());
+      if(required)
+        {
+        cmSystemTools::SetFatalErrorOccured();
+        }
       result = true;
       }
     }
-  else if(!quiet)
+  else if(!quiet || required)
     {
     cmOStringStream e;
     e << this->Variable << " is not set.  It must be set to the directory "
       << "containing " << this->Config << " in order to use "
       << this->Name << ".";
     cmSystemTools::Error(e.str().c_str());
+    if(required)
+      {
+      cmSystemTools::SetFatalErrorOccured();
+      }
     result = true;
     }
   
@@ -217,7 +230,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
 }
 
 //----------------------------------------------------------------------------
-bool cmFindPackageCommand::FindModule(bool& found, bool quiet)
+bool cmFindPackageCommand::FindModule(bool& found, bool quiet, bool required)
 {
   std::string module = "Find";
   module += this->Name;
@@ -232,6 +245,15 @@ bool cmFindPackageCommand::FindModule(bool& found, bool quiet)
       std::string quietly = this->Name;
       quietly += "_FIND_QUIETLY";
       m_Makefile->AddDefinition(quietly.c_str(), "1");
+      }
+
+    if(required)
+      {
+      // Tell the module that is about to be read that it should report
+      // a fatal error if the package is not found.
+      std::string req = this->Name;
+      req += "_FIND_REQUIRED";
+      m_Makefile->AddDefinition(req.c_str(), "1");
       }
 
     // Load the module we found.

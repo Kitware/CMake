@@ -63,7 +63,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  FIND_PACKAGE(<name> [major.minor] [QUIET])\n"
+      "  FIND_PACKAGE(<name> [major.minor] [QUIET] [REQUIRED])\n"
       "Finds and loads settings from an external project.  <name>_FOUND will "
       "be set to indicate whether the package was found.  Settings that "
       "can be used when <name>_FOUND is true are package-specific.  The "
@@ -80,12 +80,13 @@ public:
       "will generate an error describing the problem unless the QUIET "
       "argument is specified.  If <name>_DIR has been set to a directory "
       "not containing a \"<name>Config.cmake\" file, an error is always "
-      "generated.";
+      "generated.  If REQUIRED is specified and the package is not found, "
+      "a FATAL_ERROR is generated and the configure step stops executing.";
     }
   
   cmTypeMacro(cmFindPackageCommand, cmCommand);
 private:
-  bool FindModule(bool& found, bool quiet);
+  bool FindModule(bool& found, bool quiet, bool required);
   bool FindConfig();
   std::string SearchForConfig() const;
   bool ReadListFile(const char* f);
