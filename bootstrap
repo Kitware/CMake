@@ -171,11 +171,11 @@ cmake_kwsys_config_replace_string ()
       sed "/./ {s/\@KWSYS_NAMESPACE\@/cmsys/g;
                 s/@KWSYS_BUILD_SHARED@/${KWSYS_BUILD_SHARED}/g;
                 s/@KWSYS_NAME_IS_KWSYS@/${KWSYS_NAME_IS_KWSYS}/g;
-                s/@KWSYS_IOS_HAVE_ANSI@/${KWSYS_IOS_HAVE_ANSI}/g;
+                s/@KWSYS_IOS_USE_ANSI@/${KWSYS_IOS_USE_ANSI}/g;
                 s/@KWSYS_IOS_HAVE_STD@/${KWSYS_IOS_HAVE_STD}/g;
-                s/@KWSYS_IOS_HAVE_SSTREAM@/${KWSYS_IOS_HAVE_SSTREAM}/g;
-                s/@KWSYS_IOS_HAVE_STRSTREAM_H@/${KWSYS_IOS_HAVE_STRSTREAM_H}/g;
-                s/@KWSYS_IOS_HAVE_STRSTREA_H@/${KWSYS_IOS_HAVE_STRSTREA_H}/g;
+                s/@KWSYS_IOS_USE_SSTREAM@/${KWSYS_IOS_USE_SSTREAM}/g;
+                s/@KWSYS_IOS_USE_STRSTREAM_H@/${KWSYS_IOS_USE_STRSTREAM_H}/g;
+                s/@KWSYS_IOS_USE_STRSTREA_H@/${KWSYS_IOS_USE_STRSTREA_H}/g;
                 s/@KWSYS_STL_HAVE_STD@/${KWSYS_STL_HAVE_STD}/g;}" >> "${OUTFILE}.tmp"
     if [ -f "${OUTFILE}.tmp" ]; then
       if diff "${OUTFILE}" "${OUTFILE}.tmp" > /dev/null 2> /dev/null ; then
@@ -601,11 +601,11 @@ cmake_test_flags=
 # Test for kwsys features
 KWSYS_NAME_IS_KWSYS=0
 KWSYS_BUILD_SHARED=0
-KWSYS_IOS_HAVE_STRSTREAM_H=0
-KWSYS_IOS_HAVE_STRSTREA_H=0
+KWSYS_IOS_USE_STRSTREAM_H=0
+KWSYS_IOS_USE_STRSTREA_H=0
 KWSYS_IOS_HAVE_STD=0
-KWSYS_IOS_HAVE_SSTREAM=0
-KWSYS_IOS_HAVE_ANSI=0
+KWSYS_IOS_USE_SSTREAM=0
+KWSYS_IOS_USE_ANSI=0
 KWSYS_STL_HAVE_STD=0
 
 if cmake_try_run "${cmake_cxx_compiler}" \
@@ -618,15 +618,15 @@ else
 fi
 
 if cmake_try_run "${cmake_cxx_compiler}" \
-  "${cmake_cxx_flags} -DTEST_KWSYS_IOS_HAVE_ANSI" \
+  "${cmake_cxx_flags} -DTEST_KWSYS_IOS_USE_ANSI" \
   "${cmake_source_dir}/Source/kwsys/kwsysPlatformCxxTests.cxx" >> cmake_bootstrap.log 2>&1; then
-  KWSYS_IOS_HAVE_ANSI=1
+  KWSYS_IOS_USE_ANSI=1
   echo "${cmake_cxx_compiler} has ANSI streams"
 else
   echo "${cmake_cxx_compiler} does not have ANSI streams"
 fi
 
-if [ "x$KWSYS_IOS_HAVE_ANSI" = "x1" ]; then
+if [ "x$KWSYS_IOS_USE_ANSI" = "x1" ]; then
   if cmake_try_run "${cmake_cxx_compiler}" \
     "${cmake_cxx_flags} -DTEST_KWSYS_IOS_HAVE_STD" \
     "${cmake_source_dir}/Source/kwsys/kwsysPlatformCxxTests.cxx" >> cmake_bootstrap.log 2>&1; then
@@ -636,29 +636,29 @@ if [ "x$KWSYS_IOS_HAVE_ANSI" = "x1" ]; then
     echo "${cmake_cxx_compiler} does not have streams in std:: namespace"
   fi
   if cmake_try_run "${cmake_cxx_compiler}" \
-    "${cmake_cxx_flags} -DTEST_KWSYS_IOS_HAVE_SSTREAM" \
+    "${cmake_cxx_flags} -DTEST_KWSYS_IOS_USE_SSTREAM" \
     "${cmake_source_dir}/Source/kwsys/kwsysPlatformCxxTests.cxx" >> cmake_bootstrap.log 2>&1; then
-    KWSYS_IOS_HAVE_SSTREAM=1
+    KWSYS_IOS_USE_SSTREAM=1
     echo "${cmake_cxx_compiler} has sstream"
   else
     echo "${cmake_cxx_compiler} does not have sstream"
   fi
 fi
 
-if [ "x$KWSYS_IOS_HAVE_SSTREAM" = "x0" ]; then
+if [ "x$KWSYS_IOS_USE_SSTREAM" = "x0" ]; then
   if cmake_try_run "${cmake_cxx_compiler}" \
-    "${cmake_cxx_flags} -DTEST_KWSYS_IOS_HAVE_STRSTREAM_H" \
+    "${cmake_cxx_flags} -DTEST_KWSYS_IOS_USE_STRSTREAM_H" \
     "${cmake_source_dir}/Source/kwsys/kwsysPlatformCxxTests.cxx" >> cmake_bootstrap.log 2>&1; then
-    KWSYS_IOS_HAVE_STRSTREAM_H=1
+    KWSYS_IOS_USE_STRSTREAM_H=1
     echo "${cmake_cxx_compiler} has strstream.h"
   else
     echo "${cmake_cxx_compiler} does not have strstream.h"
   fi
-  if [ "x$KWSYS_IOS_HAVE_STRSTREAM_H" = "x0" ]; then
+  if [ "x$KWSYS_IOS_USE_STRSTREAM_H" = "x0" ]; then
     if cmake_try_run "${cmake_cxx_compiler}" \
-      "${cmake_cxx_flags} -DTEST_KWSYS_IOS_HAVE_STRSTREA_H" \
+      "${cmake_cxx_flags} -DTEST_KWSYS_IOS_USE_STRSTREA_H" \
       "${cmake_source_dir}/Source/kwsys/kwsysPlatformCxxTests.cxx" >> cmake_bootstrap.log 2>&1; then
-      KWSYS_IOS_HAVE_STRSTREA_H=1
+      KWSYS_IOS_USE_STRSTREA_H=1
       echo "${cmake_cxx_compiler} has strstrea.h"
     else
       echo "${cmake_cxx_compiler} does not have strstrea.h"
@@ -699,13 +699,13 @@ else
   cmake_report cmConfigure.h.tmp "#define CMAKE_NO_STD_NAMESPACE 1"
 fi
 
-if [ "x$KWSYS_IOS_HAVE_ANSI" = "x1" ]; then
+if [ "x$KWSYS_IOS_USE_ANSI" = "x1" ]; then
   cmake_report cmConfigure.h.tmp "/* #undef CMAKE_NO_ANSI_STREAM_HEADERS */"
 else
   cmake_report cmConfigure.h.tmp "#define CMAKE_NO_ANSI_STREAM_HEADERS 1"
 fi
 
-if [ "x$KWSYS_IOS_HAVE_SSTREAM" = "x1" ]; then
+if [ "x$KWSYS_IOS_USE_SSTREAM" = "x1" ]; then
   cmake_report cmConfigure.h.tmp "/* #undef CMAKE_NO_ANSI_STRING_STREAM */"
 else
   cmake_report cmConfigure.h.tmp "#define CMAKE_NO_ANSI_STRING_STREAM 1"
