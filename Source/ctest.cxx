@@ -460,11 +460,11 @@ int ctest::BuildDirectory()
     {
     std::cerr << "Error(s) when building project" << std::endl;
     }
-  // To do:
-  // Add parsing of output for errors and warnings.
 
-  cmCTestBuildErrorWarning cerw;
-  int cc;
+  // Parsing of output for errors and warnings.
+
+  std::vector<cmStdString> lines;
+  cmSystemTools::Split(output.c_str(), lines);
 
   std::ofstream ofs;
   if ( this->OpenFile("Temporary", "LastBuild.log", ofs) )
@@ -472,16 +472,19 @@ int ctest::BuildDirectory()
     ofs << output;
     ofs.close();
     }
+  else
+    {
+    std::cerr << "Cannot create LastBuild.log file" << std::endl;    
+    }
   
-  std::vector<cmStdString> lines;
-  cmSystemTools::Split(output.c_str(), lines);
-
   // Lines are marked: 
   // 0 - nothing
   // 1 - error
   // > 1 - warning
   std::vector<int> markedLines(lines.size(), 0);
   
+  cmCTestBuildErrorWarning cerw;
+  int cc;
   // Errors
   for ( cc = 0; cmCTestErrorMatches[cc]; cc ++ )
     {
@@ -508,6 +511,7 @@ int ctest::BuildDirectory()
         }
       }    
     }
+  // Errors exceptions
   for ( cc = 0; cmCTestErrorExceptions[cc]; cc ++ )
     {
     cmRegularExpression re(cmCTestErrorExceptions[cc]);
@@ -523,6 +527,7 @@ int ctest::BuildDirectory()
         }
       }
     }
+  // Warning exceptions
   for ( cc = 0; cmCTestWarningExceptions[cc]; cc ++ )
     {
     cmRegularExpression re(cmCTestWarningExceptions[cc]);
@@ -560,13 +565,18 @@ int ctest::BuildDirectory()
       }
     if ( found )
       {
-      errorwarning.m_LogLine     = static_cast<int>(kk);
+      errorwarning.m_LogLine     = static_cast<int>(kk+1);
       errorwarning.m_Text        = lines[kk];
       errorwarning.m_PreContext  = "";
       errorwarning.m_PostContext = "";
       std::vector<int>::size_type jj;
+      std::vector<int>::size_type ll = 0;
+      if ( kk > 6 )
+        {
+        ll = kk - 6;
+        }
       for ( jj = kk; 
-            jj > 0 && jj > kk - 6 /* && markedLines[jj] == 0 */; 
+            jj > 0 && jj > ll /* && markedLines[jj] == 0 */; 
             jj -- );
       for (; jj < kk; jj ++ )
         {
@@ -584,6 +594,7 @@ int ctest::BuildDirectory()
 
   if( !this->OpenFile("", "Build.xml", ofs) )
     {
+    std::cerr << "Cannot create build XML file" << std::endl;
     return 1;
     }
   this->GenerateDartBuildOutput(ofs, errorsWarnings);
@@ -621,7 +632,6 @@ bool ctest::OpenFile(const std::string& path,
   stream.open(filename.c_str());
   if( !stream )
     {
-    std::cerr << "Cannot create build XML file" << std::endl;
     return false;
     }
   return true;
@@ -661,8 +671,8 @@ void ctest::GenerateDartBuildOutput(std::ostream& os,
       os << "\t\t<SourceLineNumber>" << cm->m_LineNumber 
          << "</SourceLineNumber>" << std::endl;
       }
-    os << "\t\t<PreContext>" << cm->m_PreContext << "\n</PreContext>\n"
-       << "\t\t<PostContext>" << cm->m_PostContext << "\n</PostContext>\n"
+    os << "\t\t<PreContext>" << cm->m_PreContext << "</PreContext>\n"
+       << "\t\t<PostContext>" << cm->m_PostContext << "</PostContext>\n"
        << "\t\t<RepeatCount>0</RepeatCount>\n"
        << "</" << (cm->m_Error ? "Error" : "Warning") << ">\n\n" 
        << std::endl;
@@ -884,28 +894,8 @@ int ctest::TestDirectory()
 
   if ( m_DartMode )
     {
-    std::string testingDir = m_ToplevelPath + "/Testing/CDart";
-    if ( cmSystemTools::FileExists(testingDir.c_str()) )
-      {
-      if ( !cmSystemTools::FileIsDirectory(testingDir.c_str()) )
-        {
-        std::cerr << "File " << testingDir << " is in the place of the testing directory"
-                  << std::endl;
-        return 1;
-        }
-      }
-    else
-      {
-      if ( !cmSystemTools::MakeDirectory(testingDir.c_str()) )
-        {
-        std::cerr << "Cannot create directory " << testingDir
-                  << std::endl;
-        return 1;
-        }
-      }
-    std::string testxml = testingDir + "/Test.xml";
-    std::ofstream ofs(testxml.c_str());
-    if( !ofs )
+    std::ofstream ofs;
+    if( !this->OpenFile("", "Test.xml", ofs) )
       {
       std::cerr << "Cannot create testing XML file" << std::endl;
       return 1;
