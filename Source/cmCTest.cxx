@@ -4388,7 +4388,7 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
               failed.push_back(tryPath);
               std::string filepath = cmSystemTools::GetFilenamePath(m_TestCommand);
               std::string filename = cmSystemTools::GetFilenameName(m_TestCommand);
-              tryPath = filepath + "/" + m_ConfigType + "/" + filepath;
+              tryPath = filepath + "/" + m_ConfigType + "/" + filename;
               if ( cmSystemTools::FileExists(tryPath.c_str()) &&
                 !cmSystemTools::FileIsDirectory(tryPath.c_str()) )
                 {
