@@ -153,6 +153,7 @@ class cmake
    * files for the tree. It will not produce any actual Makefiles, or
    * workspaces. Generate does that.  */
   int LoadCache();
+  void PreLoadCMakeFiles();
 
   ///! Create a GlobalGenerator
   cmGlobalGenerator* CreateGlobalGenerator(const char* name);
