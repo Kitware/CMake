@@ -565,6 +565,24 @@ void cmDSPMakefile::WriteDSPHeader(std::ostream& fout, const char *libName,
       cmSystemTools::ReplaceString(line, 
                                    "EXTRA_DEFINES", 
 				   m_Makefile->GetDefineFlags());
+      cmSystemTools::ReplaceString(line,
+                                   "CMAKE_CXX_FLAGS_RELEASE",
+                                   m_Makefile->
+                                   GetDefinition("CMAKE_CXX_FLAGS_RELEASE"));
+      cmSystemTools::ReplaceString(line,
+                                   "CMAKE_CXX_FLAGS_MINSIZEREL",
+                                   m_Makefile->
+                                   GetDefinition("CMAKE_CXX_FLAGS_MINSIZEREL")
+        );
+      cmSystemTools::ReplaceString(line,
+                                   "CMAKE_CXX_FLAGS_DEBUG",
+                                   m_Makefile->
+                                   GetDefinition("CMAKE_CXX_FLAGS_DEBUG"));
+      cmSystemTools::ReplaceString(line,
+                                   "CMAKE_CXX_FLAGS",
+                                   m_Makefile->
+                                   GetDefinition("CMAKE_CXX_FLAGS"));
+      
       fout << line.c_str() << std::endl;
     }
 }
