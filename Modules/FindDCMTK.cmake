@@ -16,39 +16,44 @@
 # 
 
 FIND_PATH( DCMTK_config_INCLUDE_DIR osconfig.h
-  ${DCMTK_DIR}/config/include
+  ${DCMTK_DIR}/config/include ${DCMTK_DIR}/include
 )
 
 FIND_PATH( DCMTK_ofstd_INCLUDE_DIR ofstdinc.h
-  ${DCMTK_DIR}/ofstd/include
+  ${DCMTK_DIR}/ofstd/include ${DCMTK_DIR}/include/ofstd
 )
 
 FIND_LIBRARY( DCMTK_ofstd_LIBRARY ofstd
   ${DCMTK_DIR}/ofstd/libsrc
   ${DCMTK_DIR}/ofstd/Release
   ${DCMTK_DIR}/ofstd/Debug
+  ${DCMTK_DIR}/lib
 )
 
 
 FIND_PATH( DCMTK_dcmdata_INCLUDE_DIR dctypes.h
   ${DCMTK_DIR}/dcmdata/include
+  ${DCMTK_DIR}/include/dcmdata
 )
 
 FIND_LIBRARY( DCMTK_dcmdata_LIBRARY dcmdata
   ${DCMTK_DIR}/dcmdata/libsrc
   ${DCMTK_DIR}/dcmdata/Release
   ${DCMTK_DIR}/dcmdata/Debug
+  ${DCMTK_DIR}/lib
 )
 
 
 FIND_PATH( DCMTK_dcmimgle_INCLUDE_DIR dcmimage.h
   ${DCMTK_DIR}/dcmimgle/include
+  ${DCMTK_DIR}/include/dcmimgle
 )
 
 FIND_LIBRARY( DCMTK_dcmimgle_LIBRARY dcmimgle
   ${DCMTK_DIR}/dcmimgle/libsrc
   ${DCMTK_DIR}/dcmimgle/Release
   ${DCMTK_DIR}/dcmimgle/Debug
+  ${DCMTK_DIR}/lib
 )
 
 
