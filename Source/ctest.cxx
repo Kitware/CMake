@@ -26,13 +26,18 @@
 // Taken from Python 2.1.3
 
 #if defined( _WIN32 ) && !defined( __CYGWIN__ )
-# include <sys/timeb.h>
-# define HAVE_FTIME
-# define FTIME _ftime
-# define TIMEB _timeb
+#  include <sys/timeb.h>
+#  define HAVE_FTIME
+#  if defined( __BORLANDC__)
+#    define FTIME ftime
+#    define TIMEB timeb
+#  else // Visual studio?
+#    define FTIME _ftime
+#    define TIMEB _timeb
+#  endif
 #elif defined( __CYGWIN__ ) || defined( __linux__ )
-# include <sys/time.h>
-# define HAVE_GETTIMEOFDAY
+#  include <sys/time.h>
+#  define HAVE_GETTIMEOFDAY
 #endif
 
 static double
@@ -159,12 +164,14 @@ std::string ctest::MakeXMLSafe(const std::string& str)
 {
   std::string::size_type pos = 0;
   cmOStringStream ost;
+  char buffer[10];
   for ( pos = 0; pos < str.size(); pos ++ )
     {
     char ch = str[pos];
     if ( ch > 126 )
       {
-      ost << "&" << std::hex << (int)ch;
+      sprintf(buffer, "&%x", (int)ch);
+      ost << buffer;
       }
     else
       {
