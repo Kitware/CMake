@@ -28,9 +28,28 @@ bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& args)
   std::string arguments;
   bool doingargs = false;
   int count = 0;
+  std::string variable;
+  bool havevariable = false;
+  std::string e_command;
   for(size_t i=0; i < args.size(); ++i)
     {
-    if(doingargs)
+    if(args[i] == "OUTPUT_VARIABLE")
+      {
+      count++;
+      doingargs = false;
+      havevariable = true;
+      }    
+    else if ( havevariable )
+      {
+      if ( variable.size() > 0 )
+        {
+        this->SetError("called with incorrect number of arguments");
+        return false;
+        }
+      variable = args[i];
+      count ++;
+      }
+    else if(doingargs)
       {
       arguments += args[i];
       arguments += " ";
@@ -65,6 +84,15 @@ bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& args)
     {
     cmSystemTools::RunCommand(command.c_str(), output);
     }
+
+  if ( variable.size() > 0 )
+    {    
+    std::string::size_type first = output.find_first_not_of(" \n\t\r");
+    std::string::size_type last = output.find_last_not_of(" \n\t\r");
+    std::string coutput = std::string(output, first, last);
+    m_Makefile->AddDefinition(variable.c_str(), coutput.c_str());
+    }
+  
   return true;
 }
 

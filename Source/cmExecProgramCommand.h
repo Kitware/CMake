@@ -64,7 +64,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "EXEC_PROGRAM(Executable [Directory to run in] [ARGS arguments to executable])"
+      "EXEC_PROGRAM(Executable [Directory to run in] [ARGS arguments to executable] [OUTPUT_VARIABLE var])"
       "The executable is run in the optionally specified Directory.  The executable "
       "can include arguments if it is double quoted, but it is better to use the "
       "optional ARGS argument to specify arguments to the program.   This is because "
