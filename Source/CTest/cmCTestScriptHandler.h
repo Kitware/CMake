@@ -81,7 +81,24 @@ public:
    * If verbose then more informaiton is printed out
    */
   void SetVerbose(bool val) { m_Verbose = val; }
-  
+
+  /*
+   * Run a script
+   */
+  static bool RunScript(cmCTest* ctest, const char *script);
+  int RunCurrentScript(cmCTest* ctest);
+    
+  /*
+   * Empty Binary Directory
+   */
+  static bool EmptyBinaryDirectory(const char *dir);
+
+  /*
+   * Some elapsed time handling functions
+   */
+  static void SleepInSeconds(unsigned int secondsToWait);
+  void UpdateElapsedTime();
+
   cmCTestScriptHandler();
   ~cmCTestScriptHandler();
   
@@ -98,8 +115,6 @@ private:
   // perform any extra cvs updates that were requested
   int PerformExtraUpdates();
   
-  void LocalSleep(unsigned int secondsToWait);
-
   // backup and restore dirs
   int BackupDirectories();
   void RestoreBackupDirectories();
@@ -113,7 +128,8 @@ private:
   bool m_Backup;
   bool m_EmptyBinDir;
   bool m_EmptyBinDirOnce;
-
+  bool m_ScriptHasRun;
+  
   cmStdString m_SourceDir;
   cmStdString m_BinaryDir;
   cmStdString m_BackupSourceDir;
@@ -130,6 +146,9 @@ private:
 
   double m_MinimumInterval;
   double m_ContinuousDuration;
+
+  // what time in seconds did this script start running
+  double m_ScriptStartTime;
   
   cmMakefile *m_Makefile;
   cmLocalGenerator *m_LocalGenerator;

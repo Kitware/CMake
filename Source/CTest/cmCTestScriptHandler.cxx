@@ -19,6 +19,7 @@
 
 #include "cmCTest.h"
 #include "cmake.h"
+#include "cmFunctionBlocker.h"
 #include "cmMakefile.h"
 #include "cmLocalGenerator.h"
 #include "cmGlobalGenerator.h"
@@ -41,19 +42,48 @@
 # include <unistd.h>
 #endif
 
+#include "cmCTestEmptyBinaryDirectoryCommand.h"
+#include "cmCTestRunScriptCommand.h"
+#include "cmCTestSleepCommand.h"
+
 #define CTEST_INITIAL_CMAKE_OUTPUT_FILE_NAME "CTestInitialCMakeOutput.log"
+
+// used to keep elapsed time up to date
+class cmCTestScriptFunctionBlocker : public cmFunctionBlocker
+{
+public:
+  cmCTestScriptFunctionBlocker() {}
+  virtual ~cmCTestScriptFunctionBlocker() {}
+  virtual bool IsFunctionBlocked(const cmListFileFunction& lff,
+                                 cmMakefile &mf);
+  //virtual bool ShouldRemove(const cmListFileFunction& lff, cmMakefile &mf);
+  //virtual void ScopeEnded(cmMakefile &mf);
+  
+  cmCTestScriptHandler* m_CTestScriptHandler;
+};
+
+// simply update the time and don't block anything
+bool cmCTestScriptFunctionBlocker::
+IsFunctionBlocked(const cmListFileFunction& , cmMakefile &) 
+{
+  m_CTestScriptHandler->UpdateElapsedTime();
+  return false;
+}
 
 //----------------------------------------------------------------------
 cmCTestScriptHandler::cmCTestScriptHandler()
 {
   m_Verbose = false; 
   m_Backup = false; 
+  m_ScriptHasRun = false;
   m_EmptyBinDir = false;
   m_EmptyBinDirOnce = false;
   m_Makefile = 0;
   m_LocalGenerator = 0;
   m_CMake = 0;
   m_GlobalGenerator = 0;
+
+  m_ScriptStartTime = 0;
   
   // the *60 is becuase the settings are in minutes but GetTime is seconds
   m_MinimumInterval = 30*60;
@@ -110,11 +140,25 @@ int cmCTestScriptHandler::RunConfigurationScript(cmCTest* ctest)
   return res;
 }
 
+void cmCTestScriptHandler::UpdateElapsedTime()
+{
+  if (m_LocalGenerator)
+    {
+    // set the current elapsed time
+    char timeString[20];
+    int itime = static_cast<unsigned int>(cmSystemTools::GetTime()
+                                          - m_ScriptStartTime);
+    sprintf(timeString,"%i",itime);
+    m_LocalGenerator->GetMakefile()->AddDefinition("CTEST_ELAPSED_TIME",
+                                                   timeString);
+    }
+}
 
 //----------------------------------------------------------------------
 // this sets up some variables for thew script to use, creates the required
 // cmake instance and generators, and then reads in the script
-int cmCTestScriptHandler::ReadInScript(cmCTest* ctest, const std::string& total_script_arg)
+int cmCTestScriptHandler::ReadInScript(cmCTest* ctest, 
+                                       const std::string& total_script_arg)
 {
   // if the argument has a , in it then it needs to be broken into the fist
   // argument (which is the script) and the second argument which will be
@@ -158,12 +202,36 @@ int cmCTestScriptHandler::ReadInScript(cmCTest* ctest, const std::string& total_
                                      script).c_str());
   m_LocalGenerator->GetMakefile()->AddDefinition("CTEST_EXECUTABLE_NAME",
                                    ctest->GetCTestExecutable());
+
+  this->UpdateElapsedTime();
+  
+  // add any ctest specific commands, probably should have common superclass
+  // for ctest commands to clean this up. If a couple more commands are
+  // created with the same format lets do that - ken
+  cmCTestCommand* newCom = new cmCTestRunScriptCommand;
+  newCom->m_CTest = ctest;
+  newCom->m_CTestScriptHandler = this;
+  m_CMake->AddCommand(newCom);
+  newCom = new cmCTestEmptyBinaryDirectoryCommand;
+  newCom->m_CTest = ctest;
+  newCom->m_CTestScriptHandler = this;
+  m_CMake->AddCommand(newCom);
+  newCom = new cmCTestSleepCommand;
+  newCom->m_CTest = ctest;
+  newCom->m_CTestScriptHandler = this;
+  m_CMake->AddCommand(newCom);
+  
   // add the script arg if defined
   if (script_arg.size())
     {
     m_LocalGenerator->GetMakefile()->AddDefinition(
       "CTEST_SCRIPT_ARG", script_arg.c_str());
     }
+
+  // always add a function blocker to update the elapsed time
+  cmCTestScriptFunctionBlocker *f = new cmCTestScriptFunctionBlocker();
+  f->m_CTestScriptHandler = this;
+  m_LocalGenerator->GetMakefile()->AddFunctionBlocker(f);
   
   // finally read in the script
   if (!m_LocalGenerator->GetMakefile()->ReadListFile(0, script.c_str()))
@@ -264,11 +332,13 @@ int cmCTestScriptHandler::ExtractVariables()
     }
   
   
+  this->UpdateElapsedTime();
+
   return 0;
 }
 
 //----------------------------------------------------------------------
-void cmCTestScriptHandler::LocalSleep(unsigned int secondsToWait)
+void cmCTestScriptHandler::SleepInSeconds(unsigned int secondsToWait)
 {
 #if defined(_WIN32)
         Sleep(1000*secondsToWait);
@@ -284,13 +354,28 @@ int cmCTestScriptHandler::RunConfigurationScript(cmCTest* ctest,
 {
   int result;
   
+  m_ScriptStartTime = 
+    cmSystemTools::GetTime();
+  
   // read in the script
   result = this->ReadInScript(ctest, total_script_arg);
   if (result)
     {
     return result;
     }
-  
+  if (!m_ScriptHasRun)
+    {
+    return this->RunCurrentScript(ctest);
+    }
+  return result;
+}
+
+int cmCTestScriptHandler::RunCurrentScript(cmCTest* ctest)
+{
+  int result;
+
+  m_ScriptHasRun = true;
+
   // no popup widows
   cmSystemTools::SetRunCommandHideConsole(true);
   
@@ -318,6 +403,7 @@ int cmCTestScriptHandler::RunConfigurationScript(cmCTest* ctest,
   // for a continuous, do we ned to run it more than once?
   if ( m_ContinuousDuration >= 0 )
     {
+    this->UpdateElapsedTime();
     double ending_time  = cmSystemTools::GetTime() + m_ContinuousDuration;
     if (m_EmptyBinDirOnce)
       {
@@ -330,7 +416,7 @@ int cmCTestScriptHandler::RunConfigurationScript(cmCTest* ctest,
       interval = cmSystemTools::GetTime() - interval;
       if (interval < m_MinimumInterval)
         {
-        this->LocalSleep(
+        this->SleepInSeconds(
           static_cast<unsigned int>(m_MinimumInterval - interval));
         }
       if (m_EmptyBinDirOnce)
@@ -489,13 +575,7 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
   // clear the binary directory?
   if (m_EmptyBinDir)
     {
-    // try to avoid deleting directories that we shouldn't
-    std::string check = m_BinaryDir;
-    check += "/CMakeCache.txt";
-    if (cmSystemTools::FileExists(check.c_str()))
-      {
-      cmSystemTools::RemoveADirectory(m_BinaryDir.c_str());
-      }
+    cmCTestScriptHandler::EmptyBinaryDirectory(m_BinaryDir.c_str());
     }
   
   // make sure the binary directory exists if it isn't the srcdir
@@ -681,4 +761,30 @@ void cmCTestScriptHandler::RestoreBackupDirectories()
     }
 }
 
+bool cmCTestScriptHandler::RunScript(cmCTest *ctest, const char *sname)
+{
+  cmCTestScriptHandler* sh = new cmCTestScriptHandler();
+  sh->AddConfigurationScript(sname);
+  sh->RunConfigurationScript(ctest);
+  delete sh;
+  return true;
+}
 
+bool cmCTestScriptHandler::EmptyBinaryDirectory(const char *sname)
+{
+  // try to avoid deleting root
+  if (!sname || strlen(sname) < 2)
+    {
+    return false;
+    }
+  
+  // try to avoid deleting directories that we shouldn't
+  std::string check = sname;
+  check += "/CMakeCache.txt";
+  if (cmSystemTools::FileExists(check.c_str()))
+    {
+    cmSystemTools::RemoveADirectory(sname);
+    return true;
+    }
+  return false;
+}
