@@ -511,7 +511,7 @@ OutputSubDirectoryVars(std::ostream& fout,
       }
     }
   fout << "# Targets for making " << target << " in subdirectories.\n";
-  for(int i =0; i < SubDirectories.size(); i++)
+  for(unsigned int i =0; i < SubDirectories.size(); i++)
     {
     std::string subdir = FixDirectoryName(SubDirectories[i].c_str());
     fout << target << "_" << subdir.c_str() << ":\n";
