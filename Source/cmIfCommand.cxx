@@ -21,6 +21,13 @@ bool cmIfFunctionBlocker::
 IsFunctionBlocked(const char *name, const std::vector<std::string> &args, 
                   cmMakefile &mf)
 {
+  // always let if statements through
+  if (!strcmp(name,"IF"))
+    {
+    return false;
+    }
+  
+  // watch for our ELSE or ENDIF
   if (!strcmp(name,"ELSE") || !strcmp(name,"ENDIF"))
     {
     if (args == m_Args)
