@@ -119,6 +119,7 @@ IF (QT_FOUND)
   QT_WRAP_UI (qtwrapping QTUI_H_SRCS QTUI_S_SRCS QTUI_SRCS)
 
   MESSAGE("QT files are ${QTUI_S_SRCS}")
+  MESSAGE("QT other files are ${QTUI_H_SRCS}")
   ADD_DEFINITIONS(${QT_DEFINITIONS})
   ADD_EXECUTABLE (qtwrapping qtwrappingmain.cxx QTUI_S_SRCS)
 
