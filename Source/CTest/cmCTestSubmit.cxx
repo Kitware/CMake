@@ -245,7 +245,6 @@ bool cmCTestSubmit::SubmitUsingHTTP(const std::string& localprefix,
             sprintf(hex, "%%%02X", (int)c);
             ofile.append(hex);
             break;
-            break;
           default: 
             ofile.append(hex);
           }
@@ -352,7 +351,6 @@ bool cmCTestSubmit::TriggerUsingHTTP(const std::vector<std::string>& files,
           case '%':
             sprintf(hex, "%%%02X", (int)c);
             ofile.append(hex);
-            break;
             break;
           default: 
             ofile.append(hex);
