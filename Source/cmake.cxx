@@ -40,7 +40,9 @@
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/resource.h>
+#if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmGlobalCodeWarriorGenerator.h"
+#endif
 #endif
 
 
@@ -653,7 +655,7 @@ void cmake::GetRegisteredGenerators(std::vector<std::string>& names)
   names.push_back(cmGlobalBorlandMakefileGenerator::GetActualName());
   names.push_back(cmGlobalNMakeMakefileGenerator::GetActualName());
 #else
-#ifdef __APPLE__
+#if defined(__APPLE__) && defined(CMAKE_BUILD_WITH_CMAKE)
   names.push_back(cmGlobalCodeWarriorGenerator::GetActualName());
 #endif
   names.push_back(cmGlobalUnixMakefileGenerator::GetActualName());
@@ -685,7 +687,7 @@ cmGlobalGenerator* cmake::CreateGlobalGenerator(const char* name)
     ret->SetCMakeInstance(this);
     }
 #else
-#ifdef __APPLE__
+#if defined(__APPLE__) && defined(CMAKE_BUILD_WITH_CMAKE)
   if (!strcmp(name,cmGlobalCodeWarriorGenerator::GetActualName()))
     {
     ret = new cmGlobalCodeWarriorGenerator;
