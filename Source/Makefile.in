@@ -34,7 +34,7 @@ cmCacheManager.o \
 cmListFileCache.o \
 cmSourceGroup.o
 
-DEPENDS = cmConfigure.h
+DEPENDS = cmConfigure.h @CMAKE_ROOT_DIR@/Source/*.h
 
 cmakewizard.o : $(DEPENDS)
 cmListFileCache.o : $(DEPENDS)
