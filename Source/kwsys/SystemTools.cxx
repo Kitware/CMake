@@ -1199,7 +1199,7 @@ kwsys_stl::string SystemTools::FindLibrary(const char* name,
   for(kwsys_stl::vector<kwsys_stl::string>::const_iterator p = path.begin();
       p != path.end(); ++p)
     {
-#if defined(_WIN32) && !defined(__CYGWIN__)
+#if defined(_WIN32) && !defined(__CYGWIN__) && !defined(__MINGW32__)
     tryPath = *p;
     tryPath += "/";
     tryPath += name;
