@@ -47,6 +47,7 @@
 class cmOrderLinkDirectories
 {
 public:
+  cmOrderLinkDirectories();
   ///! set link information from the target
   void SetLinkInformation(const cmTarget&, cmTarget::LinkLibraryType,
                           const char* targetLibrary);
@@ -79,6 +80,11 @@ public:
     cmStdString Path;
   };
   friend struct cmOrderLinkDirectoriesCompare;
+  void DebugOn() 
+    {
+      m_Debug = true;
+    }
+  
 private:
   void CreateRegularExpressions();
   void DetermineLibraryPathOrder(std::vector<cmStdString>& searchPaths,
@@ -119,7 +125,7 @@ private:
   cmsys::RegularExpression m_RemoveLibraryExtension;
   cmsys::RegularExpression m_ExtractBaseLibraryName;
   cmsys::RegularExpression m_ExtractBaseLibraryNameNoPrefix;
-  
+  bool m_Debug;
 };
 
 #endif

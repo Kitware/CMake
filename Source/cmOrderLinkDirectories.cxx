@@ -5,6 +5,12 @@
 
 
 //-------------------------------------------------------------------
+cmOrderLinkDirectories::cmOrderLinkDirectories()
+{
+  m_Debug = false;
+}
+
+//-------------------------------------------------------------------
 bool cmOrderLinkDirectories::LibraryInDirectory(const char* dir, 
                                                 const char* libIn)
 {
@@ -272,7 +278,11 @@ bool cmOrderLinkDirectories::DetermineLibraryPathOrder()
     }
   this->FindIndividualLibraryOrders();
   m_SortedSearchPaths.clear();
-  
+  if(m_Debug)
+    {
+    this->PrintMap("m_LibraryToDirectories", m_LibraryToDirectories);
+    this->PrintMap("m_DirectoryToAfterList", m_DirectoryToAfterList);
+    }
   this->OrderPaths(m_SortedSearchPaths); 
   // now turn libfoo.a into foo and foo.a into foo
   // This will prepare the link items for -litem 
@@ -317,18 +327,18 @@ void
 cmOrderLinkDirectories::PrintMap(const char* name,
                        std::map<cmStdString, std::vector<cmStdString> >& m)
 {
-  std::cerr << name << "\n";
+  std::cout << name << "\n";
   for(std::map<cmStdString, std::vector<cmStdString> >::iterator i =
         m.begin(); i != m.end();
       ++i)
     {
-    std::cerr << i->first << ":  ";
+    std::cout << i->first << ":  ";
     for(std::vector<cmStdString>::iterator l = i->second.begin();
         l != i->second.end(); ++l)
       {
-      std::cerr << *l << " ";
+      std::cout << *l << " ";
       }
-    std::cerr << "\n";
+    std::cout << "\n";
     }
 }
 

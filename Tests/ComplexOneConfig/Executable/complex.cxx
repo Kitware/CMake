@@ -52,6 +52,7 @@ bool TestLibraryOrder(bool shouldFail)
   std::vector<cmStdString> sortedpaths;
   std::vector<cmStdString> linkItems;
   cmOrderLinkDirectories orderLibs;
+  orderLibs.DebugOn();
   orderLibs.AddLinkExtension(".so");
   orderLibs.AddLinkExtension(".a");
   orderLibs.SetLinkInformation(target, cmTarget::GENERAL, "A");
