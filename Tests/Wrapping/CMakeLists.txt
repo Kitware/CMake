@@ -82,16 +82,18 @@ VTK_WRAP_PYTHON (wraplibPython Python_SRCS SRCS)
 # Wrap VTK -> Java
 #
 # VTK_WRAP_JAVA puts dependencie between wraplibJavaJavaClasses (in ALL)
-# and each Java wrapped class (here, vtkIncluded, although it is not created). 
-# A custom target is created to trick 'make' so that the build succeeds.
+# and each Java wrapped class (here, vtkIncluded, so let's create a dummy one
+# so that the build succeeds.
 #
 SET (VTK_WRAP_JAVA "On")
 SET (VTK_WRAP_JAVA_EXE "echo")
 SET (VTK_PARSE_JAVA_EXE "echo")
-SET (VTK_JAVA_HOME ".")
+SET (VTK_JAVA_HOME "${Wrapping_BINARY_DIR}/java")
 VTK_WRAP_JAVA (wraplibJava Java_SRCS SRCS)
-ADD_CUSTOM_TARGET(${VTK_JAVA_HOME}/vtkIncluded.java
-                  echo "Triggering custom target vtkIncluded.java")
+CONFIGURE_FILE(
+  ${Wrapping_SOURCE_DIR}/dummy
+  ${VTK_JAVA_HOME}/vtkIncluded.java
+  COPYONLY IMMEDIATE)
 
 #
 # QT Wrappers
