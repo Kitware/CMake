@@ -32,7 +32,7 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
   std::vector<std::string> args;
   cmSystemTools::ExpandListArguments(argsIn, args);
 
-  std::string source, command, target;
+  std::string source, command, target, comment;
   std::vector<std::string> command_args, depends, outputs;
 
   enum tdoing {
@@ -42,6 +42,7 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
     doing_args,
     doing_depends,
     doing_outputs,
+    doing_comment,
     doing_nothing
   };
 
@@ -75,6 +76,10 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
       {
       doing = doing_outputs;
       }
+    else if (copy == "COMMENT")
+      {
+      doing = doing_comment;
+      }
     else
       {
       switch (doing)
@@ -97,6 +102,9 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
         case doing_outputs:
           outputs.push_back(copy);
           break;
+        case doing_comment:
+          comment = copy;
+          break;
         default:
           this->SetError("Wrong syntax. Unknow type of argument.");
           return false;
@@ -108,12 +116,7 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
      For the moment, let's say that COMMAND, TARGET are always 
      required.
   */
-      
-  if(command.empty())
-    {
-    this->SetError("Wrong syntax. Empty COMMAND.");
-    return false;
-    }
+  
   if(target.empty())
     {
     this->SetError("Wrong syntax. Empty TARGET.");
@@ -133,7 +136,8 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
                                command_args, 
                                depends, 
                                outputs, 
-                               target.c_str());
+                               target.c_str(),
+                               comment.c_str());
   
   return true;
 }

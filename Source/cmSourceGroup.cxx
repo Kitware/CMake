@@ -80,6 +80,7 @@ void cmSourceGroup::AddCustomCommand(const cmCustomCommand &cmd)
     CommandFiles& cmdFiles = 
       m_BuildRules[cmd.GetSourceName()].m_Commands[commandAndArgs];
     cmdFiles.m_Command = cmd.GetCommand();
+    cmdFiles.m_Comment = cmd.GetComment();
     cmdFiles.m_Arguments = cmd.GetArguments();
     cmdFiles.m_Depends.insert(cmd.GetDepends().begin(),cmd.GetDepends().end());
     cmdFiles.m_Outputs.insert(cmd.GetOutputs().begin(),cmd.GetOutputs().end());
@@ -93,6 +94,7 @@ void cmSourceGroup::AddCustomCommand(const cmCustomCommand &cmd)
     {
     // The command did not exist.  Add it.
     commands[commandAndArgs].m_Command = cmd.GetCommand();
+    commands[commandAndArgs].m_Comment = cmd.GetComment();
     commands[commandAndArgs].m_Arguments = cmd.GetArguments();
     commands[commandAndArgs].m_Depends.insert(cmd.GetDepends().begin(),
                                               cmd.GetDepends().end());

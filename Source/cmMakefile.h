@@ -123,7 +123,8 @@ public:
                         const std::vector<std::string>& commandArgs,
                         const std::vector<std::string>& depends,
                         const std::vector<std::string>& outputs,
-                        const char *target);
+                        const char *target,
+                        const char *comment = 0);
 
   void AddCustomCommand(const char* source,
                         const char* command,
@@ -260,6 +261,8 @@ public:
     {
       m_cmCurrentDirectory = m_cmStartDirectory;
       m_CurrentOutputDirectory = m_StartOutputDirectory;
+      this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR", m_cmCurrentDirectory.c_str());
+      this->AddDefinition("CMAKE_CURRENT_BINARY_DIR", m_CurrentOutputDirectory.c_str());
     }
   
   //@{
@@ -323,6 +326,7 @@ public:
     {
       m_cmCurrentDirectory = dir;
       cmSystemTools::ConvertToUnixSlashes(m_cmCurrentDirectory);
+      this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR", m_cmCurrentDirectory.c_str());
     }
   const char* GetCurrentDirectory() const 
     {
@@ -332,6 +336,7 @@ public:
     {
       m_CurrentOutputDirectory = lib;
       cmSystemTools::ConvertToUnixSlashes(m_CurrentOutputDirectory);
+      this->AddDefinition("CMAKE_CURRENT_BINARY_DIR", m_CurrentOutputDirectory.c_str());
     }
   const char* GetCurrentOutputDirectory() const
     {

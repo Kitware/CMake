@@ -1785,6 +1785,7 @@ void cmLocalUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
         {
         // escape spaces and convert to native slashes path for
         // the command
+        const char* comment = c->second.m_Comment.c_str();
         std::string command = c->second.m_Command;
         cmSystemTools::ReplaceString(command, "/./", "/");
         command = cmSystemTools::ConvertToOutputPath(command.c_str());
@@ -1811,7 +1812,7 @@ void cmLocalUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
             }
           // output rule
           this->OutputMakeRule(fout,
-                               "Custom command",
+                               (*comment?comment:"Custom command"),
                                source.c_str(),
                                depends.c_str(),
                                command.c_str());
@@ -1838,7 +1839,7 @@ void cmLocalUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
             } 
           // output rule
           this->OutputMakeRule(fout,
-                               "Custom command",
+                               (*comment?comment:"Custom command"),
                                output->c_str(),
                                depends.c_str(),
                                command.c_str());
@@ -2511,7 +2512,8 @@ void cmLocalUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
     {
     replace = *i;
     m_Makefile->ExpandVariablesInString(replace);
-    if(count == 0 && replace[0] != '-' && replace.find("echo") != 0  
+    if(count == 0 && replace.find_first_not_of(" \t\n\r") != std::string::npos && 
+       replace[0] != '-' && replace.find("echo") != 0  
        && replace.find("$(MAKE)") != 0)
       {
       std::string echostring = "Building ";

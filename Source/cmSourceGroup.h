@@ -39,12 +39,13 @@ public:
   {
     CommandFiles() {}
     CommandFiles(const CommandFiles& r):
-      m_Outputs(r.m_Outputs), m_Depends(r.m_Depends) {}
+      m_Comment(r.m_Comment), m_Outputs(r.m_Outputs), m_Depends(r.m_Depends) {}
     
     void Merge(const CommandFiles &r);
     
     std::string m_Command;
     std::string m_Arguments;
+    std::string m_Comment;
     std::set<std::string> m_Outputs;
     std::set<std::string> m_Depends;
   };

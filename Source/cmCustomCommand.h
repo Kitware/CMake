@@ -54,6 +54,10 @@ public:
   std::string GetCommand() const {return m_Command;}
   void SetCommand(const char *cmd) {m_Command = cmd;}
 
+  ///! Return the command to execute
+  std::string GetComment() const {return m_Comment;}
+  void SetComment(const char *cm) {m_Comment = cm;}
+
   ///! Return the commands arguments
   std::string GetArguments() const {return m_Arguments;}
   void SetArguments(const char *arg) {m_Arguments = arg;}
@@ -74,6 +78,7 @@ private:
   std::string m_Source;
   std::string m_Command;
   std::string m_Arguments;
+  std::string m_Comment;
   std::vector<std::string> m_Depends;
   std::vector<std::string> m_Outputs;
 };

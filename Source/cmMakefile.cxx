@@ -415,7 +415,8 @@ void cmMakefile::AddCustomCommand(const char* source,
                                   const std::vector<std::string>& commandArgs,
                                   const std::vector<std::string>& depends,
                                   const std::vector<std::string>& outputs,
-                                  const char *target) 
+                                  const char *target,
+                                  const char *comment) 
 {
   // find the target, 
   if (m_Targets.find(target) != m_Targets.end())
@@ -434,6 +435,10 @@ void cmMakefile::AddCustomCommand(const char* source,
       }
     
     cmCustomCommand cc(source,c.c_str(),combinedArgs.c_str(),depends,outputs);
+    if ( comment && comment[0] )
+      {
+      cc.SetComment(comment);
+      }
     m_Targets[target].GetCustomCommands().push_back(cc);
     std::string cacheCommand = command;
     this->ExpandVariablesInString(cacheCommand);
