@@ -88,6 +88,11 @@ public:
   virtual bool IsInherited() {return true;}
 
   /**
+   * This determines if the command is invoked when in script mode.
+   */
+  virtual bool IsScriptable() { return true; }
+
+  /**
    * More documentation.
    */
   virtual const char* GetFullDocumentation()
