@@ -482,7 +482,18 @@ case $system in
           echo "$ac_t""no" 1>&6
         fi
         rm -f conftest*
-	;;
+	;;   
+    IRIX-5* | IRIX-6* | IRIX64-6* | IRIX-64-6*)
+        echo $ac_n "checking whether ${CC} accepts -LANG:std""... $ac_c" 1>&6
+        echo 'void f(){}' > conftest.c
+        if test -z "`${CC} -LANG:std -c conftest.c 2>&1`"; then
+          echo "$ac_t""yes" 1>&6
+          CMAKE_ANSI_CFLAGS="-LANG:std"
+        else
+          echo "$ac_t""no" 1>&6
+        fi
+        rm -f conftest*
+	;;  
 esac
 fi
 AC_SUBST(CMAKE_ANSI_CFLAGS)
