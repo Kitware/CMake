@@ -109,12 +109,17 @@ public:
     {
     m_TestModel = mode;
     }
+
   std::string GetTestModelString();
+  static int GetTestModelFromString(const char* str);
 
   /**
    * constructor
    */
   cmCTest();
+
+  //! Set the notes files to be created.
+  void SetNotesFiles(const char* notes);
 
   bool m_UseIncludeRegExp;
   std::string m_IncludeRegExp;
@@ -283,6 +288,11 @@ private:
   int                     m_MemoryTesterGlobalResults[NO_MEMORY_FAULT];
 
   int                     m_CompatibilityMode;
+
+  std::string             m_NotesFiles;
+
+  //! Reread the configuration file
+  void UpdateCTestConfiguration();
 
   /**
    * Generate the Dart compatible output

@@ -383,10 +383,7 @@ int main (int argc, char *argv[])
       {
       inst.m_DartMode = true;
       inst.SetTest("Notes");
-      inst.Initialize();
-      int ires = inst.GenerateNotesFile(args[i+1].c_str());
-      inst.Finalize();
-      return ires;
+      inst.SetNotesFiles(argv[i+1]);
       }
     }
 

@@ -325,6 +325,90 @@ void cmCTest::Initialize()
 {
   m_ToplevelPath = cmSystemTools::GetCurrentWorkingDirectory();
   cmSystemTools::ConvertToUnixSlashes(m_ToplevelPath);
+  this->UpdateCTestConfiguration();
+  if ( m_DartMode )
+    {
+    std::string testingDir = m_ToplevelPath + "/Testing";
+    if ( cmSystemTools::FileExists(testingDir.c_str()) )
+      {
+      if ( !cmSystemTools::FileIsDirectory(testingDir.c_str()) )
+        {
+        std::cerr << "File " << testingDir << " is in the place of the testing directory"
+                  << std::endl;
+        return;
+        }
+      }
+    else
+      {
+      if ( !cmSystemTools::MakeDirectory(testingDir.c_str()) )
+        {
+        std::cerr << "Cannot create directory " << testingDir
+                  << std::endl;
+        return;
+        }
+      }
+    std::string tagfile = testingDir + "/TAG";
+    std::ifstream tfin(tagfile.c_str());
+    std::string tag;
+    time_t tctime = time(0);
+    struct tm *lctime = gmtime(&tctime);
+    if ( tfin && cmSystemTools::GetLineFromStream(tfin, tag) )
+      {
+      int year = 0;
+      int mon = 0;
+      int day = 0;
+      int hour = 0;
+      int min = 0;
+      sscanf(tag.c_str(), "%04d%02d%02d-%02d%02d",
+             &year, &mon, &day, &hour, &min);
+      if ( year != lctime->tm_year + 1900 ||
+           mon != lctime->tm_mon+1 ||
+           day != lctime->tm_mday )
+        {
+        tag = "";
+        }
+      std::string tagmode;
+      if ( cmSystemTools::GetLineFromStream(tfin, tagmode) )
+        {
+        if ( tagmode.size() > 4 && !( m_Tests[cmCTest::START_TEST] || m_Tests[ALL_TEST] ))
+          {
+          m_TestModel = cmCTest::GetTestModelFromString(tagmode.c_str());
+          }
+        }
+      tfin.close();
+      }
+    if ( tag.size() == 0 || m_Tests[cmCTest::START_TEST] || m_Tests[ALL_TEST])
+      {
+      //std::cout << "TestModel: " << this->GetTestModelString() << std::endl;
+      //std::cout << "TestModel: " << m_TestModel << std::endl;
+      if ( m_TestModel == cmCTest::NIGHTLY )
+        {
+        lctime = ::GetNightlyTime(m_DartConfiguration["NightlyStartTime"]);
+        }
+      char datestring[100];
+      sprintf(datestring, "%04d%02d%02d-%02d%02d",
+              lctime->tm_year + 1900,
+              lctime->tm_mon+1,
+              lctime->tm_mday,
+              lctime->tm_hour,
+              lctime->tm_min);
+      tag = datestring;
+      std::ofstream ofs(tagfile.c_str());
+      if ( ofs )
+        {
+        ofs << tag << std::endl;
+        ofs << this->GetTestModelString() << std::endl;
+        }
+      ofs.close();
+      std::cout << "Create new tag: " << tag << " - " 
+        << this->GetTestModelString() << std::endl;
+      }
+    m_CurrentTag = tag;
+    }
+}
+
+void cmCTest::UpdateCTestConfiguration()
+{
   // parse the dart test file
   std::ifstream fin("DartConfiguration.tcl");
   if(!fin)
@@ -368,74 +452,6 @@ void cmCTest::Initialize()
   if ( m_DartMode )
     {
     m_TimeOut = atoi(m_DartConfiguration["TimeOut"].c_str());
-    std::string testingDir = m_ToplevelPath + "/Testing";
-    if ( cmSystemTools::FileExists(testingDir.c_str()) )
-      {
-      if ( !cmSystemTools::FileIsDirectory(testingDir.c_str()) )
-        {
-        std::cerr << "File " << testingDir << " is in the place of the testing directory"
-                  << std::endl;
-        return;
-        }
-      }
-    else
-      {
-      if ( !cmSystemTools::MakeDirectory(testingDir.c_str()) )
-        {
-        std::cerr << "Cannot create directory " << testingDir
-                  << std::endl;
-        return;
-        }
-      }
-    std::string tagfile = testingDir + "/TAG";
-    std::ifstream tfin(tagfile.c_str());
-    std::string tag;
-    time_t tctime = time(0);
-    struct tm *lctime = gmtime(&tctime);
-    if ( tfin )
-      {
-      tfin >> tag;
-      tfin.close();
-      int year = 0;
-      int mon = 0;
-      int day = 0;
-      int hour = 0;
-      int min = 0;
-      sscanf(tag.c_str(), "%04d%02d%02d-%02d%02d",
-             &year, &mon, &day, &hour, &min);
-      if ( year != lctime->tm_year + 1900 ||
-           mon != lctime->tm_mon+1 ||
-           day != lctime->tm_mday )
-        {
-        tag = "";
-        }
-
-      }
-    if ( tag.size() == 0 || m_Tests[cmCTest::START_TEST] || m_Tests[ALL_TEST])
-      {
-      //std::cout << "TestModel: " << this->GetTestModelString() << std::endl;
-      //std::cout << "TestModel: " << m_TestModel << std::endl;
-      if ( m_TestModel == cmCTest::NIGHTLY )
-        {
-        lctime = ::GetNightlyTime(m_DartConfiguration["NightlyStartTime"]);
-        }
-      char datestring[100];
-      sprintf(datestring, "%04d%02d%02d-%02d%02d",
-              lctime->tm_year + 1900,
-              lctime->tm_mon+1,
-              lctime->tm_mday,
-              lctime->tm_hour,
-              lctime->tm_min);
-      tag = datestring;
-      std::ofstream ofs(tagfile.c_str());
-      if ( ofs )
-        {
-        ofs << tag << std::endl;
-        }
-      ofs.close();
-      std::cout << "Create new tag: " << tag << std::endl;
-      }
-    m_CurrentTag = tag;
     }
 }
 
@@ -636,7 +652,7 @@ int cmCTest::UpdateDirectory()
     }
 
   os << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-     << "<Update mode=\"Client\">\n"
+     << "<Update mode=\"Client\" Generator=\"ctest\">\n"
      << "\t<Site>" <<m_DartConfiguration["Site"] << "</Site>\n"
      << "\t<BuildName>" << m_DartConfiguration["BuildName"]
      << "</BuildName>\n"
@@ -2485,6 +2501,7 @@ int cmCTest::ProcessTests()
     }
   if ( m_Tests[BUILD_TEST] || m_Tests[ALL_TEST] )
     {
+    this->UpdateCTestConfiguration();
     if (this->BuildDirectory())
       {
       res |= CTEST_BUILD_ERRORS;
@@ -2492,6 +2509,7 @@ int cmCTest::ProcessTests()
     }
   if ( m_Tests[TEST_TEST] || m_Tests[ALL_TEST] || notest )
     {
+    this->UpdateCTestConfiguration();
     if (this->TestDirectory(false))
       {
       res |= CTEST_TEST_ERRORS;
@@ -2499,17 +2517,28 @@ int cmCTest::ProcessTests()
     }
   if ( m_Tests[COVERAGE_TEST] || m_Tests[ALL_TEST] )
     {
+    this->UpdateCTestConfiguration();
     this->CoverageDirectory();
     }
   if ( m_Tests[MEMCHECK_TEST] || m_Tests[ALL_TEST] )
     {
+    this->UpdateCTestConfiguration();
     if (this->TestDirectory(true))
       {
       res |= CTEST_MEMORY_ERRORS;
       }
     }
+  if ( m_Tests[NOTES_TEST] || m_Tests[ALL_TEST] )
+    {
+    this->UpdateCTestConfiguration();
+    if ( m_NotesFiles.size() )
+      {
+      this->GenerateNotesFile(m_NotesFiles.c_str());
+      }
+    }
   if ( m_Tests[SUBMIT_TEST] || m_Tests[ALL_TEST] )
     {
+    this->UpdateCTestConfiguration();
     this->SubmitResults();
     }
   return res;
@@ -2525,6 +2554,24 @@ std::string cmCTest::GetTestModelString()
       return "Continuous";
     }
   return "Experimental";
+}
+
+int cmCTest::GetTestModelFromString(const char* str)
+{
+  if ( !str )
+    {
+    return cmCTest::EXPERIMENTAL;
+    }
+  std::string rstr = cmSystemTools::LowerCase(str);
+  if ( strncmp(rstr.c_str(), "cont", 4) == 0 )
+    {
+    return cmCTest::CONTINUOUS;
+    }
+  if ( strncmp(rstr.c_str(), "nigh", 4) == 0 )
+    {
+    return cmCTest::NIGHTLY;
+    }
+  return cmCTest::EXPERIMENTAL;
 }
 
 #define SPACE_REGEX "[ \t\r\n]"
@@ -3109,7 +3156,7 @@ void cmCTest::StartXML(std::ostream& ostr)
     << "<Site BuildName=\"" << m_DartConfiguration["BuildName"]
     << "\" BuildStamp=\"" << m_CurrentTag << "-"
     << this->GetTestModelString() << "\" Name=\""
-    << m_DartConfiguration["Site"] << "\">" << std::endl;
+    << m_DartConfiguration["Site"] << "\" Generator=\"ctest\">" << std::endl;
 }
 
 void cmCTest::EndXML(std::ostream& ostr)
@@ -3288,7 +3335,7 @@ int cmCTest::GenerateDartNotesOutput(std::ostream& os, const cmCTest::tm_VectorO
     << "<?xml-stylesheet type=\"text/xsl\" href=\"Dart/Source/Server/XSL/Build.xsl <file:///Dart/Source/Server/XSL/Build.xsl> \"?>\n"
     << "<Site BuildName=\"" << m_DartConfiguration["BuildName"] << "\" BuildStamp=\"" 
     << m_CurrentTag << "-" << this->GetTestModelString() << "\" Name=\"" 
-    << m_DartConfiguration["Site"] << "\">\n"
+    << m_DartConfiguration["Site"] << "\" Generator=\"ctest\">\n"
     << "<Notes>" << std::endl;
 
   for ( it = files.begin(); it != files.end(); it ++ )
@@ -3347,5 +3394,14 @@ int cmCTest::GenerateNotesFile(const char* cfiles)
 
   this->GenerateDartNotesOutput(ofs, files);
   return 0;
+}
+
+void cmCTest::SetNotesFiles(const char* notes)
+{
+  if ( !notes )
+    {
+    return;
+    }
+  m_NotesFiles = notes;
 }
 
