@@ -286,6 +286,7 @@ public:
   static void DisableMessages() { s_DisableMessages = true; }
   static void DisableRunCommandOutput() {s_DisableRunCommandOutput = true; }
   static void EnableRunCommandOutput() {s_DisableRunCommandOutput = false; }
+  static bool GetRunCommandOutput() { return s_DisableRunCommandOutput; }
 protected:
   // these two functions can be called from ConvertToOutputPath
   /**
