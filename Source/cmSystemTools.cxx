@@ -483,7 +483,10 @@ bool cmSystemTools::RunSingleCommand(
       {
       std::cerr << exception_str << std::endl;
       }
-    output->append(exception_str, strlen(exception_str));
+    if ( output )
+      {
+      output->append(exception_str, strlen(exception_str));
+      }
     result = false;
     }
   else if(cmsysProcess_GetState(cp) == cmsysProcess_State_Error)
@@ -493,7 +496,10 @@ bool cmSystemTools::RunSingleCommand(
       {
       std::cerr << error_str << std::endl;
       }
-    output->append(error_str, strlen(error_str));
+    if ( output )
+      {
+      output->append(error_str, strlen(error_str));
+      }
     result = false;
     }
   else if(cmsysProcess_GetState(cp) == cmsysProcess_State_Expired)
@@ -503,7 +509,10 @@ bool cmSystemTools::RunSingleCommand(
       {
       std::cerr << error_str << std::endl;
       }
-    output->append(error_str, strlen(error_str));
+    if ( output )
+      {
+      output->append(error_str, strlen(error_str));
+      }
     result = false;
     }
   
