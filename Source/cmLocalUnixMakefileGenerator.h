@@ -99,8 +99,6 @@ protected:
   void OutputLibraryRule(std::ostream& fout,  
                          const char* name, 
                          const cmTarget &t,
-                         const char* prefix,
-                         const char* suffix,
                          const char* createRule,
                          const char* comment,
                          const char* linkFlags
@@ -114,6 +112,7 @@ protected:
                            const char* flags = 0,
                            const char* objectsquoted = 0,
                            const char* targetBase = 0,
+                           const char* targetSOName = 0,
                            const char* linkFlags = 0);
   virtual void OutputSharedLibraryRule(std::ostream&, const char* name,
                                        const cmTarget &);
@@ -219,6 +218,16 @@ protected:
   
   /** Get the full name of the target's file, without path.  */
   std::string GetFullTargetName(const char* n, const cmTarget& t);
+
+  /** Get the base name of the target's file, without path or extension.  */
+  std::string GetBaseTargetName(const char* n, const cmTarget& t);
+
+  /** Get the names associated with a library target.  */
+  void GetLibraryNames(const char* n, const cmTarget& t,
+                       std::string& name,
+                       std::string& soName,
+                       std::string& realName,
+                       std::string& baseName);
 
   /** Output an echo command to the Makefile */
   void OutputEcho(std::ostream& fout, const char *msg);

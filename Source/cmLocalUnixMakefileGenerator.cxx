@@ -332,30 +332,24 @@ std::string cmLocalUnixMakefileGenerator::GetOutputExtension(const char* s)
     }
 }
 
-std::string cmLocalUnixMakefileGenerator::GetFullTargetName(const char* n,
+std::string cmLocalUnixMakefileGenerator::GetBaseTargetName(const char* n,
                                                             const cmTarget& t)
 {
   const char* targetPrefix = t.GetProperty("PREFIX");
-  const char* targetSuffix = t.GetProperty("SUFFIX");
   const char* prefixVar = 0;
-  const char* suffixVar = 0;
   switch(t.GetType())
     {
     case cmTarget::STATIC_LIBRARY:
       prefixVar = "CMAKE_STATIC_LIBRARY_PREFIX";
-      suffixVar = "CMAKE_STATIC_LIBRARY_SUFFIX";
       break;
     case cmTarget::SHARED_LIBRARY:
       prefixVar = "CMAKE_SHARED_LIBRARY_PREFIX";
-      suffixVar = "CMAKE_SHARED_LIBRARY_SUFFIX";
       break;
     case cmTarget::MODULE_LIBRARY:
       prefixVar = "CMAKE_SHARED_MODULE_PREFIX";
-      suffixVar = "CMAKE_SHARED_MODULE_SUFFIX";
       break;
     case cmTarget::EXECUTABLE:
     case cmTarget::WIN32_EXECUTABLE:
-      targetSuffix = cmSystemTools::GetExecutableExtension();
     case cmTarget::UTILITY:
     case cmTarget::INSTALL_FILES:
     case cmTarget::INSTALL_PROGRAMS:
@@ -366,13 +360,41 @@ std::string cmLocalUnixMakefileGenerator::GetFullTargetName(const char* n,
     {
     targetPrefix = this->GetSafeDefinition(prefixVar);
     }
+  std::string name = targetPrefix?targetPrefix:"";
+  name += n;
+  return name;
+}
+
+std::string cmLocalUnixMakefileGenerator::GetFullTargetName(const char* n,
+                                                            const cmTarget& t)
+{
+  const char* targetSuffix = t.GetProperty("SUFFIX");
+  const char* suffixVar = 0;
+  switch(t.GetType())
+    {
+    case cmTarget::STATIC_LIBRARY:
+      suffixVar = "CMAKE_STATIC_LIBRARY_SUFFIX";
+      break;
+    case cmTarget::SHARED_LIBRARY:
+      suffixVar = "CMAKE_SHARED_LIBRARY_SUFFIX";
+      break;
+    case cmTarget::MODULE_LIBRARY:
+      suffixVar = "CMAKE_SHARED_MODULE_SUFFIX";
+      break;
+    case cmTarget::EXECUTABLE:
+    case cmTarget::WIN32_EXECUTABLE:
+      targetSuffix = cmSystemTools::GetExecutableExtension();
+    case cmTarget::UTILITY:
+    case cmTarget::INSTALL_FILES:
+    case cmTarget::INSTALL_PROGRAMS:
+      break;
+    }
   // if there is no suffix on the target use the cmake definition
   if(!targetSuffix && suffixVar)
     {
     targetSuffix = this->GetSafeDefinition(suffixVar);
     }
-  std::string name = targetPrefix?targetPrefix:"";
-  name += n;
+  std::string name = this->GetBaseTargetName(n, t);
   name += targetSuffix?targetSuffix:"";
   return name;
 }
@@ -539,6 +561,45 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
       fout << "\n\n";
       }
     }
+
+  // This list contains extra files created for a target.  It includes
+  // the extra names associated with a versioned shared library.
+  fout << "TARGET_EXTRAS = ";
+  for(cmTargets::const_iterator l = tgts.begin(); 
+      l != tgts.end(); l++)
+    {
+    if (l->second.IsInAll())
+      {
+      if(l->second.GetType() == cmTarget::SHARED_LIBRARY ||
+         l->second.GetType() == cmTarget::MODULE_LIBRARY)
+        {
+        std::string targetName;
+        std::string targetNameSO;
+        std::string targetNameReal;
+        std::string targetNameBase;
+        this->GetLibraryNames(l->first.c_str(), l->second,
+                              targetName, targetNameSO,
+                              targetNameReal, targetNameBase);
+        if(targetNameSO != targetName)
+          {
+          path = m_LibraryOutputPath;
+          path += targetNameSO;
+          fout << " \\\n"
+               << cmSystemTools::ConvertToOutputPath(path.c_str());
+          }
+        if(targetNameReal != targetName &&
+           targetNameReal != targetNameSO)
+          {
+          path = m_LibraryOutputPath;
+          path += targetNameReal;
+          fout << " \\\n"
+               << cmSystemTools::ConvertToOutputPath(path.c_str());
+          }
+        }
+      }
+    }
+
+  fout << "\n\n";
   fout << "CLEAN_OBJECT_FILES = ";
   for(cmTargets::const_iterator l = tgts.begin(); 
       l != tgts.end(); l++)
@@ -873,7 +934,8 @@ static RuleVariables ruleReplaceVars[] =
   {"<CMAKE_CXX_LINK_FLAGS>", "CMAKE_CXX_LINK_FLAGS"},
 
   {"<CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS>", "CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS"},
-  {"<CMAKE_SHARED_MODULE_CREATE_C_FLAGS>", "CMAKE_SHARED_MODULE_CREATE_C_FLAGS"}, 
+  {"<CMAKE_SHARED_MODULE_CREATE_C_FLAGS>", "CMAKE_SHARED_MODULE_CREATE_C_FLAGS"},
+  {"<CMAKE_SHARED_LIBRARY_SONAME_FLAG>", "CMAKE_SHARED_LIBRARY_SONAME_FLAG"},
   {"<CMAKE_C_LINK_FLAGS>", "CMAKE_C_LINK_FLAGS"},
 
   {"<CMAKE_AR>", "CMAKE_AR"},
@@ -894,6 +956,7 @@ cmLocalUnixMakefileGenerator::ExpandRuleVariables(std::string& s,
                                                   const char* flags,
                                                   const char* objectsquoted,
                                                   const char* targetBase,
+                                                  const char* targetSOName,
                                                   const char* linkFlags)
 { 
   std::string cxxcompiler = this->ConvertToOutputForExisting(
@@ -955,6 +1018,17 @@ cmLocalUnixMakefileGenerator::ExpandRuleVariables(std::string& s,
       }
     cmSystemTools::ReplaceString(s, "<TARGET_BASE>", targetBase);
     }
+  if(targetSOName)
+    {
+    if(m_Makefile->GetDefinition("CMAKE_SHARED_LIBRARY_SONAME_FLAG"))
+      {
+      cmSystemTools::ReplaceString(s, "<TARGET_SONAME>", targetSOName);
+      }
+    else
+      {
+      cmSystemTools::ReplaceString(s, "<TARGET_SONAME>", "");
+      }
+    }
   if(linkLibs)
     {
     cmSystemTools::ReplaceString(s, "<LINK_LIBRARIES>", linkLibs);
@@ -973,40 +1047,57 @@ cmLocalUnixMakefileGenerator::ExpandRuleVariables(std::string& s,
 void cmLocalUnixMakefileGenerator::OutputLibraryRule(std::ostream& fout,  
                                                      const char* name, 
                                                      const cmTarget &t,
-                                                     const char* prefix,
-                                                     const char* suffix,
                                                      const char* createVariable,
                                                      const char* comment,
                                                      const char* linkFlags
                                                      )
 {
-  // create the library name
-  std::string targetNameBase = prefix;
-  targetNameBase += name;
-  
-  std::string targetName = prefix;
-  targetName += name;
-  targetName +=  suffix;
-  // create the target full path name
+  std::string targetName;
+  std::string targetNameSO;
+  std::string targetNameReal;
+  std::string targetNameBase;
+  this->GetLibraryNames(name, t,
+                        targetName, targetNameSO,
+                        targetNameReal, targetNameBase);
+
+  // The full path versions of the names.
   std::string targetFullPath = m_LibraryOutputPath + targetName;
-  std::string targetBaseFullPath = m_LibraryOutputPath + targetNameBase;
-  targetBaseFullPath =
-    cmSystemTools::ConvertToOutputPath(targetBaseFullPath.c_str());
+  std::string targetFullPathSO = m_LibraryOutputPath + targetNameSO;
+  std::string targetFullPathReal = m_LibraryOutputPath + targetNameReal;
+  std::string targetFullPathBase = m_LibraryOutputPath + targetNameBase;
   targetFullPath = cmSystemTools::ConvertToOutputPath(targetFullPath.c_str());
+  targetFullPathSO = cmSystemTools::ConvertToOutputPath(targetFullPathSO.c_str());
+  targetFullPathReal = cmSystemTools::ConvertToOutputPath(targetFullPathReal.c_str());
+  targetFullPathBase = cmSystemTools::ConvertToOutputPath(targetFullPathBase.c_str());
+
   // get the objects that are used to link this library
   std::string objs = "$(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
   std::string objsQuoted = "$(" + this->CreateMakeVariable(name, "_SRC_OBJS_QUOTED") + ") ";
   // create a variable with the objects that this library depends on
-  std::string depend = objs + " $(" 
-    + this->CreateMakeVariable(name, "_DEPEND_LIBS") + ")";
-  // collect up the build rules
-  std::vector<std::string> rules;
-  std::string command = "$(RM) " +  targetFullPath;
-  rules.push_back(command);
-  rules.push_back(m_Makefile->GetDefinition(createVariable));
-  // expand multi-command semi-colon separated lists
-  // of commands into separate commands
+  std::string depend =
+    objs + " $(" + this->CreateMakeVariable(name, "_DEPEND_LIBS") + ")";
+
   std::vector<std::string> commands;
+  std::string cmakecommand = this->ConvertToOutputForExisting(
+    m_Makefile->GetDefinition("CMAKE_COMMAND"));
+
+  // Remove any existing files for this library.
+  std::string remove = cmakecommand;
+  remove += " -E remove -f ";
+  remove += targetFullPathReal;
+  if(targetFullPathSO != targetFullPathReal)
+    {
+    remove += " ";
+    remove += targetFullPathSO;
+    }
+  if(targetFullPath != targetFullPathSO &&
+     targetFullPath != targetFullPathReal)
+    {
+    remove += " ";
+    remove += targetFullPath;
+    }
+  commands.push_back(remove);
+
   // collect custom commands for this target and add them to the list
   std::string customCommands = this->CreatePreBuildRules(t, name);
   if(customCommands.size() > 0)
@@ -1019,13 +1110,34 @@ void cmLocalUnixMakefileGenerator::OutputLibraryRule(std::ostream& fout,
     {
     commands.push_back(customCommands);
     }
+
+  // collect up the build rules
+  std::vector<std::string> rules;
+  rules.push_back(m_Makefile->GetDefinition(createVariable));
+  // expand multi-command semi-colon separated lists
+  // of commands into separate commands
   cmSystemTools::ExpandList(rules, commands);
+
+  // Create necessary symlinks for library.
+  if(targetFullPath != targetFullPathReal)
+    {
+    std::string symlink = cmakecommand;
+    symlink += " -E cmake_symlink_library ";
+    symlink += targetFullPathReal;
+    symlink += " ";
+    symlink += targetFullPathSO;
+    symlink += " ";
+    symlink += targetFullPath;
+    commands.push_back(symlink);
+    }
+
   // collect custom commands for this target and add them to the list
   customCommands = this->CreatePostBuildRules(t, name);
   if(customCommands.size() > 0)
     {
     commands.push_back(customCommands);
     }
+
   // collect up the link libraries
   cmOStringStream linklibs;
   this->OutputLinkLibraries(linklibs, name, t);
@@ -1034,10 +1146,11 @@ void cmLocalUnixMakefileGenerator::OutputLibraryRule(std::ostream& fout,
     {
     this->ExpandRuleVariables(*i, 
                               objs.c_str(), 
-                              targetFullPath.c_str(),
+                              targetFullPathReal.c_str(),
                               linklibs.str().c_str(),
                               0, 0, 0, objsQuoted.c_str(),
-                              targetBaseFullPath.c_str(),
+                              targetFullPathBase.c_str(),
+                              targetNameSO.c_str(),
                               linkFlags);
     }
   this->OutputMakeRule(fout, comment,
@@ -1084,17 +1197,7 @@ void cmLocalUnixMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
         }
       }
     }
-  
-  const char* targetPrefix = t.GetProperty("PREFIX");
-  if(!targetPrefix)
-    {
-    targetPrefix = this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_PREFIX");
-    }
-  const char* targetSuffix = t.GetProperty("SUFFIX");
-  if(!targetSuffix)
-    {
-    targetSuffix = this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_SUFFIX");
-    }
+
   const char* targetLinkFlags = t.GetProperty("LINK_FLAGS");
   if(targetLinkFlags)
     {
@@ -1102,8 +1205,6 @@ void cmLocalUnixMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
     linkFlags += " ";
     }
   this->OutputLibraryRule(fout, name, t,
-                          targetPrefix,
-                          targetSuffix,
                           createRule,
                           "shared library",
                           linkFlags.c_str());
@@ -1133,16 +1234,6 @@ void cmLocalUnixMakefileGenerator::OutputModuleLibraryRule(std::ostream& fout,
     linkFlags += this->GetSafeDefinition(build.c_str());
     linkFlags += " ";
     }
-  const char* targetPrefix = t.GetProperty("PREFIX");
-  if(!targetPrefix)
-    {
-    targetPrefix = this->GetSafeDefinition("CMAKE_SHARED_MODULE_PREFIX");
-    }
-  const char* targetSuffix = t.GetProperty("SUFFIX");
-  if(!targetSuffix)
-    {
-    targetSuffix = this->GetSafeDefinition("CMAKE_SHARED_MODULE_SUFFIX");
-    }
   const char* targetLinkFlags = t.GetProperty("LINK_FLAGS");
   if(targetLinkFlags)
     {
@@ -1150,8 +1241,6 @@ void cmLocalUnixMakefileGenerator::OutputModuleLibraryRule(std::ostream& fout,
     linkFlags += " ";
     }
   this->OutputLibraryRule(fout, name, t,
-                          targetPrefix,
-                          targetSuffix,
                           createRule,
                           "shared module",
                           linkFlags.c_str());
@@ -1171,16 +1260,6 @@ void cmLocalUnixMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout,
     {
     createRule = "CMAKE_C_CREATE_STATIC_LIBRARY";
     }  
-  const char* targetPrefix = t.GetProperty("PREFIX");
-  if(!targetPrefix)
-    {
-    targetPrefix = this->GetSafeDefinition("CMAKE_STATIC_LIBRARY_PREFIX");
-    }
-  const char* targetSuffix = t.GetProperty("SUFFIX");
-  if(!targetSuffix)
-    {
-    targetSuffix = this->GetSafeDefinition("CMAKE_STATIC_LIBRARY_SUFFIX");
-    }
   std::string linkFlags;
   const char* targetLinkFlags = t.GetProperty("LINK_FLAGS");
   if(targetLinkFlags)
@@ -1189,8 +1268,6 @@ void cmLocalUnixMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout,
     linkFlags += " ";
     }
   this->OutputLibraryRule(fout, name, t,
-                          targetPrefix,
-                          targetSuffix,
                           createRule,
                           "static library",
                           linkFlags.c_str());
@@ -1305,6 +1382,7 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
                               0,
                               0,
                               flags.c_str(),
+                              0,
                               0,
                               0,
                               linkFlags.c_str());
@@ -2226,6 +2304,9 @@ void cmLocalUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
     {
     return;
     }
+  std::string cmakecommand = this->ConvertToOutputForExisting(
+    m_Makefile->GetDefinition("CMAKE_COMMAND"));
+
   const char* root
     = m_Makefile->GetDefinition("CMAKE_ROOT");
   fout << "INSTALL = \"" << root << "/Templates/install-sh\" -c\n";
@@ -2266,11 +2347,31 @@ void cmLocalUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
         case cmTarget::STATIC_LIBRARY:
         case cmTarget::SHARED_LIBRARY:
         case cmTarget::MODULE_LIBRARY:
+          {
+          std::string targetName;
+          std::string targetNameSO;
+          std::string targetNameReal;
+          std::string targetNameBase;
+          this->GetLibraryNames(l->first.c_str(), l->second,
+                                targetName, targetNameSO,
+                                targetNameReal, targetNameBase);
+          std::string installName = "$(DESTDIR)";
+          installName += prefix;
+          installName += l->second.GetInstallPath();
+          installName += "/";
+          std::string installNameSO = installName;
+          std::string installNameReal = installName;
+          installName += targetName;
+          installNameSO += targetNameSO;
+          installNameReal += targetNameReal;
           fname = m_LibraryOutputPath;
-          fname += this->GetFullTargetName(l->first.c_str(), l->second);
+          fname += targetNameReal;
           fout << "\t$(INSTALL_DATA) " << cmSystemTools::ConvertToOutputPath(fname.c_str())
                << " \"$(DESTDIR)" << prefix << l->second.GetInstallPath() << "\"\n";
-          break;
+          fout << "\t" << cmakecommand << " -E cmake_symlink_library \""
+               << installNameReal << "\" \"" << installNameSO << "\" \"" << installName
+               << "\"\n";
+          }; break;
         case cmTarget::WIN32_EXECUTABLE:
         case cmTarget::EXECUTABLE:
           fname = m_ExecutableOutputPath;
@@ -2369,7 +2470,7 @@ void cmLocalUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                        "clean",
                        "$(SUBDIR_CLEAN)",
                        "-@ $(RM) $(CLEAN_OBJECT_FILES) "
-                       " $(TARGETS) $(GENERATED_QT_FILES) $(GENERATED_FLTK_FILES)");
+                       " $(TARGETS) $(TARGET_EXTRAS) $(GENERATED_QT_FILES) $(GENERATED_FLTK_FILES)");
 
   // collect up all the sources
   std::vector<std::string> allsources;
@@ -2999,4 +3100,58 @@ cmLocalUnixMakefileGenerator::CreateMakeVariable(const char* sin, const char* s2
   m_MakeVariableMap[unmodified] = ret;
   return ret;
 
+}
+
+void cmLocalUnixMakefileGenerator::GetLibraryNames(const char* n,
+                                                   const cmTarget& t,
+                                                   std::string& name,
+                                                   std::string& soName,
+                                                   std::string& realName,
+                                                   std::string& baseName)
+{
+  // Check for library version properties.
+  const char* version = t.GetProperty("VERSION");
+  const char* soversion = t.GetProperty("SOVERSION");
+  if((t.GetType() != cmTarget::SHARED_LIBRARY &&
+      t.GetType() != cmTarget::MODULE_LIBRARY) ||
+     !m_Makefile->GetDefinition("CMAKE_SHARED_LIBRARY_SONAME_FLAG"))
+    {
+    // Versioning is supported only for shared libraries and modules,
+    // and then only when the platform supports an soname flag.
+    version = 0;
+    soversion = 0;
+    }
+  if(version && !soversion)
+    {
+    // The soversion must be set if the library version is set.  Use
+    // the library version as the soversion.
+    soversion = version;
+    }
+
+  // The library name.
+  name = this->GetFullTargetName(n, t);
+
+  // The library's soname.
+  soName = name;
+  if(soversion)
+    {
+    soName += ".";
+    soName += soversion;
+    }
+
+  // The library's real name on disk.
+  realName = name;
+  if(version)
+    {
+    realName += ".";
+    realName += version;
+    }
+  else if(soversion)
+    {
+    realName += ".";
+    realName += soversion;
+    }
+
+  // The library name without extension.
+  baseName = this->GetBaseTargetName(n, t);
 }
