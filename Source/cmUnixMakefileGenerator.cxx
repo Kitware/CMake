@@ -229,6 +229,8 @@ void cmUnixMakefileGenerator::OutputMakefile(const char* file)
     fout << "# " << i->c_str() << "\n";
     }
   fout << "\n\n";
+  fout << "# Suppresses display of executed commands\n";
+  fout << ".SILENT:\n";
   // create a make variable with all of the sources for this Makefile
   // for depend purposes.
   fout << "CMAKE_MAKEFILE_SOURCES = ";
@@ -249,8 +251,8 @@ void cmUnixMakefileGenerator::OutputMakefile(const char* file)
                        "Default target executed when no arguments are given to make",
                        "default_target",
                        0,
-                       "$(MAKE) -$(MAKEFLAGS) cmake.depends_mark",
-                       "$(MAKE) -$(MAKEFLAGS) all");
+                       "$(MAKE) -$(MAKEFLAGS)  $(MAKESILENT) cmake.depends_mark",
+                       "$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) all");
 
   this->OutputTargetRules(fout);
   this->OutputDependLibs(fout);
@@ -876,7 +878,7 @@ void cmUnixMakefileGenerator::OutputBuildLibraryInDir(std::ostream& fout,
     }
   fout << cmSystemTools::EscapeSpaces(fullpath)
        << ":\n\tcd " << cmSystemTools::EscapeSpaces(path)
-           << "; $(MAKE) " << makeTarget << "\n\n"; 
+           << "; $(MAKE) $(MAKESILENT) " << makeTarget << "\n\n"; 
 }
 
 bool cmUnixMakefileGenerator::SamePath(const char* path1, const char* path2)
@@ -1504,8 +1506,6 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                          "-@ $(RM) $(CLEAN_OBJECT_FILES) $(EXECUTABLES)"
                          " $(TARGETS)");
     }
-  fout << "# Suppresses display of executed commands\n";
-  fout << ".SILENT:\n";
   fout << "\n#Rule to build the cmake.depends and Makefile as side effect\n";
   fout << "cmake.depends_mark: $(CMAKE_MAKEFILE_SOURCES)\n";
   this->BuildInSubDirectory(fout, 

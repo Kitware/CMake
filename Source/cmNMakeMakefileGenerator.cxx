@@ -145,6 +145,7 @@ void cmNMakeMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     "# general variables used in the makefile\n"
     "\n"
     "# Path to cmake\n"
+    "MAKESILENT                             = /nologo\n"
     "CMAKE_STANDARD_WINDOWS_LIBRARIES       = @CMAKE_STANDARD_WINDOWS_LIBRARIES@\n"
     "CMAKE_C_FLAGS                          = @CMAKE_C_FLAGS@ @BUILD_FLAGS@\n"
     "CMAKE_C_LINK_EXECUTABLE_FLAG           = @CMAKE_C_LINK_EXECUTABLE_FLAG@\n"
@@ -242,15 +243,15 @@ void cmNMakeMakefileGenerator::BuildInSubDirectory(std::ostream& fout,
     dir = cmSystemTools::EscapeSpaces(dir.c_str());
     fout << "\tif not exist " << dir
          << " " 
-         << "$(MAKE) rebuild_cache\n"
+         << "$(MAKE) $(MAKESILENT) rebuild_cache\n"
          << "\techo Building " << target1 << " in directory " << directory << "\n"
          << "\tcd " << dir << "\n"
-         << "\t$(MAKE) -$(MAKEFLAGS) " << target1 << "\n";
+         << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) " << target1 << "\n";
     }
   if(target2)
     {
     fout << "\techo Building " << target2 << " in directory " << directory << "\n";
-    fout << "\t$(MAKE) -$(MAKEFLAGS) " << target2 << "\n";
+    fout << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) " << target2 << "\n";
     }
   std::string currentDir = m_Makefile->GetCurrentOutputDirectory();
   cmSystemTools::ConvertToWindowsSlashes(currentDir);
@@ -699,7 +700,7 @@ void cmNMakeMakefileGenerator::OutputBuildLibraryInDir(std::ostream& fout,
   cmSystemTools::ConvertToWindowsSlashes(currentDir);
   fout << cmSystemTools::EscapeSpaces(fullpath)
        << ":\n\tcd " << cmSystemTools::EscapeSpaces(path)
-       << "\n\t$(MAKE) " << cmSystemTools::EscapeSpaces(fullpath)
+       << "\n\t$(MAKE) $(MAKESILENT) " << cmSystemTools::EscapeSpaces(fullpath)
        << "\n\tcd " <<
     cmSystemTools::EscapeSpaces(currentDir.c_str()) << "\n";
 }
