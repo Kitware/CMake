@@ -21,6 +21,7 @@
 #include <ctype.h>
 #include "cmDirectory.h"
 #include <errno.h>
+#include <time.h>
 
 
 // support for realpath call
