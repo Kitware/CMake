@@ -797,16 +797,9 @@ const char* cmMakefile::GetDefinition(const char* name)
   return cmCacheManager::GetInstance()->GetCacheValue(name);
 }
 
-int cmMakefile::DumpDocumentationToFile(const char *fileName)
+int cmMakefile::DumpDocumentationToFile(std::ostream& f)
 {
   // Open the supplied filename
-  std::ofstream f;
-  f.open(fileName, std::ios::out);
-  
-  if ( f.fail() )
-    {
-    return 0;
-    }
   
   // Loop over all registered commands and print out documentation
   const char *name;

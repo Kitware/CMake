@@ -53,6 +53,7 @@ LINK_LIBRARIES(CMakeLib)
 LINK_DIRECTORIES(${CMake_BINARY_DIR}/Sources)
 
 ADD_EXECUTABLE(cmake cmakemain)
+ADD_EXECUTABLE(DumpDocumentation cmDumpDocumentation)
 
 ADD_EXECUTABLE(ctest ctest.cxx cmSystemTools.cxx cmRegularExpression.cxx)
 
@@ -66,6 +67,8 @@ IF(BUILD_TESTING)
     CONFIGURE_FILE(
       ${CMake_SOURCE_DIR}/Source/cmaketest.h.in 
       ${CMake_BINARY_DIR}/Source/cmaketest.h ESCAPE_QUOTES)
+    ADD_TEST(DumpDocumentation ${CMake_BINARY_DIR}/Source/DumpDocumentation
+      ${CMake_BINARY_DIR}/CMakeDoc.html )
     ADD_TEST(simple ${CMake_BINARY_DIR}/Source/cmaketest 
       ${CMake_SOURCE_DIR}/Tests/Simple 
       ${CMake_BINARY_DIR}/Tests/Simple simple )

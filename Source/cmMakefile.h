@@ -487,7 +487,7 @@ public:
    * Dump documentation to a file. If 0 is returned, the
    * operation failed.
    */
-  int DumpDocumentationToFile(const char *fileName);
+  int DumpDocumentationToFile(std::ostream&);
 
   /**
    * Expand all defined varibles in the string.  
