@@ -481,6 +481,7 @@ int cmCTest::UpdateDirectory()
     }
 
   std::string extra_update_opts;
+#ifdef HAVE_CURL
   if ( m_TestModel == cmCTest::NIGHTLY )
     {
     struct tm* t = ::GetNightlyTime(m_DartConfiguration["NightlyStartTime"]);
@@ -493,6 +494,7 @@ int cmCTest::UpdateDirectory()
     extra_update_opts += "-D \"" + today_update_date +"\"";
     //std::cout << "Update: " << extra_update_opts << std::endl;
     }
+#endif
 
   std::string command = cvsCommand + " -z3 update " + cvsOptions +
     " " + extra_update_opts;
