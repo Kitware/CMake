@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // cmConfigureFileNoAutoconf
 bool cmConfigureFileNoAutoconf::InitialPass(std::vector<std::string>& args)
 {
-  this->SetError("The CONFIGURE_FILE_NO_AUTOCONF method is deprecated, please use CONFIGURE_FILE instead.");
+  this->SetError("The CONFIGURE_FILE_NOAUTOCONF method is deprecated, please use CONFIGURE_FILE instead.");
   return false;
 }
 
