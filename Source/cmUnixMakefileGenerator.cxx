@@ -515,7 +515,7 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
     // if a variable expands to nothing.
     if (lib->first.size() == 0) continue;
     // if it is a full path break it into -L and -l
-    cmRegularExpression reg("(^[ \t]*\\-l)|(^[ \t]*\\-framework)|(\\${)");
+    cmRegularExpression reg("([ \t]*\\-l)|([ \t]*\\-framework)|(\\${)");
     if(lib->first.find('/') != std::string::npos
        && !reg.find(lib->first))
       {
