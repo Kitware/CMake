@@ -47,7 +47,11 @@ static const cmDocumentationEntry cmDocumentationUsage[] =
 static const cmDocumentationEntry cmDocumentationDescription[] =
 {
   {0,
-   "CMake reads ... ", 0},
+   "The \"ccmake\" executable is the CMake curses interface.  Project "
+   "configuration settings may be specified interactively through "
+   "this GUI.  Brief instructions are provided at the bottom of the "
+   "terminal when the program is running.", 0},
+  CMAKE_STANDARD_INTRODUCTION,
   {0,0,0}
 };
 
