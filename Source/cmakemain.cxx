@@ -16,7 +16,6 @@
 =========================================================================*/
 #include "cmakewizard.h"
 #include "cmake.h"
-#include "cmMakefileGenerator.h"
 #include "cmCacheManager.h"
 
 int main(int ac, char** av)
