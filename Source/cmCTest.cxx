@@ -1472,7 +1472,7 @@ int cmCTest::CoverageDirectory()
             covlines[kk] = 0;
             }
           cov.m_Tested ++;
-          covlines[kk] += count;
+          covlines[kk] ++;
           //std::cout << "Tested[" << count << "] - ";
           }
 
@@ -1496,6 +1496,19 @@ int cmCTest::CoverageDirectory()
       {
       continue;
       }
+
+    // Check if we should ignore the directory
+    std::string coverage_dir = cmSystemTools::GetFilenamePath(cov.m_AbsolutePath.c_str());
+    coverage_dir += "/.NoDartCoverage";
+    if ( cmSystemTools::FileExists(coverage_dir.c_str()) )
+      {
+      if ( m_Verbose )
+        {
+        std::cout << "Ignore file: " << cov.m_FullPath.c_str() << std::endl;
+        }
+      continue;
+      }
+
     if ( ccount == 100 )
       {
       local_end_time = ::CurrentTime();
@@ -1522,7 +1535,19 @@ int cmCTest::CoverageDirectory()
       }
 
     //std::cerr << "Final process of Source file: " << cit->first << std::endl;
-
+    cov.m_UnTested = 0;
+    cov.m_Tested = 0;
+    for ( cc = 0; cc < cov.m_Lines.size(); cc ++ )
+      {
+      if ( cov.m_Lines[cc] == 0 )
+        {
+        cov.m_UnTested ++;
+        }
+      else if ( cov.m_Lines[cc] > 0 )
+        {
+        cov.m_Tested ++;
+        }
+      }
 
     std::ifstream ifile(cov.m_AbsolutePath.c_str());
     if ( !ifile )
@@ -1539,6 +1564,7 @@ int cmCTest::CoverageDirectory()
     std::vector<cmStdString> lines;
     cmSystemTools::Split(buffer, lines);
     delete [] buffer;
+
     cfileoutput << "\t<File Name=\"" << cit->first << "\" FullPath=\""
       << cov.m_FullPath << "\">\n"
       << "\t\t<Report>" << std::endl;
