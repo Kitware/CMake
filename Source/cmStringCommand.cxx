@@ -59,7 +59,7 @@ bool cmStringCommand::InitialPass(std::vector<std::string> const& args)
 bool cmStringCommand::HandleToUpperLowerCommand(
   std::vector<std::string> const& args, bool toUpper)
 {
-  if ( args.size() <= 1 )
+  if ( args.size() < 3 )
     {
     this->SetError("no output variable specified");
     return false;
@@ -85,7 +85,7 @@ bool cmStringCommand::HandleToUpperLowerCommand(
 //----------------------------------------------------------------------------
 bool cmStringCommand::HandleAsciiCommand(std::vector<std::string> const& args)
 {
-  if ( args.size() <= 1 )
+  if ( args.size() < 3 )
     {
     this->SetError("No output variable specified");
     return false;
