@@ -185,6 +185,7 @@ bool cmCacheManager::LoadCache(const char* path,
                strcmp(entryKey.c_str() + (entryKey.size() - strlen("-ADVANCED")),
                       "-ADVANCED") == 0 )
             {
+	    std::string value = e.m_Value;
             std::string akey = entryKey.substr(0, (entryKey.size() - strlen("-ADVANCED")));
             cmCacheManager::CacheIterator it = this->GetCacheIterator(akey.c_str());
             if ( it.IsAtEnd() )
@@ -192,10 +193,11 @@ bool cmCacheManager::LoadCache(const char* path,
               e.m_Type = cmCacheManager::UNINITIALIZED;
               m_Cache[akey] = e;
               }
-            else
-              {
-              it.SetProperty("ADVANCED", true);
-              }
+	    if (!it.Find(akey.c_str()))
+	      {
+	      cmSystemTools::Error("Internal CMake error when reading cache");
+	      }
+	    it.SetProperty("ADVANCED", value.c_str());
             }
           else
             {
