@@ -27,6 +27,7 @@ IF(BUILD_TESTING)
   # make program just needs to use CMAKE_MAKE_PROGRAM which is required
   # to be defined by cmake 
   SET(MAKEPROGRAM ${CMAKE_MAKE_PROGRAM})
+  OPTION(VERBOSE_BUILD "Show the actual output of the build, or if off show a . for each 1024 bytes." "OFF")
 
   FIND_PROGRAM(CVSCOMMAND cvs )
   SET(CVS_UPDATE_OPTIONS "-d -A -P" CACHE STRING "Options passed to the cvs update command.")
@@ -56,6 +57,7 @@ IF(BUILD_TESTING)
   SET (DELIVER_CONTINUOUS_EMAIL "Off" CACHE BOOL "Should Dart server send email when build errors are found in Continuous builds?")
 
   MARK_AS_ADVANCED(
+    VERBOSE_BUILD
     SITE 
     BUILDNAME 
     MAKECOMMAND 
