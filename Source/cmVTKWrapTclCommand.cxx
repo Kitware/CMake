@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmVTKWrapTclCommand.h"
 
 // cmVTKWrapTclCommand
-bool cmVTKWrapTclCommand::InitialPass(std::vector<std::string>& args)
+bool cmVTKWrapTclCommand::InitialPass(std::vector<std::string> const& args)
 {
   if(args.size() < 3 )
     {
@@ -63,7 +63,7 @@ bool cmVTKWrapTclCommand::InitialPass(std::vector<std::string>& args)
   std::vector<std::string> sources;
   bool doing_sources = true;
 
-  for(std::vector<std::string>::iterator j = (args.begin() + 1);
+  for(std::vector<std::string>::const_iterator j = (args.begin() + 1);
       j != args.end(); ++j)
     {   
     if(*j == "SOURCES")

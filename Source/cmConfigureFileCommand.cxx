@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmConfigureFileCommand.h"
 
 // cmConfigureFileCommand
-bool cmConfigureFileCommand::InitialPass(std::vector<std::string>& args)
+bool cmConfigureFileCommand::InitialPass(std::vector<std::string> const& args)
 {
   if(args.size() < 2 )
     {

@@ -17,12 +17,13 @@
 
 
 // cmLoadcacheCommand
-bool cmLoadCacheCommand::InitialPass(std::vector<std::string>& args)
+bool cmLoadCacheCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
-  if (args.size()< 1)
+  if (argsIn.size()< 1)
     {
     this->SetError("called with wrong number of arguments.");
     }
+  std::vector<std::string> args = argsIn;
   
   // Cache entries to be excluded from the import list.
   // If this set is empty, all cache entries are brought in

@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmBuildNameCommand.h"
 
 // cmBuildNameCommand
-bool cmBuildNameCommand::InitialPass(std::vector<std::string>& args)
+bool cmBuildNameCommand::InitialPass(std::vector<std::string> const& args)
 {
   if(args.size() < 1 )
     {

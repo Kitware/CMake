@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmEndIfCommand.h"
 #include "cmCacheManager.h"
 
-bool cmEndIfCommand::InitialPass(std::vector<std::string>& args)
+bool cmEndIfCommand::InitialPass(std::vector<std::string> const& args)
 {
   if(args.size() < 1 )
     {

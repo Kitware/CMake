@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmSetCommand.h"
 
 // cmSetCommand
-bool cmSetCommand::InitialPass(std::vector<std::string>& args)
+bool cmSetCommand::InitialPass(std::vector<std::string> const& args)
 {
   if(args.size() < 1 )
     {
@@ -90,7 +90,7 @@ bool cmSetCommand::InitialPass(std::vector<std::string>& args)
     message += "Syntax error in SET:\n";
     message += "CACHE requires TYPE and document string SET command:\n";
     message += "SET (";
-    for(std::vector<std::string>::iterator i = args.begin();
+    for(std::vector<std::string>::const_iterator i = args.begin();
         i != args.end(); ++i)
       {
       message += *i;

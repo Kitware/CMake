@@ -118,13 +118,14 @@ cmCableWrapTclCommand::~cmCableWrapTclCommand()
 
 
 // cmCableWrapTclCommand
-bool cmCableWrapTclCommand::InitialPass(std::vector<std::string>& args)
+bool cmCableWrapTclCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
-  if(args.size() < 2)
+  if(argsIn.size() < 2)
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
+  std::vector<std::string>  args = argsIn;
 
   // First, we want to expand all CMAKE variables in all arguments.
   for(std::vector<std::string>::iterator a = args.begin();

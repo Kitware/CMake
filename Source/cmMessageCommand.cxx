@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmCacheManager.h"
 
 // cmLibraryCommand
-bool cmMessageCommand::InitialPass(std::vector<std::string>& args)
+bool cmMessageCommand::InitialPass(std::vector<std::string> const& args)
 {
   if(args.size() < 1 )
     {
@@ -53,7 +53,7 @@ bool cmMessageCommand::InitialPass(std::vector<std::string>& args)
   if (args.size() >= 2)
     {
     std::string message;
-    std::vector<std::string>::iterator i = args.begin();
+    std::vector<std::string>::const_iterator i = args.begin();
     ++i;
     for(;i != args.end(); ++i)
       {

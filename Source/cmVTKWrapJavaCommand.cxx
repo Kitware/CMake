@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmVTKWrapJavaCommand.h"
 
 // cmVTKWrapJavaCommand
-bool cmVTKWrapJavaCommand::InitialPass(std::vector<std::string>& args)
+bool cmVTKWrapJavaCommand::InitialPass(std::vector<std::string> const& args)
 {
   if(args.size() < 3 )
     {
@@ -65,7 +65,7 @@ bool cmVTKWrapJavaCommand::InitialPass(std::vector<std::string>& args)
   
   // get the list of classes for this library
   cmMakefile::SourceMap &Classes = m_Makefile->GetSources();
-  for(std::vector<std::string>::iterator j = (args.begin() + 2);
+  for(std::vector<std::string>::const_iterator j = (args.begin() + 2);
       j != args.end(); ++j)
     {   
     cmMakefile::SourceMap::iterator l = Classes.find(*j);

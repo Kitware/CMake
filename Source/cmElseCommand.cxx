@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmElseCommand.h"
 #include "cmCacheManager.h"
 
-bool cmElseCommand::InitialPass(std::vector<std::string>& args)
+bool cmElseCommand::InitialPass(std::vector<std::string> const& args)
 {
   if(args.size() < 1 )
     {
@@ -109,7 +109,7 @@ bool cmElseCommand::InitialPass(std::vector<std::string>& args)
   // if we created a function blocker then set its args
   if (f)
     {
-    for(std::vector<std::string>::iterator j = args.begin();
+    for(std::vector<std::string>::const_iterator j = args.begin();
         j != args.end(); ++j)
       {   
       f->m_Args.push_back(*j);

@@ -41,14 +41,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmSubdirCommand.h"
 
 // cmSubdirCommand
-bool cmSubdirCommand::InitialPass(std::vector<std::string>& args)
+bool cmSubdirCommand::InitialPass(std::vector<std::string> const& args)
 {
  if(args.size() < 1 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  for(std::vector<std::string>::iterator i = args.begin();
+  for(std::vector<std::string>::const_iterator i = args.begin();
       i != args.end(); ++i)
     {
     m_Makefile->AddSubDirectory((*i).c_str());

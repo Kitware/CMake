@@ -69,7 +69,7 @@ ScopeEnded(cmMakefile &mf)
                        mf.GetCurrentDirectory());
 }
 
-bool cmIfCommand::InitialPass(std::vector<std::string>& args)
+bool cmIfCommand::InitialPass(std::vector<std::string> const& args)
 {
   if(args.size() < 1 )
     {
@@ -137,7 +137,7 @@ bool cmIfCommand::InitialPass(std::vector<std::string>& args)
   // if we created a function blocker then set its args
   if (f)
     {
-    for(std::vector<std::string>::iterator j = args.begin();
+    for(std::vector<std::string>::const_iterator j = args.begin();
         j != args.end(); ++j)
       {   
       f->m_Args.push_back(*j);

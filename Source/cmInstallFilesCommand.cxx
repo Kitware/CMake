@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmCacheManager.h"
 
 // cmExecutableCommand
-bool cmInstallFilesCommand::InitialPass(std::vector<std::string>& args)
+bool cmInstallFilesCommand::InitialPass(std::vector<std::string> const& args)
 {
   if(args.size() < 2)
     {
@@ -58,7 +58,7 @@ bool cmInstallFilesCommand::InitialPass(std::vector<std::string>& args)
   target.SetInstallPath(args[0].c_str());
   m_Makefile->GetTargets().insert(cmTargets::value_type(m_TargetName, target));
 
-  std::vector<std::string>::iterator s = args.begin();
+  std::vector<std::string>::const_iterator s = args.begin();
   for (++s;s != args.end(); ++s)
     {
     m_FinalArgs.push_back(*s);

@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmCacheManager.h"
 
 // cmLibraryCommand
-bool cmAddLibraryCommand::InitialPass(std::vector<std::string>& args)
+bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args)
 {
   if(args.size() < 1 )
     {
@@ -54,7 +54,7 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string>& args)
   // otherwise it defaults to static library.
   int shared = !cmSystemTools::IsOff(m_Makefile->GetDefinition("BUILD_SHARED_LIBS"));
   
-  std::vector<std::string>::iterator s = args.begin();
+  std::vector<std::string>::const_iterator s = args.begin();
   ++s;
   
   // If the second argument is "SHARED" or "STATIC", then it controls

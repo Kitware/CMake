@@ -50,7 +50,7 @@ cmConfigureGccXmlCommand::~cmConfigureGccXmlCommand()
 }
 
 // cmConfigureGccXmlCommand
-bool cmConfigureGccXmlCommand::InitialPass(std::vector<std::string>& args)
+bool cmConfigureGccXmlCommand::InitialPass(std::vector<std::string> const& args)
 {
   if(args.size() != 2)
     {

@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmTargetLinkLibrariesCommand.h"
 
 // cmTargetLinkLibrariesCommand
-bool cmTargetLinkLibrariesCommand::InitialPass(std::vector<std::string>& args)
+bool cmTargetLinkLibrariesCommand::InitialPass(std::vector<std::string> const& args)
 {
   if(args.size() < 2)
     {
@@ -50,7 +50,7 @@ bool cmTargetLinkLibrariesCommand::InitialPass(std::vector<std::string>& args)
     }
   // add libraries, nothe that there is an optional prefix 
   // of debug and optimized than can be used
-  std::vector<std::string>::iterator i = args.begin();
+  std::vector<std::string>::const_iterator i = args.begin();
   
   for(++i; i != args.end(); ++i)
     {

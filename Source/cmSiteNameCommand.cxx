@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmSiteNameCommand.h"
 
 // cmSiteNameCommand
-bool cmSiteNameCommand::InitialPass(std::vector<std::string>& args)
+bool cmSiteNameCommand::InitialPass(std::vector<std::string> const& args)
 {
   if(args.size() < 1 )
     {

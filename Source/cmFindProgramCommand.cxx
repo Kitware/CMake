@@ -45,13 +45,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   
 
 // cmFindProgramCommand
-bool cmFindProgramCommand::InitialPass(std::vector<std::string>& args)
+bool cmFindProgramCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
-  if(args.size() < 2 )
+  if(argsIn.size() < 2 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
+  std::vector<std::string> args = argsIn;
   std::vector<std::string>::iterator i = args.begin();
   // Use the first argument as the name of something to be defined
   const char* define = (*i).c_str();

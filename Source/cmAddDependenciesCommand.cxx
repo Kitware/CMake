@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmCacheManager.h"
 
 // cmDependenciesCommand
-bool cmAddDependenciesCommand::InitialPass(std::vector<std::string>& args)
+bool cmAddDependenciesCommand::InitialPass(std::vector<std::string> const& args)
 {
   if(args.size() < 2 )
     {
@@ -53,7 +53,7 @@ bool cmAddDependenciesCommand::InitialPass(std::vector<std::string>& args)
   cmTargets &tgts = m_Makefile->GetTargets();
   if (tgts.find(args[0]) != tgts.end())
     {
-    std::vector<std::string>::iterator s = args.begin();
+    std::vector<std::string>::const_iterator s = args.begin();
     ++s;
     for (; s != args.end(); ++s)
       {

@@ -42,8 +42,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmSystemTools.h"
 
 // cmExecProgramCommand
-bool cmExecProgramCommand::InitialPass(std::vector<std::string>& args)
+bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
+  std::vector<std::string>  args = argsIn;
   if(args.size() < 1 )
     {
     this->SetError("called with incorrect number of arguments");

@@ -63,7 +63,7 @@ public:
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool InitialPass(std::vector<std::string>& args);
+  virtual bool InitialPass(std::vector<std::string> const& args);
 
   virtual void FinalPass();
 

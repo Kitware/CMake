@@ -540,7 +540,7 @@ public:
   /**
    * execute a single CMake command
    */
-  void ExecuteCommand(std::string &name, std::vector<std::string> &args);
+  void ExecuteCommand(std::string &name, std::vector<std::string> const& args);
   
     
 protected:
@@ -590,7 +590,7 @@ protected:
   RegisteredCommandsMap m_Commands;
   std::vector<cmCommand*> m_UsedCommands;
   cmMakefileGenerator* m_MakefileGenerator;
-  bool IsFunctionBlocked(const char *name, std::vector<std::string> &args);
+  bool IsFunctionBlocked(const char *name, std::vector<std::string> const& args);
   
 private:
   /**

@@ -42,16 +42,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmSystemTools.h"
 
 // cmUseMangledMesaCommand
-bool cmUseMangledMesaCommand::InitialPass(std::vector<std::string>& args)
+bool cmUseMangledMesaCommand::InitialPass(std::vector<std::string> const& argsIn)
 { 
   // expected two arguments:
   // arguement one: the full path to gl_mangle.h
   // arguement two : directory for output of edited headers
-  if(args.size() < 2)
+  if(argsIn.size() < 2)
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
+  std::vector<std::string>  args = argsIn;
   m_Makefile->ExpandVariablesInString(args[0]);
   m_Makefile->ExpandVariablesInString(args[1]);
   const char* inputDir = args[0].c_str();

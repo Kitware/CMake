@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmIncludeRegularExpressionCommand.h"
 
 // cmIncludeRegularExpressionCommand
-bool cmIncludeRegularExpressionCommand::InitialPass(std::vector<std::string>& args)
+bool cmIncludeRegularExpressionCommand::InitialPass(std::vector<std::string> const& args)
 {
   if((args.size() < 1) || (args.size() > 2))
     {

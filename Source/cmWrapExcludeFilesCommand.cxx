@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmWrapExcludeFilesCommand.h"
 
 // cmWrapExcludeFilesCommand
-bool cmWrapExcludeFilesCommand::InitialPass(std::vector<std::string>& args)
+bool cmWrapExcludeFilesCommand::InitialPass(std::vector<std::string> const& args)
 {
   if(args.size() < 1 )
     {
@@ -50,7 +50,7 @@ bool cmWrapExcludeFilesCommand::InitialPass(std::vector<std::string>& args)
     }
 
   cmMakefile::SourceMap &Classes = m_Makefile->GetSources();
-  for(std::vector<std::string>::iterator j = args.begin();
+  for(std::vector<std::string>::const_iterator j = args.begin();
       j != args.end(); ++j)
     {   
     for(cmMakefile::SourceMap::iterator l = Classes.begin(); 

@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   
 
 // cmFindFileCommand
-bool cmFindFileCommand::InitialPass(std::vector<std::string>& args)
+bool cmFindFileCommand::InitialPass(std::vector<std::string> const& args)
 {
   if(args.size() < 2)
     {
@@ -53,7 +53,7 @@ bool cmFindFileCommand::InitialPass(std::vector<std::string>& args)
     return false;
     }
 
-  std::vector<std::string>::iterator i = args.begin();
+  std::vector<std::string>::const_iterator i = args.begin();
   // Use the first argument as the name of something to be defined
   const char* define = (*i).c_str();
   i++; // move iterator to next arg

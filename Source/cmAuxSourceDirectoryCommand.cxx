@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmDirectory.h"
 
 // cmAuxSourceDirectoryCommand
-bool cmAuxSourceDirectoryCommand::InitialPass(std::vector<std::string>& args)
+bool cmAuxSourceDirectoryCommand::InitialPass(std::vector<std::string> const& args)
 {
   if(args.size() < 2 || args.size() > 2)
     {

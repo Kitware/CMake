@@ -109,7 +109,7 @@ ScopeEnded(cmMakefile &mf)
                        mf.GetCurrentDirectory());
 }
 
-bool cmForEachCommand::InitialPass(std::vector<std::string>& args)
+bool cmForEachCommand::InitialPass(std::vector<std::string> const& args)
 {
   if(args.size() < 2 )
     {
@@ -119,7 +119,7 @@ bool cmForEachCommand::InitialPass(std::vector<std::string>& args)
   
   // create a function blocker
   cmForEachFunctionBlocker *f = new cmForEachFunctionBlocker();
-  for(std::vector<std::string>::iterator j = args.begin();
+  for(std::vector<std::string>::const_iterator j = args.begin();
       j != args.end(); ++j)
     {   
     f->m_Args.push_back(*j);

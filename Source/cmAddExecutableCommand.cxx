@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmCacheManager.h"
 
 // cmExecutableCommand
-bool cmAddExecutableCommand::InitialPass(std::vector<std::string>& args)
+bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args)
 {
   if(args.size() < 2 )
     {
@@ -50,7 +50,7 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string>& args)
     return false;
     }
 
-  std::vector<std::string>::iterator s = args.begin();
+  std::vector<std::string>::const_iterator s = args.begin();
   ++s;
   if (*s == "WIN32")
     {

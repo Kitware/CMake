@@ -42,15 +42,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmDirectory.h"
 
 // cmMakeDirectoryCommand
-bool cmMakeDirectoryCommand::InitialPass(std::vector<std::string>& args)
+bool cmMakeDirectoryCommand::InitialPass(std::vector<std::string> const& args)
 {
   if(args.size() < 1 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  m_Makefile->ExpandVariablesInString(args[0]);
-  cmSystemTools::MakeDirectory(args[0].c_str());
+  std::string arg = args[0];
+  m_Makefile->ExpandVariablesInString(arg);
+  cmSystemTools::MakeDirectory(arg.c_str());
   return true;
 }
 

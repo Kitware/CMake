@@ -41,8 +41,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmAddCustomTargetCommand.h"
 
 // cmAddCustomTargetCommand
-bool cmAddCustomTargetCommand::InitialPass(std::vector<std::string>& args)
+bool cmAddCustomTargetCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
+  std::vector<std::string> args = argsIn;
   bool all = false;
   
   if(args.size() < 2 )

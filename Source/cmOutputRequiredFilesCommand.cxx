@@ -181,7 +181,7 @@ void cmLBDepend::DependWalk(cmDependInformation* info)
 }
 
 // cmOutputRequiredFilesCommand
-bool cmOutputRequiredFilesCommand::InitialPass(std::vector<std::string>& args)
+bool cmOutputRequiredFilesCommand::InitialPass(std::vector<std::string> const& args)
 {
   if(args.size() < 2 )
     {

@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmBuildCommand.h"
 
 // cmBuildCommand
-bool cmBuildCommand::InitialPass(std::vector<std::string>& args)
+bool cmBuildCommand::InitialPass(std::vector<std::string> const& args)
 {
   if(args.size() < 2 )
     {
@@ -56,7 +56,7 @@ bool cmBuildCommand::InitialPass(std::vector<std::string>& args)
     return true;
     }
   std::string makecommand;
-  std::string& makeprogram = args[1];
+  std::string makeprogram = args[1];
   m_Makefile->ExpandVariablesInString(makeprogram);
   if(makeprogram.find("msdev") != std::string::npos ||
      makeprogram.find("MSDEV") != std::string::npos )

@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmSourceGroupCommand.h"
 
 // cmSourceGroupCommand
-bool cmSourceGroupCommand::InitialPass(std::vector<std::string>& args)
+bool cmSourceGroupCommand::InitialPass(std::vector<std::string> const& args)
 {
   if(args.size() != 2)
     {

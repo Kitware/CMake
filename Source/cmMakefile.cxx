@@ -217,7 +217,7 @@ void cmMakefile::Print() const
 
       
 void cmMakefile::ExecuteCommand(std::string &name,
-                                std::vector<std::string> &arguments)
+                                std::vector<std::string> const& arguments)
 {
   RegisteredCommandsMap::iterator pos = m_Commands.find(name);
   if(pos != m_Commands.end())
@@ -336,16 +336,14 @@ bool cmMakefile::ReadListFile(const char* filename, const char* external)
   // add this list file to the list of dependencies
   m_ListFiles.push_back( filenametoread);
   const int numberFunctions = lf->m_Functions.size();
-  std::vector<std::string> argumentsCopy;
   for(int i =0; i < numberFunctions; ++i)
     {
     cmListFileFunction& curFunction = lf->m_Functions[i];
     if(!this->IsFunctionBlocked(curFunction.m_Name.c_str(),
                                 curFunction.m_Arguments))
       {
-      argumentsCopy = curFunction.m_Arguments;
       this->ExecuteCommand(curFunction.m_Name,
-                           argumentsCopy);
+                           curFunction.m_Arguments);
       }
     }
 
@@ -1149,7 +1147,7 @@ cmMakefile::FindSourceGroup(const char* source,
 
 
 bool cmMakefile::IsFunctionBlocked(const char *name,
-                                   std::vector<std::string> &args)
+                                   std::vector<std::string> const&args)
 {
   // loop over all function blockers to see if any block this command
   std::set<cmFunctionBlocker *>::const_iterator pos;
