@@ -133,39 +133,41 @@ void cmake::AddCMakePaths(const std::vector<std::string>& args)
   std::string cMakeSelf = args[0];
   cmSystemTools::ConvertToUnixSlashes(cMakeSelf);
   cMakeSelf = cmSystemTools::FindProgram(cMakeSelf.c_str());
+  if(!cmSystemTools::FileExists(cMakeSelf.c_str()))
+    {
 #ifdef CMAKE_BUILD_DIR
-  if(!cmSystemTools::FileExists(cMakeSelf.c_str()))
-    {
-      cMakeSelf = CMAKE_BUILD_DIR;
-      cMakeSelf += "/Source/cmake";
-    }
+    cMakeSelf = CMAKE_BUILD_DIR;
+    cMakeSelf += "/Source/cmake";
 #endif
+    }
 #ifdef CMAKE_PREFIX
-  if(!cmSystemTools::FileExists(cMakeSelf.c_str()))
+  else if(!cmSystemTools::FileExists(cMakeSelf.c_str()))
     {
-      cMakeSelf = CMAKE_PREFIX "/bin/cmake";
+    cMakeSelf = CMAKE_PREFIX "/bin/cmake";
     }
 #endif
-  if(!cmSystemTools::FileExists(cMakeSelf.c_str()))
+  else if(!cmSystemTools::FileExists(cMakeSelf.c_str()))
     {
-      cmSystemTools::Error("CMAKE can not find the command line program cmake. "
-			   "Attempted path: ", cMakeSelf.c_str());
-      return;
+    cmSystemTools::Error("CMAKE can not find the command line program cmake. "
+                         "Attempted path: ", cMakeSelf.c_str());
+    return;
     }
-   // Save the value in the cache
+  // Save the value in the cache
   cmCacheManager::GetInstance()->AddCacheEntry
     ("CMAKE_COMMAND",
      cmSystemTools::EscapeSpaces(cMakeSelf.c_str()).c_str(),
      "Path to CMake executable.",
      cmCacheManager::INTERNAL);
-
+  
   // do CMAKE_ROOT, look for the environment variable first
   std::string cMakeRoot;
+  std::string modules;
   if (getenv("CMAKE_ROOT"))
     {
     cMakeRoot = getenv("CMAKE_ROOT");
+    modules = cMakeRoot + "/Modules/FindVTK.cmake";
     }
-  else
+  if(!cmSystemTools::FileExists(modules.c_str()))
     {
     // next try exe/..
     cMakeRoot  = cmSystemTools::GetProgramPath(cMakeSelf.c_str());
@@ -175,34 +177,43 @@ void cmake::AddCMakePaths(const std::vector<std::string>& args)
       cMakeRoot = cMakeRoot.substr(0, slashPos);
       }
     // is there no Modules direcory there?
-    std::string modules = cMakeRoot + "/Modules/FindVTK.cmake";
-    if (!cmSystemTools::FileExists(modules.c_str()))
-      {
-      // try exe/../share/cmake
-      modules = cMakeRoot + "/share/CMake/Modules/FindVTK.cmake";
-      if (!cmSystemTools::FileExists(modules.c_str()))
-	{
-#ifdef CMAKE_ROOT_DIR
-	// try compiled in value on UNIX
-        cMakeRoot = CMAKE_ROOT_DIR;
-        modules = cMakeRoot + "/Modules/FindVTK.cmake";
-#endif
-	if (!cmSystemTools::FileExists(modules.c_str()))
-	  {
-	    // couldn't find modules
-	    cmSystemTools::Error("Could not find CMAKE_ROOT !!!\n", 
-                                 "Modules directory not in directory:\n",
-                                 modules.c_str());
-	    return;  
-	  }
-	}
-      else
-	{
-	cMakeRoot = cMakeRoot + "/share/CMake";
-	}
-      }
+    modules = cMakeRoot + "/Modules/FindVTK.cmake";
     }
   
+  else if (!cmSystemTools::FileExists(modules.c_str()))
+    {
+    // try exe/../share/cmake
+    modules = cMakeRoot + "/share/CMake/Modules/FindVTK.cmake";
+    }
+#ifdef CMAKE_ROOT_DIR
+  else if (!cmSystemTools::FileExists(modules.c_str()))
+    {
+    // try compiled in value on UNIX
+    cMakeRoot = CMAKE_ROOT_DIR;
+    modules = cMakeRoot + "/Modules/FindVTK.cmake";
+    }
+#endif
+#ifdef CMAKE_PREFIX
+  else if (!cmSystemTools::FileExists(modules.c_str()))
+    {
+    // try compiled in value on UNIX
+    cMakeRoot = CMAKE_PREFIX "/share/CMake";
+    modules = cMakeRoot + "/Modules/FindVTK.cmake";
+    }
+#endif
+  else if (!cmSystemTools::FileExists(modules.c_str()))
+    {
+    cMakeRoot = cMakeRoot + "/share/CMake";
+    modules = cMakeRoot +  "/Modules/FindVTK.cmake";
+    }
+  else if (!cmSystemTools::FileExists(modules.c_str()))
+    {
+    // couldn't find modules
+    cmSystemTools::Error("Could not find CMAKE_ROOT !!!\n", 
+                         "Modules directory not in directory:\n",
+                         modules.c_str());
+    return;  
+    }
   cmCacheManager::GetInstance()->AddCacheEntry
     ("CMAKE_ROOT", cMakeRoot.c_str(),
      "Path to CMake installation.", cmCacheManager::INTERNAL);
