@@ -798,14 +798,24 @@ std::string cmCTestTestHandler::FindTheExecutable(const char *exe)
 //----------------------------------------------------------------------
 void cmCTestTestHandler::GetListOfTests(tm_ListOfTests* testlist)
 {
-  // does the DartTestfile.txt exist ?
-  if(!cmSystemTools::FileExists("DartTestfile.txt"))
+  const char* testFilename = 0;
+  if( cmSystemTools::FileExists("CTestTestfile.cmake") )
+    {
+    // does the CTestTestfile.cmake exist ?
+    testFilename = "CTestTestfile.cmake";
+    }
+  else if( cmSystemTools::FileExists("DartTestfile.txt") )
+    {
+    // does the DartTestfile.txt exist ?
+    testFilename = "DartTestfile.txt";
+    }
+  else
     {
     return;
     }
 
   // parse the file
-  std::ifstream fin("DartTestfile.txt");
+  std::ifstream fin(testFilename);
   if(!fin)
     {
     return;
@@ -815,7 +825,7 @@ void cmCTestTestHandler::GetListOfTests(tm_ListOfTests* testlist)
   cmsys::RegularExpression ereg(this->m_ExcludeRegExp.c_str());
 
   cmListFileCache cache;
-  cmListFile* listFile = cache.GetFileCache("DartTestfile.txt", false);
+  cmListFile* listFile = cache.GetFileCache(testFilename, false);
   for(std::vector<cmListFileFunction>::const_iterator f =
     listFile->m_Functions.begin(); f != listFile->m_Functions.end(); ++f)
     {

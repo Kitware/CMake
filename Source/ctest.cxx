@@ -138,6 +138,10 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
   {"--test-command", "The test to run with the --build-and-test option.", "" },
   {"--tomorrow-tag", "Nightly or experimental starts with next day tag.", 
    "This is useful if the build will not finish in one day." },
+  {"--ctest-config", "The configuration file used to initialize CTest state when submitting dashboards.",
+   "This option tells CTest to use different initialization file instead of "
+   "DartConfiguration.tcl. This way multiple initialization files can be used "
+   "for example to submit to multiple dashboards." },
   {0,0,0}
 };
 
@@ -166,7 +170,8 @@ int main (int argc, char *argv[])
   // If there is a testing input file, check for documentation options
   // only if there are actually arguments.  We want running without
   // arguments to run tests.
-  if(argc > 1 || !cmSystemTools::FileExists("DartTestfile.txt"))
+  if(argc > 1 || !cmSystemTools::FileExists("DartTestfile.txt") &&
+    !cmSystemTools::FileExists("CTestTestfile.cmake"))
     {
     if(argc == 1)
       {

@@ -234,6 +234,7 @@ cmCTest::cmCTest()
   m_InteractiveDebugMode   = true;
   m_TimeOut                = 0;
   m_CompressXMLFiles       = false;
+  m_CTestConfigFile        = "";
   int cc; 
   for ( cc=0; cc < cmCTest::LAST_TEST; cc ++ )
     {
@@ -370,7 +371,15 @@ int cmCTest::Initialize(const char* binary_dir)
 
 bool cmCTest::UpdateCTestConfiguration()
 {
-  std::string fileName = m_BinaryDir + "/DartConfiguration.tcl";
+  std::string fileName = m_CTestConfigFile;
+  if ( fileName.empty() )
+    {
+    fileName = m_BinaryDir + "/DartConfiguration.tcl";
+    if ( !cmSystemTools::FileExists(fileName.c_str()) )
+      {
+      fileName = m_BinaryDir + "/CTestConfiguration.tcl";
+      }
+    }
   if ( !cmSystemTools::FileExists(fileName.c_str()) )
     {
     std::cerr << "Cannot find file: " << fileName.c_str() << std::endl;
@@ -1221,6 +1230,12 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
   for(unsigned int i=1; i < args.size(); ++i)
     {
     std::string arg = args[i];
+    if(arg.find("--dart-config",0) == 0 && i < args.size() - 1)
+      {
+      i++;
+      this->m_CTestConfigFile= args[i];
+      }
+
     if(arg.find("-C",0) == 0 && i < args.size() - 1)
       {
       i++;

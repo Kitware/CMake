@@ -44,7 +44,14 @@ void cmAddTestCommand::FinalPass()
   std::string fname;
   fname = m_Makefile->GetStartOutputDirectory();
   fname += "/";
-  fname += "DartTestfile.txt";
+  if ( m_Makefile->IsOn("DART_ROOT") )
+    {
+    fname += "DartTestfile.txt";
+    }
+  else
+    {
+    fname += "CTestTestfile.cmake";
+    }
   
 
   // If the file doesn't exist, then ENABLE_TESTING hasn't been run

@@ -229,6 +229,7 @@ private:
   //! Map of configuration properties
   typedef std::map<cmStdString, cmStdString> tm_DartConfigurationMap;
 
+  std::string             m_CTestConfigFile;
   tm_DartConfigurationMap m_DartConfiguration;
   int                     m_Tests[LAST_TEST];
   
