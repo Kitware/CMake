@@ -10,7 +10,8 @@ ENABLE_TESTING()
 
 # Include the standard Dart testing module
 INCLUDE (${CMake_SOURCE_DIR}/Modules/Dart.cmake)
-INCLUDE (${CMake_BINARY_DIR}/Source/InitialConfigureFlags.cmake OPTIONAL)
+INCLUDE (${CMake_BINARY_DIR}/Bootstrap/Source/InitialConfigureFlags.cmake
+         OPTIONAL)
 
 IF(CMAKE_CONFIGURE_INSTALL_PREFIX)
   SET(CMAKE_INSTALL_PREFIX ${CMAKE_CONFIGURE_INSTALL_PREFIX} )
