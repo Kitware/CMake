@@ -21,6 +21,7 @@
 #include "cmCommands.h"
 #include "cmAddCustomTargetCommand.cxx"
 #include "cmAddDefinitionsCommand.cxx"
+#include "cmAddDependenciesCommand.cxx"
 #include "cmAddExecutableCommand.cxx"
 #include "cmAddLibraryCommand.cxx"
 #include "cmAddTestCommand.cxx"
@@ -74,7 +75,6 @@
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmAbstractFilesCommand.cxx"
 #include "cmAddCustomCommandCommand.cxx"
-#include "cmAddDependenciesCommand.cxx"
 #include "cmAuxSourceDirectoryCommand.cxx"
 #include "cmExportLibraryDependencies.cxx"
 #include "cmFLTKWrapUICommand.cxx"
@@ -113,6 +113,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
 {
   commands.push_back(new cmAddCustomTargetCommand);
   commands.push_back(new cmAddDefinitionsCommand);
+  commands.push_back(new cmAddDependenciesCommand);
   commands.push_back(new cmAddExecutableCommand);
   commands.push_back(new cmAddLibraryCommand);
   commands.push_back(new cmAddTestCommand);
@@ -163,7 +164,6 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   commands.push_back(new cmAbstractFilesCommand);
   commands.push_back(new cmAddCustomCommandCommand);
-  commands.push_back(new cmAddDependenciesCommand);
   commands.push_back(new cmAuxSourceDirectoryCommand);
   commands.push_back(new cmExportLibraryDependenciesCommand);
   commands.push_back(new cmFLTKWrapUICommand);
