@@ -19,7 +19,7 @@
 // cmOptionCommand
 bool cmOptionCommand::InitialPass(std::vector<std::string> const& args)
 {
-  if(args.size() < 2)
+  if(args.size() < 2 || args.size() > 3)
     {
     this->SetError("called with incorrect number of arguments");
     return false;
