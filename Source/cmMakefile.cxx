@@ -477,6 +477,7 @@ void cmMakefile::AddCustomCommand(const char* source,
       // add the output to the target?
       std::string sname = *d;
       sname += ".rule";
+      this->ExpandVariablesInString(sname);
       // if the rule was added to the source, 
       // then add the source to the target
       if (!this->GetSource(sname.c_str()))
@@ -533,14 +534,25 @@ AddCustomCommandToOutput(const char* output,
     combinedArgs += " ";
     }
   cmSourceFile *file = 0;
+
+  // setup the output name and make sure we expand any variables
   std::string outName = output;
   outName += ".rule";
-  
+  this->ExpandVariablesInString(outName);
+
+  // setup the main dependency name and expand vars of course
+  std::string mainDepend;
+  if (main_dependency && main_dependency[0] != '\0')
+    {
+    mainDepend = main_dependency;
+    this->ExpandVariablesInString(mainDepend);
+    }
+
   // OK this rule will be placed on a generated output file unless the main
   // depednency was specified.
   if (main_dependency && main_dependency[0] != '\0')
     {
-    file = this->GetSource(main_dependency);
+    file = this->GetSource(mainDepend.c_str());
     if (file && file->GetCustomCommand() && !replace)
       {  
       cmCustomCommand* cc = file->GetCustomCommand();
@@ -556,7 +568,7 @@ AddCustomCommandToOutput(const char* output,
       }
     else
       {
-      file = this->GetOrCreateSource(main_dependency);
+      file = this->GetOrCreateSource(mainDepend.c_str());
       }
     }
 
@@ -598,7 +610,7 @@ AddCustomCommandToOutput(const char* output,
   std::vector<std::string> depends2(depends);
   if (main_dependency && main_dependency[0] != '\0')
     {
-    depends2.push_back(main_dependency);
+    depends2.push_back(mainDepend.c_str());
     }
   cmCustomCommand *cc = 
     new cmCustomCommand(c.c_str(),combinedArgs.c_str(),depends2, output);
