@@ -73,7 +73,8 @@ public:
     return
       "LINK_LIBRARIES(library1 <debug | optimized> library2 ...)\n"
       "Specify a list of libraries to be linked into "
-      "executables or shared objects.  This command is passed "
+      "any following targets (typically added with the ADD_EXECUTABLE "
+      "or ADD_LIBRARY calls).  This command is passed "
       "down to all other commands. "
       "The debug and optimized strings may be used to indicate that "
       "the next library listed is to be used only for that specific "
