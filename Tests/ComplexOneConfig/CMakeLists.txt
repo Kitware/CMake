@@ -3,6 +3,9 @@
 #
 PROJECT (Complex)
 
+# For borland since CMakeLib is a dll all .cxx files have
+# to be compiled with -tWR to get the dll version of the borland
+# standard library
 IF(BORLAND)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -tWR")
   SET(CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -tWR")
