@@ -177,7 +177,7 @@ void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
       fout << "\t$(CXX) ${CXX_FLAGS} ${CMAKE_SHLIB_BUILD_FLAGS} -o \\\n";
       fout << "\t  lib" << l->first << "$(SHLIB_SUFFIX) \\\n";
       fout << "\t  ${KIT_OBJ} ${" << l->first << 
-        "_SRC_OBJS} ${SHLIB_LD_LIBS}\n\n";
+        "_SRC_OBJS} ${CMAKE_LINK_LIBS}\n\n";
       }
     else
       {
