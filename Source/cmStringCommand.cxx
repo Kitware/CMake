@@ -68,8 +68,6 @@ bool cmStringCommand::HandleToUpperLowerCommand(
   std::string outvar = args[2];
   std::string output;
 
-  bool first = true;
-
   if (toUpper) 
     {
     output = cmSystemTools::UpperCase(args[1]);
