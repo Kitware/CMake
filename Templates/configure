@@ -2878,7 +2878,7 @@ case $system in
 	;;   
     CYGWIN_NT*)
         CMAKE_THREAD_LIBS=""
-	CMAKE_USE_PTHREADS=0
+	CMAKE_USE_PTHREADS=1
         ;;
 esac
 fi
