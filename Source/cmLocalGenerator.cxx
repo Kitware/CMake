@@ -65,6 +65,12 @@ void cmLocalGenerator::ConfigureFinalPass()
 
 std::string cmLocalGenerator::ConvertToRelativeOutputPath(const char* p)
 {
+  const char* outputDirectory = m_Makefile->GetHomeOutputDirectory();
+  if ( outputDirectory && *outputDirectory && *(outputDirectory+1) && 
+    outputDirectory[0] == '/' && outputDirectory[1] == '/' )
+    {
+    return cmSystemTools::ConvertToOutputPath(p);
+    }
   // The first time this is called, initialize all
   // the path ivars that are used.   This can not 
   // be moved to the constructor because all the paths are not set yet.
