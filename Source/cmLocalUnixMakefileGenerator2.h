@@ -82,9 +82,9 @@ protected:
   void WriteSpecialTargetsBottom(std::ostream& makefileStream);
   void WriteRuleFileIncludes(std::ostream& makefileStream);
   void WriteAllRules(std::ostream& makefileStream);
-  void WriteDependRules(std::ostream& makefileStream);
-  void WriteBuildRules(std::ostream& makefileStream);
-  void WriteCleanRules(std::ostream& makefileStream);
+  void WritePassRules(std::ostream& makefileStream,
+                      const char* pass, const char* comment,
+                      const std::vector<std::string>& depends);
   void WriteDriverRules(std::ostream& makefileStream, const char* pass,
                         const char* local1, const char* local2=0);
   void WriteSubdirRules(std::ostream& makefileStream, const char* pass);
@@ -123,6 +123,13 @@ protected:
   void WriteObjectsVariable(std::ostream& ruleFileStream,
                             const cmTarget& target,
                             std::vector<std::string>& objects);
+  void WriteTargetDependsRule(std::ostream& ruleFileStream,
+                              const char* ruleFileName,
+                              const cmTarget& target,
+                              const std::vector<std::string>& objects);
+  void WriteTargetCleanRule(std::ostream& ruleFileStream,
+                            const cmTarget& target,
+                            const std::vector<std::string>& files);
   std::string GetTargetDirectory(const cmTarget& target);
   std::string GetSubdirTargetName(const char* pass, const char* subdir);
   std::string GetObjectFileName(const cmTarget& target,
@@ -168,6 +175,13 @@ private:
 
   // Set of custom rule files that have been generated.
   std::set<cmStdString> m_CustomRuleFiles;
+
+  // List of target-level rules for each pass.  These are populated by
+  // target rule file writing methods.
+  std::vector<std::string> m_DependTargets;
+  std::vector<std::string> m_BuildTargets;
+  std::vector<std::string> m_InstallTargets;
+  std::vector<std::string> m_CleanTargets;
 };
 
 #endif

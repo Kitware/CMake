@@ -24,12 +24,15 @@
 #include <queue>
 
 // Quick-switch for generating old makefiles.
-#if 0
+#if 1
 # define CMLUMG_MAKEFILE_NAME "Makefile"
 #else
 # define CMLUMG_WRITE_OLD_MAKEFILE
 # define CMLUMG_MAKEFILE_NAME "Makefile2"
 #endif
+
+// TODO: Add "help" target.
+// TODO: Add install targets to m_InstallTargets list.
 
 //----------------------------------------------------------------------------
 cmLocalUnixMakefileGenerator2::cmLocalUnixMakefileGenerator2()
@@ -130,16 +133,24 @@ void cmLocalUnixMakefileGenerator2::GenerateMakefile()
   this->WriteAllRules(makefileStream);
 
   // Write dependency generation rules.
-  this->WriteDependRules(makefileStream);
+  this->WritePassRules(makefileStream, "depend",
+                       "Build dependencies for this directory.",
+                       m_DependTargets);
 
   // Write main build rules.
-  this->WriteBuildRules(makefileStream);
+  this->WritePassRules(makefileStream, "build",
+                       "Build targets in this directory.",
+                       m_BuildTargets);
+
+  // Write install rules.
+  this->WritePassRules(makefileStream, "install",
+                       "Install files from this directory.",
+                       m_InstallTargets);
 
   // Write clean rules.
-  this->WriteCleanRules(makefileStream);
-
-  // TODO: Write install rules.
-  //this->WriteInstallRules(makefileStream);
+  this->WritePassRules(makefileStream, "clean",
+                       "Clean targets in this directory.",
+                       m_CleanTargets);
 
   // Write include statements to get rules for this directory.
   this->WriteRuleFileIncludes(makefileStream);
@@ -299,28 +310,7 @@ cmLocalUnixMakefileGenerator2
       << "\n";
     }
 
-  // Write the dependency generation rule.
-  {
-  std::vector<std::string> depends;
-  std::vector<std::string> no_commands;
-  std::string depEcho = "Building dependencies for ";
-  depEcho += target.GetName();
-  depEcho += "...";
-  std::string depTarget = dir;
-  depTarget += "/";
-  depTarget += target.GetName();
-  depTarget += ".depends";
-  for(std::vector<std::string>::const_iterator obj = objects.begin();
-      obj != objects.end(); ++obj)
-    {
-    depends.push_back((*obj)+".depends");
-    }
-  depends.push_back(ruleFileName);
-  this->WriteMakeRule(ruleFileStream, 0, depEcho.c_str(),
-                      depTarget.c_str(), depends, no_commands);
-  }
-
-  // Write the build rule.
+  // Write the rule for this target type.
   switch(target.GetType())
     {
     case cmTarget::STATIC_LIBRARY:
@@ -1002,157 +992,33 @@ cmLocalUnixMakefileGenerator2
 
 //----------------------------------------------------------------------------
 void
-cmLocalUnixMakefileGenerator2::WriteDependRules(std::ostream& makefileStream)
+cmLocalUnixMakefileGenerator2
+::WritePassRules(std::ostream& makefileStream,
+                 const char* pass,
+                 const char* comment,
+                 const std::vector<std::string>& depends)
 {
   // Write section header.
   this->WriteDivider(makefileStream);
   makefileStream
-    << "# Rules for computing dependencies.\n"
+    << "# Rules for the " << pass << " pass.\n"
     << "\n";
 
-  // TODO: Unify WriteDependRules, WriteBuildRules, WriteCleanRules,
-  // etc.  They are mostly duplicate code.
-
-  // TODO: Add registered files for cleaning.
-
-  // Write rules to traverse the directory tree building dependencies.
-  this->WriteDriverRules(makefileStream, "depend", "depend.local");
-
-  // Write the rule to build dependencies in this directory.  It just
-  // depends on all targets' dependencies.
-  const cmTargets& targets = m_Makefile->GetTargets();
-  std::vector<std::string> depends;
-  std::vector<std::string> commands;
-  for(cmTargets::const_iterator t = targets.begin(); t != targets.end(); ++t)
-    {
-    // TODO: Dispatch generation of each target type.
-    if((t->second.GetType() == cmTarget::EXECUTABLE) ||
-       (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
-       (t->second.GetType() == cmTarget::SHARED_LIBRARY) ||
-       (t->second.GetType() == cmTarget::MODULE_LIBRARY))
-      {
-      if(t->second.IsInAll())
-        {
-        std::string dep = this->GetTargetDirectory(t->second);
-        dep += "/";
-        dep += t->first;
-        dep += ".depends";
-        depends.push_back(dep);
-        }
-      }
-    }
+  // Write rules to traverse the directory tree for this pass.
+  std::string passLocal = pass;
+  passLocal += ".local";
+  this->WriteDriverRules(makefileStream, pass, passLocal.c_str());
 
   // If there are no dependencies, use empty commands.
+  std::vector<std::string> commands;
   if(depends.empty())
     {
     commands = m_EmptyCommands;
     }
 
   // Write the rule.
-  this->WriteMakeRule(makefileStream,
-                      "Build dependencies for this directory.",
-                      0,
-                      "depend.local",
-                      depends,
-                      commands);
-}
-
-//----------------------------------------------------------------------------
-void
-cmLocalUnixMakefileGenerator2::WriteBuildRules(std::ostream& makefileStream)
-{
-  // Write section header.
-  this->WriteDivider(makefileStream);
-  makefileStream
-    << "# Rules for building targets.\n"
-    << "\n";
-
-  // Write rules to traverse the directory tree building targets.
-  this->WriteDriverRules(makefileStream, "build", "build.local");
-
-  // Write the rule to build targets in this directory.  It just
-  // depends on all targets.
-  const cmTargets& targets = m_Makefile->GetTargets();
-  std::vector<std::string> depends;
-  std::vector<std::string> commands;
-  for(cmTargets::const_iterator t = targets.begin(); t != targets.end(); ++t)
-    {
-    // TODO: Dispatch generation of each target type.
-    if((t->second.GetType() == cmTarget::EXECUTABLE) ||
-       (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
-       (t->second.GetType() == cmTarget::SHARED_LIBRARY) ||
-       (t->second.GetType() == cmTarget::MODULE_LIBRARY))
-      {
-      if(t->second.IsInAll())
-        {
-        depends.push_back(t->first);
-        }
-      }
-    }
-
-  // If there are no dependencies, use empty commands.
-  if(depends.empty())
-    {
-    commands = m_EmptyCommands;
-    }
-
-  // Write the rule.
-  this->WriteMakeRule(makefileStream,
-                      "Build targets in this directory.",
-                      0,
-                      "build.local",
-                      depends,
-                      commands);
-}
-
-//----------------------------------------------------------------------------
-void
-cmLocalUnixMakefileGenerator2::WriteCleanRules(std::ostream& makefileStream)
-{
-  // Write section header.
-  this->WriteDivider(makefileStream);
-  makefileStream
-    << "# Rules for cleaning targets.\n"
-    << "\n";
-
-  // Write rules to traverse the directory tree cleaning targets.
-  this->WriteDriverRules(makefileStream, "clean", "clean.local");
-
-  // Write the rule to clean targets in this directory.  It just
-  // depends on all targets' clean rules.
-  const cmTargets& targets = m_Makefile->GetTargets();
-  std::vector<std::string> depends;
-  std::vector<std::string> commands;
-  for(cmTargets::const_iterator t = targets.begin(); t != targets.end(); ++t)
-    {
-    // TODO: Dispatch generation of each target type.
-    if((t->second.GetType() == cmTarget::EXECUTABLE) ||
-       (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
-       (t->second.GetType() == cmTarget::SHARED_LIBRARY) ||
-       (t->second.GetType() == cmTarget::MODULE_LIBRARY))
-      {
-      if(t->second.IsInAll())
-        {
-        std::string clean = t->first;
-        clean += ".clean";
-        depends.push_back(clean);
-        }
-      }
-    }
-
-  // If there are no dependencies, use empty commands.
-  if(depends.empty())
-    {
-    commands = m_EmptyCommands;
-    }
-
-  // Write the rule.
-  this->WriteMakeRule(makefileStream,
-                      "Clean targets in this directory.",
-                      0,
-                      "clean.local",
-                      depends,
-                      commands);
+  this->WriteMakeRule(makefileStream, comment, 0, passLocal.c_str(),
+                      depends, commands);
 }
 
 //----------------------------------------------------------------------------
@@ -1336,9 +1202,9 @@ cmLocalUnixMakefileGenerator2
   // Build comment to describe purpose.
   std::string comment = "Driver target for ";
   comment += order;
-  comment += "-order subdirectories during ";
+  comment += "-order subdirectories during the ";
   comment += pass;
-  comment += ".";
+  comment += " pass.";
 
   // Build the make target name.
   std::string tgt = pass;
@@ -1431,6 +1297,9 @@ cmLocalUnixMakefileGenerator2
                       const cmTarget& target,
                       std::vector<std::string>& objects)
 {
+  // Write the dependency generation rule.
+  this->WriteTargetDependsRule(ruleFileStream, ruleFileName, target, objects);
+
   std::vector<std::string> commands;
 
   // Build list of dependencies.
@@ -1554,19 +1423,17 @@ cmLocalUnixMakefileGenerator2
   // Write convenience targets.
   this->WriteConvenienceRules(ruleFileStream, target, targetFullPath.c_str());
 
-  // Write clean target.  TODO: Unify with all target and object file
-  // cleaning rules.
-  std::string remove = "$(CMAKE_COMMAND) -E remove -f ";
-  remove += this->ConvertToRelativeOutputPath(targetFullPath.c_str());
-  remove += " ";
-  remove += objs;
-  std::string cleanTarget = target.GetName();
-  cleanTarget += ".clean";
-  commands.clear();
-  depends.clear();
-  commands.push_back(remove);
-  this->WriteMakeRule(ruleFileStream, 0, 0, cleanTarget.c_str(),
-                      depends, commands);
+  // Write clean target.
+  std::vector<std::string> cleanFiles;
+  cleanFiles.push_back(this->ConvertToRelativeOutputPath(targetFullPath.c_str()));
+  cleanFiles.push_back(objs);
+  this->WriteTargetCleanRule(ruleFileStream, target, cleanFiles);
+
+  // Add this to the list of build rules in this directory.
+  if(target.IsInAll())
+    {
+    m_BuildTargets.push_back(target.GetName());
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -1656,6 +1523,9 @@ cmLocalUnixMakefileGenerator2
                    const char* linkRuleVar,
                    const char* extraFlags)
 {
+  // Write the dependency generation rule.
+  this->WriteTargetDependsRule(ruleFileStream, ruleFileName, target, objects);
+
   // TODO: Merge the methods that call this method to avoid
   // code duplication.
   std::vector<std::string> commands;
@@ -1725,18 +1595,22 @@ cmLocalUnixMakefileGenerator2
     }
 
   // Add a command to remove any existing files for this library.
+  std::vector<std::string> cleanFiles;
   std::string remove = "$(CMAKE_COMMAND) -E remove -f ";
   remove += targetFullPathReal;
+  cleanFiles.push_back(targetFullPathReal);
   if(targetFullPathSO != targetFullPathReal)
     {
     remove += " ";
     remove += targetFullPathSO;
+    cleanFiles.push_back(targetFullPathSO);
     }
   if(targetFullPath != targetFullPathSO &&
      targetFullPath != targetFullPathReal)
     {
     remove += " ";
     remove += targetFullPath;
+    cleanFiles.push_back(targetFullPath);
     }
   commands.push_back(remove);
 
@@ -1811,17 +1685,15 @@ cmLocalUnixMakefileGenerator2
   // Write convenience targets.
   this->WriteConvenienceRules(ruleFileStream, target, targetFullPath.c_str());
 
-  // Write clean target.  TODO: Unify with all target and object file
-  // cleaning rules.
-  std::string cleanTarget = target.GetName();
-  cleanTarget += ".clean";
-  commands.clear();
-  depends.clear();
-  remove += " ";
-  remove += objs;
-  commands.push_back(remove);
-  this->WriteMakeRule(ruleFileStream, 0, 0, cleanTarget.c_str(),
-                      depends, commands);
+  // Write clean target.
+  cleanFiles.push_back(objs);
+  this->WriteTargetCleanRule(ruleFileStream, target, cleanFiles);
+
+  // Add this to the list of build rules in this directory.
+  if(target.IsInAll())
+    {
+    m_BuildTargets.push_back(target.GetName());
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -1860,6 +1732,86 @@ cmLocalUnixMakefileGenerator2
   ruleFileStream
     << "\n"
     << "\n";
+}
+
+//----------------------------------------------------------------------------
+void
+cmLocalUnixMakefileGenerator2
+::WriteTargetDependsRule(std::ostream& ruleFileStream,
+                         const char* ruleFileName,
+                         const cmTarget& target,
+                         const std::vector<std::string>& objects)
+{
+  std::vector<std::string> depends;
+  std::vector<std::string> no_commands;
+
+  // Construct the output message for the rule.
+  std::string depEcho = "Building dependencies for ";
+  depEcho += target.GetName();
+  depEcho += "...";
+
+  // Construct the name of the dependency generation target.
+  std::string depTarget = this->GetTargetDirectory(target);
+  depTarget += "/";
+  depTarget += target.GetName();
+  depTarget += ".depends";
+
+  // This target drives dependency generation for all object files.
+  for(std::vector<std::string>::const_iterator obj = objects.begin();
+      obj != objects.end(); ++obj)
+    {
+    depends.push_back((*obj)+".depends");
+    }
+
+  // Depend on the rule file itself.
+  depends.push_back(ruleFileName);
+
+  // Write the rule.
+  this->WriteMakeRule(ruleFileStream, 0, depEcho.c_str(),
+                      depTarget.c_str(), depends, no_commands);
+
+  // Add this to the list of depend rules in this directory.
+  if(target.IsInAll())
+    {
+    m_DependTargets.push_back(depTarget);
+    }
+}
+
+//----------------------------------------------------------------------------
+void
+cmLocalUnixMakefileGenerator2
+::WriteTargetCleanRule(std::ostream& ruleFileStream,
+                       const cmTarget& target,
+                       const std::vector<std::string>& files)
+{
+  std::vector<std::string> no_depends;
+  std::vector<std::string> commands;
+
+  // TODO: Add registered files for cleaning.
+
+  // Construct the clean target name.
+  std::string cleanTarget = target.GetName();
+  cleanTarget += ".clean";
+
+  // Construct the clean command.
+  std::string remove = "$(CMAKE_COMMAND) -E remove -f";
+  for(std::vector<std::string>::const_iterator f = files.begin();
+      f != files.end(); ++f)
+    {
+    remove += " ";
+    remove += *f;
+    }
+  commands.push_back(remove);
+
+  // Write the rule.
+  this->WriteMakeRule(ruleFileStream, 0, 0, cleanTarget.c_str(),
+                      no_depends, commands);
+
+  // Add this to the list of clean rules in this directory.
+  if(target.IsInAll())
+    {
+    m_CleanTargets.push_back(cleanTarget);
+    }
 }
 
 //----------------------------------------------------------------------------
