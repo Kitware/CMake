@@ -39,6 +39,8 @@ private:
   fltk::PropertyList   m_CacheEntriesList;
   std::string          m_WhereBuild;
   std::string          m_WhereSource;
+  std::string          m_PathToExecutable;
+  bool                 m_BuildPathChanged;
 };
 
 

@@ -8,6 +8,8 @@
 #include "../cmMakefile.h"
 #include <iostream>
 #include "FLTKPropertyList.h"
+#include "Fl/fl_draw.H"
+#include "../cmake.h"
 
 
 
@@ -17,6 +19,12 @@
 CMakeSetupGUIImplementation
 ::CMakeSetupGUIImplementation()
 {
+  m_BuildPathChanged = false;
+  char fname[1024];
+  //::GetModuleFileName(NULL,fname,1023);
+  m_PathToExecutable = cmSystemTools::GetProgramPath(fname).c_str();
+  m_PathToExecutable += "/cmake.exe";
+  std::cout << "Path to executable = " << m_PathToExecutable << std::endl;
 }
 
 
@@ -139,7 +147,11 @@ CMakeSetupGUIImplementation
 
   if( VerifyBinaryPath( path ) )
   {
-    m_WhereBuild = path;
+    if( m_WhereBuild != path )
+    {
+      m_BuildPathChanged = true;
+      m_WhereBuild = path;
+    }
     binaryPathTextInput->value( path );
   }
 
@@ -224,7 +236,44 @@ CMakeSetupGUIImplementation
 
   SaveCacheFromGUI();
   
-  fl_message("Building project files ... please wait");
+  // set the wait cursor
+  fl_cursor(FL_CURSOR_WAIT,FL_WHITE,FL_BLACK);
+  // get all the info from the dialog
+  // this->UpdateData();
+  if(!m_BuildPathChanged)
+    {
+    // if the build path has not changed save the 
+    // current GUI values to the cache
+    this->SaveCacheFromGUI();
+    }
+  // Make sure we are working from the cache on disk
+  this->LoadCacheFromDiskToGUI();
+  // create a cmake object
+  cmake make;
+  // create the arguments for the cmake object
+  std::vector<std::string> args;
+  args.push_back( m_PathToExecutable.c_str() );
+  std::string arg;
+  arg = "-H";
+  arg += m_WhereSource;
+  args.push_back(arg);
+  arg = "-B";
+  arg += m_WhereBuild;
+  args.push_back(arg);
+  // run the generate process
+  if(make.Generate(args) != 0)
+    {
+    cmSystemTools::Error(
+      "Error in generation process, project files may be invalid");
+    }
+  // update the GUI with any new values in the caused by the
+  // generation process
+  this->LoadCacheFromDiskToGUI();
+  // path is up-to-date now
+  m_BuildPathChanged = false;
+  // put the cursor back
+  fl_cursor(FL_CURSOR_DEFAULT,FL_WHITE,FL_BLACK);
+  fl_message("Done !");
 
 }
 
