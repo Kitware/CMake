@@ -38,58 +38,61 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =========================================================================*/
-#include "cmTarget.h"
-#include "cmMakefile.h"
+#ifndef cmInstallTargetsCommand_h
+#define cmInstallTargetsCommand_h
 
-void cmTarget::GenerateSourceFilesFromSourceLists(const cmMakefile &mf)
+#include "cmStandardIncludes.h"
+#include "cmCommand.h"
+
+/** \class cmInstallTargetsCommand
+ * \brief Specifies where to install some targets
+ *
+ * cmInstallTargetsCommand specifies the relative path where a list of
+ * targets should be installed. The targets can be executables or
+ * libraries.  
+ */
+class cmInstallTargetsCommand : public cmCommand
 {
-  // this is only done for non install targets
-  if (this->m_TargetType == cmTarget::INSTALL)
+public:
+  /**
+   * This is a virtual constructor for the command.
+   */
+  virtual cmCommand* Clone() 
     {
-    return;
+    return new cmInstallTargetsCommand;
     }
 
-  // for each src lists add the classes
-  for (std::vector<std::string>::const_iterator s = m_SourceLists.begin();
-       s != m_SourceLists.end(); ++s)
+  /**
+   * This is called when the command is first encountered in
+   * the CMakeLists.txt file.
+   */
+  virtual bool Invoke(std::vector<std::string>& args);
+
+  /**
+   * The name of the command as specified in CMakeList.txt.
+   */
+  virtual const char* GetName() { return "INSTALL_TARGETS";}
+
+  /**
+   * Succinct documentation.
+   */
+  virtual const char* GetTerseDocumentation() 
     {
-    // replace any variables
-    std::string temps = *s;
-    mf.ExpandVariablesInString(temps);
-    // look for a srclist
-    if (mf.GetSources().find(temps) != mf.GetSources().end())
-      {
-      const std::vector<cmSourceFile> &clsList = 
-        mf.GetSources().find(temps)->second;
-      m_SourceFiles.insert(m_SourceFiles.end(), clsList.begin(), clsList.end());
-      }
-    // if one wasn't found then assume it is a single class
-    else
-      {
-      cmSourceFile file;
-      file.SetIsAnAbstractClass(false);
-      file.SetName(temps.c_str(), mf.GetCurrentDirectory());
-      m_SourceFiles.push_back(file);
-      }
+    return "Create install rules for targets";
     }
-
-  // expand any link library variables whle we are at it
-  LinkLibraries::iterator p = m_LinkLibraries.begin();
-  for (;p != m_LinkLibraries.end(); ++p)
+  
+  /**
+   * More documentation.
+   */
+  virtual const char* GetFullDocumentation()
     {
-    mf.ExpandVariablesInString(p->first);    
+    return
+      "INSTALL_TARGETS(path target target)\n"
+      "Create rules to install the listed targets into the path. Path is relative to the variable PREFIX";
     }
-}
+  
+  cmTypeMacro(cmInstallTargetsCommand, cmCommand);
+};
 
-void cmTarget::MergeLibraries(const LinkLibraries &ll)
-{
-  typedef std::vector<std::pair<std::string,LinkLibraryType> > LinkLibraries;
 
-  LinkLibraries::const_iterator p = ll.begin();
-  for (;p != ll.end(); ++p)
-    {
-    m_LinkLibraries.push_back(*p);
-    }
-
-}
-
+#endif

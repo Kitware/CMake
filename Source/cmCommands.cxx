@@ -39,6 +39,8 @@
 #include "cmIncludeCommand.cxx"
 #include "cmIncludeDirectoryCommand.cxx"
 #include "cmIncludeRegularExpressionCommand.cxx"
+#include "cmInstallFilesCommand.cxx"
+#include "cmInstallTargetsCommand.cxx"
 #include "cmLinkDirectoriesCommand.cxx"
 #include "cmLinkLibrariesCommand.cxx"
 #include "cmLoadCacheCommand.cxx"
@@ -93,6 +95,8 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmIncludeCommand);
   commands.push_back(new cmIncludeDirectoryCommand);
   commands.push_back(new cmIncludeRegularExpressionCommand);
+  commands.push_back(new cmInstallFilesCommand);
+  commands.push_back(new cmInstallTargetsCommand);
   commands.push_back(new cmLinkDirectoriesCommand);
   commands.push_back(new cmLinkLibrariesCommand);
   commands.push_back(new cmLoadCacheCommand);

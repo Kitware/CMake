@@ -38,58 +38,70 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =========================================================================*/
-#include "cmTarget.h"
-#include "cmMakefile.h"
+#include "cmInstallFilesCommand.h"
+#include "cmCacheManager.h"
 
-void cmTarget::GenerateSourceFilesFromSourceLists(const cmMakefile &mf)
+// cmExecutableCommand
+bool cmInstallFilesCommand::Invoke(std::vector<std::string>& args)
 {
-  // this is only done for non install targets
-  if (this->m_TargetType == cmTarget::INSTALL)
+  if(args.size() < 3)
     {
-    return;
+    this->SetError("called with incorrect number of arguments");
+    return false;
     }
 
-  // for each src lists add the classes
-  for (std::vector<std::string>::const_iterator s = m_SourceLists.begin();
-       s != m_SourceLists.end(); ++s)
+  cmTargets &tgts = m_Makefile->GetTargets();
+  std::vector<std::string>::iterator s = args.begin();
+  if (tgts.find("INSTALL") != tgts.end())
     {
-    // replace any variables
-    std::string temps = *s;
-    mf.ExpandVariablesInString(temps);
-    // look for a srclist
-    if (mf.GetSources().find(temps) != mf.GetSources().end())
-      {
-      const std::vector<cmSourceFile> &clsList = 
-        mf.GetSources().find(temps)->second;
-      m_SourceFiles.insert(m_SourceFiles.end(), clsList.begin(), clsList.end());
-      }
-    // if one wasn't found then assume it is a single class
-    else
-      {
-      cmSourceFile file;
-      file.SetIsAnAbstractClass(false);
-      file.SetName(temps.c_str(), mf.GetCurrentDirectory());
-      m_SourceFiles.push_back(file);
-      }
+    tgts["INSTALL"].SetInstallPath(args[0].c_str());
     }
-
-  // expand any link library variables whle we are at it
-  LinkLibraries::iterator p = m_LinkLibraries.begin();
-  for (;p != m_LinkLibraries.end(); ++p)
+  ++s;
+  for (;s != args.end(); ++s)
     {
-    mf.ExpandVariablesInString(p->first);    
+    m_FinalArgs.push_back(*s);
     }
+  
+  return true;
 }
 
-void cmTarget::MergeLibraries(const LinkLibraries &ll)
+void cmInstallFilesCommand::FinalPass() 
 {
-  typedef std::vector<std::pair<std::string,LinkLibraryType> > LinkLibraries;
+  cmTargets &tgts = m_Makefile->GetTargets();
+  std::string testf;
+  std::string ext = m_FinalArgs[0];
 
-  LinkLibraries::const_iterator p = ll.begin();
-  for (;p != ll.end(); ++p)
+  if (tgts.find("INSTALL") != tgts.end())
     {
-    m_LinkLibraries.push_back(*p);
+    // now put the files into the list
+    std::vector<std::string>::iterator s = m_FinalArgs.begin();
+    ++s;
+    // for each argument, get the files 
+    for (;s != m_FinalArgs.end(); ++s)
+      {
+      // replace any variables
+      std::string temps = *s;
+      m_Makefile->ExpandVariablesInString(temps);
+      // look for a srclist
+      if (m_Makefile->GetSources().find(temps) != m_Makefile->GetSources().end())
+	{
+	const std::vector<cmSourceFile> &clsList = 
+	  m_Makefile->GetSources().find(temps)->second;
+	std::vector<cmSourceFile>::const_iterator c = clsList.begin();
+	for (; c != clsList.end(); ++c)
+	  {
+	  testf = c->GetSourceName() + ext;
+	  // add to the result
+	  tgts["INSTALL"].GetSourceLists().push_back(testf);
+	  }
+	}
+      // if one wasn't found then assume it is a single class
+      else
+	{
+	testf = temps + ext;
+	// add to the result
+	tgts["INSTALL"].GetSourceLists().push_back(testf);
+	}
+      }
     }
-
 }
-

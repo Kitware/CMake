@@ -54,7 +54,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 class cmTarget
 {
 public:
-  enum TargetType { EXECUTABLE, WIN32_EXECUTABLE, LIBRARY, UTILITY };
+  enum TargetType { EXECUTABLE, WIN32_EXECUTABLE, LIBRARY, UTILITY, INSTALL };
+
   /**
    * Return the type of target.
    */
@@ -99,9 +100,16 @@ public:
   typedef std::vector<std::pair<std::string,LinkLibraryType> > LinkLibraries;
   const LinkLibraries &GetLinkLibraries() const {return m_LinkLibraries;}
   LinkLibraries &GetLinkLibraries() {return m_LinkLibraries;}
+
+  /**
+   * Set the path where this target should be installed. This is relative to
+   * INSTALL_PREFIX
+   */
+  std::string GetInstallPath() const {return m_InstallPath;}
+  void SetInstallPath(const char *name) {m_InstallPath = name;}
   
   /**
-   * Merge Link LIbraries into this targets current list 
+   * Merge Link Libraries into this targets current list 
    */
   void MergeLibraries(const LinkLibraries &ll);
     
@@ -118,6 +126,7 @@ private:
   std::vector<cmSourceFile> m_SourceFiles;
   LinkLibraries m_LinkLibraries;
   bool m_InAll;
+  std::string m_InstallPath;
 };
 
 typedef std::map<std::string,cmTarget> cmTargets;
