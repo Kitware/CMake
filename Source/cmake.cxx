@@ -786,6 +786,17 @@ void cmake::SetGlobalGenerator(cmGlobalGenerator *gg)
 
 int cmake::DoPreConfigureChecks()
 {
+  // Make sure the Start directory contains a CMakeLists.txt file.
+  std::string srcList = this->GetHomeDirectory();
+  srcList += "/CMakeLists.txt";
+  if(!cmSystemTools::FileExists(srcList.c_str()))
+    {
+    cmSystemTools::Error(
+      "The source directory does not appear to contain CMakeLists.txt.\n"
+      "Specify --help for usage.");
+    return -2;
+    }
+  
   // do a sanity check on some values
   if(m_CacheManager->GetCacheValue("CMAKE_HOME_DIRECTORY"))
     {
@@ -954,17 +965,6 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
 {
   // Process the arguments
   this->SetArgs(args);
-  
-  // make sure rthe Start directory contains a CMakeLists.txt file
-  std::string srcList = this->GetHomeDirectory();
-  srcList += "/CMakeLists.txt";
-  if(!cmSystemTools::FileExists(srcList.c_str()))
-    {
-    cmSystemTools::Error(
-      "The source directory does not appear to contain CMakeLists.txt.\n"
-      "Specify --help for usage.");
-    return -1;
-    }
   
   // set the cmake command
   m_CMakeCommand = args[0];
