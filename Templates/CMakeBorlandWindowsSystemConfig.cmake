@@ -56,7 +56,7 @@ SET (CMAKE_LINKER_FLAGS_RELWITHDEBINFO "-v" CACHE STRING
      "Flags used by the linker during Release with Debug Info builds.")
 
 SET (CMAKE_CXX_FLAGS "-w- -whid -waus -wpar -tWM" CACHE STRING
-     "Flags used by the compiler during all build types, /GX /GR are for exceptions and rtti in VC++, /Zm1000 increases the compiler's memory allocation to support ANSI C++/stdlib.")
+     "Flags used to compile c++ files.")
 
 SET (CMAKE_USE_WIN32_THREADS 1 CACHE BOOL 
      "Use the win32 thread library.")
