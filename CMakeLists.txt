@@ -21,11 +21,6 @@ ENDIF (CMAKE_ANSI_CFLAGS)
 # add some testing dependencies
 IF(BUILD_TESTING)
   IF (DART_ROOT)
-    ADD_DEPENDENCIES(Nightly cmaketest cmake)
-    ADD_DEPENDENCIES(Experimental cmaketest cmake)
-    ADD_DEPENDENCIES(NightlyTest cmaketest cmake)
-    ADD_DEPENDENCIES(ExperimentalTest cmaketest cmake)
-
     CONFIGURE_FILE(${CMake_SOURCE_DIR}/CMakeLogo.gif ${CMake_BINARY_DIR}/Testing/HTML/TestingResults/Icons/Logo.gif COPYONLY)
   ENDIF (DART_ROOT)
 ENDIF(BUILD_TESTING)
