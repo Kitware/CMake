@@ -259,6 +259,17 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
     isValid = true;
     }
 
+  if (args.size() == 3 && (args[1] == "EQUAL"))
+    {
+    def = cmIfCommand::GetVariableOrString(args[0].c_str(), makefile);
+    def2 = cmIfCommand::GetVariableOrString(args[2].c_str(), makefile);
+    if(atof(def) == atof(def2))
+      {
+      isTrue = false;
+      }
+    isValid = true;
+    }
+
   if (args.size() == 3 && (args[1] == "STRLESS"))
     {
     def = cmIfCommand::GetVariableOrString(args[0].c_str(), makefile);
