@@ -153,6 +153,13 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
   const char *def;
   const char *def2;
 
+  // handle empty invocation
+  if (args.size() < 1)
+    {
+    isValid = true;
+    return false;
+    }
+  
   // store the reduced args in this vector
   std::deque<std::string> newArgs;
   int reducible = 1;
