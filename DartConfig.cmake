@@ -23,14 +23,15 @@ SET (PROJECT_URL "http://www.cmake.org")
 SET (ROLLUP_URL "http://${DROP_SITE}/cgi-bin/cmake-rollup-dashboard.sh")
 SET (CVS_WEB_URL "http://${DROP_SITE}/cgi-bin/viewcvs.cgi/")
 SET (CVS_WEB_CVSROOT "CMake")
-SET (USE_DOXYGEN "On")
-SET (DOXYGEN_URL "${PROJECT_URL}/doc/nightly/html/" )
-SET (GNATS_WEB_URL "${PROJECT_URL}/Bug/query.php?projects=2&status%5B%5D=1&status%5B%5D=2&status%5B%5D=3&status%5B%5D=4&status%5B%5D=6&op=doquery")
-SET (USE_GNATS "On")
 
 OPTION(BUILD_DOXYGEN "Build source documentation using doxygen" "Off")
 SET (DOXYGEN_CONFIG "${PROJECT_BINARY_DIR}/doxygen.config" )
 MARK_AS_ADVANCED(BUILD_DOXYGEN)
+SET (USE_DOXYGEN "On")
+SET (DOXYGEN_URL "${PROJECT_URL}/doc/nightly/html/" )
+
+SET (USE_GNATS "On")
+SET (GNATS_WEB_URL "${PROJECT_URL}/Bug/query.php?projects=2&status%5B%5D=1&status%5B%5D=2&status%5B%5D=3&status%5B%5D=4&status%5B%5D=6&op=doquery")
 
 # Continuous email delivery variables
 SET (CONTINUOUS_FROM "cmake-dashboard@public.kitware.com")
