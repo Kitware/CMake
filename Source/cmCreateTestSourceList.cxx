@@ -202,7 +202,7 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)
     "\n"
     "int main(int ac, char *av[])\n"
     "{\n"
-    "  int i, testNum, partial_match;\n"
+    "  int i, NumTests, testNum, partial_match;\n"
     "  char *arg, *test_name;\n"
     "  \n"
     "  NumTests = " << numTests << ";\n"
