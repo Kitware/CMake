@@ -397,6 +397,25 @@ std::string cmSystemTools::EscapeQuotes(const char* str)
   return result;
 }
 
+bool cmSystemTools::SameFile(const char* file1, const char* file2)
+{
+  struct stat fileStat1, fileStat2;
+  if (stat(file1, &fileStat1) == 0 && stat(file2, &fileStat2) == 0)
+    {
+    // see if the files are the same file
+    // check the device inode and size
+    if(fileStat2.st_dev == fileStat1.st_dev && 
+       fileStat2.st_ino == fileStat1.st_ino &&
+       fileStat2.st_size == fileStat1.st_size 
+      ) 
+      {
+      return true;
+      }
+    }
+  return false;
+}
+
+
 // return true if the file exists
 bool cmSystemTools::FileExists(const char* filename)
 {

@@ -248,39 +248,21 @@ bool cmCacheManager::LoadCache(const char* path,
     {
     std::string currentcwd = path;
     std::string oldcwd = this->GetCacheValue("CMAKE_CACHEFILE_DIR");
-#if defined(_WIN32) || defined(__CYGWIN__)
-    currentcwd = cmSystemTools::LowerCase(currentcwd);
-    oldcwd = cmSystemTools::LowerCase(oldcwd);
-#endif // _WIN32
     cmSystemTools::ConvertToUnixSlashes(currentcwd);
-    if(cmSystemTools::CollapseFullPath(oldcwd.c_str()) 
-       != cmSystemTools::CollapseFullPath(currentcwd.c_str()))
+    currentcwd += "/CMakeCache.txt";
+    oldcwd += "/CMakeCache.txt";
+    if(!cmSystemTools::SameFile(oldcwd.c_str(), currentcwd.c_str()))
       { 
-#if defined(_WIN32) || defined(__CYGWIN__)
-      char filename1[1024];
-      char filename2[1024];
-      GetShortPathName(cmSystemTools::CollapseFullPath(oldcwd.c_str()).c_str(),
-		       filename1, 1023);
-      GetShortPathName(cmSystemTools::CollapseFullPath(currentcwd.c_str()).c_str(),
-		       filename2, 1023);
-      if ( std::string(filename1) != std::string(filename2) )
-	{
-#endif // _WIN32
-	std::string message = 
-	  std::string("The current CMakeCache.txt directory ") +
-	  currentcwd + std::string(" is different than the directory ") + 
-	  std::string(this->GetCacheValue("CMAKE_CACHEFILE_DIR")) +
-	  std::string(" where CMackeCache.txt was created. This may result "
-		      "in binaries being created in the wrong place. If you "
-		      "are not sure, reedit the CMakeCache.txt");
-	cmSystemTools::Error(message.c_str());   
-#if defined(_WIN32) || defined(__CYGWIN__)
-	}
-#endif // _WIN32
+      std::string message = 
+        std::string("The current CMakeCache.txt directory ") +
+        currentcwd + std::string(" is different than the directory ") + 
+        std::string(this->GetCacheValue("CMAKE_CACHEFILE_DIR")) +
+        std::string(" where CMackeCache.txt was created. This may result "
+                    "in binaries being created in the wrong place. If you "
+                    "are not sure, reedit the CMakeCache.txt");
+      cmSystemTools::Error(message.c_str());   
       }
     }
-  
-
   return true;
 }
 

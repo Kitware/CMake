@@ -68,6 +68,10 @@ int main (int argc, char *argv[])
   cmListFileCache::GetInstance()->ClearCache();
   // now build the test
   std::string makeCommand = MAKEPROGRAM;
+  if(makeCommand.size() == 0)
+    {
+    std::cerr << "Error: cmaketest does not have a valid MAKEPROGRAM\n";
+    }
   std::string lowerCaseCommand = makeCommand;
   cmSystemTools::LowerCase(lowerCaseCommand);
   // if msdev is the make program then do the following
@@ -76,18 +80,18 @@ int main (int argc, char *argv[])
     // if there are spaces in the makeCommand, assume a full path
     // and convert it to a path with no spaces in it as the
     // RunCommand does not like spaces
+#if defined(_WIN32) && !defined(__CYGWIN__)      
     if(makeCommand.find(' ') != std::string::npos)
       {
       char *buffer = new char[makeCommand.size()+1];
-#if defined(_WIN32) && !defined(__CYGWIN__)      
       if(GetShortPathName(makeCommand.c_str(), buffer, 
                           makeCommand.size()+1) != 0)
         {
         makeCommand = buffer;
         }
-#endif
       delete [] buffer;\
       }
+#endif
     makeCommand += " ";
     makeCommand += executableName;
     makeCommand += ".dsw /MAKE \"ALL_BUILD - Debug\" /REBUILD";

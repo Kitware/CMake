@@ -170,7 +170,7 @@ void cmDSPWriter::AddDSPBuildRule(cmSourceGroup& sourceGroup)
   m_Makefile->ExpandVariablesInString(dsprule);
   dsprule = cmSystemTools::HandleNetworkPaths(dsprule.c_str());
   std::string args = makefileIn;
-  args += " -DSP -H\"";
+  args += " -H\"";
   args += cmSystemTools::HandleNetworkPaths(m_Makefile->GetHomeDirectory());
   args += "\" -S\"";
   args += cmSystemTools::HandleNetworkPaths(m_Makefile->GetStartDirectory());

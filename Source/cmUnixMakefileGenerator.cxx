@@ -235,11 +235,13 @@ void cmUnixMakefileGenerator::OutputMakefile(const char* file)
   for(std::vector<std::string>::const_iterator i = lfiles.begin();
       i !=  lfiles.end(); ++i)
     {
-    fout << " " << i->c_str();
+    fout << " " << cmSystemTools::EscapeSpaces(i->c_str());
     }
   // Add the cache to the list
-  fout << " " << m_Makefile->GetHomeOutputDirectory() << "/CMakeCache.txt\n";
-  fout << "\n\n";
+  std::string cacheFile = m_Makefile->GetHomeOutputDirectory();
+  cacheFile += "/CMakeCache.txt";
+  fout << " " << cmSystemTools::EscapeSpaces(cacheFile.c_str());
+  fout << "\n\n\n";
   this->OutputMakeVariables(fout);
   // Set up the default target as the VERY first target, so that make with no arguments will run it
   this->OutputMakeRule(fout, 
@@ -302,23 +304,26 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
     {
     if (l->second.IsInAll())
       {
+      std::string path = m_LibraryOutputPath + m_LibraryPrefix;
       if(l->second.GetType() == cmTarget::STATIC_LIBRARY)
         {
-        fout << " \\\n" << m_LibraryOutputPath << m_LibraryPrefix
-             << l->first.c_str()
-             << m_StaticLibraryExtension;
+        path = path + l->first + m_StaticLibraryExtension;
+        fout << " \\\n" 
+             << cmSystemTools::EscapeSpaces(path.c_str());
         }
       else if(l->second.GetType() == cmTarget::SHARED_LIBRARY)
         {
-        fout << " \\\n" << m_LibraryOutputPath << m_LibraryPrefix
-             << l->first.c_str()
-             << m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
+        path = path + l->first + 
+          m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
+        fout << " \\\n" 
+             << cmSystemTools::EscapeSpaces(path.c_str());
         }
       else if(l->second.GetType() == cmTarget::MODULE_LIBRARY)
         {
-        fout << " \\\n" << m_LibraryOutputPath <<  m_LibraryPrefix 
-             << l->first.c_str()
-             << m_Makefile->GetDefinition("CMAKE_MODULE_SUFFIX");
+        path = path + l->first + 
+          m_Makefile->GetDefinition("CMAKE_MODULE_SUFFIX");
+        fout << " \\\n" 
+             << cmSystemTools::EscapeSpaces(path.c_str());
         }
       }
     }
@@ -330,8 +335,9 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
          l->second.GetType() == cmTarget::WIN32_EXECUTABLE) &&
         l->second.IsInAll())
       {
-      fout << " \\\n" << m_ExecutableOutputPath << l->first.c_str() 
-           << m_ExecutableExtension;
+      std::string path = m_ExecutableOutputPath + l->first +
+        m_ExecutableExtension;
+      fout << " \\\n" << cmSystemTools::EscapeSpaces(path.c_str());
       }
     }
   // list utilities last
@@ -759,7 +765,7 @@ void cmUnixMakefileGenerator::OutputDependLibs(std::ostream& fout)
     if(cacheValue 
        && (strcmp(m_Makefile->GetCurrentOutputDirectory(), cacheValue) != 0))
       {
-      std::string library = "lib";
+      std::string library = m_LibraryPrefix;
       library += *lib;
       std::string libpath = cacheValue;
       // add the correct extension
@@ -776,7 +782,7 @@ void cmUnixMakefileGenerator::OutputDependLibs(std::ostream& fout)
 	}
       else
         {
-        library += ".a";
+        library += m_StaticLibraryExtension;
         }
       if(m_LibraryOutputPath.size())
         {
@@ -788,8 +794,8 @@ void cmUnixMakefileGenerator::OutputDependLibs(std::ostream& fout)
         }
       libpath += library;
       // put out a rule to build the library if it does not exist
-      fout << libpath.c_str()
-           << ":\n\tcd " << cacheValue 
+      fout << cmSystemTools::EscapeSpaces(libpath.c_str())
+           << ":\n\tcd " << cmSystemTools::EscapeSpaces(cacheValue)
            << "; $(MAKE) " << m_LibraryOutputPath << library.c_str() << "\n\n";
       }
     }
@@ -844,7 +850,7 @@ void cmUnixMakefileGenerator::OutputLibDepend(std::ostream& fout,
       {
       libpath += m_StaticLibraryExtension;
       }
-    fout << libpath << " ";
+    fout << cmSystemTools::EscapeSpaces(libpath.c_str()) << " ";
     }
 }
 
@@ -873,10 +879,11 @@ inline std::string FixDirectoryName(const char* dir)
 
 
 void cmUnixMakefileGenerator::BuildInSubDirectory(std::ostream& fout,
-                                                  const char* directory,
+                                                  const char* dir,
                                                   const char* target1,
                                                   const char* target2)
 {
+  std::string directory = cmSystemTools::EscapeSpaces(dir);
   if(target1)
     {
     fout << "\t@if test ! -d " << directory 
@@ -1187,15 +1194,20 @@ void cmUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
   
   m_Makefile->ExpandVariablesInString(replaceVars);
   fout << replaceVars.c_str();
-  fout << "CMAKE_CURRENT_SOURCE = " << m_Makefile->GetStartDirectory() << "\n";
-  fout << "CMAKE_CURRENT_BINARY = " << m_Makefile->GetStartOutputDirectory() << "\n";
-  fout << "CMAKE_SOURCE_DIR = " << m_Makefile->GetHomeDirectory() << "\n";
-  fout << "CMAKE_BINARY_DIR = " << m_Makefile->GetHomeOutputDirectory() << "\n";
+  fout << "CMAKE_CURRENT_SOURCE = " << 
+    cmSystemTools::EscapeSpaces(m_Makefile->GetStartDirectory()) << "\n";
+  fout << "CMAKE_CURRENT_BINARY = " << 
+    cmSystemTools::EscapeSpaces(m_Makefile->GetStartOutputDirectory()) << "\n";
+  fout << "CMAKE_SOURCE_DIR = " << 
+    cmSystemTools::EscapeSpaces(m_Makefile->GetHomeDirectory()) << "\n";
+  fout << "CMAKE_BINARY_DIR = " << 
+    cmSystemTools::EscapeSpaces(m_Makefile->GetHomeOutputDirectory()) << "\n";
   // Output Include paths
   fout << "INCLUDE_FLAGS = ";
   std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();
   std::vector<std::string>::iterator i;
-  fout << "-I" << m_Makefile->GetStartDirectory() << " ";
+  fout << "-I" << 
+    cmSystemTools::EscapeSpaces(m_Makefile->GetStartDirectory()) << " ";
   for(i = includes.begin(); i != includes.end(); ++i)
     {
     std::string include = *i;
@@ -1395,26 +1407,26 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                        "$(CMAKE_MAKEFILE_SOURCES) ",
                        "$(CMAKE_COMMAND) "
                        "-S$(CMAKE_CURRENT_SOURCE) -O$(CMAKE_CURRENT_BINARY) "
-                       "-H${CMAKE_SOURCE_DIR} -B${CMAKE_BINARY_DIR}");
+                       "-H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)");
   this->OutputMakeRule(fout, 
                        "Rule to force the build of cmake.depends",
                        "depend",
                        "$(SUBDIR_DEPEND)",
                        "$(CMAKE_COMMAND) "
                        "-S$(CMAKE_CURRENT_SOURCE) -O$(CMAKE_CURRENT_BINARY) "
-                       "-H${CMAKE_SOURCE_DIR} -B${CMAKE_BINARY_DIR}");  
+                       "-H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)");  
   this->OutputMakeRule(fout, 
                        "Rebuild CMakeCache.txt file",
                        "rebuild_cache",
-                       "${CMAKE_BINARY_DIR}/CMakeCache.txt",
+                       "$(CMAKE_BINARY_DIR)/CMakeCache.txt",
                        "$(CMAKE_COMMAND) "
-                       "-H${CMAKE_SOURCE_DIR} -B${CMAKE_BINARY_DIR}");
+                       "-H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)");
   this->OutputMakeRule(fout, 
                        "Create CMakeCache.txt file",
-                       "${CMAKE_BINARY_DIR}/CMakeCache.txt",
+                       "$(CMAKE_BINARY_DIR)/CMakeCache.txt",
                        0,
                        "$(CMAKE_COMMAND) "
-                       "-H${CMAKE_SOURCE_DIR} -B${CMAKE_BINARY_DIR}");
+                       "-H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)");
 
   this->OutputMakeRule(fout, 
                        "Rule to keep make from removing Makefiles "
@@ -1464,7 +1476,8 @@ OutputBuildObjectFromSource(std::ostream& fout,
       compileCommand += "$(CMAKE_SHLIB_CFLAGS) ";
       }
     compileCommand += "$(INCLUDE_FLAGS) -c ";
-    compileCommand += source.GetFullPath();
+    compileCommand += 
+      cmSystemTools::EscapeSpaces(source.GetFullPath().c_str());
     compileCommand += " -o ";
     compileCommand += objectFile;
     }
@@ -1477,14 +1490,16 @@ OutputBuildObjectFromSource(std::ostream& fout,
       compileCommand += "$(CMAKE_SHLIB_CFLAGS) ";
       }
     compileCommand += "$(INCLUDE_FLAGS) -c ";
-    compileCommand += source.GetFullPath();
+    compileCommand += 
+      cmSystemTools::EscapeSpaces(source.GetFullPath().c_str());
     compileCommand += " -o ";
     compileCommand += objectFile;
     }
   this->OutputMakeRule(fout,
                        comment.c_str(),
                        objectFile.c_str(),
-                       source.GetFullPath().c_str(),
+                       cmSystemTools::EscapeSpaces(source.GetFullPath().
+                                                   c_str()).c_str(),
                        compileCommand.c_str());
 }
 
@@ -1661,7 +1676,7 @@ void cmUnixMakefileGenerator::ComputeSystemInfo()
     // currently we run configure shell script here to determine the info
     std::string output;
     std::string cmd = "cd ";
-    cmd += m_Makefile->GetHomeOutputDirectory();
+    cmd += cmSystemTools::EscapeSpaces(m_Makefile->GetHomeOutputDirectory());
     cmd += "; ";
     const char* root
       = m_Makefile->GetDefinition("CMAKE_ROOT");

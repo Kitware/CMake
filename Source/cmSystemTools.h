@@ -204,6 +204,9 @@ public:
   ///! Compare the contents of two files.  Return true if different.
   static bool FilesDiffer(const char* source,
                           const char* destination);
+  ///! return true if the two files are the same file
+  static bool SameFile(const char* file1, const char* file2);
+
   ///! Copy a file.
   static void cmCopyFile(const char* source,
                        const char* destination);

@@ -99,7 +99,6 @@ void cmake::SetCacheArgs(cmMakefile& builder, const std::vector<std::string>& ar
             cmSystemTools::EscapeSpaces(value.c_str()).c_str(),
             "No help, variable specified on the command line.",
             type);
-          std::cerr << "parse entry " << var.c_str()<< " " << value.c_str() << "\n";
         }
       else
         {
