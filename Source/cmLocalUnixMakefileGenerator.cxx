@@ -1178,11 +1178,25 @@ void cmLocalUnixMakefileGenerator::OutputLibraryRule(std::ostream& fout,
     }
   
   targetFullPath = m_LibraryOutputPath + targetName;
-  targetFullPath = this->ConvertToRelativeOutputPath(targetFullPath.c_str());
   this->OutputMakeRule(fout, comment,
                        targetFullPath.c_str(),
                        depend.c_str(),
                        commands);
+  depend = targetFullPath;
+  targetFullPath = this->ConvertToRelativeOutputPath(targetFullPath.c_str());
+  cmSystemTools::ConvertToUnixSlashes(targetFullPath);
+  if(targetFullPath.find('/', 0) != targetFullPath.npos)
+    {
+    // we need a local target
+    depend = this->ConvertToRelativeOutputPath(depend.c_str());
+    std::string target = targetName;
+    commands.resize(0);
+    this->OutputMakeRule(fout, 
+                         comment,
+                         target.c_str(),
+                         depend.c_str(),
+                         commands);
+    }
 }
 
 void cmLocalUnixMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,  
@@ -1325,8 +1339,7 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
   target = this->ConvertToRelativeOutputPath(target.c_str());
   cmSystemTools::ConvertToUnixSlashes(target);
   bool needsLocalTarget = false;
-  unsigned int startPos = 0;
-  if(target.find('/', startPos) != target.npos)
+  if(target.find('/', 0) != target.npos)
     {
     needsLocalTarget = true;
     }
