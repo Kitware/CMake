@@ -155,12 +155,12 @@ int cmTryCompileCommand::CoreTryCompileCode(
       }
     else
       {
-      std::vector<std::string> lang;
-      mf->GetCMakeInstance()->GetGlobalGenerator()->GetEnabledLanguages(lang);
+      std::vector<std::string> langs;
+      mf->GetCMakeInstance()->GetGlobalGenerator()->GetEnabledLanguages(langs);
       std::string msg = "TRY_COMPILE only works for enabled languages files,"
         "\nCurrently enabled languages are:\n";
-      for(std::vector<std::string>::iterator l = lang.begin();
-          l != lang.end(); ++l)
+      for(std::vector<std::string>::iterator l = langs.begin();
+          l != langs.end(); ++l)
         {
         msg += *l;
         msg += " ";
