@@ -1011,7 +1011,7 @@ int main()
     }
   else
     {
-    cmPassed("CMake cmOrderLinkDirectories failed to fail when given an impossible set of paths.");
+    cmFailed("CMake cmOrderLinkDirectories failed to fail when given an impossible set of paths.");
     }
   // next run with shouldPass = true, this will 
   // run with B/libA.a removed and should create the order
