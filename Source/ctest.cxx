@@ -17,7 +17,7 @@
 #include <stdio.h>
 #include "ctest.h"
 #include "cmRegularExpression.h"
-
+#include "cmSystemTools.h"
 bool TryExecutable(const char *dir, const char *file,
                    std::string *fullPath, const char *subdir)
 {
