@@ -7,25 +7,27 @@
   Version:   $Revision$
 
 
-  Copyright (c) 2000 National Library of Medicine
+  Copyright (c) 2000 National Path of Medicine
   All rights reserved.
 
   See COPYRIGHT.txt for copyright details.
 
 =========================================================================*/
-#ifndef cmFindIncludeCommand_h
-#define cmFindIncludeCommand_h
+#ifndef cmFindPathCommand_h
+#define cmFindPathCommand_h
 
 #include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
-/** \class cmFindIncludeCommand
- * \brief Define a command that searches for an include file.
+
+/** \class cmFindPathCommand
+ * \brief Define a command to search for a library.
  *
- * cmFindIncludeCommand is used to define a CMake variable include
- * path location by specifying a file and list of directories.
+ * cmFindPathCommand is used to define a CMake variable
+ * that specifies a library. The command searches for a given
+ * file in a list of directories.
  */
-class cmFindIncludeCommand : public cmCommand
+class cmFindPathCommand : public cmCommand
 {
 public:
   /**
@@ -33,7 +35,7 @@ public:
    */
   virtual cmCommand* Clone() 
     {
-    return new cmFindIncludeCommand;
+    return new cmFindPathCommand;
     }
 
   /**
@@ -41,25 +43,24 @@ public:
    * the CMakeLists.txt file.
    */
   virtual bool Invoke(std::vector<std::string>& args);
-  
+
   /**
    * This determines if the command gets propagated down
    * to makefiles located in subdirectories.
    */
-  virtual bool IsInherited() 
-    {return true;}
+  virtual bool IsInherited() {return true;}
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "FIND_INCLUDE";}
+  virtual const char* GetName() {return "FIND_PATH";}
 
   /**
    * Succinct documentation.
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Find an include path for a given header file.";
+    return "Find a path for a file.";
     }
   
   /**
@@ -68,12 +69,11 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "FIND_INCLUDE(DEFINE_PATH DEFINE_INCLUDE includeName extraPath1 extraPath2 ...)\n"
-      "If the include file is found, then DEFINE_PATH is set to the path\n"
-      "where it was found and DEFINE_NAME is set to includeName";
+      "FIND_PATH(PATH_DEFINE fileName path1 path2 path3...)\n"
+      "If the file is found, then PATH_DEFINE is set to the path where it was found";
     }
   
-  cmTypeMacro(cmFindIncludeCommand, cmCommand);
+  cmTypeMacro(cmFindPathCommand, cmCommand);
 };
 
 

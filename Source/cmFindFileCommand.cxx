@@ -38,7 +38,10 @@ bool cmFindFileCommand::Invoke(std::vector<std::string>& args)
     = cmCacheManager::GetInstance()->GetCacheValue(define);
   if(cacheValue)
     {
-    m_Makefile->AddDefinition(define, cacheValue);
+    if(strcmp(cacheValue, "NOTFOUND") != 0)
+      {
+      m_Makefile->AddDefinition(define, cacheValue);
+      }
     return true;
     }
   // if it is not in the cache, then search the system path

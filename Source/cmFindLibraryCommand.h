@@ -69,7 +69,8 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "FIND_LIBRARY(DEFINE libraryName path1 path2 path3...)";
+      "FIND_LIBRARY(DEFINE_PATH libraryName path1 path2 path3...)\n"
+      "If the library is found, then DEFINE_PATH is set to the path where it was found";
     }
   
   cmTypeMacro(cmFindLibraryCommand, cmCommand);

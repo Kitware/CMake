@@ -37,6 +37,7 @@
 #include "cmCableInstantiateCommand.cxx"
 #include "cmCableInstantiateClassCommand.cxx"
 #include "cmFindFileCommand.cxx"
+#include "cmFindPathCommand.cxx"
 #include "cmWrapExcludeFilesCommand.cxx"
 #include "cmVTKWrapPythonCommand.cxx"
 #include "cmVTKWrapTclCommand.cxx"
@@ -83,6 +84,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmCableInstantiateCommand);
   commands.push_back(new cmCableInstantiateClassCommand);
   commands.push_back(new cmFindFileCommand);
+  commands.push_back(new cmFindPathCommand);
   commands.push_back(new cmWrapExcludeFilesCommand);  
   commands.push_back(new cmVTKWrapPythonCommand);
   commands.push_back(new cmVTKWrapTclCommand);

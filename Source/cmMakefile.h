@@ -341,22 +341,6 @@ public:
     }
 
   /**
-   * Get a list of Win32 link libraries in the build.
-   */
-  std::vector<std::string>& GetLinkLibrariesWin32()
-    { 
-    return m_LinkLibrariesWin32;
-    }
-  
-  /**
-   * Get a list of Unix link libraries in the build.
-   */
-  std::vector<std::string>& GetLinkLibrariesUnix()
-    { 
-    return m_LinkLibrariesUnix;
-    }
-
-  /**
    * Return a list of source files in this makefile.
    */
   typedef std::map<std::string,std::vector<cmSourceFile> > SourceMap;
@@ -463,8 +447,6 @@ protected:
   std::vector<std::string> m_Utilities;
   std::vector<std::string> m_UtilityDirectories;
   std::vector<std::string> m_LinkLibraries;
-  std::vector<std::string> m_LinkLibrariesWin32;
-  std::vector<std::string> m_LinkLibrariesUnix;
   std::string m_IncludeFileRegularExpression;
   std::string m_DefineFlags;
   std::vector<cmSourceGroup> m_SourceGroups;

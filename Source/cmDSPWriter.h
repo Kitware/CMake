@@ -67,14 +67,16 @@ private:
   std::string m_DSPFooterTemplate;
   std::vector<std::string> m_CreatedProjectNames;
   
-  void CreateSingleDSP(const char *lname, cmTarget &tgt);
-  void WriteDSPFile(std::ostream& fout, 
-                    const char *libName, cmTarget &tgt);
+  void CreateSingleDSP(const char *lname, cmTarget &tgt, 
+                       const std::string &libs);
+  void WriteDSPFile(std::ostream& fout, const char *libName, 
+                    cmTarget &tgt, const std::string &libs);
   void WriteDSPBeginGroup(std::ostream& fout, 
 			  const char* group,
 			  const char* filter);
   void WriteDSPEndGroup(std::ostream& fout);
-  void WriteDSPHeader(std::ostream& fout, const char *libName);
+  void WriteDSPHeader(std::ostream& fout, const char *libName,
+                      const std::string &libs);
   void WriteDSPBuildRule(std::ostream& fout, const char*);
   void WriteDSPBuildRule(std::ostream& fout);
   void WriteDSPFooter(std::ostream& fout);
@@ -85,7 +87,6 @@ private:
                        const std::set<std::string>& outputs);
 
   std::string m_IncludeOptions;
-  std::string m_LibraryOptions;
   cmMakefile* m_Makefile;
   BuildType m_LibraryBuildType;
   std::vector<std::string> m_Configurations;

@@ -34,11 +34,20 @@ bool cmFindIncludeCommand::Invoke(std::vector<std::string>& args)
       {
       m_Makefile->AddDefinition(args[0].c_str(), cacheValue);
       }
+    cacheValue
+      = cmCacheManager::GetInstance()->GetCacheValue(args[1].c_str());
+    if(cacheValue)
+      { 
+      if(strcmp(cacheValue, "NOTFOUND") != 0)
+        {
+        m_Makefile->AddDefinition(args[1].c_str(), cacheValue);
+        }
+      }
     return true;
     }
   std::vector<std::string> path;
   // add any user specified paths
-  for (unsigned int j = 2; j < args.size(); j++)
+  for (unsigned int j = 3; j < args.size(); j++)
     {
     // expand variables
     std::string exp = args[j];
@@ -53,18 +62,25 @@ bool cmFindIncludeCommand::Invoke(std::vector<std::string>& args)
     {
     std::string tryPath = path[k];
     tryPath += "/";
-    tryPath += args[1];
+    tryPath += args[2];
     if(cmSystemTools::FileExists(tryPath.c_str()))
       {
-      m_Makefile->AddDefinition(args[0].c_str(), path[k].c_str());
       // Save the value in the cache
+      m_Makefile->AddDefinition(args[0].c_str(), path[k].c_str());
       cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
                                                    path[k].c_str(),
+                                                   cmCacheManager::PATH);
+      m_Makefile->AddDefinition(args[1].c_str(), args[2].c_str());
+      cmCacheManager::GetInstance()->AddCacheEntry(args[1].c_str(),
+                                                   args[2].c_str(),
                                                    cmCacheManager::PATH);
       return true;
       }
     }
   cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
+                                               "NOTFOUND",
+                                               cmCacheManager::PATH);
+  cmCacheManager::GetInstance()->AddCacheEntry(args[1].c_str(),
                                                "NOTFOUND",
                                                cmCacheManager::PATH);
   std::string message = "Include not found: ";

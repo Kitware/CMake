@@ -51,28 +51,6 @@ void cmDSPMakefile::OutputDSPFile()
     m_IncludeOptions += *i;
     m_IncludeOptions += "\" ";
     }
-  std::vector<std::string>& libs = m_Makefile->GetLinkLibraries();
-  for(i = libs.begin(); i != libs.end(); ++i)
-    {
-    m_LibraryOptions += " ";
-    m_LibraryOptions += *i;
-    m_LibraryOptions += ".lib ";
-    }
-  std::vector<std::string>& libswin32 = m_Makefile->GetLinkLibrariesWin32();
-  for(i = libswin32.begin(); i != libswin32.end(); ++i)
-    {
-    m_LibraryOptions += " ";
-    m_LibraryOptions += *i;
-    m_LibraryOptions += ".lib ";
-    }
-  std::vector<std::string>& libdirs = m_Makefile->GetLinkDirectories();
-  for(i = libdirs.begin(); i != libdirs.end(); ++i)
-    {
-    m_LibraryOptions += " /LIBPATH:\"";
-    m_LibraryOptions += *i;
-    m_LibraryOptions += "/$(OUTDIR)\" ";
-    }
-  m_LibraryOptions += "/STACK:10000000 ";
   
   // Create the DSP or set of DSP's for libraries and executables
   const char* cacheValue
@@ -91,6 +69,30 @@ void cmDSPMakefile::OutputDSPFile()
   for(cmTargets::iterator l = tgts.begin(); 
       l != tgts.end(); l++)
     {
+    std::string libOptions;
+    std::vector<std::string>& libdirs = m_Makefile->GetLinkDirectories();
+    for(i = libdirs.begin(); i != libdirs.end(); ++i)
+      {
+      libOptions += " /LIBPATH:\"";
+      libOptions += *i;
+      libOptions += "/$(OUTDIR)\" ";
+      libOptions += " /LIBPATH:\"";
+      libOptions += *i;
+      libOptions += "\" ";
+      }
+    std::vector<std::string>& libs = m_Makefile->GetLinkLibraries();
+    for(i = libs.begin(); i != libs.end(); ++i)
+      {
+      // add libraries to executables and dlls (but never include
+      // a library in a library, bad recursion)
+      if (!l->second.IsALibrary() || 
+          (m_LibraryBuildType == DLL && l->first.c_str() != *i))
+        {
+        libOptions += " ";
+        libOptions += *i;
+        libOptions += ".lib ";
+        }
+      }
     if (l->second.IsALibrary())
       {
       this->SetBuildType(m_LibraryBuildType, l->first.c_str());
@@ -99,11 +101,13 @@ void cmDSPMakefile::OutputDSPFile()
       {
       this->SetBuildType(EXECUTABLE,l->first.c_str());
       }
-    this->CreateSingleDSP(l->first.c_str(),l->second);
+    libOptions += "/STACK:10000000 ";
+    this->CreateSingleDSP(l->first.c_str(),l->second, libOptions);
     }
 }
 
-void cmDSPMakefile::CreateSingleDSP(const char *lname, cmTarget &target)
+void cmDSPMakefile::CreateSingleDSP(const char *lname, cmTarget &target, 
+                                    const std::string &libOptions)
 {
   std::string fname;
   fname = m_Makefile->GetStartOutputDirectory();
@@ -117,7 +121,7 @@ void cmDSPMakefile::CreateSingleDSP(const char *lname, cmTarget &target)
     {
     cmSystemTools::Error("Error Writing ", fname.c_str());
     }
-  this->WriteDSPFile(fout,lname,target);
+  this->WriteDSPFile(fout,lname,target, libOptions);
 }
 
 void cmDSPMakefile::WriteDSPBuildRule(std::ostream& fout)
@@ -185,10 +189,11 @@ void cmDSPMakefile::AddDSPBuildRule(cmSourceGroup& sourceGroup)
 
 void cmDSPMakefile::WriteDSPFile(std::ostream& fout, 
                                  const char *libName,
-                                 cmTarget &target)
+                                 cmTarget &target, 
+                                 const std::string &libOptions)
 {
   // Write the DSP file's header.
-  this->WriteDSPHeader(fout, libName);
+  this->WriteDSPHeader(fout, libName, libOptions);
   
   // We may be modifying the source groups temporarily, so make a copy.
   std::vector<cmSourceGroup> sourceGroups = m_Makefile->GetSourceGroups();
@@ -399,7 +404,8 @@ void cmDSPMakefile::SetBuildType(BuildType b, const char *libName)
     }
 }
   
-void cmDSPMakefile::WriteDSPHeader(std::ostream& fout, const char *libName)
+void cmDSPMakefile::WriteDSPHeader(std::ostream& fout, const char *libName,
+                                   const std::string &libOptions)
 {
   std::ifstream fin(m_DSPHeaderTemplate.c_str());
   if(!fin)
@@ -413,12 +419,12 @@ void cmDSPMakefile::WriteDSPHeader(std::ostream& fout, const char *libName)
       fin.getline(buffer, 2048);
       std::string line = buffer;
       cmSystemTools::ReplaceString(line, "CM_LIBRARIES",
-                                    m_LibraryOptions.c_str());
+                                   libOptions.c_str());
       cmSystemTools::ReplaceString(line, "BUILD_INCLUDES",
-                                    m_IncludeOptions.c_str());
+                                   m_IncludeOptions.c_str());
       cmSystemTools::ReplaceString(line, "OUTPUT_LIBNAME",libName);
       cmSystemTools::ReplaceString(line, 
-                                    "EXTRA_DEFINES", 
+                                   "EXTRA_DEFINES", 
 				   m_Makefile->GetDefineFlags());
       fout << line.c_str() << std::endl;
     }

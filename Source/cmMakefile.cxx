@@ -128,8 +128,6 @@ void cmMakefile::Print() const
   this->PrintStringVector("m_IncludeDirectories;", m_IncludeDirectories);
   this->PrintStringVector("m_LinkDirectories", m_LinkDirectories);
   this->PrintStringVector("m_LinkLibraries", m_LinkLibraries);
-  this->PrintStringVector("m_LinkLibrariesWin32", m_LinkLibrariesWin32);
-  this->PrintStringVector("m_LinkLibrariesUnix", m_LinkLibrariesUnix);
   this->PrintStringVector("m_Utilities", m_Utilities);
   this->PrintStringVector("m_UtilityDirectories", m_UtilityDirectories);
 }

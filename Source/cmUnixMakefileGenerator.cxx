@@ -154,13 +154,6 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
     // For executables, add these a second time so order does not matter
     linkLibs += librariesLinked;
     }
-  
-  std::vector<std::string>& libsUnix = m_Makefile->GetLinkLibrariesUnix();
-  for(j = libsUnix.begin(); j != libsUnix.end(); ++j)
-    {
-    linkLibs += *j;
-    linkLibs += " ";
-    }
   linkLibs += " ${LOCAL_LINK_FLAGS} ";
   fout << linkLibs;
 }

@@ -7,23 +7,24 @@
   Version:   $Revision$
 
 
-  Copyright (c) 2000 National Library of Medicine
+  Copyright (c) 2000 National Path of Medicine
   All rights reserved.
 
   See COPYRIGHT.txt for copyright details.
 
 =========================================================================*/
-#include "cmFindLibraryCommand.h"
+#include "cmFindPathCommand.h"
 #include "cmCacheManager.h"
 
-// cmFindLibraryCommand
-bool cmFindLibraryCommand::Invoke(std::vector<std::string>& args)
+// cmFindPathCommand
+bool cmFindPathCommand::Invoke(std::vector<std::string>& args)
 {
   if(args.size() < 2)
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
+
   // Now check and see if the value has been stored in the cache
   // already, if so use that value and don't look for the program
   const char* cacheValue
@@ -54,36 +55,8 @@ bool cmFindLibraryCommand::Invoke(std::vector<std::string>& args)
     {
     std::string tryPath = path[k];
     tryPath += "/";
-    std::string testF;
-    testF = tryPath + args[1] + ".lib";
-    if(cmSystemTools::FileExists(testF.c_str()))
-      {
-      m_Makefile->AddDefinition(args[0].c_str(), path[k].c_str());  
-      cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
-                                                   path[k].c_str(),
-                                                   cmCacheManager::PATH);
-      return true;
-      }
-    testF = tryPath + "lib" + args[1] + ".so";
-    if(cmSystemTools::FileExists(testF.c_str()))
-      {
-      m_Makefile->AddDefinition(args[0].c_str(), path[k].c_str());  
-      cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
-                                                   path[k].c_str(),
-                                                   cmCacheManager::PATH);
-      return true;
-      }
-    testF = tryPath + "lib" + args[1] + ".a";
-    if(cmSystemTools::FileExists(testF.c_str()))
-      {
-      m_Makefile->AddDefinition(args[0].c_str(), path[k].c_str());  
-      cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
-                                                   path[k].c_str(),
-                                                   cmCacheManager::PATH);
-      return true;
-      }
-    testF = tryPath + "lib" + args[1] + ".sl";
-    if(cmSystemTools::FileExists(testF.c_str()))
+    tryPath += args[1];
+    if(cmSystemTools::FileExists(tryPath.c_str()))
       {
       m_Makefile->AddDefinition(args[0].c_str(), path[k].c_str());  
       cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
@@ -92,19 +65,10 @@ bool cmFindLibraryCommand::Invoke(std::vector<std::string>& args)
       return true;
       }
     }
+  
   cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
                                                "NOTFOUND",
                                                cmCacheManager::PATH);
-  std::string message = "Library not found: ";
-  message += args[1];
-  message += "\n";
-  message += "looked in ";
-  for(k=0; k < path.size(); k++)
-    {
-    message += path[k];
-    message += "\n";
-    }
-  this->SetError(message.c_str());
-  return false;
+  return true;
 }
 
