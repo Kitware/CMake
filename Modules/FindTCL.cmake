@@ -5,9 +5,24 @@
 #
 #  TCL_LIBRARY      = the full path to the tcl library found (tcl tcl80 etc)
 #  TCL_INCLUDE_PATH = the path to where tcl.h can be found
+#  TCL_TCLSH        = the full path to the tclsh binary (tcl tcl80 etc)
 #  TK_LIBRARY       = the full path to the tk library found (tk tk80 etc)
 #  TK_INCLUDE_PATH  = the path to where tk.h can be found
+#  TK_INTERNAL_PATH = the path to where tkWinInt.h can be found
+#  TK_WISH          = the full path to the wish binary (wish wish80 etc)
 #
+
+FIND_PROGRAM(TCL_TCLSH
+  NAMES tclsh tclsh84 tclsh83 tclsh82 tclsh80
+)
+
+FIND_PROGRAM(TK_WISH
+  NAMES wish wish84 wish83 wish82 wish80
+)
+
+GET_FILENAME_COMPONENT(TCL_TCLSH_PATH ${TCL_TCLSH} PATH)
+
+GET_FILENAME_COMPONENT(TK_WISH_PATH ${TK_WISH} PATH)
 
 FIND_LIBRARY(TCL_LIBRARY
   NAMES tcl tcl84 tcl83 tcl82 tcl80 
@@ -19,6 +34,8 @@ FIND_LIBRARY(TCL_LIBRARY
   [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.3;Root]/lib
   [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.2;Root]/lib
   [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.0;Root]/lib
+  "${TCL_TCLSH_PATH}/../lib"
+  "${TK_WISH_PATH}/../lib"
 )
 
 FIND_LIBRARY(TK_LIBRARY 
@@ -31,6 +48,8 @@ FIND_LIBRARY(TK_LIBRARY
   [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.3;Root]/lib
   [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.2;Root]/lib
   [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.0;Root]/lib
+  "${TCL_TCLSH_PATH}/../lib"
+  "${TK_WISH_PATH}/../lib"
 )
 
 FIND_PATH(TCL_INCLUDE_PATH tcl.h 
@@ -41,6 +60,8 @@ FIND_PATH(TCL_INCLUDE_PATH tcl.h
   [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.3;Root]/include
   [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.2;Root]/include
   [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.0;Root]/include
+  "${TCL_TCLSH_PATH}/../include"
+  "${TK_WISH_PATH}/../include"
 )
 
 FIND_PATH(TK_INCLUDE_PATH tk.h 
@@ -51,4 +72,18 @@ FIND_PATH(TK_INCLUDE_PATH tk.h
   [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.3;Root]/include
   [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.2;Root]/include
   [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.0;Root]/include
+  "${TCL_TCLSH_PATH}/../include"
+  "${TK_WISH_PATH}/../include"
+)
+
+FIND_PATH(TK_INTERNAL_PATH tkWinInt.h
+  /usr/include 
+  /usr/local/include
+  "C:/Program Files/Tcl/include" 
+  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.4;Root]/include
+  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.3;Root]/include
+  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.2;Root]/include
+  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.0;Root]/include
+  "${TCL_TCLSH_PATH}/../include"
+  "${TK_WISH_PATH}/../include"
 )
