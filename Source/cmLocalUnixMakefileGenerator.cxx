@@ -112,7 +112,7 @@ cmLocalUnixMakefileGenerator::AddDependenciesToSourceFile(cmDependInformation co
       { 
       if((*d)->m_FullPath != "")
         {
-        i->GetDepends().push_back((*d)->m_FullPath);
+        i->GetDepends().push_back((*d)->m_FullPath.c_str());
         }
       this->AddDependenciesToSourceFile(*d,i,visited);
       }
