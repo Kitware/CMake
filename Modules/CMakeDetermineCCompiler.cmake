@@ -45,6 +45,12 @@ IF(NOT CMAKE_RANLIB)
 ENDIF(NOT CMAKE_RANLIB)
 MARK_AS_ADVANCED(CMAKE_RANLIB)
 
+# do not test for GNU if the generator is visual studio
+IF(${CMAKE_GENERATOR} MATCHES "Visual Studio")
+  SET(CMAKE_COMPILER_IS_GNUCC_RUN 1)
+ENDIF(${CMAKE_GENERATOR} MATCHES "Visual Studio") 
+
+
 IF(NOT CMAKE_COMPILER_IS_GNUCC_RUN)
   # test to see if the c compiler is gnu
   
