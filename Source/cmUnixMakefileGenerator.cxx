@@ -233,6 +233,7 @@ void cmUnixMakefileGenerator::OutputMakefile(const char* file)
   fout << ".SILENT:\n";
   fout << "# disable some common implicit rules to speed things up\n";
   fout << ".SUFFIXES:\n";
+  fout << ".SUFFIXES:.hpuxmakemusthaverule\n";
   // create a make variable with all of the sources for this Makefile
   // for depend purposes.
   fout << "CMAKE_MAKEFILE_SOURCES = ";
@@ -1267,6 +1268,7 @@ void cmUnixMakefileGenerator::OutputCheckDepends(std::ostream& fout)
   fout << ".SILENT:\n";
   fout << "# disable some common implicit rules to speed things up\n";
   fout << ".SUFFIXES:\n";
+  fout << ".SUFFIXES:.hpuxmakemusthaverule\n";
   this->OutputMakeVariables(fout);
   fout << "default:\n";
   fout << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) -f cmake.check_depends all\n"
