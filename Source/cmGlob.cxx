@@ -163,6 +163,7 @@ void cmGlob::RecurseDirectory(const std::string& dir, bool dir_only)
     }
   unsigned long cc;
   std::string fullname;
+  std::string realname;
   std::string fname;
   for ( cc = 0; cc < d.GetNumberOfFiles(); cc ++ )
     {
@@ -172,6 +173,8 @@ void cmGlob::RecurseDirectory(const std::string& dir, bool dir_only)
       {
       continue;
       }
+
+    realname = dir + "/" + fname;
 
 #if defined( CM_GLOB_CASE_INDEPENDENT )
     // On Windows and apple, no difference between lower and upper case
@@ -210,6 +213,7 @@ void cmGlob::ProcessDirectory(std::string::size_type start,
     }
   unsigned long cc;
   std::string fullname;
+  std::string realname;
   std::string fname;
   for ( cc = 0; cc < d.GetNumberOfFiles(); cc ++ )
     {
@@ -218,6 +222,15 @@ void cmGlob::ProcessDirectory(std::string::size_type start,
       strcmp(fname.c_str(), "..") == 0  )
       {
       continue;
+      }
+
+    if ( start == 0 )
+      {
+      realname = dir + fname;
+      }
+    else
+      {
+      realname = dir + "/" + fname;
       }
 
 #if defined( CM_GLOB_CASE_INDEPENDENT )
@@ -247,11 +260,11 @@ void cmGlob::ProcessDirectory(std::string::size_type start,
       {
       if ( last )
         {
-        m_Internals->Files.push_back(fullname);
+        m_Internals->Files.push_back(realname);
         }
       else
         {
-        this->ProcessDirectory(start+1, fullname + "/", dir_only);
+        this->ProcessDirectory(start+1, realname + "/", dir_only);
         }
       }
     }
@@ -271,6 +284,7 @@ bool cmGlob::FindFiles(const std::string& inexpr)
     expr = cmsys::SystemTools::GetCurrentWorkingDirectory();
     expr += "/" + inexpr;
     }
+  std::string fexpr = expr;
 
   int skip = 0;
   int last_slash = 0;
@@ -289,7 +303,7 @@ bool cmGlob::FindFiles(const std::string& inexpr)
     }
   if ( last_slash > 0 )
     {
-    //std::cout << "I can skip: " << inexpr.substr(0, last_slash) << std::endl;
+    //std::cout << "I can skip: " << fexpr.substr(0, last_slash) << std::endl;
     skip = last_slash;
     }
   if ( skip == 0 )
@@ -351,7 +365,7 @@ bool cmGlob::FindFiles(const std::string& inexpr)
   // Handle network paths
   if ( skip > 0 )
     {
-    this->ProcessDirectory(0, inexpr.substr(0, skip) + "/",
+    this->ProcessDirectory(0, fexpr.substr(0, skip) + "/",
       true);     
     }
   else
