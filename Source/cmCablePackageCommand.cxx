@@ -62,7 +62,7 @@ bool cmCablePackageCommand::Invoke(std::vector<std::string>& args)
   m_Makefile->ExpandVariablesInString(command);
   std::vector<std::string> depends;
   depends.push_back(command);
-  command += " cable_config.xml";
+  command = "\""+command+"\" cable_config.xml";
   
   std::vector<std::string> outputs;
   outputs.push_back("Cxx/"+m_PackageName+"_cxx.cxx");
