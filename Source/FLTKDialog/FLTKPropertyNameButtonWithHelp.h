@@ -1,11 +1,11 @@
 #ifndef  FLTKPropertyNameButtonWithHelp_h
 #define  FLTKPropertyNameButtonWithHelp_h
 
-#include <Fl/Fl_Tile.H>
-#include <Fl/Fl_Input.H>
-#include <Fl/Fl_Box.H>
-#include <Fl/Fl_Button.H>
-#include <Fl/Fl_Window.H>
+#include <FL/Fl_Tile.H>
+#include <FL/Fl_Input.H>
+#include <FL/Fl_Box.H>
+#include <FL/Fl_Button.H>
+#include <FL/Fl_Window.H>
 #include <string>
 
 namespace fltk {

@@ -1,13 +1,13 @@
 #include "FLTKPropertyItemRow.h"
-#include <Fl/Fl.H>
-#include <Fl/Fl_Window.H>
-#include <Fl/Fl_Button.H>
-#include <Fl/Fl_Box.H>
-#include <Fl/Fl_Input.H>
-#include <Fl/Fl_Tile.H>
-#include <Fl/fl_ask.H>
-#include <Fl/fl_file_chooser.H>
-#include <Fl/Fl_Color_Chooser.H>
+#include <FL/Fl.H>
+#include <FL/Fl_Window.H>
+#include <FL/Fl_Button.H>
+#include <FL/Fl_Box.H>
+#include <FL/Fl_Input.H>
+#include <FL/Fl_Tile.H>
+#include <FL/fl_ask.H>
+#include <FL/fl_file_chooser.H>
+#include <FL/Fl_Color_Chooser.H>
 #include <cstdio>
 
 namespace fltk {

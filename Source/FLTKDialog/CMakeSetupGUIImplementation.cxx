@@ -1,14 +1,14 @@
 
 #include "CMakeSetupGUIImplementation.h"
-#include "Fl/fl_file_chooser.H"
-#include "Fl/filename.H"
-#include "Fl/fl_ask.H"
+#include "FL/fl_file_chooser.H"
+#include "FL/filename.H"
+#include "FL/fl_ask.H"
 #include "cstring"
 #include "../cmCacheManager.h"
 #include "../cmMakefile.h"
 #include <iostream>
 #include "FLTKPropertyList.h"
-#include "Fl/fl_draw.H"
+#include "FL/fl_draw.H"
 #include "../cmake.h"
 
 

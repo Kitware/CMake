@@ -5,8 +5,8 @@
 #include "FLTKPropertyList.h"
 #include "FLTKPropertyNameButtonWithHelp.h"
 
-#include <Fl/Fl_Tile.H>
-#include <Fl/Fl_Input.H>
+#include <FL/Fl_Tile.H>
+#include <FL/Fl_Input.H>
 
 
 namespace fltk {

@@ -4,11 +4,11 @@
 #include "FLTKPropertyList.h"
 #include "../cmCacheManager.h"
 #include "FLTKPropertyItemRow.h"
-#include "Fl/filename.H"
-#include "Fl/fl_file_chooser.H"
-#include "Fl/Fl_Color_Chooser.H"
-#include "Fl/fl_ask.H"
-#include "Fl/Fl_Button.H"
+#include "FL/filename.H"
+#include "FL/fl_file_chooser.H"
+#include "FL/Fl_Color_Chooser.H"
+#include "FL/fl_ask.H"
+#include "FL/Fl_Button.H"
 #include <cstdio>
 
 namespace fltk {
