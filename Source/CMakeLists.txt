@@ -597,17 +597,19 @@ IF(BUILD_TESTING)
       )
   ENDIF (APPLE)
 
-  IF (UNIX_TEST_NOT_EXISTS)
-    CONFIGURE_FILE(
-      "${CMake_SOURCE_DIR}/Tests/CTestTest/ctest.cmake.in"
-      "${CMake_BINARY_DIR}/Tests/CTestTest/ctest.cmake"
-      @ONLY
-      )
-    ADD_TEST(CTestTest ${CMAKE_CTEST_COMMAND}
-      -S "${CMake_BINARY_DIR}/Tests/CTestTest/ctest.cmake" -V
+  IF (CTEST_TEST_CTEST)
+    ADD_TEST(CTestTest ${CMAKE_CTEST_COMMAND} --force-new-ctest-process
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/CTestTest"
+      "${CMake_BINARY_DIR}/Tests/CTestTest"
+      --build-generator ${CMAKE_GENERATOR}
+      --build-makeprogram ${MAKEPROGRAM}
+      --build-project CTestTest
+      --test-command ${CMAKE_CTEST_COMMAND} --force-new-ctest-process
+      -S "${CMake_BINARY_DIR}/Tests/CTestTest/test.cmake" -V
       )
 
-  ENDIF (UNIX_TEST_NOT_EXISTS)
+  ENDIF (CTEST_TEST_CTEST)
 
 
   IF (CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE OR WXWINDOWS_INCLUDE_DIR)

@@ -1,0 +1,61 @@
+# please see common.cmake for more documentation
+###################################################################
+# The values in this section must always be provided
+###################################################################
+
+# this is the cvs module name that should be checked out
+SET (CTEST_MODULE_NAME CMake)
+
+# these are the the name of the source and binary directory on disk. 
+# They will be appended to DASHBOARD_ROOT
+SET (CTEST_SOURCE_NAME CMake)
+SET (CTEST_BINARY_NAME CMakeBin)
+
+SET (CTEST_NOTES_FILE "@CMAKE_CURRENT_BINARY_DIR@/Note.txt")
+
+# which ctest command to use for running the dashboard
+SET (CTEST_COMMAND 
+  "@CTEST_COMMAND@ -T Start -T Configure -T Build -T Test -T Submit -M Experimental -A ${CTEST_NOTES_FILE} -R SystemInformation -E CTestTest"
+  )
+
+# what cmake command to use for configuring this dashboard
+SET (CTEST_CMAKE_COMMAND        
+  "@CMAKE_COMMAND@"
+  )
+
+
+####################################################################
+# The values in this section are optional you can either
+# have them or leave them commented out
+####################################################################
+
+# should ctest wipe the binary tree before running
+SET (CTEST_START_WITH_EMPTY_BINARY_DIRECTORY TRUE)
+
+# this is the initial cache to use for the binary tree, be careful to escape
+# any quotes inside of this string if you use it
+SET (CTEST_INITIAL_CACHE "
+SITE:STRING=TestingOfCTest
+BUILDNAME:STRING=@BUILDNAME@
+CMAKE_CXX_FLAGS:STRING=@CMAKE_CXX_FLAGS@
+CMAKE_C_FLAGS:STRING=@CMAKE_C_FLAGS@
+DART_ROOT:PATH=
+MAKECOMMAND:FILEPATH=@MAKECOMMAND@
+MEMORYCHECK_COMMAND:STRING=
+")
+
+# if you do not want to use the default location for a 
+# dashboard then set this variable to the directory
+# the dashboard should be in
+SET (CTEST_DASHBOARD_ROOT "@CMAKE_CURRENT_BINARY_DIR@")
+
+
+# set any extra envionment varibles here
+SET (CTEST_ENVIRONMENT
+)
+
+FILE(WRITE "${CTEST_NOTES_FILE}"
+  "This is a test of CTest\n")
+ 
+SET (CTEST_SOURCE_DIRECTORY "@CMAKE_ROOT@")
+SET (CTEST_BINARY_DIRECTORY "@CMAKE_CURRENT_BINARY_DIR@/${CTEST_BINARY_NAME}")
