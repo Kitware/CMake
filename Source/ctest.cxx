@@ -139,6 +139,7 @@ void ctest::ProcessDirectory(int &passed, int &failed)
           continue;
           }
         fprintf(stderr,"Testing %-30s ",args[0].c_str());
+        fflush(stderr);
         //std::cerr << "Testing " << args[0] << " ... ";
         // find the test executable
         std::string testCommand = 
