@@ -158,17 +158,20 @@ struct cmOrderLinkDirectoriesCompare
                   const cmStdString& right
                   ) const
   {
-    bool ret = This->CanBeBefore(left, right);
-    if(!ret)
+    bool LBeforeR= This->CanBeBefore(left, right);
+    bool RBeforeL= This->CanBeBefore(right, left);
+
+    if ( !LBeforeR && !RBeforeL )
       {
       // check for the case when both libraries have to come
       // before each other 
-      if(!This->CanBeBefore(right, left))
-        {
-        This->AddImpossible(right, left);
-        }
+      This->AddImpossible(right, left);
       }
-    return ret;
+    if ( LBeforeR == RBeforeL )
+      {
+      return strcmp(left.c_str(), right.c_str()) < 0;
+      }
+    return LBeforeR;
   }
   cmOrderLinkDirectories* This;
 };
@@ -189,7 +192,8 @@ void cmOrderLinkDirectories::OrderPaths(std::vector<cmStdString>&
   comp.This = this;
   // for some reason when cmake is run on InsightApplication 
   // if std::sort is used here cmake crashes, but stable_sort works
-  std::stable_sort(orderedPaths.begin(), orderedPaths.end(), comp);
+  //
+  std::sort(orderedPaths.begin(), orderedPaths.end(), comp);
 }
 
 //-------------------------------------------------------------------
