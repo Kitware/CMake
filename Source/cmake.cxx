@@ -188,7 +188,7 @@ void cmake::AddCMakePaths(const std::vector<std::string>& args)
 #ifdef CMAKE_ROOT_DIR
   else if (!cmSystemTools::FileExists(modules.c_str()))
     {
-    // try compiled in value on UNIX
+    // try compiled in root directory
     cMakeRoot = CMAKE_ROOT_DIR;
     modules = cMakeRoot + "/Modules/FindVTK.cmake";
     }
@@ -196,14 +196,16 @@ void cmake::AddCMakePaths(const std::vector<std::string>& args)
 #ifdef CMAKE_PREFIX
   else if (!cmSystemTools::FileExists(modules.c_str()))
     {
-    // try compiled in value on UNIX
+    // try compiled in install prefix
     cMakeRoot = CMAKE_PREFIX "/share/CMake";
     modules = cMakeRoot + "/Modules/FindVTK.cmake";
     }
 #endif
   else if (!cmSystemTools::FileExists(modules.c_str()))
     {
-    cMakeRoot = cMakeRoot + "/share/CMake";
+    // try 
+    cMakeRoot  = cmSystemTools::GetProgramPath(cMakeSelf.c_str());
+    cMakeRoot += "/share/CMake";
     modules = cMakeRoot +  "/Modules/FindVTK.cmake";
     }
   else if (!cmSystemTools::FileExists(modules.c_str()))
