@@ -135,9 +135,6 @@ void cmVTKWrapPythonCommand::FinalPass()
 
 bool cmVTKWrapPythonCommand::CreateInitFile(std::string& res) 
 {
-  unsigned int i;
-  
-  
   std::vector<std::string> classes;
   int lastClass = m_WrapHeaders.size();
   int classNum;
