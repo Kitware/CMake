@@ -196,6 +196,23 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff)
     this->GetCMakeInstance()->GetCommand(name.c_str());
   if(rm)
     {
+    const char* versionValue
+      = this->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
+    int major = 0;
+    int minor = 0;
+    if ( versionValue )
+      {
+      sscanf(versionValue, "%d.%d", &major, &minor);
+      }
+    if ( rm->IsDeprecated(major, minor) )
+      {
+      cmOStringStream error;
+      error << "Error in cmake code at\n"
+        << lff.m_FilePath << ":" << lff.m_Line << ":\n"
+        << rm->GetError();
+      cmSystemTools::Error(error.str().c_str());
+      return false;
+      }
     cmCommand* usedCommand = rm->Clone();
     usedCommand->SetMakefile(this);
     bool keepCommand = false;
@@ -209,8 +226,8 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff)
           {
           cmOStringStream error;
           error << "Error in cmake code at\n"
-                << lff.m_FilePath << ":" << lff.m_Line << ":\n"
-                << usedCommand->GetError();
+            << lff.m_FilePath << ":" << lff.m_Line << ":\n"
+            << usedCommand->GetError();
           cmSystemTools::Error(error.str().c_str());
           result = false;
           }
