@@ -15,7 +15,15 @@ int main (int argc, char *argv[])
     {
     cmSystemTools::MakeDirectory(argv[2]);
     }
-
+  const char* sourceDirectory = argv[1];
+  const char* binaryDirectory = argv[2];
+  const char* executableName = argv[3];
+  const char* executableDirectory = "";
+  if(argc > 4)
+    {
+    executableDirectory = argv[4];
+    }
+  
   /**
    * Run an executable command and put the stdout in output.
    */
@@ -23,10 +31,10 @@ int main (int argc, char *argv[])
   
   // change to the tests directory and run cmake
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-  cmSystemTools::ChangeDirectory(argv[2]);
+  cmSystemTools::ChangeDirectory(binaryDirectory);
   std::string ccmd = CMAKE_COMMAND;
   ccmd += " ";
-  ccmd += argv[1];
+  ccmd += sourceDirectory;
   if (!cmSystemTools::RunCommand(ccmd.c_str(), output))
     {
     std::cerr << "Error: cmake execution failed\n";
@@ -39,7 +47,7 @@ int main (int argc, char *argv[])
   // now build the test
   std::string makeCommand = MAKEPROGRAM;
   makeCommand += " ";
-  makeCommand += argv[3];
+  makeCommand += executableName;
 #ifdef _WIN32
   makeCommand += ".dsw /MAKE \"ALL_BUILD - Release\" /REBUILD";
 #endif  
@@ -55,20 +63,19 @@ int main (int argc, char *argv[])
   // now run the compiled test if we can find it
   // See if the executable exists as written.
   std::string fullPath;
-  if(cmSystemTools::FileExists(argv[3]))
+  if(cmSystemTools::FileExists(executableName))
     {
-    fullPath = cmSystemTools::CollapseFullPath(argv[3]);
+    fullPath = cmSystemTools::CollapseFullPath(executableName);
     }
-  std::string tryPath = argv[3];
+  std::string tryPath = executableName;
   tryPath += cmSystemTools::GetExecutableExtension();
   if(cmSystemTools::FileExists(tryPath.c_str()))
     {
     fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
     }
-  
   // try the release extension
   tryPath = "Release/";
-  tryPath += cmSystemTools::GetFilenameName(argv[3]);
+  tryPath += cmSystemTools::GetFilenameName(executableName);
   if(cmSystemTools::FileExists(tryPath.c_str()))
     {
     fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
@@ -78,7 +85,22 @@ int main (int argc, char *argv[])
     {
     fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
     }
-
+  tryPath = executableDirectory;
+  tryPath += "/";
+  tryPath += executableName;
+  tryPath += cmSystemTools::GetExecutableExtension();
+  if(cmSystemTools::FileExists(tryPath.c_str()))
+    {
+    fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
+    }
+  tryPath = executableDirectory;
+  tryPath += "/Release/";
+  tryPath += executableName;
+  tryPath += cmSystemTools::GetExecutableExtension();
+  if(cmSystemTools::FileExists(tryPath.c_str()))
+    {
+    fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
+    }
   if (!cmSystemTools::RunCommand(fullPath.c_str(), output))
     {
     std::cerr << "Error: " << fullPath.c_str() << "  execution failed\n";

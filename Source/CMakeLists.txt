@@ -68,8 +68,12 @@ IF(BUILD_TESTING)
       ${CMake_BINARY_DIR}/Source/cmaketest.h ESCAPE_QUOTES)
     ADD_TEST(simple ${CMake_BINARY_DIR}/Source/cmaketest 
       ${CMake_SOURCE_DIR}/Tests/Simple 
-      ${CMake_BINARY_DIR}/Tests/Simple simple
-    )
+      ${CMake_BINARY_DIR}/Tests/Simple simple )
+    ADD_TEST(complex ${CMake_BINARY_DIR}/Source/cmaketest 
+      ${CMake_SOURCE_DIR}/Tests/Complex 
+      ${CMake_BINARY_DIR}/Tests/Complex 
+      complex 
+      ${CMake_BINARY_DIR}/Tests/Complex/bin )
 
   ENDIF (DART_ROOT)
 ENDIF(BUILD_TESTING)

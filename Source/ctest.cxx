@@ -117,7 +117,7 @@ void ctest::ProcessDirectory(int &passed, int &failed)
           nwd += *j;
           if (cmSystemTools::FileIsDirectory(nwd.c_str()))
             {
-            cerr << "Changing directory into " << nwd.c_str() << "\n";
+            std::cerr << "Changing directory into " << nwd.c_str() << "\n";
             cmSystemTools::ChangeDirectory(nwd.c_str());
             this->ProcessDirectory(passed,failed);
             }
@@ -128,7 +128,7 @@ void ctest::ProcessDirectory(int &passed, int &failed)
 
       if (name == "ADD_TEST")
         {
-        cerr << "Testing " << args[0] << " ... ";
+        std::cerr << "Testing " << args[0] << " ... ";
         // find the test executable
         std::string testCommand = this->FindExecutable(args[1].c_str());
         // add the arguments
