@@ -874,8 +874,16 @@ void cmMakefile::AddDefinition(const char* name, bool value)
 
 void cmMakefile::AddCacheDefinition(const char* name, bool value, const char* doc)
 {
-  this->GetCacheManager()->AddCacheEntry(name, value, doc);
-  this->AddDefinition(name, value);
+  bool val = value;
+  cmCacheManager::CacheIterator it = 
+    this->GetCacheManager()->GetCacheIterator(name);
+  if(!it.IsAtEnd() && (it.GetType() == cmCacheManager::UNINITIALIZED) &&
+    it.Initialized())
+    {
+    val = it.GetValueAsBool();
+    }
+  this->GetCacheManager()->AddCacheEntry(name, val, doc);
+  this->AddDefinition(name, val);
 }
 
 void cmMakefile::RemoveDefinition(const char* name)
