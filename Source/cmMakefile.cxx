@@ -90,20 +90,30 @@ const char* cmMakefile::GetReleaseVersion()
 
 unsigned int cmMakefile::GetCacheMajorVersion()
 {
-  if(!this->GetCacheManager()->GetCacheValue("CMAKE_CACHE_MAJOR_VERSION"))
+  if(const char* vstr =
+     this->GetCacheManager()->GetCacheValue("CMAKE_CACHE_MAJOR_VERSION"))
     {
-    return 0;
+    unsigned int v=0;
+    if(sscanf(vstr, "%u", &v) == 1)
+      {
+      return v;
+      }
     }
-  return atoi(this->GetCacheManager()->GetCacheValue("CMAKE_CACHE_MAJOR_VERSION"));
+  return 0;
 }
 
 unsigned int cmMakefile::GetCacheMinorVersion()
 {
-  if(!this->GetCacheManager()->GetCacheValue("Cmake_Cache_MINOR_VERSION"))
+  if(const char* vstr =
+     this->GetCacheManager()->GetCacheValue("CMAKE_CACHE_MINOR_VERSION"))
     {
-    return 0;
+    unsigned int v=0;
+    if(sscanf(vstr, "%u", &v) == 1)
+      {
+      return v;
+      }
     }
-  return atoi(this->GetCacheManager()->GetCacheValue("CMAKE_CACHE_MINOR_VERSION"));
+  return 0;
 }
 
 
