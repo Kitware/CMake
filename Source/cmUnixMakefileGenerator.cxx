@@ -59,25 +59,41 @@ void cmUnixMakefileGenerator::GenerateMakefile()
   if (m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH"))
     {
     m_LibraryOutputPath = m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH");
-    if(m_LibraryOutputPath.size() &&
-       m_LibraryOutputPath[m_LibraryOutputPath.size() -1] != '/')
+    if(m_LibraryOutputPath.size())
       {
-      m_LibraryOutputPath += "/";
+      if(m_LibraryOutputPath[m_LibraryOutputPath.size() -1] != '/')
+        {
+        m_LibraryOutputPath += "/";
+        }
+      if(!cmSystemTools::MakeDirectory(m_LibraryOutputPath.c_str()))
+        {
+        cmSystemTools::Error("Error failed create "
+                             "LIBRARY_OUTPUT_PATH directory:",
+                             m_LibraryOutputPath.c_str());
+        }
+      m_Makefile->AddLinkDirectory(m_LibraryOutputPath.c_str());
       }
-    cmSystemTools::MakeDirectory(m_LibraryOutputPath.c_str());
-    m_Makefile->AddLinkDirectory(m_LibraryOutputPath.c_str());
     }
   if (m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH"))
     {
-    m_ExecutableOutputPath = m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
-    if(m_ExecutableOutputPath.size() &&
-       m_ExecutableOutputPath[m_ExecutableOutputPath.size() -1] != '/')
+    m_ExecutableOutputPath =
+      m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
+    if(m_ExecutableOutputPath.size())
       {
-      m_ExecutableOutputPath += "/";
+      if(m_ExecutableOutputPath[m_ExecutableOutputPath.size() -1] != '/')
+        {
+        m_ExecutableOutputPath += "/";
+        }
+      if(!cmSystemTools::MakeDirectory(m_ExecutableOutputPath.c_str()))
+        {
+        cmSystemTools::Error("Error failed to create " 
+                             "EXECUTABLE_OUTPUT_PATH directory:",
+                             m_ExecutableOutputPath.c_str());
+        }
+      m_Makefile->AddLinkDirectory(m_ExecutableOutputPath.c_str());
       }
-    cmSystemTools::MakeDirectory(m_ExecutableOutputPath.c_str());
-    m_Makefile->AddLinkDirectory(m_ExecutableOutputPath.c_str());
     }
+  
 
   if(m_CacheOnly)
     {

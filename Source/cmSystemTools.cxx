@@ -135,6 +135,10 @@ const char* cmSystemTools::GetExecutableExtension()
 
 bool cmSystemTools::MakeDirectory(const char* path)
 {
+  if(cmSystemTools::FileExists(path))
+    {
+    return true;
+    }
   std::string dir = path;
 
   cmSystemTools::ConvertToUnixSlashes(dir);
@@ -144,29 +148,36 @@ bool cmSystemTools::MakeDirectory(const char* path)
     {
     pos = 0;
     }
+  std::string topdir;
   while((pos = dir.find('/', pos)) != std::string::npos)
     {
-    std::string topdir = dir.substr(0, pos);
+    topdir = dir.substr(0, pos);
     Mkdir(topdir.c_str());
     pos++;
     }
-  if(Mkdir(path) != 0)
+  if(topdir[dir.size()] == '/')
+    {
+    topdir = dir.substr(0, dir.size());
+    }
+  else
+    {
+    topdir = dir;
+    }
+  if(Mkdir(topdir.c_str()) != 0)
     {
     // There is a bug in the Borland Run time library which makes MKDIR
     // return EACCES when it should return EEXISTS
-    #ifdef __BORLANDC__
-    if( (errno != EEXIST) && (errno != EACCES) )
-      {
-      return false;
-      }
-    #else
     // if it is some other error besides directory exists
     // then return false
-    if(errno != EEXIST)
+    if( (errno != EEXIST) 
+#ifdef __BORLANDC__
+        && (errno != EACCES) 
+#endif      
+      )
       {
+      cmSystemTools::Error("Faild to create directory:", path);
       return false;
       }
-    #endif
     }
   return true;
 }
