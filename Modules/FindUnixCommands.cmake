@@ -11,6 +11,11 @@ IF (CYGWIN_INSTALL_PATH)
     ${CYGWIN_INSTALL_PATH}/bin
   )
 
+  FIND_PROGRAM(CP
+    cp
+    ${CYGWIN_INSTALL_PATH}/bin
+  )
+
   FIND_PROGRAM(GZIP
     gzip
     ${CYGWIN_INSTALL_PATH}/bin
@@ -38,6 +43,14 @@ ELSE (CYGWIN_INSTALL_PATH)
 
   FIND_PROGRAM(BASH
     bash
+    /bin
+    /usr/bin 
+    /usr/local/bin
+    /sbin
+  )
+
+  FIND_PROGRAM(CP
+    cp
     /bin
     /usr/bin 
     /usr/local/bin
