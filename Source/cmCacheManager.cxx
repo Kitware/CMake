@@ -97,8 +97,11 @@ bool cmCacheManager::LoadCache(const char* path,
 {
   std::string cacheFile = path;
   cacheFile += "/CMakeCache.txt";
-  // clear the old cache
-  m_Cache.clear();
+  // clear the old cache, if we are reading in internal values
+  if ( internal )
+    {
+    m_Cache.clear();
+    }
   std::ifstream fin(cacheFile.c_str());
   if(!fin)
     {
