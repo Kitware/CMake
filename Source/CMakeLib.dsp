@@ -41,7 +41,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -63,8 +63,8 @@ LIB32=link.exe -lib
 # PROP Output_Dir "Debug"
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ  /c
-# ADD CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ  /c
+# ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -85,51 +85,51 @@ LIB32=link.exe -lib
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=..\cmCacheManager.cxx
+SOURCE=.\cmCacheManager.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\cmClassFile.cxx
+SOURCE=.\cmClassFile.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\cmCommands.cxx
+SOURCE=.\cmCommands.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\cmDirectory.cxx
+SOURCE=.\cmDirectory.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\cmDSPMakefile.cxx
+SOURCE=.\cmDSPMakefile.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\cmDSWMakefile.cxx
+SOURCE=.\cmDSWMakefile.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\cmMakefile.cxx
+SOURCE=.\cmMakefile.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\cmMakefileGenerator.cxx
+SOURCE=.\cmMakefileGenerator.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\cmMSProjectGenerator.cxx
+SOURCE=.\cmMSProjectGenerator.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\cmRegularExpression.cxx
+SOURCE=.\cmRegularExpression.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\cmSystemTools.cxx
+SOURCE=.\cmSystemTools.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\cmWindowsConfigure.cxx
+SOURCE=.\cmWindowsConfigure.cxx
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -141,7 +141,15 @@ SOURCE=..\cmAbstractFilesCommand.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\cmAbstractFilesCommand.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\cmAddTargetCommand.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\cmAddTargetCommand.h
 # End Source File
 # Begin Source File
 
@@ -149,7 +157,15 @@ SOURCE=..\cmAuxSourceDirectoryCommand.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\cmAuxSourceDirectoryCommand.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\cmCacheManager.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\cmCacheManager.h
 # End Source File
 # Begin Source File
 
@@ -157,7 +173,15 @@ SOURCE=..\cmClassFile.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\cmClassFile.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\cmCommand.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\cmCommand.h
 # End Source File
 # Begin Source File
 
@@ -165,7 +189,15 @@ SOURCE=..\cmDirectory.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\cmDirectory.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\cmDSPMakefile.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\cmDSPMakefile.h
 # End Source File
 # Begin Source File
 
@@ -173,7 +205,15 @@ SOURCE=..\cmDSWMakefile.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\cmDSWMakefile.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\cmExecutablesCommand.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\cmExecutablesCommand.h
 # End Source File
 # Begin Source File
 
@@ -181,7 +221,15 @@ SOURCE=..\cmFindIncludeCommand.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\cmFindIncludeCommand.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\cmFindLibraryCommand.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\cmFindLibraryCommand.h
 # End Source File
 # Begin Source File
 
@@ -189,7 +237,15 @@ SOURCE=..\cmFindProgramCommand.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\cmFindProgramCommand.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\cmIncludeDirectoryCommand.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\cmIncludeDirectoryCommand.h
 # End Source File
 # Begin Source File
 
@@ -197,7 +253,15 @@ SOURCE=..\cmLibraryCommand.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\cmLibraryCommand.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\cmLinkDirectoriesCommand.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\cmLinkDirectoriesCommand.h
 # End Source File
 # Begin Source File
 
@@ -205,7 +269,15 @@ SOURCE=..\cmLinkLibrariesCommand.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\cmLinkLibrariesCommand.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\cmMakeDepend.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\cmMakeDepend.h
 # End Source File
 # Begin Source File
 
@@ -213,7 +285,15 @@ SOURCE=..\cmMakefile.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\cmMakefile.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\cmMakefileGenerator.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\cmMakefileGenerator.h
 # End Source File
 # Begin Source File
 
@@ -221,7 +301,15 @@ SOURCE=..\cmMSProjectGenerator.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\cmMSProjectGenerator.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\cmProjectCommand.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\cmProjectCommand.h
 # End Source File
 # Begin Source File
 
@@ -229,7 +317,15 @@ SOURCE=..\cmRegularExpression.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\cmRegularExpression.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\cmSourceFilesCommand.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\cmSourceFilesCommand.h
 # End Source File
 # Begin Source File
 
@@ -237,7 +333,15 @@ SOURCE=..\cmSourceFilesRequireCommand.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\cmSourceFilesRequireCommand.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\cmStandardIncludes.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\cmStandardIncludes.h
 # End Source File
 # Begin Source File
 
@@ -245,7 +349,15 @@ SOURCE=..\cmSubdirCommand.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\cmSubdirCommand.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\cmSystemTools.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\cmSystemTools.h
 # End Source File
 # Begin Source File
 
@@ -253,7 +365,15 @@ SOURCE=..\cmTestsCommand.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\cmTestsCommand.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\cmUnixDefinesCommand.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\cmUnixDefinesCommand.h
 # End Source File
 # Begin Source File
 
@@ -261,7 +381,15 @@ SOURCE=..\cmUnixLibrariesCommand.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\cmUnixLibrariesCommand.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\cmUnixMakefileGenerator.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\cmUnixMakefileGenerator.h
 # End Source File
 # Begin Source File
 
@@ -269,11 +397,23 @@ SOURCE=..\cmWin32DefinesCommand.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\cmWin32DefinesCommand.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\cmWin32LibrariesCommand.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\cmWin32LibrariesCommand.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\cmWindowsConfigure.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\cmWindowsConfigure.h
 # End Source File
 # End Group
 # End Target
