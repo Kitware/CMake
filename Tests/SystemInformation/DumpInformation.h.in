@@ -1,1 +1,1 @@
-#define CMAKE_DUMP_FILE "${SystemInformation_BINARY_DIR}/SystemInformation.out"
+#define CMAKE_DUMP_FILE "${DumpInformation_BINARY_DIR}/SystemInformation.out"
