@@ -70,6 +70,7 @@
 IF(NOT KWSYS_NAMESPACE)
   SET(KWSYS_NAMESPACE "kwsys")
   SET(KWSYS_STANDALONE 1)
+  SET(KWSYS_ENABLE_C 1)
 
   # Enable all components.
   SET(KWSYS_USE_Base64 1)
@@ -263,32 +264,33 @@ ENDFOREACH(c)
 #-----------------------------------------------------------------------------
 # Build a list of sources for the library based on components that are
 # included.
-SET(KWSYS_SRCS)
+SET(KWSYS_C_SRCS)
+SET(KWSYS_CXX_SRCS)
 
 # Add the proper sources for this platform's Process implementation.
 IF(KWSYS_USE_Process)
   IF(NOT UNIX)
     # Use the Windows implementation.  We need the encoded forwarding executable.
-    SET(KWSYS_SRCS ${KWSYS_SRCS} ProcessWin32.c
+    SET(KWSYS_C_SRCS ${KWSYS_C_SRCS} ProcessWin32.c
       ${PROJECT_BINARY_DIR}/${KWSYS_NAMESPACE}ProcessFwd9xEnc.c)
     SET_SOURCE_FILES_PROPERTIES(
       ${PROJECT_BINARY_DIR}/${KWSYS_NAMESPACE}ProcessFwd9xEnc.c
       PROPERTIES GENERATED 1)
   ELSE(NOT UNIX)
     # Use the UNIX implementation.
-    SET(KWSYS_SRCS ${KWSYS_SRCS} ProcessUNIX.c)
+    SET(KWSYS_C_SRCS ${KWSYS_C_SRCS} ProcessUNIX.c)
   ENDIF(NOT UNIX)
 ENDIF(KWSYS_USE_Process)
 
 # Add sources for Base64 encoding.
 IF(KWSYS_USE_Base64)
-  SET(KWSYS_SRCS ${KWSYS_SRCS} Base64.c)
+  SET(KWSYS_C_SRCS ${KWSYS_C_SRCS} Base64.c)
 ENDIF(KWSYS_USE_Base64)
 
 # Configure headers of C++ classes and construct the list of sources.
 FOREACH(c ${KWSYS_CLASSES})
   # Add this source to the list of source files for the library.
-  SET(KWSYS_SRCS ${KWSYS_SRCS} ${c}.cxx)
+  SET(KWSYS_CXX_SRCS ${KWSYS_CXX_SRCS} ${c}.cxx)
 
   # Configure the header for this class.
   CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/${c}.hxx.in ${KWSYS_HEADER_DIR}/${c}.hxx
@@ -329,14 +331,25 @@ ENDFOREACH(h)
 
 #-----------------------------------------------------------------------------
 # Add the library with the configured name and list of sources.
-IF(KWSYS_SRCS)
-  ADD_LIBRARY(${KWSYS_NAMESPACE} ${KWSYS_LIBRARY_TYPE} ${KWSYS_SRCS})
+IF(KWSYS_C_SRCS OR KWSYS_CXX_SRCS)
+  ADD_LIBRARY(${KWSYS_NAMESPACE} ${KWSYS_LIBRARY_TYPE}
+    ${KWSYS_C_SRCS} ${KWSYS_CXX_SRCS})
 
   # Create an install target for the library.
   IF(KWSYS_LIBRARY_INSTALL_DIR)
     INSTALL_TARGETS(${KWSYS_LIBRARY_INSTALL_DIR} ${KWSYS_NAMESPACE})
   ENDIF(KWSYS_LIBRARY_INSTALL_DIR)
-ENDIF(KWSYS_SRCS)
+ENDIF(KWSYS_C_SRCS OR KWSYS_CXX_SRCS)
+
+# Add a C-only library if requested.
+IF(KWSYS_ENABLE_C AND KWSYS_C_SRCS)
+  ADD_LIBRARY(${KWSYS_NAMESPACE}_c ${KWSYS_LIBRARY_TYPE} ${KWSYS_C_SRCS})
+
+  # Create an install target for the library.
+  IF(KWSYS_LIBRARY_INSTALL_DIR)
+    INSTALL_TARGETS(${KWSYS_LIBRARY_INSTALL_DIR} ${KWSYS_NAMESPACE}_c)
+  ENDIF(KWSYS_LIBRARY_INSTALL_DIR)
+ENDIF(KWSYS_ENABLE_C AND KWSYS_C_SRCS)
 
 # For building kwsys itself, we use a macro defined on the command
 # line to configure the namespace in the C and C++ source files.
@@ -399,7 +412,7 @@ IF(KWSYS_STANDALONE)
   ADD_EXECUTABLE(testProcess testProcess.c)
   ADD_EXECUTABLE(test1 test1.cxx)
   TARGET_LINK_LIBRARIES(testIOS ${KWSYS_NAMESPACE})
-  TARGET_LINK_LIBRARIES(testProcess ${KWSYS_NAMESPACE})
+  TARGET_LINK_LIBRARIES(testProcess ${KWSYS_NAMESPACE}_c)
   TARGET_LINK_LIBRARIES(test1 ${KWSYS_NAMESPACE})
 
   IF(BUILD_TESTING)
