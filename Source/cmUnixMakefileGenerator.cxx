@@ -1316,7 +1316,7 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                        "all",
                        "cmake.depends $(TARGETS) $(SUBDIR_BUILD)",
                        0);
-  if (m_Makefile->IsOn("QT_WRAP_CPP"))
+  if (m_Makefile->IsOn("QT_WRAP_CPP") || m_Makefile->IsOn("QT_WRAP_UI"))
     { 
     this->OutputMakeRule(fout, 
                          "remove generated files",
@@ -1357,7 +1357,7 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
   this->OutputMakeRule(fout, 
                        "Create CMakeCache.txt file",
                        "${CMAKE_BINARY_DIR}/CMakeCache.txt",
-		       0,
+                       0,
                        "$(CMAKE_COMMAND) "
                        "-H${CMAKE_SOURCE_DIR} -B${CMAKE_BINARY_DIR}");
 
