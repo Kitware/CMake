@@ -648,6 +648,7 @@ void cmMakefile::GenerateCacheOnly()
     std::string dest = mf->GetStartOutputDirectory();
     dest += "/Makefile";
     std::ofstream fout(dest.c_str());
+    std::cout << "cmake: creating : " << dest.c_str() << "\n";
     if(!fout)
       {
       cmSystemTools::Error("Failed to open file for write " , dest.c_str());
