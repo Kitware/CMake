@@ -76,15 +76,13 @@ public:
       "This defines a new command that can be executed during the build "
       "process. Note that MAIN_DEPENDENCY is completely optional and is "
       "used as a suggestion to visual studio about where to hang the "
-      "custom command In makefile terms this creates a new target in the "
+      "custom command. In makefile terms this creates a new target in the "
       "following form:\n"
       "  OUTPUT: MAIN_DEPENDENCY DEPENDS\n"
       "          COMMAND ARGS\n"
-      "\n"
       "The second signature adds a custom command to a target "
       "such as a library or executable. This is useful for "
-      "performing an operation before or after building the target "
-      "\n"
+      "performing an operation before or after building the target:\n"
       "  ADD_CUSTOM_COMMAND(TARGET target\n"
       "                     PRE_BUILD | PRE_LINK | POST_BUILD\n"
       "                     COMMAND command\n"
@@ -92,10 +90,10 @@ public:
       "                     [COMMENT comment])\n"
       "This defines a new command that will be associated with "
       "building the specified target. When the command will "
-      "happen is determined by whether you specify\n"
-      "PRE_BUILD - run before all other dependencies\n"
-      "PRE_LINK - run after other dependencies\n"
-      "POST_BUILD - run after the target has been built\n";
+      "happen is determined by which of the following is specified:\n"
+      "  PRE_BUILD - run before all other dependencies\n"
+      "  PRE_LINK - run after other dependencies\n"
+      "  POST_BUILD - run after the target has been built";
     }
   
   cmTypeMacro(cmAddCustomCommandCommand, cmCommand);
