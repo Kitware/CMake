@@ -1387,7 +1387,13 @@ void cmUnixMakefileGenerator::OutputCheckDepends(std::ostream& fout)
             {
             std::string dependfile = 
               this->ConvertToOutputPath(cmSystemTools::CollapseFullPath(dep->c_str()).c_str());
-            if(emitted.insert(dependfile).second)
+            // use the short path function to create uniqe names
+            std::string shortpath;
+            if(!cmSystemTools::GetShortPath(dependfile.c_str(), shortpath))
+              {
+              shortpath = dependfile;
+              }
+            if(emitted.insert(shortpath).second)
               {
               fout << " \\\n" << dependfile ;
               }
