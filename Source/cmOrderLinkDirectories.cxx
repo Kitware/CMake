@@ -6,11 +6,11 @@
 
 //-------------------------------------------------------------------
 bool cmOrderLinkDirectories::LibraryInDirectory(const char* dir, 
-                                                const char* lib)
+                                                const char* libIn)
 {
   cmStdString path = dir;
   path += "/";
-  path += lib;
+  path += libIn;
   // first look for the library as given
   if(cmSystemTools::FileExists(path.c_str()))
     {
@@ -18,7 +18,7 @@ bool cmOrderLinkDirectories::LibraryInDirectory(const char* dir,
     }
   // next remove the extension (.a, .so ) and look for the library
   // under a different name as the linker can do either
-  if(m_RemoveLibraryExtension.find(lib))
+  if(m_RemoveLibraryExtension.find(libIn))
     {
     cmStdString lib = m_RemoveLibraryExtension.match(1);
     cmStdString ext = m_RemoveLibraryExtension.match(2);
