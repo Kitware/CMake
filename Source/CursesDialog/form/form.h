@@ -277,10 +277,6 @@ extern FIELDTYPE
                 *link_fieldtype(FIELDTYPE *,FIELDTYPE *);
 
 extern int      free_fieldtype(FIELDTYPE *),
-                set_fieldtype_arg(FIELDTYPE *,
-		    void * (* const make_arg)(va_list *),
-		    void * (* const copy_arg)(const void *),
-		    void (* const free_arg)(void *)),
                 set_fieldtype_choice (FIELDTYPE *,
 		    bool (* const next_choice)(FIELD *,const void *),
 	      	    bool (* const prev_choice)(FIELD *,const void *));

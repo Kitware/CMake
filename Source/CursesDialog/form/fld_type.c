@@ -34,47 +34,6 @@
 
 MODULE_ID("$Id$")
 
-/*---------------------------------------------------------------------------
-|   Facility      :  libnform  
-|   Function      :  int set_field_type(FIELD *field, FIELDTYPE *type,...)
-|   
-|   Description   :  Associate the specified fieldtype with the field.
-|                    Certain field types take additional arguments. Look
-|                    at the spec of the field types !
-|
-|   Return Values :  E_OK           - success
-|                    E_SYSTEM_ERROR - system error
-+--------------------------------------------------------------------------*/
-int set_field_type(FIELD *field,FIELDTYPE *type, ...)
-{
-  va_list ap;
-  int res = E_SYSTEM_ERROR;
-  int err = 0;
-
-  va_start(ap,type);
-
-  Normalize_Field(field);
-  _nc_Free_Type(field);
-
-  field->type = type;
-  field->arg  = (void *)_nc_Make_Argument(field->type,&ap,&err);
-
-  if (err)
-    {
-      _nc_Free_Argument(field->type,(TypeArgument *)(field->arg));
-      field->type = (FIELDTYPE *)0;
-      field->arg  = (void *)0;
-    }
-  else
-    {
-      res = E_OK;
-      if (field->type) 
-	field->type->ref++;
-    }
-
-  va_end(ap);
-  RETURN(res);
-}
 
 /*---------------------------------------------------------------------------
 |   Facility      :  libnform  
