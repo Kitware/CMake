@@ -1367,16 +1367,22 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
   target += name;
   target += cmSystemTools::GetExecutableExtension();  
   target = this->ConvertToRelativeOutputPath(target.c_str());
-  cmSystemTools::ConvertToUnixSlashes(target);
   bool needsLocalTarget = false;
-  std::string tgt = this->ConvertToMakeTarget(target.c_str());
-  if(tgt.find('/', 0) != tgt.npos)
+  if(m_UseRelativePaths)
+    {
+    cmSystemTools::ConvertToUnixSlashes(target);
+    bool needsLocalTarget = false;
+    std::string tgt = this->ConvertToMakeTarget(target.c_str());
+    if(tgt.find('/', 0) != tgt.npos)
+      {
+      needsLocalTarget = true;
+      }
+    target = cmSystemTools::ConvertToOutputPath(target.c_str());
+    }
+  else
     {
     needsLocalTarget = true;
     }
-  target = cmSystemTools::ConvertToOutputPath(target.c_str());
-
-
   std::string objs = "$(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
   std::string depend = "$(";
   depend += this->CreateMakeVariable(name, "_SRC_OBJS") 
