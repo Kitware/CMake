@@ -68,7 +68,8 @@ int cmGlobalVisualStudio6Generator::TryCompile(const char *,
                                                const char *bindir, 
                                                const char *projectName,
                                                const char *targetName,
-                                               std::string *output)
+                                               std::string *output,
+                                               cmMakefile* mf)
 {
   // now build the test
   std::string makeCommand = 
@@ -115,10 +116,9 @@ int cmGlobalVisualStudio6Generator::TryCompile(const char *,
     makeCommand += "ALL_BUILD";
     }
   makeCommand += " - ";
-  if ( m_LocalGenerators[0]->GetMakefile()->GetDefinition("CMAKE_TRY_COMPILE_CONFIGURATION") )
+  if(const char* config = mf->GetDefinition("CMAKE_TRY_COMPILE_CONFIGURATION"))
     {
-    makeCommand += 
-      m_LocalGenerators[0]->GetMakefile()->GetDefinition("CMAKE_TRY_COMPILE_CONFIGURATION");
+    makeCommand += config;
     }
   else
     {

@@ -90,7 +90,7 @@ public:
    */
   virtual int TryCompile(const char *srcdir, const char *bindir,
                          const char *projectName, const char *targetName,
-                         std::string *output);
+                         std::string *output, cmMakefile* mf);
 
   ///! Set the CMake instance
   void SetCMakeInstance(cmake *cm) {

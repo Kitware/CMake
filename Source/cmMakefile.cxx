@@ -2093,7 +2093,8 @@ int cmMakefile::TryCompile(const char *srcdir, const char *bindir,
     m_LocalGenerator->GetGlobalGenerator()->TryCompile(srcdir,bindir,
                                                        projectName, 
                                                        targetName,
-                                                       output);
+                                                       output,
+                                                       this);
 
   cmSystemTools::ChangeDirectory(cwd.c_str());
   return ret;

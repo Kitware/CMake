@@ -55,7 +55,7 @@ public:
    */
   virtual int TryCompile(const char *srcdir, const char *bindir,
                          const char *projectName, const char *targetName,
-                         std::string *output);
+                         std::string *output, cmMakefile* mf);
 
   /**
    * Generate the all required files for building this project/tree. This

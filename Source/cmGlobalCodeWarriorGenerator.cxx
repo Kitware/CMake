@@ -44,7 +44,8 @@ int cmGlobalCodeWarriorGenerator::TryCompile(const char *,
                                              const char* /*bindir*/, 
                                              const char* /*projectName*/,
                                              const char* /*targetName*/,
-                                             std::string* /*output*/)
+                                             std::string* /*output*/,
+                                             cmMakefile* /*mf*/)
 {
   return 1;
 }

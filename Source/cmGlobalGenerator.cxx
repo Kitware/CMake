@@ -448,7 +448,7 @@ void cmGlobalGenerator::LocalGenerate()
 
 int cmGlobalGenerator::TryCompile(const char *, const char *bindir, 
                                   const char *, const char *target,
-                                  std::string *output)
+                                  std::string *output, cmMakefile*)
 {
   // now build the test
   std::string makeCommand = 
