@@ -787,7 +787,7 @@ void kwsysProcess_Execute(kwsysProcess* cp)
   
   /* Decide whether a child window should be shown.  */
   si.dwFlags |= STARTF_USESHOWWINDOW;
-  si.wShowWindow = cp->HideWindow?SW_HIDE:SW_SHOWDEFAULT;
+  si.wShowWindow = (unsigned short)(cp->HideWindow?SW_HIDE:SW_SHOWDEFAULT);
   
   /* The timeout period starts now.  */
   cp->StartTime = kwsysProcessTimeGetCurrent();
