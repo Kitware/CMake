@@ -5,7 +5,6 @@
 #include "cmStandardIncludes.h"
 #include <sys/stat.h>
 #include <stdio.h>
-#include <io.h>
 
 #if defined(_MSC_VER) || defined(__BORLANDC__)
 #define _unlink unlink
