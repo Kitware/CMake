@@ -646,7 +646,7 @@ cmLocalUnixMakefileGenerator2
   if(target.GetPropertyAsBool("MACOSX_BUNDLE"))
     {
     // Make bundle directories
-    targetFullPath += name;
+    targetFullPath += target.GetName();
     targetFullPath += ".app/Contents/MacOS/";
     }
 #endif
