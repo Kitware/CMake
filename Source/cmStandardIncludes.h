@@ -181,7 +181,8 @@ public:
       cmStrStreamCleanup cleanup(*this);
       cmStrStreamCleanup::IgnoreUnusedVariable(cleanup);
       int pcount = this->pcount();
-      return std::string(this->Superclass::str(), pcount);
+      const char* ptr = this->Superclass::str();
+      return std::string(ptr?ptr:"", pcount);
     }
 private:
   cmStringStream(const cmStringStream&);
