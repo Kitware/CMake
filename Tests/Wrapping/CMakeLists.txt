@@ -28,6 +28,9 @@ ENDIF (EXECUTABLE_OUTPUT_PATH)
 #
 ADD_EXECUTABLE (wrapping wrapping.cxx)
 
+ADD_EXECUTABLE (Wrap Wrap.c)
+SET(WRAP ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/Wrap)
+
 #
 # Test VTK wrappers
 #
@@ -49,7 +52,7 @@ FIND_FILE(VTK_WRAP_HINTS hints ${Wrapping_SOURCE_DIR})
 # Wrap VTK -> Tcl
 #
 SET (VTK_WRAP_TCL "On")
-SET (VTK_WRAP_TCL_EXE "echo")
+SET (VTK_WRAP_TCL_EXE "${WRAP}")
 VTK_WRAP_TCL (wraplibTCL TCL_SRCS SRCS)
 ADD_CUSTOM_TARGET(wraplibTCL ALL 
       ${CMAKE_COMMAND} -E echo "dummy target"  
@@ -59,7 +62,7 @@ ADD_CUSTOM_TARGET(wraplibTCL ALL
 # Wrap VTK -> Python
 #
 SET (VTK_WRAP_PYTHON "On")
-SET (VTK_WRAP_PYTHON_EXE "echo")
+SET (VTK_WRAP_PYTHON_EXE "${WRAP}")
 VTK_WRAP_PYTHON (wraplibPython Python_SRCS SRCS)
 ADD_CUSTOM_TARGET(wraplibPython ALL 
       ${CMAKE_COMMAND} -E echo "dummy target"  
@@ -73,8 +76,8 @@ ADD_CUSTOM_TARGET(wraplibPython ALL
 # so that the build succeeds.
 #
 SET (VTK_WRAP_JAVA "On")
-SET (VTK_WRAP_JAVA_EXE "echo")
-SET (VTK_PARSE_JAVA_EXE "echo")
+SET (VTK_WRAP_JAVA_EXE "${WRAP}")
+SET (VTK_PARSE_JAVA_EXE "${WRAP}")
 SET (VTK_JAVA_HOME "${Wrapping_BINARY_DIR}/java")
 VTK_WRAP_JAVA (wraplibJava Java_SRCS SRCS)
 CONFIGURE_FILE(
