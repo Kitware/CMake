@@ -66,6 +66,22 @@ bool cmAddDependenciesCommand::InitialPass(std::vector<std::string> const& args)
       tgts[target_name].AddUtility(depend_target.c_str());
       }
     }
+  else
+    {
+    std::cerr << "existing targets are:";
+    
+    for(cmTargets::iterator i = tgts.begin();
+        i != tgts.end(); ++i)
+      {
+      std::cerr << i->first << std::endl;
+      }
+    
+    std::string error = "Adding dependency to non-existent target: ";
+    error += target_name;
+    this->SetError(error.c_str());
+    return false;
+    }
+  
 
   return true;
 }
