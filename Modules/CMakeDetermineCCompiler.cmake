@@ -3,3 +3,9 @@
 # loading this file to force a compiler.
 
 FIND_PROGRAM(CMAKE_C_COMPILER NAMES $ENV{CC} gcc cc cl bcc PATHS /bin /usr/bin /usr/local/bin )
+
+
+# to check for is gnu we need to compile this:
+#  #ifdef __GNUC__
+#  yes;
+#  #endif
