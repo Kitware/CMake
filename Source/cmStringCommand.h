@@ -67,16 +67,19 @@ public:
       "STRING(COMPARE NOTEQUAL <string1> <string2> <output variable>)\n"
       "STRING(COMPARE LESS <string1> <string2> <output variable>)\n"
       "STRING(COMPARE GREATER <string1> <string2> <output variable>)\n"
+      "STRING(ASCII <number> [<number> ...] <output variable>)\n"
       "REGEX MATCH will match the regular expression once and store the match in the output variable.\n"  
       "REGEX MATCHALL will match the regular expression as many times as possible and store the matches\n"
       "               in the output variable as a list.\n"
       "REGEX REPLACE will match the regular expression as many times as possible and substitute the\n"
       "              replacement expression for the match in the output.\n"
-      "COMPARE EQUAL/NOTEQUAL/LESS/GREATER will compare the strings and store true or false in the output variable.\n";
+      "COMPARE EQUAL/NOTEQUAL/LESS/GREATER will compare the strings and store true or false in the output variable.\n"
+      "ASCII will convert all numbers into corresponding ASCII characters.\n";
     }
   
   cmTypeMacro(cmStringCommand, cmCommand);
 protected:
+  bool HandleAsciiCommand(std::vector<std::string> const& args);
   bool HandleRegexCommand(std::vector<std::string> const& args);
   bool RegexMatch(std::vector<std::string> const& args);
   bool RegexMatchAll(std::vector<std::string> const& args);

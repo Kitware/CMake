@@ -33,11 +33,47 @@ bool cmStringCommand::InitialPass(std::vector<std::string> const& args)
   else if(subCommand == "COMPARE")
     {
     return this->HandleCompareCommand(args);
-    }  
+    }
+  else if(subCommand == "ASCII")
+    {
+    return this->HandleAsciiCommand(args);
+    }
   
   std::string e = "does not recognize sub-command "+subCommand;
   this->SetError(e.c_str());
   return false;
+}
+
+//----------------------------------------------------------------------------
+bool cmStringCommand::HandleAsciiCommand(std::vector<std::string> const& args)
+{
+  if ( args.size() <= 1 )
+    {
+    this->SetError("No output variable specified");
+    return false;
+    }
+  std::string::size_type cc;
+  std::string outvar = args[args.size()-1];
+  std::string output = "";
+  for ( cc = 1; cc < args.size()-1; cc ++ )
+    {
+    int ch = atoi(args[cc].c_str());
+    if ( ch > 0 && ch < 256 )
+      {
+      output += static_cast<char>(ch);
+      }
+    else
+      {
+      std::string error = "Character with code ";
+      error += ch;
+      error += " does not exist.";
+      this->SetError(error.c_str());
+      return false;
+      }
+    }
+  // Store the output in the provided variable.
+  m_Makefile->AddDefinition(outvar.c_str(), output.c_str());
+  return true;
 }
 
 //----------------------------------------------------------------------------
