@@ -31,7 +31,7 @@
 #include <sys/wait.h>
 #endif
 
-#if defined(_MSC_VER) || defined(__BORLANDC__)
+#if defined(_WIN32) && (defined(_MSC_VER) || defined(__BORLANDC__))
 #include <string.h>
 #include <windows.h>
 #include <direct.h>
@@ -549,8 +549,8 @@ bool cmSystemTools::SameFile(const char* file1, const char* file2)
     {
     // see if the files are the same file
     // check the device inode and size
-    if(fileStat2.st_dev == fileStat1.st_dev && 
-       fileStat2.st_ino == fileStat1.st_ino &&
+    if(memcmp(&fileStat2.st_dev, &fileStat1.st_dev, sizeof(fileStat1.st_dev)) == 0 && 
+       memcmp(&fileStat2.st_ino, &fileStat1.st_ino, sizeof(fileStat1.st_ino)) == 0 &&
        fileStat2.st_size == fileStat1.st_size 
       ) 
       {
