@@ -35,9 +35,12 @@ IF ( CMAKE_WX_CAN_COMPILE )
     SET(APPLE_GUI_BUNDLE_NAME "CMake")
     SET(APPLE_GUI_SHORT_VERSION_STRING "1.5.0")
     SET(APPLE_GUI_BUNDLE_VERSION "1.5.0")
+    SET(APPLE_GUI_ICON "CMakeIcon.icns")
     SET(APPLE_GUI_COPYRIGHT "Copyright 2002 Kitware Inc.")
     CONFIGURE_FILE(${CMAKE_ROOT}/Templates/AppleInfo.plist
                    ${EXECUTABLE_OUTPUT_PATH}/CMake.app/Contents/Info.plist)
+    CONFIGURE_FILE(${CMake_SOURCE_DIR}/Source/WXDialog/CMakeIcon.icns
+                   ${EXECUTABLE_OUTPUT_PATH}/CMake.app/Contents/Resources/CMakeIcon.icns COPYONLY)
     MAKE_DIRECTORY(${EXECUTABLE_OUTPUT_PATH}/CMake.app/Contents/MacOS)
     #WRITE_FILE(${EXECUTABLE_OUTPUT_PATH}/CMake.app/Contents/PkgInfo "APPL????")
     ADD_EXECUTABLE(CMake.app/Contents/MacOS/wxCMakeSetup ${WIN32_EXECUTABLE} ${WX_SRCS})

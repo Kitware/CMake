@@ -9,7 +9,7 @@
 	<key>CFBundleGetInfoString</key>
 	<string>${APPLE_GUI_INFO_STRING}</string>
 	<key>CFBundleIconFile</key>
-	<string>wxmac.icns</string>
+	<string>${APPLE_GUI_ICON}</string>
 	<key>CFBundleIdentifier</key>
 	<string>${APPLE_GUI_IDENTIFIER}</string>
 	<key>CFBundleInfoDictionaryVersion</key>
