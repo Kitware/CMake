@@ -37,7 +37,7 @@ void ForceStringUse()
 
 void cmFailed(const char* Message, const char* m2= "")
 {
-  std::cerr << "FAILED: " << Message << m2 << "\n"; 
+  std::cout << "FAILED: " << Message << m2 << "\n"; 
   cm_failed++;
 }
 
@@ -611,6 +611,24 @@ int main()
     cmPassed("SET_SOURCE_FILES_PROPERTIES succeeded in setting extra flags == ", FILE_COMPILE_FLAGS);
     }
 #endif
+
+  // ----------------------------------------------------------------------
+  // Test registry (win32)
+#if defined(_WIN32) && !defined(__CYGWIN__)
+#ifndef REGISTRY_TEST_PATH
+  cmFailed("the CONFIGURE_FILE command is broken, REGISTRY_TEST_PATH is not defined.");
+#else
+  if(strcmp(REGISTRY_TEST_PATH, BINARY_DIR "/registry_dir") != 0)
+    {
+    cmFailed("the 'read registry value' function or CONFIGURE_FILE command is broken. REGISTRY_TEST_PATH == ", 
+             REGISTRY_TEST_PATH);
+    }
+  else
+    {
+    cmPassed("REGISTRY_TEST_PATH == ", REGISTRY_TEST_PATH);
+    }
+#endif
+#endif // defined(_WIN32) && !defined(__CYGWIN__)
 
   // ----------------------------------------------------------------------
   // Summary

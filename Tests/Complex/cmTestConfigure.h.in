@@ -48,3 +48,9 @@
 #cmakedefine FILE_HAS_ABSTRACT
 #cmakedefine FILE_HAS_WRAP_EXCLUDE
 #define FILE_COMPILE_FLAGS "${FILE_COMPILE_FLAGS}"
+
+// Test registry read
+
+#if defined(_WIN32) && !defined(__CYGWIN__)
+#define REGISTRY_TEST_PATH "${REGISTRY_TEST_PATH}"
+#endif

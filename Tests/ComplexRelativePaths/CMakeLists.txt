@@ -111,6 +111,29 @@ GET_SOURCE_FILE_PROPERTY(FILE_HAS_WRAP_EXCLUDE nonexisting_file2 WRAP_EXCLUDE)
 GET_SOURCE_FILE_PROPERTY(FILE_COMPILE_FLAGS nonexisting_file2 COMPILE_FLAGS)
 
 #
+# Test registry (win32)
+# Create a file, put its path in a registry key, try to find the file in that
+# path using that registry key, then remove the file and the key
+#
+IF (WIN32)
+  IF (NOT UNIX)
+    SET(dir "${Complex_BINARY_DIR}/registry_dir")
+    SET(file "registry_test_dummy")
+    SET(hkey "HKEY_CURRENT_USER\\Software\\Kitware\\CMake\\Tests\\Complex;registry_test")
+    CONFIGURE_FILE(
+      ${Complex_SOURCE_DIR}/Library/dummy
+      "${dir}/${file}"
+      COPYONLY IMMEDIATE)
+    EXEC_PROGRAM("${CCOMMAND_COMMAND} write_regv \"${hkey}\" \"${dir}\"")
+    FIND_PATH(REGISTRY_TEST_PATH
+              ${file}
+              "[${hkey}]")
+    EXEC_PROGRAM("${CCOMMAND_COMMAND} delete_regv \"${hkey}\"")
+    EXEC_PROGRAM("${CCOMMAND_COMMAND} remove \"${dir}/${file}\"")
+  ENDIF (NOT UNIX)
+ENDIF (WIN32)
+
+#
 # Configure file 
 # (plug vars to #define so that they can be tested)
 #
