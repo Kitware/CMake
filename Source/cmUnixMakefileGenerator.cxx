@@ -1529,7 +1529,23 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
   ctest = cmSystemTools::GetFilenamePath(ctest.c_str());
   ctest += "/";
   ctest += "ctest";
-  ctest += m_ExecutableExtension;
+  ctest += cmSystemTools::GetExecutableExtension();
+  if(!cmSystemTools::FileExists(ctest.c_str()))
+    {
+    ctest = m_Makefile->GetDefinition("CMAKE_COMMAND");
+    ctest = cmSystemTools::GetFilenamePath(ctest.c_str());
+    ctest += "/Debug/";
+    ctest += "ctest";
+    ctest += cmSystemTools::GetExecutableExtension();
+    }
+  if(!cmSystemTools::FileExists(ctest.c_str()))
+    {
+    ctest = m_Makefile->GetDefinition("CMAKE_COMMAND");
+    ctest = cmSystemTools::GetFilenamePath(ctest.c_str());
+    ctest += "/Release/";
+    ctest += "ctest";
+    ctest += cmSystemTools::GetExecutableExtension();
+    }
   if (cmSystemTools::FileExists(ctest.c_str()))
     {
     this->OutputMakeRule(fout, 
