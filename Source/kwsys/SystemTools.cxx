@@ -994,11 +994,12 @@ bool SystemTools::CopyFileAlways(const char* source, const char* destination)
     {
     return false;
     }
-
-  if ( SystemTools::FileExists(destination) && !SystemTools::RemoveFile(destination) )
-    {
-    return false;
-    }
+ 
+  // try and remove the destination file so that read only destination files
+  // can be written to.
+  // If the remove fails continue so that files in read only directories
+  // that do not allow file removal can be modified.
+  SystemTools::RemoveFile(destination);
 
 #if defined(_WIN32) || defined(__CYGWIN__)
   kwsys_ios::ofstream fout(destination, 
