@@ -449,49 +449,45 @@ std::string cmCTest::FindTheExecutable(const char *exe)
   std::string file;
 
   cmSystemTools::SplitProgramPath(exe, dir, file);
-  if(m_ConfigType != "")
+  if(m_ConfigType != "" && 
+    ::TryExecutable(dir.c_str(), file.c_str(), &fullPath, 
+      m_ConfigType.c_str()))
     {
-    if(TryExecutable(dir.c_str(), file.c_str(), &fullPath, 
-                     m_ConfigType.c_str()))
+    return fullPath;
+    }
+
+  if (::TryExecutable(dir.c_str(),file.c_str(),&fullPath,"."))
+    {
+    return fullPath;
+    }
+
+  if (::TryExecutable(dir.c_str(),file.c_str(),&fullPath,""))
+    {
+    return fullPath;
+    }
+
+  if ( m_ConfigType == "" )
+    {
+    // No config type, so try to guess it
+    if (::TryExecutable(dir.c_str(),file.c_str(),&fullPath,"Release"))
       {
       return fullPath;
       }
-    dir += "/";
-    dir += m_ConfigType;
-    dir += "/";
-    dir += file;
-    cmSystemTools::Error("config type specified on the command line, but test executable not found.",
-                         dir.c_str());
-    return "";
-    }
-  if (TryExecutable(dir.c_str(),file.c_str(),&fullPath,"."))
-    {
-    return fullPath;
-    }
 
-  if (TryExecutable(dir.c_str(),file.c_str(),&fullPath,""))
-    {
-    return fullPath;
-    }
+    if (::TryExecutable(dir.c_str(),file.c_str(),&fullPath,"Debug"))
+      {
+      return fullPath;
+      }
 
-  if (TryExecutable(dir.c_str(),file.c_str(),&fullPath,"Release"))
-    {
-    return fullPath;
-    }
+    if (::TryExecutable(dir.c_str(),file.c_str(),&fullPath,"MinSizeRel"))
+      {
+      return fullPath;
+      }
 
-  if (TryExecutable(dir.c_str(),file.c_str(),&fullPath,"Debug"))
-    {
-    return fullPath;
-    }
-
-  if (TryExecutable(dir.c_str(),file.c_str(),&fullPath,"MinSizeRel"))
-    {
-    return fullPath;
-    }
-
-  if (TryExecutable(dir.c_str(),file.c_str(),&fullPath,"RelWithDebInfo"))
-    {
-    return fullPath;
+    if (::TryExecutable(dir.c_str(),file.c_str(),&fullPath,"RelWithDebInfo"))
+      {
+      return fullPath;
+      }
     }
 
   // if everything else failed, check the users path
@@ -503,7 +499,17 @@ std::string cmCTest::FindTheExecutable(const char *exe)
       return path;
       }
     }
-  
+
+  if ( m_ConfigType != "" )
+    {
+    dir += "/";
+    dir += m_ConfigType;
+    dir += "/";
+    dir += file;
+    cmSystemTools::Error("config type specified on the command line, but test executable not found.",
+      dir.c_str());
+    return "";
+    }
   return fullPath;
 }
 
