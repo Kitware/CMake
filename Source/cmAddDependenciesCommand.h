@@ -86,7 +86,7 @@ public:
     {
     return
       "ADD_DEPENDENCIES(target-name depend-target depend-target)\n"
-      "Add a dependency to a target. This is only used to add dependecies between one executable and another. Regular build dependencies are handled automatically.";
+      "Add a dependency to a target. This is only used to add dependencies between one executable and another. Regular build dependencies are handled automatically.";
     }
   
   cmTypeMacro(cmAddDependenciesCommand, cmCommand);
