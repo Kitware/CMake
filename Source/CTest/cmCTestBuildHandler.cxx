@@ -114,6 +114,7 @@ static const char* cmCTestWarningMatches[] = {
   "^cxx: Warning:",
   ".*file: .* has no symbols",
   "([^ :]+):([0-9]+): Warning",
+  "\\([0-9]*\\): remark #[0-9]*",
   0
 };
 
