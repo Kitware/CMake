@@ -1106,16 +1106,13 @@ cmSystemTools::FileFormat cmSystemTools::GetFileFormat(const char* cext)
 bool cmSystemTools::Split(const char* s, std::vector<cmStdString>& l)
 {
   std::vector<std::string> temp;
-  if(!Superclass::Split(s, temp))
-    {
-    return false;
-    }
+  bool res = Superclass::Split(s, temp);
   for(std::vector<std::string>::const_iterator i = temp.begin();
       i != temp.end(); ++i)
     {
     l.push_back(*i);
     }
-  return true;
+  return res;
 }
 
 std::string cmSystemTools::ConvertToOutputPath(const char* path)
