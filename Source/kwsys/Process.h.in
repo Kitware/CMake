@@ -38,7 +38,6 @@
 #define kwsysProcess_GetState            kwsys(Process_GetState)
 #define kwsysProcess_State_e             kwsys(Process_State_e)
 #define kwsysProcess_Exception_None      kwsys(Process_Exception_None)
-#define kwsysProcess_Exception_Abort     kwsys(Process_Exception_Abort)
 #define kwsysProcess_Exception_Fault     kwsys(Process_Exception_Fault)
 #define kwsysProcess_Exception_Illegal   kwsys(Process_Exception_Illegal)
 #define kwsysProcess_Exception_Interrupt kwsys(Process_Exception_Interrupt)
@@ -106,7 +105,7 @@ void kwsysProcess_SetTimeout(kwsysProcess* cp, double timeout);
  *  kwsysProcess_State_Killed    = Child process terminated by Kill method.
  */
 int kwsysProcess_GetState(kwsysProcess* cp);
-typedef enum kwsysProcess_State_e
+enum kwsysProcess_State_e
 {
   kwsysProcess_State_Starting,
   kwsysProcess_State_Error,
@@ -123,7 +122,6 @@ typedef enum kwsysProcess_State_e
  * caused the child to terminate abnormally.  Possible exceptions are:
  *
  *  kwsysProcess_Exception_None      = No exceptional behavior occurred.
- *  kwsysProcess_Exception_Abort     = Child exited with abort call.
  *  kwsysProcess_Exception_Fault     = Child crashed with a memory fault.
  *  kwsysProcess_Exception_Illegal   = Child crashed with an illegal instruction.
  *  kwsysProcess_Exception_Interrupt = Child was interrupted by user (Cntl-C/Break).
@@ -131,10 +129,9 @@ typedef enum kwsysProcess_State_e
  *  kwsysProcess_Exception_Other     = Child terminated for another reason.
  */
 int kwsysProcess_GetExitException(kwsysProcess* cp);
-typedef enum kwsysProcess_Exception_e
+enum kwsysProcess_Exception_e
 {
   kwsysProcess_Exception_None,
-  kwsysProcess_Exception_Abort,
   kwsysProcess_Exception_Fault,
   kwsysProcess_Exception_Illegal,
   kwsysProcess_Exception_Interrupt,
@@ -203,7 +200,7 @@ void kwsysProcess_Execute(kwsysProcess* cp);
  */
 int kwsysProcess_WaitForData(kwsysProcess* cp, int pipes, char** data,
                              int* length, double* timeout);
-typedef enum kwsysProcess_Pipes_e
+enum kwsysProcess_Pipes_e
 {
   kwsysProcess_Pipe_STDOUT=1,
   kwsysProcess_Pipe_STDERR=2,
@@ -261,7 +258,6 @@ void kwsysProcess_Kill(kwsysProcess* cp);
 # undef kwsysProcess_GetState
 # undef kwsysProcess_State_e
 # undef kwsysProcess_Exception_None
-# undef kwsysProcess_Exception_Abort
 # undef kwsysProcess_Exception_Fault
 # undef kwsysProcess_Exception_Illegal
 # undef kwsysProcess_Exception_Interrupt
