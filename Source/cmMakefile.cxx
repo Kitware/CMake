@@ -1424,8 +1424,8 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source) const
 const char *cmMakefile::ExpandVariablesInString(std::string& source,
                                                 bool escapeQuotes,
                                                 bool atOnly,
-                                                const char* filename = 0,
-                                                long line = -1) const
+                                                const char* filename,
+                                                long line) const
 {
   // This method replaces ${VAR} and @VAR@ where VAR is looked up
   // with GetDefinition(), if not found in the map, nothing is expanded.
