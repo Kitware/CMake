@@ -28,7 +28,7 @@ IF (BUILD_TESTING)
        "Web site to signal when testing results have been submitted")
 
   # Dart server configuration 
-  SET (CVS_WEB_URL "http://${DROP_SITE}/cgi-bin/cmakecvsweb.cgi/CMake/" 
+  SET (CVS_WEB_URL "http://${DROP_SITE}/cgi-bin/cvsweb.cgi/CMake/" 
        CACHE INTERNAL "URL for revision control system")
   SET (CVS_WEB_CVSROOT "CMake" CACHE INTERNAL 
        "Symbolic name for the CVSROOT in cvsweb")
