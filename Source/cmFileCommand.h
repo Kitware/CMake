@@ -71,6 +71,7 @@ public:
       "  FILE(READ filename variable)\n"
       "  FILE(GLOB variable [globbing expressions]...)\n"
       "  FILE(GLOB_RECURSE variable [globbing expressions]...)\n"
+      "  FILE(MAKE_DIRECTORY [directory]...)\n"
       "WRITE will write a message into a file called 'filename'. It "
       "overwrites the file if it already exists, and creates the file "
       "if it does not exists.\n"
