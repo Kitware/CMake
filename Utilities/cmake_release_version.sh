@@ -1,5 +1,5 @@
 CURRENT_TAG="Release-1-6"
-CURRENT_VERSION="1.6.beta1"
+CURRENT_VERSION="1.6.beta2"
 CURRENT_RELEASE="1"
 
 # Cygwin packages need previous version/release.
