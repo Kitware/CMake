@@ -43,27 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // cmBuildSharedLibrariesCommand
 bool cmBuildSharedLibrariesCommand::InitialPass(std::vector<std::string>& args)
 {
-  // Now check and see if the value has been stored in the cache
-  // already, if so use that value and don't look for the program
-  const char* cacheValue
-    = cmCacheManager::GetInstance()->GetCacheValue("BUILD_SHARED_LIBS");
-  if(!cacheValue)
-    {
-    cmCacheManager::GetInstance()->
-      AddCacheEntry("BUILD_SHARED_LIBS",
-                    false,
-                    "If ON, the resulting project or makefiles will "
-                    "produce shared libraries.  WARNING! On some "
-                    "UNIX platforms, changing this setting will require"
-                    " removing all .o files, as they will have to be recompiled "
-                    " with -fpic or some other flag.");
-    m_Makefile->AddDefinition("BUILD_SHARED_LIBS", false);
-    }
-  else
-    {
-    m_Makefile->AddDefinition("BUILD_SHARED_LIBS", 
-                              cmCacheManager::
-                              GetInstance()->IsOn("BUILD_SHARED_LIBS"));
-    }
-  return true;
+  this->SetError("This command has been deprecated.  The BUILD_SHARED_LIBS\n"
+                 "cache entry is now always added by CMake.\n");
+  return false;
 }
