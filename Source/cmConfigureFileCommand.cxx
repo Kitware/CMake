@@ -143,8 +143,8 @@ void cmConfigureFileCommand::FinalPass()
                                          "#cmakedefine", "#undef");
             }
           }
+        fout << inLine << "\n";
         }
-      fout << inLine << "\n";
       }
     // close the files before attempting to copy
     fin.close();
