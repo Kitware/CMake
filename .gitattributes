@@ -1,0 +1,14 @@
+.gitattributes   export-ignore
+
+bootstrap        crlf=input
+configure        crlf=input
+*.[1-9]          crlf=input
+*.sh             crlf=input
+*.sh.in          crlf=input
+
+*.bat           -crlf
+*.dsp           -crlf
+*.dsptemplate   -crlf
+*.dsw           -crlf
+*.sln           -crlf
+*.vcproj        -crlf

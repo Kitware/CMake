@@ -1,0 +1,109 @@
+topdir = @fullSrcDir@
+
+CONFIG_DIR = @ITK_OBJ@
+
+SHELL = /bin/sh
+
+ITK_OBJ       = @ITK_OBJ@
+
+RANLIB        = @RANLIB@
+CC            = @CC@
+CFLAGS        = @ITK_SHLIB_CFLAGS@ @ANSI_CFLAGS@
+
+CXX           = @CXX@
+CXXFLAGS      = @ITK_SHLIB_CFLAGS@ @EXTRA_GCC_FLAG@ @ITK_TEMPLATE_FLAGS@ 
+
+
+USER_CFLAGS   = @CFLAGS@
+USER_CXXFLAGS = @CXXFLAGS@
+
+X_EXTRA_LIBS  = @X_EXTRA_LIBS@
+X_PRE_LIBS    = @X_PRE_LIBS@
+XLIBS         = @X_LIBS@
+prefix        = @prefix@
+exec_prefix   = @exec_prefix@
+LIB_RUNTIME_DIR = @exec_prefix@/lib
+
+BUILD_TCL     = @BUILD_TCL@
+CLEAN_TCL     = @CLEAN_TCL@
+BUILD_JAVA    = @BUILD_JAVA@
+CLEAN_JAVA    = @CLEAN_JAVA@
+BUILD_PYTHON    = @BUILD_PYTHON@
+CLEAN_PYTHON    = @CLEAN_PYTHON@
+
+USE_GRAPHICS_LIBS   = @USE_GRAPHICS_LIBS@
+USE_IMAGING_LIBS    = @USE_IMAGING_LIBS@
+USE_PATENTED_LIBS   = @USE_PATENTED_LIBS@
+USE_CONTRIB_LIBS    = @USE_CONTRIB_LIBS@
+USE_LOCAL_LIBS      = @USE_LOCAL_LIBS@
+
+USE_GRAPHICS_PYTHON   = @USE_GRAPHICS_PYTHON@
+USE_IMAGING_PYTHON    = @USE_IMAGING_PYTHON@
+USE_PATENTED_PYTHON   = @USE_PATENTED_PYTHON@
+USE_CONTRIB_PYTHON    = @USE_CONTRIB_PYTHON@
+USE_LOCAL_PYTHON      = @USE_LOCAL_PYTHON@
+
+USE_GRAPHICS_JAVA   = @USE_GRAPHICS_JAVA@
+USE_IMAGING_JAVA    = @USE_IMAGING_JAVA@
+USE_PATENTED_JAVA   = @USE_PATENTED_JAVA@
+USE_CONTRIB_JAVA    = @USE_CONTRIB_JAVA@
+USE_LOCAL_JAVA      = @USE_LOCAL_JAVA@
+
+TOOLKIT_DEPENDS      = @TOOLKIT_DEPENDS@
+
+ITK_TCL_SHLIB_TARGET = @ITK_TCL_SHLIB_TARGET@
+ITK_SHLIB_BUILD_FLAGS = @ITK_SHLIB_BUILD_FLAGS@
+ITK_SHLIB_LINK_FLAGS = @ITK_SHLIB_LINK_FLAGS@
+ITK_LIB_EXT          = @ITK_LIB_EXT@
+DL_LIBS              = @DL_LIBS@
+SHLIB_LD_LIBS        = @SHLIB_LD_LIBS@
+SHLIB_SUFFIX         = @SHLIB_SUFFIX@
+
+THREAD_LIBS          = @THREAD_LIBS@
+
+GRAPHICS_API_OBJ     = @GRAPHICS_API_OBJ@
+GRAPHICS_API_FLAGS   = @GRAPHICS_API_FLAGS@  @X_CFLAGS@
+GRAPHICS_API_LIBS    = @GRAPHICS_API_LIBS@
+
+CONTROLLER_API_OBJ     = @CONTROLLER_API_OBJ@
+CONTROLLER_API_FLAGS   = @CONTROLLER_API_FLAGS@
+CONTROLLER_API_LIBS    = @CONTROLLER_API_LIBS@
+
+
+
+# install support
+#
+# The following definition can be set to non-null for special systems
+# like AFS with replication.  It allows the pathnames used for installation
+# to be different than those used for actually reference files at
+# run-time.  INSTALL_ROOT is prepended to $prefix and $exec_prefix
+# when installing files.
+INSTALL_ROOT    =
+INSTALL         = @INSTALL@
+LIB_INSTALL_DIR = $(INSTALL_ROOT)$(exec_prefix)/lib
+BIN_INSTALL_DIR = $(INSTALL_ROOT)$(exec_prefix)/bin
+
+
+# leave this as a place holder for users to add compile flags
+LOCAL_CXXFLAGS =
+LOCAL_CFLAGS =
+LOCAL_BUILD_TARGETS = 
+LOCAL_LINK_FLAGS =
+
+# Add the compiler include flags
+# right now we include vxl and Common and the config directories
+INCLUDE_FLAGS = -I. \
+	-I${CONFIG_DIR}/Code/Insight3DParty/vxl \
+	-I${CONFIG_DIR} \
+	-I${topdir}/Code/Common \
+	-I${topdir}/Code/Insight3DParty/vxl 
+
+CXX_FLAGS = ${CPPFLAGS} ${LOCAL_CXXFLAGS} ${CXXFLAGS} \
+	    ${KIT_FLAGS} ${INCLUDE_FLAGS}
+
+CC_FLAGS = ${CPPFLAGS} ${LOCAL_CFLAGS} ${CFLAGS} 
+
+# set up the path to the rulesgen program
+RULESGEN = @ITK_OBJ@/Code/tools/rulesgen
+
+BUILD_LIB_FILE  = lib${ME}${ITK_LIB_EXT}

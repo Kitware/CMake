@@ -1,0 +1,17 @@
+#------------------------------------------------------------------------------
+# Include generated rules
+@MAKEINCLUDE@ @MAKEQUOTE@targets.make@MAKEQUOTE@
+
+#------------------------------------------------------------------------------
+# Include all variable settings
+@MAKEINCLUDE@ @MAKEQUOTE@@ITK_OBJ@/Code/config/MakeVariables.make@MAKEQUOTE@
+
+#------------------------------------------------------------------------------
+# Include user-editable defines.
+@MAKEINCLUDE@ @MAKEQUOTE@@ITK_OBJ@/local.make@MAKEQUOTE@
+
+#------------------------------------------------------------------------------
+# Include General Build Rules
+@MAKEINCLUDE@ @MAKEQUOTE@@ITK_OBJ@/Code/config/MakeRules.make@MAKEQUOTE@
+
+

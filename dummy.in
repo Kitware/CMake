@@ -1,0 +1,5 @@
+#empty file used by configure to generate initial targets.make files
+#if you find this as a make error, then the autoconf system is not
+#working, send for help on the insight mailing list...
+
+

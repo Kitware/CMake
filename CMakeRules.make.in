@@ -1,0 +1,51 @@
+# set up make suffixes
+
+.SUFFIXES: .cxx .java .class
+
+#------------------------------------------------------------------------------
+# rules for building .o files from source files
+
+.c.o:
+	${CC} ${CC_FLAGS} -c $< -o $@
+.cxx.o:
+	${CXX} ${CXX_FLAGS} -c $< -o $@
+
+#
+# Makefile for Visualization Toolkit sources. 
+# 
+#------------------------------------------------------------------------------
+#
+all: ${OBJ_SUB_DIRS} ${EXECUTABLES} ${SUBDIR_BUILD} ${ITK_LIB_FILE} ${LOCAL_BUILD_TARGETS}
+
+#------------------------------------------------------------------------------
+
+${RULESGEN}: @fullSrcDir@/Code/tools/*.cxx @fullSrcDir@/Code/tools/*.h
+	cd @ITK_OBJ@/Code/tools; ${MAKE} rulesgen
+
+depend: ${RULESGEN}
+	${RULESGEN} Makefile
+
+
+clean: ${SUBDIR_CLEAN}
+	rm -f ${SRC_OBJ} ${ITK_EXECUTABLES} 
+
+targets.make: ${RULESGEN} Makefile
+	${RULESGEN} Makefile -S${srcdir} -I${srcdir} ${INCLUDE_FLAGS}
+
+#------------------------------------------------------------------------------
+# rules for the normal library
+#
+lib${ME}.a: ${SRC_OBJ} ${KIT_OBJ}
+	${AR} cr lib${ME}.a ${KIT_OBJ}
+	${RANLIB} lib$(ME).a
+
+
+lib$(ME)$(SHLIB_SUFFIX): ${KIT_OBJ}
+	rm -f lib$(ME)$(SHLIB_SUFFIX)
+	$(CXX) ${CXX_FLAGS} ${ITK_SHLIB_BUILD_FLAGS} -o \
+	lib$(ME)$(SHLIB_SUFFIX) \
+	   ${KIT_OBJ} ${SHLIB_LD_LIBS}
+
+install: ${ITK_LIB_FILE} 
+	@echo "Installing ${ITK_LIB_FILE}"
+	${INSTALL} -m 755 $(ITK_LIB_FILE) $(LIB_INSTALL_DIR)/$(ITK_LIB_FILE)
