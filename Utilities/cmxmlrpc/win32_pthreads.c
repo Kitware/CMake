@@ -27,6 +27,7 @@
 
 #ifdef _WIN32
 
+#define HAVE_PTHREADS 1
 #include "xmlrpc_pthreads.h"
 
 #include <process.h>
