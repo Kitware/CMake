@@ -5,7 +5,7 @@
 #include "cmCursesPathWidget.h"
 #include "cmCursesFilePathWidget.h"
 #include "cmCursesDummyWidget.h"
-#include "cmSystemTools.h"
+#include "../cmSystemTools.h"
 
 cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(const char* key) :
   m_Key(key)

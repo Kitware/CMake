@@ -1,10 +1,9 @@
 #ifndef __cmCursesMainForm_h
 #define __cmCursesMainForm_h
 
-#include <iostream>
 #include <curses.h>
 #include <form.h>
-#include "cmStandardIncludes.h"
+#include "../cmStandardIncludes.h"
 #include "cmCursesForm.h"
 
 class cmCursesCacheEntryComposite;

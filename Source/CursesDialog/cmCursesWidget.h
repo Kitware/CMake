@@ -3,7 +3,7 @@
 
 #include <curses.h>
 #include <form.h>
-#include "cmCacheManager.h"
+#include "../cmCacheManager.h"
 
 class cmCursesWidget
 {

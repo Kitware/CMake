@@ -1,6 +1,6 @@
 #include "cmCursesMainForm.h"
-#include "cmCacheManager.h"
-#include "cmSystemTools.h"
+#include "../cmCacheManager.h"
+#include "../cmSystemTools.h"
 
 #include <curses.h>
 #include <form.h>
@@ -8,7 +8,6 @@
 #include <sys/ioctl.h>
 
 static cmCursesMainForm* myform=0;
-//std::ofstream log("log.txt", std::ios::out);
 
 void onsig(int sig)
 {

@@ -2,7 +2,7 @@
 #define __cmCursesCacheEntryComposite_h
 
 #include "cmCursesLabelWidget.h"
-#include "cmCacheManager.h"
+#include "../cmCacheManager.h"
 
 class cmCursesCacheEntryComposite
 {

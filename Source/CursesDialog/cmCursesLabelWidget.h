@@ -1,7 +1,6 @@
 #ifndef __cmCursesLabelWidget_h
 #define __cmCursesLabelWidget_h
 
-#include <iostream>
 #include <curses.h>
 #include <form.h>
 #include "cmCursesWidget.h"
