@@ -507,7 +507,8 @@ void CMakeSetupDialog::RunCMake(bool generateProjectFiles)
   // always save the current gui values to disk
   this->SaveCacheFromGUI();
   // Make sure we are working from the cache on disk
-  this->LoadCacheFromDiskToGUI();
+  this->LoadCacheFromDiskToGUI(); 
+  m_OKButton.EnableWindow(false);
   // create a cmake object
   cmake make;
   // create the arguments for the cmake object
@@ -528,7 +529,6 @@ void CMakeSetupDialog::RunCMake(bool generateProjectFiles)
     {
     cmSystemTools::Error(
       "Error in generation process, project files may be invalid");
-    cmSystemTools::ResetErrorOccuredFlag();
     }
   // update the GUI with any new values in the caused by the
   // generation process
@@ -539,12 +539,15 @@ void CMakeSetupDialog::RunCMake(bool generateProjectFiles)
   m_BuildPathChanged = false;
   // put the cursor back
   ::SetCursor(LoadCursor(NULL, IDC_ARROW));
+  cmSystemTools::ResetErrorOccuredFlag();
 }
 
 
 // Callback for build projects button
 void CMakeSetupDialog::OnConfigure() 
 {
+  // enable error messages each time configure is pressed
+  cmSystemTools::EnableMessages();
   this->RunCMake(false);
 }
 
@@ -666,7 +669,7 @@ void CMakeSetupDialog::FillCacheGUIFromCacheManager()
       }
     }
   m_OKButton.EnableWindow(false);
-  if(cache.size() > 0)
+  if(cache.size() > 0 && !cmSystemTools::GetErrorOccuredFlag())
     {
     bool enable = true;
     items = m_CacheEntriesList.GetItems();
@@ -850,6 +853,8 @@ void CMakeSetupDialog::OnCancel()
 
 void CMakeSetupDialog::OnOk() 
 {
+  // enable error messages each time configure is pressed
+  cmSystemTools::EnableMessages();
   m_CacheEntriesList.ClearDirty();
   this->RunCMake(true);
   cmMakefileGenerator::UnRegisterGenerators();

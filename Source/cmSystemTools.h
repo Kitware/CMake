@@ -285,8 +285,11 @@ public:
   ///! change directory the the directory specified
   static int ChangeDirectory(const char* dir);
     
+  static void EnableMessages() { s_DisableMessages = false; }
+  static void DisableMessages() { s_DisableMessages = true; }
 private:
   static bool s_ErrorOccured;
+  static bool s_DisableMessages;
   static ErrorCallback s_ErrorCallback;
 };
 

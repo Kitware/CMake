@@ -92,6 +92,7 @@ inline int Chdir(const char* dir)
 #endif
 
 bool cmSystemTools::s_ErrorOccured = false;
+bool cmSystemTools::s_DisableMessages = false;
 
 void (*cmSystemTools::s_ErrorCallback)(const char*, const char*, bool&);
 
@@ -711,14 +712,13 @@ void cmSystemTools::SetErrorCallback(ErrorCallback f)
 
 void cmSystemTools::Message(const char* m1, const char *title)
 {
-  static bool disableMessages = false;
-  if(disableMessages)
+  if(s_DisableMessages)
     {
     return;
     }
   if(s_ErrorCallback)
     {
-    (*s_ErrorCallback)(m1, title, disableMessages);
+    (*s_ErrorCallback)(m1, title, s_DisableMessages);
     return;
     }
   else

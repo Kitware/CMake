@@ -64,11 +64,13 @@ public:
    * the CMakeLists.txt file.
    */
   virtual bool InitialPass(std::vector<std::string> const& args);
-
+  
+  ///! 
+  virtual void FinalPass();
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "MESSAGE";}
+  virtual const char* GetName() { return "VARIABLE_REQUIRES";}
 
   /**
    * Succinct documentation.
@@ -84,20 +86,23 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "VARIABLE_REQUIRES(TEST_VARIBLE RESULT_VARIBLE\"Error Message\" "
+      "VARIABLE_REQUIRES(TEST_VARIBLE RESULT_VARIBLE "
       "REQUIRED_VARIABLE1 REQUIRED_VARIABLE2 ...) "
       "The first argument (TEST_VARIABLE) is the name of the varible to be "
       "tested, if that varible is false nothing else is done. If "
       "TEST_VARIABLE is true, then "
-      "The next arguemnt (RESULT_VARIABLE) is a vairable that is set to true "
+      "the next arguemnt (RESULT_VARIABLE) is a vairable that is set to true "
       "if all the "
-      "required variables are set, the next argument " 
-      "is a message to be displayed if required varibles are not set. "
+      "required variables are set." 
       "The rest of the arguments are varibles that must be true or not "
       "set to NOTFOUND to avoid an error.  ";
     }
   
   cmTypeMacro(cmVariableRequiresCommand, cmCommand);
+private:
+  std::string m_ErrorMessage;
+  std::vector<std::string> m_Arguments;
+  bool m_RequirementsMet;
 };
 
 

@@ -44,29 +44,50 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // cmLibraryCommand
 bool cmVariableRequiresCommand::InitialPass(std::vector<std::string> const& args)
 {
-  if(args.size() < 4 )
+  if(args.size() < 3 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  std::string testVarible = args[0]; 
-  if(m_Makefile->IsON(testVarible.c_str()))
-    {
-    return true;
-    }
-  std::string resultVarible = args[1];
-  std::string message = args[2];
-  bool requirementsMet = true;
-  std::string notSet;
-  for(int i = 3; i < args.size(); ++i)
-    {
-    if(!m_Makefile->IsOn(args[i].c_str()))
-      {
-      requirementsMet = false;
-      notSet += args[i];
-      notSet += " ";
-      }
-    }
+  m_Arguments = args;
   return true;
 }
 
+void cmVariableRequiresCommand::FinalPass()
+{
+  std::string testVarible = m_Arguments[0]; 
+  if(!m_Makefile->IsOn(testVarible.c_str()))
+    {
+    return;
+    }
+  std::string resultVarible = m_Arguments[1];
+  bool requirementsMet = true;
+  std::string notSet;
+  for(int i = 2; i < m_Arguments.size(); ++i)
+    {
+    if(!m_Makefile->IsOn(m_Arguments[i].c_str()))
+      {
+      requirementsMet = false;
+      notSet += m_Arguments[i];
+      notSet += "\n";
+      }
+    }
+  const char* reqVar = m_Makefile->GetDefinition(resultVarible.c_str());
+  // if reqVar is unset, then set it to requirementsMet 
+  // if reqVar is set to true, but requirementsMet is false , then
+  // set reqVar to false.
+  if(!reqVar || (!requirementsMet && m_Makefile->IsOn(reqVar)))
+    {
+    m_Makefile->AddDefinition(resultVarible.c_str(), requirementsMet);
+    }
+
+  if(!requirementsMet)
+    {
+    std::string message = "Variable assertion failed:\n";
+    message += testVarible + " Requires that the following unset varibles are set:\n";
+    message += notSet;
+    message += "\nPlease set them, or set ";
+    message += testVarible + " to false, and re-configure.";
+    cmSystemTools::Error(message.c_str());
+    }
+}

@@ -54,6 +54,7 @@
 #include "cmTargetLinkLibrariesCommand.cxx"
 #include "cmUseMangledMesaCommand.cxx"
 #include "cmUtilitySourceCommand.cxx"
+#include "cmVariableRequiresCommand.cxx"
 #include "cmVTKWrapJavaCommand.cxx"
 #include "cmVTKWrapPythonCommand.cxx"
 #include "cmVTKWrapTclCommand.cxx"
@@ -115,6 +116,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmTargetLinkLibrariesCommand);
   commands.push_back(new cmUseMangledMesaCommand);
   commands.push_back(new cmUtilitySourceCommand);
+  commands.push_back(new cmVariableRequiresCommand);
   commands.push_back(new cmVTKWrapJavaCommand);
   commands.push_back(new cmVTKWrapPythonCommand);
   commands.push_back(new cmVTKWrapTclCommand);
