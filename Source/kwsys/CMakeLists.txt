@@ -4,6 +4,19 @@ IF(NOT KWSYS_NAMESPACE)
 ENDIF(NOT KWSYS_NAMESPACE)
 
 PROJECT(${KWSYS_NAMESPACE})
+
+# Work-around for CMake 1.6.7 bug in custom command dependencies when
+# there is no executable output path.
+IF(NOT EXECUTABLE_OUTPUT_PATH)
+  SET(EXECUTABLE_OUTPUT_PATH "${PROJECT_BINARY_DIR}" CACHE PATH
+      "Output directory for executables.")
+ENDIF(NOT EXECUTABLE_OUTPUT_PATH)
+
+# Choose a default directory for the headers if none is given.
+IF(NOT KWSYS_HEADER_DIR)
+  SET(KWSYS_HEADER_DIR "${PROJECT_BINARY_DIR}/${KWSYS_NAMESPACE}")
+ENDIF(NOT KWSYS_HEADER_DIR)
+
 INCLUDE(${CMAKE_ROOT}/Modules/CheckIncludeFileCXX.cmake)
 INCLUDE(${CMAKE_ROOT}/Modules/TestForSTDNamespace.cmake)
 INCLUDE(${CMAKE_ROOT}/Modules/TestForANSIForScope.cmake)
@@ -50,32 +63,32 @@ SET(KWSYS_INCLUDES)
 FOREACH(c ${CLASSES})
   SET(SRCS ${SRCS} ${c}.cxx)
   CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/${c}.hxx.in
-                 ${PROJECT_BINARY_DIR}/../${KWSYS_NAMESPACE}/${c}.hxx
+                 ${KWSYS_HEADER_DIR}/${c}.hxx
                  @ONLY IMMEDIATE)
   SET(KWSYS_INCLUDES ${KWSYS_INCLUDES}
-      ${PROJECT_BINARY_DIR}/../${KWSYS_NAMESPACE}/${c}.hxx)
+      ${KWSYS_HEADER_DIR}/${c}.hxx)
 ENDFOREACH(c)
 
 FOREACH(h ${H})
   CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/${h}.h.in
-                 ${PROJECT_BINARY_DIR}/../${KWSYS_NAMESPACE}/${h}.h
+                 ${KWSYS_HEADER_DIR}/${h}.h
                  @ONLY IMMEDIATE)
   SET(KWSYS_INCLUDES ${KWSYS_INCLUDES}
-      ${PROJECT_BINARY_DIR}/../${KWSYS_NAMESPACE}/${h}.h)
+      ${KWSYS_HEADER_DIR}/${h}.h)
 ENDFOREACH(h)
 
 FOREACH(h ${HXX})
   CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/${h}.hxx.in
-                 ${PROJECT_BINARY_DIR}/../${KWSYS_NAMESPACE}/${h}.hxx
+                 ${KWSYS_HEADER_DIR}/${h}.hxx
                  @ONLY IMMEDIATE)
   SET(KWSYS_INCLUDES ${KWSYS_INCLUDES}
-      ${PROJECT_BINARY_DIR}/../${KWSYS_NAMESPACE}/${h}.hxx)
+      ${KWSYS_HEADER_DIR}/${h}.hxx)
 ENDFOREACH(h)
 
 ADD_LIBRARY(${KWSYS_NAMESPACE} ${SRCS})
 
 ADD_DEFINITIONS("-DKWSYS_NAMESPACE=${KWSYS_NAMESPACE}")
-INCLUDE_DIRECTORIES(BEFORE ${PROJECT_BINARY_DIR}/../${KWSYS_NAMESPACE})
+INCLUDE_DIRECTORIES(BEFORE ${KWSYS_HEADER_DIR})
 
 IF(KWSYS_LIBRARY_INSTALL_DIR)
   INSTALL_TARGETS(${KWSYS_LIBRARY_INSTALL_DIR} ${KWSYS_NAMESPACE})
@@ -92,26 +105,26 @@ FOREACH(header algorithm deque iterator list map numeric queue set stack string
                utility vector)
   SET(KWSYS_STL_HEADER "${header}")
   CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/kwsys_std.h.in
-                 ${PROJECT_BINARY_DIR}/../${KWSYS_NAMESPACE}/std/${header}
+                 ${KWSYS_HEADER_DIR}/std/${header}
                  @ONLY IMMEDIATE)
   IF(KWSYS_INCLUDE_INSTALL_DIR)
     INSTALL_FILES(${KWSYS_INCLUDE_INSTALL_DIR}/${KWSYS_NAMESPACE}
-      FILES ${PROJECT_BINARY_DIR}/../${KWSYS_NAMESPACE}/std/${header})
+      FILES ${KWSYS_HEADER_DIR}/std/${header})
   ENDIF(KWSYS_INCLUDE_INSTALL_DIR)
 ENDFOREACH(header)
 
 FOREACH(header iostream fstream sstream iosfwd)
   CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/kwsys_std_${header}.h.in
-                 ${PROJECT_BINARY_DIR}/../${KWSYS_NAMESPACE}/std/${header}
+                 ${KWSYS_HEADER_DIR}/std/${header}
                  @ONLY IMMEDIATE)
   IF(KWSYS_INCLUDE_INSTALL_DIR)
     INSTALL_FILES(${KWSYS_INCLUDE_INSTALL_DIR}/${KWSYS_NAMESPACE}
-      FILES ${PROJECT_BINARY_DIR}/../${KWSYS_NAMESPACE}/std/${header})
+      FILES ${KWSYS_HEADER_DIR}/std/${header})
   ENDIF(KWSYS_INCLUDE_INSTALL_DIR)
 ENDFOREACH(header)
 
 IF(KWSYS_DEFAULTS)
-  INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/..)
+  INCLUDE_DIRECTORIES(${KWSYS_HEADER_DIR}/..)
   ADD_EXECUTABLE(test1 test1.cxx)
   TARGET_LINK_LIBRARIES(test1 ${KWSYS_NAMESPACE})
 ENDIF(KWSYS_DEFAULTS)
@@ -138,14 +151,6 @@ IF(NOT UNIX)
 	   ${KWSYS_NAMESPACE} ProcessFwd9x
       DEPENDS ${CMD} ${FWD})
   ELSE("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" GREATER 1.6)
-    # Dependency work-around for cmake 1.6.7 bug.
-    SET(DEP ${CMD} ${FWD})
-    IF(NOT EXECUTABLE_OUTPUT_PATH)
-      IF(CMAKE_GENERATOR MATCHES "Borland Makefiles")
-	SET(DEP ${KWSYS_NAMESPACE}EncodeExecutable.exe ${KWSYS_NAMESPACE}ProcessFwd9x.exe)
-      ENDIF(CMAKE_GENERATOR MATCHES "Borland Makefiles")
-    ENDIF(NOT EXECUTABLE_OUTPUT_PATH)
-
     ADD_CUSTOM_COMMAND(
       TARGET ${KWSYS_NAMESPACE}
       SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/ProcessFwd9x.c
@@ -153,7 +158,7 @@ IF(NOT UNIX)
       ARGS ${FWD} ${CMAKE_CURRENT_BINARY_DIR}/${KWSYS_NAMESPACE}ProcessFwd9xEnc.c
 	   ${KWSYS_NAMESPACE} ProcessFwd9x
       OUTPUTS ${CMAKE_CURRENT_BINARY_DIR}/${KWSYS_NAMESPACE}ProcessFwd9xEnc.c
-      DEPENDS ${DEP})
+      DEPENDS ${CMD} ${FWD})
   ENDIF("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" GREATER 1.6)
   ADD_DEPENDENCIES(${KWSYS_NAMESPACE} ${KWSYS_NAMESPACE}ProcessFwd9x
                    ${KWSYS_NAMESPACE}EncodeExecutable)
