@@ -261,6 +261,7 @@ class cmake
   ///! Get the list of files written by CMake using FILE(WRITE / WRITE_FILE
   void AddWrittenFile(const char* file);
   bool HasWrittenFile(const char* file);
+  void CleanupWrittenFiles();
 
 protected:
   typedef cmGlobalGenerator* (*CreateGeneratorFunctionType)();

@@ -1065,6 +1065,8 @@ int cmake::Configure()
     m_GlobalGenerator->ClearEnabledLanguages();
     }
   
+  this->CleanupWrittenFiles();
+
   // actually do the configure
   m_GlobalGenerator->Configure();
   
@@ -1425,4 +1427,9 @@ void cmake::AddWrittenFile(const char* file)
 bool cmake::HasWrittenFile(const char* file)
 {
   return m_WrittenFiles.find(file) != m_WrittenFiles.end();
+}
+
+void cmake::CleanupWrittenFiles()
+{
+  m_WrittenFiles.clear();
 }
