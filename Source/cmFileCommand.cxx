@@ -414,6 +414,14 @@ bool cmFileCommand::HandleInstallCommand(
     return false;
     }
 
+  const char* manifest_files = 
+    m_Makefile->GetDefinition("CMAKE_INSTALL_MANIFEST_FILES");
+  std::string smanifest_files;
+  if ( manifest_files )
+    {
+    smanifest_files = manifest_files;
+    }
+
   for ( i = 0; i < files.size(); i ++ )
     {
     std::string destfile 
@@ -475,6 +483,7 @@ bool cmFileCommand::HandleInstallCommand(
           {
           perror("problem doing chmod.");
           }
+        smanifest_files += ";" + destfile;
         }
       }
     else
@@ -488,6 +497,8 @@ bool cmFileCommand::HandleInstallCommand(
         }
       }
     }
+  m_Makefile->AddDefinition("CMAKE_INSTALL_MANIFEST_FILES",
+    smanifest_files.c_str());
 
   return true;
 }

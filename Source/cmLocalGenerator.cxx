@@ -77,7 +77,16 @@ void cmLocalGenerator::GenerateInstallRules()
     }
 
   std::string file = m_Makefile->GetStartOutputDirectory();
+  std::string homedir = m_Makefile->GetHomeOutputDirectory();
+  std::string currdir = m_Makefile->GetCurrentOutputDirectory();
   cmSystemTools::ConvertToUnixSlashes(file);
+  cmSystemTools::ConvertToUnixSlashes(homedir);
+  cmSystemTools::ConvertToUnixSlashes(currdir);
+  int toplevel_install = 0;
+  if ( currdir == homedir )
+    {
+    toplevel_install = 1;
+    }
   file += "/cmake_install.cmake";
   cmGeneratedFileStream tempFile(file.c_str());
   std::ostream&  fout = tempFile.GetStream();
@@ -253,6 +262,13 @@ void cmLocalGenerator::GenerateInstallRules()
            << "/cmake_install.cmake)" << std::endl;
       }
     fout << std::endl;;
+    }
+  if ( toplevel_install )
+    {
+    fout << "FOREACH(file ${CMAKE_INSTALL_MANIFEST_FILES})" << std::endl
+      << "  FILE(APPEND \"" << homedir.c_str() << "/install_manifest.txt\" "
+      << "\"${file}\\n\")" << std::endl
+      << "ENDFOREACH(file)" << std::endl;
     }
 }
 
