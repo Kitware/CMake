@@ -3,7 +3,13 @@ AC_INIT()
 
 AC_CONFIG_HEADER(Source/cmConfigure.h)
 
+# find make to use to build cmake, prefer gmake
+AC_PATH_PROGS(RUNMAKE, gmake make)
 
+fullSrcDir=`cd $srcdir; pwd`
+CMAKE_ROOT_DIR=$fullSrcDir
+
+if test "x$BUILD_CMAKE_IN_SUBDIR" = "xtrue"; then
 
 #
 # check for some programs we use
@@ -22,8 +28,6 @@ AC_PROG_CXX
 CFLAGS=$save_CFLAGS
 CXXFLAGS=$save_CXXFLAGS
 
-fullSrcDir=`cd $srcdir; pwd`
-CMAKE_ROOT_DIR=$fullSrcDir
 AC_SUBST(CMAKE_ROOT_DIR)
 
 
@@ -190,13 +194,35 @@ if test $ac_cv_prog_gxx = no; then
   CXXFLAGS="$CXXFLAGS_ORIG"
 fi
 
-# find make to use to build cmake, prefer gmake
-AC_PATH_PROGS(RUNMAKE, gmake make)
 
 AC_OUTPUT(Source/InitialConfigureFlags.cmake Makefile Source/Makefile)
 # build cmake
 $RUNMAKE 
-# run cmake 
-./Source/cmake $fullSrcDir
-# run cmake depends
-$RUNMAKE depend
+
+else
+  PRGNAME=configure # Should be `basename $0`
+  DIRNAME=Bootstrap
+
+  # Check if the bootstrap directory already exists.
+  if test -d Bootstrap; then
+    :
+  else
+    # if it does not create one
+    mkdir Bootstrap
+  fi
+  if (
+    # Build bootstrap cmake
+    cd Bootstrap
+    echo "Bootstrapping to directory `pwd`"
+    BUILD_CMAKE_IN_SUBDIR=true $CMAKE_ROOT_DIR/$PRGNAME $ac_configure_args
+  ); then
+    # run cmake 
+    Bootstrap/Source/cmake $fullSrcDir
+
+    # run cmake depends
+    $RUNMAKE depend
+  else
+     echo "Problem bootstrapping CMake"
+     exit 1
+  fi
+fi

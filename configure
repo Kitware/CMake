@@ -524,7 +524,52 @@ fi
 
 
 
+# find make to use to build cmake, prefer gmake
+for ac_prog in gmake make
+do
+# Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
+echo "configure:534: checking for $ac_word" >&5
+if eval "test \"`echo '$''{'ac_cv_path_RUNMAKE'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  case "$RUNMAKE" in
+  /*)
+  ac_cv_path_RUNMAKE="$RUNMAKE" # Let the user override the test with a path.
+  ;;
+  ?:/*)			 
+  ac_cv_path_RUNMAKE="$RUNMAKE" # Let the user override the test with a dos path.
+  ;;
+  *)
+  IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS=":"
+  ac_dummy="$PATH"
+  for ac_dir in $ac_dummy; do 
+    test -z "$ac_dir" && ac_dir=.
+    if test -f $ac_dir/$ac_word; then
+      ac_cv_path_RUNMAKE="$ac_dir/$ac_word"
+      break
+    fi
+  done
+  IFS="$ac_save_ifs"
+  ;;
+esac
+fi
+RUNMAKE="$ac_cv_path_RUNMAKE"
+if test -n "$RUNMAKE"; then
+  echo "$ac_t""$RUNMAKE" 1>&6
+else
+  echo "$ac_t""no" 1>&6
+fi
 
+test -n "$RUNMAKE" && break
+done
+
+
+fullSrcDir=`cd $srcdir; pwd`
+CMAKE_ROOT_DIR=$fullSrcDir
+
+if test "x$BUILD_CMAKE_IN_SUBDIR" = "xtrue"; then
 
 #
 # check for some programs we use
@@ -538,7 +583,7 @@ save_CXXFLAGS=$CXXFLAGS
 # Extract the first word of "gcc", so it can be a program name with args.
 set dummy gcc; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:542: checking for $ac_word" >&5
+echo "configure:587: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CC'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -568,7 +613,7 @@ if test -z "$CC"; then
   # Extract the first word of "cc", so it can be a program name with args.
 set dummy cc; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:572: checking for $ac_word" >&5
+echo "configure:617: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CC'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -619,7 +664,7 @@ fi
       # Extract the first word of "cl", so it can be a program name with args.
 set dummy cl; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:623: checking for $ac_word" >&5
+echo "configure:668: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CC'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -651,7 +696,7 @@ fi
 fi
 
 echo $ac_n "checking whether the C compiler ($CC $CFLAGS $LDFLAGS) works""... $ac_c" 1>&6
-echo "configure:655: checking whether the C compiler ($CC $CFLAGS $LDFLAGS) works" >&5
+echo "configure:700: checking whether the C compiler ($CC $CFLAGS $LDFLAGS) works" >&5
 
 ac_ext=c
 # CFLAGS is not in ac_cpp because -g, -O, etc. are not valid cpp options.
@@ -662,12 +707,12 @@ cross_compiling=$ac_cv_prog_cc_cross
 
 cat > conftest.$ac_ext << EOF
 
-#line 666 "configure"
+#line 711 "configure"
 #include "confdefs.h"
 
 main(){return(0);}
 EOF
-if { (eval echo configure:671: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:716: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   ac_cv_prog_cc_works=yes
   # If we can't run a trivial program, we are probably using a cross compiler.
   if (./conftest; exit) 2>/dev/null; then
@@ -693,12 +738,12 @@ if test $ac_cv_prog_cc_works = no; then
   { echo "configure: error: installation or configuration problem: C compiler cannot create executables." 1>&2; exit 1; }
 fi
 echo $ac_n "checking whether the C compiler ($CC $CFLAGS $LDFLAGS) is a cross-compiler""... $ac_c" 1>&6
-echo "configure:697: checking whether the C compiler ($CC $CFLAGS $LDFLAGS) is a cross-compiler" >&5
+echo "configure:742: checking whether the C compiler ($CC $CFLAGS $LDFLAGS) is a cross-compiler" >&5
 echo "$ac_t""$ac_cv_prog_cc_cross" 1>&6
 cross_compiling=$ac_cv_prog_cc_cross
 
 echo $ac_n "checking whether we are using GNU C""... $ac_c" 1>&6
-echo "configure:702: checking whether we are using GNU C" >&5
+echo "configure:747: checking whether we are using GNU C" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_gcc'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -707,7 +752,7 @@ else
   yes;
 #endif
 EOF
-if { ac_try='${CC-cc} -E conftest.c'; { (eval echo configure:711: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }; } | egrep yes >/dev/null 2>&1; then
+if { ac_try='${CC-cc} -E conftest.c'; { (eval echo configure:756: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }; } | egrep yes >/dev/null 2>&1; then
   ac_cv_prog_gcc=yes
 else
   ac_cv_prog_gcc=no
@@ -726,7 +771,7 @@ ac_test_CFLAGS="${CFLAGS+set}"
 ac_save_CFLAGS="$CFLAGS"
 CFLAGS=
 echo $ac_n "checking whether ${CC-cc} accepts -g""... $ac_c" 1>&6
-echo "configure:730: checking whether ${CC-cc} accepts -g" >&5
+echo "configure:775: checking whether ${CC-cc} accepts -g" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_cc_g'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -762,7 +807,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:766: checking for $ac_word" >&5
+echo "configure:811: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CXX'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -794,7 +839,7 @@ test -n "$CXX" || CXX="gcc"
 
 
 echo $ac_n "checking whether the C++ compiler ($CXX $CXXFLAGS $LDFLAGS) works""... $ac_c" 1>&6
-echo "configure:798: checking whether the C++ compiler ($CXX $CXXFLAGS $LDFLAGS) works" >&5
+echo "configure:843: checking whether the C++ compiler ($CXX $CXXFLAGS $LDFLAGS) works" >&5
 
 ac_ext=C
 # CXXFLAGS is not in ac_cpp because -g, -O, etc. are not valid cpp options.
@@ -805,12 +850,12 @@ cross_compiling=$ac_cv_prog_cxx_cross
 
 cat > conftest.$ac_ext << EOF
 
-#line 809 "configure"
+#line 854 "configure"
 #include "confdefs.h"
 
 int main(){return(0);}
 EOF
-if { (eval echo configure:814: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:859: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   ac_cv_prog_cxx_works=yes
   # If we can't run a trivial program, we are probably using a cross compiler.
   if (./conftest; exit) 2>/dev/null; then
@@ -836,12 +881,12 @@ if test $ac_cv_prog_cxx_works = no; then
   { echo "configure: error: installation or configuration problem: C++ compiler cannot create executables." 1>&2; exit 1; }
 fi
 echo $ac_n "checking whether the C++ compiler ($CXX $CXXFLAGS $LDFLAGS) is a cross-compiler""... $ac_c" 1>&6
-echo "configure:840: checking whether the C++ compiler ($CXX $CXXFLAGS $LDFLAGS) is a cross-compiler" >&5
+echo "configure:885: checking whether the C++ compiler ($CXX $CXXFLAGS $LDFLAGS) is a cross-compiler" >&5
 echo "$ac_t""$ac_cv_prog_cxx_cross" 1>&6
 cross_compiling=$ac_cv_prog_cxx_cross
 
 echo $ac_n "checking whether we are using GNU C++""... $ac_c" 1>&6
-echo "configure:845: checking whether we are using GNU C++" >&5
+echo "configure:890: checking whether we are using GNU C++" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_gxx'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -850,7 +895,7 @@ else
   yes;
 #endif
 EOF
-if { ac_try='${CXX-g++} -E conftest.C'; { (eval echo configure:854: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }; } | egrep yes >/dev/null 2>&1; then
+if { ac_try='${CXX-g++} -E conftest.C'; { (eval echo configure:899: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }; } | egrep yes >/dev/null 2>&1; then
   ac_cv_prog_gxx=yes
 else
   ac_cv_prog_gxx=no
@@ -869,7 +914,7 @@ ac_test_CXXFLAGS="${CXXFLAGS+set}"
 ac_save_CXXFLAGS="$CXXFLAGS"
 CXXFLAGS=
 echo $ac_n "checking whether ${CXX-g++} accepts -g""... $ac_c" 1>&6
-echo "configure:873: checking whether ${CXX-g++} accepts -g" >&5
+echo "configure:918: checking whether ${CXX-g++} accepts -g" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_cxx_g'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -906,8 +951,6 @@ fi
 CFLAGS=$save_CFLAGS
 CXXFLAGS=$save_CXXFLAGS
 
-fullSrcDir=`cd $srcdir; pwd`
-CMAKE_ROOT_DIR=$fullSrcDir
 
 
 
@@ -916,7 +959,7 @@ CMAKE_ROOT_DIR=$fullSrcDir
 # there are a few systems, like Next, where this doesn't work.
 
 echo $ac_n "checking system version (for dynamic loading)""... $ac_c" 1>&6
-echo "configure:920: checking system version (for dynamic loading)" >&5
+echo "configure:963: checking system version (for dynamic loading)" >&5
 if test -f /usr/lib/NextStep/software_version; then
   system=NEXTSTEP-`awk '/3/,/3/' /usr/lib/NextStep/software_version`
 else
@@ -955,9 +998,9 @@ case $system in
         CFLAGS_ORIG="$FLAGS"
         CFLAGS="-Aa $CFLAGS"
         echo $ac_n "checking whether ${CC} accepts -Aa""... $ac_c" 1>&6
-echo "configure:959: checking whether ${CC} accepts -Aa" >&5
+echo "configure:1002: checking whether ${CC} accepts -Aa" >&5
         cat > conftest.$ac_ext <<EOF
-#line 961 "configure"
+#line 1004 "configure"
 #include "confdefs.h"
 
         void foo() {}
@@ -966,7 +1009,7 @@ int main() {
 
 ; return 0; }
 EOF
-if { (eval echo configure:970: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:1013: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   
         echo "$ac_t""yes" 1>&6
@@ -999,7 +1042,7 @@ rm -f conftest*
         CXXFLAGS_ORIG="$CXXFLAGS"
         CXXFLAGS="-std strict_ansi -nopure_cname $CXXFLAGS"
         echo $ac_n "checking whether ${CXX} accepts -std strict_ansi -nopure_cname""... $ac_c" 1>&6
-echo "configure:1003: checking whether ${CXX} accepts -std strict_ansi -nopure_cname" >&5
+echo "configure:1046: checking whether ${CXX} accepts -std strict_ansi -nopure_cname" >&5
         
         ac_ext=C
 # CXXFLAGS is not in ac_cpp because -g, -O, etc. are not valid cpp options.
@@ -1009,7 +1052,7 @@ ac_link='${CXX-g++} -o conftest${ac_exeext} $CXXFLAGS $CPPFLAGS $LDFLAGS conftes
 cross_compiling=$ac_cv_prog_cxx_cross
 
         cat > conftest.$ac_ext <<EOF
-#line 1013 "configure"
+#line 1056 "configure"
 #include "confdefs.h"
 
         void foo() {}
@@ -1018,7 +1061,7 @@ int main() {
 
 ; return 0; }
 EOF
-if { (eval echo configure:1022: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:1065: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   
         echo "$ac_t""yes" 1>&6
@@ -1053,7 +1096,7 @@ if test $ac_cv_prog_gxx = no; then
   CXXFLAGS_ORIG="$CXXFLAGS"
   CXXFLAGS="$CMAKE_ANSI_CXXFLAGS $CXXFLAGS"
   echo $ac_n "checking ansi standard C++ stream headers ""... $ac_c" 1>&6
-echo "configure:1057: checking ansi standard C++ stream headers " >&5 
+echo "configure:1100: checking ansi standard C++ stream headers " >&5 
   
   ac_ext=C
 # CXXFLAGS is not in ac_cpp because -g, -O, etc. are not valid cpp options.
@@ -1063,7 +1106,7 @@ ac_link='${CXX-g++} -o conftest${ac_exeext} $CXXFLAGS $CPPFLAGS $LDFLAGS conftes
 cross_compiling=$ac_cv_prog_cxx_cross
 
   cat > conftest.$ac_ext <<EOF
-#line 1067 "configure"
+#line 1110 "configure"
 #include "confdefs.h"
 
   #include <iostream>
@@ -1072,7 +1115,7 @@ int main() {
 
 ; return 0; }
 EOF
-if { (eval echo configure:1076: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:1119: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   
   echo "$ac_t""yes" 1>&6
@@ -1104,7 +1147,7 @@ fi
 CXXFLAGS_ORIG="$CXXFLAGS"
 CXXFLAGS="$CMAKE_ANSI_CXXFLAGS $CXXFLAGS"
 echo $ac_n "checking for ansi standard C++ stringstream""... $ac_c" 1>&6
-echo "configure:1108: checking for ansi standard C++ stringstream" >&5
+echo "configure:1151: checking for ansi standard C++ stringstream" >&5
 
 ac_ext=C
 # CXXFLAGS is not in ac_cpp because -g, -O, etc. are not valid cpp options.
@@ -1114,7 +1157,7 @@ ac_link='${CXX-g++} -o conftest${ac_exeext} $CXXFLAGS $CPPFLAGS $LDFLAGS conftes
 cross_compiling=$ac_cv_prog_cxx_cross
 
 cat > conftest.$ac_ext <<EOF
-#line 1118 "configure"
+#line 1161 "configure"
 #include "confdefs.h"
 
 #include <sstream>
@@ -1123,7 +1166,7 @@ int main() {
 
 ; return 0; }
 EOF
-if { (eval echo configure:1127: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:1170: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   
 echo "$ac_t""yes" 1>&6
@@ -1155,7 +1198,7 @@ if test $ac_cv_prog_gxx = no; then
   CXXFLAGS_ORIG="$CXXFLAGS"
   CXXFLAGS="$CMAKE_ANSI_CXXFLAGS $CXXFLAGS"
   echo $ac_n "checking whether the std namespace is supported""... $ac_c" 1>&6
-echo "configure:1159: checking whether the std namespace is supported" >&5
+echo "configure:1202: checking whether the std namespace is supported" >&5
   
   ac_ext=C
 # CXXFLAGS is not in ac_cpp because -g, -O, etc. are not valid cpp options.
@@ -1165,7 +1208,7 @@ ac_link='${CXX-g++} -o conftest${ac_exeext} $CXXFLAGS $CPPFLAGS $LDFLAGS conftes
 cross_compiling=$ac_cv_prog_cxx_cross
 
   cat > conftest.$ac_ext <<EOF
-#line 1169 "configure"
+#line 1212 "configure"
 #include "confdefs.h"
 
   #include <list>
@@ -1175,7 +1218,7 @@ int main() {
 
 ; return 0; }
 EOF
-if { (eval echo configure:1179: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:1222: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   
   echo "$ac_t""yes" 1>&6
@@ -1208,7 +1251,7 @@ if test $ac_cv_prog_gxx = no; then
   CXXFLAGS_ORIG="$CXXFLAGS"
   CXXFLAGS="$CMAKE_ANSI_CXXFLAGS $CXXFLAGS"
   echo $ac_n "checking ansi for scope support""... $ac_c" 1>&6
-echo "configure:1212: checking ansi for scope support" >&5
+echo "configure:1255: checking ansi for scope support" >&5
   
   ac_ext=C
 # CXXFLAGS is not in ac_cpp because -g, -O, etc. are not valid cpp options.
@@ -1218,7 +1261,7 @@ ac_link='${CXX-g++} -o conftest${ac_exeext} $CXXFLAGS $CPPFLAGS $LDFLAGS conftes
 cross_compiling=$ac_cv_prog_cxx_cross
 
   cat > conftest.$ac_ext <<EOF
-#line 1222 "configure"
+#line 1265 "configure"
 #include "confdefs.h"
 
   void foo() { for(int i;;); for(int i;;); }
@@ -1227,7 +1270,7 @@ int main() {
 
 ; return 0; }
 EOF
-if { (eval echo configure:1231: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:1274: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   
   echo "$ac_t""yes" 1>&6
@@ -1254,47 +1297,6 @@ cross_compiling=$ac_cv_prog_cc_cross
 
   CXXFLAGS="$CXXFLAGS_ORIG"
 fi
-
-# find make to use to build cmake, prefer gmake
-for ac_prog in gmake make
-do
-# Extract the first word of "$ac_prog", so it can be a program name with args.
-set dummy $ac_prog; ac_word=$2
-echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:1265: checking for $ac_word" >&5
-if eval "test \"`echo '$''{'ac_cv_path_RUNMAKE'+set}'`\" = set"; then
-  echo $ac_n "(cached) $ac_c" 1>&6
-else
-  case "$RUNMAKE" in
-  /*)
-  ac_cv_path_RUNMAKE="$RUNMAKE" # Let the user override the test with a path.
-  ;;
-  ?:/*)			 
-  ac_cv_path_RUNMAKE="$RUNMAKE" # Let the user override the test with a dos path.
-  ;;
-  *)
-  IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS=":"
-  ac_dummy="$PATH"
-  for ac_dir in $ac_dummy; do 
-    test -z "$ac_dir" && ac_dir=.
-    if test -f $ac_dir/$ac_word; then
-      ac_cv_path_RUNMAKE="$ac_dir/$ac_word"
-      break
-    fi
-  done
-  IFS="$ac_save_ifs"
-  ;;
-esac
-fi
-RUNMAKE="$ac_cv_path_RUNMAKE"
-if test -n "$RUNMAKE"; then
-  echo "$ac_t""$RUNMAKE" 1>&6
-else
-  echo "$ac_t""no" 1>&6
-fi
-
-test -n "$RUNMAKE" && break
-done
 
 
 trap '' 1 2 15
@@ -1429,13 +1431,13 @@ s%@includedir@%$includedir%g
 s%@oldincludedir@%$oldincludedir%g
 s%@infodir@%$infodir%g
 s%@mandir@%$mandir%g
+s%@RUNMAKE@%$RUNMAKE%g
 s%@CC@%$CC%g
 s%@CXX@%$CXX%g
 s%@CMAKE_ROOT_DIR@%$CMAKE_ROOT_DIR%g
 s%@CMAKE_CONFIG_DIR@%$CMAKE_CONFIG_DIR%g
 s%@CMAKE_ANSI_CFLAGS@%$CMAKE_ANSI_CFLAGS%g
 s%@CMAKE_ANSI_CXXFLAGS@%$CMAKE_ANSI_CXXFLAGS%g
-s%@RUNMAKE@%$RUNMAKE%g
 
 CEOF
 EOF
@@ -1652,7 +1654,31 @@ test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
 
 # build cmake
 $RUNMAKE 
-# run cmake 
-./Source/cmake $fullSrcDir
-# run cmake depends
-$RUNMAKE depend
+
+else
+  PRGNAME=configure # Should be `basename $0`
+  DIRNAME=Bootstrap
+
+  # Check if the bootstrap directory already exists.
+  if test -d Bootstrap; then
+    :
+  else
+    # if it does not create one
+    mkdir Bootstrap
+  fi
+  if (
+    # Build bootstrap cmake
+    cd Bootstrap
+    echo "Bootstrapping to directory `pwd`"
+    BUILD_CMAKE_IN_SUBDIR=true $CMAKE_ROOT_DIR/$PRGNAME $ac_configure_args
+  ); then
+    # run cmake 
+    Bootstrap/Source/cmake $fullSrcDir
+
+    # run cmake depends
+    $RUNMAKE depend
+  else
+     echo "Problem bootstrapping CMake"
+     exit 1
+  fi
+fi
