@@ -53,7 +53,7 @@ void cmGlobalGenerator::EnableLanguage(const char* lang,
       "Generator implementation error, "
       "all generators must specify m_FindMakeProgramFile");
     }
-  std::string root = mf->GetDefinition("CMAKE_ROOT");
+  std::string root = mf->GetRequiredDefinition("CMAKE_ROOT");
   if(!mf->GetDefinition("CMAKE_MAKE_PROGRAM")
      || cmSystemTools::IsOff(mf->GetDefinition("CMAKE_MAKE_PROGRAM")))
     {
@@ -73,7 +73,7 @@ void cmGlobalGenerator::EnableLanguage(const char* lang,
     cmSystemTools::SetFatalErrorOccured();
     return;
     }
-  std::string makeProgram = mf->GetDefinition("CMAKE_MAKE_PROGRAM");
+  std::string makeProgram = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
   // if there are spaces in the make program use short path
   // but do not short path the actual program name, as
   // this can cause trouble with VSExpress

@@ -65,7 +65,7 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args)
       this->SetError("could not find Mac OSX bundle template file.");
       return false;
       }
-    std::string macdir = m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
+    std::string macdir = m_Makefile->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
     if ( macdir.size() == 0 )
       {
       macdir = m_Makefile->GetCurrentOutputDirectory();

@@ -23,7 +23,7 @@
 bool cmAbstractFilesCommand::InitialPass(std::vector<std::string> const& args)
 {
   const char* versionValue
-    = m_Makefile->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
+    = m_Makefile->GetRequiredDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
   if (atof(versionValue) > 1.4)
     {
     this->SetError("The ABSTRACT_FILES command was deprecated in CMake version 1.4 and will be removed in later versions of CMake. You should modify your CMakeLists.txt files to use the SET command instead, or set the cache value of CMAKE_BACKWARDS_COMPATIBILITY to 1.2 or less.\n");

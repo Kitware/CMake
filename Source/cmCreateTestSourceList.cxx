@@ -82,7 +82,7 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args)
   ++i;
 
   std::string configFile = 
-    m_Makefile->GetDefinition("CMAKE_ROOT");
+    m_Makefile->GetRequiredDefinition("CMAKE_ROOT");
   configFile += "/Templates/TestDriver.cxx.in";
   // Create the test driver file
   

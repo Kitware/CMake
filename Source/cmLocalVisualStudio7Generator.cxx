@@ -157,7 +157,7 @@ void cmLocalVisualStudio7Generator::AddVCProjBuildRule()
   argv.push_back(args);
   
   std::string configFile = 
-    m_Makefile->GetDefinition("CMAKE_ROOT");
+    m_Makefile->GetRequiredDefinition("CMAKE_ROOT");
   configFile += "/Templates/CMakeWindowsSystemConfig.cmake";
   std::vector<std::string> listFiles = m_Makefile->GetListFiles();
   bool found = false;
@@ -324,19 +324,19 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   std::string flagsDebugRel = " ";
   if(target.HasCxx())
     {
-    flags = m_Makefile->GetDefinition("CMAKE_CXX_FLAGS");
-    flagsRelease += m_Makefile->GetDefinition("CMAKE_CXX_FLAGS_RELEASE");
-    flagsMinSize += m_Makefile->GetDefinition("CMAKE_CXX_FLAGS_MINSIZEREL");
-    flagsDebug += m_Makefile->GetDefinition("CMAKE_CXX_FLAGS_DEBUG");
-    flagsDebugRel += m_Makefile->GetDefinition("CMAKE_CXX_FLAGS_RELWITHDEBINFO");
+    flags = m_Makefile->GetRequiredDefinition("CMAKE_CXX_FLAGS");
+    flagsRelease += m_Makefile->GetRequiredDefinition("CMAKE_CXX_FLAGS_RELEASE");
+    flagsMinSize += m_Makefile->GetRequiredDefinition("CMAKE_CXX_FLAGS_MINSIZEREL");
+    flagsDebug += m_Makefile->GetRequiredDefinition("CMAKE_CXX_FLAGS_DEBUG");
+    flagsDebugRel += m_Makefile->GetRequiredDefinition("CMAKE_CXX_FLAGS_RELWITHDEBINFO");
     }
   else
     {
-    flags = m_Makefile->GetDefinition("CMAKE_C_FLAGS");
-    flagsRelease += m_Makefile->GetDefinition("CMAKE_C_FLAGS_RELEASE");
-    flagsMinSize += m_Makefile->GetDefinition("CMAKE_C_FLAGS_MINSIZEREL");
-    flagsDebug += m_Makefile->GetDefinition("CMAKE_C_FLAGS_DEBUG");
-    flagsDebugRel += m_Makefile->GetDefinition("CMAKE_C_FLAGS_RELWITHDEBINFO");
+    flags = m_Makefile->GetRequiredDefinition("CMAKE_C_FLAGS");
+    flagsRelease += m_Makefile->GetRequiredDefinition("CMAKE_C_FLAGS_RELEASE");
+    flagsMinSize += m_Makefile->GetRequiredDefinition("CMAKE_C_FLAGS_MINSIZEREL");
+    flagsDebug += m_Makefile->GetRequiredDefinition("CMAKE_C_FLAGS_DEBUG");
+    flagsDebugRel += m_Makefile->GetRequiredDefinition("CMAKE_C_FLAGS_RELWITHDEBINFO");
     }
 
 
@@ -538,15 +538,15 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
   std::string extraLinkOptions;
   if(target.GetType() == cmTarget::EXECUTABLE)
     {
-    extraLinkOptions = m_Makefile->GetDefinition("CMAKE_EXE_LINKER_FLAGS");
+    extraLinkOptions = m_Makefile->GetRequiredDefinition("CMAKE_EXE_LINKER_FLAGS");
     }
   if(target.GetType() == cmTarget::SHARED_LIBRARY)
     {
-    extraLinkOptions = m_Makefile->GetDefinition("CMAKE_SHARED_LINKER_FLAGS");
+    extraLinkOptions = m_Makefile->GetRequiredDefinition("CMAKE_SHARED_LINKER_FLAGS");
     }
   if(target.GetType() == cmTarget::MODULE_LIBRARY)
     {
-    extraLinkOptions = m_Makefile->GetDefinition("CMAKE_MODULE_LINKER_FLAGS");
+    extraLinkOptions = m_Makefile->GetRequiredDefinition("CMAKE_MODULE_LINKER_FLAGS");
     }
   
   const char* targetLinkFlags = target.GetProperty("LINK_FLAGS");
@@ -620,10 +620,10 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
         {
         fout << "\t\t\t\tGenerateDebugInformation=\"TRUE\"\n";
         }
-      if(const char* stacksize = m_Makefile->GetDefinition("CMAKE_CXX_STACK_SIZE"))
+      if(target.HasCxx())
         {
         fout << "\t\t\t\tStackReserveSize=\"" 
-             << stacksize << "\"\n";
+             << m_Makefile->GetRequiredDefinition("CMAKE_CXX_STACK_SIZE") << "\"\n";
         }
       temp = m_LibraryOutputPath;
       temp += configName;
@@ -645,7 +645,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
         }
       fout << "\"\n"
            << "\t\t\t\tAdditionalDependencies=\""
-           << m_Makefile->GetDefinition("CMAKE_STANDARD_LIBRARIES") 
+           << m_Makefile->GetRequiredDefinition("CMAKE_STANDARD_LIBRARIES") 
            << " ";
       this->OutputLibraries(fout, configName, libName, target);
       fout << "\"\n";
@@ -683,11 +683,12 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
         {      
         fout << "\t\t\t\tSubSystem=\"1\"\n";
         }
-      if(const char* stacksize = m_Makefile->GetDefinition("CMAKE_CXX_STACK_SIZE"))
+      if(target.HasCxx())
         {
         fout << "\t\t\t\tStackReserveSize=\"" 
-             << stacksize << "\"/>\n";
+             << m_Makefile->GetRequiredDefinition("CMAKE_CXX_STACK_SIZE") << "\"";
         }
+      fout << "/>\n";
       break;
     case cmTarget::UTILITY:
       break;

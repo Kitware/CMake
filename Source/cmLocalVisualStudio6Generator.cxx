@@ -184,7 +184,7 @@ void cmLocalVisualStudio6Generator::AddDSPBuildRule()
   argv.push_back(args);
 
   std::string configFile = 
-    m_Makefile->GetDefinition("CMAKE_ROOT");
+    m_Makefile->GetRequiredDefinition("CMAKE_ROOT");
   configFile += "/Templates/CMakeWindowsSystemConfig.cmake";
   std::vector<std::string> listFiles = m_Makefile->GetListFiles();
   bool found = false;
@@ -527,7 +527,7 @@ void cmLocalVisualStudio6Generator::SetBuildType(BuildType b,
                                                  const char* libName,
                                                  const cmTarget& target)
 {
-  std::string root= m_Makefile->GetDefinition("CMAKE_ROOT");
+  std::string root= m_Makefile->GetRequiredDefinition("CMAKE_ROOT");
   const char *def= m_Makefile->GetDefinition( "MSPROJECT_TEMPLATE_DIRECTORY");
 
   std::string exportSymbol;
@@ -924,15 +924,15 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
   std::string extraLinkOptions;
   if(target.GetType() == cmTarget::EXECUTABLE)
     {
-    extraLinkOptions = m_Makefile->GetDefinition("CMAKE_EXE_LINKER_FLAGS");
+    extraLinkOptions = m_Makefile->GetRequiredDefinition("CMAKE_EXE_LINKER_FLAGS");
     }
   if(target.GetType() == cmTarget::SHARED_LIBRARY)
     {
-    extraLinkOptions = m_Makefile->GetDefinition("CMAKE_SHARED_LINKER_FLAGS");
+    extraLinkOptions = m_Makefile->GetRequiredDefinition("CMAKE_SHARED_LINKER_FLAGS");
     }
   if(target.GetType() == cmTarget::MODULE_LIBRARY)
     {
-    extraLinkOptions = m_Makefile->GetDefinition("CMAKE_MODULE_LINKER_FLAGS");
+    extraLinkOptions = m_Makefile->GetRequiredDefinition("CMAKE_MODULE_LINKER_FLAGS");
     }
 
   if(extraLinkOptions.size())
@@ -1059,30 +1059,30 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
     // if CXX is on and the target contains cxx code then add the cxx flags
     if ( gen->GetLanguageEnabled("CXX") && target.HasCxx() )
       {
-      flagsRelease = m_Makefile->GetDefinition("CMAKE_CXX_FLAGS_RELEASE");
+      flagsRelease = m_Makefile->GetRequiredDefinition("CMAKE_CXX_FLAGS_RELEASE");
       flagsRelease += " -DCMAKE_INTDIR=\\\"Release\\\" ";
-      flagsMinSize = m_Makefile->GetDefinition("CMAKE_CXX_FLAGS_MINSIZEREL");
+      flagsMinSize = m_Makefile->GetRequiredDefinition("CMAKE_CXX_FLAGS_MINSIZEREL");
       flagsMinSize += " -DCMAKE_INTDIR=\\\"MinSizeRel\\\" ";
-      flagsDebug = m_Makefile->GetDefinition("CMAKE_CXX_FLAGS_DEBUG");
+      flagsDebug = m_Makefile->GetRequiredDefinition("CMAKE_CXX_FLAGS_DEBUG");
       flagsDebug += " -DCMAKE_INTDIR=\\\"Debug\\\" ";
-      flagsDebugRel = m_Makefile->GetDefinition("CMAKE_CXX_FLAGS_RELWITHDEBINFO");
+      flagsDebugRel = m_Makefile->GetRequiredDefinition("CMAKE_CXX_FLAGS_RELWITHDEBINFO");
       flagsDebugRel += " -DCMAKE_INTDIR=\\\"RelWithDebInfo\\\" ";
       flags = " ";
-      flags = m_Makefile->GetDefinition("CMAKE_CXX_FLAGS");
+      flags = m_Makefile->GetRequiredDefinition("CMAKE_CXX_FLAGS");
       }
     // if C and the target is not CXX
     else if(gen->GetLanguageEnabled("C") && !target.HasCxx())
       {
-      flagsRelease += m_Makefile->GetDefinition("CMAKE_C_FLAGS_RELEASE");
+      flagsRelease += m_Makefile->GetRequiredDefinition("CMAKE_C_FLAGS_RELEASE");
       flagsRelease += " -DCMAKE_INTDIR=\\\"Release\\\"";
-      flagsMinSize += m_Makefile->GetDefinition("CMAKE_C_FLAGS_MINSIZEREL");
+      flagsMinSize += m_Makefile->GetRequiredDefinition("CMAKE_C_FLAGS_MINSIZEREL");
       flagsMinSize += " -DCMAKE_INTDIR=\\\"MinSizeRel\\\"";
-      flagsDebug += m_Makefile->GetDefinition("CMAKE_C_FLAGS_DEBUG");
+      flagsDebug += m_Makefile->GetRequiredDefinition("CMAKE_C_FLAGS_DEBUG");
       flagsDebug += " -DCMAKE_INTDIR=\\\"Debug\\\"";
-      flagsDebugRel += m_Makefile->GetDefinition("CMAKE_C_FLAGS_RELWITHDEBINFO");
+      flagsDebugRel += m_Makefile->GetRequiredDefinition("CMAKE_C_FLAGS_RELWITHDEBINFO");
       flagsDebugRel += " -DCMAKE_INTDIR=\\\"RelWithDebInfo\\\"";
       flags = " ";
-      flags = m_Makefile->GetDefinition("CMAKE_C_FLAGS");
+      flags = m_Makefile->GetRequiredDefinition("CMAKE_C_FLAGS");
       }
     // if unicode is not found, then add -D_MBCS
     if(flags.find("D_UNICODE") == flags.npos)

@@ -43,7 +43,7 @@ void cmGlobalUnixMakefileGenerator::EnableLanguage(const char* lang,
       cmSystemTools::Error("CMAKE_C_COMPILER not set, after EnableLanguage");
       return;
       }
-    const char* cc = mf->GetDefinition("CMAKE_C_COMPILER");
+    const char* cc = mf->GetRequiredDefinition("CMAKE_C_COMPILER");
     std::string path = cmSystemTools::FindProgram(cc);
     if(path.size() == 0)
       {
@@ -64,7 +64,7 @@ void cmGlobalUnixMakefileGenerator::EnableLanguage(const char* lang,
       }
     if(strcmp(lang, "CXX") == 0)
       {
-      const char* cxx = mf->GetDefinition("CMAKE_CXX_COMPILER");
+      const char* cxx = mf->GetRequiredDefinition("CMAKE_CXX_COMPILER");
       path = cmSystemTools::FindProgram(cxx);
       if(path.size() == 0)
         {
