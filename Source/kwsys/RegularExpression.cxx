@@ -413,7 +413,7 @@ static char* reg (int paren, int *flagp) {
 
     // Make an OPEN node, if parenthesized.
     if (paren) {
-        if (regnpar >= RegularExpressionNSUBEXP) {
+        if (regnpar >=  RegularExpression::NSUBEXP) {
           //RAISE Error, SYM(RegularExpression), SYM(Too_Many_Parens),
           printf ("RegularExpression::compile(): Too many parentheses.\n");
           return 0;
@@ -925,7 +925,7 @@ static int regtry (const char* string, const char* *start,
 
     sp1 = start;
     ep = end;
-    for (i = RegularExpressionNSUBEXP; i > 0; i--) {
+    for (i = RegularExpression::NSUBEXP; i > 0; i--) {
         *sp1++ = 0;
         *ep++ = 0;
     }

@@ -17,7 +17,7 @@
 #ifndef @KWSYS_NAMESPACE@_Directory_hxx
 #define @KWSYS_NAMESPACE@_Directory_hxx
 
-#include <@KWSYS_NAMESPACE@/Configure.hxx>
+#include <@KWSYS_NAMESPACE@/Configure.h>
 
 namespace @KWSYS_NAMESPACE@
 {
@@ -32,7 +32,7 @@ class DirectoryInternals;
  *
  * Directory currently works with Windows and Unix operating systems.
  */
-class Directory 
+class @KWSYS_NAMESPACE@_EXPORT Directory 
 {
 public:
   Directory();

@@ -16,6 +16,8 @@
 =========================================================================*/
 #include <Directory.hxx>
 
+#include <Configure.hxx>
+
 #include <std/string>
 #include <std/vector>
 

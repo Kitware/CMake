@@ -51,7 +51,7 @@ Q190351 and Q150956.
 /* The maximum amount to read from a pipe at a time.  */
 #define CMPE_PIPE_BUFFER_SIZE 1024
 
-#define kwsysEncodedWriteArrayProcessFwd kwsys(EncodedWriteArrayProcessFwd)
+#define kwsysEncodedWriteArrayProcessFwd9x kwsys(EncodedWriteArrayProcessFwd9x)
 
 typedef LARGE_INTEGER kwsysProcessTime;
 
@@ -72,7 +72,7 @@ static kwsysProcessTime kwsysProcessTimeFromDouble(double d);
 static int kwsysProcessTimeLess(kwsysProcessTime in1, kwsysProcessTime in2);
 static kwsysProcessTime kwsysProcessTimeAdd(kwsysProcessTime in1, kwsysProcessTime in2);
 static kwsysProcessTime kwsysProcessTimeSubtract(kwsysProcessTime in1, kwsysProcessTime in2);
-extern int kwsysEncodedWriteArrayProcessFwd9x(const char* fname);
+extern kwsysEXPORT int kwsysEncodedWriteArrayProcessFwd9x(const char* fname);
 
 /*--------------------------------------------------------------------------*/
 /* A structure containing data for each pipe's thread.  */

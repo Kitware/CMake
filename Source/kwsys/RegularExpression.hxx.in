@@ -35,6 +35,7 @@
 #ifndef @KWSYS_NAMESPACE@_RegularExpression_hxx
 #define @KWSYS_NAMESPACE@_RegularExpression_hxx
 
+#include <@KWSYS_NAMESPACE@/Configure.h>
 #include <@KWSYS_NAMESPACE@/Configure.hxx>
 
 #include <@KWSYS_NAMESPACE@/std/string>
@@ -46,8 +47,6 @@
 
 namespace @KWSYS_NAMESPACE@
 {
-
-const int RegularExpressionNSUBEXP = 10;
 
 /** \class RegularExpression
  * \brief Implements pattern matching with regular expressions.
@@ -186,7 +185,7 @@ const int RegularExpressionNSUBEXP = 10;
  *      the line.  It would match "drepa qrepb" in "rep drepa qrepb".
  *
  */
-class RegularExpression 
+class @KWSYS_NAMESPACE@_EXPORT RegularExpression 
 {
 public:
   /**
@@ -273,9 +272,10 @@ public:
   kwsys_std::string::size_type end(int n) const;
   kwsys_std::string match(int n) const;
   
+  enum { NSUBEXP = 10 };
 private: 
-  const char* startp[RegularExpressionNSUBEXP];
-  const char* endp[RegularExpressionNSUBEXP];
+  const char* startp[NSUBEXP];
+  const char* endp[NSUBEXP];
   char  regstart;                       // Internal use only
   char  reganch;                        // Internal use only
   const char* regmust;                  // Internal use only

@@ -17,11 +17,14 @@
 #ifndef @KWSYS_NAMESPACE@_Base64_h
 #define @KWSYS_NAMESPACE@_Base64_h
 
+#include <@KWSYS_NAMESPACE@/Configure.h>
+
 /* Redefine all public interface symbol names to be in the proper
    namespace.  These macros are used internally to kwsys only, and are
    not visible to user code.  Use kwsysHeaderDump.pl to reproduce
    these macros after making changes to the interface.  */
 #define kwsys(x) @KWSYS_NAMESPACE@##x
+#define kwsysEXPORT          kwsys(_EXPORT)
 #define kwsysBase64          kwsys(Base64)
 #define kwsysBase64_Decode   kwsys(Base64_Decode)
 #define kwsysBase64_Decode3  kwsys(Base64_Decode3)
@@ -38,17 +41,20 @@ extern "C"
 /**
  * Encode 3 bytes into a 4 byte string.
  */
-void kwsysBase64_Encode3(const unsigned char *src, unsigned char *dest);
+kwsysEXPORT void kwsysBase64_Encode3(const unsigned char *src,
+                                     unsigned char *dest);
 
 /**
  * Encode 2 bytes into a 4 byte string.
  */
-void kwsysBase64_Encode2(const unsigned char *src, unsigned char *dest);
+kwsysEXPORT void kwsysBase64_Encode2(const unsigned char *src,
+                                     unsigned char *dest);
 
 /**
  * Encode 1 bytes into a 4 byte string.
  */
-void kwsysBase64_Encode1(const unsigned char *src, unsigned char *dest);
+kwsysEXPORT void kwsysBase64_Encode1(const unsigned char *src,
+                                     unsigned char *dest);
 
 /**
  * Encode 'length' bytes from the input buffer and store the encoded
@@ -63,16 +69,17 @@ void kwsysBase64_Encode1(const unsigned char *src, unsigned char *dest);
  * the extra padding needed to complete the encode 4 bytes will stop
  * the decoding anyway).
  */
-unsigned long kwsysBase64_Encode(const unsigned char *input,
-                                 unsigned long length,
-                                 unsigned char *output,
-                                 int mark_end);
+kwsysEXPORT unsigned long kwsysBase64_Encode(const unsigned char *input,
+                                             unsigned long length,
+                                             unsigned char *output,
+                                             int mark_end);
 
 /**
  * Decode 4 bytes into a 3 byte string.  Returns the number of bytes
  * actually decoded.
  */
-int kwsysBase64_Decode3(const unsigned char *src, unsigned char *dest);
+kwsysEXPORT int kwsysBase64_Decode3(const unsigned char *src,
+                                    unsigned char *dest);
 
 /**
  * Decode bytes from the input buffer and store the decoded stream
@@ -86,10 +93,10 @@ int kwsysBase64_Decode3(const unsigned char *src, unsigned char *dest);
  * much decoded data to expect (of course, the buffer must be large
  * enough).
  */
-unsigned long kwsysBase64_Decode(const unsigned char *input, 
-                                 unsigned long length,
-                                 unsigned char *output,
-                                 unsigned long max_input_length);
+kwsysEXPORT unsigned long kwsysBase64_Decode(const unsigned char *input, 
+                                             unsigned long length,
+                                             unsigned char *output,
+                                             unsigned long max_input_length);
 
 #if defined(__cplusplus)
 } /* extern "C" */
@@ -99,6 +106,7 @@ unsigned long kwsysBase64_Decode(const unsigned char *input,
    undefine them to keep the namespace clean.  */
 #if !defined(KWSYS_IN_BASE64_C)
 # undef kwsys
+# undef kwsysEXPORT
 # undef kwsysBase64
 # undef kwsysBase64_Decode
 # undef kwsysBase64_Decode3

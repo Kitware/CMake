@@ -17,11 +17,14 @@
 #ifndef @KWSYS_NAMESPACE@_Process_h
 #define @KWSYS_NAMESPACE@_Process_h
 
+#include <@KWSYS_NAMESPACE@/Configure.h>
+
 /* Redefine all public interface symbol names to be in the proper
    namespace.  These macros are used internally to kwsys only, and are
    not visible to user code.  Use kwsysHeaderDump.pl to reproduce
    these macros after making changes to the interface.  */
 #define kwsys(x) @KWSYS_NAMESPACE@##x
+#define kwsysEXPORT                      kwsys(_EXPORT)
 #define kwsysProcess                     kwsys(Process)
 #define kwsysProcess_s                   kwsys(Process_s)
 #define kwsysProcess_New                 kwsys(Process_New)
@@ -70,20 +73,21 @@ typedef struct kwsysProcess_s kwsysProcess;
 /**
  * Create a new Process instance.
  */
-kwsysProcess* kwsysProcess_New();
+kwsysEXPORT kwsysProcess* kwsysProcess_New();
 
 /**
  * Delete an existing Process instance.  If the instance is currently
  * executing a process, this blocks until the process terminates.
  */
-void kwsysProcess_Delete(kwsysProcess* cp);
+kwsysEXPORT void kwsysProcess_Delete(kwsysProcess* cp);
 
 /**
  * Set the command line to be executed.  Argument is an array of
  * pointers to the command and each argument.  Ths array must end with
  * a NULL pointer.
  */
-void kwsysProcess_SetCommand(kwsysProcess* cp, char const* const* command);
+kwsysEXPORT void kwsysProcess_SetCommand(kwsysProcess* cp,
+                                         char const* const* command);
 
 /**
  * Set the timeout for the child process.  The timeout period begins
@@ -91,7 +95,7 @@ void kwsysProcess_SetCommand(kwsysProcess* cp, char const* const* command);
  * the timeout expires, it will be killed.  A non-positive (<= 0)
  * value will disable the timeout.
  */
-void kwsysProcess_SetTimeout(kwsysProcess* cp, double timeout);
+kwsysEXPORT void kwsysProcess_SetTimeout(kwsysProcess* cp, double timeout);
 
 /**
  * Get the current state of the Process instance.  Possible states are:
@@ -104,7 +108,7 @@ void kwsysProcess_SetTimeout(kwsysProcess* cp, double timeout);
  *  kwsysProcess_State_Expired   = Child process's timeout expired.
  *  kwsysProcess_State_Killed    = Child process terminated by Kill method.
  */
-int kwsysProcess_GetState(kwsysProcess* cp);
+kwsysEXPORT int kwsysProcess_GetState(kwsysProcess* cp);
 enum kwsysProcess_State_e
 {
   kwsysProcess_State_Starting,
@@ -128,7 +132,7 @@ enum kwsysProcess_State_e
  *  kwsysProcess_Exception_Numerical = Child crashed with a numerical exception.
  *  kwsysProcess_Exception_Other     = Child terminated for another reason.
  */
-int kwsysProcess_GetExitException(kwsysProcess* cp);
+kwsysEXPORT int kwsysProcess_GetExitException(kwsysProcess* cp);
 enum kwsysProcess_Exception_e
 {
   kwsysProcess_Exception_None,
@@ -149,25 +153,25 @@ enum kwsysProcess_Exception_e
  * If GetState returns "Exited", use GetExitValue to get the
  * platform-independent child return value.
  */
-int kwsysProcess_GetExitCode(kwsysProcess* cp);
+kwsysEXPORT int kwsysProcess_GetExitCode(kwsysProcess* cp);
 
 /**
  * When GetState returns "Exited", this method returns the child's
  * platform-independent exit code (such as the value returned by the
  * child's main).
  */
-int kwsysProcess_GetExitValue(kwsysProcess* cp);
+kwsysEXPORT int kwsysProcess_GetExitValue(kwsysProcess* cp);
 
 /**
  * When GetState returns "Error", this method returns a string
  * describing the problem.  Otherwise, it returns NULL.
  */
-const char* kwsysProcess_GetErrorString(kwsysProcess* cp);
+kwsysEXPORT const char* kwsysProcess_GetErrorString(kwsysProcess* cp);
 
 /**
  * Start executing the child process.
  */
-void kwsysProcess_Execute(kwsysProcess* cp);
+kwsysEXPORT void kwsysProcess_Execute(kwsysProcess* cp);
 
 /**
  * Block until data are available on a requested pipe, a timeout
@@ -198,8 +202,9 @@ void kwsysProcess_Execute(kwsysProcess* cp);
  *                  call.  Time elapsed has been subtracted from timeout
  *                  argument.
  */
-int kwsysProcess_WaitForData(kwsysProcess* cp, int pipes, char** data,
-                             int* length, double* timeout);
+kwsysEXPORT int kwsysProcess_WaitForData(kwsysProcess* cp, int pipes,
+                                         char** data, int* length,
+                                         double* timeout);
 enum kwsysProcess_Pipes_e
 {
   kwsysProcess_Pipe_STDOUT=1,
@@ -225,14 +230,14 @@ enum kwsysProcess_Pipes_e
  *        argument.
  *    1 = Child has terminated or was not running.
  */
-int kwsysProcess_WaitForExit(kwsysProcess* cp, double* timeout);
+kwsysEXPORT int kwsysProcess_WaitForExit(kwsysProcess* cp, double* timeout);
 
 /**
  * Forcefully terminate the child process that is currently running.
  * The caller should call WaitForExit after this returns to wait for
  * the child to terminate.
  */
-void kwsysProcess_Kill(kwsysProcess* cp);
+kwsysEXPORT void kwsysProcess_Kill(kwsysProcess* cp);
 
 #if defined(__cplusplus)
 } /* extern "C" */
@@ -242,6 +247,7 @@ void kwsysProcess_Kill(kwsysProcess* cp);
    Otherwise, undefine them to keep the namespace clean.  */
 #if !defined(KWSYS_IN_PROCESS_C)
 # undef kwsys
+# undef kwsysEXPORT
 # undef kwsysProcess
 # undef kwsysProcess_s
 # undef kwsysProcess_New

@@ -1,0 +1,30 @@
+/*=========================================================================
+
+  Program:   KWSys - Kitware System Library
+  Module:    $RCSfile$
+  Language:  C++
+  Date:      $Date$
+  Version:   $Revision$
+
+  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
+  See http://www.cmake.org/HTML/Copyright.html for details.
+
+     This software is distributed WITHOUT ANY WARRANTY; without even 
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     PURPOSE.  See the above copyright notices for more information.
+
+=========================================================================*/
+#ifndef @KWSYS_NAMESPACE@_Configure_h
+#define @KWSYS_NAMESPACE@_Configure_h
+
+#if defined(_WIN32) && @KWSYS_BUILD_SHARED@
+# if defined(@KWSYS_NAMESPACE@_EXPORTS)
+#  define @KWSYS_NAMESPACE@_EXPORT __declspec(dllexport)
+# else
+#  define @KWSYS_NAMESPACE@_EXPORT __declspec(dllexport)
+# endif
+#else
+# define @KWSYS_NAMESPACE@_EXPORT
+#endif
+
+#endif

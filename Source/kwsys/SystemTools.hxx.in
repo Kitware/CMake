@@ -21,6 +21,8 @@
 #include <@KWSYS_NAMESPACE@/std/string>
 #include <@KWSYS_NAMESPACE@/std/vector>
 
+#include <@KWSYS_NAMESPACE@/Configure.h>
+
 /* Define this macro temporarily to keep the code readable.  */
 #if !defined (KWSYS_NAMESPACE) && !defined(@KWSYS_NAMESPACE@_NAME_IS_KWSYS)
 # define kwsys_std @KWSYS_NAMESPACE@_std
@@ -32,7 +34,7 @@ namespace @KWSYS_NAMESPACE@
 /** \class SystemTools
  * \brief A collection of useful platform-independent system functions.
  */
-class SystemTools
+class @KWSYS_NAMESPACE@_EXPORT SystemTools
 {
 public:
   /**
