@@ -14,7 +14,6 @@
 #define KWSYS_IN_PROCESS_C
 #include "kwsysPrivate.h"
 #include KWSYS_HEADER(Process.h)
-#include KWSYS_HEADER(ProcessWin32Kill.h)
 
 /*
 
@@ -102,6 +101,7 @@ static int kwsysProcessTimeLess(kwsysProcessTime in1, kwsysProcessTime in2);
 static kwsysProcessTime kwsysProcessTimeAdd(kwsysProcessTime in1, kwsysProcessTime in2);
 static kwsysProcessTime kwsysProcessTimeSubtract(kwsysProcessTime in1, kwsysProcessTime in2);
 static void kwsysProcessSetExitException(kwsysProcess* cp, int code);
+static void kwsysProcessKillTree(int pid);
 extern kwsysEXPORT int kwsysEncodedWriteArrayProcessFwd9x(const char* fname);
 
 /*--------------------------------------------------------------------------*/
@@ -1405,10 +1405,7 @@ void kwsysProcess_Kill(kwsysProcess* cp)
     /* Not Windows 9x.  Just terminate the children.  */
     for(i=0; i < cp->NumberOfCommands; ++i)
       {
-      if(!kwsysProcessWin32Kill(cp->ProcessInformation[i].dwProcessId))
-        {
-        TerminateProcess(cp->ProcessInformation[i].hProcess, 255);
-        }
+      kwsysProcessKillTree(cp->ProcessInformation[i].dwProcessId);
       }
     }
 
@@ -2141,3 +2138,404 @@ static void kwsysProcessSetExitException(kwsysProcess* cp, int code)
 }
 #undef KWSYSPE_CASE
 
+typedef struct kwsysProcess_List_s kwsysProcess_List;
+static kwsysProcess_List* kwsysProcess_List_New();
+static void kwsysProcess_List_Delete(kwsysProcess_List* self);
+static int kwsysProcess_List_Update(kwsysProcess_List* self);
+static int kwsysProcess_List_NextProcess(kwsysProcess_List* self);
+static int kwsysProcess_List_GetCurrentProcessId(kwsysProcess_List* self);
+static int kwsysProcess_List_GetCurrentParentId(kwsysProcess_List* self);
+
+/*--------------------------------------------------------------------------*/
+/* Windows NT 4 API definitions.  */
+#define STATUS_INFO_LENGTH_MISMATCH ((NTSTATUS)0xC0000004L)
+typedef LONG NTSTATUS;
+typedef LONG KPRIORITY;
+typedef struct _UNICODE_STRING UNICODE_STRING;
+struct _UNICODE_STRING
+{
+  USHORT Length;
+  USHORT MaximumLength;
+  PWSTR Buffer;
+};
+
+/* The process information structure.  Declare only enough to get
+   process identifiers.  The rest may be ignored because we use the
+   NextEntryDelta to move through an array of instances.  */
+typedef struct _SYSTEM_PROCESS_INFORMATION SYSTEM_PROCESS_INFORMATION;
+typedef SYSTEM_PROCESS_INFORMATION* PSYSTEM_PROCESS_INFORMATION;
+struct _SYSTEM_PROCESS_INFORMATION
+{
+  ULONG          NextEntryDelta;
+  ULONG          ThreadCount;
+  ULONG          Reserved1[6];
+  LARGE_INTEGER  CreateTime;
+  LARGE_INTEGER  UserTime;
+  LARGE_INTEGER  KernelTime;
+  UNICODE_STRING ProcessName;
+  KPRIORITY      BasePriority;
+  ULONG          ProcessId;
+  ULONG          InheritedFromProcessId;
+};
+
+/*--------------------------------------------------------------------------*/
+/* Toolhelp32 API definitions.  */
+#define TH32CS_SNAPPROCESS  0x00000002
+typedef struct tagPROCESSENTRY32 PROCESSENTRY32;
+typedef PROCESSENTRY32* LPPROCESSENTRY32;
+struct tagPROCESSENTRY32
+{
+  DWORD dwSize;
+  DWORD cntUsage;
+  DWORD th32ProcessID;
+  DWORD th32DefaultHeapID;
+  DWORD th32ModuleID;
+  DWORD cntThreads;
+  DWORD th32ParentProcessID;
+  LONG  pcPriClassBase;
+  DWORD dwFlags;
+  char szExeFile[MAX_PATH];
+};
+
+/*--------------------------------------------------------------------------*/
+/* Windows API function types.  */
+typedef HANDLE (WINAPI* CreateToolhelp32SnapshotType)(DWORD, DWORD);
+typedef BOOL (WINAPI* Process32FirstType)(HANDLE, LPPROCESSENTRY32);
+typedef BOOL (WINAPI* Process32NextType)(HANDLE, LPPROCESSENTRY32);
+typedef NTSTATUS (WINAPI* ZwQuerySystemInformationType)(ULONG, PVOID,
+                                                        ULONG, PULONG);
+
+
+/*--------------------------------------------------------------------------*/
+static int kwsysProcess_List__New_NT4(kwsysProcess_List* self);
+static int kwsysProcess_List__New_Snapshot(kwsysProcess_List* self);
+static void kwsysProcess_List__Delete_NT4(kwsysProcess_List* self);
+static void kwsysProcess_List__Delete_Snapshot(kwsysProcess_List* self);
+static int kwsysProcess_List__Update_NT4(kwsysProcess_List* self);
+static int kwsysProcess_List__Update_Snapshot(kwsysProcess_List* self);
+static int kwsysProcess_List__Next_NT4(kwsysProcess_List* self);
+static int kwsysProcess_List__Next_Snapshot(kwsysProcess_List* self);
+static int kwsysProcess_List__GetProcessId_NT4(kwsysProcess_List* self);
+static int kwsysProcess_List__GetProcessId_Snapshot(kwsysProcess_List* self);
+static int kwsysProcess_List__GetParentId_NT4(kwsysProcess_List* self);
+static int kwsysProcess_List__GetParentId_Snapshot(kwsysProcess_List* self);
+
+struct kwsysProcess_List_s
+{
+  /* Implementation switches at runtime based on version of Windows.  */
+  int NT4;
+
+  /* Implementation functions and data for NT 4.  */
+  ZwQuerySystemInformationType P_ZwQuerySystemInformation;
+  char* Buffer;
+  int BufferSize;
+  PSYSTEM_PROCESS_INFORMATION CurrentInfo;
+
+  /* Implementation functions and data for other Windows versions.  */
+  CreateToolhelp32SnapshotType P_CreateToolhelp32Snapshot;
+  Process32FirstType P_Process32First;
+  Process32NextType P_Process32Next;
+  HANDLE Snapshot;
+  PROCESSENTRY32 CurrentEntry;
+};
+
+/*--------------------------------------------------------------------------*/
+static kwsysProcess_List* kwsysProcess_List_New()
+{
+  OSVERSIONINFO osv;
+  kwsysProcess_List* self;
+
+  /* Allocate and initialize the list object.  */
+  if(!(self = (kwsysProcess_List*)malloc(sizeof(kwsysProcess_List))))
+    {
+    return 0;
+    }
+  memset(self, 0, sizeof(*self));
+
+  /* Select an implementation.  */
+  ZeroMemory(&osv, sizeof(osv));
+  osv.dwOSVersionInfoSize = sizeof(osv);
+  GetVersionEx(&osv);
+  self->NT4 = (osv.dwPlatformId == VER_PLATFORM_WIN32_NT &&
+               osv.dwMajorVersion < 5)? 1:0;
+
+  /* Initialize the selected implementation.  */
+  if(!(self->NT4?
+       kwsysProcess_List__New_NT4(self) :
+       kwsysProcess_List__New_Snapshot(self)))
+    {
+    kwsysProcess_List_Delete(self);
+    return 0;
+    }
+
+  /* Update to the current set of processes.  */
+  if(!kwsysProcess_List_Update(self))
+    {
+    kwsysProcess_List_Delete(self);
+    return 0;
+    }
+  return self;
+}
+
+/*--------------------------------------------------------------------------*/
+static void kwsysProcess_List_Delete(kwsysProcess_List* self)
+{
+  if(self)
+    {
+    if(self->NT4)
+      {
+      kwsysProcess_List__Delete_NT4(self);
+      }
+    else
+      {
+      kwsysProcess_List__Delete_Snapshot(self);
+      }
+    free(self);
+    }
+}
+
+/*--------------------------------------------------------------------------*/
+static int kwsysProcess_List_Update(kwsysProcess_List* self)
+{
+  return self? (self->NT4?
+                kwsysProcess_List__Update_NT4(self) :
+                kwsysProcess_List__Update_Snapshot(self)) : 0;
+}
+
+/*--------------------------------------------------------------------------*/
+static int kwsysProcess_List_GetCurrentProcessId(kwsysProcess_List* self)
+{
+  return self? (self->NT4?
+                kwsysProcess_List__GetProcessId_NT4(self) :
+                kwsysProcess_List__GetProcessId_Snapshot(self)) : -1;
+
+}
+
+/*--------------------------------------------------------------------------*/
+static int kwsysProcess_List_GetCurrentParentId(kwsysProcess_List* self)
+{
+  return self? (self->NT4?
+                kwsysProcess_List__GetParentId_NT4(self) :
+                kwsysProcess_List__GetParentId_Snapshot(self)) : -1;
+
+}
+
+/*--------------------------------------------------------------------------*/
+static int kwsysProcess_List_NextProcess(kwsysProcess_List* self)
+{
+  return (self? (self->NT4?
+                 kwsysProcess_List__Next_NT4(self) :
+                 kwsysProcess_List__Next_Snapshot(self)) : 0);
+}
+
+/*--------------------------------------------------------------------------*/
+static int kwsysProcess_List__New_NT4(kwsysProcess_List* self)
+{
+  HANDLE hNT = GetModuleHandle("ntdll.dll");
+  if(hNT)
+    {
+    /* Get pointers to the needed API functions.  */
+    self->P_ZwQuerySystemInformation =
+      ((ZwQuerySystemInformationType)
+       GetProcAddress(hNT, "ZwQuerySystemInformation"));
+    CloseHandle(hNT);
+    }
+  if(!self->P_ZwQuerySystemInformation)
+    {
+    return 0;
+    }
+
+  /* Allocate an initial process information buffer.  */
+  self->BufferSize = 32768;
+  self->Buffer = (char*)malloc(self->BufferSize);
+  return self->Buffer? 1:0;
+}
+
+/*--------------------------------------------------------------------------*/
+static void kwsysProcess_List__Delete_NT4(kwsysProcess_List* self)
+{
+  /* Free the process information buffer.  */
+  if(self->Buffer)
+    {
+    free(self->Buffer);
+    }
+}
+
+/*--------------------------------------------------------------------------*/
+static int kwsysProcess_List__Update_NT4(kwsysProcess_List* self)
+{
+  self->CurrentInfo = 0;
+  while(1)
+    {
+    /* Query number 5 is for system process list.  */
+    NTSTATUS status =
+      self->P_ZwQuerySystemInformation(5, self->Buffer, self->BufferSize, 0);
+    if(status == STATUS_INFO_LENGTH_MISMATCH)
+      {
+      /* The query requires a bigger buffer.  */
+      int newBufferSize = self->BufferSize * 2;
+      char* newBuffer = (char*)malloc(newBufferSize);
+      if(newBuffer)
+        {
+        free(self->Buffer);
+        self->Buffer = newBuffer;
+        self->BufferSize = newBufferSize;
+        }
+      else
+        {
+        return 0;
+        }
+      }
+    else if(status >= 0)
+      {
+      /* The query succeeded.  Initialize traversal of the process list.  */
+      self->CurrentInfo = (PSYSTEM_PROCESS_INFORMATION)self->Buffer;
+      return 1;
+      }
+    else
+      {
+      /* The query failed.  */
+      return 0;
+      }
+    }
+}
+
+/*--------------------------------------------------------------------------*/
+static int kwsysProcess_List__Next_NT4(kwsysProcess_List* self)
+{
+  if(self->CurrentInfo)
+    {
+    if(self->CurrentInfo->NextEntryDelta > 0)
+      {
+      self->CurrentInfo = ((PSYSTEM_PROCESS_INFORMATION)
+                              ((char*)self->CurrentInfo +
+                               self->CurrentInfo->NextEntryDelta));
+      return 1;
+      }
+    self->CurrentInfo = 0;
+    }
+  return 0;
+}
+
+/*--------------------------------------------------------------------------*/
+static int kwsysProcess_List__GetProcessId_NT4(kwsysProcess_List* self)
+{
+  return self->CurrentInfo? self->CurrentInfo->ProcessId : -1;
+}
+
+/*--------------------------------------------------------------------------*/
+static int kwsysProcess_List__GetParentId_NT4(kwsysProcess_List* self)
+{
+  return self->CurrentInfo? self->CurrentInfo->InheritedFromProcessId : -1;
+}
+
+/*--------------------------------------------------------------------------*/
+static int kwsysProcess_List__New_Snapshot(kwsysProcess_List* self)
+{
+  HANDLE hKernel = GetModuleHandle("kernel32.dll");
+  if(hKernel)
+    {
+    self->P_CreateToolhelp32Snapshot =
+      ((CreateToolhelp32SnapshotType)
+       GetProcAddress(hKernel, "CreateToolhelp32Snapshot"));
+    self->P_Process32First =
+      ((Process32FirstType)
+       GetProcAddress(hKernel, "Process32First"));
+    self->P_Process32Next =
+      ((Process32NextType)
+       GetProcAddress(hKernel, "Process32Next"));
+    CloseHandle(hKernel);
+    }
+  return (self->P_CreateToolhelp32Snapshot &&
+          self->P_Process32First &&
+          self->P_Process32Next)? 1:0;
+}
+
+/*--------------------------------------------------------------------------*/
+static void kwsysProcess_List__Delete_Snapshot(kwsysProcess_List* self)
+{
+  if(self->Snapshot)
+    {
+    CloseHandle(self->Snapshot);
+    }
+}
+
+/*--------------------------------------------------------------------------*/
+static int kwsysProcess_List__Update_Snapshot(kwsysProcess_List* self)
+{
+  if(self->Snapshot)
+    {
+    CloseHandle(self->Snapshot);
+    }
+  if(!(self->Snapshot =
+       self->P_CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0)))
+    {
+    return 0;
+    }
+  ZeroMemory(&self->CurrentEntry, sizeof(self->CurrentEntry));
+  self->CurrentEntry.dwSize = sizeof(self->CurrentEntry);
+  if(!self->P_Process32First(self->Snapshot, &self->CurrentEntry))
+    {
+    CloseHandle(self->Snapshot);
+    self->Snapshot = 0;
+    return 0;
+    }
+  return 1;
+}
+
+/*--------------------------------------------------------------------------*/
+static int kwsysProcess_List__Next_Snapshot(kwsysProcess_List* self)
+{
+  if(self->Snapshot)
+    {
+    if(self->P_Process32Next(self->Snapshot, &self->CurrentEntry))
+      {
+      return 1;
+      }
+    CloseHandle(self->Snapshot);
+    self->Snapshot = 0;
+    }
+  return 0;
+}
+
+/*--------------------------------------------------------------------------*/
+static int kwsysProcess_List__GetProcessId_Snapshot(kwsysProcess_List* self)
+{
+  return self->Snapshot? self->CurrentEntry.th32ProcessID : -1;
+}
+
+/*--------------------------------------------------------------------------*/
+static int kwsysProcess_List__GetParentId_Snapshot(kwsysProcess_List* self)
+{
+  return self->Snapshot? self->CurrentEntry.th32ParentProcessID : -1;
+}
+
+/*--------------------------------------------------------------------------*/
+static void kwsysProcessKill(DWORD pid)
+{
+  HANDLE h = OpenProcess(PROCESS_TERMINATE, 0, pid);
+  if(h)
+    {
+    TerminateProcess(h, 255);
+    WaitForSingleObject(h, INFINITE);
+    }
+}
+
+/*--------------------------------------------------------------------------*/
+static void kwsysProcessKillTree(int pid)
+{
+  kwsysProcess_List* plist = kwsysProcess_List_New();
+  kwsysProcessKill(pid);
+  if(plist)
+    {
+    do
+      {
+      if(kwsysProcess_List_GetCurrentParentId(plist) == pid)
+        {
+        int ppid = kwsysProcess_List_GetCurrentProcessId(plist);
+        kwsysProcessKillTree(ppid);
+        }
+      } while(kwsysProcess_List_NextProcess(plist));
+    kwsysProcess_List_Delete(plist);
+    }
+}
