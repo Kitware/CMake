@@ -1186,15 +1186,15 @@ bool cmSystemTools::CreateSymlink(const char* origName, const char* newName)
 #endif
 
 
-std::vector<cmStdString> cmSystemTools::SplitString(const char* p, char sep)
+std::vector<cmStdString> cmSystemTools::SplitString(const char* p, char sep, bool isPath)
 {
   std::string path = p;
   std::vector<cmStdString> paths;
-  if(path[0] == '/')
+  if(isPath && path[0] == '/')
     {
     path.erase(path.begin());
+    paths.push_back("/"); 
     }
-  paths.push_back("/");
   std::string::size_type pos1 = 0;
   std::string::size_type pos2 = path.find(sep, pos1+1);
   while(pos2 != std::string::npos)
@@ -1232,8 +1232,9 @@ std::string cmSystemTools::RelativePath(const char* local, const char* remote)
     }
   std::string relativePath;     // result string
   // split up both paths into arrays of strings using / as a separator
-  std::vector<cmStdString> fileSplit = cmSystemTools::SplitString(local); 
-  std::vector<cmStdString> relativeSplit = cmSystemTools::SplitString(remote);
+  std::string localString = local;
+  std::vector<cmStdString> fileSplit = cmSystemTools::SplitString(local, '/', true); 
+  std::vector<cmStdString> relativeSplit = cmSystemTools::SplitString(remote, '/', true);
   std::vector<cmStdString> commonPath;
   std::vector<cmStdString> finalPath;
   // count up how many matching directory names there are from the start
