@@ -307,6 +307,7 @@ private:
   std::string             m_EndBuild;
   std::string             m_StartTest;
   std::string             m_EndTest;
+  double                  m_ElapsedTestingTime;
 
   int                     m_TestModel;
 
@@ -377,7 +378,8 @@ private:
   void GenerateDartTestOutput(std::ostream& os);
   void GenerateDartMemCheckOutput(std::ostream& os);
   void GenerateDartBuildOutput(std::ostream& os, 
-                               std::vector<cmCTestBuildErrorWarning>);
+                               std::vector<cmCTestBuildErrorWarning>,
+                               double elapsed_time);
 
   bool OpenOutputFile(const std::string& path, 
                       const std::string& name, std::ofstream& stream);  

@@ -177,6 +177,7 @@ static const char* cmCTestWarningMatches[] = {
   "([^:]+): warning",
   "\", line [0-9]+\\.[0-9]+: [0-9]+-[0-9]+ \\(W\\)",
   "^cxx: Warning:",
+  ".*file: .* has no symbols",
   0
 };
 
@@ -714,7 +715,7 @@ int cmCTest::UpdateDirectory()
     std::cerr << "Cannot open log file" << std::endl;
     }
   std::string start_time = ::CurrentTime();
- 
+  double elapsed_time_start = cmSystemTools::GetTime();
 
   std::string goutput;
   int retVal = 0;
@@ -996,8 +997,11 @@ int cmCTest::UpdateDirectory()
   //std::cout << "End" << std::endl;
   std::string end_time = ::CurrentTime();
   os << "\t<EndDateTime>" << end_time << "</EndDateTime>\n"
-    << "</Update>" << std::endl;
-
+     << "<ElapsedMinutes>" << 
+    static_cast<int>((cmSystemTools::GetTime() - elapsed_time_start)/6)/10.0 
+     << "</ElapsedMinutes>"
+     << "</Update>" << std::endl;
+  
   if ( ofs )
     {
     ofs.close();
@@ -1030,6 +1034,7 @@ int cmCTest::ConfigureDirectory()
     return 1;
     }
 
+  double elapsed_time_start = cmSystemTools::GetTime();
   std::string output;
   int retVal = 0;
   int res = 0;
@@ -1069,6 +1074,10 @@ int cmCTest::ConfigureDirectory()
       std::string end_time = ::CurrentTime();
       os << "\t<ConfigureStatus>" << retVal << "</ConfigureStatus>\n"
          << "\t<EndDateTime>" << end_time << "</EndDateTime>\n"
+         << "<ElapsedMinutes>" 
+         << static_cast<int>(
+           (cmSystemTools::GetTime() - elapsed_time_start)/6)/10.0
+         << "</ElapsedMinutes>"
          << "</Configure>" << std::endl;
       this->EndXML(os);
       }    
@@ -1102,6 +1111,7 @@ int cmCTest::BuildDirectory()
     }
 
   std::ofstream ofs;
+  double elapsed_time_start = cmSystemTools::GetTime();
   if ( !this->OpenOutputFile("Temporary", "LastBuild.log", ofs) )
     {
     std::cerr << "Cannot create LastBuild.log file" << std::endl;    
@@ -1121,6 +1131,7 @@ int cmCTest::BuildDirectory()
     std::cout << "Build with command: " << makeCommand << std::endl;
     }
   m_EndBuild = ::CurrentTime();
+  double elapsed_build_time = cmSystemTools::GetTime() - elapsed_time_start;
   if (res != cmsysProcess_State_Exited || retVal )
     {
     std::cerr << "Error(s) when building project" << std::endl;
@@ -1322,13 +1333,14 @@ int cmCTest::BuildDirectory()
     std::cerr << "Cannot create build XML file" << std::endl;
     return 1;
     }
-  this->GenerateDartBuildOutput(ofs, errorsWarnings);
+  this->GenerateDartBuildOutput(ofs, errorsWarnings, elapsed_build_time);
   return 0;
 }
  
 int cmCTest::CoverageDirectory()
 {
   std::cout << "Performing coverage" << std::endl;
+  double elapsed_time_start = cmSystemTools::GetTime();
   cmCTest::tm_VectorOfStrings files;
   cmCTest::tm_VectorOfStrings cfiles;
   cmCTest::tm_VectorOfStrings cdirs;
@@ -1843,7 +1855,10 @@ int cmCTest::CoverageDirectory()
   log.setf(std::ios::fixed, std::ios::floatfield);
   log.precision(2);
   log << (percent_coverage)<< "</PercentCoverage>\n"
-      << "\t<EndDateTime>" << end_time << "</EndDateTime>\n"
+      << "\t<EndDateTime>" << end_time << "</EndDateTime>\n";
+  log << "<ElapsedMinutes>" << 
+    static_cast<int>((cmSystemTools::GetTime() - elapsed_time_start)/6)/10.0
+      << "</ElapsedMinutes>"
       << "</Coverage>" << std::endl;
   this->EndXML(log);
 
@@ -1898,7 +1913,8 @@ bool cmCTest::OpenOutputFile(const std::string& path,
 }
 
 void cmCTest::GenerateDartBuildOutput(std::ostream& os, 
-                                    std::vector<cmCTestBuildErrorWarning> ew)
+                                      std::vector<cmCTestBuildErrorWarning> ew,
+                                      double elapsed_build_time)
 {
   this->StartXML(os);
   os << "<Build>\n"
@@ -1940,6 +1956,8 @@ void cmCTest::GenerateDartBuildOutput(std::ostream& os,
     }
   os << "\t<Log Encoding=\"base64\" Compression=\"/bin/gzip\">\n\t</Log>\n"
      << "\t<EndDateTime>" << m_EndBuild << "</EndDateTime>\n"
+     << "<ElapsedMinutes>" << static_cast<int>(elapsed_build_time/6)/10.0
+     << "</ElapsedMinutes>"
      << "</Build>" << std::endl;
   this->EndXML(os);
 }
@@ -2083,6 +2101,7 @@ void cmCTest::ProcessDirectory(cmCTest::tm_VectorOfStrings &passed,
     }
 
   m_StartTest = ::CurrentTime();
+  double elapsed_time_start = cmSystemTools::GetTime();
 
   if ( olog )
     {
@@ -2322,6 +2341,7 @@ void cmCTest::ProcessDirectory(cmCTest::tm_VectorOfStrings &passed,
     }
 
   m_EndTest = ::CurrentTime();
+  m_ElapsedTestingTime = cmSystemTools::GetTime() - elapsed_time_start;
   if ( olog )
     {
     *olog << "End testing: " << m_EndTest << std::endl;
@@ -2854,6 +2874,10 @@ void cmCTest::GenerateDartMemCheckOutput(std::ostream& os)
   os << "\t</DefectList>" << std::endl;
 
   os << "\t<EndDateTime>" << m_EndTest << "</EndDateTime>" << std::endl;
+  os << "<ElapsedMinutes>" 
+     << static_cast<int>(m_ElapsedTestingTime/6)/10.0 
+     << "</ElapsedMinutes>\n";
+  
   if ( m_CompatibilityMode )
     {
     os << "</Purify>" << std::endl;
@@ -2940,6 +2964,9 @@ void cmCTest::GenerateDartTestOutput(std::ostream& os)
     }
 
   os << "\t<EndDateTime>" << m_EndTest << "</EndDateTime>\n"
+     << "<ElapsedMinutes>" 
+     << static_cast<int>(m_ElapsedTestingTime/6)/10.0
+     << "</ElapsedMinutes>"
     << "</Testing>" << std::endl;
   this->EndXML(os);
 }
