@@ -37,6 +37,12 @@ FIND_LIBRARY(CMAKE_LIB
 LINK_LIBRARIES(${CMAKE_LIB})
 
 #
+# Include Dart
+# (will also set NSLOOKUP, HOSTNAME, etc.)
+#
+INCLUDE (${CMAKE_ROOT}/Modules/Dart.cmake)
+
+#
 # Extra coverage
 #
 BUILD_COMMAND(BUILD_COMMAND_VAR ${CMAKE_MAKE_PROGRAM})
@@ -54,3 +60,8 @@ ENABLE_TESTING()
 ADD_EXECUTABLE(testing testing.cxx)
 ADD_TEST(testing ${Testing_BINARY_DIR}/bin/testing)
 
+#
+# Force subdirs
+# (coverage)
+#
+SUBDIRS(sub1)
