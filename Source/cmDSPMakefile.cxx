@@ -418,6 +418,11 @@ void cmDSPMakefile::WriteDSPHeader(std::ostream& fout, const char *libName,
   std::string libOptions;
   std::string libDebugOptions;
   std::string libOptimizedOptions;
+
+  std::string libMultiLineOptions;
+  std::string libMultiLineDebugOptions;
+  std::string libMultiLineOptimizedOptions;
+
   std::vector<std::string>::iterator i;
   std::vector<std::string>& libdirs = m_Makefile->GetLinkDirectories();
   for(i = libdirs.begin(); i != libdirs.end(); ++i)
@@ -428,6 +433,13 @@ void cmDSPMakefile::WriteDSPHeader(std::ostream& fout, const char *libName,
     libOptions += " /LIBPATH:\"";
     libOptions += *i;
     libOptions += "\" ";
+
+    libMultiLineOptions += "# ADD LINK32 /LIBPATH:\"";
+    libMultiLineOptions += *i;
+    libMultiLineOptions += "/$(OUTDIR)\" ";
+    libMultiLineOptions += " /LIBPATH:\"";
+    libMultiLineOptions += *i;
+    libMultiLineOptions += "\" \n";
     }
   // find link libraries
   const cmTarget::LinkLibraries& libs = target.GetLinkLibraries();
@@ -449,20 +461,33 @@ void cmDSPMakefile::WriteDSPHeader(std::ostream& fout, const char *libName,
         {
         libOptions += " ";
         libOptions +=  lib;
+
+        libMultiLineOptions += "# ADD LINK32 ";
+        libMultiLineOptions +=  lib;
+        libMultiLineOptions += "\n";
         }
       if (j->second == cmTarget::DEBUG)
         {
         libDebugOptions += " ";
         libDebugOptions += lib;
+
+        libMultiLineDebugOptions += "# ADD LINK32 ";
+        libMultiLineDebugOptions += lib;
+        libMultiLineDebugOptions += "\n";
         }
       if (j->second == cmTarget::OPTIMIZED)
         {
         libOptimizedOptions += " ";
         libOptimizedOptions +=  lib;
+
+        libMultiLineOptimizedOptions += "# ADD LINK32 ";
+        libMultiLineOptimizedOptions += lib;
+        libMultiLineOptimizedOptions += "\n";
         }      
       }
     }
   libOptions += " /STACK:10000000 ";
+  libMultiLineOptions += "# ADD LINK32 /STACK:10000000 \n";
   
   std::ifstream fin(m_DSPHeaderTemplate.c_str());
   if(!fin)
@@ -481,6 +506,14 @@ void cmDSPMakefile::WriteDSPHeader(std::ostream& fout, const char *libName,
                                    libDebugOptions.c_str());
       cmSystemTools::ReplaceString(line, "CM_OPTIMIZED_LIBRARIES",
                                    libOptimizedOptions.c_str());
+
+      cmSystemTools::ReplaceString(line, "CM_MULTILINE_LIBRARIES",
+                                   libMultiLineOptions.c_str());
+      cmSystemTools::ReplaceString(line, "CM_MULTILINE_DEBUG_LIBRARIES",
+                                   libMultiLineDebugOptions.c_str());
+      cmSystemTools::ReplaceString(line, "CM_MULTILINE_OPTIMIZED_LIBRARIES",
+                                   libMultiLineOptimizedOptions.c_str());
+
       cmSystemTools::ReplaceString(line, "BUILD_INCLUDES",
                                    m_IncludeOptions.c_str());
       cmSystemTools::ReplaceString(line, "OUTPUT_LIBNAME",libName);
