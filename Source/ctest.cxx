@@ -56,8 +56,8 @@ int main (int argc, char *argv[])
     if( arg.find("-D",0) == 0 && i < args.size() - 1 )
       {
       inst.m_DartMode = true;
-      std::string arg = args[i+1];
-      if ( arg == "Experimental" )
+      std::string targ = args[i+1];
+      if ( targ == "Experimental" )
         {
         inst.SetTestModel(cmCTest::EXPERIMENTAL);
         inst.SetTest("Start");
@@ -67,7 +67,7 @@ int main (int argc, char *argv[])
         inst.SetTest("Coverage");
         inst.SetTest("Submit");
         }
-      else if ( arg == "Continuous" )
+      else if ( targ == "Continuous" )
         {
         inst.SetTestModel(cmCTest::CONTINUOUS);
         inst.SetTest("Start");
@@ -78,7 +78,7 @@ int main (int argc, char *argv[])
         inst.SetTest("Coverage");
         inst.SetTest("Submit");
         }
-      else if ( arg == "Nightly" )
+      else if ( targ == "Nightly" )
         {
         inst.SetTestModel(cmCTest::NIGHTLY);
         inst.SetTest("Start");
@@ -89,7 +89,7 @@ int main (int argc, char *argv[])
         inst.SetTest("Coverage");
         inst.SetTest("Submit");
         }
-      else if ( arg == "MemoryCheck" )
+      else if ( targ == "MemoryCheck" )
         {
         inst.SetTestModel(cmCTest::EXPERIMENTAL);
         inst.SetTest("Start");
@@ -99,7 +99,7 @@ int main (int argc, char *argv[])
         inst.SetTest("Coverage");
         inst.SetTest("Submit");
         }
-      else if ( arg == "NightlyMemoryCheck" )
+      else if ( targ == "NightlyMemoryCheck" )
         {
         inst.SetTestModel(cmCTest::NIGHTLY);
         inst.SetTest("Start");
