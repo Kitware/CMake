@@ -31,10 +31,6 @@ bool cmAuxSourceDirectoryCommand::InitialPass(std::vector<std::string> const& ar
   std::string tdir = m_Makefile->GetCurrentDirectory();
   tdir += "/";
   tdir += templateDirectory;
-  // The Makefile should be dependent on the directory's last mod date,
-  // so that if a file is added or removed from the directory, it will
-  // be rescanned, and the makefile rebuilt.
-  m_Makefile->AddCMakeDependFile(tdir.c_str());
   // Load all the files in the directory
   cmDirectory dir;
   if(dir.Load(tdir.c_str()))
