@@ -9,6 +9,8 @@ SET(CMake_VERSION_PATCH 0)
 SET(CMake_VERSION "${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}")
 SET(CMake_VERSION_FULL "${CMake_VERSION}.${CMake_VERSION_PATCH}")
 
+SET(BUILD_SHARED_LIBS OFF)
+
 SET(CMAKE_DATA_DIR "/share/CMake" CACHE STRING 
   "Install location for data (relative to prefix).")
 SET(CMAKE_DOC_DIR "/doc/CMake" CACHE STRING
