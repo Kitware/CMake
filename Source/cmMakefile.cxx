@@ -314,8 +314,7 @@ bool cmMakefile::ReadListFile(const char* filename, const char* external)
   // one, then cmake will provide one via the 
   // cmListFileCache class.
   bool requireProjectCommand = false;
-  if(!m_Inheriting && !external
-    && m_cmCurrentDirectory == m_cmHomeDirectory)
+  if(!external && m_cmCurrentDirectory == m_cmHomeDirectory)
     {
     if(cmSystemTools::LowerCase(
          cmSystemTools::GetFilenameName(filename)) == "cmakelists.txt")
