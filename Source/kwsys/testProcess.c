@@ -142,7 +142,8 @@ int runChild(const char* cmd[], int state, int exception, int value,
     case kwsysProcess_State_Killed:
       printf("Child was killed by parent.\n"); break;
     case kwsysProcess_State_Exception:
-      printf("Child terminated abnormally.\n");
+      printf("Child terminated abnormally: %s\n",
+             kwsysProcess_GetExceptionString(kp));
       result = ((exception != kwsysProcess_GetExitException(kp)) ||
                 (value != kwsysProcess_GetExitValue(kp))); break;
     case kwsysProcess_State_Error:
