@@ -25,10 +25,11 @@ int main (int argc, char *argv[])
     std::cerr << "Usage: " << argv[0] << " executable" << std::endl;
     return 1;
     }
-  std::string command;
+  std::string command = argv[1];
   int cc;
-  for ( cc = 1; cc < argc; cc ++ )
+  for ( cc = 2; cc < argc; cc ++ )
     {
+    command += " ";
     command += argv[cc];
     }
  
