@@ -45,6 +45,8 @@ MODULE_ID("$Id$")
 
 /* These declarations are missing from curses.h on some platforms.  */
 extern int winnstr(WINDOW *, char *, int);
+
+#if 0
 extern int waddnstr(WINDOW *,const char *const,int);
 extern void wbkgdset(WINDOW *,chtype);
 #ifndef untouchwin
@@ -57,6 +59,7 @@ extern void wsyncup(WINDOW *);
 extern WINDOW *derwin(WINDOW *,int,int,int,int);
 extern int winsnstr(WINDOW *, const char *,int);
 extern int winsdelln(WINDOW *,int);
+#endif
 
 /*----------------------------------------------------------------------------
   This is the core module of the form library. It contains the majority
