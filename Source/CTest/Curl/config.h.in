@@ -165,9 +165,6 @@
 /* Define to 1 if you have the `gethostbyname_r' function. */
 #cmakedefine HAVE_GETHOSTBYNAME_R               ${HAVE_GETHOSTBYNAME_R}
 
-/* Define to 1 if you have the `gethostname' function. */
-#cmakedefine HAVE_GETHOSTNAME               ${HAVE_GETHOSTNAME}
-
 /* Define to 1 if you have the `getpass_r' function. */
 #cmakedefine HAVE_GETPASS_R             ${HAVE_GETPASS_R}
 
