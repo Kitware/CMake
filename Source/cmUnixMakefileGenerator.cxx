@@ -1399,7 +1399,8 @@ void cmUnixMakefileGenerator::OutputSourceObjectBuildRules(std::ostream& fout)
           rules.insert(shortName);
           fout << shortName.c_str() << ".o : " << sourceName.c_str() << "\n";
           std::string ext = source->GetSourceExtension();
-          if ( ext == "cxx" || ext == "cc" || ext == "cpp" || ext == "C" )
+          if ( ext == "cxx" || ext == "cc" || ext == "cpp" || ext == "C" || 
+	       ext =="m"    || ext == "M"  || ext == "mm")
             {
             fout << "\t${CMAKE_CXX_COMPILER} ${CMAKE_CXXFLAGS} " << exportsDef.c_str()
                  << (shared? "${CMAKE_SHLIB_CFLAGS} ":"") << "${INCLUDE_FLAGS} -c $< -o $@\n\n";
