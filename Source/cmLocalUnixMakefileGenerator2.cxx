@@ -207,11 +207,6 @@ cmLocalUnixMakefileGenerator2
   for(std::vector<cmSourceFile*>::const_iterator source = sources.begin();
       source != sources.end(); ++source)
     {
-    if((*source)->GetCustomCommand())
-      {
-      // Generate this custom command's rule file.
-      std::cout << "Found custom command!" << std::endl;
-      }
     if(!(*source)->GetPropertyAsBool("HEADER_FILE_ONLY") &&
        !(*source)->GetCustomCommand() &&
        !m_GlobalGenerator->IgnoreFile((*source)->GetSourceExtension().c_str()))
