@@ -28,7 +28,6 @@ void cmGlobalNMakeMakefileGenerator::EnableLanguage(std::vector<std::string>cons
                                                     cmMakefile *mf)
 {
   // pick a default 
-  mf->AddDefinition("CMAKE_GENERATOR_NEW", "1");
   mf->AddDefinition("CMAKE_GENERATOR_CC", "cl");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "cl");
   this->cmGlobalUnixMakefileGenerator::EnableLanguage(l, mf);

@@ -30,7 +30,6 @@ void cmGlobalBorlandMakefileGenerator::EnableLanguage(std::vector<std::string>co
                                                       cmMakefile *mf)
 {
   std::string outdir = m_CMakeInstance->GetStartOutputDirectory();
-  mf->AddDefinition("CMAKE_GENERATOR_NEW", "1");
   mf->AddDefinition("BORLAND", "1");
   mf->AddDefinition("CMAKE_GENERATOR_CC", "bcc32");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "bcc32"); 

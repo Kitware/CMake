@@ -7,9 +7,9 @@ MESSAGE("CMAKE_Fortran_COMPILER = ${CMAKE_Fortran_COMPILER}")
 MESSAGE("CMAKE_Fortran_FLAGS = ${CMAKE_Fortran_FLAGS}")
 ADD_EXECUTABLE(testf hello.f)
 
-IF(CMAKE_Fortran_COMPILER_SUPPORTS_F90 AND CMAKE_GENERATOR_NEW)
+IF(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
   ADD_EXECUTABLE(test_module
     test_module_main.f90
     test_module_implementation.f90
     test_module_interface.f90)
-ENDIF(CMAKE_Fortran_COMPILER_SUPPORTS_F90 AND CMAKE_GENERATOR_NEW)
+ENDIF(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
