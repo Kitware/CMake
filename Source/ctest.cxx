@@ -38,7 +38,7 @@ int main (int argc, char *argv[])
   for(unsigned int i=1; i < args.size(); ++i)
     {
     std::string arg = args[i];
-    if(arg.find("-D",0) == 0 && i < args.size() - 1)
+    if(arg.find("-C",0) == 0 && i < args.size() - 1)
       {
       inst.m_ConfigType = args[i+1];
       }
@@ -102,7 +102,7 @@ int main (int argc, char *argv[])
        arg.find("/?") == 0)
       {
       std::cerr << "Usage: " << argv[0] << " <options>" << std::endl
-                << "\t -D type      Specify config type" << std::endl
+                << "\t -C type      Specify config type" << std::endl
                 << "\t -E test      Specify regular expression for tests to exclude" 
                 << std::endl
                 << "\t -R test      Specify regular expression for tests to include" 
