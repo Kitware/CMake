@@ -1479,6 +1479,7 @@ bool RunCommandViaWin32(const char* command,
 			int& retVal,
 			bool verbose)
 {
+  ::SetLastError(ERROR_SUCCESS);
   if ( ! command )
     {
     cmSystemTools::Error("No command specified");
