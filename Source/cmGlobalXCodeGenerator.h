@@ -70,6 +70,7 @@ private:
   cmXCodeObject* CreateObject(cmXCodeObject::PBXType ptype);
   cmXCodeObject* CreateObject(cmXCodeObject::Type type);
   cmXCodeObject* CreateString(const char* s);
+  cmXCodeObject* CreateObjectReference(cmXCodeObject*);
   
   // delete all objects in the m_XCodeObjects vector.
   void ClearXCodeObjects();
@@ -80,8 +81,10 @@ private:
   void  WriteXCodePBXProj(std::ostream& fout,
                           cmLocalGenerator* root,
                           std::vector<cmLocalGenerator*>& generators);
-  cmXCodeObject* CreateXCodeSourceFile(cmLocalGenerator* gen, cmSourceFile* sf);
-  void CreateXCodeTargets(cmLocalGenerator* gen, std::vector<cmXCodeObject*>&);  
+  cmXCodeObject* CreateXCodeSourceFile(cmLocalGenerator* gen, cmSourceFile* sf,
+                                       cmXCodeObject* mainGroupChildren);
+  void CreateXCodeTargets(cmLocalGenerator* gen, std::vector<cmXCodeObject*>&,
+                          cmXCodeObject* mainGroupChildren);  
   
   std::vector<cmXCodeObject*> m_XCodeObjects;
   cmXCodeObject* m_RootObject;

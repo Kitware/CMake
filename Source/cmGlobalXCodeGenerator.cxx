@@ -100,16 +100,22 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateString(const char* s)
   obj->SetString(s);
   return obj;
 }
+cmXCodeObject* cmGlobalXCodeGenerator::CreateObjectReference(cmXCodeObject* ref)
+{
+  cmXCodeObject* obj = this->CreateObject(cmXCodeObject::OBJECT_REF);
+  obj->SetObject(ref);
+  return obj;
+}
 
 cmXCodeObject* 
 cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg, 
-                                              cmSourceFile* sf)
+                                              cmSourceFile* sf,
+                                              cmXCodeObject* mainGroupChildren)
 {
   cmXCodeObject* fileRef = this->CreateObject(cmXCodeObject::PBXFileReference);
-  cmXCodeObject* fileRefPtr = this->CreateObject(cmXCodeObject::OBJECT_REF);
-  fileRefPtr->SetObject(fileRef);
+  mainGroupChildren->AddObject(fileRef);
   cmXCodeObject* buildFile = this->CreateObject(cmXCodeObject::PBXBuildFile);
-  buildFile->AddAttribute("fileRef", fileRefPtr);
+  buildFile->AddAttribute("fileRef", this->CreateObjectReference(fileRef));
   cmXCodeObject* settings = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
   buildFile->AddAttribute("settings", settings);
   fileRef->AddAttribute("fileEncoding", this->CreateString("4"));
@@ -123,7 +129,8 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
 
 //----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
-                                                std::vector<cmXCodeObject*>& targets)
+                                                std::vector<cmXCodeObject*>& targets,
+                                                cmXCodeObject* mainGroupChildren)
 {
   cmTargets &tgts = gen->GetMakefile()->GetTargets();
   for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); l++)
@@ -139,7 +146,7 @@ void cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
     for(std::vector<cmSourceFile*>::iterator i = classes.begin(); 
         i != classes.end(); ++i)
       {
-      buildFiles->AddObject(this->CreateXCodeSourceFile(gen, *i));
+      buildFiles->AddObject(this->CreateXCodeSourceFile(gen, *i, mainGroupChildren));
       }
     // create header build phase
     cmXCodeObject* headerBuildPhase = this->CreateObject(cmXCodeObject::PBXHeadersBuildPhase);
@@ -193,9 +200,7 @@ void cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
       fileRef->AddAttribute("path", this->CreateString(l->first.c_str()));
       fileRef->AddAttribute("refType", this->CreateString("3"));
       fileRef->AddAttribute("sourceTree", this->CreateString("BUILT_PRODUCTS_DIR"));
-      cmXCodeObject* fileRefPtr = this->CreateObject(cmXCodeObject::OBJECT_REF);
-      fileRefPtr->SetObject(fileRef);
-      target->AddAttribute("productReference", fileRefPtr);
+      target->AddAttribute("productReference", this->CreateObjectReference(fileRef));
       target->AddAttribute("productType", this->CreateString("\"com.apple.product-type.tool\""));
       }
     else if (l->second.GetType() == cmTarget::UTILITY)
@@ -229,9 +234,15 @@ void cmGlobalXCodeGenerator::CreateXCodeObjects(cmLocalGenerator* ,
   listObjs->AddObject(developBuildStyle);
   listObjs->AddObject(deployBuildStyle);
   
-  
+  cmXCodeObject* mainGroup = this->CreateObject(cmXCodeObject::PBXGroup);
+  cmXCodeObject* mainGroupChildren = this->CreateObject(cmXCodeObject::OBJECT_LIST);
+  mainGroup->AddAttribute("children", mainGroupChildren);
+  mainGroup->AddAttribute("refType", this->CreateString("4"));
+  mainGroup->AddAttribute("sourceTree", this->CreateString("\"<group>\""));
+
   m_RootObject = this->CreateObject(cmXCodeObject::PBXProject);
   group = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
+  m_RootObject->AddAttribute("mainGroup", this->CreateObjectReference(mainGroup));
   m_RootObject->AddAttribute("buildSettings", group);
   m_RootObject->AddAttribute("buildSyles", listObjs);
   m_RootObject->AddAttribute("hasScannedForEncodings", this->CreateString("0"));
@@ -239,7 +250,7 @@ void cmGlobalXCodeGenerator::CreateXCodeObjects(cmLocalGenerator* ,
   for(std::vector<cmLocalGenerator*>::iterator i = generators.begin();
       i != generators.end(); ++i)
     {
-    this->CreateXCodeTargets(*i, targets);
+    this->CreateXCodeTargets(*i, targets, mainGroupChildren);
     }
   cmXCodeObject* allTargets = this->CreateObject(cmXCodeObject::OBJECT_LIST);
   for(std::vector<cmXCodeObject*>::iterator i = targets.begin();
