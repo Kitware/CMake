@@ -268,35 +268,37 @@ void cmDSPMakefile::WriteDSPFile(std::ostream& fout,
       // Tell MS-Dev what the source is.  If the compiler knows how to
       // build it, then it will.
       fout << "SOURCE=" << source.c_str() << "\n\n";
-      
-      // Loop through every custom command generating code from the
-      // current source.
-      // build up the depends and outputs and commands 
-      cmSourceGroup::CommandFiles totalCommand;
-      std::string totalCommandStr;
-      for(cmSourceGroup::Commands::const_iterator c = commands.begin();
-          c != commands.end(); ++c)
+      if (!commands.empty())
         {
-        totalCommandStr += "\n\t";
-        totalCommandStr += c->first;
-        totalCommand.Merge(c->second);
-        }      
-      // Create a dummy file with the name of the source if it does
-      // not exist
-      if(totalCommand.m_Outputs.empty())
-        { 
-        std::string dummyFile = m_Makefile->GetStartOutputDirectory();
-        dummyFile += "/";
-        dummyFile += source;
-        if(!cmSystemTools::FileExists(dummyFile.c_str()))
+        // Loop through every custom command generating code from the
+        // current source.
+        // build up the depends and outputs and commands 
+        cmSourceGroup::CommandFiles totalCommand;
+        std::string totalCommandStr;
+        for(cmSourceGroup::Commands::const_iterator c = commands.begin();
+            c != commands.end(); ++c)
           {
-          std::ofstream fout(dummyFile.c_str());
-          fout << "Dummy file created by cmake as unused source for utility command.\n";
+          totalCommandStr += "\n\t";
+          totalCommandStr += c->first;
+          totalCommand.Merge(c->second);
+          }      
+        // Create a dummy file with the name of the source if it does
+        // not exist
+        if(totalCommand.m_Outputs.empty())
+          { 
+          std::string dummyFile = m_Makefile->GetStartOutputDirectory();
+          dummyFile += "/";
+          dummyFile += source;
+          if(!cmSystemTools::FileExists(dummyFile.c_str()))
+            {
+            std::ofstream fout(dummyFile.c_str());
+            fout << "Dummy file created by cmake as unused source for utility command.\n";
+            }
           }
+        this->WriteCustomRule(fout, source.c_str(), totalCommandStr.c_str(), 
+                              totalCommand.m_Depends, 
+                              totalCommand.m_Outputs);
         }
-      this->WriteCustomRule(fout, source.c_str(), totalCommandStr.c_str(), 
-                            totalCommand.m_Depends, 
-                            totalCommand.m_Outputs);
       fout << "# End Source File\n";
       }
     
