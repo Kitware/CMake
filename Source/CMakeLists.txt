@@ -147,6 +147,11 @@ IF(BUILD_TESTING)
       ${CMake_BINARY_DIR}/Tests/COnly 
       conly)
 
+    ADD_TEST(X11 ${CMake_BINARY_DIR}/Source/cmaketest 
+      ${CMake_SOURCE_DIR}/Tests/X11
+      ${CMake_BINARY_DIR}/Tests/X11 
+      X11)
+
     ADD_TEST(LoadedCommand ${CMake_BINARY_DIR}/Source/cmaketest 
       ${CMake_SOURCE_DIR}/Tests/LoadCommand 
       ${CMake_BINARY_DIR}/Tests/LoadCommand 
