@@ -23,12 +23,23 @@ FIND_PATH(QT_INCLUDE_DIR qt.h
   /usr/local/include
   /usr/include/qt3
   /usr/include/qt
-  /usr/include 
+  /usr/include
   C:/Progra~1/qt/include
   )
 
-FIND_LIBRARY(QT_QT_LIBRARY 
+FIND_LIBRARY(QT_QT_LIBRARY
   NAMES qt qt-mt qt-mt230nc
+  PATHS
+  $ENV{QTDIR}/lib
+  /usr/local/qt/lib
+  /usr/local/lib
+  /usr/lib
+  /usr/share/qt3/lib
+  C:/Progra~1/qt/lib
+  )
+
+FIND_LIBRARY(QT_QASSISTANTCLIENT_LIBRARY
+  NAMES qassistantclient
   PATHS
   $ENV{QTDIR}/lib
   /usr/local/qt/lib
@@ -75,15 +86,21 @@ IF(QT_INCLUDE_DIR)
         # for version 3
         SET (QT_DEFINITIONS -DQT_DLL)
         SET (QT_DEFINITIONS "-DQT_DLL -DQT_THREAD_SUPPORT -DNO_DEBUG")
-        SET (QT_LIBRARIES imm32.lib  ${QT_QT_LIBRARY} ${QT_QTMAIN_LIBRARY} )
+        SET (QT_LIBRARIES imm32.lib ${QT_QT_LIBRARY} ${QT_QTMAIN_LIBRARY} )
         SET (QT_LIBRARIES ${QT_LIBRARIES} winmm wsock32)
       ELSE (QT_QTMAIN_LIBRARY)
         # for version 2
-        SET (QT_LIBRARIES imm32.lib ws2_32.lib  ${QT_QT_LIBRARY} )
+        SET (QT_LIBRARIES imm32.lib ws2_32.lib ${QT_QT_LIBRARY} )
       ENDIF (QT_QTMAIN_LIBRARY)
     ELSE (WIN32)
       SET (QT_LIBRARIES ${QT_QT_LIBRARY} )
     ENDIF (WIN32)
+
+    IF (QT_QASSISTANTCLIENT_LIBRARY)
+      SET (QT_LIBRARIES ${QT_QASSISTANTCLIENT_LIBRARY} ${QT_LIBRARIES})
+    ENDIF (QT_QASSISTANTCLIENT_LIBRARY)
+
+
 
     # Backwards compatibility for CMake1.4 and 1.2
     SET (QT_MOC_EXE ${QT_MOC_EXECUTABLE} )
@@ -111,8 +128,9 @@ MARK_AS_ADVANCED(
   QT_INCLUDE_DIR
   QT_QT_LIBRARY
   QT_QTMAIN_LIBRARY
+  QT_QASSISTANTCLIENT_LIBRARY
   QT_UIC_EXECUTABLE
   QT_MOC_EXECUTABLE
   QT_WRAP_CPP
   QT_WRAP_UI
-  )
+  ) 
