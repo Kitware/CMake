@@ -25,13 +25,25 @@ int main (int argc, char *argv[])
     std::cerr << "Usage: " << argv[0] << " executable" << std::endl;
     return 1;
     }
-  std::string command = argv[1];
+  std::string arg = argv[1];
+  if ( (arg.find_first_of(" ") != arg.npos) && 
+       (arg.find_first_of("\"") == arg.npos) )
+    {
+    arg = "\"" + arg + "\"";
+    }
+  std::string command = arg;
   int cc;
   for ( cc = 2; cc < argc; cc ++ )
     {
+    std::string arg = argv[cc];
+    if ( (arg.find_first_of(" ") != arg.npos) && 
+	 (arg.find_first_of("\"") == arg.npos) )
+      {
+      arg = "\"" + arg + "\"";
+      }
     command += " ";
-    command += argv[cc];
+    command += arg;
     }
- 
+
   return cmWin32ProcessExecution::Windows9xHack(command.c_str());
 }
