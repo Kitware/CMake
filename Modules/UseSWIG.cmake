@@ -1,3 +1,21 @@
+#
+# SWIG module for CMake
+# 
+# Defines the following macros:
+#
+#   SWIG_ADD_MODULE(name language [ files ])
+#     - Define swig module with given name and specified language
+#
+#   SWIG_LINK_LIBRARIES(name [ libraries ])
+#     - Link libraries to swig module
+#
+# All other macros are for internal use only.
+#
+# To get the actual name of the swig module, use: ${SWIG_MODULE_name_REAL_NAME}.
+# Set Source files propertis such as CPLUSPLUS and SWIG_FLAGS to specify
+# special behavior of SWIG. Also global CMAKE_SWIG_FLAGS can be used to add
+# special flags to all swig calls.
+
 SET(SWIG_CXX_EXTENSION "cxx")
 SET(SWIG_EXTRA_LIBRARIES "")
 
@@ -27,7 +45,7 @@ ENDMACRO(SWIG_MODULE_INITIALIZE)
 
 #
 # For a given language, input file, and output file, determine extra files that
-# will be generated
+# will be generated. This is internal swig macro.
 #
 
 MACRO(SWIG_GET_EXTRA_OUTPUT_FILES language outfiles generatedpath infile)
@@ -116,6 +134,7 @@ MACRO(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
     COMMAND "${SWIG_EXECUTABLE}"
     ARGS "-${SWIG_MODULE_${name}_SWIG_LANGUAGE_FLAG}"
     ${swig_source_file_flags}
+    ${CMAKE_SWIG_FLAGS}
     ${swig_special_flags}
     ${swig_extra_flags}
     ${swig_include_dirs}
