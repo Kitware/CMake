@@ -1086,7 +1086,9 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
       flags = m_Makefile->GetRequiredDefinition("CMAKE_C_FLAGS");
       }
     // if unicode is not found, then add -D_MBCS
-    if(flags.find("D_UNICODE") == flags.npos)
+    std::string defs = m_Makefile->GetDefineFlags();
+    if(flags.find("D_UNICODE") == flags.npos &&
+       defs.find("D_UNICODE") == flags.npos) 
       {
       flags += " /D \"_MBCS\"";
       }
