@@ -1,4 +1,4 @@
-PROJECT(SystemInformation)
+PROJECT(DumpInformation)
 INCLUDE_DIRECTORIES(${SystemInformation_BINARY_DIR})
 CONFIGURE_FILE(${SystemInformation_SOURCE_DIR}/SystemInformation.in 
 ${SystemInformation_BINARY_DIR}/SystemInformation.out)
