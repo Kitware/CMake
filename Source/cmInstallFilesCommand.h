@@ -72,14 +72,29 @@ public:
     return
       "INSTALL_FILES(path extension file file ...)\n"
       "INSTALL_FILES(path regexp)\n"
-      "Create rules to install the listed files into the path. Path is relative to the variable CMAKE_INSTALL_PREFIX. There are two forms for this command. In the first the files can be specified explicitly. If a file specified already has an extension, that extension will be removed first. This is useful for providing lists of source files such as foo.cxx when you want the corresponding foo.h to be installed. A typical extension is .h etc... In the second form any files in the current directory that match the regular expression will be installed.";
+      "INSTALL_FILES(path FILES file file ...)\n"
+      "Create rules to install the listed files into the path. Path is\n"
+      "relative to the variable CMAKE_INSTALL_PREFIX. There are three forms for\n"
+      "this command. In the first the files can be specified explicitly. If a\n"
+      "file specified already has an extension, that extension will be\n"
+      "removed first. This is useful for providing lists of source files such\n"
+      "as foo.cxx when you want the corresponding foo.h to be installed. A\n"
+      "typical extension is .h etc... In the second form any files in the\n"
+      "current directory that match the regular expression will be installed.\n"
+      "In the third form, any files listed after the FILES keyword will be\n"
+      "installed explicitly from the names given.  Full paths are allowed in\n"
+      "this form.";
     }
   
   cmTypeMacro(cmInstallFilesCommand, cmCommand);
 
+protected:
+  std::string FindInstallSource(const char* name) const;
+  
  private:
   std::string m_TargetName;
   std::vector<std::string> m_FinalArgs;
+  bool m_IsFilesForm;
 };
 
 

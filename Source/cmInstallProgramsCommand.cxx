@@ -30,11 +30,10 @@ bool cmInstallProgramsCommand::InitialPass(std::vector<std::string> const& argsI
 
   // Create an INSTALL_PROGRAMS target specifically for this path.
   m_TargetName = "INSTALL_PROGRAMS_"+args[0];
-  cmTarget target;
+  cmTarget& target = m_Makefile->GetTargets()[m_TargetName];
   target.SetInAll(false);
   target.SetType(cmTarget::INSTALL_PROGRAMS);
   target.SetInstallPath(args[0].c_str());
-  m_Makefile->GetTargets().insert(cmTargets::value_type(m_TargetName, target));
 
   std::vector<std::string>::const_iterator s = args.begin();
   for (++s;s != args.end(); ++s)
@@ -58,7 +57,7 @@ void cmInstallProgramsCommand::FinalPass()
          s != m_FinalArgs.end(); ++s)
       {
       // add to the result
-      targetSourceLists.push_back(*s);
+      targetSourceLists.push_back(this->FindInstallSource(s->c_str()));
       }
     }
   else     // reg exp list
@@ -71,9 +70,47 @@ void cmInstallProgramsCommand::FinalPass()
     // for each argument, get the programs 
     for (;s != programs.end(); ++s)
       {
-      targetSourceLists.push_back(*s);
+      targetSourceLists.push_back(this->FindInstallSource(s->c_str()));
       }
     }
 }
 
-      
+/**
+ * Find a file in the build or source tree for installation given a
+ * relative path from the CMakeLists.txt file.  This will favor files
+ * present in the build tree.  If a full path is given, it is just
+ * returned.
+ */
+std::string cmInstallProgramsCommand::FindInstallSource(const char* name) const
+{
+  if(cmSystemTools::FileIsFullPath(name))
+    {
+    // This is a full path.
+    return name;
+    }
+  
+  // This is a relative path.
+  std::string tb = m_Makefile->GetCurrentOutputDirectory();
+  tb += "/";
+  tb += name;
+  std::string ts = m_Makefile->GetCurrentDirectory();
+  ts += "/";
+  ts += name;
+  
+  if(cmSystemTools::FileExists(tb.c_str()))
+    {
+    // The file exists in the binary tree.  Use it.
+    return tb;
+    }
+  else if(cmSystemTools::FileExists(ts.c_str()))
+    {
+    // The file exists in the source tree.  Use it.
+    return ts;
+    }
+  else
+    {
+    // The file doesn't exist.  Assume it will be present in the
+    // binary tree when the install occurs.
+    return tb;
+    }
+}

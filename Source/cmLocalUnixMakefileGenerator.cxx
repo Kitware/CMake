@@ -1664,81 +1664,71 @@ void cmLocalUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
 	  break;
 	case cmTarget::INSTALL_FILES:
 	  {
+          std::string sourcePath = m_Makefile->GetCurrentDirectory();
+          std::string binaryPath = m_Makefile->GetCurrentOutputDirectory();
+          sourcePath += "/";
+          binaryPath += "/";
 	  const std::vector<std::string> &sf = l->second.GetSourceLists();
 	  std::vector<std::string>::const_iterator i;
 	  for (i = sf.begin(); i != sf.end(); ++i)
 	    {
-	    fout << "\t@ echo \"Installing " << *i << " \"\n"; 
-	    fout << "\t@if [ -f " << *i << " ] ; then \\\n";
+            std::string f = *i;
+            if(f.substr(0, sourcePath.length()) == sourcePath)
+              {
+              f = f.substr(sourcePath.length());
+              }
+            else if(f.substr(0, binaryPath.length()) == binaryPath)
+              {
+              f = f.substr(binaryPath.length());
+              }
+	    fout << "\t@ echo \"Installing " << f.c_str() << " \"\n"; 
             // avoid using install-sh to install install-sh
             // does not work on windows.... 
            if(*i == "install-sh")
               {
-              fout << "\t   cp ";
+              fout << "\t   @cp ";
               }
             else
               {
-              fout << "\t   $(INSTALL_DATA) ";
+              fout << "\t   @$(INSTALL_DATA) ";
               }
 	    fout << *i
-		 << " $(DESTDIR)" << prefix << l->second.GetInstallPath() << "; \\\n";
-	    fout << "\t elif [ -f $(CMAKE_CURRENT_SOURCE)/" << *i << " ] ; then \\\n";
-            // avoid using install-sh to install install-sh
-            // does not work on windows....
-            if(*i == "install-sh")
-              {
-              fout << "\t   cp ";
-              }
-            else
-              {
-              fout << "\t   $(INSTALL_DATA) ";
-              }
-	    fout << "$(CMAKE_CURRENT_SOURCE)/" << *i 
-		 << " $(DESTDIR)" << prefix << l->second.GetInstallPath() << "; \\\n";
-	    fout << "\telse \\\n";
-	    fout << "\t   echo \" ERROR!!! Unable to find: " << *i 
-		 << " \"; \\\n";	 
-	    fout << "\t fi\n";
+		 << " $(DESTDIR)" << prefix << l->second.GetInstallPath() << "\n";
 	    }
 	  }
 	  break;
 	case cmTarget::INSTALL_PROGRAMS:
 	  {
+          std::string sourcePath = m_Makefile->GetCurrentDirectory();
+          std::string binaryPath = m_Makefile->GetCurrentOutputDirectory();
+          sourcePath += "/";
+          binaryPath += "/";
 	  const std::vector<std::string> &sf = l->second.GetSourceLists();
 	  std::vector<std::string>::const_iterator i;
 	  for (i = sf.begin(); i != sf.end(); ++i)
 	    {
-	    fout << "\t@ echo \"Installing " << *i << " \"\n"; 
-	    fout << "\t@if [ -f " << *i << " ] ; then \\\n";
+            std::string f = *i;
+            if(f.substr(0, sourcePath.length()) == sourcePath)
+              {
+              f = f.substr(sourcePath.length());
+              }
+            else if(f.substr(0, binaryPath.length()) == binaryPath)
+              {
+              f = f.substr(binaryPath.length());
+              }
+	    fout << "\t@ echo \"Installing " << f.c_str() << " \"\n"; 
             // avoid using install-sh to install install-sh
             // does not work on windows.... 
            if(*i == "install-sh")
               {
-              fout << "\t   cp ";
+              fout << "\t   @cp ";
               }
             else
               {
-              fout << "\t   $(INSTALL_PROGRAM) ";
+              fout << "\t   @$(INSTALL_DATA) ";
               }
 	    fout << *i
-		 << " $(DESTDIR)" << prefix << l->second.GetInstallPath() << "; \\\n";
-	    fout << "\t elif [ -f $(CMAKE_CURRENT_SOURCE)/" << *i << " ] ; then \\\n";
-            // avoid using install-sh to install install-sh
-            // does not work on windows....
-            if(*i == "install-sh")
-              {
-              fout << "\t   cp ";
-              }
-            else
-              {
-              fout << "\t   $(INSTALL_PROGRAM) ";
-              }
-	    fout << "$(CMAKE_CURRENT_SOURCE)/" << *i 
-		 << " $(DESTDIR)" << prefix << l->second.GetInstallPath() << "; \\\n";
-	    fout << "\telse \\\n";
-	    fout << "\t   echo \" ERROR!!! Unable to find: " << *i 
-		 << " \"; \\\n";	 
-	    fout << "\t fi\n";
+		 << " $(DESTDIR)" << prefix << l->second.GetInstallPath() << "\n";
 	    }
 	  }
 	  break;
