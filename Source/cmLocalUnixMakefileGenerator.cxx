@@ -87,6 +87,7 @@ void cmLocalUnixMakefileGenerator::Generate(bool fromTheTop)
       }
     }
 
+  this->m_Makefile->GenerateMakefile();
   if (!fromTheTop)
     {
     // Generate depends 
