@@ -61,6 +61,7 @@ ELSE(STAGE2)
   TARGET_LINK_LIBRARIES(SimpleInstall test1 test2)
   SET(install_target SimpleInstall)
 
+  ADD_DEPENDENCIES(test2 TSD)
   ADD_DEPENDENCIES(SimpleInstall test3)
   ADD_DEPENDENCIES(test2 test3)
 
