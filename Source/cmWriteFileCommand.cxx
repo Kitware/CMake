@@ -44,12 +44,15 @@ bool cmWriteFileCommand::InitialPass(std::vector<std::string> const& argsIn)
       message += *i;
       }
     }
+  std::string dir = cmSystemTools::GetFilenamePath(fileName);
+  cmSystemTools::MakeDirectory(dir.c_str());
 
   std::ofstream file(fileName.c_str(), overwrite?std::ios::out : std::ios::app);
   if ( !file )
     {
-    cmSystemTools::Error("Internal CMake error when trying to open file: ",
-                         fileName.c_str());
+    std::string error = "Internal CMake error when trying to open file: ";
+    error += fileName.c_str();
+    this->SetError(error.c_str());
     return false;
     }
   file << message << std::endl;
