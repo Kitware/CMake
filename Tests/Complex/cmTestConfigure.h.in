@@ -2,6 +2,7 @@
 #cmakedefine ZERO_VAR
 #define STRING_VAR "${STRING_VAR}"
 
+#define BINARY_DIR "${Complex_BINARY_DIR}"
 
 #cmakedefine CMAKE_NO_STD_NAMESPACE
 #cmakedefine CMAKE_NO_ANSI_STREAM_HEADERS

@@ -3,6 +3,17 @@
 #include "file2.h"
 #include "sharedFile.h"
 #include "cmStandardIncludes.h"
+#include <sys/stat.h>
+#include <stdio.h>
+#include <io.h>
+
+#if defined(_MSC_VER) || defined(__BORLANDC__)
+#define _unlink unlink
+#else
+#include <sys/types.h>
+#include <fcntl.h>
+#include <unistd.h>
+#endif
 
 int passed = 0;
 int failed = 0;
@@ -38,6 +49,7 @@ int main()
     {
     Passed("Call to file1 function returned 1.");
     }
+
   if(file2() != 1)
     {
     Failed("Call to file2 function from library failed.");
@@ -46,6 +58,7 @@ int main()
     {
     Passed("Call to file2 function returned 1.");
     }
+
 #ifndef CMAKE_IS_FUN
   Failed("CMake is not fun, so it is broken and should be fixed.");
 #else
@@ -76,8 +89,6 @@ int main()
   Passed("ZERO_VAR is not defined.");
 #endif
   
-
-  
 #ifndef STRING_VAR
   Failed("configureFile is broken, STRING_VAR is not defined.");
 #else
@@ -92,13 +103,32 @@ int main()
     Passed("STRING_VAR == ", STRING_VAR);
     }
 #endif
+
+  // Attach a post-build custom-command to the lib.
+  // It run ${CREATE_FILE_EXE} which will create the file
+  // ${Complex_BINARY_DIR}/postbuild.txt.
+  // The 'complex' executable will then test if this file exists,
+  // and remove it.
+
+  struct stat fs;
+  if (stat(BINARY_DIR "/postbuild.txt", &fs) != 0)
+    {
+    Failed("Could not find " BINARY_DIR "/postbuild.txt (created as a post-build custom command for the shared lib).");
+    }
+  else
+    {
+    if (unlink(BINARY_DIR "/postbuild.txt") != 0)
+      {
+      Failed("Unable to remove " BINARY_DIR "/postbuild.txt (does not imply that this test failed, but it *will* be corrupted thereafter if this file is not removed).");
+      }
+    }
+
   std::cout << "Passed:" << passed << "\n";
   if(failed)
     {
     std::cout << "Failed: " << failed << "\n";
     return failed;
     }
+
   return 0;
 }
-
-  
