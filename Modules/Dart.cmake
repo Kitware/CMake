@@ -157,18 +157,23 @@ IF(BUILD_TESTING)
     )
   #  BUILDNAME 
 
+  SET(HAVE_DART)
+  IF(EXISTS "${DART_ROOT}/Source/Client/Dart.conf.in")
+    SET(HAVE_DART 1)
+  ENDIF(EXISTS "${DART_ROOT}/Source/Client/Dart.conf.in")
+
   #
   # Section #2:
   # 
   # Make necessary directories and configure testing scripts
   #
   # find a tcl shell command
-  IF(DART_ROOT)
+  IF(HAVE_DART)
     INCLUDE(${CMAKE_ROOT}/Modules/FindTclsh.cmake)
-  ENDIF(DART_ROOT)
+  ENDIF(HAVE_DART)
 
 
-  IF (DART_ROOT AND TCL_TCLSH)
+  IF (HAVE_DART AND TCL_TCLSH)
     # make directories in the binary tree
     FILE(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/Testing/HTML/TestingResults/Dashboard
       ${PROJECT_BINARY_DIR}/Testing/HTML/TestingResults/Sites/${SITE}/${BUILDNAME})
@@ -257,7 +262,7 @@ IF(BUILD_TESTING)
         ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly DashboardEnd)
     ENDIF (${CMAKE_MAKE_PROGRAM} MATCHES make)
 
-  ELSE(DART_ROOT AND TCL_TCLSH)
+  ELSE(HAVE_DART AND TCL_TCLSH)
     # make directories in the binary tree
     FILE(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/Testing/Temporary)
     GET_FILENAME_COMPONENT(CMAKE_HOST_PATH ${CMAKE_COMMAND} PATH)
@@ -306,7 +311,7 @@ IF(BUILD_TESTING)
         ENDFOREACH(testtype)
       ENDFOREACH(mode)
     ENDIF (${CMAKE_MAKE_PROGRAM} MATCHES make)
-  ENDIF (DART_ROOT AND TCL_TCLSH)
+  ENDIF (HAVE_DART AND TCL_TCLSH)
 ENDIF(BUILD_TESTING)
 
 #
