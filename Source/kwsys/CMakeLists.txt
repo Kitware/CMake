@@ -245,7 +245,7 @@ ENDFOREACH(header)
 # Build a list of classes and headers we need to implement the
 # selected components.  Initialize with required components.
 SET(KWSYS_CLASSES)
-SET(KWSYS_H_FILES Configure)
+SET(KWSYS_H_FILES Configure SharedForward)
 SET(KWSYS_HXX_FILES Configure)
 
 # Enforce component dependencies.
