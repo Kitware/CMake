@@ -4030,7 +4030,7 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
   
   // command line make program
 
-  out << "Running make command: " << makeCommand.c_str() << " ...\n";
+  out << "Running make command: " << makeCommand.c_str() << "\n";
   retVal = 0;
   std::string output;
   if (!cmSystemTools::RunSingleCommand(makeCommand.c_str(), &output, &retVal, 0, false))
@@ -4182,12 +4182,18 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
   testCommand.push_back(0);
   std::string outs;
   int retval = 0;
-  out << "Running test executable: " << fullPath << "\n"; 
   // run the test from the m_BuildRunDir if set
   if(m_BuildRunDir.size())
     {
+    out << "Run test in directory: " << m_BuildRunDir << "\n";
     cmSystemTools::ChangeDirectory(m_BuildRunDir.c_str());
     }
+  out << "Running test executable: " << fullPath << " ";
+  for(k=0; k < m_TestCommandArgs.size(); ++k)
+    {
+    out << m_TestCommandArgs[k] << " ";
+    }
+  out << "\n";
   this->RunTest(testCommand, &outs, &retval);
   out << outs << "\n";
   if(outstring)
