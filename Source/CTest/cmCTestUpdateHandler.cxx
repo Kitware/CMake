@@ -23,6 +23,7 @@
 #include "cmLocalGenerator.h"
 #include "cmGlobalGenerator.h"
 #include "cmVersion.h"
+#include "cmGeneratedFileStream.h"
 
 //#include <cmsys/RegularExpression.hxx>
 #include <cmsys/Process.h>
@@ -95,8 +96,8 @@ int cmCTestUpdateHandler::UpdateDirectory(cmCTest *ctest_inst)
 
   std::string command = cvsCommand + " -z3 update " + cvsOptions +
     " " + extra_update_opts;
-  std::ofstream os; 
-  if ( !m_CTest->OpenOutputFile(m_CTest->GetCurrentTag(), "Update.xml", os) )
+  cmGeneratedFileStream os; 
+  if ( !m_CTest->OpenOutputFile(m_CTest->GetCurrentTag(), "Update.xml", os, true) )
     {
     std::cerr << "Cannot open log file" << std::endl;
     }
@@ -106,7 +107,7 @@ int cmCTestUpdateHandler::UpdateDirectory(cmCTest *ctest_inst)
   std::string goutput;
   int retVal = 0;
   bool res = true;
-  std::ofstream ofs;
+  cmGeneratedFileStream ofs;
   if ( !m_CTest->GetShowOnly() )
     {
     res = cmSystemTools::RunSingleCommand(command.c_str(), &goutput, 

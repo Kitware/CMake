@@ -30,6 +30,7 @@ class cmCTestCoverageHandler;
 class cmCTestScriptHandler;
 class cmCTestTestHandler;
 class cmCTestUpdateHandler;
+class cmGeneratedFileStream;
 
 class cmCTest
 {
@@ -87,6 +88,7 @@ public:
    * Check if CTest file exists
    */
   bool CTestFileExists(const std::string& filename);
+  bool AddIfExists(tm_VectorOfStrings& files, const char* file);
 
   /**
    * Set the cmake test
@@ -140,7 +142,9 @@ public:
   int GenerateNotesFile(const char* files);
 
   bool OpenOutputFile(const std::string& path, 
-                      const std::string& name, std::ofstream& stream);  
+                      const std::string& name,
+                      cmGeneratedFileStream& stream,
+                      bool compress = false);
   static std::string MakeXMLSafe(const std::string&);
   static std::string MakeURLSafe(const std::string&);
   
@@ -255,6 +259,8 @@ private:
   bool                     m_InteractiveDebugMode;
 
   bool                     m_ShortDateFormat;
+
+  bool                     m_CompressXMLFiles;
   
   void BlockTestErrorDiagnostics();
   

@@ -18,6 +18,7 @@
 #include "cmCTestConfigureHandler.h"
 
 #include "cmCTest.h"
+#include "cmGeneratedFileStream.h"
 #include "cmake.h"
 #include <cmsys/Process.h>
 
@@ -59,15 +60,15 @@ int cmCTestConfigureHandler::ConfigureDirectory(cmCTest *ctest_inst)
   int res = 0;
   if ( !m_CTest->GetShowOnly() )
     {
-    std::ofstream os; 
-    if ( !m_CTest->OpenOutputFile(m_CTest->GetCurrentTag(), "Configure.xml", os) )
+    cmGeneratedFileStream os; 
+    if ( !m_CTest->OpenOutputFile(m_CTest->GetCurrentTag(), "Configure.xml", os, true) )
       {
       std::cerr << "Cannot open configure file" << std::endl;
       return 1;
       }
     std::string start_time = m_CTest->CurrentTime();
 
-    std::ofstream ofs;
+    cmGeneratedFileStream ofs;
     m_CTest->OpenOutputFile("Temporary", "LastConfigure.log", ofs);
     res = m_CTest->RunMakeCommand(cCommand.c_str(), &output, 
       &retVal, buildDirectory.c_str(),

@@ -23,6 +23,7 @@
 #include "cmListFileCache.h"
 
 class cmCTest;
+class cmGeneratedFileStream;
 
 /** \class cmCTestCoverageHandler
  * \brief A class that handles coverage computaiton for ctest
@@ -49,8 +50,8 @@ private:
   cmCTest *m_CTest;
   bool ShouldIDoCoverage(const char* file, const char* srcDir,
     const char* binDir, bool verbose);
-  bool StartLogFile(std::ofstream& ostr, int logFileCount);
-  void EndLogFile(std::ofstream& ostr, int logFileCount);
+  bool StartLogFile(cmGeneratedFileStream& ostr, int logFileCount);
+  void EndLogFile(cmGeneratedFileStream& ostr, int logFileCount);
 
   struct cmCTestCoverage
     {

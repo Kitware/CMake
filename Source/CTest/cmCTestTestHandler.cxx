@@ -19,6 +19,7 @@
 
 #include "cmCTest.h"
 #include "cmake.h"
+#include "cmGeneratedFileStream.h"
 #include <cmsys/Process.h>
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/Base64.h>
@@ -302,7 +303,7 @@ int cmCTestTestHandler::TestDirectory(cmCTest *ctest_inst, bool memcheck)
 
     if (failed.size()) 
       {
-      std::ofstream ofs;
+      cmGeneratedFileStream ofs;
 
       std::cerr << "\nThe following tests FAILED:\n";
       m_CTest->OpenOutputFile("Temporary", "LastTestsFailed.log", ofs);
@@ -324,9 +325,9 @@ int cmCTestTestHandler::TestDirectory(cmCTest *ctest_inst, bool memcheck)
 
   if ( m_CTest->GetProduceXML() )
     {
-    std::ofstream xmlfile;
+    cmGeneratedFileStream xmlfile;
     if( !m_CTest->OpenOutputFile(m_CTest->GetCurrentTag(), 
-        (memcheck ? "DynamicAnalysis.xml" : "Test.xml"), xmlfile) )
+        (memcheck ? "DynamicAnalysis.xml" : "Test.xml"), xmlfile, true) )
       {
       std::cerr << "Cannot create " << (memcheck ? "memory check" : "testing")
         << " XML file" << std::endl;
@@ -372,8 +373,8 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
   this->GetListOfTests(&testlist, memcheck);
   tm_ListOfTests::size_type tmsize = testlist.size();
 
-  std::ofstream ofs;
-  std::ofstream *olog = 0;
+  cmGeneratedFileStream ofs;
+  cmGeneratedFileStream *olog = 0;
   if ( !m_CTest->GetShowOnly() && tmsize > 0 && 
     m_CTest->OpenOutputFile("Temporary", 
       (memcheck?"LastMemCheck.log":"LastTest.log"), ofs) )
@@ -1670,7 +1671,7 @@ bool cmCTestTestHandler::CleanTestOutput(std::string& output, size_t remove_thre
     }
   cmOStringStream ostr;
   std::string::size_type cc;
-  std::string::size_type skipsize;
+  std::string::size_type skipsize = 0;
   int inTag = 0;
   int skipped = 0;
   for ( cc = 0; cc < output.size(); cc ++ )

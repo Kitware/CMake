@@ -24,6 +24,7 @@
 #include <cmsys/Directory.hxx>
 #include "cmGlob.h"
 #include "cmDynamicLoader.h"
+#include "cmGeneratedFileStream.h"
 
 #include "cmCTestBuildHandler.h"
 #include "cmCTestCoverageHandler.h"
@@ -231,6 +232,7 @@ cmCTest::cmCTest()
   m_TestModel              = cmCTest::EXPERIMENTAL;
   m_InteractiveDebugMode   = true;
   m_TimeOut                = 0;
+  m_CompressXMLFiles       = false;
   int cc; 
   for ( cc=0; cc < cmCTest::LAST_TEST; cc ++ )
     {
@@ -481,7 +483,8 @@ void cmCTest::Finalize()
  
 
 bool cmCTest::OpenOutputFile(const std::string& path, 
-                     const std::string& name, std::ofstream& stream)
+                     const std::string& name, cmGeneratedFileStream& stream,
+                     bool compress)
 {
   std::string testingDir = m_ToplevelPath + "/Testing";
   if ( path.size() > 0 )
@@ -508,43 +511,59 @@ bool cmCTest::OpenOutputFile(const std::string& path,
       }
     }
   std::string filename = testingDir + "/" + name;
-  stream.open(filename.c_str());
+  stream.Open(filename.c_str());
   if( !stream )
     {
     std::cerr << "Problem opening file: " << filename << std::endl;
     return false;
+    }
+  if ( compress )
+    {
+    if ( m_CompressXMLFiles )
+      {
+      stream.SetCompression(true);
+      }
+    }
+  return true;
+}
+
+bool cmCTest::AddIfExists(tm_VectorOfStrings& files, const char* file)
+{
+  if ( this->CTestFileExists(file) )
+    {
+    files.push_back(file);
+    }
+  else
+    {
+    std::string name = file;
+    name += ".gz";
+    if ( this->CTestFileExists(name.c_str()) )
+      {
+      files.push_back(name.c_str());
+      }
+    else
+      {
+      return false;
+      }
     }
   return true;
 }
 
 int cmCTest::SubmitResults()
 {
-  std::ofstream ofs;
+  cmGeneratedFileStream ofs;
   this->OpenOutputFile("Temporary", "LastSubmit.log", ofs);
 
   cmCTest::tm_VectorOfStrings files;
   std::string prefix = this->GetSubmitResultsPrefix();
   // TODO:
   // Check if test is enabled
-  if ( this->CTestFileExists("Update.xml") )
+  this->AddIfExists(files, "Update.xml");
+  this->AddIfExists(files, "Configure.xml");
+  this->AddIfExists(files, "Build.xml");
+  this->AddIfExists(files, "Test.xml");
+  if ( this->AddIfExists(files, "Coverage.xml") )
     {
-    files.push_back("Update.xml");
-    }
-  if ( this->CTestFileExists("Configure.xml") )
-    {
-    files.push_back("Configure.xml");
-    }
-  if ( this->CTestFileExists("Build.xml") )
-    {
-    files.push_back("Build.xml");
-    }
-  if ( this->CTestFileExists("Test.xml") )
-    {
-    files.push_back("Test.xml");
-    }
-  if ( this->CTestFileExists("Coverage.xml") )
-    {
-    files.push_back("Coverage.xml");
     cmCTest::tm_VectorOfStrings gfiles;
     std::string gpath = m_ToplevelPath + "/Testing/" + m_CurrentTag;
     std::string::size_type glen = gpath.size() + 1;
@@ -565,18 +584,9 @@ int cmCTest::SubmitResults()
       std::cerr << "Problem globbing" << std::endl;
       }
     }
-  if ( this->CTestFileExists("DynamicAnalysis.xml") )
-    {
-    files.push_back("DynamicAnalysis.xml");
-    }
-  if ( this->CTestFileExists("Purify.xml") )
-    {
-    files.push_back("Purify.xml");
-    }
-  if ( this->CTestFileExists("Notes.xml") )
-    {
-    files.push_back("Notes.xml");
-    }
+  this->AddIfExists(files, "DynamicAnalysis.xml");
+  this->AddIfExists(files, "Purify.xml");
+  this->AddIfExists(files, "Notes.xml");
 
   if ( ofs )
     {
@@ -1134,7 +1144,7 @@ int cmCTest::GenerateNotesFile(const char* cfiles)
     return 1;
     }
 
-  std::ofstream ofs;
+  cmGeneratedFileStream ofs;
   if ( !this->OpenOutputFile(m_CurrentTag, "Notes.xml", ofs) )
     {
     std::cerr << "Cannot open notes file" << std::endl;

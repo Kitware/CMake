@@ -22,6 +22,7 @@
 #include "cmMakefile.h"
 #include "cmLocalGenerator.h"
 #include "cmGlobalGenerator.h"
+#include "cmGeneratedFileStream.h"
 
 //#include <cmsys/RegularExpression.hxx>
 #include <cmsys/Process.h>
@@ -211,12 +212,13 @@ int cmCTestBuildHandler::BuildDirectory(cmCTest *ctest_inst)
     return 1;
     }
 
-  std::ofstream ofs;
+  cmGeneratedFileStream ofs;
   double elapsed_time_start = cmSystemTools::GetTime();
   if ( !m_CTest->OpenOutputFile("Temporary", "LastBuild.log", ofs) )
     {
     std::cerr << "Cannot create LastBuild.log file" << std::endl;    
     }
+
   m_StartBuild = m_CTest->CurrentTime();
   std::string output;
   int retVal = 0;
@@ -236,10 +238,6 @@ int cmCTestBuildHandler::BuildDirectory(cmCTest *ctest_inst)
   if (res != cmsysProcess_State_Exited || retVal )
     {
     std::cerr << "Error(s) when building project" << std::endl;
-    }
-  if ( ofs )
-    {
-    ofs.close();
     }
 
   std::vector<cmStdString>::size_type cc;
@@ -440,12 +438,13 @@ int cmCTestBuildHandler::BuildDirectory(cmCTest *ctest_inst)
   std::cout << "   " << errors << " Compiler errors" << std::endl;
   std::cout << "   " << warnings << " Compiler warnings" << std::endl;
 
-  if( !m_CTest->OpenOutputFile(m_CTest->GetCurrentTag(), "Build.xml", ofs) )
+  cmGeneratedFileStream xofs;
+  if( !m_CTest->OpenOutputFile(m_CTest->GetCurrentTag(), "Build.xml", xofs, true) )
     {
     std::cerr << "Cannot create build XML file" << std::endl;
     return 1;
     }
-  this->GenerateDartBuildOutput(ofs, errorsWarnings, elapsed_build_time);
+  this->GenerateDartBuildOutput(xofs, errorsWarnings, elapsed_build_time);
   return 0;
 }
 
