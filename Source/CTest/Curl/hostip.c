@@ -379,7 +379,7 @@ int Curl_resolv(struct connectdata *conn,
   CURLcode result;
 
   /* default to failure */
-  int rc = CURLRESOLV_ERROR;
+  int rc;
   *entry = NULL;
 
 #ifdef HAVE_SIGSETJMP
@@ -391,6 +391,7 @@ int Curl_resolv(struct connectdata *conn,
     return CURLRESOLV_ERROR;
   }
 #endif
+  rc = CURLRESOLV_ERROR;
 
   /* Create an entry id, based upon the hostname and port */
   entry_id = create_hostcache_id(hostname, port);
