@@ -3,7 +3,7 @@
 #include "cmake.h"
 #include "cmListFileCache.h"
 #include "cmMakefileGenerator.h"
-#if defined(_WIN32) && !defined(__CYGWIN__) && !defined(__BORLANDC__)
+#if defined(_WIN32) && !defined(__CYGWIN__) 
 #include "windows.h"
 #endif
 
