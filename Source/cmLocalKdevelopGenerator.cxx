@@ -23,11 +23,11 @@
 #include "cmMakeDepend.h"
 #include "cmCacheManager.h"
 #include "cmGeneratedFileStream.h"
+#include "cmake.h"
 
 #include <cmsys/RegularExpression.hxx>
 
 #include <iostream>
-
 
 cmLocalKdevelopGenerator::cmLocalKdevelopGenerator()
   :cmLocalUnixMakefileGenerator()
@@ -45,6 +45,10 @@ cmLocalKdevelopGenerator::~cmLocalKdevelopGenerator()
 void cmLocalKdevelopGenerator::Generate(bool fromTheTop)
 {
   cmLocalUnixMakefileGenerator::Generate(fromTheTop);
+  if ( m_GlobalGenerator->GetCMakeInstance()->GetLocal() )
+    {
+    return;
+    }
 
   bool containsTargets=false;
   std::string executable;
@@ -70,15 +74,13 @@ void cmLocalKdevelopGenerator::Generate(bool fromTheTop)
 
   if (containsTargets)
     {
-    std::string projectFileDir=m_Makefile->GetStartOutputDirectory();
-    std::string filelistDir=m_Makefile->GetDefinition("PROJECT_SOURCE_DIR");
+    std::string filelistDir=m_Makefile->GetHomeOutputDirectory();
     //build the project name by taking the subdir
-    std::string projectName=m_Makefile->GetProjectName();
-    projectName+=m_Makefile->GetStartOutputDirectory();
-    cmSystemTools::ReplaceString(projectName, filelistDir.c_str(), "");
-    cmSystemTools::ReplaceString(projectName, "/", "_");
+    std::vector<cmLocalGenerator *> lgs;
+    m_GlobalGenerator->GetLocalGenerators(lgs);
+    std::string projectName=lgs[0]->GetMakefile()->GetProjectName();
 
-    std::string cmakeFilePattern("*/CMakeLists.txt;*.cmake;");
+    std::string cmakeFilePattern("CMakeLists.txt;*.cmake;");
 
     if (!this->CreateFilelistFile(filelistDir, projectName, cmakeFilePattern))
       {
@@ -304,7 +306,7 @@ bool cmLocalKdevelopGenerator::CreateFilelistFile(const std::string& _dir,
       if ((tmp!="CMakeLists.txt")
           && (strstr(tmp.c_str(), ".cmake")==0))
         {
-        cmakeFilePattern+="*/"+tmp+";";
+        cmakeFilePattern+=tmp+";";
         }
       }
     }
@@ -313,27 +315,17 @@ bool cmLocalKdevelopGenerator::CreateFilelistFile(const std::string& _dir,
   cmTargets& targets=m_Makefile->GetTargets();
   for (cmTargets::const_iterator ti = targets.begin(); ti != targets.end(); ti++)
     {
-    const std::vector<std::string>& sources=ti->second.GetSourceLists();
-    for (std::vector<std::string>::const_iterator it=sources.begin(); it!=sources.end(); it++)
+    const std::vector<cmSourceFile*>& sources=ti->second.GetSourceFiles();
+    for (std::vector<cmSourceFile*>::const_iterator it=sources.begin();
+      it!=sources.end(); it++)
       {
-      tmp=*it;
-
-      if (tmp[0]!='/') //no absolute path
-        {
-        tmp=std::string(m_Makefile->GetDefinition("CMAKE_CURRENT_SOURCE_DIR"))+"/"+tmp;
-        }
-
-      tmp=cmSystemTools::CollapseFullPath(tmp.c_str());
-      cmSystemTools::ReplaceString(tmp, filelistDir.c_str(), "");
-      if (tmp[0]=='/')
-        {
-        std::string errorMessage("In order to get working KDevelop project files, you have to call "
-                                 "PROJECT() in a directory which is a parent directory of all source files. The source file ");
-        errorMessage+=tmp+" is not located beneath your current project directory "+filelistDir+" .";
-        cmSystemTools::Error(errorMessage.c_str());
-        return false;
-        }
-      files.insert(tmp);
+      files.insert((*it)->GetFullPath());
+      }
+    const std::vector<std::string>& listFiles=m_Makefile->GetListFiles();
+    for (std::vector<std::string>::const_iterator it=listFiles.begin();
+      it!=listFiles.end(); it++)
+      {
+      files.insert(it->c_str());
       }
     }
 
@@ -370,7 +362,7 @@ bool cmLocalKdevelopGenerator::CreateFilelistFile(const std::string& _dir,
    
   for (std::set<cmStdString>::const_iterator it=files.begin(); it!=files.end(); it++)
     {
-    fout<<*it<<"\n";
+    fout<< cmSystemTools::RelativePath(_dir.c_str(), it->c_str())<<"\n";
     }
   return true;
 }
