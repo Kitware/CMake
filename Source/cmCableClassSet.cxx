@@ -717,8 +717,10 @@ bool ElementCombinationGenerator::GenerateTag(const cmStdString& element)
   if(regex.find(element))
     {
     m_Tag = "_";
-    if(regex.match(1) == "long ")
+    if(regex.start(1) > 0 && regex.match(1) == "long ")
+      {
       m_Tag.append("l");
+      }
     m_Tag.append(regex.match(2));
     return true;
     }
