@@ -358,37 +358,50 @@ void cmDSPMakefile::WriteDSPEndGroup(std::ostream& fout)
 
 void cmDSPMakefile::SetBuildType(BuildType b, const char *libName)
 {
+  std::string root= m_Makefile->GetHomeDirectory();
+  const char *def= m_Makefile->GetDefinition( "MSPROJECT_TEMPLATE_DIRECTORY");
+
+  if( def)
+    {
+      root = def;
+    }
+  else
+    {
+      root += "/CMake/Source";
+    }
+
   switch(b)
     {
     case STATIC_LIBRARY:
-      m_DSPHeaderTemplate = m_Makefile->GetHomeDirectory();
-      m_DSPHeaderTemplate += "/CMake/Source/staticLibHeader.dsptemplate";
-      m_DSPFooterTemplate = m_Makefile->GetHomeDirectory();
-      m_DSPFooterTemplate += "/CMake/Source/staticLibFooter.dsptemplate";
+      m_DSPHeaderTemplate = root;
+      m_DSPHeaderTemplate += "/staticLibHeader.dsptemplate";
+      m_DSPFooterTemplate = root;
+      m_DSPFooterTemplate += "/staticLibFooter.dsptemplate";
       break;
     case DLL:
-      m_DSPHeaderTemplate =  m_Makefile->GetHomeDirectory();
-      m_DSPHeaderTemplate += "/CMake/Source/DLLHeader.dsptemplate";
-      m_DSPFooterTemplate =  m_Makefile->GetHomeDirectory();
-      m_DSPFooterTemplate += "/CMake/Source/DLLFooter.dsptemplate";
+      m_DSPHeaderTemplate =  root;
+      m_DSPHeaderTemplate += "/DLLHeader.dsptemplate";
+      m_DSPFooterTemplate =  root;
+      m_DSPFooterTemplate += "/DLLFooter.dsptemplate";
       break;
     case EXECUTABLE:
-      m_DSPHeaderTemplate = m_Makefile->GetHomeDirectory();
-      m_DSPHeaderTemplate += "/CMake/Source/EXEHeader.dsptemplate";
-      m_DSPFooterTemplate = m_Makefile->GetHomeDirectory();
-      m_DSPFooterTemplate += "/CMake/Source/EXEFooter.dsptemplate";
+      m_DSPHeaderTemplate = root;
+      m_DSPHeaderTemplate += "/EXEHeader.dsptemplate";
+      m_DSPFooterTemplate = root;
+      m_DSPFooterTemplate += "/EXEFooter.dsptemplate";
       break;
     case UTILITY:
-      m_DSPHeaderTemplate = m_Makefile->GetHomeDirectory();
-      m_DSPHeaderTemplate += "/CMake/Source/UtilityHeader.dsptemplate";
-      m_DSPFooterTemplate = m_Makefile->GetHomeDirectory();
-      m_DSPFooterTemplate += "/CMake/Source/UtilityFooter.dsptemplate";
+      m_DSPHeaderTemplate = root;
+      m_DSPHeaderTemplate += "/UtilityHeader.dsptemplate";
+      m_DSPFooterTemplate = root;
+      m_DSPFooterTemplate += "/UtilityFooter.dsptemplate";
       break;
     }
 
   // once the build type is set, determine what configurations are
   // possible
   std::ifstream fin(m_DSPHeaderTemplate.c_str());
+
   cmRegularExpression reg("# Name ");
   if(!fin)
     {
