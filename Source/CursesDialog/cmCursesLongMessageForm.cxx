@@ -106,7 +106,7 @@ void cmCursesLongMessageForm::Render(int left, int top, int width, int height)
 
   const char* msg = m_Messages.c_str();
 
-  clear();
+  curses_clear();
 
   if (m_Fields[0])
     {

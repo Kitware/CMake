@@ -28,6 +28,11 @@ inline void curses_move(unsigned int x, unsigned int y)
   move(x,y);
 }
 
+inline void curses_clear()
+{
+  clear();
+}
+
 #undef move
 #undef erase
 #undef clear

@@ -101,7 +101,7 @@ int main(int argc, char** argv)
   myform->HandleInput();
   
   // Need to clean-up better
-  clear();
+  curses_clear();
   touchwin(stdscr);
   endwin();
   delete cmCursesForm::CurrentForm;

@@ -332,7 +332,7 @@ void cmCursesMainForm::UpdateStatusBar()
   if ( x < cmCursesMainForm::MIN_WIDTH  || 
        y < cmCursesMainForm::MIN_HEIGHT )
     {
-    clear();
+    curses_clear();
     curses_move(0,0);
     printw("Window is too small. A size of at least %dx%d is required.",
 	   cmCursesMainForm::MIN_WIDTH, cmCursesMainForm::MIN_HEIGHT);
@@ -434,7 +434,7 @@ void cmCursesMainForm::RunCMake(bool generateMakefiles)
   int x,y;
   getmaxyx(stdscr, y, x);
 
-  clear();
+  curses_clear();
   curses_move(1,1);
   printw("Running CMake, please wait.");
   touchwin(stdscr);
