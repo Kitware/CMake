@@ -14,14 +14,14 @@ IF(CMAKE_COMPILER_IS_GNUCC)
   SET(CMAKE_SHARED_LIBRARY_C_FLAGS "-fPIC")     # -pic 
 ELSE(CMAKE_COMPILER_IS_GNUCC)
   # hp cc
-  SET(CMAKE_ANSI_CFLAGS "-Ae -Aa")
+  SET(CMAKE_ANSI_CFLAGS "-Aa -Ae")
   # use ld directly to create shared libraries for hp cc
   SET(CMAKE_C_CREATE_SHARED_LIBRARY
       "ld <CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS> -o <TARGET> <OBJECTS> <LINK_LIBRARIES>")
   SET(CMAKE_SHARED_LIBRARY_C_FLAGS "+Z")            # -pic 
   SET(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "-E -b -L/usr/lib")       # -shared
-  SET(CMAKE_SHARED_LIBRARY_LINK_FLAGS "+s")         # +s, flag for exe link to use shared lib
-  SET(CMAKE_SHARED_LIBRARY_RUNTIME_FLAG "+b")       # -rpath
+  SET(CMAKE_SHARED_LIBRARY_LINK_FLAGS "-Wl,+s")         # +s, flag for exe link to use shared lib
+  SET(CMAKE_SHARED_LIBRARY_RUNTIME_FLAG "-Wl,+b")       # -rpath
 ENDIF(CMAKE_COMPILER_IS_GNUCC)
 
 # CXX compiler
@@ -39,8 +39,6 @@ ELSE(CMAKE_COMPILER_IS_GNUCXX)
   SET(CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS "+Z -Wl,-E -b -L/usr/lib")       # -shared
   SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "-Wl,+s")         # +s, flag for exe link to use shared lib
   SET(CMAKE_SHARED_LIBRARY_RUNTIME_CXX_FLAG "-Wl,+b")       # -rpath
-  SET(CMAKE_SHARED_LIBRARY_CXX_FLAGS "-fPIC")     # -pic 
-
   SET (CMAKE_CXX_FLAGS_INIT "")
   SET (CMAKE_CXX_FLAGS_DEBUG_INIT "-g")
   SET (CMAKE_CXX_FLAGS_MINSIZEREL_INIT "-O3")
