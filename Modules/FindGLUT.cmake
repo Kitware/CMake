@@ -20,28 +20,32 @@ IF (WIN32)
     )
   ENDIF (CYGWIN)
 ELSE (WIN32)
-  FIND_PATH(GLUT_INCLUDE_PATH GL/glut.h 
-    ${OPENGL_INCLUDE_PATH}
-    /usr/include 
-    /usr/include/GL
-    /usr/local/include 
-    /usr/openwin/share/include 
-    /opt/graphics/OpenGL/include 
-    /usr/X11R6/include 
-  )
-  MARK_AS_ADVANCED(
-    GLUT_INCLUDE_PATH
-  )
+  IF (APPLE)
+    SET(GLUT_LIBRARY "-framework Glut" CACHE STRING "GLUT library for OSX")
+  ELSE (APPLE)
+    FIND_PATH(GLUT_INCLUDE_PATH GL/glut.h 
+      ${OPENGL_INCLUDE_PATH}
+      /usr/include 
+      /usr/include/GL
+      /usr/local/include 
+      /usr/openwin/share/include 
+      /opt/graphics/OpenGL/include 
+      /usr/X11R6/include 
+    )
+    MARK_AS_ADVANCED(
+      GLUT_INCLUDE_PATH
+    )
 
-  FIND_LIBRARY(GLUT_LIBRARY glut
-    ${OPENGL_LIBRARY_PATH}
-    /usr/lib 
-    /usr/local/lib 
-    /opt/graphics/OpenGL/lib 
-    /usr/openwin/lib 
-    /usr/X11R6/lib
-  )
+    FIND_LIBRARY(GLUT_LIBRARY glut
+      ${OPENGL_LIBRARY_PATH}
+      /usr/lib 
+      /usr/local/lib 
+      /opt/graphics/OpenGL/lib 
+      /usr/openwin/lib 
+      /usr/X11R6/lib
+    )
 
+   ENDIF (APPLE)
 ENDIF (WIN32)
 
 MARK_AS_ADVANCED(
