@@ -38,21 +38,23 @@ IF(NOT CMAKE_CXX_COMPILER)
 ENDIF(NOT CMAKE_CXX_COMPILER)
 MARK_AS_ADVANCED(CMAKE_CXX_COMPILER)
 
-
-# test to see if the cxx compiler is gnu
-EXEC_PROGRAM(${CMAKE_CXX_COMPILER} ARGS -E "\"${CMAKE_ROOT}/Modules/CMakeTestGNU.c\"" OUTPUT_VARIABLE CMAKE_COMPILER_OUTPUT RETURN_VALUE CMAKE_COMPILER_RETURN)
-IF(NOT CMAKE_COMPILER_RETURN)
-  IF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*THIS_IS_GNU.*" )
-    SET(CMAKE_COMPILER_IS_GNUCXX 1)
-    FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeOutput.log
-      "Determining if the C++ compiler is GNU succeeded with "
-      "the following output:\n${CMAKE_COMPILER_OUTPUT}\n\n")
-  ELSE("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*THIS_IS_GNU.*" )
-    FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeOutput.log
-      "Determining if the C++ compiler is GNU failed with "
-      "the following output:\n${CMAKE_COMPILER_OUTPUT}\n\n")
-  ENDIF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*THIS_IS_GNU.*" )
-ENDIF(NOT CMAKE_COMPILER_RETURN)
+IF(NOT CMAKE_COMPILER_IS_GNUCXX_RUN)
+  # test to see if the cxx compiler is gnu
+  SET(CMAKE_COMPILER_IS_GNUCXX_RUN 1)
+  EXEC_PROGRAM(${CMAKE_CXX_COMPILER} ARGS -E "\"${CMAKE_ROOT}/Modules/CMakeTestGNU.c\"" OUTPUT_VARIABLE CMAKE_COMPILER_OUTPUT RETURN_VALUE CMAKE_COMPILER_RETURN)
+  IF(NOT CMAKE_COMPILER_RETURN)
+    IF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*THIS_IS_GNU.*" )
+      SET(CMAKE_COMPILER_IS_GNUCXX 1)
+      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeOutput.log
+        "Determining if the C++ compiler is GNU succeeded with "
+        "the following output:\n${CMAKE_COMPILER_OUTPUT}\n\n")
+    ELSE("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*THIS_IS_GNU.*" )
+      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeOutput.log
+        "Determining if the C++ compiler is GNU failed with "
+        "the following output:\n${CMAKE_COMPILER_OUTPUT}\n\n")
+    ENDIF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*THIS_IS_GNU.*" )
+  ENDIF(NOT CMAKE_COMPILER_RETURN)
+ENDIF(NOT CMAKE_COMPILER_IS_GNUCXX_RUN)
 
 # configure all variables set in this file
 CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeCXXCompiler.cmake.in 
