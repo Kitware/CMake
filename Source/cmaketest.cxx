@@ -32,7 +32,7 @@ struct CleanUp
     {
       cmMakefileGenerator::UnRegisterGenerators();
     }
-  UseIt() 
+  void UseIt() 
     {
     }
 };
