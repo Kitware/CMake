@@ -78,7 +78,12 @@
 #include "timeval.h"
 
 #ifdef HAVE_ZLIB_H
+#error goo
 #include <zlib.h>               /* for content-encoding */
+#endif
+
+#ifdef CURL_SPECIAL_ZLIB_H
+#include CURL_SPECIAL_ZLIB_H
 #endif
 
 #ifdef USE_ARES

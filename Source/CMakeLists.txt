@@ -10,6 +10,8 @@ CONFIGURE_FILE(
 INCLUDE_DIRECTORIES(
   "${CMake_BINARY_DIR}/Source"
   "${CMake_SOURCE_DIR}/Source"
+  ${CMAKE_ZLIB_INCLUDES}
+  ${CMAKE_EXPAT_INCLUDES}
   )
 
 # let cmake know it is supposed to use it
@@ -127,7 +129,7 @@ ENDIF (WIN32)
 
 # create a library used by the command line and the GUI
 ADD_LIBRARY(CMakeLib ${SRCS})
-TARGET_LINK_LIBRARIES(CMakeLib cmsys ${CMAKE_EXPAT_LIBRARIES} cmzlib)
+TARGET_LINK_LIBRARIES(CMakeLib cmsys ${CMAKE_EXPAT_LIBRARIES} ${CMAKE_ZLIB_LIBRARIES})
 IF (UNIX)
   TARGET_LINK_LIBRARIES(CMakeLib ${CMAKE_DL_LIBS})
 ENDIF (UNIX)

@@ -507,3 +507,6 @@
 
 /* define if the compiler supports number 0x3627676LL */
 #cmakedefine HAVE_LONG_LONG_CONSTANT ${HAVE_LONG_LONG_CONSTANT}
+
+/* Special handling of zlib library */
+#cmakedefine CURL_SPECIAL_ZLIB_H "${CURL_SPECIAL_ZLIB_H}"
