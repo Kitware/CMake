@@ -84,8 +84,8 @@ typedef struct
                               int all, int numDepends, const char **depends,
                               int numOutputs, const char **outputs);
   int   (*CommandExists) (void *mf, const char* name);
-  void  (*ExecuteCommand) (void *mf, const char *name, 
-                           int numArgs, const char **args);
+  int  (*ExecuteCommand) (void *mf, const char *name, 
+                          int numArgs, const char **args);
   void  (*ExpandSourceListArguments) (void *mf,int argc, const char **argv,
                                       int *resArgc, char ***resArgv,
                                       unsigned int startArgumentIndex);

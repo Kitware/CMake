@@ -291,8 +291,8 @@ char *cmExpandVariablesInString(void *arg, const char *source,
 }
 
 
-void cmExecuteCommand(void *arg, const char *name, 
-                      int numArgs, const char **args)
+int cmExecuteCommand(void *arg, const char *name, 
+                     int numArgs, const char **args)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
   cmListFileFunction lff;
@@ -302,7 +302,7 @@ void cmExecuteCommand(void *arg, const char *name,
     // Assume all arguments are quoted.
     lff.m_Arguments.push_back(cmListFileArgument(args[i], true));
     }
-  mf->ExecuteCommand(lff);
+  return mf->ExecuteCommand(lff);
 }
 
 void cmExpandSourceListArguments(void *arg, 
