@@ -160,6 +160,14 @@ SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT}" CAC
      "Flags used by the compiler during Release with Debug Info builds.")
 SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS_INIT}" CACHE STRING
      "Flags for C compiler.")
+SET (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG_INIT}" CACHE STRING
+     "Flags used by the compiler during debug builds.")
+SET (CMAKE_C_FLAGS_MINSIZEREL "${CMAKE_C_FLAGS_MINSIZEREL_INIT}" CACHE STRING
+     "Flags used by the compiler during release minsize builds.")
+SET (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE_INIT}" CACHE STRING
+     "Flags used by the compiler during release builds (/MD /Ob1 /Oi /Ot /Oy /Gs will produce slightly less optimized but smaller files).")
+SET (CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO_INIT}" CACHE STRING
+     "Flags used by the compiler during Release with Debug Info builds.")
 
 SET (CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS_INIT}
      CACHE STRING "Flags used by the linker.")

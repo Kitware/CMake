@@ -1877,7 +1877,7 @@ void cmLocalUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
   std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();
   std::vector<std::string>::iterator i;
   fout << "-I" << 
-    cmSystemTools::ConvertToOutputPath(m_Makefile->GetStartDirectory()) << " ";
+    this->ConvertToOutputForExisting(m_Makefile->GetStartDirectory()) << " ";
   for(i = includes.begin(); i != includes.end(); ++i)
     {
     std::string include = *i;
@@ -1886,7 +1886,7 @@ void cmLocalUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     // implementations because the wrong headers may be found first.
     if(include != "/usr/include")
       {
-      fout << "-I" << cmSystemTools::ConvertToOutputPath(i->c_str()) << " ";
+      fout << "-I" << this->ConvertToOutputForExisting(i->c_str()) << " ";
       }
     }
   fout << m_Makefile->GetDefineFlags();
