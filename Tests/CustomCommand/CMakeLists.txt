@@ -66,16 +66,19 @@ ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_BINARY_DIR}/doc1.dvi
   )
 
 ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_BINARY_DIR}/doc1.h
-  DEPENDS   ${PROJECT_BINARY_DIR}/doc1.dvi 
-  COMMAND   ${CMAKE_COMMAND}
-  ARGS      -E copy ${PROJECT_BINARY_DIR}/doc1.dvi
-  ${PROJECT_BINARY_DIR}/doc1.h
+  DEPENDS ${PROJECT_BINARY_DIR}/doc1.dvi
+  COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/doc1.dvi
+                                   ${PROJECT_BINARY_DIR}/doc1temp.h
+  COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/doc1temp.h
+                                   ${PROJECT_BINARY_DIR}/doc1.h
   )
 
-ADD_CUSTOM_TARGET(TDocument ALL 
-  ${CMAKE_COMMAND} -E echo "building doc1.h"  
+ADD_CUSTOM_TARGET(TDocument ALL
+  COMMAND ${CMAKE_COMMAND} -E echo "Copying doc1.h to doc2.h."
+  COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/doc1.h
+                                   ${PROJECT_BINARY_DIR}/doc2.h
   DEPENDS ${PROJECT_BINARY_DIR}/doc1.h
-  ) 
+  )
 
 ################################################################
 #
@@ -90,11 +93,14 @@ ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_BINARY_DIR}/foo.pre
   )
 
 ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_BINARY_DIR}/foo.c
-  DEPENDS   TDocument ${PROJECT_BINARY_DIR}/foo.pre 
+  DEPENDS   ${PROJECT_BINARY_DIR}/foo.pre 
   COMMAND   ${CMAKE_COMMAND}
   ARGS      -E copy ${PROJECT_BINARY_DIR}/foo.pre
   ${PROJECT_BINARY_DIR}/foo.c
   )
+
+SET_SOURCE_FILES_PROPERTIES(${PROJECT_BINARY_DIR}/foo.c PROPERTIES
+  OBJECT_DEPENDS ${PROJECT_BINARY_DIR}/doc1.h)
 
 # add the library
 ADD_EXECUTABLE(CustomCommand 
