@@ -54,6 +54,18 @@ bool cmCursesStringWidget::HandleInput(int& key, FORM* form, WINDOW* w)
 	strcpy(originalStr, buf);
 	}
       }
+    else if ( key == KEY_DOWN || key == ctrl('n') ||
+	      key == KEY_UP || key == ctrl('p') ||
+	      key == KEY_NPAGE || key == ctrl('d') ||
+	      key == KEY_PPAGE || key == ctrl('u'))
+      {
+      m_InEdit = false;
+      delete[] originalStr;	
+      // trick to force forms to update the field buffer
+      form_driver(form, REQ_NEXT_FIELD);
+      form_driver(form, REQ_PREV_FIELD);
+      return false;
+      }
     // esc
     else if (key == 27)
       {

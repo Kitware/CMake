@@ -438,7 +438,6 @@ void cmCursesMainForm::RunCMake(bool generateMakefiles)
 
   curses_clear();
   curses_move(1,1);
-  printw("Running CMake, please wait.");
   touchwin(stdscr);
   refresh();
   endwin();
@@ -795,6 +794,7 @@ const char* cmCursesMainForm::s_ConstHelpMessage =
 " C-d : delete previous character\n"
 " C-k : kill the rest of the field\n"
 " Esc : Restore field (discard last changes)\n"
+" Enter : Leave edit mode\n"
 "You can also delete an option by pressing 'd'\n\n"
 "Commands:\n"
 " q : quit ccmake without generating build files\n"
