@@ -964,6 +964,10 @@ export MAKE
 
 # Run bootstrap CMake to configure real CMake
 "${cmake_bootstrap_dir}/cmake" "${cmake_source_dir}" "-C${cmake_bootstrap_dir}/InitialCacheFlags.cmake"
+RES=$?
+if [ "${RES}" -ne "0" ]; then
+  cmake_error 11 "Problem while running initial CMake"
+fi
 
 echo "---------------------------------------------"
 
