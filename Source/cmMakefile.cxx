@@ -1726,7 +1726,7 @@ cmSourceFile* cmMakefile::GetOrCreateSource(const char* sourceName,
 
   // OK a source file object doesn't exist for the source
   // maybe we made a bad call on assuming it was in the src tree
-  if (generated && relative)
+  if (relative)
     {
     src = this->GetCurrentOutputDirectory();
     src += "/";
@@ -1737,7 +1737,13 @@ cmSourceFile* cmMakefile::GetOrCreateSource(const char* sourceName,
     {
     return ret;
     }
-  
+  // go back to looking in the source directory for it
+  if(relative)
+    {
+    src = this->GetCurrentDirectory();
+    src += "/";
+    src += sourceName;
+    }
   // we must create one
   cmSourceFile file; 
   std::string path = cmSystemTools::GetFilenamePath(src);
