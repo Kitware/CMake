@@ -692,8 +692,6 @@ void CPropertyList::RemoveAll()
   for(int i =0; i < c; ++i)
     {
     CPropertyItem* pItem = (CPropertyItem*) GetItemDataPtr(0);
-    m_CMakeSetupDialog->GetCMakeInstance()->GetCacheManager()
-      ->RemoveCacheEntry(pItem->m_propName);
     m_PropertyItems.erase(pItem);
     delete pItem;
     this->DeleteString(0);
