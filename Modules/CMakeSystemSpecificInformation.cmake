@@ -5,20 +5,24 @@
 # makefiles.  Next, it will include a system specific file.  Finally,
 # it will optionally include a system and compiler specific file that
 # can be used to override any of this information.
+# For debugging new systems, and expert users, if the
+# CMAKE_USER_MAKE_RULES_OVERRIDE is set to a file name, that
+# file will be included last, and can override any variable
 
 
 # 1. set default values that will work for most system
+SET(CMAKE_STATIC_LIBRARY_PREFIX "lib")
+SET(CMAKE_STATIC_LIBRARY_SUFFIX ".a")
 SET(CMAKE_SHARED_LIBRARY_C_FLAGS "")            # -pic 
 SET(CMAKE_SHARED_LIBRARY_CXX_FLAGS "")          # -pic
-# for gnu compiler always 
-  
 SET(CMAKE_SHARED_LIBRARY_CREATE_FLAGS "")       # -shared
 SET(CMAKE_SHARED_LIBRARY_PREFIX "lib")          # lib
 SET(CMAKE_SHARED_LIBRARY_SUFFIX ".so")          # .so
-SET(CMAKE_SHARED_LIBRARY_LINK_FLAGS "")         # +s, or some flag that an exe needs to use a shared lib
+SET(CMAKE_SHARED_LIBRARY_LINK_FLAGS "")         # +s, flag for exe link to use shared lib
 SET(CMAKE_SHARED_LIBRARY_RUNTIME_FLAG "")       # -rpath
 SET(CMAKE_SHARED_LIBRARY_RUNTIME_FLAG_SEP "")   # : or empty
-
+SET(CMAKE_LIBRARY_PATH_FLAG "-L")
+SET(CMAKE_LINK_LIBRARY_FLAG "-l")
 IF(CMAKE_COMPILER_IS_GNUGXX)
   SET(CMAKE_SHARED_LIBRARY_C_FLAGS "-fPIC")     # -pic 
   SET(CMAKE_SHARED_LIBRARY_CXX_FLAGS "-fPIC")   # -pic
@@ -38,35 +42,45 @@ ELSE(EXISTS ${CMAKE_SYSTEM_INFO_FILE})
           "cmake@www.cmake.org so it can be added to cmake"")
 ENDIF(EXISTS ${CMAKE_SYSTEM_INFO_FILE})
 
-
-
-# Set up default values for things that have not been set either
-# in SYSTEM.cmake or SYSTEM-compiler.cmake
-
-IF(NOT CMAKE_CXX_CREATE_SHARED_LIBRARY)
-  SET(CMAKE_CXX_CREATE_SHARED_LIBRARY
-      "${CMAKE_CXX_COMPILE} ${CMAKE_SHARED_LIBRARY_CREATE_FLAGS} "
-      "${CMAKE_CXX_LINK_SHARED_OUT_FLAG} <TARGET> <OBJECTS>")
-ENDIF(NOT CMAKE_CXX_CREATE_SHARED_LIBRARY)
-
-
-IF(NOT CMAKE_CXX_CREATE_STATIC_LIBRARY)
-  SET(CMAKE_CXX_CREATE_STATIC_LIBRARY
-      "${CMAKE_CXX_AR} ${CMAKE_AR_FLAGS} <TARGET> <OBJECTS>")
-ENDIF(NOT CMAKE_CXX_CREATE_STATIC_LIBRARY)
-
-
-IF(NOT CMAKE_CXX_COMPILE)
-  SET(CMAKE_CXX_COMPILE
-    "${CMAKE_CXX_COMPILER} -o <OBJECT> ${CMAKE_CXX_FLAGS} -c <SOURCE>")
-ENDIF(NOT CMAKE_CXX_COMPILE)
-
-
 # 3. include optional systemname-compiler.cmake files
 IF(CMAKE_C_COMPILER)
-  INCLUDE(${CMAKE_ROOT}/Modules/${CMAKE_SYSTEM_NAME}-${CMAKE_C_COMPILER}.cmake OPTIONAL)
+  GET_FILENAME_COMPONENT(CMAKE_BASE_NAME ${CMAKE_C_COMPILER} NAME_WE)
+  # since the gnu compiler has several names force gcc
+  IF(CMAKE_COMPILER_IS_GNUGCC)
+     SET(CMAKE_BASE_NAME gcc)
+  ENDIF(CMAKE_COMPILER_IS_GNUGCC)
+  SET(CMAKE_SYSTEM_AND_C_COMPILER_INFO_FILE ${CMAKE_ROOT}/Modules/${CMAKE_SYSTEM_NAME}-${CMAKE_BASE_NAME}.cmake)
+  INCLUDE(${CMAKE_SYSTEM_AND_C_COMPILER_INFO_FILE} OPTIONAL)
 ENDIF(CMAKE_C_COMPILER)
 IF(CMAKE_CXX_COMPILER)
-  INCLUDE(${CMAKE_ROOT}/Modules/${CMAKE_SYSTEM_NAME}-${CMAKE_CXX_COMPILER}.cmake
-          OPTIONAL)
+  GET_FILENAME_COMPONENT(CMAKE_BASE_NAME ${CMAKE_CXX_COMPILER} NAME_WE)
+  # since the gnu compiler has several names force gcc
+  IF(CMAKE_COMPILER_IS_GNUGXX)
+     SET(CMAKE_BASE_NAME g++)
+  ENDIF(CMAKE_COMPILER_IS_GNUGXX)
+  SET(CMAKE_SYSTEM_AND_CXX_COMPILER_INFO_FILE ${CMAKE_ROOT}/Modules/${CMAKE_SYSTEM_NAME}-${CMAKE_BASE_NAME}.cmake)
+  INCLUDE(${CMAKE_SYSTEM_AND_CXX_COMPILER_INFO_FILE} OPTIONAL)
 ENDIF(CMAKE_CXX_COMPILER)
+
+
+# for most systems a module is the same as a shared library
+# so unless the variable CMAKE_MODULE_EXISTS is set just
+# copy the values from the LIBRARY variables
+IF(NOT CMAKE_MODULE_EXISTS)
+  SET(CMAKE_SHARED_MODULE_C_FLAGS ${CMAKE_SHARED_LIBRARY_C_FLAGS)
+  SET(CMAKE_SHARED_MODULE_CXX_FLAGS ${CMAKE_SHARED_LIBRARY_CXX_FLAGS})
+  SET(CMAKE_SHARED_MODULE_CREATE_FLAGS ${CMAKE_SHARED_LIBRARY_CREATE_FLAGS})
+  SET(CMAKE_SHARED_MODULE_PREFIX ${CMAKE_SHARED_LIBRARY_PREFIX})
+  SET(CMAKE_SHARED_MODULE_SUFFIX ${CMAKE_SHARED_LIBRARY_SUFFIX})
+  SET(CMAKE_SHARED_MODULE_LINK_FLAGS ${CMAKE_SHARED_LIBRARY_LINK_FLAGS})
+  SET(CMAKE_SHARED_MODULE_RUNTIME_FLAG ${CMAKE_SHARED_LIBRARY_RUNTIME_FLAG})
+  SET(CMAKE_SHARED_MODULE_RUNTIME_FLAG_SEP ${CMAKE_SHARED_MODULE_RUNTIME_FLAG_SEP})
+ENDIF(NOT CMAKE_MODULE_EXISTS)
+
+# include default rules that work for most unix like systems and compilers
+# this file will not set anything if it is already set
+INCLUDE(${CMAKE_ROOT}/Modules/CMakeDefaultMakeRuleVariables.cmake)
+
+IF(CMAKE_USER_MAKE_RULES_OVERRIDE)
+   INCLUDE(${CMAKE_USER_MAKE_RULES_OVERRIDE})
+ENDIF(CMAKE_USER_MAKE_RULES_OVERRIDE)
