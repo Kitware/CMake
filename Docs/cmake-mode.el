@@ -9,8 +9,8 @@
 ;  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
 ;  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 ;
-;     This software is distributed WITHOUT ANY WARRANTY; without even 
-;     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+;     This software is distributed WITHOUT ANY WARRANTY; without even
+;     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
 ;     PURPOSE.  See the above copyright notices for more information.
 ;
 ;=============================================================================
@@ -55,12 +55,12 @@
 ; Line indentation function.
 (defun cmake-indent ()
   "Indent current line as CMAKE code."
-  (interactive)  
+  (interactive)
   (beginning-of-line)
   (if (bobp)
       (indent-line-to 0)
     (let (cur-indent)
-      
+
       ; Search back for previous non-blank line.
       (save-excursion
         (forward-line -1)
@@ -70,7 +70,7 @@
 
         ; Start with previous non-blank line's indentation.
         (setq cur-indent (current-indentation))
-        
+
         ; If previous line is a comment line, just use its
         ; indentation.  Otherwise, adjust indentation based on the
         ; line's contents.
@@ -80,13 +80,13 @@
               (if (looking-at cmake-indent-begin-regex)
                   (setq cur-indent (+ cur-indent cmake-tab-width))
                 )
-              
+
               ; If previous line opens a command invocation, we indent
               ; this line.
               (if (looking-at cmake-indent-open-regex)
                   (setq cur-indent (+ cur-indent cmake-tab-width))
                 )
-              
+
               ; If previous line closes a command invocation, we unindent
               ; this line.
               (if (looking-at cmake-indent-close-regex)
@@ -96,12 +96,12 @@
           )
         )
 
-      
+
       ; If this line ends a block, we unindent it.
       (if (looking-at cmake-indent-end-regex)
           (setq cur-indent (- cur-indent cmake-tab-width))
         )
-      
+
       ; Indent this line by the amount selected.
       (if (< cur-indent 0)
           (indent-line-to 0)
@@ -140,7 +140,7 @@
   (setq major-mode 'cmake-mode)
   (setq mode-name "CMAKE")
 
-  ; Create the syntax table 
+  ; Create the syntax table
   (setq cmake-mode-syntax-table (make-syntax-table))
   (set-syntax-table cmake-mode-syntax-table)
   (modify-syntax-entry ?_  "w" cmake-mode-syntax-table)
@@ -148,19 +148,19 @@
   (modify-syntax-entry ?\)  ")(" cmake-mode-syntax-table)
   (modify-syntax-entry ?# "<" cmake-mode-syntax-table)
   (modify-syntax-entry ?\n ">" cmake-mode-syntax-table)
-  
+
   ; Setup font-lock mode.
   (make-local-variable 'font-lock-defaults)
   (setq font-lock-defaults '(cmake-font-lock-defaults))
-  
+
   ; Setup indentation function.
   (make-local-variable 'indent-line-function)
   (setq indent-line-function 'cmake-indent)
-  
+
   ; Setup comment syntax.
   (make-local-variable 'comment-start)
   (setq comment-start "#")
-  
+
   (run-hooks 'cmake-mode-hook))
 
 ; This file provides cmake-mode.
