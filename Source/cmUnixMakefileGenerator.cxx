@@ -231,6 +231,7 @@ void cmUnixMakefileGenerator::OutputMakefile(const char* file)
   fout << "\n\n";
   fout << "# Suppresses display of executed commands\n";
   fout << ".SILENT:\n";
+  fout << "# disable some common implicit rules to speed things up\n";
   fout << ".SUFFIXES:\n";
   // create a make variable with all of the sources for this Makefile
   // for depend purposes.
@@ -1153,6 +1154,10 @@ void cmUnixMakefileGenerator::OutputCheckDepends(std::ostream& fout)
   std::set<std::string> emitted;
   // Iterate over every target.
   std::map<cmStdString, cmTarget>& targets = m_Makefile->GetTargets();
+  fout << "# Suppresses display of executed commands\n";
+  fout << ".SILENT:\n";
+  fout << "# disable some common implicit rules to speed things up\n";
+  fout << ".SUFFIXES:\n";
   this->OutputMakeVariables(fout);
   fout << "default:\n";
   fout << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) -f cmake.check_depends all\n"
