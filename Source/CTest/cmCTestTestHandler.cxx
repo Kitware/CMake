@@ -199,6 +199,23 @@ int cmCTestTestHandler::PostProcessHandler()
 //functions and commented...
 int cmCTestTestHandler::ProcessHandler()
 {
+  // Update internal data structure from generic one
+  this->SetTestsToRunInformation(this->GetOption("TestsToRunInformation"));
+  this->SetUseUnion(cmSystemTools::IsOn(this->GetOption("UseUnion")));
+  const char* val;
+  val = this->GetOption("IncludeRegularExpression");
+  if ( val )
+    {
+    this->UseIncludeRegExp();
+    this->SetIncludeRegExp(val);
+    }
+  val = this->GetOption("ExcludeRegularExpression");
+  if ( val )
+    {
+    this->UseExcludeRegExp();
+    this->SetExcludeRegExp(val);
+    }
+
   m_TestResults.clear();
 
   std::cout << (m_MemCheck ? "Memory check" : "Test") << " project" << std::endl;

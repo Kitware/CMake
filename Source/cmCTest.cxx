@@ -768,7 +768,7 @@ int cmCTest::ProcessTests()
     }
   if ( m_Tests[CONFIGURE_TEST] || m_Tests[ALL_TEST] )
     {
-    if (m_TestingHandlers["configure"]->ProcessHandler() < 0)
+    if (this->GetHandler("configure")->ProcessHandler() < 0)
       {
       res |= cmCTest::CONFIGURE_ERRORS;
       }
@@ -776,7 +776,7 @@ int cmCTest::ProcessTests()
   if ( m_Tests[BUILD_TEST] || m_Tests[ALL_TEST] )
     {
     this->UpdateCTestConfiguration();
-    if (m_TestingHandlers["build"]->ProcessHandler() < 0)
+    if (this->GetHandler("build")->ProcessHandler() < 0)
       {
       res |= cmCTest::BUILD_ERRORS;
       }
@@ -784,7 +784,7 @@ int cmCTest::ProcessTests()
   if ( m_Tests[TEST_TEST] || m_Tests[ALL_TEST] || notest )
     {
     this->UpdateCTestConfiguration();
-    if (m_TestingHandlers["test"]->ProcessHandler() < 0)
+    if (this->GetHandler("test")->ProcessHandler() < 0)
       {
       res |= cmCTest::TEST_ERRORS;
       }
@@ -792,7 +792,7 @@ int cmCTest::ProcessTests()
   if ( m_Tests[COVERAGE_TEST] || m_Tests[ALL_TEST] )
     {
     this->UpdateCTestConfiguration();
-    if (m_TestingHandlers["coverage"]->ProcessHandler() < 0)
+    if (this->GetHandler("coverage")->ProcessHandler() < 0)
       {
       res |= cmCTest::COVERAGE_ERRORS;
       }
@@ -800,7 +800,7 @@ int cmCTest::ProcessTests()
   if ( m_Tests[MEMCHECK_TEST] || m_Tests[ALL_TEST] )
     {
     this->UpdateCTestConfiguration();
-    if (m_TestingHandlers["memcheck"]->ProcessHandler() < 0)
+    if (this->GetHandler("memcheck")->ProcessHandler() < 0)
       {
       res |= cmCTest::MEMORY_ERRORS;
       }
@@ -1226,7 +1226,7 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
       {
       this->m_RunConfigurationScript = true;
       i++;
-      cmCTestScriptHandler* ch = static_cast<cmCTestScriptHandler*>(m_TestingHandlers["script"]);
+      cmCTestScriptHandler* ch = static_cast<cmCTestScriptHandler*>(this->GetHandler("script"));
       ch->AddConfigurationScript(args[i].c_str());
       }
 
@@ -1497,28 +1497,22 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
     if(arg.find("-I",0) == 0 && i < args.size() - 1)
       {
       i++;
-      cmCTestTestHandler* th = static_cast<cmCTestTestHandler*>(m_TestingHandlers["test"]);
-      th->SetTestsToRunInformation(args[i].c_str());          
+      this->GetHandler("test")->SetOption("TestsToRunInformation", args[i].c_str());
       }                                                       
     if(arg.find("-U",0) == 0)                                 
       {                                                       
-      cmCTestTestHandler* th = static_cast<cmCTestTestHandler*>(m_TestingHandlers["test"]);
-      th->SetUseUnion(true);                                  
+      this->GetHandler("test")->SetOption("UseUnion", "true");
       }                                                       
     if(arg.find("-R",0) == 0 && i < args.size() - 1)          
       {                                                       
-      cmCTestTestHandler* th = static_cast<cmCTestTestHandler*>(m_TestingHandlers["test"]);
-      th->UseIncludeRegExp();                                 
       i++;                                                    
-      th->SetIncludeRegExp(args[i].c_str());                  
+      this->GetHandler("test")->SetOption("IncludeRegularExpression", args[i].c_str());
       }                                                       
                                                               
     if(arg.find("-E",0) == 0 && i < args.size() - 1)          
       {                                                       
-      cmCTestTestHandler* th = static_cast<cmCTestTestHandler*>(m_TestingHandlers["test"]);
-      th->UseExcludeRegExp();
       i++;
-      th->SetExcludeRegExp(args[i].c_str());
+      this->GetHandler("test")->SetOption("ExcludeRegularExpression", args[i].c_str());
       }
 
     if(arg.find("-A",0) == 0 && i < args.size() - 1)
@@ -1640,7 +1634,7 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
     // call process directory
     if (this->m_RunConfigurationScript)
       {
-      res = m_TestingHandlers["script"]->ProcessHandler();
+      res = this->GetHandler("script")->ProcessHandler();
       }
     else
       {
