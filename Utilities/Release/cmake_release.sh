@@ -85,10 +85,7 @@ clean()
 {
     setup || return 1
     echo "Cleaning up ${RELEASE_ROOT}" &&
-    rm -rf cmake-* &&
-    rm -rf ReleaseUtilities &&
-    rm -rf Tarballs &&
-    rm -rf Install
+    rm -rf *
 }
 
 #-----------------------------------------------------------------------------
