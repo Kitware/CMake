@@ -71,27 +71,24 @@ bool cmVTKWrapTclCommand::Invoke(std::vector<std::string>& args)
   for(std::vector<std::string>::iterator j = (args.begin() + 2);
       j != args.end(); ++j)
     {   
-    for(cmMakefile::SourceMap::iterator l = Classes.begin(); 
-        l != Classes.end(); l++)
+    cmMakefile::SourceMap::iterator l = Classes.find(*j);
+    for(std::vector<cmSourceFile>::iterator i = l->second.begin(); 
+        i != l->second.end(); i++)
       {
-      for(std::vector<cmSourceFile>::iterator i = l->second.begin(); 
-          i != l->second.end(); i++)
+      cmSourceFile &curr = *i;
+      // if we should wrap the class
+      if (!curr.GetWrapExclude())
         {
-        cmSourceFile &curr = *i;
-        // if we should wrap the class
-        if (!curr.GetWrapExclude())
-          {
-          cmSourceFile file;
-          file.SetIsAnAbstractClass(curr.IsAnAbstractClass());
-          std::string newName = curr.GetSourceName() + "Tcl";
-          file.SetName(newName.c_str(), m_Makefile->GetCurrentOutputDirectory(),
-                       "cxx",false);
-          std::string hname = cdir + "/" + curr.GetSourceName() + ".h";
-          m_WrapHeaders.push_back(hname);
-          // add starting depends
-          file.GetDepends().push_back(hname);
-          m_WrapClasses.push_back(file);
-          }
+        cmSourceFile file;
+        file.SetIsAnAbstractClass(curr.IsAnAbstractClass());
+        std::string newName = curr.GetSourceName() + "Tcl";
+        file.SetName(newName.c_str(), m_Makefile->GetCurrentOutputDirectory(),
+                     "cxx",false);
+        std::string hname = cdir + "/" + curr.GetSourceName() + ".h";
+        m_WrapHeaders.push_back(hname);
+        // add starting depends
+        file.GetDepends().push_back(hname);
+        m_WrapClasses.push_back(file);
         }
       }
     }
