@@ -115,7 +115,9 @@ void kwsysBase64_Encode1(const unsigned char *src, unsigned char *dest)
    3 bytes then the extra padding needed to complete the encode 4 bytes will
    stop the decoding anyway).  */
 unsigned long kwsysBase64_Encode(const unsigned char *input,
-  unsigned long length, unsigned char *output, int mark_end)
+                                 unsigned long length,
+                                 unsigned char *output,
+                                 int mark_end)
 {
   const unsigned char *ptr = input;
   const unsigned char *end = input + length;
@@ -154,8 +156,9 @@ unsigned long kwsysBase64_Encode(const unsigned char *input,
     optr += 4;
     }
 
-  return optr - output;
+  return (unsigned long)(optr - output);
 }
+
 /*--------------------------------------------------------------------------*/
 /* Decode 4 bytes into a 3 byte string. */
 int kwsysBase64_Decode3(const unsigned char *src, unsigned char *dest)
@@ -204,7 +207,9 @@ int kwsysBase64_Decode3(const unsigned char *src, unsigned char *dest)
    without actually knowing how much decoded data to expect (of course, the
    buffer must be large enough). */
 unsigned long kwsysBase64_Decode(const unsigned char *input, 
-  unsigned long length, unsigned char *output, unsigned long max_input_length)
+                                 unsigned long length,
+                                 unsigned char *output,
+                                 unsigned long max_input_length)
 {
   const unsigned char *ptr = input;
   unsigned char *optr = output;
@@ -220,7 +225,7 @@ unsigned long kwsysBase64_Decode(const unsigned char *input,
       optr += len;
       if(len < 3)
         {
-        return optr - output;
+        return (unsigned long)(optr - output);
         }
       ptr += 4;
       }
@@ -234,7 +239,7 @@ unsigned long kwsysBase64_Decode(const unsigned char *input,
       optr += len;
       if(len < 3)
         {
-        return optr - output;
+        return (unsigned long)(optr - output);
         }
       ptr += 4;
       }
@@ -258,5 +263,5 @@ unsigned long kwsysBase64_Decode(const unsigned char *input,
       }
     }
 
-  return optr - output;
+  return (unsigned long)(optr - output);
 }
