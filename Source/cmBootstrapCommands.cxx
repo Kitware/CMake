@@ -25,6 +25,7 @@
 #include "cmAddDependenciesCommand.cxx"
 #include "cmAddExecutableCommand.cxx"
 #include "cmAddLibraryCommand.cxx"
+#include "cmAddSubDirectoryCommand.cxx"
 #include "cmAddTestCommand.cxx"
 #include "cmBuildCommand.cxx"
 #include "cmBuildNameCommand.cxx"
@@ -81,6 +82,7 @@ void GetBootstrapCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmAddDependenciesCommand);
   commands.push_back(new cmAddExecutableCommand);
   commands.push_back(new cmAddLibraryCommand);
+  commands.push_back(new cmAddSubDirectoryCommand);
   commands.push_back(new cmAddTestCommand);
   commands.push_back(new cmBuildCommand);
   commands.push_back(new cmBuildNameCommand);

@@ -15,7 +15,7 @@
 
 =========================================================================*/
 #include "cmEnableTestingCommand.h"
-#include "cmSubDirectory.h"
+#include "cmLocalGenerator.h"
 
 // we do this in the final pass so that we now the subdirs have all 
 // been defined
@@ -27,14 +27,20 @@ bool cmEnableTestingCommand::InitialPass(std::vector<std::string> const&)
 
 void cmEnableTestingCommand::FinalPass()
 {
+  // initialize the DartTestfile files for the tree
+  this->CreateDartTestfileForMakefile(m_Makefile);
+}
+
+void cmEnableTestingCommand::CreateDartTestfileForMakefile(cmMakefile *mf)
+{
   // Create a full path filename for output Testfile
   std::string fname;
-  fname = m_Makefile->GetStartOutputDirectory();
+  fname = mf->GetStartOutputDirectory();
   fname += "/";
   fname += "DartTestfile.txt";
   
-  cmSystemTools::MakeDirectory(m_Makefile->GetStartOutputDirectory());
-
+  cmSystemTools::MakeDirectory(mf->GetStartOutputDirectory());
+  
   // Open the output Testfile
   std::ofstream fout(fname.c_str());
   if (!fout)
@@ -46,9 +52,9 @@ void cmEnableTestingCommand::FinalPass()
   
   fout << "# CMake generated Testfile for " << std::endl
        << "#\tSource directory: "
-       << m_Makefile->GetStartDirectory()
+       << mf->GetStartDirectory()
        << std::endl
-       << "#\tBuild directory: " << m_Makefile->GetStartOutputDirectory()
+       << "#\tBuild directory: " << mf->GetStartOutputDirectory()
        << std::endl
        << "# " << std::endl
        << "# This file replicates the SUBDIRS() and ADD_TEST() commands from the source"
@@ -62,29 +68,39 @@ void cmEnableTestingCommand::FinalPass()
        << "# Duh :-)" << std::endl << std::endl;
 
   // get our output directory
-  std::string outDir = m_Makefile->GetStartOutputDirectory();
+  std::string outDir = mf->GetStartOutputDirectory();
   outDir += "/";
   
   // write out the subdirs for the current directory
-  if (!m_Makefile->GetSubDirectories().empty())
+  std::vector<cmLocalGenerator *>& children = 
+    mf->GetLocalGenerator()->GetChildren();
+  
+  unsigned int i;
+  if (children.size())
     {
     fout << "SUBDIRS(";
-    const std::vector<cmSubDirectory>& subdirs 
-      = m_Makefile->GetSubDirectories();
-    std::vector<cmSubDirectory>::const_iterator i = subdirs.begin();
-    std::string binP = (*i).BinaryPath;
+    std::string binP = children[0]->GetMakefile()->GetStartOutputDirectory();
     cmSystemTools::ReplaceString(binP, outDir.c_str(), "");
     fout << binP.c_str();
-    ++i;
-    for(; i != subdirs.end(); ++i)
+    for(i = 1; i < children.size(); ++i)
       {
-      binP = (*i).BinaryPath;
+      binP = children[i]->GetMakefile()->GetStartOutputDirectory();
       cmSystemTools::ReplaceString(binP, outDir.c_str(), "");
       fout << " " << binP.c_str();
       }
     fout << ")" << std::endl << std::endl;;
     }
   fout.close();  
+  
+  // then recurse
+  if (children.size())
+    {
+    for(i = 0; i < children.size(); ++i)
+      {
+      this->CreateDartTestfileForMakefile(children[i]->GetMakefile());
+      }
+    }
+  
   
   return;
 }

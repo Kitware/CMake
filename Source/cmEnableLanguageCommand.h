@@ -50,15 +50,6 @@ public:
   virtual const char* GetName() {return "ENABLE_LANGUAGE";}
 
   /**
-   * This determines if the command gets propagated down
-   * to makefiles located in subdirectories.
-   */
-  virtual bool IsInherited() 
-    {
-    return true;
-    }
-
-  /**
    * Succinct documentation.
    */
   virtual const char* GetTerseDocumentation() 

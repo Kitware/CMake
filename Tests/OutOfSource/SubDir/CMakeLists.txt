@@ -1,2 +1,3 @@
 # subdir to a sibling dir
-SUBDIRS(${PROJECT_SOURCE_DIR}/OutOfSourceSubdir)
+MESSAGE ("Ken is ${KEN}")
+SUBDIRS(${PROJECT_SOURCE_DIR}/${KEN}OutOfSourceSubdir)

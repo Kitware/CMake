@@ -73,7 +73,9 @@ cmMakefile::cmMakefile()
   this->AddSourceGroup("CMake Rules", "\\.rule$");
   this->AddDefaultDefinitions();
   m_cmDefineRegex.compile("#cmakedefine[ \t]*([A-Za-z_0-9]*)");
-  }
+
+  this->PreOrder = false;
+}
 
 const char* cmMakefile::GetReleaseVersion()
 {
@@ -248,29 +250,24 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff)
       (!this->GetCMakeInstance()->GetScriptMode() || 
        usedCommand->IsScriptable()))
       {
-      // if not running in inherit mode or
-      // if the command is inherited then InitialPass it.
-      if(!m_Inheriting || usedCommand->IsInherited())
+      if(!usedCommand->InvokeInitialPass(lff.m_Arguments))
         {
-        if(!usedCommand->InvokeInitialPass(lff.m_Arguments))
+        cmOStringStream error;
+        error << "Error in cmake code at\n"
+              << lff.m_FilePath << ":" << lff.m_Line << ":\n"
+              << usedCommand->GetError();
+        cmSystemTools::Error(error.str().c_str());
+        result = false;
+        if ( this->GetCMakeInstance()->GetScriptMode() )
           {
-          cmOStringStream error;
-          error << "Error in cmake code at\n"
-            << lff.m_FilePath << ":" << lff.m_Line << ":\n"
-            << usedCommand->GetError();
-          cmSystemTools::Error(error.str().c_str());
-          result = false;
-          if ( this->GetCMakeInstance()->GetScriptMode() )
-            {
-            cmSystemTools::SetFatalErrorOccured();
-            }
+          cmSystemTools::SetFatalErrorOccured();
           }
-        else
-          {
-          // use the command
-          keepCommand = true;
-          m_UsedCommands.push_back(usedCommand);
-          }
+        }
+      else
+        {
+        // use the command
+        keepCommand = true;
+        m_UsedCommands.push_back(usedCommand);
         }
       }
     else if ( this->GetCMakeInstance()->GetScriptMode() && !usedCommand->IsScriptable() )
@@ -306,16 +303,9 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff)
   return result;
 }
 
-// Parse the given CMakeLists.txt file into a list of classes.
-// Reads in current CMakeLists file and all parent CMakeLists files
-// executing all inherited commands in the parents
+// Parse the given CMakeLists.txt file executing all commands
 //
-//   if external is non-zero, this means that we have branched to grab some
-//   commands from a remote list-file (that is, the equivalent of a
-//   #include has been called).  We DO NOT look at the parents of this
-//   list-file, and for all other purposes, the name of this list-file
-//   is "filename" and not "external".
-bool cmMakefile::ReadListFile(const char* filename_in, const char* external_in)
+bool cmMakefile::ReadListFile(const char* filename_in, const char *external_in)
 {
   // used to watch for blockers going out of scope
   // e.g. mismatched IF statement
@@ -358,47 +348,6 @@ bool cmMakefile::ReadListFile(const char* filename_in, const char* external_in)
       }
     }
   
-  // if this is not a remote makefile
-  //  (if it were, this would be called from the "filename" call,
-  //   rather than the "external" call)
-  if (!external)
-    {
-    // is there a parent CMakeLists file that does not go beyond the
-    // Home directory? if so recurse and read in that List file 
-    std::string parentList = this->GetParentListFileName();
-    if (parentList != "")
-      {
-      std::string srcdir = this->GetCurrentDirectory();
-      std::string bindir = this->GetCurrentOutputDirectory();
-      
-      std::string::size_type pos = parentList.rfind('/');
-      this->SetCurrentDirectory(parentList.substr(0, pos).c_str());
-      this->SetCurrentOutputDirectory
-        ((m_HomeOutputDirectory +
-          parentList.substr(m_cmHomeDirectory.size(),
-                            pos - m_cmHomeDirectory.size())).c_str());
-      
-      // if not found, oops
-      if(pos == std::string::npos)
-        {
-        cmSystemTools::Error("Trailing slash not found");
-        }
-      
-      this->ReadListFile(parentList.c_str());
-      
-      // restore the current directory
-      this->SetCurrentDirectory(srcdir.c_str());
-      this->SetCurrentOutputDirectory(bindir.c_str());
-      }
-    }
-  
-  // are we at the start CMakeLists file or are we processing a parent 
-  // lists file
-  //
-  //   this might, or might not be true, irrespective if we are
-  //   off looking at an external makefile.
-  m_Inheriting = (m_cmCurrentDirectory != m_cmStartDirectory);
-                    
   // Now read the input file
   const char *filenametoread= filename;
 
@@ -833,6 +782,36 @@ void cmMakefile::AddLinkDirectory(const char* dir)
     }
 }
 
+void cmMakefile::InitializeFromParent()
+{
+  cmMakefile *parent = m_LocalGenerator->GetParent()->GetMakefile();
+  
+  // copy the definitions
+  this->m_Definitions = parent->m_Definitions;
+
+  // copy include paths
+  this->m_IncludeDirectories = parent->m_IncludeDirectories;
+  
+  // define flags
+  this->m_DefineFlags = parent->m_DefineFlags;
+  
+  // link libraries
+  this->m_LinkLibraries = parent->m_LinkLibraries;
+  
+  // the initial project name
+  this->m_ProjectName = parent->m_ProjectName;
+}
+
+void cmMakefile::ConfigureSubDirectory(cmLocalGenerator *lg2)
+{
+  // copy our variables from the child makefile
+  lg2->GetMakefile()->InitializeFromParent();
+  lg2->GetMakefile()->MakeStartDirectoriesCurrent();
+  
+  // finally configure the subdir
+  lg2->Configure();
+}
+
 void cmMakefile::AddSubDirectory(const char* sub, bool topLevel, bool preorder)
 {
   // the source path must be made full if it isn't already
@@ -854,31 +833,43 @@ void cmMakefile::AddSubDirectory(const char* sub, bool topLevel, bool preorder)
     }
   
   
-  this->AddSubDirectory(srcPath.c_str(), binPath.c_str(), topLevel, preorder);
+  this->AddSubDirectory(srcPath.c_str(), binPath.c_str(), 
+                        topLevel, preorder, false);
 }
 
                         
 void cmMakefile::AddSubDirectory(const char* srcPath, const char *binPath,
-                                 bool topLevel, bool preorder)
+                                 bool topLevel, bool preorder, 
+                                 bool immediate)
 {
+  std::vector<cmLocalGenerator *>& children = m_LocalGenerator->GetChildren();
   // has this directory already been added? If so error
   unsigned int i;
-  for (i = 0; i < m_SubDirectories.size(); ++i)
+  for (i = 0; i < children.size(); ++i)
     {
-    if (m_SubDirectories[i].SourcePath == srcPath)
+    if (srcPath == children[i]->GetMakefile()->GetStartDirectory())
       {
       cmSystemTools::Error("Attempt to add subdirectory multiple times for directory.\n", srcPath);
       return;
       }
     }
   
-  // now add it
-  cmSubDirectory s;
-  s.SourcePath = srcPath;
-  s.BinaryPath = binPath;
-  s.IncludeTopLevel = topLevel;
-  s.PreOrder = preorder;
-  m_SubDirectories.push_back(s);
+  // create a new local generator and set its parent
+  cmLocalGenerator *lg2 = 
+    m_LocalGenerator->GetGlobalGenerator()->CreateLocalGenerator();
+  lg2->SetParent(m_LocalGenerator);
+  m_LocalGenerator->GetGlobalGenerator()->AddLocalGenerator(lg2);
+  
+  // set the subdirs start dirs
+  lg2->GetMakefile()->SetStartDirectory(srcPath);
+  lg2->GetMakefile()->SetStartOutputDirectory(binPath);
+  lg2->SetExcludeAll(!topLevel);
+  lg2->GetMakefile()->SetPreOrder(preorder);
+  
+  if (immediate)
+    {
+    this->ConfigureSubDirectory(lg2);
+    }
 }
 
 void cmMakefile::AddIncludeDirectory(const char* inc, bool before)
@@ -1212,110 +1203,6 @@ void cmMakefile::AddExtraDirectory(const char* dir)
   m_AuxSourceDirectories.push_back(dir);
 }
 
-// return the file name for a parent CMakeLists file. It will return the
-// parent to the CMakeLists file to the m_CurrentDirectory
-
-
-std::string cmMakefile::GetParentListFileName()
-{
-  std::string parentFile;
-
-  bool done = false;
-  cmLocalGenerator *lg = m_LocalGenerator;
-  cmLocalGenerator *lgp = 0;
-  
-  while (!done)
-    {
-    // first find the lg for the current directory
-    if (!strcmp(lg->GetMakefile()->GetStartDirectory(),
-                this->GetCurrentDirectory()))
-      {
-      // now get the parent
-      lgp = lg->GetParent();
-      done = true;
-      }
-    else
-      {
-      lg = lg->GetParent();
-      if (!lg)
-        {
-        return parentFile;
-        }
-      }
-    }
-  
-  // if we are the top then stop
-  if (!lgp)
-    {
-    return parentFile;
-    }
-  
-  // otherwise get the list file for the parent local generator
-  parentFile = lgp->GetMakefile()->GetCurrentDirectory();
-  parentFile += "/CMakeLists.txt";
-  return parentFile;
-}
-
-#if 0
-
-// return the file name for the parent CMakeLists file to the 
-// one passed in. Zero is returned if the CMakeLists file is the
-// one in the home directory or if for some reason a parent cmake lists 
-// file cannot be found.
-std::string cmMakefile::GetParentListFileName(const char *currentFileName)
-{
-  // extract the directory name
-  std::string parentFile;
-  std::string listsDir = currentFileName;
-  std::string::size_type pos = listsDir.rfind('/');
-  // if we could not find the directory return 0
-  if(pos == std::string::npos)
-    {
-    return parentFile;
-    }
-  listsDir = listsDir.substr(0, pos);
-  
-  // if we are in the home directory then stop, return 0
-  if(m_cmHomeDirectory == listsDir)
-    {
-    return parentFile;
-    }
-  
-  // is there a parent directory we can check
-  pos = listsDir.rfind('/');
-  // if we could not find the directory return 0
-  if(pos == std::string::npos)
-    {
-    return parentFile;
-    }
-  listsDir = listsDir.substr(0, pos);
-  
-  // is there a CMakeLists.txt file in the parent directory ?
-  parentFile = listsDir;
-  parentFile += "/CMakeLists.txt";
-  while(!cmSystemTools::FileExists(parentFile.c_str()))
-    {
-    // There is no CMakeLists.txt file in the parent directory.  This
-    // can occur when coming out of a subdirectory resulting from a
-    // SUBDIRS(Foo/Bar) command (coming out of Bar into Foo).  Try
-    // walking up until a CMakeLists.txt is found or the home
-    // directory is hit.
-    
-    // if we are in the home directory then stop, return 0
-    if(m_cmHomeDirectory == listsDir) { return ""; }
-    
-    // is there a parent directory we can check
-    pos = listsDir.rfind('/');
-    // if we could not find the directory return 0
-    if(pos == std::string::npos) { return ""; }
-    listsDir = listsDir.substr(0, pos);
-    parentFile = listsDir;
-    parentFile += "/CMakeLists.txt";
-    }
-
-  return parentFile;
-}
-#endif
 
 // expance CMAKE_BINARY_DIR and CMAKE_SOURCE_DIR in the
 // include and library directories.

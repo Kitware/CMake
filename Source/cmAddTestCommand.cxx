@@ -60,7 +60,7 @@ void cmAddTestCommand::FinalPass()
 
     std::vector<std::string>::iterator it;
 
-  // for each arg in the test
+    // for each arg in the test
     fout << "ADD_TEST(";
     it = m_Args.begin();
     fout << (*it).c_str();

@@ -24,8 +24,6 @@
 #include "cmListFileCache.h"
 #include "cmCacheManager.h"
 
-#include "cmSubDirectory.h"
-
 #include <cmsys/RegularExpression.hxx>
 
 class cmFunctionBlocker;
@@ -215,8 +213,14 @@ public:
    */
   void AddSubDirectory(const char*, bool includeTopLevel=true, bool preorder = false);
   void AddSubDirectory(const char* fullSrcDir,const char *fullBinDir, 
-                       bool includeTopLevel=true, bool preorder = false);
+                       bool includeTopLevel, bool preorder,
+                       bool immediate);
 
+  /**
+   * Configure a subdirectory
+   */
+  void ConfigureSubDirectory(cmLocalGenerator *);
+                             
   /**
    * Add an include directory to the build.
    */
@@ -417,13 +421,6 @@ public:
   const cmTargets &GetTargets() const { return m_Targets; }
 
   cmTarget* FindTarget(const char* name);
-  /**
-   * Get a list of the build subdirectories.
-   */
-  const std::vector<cmSubDirectory>& GetSubDirectories()
-    { 
-    return m_SubDirectories;
-    }
 
   /**
    * Get a list of include directories in the build.
@@ -662,6 +659,14 @@ public:
   const char *GetProperty(const char *prop) const;
   bool GetPropertyAsBool(const char *prop) const;
 
+  typedef std::map<cmStdString, cmStdString> DefinitionMap;
+  ///! Initialize a makefile from its parent
+  void InitializeFromParent();
+  
+  ///! Set/Get the preorder flag
+  void SetPreOrder(bool p) { this->PreOrder = p; }
+  bool GetPreOrder() { return this->PreOrder; }
+    
 protected:
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(const char* name, cmTarget& target);
@@ -684,12 +689,6 @@ protected:
   cmTargets m_Targets;
   std::vector<cmSourceFile*> m_SourceFiles;
 
-  // list of sub directories
-  std::vector<cmSubDirectory> m_SubDirectories; 
-  struct StringSet : public std::set<cmStdString>
-  {
-  };
-  
   // The include and link-library paths.  These may have order
   // dependency, so they must be vectors (not set).
   std::vector<std::string> m_IncludeDirectories;
@@ -706,17 +705,12 @@ protected:
   std::vector<std::string> m_HeaderFileExtensions;
   std::string m_DefineFlags;
   std::vector<cmSourceGroup> m_SourceGroups;
-  typedef std::map<cmStdString, cmStdString> DefinitionMap;
   DefinitionMap m_Definitions;
   std::vector<cmCommand*> m_UsedCommands;
   cmLocalGenerator* m_LocalGenerator;
   bool IsFunctionBlocked(const cmListFileFunction& lff);
   
 private:
-  /**
-   * Get the name of the parent generator's CMakeLists file
-   */
-  std::string GetParentListFileName();
 
   void ReadSources(std::ifstream& fin, bool t);
   friend class cmMakeDepend;    // make depend needs direct access 
@@ -728,7 +722,6 @@ private:
 
   typedef std::map<cmStdString, cmData*> DataMap;
   DataMap m_DataMap;
-  bool m_Inheriting;
 
   typedef std::map<cmStdString, cmStdString> StringStringMap;
   StringStringMap m_MacrosMap;
@@ -740,6 +733,9 @@ private:
   cmsys::RegularExpression m_cmDefineRegex;
 
   std::map<cmStdString,cmStdString> m_Properties;
+
+  // should this makefile be processed before or after processing the parent
+  bool PreOrder;
 };
 
 

@@ -82,15 +82,6 @@ public:
   virtual cmCommand* Clone() = 0;
   
   /**
-   * This determines if the command gets propagated down
-   * to makefiles located in subdirectories.
-   */
-  virtual bool IsInherited() 
-    {
-    return false;
-    }
-
-  /**
    * This determines if the command is invoked when in script mode.
    */
   virtual bool IsScriptable()

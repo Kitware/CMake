@@ -35,9 +35,6 @@ public:
     return new cmFindPackageCommand;
     }
 
-  /** This command is inherited. */
-  virtual bool IsInherited() {return true;}
-  
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.

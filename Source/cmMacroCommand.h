@@ -28,7 +28,7 @@
 class cmMacroFunctionBlocker : public cmFunctionBlocker
 {
 public:
-  cmMacroFunctionBlocker() {m_Executing = false;}
+  cmMacroFunctionBlocker() {}
   virtual ~cmMacroFunctionBlocker() {}
   virtual bool IsFunctionBlocked(const cmListFileFunction&, cmMakefile &mf);
   virtual bool ShouldRemove(const cmListFileFunction&, cmMakefile &mf);
@@ -36,7 +36,6 @@ public:
   
   std::vector<std::string> m_Args;
   std::vector<cmListFileFunction> m_Functions;
-  bool m_Executing;
 };
 
 /** \class cmMacroCommand
@@ -60,12 +59,6 @@ public:
    * the CMakeLists.txt file.
    */
   virtual bool InitialPass(std::vector<std::string> const& args);
-
-  /**
-   * This determines if the command gets propagated down
-   * to makefiles located in subdirectories.
-   */
-  virtual bool IsInherited() {return true;}
 
   /**
    * This determines if the command is invoked when in script mode.

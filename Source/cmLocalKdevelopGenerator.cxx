@@ -36,9 +36,3 @@ cmLocalKdevelopGenerator::~cmLocalKdevelopGenerator()
 {
 }
 
-
-void cmLocalKdevelopGenerator::Generate(bool fromTheTop)
-{
-  cmLocalUnixMakefileGenerator2::Generate(fromTheTop); 
-  return;
-}

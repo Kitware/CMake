@@ -35,7 +35,6 @@ public:
 
   virtual ~cmLocalKdevelopGenerator();
 
-  virtual void Generate(bool fromTheTop);
 };
 
 #endif

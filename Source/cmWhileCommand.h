@@ -70,12 +70,6 @@ public:
   virtual bool InitialPass(std::vector<std::string> const&) { return false; }
 
   /**
-   * This determines if the command gets propagated down
-   * to makefiles located in subdirectories.
-   */
-  virtual bool IsInherited() {return true;}
-
-  /**
    * This determines if the command is invoked when in script mode.
    */
   virtual bool IsScriptable() { return true; }

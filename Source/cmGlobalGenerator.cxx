@@ -18,7 +18,6 @@
 #include "cmLocalGenerator.h"
 #include "cmake.h"
 #include "cmMakefile.h"
-#include "cmSubDirectory.h"
 
 #include <stdlib.h> // required for atof
 
@@ -492,13 +491,24 @@ void cmGlobalGenerator::Configure()
   m_LocalGenerators.push_back(lg);
 
   // set the Start directories
-  lg->GetMakefile()->SetStartDirectory(m_CMakeInstance->GetStartDirectory());
-  lg->GetMakefile()->SetStartOutputDirectory(m_CMakeInstance->GetStartOutputDirectory());
+  lg->GetMakefile()->SetStartDirectory
+    (m_CMakeInstance->GetStartDirectory());
+  lg->GetMakefile()->SetStartOutputDirectory
+    (m_CMakeInstance->GetStartOutputDirectory());
   lg->GetMakefile()->MakeStartDirectoriesCurrent();
   
   // now do it
-  this->RecursiveConfigure(lg,0.0f,0.9f);
-
+  lg->Configure();
+  
+  // update the cache entry for the number of local generators, this is used
+  // for progress
+  char num[100];
+  sprintf(num,"%d",m_LocalGenerators.size());
+  this->GetCMakeInstance()->AddCacheEntry
+    ("CMAKE_NUMBER_OF_LOCAL_GENERATORS", num,
+     "number of local generators",
+                                          cmCacheManager::INTERNAL);
+  
   std::set<cmStdString> notFoundMap;
   // after it is all done do a ConfigureFinalPass
   cmCacheManager* manager = 0;
@@ -506,7 +516,8 @@ void cmGlobalGenerator::Configure()
     {
     manager = m_LocalGenerators[i]->GetMakefile()->GetCacheManager();
     m_LocalGenerators[i]->ConfigureFinalPass();
-    cmTargets const& targets = m_LocalGenerators[i]->GetMakefile()->GetTargets(); 
+    cmTargets const& targets = 
+      m_LocalGenerators[i]->GetMakefile()->GetTargets(); 
     for (cmTargets::const_iterator l = targets.begin();
          l != targets.end(); l++)
       {
@@ -535,7 +546,7 @@ void cmGlobalGenerator::Configure()
           }
         }
       m_CMakeInstance->UpdateProgress("Configuring", 
-                                    0.9f+0.1f*(i+1.0f)/m_LocalGenerators.size());
+                                      0.9f+0.1f*(i+1.0f)/m_LocalGenerators.size());
       m_LocalGenerators[i]->GetMakefile()->CheckInfiniteLoops();
       }
     }
@@ -572,52 +583,13 @@ void cmGlobalGenerator::Configure()
     }
 }
 
-
-// loop through the directories creating cmLocalGenerators and Configure()
-void cmGlobalGenerator::RecursiveConfigure(cmLocalGenerator *lg, 
-                                           float startProgress, 
-                                           float endProgress)
-{
-  // configure the current directory
-  lg->Configure();
-                                  
-  // get all the subdirectories
-  std::vector<cmSubDirectory> subdirs = 
-    lg->GetMakefile()->GetSubDirectories();
-  
-  float progressPiece = (endProgress - startProgress)/(1.0f+subdirs.size());
-  m_CMakeInstance->UpdateProgress("Configuring",
-                                  startProgress + progressPiece);
-  
-  // for each subdir recurse
-  std::vector<cmSubDirectory>::const_iterator sdi = subdirs.begin();
-  int i;
-  for (i = 0; sdi != subdirs.end(); ++sdi, ++i)
-    {
-    cmLocalGenerator *lg2 = this->CreateLocalGenerator();
-    lg2->SetParent(lg);
-    m_LocalGenerators.push_back(lg2);
-    
-    // add the subdir to the start output directory
-    lg2->GetMakefile()->SetStartOutputDirectory(sdi->BinaryPath.c_str());
-    lg2->SetExcludeAll(!sdi->IncludeTopLevel);
-    // add the subdir to the start source directory
-    lg2->GetMakefile()->SetStartDirectory(sdi->SourcePath.c_str());
-    lg2->GetMakefile()->MakeStartDirectoriesCurrent();
-    
-    this->RecursiveConfigure(lg2, 
-                             startProgress + (i+1.0f)*progressPiece,
-                             startProgress + (i+2.0f)*progressPiece);
-    }
-}
-
 void cmGlobalGenerator::Generate()
 {
   // For each existing cmLocalGenerator
   unsigned int i;
   for (i = 0; i < m_LocalGenerators.size(); ++i)
     {
-    m_LocalGenerators[i]->Generate(true);
+    m_LocalGenerators[i]->Generate();
     m_LocalGenerators[i]->GenerateInstallRules();
     m_CMakeInstance->UpdateProgress("Generating", 
                                     (i+1.0f)/m_LocalGenerators.size());
@@ -751,6 +723,30 @@ int cmGlobalGenerator::Build(
   
   cmSystemTools::ChangeDirectory(cwd.c_str());
   return retVal;
+}
+
+void cmGlobalGenerator::AddLocalGenerator(cmLocalGenerator *lg)
+{
+  m_LocalGenerators.push_back(lg); 
+
+  // update progress
+  // estimate how many lg there will be
+  const char *numGenC = 
+    m_CMakeInstance->GetCacheManager()->GetCacheValue
+    ("CMAKE_NUMBER_OF_LOCAL_GENERATORS");
+  
+  if (!numGenC)
+    {
+    return;
+    }
+  
+  int numGen = atoi(numGenC);
+  float prog = 0.9f*m_LocalGenerators.size()/numGen;
+  if (prog > 0.9f)
+    {
+    prog = 0.9f;
+    }
+  m_CMakeInstance->UpdateProgress("Configuring", prog);
 }
 
 cmLocalGenerator *cmGlobalGenerator::CreateLocalGenerator()

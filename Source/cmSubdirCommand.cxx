@@ -51,7 +51,7 @@ bool cmSubdirCommand::InitialPass(std::vector<std::string> const& args)
         std::string(m_Makefile->GetCurrentOutputDirectory()) + 
         "/" + i->c_str();
       m_Makefile->AddSubDirectory(srcPath.c_str(), binPath.c_str(),
-                                  intoplevel, preorder);
+                                  intoplevel, preorder, false);
       }
     // otherwise it is a full path
     else if ( cmSystemTools::FileIsDirectory(i->c_str()) )
@@ -62,7 +62,7 @@ bool cmSubdirCommand::InitialPass(std::vector<std::string> const& args)
         std::string(m_Makefile->GetCurrentOutputDirectory()) + 
         "/" + cmSystemTools::GetFilenameName(i->c_str());
       m_Makefile->AddSubDirectory(i->c_str(), binPath.c_str(),
-                                  intoplevel, preorder);
+                                  intoplevel, preorder, false);
       }
     else
       {

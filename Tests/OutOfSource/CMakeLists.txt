@@ -1,3 +1,6 @@
 # a simple test case
 PROJECT (OutOfSource)
-SUBDIRS(SubDir)
+
+ADD_SUBDIRECTORY(SubDir)
+
+SET(KEN 1)

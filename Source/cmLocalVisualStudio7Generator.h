@@ -41,13 +41,9 @@ public:
   virtual ~cmLocalVisualStudio7Generator();
   
   /**
-   * Generate the makefile for this directory. fromTheTop indicates if this
-   * is being invoked as part of a global Generate or specific to this
-   * directory. The difference is that when done from the Top we might skip
-   * some steps to save time, such as dependency generation for the
-   * makefiles. This is done by a direct invocation from make. 
+   * Generate the makefile for this directory. 
    */
-  virtual void Generate(bool fromTheTop);
+  virtual void Generate();
 
   enum BuildType {STATIC_LIBRARY, DLL, EXECUTABLE, WIN32_EXECUTABLE, UTILITY};
 

@@ -33,7 +33,7 @@ cmLocalVisualStudio6Generator::~cmLocalVisualStudio6Generator()
 }
 
 
-void cmLocalVisualStudio6Generator::Generate(bool /* fromTheTop */)
+void cmLocalVisualStudio6Generator::Generate()
 { 
   std::set<cmStdString> lang;
   lang.insert("C");

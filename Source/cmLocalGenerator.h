@@ -39,13 +39,9 @@ public:
   virtual ~cmLocalGenerator();
   
   /**
-   * Generate the makefile for this directory. fromTheTop indicates if this
-   * is being invoked as part of a global Generate or specific to this
-   * directory. The difference is that when done from the Top we might skip
-   * some steps to save time, such as dependency generation for the
-   * makefiles. This is done by a direct invocation from make. 
+   * Generate the makefile for this directory. 
    */
-  virtual void Generate(bool /* fromTheTop */) {};
+  virtual void Generate() {};
 
   /**
    * Process the CMakeLists files for this directory to fill in the
@@ -118,7 +114,12 @@ public:
   
   ///! set/get the parent generator 
   cmLocalGenerator* GetParent(){return m_Parent;}
-  void SetParent(cmLocalGenerator* g) { m_Parent = g;}
+  void SetParent(cmLocalGenerator* g) { m_Parent = g; g->AddChild(this); }
+
+  ///! set/get the children
+  void AddChild(cmLocalGenerator* g) { this->Children.push_back(g); }
+  std::vector<cmLocalGenerator*>& GetChildren() { return this->Children; };
+    
 
   void AddLanguageFlags(std::string& flags, const char* lang);
   void AddSharedFlags(std::string& flags, const char* lang, bool shared);
@@ -185,10 +186,12 @@ protected:
   std::vector<std::string> m_CurrentOutputDirectoryComponents;
   bool m_ExcludeFromAll;
   cmLocalGenerator* m_Parent;
+  std::vector<cmLocalGenerator*> Children;
   std::map<cmStdString, cmStdString> m_LanguageToIncludeFlags;
   bool m_WindowsShell;
   bool m_UseRelativePaths;
   bool m_IgnoreLibPrefix;
+  bool Configured;
 };
 
 #endif

@@ -20,7 +20,6 @@
 #include "cmMakefile.h"
 #include "cmGeneratedFileStream.h"
 #include "cmSourceFile.h"
-#include "cmSubDirectory.h"
 #include "cmOrderLinkDirectories.h"
 
 cmLocalGenerator::cmLocalGenerator()
@@ -32,6 +31,7 @@ cmLocalGenerator::cmLocalGenerator()
   m_WindowsShell = false;
   m_IgnoreLibPrefix = false;
   m_UseRelativePaths = false;
+  this->Configured = false;
 }
 
 cmLocalGenerator::~cmLocalGenerator()
@@ -53,6 +53,20 @@ void cmLocalGenerator::Configure()
   currentStart += "/CMakeLists.txt";
   m_Makefile->ReadListFile(currentStart.c_str());
 
+  // at the end of the ReadListFile handle any old style subdirs
+  // first get all the subdirectories
+  std::vector<cmLocalGenerator *> subdirs = this->GetChildren();
+  
+  // for each subdir recurse
+  std::vector<cmLocalGenerator *>::iterator sdi = subdirs.begin();
+  for (; sdi != subdirs.end(); ++sdi)
+    {
+    if (!(*sdi)->Configured)
+      {
+      m_Makefile->ConfigureSubDirectory(*sdi);
+      }
+    }  
+  
   // Setup the current output directory components for use by
   // ConvertToRelativePath.
   std::string outdir =
@@ -62,6 +76,8 @@ void cmLocalGenerator::Configure()
   // Check whether relative paths should be used for optionally
   // relative paths.
   m_UseRelativePaths = m_Makefile->IsOn("CMAKE_USE_RELATIVE_PATHS");
+
+  this->Configured = true;
 }
 
 void cmLocalGenerator::SetGlobalGenerator(cmGlobalGenerator *gg)
@@ -316,14 +332,13 @@ void cmLocalGenerator::GenerateInstallRules()
       fout << "INCLUDE(\"" << postinstall << "\")" << std::endl;
       }
     }
-  cmMakefile* mf = this->GetMakefile();
-  if ( !mf->GetSubDirectories().empty() )
+
+  if ( this->Children.size())
     {
-    const std::vector<cmSubDirectory>& subdirs = mf->GetSubDirectories();
-    std::vector<cmSubDirectory>::const_iterator i = subdirs.begin();
-    for(; i != subdirs.end(); ++i)
+    std::vector<cmLocalGenerator*>::const_iterator i = this->Children.begin();
+    for(; i != this->Children.end(); ++i)
       {
-      std::string odir = i->BinaryPath;
+      std::string odir = (*i)->GetMakefile()->GetStartOutputDirectory();
       cmSystemTools::ConvertToUnixSlashes(odir);
       fout << "INCLUDE(\"" <<  odir.c_str() 
            << "/cmake_install.cmake\")" << std::endl;

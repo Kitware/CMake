@@ -44,12 +44,6 @@ public:
     }
 
   /**
-   * This determines if the command gets propagated down
-   * to makefiles located in subdirectories.
-   */
-  virtual bool IsInherited() {return true;}
-
-  /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
@@ -90,6 +84,10 @@ public:
     }
   
   cmTypeMacro(cmEnableTestingCommand, cmCommand);
+
+  ///! method to recurse and write the DartTestfiles
+  void CreateDartTestfileForMakefile(cmMakefile *mf);
+  
 };
 
 

@@ -109,6 +109,8 @@ public:
 
   void SetConfiguredFilesPath(const char* s){m_ConfiguredFilesPath = s;}
   void GetLocalGenerators(std::vector<cmLocalGenerator *>&g) { g = m_LocalGenerators;}
+  void AddLocalGenerator(cmLocalGenerator *lg);
+  
   static int s_TryCompileTimeout;
   
   bool GetForceUnixPaths() {return m_ForceUnixPaths;}
@@ -149,9 +151,6 @@ protected:
   // map from project name to vector of local generators in that project
   std::map<cmStdString, std::vector<cmLocalGenerator*> > m_ProjectMap;
 
-  ///! used by Configure()
-  void RecursiveConfigure(cmLocalGenerator *lg, float start, float end);
-  
   ///! Find a target by name by searching the local generators.
   cmTarget* FindTarget(const char* project, const char* name);
 private:

@@ -21,7 +21,6 @@
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
-#include "cmSubDirectory.h"
 #include "cmake.h"
 
 // Include dependency scanners for supported languages.  Only the
@@ -69,16 +68,8 @@ void cmLocalUnixMakefileGenerator2::SetEmptyCommand(const char* cmd)
 }
 
 //----------------------------------------------------------------------------
-void cmLocalUnixMakefileGenerator2::Generate(bool fromTheTop)
+void cmLocalUnixMakefileGenerator2::Generate()
 {
-  // Make sure we never run a local generate.
-  if(!fromTheTop)
-    {
-    cmSystemTools::Error("Local generate invoked in ",
-                         m_Makefile->GetStartOutputDirectory());
-    return;
-    }
-
   // Setup our configuration variables for this directory.
   this->ConfigureOutputPaths();
 
@@ -1314,24 +1305,25 @@ cmLocalUnixMakefileGenerator2
   // boolean is true should be included.  Keep track of the last
   // pre-order and last post-order rule created so that ordering can
   // be enforced.
-  const std::vector<cmSubDirectory>& subdirs = m_Makefile->GetSubDirectories();
   std::string lastPre = "";
   std::string lastPost = "";
-  for(std::vector<cmSubDirectory>::const_iterator
-        i = subdirs.begin(); i != subdirs.end(); ++i)
+  for(std::vector<cmLocalGenerator*>::const_iterator
+        i = this->Children.begin(); i != this->Children.end(); ++i)
     {
-    if(i->IncludeTopLevel)
+    if(!(*i)->GetExcludeAll())
       {
       // Add the subdirectory rule either for pre-order or post-order.
-      if(i->PreOrder)
+      if((*i)->GetMakefile()->GetPreOrder())
         {
         this->WriteSubdirRule(makefileStream, pass, 
-                              i->BinaryPath.c_str(), lastPre);
+                              (*i)->GetMakefile()->GetStartOutputDirectory(), 
+                              lastPre);
         }
       else
         {
         this->WriteSubdirRule(makefileStream, pass, 
-                              i->BinaryPath.c_str(), lastPost);
+                              (*i)->GetMakefile()->GetStartOutputDirectory(), 
+                              lastPost);
         }
       }
     }

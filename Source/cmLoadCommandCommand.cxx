@@ -60,14 +60,6 @@ public:
   virtual void FinalPass();
 
   /**
-   * This determines if the command gets propagated down
-   * to makefiles located in subdirectories.
-   */
-  virtual bool IsInherited() {
-    return (info.m_Inherited != 0 ? true : false);
-  }
-  
-  /**
    * The name of the command as specified in CMakeList.txt.
    */
   virtual const char* GetName() { return info.Name; }

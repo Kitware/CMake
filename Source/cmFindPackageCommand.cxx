@@ -388,7 +388,7 @@ std::string cmFindPackageCommand::SearchForConfig() const
 //----------------------------------------------------------------------------
 bool cmFindPackageCommand::ReadListFile(const char* f)
 {
-  if(m_Makefile->ReadListFile(m_Makefile->GetCurrentListFile(), f))
+  if(m_Makefile->ReadListFile(m_Makefile->GetCurrentListFile(),f))
     {
     return true;
     }
