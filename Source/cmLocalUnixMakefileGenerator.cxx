@@ -2061,7 +2061,7 @@ void cmLocalUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
       {
       // first make the directories for each target 
       fout << "\t@if [ ! -d \"$(DESTDIR)" << prefix << l->second.GetInstallPath() << 
-        "\"] ; then \\\n";
+        "\" ] ; then \\\n";
       fout << "\t   echo \"Making directory \\\"$(DESTDIR)" << prefix 
            << l->second.GetInstallPath() << "\\\" \"; \\\n";
       fout << "\t   mkdir -p \"$(DESTDIR)" << prefix << l->second.GetInstallPath() 
