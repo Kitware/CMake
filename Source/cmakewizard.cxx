@@ -45,6 +45,13 @@ void cmakewizard::AskUser(const char* key, cmCacheManager::CacheEntry & entry)
         {
         cmSystemTools::ConvertToUnixSlashes(entry->m_Value);
         }
+      if(entry->m_Type == cmCacheManager::BOOL)
+        {
+        if(!cmSystemTools::IsOn(buffer))
+          {
+          entry->m_Value = "OFF";
+          }
+        }
       }
     else
       {
