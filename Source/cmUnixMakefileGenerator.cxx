@@ -1173,6 +1173,11 @@ void cmUnixMakefileGenerator::OutputSourceObjectBuildRules(std::ostream& fout)
       target != targets.end(); ++target)
     {
     bool shared = (target->second.GetType() == cmTarget::SHARED_LIBRARY);
+    std::string exportsDef = "";
+    if(shared)
+      {
+      exportsDef = "-D"+target->first+"_EXPORTS ";
+      }
     // Iterate over every source for this target.
     const std::vector<cmSourceFile>& sources = target->second.GetSourceFiles();
     for(std::vector<cmSourceFile>::const_iterator source = sources.begin(); 
@@ -1217,12 +1222,12 @@ void cmUnixMakefileGenerator::OutputSourceObjectBuildRules(std::ostream& fout)
           std::string ext = source->GetSourceExtension();
           if ( ext == "cxx" || ext == "cc" || ext == "cpp" || ext == "C" )
             {
-            fout << "\t${CMAKE_CXX_COMPILER} ${CMAKE_CXXFLAGS} "
+            fout << "\t${CMAKE_CXX_COMPILER} ${CMAKE_CXXFLAGS} " << exportsDef.c_str()
                  << (shared? "${CMAKE_SHLIB_CFLAGS} ":"") << "${INCLUDE_FLAGS} -c $< -o $@\n\n";
             }
           else if ( ext == "c" )
             {
-            fout << "\t${CMAKE_C_COMPILER} ${CMAKE_CFLAGS} "
+            fout << "\t${CMAKE_C_COMPILER} ${CMAKE_CFLAGS} " << exportsDef.c_str()
                  << (shared? "${CMAKE_SHLIB_CFLAGS} ":"") << "${INCLUDE_FLAGS} -c $< -o $@\n\n";
             }
           }
