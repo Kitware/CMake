@@ -87,37 +87,6 @@ void cmMakefile::AddDefaultCommands()
   
 }
 
-void cmMakefile::ReadSystemConfiguration(const char *fname)
-{
-  std::ifstream fin(fname);
-  if(!fin)
-    {
-    cmSystemTools::Error("error can not open file ", fname);
-    return;
-    }
-
-  cmRegularExpression aDef("^Define[ \t]*([A-Za-z_0-9]*)[ \t]*([A-Za-z_0-9]*)[ \t]*$");  
-  const int BUFFER_SIZE = 4096;
-  char inbuffer[BUFFER_SIZE];
-  while (fin)
-    {
-    if(fin.getline(inbuffer, BUFFER_SIZE ) )
-      {
-      if(aDef.find(inbuffer))
-        {
-        // the arguments are the second match
-        std::string def = aDef.match(1);
-        std::string val = aDef.match(2);
-        // add the definition if true
-        if (cmSystemTools::IsOn(val.c_str()))
-          {
-          this->AddDefinition(def.c_str(),val.c_str());
-          }
-        }
-      }
-    }
-}
-
 cmMakefile::~cmMakefile()
 {
   for(unsigned int i=0; i < m_UsedCommands.size(); i++)
@@ -201,7 +170,10 @@ bool cmMakefile::ReadListFile(const char* filename, const char* external)
 {
 
   // keep track of the current file being read
-  m_cmCurrentListFile= filename;
+  if (filename)
+    {
+    m_cmCurrentListFile= filename;
+    }
 
   // if this is not a remote makefile
   //  (if it were, this would be called from the "filename" call,
@@ -245,8 +217,10 @@ bool cmMakefile::ReadListFile(const char* filename, const char* external)
   const char *filenametoread= filename;
 
   if( external)
+    {
     filenametoread= external;
-
+    }
+  
   std::ifstream fin(filenametoread);
   if(!fin)
     {
@@ -884,8 +858,8 @@ void cmMakefile::SetHomeDirectory(const char* dir)
   this->AddDefinition("CMAKE_SOURCE_DIR", this->GetHomeDirectory());
 #if defined(_WIN32) && !defined(__CYGWIN__)
   std::string fpath = dir;
-  fpath += "/CMake/CMakeWindowsSystemConfig.txt";
-  this->ReadSystemConfiguration(fpath.c_str());
+  fpath += "/CMake/CMakeWindowsSystemConfig.cmake";
+  this->ReadListFile(NULL,fpath.c_str());
 #endif
 }
 
@@ -896,7 +870,7 @@ void cmMakefile::SetHomeOutputDirectory(const char* lib)
   this->AddDefinition("CMAKE_BINARY_DIR", this->GetHomeOutputDirectory());
 #if !defined(_WIN32) || defined(__CYGWIN__)
   std::string fpath = lib;
-  fpath += "/CMakeSystemConfig.txt";
-  this->ReadSystemConfiguration(fpath.c_str());
+  fpath += "/CMakeSystemConfig.cmake";
+  this->ReadListFile(NULL,fpath.c_str());
 #endif
 }

@@ -470,11 +470,6 @@ public:
   /**
    * find what source group this source is in
    */
-  void ReadSystemConfiguration(const char *fname);
-  
-  /**
-   * find what source group this source is in
-   */
   cmSourceGroup& FindSourceGroup(const char* source,
                                  std::vector<cmSourceGroup> &groups);
 
