@@ -126,14 +126,10 @@ const char* cmSystemTools::GetExecutableExtension()
 bool cmSystemTools::MakeDirectory(const char* path)
 {
   std::string dir = path;
-  // replace all of the \ with /
-  size_t pos = 0;
-  while((pos = dir.find('\\', pos)) != std::string::npos)
-    {
-    dir[pos] = '/';
-    pos++;
-    }
-  pos =  dir.find(':');
+
+  cmSystemTools::ConvertToUnixSlashes(dir);
+
+  std::string::size_type pos = dir.find(':');
   if(pos == std::string::npos)
     {
     pos = 0;
@@ -334,11 +330,11 @@ std::string cmSystemTools::Capitalized(std::string& s)
 // convert windows slashes to unix slashes \ with /
 void cmSystemTools::ConvertToUnixSlashes(std::string& path)
 {
-  std::string::size_type pos = path.find('\\');
-  while(pos != std::string::npos)
+  std::string::size_type pos = 0;
+  while((pos = path.find('\\', pos)) != std::string::npos)
     {
     path[pos] = '/';
-    pos = path.find('\\');
+    pos++;
     }
   // remove any trailing slash
   if(path[path.size()-1] == '/')
@@ -892,9 +888,9 @@ void cmSystemTools::SplitProgramPath(const char* in_name,
   if(!cmSystemTools::FileIsDirectory(dir.c_str()))
     {
     std::string::size_type slashPos = dir.rfind("/");
-    if(slashPos != std::string::npos)      
+    if(slashPos != std::string::npos)
       {
-      file = dir.substr(slashPos+1) + file;
+      file = dir.substr(slashPos+1);
       dir = dir.substr(0, slashPos);
       }
     else
