@@ -124,12 +124,12 @@ IF (WIN32)
       ${Complex_SOURCE_DIR}/Library/dummy
       "${dir}/${file}"
       COPYONLY IMMEDIATE)
-    EXEC_PROGRAM("${CCOMMAND_COMMAND} write_regv \"${hkey}\" \"${dir}\"")
+    EXEC_PROGRAM(${CCOMMAND_COMMAND} ARGS "write_regv \"${hkey}\" \"${dir}\"")
     FIND_PATH(REGISTRY_TEST_PATH
               ${file}
               "[${hkey}]")
-    EXEC_PROGRAM("${CCOMMAND_COMMAND} delete_regv \"${hkey}\"")
-    EXEC_PROGRAM("${CCOMMAND_COMMAND} remove \"${dir}/${file}\"")
+    EXEC_PROGRAM(${CCOMMAND_COMMAND} ARGS "delete_regv \"${hkey}\"")
+    EXEC_PROGRAM(${CCOMMAND_COMMAND} ARGS "remove \"${dir}/${file}\"")
   ENDIF (NOT UNIX)
 ENDIF (WIN32)
 

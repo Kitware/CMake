@@ -267,6 +267,9 @@ public:
   static bool RunCommand(const char* command, std::string& output,
                          int &retVal, const char* directory = 0, bool verbose = true);
   
+  ///! for windows return the short path for the given path, unix just a pass through
+  static bool GetShortPath(const char* path, std::string& result);
+  
   ///! change directory the the directory specified
   static int ChangeDirectory(const char* dir);
     

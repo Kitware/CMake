@@ -52,19 +52,14 @@ std::string cmNMakeMakefileGenerator::ShortPath(const char* path)
     }
     
   // if there are spaces then call GetShortPathName to get rid of them
-  char *buffer = new char[strlen(path)+1];
-  if(GetShortPathName(path, buffer, 
-                      static_cast<int>(strlen(path)+1)) != 0)
-    {
-    ret = buffer;
-    }
-  else
+  if(!cmSystemTools::GetShortPath(path, ret))
     {
     // if GetShortPathName failed for some reason use
     // ConvertToOutputPath instead which will at least escape the spaces
     ret = this->ConvertToOutputPath(path);
+    return ret;
     }
-  delete [] buffer;
+  ret = this->ConvertToOutputPath(ret.c_str());
   return ret;
 }
 
@@ -161,37 +156,37 @@ void cmNMakeMakefileGenerator::OutputMakeVariables(std::ostream& fout)
   m_Makefile->ExpandVariablesInString(replaceVars);
   fout << replaceVars.c_str();
   std::string ccommand = m_Makefile->GetDefinition("CCOMMAND_COMMAND");
-  fout << "RM = " << this->ConvertToOutputPath(ccommand.c_str()) << " remove -f\n";
+  fout << "RM = " << this->ShortPath(ccommand.c_str()) << " remove -f\n";
   std::string ccompiler = m_Makefile->GetDefinition("CMAKE_C_COMPILER");
   fout << "CMAKE_C_COMPILER                       = " 
-       << this->ConvertToOutputPath(ccompiler.c_str()) << "\n";
+       << this->ShortPath(ccompiler.c_str()) << "\n";
 
   std::string cxxcompiler = m_Makefile->GetDefinition("CMAKE_CXX_COMPILER");
   fout << "CMAKE_CXX_COMPILER                     = " 
-       << this->ConvertToOutputPath(cxxcompiler.c_str()) << "\n";
+       << this->ShortPath(cxxcompiler.c_str()) << "\n";
 
   std::string linker = m_Makefile->GetDefinition("CMAKE_LINKER");
   fout << "CMAKE_LINKER                           = " << 
-    this->ConvertToOutputPath(linker.c_str()) << "\n";
+    this->ShortPath(linker.c_str()) << "\n";
 
   std::string lib_manager = m_Makefile->GetDefinition("CMAKE_LIBRARY_MANAGER");
   fout << "CMAKE_LIBRARY_MANAGER                  = " 
-       << this->ConvertToOutputPath(lib_manager.c_str()) << "\n";
+       << this->ShortPath(lib_manager.c_str()) << "\n";
 
   std::string cmakecommand = m_Makefile->GetDefinition("CMAKE_COMMAND");
   fout << "CMAKE_COMMAND                          = "
-       << this->ConvertToOutputPath(cmakecommand.c_str()) << "\n";
+       << this->ShortPath(cmakecommand.c_str()) << "\n";
 
   fout << "CMAKE_CURRENT_SOURCE                   = " 
-       << ShortPath(m_Makefile->GetStartDirectory() )
+       << this->ShortPath(m_Makefile->GetStartDirectory() )
        << "\n";
   fout << "CMAKE_CURRENT_BINARY                   = " 
-       << ShortPath(m_Makefile->GetStartOutputDirectory())
+       << this->ShortPath(m_Makefile->GetStartOutputDirectory())
        << "\n";
   fout << "CMAKE_SOURCE_DIR                       = " 
-       << ShortPath(m_Makefile->GetHomeDirectory()) << "\n";
+       << this->ShortPath(m_Makefile->GetHomeDirectory()) << "\n";
   fout << "CMAKE_BINARY_DIR                       = " 
-       << ShortPath(m_Makefile->GetHomeOutputDirectory() )
+       << this->ShortPath(m_Makefile->GetHomeOutputDirectory() )
        << "\n";
 
   // Output Include paths

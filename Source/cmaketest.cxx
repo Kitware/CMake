@@ -157,13 +157,7 @@ int main (int argc, char **argv)
 #if defined(_WIN32) && !defined(__CYGWIN__)      
     if(makeCommand.find(' ') != std::string::npos)
       {
-      char *buffer = new char[makeCommand.size()+1];
-      if(GetShortPathName(makeCommand.c_str(), buffer, 
-                          int(makeCommand.size()+1)) != 0)
-        {
-        makeCommand = buffer;
-        }
-      delete [] buffer;\
+      cmSystemTools::GetShortPath(makeCommand.c_str(), makeCommand);
       }
 #endif
     makeCommand += " ";
@@ -177,13 +171,7 @@ int main (int argc, char **argv)
 #if defined(_WIN32) && !defined(__CYGWIN__)      
     if(makeCommand.find(' ') != std::string::npos)
       {
-      char *buffer = new char[makeCommand.size()+1];
-      if(GetShortPathName(makeCommand.c_str(), buffer, 
-                          int(makeCommand.size()+1)) != 0)
-        {
-        makeCommand = buffer;
-        }
-      delete [] buffer;\
+      cmSystemTools::GetShortPath(makeCommand.c_str(), makeCommand);
       }
 #endif
     makeCommand += " ";

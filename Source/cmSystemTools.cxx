@@ -1275,20 +1275,13 @@ bool cmSystemTools::RunCommand(const char* command,
         std::string shortCmd;
         std::string cmd = quoted.match(1);
         std::string args = quoted.match(2);
-        char *buffer = new char[cmd.size()+1];
-        if(GetShortPathName(cmd.c_str(), buffer, 
-                            int(cmd.size())) != 0)
+        if(!cmSystemTools::GetShortPath(cmd.c_str(), shortCmd))
           {
-          shortCmd = buffer;
-          shortCmd += " ";
-          shortCmd += args;
-          }
-        else
-          {
-          cmSystemTools::Error("Could not get GetShortPathName for ", 
-                               cmd.c_str());
+          cmSystemTools::Error("GetShortPath failed for " , cmd.c_str());
           return false;
           }
+        shortCmd += " ";
+        shortCmd += args;
         return RunCommandViaSystem(shortCmd.c_str(), dir, 
                                    output, retVal, verbose);
         }
@@ -1844,4 +1837,45 @@ void cmSystemTools::ExpandListArguments(std::vector<std::string> const& argument
         }
       }
     }
+}
+
+bool cmSystemTools::GetShortPath(const char* path, std::string& shortPath)
+{
+#if defined(WIN32) && !defined(__CYGWIN__)  
+  const int size = int(strlen(path)) +1; // size of return
+  char *buffer = new char[size];  // create a buffer
+  buffer[0] = 0;
+  int ret = GetShortPathName(path, buffer, size);
+  if(buffer[0] == 0 || ret > size)
+    {
+    if(ret < size)
+      {
+      LPVOID lpMsgBuf;
+      FormatMessage( 
+        FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+        FORMAT_MESSAGE_FROM_SYSTEM | 
+        FORMAT_MESSAGE_IGNORE_INSERTS,
+        NULL,
+        GetLastError(),
+        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
+        (LPTSTR) &lpMsgBuf,
+        0,
+        NULL 
+        );
+      cmSystemTools::Error((LPCTSTR)lpMsgBuf);
+      LocalFree( lpMsgBuf );
+      }
+    cmSystemTools::Error("Unable to get a short path: ", path);
+    return false;
+    }
+  else
+    {
+    shortPath = buffer;
+    delete [] buffer;
+    return true;
+    }
+#else
+  shortPath = path;
+  return true;
+#endif
 }
