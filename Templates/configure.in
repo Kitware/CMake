@@ -669,6 +669,7 @@ case $system in
       CMAKE_AR="$CXX"
       CMAKE_AR_ARGS="-xar -o"
    fi
+   ;;
    IRIX*)
    if test $ac_cv_prog_gxx = yes; then
 	:
@@ -677,6 +678,7 @@ case $system in
       CMAKE_AR="$CXX"
       CMAKE_AR_ARGS="-ar -o"
    fi
+   ;;
 esac
 AC_SUBST(CMAKE_AR)
 AC_SUBST(CMAKE_AR_ARGS)
