@@ -951,13 +951,13 @@ void CMakeSetupDialog::OnSize(UINT nType, int cx, int cy)
     m_WhereSourceControl.GetWindowRect(&cRect);
     m_WhereSourceControl.SetWindowPos(&wndTop, cRect.left, cRect.top, 
                                       cRect.Width() + deltax, 
-                                      cRect.Height() + deltay, 
+                                      cRect.Height(), 
                                       SWP_NOCOPYBITS | 
                                       SWP_NOMOVE | SWP_NOZORDER);
     m_WhereBuildControl.GetWindowRect(&cRect);
     m_WhereBuildControl.SetWindowPos(&wndTop, cRect.left, cRect.top, 
                                      cRect.Width() + deltax, 
-                                     cRect.Height() + deltay, 
+                                     cRect.Height(), 
                                      SWP_NOCOPYBITS | 
                                      SWP_NOMOVE | SWP_NOZORDER);
     m_ListFrame.GetWindowRect(&cRect);
