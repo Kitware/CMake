@@ -15,7 +15,6 @@
 
 =========================================================================*/
 #include "cmIfCommand.h"
-#include "cmCacheManager.h"
 
 bool cmIfFunctionBlocker::
 IsFunctionBlocked(const char *name, const std::vector<std::string> &args, 

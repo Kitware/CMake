@@ -15,6 +15,8 @@
 
 =========================================================================*/
 #include "cmAbstractFilesCommand.h"
+#include "cmMakefile.h"
+#include "cmSourceFile.h"
 
 // cmAbstractFilesCommand
 bool cmAbstractFilesCommand::InitialPass(std::vector<std::string> const& argsIn)

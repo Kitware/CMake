@@ -19,7 +19,7 @@
 
 #include "cmStandardIncludes.h"
 #include "cmCustomCommand.h"
-#include "cmSourceFile.h"
+class cmSourceFile;
 
 /** \class cmTarget
  * \brief Represent a library or executable target loaded from a makefile.

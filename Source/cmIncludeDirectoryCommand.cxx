@@ -15,7 +15,7 @@
 
 =========================================================================*/
 #include "cmIncludeDirectoryCommand.h"
-#include "cmCacheManager.h"
+
 // cmIncludeDirectoryCommand
 bool cmIncludeDirectoryCommand::InitialPass(std::vector<std::string> const& argsIn)
 {

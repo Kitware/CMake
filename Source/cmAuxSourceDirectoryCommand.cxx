@@ -16,6 +16,7 @@
 =========================================================================*/
 #include "cmAuxSourceDirectoryCommand.h"
 #include "cmDirectory.h"
+#include "cmSourceFile.h"
 
 // cmAuxSourceDirectoryCommand
 bool cmAuxSourceDirectoryCommand::InitialPass(std::vector<std::string> const& args)

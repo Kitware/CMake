@@ -15,7 +15,6 @@
 
 =========================================================================*/
 #include "cmAddDependenciesCommand.h"
-#include "cmCacheManager.h"
 
 // cmDependenciesCommand
 bool cmAddDependenciesCommand::InitialPass(std::vector<std::string> const& argsIn)

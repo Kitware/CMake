@@ -15,7 +15,6 @@
 
 =========================================================================*/
 #include "cmEnableTestingCommand.h"
-#include "cmCacheManager.h"
 
 // we do this in the final pass so that we now the subdirs have all 
 // been defined

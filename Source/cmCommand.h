@@ -18,7 +18,7 @@
 #define cmCommand_h
 
 #include "cmStandardIncludes.h"
-#include "cmMakefile.h"
+class cmMakefile;
 
 /** \class cmCommand
  * \brief Superclass for all commands in CMake.

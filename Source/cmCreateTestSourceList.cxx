@@ -15,7 +15,7 @@
 
 =========================================================================*/
 #include "cmCreateTestSourceList.h"
-
+#include "cmSourceFile.h"
 
 // cmCreateTestSourceList
 bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)

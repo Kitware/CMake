@@ -16,6 +16,7 @@
 =========================================================================*/
 #include "cmTarget.h"
 #include "cmMakefile.h"
+#include "cmSourceFile.h"
 
 #include <map>
 #include <set>

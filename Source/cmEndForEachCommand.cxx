@@ -15,7 +15,6 @@
 
 =========================================================================*/
 #include "cmEndForEachCommand.h"
-#include "cmCacheManager.h"
 
 bool cmEndForEachCommand::InitialPass(std::vector<std::string> const& args)
 {

@@ -15,7 +15,6 @@
 
 =========================================================================*/
 #include "cmWriteFileCommand.h"
-#include "cmCacheManager.h"
 
 // cmLibraryCommand
 bool cmWriteFileCommand::InitialPass(std::vector<std::string> const& argsIn)

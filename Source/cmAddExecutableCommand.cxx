@@ -15,7 +15,6 @@
 
 =========================================================================*/
 #include "cmAddExecutableCommand.h"
-#include "cmCacheManager.h"
 
 // cmExecutableCommand
 bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& argsIn)

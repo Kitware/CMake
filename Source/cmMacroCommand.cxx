@@ -15,7 +15,6 @@
 
 =========================================================================*/
 #include "cmMacroCommand.h"
-#include "cmCacheManager.h"
 
 bool cmMacroFunctionBlocker::
 IsFunctionBlocked(const char *name, const std::vector<std::string> &args, 

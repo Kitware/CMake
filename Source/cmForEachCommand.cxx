@@ -15,7 +15,6 @@
 
 =========================================================================*/
 #include "cmForEachCommand.h"
-#include "cmCacheManager.h"
 
 bool cmForEachFunctionBlocker::
 IsFunctionBlocked(const char *name, const std::vector<std::string> &args, 

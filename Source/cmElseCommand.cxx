@@ -15,7 +15,6 @@
 
 =========================================================================*/
 #include "cmElseCommand.h"
-#include "cmCacheManager.h"
 
 bool cmElseCommand::InitialPass(std::vector<std::string> const&)
 {

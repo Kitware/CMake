@@ -15,7 +15,6 @@
 
 =========================================================================*/
 #include "cmAddLibraryCommand.h"
-#include "cmCacheManager.h"
 
 // cmLibraryCommand
 bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& argsIn)

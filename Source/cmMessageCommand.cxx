@@ -15,7 +15,6 @@
 
 =========================================================================*/
 #include "cmMessageCommand.h"
-#include "cmCacheManager.h"
 
 // cmLibraryCommand
 bool cmMessageCommand::InitialPass(std::vector<std::string> const& argsIn)
