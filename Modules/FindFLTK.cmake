@@ -50,7 +50,7 @@ IF(UNIX)
 ENDIF(UNIX)
 
 IF(APPLE)
-  SET( FLTK_PLATFORM_DEPENDENT_LIBS  -framework Carbon -framework Cocoa -framework ApplicationServices -lz )
+  SET( FLTK_PLATFORM_DEPENDENT_LIBS  "-framework Carbon -framework Cocoa -framework ApplicationServices -lz")
 ENDIF(APPLE)
 
 # Make sure that the FLTK include path has been set
