@@ -174,6 +174,8 @@ int Curl_nonblock(curl_socket_t sockfd,    /* operate on this */
 #endif
 
 #ifdef HAVE_DISABLED_NONBLOCKING
+  (void)nonblock;
+  (void)sockfd;
   return 0; /* returns success */
 #define SETBLOCK 6
 #endif
