@@ -79,6 +79,12 @@ public:
   static std::string EscapeSpaces(const char*);
   
   /**
+   * Return a string equivalent to the input string, but with all " replaced
+   * with \"  to escape the quote
+   */
+  static std::string EscapeQuotes(const char*);
+
+  /**
    * Return a capitalized string (i.e the first letter is uppercased, all other
    * are lowercased).
    */
