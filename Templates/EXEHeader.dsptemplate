@@ -11,6 +11,7 @@
 # variables to REPLACE
 # 
 # BUILD_INCLUDES == include path
+# EXECUTABLE_OUTPUT_PATH == override in output directory
 # EXTRA_DEFINES == compiler defines
 # OUTPUT_LIBNAME  == name of output library
 # CM_LIBRARIES == libraries linked in 
@@ -51,7 +52,7 @@ RSC=rc.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "OUTPUT_EXECUTABLE_PATHRelease"
+# PROP Output_Dir "EXECUTABLE_OUTPUT_PATHRelease"
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GR /GX /Zm1000 /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS"  /FD /c
@@ -76,7 +77,7 @@ CM_MULTILINE_LIBRARIES
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "OUTPUT_EXECUTABLE_PATHDebug"
+# PROP Output_Dir "EXECUTABLE_OUTPUT_PATHDebug"
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
 # ADD BASE CPP  /W3 /GR /Zm1000 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS"  /FD /GZ /c
@@ -102,7 +103,7 @@ CM_MULTILINE_LIBRARIES
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "OUTPUT_EXECUTABLE_PATHReleaseMinSize"
+# PROP Output_Dir "EXECUTABLE_OUTPUT_PATHReleaseMinSize"
 # PROP Intermediate_Dir "ReleaseMinSize"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GR /GX /Zm1000 /O1 /Gs /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS"  /FD /c

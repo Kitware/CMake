@@ -550,9 +550,9 @@ void cmDSPMakefile::WriteDSPHeader(std::ostream& fout, const char *libName,
       cmSystemTools::ReplaceString(line, "BUILD_INCLUDES",
                                    m_IncludeOptions.c_str());
       cmSystemTools::ReplaceString(line, "OUTPUT_LIBNAME",libName);
-      cmSystemTools::ReplaceString(line, "OUTPUT_LIBRARY_PATH",
-                                   exePath.c_str());
-      cmSystemTools::ReplaceString(line, "OUTPUT_EXECUTABLE_PATH",
+      cmSystemTools::ReplaceString(line, "LIBRARY_OUTPUT_PATH",
+                                   libPath.c_str());
+      cmSystemTools::ReplaceString(line, "EXECUTABLE_OUTPUT_PATH",
                                    exePath.c_str());
       cmSystemTools::ReplaceString(line, 
                                    "EXTRA_DEFINES", 
