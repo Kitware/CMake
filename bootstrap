@@ -804,7 +804,7 @@ done
 cmake_replace_string "${cmake_source_dir}/Source/kwsys/kwsys_stl.h.in" \
    "${cmake_bootstrap_dir}/cmsys/stl/stl.h.in" KWSYS_NAMESPACE cmsys
 
-for a in string vector; do
+for a in string vector map; do
   cmake_replace_string "${cmake_bootstrap_dir}/cmsys/stl/stl.h.in" \
     "${cmake_bootstrap_dir}/cmsys/stl/${a}" KWSYS_STL_HEADER ${a}
 done
