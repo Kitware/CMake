@@ -68,6 +68,11 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
   {"-E <regex>", "Exclude tests matching regular expression.",
    "This option tells ctest to NOT run the tests whose names match the "
    "given regular expression."},
+  {"-D <DashboardTest>", "Execute dashboard test",
+   "This option tells ctest to perform act as a Dart client and perform "
+   "a dashboard test. All tests are ModeTest, where Mode can be Experimental, "
+   "Nightly, and Continuous, and Test can be Start, Update, Configure, "
+   "Build, Test, Coverage, and Submit."},
   {0,0,0}
 };
 
@@ -155,6 +160,46 @@ int main (int argc, char *argv[])
         inst.SetTest("Coverage");
         inst.SetTest("Submit");
         }
+      else if ( targ == "ExperimentalStart" )
+        {
+        inst.SetTestModel(cmCTest::EXPERIMENTAL);
+        inst.SetTest("Start");
+        }
+      else if ( targ == "ExperimentalUpdate" )
+        {
+        inst.SetTestModel(cmCTest::EXPERIMENTAL);
+        inst.SetTest("Update");
+        }
+      else if ( targ == "ExperimentalConfigure" )
+        {
+        inst.SetTestModel(cmCTest::EXPERIMENTAL);
+        inst.SetTest("Configure");
+        }
+      else if ( targ == "ExperimentalBuild" )
+        {
+        inst.SetTestModel(cmCTest::EXPERIMENTAL);
+        inst.SetTest("Build");
+        }
+      else if ( targ == "ExperimentalTest" )
+        {
+        inst.SetTestModel(cmCTest::EXPERIMENTAL);
+        inst.SetTest("Test");
+        }
+      else if ( targ == "ExperimentalPurify" )
+        {
+        inst.SetTestModel(cmCTest::EXPERIMENTAL);
+        inst.SetTest("Purify");
+        }
+      else if ( targ == "ExperimentalCoverage" )
+        {
+        inst.SetTestModel(cmCTest::EXPERIMENTAL);
+        inst.SetTest("Coverage");
+        }
+      else if ( targ == "ExperimentalSubmit" )
+        {
+        inst.SetTestModel(cmCTest::EXPERIMENTAL);
+        inst.SetTest("Submit");
+        }
       else if ( targ == "Continuous" )
         {
         inst.SetTestModel(cmCTest::CONTINUOUS);
@@ -166,6 +211,46 @@ int main (int argc, char *argv[])
         inst.SetTest("Coverage");
         inst.SetTest("Submit");
         }
+      else if ( targ == "ContinuousStart" )
+        {
+        inst.SetTestModel(cmCTest::CONTINUOUS);
+        inst.SetTest("Start");
+        }
+      else if ( targ == "ContinuousUpdate" )
+        {
+        inst.SetTestModel(cmCTest::CONTINUOUS);
+        inst.SetTest("Update");
+        }
+      else if ( targ == "ContinuousConfigure" )
+        {
+        inst.SetTestModel(cmCTest::CONTINUOUS);
+        inst.SetTest("Configure");
+        }
+      else if ( targ == "ContinuousBuild" )
+        {
+        inst.SetTestModel(cmCTest::CONTINUOUS);
+        inst.SetTest("Build");
+        }
+      else if ( targ == "ContinuousTest" )
+        {
+        inst.SetTestModel(cmCTest::CONTINUOUS);
+        inst.SetTest("Test");
+        }
+      else if ( targ == "ContinuousPurify" )
+        {
+        inst.SetTestModel(cmCTest::CONTINUOUS);
+        inst.SetTest("Purify");
+        }
+      else if ( targ == "ContinuousCoverage" )
+        {
+        inst.SetTestModel(cmCTest::CONTINUOUS);
+        inst.SetTest("Coverage");
+        }
+      else if ( targ == "ContinuousSubmit" )
+        {
+        inst.SetTestModel(cmCTest::CONTINUOUS);
+        inst.SetTest("Submit");
+        }
       else if ( targ == "Nightly" )
         {
         inst.SetTestModel(cmCTest::NIGHTLY);
@@ -175,6 +260,46 @@ int main (int argc, char *argv[])
         inst.SetTest("Build");
         inst.SetTest("Test");
         inst.SetTest("Coverage");
+        inst.SetTest("Submit");
+        }
+      else if ( targ == "NightlyStart" )
+        {
+        inst.SetTestModel(cmCTest::NIGHTLY);
+        inst.SetTest("Start");
+        }
+      else if ( targ == "NightlyUpdate" )
+        {
+        inst.SetTestModel(cmCTest::NIGHTLY);
+        inst.SetTest("Update");
+        }
+      else if ( targ == "NightlyConfigure" )
+        {
+        inst.SetTestModel(cmCTest::NIGHTLY);
+        inst.SetTest("Configure");
+        }
+      else if ( targ == "NightlyBuild" )
+        {
+        inst.SetTestModel(cmCTest::NIGHTLY);
+        inst.SetTest("Build");
+        }
+      else if ( targ == "NightlyTest" )
+        {
+        inst.SetTestModel(cmCTest::NIGHTLY);
+        inst.SetTest("Test");
+        }
+      else if ( targ == "NightlyPurify" )
+        {
+        inst.SetTestModel(cmCTest::NIGHTLY);
+        inst.SetTest("Purify");
+        }
+      else if ( targ == "NightlyCoverage" )
+        {
+        inst.SetTestModel(cmCTest::NIGHTLY);
+        inst.SetTest("Coverage");
+        }
+      else if ( targ == "NightlySubmit" )
+        {
+        inst.SetTestModel(cmCTest::NIGHTLY);
         inst.SetTest("Submit");
         }
       else if ( targ == "MemoryCheck" )
