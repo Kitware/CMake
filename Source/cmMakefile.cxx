@@ -2271,7 +2271,7 @@ void cmMakefile::ConfigureString(const std::string& input,
 }
 
 int cmMakefile::ConfigureFile(const char* infile, const char* outfile, 
-  int copyonly, int atOnly, int escapeQuotes)
+  bool copyonly, bool atOnly, bool escapeQuotes)
 {
   std::string soutfile = outfile;
   std::string sinfile = infile;
