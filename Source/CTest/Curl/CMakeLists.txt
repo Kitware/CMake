@@ -77,7 +77,6 @@ SET(libCurl_SRCS
   ssluse.c
   strequal.c
   strerror.c
-  strtoofft.c
   telnet.c
   timeval.c
   transfer.c
@@ -311,6 +310,7 @@ IF(HAVE_SIGNAL_FUNC AND HAVE_SIGNAL_MACRO)
 ENDIF(HAVE_SIGNAL_FUNC AND HAVE_SIGNAL_MACRO)
 CHECK_SYMBOL_EXISTS(uname         "${CURL_INCLUDES}" HAVE_UNAME)
 CHECK_SYMBOL_EXISTS(strtoll       "${CURL_INCLUDES}" HAVE_STRTOLL)
+CHECK_SYMBOL_EXISTS(_strtoi64     "${CURL_INCLUDES}" HAVE__STRTOI64)
 CHECK_SYMBOL_EXISTS(strerror_r    "${CURL_INCLUDES}" HAVE_STRERROR_R)
 CHECK_SYMBOL_EXISTS(siginterrupt  "${CURL_INCLUDES}" HAVE_SIGINTERRUPT)
 CHECK_SYMBOL_EXISTS(perror        "${CURL_INCLUDES}" HAVE_PERROR)
@@ -321,6 +321,11 @@ IF (NOT HAVE_STRTOK_R)
     strtok.c
     )
 ENDIF (NOT HAVE_STRTOK_R)
+IF(NOT HAVE_STRTOLL AND NOT HAVE__STRTOI64)
+  SET(libCurl_SRCS ${libCurl_SRCS}
+    strtoofft.c
+    )
+ENDIF(NOT HAVE_STRTOLL AND NOT HAVE__STRTOI64)
 
 # sigaction and sigsetjmp are special. Use special mechanism for
 # detecting those, but only if previous attempt failed.
