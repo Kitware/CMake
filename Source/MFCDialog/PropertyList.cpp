@@ -245,7 +245,7 @@ void CPropertyList::OnSelchange()
     if (m_cmbBox)
       m_cmbBox.MoveWindow(rect);
     else
-      {	
+      { 
       rect.bottom += 100;
       m_cmbBox.Create(CBS_DROPDOWNLIST 
                       | CBS_NOINTEGRALHEIGHT | WS_VISIBLE 
@@ -257,7 +257,7 @@ void CPropertyList::OnSelchange()
     //add the choices for this particular property
     CString cmbItems = pItem->m_cmbItems;
     lBoxSelText = pItem->m_curValue;
-		
+                
     m_cmbBox.ResetContent();
     int i,i2;
     i=0;
@@ -288,7 +288,7 @@ void CPropertyList::OnSelchange()
     if (m_editBox)
       m_editBox.MoveWindow(rect);
     else
-      {	
+      { 
       m_editBox.Create(ES_LEFT | ES_AUTOHSCROLL | WS_VISIBLE 
                        | WS_CHILD | WS_BORDER,
                        rect,this,IDC_PROPEDITBOX);
@@ -308,7 +308,7 @@ void CPropertyList::OnSelchange()
     if (m_CheckBoxControl)
       m_CheckBoxControl.MoveWindow(rect);
     else
-      {	
+      { 
       m_CheckBoxControl.Create("check",BS_CHECKBOX 
                                | BM_SETCHECK |BS_LEFTTEXT 
                                | WS_VISIBLE | WS_CHILD,
@@ -348,7 +348,7 @@ void CPropertyList::DisplayButton(CRect region)
   if (m_btnCtrl)
     m_btnCtrl.MoveWindow(region);
   else
-    {	
+    {   
     m_btnCtrl.Create("...",BS_PUSHBUTTON | WS_VISIBLE | WS_CHILD,
                      region,this,IDC_PROPBTNCTRL);
     m_btnCtrl.SetFont(&m_SSerif8Font);
@@ -396,7 +396,7 @@ void CPropertyList::OnChangeEditBox()
 {
   CString newStr;
   m_editBox.GetWindowText(newStr);
-	
+        
   CPropertyItem* pItem = (CPropertyItem*) GetItemDataPtr(m_curSel);
   if(pItem->m_curValue != newStr)
     {
@@ -450,6 +450,9 @@ void CPropertyList::OnButton()
 {
   CPropertyItem* pItem = (CPropertyItem*) GetItemDataPtr(m_curSel);
 
+  // The dialogs might change the working directory.  Save it.
+  std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
+
   //display the appropriate common dialog depending on what type
   //of chooser is associated with the property
 
@@ -457,9 +460,9 @@ void CPropertyList::OnButton()
     {
     CString SelectedFile; 
     CString Filter("All Files (*.*)||");
-	
+        
     CFileDialog FileDlg(TRUE, NULL, NULL, NULL,
-			Filter);
+                        Filter);
     CString initialDir;
     CString currPath = pItem->m_curValue;
     if (currPath.Right(9) == "-NOTFOUND" || currPath == "NOTFOUND")
@@ -474,7 +477,7 @@ void CPropertyList::OnButton()
         endSlash = currPath.ReverseFind('/');
         }
       initialDir = currPath.Left(endSlash);
-      }		
+      }         
     initialDir.Replace("/", "\\");
     FileDlg.m_ofn.lpstrTitle = "Select file";
     if (currPath.GetLength() > 0)
@@ -483,7 +486,7 @@ void CPropertyList::OnButton()
     if(IDOK == FileDlg.DoModal())
       {
       SelectedFile = FileDlg.GetPathName();
-			
+                        
       m_btnCtrl.ShowWindow(SW_HIDE);
       std::string path = SelectedFile;
       cmSystemTools::ConvertToUnixSlashes(path);
@@ -511,6 +514,8 @@ void CPropertyList::OnButton()
       InvalidateList();
       }
     }
+
+  cmSystemTools::ChangeDirectory(cwd.c_str());
 }
 
 void CPropertyList::OnLButtonUp(UINT nFlags, CPoint point) 
@@ -520,7 +525,7 @@ void CPropertyList::OnLButtonUp(UINT nFlags, CPoint point)
     //if columns were being resized then this indicates
     //that mouse is up so resizing is done.  Need to redraw
     //columns to reflect their new widths.
-		
+                
     m_bTracking = FALSE;
     //if mouse was captured then release it
     if (GetCapture()==this)
@@ -558,7 +563,7 @@ void CPropertyList::OnLButtonDown(UINT nFlags, CPoint point)
     windowRect.left += 10; windowRect.right -= 10;
     //do not let mouse leave the list box boundary
     ::ClipCursor(windowRect);
-		
+                
     if (m_cmbBox)
       m_cmbBox.ShowWindow(SW_HIDE);
     if (m_editBox)
@@ -586,7 +591,7 @@ void CPropertyList::OnLButtonDown(UINT nFlags, CPoint point)
 }
 
 void CPropertyList::OnMouseMove(UINT nFlags, CPoint point) 
-{	
+{       
   if (m_bTracking)
     {
     //move divider line to the mouse pos. if columns are
@@ -618,7 +623,7 @@ void CPropertyList::OnMouseMove(UINT nFlags, CPoint point)
 void CPropertyList::InvertLine(CDC* pDC,CPoint ptFrom,CPoint ptTo)
 {
   int nOldMode = pDC->SetROP2(R2_NOT);
-	
+        
   pDC->MoveTo(ptFrom);
   pDC->LineTo(ptTo);
 
