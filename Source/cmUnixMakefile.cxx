@@ -4,7 +4,8 @@
 #include <iostream>
 
 // Output the depend information for all the classes 
-// in the makefile.
+// in the makefile.  These would have been generated
+// by the class cmMakeDepend in the main of CMakeBuildTargets.
 void cmUnixMakefile::OutputDepends(std::ostream& fout)
 {
   for(int i = 0; i < m_Classes.size(); i++)
@@ -64,6 +65,18 @@ inline std::string FixDirectoryName(const char* dir)
 
 void cmUnixMakefile::OutputMakefile(const char* file)
 {
+  if( m_TemplateDirectories.size() )
+    {
+    // For the case when this is running as a remote build
+    // on unix, make the directory
+    
+    for(std::vector<std::string>::iterator i = m_TemplateDirectories.begin();
+        i != m_TemplateDirectories.end(); ++i)
+      {
+      cmSystemTools::MakeDirectory(i->c_str());
+      }
+    }
+  
   std::ofstream fout(file);
   if(!fout)
     {
@@ -144,8 +157,6 @@ void cmUnixMakefile::OutputMakefile(const char* file)
       linkLibs += " ";
       }
     linkLibs += " ${LOCAL_LINK_FLAGS} ";
-    cmSystemTools::ReplaceString(linkLibs, "${CMAKE_BINARY_DIR}",
-				 this->GetOutputHomeDirectory() );
     // Now create rules for all of the executables to be built
     for(int i = 0; i < m_Classes.size(); i++)
       {

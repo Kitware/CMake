@@ -24,13 +24,13 @@ void cmMakefile::Print()
 }
 
 // Parse the given CMakeLists.txt file into a list of classes.
-
 bool cmMakefile::ReadMakefile(const char* filename)
 {
   m_BuildFlags.SetSourceHomeDirectory(this->GetHomeDirectory());
   m_BuildFlags.SetStartDirectory(this->GetCurrentDirectory());
   m_BuildFlags.ParseDirectories();
-
+  m_BuildFlags.ExpandVaribles(this);
+ 
   std::ifstream fin(filename);
   if(!fin)
     {
@@ -188,11 +188,12 @@ void cmMakefile::ReadTemplateInstanceDirectory(std::string& line)
   std::string::size_type start = line.find("=");
   if(start != std::string::npos)
     {
-    std::string dirname = line.substr(start+1, line.size());
-    dirname = cmSystemTools::CleanUpName(dirname.c_str());
+    std::string templateDirectory = line.substr(start+1, line.size());
+    templateDirectory = cmSystemTools::CleanUpName(templateDirectory.c_str());
+    m_TemplateDirectories.push_back(templateDirectory);
     std::string tdir = this->GetCurrentDirectory();
     tdir += "/";
-    tdir += dirname;
+    tdir += templateDirectory;
     // Load all the files in the directory
     cmDirectory dir;
     if(dir.Load(tdir.c_str()))
@@ -207,7 +208,7 @@ void cmMakefile::ReadTemplateInstanceDirectory(std::string& line)
           // Remove the extension
           std::string::size_type dotpos = file.rfind(".");
           file = file.substr(0, dotpos);
-          std::string fullname = dirname;
+          std::string fullname = templateDirectory;
           fullname += "/";
           fullname += file;
           // add the file as a class file so 
@@ -221,8 +222,8 @@ void cmMakefile::ReadTemplateInstanceDirectory(std::string& line)
       }
     else
       {
-      std::cerr << "Error can not open template instance directory "
-                << dirname.c_str() << std::endl;
+      std::cerr << "Warning can not open template instance directory "
+                << templateDirectory.c_str() << std::endl;
       }
     }
 }

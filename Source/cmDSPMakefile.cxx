@@ -16,17 +16,13 @@ static void Die(const char* message)
 
 void cmDSPMakefile::OutputDSPFile()
 { 
+  // Setup /I and /LIBPATH options
   std::vector<std::string>& includes = m_BuildFlags.GetIncludeDirectories();
   std::vector<std::string>::iterator i;
   for(i = includes.begin(); i != includes.end(); ++i)
     {
-    std::string include = *i;
-    cmSystemTools::ReplaceString(include, "${CMAKE_BINARY_DIR}",
-				 this->GetOutputHomeDirectory() );
-    cmSystemTools::ReplaceString(include, "${CMAKE_SOURCE_ROOT}",
-				 this->GetHomeDirectory() );
     m_IncludeOptions +=  "/I \"";
-    m_IncludeOptions += include;
+    m_IncludeOptions += *i;
     m_IncludeOptions += "\" ";
     }
   std::vector<std::string>& libs = m_BuildFlags.GetLinkLibraries();
@@ -48,8 +44,6 @@ void cmDSPMakefile::OutputDSPFile()
     {
     m_DebugLibraryOptions += " /LIBPATH:\"";
     m_DebugLibraryOptions += *i;
-    cmSystemTools::ReplaceString(m_DebugLibraryOptions, "${CMAKE_BINARY_DIR}",
-				 this->GetOutputHomeDirectory() );
     if(i->find("Debug") == std::string::npos)
       {
       if(i->find("Release") == std::string::npos)

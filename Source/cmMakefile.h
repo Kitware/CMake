@@ -101,6 +101,7 @@ private:
 protected:
   bool m_Executables;
   std::string m_Prefix;
+  std::vector<std::string> m_TemplateDirectories; // Template directory name if found in file
   std::string m_OutputDirectory; // Current output directory for makefile
   std::string m_OutputHomeDirectory; // Top level output directory
   std::string m_cmHomeDirectory; // Home directory for source

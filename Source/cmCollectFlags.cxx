@@ -1,4 +1,5 @@
 #include "cmCollectFlags.h"
+#include "cmMakefile.h"
 #include "cmSystemTools.h"
 #include <fstream>
 #include <iterator>
@@ -105,5 +106,34 @@ void cmCollectFlags::ParseDirectory(const char* dir)
     {
     dotdotDir = dotdotDir.substr(0, pos);
     this->ParseDirectory(dotdotDir.c_str());
+    }
+}
+
+
+// expance CMAKE_BINARY_DIR and CMAKE_SOURCE_ROOT in the
+// include and library directories.
+
+void cmCollectFlags::ExpandVaribles(cmMakefile* makefile)
+{
+   // Now replace varibles
+  std::vector<std::string>& includes = m_IncludeDirectories;
+  std::vector<std::string>::iterator j, begin, end;
+  begin = m_IncludeDirectories.begin();
+  end = m_IncludeDirectories.end();
+  for(j = begin; j != end; ++j)
+    {
+    cmSystemTools::ReplaceString(*j, "${CMAKE_BINARY_DIR}",
+				 makefile->GetOutputHomeDirectory() );
+    cmSystemTools::ReplaceString(*j, "${CMAKE_SOURCE_ROOT}",
+				 makefile->GetHomeDirectory() );
+    }
+  begin = m_LinkDirectories.begin();
+  end = m_LinkDirectories.end();
+  for(j = begin; j != end; ++j)
+    {
+    cmSystemTools::ReplaceString(*j, "${CMAKE_BINARY_DIR}",
+				 makefile->GetOutputHomeDirectory() );
+    cmSystemTools::ReplaceString(*j, "${CMAKE_SOURCE_ROOT}",
+				 makefile->GetHomeDirectory() );
     }
 }

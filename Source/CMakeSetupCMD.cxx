@@ -2,6 +2,12 @@
 #include "cmDSPMakefile.h"
 #include <iostream>
 
+// this is the command line version of CMakeSetup.
+// It is called from Visual Studio when a CMakeLists.txt
+// file is changed.
+
+
+// Set the command line arguments
 void SetArgs(cmMakefile& builder, int ac, char** av)
 {
   for(int i =3; i < ac; i++)
@@ -32,10 +38,9 @@ void SetArgs(cmMakefile& builder, int ac, char** av)
     }
 }
 
+
 main(int ac, char** av)
 {
-  std::cerr << "pcbuilderCMD\n ";
-  
   if(ac < 3)
     {
     std::cerr << "Usage: " << av[0] << 

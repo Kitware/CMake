@@ -48,10 +48,6 @@ void cmMakeDepend::SetMakefile(cmMakefile* makefile)
   std::vector<std::string>::iterator j;
   for(j = includes.begin(); j != includes.end(); ++j)
     {
-    cmSystemTools::ReplaceString(*j, "${CMAKE_BINARY_DIR}",
-				 m_Makefile->GetOutputHomeDirectory() );
-    cmSystemTools::ReplaceString(*j, "${CMAKE_SOURCE_ROOT}",
-				 m_Makefile->GetHomeDirectory() );
     this->AddSearchPath(j->c_str());
     }
   // Now create cmDependInformation objects for files in the directory

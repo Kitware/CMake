@@ -67,6 +67,14 @@ make
 
 
 TODO:
-configure stuff for windows should be a copy configure file
-read in depend regular expression from a file
+
+
+Add include and directories to the build on windows.
+For unix just add them to the CMakeLocal.make.in
+
+Add a --with idea, sets a #define in the config.h file
+
+Change ME to LIBRARY, and add PROJECT=
+
+
 

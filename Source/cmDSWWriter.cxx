@@ -12,7 +12,7 @@
 #undef GetCurrentDirectory
 #undef SetCurrentDirectory
 
-// virtual override, ouput the makefile 
+// output the DSW file
 void cmDSWMakefile::OutputDSWFile()
 { 
   if(m_OutputDirectory == "")

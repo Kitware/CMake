@@ -15,12 +15,16 @@
 =========================================================================*/
 /**
  * cmCollectFlags - collect flags from CMakeLists.txt files.
+ * This class collects include and link flags from a CMakeLists.txt
+ * file and any CMakeLists.txt files above it in the directory tree.
+ * It stops searching wen the home directory is found.
  */
 #ifndef cmCollectFlags_h
 #define cmCollectFlags_h
 
 #include <vector>
 #include <string>
+class cmMakefile;
 
 class cmCollectFlags
 {
@@ -45,6 +49,13 @@ public:
    */
   void Print();
   
+  /**
+   * Expance varibles for home and binary root in the collected flags.
+   * CMAKE_BINARY_DIR and CMAKE_SOURCE_ROOT are replaced with
+   * makefile->GetOutputHomeDirectory() and
+   * makefile->GetHomeDirectory()
+   */
+  void ExpandVaribles(cmMakefile* makefile);
   
   std::vector<std::string>& GetIncludeDirectories()
     { 
