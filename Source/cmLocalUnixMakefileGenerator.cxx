@@ -215,13 +215,15 @@ void cmLocalUnixMakefileGenerator::OutputMakefile(const char* file,
   fout << " " << cmSystemTools::ConvertToOutputPath(cacheFile.c_str());
   fout << "\n\n\n";
   this->OutputMakeVariables(fout);  
-
+  std::string checkCache = m_Makefile->GetHomeOutputDirectory();
+  checkCache += "/cmake.check_cache";
+  checkCache = cmSystemTools::ConvertToOutputPath(checkCache.c_str());
   // Set up the default target as the VERY first target, so that make with no arguments will run it
   this->
     OutputMakeRule(fout, 
                    "Default target executed when no arguments are given to make, first make sure cmake.depends exists, cmake.check_depends is up-to-date, check the sources, then build the all target",
                    "default_target",
-                   "$(CMAKE_BINARY_DIR)/cmake.check_cache",
+                   checkCache.c_str(),
                    "$(MAKE) $(MAKESILENT) cmake.depends",
                    "$(MAKE) $(MAKESILENT) cmake.check_depends",
                    "$(MAKE) $(MAKESILENT) -f cmake.check_depends",
@@ -2121,11 +2123,19 @@ void cmLocalUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                        "rebuild_cache",
                        "$(CMAKE_BINARY_DIR)/CMakeCache.txt",
                        "$(CMAKE_COMMAND) "
-                       "-H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)");
+                       "-H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)");  
+  std::string checkCache = m_Makefile->GetHomeOutputDirectory();
+  checkCache += "/cmake.check_cache";
+  checkCache = cmSystemTools::ConvertToOutputPath(checkCache.c_str());
+
+  std::string CMakeCache = m_Makefile->GetHomeOutputDirectory();
+  CMakeCache += "/CMakeCache.txt";
+  CMakeCache = cmSystemTools::ConvertToOutputPath(CMakeCache.c_str());
+
   this->OutputMakeRule(fout, 
                        "CMakeCache.txt because out-of-date:",
-                       "$(CMAKE_BINARY_DIR)/cmake.check_cache",
-                       "$(CMAKE_BINARY_DIR)/CMakeCache.txt",
+                       checkCache.c_str(),
+                       CMakeCache.c_str(),
                        "$(CMAKE_COMMAND) "
                        "-H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)");
   // if CMAKE_EDIT_COMMAND is defined then add a rule to run it
