@@ -14,7 +14,7 @@
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
-#include "curl/curl.h"
+#include "CTest/Curl/curl/curl.h"
 
 #include "cmCTest.h"
 #include "cmake.h"

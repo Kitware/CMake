@@ -127,16 +127,15 @@ ENDIF (UNIX)
 TARGET_LINK_LIBRARIES(cmake CMakeLib)
 TARGET_LINK_LIBRARIES(DumpDocumentation CMakeLib)
 
+ADD_EXECUTABLE(coverage coverage.cxx)
+TARGET_LINK_LIBRARIES(coverage CMakeLib)
+
 IF(CMAKE_BUILD_WITH_CURL)
   # Don't even look for this as we don't use that part of curl
   # and linking in the the library can cause problems.
-  SET(HAVE_LIBCRYPTO 0)
   SUBDIRS(CTest)
   SET(CMTEST_SRCS ${CMTEST_SRCS} CTest/cmCTestSubmit.cxx)
   ADD_DEFINITIONS(-DHAVE_CURL)
-  INCLUDE_DIRECTORIES(
-    ${CMAKE_SOURCE_DIR}/Source/CTest/Curl
-    )
 ENDIF(CMAKE_BUILD_WITH_CURL)
 
 ADD_EXECUTABLE(ctest ${CMTEST_SRCS})

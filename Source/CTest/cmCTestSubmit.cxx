@@ -19,7 +19,7 @@ PURPOSE.  See the above copyright notices for more information.
 #include "cmSystemTools.h"
 
 #include <cmsys/Process.h>
-#include "curl/curl.h"
+#include "CTest/Curl/curl/curl.h"
 #include <sys/stat.h>
 
 cmCTestSubmit::cmCTestSubmit() : m_HTTPProxy(), m_FTPProxy()
