@@ -302,5 +302,6 @@ int main (int argc, char **argv)
     cmSystemTools::Error("test executable ", fullPath.c_str(), 
                          "returned a non-zero value");
     }
+  cmCacheManager::DeleteInstance();
   return ret;
 }
