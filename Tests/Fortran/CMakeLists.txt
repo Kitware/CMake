@@ -1,0 +1,2 @@
+PROJECT(testf FORTRAN)
+ADD_EXECUTABLE(testf hello.f)
