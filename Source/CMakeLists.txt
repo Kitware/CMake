@@ -730,6 +730,10 @@ IF(BUILD_TESTING)
   IF("${CMAKE_GENERATOR}" MATCHES XCode)
     SET(CMAKE_SKIP_BOOTSTRAP_TEST 1)
   ENDIF("${CMAKE_GENERATOR}" MATCHES XCode)
+  IF(EXISTS "${CMAKE_BINARY_DIR}/CMakeLists.txt")
+    # If there is CMakeLists.txt in the binary tree, assume in-source build
+    SET(CMAKE_SKIP_BOOTSTRAP_TEST 1)
+  ENDIF(EXISTS "${CMAKE_BINARY_DIR}/CMakeLists.txt")
   IF(UNIX AND CMAKE_RUN_LONG_TESTS AND NOT CMAKE_SKIP_BOOTSTRAP_TEST)
     ADD_TEST(BootstrapTest ${CMAKE_CTEST_COMMAND}
       --build-and-test
