@@ -39,7 +39,11 @@ int main (int argc, char *argv[])
   // use this program as the cmake to be run, it should not
   // be run that way but the cmake object requires a vailid path
   std::string cmakeCommand = CMAKE_COMMAND;
-  if(cmakeCommand[0] = '\"')
+  if(cmakeCommand[0] == '\\' && cmakeCommand[1] == '\"')
+    {
+    cmakeCommand = cmakeCommand.substr(2, cmakeCommand.size()-4);
+    }
+  if(cmakeCommand[0] == '\"')
     {
     cmakeCommand = cmakeCommand.substr(1, cmakeCommand.size()-2);
     }
