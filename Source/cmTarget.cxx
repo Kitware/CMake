@@ -247,7 +247,7 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
     if( dep_map.find(lib->first) != dep_map.end() ) // does it have dependencies?
       {
       const std::set<cmStdString>& dep_on = dep_map.find( lib->first )->second;
-      std::set<cmStdString>::iterator i;
+      std::set<cmStdString>::const_iterator i;
       for( i = dep_on.begin(); i != dep_on.end(); ++i )
         {
         if( satisfied[lib->first].end() == satisfied[lib->first].find( *i ) )
