@@ -48,6 +48,7 @@ extern "C"
 
 cmListFileLexer* cmListFileLexer_New();
 int cmListFileLexer_SetFileName(cmListFileLexer*, const char*);
+int cmListFileLexer_SetString(cmListFileLexer*, const char*);
 cmListFileLexer_Token* cmListFileLexer_Scan(cmListFileLexer*);
 long cmListFileLexer_GetCurrentLine(cmListFileLexer*);
 long cmListFileLexer_GetCurrentColumn(cmListFileLexer*);

@@ -39,6 +39,7 @@ Modify cmListFileLexer.c:
 #define ECHO
 
 /* Setup the proper yylex declaration.  */
+#define YY_EXTRA_TYPE cmListFileLexer*
 #define YY_DECL int yylex (yyscan_t yyscanner, cmListFileLexer* lexer)
 
 /* Disable some warnings.  */
@@ -64,6 +65,9 @@ struct cmListFileLexer_s
   int column;
   int size;
   FILE* file;
+  char* string_buffer;
+  char* string_position;
+  int string_left;
   yyscan_t scanner;
 };
 
@@ -71,6 +75,15 @@ static void cmListFileLexerSetToken(cmListFileLexer* lexer, const char* text,
                                     int length);
 static void cmListFileLexerAppend(cmListFileLexer* lexer, const char* text,
                                   int length);
+static int cmListFileLexerInput(cmListFileLexer* lexer, char* buffer,
+                                size_t bufferSize);
+static void cmListFileLexerInit(cmListFileLexer* lexer);
+static void cmListFileLexerDestroy(cmListFileLexer* lexer);
+
+/* Replace the lexer input function.  */
+#undef YY_INPUT
+#define YY_INPUT(buf, result, max_size) \
+  { result = cmListFileLexerInput(yyget_extra(yyscanner), buf, max_size); }
 
 /*--------------------------------------------------------------------------*/
 %}
@@ -237,6 +250,60 @@ static void cmListFileLexerAppend(cmListFileLexer* lexer, const char* text,
 }
 
 /*--------------------------------------------------------------------------*/
+static int cmListFileLexerInput(cmListFileLexer* lexer, char* buffer,
+                                size_t bufferSize)
+{
+  if(lexer)
+    {
+    if(lexer->file)
+      {
+      return (int)fread(buffer, 1, bufferSize, lexer->file);
+      }
+    else if(lexer->string_left)
+      {
+      int length = lexer->string_left;
+      if((int)bufferSize < length) { length = (int)bufferSize; }
+      memcpy(buffer, lexer->string_position, length);
+      lexer->string_position += length;
+      lexer->string_left -= length;
+      return length;
+      }
+    }
+  return 0;
+}
+
+/*--------------------------------------------------------------------------*/
+static void cmListFileLexerInit(cmListFileLexer* lexer)
+{
+  if(lexer->file || lexer->string_buffer)
+    {
+    yylex_init(&lexer->scanner);
+    yyset_extra(lexer, lexer->scanner);
+    }
+}
+
+/*--------------------------------------------------------------------------*/
+static void cmListFileLexerDestroy(cmListFileLexer* lexer)
+{
+  if(lexer->file || lexer->string_buffer)
+    {
+    yylex_destroy(lexer->scanner);
+    if(lexer->file)
+      {
+      fclose(lexer->file);
+      lexer->file = 0;
+      }
+    if(lexer->string_buffer)
+      {
+      free(lexer->string_buffer);
+      lexer->string_buffer = 0;
+      lexer->string_left = 0;
+      lexer->string_position = 0;
+      }
+    }
+}
+
+/*--------------------------------------------------------------------------*/
 cmListFileLexer* cmListFileLexer_New()
 {
   cmListFileLexer* lexer = (cmListFileLexer*)malloc(sizeof(cmListFileLexer));
@@ -261,12 +328,7 @@ void cmListFileLexer_Delete(cmListFileLexer* lexer)
 int cmListFileLexer_SetFileName(cmListFileLexer* lexer, const char* name)
 {
   int result = 1;
-  if(lexer->file)
-    {
-    yylex_destroy(lexer->scanner);
-    fclose(lexer->file);
-    lexer->file = 0;
-    }
+  cmListFileLexerDestroy(lexer);
   if(name)
     {
     lexer->file = fopen(name, "r");
@@ -275,11 +337,31 @@ int cmListFileLexer_SetFileName(cmListFileLexer* lexer, const char* name)
       result = 0;
       }
     }
-  if(lexer->file)
+  cmListFileLexerInit(lexer);
+  return result;
+}
+
+/*--------------------------------------------------------------------------*/
+int cmListFileLexer_SetString(cmListFileLexer* lexer, const char* text)
+{
+  int result = 1;
+  cmListFileLexerDestroy(lexer);
+  if(text)
     {
-    yylex_init(&lexer->scanner);
-    yyset_in(lexer->file, lexer->scanner);
+    int length = (int)strlen(text);
+    lexer->string_buffer = (char*)malloc(length+1);
+    if(lexer->string_buffer)
+      {
+      strcpy(lexer->string_buffer, text);
+      lexer->string_position = lexer->string_buffer;
+      lexer->string_left = length;
+      }
+    else
+      {
+      result = 0;
+      }
     }
+  cmListFileLexerInit(lexer);
   return result;
 }
 

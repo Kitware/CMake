@@ -503,6 +503,7 @@ Modify cmListFileLexer.c:
 #define ECHO
 
 /* Setup the proper yylex declaration.  */
+#define YY_EXTRA_TYPE cmListFileLexer*
 #define YY_DECL int yylex (yyscan_t yyscanner, cmListFileLexer* lexer)
 
 /* Disable some warnings.  */
@@ -528,6 +529,9 @@ struct cmListFileLexer_s
   int column;
   int size;
   FILE* file;
+  char* string_buffer;
+  char* string_position;
+  int string_left;
   yyscan_t scanner;
 };
 
@@ -535,10 +539,19 @@ static void cmListFileLexerSetToken(cmListFileLexer* lexer, const char* text,
                                     int length);
 static void cmListFileLexerAppend(cmListFileLexer* lexer, const char* text,
                                   int length);
+static int cmListFileLexerInput(cmListFileLexer* lexer, char* buffer,
+                                size_t bufferSize);
+static void cmListFileLexerInit(cmListFileLexer* lexer);
+static void cmListFileLexerDestroy(cmListFileLexer* lexer);
+
+/* Replace the lexer input function.  */
+#undef YY_INPUT
+#define YY_INPUT(buf, result, max_size) \
+  { result = cmListFileLexerInput(yyget_extra(yyscanner), buf, max_size); }
 
 /*--------------------------------------------------------------------------*/
 
-#line 541 "cmListFileLexer.c"
+#line 555 "cmListFileLexer.c"
 
 #define INITIAL 0
 #define STRING 1
@@ -630,6 +643,8 @@ extern int yywrap (yyscan_t yyscanner );
 #endif
 #endif
 
+
+    
 #ifndef yytext_ptr
 static void yy_flex_strncpy (char *,yyconst char *,int ,yyscan_t yyscanner);
 #endif
@@ -752,10 +767,10 @@ YY_DECL
         register int yy_act;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-#line 83 "cmListFileLexer.in.l"
+#line 97 "cmListFileLexer.in.l"
 
 
-#line 760 "cmListFileLexer.c"
+#line 774 "cmListFileLexer.c"
 
         if ( yyg->yy_init )
                 {
@@ -853,7 +868,7 @@ do_action:      /* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 85 "cmListFileLexer.in.l"
+#line 99 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_Newline;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
@@ -863,14 +878,14 @@ YY_RULE_SETUP
 }
 case 2:
 YY_RULE_SETUP
-#line 93 "cmListFileLexer.in.l"
+#line 107 "cmListFileLexer.in.l"
 {
   lexer->column += yyleng;
 }
         YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 97 "cmListFileLexer.in.l"
+#line 111 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_ParenLeft;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
@@ -879,7 +894,7 @@ YY_RULE_SETUP
 }
 case 4:
 YY_RULE_SETUP
-#line 104 "cmListFileLexer.in.l"
+#line 118 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_ParenRight;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
@@ -888,7 +903,7 @@ YY_RULE_SETUP
 }
 case 5:
 YY_RULE_SETUP
-#line 111 "cmListFileLexer.in.l"
+#line 125 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_Identifier;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
@@ -897,7 +912,7 @@ YY_RULE_SETUP
 }
 case 6:
 YY_RULE_SETUP
-#line 118 "cmListFileLexer.in.l"
+#line 132 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_ArgumentUnquoted;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
@@ -906,7 +921,7 @@ YY_RULE_SETUP
 }
 case 7:
 YY_RULE_SETUP
-#line 125 "cmListFileLexer.in.l"
+#line 139 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_ArgumentQuoted;
   cmListFileLexerSetToken(lexer, "", 0);
@@ -917,7 +932,7 @@ YY_RULE_SETUP
 case 8:
 /* rule 8 can match eol */
 YY_RULE_SETUP
-#line 132 "cmListFileLexer.in.l"
+#line 146 "cmListFileLexer.in.l"
 {
   cmListFileLexerAppend(lexer, yytext, yyleng);
   lexer->column += yyleng;
@@ -926,7 +941,7 @@ YY_RULE_SETUP
 case 9:
 /* rule 9 can match eol */
 YY_RULE_SETUP
-#line 137 "cmListFileLexer.in.l"
+#line 151 "cmListFileLexer.in.l"
 {
   cmListFileLexerAppend(lexer, yytext, yyleng);
   ++lexer->line;
@@ -935,7 +950,7 @@ YY_RULE_SETUP
         YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 143 "cmListFileLexer.in.l"
+#line 157 "cmListFileLexer.in.l"
 {
   lexer->column += yyleng;
   BEGIN(INITIAL);
@@ -943,7 +958,7 @@ YY_RULE_SETUP
 }
 case 11:
 YY_RULE_SETUP
-#line 149 "cmListFileLexer.in.l"
+#line 163 "cmListFileLexer.in.l"
 {
   cmListFileLexerAppend(lexer, yytext, yyleng);
   lexer->column += yyleng;
@@ -951,14 +966,14 @@ YY_RULE_SETUP
         YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 154 "cmListFileLexer.in.l"
+#line 168 "cmListFileLexer.in.l"
 {
   lexer->column += yyleng;
 }
         YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 158 "cmListFileLexer.in.l"
+#line 172 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_Error;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
@@ -967,7 +982,7 @@ YY_RULE_SETUP
 }
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(STRING):
-#line 165 "cmListFileLexer.in.l"
+#line 179 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_None;
   cmListFileLexerSetToken(lexer, 0, 0);
@@ -975,10 +990,10 @@ case YY_STATE_EOF(STRING):
 }
 case 14:
 YY_RULE_SETUP
-#line 171 "cmListFileLexer.in.l"
+#line 185 "cmListFileLexer.in.l"
 ECHO;
         YY_BREAK
-#line 991 "cmListFileLexer.c"
+#line 1005 "cmListFileLexer.c"
 
         case YY_END_OF_BUFFER:
                 {
@@ -1299,6 +1314,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
         return yy_is_jam ? 0 : yy_current_state;
 }
+
 
 #ifndef YY_NO_INPUT
 #ifdef __cplusplus
@@ -2031,7 +2047,6 @@ void *yyalloc (yy_size_t  size , yyscan_t yyscanner)
 
 void *yyrealloc  (void * ptr, yy_size_t  size , yyscan_t yyscanner)
 {
-        (void)yyscanner;
         /* The cast to (char *) in the following accommodates both
          * implementations that use char* generic pointers, and those
          * that use void* generic pointers.  It works with the latter
@@ -2039,6 +2054,7 @@ void *yyrealloc  (void * ptr, yy_size_t  size , yyscan_t yyscanner)
          * any pointer type to void*, and deal with argument conversions
          * as though doing an assignment.
          */
+        (void)yyscanner;
         return (void *) realloc( (char *) ptr, size );
 }
 
@@ -2062,7 +2078,7 @@ void yyfree (void * ptr , yyscan_t yyscanner)
 #undef YY_DECL_IS_OURS
 #undef YY_DECL
 #endif
-#line 171 "cmListFileLexer.in.l"
+#line 185 "cmListFileLexer.in.l"
 
 
 
@@ -2132,6 +2148,60 @@ static void cmListFileLexerAppend(cmListFileLexer* lexer, const char* text,
 }
 
 /*--------------------------------------------------------------------------*/
+static int cmListFileLexerInput(cmListFileLexer* lexer, char* buffer,
+                                size_t bufferSize)
+{
+  if(lexer)
+    {
+    if(lexer->file)
+      {
+      return (int)fread(buffer, 1, bufferSize, lexer->file);
+      }
+    else if(lexer->string_left)
+      {
+      int length = lexer->string_left;
+      if((int)bufferSize < length) { length = (int)bufferSize; }
+      memcpy(buffer, lexer->string_position, length);
+      lexer->string_position += length;
+      lexer->string_left -= length;
+      return length;
+      }
+    }
+  return 0;
+}
+
+/*--------------------------------------------------------------------------*/
+static void cmListFileLexerInit(cmListFileLexer* lexer)
+{
+  if(lexer->file || lexer->string_buffer)
+    {
+    yylex_init(&lexer->scanner);
+    yyset_extra(lexer,lexer->scanner);
+    }
+}
+
+/*--------------------------------------------------------------------------*/
+static void cmListFileLexerDestroy(cmListFileLexer* lexer)
+{
+  if(lexer->file || lexer->string_buffer)
+    {
+    yylex_destroy(lexer->scanner);
+    if(lexer->file)
+      {
+      fclose(lexer->file);
+      lexer->file = 0;
+      }
+    if(lexer->string_buffer)
+      {
+      free(lexer->string_buffer);
+      lexer->string_buffer = 0;
+      lexer->string_left = 0;
+      lexer->string_position = 0;
+      }
+    }
+}
+
+/*--------------------------------------------------------------------------*/
 cmListFileLexer* cmListFileLexer_New()
 {
   cmListFileLexer* lexer = (cmListFileLexer*)malloc(sizeof(cmListFileLexer));
@@ -2156,12 +2226,7 @@ void cmListFileLexer_Delete(cmListFileLexer* lexer)
 int cmListFileLexer_SetFileName(cmListFileLexer* lexer, const char* name)
 {
   int result = 1;
-  if(lexer->file)
-    {
-    yylex_destroy(lexer->scanner);
-    fclose(lexer->file);
-    lexer->file = 0;
-    }
+  cmListFileLexerDestroy(lexer);
   if(name)
     {
     lexer->file = fopen(name, "r");
@@ -2170,11 +2235,31 @@ int cmListFileLexer_SetFileName(cmListFileLexer* lexer, const char* name)
       result = 0;
       }
     }
-  if(lexer->file)
+  cmListFileLexerInit(lexer);
+  return result;
+}
+
+/*--------------------------------------------------------------------------*/
+int cmListFileLexer_SetString(cmListFileLexer* lexer, const char* text)
+{
+  int result = 1;
+  cmListFileLexerDestroy(lexer);
+  if(text)
     {
-    yylex_init(&lexer->scanner);
-    yyset_in(lexer->file,lexer->scanner);
+    int length = (int)strlen(text);
+    lexer->string_buffer = (char*)malloc(length+1);
+    if(lexer->string_buffer)
+      {
+      strcpy(lexer->string_buffer, text);
+      lexer->string_position = lexer->string_buffer;
+      lexer->string_left = length;
+      }
+    else
+      {
+      result = 0;
+      }
     }
+  cmListFileLexerInit(lexer);
   return result;
 }
 
@@ -2221,4 +2306,3 @@ long cmListFileLexer_GetCurrentColumn(cmListFileLexer* lexer)
     return 0;
     }
 }
-
