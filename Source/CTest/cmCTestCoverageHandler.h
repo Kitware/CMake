@@ -50,7 +50,7 @@ private:
   bool ShouldIDoCoverage(const char* file, const char* srcDir,
     const char* binDir, bool verbose);
   bool StartLogFile(std::ofstream& ostr, int logFileCount);
-  void StopLogFile(std::ofstream& ostr, int logFileCount);
+  void EndLogFile(std::ofstream& ostr, int logFileCount);
 
   struct cmCTestCoverage
     {
