@@ -30,7 +30,8 @@
 class cmSystemTools: public cmsys::SystemTools
 {
 public:
-
+  typedef cmsys::SystemTools SystemTools;
+  
   /** Expand out any arguements in the vector that have ; separated
    *  strings into multiple arguements.  A new vector is created 
    *  containing the expanded versions of all arguments in argsIn.
