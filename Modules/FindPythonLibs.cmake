@@ -48,6 +48,20 @@ FIND_LIBRARY(PYTHON_LIBRARY
 )
 
 FIND_PATH(PYTHON_INCLUDE_PATH Python.h
+  ~/Library/Frameworks/Python.framework/Headers
+  /Library/Frameworks/Python.framework/Headers
+  ~/Library/Frameworks/Python.framework/Versions/2.3/include/python2.3
+  /Library/Frameworks/Python.framework/Versions/2.3/include/python2.3
+  ~/Library/Frameworks/Python.framework/Versions/2.2/include/python2.2
+  /Library/Frameworks/Python.framework/Versions/2.2/include/python2.2
+  ~/Library/Frameworks/Python.framework/Versions/2.1/include/python2.1
+  /Library/Frameworks/Python.framework/Versions/2.1/include/python2.1
+  ~/Library/Frameworks/Python.framework/Versions/2.0/include/python2.0
+  /Library/Frameworks/Python.framework/Versions/2.0/include/python2.0
+  ~/Library/Frameworks/Python.framework/Versions/1.6/include/python1.6
+  /Library/Frameworks/Python.framework/Versions/1.6/include/python1.6
+  ~/Library/Frameworks/Python.framework/Versions/1.5/include/python1.5
+  /Library/Frameworks/Python.framework/Versions/1.5/include/python1.5
   /usr/include/python2.3
   /usr/include/python2.2
   /usr/include/python2.1
@@ -74,12 +88,22 @@ ENDIF(WIN32)
 
 # Python Should be built and installed as a Framework on OSX
 IF (APPLE)
-  IF (EXISTS ~/Library/Frameworks/Python.framework)
-    SET (PYTHON_LIBRARY "-framework Python" CACHE FILEPATH "Python Framework" FORCE)
-    SET (PYTHON_INCLUDE_PATH "~/Library/Frameworks/Python.framework/Headers" CACHE INTERNAL "Hack into the framework")
-  ENDIF (EXISTS ~/Library/Frameworks/Python.framework)
-  IF (EXISTS /Library/Frameworks/Python.framework)
-    SET (PYTHON_LIBRARY "-framework Python" CACHE FILEPATH "Python Framework" FORCE)
-    SET (PYTHON_INCLUDE_PATH "/Library/Frameworks/Python.framework/Headers" CACHE INTERNAL "Hack into the framework")
-  ENDIF (EXISTS /Library/Frameworks/Python.framework)
+  IF(EXISTS ~/Library/Frameworks/Python.framework)
+    SET(PYTHON_HAVE_FRAMEWORK 1)
+  ENDIF(EXISTS ~/Library/Frameworks/Python.framework)
+  IF(EXISTS /Library/Frameworks/Python.framework)
+    SET(PYTHON_HAVE_FRAMEWORK 1)
+  ENDIF(EXISTS /Library/Frameworks/Python.framework)
+  IF("${PYTHON_INCLUDE_PATH}" MATCHES "Python\\.framework")
+    SET(PYTHON_LIBRARY "")
+    SET(PYTHON_DEBUG_LIBRARY "")
+  ENDIF("${PYTHON_INCLUDE_PATH}" MATCHES "Python\\.framework")
+  IF(PYTHON_HAVE_FRAMEWORK)
+    IF(NOT PYTHON_LIBRARY)
+      SET (PYTHON_LIBRARY "-framework Python" CACHE FILEPATH "Python Framework" FORCE)
+    ENDIF(NOT PYTHON_LIBRARY)
+    IF(NOT PYTHON_DEBUG_LIBRARY)
+      SET (PYTHON_DEBUG_LIBRARY "-framework Python" CACHE FILEPATH "Python Framework" FORCE)
+    ENDIF(NOT PYTHON_DEBUG_LIBRARY)
+  ENDIF(PYTHON_HAVE_FRAMEWORK)
 ENDIF (APPLE)
