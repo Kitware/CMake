@@ -694,7 +694,7 @@ int cmCTest::SubmitResults()
     ofs << "  Submission succesfull" << std::endl;
     return 1;
     }
-  else
+  else if ( m_DartConfiguration["DropMethod"] == "scp" )
     {
     std::string url;
     if ( m_DartConfiguration["DropSiteUser"].size() > 0 )
@@ -712,6 +712,11 @@ int cmCTest::SubmitResults()
       }
     std::cout << "  Submission successfull" << std::endl;
     ofs << "  Submission succesfull" << std::endl;
+    }
+  else
+    {
+    std::cout << "   Unknown submission method: \"" << m_DartConfiguration["DropMethod"] << "\"" << std::endl;
+    return 0;
     }
 
   return 0;

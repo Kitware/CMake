@@ -558,7 +558,6 @@ bool cmCTestSubmit::SubmitUsingXMLRPC(const cmStdString& localprefix,
   const cmStdString& url)
 {
   xmlrpc_env env;
-  xmlrpc_value *result;
   std::string ctestVersion = cmVersion::GetCMakeVersion();
   const char *state_name;
 
@@ -576,6 +575,8 @@ bool cmCTestSubmit::SubmitUsingXMLRPC(const cmStdString& localprefix,
   int cnt = 32;
   for ( it = files.begin(); it != files.end(); ++it )
     {
+    xmlrpc_value *result;
+
     std::string local_file = localprefix + "/" + *it;
     std::cout << "Submit file: " << local_file.c_str() << std::endl;
     struct stat st;
@@ -592,15 +593,15 @@ bool cmCTestSubmit::SubmitUsingXMLRPC(const cmStdString& localprefix,
       {
       return false;
       }
-    
+
     unsigned char *fileBuffer = new unsigned char[fileSize];
     unsigned char *encodedFileBuffer = new unsigned char[encodedSize];
     if ( fread(fileBuffer, 1, fileSize, fp) != fileSize )
       {
       delete [] fileBuffer;
       delete [] encodedFileBuffer;
-      return false;
       fclose(fp);
+      return false;
       }
     fclose(fp);
 
@@ -649,10 +650,10 @@ bool cmCTestSubmit::SubmitUsingXMLRPC(const cmStdString& localprefix,
       }
 
     printf("%s\n", state_name);
-    }
 
-  /* Dispose of our result value. */
-  xmlrpc_DECREF(result);
+    /* Dispose of our result value. */
+    xmlrpc_DECREF(result);
+    }
 
   /* Clean up our error-handling environment. */
   xmlrpc_env_clean(&env);
