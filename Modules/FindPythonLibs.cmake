@@ -8,6 +8,8 @@
 #  PYTHON_DEBUG_LIBRARIES = the full path to the debug library found
 #
 
+INCLUDE(${CMAKE_ROOT}/Modules/CMakeFindFrameworks.cmake)
+
 IF(WIN32)
   FIND_LIBRARY(PYTHON_DEBUG_LIBRARY
     NAMES python23_d python22_d python21_d python20_d python
@@ -51,21 +53,22 @@ FIND_LIBRARY(PYTHON_LIBRARY
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\1.5\\InstallPath]/libs
 )
 
+# Search for the python framework on Apple.
+CMAKE_FIND_FRAMEWORKS(Python)
+SET(PYTHON_FRAMEWORK_INCLUDES)
+IF(Python_FRAMEWORKS)
+  IF(NOT PYTHON_INCLUDE_PATH)
+    FOREACH(version 2.3 2.2 2.1 2.0 1.6 1.5)
+      FOREACH(dir ${Python_FRAMEWORKS})
+        SET(PYTHON_FRAMEWORK_INCLUDES ${PYTHON_FRAMEWORK_INCLUDES}
+          ${dir}/Versions/${version}/include/python${version})
+      ENDFOREACH(dir)
+    ENDFOREACH(version)
+  ENDIF(NOT PYTHON_INCLUDE_PATH)
+ENDIF(Python_FRAMEWORKS)
+
 FIND_PATH(PYTHON_INCLUDE_PATH Python.h
-  ~/Library/Frameworks/Python.framework/Headers
-  /Library/Frameworks/Python.framework/Headers
-  ~/Library/Frameworks/Python.framework/Versions/2.3/include/python2.3
-  /Library/Frameworks/Python.framework/Versions/2.3/include/python2.3
-  ~/Library/Frameworks/Python.framework/Versions/2.2/include/python2.2
-  /Library/Frameworks/Python.framework/Versions/2.2/include/python2.2
-  ~/Library/Frameworks/Python.framework/Versions/2.1/include/python2.1
-  /Library/Frameworks/Python.framework/Versions/2.1/include/python2.1
-  ~/Library/Frameworks/Python.framework/Versions/2.0/include/python2.0
-  /Library/Frameworks/Python.framework/Versions/2.0/include/python2.0
-  ~/Library/Frameworks/Python.framework/Versions/1.6/include/python1.6
-  /Library/Frameworks/Python.framework/Versions/1.6/include/python1.6
-  ~/Library/Frameworks/Python.framework/Versions/1.5/include/python1.5
-  /Library/Frameworks/Python.framework/Versions/1.5/include/python1.5
+  ${PYTHON_FRAMEWORK_INCLUDES}
   /usr/include/python2.3
   /usr/include/python2.2
   /usr/include/python2.1
@@ -91,26 +94,20 @@ IF (WIN32)
 ENDIF(WIN32)
 
 # Python Should be built and installed as a Framework on OSX
-IF (APPLE)
-  IF(EXISTS ~/Library/Frameworks/Python.framework)
-    SET(PYTHON_HAVE_FRAMEWORK 1)
-  ENDIF(EXISTS ~/Library/Frameworks/Python.framework)
-  IF(EXISTS /Library/Frameworks/Python.framework)
-    SET(PYTHON_HAVE_FRAMEWORK 1)
-  ENDIF(EXISTS /Library/Frameworks/Python.framework)
+IF(Python_FRAMEWORKS)
+  # If a framework has been selected for the include path,
+  # make sure "-framework" is used to link it.
   IF("${PYTHON_INCLUDE_PATH}" MATCHES "Python\\.framework")
     SET(PYTHON_LIBRARY "")
     SET(PYTHON_DEBUG_LIBRARY "")
   ENDIF("${PYTHON_INCLUDE_PATH}" MATCHES "Python\\.framework")
-  IF(PYTHON_HAVE_FRAMEWORK)
-    IF(NOT PYTHON_LIBRARY)
-      SET (PYTHON_LIBRARY "-framework Python" CACHE FILEPATH "Python Framework" FORCE)
-    ENDIF(NOT PYTHON_LIBRARY)
-    IF(NOT PYTHON_DEBUG_LIBRARY)
-      SET (PYTHON_DEBUG_LIBRARY "-framework Python" CACHE FILEPATH "Python Framework" FORCE)
-    ENDIF(NOT PYTHON_DEBUG_LIBRARY)
-  ENDIF(PYTHON_HAVE_FRAMEWORK)
-ENDIF (APPLE)
+  IF(NOT PYTHON_LIBRARY)
+    SET (PYTHON_LIBRARY "-framework Python" CACHE FILEPATH "Python Framework" FORCE)
+  ENDIF(NOT PYTHON_LIBRARY)
+  IF(NOT PYTHON_DEBUG_LIBRARY)
+    SET (PYTHON_DEBUG_LIBRARY "-framework Python" CACHE FILEPATH "Python Framework" FORCE)
+  ENDIF(NOT PYTHON_DEBUG_LIBRARY)
+ENDIF(Python_FRAMEWORKS)
 
 # We use PYTHON_LIBRARY and PYTHON_DEBUG_LIBRARY for the cache entries
 # because they are meant to specify the location of a single library.

@@ -18,6 +18,7 @@
 #  TK_WISH                = full path to the wish binary (wish wish80 etc)
 #
 
+INCLUDE(${CMAKE_ROOT}/Modules/CMakeFindFrameworks.cmake)
 INCLUDE(${CMAKE_ROOT}/Modules/FindTclsh.cmake)
 INCLUDE(${CMAKE_ROOT}/Modules/FindWish.cmake)
 
@@ -78,22 +79,38 @@ FIND_LIBRARY(TK_STUB_LIBRARY_DEBUG
   PATHS ${TCLTK_POSSIBLE_LIB_PATHS}
 )
 
+CMAKE_FIND_FRAMEWORKS(Tcl)
+CMAKE_FIND_FRAMEWORKS(Tk)
+
+SET(TCL_FRAMEWORK_INCLUDES)
+IF(Tcl_FRAMEWORKS)
+  IF(NOT TCL_INCLUDE_PATH)
+    FOREACH(dir ${Tcl_FRAMEWORKS})
+      SET(TCL_FRAMEWORK_INCLUDES ${TCL_FRAMEWORK_INCLUDES} ${dir}/Headers)
+    ENDFOREACH(dir)
+  ENDIF(NOT TCL_INCLUDE_PATH)
+ENDIF(Tcl_FRAMEWORKS)
+
+SET(TK_FRAMEWORK_INCLUDES)
+IF(Tk_FRAMEWORKS)
+  IF(NOT TK_INCLUDE_PATH)
+    FOREACH(dir ${Tk_FRAMEWORKS})
+      SET(TK_FRAMEWORK_INCLUDES ${TK_FRAMEWORK_INCLUDES}
+        ${dir}/Headers ${dir}/PrivateHeaders)
+    ENDFOREACH(dir)
+  ENDIF(NOT TK_INCLUDE_PATH)
+ENDIF(Tk_FRAMEWORKS)
+
 SET (TCLTK_POSSIBLE_INCLUDE_PATHS
-  ~/Library/Frameworks/Tcl.framework/Headers
-  ~/Library/Frameworks/Tk.framework/Headers
-  ~/Library/Frameworks/Tk.framework/PrivateHeaders
-  /Library/Frameworks/Tcl.framework/Headers
-  /Library/Frameworks/Tk.framework/Headers
-  /Library/Frameworks/Tk.framework/PrivateHeaders
-  "${TCL_TCLSH_PATH}/../include"
-  "${TK_WISH_PATH}/../include"
-  "C:/Program Files/Tcl/include" 
-  "C:/Tcl/include" 
+  ${TCL_TCLSH_PATH}/../include
+  ${TK_WISH_PATH}/../include
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.4;Root]/include
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.3;Root]/include
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.2;Root]/include
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.0;Root]/include
-  /usr/include 
+  "C:/Program Files/Tcl/include"
+  C:/Tcl/include
+  /usr/include
   /usr/local/include
   /usr/include/tcl8.4
   /usr/include/tcl8.3
@@ -101,12 +118,12 @@ SET (TCLTK_POSSIBLE_INCLUDE_PATHS
   /usr/include/tcl8.0
 )
 
-FIND_PATH(TCL_INCLUDE_PATH tcl.h 
-  ${TCLTK_POSSIBLE_INCLUDE_PATHS}
+FIND_PATH(TCL_INCLUDE_PATH tcl.h
+  ${TCL_FRAMEWORK_INCLUDES} ${TCLTK_POSSIBLE_INCLUDE_PATHS}
 )
 
-FIND_PATH(TK_INCLUDE_PATH tk.h 
-  ${TCLTK_POSSIBLE_INCLUDE_PATHS}
+FIND_PATH(TK_INCLUDE_PATH tk.h
+  ${TK_FRAMEWORK_INCLUDES} ${TCLTK_POSSIBLE_INCLUDE_PATHS}
 )
 
 IF (WIN32)
@@ -127,36 +144,25 @@ IF (WIN32)
     )
 ENDIF(WIN32)
 
-IF(APPLE)
-  IF(EXISTS ~/Library/Frameworks/Tcl.framework)
-    SET(TCL_HAVE_FRAMEWORK 1)
-  ENDIF(EXISTS ~/Library/Frameworks/Tcl.framework)
-  IF(EXISTS /Library/Frameworks/Tcl.framework)
-    SET(TCL_HAVE_FRAMEWORK 1)
-  ENDIF(EXISTS /Library/Frameworks/Tcl.framework)
-  IF(EXISTS ~/Library/Frameworks/Tk.framework)
-    SET(TCL_TK_HAVE_FRAMEWORK 1)
-  ENDIF(EXISTS ~/Library/Frameworks/Tk.framework)
-  IF(EXISTS /Library/Frameworks/Tk.framework)
-    SET(TCL_TK_HAVE_FRAMEWORK 1)
-  ENDIF(EXISTS /Library/Frameworks/Tk.framework)
+IF(Tcl_FRAMEWORKS)
+  # If we are using the Tcl framework, link to it.
   IF("${TCL_INCLUDE_PATH}" MATCHES "Tcl\\.framework")
     SET(TCL_LIBRARY "")
   ENDIF("${TCL_INCLUDE_PATH}" MATCHES "Tcl\\.framework")
+  IF(NOT TCL_LIBRARY)
+    SET (TCL_LIBRARY "-framework Tcl" CACHE FILEPATH "Tcl Framework" FORCE)
+  ENDIF(NOT TCL_LIBRARY)
+ENDIF(Tcl_FRAMEWORKS)
+
+IF(Tk_FRAMEWORKS)
+  # If we are using the Tk framework, link to it.
   IF("${TK_INCLUDE_PATH}" MATCHES "Tk\\.framework")
     SET(TK_LIBRARY "")
   ENDIF("${TK_INCLUDE_PATH}" MATCHES "Tk\\.framework")
-  IF(TCL_HAVE_FRAMEWORK)
-    IF(NOT TCL_LIBRARY)
-      SET (TCL_LIBRARY "-framework Tcl" CACHE FILEPATH "Tcl Framework" FORCE)
-    ENDIF(NOT TCL_LIBRARY)
-  ENDIF(TCL_HAVE_FRAMEWORK)
-  IF(TCL_TK_HAVE_FRAMEWORK)
-    IF(NOT TK_LIBRARY)
-      SET (TK_LIBRARY "-framework Tk" CACHE FILEPATH "Tk Framework" FORCE)
-    ENDIF(NOT TK_LIBRARY)
-  ENDIF(TCL_TK_HAVE_FRAMEWORK)
-ENDIF(APPLE)
+  IF(NOT TK_LIBRARY)
+    SET (TK_LIBRARY "-framework Tk" CACHE FILEPATH "Tk Framework" FORCE)
+  ENDIF(NOT TK_LIBRARY)
+ENDIF(Tk_FRAMEWORKS)
 
 MARK_AS_ADVANCED(
   TCL_STUB_LIBRARY
