@@ -186,7 +186,7 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& argsIn)
     this->SetError("Attempt to load command failed.");
     return false;
     }
-  
+
   // try loading the shared library / dll
   cmLibHandle lib = cmDynamicLoader::OpenLibrary(fullPath.c_str());
   if(lib)
@@ -196,9 +196,21 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& argsIn)
     CM_NAME_FUNCTION nameFunction
       = (CM_NAME_FUNCTION)
       cmDynamicLoader::GetSymbolAddress(lib, "cmGetName");
+    if ( !nameFunction )
+      {
+      nameFunction = 
+	(CM_NAME_FUNCTION)(
+	  cmDynamicLoader::GetSymbolAddress(lib, "_cmGetName"));
+      }
     CM_INIT_FUNCTION initFunction
       = (CM_INIT_FUNCTION)
       cmDynamicLoader::GetSymbolAddress(lib, "cmInitializeCommand");
+    if ( !initFunction )
+      {
+      initFunction = 
+	(CM_INIT_FUNCTION)(
+	  cmDynamicLoader::GetSymbolAddress(lib, "_cmInitializeCommand"));
+      }
     // if the symbol is found call it to set the name on the 
     // function blocker
     if(nameFunction)
@@ -208,13 +220,15 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& argsIn)
       f->m_commandName = (*nameFunction)();
       if (!initFunction)
         {
-        this->SetError("Attempt to load command failed. No init function found.");
+        this->SetError("Attempt to load command failed. "
+		       "No init function found.");
         return false;
         }
       (*initFunction)(&f->info);
       m_Makefile->AddCommand(f);
+      return true;
       }
     }
-  return true;
+  return false;
 }
 
