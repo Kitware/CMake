@@ -795,17 +795,17 @@ int cmMakefile::DumpDocumentationToFile(const char *fileName)
   const char *terse;
   const char *full;
 
+  f << "<html><ul>\n";
   for(RegisteredCommandsMap::iterator j = m_Commands.begin();
       j != m_Commands.end(); ++j)
     {
     name = (*j).second->GetName();
     terse = (*j).second->GetTerseDocumentation();
     full = (*j).second->GetFullDocumentation();
-    f << name << " - " << terse << std::endl
-      << "Usage: " << full << std::endl << std::endl;
+    f << "<li><b>" << name << "</b> - " << terse << std::endl
+      << "<br><i>Usage:</i> " << full << "</li>" << std::endl << std::endl;
     }
-  
-
+  f << "</ul></html>\n";
   return 1;
 }
 
