@@ -24,7 +24,7 @@
 #include <queue>
 
 // Quick-switch for generating old makefiles.
-#if 1
+#if 0
 # define CMLUMG_MAKEFILE_NAME "Makefile"
 #else
 # define CMLUMG_WRITE_OLD_MAKEFILE
@@ -522,9 +522,15 @@ cmLocalUnixMakefileGenerator2
     }
   const cmCustomCommand& cc = *source.GetCustomCommand();
 
+  // Create a directory for custom rule files.
+  std::string dir = "CMakeCustomCommands.dir";
+  cmSystemTools::MakeDirectory(this->ConvertToFullPath(dir).c_str());
+
   // Construct the name of the rule file.
   std::string customName = this->GetCustomBaseName(cc);
-  std::string ruleFileName = customName;
+  std::string ruleFileName = dir;
+  ruleFileName += "/";
+  ruleFileName += customName;
   ruleFileName += ".make";
 
   // If this is a duplicate rule produce an error.
