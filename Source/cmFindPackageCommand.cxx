@@ -17,6 +17,27 @@
 #include "cmFindPackageCommand.h"
 #include <cmsys/RegularExpression.hxx>
 
+#include "cmVariableWatch.h"
+
+void cmFindPackageNeedBackwardsCompatibility(const std::string& variable, 
+                                             int access_type, void* )
+{
+  if(access_type == cmVariableWatch::UNKNOWN_VARIABLE_READ_ACCESS)
+    {
+    std::string message = "An attempt was made to access a variable: ";
+    message += variable;
+    message +=
+      " that has not been defined. This variable is created by the "
+      "FIND_PACKAGE command. CMake version 1.6 always converted the "
+      "variable name to upper-case, but this behavior is no longer the "
+      "case.  To fix this you might need to set the cache value of "
+      "CMAKE_BACKWARDS_COMPATIBILITY to 1.6 or less.  If you are writing a "
+      "CMake listfile, you should change the variable reference to use "
+      "the case of the argument to FIND_PACKAGE.";
+    cmSystemTools::Error(message.c_str());
+    }
+}
+
 //----------------------------------------------------------------------------
 bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
 {
@@ -63,13 +84,43 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     {
     return true;
     }
+
   // No find module.  Assume the project has a CMake config file.  Use
-  // a <NAME>_DIR cache variable to locate it.
+  // a <NAME>_DIR cache variable to locate it.  
   this->Variable = this->Name;
   this->Variable += "_DIR";
   this->Config = this->Name;
   this->Config += "Config.cmake";
+  
+  // Support old capitalization behavior.
+  std::string upperDir = cmSystemTools::UpperCase(this->Name);
+  std::string upperFound = cmSystemTools::UpperCase(this->Name);
+  upperDir += "_DIR";
+  upperFound += "_FOUND";
+  bool needCompatibility = false;
+  if(upperDir != this->Variable)
+    {
+    const char* versionValue =
+      m_Makefile->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
+    if(atof(versionValue) < 1.7)
+      {
+      needCompatibility = true;
+      }
+    }
+  
+  // Try to find the config file.
   const char* def = m_Makefile->GetDefinition(this->Variable.c_str());
+  if(needCompatibility && cmSystemTools::IsOff(def))
+    {
+    // Use the setting of the old name of the variable to provide the
+    // value of the new.
+    const char* oldDef = m_Makefile->GetDefinition(upperDir.c_str());
+    if(!cmSystemTools::IsOff(oldDef))
+      {
+      m_Makefile->AddDefinition(this->Variable.c_str(), oldDef);
+      def = m_Makefile->GetDefinition(this->Variable.c_str());
+      }
+    }  
   if(cmSystemTools::IsOff(def))
     {
     if(!this->FindConfig())
@@ -117,9 +168,51 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     result = true;
     }
   
+  // Set a variable marking whether the package was found.
   std::string foundVar = this->Name;
-  foundVar += "_FOUND";
+  foundVar += "_FOUND";  
   m_Makefile->AddDefinition(foundVar.c_str(), found? "1":"0");
+  
+  if(needCompatibility)
+    {
+    // Listfiles will be looking for the capitalized version of the
+    // name.  Provide it.
+    m_Makefile->AddDefinition(upperDir.c_str(),
+                              m_Makefile->GetDefinition(this->Variable.c_str()));
+    m_Makefile->AddDefinition(upperFound.c_str(),
+                              m_Makefile->GetDefinition(foundVar.c_str()));
+    }
+  
+  if(upperDir != this->Variable)
+    {
+    if(needCompatibility)
+      {
+      // Listfiles may use the capitalized version of the name.
+      // Remove any previously added watch.
+      m_Makefile->GetVariableWatch()->RemoveWatch(
+        upperDir.c_str(),
+        cmFindPackageNeedBackwardsCompatibility
+        );
+      m_Makefile->GetVariableWatch()->RemoveWatch(
+        upperFound.c_str(),
+        cmFindPackageNeedBackwardsCompatibility
+        );
+      }
+    else
+      {
+      // Listfiles should not be using the capitalized version of the
+      // name.  Add a watch to warn the user.
+      m_Makefile->GetVariableWatch()->AddWatch(
+        upperDir.c_str(),
+        cmFindPackageNeedBackwardsCompatibility
+        );
+      m_Makefile->GetVariableWatch()->AddWatch(
+        upperFound.c_str(),
+        cmFindPackageNeedBackwardsCompatibility
+        );
+      }
+    }
+  
   return result;
 }
 
