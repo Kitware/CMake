@@ -73,7 +73,9 @@ public:
       " TYPE and DOCSTRING are required.  If TYPE is INTERNAL, then the "
       " VALUE is Always written into the cache, replacing any values "
       "existing in the cache.  If it is not a CACHE VAR, then this always "
-      "writes into the current makefile.";
+      "writes into the current makefile.\n"
+      "An optional syntax is SET(VAR VALUE1 ... VALUEN).\n"
+      "In this case VAR is set to a ; separated list of values.";
     }
   
   cmTypeMacro(cmSetCommand, cmCommand);

@@ -41,7 +41,25 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args)
   cmCacheManager::CacheEntryType type = cmCacheManager::STRING; // required if cache
   const char* docstring = 0; // required if cache
   std::string::size_type cacheStart = 0;
-
+  
+  // check for SET(VAR v1 v2 ... vn) 
+  // and create
+  if(args.size() > 2)
+    {
+    if(args[1] != "CACHE" && args[2] != "CACHE")
+      {
+      value = args[1];
+      for(int i =2; i < args.size(); ++i)
+        {
+        value += ";";
+        value += args[i];
+        }
+      m_Makefile->AddDefinition(variable, value.c_str());
+      return true;
+      }
+    }
+  
+    
   if(args.size() == 2)
     {
       // SET (VAR value )

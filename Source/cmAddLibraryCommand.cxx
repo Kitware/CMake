@@ -18,14 +18,15 @@
 #include "cmCacheManager.h"
 
 // cmLibraryCommand
-bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args)
+bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
-  if(args.size() < 1 )
+  if(argsIn.size() < 1 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-
+  std::vector<std::string> args;
+  cmSystemTools::ExpandListArguments(argsIn, args);
   // Library type defaults to value of BUILD_SHARED_LIBS, if it exists,
   // otherwise it defaults to static library.
   int shared = !cmSystemTools::IsOff(m_Makefile->GetDefinition("BUILD_SHARED_LIBS"));
