@@ -4,6 +4,7 @@
 
 #include "CMakeSetupGUI.h"
 #include "FLTKPropertyList.h"
+#include <set>
 
 
 /**
@@ -33,6 +34,13 @@ public:
   virtual void FillCacheGUIFromCacheManager( void );
   virtual void FillCacheManagerFromCacheGUI( void );
 	virtual void SetPathToExecutable( const char * path );
+  virtual void LoadRecentDirectories(void);
+  virtual void SaveRecentDirectories(void);
+  virtual void ShowRecentBinaryDirectories(void);
+  virtual void ShowRecentSourceDirectories(void);
+  virtual void SelectOneRecentSourceDirectory(void);
+  virtual void SelectOneRecentBinaryDirectory(void);
+  virtual void UpdateListOfRecentDirectories(void);
 
 private:  
   virtual bool VerifyBinaryPath( const std::string & path ) const;
@@ -45,6 +53,10 @@ private:
   std::string          m_WhereSource;
   std::string          m_PathToExecutable;
   bool                 m_BuildPathChanged;
+  
+  std::set< std::string > m_RecentBinaryDirectories;
+  std::set< std::string > m_RecentSourceDirectories;
+
 };
 
 

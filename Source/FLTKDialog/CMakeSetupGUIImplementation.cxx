@@ -55,6 +55,7 @@ void
 CMakeSetupGUIImplementation
 ::Close( void )
 {
+  SaveRecentDirectories();
   dialogWindow->hide();
 }
 
@@ -120,7 +121,6 @@ void
 CMakeSetupGUIImplementation
 ::SetPathToExecutable( const char * path )
 {
-  m_PathToExecutable = path;
   
   char expandedPath[1024];
   filename_expand( expandedPath, path );
@@ -333,6 +333,9 @@ CMakeSetupGUIImplementation
   // Make sure we are working from the cache on disk
   this->LoadCacheFromDiskToGUI();
 
+  UpdateListOfRecentDirectories();
+  SaveRecentDirectories();
+
   // create a cmake object
   cmake make;
   // create the arguments for the cmake object
@@ -357,6 +360,7 @@ CMakeSetupGUIImplementation
 
   // path is up-to-date now
   m_BuildPathChanged = false;
+
 
   // put the cursor back
   fl_cursor(FL_CURSOR_DEFAULT,FL_BLACK,FL_WHITE);
@@ -513,5 +517,206 @@ CMakeSetupGUIImplementation
     }
 
 }
+
+
+
+
+/**
+ * Load Recent Directories
+ */
+void
+CMakeSetupGUIImplementation
+::LoadRecentDirectories( void )
+{
+  std::string home = getenv("HOME");
+  std::string filename = home + "/.cmakerc";
+  
+  std::ifstream input;
+  input.open(filename.c_str());
+  
+  if( input.fail() ) 
+  {
+    // probably the file doesn't exist
+    return;
+  }
+  
+  m_RecentBinaryDirectories.clear();
+  m_RecentSourceDirectories.clear();
+
+  std::string key;
+  std::string onedirectory;
+
+  while( !input.eof() )
+  {
+    input >> key;
+    
+    if( input.eof() ) break;
+
+    if( key == "MostRecentSource" )
+    {
+      input >> onedirectory;
+      m_WhereSource = onedirectory;
+      sourcePathTextInput->value( m_WhereSource.c_str() );
+    } else
+    if( key == "MostRecentBinary" )
+    {
+      input >> onedirectory;
+      m_WhereBuild = onedirectory;
+      binaryPathTextInput->value( m_WhereBuild.c_str() );
+    } else
+    if( key == "Binary" )
+    {
+      input >> onedirectory;
+      // insert is only done if the directory doesn't exist
+      m_RecentBinaryDirectories.insert( onedirectory );
+      recentBinaryDirectoriesBrowser->add(
+                      (onedirectory.c_str()),
+                      (void*)(onedirectory.c_str()) );
+    } else
+    if( key == "Source" )
+    {
+      input >> onedirectory;
+      // insert is only done if the directory doesn't exist
+      m_RecentSourceDirectories.insert( onedirectory );
+      recentSourceDirectoriesBrowser->add(
+                      (onedirectory.c_str()),
+                      (void*)(onedirectory.c_str()) );
+    }
+
+  }
+
+  input.close();
+}
+
+
+
+/**
+ * Save Recent Directories
+ */
+void
+CMakeSetupGUIImplementation
+::SaveRecentDirectories( void )
+{
+  std::string home = getenv("HOME");
+
+  if( home.empty() )
+  {
+    return;
+  }
+  
+  std::string filename = home + "/.cmakerc";
+  
+  std::ofstream output;
+  output.open(filename.c_str());
+
+  output << "MostRecentBinary " << m_WhereBuild  << std::endl;
+  output << "MostRecentSource " << m_WhereSource << std::endl;
+
+  // Save Recent binary directories
+  std::set< std::string >::iterator bindir = 
+                m_RecentBinaryDirectories.begin();
+
+  while( bindir != m_RecentBinaryDirectories.end() )
+  {
+    output << "Binary " << *bindir << std::endl;
+    bindir++;
+  }
+
+
+  // Save Recent source directories
+  std::set< std::string >::iterator srcdir = 
+                m_RecentSourceDirectories.begin();
+
+  while( srcdir != m_RecentSourceDirectories.end() )
+  {
+    output << "Source " << *srcdir << std::endl;
+    srcdir++;
+  }
+
+}
+
+
+/**
+ * Show Recent Binary Directories
+ */
+void
+CMakeSetupGUIImplementation
+::ShowRecentBinaryDirectories( void )
+{
+  recentBinaryDirectoriesBrowser->Fl_Widget::show();
+}
+
+
+/**
+ * Show Recent Source Directories
+ */
+void
+CMakeSetupGUIImplementation
+::ShowRecentSourceDirectories( void )
+{
+  recentSourceDirectoriesBrowser->Fl_Widget::show();
+}
+
+
+/**
+ * Select one Recent Binary Directory
+ */
+void
+CMakeSetupGUIImplementation
+::SelectOneRecentBinaryDirectory( void )
+{
+  const int selected = recentBinaryDirectoriesBrowser->value();
+  if( selected == 0 )
+  {
+    return;
+  }
+  
+  m_WhereBuild = static_cast<char *>(
+           recentBinaryDirectoriesBrowser->data( selected ));
+  binaryPathTextInput->value( m_WhereBuild.c_str() );
+  recentBinaryDirectoriesBrowser->Fl_Widget::hide();
+}
+
+
+/**
+ * Select one Recent Source Directory
+ */
+void
+CMakeSetupGUIImplementation
+::SelectOneRecentSourceDirectory( void )
+{
+  const int selected = recentSourceDirectoriesBrowser->value();
+  if( selected == 0 )
+  {
+    return;
+  }
+  m_WhereSource =  static_cast< char * >(
+          recentSourceDirectoriesBrowser->data( selected ));
+  sourcePathTextInput->value( m_WhereSource.c_str() );
+  recentSourceDirectoriesBrowser->Fl_Widget::hide();
+}
+
+
+
+/**
+ * Update List of Recent Directories
+ */
+void
+CMakeSetupGUIImplementation
+::UpdateListOfRecentDirectories( void )
+{
+
+  // Update Recent binary directories
+  // insert is only done if the directory doesn't exist
+  m_RecentBinaryDirectories.insert( m_WhereBuild );
+  
+  // Update Recent source directories
+  // insert is only done if the directory doesn't exist
+  m_RecentSourceDirectories.insert( m_WhereSource );
+
+}
+
+
+
 
 

@@ -7,11 +7,13 @@ gridy 5
 snap 3
 class CMakeSetupGUI {open
 } {
-  Function {CMakeSetupGUI()} {open selected
+  Function {CMakeSetupGUI()} {open
   } {
     Fl_Window dialogWindow {
       label CMakeSetupDialog
-      xywh {190 106 563 363} resizable visible
+      callback {recentSourceDirectoriesBrowser->hide();
+recentBinaryDirectoriesBrowser->hide();} open selected
+      xywh {645 144 563 363} resizable visible
     } {
       Fl_Input sourcePathTextInput {
         label {Where is the source code: }
@@ -21,7 +23,7 @@ class CMakeSetupGUI {open
       Fl_Button {} {
         label {Browse...}
         callback {BrowseForSourcePath();}
-        xywh {426 14 65 22} shortcut 0x80073 labelsize 11
+        xywh {453 14 65 22} shortcut 0x80073 labelsize 11
       }
       Fl_Input binaryPathTextInput {
         label {Where do you want to build the binaries: }
@@ -31,11 +33,11 @@ class CMakeSetupGUI {open
       Fl_Button {} {
         label {Browse...}
         callback {BrowseForBinaryPath();}
-        xywh {426 50 65 22} shortcut 0x80062 labelsize 11
+        xywh {453 49 65 22} shortcut 0x80062 labelsize 11
       }
       Fl_Button {} {
         label Close
-        callback {Close()}
+        callback {Close();}
         xywh {345 331 77 23} shortcut 0x80071 labelsize 11
       }
       Fl_Button {} {
@@ -43,7 +45,7 @@ class CMakeSetupGUI {open
         callback {BuildProjectFiles();}
         xywh {123 332 101 23} shortcut 0x8006d labelsize 11
       }
-      Fl_Group {} {open
+      Fl_Group {} {
         xywh {25 80 515 222} box ENGRAVED_BOX labelsize 11 align 0 resizable
       } {
         Fl_Scroll cacheValuesScroll {
@@ -58,6 +60,24 @@ class CMakeSetupGUI {open
       Fl_Box {} {
         label {Right click on cache entries for additional options}
         xywh {141 305 275 25} labelsize 11
+      }
+      Fl_Button {} {
+        label {@\#2>}
+        callback {ShowRecentSourceDirectories();}
+        xywh {420 15 22 21} labeltype SYMBOL_LABEL
+      }
+      Fl_Button {} {
+        label {@\#2>}
+        callback {ShowRecentBinaryDirectories();}
+        xywh {420 50 22 21} labeltype SYMBOL_LABEL
+      }
+      Fl_Browser recentSourceDirectoriesBrowser {
+        callback {SelectOneRecentSourceDirectory();}
+        xywh {15 35 535 115} type Hold box BORDER_BOX hide
+      }
+      Fl_Browser recentBinaryDirectoriesBrowser {
+        callback {SelectOneRecentBinaryDirectory();}
+        xywh {15 70 535 115} type Hold box BORDER_BOX hide
       }
     }
   }
@@ -75,5 +95,13 @@ class CMakeSetupGUI {open
   Function {SetBinaryPath(const char *)} {return_type {virtual bool}
   } {}
   Function {SetSourcePath(const char *)} {return_type {virtual bool}
+  } {}
+  Function {ShowRecentBinaryDirectories(void)} {return_type {virtual void}
+  } {}
+  Function {ShowRecentSourceDirectories(void)} {return_type {virtual void}
+  } {}
+  Function {SelectOneRecentBinaryDirectory(void)} {return_type {virtual void}
+  } {}
+  Function {SelectOneRecentSourceDirectory(void)} {return_type {virtual void}
   } {}
 } 

@@ -10,11 +10,16 @@
 #include <FL/Fl_Scroll.H>
 #include <FL/Fl_Pack.H>
 #include <FL/Fl_Box.H>
+#include <FL/Fl_Browser.H>
 
 class CMakeSetupGUI {
 public:
   CMakeSetupGUI();
   Fl_Window *dialogWindow;
+private:
+  inline void cb_dialogWindow_i(Fl_Window*, void*);
+  static void cb_dialogWindow(Fl_Window*, void*);
+public:
   Fl_Input *sourcePathTextInput;
 private:
   inline void cb_sourcePathTextInput_i(Fl_Input*, void*);
@@ -35,6 +40,22 @@ private:
 public:
   Fl_Scroll *cacheValuesScroll;
   Fl_Pack *propertyListPack;
+private:
+  inline void cb_2_i(Fl_Button*, void*);
+  static void cb_2(Fl_Button*, void*);
+  inline void cb_21_i(Fl_Button*, void*);
+  static void cb_21(Fl_Button*, void*);
+public:
+  Fl_Browser *recentSourceDirectoriesBrowser;
+private:
+  inline void cb_recentSourceDirectoriesBrowser_i(Fl_Browser*, void*);
+  static void cb_recentSourceDirectoriesBrowser(Fl_Browser*, void*);
+public:
+  Fl_Browser *recentBinaryDirectoriesBrowser;
+private:
+  inline void cb_recentBinaryDirectoriesBrowser_i(Fl_Browser*, void*);
+  static void cb_recentBinaryDirectoriesBrowser(Fl_Browser*, void*);
+public:
   ~CMakeSetupGUI();
   virtual void Close(void);
   virtual void BuildProjectFiles(void);
@@ -43,5 +64,9 @@ public:
   virtual void Show(void);
   virtual bool SetBinaryPath(const char *);
   virtual bool SetSourcePath(const char *);
+  virtual void ShowRecentBinaryDirectories(void);
+  virtual void ShowRecentSourceDirectories(void);
+  virtual void SelectOneRecentBinaryDirectory(void);
+  virtual void SelectOneRecentSourceDirectory(void);
 };
 #endif

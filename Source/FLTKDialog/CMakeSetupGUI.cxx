@@ -2,6 +2,14 @@
 
 #include "CMakeSetupGUI.h"
 
+inline void CMakeSetupGUI::cb_dialogWindow_i(Fl_Window*, void*) {
+  recentSourceDirectoriesBrowser->hide();
+recentBinaryDirectoriesBrowser->hide();
+}
+void CMakeSetupGUI::cb_dialogWindow(Fl_Window* o, void* v) {
+  ((CMakeSetupGUI*)(o->user_data()))->cb_dialogWindow_i(o,v);
+}
+
 inline void CMakeSetupGUI::cb_sourcePathTextInput_i(Fl_Input*, void*) {
   SetSourcePath( sourcePathTextInput->value() );
 }
@@ -44,18 +52,46 @@ void CMakeSetupGUI::cb_Build(Fl_Button* o, void* v) {
   ((CMakeSetupGUI*)(o->parent()->user_data()))->cb_Build_i(o,v);
 }
 
+inline void CMakeSetupGUI::cb_2_i(Fl_Button*, void*) {
+  ShowRecentSourceDirectories();
+}
+void CMakeSetupGUI::cb_2(Fl_Button* o, void* v) {
+  ((CMakeSetupGUI*)(o->parent()->user_data()))->cb_2_i(o,v);
+}
+
+inline void CMakeSetupGUI::cb_21_i(Fl_Button*, void*) {
+  ShowRecentBinaryDirectories();
+}
+void CMakeSetupGUI::cb_21(Fl_Button* o, void* v) {
+  ((CMakeSetupGUI*)(o->parent()->user_data()))->cb_21_i(o,v);
+}
+
+inline void CMakeSetupGUI::cb_recentSourceDirectoriesBrowser_i(Fl_Browser*, void*) {
+  SelectOneRecentSourceDirectory();
+}
+void CMakeSetupGUI::cb_recentSourceDirectoriesBrowser(Fl_Browser* o, void* v) {
+  ((CMakeSetupGUI*)(o->parent()->user_data()))->cb_recentSourceDirectoriesBrowser_i(o,v);
+}
+
+inline void CMakeSetupGUI::cb_recentBinaryDirectoriesBrowser_i(Fl_Browser*, void*) {
+  SelectOneRecentBinaryDirectory();
+}
+void CMakeSetupGUI::cb_recentBinaryDirectoriesBrowser(Fl_Browser* o, void* v) {
+  ((CMakeSetupGUI*)(o->parent()->user_data()))->cb_recentBinaryDirectoriesBrowser_i(o,v);
+}
+
 CMakeSetupGUI::CMakeSetupGUI() {
   Fl_Window* w;
   { Fl_Window* o = dialogWindow = new Fl_Window(563, 363, "CMakeSetupDialog");
     w = o;
-    o->user_data((void*)(this));
+    o->callback((Fl_Callback*)cb_dialogWindow, (void*)(this));
     { Fl_Input* o = sourcePathTextInput = new Fl_Input(219, 15, 200, 20, "Where is the source code: ");
       o->labelsize(11);
       o->textsize(11);
       o->callback((Fl_Callback*)cb_sourcePathTextInput);
       o->when(FL_WHEN_ENTER_KEY);
     }
-    { Fl_Button* o = new Fl_Button(426, 14, 65, 22, "Browse...");
+    { Fl_Button* o = new Fl_Button(453, 14, 65, 22, "Browse...");
       o->shortcut(0x80073);
       o->labelsize(11);
       o->callback((Fl_Callback*)cb_Browse);
@@ -66,7 +102,7 @@ CMakeSetupGUI::CMakeSetupGUI() {
       o->callback((Fl_Callback*)cb_binaryPathTextInput);
       o->when(FL_WHEN_ENTER_KEY);
     }
-    { Fl_Button* o = new Fl_Button(426, 50, 65, 22, "Browse...");
+    { Fl_Button* o = new Fl_Button(453, 49, 65, 22, "Browse...");
       o->shortcut(0x80062);
       o->labelsize(11);
       o->callback((Fl_Callback*)cb_Browse1);
@@ -104,6 +140,26 @@ CMakeSetupGUI::CMakeSetupGUI() {
     { Fl_Box* o = new Fl_Box(141, 305, 275, 25, "Right click on cache entries for additional options");
       o->labelsize(11);
     }
+    { Fl_Button* o = new Fl_Button(420, 15, 22, 21, "@#2>");
+      o->labeltype(FL_SYMBOL_LABEL);
+      o->callback((Fl_Callback*)cb_2);
+    }
+    { Fl_Button* o = new Fl_Button(420, 50, 22, 21, "@#2>");
+      o->labeltype(FL_SYMBOL_LABEL);
+      o->callback((Fl_Callback*)cb_21);
+    }
+    { Fl_Browser* o = recentSourceDirectoriesBrowser = new Fl_Browser(15, 35, 535, 115);
+      o->type(2);
+      o->box(FL_BORDER_BOX);
+      o->callback((Fl_Callback*)cb_recentSourceDirectoriesBrowser);
+      o->hide();
+    }
+    { Fl_Browser* o = recentBinaryDirectoriesBrowser = new Fl_Browser(15, 70, 535, 115);
+      o->type(2);
+      o->box(FL_BORDER_BOX);
+      o->callback((Fl_Callback*)cb_recentBinaryDirectoriesBrowser);
+      o->hide();
+    }
     o->end();
   }
 }
@@ -130,4 +186,16 @@ bool CMakeSetupGUI::SetBinaryPath(const char *) {
 }
 
 bool CMakeSetupGUI::SetSourcePath(const char *) {
+}
+
+void CMakeSetupGUI::ShowRecentBinaryDirectories(void) {
+}
+
+void CMakeSetupGUI::ShowRecentSourceDirectories(void) {
+}
+
+void CMakeSetupGUI::SelectOneRecentBinaryDirectory(void) {
+}
+
+void CMakeSetupGUI::SelectOneRecentSourceDirectory(void) {
 }

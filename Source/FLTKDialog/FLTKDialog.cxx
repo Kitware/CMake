@@ -13,6 +13,7 @@ int main(int argc, char * argv[] )
 
   gui->SetPathToExecutable( argv[0] );
   gui->Show();
+  gui->LoadRecentDirectories();
   gui->LoadCacheFromDiskToGUI();
 
   Fl::run();
