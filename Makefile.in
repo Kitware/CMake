@@ -23,7 +23,7 @@ BIN_INSTALL_DIR = $(exec_prefix)/bin
 LIB_INSTALL_DIR = $(exec_prefix)/share/CMake
 
 INSTALL =		@srcdir@/install-sh -c
-INSTALL_PROGRAM =	${INSTALL}
+INSTALL_PROGRAM =	${INSTALL} -m 755
 INSTALL_DATA =		${INSTALL} -m 644
 
 install:
