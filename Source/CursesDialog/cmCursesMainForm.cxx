@@ -26,6 +26,8 @@ cmCursesMainForm::cmCursesMainForm(std::vector<std::string> const& args) :
   m_AdvancedMode = false;
   m_NumberOfVisibleEntries = 0;
   m_OkToGenerate = false;
+  m_HelpMessage.push_back("Welcome to ccmake, curses based user interface for CMake.");
+  m_HelpMessage.push_back("");
   m_HelpMessage.push_back(s_ConstHelpMessage);
 }
 
@@ -619,6 +621,32 @@ void cmCursesMainForm::HandleInput()
 	{
 	int x,y;
 	getmaxyx(stdscr, y, x);
+
+	FIELD* cur = current_field(m_Form);
+	int index = field_index(cur);
+	cmCursesWidget* lbl = reinterpret_cast<cmCursesWidget*>(field_userptr(
+	  m_Fields[index-2]));
+	const char* curField = lbl->GetValue();
+	const char* helpString=0;
+	cmCacheManager::CacheEntry *entry = 
+	  cmCacheManager::GetInstance()->GetCacheEntry(curField);
+	if (entry)
+	  {
+	  helpString = entry->m_HelpString.c_str();
+	  }
+	if (helpString)
+	  {
+	  char* message = new char[strlen(curField)+strlen(helpString)
+				  +strlen("Current option is: \n Help string for this option is: \n")+10];
+	  sprintf(message,"Current option is: %s\nHelp string for this option is: %s\n", curField, helpString);
+	  m_HelpMessage[1] = message;
+	  delete[] message;
+	  }
+	else
+	  {
+	  m_HelpMessage[1] = "";
+	  }
+
 	cmCursesLongMessageForm* msgs = new cmCursesLongMessageForm(m_HelpMessage,
 								    "Help.");
 	CurrentForm = msgs;
@@ -736,7 +764,7 @@ void cmCursesMainForm::HandleInput()
     }
 }
 
-const char* cmCursesMainForm::s_ConstHelpMessage = "Welcome to ccmake, curses based user interface for CMake.\n"
+const char* cmCursesMainForm::s_ConstHelpMessage = 
 "CMake is used to configure and generate build files for software projects. "
 "The basic steps for configuring a project with ccmake are as follows:\n\n"
 "1. Run ccmake in the directory where you want the object and executable files to be placed (build directory). If the source directory is not the same as this build directory, you have to specify it as an argument on the command line.\n\n"
