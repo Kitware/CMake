@@ -170,11 +170,12 @@ bool cmWin32ProcessExecution::BorlandRunCommand(
   si.dwFlags = STARTF_USESTDHANDLES|STARTF_USESHOWWINDOW;
   si.hStdOutput = newstdout;
   si.hStdError = newstdout;
-  si.wShowWindow = SW_HIDE;
+  si.wShowWindow = SW_SHOWDEFAULT; // SW_HIDE;
  
 //set the new handles for the child process si.hStdInput = newstdin;
   char* commandAndArgs = strcpy(new char[strlen(command)+1], command);
-  if (!CreateProcess(NULL,commandAndArgs,NULL,NULL,TRUE,CREATE_NEW_CONSOLE, 
+  if (!CreateProcess(NULL,commandAndArgs,NULL,NULL,TRUE,
+                     0, // CREATE_NEW_CONSOLE, 
                      NULL,dir,&si,&pi)) 
     {
     std::cerr << "CreateProcess failed " << commandAndArgs << std::endl;
@@ -403,7 +404,7 @@ static BOOL RealPopenCreateProcess(const char *cmdstring,
   siStartInfo.hStdInput = hStdin;
   siStartInfo.hStdOutput = hStdout;
   siStartInfo.hStdError = hStderr;
-  siStartInfo.wShowWindow = SW_HIDE;
+  siStartInfo.wShowWindow = SW_SHOWDEFAULT; // SW_HIDE;
 
   //std::cout << "Create process: " << s2 << std::endl;
   if (CreateProcess(NULL,
@@ -411,7 +412,7 @@ static BOOL RealPopenCreateProcess(const char *cmdstring,
                     NULL,
                     NULL,
                     TRUE,
-                    CREATE_NEW_CONSOLE,
+                    0, //CREATE_NEW_CONSOLE,
                     NULL,
                     path,
                     &siStartInfo,
