@@ -42,6 +42,7 @@
 #include "cmSetCommand.cxx"
 #include "cmSiteNameCommand.cxx"
 #include "cmSourceFilesCommand.cxx"
+#include "cmSourceFilesRemoveCommand.cxx"
 #include "cmSourceGroupCommand.cxx"
 #include "cmSubdirCommand.cxx"
 #include "cmTargetLinkLibrariesCommand.cxx"
@@ -50,6 +51,9 @@
 #include "cmVTKWrapPythonCommand.cxx"
 #include "cmVTKWrapTclCommand.cxx"
 #include "cmWrapExcludeFilesCommand.cxx"
+// Begin Special JB addition
+#include "cmVTKWrapGUICommand.cxx"
+// End Special JB addition
 
 void GetPredefinedCommands(std::list<cmCommand*>& commands)
 {
@@ -92,6 +96,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmSetCommand);
   commands.push_back(new cmSiteNameCommand);
   commands.push_back(new cmSourceFilesCommand);
+  commands.push_back(new cmSourceFilesRemoveCommand);
   commands.push_back(new cmSourceGroupCommand);
   commands.push_back(new cmSubdirCommand);
   commands.push_back(new cmTargetLinkLibrariesCommand);
@@ -100,6 +105,9 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmVTKWrapPythonCommand);
   commands.push_back(new cmVTKWrapTclCommand);
   commands.push_back(new cmWrapExcludeFilesCommand);
+// Begin Special JB addition
+  commands.push_back(new cmVTKWrapGUICommand);
+// End Special JB addition
 }
 
-  
+
