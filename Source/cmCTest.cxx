@@ -3077,7 +3077,7 @@ int cmCTest::RunConfigurationScript()
           std::string fullCommand = command;
           fullCommand += " update ";
           fullCommand += cvsArgs[1];
-          output.empty();
+          output = "";
           retVal = 0;
           res = cmSystemTools::RunSingleCommand(fullCommand.c_str(), &output, 
                                                 &retVal, cvsArgs[0].c_str(),
@@ -3121,7 +3121,7 @@ int cmCTest::RunConfigurationScript()
     command = cmakeCmd;
     command += " \"";
     command += srcDir;
-    output.empty();
+    output = "";
     command += "\"";
     retVal = 0;
     res = cmSystemTools::RunSingleCommand(command.c_str(), &output, 
@@ -3136,7 +3136,7 @@ int cmCTest::RunConfigurationScript()
   
   // run ctest
   command = ctestCmd;
-  output.empty();
+  output = "";
   retVal = 0;
   res = cmSystemTools::RunSingleCommand(command.c_str(), &output, 
                                         &retVal, binDir,
