@@ -85,8 +85,11 @@ ScopeEnded(cmMakefile &mf)
                        mf.GetCurrentDirectory());
 }
 
-bool cmForEachCommand::InitialPass(std::vector<std::string> const& args)
+bool cmForEachCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
+  std::vector<std::string> args;
+  cmSystemTools::ExpandListArguments(argsIn, args);
+
   if(args.size() < 2 )
     {
     this->SetError("called with incorrect number of arguments");
