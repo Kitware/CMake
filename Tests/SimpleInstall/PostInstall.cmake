@@ -1,0 +1,6 @@
+MESSAGE("In post install")
+IF(PRE_INSTALL_DID_RUN)
+  MESSAGE("Pre and post install work fine")
+ELSE(PRE_INSTALL_DID_RUN)
+  MESSAGE(FATAL_ERROR "Pre install did not run before post install")
+ENDIF(PRE_INSTALL_DID_RUN)
