@@ -177,6 +177,10 @@ cmake_try_run ()
   fi
   TMPFILE=`cmake_tmp_file`
   echo "Try: ${COMPILER}"
+  echo "Line: ${COMPILER} ${FLAGS} ${TESTFILE} -o ${TMPFILE}"
+  echo "----------  file   -----------------------"
+  cat ${TESTFILE}
+  echo "------------------------------------------"
   "${COMPILER}" ${FLAGS} "${TESTFILE}" -o "${TMPFILE}"
   RES=$?
   if [ "${RES}" -ne "0" ]; then
@@ -281,6 +285,7 @@ fi
 
 # Delete all the bootstrap files
 rm -f "${cmake_bootstrap_dir}/cmake_bootstrap.log"
+rm -f "${cmake_bootstrap_dir}/cmConfigure.h.tmp"
 
 # If exist compiler flags, set them
 cmake_c_flags=${CFLAGS}
@@ -322,6 +327,8 @@ echo "C compiler on this system is: ${cmake_c_compiler} ${cmake_c_flags}"
 # Test CXX compiler
 cmake_cxx_compiler=
 
+# On Mac OSX, CC is the same as cc, so make sure not to try CC as c++ compiler.
+
 # If CC is set, use that for compiler, otherwise use list of known compilers
 if [ -n "${CXX}" ]; then
   cmake_cxx_compilers="${CXX}"
@@ -333,10 +340,18 @@ fi
 TMPFILE=`cmake_tmp_file`
 cat>"${TMPFILE}.cxx"<<EOF
 #include <stdio.h>
-class NeedCXX {};
+class NeedCXX 
+{
+public:
+  NeedCXX() { this->Foo = 1; }
+  int GetFoo() { return this->Foo; }
+private:
+  int Foo;
+};
 int main()
 {
-  printf("1\n");
+  NeedCXX c;
+  printf("%d\n", c.GetFoo());
   return 0;
 }
 EOF
@@ -479,6 +494,8 @@ cmake_report cmConfigure.h.tmp " * Make:         ${cmake_make_processor}"
 cmake_report cmConfigure.h.tmp " *"
 cmake_report cmConfigure.h.tmp " * Sources:"
 cmake_report cmConfigure.h.tmp " * ${CMAKE_SOURCES}"
+cmake_report cmConfigure.h.tmp " * kwSys Sources:"
+cmake_report cmConfigure.h.tmp " * ${KWSYS_SOURCES}"
 cmake_report cmConfigure.h.tmp " */"
 
 # Test for STD namespace
