@@ -1336,8 +1336,9 @@ bool cmSystemTools::RunCommand(const char* command,
                                bool verbose,
                                int timeout)
 {
-  int foo;
-  return cmSystemTools::RunCommand(command, output, foo, dir, verbose, timeout);
+  int dummy;
+  return cmSystemTools::RunCommand(command, output, dummy, 
+                                   dir, verbose, timeout);
 }
 
 #if defined(WIN32) && !defined(__CYGWIN__)
@@ -2476,4 +2477,3 @@ void cmSystemTools::SplitProgramFromArgs(const char* path,
   program = "";
   args = "";
 }
-

@@ -61,10 +61,10 @@ public:
     CacheEntryType GetType() const { return this->GetEntry().m_Type; }
     cmCacheManager &m_Container;
     std::map<cmStdString, CacheEntry>::iterator m_Position;
-    CacheIterator(cmCacheManager &foo) : m_Container(foo) {
+    CacheIterator(cmCacheManager &cm) : m_Container(cm) {
       this->Begin();
     }
-    CacheIterator(cmCacheManager &foo, const char* key) : m_Container(foo) {
+    CacheIterator(cmCacheManager &cm, const char* key) : m_Container(cm) {
       this->Find(key);
     }
   private:
