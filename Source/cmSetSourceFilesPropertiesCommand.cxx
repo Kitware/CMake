@@ -83,6 +83,8 @@ bool cmSetSourceFilesPropertiesCommand::InitialPass(
         propertyPairs.push_back(*j);
         ++j;
         }
+      // break out of the loop because j is already == end
+      break;
       }
     else if (doingFiles)
       {
