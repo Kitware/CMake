@@ -34,9 +34,9 @@ public:
   virtual void FillCacheManagerFromCacheGUI( void );
 
 private:  
-  virtual bool VerifyBinaryPath( const string & path ) const;
-  virtual bool VerifySourcePath( const string & path ) const;
-  virtual string ExpandPathAndMakeItAbsolute( const string & inputPath ) const;
+  virtual bool VerifyBinaryPath( const std::string & path ) const;
+  virtual bool VerifySourcePath( const std::string & path ) const;
+  virtual std::string ExpandPathAndMakeItAbsolute( const std::string & inputPath ) const;
 
 private:
   fltk::PropertyList   m_CacheEntriesList;

@@ -132,7 +132,7 @@ CMakeSetupGUIImplementation
     return false; 
   }
 
-  string expandedAbsolutePath = ExpandPathAndMakeItAbsolute( path );
+  std::string expandedAbsolutePath = ExpandPathAndMakeItAbsolute( path );
   
   sourcePathTextInput->value( expandedAbsolutePath.c_str() );
     
@@ -152,9 +152,9 @@ CMakeSetupGUIImplementation
 /**
  * Expand environment variables in the path and make it absolute
  */
-string
+std::string
 CMakeSetupGUIImplementation
-::ExpandPathAndMakeItAbsolute( const string & inputPath ) const
+::ExpandPathAndMakeItAbsolute( const std::string & inputPath ) const
 {
 
   char expandedPath[3000];
@@ -163,7 +163,7 @@ CMakeSetupGUIImplementation
   char absolutePath[3000];
   filename_absolute( absolutePath, expandedPath );
   
-  string expandedAbsolutePath = absolutePath;
+  std::string expandedAbsolutePath = absolutePath;
 
   return expandedAbsolutePath;
     
@@ -184,7 +184,7 @@ CMakeSetupGUIImplementation
     return false;
   }
 
-  string expandedAbsolutePath = ExpandPathAndMakeItAbsolute( path );
+  std::string expandedAbsolutePath = ExpandPathAndMakeItAbsolute( path );
   
   binaryPathTextInput->value( expandedAbsolutePath.c_str() );
 
@@ -212,7 +212,7 @@ CMakeSetupGUIImplementation
  */
 bool
 CMakeSetupGUIImplementation
-::VerifyBinaryPath( const string & path ) const
+::VerifyBinaryPath( const std::string & path ) const
 {
 
   bool pathIsOK = false;
@@ -229,7 +229,7 @@ CMakeSetupGUIImplementation
     
     if( userWantsToCreateDirectory  )
     {
-      string command = "mkdir ";
+      std::string command = "mkdir ";
       command += path;
       system( command.c_str() );
       pathIsOK = true;
@@ -251,7 +251,7 @@ CMakeSetupGUIImplementation
  */
 bool
 CMakeSetupGUIImplementation
-::VerifySourcePath( const string & path ) const
+::VerifySourcePath( const std::string & path ) const
 {
 
   if( !filename_isdir( path.c_str() ) )

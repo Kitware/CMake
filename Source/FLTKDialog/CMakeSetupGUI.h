@@ -14,6 +14,7 @@
 class CMakeSetupGUI {
 public:
   CMakeSetupGUI();
+  virtual ~CMakeSetupGUI();
   Fl_Window *dialogWindow;
   Fl_Input *sourcePathTextInput;
 private:
@@ -35,7 +36,6 @@ private:
 public:
   Fl_Scroll *cacheValuesScroll;
   Fl_Pack *propertyListPack;
-  ~CMakeSetupGUI();
   virtual void Close(void);
   virtual void BuildProjectFiles(void);
   virtual void BrowseForSourcePath(void);
