@@ -62,6 +62,14 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
   {0,0,0}
 };
 
+//----------------------------------------------------------------------------
+static const cmDocumentationEntry cmDocumentationSeeAlso[] =
+{
+  {0, "cmake", 0},
+  {0, "ctest", 0},
+  {0, 0, 0}
+};
+
 cmCursesForm* cmCursesForm::CurrentForm=0;
 
 extern "C"
@@ -108,6 +116,7 @@ int main(int argc, char** argv)
     doc.SetDescriptionSection(cmDocumentationDescription);
     doc.SetOptionsSection(cmDocumentationOptions);
     doc.SetCommandsSection(&commands[0]);
+    doc.SetSeeAlsoList(cmDocumentationSeeAlso);
     return doc.PrintRequestedDocumentation(std::cout)? 0:1;
     }  
   
