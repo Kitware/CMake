@@ -19,7 +19,9 @@
 #include "cmCPluginAPI.cxx"
 #include "cmDynamicLoader.h"
 #include <signal.h>
+extern "C" void TrapsForSignalsCFunction(int sig);
 
+  
 // a class for loadabple commands
 class cmLoadedCommand : public cmCommand
 {
@@ -103,11 +105,11 @@ public:
       
       if(!remove)
         {
-        signal(SIGSEGV, cmLoadedCommand::TrapsForSignals);
+        signal(SIGSEGV, TrapsForSignalsCFunction);
 #ifdef SIGBUS
-        signal(SIGBUS,  cmLoadedCommand::TrapsForSignals);
+        signal(SIGBUS,  TrapsForSignalsCFunction);
 #endif
-        signal(SIGILL,  cmLoadedCommand::TrapsForSignals);
+        signal(SIGILL,  TrapsForSignalsCFunction);
         }
       else
         {
@@ -141,6 +143,12 @@ public:
 
   cmLoadedCommandInfo info;
 };
+
+extern "C" void TrapsForSignalsCFunction(int sig)
+{
+  cmLoadedCommand::TrapsForSignals(sig);
+}
+
 
 const char* cmLoadedCommand::LastName = 0;
 
