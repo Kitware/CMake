@@ -205,8 +205,12 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& args)
   if(!lib)
     {
     std::string err = "Attempt to load the library ";
-    err += fullPath + " failed. Additional error info is:\n";
-    err += cmDynamicLoader::LastError();
+    err += fullPath + " failed.";
+    if ( cmDynamicLoader::LastError() )
+      {
+      err += " Additional error info is:\n";
+      err += cmDynamicLoader::LastError();
+      }
     this->SetError(err.c_str());
     return false;
     }
