@@ -220,7 +220,7 @@ cmCableDefineSetCommand::GenerateTag(const std::string& element,
     }
 
   // Test for basic floating-point type
-  regex.compile("^[ \t]*(long[ ])?[ \t]*(float|double)[ \t]*$");
+  regex.compile("^[ \t]*(long[ ]|)[ \t]*(float|double)[ \t]*$");
   if(regex.find(element))
     {
     tag = "_";
