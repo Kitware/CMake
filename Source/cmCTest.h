@@ -421,6 +421,9 @@ private:
   bool InitializeMemoryChecking();
   ///! Find the running cmake
   void FindRunningCMake(const char* arg0);
+
+  ///! Get the current time as string
+  std::string CurrentTime();
 };
 
 #endif

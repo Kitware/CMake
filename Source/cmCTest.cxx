@@ -101,7 +101,7 @@ static std::string CleanString(const std::string& str)
   return str.substr(spos, epos);
 }
 
-static std::string CurrentTime()
+std::string cmCTest::CurrentTime()
 {
   time_t currenttime = time(0);
   struct tm* t = localtime(&currenttime);
@@ -109,7 +109,7 @@ static std::string CurrentTime()
   char current_time[1024];
   strftime(current_time, 1000, "%a %b %d %H:%M:%S %Z %Y", t);
   //std::cout << "Current_Time: " << current_time << std::endl;
-  return ::CleanString(current_time);
+  return this->MakeXMLSafe(::CleanString(current_time));
 }
 
 static const char* cmCTestErrorMatches[] = {
@@ -716,7 +716,7 @@ int cmCTest::UpdateDirectory()
     {
     std::cerr << "Cannot open log file" << std::endl;
     }
-  std::string start_time = ::CurrentTime();
+  std::string start_time = this->CurrentTime();
   double elapsed_time_start = cmSystemTools::GetTime();
 
   std::string goutput;
@@ -739,20 +739,21 @@ int cmCTest::UpdateDirectory()
     }
 
   os << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-     << "<Update mode=\"Client\" Generator=\"ctest\">\n"
-     << "\t<Site>" <<m_DartConfiguration["Site"] << "</Site>\n"
+     << "<Update mode=\"Client\" Generator=\"ctest-" << CMake_VERSION_FULL << "\">\n"
+     << "\t<Site>" << m_DartConfiguration["Site"] << "</Site>\n"
      << "\t<BuildName>" << m_DartConfiguration["BuildName"]
      << "</BuildName>\n"
      << "\t<BuildStamp>" << m_CurrentTag << "-"
      << this->GetTestModelString() << "</BuildStamp>" << std::endl;
   os << "\t<StartDateTime>" << start_time << "</StartDateTime>\n"
-     << "\t<UpdateCommand>" << command << "</UpdateCommand>\n"
+     << "\t<UpdateCommand>" << this->MakeXMLSafe(command)
+     << "</UpdateCommand>\n"
      << "\t<UpdateReturnStatus>";
   int failed = 0;
   if ( !res || retVal )
     {
     os << "Update error: ";
-    os << goutput;
+    os << this->MakeXMLSafe(goutput);
     std::cerr << "Update with command: " << command << " failed" << std::endl;
     failed = 1;
     }
@@ -780,7 +781,10 @@ int cmCTest::UpdateDirectory()
       char mod = line[0];
       if ( line[1] == ' ' && mod != '?' )
         {
-        count ++;
+        if ( mod != 'M' && mod != 'C' )
+          {
+          count ++;
+          }
         const char* file = line + 2;
         //std::cout << "Line" << cc << ": " << mod << " - " << file << std::endl;
         std::string logcommand = cvsCommand + " -z3 log -N " + file;
@@ -997,7 +1001,7 @@ int cmCTest::UpdateDirectory()
     }
 
   //std::cout << "End" << std::endl;
-  std::string end_time = ::CurrentTime();
+  std::string end_time = this->CurrentTime();
   os << "\t<EndDateTime>" << end_time << "</EndDateTime>\n"
      << "<ElapsedMinutes>" << 
     static_cast<int>((cmSystemTools::GetTime() - elapsed_time_start)/6)/10.0 
@@ -1048,7 +1052,7 @@ int cmCTest::ConfigureDirectory()
       std::cerr << "Cannot open configure file" << std::endl;
       return 1;
       }
-    std::string start_time = ::CurrentTime();
+    std::string start_time = this->CurrentTime();
 
     std::ofstream ofs;
     this->OpenOutputFile("Temporary", "LastConfigure.log", ofs);
@@ -1073,7 +1077,7 @@ int cmCTest::ConfigureDirectory()
       os << "<ConfigureCommand>" << cCommand.c_str() << "</ConfigureCommand>" << std::endl;
       //std::cout << "End" << std::endl;
       os << "<Log>" << this->MakeXMLSafe(output) << "</Log>" << std::endl;
-      std::string end_time = ::CurrentTime();
+      std::string end_time = this->CurrentTime();
       os << "\t<ConfigureStatus>" << retVal << "</ConfigureStatus>\n"
          << "\t<EndDateTime>" << end_time << "</EndDateTime>\n"
          << "<ElapsedMinutes>" 
@@ -1118,7 +1122,7 @@ int cmCTest::BuildDirectory()
     {
     std::cerr << "Cannot create LastBuild.log file" << std::endl;    
     }
-  m_StartBuild = ::CurrentTime();
+  m_StartBuild = this->CurrentTime();
   std::string output;
   int retVal = 0;
   int res = cmsysProcess_State_Exited;
@@ -1132,7 +1136,7 @@ int cmCTest::BuildDirectory()
     {
     std::cout << "Build with command: " << makeCommand << std::endl;
     }
-  m_EndBuild = ::CurrentTime();
+  m_EndBuild = this->CurrentTime();
   double elapsed_build_time = cmSystemTools::GetTime() - elapsed_time_start;
   if (res != cmsysProcess_State_Exited || retVal )
     {
@@ -1352,7 +1356,7 @@ int cmCTest::CoverageDirectory()
   std::map<std::string, std::string> allsourcefiles;
   std::map<std::string, std::string> allbinaryfiles;
 
-  std::string start_time = ::CurrentTime();
+  std::string start_time = this->CurrentTime();
 
   // Find all source files.
   std::string sourceDirectory = m_DartConfiguration["SourceDirectory"];
@@ -1690,7 +1694,7 @@ int cmCTest::CoverageDirectory()
   std::ofstream cfileoutput; 
   int cfileoutputcount = 0;
   char cfileoutputname[100];
-  std::string local_start_time = ::CurrentTime();
+  std::string local_start_time = this->CurrentTime();
   std::string local_end_time;
   for ( cit = coverageresults.begin(); cit != coverageresults.end(); cit ++ )
     {
@@ -1735,7 +1739,7 @@ int cmCTest::CoverageDirectory()
     
     if ( ccount == 100 )
       {
-      local_end_time = ::CurrentTime();
+      local_end_time = this->CurrentTime();
       cfileoutput << "\t<EndDateTime>" << local_end_time << "</EndDateTime>\n"
         << "</CoverageLog>" << std::endl;
       this->EndXML(cfileoutput);
@@ -1752,7 +1756,7 @@ int cmCTest::CoverageDirectory()
         std::cerr << "Cannot open log file: " << cfileoutputname << std::endl;
         return 1;
         }
-      local_start_time = ::CurrentTime();
+      local_start_time = this->CurrentTime();
       this->StartXML(cfileoutput);
       cfileoutput << "<CoverageLog>\n"
         << "\t<StartDateTime>" << local_start_time << "</StartDateTime>" << std::endl;
@@ -1833,7 +1837,7 @@ int cmCTest::CoverageDirectory()
   
   if ( ccount > 0 )
     {
-    local_end_time = ::CurrentTime();
+    local_end_time = this->CurrentTime();
     cfileoutput << "\t<EndDateTime>" << local_end_time << "</EndDateTime>\n"
                 << "</CoverageLog>" << std::endl;
     this->EndXML(cfileoutput);
@@ -1848,7 +1852,7 @@ int cmCTest::CoverageDirectory()
     percent_coverage = 0;
     }
 
-  std::string end_time = ::CurrentTime();
+  std::string end_time = this->CurrentTime();
 
   log << "\t<LOCTested>" << total_tested << "</LOCTested>\n"
       << "\t<LOCUntested>" << total_untested << "</LOCUntested>\n"
@@ -2102,7 +2106,7 @@ void cmCTest::ProcessDirectory(cmCTest::tm_VectorOfStrings &passed,
     olog = &ofs;
     }
 
-  m_StartTest = ::CurrentTime();
+  m_StartTest = this->CurrentTime();
   double elapsed_time_start = cmSystemTools::GetTime();
 
   if ( olog )
@@ -2227,7 +2231,7 @@ void cmCTest::ProcessDirectory(cmCTest::tm_VectorOfStrings &passed,
         << std::endl 
         << "Directory: " << it->m_Directory << std::endl 
         << "\"" << testname.c_str() << "\" start time: " 
-        << ::CurrentTime() << std::endl
+        << this->CurrentTime() << std::endl
         << "Output:" << std::endl 
         << "----------------------------------------------------------"
         << std::endl;
@@ -2255,7 +2259,7 @@ void cmCTest::ProcessDirectory(cmCTest::tm_VectorOfStrings &passed,
         << "----------------------------------------------------------"
         << std::endl
         << "\"" << testname.c_str() << "\" end time: " 
-        << ::CurrentTime() << std::endl
+        << this->CurrentTime() << std::endl
         << "\"" << testname.c_str() << "\" time elapsed: " 
         << buffer << std::endl
         << "----------------------------------------------------------"
@@ -2342,7 +2346,7 @@ void cmCTest::ProcessDirectory(cmCTest::tm_VectorOfStrings &passed,
     m_TestResults.push_back( cres );
     }
 
-  m_EndTest = ::CurrentTime();
+  m_EndTest = this->CurrentTime();
   m_ElapsedTestingTime = cmSystemTools::GetTime() - elapsed_time_start;
   if ( olog )
     {
@@ -3963,7 +3967,8 @@ void cmCTest::StartXML(std::ostream& ostr)
     << "<Site BuildName=\"" << m_DartConfiguration["BuildName"]
     << "\" BuildStamp=\"" << m_CurrentTag << "-"
     << this->GetTestModelString() << "\" Name=\""
-    << m_DartConfiguration["Site"] << "\" Generator=\"ctest\">" << std::endl;
+    << m_DartConfiguration["Site"] << "\" Generator=\"ctest-" << CMake_VERSION_FULL
+    << "\">" << std::endl;
 }
 
 void cmCTest::EndXML(std::ostream& ostr)
@@ -4159,13 +4164,14 @@ int cmCTest::GenerateDartNotesOutput(std::ostream& os, const cmCTest::tm_VectorO
     << "<?xml-stylesheet type=\"text/xsl\" href=\"Dart/Source/Server/XSL/Build.xsl <file:///Dart/Source/Server/XSL/Build.xsl> \"?>\n"
     << "<Site BuildName=\"" << m_DartConfiguration["BuildName"] << "\" BuildStamp=\"" 
     << m_CurrentTag << "-" << this->GetTestModelString() << "\" Name=\"" 
-    << m_DartConfiguration["Site"] << "\" Generator=\"ctest\">\n"
+    << m_DartConfiguration["Site"] << "\" Generator=\"ctest-" << CMake_VERSION_FULL
+    << "\">\n"
     << "<Notes>" << std::endl;
 
   for ( it = files.begin(); it != files.end(); it ++ )
     {
     std::cout << "\tAdd file: " << it->c_str() << std::endl;
-    std::string note_time = ::CurrentTime();
+    std::string note_time = this->CurrentTime();
     os << "<Note Name=\"" << this->MakeXMLSafe(it->c_str()) << "\">\n"
       << "<DateTime>" << note_time << "</DateTime>\n"
       << "<Text>" << std::endl;
