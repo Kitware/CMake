@@ -78,7 +78,7 @@ public:
       
 private:
   void SetupTests();
-  void GenerateConfigurations();
+  void GenerateConfigurations(cmMakefile* mf);
   void WriteSLNFile(std::ostream& fout);
   void WriteSLNHeader(std::ostream& fout);
   void WriteProject(std::ostream& fout, 

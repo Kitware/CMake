@@ -67,8 +67,8 @@ IF(CMAKE_GENERATOR MATCHES "Visual Studio 6")
    SET (CMAKE_NO_BUILD_TYPE 1)
 ENDIF(CMAKE_GENERATOR MATCHES "Visual Studio 6")
 IF(CMAKE_GENERATOR MATCHES "Visual Studio 7")
-  SET (CMAKE_CONFIGURATION_TYPES "Debug Release MinSizeRel RelWithDebInfo" CACHE STRING 
-     "Space separated list of supported configuration types, only supports Debug, Release, MinSizeRel, and RelWithDebInfo, anything else will be ignored.")
+  SET (CMAKE_CONFIGURATION_TYPES "Debug;Release;MinSizeRel;RelWithDebInfo" CACHE STRING 
+     "Semicolon separated list of supported configuration types, only supports Debug, Release, MinSizeRel, and RelWithDebInfo, anything else will be ignored.")
   SET (CMAKE_CXX_WARNING_LEVEL "3" CACHE STRING
        "Size of stack for programs.")
   SET (CMAKE_CXX_STACK_SIZE "10000000" CACHE STRING

@@ -33,10 +33,11 @@ void cmGlobalVisualStudio7Generator::EnableLanguage(const char* lang,
   mf->AddDefinition("CMAKE_CFG_INTDIR","$(IntDir)");
   mf->AddDefinition("CMAKE_GENERATOR_CC", "cl");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "cl");
+  
+  // Create list of configurations requested by user's cache, if any.
+  this->GenerateConfigurations(mf);
   this->cmGlobalGenerator::EnableLanguage(lang, mf);
 }
-
-
 
 int cmGlobalVisualStudio7Generator::TryCompile(const char *, 
                                                const char *bindir, 
@@ -150,7 +151,7 @@ void cmGlobalVisualStudio7Generator::SetupTests()
     }
 }
 
-void cmGlobalVisualStudio7Generator::GenerateConfigurations()
+void cmGlobalVisualStudio7Generator::GenerateConfigurations(cmMakefile* mf)
 {
   // process the configurations
   const char* ct 
@@ -163,7 +164,7 @@ void cmGlobalVisualStudio7Generator::GenerateConfigurations()
     std::string::size_type endpos = 0;
     while(endpos != std::string::npos)
       {
-      endpos = configTypes.find(' ', start);
+      endpos = configTypes.find_first_of(" ;", start);
       std::string config;
       std::string::size_type len;
       if(endpos != std::string::npos)
@@ -200,13 +201,26 @@ void cmGlobalVisualStudio7Generator::GenerateConfigurations()
     m_Configurations.push_back("Debug");
     m_Configurations.push_back("Release");
     }
+  
+  // Reset the entry to have a semi-colon separated list.
+  std::string configs = m_Configurations[0];
+  for(unsigned int i=1; i < m_Configurations.size(); ++i)
+    {
+    configs += ";";
+    configs += m_Configurations[i];
+    }
+  
+  mf->AddCacheDefinition(
+    "CMAKE_CONFIGURATION_TYPES",
+    configs.c_str(),
+    "Semicolon separated list of supported configuration types, "
+    "only supports Debug, Release, MinSizeRel, and RelWithDebInfo, "
+    "anything else will be ignored.",
+    cmCacheManager::STRING);
 }
 
 void cmGlobalVisualStudio7Generator::Generate()
 {
-  // Generate the possible configuraitons
-  this->GenerateConfigurations();
-  
   // add a special target that depends on ALL projects for easy build
   // of Debug only
   m_LocalGenerators[0]->GetMakefile()->
@@ -580,8 +594,6 @@ std::string cmGlobalVisualStudio7Generator::CreateGUID(const char* name)
 
 void cmGlobalVisualStudio7Generator::LocalGenerate()
 {
-  // load the possible configuraitons
-  this->GenerateConfigurations();
   this->cmGlobalGenerator::LocalGenerate();
 }
 

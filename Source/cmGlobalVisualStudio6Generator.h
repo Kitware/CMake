@@ -66,6 +66,7 @@ public:
   virtual void OutputDSWFile();
 
 private:
+  void GenerateConfigurations(cmMakefile* mf);
   void SetupTests();
   void WriteDSWFile(std::ostream& fout);
   void WriteDSWHeader(std::ostream& fout);

@@ -30,7 +30,38 @@ void cmGlobalVisualStudio6Generator::EnableLanguage(const char* lang,
   mf->AddDefinition("CMAKE_CFG_INTDIR","$(IntDir)");
   mf->AddDefinition("CMAKE_GENERATOR_CC", "cl");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "cl");
+  this->GenerateConfigurations(mf);
   this->cmGlobalGenerator::EnableLanguage(lang, mf);
+}
+
+void cmGlobalVisualStudio6Generator::GenerateConfigurations(cmMakefile* mf)
+{
+  std::string fname= mf->GetDefinition("CMAKE_ROOT");
+  const char* def= mf->GetDefinition( "MSPROJECT_TEMPLATE_DIRECTORY");
+  if(def)
+    {
+    fname = def;
+    }
+  else
+    {
+    fname += "/Templates";
+    }
+  fname += "/CMakeVisualStudio6Configurations.cmake";
+  if(!mf->ReadListFile(mf->GetCurrentListFile(), fname.c_str()))
+    {
+    cmSystemTools::Error("Cannot open ", fname.c_str(),
+                         ".  Please copy this file from the main "
+                         "CMake/Templates directory and edit it for "
+                         "your build configurations.");
+    }
+  else if(!mf->GetDefinition("CMAKE_CONFIGURATION_TYPES"))
+    {
+    cmSystemTools::Error("CMAKE_CONFIGURATION_TYPES not set by ",
+                         fname.c_str(),
+                         ".  Please copy this file from the main "
+                         "CMake/Templates directory and edit it for "
+                         "your build configurations.");
+    }
 }
 
 int cmGlobalVisualStudio6Generator::TryCompile(const char *, 
