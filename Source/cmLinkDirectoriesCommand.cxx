@@ -21,8 +21,7 @@ bool cmLinkDirectoriesCommand::InitialPass(std::vector<std::string> const& argsI
 {
  if(argsIn.size() < 1 )
     {
-    this->SetError("called with incorrect number of arguments");
-    return false;
+    return true;
     }
  std::vector<std::string> args;
  cmSystemTools::ExpandListArguments(argsIn, args);
