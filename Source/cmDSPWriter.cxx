@@ -165,6 +165,7 @@ void cmDSPWriter::AddDSPBuildRule(cmSourceGroup& sourceGroup)
   makefileIn += "/";
   makefileIn += "CMakeLists.txt";
   makefileIn = cmSystemTools::HandleNetworkPaths(makefileIn.c_str());
+  makefileIn = cmSystemTools::EscapeSpaces(makefileIn.c_str());
   std::string dsprule = "${CMAKE_COMMAND} ";
   m_Makefile->ExpandVariablesInString(dsprule);
   dsprule = cmSystemTools::HandleNetworkPaths(dsprule.c_str());
