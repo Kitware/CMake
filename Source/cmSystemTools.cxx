@@ -1470,9 +1470,9 @@ bool RunCommandViaPopen(const char* command,
   std::string commandInDir;
   if(dir)
     {
-    commandInDir = "cd ";
+    commandInDir = "cd \"";
     commandInDir += dir;
-    commandInDir += " && ";
+    commandInDir += "\" && ";
     commandInDir += command;
     }
   else
