@@ -22,12 +22,15 @@ SET (EXECUTABLE_OUTPUT_PATH
 # add the executable that will generate the file
 ADD_EXECUTABLE(generator generator.cxx)
 
+GET_TARGET_PROPERTY(generator_PATH generator LOCATION)
+MESSAGE("Location ${generator_PATH}")
+
 # the folowing assumes that a cmSourceFile
 # is instantiated for the output, with GENERATED 1
 # at the end of the day this becomes a what in VS ?
 ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_BINARY_DIR}/generated.c
   DEPENDS generator
-  COMMAND ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/generator
+  COMMAND ${generator_PATH}
   ARGS ${PROJECT_BINARY_DIR}/generated.c
   )
 
