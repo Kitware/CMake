@@ -577,7 +577,8 @@ bool SystemTools::SameFile(const char* file1, const char* file2)
    GetFileInformationByHandle( hFile2, &fiBuf2 );
    CloseHandle(hFile1);
    CloseHandle(hFile2);
-   return (fiBuf1.nFileIndexHigh == fiBuf2.nFileIndexHigh &&
+   return (fiBuf1.dwVolumeSerialNumber == fiBuf2.dwVolumeSerialNumber &&
+           fiBuf1.nFileIndexHigh == fiBuf2.nFileIndexHigh &&
            fiBuf1.nFileIndexLow == fiBuf2.nFileIndexLow);
 #else
   struct stat fileStat1, fileStat2;
