@@ -240,6 +240,7 @@ int do_cmaketest (int argc, char **argv)
     std::cerr << output.c_str() << "\n";
     // return to the original directory
     cmSystemTools::ChangeDirectory(cwd.c_str());
+    std::cerr << "Return value: " << retVal << std::endl;
     return 1;
     }
   if ( retVal )
