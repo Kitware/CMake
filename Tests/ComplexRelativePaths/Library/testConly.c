@@ -1,4 +1,4 @@
-#include "sharedFile.h"
+#include "testConly.h"
 
 int CsharedFunction()
 {
