@@ -566,7 +566,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
         }
       fout << "\t\t\t\tStackReserveSize=\"" 
            << m_Makefile->GetDefinition("CMAKE_CXX_STACK_SIZE") << "\"\n";
-      temp = m_ExecutableOutputPath;
+      temp = m_LibraryOutputPath;
       temp += configName;
       temp += "/";
       temp += libName;
