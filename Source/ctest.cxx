@@ -1104,8 +1104,6 @@ void ctest::ProcessDirectory(std::vector<std::string> &passed,
   int firstTest = 1;
   long line = 0;
   
-  std::string name;
-  std::vector<std::string> args;
   cmRegularExpression ireg(this->m_IncludeRegExp.c_str());
   cmRegularExpression ereg(this->m_ExcludeRegExp.c_str());
   cmRegularExpression dartStuff("([\t\n ]*<DartMeasurement.*/DartMeasurement[a-zA-Z]*>[\t ]*[\n]*)");

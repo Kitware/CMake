@@ -295,7 +295,6 @@ void cmExecuteCommand(void *arg, const char *name,
                       int numArgs, const char **args)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
-  std::vector<std::string> args2;
   cmListFileFunction lff;
   lff.m_Name = name;
   for(int i = 0; i < numArgs; ++i)
