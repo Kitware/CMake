@@ -195,7 +195,6 @@ void ctest::ProcessDirectory(std::vector<std::string> &passed,
         // find the test executable
         std::string testCommand = 
 			cmSystemTools::EscapeSpaces(this->FindExecutable(args[1].c_str()).c_str());
-
         // continue if we did not find the executable
         if (testCommand == "")
           {
@@ -204,6 +203,7 @@ void ctest::ProcessDirectory(std::vector<std::string> &passed,
           continue;
           }
         
+	testCommand = cmSystemTools::ConvertToOutputPath(testCommand.c_str());
         // add the arguments
         std::vector<std::string>::iterator j = args.begin();
         ++j;
