@@ -123,3 +123,14 @@ VTK_MAKE_INSTANTIATOR(vtkWraplibInstantiator
                       EXPORT_MACRO VTK_WRAPLIB_EXPORT
                       HEADER_LOCATION ${Wrapping_BINARY_DIR}
                       GROUP_SIZE 5)
+
+#
+# ITK Tcl Wrapping
+#
+SET(CABLE "echo")
+SET(CABLE_INCLUDE_DIR ${Wrapping_SOURCE_DIR})
+ADD_LIBRARY(wrapITK)
+ITK_WRAP_TCL(wrapITK itkWrapperConfig.cxx)
+CONFIGURE_FILE(${Wrapping_SOURCE_DIR}/itkWrapperConfig.cxx
+	       ${Wrapping_BINARY_DIR}/itkWrapperConfig_tcl.cxx
+               COPYONLY IMMEDIATE)
