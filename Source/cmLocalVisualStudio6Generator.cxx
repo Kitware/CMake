@@ -164,10 +164,10 @@ void cmLocalVisualStudio6Generator::AddDSPBuildRule(cmSourceGroup& sourceGroup)
   std::string makefileIn = m_Makefile->GetStartDirectory();
   makefileIn += "/";
   makefileIn += "CMakeLists.txt";
-  std::string makefileInNC = makefileIn;
   makefileIn = cmSystemTools::ConvertToOutputPath(makefileIn.c_str());
   std::string dsprule = "${CMAKE_COMMAND}";
   m_Makefile->ExpandVariablesInString(dsprule);
+  dsprule = cmSystemTools::ConvertToOutputPath(dsprule.c_str());
   std::string args = makefileIn;
   args += " -H";
   args +=
@@ -203,7 +203,7 @@ void cmLocalVisualStudio6Generator::AddDSPBuildRule(cmSourceGroup& sourceGroup)
   
   std::vector<std::string> outputs;
   outputs.push_back(dspname);
-  cmCustomCommand cc(makefileInNC.c_str(), dsprule.c_str(),
+  cmCustomCommand cc(makefileIn.c_str(), dsprule.c_str(),
                      args.c_str(),
                      listFiles, 
                      outputs);
@@ -555,7 +555,7 @@ cmLocalVisualStudio6Generator::CreateTargetRules(const cmTarget &target,
         {
         customRuleCode += "\t";
         }
-      customRuleCode += cc.GetCommand() + " " + cc.GetArguments();
+      customRuleCode += cmSystemTools::ConvertToOutputPath(cc.GetCommand().c_str()) + " " + cc.GetArguments();
       }
     }
 
