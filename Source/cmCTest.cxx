@@ -139,7 +139,14 @@ std::string cmCTest::CurrentTime()
   struct tm* t = localtime(&currenttime);
   //return ::CleanString(ctime(&currenttime));
   char current_time[1024];
-  strftime(current_time, 1000, "%a %b %d %H:%M:%S %Z %Y", t);
+  if ( m_ShortDateFormat )
+    {
+    strftime(current_time, 1000, "%b %d %H:%M %Z", t);
+    }
+  else
+    {
+    strftime(current_time, 1000, "%a %b %d %H:%M:%S %Z %Y", t);
+    }
   //std::cout << "Current_Time: " << current_time << std::endl;
   return this->MakeXMLSafe(::CleanString(current_time));
 }
@@ -409,6 +416,7 @@ cmCTest::cmCTest()
     {
     m_Tests[cc] = 0;
     }
+  m_ShortDateFormat        = true;
   m_MaximumPassedTestResultSize  = 100 * 1024;
   m_MaximumFailedTestResultSize  = 200 * 1024;
 }

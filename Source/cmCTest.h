@@ -359,6 +359,8 @@ private:
   tm_VectorOfStrings       m_CustomPreMemCheck;
   tm_VectorOfStrings       m_CustomPostMemCheck;
   bool                     m_InteractiveDebugMode;
+
+  bool                     m_ShortDateFormat;
   
   void BlockTestErrorDiagnostics();
   
