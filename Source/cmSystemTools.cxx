@@ -884,7 +884,7 @@ void cmSystemTools::cmCopyFile(const char* source,
       // Final line, but with no newline.
       fout.write(buffer, count);
       }
-    else if(fin.fail())
+    else if ( count == buffer_length - 1 )
       {
       // Part of a line longer than our buffer, clear the fail bit of
       // the stream so that we can continue.
