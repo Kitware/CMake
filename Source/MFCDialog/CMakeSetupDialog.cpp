@@ -608,6 +608,27 @@ void CMakeSetupDialog::OnChangeWhereSource()
 // callback for changing the build directory
 void CMakeSetupDialog::OnChangeWhereBuild() 
 {
+  // The build dir has changed, check if there is a cache, and 
+  // grab the source dir from it
+
+  std::string path = this->m_WhereBuild;
+  cmSystemTools::ConvertToUnixSlashes(path);
+  std::string cache_file = path;
+  cache_file += "/CMakeCache.txt";
+
+  cmCacheManager *cache = cmCacheManager::GetInstance();
+
+  if (cmSystemTools::FileExists(cache_file.c_str()) &&
+      cache->LoadCache(path.c_str()) &&
+      cache->GetCacheEntry("CMAKE_HOME_DIRECTORY"))
+    {
+    path = cmSystemTools::ConvertToOutputPath(
+      cache->GetCacheEntry("CMAKE_HOME_DIRECTORY")->m_Value.c_str());
+    this->m_WhereSource = path.c_str();
+    this->m_WhereSourceControl.SetWindowText(this->m_WhereSource);
+    this->OnChangeWhereSource();
+    }
+
   this->UpdateData();
   m_CacheEntriesList.RemoveAll();
   m_CacheEntriesList.ShowWindow(SW_SHOW);
@@ -1169,32 +1190,46 @@ void CMakeSetupDialog::OnDoubleclickedAdvancedValues()
 }
 
 // Handle param or single dropped file.
-// If it's a directory, use it as source and build dirs
-// otherwise, if it's a CMakeCache, get source dir from cache
-// otherwise use file's dir to set source and build dirs.
+// If the dropped file is a build directory or any file in a 
+// build directory, set the source dir from the cache file,
+// otherwise set the source and build dirs to this file (or dir).
 
 void CMakeSetupDialog::ChangeDirectoriesFromFile(const char* buffer)
 {
-  std::string file = buffer;
-  if (cmSystemTools::FileIsDirectory(file.c_str()))
+  // Get the path to this file
+
+  std::string path = buffer;
+  if (!cmSystemTools::FileIsDirectory(path.c_str()))
     {
-    this->m_WhereSource = this->m_WhereBuild = file.c_str();
+    path = cmSystemTools::GetFilenamePath(path);
     }
   else
     {
-    std::string name = cmSystemTools::GetFilenameName(file);
-    std::string path = cmSystemTools::GetFilenamePath(file);
+    cmSystemTools::ConvertToUnixSlashes(path);
+    }
+
+  // Check if it's a build dir and grab the cache
+
+  std::string cache_file = path;
+  cache_file += "/CMakeCache.txt";
+
+  cmCacheManager *cache = cmCacheManager::GetInstance();
+
+  if (cmSystemTools::FileExists(cache_file.c_str()) &&
+      cache->LoadCache(path.c_str()) &&
+      cache->GetCacheEntry("CMAKE_HOME_DIRECTORY"))
+    {
     path = cmSystemTools::ConvertToOutputPath(path.c_str());
     this->m_WhereBuild = path.c_str();
 
-    cmCacheManager *cache = cmCacheManager::GetInstance();
-    if (name == "CMakeCache.txt" &&
-        cache->LoadCache(path.c_str()) &&
-        cache->GetCacheEntry("CMAKE_HOME_DIRECTORY"))
-      {
-      path = cmSystemTools::ConvertToOutputPath(cache->GetCacheEntry("CMAKE_HOME_DIRECTORY")->m_Value.c_str());
-      }
+    path = cmSystemTools::ConvertToOutputPath(
+      cache->GetCacheEntry("CMAKE_HOME_DIRECTORY")->m_Value.c_str());
     this->m_WhereSource = path.c_str();
+    }
+  else
+    {
+    path = cmSystemTools::ConvertToOutputPath(path.c_str());
+    this->m_WhereSource = this->m_WhereBuild = path.c_str();
     }
 }
 
