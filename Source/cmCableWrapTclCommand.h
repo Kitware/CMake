@@ -45,6 +45,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmCommand.h"
 #include "cmCableClassSet.h"
 
+class cmMakeDepend;
+
 /** \class cmCableWrapTclCommand
  * \brief Define a command that wraps a set of classes in Tcl.
  */
@@ -119,6 +121,9 @@ private:
    * added to the makefile as another set.
    */
   cmCableClassSet* m_CableClassSet;
+
+  ///! The dependency generator.
+  cmMakeDepend* m_MakeDepend;
 };
 
 #endif

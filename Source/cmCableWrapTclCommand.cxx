@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmMakeDepend.h"
 
 cmCableWrapTclCommand::cmCableWrapTclCommand():
-  m_CableClassSet(NULL)
+  m_CableClassSet(NULL), m_MakeDepend(new cmMakeDepend)
 {
 }
 
@@ -55,6 +55,7 @@ cmCableWrapTclCommand::~cmCableWrapTclCommand()
     {
     delete m_CableClassSet;
     }
+  delete m_MakeDepend;
 }
 
 
@@ -113,6 +114,9 @@ bool cmCableWrapTclCommand::InitialPass(std::vector<std::string>& args)
  */
 void cmCableWrapTclCommand::GenerateCableFiles() const
 {
+  // Make sure the dependency generator is ready to go.
+  m_MakeDepend->SetMakefile(m_Makefile);
+
   // Each wrapped class may have an associated "tag" that represents
   // an alternative name without funky C++ syntax in it.  This makes
   // it easier to refer to the class in a Tcl script.  We will also
@@ -320,10 +324,8 @@ void cmCableWrapTclCommand::GenerateCableClassFiles(const char* name,
   depends.push_back(command);
 
   // Get the dependencies of the file.
-  cmMakeDepend md;
-  md.SetMakefile(m_Makefile);
   const cmDependInformation* dependInfo =
-    md.FindDependencies(classCxxName.c_str());
+    m_MakeDepend->FindDependencies(classCxxName.c_str());
   if(dependInfo)
     {
     for(cmDependInformation::DependencySet::const_iterator d = 
