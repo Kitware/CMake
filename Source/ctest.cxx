@@ -26,8 +26,10 @@
 // Taken from Python 2.1.3
 
 #if defined( _WIN32 ) && !defined( __CYGWIN__ )
+# include <sys/timeb.h>
 # define HAVE_FTIME
-# defint FTIME _ftime_
+# define FTIME _ftime
+# define TIMEB _timeb
 #elif defined( __CYGWIN__ ) || defined( __linux__ )
 # include <sys/time.h>
 # define HAVE_GETTIMEOFDAY
@@ -58,7 +60,7 @@ floattime(void)
 #endif /* !HAVE_GETTIMEOFDAY */
   {
 #if defined(HAVE_FTIME)
-  struct timeb t;
+  struct TIMEB t;
   FTIME(&t);
   return (double)t.time + (double)t.millitm * (double)0.001;
 #else /* !HAVE_FTIME */
@@ -162,7 +164,7 @@ std::string ctest::MakeXMLSafe(const std::string& str)
     char ch = str[pos];
     if ( ch > 126 )
       {
-      ost << "&" << hex << ch;
+      ost << "&" << std::hex << (int)ch;
       }
     else
       {
