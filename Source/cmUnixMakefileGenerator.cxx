@@ -525,7 +525,6 @@ void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
   fout << "CMAKE_DEPEND_LIBS = ";
   cmTarget::LinkLibraries& libs = m_Makefile->GetLinkLibraries();
   cmTarget::LinkLibraries::const_iterator lib2;
-
   // Search the list of libraries that will be linked into
   // the executable
   emitted.clear();
@@ -575,7 +574,10 @@ void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
 
     const char* cacheValue
       = cmCacheManager::GetInstance()->GetCacheValue(lib2->first.c_str());
-    if(cacheValue)
+    // if cache and not the current directory add a rule, to
+    // jump into the directory and build for the first time
+    if(cacheValue 
+       && (strcmp(m_Makefile->GetCurrentOutputDirectory(), cacheValue) != 0))
       {
       std::string library = "lib";
       library += lib2->first; 
