@@ -1,4 +1,4 @@
-// No dependencies
+/* No dependencies */
 void NoDepY_func()
 {
 }

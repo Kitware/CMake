@@ -1,4 +1,4 @@
-// Directly depends on Two
+/* Directly depends on Two */
 void TwoFunc();
 
 int main()

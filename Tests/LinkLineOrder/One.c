@@ -1,5 +1,5 @@
-// depends on NoDepC and NoDepE (and hence on NoDepA, NoDepB and
-// NoDepF)
+/* depends on NoDepC and NoDepE (and hence on NoDepA, NoDepB and */
+/*  NoDepF) */
 void NoDepC_func();
 void NoDepE_func();
 

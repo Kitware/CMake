@@ -1,4 +1,4 @@
-// depends on NoDepF
+/* depends on NoDepF */
 void NoDepF_func();
 
 void NoDepE_func()

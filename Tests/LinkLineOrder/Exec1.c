@@ -1,4 +1,4 @@
-// Directly depends on One
+/* Directly depends on One */
 void OneFunc();
 
 int main()
