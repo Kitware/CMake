@@ -573,7 +573,6 @@ bool RunCommandViaWin32(const char* command,
     cmSystemTools::Error("No command specified");
     return false;
     }
-
   cmWin32ProcessExecution resProc;
   if(cmSystemTools::GetRunCommandHideConsole())
     {
@@ -586,6 +585,11 @@ bool RunCommandViaWin32(const char* command,
     }
   if ( !resProc.StartProcess(command, dir, verbose) )
     {
+    output = resProc.GetOutput();
+    if(verbose)
+      {
+      cmSystemTools::Stdout(output.c_str());
+      }
     return false;
     }
   resProc.Wait(timeout);
@@ -1142,6 +1146,15 @@ std::string cmSystemTools::ConvertToOutputPath(const char* path)
     {
     return cmSystemTools::ConvertToUnixOutputPath(path);
     }
+  return cmSystemTools::ConvertToWindowsOutputPath(path);
+#else
+  return cmSystemTools::ConvertToUnixOutputPath(path);
+#endif
+}
+
+std::string cmSystemTools::ConvertToRunCommandPath(const char* path)
+{
+#if defined(_WIN32) && !defined(__CYGWIN__)
   return cmSystemTools::ConvertToWindowsOutputPath(path);
 #else
   return cmSystemTools::ConvertToUnixOutputPath(path);

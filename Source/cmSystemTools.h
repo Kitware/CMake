@@ -252,7 +252,12 @@ public:
     {
       s_ForceUnixPaths = v;
     }
+  // ConvertToOutputPath use s_ForceUnixPaths
   static std::string ConvertToOutputPath(const char* path);
+  // ConvertToRunCommandPath does not use s_ForceUnixPaths and should
+  // be used when RunCommand is called from cmake, because the 
+  // running cmake needs paths to be in its format
+  static std::string ConvertToRunCommandPath(const char* path);
 
   //! Check if the first string ends with the second one.
   static bool StringEndsWith(const char* str1, const char* str2);

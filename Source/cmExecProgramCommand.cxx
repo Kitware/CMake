@@ -88,7 +88,7 @@ bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& args)
   std::string command;
   if(arguments.size())
     {
-    command = cmSystemTools::ConvertToOutputPath(args[0].c_str());
+    command = cmSystemTools::ConvertToRunCommandPath(args[0].c_str());
     command += " ";
     command += arguments;
     }
@@ -103,15 +103,16 @@ bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& args)
     }
   int retVal = 0;
   std::string output;
+  bool result = true;
   if(args.size() - count == 2)
     {
     cmSystemTools::MakeDirectory(args[1].c_str());
-    cmSystemTools::RunCommand(command.c_str(), output, retVal,
-                              cmSystemTools::ConvertToOutputPath(args[1].c_str()).c_str(), verbose);
+    result = cmSystemTools::RunCommand(command.c_str(), output, retVal,
+                                       args[1].c_str(), verbose);
     }
   else
     {
-    cmSystemTools::RunCommand(command.c_str(), output, retVal, 0, verbose);
+    result = cmSystemTools::RunCommand(command.c_str(), output, retVal, 0, verbose);
     }
 
   if ( output_variable.size() > 0 )
@@ -138,6 +139,6 @@ bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& args)
     m_Makefile->AddDefinition(return_variable.c_str(), buffer);
     }
   
-  return true;
+  return result;
 }
 

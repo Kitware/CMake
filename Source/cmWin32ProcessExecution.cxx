@@ -441,9 +441,37 @@ static BOOL RealPopenCreateProcess(const char *cmdstring,
     free(s1);
     return TRUE;
     }
-  output += "CreateProcessError ";
-  output += s2;
+  
+   LPVOID lpMsgBuf;
+
+  FormatMessage( 
+                FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+                NULL,
+                GetLastError(),
+                MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
+                (LPTSTR) &lpMsgBuf,
+                0,
+                NULL 
+                );
+  
+  // Free the buffer.
+ 
+  char* str = 0;
+  str = strcpy(new char[strlen((char*)lpMsgBuf)+1], (char*)lpMsgBuf); 
+  LocalFree( lpMsgBuf );
+  
+  output += "CreateProcessError: ";
+  output += str;
   output += "\n";
+  output += "for command: ";
+  output += s2;
+  if(path)
+    {
+    output += "\nin dir: ";
+    output += path;
+    }
+  output += "\n";
+  delete [] str;
   free(s2);
   free(s1);
   return FALSE;
