@@ -23,7 +23,6 @@
 
 #include <windows.h>
 #include <tchar.h>
-#include <crtdbg.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <tlhelp32.h>
