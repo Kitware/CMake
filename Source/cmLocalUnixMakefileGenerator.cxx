@@ -2669,14 +2669,17 @@ void cmLocalUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
     ctest = m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
     ctest += "/ctest";
     }
-  fout << "ARGS=\n";
-  std::string cmd = this->ConvertToOutputForExisting(ctest.c_str());
-  cmd += " $(ARGS)";
-  this->OutputMakeRule(fout, 
-                       "tests",
-                       "test",
-                       "",
-                       cmd.c_str());
+  if (m_Makefile->IsOn("CMAKE_TESTING_ENABLED"))
+    {
+    fout << "ARGS=\n";
+    std::string cmd = this->ConvertToOutputForExisting(ctest.c_str());
+    cmd += " $(ARGS)";
+    this->OutputMakeRule(fout, 
+                         "tests",
+                         "test",
+                         "",
+                         cmd.c_str());
+    }
 }
 
 void 
