@@ -94,22 +94,24 @@ bool cmTryCompileCommand::InitialPass(std::vector<std::string> const& argv)
   m_Makefile->AddDefinition(argv[0].c_str(), (res == 0 ? "TRUE" : "FALSE"));
       
   // if we created a directory etc, then cleanup after ourselves  
-  /*
-  cmDirectory dir;
-  dir.Load(binaryDirectory);
-  size_t fileNum;
-  for (fileNum = 0; fileNum <  dir.GetNumberOfFiles(); ++fileNum)
+  if (argv.size() == 3)
     {
-    if (strcmp(dir.GetFile(fileNum),".") &&
-        strcmp(dir.GetFile(fileNum),".."))
+    cmDirectory dir;
+    dir.Load(binaryDirectory);
+    size_t fileNum;
+    for (fileNum = 0; fileNum <  dir.GetNumberOfFiles(); ++fileNum)
       {
-      std::string fullPath = binaryDirectory;
-      fullPath += "/";
-      fullPath += dir.GetFile(fileNum);
-      cmSystemTools::RemoveFile(fullPath.c_str());
+      if (strcmp(dir.GetFile(fileNum),".") &&
+          strcmp(dir.GetFile(fileNum),".."))
+        {
+        std::string fullPath = binaryDirectory;
+        fullPath += "/";
+        fullPath += dir.GetFile(fileNum);
+        cmSystemTools::RemoveFile(fullPath.c_str());
+        }
       }
     }
-  */
+  
   return true;
 }
 
