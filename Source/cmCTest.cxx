@@ -1991,7 +1991,8 @@ int cmCTest::TestDirectory(bool memcheck)
     }
   else
     {
-    if (passed.size() && (m_UseIncludeRegExp || m_UseExcludeRegExp)) 
+    if (m_Verbose && passed.size() && 
+      (m_UseIncludeRegExp || m_UseExcludeRegExp)) 
       {
       std::cerr << "\nThe following tests passed:\n";
       for(cmCTest::tm_VectorOfStrings::iterator j = passed.begin();
