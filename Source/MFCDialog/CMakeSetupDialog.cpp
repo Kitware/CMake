@@ -5,7 +5,7 @@
 #include "CMakeSetup.h"
 #include "CMakeSetupDialog.h"
 #include "../cmDSWMakefile.h"
-#include "../itkVC60Configure.h"
+#include "../cmWindowsConfigure.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -227,10 +227,21 @@ void CMakeSetupDialog::OnOK()
   this->UpdateData();
   
   // configure the system for VC60
-  itkVC60Configure config;
+  cmWindowsConfigure config;
   config.SetWhereSource(m_WhereSource);
   config.SetWhereBuild(m_WhereBuild);
-  config.Configure();
+  std::string configSrc;
+  configSrc = m_WhereSource;
+  configSrc += "/CMakeSetupConfig.MSC";
+  if(!config.Configure(configSrc.c_str()))
+    { 
+    std::string error = "Error: in configuring system from: ";
+    error += configSrc;
+    error += "\nProject NOT created!";
+    ::MessageBox(0, error.c_str(), "config ERROR", MB_OK);
+    return;
+    }
+  
   
   cmDSWMakefile builder;
   // Set the ITK home directory

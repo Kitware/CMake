@@ -6,14 +6,14 @@
 # 
 #------------------------------------------------------------------------------
 #
-all: CMakeTargets.make ${OBJ_SUB_DIRS} ${EXECUTABLES} ${SUBDIR_BUILD} ${BUILD_LIB_FILE} ${LOCAL_BUILD_TARGETS} ${CMAKE} 
+all: CMakeTargets.make  ${LOCAL_BUILD_TARGETS} ${BUILD_LIB_FILE} ${EXECUTABLES} ${SUBDIR_BUILD} ${CMAKE} 
 
 #------------------------------------------------------------------------------
 
 ${CMAKE}: ${topdir}/CMake/Source/*.cxx ${topdir}/CMake/Source/*.h
 	cd ${CMAKE_CONFIG_DIR}/CMake/Source; ${MAKE} CMakeBuildTargets
 
-depend: ${CMAKE}
+depend: ${CMAKE} ${SUBDIR_DEPEND}
 	${MAKE} -${MAKEFLAGS} CMakeTargets.make
 
 

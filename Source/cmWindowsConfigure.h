@@ -40,7 +40,7 @@ public:
     {
       m_WhereBuild = dir;
     }
-  virtual void Configure() = 0;
+  virtual bool Configure(const char* input);
 protected:
   std::string m_WhereSource;
   std::string m_WhereBuild;

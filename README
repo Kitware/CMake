@@ -1,14 +1,29 @@
 
 CMakeLists.txt        -> File in each directory that contains classes, exe, etc
 CMakeLists.txt contains the following:
+# build targets
 WIN32_CLASSES =
 UNIX_CLASSES  = 
 ABSTRACT_CLASSES =
 SUBDIRS =
 EXECUTABLES =
+# make flags
+# make flags can use these varibles:
+# ${CMAKE_BINARY_DIR}  The root of the build tree where the binaries are
+# ${CMAKE_SOURCE_ROOT} The root of the source tree where configure is
+INCLUDE_DIRECTORIES = 
+LINK_DIRECTORIES =
+LINK_LIBRARIES = # use the same name as ME =
+WIN32_LIBRARIES =
+UNIX_LIBRARIES =
+
+# name of the library to build
 ME =
+
+# add make commands 
 BEGIN MAKE VERBATIM
 ... # copy stuff into CMakeTargets.make directly
+LOCAL_BUILD_TARGETS = // These are done first before anything else
 END MAKE VERBATIM
 TEMPLATE_INSTANCE_DIR = 
 

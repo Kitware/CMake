@@ -95,10 +95,10 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,260,23,50,14
     EDITTEXT        IDC_WhereSource,13,27,135,13,ES_AUTOHSCROLL
     PUSHBUTTON      "Browse...",IDC_BUTTON2,150,28,43,13
-    LTEXT           "Where is the Insight Source",IDC_STATIC,14,15,104,9
-    EDITTEXT        IDC_WhereBuild,16,67,133,13,ES_AUTOHSCROLL
+    LTEXT           "Where is the source code:",IDC_STATIC,15,15,104,9
+    EDITTEXT        IDC_WhereBuild,14,67,133,13,ES_AUTOHSCROLL
     PUSHBUTTON      "Browse...",IDC_BUTTON3,151,66,43,13
-    LTEXT           "Where do you want to build the binaries",IDC_STATIC,16,
+    LTEXT           "Where do you want to build the binaries:",IDC_STATIC,16,
                     56,128,9
 END
 
@@ -160,14 +160,6 @@ BEGIN
         RIGHTMARGIN, 228
         TOPMARGIN, 7
         BOTTOMMARGIN, 48
-    END
-
-    IDD_CMAKESETUPDIALOG_DIALOG, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 313
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 193
     END
 END
 #endif    // APSTUDIO_INVOKED

@@ -21,9 +21,9 @@ void cmDSPMakefile::OutputDSPFile()
   for(i = includes.begin(); i != includes.end(); ++i)
     {
     std::string include = *i;
-    cmSystemTools::ReplaceString(include, "${CMAKE_CONFIG_DIR}",
+    cmSystemTools::ReplaceString(include, "${CMAKE_BINARY_DIR}",
 				 this->GetOutputHomeDirectory() );
-    cmSystemTools::ReplaceString(include, "${srcdir}",
+    cmSystemTools::ReplaceString(include, "${CMAKE_SOURCE_ROOT}",
 				 this->GetHomeDirectory() );
     m_IncludeOptions +=  "/I \"";
     m_IncludeOptions += include;
@@ -48,7 +48,7 @@ void cmDSPMakefile::OutputDSPFile()
     {
     m_DebugLibraryOptions += " /LIBPATH:\"";
     m_DebugLibraryOptions += *i;
-    cmSystemTools::ReplaceString(m_DebugLibraryOptions, "${CMAKE_CONFIG_DIR}",
+    cmSystemTools::ReplaceString(m_DebugLibraryOptions, "${CMAKE_BINARY_DIR}",
 				 this->GetOutputHomeDirectory() );
     if(i->find("Debug") == std::string::npos)
       {

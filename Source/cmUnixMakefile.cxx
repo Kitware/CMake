@@ -1,4 +1,5 @@
 #include "cmUnixMakefile.h"
+#include "cmSystemTools.h"
 #include <fstream>
 #include <iostream>
 
@@ -143,6 +144,9 @@ void cmUnixMakefile::OutputMakefile(const char* file)
       linkLibs += " ";
       }
     linkLibs += " ${LOCAL_LINK_FLAGS} ";
+    cmSystemTools::ReplaceString(linkLibs, "${CMAKE_BINARY_DIR}",
+				 this->GetOutputHomeDirectory() );
+    cout << "link libs = " << linkLibs.c_str() << endl;
     // Now create rules for all of the executables to be built
     for(int i = 0; i < m_Classes.size(); i++)
       {
