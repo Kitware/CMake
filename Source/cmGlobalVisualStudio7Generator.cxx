@@ -75,7 +75,17 @@ int cmGlobalVisualStudio7Generator::TryCompile(const char *,
 #endif
   makeCommand += " ";
   makeCommand += projectName;
-  makeCommand += ".sln /build Debug /project ";
+  makeCommand += ".sln /build ";
+  if ( m_LocalGenerators[0]->GetMakefile()->GetDefinition("CMAKE_TRY_COMPILE_CONFIGURATION") )
+    {
+    makeCommand += 
+      m_LocalGenerators[0]->GetMakefile()->GetDefinition("CMAKE_TRY_COMPILE_CONFIGURATION");
+    }
+  else
+    {
+    makeCommand += "Debug";
+    }
+  makeCommand += " /project ";
   if (targetName)
     {
     makeCommand += targetName;

@@ -114,7 +114,17 @@ int cmGlobalVisualStudio6Generator::TryCompile(const char *,
     {
     makeCommand += "ALL_BUILD";
     }
-  makeCommand += " - Debug\"";
+  makeCommand += " - ";
+  if ( m_LocalGenerators[0]->GetMakefile()->GetDefinition("CMAKE_TRY_COMPILE_CONFIGURATION") )
+    {
+    makeCommand += 
+      m_LocalGenerators[0]->GetMakefile()->GetDefinition("CMAKE_TRY_COMPILE_CONFIGURATION");
+    }
+  else
+    {
+    makeCommand += "Debug";
+    }
+  makeCommand += "\"";
   int retVal;
   int timeout = cmGlobalGenerator::s_TryCompileTimeout;
   if (!cmSystemTools::RunSingleCommand(makeCommand.c_str(), output, 
