@@ -29,19 +29,19 @@ cmGlobalXCodeGenerator::cmGlobalXCodeGenerator()
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalXCodeGenerator::EnableLanguage(std::vector<std::string>const& lang,
-                                                    cmMakefile *mf)
+void cmGlobalXCodeGenerator::EnableLanguage(std::vector<std::string>const& ,
+                                                    cmMakefile *)
 {
   //this->cmGlobalGenerator::EnableLanguage(lang, mf);
 }
 
 //----------------------------------------------------------------------------
 int cmGlobalXCodeGenerator::TryCompile(const char *, 
-                                               const char *bindir, 
-                                               const char *projectName,
-                                               const char *targetName,
-                                               std::string *output,
-                                               cmMakefile* mf)
+                                               const char *, 
+                                               const char *,
+                                               const char *,
+                                               std::string *,
+                                               cmMakefile* )
 {
   // FIXME
   return 1;
@@ -158,9 +158,9 @@ void cmGlobalXCodeGenerator::OutputXCodeProject(cmLocalGenerator* root,
 
 //----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::WriteXCodePBXProj(std::ostream& fout,
-                                               cmLocalGenerator* root,
+                                               cmLocalGenerator* ,
                                                std::vector<cmLocalGenerator*>& 
-                                               generators)
+                                               )
 {
   fout << "// !$*UTF8*$!\n";
   fout << "{\n";
