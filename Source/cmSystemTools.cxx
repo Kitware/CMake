@@ -38,13 +38,20 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =========================================================================*/
-#include "cmSystemTools.h"
+#include "cmSystemTools.h"   
 #include "errno.h"
 #include "stdio.h"
 #include <sys/stat.h>
 #include "cmRegularExpression.h"
 #include <ctype.h>
 #include "cmDirectory.h"
+
+// support for realpath call
+#ifndef _WIN32
+#include <limits.h>
+#include <stdlib.h>
+#include <sys/param.h>
+#endif
 
 #if defined(_MSC_VER) || defined(__BORLANDC__)
 #include <windows.h>
@@ -1174,6 +1181,7 @@ void cmSystemTools::SplitProgramPath(const char* in_name,
  */
 std::string cmSystemTools::CollapseFullPath(const char* in_name)
 {
+#ifdef _WIN32
   std::string dir, file;
   cmSystemTools::SplitProgramPath(in_name, dir, file);
   // Ultra-hack warning:
@@ -1186,8 +1194,16 @@ std::string cmSystemTools::CollapseFullPath(const char* in_name)
 
   cmSystemTools::ConvertToUnixSlashes(newDir);
   std::string newPath = newDir+"/"+file;
-  
   return newPath;
+#else
+# ifdef MAXPATHLEN
+  char resolved_name[MAXPATHLEN];
+# else
+  char resolved_name[PATH_MAX];
+# endif
+   realpath(in_name, resolved_name);
+   return resolved_name;
+#endif
 }
 
 /**
