@@ -574,7 +574,10 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
   // clear the binary directory?
   if (m_EmptyBinDir)
     {
-    cmCTestScriptHandler::EmptyBinaryDirectory(m_BinaryDir.c_str());
+    if ( !cmCTestScriptHandler::EmptyBinaryDirectory(m_BinaryDir.c_str()) )
+      {
+      std::cerr << "Problem removing the binary directory" << std::endl;
+      }
     }
   
   // make sure the binary directory exists if it isn't the srcdir

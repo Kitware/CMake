@@ -27,7 +27,11 @@ bool cmCTestEmptyBinaryDirectoryCommand::InitialPass(
     return false;
     }
 
-  cmCTestScriptHandler::EmptyBinaryDirectory(args[0].c_str());
+  if ( !cmCTestScriptHandler::EmptyBinaryDirectory(args[0].c_str()) )
+    {
+    this->SetError("problem removing the binary directory");
+    return false;
+    }  
   
   return true;
 }
