@@ -220,7 +220,8 @@ public:
 
   ///! Find an executable in the system PATH, with optional extra paths.
   static std::string FindProgram(const char* name,
-				 const std::vector<std::string>& path= std::vector<std::string>());
+				 const std::vector<std::string>& path = std::vector<std::string>(),
+                                 bool no_system_path = false);
 
   ///! Find a library in the system PATH, with optional extra paths.
   static std::string FindLibrary(const char* name,

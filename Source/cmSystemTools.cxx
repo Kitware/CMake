@@ -1428,7 +1428,8 @@ std::string cmSystemTools::FindFile(const char* name,
  * found.  Otherwise, the empty string is returned.
  */
 std::string cmSystemTools::FindProgram(const char* name,
-				       const std::vector<std::string>& userPaths)
+				       const std::vector<std::string>& userPaths,
+                                       bool no_system_path)
 {
   // See if the executable exists as written.
   if(cmSystemTools::FileExists(name) &&
@@ -1446,7 +1447,10 @@ std::string cmSystemTools::FindProgram(const char* name,
 
   // Add the system search path to our path.
   std::vector<std::string> path = userPaths;
-  cmSystemTools::GetPath(path);
+  if (!no_system_path)
+    {
+    cmSystemTools::GetPath(path);
+    }
 
   for(std::vector<std::string>::const_iterator p = path.begin();
       p != path.end(); ++p)
