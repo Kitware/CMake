@@ -325,14 +325,14 @@ void cmGlobalGenerator::Configure()
   if(notFoundMap.size())
     {
     std::string notFoundVars;
-    for(std::set<std::string>::iterator i = notFoundMap.begin();
-        i != notFoundMap.end(); ++i)
+    for(std::set<std::string>::iterator ii = notFoundMap.begin();
+        ii != notFoundMap.end(); ++ii)
       { 
-      notFoundVars += *i;
+      notFoundVars += *ii;
       if(manager)
         {
         cmCacheManager::CacheIterator it = 
-          manager->GetCacheIterator(i->c_str());
+          manager->GetCacheIterator(ii->c_str());
         if(it.GetPropertyAsBool("ADVANCED"))
           {
           notFoundVars += " (ADVANCED)";
