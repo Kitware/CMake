@@ -837,6 +837,8 @@ void cmMakefile::ExpandVariablesInString(std::string& source,
 {
   // This method replaces ${VAR} and @VAR@ where VAR is looked up
   // in the m_Definitions map, if not found in the map, nothing is expanded.
+  // It also supports the $ENV{VAR} syntax where VAR is looked up in
+  // the current environment variables.
   
   // start by look for $ or @ in the string
   std::string::size_type markerPos = source.find_first_of("$@");
@@ -856,7 +858,7 @@ void cmMakefile::ExpandVariablesInString(std::string& source,
     // and add it to the result
     result += source.substr(currentPos, markerPos - currentPos);
     char endVariableMarker;     // what is the end of the variable @ or }
-    int markerStartSize = 1;    // size of the start marker 1 or 2
+    int markerStartSize = 1;    // size of the start marker 1 or 2 or 5
     if(source[markerPos] == '$')
       {
       // ${var} case
@@ -864,6 +866,14 @@ void cmMakefile::ExpandVariablesInString(std::string& source,
         {
         endVariableMarker = '}';
         markerStartSize = 2;
+        }
+      // $ENV{var} case
+      else if(markerPos+4 < source.size() && 
+              source[markerPos+4] == '{' &&
+              !source.compare(markerPos+1, 3, "ENV"))
+        {
+        endVariableMarker = '}';
+        markerStartSize = 5;
         }
       else
         {
@@ -878,7 +888,7 @@ void cmMakefile::ExpandVariablesInString(std::string& source,
       // @VAR case
       endVariableMarker = '@';
       }
-    // if it was a valid variable (started with @ or ${ )
+    // if it was a valid variable (started with @ or ${ or $ENV{ )
     if(endVariableMarker != ' ')
       {
       markerPos += markerStartSize; // move past marker
@@ -894,7 +904,7 @@ void cmMakefile::ExpandVariablesInString(std::string& source,
           }
         else
           {
-          result += "${";
+          result += (markerStartSize == 5 ? "$ENV{" : "${");
           }
         currentPos = markerPos;
         }
@@ -902,20 +912,41 @@ void cmMakefile::ExpandVariablesInString(std::string& source,
         {
         // good variable remove it
         std::string var = source.substr(markerPos, endVariablePos - markerPos);
-        DefinitionMap::const_iterator pos = m_Definitions.find(var.c_str());
-        // if found add to result, if not, then it gets blanked
-        if(pos != m_Definitions.end())
+        bool found = false;
+        if (markerStartSize == 5) // $ENV{
           {
-          if (escapeQuotes)
+          char *ptr = getenv(var.c_str());
+          if (ptr) 
             {
-            result += cmSystemTools::EscapeQuotes((*pos).second.c_str());
-            }
-          else
-            {
-            result += (*pos).second;
+            if (escapeQuotes)
+              {
+              result += cmSystemTools::EscapeQuotes(ptr);
+              }
+            else
+              {
+              result += ptr;
+              }
+            found = true;
             }
           }
         else
+          {
+          DefinitionMap::const_iterator pos = m_Definitions.find(var.c_str());
+          if(pos != m_Definitions.end())
+            {
+            if (escapeQuotes)
+              {
+              result += cmSystemTools::EscapeQuotes((*pos).second.c_str());
+              }
+            else
+              {
+              result += (*pos).second;
+              }
+            found = true;
+            }
+          }
+        // if found add to result, if not, then it gets blanked
+        if (!found) 
           {
           // if no definition is found then add the var back
           if(endVariableMarker == '@')
@@ -926,7 +957,7 @@ void cmMakefile::ExpandVariablesInString(std::string& source,
             }
           else
             {
-            result += "${";
+            result += (markerStartSize == 5 ? "$ENV{" : "${");
             result += var;
             result += "}";
             }
@@ -944,11 +975,18 @@ void cmMakefile::ExpandVariablesInString(std::string& source,
 void cmMakefile::RemoveVariablesInString(std::string& source) const
 {
   cmRegularExpression var("(\\${[A-Za-z_0-9]*})");
-  cmRegularExpression var2("(@[A-Za-z_0-9]*@)");
   while (var.find(source))
     {
     source.erase(var.start(),var.end() - var.start());
     }
+
+  cmRegularExpression varb("(\\$ENV{[A-Za-z_0-9]*})");
+  while (varb.find(source))
+    {
+    source.erase(varb.start(),varb.end() - varb.start());
+    }
+
+  cmRegularExpression var2("(@[A-Za-z_0-9]*@)");
   while (var2.find(source))
     {
     source.erase(var2.start(),var2.end() - var2.start());
