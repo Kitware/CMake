@@ -41,7 +41,9 @@ static const cmDocumentationEntry cmDocumentationUsage[] =
 static const cmDocumentationEntry cmDocumentationDescription[] =
 {
   {0,
-   "CMake reads ... ", 0},
+   "The \"DumpDocumentation\" executable is only available in the build "
+   "tree.  It is used for testing, coverage, and documentation.", 0},
+  CMAKE_STANDARD_INTRODUCTION,
   {0,0,0}
 };
 
@@ -73,7 +75,7 @@ int DumpHTML(const char* outname)
   return 0;
 }
 
-int DumpForCoverage()
+int DumpForCoverageToStream(std::ostream& out)
 {
   cmake cmi;
   cmDocumentation doc;
@@ -87,11 +89,29 @@ int DumpForCoverage()
   doc.SetOptionsSection(cmDocumentationOptions);
   doc.SetCommandsSection(&commands[0]);
   doc.SetGeneratorsSection(&generators[0]);
-  doc.PrintDocumentation(cmDocumentation::Usage, std::cout);
-  doc.PrintDocumentation(cmDocumentation::Full, std::cout);
-  doc.PrintDocumentation(cmDocumentation::HTML, std::cout);
-  doc.PrintDocumentation(cmDocumentation::Man, std::cout);
+  doc.PrintDocumentation(cmDocumentation::Usage, out);
+  doc.PrintDocumentation(cmDocumentation::Full, out);
+  doc.PrintDocumentation(cmDocumentation::HTML, out);
+  doc.PrintDocumentation(cmDocumentation::Man, out);
   return 0;
+}
+
+int DumpForCoverage(const char* outname)
+{
+  if(outname)
+    {
+    std::ofstream fout(outname);
+    if(!fout)
+      {
+      std::cerr << "failed to open output file: " << outname << "\n";
+      return -1;
+      }
+    return DumpForCoverageToStream(fout);
+    }
+  else
+    {
+    return DumpForCoverageToStream(std::cout);
+    }
 }
 
 int main(int ac, char** av)
@@ -104,6 +124,14 @@ int main(int ac, char** av)
     if(strcmp(av[1], "--all-for-coverage") == 0)
       {
       coverage = true;
+      if(ac > 2)
+        {
+        outname = av[2];
+        }
+      else
+        {
+        outname = 0;
+        }
       }
     else
       {
@@ -113,7 +141,7 @@ int main(int ac, char** av)
   
   if(coverage)
     {
-    return DumpForCoverage();
+    return DumpForCoverage(outname);
     }
   else
     {

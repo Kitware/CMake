@@ -154,8 +154,10 @@ ADD_EXECUTABLE(cmaketest cmaketest.cxx)
 TARGET_LINK_LIBRARIES(cmaketest CMakeLib)
 
 IF(BUILD_TESTING)
-    ADD_TEST(DumpDocumentation ${EXECUTABLE_OUTPUT_PATH}/DumpDocumentation
-      --all-for-coverage)
+    ADD_TEST(CommandLineTest ${EXECUTABLE_OUTPUT_PATH}/cmaketest 
+      ${CMake_SOURCE_DIR}/Tests/CommandLineTest
+      ${CMake_BINARY_DIR}/Tests/CommandLineTest
+      CommandLineTest)
 
     ADD_TEST(CustomCommand ${EXECUTABLE_OUTPUT_PATH}/cmaketest 
       ${CMake_SOURCE_DIR}/Tests/CustomCommand
