@@ -636,10 +636,15 @@ if [ "x${cmake_ansi_cxx_flags}" != "x" ]; then
   cmake_cxx_flags="${cmake_ansi_cxx_flags} ${cmake_cxx_flags}"
 fi
 
+if [ "x${cmake_c_flags}" != "x" ]; then
+  cmake_c_flags="${cmake_c_flags} "
+fi
+
 if [ "x${cmake_cxx_flags}" != "x" ]; then
   cmake_cxx_flags="${cmake_cxx_flags} "
 fi
 
+cmake_c_flags="${cmake_c_flags}-I`cmake_escape \"${cmake_source_dir}/Source\"` -I`cmake_escape \"${cmake_bootstrap_dir}\"`"
 cmake_cxx_flags="${cmake_cxx_flags}-I`cmake_escape \"${cmake_source_dir}/Source\"` -I`cmake_escape \"${cmake_bootstrap_dir}\"`"
 echo "cmake: ${objs}" > "${cmake_bootstrap_dir}/Makefile"
 echo "	${cmake_cxx_compiler} ${LDFLAGS} ${cmake_cxx_flags} ${objs} -o cmake" >> "${cmake_bootstrap_dir}/Makefile"
@@ -651,7 +656,7 @@ done
 for a in ${KWSYS_C_SOURCES}; do
   src=`cmake_escape "${cmake_source_dir}/Source/kwsys/${a}.c"`
   echo "${a}.o : ${src} ${dep}" >> "${cmake_bootstrap_dir}/Makefile"
-  echo "	${cmake_cxx_compiler} ${cmake_cxx_flags} -DKWSYS_NAMESPACE=cmsys -c ${src} -o ${a}.o" >> "${cmake_bootstrap_dir}/Makefile"
+  echo "	${cmake_c_compiler} ${cmake_c_flags} -DKWSYS_NAMESPACE=cmsys -c ${src} -o ${a}.o" >> "${cmake_bootstrap_dir}/Makefile"
 done
 for a in ${KWSYS_CXX_SOURCES}; do
   src=`cmake_escape "${cmake_source_dir}/Source/kwsys/${a}.cxx"`
