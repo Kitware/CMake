@@ -2026,13 +2026,15 @@ void cmUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
     replace = comment;
     m_Makefile->ExpandVariablesInString(replace);
     fout << "#---------------------------------------------------------\n";
-    fout << "# " << comment;
+    fout << "# " << replace;
     fout << "\n#\n";
     }
   fout << "\n";
+
   replace = target;
   m_Makefile->ExpandVariablesInString(replace);
   fout << this->ConvertToOutputPath(replace.c_str()) << ": ";
+
   if(depends)
     {
     replace = depends;
@@ -2040,61 +2042,29 @@ void cmUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
     fout << replace.c_str();
     }
   fout << "\n";
-  if(command)
+
+  const char* commands[] = { command, command2, command3, command4 };
+
+  for (int i = 0; i < sizeof(commands) / sizeof(commands[0]); ++i) 
     {
-    replace = command;
-    m_Makefile->ExpandVariablesInString(replace);
-    if(replace[0] != '-' && replace.find("echo") != 0  
-       && replace.find("$(MAKE)") != 0)
+    if(commands[i])
       {
-      std::string echostring = replace;
-      cmSystemTools::ReplaceString(echostring, "\n", "\\n");
-      fout << "\t" << "echo \"" << echostring.c_str() << "\"\n";
+      replace = commands[i];
+      m_Makefile->ExpandVariablesInString(replace);
+      if(replace[0] != '-' && replace.find("echo") != 0  
+         && replace.find("$(MAKE)") != 0)
+        {
+        std::string echostring = replace;
+        cmSystemTools::ReplaceString(echostring, "\n\t", "\n\techo ");
+        // let's try to see what happens without \"
+        // fout << "\techo \"" << echostring.c_str() << "\"\n";
+        fout << "\techo " << echostring.c_str() << "\n";
+        }
+      fout << "\t" << replace.c_str() << "\n";
       }
-    fout << "\t" << replace.c_str() << "\n";
-    }
-  if(command2)
-    {
-    replace = command2;
-    m_Makefile->ExpandVariablesInString(replace);
-    if(replace[0] != '-' && replace.find("echo") != 0  
-       && replace.find("$(MAKE)") != 0)
-      {
-      std::string echostring = replace;
-      cmSystemTools::ReplaceString(echostring, "\n", "\\n");
-      fout << "\t" << "echo \"" << echostring.c_str() << "\"\n";
-      }
-    fout << "\t" << replace.c_str() << "\n";
-    }
-  if(command3)
-    {
-    replace = command3;
-    m_Makefile->ExpandVariablesInString(replace);
-    if(replace[0] != '-' && replace.find("echo") != 0  
-       && replace.find("$(MAKE)") != 0)
-      {
-      std::string echostring = replace;
-      cmSystemTools::ReplaceString(echostring, "\n", "\\n");
-      fout << "\t" << "echo \"" << echostring.c_str() << "\"\n";
-      }
-    fout << "\t" << replace.c_str() << "\n";
-    }
-  if(command4)
-    {
-    replace = command4;
-    m_Makefile->ExpandVariablesInString(replace);
-    if(replace[0] != '-' && replace.find("echo") != 0  
-       && replace.find("$(MAKE)") != 0)
-      {
-      std::string echostring = replace;
-      cmSystemTools::ReplaceString(echostring, "\n", "\\n");
-      fout << "\t" << "echo \"" << echostring.c_str() << "\"\n";
-      }
-    fout << "\t" << replace.c_str() << "\n";
     }
   fout << "\n";
 }
-
 
 void cmUnixMakefileGenerator::SetLocal (bool local)
 {

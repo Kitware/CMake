@@ -69,6 +69,10 @@ std::string cmNMakeMakefileGenerator::ShortPath(const char* path)
 // them back together
 std::string cmNMakeMakefileGenerator::ShortPathCommand(const char* command)
 {
+  if (!command)
+    {
+    return "";
+    }
   if(!strchr(command, ' '))
     {
     return command;
@@ -248,78 +252,43 @@ void cmNMakeMakefileGenerator::OutputMakeRule(std::ostream& fout,
                                               const char* command3,
                                               const char* command4)
 {
-  if(!target)
+  std::string short_command;
+  if (command)
     {
-    cmSystemTools::Error("no target for OutputMakeRule");
-    return;
+    short_command = ShortPathCommand(command);
+    command = short_command.c_str();
     }
-  
-  std::string replace;
-  if(comment)
+
+  std::string short_command2;
+  if (command2)
     {
-    replace = comment;
-    m_Makefile->ExpandVariablesInString(replace);
-    fout << "#---------------------------------------------------------\n";
-    fout << "# " << comment;
-    fout << "\n#\n";
+    short_command2 = ShortPathCommand(command2);
+    command2 = short_command2.c_str();
     }
-  fout << "\n";
-  replace = target;
-  m_Makefile->ExpandVariablesInString(replace);
-  replace = this->ConvertToOutputPath(replace.c_str());
-  fout << replace.c_str() << ": ";
-  if(depends)
+
+  std::string short_command3;
+  if (command3)
     {
-    replace = depends;
-    m_Makefile->ExpandVariablesInString(replace);
-    fout << replace.c_str();
+    short_command3 = ShortPathCommand(command3);
+    command3 = short_command3.c_str();
     }
-  fout << "\n";
-  if(command)
+
+  std::string short_command4;
+  if (command4)
     {
-    replace = ShortPathCommand(command);
-    m_Makefile->ExpandVariablesInString(replace);
-    if(replace[0] != '-' && replace.find("echo") != 0 
-       && replace.find("$(MAKE)") != 0)
-      {
-      fout << "\t" << "echo " << replace.c_str() << "\n";
-      }
-    fout << "\t" << replace.c_str() << "\n";
+    short_command4 = ShortPathCommand(command4);
+    command4 = short_command4.c_str();
     }
-  if(command2)
-    {
-    replace = ShortPathCommand(command2);
-    m_Makefile->ExpandVariablesInString(replace);
-    if(replace[0] != '-' && replace.find("echo") != 0 
-       && replace.find("$(MAKE)") != 0)
-      {
-      fout << "\t" << "echo " << replace.c_str() << "\n";
-      }
-    fout << "\t" << replace.c_str() << "\n";
-    }
-  if(command3)
-    {
-    replace = ShortPathCommand(command3);
-    m_Makefile->ExpandVariablesInString(replace);
-    if(replace[0] != '-' && replace.find("echo") != 0 
-       && replace.find("$(MAKE)") != 0)
-      {
-      fout << "\t" << "echo " << replace.c_str() << "\n";
-      }
-    fout << "\t" << replace.c_str() << "\n";
-    }
-  if(command4)
-    {
-    replace = ShortPathCommand(command4);
-    m_Makefile->ExpandVariablesInString(replace);
-    if(replace[0] != '-' && replace.find("echo") != 0 
-       && replace.find("$(MAKE)") != 0)
-      {
-      fout << "\t" << "echo " << replace.c_str() << "\n";
-      }
-    fout << "\t" << replace.c_str() << "\n";
-    }
-  fout << "\n";
+
+  cmUnixMakefileGenerator::OutputMakeRule(fout, 
+                                          comment, 
+                                          target, 
+                                          depends, 
+                                          command, 
+                                          command2, 
+                                          command3, 
+                                          command4);
+  return;
 }
 
 void 
