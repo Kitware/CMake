@@ -397,6 +397,10 @@ void cmGlobalGenerator::SetLanguageEnabled(const char* l, cmMakefile* mf)
 }
 bool cmGlobalGenerator::IgnoreFile(const char* l)
 {
+  if(this->GetLanguageFromExtension(l))
+    {
+    return false;
+    }
   return (m_IgnoreExtensions.count(l) > 0);
 }
 
