@@ -301,3 +301,11 @@ private:
    "A makefile generator is responsible for generating a particular build " \
    "system.  Possible generator names are\n" \
    "  \"Unix Makefiles\" - Standard UNIX Makefiles"}
+
+#define CMAKE_STANDARD_INTRODUCTION \
+  {0, \
+   "CMake is a cross-platform build system generator.  Projects " \
+   "specify their build process with platform-independent CMake listfiles " \
+   "included in each directory of a source tree with the name CMakeLists.txt.  " \
+   "Users build a project by using CMake to generate a build system " \
+   "for a native tool on their platform.", 0}
