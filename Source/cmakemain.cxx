@@ -21,6 +21,7 @@
 #include "cmListFileCache.h"
 
 int do_cmake(int ac, char** av);
+void updateProgress(const char *msg, float prog, void *cd);
 
 int main(int ac, char** av)
 {
@@ -67,6 +68,15 @@ int do_cmake(int ac, char** av)
     wizard.RunWizard(args); 
     return 0;
     }
-  cmake cm;
+  cmake cm;  
+  cm.SetProgressCallback(updateProgress, 0);
   return cm.Run(args); 
+}
+
+void updateProgress(const char *msg, float prog, void*)
+{
+  if ( prog < 0 )
+    {
+    cout << "-- " << msg << endl;
+    }
 }
