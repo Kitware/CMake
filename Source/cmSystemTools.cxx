@@ -844,7 +844,7 @@ void cmSystemTools::GetArguments(std::string& line,
   while(!done)
     {
     std::string arg;
-    std::string::size_type endpos;
+    std::string::size_type endpos=0;
     bool foundQuoted = quotedArgument.find(line.c_str());
     bool foundNormal = normalArgument.find(line.c_str());
 
