@@ -956,6 +956,19 @@ void CMakeSetupDialog::LoadCacheFromDiskToGUI()
   if(m_WhereBuild != "")
     {
     cachem->LoadCache(m_WhereBuild);
+    cmCacheManager::CacheIterator itm = cachem->NewIterator();
+    if ( itm.Find("CMAKE_HOME_DIRECTORY"))
+      {
+      std::string path = ConvertToWindowsPath(itm.GetValue());
+      this->m_WhereSource = path.c_str();
+      this->m_WhereSourceControl.SetWindowText(this->m_WhereSource);
+      this->OnChangeWhereSource();
+      }
+    m_CMakeInstance->SetHomeDirectory(m_WhereSource);
+    m_CMakeInstance->SetStartDirectory(m_WhereSource);
+    m_CMakeInstance->SetHomeOutputDirectory(m_WhereBuild);
+    m_CMakeInstance->SetStartOutputDirectory(m_WhereBuild);
+    m_CMakeInstance->PreLoadCMakeFiles();
     this->FillCacheGUIFromCacheManager();
     cmCacheManager::CacheIterator it = 
       cachem->GetCacheIterator("CMAKE_GENERATOR");

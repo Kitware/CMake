@@ -1182,16 +1182,22 @@ bool cmake::CacheVersionMatches()
 void cmake::PreLoadCMakeFiles()
 {
   std::string pre_load = this->GetHomeDirectory();
-  pre_load += "/PreLoad.cmake";
-  if ( cmSystemTools::FileExists(pre_load.c_str()) )
+  if ( pre_load.size() > 0 )
     {
-    this->ReadListFile(pre_load.c_str());
+    pre_load += "/PreLoad.cmake";
+    if ( cmSystemTools::FileExists(pre_load.c_str()) )
+      {
+      this->ReadListFile(pre_load.c_str());
+      }
     }
   pre_load = this->GetHomeOutputDirectory();
-  pre_load += "/PreLoad.cmake";
-  if ( cmSystemTools::FileExists(pre_load.c_str()) )
+  if ( pre_load.size() > 0 )
     {
-    this->ReadListFile(pre_load.c_str());
+    pre_load += "/PreLoad.cmake";
+    if ( cmSystemTools::FileExists(pre_load.c_str()) )
+      {
+      this->ReadListFile(pre_load.c_str());
+      }
     }
 }
 
