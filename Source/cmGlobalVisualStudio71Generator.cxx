@@ -48,7 +48,8 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(std::ostream& fout,
   this->WriteSLNHeader(fout);
   
   // Get the home directory with the trailing slash
-  std::string homedir = m_CMakeInstance->GetHomeDirectory();
+  #undef GetCurrentDirectory
+  std::string homedir = root->GetMakefile()->GetCurrentDirectory();
   homedir += "/";
   bool doneAllBuild = false;
   bool doneRunTests = false;
