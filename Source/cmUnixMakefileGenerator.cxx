@@ -1351,13 +1351,13 @@ void cmUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
     if (l->second.GetInstallPath() != "")
       {
       // first make the directories for each target 
-      fout << "\t@if [ ! -d " << prefix << l->second.GetInstallPath() << 
+      fout << "\t@if [ ! -d $(DESTDIR)" << prefix << l->second.GetInstallPath() << 
 	" ] ; then \\\n";
-      fout << "\t   echo \"Making directory " << prefix 
+      fout << "\t   echo \"Making directory $(DESTDIR)" << prefix 
 	   << l->second.GetInstallPath() << " \"; \\\n";
-      fout << "\t   mkdir -p " << prefix << l->second.GetInstallPath() 
+      fout << "\t   mkdir -p $(DESTDIR)" << prefix << l->second.GetInstallPath() 
 	   << "; \\\n";
-      fout << "\t   chmod 755 " <<  prefix << l->second.GetInstallPath() 
+      fout << "\t   chmod 755 $(DESTDIR)" <<  prefix << l->second.GetInstallPath() 
 	   << "; \\\n";
       fout << "\t else true; \\\n";
       fout << "\t fi\n";
@@ -1368,26 +1368,26 @@ void cmUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
 	  fout << "\t$(INSTALL_DATA) " << m_LibraryOutputPath << "lib" 
                << l->first;
           fout << ".a";
-	  fout << " " << prefix << l->second.GetInstallPath() << "\n";
+	  fout << " $(DESTDIR)" << prefix << l->second.GetInstallPath() << "\n";
 	  break;
 	case cmTarget::SHARED_LIBRARY:
 	  fout << "\t$(INSTALL_DATA) " << m_LibraryOutputPath << "lib" 
                << l->first;
           fout << m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
-	  fout << " " << prefix << l->second.GetInstallPath() << "\n";
+	  fout << " $(DESTDIR)" << prefix << l->second.GetInstallPath() << "\n";
 	  break;
 	case cmTarget::MODULE_LIBRARY:
 	  fout << "\t$(INSTALL_DATA) " << m_LibraryOutputPath << "lib" 
                << l->first;
           fout << m_Makefile->GetDefinition("CMAKE_MODULE_SUFFIX");
-	  fout << " " << prefix << l->second.GetInstallPath() << "\n";
+	  fout << " $(DESTDIR)" << prefix << l->second.GetInstallPath() << "\n";
 	  break;
 	case cmTarget::WIN32_EXECUTABLE:
 	case cmTarget::EXECUTABLE:
           fout << "\t$(INSTALL_PROGRAM) " << m_ExecutableOutputPath 
                << l->first
                << cmSystemTools::GetExecutableExtension()
-	       << " " << prefix << l->second.GetInstallPath() << "\n";
+	       << " $(DESTDIR)" << prefix << l->second.GetInstallPath() << "\n";
 	  break;
 	case cmTarget::INSTALL_FILES:
 	  {
@@ -1408,7 +1408,7 @@ void cmUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
               fout << "\t   $(INSTALL_DATA) ";
               }
 	    fout << *i
-		 << " " << prefix << l->second.GetInstallPath() << "; \\\n";
+		 << " $(DESTDIR)" << prefix << l->second.GetInstallPath() << "; \\\n";
 	    fout << "\t elif [ -f $(CMAKE_CURRENT_SOURCE)/" << *i << " ] ; then \\\n";
             // avoid using install-sh to install install-sh
             // does not work on windows....
@@ -1421,7 +1421,7 @@ void cmUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
               fout << "\t   $(INSTALL_DATA) ";
               }
 	    fout << "$(CMAKE_CURRENT_SOURCE)/" << *i 
-		 << " " << prefix << l->second.GetInstallPath() << "; \\\n";
+		 << " $(DESTDIR)" << prefix << l->second.GetInstallPath() << "; \\\n";
 	    fout << "\telse \\\n";
 	    fout << "\t   echo \" ERROR!!! Unable to find: " << *i 
 		 << " \"; \\\n";	 
@@ -1448,7 +1448,7 @@ void cmUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
               fout << "\t   $(INSTALL_PROGRAM) ";
               }
 	    fout << *i
-		 << " " << prefix << l->second.GetInstallPath() << "; \\\n";
+		 << " $(DESTDIR)" << prefix << l->second.GetInstallPath() << "; \\\n";
 	    fout << "\t elif [ -f $(CMAKE_CURRENT_SOURCE)/" << *i << " ] ; then \\\n";
             // avoid using install-sh to install install-sh
             // does not work on windows....
@@ -1461,7 +1461,7 @@ void cmUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
               fout << "\t   $(INSTALL_PROGRAM) ";
               }
 	    fout << "$(CMAKE_CURRENT_SOURCE)/" << *i 
-		 << " " << prefix << l->second.GetInstallPath() << "; \\\n";
+		 << " $(DESTDIR)" << prefix << l->second.GetInstallPath() << "; \\\n";
 	    fout << "\telse \\\n";
 	    fout << "\t   echo \" ERROR!!! Unable to find: " << *i 
 		 << " \"; \\\n";	 
