@@ -36,6 +36,7 @@
 
 cmake::cmake()
 {
+  m_Local = false;
   m_Verbose = false;
   m_InTryCompile = false;
   m_CacheManager = new cmCacheManager;
