@@ -40,6 +40,14 @@ Q190351 and Q150956.
 #include <string.h>  /* strlen, strdup */
 #include <stdio.h>   /* sprintf */
 #include <io.h>      /* _unlink */
+
+#ifndef _MAX_FNAME
+#define _MAX_FNAME 4096
+#endif
+#ifndef _MAX_PATH
+#define _MAX_PATH 4096
+#endif
+
 #ifdef _MSC_VER
 #pragma warning (pop)
 #pragma warning (disable: 4514)
