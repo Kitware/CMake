@@ -23,25 +23,9 @@
 /** \class cmAddCustomCommandCommand
  * \brief 
  *
- *  cmAddCustomCommandCommand defines a new command that can
- *  be executed within the CMake
+ *  cmAddCustomCommandCommand defines a new command (rule) that can
+ *  be executed within the build process
  *
- *  In makefile terms this creates new target in the following form:
- *  OUTPUT1: SOURCE DEPENDS
- *           COMMAND ARGS
- *  OUTPUT2: SOURCE DEPENDS
- *           COMMAND ARGS
- *  ...
- *  Example of usage:
- *  ADD_CUSTOM_COMMAND(
- *             SOURCE ${VTK_TIFF_FAX_EXE} 
- *             COMMAND ${VTK_TIFF_FAX_EXE} 
- *             ARGS -c const ${VTK_BINARY_DIR}/Utilities/tiff/tif_fax3sm.c 
- *             TARGET vtktiff 
- *             OUTPUTS ${VTK_BINARY_DIR}/Utilities/tiff/tif_fax3sm.c
- *                    )
- *  This will create custom target which will generate file tif_fax3sm.c
- *  using command ${VTK_TIFF_FAX_EXE}.
  */
 
 class cmAddCustomCommandCommand : public cmCommand
@@ -88,7 +72,7 @@ public:
     return
       "There are two main signatures for ADD_CUSTOM_COMMAND "
       "The first signature is for adding a custom command "
-      "to a source file.\n" 
+      "to produce an output.\n" 
       "  ADD_CUSTOM_COMMAND(OUTPUT result\n"
       "                     COMMAND command\n"
       "                     [ARGS [args...]]\n"
@@ -96,7 +80,9 @@ public:
       "                     [DEPENDS [depends...]]\n"
       "                     [COMMENT comment])\n"
       "This defines a new command that can be executed during the build "
-      "process.  In makefile terms this creates a new target in the "
+      "process. Note that MAIN_DEPENDENCY is completely optional and is "
+      "used as a suggestion to visual studio about where to hang the "
+      "custom command In makefile terms this creates a new target in the "
       "following form:\n"
       "  OUTPUT: MAIN_DEPENDENCY DEPENDS\n"
       "          COMMAND ARGS\n"
