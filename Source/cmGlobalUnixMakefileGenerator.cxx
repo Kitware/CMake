@@ -76,24 +76,31 @@ void cmGlobalUnixMakefileGenerator::EnableLanguage(const char* lang,
  
     
   std::string fpath = rootBin;
-  fpath += "/CMakeSystem.cmake";
-  mf->ReadListFile(0,fpath.c_str());
+  if(!mf->GetDefinition("CMAKE_SYSTEM_LOADED"))
+    {
+    fpath += "/CMakeSystem.cmake";
+    mf->ReadListFile(0,fpath.c_str());
+    }
   // if C,  then enable C
-  if(lang[0] == 'C')
+  if(lang[0] == 'C' && !mf->GetDefinition("CMAKE_C_COMPILER_LOADED"))
     {
     fpath = rootBin;
     fpath += "/CMakeCCompiler.cmake";
     mf->ReadListFile(0,fpath.c_str());
     }
-  if(strcmp(lang, "CXX") == 0)
+  if(strcmp(lang, "CXX") == 0 && !mf->GetDefinition("CMAKE_CXX_COMPILER_LOADED"))
     {
     fpath = rootBin;
     fpath += "/CMakeCXXCompiler.cmake";
     mf->ReadListFile(0,fpath.c_str());
     }
-  fpath = root;
-  fpath += "/Modules/CMakeSystemSpecificInformation.cmake";
-  mf->ReadListFile(0,fpath.c_str());
+  if(!mf->GetDefinition("CMAKE_SYSTEM_SPECIFIC_INFORMATION_LOADED"))
+    {
+    fpath = root;
+    fpath += "/Modules/CMakeSystemSpecificInformation.cmake";
+    mf->ReadListFile(0,fpath.c_str());
+    }
+  
   if(!m_CMakeInstance->GetLocal())
     {
     // At this point we should have enough info for a try compile
