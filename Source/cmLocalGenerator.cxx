@@ -47,4 +47,4 @@ void cmLocalGenerator::SetGlobalGenerator(cmGlobalGenerator *gg)
     gg->GetCMakeInstance()->GetHomeDirectory());
   m_Makefile->SetHomeOutputDirectory(
     gg->GetCMakeInstance()->GetHomeOutputDirectory());
-};
+}
