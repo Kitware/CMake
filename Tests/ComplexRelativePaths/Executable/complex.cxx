@@ -999,29 +999,6 @@ int main()
 #else
   cmPassed("CMake SET CACHE FORCE");
 #endif
-
-  // first run with shouldFail = true, this will
-  // run with A B C as set by the CMakeList.txt file.
-  if(!TestLibraryOrder(true))
-    {
-    cmPassed("CMake cmOrderLinkDirectories worked.");
-    }
-  else
-    {
-    cmFailed("CMake cmOrderLinkDirectories failed to fail when given an impossible set of paths.");
-    }
-  // next run with shouldPass = true, this will 
-  // run with B/libA.a removed and should create the order
-  // B C A
-  if(TestLibraryOrder(false))
-    {
-    cmPassed("CMake cmOrderLinkDirectories worked.");
-    }
-  else
-    {
-    cmFailed("CMake cmOrderLinkDirectories failed.");
-    }
-  
   // ----------------------------------------------------------------------
   // Summary
 

@@ -91,7 +91,10 @@ private:
   void PrintMap(const char* name,
                 std::map<cmStdString, std::vector<cmStdString> >& m);
   void OrderPaths(std::vector<cmStdString>& paths);
-  bool FindPathNotInDirectoryToAfterList(cmStdString& path);
+  bool CanBeBefore(const cmStdString& d1,
+                   const cmStdString& d2);
+  void AddImpossible(const cmStdString& ,
+                     const cmStdString& );
 private:
   // map from library to directories that it is in other than its full path
   std::map<cmStdString, std::vector<cmStdString> > m_LibraryToDirectories;
