@@ -905,10 +905,12 @@ void cmSystemTools::ExpandListArgument(const std::string& arg,
             }
           newarg = arg.substr(start, len);
           }
+        // unescape semicolons 
         std::string::size_type pos = newarg.find("\\;");
-        if(pos != std::string::npos)
+        while (pos != std::string::npos)
           {
           newarg.erase(pos, 1);
+          pos = newarg.find("\\;");
           }
         newargs.push_back(newarg);
         }
