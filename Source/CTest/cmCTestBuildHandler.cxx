@@ -79,6 +79,7 @@ static const char* cmCTestErrorMatches[] = {
   "ld: 0711-993 Error occurred while writing to the output file:",
   "ld: fatal: ",
   "make: \\*\\*\\*.*Error",
+  "\\*\\*\\* Error code",
   0
 };
 
