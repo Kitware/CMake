@@ -56,6 +56,7 @@
 #include "cmVTKWrapJavaCommand.cxx"
 #include "cmVTKWrapPythonCommand.cxx"
 #include "cmVTKWrapTclCommand.cxx"
+#include "cmQTWrapCPPCommand.cxx"
 #include "cmWrapExcludeFilesCommand.cxx"
 
 void GetPredefinedCommands(std::list<cmCommand*>& commands)
@@ -113,6 +114,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmVTKWrapJavaCommand);
   commands.push_back(new cmVTKWrapPythonCommand);
   commands.push_back(new cmVTKWrapTclCommand);
+  commands.push_back(new cmQTWrapCPPCommand);
   commands.push_back(new cmWrapExcludeFilesCommand);
 }
 
