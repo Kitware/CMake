@@ -95,7 +95,7 @@ private:
   void WriteDSPEndGroup(std::ostream& fout);
 
   void WriteDSPHeader(std::ostream& fout, const char *libName,
-                      const cmTarget &tgt);
+                      const cmTarget &tgt, std::vector<cmSourceGroup> &sgs);
 
   void WriteDSPFooter(std::ostream& fout);
   void AddDSPBuildRule(cmSourceGroup&);
@@ -104,6 +104,13 @@ private:
                        const char* command,
                        const std::set<std::string>& depends,
                        const std::set<std::string>& outputs);
+
+  std::string CreateTargetRules(const cmTarget &target, 
+                                const char *libName);
+  std::string CombineCommands(const cmSourceGroup::Commands &commands,
+                              cmSourceGroup::CommandFiles &totalCommand,
+                              const char *source);
+  
 
   std::string m_IncludeOptions;
   cmMakefile* m_Makefile;

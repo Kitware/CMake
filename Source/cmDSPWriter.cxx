@@ -194,9 +194,6 @@ void cmDSPWriter::WriteDSPFile(std::ostream& fout,
                                  const char *libName,
                                  cmTarget &target)
 {
-  // Write the DSP file's header.
-  this->WriteDSPHeader(fout, libName, target);
-  
   // We may be modifying the source groups temporarily, so make a copy.
   std::vector<cmSourceGroup> sourceGroups = m_Makefile->GetSourceGroups();
   
@@ -227,6 +224,9 @@ void cmDSPWriter::WriteDSPFile(std::ostream& fout,
     cc.ExpandVariables(*m_Makefile);
     sourceGroup.AddCustomCommand(cc);
     }
+  
+  // Write the DSP file's header.
+  this->WriteDSPHeader(fout, libName, target, sourceGroups);
   
   // Find the group in which the CMakeLists.txt source belongs, and add
   // the rule to generate this DSP file.
@@ -263,49 +263,25 @@ void cmDSPWriter::WriteDSPFile(std::ostream& fout,
       std::string source = cc->first;
       const cmSourceGroup::Commands& commands = cc->second;
 
-      fout << "# Begin Source File\n\n";\
-
-      // Tell MS-Dev what the source is.  If the compiler knows how to
-      // build it, then it will.
-      fout << "SOURCE=" << cmSystemTools::EscapeSpaces(source.c_str()) << "\n\n";
-      if (!commands.empty())
+      if (source != libName)
         {
-        // Loop through every custom command generating code from the
-        // current source.
-        // build up the depends and outputs and commands 
-        cmSourceGroup::CommandFiles totalCommand;
-        std::string totalCommandStr;
-        std::string temp;
-        for(cmSourceGroup::Commands::const_iterator c = commands.begin();
-            c != commands.end(); ++c)
+        fout << "# Begin Source File\n\n";
+        
+        // Tell MS-Dev what the source is.  If the compiler knows how to
+        // build it, then it will.
+        fout << "SOURCE=" << cmSystemTools::EscapeSpaces(source.c_str()) << "\n\n";
+        if (!commands.empty())
           {
-          totalCommandStr += "\n\t";
-          temp= c->second.m_Command;
-          cmSystemTools::ConvertToWindowsSlashes(temp);
-          temp = cmSystemTools::EscapeSpaces(temp.c_str());
-          totalCommandStr += temp;
-          totalCommandStr += " ";
-          totalCommandStr += c->second.m_Arguments;
-          totalCommand.Merge(c->second);
-          }      
-        // Create a dummy file with the name of the source if it does
-        // not exist
-        if(totalCommand.m_Outputs.empty())
-          { 
-          std::string dummyFile = m_Makefile->GetStartOutputDirectory();
-          dummyFile += "/";
-          dummyFile += source;
-          if(!cmSystemTools::FileExists(dummyFile.c_str()))
-            {
-            std::ofstream fout(dummyFile.c_str());
-            fout << "Dummy file created by cmake as unused source for utility command.\n";
-            }
+          cmSourceGroup::CommandFiles totalCommand;
+          std::string totalCommandStr;
+          totalCommandStr = this->CombineCommands(commands, totalCommand,
+                                                  source.c_str());
+          this->WriteCustomRule(fout, source.c_str(), totalCommandStr.c_str(), 
+                                totalCommand.m_Depends, 
+                                totalCommand.m_Outputs);
           }
-        this->WriteCustomRule(fout, source.c_str(), totalCommandStr.c_str(), 
-                              totalCommand.m_Depends, 
-                              totalCommand.m_Outputs);
+        fout << "# End Source File\n";
         }
-      fout << "# End Source File\n";
       }
     
     // If the group has a name, write the footer.
@@ -462,9 +438,93 @@ void cmDSPWriter::SetBuildType(BuildType b, const char *libName)
       }
     }
 }
+
+std::string
+cmDSPWriter::CombineCommands(const cmSourceGroup::Commands &commands,
+                             cmSourceGroup::CommandFiles &totalCommand,
+                             const char *source)
   
+{
+  // Loop through every custom command generating code from the
+  // current source.
+  // build up the depends and outputs and commands 
+  std::string totalCommandStr = "";
+  std::string temp;
+  for(cmSourceGroup::Commands::const_iterator c = commands.begin();
+      c != commands.end(); ++c)
+    {
+    totalCommandStr += "\n\t";
+    temp= c->second.m_Command;
+    cmSystemTools::ConvertToWindowsSlashes(temp);
+    temp = cmSystemTools::EscapeSpaces(temp.c_str());
+    totalCommandStr += temp;
+    totalCommandStr += " ";
+    totalCommandStr += c->second.m_Arguments;
+    totalCommand.Merge(c->second);
+    }      
+  // Create a dummy file with the name of the source if it does
+  // not exist
+  if(totalCommand.m_Outputs.empty())
+    { 
+    std::string dummyFile = m_Makefile->GetStartOutputDirectory();
+    dummyFile += "/";
+    dummyFile += source;
+    if(!cmSystemTools::FileExists(dummyFile.c_str()))
+      {
+      std::ofstream fout(dummyFile.c_str());
+      fout << "Dummy file created by cmake as unused source for utility command.\n";
+      }
+    }
+  return totalCommandStr;
+}
+
+
+// look for custom rules on a target and collect them together
+std::string 
+cmDSPWriter::CreateTargetRules(const cmTarget &target, 
+                               const char *libName)
+{
+  std::string customRuleCode = "";
+
+  if (target.GetType() >= cmTarget::UTILITY)
+    {
+    return customRuleCode;
+    }
+  
+  // Find the group in which the lix exe custom rules belong
+  bool init = false;
+  for (std::vector<cmCustomCommand>::const_iterator cr = 
+         target.GetCustomCommands().begin(); 
+       cr != target.GetCustomCommands().end(); ++cr)
+    {
+    cmCustomCommand cc(*cr);
+    cc.ExpandVariables(*m_Makefile);
+    if (cc.GetSourceName() == libName)
+      {
+      if (!init)
+        {
+        // header stuff
+        customRuleCode = "# Begin Special Build Tool\nPostBuild_Cmds=";
+        init = true;
+        }
+      else
+        {
+        customRuleCode += "\t";
+        }
+      customRuleCode += cc.GetCommand() + " " + cc.GetArguments();
+      }
+    }
+
+  if (init)
+    {
+    customRuleCode += "\n# End Special Build Tool\n";
+    }
+  return customRuleCode;
+}
+
 void cmDSPWriter::WriteDSPHeader(std::ostream& fout, const char *libName,
-                                   const cmTarget &target)
+                                   const cmTarget &target, 
+                                 std::vector<cmSourceGroup> &sourceGroups)
 {
   // determine the link directories
   std::string libOptions;
@@ -595,6 +655,10 @@ void cmDSPWriter::WriteDSPHeader(std::ostream& fout, const char *libName,
   libOptions += " /STACK:10000000 ";
   libMultiLineOptions += "# ADD LINK32 /STACK:10000000 \n";
   
+  // are there any custom rules on the target itself
+  // only if the target is a lib or exe
+  std::string customRuleCode = this->CreateTargetRules(target, libName);
+
   std::ifstream fin(m_DSPHeaderTemplate.c_str());
   if(!fin)
     {
@@ -611,6 +675,8 @@ void cmDSPWriter::WriteDSPHeader(std::ostream& fout, const char *libName,
         {
         mfcFlag = "0";
         }
+      cmSystemTools::ReplaceString(line, "CMAKE_CUSTOM_RULE_CODE",
+                                   customRuleCode.c_str());
       cmSystemTools::ReplaceString(line, "CMAKE_MFC_FLAG",
                                    mfcFlag);
       cmSystemTools::ReplaceString(line, "CM_LIBRARIES",

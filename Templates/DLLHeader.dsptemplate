@@ -73,6 +73,8 @@ LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
 # ADD LINK32 CM_OPTIMIZED_LIBRARIES CM_LIBRARIES kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
 
+CMAKE_CUSTOM_RULE_CODE
+
 !ELSEIF  "$(CFG)" == "OUTPUT_LIBNAME - Win32 Debug"
 
 # PROP BASE Use_MFC CMAKE_MFC_FLAG
@@ -101,6 +103,8 @@ BSC32=bscmake.exe
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
 # ADD LINK32 CM_DEBUG_LIBRARIES CM_LIBRARIES kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
+
+CMAKE_CUSTOM_RULE_CODE
 
 !ELSEIF  "$(CFG)" == "OUTPUT_LIBNAME - Win32 MinSizeRel"
 
@@ -133,6 +137,8 @@ LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /stack:0x989680 /dll /machine:I386 
 # ADD LINK32 CM_OPTIMIZED_LIBRARIES CM_LIBRARIES kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /stack:0x989680 /dll /machine:I386
 
+CMAKE_CUSTOM_RULE_CODE
+
 !ELSEIF  "$(CFG)" == "OUTPUT_LIBNAME - Win32 RelWithDebInfo"
 
 # PROP BASE Use_MFC CMAKE_MFC_FLAG
@@ -162,6 +168,7 @@ LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /pdbtype:sept
 # ADD LINK32 CM_OPTIMIZED_LIBRARIES CM_LIBRARIES kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
 
+CMAKE_CUSTOM_RULE_CODE
 
 !ENDIF 
 

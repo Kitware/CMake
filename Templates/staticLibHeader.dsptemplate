@@ -67,6 +67,8 @@ LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo
 
+CMAKE_CUSTOM_RULE_CODE
+
 !ELSEIF  "$(CFG)" == "OUTPUT_LIBNAME - Win32 Debug"
 
 # PROP BASE Use_MFC CMAKE_MFC_FLAG
@@ -91,6 +93,9 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
+
+CMAKE_CUSTOM_RULE_CODE
+
 !ELSEIF  "$(CFG)" == "OUTPUT_LIBNAME - Win32 MinSizeRel"
 
 # PROP BASE Use_MFC CMAKE_MFC_FLAG
@@ -118,6 +123,8 @@ LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo
 
+CMAKE_CUSTOM_RULE_CODE
+
 !ELSEIF  "$(CFG)" == "OUTPUT_LIBNAME - Win32 RelWithDebInfo"
 
 # PROP BASE Use_MFC CMAKE_MFC_FLAG
@@ -143,6 +150,8 @@ BSC32=bscmake.exe
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo
+
+CMAKE_CUSTOM_RULE_CODE
 
 !ENDIF 
 
