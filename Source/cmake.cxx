@@ -53,7 +53,7 @@ void cmNeedBackwardsCompatibility(const std::string& variable,
 {
   if (access_type == cmVariableWatch::UNKNOWN_VARIABLE_READ_ACCESS)
     {
-    std::string message = "Error: An atttempt was made to access a variable: ";
+    std::string message = "An attempt was made to access a variable: ";
     message += variable;
     message += " that has not been defined. Some variables were always defined by CMake in versions prior to 1.6. To fix this you might need to set the cache value of CMAKE_BACKWARDS_COMPATIBILITY to 1.4 or less. If you are writing a CMakeList file, (or have already set CMAKE_BACKWARDS_COMPATABILITY to 1.4 or less) then you probably need to include a CMake module to test for the feature this variable defines.";
     cmSystemTools::Error(message.c_str());
