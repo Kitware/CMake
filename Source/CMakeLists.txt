@@ -161,17 +161,24 @@ IF(BUILD_TESTING)
       ${CMake_BINARY_DIR}/Tests/LoadCommandOneConfig
       LoadedCommand ONLY_ONE_CONFIG)
 
-    ADD_TEST(complex ${CMake_BINARY_DIR}/Source/cmaketest 
-      ${CMake_SOURCE_DIR}/Tests/Complex 
-      ${CMake_BINARY_DIR}/Tests/Complex 
-      complex 
-      ${CMake_BINARY_DIR}/Tests/Complex/bin)
+    # Como does not seem to support shared libraries.
+    GET_FILENAME_COMPONENT(CMAKE_BASE_NAME ${CMAKE_CXX_COMPILER} NAME_WE)
+    IF(CMAKE_BASE_NAME MATCHES "^como$")
+      SET(COMPILER_IS_COMO 1)
+    ENDIF(CMAKE_BASE_NAME MATCHES "^como$")
+    IF(NOT COMPILER_IS_COMO)
+      ADD_TEST(complex ${CMake_BINARY_DIR}/Source/cmaketest 
+        ${CMake_SOURCE_DIR}/Tests/Complex 
+        ${CMake_BINARY_DIR}/Tests/Complex 
+        complex 
+        ${CMake_BINARY_DIR}/Tests/Complex/bin)
 
-    ADD_TEST(complexOneConfig ${CMake_BINARY_DIR}/Source/cmaketest 
-      ${CMake_SOURCE_DIR}/Tests/Complex 
-      ${CMake_BINARY_DIR}/Tests/ComplexOneConfig 
-      complex 
-      ${CMake_BINARY_DIR}/Tests/ComplexOneConfig/bin ONLY_ONE_CONFIG)
+      ADD_TEST(complexOneConfig ${CMake_BINARY_DIR}/Source/cmaketest 
+        ${CMake_SOURCE_DIR}/Tests/Complex 
+        ${CMake_BINARY_DIR}/Tests/ComplexOneConfig 
+        complex 
+        ${CMake_BINARY_DIR}/Tests/ComplexOneConfig/bin ONLY_ONE_CONFIG)
+    ENDIF(NOT COMPILER_IS_COMO)
 
     ADD_TEST(Example ${CMake_BINARY_DIR}/Source/cmaketest 
       ${CMake_SOURCE_DIR}/Example
