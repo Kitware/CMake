@@ -80,6 +80,6 @@ void cmMSProjectGenerator::ComputeSystemInfo()
   // now load the settings
   std::string fpath = 
     cmCacheManager::GetInstance()->GetCacheValue("CMAKE_ROOT");
-  fpath += "/CMakeWindowsSystemConfig.cmake";
+  fpath += "/Templates/CMakeWindowsSystemConfig.cmake";
   m_Makefile->ReadListFile(NULL,fpath.c_str());
 }
