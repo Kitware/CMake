@@ -678,7 +678,7 @@ int cmGlobalGenerator::Build(
   const char *, const char *target,
   std::string *output, 
   const char *makeCommandCSTR,
-  const char *config,
+  const char * /* config */,
   bool clean)
 {
   *output += "\nTesting TryCompileWithoutMakefile\n";
