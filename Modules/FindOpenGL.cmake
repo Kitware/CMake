@@ -133,13 +133,13 @@ IF(OPENGL_INCLUDE_DIR)
 
     SET( OPENGL_FOUND "YES" )
 
-    # The following deprecated settings are for backwards 
-    # compatibility with CMake1.4
+    # This deprecated setting is for backward compatibility with CMake1.4
 
     SET (OPENGL_LIBRARY ${OPENGL_LIBRARIES})
-    SET (OPENGL_INCLUDE_PATH ${OPENGL_INCLUDE_DIR})
 
   ENDIF(OPENGL_gl_LIBRARY)
+
+  # This deprecated setting is for backward compatibility with CMake1.4
 
   SET(OPENGL_INCLUDE_PATH ${OPENGL_INCLUDE_DIR})
 
