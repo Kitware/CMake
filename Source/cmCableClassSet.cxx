@@ -228,6 +228,8 @@ private:
    * Represent the "$SomeSetName" portion of an input string.  This has a
    * reference to the Substitution holding the real output to generate.
    */
+  class ReplacePortion;
+  friend class ReplacePortion;
   class ReplacePortion: public Portion
   {
   public:
@@ -364,7 +366,7 @@ ElementCombinationGenerator
     
     // Put together all the pieces, with substitutions.
     for(Portions::const_iterator i = m_Portions.begin();
-        i != m_Portions.end(); ++i)
+        i != Portions::const_iterator(m_Portions.end()); ++i)
       {
       // See if there is a class associated with this portion.
       const cmCableClass* curClassPortion = (*i)->GetClass();
