@@ -691,6 +691,20 @@ int main()
     cmFailed("ESCAPE_QUOTES is not working");
     }
     
+  
+  // ----------------------------------------------------------------------
+  // Test cmSystemTools::UpperCase
+  std::string str = "abc";
+  std::string strupper = "ABC";
+  if(cmSystemTools::UpperCase(str) == strupper)
+    {
+    cmPassed("cmSystemTools::UpperCase is working");
+    }
+  else
+    {
+    cmFailed("cmSystemTools::UpperCase is working");
+    }
+    
   // ----------------------------------------------------------------------
   // Summary
 

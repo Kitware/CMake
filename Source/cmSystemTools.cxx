@@ -1789,23 +1789,6 @@ std::string cmSystemTools::GetFilenameExtension(const std::string& filename)
     }
 }
 
-/**
- * Return file extension of a full filename (dot included).
- */
-std::string cmSystemTools::GetFilenameShortestExtension(const std::string& filename)
-{
-  std::string name = cmSystemTools::GetFilenameName(filename);
-  std::string::size_type dot_pos = name.rfind(".");
-  if(dot_pos != std::string::npos)
-    {
-    return name.substr(dot_pos);
-    }
-  else
-    {
-    return "";
-    }
-}
-
 
 /**
  * Return file name without extension of a full filename (i.e. without path).

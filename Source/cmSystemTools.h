@@ -248,7 +248,6 @@ public:
   
   ///! return file extension of a full filename (dot included).
   static std::string GetFilenameExtension(const std::string&);
-  static std::string GetFilenameShortestExtension(const std::string&);
   
   ///! return file name without extension of a full filename.
   static std::string GetFilenameNameWithoutExtension(const std::string&);

@@ -103,7 +103,12 @@ ENDFOREACH (ext)
 FIND_LIBRARY(FIND_DUMMY_LIB
              dummylib
              PATHS
-             ${Complex_BINARY_DIR}/Library)
+             ${Complex_BINARY_DIR}/Library DOC "find dummy lib")
+
+FIND_LIBRARY(FIND_DUMMY_LIB
+             NAMES dummylib dummylib2
+             PATHS
+             ${Complex_BINARY_DIR}/Library DOC "find dummy lib")
 
 #
 # Test SET_SOURCE_FILES_PROPERTIES 
@@ -135,7 +140,7 @@ IF (WIN32)
     EXEC_PROGRAM(${CCOMMAND_COMMAND} ARGS "write_regv \"${hkey}\" \"${dir}\"")
     FIND_PATH(REGISTRY_TEST_PATH
               ${file}
-              "[${hkey}]")
+              "[${hkey}]" DOC "Registry_Test_Path")
     EXEC_PROGRAM(${CCOMMAND_COMMAND} ARGS "delete_regv \"${hkey}\"")
     EXEC_PROGRAM(${CCOMMAND_COMMAND} ARGS "remove \"${dir}/${file}\"")
   ENDIF (NOT UNIX)
