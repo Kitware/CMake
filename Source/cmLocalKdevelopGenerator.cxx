@@ -24,10 +24,8 @@
 #include "cmCacheManager.h"
 #include "cmGeneratedFileStream.h"
 #include "cmake.h"
-
 #include <cmsys/RegularExpression.hxx>
 
-#include <iostream>
 
 cmLocalKdevelopGenerator::cmLocalKdevelopGenerator()
   :cmLocalUnixMakefileGenerator()
@@ -38,9 +36,6 @@ cmLocalKdevelopGenerator::~cmLocalKdevelopGenerator()
 {
 }
 
-#include <stdio.h>
-#include <string>
-#include <vector>
 
 void cmLocalKdevelopGenerator::Generate(bool fromTheTop)
 {
