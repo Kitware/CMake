@@ -1,141 +1,116 @@
 #
-# Find the native VTK includes and library
+# Find a VTK installation or build tree.
 #
-# This module defines:
+# When VTK is found, the VTKConfig.cmake file is sourced to setup the
+# location and configuration of VTK.  Please read this file, or
+# VTKConfig.cmake.in from the VTK source tree for the full list of
+# definitions.  Of particular interest is
 #
-# VTK_INSTALL_PATH  - Where is the installed version of VTK.
-# USE_BUILT_VTK     - Should a built-from-source version of VTK be used.
+# VTK_USE_FILE          - A CMake source file that can be included
+#                         to set the include directories, library
+#                         directories, and preprocessor macros.
 #
-# VTK_BINARY_PATH   - Where is (one of) the binary tree(s).
-# USE_INSTALLED_VTK - Should an installed version of VTK be used
+# In addition to the variables read from VTKConfig.cmake, this find
+# module also defines
 #
-# USE_VTK_FILE      - (internal)
-#                     Full path and location to the UseVTK.cmake file.
-#                     This value changes each time USE_BUILT_VTK or 
-#                     USE_INSTALLED_VTK is modified, and only if ONE of
-#                     these setting is set to ON.
+# VTK_DIR      - The directory containing VTKConfig.cmake.  This is either
+#                the root of the build tree, or the lib/vtk
+#                directory.  This is the only cache entry.
 #
-# If VTK is not found, an error is displayed unless VTK_FIND_QUIETLY
-# is on.
+# VTK_FOUND    - Whether VTK was found.  If this is true, VTK_DIR is okay.
+#
+# USE_VTK_FILE - The full path to the UseVTK.cmake file.  This is provided
+#                for backward compatability.  Use VTK_USE_FILE instead.
 #
 
-#
-# Look for a binary tree (built from source)
-# 
-FIND_PATH(VTK_BINARY_PATH UseVTK.cmake
-  [HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\Settings\\StartPath;WhereBuild1]
-  [HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\Settings\\StartPath;WhereBuild2]
-  [HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\Settings\\StartPath;WhereBuild3]
-  [HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\Settings\\StartPath;WhereBuild4]
-  [HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\Settings\\StartPath;WhereBuild5]
-  [HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\Settings\\StartPath;WhereBuild6]
-  [HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\Settings\\StartPath;WhereBuild7]
-  [HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\Settings\\StartPath;WhereBuild8]
-  [HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\Settings\\StartPath;WhereBuild9]
-  [HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\Settings\\StartPath;WhereBuild10]
-  VTKBIN
-  ../VTKBIN
-  ../../VTKBIN
-  $ENV{HOME}/VTKBIN
-  VTK-bin
-  ../VTK-bin
-  ../../VTK-bin
-  $ENV{HOME}/VTK-bin
-  vtkbin
-  ../vtkbin
-  ../../vtkbin
-  $ENV{HOME}/vtkbin
-  VTK-vc
-  ../VTK-vc
-  ../../VTK-vc
-  $ENV{HOME}/VTK-vc
-  VTK-nmake
-  ../VTK-nmake
-  ../../VTK-nmake
-  $ENV{HOME}/VTK-nmake
-)
+# Construct consitent error messages for use below.
+SET(VTK_DIR_DESCRIPTION "directory containing VTKConfig.cmake.  This is either the root of the build tree, or PREFIX/lib/vtk for an installation.")
+SET(VTK_DIR_MESSAGE "VTK not found.  Set VTK_DIR to the ${VTK_DIR_DESCRIPTION}")
 
-#
-# If we found a built tree, USE_BUILT_VTK allows the user to 
-# use it or not. Defaults to ON.
-#
-IF (VTK_BINARY_PATH)
-  SET (USE_BUILT_VTK 1 CACHE BOOL 
-       "Use a built (versus installed) version of VTK. Be sure that VTK_BINARY_PATH is correct.")
-ENDIF (VTK_BINARY_PATH)
+# Search only if the location is not already known.
+IF(NOT VTK_DIR)
+  # Get the system search path as a list.
+  IF(UNIX)
+    STRING(REGEX MATCHALL "[^:]+" VTK_DIR_SEARCH1 $ENV{PATH})
+  ELSE(UNIX)
+    STRING(REGEX REPLACE "\\\\" "/" VTK_DIR_SEARCH1 $ENV{PATH})
+  ENDIF(UNIX)
+  STRING(REGEX REPLACE "/;" ";" VTK_DIR_SEARCH2 ${VTK_DIR_SEARCH1})
 
-#
-# Look for an installed tree
-#
-FIND_PATH(VTK_INSTALL_PATH include/vtk/UseVTK.cmake
-  /usr/local
-  /usr
-  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Kitware\\VTK\\Nightly]
-  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Kitware\\VTK\\43]
-  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Kitware\\VTK\\42]
-  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Kitware\\VTK\\41]
-  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Kitware\\VTK\\40]
-)
+  # Construct a set of paths relative to the system search path.
+  SET(VTK_DIR_SEARCH "")
+  FOREACH(dir ${VTK_DIR_SEARCH2})
+    SET(VTK_DIR_SEARCH ${VTK_DIR_SEARCH} "${dir}/../lib/vtk")
+  ENDFOREACH(dir)
 
-#
-# If we found an installed tree, USE_INSTALLED_VTK allows the user to 
-# use it or not.
-#
-# Defaults to OFF if a built tree was found before (see above), ON otherwise.
-#
-IF (VTK_INSTALL_PATH)
-  IF (USE_BUILT_VTK)
-    SET (USE_INSTALLED_VTK 0 CACHE BOOL 
-         "Use an installed (versus built from source) version of VTK. Be sure that VTK_INSTALL_PATH is correct.")
-  ELSE (USE_BUILT_VTK)
-    SET (USE_INSTALLED_VTK 1 CACHE BOOL 
-         "Use an installed (versus built from source) version of VTK. Be sure that VTK_INSTALL_PATH is correct.")
-  ENDIF (USE_BUILT_VTK)
-ENDIF (VTK_INSTALL_PATH)
+  # Old scripts may set these directories in the CMakeCache.txt file.
+  # They can tell us where to find VTKConfig.cmake.
+  SET(VTK_DIR_SEARCH_LEGACY "")
+  IF(VTK_BINARY_PATH)
+    SET(VTK_DIR_SEARCH_LEGACY ${VTK_DIR_SEARCH_LEGACY} ${VTK_BINARY_PATH})
+  ENDIF(VTK_BINARY_PATH)
+  IF(VTK_INSTALL_PATH)
+    SET(VTK_DIR_SEARCH_LEGACY ${VTK_DIR_SEARCH_LEGACY}
+        ${VTK_INSTALL_PATH}/lib/vtk)
+  ENDIF(VTK_INSTALL_PATH)
 
-#
-# Set the USE_VTK_FILE only if one of USE_BUILT_VTK or USE_INSTALLED_VTK
-# is ON.
-#
-IF (USE_BUILT_VTK)
-  IF (NOT USE_INSTALLED_VTK)
-    IF (EXISTS "${VTK_BINARY_PATH}/UseVTK.cmake")
-      SET (USE_VTK_FILE "${VTK_BINARY_PATH}/UseVTK.cmake")
-    ENDIF (EXISTS "${VTK_BINARY_PATH}/UseVTK.cmake")
-  ENDIF (NOT USE_INSTALLED_VTK)
-ELSE (USE_BUILT_VTK)
-  IF (USE_INSTALLED_VTK)
-    IF (EXISTS "${VTK_INSTALL_PATH}/include/vtk/UseVTK.cmake")
-      SET (USE_VTK_FILE "${VTK_INSTALL_PATH}/include/vtk/UseVTK.cmake")
-    ENDIF (EXISTS "${VTK_INSTALL_PATH}/include/vtk/UseVTK.cmake")
-  ENDIF (USE_INSTALLED_VTK)
-ENDIF (USE_BUILT_VTK)
+  #
+  # Look for an installation or build tree.
+  #
+  FIND_PATH(VTK_DIR VTKConfig.cmake
+    # Support legacy cache files.
+    ${VTK_DIR_SEARCH_LEGACY}
 
-#
-# Display a warning if both settings are set to ON.
-# Otherwise display a warning if VTK was not found.
-#
-IF (USE_BUILT_VTK AND USE_INSTALLED_VTK)
-  MESSAGE ("Warning. Please make sure that only ONE of the USE_INSTALLED_VTK or USE_BUILT_VTK setting is set to ON.")
-ELSE (USE_BUILT_VTK AND USE_INSTALLED_VTK)
-  IF (NOT USE_VTK_FILE)
-    IF (NOT VTK_FIND_QUIETLY)
-      MESSAGE ("Warning. VTK might be found on your system as different flavours: installed VTK or built VTK. Please make sure that the VTK_INSTALL_PATH or VTK_BINARY_PATH setting reflects which VTK you are planning to use, then set ONE of the USE_INSTALLED_VTK or USE_BUILT_VTK setting to ON.")
-    ENDIF (NOT VTK_FIND_QUIETLY)
-  ENDIF (NOT USE_VTK_FILE)
-ENDIF (USE_BUILT_VTK AND USE_INSTALLED_VTK)
+    # Look in places relative to the system executable search path.
+    ${VTK_DIR_SEARCH}
 
-# Note:
-#
-# If you use that module then you are probably relying on VTK to be found
-# on your system. Here is the CMake code you might probably want to use to
-# work hand-in-hand with that module (in that example CAN_BUILD is a var
-# that is set to 0 if your project can not be build):
-#
-# INCLUDE (${CMAKE_ROOT}/Modules/FindVTK.cmake)
-#
-# IF (USE_VTK_FILE)
-#   INCLUDE (${USE_VTK_FILE})
-# ELSE (USE_VTK_FILE)
-#   SET (CAN_BUILD 0)
-# ENDIF (USE_VTK_FILE)
+    # Look in standard UNIX install locations.
+    /usr/local/lib/vtk
+    /usr/lib/vtk
+
+    # Read from the CMakeSetup registry entries.  It is likely that
+    # VTK will have been recently built.
+    [HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\Settings\\StartPath;WhereBuild1]
+    [HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\Settings\\StartPath;WhereBuild2]
+    [HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\Settings\\StartPath;WhereBuild3]
+    [HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\Settings\\StartPath;WhereBuild4]
+    [HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\Settings\\StartPath;WhereBuild5]
+    [HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\Settings\\StartPath;WhereBuild6]
+    [HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\Settings\\StartPath;WhereBuild7]
+    [HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\Settings\\StartPath;WhereBuild8]
+    [HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\Settings\\StartPath;WhereBuild9]
+    [HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\Settings\\StartPath;WhereBuild10]
+
+    # Help the user find it if we cannot.
+    DOC "The ${VTK_DIR_DESCRIPTION}"
+  )
+ENDIF(NOT VTK_DIR)
+
+# If VTK was found, load the configuration file to get the rest of the
+# settings.
+IF(VTK_DIR)
+  # Make sure the VTKConfig.cmake file exists in the directory provided.
+  IF(EXISTS ${VTK_DIR}/VTKConfig.cmake)
+
+    # We found VTK.  Load the settings.
+    SET(VTK_FOUND 1)
+    INCLUDE(${VTK_DIR}/VTKConfig.cmake)
+
+    # Set USE_VTK_FILE for backward-compatability.
+    SET(USE_VTK_FILE ${VTK_USE_FILE})
+  ELSE(EXISTS ${VTK_DIR}/VTKConfig.cmake)
+    # We did not find VTK.
+    SET(VTK_FOUND 0)
+  ENDIF(EXISTS ${VTK_DIR}/VTKConfig.cmake)
+ELSE(VTK_DIR)
+  # We did not find VTK.
+  SET(VTK_FOUND 0)
+ENDIF(VTK_DIR)
+
+# If it was not found, explain to the user how to specify its
+# location.
+IF (NOT VTK_FOUND)
+  IF (NOT VTK_FIND_QUIETLY)
+    MESSAGE(${VTK_DIR_MESSAGE})
+  ENDIF (NOT VTK_FIND_QUIETLY)
+ENDIF (NOT VTK_FOUND)
