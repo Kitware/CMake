@@ -539,10 +539,25 @@ void cmMakefile::AddLinkDirectory(const char* dir)
   // linear search results in n^2 behavior, but n won't be getting
   // much bigger than 20.  We cannot use a set because of order
   // dependency of the link search path.
-  if(std::find(m_LinkDirectories.begin(),
-               m_LinkDirectories.end(), dir) == m_LinkDirectories.end())
+  
+  // remove trailing slashes
+  if(dir && dir[strlen(dir)-1] == '/')
     {
-    m_LinkDirectories.push_back(dir);
+    std::string newdir = dir;
+    newdir = newdir.substr(0, newdir.size()-1);
+    if(std::find(m_LinkDirectories.begin(),
+                 m_LinkDirectories.end(), newdir.c_str()) == m_LinkDirectories.end())
+      {
+      m_LinkDirectories.push_back(newdir);
+      }
+    }
+  else
+    {
+    if(std::find(m_LinkDirectories.begin(),
+                 m_LinkDirectories.end(), dir) == m_LinkDirectories.end())
+      {
+      m_LinkDirectories.push_back(dir);
+      }
     }
 }
 
