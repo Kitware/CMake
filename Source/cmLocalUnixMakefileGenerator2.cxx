@@ -2480,7 +2480,8 @@ cmLocalUnixMakefileGenerator2
 //----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator2
-::AppendAnyDepend(std::vector<std::string>& depends, const char* name)
+::AppendAnyDepend(std::vector<std::string>& depends, const char* name,
+                  bool assume_unknown_is_file)
 {
   // There are a few cases for the name of the target:
   //  - CMake target in this directory: depend on it.
@@ -2589,8 +2590,14 @@ cmLocalUnixMakefileGenerator2
     }
   else if(cmSystemTools::FileIsFullPath(name))
     {
-    // This is a path to a file.  Just trust that it will be present.
+    // This is a path to a file.  Just trust the listfile author that
+    // it will be present or there is a rule to build it.
     depends.push_back(cmSystemTools::CollapseFullPath(name));
+    }
+  else if(assume_unknown_is_file)
+    {
+    // Just assume this is a file or make target that will be present.
+    depends.push_back(name);
     }
 }
 
@@ -2632,7 +2639,7 @@ cmLocalUnixMakefileGenerator2
       d != cc.GetDepends().end(); ++d)
     {
     // Add this dependency.
-    this->AppendAnyDepend(depends, d->c_str());
+    this->AppendAnyDepend(depends, d->c_str(), true);
     }
 }
 

@@ -202,7 +202,8 @@ protected:
 
   void AppendTargetDepends(std::vector<std::string>& depends,
                            const cmTarget& target);
-  void AppendAnyDepend(std::vector<std::string>& depends, const char* name);
+  void AppendAnyDepend(std::vector<std::string>& depends, const char* name,
+                       bool assume_unknown_is_file=false);
   void AppendRuleDepend(std::vector<std::string>& depends,
                         const char* ruleFileName);
   void AppendCustomDepends(std::vector<std::string>& depends,
