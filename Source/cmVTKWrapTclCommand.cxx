@@ -237,10 +237,8 @@ bool cmVTKWrapTclCommand::WriteInit(const char *kitName,
   
   if (!strcmp(kitName,"Vtkcommontcl"))
     {
-    fprintf(fout,"extern \"C\" {\n"
-                 "  int vtkCommand(ClientData cd, Tcl_Interp *interp,\n"
-                 "                 int argc, char *argv[]);\n"
-                 "}\n");
+    fprintf(fout,"int vtkCommand(ClientData cd, Tcl_Interp *interp,\n"
+                 "               int argc, char *argv[]);\n");
     fprintf(fout,"\nTcl_HashTable vtkInstanceLookup;\n");
     fprintf(fout,"Tcl_HashTable vtkPointerLookup;\n");
     fprintf(fout,"Tcl_HashTable vtkCommandLookup;\n");
