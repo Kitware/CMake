@@ -146,7 +146,7 @@ class cmake
    * GlobalGenerator. This in turn will read in an process all the CMakeList
    * files for the tree. It will not produce any actual Makefiles, or
    * workspaces. Generate does that.  */
-  int LoadCache(bool fix_paths = false);
+  int LoadCache();
 
   ///! Create a GlobalGenerator
   cmGlobalGenerator* CreateGlobalGenerator(const char* name);

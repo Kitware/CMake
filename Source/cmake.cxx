@@ -809,9 +809,7 @@ int cmake::Configure()
 int cmake::Run(const std::vector<std::string>& args)
 {
   // a quick check for args
-  if(args.size() == 1 && 
-     !cmSystemTools::FileExists("CMakeLists.txt") &&
-     !cmSystemTools::FileExists("CMakeCache.txt"))
+  if(args.size() == 1 && !cmSystemTools::FileExists("CMakeLists.txt"))
     {
     this->Usage(args[0].c_str());
     return -1;
@@ -838,7 +836,7 @@ int cmake::Run(const std::vector<std::string>& args)
   m_CMakeCommand = args[0];
   
   // load the cache
-  this->LoadCache(true);
+  this->LoadCache();
   
   // Add any cache args
   this->SetCacheArgs(args);
@@ -950,7 +948,7 @@ void cmake::AddDefaultCommands()
     }
 }
 
-int cmake::LoadCache(bool fix_paths)
+int cmake::LoadCache()
 {
   m_CacheManager->LoadCache(this->GetHomeOutputDirectory());
 
@@ -965,38 +963,6 @@ int cmake::LoadCache(bool fix_paths)
     {
     return -3;
     }
-
-  if ( fix_paths && cmSystemTools::FileExists("CMakeCache.txt") )
-    {
-    // If we are in directory that has CMakeCache inside and we are
-    // fixing paths then we might have to modify home directory and
-    // start directory.
-    const char* home = this->GetHomeDirectory();
-    const char* startdirectory = this->GetStartDirectory();
-    const char* cachehome = this->GetCacheDefinition("CMAKE_HOME_DIRECTORY");
-    if ( cachehome && strcmp(home, cachehome) != 0 )
-      {
-      // If cachehome exists (it was in the cache), and the current
-      // home is not the same as the one from cache (which means we
-      // are not doing in source build), then fix home and start
-      // directory.
-      home = cachehome;
-      startdirectory = cachehome;
-      }
-    // If cachehome is not set and cmakelists.txt does not exists,
-    // that means we are doing out of source build and the
-    // cmakecache.txt was edited manually and we cannot find the right
-    // source directory.
-    if ( !cachehome && !cmSystemTools::FileExists("CMakeLists.txt") )
-      {
-      cmSystemTools::Error("Source directory not specified");
-      return -4;
-      }
-    // Ok, let's set the home and start directory.
-    this->SetHomeDirectory(home);
-    this->SetStartDirectory(startdirectory);
-    }
-  
   return 0;
 }
 
