@@ -806,6 +806,6 @@ const char* cmTarget::GetLinkerLanguage(cmGlobalGenerator* gg) const
     {
     prefLang = languages.begin()->c_str();
     }
-  const_cast<cmTarget*>(this)->SetProperty("LINKER_LANGUAGE", languages.begin()->c_str());
+  const_cast<cmTarget*>(this)->SetProperty("LINKER_LANGUAGE", prefLang);
   return this->GetProperty("LINKER_LANGUAGE");
 }
