@@ -240,7 +240,7 @@ bool cmFileCommand::HandleInstallCommand(std::vector<std::string> const& args)
   std::vector<std::string> files;
   int itype = cmTarget::INSTALL_FILES;
 
-  std::vector<std::string>::size_type i;
+  std::vector<std::string>::size_type i = 0;
   i++; // Get rid of subcommand
 
   std::string expr;
@@ -344,9 +344,14 @@ bool cmFileCommand::HandleInstallCommand(std::vector<std::string> const& args)
     case cmTarget::EXECUTABLE:
 
       if ( !cmSystemTools::SetPermissions(destfile.c_str(), 
+#ifdef _MSC_VER
+          S_IREAD | S_IWRITE | S_IEXEC
+#else
           S_IRUSR | S_IWUSR | S_IXUSR | 
           S_IRGRP | S_IXGRP | 
-          S_IROTH | S_IXOTH ) )
+          S_IROTH | S_IXOTH 
+#endif
+         ) )
         {
         perror("problem doing chmod.");
         }

@@ -75,6 +75,7 @@ void cmLocalGenerator::GenerateInstallRules()
     }
 
   std::string file = m_Makefile->GetStartOutputDirectory();
+  cmSystemTools::ConvertToUnixSlashes(file);
   file += "/cmake_install.cmake";
   cmGeneratedFileStream tempFile(file.c_str());
   std::ostream&  fout = tempFile.GetStream();
@@ -116,6 +117,7 @@ void cmLocalGenerator::GenerateInstallRules()
     if (l->second.GetInstallPath() != "")
       {
       destination = prefix + l->second.GetInstallPath();
+      cmSystemTools::ConvertToUnixSlashes(destination);
       const char* dest = destination.c_str();
       int type = l->second.GetType();
 
@@ -129,14 +131,14 @@ void cmLocalGenerator::GenerateInstallRules()
       case cmTarget::MODULE_LIBRARY:
         fname = libOutPath;
         fname += this->GetFullTargetName(l->first.c_str(), l->second);
-        files = cmSystemTools::ConvertToOutputPath(fname.c_str()).c_str();
+        files = fname.c_str();
         this->AddInstallRule(fout, dest, type, files);
         break;
       case cmTarget::WIN32_EXECUTABLE:
       case cmTarget::EXECUTABLE:
         fname = exeOutPath;
         fname += this->GetFullTargetName(l->first.c_str(), l->second);
-        files = cmSystemTools::ConvertToOutputPath(fname.c_str()).c_str();
+        files = fname.c_str();
         this->AddInstallRule(fout, dest, type, files);
         break;
       case cmTarget::INSTALL_FILES:
@@ -159,7 +161,7 @@ void cmLocalGenerator::GenerateInstallRules()
               f = f.substr(binaryPath.length());
               }
 
-            files = cmSystemTools::ConvertToOutputPath(i->c_str()).c_str();
+            files = i->c_str();
             this->AddInstallRule(fout, dest, type, files);
             }
           }
@@ -183,7 +185,7 @@ void cmLocalGenerator::GenerateInstallRules()
               {
               f = f.substr(binaryPath.length());
               }
-            files = cmSystemTools::ConvertToOutputPath(i->c_str()).c_str();
+            files = i->c_str();
             this->AddInstallRule(fout, dest, type, files);
             }
           }
@@ -203,8 +205,9 @@ void cmLocalGenerator::GenerateInstallRules()
       {
       std::string odir = mf->GetCurrentOutputDirectory();
       odir += "/" + (*i);
-      fout << "INCLUDE(" <<  cmSystemTools::ConvertToOutputPath(odir.c_str())
-        << "/cmake_install.cmake)" << std::endl;
+      cmSystemTools::ConvertToUnixSlashes(odir);
+      fout << "INCLUDE(" <<  odir.c_str() 
+           << "/cmake_install.cmake)" << std::endl;
       }
     fout << std::endl;;
     }
@@ -213,7 +216,7 @@ void cmLocalGenerator::GenerateInstallRules()
 void cmLocalGenerator::AddInstallRule(std::ostream& fout, const char* dest, int type, const char* files)
 {
   std::string sfiles = files;
-  std::string destination = cmSystemTools::ConvertToOutputPath(dest);
+  std::string destination = dest;
   std::string stype;
   switch ( type )
     {
