@@ -41,7 +41,30 @@ bool cmVTKWrapPythonCommand::InitialPass(std::vector<std::string> const& argsIn)
   // keep the library name
   m_LibraryName = args[0];
   m_SourceList = args[1];
-  
+  std::string sourceListValue;
+  // was the list already populated
+  const char *def = m_Makefile->GetDefinition(m_SourceList.c_str());  
+  if (def)
+    {
+    sourceListValue = def;
+    sourceListValue += ";";
+    }
+
+  // Create the init file 
+  std::string res = m_LibraryName;
+  res += "Init.cxx";
+  this->CreateInitFile(res);
+
+  // add the init file
+  cmSourceFile cfile;
+  cfile.SetIsAnAbstractClass(false);
+  std::string newName = m_LibraryName;
+  newName += "Init";
+  cfile.SetName(newName.c_str(), m_Makefile->GetCurrentOutputDirectory(),
+                "cxx",false);
+  m_Makefile->AddSource(cfile);
+  sourceListValue += newName + ".cxx";
+
   // get the list of classes for this library
   for(std::vector<std::string>::iterator j = (args.begin() + 2);
       j != args.end(); ++j)
@@ -65,9 +88,12 @@ bool cmVTKWrapPythonCommand::InitialPass(std::vector<std::string> const& argsIn)
       // add starting depends
       file.GetDepends().push_back(hname);
       m_WrapClasses.push_back(file);
+      sourceListValue += ";";
+      sourceListValue += newName + ".cxx";
       }
     }
   
+  m_Makefile->AddDefinition(m_SourceList.c_str(), sourceListValue.c_str());
   return true;
 }
 
@@ -78,32 +104,8 @@ void cmVTKWrapPythonCommand::FinalPass()
   std::vector<std::string> depends;
   std::string wpython = "${VTK_WRAP_PYTHON_EXE}";
   std::string hints = "${VTK_WRAP_HINTS}";
-  std::string sourceListValue;
 
   m_Makefile->ExpandVariablesInString(hints);
-  
-  // was the list already populated
-  const char *def = m_Makefile->GetDefinition(m_SourceList.c_str());  
-  if (def)
-    {
-    sourceListValue = def;
-    sourceListValue += ";";
-    }
-
-  // Create the init file 
-  std::string res = m_LibraryName;
-  res += "Init.cxx";
-  this->CreateInitFile(res);
-  
-  // add the init file
-  cmSourceFile cfile;
-  cfile.SetIsAnAbstractClass(false);
-  std::string newName = m_LibraryName;
-  newName += "Init";
-  cfile.SetName(newName.c_str(), m_Makefile->GetCurrentOutputDirectory(),
-                "cxx",false);
-  m_Makefile->AddSource(cfile);
-  sourceListValue += newName + ".cxx";
 
   // wrap all the .h files
   depends.push_back(wpython);
@@ -125,14 +127,11 @@ void cmVTKWrapPythonCommand::FinalPass()
       }
     args.push_back((m_WrapClasses[classNum].IsAnAbstractClass() ? "0" : "1"));
     args.push_back(res);
-    sourceListValue += ";";
-    sourceListValue += m_WrapClasses[classNum].GetSourceName() + ".cxx";
 
     m_Makefile->AddCustomCommand(m_WrapHeaders[classNum].c_str(),
                                  wpython.c_str(), args, depends, 
                                  res.c_str(), m_LibraryName.c_str());
     }
-  m_Makefile->AddDefinition(m_SourceList.c_str(), sourceListValue.c_str());
 }
 
 bool cmVTKWrapPythonCommand::CreateInitFile(std::string& res) 

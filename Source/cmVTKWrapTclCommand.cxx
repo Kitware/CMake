@@ -81,7 +81,31 @@ bool cmVTKWrapTclCommand::InitialPass(std::vector<std::string> const& argsIn)
 
     // get the resulting source list name
     m_SourceList = sources[0];
-
+    std::string sourceListValue;
+    
+    // was the list already populated
+    const char *def = m_Makefile->GetDefinition(m_SourceList.c_str());  
+    if (def)
+      {
+      sourceListValue = def;
+      sourceListValue += ";";
+      }
+    
+    // Create the init file 
+    std::string res = m_LibraryName;
+    res += "Init.cxx";
+    this->CreateInitFile(res);
+    
+    // add the init file
+    cmSourceFile cfile;
+    cfile.SetIsAnAbstractClass(false);
+    std::string newName = m_LibraryName;
+    newName += "Init";
+    cfile.SetName(newName.c_str(), m_Makefile->GetCurrentOutputDirectory(),
+                  "cxx",false);
+    m_Makefile->AddSource(cfile);
+    sourceListValue += newName + ".cxx";
+    
     for(std::vector<std::string>::iterator j = (sources.begin() + 1);
         j != sources.end(); ++j)
       {   
@@ -104,8 +128,11 @@ bool cmVTKWrapTclCommand::InitialPass(std::vector<std::string> const& argsIn)
         // add starting depends
         file.GetDepends().push_back(hname);
         m_WrapClasses.push_back(file);
+        sourceListValue += ";";
+        sourceListValue += newName + ".cxx";
         }
       }
+    m_Makefile->AddDefinition(m_SourceList.c_str(), sourceListValue.c_str());  
     }
   
   return true;
@@ -120,30 +147,6 @@ void cmVTKWrapTclCommand::FinalPass()
   std::string hints = "${VTK_WRAP_HINTS}";
   
   m_Makefile->ExpandVariablesInString(hints);
-  std::string sourceListValue;
-  
-  // was the list already populated
-  const char *def = m_Makefile->GetDefinition(m_SourceList.c_str());  
-  if (def)
-    {
-    sourceListValue = def;
-    sourceListValue += ";";
-    }
-
-  // Create the init file 
-  std::string res = m_LibraryName;
-  res += "Init.cxx";
-  this->CreateInitFile(res);
-  
-  // add the init file
-  cmSourceFile cfile;
-  cfile.SetIsAnAbstractClass(false);
-  std::string newName = m_LibraryName;
-  newName += "Init";
-  cfile.SetName(newName.c_str(), m_Makefile->GetCurrentOutputDirectory(),
-                "cxx",false);
-  m_Makefile->AddSource(cfile);
-  sourceListValue += newName + ".cxx";
 
   // wrap all the .h files
   depends.push_back(wtcl);
@@ -165,15 +168,11 @@ void cmVTKWrapTclCommand::FinalPass()
     res += "/";
     res += m_WrapClasses[classNum].GetSourceName() + ".cxx";
     args.push_back(res);
-    sourceListValue += ";";
-    sourceListValue += m_WrapClasses[classNum].GetSourceName() + ".cxx";
     
     m_Makefile->AddCustomCommand(m_WrapHeaders[classNum].c_str(),
                                  wtcl.c_str(), args, depends, 
                                  res.c_str(), m_LibraryName.c_str());
-
     }
-  m_Makefile->AddDefinition(m_SourceList.c_str(), sourceListValue.c_str());  
 }
 
 bool cmVTKWrapTclCommand::CreateInitFile(std::string& res) 

@@ -49,6 +49,15 @@ bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& argsIn)
   m_LibraryName = args[0];
   m_SourceList = args[1];
   
+  std::string sourceListValue;
+
+  // was the list already populated
+  const char *def = m_Makefile->GetDefinition(m_SourceList.c_str());  
+  if (def)
+    {
+    sourceListValue = def;
+    }
+
   // get the list of classes for this library
   for(std::vector<std::string>::iterator j = (args.begin() + 2);
       j != args.end(); ++j)
@@ -72,9 +81,15 @@ bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& argsIn)
       // add starting depends
       file.GetDepends().push_back(hname);
       m_WrapClasses.push_back(file);
+      if (sourceListValue.size() > 0)
+        {
+        sourceListValue += ";";
+        }
+      sourceListValue += newName + ".cxx";
       }
     }
   
+  m_Makefile->AddDefinition(m_SourceList.c_str(), sourceListValue.c_str());
   return true;
 }
 
@@ -85,14 +100,6 @@ void cmQTWrapCPPCommand::FinalPass()
   size_t lastClass = m_WrapClasses.size();
   std::vector<std::string> depends;
   std::string moc_exe = "${QT_MOC_EXE}";
-  std::string sourceListValue;
-
-  // was the list already populated
-  const char *def = m_Makefile->GetDefinition(m_SourceList.c_str());  
-  if (def)
-    {
-    sourceListValue = def;
-    }
 
   // wrap all the .h files
   depends.push_back(moc_exe);
@@ -109,11 +116,6 @@ void cmQTWrapCPPCommand::FinalPass()
     {
     // Add output to build list
     m_Makefile->AddSource(m_WrapClasses[classNum]);
-    if (sourceListValue.size() > 0)
-      {
-      sourceListValue += ";";
-      }
-    sourceListValue += m_WrapClasses[classNum].GetSourceName() + ".cxx";
 
     // set up moc command
     std::string res = m_Makefile->GetCurrentOutputDirectory();
@@ -134,7 +136,6 @@ void cmQTWrapCPPCommand::FinalPass()
     }
 
   m_Makefile->AddDefinition("GENERATED_QT_FILES",moc_list.c_str());
-  m_Makefile->AddDefinition(m_SourceList.c_str(), sourceListValue.c_str());
 }
 
 

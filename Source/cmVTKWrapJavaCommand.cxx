@@ -40,6 +40,13 @@ bool cmVTKWrapJavaCommand::InitialPass(std::vector<std::string> const& argsIn)
   // keep the library name
   m_LibraryName = args[0];
   m_SourceList = args[1];
+  std::string sourceListValue;
+  // was the list already populated
+  const char *def = m_Makefile->GetDefinition(m_SourceList.c_str());  
+  if (def)
+    {
+    sourceListValue = def;
+    }
   
   // get the list of classes for this library
   for(std::vector<std::string>::const_iterator j = (args.begin() + 2);
@@ -65,9 +72,15 @@ bool cmVTKWrapJavaCommand::InitialPass(std::vector<std::string> const& argsIn)
       file.GetDepends().push_back(hname);
       m_WrapClasses.push_back(file);
       m_OriginalNames.push_back(srcName);
+      if (sourceListValue.size() > 0)
+        {
+        sourceListValue += ";";
+        }
+      sourceListValue += newName + ".cxx";
       }
     }
   
+  m_Makefile->AddDefinition(m_SourceList.c_str(), sourceListValue.c_str());  
   return true;
 }
 
@@ -83,16 +96,8 @@ void cmVTKWrapJavaCommand::FinalPass()
   std::string pjava = "${VTK_PARSE_JAVA_EXE}";
   std::string hints = "${VTK_WRAP_HINTS}";
   std::string resultDirectory = "${VTK_JAVA_HOME}";
-  std::string sourceListValue;
 
   m_Makefile->ExpandVariablesInString(hints);
-
-  // was the list already populated
-  const char *def = m_Makefile->GetDefinition(m_SourceList.c_str());  
-  if (def)
-    {
-    sourceListValue = def;
-    }
 
   // wrap all the .h files
   depends.push_back(wjava);
@@ -105,11 +110,6 @@ void cmVTKWrapJavaCommand::FinalPass()
   for(size_t classNum = 0; classNum < lastClass; classNum++)
     {
     m_Makefile->AddSource(m_WrapClasses[classNum]);
-    if (sourceListValue.size() > 0)
-      {
-      sourceListValue += ";";
-      }
-    sourceListValue += m_WrapClasses[classNum].GetSourceName() + ".cxx";
 
     // wrap java
     std::string res = m_Makefile->GetCurrentOutputDirectory();
@@ -153,7 +153,6 @@ void cmVTKWrapJavaCommand::FinalPass()
                                 alldepends,
                                 empty);
   
-  m_Makefile->AddDefinition(m_SourceList.c_str(), sourceListValue.c_str());  
 }
 
 
