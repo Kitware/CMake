@@ -151,5 +151,6 @@ private:
 
   bool OpenFile(const std::string& path, 
                 const std::string& name, std::ofstream& stream);  
+  std::string MakeXMLSafe(const std::string&);
 };
 

@@ -21,6 +21,54 @@
 #include <stdio.h>
 #include <time.h>
 
+
+/* Implement floattime() for various platforms */
+// Taken from Python 2.1.3
+
+#if defined( _WIN32 ) && !defined( __CYGWIN__ )
+# define HAVE_FTIME
+# defint FTIME _ftime_
+#elif defined( __CYGWIN__ ) || defined( __linux__ )
+# include <sys/time.h>
+# define HAVE_GETTIMEOFDAY
+#endif
+
+static double
+floattime(void)
+{
+  /* There are three ways to get the time:
+     (1) gettimeofday() -- resolution in microseconds
+     (2) ftime() -- resolution in milliseconds
+     (3) time() -- resolution in seconds
+     In all cases the return value is a float in seconds.
+     Since on some systems (e.g. SCO ODT 3.0) gettimeofday() may
+     fail, so we fall back on ftime() or time().
+     Note: clock resolution does not imply clock accuracy! */
+#ifdef HAVE_GETTIMEOFDAY
+  {
+  struct timeval t;
+#ifdef GETTIMEOFDAY_NO_TZ
+  if (gettimeofday(&t) == 0)
+    return (double)t.tv_sec + t.tv_usec*0.000001;
+#else /* !GETTIMEOFDAY_NO_TZ */
+  if (gettimeofday(&t, (struct timezone *)NULL) == 0)
+    return (double)t.tv_sec + t.tv_usec*0.000001;
+#endif /* !GETTIMEOFDAY_NO_TZ */
+  }
+#endif /* !HAVE_GETTIMEOFDAY */
+  {
+#if defined(HAVE_FTIME)
+  struct timeb t;
+  FTIME(&t);
+  return (double)t.time + (double)t.millitm * (double)0.001;
+#else /* !HAVE_FTIME */
+  time_t secs;
+  time(&secs);
+  return (double)secs;
+#endif /* !HAVE_FTIME */
+  }
+}
+
 static std::string CleanString(std::string str)
 {
   std::string::size_type spos = str.find_first_not_of(" \n\t");
@@ -31,7 +79,7 @@ static std::string CleanString(std::string str)
     }
   if ( epos != str.npos )
     {
-    epos ++;
+    epos = epos - spos + 1;
     }
   return str.substr(spos, epos);
 }
@@ -105,6 +153,30 @@ static const char* cmCTestWarningExceptions[] = {
   0
 };
 
+std::string ctest::MakeXMLSafe(const std::string& str)
+{
+  std::string::size_type pos = 0;
+  cmOStringStream ost;
+  for ( pos = 0; pos < str.size(); pos ++ )
+    {
+    char ch = str[pos];
+    if ( ch > 126 )
+      {
+      ost << "&" << hex << ch;
+      }
+    else
+      {
+      switch ( ch )
+        {
+        case '&': ost << "&amp;"; break;
+        case '<': ost << "&lt;"; break;
+        case '>': ost << "&gt;"; break;
+        default: ost << ch;
+        }
+      }
+    }
+  return ost.str();
+}
 
 bool TryExecutable(const char *dir, const char *file,
                    std::string *fullPath, const char *subdir)
@@ -646,7 +718,8 @@ void ctest::GenerateDartBuildOutput(std::ostream& os,
      << m_DartConfiguration["Site"] << "\">\n"
      << "<Build>\n"
      << "\t<StartDateTime>" << m_StartBuild << "</StartDateTime>\n"
-     << "<BuildCommand>" << m_DartConfiguration["MakeCommand"]
+     << "<BuildCommand>" 
+     << this->MakeXMLSafe(m_DartConfiguration["MakeCommand"])
      << "</BuildCommand>" << std::endl;
     
   std::vector<cmCTestBuildErrorWarning>::iterator it;
@@ -655,7 +728,8 @@ void ctest::GenerateDartBuildOutput(std::ostream& os,
     cmCTestBuildErrorWarning *cm = &(*it);
     os << "\t<" << (cm->m_Error ? "Error" : "Warning") << ">\n"
        << "\t\t<BuildLogLine>" << cm->m_LogLine << "</BuildLogLine>\n"
-       << "\t\t<Text>" << cm->m_Text << "\n</Text>" << std::endl;
+       << "\t\t<Text>" << this->MakeXMLSafe(cm->m_Text) 
+       << "\n</Text>" << std::endl;
     if ( cm->m_SourceFile.size() > 0 )
       {
       os << "\t\t<SourceFile>" << cm->m_SourceFile << "</SourceFile>" 
@@ -671,8 +745,10 @@ void ctest::GenerateDartBuildOutput(std::ostream& os,
       os << "\t\t<SourceLineNumber>" << cm->m_LineNumber 
          << "</SourceLineNumber>" << std::endl;
       }
-    os << "\t\t<PreContext>" << cm->m_PreContext << "</PreContext>\n"
-       << "\t\t<PostContext>" << cm->m_PostContext << "</PostContext>\n"
+    os << "\t\t<PreContext>" << this->MakeXMLSafe(cm->m_PreContext) 
+       << "</PreContext>\n"
+       << "\t\t<PostContext>" << this->MakeXMLSafe(cm->m_PostContext) 
+       << "</PostContext>\n"
        << "\t\t<RepeatCount>0</RepeatCount>\n"
        << "</" << (cm->m_Error ? "Error" : "Warning") << ">\n\n" 
        << std::endl;
@@ -789,15 +865,14 @@ void ctest::ProcessDirectory(std::vector<std::string> &passed,
         std::string output;
         int retVal;
 
-        clock_t clock_start, clock_finish;
-        double clocks_per_sec = (double)CLOCKS_PER_SEC;
-        clock_start = clock();
+        double clock_start, clock_finish;
+        clock_start = floattime();
 
         bool res = cmSystemTools::RunCommand(testCommand.c_str(), output, 
                                              retVal, 0, false);
-        clock_finish = clock();
+        clock_finish = floattime();
 
-        cres.m_ExecutionTime = (double)(clock_finish - clock_start) / clocks_per_sec;
+        cres.m_ExecutionTime = (double)(clock_finish - clock_start);
         cres.m_FullCommandLine = testCommand;
 
         if (!res || retVal != 0)
@@ -923,47 +998,52 @@ void ctest::GenerateDartOutput(std::ostream& os)
      << "\" BuildStamp=\"" << m_CurrentTag << "-Experimental\" Name=\""
      << m_DartConfiguration["Site"] << "\">\n"
      << "<Testing>\n"
-     << "  <StartDateTime>" << m_StartTest << "</StartDateTime>\n"
-     << "  <TestList>\n";
+     << "\t<StartDateTime>" << m_StartTest << "</StartDateTime>\n"
+     << "\t<TestList>\n";
   tm_TestResultsVector::size_type cc;
   for ( cc = 0; cc < m_TestResults.size(); cc ++ )
     {
     cmCTestTestResult *result = &m_TestResults[cc];
-    os << "    <Test>" << result->m_Path << "/" << result->m_Name 
+    os << "\t\t<Test>" << this->MakeXMLSafe(result->m_Path) 
+       << "/" << this->MakeXMLSafe(result->m_Name)
        << "</Test>" << std::endl;
     }
-  os << "  </TestList>\n";
+  os << "\t</TestList>\n";
   for ( cc = 0; cc < m_TestResults.size(); cc ++ )
     {
     cmCTestTestResult *result = &m_TestResults[cc];
-    os << "  <Test Status=\"" << (result->m_ReturnValue?"failed":"passed") 
+    os << "\t<Test Status=\"" << (result->m_ReturnValue?"failed":"passed") 
        << "\">\n"
-       << "    <Name>" << result->m_Name << "</Name>\n"
-       << "    <Path>" << result->m_Path << "</Path>\n"
-       << "    <FullName>" << result->m_Path << "/" << result->m_Name << "</FullName>\n"
-       << "    <FullCommandLine>" << result->m_FullCommandLine << "</FullCommandLine>\n"
-       << "    <Results>" << std::endl;
+       << "\t\t<Name>" << this->MakeXMLSafe(result->m_Name) << "</Name>\n"
+       << "\t\t<Path>" << this->MakeXMLSafe(result->m_Path) << "</Path>\n"
+       << "\t\t<FullName>" << this->MakeXMLSafe(result->m_Path) 
+       << "/" << this->MakeXMLSafe(result->m_Name) << "</FullName>\n"
+       << "\t\t<FullCommandLine>" 
+       << this->MakeXMLSafe(result->m_FullCommandLine) 
+       << "</FullCommandLine>\n"
+       << "\t\t<Results>" << std::endl;
     if ( result->m_ReturnValue )
       {
-      os << "      <NamedMeasurement type=\"text/string\" name=\"Exit Code\"><Value>"
+      os << "\t\t\t<NamedMeasurement type=\"text/string\" name=\"Exit Code\"><Value>"
          << "CHILDSTATUS" << "</Value></NamedMeasurement>\n"
-         << "      <NamedMeasurement type=\"text/string\" name=\"Exit Value\"><Value>"
+         << "\t\t\t<NamedMeasurement type=\"text/string\" name=\"Exit Value\"><Value>"
          << result->m_ReturnValue << "</Value></NamedMeasurement>" << std::endl;
       }
-    os << "      <NamedMeasurement type=\"numeric/double\" "
+    os << "\t\t\t<NamedMeasurement type=\"numeric/double\" "
        << "name=\"Execution Time\"><Value>"
        << result->m_ExecutionTime << "</Value></NamedMeasurement>\n"
-       << "      <NamedMeasurement type=\"text/string\" "
+       << "\t\t\t<NamedMeasurement type=\"text/string\" "
        << "name=\"Completion Status\"><Value>"
        << result->m_CompletionStatus << "</Value></NamedMeasurement>\n"
-       << "      <Measurement>\n"
-       << "        <Value>" << result->m_Output << "</Value>\n"
-       << "      </Measurement>\n"
-       << "    </Results>\n"
-       << "  </Test>" << std::endl;
+       << "\t\t\t<Measurement>\n"
+       << "\t\t\t\t<Value>" << this->MakeXMLSafe(result->m_Output) 
+       << "</Value>\n"
+       << "\t\t\t</Measurement>\n"
+       << "\t\t</Results>\n"
+       << "\t</Test>" << std::endl;
     }
   
-  os << "<EndDateTime>" << m_EndTest << "</EndDateTime>\n"
+  os << "\t<EndDateTime>" << m_EndTest << "</EndDateTime>\n"
      << "</Testing>\n"
      << "</Site>" << std::endl;
 }
