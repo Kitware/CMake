@@ -2552,7 +2552,6 @@ void cmLocalUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
   checkCache += "/cmake.check_cache";
   checkCache = this->ConvertToRelativeOutputPath(checkCache.c_str());
   std::vector<std::string> cmake_depends;
-  cmake_depends.push_back(checkCache);
   cmake_depends.push_back("$(CMAKE_MAKEFILE_SOURCES)");
   
   this->OutputMakeRule(fout, 
@@ -2596,7 +2595,6 @@ void cmLocalUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
   std::string CMakeCache = m_Makefile->GetHomeOutputDirectory();
   CMakeCache += "/CMakeCache.txt";
   CMakeCache = this->ConvertToRelativeOutputPath(CMakeCache.c_str());
-  check_cache_depends.push_back(CMakeCache);
   check_cache_depends.push_back("$(CMAKE_MAKEFILE_SOURCES)");
 
   this->OutputMakeRule(fout, 
@@ -2625,10 +2623,12 @@ void cmLocalUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                          "$(CMAKE_COMMAND) "
                          "-H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) -i");
     }
-  
+  std::string cacheFile = m_Makefile->GetHomeOutputDirectory();
+  cacheFile += "/CMakeCache.txt";
+  cacheFile = this->ConvertToRelativeOutputPath(cacheFile.c_str());
   this->OutputMakeRule(fout, 
                        "CMakeCache.txt",
-                       "$(CMAKE_BINARY_DIR)/CMakeCache.txt",
+                       cacheFile.c_str(),
                        0,
                        "$(CMAKE_COMMAND) "
                        "-H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)");
