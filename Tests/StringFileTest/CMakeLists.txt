@@ -60,6 +60,10 @@ EXEC_PROGRAM(${CMAKE_COMMAND} ARGS "-E time \"${CMAKE_COMMAND} -N -L ${StringFil
 EXEC_PROGRAM(${CMAKE_COMMAND} ARGS "-E time \"${CMAKE_COMMAND} -N -LA ${StringFileTest_SOURCE_DIR}\"")
 EXEC_PROGRAM(${CMAKE_COMMAND} ARGS "-E time \"${CMAKE_COMMAND} -N -LH ${StringFileTest_SOURCE_DIR}\"")
 EXEC_PROGRAM(${CMAKE_COMMAND} ARGS "-E time \"${CMAKE_COMMAND} -N -LAH ${StringFileTest_SOURCE_DIR}\"")
+EXEC_PROGRAM(${CMAKE_COMMAND} ARGS "--help")
+EXEC_PROGRAM(${CMAKE_COMMAND} ARGS "--help-full \"${CMAKE_CURRENT_BINARY_DIR}/cmake.txt\"")
+EXEC_PROGRAM(${CMAKE_COMMAND} ARGS "--help-man \"${CMAKE_CURRENT_BINARY_DIR}/cmake.man\"")
+EXEC_PROGRAM(${CMAKE_COMMAND} ARGS "--help-html \"${CMAKE_CURRENT_BINARY_DIR}/cmake.html\"")
 
 # Write include file to a file
 STRING(REGEX REPLACE "includefile" "${file}" outfile "${infile}")
