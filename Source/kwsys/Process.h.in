@@ -33,6 +33,7 @@
 #define kwsysProcess_AddCommand          kwsys(Process_AddCommand)
 #define kwsysProcess_SetTimeout          kwsys(Process_SetTimeout)
 #define kwsysProcess_SetWorkingDirectory kwsys(Process_SetWorkingDirectory)
+#define kwsysProcess_SetPipeFile         kwsys(Process_SetPipeFile)
 #define kwsysProcess_Option_HideWindow   kwsys(Process_Option_HideWindow)
 #define kwsysProcess_GetOption           kwsys(Process_GetOption)
 #define kwsysProcess_SetOption           kwsys(Process_SetOption)
@@ -61,6 +62,7 @@
 #define kwsysProcess_WaitForData         kwsys(Process_WaitForData)
 #define kwsysProcess_Pipes_e             kwsys(Process_Pipes_e)
 #define kwsysProcess_Pipe_None           kwsys(Process_Pipe_None)
+#define kwsysProcess_Pipe_STDIN          kwsys(Process_Pipe_STDIN)
 #define kwsysProcess_Pipe_STDOUT         kwsys(Process_Pipe_STDOUT)
 #define kwsysProcess_Pipe_STDERR         kwsys(Process_Pipe_STDERR)
 #define kwsysProcess_Pipe_Timeout        kwsys(Process_Pipe_Timeout)
@@ -118,9 +120,17 @@ kwsysEXPORT void kwsysProcess_SetTimeout(kwsysProcess* cp, double timeout);
 /**
  * Set the working directory for the child process.  The working
  * directory can be absolute or relative to the current directory.
+ * Returns 1 for success and 0 for failure.
  */
-kwsysEXPORT void kwsysProcess_SetWorkingDirectory(kwsysProcess* cp,
-                                                  const char* dir);
+kwsysEXPORT int kwsysProcess_SetWorkingDirectory(kwsysProcess* cp,
+                                                 const char* dir);
+
+/**
+ * Set the name of a file to be attached to the given pipe.  Returns 1
+ * for success and 0 for failure.
+ */
+kwsysEXPORT int kwsysProcess_SetPipeFile(kwsysProcess* cp, int pipe,
+                                         const char* file);
 
 /**
  * Get/Set a platform-specific option.  Possible options are:
@@ -243,6 +253,7 @@ kwsysEXPORT int kwsysProcess_WaitForData(kwsysProcess* cp, char** data,
 enum kwsysProcess_Pipes_e
 {
   kwsysProcess_Pipe_None,
+  kwsysProcess_Pipe_STDIN,
   kwsysProcess_Pipe_STDOUT,
   kwsysProcess_Pipe_STDERR,
   kwsysProcess_Pipe_Timeout=255
@@ -292,6 +303,7 @@ kwsysEXPORT void kwsysProcess_Kill(kwsysProcess* cp);
 # undef kwsysProcess_AddCommand
 # undef kwsysProcess_SetTimeout
 # undef kwsysProcess_SetWorkingDirectory
+# undef kwsysProcess_SetPipeFile
 # undef kwsysProcess_Option_HideWindow
 # undef kwsysProcess_GetOption
 # undef kwsysProcess_SetOption
@@ -320,6 +332,7 @@ kwsysEXPORT void kwsysProcess_Kill(kwsysProcess* cp);
 # undef kwsysProcess_WaitForData
 # undef kwsysProcess_Pipes_e
 # undef kwsysProcess_Pipe_None
+# undef kwsysProcess_Pipe_STDIN
 # undef kwsysProcess_Pipe_STDOUT
 # undef kwsysProcess_Pipe_STDERR
 # undef kwsysProcess_Pipe_Timeout

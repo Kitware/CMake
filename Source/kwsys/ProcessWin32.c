@@ -80,6 +80,7 @@ static int kwsysProcessCreate(kwsysProcess* cp, int index,
                               kwsysProcessCreateInformation* si,
                               PHANDLE readEnd);
 static void kwsysProcessDestroy(kwsysProcess* cp, int event);
+static int kwsysProcessSetupOutputPipeFile(PHANDLE handle, const char* name);
 static void kwsysProcessCleanupHandle(PHANDLE h);
 static void kwsysProcessCleanup(kwsysProcess* cp, int error);
 static void kwsysProcessCleanErrorMessage(kwsysProcess* cp);
@@ -181,6 +182,11 @@ struct kwsysProcess_s
   /* Data specific to each pipe and its thread.  */
   kwsysProcessPipeData Pipe[KWSYSPE_PIPE_COUNT];
 
+  /* Name of files to which stdin and stdout pipes are attached.  */
+  char* PipeFileSTDIN;
+  char* PipeFileSTDOUT;
+  char* PipeFileSTDERR;
+
   /* ------------- Data managed per call to Execute ------------- */
 
   /* The exceptional behavior that terminated the process, if any.  */
@@ -229,6 +235,10 @@ struct kwsysProcess_s
   /* Data and process termination events for which to wait.  */
   PHANDLE ProcessEvents;
   int ProcessEventsLength;
+
+  /* Real working directory of our own process.  */
+  DWORD RealWorkingDirectoryLength;
+  char* RealWorkingDirectory;
 };
 
 /*--------------------------------------------------------------------------*/
@@ -456,6 +466,9 @@ void kwsysProcess_Delete(kwsysProcess* cp)
   /* Free memory.  */
   kwsysProcess_SetCommand(cp, 0);
   kwsysProcess_SetWorkingDirectory(cp, 0);
+  kwsysProcess_SetPipeFile(cp, kwsysProcess_Pipe_STDIN, 0);
+  kwsysProcess_SetPipeFile(cp, kwsysProcess_Pipe_STDOUT, 0);
+  kwsysProcess_SetPipeFile(cp, kwsysProcess_Pipe_STDERR, 0);
   if(cp->CommandExitCodes)
     {
     free(cp->CommandExitCodes);
@@ -715,11 +728,11 @@ void kwsysProcess_SetTimeout(kwsysProcess* cp, double timeout)
 }
 
 /*--------------------------------------------------------------------------*/
-void kwsysProcess_SetWorkingDirectory(kwsysProcess* cp, const char* dir)
+int kwsysProcess_SetWorkingDirectory(kwsysProcess* cp, const char* dir)
 {
   if(!cp)
     {
-    return;
+    return 0;
     }
   if(cp->WorkingDirectory)
     {
@@ -733,13 +746,51 @@ void kwsysProcess_SetWorkingDirectory(kwsysProcess* cp, const char* dir)
     if(length > 0)
       {
       cp->WorkingDirectory = (char*)malloc(length);
+      if(!cp->WorkingDirectory)
+        {
+        return 0;
+        }
       if(!GetFullPathName(dir, length, cp->WorkingDirectory, 0))
         {
         free(cp->WorkingDirectory);
         cp->WorkingDirectory = 0;
+        return 0;
         }
       }
     }
+  return 1;
+}
+
+/*--------------------------------------------------------------------------*/
+int kwsysProcess_SetPipeFile(kwsysProcess* cp, int pipe, const char* file)
+{
+  char** pfile;
+  if(!cp)
+    {
+    return 0;
+    }
+  switch(pipe)
+    {
+    case kwsysProcess_Pipe_STDIN: pfile = &cp->PipeFileSTDIN; break;
+    case kwsysProcess_Pipe_STDOUT: pfile = &cp->PipeFileSTDOUT; break;
+    case kwsysProcess_Pipe_STDERR: pfile = &cp->PipeFileSTDERR; break;
+    default: return 0;
+    }
+  if(*pfile)
+    {
+    free(*pfile);
+    *pfile = 0;
+    }
+  if(file)
+    {
+    *pfile = malloc(strlen(file)+1);
+    if(!*pfile)
+      {
+      return 0;
+      }
+    strcpy(*pfile, file);
+    }
+  return 1;
 }
 
 /*--------------------------------------------------------------------------*/
@@ -832,6 +883,20 @@ void kwsysProcess_Execute(kwsysProcess* cp)
     return;
     }
 
+  /* Save the real working directory of this process and change to
+     the working directory for the child processes.  This is needed
+     to make pipe file paths evaluate correctly.  */
+  if(cp->WorkingDirectory)
+    {
+    if(!GetCurrentDirectory(cp->RealWorkingDirectoryLength,
+                            cp->RealWorkingDirectory))
+      {
+      kwsysProcessCleanup(cp, 1);
+      return;
+      }
+    SetCurrentDirectory(cp->WorkingDirectory);
+    }
+
   /* Reset the Win9x resume and kill events.  */
   if(cp->Win9x)
     {
@@ -880,6 +945,19 @@ void kwsysProcess_Execute(kwsysProcess* cp)
     return;
     }
 
+  /* Replace the stderr pipe with a file if requested.  In this case
+     the pipe thread will still run but never report data.  */
+  if(cp->PipeFileSTDERR)
+    {
+    if(!kwsysProcessSetupOutputPipeFile(&si.StartupInfo.hStdError,
+                                        cp->PipeFileSTDERR))
+      {
+      kwsysProcessCleanup(cp, 1);
+      kwsysProcessCleanupHandle(&si.StartupInfo.hStdError);
+      return;
+      }
+    }
+
   /* Create the pipeline of processes.  */
   {
   HANDLE readEnd = 0;
@@ -915,6 +993,14 @@ void kwsysProcess_Execute(kwsysProcess* cp)
   /* Close the inherited handles to the stderr pipe shared by all
      processes in the pipeline.  */
   kwsysProcessCleanupHandle(&si.StartupInfo.hStdError);
+
+  /* Restore the working directory.  */
+  if(cp->RealWorkingDirectory)
+    {
+    SetCurrentDirectory(cp->RealWorkingDirectory);
+    free(cp->RealWorkingDirectory);
+    cp->RealWorkingDirectory = 0;
+    }
 
   /* The timeout period starts now.  */
   cp->StartTime = kwsysProcessTimeGetCurrent();
@@ -1372,6 +1458,20 @@ int kwsysProcessInitialize(kwsysProcess* cp)
   cp->ProcessEvents[0] = cp->Full;
   cp->ProcessEventsLength = cp->NumberOfCommands+1;
 
+  /* Allocate space to save the real working directory of this process.  */
+  if(cp->WorkingDirectory)
+    {
+    cp->RealWorkingDirectoryLength = GetCurrentDirectory(0, 0);
+    if(cp->RealWorkingDirectoryLength > 0)
+      {
+      cp->RealWorkingDirectory = malloc(cp->RealWorkingDirectoryLength);
+      if(!cp->RealWorkingDirectory)
+        {
+        return 0;
+        }
+      }
+    }
+
   return 1;
 }
 
@@ -1397,6 +1497,26 @@ int kwsysProcessCreate(kwsysProcess* cp, int index,
 
     /* This function is done with this handle.  */
     *readEnd = 0;
+    }
+  else if(cp->PipeFileSTDIN)
+    {
+    /* Create a handle to read a file for stdin.  */
+    HANDLE fin = CreateFile(cp->PipeFileSTDIN, GENERIC_READ,
+                            FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
+    if(fin == INVALID_HANDLE_VALUE)
+      {
+      return 0;
+      }
+    /* Create an inherited duplicate of the handle.  This also closes
+       the non-inherited version.  */
+    if(!DuplicateHandle(GetCurrentProcess(), fin,
+                        GetCurrentProcess(), &fin,
+                        0, TRUE, (DUPLICATE_CLOSE_SOURCE |
+                                  DUPLICATE_SAME_ACCESS)))
+      {
+      return 0;
+      }
+    si->StartupInfo.hStdInput = fin;
     }
   else
     {
@@ -1424,12 +1544,24 @@ int kwsysProcessCreate(kwsysProcess* cp, int index,
     maybeClose = 0;
     }
   if(!DuplicateHandle(GetCurrentProcess(), writeEnd,
-                      GetCurrentProcess(), &si->StartupInfo.hStdOutput,
+                      GetCurrentProcess(), &writeEnd,
                       0, TRUE, (maybeClose | DUPLICATE_SAME_ACCESS)))
     {
     return 0;
     }
+  si->StartupInfo.hStdOutput = writeEnd;
   }
+
+  /* Replace the stdout pipe with a file if requested.  In this case
+     the pipe thread will still run but never report data.  */
+  if(index == cp->NumberOfCommands-1 && cp->PipeFileSTDOUT)
+    {
+    if(!kwsysProcessSetupOutputPipeFile(&si->StartupInfo.hStdOutput,
+                                        cp->PipeFileSTDOUT))
+      {
+      return 0;
+      }
+    }
 
   /* Create the child process.  */
   {
@@ -1473,9 +1605,8 @@ int kwsysProcessCreate(kwsysProcess* cp, int index,
   /* Create the child in a suspended state so we can wait until all
      children have been created before running any one.  */
   r = CreateProcess(0, realCommand, 0, 0, TRUE,
-                    cp->Win9x? 0 : CREATE_SUSPENDED, 0,
-                    cp->WorkingDirectory, &si->StartupInfo,
-                    &cp->ProcessInformation[index]);
+                    cp->Win9x? 0 : CREATE_SUSPENDED, 0, 0,
+                    &si->StartupInfo, &cp->ProcessInformation[index]);
 
   if(cp->Win9x)
     {
@@ -1582,6 +1713,41 @@ void kwsysProcessDestroy(kwsysProcess* cp, int event)
 }
 
 /*--------------------------------------------------------------------------*/
+int kwsysProcessSetupOutputPipeFile(PHANDLE phandle, const char* name)
+{
+  HANDLE fout;
+  if(!name)
+    {
+    return 1;
+    }
+
+  /* Close the existing inherited handle.  */
+  kwsysProcessCleanupHandle(phandle);
+    
+  /* Create a handle to write a file for the pipe.  */
+  fout = CreateFile(name, GENERIC_WRITE, FILE_SHARE_READ, 0,
+                    CREATE_ALWAYS, 0, 0);
+  if(fout == INVALID_HANDLE_VALUE)
+    {
+    return 0;
+    }
+
+  /* Create an inherited duplicate of the handle.  This also closes
+     the non-inherited version.  */
+  if(!DuplicateHandle(GetCurrentProcess(), fout,
+                      GetCurrentProcess(), &fout,
+                      0, TRUE, (DUPLICATE_CLOSE_SOURCE |
+                                DUPLICATE_SAME_ACCESS)))
+    {
+    return 0;
+    }
+
+  /* Assign the replacement handle.  */
+  *phandle = fout;
+  return 1;
+}
+
+/*--------------------------------------------------------------------------*/
 
 /* Close the given handle if it is open.  Reset its value to 0.  */
 void kwsysProcessCleanupHandle(PHANDLE h)
@@ -1652,6 +1818,12 @@ void kwsysProcessCleanup(kwsysProcess* cp, int error)
         kwsysProcessCleanupHandle(&cp->ProcessInformation[i].hProcess);
         }
       }
+
+    /* Restore the working directory.  */
+    if(cp->RealWorkingDirectory)
+      {
+      SetCurrentDirectory(cp->RealWorkingDirectory);
+      }
     }
 
   /* Free memory.  */
@@ -1664,6 +1836,11 @@ void kwsysProcessCleanup(kwsysProcess* cp, int error)
     {
     free(cp->ProcessEvents);
     cp->ProcessEvents = 0;
+    }
+  if(cp->RealWorkingDirectory)
+    {
+    free(cp->RealWorkingDirectory);
+    cp->RealWorkingDirectory = 0;
     }
 
   /* Close each pipe.  */

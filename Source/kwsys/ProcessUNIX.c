@@ -86,6 +86,7 @@ static void kwsysProcessCleanup(kwsysProcess* cp, int error);
 static void kwsysProcessCleanupDescriptor(int* pfd);
 static int kwsysProcessCreate(kwsysProcess* cp, int index,
                               kwsysProcessCreateInformation* si, int* readEnd);
+static int kwsysProcessSetupOutputPipeFile(int* p, const char* name);
 static int kwsysProcessGetTimeoutTime(kwsysProcess* cp, double* userTimeout,
                                       kwsysProcessTime* timeoutTime);
 static int kwsysProcessGetTimeoutLeft(kwsysProcessTime* timeoutTime,
@@ -164,6 +165,15 @@ struct kwsysProcess_s
 
   /* The exit codes of each child process in the pipeline.  */
   int* CommandExitCodes;
+
+  /* Name of files to which stdin and stdout pipes are attached.  */
+  char* PipeFileSTDIN;
+  char* PipeFileSTDOUT;
+  char* PipeFileSTDERR;
+
+  /* The real working directory of this process.  */
+  int RealWorkingDirectoryLength;
+  char* RealWorkingDirectory;
 };
 
 /*--------------------------------------------------------------------------*/
@@ -198,6 +208,9 @@ void kwsysProcess_Delete(kwsysProcess* cp)
   /* Free memory.  */
   kwsysProcess_SetCommand(cp, 0);
   kwsysProcess_SetWorkingDirectory(cp, 0);
+  kwsysProcess_SetPipeFile(cp, kwsysProcess_Pipe_STDIN, 0);
+  kwsysProcess_SetPipeFile(cp, kwsysProcess_Pipe_STDOUT, 0);
+  kwsysProcess_SetPipeFile(cp, kwsysProcess_Pipe_STDERR, 0);
   if(cp->CommandExitCodes)
     {
     free(cp->CommandExitCodes);
@@ -322,19 +335,19 @@ void kwsysProcess_SetTimeout(kwsysProcess* cp, double timeout)
 }
 
 /*--------------------------------------------------------------------------*/
-void kwsysProcess_SetWorkingDirectory(kwsysProcess* cp, const char* dir)
+int kwsysProcess_SetWorkingDirectory(kwsysProcess* cp, const char* dir)
 {
   if(!cp)
     {
-    return;
+    return 0;
     }
   if(cp->WorkingDirectory == dir)
     {
-    return;
+    return 1;
     }
   if(cp->WorkingDirectory && dir && strcmp(cp->WorkingDirectory, dir) == 0)
     {
-    return;
+    return 1;
     }
   if(cp->WorkingDirectory)
     {
@@ -344,8 +357,45 @@ void kwsysProcess_SetWorkingDirectory(kwsysProcess* cp, const char* dir)
   if(dir)
     {
     cp->WorkingDirectory = (char*)malloc(strlen(dir) + 1);
+    if(!cp->WorkingDirectory)
+      {
+      return 0;
+      }
     strcpy(cp->WorkingDirectory, dir);
     }
+  return 1;
+}
+
+/*--------------------------------------------------------------------------*/
+int kwsysProcess_SetPipeFile(kwsysProcess* cp, int pipe, const char* file)
+{
+  char** pfile;
+  if(!cp)
+    {
+    return 0;
+    }
+  switch(pipe)
+    {
+    case kwsysProcess_Pipe_STDIN: pfile = &cp->PipeFileSTDIN; break;
+    case kwsysProcess_Pipe_STDOUT: pfile = &cp->PipeFileSTDOUT; break;
+    case kwsysProcess_Pipe_STDERR: pfile = &cp->PipeFileSTDERR; break;
+    default: return 0;
+    }
+  if(*pfile)
+    {
+    free(*pfile);
+    *pfile = 0;
+    }
+  if(file)
+    {
+    *pfile = malloc(strlen(file)+1);
+    if(!*pfile)
+      {
+      return 0;
+      }
+    strcpy(*pfile, file);
+    }
+  return 1;
 }
 
 /*--------------------------------------------------------------------------*/
@@ -423,6 +473,27 @@ void kwsysProcess_Execute(kwsysProcess* cp)
     return;
     }
 
+  /* Save the real working directory of this process and change to
+     the working directory for the child processes.  This is needed
+     to make pipe file paths evaluate correctly.  */
+  if(cp->WorkingDirectory)
+    {
+    int r;
+    if(!getcwd(cp->RealWorkingDirectory, cp->RealWorkingDirectoryLength))
+      {
+      kwsysProcessCleanup(cp, 1);
+      return;
+      }
+
+    /* Some platforms specify that the chdir call may be
+       interrupted.  Repeat the call until it finishes.  */
+    while(((r = chdir(cp->WorkingDirectory)) < 0) && (errno == EINTR));
+    if(r < 0)
+      {
+      kwsysProcessCleanup(cp, 1);
+      }
+    }
+
   /* We want no special handling of SIGCHLD.  Repeat call until it is
      not interrupted.  */
   memset(&newSigChldAction, 0, sizeof(struct sigaction));
@@ -463,6 +534,20 @@ void kwsysProcess_Execute(kwsysProcess* cp)
       }
     }
 
+  /* Replace the stderr pipe with a file if requested.  In this case
+     the select call will report that stderr is closed immediately.  */
+  if(cp->PipeFileSTDERR)
+    {
+    if(!kwsysProcessSetupOutputPipeFile(&si.StdErr, cp->PipeFileSTDERR))
+      {
+      kwsysProcessCleanup(cp, 1);
+      kwsysProcessCleanupDescriptor(&si.StdErr);
+      kwsysProcessCleanupDescriptor(&si.TermPipe);
+      return;
+      }
+    }
+
+
   /* The timeout period starts now.  */
   cp->StartTime = kwsysProcessTimeGetCurrent();
   cp->TimeoutTime.tv_sec = -1;
@@ -479,11 +564,11 @@ void kwsysProcess_Execute(kwsysProcess* cp)
 
       /* Release resources that may have been allocated for this
          process before an error occurred.  */
-      kwsysProcessCleanupDescriptor(&readEnd);
-      if(i > 0)
+      if(i > 0 || si.StdIn > 0)
         {
         kwsysProcessCleanupDescriptor(&si.StdIn);
         }
+      kwsysProcessCleanupDescriptor(&readEnd);
       kwsysProcessCleanupDescriptor(&si.StdOut);
       kwsysProcessCleanupDescriptor(&si.StdErr);
       kwsysProcessCleanupDescriptor(&si.TermPipe);
@@ -499,6 +584,16 @@ void kwsysProcess_Execute(kwsysProcess* cp)
   /* The parent process does not need the output pipe write ends.  */
   kwsysProcessCleanupDescriptor(&si.StdErr);
   kwsysProcessCleanupDescriptor(&si.TermPipe);
+
+  /* Restore the working directory. */
+  if(cp->RealWorkingDirectory)
+    {
+    /* Some platforms specify that the chdir call may be
+       interrupted.  Repeat the call until it finishes.  */
+    while((chdir(cp->RealWorkingDirectory) < 0) && (errno == EINTR));
+    free(cp->RealWorkingDirectory);
+    cp->RealWorkingDirectory = 0;
+    }
 
   /* All the pipes are now open.  */
   cp->PipesLeft = KWSYSPE_PIPE_COUNT;
@@ -895,6 +990,22 @@ static int kwsysProcessInitialize(kwsysProcess* cp)
     }
   memset(cp->CommandExitCodes, 0, sizeof(int)*cp->NumberOfCommands);
 
+  /* Allocate memory to save the real working directory.  */
+  {
+#if defined(MAXPATHLEN)
+  cp->RealWorkingDirectoryLength = MAXPATHLEN;
+#elif defined(PATH_MAX)
+  cp->RealWorkingDirectoryLength = PATH_MAX;
+#else
+  cp->RealWorkingDirectoryLength = 4096;
+#endif
+  cp->RealWorkingDirectory = malloc(cp->RealWorkingDirectoryLength);
+  if(!cp->RealWorkingDirectory)
+    {
+    return 0;
+    }
+  }
+
   return 1;
 }
 
@@ -928,6 +1039,12 @@ static void kwsysProcessCleanup(kwsysProcess* cp, int error)
           }
         }
       }
+
+    /* Restore the working directory.  */
+    if(cp->RealWorkingDirectory)
+      {
+      while((chdir(cp->RealWorkingDirectory) < 0) && (errno == EINTR));
+      }
     }
 
   /* Restore the SIGCHLD handler.  */
@@ -939,6 +1056,11 @@ static void kwsysProcessCleanup(kwsysProcess* cp, int error)
     {
     free(cp->ForkPIDs);
     cp->ForkPIDs = 0;
+    }
+  if(cp->RealWorkingDirectory)
+    {
+    free(cp->RealWorkingDirectory);
+    cp->RealWorkingDirectory = 0;
     }
 
   /* Close pipe handles.  */
@@ -971,6 +1093,21 @@ static int kwsysProcessCreate(kwsysProcess* cp, int index,
     si->StdIn = *readEnd;
     *readEnd = 0;
     }
+  else if(cp->PipeFileSTDIN)
+    {
+    /* Open a file for the child's stdin to read.  */
+    si->StdIn = open(cp->PipeFileSTDIN, O_RDONLY);
+    if(si->StdIn < 0)
+      {
+      return 0;
+      }
+
+    /* Set close-on-exec flag on the pipe's end.  */
+    if(fcntl(si->StdIn, F_SETFD, FD_CLOEXEC) < 0)
+      {
+      return 0;
+      }
+    }
   else
     {
     si->StdIn = 0;
@@ -994,6 +1131,16 @@ static int kwsysProcessCreate(kwsysProcess* cp, int index,
     return 0;
     }
   }
+
+  /* Replace the stdout pipe with a file if requested.  In this case
+     the select call will report that stdout is closed immediately.  */
+  if(index == cp->NumberOfCommands-1 && cp->PipeFileSTDOUT)
+    {
+    if(!kwsysProcessSetupOutputPipeFile(&si->StdOut, cp->PipeFileSTDOUT))
+      {
+      return 0;
+      }
+    }
 
   /* Create the error reporting pipe.  */
   if(pipe(si->ErrorPipe) < 0)
@@ -1020,7 +1167,7 @@ static int kwsysProcessCreate(kwsysProcess* cp, int index,
     close(si->ErrorPipe[0]);
 
     /* Setup the stdin, stdout, and stderr pipes.  */
-    if(index > 0)
+    if(index > 0 || si->StdIn > 0)
       {
       dup2(si->StdIn, 0);
       }
@@ -1037,20 +1184,6 @@ static int kwsysProcessCreate(kwsysProcess* cp, int index,
 
     /* Restore all default signal handlers. */
     kwsysProcessRestoreDefaultSignalHandlers();
-
-    /* Change to the working directory specified, if any.  */
-    if(cp->WorkingDirectory)
-      {
-      /* Some platforms specify that the chdir call may be
-         interrupted.  Repeat the call until it finishes.  */
-      int r;
-      while(((r = chdir(cp->WorkingDirectory)) < 0) && (errno == EINTR));
-      if(r < 0)
-        {
-        /* Failure.  Report error to parent and terminate.  */
-        kwsysProcessChildErrorExit(si->ErrorPipe[1]);
-        }
-      }
 
     /* Execute the real process.  If successful, this does not return.  */
     execvp(cp->Commands[index][0], cp->Commands[index]);
@@ -1091,7 +1224,7 @@ static int kwsysProcessCreate(kwsysProcess* cp, int index,
   }
 
   /* Successfully created this child process.  */
-  if(index > 0)
+  if(index > 0 || si->StdIn > 0)
     {
     /* The parent process does not need the input pipe read end.  */
     kwsysProcessCleanupDescriptor(&si->StdIn);
@@ -1101,6 +1234,36 @@ static int kwsysProcessCreate(kwsysProcess* cp, int index,
   kwsysProcessCleanupDescriptor(&si->StdOut);
 
   return 1;
+}
+
+/*--------------------------------------------------------------------------*/
+static int kwsysProcessSetupOutputPipeFile(int* p, const char* name)
+{
+  int fout;
+  if(!name)
+    {
+    return 1;
+    }
+
+  /* Close the existing descriptor.  */
+  kwsysProcessCleanupDescriptor(p);
+
+  /* Open a file for the pipe to write (permissions 644).  */
+  if((fout = open(name, O_WRONLY | O_CREAT | O_TRUNC,
+                  S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) < 0)
+    {
+    return 0;
+    }
+
+  /* Set close-on-exec flag on the pipe's end.  */
+  if(fcntl(fout, F_SETFD, FD_CLOEXEC) < 0)
+    {
+    return 0;
+    }
+
+  /* Assign the replacement descriptor.  */
+  *p = fout;
+  return 1;  
 }
 
 /*--------------------------------------------------------------------------*/
