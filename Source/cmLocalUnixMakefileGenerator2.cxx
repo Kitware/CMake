@@ -779,8 +779,6 @@ cmLocalUnixMakefileGenerator2
   ruleFileStream
     << "# Utility rule file for " << target.GetName() << ".\n\n";
 
-  // TODO: Pre-build and pre-link rules.
-
   // Collect the commands and dependencies.
   std::vector<std::string> commands;
   std::vector<std::string> depends;
@@ -1645,7 +1643,9 @@ cmLocalUnixMakefileGenerator2
   // Add target-specific linker flags.
   this->AppendFlags(linkFlags, target.GetProperty("LINK_FLAGS"));
 
-  // TODO: Pre-build and pre-link rules.
+  // Add the pre-build and pre-link rules.
+  this->AppendCustomCommands(commands, target.GetPreBuildCommands());
+  this->AppendCustomCommands(commands, target.GetPreLinkCommands());
 
   // Construct the main link rule.
   std::string linkRuleVar = "CMAKE_";
@@ -1891,7 +1891,9 @@ cmLocalUnixMakefileGenerator2
     }
   this->AppendCleanCommand(commands, cleanFiles);
 
-  // TODO: Pre-build and pre-link rules.
+  // Add the pre-build and pre-link rules.
+  this->AppendCustomCommands(commands, target.GetPreBuildCommands());
+  this->AppendCustomCommands(commands, target.GetPreLinkCommands());
 
   // Construct the main link rule.
   std::string linkRule = m_Makefile->GetRequiredDefinition(linkRuleVar);
