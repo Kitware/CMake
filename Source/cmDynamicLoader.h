@@ -33,6 +33,9 @@
 #elif defined(_WIN32)
   #include <windows.h>
   typedef HMODULE cmLibHandle;
+#elif defined(__APPLE__)
+  #include <mach-o/dyld.h>
+  typedef NSModule cmLibHandle;
 #else
   typedef void* cmLibHandle;
 #endif
