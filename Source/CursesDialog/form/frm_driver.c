@@ -37,6 +37,10 @@
  #undef _XOPEN_SOURCE_EXTENDED
 #endif
 
+// AIX seems to define this
+#undef lines
+#undef columns
+
 MODULE_ID("$Id$")
 
 /*----------------------------------------------------------------------------
