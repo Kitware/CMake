@@ -57,8 +57,15 @@ SET(KWSYS_USE_Process 1)
 SET(KWSYS_HEADER_ROOT ${CMake_BINARY_DIR}/Source)
 SUBDIRS(Source/kwsys)
 
+#-----------------------------------------------------------------------------
+# Build Curl library for CTest.
 SET(CMAKE_BUILD_WITH_CURL 1)
 SUBDIRS(Source/CTest/Curl)
+
+#-----------------------------------------------------------------------------
+# Build expat library for CMake and CTest.
+INCLUDE_DIRECTORIES(${CMake_BINARY_DIR}/Utilities)
+SUBDIRS(Utilities/cmexpat)
 
 IF (UNIX)
   INCLUDE (${CMake_SOURCE_DIR}/Modules/FindCurses.cmake OPTIONAL)
