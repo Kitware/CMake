@@ -89,17 +89,34 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
       case cmTarget::DEBUG:
         mf.AddCacheDefinition(linkTypeName.c_str(),
                               "debug", "Library is used for debug links only", 
-                              cmCacheManager::INTERNAL);
+                              cmCacheManager::STATIC);
         break;
       case cmTarget::OPTIMIZED:
         mf.AddCacheDefinition(linkTypeName.c_str(),
                               "optimized", "Library is used for debug links only", 
-                              cmCacheManager::INTERNAL);
+                              cmCacheManager::STATIC);
         break;
       }
     }
-  
-  mf.AddDependencyToCache( target, lib );
+  // Add the explicit dependency information for this target. This is
+  // simply a set of libraries separated by ";". There should always
+  // be a trailing ";". These library names are not canonical, in that
+  // they may be "-framework x", "-ly", "/path/libz.a", etc.
+  std::string targetEntry = target;
+  targetEntry += "_LIB_DEPENDS";
+  std::string dependencies;
+  const char* old_val = mf.GetDefinition( targetEntry.c_str() );
+  if( old_val )
+    {
+    dependencies += old_val;
+    }
+  if( dependencies.find( lib ) == std::string::npos )
+    {
+    dependencies += lib;
+    dependencies += ";";
+    }
+  mf.AddCacheDefinition( targetEntry.c_str(), dependencies.c_str(),
+                         "Dependencies for the target", cmCacheManager::STATIC );
 }
 
 bool cmTarget::HasCxx() const

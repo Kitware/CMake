@@ -505,12 +505,10 @@ public:
   ///! Enable support for the named language, if null then all languages are enabled.
   void EnableLanguage(const char* );
 
-  /**
-   * Adds the specified library to the explicit dependency list of target.
-   */
-  void AddDependencyToCache( std::string target, const std::string& lib );
-  
 protected:
+  // add link libraries and directories to the target
+  void AddGlobalLinkInformation(const char* name, cmTarget& target);
+  
   std::string m_Prefix;
   std::vector<std::string> m_AuxSourceDirectories; // 
 

@@ -423,11 +423,20 @@ void cmMakefile::FinalPass()
 void cmMakefile::GenerateMakefile()
 {
   this->FinalPass();
+  const char* versionValue
+    = this->GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
+  bool oldVersion = (!versionValue || atof(versionValue) < 1.4);
   // merge libraries
+  
   for (cmTargets::iterator l = m_Targets.begin();
        l != m_Targets.end(); l++)
     {
     l->second.GenerateSourceFilesFromSourceLists(*this);
+    // pick up any LINK_LIBRARIES that were added after the target
+    if(oldVersion)
+      {
+      this->AddGlobalLinkInformation(l->first.c_str(), l->second);
+      }
     l->second.AnalyzeLibDependencies(*this);
     }
   // now do the generation
@@ -647,6 +656,23 @@ void cmMakefile::SetProjectName(const char* p)
   m_ProjectName = p;
 }
 
+
+void cmMakefile::AddGlobalLinkInformation(const char* name, cmTarget& target)
+{
+  std::vector<std::string>::iterator j;
+  for(j = m_LinkDirectories.begin();
+      j != m_LinkDirectories.end(); ++j)
+    {
+    target.AddLinkDirectory(j->c_str());
+    }
+  cmTarget::LinkLibraries::iterator  i;
+  for(i = m_LinkLibraries.begin(); i != m_LinkLibraries.end(); ++i)
+    {
+    this->AddLinkLibraryForTarget(name, i->first.c_str(), i->second);
+    }
+}
+
+
 void cmMakefile::AddLibrary(const char* lname, int shared,
                             const std::vector<std::string> &srcs)
 {
@@ -672,25 +698,13 @@ void cmMakefile::AddLibrary(const char* lname, int shared,
   depname += "_LIB_DEPENDS";
   cmCacheManager::GetInstance()->
     AddCacheEntry(depname.c_str(), "",
-                  "Dependencies for target", cmCacheManager::INTERNAL);
+                  "Dependencies for target", cmCacheManager::STATIC);
 
   
   target.SetInAll(true);
   target.GetSourceLists() = srcs;
-  std::vector<std::string>::iterator j;
-  for(j = m_LinkDirectories.begin();
-      j != m_LinkDirectories.end(); ++j)
-    {
-    target.AddLinkDirectory(j->c_str());
-    }
   m_Targets.insert(cmTargets::value_type(lname,target));
-  cmTarget::LinkLibraries::iterator  i;
-  for(i = m_LinkLibraries.begin(); i != m_LinkLibraries.end(); ++i)
-    {
-    this->AddLinkLibraryForTarget(lname, i->first.c_str(), i->second);
-    }
-  
-  
+  this->AddGlobalLinkInformation(lname, target);
 
   // Add an entry into the cache 
   cmCacheManager::GetInstance()->
@@ -755,18 +769,8 @@ void cmMakefile::AddExecutable(const char *exeName,
     }
   target.SetInAll(true);
   target.GetSourceLists() = srcs;
-  std::vector<std::string>::iterator j;
-  for(j = m_LinkDirectories.begin();
-      j != m_LinkDirectories.end(); ++j)
-    {
-    target.AddLinkDirectory(j->c_str());
-    }
   m_Targets.insert(cmTargets::value_type(exeName,target));
-  cmTarget::LinkLibraries::iterator  i;
-  for(i = m_LinkLibraries.begin(); i != m_LinkLibraries.end(); ++i)
-    {
-    this->AddLinkLibraryForTarget(exeName, i->first.c_str(), i->second);
-    }
+  this->AddGlobalLinkInformation(exeName, target);
   
   // Add an entry into the cache 
   cmCacheManager::GetInstance()->
@@ -1402,25 +1406,3 @@ void cmMakefile::EnableLanguage(const char* lang)
   m_MakefileGenerator->EnableLanguage(lang);
 }
 
-
-void cmMakefile::AddDependencyToCache( std::string target, const std::string& lib )
-{
-  // Add the explicit dependency information for this target. This is
-  // simply a set of libraries separated by ";". There should always
-  // be a trailing ";". These library names are not canonical, in that
-  // they may be "-framework x", "-ly", "/path/libz.a", etc.
-  target += "_LIB_DEPENDS";
-  std::string dependencies;
-  const char* old_val = GetDefinition( target.c_str() );
-  if( old_val )
-    {
-    dependencies += old_val;
-    }
-  if( dependencies.find( lib ) == std::string::npos )
-    {
-    dependencies += lib;
-    dependencies += ";";
-    }
-  AddCacheDefinition( target.c_str(), dependencies.c_str(),
-                      "Dependencies for the target", cmCacheManager::INTERNAL );
-}
