@@ -129,11 +129,24 @@ void cmake::SetArgs(cmMakefile& builder, const std::vector<std::string>& args)
 // at the end of this CMAKE_ROOT and CMAAKE_COMMAND should be added to the cache
 void cmake::AddCMakePaths(const std::vector<std::string>& args)
 {
-  // Find our own exectuable.
+  // Find our own executable.
   std::string cMakeSelf = args[0];
   cmSystemTools::ConvertToUnixSlashes(cMakeSelf);
   cMakeSelf = cmSystemTools::FindProgram(cMakeSelf.c_str());
 
+  if(!cmCacheManager::GetInstance()->GetCacheValue("LIBRARY_OUTPUT_PATH"))
+    {
+    cmCacheManager::GetInstance()->AddCacheEntry("LIBRARY_OUTPUT_PATH", "",
+                                                 "Single output directory for building all libraries.",
+                                                 cmCacheManager::PATH);
+    } 
+  if(!cmCacheManager::GetInstance()->GetCacheValue("EXECUTABLE_OUTPUT_PATH"))
+    {
+    cmCacheManager::GetInstance()->AddCacheEntry("EXECUTABLE_OUTPUT_PATH", "",
+                                                 "Single output directory for building all executables.",
+                                                 cmCacheManager::PATH);
+    }
+ 
   // Save the value in the cache
   cmCacheManager::GetInstance()->AddCacheEntry
     ("CMAKE_COMMAND",

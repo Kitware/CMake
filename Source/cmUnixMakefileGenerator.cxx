@@ -55,6 +55,30 @@ cmUnixMakefileGenerator::cmUnixMakefileGenerator()
 
 void cmUnixMakefileGenerator::GenerateMakefile()
 {
+  // suppoirt override in output directories
+  if (m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH"))
+    {
+    m_LibraryOutputPath = m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH");
+    if(m_LibraryOutputPath.size() &&
+       m_LibraryOutputPath[m_LibraryOutputPath.size() -1] != '/')
+      {
+      m_LibraryOutputPath += "/";
+      }
+    cmSystemTools::MakeDirectory(m_LibraryOutputPath.c_str());
+    m_Makefile->GetLinkDirectories().push_back(m_LibraryOutputPath);
+    }
+  if (m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH"))
+    {
+    m_ExecutableOutputPath = m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
+    if(m_ExecutableOutputPath.size() &&
+       m_ExecutableOutputPath[m_ExecutableOutputPath.size() -1] != '/')
+      {
+      m_ExecutableOutputPath += "/";
+      }
+    cmSystemTools::MakeDirectory(m_ExecutableOutputPath.c_str());
+    m_Makefile->GetLinkDirectories().push_back(m_ExecutableOutputPath);
+    }
+
   if(m_CacheOnly)
     {
     // Generate the cache only stuff
@@ -211,7 +235,7 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
     if (l->second.GetType() == cmTarget::LIBRARY &&
 	l->second.IsInAll())
       {
-      fout << " \\\nlib" << l->first.c_str();
+      fout << " \\\n" << m_LibraryOutputPath << "lib" << l->first.c_str();
       if(dll)
         {
         fout << m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
@@ -230,7 +254,7 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
          l->second.GetType() == cmTarget::WIN32_EXECUTABLE) &&
         l->second.IsInAll())
       {
-      fout << " \\\n" << l->first.c_str();
+      fout << " \\\n" << m_ExecutableOutputPath << l->first.c_str();
       }
     }
   // list utilities last
@@ -318,26 +342,37 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
       libDir != libdirs.end(); ++libDir)
     { 
     std::string libpath = cmSystemTools::EscapeSpaces(libDir->c_str());
-    if(libpath != "/usr/lib")
+    bool skipPath = false;
+    if (m_LibraryOutputPath.size())
       {
-      if(emitted.insert(libpath).second)
+      if(m_LibraryOutputPath != libpath 
+         && (libpath.find(m_Makefile->GetHomeOutputDirectory()) 
+             != std::string::npos))
         {
-        std::string::size_type pos = libDir->find("-L");
-        if((pos == std::string::npos || pos > 0)
-           && libDir->find("${") == std::string::npos)
-          {
-          linkLibs += "-L";
-          if(outputRuntime)
-            {
-            runtimeDirs.push_back( libpath );
-            }
-          }
-        linkLibs += libpath;
-        linkLibs += " ";
+        emitted.insert(libpath);
         }
       }
+    if(libpath == "/usr/lib" )
+      {
+      emitted.insert(libpath);
+      }
+    if(emitted.insert(libpath).second)
+      {
+      std::string::size_type pos = libDir->find("-L");
+      if((pos == std::string::npos || pos > 0)
+         && libDir->find("${") == std::string::npos)
+        {
+        linkLibs += "-L";
+        if(outputRuntime)
+          {
+          runtimeDirs.push_back( libpath );
+          }
+        }
+      linkLibs += libpath;
+      linkLibs += " ";
+      }
     }
-
+  
   std::string librariesLinked;
   const cmTarget::LinkLibraries& libs = tgt.GetLinkLibraries();
   cmRegularExpression reg("lib(.*)(\\.so$|\\.a|\\.sl$)");
@@ -429,6 +464,7 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
 
 void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
 {
+ 
   bool dll = cmCacheManager::GetInstance()->IsOn("BUILD_SHARED_LIBS");
 
   // for each target
@@ -441,18 +477,21 @@ void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
       fout << "#---------------------------------------------------------\n";
       fout << "# rules for a library\n";
       fout << "#\n";
-      fout << "lib" << l->first << ".a: ${" << 
+      fout << m_LibraryOutputPath << "lib" << l->first << ".a: ${" << 
         l->first << "_SRC_OBJS} \n";
-      fout << "\t${CMAKE_AR} cr lib" << l->first << ".a ${" << 
+      fout << "\t${CMAKE_AR} cr "
+           << m_LibraryOutputPath << "lib" << l->first << ".a ${" << 
         l->first << "_SRC_OBJS} \n";
-      fout << "\t${CMAKE_RANLIB} lib" << l->first << ".a\n";
+      fout << "\t${CMAKE_RANLIB} "
+           << m_LibraryOutputPath << "lib" << l->first << ".a\n";
       fout << std::endl;
 
-      fout << "lib" << l->first << "$(SHLIB_SUFFIX):  ${" << 
+      fout << m_LibraryOutputPath << "lib" << l->first << "$(SHLIB_SUFFIX):  ${" << 
         l->first << "_SRC_OBJS} ${CMAKE_DEPEND_LIBS}\n";
       fout << "\trm -f lib" << l->first << "$(SHLIB_SUFFIX)\n";
-      fout << "\t$(CMAKE_CXX_COMPILER)  ${CMAKE_SHLIB_LINK_FLAGS} ${CMAKE_SHLIB_BUILD_FLAGS} ${CMAKE_CXX_FLAGS} -o \\\n";
-      fout << "\t  lib" << l->first << "$(SHLIB_SUFFIX) \\\n";
+      fout << "\t$(CMAKE_CXX_COMPILER)  ${CMAKE_SHLIB_LINK_FLAGS} "
+        "${CMAKE_SHLIB_BUILD_FLAGS} ${CMAKE_CXX_FLAGS} -o \\\n";
+      fout << "\t  " << m_LibraryOutputPath << "lib" << l->first << "$(SHLIB_SUFFIX) \\\n";
       fout << "\t  ${" << l->first << 
         "_SRC_OBJS} ";
       this->OutputLinkLibraries(fout, l->first.c_str(), l->second);
@@ -461,7 +500,7 @@ void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
     else if ((l->second.GetType() == cmTarget::EXECUTABLE)
              || (l->second.GetType() == cmTarget::WIN32_EXECUTABLE))
       {
-      fout << l->first << ": ${" << 
+      fout << m_ExecutableOutputPath << l->first << ": ${" << 
         l->first << "_SRC_OBJS} ${CMAKE_DEPEND_LIBS}\n";
       fout << "\t${CMAKE_CXX_COMPILER} ";
       if (dll)
@@ -470,7 +509,7 @@ void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
         }
       fout << "${CMAKE_CXXFLAGS} ${" << l->first << "_SRC_OBJS} ";
       this->OutputLinkLibraries(fout, NULL,l->second);
-      fout << " -o " << l->first << "\n\n";
+      fout << " -o " << m_ExecutableOutputPath << l->first << "\n\n";
       }
     }
 }
@@ -502,7 +541,15 @@ void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
     if(cacheValue)
       {
       std::string libpath = cacheValue;
-      libpath += "/lib";
+      if(m_LibraryOutputPath.size())
+        {
+        libpath = m_LibraryOutputPath;
+        libpath += "lib";
+        }
+      else
+        {
+        libpath += "/lib";
+        }
       libpath += lib2->first; 
       bool dll = cmCacheManager::GetInstance()->IsOn("BUILD_SHARED_LIBS");
       if(dll)
@@ -542,12 +589,19 @@ void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
         library += ".a";
         }
       std::string libpath = cacheValue;
-      libpath += "/";
+      if(m_LibraryOutputPath.size())
+        {
+        libpath = m_LibraryOutputPath;
+        }
+      else
+        {
+        libpath += "/";
+        }
       libpath += library;
       // put out a rule to build the library if it does not exist
       fout << libpath.c_str()
            << ":\n\tcd " << cacheValue 
-           << "; make " << library.c_str() << "\n\n";
+           << "; make " << m_LibraryOutputPath << library.c_str() << "\n\n";
       }
     }
 }

@@ -120,6 +120,8 @@ private:
 private:
   bool m_CacheOnly;
   bool m_Recurse;
+  std::string m_ExecutableOutputPath;
+  std::string m_LibraryOutputPath;
 };
 
 #endif
