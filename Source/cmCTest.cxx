@@ -304,6 +304,7 @@ cmCTest::cmCTest()
 void cmCTest::Initialize()
 {
   m_ToplevelPath = cmSystemTools::GetCurrentWorkingDirectory();
+  cmSystemTools::ConvertToUnixSlashes(m_ToplevelPath);
   // parse the dart test file
   std::ifstream fin("DartConfiguration.tcl");
   if(!fin)
@@ -1920,6 +1921,11 @@ bool cmCTest::InitializeMemoryChecking()
     return false;
     }
 
+  if ( m_MemoryTester[0] == '\"' && m_MemoryTester[m_MemoryTester.size()-1] == '\"' )
+    {
+    m_MemoryTester = m_MemoryTester.substr(1, m_MemoryTester.size()-2);
+    }
+
   // Setup the options
   if ( m_DartConfiguration["MemoryCheckCommandOptions"].size() )
     {
@@ -1933,7 +1939,7 @@ bool cmCTest::InitializeMemoryChecking()
   m_MemoryTesterOutputFile = m_ToplevelPath + "/Testing/Temporary/MemoryChecker.log";
   m_MemoryTesterOutputFile = cmSystemTools::EscapeSpaces(m_MemoryTesterOutputFile.c_str());
 
-  if ( m_MemoryTester.find("valgrind") )
+  if ( m_MemoryTester.find("valgrind") != std::string::npos )
     {
     m_MemoryTesterStyle = cmCTest::VALGRIND;
     if ( !m_MemoryTesterOptions.size() )
@@ -1951,7 +1957,7 @@ bool cmCTest::InitializeMemoryChecking()
       m_MemoryTesterOptions += " --suppressions=" + cmSystemTools::EscapeSpaces(m_DartConfiguration["MemoryCheckSuppressionFile"].c_str()) + "";
       }
     }
-  else if ( m_MemoryTester.find("purify") )
+  else if ( m_MemoryTester.find("purify") != std::string::npos )
     {
     m_MemoryTesterStyle = cmCTest::PURIFY;
 #ifdef _WIN32
@@ -1960,7 +1966,7 @@ bool cmCTest::InitializeMemoryChecking()
     m_MemoryTesterOptions += " -log-file=" + m_MemoryTesterOutputFile;
 #endif
     }
-  else if ( m_MemoryTester.find("boundschecker") )
+  else if ( m_MemoryTester.find("boundschecker") != std::string::npos )
     {
     m_MemoryTesterStyle = cmCTest::BOUNDS_CHECKER;
     std::cerr << "Bounds checker not yet implemented" << std::endl;
@@ -2674,6 +2680,7 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output, int *re
 
   cmsysProcess* cp = cmsysProcess_New();
   cmsysProcess_SetCommand(cp, &*argv.begin());
+  std::cout << "Command is: " << argv[0] << std::endl;
   if(cmSystemTools::GetRunCommandHideConsole())
     {
     cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
@@ -3015,7 +3022,7 @@ bool cmCTest::ProcessMemCheckPurifyOutput(const std::string&, std::string& log,
   cmOStringStream ostr;
   log = "";
 
-  cmsys::RegularExpression pfW("^\\[W\\] ([A-Z][A-Z][A-Z][A-Z]*): ");
+  cmsys::RegularExpression pfW("^\\[[WEI]\\] ([A-Z][A-Z][A-Z][A-Z]*): ");
 
   std::string line;
   while ( cmSystemTools::GetLineFromStream(ifs, line) )
@@ -3032,18 +3039,18 @@ bool cmCTest::ProcessMemCheckPurifyOutput(const std::string&, std::string& log,
           break;
           }
         }
-      if ( failure )
-        {
-        ostr << "<b>" << cmCTestMemCheckResultStrings[failure] << "</b> ";
-        results[failure] ++;
-        }
-      else
+      if ( cc == cmCTest::NO_MEMORY_FAULT )
         {
         std::cerr<< "Unknown Purify memory fault: " << pfW.match(1) << std::endl;
         ostr << "*** Unknown Purify memory fault: " << pfW.match(1) << std::endl;
         }
       }
-    ostr << line << std::endl;
+    if ( failure != NO_MEMORY_FAULT )
+      {
+      ostr << "<b>" << cmCTestMemCheckResultStrings[failure] << "</b> ";
+      results[failure] ++;
+      }
+    ostr << cmCTest::MakeXMLSafe(line) << std::endl;
     }
   
   log = ostr.str();
