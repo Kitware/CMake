@@ -183,6 +183,12 @@ kwsysProcess* kwsysProcess_New()
 /*--------------------------------------------------------------------------*/
 void kwsysProcess_Delete(kwsysProcess* cp)
 {
+  /* Make sure we have an instance.  */
+  if(!cp)
+    {
+    return;
+    }
+
   /* If the process is executing, wait for it to finish.  */
   if(cp->State == kwsysProcess_State_Executing)
     {
@@ -203,6 +209,10 @@ void kwsysProcess_Delete(kwsysProcess* cp)
 int kwsysProcess_SetCommand(kwsysProcess* cp, char const* const* command)
 {
   int i;
+  if(!cp)
+    {
+    return 0;
+    }
   for(i=0; i < cp->NumberOfCommands; ++i)
     {
     char** c = cp->Commands[i];
@@ -232,7 +242,7 @@ int kwsysProcess_AddCommand(kwsysProcess* cp, char const* const* command)
   char*** newCommands;
 
   /* Make sure we have a command to add.  */
-  if(!command)
+  if(!cp || !command)
     {
     return 0;
     }
@@ -300,6 +310,10 @@ int kwsysProcess_AddCommand(kwsysProcess* cp, char const* const* command)
 /*--------------------------------------------------------------------------*/
 void kwsysProcess_SetTimeout(kwsysProcess* cp, double timeout)
 {
+  if(!cp)
+    {
+    return;
+    }
   cp->Timeout = timeout;
   if(cp->Timeout < 0)
     {
@@ -310,6 +324,10 @@ void kwsysProcess_SetTimeout(kwsysProcess* cp, double timeout)
 /*--------------------------------------------------------------------------*/
 void kwsysProcess_SetWorkingDirectory(kwsysProcess* cp, const char* dir)
 {
+  if(!cp)
+    {
+    return;
+    }
   if(cp->WorkingDirectory == dir)
     {
     return;
@@ -349,31 +367,35 @@ void kwsysProcess_SetOption(kwsysProcess* cp, int optionId, int value)
 /*--------------------------------------------------------------------------*/
 int kwsysProcess_GetState(kwsysProcess* cp)
 {
-  return cp->State;
+  return cp? cp->State : kwsysProcess_State_Error;
 }
 
 /*--------------------------------------------------------------------------*/
 int kwsysProcess_GetExitException(kwsysProcess* cp)
 {
-  return cp->ExitException;
+  return cp? cp->ExitException : kwsysProcess_Exception_Other;
 }
 
 /*--------------------------------------------------------------------------*/
 int kwsysProcess_GetExitCode(kwsysProcess* cp)
 {
-  return cp->ExitCode;
+  return cp? cp->ExitCode : 0;
 }
 
 /*--------------------------------------------------------------------------*/
 int kwsysProcess_GetExitValue(kwsysProcess* cp)
 {
-  return cp->ExitValue;
+  return cp? cp->ExitValue : -1;
 }
 
 /*--------------------------------------------------------------------------*/
 const char* kwsysProcess_GetErrorString(kwsysProcess* cp)
 {
-  if(cp->State == kwsysProcess_State_Error)
+  if(!cp)
+    {
+    return "Process management structure could not be allocated.";
+    }
+  else if(cp->State == kwsysProcess_State_Error)
     {
     return cp->ErrorMessage;
     }
@@ -388,7 +410,7 @@ void kwsysProcess_Execute(kwsysProcess* cp)
   kwsysProcessCreateInformation si = {-1, -1, -1, -1, {-1, -1}};
 
   /* Do not execute a second copy simultaneously.  */
-  if(cp->State == kwsysProcess_State_Executing)
+  if(!cp || cp->State == kwsysProcess_State_Executing)
     {
     return;
     }
@@ -499,6 +521,13 @@ int kwsysProcess_WaitForData(kwsysProcess* cp, char** data, int* length,
   int expired = 0;
   int pipeId = kwsysProcess_Pipe_None;
   int numReady = 0;
+
+  /* Make sure we are executing a process.  */
+  if(!cp || cp->State != kwsysProcess_State_Executing || cp->Killed ||
+     cp->TimeoutExpired)
+    {
+    return kwsysProcess_Pipe_None;
+    }
 
   /* Record the time at which user timeout period starts.  */
   if(userTimeout)
@@ -687,7 +716,7 @@ int kwsysProcess_WaitForExit(kwsysProcess* cp, double* userTimeout)
   int pipe = 0;
 
   /* Make sure we are executing a process.  */
-  if(cp->State != kwsysProcess_State_Executing)
+  if(!cp || cp->State != kwsysProcess_State_Executing)
     {
     return 1;
     }
@@ -804,7 +833,7 @@ void kwsysProcess_Kill(kwsysProcess* cp)
   int i;
 
   /* Make sure we are executing a process.  */
-  if(cp->State != kwsysProcess_State_Executing)
+  if(!cp || cp->State != kwsysProcess_State_Executing)
     {
     return;
     }

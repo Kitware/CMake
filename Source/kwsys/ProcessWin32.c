@@ -406,6 +406,12 @@ void kwsysProcess_Delete(kwsysProcess* cp)
 {
   int i;
 
+  /* Make sure we have an instance.  */
+  if(!cp)
+    {
+    return;
+    }
+
   /* If the process is executing, wait for it to finish.  */
   if(cp->State == kwsysProcess_State_Executing)
     {
@@ -466,6 +472,10 @@ void kwsysProcess_Delete(kwsysProcess* cp)
 int kwsysProcess_SetCommand(kwsysProcess* cp, char const* const* command)
 {
   int i;
+  if(!cp)
+    {
+    return 0;
+    }
   for(i=0; i < cp->NumberOfCommands; ++i)
     {
     free(cp->Commands[i]);
@@ -490,7 +500,7 @@ int kwsysProcess_AddCommand(kwsysProcess* cp, char const* const* command)
   char** newCommands;
 
   /* Make sure we have a command to add.  */
-  if(!command)
+  if(!cp || !command)
     {
     return 0;
     }
@@ -693,12 +703,24 @@ int kwsysProcess_AddCommand(kwsysProcess* cp, char const* const* command)
 /*--------------------------------------------------------------------------*/
 void kwsysProcess_SetTimeout(kwsysProcess* cp, double timeout)
 {
+  if(!cp)
+    {
+    return;
+    }
   cp->Timeout = timeout;
+  if(cp->Timeout < 0)
+    {
+    cp->Timeout = 0;
+    }
 }
 
 /*--------------------------------------------------------------------------*/
 void kwsysProcess_SetWorkingDirectory(kwsysProcess* cp, const char* dir)
 {
+  if(!cp)
+    {
+    return;
+    }
   if(cp->WorkingDirectory)
     {
     free(cp->WorkingDirectory);
@@ -723,6 +745,11 @@ void kwsysProcess_SetWorkingDirectory(kwsysProcess* cp, const char* dir)
 /*--------------------------------------------------------------------------*/
 int kwsysProcess_GetOption(kwsysProcess* cp, int optionId)
 {
+  if(!cp)
+    {
+    return 0;
+    }
+
   switch(optionId)
     {
     case kwsysProcess_Option_HideWindow: return cp->HideWindow;
@@ -733,6 +760,11 @@ int kwsysProcess_GetOption(kwsysProcess* cp, int optionId)
 /*--------------------------------------------------------------------------*/
 void kwsysProcess_SetOption(kwsysProcess* cp, int optionId, int value)
 {
+  if(!cp)
+    {
+    return;
+    }
+
   switch(optionId)
     {
     case kwsysProcess_Option_HideWindow: cp->HideWindow = value; break;
@@ -743,31 +775,35 @@ void kwsysProcess_SetOption(kwsysProcess* cp, int optionId, int value)
 /*--------------------------------------------------------------------------*/
 int kwsysProcess_GetState(kwsysProcess* cp)
 {
-  return cp->State;
+  return cp? cp->State : kwsysProcess_State_Error;
 }
 
 /*--------------------------------------------------------------------------*/
 int kwsysProcess_GetExitException(kwsysProcess* cp)
 {
-  return cp->ExitException;
+  return cp? cp->ExitException : kwsysProcess_Exception_Other;
 }
 
 /*--------------------------------------------------------------------------*/
 int kwsysProcess_GetExitValue(kwsysProcess* cp)
 {
-  return cp->ExitValue;
+  return cp? cp->ExitValue : -1;
 }
 
 /*--------------------------------------------------------------------------*/
 int kwsysProcess_GetExitCode(kwsysProcess* cp)
 {
-  return cp->ExitCode;
+  return cp? cp->ExitCode : 0;
 }
 
 /*--------------------------------------------------------------------------*/
 const char* kwsysProcess_GetErrorString(kwsysProcess* cp)
 {
-  if(cp->State == kwsysProcess_State_Error)
+  if(!cp)
+    {
+    return "Process management structure could not be allocated.";
+    }
+  else if(cp->State == kwsysProcess_State_Error)
     {
     return cp->ErrorMessage;
     }
@@ -783,7 +819,7 @@ void kwsysProcess_Execute(kwsysProcess* cp)
   kwsysProcessCreateInformation si;
 
   /* Do not execute a second time.  */
-  if(cp->State == kwsysProcess_State_Executing)
+  if(!cp || cp->State == kwsysProcess_State_Executing)
     {
     return;
     }
@@ -935,7 +971,7 @@ int kwsysProcess_WaitForData(kwsysProcess* cp, char** data, int* length,
   DWORD w;
 
   /* Make sure we are executing a process.  */
-  if(cp->State != kwsysProcess_State_Executing || cp->Killed ||
+  if(!cp || cp->State != kwsysProcess_State_Executing || cp->Killed ||
      cp->TimeoutExpired)
     {
     return kwsysProcess_Pipe_None;
@@ -1070,7 +1106,7 @@ int kwsysProcess_WaitForExit(kwsysProcess* cp, double* userTimeout)
   int pipe;
 
   /* Make sure we are executing a process.  */
-  if(cp->State != kwsysProcess_State_Executing)
+  if(!cp || cp->State != kwsysProcess_State_Executing)
     {
     return 1;
     }
@@ -1174,7 +1210,7 @@ void kwsysProcess_Kill(kwsysProcess* cp)
   int i;
 
   /* Make sure we are executing a process.  */
-  if(cp->State != kwsysProcess_State_Executing || cp->TimeoutExpired ||
+  if(!cp || cp->State != kwsysProcess_State_Executing || cp->TimeoutExpired ||
      cp->Killed || cp->Terminated)
     {
     return;
