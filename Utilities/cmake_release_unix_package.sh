@@ -12,8 +12,8 @@ SELFPATH=`cd \`echo $0 | sed -n '/\//{s/\/[^\/]*$//;p;}'\`;pwd`
 . ${SELFPATH}/cmake_release_unix_config.sh
 
 # Cleanup from possible previous run.
-rm -rf ${INSTALL_DIR} ${TARBALL_DIR}
-mkdir -p ${INSTALL_DIR} ${TARBALL_DIR}
+rm -rf ${INSTALL_DIR}
+mkdir -p ${INSTALL_DIR}
 
 # Run the installation.
 cd ${BUILD_DIR}
@@ -70,6 +70,7 @@ ${FILES}
 EOF
 
 TARBALL="${TARBALL_DIR}/CMake$VERSION-$PLATFORM.tar"
+[ -e $TARBALL ] && rm -rf $TARBALL
 echo "Creating CMake$VERSION-$PLATFORM.tar"
 if ${TAR} cvf $TARBALL README ${INTERNAL_NAME}.tar \
      > ${LOG_DIR}/CMake$VERSION-$PLATFORM.log 2>&1 ; then : ; else
@@ -79,10 +80,12 @@ fi
 
 if test "x${GZIP}" != "x" ; then
   echo "Creating $TARBALL.gz"
+  [ -e $TARBALL.gz ] && rm -rf $TARBALL.gz
   ${GZIP} -c $TARBALL > $TARBALL.gz
 fi
 
 if test "x${COMPRESS}" != "x" ; then
   echo "Creating $TARBALL.Z"
+  [ -e $TARBALL.Z ] && rm -rf $TARBALL.Z
   ${COMPRESS} $TARBALL
 fi
