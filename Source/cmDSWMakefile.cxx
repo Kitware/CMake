@@ -130,7 +130,8 @@ void cmDSWMakefile::WriteDSWFile(std::ostream& fout)
     // Get the list of create dsp files names from the cmDSPMakefile, more
     // than one dsp could have been created per input CMakeLists.txt file
     // for each target
-    std::vector<std::string> dspnames = pg->GetDSPMakefile()->GetCreatedProjectNames();
+    std::vector<std::string> dspnames = 
+      pg->GetDSPMakefile()->GetCreatedProjectNames();
     cmTargets &tgts = pg->GetDSPMakefile()->GetMakefile()->GetTargets();
     cmTargets::iterator l = tgts.begin();
     for(std::vector<std::string>::iterator si = dspnames.begin(); 
