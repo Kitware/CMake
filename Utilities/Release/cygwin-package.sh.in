@@ -39,6 +39,11 @@ conf()
 {
   (
   cd ${BINARY_DIR} &&
+  (
+  cat >CMakeCache.txt <<EOF
+BUILD_TESTING:BOOL=ON
+EOF
+  ) &&
   ${SOURCE_DIR}/configure --prefix=${PREFIX}
   )
 }
@@ -47,7 +52,8 @@ build()
 {
   (
   cd ${BINARY_DIR} &&
-  make
+  make &&
+  ./Source/ctest
   )
 }
 
