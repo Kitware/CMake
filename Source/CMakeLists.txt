@@ -90,7 +90,7 @@ LINK_DIRECTORIES(${CMake_BINARY_DIR}/Source)
 
 ADD_EXECUTABLE(cmake cmakemain.cxx)
 ADD_EXECUTABLE(DumpDocumentation cmDumpDocumentation)
-ADD_EXECUTABLE(ctest ctest.cxx)
+ADD_EXECUTABLE(ctest ctest.cxx cmCTest.cxx)
 
 IF (UNIX)
   TARGET_LINK_LIBRARIES(CMakeLib ${CMAKE_DL_LIBS})

@@ -18,7 +18,7 @@
 
 #include "cmStandardIncludes.h"
 
-class ctest
+class cmCTest
 {
 public:
   /**
@@ -83,7 +83,7 @@ public:
   /**
    * constructor
    */
-  ctest();
+  cmCTest();
 
   bool m_UseIncludeRegExp;
   std::string m_IncludeRegExp;
