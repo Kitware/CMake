@@ -2016,7 +2016,7 @@ void cmMakefile::GetListOfMacros(std::string& macros)
 {
   StringStringMap::iterator it;
   macros = "";
-  int cc;
+  int cc = 0;
   for ( it = m_MacrosMap.begin(); it != m_MacrosMap.end(); ++it )
     {
     if ( cc > 0 )
