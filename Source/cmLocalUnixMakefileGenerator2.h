@@ -66,12 +66,20 @@ protected:
                               const char* ruleFileName,
                               const cmTarget& target,
                               std::vector<std::string>& objects);
+  void WriteSharedLibraryRule(std::ostream& ruleFileStream,
+                              const char* ruleFileName,
+                              const cmTarget& target,
+                              std::vector<std::string>& objects);
+  void WriteModuleLibraryRule(std::ostream& ruleFileStream,
+                              const char* ruleFileName,
+                              const cmTarget& target,
+                              std::vector<std::string>& objects);
   void WriteLibraryRule(std::ostream& ruleFileStream,
                         const char* ruleFileName,
                         const cmTarget& target,
                         std::vector<std::string>& objects,
                         const char* linkRuleVar,
-                        const char* flagsPropertyName);
+                        const char* extraLinkFlags);
 
   std::string GetTargetDirectory(const cmTarget& target);
   std::string GetObjectFileName(const cmTarget& target,

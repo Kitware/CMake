@@ -367,6 +367,14 @@ cmLocalUnixMakefileGenerator2
       this->WriteStaticLibraryRule(ruleFileStream, ruleFileName.c_str(),
                                    target, objects);
       break;
+    case cmTarget::SHARED_LIBRARY:
+      this->WriteSharedLibraryRule(ruleFileStream, ruleFileName.c_str(),
+                                   target, objects);
+      break;
+    case cmTarget::MODULE_LIBRARY:
+      this->WriteModuleLibraryRule(ruleFileStream, ruleFileName.c_str(),
+                                   target, objects);
+      break;
     case cmTarget::EXECUTABLE:
       this->WriteExecutableRule(ruleFileStream, ruleFileName.c_str(),
                                 target, objects);
@@ -719,8 +727,68 @@ cmLocalUnixMakefileGenerator2
   std::string linkRuleVar = "CMAKE_";
   linkRuleVar += linkLanguage;
   linkRuleVar += "_CREATE_STATIC_LIBRARY";
+
+  std::string extraFlags;
+  this->AppendFlags(extraFlags, target.GetProperty("STATIC_LIBRARY_FLAGS"));
   this->WriteLibraryRule(ruleFileStream, ruleFileName, target, objects,
-                         linkRuleVar.c_str(), "STATIC_LIBRARY_FLAGS");
+                         linkRuleVar.c_str(), extraFlags.c_str());
+}
+
+//----------------------------------------------------------------------------
+void
+cmLocalUnixMakefileGenerator2
+::WriteSharedLibraryRule(std::ostream& ruleFileStream,
+                         const char* ruleFileName,
+                         const cmTarget& target,
+                         std::vector<std::string>& objects)
+{
+  const char* linkLanguage =
+    target.GetLinkerLanguage(this->GetGlobalGenerator());
+  std::string linkRuleVar = "CMAKE_";
+  linkRuleVar += linkLanguage;
+  linkRuleVar += "_CREATE_SHARED_LIBRARY";
+
+  std::string extraFlags;
+  this->AppendFlags(extraFlags, target.GetProperty("LINK_FLAGS"));
+  this->AddConfigVariableFlags(extraFlags, "CMAKE_SHARED_LINKER_FLAGS");
+  if(m_Makefile->IsOn("WIN32") && !(m_Makefile->IsOn("CYGWIN") || m_Makefile->IsOn("MINGW")))
+    {
+    const std::vector<cmSourceFile*>& sources = target.GetSourceFiles();
+    for(std::vector<cmSourceFile*>::const_iterator i = sources.begin();
+        i != sources.end(); ++i)
+      {
+      if((*i)->GetSourceExtension() == "def")
+        {
+        extraFlags += " ";
+        extraFlags += m_Makefile->GetSafeDefinition("CMAKE_LINK_DEF_FILE_FLAG");
+        extraFlags += this->ConvertToRelativeOutputPath((*i)->GetFullPath().c_str());
+        }
+      }
+    }
+  this->WriteLibraryRule(ruleFileStream, ruleFileName, target, objects,
+                         linkRuleVar.c_str(), extraFlags.c_str());
+}
+
+//----------------------------------------------------------------------------
+void
+cmLocalUnixMakefileGenerator2
+::WriteModuleLibraryRule(std::ostream& ruleFileStream,
+                         const char* ruleFileName,
+                         const cmTarget& target,
+                         std::vector<std::string>& objects)
+{
+  const char* linkLanguage =
+    target.GetLinkerLanguage(this->GetGlobalGenerator());
+  std::string linkRuleVar = "CMAKE_";
+  linkRuleVar += linkLanguage;
+  linkRuleVar += "_CREATE_SHARED_MODULE";
+
+  std::string extraFlags;
+  this->AppendFlags(extraFlags, target.GetProperty("LINK_FLAGS"));
+  this->AddConfigVariableFlags(extraFlags, "CMAKE_MODULE_LINKER_FLAGS");
+  // TODO: Should .def files be supported here also?
+  this->WriteLibraryRule(ruleFileStream, ruleFileName, target, objects,
+                         linkRuleVar.c_str(), extraFlags.c_str());
 }
 
 //----------------------------------------------------------------------------
@@ -731,7 +799,7 @@ cmLocalUnixMakefileGenerator2
                    const cmTarget& target,
                    std::vector<std::string>& objects,
                    const char* linkRuleVar,
-                   const char* flagsPropertyName)
+                   const char* extraFlags)
 {
   std::vector<std::string> commands;
 
@@ -747,11 +815,7 @@ cmLocalUnixMakefileGenerator2
   const char* linkLanguage =
     target.GetLinkerLanguage(this->GetGlobalGenerator());
   std::string linkFlags;
-  if(const char* targetLinkFlags = target.GetProperty(flagsPropertyName))
-    {
-    linkFlags += " ";
-    linkFlags += targetLinkFlags;
-    }
+  this->AppendFlags(linkFlags, extraFlags);
   std::string targetName;
   std::string targetNameSO;
   std::string targetNameReal;
