@@ -1,9 +1,9 @@
 #
-# try to find OpenGL on UNIX systems once done this will define
+# Try to find OpenGL, once done this will define:
 #
 # OPENGL_INCLUDE_PATH = where the GL include directory can be found
-# OPENGL_LIB_PATH     = where the GL library can be found
 # OPENGL_LIBRARY      = the name of the OpenGL library to link with
+# OPENGL_LIBRARY_PATH = where the GL library can be found (might be empty)
 #
 
 IF (WIN32)
@@ -17,26 +17,30 @@ ELSE (WIN32)
     SET(OPENGL_LIBRARY "-framework Carbon -framework AGL -framework OpenGL" CACHE STRING "OpenGL library for OSX")
   ELSE (APPLE)
      FIND_PATH(OPENGL_INCLUDE_PATH GL/gl.h 
-     /usr/include 
-     /usr/local/include 
-     /usr/openwin/share/include 
-     /opt/graphics/OpenGL/include 
-     /usr/X11R6/include 
+       /usr/include 
+       /usr/local/include 
+       /usr/openwin/share/include 
+       /opt/graphics/OpenGL/include 
+       /usr/X11R6/include 
      )
      MARK_AS_ADVANCED(
        OPENGL_INCLUDE_PATH
      )
 
      FIND_LIBRARY(OPENGL_LIBRARY GL
-     /usr/lib 
-     /usr/local/lib 
-     /opt/graphics/OpenGL/lib 
-     /usr/openwin/lib 
-     /usr/X11R6/lib
+       /usr/lib 
+       /usr/local/lib 
+       /opt/graphics/OpenGL/lib 
+       /usr/openwin/lib 
+       /usr/X11R6/lib
      )
+
    ENDIF (APPLE)
 ENDIF (WIN32)
 
+GET_FILENAME_COMPONENT (OPENGL_LIBRARY_PATH ${OPENGL_LIBRARY} PATH)
+
 MARK_AS_ADVANCED(
   OPENGL_LIBRARY
+  OPENGL_LIBRARY_PATH
 )
