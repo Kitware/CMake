@@ -463,6 +463,7 @@ performCurlTransaction(xmlrpc_env *      const envP,
 }
 
 
+#if defined(HAVE_PTHREADS)
 
 static void
 doAsyncRpc2(void * const arg) {
@@ -501,7 +502,6 @@ doAsyncRpc(void * arg) {
 #endif
 
 
-#if defined(HAVE_PTHREADS)
 static void
 createRpcThread(xmlrpc_env *              const envP,
                 rpc *                     const rpcP,
@@ -651,17 +651,17 @@ finishRpc(struct list_head * const headerP,
     rpc * const rpcP = headerP->itemP;
 
     if (rpcP->threadExists) {
+#if defined(HAVE_PTHREADS)
         void *status;
         int result;
 
-#if defined(HAVE_PTHREADS)
         result = pthread_join(rpcP->thread, &status);
+        (void)result;
 #else
         abort();
 #endif
         
         rpcP->threadExists = FALSE;
-        (void)result;
     }
 
     XMLRPC_MEMBLOCK_FREE(char, rpcP->responseXmlP);
