@@ -3,9 +3,9 @@
 # include files and libraries are. It also determines what the name of
 # the library is. This code sets the following variables:
 #
-#  WXWINDOWS_STATIC_LIBRARY  = full path to the wxWindows static library
-#  WXWINDOWS_SHARED_LIBRARY  = full path to the wxWindows shared import library
-#  WXWINDOWS_INCLUDE_PATH    = path to wx.h
+#  WXWINDOWS_LIBRARY         = full path to the wxWindows library and linker flags on unix
+#  CMAKE_WX_CXX_FLAGS        = compiler flags for building wxWindows 
+#  WXWINDOWS_INCLUDE_PATH    = include path of wxWindows
 
 IF(WIN32)
 
