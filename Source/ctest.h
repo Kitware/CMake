@@ -95,6 +95,7 @@ public:
   std::string m_ConfigType;
   bool m_Verbose;
   bool m_DartMode;
+  bool m_ShowOnly;
 
 private:
   enum {
