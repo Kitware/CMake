@@ -11,12 +11,18 @@
 OPTION(BUILD_TESTING "Build the testing tree." "On")
 
 IF(BUILD_TESTING)
+  INCLUDE(${CMAKE_ROOT}/Modules/FindDart.cmake)
+
+  IF (DART_ROOT)
   #
   # Section #1:
   #
   # CMake commands that will not vary from project to project. Locates programs
   # on the client and configure site name and build name.
   #
+
+  # the project must have a DartConfig.cmake file
+  INCLUDE(${PROJECT_SOURCE_DIR}/DartConfig.cmake)
 
   # find programs used by testing
   # look for the make program
@@ -59,92 +65,8 @@ IF(BUILD_TESTING)
 
   # configure files
   CONFIGURE_FILE(
-  ${PROJECT_SOURCE_DIR}/Dart/Source/Client/Utility.conf.in
-  ${PROJECT_BINARY_DIR}/Dart/Source/Client/Utility.conf )
-
-  CONFIGURE_FILE(
-  ${PROJECT_SOURCE_DIR}/Dart/Source/Client/base64.tcl.in
-  ${PROJECT_BINARY_DIR}/Dart/Source/Client/base64.tcl COPYONLY)
-
-  CONFIGURE_FILE(
-  ${PROJECT_SOURCE_DIR}/Dart/Source/Client/Build.tcl.in
-  ${PROJECT_BINARY_DIR}/Dart/Source/Client/Build.tcl COPYONLY)
-
-  CONFIGURE_FILE(
-  ${PROJECT_SOURCE_DIR}/Dart/Source/Client/Coverage.tcl.in
-  ${PROJECT_BINARY_DIR}/Dart/Source/Client/Coverage.tcl COPYONLY)
-
-  CONFIGURE_FILE(
-  ${PROJECT_SOURCE_DIR}/Dart/Source/Client/DashboardManager.tcl.in
-  ${PROJECT_BINARY_DIR}/Dart/Source/Client/DashboardManager.tcl COPYONLY)
-
-  CONFIGURE_FILE(
-  ${PROJECT_SOURCE_DIR}/Dart/Source/Client/Doxygen.tcl.in
-  ${PROJECT_BINARY_DIR}/Dart/Source/Client/Doxygen.tcl COPYONLY)
-
-  CONFIGURE_FILE(
-  ${PROJECT_SOURCE_DIR}/Dart/Source/Client/ftp.tcl.in
-  ${PROJECT_BINARY_DIR}/Dart/Source/Client/ftp.tcl COPYONLY)
-
-  CONFIGURE_FILE(
-  ${PROJECT_SOURCE_DIR}/Dart/Source/Client/Purify.tcl.in
-  ${PROJECT_BINARY_DIR}/Dart/Source/Client/Purify.tcl COPYONLY)
-
-  CONFIGURE_FILE(
-  ${PROJECT_SOURCE_DIR}/Dart/Source/Client/Submit.tcl.in
-  ${PROJECT_BINARY_DIR}/Dart/Source/Client/Submit.tcl COPYONLY)
-  
-  CONFIGURE_FILE(
-  ${PROJECT_SOURCE_DIR}/Dart/Source/Client/Test.tcl.in
-  ${PROJECT_BINARY_DIR}/Dart/Source/Client/Test.tcl COPYONLY)
-
-  CONFIGURE_FILE(
-  ${PROJECT_SOURCE_DIR}/Dart/Source/Client/Update.tcl.in
-  ${PROJECT_BINARY_DIR}/Dart/Source/Client/Update.tcl COPYONLY)
-
-  CONFIGURE_FILE(
-  ${PROJECT_SOURCE_DIR}/Dart/Source/Client/Utility.tcl.in
-  ${PROJECT_BINARY_DIR}/Dart/Source/Client/Utility.tcl COPYONLY)
-
-  CONFIGURE_FILE(
-  ${PROJECT_SOURCE_DIR}/Dart/Source/Server/XSL/DashboardConfig.xsl.in
-  ${PROJECT_BINARY_DIR}/Dart/Source/Server/XSL/DashboardConfig.xsl )
-
-  CONFIGURE_FILE(
-  ${PROJECT_SOURCE_DIR}/Dart/Source/Server/XSL/Build.xsl.in
-  ${PROJECT_BINARY_DIR}/Dart/Source/Server/XSL/Build.xsl COPYONLY)
-
-  CONFIGURE_FILE(
-  ${PROJECT_SOURCE_DIR}/Dart/Source/Server/XSL/Coverage.xsl.in
-  ${PROJECT_BINARY_DIR}/Dart/Source/Server/XSL/Coverage.xsl COPYONLY)
-
-  CONFIGURE_FILE(
-  ${PROJECT_SOURCE_DIR}/Dart/Source/Server/XSL/CoverageLog.xsl.in
-  ${PROJECT_BINARY_DIR}/Dart/Source/Server/XSL/CoverageLog.xsl COPYONLY)
-  
-  CONFIGURE_FILE(
-  ${PROJECT_SOURCE_DIR}/Dart/Source/Server/XSL/Dashboard.xsl.in
-  ${PROJECT_BINARY_DIR}/Dart/Source/Server/XSL/Dashboard.xsl COPYONLY)
-
-  CONFIGURE_FILE(
-  ${PROJECT_SOURCE_DIR}/Dart/Source/Server/XSL/Doxygen.xsl.in
-  ${PROJECT_BINARY_DIR}/Dart/Source/Server/XSL/Doxygen.xsl COPYONLY)
-
-  CONFIGURE_FILE(
-  ${PROJECT_SOURCE_DIR}/Dart/Source/Server/XSL/Purify.xsl.in
-  ${PROJECT_BINARY_DIR}/Dart/Source/Server/XSL/Purify.xsl COPYONLY)
-
-  CONFIGURE_FILE(
-  ${PROJECT_SOURCE_DIR}/Dart/Source/Server/XSL/Test.xsl.in
-  ${PROJECT_BINARY_DIR}/Dart/Source/Server/XSL/Test.xsl COPYONLY)
-
-  CONFIGURE_FILE(
-  ${PROJECT_SOURCE_DIR}/Dart/Source/Server/XSL/TestOverview.xsl.in
-  ${PROJECT_BINARY_DIR}/Dart/Source/Server/XSL/TestOverview.xsl COPYONLY)
-
-  CONFIGURE_FILE(
-  ${PROJECT_SOURCE_DIR}/Dart/Source/Server/XSL/Update.xsl.in
-  ${PROJECT_BINARY_DIR}/Dart/Source/Server/XSL/Update.xsl COPYONLY)
+  ${DART_ROOT}/Source/Client/Utility.conf.in
+  ${PROJECT_BINARY_DIR}/DartConfiguration.tcl )
 
   #
   # Section 3:
@@ -155,30 +77,32 @@ IF(BUILD_TESTING)
 
   # add testing targets
   ADD_CUSTOM_TARGET(Nightly 
-  "${TCLSHCOMMAND} Dart/Source/Client/DashboardManager.tcl Nightly Start Build Test Submit")
+  "${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Start Build Test Submit")
   ADD_CUSTOM_TARGET(NightlyBuild   
-  "${TCLSHCOMMAND} Dart/Source/Client/DashboardManager.tcl Nightly Start Build")
+  "${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Start Build")
   ADD_CUSTOM_TARGET(NightlyTest 
-  "${TCLSHCOMMAND} Dart/Source/Client/DashboardManager.tcl Nightly Test")
+  "${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Test")
   ADD_CUSTOM_TARGET(NightlyCoverage 
-  "${TCLSHCOMMAND} Dart/Source/Client/DashboardManager.tcl Nightly Coverage")
+  "${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Coverage")
   ADD_CUSTOM_TARGET(NightlySubmit 
-  "${TCLSHCOMMAND} Dart/Source/Client/DashboardManager.tcl Nightly Submit")
+  "${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Submit")
   ADD_CUSTOM_TARGET(NightlyDashboardStart 
-  "${TCLSHCOMMAND} Dart/Source/Client/DashboardManager.tcl Nightly DashboardStart")
+  "${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly DashboardStart")
   ADD_CUSTOM_TARGET(NightlyDashboardEnd 
-  "${TCLSHCOMMAND} Dart/Source/Client/DashboardManager.tcl Nightly DashboardEnd")
+  "${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly DashboardEnd")
   ADD_CUSTOM_TARGET(ExperimentalBuild 
-  "${TCLSHCOMMAND} Dart/Source/Client/DashboardManager.tcl Experimental Start Build")
+  "${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Start Build")
   ADD_CUSTOM_TARGET(ExperimentalTest 
-  "${TCLSHCOMMAND} Dart/Source/Client/DashboardManager.tcl Experimental Test")
+  "${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Test")
   ADD_CUSTOM_TARGET(ExperimentalCoverage 
-  "${TCLSHCOMMAND} Dart/Source/Client/DashboardManager.tcl Experimental Coverage")
+  "${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Coverage")
   ADD_CUSTOM_TARGET(ExperimentalSubmit 
-  "${TCLSHCOMMAND} Dart/Source/Client/DashboardManager.tcl Experimental Submit")
+  "${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Submit")
   ADD_CUSTOM_TARGET(Experimental 
-  "${TCLSHCOMMAND} Dart/Source/Client/DashboardManager.tcl Experimental Start Build Test Submit")
+  "${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Start Build Test Submit")
 
+  ENABLE_TESTING()
+  ENDIF (DART_ROOT)
 ENDIF(BUILD_TESTING)
 
 #
