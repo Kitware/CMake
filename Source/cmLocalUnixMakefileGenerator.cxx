@@ -368,19 +368,41 @@ std::string cmLocalUnixMakefileGenerator::GetFullTargetName(const char* n,
 }
 
 // Output the rules for any targets
+void cmLocalUnixMakefileGenerator::OutputEcho(std::ostream& fout, 
+                                              const char *msg)
+{
+  std::string echostring = msg;
+  // for unix we want to quote the output of echo
+  // for nmake and borland, the echo should not be quoted
+  if(strcmp(m_GlobalGenerator->GetName(), "Unix Makefiles") == 0)
+    {
+    cmSystemTools::ReplaceString(echostring, "\\\n", " ");
+    cmSystemTools::ReplaceString(echostring, " \t", "   ");
+    cmSystemTools::ReplaceString(echostring, "\n\t", "\"\n\t@echo \"");
+    fout << "\t@echo \"" << echostring.c_str() << "\"\n";
+    }
+  else
+    {
+    cmSystemTools::ReplaceString(echostring, "\n\t", "\n\t@echo ");
+    fout << "\t@echo " << echostring.c_str() << "\n";
+    }
+}
+
+// Output the rules for any targets
 void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
 {
   const cmTargets &tgts = m_Makefile->GetTargets();
-
+  
   // add the help target
   fout << "help:\n";
-  fout << "\t@echo \"The following are some of the valid targets for this Makefile:\"\n";
-  fout << "\t@echo \"  all (the default if no target is provided)\"\n";
-  fout << "\t@echo \"  clean\"\n";
-  fout << "\t@echo \"  depend\"\n";
-  fout << "\t@echo \"  rebuild_cache\"\n";
+  this->OutputEcho(fout,"The following are some of the valid targets for this Makefile:");
+  this->OutputEcho(fout,"...  all (the default if no target is provided)");
+  this->OutputEcho(fout,"...  clean");
+  this->OutputEcho(fout,"...  depend");
+  this->OutputEcho(fout,"...  rebuild_cache");
 
   // libraries
+  std::string path;
   for(cmTargets::const_iterator l = tgts.begin(); 
       l != tgts.end(); l++)
     {
@@ -388,9 +410,11 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
        (l->second.GetType() == cmTarget::SHARED_LIBRARY) ||
        (l->second.GetType() == cmTarget::MODULE_LIBRARY))
       {
-      std::string path = m_LibraryOutputPath;
-      path += this->GetFullTargetName(l->first.c_str(), l->second);
-      fout << "\t@echo \"  " << cmSystemTools::ConvertToOutputPath(path.c_str()) << "\"\n";
+      std::string path2 = m_LibraryOutputPath;
+      path2 += this->GetFullTargetName(l->first.c_str(), l->second);
+      path = "... ";
+      path += cmSystemTools::ConvertToOutputPath(path2.c_str());
+      this->OutputEcho(fout,path.c_str());
       }
     }
   // executables
@@ -398,20 +422,22 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
       l != tgts.end(); l++)
     {
     if ((l->second.GetType() == cmTarget::EXECUTABLE ||
-         l->second.GetType() == cmTarget::WIN32_EXECUTABLE) &&
-        l->second.IsInAll())
+         l->second.GetType() == cmTarget::WIN32_EXECUTABLE))
       {
-      fout << "\t@echo \"  " << l->first << "\"\n";
+      path = "... ";
+      path += l->first + cmSystemTools::GetExecutableExtension();
+      this->OutputEcho(fout,path.c_str());
       }
     }
   // list utilities last
   for(cmTargets::const_iterator l = tgts.begin(); 
       l != tgts.end(); l++)
     {
-    if (l->second.GetType() == cmTarget::UTILITY &&
-        l->second.IsInAll())
+    if (l->second.GetType() == cmTarget::UTILITY)
       {
-      fout << "\t@echo \"  " << l->first << "\"\n";
+      path = "... ";
+      path += l->first;
+      this->OutputEcho(fout,path.c_str());
       }
     }
   fout << "\n\n";
@@ -1725,11 +1751,12 @@ inline std::string FixDirectoryName(const char* dir)
 }
 
 
-void cmLocalUnixMakefileGenerator::BuildInSubDirectoryWindows(std::ostream& fout,
-                                                              const char* directory,
-                                                              const char* target1,
-                                                              const char* target2,
-                                                              bool silent)
+void cmLocalUnixMakefileGenerator::
+BuildInSubDirectoryWindows(std::ostream& fout,
+                           const char* directory,
+                           const char* target1,
+                           const char* target2,
+                           bool silent)
 {
   if(target1)
     {
@@ -2819,21 +2846,7 @@ void cmLocalUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
       echostring += " ";
       echostring += target;
       echostring += "...";
-      
-      // for unix we want to quote the output of echo
-      // for nmake and borland, the echo should not be quoted
-      if(strcmp(m_GlobalGenerator->GetName(), "Unix Makefiles") == 0)
-        {
-        cmSystemTools::ReplaceString(echostring, "\\\n", " ");
-        cmSystemTools::ReplaceString(echostring, " \t", "   ");
-        cmSystemTools::ReplaceString(echostring, "\n\t", "\"\n\t@echo \"");
-        fout << "\t@echo \"" << echostring.c_str() << "\"\n";
-        }
-      else
-        {
-        cmSystemTools::ReplaceString(echostring, "\n\t", "\n\t@echo ");
-        fout << "\t@echo " << echostring.c_str() << "\n";
-        }
+      this->OutputEcho(fout,echostring.c_str());
       }
     fout << "\t" << replace.c_str() << "\n";
     count++;

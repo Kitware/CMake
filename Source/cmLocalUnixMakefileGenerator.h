@@ -207,6 +207,10 @@ protected:
   
   /** Get the full name of the target's file, without path.  */
   std::string GetFullTargetName(const char* n, const cmTarget& t);
+
+  /** Output an echo command to the Makefile */
+  void OutputEcho(std::ostream& fout, const char *msg);
+    
 protected:
   int m_MakefileVariableSize;
   std::map<cmStdString, cmStdString> m_MakeVariableMap;
