@@ -37,6 +37,8 @@ void xmlrpc_authcookie_set ( xmlrpc_env *env,
                         const char *password ) {
     char *unencoded;
     xmlrpc_mem_block *token;
+    static char env_buffer[1024];
+    const char* block;
 
     /* Check asserts. */
     XMLRPC_ASSERT_ENV_OK(env);
@@ -56,8 +58,9 @@ void xmlrpc_authcookie_set ( xmlrpc_env *env,
 
     /* Set HTTP_COOKIE_AUTH to the character representation of the
     ** encoded string. */
-    setenv("HTTP_COOKIE_AUTH", XMLRPC_TYPED_MEM_BLOCK_CONTENTS(char, token),
-                1);
+    block = XMLRPC_TYPED_MEM_BLOCK_CONTENTS(char, token);
+    sprintf(env_buffer, "HTTP_COOKIE_AUTH=%s", block);
+    putenv(env_buffer);
 
  cleanup:
     if (token) xmlrpc_mem_block_free(token);
