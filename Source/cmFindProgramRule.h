@@ -24,7 +24,8 @@
  *
  * cmFindProgramRule is used to define a CMake variable
  * that specifies an executable program. The rule searches 
- * for a given file in a list of directories.
+ * in the current path (e.g., PATH environment variable) for
+ * an executable that matches one of the supplied names.
  */
 class cmFindProgramRule : public cmRuleMaker
 {
@@ -74,7 +75,7 @@ public:
   virtual const char* FullDocumentation()
     {
     return
-      "FIND_PROGRAM(NAME try1 try2 ...)";
+      "FIND_PROGRAM(NAME executable1 executable2 ...)";
     }
 };
 

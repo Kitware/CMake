@@ -54,11 +54,11 @@ int main(int ac, char** av)
   cmMSProjectGenerator* pg = new cmMSProjectGenerator;
   if(arg.find("-DSP", 0) != std::string::npos)
     {
-    pg->SetBuildDSP();
+    pg->BuildDSPOff();
     }
   else
     {
-    pg->SetBuildDSW();
+    pg->BuildDSWOn();
     }
   builder.SetMakefileGenerator(pg);
   builder.ReadMakefile(av[1]);

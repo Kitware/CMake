@@ -1,3 +1,22 @@
+/*=========================================================================
+
+  Program:   Insight Segmentation & Registration Toolkit
+  Module:    $RCSfile$
+  Language:  C++
+  Date:      $Date$
+  Version:   $Revision$
+
+
+  Copyright (c) 2000 National Library of Medicine
+  All rights reserved.
+
+  See COPYRIGHT.txt for copyright details.
+
+=========================================================================*/
+/**
+ * Include header files as a function of the build process, compiler,
+ * and operating system.
+ */
 #ifndef cmStandardIncludes_h
 #define cmStandardIncludes_h
 

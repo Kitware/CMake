@@ -13,39 +13,66 @@
   See COPYRIGHT.txt for copyright details.
 
 =========================================================================*/
-/**
- * cmClassFile a structure that represents a class loaded from 
- * a makefile.
- */
 #ifndef cmClassFile_h
 #define cmClassFile_h
+
 #include "cmStandardIncludes.h"
 
-
-struct cmClassFile
+/** \class cmClassFile
+ * \brief Represent a class loaded from a makefile.
+ *
+ * cmClassFile is represents a class loaded from 
+ * a makefile.
+ */
+class cmClassFile
 {
+public:
+  /**
+   * Construct instance as a concrete class with both a
+   * .h and .cxx file.
+   */
   cmClassFile()
     {
-      m_AbstractClass = false;
-      m_HeaderFileOnly = false;
+    m_AbstractClass = false;
+    m_HeaderFileOnly = false;
     }
   
   /**
    * Set the name of the file, given the directory
-   * the file should be in.   Extensions are tried on 
-   * the name in the directory to find the actual file.
+   * the file should be in.  Various extensions are tried on 
+   * the name (e.g., .cxx, .cpp) in the directory to find the actual file.
    */
   void SetName(const char* name, const char* dir);
+
   /**
-   * print the structure to cout
+   * Print the structure to std::cout.
    */
   void Print();
 
-  bool m_AbstractClass;         // is this an abstract class
-  bool m_HeaderFileOnly;        // is this file only a header file
-  std::string m_FullPath;       // full path to the file
-  std::string m_ClassName;      // class name
-  // list of files that this file depends on
+  /**
+   * Indicate whether the class is abstract (non-instantiable).
+   */
+  bool m_AbstractClass;
+
+  /**
+   * Indicate whether this class is defined with only the header file.
+   */
+  bool m_HeaderFileOnly;
+
+  /**
+   * The full path to the file.
+   */
+  std::string m_FullPath;
+
+  /**
+   * The file name associated with stripped off directory and extension.
+   * (In most cases this is the name of the class.)
+   */
+  std::string m_ClassName;
+
+  /**
+   * The dependencies of this class are gathered here.
+   */
   std::vector<std::string> m_Depends;
 };
 

@@ -6,7 +6,7 @@ cmMSProjectGenerator::cmMSProjectGenerator()
 {
   m_DSWMakefile = 0;
   m_DSPMakefile = 0;
-  SetBuildDSW();
+  BuildDSWOn();
 }
 
 void cmMSProjectGenerator::GenerateMakefile()

@@ -1,3 +1,18 @@
+/*=========================================================================
+
+  Program:   Insight Segmentation & Registration Toolkit
+  Module:    $RCSfile$
+  Language:  C++
+  Date:      $Date$
+  Version:   $Revision$
+
+
+  Copyright (c) 2000 National Library of Medicine
+  All rights reserved.
+
+  See COPYRIGHT.txt for copyright details.
+
+=========================================================================*/
 #include "cmUnixMakefileGenerator.h"
 #include "cmMakefile.h"
 #include "cmStandardIncludes.h"
@@ -12,7 +27,6 @@ void cmUnixMakefileGenerator::GenerateMakefile()
   md.DoDepends();
   this->OutputMakefile("CMakeTargets.make"); 
 }
-
 
 // Output the depend information for all the classes 
 // in the makefile.  These would have been generated

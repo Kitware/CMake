@@ -18,20 +18,19 @@
 
 #include "cmStandardIncludes.h"
 #include "cmSystemTools.h"
+
 /** \class cmDirectory
  * \brief Portable directory/filename traversal.
  * 
  * cmDirectory provides a portable way of finding the names of the files
  * in a system directory.
  *
- * cmDirectory works with windows and unix only.
+ * cmDirectory currently works with Windows and Unix operating systems.
  */
-
 
 class cmDirectory 
 {
 public:
-  
   /**
    * Load the specified directory and load the names of the files
    * in that directory. 0 is returned if the directory can not be 
@@ -52,7 +51,7 @@ public:
 private:
   std::vector<std::string> m_Files; // Array of Files
   std::string m_Path;               // Path to Open'ed directory
-}; // End Class: cmDirectory
 
+}; // End Class: cmDirectory
   
 #endif

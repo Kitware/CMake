@@ -13,23 +13,33 @@
   See COPYRIGHT.txt for copyright details.
 
 =========================================================================*/
-/**
- * itkUnixMakefile is used generate unix makefiles.
- */
-
 #ifndef cmUnixMakefileGenerator_h
 #define cmUnixMakefileGenerator_h
+
 #include "cmMakefile.h"
 #include "cmMakefileGenerator.h"
 
+/** \class cmUnixMakefileGenerator
+ * \brief Write a Unix makefiles.
+ *
+ * cmUnixMakefileGenerator produces a Unix makefile from its
+ * member m_Makefile.
+ */
 class cmUnixMakefileGenerator : public cmMakefileGenerator
 {
 public:
-  /** 
-   * Write the makefile to the named file
+  /**
+   * Produce the makefile (in this case a Unix makefile).
    */
   virtual void GenerateMakefile();
+
+  /**
+   * Output the depend information for all the classes 
+   * in the makefile.  These would have been generated
+   * by the class cmMakeDepend.
+   */
   void OutputDepends(std::ostream&);
+
 protected:
   void OutputMakefile(const char* file);
   void OutputDependLibraries(std::ostream&);

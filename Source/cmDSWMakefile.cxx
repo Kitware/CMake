@@ -70,7 +70,7 @@ cmDSWMakefile
     {
     // Create a new cmDSPMakefile to read the currentDir CMakeLists.txt file
     cmMSProjectGenerator* pg = new cmMSProjectGenerator;
-    pg->SetBuildDSP();
+    pg->BuildDSPOff();
     cmMakefile* mf = new cmMakefile;
     mf->SetMakefileGenerator(pg);
     // add it to the vector

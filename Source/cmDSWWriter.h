@@ -13,22 +13,33 @@
   See COPYRIGHT.txt for copyright details.
 
 =========================================================================*/
-/**
- * cmDSWMakefile - class to write a microsoft DSW file.
- */
 #ifndef cmDSWMakefile_h
 #define cmDSWMakefile_h
+
 #include "cmStandardIncludes.h"
 #include "cmMakefile.h"
 
 class cmDSPMakefile;
 class cmMSProjectGenerator;
 
+/** \class cmDSWMakefile
+ * \brief Write a Microsoft Visual C++ DSW (workspace) file.
+ *
+ * cmDSWMakefile produces a Microsoft Visual C++ DSW (workspace) file.
+ */
 class cmDSWMakefile 
 {
 public:
+  /**
+   * Constructor.
+   */
   cmDSWMakefile(cmMakefile*);
+  
+  /**
+   * Generate the DSW workspace file.
+   */
   virtual void OutputDSWFile();
+
 private:
   void FindAllCMakeListsFiles(const char* subdir,
 			      std::vector<cmMSProjectGenerator*>&);

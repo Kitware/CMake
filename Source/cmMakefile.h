@@ -13,162 +13,293 @@
   See COPYRIGHT.txt for copyright details.
 
 =========================================================================*/
-/**
- * cmMakefile - used to parse and store the contents of a
- * CMakeLists.txt makefile in memory.
- */
 #ifndef cmMakefile_h
 #define cmMakefile_h
+
 #include "cmStandardIncludes.h"
 #include "cmClassFile.h"
 #include "cmSystemTools.h"
+
 class cmRuleMaker;
 class cmMakefileGenerator;
 
-
+/** \class cmMakefile
+ * \brief Process the input CMakeLists.txt file.
+ *
+ * Process and store into memory the input CMakeLists.txt file.
+ * Each CMakeLists.txt file is parsed and the rules found there
+ * are added into the build process.
+ */
 class cmMakefile
 {
 public:
+  /**
+   * Construct an empty makefile.
+   */
   cmMakefile();
+
+  /**
+   * Destructor.
+   */
   ~cmMakefile();
-  // Parse a CMakeLists.txt file
+
+  /**
+   * Read and parse a CMakeLists.txt file.
+   */
   bool ReadMakefile(const char* makefile, bool inheriting = false); 
-  // Add a wrap generator 
+
+  /**
+   * Add a wrapper generator.
+   */
   void AddRuleMaker(cmRuleMaker* );
-  // Set the make file 
+
+  /**
+   * Specify the makefile generator. This is platform/compiler
+   * dependent, although the interface is through a generic
+   * superclass.
+   */
   void SetMakefileGenerator(cmMakefileGenerator*);
-  // Generate the output file
+
+  /**
+   * Produce the output makefile.
+   */
   void GenerateMakefile();
   
-  // Print useful stuff to stdout
+  /**
+   * Print the object state to std::cout.
+   */
   void Print();
   
-  // cmRuleMaker interfaces
+  /**
+   * Add a custom rule to the build.
+   */
   void AddCustomRule(const char* source,
                      const char* result,
                      const char* command,
                      std::vector<std::string>& depends);
+  /**
+   * Add a define flag to the build.
+   */
   void AddDefineFlag(const char* definition);
-  void AddExecutable(cmClassFile&);
-  void AddLinkLibrary(const char*);
-  void AddLinkDirectory(const char*);
-  void AddSubDirectory(const char*);
-  void AddIncludeDirectory(const char*);
-  void AddDefinition(const char* name, const char* value);
-  void SetProjectName(const char*);
-  void SetLibraryName(const char*);
-  void AddClass(cmClassFile& );
-  void AddExtraDirectory(const char* dir);
-  
-  // Set the home directory for the project
-  void SetHomeDirectory(const char* dir) 
-    {
-      m_cmHomeDirectory = dir;
-      cmSystemTools::ConvertToUnixSlashes(m_cmHomeDirectory);
-    }
-  const char* GetHomeDirectory() 
-    {
-      return m_cmHomeDirectory.c_str();
-    }
-  // Set the current directory in the project
-  void SetCurrentDirectory(const char* dir) 
-    {
-      m_cmCurrentDirectory = dir;
-    }
-  const char* GetCurrentDirectory() 
-    {
-      return m_cmCurrentDirectory.c_str();
-    }
-  // Set the name of the library that is built by this makefile
-  const char* GetLibraryName()
-    {
-      return m_LibraryName.c_str();
-    }
 
+  /**
+   * Add an executable to the build.
+   */
+  void AddExecutable(cmClassFile&);
+
+  /**
+   * Add a link library to the build.
+   */
+  void AddLinkLibrary(const char*);
+
+  /**
+   * Add a link directory to the build.
+   */
+  void AddLinkDirectory(const char*);
+
+  /**
+   * Add a subdirectory to the build.
+   */
+  void AddSubDirectory(const char*);
+
+  /**
+   * Add an include directory to the build.
+   */
+  void AddIncludeDirectory(const char*);
+
+  /**
+   * Add a variable definition to the build. This variable
+   * can be used in CMake to refer to lists, directories, etc.
+   */
+  void AddDefinition(const char* name, const char* value);
+
+  /**
+   * Specify the name of the project for this build.
+   */
+  void SetProjectName(const char*);
+
+  /**
+   * Get the name of the project for this build.
+   */
   const char* GetProjectName()
     {
-      return m_ProjectName.c_str();
+    return m_ProjectName.c_str();
     }
   
-  // Set the name of the library that is built by this makefile
+  /**
+   * Set the name of the library.
+   */
+  void SetLibraryName(const char*);
+
+  /**
+   * Add a class/source file to the build.
+   */
+  void AddClass(cmClassFile& );
+
+  /**
+   * Add an auxiliary directory to the build.
+   */
+  void AddExtraDirectory(const char* dir);
+  
+  /**
+   * Specify the home directory for the build.
+   */
+  void SetHomeDirectory(const char* dir) 
+    {
+    m_cmHomeDirectory = dir;
+    cmSystemTools::ConvertToUnixSlashes(m_cmHomeDirectory);
+    }
+
+  /**
+   * Get the home directory for the build.
+   */
+  const char* GetHomeDirectory() 
+    {
+    return m_cmHomeDirectory.c_str();
+    }
+
+  /**
+   * Set the current directory in the project.
+   */
+  void SetCurrentDirectory(const char* dir) 
+    {
+    m_cmCurrentDirectory = dir;
+    }
+
+  /**
+   * Get the current directory in the project.
+   */
+  const char* GetCurrentDirectory() 
+    {
+    return m_cmCurrentDirectory.c_str();
+    }
+
+  /**
+   * Specify the name of the library that is built by this makefile.
+   */
+  const char* GetLibraryName()
+    {
+    return m_LibraryName.c_str();
+    }
+
+  /**
+   * Set the name of the library that is built by this makefile.
+   */
   void SetOutputDirectory(const char* lib)
     {
-      m_OutputDirectory = lib;
+    m_OutputDirectory = lib;
     }
+
+  /**
+   * Get the name of the library that is built by this makefile.
+   */
   const char* GetOutputDirectory()
     {
-      return m_OutputDirectory.c_str();
+    return m_OutputDirectory.c_str();
     }
-  
-  // Set the name of the library that is built by this makefile
+
+  /**
+   * Set the name of the current output directory.
+   */
   void SetOutputHomeDirectory(const char* lib)
     {
-      m_OutputHomeDirectory = lib;
+    m_OutputHomeDirectory = lib;
     }
+
+  /**
+   * Get the name of the current output directory.
+   */
   const char* GetOutputHomeDirectory()
     {
-      return m_OutputHomeDirectory.c_str();
+    return m_OutputHomeDirectory.c_str();
     }
+
+  /**
+   * Get a list of the build subdirectories.
+   */
   const std::vector<std::string>& GetSubDirectories()
     { 
-      return m_SubDirectories;
+    return m_SubDirectories;
     }
-  
+
+  /**
+   * Return a boolean flag indicating whether the build generates
+   * any executables.
+   */
   bool HasExecutables() 
     {
-      return m_Executables;
+    return m_Executables;
     }
-  
+
+  /**
+   * Get a list of include directories in the build.
+   */
   std::vector<std::string>& GetIncludeDirectories()
     { 
-      return m_IncludeDirectories;
+    return m_IncludeDirectories;
     }
-  
+
+  /**
+   * Get a list of link directories in the build.
+   */
   std::vector<std::string>& GetLinkDirectories()
     { 
-      return m_LinkDirectories;
+    return m_LinkDirectories;
     }
   
+  /**
+   * Get a list of link libraries in the build.
+   */
   std::vector<std::string>& GetLinkLibraries()
     { 
-      return m_LinkLibraries;
+    return m_LinkLibraries;
     }
-  
+
+  /**
+   * Get a list of Win32 link libraries in the build.
+   */
   std::vector<std::string>& GetLinkLibrariesWin32()
     { 
-      return m_LinkLibrariesWin32;
+    return m_LinkLibrariesWin32;
     }
   
+  /**
+   * Get a list of Unix link libraries in the build.
+   */
   std::vector<std::string>& GetLinkLibrariesUnix()
     { 
-      return m_LinkLibrariesUnix;
+    return m_LinkLibrariesUnix;
     }
-  std::vector<cmClassFile>& GetClasses(){ return  m_Classes;}
+
+  /**
+   * Return a list of source files in this makefile.
+   */
+  std::vector<cmClassFile>& GetClasses()
+    {return  m_Classes;}
+
+  /**
+   * Obtain a list of auxiliary source directories.
+   */
   std::vector<std::string>& GetAuxSourceDirectories()
-    { return m_AuxSourceDirectories; }
+    {return m_AuxSourceDirectories;}
+
+  /**
+   * Do not use this.
+   */
   std::vector<std::string>& GetMakeVerbatim() 
-    { return m_MakeVerbatim;}
+    {return m_MakeVerbatim;}
+
+  /**
+   * Given a variable name, return its value (as a string).
+   */
   const char* GetDefinition(const char*);
 
-  const char* GetDefineFlags()
-    { return m_DefineFlags.c_str();}
-
-private:
-   /**
-   * Look for CMakeLists.txt files to parse in dir,
-   * then in dir's parents, until the SourceHome directory
-   * is found.
-   */
-  void ParseDirectory(const char* dir);
   /**
-   * Parse a file for includes links and libs
+   * Get a list of preprocessor define flags.
    */
-  void ExpandVaribles();
-  void ReadClasses(std::ifstream& fin, bool t);
-  friend class cmMakeDepend;	// make depend needs direct access 
-				// to the m_Classes array 
-  void PrintStringVector(const char* s, std::vector<std::string>& v);
-  void AddDefaultRules();
+  const char* GetDefineFlags()
+    {return m_DefineFlags.c_str();}
+
 protected:
   bool m_Executables;
   std::string m_Prefix;
@@ -203,6 +334,26 @@ protected:
   StringRuleMakerMap m_RuleMakers;
   std::vector<cmRuleMaker*> m_UsedRuleMakers;
   cmMakefileGenerator* m_MakefileGenerator;
+  
+private:
+   /**
+   * Look for CMakeLists.txt files to parse in dir,
+   * then in dir's parents, until the SourceHome directory
+   * is found.
+   */
+  void ParseDirectory(const char* dir);
+
+  /**
+   * Parse a file for includes links and libs
+   */
+  void ExpandVaribles();
+
+  void ReadClasses(std::ifstream& fin, bool t);
+  friend class cmMakeDepend;	// make depend needs direct access 
+				// to the m_Classes array 
+  void PrintStringVector(const char* s, std::vector<std::string>& v);
+  void AddDefaultRules();
+  
 };
 
 

@@ -13,28 +13,62 @@
   See COPYRIGHT.txt for copyright details.
 
 =========================================================================*/
-/**
- * cmMSProjectGenerator - class to write a microsoft DSW file.
- */
 #ifndef cmMSProjectGenerator_h
 #define cmMSProjectGenerator_h
+
 #include "cmStandardIncludes.h"
 #include "cmMakefileGenerator.h"
 
 class cmDSPMakefile;
 class cmDSWMakefile;
 
-
+/** \class cmMSProjectGenerator
+ * \brief Write a Microsoft Visual C++ DSP (project) file.
+ *
+ * cmMSProjectGenerator produces a Microsoft Visual C++ DSP (project) file.
+ */
 class cmMSProjectGenerator : public cmMakefileGenerator
 {
 public:
+  /**
+   * Constructor sets the generation of DSW files on.
+   */
   cmMSProjectGenerator();
+
+  /**
+   * Destructor.
+   */
   ~cmMSProjectGenerator();
+
+  /**
+   * Produce the makefile (in this case a Microsoft Visual C++ project).
+   */
   virtual void GenerateMakefile();
-  void SetBuildDSP() { m_BuildDSW = false;}
-  void SetBuildDSW() { m_BuildDSW = true;}
-  cmDSWMakefile* GetDSWMakefile() { return m_DSWMakefile;}
-  cmDSPMakefile* GetDSPMakefile() { return m_DSPMakefile;}
+
+  /**
+   * Turn off the generation of a Microsoft Visual C++ DSP file.
+   */
+  void BuildDSPOff() 
+    {m_BuildDSW = false;}
+
+  /**
+   * Turn on the generation of a Microsoft Visual C++ DSW file.
+   */
+  void BuildDSWOn() 
+    {m_BuildDSW = true;}
+
+  /**
+   * Retrieve a pointer to a cmDSWMakefile instance.
+   */
+  cmDSWMakefile* GetDSWMakefile() 
+    {return m_DSWMakefile;}
+
+  /**
+   * Retrieve a pointer to a cmDSPMakefile instance.
+   */
+  cmDSPMakefile* GetDSPMakefile() 
+    {return m_DSPMakefile;}
+
 private:
   cmDSWMakefile* m_DSWMakefile;
   cmDSPMakefile* m_DSPMakefile;

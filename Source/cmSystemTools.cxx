@@ -79,13 +79,13 @@ bool cmSystemTools::FileExists(const char* filename)
 {
   struct stat fs;
   if (stat(filename, &fs) != 0) 
-  {
+    {
     return false;
-  }
+    }
   else
-  {
+    {
     return true;
-  }
+    }
 }
 
 
