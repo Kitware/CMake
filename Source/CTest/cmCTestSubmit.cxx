@@ -84,6 +84,69 @@ bool cmCTestSubmit::SubmitUsingFTP(const std::string& localprefix,
   return true;
 }
 
+bool cmCTestSubmit::TriggerUsingHTTP(const std::vector<std::string>& files,
+                                     const std::string& remoteprefix, 
+                                     const std::string& url)
+{
+  CURL *curl;
+  CURLcode res = CURLcode();
+  FILE* ftpfile;
+
+  /* In windows, this will init the winsock stuff */
+  ::curl_global_init(CURL_GLOBAL_ALL);
+  
+  /* get a curl handle */
+  curl = curl_easy_init();
+  if(curl) 
+    {
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
+    std::string::size_type cc, kk;
+    for ( cc = 0; cc < files.size(); cc ++ )
+      {
+      std::string file = remoteprefix + files[cc];
+      std::string ofile = "";
+      for ( kk = 0; kk < file.size(); kk ++ )
+        {
+        char c = file[kk];
+        char hex[4] = { 0, 0, 0, 0 };
+        hex[0] = c;
+        switch ( c )
+          {
+          case '+':
+          case '?':
+          case '/':
+          case '\\':
+          case '&':
+          case ' ':
+          case '=':
+          case '%':
+            sprintf(hex, "%%%02X", (int)c);
+            ofile.append(hex);
+            break;
+          break;
+          default: 
+            ofile.append(hex);
+          }
+        }
+      std::string turl = url + "?xmlfile=" + ofile;
+      std::cout << "Trigger url: " << turl.c_str() << std::endl;
+      curl_easy_setopt(curl, CURLOPT_URL, turl.c_str());
+      res = curl_easy_perform(curl);
+      if ( res )
+        {
+        std::cout << "Error when uploading" << std::endl;
+        ::curl_easy_cleanup(curl);
+        ::curl_global_cleanup(); 
+        return false;
+        }
+      }
+    // always cleanup
+    ::curl_easy_cleanup(curl);
+    }
+  ::curl_global_cleanup(); 
+  return true;
+}
+
 bool cmCTestSubmit::SubmitUsingSCP(const std::string& localprefix, 
                                    const std::vector<std::string>& files,
                                    const std::string& remoteprefix, 

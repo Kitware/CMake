@@ -42,6 +42,10 @@ public:
                       const std::vector<std::string>& files,
                       const std::string& remoteprefix, 
                       const std::string& url);
+
+  bool TriggerUsingHTTP(const std::vector<std::string>& files,
+                        const std::string& remoteprefix, 
+                        const std::string& url);
 };
 
 #endif
