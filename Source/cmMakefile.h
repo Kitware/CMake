@@ -97,7 +97,9 @@ public:
   void AddExecutable(const char *exename, const std::vector<std::string> &srcs);
 
   /**
-   * Add a utility on which this project depends.
+   * Add a utility on which this project depends. A utility is an executable
+   * name as would be specified to the ADD_EXECUTABLE or UTILITY_SOURCE
+   * commands. It is not a full path nor does it have an extension.  
    */
   void AddUtility(const char*);
 

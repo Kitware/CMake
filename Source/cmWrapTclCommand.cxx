@@ -44,6 +44,9 @@ bool cmWrapTclCommand::Invoke(std::vector<std::string>& args)
       }
     }
 
+  // add in a depend in the vtkWrapTcl executable
+  m_Makefile->AddUtility("vtkWrapTcl");
+  
   // what is the current source dir
   std::string cdir = m_Makefile->GetCurrentDirectory();
 

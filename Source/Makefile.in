@@ -26,7 +26,7 @@ cmCustomCommand.o \
 cmCacheManager.o \
 cmSourceGroup.o
 
-DEPENDS = $(srcdir)/*.h ${CMAKE_CONFIG_DIR}/CMake/Source/cmConfigure.h
+DEPENDS = $(srcdir)/*.h $(srcdir)/*.cxx ${CMAKE_CONFIG_DIR}/CMake/Source/cmConfigure.h
 
 cmCollectFlags.o : $(DEPENDS)
 CMakeBuildTargets.o  : $(DEPENDS)

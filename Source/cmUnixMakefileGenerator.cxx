@@ -19,6 +19,7 @@
 #include "cmSystemTools.h"
 #include "cmClassFile.h"
 #include "cmMakeDepend.h"
+#include "cmCacheManager.h"
 
 void cmUnixMakefileGenerator::GenerateMakefile()
 {
@@ -69,6 +70,7 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
   // for each target add to the list of targets
   fout << "TARGETS = ";
   const cmTargets &tgts = m_Makefile->GetTargets();
+  // libraries
   for(cmTargets::const_iterator l = tgts.begin(); 
       l != tgts.end(); l++)
     {
@@ -76,7 +78,12 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
       {
       fout << " \\\nlib" << l->first.c_str() << "${CMAKE_LIB_EXT}";
       }
-    else
+    }
+  // executables
+  for(cmTargets::const_iterator l = tgts.begin(); 
+      l != tgts.end(); l++)
+    {
+    if (!l->second.m_IsALibrary)
       {
       fout << "\\\n" << l->first.c_str();
       }
@@ -216,21 +223,18 @@ void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
     {
     bool found = false;
     // loop over the list of directories that the libraries might
-    // be in, looking for a LIBRARY=(lib) line.
-    for(dir = libdirs.begin(); dir != libdirs.end() && !found; ++dir)
+    // be in, looking for an ADD_LIBRARY(lib...) line. This would
+    // be stored in the cache
+    const char* cacheValue
+      = cmCacheManager::GetInstance()->GetCacheValue(lib->c_str());
+    if(cacheValue)
       {
-      std::string expression = "LIBRARY.*=.*";
-      expression += lib->c_str();
-      if(cmSystemTools::Grep(dir->c_str(), "CMakeTargets.make",
-                             expression.c_str()))
-        {
-        std::string libpath = *dir;
-        libpath += "/lib";
-        libpath += *lib;
-        libpath += "${CMAKE_LIB_EXT}";
-        fout << libpath << " ";
-        found = true;
-        }
+      std::string libpath = cacheValue;
+      libpath += "/lib";
+      libpath += *lib;
+      libpath += "${CMAKE_LIB_EXT}";
+      fout << libpath << " ";
+      found = true;
       }
     }
 
@@ -243,10 +247,10 @@ void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
     {
     bool found = false;
     // loop over the list of directories that the utilities might
-    // be in, looking for an EXECUTABLES=(util) line.
+    // be in, looking for an ADD_EXECUTABLE(util ...) line.
     for(dir = utildirs.begin(); dir != utildirs.end() && !found; ++dir)
       {
-      std::string expression = "EXECUTABLES.*=.*";
+      std::string expression = "TARGETS =.*";
       expression += util->c_str();
       if(cmSystemTools::Grep(dir->c_str(), "CMakeTargets.make",
                              expression.c_str()))
@@ -267,6 +271,7 @@ void cmUnixMakefileGenerator::OutputMakeFlags(std::ostream& fout)
   fout << "INCLUDE_FLAGS = ";
   std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();
   std::vector<std::string>::iterator i;
+  fout << "-I" << m_Makefile->GetStartDirectory() << " ";
   for(i = includes.begin(); i != includes.end(); ++i)
     {
     std::string include = *i;

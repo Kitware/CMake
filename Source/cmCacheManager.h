@@ -35,7 +35,7 @@ public:
    * text entry box, FILEPATH is a full path to a file which
    * can be different than just a path input
    */
-  enum CacheEntryType{ BOOL=0, PATH, FILEPATH, STRING  };
+  enum CacheEntryType{ BOOL=0, PATH, FILEPATH, STRING, INTERNAL  };
   static CacheEntryType StringToType(const char*);
   //! Singleton pattern get instance of the cmCacheManager.
   static cmCacheManager* GetInstance();

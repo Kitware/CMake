@@ -25,6 +25,7 @@ const char* cmCacheManagerTypes[] =
   "PATH",
   "FILEPATH",
   "STRING",
+  "INTERNAL",
   0
 };
 
