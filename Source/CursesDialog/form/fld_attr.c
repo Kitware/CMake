@@ -29,8 +29,13 @@
 /****************************************************************************
  *   Author: Juergen Pfeifer <juergen.pfeifer@gmx.net> 1995,1997            *
  ****************************************************************************/
-#include "form.priv.h"
-
+#if defined(__hpux)
+ #define _XOPEN_SOURCE_EXTENDED
+#endif
+ #include "form.priv.h"
+#if defined(__hpux)
+  #undef _XOPEN_SOURCE_EXTENDED
+#endif
 MODULE_ID("$Id$")
 
 /*----------------------------------------------------------------------------
@@ -50,7 +55,7 @@ int set_field_ ## name (FIELD * field, chtype attr)\
            res = _nc_Synchronize_Attributes( field );\
          }\
        else\
-	 res = E_OK;\
+       res = E_OK;\
      }\
    RETURN(res);\
 }

@@ -121,7 +121,7 @@ cmLibHandle cmDynamicLoader::OpenLibrary(const char* libname )
 
 int cmDynamicLoader::CloseLibrary(cmLibHandle lib)
 {
-  return 0;
+  return shl_unload(lib);
 }
 
 cmDynamicLoaderFunction

@@ -22,10 +22,17 @@ CONFIGURE_FILE(${LoadedCommand_SOURCE_DIR}/LoadedCommand.h.in
 INCLUDE_DIRECTORIES(${LoadedCommand_BINARY_DIR})
 
 # try to compile the command
-TRY_COMPILE(COMPILE_OK 
+# make sure it is not already loaded
+IF(COMMAND CMAKE_TEST_COMMAND)
+ELSE(COMMAND CMAKE_TEST_COMMAND)
+  TRY_COMPILE(COMPILE_OK 
     ${LoadedCommand_BINARY_DIR}/CMakeCommands 
     ${LoadedCommand_SOURCE_DIR}/CMakeCommands 
-    CMAKE_LOADED_COMMANDS CMAKE_FLAGS -DMUDSLIDE_TYPE:STRING=MUCHO)
+    CMAKE_LOADED_COMMANDS CMAKE_FLAGS -DMUDSLIDE_TYPE:STRING=MUCHO
+    OUTPUT_VARIABLE OUTPUT )
+ENDIF(COMMAND CMAKE_TEST_COMMAND)
+
+MESSAGE("Output from try compile: ${OUTPUT}")
 
 # if the compile was OK, try loading the command
 IF (COMPILE_OK)
