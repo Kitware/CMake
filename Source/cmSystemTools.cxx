@@ -843,22 +843,14 @@ bool cmSystemTools::FilesDiffer(const char* source,
 
 
 /**
- * Copy a file named by "source" to the file named by "destination".  This
- * implementation makes correct use of the C++ standard file streams to
- * perfectly copy any file with lines of any length (even binary files).
+ * Copy a file named by "source" to the file named by "destination".
  */
 void cmSystemTools::cmCopyFile(const char* source,
                                const char* destination)
 {
-  // Buffer length is only for block size.  Any file would still be copied
-  // correctly if this were as small as 2.
-  const int buffer_length = 4096;
-  char buffer[buffer_length];
-  std::ifstream fin(source,
-#ifdef _WIN32                    
-                    std::ios::binary | 
-#endif                    
-                    std::ios::in);
+  const int bufferSize = 4096;
+  char buffer[bufferSize];
+  std::ifstream fin(source, std::ios::binary | std::ios::in);
   if(!fin)
     {
     cmSystemTools::Error("CopyFile failed to open input file \"",
@@ -866,38 +858,25 @@ void cmSystemTools::cmCopyFile(const char* source,
     return;
     }
   std::ofstream fout(destination,
-#ifdef _WIN32                     
-                     std::ios::binary | 
-#endif                     
-                     std::ios::out | std::ios::trunc);
+                     std::ios::binary | std::ios::out | std::ios::trunc);
   if(!fout)
     {
     cmSystemTools::Error("CopyFile failed to open output file \"",
                          destination, "\"");
     return;
     }
-  while(fin.getline(buffer, buffer_length, '\n') || fin.gcount())
+  
+  // This copy loop is very sensitive on certain platforms with
+  // slightly broken stream libraries (like HPUX).  Normally, it is
+  // incorrect to not check the error condition on the fin.read()
+  // before using the data, but the fin.gcount() will be zero if an
+  // error occurred.  Therefore, the loop should be safe everywhere.
+  while(fin)
     {
-    unsigned long count = fin.gcount();
-    if(fin.eof())
+    fin.read(buffer, bufferSize);
+    if(fin.gcount())
       {
-      // Final line, but with no newline.
-      fout.write(buffer, count);
-      }
-    else if ( count == buffer_length - 1 )
-      {
-      // Part of a line longer than our buffer, clear the fail bit of
-      // the stream so that we can continue.
-      fin.clear(fin.rdstate() & ~std::ios::failbit);
-      fout.write(buffer, count);
-      }
-    else
-      {
-      // Line on which a newline was encountered.  It was read from
-      // the stream, but not stored.
-      --count;
-      fout.write(buffer, count);
-      fout << '\n';
+      fout.write(buffer, fin.gcount());
       }
     }
 }
