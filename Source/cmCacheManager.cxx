@@ -611,7 +611,7 @@ void cmCacheManager::CacheIterator::SetValue(const char* value)
 
 const char* cmCacheManager::CacheIterator::GetProperty(const char* property) const
 {
-  if ( !strcasecmp(property, "TYPE") || !strcasecmp(property, "VALUE") )
+  if ( !strcmp(property, "TYPE") || !strcmp(property, "VALUE") )
     {
     cmSystemTools::Error("Property \"", property, 
                          "\" cannot be accessed through the GetProperty()");
@@ -629,7 +629,7 @@ const char* cmCacheManager::CacheIterator::GetProperty(const char* property) con
 
 void cmCacheManager::CacheIterator::SetProperty(const char* p, const char* v) 
 {
-  if ( !strcasecmp(p, "TYPE") || !strcasecmp(p, "VALUE") )
+  if ( !strcmp(p, "TYPE") || !strcmp(p, "VALUE") )
     {
     cmSystemTools::Error("Property \"", p, 
                          "\" cannot be accessed through the SetProperty()");
@@ -641,7 +641,7 @@ void cmCacheManager::CacheIterator::SetProperty(const char* p, const char* v)
 
 bool cmCacheManager::CacheIterator::GetPropertyAsBool(const char* property) const
 {
-  if ( !strcasecmp(property, "TYPE") || !strcasecmp(property, "VALUE") )
+  if ( !strcmp(property, "TYPE") || !strcmp(property, "VALUE") )
     {
     cmSystemTools::Error("Property \"", property, 
                          "\" cannot be accessed through the GetPropertyAsBool()");
@@ -660,7 +660,7 @@ bool cmCacheManager::CacheIterator::GetPropertyAsBool(const char* property) cons
 
 void cmCacheManager::CacheIterator::SetProperty(const char* p, bool v) 
 {
-  if ( !strcasecmp(p, "TYPE") || !strcasecmp(p, "VALUE") )
+  if ( !strcmp(p, "TYPE") || !strcmp(p, "VALUE") )
     {
     cmSystemTools::Error("Property \"", p, 
                          "\" cannot be accessed through the SetProperty()");
