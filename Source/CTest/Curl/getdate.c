@@ -2371,7 +2371,7 @@ curl_getdate (const char *p, const time_t *now)
   cookie.yyHaveTime = 0;
   cookie.yyHaveZone = 0;
 
-  if (yyparse (&cookie)
+  if (yyparse ((void*)&cookie)
       || cookie.yyHaveTime > 1 || cookie.yyHaveZone > 1 ||
       cookie.yyHaveDate > 1 || cookie.yyHaveDay > 1)
     return -1;
