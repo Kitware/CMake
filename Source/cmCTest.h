@@ -310,7 +310,7 @@ private:
 
   int                     m_TestModel;
 
-  int                     m_TimeOut;
+  double                  m_TimeOut;
 
   std::string             m_MemoryTester;
   std::string             m_MemoryTesterOptions;

@@ -3354,6 +3354,7 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output, int *re
     {
     cmCTest inst;
     inst.m_ConfigType = m_ConfigType;
+    inst.m_TimeOut = m_TimeOut;
     std::vector<std::string> args;
     for(unsigned int i =0; i < argv.size(); ++i)
       {
@@ -4671,6 +4672,7 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
   cmSystemTools::SetStdoutCallback(CMakeStdoutCallback, &cmakeOutString);
   cmOStringStream out;
   cmake cm;
+  double timeout = m_TimeOut;
   // default to the build type of ctest itself
   if(m_ConfigType.size() == 0)
     {
@@ -4822,7 +4824,8 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
       out << "Running make clean command: " << cleanCommand.c_str() << " ...\n";
       retVal = 0;
       std::string output;
-      if (!cmSystemTools::RunSingleCommand(cleanCommand.c_str(), &output, &retVal) || 
+      if (!cmSystemTools::RunSingleCommand(cleanCommand.c_str(), &output, &retVal, 0,
+                                           false, timeout) ||
         retVal)
         {
         out << "Error: " << cleanCommand.c_str() << "  execution failed\n";
@@ -4855,7 +4858,7 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
   out << "Running make command: " << makeCommand.c_str() << "\n";
   retVal = 0;
   std::string output;
-  if (!cmSystemTools::RunSingleCommand(makeCommand.c_str(), &output, &retVal, 0, false))
+  if (!cmSystemTools::RunSingleCommand(makeCommand.c_str(), &output, &retVal, 0, false, timeout))
     {
     out << "Error: " << makeCommand.c_str() <<  "  execution failed\n";
     out << output.c_str() << "\n";
@@ -5035,6 +5038,7 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
     out << m_TestCommandArgs[k] << " ";
     }
   out << "\n";
+  m_TimeOut = timeout;
   int runTestRes = this->RunTest(testCommand, &outs, &retval, 0);
   if(runTestRes != cmsysProcess_State_Exited || retval != 0)
     {
