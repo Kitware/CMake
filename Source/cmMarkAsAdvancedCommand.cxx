@@ -48,6 +48,7 @@ bool cmMarkAsAdvancedCommand::InitialPass(std::vector<std::string> const& argsIn
       {
       m_Makefile->AddCacheDefinition(variable.c_str(), 0, 0,
                                      cmCacheManager::UNINITIALIZED);
+      overwrite = true;
       }
     it.Find(variable.c_str());
     if ( it.IsAtEnd() )
@@ -55,7 +56,10 @@ bool cmMarkAsAdvancedCommand::InitialPass(std::vector<std::string> const& argsIn
       cmSystemTools::Error("This should never happen...");
       return false;
       }
-    it.SetProperty("ADVANCED", value);
+    if ( overwrite )
+      {
+      it.SetProperty("ADVANCED", value);
+      }
     }
   return true;
 }
