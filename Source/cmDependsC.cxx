@@ -37,7 +37,7 @@ cmDependsC::cmDependsC(const char* dir, const char* targetFile,
   cmDepends(dir, targetFile),
   m_SourceFile(sourceFile),
   m_IncludePath(&includes),
-  m_IncludeRegexLine("^[ \t]*#[ \t]*include[ \t]*[<\"]([^\">]+)[\">]"),
+  m_IncludeRegexLine("^[ \t]*#[ \t]*include[ \t]*[<\"]([^\">]+)([\">])"),
   m_IncludeRegexScan(scanRegex),
   m_IncludeRegexComplain(complainRegex)
 {
@@ -65,7 +65,9 @@ bool cmDependsC::WriteDependencies(std::ostream& os)
 
   // Walk the dependency graph starting with the source file.
   bool first = true;
-  m_Unscanned.push(m_SourceFile);
+  UnscannedEntry root;
+  root.FileName = m_SourceFile;
+  m_Unscanned.push(root);
   m_Encountered.clear();
   m_Encountered.insert(m_SourceFile);
   std::set<cmStdString> dependencies;
@@ -73,17 +75,25 @@ bool cmDependsC::WriteDependencies(std::ostream& os)
   while(!m_Unscanned.empty())
     {
     // Get the next file to scan.
-    std::string fname = m_Unscanned.front();
+    UnscannedEntry current = m_Unscanned.front();
     m_Unscanned.pop();
 
     // If not a full path, find the file in the include path.
     std::string fullName;
-    if(first || cmSystemTools::FileIsFullPath(fname.c_str()))
+    if(first || cmSystemTools::FileIsFullPath(current.FileName.c_str()))
       {
-      if(cmSystemTools::FileExists(fname.c_str()))
+      if(cmSystemTools::FileExists(current.FileName.c_str()))
         {
-        fullName = fname;
+        fullName = current.FileName;
         }
+      }
+    else if(!current.QuotedLocation.empty() &&
+            cmSystemTools::FileExists(current.QuotedLocation.c_str()))
+      {
+      // The include statement producing this entry was a double-quote
+      // include and the included file is present in the directory of
+      // the source containing the include statement.
+      fullName = current.QuotedLocation;
       }
     else
       {
@@ -101,7 +111,7 @@ bool cmDependsC::WriteDependencies(std::ostream& os)
           {
           temp += "/";
           }
-        temp += fname;
+        temp += current.FileName;
 
         // Look for the file in this location.
         if(cmSystemTools::FileExists(temp.c_str()))
@@ -114,9 +124,11 @@ bool cmDependsC::WriteDependencies(std::ostream& os)
 
     // Complain if the file cannot be found and matches the complain
     // regex.
-    if(fullName.empty() && m_IncludeRegexComplain.find(fname.c_str()))
+    if(fullName.empty() &&
+       m_IncludeRegexComplain.find(current.FileName.c_str()))
       {
-      cmSystemTools::Error("Cannot find file \"", fname.c_str(), "\".");
+      cmSystemTools::Error("Cannot find file \"",
+                           current.FileName.c_str(), "\".");
       return false;
       }
 
@@ -134,8 +146,10 @@ bool cmDependsC::WriteDependencies(std::ostream& os)
         // Add this file as a dependency.
         dependencies.insert(fullName);
 
-        // Scan this file for new dependencies.
-        this->Scan(fin);
+        // Scan this file for new dependencies.  Pass the directory
+        // containing the file to handle double-quote includes.
+        std::string dir = cmSystemTools::GetFilenamePath(fullName);
+        this->Scan(fin, dir.c_str());
         }
       }
 
@@ -235,7 +249,7 @@ bool cmDependsC::CheckDependencies(std::istream& is)
 }
 
 //----------------------------------------------------------------------------
-void cmDependsC::Scan(std::istream& is)
+void cmDependsC::Scan(std::istream& is, const char* directory)
 {
   // Read one line at a time.
   std::string line;
@@ -245,15 +259,29 @@ void cmDependsC::Scan(std::istream& is)
     if(m_IncludeRegexLine.find(line.c_str()))
       {
       // Get the file being included.
-      std::string includeFile = m_IncludeRegexLine.match(1);
+      UnscannedEntry entry;
+      entry.FileName = m_IncludeRegexLine.match(1);
+      if(m_IncludeRegexLine.match(2) == "\"")
+        {
+        // This was a double-quoted include.  We must check for the
+        // file in the directory containing the file we are scanning.
+        entry.QuotedLocation = directory;
+        entry.QuotedLocation += "/";
+        entry.QuotedLocation += entry.FileName;
+        }
 
       // Queue the file if it has not yet been encountered and it
-      // matches the regular expression for recursive scanning.
-      if(m_Encountered.find(includeFile) == m_Encountered.end() &&
-         m_IncludeRegexScan.find(includeFile.c_str()))
+      // matches the regular expression for recursive scanning.  Note
+      // that this check does not account for the possibility of two
+      // headers with the same name in different directories when one
+      // is included by double-quotes and the other by angle brackets.
+      // This kind of problem will be fixed when a more
+      // preprocessor-like implementation of this scanner is created.
+      if(m_Encountered.find(entry.FileName) == m_Encountered.end() &&
+         m_IncludeRegexScan.find(entry.FileName.c_str()))
         {
-        m_Encountered.insert(includeFile);
-        m_Unscanned.push(includeFile);
+        m_Encountered.insert(entry.FileName);
+        m_Unscanned.push(entry);
         }
       }
     }

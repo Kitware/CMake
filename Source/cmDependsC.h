@@ -48,7 +48,7 @@ protected:
   virtual bool CheckDependencies(std::istream& is);
 
   // Method to scan a single file.
-  void Scan(std::istream& is);
+  void Scan(std::istream& is, const char* directory);
 
   // The source file from which to start scanning.
   std::string m_SourceFile;
@@ -65,8 +65,13 @@ protected:
   cmsys::RegularExpression m_IncludeRegexComplain;
 
   // Data structures for dependency graph walk.
+  struct UnscannedEntry
+  {
+    cmStdString FileName;
+    cmStdString QuotedLocation;
+  };
   std::set<cmStdString> m_Encountered;
-  std::queue<cmStdString> m_Unscanned;
+  std::queue<UnscannedEntry> m_Unscanned;
 
 private:
   cmDependsC(cmDependsC const&); // Purposely not implemented.
