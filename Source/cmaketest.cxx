@@ -32,6 +32,9 @@ struct CleanUp
     {
       cmMakefileGenerator::UnRegisterGenerators();
     }
+  UseIt() 
+    {
+    }
 };
 
 
@@ -39,6 +42,7 @@ struct CleanUp
 int main (int argc, char **argv)
 {
   CleanUp cleanup;
+  cleanup.UseIt();
   if (argc < 4)
     {
     std::cerr << "Usage: " << argv[0] << " test-src-dir test-bin-dir test-executable\n";
