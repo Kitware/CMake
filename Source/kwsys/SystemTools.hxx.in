@@ -172,6 +172,9 @@ public:
 
   ///! Copy a file.
   static bool CopyFileAlways(const char* source, const char* destination);
+
+  ///! Copy content directory to another directory with all files and subdirectories
+  static bool CopyADirectory(const char* source, const char* destination);
   
   ///! Remove a file.
   static bool RemoveFile(const char* source);

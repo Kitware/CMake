@@ -1061,6 +1061,51 @@ bool SystemTools::CopyFileAlways(const char* source, const char* destination)
   return true;
 }
 
+/**
+ * Copy a directory content from "source" directory to the directory named by
+ * "destination".
+ */
+bool SystemTools::CopyADirectory(const char* source, const char* destination)
+{
+  Directory dir;
+  dir.Load(source);
+  size_t fileNum;
+  if ( !SystemTools::MakeDirectory(destination) )
+    {
+    return false;
+    }
+  for (fileNum = 0; fileNum <  dir.GetNumberOfFiles(); ++fileNum)
+    {
+    if (strcmp(dir.GetFile(static_cast<unsigned long>(fileNum)),".") &&
+        strcmp(dir.GetFile(static_cast<unsigned long>(fileNum)),".."))
+      {
+      kwsys_stl::string fullPath = source;
+      fullPath += "/";
+      fullPath += dir.GetFile(static_cast<unsigned long>(fileNum));
+      if(SystemTools::FileIsDirectory(fullPath.c_str()))
+        {
+        kwsys_stl::string fullDestPath = destination;
+        fullDestPath += "/";
+        fullDestPath += dir.GetFile(static_cast<unsigned long>(fileNum));
+        if (!SystemTools::CopyADirectory(fullPath.c_str(), fullDestPath.c_str()))
+          {
+          return false;
+          }
+        }
+      else
+        {
+        if(!SystemTools::CopyFileAlways(fullPath.c_str(), destination))
+          {
+          return false;
+          }
+        }
+      }
+    }
+
+  return true;
+}
+
+
 // return size of file; also returns zero if no file exists
 unsigned long SystemTools::FileLength(const char* filename)
 {
