@@ -230,7 +230,6 @@ NameButtonCallback( Fl_Widget * widget, void * data)
         // Redraw the list
         grandParentGroup->redraw();
         
-        SaveCacheFromGUI();
 
         return;
       }
@@ -276,7 +275,6 @@ CheckButtonCallback( Fl_Widget * widget, void * data)
   }
   button->redraw();
   
-  SaveCacheFromGUI();
 
 }
 
@@ -291,7 +289,6 @@ InputTextCallback(   Fl_Widget * widget, void * data)
   
   item->m_curValue      = input->value();
 
-  SaveCacheFromGUI();
 
 }
 
@@ -324,7 +321,6 @@ ColorSelectionCallback(   Fl_Widget * widget, void * data)
 
   colorButton->redraw();
  
-  SaveCacheFromGUI();
 
 }
 
@@ -350,7 +346,6 @@ BrowsePathCallback(   Fl_Widget * widget, void * data)
     inputText->value( newpath );
   }
 
-  SaveCacheFromGUI();
 
 }
 
