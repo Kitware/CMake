@@ -77,8 +77,6 @@ bool cmDynamicLoaderCache::FlushCache(const char* path)
     m_CacheMap.erase(it);
     ret = true;
     }
-  delete cmDynamicLoaderCache::Instance;
-  cmDynamicLoaderCache::Instance = 0;
   return ret;
 }
 
@@ -89,7 +87,8 @@ void cmDynamicLoaderCache::FlushCache()
     {
     cmDynamicLoader::CloseLibrary(it->second);
     }
-  m_CacheMap.erase(m_CacheMap.begin(), m_CacheMap.end());
+  delete cmDynamicLoaderCache::Instance;
+  cmDynamicLoaderCache::Instance = 0;
 }
 
 cmDynamicLoaderCache* cmDynamicLoaderCache::GetInstance()

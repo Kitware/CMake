@@ -20,13 +20,25 @@
 #include "cmake.h"
 #include "cmListFileCache.h"
 #include "cmCacheManager.h"
+#include "cmDynamicLoader.h"
 #if defined(_WIN32) && !defined(__CYGWIN__) 
 #include "windows.h"
 #endif
 
+int do_cmaketest(int ac, char** av);
+
+int main(int ac, char** av)
+{
+  int ret = do_cmaketest(ac, av);
+#ifdef CMAKE_BUILD_WITH_CMAKE
+  cmDynamicLoader::FlushCache();
+#endif
+  cmListFileCache::GetInstance()->ClearCache(); 
+  return ret;
+}
 
 // this is a test driver program for cmake.
-int main (int argc, char **argv)
+int do_cmaketest (int argc, char **argv)
 {
   if (argc < 4)
     {
