@@ -109,3 +109,13 @@ bool cmListFileCache::CacheFile(const char* path)
   m_ListFileCache[path] = inFile;
   return true;
 }
+
+void cmListFileCache::FlushCache(const char* path)
+{
+  ListFileMap::iterator it = m_ListFileCache.find(path);
+  if ( it != m_ListFileCache.end() )
+    {
+    m_ListFileCache.erase(it);
+    return;
+    }
+}

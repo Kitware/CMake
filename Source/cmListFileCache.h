@@ -55,6 +55,10 @@ public:
    *  NULL is returned.
    */
   cmListFile* GetFileCache(const char* path);
+
+  //! Flush cache file out of cache.
+  void FlushCache(const char* path);
+
 private:
   // Cache the file
   bool CacheFile(const char* path);
