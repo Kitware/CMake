@@ -135,15 +135,10 @@ void cmLocalVisualStudio7Generator::AddVCProjBuildRule()
 {
   std::string dspname = *(m_CreatedProjectNames.end()-1);
   dspname += ".vcproj.cmake";
-  std::string makefileIn = m_Makefile->GetStartDirectory();
-  makefileIn += "/";
-  makefileIn += "CMakeLists.txt";
-  makefileIn = this->ConvertToRelativeOutputPath(makefileIn.c_str());
   const char* dsprule = m_Makefile->GetRequiredDefinition("CMAKE_COMMAND");
   cmCustomCommandLine commandLine;
   commandLine.push_back(dsprule);
-  commandLine.push_back(makefileIn);
-  makefileIn = m_Makefile->GetStartDirectory();
+  std::string makefileIn = m_Makefile->GetStartDirectory();
   makefileIn += "/";
   makefileIn += "CMakeLists.txt";
   std::string args;
@@ -1317,7 +1312,7 @@ std::string cmLocalVisualStudio7Generator::EscapeForXML(const char* s)
 
 std::string cmLocalVisualStudio7Generator::ConvertToXMLOutputPath(const char* path)
 {
-  std::string ret = this->ConvertToRelativeOutputPath(path);
+  std::string ret = this->ConvertToOptionallyRelativeOutputPath(path);
   cmSystemTools::ReplaceString(ret, "&", "&amp;");
   cmSystemTools::ReplaceString(ret, "\"", "&quot;");
   cmSystemTools::ReplaceString(ret, "<", "&lt;");
@@ -1327,7 +1322,7 @@ std::string cmLocalVisualStudio7Generator::ConvertToXMLOutputPath(const char* pa
 
 std::string cmLocalVisualStudio7Generator::ConvertToXMLOutputPathSingle(const char* path)
 {
-  std::string ret = this->ConvertToRelativeOutputPath(path);
+  std::string ret = this->ConvertToOptionallyRelativeOutputPath(path);
   cmSystemTools::ReplaceString(ret, "\"", "");
   cmSystemTools::ReplaceString(ret, "&", "&amp;");
   cmSystemTools::ReplaceString(ret, "<", "&lt;");
