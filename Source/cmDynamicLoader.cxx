@@ -259,15 +259,14 @@ int cmDynamicLoader::CloseLibrary(cmLibHandle lib)
 cmDynamicLoaderFunction
 cmDynamicLoader::GetSymbolAddress(cmLibHandle lib, const char* sym)
 { 
-  void* result = 0;
 #ifdef UNICODE
-        wchar_t *wsym = new wchar_t [mbstowcs(NULL, sym, 32000)];
-        mbstowcs(wsym, sym, 32000);
-        void *ret = GetProcAddress(lib, wsym);
-        delete [] wsym;
-        result = ret;
+  wchar_t *wsym = new wchar_t [mbstowcs(NULL, sym, 32000)];
+  mbstowcs(wsym, sym, 32000);
+  void *ret = GetProcAddress(lib, wsym);
+  delete [] wsym;
+  void* result = ret;
 #else
-  result = GetProcAddress(lib, sym);
+  void* result = GetProcAddress(lib, sym);
 #endif
   // Hack to cast pointer-to-data to pointer-to-function.
   return *reinterpret_cast<cmDynamicLoaderFunction*>(&result);

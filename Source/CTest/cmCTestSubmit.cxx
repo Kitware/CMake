@@ -299,7 +299,6 @@ bool cmCTestSubmit::TriggerUsingHTTP(const std::vector<std::string>& files,
                                      const std::string& url)
 {
   CURL *curl;
-  CURLcode res = CURLcode();
 
   /* In windows, this will init the winsock stuff */
   ::curl_global_init(CURL_GLOBAL_ALL);
@@ -363,8 +362,7 @@ bool cmCTestSubmit::TriggerUsingHTTP(const std::vector<std::string>& files,
         std::cout << "Trigger url: " << turl.c_str() << std::endl;
         }
       curl_easy_setopt(curl, CURLOPT_URL, turl.c_str());
-      res = curl_easy_perform(curl);
-      if ( res )
+      if ( curl_easy_perform(curl) )
         {
         std::cout << "Error when uploading" << std::endl;
         ::curl_easy_cleanup(curl);

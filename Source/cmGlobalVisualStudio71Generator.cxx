@@ -203,7 +203,6 @@ void cmGlobalVisualStudio71Generator::WriteProjectDepends(std::ostream& fout,
                                       const cmTarget& target
   )
 {
-  int depcount = 0;
   // insert Begin Project Dependency  Project_Dep_Name project stuff here 
   if (target.GetType() != cmTarget::STATIC_LIBRARY)
     {
@@ -237,7 +236,6 @@ void cmGlobalVisualStudio71Generator::WriteProjectDepends(std::ostream& fout,
       {
       fout << "\t\t{" << this->CreateGUID(i->c_str()) << "} = {"
            << this->CreateGUID(i->c_str()) << "}\n";
-      depcount++;
       }
     }
 }
