@@ -266,7 +266,9 @@ bool cmCTestSubmit::SubmitUsingHTTP(const cmStdString& localprefix,
           ofile.append(hex);
           }
         }
-      cmStdString upload_as = url + "?FileName=" + ofile;
+      cmStdString upload_as 
+        = url + ((url.find("?",0) == cmStdString::npos) ? "?" : "&") 
+        + "FileName=" + ofile;
 
       struct stat st;
       if ( ::stat(local_file.c_str(), &st) )
@@ -383,7 +385,9 @@ bool cmCTestSubmit::TriggerUsingHTTP(const std::vector<cmStdString>& files,
           ofile.append(hex);
           }
         }
-      cmStdString turl = url + "?xmlfile=" + ofile;
+      cmStdString turl 
+        = url + ((url.find("?",0) == cmStdString::npos) ? "?" : "&") 
+        + "xmlfile=" + ofile;
       *m_LogFile << "Trigger url: " << turl.c_str() << std::endl;
       if ( m_Verbose )
         {
