@@ -212,11 +212,6 @@ void cmLocalUnixMakefileGenerator::OutputMakefile(const char* file,
     fout << "# " << i->c_str() << "\n";
     }
   fout << "\n\n";
-  if(!m_Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"))
-    {
-    fout << "# Suppresses display of executed commands\n";
-    fout << ".SILENT:\n";
-    }
   fout << "# disable some common implicit rules to speed things up\n";
   fout << ".SUFFIXES:\n";
   fout << ".SUFFIXES:.hpuxmakemusthaverule\n";
@@ -247,6 +242,13 @@ void cmLocalUnixMakefileGenerator::OutputMakefile(const char* file,
                    "$(MAKE) $(MAKESILENT) cmake.check_depends",
                    "$(MAKE) $(MAKESILENT) -f cmake.check_depends",
                    "$(MAKE) $(MAKESILENT) all");
+  
+  // Generation of SILENT target must be after default_target.
+  if(!m_Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"))
+    {
+    fout << "# Suppresses display of executed commands\n";
+    fout << "$(VERBOSE).SILENT:\n\n";
+    }
   
   this->OutputTargetRules(fout);
   this->OutputDependLibs(fout);
