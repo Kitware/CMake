@@ -486,6 +486,12 @@ const char* CommandLineArguments::GetArgv0()
 }
 
 //----------------------------------------------------------------------------
+unsigned int CommandLineArguments::GetLastArgument()
+{
+  return this->Internals->LastArgument + 1;
+}
+
+//----------------------------------------------------------------------------
 void CommandLineArguments::GenerateHelp()
 {
   kwsys_ios::ostringstream str;
