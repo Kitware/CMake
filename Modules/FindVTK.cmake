@@ -15,6 +15,9 @@
 #                     USE_INSTALLED_VTK is modified, and only if ONE of
 #                     these setting is set to ON.
 #
+# If VTK is not found, an error is displayed unless VTK_FIND_QUIETLY
+# is on.
+#
 
 #
 # Look for a binary tree (built from source)
@@ -102,7 +105,9 @@ IF (USE_BUILT_VTK AND USE_INSTALLED_VTK)
   MESSAGE ("Warning. Please make sure that only ONE of the USE_INSTALLED_VTK or USE_BUILT_VTK setting is set to ON.")
 ELSE (USE_BUILT_VTK AND USE_INSTALLED_VTK)
   IF (NOT USE_VTK_FILE)
-    MESSAGE ("Warning. VTK might be found on your system as different flavours: installed VTK or built VTK. Please make sure that the VTK_INSTALL_PATH or VTK_BINARY_PATH setting reflects which VTK you are planning to use, then set ONE of the USE_INSTALLED_VTK or USE_BUILT_VTK setting to ON.")
+    IF (NOT VTK_FIND_QUIETLY)
+      MESSAGE ("Warning. VTK might be found on your system as different flavours: installed VTK or built VTK. Please make sure that the VTK_INSTALL_PATH or VTK_BINARY_PATH setting reflects which VTK you are planning to use, then set ONE of the USE_INSTALLED_VTK or USE_BUILT_VTK setting to ON.")
+    ENDIF (NOT VTK_FIND_QUIETLY)
   ENDIF (NOT USE_VTK_FILE)
 ENDIF (USE_BUILT_VTK AND USE_INSTALLED_VTK)
 
