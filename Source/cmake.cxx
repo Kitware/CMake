@@ -73,6 +73,16 @@ cmake::cmake()
     }
 #endif
 
+  // If MAKEFLAGS are given in the environment, remove the environment
+  // variable.  This will prevent try-compile from succeeding when it
+  // should fail (if "-i" is an option).  We cannot simply test
+  // whether "-i" is given and remove it because some make programs
+  // encode the MAKEFLAGS variable in a strange way.
+  if(getenv("MAKEFLAGS"))
+    {
+    putenv("MAKEFLAGS=");
+    }  
+  
   m_Local = false;
   m_Verbose = false;
   m_InTryCompile = false;
