@@ -3,6 +3,24 @@ PROJECT(LoadedCommand)
 # set a definition
 SET (TEST_COMMAND_TEST1 1)
 
+INCLUDE (${CMAKE_ROOT}/Modules/CheckSizeOf.cmake)
+CHECK_TYPE_SIZE(char  SIZEOF_CHAR)
+CHECK_TYPE_SIZE(short SIZEOF_SHORT)
+CHECK_TYPE_SIZE(int   SIZEOF_INT)
+CHECK_TYPE_SIZE(long  SIZEOF_LONG)
+CHECK_TYPE_SIZE("long long" SIZEOF_LONG_LONG)
+CHECK_TYPE_SIZE(__int64   SIZEOF___INT64)
+
+INCLUDE (${CMAKE_ROOT}/Modules/CheckFunctionExists.cmake)
+CHECK_FUNCTION_EXISTS(vsprintf  HAVE_VSPRINTF)
+CHECK_FUNCTION_EXISTS(vsnprintf HAVE_VSNPRINTF)
+CHECK_FUNCTION_EXISTS(vsblabla  HAVE_VSBLABLA)
+
+CONFIGURE_FILE(${LoadedCommand_SOURCE_DIR}/LoadedCommand.h.in
+               ${LoadedCommand_BINARY_DIR}/LoadedCommand.h)
+
+INCLUDE_DIRECTORIES(${LoadedCommand_BINARY_DIR})
+
 # try to compile the command
 TRY_COMPILE(COMPILE_OK 
     ${LoadedCommand_BINARY_DIR}/CMakeCommands 
@@ -28,4 +46,3 @@ IF (TEST_DEF)
 ENDIF (TEST_DEF)
 
 ADD_EXECUTABLE (LoadedCommand LoadedCommand.cxx)
-

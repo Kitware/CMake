@@ -1,0 +1,11 @@
+#cmakedefine SIZEOF_CHAR      ${SIZEOF_CHAR}
+#cmakedefine SIZEOF_SHORT     ${SIZEOF_SHORT}
+#cmakedefine SIZEOF_INT       ${SIZEOF_INT}
+#cmakedefine SIZEOF_LONG      ${SIZEOF_LONG}
+#cmakedefine SIZEOF_LONG_LONG ${SIZEOF_LONG_LONG}
+#cmakedefine SIZEOF___INT64   ${SIZEOF___INT64}
+
+#cmakedefine HAVE_VSPRINTF
+#cmakedefine HAVE_VSNPRINTF
+#cmakedefine HAVE_VSBLABLA
+

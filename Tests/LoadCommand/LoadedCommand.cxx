@@ -1,8 +1,10 @@
+#include "LoadedCommand.h"
+
 int main ()
 {
 #ifdef CMAKE_IS_FUN
-  return 0;
+  return SIZEOF_CHAR-1;
 #else  
-  return 1;
+  return SIZEOF_SHORT;
 #endif
 }
