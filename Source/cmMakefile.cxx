@@ -1362,3 +1362,26 @@ void cmMakefile::EnableLanguage(const char* lang)
 {
   m_MakefileGenerator->EnableLanguage(lang);
 }
+
+
+void cmMakefile::AddDependencyToCache( std::string target, const std::string& lib )
+{
+  // Add the explicit dependency information for this target. This is
+  // simply a set of libraries separated by ";". There should always
+  // be a trailing ";". These library names are not canonical, in that
+  // they may be "-framework x", "-ly", "/path/libz.a", etc.
+  target += "_LIB_DEPENDS";
+  std::string dependencies;
+  const char* old_val = GetDefinition( target.c_str() );
+  if( old_val )
+    {
+    dependencies += old_val;
+    }
+  if( dependencies.find( lib ) == std::string::npos )
+    {
+    dependencies += lib;
+    dependencies += ";";
+    }
+  AddCacheDefinition( target.c_str(), dependencies.c_str(),
+                      "Dependencies for the target", cmCacheManager::INTERNAL );
+}

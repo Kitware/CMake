@@ -155,13 +155,13 @@ public:
                          const std::vector<std::string> &depends,
                          const std::vector<std::string> &outputs);
 
-  /**
-   * Get a list of link libraries in the build.
-   */
-  cmTarget::LinkLibraries& GetLinkLibraries()
-    { 
-    return m_LinkLibraries;
-    }
+//    /**
+//     * Get a list of link libraries in the build.
+//     */
+//    cmTarget::LinkLibraries& GetLinkLibraries()
+//      { 
+//      return m_LinkLibraries;
+//      }
 
   /**
    * Get a list of link libraries in the build.
@@ -519,6 +519,11 @@ public:
     
   ///! Enable support for the named language, if null then all languages are enabled.
   void EnableLanguage(const char* );
+
+  /**
+   * Adds the specified library to the explicit dependency list of target.
+   */
+  void AddDependencyToCache( std::string target, const std::string& lib );
   
 protected:
   std::string m_Prefix;
