@@ -10,6 +10,9 @@ SET (DROP_SITE_PASSWORD "public")
 SET (TRIGGER_SITE 
        "http://${DROP_SITE}/cgi-bin/Submit-CMake-TestingResults.pl")
 
+# Project Home Page
+SET (PROJECT_URL "http://www.cmake.org/")
+
 # Dart server configuration 
 SET (CVS_WEB_URL "http://${DROP_SITE}/cgi-bin/cvsweb.cgi/CMake/")
 SET (CVS_WEB_CVSROOT "CMake")
