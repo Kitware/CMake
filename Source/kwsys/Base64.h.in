@@ -22,99 +22,90 @@
    not visible to user code.  Use kwsysHeaderDump.pl to reproduce
    these macros after making changes to the interface.  */
 #define kwsys(x) @KWSYS_NAMESPACE@##x
-#define kwsysBase64                     kwsys(Base64)
-#define kwsysBase64_Encode1             kwsys(Base64_Encode1)
-#define kwsysBase64_Encode2             kwsys(Base64_Encode2)
-#define kwsysBase64_Encode3             kwsys(Base64_Encode3)
-#define kwsysBase64_Encode              kwsys(Base64_Encode)
-#define kwsysBase64_Decode              kwsys(Base64_Decode)
-#define kwsysBase64_Decode3             kwsys(Base64_Decode3)
+#define kwsysBase64          kwsys(Base64)
+#define kwsysBase64_Decode   kwsys(Base64_Decode)
+#define kwsysBase64_Decode3  kwsys(Base64_Decode3)
+#define kwsysBase64_Encode   kwsys(Base64_Encode)
+#define kwsysBase64_Encode1  kwsys(Base64_Encode1)
+#define kwsysBase64_Encode2  kwsys(Base64_Encode2)
+#define kwsysBase64_Encode3  kwsys(Base64_Encode3)
 
 #if defined(__cplusplus)
 extern "C"
 {
 #endif
 
-/* Encode 3 bytes into a 4 byte string. */
+/**
+ * Encode 3 bytes into a 4 byte string.
+ */
 void kwsysBase64_Encode3(const unsigned char *src, unsigned char *dest);
 
-/* Encode 2 bytes into a 4 byte string. */
+/**
+ * Encode 2 bytes into a 4 byte string.
+ */
 void kwsysBase64_Encode2(const unsigned char *src, unsigned char *dest);
 
-/* Encode 1 bytes into a 4 byte string. */
+/**
+ * Encode 1 bytes into a 4 byte string.
+ */
 void kwsysBase64_Encode1(const unsigned char *src, unsigned char *dest);
 
-/* Encode 'length' bytes from the input buffer and store the
-   encoded stream into the output buffer. Return the length of the encoded
-   buffer (output). Note that the output buffer must be allocated by the caller
-   (length * 1.5 should be a safe estimate).  If 'mark_end' is true than an
-   extra set of 4 bytes is added to the end of the stream if the input is a
-   multiple of 3 bytes.  These bytes are invalid chars and therefore they will
-   stop the decoder thus enabling the caller to decode a stream without
-   actually knowing how much data to expect (if the input is not a multiple of
-   3 bytes then the extra padding needed to complete the encode 4 bytes will
-   stop the decoding anyway).  */
-
+/**
+ * Encode 'length' bytes from the input buffer and store the encoded
+ * stream into the output buffer. Return the length of the encoded
+ * buffer (output). Note that the output buffer must be allocated by
+ * the caller (length * 1.5 should be a safe estimate).  If 'mark_end'
+ * is true than an extra set of 4 bytes is added to the end of the
+ * stream if the input is a multiple of 3 bytes.  These bytes are
+ * invalid chars and therefore they will stop the decoder thus
+ * enabling the caller to decode a stream without actually knowing how
+ * much data to expect (if the input is not a multiple of 3 bytes then
+ * the extra padding needed to complete the encode 4 bytes will stop
+ * the decoding anyway).
+ */
 unsigned long kwsysBase64_Encode(const unsigned char *input,
-  unsigned long length, unsigned char *output, int mark_end);
+                                 unsigned long length,
+                                 unsigned char *output,
+                                 int mark_end);
 
-/* Decode 4 bytes into a 3 byte string. */
+/**
+ * Decode 4 bytes into a 3 byte string.  Returns the number of bytes
+ * actually decoded.
+ */
 int kwsysBase64_Decode3(const unsigned char *src, unsigned char *dest);
 
-/* Decode bytes from the input buffer and store the decoded stream 
-   into the output buffer until 'length' bytes have been decoded.  Return the
-   real length of the decoded stream (which should be equal to 'length'). Note
-   that the output buffer must be allocated by the caller.  If
-   'max_input_length' is not null, then it specifies the number of encoded
-   bytes that should be at most read from the input buffer. In that case the
-   'length' parameter is ignored. This enables the caller to decode a stream
-   without actually knowing how much decoded data to expect (of course, the
-   buffer must be large enough). */
+/**
+ * Decode bytes from the input buffer and store the decoded stream
+ * into the output buffer until 'length' bytes have been decoded.
+ * Return the real length of the decoded stream (which should be equal
+ * to 'length'). Note that the output buffer must be allocated by the
+ * caller.  If 'max_input_length' is not null, then it specifies the
+ * number of encoded bytes that should be at most read from the input
+ * buffer. In that case the 'length' parameter is ignored. This
+ * enables the caller to decode a stream without actually knowing how
+ * much decoded data to expect (of course, the buffer must be large
+ * enough).
+ */
 unsigned long kwsysBase64_Decode(const unsigned char *input, 
-  unsigned long length, unsigned char *output, unsigned long max_input_length);
+                                 unsigned long length,
+                                 unsigned char *output,
+                                 unsigned long max_input_length);
 
 #if defined(__cplusplus)
 } /* extern "C" */
 #endif
 
-/* If we are building a kwsysBase64 .c file, let it use these macros.
-   Otherwise, undefine them to keep the namespace clean.  */
-#if !defined(KWSYS_IN_PROCESS_C)
+/* If we are building Base64.c, let it use these macros.  Otherwise,
+   undefine them to keep the namespace clean.  */
+#if !defined(KWSYS_IN_BASE64_C)
 # undef kwsys
 # undef kwsysBase64
-# undef kwsysBase64_s
-# undef kwsysBase64_New
-# undef kwsysBase64_Delete
-# undef kwsysBase64_SetCommand
-# undef kwsysBase64_SetTimeout
-# undef kwsysBase64_State_Starting
-# undef kwsysBase64_State_Error
-# undef kwsysBase64_State_Exception
-# undef kwsysBase64_State_Executing
-# undef kwsysBase64_State_Exited
-# undef kwsysBase64_State_Expired
-# undef kwsysBase64_State_Killed
-# undef kwsysBase64_GetState
-# undef kwsysBase64_State_e
-# undef kwsysBase64_Exception_None
-# undef kwsysBase64_Exception_Fault
-# undef kwsysBase64_Exception_Illegal
-# undef kwsysBase64_Exception_Interrupt
-# undef kwsysBase64_Exception_Numerical
-# undef kwsysBase64_Exception_Other
-# undef kwsysBase64_GetExitException
-# undef kwsysBase64_Exception_e
-# undef kwsysBase64_GetExitCode
-# undef kwsysBase64_GetExitValue
-# undef kwsysBase64_GetErrorString
-# undef kwsysBase64_Execute
-# undef kwsysBase64_WaitForData
-# undef kwsysBase64_Pipes_e
-# undef kwsysBase64_Pipe_STDOUT
-# undef kwsysBase64_Pipe_STDERR
-# undef kwsysBase64_Pipe_Timeout
-# undef kwsysBase64_WaitForExit
-# undef kwsysBase64_Kill
+# undef kwsysBase64_Decode
+# undef kwsysBase64_Decode3
+# undef kwsysBase64_Encode
+# undef kwsysBase64_Encode1
+# undef kwsysBase64_Encode2
+# undef kwsysBase64_Encode3
 #endif
 
 #endif
