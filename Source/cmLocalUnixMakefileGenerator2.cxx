@@ -28,6 +28,7 @@
 #include "cmDependsC.h"
 #ifdef CMAKE_BUILD_WITH_CMAKE
 # include "cmDependsFortran.h"
+# include "cmDependsJava.h"
 #endif
 
 #include <memory> // auto_ptr
@@ -3135,6 +3136,10 @@ cmLocalUnixMakefileGenerator2::GetDependsChecker(const std::string& lang,
     {
     return new cmDependsFortran(dir, objFile);
     }
+  else if(lang == "Java")
+    {
+    return new cmDependsJava(dir, objFile);
+    }
 #endif
   return 0;
 }
@@ -3217,6 +3222,11 @@ cmLocalUnixMakefileGenerator2
   else if(lang == "Fortran")
     {
     cmDependsFortran scanner(".", objFile, srcFile, includes);
+    return scanner.Write();
+    }
+  else if(lang == "Java")
+    {
+    cmDependsJava scanner(".", objFile, srcFile);
     return scanner.Write();
     }
 #endif
