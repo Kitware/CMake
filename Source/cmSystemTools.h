@@ -19,6 +19,8 @@
 
 #include "cmStandardIncludes.h"
 
+class cmMakefile;
+
 /** \class cmSystemTools
  * \brief A collection of useful functions for CMake.
  *
@@ -225,7 +227,8 @@ public:
 
   ///! Find a library in the system PATH, with optional extra paths.
   static std::string FindLibrary(const char* name,
-				 const std::vector<std::string>& path);
+                                 const std::vector<std::string>& path,
+                                 const cmMakefile *makefile = 0);
 
   ///! return true if the file is a directory.
   static bool FileIsDirectory(const char* name);
