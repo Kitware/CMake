@@ -270,7 +270,7 @@ utilities()
     cvs_login || return 1
     (
         if [ -d "ReleaseUtilities/CVS" ]; then
-            cd ReleaseUtilities && cvs -z3 -q update -dAP
+            cd ReleaseUtilities && cvs -z3 -q update -dAP -r ${TAG}
         else
             rm -rf CheckoutTemp &&
             mkdir CheckoutTemp &&
