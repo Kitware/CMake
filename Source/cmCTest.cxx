@@ -3056,7 +3056,7 @@ int cmCTest::RunConfigurationScript()
   int retVal = 0;
   bool res; 
   
-  // do an initial cvs update on the src dir
+  // do an initial cvs update as required
   const char *cvsCmd = mf->GetDefinition("CTEST_CVS_COMMAND");
   if (cvsCmd)
     {
@@ -3114,6 +3114,7 @@ int cmCTest::RunConfigurationScript()
   
   // do an initial cmake to setup the DartConfig file
   const char *cmakeCmd = mf->GetDefinition("CTEST_CMAKE_COMMAND");
+  int cmakeFailed = 0;
   if (cmakeCmd)
     {
     command = cmakeCmd;
@@ -3127,8 +3128,8 @@ int cmCTest::RunConfigurationScript()
                                           m_Verbose, 0 /*m_TimeOut*/);
     if (!res || retVal != 0)
       {
-      cmSystemTools::Error("Unable to run cmake");    
-      return -7;
+      // even if this fails continue to the next step
+      cmakeFailed = 1;
       }
     }
   
@@ -3141,7 +3142,7 @@ int cmCTest::RunConfigurationScript()
                                         m_Verbose, 0 /*m_TimeOut*/);
 
   // did something critical fail in ctest
-  if (!res || 
+  if (!res || cmakeFailed ||
       retVal & CTEST_BUILD_ERRORS)
     {
     // if we backed up the dirs and the build failed, then restore
@@ -3160,6 +3161,11 @@ int cmCTest::RunConfigurationScript()
       // rename the src and binary directories 
       rename(backupSrcDir.c_str(), srcDir);
       rename(backupBinDir.c_str(), binDir);
+      }
+    if (cmakeFailed)
+      {
+      cmSystemTools::Error("Unable to run cmake");    
+      return -7;
       }
     cmSystemTools::Error("Unable to run ctest");    
     if (!res)
