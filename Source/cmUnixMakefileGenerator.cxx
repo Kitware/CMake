@@ -440,9 +440,9 @@ void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
       fout << std::endl;
 
       fout << "lib" << l->first << "$(SHLIB_SUFFIX):  ${" << 
-        l->first << "_SRC_OBJS} \n";
+        l->first << "_SRC_OBJS} ${CMAKE_DEPEND_LIBS}\n";
       fout << "\trm -f lib" << l->first << "$(SHLIB_SUFFIX)\n";
-      fout << "\t$(CMAKE_CXX_COMPILER) ${CMAKE_SHLIB_LINK_FLAGS} ${CMAKE_CXX_FLAGS} ${CMAKE_SHLIB_BUILD_FLAGS} -o \\\n";
+      fout << "\t$(CMAKE_CXX_COMPILER)  ${CMAKE_SHLIB_LINK_FLAGS} ${CMAKE_SHLIB_BUILD_FLAGS} ${CMAKE_CXX_FLAGS} -o \\\n";
       fout << "\t  lib" << l->first << "$(SHLIB_SUFFIX) \\\n";
       fout << "\t  ${" << l->first << 
         "_SRC_OBJS} ";
@@ -454,7 +454,7 @@ void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
       {
       fout << l->first << ": ${" << 
         l->first << "_SRC_OBJS} ${CMAKE_DEPEND_LIBS}\n";
-      fout << "\t${CMAKE_CXX_COMPILER}  ${CMAKE_CXXFLAGS} ${" << 
+      fout << "\t${CMAKE_CXX_COMPILER} ${CMAKE_SHLIB_LINK_FLAGS} ${CMAKE_CXXFLAGS} ${" << 
         l->first << "_SRC_OBJS} ";
       this->OutputLinkLibraries(fout, NULL,l->second);
       fout << " -o " << l->first << "\n\n";
