@@ -1,0 +1,32 @@
+cmake
+--------------------------------------
+Runtime requirements:
+  cygwin-1.3.5 or newer
+
+Build requirements
+  cygwin-1.3.5 or newer
+  make
+
+Canonical homepage:
+  http://www.cmake.org
+
+Canonical download:
+  ftp://www.cmake.org/pub/cmake/
+
+---------------------------------------
+
+Build instructions:
+  unpack cmake-1.4-X-src.tar.bz2
+  cd cmake
+  ./configure
+  make
+  make test 
+
+---------------------------------------
+
+Port Notes:
+
+<none>
+
+----------------------------------------
+Cygwin port maintained by: William A. Hoffman <bill.hoffman@kitware.com>

@@ -1,0 +1,28 @@
+PREFIX="/usr"
+RELEASE_TAG="Release-1-4"
+VERSION="1.4-4"
+PLATFORM="x86-cygwin"
+DOC_DIR="/doc/cmake-${VERSION}"
+FIND="/usr/bin/find"
+
+CreateExtraFiles()
+{
+mkdir -p ${INSTALL_DIR}${PREFIX}/doc/cmake-${VERSION}
+cp ${SOURCE_DIR}/CMake.pdf  ${INSTALL_DIR}${PREFIX}/doc/cmake-${VERSION}
+cp ${SOURCE_DIR}/CMake.rtf  ${INSTALL_DIR}${PREFIX}/doc/cmake-${VERSION}
+mkdir -p ${INSTALL_DIR}${PREFIX}/doc/Cygwin
+cp ${SOURCE_DIR}/Utilities/cmake-cygwin.README ${INSTALL_DIR}${PREFIX}/doc/Cygwin/cmake-${VERSION}.README
+}
+
+
+CreatePackage()
+{
+echo "Creating cmake-$VERSION-$PLATFORM.tar"
+cd ${INSTALL_DIR}
+if ${TAR} cvf ${TARBALL_DIR}/cmake-$VERSION-$PLATFORM.tar ${PREFIX} \
+     > ${LOG_DIR}/cmake-$VERSION-$PLATFORM-cygwin.log 2>&1 ; then : ; else
+  echo "Error, see ${LOG_DIR}/cmake-$VERSION-$PLATFORM-cygwin.log"
+  exit 1
+fi
+bzip2 ${TARBALL_DIR}/cmake-$VERSION-$PLATFORM.tar
+}
