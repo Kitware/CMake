@@ -188,15 +188,15 @@ void cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
       target->AddAttribute("name", this->CreateString(l->first.c_str()));
       target->AddAttribute("productName",this->CreateString(l->first.c_str()));
       cmXCodeObject* fileRef = this->CreateObject(cmXCodeObject::PBXFileReference);
-      fileRef->AddAttribute("explicitFileType", this->CreateString("compiled.mach-o.executable"));
+      fileRef->AddAttribute("explicitFileType", this->CreateString("\"compiled.mach-o.executable\""));
       fileRef->AddAttribute("includedInIndex", this->CreateString("0"));
       fileRef->AddAttribute("path", this->CreateString(l->first.c_str()));
       fileRef->AddAttribute("refType", this->CreateString("3"));
       fileRef->AddAttribute("sourceTree", this->CreateString("BUILT_PRODUCTS_DIR"));
       cmXCodeObject* fileRefPtr = this->CreateObject(cmXCodeObject::OBJECT_REF);
-      fileRefPtr->AddObject(fileRef);
+      fileRefPtr->SetObject(fileRef);
       target->AddAttribute("productReference", fileRefPtr);
-      target->AddAttribute("productReference", this->CreateString("com.apple.product-type.tool"));
+      target->AddAttribute("productType", this->CreateString("\"com.apple.product-type.tool\""));
       }
     else if (l->second.GetType() == cmTarget::UTILITY)
       {

@@ -1,4 +1,6 @@
 #include "cmXCodeObject.h"
+#include "cmSystemTools.h"
+
 const char* cmXCodeObject::PBXTypeNames[] = {
     "PBXGroup", "PBXBuildStyle", "PBXProject", "PBXHeadersBuildPhase", 
     "PBXSourcesBuildPhase", "PBXFrameworksBuildPhase", "PBXNativeTarget",
@@ -17,6 +19,7 @@ cmXCodeObject::cmXCodeObject(PBXType ptype, Type type)
   str << (void*)this;
   str << (void*)this;
   m_Id = str.str();
+  cmSystemTools::ReplaceString(m_Id, "0x", "");
   m_Type = type;
   if(m_Type == OBJECT)
     {
