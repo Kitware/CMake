@@ -44,6 +44,7 @@
 #include "cmFindProgramCommand.cxx"
 #include "cmForEachCommand.cxx"
 #include "cmGetFilenameComponentCommand.cxx"
+#include "cmGetSourceFilePropertyCommand.cxx"
 #include "cmIfCommand.cxx"
 #include "cmIncludeCommand.cxx"
 #include "cmIncludeDirectoryCommand.cxx"
@@ -82,7 +83,6 @@
 #include "cmFLTKWrapUICommand.cxx"
 #include "cmGetCMakePropertyCommand.cxx"
 #include "cmGetDirectoryPropertyCommand.cxx"
-#include "cmGetSourceFilePropertyCommand.cxx"
 #include "cmGetTargetPropertyCommand.cxx"
 #include "cmITKWrapTclCommand.cxx"
 #include "cmIncludeExternalMSProjectCommand.cxx"
@@ -139,6 +139,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmFindProgramCommand);
   commands.push_back(new cmForEachCommand);
   commands.push_back(new cmGetFilenameComponentCommand);
+  commands.push_back(new cmGetSourceFilePropertyCommand);
   commands.push_back(new cmIfCommand);
   commands.push_back(new cmIncludeCommand);
   commands.push_back(new cmIncludeDirectoryCommand);
@@ -174,7 +175,6 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmFLTKWrapUICommand);
   commands.push_back(new cmGetCMakePropertyCommand);
   commands.push_back(new cmGetDirectoryPropertyCommand);
-  commands.push_back(new cmGetSourceFilePropertyCommand);
   commands.push_back(new cmGetTargetPropertyCommand);
   commands.push_back(new cmITKWrapTclCommand);
   commands.push_back(new cmIncludeExternalMSProjectCommand);
