@@ -4,10 +4,10 @@
 #
 #  CABLE              = the full path to the cable executable
 #  CABLE_TCL_LIBRARY  = the full path to the Tcl wrapper facility library
-#  CABLE_ROOT         = the full path to the root of the cable installation
+#  CABLE_INCLUDE_DIR  = the full path to the cable include directory
 #
 #  To build Tcl wrappers, you should add shared library and link it to
-#  ${CABLE_TCL_LIBRARY}.  You should also add ${CABLE_ROOT}/include as
+#  ${CABLE_TCL_LIBRARY}.  You should also add ${CABLE_INCLUDE_DIR} as
 #  an include directory.
 #
 
@@ -27,10 +27,12 @@ FIND_PROGRAM(CABLE
 # name on it.
 GET_FILENAME_COMPONENT(CABLE_ROOT_BIN ${CABLE} PATH)
 
-# Find the root of the CABLE installation based on the executable's
-# location.
-FIND_PATH(CABLE_ROOT include/wrapCalls.h ${CABLE_ROOT_BIN}/..)
+# Find the cable include directory in a path relative to the cable
+# executable.
+FIND_PATH(CABLE_INCLUDE_DIR WrapTclFacility/wrapCalls.h
+          ${CABLE_ROOT_BIN}/../include)
 
-# Find the WrapTclFacility library in a path relative to the root of
-# the CABLE installation.
-FIND_LIBRARY(CABLE_TCL_LIBRARY NAMES WrapTclFacility PATHS ${CABLE_ROOT}/lib)
+# Find the WrapTclFacility library in a path relative to the cable
+# executable.
+FIND_LIBRARY(CABLE_TCL_LIBRARY NAMES WrapTclFacility PATHS
+             ${CABLE_ROOT_BIN}/../lib)
