@@ -27,17 +27,21 @@
 #if !defined(KWSYS_NO_ANSI_STREAM_HEADERS)
 # include <iosfwd>
 #else
+class fstream;
+class ifstream;
+class ios;
+class istream;
+class ofstream;
+class ostream;
 # if !defined(KWSYS_NO_STD_NAMESPACE)
 namespace std
 {
-# endif
-  class fstream;
-  class ifstream;
-  class ios;
-  class istream;
-  class ofstream;
-  class ostream;
-# if !defined(KWSYS_NO_STD_NAMESPACE)
+  using ::fstream;
+  using ::ifstream;
+  using ::ios;
+  using ::istream;
+  using ::ofstream;
+  using ::ostream;
 }
 # endif
 #endif
