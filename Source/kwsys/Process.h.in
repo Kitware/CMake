@@ -17,119 +17,223 @@
 #ifndef @KWSYS_NAMESPACE@_Process_h
 #define @KWSYS_NAMESPACE@_Process_h
 
+/* Redefine all public interface symbol names to be in the proper
+   namespace.  These macros are used internally to kwsys only, and are
+   not visible to user code.  Use kwsysHeaderDump.pl to reproduce
+   these macros after making changes to the interface.  */
 #define kwsys(x) @KWSYS_NAMESPACE@##x
-#define kwsysProcess_STDOUT kwsys(Process_STDOUT)
-#define kwsysProcess_STDERR kwsys(Process_STDERR)
-#define kwsysProcess_Timeout kwsys(Process_Timeout)
-#define kwsysProcess_Starting kwsys(Process_Starting)
-#define kwsysProcess_Executing kwsys(Process_Executing)
-#define kwsysProcess_Expired kwsys(Process_Expired)
-#define kwsysProcess_Exited kwsys(Process_Exited)
-#define kwsysProcess_Killed kwsys(Process_Killed)
-#define kwsysProcess_Signalled kwsys(Process_Signalled)
-#define kwsysProcess_Error kwsys(Process_Error)
-#define kwsysProcess_State kwsys(Process_State)
-#define kwsysProcess_Pipes_e kwsys(Process_Pipes_e)
-#define kwsysProcess_State_e kwsys(Process_State_e)
-#define kwsysProcess_s kwsys(Process_s)
-#define kwsysProcess kwsys(Process)
-#define kwsysProcess_New kwsys(Process_New)
-#define kwsysProcess_Delete kwsys(Process_Delete)
-#define kwsysProcess_SetCommand kwsys(Process_SetCommand)
-#define kwsysProcess_SetTimeout kwsys(Process_SetTimeout)
-#define kwsysProcess_GetState kwsys(Process_GetState)
-#define kwsysProcess_GetExitCode kwsys(Process_GetExitCode)
-#define kwsysProcess_GetErrorString kwsys(Process_GetErrorString)
-#define kwsysProcess_Execute kwsys(Process_Execute)
-#define kwsysProcess_WaitForData kwsys(Process_WaitForData)
-#define kwsysProcess_WaitForExit kwsys(Process_WaitForExit)
-#define kwsysProcess_Kill kwsys(Process_Kill)
+#define kwsysProcess                     kwsys(Process)
+#define kwsysProcess_s                   kwsys(Process_s)
+#define kwsysProcess_New                 kwsys(Process_New)
+#define kwsysProcess_Delete              kwsys(Process_Delete)
+#define kwsysProcess_SetCommand          kwsys(Process_SetCommand)
+#define kwsysProcess_SetTimeout          kwsys(Process_SetTimeout)
+#define kwsysProcess_State_Starting      kwsys(Process_State_Starting)
+#define kwsysProcess_State_Error         kwsys(Process_State_Error)
+#define kwsysProcess_State_Exception     kwsys(Process_State_Exception)
+#define kwsysProcess_State_Executing     kwsys(Process_State_Executing)
+#define kwsysProcess_State_Exited        kwsys(Process_State_Exited)
+#define kwsysProcess_State_Expired       kwsys(Process_State_Expired)
+#define kwsysProcess_State_Killed        kwsys(Process_State_Killed)
+#define kwsysProcess_GetState            kwsys(Process_GetState)
+#define kwsysProcess_State_e             kwsys(Process_State_e)
+#define kwsysProcess_Exception_None      kwsys(Process_Exception_None)
+#define kwsysProcess_Exception_Abort     kwsys(Process_Exception_Abort)
+#define kwsysProcess_Exception_Fault     kwsys(Process_Exception_Fault)
+#define kwsysProcess_Exception_Illegal   kwsys(Process_Exception_Illegal)
+#define kwsysProcess_Exception_Interrupt kwsys(Process_Exception_Interrupt)
+#define kwsysProcess_Exception_Numerical kwsys(Process_Exception_Numerical)
+#define kwsysProcess_Exception_Other     kwsys(Process_Exception_Other)
+#define kwsysProcess_GetExitException    kwsys(Process_GetExitException)
+#define kwsysProcess_Exception_e         kwsys(Process_Exception_e)
+#define kwsysProcess_GetExitCode         kwsys(Process_GetExitCode)
+#define kwsysProcess_GetExitValue        kwsys(Process_GetExitValue)
+#define kwsysProcess_GetErrorString      kwsys(Process_GetErrorString)
+#define kwsysProcess_Execute             kwsys(Process_Execute)
+#define kwsysProcess_WaitForData         kwsys(Process_WaitForData)
+#define kwsysProcess_Pipes_e             kwsys(Process_Pipes_e)
+#define kwsysProcess_Pipe_STDOUT         kwsys(Process_Pipe_STDOUT)
+#define kwsysProcess_Pipe_STDERR         kwsys(Process_Pipe_STDERR)
+#define kwsysProcess_Pipe_Timeout        kwsys(Process_Pipe_Timeout)
+#define kwsysProcess_WaitForExit         kwsys(Process_WaitForExit)
+#define kwsysProcess_Kill                kwsys(Process_Kill)
 
 #if defined(__cplusplus)
 extern "C"
 {
 #endif
 
-typedef enum kwsysProcess_Pipes_e
-{
-  kwsysProcess_STDOUT=1,
-  kwsysProcess_STDERR=2,
-  kwsysProcess_Timeout=255
-} kwsysProcess_Pipes;
-
-typedef enum kwsysProcess_State_e
-{
-  kwsysProcess_Starting,  /* Between New and Execute; No process run yet */
-  kwsysProcess_Executing, /* Process is running */
-  kwsysProcess_Expired,   /* Process timeout expired and was killed */
-  kwsysProcess_Exited,    /* Process exited */
-  kwsysProcess_Killed,    /* Process was killed by Kill */
-  kwsysProcess_Signalled, /* Process was terminated by a signal (crash / ctrl-C) */
-  kwsysProcess_Error      /* Internal error of Process */
-} kwsysProcess_State;
-
+/**
+ * Process control data structure.
+ */
 typedef struct kwsysProcess_s kwsysProcess;
 
+/**
+ * Create a new Process instance.
+ */
 kwsysProcess* kwsysProcess_New();
 
+/**
+ * Delete an existing Process instance.  If the instance is currently
+ * executing a process, this blocks until the process terminates.
+ */
 void kwsysProcess_Delete(kwsysProcess* cp);
 
+/**
+ * Set the command line to be executed.  Argument is an array of
+ * pointers to the command and each argument.  Ths array must end with
+ * a NULL pointer.
+ */
 void kwsysProcess_SetCommand(kwsysProcess* cp, char const* const* command);
 
+/**
+ * Set the timeout for the child process.  The timeout period begins
+ * when the child is executed.  If the child has not terminated when
+ * the timeout expires, it will be killed.  A non-positive (<= 0)
+ * value will disable the timeout.
+ */
 void kwsysProcess_SetTimeout(kwsysProcess* cp, double timeout);
 
-/*
- * Get the current internal state of the kwsysProcess instance
+/**
+ * Get the current state of the Process instance.  Possible states are:
+ *
+ *  kwsysProcess_State_Starting  = Execute has not yet been called.
+ *  kwsysProcess_State_Error     = Error administrating the child process.
+ *  kwsysProcess_State_Exception = Child process exited abnormally.
+ *  kwsysProcess_State_Executing = Child process is currently running.
+ *  kwsysProcess_State_Exited    = Child process exited normally.
+ *  kwsysProcess_State_Expired   = Child process's timeout expired.
+ *  kwsysProcess_State_Killed    = Child process terminated by Kill method.
  */
 int kwsysProcess_GetState(kwsysProcess* cp);
+typedef enum kwsysProcess_State_e
+{
+  kwsysProcess_State_Starting,
+  kwsysProcess_State_Error,
+  kwsysProcess_State_Exception,
+  kwsysProcess_State_Executing,
+  kwsysProcess_State_Exited,
+  kwsysProcess_State_Expired,
+  kwsysProcess_State_Killed
+};
 
-/*
- * Get process return code or when signalled, get the signal code 
+/**
+ * When GetState returns "Exception", this method returns a
+ * platform-independent description of the exceptional behavior that
+ * caused the child to terminate abnormally.  Possible exceptions are:
+ *
+ *  kwsysProcess_Exception_None      = No exceptional behavior occurred.
+ *  kwsysProcess_Exception_Abort     = Child exited with abort call.
+ *  kwsysProcess_Exception_Fault     = Child crashed with a memory fault.
+ *  kwsysProcess_Exception_Illegal   = Child crashed with an illegal instruction.
+ *  kwsysProcess_Exception_Interrupt = Child was interrupted by user (Cntl-C/Break).
+ *  kwsysProcess_Exception_Numerical = Child crashed with a numerical exception.
+ *  kwsysProcess_Exception_Other     = Child terminated for another reason.
+ */
+int kwsysProcess_GetExitException(kwsysProcess* cp);
+typedef enum kwsysProcess_Exception_e
+{
+  kwsysProcess_Exception_None,
+  kwsysProcess_Exception_Abort,
+  kwsysProcess_Exception_Fault,
+  kwsysProcess_Exception_Illegal,
+  kwsysProcess_Exception_Interrupt,
+  kwsysProcess_Exception_Numerical,
+  kwsysProcess_Exception_Other
+};
+
+/**
+ * When GetState returns "Exited" or "Exception", this method returns
+ * the platform-specific raw exit code of the process.  UNIX platforms
+ * should use WIFEXITED/WEXITSTATUS and WIFSIGNALED/WTERMSIG to access
+ * this value.  Windows users should compare the value to the various
+ * EXCEPTION_* values.
+ *
+ * If GetState returns "Exited", use GetExitValue to get the
+ * platform-independent child return value.
  */
 int kwsysProcess_GetExitCode(kwsysProcess* cp);
 
-/*
- * On kwsysProcess_Error get the error message
+/**
+ * When GetState returns "Exited", this method returns the child's
+ * platform-independent exit code (such as the value returned by the
+ * child's main).
+ */
+int kwsysProcess_GetExitValue(kwsysProcess* cp);
+
+/**
+ * When GetState returns "Error", this method returns a string
+ * describing the problem.  Otherwise, it returns NULL.
  */
 const char* kwsysProcess_GetErrorString(kwsysProcess* cp);
 
+/**
+ * Start executing the child process.
+ */
 void kwsysProcess_Execute(kwsysProcess* cp);
 
-/*
- * Block until data available on requested pipe or one of the timeouts expired,
- * or the process exits. If the pipe is not specified, data on that pipe are
- * ignored.
+/**
+ * Block until data are available on a requested pipe, a timeout
+ * expires, or the child process terminates.  Arguments are as
+ * follows:
  *
- * pipes - a list of interested pipes - kwsysProcess_STDOUT | kwsysProcess_STDERR
- * data - returns pointer to data if read, NULL otherwise
- * length - length of the returned data
- * userTimeout - timeout for the current kwsysProcess_WaitForData call
- *     the userTimeout will contain the remaining time
+ *  pipes   = Flags for the child output pipes of interest to the caller.
+ *            Possible values are Pipe_STDOUT and Pipe_STDERR.  Multiple
+ *            pipes may be specified by using the bitwise OR operator '|'.
+ *  data    = If data are read, the pointer to which this points is
+ *            set to point to the data.
+ *  length  = If data are read, the integer to which this points is
+ *            set to the length of the data read.
+ *  timeout = Specifies the maximum time this call may block.  Upon
+ *            return after reading data, the time elapsed is subtracted
+ *            from the timeout value.  If this timeout expires, the
+ *            value is set to 0.  A NULL pointer passed for this argument
+ *            indicates no timeout for the call.
  *
- * Returns:
- *    0 - Process exited or killed or process timeout expired with no data
- *        available, or no process running.
- *    PIPE id otherwise:
- *       kwsysProcess_STDOUT - if stdout is returned
- *       kwsysProcess_STDERR - if stderr is returned
- *       kwsysProcess_Timeout - if user timeout expired
- */ 
-int kwsysProcess_WaitForData(kwsysProcess* cp, int pipes, char** data, int* length,
-                          double* userTimeout);
-
-/*
- * Block until the process exits or the timeout expires. If no process is
- * running, return immediatly.
+ * Return value will be one of:
  *
- * Returns:
- *    0 - When user timeout expires
- *    1 - Otherwise
+ *   0            = No more data will be available from the child process,
+ *                  or no process has been executed.  WaitForExit should
+ *                  be called to wait for the process to terminate.
+ *   Pipe_STDOUT  = Data have been read from the child's stdout pipe.
+ *   Pipe_STDERR  = Data have been read from the child's stderr pipe.
+ *   Pipe_Timeout = No data available within timeout specified for the
+ *                  call.  Time elapsed has been subtracted from timeout
+ *                  argument.
  */
-int kwsysProcess_WaitForExit(kwsysProcess* cp, double* userTimeout);
+int kwsysProcess_WaitForData(kwsysProcess* cp, int pipes, char** data,
+                             int* length, double* timeout);
+typedef enum kwsysProcess_Pipes_e
+{
+  kwsysProcess_Pipe_STDOUT=1,
+  kwsysProcess_Pipe_STDERR=2,
+  kwsysProcess_Pipe_Timeout=255
+};
 
-/* 
- * Kills the process.  kwsysProcess_WaitForExit should still be called
- * after kwsysProcess_Kill.
+/**
+ * Block until the child process terminates or the given timeout
+ * expires.  If no process is running, returns immediatly.  The
+ * argument is:
+ *
+ *  timeout = Specifies the maximum time this call may block.  Upon
+ *            returning due to child termination, the elapsed time
+ *            is subtracted from the given value.  A NULL pointer
+ *            passed for this argument indicates no timeout for the
+ *            call.
+ *
+ * Return value will be one of:
+ *
+ *    0 = Child did not terminate within timeout specified for
+ *        the call.  Time elapsed has been subtracted from timeout
+ *        argument.
+ *    1 = Child has terminated or was not running.
+ */
+int kwsysProcess_WaitForExit(kwsysProcess* cp, double* timeout);
+
+/**
+ * Forcefully terminate the child process that is currently running.
+ * The caller should call WaitForExit after this returns to wait for
+ * the child to terminate.
  */
 void kwsysProcess_Kill(kwsysProcess* cp);
 
@@ -137,34 +241,43 @@ void kwsysProcess_Kill(kwsysProcess* cp);
 } /* extern "C" */
 #endif
 
-
-/* If we are building a kwsysProcess .c file, let it use these macros.  */
+/* If we are building a kwsysProcess .c file, let it use these macros.
+   Otherwise, undefine them to keep the namespace clean.  */
 #if !defined(KWSYS_IN_PROCESS_C)
 # undef kwsys
-# undef kwsysProcess_STDOUT
-# undef kwsysProcess_STDERR
-# undef kwsysProcess_Timeout
-# undef kwsysProcess_Starting
-# undef kwsysProcess_Executing
-# undef kwsysProcess_Expired
-# undef kwsysProcess_Exited
-# undef kwsysProcess_Killed
-# undef kwsysProcess_Signalled
-# undef kwsysProcess_Error
-# undef kwsysProcess_State
-# undef kwsysProcess_Pipes_e
-# undef kwsysProcess_State_e
-# undef kwsysProcess_s
 # undef kwsysProcess
+# undef kwsysProcess_s
 # undef kwsysProcess_New
 # undef kwsysProcess_Delete
 # undef kwsysProcess_SetCommand
 # undef kwsysProcess_SetTimeout
+# undef kwsysProcess_State_Starting
+# undef kwsysProcess_State_Error
+# undef kwsysProcess_State_Exception
+# undef kwsysProcess_State_Executing
+# undef kwsysProcess_State_Exited
+# undef kwsysProcess_State_Expired
+# undef kwsysProcess_State_Killed
 # undef kwsysProcess_GetState
+# undef kwsysProcess_State_e
+# undef kwsysProcess_Exception_None
+# undef kwsysProcess_Exception_Abort
+# undef kwsysProcess_Exception_Fault
+# undef kwsysProcess_Exception_Illegal
+# undef kwsysProcess_Exception_Interrupt
+# undef kwsysProcess_Exception_Numerical
+# undef kwsysProcess_Exception_Other
+# undef kwsysProcess_GetExitException
+# undef kwsysProcess_Exception_e
 # undef kwsysProcess_GetExitCode
+# undef kwsysProcess_GetExitValue
 # undef kwsysProcess_GetErrorString
 # undef kwsysProcess_Execute
 # undef kwsysProcess_WaitForData
+# undef kwsysProcess_Pipes_e
+# undef kwsysProcess_Pipe_STDOUT
+# undef kwsysProcess_Pipe_STDERR
+# undef kwsysProcess_Pipe_Timeout
 # undef kwsysProcess_WaitForExit
 # undef kwsysProcess_Kill
 #endif

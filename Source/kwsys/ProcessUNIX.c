@@ -98,7 +98,7 @@ struct kwsysProcess_s
   int ChildError;
   
   /* The timeout length.  */
-  float Timeout;
+  double Timeout;
   
   /* Time at which the child started.  Negative for no timeout.  */
   kwsysProcessTime StartTime;
@@ -120,9 +120,16 @@ struct kwsysProcess_s
 
   /* The current status of the child process. */
   int State;
-
-  /* The exit code of the child process, if any.  */
+  
+  /* The exceptional behavior that terminated the child process, if
+   * any.  */
+  int ExitException;
+  
+  /* The exit code of the child process.  */
   int ExitCode;
+  
+  /* The exit value of the child process, if any.  */
+  int ExitValue;
   
   /* Whether the process was killed.  */
   int Killed;
@@ -142,7 +149,7 @@ kwsysProcess* kwsysProcess_New()
     return 0;
     }
   memset(cp, 0, sizeof(kwsysProcess));
-  cp->State = kwsysProcess_Starting;
+  cp->State = kwsysProcess_State_Starting;
   return cp;
 }
 
@@ -150,7 +157,7 @@ kwsysProcess* kwsysProcess_New()
 void kwsysProcess_Delete(kwsysProcess* cp)
 {
   /* If the process is executing, wait for it to finish.  */
-  if(cp->State == kwsysProcess_Executing)
+  if(cp->State == kwsysProcess_State_Executing)
     {
     kwsysProcess_WaitForExit(cp, 0);
     }
@@ -206,19 +213,31 @@ int kwsysProcess_GetState(kwsysProcess* cp)
 }
 
 /*--------------------------------------------------------------------------*/
+int kwsysProcess_GetExitException(kwsysProcess* cp)
+{
+  return cp->ExitException;
+}
+
+/*--------------------------------------------------------------------------*/
 int kwsysProcess_GetExitCode(kwsysProcess* cp)
 {
   return cp->ExitCode;
 }
 
 /*--------------------------------------------------------------------------*/
+int kwsysProcess_GetExitValue(kwsysProcess* cp)
+{
+  return cp->ExitValue;
+}
+
+/*--------------------------------------------------------------------------*/
 const char* kwsysProcess_GetErrorString(kwsysProcess* cp)
 {
-  if(cp->State == kwsysProcess_Error)
+  if(cp->State == kwsysProcess_State_Error)
     {
     return cp->PipeBuffer;
     }
-  return "";
+  return 0;
 }
 
 /*--------------------------------------------------------------------------*/
@@ -228,7 +247,7 @@ void kwsysProcess_Execute(kwsysProcess* cp)
   struct sigaction newSigChldAction;
   
   /* Do not execute a second copy simultaneously.  */
-  if(cp->State == kwsysProcess_Executing)
+  if(cp->State == kwsysProcess_State_Executing)
     {
     return;
     }
@@ -317,7 +336,7 @@ void kwsysProcess_Execute(kwsysProcess* cp)
   cp->PipesLeft = KWSYSPE_PIPE_COUNT;
   
   /* The process has now started.  */
-  cp->State = kwsysProcess_Executing;
+  cp->State = kwsysProcess_State_Executing;
 }
 
 /*--------------------------------------------------------------------------*/
@@ -503,7 +522,7 @@ int kwsysProcess_WaitForData(kwsysProcess* cp, int pipes, char** data, int* leng
     if(user)
       {
       /* The user timeout has expired.  It has no time left.  */
-      return kwsysProcess_Timeout;
+      return kwsysProcess_Pipe_Timeout;
       }
     else
       {
@@ -530,7 +549,7 @@ int kwsysProcess_WaitForExit(kwsysProcess* cp, double* userTimeout)
   int pipe = 0;
   
   /* Make sure we are executing a process.  */
-  if(cp->State != kwsysProcess_Executing)
+  if(cp->State != kwsysProcess_State_Executing)
     {
     return 1;
     }
@@ -538,7 +557,7 @@ int kwsysProcess_WaitForExit(kwsysProcess* cp, double* userTimeout)
   /* Wait for all the pipes to close.  Ignore all data.  */
   while((pipe = kwsysProcess_WaitForData(cp, 0, 0, 0, userTimeout)) > 0)
     {
-    if(pipe == kwsysProcess_Timeout)
+    if(pipe == kwsysProcess_Pipe_Timeout)
       {
       return 0;
       }
@@ -561,7 +580,7 @@ int kwsysProcess_WaitForExit(kwsysProcess* cp, double* userTimeout)
     /* The error message is already in its buffer.  Tell
        kwsysProcessCleanup to not create it.  */
     kwsysProcessCleanup(cp, 0);
-    cp->State = kwsysProcess_Error;
+    cp->State = kwsysProcess_State_Error;
     return 1;
     }
   
@@ -569,30 +588,52 @@ int kwsysProcess_WaitForExit(kwsysProcess* cp, double* userTimeout)
   if(cp->Killed)
     {
     /* We killed the child.  */
-    cp->State = kwsysProcess_Killed;
+    cp->State = kwsysProcess_State_Killed;
     }
   else if(cp->TimeoutExpired)
     {
     /* The timeout expired.  */
-    cp->State = kwsysProcess_Expired;
+    cp->State = kwsysProcess_State_Expired;
     }
   else if(WIFEXITED(status))
     {
-    /* The child exited.  */
-    cp->State = kwsysProcess_Exited;
-    cp->ExitCode = (int)WEXITSTATUS(status);
+    /* The child exited normally.  */
+    cp->State = kwsysProcess_State_Exited;
+    cp->ExitException = kwsysProcess_Exception_None;
+    cp->ExitCode = status;
+    cp->ExitValue = (int)WEXITSTATUS(status);
     }
   else if(WIFSIGNALED(status))
     {
     /* The child received an unhandled signal.  */
-    cp->State = kwsysProcess_Signalled;
-    cp->ExitCode = (int)WTERMSIG(status);
+    cp->State = kwsysProcess_State_Exception;
+    switch ((int)WTERMSIG(status))
+      {
+#ifdef SIGSEGV
+      case SIGSEGV: cp->ExitException = kwsysProcess_Exception_Fault; break;
+#endif
+#ifdef SIGFPE
+      case SIGFPE:  cp->ExitException = kwsysProcess_Exception_Numerical; break;
+#endif
+#ifdef SIGILL
+      case SIGILL:  cp->ExitException = kwsysProcess_Exception_Illegal; break;
+#endif
+#ifdef SIGINT
+      case SIGINT:  cp->ExitException = kwsysProcess_Exception_Interrupt; break;
+#endif
+#ifdef SIGABRT
+      case SIGABRT: cp->ExitException = kwsysProcess_Exception_Abort; break;
+#endif
+      default: cp->ExitException = kwsysProcess_Exception_Other; break;
+      }
+    cp->ExitCode = status;
+    cp->ExitValue = (int)WTERMSIG(status);
     }
   else
     {
     /* Error getting the child return code.  */
     strcpy(cp->ErrorMessage, "Error getting child return code.");
-    cp->State = kwsysProcess_Error;
+    cp->State = kwsysProcess_State_Error;
     }
   
   /* Normal cleanup.  */
@@ -604,7 +645,7 @@ int kwsysProcess_WaitForExit(kwsysProcess* cp, double* userTimeout)
 void kwsysProcess_Kill(kwsysProcess* cp)
 {  
   /* Make sure we are executing a process.  */
-  if(cp->State != kwsysProcess_Executing)
+  if(cp->State != kwsysProcess_State_Executing)
     {
     return;
     }
@@ -633,9 +674,11 @@ static void kwsysProcessInitialize(kwsysProcess* cp)
   cp->TimeoutExpired = 0;
   cp->PipesLeft = 0;
   FD_ZERO(&cp->PipeSet);
-  cp->State = kwsysProcess_Starting;
+  cp->State = kwsysProcess_State_Starting;
   cp->Killed = 0;
-  cp->ExitCode = 0;
+  cp->ExitException = kwsysProcess_Exception_None;
+  cp->ExitCode = 1;
+  cp->ExitValue = 1;
   cp->ErrorMessage[0] = 0;
   cp->ErrorMessageLength = 0;
 }
@@ -651,7 +694,7 @@ static void kwsysProcessCleanup(kwsysProcess* cp, int error)
   if(error)
     {
     snprintf(cp->ErrorMessage, KWSYSPE_PIPE_BUFFER_SIZE, "%s", strerror(errno));
-    cp->State = kwsysProcess_Error;
+    cp->State = kwsysProcess_State_Error;
     }
   
   /* Restore the SIGCHLD handler.  */

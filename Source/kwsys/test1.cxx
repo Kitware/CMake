@@ -11,7 +11,8 @@ int main()
   kwsysProcess_Execute(kp);
   char* data = 0;
   int length = 0;
-  while(kwsysProcess_WaitForData(kp, kwsysProcess_STDOUT | kwsysProcess_STDERR,
+  while(kwsysProcess_WaitForData(kp, (kwsysProcess_Pipe_STDOUT |
+                                      kwsysProcess_Pipe_STDERR),
                                  &data, &length, 0))
     {
     kwsys_std::cout.write(data, length);
