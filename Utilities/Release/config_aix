@@ -1,0 +1,14 @@
+PLATFORM="aix15"
+CC="xlc"
+CXX="xlC"
+
+# Write entries into the cache file before building cmake.
+write_cache()
+{
+cat > CMakeCache.txt <<EOF
+BUILD_TESTING:BOOL=OFF
+CMAKE_CXX_SHLIB_LINK_FLAGS:STRING=-bstatic
+CMAKE_CXX_SHLIB_BUILD_FLAGS:STRING=
+CMAKE_CXX_SHLIB_RUNTIME_FLAG:STRING=
+EOF
+}

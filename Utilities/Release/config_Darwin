@@ -1,0 +1,12 @@
+PLATFORM="darwin"
+CC="cc"
+CXX="c++"
+
+# Write entries into the cache file before building cmake.
+write_cache()
+{
+cat > CMakeCache.txt <<EOF
+BUILD_TESTING:BOOL=OFF
+CURSES_LIBRARY:FILEPATH=/usr/local/lib/libncurses.a
+EOF
+}
