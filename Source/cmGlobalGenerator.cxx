@@ -70,6 +70,12 @@ void cmGlobalGenerator::Configure()
   
   // now do it
   this->RecursiveConfigure(lg);
+
+  // after it is all done do a ConfigureFinalPass
+  for (i = 0; i < m_LocalGenerators.size(); ++i)
+    {
+    m_LocalGenerators[i]->ConfigureFinalPass();
+    }
 }
 
 // loop through the directories creating cmLocalGenerators and Configure()
@@ -129,6 +135,7 @@ void cmGlobalGenerator::LocalGenerate()
   
   // now do trhe configure
   lg->Configure();
+  lg->ConfigureFinalPass();
   lg->Generate(false);
   delete lg;
 }

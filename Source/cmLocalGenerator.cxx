@@ -48,3 +48,8 @@ void cmLocalGenerator::SetGlobalGenerator(cmGlobalGenerator *gg)
   m_Makefile->SetHomeOutputDirectory(
     gg->GetCMakeInstance()->GetHomeOutputDirectory());
 }
+
+void cmLocalGenerator::ConfigureFinalPass()
+{ 
+  m_Makefile->ConfigureFinalPass(); 
+}

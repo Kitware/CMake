@@ -50,6 +50,11 @@ public:
    */
   virtual void Configure();
 
+  /**
+   * Perform any final calculations prior to generation
+   */
+  virtual void ConfigureFinalPass();
+
   ///! Get the makefile for this generator
   cmMakefile *GetMakefile() {
     return this->m_Makefile; };
