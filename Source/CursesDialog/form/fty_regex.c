@@ -147,6 +147,7 @@ static void *Make_RegularExpression_Type(va_list * ap)
     }
   return (void *)pArg;
 #else
+  ap=0; /* Silence unused parameter warning.  */
   return 0;
 #endif
 }
@@ -173,6 +174,7 @@ static void *Copy_RegularExpression_Type(const void * argp)
     }
   return (void *)result;
 #else
+  argp=0; /* Silence unused parameter warning.  */
   return 0;
 #endif
 }
@@ -209,6 +211,8 @@ static void Free_RegularExpression_Type(void * argp)
 	  free(ap);
 	}
     }
+#else
+  argp=0; /* Silence unused parameter warning.  */
 #endif
 }
 
@@ -234,6 +238,9 @@ static bool Check_RegularExpression_Field(FIELD * field, const void  * argp)
   RegExp_Arg *ap = (RegExp_Arg *)argp;
   if (ap && ap->compiled_expression)
     match = (step(field_buffer(field,0),ap->compiled_expression) ? TRUE:FALSE);
+#else
+  argp=0;  /* Silence unused parameter warning.  */
+  field=0; /* Silence unused parameter warning.  */
 #endif
   return match;
 }

@@ -115,6 +115,7 @@ static bool Check_AlphaNumeric_Field(FIELD * field, const void * argp)
 +--------------------------------------------------------------------------*/
 static bool Check_AlphaNumeric_Character(int c, const void * argp)
 {
+  argp=0; /* Silence unused parameter warning. */
   return (isalnum(c) ? TRUE : FALSE);
 }
 

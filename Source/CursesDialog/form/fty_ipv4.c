@@ -32,13 +32,15 @@ static bool Check_IPV4_Field(FIELD * field, const void * argp)
   int num = 0, len;
   unsigned int d1, d2, d3, d4;
 
-  if(isdigit(*bp))              /* Must start with digit */
+  argp=0; /* Silence unused parameter warning.  */
+
+  if(isdigit((int)(*bp)))              /* Must start with digit */
     {
       num = sscanf(bp, "%u.%u.%u.%u%n", &d1, &d2, &d3, &d4, &len);
       if (num == 4)
         {
           bp += len;            /* Make bp point to what sscanf() left */
-          while (*bp && isspace(*bp))
+          while (*bp && isspace((int)(*bp)))
             bp++;               /* Allow trailing whitespace */
         }
     }
@@ -59,6 +61,7 @@ static bool Check_IPV4_Field(FIELD * field, const void * argp)
 +--------------------------------------------------------------------------*/
 static bool Check_IPV4_Character(int c, const void * argp)
 {
+  argp=0; /* Silence unused parameter warning.  */
   return ((isdigit(c) || (c=='.')) ? TRUE : FALSE);
 }
 

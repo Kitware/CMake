@@ -3797,7 +3797,7 @@ int set_field_buffer(FIELD * field, int buffer, const char * value)
 	      unsigned int i;
 	  
 	      for(i=len; i<vlen; i++)
-		if (!isprint(value[i]))
+		if (!isprint((int)(value[i])))
 		  RETURN(E_BAD_ARGUMENT);
 	    }
 	  len = vlen;

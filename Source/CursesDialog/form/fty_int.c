@@ -138,6 +138,7 @@ static bool Check_Integer_Field(FIELD * field, const void * argp)
 +--------------------------------------------------------------------------*/
 static bool Check_Integer_Character(int c, const void * argp)
 {
+  argp=0; /* Silence unused parameter warning.  */
   return ((isdigit(c) || (c=='-')) ? TRUE : FALSE);
 }
 
