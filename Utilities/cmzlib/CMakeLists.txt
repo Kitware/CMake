@@ -1,7 +1,11 @@
 PROJECT(CMZLIB)
 INCLUDE_REGULAR_EXPRESSION("^(deflate|inf|trees|zconf|zlib|zutil).*$")
 
-INCLUDE_DIRECTORIES(${CMZLIB_SOURCE_DIR})
+INCLUDE_DIRECTORIES(
+  "${CMZLIB_SOURCE_DIR}"
+  "${CMZLIB_SOURCE_DIR}/.."
+  "${CMZLIB_BINARY_DIR}/.."
+  )
 
 # Tell the header files included from the .c files that they are being
 # built.  Used to disable warnings since we do not want to change the

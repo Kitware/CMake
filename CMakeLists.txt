@@ -62,6 +62,17 @@ SET(KWSYS_HEADER_ROOT ${CMake_BINARY_DIR}/Source)
 SUBDIRS(Source/kwsys)
 
 #-----------------------------------------------------------------------------
+# Build zlib library for Curl, CMake, and CTest.
+SUBDIRS(Utilities/cmzlib)
+SET(CMAKE_ZLIB_INCLUDES
+  "${CMAKE_CURRENT_BINARY_DIR}/Utilities"
+  )
+SET(CMAKE_ZLIB_LIBRARIES "cmzlib")
+SET(CURL_SPECIAL_LIBZ ${CMAKE_ZLIB_LIBRARIES})
+SET(CURL_SPECIAL_LIBZ_INCLUDES ${CMAKE_ZLIB_INCLUDES})
+SET(CURL_SPECIAL_ZLIB_H "cmzlib/zlib.h")
+
+#-----------------------------------------------------------------------------
 # Build Curl library for CTest.
 SUBDIRS(Source/CTest/Curl)
 SET(CMAKE_CURL_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/Source/CTest/Curl")
@@ -69,9 +80,11 @@ SET(CMAKE_CURL_LIBRARIES "Curl")
 
 #-----------------------------------------------------------------------------
 # Build expat library for CMake and CTest.
-INCLUDE_DIRECTORIES(${CMake_BINARY_DIR}/Utilities)
-SUBDIRS(Utilities/cmexpat Utilities/cmzlib)
-SET(CMAKE_EXPAT_INCLUDES "${CMAKE_CURRENT_BINARY_DIR}/Utilities/cmexpat")
+SUBDIRS(Utilities/cmexpat)
+SET(CMAKE_EXPAT_INCLUDES
+  "${CMAKE_CURRENT_BINARY_DIR}/Utilities"
+  "${CMAKE_CURRENT_BINARY_DIR}/Utilities/cmexpat"
+  )
 SET(CMAKE_EXPAT_LIBRARIES "cmexpat")
 
 SUBDIRS(Utilities/cmxmlrpc)

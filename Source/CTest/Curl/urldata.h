@@ -78,7 +78,6 @@
 #include "timeval.h"
 
 #ifdef HAVE_ZLIB_H
-#error goo
 #include <zlib.h>               /* for content-encoding */
 #endif
 
