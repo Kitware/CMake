@@ -7,6 +7,7 @@
 # Build the documentation ?
 #
 OPTION(BUILD_DOCUMENTATION "Build the documentation (Doxygen)." OFF)
+MARK_AS_ADVANCED(BUILD_DOCUMENTATION)
 
 IF (BUILD_DOCUMENTATION)
 
@@ -24,6 +25,11 @@ IF (BUILD_DOCUMENTATION)
 
   OPTION(DOCUMENTATION_HTML_TARZ 
 	 "Build a compressed tar archive of the HTML doc." OFF)
+
+  MARK_AS_ADVANCED(
+    DOCUMENTATION_HTML_HELP
+    DOCUMENTATION_HTML_TARZ
+  )
 
   # 
   # The documentation process is controled by a batch file.

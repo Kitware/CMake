@@ -12,7 +12,12 @@ FIND_PROGRAM(DOT
 )
 # HKEY_CURRENT_USER\Software\AT&T\Graphviz
 
-# Since most of the time dot is called by Doxygen, the path to dot is useful too
+# Since most of the time dot is called by Doxygen, the path to dot is 
+# useful too
 GET_FILENAME_COMPONENT(DOT_PATH ${DOT} PATH CACHE)
 
-
+MARK_AS_ADVANCED(
+  DOT
+  DOT_PATH
+  DOXYGEN
+)

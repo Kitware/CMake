@@ -8,37 +8,28 @@
 
 INCLUDE(${CMAKE_ROOT}/Modules/FindCygwin.cmake)
 
-IF (CYGWIN_INSTALL_PATH)
+FIND_PROGRAM(SELF_PACKER_FOR_EXECUTABLE
+  upx
+  ${CYGWIN_INSTALL_PATH}/bin
+  /bin
+  /usr/bin 
+  /usr/local/bin
+  /sbin
+)
 
-  FIND_PROGRAM(SELF_PACKER_FOR_EXECUTABLE
-    upx
-    ${CYGWIN_INSTALL_PATH}/bin
-  )
+FIND_PROGRAM(SELF_PACKER_FOR_SHARED_LIB
+  upx
+  ${CYGWIN_INSTALL_PATH}/bin
+  /bin
+  /usr/bin 
+  /usr/local/bin
+  /sbin
+)
 
-  FIND_PROGRAM(SELF_PACKER_FOR_SHARED_LIB
-    upx
-    ${CYGWIN_INSTALL_PATH}/bin
-  )
-
-ELSE (CYGWIN_INSTALL_PATH)
-
-  FIND_PROGRAM(SELF_PACKER_FOR_EXECUTABLE
-    upx
-    /bin
-    /usr/bin 
-    /usr/local/bin
-    /sbin
-  )
-
-  FIND_PROGRAM(SELF_PACKER_FOR_SHARED_LIB
-    upx
-    /bin
-    /usr/bin 
-    /usr/local/bin
-    /sbin
-  )
-
-ENDIF (CYGWIN_INSTALL_PATH)
+MARK_AS_ADVANCED(
+  SELF_PACKER_FOR_EXECUTABLE
+  SELF_PACKER_FOR_SHARED_LIB
+)
 
 #
 # Set flags
@@ -58,3 +49,8 @@ ELSE (SELF_PACKER_FOR_SHARED_LIB MATCHES "upx")
   SET (SELF_PACKER_FOR_SHARED_LIB_FLAGS "" CACHE STRING 
        "Flags for the shared lib self-packer.")
 ENDIF (SELF_PACKER_FOR_SHARED_LIB MATCHES "upx")
+
+MARK_AS_ADVANCED(
+  SELF_PACKER_FOR_EXECUTABLE_FLAGS
+  SELF_PACKER_FOR_SHARED_LIB_FLAGS
+)
