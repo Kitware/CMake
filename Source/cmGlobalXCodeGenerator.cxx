@@ -364,19 +364,24 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
   const char* lang = 
     this->GetLanguageFromExtension(sf->GetSourceExtension().c_str());
   std::string sourcecode = "sourcecode";
-  if(sf->GetSourceExtension() == "o")
+  std::string ext = sf->GetSourceExtension();
+  ext = cmSystemTools::LowerCase(ext);
+  if(ext == "o")
     {
     sourcecode = "compiled.mach-o.objfile";
     }
-  else if(sf->GetSourceExtension() == "mm")
+  else if(ext == "mm")
     {
     sourcecode += ".cpp.objcpp";
     }
+  else if(ext == "m")
+    {
+    sourcecode += ".cpp.objc";
+    }
   else if(!lang)
     {
-    std::string ext = ".";
-    ext = sf->GetSourceExtension();
     sourcecode += ext;
+    sourcecode += ".";
     sourcecode += ext;
     }
   else if(strcmp(lang, "C") == 0)
