@@ -36,7 +36,7 @@ cmGlobalGenerator::~cmGlobalGenerator()
     {
     env += m_CCEnvironment;
     }
-  unsigned int size = env.size();
+  std::string::size_type size = env.size();
   if(size > 4999)
     {
     size = 4999;
