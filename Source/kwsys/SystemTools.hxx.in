@@ -20,6 +20,8 @@
 
 #include <@KWSYS_NAMESPACE@/Configure.h>
 
+#include <sys/types.h>
+
 /* Define these macros temporarily to keep the code readable.  */
 #if !defined (KWSYS_NAMESPACE) && !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
 # define kwsys_stl @KWSYS_NAMESPACE@_stl
@@ -284,6 +286,12 @@ public:
    */
   static int GetTerminalWidth();
   
+  /**
+   * Get and set permissions of the file.
+   */
+  static bool GetPermissions(const char* file, mode_t& mode);
+  static bool SetPermissions(const char* file, mode_t mode);
+
 protected:
   // these two functions can be called from ConvertToOutputPath
   /**
@@ -299,6 +307,7 @@ protected:
    * if there are spaces in the string it is double quoted.
    */
   static kwsys_stl::string ConvertToWindowsOutputPath(const char*);
+
 };
 
 } // namespace @KWSYS_NAMESPACE@

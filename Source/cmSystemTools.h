@@ -20,7 +20,6 @@
 #include "cmStandardIncludes.h"
 
 #include <cmsys/SystemTools.hxx>
-#include <sys/types.h>
 
 /** \class cmSystemTools
  * \brief A collection of useful functions for CMake.
@@ -277,10 +276,6 @@ public:
   /** put a string into the environment
       of the form var=value */
   static bool PutEnv(const char* value);
-
-  ///! Get permissions of the file
-  static bool GetPermissions(const char* file, mode_t& mode);
-  static bool SetPermissions(const char* file, mode_t mode);
 
 private:
   static bool s_ForceUnixPaths;

@@ -858,19 +858,13 @@ bool cmSystemTools::DoesFileExistWithExtensions(
 
 bool cmSystemTools::cmCopyFile(const char* source, const char* destination)
 {
-  mode_t perm = 0;
-  return cmSystemTools::GetPermissions(source, perm) && 
-    Superclass::CopyFileAlways(source, destination) &&
-    cmSystemTools::SetPermissions(destination, perm);
+  return Superclass::CopyFileAlways(source, destination);
 }
 
 bool cmSystemTools::CopyFileIfDifferent(const char* source, 
   const char* destination)
 {
-  mode_t perm = 0;
-  return cmSystemTools::GetPermissions(source, perm) && 
-    Superclass::CopyFileIfDifferent(source, destination) &&
-    cmSystemTools::SetPermissions(destination, perm);
+  return Superclass::CopyFileIfDifferent(source, destination);
 }
 
 void cmSystemTools::Glob(const char *directory, const char *regexp,
@@ -1283,36 +1277,3 @@ bool cmSystemTools::PutEnv(const char* value)
   return ret == 0;
 }
 
-bool cmSystemTools::GetPermissions(const char* file, mode_t& mode)
-{
-  if ( !file )
-    {
-    return false;
-    }
-
-  struct stat st;
-  if ( stat(file, &st) < 0 )
-    {
-    return false;
-    }
-  mode = st.st_mode;
-  return true;
-}
-
-bool cmSystemTools::SetPermissions(const char* file, mode_t mode)
-{
-  if ( !file )
-    {
-    return false;
-    }
-  if ( !cmSystemTools::FileExists(file) )
-    {
-    return false;
-    }
-  if ( chmod(file, mode) < 0 )
-    {
-    return false;
-    }
-
-  return true;
-}

@@ -930,6 +930,10 @@ bool SystemTools::CopyFileAlways(const char* source, const char* destination)
     {
     return true;
     }
+
+  mode_t perm = 0;
+  bool perms = SystemTools::GetPermissions(source, perm);
+
   const int bufferSize = 4096;
   char buffer[bufferSize];
 
@@ -1021,6 +1025,13 @@ bool SystemTools::CopyFileAlways(const char* source, const char* destination)
   else if(statSource.st_size != statDestination.st_size)
     {
     return false;
+    }
+  if ( perms )
+    {
+    if ( !SystemTools::SetPermissions(destination, perm) )
+      {
+      return false;
+      }
     }
   return true;
 }
@@ -1885,6 +1896,40 @@ int SystemTools::GetTerminalWidth()
     }
 #endif
   return width;
+}
+
+bool SystemTools::GetPermissions(const char* file, mode_t& mode)
+{
+  if ( !file )
+    {
+    return false;
+    }
+
+  struct stat st;
+  if ( stat(file, &st) < 0 )
+    {
+    return false;
+    }
+  mode = st.st_mode;
+  return true;
+}
+
+bool SystemTools::SetPermissions(const char* file, mode_t mode)
+{
+  if ( !file )
+    {
+    return false;
+    }
+  if ( !SystemTools::FileExists(file) )
+    {
+    return false;
+    }
+  if ( chmod(file, mode) < 0 )
+    {
+    return false;
+    }
+
+  return true;
 }
 } // namespace KWSYS_NAMESPACE
 
