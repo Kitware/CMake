@@ -1370,27 +1370,31 @@ void cmUnixMakefileGenerator::ComputeSystemInfo()
 {
   if (m_CacheOnly)
     {
-      if(m_Makefile->GetDefinition("CMAKE_CXX_COMPILER"))
-	{
-          std::string env = "CXX=${CMAKE_CXX_COMPILER}";
-          m_Makefile->ExpandVariablesInString(env);
-	  putenv(const_cast<char*>(env.c_str()));
-	  env = "CC=${CMAKE_C_COMPILER}";
-	  m_Makefile->ExpandVariablesInString(env);
-	  putenv(const_cast<char*>(env.c_str()));
-	}
-      
-      // currently we run configure shell script here to determine the info
-      std::string output;
-      std::string cmd = "cd ";
-      cmd += m_Makefile->GetHomeOutputDirectory();
-      cmd += "; ";
-      const char* root
-	= m_Makefile->GetDefinition("CMAKE_ROOT");
-      cmd += root;
-      cmd += "/Templates/configure";
-      cmSystemTools::RunCommand(cmd.c_str(), output);
-      m_Makefile->AddDefinition("RUN_CONFIGURE", true);
+    if(m_Makefile->GetDefinition("CMAKE_CXX_COMPILER"))
+      {
+      std::string env = "CXX=${CMAKE_CXX_COMPILER}";
+      m_Makefile->ExpandVariablesInString(env);
+      std::cout << "Setting: " << env.c_str() << "\n";
+      putenv(const_cast<char*>(env.c_str()));
+      }
+    if(m_Makefile->GetDefinition("CMAKE_C_COMPILER"))
+      {
+      std::string env = "CC=${CMAKE_C_COMPILER}";
+      m_Makefile->ExpandVariablesInString(env);
+      std::cout << "Setting: " << env.c_str() << "\n";
+      putenv(const_cast<char*>(env.c_str()));
+      }
+    // currently we run configure shell script here to determine the info
+    std::string output;
+    std::string cmd = "cd ";
+    cmd += m_Makefile->GetHomeOutputDirectory();
+    cmd += "; ";
+    const char* root
+      = m_Makefile->GetDefinition("CMAKE_ROOT");
+    cmd += root;
+    cmd += "/Templates/configure";
+    cmSystemTools::RunCommand(cmd.c_str(), output);
+    m_Makefile->AddDefinition("RUN_CONFIGURE", true);
     }
 
   // now load the settings

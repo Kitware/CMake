@@ -452,7 +452,7 @@ public:
    * If the variable is not found in this makefile instance, the
    * cache is then queried.
    */
-  const char* GetDefinition(const char*);
+  const char* GetDefinition(const char*) const;
   
   /** Test a boolean cache entry to see if it is true or false, 
    *  returns false if no entry defined.

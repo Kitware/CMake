@@ -787,9 +787,9 @@ bool cmMakefile::IsOn(const char* name)
   return cmSystemTools::IsOn(value);
 }
 
-const char* cmMakefile::GetDefinition(const char* name)
+const char* cmMakefile::GetDefinition(const char* name) const
 {
-  DefinitionMap::iterator pos = m_Definitions.find(name);
+  DefinitionMap::const_iterator pos = m_Definitions.find(name);
   if(pos != m_Definitions.end())
     {
     return (*pos).second.c_str();
@@ -929,16 +929,16 @@ void cmMakefile::ExpandVariablesInString(std::string& source,
           }
         else
           {
-          DefinitionMap::const_iterator pos = m_Definitions.find(var.c_str());
-          if(pos != m_Definitions.end())
+          const char* lookup = this->GetDefinition(var.c_str());
+          if(lookup)
             {
             if (escapeQuotes)
               {
-              result += cmSystemTools::EscapeQuotes((*pos).second.c_str());
+              result += cmSystemTools::EscapeQuotes(lookup);
               }
             else
               {
-              result += (*pos).second;
+              result += lookup;
               }
             found = true;
             }
