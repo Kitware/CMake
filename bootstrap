@@ -391,28 +391,78 @@ echo "Make processor on this system is: ${cmake_make_processor}"
 # Test C++ compiler features
 
 # If we are on IRIX, check for -LANG:std
+cmake_test_flags="-LANG:std"
 if [ "x${cmake_system}" = "xIRIX64" ]; then
   TMPFILE=`cmake_tmp_file`
   cat>${TMPFILE}.cxx<<EOF
   #include <iostream>
-  int main() { std::cout << "No need for -LANG:std" << std::endl; return 0;}
+  int main() { std::cout << "No need for ${cmake_test_flags}" << std::endl; return 0;}
 EOF
   cmake_need_lang_std=0
   if cmake_try_run "${cmake_cxx_compiler}" "${cmake_cxx_flags}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
     :
   else
-    if cmake_try_run "${cmake_cxx_compiler}" "${cmake_cxx_flags} -LANG:std" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
+    if cmake_try_run "${cmake_cxx_compiler}" "${cmake_cxx_flags} ${cmake_test_flags}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
       cmake_need_lang_std=1
     fi
   fi
   if [ "x${cmake_need_lang_std}" = "x1" ]; then
-    cmake_cxx_flags="${cmake_cxx_flags} -LANG:std"
-    echo "${cmake_cxx_compiler} needs -LANG:std"
+    cmake_cxx_flags="${cmake_cxx_flags} ${cmake_test_flags}"
+    echo "${cmake_cxx_compiler} needs ${cmake_test_flags}"
   else
-    echo "${cmake_cxx_compiler} does not need -LANG:std"
+    echo "${cmake_cxx_compiler} does not need ${cmake_test_flags}"
   fi
   rm -f "${TMPFILE}.cxx"
 fi
+cmake_test_flags=
+
+# If we are on OSF, check for -timplicit_local -no_implicit_include
+cmake_test_flags="-timplicit_local -no_implicit_include"
+if [ "x${cmake_system}" = "xOSF1" ]; then
+  TMPFILE=`cmake_tmp_file`
+  cat>${TMPFILE}.cxx<<EOF
+  #include <iostream>
+  int main() { std::cout << "We need ${cmake_test_flags}" << std::endl; return 0;}
+EOF
+  cmake_need_flags=1
+  if cmake_try_run "${cmake_cxx_compiler}" "${cmake_cxx_flags} ${cmake_test_flags}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
+    :
+  else
+    cmake_need_flags=0
+  fi
+  if [ "x${cmake_need_flags}" = "x1" ]; then
+    cmake_cxx_flags="${cmake_cxx_flags} ${cmake_test_flags}"
+    echo "${cmake_cxx_compiler} needs ${cmake_test_flags}"
+  else
+    echo "${cmake_cxx_compiler} does not need ${cmake_test_flags}"
+  fi
+  rm -f "${TMPFILE}.cxx"
+fi
+cmake_test_flags=
+
+# If we are on OSF, check for -std strict_ansi -nopure_cname
+cmake_test_flags="-std strict_ansi -nopure_cname"
+if [ "x${cmake_system}" = "xOSF1" ]; then
+  TMPFILE=`cmake_tmp_file`
+  cat>${TMPFILE}.cxx<<EOF
+  #include <iostream>
+  int main() { std::cout << "We need ${cmake_test_flags}" << std::endl; return 0;}
+EOF
+  cmake_need_flags=1
+  if cmake_try_run "${cmake_cxx_compiler}" "${cmake_cxx_flags} ${cmake_test_flags}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
+    :
+  else
+    cmake_need_flags=0
+  fi
+  if [ "x${cmake_need_flags}" = "x1" ]; then
+    cmake_cxx_flags="${cmake_cxx_flags} ${cmake_test_flags}"
+    echo "${cmake_cxx_compiler} needs ${cmake_test_flags}"
+  else
+    echo "${cmake_cxx_compiler} does not need ${cmake_test_flags}"
+  fi
+  rm -f "${TMPFILE}.cxx"
+fi
+cmake_test_flags=
 
 # Just to be safe, let us store compiler and flags to the header file
 
