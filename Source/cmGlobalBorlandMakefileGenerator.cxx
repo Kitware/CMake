@@ -35,13 +35,6 @@ void cmGlobalBorlandMakefileGenerator::EnableLanguage(const char* l,
     return;
     }
   std::string outdir = m_CMakeInstance->GetStartOutputDirectory();
-  if(outdir.find('-') != std::string::npos)
-    {
-    std::string message = "The Borland command line tools do not support path names that have - in them.  Please re-name your output directory and use _ instead of -.";
-    message += "\nYour path currently is: ";
-    message += outdir;
-    cmSystemTools::Error(message.c_str());
-    }
   mf->AddDefinition("BORLAND", "1");
   mf->AddDefinition("CMAKE_GENERATOR_CC", "bcc32");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "bcc32"); 

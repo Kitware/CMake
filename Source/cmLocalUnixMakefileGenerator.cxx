@@ -928,7 +928,15 @@ cmLocalUnixMakefileGenerator::ExpandRuleVariables(std::string& s,
     cmSystemTools::ReplaceString(s, "<OBJECTS_QUOTED>", objectsquoted);
     }
   if(target)
-    {
+    { 
+    std::string targetQuoted = target;
+    if(targetQuoted.size() && targetQuoted[0] != '\"')
+      {
+      targetQuoted = '\"';
+      targetQuoted += target;
+      targetQuoted += '\"';
+      }
+    cmSystemTools::ReplaceString(s, "<TARGET_QUOTED>", targetQuoted.c_str());
     cmSystemTools::ReplaceString(s, "<TARGET>", target);
     }
   if(targetBase)
