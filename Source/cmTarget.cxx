@@ -116,7 +116,7 @@ void cmTarget::TraceVSDependencies(std::string projFile,
          ic != this->GetPostBuildCommands().end(); ++ic)
       {
       cmCustomCommand &c = *ic;
-      for (std::vector<std::string>::iterator i = c.GetDepends().begin();
+      for (std::vector<std::string>::const_iterator i = c.GetDepends().begin();
            i != c.GetDepends().end(); ++i)
         {
         srcFilesToProcess.push(*i);
