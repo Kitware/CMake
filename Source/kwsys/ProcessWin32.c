@@ -609,7 +609,6 @@ void kwsysProcess_Execute(kwsysProcess* cp)
   for(i=0; i < cp->PipeCount; ++i)
     {
     HANDLE writeEnd;
-    DWORD dummy=0;
     
     /* The pipe is not closed.  */
     cp->Pipe[i].Closed = 0;
@@ -884,7 +883,6 @@ int kwsysProcess_WaitForExit(kwsysProcess* cp, double* userTimeout)
 {
   int i;
   int pipe = 0;
-  int pipesLeft = cp->PipeCount;
   
   /* Buffer for child's return value.  */
   int childReturnValue = 0;
