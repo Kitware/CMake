@@ -221,8 +221,6 @@ IF(BUILD_TESTING)
       Exec
       ${CMake_BINARY_DIR}/Tests/LinkLine
       LinkLine)
-
-  ENDIF (DART_ROOT)
 ENDIF(BUILD_TESTING)
 
 
