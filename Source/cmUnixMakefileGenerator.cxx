@@ -395,7 +395,6 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
   
   std::string librariesLinked;
   const cmTarget::LinkLibraries& libs = tgt.GetLinkLibraries();
-  cmRegularExpression reg("lib(.*)(\\.so$|\\.a|\\.sl$)");
   for(cmTarget::LinkLibraries::const_iterator lib = libs.begin();
       lib != libs.end(); ++lib)
     {
