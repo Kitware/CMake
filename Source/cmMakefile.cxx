@@ -38,22 +38,30 @@ cmMakefile::cmMakefile()
   // Setup the default include complaint regular expression (match nothing).
   m_ComplainFileRegularExpression = "^$";
   // Source and header file extensions that we can handle
-  m_SourceFileExtensions.push_back( "cxx" );
-  m_SourceFileExtensions.push_back( "cpp" );
-  m_SourceFileExtensions.push_back( "c" );
+  m_SourceFileExtensions.push_back( "C" );
   m_SourceFileExtensions.push_back( "M" );
+  m_SourceFileExtensions.push_back( "c" );
+  m_SourceFileExtensions.push_back( "c++" );
+  m_SourceFileExtensions.push_back( "cc" );
+  m_SourceFileExtensions.push_back( "cpp" );
+  m_SourceFileExtensions.push_back( "cxx" );
   m_SourceFileExtensions.push_back( "m" );
   m_SourceFileExtensions.push_back( "mm" );
 
   m_HeaderFileExtensions.push_back( "h" );
-  m_HeaderFileExtensions.push_back( "txx" );
+  m_HeaderFileExtensions.push_back( "h++" );
+  m_HeaderFileExtensions.push_back( "hm" );
+  m_HeaderFileExtensions.push_back( "hpp" );
+  m_HeaderFileExtensions.push_back( "hxx" );
   m_HeaderFileExtensions.push_back( "in" );
+  m_HeaderFileExtensions.push_back( "txx" );
   
   m_DefineFlags = " ";
   m_LocalGenerator = 0;
   this->AddSourceGroup("", "^.*$");
-  this->AddSourceGroup("Source Files", "\\.(cpp|C|c|cxx|rc|def|r|odl|idl|hpj|bat)$");
-  this->AddSourceGroup("Header Files", "\\.(h|hh|hpp|hxx|hm|inl)$");
+  this->AddSourceGroup("Source Files", 
+                       "\\.(C|M|c|c++|cc|cpp|cxx|m|mm|rc|def|r|odl|idl|hpj|bat)$");
+  this->AddSourceGroup("Header Files", "\\.(h|h++|hm|hpp|hxx|in|txx|inl)$");
   this->AddDefaultDefinitions();
 }
 

@@ -2286,16 +2286,26 @@ cmSystemTools::FileFormat cmSystemTools::GetFileFormat(const char* cext)
     }
   std::string ext = cmSystemTools::LowerCase(cext);
   if ( ext == "c" || ext == ".c" ) { return cmSystemTools::C_FILE_FORMAT; }
-  if ( ext == "cxx" || ext == ".cxx" ||
-       ext == "cpp" || ext == ".cpp" ||
-       ext == "c++" || ext == ".c++" ||
-       ext == "mm" || ext == ".mm" ||
-       ext == "cc" || ext == ".cc" ) { return cmSystemTools::CXX_FILE_FORMAT; }
+  if ( 
+    ext == "C" || ext == ".C" ||
+    ext == "M" || ext == ".M" ||
+    ext == "c++" || ext == ".c++" ||
+    ext == "cc" || ext == ".cc" ||
+    ext == "cpp" || ext == ".cpp" ||
+    ext == "cxx" || ext == ".cxx" ||
+    ext == "m" || ext == ".m" ||
+    ext == "mm" || ext == ".mm"
+    ) { return cmSystemTools::CXX_FILE_FORMAT; }
   if ( ext == "java" || ext == ".java" ) { return cmSystemTools::JAVA_FILE_FORMAT; }
-  if ( ext == "h" || ext == ".h" || 
-       ext == "hpp" || ext == ".hpp" || 
-       ext == "h++" || ext == ".h++" ||
-       ext == "hxx" || ext == ".hxx" ) { return cmSystemTools::HEADER_FILE_FORMAT; }
+  if ( 
+    ext == "h" || ext == ".h" || 
+    ext == "h++" || ext == ".h++" ||
+    ext == "hm" || ext == ".hm" || 
+    ext == "hpp" || ext == ".hpp" || 
+    ext == "hxx" || ext == ".hxx" ||
+    ext == "in" || ext == ".in" ||
+    ext == "txx" || ext == ".txx"
+    ) { return cmSystemTools::HEADER_FILE_FORMAT; }
   if ( ext == "rc" || ext == ".rc" ) { return cmSystemTools::RESOURCE_FILE_FORMAT; }
   if ( ext == "def" || ext == ".def" ) { return cmSystemTools::DEFINITION_FILE_FORMAT; }
   if ( ext == "lib" || ext == ".lib" ||
