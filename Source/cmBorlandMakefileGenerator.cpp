@@ -98,13 +98,22 @@ void cmBorlandMakefileGenerator::RecursiveGenerateCacheOnly()
     mf->GenerateMakefile();
     }
   // CLEAN up the makefiles created
-  for (unsigned int i=0; i<makefiles.size(); ++i) 
+  for (unsigned int i=0; i<makefiles.size(); ++i)
     {
     delete makefiles[i];
     }
 }
 //---------------------------------------------------------------------------
-void cmBorlandMakefileGenerator::OutputMakefile(const char* file) 
+// Add quotes regardless of spaces in the string
+std::string cmBorlandMakefileGenerator::EscapeSpaces(const char* str)
+{
+    std::string temp = "\"";;
+    temp += str;
+    temp += "\"";
+    return cmSystemTools::EscapeSpaces(temp.c_str());
+}
+
+void cmBorlandMakefileGenerator::OutputMakefile(const char* file)
 {
   //
   // Create sub directories for aux source directories
@@ -200,10 +209,10 @@ void cmBorlandMakefileGenerator::OutputMakefile(const char* file)
        i!=includes.end(); ++i)
     {
     std::string include = *i;
-    fout << "-I" << cmSystemTools::EscapeSpaces(i->c_str()) << "; \\\n  ";
+    fout << "-I" << cmBorlandMakefileGenerator::EscapeSpaces(i->c_str()) << "; \\\n  ";
     }
   fout << "-I" <<
-    cmSystemTools::EscapeSpaces(m_Makefile->GetStartDirectory()) << "\n\n";
+    cmBorlandMakefileGenerator::EscapeSpaces(m_Makefile->GetStartDirectory()) << "\n\n";
   //
   // for each target add to the list of targets
   //
@@ -282,7 +291,7 @@ void cmBorlandMakefileGenerator::OutputMakefile(const char* file)
   fout << "LINK_DIR =";
   for (std::vector<std::string>::const_iterator d=linkdirs.begin(); d!=linkdirs.end(); d++)
     {
-    std::string temp = cmSystemTools::EscapeSpaces(d->c_str());
+    std::string temp = cmBorlandMakefileGenerator::EscapeSpaces(d->c_str());
     fout << temp << ";";
     }
   fout << "\n\n";
@@ -332,7 +341,7 @@ void cmBorlandMakefileGenerator::OutputMakefile(const char* file)
             {
             libname = "$(OUTDIRLIB)\\" + libname;
             }
-          fout << " \\\n  " << cmSystemTools::EscapeSpaces(libname.c_str());
+          fout << " \\\n  " << cmBorlandMakefileGenerator::EscapeSpaces(libname.c_str());
           }
         }
       fout << "\n\n";
@@ -372,7 +381,7 @@ void cmBorlandMakefileGenerator::OutputMakefile(const char* file)
             {
             libname = "$(OUTDIRLIB)\\" + libname + ".bpi";
             }
-          fout << " \\\n  " << cmSystemTools::EscapeSpaces(libname.c_str());
+          fout << " \\\n  " << cmBorlandMakefileGenerator::EscapeSpaces(libname.c_str());
           }
         }
       fout << "\n\n";
@@ -650,7 +659,7 @@ void cmBorlandMakefileGenerator::OutputCustomRules(std::ostream& fout)
                 commandFiles.m_Depends.begin();
               d != commandFiles.m_Depends.end(); ++d)
             {
-            std::string dep = cmSystemTools::EscapeSpaces(d->c_str());
+            std::string dep = cmBorlandMakefileGenerator::EscapeSpaces(d->c_str());
             fout << " " << dep.c_str();
             }
           fout << "\n\t" << command.c_str() << "\n\n";
@@ -660,14 +669,14 @@ void cmBorlandMakefileGenerator::OutputCustomRules(std::ostream& fout)
               commandFiles.m_Outputs.begin();
             output != commandFiles.m_Outputs.end(); ++output)
           {
-          std::string src = cmSystemTools::EscapeSpaces(source.c_str());
+          std::string src = cmBorlandMakefileGenerator::EscapeSpaces(source.c_str());
           fout << output->c_str() << ": " << src.c_str();
           // Write out all the dependencies for this rule.
           for(std::set<std::string>::const_iterator d =
                 commandFiles.m_Depends.begin();
               d != commandFiles.m_Depends.end(); ++d)
             {
-            std::string dep = cmSystemTools::EscapeSpaces(d->c_str());
+            std::string dep = cmBorlandMakefileGenerator::EscapeSpaces(d->c_str());
             fout << " " << dep.c_str();
             }
           fout << "\n\t" << command.c_str() << "\n\n";

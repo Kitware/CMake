@@ -80,6 +80,8 @@ private:
                       const char* target,
                       const char* depends,
                       const char* command);
+
+  std::string EscapeSpaces(const char* str);
 private:
   bool m_CacheOnly;
   bool m_Recurse;

@@ -345,9 +345,17 @@ std::string cmSystemTools::EscapeSpaces(const char* str)
   std::string temp = str;
   if (temp.find(" ") != std::string::npos)
     {
-    result = "\"";
+    // don't add quotes if they're already there
+    if (temp.find("\"")==std::string::npos)
+      {
+      result = "\"";
+      }
     result += cmSystemTools::HandleNetworkPaths(str);
-    return result+"\"";
+    if (temp.find("\"")==std::string::npos)
+      {
+      result += "\"";
+      }
+    return result;
     }
   return cmSystemTools::HandleNetworkPaths(str);
   
