@@ -31,6 +31,7 @@ cmLocalUnixMakefileGenerator::cmLocalUnixMakefileGenerator()
   m_WindowsShell = false;
   m_IncludeDirective = "include";
   m_MakefileVariableSize = 0;
+  m_IgnoreLibPrefix = false;
 }
 
 cmLocalUnixMakefileGenerator::~cmLocalUnixMakefileGenerator()
@@ -601,11 +602,19 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
         }  
       cmsys::RegularExpression libname("^lib([^/]*)(\\.so|\\.lib|\\.dll|\\.sl|\\.a|\\.dylib).*");
       cmsys::RegularExpression libname_noprefix("([^/]*)(\\.so|\\.lib|\\.dll|\\.sl|\\.a|\\.dylib).*");
+      std::cout << "file is " << file << "\n";
       if(libname.find(file))
         {
         // Library had "lib" prefix.
         librariesLinked += libLinkFlag;
         file = libname.match(1);
+        // if ignore libprefix is on,
+        // then add the lib prefix back into the name
+        if(m_IgnoreLibPrefix)
+          {
+          std::cout << "m_IgnoreLibPrefix\n";
+          file = "lib" + file;
+          }
         librariesLinked += file;
         if(linkSuffix.size() && !hasSuffix.find(file))
           {

@@ -40,6 +40,7 @@ cmLocalGenerator *cmGlobalNMakeMakefileGenerator::CreateLocalGenerator()
   lg->SetWindowsShell(true);
   lg->SetMakeSilentFlag("/nologo");
   lg->SetGlobalGenerator(this);
+  lg->SetIgnoreLibPrefix(true);
   return lg;
 }
 

@@ -77,6 +77,10 @@ public:
   ///! Set max makefile variable size, default is 0 which means unlimited.
   void SetMakefileVariableSize(int s) { m_MakefileVariableSize = s; }
 
+  ///! If ignore lib prefix is true, then do not strip lib from the name of a library.
+  void SetIgnoreLibPrefix(bool s) { m_IgnoreLibPrefix = s; }
+
+  
 protected:
   void AddDependenciesToSourceFile(cmDependInformation const*info,
                                    cmSourceFile *i,
@@ -207,7 +211,7 @@ protected:
   int m_MakefileVariableSize;
   std::map<cmStdString, cmStdString> m_MakeVariableMap;
   std::map<cmStdString, cmStdString> m_ShortMakeVariableMap;
-  
+  bool m_IgnoreLibPrefix;
   std::string m_IncludeDirective;
   std::string m_MakeSilentFlag;
   std::string m_ExecutableOutputPath;
