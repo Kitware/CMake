@@ -1,9 +1,9 @@
 #
-# Check if the type exists and determine size of type.  if the type
-# exists, the size will be stored to the variable.
+# Check if the function exists.
 #
-# CHECK_TYPE_SIZE - macro which checks the size of type
-# VARIABLE - variable to store size if the type exists.
+# CHECK_FUNCTION_EXISTS - macro which checks if the function exists
+# FUNCTION - the name of the function
+# VARIABLE - variable to store the result
 #
 
 MACRO(CHECK_FUNCTION_EXISTS FUNCTION VARIABLE)
