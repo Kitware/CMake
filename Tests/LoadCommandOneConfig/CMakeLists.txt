@@ -3,7 +3,7 @@ PROJECT(LoadedCommand)
 # set a definition
 SET (TEST_COMMAND_TEST1 1)
 
-INCLUDE (${CMAKE_ROOT}/Modules/CheckSizeOf.cmake)
+INCLUDE (${CMAKE_ROOT}/Modules/CheckTypeSize.cmake)
 CHECK_TYPE_SIZE(char  SIZEOF_CHAR)
 
 INCLUDE (${CMAKE_ROOT}/Modules/CheckFunctionExists.cmake)
