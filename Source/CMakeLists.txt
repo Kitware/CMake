@@ -130,7 +130,7 @@ TARGET_LINK_LIBRARIES(cmaketest CMakeLib)
 
 IF(BUILD_TESTING)
     ADD_TEST(DumpDocumentation ${CMake_BINARY_DIR}/Source/DumpDocumentation
-      ${CMake_BINARY_DIR}/CMakeDoc.html)
+      --all-for-coverage)
 
     ADD_TEST(SystemInformation ${CMake_BINARY_DIR}/Source/cmaketest 
       ${CMake_SOURCE_DIR}/Tests/SystemInformation
