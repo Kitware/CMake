@@ -41,10 +41,10 @@ void cmGlobalCodeWarriorGenerator::EnableLanguage(const char*,
 }
 
 int cmGlobalCodeWarriorGenerator::TryCompile(const char *, 
-                                             const char *bindir, 
-                                             const char *projectName,
-                                             const char *targetName,
-                                             std::string *output)
+                                             const char */*bindir*/, 
+                                             const char */*projectName*/,
+                                             const char */*targetName*/,
+                                             std::string */*output*/)
 {
   return 1;
 }

@@ -216,7 +216,7 @@ void cmLocalCodeWarriorGenerator::WriteSettingList(std::ostream& fout,
       break;
     }
   
-  fout << "<SETTING><NAME>MWProject_PPC_filecreator</NAME><VALUE>????</VALUE></SETTING>\n";
+  fout << "<SETTING><NAME>MWProject_PPC_filecreator</NAME><VALUE>????" << "</VALUE></SETTING>\n";
   fout << "<SETTING><NAME>MWProject_PPC_filetype</NAME><VALUE>APPL</VALUE></SETTING>\n";
   fout << "<SETTING><NAME>MWProject_PPC_size</NAME><VALUE>384</VALUE></SETTING>\n";
   fout << "<SETTING><NAME>MWProject_PPC_minsize</NAME><VALUE>384</VALUE></SETTING>\n";
@@ -225,7 +225,7 @@ void cmLocalCodeWarriorGenerator::WriteSettingList(std::ostream& fout,
   fout << "<SETTING><NAME>MWProject_PPC_symfilename</NAME><VALUE></VALUE></SETTING>\n";
   fout << "<SETTING><NAME>MWProject_PPC_rsrcname</NAME><VALUE></VALUE></SETTING>\n";
   fout << "<SETTING><NAME>MWProject_PPC_rsrcheader</NAME><VALUE>Native</VALUE></SETTING>\n";
-  fout << "<SETTING><NAME>MWProject_PPC_rsrctype</NAME><VALUE>????</VALUE></SETTING>\n";
+  fout << "<SETTING><NAME>MWProject_PPC_rsrctype</NAME><VALUE>????" << "</VALUE></SETTING>\n";
   fout << "<SETTING><NAME>MWProject_PPC_rsrcid</NAME><VALUE>0</VALUE></SETTING>\n";
   fout << "<SETTING><NAME>MWProject_PPC_rsrcflags</NAME><VALUE>0</VALUE></SETTING>\n";
   fout << "<SETTING><NAME>MWProject_PPC_rsrcstore</NAME><VALUE>0</VALUE></SETTING>\n";
@@ -258,7 +258,7 @@ void cmLocalCodeWarriorGenerator::WriteSettingList(std::ostream& fout,
 }
 
 void cmLocalCodeWarriorGenerator::WriteFileList(std::ostream& fout,
-                                                const char *tgtName,
+                                                const char */*tgtName*/,
                                                 cmTarget const *l)
 {
   fout << "<FILELIST>\n";
@@ -301,7 +301,7 @@ void cmLocalCodeWarriorGenerator::WriteFileList(std::ostream& fout,
 
 
 void cmLocalCodeWarriorGenerator::WriteLinkOrder(std::ostream& fout,
-                                                 const char *tgtName,
+                                                 const char */*tgtName*/,
                                                  cmTarget const *l)
 {
   fout << "<LINKORDER>\n";
