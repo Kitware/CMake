@@ -241,13 +241,13 @@ void cmDependInformation::MergeInfo(cmDependInformation* info)
 // find the full path to fname by searching the m_IncludeDirectories array
 std::string cmMakeDepend::FullPath(const char* fname)
 {
+  if(cmSystemTools::FileExists(fname))
+    {
+      return std::string(fname);
+    }
   for(std::vector<std::string>::iterator i = m_IncludeDirectories.begin();
       i != m_IncludeDirectories.end(); ++i)
     {
-    if(cmSystemTools::FileExists(fname))
-      {
-      return std::string(fname);
-      }
     std::string path = *i;
     path = path + "/";
     path = path + fname;
