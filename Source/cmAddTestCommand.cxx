@@ -72,8 +72,10 @@ void cmAddTestCommand::FinalPass()
       fout << " \"";
       for(std::string::iterator c = it->begin(); c != it->end(); ++c)
         {
-        // Escape quotes and backslashes within arguments.
-        if((*c == '"') || (*c == '\\'))
+        // Escape quotes within arguments.  We should escape
+        // backslashes too but we cannot because it makes the result
+        // inconsistent with previous behavior of this command.
+        if((*c == '"'))
           {
           fout << '\\';
           }
