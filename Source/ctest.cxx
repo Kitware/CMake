@@ -203,10 +203,7 @@ int main (int argc, char *argv[])
   // run ctest
   std::string output;
   int res = inst.Run(args,&output);
-  if (res)
-    {
-    std::cout << output;
-    }
+  std::cout << output;
   cmListFileCache::ClearCache();
 
   return res;
