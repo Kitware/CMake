@@ -308,10 +308,10 @@ private:
   const char* GetTestStatus(int status);
 
   //! Start CTest XML output file
-  void StartXML(ostream& ostr);
+  void StartXML(std::ostream& ostr);
 
   //! End CTest XML output file
-  void EndXML(ostream& ostr);
+  void EndXML(std::ostream& ostr);
 
   //! Parse Valgrind/Purify/Bounds Checker result out of the output string. After running,
   // log holds the output and results hold the different memmory errors.

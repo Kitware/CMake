@@ -2956,7 +2956,7 @@ int cmCTest::RunConfigurationScript()
   return 0;  
 }
 
-void cmCTest::StartXML(ostream& ostr)
+void cmCTest::StartXML(std::ostream& ostr)
 {
   ostr << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
     << "<Site BuildName=\"" << m_DartConfiguration["BuildName"]
@@ -2965,7 +2965,7 @@ void cmCTest::StartXML(ostream& ostr)
     << m_DartConfiguration["Site"] << "\">" << std::endl;
 }
 
-void cmCTest::EndXML(ostream& ostr)
+void cmCTest::EndXML(std::ostream& ostr)
 {
   ostr << "</Site>" << std::endl;
 }
