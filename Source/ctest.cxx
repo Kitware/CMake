@@ -72,6 +72,16 @@ std::string ctest::FindExecutable(const char *exe)
     return fullPath;
     }
 
+  // if everything else failed, check the users path
+  if (dir != "")
+    {
+    std::string path = cmSystemTools::FindProgram(file.c_str());
+    if (path != "")
+      {
+      return path;
+      }
+    }
+  
   return fullPath;
 }
 
