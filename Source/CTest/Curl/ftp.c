@@ -2692,7 +2692,7 @@ CURLcode ftp_regular_transfer(struct connectdata *conn)
       cur_pos = slash_pos + 1; /* jump to the rest of the string */
       if(++ftp->dirdepth >= ftp->diralloc) {
         /* enlarge array */
-        char *bigger;
+        char **bigger;
         ftp->diralloc *= 2; /* double the size each time */
         bigger = realloc(ftp->dirs, ftp->diralloc * sizeof(ftp->dirs[0]));
         if(!bigger) {

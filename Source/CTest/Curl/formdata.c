@@ -626,9 +626,15 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
       {
         /* this "cast increases required alignment of target type" but
            we consider it OK anyway */
-        struct curl_slist* list = array_state?
-          (struct curl_slist*)array_value:
-          va_arg(params, struct curl_slist*);
+        struct curl_slist* list = 0;
+        if ( array_state )
+          {
+          memcpy(&list, &array_value, sizeof(struct curl_slist*));
+          }
+        else
+          {
+          list = va_arg(params, struct curl_slist*);
+          }
 
         if( current_form->contentheader )
           return_value = CURL_FORMADD_OPTION_TWICE;
