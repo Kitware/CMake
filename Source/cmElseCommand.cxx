@@ -49,40 +49,77 @@ bool cmElseCommand::InitialPass(std::vector<std::string>& args)
     return false;
     }
 
-  // check for the NOT vale
+  // create a function blocker
+  cmIfFunctionBlocker *f = NULL;
+
+  // check for the different signatures
   const char *def;
-  if (args.size() == 2 && (args[0] == "NOT"))
-    {
-    def = m_Makefile->GetDefinition(args[1].c_str());
-    if(!cmSystemTools::IsOff(def))
-      {
-      // remove any function blockers for this define
-      m_Makefile->RemoveFunctionBlocker("ENDIF",args);
-      }
-    else
-      {
-      // create a function blocker
-      cmIfFunctionBlocker *f = new cmIfFunctionBlocker();
-      f->m_Define = args[1];
-      f->m_Not = true;
-      m_Makefile->AddFunctionBlocker(f);
-      }
-    }
-  else
+  const char *def2;
+
+  if (args.size() == 1)
     {
     def = m_Makefile->GetDefinition(args[0].c_str());
     if(!cmSystemTools::IsOff(def))
       {
-      // create a function blocker
-      cmIfFunctionBlocker *f = new cmIfFunctionBlocker();
-      f->m_Define = args[0];
-      m_Makefile->AddFunctionBlocker(f);
+      f = new cmIfFunctionBlocker();
       }
-    else
+    }
+
+  if (args.size() == 2 && (args[0] == "NOT"))
+    {
+    def = m_Makefile->GetDefinition(args[1].c_str());
+    if(cmSystemTools::IsOff(def))
       {
-      // remove any function blockers for this define
-      m_Makefile->RemoveFunctionBlocker("ENDIF",args);
+      f = new cmIfFunctionBlocker();
       }
+    }
+
+  if (args.size() == 3 && (args[1] == "AND"))
+    {
+    def = m_Makefile->GetDefinition(args[0].c_str());
+    def2 = m_Makefile->GetDefinition(args[2].c_str());
+    if(cmSystemTools::IsOff(def) || cmSystemTools::IsOff(def2))
+      {
+      f = new cmIfFunctionBlocker();
+      }
+    }
+  
+  if (args.size() == 3 && (args[1] == "OR"))
+    {
+    def = m_Makefile->GetDefinition(args[0].c_str());
+    def2 = m_Makefile->GetDefinition(args[2].c_str());
+    if(cmSystemTools::IsOff(def) && cmSystemTools::IsOff(def2))
+      {
+      f = new cmIfFunctionBlocker();
+      }
+    }
+
+  if (args.size() == 3 && (args[1] == "MATCHES"))
+    {
+    def = m_Makefile->GetDefinition(args[0].c_str());
+    cmRegularExpression regEntry(args[2].c_str());
+    
+    // check for black line or comment
+    if (!regEntry.find(def))
+      {
+      f = new cmIfFunctionBlocker();
+      }
+    }
+  
+  // if we created a function blocker then set its args
+  if (f)
+    {
+    for(std::vector<std::string>::iterator j = args.begin();
+        j != args.end(); ++j)
+      {   
+      f->m_Args.push_back(*j);
+      }
+    m_Makefile->AddFunctionBlocker(f);
+    }
+  else
+    {
+    // remove any function blockers for this define
+    m_Makefile->RemoveFunctionBlocker("ENDIF",args);
     }
   
   return true;

@@ -90,7 +90,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "ELSE(define)";
+      "ELSE(args), Note that the args for the ELSE clause must match those of the IF clause. See the IF command for more information.";
     }
   
   cmTypeMacro(cmElseCommand, cmCommand);

@@ -53,7 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 class cmIfFunctionBlocker : public cmFunctionBlocker
 {
 public:
-  cmIfFunctionBlocker() {m_Not = false;}
+  cmIfFunctionBlocker() {}
   virtual ~cmIfFunctionBlocker() {}
   virtual bool IsFunctionBlocked(const char *name, 
                                  const std::vector<std::string> &args, 
@@ -63,8 +63,7 @@ public:
                             cmMakefile &mf);
   virtual void ScopeEnded(cmMakefile &mf);
   
-  std::string m_Define;
-  bool m_Not;
+  std::vector<std::string> m_Args;
 };
 
 /** \class cmIfCommand
@@ -114,8 +113,9 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "IF (define) Starts an if block. Optionally there it can be invoked as\n"
-      "IF (NOT Define) the matching ELSE and ENDIF require the NOT as well.";
+      "IF (define) Starts an if block. Optionally it can be invoked "
+      "using (NOT define) (def AND def2) (def OR def2) (def MATCHES def2) "
+      "MATCHES checks if def matches the regular expression def2 ";
     }
   
   cmTypeMacro(cmIfCommand, cmCommand);
