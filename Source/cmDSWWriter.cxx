@@ -126,7 +126,7 @@ void cmDSWMakefile::WriteProject(std::ostream& fout,
   std::vector<std::string>::iterator i, end;
   i = project->GetMakefile()->GetLinkLibraries().begin();
   end = project->GetMakefile()->GetLinkLibraries().end();
-  if(project->GetBuildType() != cmDSPMakefile::STATIC_LIBRARY)
+  if(project->NeedsDependencies(dspname))
     {
     for(;i!= end; ++i)
       {

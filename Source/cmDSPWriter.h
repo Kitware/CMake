@@ -61,7 +61,7 @@ public:
     {
     return m_Makefile;
     }
-  
+  bool NeedsDependencies(const char* dspname);
 private:
   std::string m_DSPHeaderTemplate;
   std::string m_DSPFooterTemplate;
@@ -86,6 +86,7 @@ private:
 
   std::string m_IncludeOptions;
   std::string m_LibraryOptions;
+  std::string m_OutputLibName;
   cmMakefile* m_Makefile;
   BuildType m_BuildType;
   std::vector<std::string> m_Configurations;

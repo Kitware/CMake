@@ -73,6 +73,7 @@ void cmDSPMakefile::OutputDSPFile()
     m_LibraryOptions += "/$(OUTDIR)\" ";
     }
   m_LibraryOptions += "/STACK:10000000 ";
+  m_OutputLibName = m_Makefile->GetLibraryName();
   
   // Create the DSP or set of DSP's for libraries and executables
   if(strlen(m_Makefile->GetLibraryName()) != 0)
@@ -115,9 +116,10 @@ void cmDSPMakefile::CreateExecutableDSPFiles()
         }
       else
         {
-        m_Makefile->SetLibraryName(classfile.m_ClassName.c_str());
+//        m_Makefile->SetLibraryName(classfile.m_ClassName.c_str());
         this->SetBuildType(EXECUTABLE);
-        std::string pname = m_Makefile->GetLibraryName();
+        m_OutputLibName = classfile.m_ClassName;
+        std::string pname = classfile.m_ClassName.c_str(); //m_Makefile->GetLibraryName();
         m_CreatedProjectNames.push_back(pname);
         
         this->WriteDSPHeader(fout);
@@ -412,7 +414,7 @@ void cmDSPMakefile::WriteDSPHeader(std::ostream& fout)
       cmSystemTools::ReplaceString(line, "BUILD_INCLUDES",
                                     m_IncludeOptions.c_str());
       cmSystemTools::ReplaceString(line, "OUTPUT_LIBNAME", 
-                                    m_Makefile->GetLibraryName());
+                                    m_OutputLibName.c_str());
       cmSystemTools::ReplaceString(line, 
                                     "EXTRA_DEFINES", 
 				   m_Makefile->GetDefineFlags());
@@ -445,3 +447,26 @@ void cmDSPMakefile::WriteDSPBuildRule(std::ostream& fout, const char* path)
        << path << "\n";
   fout << "# End Source File\n";
 }
+
+bool cmDSPMakefile::NeedsDependencies(const char* dspname)
+{
+  if(strcmp(m_Makefile->GetLibraryName(), dspname) == 0)
+    {
+    // only shared libs need depend info
+    const char* cacheValue
+      = cmCacheManager::GetInstance()->GetCacheValue("BUILD_SHARED_LIBS");
+    if(cacheValue && strcmp(cacheValue,"0"))
+      {
+      return true;
+      }
+    else
+      {
+      return false;
+      }
+    }
+  // must be an executable so it needs depends
+  return true;
+}
+
+  
+  
