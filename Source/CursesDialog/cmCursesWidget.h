@@ -1,9 +1,9 @@
 #ifndef __cmCursesWidget_h
 #define __cmCursesWidget_h
 
+#include "../cmCacheManager.h"
 #include <curses.h>
 #include <form.h>
-#include "../cmCacheManager.h"
 
 class cmCursesWidget
 {

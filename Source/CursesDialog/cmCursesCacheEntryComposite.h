@@ -1,8 +1,8 @@
 #ifndef __cmCursesCacheEntryComposite_h
 #define __cmCursesCacheEntryComposite_h
 
-#include "cmCursesLabelWidget.h"
 #include "../cmCacheManager.h"
+#include "cmCursesLabelWidget.h"
 
 class cmCursesCacheEntryComposite
 {

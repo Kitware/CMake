@@ -1,3 +1,6 @@
+#include "../cmCacheManager.h"
+#include "../cmSystemTools.h"
+#include "../cmake.h"
 #include "cmCursesMainForm.h"
 #include "cmCursesStringWidget.h"
 #include "cmCursesLabelWidget.h"
@@ -6,9 +9,6 @@
 #include "cmCursesFilePathWidget.h"
 #include "cmCursesDummyWidget.h"
 #include "cmCursesCacheEntryComposite.h"
-#include "../cmCacheManager.h"
-#include "../cmSystemTools.h"
-#include "../cmake.h"
 
 cmCursesMainForm::cmCursesMainForm(const char* whereSource, 
 				   bool newCache) :
