@@ -33,10 +33,18 @@
 # define CMLUMG_MAKEFILE_NAME "Makefile2"
 #endif
 
+#if 0
+# define CMLUMG_PROVIDES_REQUIRES
+#endif
+
 // TODO: Add "help" target.
 // TODO: Identify remaining relative path violations.
 // TODO: Add test to drive installation through native build system.
 // TODO: Is there a case where quoted object list fails and unquoted works?
+
+// TODO: Fortran support:
+//  - This needs a "provides-requires" mode for the .o files in a target.
+//  - Driving target must be TGT.requires: account for this in jump-and-build.
 
 //----------------------------------------------------------------------------
 cmLocalUnixMakefileGenerator2::cmLocalUnixMakefileGenerator2()
@@ -261,10 +269,7 @@ cmLocalUnixMakefileGenerator2
        !m_GlobalGenerator->IgnoreFile((*source)->GetSourceExtension().c_str()))
       {
       // Generate this object file's rule file.
-      this->GenerateObjectRuleFile(target, *(*source));
-
-      // Save the object file name.
-      objects.push_back(this->GetObjectFileName(target, *(*source)));
+      this->GenerateObjectRuleFile(target, *(*source), objects);
       }
     }
 
@@ -349,7 +354,8 @@ cmLocalUnixMakefileGenerator2
 //----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator2
-::GenerateObjectRuleFile(const cmTarget& target, const cmSourceFile& source)
+::GenerateObjectRuleFile(const cmTarget& target, const cmSourceFile& source,
+                         std::vector<std::string>& objects)
 {
   // Identify the language of the source file.
   const char* lang = this->GetSourceFileLanguage(source);
@@ -363,6 +369,9 @@ cmLocalUnixMakefileGenerator2
 
   // Get the full path name of the object file.
   std::string obj = this->GetObjectFileName(target, source);
+
+  // Save this in the target's list of object files.
+  objects.push_back(obj);
 
   // The object file should be checked for dependency integrity.
   m_CheckDependFiles.insert(obj);
@@ -519,6 +528,27 @@ cmLocalUnixMakefileGenerator2
   this->WriteMakeRule(ruleFileStream, 0, buildEcho.c_str(),
                       obj.c_str(), depends, commands);
   }
+
+#ifdef CMLUMG_PROVIDES_REQUIRES
+  std::string objectRequires = obj;
+  std::string objectProvides = obj;
+  objectRequires += ".requires";
+  objectProvides += ".provides";
+  {
+  std::vector<std::string> no_commands;
+  std::vector<std::string> depends;
+  depends.push_back(obj);
+  this->WriteMakeRule(ruleFileStream, 0, 0,
+                      objectProvides.c_str(), depends, no_commands);
+  }
+  {
+  std::vector<std::string> no_depends;
+  std::vector<std::string> commands;
+  commands.push_back(this->GetRecursiveMakeCall(objectProvides.c_str()));
+  this->WriteMakeRule(ruleFileStream, 0, 0,
+                      objectRequires.c_str(), no_depends, commands);
+  }
+#endif
 }
 
 //----------------------------------------------------------------------------
@@ -1487,10 +1517,41 @@ cmLocalUnixMakefileGenerator2
   cleanFiles.push_back(objs);
   this->WriteTargetCleanRule(ruleFileStream, target, cleanFiles);
 
+  // Construct name of driving target listed in build.local rule.
+  // TODO: See top of file description of Fortran support.
+  std::string targetDriveName = target.GetName();
+
+#ifdef CMLUMG_PROVIDES_REQUIRES
+  targetDriveName += ".requires";
+  std::string targetProvides = target.GetName();
+  targetProvides += ".provides";
+  {
+  std::vector<std::string> no_commands;
+  std::vector<std::string> depends;
+  depends.push_back(target.GetName());
+  this->WriteMakeRule(ruleFileStream, 0, 0,
+                      targetProvides.c_str(), depends, no_commands);
+  }
+  {
+  // Build list of require-level dependencies.
+  std::vector<std::string> depends;
+  for(std::vector<std::string>::const_iterator obj = objects.begin();
+      obj != objects.end(); ++obj)
+    {
+    depends.push_back(*obj + ".requires");
+    }
+
+  std::vector<std::string> commands;
+  commands.push_back(this->GetRecursiveMakeCall(targetProvides.c_str()));
+  this->WriteMakeRule(ruleFileStream, 0, 0,
+                      targetDriveName.c_str(), depends, commands);
+  }
+#endif
+
   // Add this to the list of build rules in this directory.
   if(target.IsInAll())
     {
-    m_BuildTargets.push_back(target.GetName());
+    m_BuildTargets.push_back(targetDriveName);
     }
 }
 

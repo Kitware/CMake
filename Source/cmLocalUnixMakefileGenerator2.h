@@ -65,7 +65,8 @@ protected:
   void GenerateCMakefile();
   void GenerateTargetRuleFile(const cmTarget& target);
   void GenerateObjectRuleFile(const cmTarget& target,
-                              const cmSourceFile& source);
+                              const cmSourceFile& source,
+                              std::vector<std::string>& objects);
   void GenerateCustomRuleFile(const cmCustomCommand& cc);
   void GenerateUtilityRuleFile(const cmTarget& target);
   std::string GenerateDependsMakeFile(const char* file);
