@@ -328,7 +328,12 @@ bool cmLocalKdevelopGenerator::CreateFilelistFile(const std::string& outputDir, 
       for (std::vector<cmSourceFile*>::const_iterator si=sources.begin();
            si!=sources.end(); si++)
         {
-        files.insert((*si)->GetFullPath());
+        tmp=(*si)->GetFullPath();
+        cmSystemTools::ReplaceString(tmp, projectDir.c_str(), "");
+        if (tmp[0]!='/')
+        {
+            files.insert(tmp);
+        }
         }
       for (std::vector<std::string>::const_iterator lt=listFiles.begin();
            lt!=listFiles.end(); lt++)
@@ -373,7 +378,7 @@ bool cmLocalKdevelopGenerator::CreateFilelistFile(const std::string& outputDir, 
   for (std::set<cmStdString>::const_iterator it=files.begin(); it!=files.end(); it++)
     {
     // get the full path to the file
-    tmp=cmSystemTools::CollapseFullPath(it->c_str());
+    tmp=cmSystemTools::CollapseFullPath(it->c_str(), projectDir.c_str());
     // make it relative to the project dir
     cmSystemTools::ReplaceString(tmp, projectDir.c_str(), "");
     // only put relative paths
