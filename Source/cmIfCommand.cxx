@@ -49,7 +49,7 @@ IsFunctionBlocked(const char *name, const std::vector<std::string> &args,
 
 bool cmIfFunctionBlocker::
 ShouldRemove(const char *name, const std::vector<std::string> &args, 
-             cmMakefile &mf) 
+             cmMakefile &) 
 {
   if (!strcmp(name,"ELSE") || !strcmp(name,"ENDIF"))
     {
