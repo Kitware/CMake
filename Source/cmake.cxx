@@ -180,19 +180,23 @@ void cmake::AddCMakePaths(char **av)
       {
       // try exe/../share/cmake
       modules = cMakeRoot + "/share/CMake/Modules";
+      if (!cmSystemTools::FileIsDirectory(modules.c_str()))
+	{
 #if !defined(_WIN32) || defined(__CYGWIN__)
-      if (!cmSystemTools::FileIsDirectory(modules.c_str()))
-	{
 	// try compiled in value on UNIX
-        std::string cMakeRoot = CMAKE_ROOT_DIR;
+        cMakeRoot = CMAKE_ROOT_DIR;
         modules = cMakeRoot + "/Modules";
-	}
 #endif
-      if (!cmSystemTools::FileIsDirectory(modules.c_str()))
+	if (!cmSystemTools::FileIsDirectory(modules.c_str()))
+	  {
+	    // couldn't find modules
+	    cmSystemTools::Error("Could not find CMAKE_ROOT !!!");
+	    return;  
+	  }
+	}
+      else
 	{
-	// couldn't find modules
-        cmSystemTools::Error("Could nto find CMAKE_ROOT !!!");
-	return;  
+	cMakeRoot = cMakeRoot + "/share/CMake";
 	}
       }
     }
