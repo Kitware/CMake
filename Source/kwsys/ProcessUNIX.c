@@ -1824,6 +1824,7 @@ static pid_t kwsysProcessFork(kwsysProcess* cp,
 
         /* Exit without cleanup.  The parent holds all resources.  */
         _exit(0);
+        return 0; /* Never reached, but avoids SunCC warning.  */
         }
       }
     else
