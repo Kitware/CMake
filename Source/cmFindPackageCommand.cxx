@@ -326,6 +326,20 @@ bool cmFindPackageCommand::FindConfig()
 //----------------------------------------------------------------------------
 std::string cmFindPackageCommand::SearchForConfig() const
 {
+  // Check the environment variable.
+  std::string env;
+  if(cmSystemTools::GetEnv(this->Variable.c_str(), env) && env.length() > 0)
+    {
+    cmSystemTools::ConvertToUnixSlashes(env);
+    std::string f = env;
+    f += "/";
+    f += this->Config;
+    if(cmSystemTools::FileExists(f.c_str()))
+      {
+      return env;
+      }
+    }
+
   // Search the build directories.
   for(std::vector<cmStdString>::const_iterator b = this->Builds.begin();
       b != this->Builds.end(); ++b)

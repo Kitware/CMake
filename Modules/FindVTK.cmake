@@ -65,6 +65,9 @@ IF(NOT VTK_DIR)
     # Support legacy cache files.
     ${VTK_DIR_SEARCH_LEGACY}
 
+    # Look for an environment variable VTK_DIR.
+    $ENV{VTK_DIR}
+
     # Look in places relative to the system executable search path.
     ${VTK_DIR_SEARCH}
 

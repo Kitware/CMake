@@ -45,6 +45,9 @@ IF(NOT ITK_DIR)
   # Look for an installation or build tree.
   #
   FIND_PATH(ITK_DIR ITKConfig.cmake
+    # Look for an environment variable ITK_DIR.
+    $ENV{ITK_DIR}
+
     # Look in places relative to the system executable search path.
     ${ITK_DIR_SEARCH}
 
