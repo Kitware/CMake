@@ -80,7 +80,7 @@ IF(CMAKE_GENERATOR MATCHES "NMake Makefiles")
     # tools from Microsoft.  These tools do not provide debug libraries,
     # so the link flags used have to be different.
     MAKE_DIRECTORY("${CMAKE_BINARY_DIR}/CMakeTmp2")
-    EXEC_PROGRAM(${CMAKE_CXX_COMPILER} ${CMAKE_BINARY_DIR}/CMakeTmp2
+    EXEC_PROGRAM(${CMAKE_C_COMPILER} ${CMAKE_BINARY_DIR}/CMakeTmp2
       ARGS /nologo /MD /EHsc
       \"${CMAKE_ROOT}/Modules/CMakeTestForFreeVC.cxx\"
       OUTPUT_VARIABLE CMAKE_COMPILER_OUTPUT 
