@@ -384,7 +384,7 @@ public:
    */
   void ExpandSourceListArguments(std::vector<std::string> const& argsIn,
                                  std::vector<std::string>& argsOut,
-                                 int startArgumentIndex);
+                                 unsigned int startArgumentIndex);
 
   /** Get a cmSourceFile pointer for a given source name, if the name is
    *  not found, then a null pointer is returned.

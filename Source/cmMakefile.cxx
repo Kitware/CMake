@@ -1374,7 +1374,7 @@ void cmMakefile::EnableLanguage(const char* lang)
 
 void cmMakefile::ExpandSourceListArguments(
   std::vector<std::string> const& arguments, 
-  std::vector<std::string>& newargs, int start)
+  std::vector<std::string>& newargs, unsigned int start)
 {
   // first figure out if we need to handle version 1.2 style source lists
   int oldVersion = 1;
