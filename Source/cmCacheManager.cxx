@@ -605,7 +605,7 @@ void cmCacheManager::AddCacheEntry(const char* key, bool v,
     }
 }
 
-bool cmCacheManager::CacheIterator::IsAtEnd() 
+bool cmCacheManager::CacheIterator::IsAtEnd() const
 {
   return m_Position == m_Container.m_Cache.end();
 }
@@ -623,17 +623,30 @@ bool cmCacheManager::CacheIterator::Find(const char* key)
 
 void cmCacheManager::CacheIterator::Next() 
 {
-  ++m_Position; 
+  if (!this->IsAtEnd())
+    {
+    ++m_Position; 
+    }
 }
 
 void cmCacheManager::CacheIterator::SetValue(const char* value)
 {
+  if (this->IsAtEnd())
+    {
+    return;
+    }
   CacheEntry* entry = &this->GetEntry();
   entry->m_Value = value;
 }
 
 const char* cmCacheManager::CacheIterator::GetProperty(const char* property) const
 {
+  // make sure it is not at the end
+  if (this->IsAtEnd())
+    {
+    return 0;
+    }
+
   if ( !strcmp(property, "TYPE") || !strcmp(property, "VALUE") )
     {
     cmSystemTools::Error("Property \"", property, 
@@ -652,6 +665,12 @@ const char* cmCacheManager::CacheIterator::GetProperty(const char* property) con
 
 void cmCacheManager::CacheIterator::SetProperty(const char* p, const char* v) 
 {
+  // make sure it is not at the end
+  if (this->IsAtEnd())
+    {
+    return;
+    }
+
   if ( !strcmp(p, "TYPE") || !strcmp(p, "VALUE") )
     {
     cmSystemTools::Error("Property \"", p, 
@@ -664,6 +683,12 @@ void cmCacheManager::CacheIterator::SetProperty(const char* p, const char* v)
 
 bool cmCacheManager::CacheIterator::GetPropertyAsBool(const char* property) const
 {
+  // make sure it is not at the end
+  if (this->IsAtEnd())
+    {
+    return false;
+    }
+  
   if ( !strcmp(property, "TYPE") || !strcmp(property, "VALUE") )
     {
     cmSystemTools::Error("Property \"", property, 
@@ -683,6 +708,12 @@ bool cmCacheManager::CacheIterator::GetPropertyAsBool(const char* property) cons
 
 void cmCacheManager::CacheIterator::SetProperty(const char* p, bool v) 
 {
+  // make sure it is not at the end
+  if (this->IsAtEnd())
+    {
+    return;
+    }
+
   if ( !strcmp(p, "TYPE") || !strcmp(p, "VALUE") )
     {
     cmSystemTools::Error("Property \"", p, 
@@ -695,6 +726,12 @@ void cmCacheManager::CacheIterator::SetProperty(const char* p, bool v)
 
 bool cmCacheManager::CacheIterator::PropertyExists(const char* property) const
 {
+  // make sure it is not at the end
+  if (this->IsAtEnd())
+    {
+    return false;
+    }
+
   if ( !strcmp(property, "TYPE") || !strcmp(property, "VALUE") )
     {
     cmSystemTools::Error("Property \"", property, 

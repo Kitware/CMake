@@ -47,7 +47,7 @@ public:
   public:
     void Begin();
     bool Find(const char*);
-    bool IsAtEnd();
+    bool IsAtEnd() const;
     void Next();
     const char *GetName() const {
       return m_Position->first.c_str(); } 
