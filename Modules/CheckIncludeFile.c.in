@@ -1,0 +1,14 @@
+#ifdef CHECK_INCLUDE_FILE
+
+#include <${CHECK_INCLUDE_FILE_VAR}>
+
+int main()
+{
+  return 0;
+}
+
+#else  /* CHECK_INCLUDE_FILE */
+
+#  error "CHECK_INCLUDE_FILE has to specify the include file"
+
+#endif /* CHECK_INCLUDE_FILE */
