@@ -204,9 +204,9 @@ bool cmVTKWrapPythonCommand::WriteInit(const char *kitName,
   /* module init function */
   fprintf(fout,"  PyObject *m, *d, *c;\n\n");
 #ifdef _WIN32
-  fprintf(fout,"  static char modulename[] = \"lib%s\";\n",kitName);
-#else
   fprintf(fout,"  static char modulename[] = \"%s\";\n",kitName);
+#else
+  fprintf(fout,"  static char modulename[] = \"lib%s\";\n",kitName);
 #endif
   fprintf(fout,"  m = Py_InitModule(modulename, Py%s_ClassMethods);\n",
 	  kitName);
