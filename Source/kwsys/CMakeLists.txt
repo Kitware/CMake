@@ -75,8 +75,9 @@ IF(NOT KWSYS_NAMESPACE)
   SET(KWSYS_STANDALONE 1)
   
   # Enable all components.
-  SET(KWSYS_USE_Process 1)
+  SET(KWSYS_USE_Base64 1)
   SET(KWSYS_USE_Directory 1)
+  SET(KWSYS_USE_Process 1)
   SET(KWSYS_USE_RegularExpression 1)
   SET(KWSYS_USE_SystemTools 1)
 ENDIF(NOT KWSYS_NAMESPACE)
@@ -208,12 +209,11 @@ FOREACH(c Directory RegularExpression SystemTools)
 ENDFOREACH(c)
 
 # Add selected C components.
-IF(KWSYS_USE_Process)
-  SET(KWSYS_H_FILES ${KWSYS_H_FILES} Process)
-ENDIF(KWSYS_USE_Process)
-IF(KWSYS_USE_Base64)
-  SET(KWSYS_H_FILES ${KWSYS_H_FILES} Base64)
-ENDIF(KWSYS_USE_Base64)
+FOREACH(c Process Base64)
+  IF(KWSYS_USE_${c})
+    SET(KWSYS_H_FILES ${KWSYS_H_FILES} ${c})
+  ENDIF(KWSYS_USE_${c})
+ENDFOREACH(c)
 
 #-----------------------------------------------------------------------------
 # Build a list of sources for the library based on components that are
@@ -224,16 +224,17 @@ SET(KWSYS_SRCS)
 IF(KWSYS_USE_Process)
   IF(NOT UNIX)
     # Use the Windows implementation.  We need the encoded forwarding executable.
-    SET(KWSYS_SRCS ProcessWin32.c ${CMAKE_CURRENT_BINARY_DIR}/${KWSYS_NAMESPACE}ProcessFwd9xEnc.c)
+    SET(KWSYS_SRCS ${KWSYS_SRCS} ProcessWin32.c
+        ${CMAKE_CURRENT_BINARY_DIR}/${KWSYS_NAMESPACE}ProcessFwd9xEnc.c)
     SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/${KWSYS_NAMESPACE}ProcessFwd9xEnc.c
                                 PROPERTIES GENERATED 1)
   ELSE(NOT UNIX)
     # Use the UNIX implementation.
-    SET(KWSYS_SRCS ProcessUNIX.c)
+    SET(KWSYS_SRCS ${KWSYS_SRCS} ProcessUNIX.c)
   ENDIF(NOT UNIX)
 ENDIF(KWSYS_USE_Process)
 
-# Add proper sources for Base64 encoding
+# Add sources for Base64 encoding.
 IF(KWSYS_USE_Base64)
   SET(KWSYS_SRCS ${KWSYS_SRCS} Base64.c)
 ENDIF(KWSYS_USE_Base64)
