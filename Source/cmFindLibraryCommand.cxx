@@ -14,6 +14,7 @@
 
 =========================================================================*/
 #include "cmFindLibraryCommand.h"
+#include "cmCacheManager.h"
 
 // cmFindLibraryCommand
 bool cmFindLibraryCommand::Invoke(std::vector<std::string>& args)
@@ -23,7 +24,15 @@ bool cmFindLibraryCommand::Invoke(std::vector<std::string>& args)
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  
+  // Now check and see if the value has been stored in the cache
+  // already, if so use that value and don't look for the program
+  const char* cacheValue
+    = cmCacheManager::GetInstance()->GetCacheValue(args[0].c_str());
+  if(cacheValue)
+    {
+    m_Makefile->AddDefinition(args[0].c_str(), cacheValue);
+    return true;
+    }
   std::vector<std::string> path;
   // add any user specified paths
   for (int j = 2; j < args.size(); j++)
@@ -44,9 +53,13 @@ bool cmFindLibraryCommand::Invoke(std::vector<std::string>& args)
     tryPath += args[1];
     if(cmSystemTools::FileExists(tryPath.c_str()))
       {
-      m_Makefile->AddDefinition(args[0].c_str(), path[k].c_str());
+      m_Makefile->AddDefinition(args[0].c_str(), path[k].c_str());  
+      cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
+                                                   path[k].c_str(),
+                                                   cmCacheManager::PATH);
       return true;
       }
     }
+  return false;
 }
 

@@ -21,6 +21,7 @@
 #include "cmSystemTools.h"
 #include "cmMakefileGenerator.h"
 #include "cmCommands.h"
+#include "cmCacheManager.h"
 
 // default is not to be building executables
 cmMakefile::cmMakefile()
@@ -170,7 +171,6 @@ bool cmMakefile::ReadListFile(const char* filename)
           cmCommand* rm = (*pos).second;
           cmCommand* usedCommand = rm->Clone();
           usedCommand->SetMakefile(this);
-          usedCommand->LoadCache();
           bool keepCommand = false;
           if(usedCommand->GetEnabled())
             {

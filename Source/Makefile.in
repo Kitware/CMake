@@ -21,7 +21,8 @@ cmClassFile.o \
 cmSystemTools.o \
 cmDirectory.o \
 cmUnixMakefileGenerator.o \
-cmCommands.o
+cmCommands.o \
+cmCacheManager.o
 
 
 cmCollectFlags.o : $(srcdir)/*.h 
@@ -35,6 +36,7 @@ cmClassFile.o : $(srcdir)/*.h
 cmDirectory.o : $(srcdir)/*.h
 cmUnixMakefileGenerator.o : $(srcdir)/*.h
 cmCommands.o : $(srcdir)/*.h
+cmCacheManager.o : $(srcdir)/*.h
 
 
 

@@ -56,7 +56,7 @@ const int NSUBEXP = 10;
  * regular  expression  is  a  sequence  of  characters used to
  * search for exact character matches. However, many times  the
  * exact  sequence to be found is not known, or only a match at
- * the beginning or end of a string is desired. The vbl  regu-
+ * the beginning or end of a string is desired. The cmRegularExpression regu-
  * lar  expression  class implements regular expression pattern
  * matching as is found and implemented in many  UNIX  commands
  * and utilities.
@@ -68,7 +68,7 @@ const int NSUBEXP = 10;
  *    
  * Is written as follows in C++
  *
- *    vbl_reg_exp re("([a-z]+)\\.cc");
+ *    cmRegularExpression re("([a-z]+)\\.cc");
  *    re.find(filename);
  *    cerr << re.match(1);
  *

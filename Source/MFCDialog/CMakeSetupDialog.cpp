@@ -7,6 +7,7 @@
 #include "../cmDSWMakefile.h"
 #include "../cmWindowsConfigure.h"
 #include "../cmMSProjectGenerator.h"
+#include "../cmCacheManager.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -266,10 +267,13 @@ void CMakeSetupDialog::OnOK()
   CString makefileIn = m_WhereSource;
   makefileIn += "/CMakeLists.txt";
   mf.MakeStartDirectoriesCurrent();
+  // Create a string for the cache file
+  cmCacheManager::GetInstance()->LoadCache(&mf);
   mf.ReadListFile(makefileIn);
   // Move this to the cache editor
   mf.GenerateMakefile();
   CDialog::OnOK();
+  cmCacheManager::GetInstance()->SaveCache(&mf);
   this->SaveToRegistry();
 }
 

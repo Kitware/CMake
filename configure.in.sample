@@ -583,7 +583,7 @@ if test "x$srcdir" = x.; then
 else
     allDirs=`echo $allDirs | sed -e "s|$srcdir/||g"`
 fi
-SUBDIR_MAKEFILES=`echo $allDirs | sed -e 's|\\([[A-Za-z0-9_/]][[A-Za-z0-9_/]]*\\)|\1/Makefile:CMake/MakefileTemplate.in|g'`
+SUBDIR_MAKEFILES=`echo $allDirs | sed -e 's|\\([[A-Za-z0-9_/]][[A-Za-z0-9_/]]*\\)|\1/Makefile:CMake/CMakeMakefileTemplate.in|g'`
 
 SUBDIR_CMAKE_TARGETS=`echo $allDirs | sed -e 's|\\([[A-Za-z0-9_/]][[A-Za-z0-9_/]]*\\)|\1/CMakeTargets.make:CMake/CMakeTargets.make.in|g'`
 
@@ -601,7 +601,7 @@ SUBDIR_CMAKE_TARGETS=`echo $allDirs | sed -e 's|\\([[A-Za-z0-9_/]][[A-Za-z0-9_/]
 # sub directories found in CMakeLists.txt files
 
 AC_OUTPUT(
-Makefile:CMake/MakefileTemplate.in
+Makefile:CMake/CMakeMakefileTemplate.in
 CMakeTargets.make:CMake/CMakeTargets.make.in 
 CMake/CMakeSimpleRules.make 
 CMake/CMakeMaster.make 

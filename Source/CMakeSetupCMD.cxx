@@ -16,6 +16,7 @@
 #include "cmStandardIncludes.h"
 #include "cmMakefile.h"
 #include "cmMSProjectGenerator.h"
+#include "cmCacheManager.h"
 
 
 // this is the command line version of CMakeSetup.
@@ -59,13 +60,13 @@ int main(int ac, char** av)
   if(ac < 3)
     {
     std::cerr << "Usage: " << av[0] << 
-      " CMakeLists.txt -[DSP|DSW] -Hinsighthome -Dcurrentdir"
-      " -Ooutput directory" << std::endl;
+      " CMakeLists.txt -[DSP|DSW] -Hsource_home  -Sstart_source_directory "
+      " -Ostart_output_directory -Boutput_home" << std::endl;
     return -1;
     }
   std::string arg = av[2];
-  cmMakefile builder;
-  SetArgs(builder, ac, av);
+  cmMakefile makefile;
+  SetArgs(makefile, ac, av);
   cmMSProjectGenerator* pg = new cmMSProjectGenerator;
   if(arg.find("-DSP", 0) != std::string::npos)
     {
@@ -75,10 +76,12 @@ int main(int ac, char** av)
     {
     pg->BuildDSWOn();
     }
-  builder.SetMakefileGenerator(pg);
-  builder.MakeStartDirectoriesCurrent();
-  builder.ReadListFile(av[1]);
-  builder.GenerateMakefile();
+  makefile.SetMakefileGenerator(pg);
+  makefile.MakeStartDirectoriesCurrent();
+  cmCacheManager::GetInstance()->LoadCache(&makefile);
+  makefile.ReadListFile(av[1]);
+  makefile.GenerateMakefile();
+  cmCacheManager::GetInstance()->SaveCache(&makefile);
   return 0;
 }
 

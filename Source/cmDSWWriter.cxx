@@ -165,7 +165,8 @@ void cmDSWMakefile::WriteDSWFile(std::ostream& fout)
     cmSystemTools::ReplaceString(dir, homedir.c_str(), "");
     // Get the list of create dsp files from the cmDSPMakefile, more
     // than one dsp could have been created per input CMakeLists.txt file
-    std::vector<std::string> dspnames = (*k)->GetDSPMakefile()->GetCreatedProjectNames();
+    std::vector<std::string> dspnames =
+      (*k)->GetDSPMakefile()->GetCreatedProjectNames();
     for(std::vector<std::string>::iterator si = dspnames.begin();
 	si != dspnames.end(); ++si)
       {
@@ -188,7 +189,8 @@ void cmDSWMakefile::WriteProject(std::ostream& fout,
                                  cmDSPMakefile* project)
 {
   project->GetMakefile()->ExpandVariables();
-  fout << "###############################################################################\n\n";
+  fout << "#########################################################"
+    "######################\n\n";
   fout << "Project: \"" << dspname << "\"=" 
        << dir << "\\" << dspname << ".dsp - Package Owner=<4>\n\n";
   fout << "Package=<5>\n{{{\n}}}\n\n";
@@ -215,11 +217,13 @@ void cmDSWMakefile::WriteProject(std::ostream& fout,
 
 void cmDSWMakefile::WriteDSWFooter(std::ostream& fout)
 {
-  fout << "###############################################################################\n\n";
+  fout << "######################################################"
+    "#########################\n\n";
   fout << "Global:\n\n";
   fout << "Package=<5>\n{{{\n}}}\n\n";
   fout << "Package=<3>\n{{{\n}}}\n\n";
-  fout << "###############################################################################\n\n";
+  fout << "#####################################################"
+    "##########################\n\n";
 }
 
   

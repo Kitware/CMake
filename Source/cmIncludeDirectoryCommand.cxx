@@ -14,7 +14,7 @@
 
 =========================================================================*/
 #include "cmIncludeDirectoryCommand.h"
-
+#include "cmCacheManager.h"
 // cmIncludeDirectoryCommand
 bool cmIncludeDirectoryCommand::Invoke(std::vector<std::string>& args)
 {

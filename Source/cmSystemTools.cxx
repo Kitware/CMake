@@ -146,7 +146,8 @@ void cmSystemTools::ConvertToUnixSlashes(std::string& path)
 }
 
 
-int cmSystemTools::Grep(const char* dir, const char* file, const char* expression)
+int cmSystemTools::Grep(const char* dir, const char* file, 
+                        const char* expression)
 {
   std::string path = dir;
   path += "/";
@@ -327,7 +328,7 @@ void cmSystemTools::Error(const char* m1, const char* m2)
     message += m2;
     }
 #ifdef _WIN32
-//  MessageBox(0, message.c_str(), 0, MB_OK);
+  ::MessageBox(0, message.c_str(), 0, MB_OK);
   std::cerr << message.c_str() << std::endl;
 #else
   std::cerr << message.c_str() << std::endl;

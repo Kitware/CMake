@@ -42,6 +42,12 @@ public:
 
 protected:
   void OutputMakefile(const char* file);
+  void OutputMakeFlags(std::ostream&);
+  void OutputVerbatim(std::ostream&);
+  void OutputSourceToObjectList(std::ostream& fout);
+  void OutputExecutableRules(std::ostream&);
+  void OutputSubDirectoryRules(std::ostream&);
+  void OutputDependInformation(std::ostream&);
   void OutputDependLibraries(std::ostream&);
 };
 

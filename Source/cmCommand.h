@@ -53,14 +53,10 @@ public:
   /**
    * This is called at the end after all the information
    * specified by the command is accumulated. Most commands do
-   * not implement this method.
+   * not implement this method.  At this point, reading and
+   * writing to the cache can be done.
    */
   virtual void FinalPass() {};
-
-  /**
-   * This is called to let the command check the cache.
-   */
-  virtual void LoadCache() {}
   
   /**
    * This is a virtual constructor for the command.
