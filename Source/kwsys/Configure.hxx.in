@@ -1,0 +1,10 @@
+#ifndef @KWSYS_NAMESPACE@_Configure_hxx
+#define @KWSYS_NAMESPACE@_Configure_hxx
+
+/* This configuration should match for all instances of kwsys.  */
+#cmakedefine KWSYS_NO_STD_NAMESPACE
+#cmakedefine KWSYS_NO_ANSI_STREAM_HEADERS
+#cmakedefine KWSYS_NO_ANSI_STRING_STREAM
+#cmakedefine KWSYS_NO_ANSI_FOR_SCOPE
+
+#endif

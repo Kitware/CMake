@@ -1,0 +1,44 @@
+/*=========================================================================
+
+  Program:   KWSys - Kitware System Library
+  Module:    $RCSfile$
+  Language:  C++
+  Date:      $Date$
+  Version:   $Revision$
+
+  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
+  See http://www.cmake.org/HTML/Copyright.html for details.
+
+     This software is distributed WITHOUT ANY WARRANTY; without even 
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     PURPOSE.  See the above copyright notices for more information.
+
+=========================================================================*/
+#ifndef @KWSYS_NAMESPACE@_StandardIncludes_hxx
+#define @KWSYS_NAMESPACE@_StandardIncludes_hxx
+
+#include <@KWSYS_NAMESPACE@/Configure.hxx>
+
+#ifndef KWSYS_NO_ANSI_STREAM_HEADERS
+#  include <fstream>
+#  include <iostream>
+#else
+#  include <fstream.h>
+#  include <iostream.h>
+#endif
+
+#if !defined(KWSYS_NO_ANSI_STRING_STREAM)
+#  include <sstream>
+#elif !defined(KWSYS_NO_ANSI_STREAM_HEADERS)
+#  include <strstream>
+#else
+#  include <strstream.h>
+#endif
+
+#if defined(KWSYS_NO_STD_NAMESPACE)
+# define kwsys_std
+#else
+# define kwsys_std std
+#endif
+
+#endif
