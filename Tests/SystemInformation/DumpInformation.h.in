@@ -1,1 +1,3 @@
 #define CMAKE_DUMP_FILE "${DumpInformation_BINARY_DIR}/SystemInformation.out"
+#define CMAKE_CACHE_FILE "${CMAKE_BINARY_DIR}/../../CMakeCache.txt"
+#define CMAKE_ALL_VARIABLES "${CMAKE_BINARY_DIR}/AllVariables.txt"
