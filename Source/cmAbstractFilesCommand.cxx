@@ -30,7 +30,6 @@ bool cmAbstractFilesCommand::InitialPass(std::vector<std::string> const& argsIn)
   bool ret = true;
   std::string m = "could not find source file(s):\n";
 
-  cmMakefile::SourceMap &Classes = m_Makefile->GetSources();
   for(std::vector<std::string>::const_iterator j = args.begin();
       j != args.end(); ++j)
     {  
