@@ -110,12 +110,12 @@ cmDynamicLoader::GetSymbolAddress(cmLibHandle lib, const char* sym)
 
 const char* cmDynamicLoader::LibPrefix()
 {
-  return "";
+  return "lib";
 }
 
 const char* cmDynamicLoader::LibExtension()
 {
-  return ".dylib";
+  return ".so";
 }
 
 const char* cmDynamicLoader::LastError()
