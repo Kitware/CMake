@@ -82,6 +82,13 @@ void cmUnixMakefile::OutputMakefile(const char* file)
       }
     fout << "\n";
     }
+  fout << "ME = " <<  this->GetLibraryName() << "\n\n";
+  for(int i =0; i < m_MakeVerbatim.size(); i++)
+    {
+    fout << m_MakeVerbatim[i] << "\n";
+    }
+  fout << "\n\n";
+
   if( m_Executables )
     {
     for(int i = 0; i < m_Classes.size(); i++)
@@ -91,10 +98,19 @@ void cmUnixMakefile::OutputMakefile(const char* file)
         std::string DotO = m_Classes[i].m_ClassName;
         DotO += ".o";
         fout << m_Classes[i].m_ClassName << ": " << DotO << "\n";
-	fout << "\t ${CXX}  ${CXX_FLAGS}  " << DotO.c_str() << " -o $@ -L${ITK_OBJ}/Code/Common -lITKCommon \\\n"
-	     << "\t-L${ITK_OBJ}/Code/Insight3DParty/vxl -lITKNumerics -lm ${DL_LIBS}\n\n";
+	fout << "\t ${CXX}  ${CXX_FLAGS}  " << DotO.c_str() << " -o $@ -L${CMAKE_OBJ_DIR}/Code/Common -lITKCommon \\\n"
+	     << "\t-L${CMAKE_OBJ_DIR}/Code/Insight3DParty/vxl -lITKNumerics -lm ${DL_LIBS}\n\n";
 	}
       }
+    fout << "EXECUTABLES = \\\n";
+    for(int i = 0; i < m_Classes.size(); i++)
+      {
+      if(!m_Classes[i].m_AbstractClass && !m_Classes[i].m_HeaderFileOnly)
+	{ 
+        fout << m_Classes[i].m_ClassName << " \\\n";
+	}
+      }
+    fout << "\n";
     }
   
   if( m_SubDirectories.size() )
@@ -135,9 +151,7 @@ void cmUnixMakefile::OutputMakefile(const char* file)
     for(i =0; i < m_SubDirectories.size(); i++)
       {
       std::string subdir = FixDirectoryName(m_SubDirectories[i].c_str());
-      fout << "build_" << subdir.c_str() << ": targets.make\n";
-      fout << "\tcd " << m_SubDirectories[i].c_str() 
-	   << "; ${MAKE} -${MAKEFLAGS} targets.make\n";
+      fout << "build_" << subdir.c_str() << ":\n";
       fout << "\tcd " << m_SubDirectories[i].c_str()
 	   << "; ${MAKE} -${MAKEFLAGS} all\n\n";
 

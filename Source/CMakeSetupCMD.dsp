@@ -91,7 +91,15 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=.\CMakeSetupCMD.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=.\cmClassFile.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=.\cmDirectory.cxx
 # End Source File
 # Begin Source File
 
@@ -128,10 +136,6 @@ SOURCE=.\cmRegularExpression.cxx
 # Begin Source File
 
 SOURCE=.\cmSystemTools.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=.\CMakeSetupCMD.cxx
 # End Source File
 # End Group
 # Begin Group "Header Files"

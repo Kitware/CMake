@@ -3,13 +3,14 @@
 #endif
 #include "cmMakefile.h"
 #include "cmClassFile.h"
+#include "cmDirectory.h"
 
 #include <fstream>
 #include <iostream>
 
 
 // remove extra spaces and the "\" character from the name
-// of the class as it is in the Makefile.in
+// of the class as it is in the CMakeLists.txt
 inline std::string CleanUpName(const char* name)
 {
   std::string className = name;
@@ -50,7 +51,7 @@ void cmMakefile::Print()
     m_Classes[i].Print();
 }
 
-// Parse the given Makefile.in file into a list of classes.
+// Parse the given CMakeLists.txt file into a list of classes.
 
 bool cmMakefile::ReadMakefile(const char* filename)
 {
@@ -97,6 +98,10 @@ bool cmMakefile::ReadMakefile(const char* filename)
 	this->ReadClasses(fin, true);
 	}
       }
+    else if(line.find("TEMPLATE_INSTANCE_DIRECTORY") != std::string::npos)
+      {
+      this->ReadTemplateInstanceDirectory(line);
+      }
     else if(line.find("SUBDIRS") != std::string::npos)
       {
       if(line.find("\\") != std::string::npos)
@@ -111,6 +116,23 @@ bool cmMakefile::ReadMakefile(const char* filename)
 	this->ReadClasses(fin, false);
 	m_Executables = true;
 	}
+      }
+    else if(line.find("BEGIN MAKE VERBATIM") != std::string::npos)
+      {
+      char inbuffer[2048];
+      bool done = false;
+      m_MakeVerbatim.push_back("# Begin CMakeLists Verbatim\n");
+      while(!done)
+        {
+        fin.getline(inbuffer, 2047);
+        m_MakeVerbatim.push_back(inbuffer);
+        if((m_MakeVerbatim.end()-1)->find("END MAKE VERBATIM") 
+           != std::string::npos )
+          {
+          done = true;
+          *(m_MakeVerbatim.end()-1) = "# End CMakeLists VERBATIM\n\n";
+          }
+        }
       }
     else if(line.find("ME") != std::string::npos)
       {
@@ -183,6 +205,52 @@ void cmMakefile::ReadClasses(std::ifstream& fin,
 }
 
 
+void cmMakefile::ReadTemplateInstanceDirectory(std::string& line)
+{
+  std::string::size_type start = line.find("=");
+  if(start != std::string::npos)
+    {
+    std::string dirname = line.substr(start+1, line.size());
+    dirname = CleanUpName(dirname.c_str());
+    std::string tdir = this->GetCurrentDirectory();
+    tdir += "/";
+    tdir += dirname;
+    // Load all the files in the directory
+    cmDirectory dir;
+    if(dir.Load(tdir.c_str()))
+      {
+      int numfiles = dir.GetNumberOfFiles();
+      for(int i =0; i < numfiles; ++i)
+        {
+        std::string file = dir.GetFile(i);
+        // ignore files less than f.cxx in length
+        if(file.size() > 4)
+          {
+          // Remove the extension
+          std::string::size_type dotpos = file.rfind(".");
+          file = file.substr(0, dotpos);
+          std::string fullname = dirname;
+          fullname += "/";
+          fullname += file;
+          // add the file as a class file so 
+          // depends can be done
+          cmClassFile cmfile;
+          cmfile.SetName(fullname.c_str(), this->GetCurrentDirectory());
+          cmfile.m_AbstractClass = false;
+          m_Classes.push_back(cmfile);
+          }
+        }
+      }
+    else
+      {
+      std::cerr << "Error can not open template instance directory "
+                << dirname.c_str() << std::endl;
+      }
+    }
+}
+
+
+
 // Read a list of subdirectories from the stream
 void cmMakefile::ReadSubdirs(std::ifstream& fin)
 {
@@ -206,3 +274,4 @@ void cmMakefile::ReadSubdirs(std::ifstream& fin)
     m_SubDirectories.push_back(dir);
     }
 }
+

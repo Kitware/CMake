@@ -92,7 +92,23 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=.\CMakeSetup.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\CMakeSetup.rc
+# End Source File
+# Begin Source File
+
+SOURCE=.\CMakeSetupDialog.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\cmClassFile.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\cmDirectory.cxx
 # End Source File
 # Begin Source File
 
@@ -132,23 +148,11 @@ SOURCE=..\cmSystemTools.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=..\itkVC60Configure.cxx
-# End Source File
-# Begin Source File
-
 SOURCE=..\cmWindowsConfigure.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=.\CMakeSetup.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\CMakeSetup.rc
-# End Source File
-# Begin Source File
-
-SOURCE=.\CMakeSetupDialog.cpp
+SOURCE=..\itkVC60Configure.cxx
 # End Source File
 # Begin Source File
 
@@ -159,6 +163,18 @@ SOURCE=.\StdAfx.cpp
 # Begin Group "Header Files"
 
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
+# Begin Source File
+
+SOURCE=..\CMakeSetup.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\CMakeSetup.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\CMakeSetupDialog.h
+# End Source File
 # Begin Source File
 
 SOURCE=..\cmClassFile.h
@@ -189,19 +205,7 @@ SOURCE=..\cmMakefile.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\CMakeSetup.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\cmRegularExpression.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\CMakeSetup.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\CMakeSetupDialog.h
 # End Source File
 # Begin Source File
 
@@ -221,11 +225,11 @@ SOURCE=.\res\CMakeSetup.ico
 # End Source File
 # Begin Source File
 
-SOURCE=.\res\CMakeSetupDialog.rc2
+SOURCE=.\res\CMakeSetupDialog.ico
 # End Source File
 # Begin Source File
 
-SOURCE=.\res\CMakeSetupDialog.ico
+SOURCE=.\res\CMakeSetupDialog.rc2
 # End Source File
 # End Group
 # Begin Source File

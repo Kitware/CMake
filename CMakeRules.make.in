@@ -15,7 +15,7 @@
 # 
 #------------------------------------------------------------------------------
 #
-all: ${OBJ_SUB_DIRS} ${EXECUTABLES} ${SUBDIR_BUILD} ${ITK_LIB_FILE} ${LOCAL_BUILD_TARGETS} 
+all: ${OBJ_SUB_DIRS} ${EXECUTABLES} ${SUBDIR_BUILD} ${BUILD_LIB_FILE} ${LOCAL_BUILD_TARGETS} 
 
 #------------------------------------------------------------------------------
 
@@ -46,6 +46,6 @@ lib$(ME)$(SHLIB_SUFFIX): ${KIT_OBJ}
 	lib$(ME)$(SHLIB_SUFFIX) \
 	   ${KIT_OBJ} ${SHLIB_LD_LIBS}
 
-install: ${ITK_LIB_FILE} 
-	@echo "Installing ${ITK_LIB_FILE}"
-	${INSTALL} -m 755 $(ITK_LIB_FILE) $(LIB_INSTALL_DIR)/$(ITK_LIB_FILE)
+install: ${BUILD_LIB_FILE} 
+	@echo "Installing ${BUILD_LIB_FILE}"
+	${INSTALL} -m 755 $(BUILD_LIB_FILE) $(LIB_INSTALL_DIR)/$(BUILD_LIB_FILE)

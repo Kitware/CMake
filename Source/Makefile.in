@@ -12,12 +12,15 @@ CMAKE =
 
 OBJS = \
 cmClassFile.o \
+cmDirectory.o \
 cmMakefile.o \
 cmUnixMakefile.o \
 cmMakeDepend.o \
 cmRegularExpression.o \
-CMakeBuildTargets.o
+CMakeBuildTargets.o 
 
+
+cmDirectory.o : cmDirectory.h cmDirectory.cxx
 cmClassFile.o : cmClassFile.h cmClassFile.cxx
 cmMakefile.o : cmMakefile.h cmMakefile.cxx cmClassFile.h
 cmUnixMakefile.o : cmUnixMakefile.h cmUnixMakefile.cxx cmMakefile.h cmClassFile.h

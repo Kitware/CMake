@@ -4,6 +4,13 @@
 #include <fstream>
 #include <windows.h>
 
+static void Die(const char* message)
+{
+  MessageBox(0, message, 0, MB_OK);
+  exit(-1);
+}
+
+
 void cmDSPMakefile::OutputDSPFile()
 { 
   m_IncludeOptions = "/STACK:10000000 ";
@@ -36,8 +43,9 @@ void cmDSPMakefile::OutputDSPFile()
     {
     if(!cmSystemTools::MakeDirectory(m_OutputDirectory.c_str()))
       {
-      MessageBox(0, "Error creating directory ", 0, MB_OK);
-      MessageBox(0, m_OutputDirectory.c_str(), 0, MB_OK);
+      std::string message = "Error creating directory ";
+      message += m_OutputDirectory;
+      Die(message.c_str());
       }
     }
   
@@ -45,22 +53,19 @@ void cmDSPMakefile::OutputDSPFile()
     {
     if(this->m_LibraryName == "")
       {
-      std::cerr  << "No library name in Makefile.in dsp not created" << std::endl;
+      // if no library silently give up
       return;
       }
-    std::cerr << "building library " << this->m_LibraryName.c_str() << std::endl;
     this->SetBuildType(STATIC_LIBRARY);
     this->CreateSingleDSP();
     }
   else
     {
-    std::cerr << "Build Executables " << std::endl;
     this->CreateExecutableDSPFiles();
     }
 }
 void cmDSPMakefile::CreateExecutableDSPFiles()
 {
-  std::cerr << "Create executables for ";
   for(int i = 0; i < m_Classes.size(); ++i)
     {
     cmClassFile& classfile = m_Classes[i];
@@ -71,9 +76,9 @@ void cmDSPMakefile::CreateExecutableDSPFiles()
     std::ofstream fout(fname.c_str());
     if(!fout)
       {
-      MessageBox(0, "Error writing ", 0, MB_OK);
-      MessageBox(0, fname.c_str(), 0, MB_OK);
-      std::cerr  << "Error can not open " << fname.c_str() << " for write" << std::endl;
+      std::string message = "Error Writing ";
+      message += fname;
+      Die(message.c_str());
       }
     else
       {
@@ -97,8 +102,6 @@ void cmDSPMakefile::CreateExecutableDSPFiles()
 void cmDSPMakefile::CreateSingleDSP()
 {
   std::string fname;
-  std::cerr << "writting dsp file " << m_cmCurrentDirectory.c_str()
-	    << std::endl;
   fname = m_OutputDirectory;
   fname += "/";
   fname += this->m_LibraryName;
@@ -106,15 +109,13 @@ void cmDSPMakefile::CreateSingleDSP()
   m_CreatedProjectNames.clear();
   std::string pname = m_LibraryName;
   m_CreatedProjectNames.push_back(pname);
-  std::cerr << "writting dsp file " << fname.c_str() << std::endl;
   std::ofstream fout(fname.c_str());
   if(!fout)
     {
-    MessageBox(0, "Error writing ", 0, MB_OK);
-    MessageBox(0, fname.c_str(), 0, MB_OK);
-    std::cerr  << "Error can not open " << fname.c_str() << " for write" << std::endl;
-    return;
-  }
+    std::string message = "Error Writing ";
+    message += fname;
+    Die(message.c_str());
+    }
   this->WriteDSPFile(fout);
 }
 
@@ -125,7 +126,7 @@ void cmDSPMakefile::WriteDSPBuildRule(std::ostream& fout)
 #undef GetCurrentDirectory
   std::string makefileIn = this->GetCurrentDirectory();
   makefileIn += "/";
-  makefileIn += "Makefile.in";
+  makefileIn += "CMakeLists.txt";
   std::string dsprule = GetHomeDirectory();
   dsprule += "/CMake/pcbuilderCMD ";
   dsprule += makefileIn;
@@ -191,21 +192,21 @@ void cmDSPMakefile::SetBuildType(BuildType b)
     {
     case STATIC_LIBRARY:
       m_DSPHeaderTemplate = m_cmHomeDirectory;
-      m_DSPHeaderTemplate += "/CMake/staticLibHeader.dsptemplate";
+      m_DSPHeaderTemplate += "/CMake/Source/staticLibHeader.dsptemplate";
       m_DSPFooterTemplate = m_cmHomeDirectory;
-      m_DSPFooterTemplate += "/CMake/staticLibFooter.dsptemplate";
+      m_DSPFooterTemplate += "/CMake/Source/staticLibFooter.dsptemplate";
       break;
     case DLL:
       m_DSPHeaderTemplate = m_cmHomeDirectory;
-      m_DSPHeaderTemplate += "/CMake/DLLHeader.dsptemplate";
+      m_DSPHeaderTemplate += "/CMake/Source/DLLHeader.dsptemplate";
       m_DSPFooterTemplate = m_cmHomeDirectory;
-      m_DSPFooterTemplate += "/CMake/DLLFooter.dsptemplate";
+      m_DSPFooterTemplate += "/CMake/Source/DLLFooter.dsptemplate";
       break;
     case EXECUTABLE:
       m_DSPHeaderTemplate = m_cmHomeDirectory;
-      m_DSPHeaderTemplate += "/CMake/EXEHeader.dsptemplate";
+      m_DSPHeaderTemplate += "/CMake/Source/EXEHeader.dsptemplate";
       m_DSPFooterTemplate = m_cmHomeDirectory;
-      m_DSPFooterTemplate += "/CMake/EXEFooter.dsptemplate";
+      m_DSPFooterTemplate += "/CMake/Source/EXEFooter.dsptemplate";
       break;
     }
 }
@@ -216,9 +217,9 @@ void cmDSPMakefile::WriteDSPHeader(std::ostream& fout)
   std::ifstream fin(m_DSPHeaderTemplate.c_str());
   if(!fin)
     {
-    std::cerr << "failed to open " << m_DSPHeaderTemplate.c_str() 
-	      << " for read" << std::endl;
-    return;
+    std::string message = "Error Reading ";
+    message += m_DSPHeaderTemplate;
+    Die(message.c_str());
     }
   char buffer[2048];
   while(fin)
@@ -245,9 +246,9 @@ void cmDSPMakefile::WriteDSPFooter(std::ostream& fout)
   std::ifstream fin(m_DSPFooterTemplate.c_str());
   if(!fin)
     {
-    std::cerr << "can not open " << m_DSPFooterTemplate.c_str() <<
-      " for read" << std::endl;
-    return;
+    std::string message = "Error Reading ";
+    message += m_DSPFooterTemplate;
+    Die(message.c_str());
     }
   char buffer[2048];
   while(fin)

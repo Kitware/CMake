@@ -62,7 +62,7 @@ void cmDSWMakefile::WriteDSWFile(std::ostream& fout)
       std::cerr << "Create dsp for " << (*si).c_str() << std::endl;
       if(dspname == "")
 	{
-	std::cerr << "Project name not found in " << dir << "/Makefile.in" << std::endl;
+	std::cerr << "Project name not found in " << dir << "/CMakeLists.txt" << std::endl;
 	std::cerr << "Skipping Project " << std::endl;
 	}
       else
@@ -91,7 +91,7 @@ std::vector<std::string> cmDSWMakefile::CreateDSPFile(const char* subdir)
   outdir += subdir;
   dsp.SetOutputDirectory(outdir.c_str());
   currentDir += "/";
-  currentDir += "Makefile.in";
+  currentDir += "CMakeLists.txt";
   dsp.SetInputMakefilePath(currentDir.c_str());
   dsp.CreateDSPFile();
   return dsp.GetCreatedProjectNames();

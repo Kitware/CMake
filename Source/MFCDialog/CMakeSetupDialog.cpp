@@ -235,13 +235,13 @@ void CMakeSetupDialog::OnOK()
   cmDSWBuilder builder;
   // Set the ITK home directory
   builder.SetHomeDirectory(m_WhereSource);
-  // Set the Makefile.in file
+  // Set the CMakeLists.txt file
   CString makefileIn = m_WhereSource;
-  makefileIn += "/Makefile.in";
+  makefileIn += "/CMakeLists.txt";
   builder.SetInputMakefilePath(makefileIn);
   // Set the output directory
   builder.SetOutputDirectory(m_WhereBuild);
-  // set the directory which contains the Makefile.in
+  // set the directory which contains the CMakeLists.txt
   builder.SetMakefileDirectory(m_WhereSource);
   // Create the master DSW file and all children dsp files for ITK
   builder.CreateDSWFile();

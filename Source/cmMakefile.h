@@ -84,6 +84,7 @@ public:
     }
   
 private:
+  void ReadTemplateInstanceDirectory(std::string&);
   void ReadSubdirs(std::ifstream& fin);
   void ReadClasses(std::ifstream& fin, bool t);
   friend class cmMakeDepend;	// make depend needs direct access 
@@ -98,6 +99,7 @@ protected:
   std::string m_LibraryName;	// library name
   std::vector<cmClassFile> m_Classes; // list of classes in makefile
   std::vector<std::string> m_SubDirectories; // list of sub directories
+  std::vector<std::string> m_MakeVerbatim; // list of sub directories
 };
 
 

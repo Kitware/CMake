@@ -13,6 +13,18 @@ Unix
 configure            -> run on unix to configure for build
 CMakeBuildTargets    -> Unix program to read CMakeLists.txt and generate CMakeTargets.make
 
+
+CMakeLists.txt:
+WIN32_CLASSES =
+UNIX_CLASSES  = 
+ABSTRACT_CLASSES =
+SUBDIRS =
+EXECUTABLES =
+ME =
+BEGIN MAKE VERBATIM
+... # copy stuff into CMakeTargets.make directly
+END MAKE VERBATIM
+TEMPLATE_INSTANCE_DIR = 
 TODO:
 Fix cmUnixMakefile.cxx and cmDSPMakefile.cxx 
 to read libraries and -I stuff from a config file

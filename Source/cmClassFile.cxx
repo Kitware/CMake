@@ -38,11 +38,12 @@ void cmClassFile::SetName(const char* name, const char* dir)
   std::string hname = pathname;
   hname += ".cxx";
   if(cmFileExists(hname.c_str()))
-  {
+    {
     m_HeaderFileOnly = false;
     m_FullPath = hname;
     return;
-  }
+    }
+  
   hname = pathname;
   hname += ".c";
   if(cmFileExists(hname.c_str()))
