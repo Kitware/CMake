@@ -248,25 +248,34 @@ bool cmCacheManager::LoadCache(const char* path,
                         "current loaded cache", cmCacheManager::INTERNAL);
     
     }
-  std::string currentcwd = path;
-  if ( currentcwd[0] >= 'A' && currentcwd[0] <= 'Z' &&
-       currentcwd[1] == ':' )
+  if ( internal && this->GetCacheValue("CMAKE_CACHEFILE_DIR") )
     {
-    currentcwd[0] = currentcwd[0] - 'A' + 'a';
+    std::string currentcwd = path;
+    std::string oldcwd = this->GetCacheValue("CMAKE_CACHEFILE_DIR");
+    if ( currentcwd[0] >= 'A' && currentcwd[0] <= 'Z' &&
+         currentcwd[1] == ':' )
+      {
+      currentcwd[0] = currentcwd[0] - 'A' + 'a';
+      }
+    if ( oldcwd[0] >= 'A' && oldcwd[0] <= 'Z' &&
+         oldcwd[1] == ':' )
+      {
+      oldcwd[0] = oldcwd[0] - 'A' + 'a';
+      }
+    cmSystemTools::ConvertToUnixSlashes(currentcwd);
+    if(oldcwd != currentcwd) 
+      {
+      std::string message = 
+        std::string("The current CMakeCache.txt directory ") +
+        currentcwd + std::string(" is different than the directory ") + 
+        std::string(this->GetCacheValue("CMAKE_CACHEFILE_DIR")) +
+        std::string(" where CMackeCache.txt was created. This may result "
+                    "in binaries being created in the wrong place. If you "
+                    "are not sure, reedit the CMakeCache.txt");
+      cmSystemTools::Error(message.c_str());   
+      }
     }
-  cmSystemTools::ConvertToUnixSlashes(currentcwd);
-  if(internal && this->GetCacheValue("CMAKE_CACHEFILE_DIR") && 
-     std::string(this->GetCacheValue("CMAKE_CACHEFILE_DIR")) != currentcwd) 
-    {
-    std::string message = 
-      std::string("The current CMakeCache.txt directory ") +
-      currentcwd + std::string(" is different than the directory ") + 
-      std::string(this->GetCacheValue("CMAKE_CACHEFILE_DIR")) +
-      std::string(" where CMackeCache.txt was created. This may result "
-		  "in binaries being created in the wrong place. If you "
-		  "are not sure, reedit the CMakeCache.txt");
-    cmSystemTools::Error(message.c_str());   
-    }
+  
 
   return true;
 }
