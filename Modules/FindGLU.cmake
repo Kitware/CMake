@@ -13,7 +13,7 @@ IF (WIN32)
     SET (GLU_LIBRARY glu32 CACHE STRING "GLU library for win32")
   ENDIF(BORLAND)
 ELSE (WIN32)
-  FIND_PATH(GLU_INCLUDE_PATH GL/gl.h 
+  FIND_PATH(GLU_INCLUDE_PATH GL/glu.h 
   /usr/include 
   /usr/local/include 
   /usr/openwin/share/include 
