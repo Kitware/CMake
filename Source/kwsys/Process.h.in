@@ -56,6 +56,7 @@
 #define kwsysProcess_GetExitCode         kwsys(Process_GetExitCode)
 #define kwsysProcess_GetExitValue        kwsys(Process_GetExitValue)
 #define kwsysProcess_GetErrorString      kwsys(Process_GetErrorString)
+#define kwsysProcess_GetExceptionString  kwsys(Process_GetExceptionString)
 #define kwsysProcess_Execute             kwsys(Process_Execute)
 #define kwsysProcess_WaitForData         kwsys(Process_WaitForData)
 #define kwsysProcess_Pipes_e             kwsys(Process_Pipes_e)
@@ -225,6 +226,12 @@ kwsysEXPORT int kwsysProcess_GetExitValue(kwsysProcess* cp);
 kwsysEXPORT const char* kwsysProcess_GetErrorString(kwsysProcess* cp);
 
 /**
+ * When GetState returns "Exception", this method returns a string
+ * describing the problem.  Otherwise, it returns NULL.
+ */
+kwsysEXPORT const char* kwsysProcess_GetExceptionString(kwsysProcess* cp);
+
+/**
  * Start executing the child process.
  */
 kwsysEXPORT void kwsysProcess_Execute(kwsysProcess* cp);
@@ -335,6 +342,7 @@ kwsysEXPORT void kwsysProcess_Kill(kwsysProcess* cp);
 # undef kwsysProcess_GetExitCode
 # undef kwsysProcess_GetExitValue
 # undef kwsysProcess_GetErrorString
+# undef kwsysProcess_GetExceptionString
 # undef kwsysProcess_Execute
 # undef kwsysProcess_WaitForData
 # undef kwsysProcess_Pipes_e

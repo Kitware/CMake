@@ -92,6 +92,7 @@ static kwsysProcessTime kwsysProcessTimeFromDouble(double d);
 static int kwsysProcessTimeLess(kwsysProcessTime in1, kwsysProcessTime in2);
 static kwsysProcessTime kwsysProcessTimeAdd(kwsysProcessTime in1, kwsysProcessTime in2);
 static kwsysProcessTime kwsysProcessTimeSubtract(kwsysProcessTime in1, kwsysProcessTime in2);
+static void kwsysProcessSetExitException(kwsysProcess* cp, int code);
 extern kwsysEXPORT int kwsysEncodedWriteArrayProcessFwd9x(const char* fname);
 
 /*--------------------------------------------------------------------------*/
@@ -233,6 +234,9 @@ struct kwsysProcess_s
 
   /* Buffer for error messages (possibly from Win9x child).  */
   char ErrorMessage[KWSYSPE_PIPE_BUFFER_SIZE+1];
+
+  /* Description for the ExitException.  */
+  char ExitExceptionString[KWSYSPE_PIPE_BUFFER_SIZE+1];
 
   /* Windows process information data.  */
   PROCESS_INFORMATION* ProcessInformation;
@@ -905,13 +909,27 @@ const char* kwsysProcess_GetErrorString(kwsysProcess* cp)
 {
   if(!cp)
     {
-    return "Process management structure could not be allocated.";
+    return "Process management structure could not be allocated";
     }
   else if(cp->State == kwsysProcess_State_Error)
     {
     return cp->ErrorMessage;
     }
-  return 0;
+  return "Success";
+}
+
+/*--------------------------------------------------------------------------*/
+const char* kwsysProcess_GetExceptionString(kwsysProcess* cp)
+{
+  if(!cp)
+    {
+    return "GetExceptionString called with NULL process management structure";
+    }
+  else if(cp->State == kwsysProcess_State_Exception)
+    {
+    return cp->ExitExceptionString;
+    }
+  return "No exception";
 }
 
 /*--------------------------------------------------------------------------*/
@@ -1312,39 +1330,8 @@ int kwsysProcess_WaitForExit(kwsysProcess* cp, double* userTimeout)
       {
       /* Child terminated due to exceptional behavior.  */
       cp->State = kwsysProcess_State_Exception;
-      switch (cp->ExitCode)
-        {
-        case CONTROL_C_EXIT:
-          cp->ExitException = kwsysProcess_Exception_Interrupt; break;
-
-        case EXCEPTION_FLT_DENORMAL_OPERAND:
-        case EXCEPTION_FLT_DIVIDE_BY_ZERO:
-        case EXCEPTION_FLT_INEXACT_RESULT:
-        case EXCEPTION_FLT_INVALID_OPERATION:
-        case EXCEPTION_FLT_OVERFLOW:
-        case EXCEPTION_FLT_STACK_CHECK:
-        case EXCEPTION_FLT_UNDERFLOW:
-        case EXCEPTION_INT_DIVIDE_BY_ZERO:
-        case EXCEPTION_INT_OVERFLOW:
-          cp->ExitException = kwsysProcess_Exception_Numerical; break;
-
-        case EXCEPTION_ACCESS_VIOLATION:
-        case EXCEPTION_ARRAY_BOUNDS_EXCEEDED:
-        case EXCEPTION_DATATYPE_MISALIGNMENT:
-        case EXCEPTION_INVALID_DISPOSITION:
-        case EXCEPTION_IN_PAGE_ERROR:
-        case EXCEPTION_NONCONTINUABLE_EXCEPTION:
-        case EXCEPTION_STACK_OVERFLOW:
-          cp->ExitException = kwsysProcess_Exception_Fault; break;
-
-        case EXCEPTION_ILLEGAL_INSTRUCTION:
-        case EXCEPTION_PRIV_INSTRUCTION:
-          cp->ExitException = kwsysProcess_Exception_Illegal; break;
-
-        default:
-          cp->ExitException = kwsysProcess_Exception_Other; break;
-        }
       cp->ExitValue = 1;
+      kwsysProcessSetExitException(cp, cp->ExitCode);
       }
     else
       {
@@ -1493,6 +1480,7 @@ int kwsysProcessInitialize(kwsysProcess* cp)
 
   /* Reset error data.  */
   cp->ErrorMessage[0] = 0;
+  strcpy(cp->ExitExceptionString, "No exception");
 
   /* Allocate process information for each process.  */
   cp->ProcessInformation =
@@ -2070,3 +2058,73 @@ kwsysProcessTime kwsysProcessTimeSubtract(kwsysProcessTime in1, kwsysProcessTime
   out.QuadPart = in1.QuadPart - in2.QuadPart;
   return out;
 }
+
+/*--------------------------------------------------------------------------*/
+#define KWSYSPE_CASE(type, str) \
+  cp->ExitException = kwsysProcess_Exception_##type; \
+  strcpy(cp->ExitExceptionString, str)
+static void kwsysProcessSetExitException(kwsysProcess* cp, int code)
+{
+  switch (code)
+    {
+    case STATUS_CONTROL_C_EXIT:
+      KWSYSPE_CASE(Interrupt, "User interrupt"); break;
+
+    case STATUS_FLOAT_DENORMAL_OPERAND:
+      KWSYSPE_CASE(Numerical, "Floating-point exception (denormal operand)"); break;
+    case STATUS_FLOAT_DIVIDE_BY_ZERO:
+      KWSYSPE_CASE(Numerical, "Divide-by-zero"); break;
+    case STATUS_FLOAT_INEXACT_RESULT:
+      KWSYSPE_CASE(Numerical, "Floating-point exception (inexact result)"); break;
+    case STATUS_FLOAT_INVALID_OPERATION:
+      KWSYSPE_CASE(Numerical, "Invalid floating-point operation"); break;
+    case STATUS_FLOAT_OVERFLOW:
+      KWSYSPE_CASE(Numerical, "Floating-point overflow"); break;
+    case STATUS_FLOAT_STACK_CHECK:
+      KWSYSPE_CASE(Numerical, "Floating-point stack check failed"); break;
+    case STATUS_FLOAT_UNDERFLOW:
+      KWSYSPE_CASE(Numerical, "Floating-point underflow"); break;
+#ifdef STATUS_FLOAT_MULTIPLE_FAULTS
+    case STATUS_FLOAT_MULTIPLE_FAULTS:
+      KWSYSPE_CASE(Numerical, "Floating-point exception (multiple faults)"); break;
+#endif
+#ifdef STATUS_FLOAT_MULTIPLE_TRAPS
+    case STATUS_FLOAT_MULTIPLE_TRAPS:
+      KWSYSPE_CASE(Numerical, "Floating-point exception (multiple traps)"); break;
+#endif
+    case STATUS_INTEGER_DIVIDE_BY_ZERO:
+      KWSYSPE_CASE(Numerical, "Integer divide-by-zero"); break;
+    case STATUS_INTEGER_OVERFLOW:
+      KWSYSPE_CASE(Numerical, "Integer overflow"); break;
+
+    case STATUS_DATATYPE_MISALIGNMENT:
+      KWSYSPE_CASE(Fault, "Datatype misalignment"); break;
+    case STATUS_ACCESS_VIOLATION:
+      KWSYSPE_CASE(Fault, "Access violation"); break;
+    case STATUS_IN_PAGE_ERROR:
+      KWSYSPE_CASE(Fault, "In-page error"); break;
+    case STATUS_INVALID_HANDLE:
+      KWSYSPE_CASE(Fault, "Invalid hanlde"); break;
+    case STATUS_NONCONTINUABLE_EXCEPTION:
+      KWSYSPE_CASE(Fault, "Noncontinuable exception"); break;
+    case STATUS_INVALID_DISPOSITION:
+      KWSYSPE_CASE(Fault, "Invalid disposition"); break;
+    case STATUS_ARRAY_BOUNDS_EXCEEDED:
+      KWSYSPE_CASE(Fault, "Array bounds exceeded"); break;
+    case STATUS_STACK_OVERFLOW:
+      KWSYSPE_CASE(Fault, "Stack overflow"); break;
+
+    case STATUS_ILLEGAL_INSTRUCTION:
+      KWSYSPE_CASE(Illegal, "Illegal instruction"); break;
+    case STATUS_PRIVILEGED_INSTRUCTION:
+      KWSYSPE_CASE(Illegal, "Privileged instruction"); break;
+
+    case STATUS_NO_MEMORY:
+    default:
+      cp->ExitException = kwsysProcess_Exception_Other;
+      sprintf(cp->ExitExceptionString, "Exit code 0x%x\n", code);
+      break;
+    }
+}
+#undef KWSYSPE_CASE
+

@@ -28,6 +28,15 @@ int main()
     {
     kwsys_ios::cout.write(data, length);
     }
+  kwsysProcess_WaitForExit(kp, 0);
+  if(kwsysProcess_GetState(kp) == kwsysProcess_State_Error)
+    {
+    kwsys_ios::cout << kwsysProcess_GetErrorString(kp) << kwsys_ios::endl;
+    }
+  else if(kwsysProcess_GetState(kp) == kwsysProcess_State_Exception)
+    {
+    kwsys_ios::cout << kwsysProcess_GetExceptionString(kp) << kwsys_ios::endl;
+    }
   kwsysProcess_Delete(kp);
   kwsys_ios::cout << kwsys_ios::endl;
   return 0;
