@@ -701,10 +701,6 @@ AddCustomCommandToOutput(const char* outputIn,
     }
   if(file)
     {
-    if (file->GetCustomCommand())
-      {
-      delete file->GetCustomCommand();
-      }
     file->SetCustomCommand(cc);
     }
 }

@@ -201,3 +201,12 @@ bool cmSourceFile::GetPropertyAsBool(const char* prop) const
     }
   return false;
 }
+
+void cmSourceFile::SetCustomCommand(cmCustomCommand* cc)
+{
+  if(m_CustomCommand)
+    {
+    delete m_CustomCommand;
+    }
+  m_CustomCommand = cc;
+}

@@ -38,7 +38,7 @@ public:
     }
   ~cmSourceFile()
     {
-      if (m_CustomCommand) { delete m_CustomCommand; }
+      this->SetCustomCommand(0);
     }
   
   /**
@@ -56,8 +56,7 @@ public:
   const cmCustomCommand *GetCustomCommand() const 
     {return m_CustomCommand;}
   cmCustomCommand *GetCustomCommand() {return m_CustomCommand;}
-  void SetCustomCommand(cmCustomCommand *cc) 
-    { m_CustomCommand = cc;}
+  void SetCustomCommand(cmCustomCommand *cc);
     
   /**
    * Set the name of the file, given the directory the file should be in.  IN
