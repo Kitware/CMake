@@ -62,7 +62,6 @@ public:
 
   cmCTestTestHandler();
 
-protected:
   struct cmCTestTestResult
   {
     std::string m_Name;
@@ -78,6 +77,16 @@ protected:
   };
 
   typedef std::vector<cmListFileArgument> tm_VectorOfListFileArgs;
+
+protected:
+  struct cmCTestTestProperties
+  {
+    cmStdString m_Name;
+    cmStdString m_Directory;
+    tm_VectorOfListFileArgs m_Args;
+    bool m_IsInBasedOnREOptions;
+  };
+
 
   virtual int PreProcessHandler();
   virtual int PostProcessHandler();
@@ -120,13 +129,6 @@ private:
   void ProcessDirectory(std::vector<cmStdString> &passed, 
                         std::vector<cmStdString> &failed);
   
-  struct cmCTestTestProperties
-  {
-    cmStdString m_Name;
-    cmStdString m_Directory;
-    tm_VectorOfListFileArgs m_Args;
-    bool m_IsInBasedOnREOptions;
-  };
 
   typedef std::vector<cmCTestTestProperties> tm_ListOfTests;
   /**
