@@ -82,6 +82,15 @@ bool cmFindProgramCommand::InitialPass(std::vector<std::string> const& argsIn)
     {
     return true;
     }
+  if(cacheValue)
+    {
+    cmCacheManager::CacheEntry* e = 
+      cmCacheManager::GetInstance()->GetCacheEntry(args[0].c_str());
+    if(e)
+      {
+      doc = e->m_HelpString;
+      }
+    }
   std::vector<std::string> path;
   std::vector<std::string> names;
   bool foundName = false;

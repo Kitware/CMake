@@ -77,7 +77,15 @@ bool cmFindPathCommand::InitialPass(std::vector<std::string> const& argsIn)
     { 
     return true;
     }
-
+  if(cacheValue)
+    {
+    cmCacheManager::CacheEntry* e = 
+      cmCacheManager::GetInstance()->GetCacheEntry(args[0].c_str());
+    if(e)
+      {
+      helpString = e->m_HelpString;
+      }
+    }
   std::vector<std::string> path;
   // add any user specified paths
   for (unsigned int j = 2; j < args.size(); j++)
