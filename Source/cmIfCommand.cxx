@@ -263,7 +263,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
     {
     def = cmIfCommand::GetVariableOrString(args[0].c_str(), makefile);
     def2 = cmIfCommand::GetVariableOrString(args[2].c_str(), makefile);
-    if(atof(def) == atof(def2))
+    if(atof(def) != atof(def2))
       {
       isTrue = false;
       }
