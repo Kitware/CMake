@@ -35,7 +35,7 @@ FIND_PATH(FLTK_INCLUDE_DIR FL/Fl.h
 # Platform dependent libraries required by FLTK
 
 IF(WIN32)
-  SET( FLTK_PLATFORM_DEPENDENT_LIBS wsock32 )
+  SET( FLTK_PLATFORM_DEPENDENT_LIBS wsock32 comctl32 )
 ENDIF(WIN32)
 
 IF(UNIX)
