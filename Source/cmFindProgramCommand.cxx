@@ -52,7 +52,24 @@ bool cmFindProgramCommand::InitialPass(std::vector<std::string> const& argsIn)
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  std::vector<std::string> args = argsIn;
+  std::string doc = "Path to a program.";
+  unsigned int size = argsIn.size();
+  std::vector<std::string> args;
+  for(unsigned int j = 0; j < size; ++j)
+    {
+    if(argsIn[j] != "DOC")
+      {
+      args.push_back(argsIn[j]);
+      }
+    else
+      {
+      if(j+1 < size)
+        {
+        doc = argsIn[j+1];
+        }
+      break;
+      }
+    }
   std::vector<std::string>::iterator i = args.begin();
   // Use the first argument as the name of something to be defined
   const char* define = (*i).c_str();
@@ -125,7 +142,7 @@ bool cmFindProgramCommand::InitialPass(std::vector<std::string> const& argsIn)
       // Save the value in the cache
       m_Makefile->AddCacheDefinition(define,
                                      result.c_str(),
-                                     "Path to a program.",
+                                     doc.c_str(),
                                      cmCacheManager::FILEPATH);
       
       return true;
@@ -133,7 +150,7 @@ bool cmFindProgramCommand::InitialPass(std::vector<std::string> const& argsIn)
     }
   m_Makefile->AddCacheDefinition(args[0].c_str(),
                                  "NOTFOUND",
-                                 "Path to a program",
+                                 doc.c_str(),
                                  cmCacheManager::FILEPATH);
   return true;
 }

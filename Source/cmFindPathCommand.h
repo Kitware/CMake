@@ -70,7 +70,9 @@ public:
     {
     return
       "FIND_PATH(PATH_DEFINE fileName path1 path2 path3...)\n"
-      "If the file is found, then PATH_DEFINE is set to the path where it was found";
+      "If the file is found, then PATH_DEFINE is set to the path where it was found."
+      "If DOC is specified the next argument is the "
+      "documentation string for the cache entry NAME.";
     }
   
   cmTypeMacro(cmFindPathCommand, cmCommand);

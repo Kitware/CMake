@@ -94,7 +94,11 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "FIND_PROGRAM(NAME executable1 extrapath extrapath ...)";
+      "FIND_PROGRAM(NAME executable1 extrapath extrapath ... [DOC helpstring]) "
+      "Find the executable in the system PATH or in any extra paths specified in the command."
+      "A cache entry called NAME is created to store the result.   NOTFOUND is the value"
+      " used if the program was not found.  If DOC is specified the next argument is the "
+      "documentation string for the cache entry NAME.";
     }
   
   cmTypeMacro(cmFindProgramCommand, cmCommand);

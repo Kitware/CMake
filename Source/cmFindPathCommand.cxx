@@ -42,9 +42,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmCacheManager.h"
 
 // cmFindPathCommand
-bool cmFindPathCommand::InitialPass(std::vector<std::string> const& args)
+bool cmFindPathCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
-  if(args.size() < 2)
+  if(argsIn.size() < 2)
     {
     this->SetError("called with incorrect number of arguments");
     return false;
@@ -53,7 +53,24 @@ bool cmFindPathCommand::InitialPass(std::vector<std::string> const& args)
   // Now check and see if the value has been stored in the cache
   // already, if so use that value and don't look for the program
   std::string helpString = "What is the path where the file ";
-  helpString += args[1] + " can be found";
+  helpString += argsIn[1] + " can be found";
+  std::vector<std::string> args;
+  unsigned int size = argsIn.size();
+  for(unsigned int j = 0; j < size; ++j)
+    {
+    if(argsIn[j] != "DOC")
+      {
+      args.push_back(argsIn[j]);
+      }
+    else
+      {
+      if(j+1 < size)
+        {
+        helpString = argsIn[j+1];
+        }
+      break;
+      }
+    }
   const char* cacheValue
     = m_Makefile->GetDefinition(args[0].c_str());
   if(cacheValue && strcmp(cacheValue, "NOTFOUND"))

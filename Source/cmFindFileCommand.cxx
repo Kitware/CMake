@@ -45,22 +45,38 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   
 
 // cmFindFileCommand
-bool cmFindFileCommand::InitialPass(std::vector<std::string> const& args)
+bool cmFindFileCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
-  if(args.size() < 2)
+  if(argsIn.size() < 2)
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-
+  std::string helpString = "Where can the ";
+  helpString += argsIn[1] + " file be found";
+  unsigned int size = argsIn.size();
+  std::vector<std::string> args;
+  for(unsigned int j = 0; j < size; ++j)
+    {
+    if(argsIn[j] != "DOC")
+      {
+      args.push_back(argsIn[j]);
+      }
+    else
+      {
+      if(j+1 < size)
+        {
+        helpString = argsIn[j+1];
+        }
+      break;
+      }
+    }
   std::vector<std::string>::const_iterator i = args.begin();
   // Use the first argument as the name of something to be defined
   const char* define = (*i).c_str();
   i++; // move iterator to next arg
   // Now check and see if the value has been stored in the cache
   // already, if so use that value and don't look for the program
-  std::string helpString = "Where can the ";
-  helpString += args[1] + " file be found";
   const char* cacheValue
     = m_Makefile->GetDefinition(define);
   if(cacheValue && strcmp(cacheValue, "NOTFOUND"))

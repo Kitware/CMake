@@ -44,11 +44,28 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // cmFindLibraryCommand
 bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
-  std::vector<std::string>  args = argsIn;
-  if(args.size() < 2)
+  if(argsIn.size() < 2)
     {
     this->SetError("called with incorrect number of arguments");
     return false;
+    } 
+  std::string helpString;
+  unsigned int size = argsIn.size();
+  std::vector<std::string> args;
+  for(unsigned int j = 0; j < size; ++j)
+    {
+    if(argsIn[j] != "DOC")
+      {
+      args.push_back(argsIn[j]);
+      }
+    else
+      {
+      if(j+1 < size)
+        {
+        helpString = argsIn[j+1];
+        }
+      break;
+      }
     }
 
   std::vector<std::string> path;
@@ -101,26 +118,28 @@ bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn)
       cmSystemTools::GlobDirs(exp.c_str(), path);
       }
     }
-
-  std::string helpString = "Where can ";
-  if (names.size() == 0)
+  if(helpString.size() == 0)
     {
-    helpString += "the (unknown) library be found";
-    }
-  else if (names.size() == 1)
-    {
-    helpString += "the " + names[0] + " library be found";
-    }
-  else
-    {
-    helpString += "one of the " + names[0];
-    for (unsigned int j = 1; j < names.size() - 1; ++j)
+    helpString = "Where can ";
+    if (names.size() == 0)
       {
-      helpString += ", " + names[j];
+      helpString += "the (unknown) library be found";
       }
-    helpString += " or " + names[names.size() - 1] + " libraries be found";
+    else if (names.size() == 1)
+      {
+      helpString += "the " + names[0] + " library be found";
+      }
+    else
+      {
+      helpString += "one of the " + names[0];
+      for (unsigned int j = 1; j < names.size() - 1; ++j)
+        {
+        helpString += ", " + names[j];
+        }
+      helpString += " or " + names[names.size() - 1] + " libraries be found";
+      }
     }
-
+  
   const char* cacheValue
     = m_Makefile->GetDefinition(args[0].c_str());
   if(cacheValue && strcmp(cacheValue, "NOTFOUND"))
