@@ -210,7 +210,7 @@ void cmLocalGenerator::GenerateInstallRules()
     }
 }
 
-void cmLocalGenerator::AddInstallRule(ostream& fout, const char* dest, int type, const char* files)
+void cmLocalGenerator::AddInstallRule(std::ostream& fout, const char* dest, int type, const char* files)
 {
   std::string sfiles = files;
   std::string destination = cmSystemTools::ConvertToOutputPath(dest);

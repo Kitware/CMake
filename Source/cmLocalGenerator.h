@@ -79,7 +79,7 @@ public:
 
   std::string ConvertToRelativeOutputPath(const char* p);
 protected:
-  virtual void AddInstallRule(ostream& fout, const char* dest, int type, const char* files);
+  virtual void AddInstallRule(std::ostream& fout, const char* dest, int type, const char* files);
   
   bool m_FromTheTop;
   cmMakefile *m_Makefile;
