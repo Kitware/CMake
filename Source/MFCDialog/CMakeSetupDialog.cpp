@@ -683,14 +683,11 @@ void CMakeSetupDialog::FillCacheGUIFromCacheManager()
     CPropertyItem* item = *i;
     item->m_NewValue = false;
     }
-  const cmCacheManager::CacheEntryMap &cache =
-    cmCacheManager::GetInstance()->GetCacheMap();
-
-  for(cmCacheManager::CacheEntryMap::const_iterator i = cache.begin();
-      i != cache.end(); ++i)
+  for(cmCacheManager::CacheIterator i = cmCacheManager::GetInstance()->NewIterator();
+      !i.IsAtEnd(); i.Next())
     {
-    const char* key = i->first.c_str();
-    cmCacheManager::CacheEntry value = i->second;
+    const char* key = i.GetName();
+    cmCacheManager::CacheEntry value = i.GetEntry();
 
     // if value has trailing space or tab, enclose it in single quotes
     // to enforce the fact that it has 'invisible' trailing stuff
@@ -761,7 +758,7 @@ void CMakeSetupDialog::FillCacheGUIFromCacheManager()
       }
     }
   m_OKButton.EnableWindow(false);
-  if(cache.size() > 0 && !cmSystemTools::GetErrorOccuredFlag())
+  if(cmCacheManager::GetInstance()->GetSize() > 0 && !cmSystemTools::GetErrorOccuredFlag())
     {
     bool enable = true;
     items = m_CacheEntriesList.GetItems();
@@ -790,7 +787,6 @@ void CMakeSetupDialog::FillCacheGUIFromCacheManager()
 // copy from the list box to the cache manager
 void CMakeSetupDialog::FillCacheManagerFromCacheGUI()
 { 
-  cmCacheManager::GetInstance()->GetCacheMap();
   std::set<CPropertyItem*> items = m_CacheEntriesList.GetItems();
   for(std::set<CPropertyItem*>::iterator i = items.begin();
       i != items.end(); ++i)
@@ -1115,14 +1111,11 @@ void CMakeSetupDialog::OnHelpButton()
 
 void CMakeSetupDialog::ShowAdvancedValues()
 {
-  const cmCacheManager::CacheEntryMap &cache =
-    cmCacheManager::GetInstance()->GetCacheMap();
-  
-  for(cmCacheManager::CacheEntryMap::const_iterator i = cache.begin();
-      i != cache.end(); ++i)
+  for(cmCacheManager::CacheIterator i = cmCacheManager::GetInstance()->NewIterator();
+      !i.IsAtEnd(); i.Next())
     {
-    const char* key = i->first.c_str();
-    const cmCacheManager::CacheEntry& value = i->second;
+    const char* key = i.GetName();
+    const cmCacheManager::CacheEntry& value = i.GetEntry();
     if(!cmCacheManager::GetInstance()->IsAdvanced(key))
       {
       continue;
@@ -1182,14 +1175,11 @@ void CMakeSetupDialog::ShowAdvancedValues()
 
 void CMakeSetupDialog::RemoveAdvancedValues()
 {
-  const cmCacheManager::CacheEntryMap &cache =
-    cmCacheManager::GetInstance()->GetCacheMap();
-  
-  for(cmCacheManager::CacheEntryMap::const_iterator i = cache.begin();
-      i != cache.end(); ++i)
+  for(cmCacheManager::CacheIterator i = cmCacheManager::GetInstance()->NewIterator();
+      !i.IsAtEnd(); i.Next())
     {
-    const char* key = i->first.c_str();
-    const cmCacheManager::CacheEntry& value = i->second;
+    const char* key = i.GetName();
+    const cmCacheManager::CacheEntry& value = i.GetEntry();
     if(cmCacheManager::GetInstance()->IsAdvanced(key))
       {
       m_CacheEntriesList.RemoveProperty(key);
