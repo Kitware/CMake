@@ -29,12 +29,13 @@
 /****************************************************************************
  *   Author: Juergen Pfeifer <juergen.pfeifer@gmx.net> 1995,1997            *
  ****************************************************************************/
-#define _XOPEN_SOURCE_EXTENDED
-#ifdef __FreeBSD__
- #define _WCHAR_T
-#endif /* __FreeBSD__ */
+#if defined(__hpux)
+ #define _XOPEN_SOURCE_EXTENDED
+#endif
 #include "form.priv.h"
-#undef _XOPEN_SOURCE_EXTENDED
+#if defined(__hpux)
+ #undef _XOPEN_SOURCE_EXTENDED
+#endif
 
 MODULE_ID("$Id$")
 
@@ -1994,7 +1995,10 @@ static int Insert_String(FORM *form, int row, char *txt, int len)
   int requiredlen  = len+1;
   char *split;
   int result = E_REQUEST_DENIED;
-  const char *Space = " ";
+  char *Space;
+
+  Space = (char*)malloc(2*sizeof(char));
+  strcpy(Space, " ");
 
   if (freelen >= requiredlen)
     {
@@ -2002,6 +2006,7 @@ static int Insert_String(FORM *form, int row, char *txt, int len)
       winsnstr(form->w,txt,len);
       wmove(form->w,row,len);
       winsnstr(form->w,Space,1);
+      free(Space);
       return E_OK;
     }
   else
@@ -2010,7 +2015,10 @@ static int Insert_String(FORM *form, int row, char *txt, int len)
       if ((row == (field->drows - 1)) && Growable(field))
 	{
 	  if (!Field_Grown(field,1))
+	    {
+	    free(Space);
 	    return(E_SYSTEM_ERROR);
+	    }
 	  /* !!!Side-Effect : might be changed due to growth!!! */
 	  bp = Address_Of_Row_In_Buffer(field,row); 
 	}
@@ -2033,9 +2041,11 @@ static int Insert_String(FORM *form, int row, char *txt, int len)
 	      winsnstr(form->w,txt,len);
 	      wmove(form->w,row,len);
 	      winsnstr(form->w,Space,1);
+	      free(Space);
 	      return E_OK;
 	    }
 	}
+      free(Space);
       return(result);
     }
 }

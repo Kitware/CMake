@@ -35,12 +35,13 @@
 * Routines to handle external names of menu requests                       *
 ***************************************************************************/
 
-#define _XOPEN_SOURCE_EXTENDED
-#ifdef __FreeBSD__
- #define _WCHAR_T
-#endif /* __FreeBSD__ */
+#if defined(__hpux)
+ #define _XOPEN_SOURCE_EXTENDED
+#endif
 #include "form.priv.h"
-#undef _XOPEN_SOURCE_EXTENDED
+#if defined(__hpux)
+ #undef _XOPEN_SOURCE_EXTENDED
+#endif
 
 MODULE_ID("$Id$")
 

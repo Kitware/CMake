@@ -1,4 +1,3 @@
-SUBDIRS(form)
 
 SOURCE_FILES( CURSES_SRCS
               cmCursesBoolWidget
