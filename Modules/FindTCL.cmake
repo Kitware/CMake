@@ -79,6 +79,12 @@ FIND_LIBRARY(TK_STUB_LIBRARY_DEBUG
 )
 
 SET (TCLTK_POSSIBLE_INCLUDE_PATHS
+  ~/Library/Frameworks/Tcl.framework/Headers
+  ~/Library/Frameworks/Tk.framework/Headers
+  ~/Library/Frameworks/Tk.framework/PrivateHeaders
+  /Library/Frameworks/Tcl.framework/Headers
+  /Library/Frameworks/Tk.framework/Headers
+  /Library/Frameworks/Tk.framework/PrivateHeaders
   "${TCL_TCLSH_PATH}/../include"
   "${TK_WISH_PATH}/../include"
   /usr/include 
@@ -120,6 +126,34 @@ IF (WIN32)
     TK_LIBRARY_DEBUG
     )
 ENDIF(WIN32)
+
+IF(APPLE)
+  IF(EXISTS ~/Library/Frameworks/Tcl.framework)
+    SET(TCL_HAVE_FRAMEWORK 1)
+  ENDIF(EXISTS ~/Library/Frameworks/Tcl.framework)
+  IF(EXISTS /Library/Frameworks/Tcl.framework)
+    SET(TCL_HAVE_FRAMEWORK 1)
+  ENDIF(EXISTS /Library/Frameworks/Tcl.framework)
+  IF(EXISTS ~/Library/Frameworks/Tk.framework)
+    SET(TCL_TK_HAVE_FRAMEWORK 1)
+  ENDIF(EXISTS ~/Library/Frameworks/Tk.framework)
+  IF(EXISTS /Library/Frameworks/Tk.framework)
+    SET(TCL_TK_HAVE_FRAMEWORK 1)
+  ENDIF(EXISTS /Library/Frameworks/Tk.framework)
+  IF("${TCL_INCLUDE_PATH}" MATCHES "Tcl\\.framework")
+    SET(TCL_LIBRARY "")
+  ENDIF("${TCL_INCLUDE_PATH}" MATCHES "Tcl\\.framework")
+  IF(TCL_HAVE_FRAMEWORK)
+    IF(NOT TCL_LIBRARY)
+      SET (TCL_LIBRARY "-framework Tcl" CACHE FILEPATH "Tcl Framework" FORCE)
+    ENDIF(NOT TCL_LIBRARY)
+  ENDIF(TCL_HAVE_FRAMEWORK)
+  IF(TCL_TK_HAVE_FRAMEWORK)
+    IF(NOT TK_LIBRARY)
+      SET (TK_LIBRARY "-framework Tk" CACHE FILEPATH "Tk Framework" FORCE)
+    ENDIF(NOT TK_LIBRARY)
+  ENDIF(TCL_TK_HAVE_FRAMEWORK)
+ENDIF(APPLE)
 
 MARK_AS_ADVANCED(
   TCL_STUB_LIBRARY
