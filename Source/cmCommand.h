@@ -149,7 +149,7 @@ public:
       if(m_Error.length() == 0)
         {
         m_Error = this->GetName();
-        m_Error += " uknown error.";
+        m_Error += " unknown error.";
         }
       return m_Error.c_str();
     }
