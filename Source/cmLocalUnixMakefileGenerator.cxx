@@ -2494,7 +2494,7 @@ void cmLocalUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     std::string arg = m_Makefile->GetDefinition("CMAKE_PLATFORM_IMPLICIT_INCLUDE_DIRECTORIES");
     std::vector<std::string> implicitIncludeVec;
     cmSystemTools::ExpandListArgument(arg, implicitIncludeVec);
-    for(int k =0; k < implicitIncludeVec.size(); k++)
+    for(unsigned int k =0; k < implicitIncludeVec.size(); k++)
       {
       implicitIncludes[implicitIncludeVec[k]] = implicitIncludeVec[k];
       }
