@@ -228,14 +228,11 @@ void cmDSPWriter::WriteDSPFile(std::ostream& fout,
   for(std::vector<cmSourceFile>::iterator i = classes.begin(); 
       i != classes.end(); i++)
     {
-    if(!i->IsAHeaderFileOnly())
-      {
-      // Add the file to the list of sources.
-      std::string source = i->GetFullPath();
-      cmSourceGroup& sourceGroup = m_Makefile->FindSourceGroup(source.c_str(),
-                                                               sourceGroups);
-      sourceGroup.AddSource(source.c_str());
-      }
+    // Add the file to the list of sources.
+    std::string source = i->GetFullPath();
+    cmSourceGroup& sourceGroup = m_Makefile->FindSourceGroup(source.c_str(),
+                                                             sourceGroups);
+    sourceGroup.AddSource(source.c_str());
     }
   
   // add any custom rules to the source groups
