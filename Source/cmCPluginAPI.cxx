@@ -386,6 +386,12 @@ const char *cmSourceFileGetSourceName(void *arg)
   return sf->GetSourceName().c_str();
 }
 
+const char *cmSourceFileGetFullPath(void *arg)
+{
+  cmSourceFile *sf = static_cast<cmSourceFile *>(arg);
+  return sf->GetFullPath().c_str();
+}
+
 const char *cmSourceFileGetProperty(void *arg,const char *prop)
 {
   cmSourceFile *sf = static_cast<cmSourceFile *>(arg);
@@ -508,6 +514,7 @@ cmCAPI cmStaticCAPI =
   cmSourceFileGetProperty,
   cmSourceFileGetPropertyAsBool,
   cmSourceFileGetSourceName,
+  cmSourceFileGetFullPath,
   cmSourceFileSetName,
   cmSourceFileSetName2,
   cmSourceFileSetProperty,

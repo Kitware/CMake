@@ -118,6 +118,7 @@ typedef struct
   const char *(*SourceFileGetProperty) (void *sf, const char *prop);
   int   (*SourceFileGetPropertyAsBool) (void *sf, const char *prop);
   const char *(*SourceFileGetSourceName) (void *sf);
+  const char *(*SourceFileGetFullPath) (void *sf);
   void  (*SourceFileSetName) (void *sf, const char* name, const char* dir,
                              int numSourceExtensions,
                              const char **sourceExtensions,
