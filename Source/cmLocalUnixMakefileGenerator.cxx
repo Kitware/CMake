@@ -3081,7 +3081,7 @@ cmLocalUnixMakefileGenerator::CreateSafeUniqueObjectFileName(const char* sin)
   if ( it == m_UniqueObjectNamesMap.end() )
     {
     std::string ssin = sin;
-    bool done = false;
+    bool done;
     int cc = 0;
     char rpstr[100];
     sprintf(rpstr, "_p_");

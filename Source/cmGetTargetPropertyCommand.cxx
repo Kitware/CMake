@@ -71,8 +71,7 @@ bool cmGetTargetPropertyCommand::InitialPass(
       }
     else
       {
-      const char *prop = 0;
-      prop = target.GetProperty(args[2].c_str());
+      const char *prop = target.GetProperty(args[2].c_str());
       if (prop)
         {
         m_Makefile->AddDefinition(var, prop);
