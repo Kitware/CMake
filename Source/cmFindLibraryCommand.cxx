@@ -99,7 +99,11 @@ bool cmFindLibraryCommand::Invoke(std::vector<std::string>& args)
     }
 
   std::string helpString = "Where can ";
-  if (names.size() == 1)
+  if (names.size() == 0)
+    {
+    helpString += "the (unknown) library be found";
+    }
+  else if (names.size() == 1)
     {
     helpString += "the " + names[0] + " library be found";
     }
