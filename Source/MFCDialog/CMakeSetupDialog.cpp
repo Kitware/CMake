@@ -750,7 +750,7 @@ void CMakeSetupDialog::OnChangeWhereBuild()
       cachem->LoadCache(path.c_str()) &&
       it.Find("CMAKE_HOME_DIRECTORY"))
     {
-    path = cmSystemTools::ConvertToOutputPath(it.GetValue());
+    path = ConvertToWindowsPath(it.GetValue());
     this->m_WhereSource = path.c_str();
     this->m_WhereSourceControl.SetWindowText(this->m_WhereSource);
     this->OnChangeWhereSource();
@@ -1417,10 +1417,10 @@ void CMakeSetupDialog::ChangeDirectoriesFromFile(const char* arg)
     cmCacheManager::CacheIterator it = cachem->NewIterator();
     if(cachem->LoadCache(cachePath.c_str()) && it.Find("CMAKE_HOME_DIRECTORY"))
       {
-      std::string path = cmSystemTools::ConvertToOutputPath(cachePath.c_str());
+      std::string path = ConvertToWindowsPath(cachePath.c_str());
       m_WhereBuild = path.c_str();
       
-      path = cmSystemTools::ConvertToOutputPath(it.GetValue());
+      path = ConvertToWindowsPath(it.GetValue());
       m_WhereSource = path.c_str();
       return;
       }
