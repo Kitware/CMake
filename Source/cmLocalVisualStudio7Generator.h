@@ -64,7 +64,7 @@ public:
     return m_CreatedProjectNames;
     }
   void SetVersion71() {m_Version71 = true;}
-
+  virtual void ConfigureFinalPass();
 private:
   void OutputVCProjFile();
   void WriteVCProjHeader(std::ostream& fout, const char *libName,

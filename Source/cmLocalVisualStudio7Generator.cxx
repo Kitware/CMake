@@ -151,14 +151,6 @@ void cmLocalVisualStudio7Generator::AddVCProjBuildRule()
   args +=
     this->ConvertToRelativeOutputPath(m_Makefile->GetHomeDirectory());
   argv.push_back(args);
-  args = "-S";
-  args +=
-    this->ConvertToRelativeOutputPath(m_Makefile->GetStartDirectory());
-  argv.push_back(args);
-  args = "-O";
-  args += 
-    this->ConvertToRelativeOutputPath(m_Makefile->GetStartOutputDirectory());
-  argv.push_back(args);
   args = "-B";
   args += 
     this->ConvertToRelativeOutputPath(m_Makefile->GetHomeOutputDirectory());
@@ -1237,4 +1229,17 @@ std::string cmLocalVisualStudio7Generator::ConvertToXMLOutputPathSingle(const ch
   return ret;
 }
 
+void cmLocalVisualStudio7Generator::ConfigureFinalPass()
+{
+  cmLocalGenerator::ConfigureFinalPass();
+  cmTargets &tgts = m_Makefile->GetTargets();
+
+  cmGlobalVisualStudio7Generator* gg = 
+    static_cast<cmGlobalVisualStudio7Generator *>(m_GlobalGenerator);
+  for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); l++)
+    {
+    gg->CreateGUID(l->first.c_str());
+    }
+  
+}
 

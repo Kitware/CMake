@@ -80,8 +80,14 @@ public:
    * Get the list of configurations
    */
   std::vector<std::string> *GetConfigurations();
-      
+  
+  ///! Create a GUID
+  void CreateGUID(const char* name);
+
+  ///! do configure step
+  virtual void Configure();
 protected:
+  std::string GetGUID(const char* name); 
   void CollectSubprojects();
   virtual void OutputSLNFile(cmLocalGenerator* root, 
                              std::vector<cmLocalGenerator*>& generators);
@@ -103,7 +109,6 @@ protected:
   void WriteExternalProject(std::ostream& fout, 
                             const char* name, const char* path,
                             const std::vector<std::string>& dependencies);
-  std::string CreateGUID(const char* name);
 
   std::vector<std::string> m_Configurations;
   std::map<cmStdString, cmStdString> m_GUIDMap;

@@ -231,7 +231,7 @@ void cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
   fout << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"" 
        << dspname << "\", \""
        << d << "\\" << dspname << ".vcproj\", \"{"
-       << this->CreateGUID(dspname) << "}\"\n";
+       << this->GetGUID(dspname) << "}\"\n";
   fout << "\tProjectSection(ProjectDependencies) = postProject\n";
   this->WriteProjectDepends(fout, dspname, dir, t);
   fout << "\tEndProjectSection\n";
@@ -266,8 +266,8 @@ void cmGlobalVisualStudio71Generator::WriteProjectDepends(std::ostream& fout,
           = m_CMakeInstance->GetCacheDefinition(libPath.c_str());
         if(cacheValue && *cacheValue)
           {
-          fout << "\t\t{" << this->CreateGUID(j->first.c_str()) << "} = {"
-               << this->CreateGUID(j->first.c_str()) << "}\n";
+          fout << "\t\t{" << this->GetGUID(j->first.c_str()) << "} = {"
+               << this->GetGUID(j->first.c_str()) << "}\n";
           }
         }
       }
@@ -281,8 +281,8 @@ void cmGlobalVisualStudio71Generator::WriteProjectDepends(std::ostream& fout,
     {
     if(*i != dspname)
       {
-      fout << "\t\t{" << this->CreateGUID(i->c_str()) << "} = {"
-           << this->CreateGUID(i->c_str()) << "}\n";
+      fout << "\t\t{" << this->GetGUID(i->c_str()) << "} = {"
+           << this->GetGUID(i->c_str()) << "}\n";
       }
     }
 }
@@ -296,7 +296,7 @@ cmGlobalVisualStudio71Generator::WriteProjectConfigurations(std::ostream& fout,
                                                            const char* name, 
                                                            bool in_all_build)
 {
-  std::string guid = this->CreateGUID(name);
+  std::string guid = this->GetGUID(name);
   for(std::vector<std::string>::iterator i = m_Configurations.begin();
       i != m_Configurations.end(); ++i)
     {

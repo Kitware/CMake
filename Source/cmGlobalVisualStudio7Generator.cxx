@@ -16,6 +16,7 @@
 =========================================================================*/
 #include "cmGlobalVisualStudio7Generator.h"
 #include "cmLocalVisualStudio7Generator.h"
+#include "cmGeneratedFileStream.h"
 #include "cmMakefile.h"
 #include "cmake.h"
 #include "windows.h"
@@ -285,14 +286,14 @@ void cmGlobalVisualStudio7Generator::OutputSLNFile(cmLocalGenerator* root,
   fname += "/";
   fname += root->GetMakefile()->GetProjectName();
   fname += ".sln";
-  std::ofstream fout(fname.c_str());
+  cmGeneratedFileStream fout(fname.c_str());
   if(!fout)
     {
     cmSystemTools::Error("Error can not open DSW file for write: ",
                          fname.c_str());
     return;
     }
-  this->WriteSLNFile(fout, root, generators);
+  this->WriteSLNFile(fout.GetStream(), root, generators);
 }
 
 // output the SLN file
@@ -528,7 +529,7 @@ void cmGlobalVisualStudio7Generator::WriteProject(std::ostream& fout,
   fout << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"" 
        << dspname << "\", \""
        << d << "\\" << dspname << ".vcproj\", \"{"
-       << this->CreateGUID(dspname) << "}\"\nEndProject\n";
+       << this->GetGUID(dspname) << "}\"\nEndProject\n";
 }
 
 
@@ -559,8 +560,8 @@ void cmGlobalVisualStudio7Generator::WriteProjectDepends(std::ostream& fout,
           = m_CMakeInstance->GetCacheDefinition(libPath.c_str());
         if(cacheValue && *cacheValue)
           {
-          fout << "\t\t{" << this->CreateGUID(dspname) << "}." << depcount << " = {"
-               << this->CreateGUID(j->first.c_str()) << "}\n";
+          fout << "\t\t{" << this->GetGUID(dspname) << "}." << depcount << " = {"
+               << this->GetGUID(j->first.c_str()) << "}\n";
           depcount++;
           }
         }
@@ -575,8 +576,8 @@ void cmGlobalVisualStudio7Generator::WriteProjectDepends(std::ostream& fout,
     {
     if(*i != dspname)
       {
-      fout << "\t\t{" << this->CreateGUID(dspname) << "}." << depcount << " = {"
-           << this->CreateGUID(i->c_str()) << "}\n";
+      fout << "\t\t{" << this->GetGUID(dspname) << "}." << depcount << " = {"
+           << this->GetGUID(i->c_str()) << "}\n";
       depcount++;
       }
     }
@@ -591,7 +592,7 @@ cmGlobalVisualStudio7Generator::WriteProjectConfigurations(std::ostream& fout,
                                                            const char* name, 
                                                            bool in_all_build)
 {
-  std::string guid = this->CreateGUID(name);
+  std::string guid = this->GetGUID(name);
   for(std::vector<std::string>::iterator i = m_Configurations.begin();
       i != m_Configurations.end(); ++i)
     {
@@ -617,7 +618,7 @@ void cmGlobalVisualStudio7Generator::WriteExternalProject(std::ostream& fout,
   fout << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"" 
        << name << "\", \""
        << d << "\", \"{"
-       << this->CreateGUID(name) << "}\"\nEndProject\n";
+       << this->GetGUID(name) << "}\"\nEndProject\n";
 }
 
 
@@ -639,13 +640,28 @@ void cmGlobalVisualStudio7Generator::WriteSLNHeader(std::ostream& fout)
   fout << "Microsoft Visual Studio Solution File, Format Version 7.00\n";
 }
 
-
-std::string cmGlobalVisualStudio7Generator::CreateGUID(const char* name)
+std::string cmGlobalVisualStudio7Generator::GetGUID(const char* name)
 {
-  std::map<cmStdString, cmStdString>::iterator i = m_GUIDMap.find(name);
-  if(i != m_GUIDMap.end())
+  std::string guidStoreName = name;
+  guidStoreName += "_GUID_CMAKE";
+  const char* storedGUID = m_CMakeInstance->GetCacheDefinition(guidStoreName.c_str());
+  if(storedGUID)
     {
-    return i->second;
+    return std::string(storedGUID);
+    }
+  cmSystemTools::Error("Internal CMake Error, Could not find GUID for target: ",
+                       name);
+  return guidStoreName;
+}
+
+
+void cmGlobalVisualStudio7Generator::CreateGUID(const char* name)
+{
+  std::string guidStoreName = name;
+  guidStoreName += "_GUID_CMAKE";
+  if(m_CMakeInstance->GetCacheDefinition(guidStoreName.c_str()))
+    {
+    return;
     }
   std::string ret;
   UUID uid;
@@ -655,8 +671,8 @@ std::string cmGlobalVisualStudio7Generator::CreateGUID(const char* name)
   ret = reinterpret_cast<char*>(uidstr);
   RpcStringFree(&uidstr);
   ret = cmSystemTools::UpperCase(ret);
-  m_GUIDMap[name] = ret;
-  return ret;
+  m_CMakeInstance->AddCacheEntry(guidStoreName.c_str(), ret.c_str(), "Stored GUID", 
+                                 cmCacheManager::INTERNAL);
 }
 
 void cmGlobalVisualStudio7Generator::LocalGenerate()
@@ -692,4 +708,13 @@ void cmGlobalVisualStudio7Generator::CollectSubprojects()
       m_SubProjectMap[pprojects[k]].push_back(m_LocalGenerators[i]);
       }
     }
+}
+
+// make sure "special" targets have GUID's
+void cmGlobalVisualStudio7Generator::Configure()
+{
+  cmGlobalGenerator::Configure();
+  this->CreateGUID("ALL_BUILD");
+  this->CreateGUID("INSTALL");
+  this->CreateGUID("RUN_TESTS");
 }

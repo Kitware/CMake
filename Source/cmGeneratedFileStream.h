@@ -18,6 +18,7 @@
 #define cmGeneratedFileStream_h
 
 #include "cmStandardIncludes.h"
+#include "cmSystemTools.h"
 
 /** \class cmGeneratedFileStream
  * \brief Output stream for generated files that does copy-if-different.
