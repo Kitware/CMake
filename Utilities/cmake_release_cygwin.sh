@@ -16,14 +16,15 @@ SELF_DIR=`cd \`echo "$0" | sed -n '/\//{s/\/[^\/]*$//;p;}'\`;pwd`
 
 WriteREADME()
 {
+CYGVERSION=`uname -r`
 cat > ${PKG}-${VER}/CYGWIN-PATCHES/cmake.README <<EOF
 cmake
 --------------------------------------
 Runtime requirements:
-  cygwin-1.3.5 or newer
+  cygwin-${CYGVERSION} or newer
 
 Build requirements
-  cygwin-1.3.5 or newer
+  cygwin-${CYGVERSION} or newer
   make
 
 Canonical homepage:
@@ -84,7 +85,6 @@ SourcePatch()
   mkdir -p ${PKG}-${VER}/CYGWIN-PATCHES &&
   WriteREADME &&
   WriteSetupHint &&
-  cp ${PKG}-${VER}/Utilities/setup.hint ${PKG}-${VER}/CYGWIN-PATCHES &&
   (diff -urN "${PKG}-${VER}-orig" "${PKG}-${VER}" > "${FULLPKG}.patch")
   rm -rf ${PKG}-${VER} ${PKG}-${VER}-orig
 }

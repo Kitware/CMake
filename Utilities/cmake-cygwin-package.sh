@@ -65,7 +65,7 @@ install()
      ${INSTALL_DIR}${PREFIX}/doc/Cygwin/${FULLPKG}.README &&
   touch ${INSTALL_DIR}${PREFIX}/doc/${PKG}-${VER}/MANIFEST &&
   cd ${INSTALL_DIR} &&
-  FILES=`find .${PREFIX} -type f |sed 's/^\.\//\//'` &&
+  FILES=`/usr/bin/find .${PREFIX} -type f |sed 's/^\.\//\//'` &&
 (
 cat >> ${INSTALL_DIR}${PREFIX}/doc/${PKG}-${VER}/MANIFEST <<EOF
 ${FILES}
@@ -78,8 +78,8 @@ strip()
 {
   (
   cd ${INSTALL_DIR} &&
-  find . -name "*.dll" | xargs strip >/dev/null 2>&1
-  find . -name "*.exe" | xargs strip >/dev/null 2>&1
+  /usr/bin/find . -name "*.dll" | xargs strip >/dev/null 2>&1
+  /usr/bin/find . -name "*.exe" | xargs strip >/dev/null 2>&1
   true
   )
 }
