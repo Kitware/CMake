@@ -645,11 +645,18 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
       }
     }
   fout << "\n\n";
-  const char * additional_clean_files = m_Makefile->GetDefinition("ADDITIONAL_MAKE_CLEAN_FILES");
+  const char * additional_clean_files =
+    m_Makefile->GetDefinition("ADDITIONAL_MAKE_CLEAN_FILES");
   if ( additional_clean_files && strlen(additional_clean_files) > 0 )
     {
+    std::string arg = additional_clean_files;
+    std::vector<std::string> args;
+    cmSystemTools::ExpandListArgument(arg, args);
     fout << "ADDITIONAL_MAKE_CLEAN_FILES = ";
-    fout << additional_clean_files;
+    for(std::vector<std::string>::iterator i = args.begin(); i != args.end(); ++i)
+      {
+      fout << this->ConvertToRelativeOutputPath(i->c_str()) << " ";
+      }
     fout << "\n\n";
     }
   const char * qt_files = m_Makefile->GetDefinition("GENERATED_QT_FILES");
