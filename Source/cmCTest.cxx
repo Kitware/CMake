@@ -79,7 +79,7 @@ struct tm* cmCTest::GetNightlyTime(std::string str,
 
   const int dayLength = 24 * 60 * 60;
   //std::cout << "Seconds: " << tctime << std::endl;
-  if ( ntime > tctime )
+  while ( ntime > tctime )
     {
     // If nightlySeconds is in the past, this is the current
     // open dashboard, then return nightlySeconds.  If
@@ -93,7 +93,7 @@ struct tm* cmCTest::GetNightlyTime(std::string str,
       std::cout << "   Future time, subtract day: " << ntime << std::endl;
       }
     }
-  if ( tctime > (ntime + dayLength) )
+  while ( tctime > (ntime + dayLength) )
     {
     ntime += dayLength;
     if ( verbose )
