@@ -292,14 +292,14 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
         linkLibs += libpath;
         linkLibs += " ";
         }
-      librariesLinked += "-l";
       cmRegularExpression libname("lib(.*)\\.(.*)");
       if(libname.find(file))
         {
+        librariesLinked += "-l";
         file = libname.match(1);
+	librariesLinked += file;
+        librariesLinked += " ";
         }
-      librariesLinked += file;
-      librariesLinked += " ";
       }
     // not a full path, so add -l name
     else
