@@ -458,13 +458,27 @@ void cmMakefile::AddCustomCommand(const char* source,
     for(std::vector<std::string>::const_iterator d = outputs.begin();
         d != outputs.end(); ++d)
       {
-      std::vector<std::string> depends2 = depends;
-      depends2.push_back(source);
-      this->AddCustomCommandToOutput(d->c_str(), command, commandArgs, 
-                                     0, depends2, comment);
+      // if this looks like a real file then use is as the main depend
+      cmRegularExpression SourceFiles("\\.(C|M|c|c\\+\\+|cc|cpp|cxx|m|mm|rc|def|r|odl|idl|hpj|bat|h|h\\+\\+|hm|hpp|hxx|in|txx|inl)$");
+      if (SourceFiles.find(source))
+        {
+        this->AddCustomCommandToOutput(d->c_str(), command, commandArgs, 
+                                       source, depends, comment);
+        }
+      // otherwise do not use a main depend
+      else
+        {
+        std::vector<std::string> depends2 = depends;
+        depends2.push_back(source);
+        this->AddCustomCommandToOutput(d->c_str(), command, commandArgs, 
+                                       0, depends2, comment);
+        }
+      
       // add the output to the target?
       std::string sname = *d;
       sname += ".rule";
+      // if the rule was added to the source, 
+      // then add the source to the target
       if (!this->GetSource(sname.c_str()))
         {
         if (m_Targets.find(target) != m_Targets.end())
