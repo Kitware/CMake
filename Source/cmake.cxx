@@ -1213,6 +1213,9 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
       return ret;
       }
     ret = this->Generate();
+    std::string message = "Build files have been written to: ";
+    message += this->GetHomeOutputDirectory();
+    this->UpdateProgress(message.c_str(), -1);
     if(ret)
       {
       return ret;
