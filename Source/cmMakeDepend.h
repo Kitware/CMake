@@ -19,7 +19,6 @@
 
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
-#include "cmStandardIncludes.h"
 
 #include <cmsys/RegularExpression.hxx>
 

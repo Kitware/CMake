@@ -15,7 +15,6 @@
 
 =========================================================================*/
 #include "cmMakeDepend.h"
-#include "cmStandardIncludes.h"
 #include "cmSystemTools.h"
 
 #include <cmsys/RegularExpression.hxx>
