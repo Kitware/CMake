@@ -127,9 +127,6 @@ ENDIF (UNIX)
 TARGET_LINK_LIBRARIES(cmake CMakeLib)
 TARGET_LINK_LIBRARIES(DumpDocumentation CMakeLib)
 
-ADD_EXECUTABLE(coverage coverage.cxx)
-TARGET_LINK_LIBRARIES(coverage CMakeLib)
-
 IF(CMAKE_BUILD_WITH_CURL)
   # Don't even look for this as we don't use that part of curl
   # and linking in the the library can cause problems.
