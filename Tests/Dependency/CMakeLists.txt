@@ -1,15 +1,16 @@
 PROJECT( Dependency )
 
+# to test directories with only one character One was changed to 1
 # There is one executable that depends on eight libraries. The
 # system has the following dependency graph:
 #
 # NoDepA:
 # NoDepB: NoDepA
 # NoDepC: NoDepA
-# One:
+# 1:
 # Two: Three
-# Three: One Four
-# Four: One Two NoDepA
+# Three: 1 Four
+# Four: 1 Two NoDepA
 # Five: Two
 # SixA: Two Five
 # SixB: Four Five
@@ -28,5 +29,5 @@ PROJECT( Dependency )
 # in the corresponding CMakeLists.txt just because of commands used.
 
 SUBDIRS( NoDepA NoDepB NoDepC )
-SUBDIRS( One Two Three Four Five Six Seven Eight )
+SUBDIRS( 1 Two Three Four Five Six Seven Eight )
 SUBDIRS( Exec Exec2 Exec3 Exec4 )
