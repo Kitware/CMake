@@ -100,8 +100,8 @@ SET (CMAKE_LIBRARY_MANAGER_OUTPUT_FILE_FLAG "/out:" CACHE STRING
 SET (CMAKE_LINKER link CACHE FILEPATH
      "Name of linker used.")
 
-SET (CMAKE_LINKER_FLAGS "/nologo /STACK:10000000 /machine:I386" CACHE STRING
-     "Flags used by the linker.")
+SET (CMAKE_LINKER_FLAGS "/nologo /STACK:10000000 /machine:I386 /INCREMENTAL:YES"
+     CACHE STRING "Flags used by the linker.")
 
 SET (CMAKE_LINKER_FLAGS_DEBUG "/debug /pdbtype:sept" CACHE STRING
      "Flags used by the linker during debug builds.")
