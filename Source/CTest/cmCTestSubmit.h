@@ -29,7 +29,7 @@ class cmCTestSubmit
 {
 public:
   cmCTestSubmit();
-  ~cmCTestSubmit() {}
+  ~cmCTestSubmit() { m_LogFile = 0; }
 
   /**
    * Set verbosity of send
@@ -37,6 +37,8 @@ public:
   void SetVerbose(bool i) { m_Verbose = i; }
   void VerboseOn() { this->SetVerbose(1); }
   void VerboseOff() { this->SetVerbose(0); }
+
+  void SetLogFile(std::ostream* ost) { m_LogFile = ost; }
   
   /**
    * Submit file using various ways
@@ -59,11 +61,12 @@ public:
                         const cmStdString& url);
 
 private:
-  cmStdString m_HTTPProxy;
-  int         m_HTTPProxyType;
-  cmStdString m_FTPProxy;
-  int         m_FTPProxyType;
-  bool        m_Verbose;
+  cmStdString   m_HTTPProxy;
+  int           m_HTTPProxyType;
+  cmStdString   m_FTPProxy;
+  int           m_FTPProxyType;
+  bool          m_Verbose;
+  std::ostream* m_LogFile;
 };
 
 #endif

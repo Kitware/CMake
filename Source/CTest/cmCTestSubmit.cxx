@@ -142,6 +142,8 @@ bool cmCTestSubmit::SubmitUsingFTP(const cmStdString& localprefix,
         }
 
       ftpfile = ::fopen(local_file.c_str(), "rb");
+      *m_LogFile << "\tUpload file: " << local_file.c_str() << " to "
+          << upload_as.c_str() << std::endl;
       if ( m_Verbose )
         {
         std::cout << "  Upload file: " << local_file.c_str() << " to " 
@@ -170,6 +172,8 @@ bool cmCTestSubmit::SubmitUsingFTP(const cmStdString& localprefix,
         {
         std::cout << "  Error when uploading file: " << local_file.c_str() << std::endl;
         std::cout << "  Error message was: " << error_buffer << std::endl;
+        *m_LogFile << "  Error when uploading file: " << local_file.c_str() << std::endl
+          << "  Error message was: " << error_buffer << std::endl;
         ::curl_easy_cleanup(curl);
         ::curl_global_cleanup(); 
         return false;
@@ -192,6 +196,7 @@ bool cmCTestSubmit::SubmitUsingHTTP(const cmStdString& localprefix,
   CURL *curl;
   CURLcode res;
   FILE* ftpfile;
+  char error_buffer[1024];
 
   /* In windows, this will init the winsock stuff */
   ::curl_global_init(CURL_GLOBAL_ALL);
@@ -233,6 +238,10 @@ bool cmCTestSubmit::SubmitUsingHTTP(const cmStdString& localprefix,
 
       cmStdString local_file = localprefix + "/" + files[cc];
       cmStdString remote_file = remoteprefix + files[cc];
+
+      *m_LogFile << "\tUpload file: " << local_file.c_str() << " to "
+          << remote_file.c_str() << std::endl;
+
       cmStdString ofile = "";
       for ( kk = 0; kk < remote_file.size(); kk ++ )
         {
@@ -281,6 +290,9 @@ bool cmCTestSubmit::SubmitUsingHTTP(const cmStdString& localprefix,
       // and give the size of the upload (optional)
       ::curl_easy_setopt(curl, CURLOPT_INFILESIZE, static_cast<long>(st.st_size));
 
+      // and give curl the buffer for errors
+      ::curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, &error_buffer);
+
       // Now run off and do what you've been told!
       res = ::curl_easy_perform(curl);
 
@@ -288,6 +300,8 @@ bool cmCTestSubmit::SubmitUsingHTTP(const cmStdString& localprefix,
       if ( res )
         {
         std::cout << "  Error when uploading file: " << local_file.c_str() << std::endl;
+        *m_LogFile << "  Error when uploading file: " << local_file.c_str() << std::endl
+          << "  Error message was: " << error_buffer << std::endl;
         ::curl_easy_cleanup(curl);
         ::curl_global_cleanup(); 
         return false;
@@ -306,6 +320,7 @@ bool cmCTestSubmit::TriggerUsingHTTP(const std::vector<cmStdString>& files,
   const cmStdString& url)
 {
   CURL *curl;
+  char error_buffer[1024];
 
   /* In windows, this will init the winsock stuff */
   ::curl_global_init(CURL_GLOBAL_ALL);
@@ -339,6 +354,10 @@ bool cmCTestSubmit::TriggerUsingHTTP(const std::vector<cmStdString>& files,
         {
         ::curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
         }
+
+      // and give curl the buffer for errors
+      ::curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, &error_buffer);
+
       cmStdString file = remoteprefix + files[cc];
       cmStdString ofile = "";
       for ( kk = 0; kk < file.size(); kk ++ )
@@ -364,6 +383,7 @@ bool cmCTestSubmit::TriggerUsingHTTP(const std::vector<cmStdString>& files,
           }
         }
       cmStdString turl = url + "?xmlfile=" + ofile;
+      *m_LogFile << "Trigger url: " << turl.c_str() << std::endl;
       if ( m_Verbose )
         {
         std::cout << "  Trigger url: " << turl.c_str() << std::endl;
@@ -372,6 +392,7 @@ bool cmCTestSubmit::TriggerUsingHTTP(const std::vector<cmStdString>& files,
       if ( curl_easy_perform(curl) )
         {
         std::cout << "  Error when triggering: " << turl.c_str() << std::endl;
+        *m_LogFile << "\tTrigerring failed with error: " << error_buffer << std::endl;
         ::curl_easy_cleanup(curl);
         ::curl_global_cleanup(); 
         return false;

@@ -2442,6 +2442,9 @@ int cmCTest::TestDirectory(bool memcheck)
 
 int cmCTest::SubmitResults()
 {
+  std::ofstream ofs;
+  this->OpenOutputFile("Temporary", "LastSubmit.log", ofs);
+
   cmCTest::tm_VectorOfStrings files;
   std::string prefix = this->GetSubmitResultsPrefix();
   // TODO:
@@ -2497,11 +2500,25 @@ int cmCTest::SubmitResults()
     {
     files.push_back("Notes.xml");
     }
+
+  if ( ofs )
+    {
+    ofs << "Upload files:" << std::endl;
+    int cnt = 0;
+    cmCTest::tm_VectorOfStrings::iterator it;
+    for ( it = files.begin(); it != files.end(); ++ it )
+      {
+      ofs << cnt << "\t" << it->c_str() << std::endl;
+      cnt ++;
+      }
+    }
   cmCTestSubmit submit;
   submit.SetVerbose(m_Verbose);
+  submit.SetLogFile(&ofs);
   if ( m_DartConfiguration["DropMethod"] == "" ||
     m_DartConfiguration["DropMethod"] ==  "ftp" )
     {
+    ofs << "Using drop method: FTP" << std::endl;
     std::cout << "  Using FTP submit method" << std::endl;
     std::string url = "ftp://";
     url += cmCTest::MakeURLSafe(m_DartConfiguration["DropSiteUser"]) + ":" + 
@@ -2512,18 +2529,22 @@ int cmCTest::SubmitResults()
         files, prefix, url) )
       {
       std::cerr << "  Problems when submitting via FTP" << std::endl;
+      ofs << "  Problems when submitting via FTP" << std::endl;
       return 0;
       }
     if ( !submit.TriggerUsingHTTP(files, prefix, m_DartConfiguration["TriggerSite"]) )
       {
       std::cerr << "  Problems when triggering via HTTP" << std::endl;
+      ofs << "  Problems when triggering via HTTP" << std::endl;
       return 0;
       }
     std::cout << "  Submission successfull" << std::endl;
+    ofs << "  Submission succesfull" << std::endl;
     return 1;
     }
   else if ( m_DartConfiguration["DropMethod"] == "http" )
     {
+    ofs << "Using drop method: HTTP" << std::endl;
     std::cout << "  Using HTTP submit method" << std::endl;
     std::string url = "http://";
     if ( m_DartConfiguration["DropSiteUser"].size() > 0 )
@@ -2539,19 +2560,23 @@ int cmCTest::SubmitResults()
     if ( !submit.SubmitUsingHTTP(m_ToplevelPath+"/Testing/"+m_CurrentTag, files, prefix, url) )
       {
       std::cerr << "  Problems when submitting via HTTP" << std::endl;
+      ofs << "  Problems when submitting via HTTP" << std::endl;
       return 0;
       }
     if ( !submit.TriggerUsingHTTP(files, prefix, m_DartConfiguration["TriggerSite"]) )
       {
       std::cerr << "  Problems when triggering via HTTP" << std::endl;
+      ofs << "  Problems when triggering via HTTP" << std::endl;
       return 0;
       }
     std::cout << "  Submission successfull" << std::endl;
+    ofs << "  Submission succesfull" << std::endl;
     return 1;
     }
   else
     {
     std::cerr << "SCP submit not yet implemented" << std::endl;
+    ofs << "SCP submit not yet implemented" << std::endl;
     }
 
   return 0;
