@@ -56,6 +56,7 @@ LOAD_CACHE(${Complex_SOURCE_DIR}/Cache
 INCLUDE_DIRECTORIES(
   ${Complex_SOURCE_DIR}/Library
   ${Complex_SOURCE_DIR}/../../Source
+  ${Complex_BINARY_DIR}/../../Source
 )
 
 INCLUDE_DIRECTORIES(BEFORE
