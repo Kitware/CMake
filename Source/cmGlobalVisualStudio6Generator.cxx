@@ -280,7 +280,6 @@ void cmGlobalVisualStudio6Generator::WriteDSWFile(std::ostream& fout,
         std::vector<std::string> depends;
         depends.push_back(cc.GetOutput());
         this->WriteExternalProject(fout, stuff[0].c_str(), stuff[1].c_str(), depends);
-        ++si;
         }
       else 
         {
