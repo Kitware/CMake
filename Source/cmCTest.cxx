@@ -1758,9 +1758,9 @@ void cmCTest::ProcessDirectory(std::vector<std::string> &passed,
               {
               if (dartStuff.find(output.c_str()))
                 {
-                std::string res = dartStuff.match(1);
-                cmSystemTools::ReplaceString(output, res.c_str(),"");
-                cres.m_RegressionImages = this->GenerateRegressionImages(res);
+                std::string dartString = dartStuff.match(1);
+                cmSystemTools::ReplaceString(output, dartString.c_str(),"");
+                cres.m_RegressionImages = this->GenerateRegressionImages(dartString);
                 }
               if (output != "" && m_Verbose)
                 {
@@ -1777,9 +1777,9 @@ void cmCTest::ProcessDirectory(std::vector<std::string> &passed,
               std::cout << "Before dart check" << std::endl;
               if (dartStuff.find(output.c_str()))
                 {
-                std::string res = dartStuff.match(1);
-                cmSystemTools::ReplaceString(output, res.c_str(),"");
-                cres.m_RegressionImages = this->GenerateRegressionImages(res);
+                std::string dartString = dartStuff.match(1);
+                cmSystemTools::ReplaceString(output, dartString.c_str(),"");
+                cres.m_RegressionImages = this->GenerateRegressionImages(dartString);
                 }
               if (output != "" && m_Verbose)
                 {
