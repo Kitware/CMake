@@ -93,6 +93,7 @@ private:
   
   std::vector<cmXCodeObject*> m_XCodeObjects;
   cmXCodeObject* m_RootObject;
+  cmMakefile* m_CurrentMakefile;
 };
 
 #endif

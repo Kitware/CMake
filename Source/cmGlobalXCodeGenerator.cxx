@@ -65,7 +65,6 @@ int cmGlobalXCodeGenerator::TryCompile(const char *,
    */
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
   cmSystemTools::ChangeDirectory(bindir);
-  std::cerr << "ChangeDirectory " << bindir << "\n";
 //  Usage: xcodebuild [-project <projectname>] [-activetarget] 
 //         [-alltargets] [-target <targetname>]... [-activebuildstyle] 
 //         [-buildstyle <buildstylename>] [-optionalbuildstyle <buildstylename>] 
@@ -82,6 +81,8 @@ int cmGlobalXCodeGenerator::TryCompile(const char *,
     makeCommand += targetName;
     }
   makeCommand += " -buildstyle Development ";
+  makeCommand += " SYMROOT=";
+  makeCommand += cmSystemTools::ConvertToOutputPath(bindir);
   int retVal;
   int timeout = cmGlobalGenerator::s_TryCompileTimeout;
   if (!cmSystemTools::RunSingleCommand(makeCommand.c_str(), output, &retVal, 
@@ -92,8 +93,6 @@ int cmGlobalXCodeGenerator::TryCompile(const char *,
     cmSystemTools::ChangeDirectory(cwd.c_str());
     return 1;
     }
-  std::cerr << makeCommand << "\n";
-  std::cerr << "build worked " << retVal << "\n";;
   cmSystemTools::ChangeDirectory(cwd.c_str());
   return retVal;
 }
@@ -172,12 +171,19 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
   cmXCodeObject* settings = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
   buildFile->AddAttribute("settings", settings);
   fileRef->AddAttribute("fileEncoding", this->CreateString("4"));
-  std::string lang = 
+  const char* lang = 
     this->GetLanguageFromExtension(sf->GetSourceExtension().c_str());
   std::string sourcecode = "sourcecode";
-  if(lang == "C")
+  if(!lang)
     {
-      sourcecode += ".c.c";
+    std::string ext = ".";
+    ext = sf->GetSourceExtension();
+    sourcecode += ext;
+    sourcecode += ext;
+    }
+  else if(strcmp(lang, "C") == 0)
+    {
+    sourcecode += ".c.c";
     }
   // default to c++
   else
@@ -199,6 +205,7 @@ void cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
                                                 std::vector<cmXCodeObject*>& targets,
                                                 cmXCodeObject* mainGroupChildren)
 {
+  m_CurrentMakefile = gen->GetMakefile();
   cmTargets &tgts = gen->GetMakefile()->GetTargets();
   for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); l++)
     { 
@@ -289,8 +296,9 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateExecutable(cmTarget& cmtarget,
                               this->CreateString("/usr/local/bin"));
   buildSettings->AddAttribute("OPTIMIZATION_CFLAGS", 
                               this->CreateString(""));
+  std::cerr << m_CurrentMakefile->GetDefineFlags() << "\n";
   buildSettings->AddAttribute("OTHER_CFLAGS", 
-                              this->CreateString(""));
+                              this->CreateString(m_CurrentMakefile->GetDefineFlags()));
   buildSettings->AddAttribute("OTHER_LDFLAGS",
                               this->CreateString(""));
   buildSettings->AddAttribute("OTHER_REZFLAGS", 
@@ -335,8 +343,9 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateStaticLibrary(cmTarget& cmtarget,
                               this->CreateString("STATIC"));
   buildSettings->AddAttribute("OPTIMIZATION_CFLAGS", 
                               this->CreateString(""));
+  std::cerr << m_CurrentMakefile->GetDefineFlags() << "\n";
   buildSettings->AddAttribute("OTHER_CFLAGS", 
-                              this->CreateString(""));
+                              this->CreateString(m_CurrentMakefile->GetDefineFlags()));
   buildSettings->AddAttribute("OTHER_LDFLAGS",
                               this->CreateString(""));
   buildSettings->AddAttribute("OTHER_REZFLAGS", 
@@ -385,8 +394,9 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateSharedLibrary(cmTarget& cmtarget,
                               this->CreateString("DYNAMIC"));
   buildSettings->AddAttribute("OPTIMIZATION_CFLAGS", 
                               this->CreateString(""));
+  std::cerr << m_CurrentMakefile->GetDefineFlags() << "\n" ;
   buildSettings->AddAttribute("OTHER_CFLAGS", 
-                              this->CreateString(""));
+                              this->CreateString(m_CurrentMakefile->GetDefineFlags()));
   const char* libFlag = "-dynamiclib";
   if(cmtarget.GetType() == cmTarget::MODULE_LIBRARY)
     {
@@ -429,8 +439,8 @@ void cmGlobalXCodeGenerator::CreateXCodeObjects(cmLocalGenerator* ,
                                                 generators
   )
 {
-  delete m_RootObject;
   this->ClearXCodeObjects(); 
+  m_RootObject = 0;
   cmXCodeObject* group = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
   group->AddAttribute("COPY_PHASE_STRIP", this->CreateString("NO"));
   cmXCodeObject* developBuildStyle = this->CreateObject(cmXCodeObject::PBXBuildStyle);
