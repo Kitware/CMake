@@ -3160,17 +3160,7 @@ int cmCTest::RunConfigurationScript()
     rename(srcDir, backupSrcDir.c_str());
     rename(binDir, backupBinDir.c_str());
 
-    // we must now checkout the src dir, first make the dir
-    if (!cmSystemTools::MakeDirectory(srcDir))
-      {
-      cmSystemTools::Error("Unable to create the src directory");    
-      this->RestoreBackupDirectories(backup, srcDir, binDir,
-        backupSrcDir.c_str(), 
-        backupBinDir.c_str());
-      return 5;
-      }
-
-    // then do the checkout
+    // we must now checkout the src dir
     output = "";
     res = cmSystemTools::RunSingleCommand(cvsCheckOut, &output, 
       &retVal, ctestRoot,
