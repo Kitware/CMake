@@ -49,7 +49,18 @@ bool cmTargetLinkLibrariesCommand::InitialPass(std::vector<std::string> const& a
       m_Makefile->AddLinkLibraryForTarget(args[0].c_str(),i->c_str(),
                                           cmTarget::GENERAL);  
       }
-    }
+    // if this is a library that cmake knows about, and LIBRARY_OUTPUT_PATH 
+    // is not set, then add the link directory
+    const char* ldir = m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH");
+    if (cmSystemTools::IsOff(ldir))
+      {
+      const char* dir = m_Makefile->GetDefinition(i->c_str());
+      if( dir )
+        {
+        m_Makefile->AddLinkDirectory( dir );
+        }
+      }
+    } 
   return true;
 }
 
