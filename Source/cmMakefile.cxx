@@ -879,8 +879,10 @@ void cmMakefile::AddIncludeDirectory(const char* inc, bool before)
   // this linear search results in n^2 behavior, but n won't be
   // getting much bigger than 20.  We cannot use a set because of
   // order dependency of the include path.
-  if(std::find(m_IncludeDirectories.begin(),
-               m_IncludeDirectories.end(), inc) == m_IncludeDirectories.end())
+  std::vector<std::string>::iterator i = 
+    std::find(m_IncludeDirectories.begin(),
+               m_IncludeDirectories.end(), inc);
+  if(i == m_IncludeDirectories.end())
     {
     if (before)
       {
@@ -890,6 +892,16 @@ void cmMakefile::AddIncludeDirectory(const char* inc, bool before)
     else
       {
       m_IncludeDirectories.push_back(inc);
+      }
+    }
+  else
+    {
+    if(before)
+      {
+      // if this before and already in the path then remove it
+      m_IncludeDirectories.erase(i);
+      // WARNING: this *is* expensive (linear time) since it's a vector
+      m_IncludeDirectories.insert(m_IncludeDirectories.begin(), inc);
       }
     }
 }
