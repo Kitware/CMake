@@ -135,6 +135,26 @@ void cmSourceFile::SetName(const char* name, const char* dir)
     }
 
   hname = pathname;
+  hname += ".m";
+  if(cmSystemTools::FileExists(hname.c_str()))
+    {
+    m_SourceExtension = "m";
+    m_HeaderFileOnly = false;
+    m_FullPath = hname;
+    return;
+    }
+
+  hname = pathname;
+  hname += ".M";
+  if(cmSystemTools::FileExists(hname.c_str()))
+    {
+    m_SourceExtension = "M";
+    m_HeaderFileOnly = false;
+    m_FullPath = hname;
+    return;
+    }
+
+  hname = pathname;
   hname += ".h";
   if(cmSystemTools::FileExists(hname.c_str()))
     {
@@ -144,7 +164,7 @@ void cmSourceFile::SetName(const char* name, const char* dir)
     }
   
   cmSystemTools::Error("can not find file ", hname.c_str());
-  cmSystemTools::Error("Tried .txx .cxx .c for ", hname.c_str());
+  cmSystemTools::Error("Tried .cxx .c .txx .cpp .m .M .h for ", hname.c_str());
 }
 
 void cmSourceFile::SetName(const char* name, const char* dir, const char *ext,

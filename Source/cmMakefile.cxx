@@ -108,8 +108,11 @@ void cmMakefile::AddDefaultCommands()
   // Cygwin is more like unix so enable the unix commands
 #if defined(__CYGWIN__)
   this->AddDefinition("UNIX", "1");
+  this->AddDefinition("CYGWIN", "1");
 #endif
-  
+#if defined(__APPLE__)
+  this->AddDefinition("APPLE", "1");
+#endif
   // always creat an empty install target
   cmTarget target;
   target.SetType(cmTarget::INSTALL);
