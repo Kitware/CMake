@@ -3,8 +3,8 @@
 #
 ADD_EXECUTABLE(complex complex)
 
-TARGET_LINK_LIBRARIES(complex CMakeTestLibrary)
-TARGET_LINK_LIBRARIES(complex CMakeTestLibraryShared)
+SET(COMPLEX_LIBS CMakeTestLibrary;CMakeTestLibraryShared)
+TARGET_LINK_LIBRARIES(complex ${COMPLEX_LIBS})
 
 #
 # Link to CMake lib
