@@ -20,7 +20,6 @@
 #include "cmSystemTools.h"
 #include "cmSourceFile.h"
 #include "cmCacheManager.h"
-#include <queue>
 
 #include <cmsys/RegularExpression.hxx>
 
@@ -225,9 +224,6 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
                                  const char *libName,
                                  cmTarget &target)
 {
-  // We may be modifying the source groups temporarily, so make a copy.
-  std::vector<cmSourceGroup> sourceGroups = m_Makefile->GetSourceGroups();
-  
   // if we should add regen rule then...
   const char *suppRegenRule = 
     m_Makefile->GetDefinition("CMAKE_SUPPRESS_REGENERATION");
@@ -235,92 +231,17 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
     {
     this->AddDSPBuildRule();
     }
+  
+  // trace the visual studio dependencies
+  std::string name = libName;
+  name += ".dsp.cmake";
+  target.TraceVSDependencies(name, m_Makefile);
 
+  // We may be modifying the source groups temporarily, so make a copy.
+  std::vector<cmSourceGroup> sourceGroups = m_Makefile->GetSourceGroups();
+  
   // get the classes from the source lists then add them to the groups
   std::vector<cmSourceFile*> & classes = target.GetSourceFiles();
-  // use a deck to keep track of processed source files
-  std::queue<std::string> srcFilesToProcess;
-  std::string name;
-  for(std::vector<cmSourceFile*>::const_iterator i = classes.begin(); 
-      i != classes.end(); ++i)
-    {
-    name = (*i)->GetSourceName();
-    if ((*i)->GetSourceExtension() != "rule")
-      {
-      name += ".";
-      name += (*i)->GetSourceExtension();
-      }
-    srcFilesToProcess.push(name);
-    }
-  name = libName;
-  name += ".dsp.cmake";
-  srcFilesToProcess.push(name);
-  // add in the library depends for cusotm targets
-  if (target.GetType() == cmTarget::UTILITY)
-    {
-    for (std::vector<cmCustomCommand>::iterator ic = 
-           target.GetPostBuildCommands().begin();
-         ic != target.GetPostBuildCommands().end(); ++ic)
-      {
-      cmCustomCommand &c = *ic;
-      for (std::vector<std::string>::iterator i = c.GetDepends().begin();
-           i != c.GetDepends().end(); ++i)
-        {
-        srcFilesToProcess.push(*i);
-        }
-      }
-    }
-  while (!srcFilesToProcess.empty())
-    {
-    // is this source the output of a custom command
-    cmSourceFile* outsf = 
-      m_Makefile->GetSourceFileWithOutput(srcFilesToProcess.front().c_str());
-    if (outsf)
-      {
-      // is it not already in the target?
-      if (std::find(classes.begin(),classes.end(),outsf) == classes.end())
-        {
-        // then add the source to this target and add it to the queue
-        classes.push_back(outsf);
-        std::string name = outsf->GetSourceName();
-        if (outsf->GetSourceExtension() != "rule")
-          {
-          name += ".";
-          name += outsf->GetSourceExtension();
-          }
-        std::string temp = 
-          cmSystemTools::GetFilenamePath(outsf->GetFullPath());
-        temp += "/";
-        temp += name;
-        srcFilesToProcess.push(temp);
-        }
-      // add its dependencies to the list to check
-      unsigned int i;
-      for (i = 0; i < outsf->GetCustomCommand()->GetDepends().size(); ++i)
-        {
-        std::string dep = cmSystemTools::GetFilenameName(
-          outsf->GetCustomCommand()->GetDepends()[i]);
-        if (cmSystemTools::GetFilenameLastExtension(dep) == ".exe")
-          {
-          dep = cmSystemTools::GetFilenameWithoutLastExtension(dep);
-          }
-        // watch for target dependencies,
-        std::string libPath = dep + "_CMAKE_PATH";
-        const char* cacheValue = m_Makefile->GetDefinition(libPath.c_str());
-        if (cacheValue)
-          {
-          // add the depend as a utility on the target
-          target.AddUtility(dep.c_str());
-          }
-        else
-          {
-          srcFilesToProcess.push(outsf->GetCustomCommand()->GetDepends()[i]);
-          }
-        }
-      }
-    // finished with this SF move to the next
-    srcFilesToProcess.pop();
-    }
 
   // now all of the source files have been properly assigned to the target
   // now stick them into source groups using the reg expressions
