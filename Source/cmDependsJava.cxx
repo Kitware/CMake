@@ -40,7 +40,7 @@ cmDependsJava::~cmDependsJava()
 }
 
 //----------------------------------------------------------------------------
-bool cmDependsJava::WriteDependencies(std::ostream& os)
+bool cmDependsJava::WriteDependencies(std::ostream&)
 {
   // Make sure this is a scanning instance.
   if(m_SourceFile == "")
