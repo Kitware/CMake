@@ -1,10 +1,14 @@
 SOURCE_FILES(SRCS
-CMakeSetupGUI.cxx
 CMakeSetupGUIImplementation.cxx
 FLTKDialog.cxx
 FLTKPropertyItemRow.cxx
 FLTKPropertyList.cxx
 )
+
+SOURCE_FILES(FLTK_GUI_Files_SRCS
+CMakeSetupGUI.fl
+)
+
 
 LINK_LIBRARIES(${FLTK_LIBRARY})
 IF(WIN32)
@@ -21,7 +25,10 @@ ENDIF(UNIX)
 
 INCLUDE_DIRECTORIES(${FLTK_INCLUDE_PATH})
 
+
 ADD_EXECUTABLE(CMakeSetup SRCS)
+FLTK_WRAP_UI(CMakeSetup FLTK_GUI_Files_SRCS)
+
 INSTALL_TARGETS (/bin CMakeSetup)
 
 IF(CMAKE_HAS_X)
