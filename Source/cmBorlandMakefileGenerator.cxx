@@ -200,7 +200,7 @@ OutputBuildObjectFromSource(std::ostream& fout,
     }
   else if (ext == "rc")
     {
-    compileCommand = "$(RC) -o\"";
+    compileCommand = "$(RC) $(INCLUDE_FLAGS) -o\"";
     compileCommand += objectFile;
     compileCommand += "\" ";
     compileCommand += 

@@ -811,6 +811,14 @@ void cmMSDotNETGenerator::WriteConfiguration(std::ostream& fout,
   fout << "/>\n";  // end of <Tool Name=VCCLCompilerTool
 
   fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCCustomBuildTool\"/>\n";
+  fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCResourceCompilerTool\"\n"
+       << "AdditionalIncludeDirectories=\"";
+  for(i = includes.begin();i != includes.end(); ++i)
+    {
+    std::string ipath = this->ConvertToXMLOutputPath(i->c_str());
+    fout << ipath << ";";
+    }
+  fout << "\"\n/>\n";
   fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCMIDLTool\"/>\n";
   fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCPostBuildEventTool\"";
   this->OutputTargetRules(fout, target, libName);
