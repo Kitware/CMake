@@ -389,7 +389,9 @@ rm -f "${TMPFILE}.c"
 
 if [ -z "${cmake_c_compiler}" ]; then
   cmake_error 6 "Cannot find appropriate C compiler on this system.
-Please specify one using environment variable CC."
+Please specify one using environment variable CC.
+See cmake_bootstrap.log for compilers attempted.
+"
 fi
 echo "C compiler on this system is: ${cmake_c_compiler} ${cmake_c_flags}"
 
@@ -445,7 +447,8 @@ rm -f "${TMPFILE}.cxx"
 
 if [ -z "${cmake_cxx_compiler}" ]; then
   cmake_error 7 "Cannot find appropriate C++ compiler on this system.
-Please specify one using environment variable CXX."
+Please specify one using environment variable CXX.
+See cmake_bootstrap.log for compilers attempted."
 fi
 echo "C++ compiler on this system is: ${cmake_cxx_compiler} ${cmake_cxx_flags}"
 

@@ -65,11 +65,11 @@ IF (APPLE)
 ENDIF (APPLE)
 
 # Kdevelop only works on UNIX and not windows
-IF(UNIX AND NOT WIN32)
+IF(UNIX)
   SET(SRCS ${SRCS}
     cmGlobalKdevelopGenerator.cxx
     cmLocalKdevelopGenerator.cxx)
-ENDIF(UNIX AND NOT WIN32)
+ENDIF(UNIX)
 
 
 IF (WIN32)
