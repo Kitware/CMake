@@ -111,9 +111,8 @@ void cmCableWrapTclCommand::GenerateCableFiles() const
   cmSystemTools::MakeDirectory((outDir+"/Tcl").c_str());
 
   std::string packageConfigName = outDir+"/Tcl/"+m_TargetName+"_config.xml";
-  std::string packageTclFileName = m_TargetName+"_tcl";
-  std::string packageTclPath = outDir+"/Tcl";
-  std::string packageTclFullName = packageTclPath+"/"+packageTclFileName;
+  std::string packageTclFileName = "Tcl/"+m_TargetName+"_tcl";
+  std::string packageTclFullName = outDir+"/"+packageTclFileName;
   
   // Generate the main package configuration file for CABLE.
   cmGeneratedFileStream packageConfig(packageConfigName.c_str());
@@ -148,7 +147,7 @@ void cmCableWrapTclCommand::GenerateCableFiles() const
   depends.push_back(packageConfigName);
   
   std::vector<std::string> outputs;
-  outputs.push_back(packageTclFullName+".cxx");
+  outputs.push_back(packageTclFileName+".cxx");
   
   m_Makefile->AddCustomCommand(packageConfigName.c_str(),
                                command.c_str(),
@@ -159,7 +158,7 @@ void cmCableWrapTclCommand::GenerateCableFiles() const
   
   // Add the generated source to the package's source list.
   cmSourceFile file;
-  file.SetName(packageTclFileName.c_str(), packageTclPath.c_str(), "cxx", false);
+  file.SetName(packageTclFileName.c_str(), outDir.c_str(), "cxx", false);
   // Set dependency hints.
   file.GetDepends().push_back("wrapCalls.h");
   m_Makefile->AddSource(file, m_TargetName.c_str());
@@ -189,9 +188,8 @@ void cmCableWrapTclCommand::GenerateCableClassFiles(const char* name,
   std::string classConfigName = outDir+"/Tcl/"+groupName+"_config_tcl.xml";
   std::string classCxxName = outDir+"/Tcl/"+groupName+"_cxx.cc";
   std::string classXmlName = outDir+"/Tcl/"+groupName+"_cxx.xml";
-  std::string classTclFileName = groupName+"_tcl";
-  std::string classTclPath = outDir+"/Tcl";
-  std::string classTclFullName = classTclPath+"/"+classTclFileName;
+  std::string classTclFileName = "Tcl/"+groupName+"_tcl";
+  std::string classTclFullName = outDir+"/"+classTclFileName;
   
   cmGeneratedFileStream classConfig(classConfigName.c_str());
   if(classConfig)
@@ -298,7 +296,7 @@ void cmCableWrapTclCommand::GenerateCableClassFiles(const char* name,
   depends.push_back(classXmlName);
   
   std::vector<std::string> outputs;
-  outputs.push_back(classTclFullName+".cxx");
+  outputs.push_back(classTclFileName+".cxx");
   
   m_Makefile->AddCustomCommand(classConfigName.c_str(),
                                command.c_str(),
@@ -309,7 +307,7 @@ void cmCableWrapTclCommand::GenerateCableClassFiles(const char* name,
 
   // Add the generated source to the package's source list.
   cmSourceFile file;
-  file.SetName(classTclFileName.c_str(), classTclPath.c_str(), "cxx", false);
+  file.SetName(classTclFileName.c_str(), outDir.c_str(), "cxx", false);
   // Set dependency hints.
   for(cmCableClass::Sources::const_iterator source = c.SourcesBegin();
       source != c.SourcesEnd(); ++source)
