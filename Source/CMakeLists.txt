@@ -42,6 +42,7 @@ cmLocalUnixMakefileGenerator.h
 cmVariableWatch.h
 )
 
+
 # configure the .h file
 CONFIGURE_FILE(
 ${CMake_SOURCE_DIR}/Source/cmConfigure.cmake.h.in 
@@ -62,6 +63,14 @@ IF (APPLE)
     cmLocalCodeWarriorGenerator.h
     )
 ENDIF (APPLE)
+
+# Kdevelop only works on UNIX and not windows
+IF(UNIX AND NOT WIN32)
+  SET(SRCS ${SRCS}
+    cmGlobalKdevelopGenerator.cxx
+    cmLocalKdevelopGenerator.cxx)
+ENDIF(UNIX AND NOT WIN32)
+
 
 IF (WIN32)
   IF(NOT UNIX)

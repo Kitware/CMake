@@ -25,29 +25,29 @@
 
 // include the generator
 #if defined(_WIN32) && !defined(__CYGWIN__)
-#include "cmGlobalVisualStudio6Generator.h"
-#if !defined(__MINGW32__)
-#include "cmGlobalVisualStudio7Generator.h"
-#include "cmGlobalVisualStudio71Generator.h"
-#include "cmGlobalVisualStudio8Generator.h"
-#endif
-#include "cmGlobalBorlandMakefileGenerator.h"
-#include "cmGlobalNMakeMakefileGenerator.h"
-#include "cmGlobalUnixMakefileGenerator.h"
-#include "cmWin32ProcessExecution.h"
+#  include "cmGlobalVisualStudio6Generator.h"
+#  if !defined(__MINGW32__)
+#    include "cmGlobalVisualStudio7Generator.h"
+#    include "cmGlobalVisualStudio71Generator.h"
+#    include "cmGlobalVisualStudio8Generator.h"
+#  endif
+#  include "cmGlobalBorlandMakefileGenerator.h"
+#  include "cmGlobalNMakeMakefileGenerator.h"
+#  include "cmWin32ProcessExecution.h"
 #else
-#include "cmGlobalUnixMakefileGenerator.h"
 #endif
+#include "cmGlobalUnixMakefileGenerator.h"
+#include "cmGlobalKdevelopGenerator.h"
 
 #include <stdlib.h> // required for atoi
 
 #ifdef __APPLE__
-#include <sys/types.h>
-#include <sys/time.h>
-#include <sys/resource.h>
-#if defined(CMAKE_BUILD_WITH_CMAKE)
-#include "cmGlobalCodeWarriorGenerator.h"
-#endif
+#  include <sys/types.h>
+#  include <sys/time.h>
+#  include <sys/resource.h>
+#  if defined(CMAKE_BUILD_WITH_CMAKE)
+#    include "cmGlobalCodeWarriorGenerator.h"
+#  endif
 #endif
 
 #include <memory> // auto_ptr
@@ -1415,6 +1415,10 @@ void cmake::AddDefaultGenerators()
 #endif
   m_Generators[cmGlobalUnixMakefileGenerator::GetActualName()] =
     &cmGlobalUnixMakefileGenerator::New;
+#if !defined(_WIN32)
+  m_Generators[cmGlobalKdevelopGenerator::GetActualName()] =
+     &cmGlobalKdevelopGenerator::New;
+#endif
 }
 
 int cmake::LoadCache()
