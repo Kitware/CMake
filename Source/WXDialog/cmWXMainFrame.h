@@ -56,8 +56,10 @@ public:
   void OnHelp(wxCommandEvent& event);
   void OnBrowseSource(wxCommandEvent& event);
   void OnSourceSelected(wxCommandEvent& event);
+  void OnSourceUpdated(wxCommandEvent& event);
   void OnBrowseBinary(wxCommandEvent& event);
   void OnBinarySelected(wxCommandEvent& event);
+  void OnBinaryUpdated(wxCommandEvent& event);
   void OnShowAdvancedValues(wxCommandEvent& event);
   void OnResize(wxSizeEvent& event);
   void OnPropertyChanged(wxEvent& event);
@@ -115,8 +117,9 @@ private:
   // update source and binary menus.
   void UpdateSourceBuildMenus();
 
-  // Check wether cache is dirty.
+  // Check wether cache is dirty.  
   bool IsDirty() { return !this->m_Clean; }
+  void SetDirty() { this->m_Clean = false; }
   void ClearDirty() { this->m_Clean = true; }
   
   // Run the CMake

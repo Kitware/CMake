@@ -27,12 +27,12 @@ cmMainFrame::cmMainFrame(const wxString& title, const wxSize& size)
 {
 
   cmSystemTools::SetErrorCallback(cmMainFrame::MessageCallback, this);
-  this->m_Clean            = false;
+  this->m_Clean            = true;
   this->m_BuildPathChanged = false;
   this->m_WhereSource      = "";
   this->m_WhereBuild       = "";
   
-  this->m_CMakeInstance    = 0;
+  this->m_CMakeInstance    = new cmake; // force a register of generators
   this->m_Update           = false;
   this->m_Valid            = false;
   this->m_EntryRemoved     = false;
@@ -59,6 +59,7 @@ cmMainFrame::cmMainFrame(const wxString& title, const wxSize& size)
 
   wxFlexGridSizer* tgrid = new wxFlexGridSizer(7, 2, 2);
   tgrid->AddGrowableCol(2);
+  tgrid->AddGrowableCol(6);
   this->m_TopGrid = tgrid;
   
 
@@ -66,7 +67,9 @@ cmMainFrame::cmMainFrame(const wxString& title, const wxSize& size)
   this->m_PathSource = new wxComboBox(this->m_MainPanel, -1, "PathSource");
   this->m_BrowseSource = new wxButton(this->m_MainPanel, -1, "Browse...");
 
-  this->m_GeneratorFrame = new wxBoxSizer(wxHORIZONTAL);
+  tgrid = new wxFlexGridSizer(3, 2, 2);
+  tgrid->AddGrowableCol(2);
+  this->m_GeneratorFrame = tgrid;
   this->m_BuildFor = new wxStaticText(this->m_MainPanel, -1, "Build For:");
   this->m_GeneratorMenu = new wxComboBox(this->m_MainPanel, -1, "Generator", 
                                          wxDefaultPosition, wxDefaultSize,
@@ -74,7 +77,7 @@ cmMainFrame::cmMainFrame(const wxString& title, const wxSize& size)
 
   this->m_GeneratorFrame->Add(this->m_BuildFor, 0, wxALIGN_LEFT);
   this->m_GeneratorFrame->Add(5,5,0);
-  this->m_GeneratorFrame->Add(this->m_GeneratorMenu, 1, wxGROW | wxALL );
+  this->m_GeneratorFrame->Add(this->m_GeneratorMenu, 1, wxGROW | wxLEFT | wxRIGHT );
 
   this->m_TextBinary = new wxStaticText(this->m_MainPanel, -1, 
                                         "Where to build the binaries:");
@@ -89,7 +92,7 @@ cmMainFrame::cmMainFrame(const wxString& title, const wxSize& size)
   this->m_TopGrid->Add(5, 5, 0);
   this->m_TopGrid->Add(this->m_BrowseSource, 1, 0);
   this->m_TopGrid->Add(5, 5, 0);
-  this->m_TopGrid->Add(this->m_GeneratorFrame, 1, 0);
+  this->m_TopGrid->Add(this->m_GeneratorFrame, 1, wxGROW | wxLEFT | wxRIGHT);
   this->m_TopGrid->Add(this->m_TextBinary, 1, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL);
   this->m_TopGrid->Add(5, 5, 0);
   this->m_TopGrid->Add(this->m_PathBinary, 1, wxGROW | wxLEFT | wxRIGHT );
@@ -206,11 +209,11 @@ cmMainFrame::cmMainFrame(const wxString& title, const wxSize& size)
   this->ConnectEvent( this->m_PathSource, wxEVT_COMMAND_COMBOBOX_SELECTED,
                       (wxObjectEventFunction) &cmMainFrame::OnSourceSelected );
   this->ConnectEvent( this->m_PathSource, wxEVT_COMMAND_TEXT_UPDATED,
-                      (wxObjectEventFunction) &cmMainFrame::OnSourceSelected );
+                      (wxObjectEventFunction) &cmMainFrame::OnSourceUpdated );
   this->ConnectEvent( this->m_PathBinary, wxEVT_COMMAND_COMBOBOX_SELECTED,
                       (wxObjectEventFunction) &cmMainFrame::OnBinarySelected );
   this->ConnectEvent( this->m_PathBinary, wxEVT_COMMAND_TEXT_UPDATED,
-                      (wxObjectEventFunction) &cmMainFrame::OnBinarySelected );
+                      (wxObjectEventFunction) &cmMainFrame::OnBinaryUpdated );
   this->ConnectEvent( this->m_GeneratorMenu, wxEVT_COMMAND_COMBOBOX_SELECTED,
                       (wxObjectEventFunction) &cmMainFrame::OnGeneratorSelected );
   this->ConnectEvent( this->m_GeneratorMenu, wxEVT_COMMAND_TEXT_UPDATED,
@@ -482,7 +485,7 @@ void cmMainFrame::OnHelp(wxCommandEvent&)
 
 void cmMainFrame::OnPropertyChanged(wxEvent& event)
 {
-
+  this->SetDirty();
   wxControl* eobject = static_cast<wxControl*>(event.GetEventObject());
   if ( eobject && eobject->GetClientData() )
     {
@@ -494,7 +497,6 @@ void cmMainFrame::OnPropertyChanged(wxEvent& event)
 
 void cmMainFrame::OnResize(wxSizeEvent& event)
 {
-  
   this->wxFrame::OnSize(event);
   // Expand inner pannel when window resizes
   this->ResizeInternal();
@@ -559,7 +561,6 @@ void cmMainFrame::Initialize(cmCommandLineInfo* cmdInfo)
 
   this->m_PathToExecutable = cmdInfo->GetPathToExecutable();
   this->LoadFromRegistry();
-  this->m_CMakeInstance = new cmake; // force a register of generators
   std::vector<std::string> names;
   this->m_CMakeInstance->GetRegisteredGenerators(names);
   for(std::vector<std::string>::iterator i = names.begin();
@@ -728,6 +729,19 @@ void cmMainFrame::UpdateSourceBuildMenus()
 
 void cmMainFrame::RunCMake(bool generateProjectFiles)
 {
+  if(std::string(this->m_GeneratorMenu->GetValue().c_str()) == "Borland Makefiles") 
+    {
+    std::string bindir = this->GetBinaryDir();
+    if ( bindir.find("-") != bindir.npos )
+      {
+      std::string message = 
+        "The Borland command line tools do not support path names\n"
+        "that have - in them.  Please re-name your output directory\n"
+        "and use _ instead of -.";
+      wxMessageBox(message.c_str(), "CMake Error", wxICON_ERROR | wxOK );
+      return;
+      }
+    }
   if(!cmSystemTools::FileExists(this->GetBinaryDir().c_str()))
     {
     std::string message =
@@ -778,7 +792,8 @@ void cmMainFrame::RunCMake(bool generateProjectFiles)
     this->m_CMakeInstance->SetHomeOutputDirectory(this->GetBinaryDir().c_str());
     this->m_CMakeInstance->SetStartOutputDirectory(this->GetBinaryDir().c_str());
     this->m_CMakeInstance->SetGlobalGenerator(
-     this-> m_CMakeInstance->CreateGlobalGenerator(this->m_GeneratorMenu->GetValue()));
+     this-> m_CMakeInstance->CreateGlobalGenerator(
+       this->m_GeneratorMenu->GetValue().c_str()));
     this->m_CMakeInstance->SetCMakeCommand(this->m_PathToExecutable.c_str());
     this->m_CMakeInstance->LoadCache();
     if(this->m_CMakeInstance->Configure() != 0)
@@ -980,6 +995,14 @@ void cmMainFrame::UpdateCacheValuesDisplay()
     this->m_CacheValuesPanel->SetBackgroundColour(*wxWHITE);
     }
 
+  if ( this->m_Valid )
+    {
+    this->ClearDirty();
+    }
+  else
+    {
+    this->SetDirty();
+    }
   int max = 0;
   int count = 0;
   wxSize size1 = this->m_CacheValuesPanel->GetSize();
@@ -1038,6 +1061,7 @@ void cmMainFrame::UpdateCacheValuesDisplay()
   else
     {
     this->m_CacheValuesPanel->SetBackgroundColour(*wxWHITE);
+    this->ClearDirty();
     }
   this->m_CacheValuesSizer->Layout();
 
@@ -1167,14 +1191,14 @@ void cmMainFrame::ClearCache()
 
 }
 
-void cmMainFrame::OnBinarySelected(wxCommandEvent&)
+void cmMainFrame::OnBinarySelected(wxCommandEvent& e)
 {
   if ( this->BuildDirectoryChanged() )
     {
     this->m_WhereBuild = this->GetBinaryDir();
     this->ChangeWhereBuild();
     }
-
+  //this->OnConfigure(e);
 }
 
 void cmMainFrame::OnSourceSelected(wxCommandEvent&)
@@ -1395,3 +1419,16 @@ void cmMainFrame::CursorNormal(bool s)
     }
 }
 
+void cmMainFrame::OnSourceUpdated(wxCommandEvent& event)
+{
+  this->OnSourceSelected(event);
+}
+
+void cmMainFrame::OnBinaryUpdated(wxCommandEvent& event)
+{
+  if ( this->BuildDirectoryChanged() )
+    {
+    this->m_WhereBuild = this->GetBinaryDir();
+    this->ChangeWhereBuild();
+    }
+}
