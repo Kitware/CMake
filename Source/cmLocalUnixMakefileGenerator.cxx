@@ -2304,11 +2304,14 @@ void cmLocalUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
     }
   if (cmSystemTools::FileExists(ctest.c_str()))
     {
+    fout << "ARGS=\n";
+    std::string cmd = this->ConvertToOutputForExisting(ctest.c_str());
+    cmd += " $(ARGS)";
     this->OutputMakeRule(fout, 
                          "tests",
                          "test",
                          "",
-                         this->ConvertToOutputForExisting(ctest.c_str()).c_str());
+                         cmd.c_str());
     }
 }
 
