@@ -29,6 +29,17 @@ bool cmUseMangledMesaCommand::InitialPass(std::vector<std::string> const& args)
     return false;
     }
   const char* inputDir = args[0].c_str();
+  std::string glh = inputDir;
+  glh += "/";
+  glh += "gl.h";
+  if(!cmSystemTools::FileExists(glh.c_str()))
+    {
+    std::string e = "Bad path to Mesa, could not find: ";
+    e += glh;
+    e += " ";
+    this->SetError(e.c_str());
+    return false;
+    }
   const char* destDir = args[1].c_str();
   std::vector<std::string> files;
   cmSystemTools::Glob(inputDir, "\\.h$", files);
