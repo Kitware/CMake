@@ -190,7 +190,9 @@ bool cmMakefile::ReadListFile(const char* filename)
               {
               if(!usedCommand->Invoke(arguments))
                 {
-                cmSystemTools::Error(usedCommand->GetError());
+                cmSystemTools::Error(usedCommand->GetName(),
+                                     ": Error : \n",
+                                     usedCommand->GetError());
                 }
               else
                 {
