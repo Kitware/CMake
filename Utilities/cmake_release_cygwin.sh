@@ -4,12 +4,18 @@
 # directory from a separate CMake checkout.
 #
 
-CVS_TAG="-r Release-1-4"
+# Find our own script's location.
+SELFPATH=`cd \`echo $0 | sed -n '/\//{s/\/[^\/]*$//;p;}'\`;pwd`
+
+# Read version numbers.
+. ${SELFPATH}/cmake_release_version.sh
+
+CVS_TAG="-r ${CURRENT_TAG}"
 PKG=cmake
-VER=1.4.7
-REL=1
-PREVER=1.4.6
-PREREL=1
+VER="${CURRENT_VERSION}"
+REL="${CURRENT_RELEASE}"
+PREVER="${PREVIOUS_VERSION}"
+PREREL="${PREVIOUS_RELEASE}"
 
 CVSROOT=":pserver:anonymous@www.cmake.org:/cvsroot/CMake"
 FULLPKG="${PKG}-${VER}-${REL}"

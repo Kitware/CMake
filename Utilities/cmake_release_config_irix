@@ -1,5 +1,3 @@
-RELEASE_TAG="Release-1-4"
-VERSION="1.4.7"
 PLATFORM="irix65"
 CC="cc"
 CXX="CC"

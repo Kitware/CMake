@@ -1,5 +1,3 @@
-RELEASE_TAG="Release-1-4"
-VERSION="1.4.7"
 PLATFORM="x86-linux-static"
 CREATE_SOURCE_TARBALL="yes"
 CURSES_LIBRARY="/usr/lib/libcurses.a"

@@ -13,8 +13,6 @@ if test "x$1" = "x"; then
   echo "  $0 <configuration-file>"
   echo ""
   echo "Sample configuration file:"
-  echo "  RELEASE_TAG=\"Release-1-4\""
-  echo "  VERSION=\"1.4\""
   echo "  PLATFORM=\"x86-linux\""
   exit 1
 fi
@@ -65,6 +63,9 @@ BUILD_TESTING:BOOL=OFF
 EOF
 }
 
+SELFPATH=`cd \`echo $0 | sed -n '/\//{s/\/[^\/]*$//;p;}'\`;pwd`
+. ${SELFPATH}/cmake_release_version.sh
+
 #-----------------------------------------------------------------------------
 # Configuration options.
 echo "Reading configuration from ${CONFIG_FILE}..."
@@ -77,6 +78,8 @@ fi
 export CC CXX CFLAGS CXXFLAGS
 
 # Select directories.
+RELEASE_TAG="${CURRENT_TAG}"
+VERSION="${CURRENT_VERSION}"
 INSTALL_DIR="${RELEASE_ROOT}/Install"
 TARBALL_DIR="${RELEASE_ROOT}/Tarballs"
 SOURCE_DIR="${RELEASE_ROOT}/CMake-$VERSION"
