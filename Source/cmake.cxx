@@ -65,7 +65,8 @@ cmake::cmake()
 void cmake::Usage(const char* program)
 {
   std::cerr << "cmake version " << cmMakefile::GetMajorVersion()
-            << "." << cmMakefile::GetMinorVersion() << "\n";
+            << "." << cmMakefile::GetMinorVersion() << " - " 
+            << cmMakefile::GetReleaseVersion() << "\n";
   std::cerr << "Usage: " << program << " [srcdir] [options]\n" 
             << "Where cmake is run from the directory where you want the object files written.  If srcdir is not specified, the current directory is used for both source and object files.\n";
   std::cerr << "Options are:\n";
