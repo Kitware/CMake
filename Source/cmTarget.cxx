@@ -243,8 +243,8 @@ bool cmTarget::HasCxx() const
   for(std::vector<cmSourceFile*>::const_iterator i =  m_SourceFiles.begin();
       i != m_SourceFiles.end(); ++i)
     {
-    if((*i)->GetSourceExtension() != "c" &&
-       (*i)->GetSourceExtension() != "h")
+    if(cmSystemTools::GetFileFormat((*i)->GetSourceExtension().c_str())
+       == cmSystemTools::CXX_FILE_FORMAT)
       {
       return true;
       }
