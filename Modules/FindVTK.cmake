@@ -38,11 +38,11 @@ SET(VTK_DIR_MESSAGE "VTK not found.  Set VTK_DIR to the ${VTK_DIR_DESCRIPTION}")
 IF(NOT VTK_DIR)
   # Get the system search path as a list.
   IF(UNIX)
-    STRING(REGEX MATCHALL "[^:]+" VTK_DIR_SEARCH1 $ENV{PATH})
+    STRING(REGEX MATCHALL "[^:]+" VTK_DIR_SEARCH1 "$ENV{PATH}")
   ELSE(UNIX)
-    STRING(REGEX REPLACE "\\\\" "/" VTK_DIR_SEARCH1 $ENV{PATH})
+    STRING(REGEX REPLACE "\\\\" "/" VTK_DIR_SEARCH1 "$ENV{PATH}")
   ENDIF(UNIX)
-  STRING(REGEX REPLACE "/;" ";" VTK_DIR_SEARCH2 ${VTK_DIR_SEARCH1})
+  STRING(REGEX REPLACE "/;" ";" VTK_DIR_SEARCH2 "${VTK_DIR_SEARCH1}")
 
   # Construct a set of paths relative to the system search path.
   SET(VTK_DIR_SEARCH "")
