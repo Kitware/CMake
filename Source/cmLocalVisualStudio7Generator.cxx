@@ -244,9 +244,23 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
        << "\t\t\tCharacterSet=\"2\">\n";
   fout << "\t\t\t<Tool\n"
        << "\t\t\t\tName=\"VCCLCompilerTool\"\n"
-       << "\t\t\t\tAdditionalOptions=\""
-       << m_Makefile->GetDefinition("CMAKE_CXX_FLAGS") 
-       << " -DCMAKE_INTDIR=\\&quot;" << configName << "\\&quot;" 
+       << "\t\t\t\tAdditionalOptions=\"";
+  std::string flags;
+  if(target.HasCxx())
+    {
+    flags = m_Makefile->GetDefinition("CMAKE_CXX_FLAGS");
+    }
+  else
+    {
+    if(m_Makefile->GetDefinition("CMAKE_C_FLAGS"))
+      {
+      flags = m_Makefile->GetDefinition("CMAKE_C_FLAGS");
+      }
+    }
+  cmSystemTools::ReplaceString(flags, "\"", "&quot;");
+  fout << flags;
+
+  fout << " -DCMAKE_INTDIR=\\&quot;" << configName << "\\&quot;" 
        << "\"\n";
 
   fout << "\t\t\t\tAdditionalIncludeDirectories=\"";
