@@ -58,9 +58,9 @@ public:
   /*
    * A utility function that returns the nightly time
    */
-  static struct * GetNightlyTime(std::string str, 
-                                 bool verbose, 
-                                 bool tomorrowtag);
+  static struct tm* GetNightlyTime(std::string str, 
+                                   bool verbose, 
+                                   bool tomorrowtag);
   
   /*
    * Is the tomorrow tag set?
