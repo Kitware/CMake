@@ -9,8 +9,8 @@ Version:   $Revision$
 Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
 See http://www.cmake.org/HTML/Copyright.html for details.
 
-This software is distributed WITHOUT ANY WARRANTY; without even 
-the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+This software is distributed WITHOUT ANY WARRANTY; without even
+the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
 PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -34,10 +34,10 @@ int main()
   /* Process startup information for the real child.  */
   STARTUPINFO si;
   PROCESS_INFORMATION pi;
-  
+
   /* The result of waiting for the child to exit.  */
   DWORD waitResult;
-  
+
   /* The child's process return code.  */
   DWORD retVal;
 
@@ -47,7 +47,7 @@ int main()
   /* Pointer that will be advanced to the beginning of the command
      line of the real child process.  */
   LPSTR cmdLine = commandLine;
-  
+
   /* Handle to the error reporting pipe provided by the parent.  This
      is parsed off the command line.  */
   HANDLE errorPipe = 0;
@@ -60,14 +60,14 @@ int main()
   /* Handle to the event the parent uses to tell us to kill the child.
      This is parsed off the command line.  */
   HANDLE killEvent = 0;
-  
+
   /* Flag for whether to hide window of child process.  */
   int hideWindow = 0;
-  
+
   /* An array of the handles on which we wait when the child is
      running.  */
   HANDLE waitHandles[2] = {0, 0};
-  
+
   /* Move the pointer past the name of this executable.  */
   if(*cmdLine == '"')
     {
@@ -93,12 +93,12 @@ int main()
   while(*cmdLine && *cmdLine != ' ') { ++cmdLine; }
   while(*cmdLine && *cmdLine == ' ') { ++cmdLine; }
   sscanf(cmdLine, "%p", &killEvent);
-  
+
   /* Parse the hide window flag.  */
   while(*cmdLine && *cmdLine != ' ') { ++cmdLine; }
   while(*cmdLine && *cmdLine == ' ') { ++cmdLine; }
   sscanf(cmdLine, "%d", &hideWindow);
-  
+
   /* Skip to the beginning of the command line of the real child.  */
   while(*cmdLine && *cmdLine != ' ') { ++cmdLine; }
   while(*cmdLine && *cmdLine == ' ') { ++cmdLine; }
@@ -154,7 +154,7 @@ int main()
     TerminateProcess(pi.hProcess, 255);
     WaitForSingleObject(pi.hProcess, INFINITE);
     CloseHandle(pi.hProcess);
-    CloseHandle(pi.hThread);  
+    CloseHandle(pi.hThread);
     return 1;
     }
   else
@@ -191,16 +191,16 @@ void ReportLastError(HANDLE errorPipe)
 {
   LPVOID lpMsgBuf;
   DWORD n;
-  FormatMessage( 
-    FORMAT_MESSAGE_ALLOCATE_BUFFER | 
-    FORMAT_MESSAGE_FROM_SYSTEM | 
+  FormatMessage(
+    FORMAT_MESSAGE_ALLOCATE_BUFFER |
+    FORMAT_MESSAGE_FROM_SYSTEM |
     FORMAT_MESSAGE_IGNORE_INSERTS,
     NULL,
     GetLastError(),
     MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
     (LPTSTR) &lpMsgBuf,
     0,
-    NULL 
+    NULL
     );
   WriteFile(errorPipe, lpMsgBuf, strlen(lpMsgBuf)+1, &n, 0);
   LocalFree( lpMsgBuf );
