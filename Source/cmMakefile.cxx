@@ -570,7 +570,12 @@ void cmMakefile::AddLinkDirectory(const char* dir)
 
 void cmMakefile::AddSubDirectory(const char* sub)
 {
-  m_SubDirectories.push_back(sub);
+  // make sure it isn't already there
+  if (std::find(m_SubDirectories.begin(),
+                m_SubDirectories.end(), sub) == m_SubDirectories.end())  
+    {
+    m_SubDirectories.push_back(sub);
+    }
 }
 
 void cmMakefile::AddIncludeDirectory(const char* inc, bool before)
