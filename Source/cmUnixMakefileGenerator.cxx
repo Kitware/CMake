@@ -1102,10 +1102,12 @@ void cmUnixMakefileGenerator::ComputeSystemInfo()
     {
       // currently we run configure shell script here to determine the info
       std::string output;
-      std::string cmd;
+      std::string cmd = "cd ";
+      cmd += m_Makefile->GetHomeOutputDirectory();
+      cmd += "; ";
       const char* root
 	= cmCacheManager::GetInstance()->GetCacheValue("CMAKE_ROOT");
-      cmd = root;
+      cmd += root;
       cmd += "/Templates/configure";
       cmSystemTools::RunCommand(cmd.c_str(), output);
       m_Makefile->AddDefinition("RUN_CONFIGURE", true);
