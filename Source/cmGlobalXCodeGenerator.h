@@ -143,6 +143,7 @@ private:
   bool m_DoneXCodeHack;
   std::string m_CurrentReRunCMakeMakefile;
   std::string m_CurrentXCodeHackMakefile;
+  std::string m_CurrentProject;
   std::string m_OutputDir; 
   std::vector<std::string> m_CurrentOutputDirectoryComponents;
   std::vector<std::string> m_ProjectOutputDirectoryComponents;

@@ -168,6 +168,7 @@ void cmGlobalXCodeGenerator::Generate()
   for(it = m_ProjectMap.begin(); it!= m_ProjectMap.end(); ++it)
     { 
     cmLocalGenerator* root = it->second[0];
+    m_CurrentProject = root->GetMakefile()->GetProjectName();
     this->SetCurrentLocalGenerator(root);
     m_OutputDir = m_CurrentMakefile->GetHomeOutputDirectory();
     m_OutputDir = cmSystemTools::CollapseFullPath(m_OutputDir.c_str());
@@ -722,7 +723,7 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
       for(std::vector<std::string>::const_iterator d = cc.GetDepends().begin();
           d != cc.GetDepends().end(); ++d)
         {
-        if(!this->FindTarget(m_CurrentMakefile->GetProjectName(),
+        if(!this->FindTarget(m_CurrentProject.c_str(),
                              d->c_str()))
           {
           makefileStream << "\\\n" << this
@@ -1216,7 +1217,7 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
   for(std::vector<cmStdString>::iterator lib = linkItems.begin();
       lib != linkItems.end(); ++lib)
     {
-    cmTarget* t = this->FindTarget(m_CurrentMakefile->GetProjectName(),
+    cmTarget* t = this->FindTarget(m_CurrentProject.c_str(),
                                    lib->c_str());
     cmXCodeObject* dptarget = this->FindXCodeTarget(t);
     if(dptarget)
@@ -1241,30 +1242,46 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
         = cmtarget->GetUtilities().begin();
       i != cmtarget->GetUtilities().end(); ++i)
     {
-    cmTarget* t = this->FindTarget(m_CurrentMakefile->GetProjectName(),
+    cmTarget* t = this->FindTarget(m_CurrentProject.c_str(),
                                    i->c_str());
-    cmXCodeObject* dptarget = this->FindXCodeTarget(t);
-    if(dptarget)
+    if(!t)
       {
-      this->AddDependTarget(target, dptarget);
+      std::string m = "Error Utility: ";
+      m += *i;
+      m += " not found in project ";
+      m += m_CurrentProject.c_str();
+      m += " it is a utility of ";
+      m += cmtarget->GetName();
+      cmSystemTools::Error(m.c_str());
       }
     else
       {
-      std::string m = "Error Utility: ";
-      m += i->c_str();
-      m += "\n";
-      m += "cmtarget ";
-      m += t->GetName();
-      m += "\n";
-      m += "Is on the target ";
-      m += cmtarget->GetName();
-      m += "\n";
-      m += "But it has no xcode target created yet??\n";
-      m += "Current project is ";
-      m += m_CurrentMakefile->GetProjectName();
-      cmSystemTools::Error(m.c_str());
-      }
-    } 
+      cmXCodeObject* dptarget = this->FindXCodeTarget(t);
+      if(dptarget)
+        {
+        this->AddDependTarget(target, dptarget);
+        }
+      else
+        {
+        std::string m = "Error Utility: ";
+        m += i->c_str();
+        m += "\n";
+        m += "cmtarget ";
+        if(t)
+          {
+          m += t->GetName();
+          }
+        m += "\n";
+        m += "Is on the target ";
+        m += cmtarget->GetName();
+        m += "\n";
+        m += "But it has no xcode target created yet??\n";
+        m += "Current project is ";
+        m += m_CurrentProject.c_str();
+        cmSystemTools::Error(m.c_str());
+        }
+      } 
+    }
   std::vector<cmStdString> fullPathLibs;
   orderLibs.GetFullPathLibraries(fullPathLibs);
   for(std::vector<cmStdString>::iterator i = fullPathLibs.begin();
