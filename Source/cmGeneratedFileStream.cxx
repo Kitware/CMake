@@ -169,10 +169,10 @@ void cmGeneratedFileStreamBase::Open(const char* name)
 }
 
 //----------------------------------------------------------------------------
+#ifdef CMAKE_BUILD_WITH_CMAKE
 int cmGeneratedFileStreamBase::CompressFile(const char* oldname,
                                             const char* newname)
 {
-#ifdef CMAKE_BUILD_WITH_CMAKE
   gzFile gf = cm_zlib_gzopen(newname, "w");
   if ( !gf )
     {
@@ -198,10 +198,13 @@ int cmGeneratedFileStreamBase::CompressFile(const char* oldname,
   fclose(ifs);
   cm_zlib_gzclose(gf);
   return 1;
-#else
-  return 0;
-#endif
 }
+#else
+int cmGeneratedFileStreamBase::CompressFile(const char*, const char*)
+{
+  return 0;
+}
+#endif
 
 //----------------------------------------------------------------------------
 int cmGeneratedFileStreamBase::RenameFile(const char* oldname,
