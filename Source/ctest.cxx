@@ -876,6 +876,10 @@ void ctest::ProcessDirectory(std::vector<std::string> &passed,
         double clock_start, clock_finish;
         clock_start = floattime();
 
+        if ( m_Verbose )
+          {
+          std::cout << std::endl << "Test command: " << testCommand << std::endl;
+          }
         bool res = cmSystemTools::RunCommand(testCommand.c_str(), output, 
                                              retVal, 0, false);
         clock_finish = floattime();
