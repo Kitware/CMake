@@ -290,6 +290,7 @@ private:
   int                     m_Tests[LAST_TEST];
   
   std::string             m_CurrentTag;
+  bool                    m_TomorrowTag;
 
   std::string             m_StartBuild;
   std::string             m_EndBuild;
