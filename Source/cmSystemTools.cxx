@@ -1203,7 +1203,7 @@ public:
       for(std::vector<char*>::iterator i = this->begin();
           i != this->end(); ++i)
         {
-        delete *i;
+        delete []*i;
         }
     }
 };
