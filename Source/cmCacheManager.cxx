@@ -249,6 +249,11 @@ bool cmCacheManager::LoadCache(const char* path,
     
     }
   std::string currentcwd = path;
+  if ( currentcwd[0] >= 'A' && currentcwd[0] <= 'Z' &&
+       currentcwd[1] == ':' )
+    {
+    currentcwd[0] = currentcwd[0] - 'A' + 'a';
+    }
   cmSystemTools::ConvertToUnixSlashes(currentcwd);
   if(internal && this->GetCacheValue("CMAKE_CACHEFILE_DIR") && 
      std::string(this->GetCacheValue("CMAKE_CACHEFILE_DIR")) != currentcwd) 
@@ -316,6 +321,11 @@ bool cmCacheManager::SaveCache(const char* path)
   // Let us store the current working directory so that if somebody
   // Copies it, he will not be surprised
   std::string currentcwd = path;
+  if ( currentcwd[0] >= 'A' && currentcwd[0] <= 'Z' &&
+       currentcwd[1] == ':' )
+    {
+    currentcwd[0] = currentcwd[0] - 'A' + 'a';
+    }
   cmSystemTools::ConvertToUnixSlashes(currentcwd);
   this->AddCacheEntry("CMAKE_CACHEFILE_DIR", currentcwd.c_str(),
                       "This is the directory where this CMakeCahe.txt"
