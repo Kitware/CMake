@@ -1084,7 +1084,14 @@ void cmUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
       for(cmSourceGroup::Commands::const_iterator c = commands.begin();
           c != commands.end(); ++c)
         {
-        std::string command = c->first;
+        // escape spaces and convert to native slashes path for
+        // the command
+        std::string command =
+          cmSystemTools::EscapeSpaces(c->second.m_Command.c_str());
+        command = this->ConvertToNativePath(command.c_str());
+        command += " ";
+        // now add the arguments
+        command += c->second.m_Arguments;
         const cmSourceGroup::CommandFiles& commandFiles = c->second;
         // if the command has no outputs, then it is a utility command
         // with no outputs
@@ -1680,17 +1687,24 @@ void cmUnixMakefileGenerator::ComputeSystemInfo()
 {
   if (m_CacheOnly)
     {
+    // see man putenv for explaination of this stupid code....
+    static char envCXX[5000];
+    static char envCC[5000];
     if(m_Makefile->GetDefinition("CMAKE_CXX_COMPILER"))
       {
       std::string env = "CXX=${CMAKE_CXX_COMPILER}";
       m_Makefile->ExpandVariablesInString(env);
-      putenv(const_cast<char*>(env.c_str()));
+      strncpy(envCXX, env.c_str(), 4999);
+      envCXX[4999] = 0;
+      putenv(envCXX);
       }
     if(m_Makefile->GetDefinition("CMAKE_C_COMPILER"))
       {
       std::string env = "CC=${CMAKE_C_COMPILER}";
       m_Makefile->ExpandVariablesInString(env);
-      putenv(const_cast<char*>(env.c_str()));
+      strncpy(envCC, env.c_str(), 4999);
+      envCC[4999] = 0;
+      putenv(envCC);
       }
     // currently we run configure shell script here to determine the info
     std::string output;
