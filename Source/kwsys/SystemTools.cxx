@@ -936,6 +936,28 @@ char* SystemTools::ReplaceChars(char* str, const char *toreplace, char replaceme
   return str;
 }
 
+// Returns if string starts with another string
+bool vtkString::StringStartsWith(const char* str1, const char* str2)
+{
+  if (!str1 || !str2)
+    {
+    return false;
+    }
+  size_t len1 = strlen(str1), len2 = strlen(str2);
+  return len1 >= len2 && !strncmp(str1, str2, len2) ? true : false
+}
+
+// Returns if string ends with another string
+bool vtkString::StringEndsWith(const char* str1, const char* str2)
+{
+  if (!str1 || !str2)
+    {
+    return false;
+    }
+  size_t len1 = strlen(str1), len2 = strlen(str2);
+  return len1 >= len2 &&  !strncmp(str1 + (len1 - len2), str2, len2) ? true : false;
+}
+
 // Returns a pointer to the last occurence of str2 in str1
 const char* SystemTools::FindLastString(const char* str1, const char* str2)
 {

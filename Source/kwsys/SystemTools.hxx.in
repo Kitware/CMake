@@ -155,6 +155,12 @@ public:
   static char* ReplaceChars(char* str, const char *toreplace,char replacement);
   
   /**
+   * Returns true if str1 starts or ends with str2
+   */
+  static bool StringStartsWith(const char* str1, const char* str2);
+  static bool StringEndsWith(const char* str1, const char* str2);
+
+  /**
    * Returns a pointer to the last occurence of str2 in str1
    */
   static const char* FindLastString(const char* str1, const char* str2);
