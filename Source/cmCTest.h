@@ -291,6 +291,7 @@ private:
   };
 
   typedef std::vector<cmCTestTestResult> tm_TestResultsVector;
+  //! Map of configuration properties
   typedef std::map<std::string, std::string> tm_DartConfigurationMap;
   typedef std::map<std::string, cmCTestCoverage> tm_CoverageMap;
 

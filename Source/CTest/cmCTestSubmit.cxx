@@ -18,6 +18,7 @@ PURPOSE.  See the above copyright notices for more information.
 #include "cmCTestSubmit.h"
 #include "cmSystemTools.h"
 
+#include <cmsys/Process.h>
 #include "curl/curl.h"
 #include <sys/stat.h>
 
@@ -407,11 +408,110 @@ bool cmCTestSubmit::TriggerUsingHTTP(const std::vector<cmStdString>& files,
   return true;
 }
 
-bool cmCTestSubmit::SubmitUsingSCP(const cmStdString&, 
-  const std::vector<cmStdString>&,
-  const cmStdString&, 
-  const cmStdString&)
+bool cmCTestSubmit::SubmitUsingSCP(
+  const cmStdString& scp_command, 
+  const cmStdString& localprefix, 
+  const std::vector<cmStdString>& files,
+  const cmStdString& remoteprefix, 
+  const cmStdString& url)
 {
-  std::cout << "SubmitUsingSCP is not yet implemented" << std::endl;
-  return false;
+  if ( !scp_command.size() || !localprefix.size() ||
+    !files.size() || !remoteprefix.size() || !url.size() )
+    {
+    return 0;
+    }
+  std::vector<const char*> argv;
+  argv.push_back(scp_command.c_str()); // Scp command
+  argv.push_back(scp_command.c_str()); // Dummy string for file
+  argv.push_back(scp_command.c_str()); // Dummy string for remote url
+  argv.push_back(0);
+
+  cmsysProcess* cp = cmsysProcess_New();
+  cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
+  //cmsysProcess_SetTimeout(cp, timeout);
+
+  int retVal = 0;
+
+  int problems = 0;
+
+  std::vector<cmStdString>::const_iterator it;
+  for ( it = files.begin();
+    it != files.end();
+    it ++ )
+    {
+    std::string lfname = localprefix;
+    cmSystemTools::ConvertToUnixSlashes(lfname);
+    lfname += "/" + *it;
+    lfname = cmSystemTools::ConvertToOutputPath(lfname.c_str());
+    argv[1] = lfname.c_str();
+    std::string rfname = url + "/" + remoteprefix + *it;
+    argv[2] = rfname.c_str();
+    if ( m_Verbose )
+      {
+      std::cout << "Execute \"" << argv[0] << "\" \"" << argv[1] << "\" \"" 
+        << argv[2] << "\"" << std::endl;
+      }
+    *m_LogFile << "Execute \"" << argv[0] << "\" \"" << argv[1] << "\" \"" 
+      << argv[2] << "\"" << std::endl;
+    cmsysProcess_SetCommand(cp, &*argv.begin());
+    cmsysProcess_Execute(cp);
+    char* data;
+    int length;
+    while(cmsysProcess_WaitForData(cp, &data, &length, 0))
+      {
+      std::cout.write(data, length);
+      }
+    cmsysProcess_WaitForExit(cp, 0);
+    int result = cmsysProcess_GetState(cp);
+
+    if(result == cmsysProcess_State_Exited)
+      {
+      retVal = cmsysProcess_GetExitValue(cp);
+      if ( retVal != 0 )
+        {
+        if ( m_Verbose )
+          {
+          std::cout << "\tSCP returned: " << retVal << std::endl;
+          }
+        *m_LogFile << "\tSCP returned: " << retVal << std::endl;
+        problems ++;
+        }
+      }
+    else if(result == cmsysProcess_State_Exception)
+      {
+      retVal = cmsysProcess_GetExitException(cp);
+      if ( m_Verbose )
+        {
+        std::cout << "\tThere was an exception: " << retVal << std::endl;
+        }
+      *m_LogFile << "\tThere was an exception: " << retVal << std::endl;
+      problems ++;
+      }
+    else if(result == cmsysProcess_State_Expired)
+      {
+      if ( m_Verbose )
+        {
+        std::cout << "\tThere was a timeout" << std::endl;
+        }
+      *m_LogFile << "\tThere was a timeout" << std::endl;
+      problems ++;
+      } 
+    else if(result == cmsysProcess_State_Error)
+      {
+      if ( m_Verbose )
+        {
+        std::cout << "\tError executing SCP: "
+          << cmsysProcess_GetErrorString(cp) << std::endl;
+        }
+      *m_LogFile << "\tError executing SCP: "
+        << cmsysProcess_GetErrorString(cp) << std::endl;
+      problems ++;
+      }
+    }
+  cmsysProcess_Delete(cp);
+  if ( problems )
+    {
+    return false;
+    }
+  return true;
 }

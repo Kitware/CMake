@@ -2619,6 +2619,8 @@ int cmCTest::SubmitResults()
       cnt ++;
       }
     }
+  std::cout << "Submit files (using " << m_DartConfiguration["DropMethod"] << ")"
+    << std::endl;
   cmCTestSubmit submit;
   submit.SetVerbose(m_Verbose);
   submit.SetLogFile(&ofs);
@@ -2682,8 +2684,22 @@ int cmCTest::SubmitResults()
     }
   else
     {
-    std::cerr << "SCP submit not yet implemented" << std::endl;
-    ofs << "SCP submit not yet implemented" << std::endl;
+    std::string url;
+    if ( m_DartConfiguration["DropSiteUser"].size() > 0 )
+      {
+      url += m_DartConfiguration["DropSiteUser"] + "@";
+      }
+    url += m_DartConfiguration["DropSite"] + ":" + m_DartConfiguration["DropLocation"];
+    
+    if ( !submit.SubmitUsingSCP(m_DartConfiguration["ScpCommand"],
+        m_ToplevelPath+"/Testing/"+m_CurrentTag, files, prefix, url) )
+      {
+      std::cerr << "  Problems when submitting via SCP" << std::endl;
+      ofs << "  Problems when submitting via SCP" << std::endl;
+      return 0;
+      }
+    std::cout << "  Submission successfull" << std::endl;
+    ofs << "  Submission succesfull" << std::endl;
     }
 
   return 0;

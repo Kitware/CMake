@@ -51,7 +51,8 @@ public:
                        const std::vector<cmStdString>& files,
                        const cmStdString& remoteprefix, 
                        const cmStdString& url);
-  bool SubmitUsingSCP(const cmStdString& localprefix, 
+  bool SubmitUsingSCP(const cmStdString& scp_command,
+                      const cmStdString& localprefix, 
                       const std::vector<cmStdString>& files,
                       const cmStdString& remoteprefix, 
                       const cmStdString& url);
