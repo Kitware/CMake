@@ -23,6 +23,7 @@
 #include KWSYS_HEADER(ios/iostream)
 
 #include <stdio.h>
+#include <stdlib.h>
 
 namespace KWSYS_NAMESPACE
 {
