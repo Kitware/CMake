@@ -19,6 +19,8 @@
 #include "cmCacheManager.h"
 #include "cmMakefile.h"
 #include "cmLocalGenerator.h"
+#include "cmCommands.h"
+#include "cmCommand.h"
 
 // include the generator
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -35,6 +37,7 @@ cmake::cmake()
   m_Verbose = false;
   m_CacheManager = new cmCacheManager;
   m_GlobalGenerator = 0;
+  this->AddDefaultCommands();
 }
 
 cmake::~cmake()
@@ -45,8 +48,34 @@ cmake::~cmake()
     delete m_GlobalGenerator;
     m_GlobalGenerator = 0;
     }
+  for(RegisteredCommandsMap::iterator j = m_Commands.begin();
+      j != m_Commands.end(); ++j)
+    {
+    delete (*j).second;
+    }
 }
 
+bool cmake::CommandExists(const char* name) const
+{
+  return (m_Commands.find(name) != m_Commands.end());
+}
+
+cmCommand *cmake::GetCommand(const char *name) 
+{
+  cmCommand* rm = 0;
+  RegisteredCommandsMap::iterator pos = m_Commands.find(name);
+  if (pos != m_Commands.end())
+    {
+    rm = (*pos).second;
+    }
+  return rm;
+}
+
+void cmake::AddCommand(cmCommand* wg)
+{
+  std::string name = wg->GetName();
+  m_Commands.insert( RegisteredCommandsMap::value_type(name, wg));
+}
 
 void cmake::Usage(const char* program)
 {
@@ -811,3 +840,40 @@ const char* cmake::GetCacheDefinition(const char* name) const
 {
   return m_CacheManager->GetCacheValue(name);
 }
+
+int cmake::DumpDocumentationToFile(std::ostream& f)
+{
+  // Loop over all registered commands and print out documentation
+  const char *name;
+  const char *terse;
+  const char *full;
+  char tmp[1024];
+  sprintf(tmp,"Version %d.%d", cmake::GetMajorVersion(),
+          cmake::GetMinorVersion());
+  f << "<html>\n";
+  f << "<h1>Documentation for commands of CMake " << tmp << "</h1>\n";
+  f << "<ul>\n";
+  for(RegisteredCommandsMap::iterator j = m_Commands.begin();
+      j != m_Commands.end(); ++j)
+    {
+    name = (*j).second->GetName();
+    terse = (*j).second->GetTerseDocumentation();
+    full = (*j).second->GetFullDocumentation();
+    f << "<li><b>" << name << "</b> - " << terse << std::endl
+      << "<br><i>Usage:</i> " << full << "</li>" << std::endl << std::endl;
+    }
+  f << "</ul></html>\n";
+  return 1;
+}
+
+void cmake::AddDefaultCommands()
+{
+  std::list<cmCommand*> commands;
+  GetPredefinedCommands(commands);
+  for(std::list<cmCommand*>::iterator i = commands.begin();
+      i != commands.end(); ++i)
+    {
+    this->AddCommand(*i);
+    }
+}
+

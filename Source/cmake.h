@@ -25,6 +25,7 @@ class cmGlobalGenerator;
 class cmLocalGenerator;
 class cmCacheManager;
 class cmMakefile;
+class cmCommand;
 
 class cmake
 {
@@ -90,6 +91,12 @@ class cmake
   //@}
 
   /**
+   * Dump documentation to a file. If 0 is returned, the
+   * operation failed.
+   */
+  int DumpDocumentationToFile(std::ostream&);
+
+  /**
    * Handle a command line invocation of cmake.
    */
   int Run(const std::vector<std::string>&args);
@@ -141,6 +148,19 @@ class cmake
   static int CMakeCommand(std::vector<std::string>&);
 
   /**
+   * Add a command to this cmake instance
+   */
+  void AddCommand(cmCommand* );
+
+  /**
+   * Get a command by its name
+   */
+  cmCommand *GetCommand(const char *name);
+
+  /** Check if a command exists. */
+  bool CommandExists(const char* name) const;
+    
+  /**
    * Is cmake in the process of a local cmake invocation. If so, we know the
    * cache is already configured and ready to go. 
    */
@@ -156,6 +176,10 @@ class cmake
   void SetArgs(const std::vector<std::string>&);
 
 protected:
+  typedef std::map<cmStdString, cmCommand*> RegisteredCommandsMap;
+  RegisteredCommandsMap m_Commands;
+  void AddDefaultCommands();
+
   cmGlobalGenerator *m_GlobalGenerator;
   cmCacheManager *m_CacheManager;
   std::string m_cmHomeDirectory; 
