@@ -18,9 +18,9 @@ namespace fltk {
 
 PropertyList::PropertyList()
 {
-  m_Dirty = false;
-  m_curSel = -1;
 }
+
+
 
 PropertyList::~PropertyList()
 {
@@ -34,7 +34,7 @@ PropertyList::~PropertyList()
 
 
 
-int PropertyList::AddItem(string txt)
+int PropertyList::AddItem( std::string txt)
 {
   int nIndex =0;// = AddString(txt);
   return nIndex;
@@ -71,7 +71,6 @@ int PropertyList::AddProperty(const char* name,
         {
         pItem->m_curValue = value;
         pItem->m_HelpString = helpString;
-        m_Dirty = true;
         Invalidate();
         }
       return i;
@@ -86,74 +85,6 @@ int PropertyList::AddProperty(const char* name,
 }
 
 
-
-
-void PropertyList::OnButton()
-{
-  PropertyItem* pItem = (PropertyItem*) GetItemDataPtr(m_curSel);
-
-  //display the appropriate common dialog depending on what type
-  //of chooser is associated with the property
-  if (pItem->m_nItemType == PropertyList::COLOR)
-    {
-      unsigned char red   = 0;
-      unsigned char blue  = 0;
-      unsigned char green = 0;
-      fl_color_chooser("Please pick a color",red,green,blue);
-      char buffer[300];
-      sprintf(buffer,"RGB(%d,%d,%d)",red,green,blue);
-      pItem->m_curValue = buffer;
-      m_Dirty = true;
-      Invalidate();
-    }
-  else if (pItem->m_nItemType == PropertyList::FILE)
-    {
-    string currPath   = pItem->m_curValue;
-
-    const char * SelectedFile 
-                    =  fl_file_chooser("Choose a file",
-                             "*",currPath.c_str() );
-
-    if( SelectedFile )
-      {
-        pItem->m_curValue = SelectedFile;
-        m_Dirty = true;
-        Invalidate();
-      }
-    }
-   else if (pItem->m_nItemType == PropertyList::PATH)
-    {
-    string currPath   = pItem->m_curValue;
-    string initialDir = currPath;
-    
-    const char * SelectedFile 
-                    =  fl_file_chooser("Choose a directory",
-                             "*/",initialDir.c_str() );
-
-    if( SelectedFile   && filename_isdir( SelectedFile ) )
-      {
-      pItem->m_curValue = SelectedFile;
-      m_Dirty = true;
-      Invalidate();
-      }
-    }
-  else if (pItem->m_nItemType == PropertyList::FONT)
-    {	
-    }
-}
-
-
-
-
-void PropertyList::OnHelp()
-{ 
-  if(m_curSel == -1 || this->GetCount() <= 0)
-    {
-    return;
-    }
-  PropertyItem* pItem = (PropertyItem*) GetItemDataPtr(m_curSel);
-  fl_message(pItem->m_HelpString.c_str());
-}
 
 
 void PropertyList::RemoveAll()

@@ -8,6 +8,7 @@
 #include <Fl/Fl_Tile.H>
 #include <Fl/Fl_Input.H>
 
+
 namespace fltk {
   
 
@@ -42,9 +43,11 @@ class PropertyItemRow  : public Fl_Tile
     // manages the popup help blob
     PropertyNameButtonWithHelp * m_NameButton;
 
+
     static void CheckButtonCallback( Fl_Widget *, void *);
     static void InputTextCallback(   Fl_Widget *, void *);
     static void BrowsePathCallback(  Fl_Widget *, void *);
+    static void ColorSelectionCallback(   Fl_Widget * widget, void * data);
 
 };
 

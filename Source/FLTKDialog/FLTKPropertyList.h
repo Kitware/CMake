@@ -7,7 +7,6 @@
 
 namespace fltk {
 
-using std::string;
 
 /////////////////////////////////////////////////////////////////////////////
 //PropertyList Items
@@ -15,16 +14,18 @@ class PropertyItem
 {
 // Attributes
 public:
-  string m_HelpString;
-  string m_propName;
-  string m_curValue;
+  std::string m_HelpString;
+  std::string m_propName;
+  std::string m_curValue;
   int m_nItemType;
-  string m_cmbItems;
+  std::string m_cmbItems;
   bool m_Removed;
 public:
-  PropertyItem(string propName, string curValue,
-                string helpString,
-                int nItemType, string cmbItems)
+  PropertyItem( std::string propName, 
+                std::string curValue,
+                std::string helpString,
+                int nItemType, 
+                std::string cmbItems )
     {
       m_HelpString = helpString;
       m_Removed = false;
@@ -59,7 +60,7 @@ public:
 
 // Operations
 public:
-  int AddItem(string txt);
+  int AddItem( std::string txt );
   int AddProperty(const char* name,
                   const char* value,
                   const char* helpString,
@@ -88,17 +89,11 @@ public:
 public:
   virtual ~PropertyList();
 
-  // Generated message map functions
 protected:
 
   int AddPropItem(PropertyItem* pItem);
 
-//  CComboBox m_cmbBox;
-//  CEdit m_editBox;
-//  CButton m_btnCtrl;
-//  CButton m_CheckBoxControl;
-  
-
+  /*
   bool m_Dirty;
   int m_curSel;
   int m_prevSel;
@@ -107,6 +102,7 @@ protected:
   int m_nDivBtm;
   int m_nOldDivX;
   int m_nLastBox;
+  */
 
   std::set<PropertyItem*> m_PropertyItems;
 

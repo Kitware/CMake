@@ -1,5 +1,9 @@
 #include <FLTKPropertyNameButtonWithHelp.h>
 #include <Fl/Fl.H>
+#include <Fl/fl_ask.H>
+#include <Fl/Fl_Menu_Button.H>
+#include "../cmCacheManager.h"
+
 
 namespace fltk {
   
@@ -72,6 +76,8 @@ PropertyNameButtonWithHelp::
 handle( int event )
 {
 
+  static bool helpBlobVisible = false;
+
   const float delayForShowingHelpBlob = 1.0; // seconds
   
   const int   maxWidth   = 300;
@@ -96,7 +102,7 @@ handle( int event )
   switch( event )
   {
     case FL_ENTER: 
-     {
+    {
       lastMousePositionX = Fl::event_x();
       lastMousePositionY = Fl::event_y();
       const float factor = helpText->labelsize() * 0.5;
@@ -117,15 +123,33 @@ handle( int event )
       helpText->label(  m_HelpText.c_str() );
       Fl_Widget * parent = this->parent();
       Fl::add_timeout( delayForShowingHelpBlob, ShowHelpBlobCallback, (void *)parent );
+      helpBlobVisible = true;
       eventManaged = 0;
       break;
-      }
+     }
     case FL_LEAVE:
-      helpBlob->hide();
+    {
+      if( helpBlobVisible )
+      {
+        helpBlobVisible = false;
+        helpBlob->hide();
+      }
       eventManaged = 0;
       break;
+    }
     case FL_MOVE:
-      helpBlob->hide();
+      if( helpBlobVisible )
+      {
+        helpBlobVisible = false;
+        helpBlob->hide();
+      }
+      eventManaged = 0;
+      break;
+    case FL_PUSH:
+      if( Fl::event_button() == FL_RIGHT_MOUSE )
+      {
+        PopupMenu();
+      }
       eventManaged = 0;
       break;
     default:
@@ -152,6 +176,54 @@ ShowHelpBlobCallback( void * data )
     helpBlob->show();
   }
 
+}
+
+
+
+////////////////////////////////////////////////////////////////
+//  This popup menu is displayed when the 
+//  right mouse button is pressed
+void 
+PropertyNameButtonWithHelp::
+PopupMenu(void)
+{
+  static Fl_Menu_Button * popupMenu = 0;
+  if( !popupMenu )
+  {
+    popupMenu = new Fl_Menu_Button(0,0,100,200);
+  }
+  
+  popupMenu->type( Fl_Menu_Button::POPUP3 );
+  popupMenu->add("Remove|Properties...");
+  popupMenu->popup();
+  
+  switch( popupMenu->value() )
+  {
+    case 0: // Remove
+    {
+      const char * propertyName = label();
+      int answer = fl_ask( "Do you want to remove property %s", propertyName );
+      if( answer == 1 )
+      {
+        // Remove the entry from the cache
+        cmCacheManager::GetInstance()->RemoveCacheEntry( propertyName );
+        // Get the parent: Fl_Tile that manages the whole row in the GUI
+        Fl_Group * parentGroup      = (Fl_Group *) parent();
+        // Get the grandParent: Fl_Pack with the property list
+        Fl_Group * grandParentGroup = (Fl_Group *) parentGroup->parent();
+        // Remove the row from the list
+        grandParentGroup->remove( *parentGroup );
+        // Destroy the row
+        delete parentGroup;  // Patricide... ?
+        // Redraw the list
+        grandParentGroup->redraw();
+        return;
+      }
+      break;
+    }
+    case 1: // Properties
+      break;
+  }
 }
 
 

@@ -28,9 +28,11 @@ class PropertyNameButtonWithHelp : public Fl_Button
     
     static void ShowHelpBlobCallback( void * );
 
+    void PopupMenu( void );
+
   private:
     
-    string                m_HelpText;
+    std::string           m_HelpText;
 
     // Class variables
     static Fl_Window   *  helpBlob;
