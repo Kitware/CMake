@@ -176,8 +176,9 @@ private:
 class cmInputStringStream: public std::istringstream
 {
 public:
+  typedef std::istringstream Superclass;
   cmInputStringStream() {}
-  cmInputStringStream(const char* c) : std::istringstream(c) {}
+  cmInputStringStream(const char* c) : Superclass(c) {}
 private:
   cmInputStringStream(const cmInputStringStream&);
   void operator=(const cmInputStringStream&);

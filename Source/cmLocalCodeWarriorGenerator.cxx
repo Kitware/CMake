@@ -258,7 +258,7 @@ void cmLocalCodeWarriorGenerator::WriteSettingList(std::ostream& fout,
 }
 
 void cmLocalCodeWarriorGenerator::WriteFileList(std::ostream& fout,
-                                                const char */*tgtName*/,
+                                                const char* /*tgtName*/,
                                                 cmTarget const *l)
 {
   fout << "<FILELIST>\n";
@@ -301,7 +301,7 @@ void cmLocalCodeWarriorGenerator::WriteFileList(std::ostream& fout,
 
 
 void cmLocalCodeWarriorGenerator::WriteLinkOrder(std::ostream& fout,
-                                                 const char */*tgtName*/,
+                                                 const char* /*tgtName*/,
                                                  cmTarget const *l)
 {
   fout << "<LINKORDER>\n";
