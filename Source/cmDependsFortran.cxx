@@ -21,6 +21,7 @@
 #include "cmDependsFortranLexer.h"  /* Interface to lexer object.  */
 #include "cmDependsFortranParser.h" /* Interface to parser object.  */
 
+#include <assert.h>
 #include <stack>
 
 //----------------------------------------------------------------------------
@@ -37,6 +38,9 @@ extern "C"
 // Define parser object internal structure.
 struct cmDependsFortranFile
 {
+  cmDependsFortranFile(FILE* file, YY_BUFFER_STATE buffer,
+                       const std::string& dir):
+    File(file), Buffer(buffer), Directory(dir) {}
   FILE* File;
   YY_BUFFER_STATE Buffer;
   std::string Directory;
@@ -215,7 +219,7 @@ int cmDependsFortranParser_FilePush(cmDependsFortranParser* parser,
     YY_BUFFER_STATE current =
       cmDependsFortranLexer_GetCurrentBuffer(parser->Scanner);
     std::string dir = cmSystemTools::GetParentDirectory(fname);
-    cmDependsFortranFile f = {file, current, dir};
+    cmDependsFortranFile f(file, current, dir);
     YY_BUFFER_STATE buffer =
       cmDependsFortran_yy_create_buffer(0, 16384, parser->Scanner);
     cmDependsFortran_yy_switch_to_buffer(buffer, parser->Scanner);
