@@ -869,7 +869,17 @@ WriteCustomRule(std::ostream& fout,
         }
       std::string libPath = dep + "_CMAKE_PATH";
       const char* cacheValue = m_Makefile->GetDefinition(libPath.c_str());
-      if (!cacheValue)
+      if (cacheValue)
+        {
+        libPath = cacheValue;
+        libPath += "/";
+        libPath += "$(INTDIR)";
+        libPath += dep;
+        libPath += ".exe";
+        fout << this->ConvertToXMLOutputPath(libPath.c_str())
+             << ";";
+        }
+      else
         {
         fout << this->ConvertToXMLOutputPath(d->c_str())
              << ";";

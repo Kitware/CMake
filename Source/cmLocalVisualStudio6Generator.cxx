@@ -465,10 +465,20 @@ void cmLocalVisualStudio6Generator::WriteCustomRule(std::ostream& fout,
         }
       std::string libPath = dep + "_CMAKE_PATH";
       const char* cacheValue = m_Makefile->GetDefinition(libPath.c_str());
-      if (!cacheValue)
+      if (cacheValue)
         {
-        fout << "\\\n\t" << 
-          cmSystemTools::ConvertToOutputPath(d->c_str());
+        libPath = cacheValue;
+        libPath += "/";
+        libPath += "$(INTDIR)";
+        libPath += dep;
+        libPath += ".exe";
+        fout << cmSystemTools::ConvertToOutputPath(libPath.c_str())
+             << ";";
+        }
+      else
+        {
+        fout << cmSystemTools::ConvertToOutputPath(d->c_str())
+             << ";";
         }
       }
     fout << "\n";
