@@ -9,7 +9,9 @@ ADD_LIBRARY(test1 STATIC lib1.cxx)
 ADD_LIBRARY(test2 SHARED lib2.cxx)
 ADD_LIBRARY(test3 MODULE lib3.cxx)
 ADD_EXECUTABLE (SimpleInstall inst.cxx foo.c foo.h)
-TARGET_LINK_LIBRARIES(SimpleInstall test1 test2 test3)
+TARGET_LINK_LIBRARIES(SimpleInstall test1 test2)
+
+ADD_DEPENDENCIES(SimpleInstall test3)
 
 INSTALL_TARGETS(/bin SimpleInstall)
 INSTALL_TARGETS(/lib test1 test2 test3)

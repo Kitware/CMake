@@ -1603,7 +1603,16 @@ void cmLocalUnixMakefileGenerator::OutputDependLibs(std::ostream& fout)
         if(emitted.insert(*util).second)
           {
           // Output this dependency.
-          this->OutputExeDepend(fout, util->c_str());
+          std::string utilType = *util + "_LIBRARY_TYPE";
+          const char* libType = m_Makefile->GetDefinition(utilType.c_str());
+          if ( libType )
+            {
+            this->OutputLibDepend(fout, util->c_str());
+            }
+          else
+            {
+            this->OutputExeDepend(fout, util->c_str());
+            }
           }
         }
       fout << "\n";
