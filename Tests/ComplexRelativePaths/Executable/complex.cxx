@@ -2,6 +2,9 @@
 #include "ExtraSources/file1.h"
 #include "file2.h"
 #include "sharedFile.h"
+extern "C" {
+#include "testConly.h"
+}
 #include "cmStandardIncludes.h"
 #include "cmSystemTools.h"
 
@@ -102,6 +105,14 @@ int main()
   else
     {
     cmPassed("Call to sharedFunction from shared library worked.");
+    }
+  if(CsharedFunction() != 1)
+    {
+    cmFailed("Call to C sharedFunction from shared library failed.");
+    }
+  else
+    {
+    cmPassed("Call to C sharedFunction from shared library worked.");
     }
   
   if(file1() != 1)

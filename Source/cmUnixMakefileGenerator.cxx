@@ -427,14 +427,33 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
   std::string runtimeSep;
   std::vector<std::string> runtimeDirs;
 
-  if(m_Makefile->GetDefinition("CMAKE_SHLIB_RUNTIME_FLAG"))
+  bool cxx = tgt.HasCxx();
+  if(!cxx)
     {
-    runtimeFlag = m_Makefile->GetDefinition("CMAKE_SHLIB_RUNTIME_FLAG");
+    if(m_Makefile->GetDefinition("CMAKE_SHLIB_RUNTIME_FLAG"))
+      {
+      runtimeFlag = m_Makefile->GetDefinition("CMAKE_SHLIB_RUNTIME_FLAG");
+      }
+  
+    if(m_Makefile->GetDefinition("CMAKE_SHLIB_RUNTIME_SEP"))
+      {
+      runtimeSep = m_Makefile->GetDefinition("CMAKE_SHLIB_RUNTIME_SEP");
+      }    
     }
-  if(m_Makefile->GetDefinition("CMAKE_SHLIB_RUNTIME_SEP"))
+  else
     {
-    runtimeSep = m_Makefile->GetDefinition("CMAKE_SHLIB_RUNTIME_SEP");
+    if(m_Makefile->GetDefinition("CMAKE_CXX_SHLIB_RUNTIME_FLAG"))
+      {
+      runtimeFlag = m_Makefile->GetDefinition("CMAKE_CXX_SHLIB_RUNTIME_FLAG");
+      }
+  
+    if(m_Makefile->GetDefinition("CMAKE_CXX_SHLIB_RUNTIME_SEP"))
+      {
+      runtimeSep = m_Makefile->GetDefinition("CMAKE_CXX_SHLIB_RUNTIME_SEP");
+      }    
     }
+  
+
 
   // concatenate all paths or no?
   bool runtimeConcatenate = ( runtimeSep!="" );
@@ -607,13 +626,13 @@ void cmUnixMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
   std::string command2;
   if(t.HasCxx())
     {
-    command2 = "$(CMAKE_CXX_COMPILER)  $(CMAKE_SHLIB_LINK_FLAGS) "
-      "$(CMAKE_SHLIB_BUILD_FLAGS) $(CMAKE_CXX_FLAGS) -o \\\n";
+    command2 = "$(CMAKE_CXX_LINK_SHARED)  $(CMAKE_CXX_SHLIB_LINK_FLAGS) "
+      "$(CMAKE_CXX_SHLIB_BUILD_FLAGS) $(CMAKE_CXX_FLAGS) -o \\\n";
     }
   else
     {
-    command2 = "$(CMAKE_C_COMPILER)  $(CMAKE_SHLIB_LINK_FLAGS) "
-      "$(CMAKE_SHLIB_BUILD_FLAGS) $(CMAKE_C_FLAGS) -o \\\n";
+    command2 = "$(CMAKE_C_LINK_SHARED)  $(CMAKE_SHLIB_LINK_FLAGS) "
+      "$(CMAKE_SHLIB_BUILD_FLAGS)  -o \\\n";
     }
   command2 += "\t  ";
   std::string libName = m_LibraryOutputPath + "lib" + std::string(name) + "$(SHLIB_SUFFIX)";
@@ -651,13 +670,13 @@ void cmUnixMakefileGenerator::OutputModuleLibraryRule(std::ostream& fout,
   std::string command2;
   if(t.HasCxx())
     {
-    command2 = "$(CMAKE_CXX_COMPILER)  $(CMAKE_SHLIB_LINK_FLAGS) "
-      "$(CMAKE_SHLIB_BUILD_FLAGS) $(CMAKE_CXX_FLAGS) -o \\\n";
+    command2 = "$(CMAKE_CXX_LINK_SHARED)  $(CMAKE_CXX_SHLIB_LINK_FLAGS) "
+      "$(CMAKE_CXX_SHLIB_BUILD_FLAGS) $(CMAKE_CXX_FLAGS) -o \\\n";
     }
   else
     {
-    command2 = "$(CMAKE_C_COMPILER)  $(CMAKE_SHLIB_LINK_FLAGS) "
-      "$(CMAKE_SHLIB_BUILD_FLAGS) $(CMAKE_C_FLAGS) -o \\\n";
+    command2 = "$(CMAKE_C_LINK_SHARED)  $(CMAKE_SHLIB_LINK_FLAGS) "
+      "$(CMAKE_SHLIB_BUILD_FLAGS) -o \\\n";
     }
   command2 += "\t  ";
   std::string libName = m_LibraryOutputPath + "lib" + std::string(name) + "$(MODULE_SUFFIX)";
@@ -735,7 +754,7 @@ void cmUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
   if(t.HasCxx())
     {
     command = 
-      "$(CMAKE_CXX_COMPILER) $(CMAKE_SHLIB_LINK_FLAGS) $(CMAKE_CXX_FLAGS) ";
+      "$(CMAKE_CXX_COMPILER) $(CMAKE_CXX_SHLIB_LINK_FLAGS) $(CMAKE_CXX_FLAGS) ";
     }
   else
     {
@@ -1510,8 +1529,19 @@ void cmUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     "CMAKE_CXX_AR            = @CMAKE_CXX_AR@\n"
     "CMAKE_CXX_AR_ARGS       = @CMAKE_CXX_AR_ARGS@\n"
     "CMAKE_C_COMPILER    = @CMAKE_C_COMPILER@\n"
-    "CMAKE_C_FLAGS       = @CMAKE_C_FLAGS@\n"
+    "CMAKE_C_COMPILER    = @CMAKE_C_COMPILER@\n"
+    "CMAKE_C_LINK_SHARED    = @CMAKE_C_LINK_SHARED@\n"
+    "CMAKE_CXX_LINK_SHARED       = @CMAKE_CXX_LINK_SHARED@\n"
     "CMAKE_SHLIB_CFLAGS  = @CMAKE_SHLIB_CFLAGS@\n"
+    
+    "CMAKE_CXX_SHLIB_CFLAGS = @CMAKE_CXX_SHLIB_CFLAGS@\n"
+    "CMAKE_CXX_SHLIB_BUILD_FLAGS = @CMAKE_CXX_SHLIB_BUILD_FLAGS@\n"
+    "CMAKE_CXX_SHLIB_LINK_FLAGS = @CMAKE_CXX_SHLIB_LINK_FLAGS@\n"
+    "CMAKE_CXX_MODULE_BUILD_FLAGS = @CMAKE_CXX_MODULE_BUILD_FLAGS@\n"
+    "CMAKE_CXX_MODULE_LINK_FLAGS = @CMAKE_CXX_MODULE_LINK_FLAGS@\n"
+    "CMAKE_CXX_SHLIB_RUNTIME_FLAG = @CMAKE_CXX_SHLIB_RUNTIME_FLAG@\n"
+    "CMAKE_CXX_SHLIB_RUNTIME_SEP = @CMAKE_CXX_SHLIB_RUNTIME_SEP@\n"
+
     "\n"
     "CMAKE_CXX_COMPILER  = @CMAKE_CXX_COMPILER@\n"
     "CMAKE_CXX_FLAGS     = @CMAKE_CXX_FLAGS@\n"

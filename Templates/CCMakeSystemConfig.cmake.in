@@ -77,6 +77,8 @@ SET (CMAKE_SHLIB_RUNTIME_SEP "@CMAKE_SHLIB_RUNTIME_SEP@" CACHE STRING
 SET (CMAKE_SKIP_RPATH "NO" CACHE BOOL
      "If set, runtime paths are not added when using shared libraries.")
 
+SET(CMAKE_C_LINK_SHARED "@CMAKE_C_LINK_SHARED@" CACHE STRING 
+  "program used to link c shared libraries")
 # support for X11
 
 SET (CMAKE_X_LIBS             "@X_PRE_LIBS@ @X_LIBS@ -lX11 -lXext @X_EXTRA_LIBS@" CACHE STRING 

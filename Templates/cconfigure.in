@@ -142,6 +142,7 @@ AC_CHECK_LIB(dl, dlopen, have_dl=yes, have_dl=no)
 
 # Step 4: set configuration options based on system name and version.
 
+CMAKE_C_LINK_SHARED=${CC}
 fullSrcDir=`cd $srcdir; pwd`
 AC_SUBST(fullSrcDir)
 case $system in
@@ -181,18 +182,20 @@ case $system in
         CMAKE_SHLIB_RUNTIME_SEP=":"
 	;;
     HP-UX-*)
+        CMAKE_C_LINK_SHARED=ld
 	CMAKE_SHLIB_CFLAGS="+Z"
 	CMAKE_SHLIB_LD_LIBS=""
 	CMAKE_SHLIB_SUFFIX=".sl"
 	CMAKE_MODULE_SUFFIX=".sl"
 	CMAKE_DL_LIBS="-ldld"
-	CMAKE_SHLIB_BUILD_FLAGS='+Z -Wl,-E -b -L/usr/lib'
-	CMAKE_SHLIB_LINK_FLAGS='-Wl,+s'
-	CMAKE_MODULE_BUILD_FLAGS='+Z -Wl,-E -b -L/usr/lib'
-	CMAKE_MODULE_LINK_FLAGS='-Wl,+s'
-        CMAKE_SHLIB_RUNTIME_FLAG='-Wl,+b,'
+	CMAKE_SHLIB_BUILD_FLAGS='+Z -E -b -L/usr/lib'
+	CMAKE_SHLIB_LINK_FLAGS='+s'
+	CMAKE_MODULE_BUILD_FLAGS='+Z -E -b -L/usr/lib'
+	CMAKE_MODULE_LINK_FLAGS='+s'
+        CMAKE_SHLIB_RUNTIME_FLAG='+b,'
         CMAKE_SHLIB_RUNTIME_SEP=':'
         if test $ac_cv_prog_gcc = yes; then
+          CMAKE_C_LINK_SHARED=${CC}
 	  CMAKE_SHLIB_CFLAGS="-fPIC"
   	  CMAKE_SHLIB_BUILD_FLAGS='-shared -Wl,-E -Wl,-b'
 	  CMAKE_SHLIB_LINK_FLAGS='-Wl,+s'
@@ -479,7 +482,7 @@ if test "${SHLIB_CFLAGS}" != ""; then
 fi
 CMAKE_LD_SEARCH_FLAGS="${LD_SEARCH_FLAGS}"
 
-
+AC_SUBST(CMAKE_C_LINK_SHARED)
 AC_SUBST(CMAKE_SHLIB_LINK_FLAGS)
 AC_SUBST(CMAKE_SHLIB_BUILD_FLAGS)
 AC_SUBST(CMAKE_MODULE_LINK_FLAGS)

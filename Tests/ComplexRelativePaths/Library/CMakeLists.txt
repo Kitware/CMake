@@ -26,6 +26,8 @@ ADD_LIBRARY(CMakeTestLibrary LibrarySources)
 SOURCE_FILES(SharedLibrarySources sharedFile)
 ADD_LIBRARY(CMakeTestLibraryShared SHARED SharedLibrarySources)
 
+ADD_LIBRARY(CMakeTestCLibraryShared SHARED testConly.c)
+
 #
 # Attach a post-build custom-command to the lib.
 # It runs ${CREATE_FILE_EXE} which will create a file.
