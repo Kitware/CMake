@@ -43,11 +43,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // cmSourceFilesCommand
 bool cmSourceFilesCommand::InitialPass(std::vector<std::string> const& args)
 {
- if(args.size() < 1 )
+  if(args.size() < 1 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
+  
+  std::string name = args[0];
+  m_Makefile->ExpandVariablesInString(name);
+
   for(std::vector<std::string>::const_iterator i = (args.begin() + 1);
       i != args.end(); ++i)
     {
@@ -71,7 +75,7 @@ bool cmSourceFilesCommand::InitialPass(std::vector<std::string> const& args)
                    m_Makefile->GetSourceExtensions(),
                    m_Makefile->GetHeaderExtensions());
       }
-    m_Makefile->AddSource(file, args[0].c_str());
+    m_Makefile->AddSource(file, name.c_str());
     }
   return true;
 }
