@@ -139,14 +139,15 @@ bool cmDependsFortran::WriteDependencies(std::ostream& os)
     // Require only modules not provided in the same source.
     if(parser.Provides.find(*i) == parser.Provides.end())
       {
-      os << m_TargetFile.c_str() << ": " << i->c_str() << ".mod.stamp"
+      std::string m = cmSystemTools::LowerCase(*i);
+      os << m_TargetFile.c_str() << ": " << m.c_str() << ".mod.stamp"
          << std::endl;
       os << m_TargetFile.c_str() << ".requires: " << i->c_str() << ".mod.proxy"
          << std::endl;
       os << i->c_str() << ".mod.proxy:" << std::endl;
       std::string stampName = m_Directory;
       stampName += "/";
-      stampName += *i;
+      stampName += m;
       stampName += ".mod.stamp";
       if(!cmSystemTools::FileExists(stampName.c_str()))
         {
@@ -172,8 +173,9 @@ bool cmDependsFortran::WriteDependencies(std::ostream& os)
     for(std::set<cmStdString>::const_iterator i = parser.Provides.begin();
         i != parser.Provides.end(); ++i)
       {
+      std::string m = cmSystemTools::LowerCase(*i);
       os << "\t@$(CMAKE_COMMAND) -E copy_if_different "
-         << i->c_str() << ".mod " << i->c_str() << ".mod.stamp\n";
+         << m.c_str() << ".mod " << m.c_str() << ".mod.stamp\n";
       }
     os << "\t@touch " << m_TargetFile.c_str() << ".provides\n";
     }
