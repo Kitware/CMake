@@ -15,7 +15,7 @@
 
 =========================================================================*/
 #include "cmStringCommand.h"
-
+#include <stdlib.h> // required for atoi
 //----------------------------------------------------------------------------
 bool cmStringCommand::InitialPass(std::vector<std::string> const& args)
 {

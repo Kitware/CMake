@@ -24,6 +24,7 @@
 # include "curl/curl.h"
 #endif
 
+#include <stdlib.h> // required for atoi
 #include <stdio.h>
 #include <time.h>
 #include <math.h>

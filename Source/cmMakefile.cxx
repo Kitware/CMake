@@ -29,7 +29,7 @@
 #include "cmVariableWatch.h"
 #include "cmake.h"
 #include <stdio.h>  // required for sprintf
-
+#include <stdlib.h> // required for atoi
 // default is not to be building executables
 cmMakefile::cmMakefile()
 {
