@@ -2493,8 +2493,6 @@ void cmLocalUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
   fout << "INCLUDE_FLAGS = ";
   std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();
   std::vector<std::string>::iterator i;
-  fout << "-I" << 
-    this->ConvertToOutputForExisting(m_Makefile->GetStartDirectory()) << " ";
   std::map<cmStdString, cmStdString> implicitIncludes;
   implicitIncludes["/usr/include"] = "/usr/include";
   if(m_Makefile->GetDefinition("CMAKE_PLATFORM_IMPLICIT_INCLUDE_DIRECTORIES"))
