@@ -1609,7 +1609,8 @@ void cmSystemTools::GlobDirs(const char *fullPath,
 
 
 void cmSystemTools::ExpandListArguments(std::vector<std::string> const& arguments, 
-                                        std::vector<std::string>& newargs)
+                                        std::vector<std::string>& newargs,
+                                        bool ignore_empty)
 {
   std::vector<std::string>::const_iterator i;
   for(i = arguments.begin();i != arguments.end(); ++i)
@@ -1630,7 +1631,10 @@ void cmSystemTools::ExpandListArguments(std::vector<std::string> const& argument
           {
           len = i->size()-start;
           }
-        newargs.push_back(i->substr(start, len));
+        if (ignore_empty == false || len > 0)
+          {
+          newargs.push_back(i->substr(start, len));
+          }
         start = endpos+1;
         }
       }

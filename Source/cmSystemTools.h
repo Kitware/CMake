@@ -48,7 +48,8 @@ public:
    *  containing the expanded versions of all arguments in argsIn.
    */
   static void ExpandListArguments(std::vector<std::string> const& argsIn,
-                                  std::vector<std::string>& argsOut);
+                                  std::vector<std::string>& argsOut,
+                                  bool ignore_empty = false);
 
   /**
    * Look for and replace registry values in a string
