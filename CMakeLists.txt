@@ -13,7 +13,7 @@ IF(BUILD_TESTING)
     ADD_DEPENDENCIES(NightlyTest cmaketest cmake)
     ADD_DEPENDENCIES(ExperimentalTest cmaketest cmake)
 
-    CONFIGURE_FILE(${CMake_SOURCE_DIR}/Web/Art/CMakeLogo.gif ${CMake_BINARY_DIR}/Testing/HTML/TestingResults/Icons/Logo.gif COPYONLY)
+    CONFIGURE_FILE(${CMake_SOURCE_DIR}/CMakeLogo.gif ${CMake_BINARY_DIR}/Testing/HTML/TestingResults/Icons/Logo.gif COPYONLY)
   ENDIF (DART_ROOT)
 ENDIF(BUILD_TESTING)
 
