@@ -541,7 +541,7 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
   for(std::vector<std::string>::const_iterator libDir = libdirs.begin();
       libDir != libdirs.end(); ++libDir)
     { 
-    std::string libpath = cmSystemTools::ConvertToOutputPath(libDir->c_str());
+    std::string libpath = this->ConvertToOutputForExisting(libDir->c_str());
     if(emitted.insert(libpath).second)
       {
       std::string::size_type pos = libDir->find(libPathFlag.c_str());
