@@ -232,7 +232,6 @@ static void cmTryCompileCommandNotUsed(bool){}
 
 void cmTryCompileCommand::CleanupFiles(const char* binDir)
 {
-  return;
   if ( !binDir )
     {
     return;
