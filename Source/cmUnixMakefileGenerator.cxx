@@ -1636,8 +1636,8 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
       {
       if(!source->IsAHeaderFileOnly())
         {
+          allsources += " \\\n";
           allsources += source->GetFullPath();
-          allsources += " ";
         }
       }
     }
