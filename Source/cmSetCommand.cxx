@@ -126,11 +126,6 @@ bool cmSetCommand::InitialPass(std::vector<std::string>& args)
       return true;
       }
     }
-  // if value is a path, collapse it (cleaner)
-  if (type == cmCacheManager::PATH || type == cmCacheManager::FILEPATH) 
-    {
-    value = cmSystemTools::CollapseFullPath(value.c_str());
-    }
   // if it is meant to be in the cache then define it in the cache
   if(cache)
     {
