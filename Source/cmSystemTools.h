@@ -38,6 +38,15 @@ public:
   static bool MakeDirectory(const char* path);
 
   /**
+   * Get current time as a double. On certain platforms this will
+   * return higher resolution than seconds:
+   * (1) gettimeofday() -- resolution in microseconds
+   * (2) ftime() -- resolution in milliseconds
+   * (3) time() -- resolution in seconds
+   */
+  static double GetTime();
+
+  /**
    * Replace replace all occurances of the string in
    * the source string.
    */

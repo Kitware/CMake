@@ -21,61 +21,6 @@
 #include <stdio.h>
 #include <time.h>
 
-
-/* Implement floattime() for various platforms */
-// Taken from Python 2.1.3
-
-#if defined( _WIN32 ) && !defined( __CYGWIN__ )
-#  include <sys/timeb.h>
-#  define HAVE_FTIME
-#  if defined( __BORLANDC__)
-#    define FTIME ftime
-#    define TIMEB timeb
-#  else // Visual studio?
-#    define FTIME _ftime
-#    define TIMEB _timeb
-#  endif
-#elif defined( __CYGWIN__ ) || defined( __linux__ )
-#  include <sys/time.h>
-#  define HAVE_GETTIMEOFDAY
-#endif
-
-static double
-floattime(void)
-{
-  /* There are three ways to get the time:
-     (1) gettimeofday() -- resolution in microseconds
-     (2) ftime() -- resolution in milliseconds
-     (3) time() -- resolution in seconds
-     In all cases the return value is a float in seconds.
-     Since on some systems (e.g. SCO ODT 3.0) gettimeofday() may
-     fail, so we fall back on ftime() or time().
-     Note: clock resolution does not imply clock accuracy! */
-#ifdef HAVE_GETTIMEOFDAY
-  {
-  struct timeval t;
-#ifdef GETTIMEOFDAY_NO_TZ
-  if (gettimeofday(&t) == 0)
-    return (double)t.tv_sec + t.tv_usec*0.000001;
-#else /* !GETTIMEOFDAY_NO_TZ */
-  if (gettimeofday(&t, (struct timezone *)NULL) == 0)
-    return (double)t.tv_sec + t.tv_usec*0.000001;
-#endif /* !GETTIMEOFDAY_NO_TZ */
-  }
-#endif /* !HAVE_GETTIMEOFDAY */
-  {
-#if defined(HAVE_FTIME)
-  struct TIMEB t;
-  FTIME(&t);
-  return (double)t.time + (double)t.millitm * (double)0.001;
-#else /* !HAVE_FTIME */
-  time_t secs;
-  time(&secs);
-  return (double)secs;
-#endif /* !HAVE_FTIME */
-  }
-}
-
 static std::string CleanString(std::string str)
 {
   std::string::size_type spos = str.find_first_not_of(" \n\t");
@@ -874,7 +819,7 @@ void ctest::ProcessDirectory(std::vector<std::string> &passed,
         int retVal;
 
         double clock_start, clock_finish;
-        clock_start = floattime();
+        clock_start = cmSystemTools::GetTime();
 
         if ( m_Verbose )
           {
@@ -882,7 +827,7 @@ void ctest::ProcessDirectory(std::vector<std::string> &passed,
           }
         bool res = cmSystemTools::RunCommand(testCommand.c_str(), output, 
                                              retVal, 0, false);
-        clock_finish = floattime();
+        clock_finish = cmSystemTools::GetTime();
 
         cres.m_ExecutionTime = (double)(clock_finish - clock_start);
         cres.m_FullCommandLine = testCommand;
