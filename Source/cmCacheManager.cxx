@@ -250,15 +250,17 @@ bool cmCacheManager::LoadCache(const char* path,
     }
   std::string currentcwd = path;
   cmSystemTools::ConvertToUnixSlashes(currentcwd);
-  if(internal && this->GetCacheValue("CMAKE_CACHE_CWD") && 
-     std::string(this->GetCacheValue("CMAKE_CACHE_CWD")) != currentcwd) 
+  if(internal && this->GetCacheValue("CMAKE_CACHEFILE_DIR") && 
+     std::string(this->GetCacheValue("CMAKE_CACHEFILE_DIR")) != currentcwd) 
     {
-    cmSystemTools::Error("The current directory is different"
-                         " than the one CMake was run before."
-                         " The binary files will be created "
-                         "in the previous directory. If that "
-                         "is not what you want, reedit the "
-                         "CMakeCache.txt");   
+    std::string message = 
+      std::string("The current CMakeCache.txt directory ") +
+      currentcwd + std::string(" is different than the directory ") + 
+      std::string(this->GetCacheValue("CMAKE_CACHEFILE_DIR")) +
+      std::string(" where CMackeCache.txt was created. This may result "
+		  "in binaries being created in the wrong place. If you "
+		  "are not sure, reedit the CMakeCache.txt");
+    cmSystemTools::Error(message.c_str());   
     }
 
   return true;
@@ -315,9 +317,9 @@ bool cmCacheManager::SaveCache(const char* path)
   // Copies it, he will not be surprised
   std::string currentcwd = path;
   cmSystemTools::ConvertToUnixSlashes(currentcwd);
-  this->AddCacheEntry("CMAKE_CACHE_CWD", currentcwd.c_str(),
-                      "This is the directory where cmake was running the"
-                      " last time", cmCacheManager::INTERNAL);
+  this->AddCacheEntry("CMAKE_CACHEFILE_DIR", currentcwd.c_str(),
+                      "This is the directory where this CMakeCahe.txt"
+                      " was created", cmCacheManager::INTERNAL);
 
   fout << "# This is the CMakeCache file.\n"
        << "# For build in directory: " << path << "\n"
