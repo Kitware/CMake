@@ -107,10 +107,10 @@
           ; Search forward counting tokens that adjust indentation.
           (while (re-search-forward cmake-regex-token point-start t)
             (setq token (match-string 0))
-            (if (string-match cmake-regex-paren-left token)
+            (if (string-match (concat "^" cmake-regex-paren-left "$") token)
                 (setq cur-indent (+ cur-indent cmake-tab-width))
               )
-            (if (string-match cmake-regex-paren-right token)
+            (if (string-match (concat "^" cmake-regex-paren-right "$") token)
                 (setq cur-indent (- cur-indent cmake-tab-width))
               )
             (if (string-match cmake-regex-block-open token)
