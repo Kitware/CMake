@@ -497,6 +497,10 @@ osx_install()
     [ -z "${DONE_osx_install}" ] || return 0 ; DONE_osx_install="yes"
     config || return 1
     [ -f "cmake-${VERSION}-${PLATFORM}/Source/ccmake" ] || build || return 1
+    if [ -z "${WX_RESOURCES}" ]; then
+        echo "${CONFIG_FILE} should specify WX_RESOURCES."
+        return 1
+    fi
     echo "Running make install for OSX package ..." &&
     (
         rm -rf OSX &&
