@@ -1722,8 +1722,8 @@ cmSourceFile* cmMakefile::GetOrCreateSource(const char* sourceName,
 cmSourceFile* cmMakefile::AddSource(cmSourceFile const&sf)
 {
   // check to see if it exists
-  cmSourceFile* ret = this->GetSource(sf.GetSourceName().c_str());
-  if(ret && ret->GetSourceExtension() == sf.GetSourceExtension())
+  cmSourceFile* ret = this->GetSource(sf.GetFullPath().c_str());
+  if(ret)
     {
     return ret;
     }
