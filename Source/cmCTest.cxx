@@ -499,16 +499,15 @@ int cmCTest::UpdateDirectory()
   std::string goutput;
   int retVal = 0;
   bool res = true;
+  std::ofstream ofs;
   if ( !m_ShowOnly )
     {
     res = cmSystemTools::RunCommand(command.c_str(), goutput, 
                                     retVal, sourceDirectory.c_str(),
                                     m_Verbose);
-    std::ofstream ofs;
     if ( this->OpenOutputFile("Temporary", "LastUpdate.log", ofs) )
       {
-      ofs << goutput;
-      ofs.close();
+      ofs << goutput << std::endl;; 
       }
     }
   else
@@ -562,6 +561,10 @@ int cmCTest::UpdateDirectory()
       res = cmSystemTools::RunCommand(logcommand.c_str(), output, 
                                       retVal, sourceDirectory.c_str(),
                                       m_Verbose);
+      if ( ofs )
+        {
+        ofs << output << std::endl;
+        }
       if ( res && retVal == 0)
         {
         //std::cout << output << std::endl;
@@ -764,7 +767,11 @@ int cmCTest::UpdateDirectory()
   os << "\t<EndDateTime>" << end_time << "</EndDateTime>\n"
      << "</Update>" << std::endl;
 
-  
+  if ( ofs )
+    {
+    ofs.close();
+    }
+
   if (! res || retVal )
     {
     std::cerr << "Error(s) when updating the project" << std::endl;
