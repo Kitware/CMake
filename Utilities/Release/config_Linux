@@ -1,5 +1,5 @@
 PLATFORM="x86-linux"
-CURSES_LIBRARY="/usr/lib/libcurses.a"
+CURSES_LIBRARY="-Wl,-Bstatic -lcurses -Wl,-Bdynamic"
 FORM_LIBRARY="/usr/lib/libform.a"
 CC="gcc304s"
 CXX="c++304s"
