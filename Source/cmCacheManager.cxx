@@ -263,8 +263,9 @@ bool cmCacheManager::LoadCache(const char* path,
       oldcwd[0] = oldcwd[0] - 'A' + 'a';
       }
     cmSystemTools::ConvertToUnixSlashes(currentcwd);
-    if(oldcwd != currentcwd) 
-      {
+    if(cmSystemTools::CollapseFullPath(oldcwd.c_str()) 
+       != cmSystemTools::CollapseFullPath(currentcwd.c_str()))
+      { 
       std::string message = 
         std::string("The current CMakeCache.txt directory ") +
         currentcwd + std::string(" is different than the directory ") + 
