@@ -564,7 +564,7 @@ void cmMakefile::AddSubdirDependency(const char* subdir,
   m_SubdirDepends[subdir].insert(dependency);
 }
 
-void cmMakefile::AddIncludeDirectory(const char* inc)
+void cmMakefile::AddIncludeDirectory(const char* inc, bool before)
 {
   // Don't add an include directory that is already present.  Yes,
   // this linear search results in n^2 behavior, but n won't be
@@ -573,7 +573,15 @@ void cmMakefile::AddIncludeDirectory(const char* inc)
   if(std::find(m_IncludeDirectories.begin(),
                m_IncludeDirectories.end(), inc) == m_IncludeDirectories.end())
     {
-    m_IncludeDirectories.push_back(inc);
+    if (before)
+      {
+      // WARNING: this *is* expensive (linear time) since it's a vector
+      m_IncludeDirectories.insert(m_IncludeDirectories.begin(), inc);
+      }
+    else
+      {
+      m_IncludeDirectories.push_back(inc);
+      }
     }
 }
 

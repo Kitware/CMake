@@ -92,7 +92,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "INCLUDE_DIRECTORIES(dir1 dir2 ...)";
+      "INCLUDE_DIRECTORIES([BEFORE] dir1 dir2 ...)";
     }
   
   cmTypeMacro(cmIncludeDirectoryCommand, cmCommand);

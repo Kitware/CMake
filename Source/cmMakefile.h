@@ -218,7 +218,7 @@ public:
   /**
    * Add an include directory to the build.
    */
-  void AddIncludeDirectory(const char*);
+  void AddIncludeDirectory(const char*, bool before = false);
 
   /**
    * Add a variable definition to the build. This variable
