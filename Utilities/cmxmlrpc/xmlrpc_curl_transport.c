@@ -22,7 +22,10 @@
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
-#include "xmlrpc_pthreads.h"
+
+#if defined(HAVE_PTHREADS)
+#  include "xmlrpc_pthreads.h"
+#endif
 
 #include <curl/curl.h>
 #include <curl/types.h>
@@ -143,7 +146,6 @@ initWindowsStuff(xmlrpc_env * const envP) {
 }
 
 
-
 static void 
 create(xmlrpc_env *              const envP,
        int                       const flags ATTR_UNUSED,
@@ -163,7 +165,9 @@ create(xmlrpc_env *              const envP,
             envP, XMLRPC_INTERNAL_ERROR, 
             "Unable to allocate transport descriptor.");
     else {
+#ifdef HAVE_PTHREADS
         pthread_mutex_init(&transportP->listLock, NULL);
+#endif
         
         list_make_empty(&transportP->rpcList);
 
@@ -181,7 +185,6 @@ create(xmlrpc_env *              const envP,
         *handlePP = transportP;
     }
 }
-
 
 
 static void
@@ -203,7 +206,9 @@ destroy(struct clientTransport * const clientTransportP) {
 
     XMLRPC_ASSERT(list_is_empty(&clientTransportP->rpcList));
 
+#if defined(HAVE_PTHREADS)
     pthread_mutex_destroy(&clientTransportP->listLock);
+#endif
 
     curl_global_cleanup();
 
@@ -428,7 +433,7 @@ doAsyncRpc(void * arg) {
 #endif
 
 
-
+#if defined(HAVE_PTHREADS)
 static void
 createRpcThread(xmlrpc_env *              const envP,
                 rpc *                     const rpcP,
@@ -462,6 +467,7 @@ createRpcThread(xmlrpc_env *              const envP,
         break;
     }
 }
+#endif
 
 
 
@@ -493,15 +499,23 @@ rpcCreate(xmlrpc_env *             const envP,
                               &rpcP->curlTransactionP);
         if (!envP->fault_occurred) {
             if (complete) {
+#if defined(HAVE_PTHREADS)
                 createRpcThread(envP, rpcP, &rpcP->thread);
+#else 
+                abort();
+#endif
                 if (!envP->fault_occurred)
                     rpcP->threadExists = TRUE;
             }
             if (!envP->fault_occurred) {
                 list_init_header(&rpcP->link, rpcP);
+#if defined(HAVE_PTHREADS)
                 pthread_mutex_lock(&clientTransportP->listLock);
+#endif
                 list_add_head(&clientTransportP->rpcList, &rpcP->link);
+#if defined(HAVE_PTHREADS)
                 pthread_mutex_unlock(&clientTransportP->listLock);
+#endif
             }
             if (envP->fault_occurred)
                     destroyCurlTransaction(rpcP->curlTransactionP);
@@ -511,7 +525,6 @@ rpcCreate(xmlrpc_env *             const envP,
     }
     *rpcPP = rpcP;
 }
-
 
 
 static void 
@@ -573,7 +586,11 @@ finishRpc(struct list_head * const headerP,
         void *status;
         int result;
 
+#if defined(HAVE_PTHREADS)
         result = pthread_join(rpcP->thread, &status);
+#else
+        abort();
+#endif
         
         rpcP->threadExists = FALSE;
     }
@@ -601,11 +618,19 @@ finishAsynch(struct clientTransport * const clientTransportP ATTR_UNUSED,
        to set an alarm and interrupt running threads.
     */
 
+#if defined(HAVE_PTHREADS)
     pthread_mutex_lock(&clientTransportP->listLock);
+#else
+        abort();
+#endif
 
     list_foreach(&clientTransportP->rpcList, finishRpc, NULL);
 
+#if defined(HAVE_PTHREADS)
     pthread_mutex_unlock(&clientTransportP->listLock);
+#else
+        abort();
+#endif
 }
 
 

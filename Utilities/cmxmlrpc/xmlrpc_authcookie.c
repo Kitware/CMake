@@ -51,7 +51,7 @@ void xmlrpc_authcookie_set ( xmlrpc_env *env,
     sprintf(unencoded, "%s:%s", username, password);
 
     /* Create encoded string. */
-    token = xmlrpc_base64_encode_without_newlines(env, unencoded,
+    token = xmlrpc_base64_encode_without_newlines(env, (unsigned char*)unencoded,
                                 strlen(unencoded));
     XMLRPC_FAIL_IF_FAULT(env);
 

@@ -26,6 +26,10 @@
 #ifndef xmlrpc_pthreads_h_
 #define xmlrpc_pthreads_h_
 
+#if !defined(HAVE_PTHREADS)
+# error This system does not have PThreads
+#endif
+
 #ifndef WIN32
 #       define _REENTRANT
 #       include <pthread.h>

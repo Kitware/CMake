@@ -30,6 +30,8 @@
 
 #define DIRECTORY_SEPARATOR "@DIRECTORY_SEPARATOR@"
 
+#cmakedefine HAVE_PTHREADS @HAVE_PTHREADS@
+
 /*  Xmlrpc-c code uses __inline__ to declare functions that should
     be compiled as inline code.  GNU C recognizes the __inline__ keyword.
     Others recognize 'inline' or '__inline' or nothing at all to say

@@ -6,7 +6,9 @@
 extern "C" {
 #endif
 
-#include "xmlrpc_pthreads.h" /* For threading helpers. */
+#if defined(HAVE_PTHREADS)
+#  include "xmlrpc_pthreads.h" /* For threading helpers. */
+#endif
 
 struct call_info;
 
@@ -67,6 +69,7 @@ struct clientTransportOps {
 **  Transport Helper Functions and declarations.
 **=========================================================================
 */
+#if defined(HAVE_PTHREADS)
 typedef struct _running_thread_info
 {
         struct _running_thread_info * Next;
@@ -90,6 +93,7 @@ void register_asynch_thread (running_thread_list *list, pthread_t *thread);
 /* MRB-WARNING: Only call when you have successfully
 **     acquired the Lock/Unlock mutex! */
 void unregister_asynch_thread (running_thread_list *list, pthread_t *thread);
+#endif
 
 
 #ifdef __cplusplus
