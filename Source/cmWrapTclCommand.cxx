@@ -18,7 +18,7 @@
 // cmWrapTclCommand
 bool cmWrapTclCommand::Invoke(std::vector<std::string>& args)
 {
-  if(args.size() < 0 )
+  if(args.size() > 0 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;
