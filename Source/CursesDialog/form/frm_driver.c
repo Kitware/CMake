@@ -45,7 +45,7 @@ MODULE_ID("$Id$")
 
 /* These declarations are missing from curses.h on some platforms.  */
 extern int winnstr(WINDOW *, char *, int);
-#if defined(__DECCXX_VER)
+#if defined(__DECCXX_VER) || (defined(__GNUC__) && defined(__osf__))
 extern int waddnstr(WINDOW *,const char *const,int);
 extern void wbkgdset(WINDOW *,chtype);
 #ifndef untouchwin
