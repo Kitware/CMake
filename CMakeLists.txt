@@ -67,7 +67,7 @@ SUBDIRS(Source/CTest/Curl)
 #-----------------------------------------------------------------------------
 # Build expat library for CMake and CTest.
 INCLUDE_DIRECTORIES(${CMake_BINARY_DIR}/Utilities)
-SUBDIRS(Utilities/cmexpat)
+SUBDIRS(Utilities/cmexpat Utilities/cmzlib)
 
 IF (UNIX)
   INCLUDE (${CMake_SOURCE_DIR}/Modules/FindCurses.cmake OPTIONAL)
