@@ -2379,6 +2379,7 @@ void cmLocalUnixMakefileGenerator::OutputSourceObjectBuildRules(std::ostream& fo
           if((*source)->GetProperty("COMPILE_FLAGS"))
             {
             compileFlags += (*source)->GetProperty("COMPILE_FLAGS");
+            compileFlags += " ";
             }
           this->OutputBuildObjectFromSource(fout,
                                             shortName.c_str(),
