@@ -1414,12 +1414,6 @@ bool WindowsRunCommand(const char* command, const char* dir,
 //main program loop 
     {
     Sleep(10);
-    //std::cout << "Check for process..." << std::endl;
-    GetExitCodeProcess(pi.hProcess,&exit);
- 
-//while the process is running 
-    if (exit != STILL_ACTIVE) break;
- 
 //check to see if there is any data to read from stdout 
     //std::cout << "Peek for data..." << std::endl;
     PeekNamedPipe(read_stdout,buf,1023,&bread,&avail,NULL);
@@ -1441,22 +1435,25 @@ bool WindowsRunCommand(const char* command, const char* dir,
             std::cout << buf << std::flush; 
             }
           }
-        output += "\n";          
         }
       else 
         {
         ReadFile(read_stdout,buf,1023,&bread,NULL);
         output += buf;
-        output += "\n";
         if(verbose) 
           {
           std::cout << buf << std::flush;
- 
           }
  
         }
  
       }
+ 
+    //std::cout << "Check for process..." << std::endl;
+    GetExitCodeProcess(pi.hProcess,&exit);
+ 
+//while the process is running 
+    if (exit != STILL_ACTIVE) break;
  
     }
   CloseHandle(pi.hThread);
