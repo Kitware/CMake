@@ -238,10 +238,18 @@ bool cmFileCommand::HandleInstallCommand(std::vector<std::string> const& args)
   std::string destination = "";
   std::string stype = "FILES";
   const char* build_type = m_Makefile->GetDefinition("BUILD_TYPE");
+  const char* debug_postfix = m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX");
   std::string extra_dir = "";
+  int debug = 0;
   if ( build_type )
     {
     extra_dir = build_type;
+    std::string btype = build_type;
+    cmSystemTools::LowerCase(btype);
+    if ( btype == "debug" )
+      {
+      debug = 1;
+      }
     }
 
 
@@ -341,17 +349,24 @@ bool cmFileCommand::HandleInstallCommand(std::vector<std::string> const& args)
     {
     std::string destfile = destination + "/" + cmSystemTools::GetFilenameName(files[i]);
     std::string ctarget = files[i].c_str();
+    std::string fname = cmSystemTools::GetFilenameName(ctarget);
+    std::string ext = cmSystemTools::GetFilenameExtension(ctarget);
+    std::string fnamewe = cmSystemTools::GetFilenameWithoutExtension(ctarget);
     switch( itype )
       {
     case cmTarget::MODULE_LIBRARY:
     case cmTarget::STATIC_LIBRARY:
     case cmTarget::SHARED_LIBRARY:
+      if ( debug )
+        {
+        fname = fnamewe + debug_postfix + "." + ext;
+        }
     case cmTarget::EXECUTABLE:
       if ( extra_dir.size() > 0 )
         {
         cmOStringStream str;
         str << cmSystemTools::GetFilenamePath(ctarget) << "/" << extra_dir << "/" 
-          << cmSystemTools::GetFilenameName(ctarget);
+          << fname;
         ctarget = str.str();
         }
       break;

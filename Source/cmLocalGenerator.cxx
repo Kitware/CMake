@@ -83,6 +83,13 @@ void cmLocalGenerator::GenerateInstallRules()
   fout << "# Install script for directory: " << m_Makefile->GetCurrentDirectory() 
     << std::endl << std::endl;
 
+  const char* cmakeDebugPosfix = m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX");
+  if ( cmakeDebugPosfix )
+    {
+    fout << "SET(CMAKE_DEBUG_POSTFIX \"" << cmakeDebugPosfix << "\")"
+      << std::endl << std::endl;
+    }
+
   std::string libOutPath = "";
   if (m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH"))
     {
