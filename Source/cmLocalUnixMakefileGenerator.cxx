@@ -603,7 +603,6 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
         }  
       cmsys::RegularExpression libname("^lib([^/]*)(\\.so|\\.lib|\\.dll|\\.sl|\\.a|\\.dylib).*");
       cmsys::RegularExpression libname_noprefix("([^/]*)(\\.so|\\.lib|\\.dll|\\.sl|\\.a|\\.dylib).*");
-      std::cout << "file is " << file << "\n";
       if(libname.find(file))
         {
         // Library had "lib" prefix.
