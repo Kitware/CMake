@@ -3062,6 +3062,11 @@ esac
 
 
 
+CMAKE_COMPILER_IS_GNUGXX=0
+if test $ac_cv_prog_gxx = yes; then
+	CMAKE_COMPILER_IS_GNUCXX=1
+fi
+
 # generate output files.
 # create mkdir files just to make some of the directories
 
@@ -3248,6 +3253,7 @@ s%@RUNMAKE@%$RUNMAKE%g
 s%@CMAKE_AR_TMP@%$CMAKE_AR_TMP%g
 s%@CMAKE_AR@%$CMAKE_AR%g
 s%@CMAKE_AR_ARGS@%$CMAKE_AR_ARGS%g
+s%@CMAKE_COMPILER_IS_GNUCXX@%$CMAKE_COMPILER_IS_GNUCXX%g
 
 CEOF
 EOF

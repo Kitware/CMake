@@ -559,6 +559,11 @@ esac
 AC_SUBST(CMAKE_AR)
 AC_SUBST(CMAKE_AR_ARGS)
 
+CMAKE_COMPILER_IS_GNUGXX=0
+if test $ac_cv_prog_gxx = yes; then
+	CMAKE_COMPILER_IS_GNUCXX=1
+fi
+AC_SUBST(CMAKE_COMPILER_IS_GNUCXX)
 # generate output files.
 # create mkdir files just to make some of the directories
 
