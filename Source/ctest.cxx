@@ -139,7 +139,8 @@ void ctest::ProcessDirectory(int &passed, int &failed)
         fprintf(stderr,"Testing %-30s ",args[0].c_str());
         //std::cerr << "Testing " << args[0] << " ... ";
         // find the test executable
-        std::string testCommand = this->FindExecutable(args[1].c_str());
+        std::string testCommand = 
+			cmSystemTools::EscapeSpaces(this->FindExecutable(args[1].c_str()).c_str());
         // add the arguments
         std::vector<std::string>::iterator j = args.begin();
         ++j;
@@ -147,7 +148,7 @@ void ctest::ProcessDirectory(int &passed, int &failed)
         for(;j != args.end(); ++j)
           {   
           testCommand += " ";
-          testCommand += *j;
+          testCommand += cmSystemTools::EscapeSpaces(j->c_str());
           }
         /**
          * Run an executable command and put the stdout in output.
