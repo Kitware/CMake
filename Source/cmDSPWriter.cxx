@@ -258,11 +258,14 @@ void cmDSPWriter::WriteDSPFile(std::ostream& fout,
         // build up the depends and outputs and commands 
         cmSourceGroup::CommandFiles totalCommand;
         std::string totalCommandStr;
+        std::string temp;
         for(cmSourceGroup::Commands::const_iterator c = commands.begin();
             c != commands.end(); ++c)
           {
           totalCommandStr += "\n\t";
-          totalCommandStr += c->first;
+          temp= c->first;
+          cmSystemTools::ConvertToWindowsSlashes(temp);
+          totalCommandStr += temp;
           totalCommand.Merge(c->second);
           }      
         // Create a dummy file with the name of the source if it does
@@ -317,10 +320,12 @@ void cmDSPWriter::WriteCustomRule(std::ostream& fout,
     
     // Write out the dependencies for the rule.
     fout << "USERDEP__HACK=";
+    std::string temp;
     for(std::set<std::string>::const_iterator d = depends.begin();
 	d != depends.end(); ++d)
       {
-	fout << "\\\n\t" << cmSystemTools::EscapeSpaces(d->c_str());
+      temp = *d;
+      fout << "\\\n\t" << cmSystemTools::EscapeSpaces(cmSystemTools::ConvertToWindowsSlashes(temp));
       }
     fout << "\n";
 
