@@ -137,15 +137,6 @@ cmDynamicLoader::GetSymbolAddress(cmLibHandle lib, const char* sym)
   return *reinterpret_cast<cmDynamicLoaderFunction*>(&result);
 }
 
-const char* cmDynamicLoader::LibPrefix()
-{ 
-  return "lib";
-}
-
-const char* cmDynamicLoader::LibExtension()
-{
-  return ".sl";
-}
 
 const char* cmDynamicLoader::LastError()
 {
@@ -202,16 +193,6 @@ cmDynamicLoader::GetSymbolAddress(cmLibHandle /* lib */, const char* sym)
     }
   // Hack to cast pointer-to-data to pointer-to-function.
   return *reinterpret_cast<cmDynamicLoaderFunction*>(&result);
-}
-
-const char* cmDynamicLoader::LibPrefix()
-{
-  return "lib";
-}
-
-const char* cmDynamicLoader::LibExtension()
-{
-  return ".so";
 }
 
 const char* cmDynamicLoader::LastError()
@@ -272,19 +253,6 @@ cmDynamicLoader::GetSymbolAddress(cmLibHandle lib, const char* sym)
   return *reinterpret_cast<cmDynamicLoaderFunction*>(&result);
 }
 
-const char* cmDynamicLoader::LibPrefix()
-{ 
-#if defined( __MINGW32__ )
-  return "lib";
-#else
-  return "";
-#endif
-}
-
-const char* cmDynamicLoader::LibExtension()
-{
-  return ".dll";
-}
 
 const char* cmDynamicLoader::LastError()
 {
@@ -346,20 +314,6 @@ cmDynamicLoader::GetSymbolAddress(cmLibHandle lib, const char* sym)
   return *reinterpret_cast<cmDynamicLoaderFunction*>(&result);
 }
 
-const char* cmDynamicLoader::LibPrefix()
-{ 
-  return "lib";
-}
-
-const char* cmDynamicLoader::LibExtension()
-{
-#ifdef __CYGWIN__
-  return ".dll";
-#else
-  return ".so";
-#endif
-}
-
 const char* cmDynamicLoader::LastError()
 {
   return dlerror(); 
@@ -370,3 +324,16 @@ void cmDynamicLoader::FlushCache()
 {
   cmDynamicLoaderCache::GetInstance()->FlushCache();
 }
+
+// Stay consistent with the Modules/Platform directory as
+// to what the correct prefix and lib extension
+const char* cmDynamicLoader::LibPrefix()
+{ 
+  return CMAKE_SHARED_MODULE_PREFIX;
+}
+
+const char* cmDynamicLoader::LibExtension()
+{
+  return CMAKE_SHARED_LIBRARY_SUFFIX;
+}
+
