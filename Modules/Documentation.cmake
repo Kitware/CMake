@@ -14,12 +14,12 @@ IF (BUILD_DOCUMENTATION)
   #
   # Check for the tools
   #
-  INCLUDE(FindUnixCommands)
-  INCLUDE(FindDoxygen)
-  INCLUDE(FindGnuplot)
-  INCLUDE(FindHTMLHelp)
-  INCLUDE(FindPerl)
-  INCLUDE(FindWget)
+  FIND_PACKAGE(UnixCommands)
+  FIND_PACKAGE(Doxygen)
+  FIND_PACKAGE(Gnuplot)
+  FIND_PACKAGE(HTMLHelp)
+  FIND_PACKAGE(Perl)
+  FIND_PACKAGE(Wget)
 
   OPTION(DOCUMENTATION_HTML_HELP 
     "Build the HTML Help file (CHM)." OFF)
