@@ -162,10 +162,17 @@ void cmDSWWriter::WriteDSWFile(std::ostream& fout)
             for(cmTargets::const_iterator al = atgts.begin();
                 al != atgts.end(); ++al)
               {
-              if(al->second.IsInAll())
+              if (al->second.IsInAll())
                 {
-                l->second.GetLinkLibraries().push_back(
-                  cmTarget::LinkLibraries::value_type(al->first, cmTarget::GENERAL));
+                if (al->second.GetType() == cmTarget::UTILITY)
+                  {
+                  l->second.AddUtility(al->first.c_str());
+                  }
+                else
+                  {
+                  l->second.GetLinkLibraries().push_back(
+                    cmTarget::LinkLibraries::value_type(al->first, cmTarget::GENERAL));
+                  }
                 }
               }
             }
@@ -234,7 +241,7 @@ void cmDSWWriter::WriteProject(std::ostream& fout,
         // is the library part of this DSW ? If so add dependency
         const char* cacheValue
           = m_Makefile->GetDefinition(j->first.c_str());
-        if(cacheValue || (strcmp(dspname, "ALL_BUILD") == 0))
+        if(cacheValue)
           {
           fout << "Begin Project Dependency\n";
           fout << "Project_Dep_Name " << j->first << "\n";
