@@ -109,7 +109,7 @@ export ALLOW_ERASE_OUTPUT_DIRECTORY=ON
 #   RESULTING_HTML_HELP_FILE=$DOXTEMP/vtk4.chm
 #
 export COMPILE_HTML_HELP=@DOCUMENTATION_HTML_HELP@
-export RESULTING_HTML_HELP_FILE="$DOXTEMP/cmake.chm"
+export RESULTING_HTML_HELP_FILE="$DOXTEMP/$PROJECT_NAME.chm"
 
 # CREATE_HTML_TARZ_ARCHIVE RESULTING_HTML_TARZ_ARCHIVE_FILE:
 # Create a compressed (gzip) tar archive of the html directory (located
@@ -123,7 +123,7 @@ export RESULTING_HTML_HELP_FILE="$DOXTEMP/cmake.chm"
 #   RESULTING_HTML_TARZ_ARCHIVE_FILE=$DOXTEMP/$PROJECT_NAME-html.tar.gz
 #
 export CREATE_HTML_TARZ_ARCHIVE=@DOCUMENTATION_HTML_TARZ@
-export RESULTING_HTML_TARZ_ARCHIVE_FILE="$DOXTEMP/cmake-html.tar.gz"
+export RESULTING_HTML_TARZ_ARCHIVE_FILE="$DOXTEMP/$PROJECT_NAME-html.tar.gz"
 
 # ----------------------------------------------------------------------------
 # Build the contributors list.
@@ -158,7 +158,7 @@ if test "x@VTK_SOURCE_DIR@" != "x" ; then
   fi
 
   if test "x$GNUPLOT_PROG" != "xNOTFOUND" ; then
-    $GNUPLOT_PROG $DOXTEMP/contrib/history.plt
+    $GNUPLOT_PROG "$DOXTEMP/contrib/history.plt"
   fi
 fi
 
@@ -168,10 +168,13 @@ fi
 if test "x$DOXYGEN_PROG" != "xNOTFOUND" ; then
 
     if test "x$RM_PROG" != "xNOTFOUND" ; then
-        $RM_PROG -fr $OUTPUT_DIRECTORY
+        $RM_PROG -fr "$OUTPUT_DIRECTORY"
     fi
 
-    $DOXYGEN_PROG "$DOXYFILE"
+    "$DOXYGEN_PROG" "$DOXYFILE"
+
+    # yes, a second time, to get the contrib, I don't know why
+    "$DOXYGEN_PROG" "$DOXYFILE"
 fi
 
 # ----------------------------------------------------------------------------
@@ -179,12 +182,12 @@ fi
 
 if test "x@VTK_SOURCE_DIR@" != "x" ; then
   if test "x$PERL_PROG" != "xNOTFOUND" ; then
-    $PERL_PROG $PATH_TO_VTK_DOX_SCRIPTS/doc_rmpath.pl \
+    $PERL_PROG "$PATH_TO_VTK_DOX_SCRIPTS/doc_rmpath.pl" \
         --verbose \
         --to "$INTERMEDIATE_DOX_DIR" \
         --html "$OUTPUT_DIRECTORY/html"
   fi
-fi 
+fi
 
 # ----------------------------------------------------------------------------
 # Create the CHM HTML HELP doc.
@@ -193,9 +196,9 @@ if test "x$COMPILE_HTML_HELP" == "xON" ; then
     if test "x$RESULTING_HTML_HELP_FILE" != "x" ; then
         cd $OUTPUT_DIRECTORY/html
         if test "x$HHC_PROG" != "xNOTFOUND" ; then
-            $HHC_PROG index.hhp
+            "$HHC_PROG" index.hhp
             if test "x$MV_PROG" != "xNOTFOUND" ; then
-                $MV_PROG -f index.chm $RESULTING_HTML_HELP_FILE
+                $MV_PROG -f index.chm "$RESULTING_HTML_HELP_FILE"
             fi
        fi
    fi
@@ -206,7 +209,7 @@ fi
 
 if test "x$CREATE_HTML_TARZ_ARCHIVE" == "xON" ; then
     if test "x$RESULTING_HTML_TARZ_ARCHIVE_FILE" != "x" ; then
-        cd $OUTPUT_DIRECTORY
+        cd "$OUTPUT_DIRECTORY"
         if test "x$TAR_PROG" != "xNOTFOUND" ; then
             if test "x$RM_PROG" != "xNOTFOUND" ; then
                 $RM_PROG -f html.tar
@@ -217,7 +220,7 @@ if test "x$CREATE_HTML_TARZ_ARCHIVE" == "xON" ; then
                     $RM_PROG -f html.tar.gz
                 fi
                 $GZIP_PROG html.tar
-                $MV_PROG -f html.tar.gz $RESULTING_HTML_TARZ_ARCHIVE_FILE
+                $MV_PROG -f html.tar.gz "$RESULTING_HTML_TARZ_ARCHIVE_FILE"
             fi
        fi
    fi
@@ -227,18 +230,18 @@ fi
 # Clean-up.
 
 if test "x$RM_PROG" != "xNOTFOUND" ; then
-    $RM_PROG -fr $INTERMEDIATE_DOX_DIR
+    $RM_PROG -fr "$INTERMEDIATE_DOX_DIR"
 
     if test "x$DOWNLOAD_VTK_TAGFILE" == "xON" ; then
         if test "x$VTK_TAGFILE" != "x" ; then
-            $RM_PROG -f $VTK_TAGFILE_DEST_DIR/$VTK_TAGFILE
+            $RM_PROG -f "$VTK_TAGFILE_DEST_DIR/$VTK_TAGFILE"
         fi
     fi
 
     if test "x$COMPILE_HTML_HELP" == "xON" ; then
         if test "x$RESULTING_HTML_HELP_FILE" != "x" ; then
             if test "x$ALLOW_ERASE_OUTPUT_DIRECTORY" == "xON" ; then
-                $RM_PROG -fr $OUTPUT_DIRECTORY
+                $RM_PROG -fr "$OUTPUT_DIRECTORY"
             fi
         fi
     fi
