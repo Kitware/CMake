@@ -144,7 +144,7 @@ void cmCursesLongMessageForm::Render(int, int, int, int)
 
   int i=0;
   form_driver(m_Form, REQ_BEG_FIELD);
-  while(msg[i] != '\0')
+  while(msg[i] != '\0' && i < 60000)
     {
     if (msg[i] == '\n' && msg[i+1] != '\0')
       {
