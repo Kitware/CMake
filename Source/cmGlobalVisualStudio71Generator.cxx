@@ -204,8 +204,16 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(std::ostream& fout,
     for(std::vector<std::string>::iterator si = dspnames.begin(); 
         l != tgts.end() && si != dspnames.end(); ++l)
       {
-      if ((l->second.GetType() != cmTarget::INSTALL_FILES)
-          && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))
+      if (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
+        {
+        cmCustomCommand cc = l->second.GetPostBuildCommands()[0];
+        // dodgy use of the cmCustomCommand's members to store the 
+        // arguments from the INCLUDE_EXTERNAL_MSPROJECT command
+        std::vector<std::string> stuff = cc.GetDepends();
+        this->WriteProjectConfigurations(fout, stuff[0].c_str(), l->second.IsInAll());
+        }
+      else if ((l->second.GetType() != cmTarget::INSTALL_FILES)
+               && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))
         {
         this->WriteProjectConfigurations(fout, si->c_str(), l->second.IsInAll());
         ++si;
@@ -281,8 +289,11 @@ void cmGlobalVisualStudio71Generator::WriteProjectDepends(std::ostream& fout,
     {
     if(*i != dspname)
       {
-      fout << "\t\t{" << this->GetGUID(i->c_str()) << "} = {"
-           << this->GetGUID(i->c_str()) << "}\n";
+      std::string name = i->c_str();
+      if(strncmp(name.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
+        name.erase(name.begin(), name.begin() + 27);
+      fout << "\t\t{" << this->GetGUID(name.c_str()) << "} = {"
+           << this->GetGUID(name.c_str()) << "}\n";
       }
     }
 }
