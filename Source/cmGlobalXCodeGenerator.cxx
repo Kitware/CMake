@@ -237,13 +237,17 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
   m_CurrentXCodeHackMakefile += "/CMakeScripts";
   cmSystemTools::MakeDirectory(m_CurrentXCodeHackMakefile.c_str());
   m_CurrentXCodeHackMakefile += "/XCODE_DEPEND_HELPER.make";
-  std::string makecommand = "make -C ";
-  makecommand += this->ConvertToRelativeOutputPath(dir.c_str());
-  makecommand += " -f ";
-  makecommand += this->ConvertToRelativeOutputPath(
-    m_CurrentXCodeHackMakefile.c_str());
+  cmCustomCommandLine makecommand;
+  makecommand.push_back("make");
+  makecommand.push_back("-C");
+  makecommand.push_back(this->ConvertToRelativeOutputPath(dir.c_str()));
+  makecommand.push_back("-f");
+  makecommand.push_back(this->ConvertToRelativeOutputPath(
+                          m_CurrentXCodeHackMakefile.c_str()));
+  cmCustomCommandLines commandLines;
+  commandLines.push_back(makecommand);
   mf->AddUtilityCommand("XCODE_DEPEND_HELPER", false, no_output, no_depends,
-                        makecommand.c_str());
+                        commandLines);
   // now make the allbuild depend on all the non-utility targets
   // in the project
   for(std::vector<cmLocalGenerator*>::iterator i = gens.begin();
