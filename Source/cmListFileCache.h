@@ -35,6 +35,10 @@ struct cmListFileArgument
     {
     return (this->Value == r.Value) && (this->Quoted == r.Quoted);
     }
+  bool operator != (const cmListFileArgument& r) const
+    {
+    return !(*this == r);
+    }
   std::string Value;
   bool Quoted;
 };
