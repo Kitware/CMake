@@ -4857,6 +4857,11 @@ void cmCTest::SetTestsToRunInformation(const char* in)
 
 void cmCTest::ExpandTestsToRunInformation(int numTests)
 {
+  if (this->TestsToRunString.empty())
+    {
+    return;
+    }
+  
   int start = -1;
   int end = -1;
   int stride = -1;
