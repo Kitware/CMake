@@ -20,6 +20,7 @@ cmGlobalGenerator.cxx
 cmGlobalUnixMakefileGenerator.cxx
 cmLocalGenerator.cxx
 cmLocalUnixMakefileGenerator.cxx
+cmVariableWatch.cxx
 cmake.h
 cmakewizard.h
 cmMakeDepend.h
@@ -39,6 +40,7 @@ cmGlobalGenerator.h
 cmGlobalUnixMakefileGenerator.h
 cmLocalGenerator.h
 cmLocalUnixMakefileGenerator.h
+cmVariableWatch.h
 )
 
 # configure the .h file

@@ -21,6 +21,7 @@
 #include "cmLocalGenerator.h"
 #include "cmCommands.h"
 #include "cmCommand.h"
+#include "cmVariableWatch.h"
 
 // include the generator
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -62,6 +63,7 @@ cmake::cmake()
   m_GlobalGenerator = 0;
   m_ProgressCallback = 0;
   m_ProgressCallbackClientData = 0;
+  m_VariableWatch = new cmVariableWatch;
 
   this->AddDefaultCommands();
 }
@@ -79,6 +81,7 @@ cmake::~cmake()
     {
     delete (*j).second;
     }
+  delete m_VariableWatch;
 }
 
 bool cmake::CommandExists(const char* name) const

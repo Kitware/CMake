@@ -26,6 +26,7 @@
 #include "cmCacheManager.h"
 #include "cmFunctionBlocker.h"
 #include "cmListFileCache.h"
+#include "cmVariableWatch.h"
 #include "cmake.h"
 #include <stdio.h>  // required for sprintf
 
@@ -558,6 +559,11 @@ void cmMakefile::AddDefinition(const char* name, const char* value)
     }
   m_Definitions.erase( DefinitionMap::key_type(name));
   m_Definitions.insert(DefinitionMap::value_type(name, value));
+  cmVariableWatch* vv = this->GetVariableWatch();
+  if ( vv )
+    {
+    vv->VariableAccessed(name, cmVariableWatch::VARIABLE_MODIFIED_ACCESS);
+    }
 }
 
 
@@ -582,6 +588,11 @@ void cmMakefile::AddDefinition(const char* name, bool value)
     m_Definitions.erase( DefinitionMap::key_type(name));
     m_Definitions.insert(DefinitionMap::value_type(name, "OFF"));
     }
+  cmVariableWatch* vv = this->GetVariableWatch();
+  if ( vv )
+    {
+    vv->VariableAccessed(name, cmVariableWatch::VARIABLE_MODIFIED_ACCESS);
+    }
 }
 
 
@@ -594,6 +605,11 @@ void cmMakefile::AddCacheDefinition(const char* name, bool value, const char* do
 void cmMakefile::RemoveDefinition(const char* name)
 {
   m_Definitions.erase(DefinitionMap::key_type(name));
+  cmVariableWatch* vv = this->GetVariableWatch();
+  if ( vv )
+    {
+    vv->VariableAccessed(name, cmVariableWatch::VARIABLE_REMOVED_ACCESS);
+    }
 }
 
 void cmMakefile::SetProjectName(const char* p)
@@ -860,7 +876,7 @@ std::string cmMakefile::GetParentListFileName(const char *currentFileName)
 
 void cmMakefile::ExpandVariables()
 {
-  // Now expand varibles in the include and link strings
+  // Now expand variables in the include and link strings
   for(std::vector<std::string>::iterator d = m_IncludeDirectories.begin();
         d != m_IncludeDirectories.end(); ++d)
     {
@@ -886,12 +902,29 @@ bool cmMakefile::IsOn(const char* name) const
 
 const char* cmMakefile::GetDefinition(const char* name) const
 {
+  const char* def = 0;
   DefinitionMap::const_iterator pos = m_Definitions.find(name);
   if(pos != m_Definitions.end())
     {
-    return (*pos).second.c_str();
+    def = (*pos).second.c_str();
     }
-  return this->GetCacheManager()->GetCacheValue(name);
+  else
+    {
+    def = this->GetCacheManager()->GetCacheValue(name);
+    }
+  cmVariableWatch* vv = this->GetVariableWatch();
+  if ( vv )
+    {
+    if ( def )
+      {
+      vv->VariableAccessed(name, cmVariableWatch::VARIABLE_READ_ACCESS);
+      }
+    else 
+      {
+      vv->VariableAccessed(name, cmVariableWatch::UNKNOWN_VARIABLE_READ_ACCESS);
+      }
+    }
+  return def;
 }
 
 
@@ -1428,6 +1461,25 @@ int cmMakefile::TryCompile(const char *srcdir, const char *bindir,
 
   cmSystemTools::ChangeDirectory(cwd.c_str());
   return ret;
+}
+
+cmake *cmMakefile::GetCMakeInstance() const
+{
+  if ( m_LocalGenerator && m_LocalGenerator->GetGlobalGenerator() )
+    {
+    return m_LocalGenerator->GetGlobalGenerator()->GetCMakeInstance();
+    }
+  return 0;
+}
+
+cmVariableWatch *cmMakefile::GetVariableWatch() const
+{
+  if ( this->GetCMakeInstance() &&
+       this->GetCMakeInstance()->GetVariableWatch() )
+    {
+    return this->GetCMakeInstance()->GetVariableWatch();
+    }
+  return 0;
 }
 
 cmCacheManager *cmMakefile::GetCacheManager() const

@@ -32,6 +32,7 @@ cmTarget.o \
 cmCustomCommand.o \
 cmCacheManager.o \
 cmListFileCache.o \
+cmVariableWatch.o \
 cmSourceGroup.o
 
 DEPENDS = cmConfigure.h @CMAKE_ROOT_DIR@/Source/*.h
@@ -56,6 +57,7 @@ cmCommands.o : $(DEPENDS) $(srcdir)/*Command*.cxx
 cmTarget.o : $(DEPENDS)
 cmCacheManager.o : $(DEPENDS)
 cmSourceGroup.o : $(DEPENDS)
+cmVariableWatch.o : $(DEPENDS)
 
 
 cmake: ${OBJS}

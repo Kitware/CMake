@@ -45,6 +45,7 @@ class cmLocalGenerator;
 class cmCacheManager;
 class cmMakefile;
 class cmCommand;
+class cmVariableWatch;
 
 class cmake
 {
@@ -227,6 +228,10 @@ class cmake
   ///! this is called by generators to update the progress
   void UpdateProgress(const char *msg, float prog);
 
+
+  ///! Get the variable watch object
+  cmVariableWatch* GetVariableWatch() { return m_VariableWatch; }
+
 protected:
   typedef std::map<cmStdString, cmCommand*> RegisteredCommandsMap;
   RegisteredCommandsMap m_Commands;
@@ -251,6 +256,8 @@ protected:
    * Generate CMAKE_ROOT and CMAKE_COMMAND cache entries
    */
   int AddCMakePaths(const char *arg0);
+
+  cmVariableWatch* m_VariableWatch;
 
 private:
   ProgressCallback m_ProgressCallback;

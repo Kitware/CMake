@@ -30,6 +30,7 @@ class cmCommand;
 class cmLocalGenerator;
 class cmMakeDepend;
 class cmSourceFile;
+class cmVariableWatch;
 
 /** \class cmMakefile
  * \brief Process the input CMakeLists.txt file.
@@ -531,6 +532,8 @@ public:
    * given a current CMakeLists file name
    */
   cmCacheManager *GetCacheManager() const;
+  cmake *GetCMakeInstance() const;
+  cmVariableWatch* GetVariableWatch() const;
 
   //! Determine wether this is a local or global build.
   bool GetLocal() const;
