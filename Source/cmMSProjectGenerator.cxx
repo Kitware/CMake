@@ -69,3 +69,7 @@ cmMSProjectGenerator::~cmMSProjectGenerator()
   delete m_DSWMakefile;
 }
 
+void cmMSProjectGenerator::SetLocal(bool local)
+{
+  m_BuildDSW = !local;
+}

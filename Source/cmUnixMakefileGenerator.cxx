@@ -875,3 +875,17 @@ void cmUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
 
 }
 
+
+void cmUnixMakefileGenerator::SetLocal (bool local)
+{
+  if (local)
+    {
+    m_CacheOnly = false;
+    m_Recurse = false;
+    }
+  else
+    {
+    m_CacheOnly = true;
+    m_Recurse = true;
+    }
+}

@@ -70,20 +70,21 @@ public:
    */
   virtual void GenerateMakefile();
 
+  //! controls the DSW/DSP settings
+  virtual void SetLocal(bool);
+
   /**
    * Turn off the generation of a Microsoft Visual C++ DSW file.
    * This causes only the dsp file to be created.  This
    * is used to run as a command line program from inside visual
    * studio.
    */
-  void BuildDSWOff() 
-    {m_BuildDSW = false;}
+  void BuildDSWOff()  {m_BuildDSW = false;}
 
   /**
    * Turn on the generation of a Microsoft Visual C++ DSW file.
    */
-  void BuildDSWOn() 
-    {m_BuildDSW = true;}
+  void BuildDSWOn() {m_BuildDSW = true;}
 
   /**
    * Retrieve a pointer to a cmDSWMakefile instance.

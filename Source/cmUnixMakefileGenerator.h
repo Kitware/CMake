@@ -55,7 +55,10 @@ class cmUnixMakefileGenerator : public cmMakefileGenerator
 public:
   ///! Set cache only and recurse to false by default.
   cmUnixMakefileGenerator();
-  
+
+  //! just sets the Cache Only and Recurse flags
+  virtual void SetLocal(bool local);
+
   /**
    * If cache only is on.
    * and only stub makefiles are generated, and no depends, for speed.

@@ -67,6 +67,15 @@ public:
    */
   virtual void GenerateMakefile() = 0;
 
+  /**
+   * The local setting indicates that the generator is producing a
+   * fully configured makefile in the current directory. In Microsoft
+   * terms it is producing a DSP file if local is true and a DSW file
+   * if local is false. On UNIX when local is false it skips the
+   * dependecy check and recurses the full tree building the structure
+   */
+  virtual void SetLocal(bool ) {};
+
 protected:
   cmMakefile* m_Makefile;
 };
