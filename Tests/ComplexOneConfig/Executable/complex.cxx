@@ -23,6 +23,7 @@ void ForceStringUse()
   std::string x(5,'x');  
   char buff[5];
   x.copy(buff, 1, 0);
+  x[0] = 'a';
   std::string::size_type pos = 0;
   x.replace(pos, pos, pos, 'x');
   std::string copy = cachetest;
