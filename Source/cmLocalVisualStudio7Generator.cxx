@@ -328,7 +328,9 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   // if -D_UNICODE or /D_UNICODE is found in the flags
   // change the character set to unicode, if not then
   // default to MBCS 
-  if(flags.find("D_UNICODE") != flags.npos )
+  std::string defs = m_Makefile->GetDefineFlags();
+  if(flags.find("D_UNICODE") != flags.npos ||
+     defs.find("D_UNICODE") != flags.npos)
     {
     fout << "\t\t\tCharacterSet=\"1\">\n";
     }
@@ -692,6 +694,7 @@ void cmLocalVisualStudio7Generator::OutputLibraries(std::ostream& fout,
 void cmLocalVisualStudio7Generator::OutputDefineFlags(std::ostream& fout)
 {
   std::string defs = m_Makefile->GetDefineFlags();
+  cmSystemTools::ReplaceString(defs, "/D","-D");
   std::string::size_type pos = defs.find("-D");
   bool done = pos == std::string::npos;
   if(!done)
