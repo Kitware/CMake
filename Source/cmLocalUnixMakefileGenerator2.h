@@ -45,6 +45,9 @@ public:
       implementations.  */
   void SetEmptyCommand(const char* cmd);
 
+  /** Set whether the echo command needs its argument quoted.  */
+  void SetEchoNeedsQuote(bool b) { m_EchoNeedsQuote = b; }
+
   /**
    * Set to true if the shell being used is the windows shell.
    * This controls if statements in the makefile and the SHELL variable.
@@ -114,11 +117,9 @@ protected:
                                std::string& depMarkFile);
   void WriteMakeRule(std::ostream& os,
                      const char* comment,
-                     const char* preEcho,
                      const char* target,
                      const std::vector<std::string>& depends,
-                     const std::vector<std::string>& commands,
-                     const char* postEcho=0);
+                     const std::vector<std::string>& commands);
   void WriteDivider(std::ostream& os);
   void WriteDisclaimer(std::ostream& os);
   void WriteMakeVariables(std::ostream& makefileStream);
@@ -216,9 +217,10 @@ protected:
                            const cmCustomCommand& cc);
   void AppendCleanCommand(std::vector<std::string>& commands,
                           const std::vector<std::string>& files);
+  void AppendEcho(std::vector<std::string>& commands,
+                  const char* text);
 
   //==========================================================================
-  void OutputEcho(std::ostream& fout, const char* msg);
   bool SamePath(const char* path1, const char* path2);
   std::string GetBaseTargetName(const cmTarget& t);
   void GetLibraryNames(const cmTarget& t,
@@ -267,6 +269,9 @@ private:
   std::string m_LibraryOutputPath;
   bool m_PassMakeflags;
   //==========================================================================
+
+  // Flag for whether echo command needs quotes.
+  bool m_EchoNeedsQuote;
 
   // List of make rule files that need to be included by the makefile.
   std::vector<std::string> m_IncludeRuleFiles;
