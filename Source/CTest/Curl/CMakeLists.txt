@@ -59,16 +59,22 @@ SET(libCurl_SRCS
   transfer.c
   strequal.c
   easy.c
-  security.c
-  krb4.c
   http_chunks.c
   strtok.c
   connect.c
   llist.c
   hash.c
   multi.c
-  content_encoding.c
   )
+
+
+# if we have Kerberos 4, right now this is never on
+IF(KRB4)
+  SET(libCurl_SRCS ${libCurl_SRCS}
+    krb4.c
+    security.c
+    )
+ENDIF(KRB4)
 
 OPTION(CURL_MALLOC_DEBUG "Debug mallocs in Curl" OFF)
 MARK_AS_ADVANCED(CURL_MALLOC_DEBUG)
@@ -77,6 +83,7 @@ IF(CURL_MALLOC_DEBUG)
     memdebug.c
     )
 ENDIF(CURL_MALLOC_DEBUG)
+
 
 # On windows preload settings
 IF(WIN32)
@@ -380,6 +387,10 @@ ENDIF(NOT HAVE_LIBZ)
 IF(NOT HAVE_ZLIB_H)
   SET(HAVE_LIBZ 0)
 ENDIF(NOT HAVE_ZLIB_H)
+
+IF(HAVE_LIBZ)
+  SET(libCurl_SRCS ${libCurl_SRCS} content_encoding.c)
+ENDIF(HAVE_LIBZ)
 
 # Check for nonblocking
 
