@@ -199,7 +199,7 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args)
     "  new_string = (char *)malloc(sizeof(char) * (size_t)(strlen(string) + 1));\n"
     "  if (!new_string)\n"
     "    {\n"
-    "    return NULL;\n"
+    "    return 0;\n"
     "    }\n"
     "  strcpy(new_string, string);\n"
     "  p = new_string;\n"
