@@ -602,9 +602,10 @@ void cmMakefile::AddGlobalLinkInformation(const char* name, cmTarget& target)
   // for these targets do not add anything
   switch(target.GetType())
     {
-    case cmTarget::UTILITY: return;
-    case cmTarget::INSTALL_FILES: return;
-    case cmTarget::INSTALL_PROGRAMS: return;
+    case cmTarget::UTILITY: 
+    case cmTarget::INSTALL_FILES: 
+    case cmTarget::INSTALL_PROGRAMS: 
+      return;
     default:;
     }
   std::vector<std::string>::iterator j;
@@ -1209,7 +1210,7 @@ void cmMakefile::RemoveFunctionBlocker(const char *name,
       cmFunctionBlocker* b = *pos;
       m_FunctionBlockers.remove(*pos);
       delete b;
-      return;
+      break;
       }
     }
   
