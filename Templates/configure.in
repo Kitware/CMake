@@ -127,6 +127,19 @@ case $system in
         CMAKE_SHLIB_RUNTIME_FLAG=""
         CMAKE_SHLIB_RUNTIME_SEP=""
 	;;
+    Darwin-*)
+        CMAKE_SHLIB_CFLAGS=""
+        CMAKE_SHLIB_LD_LIBS=""
+        CMAKE_SHLIB_SUFFIX=".dylib"
+        CMAKE_MODULE_SUFFIX=".so"
+        CMAKE_DL_LIBS=""
+        CMAKE_SHLIB_BUILD_FLAGS="-dynamiclib -undefined warning" #undefined warning must go away post 10.1
+        CMAKE_SHLIB_LINK_FLAGS=""
+        CMAKE_MODULE_BUILD_FLAGS="-bundle -undefined warning" #undefined warning must go away post 10.1
+        CMAKE_MODULE_LINK_FLAGS=""
+        CMAKE_SHLIB_RUNTIME_FLAG=""
+        CMAKE_SHLIB_RUNTIME_SEP=":"
+        ;;
     HP-UX-*.08.*|HP-UX-*.09.*|HP-UX-*.10.*)
 	CMAKE_SHLIB_CFLAGS="+z"
 	CMAKE_SHLIB_LD_LIBS=""
