@@ -1077,7 +1077,15 @@ void cmLocalUnixMakefileGenerator::OutputLibraryRule(std::ostream& fout,
                         targetNameReal, targetNameBase);
 
   std::string outpath;
-  std::string outdir = this->ConvertToRelativeOutputPath(m_LibraryOutputPath.c_str());
+  std::string outdir;
+  if(m_UseRelativePaths)
+    {
+    outdir = this->ConvertToRelativeOutputPath(m_LibraryOutputPath.c_str());
+    }
+  else
+    {
+    outdir = m_LibraryOutputPath;
+    }
   if(!m_WindowsShell && m_UseRelativePaths && outdir.size())
     {
     outpath =  "\"`cd ";
@@ -1096,7 +1104,16 @@ void cmLocalUnixMakefileGenerator::OutputLibraryRule(std::ostream& fout,
   std::string targetFullPathSO = outpath + targetNameSO;
   std::string targetFullPathReal = outpath + targetNameReal;
   std::string targetFullPathBase = outpath + targetNameBase;
-  
+  // If not using relative paths then the output path needs to be
+  // converted here
+  if(!m_UseRelativePaths)
+    {
+    targetFullPath = this->ConvertToRelativeOutputPath(targetFullPath.c_str());
+    targetFullPathSO = this->ConvertToRelativeOutputPath(targetFullPathSO.c_str());
+    targetFullPathReal = this->ConvertToRelativeOutputPath(targetFullPathReal.c_str());
+    targetFullPathBase = this->ConvertToRelativeOutputPath(targetFullPathBase.c_str());
+    }
+
   // get the objects that are used to link this library
   std::string objs = "$(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
   std::string objsQuoted = "$(" + this->CreateMakeVariable(name, "_SRC_OBJS_QUOTED") + ") ";
