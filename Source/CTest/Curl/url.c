@@ -973,10 +973,10 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
         }
       }
     }
+    break;
 #else
     return CURLE_SSL_ENGINE_NOTFOUND;
 #endif
-    break;
   case CURLOPT_SSLENGINE_DEFAULT:
     /*
      * flag to set engine as default.

@@ -174,7 +174,7 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
   /* scan through the list and remove the 'curl_handle' */
   easy = multi->easy.next;
   while(easy) {
-    if(easy->easy_handle == curl_handle)
+    if((CURL*)(easy->easy_handle) == curl_handle)
       break;
     easy=easy->next;
   }
