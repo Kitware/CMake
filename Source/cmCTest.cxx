@@ -3706,7 +3706,6 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
       }
     if(arg.find("--build-nocmake",0) == 0 && i < args.size() - 1)
       {
-      i++;
       m_BuildNoCMake = true;
       }
     if(arg.find("--build-run-dir",0) == 0 && i < args.size() - 1)
