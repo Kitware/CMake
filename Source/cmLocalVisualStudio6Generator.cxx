@@ -624,10 +624,6 @@ cmLocalVisualStudio6Generator::CreateTargetRules(const cmTarget &target,
       customRuleCode += "PreLink_Cmds=";
       init = true;
       }
-    else
-      {
-      customRuleCode += "\\\n\t";
-      }
     customRuleCode += this->ConstructScript(cr->GetCommandLines(), "\\\n\t");
     }
 
@@ -641,13 +637,15 @@ cmLocalVisualStudio6Generator::CreateTargetRules(const cmTarget &target,
       customRuleCode += "PreLink_Cmds=";
       init = true;
       }
-    else
-      {
-      customRuleCode += "\\\n\t";
-      }
     customRuleCode += this->ConstructScript(cr->GetCommandLines(), "\\\n\t");
     }
-
+  // remove trailing \\\n\t and replace with \n as this
+  // is a new command and not a continuation 
+  if(init)
+    {
+    customRuleCode.erase(customRuleCode.size()-3, 3);
+    customRuleCode += "\n";
+    }
   // do the post build rules
   init = false;
   for (std::vector<cmCustomCommand>::const_iterator cr = 
@@ -659,10 +657,6 @@ cmLocalVisualStudio6Generator::CreateTargetRules(const cmTarget &target,
       // header stuff
       customRuleCode += "PostBuild_Cmds=";
       init = true;
-      }
-    else
-      {
-      customRuleCode += "\\\n\t";
       }
     customRuleCode += this->ConstructScript(cr->GetCommandLines(), "\\\n\t");
     }
