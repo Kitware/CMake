@@ -756,7 +756,7 @@ int cmake::DoPreConfigureChecks()
     {
     cmSystemTools::Error(
       "The source directory does not appear to contain CMakeLists.txt.\n"
-      "Specify --help for usage.");
+      "Specify --help for usage, or press the help button on the CMake GUI.");
     return -2;
     }
   
