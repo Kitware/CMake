@@ -24,6 +24,35 @@ IF (UNIX)
     /opt/graphics/OpenGL/include
   )
 
+  FIND_PATH(CMAKE_Xlib_INCLUDE_PATH X11/Xlib.h
+    /usr/include 
+    /usr/local/include 
+    /usr/openwin/include 
+    /usr/openwin/share/include 
+    /usr/X11R6/include 
+    /usr/include/X11
+    /opt/graphics/OpenGL/include
+  )
+
+  FIND_PATH(CMAKE_Xutil_INCLUDE_PATH X11/Xutil.h
+    /usr/include 
+    /usr/local/include 
+    /usr/openwin/include 
+    /usr/openwin/share/include 
+    /usr/X11R6/include 
+    /usr/include/X11
+    /opt/graphics/OpenGL/include
+  )
+
+  IF(CMAKE_X11_INCLUDE_PATH)
+    SET(CMAKE_X11_INCLUDES "${CMAKE_X11_INCLUDES};${CMAKE_X11_INCLUDE_PATH}")
+  ENDIF(CMAKE_X11_INCLUDE_PATH)
+  IF(CMAKE_Xlib_INCLUDE_PATH)
+    SET(CMAKE_X11_INCLUDES "${CMAKE_X11_INCLUDES};${CMAKE_Xlib_INCLUDE_PATH}")
+  ENDIF(CMAKE_Xlib_INCLUDE_PATH)
+  IF(CMAKE_Xutil_INCLUDE_PATH)
+    SET(CMAKE_X11_INCLUDES "${CMAKE_X11_INCLUDES};${CMAKE_Xutil_INCLUDE_PATH}")
+  ENDIF(CMAKE_Xutil_INCLUDE_PATH)
 
   FIND_LIBRARY(CMAKE_X11_LIBDIR X11
     /usr/lib 
