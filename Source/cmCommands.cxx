@@ -64,6 +64,7 @@
 #include "cmQTWrapUICommand.cxx"
 #include "cmWrapExcludeFilesCommand.cxx"
 #include "cmAddCustomCommandCommand.cxx"
+#include "cmVTKMakeInstantiatorCommand.cxx"
 
 void GetPredefinedCommands(std::list<cmCommand*>& commands)
 {
@@ -128,6 +129,5 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmQTWrapUICommand);
   commands.push_back(new cmWrapExcludeFilesCommand);
   commands.push_back(new cmAddCustomCommandCommand);
+  commands.push_back(new cmVTKMakeInstantiatorCommand);
 }
-
-
