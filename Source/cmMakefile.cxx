@@ -1173,6 +1173,7 @@ void cmMakefile::ExpandVariables()
 
 void cmMakefile::ExpandVariablesInCustomCommands()
 {
+  // do source files
   for(std::vector<cmSourceFile*>::iterator i = m_SourceFiles.begin();
       i != m_SourceFiles.end(); ++i)
     {
@@ -1180,6 +1181,28 @@ void cmMakefile::ExpandVariablesInCustomCommands()
     if (cc)
       {
       cc->ExpandVariables(*this);
+      }
+    }
+  
+  // now do targets
+  std::vector<cmCustomCommand>::iterator ic;
+  for (cmTargets::iterator l = m_Targets.begin();
+       l != m_Targets.end(); l++)
+    {
+    for (ic = l->second.GetPreBuildCommands().begin();
+         ic != l->second.GetPreBuildCommands().end(); ++ic)
+      {
+      ic->ExpandVariables(*this);
+      }
+    for (ic = l->second.GetPreLinkCommands().begin();
+         ic != l->second.GetPreLinkCommands().end(); ++ic)
+      {
+      ic->ExpandVariables(*this);
+      }
+    for (ic = l->second.GetPostBuildCommands().begin();
+         ic != l->second.GetPostBuildCommands().end(); ++ic)
+      {
+      ic->ExpandVariables(*this);
       }
     }
 }
