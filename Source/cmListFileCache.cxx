@@ -146,15 +146,59 @@ void cmListFileCache::FlushCache(const char* path)
     }
 }
 
-inline void RemoveComments(std::string& line)
+//----------------------------------------------------------------------------
+inline bool cmListFileCachePreprocessLine(std::string& line)
 {
-  std::string::size_type pos = line.find("#");
-  if (pos != std::string::npos )
+  // Keep track of whether characters are inside a quoted argument.
+  bool quoted = false;
+  
+  // Keep track of whether the line is blank.
+  bool blank = true;
+  
+  // Loop over every character in the line.
+  std::string::iterator c;
+  for(c = line.begin(); c != line.end(); ++c)
     {
-    line.erase(pos);
+    if((*c == '\\') && (c < line.end()-1))
+      {
+      // A backslash escapes any character, so skip the next
+      // character.
+      ++c;
+      
+      // We have encountered a non-whitespace character.
+      blank = false;
+      }
+    else if(*c == '"')
+      {
+      // A double-quote either starts or ends a quoted argument.
+      quoted = !quoted;
+      
+      // We have encountered a non-whitespace character.
+      blank = false;
+      }
+    else if(*c == '#' && !quoted)
+      {
+      // A pound character outside a double-quoted argument marks the
+      // rest of the line as a comment.  Skip it.
+      break;
+      }
+    else if((*c != ' ') && (*c != '\t') && (*c != '\r'))
+      {
+      // We have encountered a non-whitespace character.
+      blank = false;
+      }
     }
+  
+  // Erase from the comment character to the end of the line.  If no
+  // comment was present, both iterators are end() iterators and this
+  // does nothing.
+  line.erase(c, line.end());
+  
+  // Return true if there is anything useful on this line.
+  return !blank;
 }
 
+//----------------------------------------------------------------------------
 bool cmListFileCache::ParseFunction(std::ifstream& fin,
                                     cmListFileFunction& function,
                                     const char* filename,
@@ -173,20 +217,23 @@ bool cmListFileCache::ParseFunction(std::ifstream& fin,
     }
   if(cmSystemTools::GetLineFromStream(fin, inbuffer) )
     {
+    // Count this line in line numbering.
     ++line;
-    RemoveComments(inbuffer);
-    cmsys::RegularExpression blankLine("^[ \t\r]*$");
+    
+    // Preprocess the line to remove comments.  Only use it if there
+    // is non-whitespace.
+    if(!cmListFileCachePreprocessLine(inbuffer))
+      {
+      return false;
+      }
+    
+    // Regular expressions to match portions of a command invocation.
     cmsys::RegularExpression oneLiner("^[ \t]*([A-Za-z_0-9]*)[ \t]*\\((.*)\\)[ \t\r]*$");
     cmsys::RegularExpression multiLine("^[ \t]*([A-Za-z_0-9]*)[ \t]*\\((.*)$");
     cmsys::RegularExpression lastLine("^(.*)\\)[ \t\r]*$");
 
-    // check for blank line or comment
-    if(blankLine.find(inbuffer.c_str()) )
-      {
-      return false;
-      }
     // look for a oneline fun(arg arg2) 
-    else if(oneLiner.find(inbuffer.c_str()))
+    if(oneLiner.find(inbuffer.c_str()))
       {
       // the arguments are the second match
       std::string args = oneLiner.match(2);
@@ -210,11 +257,16 @@ bool cmListFileCache::ParseFunction(std::ifstream& fin,
         // read lines until the end paren is found
         if(cmSystemTools::GetLineFromStream(fin, inbuffer) )
           {
+          // Count this line in line numbering.
           ++line;
-          RemoveComments(inbuffer);
-          // Check for comment lines and ignore them.
-          if(blankLine.find(inbuffer.c_str()))
-            { continue; }
+          
+          // Preprocess the line to remove comments.  Only use it if there
+          // is non-whitespace.
+          if(!cmListFileCachePreprocessLine(inbuffer))
+            {
+            continue;
+            }
+    
           // Is this the last line?
           if(lastLine.find(inbuffer.c_str()))
             {

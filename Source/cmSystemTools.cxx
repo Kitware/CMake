@@ -164,6 +164,7 @@ std::string cmSystemTools::RemoveEscapes(const char* s)
         case 't': result.insert(result.end(), '\t'); break;
         case 'n': result.insert(result.end(), '\n'); break;
         case 'r': result.insert(result.end(), '\r'); break;
+        case '#': result.insert(result.end(), '#'); break;
         case '0': result.insert(result.end(), '\0'); break;
         case '\0':
           {
