@@ -359,6 +359,21 @@ int main()
     }
 #endif
 
+#ifndef FOREACH_CONCAT
+  cmFailed("the FOREACH, SET or CONFIGURE_FILE command is broken, "
+         "FOREACH_CONCAT is not defined.");
+#else
+  if(strcmp(FOREACH_CONCAT, "abcdefg") != 0)
+    {
+    cmFailed("the FOREACH, SET or CONFIGURE_FILE command is broken, "
+           "FOREACH_CONCAT == ", FOREACH_CONCAT);
+    }
+  else
+    {
+    cmPassed("FOREACH_CONCAT == ", FOREACH_CONCAT);
+    }
+#endif
+
   // ----------------------------------------------------------------------
   // Test FIND_FILE, FIND_PATH and various GET_FILENAME_COMPONENT combinations
 
