@@ -237,13 +237,11 @@ OutputBuildObjectFromSource(std::ostream& fout,
   std::string comment = "Build ";
   std::string objectFile = std::string(shortName) + 
     this->GetOutputExtension(source.GetSourceExtension().c_str());
-  std::cerr << "short name  objectfile " << objectFile.c_str() << " " << shortName << "\n";
   
   comment += objectFile + "  From ";
   comment += source.GetFullPath();
   std::string compileCommand;
   std::string ext = source.GetSourceExtension();
-  std::cerr << "ext " << ext.c_str() << "\n";
   if(ext == "c" )
     {
     compileCommand = "$(CMAKE_C_COMPILER) $(CMAKE_CFLAGS) ";
@@ -266,15 +264,15 @@ OutputBuildObjectFromSource(std::ostream& fout,
     }
   else if (ext == "def")
     {
-    std::cerr << "def file " << source.GetFullPath() << "\n";
+    // *** do something here??
     }
   else if (ext == "ico")
     {
-    std::cerr << "ico file " << source.GetFullPath() << "\n";
+    // do something here??
     }
   else if (ext == "rc2")
     {
-    std::cerr << "rc2 file " << source.GetFullPath() << "\n";
+    // do something here??
     }
   // assume c++ if not c rc or def
   else
