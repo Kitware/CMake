@@ -181,6 +181,7 @@ private:
         m_Tested = 0;
         m_UnTested = 0;
         m_Lines.clear();
+        m_Show = false;
       }
     std::string      m_AbsolutePath;
     std::string      m_FullPath;
@@ -188,6 +189,7 @@ private:
     int              m_Tested;
     int              m_UnTested;
     std::vector<int> m_Lines;
+    bool             m_Show;
   };
 
   typedef std::vector<cmCTestTestResult> tm_TestResultsVector;
