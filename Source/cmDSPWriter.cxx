@@ -317,13 +317,12 @@ void cmDSPWriter::WriteCustomRule(std::ostream& fout,
       fout << "!ELSEIF  \"$(CFG)\" == " << i->c_str() << std::endl;
       }
     
-    // Write out the dependencies (this seems to be the only way to
-    //  get VC6 to actually take these dependencies into account.
-    fout << "USERDEP__HACK= ";
+    // Write out the dependencies for the rule.
+    fout << "USERDEP__HACK=";
     for(std::set<std::string>::const_iterator d = depends.begin();
 	d != depends.end(); ++d)
       {
-	fout << " \"" << d->c_str() << "\"";
+	fout << "\\\n\t\"" << d->c_str() << "\"";
       }
     fout << "\n";
 
@@ -340,12 +339,6 @@ void cmDSPWriter::WriteCustomRule(std::ostream& fout,
       {
       fout << "\"" << output->c_str()
            << "\" :  \"$(SOURCE)\" \"$(INTDIR)\" \"$(OUTDIR)\"";
-      // Write out all the dependencies for this rule.
-      for(std::set<std::string>::const_iterator d = depends.begin();
-          d != depends.end(); ++d)
-        {
-        fout << " \"" << d->c_str() << "\"";
-        }
       fout << command << "\n\n";
       }
     
