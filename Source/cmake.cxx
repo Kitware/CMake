@@ -358,19 +358,15 @@ int cmake::Generate(const std::vector<std::string>& args, bool buildMakefiles)
   cmCacheManager::GetInstance()->LoadCache(&mf);
   if(mf.GetDefinition("CMAKE_HOME_DIRECTORY"))
     {
-    std::string cacheStart = 
-      cmSystemTools::CollapseFullPath(mf.GetDefinition("CMAKE_HOME_DIRECTORY"));
-    std::string currentStart = 
-      cmSystemTools::CollapseFullPath(mf.GetHomeDirectory());
-#ifdef _WIN32
-    cacheStart = cmSystemTools::LowerCase(cacheStart);
-    currentStart = cmSystemTools::LowerCase(currentStart);
-#endif
-    if(cacheStart != currentStart)
+    std::string cacheStart = mf.GetDefinition("CMAKE_HOME_DIRECTORY");
+    cacheStart += "/CMakeLists.txt";
+    std::string currentStart = mf.GetHomeDirectory();
+    currentStart += "/CMakeLists.txt";
+    if(!cmSystemTools::SameFile(cacheStart.c_str(), currentStart.c_str()))
       {
-      std::string message = "Error: source directory: ";
+      std::string message = "Error: source : ";
       message += currentStart;
-      message += "\nDoes not match source directory used to generate cache: ";
+      message += "\nDoes not match source used to generate cache: ";
       message += cacheStart;
       message += "\nRe-run cmake with a different source directory.";
       cmSystemTools::Error(message.c_str());

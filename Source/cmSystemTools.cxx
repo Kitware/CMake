@@ -487,6 +487,47 @@ std::string cmSystemTools::EscapeQuotes(const char* str)
 
 bool cmSystemTools::SameFile(const char* file1, const char* file2)
 {
+#ifdef _WIN32
+  HANDLE hFile1, hFile2;
+
+  hFile1 = CreateFile( file1, 
+                      GENERIC_READ, 
+                      FILE_SHARE_READ ,
+                      NULL,
+                      OPEN_EXISTING,
+                      FILE_FLAG_BACKUP_SEMANTICS,
+                      NULL
+    );
+  hFile2 = CreateFile( file2, 
+                      GENERIC_READ, 
+                      FILE_SHARE_READ, 
+                      NULL,
+                      OPEN_EXISTING,
+                      FILE_FLAG_BACKUP_SEMANTICS,
+                      NULL
+    );
+  if( hFile1 == INVALID_HANDLE_VALUE || hFile2 == INVALID_HANDLE_VALUE)
+    {
+    if(hFile1 != INVALID_HANDLE_VALUE)
+      {
+      CloseHandle(hFile1);
+      }
+    if(hFile2 != INVALID_HANDLE_VALUE)
+      {
+      CloseHandle(hFile2);
+      }
+    return false;
+    }
+
+   BY_HANDLE_FILE_INFORMATION fiBuf1;
+   BY_HANDLE_FILE_INFORMATION fiBuf2;
+   GetFileInformationByHandle( hFile1, &fiBuf1 );
+   GetFileInformationByHandle( hFile2, &fiBuf2 );
+   CloseHandle(hFile1);
+   CloseHandle(hFile2);
+   return (fiBuf1.nFileIndexHigh == fiBuf2.nFileIndexHigh &&
+           fiBuf1.nFileIndexLow == fiBuf2.nFileIndexLow);
+#else
   struct stat fileStat1, fileStat2;
   if (stat(file1, &fileStat1) == 0 && stat(file2, &fileStat2) == 0)
     {
@@ -501,6 +542,7 @@ bool cmSystemTools::SameFile(const char* file1, const char* file2)
       }
     }
   return false;
+#endif
 }
 
 
