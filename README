@@ -1,124 +1,188 @@
-WELCOME TO CROSS-PLATFORM MAKE
+WELCOME TO CROSS-PLATFORM MAKE (CMake)
+-------------------------------------
 
 CMake is a cross-platform, extensible build environment. It currently generates
 Unix makefiles and Microsoft Visual C++ projects/workspaces.
 
 To use CMake, create CMakeLists.txt in each directory that makes up your
-source repository. The CMakeLists.txt contains rules. Each rule does something
-different, like defines a list of source code, include directories, etc. Once
-CMake has processed all the rules in all the CMakeLists.txt files, it generates
-the appropriate "makefile(s)" for the system/compiler that you are on.
+source repository. The CMakeLists.txt file contains rules. Each rule does
+something different, like defining a list of source code, include directories,
+etc. Once CMake has processed all the rules in all the CMakeLists.txt files,
+it generates the appropriate "makefile(s)" for the system/compiler that you
+are on.
 
 THE BOOK OF RULES
+-----------------
+
 The key to using CMake is to learn the rules. Each rule has the same format:
 
     NAME_OF_RULE(args....)
 
 where args is a white-space separated listed of arguments. (Arguments 
-containing spaces should be quoted. For example:
+containing spaces should be quoted). For example:
 
     INCLUDE_DIRECTORIES(./ d:/include "c:/Program Files/include")
 
-note that Unix-style slashes are used.
+note that Unix-style slashes are used. The rules may reference CMake
+variables, either built-in or defined variables. Two important variables
+are built-in to CMake:
 
-Here are the important rules.
+        CMAKE_SOURCE_DIR - The root directory of the source code 
+                           directory tree.
 
-# build targets
-WIN32_SOURCE_FILES(file1 file2 ...)
+        CMAKE_BINARY_DIR - The root directory of the build tree 
+                           where binaries are placed. This includes 
+                           object files, libraries, and executables.
 
-UNIX_SOURCE_FILES()
+A rule might reference these as follows:
 
-ABSTRACT_CLASSES(class1 class2 ...)
+        INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 
-SUBDIRS()
+using the ${} delimiters.
+        
+Here is a list of current rules. You may also wish to view
+the Doxygen documentation (if available) or generate it with
+the doxygen.config file in this directory.
 
-EXECUTABLES()
+Rules: (Generated with cmDumpDocumentation)
+------------------------------------------
 
-# name of the library to build
-LIBRARY(library_name)
+ABSTRACT_FILES - A list of abstract classes, useful for wrappers.
+Usage: ABSTRACT_FILES(file1 file2 ..)
 
-# make flags
-# make flags can use these variables:
-# ${CMAKE_BINARY_DIR}  The root of the build tree where the binaries are
-# ${CMAKE_SOURCE_DIR} The root of the source tree where configure is
+ADD_TARGET - Add an extra target to the build system.
+Usage: ADD_TARGET(Name "command to run")
 
-INCLUDE_DIRECTORIES()
+AUX_SOURCE_DIRECTORY - Add all the source files found in the specified directory to
+ the build.
+Usage: AUX_SOURCE_DIRECTORY(dir)
 
-LINK_DIRECTORIES()
+EXECUTABLES - Add a list of executables files.
+Usage: EXECUTABLES(file1 file2 ...)
 
-LINK_LIBRARIES() = # use the same name as the LIBRARY() rule specified
-WIN32_LIBRARIES()
-UNIX_LIBRARIES()
+FIND_INCLUDE - Find an include path.
+Usage: FIND_INCLUDE(DEFINE try1 try2 ...)
 
-# define other targtes/source directories
-AUX_SOURCE_DIR(dir1 dir2 ...)
+FIND_LIBRARY - Find a library.
+Usage: FIND_LIBRARY(DEFINE try1 try2)
 
-Windows / Visual Studio 6.0 programs
-CMakeSetup.exe      -> window MFC based GUI for configure on windows
-CMakeSetupCMD.exe   -> windows command line version of CMakeConfigure
+FIND_PROGRARM - Find an executable program.
+Usage: FIND_PROGRAM(NAME executable1 executable2 ...)
 
-To Build on Windows:
-load CMake/Source/CMakeSetup.dsw
-Build it
-Run it
-Specify paths
-
-Load ITK.dsw
-Build Common, Numerics, then any of the many executables, or do a Batch build 
-with debug only.
+INCLUDE_DIRECTORIES - Add include directories to the build.
+Usage: INCLUDE_DIRECTORIES(dir1 dir2 ...).
 
 
-Unix scripts and programs:
+LIBRARY - Set a name for a library.
+Usage: LIBRARY(libraryname)
+
+LINK_DIRECTORIES - Specify link directories.
+Usage: Specify the paths to the libraries that will be linked in.
+LINK_DIRECTORIES(directory1 directory2 ...)
+The directories can use built in definitions like 
+CMAKE_BINARY_DIR and CMAKE_SOURCE_DIR.
+
+LINK_LIBRARIES - Specify a list of libraries to be linked into executables or 
+shared objects.
+Usage: Specify a list of libraries to be linked into executables or 
+shared objects.  This rule is passed down to all other rules.LINK_LIBRARIES(library1 library2).
+The library name should be the same as the name used in the
+LIBRARY(library) rule.
+
+PROJECT - Set a name for the entire project. One argument.
+Usage: Set the name for the entire project.  This takes one argument.
+PROJECT(projectname)
+
+SOURCE_FILES - Add a list of source files.
+Usage: SOURCE_FILES(file1 file2 ...)
+
+SOURCE_FILES_REQUIRE - Add a list of source files if the required variables are set.
+Usage: SOURCE_FILES_REQUIRE(var1 var2 ... SOURCES_BEGIN file1 file2 ...)
+
+SUBDIRS - Add a list of subdirectories to the build.
+Usage: Add a list of subdirectories to the build.
+SUBDIRS(dir1 dir2 ...)
+This will cause any CMakeLists.txt files in the sub directories
+to be processed by CMake.
+
+TESTS - Add a list of executables files that are run as tests.
+Usage: TESTS(file1 file2 ...)
+
+UNIX_DEFINES - Add -D flags to the command line for Unix only.
+Usage: Add -D flags to the command line for Unix only.
+UNIX_DEFINES(-DFOO -DBAR)
+
+UNIX_LIBRARIES - Add libraries that are only used for Unix programs.
+Usage: UNIX_LIBRARIES(library -lm ...)
+
+WIN32_DEFINES - Add -D define flags to command line for Win32 environments.
+Usage: Add -D define flags to command line for Win32 environments.
+WIN32_DEFINES(-DFOO -DBAR ...)
+
+WIN32_LIBRARIES - Add libraries that are only used for Win32 programs.
+Usage: WIN32_LIBRARIES(library -lm ...)
+
+
+
+
+USING / BUILDING WITH CMAKE
+---------------------------
+
+Windows:
+-------
+These programs are used to drive CMake on Windows:
+
+        CMakeSetup.exe      -> window MFC based GUI for configure on windows
+
+        CMakeSetupCMD.exe   -> windows command line version of CMakeConfigure
+
+To build a project on Windows:
+
+        load CMake/Source/CMakeSetup.dsw
+        Build it
+        Run it
+        Specify paths
+
+        Load ITK.dsw
+        Build Common, Numerics, then any of the many executables, 
+        or do a Batch build with debug only.
+
+
+Unix:
+----
+These programs/files are used to drive CMake on Unix:
+
 configure             -> run on unix to configure for build
-CMakeBuildTargets     -> Unix program to read CMakeLists.txt and generate CMakeTargets.make
+CMakeBuildTargets     -> Unix program to read CMakeLists.txt and 
+                         generate CMakeTargets.make
+
 makefile fragments:
 CMakeMaster.make      -> main file to be included by makefiles
 CMakeVariables.make   -> all make varibles are set in this file
 CMakeRules.make       -> All build rules are here (except Simple Rules)
-CMakeSimpleRules.make -> simple build rules for .o to .cxx, this is separate to be able
-to build CMakeBuildTargets itself.
+CMakeSimpleRules.make -> simple build rules for .o to .cxx, this is separate 
+                         to be able to build CMakeBuildTargets itself.
 CMakeLocal.make       -> Place for hand configuration
 CMakeTargets.make     -> generated rules for make style build in each directory
-MakefileTemplate.make -> master makefile template used by configure to generate Makefiles
+MakefileTemplate.make -> master makefile template used by configure to 
+                         generate Makefiles
 
 
 Unix install:
-In place:
-./configure
-make
+In place (object files end up in source code directory):
 
-Other directory:
-mkdir Insight-build
-cd Insight-build
-../Insight/configure
-make
+        ./configure
+        make
 
+Other directory (object files are in another directory):
 
-TODO:
-
-FEATURES:
-Add include and directories to the build on windows.
-For unix just add them to the CMakeLocal.make.in
-Add a --with idea, sets a #define in the config.h file
-Create a directory
-Run a command
-
-CLEANUP:
-Change ME to LIBRARY, and add PROJECT=
-Remove the rest of the ITK_* stuff
-move the libs used from the top into the testing...
+        mkdir Insight-build
+        cd Insight-build
+        ../Insight/configure
+        make
 
 
-FEATURES
-1. run a command in the current build directory
-2. make a directory
-3. search for 3rd party software and define some variables
-that can be used in the CMakeLists.txt files.  Perhaps from
-some central CMake.in file.
-4. Have cmake define some stuff like:
-  SITE, OS-REV, COMPILER-VERSION
-(use configure for unix, and add stuff to the pc version for windows.)
-
-BUGS:
-1. allow multiple registry entries on windows
-
+FOR MORE INFORMATION
+--------------------
+Contact Bill Hoffman bill.hoffman@kitware.com who is the
+principal developer.
