@@ -170,17 +170,6 @@ void cmMakefile::PrintStringVector(const char* s, const std::vector<std::string>
   std::cout << " )\n";
 }
 
-void cmMakefile::PrintStringVector(const char* s, const std::set<std::string>& v) const
-{
-  std::cout << s << ": ( \n";
-  for(std::set<std::string>::const_iterator i = v.begin();
-      i != v.end(); ++i)
-    {
-    std::cout << (*i).c_str() << " ";
-    }
-  std::cout << " )\n";
-}
-
 
 // call print on all the classes in the makefile
 void cmMakefile::Print() const
@@ -545,7 +534,15 @@ void cmMakefile::AddLinkLibrary(const char* lib)
 
 void cmMakefile::AddLinkDirectory(const char* dir)
 {
-  m_LinkDirectories.insert(dir);
+  // Don't add a link directory that is already present.  Yes, this
+  // linear search results in n^2 behavior, but n won't be getting
+  // much bigger than 20.  We cannot use a set because of order
+  // dependency of the link search path.
+  if(std::find(m_LinkDirectories.begin(),
+               m_LinkDirectories.end(), dir) == m_LinkDirectories.end())
+    {
+    m_LinkDirectories.push_back(dir);
+    }
 }
 
 void cmMakefile::AddSubDirectory(const char* sub)
@@ -555,7 +552,15 @@ void cmMakefile::AddSubDirectory(const char* sub)
 
 void cmMakefile::AddIncludeDirectory(const char* inc)
 {
-  m_IncludeDirectories.insert(inc);
+  // Don't add an include directory that is already present.  Yes,
+  // this linear search results in n^2 behavior, but n won't be
+  // getting much bigger than 20.  We cannot use a set because of
+  // order dependency of the include path.
+  if(std::find(m_IncludeDirectories.begin(),
+               m_IncludeDirectories.end(), inc) == m_IncludeDirectories.end())
+    {
+    m_IncludeDirectories.push_back(inc);
+    }
 }
 
 void cmMakefile::AddDefinition(const char* name, const char* value)
@@ -739,37 +744,20 @@ std::string cmMakefile::GetParentListFileName(const char *currentFileName)
 void cmMakefile::ExpandVariables()
 {
   // Now expand varibles in the include and link strings
-  std::set<std::string>::iterator j, begin, end;
-  begin = m_IncludeDirectories.begin();
-  end = m_IncludeDirectories.end();
-  std::set<std::string> new_set;
-  std::string x;
-  
-  for(j = begin; j != end; ++j)
+  for(std::vector<std::string>::iterator d = m_IncludeDirectories.begin();
+        d != m_IncludeDirectories.end(); ++d)
     {
-    x= *j;
-    this->ExpandVariablesInString(x);
-    new_set.insert(x);
+    this->ExpandVariablesInString(*d);
     }
-  m_IncludeDirectories = new_set;
-
-  new_set.clear();
-  begin = m_LinkDirectories.begin();
-  end = m_LinkDirectories.end();
-  for(j = begin; j != end; ++j)
+  for(std::vector<std::string>::iterator d = m_LinkDirectories.begin();
+        d != m_LinkDirectories.end(); ++d)
     {
-    x = *j;
-    this->ExpandVariablesInString(x);
-    new_set.insert(x);
+    this->ExpandVariablesInString(*d);
     }
-  m_LinkDirectories = new_set;
-
-  cmTarget::LinkLibraries::iterator j2, end2;
-  j2 = m_LinkLibraries.begin();
-  end2 = m_LinkLibraries.end();
-  for(; j2 != end2; ++j2)
+  for(cmTarget::LinkLibraries::iterator l = m_LinkLibraries.begin();
+      l != m_LinkLibraries.end(); ++l)
     {
-    this->ExpandVariablesInString(j2->first);
+    this->ExpandVariablesInString(l->first);
     }
 }
 

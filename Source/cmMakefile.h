@@ -383,11 +383,11 @@ public:
   /**
    * Get a list of include directories in the build.
    */
-  std::set<std::string>& GetIncludeDirectories()
+  std::vector<std::string>& GetIncludeDirectories()
     { 
     return m_IncludeDirectories;
     }
-  const std::set<std::string>& GetIncludeDirectories() const
+  const std::vector<std::string>& GetIncludeDirectories() const
     { 
     return m_IncludeDirectories;
     }
@@ -395,7 +395,7 @@ public:
   /**
    * Get a list of link directories in the build.
    */
-  std::set<std::string>& GetLinkDirectories()
+  std::vector<std::string>& GetLinkDirectories()
     { 
     return m_LinkDirectories;
     }
@@ -523,8 +523,12 @@ protected:
   SourceMap m_Sources; 
 
   std::vector<std::string> m_SubDirectories; // list of sub directories
-  std::set<std::string> m_IncludeDirectories;
-  std::set<std::string> m_LinkDirectories;
+  
+  // The include and link-library paths.  These may have order
+  // dependency, so they must be vectors (not set).
+  std::vector<std::string> m_IncludeDirectories;
+  std::vector<std::string> m_LinkDirectories;
+  
   std::vector<std::string> m_ListFiles; // list of command files loaded
   
   
@@ -555,7 +559,6 @@ private:
   friend class cmMakeDepend;	// make depend needs direct access 
 				// to the m_Sources array 
   void PrintStringVector(const char* s, const std::vector<std::string>& v) const;
-  void PrintStringVector(const char* s, const std::set<std::string>& v) const;
   void AddDefaultCommands();
   void AddDefaultDefinitions();
   std::set<cmFunctionBlocker *> m_FunctionBlockers;

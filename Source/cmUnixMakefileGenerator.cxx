@@ -65,7 +65,7 @@ void cmUnixMakefileGenerator::GenerateMakefile()
       m_LibraryOutputPath += "/";
       }
     cmSystemTools::MakeDirectory(m_LibraryOutputPath.c_str());
-    m_Makefile->GetLinkDirectories().insert(m_LibraryOutputPath);
+    m_Makefile->AddLinkDirectory(m_LibraryOutputPath.c_str());
     }
   if (m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH"))
     {
@@ -76,7 +76,7 @@ void cmUnixMakefileGenerator::GenerateMakefile()
       m_ExecutableOutputPath += "/";
       }
     cmSystemTools::MakeDirectory(m_ExecutableOutputPath.c_str());
-    m_Makefile->GetLinkDirectories().insert(m_ExecutableOutputPath);
+    m_Makefile->AddLinkDirectory(m_ExecutableOutputPath.c_str());
     }
 
   if(m_CacheOnly)
@@ -362,8 +362,8 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
 
   // collect all the flags needed for linking libraries
   std::string linkLibs;
-  std::set<std::string>& libdirs = m_Makefile->GetLinkDirectories();
-  for(std::set<std::string>::iterator libDir = libdirs.begin();
+  std::vector<std::string>& libdirs = m_Makefile->GetLinkDirectories();
+  for(std::vector<std::string>::iterator libDir = libdirs.begin();
       libDir != libdirs.end(); ++libDir)
     { 
     std::string libpath = cmSystemTools::EscapeSpaces(libDir->c_str());
@@ -653,8 +653,8 @@ void cmUnixMakefileGenerator::OutputMakeFlags(std::ostream& fout)
 {
   // Output Include paths
   fout << "INCLUDE_FLAGS = ";
-  std::set<std::string>& includes = m_Makefile->GetIncludeDirectories();
-  std::set<std::string>::iterator i;
+  std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();
+  std::vector<std::string>::iterator i;
   fout << "-I" << m_Makefile->GetStartDirectory() << " ";
   for(i = includes.begin(); i != includes.end(); ++i)
     {

@@ -644,11 +644,11 @@ void ElementCombinationGenerator::FindTagSource()
     }
 
   // Get the makefile's include path.
-  const std::set<std::string>& includePath =
+  const std::vector<std::string>& includePath =
     m_Makefile->GetIncludeDirectories();
 
   // Search the path for a file called "(m_Tag).h".
-  for(std::set<std::string>::const_iterator dir = includePath.begin();
+  for(std::vector<std::string>::const_iterator dir = includePath.begin();
       dir != includePath.end(); ++dir)
     {
     std::string filePath = *dir;
