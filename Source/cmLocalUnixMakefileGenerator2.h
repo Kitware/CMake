@@ -67,7 +67,8 @@ protected:
   void GenerateTargetRuleFile(const cmTarget& target);
   void GenerateObjectRuleFile(const cmTarget& target,
                               const cmSourceFile& source,
-                              std::vector<std::string>& objects);
+                              std::vector<std::string>& objects,
+                              std::vector<std::string>& provides_requires);
   void GenerateCustomRuleFile(const cmCustomCommand& cc);
   void GenerateUtilityRuleFile(const cmTarget& target);
   bool GenerateDependsMakeFile(const std::string& lang,
@@ -107,25 +108,30 @@ protected:
   void WriteExecutableRule(std::ostream& ruleFileStream,
                            const char* ruleFileName,
                            const cmTarget& target,
-                           std::vector<std::string>& objects);
+                           std::vector<std::string>& objects,
+                           const std::vector<std::string>& provides_requires);
   void WriteStaticLibraryRule(std::ostream& ruleFileStream,
                               const char* ruleFileName,
                               const cmTarget& target,
-                              std::vector<std::string>& objects);
+                              std::vector<std::string>& objects,
+                              const std::vector<std::string>& provides_requires);
   void WriteSharedLibraryRule(std::ostream& ruleFileStream,
                               const char* ruleFileName,
                               const cmTarget& target,
-                              std::vector<std::string>& objects);
+                              std::vector<std::string>& objects,
+                              const std::vector<std::string>& provides_requires);
   void WriteModuleLibraryRule(std::ostream& ruleFileStream,
                               const char* ruleFileName,
                               const cmTarget& target,
-                              std::vector<std::string>& objects);
+                              std::vector<std::string>& objects,
+                              const std::vector<std::string>& provides_requires);
   void WriteLibraryRule(std::ostream& ruleFileStream,
                         const char* ruleFileName,
                         const cmTarget& target,
                         std::vector<std::string>& objects,
                         const char* linkRuleVar,
-                        const char* extraLinkFlags);
+                        const char* extraLinkFlags,
+                        const std::vector<std::string>& provides_requires);
   void WriteObjectsVariable(std::ostream& ruleFileStream,
                             const cmTarget& target,
                             const std::vector<std::string>& objects,
@@ -137,6 +143,9 @@ protected:
   void WriteTargetCleanRule(std::ostream& ruleFileStream,
                             const cmTarget& target,
                             const std::vector<std::string>& files);
+  void WriteTargetRequiresRule(std::ostream& ruleFileStream,
+                               const cmTarget& target,
+                               const std::vector<std::string>& provides_requires);
   std::string GetTargetDirectory(const cmTarget& target);
   std::string GetSubdirTargetName(const char* pass, const char* subdir);
   std::string GetObjectFileName(const cmTarget& target,

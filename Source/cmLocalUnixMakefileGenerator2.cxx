@@ -42,19 +42,11 @@
 # define CMLUMG_MAKEFILE_NAME "Makefile2"
 #endif
 
-#if 0
-# define CMLUMG_PROVIDES_REQUIRES
-#endif
-
 // TODO: Add "help" target.
 // TODO: Identify remaining relative path violations.
 // TODO: Add test to drive installation through native build system.
 // TODO: External object file feature.
 // TODO: Need test for separate executable/library output path.
-
-// TODO: Fortran support:
-//  - This needs a "provides-requires" mode for the .o files in a target.
-//  - Driving target must be TGT.requires: account for this in jump-and-build.
 
 //----------------------------------------------------------------------------
 cmLocalUnixMakefileGenerator2::cmLocalUnixMakefileGenerator2()
@@ -287,6 +279,7 @@ cmLocalUnixMakefileGenerator2
   // First generate the object rule files.  Save a list of all object
   // files for this target.
   std::vector<std::string> objects;
+  std::vector<std::string> provides_requires;
   const std::vector<cmSourceFile*>& sources = target.GetSourceFiles();
   for(std::vector<cmSourceFile*>::const_iterator source = sources.begin();
       source != sources.end(); ++source)
@@ -296,7 +289,8 @@ cmLocalUnixMakefileGenerator2
        !m_GlobalGenerator->IgnoreFile((*source)->GetSourceExtension().c_str()))
       {
       // Generate this object file's rule file.
-      this->GenerateObjectRuleFile(target, *(*source), objects);
+      this->GenerateObjectRuleFile(target, *(*source), objects,
+                                   provides_requires);
       }
     }
 
@@ -351,19 +345,19 @@ cmLocalUnixMakefileGenerator2
     {
     case cmTarget::STATIC_LIBRARY:
       this->WriteStaticLibraryRule(ruleFileStream, ruleFileName.c_str(),
-                                   target, objects);
+                                   target, objects, provides_requires);
       break;
     case cmTarget::SHARED_LIBRARY:
       this->WriteSharedLibraryRule(ruleFileStream, ruleFileName.c_str(),
-                                   target, objects);
+                                   target, objects, provides_requires);
       break;
     case cmTarget::MODULE_LIBRARY:
       this->WriteModuleLibraryRule(ruleFileStream, ruleFileName.c_str(),
-                                   target, objects);
+                                   target, objects, provides_requires);
       break;
     case cmTarget::EXECUTABLE:
       this->WriteExecutableRule(ruleFileStream, ruleFileName.c_str(),
-                                target, objects);
+                                target, objects, provides_requires);
       break;
     default:
       break;
@@ -374,7 +368,8 @@ cmLocalUnixMakefileGenerator2
 void
 cmLocalUnixMakefileGenerator2
 ::GenerateObjectRuleFile(const cmTarget& target, const cmSourceFile& source,
-                         std::vector<std::string>& objects)
+                         std::vector<std::string>& objects,
+                         std::vector<std::string>& provides_requires)
 {
   // Identify the language of the source file.
   const char* lang = this->GetSourceFileLanguage(source);
@@ -554,26 +549,35 @@ cmLocalUnixMakefileGenerator2
                       obj.c_str(), depends, commands);
   }
 
-#ifdef CMLUMG_PROVIDES_REQUIRES
-  std::string objectRequires = obj;
-  std::string objectProvides = obj;
-  objectRequires += ".requires";
-  objectProvides += ".provides";
-  {
-  std::vector<std::string> no_commands;
-  std::vector<std::string> depends;
-  depends.push_back(obj);
-  this->WriteMakeRule(ruleFileStream, 0, 0,
-                      objectProvides.c_str(), depends, no_commands);
-  }
-  {
-  std::vector<std::string> no_depends;
-  std::vector<std::string> commands;
-  commands.push_back(this->GetRecursiveMakeCall(objectProvides.c_str()));
-  this->WriteMakeRule(ruleFileStream, 0, 0,
-                      objectRequires.c_str(), no_depends, commands);
-  }
-#endif
+  // If the language needs provides-requires mode, create the
+  // corresponding targets.
+  if(strcmp(lang, "Fortran") == 0)
+    {
+    std::string objectRequires = obj;
+    std::string objectProvides = obj;
+    objectRequires += ".requires";
+    objectProvides += ".provides";
+    {
+    // Add the provides target to build the object file.
+    std::vector<std::string> no_commands;
+    std::vector<std::string> depends;
+    depends.push_back(obj);
+    this->WriteMakeRule(ruleFileStream, 0, 0,
+                        objectProvides.c_str(), depends, no_commands);
+    }
+    {
+    // Add the requires target to recursively build the provides
+    // target after needed information is up to date.
+    std::vector<std::string> no_depends;
+    std::vector<std::string> commands;
+    commands.push_back(this->GetRecursiveMakeCall(objectProvides.c_str()));
+    this->WriteMakeRule(ruleFileStream, 0, 0,
+                        objectRequires.c_str(), no_depends, commands);
+    }
+
+    // Add this to the set of provides-requires objects on the target.
+    provides_requires.push_back(objectRequires);
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -1403,7 +1407,8 @@ cmLocalUnixMakefileGenerator2
 ::WriteExecutableRule(std::ostream& ruleFileStream,
                       const char* ruleFileName,
                       const cmTarget& target,
-                      std::vector<std::string>& objects)
+                      std::vector<std::string>& objects,
+                      const std::vector<std::string>& provides_requires)
 {
   // Write the dependency generation rule.
   this->WriteTargetDependsRule(ruleFileStream, ruleFileName, target, objects);
@@ -1538,42 +1543,8 @@ cmLocalUnixMakefileGenerator2
   cleanFiles.push_back(objs);
   this->WriteTargetCleanRule(ruleFileStream, target, cleanFiles);
 
-  // Construct name of driving target listed in build.local rule.
-  // TODO: See top of file description of Fortran support.
-  std::string targetDriveName = target.GetName();
-
-#ifdef CMLUMG_PROVIDES_REQUIRES
-  targetDriveName += ".requires";
-  std::string targetProvides = target.GetName();
-  targetProvides += ".provides";
-  {
-  std::vector<std::string> no_commands;
-  std::vector<std::string> depends;
-  depends.push_back(target.GetName());
-  this->WriteMakeRule(ruleFileStream, 0, 0,
-                      targetProvides.c_str(), depends, no_commands);
-  }
-  {
-  // Build list of require-level dependencies.
-  std::vector<std::string> depends;
-  for(std::vector<std::string>::const_iterator obj = objects.begin();
-      obj != objects.end(); ++obj)
-    {
-    depends.push_back(*obj + ".requires");
-    }
-
-  std::vector<std::string> commands;
-  commands.push_back(this->GetRecursiveMakeCall(targetProvides.c_str()));
-  this->WriteMakeRule(ruleFileStream, 0, 0,
-                      targetDriveName.c_str(), depends, commands);
-  }
-#endif
-
-  // Add this to the list of build rules in this directory.
-  if(target.IsInAll())
-    {
-    m_BuildTargets.push_back(targetDriveName);
-    }
+  // Write the driving make target.
+  this->WriteTargetRequiresRule(ruleFileStream, target, provides_requires);
 }
 
 //----------------------------------------------------------------------------
@@ -1582,7 +1553,8 @@ cmLocalUnixMakefileGenerator2
 ::WriteStaticLibraryRule(std::ostream& ruleFileStream,
                          const char* ruleFileName,
                          const cmTarget& target,
-                         std::vector<std::string>& objects)
+                         std::vector<std::string>& objects,
+                         const std::vector<std::string>& provides_requires)
 {
   const char* linkLanguage =
     target.GetLinkerLanguage(this->GetGlobalGenerator());
@@ -1593,7 +1565,8 @@ cmLocalUnixMakefileGenerator2
   std::string extraFlags;
   this->AppendFlags(extraFlags, target.GetProperty("STATIC_LIBRARY_FLAGS"));
   this->WriteLibraryRule(ruleFileStream, ruleFileName, target, objects,
-                         linkRuleVar.c_str(), extraFlags.c_str());
+                         linkRuleVar.c_str(), extraFlags.c_str(),
+                         provides_requires);
 }
 
 //----------------------------------------------------------------------------
@@ -1602,7 +1575,8 @@ cmLocalUnixMakefileGenerator2
 ::WriteSharedLibraryRule(std::ostream& ruleFileStream,
                          const char* ruleFileName,
                          const cmTarget& target,
-                         std::vector<std::string>& objects)
+                         std::vector<std::string>& objects,
+                         const std::vector<std::string>& provides_requires)
 {
   const char* linkLanguage =
     target.GetLinkerLanguage(this->GetGlobalGenerator());
@@ -1628,7 +1602,8 @@ cmLocalUnixMakefileGenerator2
       }
     }
   this->WriteLibraryRule(ruleFileStream, ruleFileName, target, objects,
-                         linkRuleVar.c_str(), extraFlags.c_str());
+                         linkRuleVar.c_str(), extraFlags.c_str(),
+                         provides_requires);
 }
 
 //----------------------------------------------------------------------------
@@ -1637,7 +1612,8 @@ cmLocalUnixMakefileGenerator2
 ::WriteModuleLibraryRule(std::ostream& ruleFileStream,
                          const char* ruleFileName,
                          const cmTarget& target,
-                         std::vector<std::string>& objects)
+                         std::vector<std::string>& objects,
+                         const std::vector<std::string>& provides_requires)
 {
   const char* linkLanguage =
     target.GetLinkerLanguage(this->GetGlobalGenerator());
@@ -1650,7 +1626,8 @@ cmLocalUnixMakefileGenerator2
   this->AddConfigVariableFlags(extraFlags, "CMAKE_MODULE_LINKER_FLAGS");
   // TODO: .def files should be supported here also.
   this->WriteLibraryRule(ruleFileStream, ruleFileName, target, objects,
-                         linkRuleVar.c_str(), extraFlags.c_str());
+                         linkRuleVar.c_str(), extraFlags.c_str(),
+                         provides_requires);
 }
 
 //----------------------------------------------------------------------------
@@ -1661,7 +1638,8 @@ cmLocalUnixMakefileGenerator2
                    const cmTarget& target,
                    std::vector<std::string>& objects,
                    const char* linkRuleVar,
-                   const char* extraFlags)
+                   const char* extraFlags,
+                   const std::vector<std::string>& provides_requires)
 {
   // Write the dependency generation rule.
   this->WriteTargetDependsRule(ruleFileStream, ruleFileName, target, objects);
@@ -1817,11 +1795,8 @@ cmLocalUnixMakefileGenerator2
   cleanFiles.push_back(objs);
   this->WriteTargetCleanRule(ruleFileStream, target, cleanFiles);
 
-  // Add this to the list of build rules in this directory.
-  if(target.IsInAll())
-    {
-    m_BuildTargets.push_back(target.GetName());
-    }
+  // Write the driving make target.
+  this->WriteTargetRequiresRule(ruleFileStream, target, provides_requires);
 }
 
 //----------------------------------------------------------------------------
@@ -1927,6 +1902,62 @@ cmLocalUnixMakefileGenerator2
   if(target.IsInAll())
     {
     m_CleanTargets.push_back(cleanTarget);
+    }
+}
+
+//----------------------------------------------------------------------------
+void
+cmLocalUnixMakefileGenerator2
+::WriteTargetRequiresRule(std::ostream& ruleFileStream, const cmTarget& target,
+                          const std::vector<std::string>& provides_requires)
+{
+  // Create the driving make target.
+  std::string targetRequires = target.GetName();
+  targetRequires += ".requires";
+  if(provides_requires.empty())
+    {
+    // No provides-requires mode objects in this target.  Anything
+    // that requires the target can build it directly.
+    std::vector<std::string> no_commands;
+    std::vector<std::string> depends;
+    depends.push_back(target.GetName());
+    this->WriteMakeRule(ruleFileStream, 0, 0,
+                        targetRequires.c_str(), depends, no_commands);
+    }
+  else
+    {
+    // There are provides-requires mode objects in this target.  Use
+    // provides-requires mode to build the target itself.
+    std::string targetProvides = target.GetName();
+    targetProvides += ".provides";
+    {
+    std::vector<std::string> no_commands;
+    std::vector<std::string> depends;
+    depends.push_back(target.GetName());
+    this->WriteMakeRule(ruleFileStream, 0, 0,
+                        targetProvides.c_str(), depends, no_commands);
+    }
+    {
+    // Build list of require-level dependencies.
+    std::vector<std::string> depends;
+    for(std::vector<std::string>::const_iterator
+          pr = provides_requires.begin();
+        pr != provides_requires.end(); ++pr)
+      {
+      depends.push_back(*pr);
+      }
+
+    std::vector<std::string> commands;
+    commands.push_back(this->GetRecursiveMakeCall(targetProvides.c_str()));
+    this->WriteMakeRule(ruleFileStream, 0, 0,
+                        targetRequires.c_str(), depends, commands);
+    }
+    }
+
+  // Add this to the list of build rules in this directory.
+  if(target.IsInAll())
+    {
+    m_BuildTargets.push_back(targetRequires);
     }
 }
 
@@ -2627,6 +2658,7 @@ cmLocalUnixMakefileGenerator2
     dep += ".depends";
     dep = this->ConvertToRelativeOutputPath(dep.c_str());
     std::string tgt = jump->first;
+    tgt += ".requires";
     tgt = this->ConvertToRelativeOutputPath(tgt.c_str());
 
     // Build the jump-and-build command list.
