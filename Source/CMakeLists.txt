@@ -85,6 +85,10 @@ ADD_EXECUTABLE(cmake cmakemain.cxx)
 ADD_EXECUTABLE(DumpDocumentation cmDumpDocumentation)
 ADD_EXECUTABLE(ctest ctest.cxx)
 
+IF (UNIX)
+  TARGET_LINK_LIBRARIES(CMakeLib ${CMAKE_DL_LIBS})
+ENDIF (UNIX)
+
 TARGET_LINK_LIBRARIES(cmake CMakeLib)
 TARGET_LINK_LIBRARIES(DumpDocumentation CMakeLib)
 TARGET_LINK_LIBRARIES(ctest CMakeLib)

@@ -87,7 +87,13 @@
 #include "cmQTWrapUICommand.cxx"
 #include "cmWrapExcludeFilesCommand.cxx"
 
+// on regular builds add in the load command command
+// we do not add it in on the bootstrap because it 
+// requires dynaic loading support etc, which makes
+// the bootstrap configure file a mess
+#if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmLoadCommandCommand.cxx"
+#endif
 
 void GetPredefinedCommands(std::list<cmCommand*>& commands)
 {
@@ -130,7 +136,9 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmLinkDirectoriesCommand);
   commands.push_back(new cmLinkLibrariesCommand);
   commands.push_back(new cmLoadCacheCommand);
+#if defined(CMAKE_BUILD_WITH_CMAKE)
   commands.push_back(new cmLoadCommandCommand);
+#endif
   commands.push_back(new cmMacroCommand);
   commands.push_back(new cmMakeDirectoryCommand);
   commands.push_back(new cmMarkAsAdvancedCommand);
