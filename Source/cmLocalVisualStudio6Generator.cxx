@@ -407,8 +407,8 @@ void cmLocalVisualStudio6Generator::WriteCustomRule(std::ostream& fout,
     for(std::set<std::string>::const_iterator output = outputs.begin();
         output != outputs.end(); ++output)
       {
-      fout << "\"" << cmSystemTools::ConvertToOutputPath(output->c_str())
-           << "\" :  \"$(SOURCE)\" \"$(INTDIR)\" \"$(OUTDIR)\"";
+      fout << cmSystemTools::ConvertToOutputPath(output->c_str())
+           << " :  \"$(SOURCE)\" \"$(INTDIR)\" \"$(OUTDIR)\"";
       fout << command << "\n\n";
       }
     

@@ -692,9 +692,7 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
       if (source != libName || target.GetType() == cmTarget::UTILITY)
         {
         fout << "\t\t\t<File\n";
-        std::string d = this->ConvertToXMLOutputPath(source.c_str());
-        // remove double quotes from the string
-        cmSystemTools::ReplaceString(d, "\"", "");
+        std::string d = this->ConvertToXMLOutputPathSingle(source.c_str());
         // Tell MS-Dev what the source is.  If the compiler knows how to
         // build it, then it will.
         fout << "\t\t\t\tRelativePath=\"" << d << "\">\n";
@@ -813,7 +811,7 @@ void cmLocalVisualStudio7Generator::WriteCustomRule(std::ostream& fout,
         {
         first = false;
         }
-      fout << this->ConvertToXMLOutputPath(output->c_str());
+      fout << this->ConvertToXMLOutputPathSingle(output->c_str());
       }
     fout << "\"/>\n";
     fout << "\t\t\t\t</FileConfiguration>\n";
