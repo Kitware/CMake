@@ -224,10 +224,13 @@ void cmMakefile::ExecuteCommand(std::string &name,
           }
         if(!usedCommand->InitialPass(expandedArguments))
           {
-          cmSystemTools::Error(usedCommand->GetName(),
-                               ": Error : \n",
-                               usedCommand->GetError(),
-                               m_cmCurrentDirectory.c_str());
+	  std::string error;
+	  error = usedCommand->GetName();
+	  error += ": Error : \n";
+	  error += usedCommand->GetError();
+	  error += " from CMakeLists.txt file in directory: ";
+	  error += m_cmCurrentDirectory;
+          cmSystemTools::Error(error.c_str());
           }
         else
           {

@@ -35,7 +35,7 @@ bool cmIncludeCommand::InitialPass(std::vector<std::string> const& args)
                                           args[0].c_str());
   if(!optional && !readit)
     {
-    std::string m = "Could not find include file:";
+    std::string m = "Could not find include file: ";
     m += args[0];
     this->SetError(m.c_str());
     return false;
