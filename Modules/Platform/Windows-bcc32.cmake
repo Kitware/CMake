@@ -21,6 +21,8 @@ SET(BORLAND 1)
 #SET(CMAKE_END_TEMP_FILE "")
 #SET(CMAKE_VERBOSE_MAKEFILE 1)
 
+# Borland cannot handle + in the file name, so mangle object file name
+SET (CMAKE_MANGLE_OBJECT_FILE_NAMES "ON")
 
 # create a shared C++ library
 SET(CMAKE_CXX_CREATE_SHARED_LIBRARY 

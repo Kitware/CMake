@@ -3077,38 +3077,45 @@ std::string cmLocalUnixMakefileGenerator::LowerCasePath(const char* path)
 std::string&
 cmLocalUnixMakefileGenerator::CreateSafeUniqueObjectFileName(const char* sin)
 {
-  std::map<cmStdString,cmStdString>::iterator it = m_UniqueObjectNamesMap.find(sin);
-  if ( it == m_UniqueObjectNamesMap.end() )
+  if ( m_Makefile->IsOn("CMAKE_MANGLE_OBJECT_FILE_NAMES") )
     {
-    std::string ssin = sin;
-    bool done;
-    int cc = 0;
-    char rpstr[100];
-    sprintf(rpstr, "_p_");
-    cmSystemTools::ReplaceString(ssin, "+", rpstr);
-    std::string sssin = sin;
-    do
+    std::map<cmStdString,cmStdString>::iterator it = m_UniqueObjectNamesMap.find(sin);
+    if ( it == m_UniqueObjectNamesMap.end() )
       {
-      done = true;
-      for ( it = m_UniqueObjectNamesMap.begin();
-        it != m_UniqueObjectNamesMap.end();
-        ++ it )
+      std::string ssin = sin;
+      bool done;
+      int cc = 0;
+      char rpstr[100];
+      sprintf(rpstr, "_p_");
+      cmSystemTools::ReplaceString(ssin, "+", rpstr);
+      std::string sssin = sin;
+      do
         {
-        if ( it->second == ssin )
+        done = true;
+        for ( it = m_UniqueObjectNamesMap.begin();
+          it != m_UniqueObjectNamesMap.end();
+          ++ it )
           {
-          done = false;
+          if ( it->second == ssin )
+            {
+            done = false;
+            }
           }
+        if ( done )
+          {
+          break;
+          }
+        sssin = ssin;
+        cmSystemTools::ReplaceString(ssin, "_p_", rpstr);
+        sprintf(rpstr, "_p%d_", cc++);
         }
-      if ( done )
-        {
-        break;
-        }
-      sssin = ssin;
-      cmSystemTools::ReplaceString(ssin, "_p_", rpstr);
-      sprintf(rpstr, "_p%d_", cc++);
+      while ( !done );
+      m_UniqueObjectNamesMap[sin] = ssin;
       }
-    while ( !done );
-    m_UniqueObjectNamesMap[sin] = ssin;
+    }
+  else
+    {
+    m_UniqueObjectNamesMap[sin] = sin;
     }
   return m_UniqueObjectNamesMap[sin];
 }
