@@ -62,16 +62,14 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "TRY_COMPILE(RESULT_VAR CMakeListFile )\n"
-      "TRY_COMPILE(RESULT_VAR sourceCode)\n"
-      "Try compiling a program. Return the success or failure in result";
+      "TRY_COMPILE(RESULT_VAR srcdir bindir projectName <targetName>)\n"
+      "Try compiling a program. Return the success or failure in RESULT_VAR "
+      "If <target name> is specified then build just that target "
+      "otherwise the all or ALL_BUILD target is built.";
     }
   
   cmTypeMacro(cmTryCompileCommand, cmCommand);
 
- private:
-  std::string m_TargetName;
-  std::vector<std::string> m_FinalArgs;
 };
 
 
