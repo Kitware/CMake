@@ -256,11 +256,16 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
   // add in the library depends for cusotm targets
   if (target.GetType() == cmTarget::UTILITY)
     {
-    cmCustomCommand &c = target.GetPostBuildCommands()[0];
-    for (std::vector<std::string>::iterator i = c.GetDepends().begin();
-         i != c.GetDepends().end(); ++i)
+    for (std::vector<cmCustomCommand>::iterator ic = 
+           target.GetPostBuildCommands().begin();
+         ic != target.GetPostBuildCommands().end(); ++ic)
       {
-      srcFilesToProcess.push(*i);
+      cmCustomCommand &c = *ic;
+      for (std::vector<std::string>::iterator i = c.GetDepends().begin();
+           i != c.GetDepends().end(); ++i)
+        {
+        srcFilesToProcess.push(*i);
+        }
       }
     }
   while (!srcFilesToProcess.empty())
