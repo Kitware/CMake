@@ -35,7 +35,7 @@ ADD_LIBRARY(CMakeLib SRCS)
 # always link in the library
 LINK_LIBRARIES(CMakeLib)
 # the library is found here
-LINK_DIRECTORIES(${CMAKE}/Sources)
+LINK_DIRECTORIES(${CMake_BINARY_DIR}/Sources)
 
 ADD_EXECUTABLE(cmake cmakemain)
 

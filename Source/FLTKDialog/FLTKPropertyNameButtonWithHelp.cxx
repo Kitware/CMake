@@ -1,7 +1,7 @@
 // #include <FLTKPropertyNameButtonWithHelp.h>
-#include <Fl/Fl.H>
-#include <Fl/fl_ask.H>
-#include <Fl/Fl_Menu_Button.H>
+#include <FL/Fl.H>
+#include <FL/fl_ask.H>
+#include <FL/Fl_Menu_Button.H>
 #include "../cmCacheManager.h"
 #include "FLTKPropertyNameButtonWithHelp.h"
 
