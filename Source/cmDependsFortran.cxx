@@ -23,6 +23,10 @@
 #include <assert.h>
 #include <stack>
 
+// TODO: Test compiler for the case of the mod file.  Some always
+// use lower case and some always use upper case.  I do not know if any
+// use the case from the source code.
+
 //----------------------------------------------------------------------------
 // Parser methods not included in generated interface.
 
@@ -139,7 +143,12 @@ bool cmDependsFortran::WriteDependencies(std::ostream& os)
     // Require only modules not provided in the same source.
     if(parser.Provides.find(*i) == parser.Provides.end())
       {
+      // Temporary hack for Fortran: choose case depending on platform
+#if defined(__sgi)
+      std::string m = cmSystemTools::UpperCase(*i);
+#else
       std::string m = cmSystemTools::LowerCase(*i);
+#endif
       os << m_TargetFile.c_str() << ": " << m.c_str() << ".mod.stamp"
          << std::endl;
       os << m_TargetFile.c_str() << ".requires: " << i->c_str() << ".mod.proxy"
@@ -173,7 +182,12 @@ bool cmDependsFortran::WriteDependencies(std::ostream& os)
     for(std::set<cmStdString>::const_iterator i = parser.Provides.begin();
         i != parser.Provides.end(); ++i)
       {
+      // Temporary hack for Fortran: choose case depending on platform
+#if defined(__sgi)
+      std::string m = cmSystemTools::UpperCase(*i);
+#else
       std::string m = cmSystemTools::LowerCase(*i);
+#endif
       os << "\t@$(CMAKE_COMMAND) -E copy_if_different "
          << m.c_str() << ".mod " << m.c_str() << ".mod.stamp\n";
       }
