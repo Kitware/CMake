@@ -881,6 +881,8 @@ int cmake::Run(const std::vector<std::string>& args)
     {
     // If we are doing global generate, we better set start and start
     // output directory to the root of the project.
+    std::string oldstartdir = this->GetStartDirectory();
+    std::string oldstartoutputdir = this->GetStartOutputDirectory();
     this->SetStartDirectory(this->GetHomeDirectory());
     this->SetStartOutputDirectory(this->GetHomeOutputDirectory());
     bool saveLocalFlag = m_Local;
@@ -896,7 +898,10 @@ int cmake::Run(const std::vector<std::string>& args)
       return ret;
       }
     m_Local = saveLocalFlag;
+    this->SetStartDirectory(oldstartdir.c_str());
+    this->SetStartOutputDirectory(oldstartoutputdir.c_str());
     }
+
   // if we are local do the local thing
   if (m_Local)
     {
