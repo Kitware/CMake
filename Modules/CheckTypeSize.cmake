@@ -4,6 +4,7 @@
 #
 # CHECK_TYPE_SIZE - macro which checks the size of type
 # VARIABLE - variable to store size if the type exists.
+# HAVE_${VARIABLE} - does the variable exists or not
 #
 
 MACRO(CHECK_TYPE_SIZE TYPE VARIABLE)
