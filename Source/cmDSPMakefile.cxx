@@ -126,38 +126,6 @@ void cmDSPMakefile::CreateSingleDSP(const char *lname, cmTarget &target)
 }
 
 
-void cmDSPMakefile::WriteDSPBuildRule(std::ostream& fout)
-{
-  std::string dspname = *(m_CreatedProjectNames.end()-1);
-  dspname += ".dsp";
-  std::string makefileIn = "\"";
-  makefileIn += m_Makefile->GetStartDirectory();
-  makefileIn += "/";
-  makefileIn += "CMakeLists.txt\"";
-  std::string dsprule = "\"";
-  dsprule += m_Makefile->GetHomeDirectory();
-  dsprule += "/CMake/Source/CMakeSetupCMD\" ";
-  dsprule += makefileIn;
-  dsprule += " -DSP -H\"";
-  dsprule += m_Makefile->GetHomeDirectory();
-  dsprule += "\" -S\"";
-  dsprule += m_Makefile->GetStartDirectory();
-  dsprule += "\" -O\"";
-  dsprule += m_Makefile->GetStartOutputDirectory();
-  dsprule += "\" -B\"";
-  dsprule += m_Makefile->GetHomeOutputDirectory();
-  dsprule += "\"";
-
-  std::set<std::string> depends;
-  std::set<std::string> outputs;
-  outputs.insert(outputs.begin(), dspname);
-  fout << "# Begin Source File\n\n";
-  fout << "SOURCE=" << makefileIn.c_str() << "\n\n";
-  this->WriteCustomRule(fout, makefileIn.c_str(), dsprule.c_str(), depends, outputs);
-  fout << "# End Source File\n";
-}
-
-
 void cmDSPMakefile::AddDSPBuildRule(cmSourceGroup& sourceGroup)
 {
   std::string dspname = *(m_CreatedProjectNames.end()-1);
@@ -166,9 +134,7 @@ void cmDSPMakefile::AddDSPBuildRule(cmSourceGroup& sourceGroup)
   makefileIn += m_Makefile->GetStartDirectory();
   makefileIn += "/";
   makefileIn += "CMakeLists.txt\"";
-  std::string dsprule = "\"";
-  dsprule += m_Makefile->GetHomeDirectory();
-  dsprule += "/CMake/Source/CMakeSetupCMD\" ";
+  std::string dsprule = "${CMAKE} ";
   dsprule += makefileIn;
   dsprule += " -DSP -H\"";
   dsprule += m_Makefile->GetHomeDirectory();
@@ -179,6 +145,7 @@ void cmDSPMakefile::AddDSPBuildRule(cmSourceGroup& sourceGroup)
   dsprule += "\" -B\"";
   dsprule += m_Makefile->GetHomeOutputDirectory();
   dsprule += "\"";
+  m_Makefile->ExpandVariablesInString(dsprule);
   
   std::vector<std::string> outputs;
   outputs.push_back(dspname);
