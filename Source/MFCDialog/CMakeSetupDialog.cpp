@@ -768,14 +768,9 @@ void CMakeSetupDialog::FillCacheGUIFromCacheManager()
 { 
   cmCacheManager *cachem = this->m_CMakeInstance->GetCacheManager();
   size_t size = m_CacheEntriesList.GetItems().size();
-  bool reverseOrder = false;
   // if there are already entries in the cache, then
   // put the new ones in the top, so they show up first
-  if(size)
-    {
-    reverseOrder = true;
-    }
-  
+  bool reverseOrder = false;
   // all the current values are not new any more
   std::set<CPropertyItem*> items = m_CacheEntriesList.GetItems();
   for(std::set<CPropertyItem*>::iterator i = items.begin();
@@ -798,15 +793,7 @@ void CMakeSetupDialog::FillCacheGUIFromCacheManager()
       {
       value = '\'' + value +  '\'';
       }
-
-    if(!m_AdvancedValues)
-      {
-      if(i.GetPropertyAsBool("ADVANCED"))
-        {
-        m_CacheEntriesList.RemoveProperty(key);
-        continue;
-        }
-      }
+    bool advanced = i.GetPropertyAsBool("ADVANCED");
     switch(i.GetType() )
       {
       case cmCacheManager::BOOL:
@@ -816,7 +803,8 @@ void CMakeSetupDialog::FillCacheGUIFromCacheManager()
                                          "ON",
                                          i.GetProperty("HELPSTRING"),
                                          CPropertyList::COMBO,"ON|OFF",
-                                         reverseOrder 
+                                         reverseOrder,
+                                         advanced
             );
           }
         else
@@ -825,7 +813,7 @@ void CMakeSetupDialog::FillCacheGUIFromCacheManager()
                                          "OFF",
                                          i.GetProperty("HELPSTRING"),
                                          CPropertyList::COMBO,"ON|OFF",
-                                         reverseOrder
+                                         reverseOrder, advanced
             );
           }
         break;
@@ -834,7 +822,7 @@ void CMakeSetupDialog::FillCacheGUIFromCacheManager()
                                        value.c_str(),
                                        i.GetProperty("HELPSTRING"),
                                        CPropertyList::PATH,"",
-                                       reverseOrder
+                                       reverseOrder, advanced
           );
         break;
       case cmCacheManager::FILEPATH:
@@ -842,7 +830,7 @@ void CMakeSetupDialog::FillCacheGUIFromCacheManager()
                                        value.c_str(),
                                        i.GetProperty("HELPSTRING"),
                                        CPropertyList::FILE,"",
-                                       reverseOrder
+                                       reverseOrder, advanced
           );
         break;
       case cmCacheManager::STRING:
@@ -850,7 +838,7 @@ void CMakeSetupDialog::FillCacheGUIFromCacheManager()
                                        value.c_str(),
                                        i.GetProperty("HELPSTRING"),
                                        CPropertyList::EDIT,"",
-                                       reverseOrder
+                                       reverseOrder, advanced
           );
         break;
       case cmCacheManager::INTERNAL:
@@ -858,6 +846,15 @@ void CMakeSetupDialog::FillCacheGUIFromCacheManager()
         break;
       }
     }
+  if(m_CacheEntriesList.GetShowAdvanced())
+    {
+    m_CacheEntriesList.ShowAdvanced();
+    }
+  else
+    {
+    m_CacheEntriesList.HideAdvanced();
+    }
+  
   m_OKButton.EnableWindow(false);
   if(cachem->GetSize() > 0 && !cmSystemTools::GetErrorOccuredFlag())
     {
@@ -867,11 +864,22 @@ void CMakeSetupDialog::FillCacheGUIFromCacheManager()
         i != items.end(); ++i)
       {
       CPropertyItem* item = *i;
-      if(item->m_NewValue)
+      if(item->m_Advanced )
         {
-        // if one new value then disable to OK button
-        enable = false;
-        break;
+        if(item->m_NewValue && m_CacheEntriesList.GetShowAdvanced())
+          {
+          enable = false;
+          break;
+          }
+        }
+      else
+        {
+        if(item->m_NewValue)
+          {
+          // if one new value then disable to OK button
+          enable = false;
+          break;
+          }
         }
       }
     if(enable)
@@ -1274,82 +1282,14 @@ void CMakeSetupDialog::OnHelpButton()
 
 void CMakeSetupDialog::ShowAdvancedValues()
 {
-  cmCacheManager *cachem = this->m_CMakeInstance->GetCacheManager();
-  for(cmCacheManager::CacheIterator i = cachem->NewIterator();
-      !i.IsAtEnd(); i.Next())
-    {
-    const char* key = i.GetName();
-    if(!i.GetPropertyAsBool("ADVANCED"))
-      {
-      continue;
-      }
-    switch(i.GetType() )
-      {
-      case cmCacheManager::BOOL:
-        if(cmSystemTools::IsOn(i.GetValue()))
-          {
-          m_CacheEntriesList.AddProperty(key,
-                                         "ON",
-                                         i.GetProperty("HELPSTRING"),
-                                         CPropertyList::COMBO,"ON|OFF",
-                                         true 
-            );
-          }
-        else
-          {
-          m_CacheEntriesList.AddProperty(key,
-                                         "OFF",
-                                         i.GetProperty("HELPSTRING"),
-                                         CPropertyList::COMBO,"ON|OFF",
-                                         true
-            );
-          }
-        break;
-      case cmCacheManager::PATH:
-        m_CacheEntriesList.AddProperty(key, 
-				       i.GetValue(),
-				       i.GetProperty("HELPSTRING"),
-                                       CPropertyList::PATH,"",
-                                       true
-          );
-        break;
-      case cmCacheManager::FILEPATH:
-        m_CacheEntriesList.AddProperty(key, 
-                                       i.GetValue(),
-				       i.GetProperty("HELPSTRING"),
-                                       CPropertyList::FILE,"",
-                                       true
-          );
-        break;
-      case cmCacheManager::STRING:
-        m_CacheEntriesList.AddProperty(key,
-                                       i.GetValue(),
-				       i.GetProperty("HELPSTRING"),
-                                       CPropertyList::EDIT,"",
-                                       true
-          );
-        break;
-      case cmCacheManager::INTERNAL:
-	m_CacheEntriesList.RemoveProperty(key);
-        break;
-      }
-    }
+  m_CacheEntriesList.ShowAdvanced();
 }
 
 void CMakeSetupDialog::RemoveAdvancedValues()
 {
-  cmCacheManager *cachem = this->m_CMakeInstance->GetCacheManager();
-  
-  for(cmCacheManager::CacheIterator i = cachem->NewIterator();
-      !i.IsAtEnd(); i.Next())
-    {
-    const char* key = i.GetName();
-    if(i.GetPropertyAsBool("ADVANCED"))
-      {
-      m_CacheEntriesList.RemoveProperty(key);
-      }
-    }
+  m_CacheEntriesList.HideAdvanced();
 }
+
 
 void CMakeSetupDialog::OnAdvancedValues() 
 {

@@ -20,6 +20,7 @@
 CPropertyList::CPropertyList()
 {
   m_Dirty = false;
+  m_ShowAdvanced = false;
   m_curSel = -1;
 }
 
@@ -129,34 +130,52 @@ int CPropertyList::AddItem(CString txt)
   int nIndex = AddString(txt);
   return nIndex;
 }
-
-int CPropertyList::AddPropItem(CPropertyItem* pItem, bool reverseOrder)
+// order = 0 sorted
+// order = 1 add to top
+// order = 2 add to bottom
+int CPropertyList::AddPropItem(CPropertyItem* pItem, int order)
 {
+  if(pItem->m_Advanced && ! m_ShowAdvanced)
+    {
+    m_PropertyItems.insert(pItem);
+    return 0;
+    }
   this->HideControls();
   int nIndex;
-  if(reverseOrder)
+  if(order)
     {
-    nIndex = InsertString(0, _T(""));
+    if(order == 1)
+      {
+      order = 0;
+      }
+    if(order == 2)
+      {
+      order = -1;
+      }
+    nIndex = InsertString(order, _T(""));
     }
   else
     {
-    nIndex = AddString(_T(""));
+    nIndex = AddString(pItem->m_propName);
     }
   SetItemDataPtr(nIndex,pItem);
   m_PropertyItems.insert(pItem);
   return nIndex;
 }
 
-int CPropertyList::AddProperty(const char* name,
-                               const char* value,
-                               const char* helpString,
-                               int type,
-                               const char* comboItems, bool reverseOrder)
+void CPropertyList::AddProperty(const char* name,
+                                const char* value,
+                                const char* helpString,
+                                int type,
+                                const char* comboItems, 
+                                bool reverseOrder,
+                                bool advanced)
 { 
-  CPropertyItem* pItem = 0;
-  for(int i =0; i < this->GetCount(); ++i)
+  CPropertyItem* pItem = 0; 
+  for(std::set<CPropertyItem*>::iterator i = m_PropertyItems.begin();
+      i != m_PropertyItems.end(); ++i)
     {
-    CPropertyItem* item = this->GetItem(i);
+    CPropertyItem* item = *i;
     if(item->m_propName == name)
       {
       pItem = item;
@@ -166,7 +185,7 @@ int CPropertyList::AddProperty(const char* name,
         pItem->m_HelpString = helpString;
         InvalidateList();
         }
-      return i;
+      return;
       }
     }
   // if it is not found, then create a new one
@@ -175,7 +194,14 @@ int CPropertyList::AddProperty(const char* name,
     pItem = new CPropertyItem(name, value, helpString, type, comboItems);
     pItem->m_NewValue = true;
     }
-  return this->AddPropItem(pItem, reverseOrder);
+  pItem->m_Advanced = advanced;
+  int order = 0;
+  if(reverseOrder)
+    {
+    order = 1;
+    }
+  this->AddPropItem(pItem, order);
+  return;
 }
 
 int CPropertyList::OnCreate(LPCREATESTRUCT lpCreateStruct) 
@@ -705,5 +731,68 @@ void CPropertyList::InvalidateList()
 {
   Invalidate();
   m_Dirty = true;
+}
+
+void CPropertyList::ShowAdvanced()
+{
+  this->ResetContent();
+  m_ShowAdvanced = true; 
+  std::map<std::string, CPropertyItem*> sortProps;
+  for(std::set<CPropertyItem*>::iterator i = m_PropertyItems.begin();
+      i != m_PropertyItems.end(); ++i)
+    {
+    sortProps[(const char*)(*i)->m_propName] = *i;
+    }
+  for(std::map<std::string, CPropertyItem*>::iterator i = sortProps.begin();
+      i != sortProps.end(); ++i)
+    {
+    CPropertyItem* item = i->second;
+    if(item->m_NewValue)
+      {
+      this->AddPropItem(item, 2);
+      }
+    }
+  for(std::map<std::string, CPropertyItem*>::iterator i = sortProps.begin();
+      i != sortProps.end(); ++i)
+    {
+    CPropertyItem* item = i->second;
+    if(!item->m_NewValue)
+      {
+      this->AddPropItem(item, 2);
+      }
+    }
+  this->InvalidateList();
+}
+
+
+void CPropertyList::HideAdvanced()
+{
+  this->ResetContent();
+  m_ShowAdvanced = false;
+  std::map<std::string, CPropertyItem*> sortProps;
+  for(std::set<CPropertyItem*>::iterator i = m_PropertyItems.begin();
+      i != m_PropertyItems.end(); ++i)
+    {
+    sortProps[(const char*)(*i)->m_propName] = *i;
+    }
+  for(std::map<std::string, CPropertyItem*>::iterator i = sortProps.begin();
+      i != sortProps.end(); ++i)
+    {
+    CPropertyItem* item = i->second;
+    if(item->m_NewValue && !item->m_Advanced)
+      {
+      this->AddPropItem(item, 2);
+      }
+    }
+  for(std::map<std::string, CPropertyItem*>::iterator i = sortProps.begin();
+      i != sortProps.end(); ++i)
+    {
+    CPropertyItem* item = i->second;
+    if(!item->m_Advanced && !item->m_NewValue)
+      {
+      this->AddPropItem(item, 2);
+      }
+    }
+  this->InvalidateList();
 }
 

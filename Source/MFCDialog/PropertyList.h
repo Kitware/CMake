@@ -35,6 +35,7 @@ public:
   CString m_cmbItems;
   bool m_NewValue;
   bool m_Removed;
+  bool m_Advanced;
   
 public:
   CPropertyItem(CString propName, CString curValue,
@@ -48,6 +49,7 @@ public:
       m_curValue = curValue;
       m_nItemType = nItemType;
       m_cmbItems = cmbItems;
+      m_Advanced = false;
     }
 };
 
@@ -76,18 +78,22 @@ public:
 
 // Operations
 public:
+  bool GetShowAdvanced() {return m_ShowAdvanced;}
   bool IsDirty() { return m_Dirty;  }
   void ClearDirty() { m_Dirty = false;  }
   
   int AddItem(CString txt);
-  int AddProperty(const char* name,
+  void AddProperty(const char* name,
                   const char* value,
                   const char* helpString,
                   int type,
                   const char* comboItems,
-                  bool reverseOrder);
+                  bool reverseOrder,
+                  bool advanced);
   void RemoveProperty(const char* name);
   void HideControls();
+  void ShowAdvanced();
+  void HideAdvanced();
   std::set<CPropertyItem*> GetItems() 
     {
       return m_PropertyItems;
@@ -136,7 +142,10 @@ protected:
 
   void InvertLine(CDC* pDC,CPoint ptFrom,CPoint ptTo);
   void DisplayButton(CRect region);
-  int AddPropItem(CPropertyItem* pItem, bool top);
+// order = 0 sorted
+// order = 1 add to top
+// order = 2 add to bottom
+  int AddPropItem(CPropertyItem* pItem, int order);
   void InvalidateList();
   
   CComboBox m_cmbBox;
@@ -158,6 +167,7 @@ protected:
   BOOL m_bDivIsSet;
   HCURSOR m_hCursorArrow;
   HCURSOR m_hCursorSize;
+  bool m_ShowAdvanced;
   std::set<CPropertyItem*> m_PropertyItems;
 };
 
