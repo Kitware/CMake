@@ -41,6 +41,15 @@
 /*REFERENCED*/ int cfsetispeed (struct termios *__t, speed_t __s);
 /*REFERENCED*/ int tcgetattr (int __fd, struct termios *__t);
 /*REFERENCED*/ int tcsetattr (int __fd, int __act, const struct termios *__t);
+enum
+{
+  cmCursesStandardIncludesHackRef1 = sizeof(cfgetospeed(0)),
+  cmCursesStandardIncludesHackRef2 = sizeof(cfgetospeed(0, 0)),
+  cmCursesStandardIncludesHackRef3 = sizeof(cfgetispeed(0)),
+  cmCursesStandardIncludesHackRef4 = sizeof(cfgetispeed(0, 0)),
+  cmCursesStandardIncludesHackRef5 = sizeof(tcgetattr(0, 0)),
+  cmCursesStandardIncludesHackRef6 = sizeof(tcsetattr(0, 0, 0))
+};
 #endif
 
 #ifndef getmaxyx
