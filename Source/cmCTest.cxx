@@ -230,7 +230,7 @@ static const char* cmCTestMemCheckResultStrings[] = {
 };
 
 static const char* cmCTestMemCheckResultLongStrings[] = {
-  "ABR",
+  "Threading Problem",
   "ABW",
   "ABWL",
   "COR",
@@ -4101,6 +4101,7 @@ bool cmCTest::ProcessMemCheckValgrindOutput(const std::string& str, std::string&
   cmsys::RegularExpression vgUMR4(
     "== .*Syscall param .* contains uninitialised or unaddressable byte\\(s\\)");
   cmsys::RegularExpression vgIPW("== .*Invalid write of size [0-9]");
+  cmsys::RegularExpression vgABR("== .*pthread_mutex_unlock: mutex is locked by a different thread");
 
   //double sttime = cmSystemTools::GetTime();
   //std::cout << "Start test: " << lines.size() << std::endl;
@@ -4121,6 +4122,7 @@ bool cmCTest::ProcessMemCheckValgrindOutput(const std::string& str, std::string&
       else if ( vgUMR3.find(lines[cc]) ){ failure = cmCTest::UMR; }
       else if ( vgUMR4.find(lines[cc]) ){ failure = cmCTest::UMR; }
       else if ( vgIPW.find(lines[cc]) ) { failure = cmCTest::IPW; }
+      else if ( vgABR.find(lines[cc]) ) { failure = cmCTest::ABR; }
 
       if ( failure != cmCTest::NO_MEMORY_FAULT )
         {
