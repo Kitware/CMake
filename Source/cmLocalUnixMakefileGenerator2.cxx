@@ -17,11 +17,17 @@
 #include "cmLocalUnixMakefileGenerator2.h"
 
 #include "cmDepends.h"
-#include "cmDependsC.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
+
+// Include dependency scanners for supported languages.  Only the
+// C/C++ scanner is needed for bootstrapping CMake.
+#include "cmDependsC.h"
+#ifdef CMAKE_BUILD_WITH_CMAKE
+# include "cmDependsFortran.h"
+#endif
 
 #include <memory> // auto_ptr
 #include <queue>
@@ -2696,6 +2702,12 @@ cmLocalUnixMakefileGenerator2::GetDependsChecker(const std::string& lang,
     {
     return new cmDependsC(dir, objFile);
     }
+#ifdef CMAKE_BUILD_WITH_CMAKE
+  else if(lang == "Fortran")
+    {
+    return new cmDependsFortran(dir, objFile);
+    }
+#endif
   return 0;
 }
 
@@ -2735,6 +2747,14 @@ cmLocalUnixMakefileGenerator2
     scanner.Write();
     return true;
     }
+#ifdef CMAKE_BUILD_WITH_CMAKE
+  else if(lang == "Fortran")
+    {
+    cmDependsFortran scanner(".", objFile, srcFile, includes);
+    scanner.Write();
+    return true;
+    }
+#endif
   return false;
 }
 

@@ -55,6 +55,11 @@ SET(SRCS
   cmDepends.cxx
   cmDependsC.h
   cmDependsC.cxx
+  cmDependsFortran.h
+  cmDependsFortran.cxx
+  cmDependsFortranLexer.c
+  cmDependsFortranParser.h
+  cmDependsFortranParser.c
   )
 
 
