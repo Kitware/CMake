@@ -113,24 +113,85 @@ bool cmCableWrapTclCommand::InitialPass(std::vector<std::string>& args)
  */
 void cmCableWrapTclCommand::GenerateCableFiles() const
 {
-  // Setup the output directory.
+  // Each wrapped class may have an associated "tag" that represents
+  // an alternative name without funky C++ syntax in it.  This makes
+  // it easier to refer to the class in a Tcl script.  We will also
+  // use the tags to make easy-to-read, unique file names for each
+  // class's wrapper.  Count the number of times each tag is used.
+  // Warn if a tag is used more than once.
+  std::map<std::string, unsigned int> tagCounts;
+  for(cmCableClassSet::CableClassMap::const_iterator
+        c = m_CableClassSet->Begin(); c != m_CableClassSet->End(); ++c)
+    {
+    std::string tag = c->second->GetTag();
+    if((++tagCounts[tag] > 1) && (tag != ""))
+      {
+      std::string message =
+        "CABLE_WRAP_TCL has found two classes with the tag "+tag
+        +" for target "+m_TargetName;
+      cmSystemTools::Message(message.c_str(), "Warning");
+      }
+    }
+
+  // Each class wrapper will be written into its own CABLE "group"
+  // file.  This should hold the names of the groups generated so that
+  // the package configuration file can tell cable how to generate the
+  // package initialization code.
+  std::vector<std::string> groupTags;
+
+  // Setup the output directory name and make sure it exists.
   std::string outDir = m_Makefile->GetCurrentOutputDirectory();
   cmSystemTools::MakeDirectory((outDir+"/Tcl").c_str());
 
+  // Write out the cable configuration files with one class per group.
+  // Try to name the groups based on their class's tag, but use an
+  // index to disambiguate tag repeats (mostly used for empty tags).
+  std::map<std::string, unsigned int> tagIndexes;
+  for(cmCableClassSet::CableClassMap::const_iterator
+        c = m_CableClassSet->Begin(); c != m_CableClassSet->End(); ++c)
+    {
+    // Construct the group's tag-based name, with index if necessary.
+    std::string tag = c->second->GetTag();
+    std::string groupTag;
+    if(tagCounts[tag] > 1)
+      {
+      unsigned int tagIndex = tagIndexes[tag]++;
+      std::strstream indexStrStream;
+      indexStrStream << tagIndex << std::ends;
+      std::string indexStr = indexStrStream.str();
+      groupTag = "_"+indexStr;
+      }
+    if(tag != "")
+      {
+      groupTag += "_"+tag;
+      }
+    
+    // Save this group tag in the list of tags for the main package
+    // configuration file below.
+    groupTags.push_back(groupTag);
+    
+    // Actually generate the class's configuration file.
+    this->GenerateCableClassFiles(c->first.c_str(), *(c->second),
+                                  groupTag.c_str());
+    }  
+
+  // Construct the output file names.
   std::string packageConfigName = outDir+"/Tcl/"+m_TargetName+"_config.xml";
   std::string packageTclFileName = "Tcl/"+m_TargetName+"_tcl";
-  std::string packageTclFullName = outDir+"/"+packageTclFileName;
+  std::string packageTclFullName = outDir+"/"+packageTclFileName;  
   
-  // Generate the main package configuration file for CABLE.
+  // Generate the main package configuration file for CABLE.  This
+  // just lists the "group" files generated above.
   cmGeneratedFileStream packageConfig(packageConfigName.c_str());
   if(packageConfig)
     {
     packageConfig <<
       "<CableConfiguration package=\"" << m_TargetName.c_str() << "\">\n";
-    for(unsigned int i=0; i < m_CableClassSet->Size(); ++i)
+    for(std::vector<std::string>::const_iterator g = groupTags.begin();
+        g != groupTags.end(); ++g)
       {
       packageConfig <<
-        "  <Group name=\"" << m_TargetName.c_str() << "_" << i << "\"/>\n";
+        "  <Group name=\"" << m_TargetName.c_str() << g->c_str() << "\"/>\n";
       }
     packageConfig <<
       "</CableConfiguration>\n";
@@ -142,8 +203,8 @@ void cmCableWrapTclCommand::GenerateCableFiles() const
     cmSystemTools::Error("Error opening CABLE configuration file for writing: ",
                          packageConfigName.c_str());
     }
-
-  {
+  
+  // Generate the rule to run CABLE for the package configuration file.
   std::string command = "${CABLE}";
   m_Makefile->ExpandVariablesInString(command);
   std::vector<std::string> depends;
@@ -161,37 +222,24 @@ void cmCableWrapTclCommand::GenerateCableFiles() const
                                commandArgs.c_str(),
                                depends,
                                outputs, m_TargetName.c_str());
-  }
-  
-  // Add the generated source to the package's source list.
+
+  // Add the generated source to the package target's source list.
   cmSourceFile file;
   file.SetName(packageTclFileName.c_str(), outDir.c_str(), "cxx", false);
   // Set dependency hints.
   file.GetDepends().push_back("wrapCalls.h");
   m_Makefile->AddSource(file, m_TargetName.c_str());
-  
-  unsigned int index = 0;
-  for(cmCableClassSet::CableClassMap::const_iterator
-        c = m_CableClassSet->Begin(); c != m_CableClassSet->End(); ++c, ++index)
-    {
-    this->GenerateCableClassFiles(c->first.c_str(), *(c->second), index);
-    }
-  
 }
 
 
 void cmCableWrapTclCommand::GenerateCableClassFiles(const char* name,
                                                     const cmCableClass& c,
-                                                    unsigned int index) const
-{
-  std::strstream indexStrStream;
-  indexStrStream << index << std::ends;
-  std::string indexStr = indexStrStream.str();
-  
+                                                    const char* groupTag) const
+{  
   std::string outDir = m_Makefile->GetCurrentOutputDirectory();  
   
   std::string className = name;
-  std::string groupName = m_TargetName+"_"+indexStr;
+  std::string groupName = m_TargetName+groupTag;
   std::string classConfigName = outDir+"/Tcl/"+groupName+"_config_tcl.xml";
   std::string classCxxName = outDir+"/Tcl/"+groupName+"_cxx.cc";
   std::string classXmlName = outDir+"/Tcl/"+groupName+"_cxx.xml";

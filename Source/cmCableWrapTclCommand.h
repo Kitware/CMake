@@ -97,7 +97,7 @@ public:
 
 protected:
   void GenerateCableFiles() const;
-  void GenerateCableClassFiles(const char*, const cmCableClass&, unsigned int) const;
+  void GenerateCableClassFiles(const char*, const cmCableClass&, const char*) const;
   std::string GetGccXmlFromCache() const;
   std::string GetGccXmlFlagsFromCache() const;
   std::string GetCableFromCache() const;
