@@ -1048,10 +1048,12 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                        ".cxx.o", 
                        0,
                        "${CMAKE_CXX_COMPILER} ${CMAKE_CXXFLAGS} ${INCLUDE_FLAGS} -c $< -o $@");  
+  // only include the cmake.depends and not the Makefile, as
+  // building one will cause the other to be built
   this->OutputMakeRule(fout, 
                        "Default build rule",
                        "all",
-                       "Makefile cmake.depends ${TARGETS} ${SUBDIR_BUILD} ${CMAKE_COMMAND}",
+                       "cmake.depends ${TARGETS} ${SUBDIR_BUILD} ${CMAKE_COMMAND}",
                        0);
   this->OutputMakeRule(fout, 
                        "remove generated files",
@@ -1059,14 +1061,7 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                        "${SUBDIR_CLEAN}",
                        "rm -f ${CLEAN_OBJECT_FILES} ${EXECUTABLES} ${TARGETS}");
   this->OutputMakeRule(fout, 
-                       "Rule to build the Makefile",
-                       "Makefile",
-                       "${CMAKE_COMMAND} ${CMAKE_MAKEFILE_SOURCES} ",
-                       "${CMAKE_COMMAND} "
-                       "-S${CMAKE_CURRENT_SOURCE} -O${CMAKE_CURRENT_BINARY} "
-                       "-H${CMAKE_SOURCE_DIR} -B${CMAKE_BINARY_DIR}");  
-  this->OutputMakeRule(fout, 
-                       "Rule to build the cmake.depends",
+                       "Rule to build the cmake.depends and Makefile as side effect",
                        "cmake.depends",
                        "${CMAKE_COMMAND} ${CMAKE_MAKEFILE_SOURCES} ",
                        "${CMAKE_COMMAND} "
