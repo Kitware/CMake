@@ -89,7 +89,7 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv)
         finalCommand = cmSystemTools::ConvertToOutputPath(fullPath.c_str());
         finalCommand += runArgs;
         }
-      cmSystemTools::RunCommand(finalCommand.c_str(), output, retVal);
+      cmSystemTools::RunCommand(finalCommand.c_str(), output, retVal, false);
       // set the run var
       char retChar[1000];
       sprintf(retChar,"%i",retVal);
