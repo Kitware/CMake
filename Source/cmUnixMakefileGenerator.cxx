@@ -267,7 +267,9 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
     // if a variable expands to nothing.
     if (lib->first.size() == 0) continue;
     // if it is a full path break it into -L and -l
-    if(lib->first.find('/') != std::string::npos)
+    cmRegularExpression reg("(^[ \t]*\\-l)|(\\${)");
+    if(lib->first.find('/') != std::string::npos
+       && !reg.find(lib->first))
       {
       std::string dir, file;
       cmSystemTools::SplitProgramPath(lib->first.c_str(),
@@ -286,9 +288,7 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
     // not a full path, so add -l name
     else
       {
-      std::string::size_type pos = lib->first.find("-l");
-      if((pos == std::string::npos || pos > 0)
-         && lib->first.find("${") == std::string::npos)
+      if(!reg.find(lib->first))
         {
         librariesLinked += "-l";
         }
