@@ -512,7 +512,6 @@ AC_SUBST(CMAKE_TEMPLATE_FLAGS)
 # ansi stream files (without the .h)
 if test $ac_cv_prog_gxx = no; then
   AC_MSG_CHECKING( ansi standard C++ stream headers ) 
-  echo "******"
   rm -rf conftest.*
   cat > conftest.cc <<!
 #include <iostream>
@@ -528,7 +527,6 @@ AC_SUBST(CMAKE_NO_STD_NAMESPACE)
 
 # check to see if stl is in the std namespace
 if test $ac_cv_prog_gxx = no; then
-  echo "******"
   AC_MSG_CHECKING( ansi standard namespace support ) 
   rm -rf conftest.*
   cat > conftest.cc <<!
