@@ -19,7 +19,7 @@
 
 #include "cmStandardIncludes.h"
 #include "cmCommand.h"
-
+class cmDependInformation;
 class cmMakeDepend;
 
 /** \class cmITKWrapTclCommand
@@ -58,7 +58,10 @@ public:
     }
   
   cmTypeMacro(cmITKWrapTclCommand, cmCommand);
-protected:
+protected:  
+  void AddDependencies(cmDependInformation const*info,
+                       std::vector<std::string>& depends,
+                       std::set<cmDependInformation const*>& visited);
   cmStdString m_TargetName;
   cmTarget* m_Target;
   

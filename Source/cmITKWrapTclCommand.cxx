@@ -27,6 +27,37 @@ cmITKWrapTclCommand::~cmITKWrapTclCommand()
   delete m_MakeDepend;
 }
 
+
+
+void 
+cmITKWrapTclCommand::AddDependencies(cmDependInformation const *info,
+                                     std::vector<std::string>& depends,
+                                     std::set<cmDependInformation const*>& visited)
+{
+  if(!info)
+    {
+    return;
+    }
+  // add info to the visited set
+  visited.insert(info);
+    
+  // add this dependency and the recurse
+  // now recurse with info's dependencies
+  for(cmDependInformation::DependencySet::const_iterator d = 
+        info->m_DependencySet.begin();
+      d != info->m_DependencySet.end(); ++d)
+    {
+    if (visited.find(*d) == visited.end())
+      { 
+      if((*d)->m_FullPath != "")
+        {
+        depends.push_back((*d)->m_FullPath);
+        }
+      this->AddDependencies(*d,depends,visited);
+      }
+    }
+}
+
 // cmITKWrapTclCommand
 bool cmITKWrapTclCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
@@ -154,17 +185,8 @@ bool cmITKWrapTclCommand::CreateCableRule(const char* configFile)
     m_MakeDepend->FindDependencies(inFile.c_str());
   if (info)
     {
-    for(cmDependInformation::DependencySet::const_iterator d = 
-          info->m_DependencySet.begin();
-        d != info->m_DependencySet.end(); ++d)
-      {
-      // Make sure the full path is given.  If not, the dependency was
-      // not found.
-      if((*d)->m_FullPath != "")
-        {
-        depends.push_back((*d)->m_FullPath);
-        }
-      }
+    std::set<cmDependInformation const*> visited;
+    this->AddDependencies(info, depends, visited);
     }
   
   std::vector<std::string> outputs;
