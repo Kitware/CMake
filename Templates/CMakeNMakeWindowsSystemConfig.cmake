@@ -4,6 +4,12 @@
 
 # Suffixes
 
+SET (CMAKE_SYSTEM "Win32" CACHE INTERNAL 
+     "What system is this.  Result of uname.")
+
+SET (CMAKE_BUILD_TOOL nmake CACHE INTERNAL 
+     "What is the target build tool cmake is generating for.")
+
 SET (CMAKE_EXECUTABLE_SUFFIX ".exe" CACHE STRING 
      "Executable suffix.")
 

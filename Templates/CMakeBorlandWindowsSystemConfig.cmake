@@ -8,6 +8,12 @@ FIND_PATH(BCB_BIN_PATH bcc32.exe
   [HKEY_LOCAL_MACHINE/SOFTWARE/Borland/C++Builder/5.0/RootDir]/Bin
 )
 
+SET (CMAKE_BUILD_TOOL borlandmake CACHE INTERNAL 
+     "What is the target build tool cmake is generating for.")
+
+SET (CMAKE_SYSTEM "Win32" CACHE INTERNAL 
+     "What system is this.  Result of uname.")
+
 SET (BORLAND 1 CACHE INTERNAL "This is the borland generator")
 
 SET (CMAKE_C_COMPILER ${BCB_BIN_PATH}/bcc32  CACHE FILEPATH

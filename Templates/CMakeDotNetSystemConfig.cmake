@@ -10,6 +10,12 @@ FIND_PROGRAM(MICROSOFT_DEVENV
         "c:/Program Files/Microsoft Visual Studio.NET/Common7/IDE"
 )
 
+SET (CMAKE_BUILD_TOOL devenv CACHE INTERNAL 
+     "What is the target build tool cmake is generating for.")
+
+SET (CMAKE_SYSTEM "Win32" CACHE INTERNAL 
+     "What system is this.  Result of uname.")
+
 SET (CMAKE_CXX_COMPILER  cl CACHE STRING 
      "Name of C++ compiler used.")
 
@@ -36,7 +42,6 @@ SET (BUILDNAME "Win32-DotNET-devenv" CACHE STRING
 
 SET (CMAKE_CONFIGURATION_TYPES "Debug Release MinSizeRel RelWithDebInfo" CACHE STRING 
      "Space separated list of supported configuration types, only supports Debug, Release, MinSizeRel, and RelWithDebInfo, anything else will be ignored.")
-
 
 # We will hardcode them for now. Make sure to fix that in the future
 SET (CMAKE_SIZEOF_INT       4   CACHE INTERNAL "Size of int data type")

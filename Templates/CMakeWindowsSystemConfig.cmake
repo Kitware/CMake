@@ -1,5 +1,10 @@
 # Microsoft specific config file 
 
+SET (CMAKE_BUILD_TOOL msdev CACHE INTERNAL 
+     "What is the target build tool cmake is generating for.")
+
+SET (CMAKE_SYSTEM "Win32" CACHE INTERNAL 
+     "What system is this.  Result of uname.")
 
 SET (CMAKE_CXX_COMPILER  cl CACHE STRING 
      "Name of C++ compiler used.")

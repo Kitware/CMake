@@ -731,6 +731,9 @@ CMAKE_COMPILER_IS_GNUGXX=0
 if test $ac_cv_prog_gxx = yes; then
 	CMAKE_COMPILER_IS_GNUCXX=1
 fi
+
+CMAKE_SYSTEM="$system"
+AC_SUBST(CMAKE_SYSTEM)
 AC_SUBST(CMAKE_COMPILER_IS_GNUCXX)
 # generate output files.
 # create mkdir files just to make some of the directories
