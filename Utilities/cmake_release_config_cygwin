@@ -4,6 +4,8 @@ VERSION="1.4-4"
 PLATFORM="x86-cygwin"
 DOC_DIR="/doc/cmake-${VERSION}"
 FIND="/usr/bin/find"
+CREATE_SOURCE_TARBALL="yes"
+SOURCE_TARBALL_NAME="cmake-$VERSION"
 
 CreateExtraFiles()
 {
@@ -19,7 +21,7 @@ CreatePackage()
 {
 echo "Creating cmake-$VERSION-$PLATFORM.tar"
 cd ${INSTALL_DIR}
-if ${TAR} cvf ${TARBALL_DIR}/cmake-$VERSION-$PLATFORM.tar ${PREFIX} \
+if ${TAR} cvf ${TARBALL_DIR}/cmake-$VERSION-$PLATFORM.tar .${PREFIX} \
      > ${LOG_DIR}/cmake-$VERSION-$PLATFORM-cygwin.log 2>&1 ; then : ; else
   echo "Error, see ${LOG_DIR}/cmake-$VERSION-$PLATFORM-cygwin.log"
   exit 1

@@ -29,25 +29,6 @@ if test ! -d ${SOURCE_DIR} ; then
   mv CMake CMake-$VERSION
 fi
 
-# Make the source tarball if requested.
-if test "${CREATE_SOURCE_TARBALL}" = "yes" ; then
-  TARBALL="${TARBALL_DIR}/CMake$VERSION-src-unix.tar"
-  echo "Creating CMake$VERSION-src-unix.tar"
-  if ${TAR} cvf $TARBALL CMake-$VERSION \
-       > ${LOG_DIR}/CMake$VERSION-src-unix.log 2>&1 ; then : ; else
-    "Error, see ${LOG_DIR}/CMake$VERSION-src-unix.log"
-    exit 1
-  fi
-  if test "x${GZIP}" != "x" ; then
-    echo "Creating $TARBALL.gz"
-    ${GZIP} -c $TARBALL > $TARBALL.gz
-  fi
-  if test "x${COMPRESS}" != "x" ; then
-    echo "Creating $TARBALL.Z"
-    ${COMPRESS} $TARBALL
-  fi
-fi
-
 # Build the release.
 cd ${BUILD_DIR}
 echo "Writing CMakeCache.txt..."
