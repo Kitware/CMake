@@ -260,12 +260,6 @@ void cmUnixMakefileGenerator::OutputMakefile(const char* file)
       }
     this->OutputObjectDepends(dependout);
     }
-  else
-    {
-    std::cout << "skipping depends\n";
-    }
-  std::cout << "hello\n";
-  
   this->OutputCustomRules(fout);
   this->OutputMakeRules(fout);
   this->OutputInstallRules(fout);
