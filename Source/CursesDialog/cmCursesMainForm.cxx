@@ -869,7 +869,7 @@ void cmCursesMainForm::HandleInput()
                 key >= '0' && key <= '9' ||
                 key == '_' )
         {
-        if ( m_SearchString.size() < x-10 )
+        if ( m_SearchString.size() < static_cast<std::string::size_type>(x-10) )
           {
           m_SearchString += key;
           }
