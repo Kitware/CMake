@@ -425,7 +425,7 @@ int cmCTestUpdateHandler::ProcessHandler()
 
   // Subversion style regular expressions
   cmsys::RegularExpression svn_status_line_regex("^ *([0-9]+)  *([0-9]+)  *([^ ]+)  *([^ ][^\t\r\n]*)[ \t\r\n]*$");
-  cmsys::RegularExpression svn_latest_revision_regex("Updated to revision ([0-9]+).");
+  cmsys::RegularExpression svn_latest_revision_regex("(Updated to|At) revision ([0-9]+)\\.");
 
   cmsys::RegularExpression file_update_line("([A-Z])  *(.*)");
   std::string current_path = "<no-path>";
@@ -443,7 +443,7 @@ int cmCTestUpdateHandler::ProcessHandler()
       const char* line = lines[cc].c_str();
       if ( svn_latest_revision_regex.find(line) )
         {
-        svn_latest_revision = atoi(svn_latest_revision_regex.match(1).c_str());
+        svn_latest_revision = atoi(svn_latest_revision_regex.match(2).c_str());
         }
       }
     }
