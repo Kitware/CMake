@@ -254,8 +254,10 @@ void cmLocalGenerator::AddInstallRule(std::ostream& fout, const char* dest,
   case cmTarget::INSTALL_FILES:
   default:                         stype = "FILE"; break;
     }
+  std::string fname = cmSystemTools::GetFilenameName(sfiles.c_str());
   fout 
-    << "MESSAGE(STATUS \"Install " << stype << ": " << sfiles.c_str() << "\")\n" 
+    << "MESSAGE(STATUS \"Installing " << destination.c_str() 
+    << "/" << fname.c_str() << "\")\n" 
     << "FILE(INSTALL DESTINATION \"" << destination.c_str() 
     << "\" TYPE " << stype.c_str() << (optional?" OPTIONAL":"") 
     << " FILES \"" << sfiles.c_str() << "\")\n";
