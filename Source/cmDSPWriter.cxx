@@ -496,13 +496,13 @@ void cmDSPWriter::WriteDSPHeader(std::ostream& fout, const char *libName,
       }
     libOptions += " /LIBPATH:\"";
     libOptions += cmSystemTools::HandleNetworkPaths(libPath.c_str());
-    libOptions += "$(IntDir)\" ";
+    libOptions += "$(INTDIR)\" ";
     libOptions += " /LIBPATH:\"";
     libOptions += cmSystemTools::HandleNetworkPaths(libPath.c_str());
     libOptions += "\" ";
     libMultiLineOptions += "# ADD LINK32 /LIBPATH:\"";
     libMultiLineOptions += cmSystemTools::HandleNetworkPaths(libPath.c_str()); 
-    libMultiLineOptions += "$(IntDir)\" ";
+    libMultiLineOptions += "$(INTDIR)\" ";
     libMultiLineOptions += " /LIBPATH:\"";
     libMultiLineOptions += cmSystemTools::HandleNetworkPaths(libPath.c_str()); 
     libMultiLineOptions += "\" \n";
@@ -516,13 +516,13 @@ void cmDSPWriter::WriteDSPHeader(std::ostream& fout, const char *libName,
       }
     libOptions += " /LIBPATH:\"";
     libOptions += cmSystemTools::HandleNetworkPaths(exePath.c_str());
-    libOptions += "$(IntDir)\" ";
+    libOptions += "$(INTDIR)\" ";
     libOptions += " /LIBPATH:\"";
     libOptions += cmSystemTools::HandleNetworkPaths(exePath.c_str());
     libOptions += "\" ";
     libMultiLineOptions += "# ADD LINK32 /LIBPATH:\"";
     libMultiLineOptions += cmSystemTools::HandleNetworkPaths(exePath.c_str()); 
-    libMultiLineOptions += "$(IntDir)\" ";
+    libMultiLineOptions += "$(INTDIR)\" ";
     libMultiLineOptions += " /LIBPATH:\"";
     libMultiLineOptions += cmSystemTools::HandleNetworkPaths(exePath.c_str());
     libMultiLineOptions += "\" \n";
@@ -533,14 +533,14 @@ void cmDSPWriter::WriteDSPHeader(std::ostream& fout, const char *libName,
     {
     libOptions += " /LIBPATH:\"";
     libOptions += cmSystemTools::HandleNetworkPaths(i->c_str());
-    libOptions += "/$(IntDir)\" ";
+    libOptions += "/$(INTDIR)\" ";
     libOptions += " /LIBPATH:\"";
     libOptions += cmSystemTools::HandleNetworkPaths(i->c_str());
     libOptions += "\" ";
 
     libMultiLineOptions += "# ADD LINK32 /LIBPATH:\"";
     libMultiLineOptions += cmSystemTools::HandleNetworkPaths(i->c_str()); 
-    libMultiLineOptions += "/$(IntDir)\" ";
+    libMultiLineOptions += "/$(INTDIR)\" ";
     libMultiLineOptions += " /LIBPATH:\"";
     libMultiLineOptions += cmSystemTools::HandleNetworkPaths(i->c_str());
     libMultiLineOptions += "\" \n";
