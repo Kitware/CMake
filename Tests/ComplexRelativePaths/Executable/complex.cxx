@@ -8,17 +8,23 @@
 int passed = 0;
 int failed = 0;
 
+// ======================================================================
+
 void Failed(const char* Message, const char* m2= "")
 {
   std::cerr << "Failed: " << Message << m2 << "\n"; 
   failed++;
 }
 
+// ======================================================================
+
 void Passed(const char* Message, const char* m2="")
 {
   std::cout << "Passed: " << Message << m2 << "\n"; 
   passed++;
 }
+
+// ======================================================================
 
 void TestAndRemoveFile(const char* filename) 
 {
@@ -39,6 +45,8 @@ void TestAndRemoveFile(const char* filename)
     }
 }
 
+// ======================================================================
+
 void TestDir(const char* filename) 
 {
   if (!cmSystemTools::FileExists(filename))
@@ -58,6 +66,7 @@ void TestDir(const char* filename)
     }
 }
 
+// ======================================================================
 
 int main()
 {
@@ -88,12 +97,18 @@ int main()
     Passed("Call to file2 function returned 1.");
     }
 
+  // ----------------------------------------------------------------------
+  // Test ADD_DEFINITIONS
+
 #ifndef CMAKE_IS_FUN
   Failed("CMake is not fun, so it is broken and should be fixed.");
 #else
   Passed("CMAKE_IS_FUN is defined.");
 #endif
   
+  // ----------------------------------------------------------------------
+  // Test SET, VARIABLE_REQUIRES
+
 #ifdef SHOULD_NOT_BE_DEFINED
   Failed("IF or SET is broken, SHOULD_NOT_BE_DEFINED is defined.");
 #else
@@ -106,6 +121,42 @@ int main()
   Passed("SHOULD_BE_DEFINED is defined.");
 #endif
   
+#ifndef ONE_VAR
+  Failed("cmakedefine is broken, ONE_VAR is not defined.");
+#else
+  Passed("ONE_VAR is defined.");
+#endif
+  
+#ifndef ONE_VAR_IS_DEFINED
+  Failed("cmakedefine, SET or VARIABLE_REQUIRES is broken, "
+         "ONE_VAR_IS_DEFINED is not defined.");
+#else
+  Passed("ONE_VAR_IS_DEFINED is defined.");
+#endif
+  
+#ifdef ZERO_VAR
+  Failed("cmakedefine is broken, ZERO_VAR is defined.");
+#else
+  Passed("ZERO_VAR is not defined.");
+#endif
+  
+#ifndef STRING_VAR
+  Failed("the CONFIGURE_FILE command is broken, STRING_VAR is not defined.");
+#else
+  if(strcmp(STRING_VAR, "CMake is great") != 0)
+    {
+    Failed("the SET or CONFIGURE_FILE command is broken. STRING_VAR == ", 
+           STRING_VAR);
+    }
+  else
+    {
+    Passed("STRING_VAR == ", STRING_VAR);
+    }
+#endif
+
+  // ----------------------------------------------------------------------
+  // Test various IF/ELSE combinations
+
 #ifdef SHOULD_NOT_BE_DEFINED_AND
   Failed("IF or SET is broken, SHOULD_NOT_BE_DEFINED_AND is defined.");
 #else
@@ -142,38 +193,8 @@ int main()
   Passed("SHOULD_BE_DEFINED_MATCHES is defined.");
 #endif
   
-#ifndef ONE_VAR
-  Failed("cmakedefine is broken, ONE_VAR is not defined.");
-#else
-  Passed("ONE_VAR is defined.");
-#endif
-  
-#ifndef ONE_VAR_IS_DEFINED
-  Failed("cmakedefine, SET or VARIABLE_REQUIRES is broken, "
-         "ONE_VAR_IS_DEFINED is not defined.");
-#else
-  Passed("ONE_VAR_IS_DEFINED is defined.");
-#endif
-  
-#ifdef ZERO_VAR
-  Failed("cmakedefine is broken, ZERO_VAR is defined.");
-#else
-  Passed("ZERO_VAR is not defined.");
-#endif
-  
-#ifndef STRING_VAR
-  Failed("the CONFIGURE_FILE command is broken, STRING_VAR is not defined.");
-#else
-  if(strcmp(STRING_VAR, "CMake is great") != 0)
-    {
-    Failed("the SET or CONFIGURE_FILE command is broken. STRING_VAR == ", 
-           STRING_VAR);
-    }
-  else
-    {
-    Passed("STRING_VAR == ", STRING_VAR);
-    }
-#endif
+  // ----------------------------------------------------------------------
+  // Test FOREACH
 
 #ifndef FOREACH_VAR1
   Failed("the FOREACH, SET or CONFIGURE_FILE command is broken, "
@@ -204,6 +225,9 @@ int main()
     Passed("FOREACH_VAR2 == ", FOREACH_VAR2);
     }
 #endif
+
+  // ----------------------------------------------------------------------
+  // Test FIND_FILE, FIND_PATH and various GET_FILENAME_COMPONENT combinations
 
 #ifndef FILENAME_VAR_PATH_NAME
   Failed("the FIND_FILE or GET_FILENAME_COMPONENT command is broken, "
@@ -280,6 +304,9 @@ int main()
     }
 #endif
 
+  // ----------------------------------------------------------------------
+  // Test LOAD_CACHE
+
 #ifndef CACHE_TEST_VAR1
   Failed("the LOAD_CACHE or CONFIGURE_FILE command is broken, "
          "CACHE_TEST_VAR1 is not defined.");
@@ -325,21 +352,25 @@ int main()
     }
 #endif
 
+  // ----------------------------------------------------------------------
   // A post-build custom-command has been attached to the lib (see Library/).
-  // It run ${CREATE_FILE_EXE} which will create the file
-  // ${Complex_BINARY_DIR}/Library/postbuild.txt.
+  // It runs ${CREATE_FILE_EXE} which will create a file.
 
   TestAndRemoveFile(BINARY_DIR "/Library/postbuild.txt");
 
+  // ----------------------------------------------------------------------
   // A custom target has been created (see Library/).
-  // It run ${CREATE_FILE_EXE} which will create the file
-  // ${Complex_BINARY_DIR}/Library/custom_target1.txt.
+  // It runs ${CREATE_FILE_EXE} which will create a file.
 
   TestAndRemoveFile(BINARY_DIR "/Library/custom_target1.txt");
 
+  // ----------------------------------------------------------------------
   // A directory has been created.
 
   TestDir(BINARY_DIR "/make_dir");
+
+  // ----------------------------------------------------------------------
+  // Summary
 
   std::cout << "Passed: " << passed << "\n";
   if(failed)

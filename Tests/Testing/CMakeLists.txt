@@ -1,0 +1,56 @@
+#
+# Testing
+#
+PROJECT (Testing)
+
+#
+# Lib and exe path
+#
+SET (LIBRARY_OUTPUT_PATH 
+     ${Testing_BINARY_DIR}/bin/ CACHE PATH 
+     "Single output directory for building all libraries.")
+
+SET (EXECUTABLE_OUTPUT_PATH 
+     ${Testing_BINARY_DIR}/bin/ CACHE PATH 
+     "Single output directory for building all executables.")
+
+#
+# Where will executable tests be written ?
+#
+IF (EXECUTABLE_OUTPUT_PATH)
+  SET (CXX_TEST_PATH ${EXECUTABLE_OUTPUT_PATH})
+ELSE (EXECUTABLE_OUTPUT_PATH)
+  SET (CXX_TEST_PATH .)
+ENDIF (EXECUTABLE_OUTPUT_PATH)
+
+#
+# Link to CMake lib
+#
+FIND_LIBRARY(CMAKE_LIB
+             CMakeLib 
+             ${Testing_BINARY_DIR}/../../Source
+             ${Testing_BINARY_DIR}/../../Source/Debug
+             ${Testing_BINARY_DIR}/../../Source/Release
+             ${Testing_BINARY_DIR}/../../Source/MinSizeRel
+             ${Testing_BINARY_DIR}/../../Source/RelWithDebInfo)
+
+LINK_LIBRARIES(${CMAKE_LIB})
+
+#
+# Extra coverage
+#
+BUILD_COMMAND(BUILD_COMMAND_VAR ${CMAKE_MAKE_PROGRAM})
+BUILD_NAME(BUILD_NAME_VAR)
+SITE_NAME(SITE_NAME_VAR)
+
+#
+# Enable testing
+#
+ENABLE_TESTING()
+
+#
+# Add test
+#
+ADD_EXECUTABLE(testing testing.cxx)
+ADD_TEST(testing ${Testing_BINARY_DIR}/bin/testing)
+

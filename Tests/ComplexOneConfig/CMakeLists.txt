@@ -12,28 +12,41 @@ ENDIF (CMAKE_ANSI_CXXFLAGS)
 
 ADD_DEFINITIONS(-DCMAKE_IS_FUN)
 
+#
+# Include vars from a file and from a cache
+#
 IF (EXISTS ${Complex_SOURCE_DIR}/VarTests.cmake)
   INCLUDE(${Complex_SOURCE_DIR}/VarTests.cmake)
 ENDIF (EXISTS ${Complex_SOURCE_DIR}/VarTests.cmake)
 
 LOAD_CACHE(${Complex_SOURCE_DIR})
 
+#
+# Configure file 
+# (plug vars to #define so that they can be tested)
+#
 CONFIGURE_FILE(
   ${Complex_SOURCE_DIR}/cmTestConfigure.h.in
   ${Complex_BINARY_DIR}/cmTestConfigure.h)
 
+#
+# Specify include and lib dirs 
+#
 INCLUDE_DIRECTORIES(
   ${Complex_BINARY_DIR}
   ${Complex_SOURCE_DIR}/Library
   ${Complex_SOURCE_DIR}/../../Source
 )
 
+INCLUDE_REGULAR_EXPRESSION("^(cmTest|file|sharedFile).*$")
+
 LINK_DIRECTORIES(
   ${Complex_BINARY_DIR}/Library
 )
 
-INCLUDE_REGULAR_EXPRESSION("^(cmTest|file|sharedFile).*$")
-
+#
+# Lib and exe path
+#
 SET (LIBRARY_OUTPUT_PATH 
      ${Complex_BINARY_DIR}/bin/ CACHE PATH 
      "Single output directory for building all libraries.")
@@ -43,14 +56,8 @@ SET (EXECUTABLE_OUTPUT_PATH
      "Single output directory for building all executables.")
 
 #
-# Where will executable tests be written ?
+# Create the libs and the main exe
 #
-IF (EXECUTABLE_OUTPUT_PATH)
-  SET (CXX_TEST_PATH ${EXECUTABLE_OUTPUT_PATH})
-ELSE (EXECUTABLE_OUTPUT_PATH)
-  SET (CXX_TEST_PATH .)
-ENDIF (EXECUTABLE_OUTPUT_PATH)
-
 SUBDIRS(Library Executable)
 SUBDIR_DEPENDS(Executable Library)
 
@@ -69,29 +76,8 @@ MARK_AS_ADVANCED(NO_EXEC_PROGRAM)
 MARK_AS_ADVANCED(CLEAR NO_EXEC_PROGRAM)
 
 #
-# More coverage
-#
-ABSTRACT_FILES(
-  ExtraSources/file1.cxx
-)
-
-INSTALL_FILES(/tmp .h ${Complex_BINARY_DIR}/cmTestConfigure.h)
-
-#
 # Create directory.
 # The 'complex' executable will then test if this dir exists,
 # sadly it won't be able to remove it.
 #
 MAKE_DIRECTORY("${Complex_BINARY_DIR}/make_dir")
-
-#
-# Testing
-#
-ENABLE_TESTING()
-
-#
-# Test Cable
-#
-CABLE_CLASS_SET(Float float)
-CABLE_CLASS_SET(Mesh "itk::Mesh<$Float>")
-

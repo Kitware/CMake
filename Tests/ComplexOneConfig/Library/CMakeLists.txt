@@ -1,25 +1,30 @@
-AUX_SOURCE_DIRECTORY(ExtraSources LibrarySources)
-
-# SOURCE_FILES_REMOVE is used for Coverage
-SOURCE_FILES(LibrarySources file2 GENERATED nonexisting_file)
-SOURCE_FILES_REMOVE(LibrarySources GENERATED nonexisting_file) 
-ADD_LIBRARY(CMakeTestLibrary LibrarySources)
-
-SOURCE_FILES(SharedLibrarySources sharedFile)
-ADD_LIBRARY(CMakeTestLibraryShared SHARED SharedLibrarySources)
-
 #
 # Small utility used to create file
+# UTILITY_SOURCE is used for coverage and for getting the exact name
+# of the executable.
 #
 UTILITY_SOURCE(CREATE_FILE_EXE create_file "." create_file.cxx)
 ADD_EXECUTABLE(create_file create_file.cxx)
 
 #
+# Create static library
+# SOURCE_FILES_REMOVE is used for Coverage
+#
+AUX_SOURCE_DIRECTORY(ExtraSources LibrarySources)
+SOURCE_FILES(LibrarySources file2 create_file.cxx GENERATED nonexisting_file)
+SOURCE_FILES_REMOVE(LibrarySources create_file.cxx GENERATED nonexisting_file) 
+ADD_LIBRARY(CMakeTestLibrary LibrarySources)
+
+#
+# Create shared library
+#
+SOURCE_FILES(SharedLibrarySources sharedFile)
+ADD_LIBRARY(CMakeTestLibraryShared SHARED SharedLibrarySources)
+
+#
 # Attach a post-build custom-command to the lib.
-# It run ${CREATE_FILE_EXE} which will create the file
-# ${Complex_BINARY_DIR}/Library/postbuild.txt.
-# The 'complex' executable will then test if this file exists,
-# and remove it.
+# It runs ${CREATE_FILE_EXE} which will create a file.
+# The 'complex' executable will then test if this file exists and remove it.
 #
 ADD_DEPENDENCIES(CMakeTestLibraryShared create_file)
 
@@ -29,11 +34,10 @@ ADD_CUSTOM_COMMAND(SOURCE CMakeTestLibraryShared
                    TARGET CMakeTestLibraryShared)
 
 #
-# Add custom target
-# It run ${CREATE_FILE_EXE} which will create the file
-# ${Complex_BINARY_DIR}/Library/custom_target1.txt.
-# The 'complex' executable will then test if this file exists,
-# and remove it.
+# Add a custom target.
+# It runs ${CREATE_FILE_EXE} which will create the file
+# It runs ${CREATE_FILE_EXE} which will create a file.
+# The 'complex' executable will then test if this file exists and remove it.
 #
 ADD_CUSTOM_TARGET(custom_target1
                   ALL
@@ -42,6 +46,12 @@ ADD_CUSTOM_TARGET(custom_target1
 
 ADD_DEPENDENCIES(custom_target1 create_file)
 
-# More coverage
+#
+# Extra coverage
+#
+ABSTRACT_FILES(
+  ExtraSources/file1.cxx
+)
 
-SOURCE_GROUP(A_GROUP ".cxx")
+INSTALL_FILES(/tmp .h ${Complex_BINARY_DIR}/cmTestConfigure.h)
+

@@ -1,8 +1,14 @@
+#
+# Create exe. 
+#
 ADD_EXECUTABLE(complex complex)
 
 TARGET_LINK_LIBRARIES(complex CMakeTestLibrary)
 TARGET_LINK_LIBRARIES(complex CMakeTestLibraryShared)
 
+#
+# Link to CMake lib
+#
 FIND_LIBRARY(CMAKE_LIB
              CMakeLib 
              ${Complex_BINARY_DIR}/../../Source
@@ -12,15 +18,11 @@ FIND_LIBRARY(CMAKE_LIB
              ${Complex_BINARY_DIR}/../../Source/RelWithDebInfo)
 
 TARGET_LINK_LIBRARIES(complex ${CMAKE_LIB})
-LINK_LIBRARIES(${CMAKE_LIB})
 
 #
-# Testing
-#
-ADD_TEST(complex ${Complex_BINARY_DIR}/bin/complex)
-
-#
-# More coverage
+# Extra coverage.Not used.
 #
 INSTALL_TARGETS(/tmp complex)
 INSTALL_PROGRAMS(/tmp complex)
+
+SOURCE_GROUP(A_GROUP ".cxx")
