@@ -1919,7 +1919,7 @@ int cmCTest::SubmitResults()
   if ( m_DartConfiguration["DropMethod"] == "" ||
        m_DartConfiguration["DropMethod"] ==  "ftp" )
     {
-    std::cout << "FTP submit method" << std::endl;
+    std::cout << "  Using FTP submit method" << std::endl;
     std::string url = "ftp://";
     url += cmCTest::MakeURLSafe(m_DartConfiguration["DropSiteUser"]) + ":" + 
       cmCTest::MakeURLSafe(m_DartConfiguration["DropSitePassword"]) + "@" + 
@@ -1928,17 +1928,20 @@ int cmCTest::SubmitResults()
     if ( !submit.SubmitUsingFTP(m_ToplevelPath+"/Testing/"+m_CurrentTag, 
         files, prefix, url) )
       {
+      std::cout << "  Problems when submitting via FTP" << std::endl;
       return 0;
       }
     if ( !submit.TriggerUsingHTTP(files, prefix, m_DartConfiguration["TriggerSite"]) )
       {
+      std::cout << "  Problems when triggering via HTTP" << std::endl;
       return 0;
       }
+    std::cout << "  Submission successfull" << std::endl;
     return 1;
     }
   else if ( m_DartConfiguration["DropMethod"] == "http" )
     {
-    std::cout << "HTTP submit method" << std::endl;
+    std::cout << "  Using HTTP submit method" << std::endl;
     std::string url = "http://";
     if ( m_DartConfiguration["DropSiteUser"].size() > 0 )
       {
@@ -1952,13 +1955,15 @@ int cmCTest::SubmitResults()
     url += m_DartConfiguration["DropSite"] + m_DartConfiguration["DropLocation"];
     if ( !submit.SubmitUsingHTTP(m_ToplevelPath+"/Testing/"+m_CurrentTag, files, prefix, url) )
       {
+      std::cout << "  Problems when submitting via HTTP" << std::endl;
       return 0;
       }
     if ( !submit.TriggerUsingHTTP(files, prefix, m_DartConfiguration["TriggerSite"]) )
       {
+      std::cout << "  Problems when triggering via HTTP" << std::endl;
       return 0;
       }
-    std::cout << "Submission successfull" << std::endl;
+    std::cout << "  Submission successfull" << std::endl;
     return 1;
     }
   else
