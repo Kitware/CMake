@@ -5,6 +5,1569 @@
    cvs2cl.pl.  See http://www.red-bean.com/~kfogel/cvs2cl.shtml for more.
   -+- -+- -+- -+- -+- -+- -+- -+- -+- -+- -+- -+- -+- -+- -+- -+- -+- -+-
 
+2001-12-05 16:32  hoffman
+
+	* CMake.rtf: ENH: update cvs path
+
+2001-12-04 23:49  starreveld
+
+	* Templates/configure, Templates/configure.in: 
+	
+	Add the flat_namespace and undefined suppress flags to OSX builds
+
+2001-12-04 22:28  hoffman
+
+	* Source/cmSystemTools.cxx: ENH: remove /tmp_mnt from all paths in
+	convert to unix slashes
+
+2001-12-04 21:19  berk
+
+	* Source/CursesDialog/cmCursesMainForm.cxx: Fixed outdated comment
+
+2001-12-04 20:55  hoffman
+
+	* Templates/CMakeBorlandWindowsSystemConfig.cmake: add tWM to c
+	flags as well as CXX flags
+
+2001-12-04 20:53  berk
+
+	* Source/CursesDialog/cmCursesMainForm.cxx: Fixed overflow problem.
+
+2001-12-04 20:16  hoffman
+
+	* Templates/CMakeBorlandWindowsSystemConfig.cmake: ENH: add -tWM to
+	default flags for compilation
+
+2001-12-04 17:03  hoffman
+
+	* Source/cmUnixMakefileGenerator.cxx: crazy fix for putenv, and
+	native path called on custom command paths
+
+2001-12-04 16:20  berk
+
+	* Source/CursesDialog/cmCursesStandardIncludes.h: replacing clear()
+
+2001-12-04 16:16  berk
+
+	* Source/CursesDialog/ccmake.cxx,
+	Source/CursesDialog/cmCursesForm.cxx,
+	Source/CursesDialog/cmCursesForm.h,
+	Source/CursesDialog/cmCursesLongMessageForm.cxx,
+	Source/CursesDialog/cmCursesMainForm.cxx,
+	Source/CursesDialog/cmCursesStringWidget.cxx: Added debugging.
+
+2001-12-04 15:53  barre
+
+	* Modules/FindTCL.cmake: Make shells also ADVANCED
+
+2001-12-04 15:53  barre
+
+	* Modules/Dart.cmake: Remove code duplication. Call FindTcl.cmake,
+	which also does the ADVANCED stuff.
+
+2001-12-04 15:53  barre
+
+	* Modules/Documentation.cmake, Modules/FindCygwin.cmake,
+	Modules/FindDoxygen.cmake, Modules/FindHhc.cmake,
+	Modules/FindPerl.cmake, Modules/FindSelfPackers.cmake,
+	Modules/FindUnixCommands.cmake, Modules/FindWget.cmake: Remove
+	unneeded test and code duplication. Add WIN32 test. Make all
+	ADVANCED.
+
+2001-12-04 15:27  barre
+
+	* Modules/FindPythonLibs.cmake: Make vars ADVANCED for WIN32 (same
+	as Tcl)
+
+2001-12-04 15:11  hoffman
+
+	* Source/CursesDialog/form/frm_driver.c: no c++ comments in c code,
+	duhhhh
+
+2001-12-04 00:58  hoffman
+
+	* Source/CursesDialog/form/frm_driver.c: ENH: AIX seems to define
+	lines and columns as macros, I undefed them
+
+2001-12-03 23:04  hoffman
+
+	* Templates/CMakeBorlandWindowsSystemConfig.cmake: ENH: fix crashes
+	in console apps
+
+2001-12-03 22:47  hoffman
+
+	* Source/cmVariableRequiresCommand.cxx: ENH: let people know the
+	variable is advanced
+
+2001-12-03 22:00  hoffman
+
+	* Source/cmake.cxx: ENH: add -C load cache file option
+
+2001-12-03 22:00  hoffman
+
+	* Modules/FindOpenGL.cmake, Source/cmBorlandMakefileGenerator.cxx,
+	Templates/CMakeBorlandWindowsSystemConfig.cmake: ENH: fix debugging
+	with borland
+
+2001-12-03 20:59  barre
+
+	* Source/MFCDialog/CMakeSetupDialog.cpp,
+	Source/MFCDialog/CMakeCommandLineInfo.cpp,
+	Source/MFCDialog/CMakeCommandLineInfo.h: Add /A and /G command-line
+	param to carry the value of "Show Advanced" and generator name in
+	desktop shortcuts
+
+2001-12-03 20:55  martink
+
+	* Source/ctest.cxx: minor fix for not found executables
+
+2001-12-03 20:48  hoffman
+
+	* CMake.rtf: [no log message]
+
+2001-12-03 20:11  berk
+
+	* Source/cmake.cxx, Source/cmake.cxx: Fixed help.
+
+2001-12-03 18:05  hoffman
+
+	* Source/Makefile.borland: add wizard
+
+2001-12-03 14:39  hoffman
+
+	* CMake.rtf: update docs some
+
+2001-12-02 23:22  ibanez
+
+	* Source/cmFLTKWrapUICommand.cxx: ENH: AddCustomCommand register
+	now multiple outputs. Auxiliary variable manage      the output
+	directory where FLTK generated code is going to be writen.
+
+2001-11-30 22:20  barre
+
+	* Source/cmBuildCommand.cxx, Source/cmDSPWriter.cxx,
+	Source/cmDSWWriter.cxx, Source/cmIfCommand.cxx,
+	Source/cmUnixMakefileGenerator.cxx, Source/cmake.cxx: fix warning
+	for Borland build
+
+2001-11-30 21:48  hoffman
+
+	* Source/cmakewizard.h: [no log message]
+
+2001-11-30 21:48  hoffman
+
+	* Source/CMakeLib.dsp, Source/CMakeLists.txt,
+	Source/Makefile.borland, Source/Makefile.in,
+	Source/cmBorlandMakefileGenerator.cxx,
+	Source/cmBorlandMakefileGenerator.h,
+	Source/cmBorlandMakefileGenerator2.cxx,
+	Source/cmBorlandMakefileGenerator2.h, Source/cmForEachCommand.cxx,
+	Source/cmake.cxx, Source/cmakemain.cxx, Source/cmakewizard.cxx,
+	Templates/CMakeBorlandWindowsSystemConfig.cmake,
+	Templates/CMakeWindowsBorlandConfig.cmake,
+	Templates/CMakeWindowsBorlandConfig2.cmake: new borland generator
+	moved into place
+
+2001-11-30 21:27  hoffman
+
+	* Source/cmBorlandMakefileGenerator.cpp,
+	Source/cmBorlandMakefileGenerator.h: Replace with nmake subclassed
+	generator
+
+2001-11-30 21:04  barre
+
+	* Source/cmBorlandMakefileGenerator2.cxx,
+	Source/cmNMakeMakefileGenerator.cxx,
+	Source/cmUnixMakefileGenerator.cxx: Add options for library manager
+	(lib).
+
+2001-11-30 21:04  barre
+
+	* Templates/CMakeNMakeWindowsSystemConfig.cmake: Add options for
+	library manager (lib). Alpha sort
+
+2001-11-30 20:55  berk
+
+	* Modules/FindTCL.cmake: Unix users are smarter.
+
+2001-11-30 20:04  berk
+
+	* Source/CursesDialog/cmCursesMainForm.cxx,
+	Source/CursesDialog/cmCursesStringWidget.cxx: Improving interface.
+
+2001-11-30 19:50  hoffman
+
+	* Source/CursesDialog/cmCursesMainForm.cxx: print cmake running
+	message to cerr
+
+2001-11-30 19:33  barre
+
+	* Templates/CMakeNMakeWindowsSystemConfig.cmake,
+	Source/cmNMakeMakefileGenerator.cxx: Add linker flags for each
+	build type
+
+2001-11-30 19:24  berk
+
+	* Source/CursesDialog/cmCursesMainForm.cxx: Better documentation.
+
+2001-11-30 19:16  berk
+
+	* Source/CursesDialog/cmCursesMainForm.cxx: Better documentation.
+
+2001-11-30 18:59  berk
+
+	* Source/CursesDialog/cmCursesLongMessageForm.cxx,
+	Source/CursesDialog/cmCursesMainForm.cxx,
+	Source/CursesDialog/cmCursesStringWidget.cxx: Improved help.
+
+2001-11-30 18:53  berk
+
+	* Templates/CMakeSystemConfig.cmake.in: Removed unused options.
+
+2001-11-30 18:10  barre
+
+	* Templates/CMakeNMakeWindowsSystemConfig.cmake: CMAKE_ANSI_CFLAGS
+	is used by VTK, so it should be set in the NMake config so that it
+	gets expanded (even to "")
+
+2001-11-30 18:09  hoffman
+
+	* Source/cmNMakeMakefileGenerator.cxx: fix library suffix
+
+2001-11-30 17:41  hoffman
+
+	* Source/cmUnixMakefileGenerator.cxx: remove suffix rules
+
+2001-11-30 17:05  hoffman
+
+	* Source/cmUnixMakefileGenerator.cxx: add new suffix rules
+
+2001-11-30 16:34  berk
+
+	* Source/CursesDialog/ccmake.cxx,
+	Source/CursesDialog/cmCursesLongMessageForm.cxx,
+	Source/CursesDialog/cmCursesMainForm.cxx,
+	Source/CursesDialog/cmCursesStandardIncludes.h: Can non use clear
+	because it is undef'ed.
+
+2001-11-30 15:58  berk
+
+	* Source/CursesDialog/ccmake.cxx: Fixed warning.
+
+2001-11-30 15:51  berk
+
+	* Source/CursesDialog/ccmake.cxx,
+	Source/CursesDialog/cmCursesMainForm.cxx: Fixed warning.
+
+2001-11-30 15:51  berk
+
+	* Source/CursesDialog/cmCursesMainForm.h,
+	Source/CursesDialog/cmCursesMainForm.cxx: Since it is being used as
+	an array size in another file, it is not possible to initialize
+	MAX_WIDTH in a .cxx file.
+
+2001-11-30 15:41  hoffman
+
+	* Source/cmUnixMakefileGenerator.cxx: fix warning
+
+2001-11-30 15:39  berk
+
+	* Source/CursesDialog/cmCursesLongMessageForm.cxx,
+	Source/CursesDialog/cmCursesLongMessageForm.h: Missed std::
+
+2001-11-30 15:27  berk
+
+	* Source/CursesDialog/cmCursesMainForm.h: Missed std::
+
+2001-11-30 15:27  berk
+
+	* Templates/CMakeSystemConfig.cmake.in: CMAKE_WORDS_BIGENDIAN
+	should not be in the cache.
+
+2001-11-30 15:23  berk
+
+	* Modules/FindPythonLibs.cmake: PYTHON_DEBUG_LIBRARY is only used
+	on Windows.
+
+2001-11-30 14:19  barre
+
+	* Templates/CMakeSystemConfig.cmake.in: fix: If documentation
+	added, then need cache type
+
+2001-11-30 04:45  berk
+
+	* Source/CursesDialog/cmCursesLongMessageForm.cxx,
+	Source/CursesDialog/cmCursesLongMessageForm.h: opps I forgot to add
+	these
+
+2001-11-30 04:24  hoffman
+
+	* Source/Makefile.borland, Source/cmBorlandMakefileGenerator2.cxx,
+	Source/cmNMakeMakefileGenerator.cxx,
+	Source/cmUnixMakefileGenerator.cxx,
+	Templates/CMakeSystemConfig.cmake.in,
+	Templates/CMakeWindowsBorlandConfig2.cmake: ENH: fix various
+	problems caused by the generalization of nmake generator
+
+2001-11-30 01:59  barre
+
+	* Source/cmBorlandMakefileGenerator2.cxx,
+	Source/cmNMakeMakefileGenerator.cxx,
+	Source/cmUnixMakefileGenerator.cxx,
+	Source/cmUnixMakefileGenerator.h,
+	Templates/CMakeNMakeWindowsSystemConfig.cmake,
+	Templates/CMakeSystemConfig.cmake.in,
+	Templates/CMakeWindowsBorlandConfig2.cmake,
+	Templates/CMakeWindowsSystemConfig.cmake: Nmake build: move most of
+	hard-coded values to config parameters
+
+2001-11-29 21:44  berk
+
+	* Source/cmListFileCache.cxx, Source/cmSystemTools.cxx,
+	Source/cmSystemTools.h, Source/ctest.cxx,
+	Source/CursesDialog/CMakeLists.txt, Source/CursesDialog/ccmake.cxx,
+	Source/CursesDialog/cmCursesCacheEntryComposite.cxx,
+	Source/CursesDialog/cmCursesCacheEntryComposite.h,
+	Source/CursesDialog/cmCursesForm.h,
+	Source/CursesDialog/cmCursesMainForm.cxx,
+	Source/CursesDialog/cmCursesMainForm.h: Improvements to the curses
+	interface.
+
+2001-11-29 20:14  hoffman
+
+	* Source/MFCDialog/CMakeSetup.cpp: ENH: fix memory leaks
+
+2001-11-29 19:51  barre
+
+	* Source/cmNMakeMakefileGenerator.cxx: Fix space pb (embended, then
+	escaped)
+
+2001-11-29 14:22  hoffman
+
+	* Source/Makefile.borland: add bootstrap makefile for borland
+	compiler
+
+2001-11-29 14:09  hoffman
+
+	* Source/CMakeLists.txt, Source/cmBorlandMakefileGenerator2.cxx,
+	Source/cmakewizard.cxx, Templates/CMakeWindowsBorlandConfig2.cmake:
+	fix for shared libs and borland
+
+2001-11-29 06:46  ibanez
+
+	* Source/cmTarget.h: ENH: A type of target was added for
+	representing GENERATED_CODE
+
+2001-11-29 06:46  ibanez
+
+	* Source/cmFLTKWrapUICommand.cxx: ENH: Custom commands are now
+	builded.
+
+2001-11-29 06:46  ibanez
+
+	* Source/cmUnixMakefileGenerator.cxx: ENH: GENERATED_CODE case
+	added to switch.
+
+2001-11-28 23:07  hoffman
+
+	* Source/CMakeLib.dsp, Source/cmBorlandMakefileGenerator2.cxx,
+	Source/cmBorlandMakefileGenerator2.h,
+	Source/cmNMakeMakefileGenerator.cxx,
+	Source/cmNMakeMakefileGenerator.h,
+	Source/cmUnixMakefileGenerator.cxx,
+	Source/cmUnixMakefileGenerator.h,
+	Templates/CMakeWindowsBorlandConfig2.cmake: ENH: borland generator
+	2 is working more or less
+
+2001-11-28 19:44  ibanez
+
+	* Source/cmFLTKWrapUICommand.h: ENH: The command was simplified to
+	generate a source list of cxx from a	  source list of .fl GUI
+	files.
+
+2001-11-28 19:44  ibanez
+
+	* Source/cmFLTKWrapUICommand.cxx: ENH: Command simplified in order
+	to construct a Source list of .cxx from      a source list of .fl
+	GUI files.
+
+2001-11-28 17:49  barre
+
+	* Modules/FindPythonLibs.cmake: Fynd Python debug lib in usual libs
+	dir too
+
+2001-11-28 16:12  hoffman
+
+	* Source/CMakeLists.txt, Source/cmBorlandMakefileGenerator2.cxx,
+	Source/cmBorlandMakefileGenerator2.h,
+	Source/cmNMakeMakefileGenerator.cxx,
+	Source/cmNMakeMakefileGenerator.h, Source/cmake.cxx: add new
+	borland generator
+
+2001-11-28 15:51  hoffman
+
+	* Source/cmaketest.cxx: [no log message]
+
+2001-11-28 12:14  hoffman
+
+	* Source/cmMarkAsAdvancedCommand.cxx: fix warning
+
+2001-11-28 12:14  hoffman
+
+	* Source/cmNMakeMakefileGenerator.cxx,
+	Source/cmNMakeMakefileGenerator.h,
+	Source/cmUnixMakefileGenerator.cxx,
+	Source/cmUnixMakefileGenerator.h: bug: fix same path comparison
+	when short paths are used
+
+2001-11-28 00:38  ibanez
+
+	* Source/FLTKDialog/CMakeSetupGUIImplementation.cxx: FIX: When
+	switching from one project to another the CacheGUI wasn't being    
+	 cleared. Values from one project were mixed into the other.
+
+2001-11-27 22:53  berk
+
+	* Source/cmNMakeMakefileGenerator.cxx,
+	Source/cmNMakeMakefileGenerator.h,
+	Source/cmUnixMakefileGenerator.cxx,
+	Source/cmUnixMakefileGenerator.h: ENH: nmake generator much closer
+	to working with spaces
+
+2001-11-27 22:31  berk
+
+	* Source/cmMakefile.cxx: ENH: expand variables in a command before
+	escaping spaces in the command
+
+2001-11-27 22:31  berk
+
+	* Source/cmOptionCommand.cxx: ENH: do not write over existing cache
+	values even doc strings to avoid changing the cache file
+
+2001-11-27 21:12  berk
+
+	* Source/cmDSPWriter.cxx: remove unused include
+
+2001-11-27 20:32  martink
+
+	* Source/cmLinkLibrariesCommand.cxx: removed extra lib paths to
+	avoid finding old libs
+
+2001-11-27 20:32  martink
+
+	* Source/MFCDialog/CMakeSetup.rc: adjusted spacing
+
+2001-11-27 20:32  martink
+
+	* Modules/FindTCL.cmake: made some vars advanced
+
+2001-11-27 20:20  martink
+
+	* Modules/Dart.cmake: made some vars advanced
+
+2001-11-27 05:02  ibanez
+
+	* Source/cmUnixMakefileGenerator.cxx: ENH: Support for FLTK Fluid
+	tool added.
+
+2001-11-27 05:02  ibanez
+
+	* Source/cmCommands.cxx: ENH: Command for running FLTK's UI tool
+	"Fluid" was added.
+
+2001-11-27 04:57  ibanez
+
+	* Modules/FindFLTK.cmake: ENH: Support for running FLUID was added.
+
+2001-11-27 03:40  ibanez
+
+	* Source/cmFLTKWrapUICommand.cxx, Source/cmFLTKWrapUICommand.h:
+	Command for invoking FLTK's code generator "Fluid" during the
+	building process
+
+2001-11-26 23:24  hoffman
+
+	* Modules/Dart.cmake, Source/CMakeLists.txt,
+	Source/cmCacheManager.cxx, Source/cmCacheManager.h,
+	Source/cmCommands.cxx, Source/cmSystemTools.cxx,
+	Source/cmSystemTools.h, Source/cmUnixMakefileGenerator.cxx,
+	Source/cmakewizard.cxx, Source/MFCDialog/CMakeSetup.rc,
+	Source/MFCDialog/CMakeSetupDialog.cpp,
+	Source/MFCDialog/CMakeSetupDialog.h, Source/MFCDialog/resource.h,
+	Templates/CMakeSystemConfig.cmake.in,
+	Templates/CMakeWindowsSystemConfig.cmake,
+	Source/cmMarkAsAdvancedCommand.cxx,
+	Source/cmMarkAsAdvancedCommand.h: ENH: add advanced variable types
+	and command line wizard gui
+
+2001-11-26 23:24  hoffman
+
+	* Source/cmFindFileCommand.cxx, Source/cmFindFileCommand.h,
+	Source/cmFindLibraryCommand.cxx, Source/cmFindLibraryCommand.h,
+	Source/cmFindPathCommand.cxx, Source/cmFindPathCommand.h,
+	Source/cmFindProgramCommand.cxx, Source/cmFindProgramCommand.h:
+	ENH: add possibility to add doc strings to varibles created by find
+	type commands
+
+2001-11-26 21:32  berk
+
+	* Source/cmCacheManager.cxx: Oops. The wrong version of the
+	duplicate code was kept. Loaded cache values were not made
+	internal.
+
+2001-11-26 20:45  berk
+
+	* Modules/FindTCL.cmake: TK_INTERNAL_PATH is only needed on
+	Windows.
+
+2001-11-26 16:31  martink
+
+	* Source/cmSystemTools.cxx, Source/cmSystemTools.h: removed warning
+	messages
+
+2001-11-26 16:31  martink
+
+	* Source/cmIfCommand.cxx: better error messages
+
+2001-11-24 23:47  barre
+
+	* Modules/Dart.cmake: I want to be able to start/end
+	experimental-only dashboards
+
+2001-11-21 22:45  hoffman
+
+	* Source/cmCacheManager.cxx, Source/cmDSPWriter.cxx,
+	Source/cmNMakeMakefileGenerator.cxx, Source/cmSystemTools.cxx,
+	Source/cmSystemTools.h, Source/cmUnixMakefileGenerator.cxx,
+	Source/cmake.cxx, Source/cmaketest.cxx: NMake with spaces in
+	directories
+
+2001-11-21 16:35  andy
+
+	* Source/cmCacheManager.cxx: Fix the current directory check for
+	NMake
+
+2001-11-21 13:46  hoffman
+
+	* Source/cmQTWrapUICommand.cxx,
+	Source/cmVariableRequiresCommand.cxx: WAR: fix warning
+
+2001-11-21 13:46  hoffman
+
+	* Source/cmake.cxx: ENH: clean up command line arguments
+
+2001-11-20 22:50  hoffman
+
+	* Source/cmCacheManager.cxx, Source/cmCacheManager.h,
+	Source/cmake.cxx, Source/cmake.h: ENH: add command line arguments
+	to set cache entries
+
+2001-11-20 22:26  berk
+
+	* Source/cmNMakeMakefileGenerator.cxx: ENH: closer to working with
+	spaces in source directory
+
+2001-11-20 22:26  berk
+
+	* Source/cmDSPWriter.cxx: BUG: fix for spaces in path to
+	CMakeList.txt file
+
+2001-11-20 22:26  berk
+
+	* Source/cmaketest.cxx: BUG: fix memory leak
+
+2001-11-20 13:28  hoffman
+
+	* Source/cmStandardIncludes.h,
+	Source/CursesDialog/cmCursesMainForm.cxx,
+	Source/CursesDialog/cmCursesStandardIncludes.h: define hacks and
+	such for the dec compiler
+
+2001-11-19 22:52  hoffman
+
+	* Source/cmCommands.cxx, Source/cmSystemTools.cxx,
+	Source/cmSystemTools.h, Source/cmVariableRequiresCommand.cxx,
+	Source/cmVariableRequiresCommand.h,
+	Source/MFCDialog/CMakeSetupDialog.cpp: ENH: add new command
+	VARIABLE_REQUIRES for better debugging of list files
+
+2001-11-19 14:34  hoffman
+
+	* Source/cmVariableRequiresCommand.cxx,
+	Source/cmVariableRequiresCommand.h: [no log message]
+
+2001-11-19 14:20  hoffman
+
+	* Source/MFCDialog/CMakeLists.txt: ENH: remove unused source files
+
+2001-11-16 21:42  hoffman
+
+	* Source/cmUnixMakefileGenerator.cxx: ENH: look for cmake test with
+	.exe if nmake
+
+2001-11-16 21:28  hoffman
+
+	* Source/cmNMakeMakefileGenerator.cxx: ENH: fix for dll builds
+
+2001-11-16 21:28  hoffman
+
+	* Source/MFCDialog/CMakeLists.txt, Source/MFCDialog/CMakeSetup.dsp,
+	Source/MFCDialog/CMakeSetup.rc,
+	Source/MFCDialog/CMakeSetupDialog.cpp,
+	Source/MFCDialog/CMakeSetupDialog.h, Source/MFCDialog/MakeHelp.cpp,
+	Source/MFCDialog/MakeHelp.h, Source/MFCDialog/resource.h: face lift
+	for GUI and some more help
+
+2001-11-16 18:08  bettingf
+
+	* Source/cmUnixMakefileGenerator.cxx: Added a make depend in the
+	clean rule to refresh the dependencies
+
+2001-11-16 15:14  bettingf
+
+	* Source/cmUnixMakefileGenerator.cxx: undo the last change because
+	of problem with some versions of make
+
+2001-11-16 14:40  bettingf
+
+	* Modules/FindQt.cmake: fixed QT_UIC_EXE name
+
+2001-11-16 14:01  bettingf
+
+	* Source/cmMakeDepend.cxx: Now adds dependency if the file doesn't
+	exist but will be created during the compilation
+
+2001-11-16 14:01  bettingf
+
+	* Source/cmUnixMakefileGenerator.cxx: added the deletion of
+	cmake.depends in the cleaning so that it is recomputed even source
+	files (i.e. .cxx or .h) are generated
+
+2001-11-16 14:01  bettingf
+
+	* Source/cmQTWrapUICommand.cxx, Source/cmQTWrapUICommand.h:
+	corrected path problem and added moc compilation too
+
+2001-11-16 03:10  hoffman
+
+	* Source/Makefile.in: remove depend on star dot h as it is not
+	really needed and breaks some versions of gmake
+
+2001-11-15 23:18  hoffman
+
+	* Source/cmNMakeMakefileGenerator.cxx: ENH: use crazy temp files
+	for long command lines
+
+2001-11-15 22:45  hoffman
+
+	* Source/cmNMakeMakefileGenerator.cxx: ENH: remove debug prints
+
+2001-11-15 22:11  hoffman
+
+	* Modules/Dart.cmake, Source/cmBuildCommand.cxx,
+	Source/cmNMakeMakefileGenerator.cxx,
+	Source/cmNMakeMakefileGenerator.h,
+	Source/cmUnixMakefileGenerator.cxx,
+	Source/cmUnixMakefileGenerator.h,
+	Templates/CMakeNMakeWindowsSystemConfig.cmake,
+	Templates/CMakeSystemConfig.cmake.in,
+	Templates/CMakeWindowsBorlandConfig.cmake,
+	Templates/CMakeWindowsSystemConfig.cmake: closer to nmake working,
+	added CMAKE_MAKE_COMMAND instead of MAKECOMMAND used by Dart, nmake
+	makefiles work with borland make and nmake
+
+2001-11-15 19:52  millerjv
+
+	* Modules/Dart.cmake: ENH: New make targets for Continuous builds. 
+	Added a NightlyStart and NightlyUpdate target for unix builds as
+	well.
+
+2001-11-15 19:52  millerjv
+
+	* DartConfig.cmake: ENH: Changed Nightly start time
+
+2001-11-15 14:55  hoffman
+
+	* Source/cmNMakeMakefileGenerator.cxx,
+	Source/cmNMakeMakefileGenerator.h,
+	Source/cmUnixMakefileGenerator.h, Source/cmake.cxx: ENH: fix
+	library builds with nmake
+
+2001-11-15 14:00  hoffman
+
+	* Source/cmUnixMakefileGenerator.cxx: BUG: wrong shortname used
+
+2001-11-15 13:42  hoffman
+
+	* Source/cmaketest.cxx: BUG: fix build for cygwin
+
+2001-11-15 13:42  hoffman
+
+	* Source/cmUnixMakefileGenerator.cxx: BUG: avoid .cxx.o names...
+
+2001-11-14 23:11  hoffman
+
+	* Source/cmSystemTools.cxx, Source/cmSystemTools.h,
+	Source/cmUnixMakefileGenerator.cxx,
+	Source/cmUnixMakefileGenerator.h, Source/cmake.cxx,
+	Source/cmaketest.cxx, Source/cmaketest.h.in,
+	Templates/CMakeNMakeWindowsSystemConfig.cmake: Closer to nmake
+	build
+
+2001-11-14 23:11  hoffman
+
+	* Source/cmNMakeMakefileGenerator.cxx,
+	Source/cmNMakeMakefileGenerator.h: closer to nmake build
+
+2001-11-14 19:39  barre
+
+	* Source/MFCDialog/CMakeSetup.rc,
+	Source/MFCDialog/CMakeSetupDialog.cpp,
+	Source/MFCDialog/CMakeSetupDialog.h, Source/MFCDialog/resource.h:
+	Quick addition: "Create shortcut" menu entry.
+
+2001-11-14 15:21  hoffman
+
+	* Templates/CMakeNMakeWindowsSystemConfig.cmake,
+	Source/cmNMakeMakefileGenerator.cxx,
+	Source/cmNMakeMakefileGenerator.h,
+	Source/cmUnixMakefileGenerator.cxx,
+	Source/cmUnixMakefileGenerator.h: nmake support
+
+2001-11-14 14:55  king
+
+	* Source/CursesDialog/form/frm_driver.c: ERR: Fixed compiler
+	warning for gcc 3.0.
+
+2001-11-14 14:55  king
+
+	* Source/CursesDialog/ccmake.cxx: ERR: Re-ordered includes to fix
+	macro conflict for gcc 3.0.
+
+2001-11-14 14:22  hoffman
+
+	* Source/cmUnixMakefileGenerator.cxx: ENH: remove debug statements
+
+2001-11-14 13:49  hoffman
+
+	* Source/FLTKDialog/CMakeSetupGUI.cxx: ENH: remove warning
+
+2001-11-13 23:23  hoffman
+
+	* Source/CMakeLib.dsp, Source/CMakeLists.txt,
+	Source/cmNMakeMakefileGenerator.cxx,
+	Source/cmNMakeMakefileGenerator.h,
+	Source/cmUnixMakefileGenerator.cxx,
+	Source/cmUnixMakefileGenerator.h: start work on nmake generator
+
+2001-11-13 20:54  hoffman
+
+	* Source/cmUnixMakefileGenerator.h,
+	Source/cmUnixMakefileGenerator.cxx: clean up object file build
+	rule, and do not attempt to remove link_directories that are in the
+	build tree
+
+2001-11-13 19:22  martink
+
+	* Source/CMakeLists.txt, Source/CursesDialog/CMakeLists.txt: fixes
+	to curses stuff
+
+2001-11-13 17:42  hoffman
+
+	* Source/CursesDialog/form/fty_num.c: warnings
+
+2001-11-13 17:38  hoffman
+
+	* Source/cmCacheManager.cxx, Source/cmForEachCommand.cxx,
+	Source/cmIncludeExternalMSProjectCommand.cxx,
+	Source/cmMakefile.cxx, Source/cmSystemTools.cxx,
+	Source/cmUnixMakefileGenerator.cxx,
+	Source/FLTKDialog/CMakeSetupGUI.cxx,
+	Source/FLTKDialog/CMakeSetupGUI.h,
+	Source/FLTKDialog/CMakeSetupGUIImplementation.cxx: ENH: clean up
+	warnings
+
+2001-11-13 17:25  hoffman
+
+	* Source/FLTKDialog/CMakeSetupGUI.cxx,
+	Source/FLTKDialog/FLTKPropertyItemRow.cxx: WAR: fix compile
+	warnings
+
+2001-11-13 17:21  hoffman
+
+	* Source/CursesDialog/cmCursesMainForm.cxx: ENH: remove warnings
+
+2001-11-13 17:21  hoffman
+
+	* Source/cmAddDependenciesCommand.h: ENH: fix spelling error
+
+2001-11-12 20:37  king
+
+	* Source/cmMakeDepend.cxx: ENH:
+	cmMakeDepend::GenerateDependInformation will now use hints
+	regardless of whether the actual file exists.  This can be used to
+	add dependencies to .h files which are generated but included in
+	hand-written .cxx files.  If the .cxx does exist, though, it will
+	be used first, and the hints will be used afterward.
+
+2001-11-12 14:21  martink
+
+	* Source/cmDSPWriter.cxx: minor fix
+
+2001-11-11 04:01  ibanez
+
+	* Modules/FindX11.cmake:      Module to search for the installation
+	of X11
+
+2001-11-09 21:16  berk
+
+	* Source/CursesDialog/CMakeLists.txt,
+	Source/CursesDialog/ccmake.cxx, Source/CursesDialog/ccurses.cxx:
+	Renaming ccurses to ccmake.
+
+2001-11-09 21:15  barre
+
+	* Modules/FindSelfPackers.cmake: Self-packers
+
+2001-11-09 21:05  berk
+
+	* Source/CMakeLists.txt, Source/CursesDialog/CMakeLists.txt,
+	Source/CursesDialog/cmCursesStandardIncludes.h,
+	Source/CursesDialog/form/frm_driver.c,
+	Source/CursesDialog/form/frm_req_name.c: Trying to fix curses.
+
+2001-11-09 18:00  martink
+
+	* Source/cmDSPWriter.cxx, Source/cmDSPWriter.h,
+	Templates/DLLHeader.dsptemplate, Templates/EXEHeader.dsptemplate,
+	Templates/EXEWinHeader.dsptemplate,
+	Templates/staticLibHeader.dsptemplate: support for custom targets
+	on exe and lib
+
+2001-11-09 17:07  bettingf
+
+	* Source/cmQTWrapCPPCommand.cxx, Source/cmQTWrapCPPCommand.h:
+	cleanups
+
+2001-11-09 17:07  bettingf
+
+	* Modules/FindQt.cmake: support for compilation of .ui files into
+	.h and .cxx files
+
+2001-11-09 17:02  bettingf
+
+	* Source/cmQTWrapUICommand.h, Source/cmQTWrapUICommand.cxx,
+	Source/cmCommands.cxx, Source/cmUnixMakefileGenerator.cxx: support
+	for compilation of .ui files into .h and .cxx files
+
+2001-11-09 15:42  barre
+
+	* Source/cmAddCustomCommandCommand.cxx: SOURCE, COMMAND, TARGET are
+	required now
+
+2001-11-09 15:37  barre
+
+	* Source/cmAddCustomCommandCommand.h: SOURCE, COMMAND, TARGET are
+	required now
+
+2001-11-09 15:33  barre
+
+	* Source/cmAddCustomCommandCommand.cxx,
+	Source/cmAddCustomCommandCommand.h: Reimplement code. Since a
+	custom command is very flexible and might be extended in the
+	future, make all arguments prefixed with arg type, make ordering
+	irrelevant and potentially all args optional.
+
+2001-11-08 22:30  berk
+
+	* Source/CursesDialog/form/frm_driver.c,
+	Source/CursesDialog/form/frm_req_name.c: Trying to fix curses
+	problems.
+
+2001-11-08 22:25  berk
+
+	* Source/CursesDialog/form/frm_driver.c,
+	Source/CursesDialog/form/frm_req_name.c: Fixing problems with
+	curses headers.
+
+2001-11-08 22:17  berk
+
+	* Source/CursesDialog/form/frm_driver.c,
+	Source/CursesDialog/form/frm_req_name.c: Trying to fix curses
+	problems.
+
+2001-11-08 22:10  berk
+
+	* Source/CursesDialog/form/form.h: Oops.
+
+2001-11-08 22:03  berk
+
+	* CMakeLists.txt, Source/CursesDialog/CMakeLists.txt,
+	Source/CursesDialog/form/CMakeLists.txt,
+	Source/CursesDialog/form/form.h,
+	Source/CursesDialog/form/nc_alloc.h: Changes to remove warnings and
+	fix dependencies.
+
+2001-11-08 20:09  martink
+
+	* Source/cmDSWWriter.cxx: a better fix maybe
+
+2001-11-08 19:44  hoffman
+
+	* Source/cmDSWWriter.cxx: make sure custom targets are in the
+	ALL_BUILD
+
+2001-11-08 19:34  barre
+
+	* Source/cmAddCustomCommandCommand.cxx: Fix number of params and
+	expand vars in all args
+
+2001-11-08 16:50  barre
+
+	* Source/cmSourceFilesCommand.cxx: Fix bug. Was using unexpanded
+	var instead of copy
+
+2001-11-08 16:40  barre
+
+	* Source/cmAddLibraryCommand.cxx: Break the "to infinity and
+	beyond" stuff
+
+2001-11-08 15:48  barre
+
+	* Source/cmAddLibraryCommand.cxx: Expand var in srclist name too
+
+2001-11-08 15:40  barre
+
+	* Source/cmSourceFilesCommand.cxx: Expand var in name too
+
+2001-11-08 14:16  barre
+
+	* Source/cmAddDependenciesCommand.cxx: Expand variables in all
+	target args
+
+2001-11-08 13:42  berk
+
+	* Source/cmUnixMakefileGenerator.cxx: Needed to replace srcdir to
+	make install targets work.
+
+2001-11-07 22:12  hoffman
+
+	* Templates/configure, Templates/configure.in: put back
+	CMAKE_TEMPLATE_FLAGS
+
+2001-11-07 22:04  hoffman
+
+	* Source/cmUnixMakefileGenerator.cxx: BUG: no +=+
+
+2001-11-07 21:47  andy
+
+	* Source/cmAddCustomCommandCommand.cxx,
+	Source/cmAddCustomCommandCommand.h, Source/cmCommands.cxx: Added
+	accessor for add custom command
+
+2001-11-07 21:07  barre
+
+	* Modules/FindUnixCommands.cmake: Add cp (CP)
+
+2001-11-07 20:57  hoffman
+
+	* Source/CursesDialog/cmCursesStandardIncludes.h: Trying to fix
+	curses problems with some systems.
+
+2001-11-07 20:57  hoffman
+
+	* configure, configure.in, Source/cmUnixMakefileGenerator.cxx,
+	Templates/configure, Templates/configure.in: remove template flags
+	from cmake, no ptused, or -instance=static
+
+2001-11-07 20:01  berk
+
+	* Source/CursesDialog/cmCursesStandardIncludes.h: Trying to fix
+	build problems related to curses.
+
+2001-11-07 19:55  hoffman
+
+	* Source/cmUnixMakefileGenerator.cxx: ENH: use full source name for
+	c code as well as c++
+
+2001-11-07 19:44  hoffman
+
+	* Source/CursesDialog/ccurses.cxx: use cmake as the executable for
+	cmake and not ccurses
+
+2001-11-07 19:44  hoffman
+
+	* Source/cmUnixMakefileGenerator.cxx: make sure default_target is
+	first
+
+2001-11-07 18:46  hoffman
+
+	* CMakeLists.txt: ENH: add ansi flag for c compiler
+
+2001-11-07 17:23  hoffman
+
+	* Source/cmMessageCommand.cxx: Allow multiline messages
+
+2001-11-07 14:54  hoffman
+
+	* Source/cmUnixMakefileGenerator.cxx,
+	Source/cmUnixMakefileGenerator.h: Clean up a bit more
+
+2001-11-07 14:29  hoffman
+
+	* Source/cmCacheManager.cxx: One more time...  case does not matter
+	on cygwin
+
+2001-11-06 21:14  hoffman
+
+	* Source/cmExecProgramCommand.h: ENH: fix doc string
+
+2001-11-06 20:29  bettingf
+
+	* Source/cmQTWrapCPPCommand.cxx,
+	Source/cmUnixMakefileGenerator.cxx: add cleaning of QT generated
+	files when make clean is used
+
+2001-11-06 17:03  hoffman
+
+	* Source/CursesDialog/ccurses.cxx,
+	Source/CursesDialog/cmCursesMainForm.cxx,
+	Source/CursesDialog/cmCursesMainForm.h: ENH: tell cmake object
+	where cmake is
+
+2001-11-06 14:35  hoffman
+
+	* Source/cmCableWrapTclCommand.cxx, Source/cmQTWrapCPPCommand.cxx,
+	Source/cmVTKWrapJavaCommand.cxx, Source/cmVTKWrapPythonCommand.cxx,
+	Source/cmVTKWrapTclCommand.cxx: BUG: CustomCommand has to use full
+	path to Source file now
+
+2001-11-06 13:40  hoffman
+
+	* Source/CursesDialog/form/fld_type.c,
+	Source/CursesDialog/form/form.h: Removed a function which used
+	va_start (did not compile on Sun with gcc)
+
+2001-11-06 03:10  berk
+
+	* Source/CursesDialog/ccurses.cxx,
+	Source/CursesDialog/cmCursesBoolWidget.cxx,
+	Source/CursesDialog/cmCursesLabelWidget.cxx,
+	Source/CursesDialog/cmCursesMainForm.cxx,
+	Source/CursesDialog/cmCursesMainForm.h,
+	Source/CursesDialog/cmCursesStringWidget.cxx: Many improvements.
+
+2001-11-05 21:38  hoffman
+
+	* Source/cmUnixMakefileGenerator.cxx: ENH: use full paths for
+	object compile rules
+
+2001-11-05 20:55  berk
+
+	* Source/CMakeLists.txt, Source/CursesDialog/cmCursesMainForm.cxx:
+	Re-enabling curses support.
+
+2001-11-05 20:39  hoffman
+
+	* Source/cmUnixMakefileGenerator.cxx: ENH: change to work with
+	nmake
+
+2001-11-05 18:22  berk
+
+	* Modules/FindCurses.cmake, Source/CursesDialog/CMakeLists.txt,
+	Source/CursesDialog/cmCursesForm.h,
+	Source/CursesDialog/cmCursesLabelWidget.h,
+	Source/CursesDialog/cmCursesMainForm.h,
+	Source/CursesDialog/cmCursesWidget.h,
+	Source/CursesDialog/form/frm_driver.c,
+	Source/CursesDialog/form/frm_req_name.c,
+	Source/CursesDialog/cmCursesStandardIncludes.h: HPUX support.
+
+2001-11-05 17:57  lorensen
+
+	* Source/cmIncludeExternalMSProjectCommand.cxx: ERR: ^M's removed.
+
+2001-11-05 16:52  berk
+
+	* Source/CMakeLists.txt, Source/CursesDialog/CMakeLists.txt,
+	Source/CursesDialog/cmCursesCacheEntryComposite.h,
+	Source/CursesDialog/cmCursesLabelWidget.h,
+	Source/CursesDialog/cmCursesMainForm.cxx,
+	Source/CursesDialog/cmCursesMainForm.h,
+	Source/CursesDialog/cmCursesWidget.h: Fixing problems on Sun (name
+	collusions between STL and curses) and disabling curses
+	temporarily.
+
+2001-11-05 16:52  berk
+
+	* Source/CursesDialog/form/CMakeLists.txt,
+	Source/CursesDialog/form/READ.ME, Source/CursesDialog/form/eti.h,
+	Source/CursesDialog/form/fld_arg.c,
+	Source/CursesDialog/form/fld_attr.c,
+	Source/CursesDialog/form/fld_current.c,
+	Source/CursesDialog/form/fld_def.c,
+	Source/CursesDialog/form/fld_dup.c,
+	Source/CursesDialog/form/fld_ftchoice.c,
+	Source/CursesDialog/form/fld_ftlink.c,
+	Source/CursesDialog/form/fld_info.c,
+	Source/CursesDialog/form/fld_just.c,
+	Source/CursesDialog/form/fld_link.c,
+	Source/CursesDialog/form/fld_max.c,
+	Source/CursesDialog/form/fld_move.c,
+	Source/CursesDialog/form/fld_newftyp.c,
+	Source/CursesDialog/form/fld_opts.c,
+	Source/CursesDialog/form/fld_pad.c,
+	Source/CursesDialog/form/fld_page.c,
+	Source/CursesDialog/form/fld_stat.c,
+	Source/CursesDialog/form/fld_type.c,
+	Source/CursesDialog/form/fld_user.c,
+	Source/CursesDialog/form/form.h,
+	Source/CursesDialog/form/form.priv.h,
+	Source/CursesDialog/form/frm_cursor.c,
+	Source/CursesDialog/form/frm_data.c,
+	Source/CursesDialog/form/frm_def.c,
+	Source/CursesDialog/form/frm_driver.c,
+	Source/CursesDialog/form/frm_hook.c,
+	Source/CursesDialog/form/frm_opts.c,
+	Source/CursesDialog/form/frm_page.c,
+	Source/CursesDialog/form/frm_post.c,
+	Source/CursesDialog/form/frm_req_name.c,
+	Source/CursesDialog/form/frm_scale.c,
+	Source/CursesDialog/form/frm_sub.c,
+	Source/CursesDialog/form/frm_user.c,
+	Source/CursesDialog/form/frm_win.c,
+	Source/CursesDialog/form/fty_alnum.c,
+	Source/CursesDialog/form/fty_alpha.c,
+	Source/CursesDialog/form/fty_enum.c,
+	Source/CursesDialog/form/fty_int.c,
+	Source/CursesDialog/form/fty_ipv4.c,
+	Source/CursesDialog/form/fty_num.c,
+	Source/CursesDialog/form/fty_regex.c,
+	Source/CursesDialog/form/llib-lform,
+	Source/CursesDialog/form/mf_common.h,
+	Source/CursesDialog/form/nc_alloc.h: Adding form library.
+
+2001-11-05 15:42  andy
+
+	* Source/CMakeLists.txt: Fix the IF IF problem
+
+2001-11-05 13:37  berk
+
+	* Source/CursesDialog/ccurses.cxx,
+	Source/CursesDialog/cmCursesCacheEntryComposite.cxx,
+	Source/CursesDialog/cmCursesCacheEntryComposite.h,
+	Source/CursesDialog/cmCursesLabelWidget.h,
+	Source/CursesDialog/cmCursesMainForm.cxx,
+	Source/CursesDialog/cmCursesMainForm.h,
+	Source/CursesDialog/cmCursesWidget.h: ERR: To include cmake
+	headers, one should use ../
+
+2001-11-05 10:43  pcp
+
+	* Source/cmDSPWriter.cxx, Source/cmDSWWriter.cxx: switched
+	string::compare to strncmp
+
+2001-11-04 23:10  berk
+
+	* Source/CursesDialog/cmCursesMainForm.h: Need to include standard
+	headers.
+
+2001-11-04 23:00  berk
+
+	* Modules/FindCurses.cmake, Source/CMakeLists.txt,
+	Source/CursesDialog/CMakeLists.txt,
+	Source/CursesDialog/cmCursesBoolWidget.h,
+	Source/CursesDialog/cmCursesCacheEntryComposite.h,
+	Source/CursesDialog/cmCursesDummyWidget.h,
+	Source/CursesDialog/cmCursesFilePathWidget.h,
+	Source/CursesDialog/cmCursesForm.h,
+	Source/CursesDialog/cmCursesLabelWidget.h,
+	Source/CursesDialog/cmCursesMainForm.h,
+	Source/CursesDialog/cmCursesPathWidget.h,
+	Source/CursesDialog/cmCursesStringWidget.h,
+	Source/CursesDialog/cmCursesWidget.h,
+	Source/CursesDialog/ccurses.cxx,
+	Source/CursesDialog/cmCursesBoolWidget.cxx,
+	Source/CursesDialog/cmCursesCacheEntryComposite.cxx,
+	Source/CursesDialog/cmCursesDummyWidget.cxx,
+	Source/CursesDialog/cmCursesFilePathWidget.cxx,
+	Source/CursesDialog/cmCursesForm.cxx,
+	Source/CursesDialog/cmCursesLabelWidget.cxx,
+	Source/CursesDialog/cmCursesMainForm.cxx,
+	Source/CursesDialog/cmCursesPathWidget.cxx,
+	Source/CursesDialog/cmCursesStringWidget.cxx,
+	Source/CursesDialog/cmCursesWidget.cxx: Adding curses support.
+
+2001-11-03 03:32  barre
+
+	* Source/cmIncludeDirectoryCommand.cxx,
+	Source/cmIncludeDirectoryCommand.h, Source/cmMakefile.cxx,
+	Source/cmMakefile.h: Add optional BEFORE param to
+	INCLUDE_DIRECTORIES so that include dirs can be specified before
+	the actual include dirs
+
+2001-11-02 21:43  barre
+
+	* Modules/Documentation.cmake, Modules/DocumentationVTK.cmake,
+	Modules/FindCygwin.cmake, Modules/FindPerl.cmake,
+	Modules/FindUnixCommands.cmake, Modules/FindWget.cmake: Move usual
+	Unix commands to FindUnixCommands, use FingCygwin in other modules
+
+2001-11-02 21:43  barre
+
+	* Utilities/Doxygen/CMakeLists.txt,
+	Utilities/Doxygen/doc_makeall.sh.in: Update
+
+2001-11-02 21:05  barre
+
+	* Utilities/CMakeLists.txt, Utilities/Doxygen/CMakeLists.txt,
+	Utilities/Doxygen/doc_makeall.sh.in, Utilities/Doxygen/doxyfile.in:
+	Doxygen doc generator
+
+2001-11-02 21:01  barre
+
+	* CMakeLists.txt: Doxygen doc generator
+
+2001-11-02 20:26  blezek
+
+	* Modules/Dart.cmake: ENH: More Experimental targets for unix
+
+2001-11-02 16:19  pcp
+
+	* Source/cmDSWWriter.cxx,
+	Source/cmIncludeExternalMSProjectCommand.cxx,
+	Source/cmDSPWriter.cxx: allow more than one external MS project
+
+2001-11-02 14:18  andy
+
+	* Source/cmCacheManager.cxx: On win32 path is all in lower case now
+
+2001-11-01 23:36  hoffman
+
+	* Source/cmUnixMakefileGenerator.cxx,
+	Source/cmUnixMakefileGenerator.h: ENH: clean up interface and
+	change build in current directory to build the depend file first
+
+2001-11-01 23:36  hoffman
+
+	* Source/cmCacheManager.cxx: BUG: use collapse full path when
+	testing cache directory
+
+2001-11-01 23:36  hoffman
+
+	* Source/cmDSPWriter.cxx: ENH: IntDir to INTDIR
+
+2001-11-01 18:09  barre
+
+	* Source/cmAddExecutableCommand.cxx,
+	Source/cmAddLibraryCommand.cxx: Expand vars in exe and lib name
+
+2001-11-01 15:42  hoffman
+
+	* Source/cmCacheManager.cxx: ENH: clean up drive letter check
+
+2001-10-31 23:56  king
+
+	* Source/cmCableClassSet.cxx, Source/cmCableClassSet.h: ENH: Added
+	automatic detection of >> sequences in template names and
+	replacement with "> >" in the output.
+
+2001-10-31 23:56  king
+
+	* Source/cmStandardIncludes.h: ENH: Replaced cmStdString
+	implementation to make it more transparently a std:string.
+
+2001-10-31 12:03  pcp
+
+	* Source/cmCommands.cxx, Source/cmDSPWriter.cxx,
+	Source/cmDSWWriter.cxx, Source/cmDSWWriter.h,
+	Source/cmIncludeExternalMSProjectCommand.cxx,
+	Source/cmIncludeExternalMSProjectCommand.h:
+	INCLUDE_EXTERNAL_MSPROJECT command
+
+2001-10-30 23:32  ibanez
+
+	* Source/FLTKDialog/FLTKPropertyItemRow.cxx,
+	Source/FLTKDialog/FLTKPropertyItemRow.h: FIX: Reverted to use
+	FillCacheManagerFromGUI().
+
+2001-10-30 19:36  andy
+
+	* Source/cmCacheManager.cxx: Fix the problem on windows of capital
+	or lower case drive letter for CMAKE_CACHEFILE_DIR
+
+2001-10-30 19:15  andy
+
+	* Source/cmCacheManager.cxx: Change CMAKE_CURRENT_CWD to
+	CMAKE_CACHEFILE_DIR and change the messages
+
+2001-10-30 19:05  hoffman
+
+	* Source/cmConfigureFileCommand.cxx,
+	Source/cmConfigureFileCommand.h, Source/cmMakefile.cxx,
+	Source/cmMakefile.h: ENH: add an option to configure file command
+	that allows for only expansion of at variables and not dollar
+	variables
+
+2001-10-30 09:33  ibanez
+
+	* Source/FLTKDialog/CMakeSetupGUIImplementation.cxx: FIX: In order
+	to disable a button in fl_choice, a 0 pointer must be sent     
+	instead of  "".
+
+2001-10-30 02:20  ibanez
+
+	* Source/FLTKDialog/FLTKPropertyItemRow.cxx,
+	Source/FLTKDialog/FLTKPropertyItemRow.h: ENH:
+	FillCacheManagerFromGUI() was replaced by SaveFromCacheGUI() to    
+	 ensure that changes on the GUI are directly update in the config  
+	   file.
+
+2001-10-30 02:20  ibanez
+
+	* Source/FLTKDialog/CMakeSetupGUIImplementation.cxx: ENH: fl_ask
+	replaced by fl_choice in FLTKCallback.
+
+2001-10-29 15:41  hoffman
+
+	* Source/cmSystemTools.cxx,
+	Source/FLTKDialog/CMakeSetupGUIImplementation.cxx,
+	Source/MFCDialog/CMakeSetupDialog.cpp: ENH: use callback not ifdef
+	for MFC message box errors
+
+2001-10-29 15:19  hoffman
+
+	* Source/cmCacheManager.cxx, Source/cmSystemTools.cxx,
+	Source/cmSystemTools.h,
+	Source/FLTKDialog/CMakeSetupGUIImplementation.cxx: ENH: add
+	callback for message display
+
+2001-10-28 23:52  ibanez
+
+	* Source/FLTKDialog/CMakeSetupGUI.cxx,
+	Source/FLTKDialog/CMakeSetupGUI.fl: ENH: Button were renamed :
+	"Configure", "OK" and "Cancel" as the MFC version.
+
+2001-10-28 03:47  ibanez
+
+	* Source/FLTKDialog/CMakeSetupGUI.cxx,
+	Source/FLTKDialog/CMakeSetupGUI.fl,
+	Source/FLTKDialog/CMakeSetupGUI.h,
+	Source/FLTKDialog/CMakeSetupGUIImplementation.cxx,
+	Source/FLTKDialog/CMakeSetupGUIImplementation.h,
+	Source/FLTKDialog/FLTKPropertyItemRow.cxx,
+	Source/FLTKDialog/FLTKPropertyList.cxx,
+	Source/FLTKDialog/FLTKPropertyList.h: ENH: Updated with respect to
+	MFC CMakeSetup. New cache entries are now      colored in red. The
+	browsers for recent directories only popup if	   there is at
+	least one in the list.
+
+2001-10-26 22:21  hoffman
+
+	* Modules/FindITK.cmake: [no log message]
+
+2001-10-26 21:06  berk
+
+	* Templates/CMakeSystemConfig.cmake.in, Templates/configure,
+	Templates/configure.in: added
+	CMAKE_NO_EXPLICIT_TEMPLATE_INSTANTIATION
+
+2001-10-26 19:42  hoffman
+
+	* Source/cmConfigureFileCommand.cxx, Source/cmMakefile.h,
+	Source/cmaketest.cxx: add dependency for configure files and use
+	short path in WIN32 cmake test
+
+2001-10-26 18:35  hoffman
+
+	* Modules/FindVTK.cmake: use find_file and not just a set for
+	USE_VTK_FILE
+
+2001-10-26 15:22  barre
+
+	* Modules/DocumentationVTK.cmake: VTK documentation framework
+
+2001-10-26 13:29  andy
+
+	* Source/cmCacheManager.cxx: Added check if the binary directory
+	changed. If it did, it will print the warning message
+
+2001-10-25 00:37  barre
+
+	* Modules/FindCygwin.cmake: Add GZIP (gzip)
+
+2001-10-25 00:33  barre
+
+	* Modules/FindCygwin.cmake: Add TAR (path to tar or gtar)
+
+2001-10-24 21:51  berk
+
+	* Source/cmUnixMakefileGenerator.cxx: ENH: allow -framework as a
+	complete entry in the link line for Mac OSX
+
+2001-10-24 19:51  berk
+
+	* DartConfig.cmake: public no longer has anonymous ftp.
+
+2001-10-24 13:41  king
+
+	* Modules/FindGCCXML.cmake: ENH: Improved FIND_PROGRAM call to find
+	the executable in PREFIX/share/GCC_XML, the new standard install
+	location.
+
+2001-10-23 22:30  barre
+
+	* Modules/FindCygwin.cmake: Cygwin mod
+
+2001-10-23 21:47  barre
+
+	* Modules/FindDoxygen.cmake: Find Graphivz's dot too
+
+2001-10-23 21:47  barre
+
+	* Source/cmGetFilenameComponentCommand.cxx,
+	Source/cmGetFilenameComponentCommand.h: The result of this utility
+	command can now be optionally added to the cache
+
+2001-10-23 21:06  barre
+
+	* Modules/FindDoxygen.cmake, Modules/FindWget.cmake: Add Doxygen
+	and Wget modules. Very simple. But might be more complex later, so
+	let's use them asap
+
+2001-10-23 20:55  barre
+
+	* Modules/FindHhc.cmake, Modules/FindPerl.cmake: Modules to find
+	Perl and the HTML Help Compiler
+
+2001-10-19 14:07  barre
+
+	* Source/cmEnableTestingCommand.h: Add warning regarding the
+	location of ENABLE_TESTING (should be in the top CMakeList.txt,
+	otherwise Dart is lost)
+
+2001-10-18 22:01  barre
+
+	* Source/cmSiteNameCommand.cxx: SITE_NAME should return the most
+	qualified name of the host. If nslookup works, now the domain is
+	appended to the hostname (whereas it *replaced* the host name
+	before)
+
+2001-10-18 17:51  iscott
+
+	* Source/cmQTWrapCPPCommand.cxx: Detect error and output useful
+	message Previously it would have got confused about the
+	destinationSourceGroup
+
+2001-10-18 17:03  iscott
+
+	* Source/cmFindFileCommand.cxx: This command should always set the
+	cahce variabel to a filepath not a path
+
+2001-10-17 19:11  barre
+
+	* Source/cmProjectCommand.cxx: Add PROJECT_NAME to the set of
+	definitions
+
+2001-10-16 19:40  iscott
+
+	* Modules/FindQt.cmake: fixed some stupid mistakes I thought I had
+	tested these - honest
+
+2001-10-16 19:32  iscott
+
+	* Modules/FindQt.cmake, Modules/LinkQT.cmake: Some simple modules
+	for finding and linking qt
+
+2001-10-15 22:36  hoffman
+
+	* Source/cmMessageCommand.cxx: ENH: expand variables in message
+	command output
+
+2001-10-15 22:36  hoffman
+
+	* Source/cmSourceFile.cxx: ENH: clean up error report for source
+	files not found
+
+2001-10-15 18:19  iscott
+
+	* CMake.rtf, Source/cmCommands.cxx, Source/cmQTWrapCPPCommand.cxx,
+	Source/cmQTWrapCPPCommand.h: added a QT_WRAP_CPP command
+
+2001-10-11 21:20  king
+
+	* Source/cmCableWrapTclCommand.cxx: ENH: Improved parsing of
+	GCCXML_FLAGS to improve generation of gccxml rule.  Also added
+	ADD_DEFINITIONS arguments to the generated rule.
+
+2001-10-11 18:57  andy
+
+	* Source/cmCacheManager.cxx: Added removing of spaces in
+	CMakeCache.txt in front of comments and variables
+
+2001-10-10 14:22  hoffman
+
+	* Source/cmCacheManager.cxx: ENH: add a warning comment for cache
+	values that can not be changed because they are always loaded from
+	another cache
+
+2001-10-10 02:18  biddi
+
+	* Source/cmBorlandMakefileGenerator.cpp: FIX: Same as last checkin
+	except applies to bpi files as wellas lib files If we can't find it
+	- and it's not a target - and it has no path already specified, it
+	must be in OUTDIRLIB from another makefile in the same project !
+	(What this really means is the lib paths are correctly specified)
+
+2001-10-09 14:25  hoffman
+
+	* Source/cmSystemTools.cxx: ENH: better fix for dos return in
+	lines, use the regular expression and don't edit the input line
+
+2001-10-05 21:31  hoffman
+
+	* Source/cmSystemTools.cxx: ENH: clean up returns from input, so we
+	can read dos files on unix
+
+2001-10-04 13:32  starreveld
+
+	* Templates/configure, Templates/configure.in: 
+	
+	ERR: remove undefined warning for compatibility with new 10.1
+	linker
+
+2001-10-03 19:49  hoffman
+
+	* Modules/Dart.cmake, Source/CMakeLists.txt, Source/cmake.cxx,
+	Source/cmaketest.cxx: ENH: fixes for borland compiler testing
+
+2001-10-03 15:36  king
+
+	* Modules/FindCABLE.cmake: ENH: Changed CABLE_BUILD_DIR to look for
+	cableVersion.h instead of cable.README.txt.
+
+2001-10-03 03:10  biddi
+
+	* Source/cmBorlandMakefileGenerator.cpp: FIX:if we can't find it -
+	and it's not a target - and it has no path already specified, it
+	must be in OUTDIRLIB from another makefile in the same project !
+	(What this really means is the lib paths are correctly specified)
+
+2001-10-02 21:28  hoffman
+
+	* Source/cmListFileCache.cxx, Source/cmMakefile.cxx,
+	Source/cmSystemTools.cxx, Source/cmSystemTools.h, Source/ctest.cxx:
+	ENH: add better error reports in parsing cmake files, like what
+	file has the error
+
+2001-10-01 17:35  martink
+
+	* Source/cmMakefile.h, Source/cmMakefile.h: version
+
+2001-10-01 17:26  hoffman
+
+	* ChangeLog.txt: [no log message]
+
 2001-10-01 15:55  hoffman
 
 	* Source/cmaketest.cxx: BUG: add missing include
@@ -1029,21 +2592,8 @@
 
 2001-08-06 19:01  king
 
-	* Web/index.html, Web/Art/CMakeBanner.jpg, Web/Art/CMakeBanner.psd,
-	Web/Art/CMakeGUI.jpg, Web/Art/CMakeLogo.gif, Web/Art/CMakeLogo.ppt,
-	Web/Art/CMakeLogo.psd, Web/Art/SideBar.jpg, Web/Art/SideBar.psd,
-	Web/Art/acl.gif, Web/Art/asci.gif, Web/Art/asci_little.gif,
-	Web/Art/itkLogoSmallTransparentBackground.gif,
-	Web/Art/nlm_logo.gif, Web/Art/swooshSmall.gif, Web/HTML/About.html,
-	CMake.pdf, CMake.rtf, Web/HTML/Documentation.html,
-	Web/HTML/Download.html, Web/HTML/Examples.html, Web/HTML/FAQ.html,
-	Web/HTML/Features.html, Web/HTML/Head.html, Web/HTML/Install.html,
-	Web/HTML/MailingLists.html, Web/HTML/News.html,
-	Web/HTML/SideBar.html, Web/HTML/Sponsors.html, Web/HTML/Style.css,
-	Web/HTML/Table.html, Web/HTML/Testing.html,
-	Web/HTML/TestingSetup.html, Web/HTML/cmakeExample.tar.gz: Removing
-	Web directory from CMake.  It is moving to a separate, parallel CVS
-	module called "CMakeWeb"
+	* CMake.pdf, CMake.rtf: Removing Web directory from CMake.  It is
+	moving to a separate, parallel CVS module called "CMakeWeb"
 
 2001-08-03 19:47  king
 
@@ -1259,10 +2809,6 @@
 	current compiler.  Currently only implemented correctly for Visual
 	C++ in Windows.
 
-2001-07-20 19:05  millerjv
-
-	* Web/index.html: FIX: changed hyperlink color from white/white
-
 2001-07-20 15:41  millerjv
 
 	* Modules/Dart.cmake: ENH: Added Purify targets
@@ -1340,25 +2886,10 @@
 	AUX_SOURCE_DIRECTORY will only add files that have a "source"
 	extension.
 
-2001-07-16 20:49  hoffman
-
-	* Web/HTML/About.html, Web/HTML/Documentation.html,
-	Web/HTML/Download.html, Web/HTML/Examples.html, Web/HTML/FAQ.html,
-	Web/HTML/Features.html, Web/HTML/Install.html,
-	Web/HTML/MailingLists.html, Web/HTML/News.html,
-	Web/HTML/SideBar.html, Web/HTML/Sponsors.html,
-	Web/HTML/Testing.html, Web/HTML/TestingSetup.html: ENH: add
-	TestingSetup
-
 2001-07-16 19:19  ibanez
 
 	* Modules/FindGLU.cmake, Modules/FindGLUT.cmake:      Search path
 	for OpenGL related libraries
-
-2001-07-16 15:17  king
-
-	* Web/HTML/Sponsors.html: ERR: ITK is the original sponsoring
-	project for CMake, not itself.
 
 2001-07-16 14:14  hoffman
 
@@ -1553,18 +3084,6 @@
 	Source/cmVTKWrapPythonCommand.cxx, Source/cmVTKWrapTclCommand.cxx:
 	Better error checking.
 
-2001-06-29 21:06  martink
-
-	* Web/Art/CMakeLogo.gif: cmake logo for dashboard
-
-2001-06-29 20:59  martink
-
-	* Web/Art/CMakeLogo.gif: cmake logo for dashboard
-
-2001-06-29 20:55  martink
-
-	* Web/Art/CMakeLogo.gif: cmake logo for dashboard
-
 2001-06-29 20:46  martink
 
 	* Source/cmConfigureFileCommand.cxx: better configure file command
@@ -1572,10 +3091,6 @@
 2001-06-29 20:06  nobody
 
 	* CMakeLists.txt: added logo
-
-2001-06-29 17:43  martink
-
-	* Web/Art/CMakeLogo.gif: cmake logo for dashboard
 
 2001-06-29 13:53  martink
 
@@ -1679,10 +3194,6 @@
 
 	* Source/cmDSPWriter.cxx: BUG: Check for building shared libraries
 	should read from makefile's setting, not directly from the cache.
-
-2001-06-27 17:57  will
-
-	* Web/HTML/Download.html: added binary download
 
 2001-06-27 17:12  martink
 
@@ -2132,24 +3643,6 @@
 	Source/FLTKDialog/FLTKPropertyNameButtonWithHelp.cxx: ENH: Absolute
 	path to cmake resolved
 
-2001-06-15 11:40  will
-
-	* Web/HTML/Features.html: ENH:Added features
-
-2001-06-15 11:34  will
-
-	* Web/HTML/About.html, Web/HTML/Features.html,
-	Web/HTML/SideBar.html: ENH:Added features
-
-2001-06-15 11:24  will
-
-	* Web/index.html, Web/HTML/Sponsors.html: Updated ASCI link
-
-2001-06-14 21:29  king
-
-	* Web/HTML/Download.html: ENH: Updated anonymous checkout commands
-	for new repository root location.
-
 2001-06-14 21:06  biddi
 
 	* Source/cmSourceFile.cxx: ERR: allow *.cpp as well as *.cxx etc
@@ -2164,15 +3657,6 @@
 	Source/FLTKDialog/FLTKPropertyNameButtonWithHelp.cxx,
 	Source/FLTKDialog/FLTKPropertyNameButtonWithHelp.h: Include
 	directory names are Case sensitive in Unix.
-
-2001-06-14 16:48  will
-
-	* Web/HTML/Sponsors.html: Refined Jim Ahrens changes
-
-2001-06-14 16:42  will
-
-	* Web/index.html, Web/HTML/Sponsors.html, Web/Art/asci.gif,
-	Web/Art/asci_little.gif: Feedback from Jim Ahrens
 
 2001-06-14 15:45  martink
 
@@ -2220,10 +3704,6 @@
 
 	* Source/FLTKDialog/CMakeSetupGUIImplementation.cxx: ENH: Search
 	for cmake executable full path added (window/unix)
-
-2001-06-13 13:37  will
-
-	* Web/HTML/SideBar.html: Added dashboard
 
 2001-06-13 04:16  ibanez
 
@@ -2448,12 +3928,6 @@
 	GCCXML_FLAGS cache entries.  This also allowed the correct
 	generation of gccxml rules.
 
-2001-06-08 15:28  will
-
-	* Web/HTML/Documentation.html, Web/HTML/Documentation.html,
-	Web/HTML/Documentation.html, Web/HTML/Documentation.html:
-	Documentation updated
-
 2001-06-08 04:18  perera
 
 	* Source/cmUnixMakefileGenerator.cxx,
@@ -2554,11 +4028,6 @@
 	Source/cmMSProjectGenerator.cxx, Source/cmMSProjectGenerator.h:
 	ENH: rename DSWMakefile and DSPMakefile to DSWWriter and DSPWriter
 
-2001-06-06 17:37  will
-
-	* Web/HTML/About.html, Web/HTML/Documentation.html: ENH:Some more
-	tweaks
-
 2001-06-06 17:18  hoffman
 
 	* Source/cmAbstractFilesCommand.cxx,
@@ -2641,22 +4110,6 @@
 	* Source/cmMakefile.cxx: Change name of file created from Testfile
 	to CMakeTestfile.txt
 
-2001-06-06 14:29  will
-
-	* Web/HTML/Examples.html: ENH:More tweaks
-
-2001-06-06 14:25  will
-
-	* Web/HTML/Download.html, Web/HTML/Install.html,
-	Web/HTML/SideBar.html: ENH:More tweaks
-
-2001-06-06 14:11  will
-
-	* Web/Art/CMakeGUI.jpg, Web/HTML/About.html,
-	Web/HTML/Documentation.html, Web/HTML/Examples.html,
-	Web/HTML/SideBar.html, Web/HTML/Sponsors.html, Web/HTML/Table.html,
-	Web/HTML/cmakeExample.tar.gz: ENH:Some enhancements to the examples
-
 2001-06-06 13:43  martink
 
 	* Source/cmSystemTools.cxx: better regexp for reg entries
@@ -2664,28 +4117,6 @@
 2001-06-06 13:43  martink
 
 	* Modules/FindJNI.cmake: better tests
-
-2001-06-06 13:07  will
-
-	* Web/Art/CMakeBanner.jpg: Didn't kb
-
-2001-06-06 13:07  will
-
-	* Web/Art/CMakeBanner.jpg: ERR:Didn't -kb
-
-2001-06-06 12:49  will
-
-	* Web/index.html, Web/Art/CMakeBanner.jpg, Web/Art/CMakeBanner.psd,
-	Web/Art/CMakeLogo.ppt, Web/Art/CMakeLogo.psd, Web/Art/SideBar.jpg,
-	Web/Art/SideBar.psd, Web/Art/acl.gif,
-	Web/Art/itkLogoSmallTransparentBackground.gif,
-	Web/Art/nlm_logo.gif, Web/Art/swooshSmall.gif, Web/HTML/About.html,
-	Web/HTML/Documentation.html, Web/HTML/Download.html,
-	Web/HTML/Examples.html, Web/HTML/FAQ.html, Web/HTML/Head.html,
-	Web/HTML/MailingLists.html, Web/HTML/News.html,
-	Web/HTML/SideBar.html, Web/HTML/Sponsors.html, Web/HTML/Style.css,
-	Web/HTML/Table.html, Web/HTML/Testing.html: ENH:First incarnation
-	of web pages
 
 2001-06-06 11:47  millerjv
 
