@@ -115,7 +115,9 @@ public:
     return
       "IF (define) Starts an if block. Optionally it can be invoked "
       "using (NOT define) (def AND def2) (def OR def2) (def MATCHES def2) "
-      "MATCHES checks if def matches the regular expression def2 ";
+      "(COMMAND cmd) (EXISTS file) MATCHES checks if def matches the "
+      "regular expression def2. COMMAND checks if the cmake command cmd "
+      "is in this cmake executable. EXISTS file checks if file exists";
     }
   
   cmTypeMacro(cmIfCommand, cmCommand);

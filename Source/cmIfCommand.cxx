@@ -134,6 +134,14 @@ bool cmIfCommand::InitialPass(std::vector<std::string> const& args)
       }
     }
 
+  if (args.size() == 2 && (args[0] == "EXISTS"))
+    {
+    if(!cmSystemTools::FileExists(args[1].c_str()))
+      {
+      f = new cmIfFunctionBlocker();
+      }
+    }
+
   if (args.size() == 3 && (args[1] == "AND"))
     {
     def = m_Makefile->GetDefinition(args[0].c_str());
