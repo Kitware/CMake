@@ -232,7 +232,11 @@ bool cmVTKWrapTclCommand::WriteInit(const char *kitName,
   fprintf(fout,
           "extern \"C\"\n"
           "{\n"
+          "#if (TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4)\n"
+          "  typedef int (*vtkTclCommandType)(ClientData, Tcl_Interp *,int, CONST char *[]);\n"
+          "#else\n"
           "  typedef int (*vtkTclCommandType)(ClientData, Tcl_Interp *,int, char *[]);\n"
+          "#endif\n"
           "}\n"
           "\n");
 
