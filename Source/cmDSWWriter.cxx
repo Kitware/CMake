@@ -216,7 +216,7 @@ void cmDSWWriter::WriteDSWFile(std::ostream& fout)
 void cmDSWWriter::WriteProject(std::ostream& fout, 
 				 const char* dspname,
 				 const char* dir,
-                                 cmDSPWriter* project,
+                                 cmDSPWriter*,
                                  const cmTarget& target
                                  )
 {

@@ -69,10 +69,7 @@ bool cmBuildCommand::InitialPass(std::vector<std::string> const& args)
     makecommand += m_Makefile->GetProjectName();
     makecommand += ".dsw /MAKE \"ALL_BUILD - Release\" ";
     }
-  else if(makeprogram.find("Borland") != std::string::npos ||
-          makeprogram.find("BORLAND") != std::string::npos ||
-          makeprogram.find("borland") != std::string::npos ||
-          compiler.find("Borland") != std::string::npos)
+  else if(m_Makefile->GetDefinition("BORLAND"))
     {
     makecommand = makeprogram;
     makecommand += " -i";

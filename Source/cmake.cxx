@@ -82,7 +82,7 @@ void cmake::Usage(const char* program)
 }
 
 // Parse the args
-void cmake::SetCacheArgs(cmMakefile& builder, const std::vector<std::string>& args)
+void cmake::SetCacheArgs(cmMakefile& , const std::vector<std::string>& args)
 { 
   for(unsigned int i=1; i < args.size(); ++i)
     {

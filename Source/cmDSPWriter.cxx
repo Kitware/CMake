@@ -524,7 +524,7 @@ cmDSPWriter::CreateTargetRules(const cmTarget &target,
 
 void cmDSPWriter::WriteDSPHeader(std::ostream& fout, const char *libName,
                                    const cmTarget &target, 
-                                 std::vector<cmSourceGroup> &sourceGroups)
+                                 std::vector<cmSourceGroup> &)
 {
   // determine the link directories
   std::string libOptions;

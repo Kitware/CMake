@@ -286,7 +286,7 @@ void cmUnixMakefileGenerator::OutputIncludeMakefile(std::ostream& fout,
 
 
 std::string 
-cmUnixMakefileGenerator::GetOutputExtension(const char* sourceExtension)
+cmUnixMakefileGenerator::GetOutputExtension(const char*)
 {
   return m_ObjectFileExtension;
 }
@@ -601,7 +601,7 @@ void cmUnixMakefileGenerator::OutputModuleLibraryRule(std::ostream& fout,
 
 void cmUnixMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout,
                                                       const char* name, 
-                                                      const cmTarget & t)
+                                                      const cmTarget &)
 {
   std::string target = m_LibraryOutputPath + "lib" + std::string(name) + ".a";
   std::string depend = "$(";
@@ -628,7 +628,7 @@ void cmUnixMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout,
 
 void cmUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
                                                    const char* name,
-                                                   const cmTarget & t)
+                                                   const cmTarget &t)
 {
   std::string target = m_ExecutableOutputPath + name;
   std::string depend = "$(";
