@@ -23,10 +23,11 @@
 #
 
 # Release version number.
-TAG="Release-1-6-7"
-VERSION="1.6.7"
+TAG="Release-1-8-0"
+CMAKE_VERSION="1.8"
+VERSION="${CMAKE_VERSION}.0"
 RELEASE="1"
-PREVIOUS_VERSION="1.4.7"
+PREVIOUS_VERSION="1.6.7"
 PREVIOUS_RELEASE="1"
 
 # CVSROOT setting used to check out CMake.
@@ -219,7 +220,7 @@ remote_binary()
 upload()
 {
     echo "------- Copying tarballs to www.cmake.org. -------"
-    scp cmake-${VERSION}*tar.* kitware@www.cmake.org:/projects/FTP/pub/cmake
+    scp cmake-${VERSION}*tar.* kitware@www.cmake.org:/projects/FTP/pub/cmake/v${CMAKE_VERSION}
     echo "---- Done copying tarballs to www.cmake.org. -----"
 }
 
@@ -657,7 +658,7 @@ win32_upload()
     setup || return 1
     echo "------- Copying windows zip file to www.cmake.org. -------"
     scp Win32/cmake-${VERSION}-x86-win.zip \
-        kitware@www.cmake.org:/projects/FTP/pub/cmake
+        kitware@www.cmake.org:/projects/FTP/pub/cmake/v${CMAKE_VERSION}
     echo "---- Done copying windows zip file to www.cmake.org. -----"
 }
 
