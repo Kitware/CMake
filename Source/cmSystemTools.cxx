@@ -1880,6 +1880,27 @@ std::string cmSystemTools::GetFilenameWithoutExtension(const std::string& filena
 }
 
 
+/**
+ * Return file name without extension of a full filename (i.e. without path).
+ * Warning: it considers the last extension (for example: removes .gz
+ * from .tar.gz)
+ */
+std::string
+cmSystemTools::GetFilenameWithoutLastExtension(const std::string& filename)
+{
+  std::string name = cmSystemTools::GetFilenameName(filename);
+  std::string::size_type dot_pos = name.rfind(".");
+  if(dot_pos != std::string::npos)
+    {
+    return name.substr(0, dot_pos);
+    }
+  else
+    {
+    return name;
+    }
+}
+
+
 void cmSystemTools::Glob(const char *directory, const char *regexp,
                          std::vector<std::string>& files)
 {

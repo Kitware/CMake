@@ -255,6 +255,9 @@ public:
   ///! return file name without extension of a full filename.
   static std::string GetFilenameWithoutExtension(const std::string&);
   
+  ///! return file name without its last (shortest) extension.
+  static std::string GetFilenameWithoutLastExtension(const std::string&);
+  
   static long int ModifiedTime(const char* filename);
 
   /**
