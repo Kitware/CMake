@@ -34,6 +34,8 @@
 
 MODULE_ID("$Id$")
 
+extern int winnstr(WINDOW *, char *, int);
+
 /*---------------------------------------------------------------------------
 |   Facility      :  libnform  
 |   Function      :  bool data_behind(const FORM *form)
