@@ -461,7 +461,7 @@ bool cmFileCommand::HandleInstallCommand(
     std::string destfile = destfilewe;
     if ( ext.size() )
       {
-       destfile + "." + ext;
+      destfile += ext;
       }
     switch( itype )
       {
