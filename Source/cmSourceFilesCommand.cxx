@@ -20,11 +20,15 @@
 bool cmSourceFilesCommand::InitialPass(std::vector<std::string> const& args)
 {
   const char* versionValue
-    = m_Makefile->GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
-  if (versionValue && atof(versionValue) > 1.2)
+    = m_Makefile->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
+  if (atof(versionValue) > 1.4)
     {
-    this->SetError("The SOURCE_FILES command has been deprecated in CMake version 1.4. You should use the SET command instead.\n");
+    this->SetError("The SOURCE_FILES command was deprecated in CMake version 1.4 and will be removed in later versions of CMake. You should modify your CMakeLists.txt files to use the SET command instead, or set the cache value of CMAKE_BACKWARDS_COMPATIBILITY to 1.2 or less.\n");
     return false;
+    }
+  if (atof(versionValue) > 1.2)
+    {
+    cmSystemTools::Message("The SOURCE_FILES command was deprecated in CMake version 1.4 and will be removed in later versions. You should modify your CMakeLists.txt files to use the SET command instead, or set the cache value of CMAKE_BACKWARDS_COMPATIBILITY to 1.2 or less.\n","Warning");
     }
 
   if(args.size() < 1 )

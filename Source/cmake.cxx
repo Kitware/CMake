@@ -1037,9 +1037,6 @@ int cmake::LoadCache()
       ("CMAKE_BACKWARDS_COMPATIBILITY",ver, 
        "For backwards compatibility, what version of CMake commands and syntax should this version of CMake allow.",
        cmCacheManager::STRING);
-    cmCacheManager::CacheIterator it = 
-      this->m_CacheManager->GetCacheIterator("CMAKE_BACKWARDS_COMPATIBILITY");
-    it.SetProperty("ADVANCED", "1");
     }
   
   return 0;
