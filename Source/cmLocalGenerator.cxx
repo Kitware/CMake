@@ -605,6 +605,10 @@ void cmLocalGenerator::CreateCustomTargetsAndCommands(std::set<cmStdString> cons
           this->AddBuildTargetRule(llang, target);
           }
         }
+        break; 
+      case cmTarget::UTILITY:
+      case cmTarget::INSTALL_FILES:
+      case cmTarget::INSTALL_PROGRAMS:
         break;
       }
     }
@@ -1011,6 +1015,10 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
         linkFlags += " ";
         }
       }
+      break; 
+    case cmTarget::UTILITY:
+    case cmTarget::INSTALL_FILES:
+    case cmTarget::INSTALL_PROGRAMS:
       break;
     }
 }

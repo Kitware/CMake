@@ -823,6 +823,10 @@ const char* cmTarget::GetCreateRuleVariable()
     case cmTarget::EXECUTABLE:
       return "_LINK_EXECUTABLE";
       break; 
+    case cmTarget::UTILITY:
+    case cmTarget::INSTALL_FILES:
+    case cmTarget::INSTALL_PROGRAMS:
+      break;
     }
   return "";
 }
