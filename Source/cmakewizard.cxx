@@ -39,7 +39,6 @@ void cmakewizard::AskUser(const char* key, cmCacheManager::CacheIterator& iter)
   char buffer[4096];
   buffer[0] = 0;
   fgets(buffer, sizeof(buffer)-1, stdin);
-  char ch = 0;
           
   if(strlen(buffer) > 0)
     {
