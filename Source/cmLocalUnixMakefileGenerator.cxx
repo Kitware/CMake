@@ -1295,7 +1295,11 @@ void cmLocalUnixMakefileGenerator::OutputLibraryRule(std::ostream& fout,
                          commands);
     }
   // Add a target with the canonical name (no prefix, suffix or path). 
-  this->OutputMakeRule(fout, comment, name, tgt.c_str(), 0); 
+  this->OutputMakeRule(fout,
+                       comment,
+                       name,
+                       this->ConvertToRelativeOutputPath(tgt.c_str()).c_str(), 
+                       0); 
 
 }
 
