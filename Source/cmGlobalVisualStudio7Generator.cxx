@@ -295,7 +295,6 @@ void cmGlobalVisualStudio7Generator::OutputSLNFile()
   std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
   for(it = m_SubProjectMap.begin(); it!= m_SubProjectMap.end(); ++it)
     {
-    std::vector<cmLocalGenerator*>& gen = it->second;
     this->OutputSLNFile(it->second);
     }
 }
