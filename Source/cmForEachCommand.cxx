@@ -106,7 +106,79 @@ bool cmForEachCommand::InitialPass(std::vector<std::string> const& args)
   
   // create a function blocker
   cmForEachFunctionBlocker *f = new cmForEachFunctionBlocker();
-  f->m_Args = args;
+  if ( args.size() > 1 )
+    {
+    if ( args[1] == "RANGE" )
+      {
+      int start = 0;
+      int stop = 0;
+      int step = 0;
+      if ( args.size() == 3 )
+        {
+        stop = atoi(args[2].c_str());
+        }
+      if ( args.size() == 4 )
+        {
+        start = atoi(args[2].c_str());
+        stop = atoi(args[3].c_str());
+        }
+      if ( args.size() == 5 )
+        {
+        start = atoi(args[2].c_str());
+        stop = atoi(args[3].c_str());
+        step = atoi(args[4].c_str());
+        }
+      if ( step == 0 )
+        {
+        if ( start > stop )
+          {
+          step = -1;
+          }
+        else
+          {
+          step = 1;
+          }
+        }
+      if ( 
+        (start > stop && step > 0) ||
+        (start < stop && step < 0) ||
+        step == 0
+        )
+        {
+        cmOStringStream str;
+        str << "called with incorrect range specification: start ";
+        str << start << ", stop " << stop << ", step " << step;
+        this->SetError(str.str().c_str());
+        return false;
+        }
+      std::vector<std::string> range;
+      char buffer[100];
+      range.push_back(args[0]);
+      int cc;
+      for ( cc = start; ; cc += step )
+        {
+        if ( (step > 0 && cc > stop) || (step < 0 && cc < stop) )
+          {
+          break;
+          }
+        sprintf(buffer, "%d", cc);
+        range.push_back(buffer);
+        if ( cc == stop )
+          {
+          break;
+          }
+        }
+      f->m_Args = range;
+      }
+    else
+      {
+      f->m_Args = args;
+      }
+    }
+  else
+    {
+    f->m_Args = args;
+    }
   m_Makefile->AddFunctionBlocker(f);
   
   return true;
