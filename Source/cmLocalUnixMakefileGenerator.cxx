@@ -1371,7 +1371,6 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
   if(m_UseRelativePaths)
     {
     cmSystemTools::ConvertToUnixSlashes(target);
-    bool needsLocalTarget = false;
     std::string tgt = this->ConvertToMakeTarget(target.c_str());
     if(tgt.find('/', 0) != tgt.npos)
       {
