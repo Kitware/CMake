@@ -3781,7 +3781,12 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
   
   if(cmakeAndTest)
     {
-    return this->RunCMakeAndTest(output);
+    cmSystemTools::ResetErrorOccuredFlag();
+    cmListFileCache::GetInstance()->ClearCache();
+    int retv = this->RunCMakeAndTest(output);
+    cmSystemTools::ResetErrorOccuredFlag();
+    cmListFileCache::GetInstance()->ClearCache();
+    return retv;
     }
   
   int res;
@@ -3865,8 +3870,6 @@ void CMakeStdoutCallback(const char* m, int len, void* s)
 int cmCTest::RunCMakeAndTest(std::string* outstring)
 {  
   unsigned int k;
-  cmSystemTools::ResetErrorOccuredFlag();
-  cmListFileCache::GetInstance()->ClearCache();
   std::string cmakeOutString;
   cmSystemTools::SetErrorCallback(CMakeMessageCallback, &cmakeOutString);
   cmSystemTools::SetStdoutCallback(CMakeStdoutCallback, &cmakeOutString);
