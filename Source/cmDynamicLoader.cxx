@@ -24,6 +24,81 @@
 // Each part of the ifdef contains a complete implementation for
 // the static methods of cmDynamicLoader.  
 
+
+class cmDynamicLoaderCache 
+{
+public:
+  ~cmDynamicLoaderCache();
+  void CacheFile(const char* path, const cmLibHandle&);
+  bool GetCacheFile(const char* path, cmLibHandle&);
+  bool FlushCache(const char* path);
+  void FlushCache();
+  static cmDynamicLoaderCache* GetInstance();
+
+private:
+  std::map<std::string, void*> m_CacheMap;
+  static cmDynamicLoaderCache* Instance;
+};
+
+cmDynamicLoaderCache* cmDynamicLoaderCache::Instance = 0;
+
+cmDynamicLoaderCache::~cmDynamicLoaderCache()
+{
+  this->FlushCache();
+}
+
+void cmDynamicLoaderCache::CacheFile(const char* path, const cmLibHandle& p)
+{
+  cmLibHandle h;
+  if ( this->GetCacheFile(path, h) )
+    {
+    this->FlushCache(path);
+    }
+  this->m_CacheMap[path] = p;
+}
+
+bool cmDynamicLoaderCache::GetCacheFile(const char* path, cmLibHandle& p)
+{
+  std::map<std::string, void*>::iterator it = m_CacheMap.find(path);
+  if ( it != m_CacheMap.end() )
+    {
+    p = it->second;
+    return true;
+    }
+  return false;
+}
+
+bool cmDynamicLoaderCache::FlushCache(const char* path)
+{
+  std::map<std::string, void*>::iterator it = m_CacheMap.find(path);
+  if ( it != m_CacheMap.end() )
+    {
+    cmDynamicLoader::CloseLibrary(it->second);
+    m_CacheMap.erase(it);
+    return true;
+    }
+  return false;
+}
+
+void cmDynamicLoaderCache::FlushCache()
+{
+  for ( std::map<std::string, void*>::iterator it = m_CacheMap.begin();
+        it != m_CacheMap.end(); it++ )
+    {
+    cmDynamicLoader::CloseLibrary(it->second);
+    }
+  m_CacheMap.erase(m_CacheMap.begin(), m_CacheMap.end());
+}
+
+cmDynamicLoaderCache* cmDynamicLoaderCache::GetInstance()
+{
+  if ( !cmDynamicLoaderCache::Instance )
+    {
+    cmDynamicLoaderCache::Instance = new cmDynamicLoaderCache;
+    }
+  return cmDynamicLoaderCache::Instance;
+}
+
 // ---------------------------------------------------------------
 // 1. Implementation for HPUX  machines
 #ifdef __hpux
@@ -32,7 +107,15 @@
 
 cmLibHandle cmDynamicLoader::OpenLibrary(const char* libname )
 {
-  return shl_load(libname, BIND_DEFERRED | DYNAMIC_PATH, 0L);
+  cmLibHandle lh;
+  if ( cmDynamicLoaderCache::GetInstance()->GetCacheFile(libname, lh) )
+    {
+    return lh;
+    }
+  
+  lh = shl_load(libname, BIND_DEFERRED | DYNAMIC_PATH, 0L);
+  cmDynamicLoaderCache::GetInstance()->CacheFile(libname, lh);
+  return lh;
 }
 
 int cmDynamicLoader::CloseLibrary(cmLibHandle lib)
@@ -80,11 +163,19 @@ const char* cmDynamicLoader::LastError()
 
 cmLibHandle cmDynamicLoader::OpenLibrary(const char* libname )
 {
+  cmLibHandle lh;
+  if ( cmDynamicLoaderCache::GetInstance()->GetCacheFile(libname, lh) )
+    {
+    return lh;
+    }
+  
   NSObjectFileImageReturnCode rc;
   NSObjectFileImage image;
 
   rc = NSCreateObjectFileImageFromFile(libname, &image);
-  return NSLinkModule(image, libname, TRUE);
+  lh = NSLinkModule(image, libname, TRUE);
+  cmDynamicLoaderCache::GetInstance()->CacheFile(libname, lh);
+  return lh; 
 }
 
 int cmDynamicLoader::CloseLibrary(cmLibHandle lib)
@@ -136,15 +227,23 @@ const char* cmDynamicLoader::LastError()
 
 cmLibHandle cmDynamicLoader::OpenLibrary(const char* libname )
 {
+  cmLibHandle lh;
+  if ( cmDynamicLoaderCache::GetInstance()->GetCacheFile(libname, lh) )
+    {
+    return lh;
+    }
 #ifdef UNICODE
-        wchar_t *libn = new wchar_t [mbstowcs(NULL, libname, 32000)];
-        mbstowcs(libn, libname, 32000);
-        cmLibHandle ret = LoadLibrary(libn);
-        delete [] libn;
-        return ret;
+  wchar_t *libn = new wchar_t [mbstowcs(NULL, libname, 32000)];
+  mbstowcs(libn, libname, 32000);
+  cmLibHandle ret = LoadLibrary(libn);
+  delete [] libn;
+  lh = ret;
 #else
-        return LoadLibrary(libname);
+  lh = LoadLibrary(libname);
 #endif
+  
+  cmDynamicLoaderCache::GetInstance()->CacheFile(libname, lh);
+  return lh;
 }
 
 int cmDynamicLoader::CloseLibrary(cmLibHandle lib)
@@ -213,7 +312,15 @@ const char* cmDynamicLoader::LastError()
 
 cmLibHandle cmDynamicLoader::OpenLibrary(const char* libname )
 {
-  return dlopen(libname, RTLD_LAZY);
+  cmLibHandle lh;
+  if ( cmDynamicLoaderCache::GetInstance()->GetCacheFile(libname, lh) )
+    {
+    return lh;
+    }
+  
+  lh = dlopen(libname, RTLD_LAZY);
+  cmDynamicLoaderCache::GetInstance()->CacheFile(libname, lh);
+  return lh;
 }
 
 int cmDynamicLoader::CloseLibrary(cmLibHandle lib)
