@@ -29,6 +29,7 @@
 #if !defined(__MINGW32__)
 #include "cmGlobalVisualStudio7Generator.h"
 #include "cmGlobalVisualStudio71Generator.h"
+#include "cmGlobalVisualStudio8Generator.h"
 #endif
 #include "cmGlobalBorlandMakefileGenerator.h"
 #include "cmGlobalNMakeMakefileGenerator.h"
@@ -1348,6 +1349,8 @@ void cmake::AddDefaultGenerators()
     &cmGlobalVisualStudio7Generator::New;
   m_Generators[cmGlobalVisualStudio71Generator::GetActualName()] =
     &cmGlobalVisualStudio71Generator::New;
+  m_Generators[cmGlobalVisualStudio8Generator::GetActualName()] =
+    &cmGlobalVisualStudio8Generator::New;
 #endif
   m_Generators[cmGlobalBorlandMakefileGenerator::GetActualName()] =
     &cmGlobalBorlandMakefileGenerator::New;

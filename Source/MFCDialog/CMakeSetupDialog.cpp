@@ -322,26 +322,36 @@ BOOL CMakeSetupDialog::OnInitDialog()
     {
     // check for vs7 in registry then decide what default to use
     std::string mp;
-    mp = "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\7.1;InstallDir]";
+    mp = "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\8.0\\Setup;Dbghelp_path";
     cmSystemTools::ExpandRegistryValues(mp);
-    if (mp != "/registry")
+    if(mp != "/registry")
       {
-      m_GeneratorChoiceString = "Visual Studio 7 .NET 2003";
+      m_GeneratorChoiceString = "Visual Studio 8 2005";
       }
     else
       {
-      mp = "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\7.0;InstallDir]";
+      mp = "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\7.1;InstallDir]";
       cmSystemTools::ExpandRegistryValues(mp);
       if (mp != "/registry")
         {
-        m_GeneratorChoiceString = "Visual Studio 7";
+        m_GeneratorChoiceString = "Visual Studio 7 .NET 2003";
         }
       else
         {
-        m_GeneratorChoiceString = "Visual Studio 6";
+        mp = "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\7.0;InstallDir]";
+        cmSystemTools::ExpandRegistryValues(mp);
+        if (mp != "/registry")
+          {
+          m_GeneratorChoiceString = "Visual Studio 7";
+          }
+        else
+          {
+          m_GeneratorChoiceString = "Visual Studio 6";
+          }
         }
       }
     }
+  
 
   // try to load the cmake cache from disk
   this->LoadCacheFromDiskToGUI();

@@ -40,28 +40,10 @@ SET(CMAKE_CXX_LINK_EXECUTABLE
 SET(CMAKE_CREATE_WIN32_EXE /subsystem:windows)
 SET(CMAKE_CREATE_CONSOLE_EXE /subsystem:console)
 
-# default to Debug builds
-SET(CMAKE_BUILD_TYPE_INIT Debug)
-SET (CMAKE_CXX_FLAGS_INIT "/W3 /Zm1000 /GX /GR")
-SET (CMAKE_CXX_FLAGS_DEBUG_INIT "/MDd /Zi /Od /GZ")
-SET (CMAKE_CXX_FLAGS_MINSIZEREL_INIT "/MD /O1 /D NDEBUG")
-SET (CMAKE_CXX_FLAGS_RELEASE_INIT "/MD /O2 /D NDEBUG")
-SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT "/MD /Zi /O2 /D NDEBUG")
-SET (CMAKE_C_FLAGS_INIT "/W3 /Zm1000")
-SET (CMAKE_C_FLAGS_DEBUG_INIT "/MDd /Zi /Od /GZ")
-SET (CMAKE_C_FLAGS_MINSIZEREL_INIT "/MD /O1 /D NDEBUG")
-SET (CMAKE_C_FLAGS_RELEASE_INIT "/MD /O2 /D NDEBUG")
-SET (CMAKE_C_FLAGS_RELWITHDEBINFO_INIT "/MD /Zi /O2 /D NDEBUG")
-
-
-SET (CMAKE_STANDARD_LIBRARIES "kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib" CACHE STRING 
-     "Libraries linked by defalut with all applications.")
-MARK_AS_ADVANCED(CMAKE_STANDARD_LIBRARIES)
-
 IF(CMAKE_GENERATOR MATCHES "Visual Studio 6")
    SET (CMAKE_NO_BUILD_TYPE 1)
 ENDIF(CMAKE_GENERATOR MATCHES "Visual Studio 6")
-IF(CMAKE_GENERATOR MATCHES "Visual Studio 7")
+IF(CMAKE_GENERATOR MATCHES "Visual Studio 7" OR CMAKE_GENERATOR MATCHES "Visual Studio 8")
   SET (CMAKE_NO_BUILD_TYPE 1)
   SET (CMAKE_CONFIGURATION_TYPES "Debug;Release;MinSizeRel;RelWithDebInfo" CACHE STRING 
      "Semicolon separated list of supported configuration types, only supports Debug, Release, MinSizeRel, and RelWithDebInfo, anything else will be ignored.")
@@ -70,10 +52,13 @@ IF(CMAKE_GENERATOR MATCHES "Visual Studio 7")
   SET (CMAKE_CXX_STACK_SIZE "10000000" CACHE STRING
        "Size of stack for programs.")
   MARK_AS_ADVANCED(CMAKE_CONFIGURATION_TYPES CMAKE_CXX_STACK_SIZE CMAKE_CXX_WARNING_LEVEL)
-ENDIF(CMAKE_GENERATOR MATCHES "Visual Studio 7")
-
-# does the compiler support pdbtype
+ENDIF(CMAKE_GENERATOR MATCHES "Visual Studio 7" OR CMAKE_GENERATOR MATCHES "Visual Studio 8")
+# does the compiler support pdbtype and is it the newer compiler
 SET(CMAKE_COMPILER_SUPPORTS_PDBTYPE 1)
+SET(CMAKE_COMPILER_2005 0)
+IF(CMAKE_GENERATOR MATCHES  "Visual Studio 8")
+  SET(CMAKE_COMPILER_2005 1)
+ENDIF(CMAKE_GENERATOR MATCHES  "Visual Studio 8")
 IF(CMAKE_GENERATOR MATCHES "NMake Makefiles")
   EXEC_PROGRAM(${CMAKE_C_COMPILER} 
     ARGS /nologo -EP \"${CMAKE_ROOT}/Modules/CMakeTestNMakeCLVersion.c\" 
@@ -84,8 +69,47 @@ IF(CMAKE_GENERATOR MATCHES "NMake Makefiles")
     IF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*VERSION=1[3-9][0-9][0-9].*" )
       SET(CMAKE_COMPILER_SUPPORTS_PDBTYPE 0)
     ENDIF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*VERSION=1[3-9][0-9][0-9].*" )
+    IF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*VERSION=1[4-9][0-9][0-9].*" )
+      SET(CMAKE_COMPILER_2005 1)
+    ENDIF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*VERSION=1[4-9][0-9][0-9].*" )
   ENDIF(NOT CMAKE_COMPILER_RETURN)
 ENDIF(CMAKE_GENERATOR MATCHES "NMake Makefiles")
+
+
+# default to Debug builds
+IF(CMAKE_COMPILER_2005)
+  SET(CMAKE_BUILD_TYPE_INIT Debug)
+  SET (CMAKE_CXX_FLAGS_INIT "/W3 /Zm1000 /EHsc /GR")
+  SET (CMAKE_CXX_FLAGS_DEBUG_INIT "/MDd /Zi /Od /RTC1")
+  SET (CMAKE_CXX_FLAGS_MINSIZEREL_INIT "/MD /O1 /D NDEBUG")
+  SET (CMAKE_CXX_FLAGS_RELEASE_INIT "/MD /O2 /D NDEBUG")
+  SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT "/MD /Zi /O2 /D NDEBUG")
+  SET (CMAKE_C_FLAGS_INIT "/W3 /Zm1000")
+  SET (CMAKE_C_FLAGS_DEBUG_INIT "/MDd /Zi /Od /GZ")
+  SET (CMAKE_C_FLAGS_MINSIZEREL_INIT "/MD /O1 /D NDEBUG")
+  SET (CMAKE_C_FLAGS_RELEASE_INIT "/MD /O2 /D NDEBUG")
+  SET (CMAKE_C_FLAGS_RELWITHDEBINFO_INIT "/MD /Zi /O2 /D NDEBUG")
+  SET (CMAKE_STANDARD_LIBRARIES "kernel32.lib" CACHE STRING 
+     "Libraries linked by defalut with all applications.")
+ELSE(CMAKE_COMPILER_2005)
+  SET(CMAKE_BUILD_TYPE_INIT Debug)
+  SET (CMAKE_CXX_FLAGS_INIT "/W3 /Zm1000 /GX /GR")
+  SET (CMAKE_CXX_FLAGS_DEBUG_INIT "/MDd /Zi /Od /GZ")
+  SET (CMAKE_CXX_FLAGS_MINSIZEREL_INIT "/MD /O1 /D NDEBUG")
+  SET (CMAKE_CXX_FLAGS_RELEASE_INIT "/MD /O2 /D NDEBUG")
+  SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT "/MD /Zi /O2 /D NDEBUG")
+  SET (CMAKE_C_FLAGS_INIT "/W3 /Zm1000")
+  SET (CMAKE_C_FLAGS_DEBUG_INIT "/MDd /Zi /Od /GZ")
+  SET (CMAKE_C_FLAGS_MINSIZEREL_INIT "/MD /O1 /D NDEBUG")
+  SET (CMAKE_C_FLAGS_RELEASE_INIT "/MD /O2 /D NDEBUG")
+  SET (CMAKE_C_FLAGS_RELWITHDEBINFO_INIT "/MD /Zi /O2 /D NDEBUG")
+  SET (CMAKE_STANDARD_LIBRARIES "kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib" CACHE STRING 
+     "Libraries linked by defalut with all applications.")
+ENDIF(CMAKE_COMPILER_2005)
+
+
+MARK_AS_ADVANCED(CMAKE_STANDARD_LIBRARIES)
+
 
 
 # executable linker flags

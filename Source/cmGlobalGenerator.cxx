@@ -74,9 +74,22 @@ void cmGlobalGenerator::EnableLanguage(const char* lang,
     return;
     }
   std::string makeProgram = mf->GetDefinition("CMAKE_MAKE_PROGRAM");
+  // if there are spaces in the make program use short path
+  // but do not short path the actual program name, as
+  // this can cause trouble with VSExpress
   if(makeProgram.find(' ') != makeProgram.npos)
     {
+    std::string dir;
+    std::string file;
+    cmSystemTools::SplitProgramPath(makeProgram.c_str(),
+                                    dir, file);
+    std::string saveFile = file;
     cmSystemTools::GetShortPath(makeProgram.c_str(), makeProgram);
+    cmSystemTools::SplitProgramPath(makeProgram.c_str(),
+                                    dir, file);
+    makeProgram = dir;
+    makeProgram += "/";
+    makeProgram += saveFile;
     this->GetCMakeInstance()->AddCacheEntry("CMAKE_MAKE_PROGRAM", makeProgram.c_str(),
                                             "make program",
                                             cmCacheManager::FILEPATH);

@@ -79,8 +79,11 @@ IF (WIN32)
       )
     IF(NOT MINGW)
       SET(SRCS ${SRCS}
+        cmGlobalVisualStudio71Generator.h
+        cmGlobalVisualStudio8Generator.h
         cmGlobalVisualStudio7Generator.h
         cmLocalVisualStudio7Generator.h
+        cmGlobalVisualStudio8Generator.cxx
         cmGlobalVisualStudio71Generator.cxx
         cmGlobalVisualStudio7Generator.cxx
         cmLocalVisualStudio7Generator.cxx)

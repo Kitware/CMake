@@ -63,7 +63,8 @@ public:
     {
     return m_CreatedProjectNames;
     }
-  void SetVersion71() {m_Version71 = true;}
+  void SetVersion71() {m_Version = 71;}
+  void SetVersion8() {m_Version = 8;}
   virtual void ConfigureFinalPass();
 private:
   void OutputVCProjFile();
@@ -118,7 +119,7 @@ private:
   std::string m_LibraryOutputPath;
   std::string m_ExecutableOutputPath;
   std::string m_ModuleDefinitionFile;
-  bool m_Version71;
+  int m_Version;
 };
 
 #endif
