@@ -580,7 +580,9 @@ IF(BUILD_TESTING)
     --build-generator ${CMAKE_GENERATOR}
     --build-makeprogram ${MAKEPROGRAM}
     --build-project SUBDIR
-    --test-command test "${CMake_BINARY_DIR}/Tests/SubDir/ShouldBeHere"
+    --test-command test 
+    "${CMake_BINARY_DIR}/Tests/SubDir/ShouldBeHere"
+    "${CMake_BINARY_DIR}/Tests/SubDir/testfromsubdir.o"
     )
 
   IF (APPLE)

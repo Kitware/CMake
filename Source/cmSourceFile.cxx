@@ -27,9 +27,16 @@ void cmSourceFile::SetName(const char* name, const char* dir,
                            const std::vector<std::string>& sourceExts,
                            const std::vector<std::string>& headerExts)
 {
+
   this->SetProperty("HEADER_FILE_ONLY","1");
 
-  m_SourceName = name;
+  m_SourceName = cmSystemTools::GetFilenamePath(name);
+  if ( m_SourceName.size() > 0 )
+    {
+    m_SourceName += "/";
+    }
+  m_SourceName += cmSystemTools::GetFilenameWithoutLastExtension(name);
+
   std::string pathname = dir;
 
   // the name might include the full path already, so
@@ -47,7 +54,7 @@ void cmSourceFile::SetName(const char* name, const char* dir,
 
   // First try and see whether the listed file can be found
   // as is without extensions added on.
-  pathname += m_SourceName;
+  pathname += name;
   std::string hname = pathname;
   if(cmSystemTools::FileExists(hname.c_str()))
     {
@@ -55,14 +62,13 @@ void cmSourceFile::SetName(const char* name, const char* dir,
     if(pos != std::string::npos)
       {
       m_SourceExtension = hname.substr(pos+1, hname.size()-pos);
-      std::string::size_type pos2 = hname.rfind('/');
-      if(pos2 != std::string::npos)
+      if ( cmSystemTools::FileIsFullPath(name) )
         {
+        std::string::size_type pos2 = hname.rfind('/');
+        if(pos2 != std::string::npos)
+          {
           m_SourceName = hname.substr(pos2+1, pos - pos2-1);
-        }
-      else
-        {
-          m_SourceName = hname.substr(0, pos);
+          }
         }
       }
 
