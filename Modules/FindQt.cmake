@@ -28,7 +28,7 @@ FIND_PATH(QT_INCLUDE_DIR qt.h
   )
 
 FIND_LIBRARY(QT_QT_LIBRARY 
-  NAMES qt qt-mt
+  NAMES qt qt-mt qt-mt230nc
   PATHS
   $ENV{QTDIR}/lib
   /usr/local/qt/lib
@@ -74,7 +74,9 @@ IF(QT_INCLUDE_DIR)
       IF (QT_QTMAIN_LIBRARY)
         # for version 3
         SET (QT_DEFINITIONS -DQT_DLL)
+        SET (QT_DEFINITIONS "-DQT_DLL -DQT_THREAD_SUPPORT -DNO_DEBUG")
         SET (QT_LIBRARIES imm32.lib  ${QT_QT_LIBRARY} ${QT_QTMAIN_LIBRARY} )
+        SET (QT_LIBRARIES ${QT_LIBRARIES} winmm wsock32)
       ELSE (QT_QTMAIN_LIBRARY)
         # for version 2
         SET (QT_LIBRARIES imm32.lib ws2_32.lib  ${QT_QT_LIBRARY} )
