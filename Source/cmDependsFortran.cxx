@@ -124,16 +124,98 @@ bool cmDependsFortran::WriteDependencies(std::ostream& os)
     return false;
     }
 
-  // Write the dependencies to the output stream.
-  const std::set<cmStdString>& dependencies = parser.Includes;
-  for(std::set<cmStdString>::const_iterator i=dependencies.begin();
-      i != dependencies.end(); ++i)
+  // Write the include dependencies to the output stream.
+  for(std::set<cmStdString>::const_iterator i = parser.Includes.begin();
+      i != parser.Includes.end(); ++i)
     {
     os << m_TargetFile.c_str() << ": "
        << cmSystemTools::ConvertToOutputPath(i->c_str()).c_str()
        << std::endl;
     }
   os << std::endl;
+
+  // Write module requirements to the output stream.
+  for(std::set<cmStdString>::const_iterator i = parser.Requires.begin();
+      i != parser.Requires.end(); ++i)
+    {
+    // Require only modules not provided in the same source.
+    if(parser.Provides.find(*i) == parser.Provides.end())
+      {
+      os << m_TargetFile.c_str() << ": " << i->c_str() << ".mod.stamp"
+         << std::endl;
+      os << m_TargetFile.c_str() << ".requires: " << i->c_str() << ".mod.proxy"
+         << std::endl;
+      os << i->c_str() << ".mod.proxy:" << std::endl;
+      std::string stampName = m_Directory;
+      stampName += "/";
+      stampName += *i;
+      stampName += ".mod.stamp";
+      if(!cmSystemTools::FileExists(stampName.c_str()))
+        {
+        std::ofstream stamp(stampName.c_str());
+        stamp << "# Dummy stamp file in case nothing provides it."
+              << std::endl;
+        }
+      }
+    }
+
+  // Write provided modules to the output stream.
+  for(std::set<cmStdString>::const_iterator i = parser.Provides.begin();
+      i != parser.Provides.end(); ++i)
+    {
+    os << i->c_str() << ".mod.proxy: " << m_TargetFile.c_str()
+       << ".requires" << std::endl;
+    }
+
+  // If any modules are provided then they must be converted to stamp files.
+  if(!parser.Provides.empty())
+    {
+    os << m_TargetFile.c_str() << ".provides:\n";
+    for(std::set<cmStdString>::const_iterator i = parser.Provides.begin();
+        i != parser.Provides.end(); ++i)
+      {
+      os << "\t@$(CMAKE_COMMAND) -E copy_if_different "
+         << i->c_str() << ".mod " << i->c_str() << ".mod.stamp\n";
+      }
+    os << "\t@touch " << m_TargetFile.c_str() << ".provides\n";
+    }
+
+  /*
+  // TODO:
+  What about .mod files provided in another directory and found with a
+  -M search path?  The stamp file will not be updated, so things might
+  not rebuild.  Possible solutions (not all thought through):
+
+  Solution 1: Have all the .o.requires in a directory depend on a
+  single .outside.requires that searches for .mod files in another
+  directory of the build tree and uses copy-if-different to produce
+  the local directory's stamp files. (won't work because the single
+  rule cannot know about the modules)
+
+  Solution 2: When the dependency is detected search the module
+  include path for a mark file indicating the module is provided.  If
+  not found just write the dummy stamp file.  If found, we need a rule
+  to copy-if-different the module file.  When a module is provided,
+  write this mark file.
+
+  Solution 3: Use a set of make rules like this:
+
+    # When required:
+    foo.mod.proxy: foo.mod.default
+    foo.mod.default:: foo.mod.hack
+      @echo foo.mod.default2 # Search for and copy-if-different the mod file.
+    foo.mod.hack:
+
+    # When provided:
+    foo.mod.proxy: foo.o.requires
+      @rm -f foo.mod.hack foo.mod.default
+    foo.o.requires: foo.mod.hack
+      @echo foo.o.requires
+    foo.mod.hack:
+      @touch foo.mod.hack
+      @touch foo.mod.default
+
+  */
 
   return true;
 }
