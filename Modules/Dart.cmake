@@ -254,7 +254,8 @@ IF(BUILD_TESTING)
     IF(${CMAKE_MAKE_PROGRAM} MATCHES make)
       # Make targets for Experimental builds
       FOREACH(mode Nightly Experimental Continuous)
-        FOREACH(testtype Start Update Configure Build Test Purify Coverage Submit)
+        FOREACH(testtype Start Update Configure Build Test Coverage Submit)
+          # missing purify
           ADD_CUSTOM_TARGET(${mode}${testtype} 
             ${CMAKE_CTEST_COMMAND} -D ${mode}${testtype})
         ENDFOREACH(testtype)
