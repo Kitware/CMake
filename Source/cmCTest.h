@@ -141,6 +141,18 @@ private:
     LAST_TEST      = 10
   };
 
+  enum { // Program statuses
+    NOT_RUN = 0,
+    TIMEOUT,
+    SEGFAULT,
+    ILLEGAL,
+    INTERRUPT,
+    NUMERICAL,
+    OTHER_FAULT,
+    BAD_COMMAND,
+    COMPLETED
+  };
+
   struct cmCTestTestResult
   {
     std::string m_Name;
@@ -148,6 +160,7 @@ private:
     std::string m_FullCommandLine;
     double      m_ExecutionTime;
     int         m_ReturnValue;
+    int         m_Status;
     std::string m_CompletionStatus;
     std::string m_Output;
     std::string m_RegressionImages;
@@ -227,8 +240,10 @@ private:
 
   bool RunMakeCommand(const char* command, std::string* output,
     int* retVal, const char* dir, bool verbose, int timeout, std::ofstream& ofs);
+  int RunTest( const char* command, std::string* output, int *retVal);
 
   std::string GenerateRegressionImages(const std::string& xml);
+  const char* GetTestStatus(int status);
 };
 
 #endif
