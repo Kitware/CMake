@@ -379,7 +379,7 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout,
       // Write the project into the SLN file
       if (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
         {
-        cmCustomCommand cc = l->second.GetPreLinkCommands()[0];
+        cmCustomCommand cc = l->second.GetPostBuildCommands()[0];
         
         // dodgy use of the cmCustomCommand's members to store the 
         // arguments from the INCLUDE_EXTERNAL_MSPROJECT command
@@ -455,7 +455,7 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout,
     cmTargets::iterator l = tgts.begin();
     std::string dir = mf->GetStartDirectory();
     for(std::vector<std::string>::iterator si = dspnames.begin(); 
-        l != tgts.end(); ++l)
+        l != tgts.end() && si != dspnames.end(); ++l)
       {
       if ((l->second.GetType() != cmTarget::INSTALL_FILES)
           && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))
@@ -482,7 +482,7 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout,
     cmTargets::iterator l = tgts.begin();
     std::string dir = mf->GetStartDirectory();
     for(std::vector<std::string>::iterator si = dspnames.begin(); 
-        l != tgts.end(); ++l)
+        l != tgts.end() && si != dspnames.end(); ++l)
       {
       if ((l->second.GetType() != cmTarget::INSTALL_FILES)
           && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))
@@ -591,12 +591,16 @@ cmGlobalVisualStudio7Generator::WriteProjectConfigurations(std::ostream& fout,
 // Write a dsp file into the SLN file,
 // Note, that dependencies from executables to 
 // the libraries it uses are also done here
-void cmGlobalVisualStudio7Generator::WriteExternalProject(std::ostream& , 
-                               const char* ,
-                               const char* ,
+void cmGlobalVisualStudio7Generator::WriteExternalProject(std::ostream& fout, 
+                               const char* name,
+                               const char* location,
                                const std::vector<std::string>& )
-{
-  cmSystemTools::Error("WriteExternalProject not implemented for Visual Studio 7");
+{ 
+  std::string d = cmSystemTools::ConvertToOutputPath(location);
+  fout << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"" 
+       << name << "\", \""
+       << d << "\", \"{"
+       << this->CreateGUID(name) << "}\"\nEndProject\n";
 }
 
 
