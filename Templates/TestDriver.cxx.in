@@ -3,36 +3,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#if defined(_MSC_VER) && defined(_DEBUG)
-/* MSVC debug hook to prevent dialogs when running from DART.  */
-# include <crtdbg.h>
-static int TestDriverDebugReport(int type, char* message, int* retVal)
-{
-  (void)type; (void)retVal;
-  fprintf(stderr, message);
-  exit(1);
-}
-#endif
-
-#if defined(_WIN32) && !defined(__CYGWIN__)
-# include <windows.h>
-static LONG __stdcall
-TestDriverUnhandledExceptionFilter(EXCEPTION_POINTERS* e)
-{
-  ExitProcess(e->ExceptionRecord->ExceptionCode);
-}
-static void TestDriverEnableWindowsExceptionFilter()
-{
-  if(getenv("DART_TEST_FROM_DART"))
-    {
-    SetUnhandledExceptionFilter(&TestDriverUnhandledExceptionFilter);    
-    }
-}
-#else
-static void TestDriverEnableWindowsExceptionFilter()
-{
-}
-#endif
 @CMAKE_TESTDRIVER_EXTRA_INCLUDES@
 
 
@@ -83,21 +53,12 @@ int main(int ac, char *av[])
 
   @CMAKE_TESTDRIVER_ARGVC_FUNCTION@
     
-#if defined(_MSC_VER) && defined(_DEBUG)
-  /* If running from DART, put in debug hook.  */
-  if(getenv("DART_TEST_FROM_DART"))
-    {
-    _CrtSetReportHook(TestDriverDebugReport);
-    }
-#endif
-  TestDriverEnableWindowsExceptionFilter();
   for(count =0; cmakeGeneratedFunctionMapEntries[count].name != 0; count++)
     {
     }
   NumTests = count;
   /* If no test name was given */
   /* process command line with user function.  */
-  @CMAKE_TESTDRIVER_ARGVC_FUNCTION@
   if (ac < 2)
     {
     /* Ask for a test.  */
