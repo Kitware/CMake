@@ -164,7 +164,6 @@ BOOL CMakeSetupDialog::OnInitDialog()
           cmMakefile::GetMinorVersion());
   SetDlgItemText(IDC_CMAKE_VERSION, tmp);
   this->UpdateData(FALSE);
-  m_OKButton.EnableWindow(false);
   return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
@@ -455,8 +454,6 @@ void CMakeSetupDialog::RunCMake(bool generateProjectFiles)
 void CMakeSetupDialog::OnConfigure() 
 {
   this->RunCMake(false);
-  // if cache has values then enb
-  m_OKButton.EnableWindow(true);
 }
 
 
@@ -519,6 +516,15 @@ void CMakeSetupDialog::FillCacheGUIFromCacheManager()
     }
   const cmCacheManager::CacheEntryMap &cache =
     cmCacheManager::GetInstance()->GetCacheMap();
+  if(cache.size() == 0)
+    {
+    m_OKButton.EnableWindow(false);
+    }
+  else
+    {
+    m_OKButton.EnableWindow(true);
+    }
+
   for(cmCacheManager::CacheEntryMap::const_iterator i = cache.begin();
       i != cache.end(); ++i)
     {
@@ -704,7 +710,7 @@ void CMakeSetupDialog::OnGetMinMaxInfo( MINMAXINFO FAR* lpMMI )
 
 void CMakeSetupDialog::OnCancel()
 {
-  if(m_OKButton.IsWindowEnabled())
+  if(m_CacheEntriesList.IsDirty())
     {
     if(MessageBox("You have changed options but not rebuilt, "
 		  "are you sure you want to exit?", "Confirm Exit",

@@ -652,6 +652,7 @@ void CPropertyList::RemoveAll()
     delete pItem;
     this->DeleteString(0);
     }
+  m_Dirty = false;
   this->HideControls();
   InvalidateList();
 }
