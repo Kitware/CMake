@@ -870,13 +870,18 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
           }
         else if(compileFlags.size() || additionalDeps.length())
           {
+          const char* aCompilerTool = "VCCLCompilerTool";
+          if((*sf)->GetSourceExtension() == "idl")
+            {
+            aCompilerTool = "VCMIDLTool";
+            }
           for(std::vector<std::string>::iterator i = configs->begin(); 
               i != configs->end(); ++i)
             {
             fout << "\t\t\t\t<FileConfiguration\n"
                  << "\t\t\t\t\tName=\""  << *i << "|Win32\">\n"
                  << "\t\t\t\t\t<Tool\n"
-                 << "\t\t\t\t\tName=\"VCCLCompilerTool\"\n";
+                 << "\t\t\t\t\tName=\"" << aCompilerTool << "\"\n";
             if(compileFlags.size())
               {
               fout << "\t\t\t\t\tAdditionalOptions=\""
