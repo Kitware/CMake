@@ -282,9 +282,6 @@ public:
   static bool RunCommand(const char* command, std::string& output,
                          int &retVal, bool verbose = true);
   
-  ///! Generate a temporary file name
-  static std::string TemporaryFileName();
-
   ///! change directory the the directory specified
   static int ChangeDirectory(const char* dir);
     

@@ -930,7 +930,8 @@ bool cmSystemTools::RunCommand(const char* command,
   std::string commandToFile = command;
   commandToFile += " > ";
   std::string tempFile;
-  tempFile += cmSystemTools::TemporaryFileName();
+  tempFile += _tempnam(0, "cmake");
+
   commandToFile += tempFile;
   retVal = system(commandToFile.c_str());
   std::ifstream fin(tempFile.c_str());
@@ -980,18 +981,6 @@ bool cmSystemTools::RunCommand(const char* command,
   retVal = pclose(cpipe);
   return true;
 #endif
-}
-
-#ifdef _MSC_VER
-#define tempnam _tempnam
-#endif
-
-std::string cmSystemTools::TemporaryFileName()
-{
-  /** \warning in Unix is recomended to use mkstemp( char * ) 
-   instead of tempnam in order to avoid the security
-   risk of setting rights with 0666 */
-  return tempnam(0, "cmake");
 }
 
 /**
