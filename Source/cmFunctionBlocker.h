@@ -38,7 +38,7 @@ public:
    * should this function blocker be removed, useful when one function adds a
    * blocker and another must remove it 
    */
-  virtual bool ShouldRemove(const cmListFileFunction& lff,
+  virtual bool ShouldRemove(const cmListFileFunction&,
                             cmMakefile&) {return false;}
 
   /**
