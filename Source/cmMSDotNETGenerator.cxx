@@ -42,6 +42,34 @@ void cmMSDotNETGenerator::GenerateMakefile()
     }
   else
     {
+    m_LibraryOutputPath = "";
+    if (m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH"))
+      {
+      m_LibraryOutputPath = m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH");
+      }
+    if(m_LibraryOutputPath.size())
+      {
+      // make sure there is a trailing slash
+      if(m_LibraryOutputPath[m_LibraryOutputPath.size()-1] != '/')
+        {
+        m_LibraryOutputPath += "/";
+        }
+      m_LibraryOutputPath = cmSystemTools::HandleNetworkPaths(m_LibraryOutputPath.c_str());
+      }
+    m_ExecutableOutputPath = "";
+    if (m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH"))
+      {
+      m_ExecutableOutputPath = m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
+      }
+    if(m_ExecutableOutputPath.size())
+      {
+      // make sure there is a trailing slash
+      if(m_ExecutableOutputPath[m_ExecutableOutputPath.size()-1] != '/')
+        {
+        m_ExecutableOutputPath += "/";
+        }
+      }
+    m_ExecutableOutputPath = cmSystemTools::HandleNetworkPaths(m_ExecutableOutputPath.c_str());
     this->OutputVCProjFile();
     }
 }
@@ -304,8 +332,8 @@ void cmMSDotNETGenerator::WriteProject(std::ostream& fout,
 {
   std::string d = dir;
   cmSystemTools::ConvertToWindowsSlashes(d);
-  fout << "Project(\"{" << this->CreateGUID(m_Makefile->GetProjectName()) 
-       << "}\") = \"" << dspname << "\", \""
+  fout << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\" = \"" 
+       << dspname << "\", \""
        << d << "\\" << dspname << ".vcproj\", \"{"
        << this->CreateGUID(dspname) << "}\"\nEndProject\n";
 }
@@ -444,6 +472,7 @@ std::string cmMSDotNETGenerator::CreateGUID(const char* name)
   UuidToString(&uid,&uidstr);
   ret = reinterpret_cast<char*>(uidstr);
   RpcStringFree(&uidstr);
+  ret = cmSystemTools::UpperCase(ret);
   m_GUIDMap[name] = ret;
   return ret;
 }
@@ -498,31 +527,6 @@ void cmMSDotNETGenerator::OutputVCProjFile()
   for(cmTargets::iterator l = tgts.begin(); 
       l != tgts.end(); l++)
     {
-    switch(l->second.GetType())
-      {
-      case cmTarget::STATIC_LIBRARY:
-        this->SetBuildType(STATIC_LIBRARY, l->first.c_str());
-        break;
-      case cmTarget::SHARED_LIBRARY:
-        this->SetBuildType(DLL, l->first.c_str());
-        break;
-      case cmTarget::EXECUTABLE:
-        this->SetBuildType(EXECUTABLE,l->first.c_str());
-        break;
-      case cmTarget::WIN32_EXECUTABLE:
-        this->SetBuildType(WIN32_EXECUTABLE,l->first.c_str());
-        break;
-      case cmTarget::UTILITY:
-        this->SetBuildType(UTILITY, l->first.c_str());
-        break;
-      case cmTarget::INSTALL_FILES:
-	break;
-      case cmTarget::INSTALL_PROGRAMS:
-	break;
-      default:
-	cmSystemTools::Error("Bad target type", l->first.c_str());
-	break;
-      }
     // INCLUDE_EXTERNAL_MSPROJECT command only affects the workspace
     // so don't build a projectfile for it
     if ((l->second.GetType() != cmTarget::INSTALL_FILES)
@@ -633,12 +637,19 @@ void cmMSDotNETGenerator::WriteConfiguration(std::ostream& fout,
                                              const char* configName,
                                              const char *libName,
                                              const cmTarget &target)
-{
-  fout << "\t\t<Configuration>\n"
+{ 
+  const char* mfcFlag = m_Makefile->GetDefinition("CMAKE_MFC_FLAG");
+  if(!mfcFlag)
+    {
+    mfcFlag = "0";
+    }
+  fout << "\t\t<Configuration\n"
        << "\t\t\tName=\"" << configName << "|Win32\"\n"
-       << "\t\t\tOutputDirectory=\"" << configName << "\"\n"
-       << "\t\t\tIntermediateDirectory=\"" << configName << "\"\n"
-       << "\t\t\tConfigurationType=\"2\"\n"
+       << "\t\t\tOutputDirectory=\"" << m_LibraryOutputPath << configName << "\"\n"
+       << "\t\t\tIntermediateDirectory=\".\\" << configName << "\"\n"
+       << "\t\t\tConfigurationType=\"4\"\n"
+       << "\t\t\tUseOfMFC=\"" << mfcFlag << "\"\n"
+       << "\t\t\tATLMinimizesCRunTimeLibraryUsage=\"FALSE\"\n"
        << "\t\t\tCharacterSet=\"2\">\n";
   fout << "\t\t\t<Tool\n"
        << "\t\t\t\tName=\"VCCLCompilerTool\"\n"
@@ -683,72 +694,110 @@ void cmMSDotNETGenerator::WriteConfiguration(std::ostream& fout,
     fout << ";&quot;" << *i << "&quot;";
     }
   fout << "\"\n";
+  fout << "\t\t\t\tAssemblerListingLocation=\"" << configName << "\"\n";
+  fout << "\t\t\t\tObjectFile=\"" << configName << "\"\n";
+  fout << "\t\t\t\tProgramDataBaseFileName=\"" << configName << "\"\n";
   fout << "\t\t\t\tWarningLevel=\"3\"\n";
   fout << "\t\t\t\tDetect64BitPortabilityProblems=\"TRUE\"\n"
        << "\t\t\t\tDebugInformationFormat=\"3\"";
   fout << "/>\n";  // end of <Tool Name=VCCLCompilerTool
 
   fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCCustomBuildTool\"/>\n";
-  this->OutputBuildTool(fout, libName, target);
+  fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCMIDLTool\"/>\n";
+  fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCPostBuildEventTool\"/>\n";
+  fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCPreBuildEventTool\"/>\n";
+  this->OutputBuildTool(fout, configName, libName, target);
   fout << "\t\t</Configuration>\n";
 }
 
 void cmMSDotNETGenerator::OutputBuildTool(std::ostream& fout,
+                                          const char* configName,
                                           const char *libName,
                                           const cmTarget &target)
 { 
-  std::string libPath = "";
-  if (m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH"))
+  switch(target.GetType())
     {
-    libPath = m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH");
-    }
-  if(libPath.size())
-    {
-    // make sure there is a trailing slash
-    if(libPath[libPath.size()-1] != '/')
-      {
-      libPath += "/";
-      }
-    libPath = cmSystemTools::HandleNetworkPaths(libPath.c_str());
-    }
-  std::string exePath = "";
-  if (m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH"))
-    {
-    exePath = m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
-    }
-  if(exePath.size())
-    {
-    // make sure there is a trailing slash
-    if(exePath[exePath.size()-1] != '/')
-      {
-      exePath += "/";
-      }
-    }
-  exePath = cmSystemTools::HandleNetworkPaths(exePath.c_str());
-  
-  switch(m_BuildType)
-    {
-    case STATIC_LIBRARY:
+    case cmTarget::STATIC_LIBRARY:
       fout << "\t\t\t<Tool\n"
            << "\t\t\t\tName=\"VCLibrarianTool\"\n"
-           << "\t\t\t\t\tOutputFile=\"" << exePath << libName << ".lib\"/>\n";
+           << "\t\t\t\t\tOutputFile=\"" << m_ExecutableOutputPath << configName 
+           << "/" << libName << ".lib\"/>\n";
       break;
-    case DLL:
+    case cmTarget::SHARED_LIBRARY:
+    case cmTarget::MODULE_LIBRARY:
       break;
-    case EXECUTABLE:
+    case cmTarget::EXECUTABLE:
       fout << "\t\t\t<Tool\n"
            << "\t\t\t\tName=\"VCLinkerTool\"\n"
-           << "AdditionalOptions=\"/MACHINE:I386\"\n"
-           << "AdditionalDependencies=\" odbc32.lib odbccp32.lib ";
-      fout << "**** FINISH cmMSDotNETGenerator **** \n";
+           << "\t\t\t\tAdditionalOptions=\"/MACHINE:I386\"\n"
+           << "\t\t\t\tAdditionalDependencies=\" odbc32.lib odbccp32.lib ";
+      this->OutputLibraries(fout, configName, libName, target);
+      fout << "\"\n";
+      fout << "\t\t\t\tOutputFile=\"" << m_LibraryOutputPath <<
+        configName << "/" << libName << ".exe\"\n";
+      fout << "\t\t\t\tLinkIncremental=\"1\"\n";
+      fout << "\t\t\t\tSuppressStartupBanner=\"TRUE\"\n";
+      fout << "AdditionalLibraryDirectories=\"";
+      this->OutputLibraryDirectories(fout, configName, libName, target);
+      fout << "\"\n";
+      fout << "\t\t\t\tProgramDatabaseFile=\"" << m_LibraryOutputPath << libName << ".pdb\"\n";
+      fout << "\t\t\t\tSubSystem=\"1\"\n";
+      fout << "\t\t\t\tStackReserveSize=\"10000000\"/>\n";
       break;
-    case WIN32_EXECUTABLE:
+    case cmTarget::WIN32_EXECUTABLE:
       break;
-    case UTILITY:
+    case cmTarget::UTILITY:
       break;
     }
 }
 
+void cmMSDotNETGenerator::OutputLibraryDirectories(std::ostream& fout,
+                                                   const char* configName,
+                                                   const char* libName,
+                                                   const cmTarget &target)
+{
+  fout << m_LibraryOutputPath << "$(INTDIR)," << m_LibraryOutputPath;
+  std::set<std::string> pathEmitted;
+  std::vector<std::string>::iterator i;
+  std::vector<std::string>& libdirs = m_Makefile->GetLinkDirectories();
+  for(i = libdirs.begin(); i != libdirs.end(); ++i)
+    {
+    std::string lpath = cmSystemTools::HandleNetworkPaths(i->c_str());
+    if(lpath[lpath.size()-1] != '/')
+      {
+      lpath += "/";
+      }
+    if(pathEmitted.insert(lpath).second)
+      {
+      fout << "," << lpath;
+      }
+    }
+  
+}
+
+void cmMSDotNETGenerator::OutputLibraries(std::ostream& fout,
+                                          const char* configName,
+                                          const char* libName,
+                                          const cmTarget &target)
+{
+  const cmTarget::LinkLibraries& libs = target.GetLinkLibraries();
+  cmTarget::LinkLibraries::const_iterator j;
+  for(j = libs.begin(); j != libs.end(); ++j)
+    { 
+    std::string lib = j->first;
+    if(j->first.find(".lib") == std::string::npos)
+      {
+      lib += ".lib";
+      }
+    lib = cmSystemTools::EscapeSpaces(lib.c_str());
+     if (j->second == cmTarget::GENERAL
+         || (j->second == cmTarget::DEBUG && strcmp(configName, "DEBUG") == 0)
+         || (j->second == cmTarget::OPTIMIZED && strcmp(configName, "DEBUG") != 0))
+       {
+       fout << lib << " ";
+       }
+    }
+}
 
 void cmMSDotNETGenerator::OutputDefineFlags(std::ostream& fout)
 {
@@ -951,10 +1000,6 @@ void cmMSDotNETGenerator::WriteVCProjEndGroup(std::ostream& fout)
 
 
 
-void cmMSDotNETGenerator::SetBuildType(BuildType b, const char *libName)
-{
-  m_BuildType = b;
-}
 
 std::string
 cmMSDotNETGenerator::CombineCommands(const cmSourceGroup::Commands &commands,
@@ -1049,7 +1094,7 @@ void cmMSDotNETGenerator::WriteProjectStart(std::ostream& fout, const char *libN
        << "\tName=\"" << libName << "\"\n"
        << "\tSccProjectName=\"\"\n"
        << "\tSccLocalPath=\"\"\n"
-       << "\tKeyword=\"AtlProj\">\n"
+       << "\tKeyword=\"Win32Proj\">\n"
        << "\t<Platforms>\n"
        << "\t\t<Platform\n\t\t\tName=\"Win32\"/>\n"
        << "\t</Platforms>\n";

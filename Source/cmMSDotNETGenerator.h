@@ -30,8 +30,6 @@
 class cmMSDotNETGenerator : public cmMakefileGenerator
 {
 public:
-  enum BuildType {STATIC_LIBRARY, DLL, EXECUTABLE, WIN32_EXECUTABLE, UTILITY};
-
   ///! Constructor sets the generation of SLN files on.
   cmMSDotNETGenerator();
 
@@ -69,11 +67,6 @@ public:
   virtual void ComputeSystemInfo();
 
 protected:  
-    /**
-   * Specify the type of the build: static, dll, or executable.
-   */
-  void SetBuildType(BuildType,const char *name);
-
   /**
    * Return array of created VCProj names in a STL vector.
    * Each executable must have its own dsp.
@@ -142,11 +135,22 @@ private:
                     const char* name, const char* path,
                     const std::vector<std::string>& dependencies);
   void WriteSLNFooter(std::ostream& fout);
-  void OutputBuildTool(std::ostream& fout, const char* libname, const cmTarget& t);
+  void OutputBuildTool(std::ostream& fout, const char* configName,
+                       const char* libname, const cmTarget& t);
+  void OutputLibraryDirectories(std::ostream& fout,
+                                const char* configName,
+                                const char* libName,
+                                const cmTarget &target);
+  void OutputLibraries(std::ostream& fout,
+                       const char* configName,
+                       const char* libName,
+                       const cmTarget &target);
+  
 private:
   std::map<cmStdString, cmStdString> m_GUIDMap;
-  BuildType m_BuildType;
   bool m_BuildSLN;
+  std::string m_LibraryOutputPath;
+  std::string m_ExecutableOutputPath;
   std::string m_IncludeOptions;
   std::vector<std::string> m_Configurations;
   std::string m_VCProjHeaderTemplate;
