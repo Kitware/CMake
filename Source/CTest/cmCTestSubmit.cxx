@@ -295,6 +295,23 @@ bool cmCTestSubmit::TriggerUsingHTTP(const std::vector<std::string>& files,
   curl = curl_easy_init();
   if(curl) 
     {
+    // Using proxy
+    if ( m_HTTPProxyType > 0 )
+      {
+      curl_easy_setopt(curl, CURLOPT_PROXY, m_HTTPProxy.c_str()); 
+      switch (m_HTTPProxyType)
+        {
+        case 2:
+          curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS4);
+          break;
+        case 3:
+          curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
+          break;
+        default:
+          curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);           
+        }
+      }
+
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
     std::string::size_type cc, kk;
     for ( cc = 0; cc < files.size(); cc ++ )
@@ -319,7 +336,7 @@ bool cmCTestSubmit::TriggerUsingHTTP(const std::vector<std::string>& files,
             sprintf(hex, "%%%02X", (int)c);
             ofile.append(hex);
             break;
-          break;
+            break;
           default: 
             ofile.append(hex);
           }
