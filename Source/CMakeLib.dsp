@@ -109,11 +109,11 @@ SOURCE=.\cmDirectory.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmDSPMakefile.cxx
+SOURCE=.\cmDSPWriter.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmDSWMakefile.cxx
+SOURCE=.\cmDSWWriter.cxx
 # End Source File
 # Begin Source File
 
