@@ -91,6 +91,10 @@ SOURCE=.\cmake.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=.\cmNMakeMakefileGenerator.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=.\cmBorlandMakefileGenerator.cpp
 # End Source File
 # Begin Source File

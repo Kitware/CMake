@@ -131,6 +131,11 @@ protected:
                                            const char* extraCompileFlags,
                                            bool sharedTarget);
   
+  virtual void BuildInSubDirectory(std::ostream& fout,
+                                   const char* directory,
+                                   const char* target1,
+                                   const char* target2);
+
   virtual void OutputSubDirectoryVars(std::ostream& fout,
                                       const char* var,
                                       const char* target,
