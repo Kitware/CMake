@@ -711,3 +711,11 @@ std::string cmNMakeMakefileGenerator::ConvertToOutputPath(const char* s)
 {
   return cmSystemTools::ConvertToOutputPath(s);
 }
+
+
+std::string cmNMakeMakefileGenerator::CreateMakeVariable(const char* s, const char* s2)
+{
+  std::string ret=  std::string(s) + std::string(s2);
+  cmSystemTools::ReplaceString(ret, "-", "_");
+  return ret;
+}

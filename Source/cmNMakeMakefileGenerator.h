@@ -87,6 +87,9 @@ protected:
   void SetLibraryPathOption(const char* lib){ m_LibraryPathOption = lib;}
   void SetLibraryLinkOption(const char* lib){ m_LibraryLinkOption = lib;}
   virtual std::string ConvertToOutputPath(const char* s);
+
+  virtual std::string CreateMakeVariable(const char* s, const char* s2);
+
 private:
   std::string m_LibraryPathOption;// option to specifiy a link path -LIBPATH 
   std::string m_LibraryLinkOption; // option to specify a library (like -l, empty for nmake)
