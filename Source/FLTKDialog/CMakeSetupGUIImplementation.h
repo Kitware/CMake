@@ -21,6 +21,7 @@ public:
   virtual ~CMakeSetupGUIImplementation();
   virtual void Close( void );
   virtual void Show( void );
+  virtual void UpdateData( bool option );
   virtual void BuildProjectFiles( void );
   virtual void BrowseForBinaryPath( void );
   virtual void BrowseForSourcePath( void );
@@ -28,6 +29,9 @@ public:
   virtual void SetSourcePath( const char * path );
   virtual bool VerifyBinaryPath( const char * path );
   virtual bool VerifySourcePath( const char * path );
+  virtual void SaveCacheFromGUI( void );
+  virtual void LoadCacheFromDiskToGUI( void );
+  virtual void FillCacheGUIFromCacheManager( void );
 
 };
 
