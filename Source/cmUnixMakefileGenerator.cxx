@@ -869,9 +869,14 @@ void cmUnixMakefileGenerator::OutputBuildLibraryInDir(std::ostream& fout,
 						      const char* library,
 						      const char* fullpath)
 {
+  const char* makeTarget = library;
+  if(m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH"))
+    {
+    makeTarget = fullpath;
+    }
   fout << cmSystemTools::EscapeSpaces(fullpath)
        << ":\n\tcd " << cmSystemTools::EscapeSpaces(path)
-           << "; $(MAKE) " << library << "\n\n"; 
+           << "; $(MAKE) " << makeTarget << "\n\n"; 
 }
 
 bool cmUnixMakefileGenerator::SamePath(const char* path1, const char* path2)
