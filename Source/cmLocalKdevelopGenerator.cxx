@@ -327,10 +327,10 @@ bool cmLocalKdevelopGenerator::CreateFilelistFile(const std::string& outputDir, 
     for (cmTargets::const_iterator ti = targets.begin(); ti != targets.end(); ti++)
       {
       const std::vector<cmSourceFile*>& sources=ti->second.GetSourceFiles();
-      for (std::vector<cmSourceFile*>::const_iterator it=sources.begin();
-           it!=sources.end(); it++)
+      for (std::vector<cmSourceFile*>::const_iterator si=sources.begin();
+           si!=sources.end(); si++)
         {
-        files.insert((*it)->GetFullPath());
+        files.insert((*si)->GetFullPath());
         }
       for (std::vector<std::string>::const_iterator lt=listFiles.begin();
            lt!=listFiles.end(); lt++)
