@@ -818,7 +818,8 @@ const char* cmGlobalGenerator::GetLinkerPreference(const char* lang)
 
 
 void cmGlobalGenerator::FillProjectMap()
-{  
+{ 
+  m_ProjectMap.clear(); // make sure we start with a clean map
   unsigned int i;
   for(i = 0; i < m_LocalGenerators.size(); ++i)
     {
