@@ -37,8 +37,8 @@
 #
 #    Example:
 #
-#      SET(KWSYS_HEADER_ROOT ${CMAKE_CURRENT_BINARY_DIR})
-#      INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
+#      SET(KWSYS_HEADER_ROOT ${PROJECT_BINARY_DIR})
+#      INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR})
 #
 #  KWSYS_LIBRARY_INSTALL_DIR = The installation target directories into
 #  KWSYS_HEADER_INSTALL_DIR    which the libraries and headers from
