@@ -144,6 +144,10 @@ SET(CMAKE_VERBOSE_MAKEFILE FALSE CACHE BOOL "If this value is on, makefiles will
 SET (CMAKE_BUILD_TYPE "" CACHE STRING 
      "Choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel.")
 
+
+SET (CMAKE_INSTALL_PREFIX    /usr/local CACHE PATH 
+     "Install path prefix, prepended onto install directories.")
+
 # add the flags to the cache based
 # on the initial values computed in the platform/*.cmake files
 # use _INIT variables so that this only happens the first time
