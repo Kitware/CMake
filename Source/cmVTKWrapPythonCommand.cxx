@@ -53,17 +53,11 @@ bool cmVTKWrapPythonCommand::InitialPass(std::vector<std::string> const& argsIn)
   // Create the init file 
   std::string res = m_LibraryName;
   res += "Init.cxx";
-  this->CreateInitFile(res);
 
   // add the init file
-  cmSourceFile cfile;
-  cfile.SetIsAnAbstractClass(false);
-  std::string newName = m_LibraryName;
-  newName += "Init";
-  cfile.SetName(newName.c_str(), m_Makefile->GetCurrentOutputDirectory(),
-                "cxx",false);
-  m_Makefile->AddSource(cfile);
-  sourceListValue += newName + ".cxx";
+  std::string initName = m_LibraryName;
+  initName += "Init";
+  sourceListValue += initName + ".cxx";
 
   // get the list of classes for this library
   for(std::vector<std::string>::iterator j = (args.begin() + 2);
@@ -93,6 +87,12 @@ bool cmVTKWrapPythonCommand::InitialPass(std::vector<std::string> const& argsIn)
       }
     }
   
+  cmSourceFile cfile;
+  cfile.SetIsAnAbstractClass(false);
+  this->CreateInitFile(res);
+  cfile.SetName(initName.c_str(), m_Makefile->GetCurrentOutputDirectory(),
+                "cxx",false);
+  m_Makefile->AddSource(cfile);
   m_Makefile->AddDefinition(m_SourceList.c_str(), sourceListValue.c_str());
   return true;
 }
