@@ -272,8 +272,10 @@ void cmBorlandMakefileGenerator::OutputMakefile(const char* file)
         std::string ext = i->GetSourceExtension();
         if (!i->IsAHeaderFileOnly() && (ext!="def" && ext!="rc"))
           {
+          std::string sourceName = i->GetSourceName();
+          cmSystemTools::ConvertToWindowsSlashes(sourceName);
           fout << " \\\n  " <<
-            cmSystemTools::ConvertToWindowsSlashes(i->GetSourceName())
+            sourceName
                << ".obj ";
           }
         }
@@ -399,8 +401,10 @@ void cmBorlandMakefileGenerator::OutputMakefile(const char* file)
           {
           fullname = i->GetFullPath();
           cmSystemTools::ReplaceString(fullname, outpath.c_str(), "");
+          std::string sourceName = i->GetSourceName();
+          cmSystemTools::ConvertToWindowsSlashes(sourceName);
           fout << "" 
-               << cmSystemTools::ConvertToWindowsSlashes(i->GetSourceName()) 
+               << sourceName
                << ".obj : " << fullname << "\n";
           }
         }
