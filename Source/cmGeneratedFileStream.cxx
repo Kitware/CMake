@@ -27,6 +27,12 @@
 #endif
 
 //----------------------------------------------------------------------------
+cmGeneratedFileStream::cmGeneratedFileStream():
+  cmGeneratedFileStreamBase(), Stream()
+{
+}
+
+//----------------------------------------------------------------------------
 cmGeneratedFileStream::cmGeneratedFileStream(const char* name, bool quiet):
   cmGeneratedFileStreamBase(name),
   Stream(m_TempName.c_str())
@@ -51,9 +57,37 @@ cmGeneratedFileStream::~cmGeneratedFileStream()
 }
 
 //----------------------------------------------------------------------------
+cmGeneratedFileStream&
+cmGeneratedFileStream::Open(const char* name, bool quiet)
+{
+  // Store the file name and construct the temporary file name.
+  this->cmGeneratedFileStreamBase::Open(name);
+
+  // Open the temporary output file.
+  this->Stream::open(m_TempName.c_str());
+
+  // Check if the file opened.
+  if(!*this && !quiet)
+    {
+    cmSystemTools::Error("Cannot open file for write: ", m_TempName.c_str());
+    cmSystemTools::ReportLastSystemError("");
+    }
+  return *this;
+}
+
+//----------------------------------------------------------------------------
 void cmGeneratedFileStream::SetCopyIfDifferent(bool copy_if_different)
 {
   m_CopyIfDifferent = copy_if_different;
+}
+
+//----------------------------------------------------------------------------
+cmGeneratedFileStreamBase::cmGeneratedFileStreamBase():
+  m_Name(),
+  m_TempName(),
+  m_CopyIfDifferent(false),
+  m_Okay(false)
+{
 }
 
 //----------------------------------------------------------------------------
@@ -89,6 +123,20 @@ cmGeneratedFileStreamBase::~cmGeneratedFileStreamBase()
     // file.
     cmSystemTools::RemoveFile(m_TempName.c_str());
     }
+}
+
+//----------------------------------------------------------------------------
+void cmGeneratedFileStreamBase::Open(const char* name)
+{
+  // Save the original name of the file.
+  m_Name = name;
+
+  // Create the name of the temporary file.
+  m_TempName = name;
+  m_TempName += ".tmp";
+
+  // Make sure the temporary file that will be used is not present.
+  cmSystemTools::RemoveFile(m_TempName.c_str());
 }
 
 //----------------------------------------------------------------------------

@@ -25,11 +25,18 @@
 class cmGeneratedFileStreamBase
 {
 protected:
-  // The constructor prepares the temporary output file.
+  // This constructor does not prepare the temporary file.  The open
+  // method must be used.
+  cmGeneratedFileStreamBase();
+
+  // This constructor prepares the temporary output file.
   cmGeneratedFileStreamBase(const char* name);
 
   // The destructor renames the temporary output file to the real name.
   ~cmGeneratedFileStreamBase();
+
+  // Internal method to setup the instance for a given file name.
+  void Open(const char* name);
 
   // Internal file replacement implementation.
   int RenameFile(const char* oldname, const char* newname);
@@ -64,7 +71,13 @@ public:
   typedef std::ofstream Stream;
 
   /**
-   * The constructor takes the name of the file to be generated.  It
+   * This constructor prepares a default stream.  The open method must
+   * be used before writing to the stream.
+   */
+  cmGeneratedFileStream();
+
+  /**
+   * This constructor takes the name of the file to be generated.  It
    * automatically generates a name for the temporary file.  If the
    * file cannot be opened an error message is produced unless the
    * second argument is set to true.
@@ -77,6 +90,14 @@ public:
    * replaced.
    */
   ~cmGeneratedFileStream();
+
+  /**
+   * Open an output file by name.  This should be used only with a
+   * default-constructed stream.  It automatically generates a name
+   * for the temporary file.  If the file cannot be opened an error
+   * message is produced unless the second argument is set to true.
+   */
+  cmGeneratedFileStream& Open(const char* name, bool quiet=false);
 
   /**
    * Set whether copy-if-different is done.
