@@ -109,11 +109,11 @@ private:
   void CreateXCodeTargets(cmLocalGenerator* gen, std::vector<cmXCodeObject*>&);
   void AddDependTarget(cmXCodeObject* target,
                        cmXCodeObject* dependTarget);
-  void AddLinkTarget(cmXCodeObject* target,
-                     cmXCodeObject* dependTarget);
   void AddLinkLibrary(cmXCodeObject* target,
-                      const char*);
+                      const char* lib, cmTarget* dtarget = 0);
   void ConfigureOutputPaths();
+  void CreateXCodeDependHackTarget(std::vector<cmXCodeObject*>& targets);
+  std::string GetTargetFullPath(cmTarget*);
 private:
   std::vector<cmXCodeObject*> m_XCodeObjects;
   cmXCodeObject* m_RootObject;
@@ -125,6 +125,8 @@ private:
   std::string m_ExecutableOutputPath;
   cmLocalGenerator* m_CurrentLocalGenerator;
   bool m_DoneAllBuild;
+  bool m_DoneXCodeHack;
+  std::string m_CurrentXCodeHackMakefile;
 };
 
 #endif

@@ -49,6 +49,17 @@ public:
     {
       m_List.push_back(value);
     }
+  bool HasObject(cmXCodeObject* o)
+    {
+      return !(std::find(m_List.begin(), m_List.end(), o) == m_List.end());
+    }
+  void AddUniqueObject(cmXCodeObject* value)
+    {
+      if(std::find(m_List.begin(), m_List.end(), value) == m_List.end())
+        {
+        m_List.push_back(value);
+        }
+    }
   static void Indent(int level, std::ostream& out);
   void Print(std::ostream& out);
   static void PrintList(std::vector<cmXCodeObject*> const&, std::ostream& out);
@@ -97,6 +108,14 @@ public:
     }
   void CopyAttributes(cmXCodeObject* );
   
+  void AddDependLibrary(const char* l)
+    {
+      m_DependLibraries.push_back(l);
+    }
+  std::vector<cmStdString> const& GetDependLibraries()
+    {
+      return m_DependLibraries;
+    }
 private:
   cmTarget* m_cmTarget;
   Type m_Type;
@@ -106,6 +125,7 @@ private:
   cmXCodeObject* m_Object;
   cmXCodeObject* m_PBXTargetDependency;
   std::vector<cmXCodeObject*> m_List;
+  std::vector<cmStdString> m_DependLibraries;
   std::map<cmStdString, cmXCodeObject*> m_ObjectAttributes;
 };
 #endif

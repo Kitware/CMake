@@ -745,7 +745,7 @@ void cmGlobalGenerator::GetDocumentation(cmDocumentationEntry& entry) const
 }
 
 bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root, 
-                                                cmLocalGenerator* gen)
+                                   cmLocalGenerator* gen)
 {
   cmLocalGenerator* cur = gen->GetParent();
   while(cur && cur != root)
