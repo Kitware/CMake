@@ -51,7 +51,6 @@ KWSYS_FILES="\
   Directory.hxx \
   Process.h \
   RegularExpression.hxx \
-  StandardIncludes.hxx \
   SystemTools.hxx"
 
 KWSYS_STD_FILES="
@@ -579,6 +578,10 @@ for a in ${KWSYS_STD_FILES}; do
 done
 cmake_replace_string "${cmake_source_dir}/Source/kwsys/kwsys_std.h.in" \
    "${cmake_bootstrap_dir}/cmsys/std/stl.h.in" KWSYS_NAMESPACE cmsys
+cmake_replace_string "${cmake_source_dir}/Source/kwsys/Configure.h.in" \
+   "${cmake_bootstrap_dir}/cmsys/Configure.h.in" KWSYS_NAMESPACE cmsys
+cmake_replace_string "${cmake_bootstrap_dir}/cmsys/Configure.h.in" \
+   "${cmake_bootstrap_dir}/cmsys/Configure.h" KWSYS_BUILD_SHARED 0
 for a in string vector; do
   cmake_replace_string "${cmake_bootstrap_dir}/cmsys/std/stl.h.in" \
     "${cmake_bootstrap_dir}/cmsys/std/${a}" KWSYS_STL_HEADER ${a}
