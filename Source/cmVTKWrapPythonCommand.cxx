@@ -194,14 +194,22 @@ bool cmVTKWrapPythonCommand::WriteInit(const char *kitName,
 
   for (i = 0; i < classes.size(); i++)
     {
+#ifdef _WIN32
     fprintf(fout,"extern  \"C\" {__declspec( dllexport) PyObject *PyVTKClass_%sNew(char *); }\n",classes[i].c_str());
+#else
+    fprintf(fout,"extern  \"C\" {PyObject *PyVTKClass_%sNew(char *); }\n",classes[i].c_str());
+#endif
     }
 
   fprintf(fout,"\nstatic PyMethodDef Py%s_ClassMethods[] = {\n",
 	  kitName);
   fprintf(fout,"{NULL, NULL}};\n\n");
   
+#ifdef _WIN32
   fprintf(fout,"extern  \"C\" {__declspec( dllexport) void init%s();}\n\n",kitName);
+#else
+  fprintf(fout,"extern  \"C\" {void init%s();}\n\n",kitName);
+#endif
   
 
   /* module init function */
