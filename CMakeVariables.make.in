@@ -48,8 +48,8 @@ CFLAGS        = @CMAKE_SHLIB_CFLAGS@ @ANSI_CFLAGS@
 CXX           = @CXX@
 CXXFLAGS      = @CMAKE_SHLIB_CFLAGS@ @EXTRA_GCC_FLAG@ @CMAKE_TEMPLATE_FLAGS@ 
 
-JAVA          = @JAVA@
-JRE           = @JAVA@
+JAVA          = @JAVACOMMAND@
+JRE           = @JAVACOMMAND@
 JAVAC         = @JAVAC@
 JAR           = @JAR@
 JAVADOC       = @JAVADOC@
