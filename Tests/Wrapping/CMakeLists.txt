@@ -38,8 +38,8 @@ SET(WRAP ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/Wrap${EXE_EXT})
 # Test VTK wrappers
 #
 SET (SRCS
-  vtkExcluded
-  vtkIncluded
+  vtkExcluded.cxx
+  vtkIncluded.cxx
   )
 
 WRAP_EXCLUDE_FILES (
@@ -106,22 +106,26 @@ IF (QT_FOUND)
   INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR} )
 
 
-  QT_WRAP_CPP (wraplibQT QT_SRCS SRCS)
   CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/foo.ui.in
-    ${CMAKE_CURRENT_BINARY_DIR}/foo.ui)
+    ${CMAKE_CURRENT_BINARY_DIR}/foo.ui IMMEDIATE)
 
   SET (QT_WRAP_UI "On")
   SET (QT_UIC_EXE "${QT_UIC_EXECUTABLE}")
+
+
   SET (QTUI_SRCS
     qtwrapping.ui
     ${CMAKE_CURRENT_BINARY_DIR}/foo.ui
     )
-  QT_WRAP_UI (qtwrapping QTUI_H_SRCS QTUI_S_SRCS QTUI_SRCS)
+  QT_WRAP_UI (myqtlib QTUI_H_SRCS QTUI_S_SRCS ${QTUI_SRCS})
+  QT_WRAP_CPP (myqtlib QT_MOC_SRCS ${SRCS})
 
   MESSAGE("QT files are ${QTUI_S_SRCS}")
   MESSAGE("QT other files are ${QTUI_H_SRCS}")
   ADD_DEFINITIONS(${QT_DEFINITIONS})
-  ADD_EXECUTABLE (qtwrapping qtwrappingmain.cxx QTUI_S_SRCS)
+  ADD_LIBRARY(myqtlib ${QTUI_S_SRCS} ${QT_MOC_SRCS})
+  ADD_EXECUTABLE (qtwrapping qtwrappingmain.cxx)
+  TARGET_LINK_LIBRARIES(qtwrapping myqtlib)
 
   TARGET_LINK_LIBRARIES( qtwrapping ${QT_LIBRARIES} )
 ENDIF (QT_FOUND)
