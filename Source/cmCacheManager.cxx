@@ -136,6 +136,22 @@ bool cmCacheManager::LoadCache(const char* path)
   return true;
 }
 
+void cmCacheManager::DefineCache(cmMakefile *mf)
+{
+  if (!mf)
+    {
+    return;
+    }
+  
+  // add definition to the makefile
+  for( std::map<std::string, CacheEntry>::const_iterator i = m_Cache.begin();
+       i != m_Cache.end(); ++i)
+    {
+    const CacheEntry& ce = (*i).second;
+    mf->AddDefinition((*i).first.c_str(), ce.m_Value.c_str());
+    }
+}
+
 bool cmCacheManager::SaveCache(cmMakefile* mf) const
 {
   return this->SaveCache(mf->GetHomeOutputDirectory());
