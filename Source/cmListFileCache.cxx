@@ -90,6 +90,9 @@ bool cmListFileCache::CacheFile(const char* path, bool requireProjectCommand)
     return false;
     }
 
+  // Get a pointer to a persistent copy of the name.
+  const char* filename = this->GetUniqueStringPointer(path);
+
   // Create the scanner.
   cmListFileLexer* lexer = cmListFileLexer_New();
   if(!lexer)
@@ -99,17 +102,17 @@ bool cmListFileCache::CacheFile(const char* path, bool requireProjectCommand)
     }
 
   // Open the file.
-  if(!cmListFileLexer_SetFileName(lexer, path))
+  if(!cmListFileLexer_SetFileName(lexer, filename))
     {
     cmListFileLexer_Delete(lexer);
-    cmSystemTools::Error("cmListFileCache: error can not open file ", path);
+    cmSystemTools::Error("cmListFileCache: error can not open file ", filename);
     return false;
     }
 
   // Use a simple recursive-descent parser to process the token
   // stream.
   cmListFile inFile;
-  inFile.m_ModifiedTime = cmSystemTools::ModifiedTime(path);
+  inFile.m_ModifiedTime = cmSystemTools::ModifiedTime(filename);
   bool parseError = false;
   bool haveNewline = true;
   cmListFileLexer_Token* token;
@@ -126,9 +129,9 @@ bool cmListFileCache::CacheFile(const char* path, bool requireProjectCommand)
         haveNewline = false;
         cmListFileFunction inFunction;
         inFunction.m_Name = token->text;
-        inFunction.m_FilePath = path;
+        inFunction.m_FilePath = filename;
         inFunction.m_Line = token->line;
-        if(cmListFileCacheParseFunction(lexer, inFunction, path))
+        if(cmListFileCacheParseFunction(lexer, inFunction, filename))
           {
           inFile.m_Functions.push_back(inFunction);
           }
@@ -141,7 +144,7 @@ bool cmListFileCache::CacheFile(const char* path, bool requireProjectCommand)
         {
         cmOStringStream error;
         error << "Error in cmake code at\n"
-              << path << ":" << token->line << ":\n"
+              << filename << ":" << token->line << ":\n"
               << "Parse error.  Expected a newline, got \""
               << token->text << "\".";
         cmSystemTools::Error(error.str().c_str());
@@ -152,7 +155,7 @@ bool cmListFileCache::CacheFile(const char* path, bool requireProjectCommand)
       {
       cmOStringStream error;
       error << "Error in cmake code at\n"
-            << path << ":" << token->line << ":\n"
+            << filename << ":" << token->line << ":\n"
             << "Parse error.  Expected a command name, got \""
             << token->text << "\".";
       cmSystemTools::Error(error.str().c_str());
@@ -185,12 +188,12 @@ bool cmListFileCache::CacheFile(const char* path, bool requireProjectCommand)
       {
       cmListFileFunction project;
       project.m_Name = "PROJECT";
-      cmListFileArgument prj("Project", false);
+      cmListFileArgument prj("Project", false, filename, 0);
       project.m_Arguments.push_back(prj);
       inFile.m_Functions.insert(inFile.m_Functions.begin(),project);
       }
     }
-  m_ListFileCache[path] = inFile;
+  m_ListFileCache[filename] = inFile;
   return true;
 }
 
@@ -241,13 +244,13 @@ bool cmListFileCacheParseFunction(cmListFileLexer* lexer,
             token->type == cmListFileLexer_Token_ArgumentUnquoted)
       {
       cmListFileArgument a(cmSystemTools::RemoveEscapes(token->text),
-                           false);
+                           false, filename, token->line);
       function.m_Arguments.push_back(a);
       }
     else if(token->type == cmListFileLexer_Token_ArgumentQuoted)
       {
       cmListFileArgument a(cmSystemTools::RemoveEscapes(token->text),
-                           true);
+                           true, filename, token->line);
       function.m_Arguments.push_back(a);
       }
     else if(token->type != cmListFileLexer_Token_Newline)
@@ -271,4 +274,27 @@ bool cmListFileCacheParseFunction(cmListFileLexer* lexer,
   cmSystemTools::Error(error.str().c_str());
 
   return false;
+}
+
+//----------------------------------------------------------------------------
+const char* cmListFileCache::GetUniqueStringPointer(const char* name)
+{
+  UniqueStrings::iterator i = m_UniqueStrings.find(name);
+  if(i == m_UniqueStrings.end())
+    {
+    char* str = new char[strlen(name)+1];
+    strcpy(str, name);
+    i = m_UniqueStrings.insert(UniqueStrings::value_type(name, str)).first;
+    }
+  return i->second;
+}
+
+//----------------------------------------------------------------------------
+cmListFileCache::~cmListFileCache()
+{
+  for(UniqueStrings::iterator i = m_UniqueStrings.begin();
+      i != m_UniqueStrings.end(); ++i)
+    {
+    delete [] i->second;
+    }
 }

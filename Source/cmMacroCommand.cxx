@@ -173,6 +173,22 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
         
         arg.Value = tmps;
         arg.Quoted = k->Quoted;
+        const char* def =
+          mf.GetDefinition("CMAKE_MACRO_REPORT_DEFINITION_LOCATION");
+        if(def && !cmSystemTools::IsOff(def))
+          {
+          // Report the location of the argument where the macro was
+          // defined.
+          arg.FilePath = k->FilePath;
+          arg.Line = k->Line;
+          }
+        else
+          {
+          // Report the location of the argument where the macro was
+          // invoked.
+          arg.FilePath = lff.m_FilePath;
+          arg.Line = lff.m_Line;
+          }
         newLFF.m_Arguments.push_back(arg);
         }
       if(!mf.ExecuteCommand(newLFF))

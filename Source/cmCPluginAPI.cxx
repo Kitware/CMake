@@ -356,7 +356,8 @@ int cmExecuteCommand(void *arg, const char *name,
   for(int i = 0; i < numArgs; ++i)
     {
     // Assume all arguments are quoted.
-    lff.m_Arguments.push_back(cmListFileArgument(args[i], true));
+    lff.m_Arguments.push_back(cmListFileArgument(args[i], true,
+                                                 "[CMake-Plugin]", 0));
     }
   return mf->ExecuteCommand(lff);
 }

@@ -1423,7 +1423,9 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source) const
 
 const char *cmMakefile::ExpandVariablesInString(std::string& source,
                                                 bool escapeQuotes,
-                                                bool atOnly) const
+                                                bool atOnly,
+                                                const char* filename = 0,
+                                                long line = -1) const
 {
   // This method replaces ${VAR} and @VAR@ where VAR is looked up
   // with GetDefinition(), if not found in the map, nothing is expanded.
@@ -1540,6 +1542,18 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
               {
               result += lookup;
               }
+            found = true;
+            }
+          else if(filename && (var == "CMAKE_CURRENT_LIST_FILE"))
+            {
+            result += filename;
+            found = true;
+            }
+          else if(line >= 0 && (var == "CMAKE_CURRENT_LIST_LINE"))
+            {
+            cmOStringStream ostr;
+            ostr << line;
+            result += ostr.str();
             found = true;
             }
           }
@@ -1696,8 +1710,8 @@ void cmMakefile::ExpandArguments(
     {
     // Expand the variables in the argument.
     value = i->Value;
-    this->ExpandVariablesInString(value);
-    
+    this->ExpandVariablesInString(value, false, false, i->FilePath, i->Line);
+
     // If the argument is quoted, it should be one argument.
     // Otherwise, it may be a list of arguments.
     if(i->Quoted)

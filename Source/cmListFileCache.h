@@ -28,9 +28,12 @@
 
 struct cmListFileArgument
 {
-  cmListFileArgument(): Value(), Quoted(false) {}
-  cmListFileArgument(const cmListFileArgument& r): Value(r.Value), Quoted(r.Quoted) {}
-  cmListFileArgument(const std::string& v, bool q): Value(v), Quoted(q) {}
+  cmListFileArgument(): Value(), Quoted(false), FilePath(0), Line(0) {}
+  cmListFileArgument(const cmListFileArgument& r):
+    Value(r.Value), Quoted(r.Quoted), FilePath(r.FilePath), Line(r.Line) {}
+  cmListFileArgument(const std::string& v, bool q, const char* file,
+                     long line): Value(v), Quoted(q),
+                                 FilePath(file), Line(line) {}
   bool operator == (const cmListFileArgument& r) const
     {
     return (this->Value == r.Value) && (this->Quoted == r.Quoted);
@@ -41,13 +44,15 @@ struct cmListFileArgument
     }
   std::string Value;
   bool Quoted;
+  const char* FilePath;
+  long Line;
 };
 
 struct cmListFileFunction
 {
   std::string m_Name;
   std::vector<cmListFileArgument> m_Arguments;
-  std::string m_FilePath;
+  const char* m_FilePath;
   long m_Line;
 };
 
@@ -80,12 +85,18 @@ public:
   //! Flush cache file out of cache.
   void FlushCache(const char* path);
 
+  ~cmListFileCache();
 private:
   // Cache the file
   bool CacheFile(const char* path, bool requireProjectCommand);
   // private data
   typedef std::map<cmStdString, cmListFile> ListFileMap;
   ListFileMap m_ListFileCache;  // file name to ListFile map
+
+  typedef std::map<cmStdString, char*> UniqueStrings;
+  UniqueStrings m_UniqueStrings;
+  const char* GetUniqueStringPointer(const char* name);
+
   static cmListFileCache* Instance; // singelton pointer
 };
 

@@ -58,6 +58,8 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
             cmSystemTools::ReplaceString(tmps, variable.c_str(), j->c_str());
             arg.Value = tmps;
             arg.Quoted = k->Quoted;
+            arg.FilePath = k->FilePath;
+            arg.Line = k->Line;
             newLFF.m_Arguments.push_back(arg);
             }
           mf.ExecuteCommand(newLFF);
