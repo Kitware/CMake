@@ -45,6 +45,15 @@ void FinalPass(void *inf, void *mf)
     }
 }
 
+void Destructor(void *inf) 
+{
+  cmLoadedCommandInfo *info = (cmLoadedCommandInfo *)inf;
+  // get our client data from initial pass
+  cmVTKWrapTclData *cdata = 
+    (cmVTKWrapTclData *)info->CAPI->GetClientData(info);
+  free(cdata);
+}
+
 CM_PLUGIN_EXPORT const char *cmGetName()
 {
   return "CMAKE_TEST_COMMAND";
@@ -54,6 +63,7 @@ void CM_PLUGIN_EXPORT cmInitializeCommand(cmLoadedCommandInfo *info)
 {
   info->InitialPass = InitialPass;
   info->FinalPass = FinalPass;
+  info->Destructor = Destructor;
   info->m_Inherited = 0;
 }
 
