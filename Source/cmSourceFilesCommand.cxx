@@ -76,7 +76,7 @@ bool cmSourceFilesCommand::InitialPass(std::vector<std::string> const& args)
       std::string ext = cmSystemTools::GetFilenameExtension(copy);
       std::string name_no_ext = cmSystemTools::GetFilenameName(copy.c_str());
       name_no_ext = name_no_ext.substr(0, name_no_ext.length()-ext.length());
-      if ( ext[0] == '.' )
+      if ( ext.length() && ext[0] == '.' )
 	{
 	ext = ext.substr(1);
 	}

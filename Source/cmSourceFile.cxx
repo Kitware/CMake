@@ -160,7 +160,12 @@ void cmSourceFile::SetName(const char* name, const char* dir, const char *ext,
     pathname += "/";
     }
   
-  pathname += m_SourceName + "." + ext;
+  pathname += m_SourceName;
+  if(ext && strlen(ext))
+    {
+    pathname += ".";
+    pathname += ext;
+    }
   m_FullPath = pathname;
   m_SourceExtension = ext;
   return;
