@@ -258,6 +258,7 @@ void CMakeSetupDialog::OnOK()
 
   // Set the output directory
   mf.SetOutputDirectory(m_WhereBuild);
+  mf.SetOutputHomeDirectory(m_WhereBuild);
   // set the directory which contains the CMakeLists.txt
   mf.SetCurrentDirectory(m_WhereSource);
   // Create the master DSW file and all children dsp files for ITK
