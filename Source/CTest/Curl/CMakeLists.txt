@@ -55,7 +55,7 @@ SET(libCurl_SRCS
     )
 
 IF(WIN32)
-  INCLUDE(${LIBCURL_SOURCE_DIR}/WindowsCache.cmake)
+  INCLUDE(${LIBCURL_SOURCE_DIR}/Platforms/WindowsCache.cmake)
 ENDIF(WIN32)
 
 SET(CURL_LIBS "")
