@@ -30,7 +30,7 @@ xmlrpc_makePrintable(const char * const input) {
              inputCursor < inputLength; 
              ++inputCursor) {
 
-            if (isprint(input[inputCursor]))
+            if (isprint((int)(input[inputCursor])))
                 output[outputCursor++] = input[inputCursor]; 
             else if (input[inputCursor] == '\n') {
                 output[outputCursor++] = '\\';

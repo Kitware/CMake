@@ -355,7 +355,7 @@ xmlrpc_traceXml(const char * const label,
         nonPrintableCount = 0;  /* Initial value */
 
         for (i = 0; i < xmlLength; ++i) {
-            if (!isprint(xml[i]) && xml[i] != '\n' && xml[i] != '\r')
+            if (!isprint((int)(xml[i])) && xml[i] != '\n' && xml[i] != '\r')
                 ++nonPrintableCount;
         }
         if (nonPrintableCount > 0)
