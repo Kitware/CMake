@@ -2954,6 +2954,31 @@ int cmCTest::ProcessTests()
       res |= CTEST_MEMORY_ERRORS;
       }
     }
+  if ( !notest )
+    {
+    std::string notes_dir = m_ToplevelPath + "/Testing/Notes";
+    if ( cmSystemTools::FileIsDirectory(notes_dir.c_str()) )
+      {
+      cmsys::Directory d;
+      d.Load(notes_dir.c_str());
+      unsigned long cc;
+      for ( cc = 0; cc < d.GetNumberOfFiles(); cc ++ )
+        {
+        const char* file = d.GetFile(cc);
+        std::string fullname = notes_dir + "/" + file;
+        if ( cmSystemTools::FileExists(fullname.c_str()) &&
+          !cmSystemTools::FileIsDirectory(fullname.c_str()) )
+          {
+          if ( m_NotesFiles.size() > 0 )
+            {
+            m_NotesFiles += ";";
+            }
+          m_NotesFiles += fullname;
+          m_Tests[NOTES_TEST] = 1;
+          }
+        }
+      }
+    }
   if ( m_Tests[NOTES_TEST] || m_Tests[ALL_TEST] )
     {
     this->UpdateCTestConfiguration();
