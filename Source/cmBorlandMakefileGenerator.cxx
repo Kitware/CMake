@@ -169,7 +169,7 @@ OutputBuildObjectFromSource(std::ostream& fout,
     shared = true;
     }
   // Header files shouldn't have build rules.
-  if(source.IsAHeaderFileOnly())
+  if(source.GetPropertyAsBool("HEADER_FILE_ONLY"))
     {
     return;
     }

@@ -111,7 +111,8 @@ cmVTKMakeInstantiatorCommand
     // vtkIndent and vtkTimeStamp are special cases and are not
     // vtkObject subclasses.
     if(
-      (!sf || (!sf->GetWrapExclude() && !sf->GetIsAnAbstractClass())) &&
+      (!sf || (!sf->GetPropertyAsBool("WRAP_EXCLUDE") && 
+               !sf->GetPropertyAsBool("ABSTRACT"))) &&
       ((srcName != "vtkIndent") && (srcName != "vtkTimeStamp")))
       {
       m_Classes.push_back(srcName);
@@ -159,8 +160,8 @@ cmVTKMakeInstantiatorCommand
   
   // Add the generated source file into the source list.
   cmSourceFile file;
-  file.SetWrapExclude(true);
-  file.SetIsAnAbstractClass(false);
+  file.SetProperty("WRAP_EXCLUDE","1");
+  file.SetProperty("ABSTRACT","0");
   file.SetName(fileName.c_str(), filePath.c_str(),
                m_Makefile->GetSourceExtensions(),
                m_Makefile->GetHeaderExtensions());
@@ -197,8 +198,8 @@ cmVTKMakeInstantiatorCommand
       
       // Add the generated source file into the source list.
       cmSourceFile file;
-      file.SetWrapExclude(true);
-      file.SetIsAnAbstractClass(false);
+      file.SetProperty("WRAP_EXCLUDE","1");
+      file.SetProperty("ABSTRACT","0");
       file.SetName(fileName.c_str(), filePath.c_str(),
                    m_Makefile->GetSourceExtensions(),
                    m_Makefile->GetHeaderExtensions());

@@ -324,8 +324,10 @@ OutputBuildObjectFromSource(std::ostream& fout,
                             bool shared)
 { 
   // Header files shouldn't have build rules.
-  if(source.IsAHeaderFileOnly())
+  if(source.GetPropertyAsBool("HEADER_FILE_ONLY"))
+    {
     return;
+    }
 
   std::string comment = "Build ";
   std::string objectFile = std::string(shortName) + 

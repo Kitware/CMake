@@ -69,7 +69,7 @@ bool cmAuxSourceDirectoryCommand::InitialPass(std::vector<std::string> const& ar
           cmfile.SetName(fullname.c_str(), m_Makefile->GetCurrentDirectory(),
                          m_Makefile->GetSourceExtensions(),
                          m_Makefile->GetHeaderExtensions());
-          cmfile.SetIsAnAbstractClass(false);
+          cmfile.SetProperty("ABSTRACT","0");
           m_Makefile->AddSource(cmfile);
           if (sourceListValue.size() > 0)
             {

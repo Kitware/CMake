@@ -123,7 +123,7 @@ void cmUnixMakefileGenerator::ProcessDepends(const cmMakeDepend &md)
     for(std::vector<cmSourceFile*>::iterator i = classes.begin(); 
         i != classes.end(); ++i)
       {
-      if(!(*i)->GetIsAHeaderFileOnly())
+      if(!(*i)->GetPropertyAsBool("HEADER_FILE_ONLY"))
         {
         // get the depends
         const cmDependInformation *info = 
@@ -375,7 +375,7 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
       for(std::vector<cmSourceFile*>::iterator i = classes.begin(); 
           i != classes.end(); i++)
         {
-        if(!(*i)->IsAHeaderFileOnly())
+        if(!(*i)->GetPropertyAsBool("HEADER_FILE_ONLY"))
           {
           std::string outExt(this->GetOutputExtension((*i)->GetSourceExtension().c_str()));
           if(outExt.size())
@@ -390,7 +390,7 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
       for(std::vector<cmSourceFile*>::iterator i = classes.begin(); 
           i != classes.end(); i++)
         {
-        if(!(*i)->IsAHeaderFileOnly())
+        if(!(*i)->GetPropertyAsBool("HEADER_FILE_ONLY"))
           {
           std::string outExt(this->GetOutputExtension((*i)->GetSourceExtension().c_str()));
           if(outExt.size())
@@ -1307,7 +1307,7 @@ bool cmUnixMakefileGenerator::OutputObjectDepends(std::ostream& fout)
     for(std::vector<cmSourceFile*>::const_iterator source = sources.begin(); 
         source != sources.end(); ++source)
       {
-      if(!(*source)->IsAHeaderFileOnly())
+      if(!(*source)->GetPropertyAsBool("HEADER_FILE_ONLY"))
         {
         if(!(*source)->GetDepends().empty())
           {
@@ -1358,7 +1358,7 @@ void cmUnixMakefileGenerator::OutputCheckDepends(std::ostream& fout)
     for(std::vector<cmSourceFile*>::const_iterator source = sources.begin(); 
         source != sources.end(); ++source)
       {
-      if(!(*source)->IsAHeaderFileOnly())
+      if(!(*source)->GetPropertyAsBool("HEADER_FILE_ONLY"))
         {
         if(!(*source)->GetDepends().empty())
           {
@@ -1816,7 +1816,7 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
     for(std::vector<cmSourceFile*>::const_iterator source = sources.begin(); 
         source != sources.end(); ++source)
       {
-      if(!(*source)->IsAHeaderFileOnly())
+      if(!(*source)->GetPropertyAsBool("HEADER_FILE_ONLY"))
         {
           allsources += " \\\n";
           allsources += this->ConvertToOutputPath((*source)->GetFullPath().c_str());
@@ -1931,7 +1931,7 @@ OutputBuildObjectFromSource(std::ostream& fout,
                             bool shared)
 {
   // Header files shouldn't have build rules.
-  if(source.IsAHeaderFileOnly())
+  if(source.GetPropertyAsBool("HEADER_FILE_ONLY"))
     {
     return;
     }
@@ -2005,7 +2005,7 @@ void cmUnixMakefileGenerator::OutputSourceObjectBuildRules(std::ostream& fout)
     for(std::vector<cmSourceFile*>::const_iterator source = sources.begin(); 
         source != sources.end(); ++source)
       {
-      if(!(*source)->IsAHeaderFileOnly())
+      if(!(*source)->GetPropertyAsBool("HEADER_FILE_ONLY"))
         {
         std::string shortName;
         std::string sourceName;
@@ -2042,9 +2042,9 @@ void cmUnixMakefileGenerator::OutputSourceObjectBuildRules(std::ostream& fout)
         // Only output a rule for each .o once.
         if(rules.find(shortNameWithExt) == rules.end())
           {
-          if((*source)->GetCompileFlags())
+          if((*source)->GetProperty("COMPILE_FLAGS"))
             {
-            exportsDef += (*source)->GetCompileFlags();
+            exportsDef += (*source)->GetProperty("COMPILE_FLAGS");
             exportsDef += " ";
             }
           this->OutputBuildObjectFromSource(fout,

@@ -42,7 +42,7 @@ bool cmWrapExcludeFilesCommand::InitialPass(std::vector<std::string> const& args
     cmSourceFile* sf = m_Makefile->GetSource(j->c_str());
     if(sf)
       {
-      sf->SetWrapExclude(true);
+      sf->SetProperty("WRAP_EXCLUDE","1");
       }
     // if file is not already in the makefile, then add it
     else
@@ -51,7 +51,7 @@ bool cmWrapExcludeFilesCommand::InitialPass(std::vector<std::string> const& args
       cmSourceFile file; 
       std::string path = cmSystemTools::GetFilenamePath(newfile);
       // set the flags
-      file.SetWrapExclude(true);
+      file.SetProperty("WRAP_EXCLUDE","1");
       // if this is a full path then 
       if((path.size() && path[0] == '/') ||
          (path.size() > 1 && path[1] == ':'))

@@ -76,7 +76,7 @@ void cmTarget::GenerateSourceFilesFromSourceLists( cmMakefile &mf)
             else
               {
               cmSourceFile file;
-              file.SetIsAnAbstractClass(false);
+              file.SetProperty("ABSTRACT","0");
               file.SetName(args[i].c_str(), mf.GetCurrentDirectory(),
                            mf.GetSourceExtensions(),
                            mf.GetHeaderExtensions());
@@ -92,7 +92,7 @@ void cmTarget::GenerateSourceFilesFromSourceLists( cmMakefile &mf)
     if (!done)
       {
       cmSourceFile file;
-      file.SetIsAnAbstractClass(false);
+      file.SetProperty("ABSTRACT","0");
       file.SetName(temps.c_str(), mf.GetCurrentDirectory(),
                    mf.GetSourceExtensions(),
                    mf.GetHeaderExtensions());

@@ -28,7 +28,7 @@ void cmSourceFile::SetName(const char* name, const char* dir,
                            const std::vector<std::string>& sourceExts,
                            const std::vector<std::string>& headerExts)
 {
-  m_HeaderFileOnly = true;
+  this->SetProperty("HEADER_FILE_ONLY","1");
 
   m_SourceName = name;
   std::string pathname = dir;
@@ -68,10 +68,11 @@ void cmSourceFile::SetName(const char* name, const char* dir,
       }
 
     // See if the file is a header file
-    if(std::find( headerExts.begin(), headerExts.end(), m_SourceExtension ) == headerExts.end())
-      m_HeaderFileOnly = false;
-    else
-      m_HeaderFileOnly = true;
+    if(std::find( headerExts.begin(), headerExts.end(), m_SourceExtension ) ==
+       headerExts.end())
+      {
+      this->SetProperty("HEADER_FILE_ONLY","0");
+      }
     m_FullPath = hname;
     return;
     }
@@ -86,7 +87,7 @@ void cmSourceFile::SetName(const char* name, const char* dir,
     if(cmSystemTools::FileExists(hname.c_str()))
       {
       m_SourceExtension = *ext;
-      m_HeaderFileOnly = false;
+      this->SetProperty("HEADER_FILE_ONLY","0");
       m_FullPath = hname;
       return;
       }
@@ -128,7 +129,7 @@ void cmSourceFile::SetName(const char* name, const char* dir,
 void cmSourceFile::SetName(const char* name, const char* dir, const char *ext,
                            bool hfo)
 {
-  m_HeaderFileOnly = hfo;
+  this->SetProperty("HEADER_FILE_ONLY",(hfo ? "1" : "0"));
   m_SourceName = name;
   std::string pathname = dir;
   if(pathname != "")
@@ -149,24 +150,38 @@ void cmSourceFile::SetName(const char* name, const char* dir, const char *ext,
 
 void cmSourceFile::Print() const
 {
-  if(m_AbstractClass)
-    {
-    std::cerr <<  "Abstract ";
-    }
-  else
-    {
-    std::cerr << "Concrete ";
-    }
-  if(m_HeaderFileOnly)
-    {
-    std::cerr << "Header file ";
-    }
-  else
-    {
-    std::cerr << "CXX file ";
-    }
-  std::cerr << "m_CompileFlags: " << m_CompileFlags << "\n";
   std::cerr << "m_FullPath: " <<  m_FullPath << "\n";
   std::cerr << "m_SourceName: " << m_SourceName << std::endl;
   std::cerr << "m_SourceExtension: " << m_SourceExtension << "\n";
+}
+
+void cmSourceFile::SetProperty(const char* prop, const char* value)
+{
+  if (!prop)
+    {
+    return;
+    }
+  m_Properties[prop] = value;
+}
+
+const char *cmSourceFile::GetProperty(const char* prop) const
+{
+  std::map<cmStdString,cmStdString>::const_iterator i = 
+    m_Properties.find(prop);
+  if (i != m_Properties.end())
+    {
+    return i->second.c_str();
+    }
+  return 0;
+}
+
+bool cmSourceFile::GetPropertyAsBool(const char* prop) const
+{
+  std::map<cmStdString,cmStdString>::const_iterator i = 
+    m_Properties.find(prop);
+  if (i != m_Properties.end())
+    {
+    return cmSystemTools::IsOn(i->second.c_str());
+    }
+  return false;
 }

@@ -279,7 +279,7 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)
   cmSourceFile cfile;
   std::string sourceListValue;
   
-  cfile.SetIsAnAbstractClass(false);
+  cfile.SetProperty("ABSTRACT","0");
   cfile.SetName(cmSystemTools::GetFilenameWithoutExtension(args[1]).c_str(), 
                 m_Makefile->GetCurrentOutputDirectory(),
                 cmSystemTools::GetFilenameExtension(args[1]).c_str()+1, 
@@ -290,7 +290,7 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)
   for(i = testsBegin; i != tests.end(); ++i)
     {
     cmSourceFile cfile;
-    cfile.SetIsAnAbstractClass(false);
+    cfile.SetProperty("ABSTRACT","0");
     cfile.SetName(i->c_str(), 
                   m_Makefile->GetCurrentDirectory(),
                   m_Makefile->GetSourceExtensions(), 

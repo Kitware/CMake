@@ -34,9 +34,6 @@ public:
    */
   cmSourceFile()
     {
-    m_AbstractClass = false;
-    m_HeaderFileOnly = false;
-    m_WrapExclude = false;
     }
   
   /**
@@ -61,26 +58,11 @@ public:
    */
   void Print() const;
 
-  /**
-   * Indicate whether the class is abstract (non-instantiable).
-   */
-  bool IsAnAbstractClass() const { return m_AbstractClass; }
-  bool GetIsAnAbstractClass() const { return m_AbstractClass; }
-  void SetIsAnAbstractClass(bool f) { m_AbstractClass = f; }
-
-  /**
-   * Indicate whether the class should not be wrapped
-   */
-  bool GetWrapExclude() const { return m_WrapExclude; }
-  void SetWrapExclude(bool f) { m_WrapExclude = f; }
-
-  /**
-   * Indicate whether this class is defined with only the header file.
-   */
-  bool IsAHeaderFileOnly() const { return m_HeaderFileOnly; }
-  bool GetIsAHeaderFileOnly() const { return m_HeaderFileOnly; }
-  void SetIsAHeaderFileOnly(bool f) { m_HeaderFileOnly = f; }
-
+  ///! Set/Get a property of this source file
+  void SetProperty(const char *prop, const char *value);
+  const char *GetProperty(const char *prop) const;
+  bool GetPropertyAsBool(const char *prop) const;
+    
   /**
    * The full path to the file.
    */
@@ -107,14 +89,9 @@ public:
   const std::vector<std::string> &GetDepends() const {return m_Depends;}
   std::vector<std::string> &GetDepends() {return m_Depends;}
 
-  ///! Set/Get per file compiler flags
-  void SetCompileFlags(const char* f)  { m_CompileFlags = f;}
-  const char* GetCompileFlags() const { return m_CompileFlags.size() ? m_CompileFlags.c_str(): 0; }
 private:
-  bool m_AbstractClass;
-  bool m_WrapExclude;
-  bool m_HeaderFileOnly;
-  std::string m_CompileFlags;
+
+  std::map<cmStdString,cmStdString> m_Properties;
   std::string m_FullPath;
   std::string m_SourceName;
   std::string m_SourceExtension;

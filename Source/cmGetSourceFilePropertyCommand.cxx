@@ -32,15 +32,15 @@ bool cmGetSourceFilePropertyCommand::InitialPass(std::vector<std::string> const&
     {
     if(args[2] == "ABSTRACT")
       {
-      m_Makefile->AddDefinition(var, sf->IsAnAbstractClass());
+      m_Makefile->AddDefinition(var, sf->GetPropertyAsBool("ABSTRACT"));
       }
     if(args[2] == "WRAP_EXCLUDE")
       {
-      m_Makefile->AddDefinition(var, sf->GetWrapExclude());
+      m_Makefile->AddDefinition(var, sf->GetPropertyAsBool("WRAP_EXCLUDE"));
       }
     if(args[2] == "COMPILE_FLAGS")
       {
-      m_Makefile->AddDefinition(var, sf->GetCompileFlags());
+      m_Makefile->AddDefinition(var, sf->GetProperty("COMPILE_FLAGS"));
       }
     }
   else

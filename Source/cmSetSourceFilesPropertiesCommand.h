@@ -53,9 +53,9 @@ public:
   virtual const char* GetFullDocumentation()
     {
       return
-        "SET_SOURCE_FILES_PROPERTIES(file1 file2 .. filen [ABSTRACT|WRAP_EXCLUDE|GENERATED|COMPILE_FLAGS] [flags]) "
-        "Set properties on a file.   The syntax for the command is to list all the files you want "
-        "to change, and then provide the values you want to set next.";
+        "SET_SOURCE_FILES_PROPERTIES(file1 file2 .. filen PROPERTIES prop1 value1 prop2 value2 ... prop2 valuen)"
+        "Set properties on a file. The syntax for the command is to list all the files you want "
+        "to change, and then provide the values you want to set next. Common boolean properties ABSTRACT, WRAP_EXCLUDE, GENERATED and COMPILE_FLAGS. The first three are boolean properties (use a 1 or 0, TRUE or FALSE) while the COMPILE_FLAGS accepts any string. You can make up your own properties as well.";
     }
   
   cmTypeMacro(cmSetSourceFilesPropertiesCommand, cmCommand);

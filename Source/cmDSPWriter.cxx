@@ -277,7 +277,7 @@ void cmDSPWriter::WriteDSPFile(std::ostream& fout,
       const char* compileFlags = 0;
       if(cc->second.m_SourceFile)
         {
-        compileFlags = cc->second.m_SourceFile->GetCompileFlags();
+        compileFlags = cc->second.m_SourceFile->GetProperty("COMPILE_FLAGS");
         }
       if (source != libName || target.GetType() == cmTarget::UTILITY)
         {

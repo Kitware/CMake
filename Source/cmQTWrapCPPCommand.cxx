@@ -65,12 +65,12 @@ bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& argsIn)
     cmSourceFile *curr = m_Makefile->GetSource(j->c_str());
     
     // if we should wrap the class
-    if (!curr || !curr->GetWrapExclude())
+    if (!curr || !curr->GetPropertyAsBool("WRAP_EXCLUDE"))
       {
       cmSourceFile file;
       if (curr)
         {
-        file.SetIsAnAbstractClass(curr->IsAnAbstractClass());
+        file.SetProperty("ABSTRACT",curr->GetProperty("ABSTRACT"));
         }
       std::string srcName = cmSystemTools::GetFilenameWithoutExtension(*j);
       std::string newName = "moc_" + srcName;

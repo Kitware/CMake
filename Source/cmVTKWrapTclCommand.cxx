@@ -102,12 +102,12 @@ bool cmVTKWrapTclCommand::InitialPass(std::vector<std::string> const& argsIn)
       cmSourceFile *curr = m_Makefile->GetSource(j->c_str());
       
       // if we should wrap the class
-      if (!curr || !curr->GetWrapExclude())
+      if (!curr || !curr->GetPropertyAsBool("WRAP_EXCLUDE"))
         {
         cmSourceFile file;
         if (curr)
           {
-          file.SetIsAnAbstractClass(curr->IsAnAbstractClass());
+          file.SetProperty("ABSTRACT",curr->GetProperty("ABSTRACT"));
           }
         std::string srcName = cmSystemTools::GetFilenameWithoutExtension(*j);
         std::string newName = srcName + "Tcl";
@@ -124,7 +124,7 @@ bool cmVTKWrapTclCommand::InitialPass(std::vector<std::string> const& argsIn)
       }
     // add the init file
     cmSourceFile cfile;
-    cfile.SetIsAnAbstractClass(false);
+    cfile.SetProperty("ABSTRACT","0");
     std::string newName = m_LibraryName;
     newName += "Init";
     this->CreateInitFile(res);
@@ -162,7 +162,7 @@ void cmVTKWrapTclCommand::FinalPass()
       {
       args.push_back(hints);
       }
-    args.push_back((m_WrapClasses[classNum].IsAnAbstractClass() ? "0" : "1"));
+    args.push_back((m_WrapClasses[classNum].GetPropertyAsBool("ABSTRACT") ? "0" : "1"));
     std::string res = m_Makefile->GetCurrentOutputDirectory();
     res += "/";
     res += m_WrapClasses[classNum].GetSourceName() + ".cxx";
@@ -184,7 +184,7 @@ bool cmVTKWrapTclCommand::CreateInitFile(std::string& res)
   size_t classNum;
   for(classNum = 0; classNum < lastClass; classNum++)
     {
-    if (!m_WrapClasses[classNum].IsAnAbstractClass())
+    if (!m_WrapClasses[classNum].GetPropertyAsBool("ABSTRACT"))
       {
       std::string cls = m_WrapHeaders[classNum];
       cls = cls.substr(0,cls.size()-2);

@@ -44,7 +44,7 @@ bool cmAbstractFilesCommand::InitialPass(std::vector<std::string> const& argsIn)
     cmSourceFile* sf = m_Makefile->GetSource(j->c_str());
     if(sf)
       {
-      sf->SetIsAnAbstractClass(true);
+      sf->SetProperty("ABSTRACT","1");
       }
     else
       {

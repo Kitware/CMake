@@ -277,7 +277,7 @@ void cmMakeDepend::GenerateMakefileDependencies()
     for(std::vector<cmSourceFile*>::const_iterator i = classes.begin(); 
         i != classes.end(); ++i)
       {
-      if(!(*i)->GetIsAHeaderFileOnly())
+      if(!(*i)->GetPropertyAsBool("HEADER_FILE_ONLY"))
         {
         cmDependInformation* info =
           this->GetDependInformation((*i)->GetFullPath().c_str(),NULL);

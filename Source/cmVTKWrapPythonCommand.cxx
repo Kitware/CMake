@@ -66,12 +66,12 @@ bool cmVTKWrapPythonCommand::InitialPass(std::vector<std::string> const& argsIn)
     cmSourceFile *curr = m_Makefile->GetSource(j->c_str());
     
     // if we should wrap the class
-    if (!curr || !curr->GetWrapExclude())
+    if (!curr || !curr->GetPropertyAsBool("WRAP_EXCLUDE"))
       {
       cmSourceFile file;
       if (curr)
         {
-        file.SetIsAnAbstractClass(curr->IsAnAbstractClass());
+        file.SetProperty("ABSTRACT",curr->GetProperty("ABSTRACT"));
         }
       std::string srcName = cmSystemTools::GetFilenameWithoutExtension(*j);
       std::string newName = srcName + "Python";
@@ -88,7 +88,7 @@ bool cmVTKWrapPythonCommand::InitialPass(std::vector<std::string> const& argsIn)
     }
   
   cmSourceFile cfile;
-  cfile.SetIsAnAbstractClass(false);
+  cfile.SetProperty("ABSTRACT","0");
   this->CreateInitFile(res);
   cfile.SetName(initName.c_str(), m_Makefile->GetCurrentOutputDirectory(),
                 "cxx",false);
@@ -125,7 +125,7 @@ void cmVTKWrapPythonCommand::FinalPass()
       {
       args.push_back(hints);
       }
-    args.push_back((m_WrapClasses[classNum].IsAnAbstractClass() ? "0" : "1"));
+    args.push_back((m_WrapClasses[classNum].GetPropertyAsBool("ABSTRACT") ? "0" : "1"));
     args.push_back(res);
 
     m_Makefile->AddCustomCommand(m_WrapHeaders[classNum].c_str(),

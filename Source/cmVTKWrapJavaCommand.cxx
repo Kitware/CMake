@@ -55,12 +55,12 @@ bool cmVTKWrapJavaCommand::InitialPass(std::vector<std::string> const& argsIn)
     cmSourceFile *curr = m_Makefile->GetSource(j->c_str());
 
     // if we should wrap the class
-    if (!curr || !curr->GetWrapExclude())
+    if (!curr || !curr->GetPropertyAsBool("WRAP_EXCLUDE"))
       {
       cmSourceFile file;
       if (curr)
         {
-        file.SetIsAnAbstractClass(curr->IsAnAbstractClass());
+        file.SetProperty("ABSTRACT",curr->GetProperty("ABSTRACT"));
         }
       std::string srcName = cmSystemTools::GetFilenameWithoutExtension(*j);
       std::string newName = srcName + "Java";
@@ -124,7 +124,7 @@ void cmVTKWrapJavaCommand::FinalPass()
       {
       args.push_back(hints);
       }
-    args.push_back((m_WrapClasses[classNum].IsAnAbstractClass() ? "0" : "1"));
+    args.push_back((m_WrapClasses[classNum].GetPropertyAsBool("ABSTRACT") ? "0" : "1"));
     args.push_back(res);
 
     m_Makefile->AddCustomCommand(m_WrapHeaders[classNum].c_str(),
@@ -137,7 +137,7 @@ void cmVTKWrapJavaCommand::FinalPass()
       {
       args2.push_back(hints);
       }
-    args2.push_back((m_WrapClasses[classNum].IsAnAbstractClass() ? "0" : "1"));
+    args2.push_back((m_WrapClasses[classNum].GetPropertyAsBool("ABSTRACT") ? "0" : "1"));
     args2.push_back(res2);
 
     m_Makefile->AddCustomCommand(m_WrapHeaders[classNum].c_str(),

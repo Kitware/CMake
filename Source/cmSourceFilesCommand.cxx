@@ -71,7 +71,7 @@ bool cmSourceFilesCommand::InitialPass(std::vector<std::string> const& argsIn)
       continue;
       }
     cmSourceFile file;
-    file.SetIsAnAbstractClass(false);
+    file.SetProperty("ABSTRACT","0");
     std::string path = cmSystemTools::GetFilenamePath(copy);
     if ( generated )
       {
