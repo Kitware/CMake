@@ -73,7 +73,17 @@ void cmDSPMakefile::OutputDSPFile()
   for(i = includes.begin(); i != includes.end(); ++i)
     {
     m_IncludeOptions +=  "/I \"";
-    m_IncludeOptions += *i;
+    // watch for network paths, MSVC can't seem to load // 
+    if (strlen(i->c_str()) > 2 && i->c_str()[0] == '/' && 
+        i->c_str()[1] == '/')
+      {
+      m_IncludeOptions += "\\\\";
+      m_IncludeOptions += (i->c_str() + 2);
+      }
+    else
+      {
+      m_IncludeOptions += *i;
+      }
     m_IncludeOptions += "\" ";
     }
   
