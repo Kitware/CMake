@@ -20,9 +20,9 @@
 #include "cmCommand.h"
 
 /** \class cmEndWhileCommand
- * \brief ends an if block
+ * \brief ends a while loop
  *
- * cmEndWhileCommand ends an if block
+ * cmEndWhileCommand ends a while loop
  */
 class cmEndWhileCommand : public cmCommand
 {
