@@ -853,7 +853,7 @@ std::string cmSystemTools::RemoveEscapes(const char* s)
   std::string result = "";
   for(const char* ch = s; *ch; ++ch)
     {
-    if(*ch == '\\')
+    if(*ch == '\\' && *(ch+1) != ';')
       {
       ++ch;
       switch (*ch)
@@ -1788,6 +1788,7 @@ void cmSystemTools::ExpandListArguments(std::vector<std::string> const& argument
                                         std::vector<std::string>& newargs)
 {
   std::vector<std::string>::const_iterator i;
+  std::string newarg;
   for(i = arguments.begin();i != arguments.end(); ++i)
     {
     // if there are no ; in the name then just copy the current string
@@ -1808,6 +1809,20 @@ void cmSystemTools::ExpandListArguments(std::vector<std::string> const& argument
           {
           endpos = i->size();
           }
+        else
+          {
+          // skip right over escaped ; ( \; )
+          while((endpos != std::string::npos)
+                && (endpos > 0) 
+                && ((*i)[endpos-1] == '\\') )
+            {
+            endpos = i->find(';', endpos+1);
+            }
+          if(endpos == std::string::npos)
+            {
+            endpos = i->size();
+            }
+          }
         std::string::size_type len = endpos - start;
         if (len > 0)
           {
@@ -1815,7 +1830,7 @@ void cmSystemTools::ExpandListArguments(std::vector<std::string> const& argument
           if(i->find('[', start) == std::string::npos)
             {
             // if there is no [ in the string then keep it
-            newargs.push_back(i->substr(start, len));
+            newarg = i->substr(start, len);
             }
           else
             {
@@ -1842,8 +1857,14 @@ void cmSystemTools::ExpandListArguments(std::vector<std::string> const& argument
                 }
               len = endpos - start;
               }
-            newargs.push_back(i->substr(start, len));
+            newarg = i->substr(start, len);
             }
+          std::string::size_type pos = newarg.find("\\;");
+          if(pos != std::string::npos)
+            {
+            newarg[pos] = ' ';
+            }
+          newargs.push_back(newarg);
           }
         start = endpos+1;
         }

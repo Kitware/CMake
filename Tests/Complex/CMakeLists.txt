@@ -58,6 +58,7 @@ SET (EXECUTABLE_OUTPUT_PATH
      ${Complex_BINARY_DIR}/bin/ CACHE PATH 
      "Single output directory for building all executables.")
 
+MESSAGE (Test " " escape " " semi-colon " " \; \;)
 #
 # Exec program (TODO: test a result)
 # Increase coverage.
