@@ -116,6 +116,7 @@ static bool Check_Alpha_Field(FIELD * field, const void * argp)
 +--------------------------------------------------------------------------*/
 static bool Check_Alpha_Character(int c, const void * argp)
 {
+  argp=0; /* Silence unused parameter warning.  */
   return (isalpha(c) ? TRUE : FALSE);
 }
 
