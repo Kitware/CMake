@@ -1351,7 +1351,6 @@ bool WindowsRunCommand(const char* command, const char* dir,
  
     }
   else sa.lpSecurityDescriptor = NULL;
-
   sa.nLength = sizeof(SECURITY_ATTRIBUTES);
   sa.bInheritHandle = true;
  
@@ -1380,10 +1379,11 @@ bool WindowsRunCommand(const char* command, const char* dir,
    * members. STARTF_USESHOWWINDOW validates the wShowWindow
    * member. */ 
   
+  si.cb = sizeof(STARTUPINFO);
   si.dwFlags = STARTF_USESTDHANDLES|STARTF_USESHOWWINDOW;
-  si.wShowWindow = SW_HIDE;
   si.hStdOutput = newstdout;
   si.hStdError = newstdout;
+  si.wShowWindow = SW_HIDE;
  
 //set the new handles for the child process si.hStdInput = newstdin;
   char* commandAndArgs = strcpy(new char[strlen(command)+1], command);
@@ -1456,6 +1456,8 @@ bool WindowsRunCommand(const char* command, const char* dir,
     if (exit != STILL_ACTIVE) break;
  
     }
+  WaitForSingleObject(pi.hProcess, INFINITE);
+  GetExitCodeProcess(pi.hProcess,&exit);
   CloseHandle(pi.hThread);
   CloseHandle(pi.hProcess);
   CloseHandle(newstdin);
