@@ -81,6 +81,10 @@ protected:
   afx_msg void OnGetMinMaxInfo( MINMAXINFO FAR* lpMMI );
   //}}AFX_MSG
   DECLARE_MESSAGE_MAP()
+
+    int m_oldCX;
+    int m_oldCY;
+  float m_deltaXRemainder;
 };
 
 //{{AFX_INSERT_LOCATION}}

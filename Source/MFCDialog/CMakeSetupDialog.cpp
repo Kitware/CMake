@@ -81,6 +81,9 @@ CMakeSetupDialog::CMakeSetupDialog(CWnd* pParent /*=NULL*/)
   m_PathToExecutable = cmSystemTools::GetProgramPath(fname).c_str();
   // add the cmake.exe to the path
   m_PathToExecutable += "/cmake.exe";
+  
+  m_oldCX = -1;
+  m_deltaXRemainder = 0;
 }
 
 void CMakeSetupDialog::DoDataExchange(CDataExchange* pDX)
@@ -95,8 +98,8 @@ void CMakeSetupDialog::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_WhereSource, m_WhereSourceControl);
 	DDX_Control(pDX, IDC_WhereBuild, m_WhereBuildControl);
 	DDX_Control(pDX, IDC_LIST2, m_CacheEntriesList);
-	DDX_CBString(pDX, IDC_WhereBuild, m_WhereBuild);
-	DDX_CBString(pDX, IDC_WhereSource, m_WhereSource);
+	DDX_CBStringExact(pDX, IDC_WhereBuild, m_WhereBuild);
+	DDX_CBStringExact(pDX, IDC_WhereSource, m_WhereSource);
 	//}}AFX_DATA_MAP
 }
 
@@ -451,6 +454,7 @@ void CMakeSetupDialog::OnSelendokWhereBuild()
 {
   m_WhereBuildControl.GetLBText(m_WhereBuildControl.GetCurSel(), 
                                 m_WhereBuild);
+  m_WhereBuildControl.SetWindowText( m_WhereBuild);
   this->UpdateData(FALSE);
   this->OnChangeWhereBuild();
 }
@@ -582,23 +586,62 @@ void CMakeSetupDialog::SaveCacheFromGUI()
 
 void CMakeSetupDialog::OnSize(UINT nType, int cx, int cy) 
 {
+  if (m_oldCX == -1)
+    {
+    m_oldCX = cx;
+    m_oldCY = cy;
+    }
+  int deltax = cx - m_oldCX;
+  int deltay = cy - m_oldCY;
+
+  m_oldCX = cx;
+  m_oldCY = cy;
+
   CDialog::OnSize(nType, cx, cy);
+
+  if (deltax == 0 && deltay == 0)
+    {
+    return;
+    }
   
   if(m_CacheEntriesList.m_hWnd)
     {
-    m_ListFrame.SetWindowPos(&wndTop, 0, 0, cx-28, cy-137,
+    // get the original sizes/positions
+    CRect cRect;
+    m_ListFrame.GetWindowRect(&cRect);
+    m_ListFrame.SetWindowPos(&wndTop, cRect.left, cRect.top, 
+                             cRect.Width() + deltax, 
+                             cRect.Height() + deltay, 
                              SWP_NOMOVE | SWP_NOZORDER);
-    m_CacheEntriesList.SetWindowPos(&wndTop, 0, 0, cx-48, cy-168,
-                                    SWP_NOMOVE | SWP_NOZORDER);
-    m_BuildProjects.SetWindowPos(&wndTop, 143, cy-33, 0, 0, 
-                                 SWP_NOSIZE | SWP_NOZORDER);
-    m_MouseHelp.SetWindowPos(&wndTop, 159, cy-57,
-                             0, 0,
-                             SWP_NOSIZE | SWP_NOZORDER);
-    m_CancelButton.SetWindowPos(&wndTop, 329, cy-33, 0, 0, 
-                                 SWP_NOSIZE | SWP_NOZORDER);
+    m_CacheEntriesList.GetWindowRect(&cRect);
+    m_CacheEntriesList.SetWindowPos(&wndTop, cRect.left, cRect.top, 
+                             cRect.Width() + deltax, 
+                             cRect.Height() + deltay, 
+                             SWP_NOMOVE | SWP_NOZORDER);
     m_VersionDisplay.SetWindowPos(&wndTop, 5, cy-23, 0, 0,
                                   SWP_NOSIZE | SWP_NOZORDER);
+
+    deltax = deltax + m_deltaXRemainder;
+    m_deltaXRemainder = deltax%2;
+    m_MouseHelp.GetWindowRect(&cRect);
+    this->ScreenToClient(&cRect);
+    m_MouseHelp.SetWindowPos(&wndTop, cRect.left + deltax/2, 
+                             cRect.top + deltay, 
+                             0, 0,
+                             SWP_NOSIZE | SWP_NOZORDER);
+
+    m_BuildProjects.GetWindowRect(&cRect);
+    this->ScreenToClient(&cRect);
+    m_BuildProjects.SetWindowPos(&wndTop, cRect.left + deltax/2, 
+                                 cRect.top + deltay, 
+                                 0, 0,
+                                 SWP_NOSIZE | SWP_NOZORDER);
+    m_CancelButton.GetWindowRect(&cRect);
+    this->ScreenToClient(&cRect);
+    m_CancelButton.SetWindowPos(&wndTop, cRect.left + deltax/2, 
+                                cRect.top + deltay, 
+                                0, 0,
+                                SWP_NOSIZE | SWP_NOZORDER);
     }
   
 }
