@@ -19,54 +19,69 @@
 // cmAddCustomCommandCommand
 bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
-  if (argsIn.size()< 9)
+  if (argsIn.size() < 6)
     {
       this->SetError("called with wrong number of arguments.");
       return false;
     }
+
   std::vector<std::string> args = argsIn;
-  std::vector<std::string> commandArgs;
-  std::vector<std::string> depends;
-  std::vector<std::string> outputs;
   
-  const char* source = args[0].c_str();
-  const char* command = args[1].c_str();
   if(args[2] != "ARGS")
     {
     this->SetError("Wrong syntax. The third argument should be ARGS");
     return false;
     }
   int cc=3;
+
+  std::vector<std::string> commandArgs;
   while(args[cc] != "DEPENDS" && cc < argsIn.size())
     {
+    m_Makefile->ExpandVariablesInString(args[cc]);
     commandArgs.push_back(args[cc]);
     cc++;
     }
+
   if(cc == argsIn.size()-1)
     {
     this->SetError("Wrong syntax. Missing DEPENDS.");
     return false;
     }
-  cc ++ ; // Skip DEPENDS
+  cc++ ; // Skip DEPENDS
+
+  std::vector<std::string> depends;
   while(args[cc] != "OUTPUTS" && cc < argsIn.size())
     {
+    m_Makefile->ExpandVariablesInString(args[cc]);
     depends.push_back(args[cc]);
     cc++;
     }
+
   if(cc == argsIn.size()-1)
     {
     this->SetError("Wrong syntax. Missing OUTPUTS.");
     return false;
     }
   cc ++; // Skip OUTPUTS
+
+  std::vector<std::string> outputs;
   while(cc < argsIn.size()-1)
     {
+    m_Makefile->ExpandVariablesInString(args[cc]);
     outputs.push_back(args[cc]);
     cc++;
     }
-  const char *target = args[argsIn.size()-1].c_str();
-  m_Makefile->AddCustomCommand( source, command, commandArgs, 
-				depends, outputs, target );
+
+  m_Makefile->ExpandVariablesInString(args[0]);
+  m_Makefile->ExpandVariablesInString(args[1]);
+  m_Makefile->ExpandVariablesInString(args[argsIn.size()-1]);
+
+  m_Makefile->AddCustomCommand(args[0].c_str(), 
+                               args[1].c_str(), 
+                               commandArgs, 
+			       depends, 
+                               outputs, 
+                               args[argsIn.size()-1].c_str());
   return true;
 }
 
