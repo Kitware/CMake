@@ -239,10 +239,10 @@ void cmUnixMakefileGenerator::OutputMakefile(const char* file)
                    "Default target executed when no arguments are given to make, first make sure cmake.depends exists, cmake.check_depends is up-to-date, check the sources, then build the all target",
                    "default_target",
                    0,
-                   "$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.depends",
-                   "$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.check_depends",
-                   "$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) -f cmake.check_depends",
-                   "$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) all");
+                   "$(MAKE) $(MAKESILENT) cmake.depends",
+                   "$(MAKE) $(MAKESILENT) cmake.check_depends",
+                   "$(MAKE) $(MAKESILENT) -f cmake.check_depends",
+                   "$(MAKE) $(MAKESILENT) all");
   
   this->OutputTargetRules(fout);
   this->OutputDependLibs(fout);
@@ -1030,9 +1030,9 @@ void cmUnixMakefileGenerator::OutputBuildLibraryInDir(std::ostream& fout,
     }
   fout << this->ConvertToOutputPath(fullpath)
        << ":\n\tcd " << this->ConvertToOutputPath(path)
-       << "; $(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.depends"
-       << "; $(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.check_depends"
-       << "; $(MAKE) -$(MAKEFLAGS) $(MAKESILENT) -f cmake.check_depends"
+       << "; $(MAKE) $(MAKESILENT) cmake.depends"
+       << "; $(MAKE) $(MAKESILENT) cmake.check_depends"
+       << "; $(MAKE) $(MAKESILENT) -f cmake.check_depends"
        << "; $(MAKE) $(MAKESILENT) " << makeTarget << "\n\n"; 
 }
 
@@ -1049,9 +1049,9 @@ void cmUnixMakefileGenerator::OutputBuildExecutableInDir(std::ostream& fout,
     }
   fout << this->ConvertToOutputPath(fullpath)
        << ":\n\tcd " << this->ConvertToOutputPath(path)
-       << "; $(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.depends"
-       << "; $(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.check_depends"
-       << "; $(MAKE) -$(MAKEFLAGS) $(MAKESILENT) -f cmake.check_depends"
+       << "; $(MAKE) $(MAKESILENT) cmake.depends"
+       << "; $(MAKE) $(MAKESILENT) cmake.check_depends"
+       << "; $(MAKE) $(MAKESILENT) -f cmake.check_depends"
        << "; $(MAKE) $(MAKESILENT) " << makeTarget << "\n\n"; 
 }
 
@@ -1199,7 +1199,7 @@ void cmUnixMakefileGenerator::BuildInSubDirectory(std::ostream& fout,
       fout << "\techo " << directory << ": building " << target1 << "\n";
       }
     fout << "\t@cd " << directory
-         << "; $(MAKE) -$(MAKEFLAGS) " << target1 << "\n";
+         << "; $(MAKE) " << target1 << "\n";
     }
   if(target2)
     {
@@ -1208,7 +1208,7 @@ void cmUnixMakefileGenerator::BuildInSubDirectory(std::ostream& fout,
       fout << "\techo " << directory << ": building " << target2 << "\n";
       }
     fout << "\t@cd " << directory
-         << "; $(MAKE) -$(MAKEFLAGS) " << target2 << "\n";
+         << "; $(MAKE) " << target2 << "\n";
     }
   fout << "\n";
 }
@@ -1366,8 +1366,8 @@ void cmUnixMakefileGenerator::OutputCheckDepends(std::ostream& fout)
   fout << ".SUFFIXES:.hpuxmakemusthaverule\n";
   this->OutputMakeVariables(fout);
   fout << "default:\n";
-  fout << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) -f cmake.check_depends all\n"
-       << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) -f cmake.check_depends cmake.depends\n\n";
+  fout << "\t$(MAKE) $(MAKESILENT) -f cmake.check_depends all\n"
+       << "\t$(MAKE) $(MAKESILENT) -f cmake.check_depends cmake.depends\n\n";
   fout << "all: ";
   for(std::map<cmStdString, cmTarget>::const_iterator target = targets.begin(); 
       target != targets.end(); ++target)
@@ -1403,14 +1403,14 @@ void cmUnixMakefileGenerator::OutputCheckDepends(std::ostream& fout)
     {
     fout << " \\\n" << *i;
     }
-  fout << "\n\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) dependlocal\n\n";
+  fout << "\n\t$(MAKE) $(MAKESILENT) dependlocal\n\n";
   fout << "\n\n";
   fout << "# if a .h file is removed then run make dependlocal\n\n";
   for(std::set<std::string>::iterator i = emitted.begin();
       i != emitted.end(); ++i)
     {
     fout << *i << ":\n"
-         << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) dependlocal\n\n";
+         << "\t$(MAKE) $(MAKESILENT) dependlocal\n\n";
     }
 }
 
