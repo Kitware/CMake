@@ -359,7 +359,6 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
       libDir != libdirs.end(); ++libDir)
     { 
     std::string libpath = cmSystemTools::EscapeSpaces(libDir->c_str());
-    bool skipPath = false;
     if (m_LibraryOutputPath.size())
       {
       if(m_LibraryOutputPath != libpath 
