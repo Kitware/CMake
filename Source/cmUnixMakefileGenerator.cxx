@@ -335,6 +335,10 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
     outputRuntime = false;
     }
 
+  // Some search paths should never be emitted
+  emitted.insert("");
+  emitted.insert("/usr/lib");
+
   // collect all the flags needed for linking libraries
   std::string linkLibs;
   std::vector<std::string>& libdirs = m_Makefile->GetLinkDirectories();
@@ -351,10 +355,6 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
         {
         emitted.insert(libpath);
         }
-      }
-    if(libpath == "/usr/lib" )
-      {
-      emitted.insert(libpath);
       }
     if(emitted.insert(libpath).second)
       {
@@ -395,17 +395,14 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
       cmSystemTools::SplitProgramPath(lib->first.c_str(),
                                       dir, file);
       std::string libpath = cmSystemTools::EscapeSpaces(dir.c_str());
-      if(libpath != "/usr/lib")
+      if(emitted.insert(libpath).second)
         {
-        if(emitted.insert(libpath).second)
+        linkLibs += "-L";
+        linkLibs += libpath;
+        linkLibs += " ";
+        if(outputRuntime)
           {
-          linkLibs += "-L";
-          linkLibs += libpath;
-          linkLibs += " ";
-          if(outputRuntime)
-            {
-            runtimeDirs.push_back( libpath );
-            }
+          runtimeDirs.push_back( libpath );
           }
         }
       cmRegularExpression libname("lib(.*)\\.(.*)");
