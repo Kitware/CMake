@@ -60,8 +60,9 @@ bool cmBuildNameCommand::InitialPass(std::vector<std::string> const& args)
 	}
       }
     }
-  std::string compiler = "-${CMAKE_CXX_COMPILER}";
+  std::string compiler = "${CMAKE_CXX_COMPILER}";
   m_Makefile->ExpandVariablesInString ( compiler );
+  buildname += "-";
   buildname += cmSystemTools::GetFilenameName(compiler);
   cmSystemTools::ReplaceString(buildname,
                                "/", "_");
