@@ -7,9 +7,8 @@
 #
 
 IF (WIN32)
-  SET (OPENGL_LIBRARY opengl32 CACHE)
+  SET (OPENGL_LIBRARY opengl32 CACHE STRING "OpenGL library for win32")
 ELSE (WIN32)
-  
   FIND_PATH(OPENGL_INCLUDE_PATH GL/gl.h 
   /usr/include 
   /usr/local/include 
@@ -17,7 +16,6 @@ ELSE (WIN32)
   /opt/graphics/OpenGL/include 
   /usr/X11R6/include 
   )
-
 
   FIND_LIBRARY(OPENGL_LIBRARY GL
   /usr/lib 

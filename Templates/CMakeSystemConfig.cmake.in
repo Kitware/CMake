@@ -2,29 +2,44 @@
 # CMakeLocal.make.in should be in the directory where you run configure
 # in, which need not be the source directory
 #
-SET (CMAKE_INSTALL_PREFIX     @prefix@ CACHE_NO_REPLACE PATH)
+SET (CMAKE_INSTALL_PREFIX     @prefix@ CACHE PATH 
+        "Install path prefix, prepended onto install directories")
 SET (CMAKE_WORDS_BIGENDIAN    @CMAKE_WORDS_BIGENDIAN@ )
-SET (CMAKE_USE_SPROC          @CMAKE_USE_SPROC@ CACHE_NO_REPLACE BOOL)
-SET (CMAKE_USE_PTHREADS       @CMAKE_USE_PTHREADS@ CACHE_NO_REPLACE BOOL)
-SET (CMAKE_HP_PTHREADS        @CMAKE_HP_PTHREADS@ CACHE_NO_REPLACE BOOL)
-SET (CMAKE_LIB_EXT            @CMAKE_LIB_EXT@ CACHE_NO_REPLACE )
-SET (CMAKE_RANLIB             "@RANLIB@" CACHE_NO_REPLACE )
-SET (CMAKE_AR                 "@CMAKE_AR@" CACHE_NO_REPLACE )
-SET (CMAKE_CXX_COMPILER       "@CXX@" CACHE_NO_REPLACE FILEPATH)
-SET (CMAKE_CXX_FLAGS          "@CXXFLAGS@" CACHE_NO_REPLACE )
-SET (CMAKE_TEMPLATE_FLAGS     "@CMAKE_TEMPLATE_FLAGS@" CACHE_NO_REPLACE )
-SET (CMAKE_C_COMPILER         "@CC@" CACHE_NO_REPLACE FILEPATH)
-SET (CMAKE_C_FLAGS            "@CFLAGS@" CACHE_NO_REPLACE )
-SET (CMAKE_SHLIB_CFLAGS       "@CMAKE_SHLIB_CFLAGS@" CACHE_NO_REPLACE )
-SET (CMAKE_SHLIB_BUILD_FLAGS  "@CMAKE_SHLIB_BUILD_FLAGS@" CACHE_NO_REPLACE )
-SET (CMAKE_SHLIB_SUFFIX       @CMAKE_SHLIB_SUFFIX@ CACHE_NO_REPLACE )
-SET (CMAKE_THREAD_LIBS        "@CMAKE_THREAD_LIBS@" CACHE_NO_REPLACE )
-SET (CMAKE_DL_LIBS            "@CMAKE_DL_LIBS@" CACHE_NO_REPLACE )
-SET (CMAKE_SHLIB_LINK_FLAGS   "@CMAKE_SHLIB_LINK_FLAGS@" CACHE_NO_REPLACE )
-SET (CMAKE_SHLIB_LD_LIBS      "@CMAKE_SHLIB_LD_LIBS@" CACHE_NO_REPLACE )
-SET (CMAKE_SHLIB_LD_LIBS      "@CMAKE_SHLIB_LD_LIBS@" CACHE_NO_REPLACE_NO_REPLACE )
+SET (CMAKE_USE_SPROC          @CMAKE_USE_SPROC@ CACHE BOOL "Use sproc libs.")
+SET (CMAKE_USE_PTHREADS       @CMAKE_USE_PTHREADS@ CACHE BOOL
+        "Use the pthreads library")
+SET (CMAKE_HP_PTHREADS        @CMAKE_HP_PTHREADS@ CACHE BOOL
+        "Use HP pthreads")
+SET (CMAKE_LIB_EXT            @CMAKE_LIB_EXT@ CACHE STRING
+        "Library extension used by this machine" )
+SET (CMAKE_RANLIB             "@RANLIB@" CACHE FILEPATH 
+        " Library randomizer program used on archive libraries." )
+SET (CMAKE_AR                 "@CMAKE_AR@" CACHE FILEPATH 
+        " Archive program used to make archive libraries." )
+SET (CMAKE_CXX_COMPILER       "@CXX@" CACHE FILEPATH "CXX compiler used.")
+SET (CMAKE_CXX_FLAGS          "@CXXFLAGS@" CACHE STRING 
+        "Flags used by CXX compiler")
+SET (CMAKE_TEMPLATE_FLAGS     "@CMAKE_TEMPLATE_FLAGS@" CACHE 
+        "CXX template flags used by compiler")
+SET (CMAKE_C_COMPILER         "@CC@" CACHE FILEPATH
+        "C compiler used.")
+SET (CMAKE_C_FLAGS            "@CFLAGS@" CACHE STRING "C compiler flags")
+SET (CMAKE_SHLIB_CFLAGS       "@CMAKE_SHLIB_CFLAGS@" CACHE STRING
+        "Flag used for building shared library objects" )
+SET (CMAKE_SHLIB_BUILD_FLAGS  "@CMAKE_SHLIB_BUILD_FLAGS@" CACHE STRING
+        "Flag used by CXX to build a shared library")
+SET (CMAKE_SHLIB_SUFFIX       @CMAKE_SHLIB_SUFFIX@ CACHE STRING 
+        "Shared library suffix")
+SET (CMAKE_THREAD_LIBS        "@CMAKE_THREAD_LIBS@" CACHE STRING
+        "Thread library used")
+SET (CMAKE_DL_LIBS            "@CMAKE_DL_LIBS@" CACHE STRING 
+        "Dynamic link library to link in.")
+SET (CMAKE_SHLIB_LINK_FLAGS   "@CMAKE_SHLIB_LINK_FLAGS@" CACHE STRING
+        "Flags used to link a shared library.")
+SET (CMAKE_SHLIB_LD_LIBS      "@CMAKE_SHLIB_LD_LIBS@" CACHE STRING 
+        "Libraries used by LD for shared libraries")
 # support for X11
-SET (CMAKE_X_LIBS             "@X_PRE_LIBS@ @X_LIBS@ -lX11 -lXext @X_EXTRA_LIBS@" CACHE_NO_REPLACE )
-SET (CMAKE_X_CFLAGS           "@X_CFLAGS@" CACHE_NO_REPLACE)
-SET (CMAKE_HAS_X              "@CMAKE_HAS_X@" CACHE_NO_REPLACE BOOL)
+SET (CMAKE_X_LIBS             "@X_PRE_LIBS@ @X_LIBS@ -lX11 -lXext @X_EXTRA_LIBS@" CACHE STRING "Libraries and options used in X11 programs")
+SET (CMAKE_X_CFLAGS           "@X_CFLAGS@" CACHE STRING "X11 extra flags")
+SET (CMAKE_HAS_X              "@CMAKE_HAS_X@" )
 

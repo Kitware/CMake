@@ -48,67 +48,72 @@ bool cmSetCommand::Invoke(std::vector<std::string>& args)
     this->SetError("called with incorrect number of arguments");
     return false;
     }
+  // SET (VAR ) // this is a no-op
   if (args.size() == 1)
     {
-      return true;
+    return true;
     }
-// here are the options with the num
-//  SET VAR                               
-//  SET VAR value                             
-//  SET VAR CACHE|CACHE_NO_REPLACE        
-//  SET VAR value CACHE|CACHE_NO_REPLACE      
-//  SET VAR CACHE|CACHE_NO_REPLACE TYPE   
-//  SET VAR value CACHE|CACHE_NO_REPLACE TYPE 
-  const char* type = "STRING"; // set a default type of STRING
-  const char* value = "";// set a default value of the empty string
-  if(args.size() > 1)
+// here are the options 
+//  SET (VAR) 
+//  SET (VAR value )
+//  SET (VAR CACHE TYPE "doc String")
+//  SET (VAR value CACHE TYPE "doc string")
+
+  const char* variable = args[0].c_str(); // VAR is always first
+  std::string value;  // optional
+  bool cache = false; // optional
+  cmCacheManager::CacheEntryType type = cmCacheManager::STRING; // required if cache
+  const char* docstring = 0; // required if cache
+  std::string::size_type cacheStart = 0;
+  if(args.size() == 4)
     {
-    // always expand the first argument
-    m_Makefile->ExpandVariablesInString(args[1]);
-    value = args[1].c_str();
+    // SET (VAR CACHE TYPE "doc String")
+    cache = true;
+    cacheStart = 1;
     }
-  // get the current cache value for the variable
-  const char* cacheValue = 
-    cmCacheManager::GetInstance()->GetCacheValue(args[0].c_str());
-  // assume this will not be cached
-  bool cache = false;
-  // search the arguments for key words CACHE and CACHE_NO_REPLACE
-  for(int i = 1; i < args.size() && !cache; ++i)
+  else if(args.size() == 5)
     {
-    if(args[i] == "CACHE_NO_REPLACE")
-      {
-      // if already in cache, ignore entire command
-      if(cacheValue)
-        {
-        return true;
-        }
-      cache = true;
-      }
-    if(args[i] == "CACHE")
-      {
-      cache = true;
-      }
-    // if this is to be cached, find the value and type
-    if(cache)
-      {
-      // if this is the 
-      if(i == 1)
-        {
-        value = "";
-        }
-      if(i+1 < args.size())
-        {
-        type = args[i+1].c_str();
-        }
-      }
+    //  SET (VAR value CACHE TYPE "doc string")
+    cache = true;
+    value = args[1];
+    cacheStart = 2;
     }
-  m_Makefile->AddDefinition(args[0].c_str(), value);
   if(cache)
     {
-    cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
-                                                 value,
-                                                 "Value Computed by CMake",
-                                                 cmCacheManager::StringToType(type));
+    if(args[cacheStart] != "CACHE")
+      {
+      std::string error = "Error in arguments to cache, expected CACHE found:";
+      error += args[cacheStart];
+      this->SetError(error.c_str());
+      return false;
+      }
+    type = cmCacheManager::StringToType(args[cacheStart+1].c_str());
+    docstring = args[cacheStart+2].c_str();
+    }
+  // always expand the first argument
+  m_Makefile->ExpandVariablesInString(value);
+  // get the current cache value for the variable
+  const char* cacheValue = 
+    cmCacheManager::GetInstance()->GetCacheValue(variable);
+  if(cacheValue)
+    {
+    // if it is not a cached value, or it is a cached
+    // value that is not internal keep the value found
+    // in the cache
+    if(cache && type != cmCacheManager::INTERNAL)
+      {
+      return true;
+      }
+    }
+  // add the definition
+  m_Makefile->AddDefinition(variable, value.c_str());
+  // if it is meant to be in the cache then define it in the cache
+  if(cache)
+    {
+    cmCacheManager::GetInstance()->AddCacheEntry(variable,
+                                                 value.c_str(),
+                                                 docstring,
+                                                 type);
     }
   return true;
 }

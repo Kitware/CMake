@@ -104,10 +104,10 @@ BEGIN
                     WS_HSCROLL | WS_TABSTOP
     CTEXT           "Right click on cache entries for additional options",
                     IDC_STATIC,19,190,333,11
-    COMBOBOX        IDC_WhereBuild,147,25,133,68,CBS_DROPDOWN | WS_VSCROLL | 
-                    WS_TABSTOP
-    COMBOBOX        IDC_WhereSource,147,5,133,66,CBS_DROPDOWN | WS_VSCROLL | 
-                    WS_TABSTOP
+    COMBOBOX        IDC_WhereBuild,129,26,133,68,CBS_DROPDOWN | 
+                    CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_WhereSource,127,6,135,66,CBS_DROPDOWN | 
+                    CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
     LTEXT           "Static",IDC_CMAKE_VERSION,3,211,70,13,SS_CENTERIMAGE
 END
 
