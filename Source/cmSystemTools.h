@@ -270,11 +270,16 @@ public:
    *
    * If verbose is false, no user-viewable output from the program
    * being run will be generated.
+   *
+   * If timeout is specified, the command will be terminated after
+   * timeout expires.
    */
-  static bool RunCommand(const char* command, std::string& output, const char* directory = 0,
-                         bool verbose = true);
+  static bool RunCommand(const char* command, std::string& output, 
+                         const char* directory = 0,
+                         bool verbose = true, int timeout = 0);
   static bool RunCommand(const char* command, std::string& output,
-                         int &retVal, const char* directory = 0, bool verbose = true);
+                         int &retVal, const char* directory = 0, 
+                         bool verbose = true, int timeout = 0);
   
   ///! for windows return the short path for the given path, unix just a pass through
   static bool GetShortPath(const char* path, std::string& result);

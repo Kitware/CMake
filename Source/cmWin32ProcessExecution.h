@@ -104,6 +104,38 @@ public:
   void SetConsoleSpawn(const char* prog) { this->m_ConsoleSpawn = prog; }
   static int Windows9xHack(const char* command);
 
+  /** Code from a Borland web site with the following explaination :
+   * In this article, I will explain how to spawn a console
+   * application and redirect its standard input/output using
+   * anonymous pipes. An anonymous pipe is a pipe that goes only in
+   * one direction (read pipe, write pipe, etc.). Maybe you are
+   * asking, "why would I ever need to do this sort of thing?" One
+   * example would be a Windows telnet server, where you spawn a shell
+   * and listen on a port and send and receive data between the shell
+   * and the socket client. (Windows does not really have a built-in
+   * remote shell). First, we should talk about pipes. A pipe in
+   * Windows is simply a method of communication, often between
+   * process. The SDK defines a pipe as "a communication conduit with
+   * two ends; a process with a handle to one end can communicate with
+   * a process having a handle to the other end." In our case, we are
+   * using "anonymous" pipes, one-way pipes that "transfer data
+   * between a parent process and a child process or between two child
+   * processes of the same parent process." It's easiest to imagine a
+   * pipe as its namesake. An actual pipe running between processes
+   * that can carry data. We are using anonymous pipes because the
+   * console app we are spawning is a child process. We use the
+   * CreatePipe function which will create an anonymous pipe and
+   * return a read handle and a write handle. We will create two
+   * pipes, on for stdin and one for stdout. We will then monitor the
+   * read end of the stdout pipe to check for display on our child
+   * process. Every time there is something availabe for reading, we
+   * will display it in our app. Consequently, we check for input in
+   * our app and send it off to the write end of the stdin pipe.
+   */ 
+  bool BorlandRunCommand(const char* command, const char* dir, 
+                         std::string& output, int& retVal, bool verbose,
+                         int timeout);
+
 private:
   bool PrivateOpen(const char*, const char*, int, int);
   bool PrivateClose(int timeout);

@@ -1255,232 +1255,26 @@ bool cmSystemTools::IsOff(const char* val)
 bool cmSystemTools::RunCommand(const char* command, 
                                std::string& output,
                                const char* dir,
-                               bool verbose)
+                               bool verbose,
+                               int timeout)
 {
   int foo;
-  return cmSystemTools::RunCommand(command, output, foo, dir, verbose);
+  return cmSystemTools::RunCommand(command, output, foo, dir, verbose, timeout);
 }
 
 #if defined(WIN32) && !defined(__CYGWIN__)
-// Code from a Borland web site with the following explaination : 
-/* In this article, I will explain how to spawn a console application
- * and redirect its standard input/output using anonymous pipes. An
- * anonymous pipe is a pipe that goes only in one direction (read
- * pipe, write pipe, etc.). Maybe you are asking, "why would I ever
- * need to do this sort of thing?" One example would be a Windows
- * telnet server, where you spawn a shell and listen on a port and
- * send and receive data between the shell and the socket
- * client. (Windows does not really have a built-in remote
- * shell). First, we should talk about pipes. A pipe in Windows is
- * simply a method of communication, often between process. The SDK
- * defines a pipe as "a communication conduit with two ends;
- a process
- * with a handle to one end can communicate with a process having a
- * handle to the other end." In our case, we are using "anonymous"
- * pipes, one-way pipes that "transfer data between a parent process
- * and a child process or between two child processes of the same
- * parent process." It's easiest to imagine a pipe as its namesake. An
- * actual pipe running between processes that can carry data. We are
- * using anonymous pipes because the console app we are spawning is a
- * child process. We use the CreatePipe function which will create an
- * anonymous pipe and return a read handle and a write handle. We will
- * create two pipes, on for stdin and one for stdout. We will then
- * monitor the read end of the stdout pipe to check for display on our
- * child process. Every time there is something availabe for reading,
- * we will display it in our app. Consequently, we check for input in
- * our app and send it off to the write end of the stdin pipe. */ 
-
-inline bool IsWinNT() 
-//check if we're running NT 
-{
-  OSVERSIONINFO osv;
-  osv.dwOSVersionInfoSize = sizeof(osv);
-  GetVersionEx(&osv);
-  return (osv.dwPlatformId == VER_PLATFORM_WIN32_NT); 
-}
-
-void DisplayErrorMessage()
-{
-  LPVOID lpMsgBuf;
-  FormatMessage( 
-    FORMAT_MESSAGE_ALLOCATE_BUFFER | 
-    FORMAT_MESSAGE_FROM_SYSTEM | 
-    FORMAT_MESSAGE_IGNORE_INSERTS,
-    NULL,
-    GetLastError(),
-    MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-    (LPTSTR) &lpMsgBuf,
-    0,
-    NULL 
-    );
-  // Process any inserts in lpMsgBuf.
-  // ... 
-  // Display the string.
-  MessageBox( NULL, (LPCTSTR)lpMsgBuf, "Error", MB_OK | MB_ICONINFORMATION );
-  // Free the buffer.
-  LocalFree( lpMsgBuf );
-}
- 
-//--------------------------------------------------------------------------- 
-bool WindowsRunCommand(const char* command, const char* dir, 
-                       std::string& output, int& retVal, bool verbose) 
-{
-  //verbose = true;
-  //std::cerr << std::endl 
-  //        << "WindowsRunCommand(" << command << ")" << std::endl 
-  //        << std::flush;
-  const int BUFFER_SIZE = 4096;
-  char buf[BUFFER_SIZE];
- 
-//i/o buffer 
-  STARTUPINFO si;
-  SECURITY_ATTRIBUTES sa;
-  SECURITY_DESCRIPTOR sd;
- 
-//security information for pipes 
-  PROCESS_INFORMATION pi;
-  HANDLE newstdin,newstdout,read_stdout,write_stdin;
- 
-//pipe handles 
-  if (IsWinNT()) 
-//initialize security descriptor (Windows NT) 
-    {
-    InitializeSecurityDescriptor(&sd,SECURITY_DESCRIPTOR_REVISION);
-    SetSecurityDescriptorDacl(&sd, true, NULL, false);
-    sa.lpSecurityDescriptor = &sd;
- 
-    }
-  else sa.lpSecurityDescriptor = NULL;
-  sa.nLength = sizeof(SECURITY_ATTRIBUTES);
-  sa.bInheritHandle = true;
- 
-//allow inheritable handles 
-  if (!CreatePipe(&newstdin,&write_stdin,&sa,0)) 
-//create stdin pipe 
-    {
-    std::cerr << "CreatePipe" << std::endl;
-    return false;
- 
-    }
-  if (!CreatePipe(&read_stdout,&newstdout,&sa,0)) 
-//create stdout pipe 
-    {
-    std::cerr << "CreatePipe" << std::endl;
-    CloseHandle(newstdin);
-    CloseHandle(write_stdin);
-    return false;
- 
-    }
-  GetStartupInfo(&si);
- 
-//set startupinfo for the spawned process 
-  /* The dwFlags member tells CreateProcess how to make the
-   * process. STARTF_USESTDHANDLES validates the hStd*
-   * members. STARTF_USESHOWWINDOW validates the wShowWindow
-   * member. */ 
-  
-  si.cb = sizeof(STARTUPINFO);
-  si.dwFlags = STARTF_USESTDHANDLES|STARTF_USESHOWWINDOW;
-  si.hStdOutput = newstdout;
-  si.hStdError = newstdout;
-  si.wShowWindow = SW_HIDE;
- 
-//set the new handles for the child process si.hStdInput = newstdin;
-  char* commandAndArgs = strcpy(new char[strlen(command)+1], command);
-  if (!CreateProcess(NULL,commandAndArgs,NULL,NULL,TRUE,CREATE_NEW_CONSOLE, 
-                     NULL,dir,&si,&pi)) 
-    {
-    std::cerr << "CreateProcess failed " << commandAndArgs << std::endl;
-    CloseHandle(newstdin);
-    CloseHandle(newstdout);
-    CloseHandle(read_stdout);
-    CloseHandle(write_stdin);
-    delete [] commandAndArgs;
-    return false;
- 
-    }
-  delete [] commandAndArgs;
-  unsigned long exit=0;
- 
-//process exit code unsigned 
-  unsigned long bread;
- 
-//bytes read unsigned 
-  unsigned long avail;
- 
-//bytes available 
-  memset(buf, 0, sizeof(buf));
-  for(;;) 
-//main program loop 
-    {
-    Sleep(10);
-//check to see if there is any data to read from stdout 
-    //std::cout << "Peek for data..." << std::endl;
-    PeekNamedPipe(read_stdout,buf,1023,&bread,&avail,NULL);
-    if (bread != 0) 
-      {
-      memset(buf, 0, sizeof(buf));
-      if (avail > 1023) 
-        {
-        while (bread >= 1023) 
-          {
-          //std::cout << "Read data..." << std::endl;
-          ReadFile(read_stdout,buf,1023,&bread,NULL);
- 
-          //read the stdout pipe 
-          memset(buf, 0, sizeof(buf));
-          output += buf;
-          if (verbose)
-            {
-            std::cout << buf << std::flush; 
-            }
-          }
-        }
-      else 
-        {
-        ReadFile(read_stdout,buf,1023,&bread,NULL);
-        output += buf;
-        if(verbose) 
-          {
-          std::cout << buf << std::flush;
-          }
- 
-        }
- 
-      }
- 
-    //std::cout << "Check for process..." << std::endl;
-    GetExitCodeProcess(pi.hProcess,&exit);
- 
-//while the process is running 
-    if (exit != STILL_ACTIVE) break;
- 
-    }
-  WaitForSingleObject(pi.hProcess, INFINITE);
-  GetExitCodeProcess(pi.hProcess,&exit);
-  CloseHandle(pi.hThread);
-  CloseHandle(pi.hProcess);
-  CloseHandle(newstdin);
- 
-//clean stuff up 
-  CloseHandle(newstdout);
-  CloseHandle(read_stdout);
-  CloseHandle(write_stdin);
-  retVal = exit;
-  return true;
- 
-}
-
 #include "cmWin32ProcessExecution.h"
 // use this for shell commands like echo and dir
 bool RunCommandViaWin32(const char* command,
                         const char* dir,
                         std::string& output,
                         int& retVal,
-                        bool verbose)
+                        bool verbose,
+                        int timeout)
 {
 #if defined(__BORLANDC__)
-  return ::WindowsRunCommand(command, dir, output, retVal, verbose);
+  return cmWin32ProcessExecution::BorlandRunCommand(command, dir, output, retVal, 
+                                                    verbose, timeout);
 #else // Visual studio
   ::SetLastError(ERROR_SUCCESS);
   if ( ! command )
@@ -1504,7 +1298,7 @@ bool RunCommandViaWin32(const char* command,
     std::cout << "Problem starting command" << std::endl;
     return false;
     }
-  resProc.Wait(INFINITE);
+  resProc.Wait(timeout);
   output = resProc.GetOutput();
   retVal = resProc.GetExitValue();
   return true;
@@ -1574,82 +1368,15 @@ bool RunCommandViaSystem(const char* command,
   return true;
 }
 
+#else // We have popen
 
-#endif  // endif WIN32 not CYGWIN
-
-
-// run a command unix uses popen (easy)
-// windows uses system and ShortPath
-bool cmSystemTools::RunCommand(const char* command, 
-                               std::string& output,
-                               int &retVal, 
-                               const char* dir,
-                               bool verbose)
+bool RunCommandViaPopen(const char* command,
+                        const char* dir,
+                        std::string& output,
+                        int& retVal,
+                        bool verbose,
+                        int /*timeout*/)
 {
-  if(s_DisableRunCommandOutput)
-    {
-    verbose = false;
-    }
-  
-#if defined(WIN32) && !defined(__CYGWIN__)
-  // if the command does not start with a quote, then
-  // try to find the program, and if the program can not be
-  // found use system to run the command as it must be a built in
-  // shell command like echo or dir
-  int count = 0;
-  if(command[0] == '\"')
-    {
-    // count the number of quotes
-    for(const char* s = command; *s != 0; ++s)
-      {
-      if(*s == '\"')
-        {
-        count++;
-        if(count > 2)
-          {
-          break;
-          }
-        }      
-      }
-    // if there are more than two double quotes use 
-    // GetShortPathName, the cmd.exe program in windows which
-    // is used by system fails to execute if there are more than
-    // one set of quotes in the arguments
-    if(count > 2)
-      {
-      cmRegularExpression quoted("^\"([^\"]*)\"[ \t](.*)");
-      if(quoted.find(command))
-        {
-        std::string shortCmd;
-        std::string cmd = quoted.match(1);
-        std::string args = quoted.match(2);
-        if(!cmSystemTools::GetShortPath(cmd.c_str(), shortCmd))
-          {
-          cmSystemTools::Error("GetShortPath failed for " , cmd.c_str());
-          return false;
-          }
-        shortCmd += " ";
-        shortCmd += args;
-
-        //return RunCommandViaSystem(shortCmd.c_str(), dir, 
-        //                           output, retVal, verbose);
-        //return WindowsRunCommand(shortCmd.c_str(), dir, 
-        //output, retVal, verbose);
-        return RunCommandViaWin32(shortCmd.c_str(), dir, 
-                                  output, retVal, verbose);
-        }
-      else
-        {
-        cmSystemTools::Error("Could not parse command line with quotes ", 
-                             command);
-        }
-      }
-    }
-  // if there is only one set of quotes or no quotes then just run the command
-  //return RunCommandViaSystem(command, dir, output, retVal, verbose);
-  //return WindowsRunCommand(command, dir, output, retVal, verbose);
-  return RunCommandViaWin32(command, dir, output, retVal, verbose);
-#else
   // if only popen worked on windows.....
   std::string commandInDir;
   if(dir)
@@ -1729,6 +1456,85 @@ bool cmSystemTools::RunCommand(const char* command,
     output += error.str();
     }
   return false;
+}
+
+#endif  // endif WIN32 not CYGWIN
+
+
+// run a command unix uses popen (easy)
+// windows uses system and ShortPath
+bool cmSystemTools::RunCommand(const char* command, 
+                               std::string& output,
+                               int &retVal, 
+                               const char* dir,
+                               bool verbose,
+                               int timeout)
+{
+  if(s_DisableRunCommandOutput)
+    {
+    verbose = false;
+    }
+  
+#if defined(WIN32) && !defined(__CYGWIN__)
+  // if the command does not start with a quote, then
+  // try to find the program, and if the program can not be
+  // found use system to run the command as it must be a built in
+  // shell command like echo or dir
+  int count = 0;
+  if(command[0] == '\"')
+    {
+    // count the number of quotes
+    for(const char* s = command; *s != 0; ++s)
+      {
+      if(*s == '\"')
+        {
+        count++;
+        if(count > 2)
+          {
+          break;
+          }
+        }      
+      }
+    // if there are more than two double quotes use 
+    // GetShortPathName, the cmd.exe program in windows which
+    // is used by system fails to execute if there are more than
+    // one set of quotes in the arguments
+    if(count > 2)
+      {
+      cmRegularExpression quoted("^\"([^\"]*)\"[ \t](.*)");
+      if(quoted.find(command))
+        {
+        std::string shortCmd;
+        std::string cmd = quoted.match(1);
+        std::string args = quoted.match(2);
+        if(!cmSystemTools::GetShortPath(cmd.c_str(), shortCmd))
+          {
+          cmSystemTools::Error("GetShortPath failed for " , cmd.c_str());
+          return false;
+          }
+        shortCmd += " ";
+        shortCmd += args;
+
+        //return RunCommandViaSystem(shortCmd.c_str(), dir, 
+        //                           output, retVal, verbose);
+        //return WindowsRunCommand(shortCmd.c_str(), dir, 
+        //output, retVal, verbose);
+        return RunCommandViaWin32(shortCmd.c_str(), dir, 
+                                  output, retVal, verbose);
+        }
+      else
+        {
+        cmSystemTools::Error("Could not parse command line with quotes ", 
+                             command);
+        }
+      }
+    }
+  // if there is only one set of quotes or no quotes then just run the command
+  //return RunCommandViaSystem(command, dir, output, retVal, verbose);
+  //return WindowsRunCommand(command, dir, output, retVal, verbose);
+  return ::RunCommandViaWin32(command, dir, output, retVal, verbose, timeout);
+#else
+  return ::RunCommandViaPopen(command, dir, output, retVal, verbose, timeout);
 #endif
 }
 
