@@ -49,6 +49,7 @@ private:
                        const char* name);
   void PrintHelpSection(std::ostream& os, const cmDocumentationEntry* section);
   void PrintHTMLEscapes(std::ostream& os, const char* text);
+  void PrintHTMLFull(std::ostream& os, const char* text);
   void PrintHelpHTMLSection(std::ostream& os,
                             const cmDocumentationEntry* section,
                             const char* header);

@@ -100,7 +100,7 @@ void cmDocumentation::PrintManSection(std::ostream& os,
       {
       os << ".TP\n"
          << ".B " << op->name << "\n"
-         << op->brief << "\n";
+         << op->brief << "\n\n";
       if(op->full) { os << op->full << "\n"; }
       }
     else
@@ -126,6 +126,7 @@ void cmDocumentation::PrintHelpSection(std::ostream& os,
       if(op->full)
         {
         os << "\n"
+           << "\n"
            << "       ";
         this->PrintColumn(os, 70, "       ", op->full);
         }
@@ -148,6 +149,7 @@ void cmDocumentation::PrintHTMLEscapes(std::ostream& os, const char* text)
     {"<", "&lt;", 0},
     {">", "&gt;", 0},
     {"&", "&amp;", 0},
+    {"\n", "<br>", 0},
     {0,0,0}
   };
   for(const char* p = text; *p; ++p)
@@ -164,6 +166,50 @@ void cmDocumentation::PrintHTMLEscapes(std::ostream& os, const char* text)
     if(!found)
       {
       os << *p;
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmDocumentation::PrintHTMLFull(std::ostream& os, const char* text)
+{
+  const char* line = text;
+  while(*line)
+    {
+    // Any lines starting in a space are treated as a preformatted
+    // section.
+    std::string preformatted;
+    while(*line == ' ')
+      {
+      for(char ch = *line; ch && ch != '\n'; ++line, ch = *line)
+        {
+        preformatted.append(1, ch);
+        }
+      if(*line)
+        {
+        ++line;
+        preformatted.append(1, '\n');
+        }
+      }
+    if(preformatted.length())
+      {
+      os << "<pre>";
+      this->PrintHTMLEscapes(os, preformatted.c_str());
+      os << "</pre>";
+      }
+    std::string normal;
+    for(char ch = *line; ch && ch != '\n'; ++line, ch = *line)
+      {
+      normal.append(1, ch);
+      }
+    if(*line)
+      {
+      ++line;
+      normal.append(1, '\n');
+      }
+    if(normal.length())
+      {
+      this->PrintHTMLEscapes(os, normal.c_str());
       }
     }
 }
@@ -192,8 +238,8 @@ void cmDocumentation::PrintHelpHTMLSection(std::ostream& os,
         this->PrintHTMLEscapes(os, op->brief);
         if(op->full)
           {
-          os << "  ";
-          this->PrintHTMLEscapes(os, op->full);
+          os << "<br>";
+          this->PrintHTMLFull(os, op->full);
           }
         os << "\n";
         os << "  </li>\n";
@@ -332,7 +378,13 @@ void cmDocumentation::PrintColumn(std::ostream& os, int width,
   const char* l = text;
   int column = 0;
   bool newSentence = false;
-  bool first = true;
+  bool firstLine = true;
+
+  // Count leading blanks in the text.
+  int blanks = 0;
+  for(const char* b = l; *b == ' '; ++b) { ++blanks; }
+  
+  // Loop until the end of the text.
   while(*l)
     {
     // Parse the next word.
@@ -364,7 +416,16 @@ void cmDocumentation::PrintColumn(std::ostream& os, int width,
           {
           // First word on line.  Print indentation unless this is the
           // first line.
-          os << (first?"":indent);
+          os << (firstLine?"":indent);
+          
+          // Further indent by leading blanks from the text on this
+          // line.
+          for(int i = 0; i < blanks; ++i)
+            {
+            os << " ";
+            ++column;
+            }
+          blanks = 0;
           }
         
         // Print the word.
@@ -378,7 +439,10 @@ void cmDocumentation::PrintColumn(std::ostream& os, int width,
         os << "\n";
         ++r;
         column = 0;
-        first = false;
+        firstLine = false;
+        
+        // Count leading blanks in the text.
+        for(const char* b = r; *b == ' '; ++b) { ++blanks; }
         }
       else
         {
@@ -390,7 +454,7 @@ void cmDocumentation::PrintColumn(std::ostream& os, int width,
       {
       // Word does not fit on this line.  Start a new line.
       os << "\n";
-      first = false;
+      firstLine = false;
       if(r > l)
         {
         os << indent;
