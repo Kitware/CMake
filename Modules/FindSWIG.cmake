@@ -17,7 +17,7 @@ IF(EXISTS ${SWIG_DIR})
   ELSE(EXISTS ${SWIG_DIR}/SWIGConfig.cmake)
     FIND_PROGRAM(SWIG_EXECUTABLE
       NAMES swig-1.3 swig
-      PATHS ${SWIG_DIR} ${SWIG_DIR}/.. /usr/bin /usr/local/bin )
+      PATHS ${SWIG_DIR} ${SWIG_DIR}/.. ${SWIG_DIR}/../../bin /usr/bin /usr/local/bin )
     SET(SWIG_USE_FILE ${CMAKE_ROOT}/Modules/UseSWIG.cmake)
   ENDIF(EXISTS ${SWIG_DIR}/SWIGConfig.cmake)
 ENDIF(EXISTS ${SWIG_DIR})
