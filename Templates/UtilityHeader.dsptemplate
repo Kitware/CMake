@@ -58,13 +58,13 @@ MTL=midl.exe
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "ReleaseMinSize"
-# PROP BASE Intermediate_Dir "ReleaseMinSize"
+# PROP BASE Output_Dir "MinSizeRel"
+# PROP BASE Intermediate_Dir "MinSizeRel"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "EXECUTABLE_OUTPUT_PATHReleaseMinSize"
-# PROP Intermediate_Dir "ReleaseMinSize"
+# PROP Output_Dir "EXECUTABLE_OUTPUT_PATHMinSizeRel"
+# PROP Intermediate_Dir "MinSizeRel"
 # PROP Target_Dir ""
 
 !ENDIF 

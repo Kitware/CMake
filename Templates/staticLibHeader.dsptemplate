@@ -88,13 +88,13 @@ LIB32=link.exe -lib
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "ReleaseMinSize"
-# PROP BASE Intermediate_Dir "ReleaseMinSize"
+# PROP BASE Output_Dir "MinSizeRel"
+# PROP BASE Intermediate_Dir "MinSizeRel"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "LIBRARY_OUTPUT_PATHReleaseMinSize"
-# PROP Intermediate_Dir "ReleaseMinSize"
+# PROP Output_Dir "LIBRARY_OUTPUT_PATHMinSizeRel"
+# PROP Intermediate_Dir "MinSizeRel"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /O1 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "_ATL_DLL" /FD /c
