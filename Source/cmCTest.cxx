@@ -132,6 +132,8 @@ static const char* cmCTestErrorMatches[] = {
   ": Unrecognized option \\`.*\\'",
   "\", line [0-9]+\\.[0-9]+: [0-9]+-[0-9]+ \\([^W]\\)",
   "ld: 0706-006 Cannot find or open library file: -l ",
+  "ild: \\(argument error\\) can't find library argument ::",
+  "^could not be found and will not be loaded.",
   0
 };
 
