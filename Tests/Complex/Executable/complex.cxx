@@ -475,10 +475,11 @@ int main()
   std::vector<std::string> v2;
   v = v2;
   std::string cachetest = CACHE_TEST_VAR_INTERNAL;
+  v.push_back(cachetest);
+  v2 = v;
   std::string copy = cachetest;
   cachetest.find("bar");
   cachetest.rfind("bar");
-  copy.replace(0,0,0,'a');
   copy.append(cachetest);
   copy = cachetest.substr(0, cachetest.size());
   if(cachetest != "bar")
