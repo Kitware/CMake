@@ -266,6 +266,7 @@ void cmUnixMakefileGenerator::OutputMakefile(const char* file)
        cmSystemTools::Error("Error can not open for write: ", dependName.c_str());
        return;
       }
+    dependout << "# .o dependencies in this directory." << std::endl;
     this->OutputObjectDepends(dependout);
     }
   this->OutputCustomRules(fout);
