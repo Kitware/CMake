@@ -76,11 +76,11 @@ public:
   virtual const char* FullDocumentation()
     {
     return
-      "Specify a list of libraries to be linked into executables or \n"
-      "shared objects.  This rule is passed down to all other rules."
-      "LINK_LIBRARIES(library1 library2).\n"
-      "The library name should be the same as the name used in the\n"
-      "LIBRARY(library) rule.";
+      "LINK_LIBRARIES(library1 library2)\n"
+      "Specify a list of libraries to be linked into\n"
+      "executables or shared objects.  This rule is passed\n"
+      "down to all other rules. The library name should be\n"
+      "the same as the name used in the LIBRARY(library) rule.";
     }
 };
 

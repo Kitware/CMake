@@ -61,8 +61,8 @@ public:
    */
   virtual const char* TerseDocumentation() 
     {
-    return "Add all the source files found in the specified directory to\n"
-           " the build.";
+    return "Add all the source files found in the specified\n"
+           "directory to the build.";
     }
   
   /**

@@ -78,8 +78,8 @@ public:
   virtual const char* FullDocumentation()
     {
     return
-      "Add -D define flags to command line for Win32 environments.\n"
-      "WIN32_DEFINES(-DFOO -DBAR ...)";
+      "WIN32_DEFINES(-DFOO -DBAR ...)\n"
+      "Add -D define flags to command line for Win32 environments.";
     }
 };
 

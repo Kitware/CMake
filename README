@@ -27,16 +27,16 @@ note that Unix-style slashes are used. The rules may reference CMake
 variables, either built-in or defined variables. Two important variables
 are built-in to CMake:
 
-        CMAKE_SOURCE_DIR - The root directory of the source code 
-                           directory tree.
+    CMAKE_SOURCE_DIR - The root directory of the source code 
+                       directory tree.
 
-        CMAKE_BINARY_DIR - The root directory of the build tree 
-                           where binaries are placed. This includes 
-                           object files, libraries, and executables.
+    CMAKE_BINARY_DIR - The root directory of the build tree 
+                       where binaries are placed. This includes 
+                       object files, libraries, and executables.
 
 A rule might reference these as follows:
 
-        INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
+    INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 
 using the ${} delimiters.
         
@@ -47,83 +47,81 @@ the doxygen.config file in this directory.
 Rules: (Generated with cmDumpDocumentation)
 ------------------------------------------
 
-ABSTRACT_FILES - A list of abstract classes, useful for wrappers.
-Usage: ABSTRACT_FILES(file1 file2 ..)
+    ABSTRACT_FILES - A list of abstract classes, useful for wrappers.
+    Usage: ABSTRACT_FILES(file1 file2 ..)
 
-ADD_TARGET - Add an extra target to the build system.
-Usage: ADD_TARGET(Name "command to run")
+    ADD_TARGET - Add an extra target to the build system.
+    Usage: ADD_TARGET(Name "command to run")
 
-AUX_SOURCE_DIRECTORY - Add all the source files found in the specified directory to
- the build.
-Usage: AUX_SOURCE_DIRECTORY(dir)
+    AUX_SOURCE_DIRECTORY - Add all the source files found in the specified
+    directory to the build.
+    Usage: AUX_SOURCE_DIRECTORY(dir)
 
-EXECUTABLES - Add a list of executables files.
-Usage: EXECUTABLES(file1 file2 ...)
+    EXECUTABLES - Add a list of executables files.
+    Usage: EXECUTABLES(file1 file2 ...)
 
-FIND_INCLUDE - Find an include path.
-Usage: FIND_INCLUDE(DEFINE try1 try2 ...)
+    FIND_INCLUDE - Find an include path.
+    Usage: FIND_INCLUDE(DEFINE try1 try2 ...)
 
-FIND_LIBRARY - Find a library.
-Usage: FIND_LIBRARY(DEFINE try1 try2)
+    FIND_LIBRARY - Find a library.
+    Usage: FIND_LIBRARY(DEFINE try1 try2)
 
-FIND_PROGRARM - Find an executable program.
-Usage: FIND_PROGRAM(NAME executable1 executable2 ...)
+    FIND_PROGRARM - Find an executable program.
+    Usage: FIND_PROGRAM(NAME executable1 executable2 ...)
 
-INCLUDE_DIRECTORIES - Add include directories to the build.
-Usage: INCLUDE_DIRECTORIES(dir1 dir2 ...).
+    INCLUDE_DIRECTORIES - Add include directories to the build.
+    Usage: INCLUDE_DIRECTORIES(dir1 dir2 ...)
 
+    LIBRARY - Set a name for a library.
+    Usage: LIBRARY(libraryname)
 
-LIBRARY - Set a name for a library.
-Usage: LIBRARY(libraryname)
+    LINK_DIRECTORIES - Specify link directories.
+    Usage: Specify the paths to the libraries that will be linked in.
+    LINK_DIRECTORIES(directory1 directory2 ...)
+    The directories can use built in definitions like 
+    CMAKE_BINARY_DIR and CMAKE_SOURCE_DIR.
 
-LINK_DIRECTORIES - Specify link directories.
-Usage: Specify the paths to the libraries that will be linked in.
-LINK_DIRECTORIES(directory1 directory2 ...)
-The directories can use built in definitions like 
-CMAKE_BINARY_DIR and CMAKE_SOURCE_DIR.
+    LINK_LIBRARIES - Specify a list of libraries to be linked into executables or 
+    shared objects.
+    Usage: LINK_LIBRARIES(library1 library2)
+    Specify a list of libraries to be linked into
+    executables or shared objects.  This rule is passed
+    down to all other rules. The library name should be
+    the same as the name used in the LIBRARY(library) rule.
 
-LINK_LIBRARIES - Specify a list of libraries to be linked into executables or 
-shared objects.
-Usage: Specify a list of libraries to be linked into executables or 
-shared objects.  This rule is passed down to all other rules.LINK_LIBRARIES(library1 library2).
-The library name should be the same as the name used in the
-LIBRARY(library) rule.
+    PROJECT - Set a name for the entire project. One argument.
+    Usage: PROJECT(projectname)
+    Set the name for the entire project.  This takes one argument.
 
-PROJECT - Set a name for the entire project. One argument.
-Usage: Set the name for the entire project.  This takes one argument.
-PROJECT(projectname)
+    SOURCE_FILES - Add a list of source files.
+    Usage: SOURCE_FILES(file1 file2 ...)
 
-SOURCE_FILES - Add a list of source files.
-Usage: SOURCE_FILES(file1 file2 ...)
+    SOURCE_FILES_REQUIRE - Add a list of source files if the required 
+    variables are set.
+    Usage: SOURCE_FILES_REQUIRE(var1 var2 ... SOURCES_BEGIN file1 file2 ...)
 
-SOURCE_FILES_REQUIRE - Add a list of source files if the required variables are set.
-Usage: SOURCE_FILES_REQUIRE(var1 var2 ... SOURCES_BEGIN file1 file2 ...)
+    SUBDIRS - Add a list of subdirectories to the build.
+    Usage: SUBDIRS(dir1 dir2 ...)
+    Add a list of subdirectories to the build.
+    This will cause any CMakeLists.txt files in the sub directories
+    to be processed by CMake.
 
-SUBDIRS - Add a list of subdirectories to the build.
-Usage: Add a list of subdirectories to the build.
-SUBDIRS(dir1 dir2 ...)
-This will cause any CMakeLists.txt files in the sub directories
-to be processed by CMake.
+    TESTS - Add a list of executables files that are run as tests.
+    Usage: TESTS(file1 file2 ...)
 
-TESTS - Add a list of executables files that are run as tests.
-Usage: TESTS(file1 file2 ...)
+    UNIX_DEFINES - Add -D flags to the command line for Unix only.
+    Usage: UNIX_DEFINES(-DFOO -DBAR)
+    Add -D flags to the command line for Unix only.
 
-UNIX_DEFINES - Add -D flags to the command line for Unix only.
-Usage: Add -D flags to the command line for Unix only.
-UNIX_DEFINES(-DFOO -DBAR)
+    UNIX_LIBRARIES - Add libraries that are only used for Unix programs.
+    Usage: UNIX_LIBRARIES(library -lm ...)
 
-UNIX_LIBRARIES - Add libraries that are only used for Unix programs.
-Usage: UNIX_LIBRARIES(library -lm ...)
+    WIN32_DEFINES - Add -D define flags to command line for Win32 environments.
+    Usage: WIN32_DEFINES(-DFOO -DBAR ...)
+    Add -D define flags to command line for Win32 environments.
 
-WIN32_DEFINES - Add -D define flags to command line for Win32 environments.
-Usage: Add -D define flags to command line for Win32 environments.
-WIN32_DEFINES(-DFOO -DBAR ...)
-
-WIN32_LIBRARIES - Add libraries that are only used for Win32 programs.
-Usage: WIN32_LIBRARIES(library -lm ...)
-
-
-
+    WIN32_LIBRARIES - Add libraries that are only used for Win32 programs.
+    Usage: WIN32_LIBRARIES(library -lm ...)
 
 USING / BUILDING WITH CMAKE
 ---------------------------
@@ -132,54 +130,56 @@ Windows:
 -------
 These programs are used to drive CMake on Windows:
 
-        CMakeSetup.exe      -> window MFC based GUI for configure on windows
+    CMakeSetup.exe      -> window MFC based GUI for configure on windows
 
-        CMakeSetupCMD.exe   -> windows command line version of CMakeConfigure
+    CMakeSetupCMD.exe   -> windows command line version of CMakeConfigure
 
 To build a project on Windows:
 
-        load CMake/Source/CMakeSetup.dsw
-        Build it
-        Run it
-        Specify paths
+    load CMake/Source/CMakeSetup.dsw
+    Build it
+    Run it
+    Specify paths
 
-        Load ITK.dsw
-        Build Common, Numerics, then any of the many executables, 
-        or do a Batch build with debug only.
+    Load ITK.dsw
+    Build Common, Numerics, then any of the many executables, 
+    or do a Batch build with debug only.
 
 
 Unix:
 ----
 These programs/files are used to drive CMake on Unix:
 
-configure             -> run on unix to configure for build
-CMakeBuildTargets     -> Unix program to read CMakeLists.txt and 
-                         generate CMakeTargets.make
+    configure             -> run on unix to configure for build
+    CMakeBuildTargets     -> Unix program to read CMakeLists.txt and 
+                             generate CMakeTargets.make
 
-makefile fragments:
-CMakeMaster.make      -> main file to be included by makefiles
-CMakeVariables.make   -> all make varibles are set in this file
-CMakeRules.make       -> All build rules are here (except Simple Rules)
-CMakeSimpleRules.make -> simple build rules for .o to .cxx, this is separate 
-                         to be able to build CMakeBuildTargets itself.
-CMakeLocal.make       -> Place for hand configuration
-CMakeTargets.make     -> generated rules for make style build in each directory
-MakefileTemplate.make -> master makefile template used by configure to 
-                         generate Makefiles
+    makefile fragments:
+    CMakeMaster.make      -> main file to be included by makefiles
+    CMakeVariables.make   -> all make varibles are set in this file
+    CMakeRules.make       -> All build rules are here (except Simple Rules)
+    CMakeSimpleRules.make -> simple build rules for .o to .cxx, this is 
+                             separate to be able to build CMakeBuildTargets 
+                             itself.
+    CMakeLocal.make       -> Place for hand configuration
+    CMakeTargets.make     -> generated rules for make style build in each 
+                             directory
+    MakefileTemplate.make -> master makefile template used by configure to 
+                             generate Makefiles
 
 
 Unix install:
 In place (object files end up in source code directory):
 
-        ./configure
-        make
+    ./configure
+    make
 
 Other directory (object files are in another directory):
 
-        mkdir Insight-build
-        cd Insight-build
-        ../Insight/configure
-        make
+    mkdir Insight-build
+    cd Insight-build
+    ../Insight/configure
+    make
 
 
 FOR MORE INFORMATION

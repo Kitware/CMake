@@ -61,7 +61,8 @@ public:
    */
   virtual const char* TerseDocumentation() 
     {
-    return "Add a list of source files if the required variables are set.";
+    return "Add a list of source files if the required \n"
+           "variables are set.";
     }
   
   /**

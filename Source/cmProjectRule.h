@@ -68,8 +68,8 @@ public:
   virtual const char* FullDocumentation()
     {
     return
-      "Set the name for the entire project.  This takes one argument.\n"
-      "PROJECT(projectname)";
+      "PROJECT(projectname)\n"
+      "Set the name for the entire project.  This takes one argument.";
     }
 };
 

@@ -73,7 +73,7 @@ public:
   virtual const char* FullDocumentation()
     {
     return
-      "INCLUDE_DIRECTORIES(dir1 dir2 ...).\n";
+      "INCLUDE_DIRECTORIES(dir1 dir2 ...)";
     }
 };
 

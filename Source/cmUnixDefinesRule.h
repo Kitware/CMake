@@ -78,8 +78,8 @@ public:
   virtual const char* FullDocumentation()
     {
     return
-      "Add -D flags to the command line for Unix only.\n"
-      "UNIX_DEFINES(-DFOO -DBAR)";
+      "UNIX_DEFINES(-DFOO -DBAR)\n"
+      "Add -D flags to the command line for Unix only.";
     }
 };
 
