@@ -182,8 +182,9 @@ case $system in
     CYGWIN_NT*)
         CMAKE_SHLIB_CFLAGS=""
         CMAKE_DL_LIBS="-lgdi32" 
+        CMAKE_SHLIB_BUILD_FLAGS="-shared"
         CMAKE_SHLIB_SUFFIX=".dll"
-        CMAKE_SHLIB_LINK_FLAGS="-shared"
+        CMAKE_SHLIB_LINK_FLAGS=""
         CMAKE_SHLIB_RUNTIME_FLAG=""
         CMAKE_SHLIB_RUNTIME_SEP=""
         ;;
