@@ -1107,14 +1107,14 @@ std::string cmSystemTools::RelativePath(const char* local, const char* remote)
   std::vector<std::string> fileSplit = cmSystemTools::SplitString(local);
   std::vector<std::string> relativeSplit = cmSystemTools::SplitString(remote);
   // count up how many mathing directory names there are from the start
-  int sameCount = 0;
+  unsigned int sameCount = 0;
   while(sameCount < fileSplit.size()-1 && sameCount < relativeSplit.size()-1 && 
         fileSplit[sameCount] == relativeSplit[sameCount])
     {
     sameCount++;
     }
   // put in sameCount number of ../ into the path
-  int i;
+  unsigned int i;
   for(i = sameCount; i < fileSplit.size(); ++i)
     {
     relativePath += "../";

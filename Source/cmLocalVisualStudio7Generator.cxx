@@ -141,10 +141,10 @@ void cmLocalVisualStudio7Generator::AddVCProjBuildRule()
   std::string makefileIn = m_Makefile->GetStartDirectory();
   makefileIn += "/";
   makefileIn += "CMakeLists.txt";
-  makefileIn = cmSystemTools::ConvertToOutputPath(makefileIn.c_str());
+  makefileIn = this->ConvertToRelativeOutputPath(makefileIn.c_str());
   std::string dsprule = "${CMAKE_COMMAND}";
   m_Makefile->ExpandVariablesInString(dsprule);
-  dsprule = cmSystemTools::ConvertToOutputPath(dsprule.c_str());
+  dsprule = this->ConvertToRelativeOutputPath(dsprule.c_str());
   std::vector<std::string> argv;
   argv.push_back(makefileIn);
   makefileIn = m_Makefile->GetStartDirectory();
@@ -153,19 +153,19 @@ void cmLocalVisualStudio7Generator::AddVCProjBuildRule()
   std::string args;
   args = "-H";
   args +=
-    cmSystemTools::ConvertToOutputPath(m_Makefile->GetHomeDirectory());
+    this->ConvertToRelativeOutputPath(m_Makefile->GetHomeDirectory());
   argv.push_back(args);
   args = "-S";
   args +=
-    cmSystemTools::ConvertToOutputPath(m_Makefile->GetStartDirectory());
+    this->ConvertToRelativeOutputPath(m_Makefile->GetStartDirectory());
   argv.push_back(args);
   args = "-O";
   args += 
-    cmSystemTools::ConvertToOutputPath(m_Makefile->GetStartOutputDirectory());
+    this->ConvertToRelativeOutputPath(m_Makefile->GetStartOutputDirectory());
   argv.push_back(args);
   args = "-B";
   args += 
-    cmSystemTools::ConvertToOutputPath(m_Makefile->GetHomeOutputDirectory());
+    this->ConvertToRelativeOutputPath(m_Makefile->GetHomeOutputDirectory());
   argv.push_back(args);
   
   std::string configFile = 
@@ -856,7 +856,7 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
           {
           std::string totalCommandStr;
           totalCommandStr = 
-            cmSystemTools::ConvertToOutputPath(command->GetCommand().c_str()); 
+            this->ConvertToRelativeOutputPath(command->GetCommand().c_str()); 
           totalCommandStr += " ";
           totalCommandStr += command->GetArguments();
           totalCommandStr += "\n";
@@ -1149,7 +1149,7 @@ std::string cmLocalVisualStudio7Generator::EscapeForXML(const char* s)
 
 std::string cmLocalVisualStudio7Generator::ConvertToXMLOutputPath(const char* path)
 {
-  std::string ret = cmSystemTools::ConvertToOutputPath(path);
+  std::string ret = this->ConvertToRelativeOutputPath(path);
   cmSystemTools::ReplaceString(ret, "&", "&amp;");
   cmSystemTools::ReplaceString(ret, "\"", "&quot;");
   cmSystemTools::ReplaceString(ret, "<", "&lt;");
@@ -1159,7 +1159,7 @@ std::string cmLocalVisualStudio7Generator::ConvertToXMLOutputPath(const char* pa
 
 std::string cmLocalVisualStudio7Generator::ConvertToXMLOutputPathSingle(const char* path)
 {
-  std::string ret = cmSystemTools::ConvertToOutputPath(path);
+  std::string ret = this->ConvertToRelativeOutputPath(path);
   cmSystemTools::ReplaceString(ret, "\"", "");
   cmSystemTools::ReplaceString(ret, "&", "&amp;");
   cmSystemTools::ReplaceString(ret, "<", "&lt;");
