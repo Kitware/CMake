@@ -581,7 +581,7 @@ int cmCTest::UpdateDirectory()
      << "\t<UpdateReturnStatus>";
   if ( retVal )
     {
-    os << retVal;
+    os << goutput;
     }
   os << "</UpdateReturnStatus>" << std::endl;
 
