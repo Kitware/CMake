@@ -183,6 +183,9 @@ public:
   //! Get the path to CTest
   const char* GetCTestExecutable() { return m_CTestSelf.c_str(); }
 
+  //! Get the short path to the file. This means if the file is in binary or
+  //source directory, it will become /.../relative/path/to/file
+  std::string GetShortPathToFile(const char* fname);
 
 private:
   // these are helper classes

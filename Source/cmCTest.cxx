@@ -2123,6 +2123,50 @@ void cmCTest::PopulateCustomVector(cmMakefile* mf, const char* def, tm_VectorOfS
     }
 }
 
+std::string cmCTest::GetShortPathToFile(const char* fname)
+{
+  const std::string& sourceDir = GetDartConfiguration("SourceDirectory");
+  const std::string& buildDir = GetDartConfiguration("BuildDirectory");
+
+  // Find relative paths to both directories
+  std::string srcRelpath = cmSystemTools::RelativePath(sourceDir.c_str(), fname);
+  std::string bldRelpath = cmSystemTools::RelativePath(buildDir.c_str(), fname);
+
+  // If any contains "." it is not parent directory
+  bool inSrc = srcRelpath.find("..") == srcRelpath.npos;
+  bool inBld = bldRelpath.find("..") == bldRelpath.npos;
+  // TODO: Handle files with .. in their name
+
+  std::string* res = 0;
+
+  if ( inSrc && inBld )
+    {
+    // If both have relative path with no dots, pick the shorter one
+    if ( srcRelpath.size() < bldRelpath.size() )
+      {
+      res = &srcRelpath;
+      }
+    else
+      {
+      res = &bldRelpath;
+      }
+    }
+  else if ( inSrc )
+    {
+    res = &srcRelpath;
+    }
+  else if ( inBld )
+    {
+    res = &bldRelpath;
+    }
+  if ( !res )
+    {
+    return fname;
+    }
+  cmSystemTools::ConvertToUnixSlashes(*res);
+  return "./" + *res;
+}
+
 std::string cmCTest::GetDartConfiguration(const char *name)
 {
   return m_DartConfiguration[name];
