@@ -1,3 +1,5 @@
+#ifndef cmCursesStandardIncludes_h
+#define cmCursesStandardIncludes_h
 #if defined(__sun__) && defined(__GNUC__)
  #define _MSE_INT_H
 #endif
@@ -19,3 +21,16 @@
 #endif
 
 
+// on some machines move erase and clear conflict with stl
+// so remove them from the namespace
+inline void curses_move(unsigned int x, unsigned int y)
+{
+  move(x,y);
+}
+
+#undef move
+#undef erase
+#undef clear
+
+
+#endif // cmCursesStandardIncludes_h

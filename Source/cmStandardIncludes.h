@@ -102,12 +102,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #  if   (_COMPILER_VERSION >= 730)
 #   define CM_SGI_CC_730
 #  elif (_COMPILER_VERSION >= 720)
-#   define CM_SGI_CC_720
+#   define CM_HAS_STD_BUT_NOT_FOR_IOSTREAM
 #  endif
 #endif
 
-# ifdef CM_SGI_CC_720
-// the 720 sgi compiler has std:: but not for the stream library,
+#ifdef __DECCXX_VER
+# if __DECCXX_VER <= 60390002
+#  define CM_HAS_STD_BUT_NOT_FOR_IOSTREAM
+# endif
+#endif
+
+#ifdef CM_HAS_STD_BUT_NOT_FOR_IOSTREAM
+// some compilers have std:: but not for the stream library,
 // so we have to bring it into the std namespace by hand.
 namespace std {
 using ::ostream;
