@@ -739,8 +739,6 @@ void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
         // This is handled by the OutputInstallRules method
       case cmTarget::INSTALL_PROGRAMS:
         // This is handled by the OutputInstallRules method
-      case cmTarget::GENERATED_CODE:
-        // This is handled by the CustomCommands
 	break;
       }
     }
