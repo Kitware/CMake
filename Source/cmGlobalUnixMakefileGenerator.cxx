@@ -29,8 +29,9 @@ void cmGlobalUnixMakefileGenerator::EnableLanguage(const char* lang,
     {
     lang = "CXX";
     }
-  std::string root 
-    = cmSystemTools::ConvertToOutputPath(mf->GetDefinition("CMAKE_ROOT"));
+  //std::string root 
+  //  = cmSystemTools::ConvertToOutputPath(mf->GetDefinition("CMAKE_ROOT"));
+  std::string root = mf->GetDefinition("CMAKE_ROOT");
   std::string rootBin = mf->GetHomeOutputDirectory();
   if(m_ConfiguredFilesPath.size())
     {
