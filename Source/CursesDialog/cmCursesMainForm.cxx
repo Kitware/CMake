@@ -992,7 +992,7 @@ void cmCursesMainForm::HandleInput()
 void cmCursesMainForm::LoadCache(const char *dir)
 
 {
-  m_CMakeInstance->GetCacheManager()->LoadCache(dir); 
+  m_CMakeInstance->LoadCache(); 
   m_CMakeInstance->SetCacheArgs(m_Args);
 }
   
