@@ -282,7 +282,7 @@ setupCurlSession(xmlrpc_env *       const envP,
                  xmlrpc_mem_block * const responseXmlP) {
 
   static char proxy[1024];
-  static proxyUser[1024];
+  static char proxyUser[1024];
   int proxy_type = 0;
 
   if ( getenv("HTTP_PROXY") )
