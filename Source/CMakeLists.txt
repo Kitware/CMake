@@ -37,6 +37,7 @@ ADD_DEFINITIONS(-DCMAKE_BUILD_WITH_CMAKE)
 
 IF (WIN32)
   SOURCE_FILES(SRCS cmDSWWriter.cxx cmDSPWriter.cxx cmMSProjectGenerator.cxx)
+  SOURCE_FILES(SRCS cmBorlandMakefileGenerator2.cxx)
   SOURCE_FILES(SRCS cmBorlandMakefileGenerator.cpp)
   SOURCE_FILES(SRCS cmNMakeMakefileGenerator.cxx)
   IF(NOT UNIX)

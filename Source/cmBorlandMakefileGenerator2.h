@@ -38,37 +38,35 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =========================================================================*/
-#ifndef cmNMakeMakefileGenerator_h
-#define cmNMakeMakefileGenerator_h
+#ifndef cmBorlandMakefileGenerator2_h
+#define cmBorlandMakefileGenerator2_h
 
-#include "cmUnixMakefileGenerator.h"
+#include "cmNMakeMakefileGenerator.h"
 
-/** \class cmNMakeMakefileGenerator
+/** \class cmBorlandMakefileGenerator2
  * \brief Write an NMake makefile.
  *
- * cmNMakeMakefileGenerator produces a Unix makefile from its
+ * cmBorlandMakefileGenerator2 produces a Unix makefile from its
  * member m_Makefile.
  */
-class cmNMakeMakefileGenerator : public cmUnixMakefileGenerator
+class cmBorlandMakefileGenerator2 : public cmNMakeMakefileGenerator
 {
 public:
   ///! Set cache only and recurse to false by default.
-  cmNMakeMakefileGenerator();
+  cmBorlandMakefileGenerator2();
 
-  virtual ~cmNMakeMakefileGenerator();
+  virtual ~cmBorlandMakefileGenerator2();
   
   ///! Get the name for the generator.
-  virtual const char* GetName() {return "NMake Makefiles";}
+  virtual const char* GetName() {return "Borland Makefiles2";}
 
   ///! virtual copy constructor
   virtual cmMakefileGenerator* CreateObject() 
-    { return new cmNMakeMakefileGenerator;}
+    { return new cmBorlandMakefileGenerator2;}
 
   ///! figure out about the current system information
   virtual void ComputeSystemInfo(); 
 protected:
-  std::string ShortPath(const char* path);
-  std::string ShortPathCommand(const char* command);
   virtual void OutputMakeVariables(std::ostream&);
   virtual void BuildInSubDirectory(std::ostream& fout,
                                    const char* directory,
@@ -97,24 +95,18 @@ protected:
                                        const cmTarget &);
   virtual void OutputExecutableRule(std::ostream&, const char* name,
                                     const cmTarget &);
-  virtual void OutputLinkLibraries(std::ostream& fout,
-                                   const char* targetLibrary,
-                                   const cmTarget &tgt);
   virtual std::string GetOutputExtension(const char* sourceExtension); 
-  virtual void OutputIncludeMakefile(std::ostream&, const char* file);
   virtual void OutputBuildLibraryInDir(std::ostream& fout,
 				       const char* path,
 				       const char* library,
 				       const char* fullpath); 
   ///! return true if the two paths are the same (checks short paths)
   virtual bool SamePath(const char* path1, const char* path2);
-  void SetLibraryPathOption(const char* lib){ m_LibraryPathOption = lib;}
 private:
   bool m_QuoteNextCommand;      // if this is true, OutputMakeRule
                                 // will not quote the next commands
                                 // it is reset to false after each
                                 // call to OutputMakeRule
-  std::string m_LibraryPathOption;
 };
 
 #endif

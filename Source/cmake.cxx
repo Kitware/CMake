@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #include "cmMSProjectGenerator.h"
 #include "cmBorlandMakefileGenerator.h"
+#include "cmBorlandMakefileGenerator2.h"
 #include "cmNMakeMakefileGenerator.h"
 #else
 #include "cmUnixMakefileGenerator.h"
@@ -57,6 +58,7 @@ cmake::cmake()
   cmMakefileGenerator::RegisterGenerator(new cmMSProjectGenerator);
   cmMakefileGenerator::RegisterGenerator(new cmNMakeMakefileGenerator);
   cmMakefileGenerator::RegisterGenerator(new cmBorlandMakefileGenerator);
+  cmMakefileGenerator::RegisterGenerator(new cmBorlandMakefileGenerator2);
 #else
   cmMakefileGenerator::RegisterGenerator(new cmUnixMakefileGenerator);
 #endif
