@@ -66,9 +66,10 @@ void cmake::Usage(const char* program)
 {
   std::cerr << "cmake version " << cmMakefile::GetMajorVersion()
             << "." << cmMakefile::GetMinorVersion() << "\n";
-  std::cerr << "Usage: " << program << " srcdir \n" 
+  std::cerr << "Usage: " << program << " srcdir [options]\n" 
             << "Where cmake is run from the directory where you want the object files written\n";
-  std::cerr << "[-GgeneratorName] (where generator name can be: ";
+  std::cerr << "Options are:\n";
+  std::cerr << "[-GgeneratorName] (where generator name can be one of these: ";
   std::vector<std::string> names;
   cmMakefileGenerator::GetRegisteredGenerators(names);
   for(std::vector<std::string>::iterator i =names.begin();
@@ -76,6 +77,7 @@ void cmake::Usage(const char* program)
     {
     std::cerr << "\"" << i->c_str() << "\" ";
     }
+  std::cerr << "\n-DVAR:TYPE=VALUE (create a cache file entry)\n";
   std::cerr << ")\n";
 }
 
@@ -169,6 +171,10 @@ void cmake::SetArgs(cmMakefile& builder, const std::vector<std::string>& args)
       {
 	m_Verbose = true;
       }
+    else if(arg.find("-D",0) == 0)
+      {
+      // skip for now
+      }
     else if(arg.find("-G",0) == 0)
       {
       std::string value = arg.substr(2);
@@ -193,9 +199,9 @@ void cmake::SetArgs(cmMakefile& builder, const std::vector<std::string>& args)
       builder.SetStartOutputDirectory
         (cmSystemTools::GetCurrentWorkingDirectory().c_str());
       builder.SetHomeDirectory
-        (cmSystemTools::CollapseFullPath(args[1].c_str()).c_str());
+        (cmSystemTools::CollapseFullPath(arg.c_str()).c_str());
       builder.SetStartDirectory
-        (cmSystemTools::CollapseFullPath(args[1].c_str()).c_str());
+        (cmSystemTools::CollapseFullPath(arg.c_str()).c_str());
       }
     }
   if(!directoriesSet)
