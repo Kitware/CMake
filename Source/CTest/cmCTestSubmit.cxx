@@ -300,7 +300,6 @@ bool cmCTestSubmit::TriggerUsingHTTP(const std::vector<std::string>& files,
 {
   CURL *curl;
   CURLcode res = CURLcode();
-  FILE* ftpfile;
 
   /* In windows, this will init the winsock stuff */
   ::curl_global_init(CURL_GLOBAL_ALL);
@@ -381,10 +380,10 @@ bool cmCTestSubmit::TriggerUsingHTTP(const std::vector<std::string>& files,
   return true;
 }
 
-bool cmCTestSubmit::SubmitUsingSCP(const std::string& localprefix, 
-                                   const std::vector<std::string>& files,
-                                   const std::string& remoteprefix, 
-                                   const std::string& url)
+bool cmCTestSubmit::SubmitUsingSCP(const std::string&, 
+                                   const std::vector<std::string>&,
+                                   const std::string&, 
+                                   const std::string&)
 {
   std::cout << "SubmitUsingSCP is not yet implemented" << std::endl;
   return false;
