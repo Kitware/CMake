@@ -29,6 +29,7 @@
 // do I need an ALL_BUILD
 // link libraries stuff
 // exe/lib output paths
+// PBXBuildFile can not be reused, or error occurs
 
 //----------------------------------------------------------------------------
 cmGlobalXCodeGenerator::cmGlobalXCodeGenerator()
@@ -443,14 +444,18 @@ cmGlobalXCodeGenerator::CreateXCodeTarget(cmTarget& cmtarget,
   target->AddAttribute("dependencies", dependencies);
   target->AddAttribute("name", this->CreateString(cmtarget.GetName()));
   target->AddAttribute("productName",this->CreateString(cmtarget.GetName()));
+
   cmXCodeObject* fileRef = this->CreateObject(cmXCodeObject::PBXFileReference);
   fileRef->AddAttribute("explicitFileType", 
                         this->CreateString(fileTypeString.c_str()));
-  fileRef->AddAttribute("includedInIndex", this->CreateString("0"));
+//  fileRef->AddAttribute("includedInIndex", this->CreateString("0"));
   fileRef->AddAttribute("path", this->CreateString(productName.c_str()));
   fileRef->AddAttribute("refType", this->CreateString("3"));
-  fileRef->AddAttribute("sourceTree", this->CreateString("BUILT_PRODUCTS_DIR"));
-  target->AddAttribute("productReference", this->CreateObjectReference(fileRef));
+  fileRef->AddAttribute("sourceTree",
+                        this->CreateString("BUILT_PRODUCTS_DIR"));
+  
+  target->AddAttribute("productReference", 
+                       this->CreateObjectReference(fileRef));
   target->AddAttribute("productType", 
                        this->CreateString(productTypeString.c_str()));
   target->SetcmTarget(&cmtarget);
@@ -515,8 +520,9 @@ void cmGlobalXCodeGenerator::AddDependTarget(cmXCodeObject* target,
 void cmGlobalXCodeGenerator::AddLinkTarget(cmXCodeObject* target ,
                                            cmXCodeObject* dependTarget )
 {
-  cmXCodeObject* buildfile = this->CreateObject(cmXCodeObject::PBXBuildFile);
   cmXCodeObject* ref = dependTarget->GetObject("productReference");
+
+  cmXCodeObject* buildfile = this->CreateObject(cmXCodeObject::PBXBuildFile);
   buildfile->AddAttribute("fileRef", ref);
   cmXCodeObject* settings = 
     this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
@@ -553,7 +559,10 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
     if(dptarget)
       {
       this->AddDependTarget(target, dptarget);
-      this->AddLinkTarget(target, dptarget);
+      if(cmtarget->GetType() != cmTarget::STATIC_LIBRARY)
+        {
+        this->AddLinkTarget(target, dptarget);
+        }
       }
     else
       {
@@ -654,7 +663,7 @@ void cmGlobalXCodeGenerator::CreateXCodeObjects(cmLocalGenerator* ,
     cmXCodeObject* productRef = t->GetObject("productReference");
     if(productRef)
       {
-      productGroupChildren->AddObject(productRef);
+      productGroupChildren->AddObject(productRef->GetObject());
       }
     }
   m_RootObject->AddAttribute("targets", allTargets);

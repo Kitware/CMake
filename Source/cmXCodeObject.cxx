@@ -25,12 +25,20 @@ cmXCodeObject::cmXCodeObject(PBXType ptype, Type type)
   m_Object =0;
   
   m_IsA = ptype;
-  cmOStringStream str;
-  str << (void*)this;
-  str << (void*)this;
-  str << (void*)this;
-  m_Id = str.str();
+  if(type == OBJECT)
+    {
+    cmOStringStream str;
+    str << (void*)this;
+    str << (void*)this;
+    str << (void*)this;
+    m_Id = str.str();
+    }
+  else
+    {
+    m_Id = "Temporary cmake object, should not be refered to in xcode file";
+    }
   cmSystemTools::ReplaceString(m_Id, "0x", "");
+  m_Id = cmSystemTools::UpperCase(m_Id);
   if(m_Id.size() < 24)
     {
     int diff = 24 - m_Id.size();
@@ -126,3 +134,13 @@ void cmXCodeObject::PrintList(std::vector<cmXCodeObject*> const& objs,
   cmXCodeObject::Indent(1, out);
   out << "};\n";
 }
+
+
+void cmXCodeObject::CopyAttributes(cmXCodeObject* copy)
+{
+  this->m_ObjectAttributes = copy->m_ObjectAttributes;
+  this->m_List = copy->m_List;
+  this->m_String = copy->m_String;
+  this->m_Object = copy->m_Object;
+}
+

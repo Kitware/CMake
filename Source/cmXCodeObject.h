@@ -37,6 +37,10 @@ public:
     {
       m_Object = value;
     }
+  cmXCodeObject* GetObject()
+    {
+      return m_Object;
+    }
   void AddObject(cmXCodeObject* value)
     {
       m_List.push_back(value);
@@ -87,6 +91,7 @@ public:
     {
       m_PBXTargetDependency = d;
     }
+  void CopyAttributes(cmXCodeObject* );
   
 private:
   cmTarget* m_cmTarget;
