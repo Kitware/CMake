@@ -970,11 +970,11 @@ int cmCTest::BuildDirectory()
     std::vector<int>::size_type kk;
     for ( kk =0; kk < markedLines.size(); kk ++ )
       {
-      if ( markedLines[cc] == 1 )
+      if ( markedLines[kk] == 1 )
         {
         if ( re.find(lines[kk]) )
           {
-          markedLines[cc] = 0;
+          markedLines[kk] = 0;
           }
         }
       }
@@ -986,11 +986,11 @@ int cmCTest::BuildDirectory()
     std::vector<int>::size_type kk;
     for ( kk =0; kk < markedLines.size(); kk ++ )
       {
-      if ( markedLines[cc] > 1 )
+      if ( markedLines[kk] > 1 )
         {
         if ( re.find(lines[kk]) )
           {
-          markedLines[cc] = 0;
+          markedLines[kk] = 0;
           }
         }
       }
