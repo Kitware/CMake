@@ -10,15 +10,20 @@ FIND_PATH(MPI_INCLUDE_PATH mpi.h
           /usr/local/include 
           /usr/include 
           /usr/include/mpi
-          /usr/local/mpi/include)
+          /usr/local/mpi/include
+          "C:/Program Files/MPICH/SDK/Include" 
+)
 
 FIND_LIBRARY(MPI_LIBRARY 
              NAMES mpi mpich
-             PATHS /usr/lib /usr/local/lib /usr/local/mpi/lib)
+             PATHS /usr/lib /usr/local/lib /usr/local/mpi/lib
+             "C:/Program Files/MPICH/SDK/Lib" 
+)
 
 FIND_LIBRARY(MPI_EXTRA_LIBRARY 
              NAMES mpi++
              PATHS /usr/lib /usr/local/lib /usr/local/mpi/lib
+             "C:/Program Files/MPICH/SDK/Lib" 
 	     DOC "If a second mpi library is necessary, specify it here.")
 
 MARK_AS_ADVANCED(MPI_INCLUDE_PATH MPI_LIBRARY MPI_EXTRA_LIBRARY)
