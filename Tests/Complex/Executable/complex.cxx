@@ -798,7 +798,7 @@ int main()
 
   // ----------------------------------------------------------------------
   // Test REMOVE command
-  if (strcmp("a;b;d",REMOVE_STRING))
+  if (strcmp("a;b;d",REMOVE_STRING) == 0)
     {
     cmPassed("REMOVE is working");
     }
