@@ -104,6 +104,9 @@ SET (CMAKE_LINKER_FLAGS_RELEASE "" CACHE STRING
 SET (CMAKE_LINKER_FLAGS_RELWITHDEBINFO "/debug /pdbtype:sept" CACHE STRING
      "Flags used by the linker during Release with Debug Info builds.")
 
+SET (CMAKE_LINKER_HIDE_PARAMETERS 1 CACHE BOOL 
+     "Hide linker parameters when it is run.")
+
 SET (CMAKE_LINKER_OUTPUT_FILE_FLAG "/out:" CACHE STRING
      "Flags used to specify output filename by the linker. No space will be appended (use single quotes around value to insert trailing space).")
 
@@ -160,6 +163,7 @@ CMAKE_LINKER_FLAGS_DEBUG
 CMAKE_LINKER_FLAGS_MINSIZEREL
 CMAKE_LINKER_FLAGS_RELEASE
 CMAKE_LINKER_FLAGS_RELWITHDEBINFO
+CMAKE_LINKER_HIDE_PARAMETERS
 CMAKE_LINKER_OUTPUT_FILE_FLAG
 CMAKE_LINKER_SHARED_LIBRARY_FLAG
 CMAKE_MAKE_PROGRAM
