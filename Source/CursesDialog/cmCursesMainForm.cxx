@@ -796,7 +796,7 @@ void cmCursesMainForm::FillCacheManagerFromUI()
 
 void cmCursesMainForm::HandleInput()
 {
-  int x,y;
+  int x=0,y=0;
 
   if (!m_Form)
     {
@@ -844,7 +844,7 @@ void cmCursesMainForm::HandleInput()
     currentWidget = reinterpret_cast<cmCursesWidget*>(field_userptr(
       currentField));
 
-    bool widgetHandled;
+    bool widgetHandled=false;
 
     if ( m_SearchMode )
       {
