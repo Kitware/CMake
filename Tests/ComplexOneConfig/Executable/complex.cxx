@@ -667,7 +667,17 @@ int main()
     {
     cmFailed("REMOVE is not working");
     }
-
+  
+  // ----------------------------------------------------------------------
+  // Test SEPARATE_ARGUMENTS
+  if(strcmp("a;b;c", TEST_SEP) == 0)
+    {
+    cmPassed("SEPARATE_ARGUMENTS is working");
+    }
+  else
+    {
+    cmFailed("SEPARATE_ARGUMENTS is not working");
+    }
   // ----------------------------------------------------------------------
   // Summary
 

@@ -14,6 +14,10 @@ ENDIF (CMAKE_ANSI_CXXFLAGS)
 
 ADD_DEFINITIONS(-DCMAKE_IS_FUN)
 
+SET(TEST_SEP "a b c")
+SEPARATE_ARGUMENTS(TEST_SEP)
+
+
 #
 # Include vars from a file and from a cache
 #
