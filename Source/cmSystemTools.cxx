@@ -602,6 +602,7 @@ bool cmSystemTools::RunCommand(const char* command,
     fgets(buffer, BUFFER_SIZE, cpipe);
     }
   fclose(cpipe);
+  return true;
 #endif
 }
 
