@@ -1,5 +1,5 @@
 RELEASE_TAG="Release-1-4"
-VERSION="1.4.5"
+VERSION="1.4.6"
 PLATFORM="sparc-sunos57-static"
 CURSES_LIBRARY="/usr/lib/libcurses.a"
 FORM_LIBRARY="/usr/lib/libform.a"
