@@ -19,13 +19,13 @@ public:
   
   // This is the name used in the input file.
   virtual const char* GetName() { return "SOURCE_FILES_REQUIRE";}
-  virtual const char* TerseDocumentaion() 
+  virtual const char* TerseDocumentation() 
     {
       return "Add a list of source files.";
     }
   
   // Return full documentation for the rule
-  virtual const char* FullDocumentaion()
+  virtual const char* FullDocumentation()
     {
       return
         "SOURCE_FILES(file1 file2 ...)";

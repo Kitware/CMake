@@ -19,13 +19,13 @@ public:
   
   // This is the name used in the input file.
   virtual const char* GetName() { return "SUBDIRS";}
-  virtual const char* TerseDocumentaion() 
+  virtual const char* TerseDocumentation() 
     {
       return "Add a list of subdirectories to the build.";
     }
   
   // Return full documentation for the rule
-  virtual const char* FullDocumentaion()
+  virtual const char* FullDocumentation()
     {
       return
         "Add a list of subdirectories to the build.\n"

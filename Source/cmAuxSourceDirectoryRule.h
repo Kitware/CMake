@@ -19,14 +19,14 @@ public:
   
   // This is the name used in the input file.
   virtual const char* GetName() { return "AUX_SOURCE_DIRECTORY";}
-  virtual const char* TerseDocumentaion() 
+  virtual const char* TerseDocumentation() 
     {
       return "Add all the source files found in the specified directory to\n"
         " the build.";
     }
   
   // Return full documentation for the rule
-  virtual const char* FullDocumentaion()
+  virtual const char* FullDocumentation()
     {
       return
         "AUX_SOURCE_DIRECTORY(dir)";

@@ -21,13 +21,13 @@ public:
 
   // This is the name used in the input file.
   virtual const char* GetName() { return "UNIX_DEFINES";}
-  virtual const char* TerseDocumentaion() 
+  virtual const char* TerseDocumentation() 
     {
       return "Add -D flags to the command line for unix only.";
     }
   
   // Return full documentation for the rule
-  virtual const char* FullDocumentaion()
+  virtual const char* FullDocumentation()
     {
       return
         "Add -D flags to the command line for unix only.\n"

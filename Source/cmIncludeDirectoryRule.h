@@ -20,13 +20,13 @@ public:
 
   // This is the name used in the input file.
   virtual const char* GetName() { return "INCLUDE_DIRECTORIES";}
-  virtual const char* TerseDocumentaion() 
+  virtual const char* TerseDocumentation() 
     {
       return "Add include directories to the build.";
     }
   
   // Return full documentation for the rule
-  virtual const char* FullDocumentaion()
+  virtual const char* FullDocumentation()
     {
       return
         "INCLUDE_DIRECTORIES(dir1 dir2 ...).\n";

@@ -21,13 +21,13 @@ public:
 
   // This is the name used in the input file.
   virtual const char* GetName() { return "WIN32_LIBRARIES";}
-  virtual const char* TerseDocumentaion() 
+  virtual const char* TerseDocumentation() 
     {
       return "Set a name for the library to be built. One argument.";
     }
   
   // Return full documentation for the rule
-  virtual const char* FullDocumentaion()
+  virtual const char* FullDocumentation()
     {
       return
         "Set the name for the library in this makefile.  \n"

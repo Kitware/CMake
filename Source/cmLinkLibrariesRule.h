@@ -21,7 +21,7 @@ public:
     
   // This is the name used in the input file.
   virtual const char* GetName() { return "LINK_LIBRARIES";}
-  virtual const char* TerseDocumentaion() 
+  virtual const char* TerseDocumentation() 
     {
       return 
         "Specify a list of libraries to be linked into executables or \n"
@@ -29,7 +29,7 @@ public:
     }
   
   // Return full documentation for the rule
-  virtual const char* FullDocumentaion()
+  virtual const char* FullDocumentation()
     {
       return
         "Specify a list of libraries to be linked into executables or \n"

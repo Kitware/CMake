@@ -20,13 +20,13 @@ public:
 
   // This is the name used in the input file.
   virtual const char* GetName() { return "FIND_PROGRARM";}
-  virtual const char* TerseDocumentaion() 
+  virtual const char* TerseDocumentation() 
     {
       return "not implemented.";
     }
   
   // Return full documentation for the rule
-  virtual const char* FullDocumentaion()
+  virtual const char* FullDocumentation()
     {
       return
         "not implemented.\n"

@@ -21,13 +21,13 @@ public:
 
   // This is the name used in the input file.
   virtual const char* GetName() { return "UNIX_LIBRARIES";}
-  virtual const char* TerseDocumentaion() 
+  virtual const char* TerseDocumentation() 
     {
       return "Add libraries that are only used for unix programs.";
     }
   
   // Return full documentation for the rule
-  virtual const char* FullDocumentaion()
+  virtual const char* FullDocumentation()
     {
       return
         "UNIX_LIBRARIES(library -lm ...);";

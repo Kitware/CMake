@@ -21,13 +21,13 @@ public:
   
   // This is the name used in the input file.
   virtual const char* GetName() { return "LINK_DIRECTORIES";}
-  virtual const char* TerseDocumentaion() 
+  virtual const char* TerseDocumentation() 
     {
       return "Specify link directories.";
     }
   
   // Return full documentation for the rule
-  virtual const char* FullDocumentaion()
+  virtual const char* FullDocumentation()
     {
       return
         "Specify the paths to the libraries that will be linked in.\n"

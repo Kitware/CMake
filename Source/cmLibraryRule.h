@@ -19,13 +19,13 @@ public:
   
   // This is the name used in the input file.
   virtual const char* GetName() { return "LIBRARY";}
-  virtual const char* TerseDocumentaion() 
+  virtual const char* TerseDocumentation() 
     {
       return "Set a name for the Library.";
     }
   
   // Return full documentation for the rule
-  virtual const char* FullDocumentaion()
+  virtual const char* FullDocumentation()
     {
       return
         "LIBRARY(libraryname);";

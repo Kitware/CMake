@@ -20,13 +20,13 @@ public:
 
   // This is the name used in the input file.
   virtual const char* GetName() { return "FIND_INCLUDE";}
-  virtual const char* TerseDocumentaion() 
+  virtual const char* TerseDocumentation() 
     {
       return "Find an include path.";
     }
   
   // Return full documentation for the rule
-  virtual const char* FullDocumentaion()
+  virtual const char* FullDocumentation()
     {
       return
         "FIND_INCLUDE(DEFINE try1 try2 ...);";

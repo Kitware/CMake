@@ -3,7 +3,7 @@
 cmUnixLibrariesRule::cmUnixLibrariesRule()
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  this->SetEnableOff();
+  this->EnabledOff();
 #endif
 }
 

@@ -20,13 +20,13 @@ public:
   virtual bool IsInherited() { return true;  }
   // This is the name used in the input file.
   virtual const char* GetName() { return "WIN32_DEFINES";}
-  virtual const char* TerseDocumentaion() 
+  virtual const char* TerseDocumentation() 
     {
       return "Add -D define flags to command line for win32 environments.";
     }
   
   // Return full documentation for the rule
-  virtual const char* FullDocumentaion()
+  virtual const char* FullDocumentation()
     {
       return
         "Add -D define flags to command line for win32 environments.\n"

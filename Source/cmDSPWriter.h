@@ -13,33 +13,47 @@
   See COPYRIGHT.txt for copyright details.
 
 =========================================================================*/
-/**
- * cmDSPMakefile generate a microsoft DSP project file.
- * see the *.dsptemplate files for information on the templates
- * used for making the project files.
- */
 #ifndef cmDSPMakefile_h
 #define cmDSPMakefile_h
+
 #include "cmStandardIncludes.h"
 #include "cmMakefile.h"
 
+/** \class cmDSPMakefile
+ * \brief Generate a Microsoft DSP project file.
+ *
+ * cmDSPMakefile generates a Microsoft DSP project file.
+ * See the *.dsptemplate files for information on the templates
+ * used for making the project files.
+ */
 class cmDSPMakefile 
 {
 public:
   cmDSPMakefile(cmMakefile*);
   ~cmDSPMakefile();
   void OutputDSPFile();
-  enum BuildType { STATIC_LIBRARY, DLL, EXECUTABLE };
-  void SetBuildType(BuildType );
-  // return array of created DSP names
-  // Each executable must have its own dsp
+  enum BuildType {STATIC_LIBRARY, DLL, EXECUTABLE};
+
+  /**
+   * Specify the type of the build: static, dll, or executable.
+   */
+  void SetBuildType(BuildType);
+
+  /**
+   * Return array of created DSP names in a STL vector.
+   * Each executable must have its own dsp.
+   */
   std::vector<std::string> GetCreatedProjectNames() 
     {
-      return m_CreatedProjectNames;
+    return m_CreatedProjectNames;
     }
+
+  /**
+   * Return the makefile.
+   */
   cmMakefile* GetMakefile() 
     {
-      return m_Makefile;
+    return m_Makefile;
     }
   
 private:
@@ -63,7 +77,7 @@ private:
 		       const char* source,
 		       const char* result,
 		       const char* command);
-private:
+
   std::string m_IncludeOptions;
   std::string m_DebugLibraryOptions;
   std::string m_ReleaseLibraryOptions;
