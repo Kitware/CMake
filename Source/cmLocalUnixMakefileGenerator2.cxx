@@ -45,7 +45,14 @@ void cmLocalUnixMakefileGenerator2::Generate(bool fromTheTop)
   const cmTargets& targets = m_Makefile->GetTargets();
   for(cmTargets::const_iterator t = targets.begin(); t != targets.end(); ++t)
     {
-    this->GenerateTargetRuleFile(t->second);
+    // TODO: Dispatch generation of each target type.
+    if((t->second.GetType() == cmTarget::EXECUTABLE) ||
+       (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
+       (t->second.GetType() == cmTarget::SHARED_LIBRARY) ||
+       (t->second.GetType() == cmTarget::MODULE_LIBRARY))
+      {
+      this->GenerateTargetRuleFile(t->second);
+      }
     }
 
   // Generate the main makefile.
@@ -131,13 +138,20 @@ void cmLocalUnixMakefileGenerator2::GenerateMakefile()
   std::vector<std::string> commands;
   for(cmTargets::const_iterator t = targets.begin(); t != targets.end(); ++t)
     {
-    if(t->second.IsInAll())
+    // TODO: Dispatch generation of each target type.
+    if((t->second.GetType() == cmTarget::EXECUTABLE) ||
+       (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
+       (t->second.GetType() == cmTarget::SHARED_LIBRARY) ||
+       (t->second.GetType() == cmTarget::MODULE_LIBRARY))
       {
-      std::string dep = this->GetTargetDirectory(t->second);
-      dep += "/";
-      dep += t->first;
-      dep += ".depends";
-      depends.push_back(dep);
+      if(t->second.IsInAll())
+        {
+        std::string dep = this->GetTargetDirectory(t->second);
+        dep += "/";
+        dep += t->first;
+        dep += ".depends";
+        depends.push_back(dep);
+        }
       }
     }
   this->OutputMakeRule(makefileStream, "all dependencies", "all.depends",
@@ -150,9 +164,16 @@ void cmLocalUnixMakefileGenerator2::GenerateMakefile()
   std::vector<std::string> commands;
   for(cmTargets::const_iterator t = targets.begin(); t != targets.end(); ++t)
     {
-    if(t->second.IsInAll())
+    // TODO: Dispatch generation of each target type.
+    if((t->second.GetType() == cmTarget::EXECUTABLE) ||
+       (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
+       (t->second.GetType() == cmTarget::SHARED_LIBRARY) ||
+       (t->second.GetType() == cmTarget::MODULE_LIBRARY))
       {
-      depends.push_back(t->first+".requires");
+      if(t->second.IsInAll())
+        {
+        depends.push_back(t->first+".requires");
+        }
       }
     }
   this->OutputMakeRule(makefileStream, "all", "all",
@@ -164,14 +185,21 @@ void cmLocalUnixMakefileGenerator2::GenerateMakefile()
     << "# Include target rule files.\n";
   for(cmTargets::const_iterator t = targets.begin(); t != targets.end(); ++t)
     {
-    std::string ruleFileName = this->GetTargetDirectory(t->second);
-    ruleFileName += "/";
-    ruleFileName += t->first;
-    ruleFileName += ".make";
-    makefileStream
-      << m_IncludeDirective << " "
-      << this->ConvertToOutputForExisting(ruleFileName.c_str()).c_str()
-      << "\n";
+    // TODO: Dispatch generation of each target type.
+    if((t->second.GetType() == cmTarget::EXECUTABLE) ||
+       (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
+       (t->second.GetType() == cmTarget::SHARED_LIBRARY) ||
+       (t->second.GetType() == cmTarget::MODULE_LIBRARY))
+      {
+      std::string ruleFileName = this->GetTargetDirectory(t->second);
+      ruleFileName += "/";
+      ruleFileName += t->first;
+      ruleFileName += ".make";
+      makefileStream
+        << m_IncludeDirective << " "
+        << this->ConvertToOutputForExisting(ruleFileName.c_str()).c_str()
+        << "\n";
+      }
     }
 
   // Write jump-and-build rules that were recorded in the map.
@@ -238,7 +266,7 @@ cmLocalUnixMakefileGenerator2
 {
   // Create a directory for this target.
   std::string dir = this->GetTargetDirectory(target);
-  cmSystemTools::MakeDirectory(dir.c_str());
+  cmSystemTools::MakeDirectory(this->ConvertToFullPath(dir).c_str());
 
   // First generate the object rule files.  Save a list of all object
   // files for this target.
@@ -264,9 +292,10 @@ cmLocalUnixMakefileGenerator2
   depFileName += "/";
   depFileName += target.GetName();
   depFileName += ".depends.make";
-  if(!cmSystemTools::FileExists(depFileName.c_str()))
+  std::string depFileNameFull = this->ConvertToFullPath(depFileName);
+  if(!cmSystemTools::FileExists(depFileNameFull.c_str()))
     {
-    std::ofstream depFileStream(depFileName.c_str());
+    std::ofstream depFileStream(depFileNameFull.c_str());
     this->WriteDisclaimer(depFileStream);
     depFileStream
       << "# Empty dependencies file for target " << target.GetName() << ".\n"
@@ -279,7 +308,8 @@ cmLocalUnixMakefileGenerator2
   ruleFileName += "/";
   ruleFileName += target.GetName();
   ruleFileName += ".make";
-  cmGeneratedFileStream ruleFile(ruleFileName.c_str());
+  std::string ruleFileNameFull = this->ConvertToFullPath(ruleFileName);
+  cmGeneratedFileStream ruleFile(ruleFileNameFull.c_str());
   std::ostream& ruleFileStream = ruleFile.GetStream();
   if(!ruleFileStream)
     {
@@ -402,14 +432,15 @@ cmLocalUnixMakefileGenerator2
   // Create the directory containing the object file.  This may be a
   // subdirectory under the target's directory.
   std::string dir = cmSystemTools::GetFilenamePath(obj.c_str());
-  cmSystemTools::MakeDirectory(dir.c_str());
+  cmSystemTools::MakeDirectory(this->ConvertToFullPath(dir).c_str());
 
   // If there is no dependencies file, create an empty one.
   std::string depFileName = obj;
   depFileName += ".depends.make";
-  if(!cmSystemTools::FileExists(depFileName.c_str()))
+  std::string depFileNameFull = this->ConvertToFullPath(depFileName);
+  if(!cmSystemTools::FileExists(depFileNameFull.c_str()))
     {
-    std::ofstream depFileStream(depFileName.c_str());
+    std::ofstream depFileStream(depFileNameFull.c_str());
     this->WriteDisclaimer(depFileStream);
     depFileStream
       << "# Empty dependencies file for object file " << obj.c_str() << ".\n"
@@ -420,7 +451,8 @@ cmLocalUnixMakefileGenerator2
   // because the rules may depend on this file itself.
   std::string ruleFileName = obj;
   ruleFileName += ".make";
-  cmGeneratedFileStream ruleFile(ruleFileName.c_str());
+  std::string ruleFileNameFull = this->ConvertToFullPath(ruleFileName);
+  cmGeneratedFileStream ruleFile(ruleFileNameFull.c_str());
   std::ostream& ruleFileStream = ruleFile.GetStream();
   if(!ruleFileStream)
     {
@@ -1028,6 +1060,17 @@ cmLocalUnixMakefileGenerator2
   // Identify the language of the source file.
   return (m_GlobalGenerator
           ->GetLanguageFromExtension(source.GetSourceExtension().c_str()));
+}
+
+//----------------------------------------------------------------------------
+std::string
+cmLocalUnixMakefileGenerator2
+::ConvertToFullPath(const std::string& localPath)
+{
+  std::string dir = m_Makefile->GetCurrentOutputDirectory();
+  dir += "/";
+  dir += localPath;
+  return dir;
 }
 
 //----------------------------------------------------------------------------

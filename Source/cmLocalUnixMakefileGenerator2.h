@@ -85,6 +85,7 @@ protected:
   std::string GetObjectFileName(const cmTarget& target,
                                 const cmSourceFile& source);
   const char* GetSourceFileLanguage(const cmSourceFile& source);
+  std::string ConvertToFullPath(const std::string& localPath);
 
   void AddLanguageFlags(std::string& flags, const char* lang);
   void AddSharedFlags(std::string& flags, const char* lang, bool shared);
