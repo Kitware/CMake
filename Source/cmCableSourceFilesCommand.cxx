@@ -28,13 +28,10 @@ void cmCableSourceFilesCommand::FinalPass()
   // finder will need hints.  Add one for each source file.
   cmClassFile& cFile = m_Makefile->GetClasses()[index];
   
-  std::string curPath = m_Makefile->GetCurrentDirectory();
-  curPath += "/";
-  
   for(Entries::const_iterator f = m_Entries.begin();
       f != m_Entries.end(); ++f)
     {
-    std::string header = curPath+*f+".h";
+    std::string header = *f+".h";
     cFile.m_Depends.push_back(header);
     }
 }
@@ -59,11 +56,9 @@ void cmCableSourceFilesCommand::WriteConfiguration() const
   for(Entries::const_iterator f = m_Entries.begin();
       f != m_Entries.end(); ++f)
     {
-    std::string file = curPath+*f;
-    
     // Look for the normal include file.
-    std::string header = file+".h";
-    if(cmSystemTools::FileExists(header.c_str()))
+    std::string header = *f+".h";
+    if(cmSystemTools::FileExists((curPath+header).c_str()))
       {
       os << indent << "  <File name=\"" << header.c_str() << "\"/>"
          << std::endl;
@@ -74,10 +69,10 @@ void cmCableSourceFilesCommand::WriteConfiguration() const
       }
     
     // Look for an instantiation file.
-    std::string instantiation = file+".txx";
-    if(cmSystemTools::FileExists(instantiation.c_str()))
+    std::string txx = *f+".txx";
+    if(cmSystemTools::FileExists((curPath+txx).c_str()))
       {
-      os << indent << "  <File name=\"" << instantiation.c_str()
+      os << indent << "  <File name=\"" << txx.c_str()
          << "\" purpose=\"instantiate\"/>" << std::endl;
       }
     }

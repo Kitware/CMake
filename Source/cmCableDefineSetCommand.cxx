@@ -253,16 +253,16 @@ bool cmCableDefineSetCommand::AddSourceFile(const std::string& file)
   // We must locate the file in the include path so that we can detect
   // its extension, and whether there is more than one to find.
   std::string header = file+".h";
+  std::string txx = file+".txx";
   m_Makefile->ExpandVariablesInString(header);
-
+  m_Makefile->ExpandVariablesInString(txx);
+      
   // See if the file just exists here.  The compiler's search path will
   // locate it.
   if(cmSystemTools::FileExists(header.c_str()))
     {
     m_SourceHeaders.push_back(header);
     // See if there is a matching .txx as well.
-    std::string txx = file+".txx";
-    m_Makefile->ExpandVariablesInString(txx);
     if(cmSystemTools::FileExists(txx.c_str()))
       {
       m_InstantiationSources.push_back(txx);
@@ -277,15 +277,13 @@ bool cmCableDefineSetCommand::AddSourceFile(const std::string& file)
   for(std::vector<std::string>::const_iterator dir = includeDirectories.begin();
       dir != includeDirectories.end(); ++dir)
     {
-    std::string path = *dir + "/" + header;
+    std::string path = *dir + "/";
     m_Makefile->ExpandVariablesInString(path);
-    if(cmSystemTools::FileExists(path.c_str()))
+    if(cmSystemTools::FileExists((path+header).c_str()))
       {
-      m_SourceHeaders.push_back(path);
+      m_SourceHeaders.push_back(header);
       // See if there is a matching .txx as well.
-      std::string txx = *dir + "/" + file + ".txx";
-      m_Makefile->ExpandVariablesInString(txx);
-      if(cmSystemTools::FileExists(txx.c_str()))
+      if(cmSystemTools::FileExists((path+txx).c_str()))
         {
         m_InstantiationSources.push_back(txx);
         }
