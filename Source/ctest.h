@@ -38,9 +38,10 @@ public:
    * constructor
    */
   ctest() {
-    m_UseIncludeRegExp = false;
-    m_UseExcludeRegExp = false;
+    m_UseIncludeRegExp      = false;
+    m_UseExcludeRegExp      = false;
     m_UseExcludeRegExpFirst = false;
+    m_Verbose               = false;
   }
 
   bool m_UseIncludeRegExp;
@@ -51,6 +52,7 @@ public:
   std::string m_ExcludeRegExp;
 
   std::string m_ConfigType;
+  bool m_Verbose;
 private:
 };
 

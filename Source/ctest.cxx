@@ -228,7 +228,7 @@ void ctest::ProcessDirectory(std::vector<std::string> &passed,
               cmSystemTools::ReplaceString(output,
                                            dartStuff.match(1).c_str(),"");
               }
-            if (output != "")
+            if (output != "" && m_Verbose)
               {
               std::cerr << output.c_str() << "\n";
               }
@@ -245,7 +245,7 @@ void ctest::ProcessDirectory(std::vector<std::string> &passed,
               cmSystemTools::ReplaceString(output,
                                            dartStuff.match(1).c_str(),"");
               }
-            if (output != "")
+            if (output != "" && m_Verbose)
               {
               std::cerr << output.c_str() << "\n";
               }
@@ -266,6 +266,7 @@ int main (int argc, char *argv[])
   std::vector<std::string> failed;
   int total;
   
+
   ctest inst;
   
   // look at the args
@@ -282,6 +283,11 @@ int main (int argc, char *argv[])
       {
       inst.m_ConfigType = args[i+1];
       }
+
+    if( arg.find("-V",0) == 0 || arg.find("--verbose",0) == 0 )
+      {
+      inst.m_Verbose = true;
+      }
     
     if(arg.find("-R",0) == 0 && i < args.size() - 1)
       {
@@ -294,6 +300,25 @@ int main (int argc, char *argv[])
       inst.m_UseExcludeRegExp = true;
       inst.m_ExcludeRegExp  = args[i+1];
       inst.m_UseExcludeRegExpFirst = inst.m_UseIncludeRegExp ? false : true;
+      }
+
+    if(arg.find("-h") == 0 || 
+       arg.find("-help") == 0 || 
+       arg.find("-H") == 0 || 
+       arg.find("--help") == 0 || 
+       arg.find("/H") == 0 || 
+       arg.find("/HELP") == 0 || 
+       arg.find("/?") == 0)
+      {
+      std::cerr << "Usage: " << argv[0] << " <options>" << std::endl
+                << "\t -D type      Specify config type" << std::endl
+                << "\t -E test      Specify regular expression for tests to exclude" 
+                << std::endl
+                << "\t -R test      Specify regular expression for tests to include" 
+                << std::endl
+                << "\t -V           Verbose testing" << std::endl
+                << "\t -H           Help page" << std::endl;
+      return 1;
       }
     }
 
