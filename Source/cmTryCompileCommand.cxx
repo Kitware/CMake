@@ -270,12 +270,12 @@ void cmTryCompileCommand::CleanupFiles(const char* binDir)
   size_t fileNum;
   for (fileNum = 0; fileNum <  dir.GetNumberOfFiles(); ++fileNum)
     {
-    if (strcmp(dir.GetFile(fileNum),".") &&
-        strcmp(dir.GetFile(fileNum),".."))
+    if (strcmp(dir.GetFile(static_cast<unsigned long>(fileNum)),".") &&
+        strcmp(dir.GetFile(static_cast<unsigned long>(fileNum)),".."))
       {
       std::string fullPath = binDir;
       fullPath += "/";
-      fullPath += dir.GetFile(fileNum);
+      fullPath += dir.GetFile(static_cast<unsigned long>(fileNum));
       if(cmSystemTools::FileIsDirectory(fullPath.c_str()))
         {
         cmTryCompileCommand::CleanupFiles(fullPath.c_str());
