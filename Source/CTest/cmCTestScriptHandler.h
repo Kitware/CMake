@@ -30,6 +30,37 @@ class cmake;
 /** \class cmCTestScriptHandler
  * \brief A class that handles ctest -S invocations
  *
+ * CTest script is controlled using several variables that script has to
+ * specify and some optional ones. Required ones are:
+ *   CTEST_SOURCE_DIRECTORY - Source directory of the project
+ *   CTEST_BINARY_DIRECTORY - Binary directory of the project
+ *   CTEST_COMMAND          - Testing commands
+ *
+ * Optional variables are:
+ *   CTEST_BACKUP_AND_RESTORE
+ *   CTEST_CMAKE_COMMAND
+ *   CTEST_CMAKE_OUTPUT_FILE_NAME
+ *   CTEST_CONTINUOUS_DURATION
+ *   CTEST_CONTINUOUS_MINIMUM_INTERVAL
+ *   CTEST_CVS_CHECKOUT
+ *   CTEST_CVS_COMMAND
+ *   CTEST_DASHBOARD_ROOT
+ *   CTEST_ENVIRONMENT
+ *   CTEST_INITIAL_CACHE
+ *   CTEST_START_WITH_EMPTY_BINARY_DIRECTORY
+ *   CTEST_START_WITH_EMPTY_BINARY_DIRECTORY_ONCE
+ *   
+ * In addition the follwing variables can be used. The number can be 1-10.
+ *   CTEST_EXTRA_UPDATES_1
+ *   CTEST_EXTRA_UPDATES_2
+ *   ...
+ *   CTEST_EXTRA_UPDATES_10
+ *
+ * CTest script can use the following arguments CTest provides:
+ *   CTEST_SCRIPT_ARG
+ *   CTEST_SCRIPT_DIRECTORY
+ *   CTEST_SCRIPT_NAME
+ *
  */
 class cmCTestScriptHandler
 {
@@ -95,7 +126,6 @@ private:
   cmLocalGenerator *m_LocalGenerator;
   cmGlobalGenerator *m_GlobalGenerator;
   cmake *m_CMake;
-  
 };
 
 #endif
