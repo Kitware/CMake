@@ -648,6 +648,10 @@ for a in ${KWSYS_CXX_SOURCES}; do
   echo "${a}.o : ${src} ${dep}" >> "${cmake_bootstrap_dir}/Makefile"
   echo "	${cmake_cxx_compiler} ${cmake_cxx_flags} -DKWSYS_NAMESPACE=cmsys -c ${src} -o ${a}.o" >> "${cmake_bootstrap_dir}/Makefile"
 done
+cat>>"${cmake_bootstrap_dir}/Makefile"<<EOF
+rebuild_cache:
+	cd "${cmake_binary_dir}" && "${cmake_source_dir}/bootstrap"
+EOF
 
 # Write our default settings to Bootstrap.cmk/InitialCacheFlags.cmake.
 cat > "${cmake_bootstrap_dir}/InitialCacheFlags.cmake" <<EOF
