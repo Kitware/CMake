@@ -1679,7 +1679,7 @@ void cmLocalUnixMakefileGenerator::BuildInSubDirectoryWindows(std::ostream& fout
          << "$(MAKE) $(MAKESILENT) rebuild_cache\n";
     if (!silent) 
       {
-      fout << "\techo " << directory << ": building " << target1 << "\n";
+      fout << "\t@echo " << directory << ": building " << target1 << "\n";
       }
     fout << "\tcd " << dir << "\n"
          << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) " << target1 << "\n";
@@ -1688,7 +1688,7 @@ void cmLocalUnixMakefileGenerator::BuildInSubDirectoryWindows(std::ostream& fout
     {
     if (!silent) 
       {
-      fout << "\techo " << directory << ": building " << target2 << "\n";
+      fout << "\t@echo " << directory << ": building " << target2 << "\n";
       }
     fout << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) " << target2 << "\n";
     }
@@ -1716,7 +1716,7 @@ void cmLocalUnixMakefileGenerator::BuildInSubDirectory(std::ostream& fout,
          << "; then $(MAKE) rebuild_cache; fi\n";
     if (!silent) 
       {
-      fout << "\techo " << directory << ": building " << target1 << "\n";
+      fout << "\t@echo " << directory << ": building " << target1 << "\n";
       }
     fout << "\t@cd " << directory
          << "; $(MAKE) " << target1 << "\n";
@@ -1725,7 +1725,7 @@ void cmLocalUnixMakefileGenerator::BuildInSubDirectory(std::ostream& fout,
     {
     if (!silent) 
       {
-      fout << "\techo " << directory << ": building " << target2 << "\n";
+      fout << "\t@echo " << directory << ": building " << target2 << "\n";
       }
     fout << "\t@cd " << directory
          << "; $(MAKE) " << target2 << "\n";
@@ -2134,7 +2134,7 @@ void cmLocalUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
       // first make the directories for each target 
       fout << "\t@if [ ! -d \"$(DESTDIR)" << prefix << l->second.GetInstallPath() << 
         "\" ] ; then \\\n";
-      fout << "\t   echo \"Making directory \\\"$(DESTDIR)" << prefix 
+      fout << "\t   @echo \"Making directory \\\"$(DESTDIR)" << prefix 
            << l->second.GetInstallPath() << "\\\" \"; \\\n";
       fout << "\t   mkdir -p \"$(DESTDIR)" << prefix << l->second.GetInstallPath() 
            << "\"; \\\n";
@@ -2742,13 +2742,13 @@ void cmLocalUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
         {
         cmSystemTools::ReplaceString(echostring, "\\\n", " ");
         cmSystemTools::ReplaceString(echostring, " \t", "   ");
-        cmSystemTools::ReplaceString(echostring, "\n\t", "\"\n\techo \"");
-        fout << "\techo \"" << echostring.c_str() << "\"\n";
+        cmSystemTools::ReplaceString(echostring, "\n\t", "\"\n\t@echo \"");
+        fout << "\t@echo \"" << echostring.c_str() << "\"\n";
         }
       else
         {
-        cmSystemTools::ReplaceString(echostring, "\n\t", "\n\techo ");
-        fout << "\techo " << echostring.c_str() << "\n";
+        cmSystemTools::ReplaceString(echostring, "\n\t", "\n\t@echo ");
+        fout << "\t@echo " << echostring.c_str() << "\n";
         }
       }
     fout << "\t" << replace.c_str() << "\n";
