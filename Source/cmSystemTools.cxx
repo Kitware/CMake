@@ -26,7 +26,7 @@ std::string cmSystemTools::CleanUpName(const char* name)
 {
   std::string className = name;
   size_t i =0;
-  while(className[i] == ' ')
+  while(className[i] == ' ' || className[i] == '\t')
     {
     i++;
     }
