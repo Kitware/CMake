@@ -20,15 +20,15 @@
    namespace.  These macros are used internally to kwsys only, and are
    not visible to user code.  Use kwsysHeaderDump.pl to reproduce
    these macros after making changes to the interface.  */
-#define kw_sys(x) @KWSYS_NAMESPACE@##x
+#define kwsys_ns(x) @KWSYS_NAMESPACE@##x
 #define kwsysEXPORT          @KWSYS_NAMESPACE@_EXPORT
-#define kwsysBase64          kw_sys(Base64)
-#define kwsysBase64_Decode   kw_sys(Base64_Decode)
-#define kwsysBase64_Decode3  kw_sys(Base64_Decode3)
-#define kwsysBase64_Encode   kw_sys(Base64_Encode)
-#define kwsysBase64_Encode1  kw_sys(Base64_Encode1)
-#define kwsysBase64_Encode2  kw_sys(Base64_Encode2)
-#define kwsysBase64_Encode3  kw_sys(Base64_Encode3)
+#define kwsysBase64          kwsys_ns(Base64)
+#define kwsysBase64_Decode   kwsys_ns(Base64_Decode)
+#define kwsysBase64_Decode3  kwsys_ns(Base64_Decode3)
+#define kwsysBase64_Encode   kwsys_ns(Base64_Encode)
+#define kwsysBase64_Encode1  kwsys_ns(Base64_Encode1)
+#define kwsysBase64_Encode2  kwsys_ns(Base64_Encode2)
+#define kwsysBase64_Encode3  kwsys_ns(Base64_Encode3)
 
 #if defined(__cplusplus)
 extern "C"
@@ -102,7 +102,7 @@ kwsysEXPORT unsigned long kwsysBase64_Decode(const unsigned char *input,
 /* If we are building Base64.c, let it use these macros.  Otherwise,
    undefine them to keep the namespace clean.  */
 #if !defined(KWSYS_IN_BASE64_C)
-# undef kwsys
+# undef kwsys_ns
 # undef kwsysEXPORT
 # undef kwsysBase64
 # undef kwsysBase64_Decode
