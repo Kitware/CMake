@@ -88,9 +88,8 @@ void CMakeSetupGUI::cb_m_OKButton(Fl_Button* o, void* v) {
 }
 
 CMakeSetupGUI::CMakeSetupGUI() {
-  { Fl_Window* w;
+  { 
   Fl_Window* o = dialogWindow = new Fl_Window(562, 373, "CMakeSetupDialog");
-    w = o;
     o->callback((Fl_Callback*)cb_dialogWindow, (void*)(this));
     { Fl_Input* o = sourcePathTextInput = new Fl_Input(219, 15, 200, 20, "Where is the source code: ");
       o->labelsize(11);
