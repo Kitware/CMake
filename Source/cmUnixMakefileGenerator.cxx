@@ -670,8 +670,8 @@ void cmUnixMakefileGenerator::OutputModuleLibraryRule(std::ostream& fout,
   std::string command2;
   if(t.HasCxx())
     {
-    command2 = "$(CMAKE_CXX_LINK_SHARED)  $(CMAKE_CXX_SHLIB_LINK_FLAGS) "
-      "$(CMAKE_CXX_SHLIB_BUILD_FLAGS) $(CMAKE_CXX_FLAGS) -o \\\n";
+    command2 = "$(CMAKE_CXX_LINK_SHARED)  $(CMAKE_CXX_MODULE_LINK_FLAGS) "
+      "$(CMAKE_CXX_MODULE_BUILD_FLAGS) $(CMAKE_CXX_FLAGS) -o \\\n";
     }
   else
     {
