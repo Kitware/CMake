@@ -20,10 +20,22 @@ CMakeSetupGUIImplementation
 ::CMakeSetupGUIImplementation()
 {
   m_BuildPathChanged = false;
+
+// Construct the full path to cmake executable
+
+#if defined(_WIN32)
   char fname[1024];
-  //::GetModuleFileName(NULL,fname,1023);  // Didn't found this method. (?)
+  ::GetModuleFileName(NULL,fname,1023);  // Didn't found this method. (?)
   m_PathToExecutable = cmSystemTools::GetProgramPath(fname).c_str();
   m_PathToExecutable += "/cmake.exe";
+#else
+  char fullPathToCMake[1024];
+  filename_absolute( fullPathToCMake, "../cmake" );
+  m_PathToExecutable = fullPathToCMake;
+#endif
+
+  std::cout << "Path to CMake executable " << m_PathToExecutable << std::endl;
+  
 }
 
 
