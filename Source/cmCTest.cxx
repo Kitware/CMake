@@ -2700,7 +2700,7 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output, int *re
 
   cmsysProcess* cp = cmsysProcess_New();
   cmsysProcess_SetCommand(cp, &*argv.begin());
-  std::cout << "Command is: " << argv[0] << std::endl;
+  //std::cout << "Command is: " << argv[0] << std::endl;
   if(cmSystemTools::GetRunCommandHideConsole())
     {
     cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
