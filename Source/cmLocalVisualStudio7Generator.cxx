@@ -344,6 +344,44 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
        << "\t\t\t\tAdditionalOptions=\"";
 
   cmSystemTools::ReplaceString(flags, "\"", "&quot;");
+  // check the flags for the run time library flag options
+  // if there is a match set the run time flag
+  if(flags.find("MTd") != flags.npos)
+    {
+    cmSystemTools::ReplaceString(flags, "-MTd", "");
+    cmSystemTools::ReplaceString(flags, "/MTd", "");
+    runtime = 1;
+    }
+  else if (flags.find("MDd") != flags.npos)
+    {
+    cmSystemTools::ReplaceString(flags, "-MDd", "");
+    cmSystemTools::ReplaceString(flags, "/MDd", "");
+    runtime = 3;
+    }
+  else if (flags.find("MLd") != flags.npos)
+    {
+    cmSystemTools::ReplaceString(flags, "-MLd", "");
+    cmSystemTools::ReplaceString(flags, "/MLd", "");
+    runtime = 5;
+    }
+  else if (flags.find("MT") != flags.npos)
+    {
+    cmSystemTools::ReplaceString(flags, "-MT", "");
+    cmSystemTools::ReplaceString(flags, "/MT", "");
+    runtime = 0;
+    }
+  else if (flags.find("MD") != flags.npos)
+    {
+    cmSystemTools::ReplaceString(flags, "-MD", "");
+    cmSystemTools::ReplaceString(flags, "/MD", "");
+    runtime = 2;
+    }
+  else if (flags.find("ML") != flags.npos)
+    {
+    cmSystemTools::ReplaceString(flags, "-ML", "");
+    cmSystemTools::ReplaceString(flags, "/ML", "");
+    runtime = 4;
+    }
   fout << flags;
 
   fout << " -DCMAKE_INTDIR=\\&quot;" << configName << "\\&quot;" 
@@ -358,32 +396,6 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     fout << ipath << ";";
     }
   fout << "\"\n";
-  // check the flags for the run time library flag options
-  // if there is a match set the run time flag
-  if(flags.find("MTd") != flags.npos)
-    {
-    runtime = 1;
-    }
-  else if (flags.find("MDd") != flags.npos)
-    {
-    runtime = 3;
-    }
-  else if (flags.find("MLd") != flags.npos)
-    {
-    runtime = 5;
-    }
-  else if (flags.find("MT") != flags.npos)
-    {
-    runtime = 0;
-    }
-  else if (flags.find("MD") != flags.npos)
-    {
-    runtime = 2;
-    }
-  else if (flags.find("ML") != flags.npos)
-    {
-    runtime = 4;
-    }
 
   fout << "\t\t\t\tOptimization=\"" << optimized << "\"\n"
        << "\t\t\t\tRuntimeLibrary=\"" << runtime << "\"\n"
