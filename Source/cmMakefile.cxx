@@ -665,11 +665,7 @@ void cmMakefile::AddGlobalLinkInformation(const char* name, cmTarget& target)
     {
     target.AddLinkDirectory(j->c_str());
     }
-  cmTarget::LinkLibraries::iterator  i;
-  for(i = m_LinkLibraries.begin(); i != m_LinkLibraries.end(); ++i)
-    {
-    this->AddLinkLibraryForTarget(name, i->first.c_str(), i->second);
-    }
+  target.MergeLinkLibraries( *this, name, m_LinkLibraries );
 }
 
 
@@ -703,8 +699,8 @@ void cmMakefile::AddLibrary(const char* lname, int shared,
   
   target.SetInAll(true);
   target.GetSourceLists() = srcs;
-  m_Targets.insert(cmTargets::value_type(lname,target));
   this->AddGlobalLinkInformation(lname, target);
+  m_Targets.insert(cmTargets::value_type(lname,target));
 
   // Add an entry into the cache 
   cmCacheManager::GetInstance()->
@@ -769,8 +765,10 @@ void cmMakefile::AddExecutable(const char *exeName,
     }
   target.SetInAll(true);
   target.GetSourceLists() = srcs;
-  m_Targets.insert(cmTargets::value_type(exeName,target));
   this->AddGlobalLinkInformation(exeName, target);
+
+  m_Targets.insert(cmTargets::value_type(exeName,target));
+  
   
   // Add an entry into the cache 
   cmCacheManager::GetInstance()->

@@ -80,8 +80,18 @@ public:
   typedef std::vector<std::pair<std::string,LinkLibraryType> > LinkLibraries;
   const LinkLibraries &GetLinkLibraries() const {return m_LinkLibraries;}
 
+  void AddLinkLibrary(cmMakefile& mf,
+                      const char *target, const char* lib, 
+                      LinkLibraryType llt);
+
+  void AddLinkLibrary(const std::string& lib, 
+                      LinkLibraryType llt);
+
+  void MergeLinkLibraries( cmMakefile& mf, const char* selfname, const LinkLibraries& libs );
+
   const std::vector<std::string>& GetLinkDirectories() const {return m_LinkDirectories;}
-  void AddLinkDirectory(const char* d) { m_LinkDirectories.push_back(d);}
+  
+  void AddLinkDirectory(const char* d);
 
   /**
    * Set the path where this target should be installed. This is relative to
@@ -90,13 +100,7 @@ public:
   std::string GetInstallPath() const {return m_InstallPath;}
   void SetInstallPath(const char *name) {m_InstallPath = name;}
   
-  void AddLinkLibrary(cmMakefile& mf,
-                      const char *target, const char* lib, 
-                      LinkLibraryType llt);
-
-  void AddLinkLibrary(const std::string& lib, 
-                      LinkLibraryType llt);
-
+  
   /**
    * Generate the SourceFilesList from the SourceLists. This should only be
    * done once to be safe.  
@@ -148,8 +152,7 @@ private:
    * path.
    */
   void GatherDependencies( const cmMakefile& mf, const std::string& lib,
-                           DependencyMap& dep_map,
-                           LibTypeMap& lib_map, bool addLibDirs );
+                           DependencyMap& dep_map );
 
   /**
    * Returns true if lib1 depends on lib2 according to \param
@@ -166,6 +169,7 @@ private:
   TargetType m_TargetType;
   std::vector<cmSourceFile*> m_SourceFiles;
   LinkLibraries m_LinkLibraries;
+  std::set<std::string> m_PrevLinkedLibraries;
   std::vector<std::string> m_LinkDirectories;
   bool m_InAll;
   std::string m_InstallPath;
