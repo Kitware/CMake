@@ -664,7 +664,7 @@ IF(BUILD_TESTING)
         "${JNIPATH}/../include"
         "${JNIPATH}/../java/include")
       IF(JNI_H)
-        FILE(READ ${JNI_H} JNI_FILE)
+        FILE(READ "${JNI_H}" JNI_FILE)
         IF("${JNI_FILE}" MATCHES JDK1_2)
           ADD_TEST(Java ${CMAKE_CTEST_COMMAND}
             --build-and-test 
