@@ -996,6 +996,7 @@ static const char* ruleReplaceVars[] =
  
 void 
 cmLocalUnixMakefileGenerator::ExpandRuleVariables(std::string& s,
+                                                  const char* lang,
                                                   const char* objects,
                                                   const char* target,
                                                   const char* linkLibs,
@@ -1065,11 +1066,19 @@ cmLocalUnixMakefileGenerator::ExpandRuleVariables(std::string& s,
     }
   if(targetSOName)
     {
-    if(m_Makefile->GetDefinition("CMAKE_SHARED_LIBRARY_SONAME_C_FLAG"))
+    bool replaced = false;
+    if(lang)
       {
-      cmSystemTools::ReplaceString(s, "<TARGET_SONAME>", targetSOName);
+      std::string name = "CMAKE_SHARED_LIBRARY_SONAME_";
+      name += lang;
+      name += "_FLAG";
+      if(m_Makefile->GetDefinition(name.c_str()))
+        {
+        replaced = true;
+        cmSystemTools::ReplaceString(s, "<TARGET_SONAME>", targetSOName);
+        }
       }
-    else
+    if(!replaced)
       {
       cmSystemTools::ReplaceString(s, "<TARGET_SONAME>", "");
       }
@@ -1083,28 +1092,31 @@ cmLocalUnixMakefileGenerator::ExpandRuleVariables(std::string& s,
   int pos = 0;
   while(ruleReplaceVars[pos])
     {
-    std::string replace = "<";
-    replace += ruleReplaceVars[pos];
-    replace += ">";
-    std::string replaceWith = ruleReplaceVars[pos];
-    for(std::vector<std::string>::iterator i = enabledLanguages.begin();
-        i != enabledLanguages.end(); ++i)
+    if(lang)
       {
+      std::string replace = "<";
+      replace += ruleReplaceVars[pos];
+      replace += ">";
+      std::string replaceWith = ruleReplaceVars[pos];
       std::string actualReplace = replace;
-      cmSystemTools::ReplaceString(actualReplace, "${LANG}", i->c_str());
+      cmSystemTools::ReplaceString(actualReplace, "${LANG}", lang);
       std::string actualReplaceWith = replaceWith;
-      cmSystemTools::ReplaceString(actualReplaceWith, "${LANG}", i->c_str());
+      cmSystemTools::ReplaceString(actualReplaceWith, "${LANG}", lang);
       replace = m_Makefile->GetSafeDefinition(actualReplaceWith.c_str());
       // if the variable is not a FLAG then treat it like a path
       if(actualReplaceWith.find("_FLAG") == actualReplaceWith.npos)
         {
         replace = this->ConvertToOutputForExisting(replace.c_str());
         }
-      cmSystemTools::ReplaceString(s, actualReplace.c_str(), replace.c_str());
+      if(actualReplace.size())
+        {
+        cmSystemTools::ReplaceString(s, actualReplace.c_str(), replace.c_str());
+        }
+      pos++;
       }
-    pos++;
     }
 }
+
 
   
 void cmLocalUnixMakefileGenerator::OutputLibraryRule(std::ostream& fout,  
@@ -1238,6 +1250,7 @@ void cmLocalUnixMakefileGenerator::OutputLibraryRule(std::ostream& fout,
       i != commands.end(); ++i)
     {
     this->ExpandRuleVariables(*i, 
+                              t.GetLinkerLanguage(m_GlobalGenerator),
                               objs.c_str(), 
                               targetFullPathReal.c_str(),
                               linklibs.str().c_str(),
@@ -1502,6 +1515,7 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
       i != commands.end(); ++i)
     {
     this->ExpandRuleVariables(*i, 
+                              linkLanguage,
                               objs.c_str(), 
                               target.c_str(),
                               linklibs.str().c_str(),
@@ -2897,6 +2911,7 @@ OutputBuildObjectFromSource(std::ostream& fout,
       i != commands.end(); ++i)
     {
     this->ExpandRuleVariables(*i,
+                              lang,
                               0, // no objects
                               0, // no target
                               0, // no link libs

@@ -104,6 +104,7 @@ protected:
                          const char* linkFlags
     );
   void ExpandRuleVariables(std::string& string,
+                           const char* language,
                            const char* objects=0,
                            const char* target=0,
                            const char* linkLibs=0,
