@@ -1177,6 +1177,7 @@ int cmCursesMainForm::LoadCache(const char *)
     return r;
     }
   m_CMakeInstance->SetCacheArgs(m_Args);
+  m_CMakeInstance->PreLoadCMakeFiles();
   return r;
 }
   
