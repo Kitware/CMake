@@ -93,6 +93,41 @@ bool cmITKWrapTclCommand::CreateCableRule(const char* configFile)
     commandArgs.push_back("--gccxml-cxxflags");
     commandArgs.push_back(tmp);
     }
+#else
+  const char* genName = m_Makefile->GetDefinition("CMAKE_GENERATOR");
+  if (genName)
+    {
+    std::string gen = genName;
+    if(gen == "Visual Studio 6")
+      {
+      commandArgs.push_back("--gccxml-compiler");
+      commandArgs.push_back("msvc6");
+      tmp = "${CMAKE_CXX_FLAGS}";
+      m_Makefile->ExpandVariablesInString(tmp);
+      commandArgs.push_back("--gccxml-cxxflags");
+      commandArgs.push_back(tmp);
+      }
+    else if(gen == "Visual Studio 7")
+      {
+      commandArgs.push_back("--gccxml-compiler");
+      commandArgs.push_back("msvc7");
+      tmp = "${CMAKE_CXX_FLAGS}";
+      m_Makefile->ExpandVariablesInString(tmp);
+      commandArgs.push_back("--gccxml-cxxflags");
+      commandArgs.push_back(tmp);
+      }
+    else if(gen == "NMake Makefiles")
+      {
+      tmp = "${CMAKE_CXX_COMPILER}";
+      m_Makefile->ExpandVariablesInString(tmp);
+      commandArgs.push_back("--gccxml-compiler");
+      commandArgs.push_back(tmp);
+      tmp = "${CMAKE_CXX_FLAGS}";
+      m_Makefile->ExpandVariablesInString(tmp);
+      commandArgs.push_back("--gccxml-cxxflags");
+      commandArgs.push_back(tmp);      
+      }
+    }
 #endif
   const char* gccxml = m_Makefile->GetDefinition("ITK_GCCXML_EXECUTABLE");
   if(gccxml)
