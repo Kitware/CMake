@@ -396,10 +396,10 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
   // add the help target
   fout << "help:\n";
   this->OutputEcho(fout,"The following are some of the valid targets for this Makefile:");
-  this->OutputEcho(fout,"...  all (the default if no target is provided)");
-  this->OutputEcho(fout,"...  clean");
-  this->OutputEcho(fout,"...  depend");
-  this->OutputEcho(fout,"...  rebuild_cache");
+  this->OutputEcho(fout,"... all (the default if no target is provided)");
+  this->OutputEcho(fout,"... clean");
+  this->OutputEcho(fout,"... depend");
+  this->OutputEcho(fout,"... rebuild_cache");
 
   // libraries
   std::string path;
