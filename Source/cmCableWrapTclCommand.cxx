@@ -44,6 +44,63 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmGeneratedFileStream.h"
 #include "cmMakeDepend.h"
 
+#include "cmData.h"
+
+/**
+ * One instance of this is associated with the makefile to hold a
+ * vector of the GCC-XML flags pre-parsed from the string in the
+ * cache.  The first cmCableWrapTclCommand to need it creates the
+ * instance.  The others find it and use it.
+ */
+class cmCableWrapTclCommand::cmGccXmlFlagsParser: public cmData
+{
+public:
+  cmGccXmlFlagsParser(const char* name): cmData(name) {}
+  
+  void Parse(const char*);
+  void AddParsedFlags(std::vector<std::string>& resultArgs);
+  
+private:
+  std::vector<std::string> m_Flags;
+};
+
+void cmCableWrapTclCommand::cmGccXmlFlagsParser::Parse(const char* in_flags)
+{
+  // Prepare a work string for searching.
+  std::string flags = in_flags;
+  
+  // Look for " -" separating arguments.  Currently the find_*_options
+  // scripts always output a single space between arguments, so we don't
+  // need to worry about removing extra whitespace.
+  
+  // The first argument starts at the beginning of the string.
+  std::string::size_type leftPos = 0;
+  std::string::size_type rightPos = flags.find(" -", leftPos);
+  while(rightPos != std::string::npos)
+    {
+    // Pull out and store this argument.
+    m_Flags.push_back(flags.substr(leftPos, rightPos-leftPos));
+    
+    // The next argument starts at the '-' from the previously found " -".
+    leftPos = rightPos+1;
+    rightPos = flags.find(" -", leftPos);
+    }
+  // Pull out and store the last argument.
+  m_Flags.push_back(flags.substr(leftPos, std::string::npos));
+}
+
+void
+cmCableWrapTclCommand::cmGccXmlFlagsParser
+::AddParsedFlags(std::vector<std::string>& resultArgs)
+{
+  for(std::vector<std::string>::const_iterator flag = m_Flags.begin();
+      flag != m_Flags.end(); ++flag)
+    {
+    resultArgs.push_back(*flag);
+    }
+}
+
+
 cmCableWrapTclCommand::cmCableWrapTclCommand():
   m_CableClassSet(NULL), m_MakeDepend(new cmMakeDepend)
 {
@@ -345,18 +402,23 @@ void cmCableWrapTclCommand::GenerateCableClassFiles(const char* name,
     }
   
   std::vector<std::string> commandArgs;
-  commandArgs.push_back(this->GetGccXmlFlagsFromCache());
-  commandArgs.push_back(m_Makefile->GetDefineFlags());
-  commandArgs.push_back("-I");
-  commandArgs.push_back(m_Makefile->GetStartDirectory());
+  this->AddGccXmlFlagsFromCache(commandArgs);
+  //commandArgs.push_back(m_Makefile->GetDefineFlags());
+  
+  {
+  std::string tmp = "-I";
+  tmp += m_Makefile->GetStartDirectory();
+  commandArgs.push_back(cmSystemTools::EscapeSpaces(tmp.c_str()));
+  }
     
   const std::vector<std::string>& includes = 
     m_Makefile->GetIncludeDirectories();
   for(std::vector<std::string>::const_iterator i = includes.begin();
       i != includes.end(); ++i)
     {
-      commandArgs.push_back("-I");
-      commandArgs.push_back(cmSystemTools::EscapeSpaces(i->c_str()));
+    std::string tmp = "-I";
+    tmp += i->c_str();
+    commandArgs.push_back(cmSystemTools::EscapeSpaces(tmp.c_str()));
     }
   std::string tmp = "-fxml=";
   tmp += classXmlName;
@@ -465,4 +527,36 @@ std::string cmCableWrapTclCommand::GetCableFromCache() const
                                  "Path to CABLE executable.",
                                  cmCacheManager::FILEPATH);
   return "NOTFOUND";
+}
+
+
+/**
+ * Parse flags from the result of GetGccXmlFlagsFromCache() and push
+ * them onto the back of the given vector, in order.  This uses an
+ * instance of cmGccXmlFlagsParser associated with the makefile so
+ * that parsing need only be done once.
+ */
+void
+cmCableWrapTclCommand
+::AddGccXmlFlagsFromCache(std::vector<std::string>& resultArgs) const
+{
+  cmGccXmlFlagsParser* parser = 0;
+  
+  // See if the instance already exists with the parsed flags.
+  cmData* data = m_Makefile->LookupData("cmGccXmlFlagsParser");
+  if(data)
+    {
+    // Yes, use it.
+    parser = static_cast<cmGccXmlFlagsParser*>(data);
+    }
+  else
+    {
+    // No, create the instance and ask it to parse the flags.
+    parser = new cmGccXmlFlagsParser("cmGccXmlFlagsParser");
+    m_Makefile->RegisterData(parser);
+    parser->Parse(this->GetGccXmlFlagsFromCache().c_str());
+    }
+  
+  // Use the parsed flags in the single instance.
+  parser->AddParsedFlags(resultArgs);
 }

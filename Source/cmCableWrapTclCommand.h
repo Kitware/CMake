@@ -103,7 +103,10 @@ protected:
   std::string GetGccXmlFromCache() const;
   std::string GetGccXmlFlagsFromCache() const;
   std::string GetCableFromCache() const;
+  void AddGccXmlFlagsFromCache(std::vector<std::string>&) const;
   
+  class cmGccXmlFlagsParser;
+
 private:
   /**
    * The name of the package of wrappers to produce.
