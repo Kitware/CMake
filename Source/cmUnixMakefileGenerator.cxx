@@ -105,7 +105,7 @@ void cmUnixMakefileGenerator::OutputDependLibraries(std::ostream& fout)
 {
   std::vector<std::string>& libs = m_Makefile->GetLinkLibraries();
   std::vector<std::string>& libdirs = m_Makefile->GetLinkDirectories();
-  std::vector<std::string>::iterator dir, lib, endlibs, enddirs;
+  std::vector<std::string>::iterator dir, lib;
   // Search the list of libraries that will be linked into
   // the executable
   for(lib = libs.begin(); lib != libs.end(); ++lib)

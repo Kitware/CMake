@@ -35,7 +35,7 @@ bool cmFindLibraryCommand::Invoke(std::vector<std::string>& args)
     }
   std::vector<std::string> path;
   // add any user specified paths
-  for (int j = 2; j < args.size(); j++)
+  for (unsigned int j = 2; j < args.size(); j++)
     {
     // expand variables
     std::string exp = args[j];
@@ -46,7 +46,7 @@ bool cmFindLibraryCommand::Invoke(std::vector<std::string>& args)
   // add the standard path
   cmSystemTools::GetPath(path);
 
-  for(int k=0; k < path.size(); k++)
+  for(unsigned int k=0; k < path.size(); k++)
     {
     std::string tryPath = path[k];
     tryPath += "/";

@@ -39,6 +39,11 @@ public:
     {m_Makefile = 0; m_Enabled = true;}
 
   /**
+   * Need virtual destructor to destroy real command type.
+   */
+  virtual ~cmCommand() {}
+  
+  /**
    * Specify the makefile.
    */
   void SetMakefile(cmMakefile*m) 

@@ -54,7 +54,7 @@ void cmMakefile::AddDefaultCommands()
 
 cmMakefile::~cmMakefile()
 {
-  for(int i=0; i < m_UsedCommands.size(); i++)
+  for(unsigned int i=0; i < m_UsedCommands.size(); i++)
     {
     delete m_UsedCommands[i];
     }
@@ -517,7 +517,7 @@ void cmMakefile::GenerateCacheOnly()
 {
   std::vector<cmMakefile*> makefiles;
   this->FindSubDirectoryCMakeListsFiles(makefiles);
-  for(int i =0; i < makefiles.size(); ++i)
+  for(unsigned int i =0; i < makefiles.size(); ++i)
     {
     delete makefiles[i];
     }

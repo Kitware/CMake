@@ -27,7 +27,7 @@ bool cmAbstractFilesCommand::Invoke(std::vector<std::string>& args)
       j != args.end(); ++j)
     {   
     std::vector<cmClassFile>& Classes = m_Makefile->GetClasses();
-    for(int i = 0; i < Classes.size(); i++)
+    for(unsigned int i = 0; i < Classes.size(); i++)
       {
       if(Classes[i].m_ClassName == (*j))
         {

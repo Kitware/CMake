@@ -45,7 +45,7 @@ bool cmFindProgramCommand::Invoke(std::vector<std::string>& args)
   cmSystemTools::GetPath(path);
   for(; i != args.end(); ++i)
     {
-    for(int k=0; k < path.size(); k++)
+    for(unsigned int k=0; k < path.size(); k++)
       {
       std::string tryPath = path[k];
       tryPath += "/";
