@@ -4,9 +4,7 @@ CMakeSetupGUIImplementation.cxx
 FLTKDialog.cxx
 FLTKPropertyItemRow.cxx
 FLTKPropertyList.cxx
-FLTKPropertyNameButtonWithHelp.cxx
 )
-
 
 LINK_LIBRARIES(${FLTK_LIBRARY})
 IF(WIN32)

@@ -141,8 +141,6 @@ CMakeSetupGUIImplementation
   }
   *p = '\0';
   
-  std::cout << "absolutePath = " << absolutePath << std::endl;
-  
   m_PathToExecutable = absolutePath;
 
 #if defined(_WIN32)
@@ -150,7 +148,7 @@ CMakeSetupGUIImplementation
 #else
   m_PathToExecutable += "/cmake";
 #endif
-  std::cout << "Path to CMake executable = "  << m_PathToExecutable << std::endl;
+
 }
 
 
@@ -324,20 +322,15 @@ CMakeSetupGUIImplementation
   }
   
 
-  SaveCacheFromGUI();
-  
   // set the wait cursor
   fl_cursor(FL_CURSOR_WAIT,FL_BLACK,FL_WHITE);
-  // get all the info from the dialog
-  // this->UpdateData();
-  if(!m_BuildPathChanged)
-    {
-    // if the build path has not changed save the 
-    // current GUI values to the cache
-    this->SaveCacheFromGUI();
-    }
+
+  // save the current GUI values to the cache
+  this->SaveCacheFromGUI();
+
   // Make sure we are working from the cache on disk
   this->LoadCacheFromDiskToGUI();
+
   // create a cmake object
   cmake make;
   // create the arguments for the cmake object
@@ -394,12 +387,14 @@ void
 CMakeSetupGUIImplementation
 ::SaveCacheFromGUI( void )
 {
+  std::cout << "Saving cache from GUI ...";
   this->FillCacheManagerFromCacheGUI();
   if( m_WhereBuild != "" )
   {
     cmCacheManager::GetInstance()->SaveCache( 
                                   m_WhereBuild.c_str() );
   }
+  std::cout << "   Done ! " << std::endl;
 }
 
 

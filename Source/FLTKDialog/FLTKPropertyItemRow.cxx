@@ -8,6 +8,8 @@
 #include <FL/fl_ask.H>
 #include <FL/fl_file_chooser.H>
 #include <FL/Fl_Color_Chooser.H>
+#include <FL/Fl_Menu_Button.H>
+#include "../cmCacheManager.h"
 #include <cstdio>
 
 namespace fltk {
@@ -38,14 +40,14 @@ PropertyItemRow::PropertyItemRow( PropertyItem * pItem ):Fl_Tile(0,0,10,10,"")
   parent()->size( nameWidth + textWidth , rowHeight );
 
   m_NameButton = new 
-          PropertyNameButtonWithHelp( firstColumn, 0, nameWidth, rowHeight, 
+          Fl_Button( firstColumn, 0, nameWidth, rowHeight, 
                                     m_PropertyItem->m_propName.c_str() );
 
   m_NameButton->align( FL_ALIGN_CLIP | FL_ALIGN_LEFT | FL_ALIGN_INSIDE );
   m_NameButton->labelsize( fontsize );
   m_NameButton->box( FL_DOWN_BOX );
-  m_NameButton->SetHelpText( m_PropertyItem->m_HelpString.c_str() );
   m_NameButton->size( secondColumn, rowHeight );
+  m_NameButton->callback( NameButtonCallback, (void *)m_PropertyItem );
     
   switch( m_PropertyItem->m_nItemType )
   {
@@ -164,6 +166,68 @@ PropertyItemRow::~PropertyItemRow( )
   
 void 
 PropertyItemRow::
+NameButtonCallback( Fl_Widget * widget, void * data) 
+{
+  Fl_Button    * button = (Fl_Button *)widget;
+  PropertyItem * pItem  = (PropertyItem *)data;
+  
+  static Fl_Menu_Button * popupMenu = 0;
+  if( !popupMenu )
+  {
+    int lastMousePositionX = Fl::event_x_root();
+    int lastMousePositionY = Fl::event_y_root();
+    popupMenu = new Fl_Menu_Button(lastMousePositionX,
+                                   lastMousePositionY,100,200);
+  }
+  
+  popupMenu->type( Fl_Menu_Button::POPUP3 );
+  popupMenu->add("Help|Remove|Properties...");
+  popupMenu->popup();
+ 
+  typedef enum {
+    HELP=0,
+    REMOVE,
+    PROPERTIES
+  } MenuOptions;
+    
+  
+  switch( popupMenu->value() )
+  {
+    case HELP:
+      fl_message( pItem->m_HelpString.c_str() );
+      break;
+    case REMOVE: // Remove
+    {
+      const char * propertyName = pItem->m_propName.c_str();
+      int answer = fl_ask( "Do you want to remove property %s", propertyName );
+      if( answer == 1 )
+      {
+        // Remove the entry from the cache
+        cmCacheManager::GetInstance()->RemoveCacheEntry( propertyName );
+        // Get the parent: Fl_Tile that manages the whole row in the GUI
+        Fl_Group * parentGroup      = (Fl_Group *) (button->parent());
+        // Get the grandParent: Fl_Pack with the property list
+        Fl_Group * grandParentGroup = (Fl_Group *) parentGroup->parent();
+        // Remove the row from the list
+        grandParentGroup->remove( *parentGroup );
+        // Destroy the row
+        delete parentGroup;  // Patricide... ?
+        // Redraw the list
+        grandParentGroup->redraw();
+        return;
+      }
+      break;
+    }
+    case PROPERTIES: // Properties
+      break;
+  }
+}
+  
+
+
+
+void 
+PropertyItemRow::
 CheckButtonCallback( Fl_Widget * widget, void * data) 
 {
   Fl_Button    * button = (Fl_Button *)widget;
@@ -253,28 +317,6 @@ BrowsePathCallback(   Fl_Widget * widget, void * data)
 }
 
 
-
-
-int 
-PropertyItemRow::
-handle(int event)
-{
-  
-  int status = Fl_Tile::handle( event );
-  switch( event ) 
-  {
-    case FL_LEAVE:
-      m_NameButton->HideHelp();
-      status = 1;
-      break;
-    case FL_MOVE:
-      m_NameButton->HideHelp();
-      status = 1;
-      break;
-  }
-  
-  return status;
-}
 
 
 } // end namespace fltk

@@ -7,11 +7,11 @@ gridy 5
 snap 3
 class CMakeSetupGUI {open
 } {
-  Function {CMakeSetupGUI()} {open
+  Function {CMakeSetupGUI()} {open selected
   } {
     Fl_Window dialogWindow {
-      label CMakeSetupDialog open
-      xywh {401 125 563 363} resizable visible
+      label CMakeSetupDialog
+      xywh {190 106 563 363} resizable visible
     } {
       Fl_Input sourcePathTextInput {
         label {Where is the source code: }
@@ -25,7 +25,7 @@ class CMakeSetupGUI {open
       }
       Fl_Input binaryPathTextInput {
         label {Where do you want to build the binaries: }
-        callback {SetBinaryPath( binaryPathTextInput->value() );} selected
+        callback {SetBinaryPath( binaryPathTextInput->value() );}
         xywh {219 50 200 20} labelsize 11 when 8 textsize 11
       }
       Fl_Button {} {

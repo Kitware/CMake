@@ -3,10 +3,10 @@
 #define  FLTKPropertyItemRow_h
 
 #include "FLTKPropertyList.h"
-#include "FLTKPropertyNameButtonWithHelp.h"
 
 #include <FL/Fl_Tile.H>
 #include <FL/Fl_Input.H>
+#include <FL/Fl_Button.H>
 
 
 namespace fltk {
@@ -32,19 +32,16 @@ class PropertyItemRow  : public Fl_Tile
 
     PropertyItemRow( PropertyItem * );
     ~PropertyItemRow();
-    int handle(int event);
     
   private:
     
     PropertyItem * m_PropertyItem;
     ItemValue    * m_ItemValue;
-
-    // Button that displays the property name and
-    // manages the popup help blob
-    PropertyNameButtonWithHelp * m_NameButton;
+    Fl_Button    * m_NameButton;
 
 
     static void CheckButtonCallback( Fl_Widget *, void *);
+    static void NameButtonCallback( Fl_Widget *, void *);
     static void InputTextCallback(   Fl_Widget *, void *);
     static void BrowsePathCallback(  Fl_Widget *, void *);
     static void ColorSelectionCallback(   Fl_Widget * widget, void * data);
