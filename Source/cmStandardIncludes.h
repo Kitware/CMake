@@ -28,6 +28,8 @@
 
 #ifdef _MSC_VER
 #pragma warning ( disable : 4786 )
+// for loop scoping hack
+#define for if(false) {} else for
 #endif
 
 #ifndef CMAKE_NO_ANSI_STREAM_HEADERS
