@@ -636,6 +636,22 @@ void kwsysProcess_SetWorkingDirectory(kwsysProcess* cp, const char* dir)
 }
 
 /*--------------------------------------------------------------------------*/
+int kwsysProcess_GetOption(kwsysProcess* cp, int optionId)
+{
+  (void)cp;
+  (void)optionId;
+  return 0;
+}
+
+/*--------------------------------------------------------------------------*/
+void kwsysProcess_SetOption(kwsysProcess* cp, int optionId, int value)
+{
+  (void)cp;
+  (void)optionId;
+  (void)value;
+}
+
+/*--------------------------------------------------------------------------*/
 int kwsysProcess_GetState(kwsysProcess* cp)
 {
   return cp->State;

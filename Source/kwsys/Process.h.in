@@ -32,6 +32,10 @@
 #define kwsysProcess_SetCommand          kwsys(Process_SetCommand)
 #define kwsysProcess_SetTimeout          kwsys(Process_SetTimeout)
 #define kwsysProcess_SetWorkingDirectory kwsys(Process_SetWorkingDirectory)
+#define kwsysProcess_Option_HideWindow   kwsys(Process_Option_HideWindow)
+#define kwsysProcess_GetOption           kwsys(Process_GetOption)
+#define kwsysProcess_SetOption           kwsys(Process_SetOption)
+#define kwsysProcess_Option_e            kwsys(Process_Option_e)
 #define kwsysProcess_State_Starting      kwsys(Process_State_Starting)
 #define kwsysProcess_State_Error         kwsys(Process_State_Error)
 #define kwsysProcess_State_Exception     kwsys(Process_State_Exception)
@@ -104,6 +108,21 @@ kwsysEXPORT void kwsysProcess_SetTimeout(kwsysProcess* cp, double timeout);
  */
 kwsysEXPORT void kwsysProcess_SetWorkingDirectory(kwsysProcess* cp,
                                                   const char* dir);
+
+/**
+ * Get/Set a platform-specific option.  Possible options are:
+ *
+ *  kwsysProcess_Option_HideWindow = Whether to hide window on Windows.
+ *         0 = No (default)
+ *         1 = Yes
+ */
+kwsysEXPORT int kwsysProcess_GetOption(kwsysProcess* cp, int optionId);
+kwsysEXPORT void kwsysProcess_SetOption(kwsysProcess* cp, int optionId,
+                                        int value);
+enum kwsysProcess_Option_e
+{
+  kwsysProcess_Option_HideWindow
+};
 
 /**
  * Get the current state of the Process instance.  Possible states are:
@@ -263,6 +282,10 @@ kwsysEXPORT void kwsysProcess_Kill(kwsysProcess* cp);
 # undef kwsysProcess_SetCommand
 # undef kwsysProcess_SetTimeout
 # undef kwsysProcess_SetWorkingDirectory
+# undef kwsysProcess_Option_HideWindow
+# undef kwsysProcess_GetOption
+# undef kwsysProcess_SetOption
+# undef kwsysProcess_Option_e
 # undef kwsysProcess_State_Starting
 # undef kwsysProcess_State_Error
 # undef kwsysProcess_State_Exception
