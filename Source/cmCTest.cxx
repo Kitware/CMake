@@ -97,6 +97,7 @@ static const char* cmCTestErrorMatches[] = {
   "^Fatal",
   "^Error: ",
   "^Error ",
+  "[0-9] ERROR: ",
   "^\"[^\"]+\", line [0-9]+: [^Ww]",
   "^cc[^C]*CC: ERROR File = ([^,]+), Line = ([0-9]+)",
   "^ld([^:])*:([ \\t])*ERROR([^:])*:",
@@ -142,6 +143,7 @@ static const char* cmCTestWarningMatches[] = {
   "WARNING: ",
   "([^ :]+) : warning",
   "([^:]+): warning",
+  "\", line [0-9]+\\.[0-9]+:",
   0
 };
 
