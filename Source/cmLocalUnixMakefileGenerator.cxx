@@ -2200,6 +2200,11 @@ void cmLocalUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
 
 void cmLocalUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
 {
+  // Install is not currently supported on windows
+  if(m_WindowsShell)
+    {
+    return;
+    }
   const char* root
     = m_Makefile->GetDefinition("CMAKE_ROOT");
   fout << "INSTALL = \"" << root << "/Templates/install-sh\" -c\n";
