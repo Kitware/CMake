@@ -61,6 +61,10 @@ void cmEnableTestingCommand::FinalPass()
        << "# The next line is critical for Dart to work" << std::endl 
        << "# Duh :-)" << std::endl << std::endl;
 
+  // get our output directory
+  std::string outDir = m_Makefile->GetStartOutputDirectory();
+  outDir += "/";
+  
   // write out the subdirs for the current directory
   if (!m_Makefile->GetSubDirectories().empty())
     {
@@ -68,11 +72,15 @@ void cmEnableTestingCommand::FinalPass()
     const std::vector<cmSubDirectory>& subdirs 
       = m_Makefile->GetSubDirectories();
     std::vector<cmSubDirectory>::const_iterator i = subdirs.begin();
-    fout << (*i).SourcePath.c_str();
+    std::string binP = (*i).BinaryPath;
+    cmSystemTools::ReplaceString(binP, outDir.c_str(), "");
+    fout << binP.c_str();
     ++i;
     for(; i != subdirs.end(); ++i)
       {
-      fout << " " << i->SourcePath.c_str();
+      binP = (*i).BinaryPath;
+      cmSystemTools::ReplaceString(binP, outDir.c_str(), "");
+      fout << " " << binP.c_str();
       }
     fout << ")" << std::endl << std::endl;;
     }
