@@ -122,6 +122,33 @@ void updateProgress(const char *msg, float prog, void *cd)
     }
 }
 
+// Convert to Win32 path (slashes). This calls the system tools one and then
+// removes the spaces. It is not in system tools because we don't want any
+// generators accidentally use it
+std::string ConvertToWindowsPath(const char* path)
+{
+  // Convert to output path.
+  // Remove the "" around it (if any) since it's an output path for
+  // the shell. If another shell-oriented feature is not designed 
+  // for a GUI use, then we are in trouble.
+
+  std::string s = cmSystemTools::ConvertToOutputPath(path);
+  if (s.size())
+    {
+    std::string::iterator i = s.begin();
+    if (*i == '\"')
+      {
+      s.erase(i, i + 1);
+      }
+    i = s.begin() + s.length() - 1;
+    if (*i == '\"')
+      {
+      s.erase(i, i + 1);
+      }
+    }
+  return s;
+}
+
 CMakeSetupDialog::CMakeSetupDialog(const CMakeCommandLineInfo& cmdInfo,
                                    CWnd* pParent /*=NULL*/)
   : CDialog(CMakeSetupDialog::IDD, pParent)
@@ -1402,7 +1429,7 @@ void CMakeSetupDialog::ChangeDirectoriesFromFile(const char* arg)
   // If there is a CMakeLists.txt file, use it as the source tree.
   if(listPath.length() > 0)
     {
-    std::string path = cmSystemTools::ConvertToOutputPath(listPath.c_str());
+    std::string path = ConvertToWindowsPath(listPath.c_str());
     m_WhereSource = path.c_str();
     
     if(argIsFile)
@@ -1417,7 +1444,7 @@ void CMakeSetupDialog::ChangeDirectoriesFromFile(const char* arg)
       // Source directory given on command line.  Use current working
       // directory as build tree.
       std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-      path = cmSystemTools::ConvertToOutputPath(cwd.c_str());
+      path = ConvertToWindowsPath(cwd.c_str());
       m_WhereBuild = path.c_str();
       }
     }
