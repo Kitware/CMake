@@ -2259,6 +2259,59 @@ bool cmSystemTools::GetShortPath(const char* path, std::string& shortPath)
 #endif
 }
 
+bool cmSystemTools::SimpleGlob(const std::string& glob, 
+                               std::vector<std::string>& files, 
+                               int type /* = 0 */)
+{
+  if ( glob[glob.size()-1] != '*' )
+    {
+    return false;
+    }
+  std::string path = cmSystemTools::GetFilenamePath(glob);
+  std::string ppath = cmSystemTools::GetFilenameName(glob);
+  ppath = ppath.substr(0, ppath.size()-1);
+  if ( path.size() == 0 )
+    {
+    path = "/";
+    }
+
+  bool res;
+  cmDirectory d;
+  if (d.Load(path.c_str()))
+    {
+    for (unsigned int i = 0; i < d.GetNumberOfFiles(); ++i)
+      {
+      if((std::string(d.GetFile(i)) != ".")
+         && (std::string(d.GetFile(i)) != ".."))
+        {
+        std::string fname = path;
+        if ( path[path.size()-1] != '/' )
+          {
+          fname +="/";
+          }
+        fname += d.GetFile(i);
+        std::string sfname = d.GetFile(i);
+        if ( type > 0 && cmSystemTools::FileIsDirectory(fname.c_str()) )
+          {
+          continue;
+          }
+        if ( type < 0 && !cmSystemTools::FileIsDirectory(fname.c_str()) )
+          {
+          continue;
+          }
+        if ( sfname.size() >= ppath.size() && 
+             sfname.substr(0, ppath.size()) == 
+             ppath )
+          {
+          files.push_back(fname);
+          res = true;
+          }
+        }
+      }
+    }
+  return res;
+}
+
 cmSystemTools::e_FileFormat cmSystemTools::GetFileFormat(const char* cext)
 {
   if ( ! cext || *cext == 0 )

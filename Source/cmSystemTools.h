@@ -235,6 +235,18 @@ public:
   static void Glob(const char *directory, const char *regexp,
                    std::vector<std::string>& files);
   static void GlobDirs(const char *fullPath, std::vector<std::string>& files);
+
+  /**
+   * Try to find a list of files that match the "simple" globbing
+   * expression. At this point in time the globbing expressions have
+   * to be in form: /directory/partial_file_name*. The * character has
+   * to be at the end of the string and it does not support ?
+   * []... The optional argument type specifies what kind of files you
+   * want to find. 0 means all files, -1 means directories, 1 means
+   * files only. This method returns true if search was succesfull.
+   */
+  static bool SimpleGlob(const std::string& glob, std::vector<std::string>& files, 
+                         int type = 0);
   
   static std::string GetCurrentWorkingDirectory();
   static std::string GetProgramPath(const char*);
