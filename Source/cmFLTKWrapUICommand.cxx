@@ -64,7 +64,7 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args)
     cmSourceFile *curr = m_Makefile->GetSource(i->c_str());
     // if we should use the source GUI 
     // to generate .cxx and .h files
-    if (!curr || !curr->GetPropertyAsBool("WRAP_EXCLUDE"))
+    if (!curr && !curr->GetPropertyAsBool("WRAP_EXCLUDE"))
       {
       cmSourceFile header_file;
       cmSourceFile source_file;
