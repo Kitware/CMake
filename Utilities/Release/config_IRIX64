@@ -1,6 +1,7 @@
 PLATFORM="irix64"
 CC="cc"
 CXX="CC"
+MAKE="gmake -j 20"
 
 # Write entries into the cache file before building cmake.
 write_cache()

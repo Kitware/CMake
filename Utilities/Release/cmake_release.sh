@@ -52,6 +52,9 @@ CXX=""
 CFLAGS=""
 CXXFLAGS=""
 
+# Provide a default make.
+MAKE=make
+
 # Details of remote invocation.
 [ -z "$REMOTE" ] && SELF="$0"
 
@@ -366,10 +369,10 @@ configure()
     config || return 1
     [ -d "cmake-${VERSION}" ] || checkout || return 1
     cache || return 1
-    echo "Running configure ..." &&
+    echo "Running bootstrap ..." &&
     (
         cd "cmake-${VERSION}-${PLATFORM}" &&
-        ../cmake-${VERSION}/configure --prefix=${PREFIX}
+        ../cmake-${VERSION}/bootstrap --prefix=${PREFIX}
     ) >Logs/configure.log 2>&1 || error_log Logs/configure.log
 }
 
@@ -384,7 +387,7 @@ build()
     echo "Running make ..." &&
     (
         cd "cmake-${VERSION}-${PLATFORM}" &&
-        make
+        ${MAKE}
     ) >Logs/build.log 2>&1 || error_log Logs/build.log
 }
 
@@ -398,7 +401,7 @@ tests()
     (
         cd "cmake-${VERSION}-${PLATFORM}" &&
         rm -rf Tests &&
-        ./Source/ctest -V
+        ./bin/ctest -V
     ) >Logs/tests.log 2>&1 || error_log Logs/tests.log
 }
 
@@ -412,7 +415,7 @@ install()
     (
         rm -rf Install &&
         cd "cmake-${VERSION}-${PLATFORM}" &&
-        make install DESTDIR="${RELEASE_ROOT}/Install"
+        ${MAKE} install DESTDIR="${RELEASE_ROOT}/Install"
     ) >Logs/install.log 2>&1 || error_log Logs/install.log
 }
 
@@ -685,7 +688,7 @@ osx_install()
         mkdir -p OSX/Resources/PostFlight &&
         (
             cd "cmake-${VERSION}-${PLATFORM}" &&
-            make install DESTDIR="${RELEASE_ROOT}/OSX/Package_Root"
+            ${MAKE} install DESTDIR="${RELEASE_ROOT}/OSX/Package_Root"
         ) &&
         cp cmake-${VERSION}/Copyright.txt OSX/Resources/License.txt &&
         cp -r cmake-${VERSION}-${PLATFORM}/Source/CMake.app OSX/Package_Root/Applications &&

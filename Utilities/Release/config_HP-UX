@@ -1,21 +1,16 @@
 PLATFORM="hpux-static"
 CC="cc"
 CXX="aCC"
+CFLAGS="+DAportable"
+CXXFLAGS="-Wl,+vnocompatwarnings +W740,749 +DAportable -D__HPACC_STRICTER_ANSI__"
 PATH=/usr/local/bin:/usr/bin:/opt/ansic/bin:/usr/ccs/bin:/usr/contrib/bin:/opt/nettladm/bin:/opt/pd/bin:/opt/upgrade/bin:/usr/bin/X11:/usr/contrib/bin/X11:/opt/atok/bin:/opt/asx/bin/X11:/opt/xdevice/bin:/opt/egb/bin:/opt/vje/bin:/opt/resmon/bin:/opt/hparray/bin:/opt/langtools/bin:/opt/imake/bin:/opt/aCC/bin
 
 # Write entries into the cache file before building cmake.
 write_cache()
 {
-BINDIR=`pwd`
-
-cat > UserMakeRules.cmake <<EOF
-SET(CMAKE_DL_LIBS "")
-EOF
-
 cat > CMakeCache.txt <<EOF
 BUILD_TESTING:BOOL=ON
-CMAKE_EXE_LINKER_FLAGS:STRING=-ldld -Wl,-a,archive_shared
-CMAKE_USER_MAKE_RULES_OVERRIDE:STRING=${BINDIR}/UserMakeRules.cmake
+CMAKE_EXE_LINKER_FLAGS:STRING=-Wl,-a,archive_shared
 CMAKE_SKIP_RPATH:BOOL=1
 CMAKE_VERBOSE_MAKEFILE:BOOL=TRUE
 EOF
