@@ -233,7 +233,7 @@ NameButtonCallback( Fl_Widget * widget, void * data)
         delete parentGroup;  // Patricide... ?
         // Redraw the list
         grandParentGroup->redraw();
-        SaveCacheFromGUI();        
+        FillCacheManagerFromCacheGUI();        
         return;
       }
       break;
@@ -247,11 +247,11 @@ NameButtonCallback( Fl_Widget * widget, void * data)
 
 void
 PropertyItemRow::
-SaveCacheFromGUI( void )
+FillCacheManagerFromCacheGUI( void )
 {
   if( m_CMakeSetup )
   {
-    m_CMakeSetup->SaveCacheFromGUI();
+    m_CMakeSetup->FillCacheManagerFromCacheGUI();
   }
 }
 
@@ -281,7 +281,7 @@ CheckButtonCallback( Fl_Widget * widget, void * data)
     
   button->redraw();
   
-  SaveCacheFromGUI();
+  FillCacheManagerFromCacheGUI();
 
 }
 
@@ -298,7 +298,7 @@ InputTextCallback(   Fl_Widget * widget, void * data)
 
   item->m_Dirty = true;
 
-  SaveCacheFromGUI();
+  FillCacheManagerFromCacheGUI();
 
 }
 
@@ -333,7 +333,7 @@ ColorSelectionCallback(   Fl_Widget * widget, void * data)
 
   colorButton->redraw();
  
-  SaveCacheFromGUI();
+  FillCacheManagerFromCacheGUI();
 
 }
 
@@ -361,7 +361,7 @@ BrowsePathCallback(   Fl_Widget * widget, void * data)
 
   propertyItem->m_Dirty = true;
 
-  SaveCacheFromGUI();
+  FillCacheManagerFromCacheGUI();
 
 }
 
