@@ -28,20 +28,9 @@ bool cmWrapTclCommand::Invoke(std::vector<std::string>& args)
   // already, if so use that value and don't look for the program
   const char* cacheValue
     = cmCacheManager::GetInstance()->GetCacheValue("WRAP_TCL");
-  if(!cacheValue)
+  if(!cacheValue || !strcmp(cacheValue,"0"))
     {
-    cmCacheManager::GetInstance()->AddCacheEntry("WRAP_TCL","1",
-                                                 cmCacheManager::BOOL);
-    m_Makefile->AddDefinition("WRAP_TCL", "1");
-    }
-  else
-    {
-    m_Makefile->AddDefinition("WRAP_TCL", cacheValue);
-    // if it is turned off then return
-    if (!strcmp(cacheValue,"0"))
-      {
-      return true;
-      }
+    return true;
     }
 
   // add in a depend in the vtkWrapTcl executable

@@ -47,6 +47,7 @@
 #include "cmElseCommand.cxx"
 #include "cmEndIfCommand.cxx"
 #include "cmAddDefinitionsCommand.cxx"
+#include "cmOptionCommand.cxx"
 
 void GetPredefinedCommands(std::list<cmCommand*>& commands)
 {
@@ -91,6 +92,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmElseCommand);
   commands.push_back(new cmEndIfCommand);
   commands.push_back(new cmAddDefinitionsCommand);
+  commands.push_back(new cmOptionCommand);
 }
 
   
