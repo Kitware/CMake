@@ -52,14 +52,6 @@ class cmake
   void AddCMakePaths(const std::vector<std::string>&);
 
   /**
-   * Handle the case where cmake is being used to bootstrap itself.
-   * This typically happens on windows, where a cmake executable is 
-   * used to produce makefiles for cmake itself. When bootstrapping
-   * CMAKE_BOOTSTRAP is set to 1
-   */
-  void HandleBootstrap(cmMakefile& builder, const std::string& arg0);
-  
-  /**
    * constructor
    */
   cmake();

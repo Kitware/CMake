@@ -348,57 +348,6 @@ void cmake::AddCMakePaths(const std::vector<std::string>& args)
 }
 
 
-void cmake::HandleBootstrap(cmMakefile& mf, const std::string& args0)
-{
-  if (cmSystemTools::GetFilenameNameWithoutExtension(args0) == 
-      "bootstrap")
-    {
-    // if the user specified a generator on the command line we do not
-    // need to prompt the user
-    int done = (mf.GetMakefileGenerator() != 0);
-    
-    while (!done)
-      {
-      int choice = 0;
-      std::cout << 
-        "\n\nPlease select the tool you wish to use to build CMake."
-        "\nPlease note that selecting a tool here will not limit"
-        "\nwhat tools the resulting CMake executable supports.\n\n";
-      std::vector<std::string> names;
-      cmMakefileGenerator::GetRegisteredGenerators(names);
-      int count = 1;
-      for(std::vector<std::string>::iterator i =names.begin();
-          i != names.end(); ++i, ++count)
-        {
-        std::cout << "\t" << count << ") " << i->c_str() << "\n";
-        }
-      std::cin >> choice;
-      if (choice > 0 && choice < count)
-        {
-        done = 1;
-        cmMakefileGenerator* gen = 
-          cmMakefileGenerator::CreateGenerator(names[choice-1].c_str());
-        if(!gen)
-          {
-          cmSystemTools::Error("Could not create named generator ",
-                               names[choice-1].c_str());
-          }
-        else
-          {
-          mf.SetMakefileGenerator(gen);
-          std::cout << 
-            "\n\nThank You. CMake will now generate the appropriate files for\nbeing built with " << names[choice-1].c_str() << "\n\n";
-          }
-        }
-      else
-        {
-        std::cout << "Please make a selection between 1 and " << 
-          count -1 << "\n";
-        }
-      }
-    mf.AddDefinition("CMAKE_BOOTSTRAP","1");
-    }
-}
 
 int cmake::Generate(const std::vector<std::string>& args, bool buildMakefiles)
 {
@@ -451,10 +400,6 @@ int cmake::Generate(const std::vector<std::string>& args, bool buildMakefiles)
   // extract command line arguments that might add cache entries
   this->SetCacheArgs(mf, args);
 
-  // handle bootstraping command
-  this->HandleBootstrap(mf,args[0]);
-  
-    
   // no generator specified on the command line
   if(!mf.GetMakefileGenerator())
     {
