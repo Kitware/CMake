@@ -86,6 +86,7 @@ inline int Chdir(const char* dir)
 #  endif
 #elif defined( __CYGWIN__ ) || defined( __linux__ )
 #  include <sys/time.h>
+#  include <time.h>
 #  define HAVE_GETTIMEOFDAY
 #endif
 
