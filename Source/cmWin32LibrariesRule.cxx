@@ -2,7 +2,7 @@
 cmWin32LibrariesRule::cmWin32LibrariesRule()
 {
 #ifndef _WIN32
-  this->SetEnableOff();
+  this->EnabledOff();
 #endif
 }
 

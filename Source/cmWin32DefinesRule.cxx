@@ -5,7 +5,7 @@
 cmWin32DefinesRule::cmWin32DefinesRule()
 {
 #ifndef _WIN32
-  this->SetEnableOff();
+  this->EnabledOff();
 #endif
 }
 
