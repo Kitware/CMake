@@ -486,6 +486,16 @@ const char *cmSystemTools::ConvertToUnixSlashes(std::string& path)
     {
     path = path.substr(0, path.size()-1);
     }
+
+  // if there is a tilda ~ then replace it with HOME
+  if(path.find("~") == 0)
+    {
+    if (getenv("HOME"))
+      {
+      path = std::string(getenv("HOME")) + path.substr(1);
+      }
+    }
+  
   // if there is a /tmp_mnt in a path get rid of it!
   // stupid sgi's 
   if(path.find("/tmp_mnt") == 0)
