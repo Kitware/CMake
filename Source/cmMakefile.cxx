@@ -61,13 +61,13 @@ cmMakefile::cmMakefile()
   // Source and header file extensions that we can handle
   m_SourceFileExtensions.push_back( "cxx" );
   m_SourceFileExtensions.push_back( "cpp" );
-  m_SourceFileExtensions.push_back( "txx" );
   m_SourceFileExtensions.push_back( "c" );
   m_SourceFileExtensions.push_back( "M" );
   m_SourceFileExtensions.push_back( "m" );
   m_SourceFileExtensions.push_back( "mm" );
 
   m_HeaderFileExtensions.push_back( "h" );
+  m_HeaderFileExtensions.push_back( "txx" );
   
   m_DefineFlags = " ";
   m_MakefileGenerator = 0;
