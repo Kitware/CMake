@@ -1,0 +1,63 @@
+#!/bin/sh
+
+CMAKE_COMMAND="@CMAKE_INSTALL_PREFIX@/bin/cmake"
+CMake_SOURCE_DIR="@CMake_SOURCE_DIR@"
+CMake_BINARY_DIR="@CMake_BINARY_DIR@"
+CMAKE_INSTALL_PREFIX="@CMAKE_INSTALL_PREFIX@"
+CMAKE_BUILD_TOOL="@CMAKE_BUILD_TOOL@"
+
+SOURCE_DIR="${CMake_SOURCE_DIR}/Tests/Simple"
+BINARY_DIR="${CMake_BINARY_DIR}/Tests/TestInstall"
+
+install()
+{
+    echo "Erasing ${CMAKE_INSTALL_PREFIX}" &&
+    ([ ! -d "${CMAKE_INSTALL_PREFIX}" ] || rm -rf "${CMAKE_INSTALL_PREFIX}") &&
+    mkdir -p "${CMAKE_INSTALL_PREFIX}" &&
+    echo "Running make install" &&
+    (
+        cd "${CMake_BINARY_DIR}" &&
+        "${CMAKE_BUILD_TOOL}" install
+    )
+}
+
+setup()
+{
+    echo "Entering ${BINARY_DIR}" &&
+    cd "${BINARY_DIR}"
+}
+
+write_cache()
+{
+    install || return 1
+    setup || return 1
+    echo "Writing CMakeCache.txt"
+    (
+        cat > CMakeCache.txt <<EOF
+EOF
+    )
+}
+
+run_cmake()
+{
+    write_cache || return 1
+    echo "Running CMake"
+    "${CMAKE_COMMAND}" "${SOURCE_DIR}"
+}
+
+run_make()
+{
+    run_cmake || return 1
+    echo "Running ${CMAKE_BUILD_TOOL}"
+    "${CMAKE_BUILD_TOOL}"
+}
+
+run_test()
+{
+    echo "Running ${BINARY_DIR}/simple"
+    (
+    "${BINARY_DIR}/simple"
+    )
+}
+
+run_make && run_test
