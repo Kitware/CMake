@@ -28,6 +28,8 @@ IF(BUILD_TESTING)
   # to be defined by cmake 
   SET(MAKEPROGRAM ${CMAKE_MAKE_PROGRAM})
   OPTION(VERBOSE_BUILD "Show the actual output of the build, or if off show a . for each 1024 bytes." "OFF")
+  OPTION(BUILD_ERROR_REPORT_LIMIT "Limit of reported errors, -1 reports all." -1 )  
+  OPTION(BUILD_WARNING_REPORT_LIMIT "Limit of reported warnings, -1 reports all." -1 )  
 
   FIND_PROGRAM(CVSCOMMAND cvs )
   SET(CVS_UPDATE_OPTIONS "-d -A -P" CACHE STRING "Options passed to the cvs update command.")
@@ -58,6 +60,8 @@ IF(BUILD_TESTING)
 
   MARK_AS_ADVANCED(
     VERBOSE_BUILD
+    BUILD_WARNING_REPORT_LIMIT 
+    BUILD_ERROR_REPORT_LIMIT     
     SITE 
     BUILDNAME 
     MAKECOMMAND 
