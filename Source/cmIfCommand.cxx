@@ -128,7 +128,7 @@ bool cmIfCommand::InitialPass(std::vector<std::string>& args)
     cmRegularExpression regEntry(args[2].c_str());
     
     // check for black line or comment
-    if (regEntry.find(def))
+    if (!regEntry.find(def))
       {
       f = new cmIfFunctionBlocker();
       }
