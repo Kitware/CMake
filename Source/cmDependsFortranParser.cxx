@@ -1410,7 +1410,7 @@ yyerrlab:
 `---------------------------------------------------*/
 yyerrorlab:
 
-#if defined(__GNUC__) || defined(__HP_aCC)
+#if defined(__GNUC__) || defined(__HP_aCC) || defined(__INTEL_COMPILER)
   /* Pacify GCC when the user code never invokes YYERROR and the label
      yyerrorlab therefore never appears in user code.  */
   if (0)

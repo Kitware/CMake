@@ -36,6 +36,7 @@ Run bison like this:
 Modify cmDependsFortranParser.cxx:
   - remove TABs
   - add __HP_aCC to the #if test for yyerrorlab warning suppression
+  - add __INTEL_COMPILER to the #if test for yyerrorlab warning suppression
 
 */
 
