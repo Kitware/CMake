@@ -61,7 +61,7 @@ public:
 	CString GetPathName();
 	virtual int DoModal();
 
-	static Touch(LPCTSTR lpPath, BOOL bValidate=TRUE);
+	static int Touch(LPCTSTR lpPath, BOOL bValidate=TRUE);
 	static int MakeSurePathExists(LPCTSTR lpPath);
 	static BOOL IsFileNameValid(LPCTSTR lpFileName);
 	static int ConcatPath(LPTSTR lpRoot, LPCTSTR lpMorePath);
