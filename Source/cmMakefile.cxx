@@ -155,6 +155,11 @@ void cmMakefile::Print() const
   this->PrintStringVector("m_LinkDirectories", m_LinkDirectories);
   this->PrintStringVector("m_Utilities", m_Utilities);
   this->PrintStringVector("m_UtilityDirectories", m_UtilityDirectories);
+  for( std::vector<cmSourceGroup>::const_iterator i = m_SourceGroups.begin();
+       i != m_SourceGroups.end(); ++i)
+    {
+    i->Print();
+    }
 }
 
 // Parse the given CMakeLists.txt file into a list of classes.
@@ -231,62 +236,50 @@ bool cmMakefile::ReadListFile(const char* filename, const char* external)
   std::vector<std::string> arguments;
   while ( fin )
     {
-      // add this list file to the list of dependencies
-      m_ListFiles.push_back( filenametoread);
+    // add this list file to the list of dependencies
+    m_ListFiles.push_back( filenametoread);
 
     if(cmSystemTools::ParseFunction(fin, name, arguments) &&
        !this->IsFunctionBlocked(name.c_str(),arguments))
       {
-      // Special command that needs to be removed when 
-      // ADD_COMMAND is implemented
-      if(name == "VERBATIM")
+      RegisteredCommandsMap::iterator pos = m_Commands.find(name);
+      if(pos != m_Commands.end())
         {
-        if (!inheriting)
+        cmCommand* rm = (*pos).second;
+        cmCommand* usedCommand = rm->Clone();
+        usedCommand->SetMakefile(this);
+        bool keepCommand = false;
+        if(usedCommand->GetEnabled())
           {
-          m_MakeVerbatim = arguments;
+          // if not running in inherit mode or
+          // if the command is inherited then Invoke it.
+          if(!inheriting || usedCommand->IsInherited())
+            {
+            if(!usedCommand->Invoke(arguments))
+              {
+              cmSystemTools::Error(usedCommand->GetName(),
+                                   ": Error : \n",
+                                   usedCommand->GetError(),
+                                   m_cmCurrentDirectory.c_str());
+              }
+            else
+              {
+              // use the command
+              keepCommand = true;
+              m_UsedCommands.push_back(usedCommand);
+              }
+            }
+          }
+        // if the Cloned command was not used 
+        // then delete it
+        if(!keepCommand)
+          {
+          delete usedCommand;
           }
         }
       else
         {
-        RegisteredCommandsMap::iterator pos = m_Commands.find(name);
-        if(pos != m_Commands.end())
-          {
-          cmCommand* rm = (*pos).second;
-          cmCommand* usedCommand = rm->Clone();
-          usedCommand->SetMakefile(this);
-          bool keepCommand = false;
-          if(usedCommand->GetEnabled())
-            {
-            // if not running in inherit mode or
-            // if the command is inherited then Invoke it.
-            if(!inheriting || usedCommand->IsInherited())
-              {
-              if(!usedCommand->Invoke(arguments))
-                {
-                cmSystemTools::Error(usedCommand->GetName(),
-                                     ": Error : \n",
-                                     usedCommand->GetError(),
-                                     m_cmCurrentDirectory.c_str());
-                }
-              else
-                {
-                // use the command
-                keepCommand = true;
-                m_UsedCommands.push_back(usedCommand);
-                }
-              }
-            }
-          // if the Cloned command was not used 
-          // then delete it
-          if(!keepCommand)
-            {
-            delete usedCommand;
-            }
-          }
-        else
-          {
-          cmSystemTools::Error("unknown CMake command ", name.c_str());
-          }
+        cmSystemTools::Error("unknown CMake command ", name.c_str(), filename);
         }
       }
     }
@@ -663,11 +656,11 @@ void cmMakefile::RemoveVariablesInString(std::string& source) const
   cmRegularExpression var2("(@[A-Za-z_0-9]*@)");
   while (var.find(source))
     {
-    source.erase(var.start(),var.end());
+    source.erase(var.start(),var.end() - var.start());
     }
   while (var2.find(source))
     {
-    source.erase(var2.start(),var2.end());
+    source.erase(var2.start(),var2.end() - var2.start());
     }
 }
 

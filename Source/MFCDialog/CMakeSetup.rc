@@ -103,7 +103,7 @@ BEGIN
     GROUPBOX        "Cache Values",IDC_STATIC,9,43,356,141
     LISTBOX         IDC_LIST2,15,55,344,122,LBS_OWNERDRAWVARIABLE | 
                     LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | 
-                    WS_TABSTOP
+                    WS_HSCROLL | WS_TABSTOP
     CTEXT           "Right click on cache entries for additional options",
                     IDC_STATIC,19,190,333,11
 END

@@ -90,7 +90,10 @@ bool cmFindProgramCommand::Invoke(std::vector<std::string>& args)
     m_Makefile->AddDefinition(define, result.c_str());
     return true;
     }
-  
-  return false;
+  std::string error = "Faild to find program: \"";
+  error += *i;
+  error += "\" ";
+  this->SetError(error.c_str());
+  return true;
 }
 

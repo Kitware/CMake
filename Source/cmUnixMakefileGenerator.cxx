@@ -460,7 +460,7 @@ void cmUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
       sourceGroup.AddCustomCommand(cc);
       }
     }
-  
+
   // Loop through every source group.
   for(std::vector<cmSourceGroup>::const_iterator sg =
         sourceGroups.begin(); sg != sourceGroups.end(); ++sg)

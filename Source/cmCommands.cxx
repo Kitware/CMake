@@ -6,7 +6,7 @@
 #include "cmAbstractFilesCommand.cxx"
 #include "cmAddExecutableCommand.cxx"
 #include "cmAddLibraryCommand.cxx"
-#include "cmAddTargetCommand.cxx"
+#include "cmAddCustomTargetCommand.cxx"
 #include "cmAuxSourceDirectoryCommand.cxx"
 #include "cmFindLibraryCommand.cxx"
 #include "cmFindProgramCommand.cxx"
@@ -48,13 +48,21 @@
 #include "cmAddDefinitionsCommand.cxx"
 #include "cmOptionCommand.cxx"
 #include "cmIncludeCommand.cxx"
+#include "cmSiteNameCommand.cxx"
+#include "cmBuildNameCommand.cxx"
+#include "cmExecProgram.cxx"
+#include "cmBuildCommand.cxx"
 
 void GetPredefinedCommands(std::list<cmCommand*>& commands)
 {
+  commands.push_back(new cmBuildCommand);
+  commands.push_back(new cmExecProgram);
+  commands.push_back(new cmBuildNameCommand);
+  commands.push_back(new cmSiteNameCommand);
   commands.push_back(new cmAbstractFilesCommand);
   commands.push_back(new cmAddExecutableCommand);
   commands.push_back(new cmAddLibraryCommand);
-  commands.push_back(new cmAddTargetCommand);
+  commands.push_back(new cmAddCustomTargetCommand);
   commands.push_back(new cmAuxSourceDirectoryCommand);
   commands.push_back(new cmFindLibraryCommand);
   commands.push_back(new cmFindProgramCommand);

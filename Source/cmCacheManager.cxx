@@ -295,6 +295,11 @@ void cmCacheManager::AddCacheEntry(const char* key,
   CacheEntry e;
   e.m_Value = value;
   e.m_Type = type;
+  // make sure we only use unix style paths
+  if(type == FILEPATH || type == PATH)
+    {
+    cmSystemTools::ConvertToUnixSlashes(e.m_Value);
+    }  
   e.m_HelpString = helpString;
   m_Cache[key] = e;
 }

@@ -122,6 +122,24 @@ void cmSourceGroup::AddCustomCommand(const cmCustomCommand &cmd)
   commandFiles.m_Outputs.insert(cmd.GetOutputs().begin(), cmd.GetOutputs().end());
 }
 
+void cmSourceGroup::Print() const
+{
+  std::cout << "cmSourceGroup: " << m_Name.c_str() << "\n";
+  for(BuildRules::const_iterator i = m_BuildRules.begin();
+      i != m_BuildRules.end(); ++i)
+    {
+    std::cout << "BuildRule: " << i->first.c_str() << "\n";
+    for(Commands::const_iterator j = i->second.begin();
+        j != i->second.end(); ++j)
+      {
+      std::cout << "Command: " << j->first.c_str() << "\n";
+      std::cout << "Command Outputs " << j->second.m_Outputs.size() << "\n";
+      std::cout << "Command Depends " << j->second.m_Depends.size() << "\n";
+      }
+    }
+}
+
+
 void cmSourceGroup::CommandFiles::Merge(const CommandFiles &r)
 {
   std::set<std::string>::const_iterator dep = r.m_Depends.begin();
@@ -135,5 +153,6 @@ void cmSourceGroup::CommandFiles::Merge(const CommandFiles &r)
     this->m_Outputs.insert(*out);
     }
 }
+
 
 

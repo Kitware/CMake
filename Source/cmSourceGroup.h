@@ -90,7 +90,7 @@ public:
     { return m_Name.c_str(); }
   const BuildRules& GetBuildRules() const
     { return m_BuildRules; }
-  
+  void Print() const;
 private:
   /**
    * The name of the source group.

@@ -24,7 +24,6 @@ CMakeTargets.make: ${CMAKE} ${srcdir}/CMakeLists.txt ${CMAKE_CONFIG_DIR}/CMakeCa
 	${CMAKE} ${currentdir}/CMakeLists.txt -S${currentdir} -O${currentbindir} -H${topdir} -B${CMAKE_CONFIG_DIR}
 
 rebuild_cache: ${CMAKE_CONFIG_DIR}/CMakeCache.txt
-	rm -f ${CMAKE_CONFIG_DIR}/CMakeCache.txt
 	${CMAKE} ${topdir}/CMakeLists.txt -MakeCache -S${topdir} -O${CMAKE_CONFIG_DIR} -H${topdir} -B${CMAKE_CONFIG_DIR}
 
 ${CMAKE_CONFIG_DIR}/CMakeCache.txt:

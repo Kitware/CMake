@@ -105,6 +105,11 @@ void cmSystemTools::GetPath(std::vector<std::string>& path)
       done = true;
       }
     }
+  for(std::vector<std::string>::iterator i = path.begin();
+      i != path.end(); ++i)
+    {
+    cmSystemTools::ConvertToUnixSlashes(*i);
+    }
 }
 
 
@@ -276,35 +281,6 @@ bool cmSystemTools::ParseFunction(std::ifstream& fin,
     cmRegularExpression oneLiner("^[ \t]*([A-Za-z_0-9]*)[ \t]*\\((.*)\\)[ \t]*$");
     cmRegularExpression multiLine("^[ \t]*([A-Za-z_0-9]*)[ \t]*\\((.*)$");
     cmRegularExpression lastLine("^(.*)\\)[ \t]*$");
-
-    // BEGIN VERBATIM JUNK SHOULD BE REMOVED
-    cmRegularExpression verbatim("BEGIN MAKE VERBATIM");
-    if(verbatim.find(inbuffer))
-      {
-      cmRegularExpression endVerbatim("END MAKE VERBATIM");
-      name = "VERBATIM";
-      bool done = false;
-      while(!done)
-        {
-        if(fin.getline(inbuffer, BUFFER_SIZE))
-          {
-          if(endVerbatim.find(inbuffer))
-            {
-            done = true;
-            }
-          else
-            {
-            arguments.push_back(inbuffer);
-            }
-          }
-        else
-          {
-          done = true;
-          }
-        }
-      return true;
-      }
-    // END VERBATIM JUNK SHOULD BE REMOVED
 
     // check for black line or comment
     if(blankLine.find(inbuffer) || comment.find(inbuffer))
@@ -584,6 +560,46 @@ bool cmSystemTools::IsOff(const char* val)
 }
 
 
+bool cmSystemTools::RunCommand(const char* command, 
+                               std::string& output)
+{
+  std::string commandToFile = command;
+  commandToFile += " > ";
+  std::string tempFile;
+  tempFile += cmSystemTools::TemporaryFileName();
+  commandToFile += tempFile;
+  system(commandToFile.c_str());
+  std::ifstream fin(tempFile.c_str());
+  if(!fin)
+    {
+    cmSystemTools::Error(command, " from RunCommand Faild to create output file",
+                         tempFile.c_str());
+    return false;
+    }
+  const int BUFFER_SIZE = 4096;
+  char buffer[BUFFER_SIZE];
+  while(fin)
+    {
+    fin.getline(buffer, BUFFER_SIZE);
+    output += buffer;
+    }
+  cmSystemTools::RemoveFile(tempFile.c_str());
+  return true;
+}
+
+#ifdef _MSC_VER
+#define tempnam _tempnam
+#endif
+
+std::string cmSystemTools::TemporaryFileName()
+{
+  return tempnam(0, "cmake");
+}
+
+  
+  
+
+
 /**
  * Find the executable with the given name.  Searches the given path and then
  * the system search path.  Returns the full path to the executable if it is
@@ -718,3 +734,4 @@ std::string cmSystemTools::CollapseFullPath(const char* in_name)
   
   return newPath;
 }
+

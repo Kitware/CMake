@@ -177,6 +177,17 @@ public:
   
   static long int ModifiedTime(const char* filename);
 
+  /**
+   * Run an executable command and put the stdout in output.
+   * A temporary file is created in the binaryDir for storing the
+   * output because windows does not have popen.
+   */
+  static bool RunCommand(const char* command, 
+                         std::string& output);
+
+  ///! Generate a temporary file name
+  static std::string TemporaryFileName();
+  
 private:
   static bool s_ErrorOccured;
 };

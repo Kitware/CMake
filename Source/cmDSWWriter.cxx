@@ -122,10 +122,8 @@ void cmDSWMakefile::WriteDSWFile(std::ostream& fout)
     // than one dsp could have been created per input CMakeLists.txt file
     // for each target
     std::vector<std::string> dspnames = pg->GetDSPMakefile()->GetCreatedProjectNames();
-    const cmTargets &tgts = pg->GetDSPMakefile()->GetMakefile()->GetTargets();
-    cmTargets::const_iterator l = tgts.begin();
-    std::vector<std::string> originalUtilities;
-    bool addedUtilities = false;
+    cmTargets &tgts = pg->GetDSPMakefile()->GetMakefile()->GetTargets();
+    cmTargets::iterator l = tgts.begin();
     for(std::vector<std::string>::iterator si = dspnames.begin(); 
         l != tgts.end(); ++l, ++si)
       {
@@ -139,8 +137,6 @@ void cmDSWMakefile::WriteDSWFile(std::ostream& fout)
         // vector on the makefile
         if(l->first == "ALL_BUILD")
           {
-          addedUtilities = true;
-          originalUtilities = m_Makefile->GetUtilities();
           for(std::vector<cmMakefile*>::iterator a = allListFiles.begin();
               a != allListFiles.end(); ++a)
             {
@@ -150,7 +146,8 @@ void cmDSWMakefile::WriteDSWFile(std::ostream& fout)
               {
               if(al->second.GetType() != cmTarget::UTILITY)
                 {
-                m_Makefile->GetUtilities().push_back(al->first);
+                l->second.GetLinkLibraries().push_back(
+                  cmTarget::LinkLibraries::value_type(al->first, cmTarget::GENERAL));
                 }
               }
             }
@@ -159,11 +156,6 @@ void cmDSWMakefile::WriteDSWFile(std::ostream& fout)
       // Write the project into the DSW file
       this->WriteProject(fout, si->c_str(), dir.c_str(), 
                          pg->GetDSPMakefile(),l->second);
-      if(addedUtilities)
-        {
-        m_Makefile->GetUtilities() = originalUtilities;
-        }
-      
       }
     // delete the cmMakefile which also deletes the cmMSProjectGenerator
     if(mf != m_Makefile)

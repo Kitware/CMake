@@ -1,0 +1,11 @@
+# 
+# CMakeLocal.make.in should be in the directory where you run configure
+# in, which need not be the source directory
+#
+
+SET (CXXCOMPILER     @CXX@)
+SET (WORDS_BIGENDIAN @WORDS_BIGENDIAN@)
+SET (HAVE_LIMITS_H   @HAVE_LIMITS_H@)
+SET (HAVE_UNISTD_H   @HAVE_UNISTD_H@)
+
+

@@ -55,10 +55,15 @@ bool cmOptionCommand::Invoke(std::vector<std::string>& args)
     = cmCacheManager::GetInstance()->GetCacheValue(args[0].c_str());
   if(!cacheValue)
     {
+    const char* initialValue = "Off";
+    if(args.size() == 3)
+      {
+      initialValue = args[2].c_str();
+      }
     cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
-                                                 false,
+                                                 cmSystemTools::IsOn(initialValue),
                                                  args[1].c_str());
-    m_Makefile->AddDefinition(args[0].c_str(), "Off");
+    m_Makefile->AddDefinition(args[0].c_str(), initialValue);
     }
   else
     {
