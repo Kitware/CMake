@@ -64,7 +64,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  FIND_PACKAGE(<name> [major.minor])\n"
+      "  FIND_PACKAGE(<name> [major.minor] [QUIET])\n"
       "Finds and loads settings from an external project.  <name>_FOUND will "
       "be set to indicate whether the package was found.  Settings that "
       "can be used when <name>_FOUND is true are package-specific.  The "
@@ -76,7 +76,12 @@ public:
       "project built by CMake that has a \"<name>Config.cmake\" file.  "
       "A cache entry called <name>_DIR is created and is expected to be set "
       "to the directory containing this file.  If the file is found, it is "
-      "read and processed by CMake to load the settings of the package.";
+      "read and processed by CMake to load the settings of the package.  If "
+      "<name>_DIR has not been set during a configure step, the command "
+      "will generate an error describing the problem unless the QUIET "
+      "argument is specified.  If <name>_DIR has been set to a directory "
+      "not containing a \"<name>Config.cmake\" file, an error is always "
+      "generated.";
     }
   
   cmTypeMacro(cmFindPackageCommand, cmCommand);
@@ -87,7 +92,6 @@ private:
   bool ReadListFile(const char* f);
 
   cmStdString Name;
-  cmStdString UpperName;
   cmStdString Variable;
   cmStdString Config;
   std::vector<cmStdString> Builds;

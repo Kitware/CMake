@@ -15,6 +15,7 @@
 
 =========================================================================*/
 #include "cmFindPackageCommand.h"
+#include <cmsys/RegularExpression.hxx>
 
 //----------------------------------------------------------------------------
 bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
@@ -26,7 +27,31 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     }
   
   this->Name = args[0];
-  this->UpperName = cmSystemTools::UpperCase(this->Name);
+  
+  bool quiet = false;
+  if(args.size() > 1)
+    {
+    cmsys::RegularExpression version("^[0-9.]+$");
+    bool haveVersion = false;
+    for(unsigned int i=1; i < args.size(); ++i)
+      {
+      if(!haveVersion && version.find(args[i].c_str()))
+        {
+        haveVersion = true;
+        }
+      else if(args[i] == "QUIET")
+        {
+        quiet = true;
+        }
+      else
+        {
+        cmOStringStream e;
+        e << "called with invalid argument \"" << args[i].c_str() << "\"";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+      }
+    }
   
   // See if there is a Find<name>.cmake module.
   bool foundModule = false;
@@ -40,7 +65,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     }
   // No find module.  Assume the project has a CMake config file.  Use
   // a <NAME>_DIR cache variable to locate it.
-  this->Variable = this->UpperName;
+  this->Variable = this->Name;
   this->Variable += "_DIR";
   this->Config = this->Name;
   this->Config += "Config.cmake";
@@ -82,7 +107,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
       result = true;
       }
     }
-  else
+  else if(!quiet)
     {
     cmOStringStream e;
     e << this->Variable << " is not set.  It must be set to the directory "
@@ -92,7 +117,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     result = true;
     }
   
-  std::string foundVar = this->UpperName;
+  std::string foundVar = this->Name;
   foundVar += "_FOUND";
   m_Makefile->AddDefinition(foundVar.c_str(), found? "1":"0");
   return result;
