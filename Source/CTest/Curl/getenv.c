@@ -53,7 +53,8 @@ char *GetEnv(const char *variable)
 #ifdef  VMS
   char *env = getenv(variable);
   if (env && strcmp("HOME",variable) == 0) {
-        env = decc$translate_vms(env);
+    /* VMS does not work because of warning on icc */
+    /*        env = decc$translate_vms(env);       */
   }
 #else
   /* no length control */

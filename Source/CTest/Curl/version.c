@@ -91,7 +91,7 @@ char *curl_version(void)
 {
   static char version[200];
   char *ptr;
-  long num;
+  long num=0;
   strcpy(version, LIBCURL_NAME "/" LIBCURL_VERSION );
   ptr=strchr(version, '\0');
 

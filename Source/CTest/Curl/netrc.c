@@ -95,7 +95,8 @@ int Curl_parsenetrc(char *host,
   pw= getpwuid(geteuid());
   if (pw) {
 #ifdef  VMS
-    home = decc$translate_vms(pw->pw_dir);
+        /* VMS does not work because of warnings on icc */
+        /* home = decc$translate_vms(pw->pw_dir);       */
 #else
     home = pw->pw_dir;
 #endif

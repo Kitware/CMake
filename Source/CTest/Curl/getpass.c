@@ -52,7 +52,8 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
         long sts;
         short chan;
         struct _iosb iosb;
-        $DESCRIPTOR(ttdesc, "TT");
+        /* VMS does not work because of warnings on icc */
+        /* $DESCRIPTOR(ttdesc, "TT");                   
 
         buffer[0]='\0';
         if ((sts = sys$assign(&ttdesc, &chan,0,0)) & 1) {
@@ -61,6 +62,7 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
                 } 
                 sts = sys$dassgn(chan);
         }
+        */
         return buffer; /* we always return success */
 }
 #else /* VMS */

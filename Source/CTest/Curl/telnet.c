@@ -99,7 +99,7 @@
 #define  SB_CLEAR(x)  x->subpointer = x->subbuffer;
 #define  SB_TERM(x)   { x->subend = x->subpointer; SB_CLEAR(x); }
 #define  SB_ACCUM(x,c) if (x->subpointer < (x->subbuffer+sizeof x->subbuffer)) { \
-            *x->subpointer++ = (c); \
+            *x->subpointer++ = (char)(c); \
          }
 
 #define  SB_GET(x) ((*x->subpointer++)&0xff)
@@ -1058,6 +1058,8 @@ CURLcode Curl_telnet(struct connectdata *conn)
   ssize_t nread;
   struct TELNET *tn;
   struct timeval now;           /* current time */
+  now.tv_sec = 0;
+  now.tv_usec = 0;
   (void) now;
 
   code = init_telnet(conn);
