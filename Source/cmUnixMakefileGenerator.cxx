@@ -231,6 +231,7 @@ void cmUnixMakefileGenerator::OutputMakefile(const char* file)
   fout << "\n\n";
   fout << "# Suppresses display of executed commands\n";
   fout << ".SILENT:\n";
+  fout << ".SUFFIXES:\n";
   // create a make variable with all of the sources for this Makefile
   // for depend purposes.
   fout << "CMAKE_MAKEFILE_SOURCES = ";
