@@ -77,7 +77,7 @@ ScopeEnded(const cmMakefile &mf) const
                        m_Define.c_str());
 }
 
-bool cmIfCommand::Invoke(std::vector<std::string>& args)
+bool cmIfCommand::InitialPass(std::vector<std::string>& args)
 {
   if(args.size() < 1 )
     {

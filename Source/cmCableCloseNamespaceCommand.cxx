@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 // cmCableCloseNamespaceCommand
-bool cmCableCloseNamespaceCommand::Invoke(std::vector<std::string>& args)
+bool cmCableCloseNamespaceCommand::InitialPass(std::vector<std::string>& args)
 {
   if(args.size() != 1)
     {

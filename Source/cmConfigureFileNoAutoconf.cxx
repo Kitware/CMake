@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmConfigureFileNoAutoconf.h"
 
 // cmConfigureFileNoAutoconf
-bool cmConfigureFileNoAutoconf::Invoke(std::vector<std::string>& args)
+bool cmConfigureFileNoAutoconf::InitialPass(std::vector<std::string>& args)
 {
   if(args.size() != 2 )
     {

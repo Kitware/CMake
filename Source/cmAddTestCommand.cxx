@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmCacheManager.h"
 
 // cmExecutableCommand
-bool cmAddTestCommand::Invoke(std::vector<std::string>& args)
+bool cmAddTestCommand::InitialPass(std::vector<std::string>& args)
 {
   // First argument is the name of the test
   // Second argument is the name of the executable to run (a target or external

@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmTestsCommand.h"
 
 // cmExecutableCommand
-bool cmTestsCommand::Invoke(std::vector<std::string>& args)
+bool cmTestsCommand::InitialPass(std::vector<std::string>& args)
 {
   // does nothing in CMake
   return true;

@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmAddDefinitionsCommand.h"
 
 // cmAddDefinitionsCommand
-bool cmAddDefinitionsCommand::Invoke(std::vector<std::string>& args)
+bool cmAddDefinitionsCommand::InitialPass(std::vector<std::string>& args)
 {
   if(args.size() < 1 )
     {

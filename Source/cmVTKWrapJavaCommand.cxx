@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmVTKWrapJavaCommand.h"
 
 // cmVTKWrapJavaCommand
-bool cmVTKWrapJavaCommand::Invoke(std::vector<std::string>& args)
+bool cmVTKWrapJavaCommand::InitialPass(std::vector<std::string>& args)
 {
   if(args.size() < 3 )
     {

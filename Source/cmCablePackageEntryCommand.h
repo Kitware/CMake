@@ -47,9 +47,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** \class cmCablePackageEntryCommand
  * \brief Superclass to all CABLE Package entry generation commands.
  *
- * cmCablePackageEntryCommand implements the Invoke method of a cmCommand
+ * cmCablePackageEntryCommand implements the InitialPass method of a cmCommand
  * to save the arguments as a vector of entries to a CABLE Package.  The
- * Invoke then calls the virtual WriteConfiguration() so that the subclass
+ * InitialPass then calls the virtual WriteConfiguration() so that the subclass
  * can generate the configuration code for its particular type of Package
  * entry.
  */
@@ -63,7 +63,7 @@ public:
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool Invoke(std::vector<std::string>& args);  
+  virtual bool InitialPass(std::vector<std::string>& args);  
 
   cmTypeMacro(cmCablePackageEntryCommand, cmCableCommand);
 

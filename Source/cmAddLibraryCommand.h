@@ -65,7 +65,7 @@ public:
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool Invoke(std::vector<std::string>& args);
+  virtual bool InitialPass(std::vector<std::string>& args);
 
   /**
    * The name of the command as specified in CMakeList.txt.

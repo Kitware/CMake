@@ -60,7 +60,7 @@ cmCableWrapTclCommand::~cmCableWrapTclCommand()
 
 
 // cmCableWrapTclCommand
-bool cmCableWrapTclCommand::Invoke(std::vector<std::string>& args)
+bool cmCableWrapTclCommand::InitialPass(std::vector<std::string>& args)
 {
   if(args.size() < 2)
     {

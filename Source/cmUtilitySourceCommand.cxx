@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmUtilitySourceCommand.h"
 
 // cmUtilitySourceCommand
-bool cmUtilitySourceCommand::Invoke(std::vector<std::string>& args)
+bool cmUtilitySourceCommand::InitialPass(std::vector<std::string>& args)
 {
   if(args.size() < 3)
     {

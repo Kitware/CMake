@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmLinkLibrariesCommand.h"
 
 // cmLinkLibrariesCommand
-bool cmLinkLibrariesCommand::Invoke(std::vector<std::string>& args)
+bool cmLinkLibrariesCommand::InitialPass(std::vector<std::string>& args)
 {
   if(args.size() < 1 )
     {

@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   
 
 // cmFindFileCommand
-bool cmFindFileCommand::Invoke(std::vector<std::string>& args)
+bool cmFindFileCommand::InitialPass(std::vector<std::string>& args)
 {
   if(args.size() < 2)
     {

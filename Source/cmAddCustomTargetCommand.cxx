@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmAddCustomTargetCommand.h"
 
 // cmAddCustomTargetCommand
-bool cmAddCustomTargetCommand::Invoke(std::vector<std::string>& args)
+bool cmAddCustomTargetCommand::InitialPass(std::vector<std::string>& args)
 {
   bool all = false;
   

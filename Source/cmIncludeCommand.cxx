@@ -18,7 +18,7 @@
 #include <iostream.h>
 
 // cmIncludeCommand
-bool cmIncludeCommand::Invoke(std::vector<std::string>& args)
+bool cmIncludeCommand::InitialPass(std::vector<std::string>& args)
 {
   if (args.size()< 1)
     {

@@ -60,7 +60,7 @@ cmCablePackageCommand::~cmCablePackageCommand()
 }
 
 // cmCablePackageCommand
-bool cmCablePackageCommand::Invoke(std::vector<std::string>& args)
+bool cmCablePackageCommand::InitialPass(std::vector<std::string>& args)
 {
   if(args.size() != 2)
     {

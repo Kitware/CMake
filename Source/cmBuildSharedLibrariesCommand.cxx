@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmBuildSharedLibrariesCommand.h"
 
 // cmBuildSharedLibrariesCommand
-bool cmBuildSharedLibrariesCommand::Invoke(std::vector<std::string>& args)
+bool cmBuildSharedLibrariesCommand::InitialPass(std::vector<std::string>& args)
 {
   // Now check and see if the value has been stored in the cache
   // already, if so use that value and don't look for the program

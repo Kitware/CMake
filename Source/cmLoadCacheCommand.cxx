@@ -18,7 +18,7 @@
 #include <iostream.h>
 
 // cmLoadcacheCommand
-bool cmLoadCacheCommand::Invoke(std::vector<std::string>& args)
+bool cmLoadCacheCommand::InitialPass(std::vector<std::string>& args)
 {
   if (args.size()< 1)
     {

@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmAbstractFilesCommand.h"
 
 // cmAbstractFilesCommand
-bool cmAbstractFilesCommand::Invoke(std::vector<std::string>& args)
+bool cmAbstractFilesCommand::InitialPass(std::vector<std::string>& args)
 {
   if(args.size() < 1 )
     {

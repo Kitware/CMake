@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmProjectCommand.h"
 
 // cmProjectCommand
-bool cmProjectCommand::Invoke(std::vector<std::string>& args)
+bool cmProjectCommand::InitialPass(std::vector<std::string>& args)
 {
   if(args.size() < 1 || args.size() > 1)
     {

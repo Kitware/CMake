@@ -275,10 +275,10 @@ bool cmMakefile::ReadListFile(const char* filename, const char* external)
         if(usedCommand->GetEnabled())
           {
           // if not running in inherit mode or
-          // if the command is inherited then Invoke it.
+          // if the command is inherited then InitialPass it.
           if(!inheriting || usedCommand->IsInherited())
             {
-            if(!usedCommand->Invoke(arguments))
+            if(!usedCommand->InitialPass(arguments))
               {
               cmSystemTools::Error(usedCommand->GetName(),
                                    ": Error : \n",

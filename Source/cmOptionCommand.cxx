@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmOptionCommand.h"
 
 // cmOptionCommand
-bool cmOptionCommand::Invoke(std::vector<std::string>& args)
+bool cmOptionCommand::InitialPass(std::vector<std::string>& args)
 {
   if(args.size() < 2)
     {

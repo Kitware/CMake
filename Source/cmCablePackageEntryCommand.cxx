@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmCacheManager.h"
 
 // cmCablePackageEntryCommand
-bool cmCablePackageEntryCommand::Invoke(std::vector<std::string>& args)
+bool cmCablePackageEntryCommand::InitialPass(std::vector<std::string>& args)
 {
   if(args.size() < 1)
     {
