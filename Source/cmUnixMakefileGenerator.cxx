@@ -177,34 +177,33 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
 {
   // collect all the flags needed for linking libraries
   std::string linkLibs;        
-  std::vector<std::string>::iterator j;
   std::vector<std::string>& libdirs = m_Makefile->GetLinkDirectories();
-  for(j = libdirs.begin(); j != libdirs.end(); ++j)
+  for(std::vector<std::string>::iterator libDir = libdirs.begin();
+      libDir != libdirs.end(); ++libDir)
     { 
-    std::string::size_type pos = (*j).find("-L");
+    std::string::size_type pos = libDir->find("-L");
     if((pos == std::string::npos || pos > 0)
-       && (*j).find("${") == std::string::npos)
+       && libDir->find("${") == std::string::npos)
       {
       linkLibs += "-L";
       }
-    linkLibs += cmSystemTools::EscapeSpaces(j->c_str());
+    linkLibs += cmSystemTools::EscapeSpaces(libDir->c_str());
     linkLibs += " ";
     }
   std::string librariesLinked;
   const cmTarget::LinkLibraries& libs = tgt.GetLinkLibraries();
-  cmTarget::LinkLibraries::const_iterator j2;
-  for(j2 = libs.begin(); j2 != libs.end(); ++j2)
+  for(cmTarget::LinkLibraries::const_iterator lib = libs.begin();
+      lib != libs.end(); ++lib)
     {
     // Don't link the library against itself!
-    if(targetLibrary && (j2->first == targetLibrary)) continue;
+    if(targetLibrary && (lib->first == targetLibrary)) continue;
     // don't look at debug libraries
-    if (j2->second == cmTarget::DEBUG) continue;
-    std::cerr << j2->first.c_str() << "\n";
+    if (lib->second == cmTarget::DEBUG) continue;
     
-    if(j2->first.find('/') != std::string::npos)
+    if(lib->first.find('/') != std::string::npos)
       {
       std::string dir, file;
-      cmSystemTools::SplitProgramPath(j2->first.c_str(),
+      cmSystemTools::SplitProgramPath(lib->first.c_str(),
                                       dir, file);
       linkLibs += "-L";
       linkLibs += cmSystemTools::EscapeSpaces(dir.c_str());
@@ -215,13 +214,13 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
       }
     else
       {
-      std::string::size_type pos = j2->first.find("-l");
+      std::string::size_type pos = lib->first.find("-l");
       if((pos == std::string::npos || pos > 0)
-         && j2->first.find("${") == std::string::npos)
+         && lib->first.find("${") == std::string::npos)
         {
         librariesLinked += "-l";
         }
-      librariesLinked += j2->first;
+      librariesLinked += lib->first;
       librariesLinked += " ";
       }
     }
