@@ -309,6 +309,14 @@ bool cmSystemTools::RunSingleCommand(
   std::vector<std::string> args;
   std::string arg;
 
+  bool win_path = false;
+
+  if ( command[0] != '/' && command[1] == ':' && command[2] == '\\' ||
+       command[0] == '\"' && command[1] != '/' && command[2] == ':' && command[3] == '\\' || 
+       command[0] == '\\' && command[1] == '\\')
+    {
+    win_path = true;
+    }
   // Split the command into an argv array.
   for(const char* c = command; *c;)
     {
@@ -338,7 +346,7 @@ bool cmSystemTools::RunSingleCommand(
       // Parse an unquoted argument.
       while(*c && *c != ' ' && *c != '\t')
         {
-        if(*c == '\\')
+        if(*c == '\\' && !win_path)
           {
           ++c;
           if(*c)
@@ -374,6 +382,7 @@ bool cmSystemTools::RunSingleCommand(
     {
     *output = "";
     }
+
   cmsysProcess* cp = cmsysProcess_New();
   cmsysProcess_SetCommand(cp, &*argv.begin());
   cmsysProcess_SetWorkingDirectory(cp, dir);
