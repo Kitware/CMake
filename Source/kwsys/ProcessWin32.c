@@ -102,6 +102,7 @@ static kwsysProcessTime kwsysProcessTimeAdd(kwsysProcessTime in1, kwsysProcessTi
 static kwsysProcessTime kwsysProcessTimeSubtract(kwsysProcessTime in1, kwsysProcessTime in2);
 static void kwsysProcessSetExitException(kwsysProcess* cp, int code);
 static void kwsysProcessKillTree(int pid);
+static void kwsysProcessDisablePipeThreads(kwsysProcess* cp);
 extern kwsysEXPORT int kwsysEncodedWriteArrayProcessFwd9x(const char* fname);
 
 /*--------------------------------------------------------------------------*/
@@ -164,6 +165,12 @@ struct kwsysProcess_s
 
   /* The working directory for the child process.  */
   char* WorkingDirectory;
+
+  /* Whether to create the child as a detached process.  */
+  int OptionDetach;
+
+  /* Whether the child was created as a detached process.  */
+  int Detached;
 
   /* Whether to hide the child process's window.  */
   int HideWindow;
@@ -460,7 +467,14 @@ void kwsysProcess_Delete(kwsysProcess* cp)
   /* If the process is executing, wait for it to finish.  */
   if(cp->State == kwsysProcess_State_Executing)
     {
-    kwsysProcess_WaitForExit(cp, 0);
+    if(cp->Detached)
+      {
+      kwsysProcess_Disown(cp);
+      }
+    else
+      {
+      kwsysProcess_WaitForExit(cp, 0);
+      }
     }
 
   /* We are deleting the kwsysProcess instance.  */
@@ -869,6 +883,7 @@ int kwsysProcess_GetOption(kwsysProcess* cp, int optionId)
 
   switch(optionId)
     {
+    case kwsysProcess_Option_Detach: return cp->OptionDetach;
     case kwsysProcess_Option_HideWindow: return cp->HideWindow;
     default: return 0;
     }
@@ -884,6 +899,7 @@ void kwsysProcess_SetOption(kwsysProcess* cp, int optionId, int value)
 
   switch(optionId)
     {
+    case kwsysProcess_Option_Detach: cp->OptionDetach = value; break;
     case kwsysProcess_Option_HideWindow: cp->HideWindow = value; break;
     default: break;
     }
@@ -1134,13 +1150,35 @@ void kwsysProcess_Execute(kwsysProcess* cp)
 
   /* The process has now started.  */
   cp->State = kwsysProcess_State_Executing;
+  cp->Detached = cp->OptionDetach;
 }
 
 /*--------------------------------------------------------------------------*/
 void kwsysProcess_Disown(kwsysProcess* cp)
 {
-  /* TODO: Implement windows version.  */
-  (void)cp;
+  int i;
+
+  /* Make sure we are executing a detached process.  */
+  if(!cp || !cp->Detached || cp->State != kwsysProcess_State_Executing ||
+     cp->TimeoutExpired || cp->Killed || cp->Terminated)
+    {
+    return;
+    }
+
+  /* Disable the reading threads.  */
+  kwsysProcessDisablePipeThreads(cp);
+
+  /* Wait for all pipe threads to reset.  */
+  for(i=0; i < KWSYSPE_PIPE_COUNT; ++i)
+    {
+    WaitForSingleObject(cp->Pipe[i].Reset, INFINITE);
+    }
+
+  /* We will not wait for exit, so cleanup now.  */
+  kwsysProcessCleanup(cp, 0);
+
+  /* The process has been disowned.  */
+  cp->State = kwsysProcess_State_Disowned;
 }
 
 /*--------------------------------------------------------------------------*/
@@ -1373,31 +1411,8 @@ void kwsysProcess_Kill(kwsysProcess* cp)
     return;
     }
 
-  /* If we are killing a process that just reported data, release
-     the pipe's thread.  */
-  if(cp->CurrentIndex < KWSYSPE_PIPE_COUNT)
-    {
-    ReleaseSemaphore(cp->Pipe[cp->CurrentIndex].Empty, 1, 0);
-    cp->CurrentIndex = KWSYSPE_PIPE_COUNT;
-    }
-
-  /* Wake up all the pipe threads with dummy data.  */
-  for(i=0; i < KWSYSPE_PIPE_COUNT; ++i)
-    {
-    DWORD dummy;
-    WriteFile(cp->Pipe[i].Write, "", 1, &dummy, 0);
-    }
-
-  /* Tell pipe threads to reset until we run another process.  */
-  while(cp->PipesLeft > 0)
-    {
-    WaitForSingleObject(cp->Full, INFINITE);
-    cp->CurrentIndex = cp->SharedIndex;
-    ReleaseSemaphore(cp->SharedIndexMutex, 1, 0);
-    cp->Pipe[cp->CurrentIndex].Closed = 1;
-    ReleaseSemaphore(cp->Pipe[cp->CurrentIndex].Empty, 1, 0);
-    --cp->PipesLeft;
-    }
+  /* Disable the reading threads.  */
+  kwsysProcessDisablePipeThreads(cp);
 
   /* Kill the children.  */
   cp->Killed = 1;
@@ -2540,5 +2555,36 @@ static void kwsysProcessKillTree(int pid)
         }
       } while(kwsysProcess_List_NextProcess(plist));
     kwsysProcess_List_Delete(plist);
+    }
+}
+
+/*--------------------------------------------------------------------------*/
+static void kwsysProcessDisablePipeThreads(kwsysProcess* cp)
+{
+  int i;
+
+  /* If data were just reported data, release the pipe's thread.  */
+  if(cp->CurrentIndex < KWSYSPE_PIPE_COUNT)
+    {
+    ReleaseSemaphore(cp->Pipe[cp->CurrentIndex].Empty, 1, 0);
+    cp->CurrentIndex = KWSYSPE_PIPE_COUNT;
+    }
+
+  /* Wake up all the pipe threads with dummy data.  */
+  for(i=0; i < KWSYSPE_PIPE_COUNT; ++i)
+    {
+    DWORD dummy;
+    WriteFile(cp->Pipe[i].Write, "", 1, &dummy, 0);
+    }
+
+  /* Tell pipe threads to reset until we run another process.  */
+  while(cp->PipesLeft > 0)
+    {
+    WaitForSingleObject(cp->Full, INFINITE);
+    cp->CurrentIndex = cp->SharedIndex;
+    ReleaseSemaphore(cp->SharedIndexMutex, 1, 0);
+    cp->Pipe[cp->CurrentIndex].Closed = 1;
+    ReleaseSemaphore(cp->Pipe[cp->CurrentIndex].Empty, 1, 0);
+    --cp->PipesLeft;
     }
 }
