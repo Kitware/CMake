@@ -1,11 +1,13 @@
-#include "cmCursesMainForm.h"
 #include "../cmCacheManager.h"
 #include "../cmSystemTools.h"
 
-#include <curses.h>
-#include <form.h>
 #include <signal.h>
 #include <sys/ioctl.h>
+
+#include "cmCursesMainForm.h"
+
+#include <curses.h>
+#include <form.h>
 
 static cmCursesMainForm* myform=0;
 
