@@ -97,7 +97,7 @@ int anindex = 0;
 
 bool cmWrapTclCommand::CreateInitFile(std::string& res) 
 {
-  int i;
+  unsigned int i;
   
   /* we have to make sure that the name is the correct case */
   std::string kitName = m_Makefile->GetLibraryName();
@@ -138,7 +138,7 @@ bool cmWrapTclCommand::CreateInitFile(std::string& res)
 bool cmWrapTclCommand::WriteInit(const char *kitName, std::string& outFileName,
                                  std::vector<std::string>& classes)
 {
-  int i;
+  unsigned int i;
   FILE *fout = fopen(outFileName.c_str(),"w");
   if (!fout)
     {
