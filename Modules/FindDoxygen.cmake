@@ -4,20 +4,16 @@
 
 FIND_PROGRAM(DOXYGEN
   doxygen
+  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\doxygen_is1;Inno Setup: App Path]/bin"
 )
 
 FIND_PROGRAM(DOT
   dot
   "C:/Program Files/ATT/Graphviz/bin"
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\ATT\\Graphviz;InstallPath]/bin
 )
-# HKEY_CURRENT_USER\Software\AT&T\Graphviz
-
-# Since most of the time dot is called by Doxygen, the path to dot is 
-# useful too
-GET_FILENAME_COMPONENT(DOT_PATH ${DOT} PATH CACHE)
 
 MARK_AS_ADVANCED(
   DOT
-  DOT_PATH
   DOXYGEN
 )
