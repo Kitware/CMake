@@ -319,7 +319,50 @@ std::string cmLocalUnixMakefileGenerator::GetOutputExtension(const char*)
 }
 #endif
 
-
+std::string cmLocalUnixMakefileGenerator::GetFullTargetName(const char* n,
+                                                            const cmTarget& t)
+{
+  const char* targetPrefix = t.GetProperty("PREFIX");
+  const char* targetSuffix = t.GetProperty("SUFFIX");
+  const char* prefixVar = 0;
+  const char* suffixVar = 0;
+  switch(t.GetType())
+    {
+    case cmTarget::STATIC_LIBRARY:
+      prefixVar = "CMAKE_STATIC_LIBRARY_PREFIX";
+      suffixVar = "CMAKE_STATIC_LIBRARY_SUFFIX";
+      break;
+    case cmTarget::SHARED_LIBRARY:
+      prefixVar = "CMAKE_SHARED_LIBRARY_PREFIX";
+      suffixVar = "CMAKE_SHARED_LIBRARY_SUFFIX";
+      break;
+    case cmTarget::MODULE_LIBRARY:
+      prefixVar = "CMAKE_SHARED_MODULE_PREFIX";
+      suffixVar = "CMAKE_SHARED_MODULE_SUFFIX";
+      break;
+    case cmTarget::EXECUTABLE:
+    case cmTarget::WIN32_EXECUTABLE:
+      targetSuffix = cmSystemTools::GetExecutableExtension();
+    case cmTarget::UTILITY:
+    case cmTarget::INSTALL_FILES:
+    case cmTarget::INSTALL_PROGRAMS:
+      break;
+    }
+  // if there is no prefix on the target use the cmake definition
+  if(!targetPrefix && prefixVar)
+    {
+    targetPrefix = this->GetSafeDefinition(prefixVar);
+    }
+  // if there is no suffix on the target use the cmake definition
+  if(!targetSuffix && suffixVar)
+    {
+    targetSuffix = this->GetSafeDefinition(suffixVar);
+    }
+  std::string name = targetPrefix?targetPrefix:"";
+  name += n;
+  name += targetSuffix?targetSuffix:"";
+  return name;
+}
 
 // Output the rules for any targets
 void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
@@ -333,47 +376,12 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
     {
     if (l->second.IsInAll())
       {
-      const char* targetPrefix = l->second.GetProperty("PREFIX");
-      const char* targetSuffix = l->second.GetProperty("SUFFIX");
-      std::string path = m_LibraryOutputPath;
-      const char* prefixVar = 0;
-      const char* suffixVar = 0;
-      switch(l->second.GetType())
+      if((l->second.GetType() == cmTarget::STATIC_LIBRARY) ||
+         (l->second.GetType() == cmTarget::SHARED_LIBRARY) ||
+         (l->second.GetType() == cmTarget::MODULE_LIBRARY))
         {
-        case cmTarget::STATIC_LIBRARY:
-          prefixVar = "CMAKE_STATIC_LIBRARY_PREFIX";
-          suffixVar = "CMAKE_STATIC_LIBRARY_SUFFIX";
-          break;
-        case cmTarget::SHARED_LIBRARY:
-          prefixVar = "CMAKE_SHARED_LIBRARY_PREFIX";
-          suffixVar = "CMAKE_SHARED_LIBRARY_SUFFIX";
-          break;
-        case cmTarget::MODULE_LIBRARY:
-          prefixVar = "CMAKE_SHARED_MODULE_PREFIX";
-          suffixVar = "CMAKE_SHARED_MODULE_SUFFIX";
-          break;
-        case cmTarget::EXECUTABLE:
-        case cmTarget::WIN32_EXECUTABLE:
-        case cmTarget::UTILITY:
-        case cmTarget::INSTALL_FILES:
-        case cmTarget::INSTALL_PROGRAMS:
-          break;
-        }
-      // if it is a library this will be set
-      if(prefixVar)
-        {
-        // if there is no prefix on the target use the cmake definition
-        if(!targetPrefix)
-          {
-          targetPrefix = this->GetSafeDefinition(prefixVar);
-          }
-        // if there is no suffix on the target use the cmake definition
-        if(!targetSuffix)
-          {
-          targetSuffix = this->GetSafeDefinition(suffixVar);
-          }
-        path +=
-          targetPrefix + l->first + targetSuffix;
+        std::string path = m_LibraryOutputPath;
+        path += this->GetFullTargetName(l->first.c_str(), l->second);
         fout << " \\\n" 
              << cmSystemTools::ConvertToOutputPath(path.c_str());
         }
@@ -387,8 +395,8 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
          l->second.GetType() == cmTarget::WIN32_EXECUTABLE) &&
         l->second.IsInAll())
       {
-      std::string path = m_ExecutableOutputPath + l->first +
-        cmSystemTools::GetExecutableExtension();
+      std::string path = m_ExecutableOutputPath;
+      path += this->GetFullTargetName(l->first.c_str(), l->second);
       fout << " \\\n" << cmSystemTools::ConvertToOutputPath(path.c_str());
       }
     }
@@ -2052,45 +2060,34 @@ void cmLocalUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
     if (l->second.GetInstallPath() != "")
       {
       // first make the directories for each target 
-      fout << "\t@if [ ! -d $(DESTDIR)" << prefix << l->second.GetInstallPath() << 
+      fout << "\t@if [ ! -d \"$(DESTDIR)\"" << prefix << l->second.GetInstallPath() << 
         " ] ; then \\\n";
-      fout << "\t   echo \"Making directory $(DESTDIR)" << prefix 
+      fout << "\t   echo \"Making directory \"$(DESTDIR)\"" << prefix 
            << l->second.GetInstallPath() << " \"; \\\n";
-      fout << "\t   mkdir -p $(DESTDIR)" << prefix << l->second.GetInstallPath() 
+      fout << "\t   mkdir -p \"$(DESTDIR)\"" << prefix << l->second.GetInstallPath() 
            << "; \\\n";
-      fout << "\t   chmod 755 $(DESTDIR)" <<  prefix << l->second.GetInstallPath() 
+      fout << "\t   chmod 755 \"$(DESTDIR)\"" <<  prefix << l->second.GetInstallPath() 
            << "; \\\n";
       fout << "\t else true; \\\n";
       fout << "\t fi\n";
+      std::string fname;
       // now install the target
       switch (l->second.GetType())
         {
         case cmTarget::STATIC_LIBRARY:
-          fout << "\t$(INSTALL_DATA) " << m_LibraryOutputPath << "lib" 
-               << l->first;
-          fout << ".a";
-          fout << " $(DESTDIR)" << prefix << l->second.GetInstallPath() << "\n";
-          break;
         case cmTarget::SHARED_LIBRARY:
-          fout << "\t$(INSTALL_DATA) " << m_LibraryOutputPath
-               << this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_PREFIX")
-               << l->first;
-          fout << this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_SUFFIX");
-          fout << " $(DESTDIR)" << prefix << l->second.GetInstallPath() << "\n";
-          break;
         case cmTarget::MODULE_LIBRARY:
-          fout << "\t$(INSTALL_DATA) " << m_LibraryOutputPath 
-               << this->GetSafeDefinition("CMAKE_SHARED_MODULE_PREFIX")
-               << l->first;
-          fout <<  this->GetSafeDefinition("CMAKE_SHARED_MODULE_SUFFIX");
-          fout << " $(DESTDIR)" << prefix << l->second.GetInstallPath() << "\n";
+          fname = m_LibraryOutputPath;
+          fname += this->GetFullTargetName(l->first.c_str(), l->second);
+          fout << "\t$(INSTALL_DATA) " << cmSystemTools::ConvertToOutputPath(fname.c_str())
+               << " \"$(DESTDIR)" << prefix << l->second.GetInstallPath() << "\"\n";
           break;
         case cmTarget::WIN32_EXECUTABLE:
         case cmTarget::EXECUTABLE:
-          fout << "\t$(INSTALL_PROGRAM) " << m_ExecutableOutputPath 
-               << l->first
-               << cmSystemTools::GetExecutableExtension()
-               << " $(DESTDIR)" << prefix << l->second.GetInstallPath() << "\n";
+          fname = m_ExecutableOutputPath;
+          fname += this->GetFullTargetName(l->first.c_str(), l->second);
+          fout << "\t$(INSTALL_PROGRAM) " << cmSystemTools::ConvertToOutputPath(fname.c_str())
+               << " \"$(DESTDIR)" << prefix << l->second.GetInstallPath() << "\"\n";
           break;
         case cmTarget::INSTALL_FILES:
           {
@@ -2114,7 +2111,7 @@ void cmLocalUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
             fout << "\t@echo \"Installing " << f.c_str() << " \"\n"; 
             // avoid using install-sh to install install-sh
             // does not work on windows.... 
-           if(*i == "install-sh")
+            if(*i == "install-sh")
               {
               fout << "\t   @cp ";
               }
@@ -2122,8 +2119,9 @@ void cmLocalUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
               {
               fout << "\t   @$(INSTALL_DATA) ";
               }
-            fout << *i
-                 << " $(DESTDIR)" << prefix << l->second.GetInstallPath() << "\n";
+            
+            fout << cmSystemTools::ConvertToOutputPath(i->c_str())
+                 << " \"$(DESTDIR)" << prefix << l->second.GetInstallPath() << "\"\n";
             }
           }
           break;
@@ -2149,7 +2147,7 @@ void cmLocalUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
             fout << "\t@echo \"Installing " << f.c_str() << " \"\n"; 
             // avoid using install-sh to install install-sh
             // does not work on windows.... 
-           if(*i == "install-sh")
+            if(*i == "install-sh")
               {
               fout << "\t   @cp ";
               }
@@ -2157,8 +2155,8 @@ void cmLocalUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
               {
               fout << "\t   @$(INSTALL_PROGRAM) ";
               }
-            fout << *i
-                 << " $(DESTDIR)" << prefix << l->second.GetInstallPath() << "\n";
+            fout << cmSystemTools::ConvertToOutputPath(i->c_str())
+                 << " \"$(DESTDIR)" << prefix << l->second.GetInstallPath() << "\"\n";
             }
           }
           break;

@@ -196,6 +196,9 @@ protected:
 
   ///! for existing files convert to output path and short path if spaces
   std::string ConvertToOutputForExisting(const char*);
+  
+  /** Get the full name of the target's file, without path.  */
+  std::string GetFullTargetName(const char* n, const cmTarget& t);
 protected:
   int m_MakefileVariableSize;
   std::map<cmStdString, cmStdString> m_MakeVariableMap;
