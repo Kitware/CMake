@@ -75,10 +75,8 @@ void cmDSPMakefile::OutputDSPFile()
     }
   m_DebugLibraryOptions += "/STACK:10000000 ";
   // add any extra define flags 
-  m_DebugLibraryOptions += m_Makefile->GetDefineFlags();
   m_ReleaseLibraryOptions = m_DebugLibraryOptions;
   cmSystemTools::ReplaceString(m_ReleaseLibraryOptions, "Debug", "Release");
-  
   // If the output directory is not the m_cmHomeDirectory
   // then create it.
   if(strcmp(m_Makefile->GetOutputDirectory(),
@@ -265,6 +263,7 @@ void cmDSPMakefile::WriteDSPHeader(std::ostream& fout)
     Die(message.c_str());
     }
   char buffer[2048];
+
   while(fin)
     {
       fin.getline(buffer, 2048);
@@ -278,7 +277,8 @@ void cmDSPMakefile::WriteDSPHeader(std::ostream& fout)
       cmSystemTools::ReplaceString(line, "OUTPUT_LIBNAME", 
                                     m_Makefile->GetLibraryName());
       cmSystemTools::ReplaceString(line, 
-                                    "EXTRA_DEFINES", "");
+                                    "EXTRA_DEFINES", 
+				   m_Makefile->GetDefineFlags());
       fout << line.c_str() << std::endl;
     }
 }
