@@ -23,7 +23,7 @@ open(INFILE, $ARGV[1]);
 while (chomp ($line = <INFILE>))
 {
     if (($line !~ /^\#/) &&
-        ($line =~ s/.*kwsys${name}_([A-Za-z0-9_]*).*/\1/) && 
+        ($line =~ s/.*kwsys${name}_([A-Za-z0-9_]*).*/\1/) &&
         ($i{$line}++ < 1))
     {
         push(@lines, "$line");
@@ -34,12 +34,12 @@ while (chomp ($line = <INFILE>))
     }
 }
 close(INFILE);
-    
+
 $width = $max + 13;
-print sprintf("#define %-${width}s kwsys(${name})\n", "kwsys${name}");
+print sprintf("#define %-${width}s kwsys_ns(${name})\n", "kwsys${name}");
 foreach $l (@lines)
 {
-    print sprintf("#define %-${width}s kwsys(${name}_$l)\n",
+    print sprintf("#define %-${width}s kwsys_ns(${name}_$l)\n",
                   "kwsys${name}_$l");
 }
 print "\n";
