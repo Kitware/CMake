@@ -310,7 +310,7 @@ void cmCTest::Initialize()
         }
 
       }
-    if ( tag.size() == 0 )
+    if ( tag.size() == 0 || m_Tests[cmCTest::START_TEST] || m_Tests[ALL_TEST])
       {
 #ifdef HAVE_CURL
       //std::cout << "TestModel: " << this->GetTestModelString() << std::endl;
@@ -345,6 +345,10 @@ bool cmCTest::SetTest(const char* ttype)
   if ( cmSystemTools::LowerCase(ttype) == "all" )
     {
     m_Tests[cmCTest::ALL_TEST] = 1;
+    }
+  else if ( cmSystemTools::LowerCase(ttype) == "start" )
+    {
+    m_Tests[cmCTest::START_TEST] = 1;
     }
   else if ( cmSystemTools::LowerCase(ttype) == "update" )
     {
