@@ -248,9 +248,7 @@ void cmake::AddCMakePaths(const std::vector<std::string>& args)
     }
   // Save the value in the cache
   cmCacheManager::GetInstance()->AddCacheEntry
-    ("CMAKE_COMMAND",
-     cmSystemTools::EscapeSpaces(cMakeSelf.c_str()).c_str(),
-     "Path to CMake executable.",
+    ("CMAKE_COMMAND",cMakeSelf.c_str(), "Path to CMake executable.",
      cmCacheManager::INTERNAL);
 
   // Find ccommand
@@ -265,10 +263,8 @@ void cmake::AddCMakePaths(const std::vector<std::string>& args)
 
   // Save the value in the cache
   cmCacheManager::GetInstance()->AddCacheEntry
-    ("CCOMMAND_COMMAND",
-     cmSystemTools::EscapeSpaces(cCommand.c_str()).c_str(),
-     "Path to CMakeCommand executable.",
-     cmCacheManager::INTERNAL);
+    ("CCOMMAND_COMMAND",cCommand.c_str(),
+     "Path to CMakeCommand executable.", cmCacheManager::INTERNAL);
   
   // do CMAKE_ROOT, look for the environment variable first
   std::string cMakeRoot;
