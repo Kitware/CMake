@@ -331,7 +331,9 @@ IF(BUILD_TESTING)
     ADD_TEST(kwsys ${EXECUTABLE_OUTPUT_PATH}/cmaketest
              ${CMake_SOURCE_DIR}/Source/kwsys
              ${CMake_BINARY_DIR}/Tests/kwsys
-             test1)
+             test1
+             ${CMake_BINARY_DIR}/Tests/kwsys
+             kwsys)
 
     IF (APPLE)
       ADD_TEST(objc++ ${EXECUTABLE_OUTPUT_PATH}/cmaketest
