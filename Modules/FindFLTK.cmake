@@ -32,7 +32,7 @@ H:/usr/local/fltk
 # So the FLTK_LIBRARY does not appear the first time
 IF(FLTK_INCLUDE_PATH)
   IF(USE_FLTK_VERSION_1.0.11)
-    FIND_LIBRARY(FLTK_BASE_LIBRARY  fltk
+    FIND_LIBRARY(FLTK_BASE_LIBRARY  NAMES fltk fltkd
      PATHS /usr/lib /usr/local/lib /usr/local/fltk/lib H:/usr/local/fltk/lib /usr/X11R6/lib
        ${FLTK_INCLUDE_PATH}/lib
     )
@@ -40,21 +40,25 @@ IF(FLTK_INCLUDE_PATH)
 
 
   IF(USE_FLTK_VERSION_1.1)
-    FIND_LIBRARY(FLTK_BASE_LIBRARY  fltk
+    FIND_LIBRARY(FLTK_BASE_LIBRARY  NAMES fltk fltkd
      PATHS /usr/lib /usr/local/lib /usr/local/fltk/lib H:/usr/local/fltk/lib /usr/X11R6/lib
            ${FLTK_INCLUDE_PATH}/lib
     )
-   FIND_LIBRARY(FLTK_GL_LIBRARY NAMES fltkgl fltk_gl
+   FIND_LIBRARY(FLTK_GL_LIBRARY NAMES fltkgl fltkgld fltk_gl
      PATHS /usr/lib /usr/local/lib /usr/local/fltk/lib H:/usr/local/fltk/lib /usr/X11R6/lib
            ${FLTK_INCLUDE_PATH}/lib
     )
-   FIND_LIBRARY(FLTK_FORMS_LIBRARY NAMES fltkforms fltk_forms
+   FIND_LIBRARY(FLTK_FORMS_LIBRARY NAMES fltkforms fltkformsd fltk_forms
+     PATHS /usr/lib /usr/local/lib /usr/local/fltk/lib H:/usr/local/fltk/lib /usr/X11R6/lib
+           ${FLTK_INCLUDE_PATH}/lib
+    )
+   FIND_LIBRARY(FLTK_IMAGES_LIBRARY NAMES fltkimages fltkimagesd fltk_images
      PATHS /usr/lib /usr/local/lib /usr/local/fltk/lib H:/usr/local/fltk/lib /usr/X11R6/lib
            ${FLTK_INCLUDE_PATH}/lib
     )
   ENDIF(USE_FLTK_VERSION_1.1)
 
-  SET( FLTK_LIBRARY ${FLTK_BASE_LIBRARY} ${FLTK_GL_LIBRARY} ${FLTK_FORMS_LIBRARY} )
+  SET( FLTK_LIBRARY ${FLTK_BASE_LIBRARY} ${FLTK_GL_LIBRARY} ${FLTK_FORMS_LIBRARY} ${FLTK_IMAGES_LIBRARY} )
 
 ENDIF(FLTK_INCLUDE_PATH)
 
