@@ -74,6 +74,8 @@ public:
     return
       "UNIX_LIBRARIES(library -lm ...)";
     }
+  
+  cmTypeMacro(cmUnixLibrariesCommand, cmCommand);
 };
 
 

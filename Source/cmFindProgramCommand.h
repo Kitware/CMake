@@ -71,6 +71,8 @@ public:
     return
       "FIND_PROGRAM(NAME executable1 executable2 ...)";
     }
+  
+  cmTypeMacro(cmFindProgramCommand, cmCommand);
 };
 
 

@@ -64,6 +64,8 @@ public:
     return
       "LIBRARY(libraryname)";
     }
+  
+  cmTypeMacro(cmLibraryCommand, cmCommand);
 };
 
 

@@ -75,6 +75,8 @@ public:
       "UNIX_DEFINES(-DFOO -DBAR)\n"
       "Add -D flags to the command line for Unix only.";
     }
+  
+  cmTypeMacro(cmUnixDefinesCommand, cmCommand);
 };
 
 

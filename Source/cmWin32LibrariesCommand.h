@@ -74,6 +74,8 @@ public:
     return
       "WIN32_LIBRARIES(library -lm ...)";
     }
+  
+  cmTypeMacro(cmWin32LibrariesCommand, cmCommand);
 };
 
 

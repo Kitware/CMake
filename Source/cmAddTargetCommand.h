@@ -65,6 +65,8 @@ public:
     return
       "ADD_TARGET(Name \"command to run\")";
     }
+  
+  cmTypeMacro(cmAddTargetCommand, cmCommand);
 };
 
 #endif

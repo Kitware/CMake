@@ -74,6 +74,8 @@ public:
     return
       "PROJECT(projectname) Sets the name of the Microsoft workspace .dsw file. Does nothing on UNIX currently\n";
     }
+  
+  cmTypeMacro(cmProjectCommand, cmCommand);
 };
 
 

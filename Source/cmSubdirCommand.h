@@ -67,6 +67,8 @@ public:
       "This will cause any CMakeLists.txt files in the sub directories\n"
       "to be processed by CMake.";
     }
+  
+  cmTypeMacro(cmSubdirCommand, cmCommand);
 };
 
 

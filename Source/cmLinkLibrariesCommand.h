@@ -76,6 +76,8 @@ public:
       "down to all other commands. The library name should be\n"
       "the same as the name used in the LIBRARY(library) command.";
     }
+  
+  cmTypeMacro(cmLinkLibrariesCommand, cmCommand);
 };
 
 

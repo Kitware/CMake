@@ -69,6 +69,8 @@ public:
     return
       "INCLUDE_DIRECTORIES(dir1 dir2 ...)";
     }
+  
+  cmTypeMacro(cmIncludeDirectoryCommand, cmCommand);
 };
 
 

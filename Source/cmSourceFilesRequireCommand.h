@@ -67,6 +67,8 @@ public:
     return
       "SOURCE_FILES_REQUIRE(var1 var2 ... SOURCES_BEGIN file1 file2 ...)";
     }
+  
+  cmTypeMacro(cmSourceFilesRequireCommand, cmCommand);
 };
 
 

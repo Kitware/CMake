@@ -68,6 +68,8 @@ public:
     return
       "SOURCE_FILES(file1 file2 ...)";
     }
+  
+  cmTypeMacro(cmSourceFilesCommand, cmCommand);
 };
 
 

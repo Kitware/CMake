@@ -54,6 +54,8 @@ public:
       return
         "ABSTRACT_FILES(file1 file2 ..)";
     }
+  
+  cmTypeMacro(cmAbstractFilesCommand, cmCommand);
 };
 
 

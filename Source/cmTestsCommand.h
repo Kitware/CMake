@@ -67,6 +67,8 @@ public:
     return
       "TESTS(file1 file2 ...)";
     }
+  
+  cmTypeMacro(cmTestsCommand, cmCommand);
 };
 
 

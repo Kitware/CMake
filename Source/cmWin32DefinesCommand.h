@@ -75,6 +75,8 @@ public:
       "WIN32_DEFINES(-DFOO -DBAR ...)\n"
       "Add -D define flags to command line for Win32 environments.";
     }
+  
+  cmTypeMacro(cmWin32DefinesCommand, cmCommand);
 };
 
 

@@ -70,6 +70,8 @@ public:
     return
       "FIND_INCLUDE(DEFINE try1 try2 ...)";
     }
+  
+  cmTypeMacro(cmFindIncludeCommand, cmCommand);
 };
 
 

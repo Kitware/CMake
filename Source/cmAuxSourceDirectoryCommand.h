@@ -67,6 +67,8 @@ public:
     return
       "AUX_SOURCE_DIRECTORY(dir)";
     }
+  
+  cmTypeMacro(cmAuxSourceDirectoryCommand, cmCommand);
 };
 
 

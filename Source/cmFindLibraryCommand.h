@@ -71,6 +71,8 @@ public:
     return
       "FIND_LIBRARY(DEFINE libraryName path1 path2 path3...)";
     }
+  
+  cmTypeMacro(cmFindLibraryCommand, cmCommand);
 };
 
 

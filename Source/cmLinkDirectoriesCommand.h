@@ -74,6 +74,8 @@ public:
       "The directories can use built in definitions like \n"
       "CMAKE_BINARY_DIR and CMAKE_SOURCE_DIR.";
     }
+  
+  cmTypeMacro(cmLinkDirectoriesCommand, cmCommand);
 };
 
 

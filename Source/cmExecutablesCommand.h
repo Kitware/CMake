@@ -63,6 +63,8 @@ public:
     return
       "EXECUTABLES(file1 file2 ...)";
     }
+  
+  cmTypeMacro(cmExecutablesCommand, cmCommand);
 };
 
 
