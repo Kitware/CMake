@@ -340,15 +340,238 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
     frameworkBuildPhase->AddAttribute("files", buildFiles);
     frameworkBuildPhase->AddAttribute("runOnlyForDeploymentPostprocessing", 
                                       this->CreateString("0"));
-
     cmXCodeObject* buildPhases = 
       this->CreateObject(cmXCodeObject::OBJECT_LIST);
-    buildPhases->AddObject(sourceBuildPhase);
-    buildPhases->AddObject(headerBuildPhase);
-    buildPhases->AddObject(frameworkBuildPhase);
+    this->CreateCustomCommands(buildPhases, sourceBuildPhase,
+                               headerBuildPhase, frameworkBuildPhase,
+                               cmtarget);
     targets.push_back(this->CreateXCodeTarget(l->second, buildPhases));
     }
+}
+
+void cmGlobalXCodeGenerator::CreateCustomCommands(cmXCodeObject* buildPhases,
+                                                  cmXCodeObject*
+                                                  sourceBuildPhase,
+                                                  cmXCodeObject*
+                                                  headerBuildPhase,
+                                                  cmXCodeObject*
+                                                  frameworkBuildPhase,
+                                                  cmTarget& cmtarget)
+{
+  std::vector<cmCustomCommand> const & prebuild 
+    = cmtarget.GetPreBuildCommands();
+  std::vector<cmCustomCommand> const & prelink 
+    = cmtarget.GetPreLinkCommands();
+  std::vector<cmCustomCommand> const & postbuild 
+    = cmtarget.GetPostBuildCommands();
+  cmtarget.TraceVSDependencies(cmtarget.GetName(), m_CurrentMakefile);
+  std::vector<cmSourceFile*> &classes = cmtarget.GetSourceFiles();
+  // add all the sources
+  std::vector<cmCustomCommand> commands;
+  for(std::vector<cmSourceFile*>::iterator i = classes.begin(); 
+      i != classes.end(); ++i)
+    {
+    if((*i)->GetCustomCommand())
+      {
+      commands.push_back(*(*i)->GetCustomCommand());
+      }
+    }
   
+  // create prebuild phase
+  cmXCodeObject* cmakeRulesBuildPhase = 0;
+  if(commands.size())
+    {
+    cmakeRulesBuildPhase = 
+      this->CreateObject(cmXCodeObject::PBXShellScriptBuildPhase);
+    cmakeRulesBuildPhase->AddAttribute("buildActionMask",
+                                this->CreateString("2147483647"));
+    cmXCodeObject* buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
+    cmakeRulesBuildPhase->AddAttribute("files", buildFiles);
+    cmakeRulesBuildPhase->AddAttribute("name", 
+                                this->CreateString("CMake Rules"));
+    cmakeRulesBuildPhase->AddAttribute("runOnlyForDeploymentPostprocessing", 
+                                this->CreateString("0"));
+    cmakeRulesBuildPhase->AddAttribute("shellPath",
+                                       this->CreateString("/bin/sh"));
+    this->AddCommandsToBuildPhase(cmakeRulesBuildPhase, cmtarget, commands,
+      "cmakeRulesCommands");
+    }
+  // create prebuild phase
+  cmXCodeObject* preBuildPhase = 0;
+  if(prebuild.size())
+    {
+    preBuildPhase = 
+      this->CreateObject(cmXCodeObject::PBXShellScriptBuildPhase);
+    preBuildPhase->AddAttribute("buildActionMask",
+                                this->CreateString("2147483647"));
+    cmXCodeObject* buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
+    preBuildPhase->AddAttribute("files", buildFiles);
+    preBuildPhase->AddAttribute("name", 
+                                this->CreateString("CMake PreBuild Rules"));
+    preBuildPhase->AddAttribute("runOnlyForDeploymentPostprocessing", 
+                                this->CreateString("0"));
+    preBuildPhase->AddAttribute("shellPath", this->CreateString("/bin/sh"));
+    this->AddCommandsToBuildPhase(preBuildPhase, cmtarget, prebuild,
+      "preBuildCommands");
+    }
+  // create prebuild phase
+  cmXCodeObject* preLinkPhase = 0;
+  if(prelink.size())
+    {
+    preLinkPhase = 
+      this->CreateObject(cmXCodeObject::PBXShellScriptBuildPhase);
+    preLinkPhase->AddAttribute("buildActionMask",
+                               this->CreateString("2147483647"));
+    cmXCodeObject* buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
+    preLinkPhase->AddAttribute("files", buildFiles);
+    preLinkPhase->AddAttribute("name", 
+                               this->CreateString("CMake PreLink Rules"));
+    preLinkPhase->AddAttribute("runOnlyForDeploymentPostprocessing", 
+                               this->CreateString("0"));
+    preLinkPhase->AddAttribute("shellPath", this->CreateString("/bin/sh"));
+    this->AddCommandsToBuildPhase(preLinkPhase, cmtarget, prelink,
+                                  "preLinkCommands");
+    }
+  // create prebuild phase
+  cmXCodeObject* postBuildPhase = 0;
+  if(postbuild.size())
+    {
+    postBuildPhase = 
+      this->CreateObject(cmXCodeObject::PBXShellScriptBuildPhase);
+    postBuildPhase->AddAttribute("buildActionMask",
+                                 this->CreateString("2147483647"));
+    cmXCodeObject* buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
+    postBuildPhase->AddAttribute("files", buildFiles);
+    postBuildPhase->AddAttribute("name", 
+                                 this->CreateString("CMake PostBuild Rules"));
+    postBuildPhase->AddAttribute("runOnlyForDeploymentPostprocessing", 
+                                 this->CreateString("0"));
+    postBuildPhase->AddAttribute("shellPath", this->CreateString("/bin/sh"));
+    this->AddCommandsToBuildPhase(postBuildPhase, cmtarget, postbuild,
+                                  "postBuildCommands");
+    }
+  // the order here is the order they will be built in
+  if(preBuildPhase)
+    {
+    buildPhases->AddObject(preBuildPhase);
+    }
+  if(cmakeRulesBuildPhase)
+    {
+    buildPhases->AddObject(cmakeRulesBuildPhase);
+    }
+  if(sourceBuildPhase)
+    {
+    buildPhases->AddObject(sourceBuildPhase);
+    }
+  if(headerBuildPhase)
+    {
+    buildPhases->AddObject(headerBuildPhase);
+    }
+  if(preLinkPhase)
+    {
+    buildPhases->AddObject(preLinkPhase);
+    }
+  if(frameworkBuildPhase)
+    {
+    buildPhases->AddObject(frameworkBuildPhase);
+    }
+  if(postBuildPhase)
+    {
+    buildPhases->AddObject(postBuildPhase);
+    }
+}
+
+void 
+cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
+                                                cmTarget& target,
+                                                std::vector<cmCustomCommand> 
+                                                const & commands,
+                                                const char* name)
+{
+  std::string makefile = m_CurrentMakefile->GetCurrentOutputDirectory();
+  cmSystemTools::MakeDirectory(makefile.c_str());
+  makefile += "/";
+  makefile += target.GetName();
+  makefile += "_";
+  makefile += name;
+  makefile += ".make";
+  cmGeneratedFileStream makefileStream(makefile.c_str());
+  if(!makefileStream)
+    {
+    return;
+    }
+  makefileStream << "# Generated by CMake, DO NOT EDIT\n";
+  makefileStream << "# Custom rules for " << target.GetName() << "\n";
+  
+  // have all depend on all outputs
+  makefileStream << "all: ";
+  for(std::vector<cmCustomCommand>::const_iterator i = commands.begin();
+      i != commands.end(); ++i)
+    {
+    cmCustomCommand const& cc = *i; 
+    if(cc.GetCommand().size())
+      {
+      if(cc.GetOutput().size())
+        {
+        makefileStream << "\\\n\t" << m_CurrentLocalGenerator
+          ->ConvertToRelativeOutputPath(cc.GetOutput().c_str());
+        }
+      else
+        {
+        makefileStream << "\\\n\t" << target.GetName();
+        }
+      }
+    }
+  makefileStream << "\n\n";
+  
+  for(std::vector<cmCustomCommand>::const_iterator i = commands.begin();
+      i != commands.end(); ++i)
+    {
+    cmCustomCommand const& cc = *i; 
+    if(cc.GetCommand().size())
+      {
+      
+      makefileStream << "\n#" << "Custom command rule: " << 
+        cc.GetComment() << "\n";
+      if(cc.GetOutput().size())
+        {
+        makefileStream << m_CurrentLocalGenerator
+          ->ConvertToRelativeOutputPath(cc.GetOutput().c_str()) << ": ";
+        }
+      else
+        {
+        // if no outputs then use the target name as this must
+        // be a utility target
+        makefileStream << target.GetName() << ": ";
+        }
+      for(std::vector<std::string>::const_iterator d = cc.GetDepends().begin();
+          d != cc.GetDepends().end(); ++d)
+        {
+        if(!this->FindTarget(d->c_str()))
+          {
+          makefileStream << "\\\n" << *d;
+          }
+        else
+          {
+          // if the depend is a target then make 
+          // the target with the source that is a custom command
+          // depend on the that target via a AddUtility call
+          target.AddUtility(d->c_str());
+          }
+        }
+      makefileStream << "\n";
+      makefileStream << "\t" << cc.GetCommand() << " " 
+                     << cc.GetArguments() << "\n";
+      }
+    }
+  
+  std::string dir = cmSystemTools::ConvertToOutputPath(
+    m_CurrentMakefile->GetCurrentOutputDirectory());
+  std::string makecmd = "make -C ";
+  makecmd += dir;
+  makecmd += " -f ";
+  makecmd += makefile;
+  buildphase->AddAttribute("shellScript", this->CreateString(makecmd.c_str()));
 }
 
 
@@ -566,7 +789,7 @@ cmGlobalXCodeGenerator::CreateUtilityTarget(cmTarget& cmtarget)
 
   cmXCodeObject* buildPhases = 
     this->CreateObject(cmXCodeObject::OBJECT_LIST);
-  buildPhases->AddObject(shellBuildPhase);
+  this->CreateCustomCommands(buildPhases, 0, 0, 0, cmtarget);
   target->AddAttribute("buildPhases", buildPhases);
   cmXCodeObject* buildSettings =
     this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);

@@ -19,6 +19,7 @@
 
 #include "cmGlobalGenerator.h"
 #include "cmXCodeObject.h"
+#include "cmCustomCommand.h"
 class cmTarget;
 class cmSourceFile;
 
@@ -66,6 +67,17 @@ public:
   virtual void Generate();
 
 private:
+  void CreateCustomCommands(cmXCodeObject* buildPhases,
+                            cmXCodeObject* sourceBuildPhase,
+                            cmXCodeObject* headerBuildPhase,
+                            cmXCodeObject* frameworkBuildPhase,
+                            cmTarget& cmtarget);
+  
+  void AddCommandsToBuildPhase(cmXCodeObject* buildphase,
+                               cmTarget& target,
+                               std::vector<cmCustomCommand> 
+                               const & commands,
+                               const char* commandFileName);
   cmXCodeObject* FindXCodeTarget(cmTarget*);
   // create cmXCodeObject from these functions so that memory can be managed
   // correctly.  All objects created are stored in m_XCodeObjects.
