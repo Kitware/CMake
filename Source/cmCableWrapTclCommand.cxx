@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmCacheManager.h"
 #include "cmTarget.h"
 #include "cmGeneratedFileStream.h"
-#include <strstream>
+
 
 cmCableWrapTclCommand::cmCableWrapTclCommand():
   m_CableClassSet(NULL)

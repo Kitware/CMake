@@ -64,9 +64,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef CMAKE_NO_ANSI_STREAM_HEADERS
 #include <fstream>
 #include <iostream>
+#include <strstream>
 #else
 #include <fstream.h>
 #include <iostream.h>
+#include <strstream.h>
 #endif
 
 #include <vector>
