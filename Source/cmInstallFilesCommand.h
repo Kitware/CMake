@@ -95,7 +95,8 @@ public:
     {
     return
       "INSTALL_FILES(path extension srclist file file srclist ...)\n"
-      "Create rules to install the listed files into the path. Path is relative to the variable PREFIX. The files can be specified explicitly or by referenceing source lists. All files must either have the extension specified or exist with the extension appended. A typical extension is .h etc...";
+      "INSTALL_FILES(path regexp)\n"
+      "Create rules to install the listed files into the path. Path is relative to the variable CMAKE_INSTALL_PREFIX. There are two forms for this command. In the first the files can be specified explicitly or by referenceing source lists. All files must either have the extension specified or exist with the extension appended. A typical extension is .h etc... In the second form any files in the current directory that match the regular expression will be installed.";
     }
   
   cmTypeMacro(cmInstallFilesCommand, cmCommand);

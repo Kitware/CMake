@@ -204,7 +204,9 @@ public:
 
   ///! return true if the file is a directory.
   static bool FileIsDirectory(const char* name);
-
+  static void Glob(const char *directory, const char *regexp,
+                   std::vector<std::string>& files);
+  
   static std::string GetCurrentWorkingDirectory();
   static std::string GetProgramPath(const char*);
   static void SplitProgramPath(const char* in_name, 

@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // cmExecutableCommand
 bool cmInstallFilesCommand::InitialPass(std::vector<std::string>& args)
 {
-  if(args.size() < 3)
+  if(args.size() < 2)
     {
     this->SetError("called with incorrect number of arguments");
     return false;
@@ -71,7 +71,13 @@ void cmInstallFilesCommand::FinalPass()
   std::string testf;
   std::string ext = m_FinalArgs[0];
 
-  if (tgts.find("INSTALL") != tgts.end())
+  if (tgts.find("INSTALL") == tgts.end())
+    {
+    return;
+    }
+  
+  // two different options
+  if (m_FinalArgs.size() > 1)
     {
     // now put the files into the list
     std::vector<std::string>::iterator s = m_FinalArgs.begin();
@@ -84,24 +90,39 @@ void cmInstallFilesCommand::FinalPass()
       m_Makefile->ExpandVariablesInString(temps);
       // look for a srclist
       if (m_Makefile->GetSources().find(temps) != m_Makefile->GetSources().end())
-	{
-	const std::vector<cmSourceFile> &clsList = 
-	  m_Makefile->GetSources().find(temps)->second;
-	std::vector<cmSourceFile>::const_iterator c = clsList.begin();
-	for (; c != clsList.end(); ++c)
-	  {
-	  testf = c->GetSourceName() + ext;
-	  // add to the result
-	  tgts["INSTALL"].GetSourceLists().push_back(testf);
-	  }
-	}
+        {
+        const std::vector<cmSourceFile> &clsList = 
+          m_Makefile->GetSources().find(temps)->second;
+        std::vector<cmSourceFile>::const_iterator c = clsList.begin();
+        for (; c != clsList.end(); ++c)
+          {
+          testf = c->GetSourceName() + ext;
+          // add to the result
+          tgts["INSTALL"].GetSourceLists().push_back(testf);
+          }
+        }
       // if one wasn't found then assume it is a single class
       else
-	{
-	testf = temps + ext;
-	// add to the result
-	tgts["INSTALL"].GetSourceLists().push_back(testf);
-	}
+        {
+        testf = temps + ext;
+        // add to the result
+        tgts["INSTALL"].GetSourceLists().push_back(testf);
+        }
+      }
+    }
+  else     // reg exp list
+    {
+    std::vector<std::string> files;
+    cmSystemTools::Glob(m_Makefile->GetCurrentDirectory(),
+                        m_FinalArgs[0].c_str(), files);
+    
+    std::vector<std::string>::iterator s = files.begin();
+    // for each argument, get the files 
+    for (;s != files.end(); ++s)
+      {
+      tgts["INSTALL"].GetSourceLists().push_back(*s);
       }
     }
 }
+
+      

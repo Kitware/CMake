@@ -895,89 +895,6 @@ else
   fi
 fi
 
-ac_aux_dir=
-for ac_dir in $srcdir $srcdir/.. $srcdir/../..; do
-  if test -f $ac_dir/install-sh; then
-    ac_aux_dir=$ac_dir
-    ac_install_sh="$ac_aux_dir/install-sh -c"
-    break
-  elif test -f $ac_dir/install.sh; then
-    ac_aux_dir=$ac_dir
-    ac_install_sh="$ac_aux_dir/install.sh -c"
-    break
-  fi
-done
-if test -z "$ac_aux_dir"; then
-  { echo "configure: error: can not find install-sh or install.sh in $srcdir $srcdir/.. $srcdir/../.." 1>&2; exit 1; }
-fi
-ac_config_guess=$ac_aux_dir/config.guess
-ac_config_sub=$ac_aux_dir/config.sub
-ac_configure=$ac_aux_dir/configure # This should be Cygnus configure.
-
-# Find a good install program.  We prefer a C program (faster),
-# so one script is as good as another.  But avoid the broken or
-# incompatible versions:
-# SysV /etc/install, /usr/sbin/install
-# SunOS /usr/etc/install
-# IRIX /sbin/install
-# AIX /bin/install
-# AIX 4 /usr/bin/installbsd, which doesn't work without a -g flag
-# AFS /usr/afsws/bin/install, which mishandles nonexistent args
-# SVR4 /usr/ucb/install, which tries to use the nonexistent group "staff"
-# ./install, which can be erroneously created by make from ./install.sh.
-echo $ac_n "checking for a BSD compatible install""... $ac_c" 1>&6
-echo "configure:930: checking for a BSD compatible install" >&5
-if test -z "$INSTALL"; then
-if eval "test \"`echo '$''{'ac_cv_path_install'+set}'`\" = set"; then
-  echo $ac_n "(cached) $ac_c" 1>&6
-else
-    IFS="${IFS= 	}"; ac_save_IFS="$IFS"; IFS=":"
-  for ac_dir in $PATH; do
-    # Account for people who put trailing slashes in PATH elements.
-    case "$ac_dir/" in
-    /|./|.//|/etc/*|/usr/sbin/*|/usr/etc/*|/sbin/*|/usr/afsws/bin/*|/usr/ucb/*) ;;
-    *)
-      # OSF1 and SCO ODT 3.0 have their own names for install.
-      # Don't use installbsd from OSF since it installs stuff as root
-      # by default.
-      for ac_prog in ginstall scoinst install; do
-        if test -f $ac_dir/$ac_prog; then
-	  if test $ac_prog = install &&
-            grep dspmsg $ac_dir/$ac_prog >/dev/null 2>&1; then
-	    # AIX install.  It has an incompatible calling convention.
-	    :
-	  else
-	    ac_cv_path_install="$ac_dir/$ac_prog -c"
-	    break 2
-	  fi
-	fi
-      done
-      ;;
-    esac
-  done
-  IFS="$ac_save_IFS"
-
-fi
-  if test "${ac_cv_path_install+set}" = set; then
-    INSTALL="$ac_cv_path_install"
-  else
-    # As a last resort, use the slow shell script.  We don't cache a
-    # path for INSTALL within a source directory, because that will
-    # break other packages using the cache if that directory is
-    # removed, or if the path is relative.
-    INSTALL="$ac_install_sh"
-  fi
-fi
-echo "$ac_t""$INSTALL" 1>&6
-
-# Use test -z because SunOS4 sh mishandles braces in ${var-val}.
-# It thinks the first close brace ends the variable substitution.
-test -z "$INSTALL_PROGRAM" && INSTALL_PROGRAM='${INSTALL}'
-
-test -z "$INSTALL_SCRIPT" && INSTALL_SCRIPT='${INSTALL_PROGRAM}'
-
-test -z "$INSTALL_DATA" && INSTALL_DATA='${INSTALL} -m 644'
-
 
 fullSrcDir=`cd $srcdir; pwd`
 CMAKE_ROOT_DIR=$fullSrcDir
@@ -1030,7 +947,7 @@ fi
 # ansi stream files (without the .h)
 if test $ac_cv_prog_gxx = no; then
   echo $ac_n "checking ansi standard C++ stream headers ""... $ac_c" 1>&6
-echo "configure:1034: checking ansi standard C++ stream headers " >&5 
+echo "configure:951: checking ansi standard C++ stream headers " >&5 
   rm -rf conftest.*
   cat > conftest.cc <<!
 #include <iostream>
@@ -1049,7 +966,7 @@ fi
 # check to see if stl is in the std namespace
 if test $ac_cv_prog_gxx = no; then
   echo $ac_n "checking ansi standard namespace support ""... $ac_c" 1>&6
-echo "configure:1053: checking ansi standard namespace support " >&5 
+echo "configure:970: checking ansi standard namespace support " >&5 
   rm -rf conftest.*
   cat > conftest.cc <<!
 #include <list>
@@ -1166,7 +1083,6 @@ do
 done
 
 ac_given_srcdir=$srcdir
-ac_given_INSTALL="$INSTALL"
 
 trap 'rm -fr `echo "Makefile Source/Makefile Source/cmConfigure.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
 EOF
@@ -1203,9 +1119,6 @@ s%@mandir@%$mandir%g
 s%@CMAKE_CONFIG_DIR@%$CMAKE_CONFIG_DIR%g
 s%@CC@%$CC%g
 s%@CXX@%$CXX%g
-s%@INSTALL_PROGRAM@%$INSTALL_PROGRAM%g
-s%@INSTALL_SCRIPT@%$INSTALL_SCRIPT%g
-s%@INSTALL_DATA@%$INSTALL_DATA%g
 s%@CMAKE_ROOT_DIR@%$CMAKE_ROOT_DIR%g
 s%@CMAKE_ANSI_CFLAGS@%$CMAKE_ANSI_CFLAGS%g
 s%@CMAKE_TEMPLATE_FLAGS@%$CMAKE_TEMPLATE_FLAGS%g
@@ -1285,10 +1198,6 @@ for ac_file in .. $CONFIG_FILES; do if test "x$ac_file" != x..; then
     top_srcdir="$ac_dots$ac_given_srcdir" ;;
   esac
 
-  case "$ac_given_INSTALL" in
-  [/$]*) INSTALL="$ac_given_INSTALL" ;;
-  *) INSTALL="$ac_dots$ac_given_INSTALL" ;;
-  esac
 
   echo creating "$ac_file"
   rm -f "$ac_file"
@@ -1304,7 +1213,6 @@ for ac_file in .. $CONFIG_FILES; do if test "x$ac_file" != x..; then
 s%@configure_input@%$configure_input%g
 s%@srcdir@%$srcdir%g
 s%@top_srcdir@%$top_srcdir%g
-s%@INSTALL@%$INSTALL%g
 " $ac_file_inputs | (eval "$ac_sed_cmds") > $ac_file
 fi; done
 rm -f conftest.s*

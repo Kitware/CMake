@@ -11,7 +11,6 @@ AC_SUBST(CMAKE_CONFIG_DIR)
 #
 AC_PROG_CC
 AC_PROG_CXX
-AC_PROG_INSTALL
 
 fullSrcDir=`cd $srcdir; pwd`
 CMAKE_ROOT_DIR=$fullSrcDir

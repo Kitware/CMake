@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sys/stat.h>
 #include "cmRegularExpression.h"
 #include <ctype.h>
+#include "cmDirectory.h"
 
 #if defined(_MSC_VER) || defined(__BORLANDC__)
 #include <windows.h>
@@ -1061,6 +1062,28 @@ std::string cmSystemTools::GetFilenameNameWithoutExtension(const std::string& fi
   else
     {
     return name;
+    }
+}
+
+
+void cmSystemTools::Glob(const char *directory, const char *regexp,
+                         std::vector<std::string>& files)
+{
+  cmDirectory d;
+  cmRegularExpression reg(regexp);
+  
+  if (d.Load(directory))
+    {
+    int i, numf;
+    numf = d.GetNumberOfFiles();
+    for (i = 0; i < numf; i++)
+      {
+      std::string fname = d.GetFile(i);
+      if (reg.find(fname))
+        {
+        files.push_back(fname);
+        }
+      }
     }
 }
 

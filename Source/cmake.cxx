@@ -157,19 +157,19 @@ void cmake::AddCMakePaths(const std::vector<std::string>& args)
       cMakeRoot = cMakeRoot.substr(0, slashPos);
       }
     // is there no Modules direcory there?
-    std::string modules = cMakeRoot + "/Modules";
-    if (!cmSystemTools::FileIsDirectory(modules.c_str()))
+    std::string modules = cMakeRoot + "/Modules/FindVTK.cmake";
+    if (!cmSystemTools::FileExists(modules.c_str()))
       {
       // try exe/../share/cmake
-      modules = cMakeRoot + "/share/CMake/Modules";
-      if (!cmSystemTools::FileIsDirectory(modules.c_str()))
+      modules = cMakeRoot + "/share/CMake/Modules/FindVTK.cmake";
+      if (!cmSystemTools::FileExists(modules.c_str()))
 	{
 #ifdef CMAKE_ROOT_DIR
 	// try compiled in value on UNIX
         cMakeRoot = CMAKE_ROOT_DIR;
-        modules = cMakeRoot + "/Modules";
+        modules = cMakeRoot + "/Modules/FindVTK.cmake";
 #endif
-	if (!cmSystemTools::FileIsDirectory(modules.c_str()))
+	if (!cmSystemTools::FileExists(modules.c_str()))
 	  {
 	    // couldn't find modules
 	    cmSystemTools::Error("Could not find CMAKE_ROOT !!!\n", 
