@@ -19,8 +19,8 @@ int InitialPass(void *inf, void *mf, int argc, char *argv[])
   cdata->LibraryName = "BOO";
   info->CAPI->SetClientData(info,cdata);
   
-  // Now check and see if the value has been stored in the cache
-  // already, if so use that value and don't look for the program
+  /* Now check and see if the value has been stored in the cache */
+  /* already, if so use that value and don't look for the program */
   if(!info->CAPI->IsOn(mf,"TEST_COMMAND_TEST1"))
     {
     info->CAPI->AddDefinition(mf, "TEST_DEF", "HOO");  
@@ -35,7 +35,7 @@ int InitialPass(void *inf, void *mf, int argc, char *argv[])
 void FinalPass(void *inf, void *mf) 
 {
   cmLoadedCommandInfo *info = (cmLoadedCommandInfo *)inf;
-  // get our client data from initial pass
+  /* get our client data from initial pass */
   cmVTKWrapTclData *cdata = 
     (cmVTKWrapTclData *)info->CAPI->GetClientData(info);
   if (strcmp(info->CAPI->GetDefinition(mf, "TEST_DEF"),"HOO") ||
@@ -48,7 +48,7 @@ void FinalPass(void *inf, void *mf)
 void Destructor(void *inf) 
 {
   cmLoadedCommandInfo *info = (cmLoadedCommandInfo *)inf;
-  // get our client data from initial pass
+  /* get our client data from initial pass */
   cmVTKWrapTclData *cdata = 
     (cmVTKWrapTclData *)info->CAPI->GetClientData(info);
   free(cdata);
