@@ -104,7 +104,7 @@ int do_cmaketest (int argc, char **argv)
   // use this program as the cmake to be run, it should not
   // be run that way but the cmake object requires a vailid path
   std::string cmakeCommand = CMAKE_BINARY_DIR;
-  cmakeCommand += "/Source";
+  cmakeCommand += "/bin";
   cmakeCommand += "/";
   cmakeCommand += intdir;
   cmakeCommand += "/cmake";
