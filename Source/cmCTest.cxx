@@ -1308,7 +1308,7 @@ int cmCTest::CoverageDirectory()
         std::string src_dir = m_DartConfiguration["SourceDirectory"];
         if ( src_dir[src_dir.size()-1] != '/' )
           {
-          src_dir.push_back('/');
+          src_dir = src_dir + "/";
           }
         std::string::size_type spos = cov.m_FullPath.find(src_dir);
         if ( spos == 0 )
