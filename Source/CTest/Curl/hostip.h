@@ -26,6 +26,10 @@
 #include "setup.h"
 #include "hash.h"
 
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
+#endif
+
 /*
  * Setup comfortable CURLRES_* defines to use in the host*.c sources.
  */
@@ -106,7 +110,6 @@ typedef struct Curl_addrinfo Curl_addrinfo;
 #endif
 
 struct addrinfo;
-struct hostent;
 struct SessionHandle;
 struct connectdata;
 
