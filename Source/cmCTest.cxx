@@ -3530,12 +3530,9 @@ int cmCTest::RunConfigurationScript(const std::string& total_script_arg)
   const char *srcDir = mf->GetDefinition("CTEST_SOURCE_DIRECTORY");
   const char *binDir = mf->GetDefinition("CTEST_BINARY_DIRECTORY");
   const char *ctestCmd = mf->GetDefinition("CTEST_COMMAND");
-  const char *ctestEnv = mf->GetDefinition("CTEST_ENVIRONMENT");
-  const char *ctestRoot = mf->GetDefinition("CTEST_DASHBOARD_ROOT");
   bool backup = mf->IsOn("CTEST_BACKUP_AND_RESTORE");
 
   // in order to back we also must have the cvs root
-  const char *cvsCmd = mf->GetDefinition("CTEST_CVS_COMMAND");
   const char *cvsCheckOut = mf->GetDefinition("CTEST_CVS_CHECKOUT");
   if (backup && !cvsCheckOut)
     {
@@ -3551,6 +3548,7 @@ int cmCTest::RunConfigurationScript(const std::string& total_script_arg)
     }
 
   // set any environment variables
+  const char *ctestEnv = mf->GetDefinition("CTEST_ENVIRONMENT");
   if (ctestEnv)
     {
     std::vector<std::string> envArgs;
@@ -3561,6 +3559,55 @@ int cmCTest::RunConfigurationScript(const std::string& total_script_arg)
       cmSystemTools::PutEnv(envArgs[i].c_str());
       }
     }
+
+  // now that we have done most of the error checking finally run the
+  // dashboard, we may be asked to repeatedly run this dashboard, such as
+  // for a continuous
+  if (mf->GetDefinition("CTEST_CONTINUOUS_DURATION"))
+    {
+    // the *60 is becuase the settings are in minutes but GetTime is seconds
+    double minimumInterval = 30*60;
+    if (mf->GetDefinition("CTEST_CONTINUOUS_MINIMUM_INTERVAL"))
+      {
+      minimumInterval = 
+        60*atof(mf->GetDefinition("CTEST_CONTINUOUS_MINIMUM_INTERVAL"));
+      }
+    double duration = 60.0*atof(mf->GetDefinition("CTEST_CONTINUOUS_DURATION"));
+    double clock_start = cmSystemTools::GetTime();
+    while (cmSystemTools::GetTime() < clock_start + duration)
+      {
+      double clock_recent_start = cmSystemTools::GetTime();
+      this->RunConfigurationDashboard(mf, srcDir, binDir, backup, 
+                                      cvsCheckOut, ctestCmd);
+      double interval = cmSystemTools::GetTime() - clock_recent_start;
+      if (interval < minimumInterval)
+        {
+        unsigned int secondsToWait = 
+          static_cast<unsigned int>(minimumInterval - interval);
+#if defined(_WIN32)
+        Sleep(1000*secondsToWait);
+#else
+        sleep(secondsToWait);
+#endif
+        }
+      }
+    }
+  // otherwise just run it once
+  else
+    {
+    return this->RunConfigurationDashboard(mf, srcDir, binDir, 
+                                           backup, cvsCheckOut, ctestCmd);
+    }
+  return 0;
+}
+
+int cmCTest::RunConfigurationDashboard(cmMakefile *mf, 
+                                       const char *srcDir, const char *binDir,
+                                       bool backup, const char *cvsCheckOut,
+                                       const char *ctestCmd)
+{
+  const char *ctestRoot = mf->GetDefinition("CTEST_DASHBOARD_ROOT");
+  const char *cvsCmd = mf->GetDefinition("CTEST_CVS_COMMAND");
 
   // local variables
   std::string command;
@@ -3598,8 +3645,8 @@ int cmCTest::RunConfigurationScript(const std::string& total_script_arg)
       std::cerr << "Run cvs: " << cvsCheckOut << std::endl;
       }
     res = cmSystemTools::RunSingleCommand(cvsCheckOut, &output, 
-      &retVal, ctestRoot,
-      m_Verbose, 0 /*m_TimeOut*/);
+                                          &retVal, ctestRoot,
+                                          m_Verbose, 0 /*m_TimeOut*/);
     if (!res || retVal != 0)
       {
       cmSystemTools::Error("Unable to perform cvs checkout ");    

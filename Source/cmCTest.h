@@ -38,6 +38,10 @@ public:
    */
   int RunConfigurationScript();
   int RunConfigurationScript(const std::string& script);
+  int RunConfigurationDashboard(cmMakefile *mf, 
+                                const char *srcDir, const char *binDir,
+                                bool backup, const char *cvsCheckOut,
+                                const char *ctestCmd);
   
   /**
    * Initialize and finalize testing
