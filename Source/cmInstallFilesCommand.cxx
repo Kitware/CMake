@@ -50,14 +50,16 @@ bool cmInstallFilesCommand::InitialPass(std::vector<std::string>& args)
     return false;
     }
 
-  cmTargets &tgts = m_Makefile->GetTargets();
+  // Create an INSTALL_FILES target specifically for this path.
+  m_TargetName = "INSTALL_FILES_"+args[0];
+  cmTarget target;
+  target.SetInAll(false);
+  target.SetType(cmTarget::INSTALL_FILES);
+  target.SetInstallPath(args[0].c_str());
+  m_Makefile->GetTargets().insert(cmTargets::value_type(m_TargetName, target));
+
   std::vector<std::string>::iterator s = args.begin();
-  if (tgts.find("INSTALL_FILES") != tgts.end())
-    {
-    tgts["INSTALL_FILES"].SetInstallPath(args[0].c_str());
-    }
-  ++s;
-  for (;s != args.end(); ++s)
+  for (++s;s != args.end(); ++s)
     {
     m_FinalArgs.push_back(*s);
     }
@@ -67,14 +69,10 @@ bool cmInstallFilesCommand::InitialPass(std::vector<std::string>& args)
 
 void cmInstallFilesCommand::FinalPass() 
 {
-  cmTargets &tgts = m_Makefile->GetTargets();
   std::string testf;
   std::string ext = m_FinalArgs[0];
-
-  if (tgts.find("INSTALL_FILES") == tgts.end())
-    {
-    return;
-    }
+  std::vector<std::string>& targetSourceLists =
+    m_Makefile->GetTargets()[m_TargetName].GetSourceLists();
   
   // two different options
   if (m_FinalArgs.size() > 1)
@@ -98,7 +96,7 @@ void cmInstallFilesCommand::FinalPass()
           {
           testf = c->GetSourceName() + ext;
           // add to the result
-          tgts["INSTALL_FILES"].GetSourceLists().push_back(testf);
+          targetSourceLists.push_back(testf);
           }
         }
       // if one wasn't found then assume it is a single class
@@ -106,7 +104,7 @@ void cmInstallFilesCommand::FinalPass()
         {
         testf = temps + ext;
         // add to the result
-        tgts["INSTALL_FILES"].GetSourceLists().push_back(testf);
+        targetSourceLists.push_back(testf);
         }
       }
     }
@@ -122,7 +120,7 @@ void cmInstallFilesCommand::FinalPass()
     // for each argument, get the files 
     for (;s != files.end(); ++s)
       {
-      tgts["INSTALL_FILES"].GetSourceLists().push_back(*s);
+      targetSourceLists.push_back(*s);
       }
     }
 }

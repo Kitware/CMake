@@ -50,29 +50,27 @@ bool cmInstallProgramsCommand::InitialPass(std::vector<std::string>& args)
     return false;
     }
 
-  cmTargets &tgts = m_Makefile->GetTargets();
+  // Create an INSTALL_PROGRAMS target specifically for this path.
+  m_TargetName = "INSTALL_PROGRAMS_"+args[0];
+  cmTarget target;
+  target.SetInAll(false);
+  target.SetType(cmTarget::INSTALL_PROGRAMS);
+  target.SetInstallPath(args[0].c_str());
+  m_Makefile->GetTargets().insert(cmTargets::value_type(m_TargetName, target));
+
   std::vector<std::string>::iterator s = args.begin();
-  if (tgts.find("INSTALL_PROGRAMS") != tgts.end())
-    {
-    tgts["INSTALL_PROGRAMS"].SetInstallPath(args[0].c_str());
-    }
-  ++s;
-  for (;s != args.end(); ++s)
+  for (++s;s != args.end(); ++s)
     {
     m_FinalArgs.push_back(*s);
-    }
+    }  
   
   return true;
 }
 
 void cmInstallProgramsCommand::FinalPass() 
 {
-  cmTargets &tgts = m_Makefile->GetTargets();
-
-  if (tgts.find("INSTALL_PROGRAMS") == tgts.end())
-    {
-    return;
-    }
+  std::vector<std::string>& targetSourceLists =
+    m_Makefile->GetTargets()[m_TargetName].GetSourceLists();
   
   // two different options
   if (m_FinalArgs.size() > 1)
@@ -85,7 +83,7 @@ void cmInstallProgramsCommand::FinalPass()
       std::string temps = *s;
       m_Makefile->ExpandVariablesInString(temps);
       // add to the result
-      tgts["INSTALL_PROGRAMS"].GetSourceLists().push_back(temps);
+      targetSourceLists.push_back(temps);
       }
     }
   else     // reg exp list
@@ -98,7 +96,7 @@ void cmInstallProgramsCommand::FinalPass()
     // for each argument, get the programs 
     for (;s != programs.end(); ++s)
       {
-      tgts["INSTALL_PROGRAMS"].GetSourceLists().push_back(*s);
+      targetSourceLists.push_back(*s);
       }
     }
 }

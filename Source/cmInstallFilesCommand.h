@@ -102,6 +102,7 @@ public:
   cmTypeMacro(cmInstallFilesCommand, cmCommand);
 
  private:
+  std::string m_TargetName;
   std::vector<std::string> m_FinalArgs;
 };
 
