@@ -377,7 +377,7 @@ bool cmCTest::UpdateCTestConfiguration()
     fileName = m_BinaryDir + "/DartConfiguration.tcl";
     if ( !cmSystemTools::FileExists(fileName.c_str()) )
       {
-      fileName = m_BinaryDir + "/CTestConfiguration.tcl";
+      fileName = m_BinaryDir + "/CTestConfiguration.ini";
       }
     }
   if ( !cmSystemTools::FileExists(fileName.c_str()) )

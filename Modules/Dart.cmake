@@ -304,7 +304,7 @@ IF(BUILD_TESTING)
     # configure files
     CONFIGURE_FILE(
       ${CMAKE_ROOT}/Modules/DartConfiguration.tcl.in
-      ${PROJECT_BINARY_DIR}/DartConfiguration.tcl )
+      ${PROJECT_BINARY_DIR}/CTestConfiguration.ini )
 
     #
     # Section 3:
