@@ -1429,6 +1429,7 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
   ctest = cmSystemTools::GetFilenamePath(ctest.c_str());
   ctest += "/";
   ctest += "ctest";
+  ctest += m_ExecutableExtension;
   if (cmSystemTools::FileExists(ctest.c_str()))
     {
     this->OutputMakeRule(fout, 
