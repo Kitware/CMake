@@ -20,7 +20,6 @@ static LONG __stdcall
 TestDriverUnhandledExceptionFilter(EXCEPTION_POINTERS* e)
 {
   ExitProcess(e->ExceptionRecord->ExceptionCode);
-  return 0;
 }
 static void TestDriverEnableWindowsExceptionFilter()
 {
