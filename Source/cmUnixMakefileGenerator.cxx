@@ -829,6 +829,22 @@ void cmUnixMakefileGenerator::OutputDependLibs(std::ostream& fout)
           this->OutputLibDepend(fout, lib->first.c_str());
           }
         }
+
+      // Now, look at all utilities specific to this target.
+      const std::set<std::string>& tutils = l->second.GetUtilities();
+      for(std::set<std::string>::const_iterator util = tutils.begin();
+          util != tutils.end(); ++util)
+        {
+        // Record that this utility was used.
+        used.insert(*util);
+
+        // Don't emit the same utility twice for this target.
+        if(emitted.insert(*util).second)
+          {
+          // Output this dependency.
+          this->OutputExeDepend(fout, util->c_str());
+          }
+        }
       
       fout << "\n";
       }
@@ -926,7 +942,6 @@ void cmUnixMakefileGenerator::OutputLibDepend(std::ostream& fout,
       {
       // if the library is not in the current directory, then get the full
       // path to it
-      libpath = cacheValue;
       if(m_LibraryOutputPath.size())
         {
         libpath = m_LibraryOutputPath;
@@ -934,6 +949,7 @@ void cmUnixMakefileGenerator::OutputLibDepend(std::ostream& fout,
         }
       else
         {
+        libpath = cacheValue;
         libpath += "/";
         libpath += m_LibraryPrefix;
         }
@@ -955,14 +971,55 @@ void cmUnixMakefileGenerator::OutputLibDepend(std::ostream& fout,
       libpath += m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
       }
     else if (libType && std::string(libType) == "MODULE")
-          {
-          libpath += m_Makefile->GetDefinition("CMAKE_MODULE_SUFFIX");
-          }
-    else
+      {
+      libpath += m_Makefile->GetDefinition("CMAKE_MODULE_SUFFIX");
+      }
+    else if (libType && std::string(libType) == "STATIC")
       {
       libpath += m_StaticLibraryExtension;
       }
     fout << this->ConvertToNativePath(cmSystemTools::EscapeSpaces(libpath.c_str()).c_str())
+         << " ";
+    }
+}
+
+
+void cmUnixMakefileGenerator::OutputExeDepend(std::ostream& fout,
+                                              const char* name)
+{
+  const char* cacheValue = m_Makefile->GetDefinition(name);
+  if(cacheValue )
+    {
+    // if there is a cache value, then this is a executable/utility that cmake
+    // knows how to build, so we can depend on it
+    std::string exepath;
+    if (!this->SamePath(m_Makefile->GetCurrentOutputDirectory(), cacheValue))
+      {
+      // if the exe/utility is not in the current directory, then get the full
+      // path to it
+      if(m_ExecutableOutputPath.size())
+        {
+        exepath = m_ExecutableOutputPath;
+        }
+      else
+        {
+        exepath = cacheValue;
+        exepath += "/";
+        }
+      }
+    else
+      {
+      // library is in current Makefile
+      exepath = m_ExecutableOutputPath;
+      }
+    // add the library name
+    exepath += name;
+    // add the correct extension
+    if (m_Makefile->GetDefinition("CMAKE_EXECUTABLE_SUFFIX"))
+      {
+      exepath += m_Makefile->GetDefinition("CMAKE_EXECUTABLE_SUFFIX");
+      }
+    fout << this->ConvertToNativePath(cmSystemTools::EscapeSpaces(exepath.c_str()).c_str())
          << " ";
     }
 }

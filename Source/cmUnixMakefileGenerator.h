@@ -127,6 +127,7 @@ protected:
   virtual void OutputSubDirectoryRules(std::ostream&);
   virtual void OutputDependLibs(std::ostream&);
   virtual void OutputLibDepend(std::ostream&, const char*);
+  virtual void OutputExeDepend(std::ostream&, const char*);
   virtual void OutputCustomRules(std::ostream&);
   virtual void OutputMakeVariables(std::ostream&);
   virtual void OutputMakeRules(std::ostream&);
