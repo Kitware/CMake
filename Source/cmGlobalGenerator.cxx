@@ -371,7 +371,10 @@ void cmGlobalGenerator::Configure()
                          "Please set the following variables:\n",
                          notFoundVars.c_str());
     }
-  m_CMakeInstance->UpdateProgress("Configuring done", -1);
+  if ( !m_CMakeInstance->GetScriptMode() )
+    {
+    m_CMakeInstance->UpdateProgress("Configuring done", -1);
+    }
 }
 
 // loop through the directories creating cmLocalGenerators and Configure()
