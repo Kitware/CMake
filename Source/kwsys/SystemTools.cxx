@@ -631,7 +631,9 @@ bool SystemTools::FileExists(const char* filename)
 {
 #ifdef _MSC_VER
 # define access _access
-# define F_OK 0
+#endif
+#ifndef F_OK
+#define F_OK 0
 #endif
   if ( access(filename, F_OK) != 0 )
     {
