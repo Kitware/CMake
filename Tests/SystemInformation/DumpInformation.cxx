@@ -1,49 +1,71 @@
-#include <stdio.h>
 #include "DumpInformation.h"
+#include <stdio.h>
+#include <sys/stat.h>
 
-int DumpFile(char* filename, char* comment)
+void cmDumpInformationPrintFile(const char* name, FILE* fout)
 {
-  FILE* file = fopen(filename, "r");
-  if(!file)
+  fprintf(fout,
+          "================================================================\n");
+  struct stat fs;
+  if(stat(name, &fs) != 0)
     {
-    printf("Error, could not open file %s\n", filename);
-    return 1;
+    fprintf(fout, "The file \"%s\" does not exist.\n", name);
+    fflush(fout);
+    return;
     }
-  printf("%s", comment);
-  while(!feof(file))
+  
+  FILE* fin = fopen(name, "rb");
+  if(fin)
     {
-    int ch = fgetc(file);
-    if(ch != EOF)
+    fprintf(fout,
+            "Contents of \"%s\":\n"
+            "----------------------------------------------------------------\n",
+            name);
+    const int bufferSize = 4096;
+    char buffer[bufferSize];
+    int n;
+    while((n = fread(buffer, 1, bufferSize, fin)) > 0)
       {
-      if(ch == '<')
+      for(char* c = buffer; c < buffer+n; ++c)
         {
-        printf("&lt;");
+        switch(*c)
+          {
+          case '<': fprintf(fout, "&lt;"); break;
+          case '>': fprintf(fout, "&gt;"); break;
+          case '&': fprintf(fout, "&amp;"); break;
+          default: putc(*c, fout); break;
+          }
         }
-      else if(ch == '>')
-        {
-        printf("&gt;");
-        }
-      else if(ch == '&')
-        {
-        printf("&amp;");
-        }
-      else 
-        {
-        putc(ch, stdout);
-        }
+      fflush(fout);
       }
+    fclose(fin);
     }
-  printf("\n");
-  fclose(file);
-  return 0;
+  else
+    {
+    fprintf(fout, "Error opening \"%s\" for reading.\n", name);
+    fflush(fout);
+    }
 }
 
-
-int main(int, char*[])
+int main(int,char *[])
 {
-  int res = 0;
-  res += DumpFile(CMAKE_DUMP_FILE, "#CMake System Variables are:");
-  res += DumpFile(CMAKE_CACHE_FILE, "#CMake Cache is:");
-  res += DumpFile(CMAKE_ALL_VARIABLES, "#CMake Variables are:");
-  return res;
-}
+  const char* files[] =
+    {
+      DumpInformation_BINARY_DIR "/SystemInformation.out",
+      DumpInformation_BINARY_DIR "/AllVariables.txt",
+      DumpInformation_BINARY_DIR "/../../Source/cmConfigure.h",
+      DumpInformation_BINARY_DIR "/../../CMakeCache.txt", 
+      DumpInformation_BINARY_DIR "/../../CMakeOutput.log",
+      DumpInformation_BINARY_DIR "/../../CMakeError.log",
+      DumpInformation_BINARY_DIR "/../../Bootstrap.cmk/cmake_bootstrap.log",
+      0
+    };
+
+  const char** f;
+  for(f = files; *f; ++f)
+    {
+    cmDumpInformationPrintFile(*f, stdout);
+    }
+  
+  return 0;
+} 
