@@ -215,7 +215,6 @@ void cmOutputRequiredFilesCommand::FinalPass()
   m_Makefile->ExpandVariablesInString(m_OutputFile);
 
   // find the depends for a file
-  const cmMakeDepend::DependArray &da = md.GetDependInformation();
   const cmDependInformation *info = md.GetDependInformationForSourceFile(m_File.c_str());
   if (info)
     {
