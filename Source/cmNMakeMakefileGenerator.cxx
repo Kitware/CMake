@@ -309,7 +309,8 @@ void cmNMakeMakefileGenerator::OutputMakeRule(std::ostream& fout,
     {
     replace = ShortPathCommand(command);
     m_Makefile->ExpandVariablesInString(replace);
-    if(replace[0] != '-' && replace.find("echo") != 0)
+    if(replace[0] != '-' && replace.find("echo") != 0 
+       && replace.find("$(MAKE)") != 0)
       {
       fout << "\t" << "echo " << replace.c_str() << "\n";
       }
@@ -319,7 +320,8 @@ void cmNMakeMakefileGenerator::OutputMakeRule(std::ostream& fout,
     {
     replace = ShortPathCommand(command2);
     m_Makefile->ExpandVariablesInString(replace);
-    if(replace[0] != '-' && replace.find("echo") != 0)
+    if(replace[0] != '-' && replace.find("echo") != 0 
+       && replace.find("$(MAKE)") != 0)
       {
       fout << "\t" << "echo " << replace.c_str() << "\n";
       }
@@ -329,7 +331,8 @@ void cmNMakeMakefileGenerator::OutputMakeRule(std::ostream& fout,
     {
     replace = ShortPathCommand(command3);
     m_Makefile->ExpandVariablesInString(replace);
-    if(replace[0] != '-' && replace.find("echo") != 0)
+    if(replace[0] != '-' && replace.find("echo") != 0 
+       && replace.find("$(MAKE)") != 0)
       {
       fout << "\t" << "echo " << replace.c_str() << "\n";
       }
@@ -339,7 +342,8 @@ void cmNMakeMakefileGenerator::OutputMakeRule(std::ostream& fout,
     {
     replace = ShortPathCommand(command4);
     m_Makefile->ExpandVariablesInString(replace);
-    if(replace[0] != '-' && replace.find("echo") != 0)
+    if(replace[0] != '-' && replace.find("echo") != 0 
+       && replace.find("$(MAKE)") != 0)
       {
       fout << "\t" << "echo " << replace.c_str() << "\n";
       }
@@ -722,7 +726,6 @@ void cmNMakeMakefileGenerator::OutputBuildLibraryInDir(std::ostream& fout,
   fout << cmSystemTools::EscapeSpaces(fullpath)
        << ":\n\tcd " << cmSystemTools::EscapeSpaces(path)  << "\n"
        << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.depends\n"
-       << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.check_depends\n"
        << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) -f cmake.check_depends\n"
        << "\t$(MAKE) $(MAKESILENT) " << cmSystemTools::EscapeSpaces(fullpath)
        << "\n\tcd " <<

@@ -253,7 +253,6 @@ void cmUnixMakefileGenerator::OutputMakefile(const char* file)
                    "default_target",
                    0,
                    "$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.depends",
-                   "$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.check_depends",
                    "$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) -f cmake.check_depends",
                    "$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) all");
   
@@ -290,7 +289,7 @@ void cmUnixMakefileGenerator::OutputMakefile(const char* file)
       }
     else
       {
-      checkdependout << "all:\n\tcd .\n";
+      checkdependout << "all:\n\t@echo cmake.depends is up-to-date\n";
       }
     }
   this->OutputCustomRules(fout);
@@ -901,7 +900,6 @@ void cmUnixMakefileGenerator::OutputBuildLibraryInDir(std::ostream& fout,
   fout << cmSystemTools::EscapeSpaces(fullpath)
        << ":\n\tcd " << cmSystemTools::EscapeSpaces(path)
        << "; $(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.depends"
-       << "; $(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.check_depends"
        << "; $(MAKE) -$(MAKEFLAGS) $(MAKESILENT) -f cmake.check_depends"
        << "; $(MAKE) $(MAKESILENT) " << makeTarget << "\n\n"; 
 }
@@ -1599,10 +1597,29 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                          "-@ $(RM) $(CLEAN_OBJECT_FILES) $(EXECUTABLES)"
                          " $(TARGETS)");
     }
+  // collect up all the sources
+  std::string allsources("$(CMAKE_MAKEFILE_SOURCES) ");
+  std::map<cmStdString, cmTarget>& targets = m_Makefile->GetTargets();
+  for(std::map<cmStdString, cmTarget>::const_iterator target = targets.begin(); 
+      target != targets.end(); ++target)
+    {
+    // Iterate over every source for this target.
+    const std::vector<cmSourceFile>& sources = target->second.GetSourceFiles();
+    for(std::vector<cmSourceFile>::const_iterator source = sources.begin(); 
+        source != sources.end(); ++source)
+      {
+      if(!source->IsAHeaderFileOnly())
+        {
+          allsources += " \\\n";
+          allsources += source->GetFullPath();
+        }
+      }
+    }
+
   this->OutputMakeRule(fout, 
                        "Rule to build the cmake.depends and Makefile as side effect, if a source cmakelist file is out of date.",
                        "cmake.depends",
-                       "$(CMAKE_MAKEFILE_SOURCES) ",
+                       allsources.c_str(),
                        "$(CMAKE_COMMAND) "
                        "-S$(CMAKE_CURRENT_SOURCE) -O$(CMAKE_CURRENT_BINARY) "
                        "-H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)"
@@ -1622,32 +1639,6 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                        "$(CMAKE_COMMAND) "
                        "-S$(CMAKE_CURRENT_SOURCE) -O$(CMAKE_CURRENT_BINARY) "
                        "-H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)");  
-
-  // collect up all the sources
-  std::string allsources;
-  std::map<cmStdString, cmTarget>& targets = m_Makefile->GetTargets();
-  for(std::map<cmStdString, cmTarget>::const_iterator target = targets.begin(); 
-      target != targets.end(); ++target)
-    {
-    // Iterate over every source for this target.
-    const std::vector<cmSourceFile>& sources = target->second.GetSourceFiles();
-    for(std::vector<cmSourceFile>::const_iterator source = sources.begin(); 
-        source != sources.end(); ++source)
-      {
-      if(!source->IsAHeaderFileOnly())
-        {
-          allsources += " \\\n";
-          allsources += source->GetFullPath();
-        }
-      }
-    }
-  this->OutputMakeRule(fout, 
-                       "rule to rebuild cmake.depends if a source file is changed.",
-                       "cmake.check_depends",
-                       allsources.c_str(),
-                       "$(CMAKE_COMMAND) "
-                       "-S$(CMAKE_CURRENT_SOURCE) -O$(CMAKE_CURRENT_BINARY) "
-                       "-H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)");
 
   this->OutputMakeRule(fout, 
                        "Rebuild CMakeCache.txt file",
@@ -1870,7 +1861,8 @@ void cmUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
     {
     replace = command;
     m_Makefile->ExpandVariablesInString(replace);
-    if(replace[0] != '-' || replace.find("echo") != 0)
+    if(replace[0] != '-' || replace.find("echo") != 0  
+       && replace.find("$(MAKE)") != 0)
       {
       fout << "\t" << "echo " << replace.c_str() << "\n";
       }
@@ -1880,7 +1872,8 @@ void cmUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
     {
     replace = command2;
     m_Makefile->ExpandVariablesInString(replace);
-    if(replace[0] != '-' && replace.find("echo") != 0)
+    if(replace[0] != '-' && replace.find("echo") != 0  
+       && replace.find("$(MAKE)") != 0)
       {
       fout << "\t" << "echo " << replace.c_str() << "\n";
       }
@@ -1890,7 +1883,8 @@ void cmUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
     {
     replace = command3;
     m_Makefile->ExpandVariablesInString(replace);
-    if(replace[0] != '-' && replace.find("echo") != 0)
+    if(replace[0] != '-' && replace.find("echo") != 0  
+       && replace.find("$(MAKE)") != 0)
       {
       fout << "\t" << "echo " << replace.c_str() << "\n";
       }
@@ -1900,7 +1894,8 @@ void cmUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
     {
     replace = command4;
     m_Makefile->ExpandVariablesInString(replace);
-    if(replace[0] != '-' && replace.find("echo") != 0)
+    if(replace[0] != '-' && replace.find("echo") != 0  
+       && replace.find("$(MAKE)") != 0)
       {
       fout << "\t" << "echo " << replace.c_str() << "\n";
       }
