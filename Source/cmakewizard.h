@@ -19,7 +19,7 @@
 #include "cmMakefile.h"
 #include "cmStandardIncludes.h"
 
-class cmakewizard
+class CM_EXPORT cmakewizard
 {
 public:
   cmakewizard();
