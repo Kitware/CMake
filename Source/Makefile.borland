@@ -12,6 +12,7 @@
 
 OBJS = \
 cmake.obj  \
+cmakewizard.obj  \
 cmakemain.obj \
 cmMakeDepend.obj \
 cmMakefile.obj \
