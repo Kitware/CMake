@@ -412,8 +412,10 @@ int main(void) {
     return 0;
 }
 #endif
+#ifdef HAVE_FILE_OFFSET_BITS
 #ifdef _FILE_OFFSET_BITS
 #undef _FILE_OFFSET_BITS
+#endif
 #define _FILE_OFFSET_BITS 64
 #include <sys/types.h>
  /* Check that off_t can represent 2**63 - 1 correctly.
