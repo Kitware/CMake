@@ -281,7 +281,11 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
           name += ".";
           name += outsf->GetSourceExtension();
           }
-        srcFilesToProcess.push(name);
+        std::string temp = 
+          cmSystemTools::GetFilenamePath(outsf->GetFullPath());
+        temp += "/";
+        temp += name;
+        srcFilesToProcess.push(temp);
         }
       // add its dependencies to the list to check
       unsigned int i;
