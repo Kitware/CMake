@@ -16,6 +16,15 @@
   On Windows9x platforms, this executable is spawned between a parent
   process and the child it is invoking to work around a bug.  See the
   Win32 implementation file for details.
+
+  Future Work: This executable must be linked statically against the C
+  runtime library before being encoded into the library.  Building it
+  in this way may be hard because CMake has limited abilities to build
+  different targets with different configurations in the same
+  directory.  We may just have to create and encode the executable
+  once instead of generating it during the build.  This would be an
+  acceptable solution because the forwarding executable should not
+  change very often and is pretty simple.
 */
 
 #ifdef _MSC_VER
