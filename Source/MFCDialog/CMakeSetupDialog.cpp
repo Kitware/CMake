@@ -593,7 +593,7 @@ void CMakeSetupDialog::FillCacheGUIFromCacheManager()
           m_CacheEntriesList.AddProperty(key,
                                          "ON",
                                          value.m_HelpString.c_str(),
-                                         CPropertyList::CHECKBOX,"",
+                                         CPropertyList::COMBO,"ON|OFF",
                                          reverseOrder 
             );
           }
@@ -602,7 +602,7 @@ void CMakeSetupDialog::FillCacheGUIFromCacheManager()
           m_CacheEntriesList.AddProperty(key,
                                          "OFF",
                                          value.m_HelpString.c_str(),
-                                         CPropertyList::CHECKBOX,"",
+                                         CPropertyList::COMBO,"ON|OFF",
                                          reverseOrder
             );
           }

@@ -126,5 +126,6 @@ int main (int argc, char *argv[])
   
   // return to the original directory
   cmSystemTools::ChangeDirectory(cwd.c_str());
+  cmMakefileGenerator::UnRegisterGenerators();
   return 0;
 }
