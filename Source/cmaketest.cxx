@@ -324,7 +324,7 @@ int do_cmaketest (int argc, char **argv)
   if(retVal)
     {
     cmSystemTools::Error("test executable ", fullPath.c_str(), 
-                         "returned a non-zero value");
+                         " returned a non-zero value");
     ret = 1;
     }
   if ( ret )
