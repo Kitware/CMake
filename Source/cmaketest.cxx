@@ -170,6 +170,11 @@ int do_cmaketest (int argc, char **argv)
     {
     std::cerr << "Error: cmaketest does not have a valid MAKEPROGRAM\n";
     }
+
+  // Return value for run command;
+  int retVal = 0;
+  int ret = 0;
+
   makeCommand = cmSystemTools::ConvertToOutputPath(makeCommand.c_str());
   std::string lowerCaseCommand = cmSystemTools::LowerCase(makeCommand);
   // if msdev is the make program then do the following
@@ -212,12 +217,14 @@ int do_cmaketest (int argc, char **argv)
     std::string cleanCommand = makeCommand;
     cleanCommand += " clean";
     std::cout << "Running make clean command: " << cleanCommand.c_str() << " ...\n";
-    if (!cmSystemTools::RunCommand(cleanCommand.c_str(), output))
+    retVal = 0;
+    if (!cmSystemTools::RunCommand(cleanCommand.c_str(), output, retVal) || retVal)
       {
       std::cerr << "Error: " << cleanCommand.c_str() << "  execution failed\n";
       std::cerr << output.c_str() << "\n";
       // return to the original directory
       cmSystemTools::ChangeDirectory(cwd.c_str());
+      std::cerr << "Return value: " << retVal << std::endl;
       return 1;
       }
     
@@ -225,13 +232,22 @@ int do_cmaketest (int argc, char **argv)
     }
 
   std::cout << "Running make command: " << makeCommand.c_str() << " ...\n";
-  if (!cmSystemTools::RunCommand(makeCommand.c_str(), output))
+  retVal = 0;
+  if (!cmSystemTools::RunCommand(makeCommand.c_str(), output, retVal))
     {
     std::cerr << "Error: " << makeCommand.c_str() <<  "  execution failed\n";
     std::cerr << output.c_str() << "\n";
     // return to the original directory
     cmSystemTools::ChangeDirectory(cwd.c_str());
     return 1;
+    }
+  if ( retVal )
+    {
+    cmSystemTools::Error("Building of project failed\n");
+    std::cerr << output.c_str() << "\n";
+    // return to the original directory
+    cmSystemTools::ChangeDirectory(cwd.c_str());
+    ret = 1;
     }
 
   // now run the compiled test if we can find it
@@ -293,21 +309,26 @@ int do_cmaketest (int argc, char **argv)
     fullPath += *p;
     }
   std::cout << "Running test executable: " << fullPath.c_str() << "\n";
-  int ret = 0;
-  if (!cmSystemTools::RunCommand(fullPath.c_str(), output, ret, 0, true))
+  retVal = 0;
+  if (!cmSystemTools::RunCommand(fullPath.c_str(), output, retVal, 0, true))
     {
     std::cerr << "Error: " << fullPath.c_str() << "  execution failed\n";
     // return to the original directory
     cmSystemTools::ChangeDirectory(cwd.c_str());
     return 1;
-    }  
+    }
   std::cout << output << "\n";
   // return to the original directory
   cmSystemTools::ChangeDirectory(cwd.c_str());
-  if(ret)
+  if(retVal)
     {
     cmSystemTools::Error("test executable ", fullPath.c_str(), 
                          "returned a non-zero value");
+    ret = 1;
+    }
+  if ( ret )
+    {
+    cmSystemTools::Error("Test failed");
     }
   return ret;
 }

@@ -1,6 +1,7 @@
 INCLUDE (${CMAKE_ROOT}/Modules/FindwxWindows.cmake)
 
-IF ( CMAKE_WX_CAN_COMPILE )
+IF ( WXWINDOWS_FOUND )
+  INCLUDE(${CMAKE_ROOT}/Modules/Use_wxWindows.cmake)
 
   SET( WX_SRCS
        cmWXCacheProperty.cxx
@@ -65,8 +66,8 @@ IF ( CMAKE_WX_CAN_COMPILE )
              -Q -A:ON -B:${CMake_BINARY_DIR}/Tests/Simple 
              -H:${CMake_SOURCE_DIR}/Tests/Simple)
   ENDIF(BUILD_TESTING)
-ELSE ( CMAKE_WX_CAN_COMPILE )
+ELSE ( WXWINDOWS_FOUND )
 
   MESSAGE("Cannot find wxWindows libraries and/or header files")
 
-ENDIF ( CMAKE_WX_CAN_COMPILE )
+ENDIF ( WXWINDOWS_FOUND )
