@@ -527,14 +527,12 @@ void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
   emitted.clear();
   for(lib2 = libs.begin(); lib2 != libs.end(); ++lib2)
     {
-    // loop over the list of directories that the libraries might
-    // be in, looking for an ADD_LIBRARY(lib...) line. This would
-    // be stored in the cache
     if( ! emitted.insert(lib2->first).second ) continue;
 
     const char* cacheValue
       = cmCacheManager::GetInstance()->GetCacheValue(lib2->first.c_str());
-    if(cacheValue)
+    if(cacheValue 
+       && (strcmp(m_Makefile->GetCurrentOutputDirectory(), cacheValue) != 0))
       {
       std::string libpath = cacheValue;
       if(m_LibraryOutputPath.size())
