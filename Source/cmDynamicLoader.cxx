@@ -162,12 +162,19 @@ cmLibHandle cmDynamicLoader::OpenLibrary(const char* libname )
     }
   
   NSObjectFileImageReturnCode rc;
-  NSObjectFileImage image;
+  NSObjectFileImage image = 0;
 
   rc = NSCreateObjectFileImageFromFile(libname, &image);
+  if(!image)
+    {
+    return 0;
+    }
   lh = NSLinkModule(image, libname, TRUE);
-  cmDynamicLoaderCache::GetInstance()->CacheFile(libname, lh);
-  return lh; 
+  if(lh)
+    {
+    cmDynamicLoaderCache::GetInstance()->CacheFile(libname, lh);
+    }
+  return lh;
 }
 
 int cmDynamicLoader::CloseLibrary(cmLibHandle lib)
@@ -334,6 +341,6 @@ const char* cmDynamicLoader::LibPrefix()
 
 const char* cmDynamicLoader::LibExtension()
 {
-  return CMAKE_SHARED_LIBRARY_SUFFIX;
+  return CMAKE_SHARED_MODULE_SUFFIX;
 }
 
