@@ -1377,7 +1377,8 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                          "clean",
                          "$(SUBDIR_CLEAN)",
                          "rm -f $(CLEAN_OBJECT_FILES) $(EXECUTABLES)"
-                         " $(TARGETS) ${GENERATED_QT_FILES}");
+                         " $(TARGETS) ${GENERATED_QT_FILES}",
+                         "make depend");
     }
   else  
     {
