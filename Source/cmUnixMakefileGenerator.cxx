@@ -617,11 +617,11 @@ void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
         = cmCacheManager::GetInstance()->GetCacheValue(ltname.c_str());
       if(libType && std::string(libType) == "SHARED")
         {
-        libpath += m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
+        library += m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
         }
       else
         {
-        libpath += ".a";
+        library += ".a";
         }
       if(m_LibraryOutputPath.size())
         {
