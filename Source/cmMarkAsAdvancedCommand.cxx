@@ -17,15 +17,13 @@
 #include "cmMarkAsAdvancedCommand.h"
 
 // cmMarkAsAdvancedCommand
-bool cmMarkAsAdvancedCommand::InitialPass(std::vector<std::string> const& argsIn)
+bool cmMarkAsAdvancedCommand::InitialPass(std::vector<std::string> const& args)
 {
-  if(argsIn.size() < 1 )
+  if(args.size() < 1 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  std::vector<std::string> args;
-  cmSystemTools::ExpandListArguments(argsIn, args);
 
   unsigned int i =0;
   const char* value = "1";

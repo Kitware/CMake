@@ -843,168 +843,6 @@ std::string cmSystemTools::ConvertToWindowsOutputPath(const char* path)
   return ret;
 }
 
-inline void RemoveComments(char* ptr)
-{
-  while(*ptr)
-    {
-    if(*ptr == '#')
-      {
-      *ptr = 0;
-      break;
-      }
-    ++ptr;
-    }
-}
-
-bool cmSystemTools::ParseFunction(std::ifstream& fin,
-                                  std::string& name,
-                                  std::vector<std::string>& arguments,
-                                  const char* filename,
-                                  bool& parseError)
-{
-  parseError = false;
-  name = "";
-  arguments = std::vector<std::string>();
-  const int BUFFER_SIZE = 4096;
-  char inbuffer[BUFFER_SIZE];
-  if(!fin)
-    {
-    return false;
-    }
-  if(fin.getline(inbuffer, BUFFER_SIZE ) )
-    {
-    RemoveComments(inbuffer);
-    cmRegularExpression blankLine("^[ \t\r]*$");
-//    cmRegularExpression comment("^[ \t]*#.*$");
-    cmRegularExpression oneLiner("^[ \t]*([A-Za-z_0-9]*)[ \t]*\\((.*)\\)[ \t\r]*$");
-    cmRegularExpression multiLine("^[ \t]*([A-Za-z_0-9]*)[ \t]*\\((.*)$");
-    cmRegularExpression lastLine("^(.*)\\)[ \t\r]*$");
-
-    // check for blank line or comment
-    if(blankLine.find(inbuffer) )
-      {
-      return false;
-      }
-    // look for a oneline fun(arg arg2) 
-    else if(oneLiner.find(inbuffer))
-      {
-      // the arguments are the second match
-      std::string args = oneLiner.match(2);
-      name = oneLiner.match(1);
-      // break up the arguments
-      cmSystemTools::GetArguments(args, arguments);
-      return true;
-      }
-    // look for a start of a multiline with no trailing ")"  fun(arg arg2 
-    else if(multiLine.find(inbuffer))
-      {
-      name = multiLine.match(1);
-      std::string args = multiLine.match(2);
-      cmSystemTools::GetArguments(args, arguments);
-      // Read lines until the closing paren is hit
-      bool done = false;
-      while(!done)
-        {
-        // read lines until the end paren is found
-        if(fin.getline(inbuffer, BUFFER_SIZE ) )
-          {
-          RemoveComments(inbuffer);
-          // Check for comment lines and ignore them.
-          if(blankLine.find(inbuffer))
-            { continue; }
-          // Is this the last line?
-          if(lastLine.find(inbuffer))
-            {
-            done = true;
-            std::string gargs = lastLine.match(1);
-            cmSystemTools::GetArguments(gargs, arguments);
-            }
-          else
-            {
-            std::string line = inbuffer;
-            cmSystemTools::GetArguments(line, arguments);
-            }
-          }
-        else
-          {
-          parseError = true;
-          cmSystemTools::Error("Parse error in read function missing end )\nIn File: ",
-                               filename, "\nCurrent line:", inbuffer);
-          return false;
-          }
-        }
-      return true;
-      }
-    else
-      {
-      parseError = true;
-      cmSystemTools::Error("Parse error in read function\nIn file:", 
-                           filename, "\nCurrent line:", inbuffer);
-      return false;
-      }
-    }
-  return false;
-
-}
-
-void cmSystemTools::GetArguments(std::string& line,
-                                 std::vector<std::string>& arguments)
-{
-  // Match a normal argument (not quoted, no spaces).
-  cmRegularExpression normalArgument("[ \t]*(([^ \t\r\\]|[\\].)+)[ \t\r]*");
-  // Match a quoted argument (surrounded by double quotes, spaces allowed).
-  cmRegularExpression quotedArgument("[ \t]*(\"([^\"\\]|[\\].)*\")[ \t\r]*");
-
-  bool done = false;
-  while(!done)
-    {
-    std::string arg;
-    std::string::size_type endpos=0;
-    bool foundQuoted = quotedArgument.find(line.c_str());
-    bool foundNormal = normalArgument.find(line.c_str());
-
-    if(foundQuoted && foundNormal)
-      {
-      // Both matches were found.  Take the earlier one.
-      // Favor double-quoted version if there is a tie.
-      if(normalArgument.start(1) < quotedArgument.start(1))
-        {
-        arg = normalArgument.match(1);
-        endpos = normalArgument.end(1);
-        }
-      else
-        {
-        arg = quotedArgument.match(1);
-        endpos = quotedArgument.end(1);
-        // Strip off the double quotes on the ends.
-        arg = arg.substr(1, arg.length()-2);
-        }
-      }    
-    else if (foundQuoted)
-      {
-      arg = quotedArgument.match(1);
-      endpos = quotedArgument.end(1);
-      // Strip off the double quotes on the ends.
-      arg = arg.substr(1, arg.length()-2);
-      }
-    else if(foundNormal)
-      {
-      arg = normalArgument.match(1);
-      endpos = normalArgument.end(1);
-      }
-    else
-      {
-      done = true;
-      }
-    if(!done)
-      {
-      arguments.push_back(cmSystemTools::RemoveEscapes(arg.c_str()));
-      line = line.substr(endpos, line.length() - endpos);
-      }
-    }
-}
-
-
 std::string cmSystemTools::RemoveEscapes(const char* s)
 {
   std::string result = "";
@@ -2141,90 +1979,101 @@ void cmSystemTools::GlobDirs(const char *fullPath,
 }
 
 
-void cmSystemTools::ExpandListArguments(std::vector<std::string> const& arguments, 
-                                        std::vector<std::string>& newargs)
+void cmSystemTools::ExpandList(std::vector<std::string> const& arguments, 
+                               std::vector<std::string>& newargs)
 {
   std::vector<std::string>::const_iterator i;
-  std::string newarg;
   for(i = arguments.begin();i != arguments.end(); ++i)
     {
-    // if there are no ; in the name then just copy the current string
-    if(i->find(';') == std::string::npos)
+    cmSystemTools::ExpandListArgument(*i, newargs);
+    }
+}
+
+void cmSystemTools::ExpandListArgument(const std::string& arg,
+                                       std::vector<std::string>& newargs)
+{
+  std::string newarg;
+  // If argument is empty, it is an empty list.
+  if(arg.length() == 0)
+    {
+    return;
+    }
+  // if there are no ; in the name then just copy the current string
+  if(arg.find(';') == std::string::npos)
+    {
+    newargs.push_back(arg);
+    }
+  else
+    {
+    std::string::size_type start = 0;
+    std::string::size_type endpos = 0;
+    const std::string::size_type size = arg.size();
+    // break up ; separated sections of the string into separate strings
+    while(endpos != size)
       {
-      newargs.push_back(*i);
-      }
-    else
-      {
-      std::string::size_type start = 0;
-      std::string::size_type endpos = 0;
-      const std::string::size_type size = i->size();
-      // break up ; separated sections of the string into separate strings
-      while(endpos != size)
+      endpos = arg.find(';', start); 
+      if(endpos == std::string::npos)
         {
-        endpos = i->find(';', start); 
+        endpos = arg.size();
+        }
+      else
+        {
+        // skip right over escaped ; ( \; )
+        while((endpos != std::string::npos)
+              && (endpos > 0) 
+              && ((arg)[endpos-1] == '\\') )
+          {
+          endpos = arg.find(';', endpos+1);
+          }
         if(endpos == std::string::npos)
           {
-          endpos = i->size();
+          endpos = arg.size();
+          }
+        }
+      std::string::size_type len = endpos - start;
+      if (len > 0)
+        {
+        // check for a closing ] after the start position
+        if(arg.find('[', start) == std::string::npos)
+          {
+          // if there is no [ in the string then keep it
+          newarg = arg.substr(start, len);
           }
         else
           {
-          // skip right over escaped ; ( \; )
-          while((endpos != std::string::npos)
-                && (endpos > 0) 
-                && ((*i)[endpos-1] == '\\') )
+          int opencount = 0;
+          int closecount = 0;
+          for(std::string::size_type j = start; j < endpos; ++j)
             {
-            endpos = i->find(';', endpos+1);
+            if(arg.at(j) == '[')
+              {
+              ++opencount;
+              }
+            else if (arg.at(j) == ']')
+              {
+              ++closecount;
+              }
             }
-          if(endpos == std::string::npos)
+          if(opencount != closecount)
             {
-            endpos = i->size();
+            // skip this one
+            endpos = arg.find(';', endpos+1);  
+            if(endpos == std::string::npos)
+              {
+              endpos = arg.size();
+              }
+            len = endpos - start;
             }
+          newarg = arg.substr(start, len);
           }
-        std::string::size_type len = endpos - start;
-        if (len > 0)
+        std::string::size_type pos = newarg.find("\\;");
+        if(pos != std::string::npos)
           {
-          // check for a closing ] after the start position
-          if(i->find('[', start) == std::string::npos)
-            {
-            // if there is no [ in the string then keep it
-            newarg = i->substr(start, len);
-            }
-          else
-            {
-            int opencount = 0;
-            int closecount = 0;
-            for(std::string::size_type j = start; j < endpos; ++j)
-              {
-              if(i->at(j) == '[')
-                {
-                ++opencount;
-                }
-              else if (i->at(j) == ']')
-                {
-                ++closecount;
-                }
-              }
-            if(opencount != closecount)
-              {
-              // skip this one
-              endpos = i->find(';', endpos+1);  
-              if(endpos == std::string::npos)
-                {
-                endpos = i->size();
-                }
-              len = endpos - start;
-              }
-            newarg = i->substr(start, len);
-            }
-          std::string::size_type pos = newarg.find("\\;");
-          if(pos != std::string::npos)
-            {
-            newarg.erase(pos, 1);
-            }
-          newargs.push_back(newarg);
+          newarg.erase(pos, 1);
           }
-        start = endpos+1;
+        newargs.push_back(newarg);
         }
+      start = endpos+1;
       }
     }
 }

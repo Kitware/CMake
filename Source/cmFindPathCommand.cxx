@@ -30,13 +30,13 @@ bool cmFindPathCommand::InitialPass(std::vector<std::string> const& argsIn)
   // already, if so use that value and don't look for the program
   std::string helpString = "What is the path where the file ";
   helpString += argsIn[1] + " can be found";
-  std::vector<std::string> argst;
+  std::vector<std::string> args;
   size_t size = argsIn.size();
   for(unsigned int j = 0; j < size; ++j)
     {
     if(argsIn[j] != "DOC")
       {
-      argst.push_back(argsIn[j]);
+      args.push_back(argsIn[j]);
       }
     else
       {
@@ -47,8 +47,6 @@ bool cmFindPathCommand::InitialPass(std::vector<std::string> const& argsIn)
       break;
       }
     }
-  std::vector<std::string> args;
-  cmSystemTools::ExpandListArguments(argst, args);
 
   const char* cacheValue
     = m_Makefile->GetDefinition(args[0].c_str());

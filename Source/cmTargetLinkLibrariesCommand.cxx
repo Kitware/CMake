@@ -17,21 +17,19 @@
 #include "cmTargetLinkLibrariesCommand.h"
 
 // cmTargetLinkLibrariesCommand
-bool cmTargetLinkLibrariesCommand::InitialPass(std::vector<std::string> const& argsIn)
+bool cmTargetLinkLibrariesCommand::InitialPass(std::vector<std::string> const& args)
 {
   // must have one argument
-  if(argsIn.size() < 1)
+  if(args.size() < 1)
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
   // but we might not have any libs after variable expansion
-  if(argsIn.size() < 2)
+  if(args.size() < 2)
     {
     return true;
     }
-  std::vector<std::string> args;
-  cmSystemTools::ExpandListArguments(argsIn, args);
   // add libraries, nothe that there is an optional prefix 
   // of debug and optimized than can be used
   std::vector<std::string>::const_iterator i = args.begin();

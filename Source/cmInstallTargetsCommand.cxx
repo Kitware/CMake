@@ -17,15 +17,13 @@
 #include "cmInstallTargetsCommand.h"
 
 // cmExecutableCommand
-bool cmInstallTargetsCommand::InitialPass(std::vector<std::string> const& argsIn)
+bool cmInstallTargetsCommand::InitialPass(std::vector<std::string> const& args)
 {
-  if(argsIn.size() < 2 )
+  if(args.size() < 2 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  std::vector<std::string> args;
-  cmSystemTools::ExpandListArguments(argsIn, args);
 
   cmTargets &tgts = m_Makefile->GetTargets();
   std::vector<std::string>::const_iterator s = args.begin();

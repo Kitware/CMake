@@ -17,14 +17,12 @@
 #include "cmLinkDirectoriesCommand.h"
 
 // cmLinkDirectoriesCommand
-bool cmLinkDirectoriesCommand::InitialPass(std::vector<std::string> const& argsIn)
+bool cmLinkDirectoriesCommand::InitialPass(std::vector<std::string> const& args)
 {
- if(argsIn.size() < 1 )
+ if(args.size() < 1 )
     {
     return true;
     }
- std::vector<std::string> args;
- cmSystemTools::ExpandListArguments(argsIn, args);
 
   for(std::vector<std::string>::const_iterator i = args.begin();
       i != args.end(); ++i)

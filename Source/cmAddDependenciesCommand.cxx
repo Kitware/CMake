@@ -17,15 +17,13 @@
 #include "cmAddDependenciesCommand.h"
 
 // cmDependenciesCommand
-bool cmAddDependenciesCommand::InitialPass(std::vector<std::string> const& argsIn)
+bool cmAddDependenciesCommand::InitialPass(std::vector<std::string> const& args)
 {
-  if(argsIn.size() < 2 )
+  if(args.size() < 2 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  std::vector<std::string> args;
-  cmSystemTools::ExpandListArguments(argsIn, args);
 
   std::string target_name = args[0];
 

@@ -37,19 +37,17 @@ bool cmRemoveCommand::InitialPass(std::vector<std::string> const& args)
   
   // expand the variable
   std::vector<std::string> varArgsExpanded;
-  std::vector<std::string> temp;
-  temp.push_back(std::string(cacheValue));
-  cmSystemTools::ExpandListArguments(temp, varArgsExpanded);
+  cmSystemTools::ExpandListArgument(cacheValue, varArgsExpanded);
   
   // expand the args
   // check for REMOVE(VAR v1 v2 ... vn) 
   std::vector<std::string> argsExpanded;
-  std::vector<std::string> temp2;
+  std::vector<std::string> temp;
   for(unsigned int j = 1; j < args.size(); ++j)
     {
-    temp2.push_back(args[j]);
+    temp.push_back(args[j]);
     }
-  cmSystemTools::ExpandListArguments(temp2, argsExpanded);
+  cmSystemTools::ExpandList(temp, argsExpanded);
   
   // now create the new value
   std::string value;

@@ -17,9 +17,10 @@
 #include "cmIfCommand.h"
 
 bool cmIfFunctionBlocker::
-IsFunctionBlocked(const char *name, const std::vector<std::string> &args, 
-                  cmMakefile &mf)
+IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
 {
+  const char* name = lff.m_Name.c_str();
+  const std::vector<cmListFileArgument>& args = lff.m_Arguments;
   // always let if statements through
   if (!strcmp(name,"IF"))
     {
@@ -40,7 +41,7 @@ IsFunctionBlocked(const char *name, const std::vector<std::string> &args,
         }
       // otherwise it must be an ENDIF statement, in that case remove the
       // function blocker
-      mf.RemoveFunctionBlocker("ENDIF",args);
+      mf.RemoveFunctionBlocker(lff);
       return true;
       }
     else if(args.empty())
@@ -50,10 +51,12 @@ IsFunctionBlocked(const char *name, const std::vector<std::string> &args,
       err += ".  Did you mean ";
       err += name;
       err += "( ";
-      for(std::vector<std::string>::const_iterator a = m_Args.begin();
+      for(std::vector<cmListFileArgument>::const_iterator a = m_Args.begin();
           a != m_Args.end();++a)
         {
-        err += *a;
+        err += (a->Quoted?"\"":"");
+        err += a->Value;
+        err += (a->Quoted?"\"":"");
         err += " ";
         }
       err += ")?";
@@ -63,13 +66,12 @@ IsFunctionBlocked(const char *name, const std::vector<std::string> &args,
   return m_IsBlocking;
 }
 
-bool cmIfFunctionBlocker::
-ShouldRemove(const char *name, const std::vector<std::string> &args, 
-             cmMakefile &) 
+bool cmIfFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
+                                       cmMakefile&)
 {
-  if (!strcmp(name,"ENDIF"))
+  if (lff.m_Name == "ENDIF")
     {
-    if (args == m_Args)
+    if (lff.m_Arguments == m_Args)
       {
       return true;
       }
@@ -90,19 +92,24 @@ ScopeEnded(cmMakefile &mf)
   std::string errmsg = "The end of a CMakeLists file was reached with an IF statement that was not closed properly.\nWithin the directory: ";
   errmsg += mf.GetCurrentDirectory();
   errmsg += "\nThe arguments are: ";
-  for(std::vector<std::string>::const_iterator j = m_Args.begin();
+  for(std::vector<cmListFileArgument>::const_iterator j = m_Args.begin();
       j != m_Args.end(); ++j)
     {   
-    errmsg += *j;
+    errmsg += (j->Quoted?"\"":"");
+    errmsg += j->Value;
+    errmsg += (j->Quoted?"\"":"");
     errmsg += " ";
     }
   cmSystemTools::Error(errmsg.c_str());
 }
 
-bool cmIfCommand::InitialPass(std::vector<std::string> const& args)
+bool cmIfCommand::InvokeInitialPass(const std::vector<cmListFileArgument>& args)
 {
   bool isValid;
-  bool isTrue = cmIfCommand::IsTrue(args,isValid,m_Makefile);
+  
+  std::vector<std::string> expandedArguments;
+  m_Makefile->ExpandArguments(args, expandedArguments);
+  bool isTrue = cmIfCommand::IsTrue(expandedArguments,isValid,m_Makefile);
   
   if (!isValid)
     {
@@ -110,7 +117,9 @@ bool cmIfCommand::InitialPass(std::vector<std::string> const& args)
     unsigned int i;
     for(i =0; i < args.size(); ++i)
       {
-      err += args[i];
+      err += (args[i].Quoted?"\"":"");
+      err += args[i].Value;
+      err += (args[i].Quoted?"\"":"");
       err += " ";
       }
     this->SetError(err.c_str());
@@ -120,25 +129,21 @@ bool cmIfCommand::InitialPass(std::vector<std::string> const& args)
   cmIfFunctionBlocker *f = new cmIfFunctionBlocker();
   // if is isn't true block the commands
   f->m_IsBlocking = !isTrue;
-  for(std::vector<std::string>::const_iterator j = args.begin();
-      j != args.end(); ++j)
-    {   
-    f->m_Args.push_back(*j);
-    }
+  f->m_Args = args;
   m_Makefile->AddFunctionBlocker(f);
   
   return true;
 }
 
-bool cmIfCommand::IsTrue(const std::vector<std::string> &args, bool &isValid,
-                         const cmMakefile *makefile)
+bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
+                         bool &isValid, const cmMakefile *makefile)
 {
   // check for the different signatures
   bool isTrue = true;
   isValid = false;
   const char *def;
   const char *def2;
-
+  
   if(args.size() < 1 )
     {
     isValid = true;

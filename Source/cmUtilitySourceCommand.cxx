@@ -17,15 +17,13 @@
 #include "cmUtilitySourceCommand.h"
 
 // cmUtilitySourceCommand
-bool cmUtilitySourceCommand::InitialPass(std::vector<std::string> const& argsIn)
+bool cmUtilitySourceCommand::InitialPass(std::vector<std::string> const& args)
 {
-  if(argsIn.size() < 3)
+  if(args.size() < 3)
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  std::vector<std::string> args;
-  cmSystemTools::ExpandListArguments(argsIn, args);
 
   std::vector<std::string>::const_iterator arg = args.begin();
   

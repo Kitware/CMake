@@ -16,7 +16,7 @@
 =========================================================================*/
 #include "cmListFileCache.h"
 #include "cmSystemTools.h"
-
+#include "cmRegularExpression.h"
 
 cmListFileCache* cmListFileCache::Instance = 0;
 
@@ -89,17 +89,17 @@ bool cmListFileCache::CacheFile(const char* path, bool requireProjectCommand)
     cmSystemTools::Error("cmListFileCache: error can not open file ", path);
     return false;
     }
+  long line=0;
   cmListFile inFile;
   inFile.m_ModifiedTime = cmSystemTools::ModifiedTime(path);
   bool parseError;
   while ( fin )
     {
     cmListFileFunction inFunction;
-    if(cmSystemTools::ParseFunction(fin, 
-                                    inFunction.m_Name,
-                                    inFunction.m_Arguments,
-                                    path, parseError))
+    if(cmListFileCache::ParseFunction(fin, inFunction, path, parseError,
+                                      &line))
       {
+      inFunction.m_FilePath = path;
       inFile.m_Functions.push_back(inFunction);
       }
     if (parseError)
@@ -126,7 +126,8 @@ bool cmListFileCache::CacheFile(const char* path, bool requireProjectCommand)
       {
       cmListFileFunction project;
       project.m_Name = "PROJECT";
-      project.m_Arguments.push_back("Project");
+      cmListFileArgument prj("Project", false);
+      project.m_Arguments.push_back(prj);
       inFile.m_Functions.insert(inFile.m_Functions.begin(),project);
       }
     }
@@ -141,5 +142,181 @@ void cmListFileCache::FlushCache(const char* path)
     {
     m_ListFileCache.erase(it);
     return;
+    }
+}
+
+inline void RemoveComments(char* ptr)
+{
+  while(*ptr)
+    {
+    if(*ptr == '#')
+      {
+      *ptr = 0;
+      break;
+      }
+    ++ptr;
+    }
+}
+
+bool cmListFileCache::ParseFunction(std::ifstream& fin,
+                                    cmListFileFunction& function,
+                                    const char* filename,
+                                    bool& parseError,
+                                    long* line)
+{
+  parseError = false;
+  std::string& name = function.m_Name;
+  std::vector<cmListFileArgument>& arguments = function.m_Arguments;
+  name = "";
+  arguments = std::vector<cmListFileArgument>();
+  const int BUFFER_SIZE = 4096;
+  char inbuffer[BUFFER_SIZE];
+  if(!fin)
+    {
+    return false;
+    }
+  if(fin.getline(inbuffer, BUFFER_SIZE ) )
+    {
+    if(line) { ++*line; }
+    RemoveComments(inbuffer);
+    cmRegularExpression blankLine("^[ \t\r]*$");
+    cmRegularExpression oneLiner("^[ \t]*([A-Za-z_0-9]*)[ \t]*\\((.*)\\)[ \t\r]*$");
+    cmRegularExpression multiLine("^[ \t]*([A-Za-z_0-9]*)[ \t]*\\((.*)$");
+    cmRegularExpression lastLine("^(.*)\\)[ \t\r]*$");
+
+    // check for blank line or comment
+    if(blankLine.find(inbuffer) )
+      {
+      return false;
+      }
+    // look for a oneline fun(arg arg2) 
+    else if(oneLiner.find(inbuffer))
+      {
+      // the arguments are the second match
+      std::string args = oneLiner.match(2);
+      name = oneLiner.match(1);
+      // break up the arguments
+      cmListFileCache::GetArguments(args, arguments);
+      if(line)
+        {
+        function.m_Line = *line;
+        }
+      return true;
+      }
+    // look for a start of a multiline with no trailing ")"  fun(arg arg2 
+    else if(multiLine.find(inbuffer))
+      {
+      name = multiLine.match(1);
+      std::string args = multiLine.match(2);
+      cmListFileCache::GetArguments(args, arguments);
+      if(line)
+        {
+        function.m_Line = *line;
+        }
+      // Read lines until the closing paren is hit
+      bool done = false;
+      while(!done)
+        {
+        // read lines until the end paren is found
+        if(fin.getline(inbuffer, BUFFER_SIZE ) )
+          {
+          ++line;
+          RemoveComments(inbuffer);
+          // Check for comment lines and ignore them.
+          if(blankLine.find(inbuffer))
+            { continue; }
+          // Is this the last line?
+          if(lastLine.find(inbuffer))
+            {
+            done = true;
+            std::string gargs = lastLine.match(1);
+            cmListFileCache::GetArguments(gargs, arguments);
+            }
+          else
+            {
+            std::string line = inbuffer;
+            cmListFileCache::GetArguments(line, arguments);
+            }
+          }
+        else
+          {
+          parseError = true;
+          cmSystemTools::Error("Parse error in read function missing end )\nIn File: ",
+                               filename, "\nCurrent line:", inbuffer);
+          return false;
+          }
+        }
+      return true;
+      }
+    else
+      {
+      parseError = true;
+      cmSystemTools::Error("Parse error in read function\nIn file:", 
+                           filename, "\nCurrent line:", inbuffer);
+      return false;
+      }
+    }
+  return false;
+
+}
+
+void cmListFileCache::GetArguments(std::string& line,
+                                 std::vector<cmListFileArgument>& arguments)
+{
+  // Match a normal argument (not quoted, no spaces).
+  cmRegularExpression normalArgument("[ \t]*(([^ \t\r\\]|[\\].)+)[ \t\r]*");
+  // Match a quoted argument (surrounded by double quotes, spaces allowed).
+  cmRegularExpression quotedArgument("[ \t]*(\"([^\"\\]|[\\].)*\")[ \t\r]*");
+
+  bool done = false;
+  while(!done)
+    {
+    std::string arg;
+    std::string::size_type endpos=0;
+    bool quoted = false;
+    bool foundQuoted = quotedArgument.find(line.c_str());
+    bool foundNormal = normalArgument.find(line.c_str());
+
+    if(foundQuoted && foundNormal)
+      {
+      // Both matches were found.  Take the earlier one.
+      // Favor double-quoted version if there is a tie.
+      if(normalArgument.start(1) < quotedArgument.start(1))
+        {
+        arg = normalArgument.match(1);
+        endpos = normalArgument.end(1);
+        }
+      else
+        {
+        arg = quotedArgument.match(1);
+        endpos = quotedArgument.end(1);
+        // Strip off the double quotes on the ends.
+        arg = arg.substr(1, arg.length()-2);
+        quoted = true;
+        }
+      }    
+    else if(foundQuoted)
+      {
+      arg = quotedArgument.match(1);
+      endpos = quotedArgument.end(1);
+      // Strip off the double quotes on the ends.
+      arg = arg.substr(1, arg.length()-2);
+      quoted = true;
+      }
+    else if(foundNormal)
+      {
+      arg = normalArgument.match(1);
+      endpos = normalArgument.end(1);
+      }
+    else
+      {
+      done = true;
+      }
+    if(!done)
+      {
+      cmListFileArgument a(cmSystemTools::RemoveEscapes(arg.c_str()), quoted);
+      arguments.push_back(a);
+      line = line.substr(endpos, line.length() - endpos);
+      }
     }
 }

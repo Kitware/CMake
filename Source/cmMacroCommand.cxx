@@ -17,66 +17,67 @@
 #include "cmMacroCommand.h"
 
 bool cmMacroFunctionBlocker::
-IsFunctionBlocked(const char *name, const std::vector<std::string> &args, 
-                  cmMakefile &mf) 
+IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf) 
 {
   // record commands until we hit the ENDMACRO
   // at the ENDMACRO call we shift gears and start looking for invocations
-  if (!strcmp(name,"ENDMACRO") && args[0] == m_Args[0])
+  if(lff.m_Name == "ENDMACRO")
     {
-    m_Executing = true;
-    return true;
+    std::vector<std::string> expandedArguments;
+    mf.ExpandArguments(lff.m_Arguments, expandedArguments);
+    if(!expandedArguments.empty() && (expandedArguments[0] == m_Args[0]))
+      {
+      m_Executing = true;
+      return true;
+      }
     }
   
   if (!m_Executing)
     {
     // if it wasn't an endmacro and we are not executing then we must be
     // recording
-    m_Commands.push_back(name);
-    std::vector<std::string> newArgs;
-    for(std::vector<std::string>::const_iterator j = args.begin();
-        j != args.end(); ++j)
-      {   
-      newArgs.push_back(*j);
-      }
-    m_CommandArguments.push_back(newArgs);
+    m_Functions.push_back(lff);
     return true;
     }
   
   // otherwise the macro has been recorded and we are executing
   // so we look for macro invocations
-  if (!strcmp(name,m_Args[0].c_str()))
+  if(lff.m_Name == m_Args[0])
     {
+    // Expand the argument list to the macro.
+    std::vector<std::string> expandedArguments;
+    mf.ExpandArguments(lff.m_Arguments, expandedArguments);
     // make sure the number of arguments matches
-    if (args.size() != m_Args.size() - 1)
+    if (expandedArguments.size() != m_Args.size() - 1)
       {
       cmSystemTools::Error("A macro was invoked without the correct number of arguments. The macro name was: ", m_Args[0].c_str());
       }
-    // for each recorded command
-    for(unsigned int c = 0; c < m_Commands.size(); ++c)
+    
+    // Invoke all the functions that were collected in the block.
+    for(unsigned int c = 0; c < m_Functions.size(); ++c)
       {
-      // perform argument replacement
-      std::vector<std::string> newArgs;
-      // for each argument of this command
-      for (std::vector<std::string>::const_iterator k = 
-             m_CommandArguments[c].begin();
-           k != m_CommandArguments[c].end(); ++k)
+      // Replace the formal arguments and then invoke the command.
+      cmListFileFunction newLFF;
+      newLFF.m_Name = m_Functions[c].m_Name;
+      for (std::vector<cmListFileArgument>::const_iterator k = 
+             m_Functions[c].m_Arguments.begin();
+           k != m_Functions[c].m_Arguments.end(); ++k)
         {
-        // replace any matches with the formal arguments
-        std::string tmps = *k;
-        // for each formal macro argument
+        std::string tmps = k->Value;
         for (unsigned int j = 1; j < m_Args.size(); ++j)
           {
           std::string variable = "${";
           variable += m_Args[j];
           variable += "}"; 
           cmSystemTools::ReplaceString(tmps, variable.c_str(),
-                                       args[j-1].c_str());
+                                       expandedArguments[j-1].c_str());
           }
-        newArgs.push_back(tmps);
+        cmListFileArgument arg(tmps, k->Quoted);
+        newLFF.m_Arguments.push_back(arg);
+        newLFF.m_FilePath = m_Functions[c].m_FilePath;
+        newLFF.m_Line = m_Functions[c].m_Line;
         }
-      // execute command
-      mf.ExecuteCommand(m_Commands[c],newArgs);
+      mf.ExecuteCommand(newLFF);
       }
     return true;
     }
@@ -86,8 +87,7 @@ IsFunctionBlocked(const char *name, const std::vector<std::string> &args,
 }
 
 bool cmMacroFunctionBlocker::
-ShouldRemove(const char *, const std::vector<std::string> &, 
-             cmMakefile &) 
+ShouldRemove(const cmListFileFunction&, cmMakefile &) 
 {
   return false;
 }
@@ -98,11 +98,8 @@ ScopeEnded(cmMakefile &)
   // macros never leave scope
 }
 
-bool cmMacroCommand::InitialPass(std::vector<std::string> const& argsIn)
+bool cmMacroCommand::InitialPass(std::vector<std::string> const& args)
 {
-  std::vector<std::string> args;
-  cmSystemTools::ExpandListArguments(argsIn, args);
-
   if(args.size() < 1)
     {
     this->SetError("called with incorrect number of arguments");

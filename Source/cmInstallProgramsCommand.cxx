@@ -17,15 +17,13 @@
 #include "cmInstallProgramsCommand.h"
 
 // cmExecutableCommand
-bool cmInstallProgramsCommand::InitialPass(std::vector<std::string> const& argsIn)
+bool cmInstallProgramsCommand::InitialPass(std::vector<std::string> const& args)
 {
-  if(argsIn.size() < 2)
+  if(args.size() < 2)
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  std::vector<std::string> args;
-  cmSystemTools::ExpandListArguments(argsIn, args);
 
   // Create an INSTALL_PROGRAMS target specifically for this path.
   m_TargetName = "INSTALL_PROGRAMS_"+args[0];

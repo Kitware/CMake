@@ -32,8 +32,7 @@ bool cmAddTestCommand::InitialPass(std::vector<std::string> const& args)
   // store the arguments for the final pass
   // also expand any CMake variables
 
-  m_Args.erase(m_Args.begin(), m_Args.end());
-  cmSystemTools::ExpandListArguments(args, m_Args);
+  m_Args = args;
   return true;
 }
 

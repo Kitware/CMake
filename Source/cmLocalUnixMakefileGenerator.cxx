@@ -812,7 +812,7 @@ void cmLocalUnixMakefileGenerator::OutputLibraryRule(std::ostream& fout,
   // expand multi-command semi-colon separated lists
   // of commands into separate commands
   std::vector<std::string> commands;
-  cmSystemTools::ExpandListArguments(rules, commands);
+  cmSystemTools::ExpandList(rules, commands);
   // collect custom commands for this target and add them to the list
   std::string customCommands = this->CreateTargetRules(t, name);
   if(customCommands.size() > 0)
@@ -986,7 +986,7 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
   std::string comment = "executable";
   
   std::vector<std::string> commands;
-  cmSystemTools::ExpandListArguments(rules, commands);
+  cmSystemTools::ExpandList(rules, commands);
   std::string customCommands = this->CreateTargetRules(t, name);
   if(customCommands.size() > 0)
     {
@@ -2339,7 +2339,7 @@ OutputBuildObjectFromSource(std::ostream& fout,
   // expand multi-command semi-colon separated lists
   // of commands into separate commands
   std::vector<std::string> commands;
-  cmSystemTools::ExpandListArguments(rules, commands);
+  cmSystemTools::ExpandList(rules, commands);
   for(std::vector<std::string>::iterator i = commands.begin();
       i != commands.end(); ++i)
     {

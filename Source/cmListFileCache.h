@@ -26,10 +26,25 @@
  * cmake list files.
  */
 
+struct cmListFileArgument
+{
+  cmListFileArgument(): Value(), Quoted(false) {}
+  cmListFileArgument(const cmListFileArgument& r): Value(r.Value), Quoted(r.Quoted) {}
+  cmListFileArgument(const std::string& v, bool q): Value(v), Quoted(q) {}
+  bool operator == (const cmListFileArgument& r) const
+    {
+    return (this->Value == r.Value) && (this->Quoted == r.Quoted);
+    }
+  std::string Value;
+  bool Quoted;
+};
+
 struct cmListFileFunction
 {
   std::string m_Name;
-  std::vector<std::string> m_Arguments;
+  std::vector<cmListFileArgument> m_Arguments;
+  std::string m_FilePath;
+  long m_Line;
 };
 
 struct cmListFile
@@ -60,7 +75,25 @@ public:
 
   //! Flush cache file out of cache.
   void FlushCache(const char* path);
+    
+  /**
+   * Read a CMake command (or function) from an input file.  This
+   * returns the name of the function and a list of its 
+   * arguments.  The last argument is the name of the file that 
+   * the ifstream points to, and is used for debug info only.
+   */
+  static bool ParseFunction(std::ifstream&, cmListFileFunction& function,
+                            const char* filename, bool& parseError,
+                            long* line = 0);
 
+  /**
+   *  Extract white-space separated arguments from a string.
+   *  Double quoted strings are accepted with spaces.
+   *  This is called by ParseFunction.
+   */
+  static void GetArguments(std::string& line,
+                           std::vector<cmListFileArgument>& arguments);
+  
 private:
   // Cache the file
   bool CacheFile(const char* path, bool requireProjectCommand);

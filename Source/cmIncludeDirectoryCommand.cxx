@@ -17,14 +17,12 @@
 #include "cmIncludeDirectoryCommand.h"
 
 // cmIncludeDirectoryCommand
-bool cmIncludeDirectoryCommand::InitialPass(std::vector<std::string> const& argsIn)
+bool cmIncludeDirectoryCommand::InitialPass(std::vector<std::string> const& args)
 {
-  if(argsIn.size() < 1 )
+  if(args.size() < 1 )
     {
     return true;
     }
-  std::vector<std::string> args;
-  cmSystemTools::ExpandListArguments(argsIn, args);
 
   std::vector<std::string>::const_iterator i = args.begin();
 

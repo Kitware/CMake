@@ -19,7 +19,7 @@
 #include "cmSourceFile.h"
 
 // cmAbstractFilesCommand
-bool cmAbstractFilesCommand::InitialPass(std::vector<std::string> const& argsIn)
+bool cmAbstractFilesCommand::InitialPass(std::vector<std::string> const& args)
 {
   const char* versionValue
     = m_Makefile->GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
@@ -29,13 +29,11 @@ bool cmAbstractFilesCommand::InitialPass(std::vector<std::string> const& argsIn)
     return false;
     }
   
-  if(argsIn.size() < 1 )
+  if(args.size() < 1 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  std::vector<std::string> args;
-  cmSystemTools::ExpandListArguments(argsIn, args);
 
   bool ret = true;
   std::string m = "could not find source file(s):\n";

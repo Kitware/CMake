@@ -18,7 +18,8 @@
 #define cmCommand_h
 
 #include "cmStandardIncludes.h"
-class cmMakefile;
+#include "cmListFileCache.h"
+#include "cmMakefile.h"
 
 /** \class cmCommand
  * \brief Superclass for all commands in CMake.
@@ -49,6 +50,18 @@ public:
    */
   void SetMakefile(cmMakefile*m) 
     {m_Makefile = m; }
+
+  /**
+   * This is called by the cmMakefile when the command is first
+   * encountered in the CMakeLists.txt file.  It expands the command's
+   * arguments and then invokes the InitialPass.
+   */
+  virtual bool InvokeInitialPass(const std::vector<cmListFileArgument>& args)
+    {
+    std::vector<std::string> expandedArguments;
+    m_Makefile->ExpandArguments(args, expandedArguments);
+    return this->InitialPass(expandedArguments);
+    }
 
   /**
    * This is called when the command is first encountered in
@@ -159,13 +172,14 @@ private:
 
 // All subclasses of cmCommand should invoke this macro.
 #define cmTypeMacro(thisClass,superclass) \
+typedef superclass Superclass; \
 static bool IsTypeOf(const char *type) \
 { \
   if ( !strcmp(#thisClass,type) ) \
     { \
     return true; \
     } \
-  return superclass::IsTypeOf(type); \
+  return Superclass::IsTypeOf(type); \
 } \
 virtual bool IsA(const char *type) \
 { \

@@ -17,15 +17,13 @@
 #include "cmAddDefinitionsCommand.h"
 
 // cmAddDefinitionsCommand
-bool cmAddDefinitionsCommand::InitialPass(std::vector<std::string> const& argsIn)
+bool cmAddDefinitionsCommand::InitialPass(std::vector<std::string> const& args)
 {
   // it is OK to have no arguments
-  if(argsIn.size() < 1 )
+  if(args.size() < 1 )
     {
     return true;
     }
-  std::vector<std::string> args;
-  cmSystemTools::ExpandListArguments(argsIn, args);
 
   for(std::vector<std::string>::const_iterator i = args.begin();
       i != args.end(); ++i)

@@ -30,12 +30,12 @@ bool cmFindProgramCommand::InitialPass(std::vector<std::string> const& argsIn)
     }
   std::string doc = "Path to a program.";
   size_t size = argsIn.size();
-  std::vector<std::string> argst;
+  std::vector<std::string> args;
   for(unsigned int j = 0; j < size; ++j)
     {
     if(argsIn[j] != "DOC")
       {
-      argst.push_back(argsIn[j]);
+      args.push_back(argsIn[j]);
       }
     else
       {
@@ -46,9 +46,6 @@ bool cmFindProgramCommand::InitialPass(std::vector<std::string> const& argsIn)
       break;
       }
     }
-  std::vector<std::string> args;
-  cmSystemTools::ExpandListArguments(argst, args);
-
 
   std::vector<std::string>::iterator i = args.begin();
   // Use the first argument as the name of something to be defined

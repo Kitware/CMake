@@ -17,7 +17,7 @@
 #include "cmSourceFilesCommand.h"
 
 // cmSourceFilesCommand
-bool cmSourceFilesCommand::InitialPass(std::vector<std::string> const& argsIn)
+bool cmSourceFilesCommand::InitialPass(std::vector<std::string> const& args)
 {
   const char* versionValue
     = m_Makefile->GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
@@ -27,13 +27,11 @@ bool cmSourceFilesCommand::InitialPass(std::vector<std::string> const& argsIn)
     return false;
     }
 
-  if(argsIn.size() < 1 )
+  if(args.size() < 1 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  std::vector<std::string> args;
-  cmSystemTools::ExpandListArguments(argsIn, args);
   std::string sourceListValue;
   
   // was the list already populated

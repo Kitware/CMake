@@ -16,7 +16,7 @@
 =========================================================================*/
 #include "cmEndForEachCommand.h"
 
-bool cmEndForEachCommand::InitialPass(std::vector<std::string> const& args)
+bool cmEndForEachCommand::InvokeInitialPass(std::vector<cmListFileArgument> const& args)
 {
   if(args.size() < 1 )
     {
@@ -25,7 +25,10 @@ bool cmEndForEachCommand::InitialPass(std::vector<std::string> const& args)
     }
 
   // remove any function blockers for this define
-  m_Makefile->RemoveFunctionBlocker("ENDFOREACH",args);
+  cmListFileFunction lff;
+  lff.m_Name = "ENDFOREACH";
+  lff.m_Arguments = args;
+  m_Makefile->RemoveFunctionBlocker(lff);
   
   return true;
 }

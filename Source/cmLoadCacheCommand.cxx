@@ -18,14 +18,12 @@
 
 
 // cmLoadCacheCommand
-bool cmLoadCacheCommand::InitialPass(std::vector<std::string> const& argsIn)
+bool cmLoadCacheCommand::InitialPass(std::vector<std::string> const& args)
 {
-  if (argsIn.size()< 1)
+  if (args.size()< 1)
     {
     this->SetError("called with wrong number of arguments.");
     }
-  std::vector<std::string> args;
-  cmSystemTools::ExpandListArguments(argsIn, args);
 
   if(args.size() >= 2 && args[1] == "READ_WITH_PREFIX")
     {

@@ -17,14 +17,12 @@
 #include "cmLinkLibrariesCommand.h"
 
 // cmLinkLibrariesCommand
-bool cmLinkLibrariesCommand::InitialPass(std::vector<std::string> const& argsIn)
+bool cmLinkLibrariesCommand::InitialPass(std::vector<std::string> const& args)
 {
-  if(argsIn.size() < 1 )
+  if(args.size() < 1 )
     {
     return true;
     }
-  std::vector<std::string> args;
-  cmSystemTools::ExpandListArguments(argsIn, args);
   // add libraries, nothe that there is an optional prefix 
   // of debug and optimized than can be used
   for(std::vector<std::string>::const_iterator i = args.begin();

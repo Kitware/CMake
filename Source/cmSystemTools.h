@@ -56,8 +56,10 @@ public:
    *  strings into multiple arguements.  A new vector is created 
    *  containing the expanded versions of all arguments in argsIn.
    */
-  static void ExpandListArguments(std::vector<std::string> const& argsIn,
-                                  std::vector<std::string>& argsOut);
+  static void ExpandList(std::vector<std::string> const& argsIn,
+                         std::vector<std::string>& argsOut);
+  static void ExpandListArgument(const std::string& arg,
+                                 std::vector<std::string>& argsOut);
 
   /**
    * Read a registry value
@@ -117,25 +119,6 @@ public:
   
   ///! Return true if a file exists in the current directory.
   static bool FileExists(const char* filename);
-
-  /**
-   * Read a CMake command (or function) from an input file.  This
-   * returns the name of the function and a list of its 
-   * arguments.  The last argument is the name of the file that 
-   * the ifstream points to, and is used for debug info only.
-   */
-  static bool ParseFunction(std::ifstream&, 
-                            std::string& name,
-                            std::vector<std::string>& arguments,
-                            const char* filename, bool& parseError);
-
-  /**
-   *  Extract white-space separated arguments from a string.
-   *  Double quoted strings are accepted with spaces.
-   *  This is called by ParseFunction.
-   */
-  static void GetArguments(std::string& line,
-                           std::vector<std::string>& arguments);
   
   /**
    * Given a string, replace any escape sequences with the corresponding
@@ -388,6 +371,5 @@ private:
 
   static std::string s_Windows9xComspecSubstitute;
 };
-
 
 #endif

@@ -22,6 +22,7 @@
 #include "cmSystemTools.h"
 #include "cmSourceGroup.h"
 #include "cmTarget.h"
+#include "cmListFileCache.h"
 #include "cmCacheManager.h"
 
 class cmFunctionBlocker;
@@ -77,7 +78,7 @@ public:
     { m_FunctionBlockers.push_back(fb);}
   void RemoveFunctionBlocker(cmFunctionBlocker *fb)
     { m_FunctionBlockers.remove(fb);}
-  void RemoveFunctionBlocker(const char *name, const std::vector<std::string> &args);
+  void RemoveFunctionBlocker(const cmListFileFunction& lff);
   
   /**
    * Try running cmake and building a file. This is used for dynalically
@@ -511,7 +512,7 @@ public:
   /**
    * execute a single CMake command
    */
-  void ExecuteCommand(std::string const &name, std::vector<std::string> const& args);
+  void ExecuteCommand(const cmListFileFunction& lff);
   
   /** Check if a command exists. */
   bool CommandExists(const char* name) const;
@@ -535,6 +536,13 @@ public:
 
   ///! Display progress or status message.
   void DisplayStatus(const char*, float);
+  
+  /**
+   * Expand the given list file arguments into the full set after
+   * variable replacement and list expansion.
+   */
+  void ExpandArguments(std::vector<cmListFileArgument> const& inArgs,
+                       std::vector<std::string>& outArgs);
 protected:
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(const char* name, cmTarget& target);
@@ -581,7 +589,7 @@ protected:
   DefinitionMap m_Definitions;
   std::vector<cmCommand*> m_UsedCommands;
   cmLocalGenerator* m_LocalGenerator;
-  bool IsFunctionBlocked(const char *name, std::vector<std::string> const& args);
+  bool IsFunctionBlocked(const cmListFileFunction& lff);
   
 private:
   /**

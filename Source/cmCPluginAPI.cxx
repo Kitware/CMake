@@ -296,12 +296,14 @@ void cmExecuteCommand(void *arg, const char *name,
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
   std::vector<std::string> args2;
-  int i;
-  for (i = 0; i < numArgs; ++i)
+  cmListFileFunction lff;
+  lff.m_Name = name;
+  for(int i = 0; i < numArgs; ++i)
     {
-    args2.push_back(args[i]);
+    // Assume all arguments are quoted.
+    lff.m_Arguments.push_back(cmListFileArgument(args[i], true));
     }
-  mf->ExecuteCommand(std::string(name), args2);
+  mf->ExecuteCommand(lff);
 }
 
 void cmExpandSourceListArguments(void *arg, 

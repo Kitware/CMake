@@ -31,15 +31,13 @@ class cmIfFunctionBlocker : public cmFunctionBlocker
 public:
   cmIfFunctionBlocker() {}
   virtual ~cmIfFunctionBlocker() {}
-  virtual bool IsFunctionBlocked(const char *name, 
-                                 const std::vector<std::string> &args, 
+  virtual bool IsFunctionBlocked(const cmListFileFunction& lff,
                                  cmMakefile &mf);
-  virtual bool ShouldRemove(const char *name, 
-                            const std::vector<std::string> &args, 
+  virtual bool ShouldRemove(const cmListFileFunction& lff,
                             cmMakefile &mf);
   virtual void ScopeEnded(cmMakefile &mf);
   
-  std::vector<std::string> m_Args;
+  std::vector<cmListFileArgument> m_Args;
   bool m_IsBlocking;
 };
 
@@ -60,10 +58,16 @@ public:
     }
 
   /**
+   * This overrides the default InvokeInitialPass implementation.
+   * It records the arguments before expansion.
+   */
+  virtual bool InvokeInitialPass(const std::vector<cmListFileArgument>& args);
+    
+  /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool InitialPass(std::vector<std::string> const& args);
+  virtual bool InitialPass(std::vector<std::string> const& args) { return false; }
 
   /**
    * The name of the command as specified in CMakeList.txt.

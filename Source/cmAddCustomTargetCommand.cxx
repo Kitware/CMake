@@ -17,17 +17,15 @@
 #include "cmAddCustomTargetCommand.h"
 
 // cmAddCustomTargetCommand
-bool cmAddCustomTargetCommand::InitialPass(std::vector<std::string> const& argsIn)
+bool cmAddCustomTargetCommand::InitialPass(std::vector<std::string> const& args)
 {
   bool all = false;
   
-  if(argsIn.size() < 2 )
+  if(args.size() < 2 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  std::vector<std::string> args;
-  cmSystemTools::ExpandListArguments(argsIn, args);
 
   // all target option
   std::string arguments;

@@ -31,19 +31,12 @@ class cmMacroFunctionBlocker : public cmFunctionBlocker
 public:
   cmMacroFunctionBlocker() {m_Executing = false;}
   virtual ~cmMacroFunctionBlocker() {}
-  virtual bool IsFunctionBlocked(const char *name, 
-                                 const std::vector<std::string> &args, 
-                                 cmMakefile &mf);
-  virtual bool ShouldRemove(const char *name, 
-                            const std::vector<std::string> &args, 
-                            cmMakefile &mf);
+  virtual bool IsFunctionBlocked(const cmListFileFunction&, cmMakefile &mf);
+  virtual bool ShouldRemove(const cmListFileFunction&, cmMakefile &mf);
   virtual void ScopeEnded(cmMakefile &mf);
   
-  virtual int NeedExpandedVariables () { return 0; };
-
   std::vector<std::string> m_Args;
-  std::vector<std::string> m_Commands;
-  std::vector<std::vector<std::string> > m_CommandArguments;
+  std::vector<cmListFileFunction> m_Functions;
   bool m_Executing;
 };
 

@@ -18,18 +18,16 @@
 #include "cmSourceFile.h"
 
 // cmCreateTestSourceList
-bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)
+bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args)
 {
-  if (argsIn.size() < 3)
+  if (args.size() < 3)
     {
     this->SetError("called with wrong number of arguments.");
     return false;
     }
 
-  std::vector<std::string> args;
-  cmSystemTools::ExpandListArguments(argsIn, args);
   
-  std::vector<std::string>::iterator i = args.begin();
+  std::vector<std::string>::const_iterator i = args.begin();
   std::string extraInclude;
   std::string function;
   std::vector<std::string> tests;
@@ -120,7 +118,7 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)
     "/* Forward declare test functions. */\n"
     "\n";
 
-  std::vector<std::string>::iterator testsBegin = i;
+  std::vector<std::string>::const_iterator testsBegin = i;
   std::vector<std::string> tests_func_name;
 
   // The rest of the arguments consist of a list of test source files.

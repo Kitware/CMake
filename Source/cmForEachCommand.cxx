@@ -17,68 +17,71 @@
 #include "cmForEachCommand.h"
 
 bool cmForEachFunctionBlocker::
-IsFunctionBlocked(const char *name, const std::vector<std::string> &args, 
-                  cmMakefile &mf) 
+IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf) 
 {
-  // prevent recusion and don't let this blobker blobk its own commands
+  // Prevent recusion and don't let this blobker block its own
+  // commands.
   if (m_Executing)
     {
     return false;
     }
   
   // at end of for each execute recorded commands
-  if (!strcmp(name,"ENDFOREACH") && args[0] == m_Args[0])
+  if (lff.m_Name == "ENDFOREACH")
     {
-    m_Executing = true;
-    std::string variable = "${";
-    variable += m_Args[0];
-    variable += "}"; 
-    std::vector<std::string>::const_iterator j = m_Args.begin();
-    ++j;
-    
-    for( ; j != m_Args.end(); ++j)
-      {   
-      // perform string replace
-        for(unsigned int c = 0; c < m_Commands.size(); ++c)
-        {
-        std::vector<std::string> newArgs;
-        for (std::vector<std::string>::const_iterator k = 
-               m_CommandArguments[c].begin();
-             k != m_CommandArguments[c].end(); ++k)
+    std::vector<std::string> expandedArguments;
+    mf.ExpandArguments(lff.m_Arguments, expandedArguments);
+    if(!expandedArguments.empty() && (expandedArguments[0] == m_Args[0]))
+      {
+      m_Executing = true;
+      std::string variable = "${";
+      variable += m_Args[0];
+      variable += "}"; 
+      std::vector<std::string>::const_iterator j = m_Args.begin();
+      ++j;
+      
+      for( ; j != m_Args.end(); ++j)
+        {   
+        // Invoke all the functions that were collected in the block.
+        for(unsigned int c = 0; c < m_Functions.size(); ++c)
           {
-          std::string tmps = *k;
-          cmSystemTools::ReplaceString(tmps, variable.c_str(),
-                                       j->c_str());
-          newArgs.push_back(tmps);
+          // Replace the loop variable and then invoke the command.
+          cmListFileFunction newLFF;
+          newLFF.m_Name = m_Functions[c].m_Name;
+          for (std::vector<cmListFileArgument>::const_iterator k = 
+                 m_Functions[c].m_Arguments.begin();
+               k != m_Functions[c].m_Arguments.end(); ++k)
+            {
+            std::string tmps = k->Value;
+            cmSystemTools::ReplaceString(tmps, variable.c_str(), j->c_str());
+            cmListFileArgument arg(tmps, k->Quoted);
+            newLFF.m_Arguments.push_back(arg);
+            }
+          mf.ExecuteCommand(newLFF);
           }
-        // execute command
-        mf.ExecuteCommand(m_Commands[c],newArgs);
         }
+      return false;
       }
-    return false;
     }
 
   // record the command
-  m_Commands.push_back(name);
-  std::vector<std::string> newArgs;
-  for(std::vector<std::string>::const_iterator j = args.begin();
-      j != args.end(); ++j)
-    {   
-    newArgs.push_back(*j);
-    }
-  m_CommandArguments.push_back(newArgs);
+  m_Functions.push_back(lff);
   
   // always return true
   return true;
 }
 
 bool cmForEachFunctionBlocker::
-ShouldRemove(const char *name, const std::vector<std::string> &args, 
-             cmMakefile &) 
+ShouldRemove(const cmListFileFunction& lff, cmMakefile& mf)
 {
-  if (!strcmp(name,"ENDFOREACH") && args[0] == m_Args[0])
+  if(lff.m_Name == "ENDFOREACH")
     {
-    return true;
+    std::vector<std::string> expandedArguments;
+    mf.ExpandArguments(lff.m_Arguments, expandedArguments);
+    if(!expandedArguments.empty() && (expandedArguments[0] == m_Args[0]))
+      {
+      return true;
+      }
     }
   return false;
 }
@@ -90,11 +93,8 @@ ScopeEnded(cmMakefile &mf)
                        mf.GetCurrentDirectory());
 }
 
-bool cmForEachCommand::InitialPass(std::vector<std::string> const& argsIn)
+bool cmForEachCommand::InitialPass(std::vector<std::string> const& args)
 {
-  std::vector<std::string> args;
-  cmSystemTools::ExpandListArguments(argsIn, args);
-
   if(args.size() < 1)
     {
     this->SetError("called with incorrect number of arguments");
@@ -103,11 +103,7 @@ bool cmForEachCommand::InitialPass(std::vector<std::string> const& argsIn)
   
   // create a function blocker
   cmForEachFunctionBlocker *f = new cmForEachFunctionBlocker();
-  for(std::vector<std::string>::const_iterator j = args.begin();
-      j != args.end(); ++j)
-    {   
-    f->m_Args.push_back(*j);
-    }
+  f->m_Args = args;
   m_Makefile->AddFunctionBlocker(f);
   
   return true;

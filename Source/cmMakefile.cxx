@@ -157,14 +157,14 @@ bool cmMakefile::CommandExists(const char* name) const
   return m_LocalGenerator->GetGlobalGenerator()->GetCMakeInstance()->CommandExists(name);
 }
       
-void cmMakefile::ExecuteCommand(std::string const &name,
-                                std::vector<std::string> const& arguments)
+void cmMakefile::ExecuteCommand(const cmListFileFunction& lff)
 {
   // quick return if blocked
-  if(this->IsFunctionBlocked(name.c_str(), arguments))
+  if(this->IsFunctionBlocked(lff))
     {
     return;
     }
+  std::string name = lff.m_Name;
   // execute the command
   cmCommand *rm = 
     m_LocalGenerator->GetGlobalGenerator()->GetCMakeInstance()->GetCommand(name.c_str());
@@ -179,27 +179,13 @@ void cmMakefile::ExecuteCommand(std::string const &name,
       // if the command is inherited then InitialPass it.
       if(!m_Inheriting || usedCommand->IsInherited())
         {
-        std::vector<std::string> expandedArguments;
-        for(std::vector<std::string>::const_iterator i = arguments.begin();
-            i != arguments.end(); ++i)
+        if(!usedCommand->InvokeInitialPass(lff.m_Arguments))
           {
-          std::string tmps = *i;
-          this->ExpandVariablesInString(tmps);
-          if (tmps.find_first_not_of(" ") != std::string::npos)
-            {
-            // we found something in the args
-            expandedArguments.push_back(tmps);
-            }
-          }
-        if(!usedCommand->InitialPass(expandedArguments))
-          {
-          std::string error;
-          error = usedCommand->GetName();
-          error += ": Error : \n";
-          error += usedCommand->GetError();
-          error += " from CMakeLists.txt file in directory: ";
-          error += m_cmCurrentDirectory;
-          cmSystemTools::Error(error.c_str());
+          cmOStringStream error;
+          error << "Error in cmake code at\n"
+                << lff.m_FilePath << ":" << lff.m_Line << ":\n"
+                << usedCommand->GetError();
+          cmSystemTools::Error(error.str().c_str());
           }
         else
           {
@@ -216,18 +202,13 @@ void cmMakefile::ExecuteCommand(std::string const &name,
       delete usedCommand;
       }
     }
-  else if((name == "CABLE_WRAP_TCL") || (name == "CABLE_CLASS_SET") ||
-          (name == "CONFIGURE_GCCXML"))
-    {
-    cmSystemTools::Error("The command ", name.c_str(),
-                         " is not implemented in this version of CMake.\n"
-                         "Contact cable@public.kitware.com for more information.");
-    }
   else
     {
-    cmSystemTools::Error("unknown CMake command:", name.c_str(), 
-                         "\nReading cmake file in directory:" , 
-                         m_cmCurrentDirectory.c_str());
+    cmOStringStream error;
+    error << "Error in cmake code at\n"
+          << lff.m_FilePath << ":" << lff.m_Line << ":\n"
+          << "Unknown CMake command \"" << lff.m_Name.c_str() << "\".";
+    cmSystemTools::Error(error.str().c_str());
     }
 }
 
@@ -335,9 +316,7 @@ bool cmMakefile::ReadListFile(const char* filename, const char* external)
   const size_t numberFunctions = lf->m_Functions.size();
   for(size_t i =0; i < numberFunctions; ++i)
     {
-    cmListFileFunction& curFunction = lf->m_Functions[i];
-    this->ExecuteCommand(curFunction.m_Name,
-                         curFunction.m_Arguments);
+    this->ExecuteCommand(lf->m_Functions[i]);
     }
 
   // send scope ended to and funciton blockers
@@ -1161,8 +1140,7 @@ cmMakefile::FindSourceGroup(const char* source,
   return groups.front();
 }
 
-bool cmMakefile::IsFunctionBlocked(const char *name,
-                                   std::vector<std::string> const&args)
+bool cmMakefile::IsFunctionBlocked(const cmListFileFunction& lff)
 {
   // if there are no blockers get out of here
   if (m_FunctionBlockers.begin() == m_FunctionBlockers.end())
@@ -1171,51 +1149,52 @@ bool cmMakefile::IsFunctionBlocked(const char *name,
     }
 
   // loop over all function blockers to see if any block this command
-  std::vector<std::string> expandedArguments;
-  for(std::vector<std::string>::const_iterator i = args.begin();
-      i != args.end(); ++i)
-    {
-    std::string tmps = *i;
-    this->ExpandVariablesInString(tmps);
-    if (tmps.find_first_not_of(" ") != std::string::npos)
-      {
-      // we found something in the args
-      expandedArguments.push_back(tmps);
-      }
-    }
   // evaluate in reverse, this is critical for balanced IF statements etc
   std::list<cmFunctionBlocker *>::reverse_iterator pos;
   for (pos = m_FunctionBlockers.rbegin(); 
        pos != m_FunctionBlockers.rend(); ++pos)
     {
-    if ((*pos)->NeedExpandedVariables()) 
+    if((*pos)->IsFunctionBlocked(lff, *this))
       {
-      if ((*pos)->IsFunctionBlocked(name, expandedArguments, *this))
-        {
-        return true;
-        }
-      }
-    else
-      {
-      if ((*pos)->IsFunctionBlocked(name, args, *this))
-        {
-        return true;
-        }
+      return true;
       }
     }
   
   return false;
 }
 
-void cmMakefile::RemoveFunctionBlocker(const char *name,
-                                       const std::vector<std::string> &args)
+void cmMakefile::ExpandArguments(
+  std::vector<cmListFileArgument> const& inArgs,
+  std::vector<std::string>& outArgs)
+{
+  std::vector<cmListFileArgument>::const_iterator i;
+  for(i = inArgs.begin(); i != inArgs.end(); ++i)
+    {
+    // Expand the variables in the argument.
+    std::string value = i->Value;
+    this->ExpandVariablesInString(value);
+    
+    // If the argument is quoted, it should be one argument.
+    // Otherwise, it may be a list of arguments.
+    if(i->Quoted)
+      {
+      outArgs.push_back(value);
+      }
+    else
+      {
+      cmSystemTools::ExpandListArgument(value, outArgs);
+      }
+    }
+}
+
+void cmMakefile::RemoveFunctionBlocker(const cmListFileFunction& lff)
 {
   // loop over all function blockers to see if any block this command
   std::list<cmFunctionBlocker *>::reverse_iterator pos;
   for (pos = m_FunctionBlockers.rbegin(); 
        pos != m_FunctionBlockers.rend(); ++pos)
     {
-    if ((*pos)->ShouldRemove(name, args, *this))
+    if ((*pos)->ShouldRemove(lff, *this))
       {
       cmFunctionBlocker* b = *pos;
       m_FunctionBlockers.remove(b);
@@ -1348,7 +1327,6 @@ void cmMakefile::ExpandSourceListArguments(
     }
   
   // now expand the args
-  std::vector<std::string> tmpArgs;
   unsigned int i;
   for(i = 0; i < arguments.size(); ++i)
     {
@@ -1356,14 +1334,16 @@ void cmMakefile::ExpandSourceListArguments(
     const char *def = this->GetDefinition(arguments[i].c_str());
     if (def && oldVersion && i >= start)
       {
-      tmpArgs.push_back(def);
+      // Definition lookup could result in a list that needs to be
+      // expanded.
+      cmSystemTools::ExpandListArgument(def, newargs);
       }
     else
       {
-      tmpArgs.push_back(arguments[i]);
+      // List expansion will have been done already.
+      newargs.push_back(arguments[i]);
       }
     }
-  cmSystemTools::ExpandListArguments(tmpArgs, newargs);
 }
 
 int cmMakefile::TryCompile(const char *srcdir, const char *bindir, 

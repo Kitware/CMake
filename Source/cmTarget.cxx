@@ -75,10 +75,8 @@ void cmTarget::GenerateSourceFilesFromSourceLists( cmMakefile &mf)
         // if the definition exists
         if (varValue)
           {
-          std::vector<std::string> tval;
-          tval.push_back(varValue);
           std::vector<std::string> args;
-          cmSystemTools::ExpandListArguments(tval, args);
+          cmSystemTools::ExpandListArgument(varValue, args);
           unsigned int i;
           for (i = 0; i < args.size(); ++i)
             {

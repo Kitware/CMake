@@ -31,15 +31,14 @@ public:
   /**
    * should a function be blocked
    */
-  virtual bool IsFunctionBlocked(const char *name, const std::vector<std::string> &args, 
+  virtual bool IsFunctionBlocked(const cmListFileFunction& lff,
                                  cmMakefile&mf) = 0;
 
   /**
    * should this function blocker be removed, useful when one function adds a
    * blocker and another must remove it 
    */
-  virtual bool ShouldRemove(const char *, 
-                            const std::vector<std::string>&,
+  virtual bool ShouldRemove(const cmListFileFunction& lff,
                             cmMakefile&) {return false;}
 
   /**
@@ -50,8 +49,6 @@ public:
   virtual void ScopeEnded(cmMakefile&) {}
 
   virtual ~cmFunctionBlocker() {}
-
-  virtual int NeedExpandedVariables () { return 1; };
 };
 
 #endif
