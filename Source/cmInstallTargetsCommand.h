@@ -53,7 +53,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Create UNIX install rules for targets.";
+    return "Create install rules for targets.";
     }
   
   /**
