@@ -2422,7 +2422,7 @@ bool cmSystemTools::GetLineFromStream(std::istream& is, std::string& line)
     // If newline character was read, the gcount includes the
     // character, but the buffer does not.  The end of line has been
     // reached.
-    if(strlen(buffer) == static_cast<size_t>(is.gcount()-1))
+    if(strlen(buffer) < static_cast<size_t>(is.gcount()))
       {
       break;
       }
