@@ -18,7 +18,6 @@
 
 #include "cmCursesMainForm.h"
 #include "cmSystemTools.h"
-#include "cmDirectory.h"
 
 cmCursesPathWidget::cmCursesPathWidget(int width, int height, 
                                            int left, int top) :

@@ -29,6 +29,15 @@ IF(CMAKE_SYSTEM MATCHES "OSF1-V.*")
      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -timplicit_local -no_implicit_include ")
   ENDIF(NOT CMAKE_COMPILER_IS_GNUCXX)
 ENDIF(CMAKE_SYSTEM MATCHES "OSF1-V.*")
+
+#-----------------------------------------------------------------------------
+# Create the kwsys library for CMake.
+SET(KWSYS_NAMESPACE cmsys)
+SET(KWSYS_USE_SystemTools 1)
+SET(KWSYS_USE_Directory 1)
+SET(KWSYS_HEADER_ROOT ${CMake_BINARY_DIR}/Source)
+SUBDIRS(Source/kwsys)
+
 SUBDIRS(Source Modules Templates Utilities)
 ENABLE_TESTING()
 

@@ -15,8 +15,9 @@
 
 =========================================================================*/
 #include "cmAuxSourceDirectoryCommand.h"
-#include "cmDirectory.h"
 #include "cmSourceFile.h"
+
+#include <cmsys/Directory.hxx>
 
 // cmAuxSourceDirectoryCommand
 bool cmAuxSourceDirectoryCommand::InitialPass(std::vector<std::string> const& args)
@@ -42,7 +43,7 @@ bool cmAuxSourceDirectoryCommand::InitialPass(std::vector<std::string> const& ar
     }
   
   // Load all the files in the directory
-  cmDirectory dir;
+  cmsys::Directory dir;
   if(dir.Load(tdir.c_str()))
     {
     size_t numfiles = dir.GetNumberOfFiles();

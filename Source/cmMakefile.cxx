@@ -18,7 +18,6 @@
 #include "cmCommand.h"
 #include "cmStandardIncludes.h"
 #include "cmSourceFile.h"
-#include "cmDirectory.h"
 #include "cmSystemTools.h"
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"

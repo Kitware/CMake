@@ -8,7 +8,6 @@ cmMakefile.cxx
 cmRegularExpression.cxx
 cmSourceFile.cxx
 cmSystemTools.cxx
-cmDirectory.cxx
 cmDocumentation.cxx
 cmDynamicLoader.cxx
 cmCommands.cxx
@@ -30,7 +29,6 @@ cmRegularExpression.h
 cmSourceFile.h
 cmSystemTools.h
 cmDynamicLoader.h
-cmDirectory.h
 cmCommands.h
 cmTarget.h
 cmCustomCommand.h
@@ -96,6 +94,7 @@ ENDIF (WIN32)
 # create a library used by the command line and the GUI
 ADD_LIBRARY(CMakeLib ${SRCS})
 
+TARGET_LINK_LIBRARIES(CMakeLib cmsys)
 
 # always link in the library
 # the library is found here

@@ -18,6 +18,8 @@
 #include "cmCacheManager.h"
 #include "cmListFileCache.h"
 
+#include <cmsys/Directory.hxx>
+
 int cmTryCompileCommand::CoreTryCompileCode(
   cmMakefile *mf, std::vector<std::string> const& argv, bool clean)
 {
@@ -263,7 +265,7 @@ void cmTryCompileCommand::CleanupFiles(const char* binDir)
     return;
     }
   
-  cmDirectory dir;
+  cmsys::Directory dir;
   dir.Load(binDir);
   size_t fileNum;
   for (fileNum = 0; fileNum <  dir.GetNumberOfFiles(); ++fileNum)

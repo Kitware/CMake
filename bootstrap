@@ -33,7 +33,6 @@ CMAKE_SOURCES="\
   cmRegularExpression \
   cmSourceFile \
   cmSystemTools \
-  cmDirectory \
   cmGlobalUnixMakefileGenerator \
   cmLocalUnixMakefileGenerator \
   cmCommands \
@@ -43,6 +42,24 @@ CMAKE_SOURCES="\
   cmListFileCache \
   cmVariableWatch \
   cmSourceGroup"
+
+KWSYS_SOURCES="\
+  Directory \
+  RegularExpression \
+  SystemTools"
+
+KWSYS_FILES="\
+  Directory.hxx \
+  Process.h \
+  RegularExpression.hxx \
+  StandardIncludes.hxx \
+  SystemTools.hxx"
+
+KWSYS_STD_FILES="
+  fstream \
+  iosfwd \
+  iostream \
+  sstream"
 
 cmake_system=`uname`
 
@@ -117,6 +134,8 @@ cmake_replace_string ()
         mv -f "${OUTFILE}.tmp" "${OUTFILE}"
       fi
     fi
+  else
+    cmake_error "Cannot find file ${INFILE}"
   fi
 }
 
@@ -250,6 +269,16 @@ if [ ! -d "${cmake_bootstrap_dir}" ]; then
   cmake_error "Cannot create directory ${cmake_bootstrap_dir} to bootstrap CMake."
 fi
 cd "${cmake_bootstrap_dir}"
+
+[ -d "cmsys" ] || mkdir "cmsys"
+if [ ! -d "cmsys" ]; then
+  cmake_error "Cannot create directory ${cmake_bootstrap_dir}/cmsys"
+fi
+
+[ -d "cmsys/std" ] || mkdir "cmsys/std"
+if [ ! -d "cmsys/std" ]; then
+  cmake_error "Cannot create directory ${cmake_bootstrap_dir}/cmsys/std"
+fi
 
 # Delete all the bootstrap files
 rm -f "${cmake_bootstrap_dir}/cmake_bootstrap.log"
@@ -406,9 +435,12 @@ cmake_report cmConfigure.h.tmp " */"
 # Test for STD namespace
 if cmake_try_run "${cmake_cxx_compiler}" "${cmake_cxx_flags}" "${cmake_source_dir}/Modules/TestForSTDNamespace.cxx" >> cmake_bootstrap.log 2>&1; then
   cmake_report cmConfigure.h.tmp "/* #undef CMAKE_NO_STD_NAMESPACE */"
+  cmake_report cmConfigure.h.tmp "#define cmsys_std std"
   echo "${cmake_cxx_compiler} has STD namespace"
 else
   cmake_report cmConfigure.h.tmp "#define CMAKE_NO_STD_NAMESPACE 1"
+  cmake_report cmConfigure.h.tmp "#define KWSYS_NO_STD_NAMESPACE"
+  cmake_report cmConfigure.h.tmp "#define cmsys_std"
   echo "${cmake_cxx_compiler} does not have STD namespace"
 fi
 
@@ -418,6 +450,8 @@ if cmake_try_run "${cmake_cxx_compiler}" "${cmake_cxx_flags}" "${cmake_source_di
   echo "${cmake_cxx_compiler} has ANSI stream headers"
 else
   cmake_report cmConfigure.h.tmp "#define CMAKE_NO_ANSI_STREAM_HEADERS 1"
+  cmake_report cmConfigure.h.tmp "#define KWSYS_NO_ANSI_STREAM_HEADERS 1"
+  cmake_report cmConfigure.h.tmp "#define cmsys_NO_ANSI_STREAM_HEADERS"
   echo "${cmake_cxx_compiler} does not have ANSI stream headers"
 fi
 
@@ -432,6 +466,8 @@ if cmake_try_run "${cmake_cxx_compiler}" "${cmake_cxx_flags}" "${TMPFILE}.cxx" >
   echo "${cmake_cxx_compiler} has ANSI string streams"
 else
   cmake_report cmConfigure.h.tmp "#define CMAKE_NO_ANSI_STRING_STREAM 1"
+  cmake_report cmConfigure.h.tmp "#define KWSYS_NO_ANSI_STRING_STREAM 1"
+  cmake_report cmConfigure.h.tmp "#define cmsys_NO_ANSI_STRING_STREAM 1"
   echo "${cmake_cxx_compiler} does not have ANSI string streams"
 fi
 rm -f "${TMPFILE}.cxx"
@@ -444,6 +480,11 @@ else
   cmake_report cmConfigure.h.tmp "#define CMAKE_NO_ANSI_FOR_SCOPE 1"
   echo "${cmake_cxx_compiler} does not have ANSI for scoping"
 fi
+cmake_report cmConfigure.h.tmp "/* Defined if std namespace is the GCC hack.  */"
+cmake_report cmConfigure.h.tmp "#if defined(__GNUC__) && (__GNUC__ < 3)"
+cmake_report cmConfigure.h.tmp "# define cmsys_FAKE_STD_NAMESPACE"
+cmake_report cmConfigure.h.tmp "#endif"
+cmake_report cmConfigure.h.tmp "#define kwsys_std cmsys_std"
 
 # Write CMake version
 for a in MAJOR MINOR PATCH; do
@@ -458,12 +499,29 @@ if diff cmConfigure.h cmConfigure.h.tmp > /dev/null 2> /dev/null; then
   rm -f cmConfigure.h.tmp
 else
   mv -f cmConfigure.h.tmp cmConfigure.h
+  cp cmConfigure.h cmsys/Configure.hxx
 fi
+
+# Prepare KWSYS
+for a in ${KWSYS_FILES}; do 
+  cmake_replace_string "${cmake_source_dir}/Source/kwsys/${a}.in" \
+     "${cmake_bootstrap_dir}/cmsys/${a}" KWSYS_NAMESPACE cmsys
+done
+for a in ${KWSYS_STD_FILES}; do 
+  cmake_replace_string "${cmake_source_dir}/Source/kwsys/kwsys_std_${a}.h.in" \
+     "${cmake_bootstrap_dir}/cmsys/std/${a}" KWSYS_NAMESPACE cmsys
+done
+cmake_replace_string "${cmake_source_dir}/Source/kwsys/kwsys_std.h.in" \
+   "${cmake_bootstrap_dir}/cmsys/std/stl.h.in" KWSYS_NAMESPACE cmsys
+for a in string vector; do
+  cmake_replace_string "${cmake_bootstrap_dir}/cmsys/std/stl.h.in" \
+    "${cmake_bootstrap_dir}/cmsys/std/${a}" KWSYS_STL_HEADER ${a}
+done
 
 # Generate Makefile
 dep="cmConfigure.h `cmake_escape \"${cmake_source_dir}\"`/Source/*.h"
 objs=""
-for a in ${CMAKE_SOURCES}; do
+for a in ${CMAKE_SOURCES} ${KWSYS_SOURCES}; do
   objs="${objs} ${a}.o"
 done
 
@@ -482,6 +540,11 @@ for a in ${CMAKE_SOURCES}; do
   src=`cmake_escape "${cmake_source_dir}/Source/${a}.cxx"`
   echo "${a}.o : ${src} ${dep}" >> "${cmake_bootstrap_dir}/Makefile"
   echo "	${cmake_cxx_compiler} ${cmake_cxx_flags} -c ${src} -o ${a}.o" >> "${cmake_bootstrap_dir}/Makefile"
+done
+for a in ${KWSYS_SOURCES}; do
+  src=`cmake_escape "${cmake_source_dir}/Source/kwsys/${a}.cxx"`
+  echo "${a}.o : ${src} ${dep}" >> "${cmake_bootstrap_dir}/Makefile"
+  echo "	${cmake_cxx_compiler} ${cmake_cxx_flags} -I`cmake_escape \"${cmake_bootstrap_dir}/cmsys\"` -DKWSYS_NAMESPACE=cmsys -c ${src} -o ${a}.o" >> "${cmake_bootstrap_dir}/Makefile"
 done
 
 # Write prefix to Bootstrap.cmk/InitialConfigureFlags.cmake

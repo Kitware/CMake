@@ -15,7 +15,6 @@
 
 =========================================================================*/
 #include "cmMakeDirectoryCommand.h"
-#include "cmDirectory.h"
 
 // cmMakeDirectoryCommand
 bool cmMakeDirectoryCommand::InitialPass(std::vector<std::string> const& args)
