@@ -81,10 +81,14 @@ MAKE_DIRECTORY("${Complex_BINARY_DIR}/make_dir")
 # Test FIND_LIBARY
 # Create a dummy empty lib
 #
-FOREACH (ext "${CMAKE_SHLIB_SUFFIX};.lib;.so")
+CONFIGURE_FILE(
+  ${Complex_SOURCE_DIR}/Library/dummy
+  ${Complex_BINARY_DIR}/Library/dummylib.lib
+  COPYONLY IMMEDIATE)
+FOREACH (ext "${CMAKE_SHLIB_SUFFIX};.so;.a;.sl")
   CONFIGURE_FILE(
     ${Complex_SOURCE_DIR}/Library/dummy
-    ${Complex_BINARY_DIR}/Library/dummylib${ext}
+    ${Complex_BINARY_DIR}/Library/libdummylib${ext}
     COPYONLY IMMEDIATE)
 ENDFOREACH (ext)
 
