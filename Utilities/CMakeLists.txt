@@ -1,18 +1,20 @@
 SUBDIRS(Doxygen)
 
+SET(CMD_DIR ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR})
 IF(WIN32)
-  SET(CMD ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/cmake.exe)
+  SET(CMD_EXT ".exe")
 ELSE(WIN32)
-  SET(CMD ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/cmake)
+  SET(CMD_EXT "")
 ENDIF(WIN32)
 
 MAKE_DIRECTORY(${CMake_BINARY_DIR}/Docs)
+
+# Add a documentation target.
 ADD_CUSTOM_TARGET(documentation ALL)
-ADD_CUSTOM_COMMAND(
-  TARGET documentation
-  SOURCE documentation
-  DEPENDS ${CMake_BINARY_DIR}/Docs/Copyright.txt
-  )
+SET(DOC_FILES "")
+
+# Generate documentation for "cmake" executable.
+SET(CMD ${CMD_DIR}/cmake${CMD_EXT})
 ADD_CUSTOM_COMMAND(
   TARGET documentation
   COMMAND ${CMD}
@@ -22,13 +24,42 @@ ADD_CUSTOM_COMMAND(
        --help-man ${CMake_BINARY_DIR}/Docs/cmake.1
   DEPENDS ${CMD}
   SOURCE ${CMake_SOURCE_DIR}/Utilities/Doxygen/authors.txt
-  OUTPUTS ${CMake_BINARY_DIR}/Docs/Copyright.txt
+  OUTPUTS ${CMake_BINARY_DIR}/Docs/cmake.txt
   )
 ADD_DEPENDENCIES(documentation cmake)
-
 INSTALL_FILES(${CMAKE_MAN_DIR}/man1 FILES ${CMake_BINARY_DIR}/Docs/cmake.1)
 INSTALL_FILES(${CMAKE_DOC_DIR} FILES
   ${CMake_BINARY_DIR}/Docs/Copyright.txt
   ${CMake_BINARY_DIR}/Docs/cmake.txt
   ${CMake_BINARY_DIR}/Docs/cmake.html
 )
+SET(DOC_FILES ${DOC_FILES} ${CMake_BINARY_DIR}/Docs/cmake.txt)
+
+# Generate documentation for "ccmake" executable.
+IF(UNIX)
+  SET(CMD ${CMD_DIR}/ccmake${CMD_EXT})
+  ADD_CUSTOM_COMMAND(
+    TARGET documentation
+    COMMAND ${CMD}
+    ARGS --help-full ${CMake_BINARY_DIR}/Docs/ccmake.txt
+         --help-html ${CMake_BINARY_DIR}/Docs/ccmake.html
+         --help-man ${CMake_BINARY_DIR}/Docs/ccmake.1
+    DEPENDS ${CMD}
+    SOURCE ${CMake_SOURCE_DIR}/Utilities/Doxygen/authors.txt
+    OUTPUTS ${CMake_BINARY_DIR}/Docs/ccmake.txt
+    )
+  ADD_DEPENDENCIES(documentation ccmake)  
+  INSTALL_FILES(${CMAKE_MAN_DIR}/man1 FILES ${CMake_BINARY_DIR}/Docs/ccmake.1)
+  INSTALL_FILES(${CMAKE_DOC_DIR} FILES
+    ${CMake_BINARY_DIR}/Docs/ccmake.txt
+    ${CMake_BINARY_DIR}/Docs/ccmake.html
+    )
+  SET(DOC_FILES ${DOC_FILES} ${CMake_BINARY_DIR}/Docs/ccmake.txt)
+ENDIF(UNIX)
+
+# Drive documentation generation.
+ADD_CUSTOM_COMMAND(
+  TARGET documentation
+  SOURCE documentation
+  DEPENDS ${DOC_FILES}
+  )
