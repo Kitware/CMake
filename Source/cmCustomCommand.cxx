@@ -65,3 +65,18 @@ void cmCustomCommand::ExpandVariables(const cmMakefile &mf)
     mf.ExpandVariablesInString(*i);
     }
 }
+
+
+bool cmCustomCommand::IsEquivalent(const char* command,
+                                   const char* args)
+{
+  if(m_Command != command)
+    {
+    return false;
+    }
+  if(m_Arguments != args)
+    {
+    return false;
+    }
+  return true;
+}

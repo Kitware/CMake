@@ -499,6 +499,16 @@ AddCustomCommandToOutput(const char* output,
                          const char *comment,
                          bool replace)
 {
+  std::string expandC;
+  std::string combinedArgs;
+  unsigned int i;
+  for (i = 0; i < commandArgs.size(); ++i)
+    {
+    expandC = commandArgs[i].c_str();
+    this->ExpandVariablesInString(expandC);
+    combinedArgs += cmSystemTools::EscapeSpaces(expandC.c_str());
+    combinedArgs += " ";
+    }
   cmSourceFile *file = 0;
   std::string outName = output;
   outName += ".rule";
@@ -524,7 +534,18 @@ AddCustomCommandToOutput(const char* output,
     file = this->GetSource(outName.c_str());
     if (file && file->GetCustomCommand() && !replace)
       {
-      cmSystemTools::Error("Attempt to add a custom rule to an output that already has a custom rule. For output: ",  output);
+      cmCustomCommand* cc = file->GetCustomCommand();
+      // if the command and args are the same
+      // as the command already there, then silently skip
+      // this add command
+      if(cc->IsEquivalent(command, combinedArgs.c_str()))
+        {
+        return;
+        }
+      // produce error if two different commands are given to produce
+      // the same output
+      cmSystemTools::Error("Attempt to add a custom rule to an output that already"
+                           " has a custom rule. For output: ",  output);
       return;
       }
     // create a cmSourceFile for the output
@@ -538,19 +559,11 @@ AddCustomCommandToOutput(const char* output,
   out->SetProperty("GENERATED","1");
   
   // process the command
-  std::string expandC = command;
+  expandC = command;
   this->ExpandVariablesInString(expandC);
   std::string c = cmSystemTools::EscapeSpaces(expandC.c_str());
   
-  std::string combinedArgs;
-  unsigned int i;
-  for (i = 0; i < commandArgs.size(); ++i)
-    {
-    expandC = commandArgs[i].c_str();
-    this->ExpandVariablesInString(expandC);
-    combinedArgs += cmSystemTools::EscapeSpaces(expandC.c_str());
-    combinedArgs += " ";
-    }
+
   std::vector<std::string> depends2(depends);
   if (main_dependency && main_dependency[0] != '\0')
     {

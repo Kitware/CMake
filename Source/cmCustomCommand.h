@@ -69,6 +69,9 @@ public:
   const std::vector<std::string> &GetDepends() const {return m_Depends;}
   std::vector<std::string> &GetDepends() {return m_Depends;}
   
+  ///! Return true if the command and args are equal to the ones here.
+  bool IsEquivalent(const char* command,
+                    const char* args);
 private:
   std::string m_Command;
   std::string m_Arguments;

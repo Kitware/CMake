@@ -951,7 +951,7 @@ void cmLocalVisualStudio7Generator::WriteVCProjEndGroup(std::ostream& fout)
 // look for custom rules on a target and collect them together
 void cmLocalVisualStudio7Generator::OutputTargetRules(std::ostream& fout,
                                                       const cmTarget &target, 
-                                                      const char */* libName */)
+                                                      const char * /* libName */)
 {
   if (target.GetType() > cmTarget::UTILITY)
     {
