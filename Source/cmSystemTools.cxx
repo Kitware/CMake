@@ -1388,8 +1388,47 @@ bool cmSystemTools::RunCommand(const char* command,
     }
 
   retVal = pclose(cpipe);
-  retVal = WEXITSTATUS(retVal);
-  return true;
+  if (WIFEXITED(retVal))
+    {
+    retVal = WEXITSTATUS(retVal);
+    return true;
+    }
+  if (WIFSIGNALED(retVal))
+    {
+    retVal = WTERMSIG(retVal);
+    std::strstream error;
+    error << "\nProcess terminated due to ";
+    switch (retVal)
+      {
+#ifdef SIGKILL
+      case SIGKILL:
+	error << "SIGKILL";
+	break;
+#endif
+#ifdef SIGFPE
+      case SIGFPE:
+	error << "SIGFPE";
+	break;
+#endif
+#ifdef SIGBUS
+      case SIGBUS:
+	error << "SIGBUS";
+	break;
+#endif
+#ifdef SIGSEGV
+      case SIGSEGV:
+	error << "SIGSEGV";
+	break;
+#endif
+      default:
+	error << "signal " << retVal;
+	break;
+      }
+    error << std::ends;
+    output += error.str();
+    error.rdbuf()->freeze(0);
+    }
+  return false;
 #endif
 }
 
