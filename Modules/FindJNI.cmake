@@ -9,8 +9,11 @@
 # 
 
 FIND_LIBRARY(JAVA_AWT_LIBRARY jawt 
-  PATHS /usr/lib /usr/local/lib /usr/lib/java/jre/lib/i386
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.3;JavaHome]/lib"
+  PATHS /usr/lib
+        /usr/local/lib
+        /usr/lib/java/jre/lib/i386
+        /usr/local/lib/java/jre/lib/i386
+        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.3;JavaHome]/lib"
 )
 
 # add in the include path    
@@ -18,6 +21,7 @@ FIND_PATH(JAVA_INCLUDE_PATH jni.h
   /usr/include 
   /usr/local/include
   /usr/lib/java/include
+  /usr/local/lib/java/include
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.3;JavaHome]/include"
 )
 
