@@ -229,22 +229,19 @@ bool cmTryCompileCommand::InitialPass(std::vector<std::string> const& argv)
 
 static void cmTryCompileCommandNotUsed(bool){}
 
-void cmTryCompileCommand::CleanupFiles(const char* binDir, bool recursive)
+void cmTryCompileCommand::CleanupFiles(const char* binDir)
 {
   if ( !binDir )
     {
     return;
     }
-  cmTryCompileCommandNotUsed(recursive);
-#ifdef WIN32
-  if ( recursive )
+  std::string bdir = binDir;
+  if(bdir.find("CMakeTmp") == std::string::npos)
     {
-    std::string bdir = binDir;
-    bdir += "/Debug";
-    cmTryCompileCommand::CleanupFiles(bdir.c_str(), false);
+    cmSystemTools::Error("TRY_COMPILE attempt to remove -rf directory that does not contain CMakeTmp:", binDir);
+    return;
     }
-#endif
-
+  
   cmDirectory dir;
   dir.Load(binDir);
   size_t fileNum;
@@ -256,7 +253,14 @@ void cmTryCompileCommand::CleanupFiles(const char* binDir, bool recursive)
       std::string fullPath = binDir;
       fullPath += "/";
       fullPath += dir.GetFile(fileNum);
-      cmSystemTools::RemoveFile(fullPath.c_str());
+      if(cmSystemTools::FileIsDirectory(fullPath.c_str()))
+        {
+        cmTryCompileCommand::CleanupFiles(fullPath.c_str());
+        }
+      else
+        {
+        cmSystemTools::RemoveFile(fullPath.c_str());
+        }
       }
     }
 }

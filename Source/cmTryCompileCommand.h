@@ -68,7 +68,7 @@ public:
    * code. This way we do not have to rely on the timing and
    * dependencies of makefiles.
    */
-  static void CleanupFiles(const char* binDir, bool recursive=true);
+  static void CleanupFiles(const char* binDir);
   
   /**
    * More documentation.  */
