@@ -1392,6 +1392,7 @@ bool cmSystemTools::RunCommand(const char* command,
     {
     commandInDir = command;
     }
+  commandInDir += " 2>&1";
   command = commandInDir.c_str();
   const int BUFFER_SIZE = 4096;
   char buffer[BUFFER_SIZE];
