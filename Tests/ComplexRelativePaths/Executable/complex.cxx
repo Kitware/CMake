@@ -558,14 +558,16 @@ int main()
   cmFailed("the FIND_FILE or GET_FILENAME_COMPONENT command is broken, "
          "FILENAME_VAR_PATH_NAME is not defined.");
 #else
-  if(strcmp(FILENAME_VAR_PATH_NAME, "Complex") != 0)
+  if((strcmp(FILENAME_VAR_PATH_NAME, "Complex") == 0) ||
+     (strcmp(FILENAME_VAR_PATH_NAME, "ComplexOneConfig") == 0) ||
+     (strcmp(FILENAME_VAR_PATH_NAME, "ComplexRelativePaths") == 0))
     {
-    cmFailed("the FIND_FILE or GET_FILENAME_COMPONENT command is broken, "
-           "FILENAME_VAR_PATH_NAME == ", FILENAME_VAR_PATH_NAME);
+    cmPassed("FILENAME_VAR_PATH_NAME == ", FILENAME_VAR_PATH_NAME);
     }
   else
     {
-    cmPassed("FILENAME_VAR_PATH_NAME == ", FILENAME_VAR_PATH_NAME);
+    cmFailed("the FIND_FILE or GET_FILENAME_COMPONENT command is broken, "
+           "FILENAME_VAR_PATH_NAME == ", FILENAME_VAR_PATH_NAME);
     }
 #endif
 
@@ -618,14 +620,16 @@ int main()
   cmFailed("the FIND_FILE or GET_FILENAME_COMPONENT command is broken, "
          "PATH_VAR_NAME is not defined.");
 #else
-  if(strcmp(PATH_VAR_NAME, "Complex") != 0)
+  if((strcmp(PATH_VAR_NAME, "Complex") == 0) ||
+     (strcmp(PATH_VAR_NAME, "ComplexOneConfig") == 0) ||
+     (strcmp(PATH_VAR_NAME, "ComplexRelativePaths") == 0))
     {
-    cmFailed("the FIND_FILE or GET_FILENAME_COMPONENT command is broken, "
-           "PATH_VAR_NAME == ", PATH_VAR_NAME);
+    cmPassed("PATH_VAR_NAME == ", PATH_VAR_NAME);
     }
   else
     {
-    cmPassed("PATH_VAR_NAME == ", PATH_VAR_NAME);
+    cmFailed("the FIND_FILE or GET_FILENAME_COMPONENT command is broken, "
+           "PATH_VAR_NAME == ", PATH_VAR_NAME);
     }
 #endif
 

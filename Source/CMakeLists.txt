@@ -263,7 +263,7 @@ IF(BUILD_TESTING)
     --test-command   ${SimpleInstallInstallDir}/bin/SimpleInstall)
   ADD_TEST(SimpleInstall-Stage2 ${CMAKE_CTEST_COMMAND}
     --build-and-test 
-    "${CMake_SOURCE_DIR}/Tests/SimpleInstall"
+    "${CMake_SOURCE_DIR}/Tests/SimpleInstallS2"
     "${CMake_BINARY_DIR}/Tests/SimpleInstallS2"
     --build-generator ${CMAKE_GENERATOR}
     --build-project TestSimpleInstall
@@ -296,7 +296,7 @@ IF(BUILD_TESTING)
 
   ADD_TEST(LoadedCommandOneConfig  ${CMAKE_CTEST_COMMAND}
     --build-and-test 
-    "${CMake_SOURCE_DIR}/Tests/LoadCommand"
+    "${CMake_SOURCE_DIR}/Tests/LoadCommandOneConfig"
     "${CMake_BINARY_DIR}/Tests/LoadCommandOneConfig"
     --build-generator ${CMAKE_GENERATOR}
     --build-project LoadedCommand
@@ -324,7 +324,7 @@ IF(BUILD_TESTING)
 
     ADD_TEST(complexOneConfig  ${CMAKE_CTEST_COMMAND}
       --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/Complex"
+      "${CMake_SOURCE_DIR}/Tests/ComplexOneConfig"
       "${CMake_BINARY_DIR}/Tests/ComplexOneConfig"
       --build-generator ${CMAKE_GENERATOR}
       --build-project complex
@@ -334,7 +334,7 @@ IF(BUILD_TESTING)
 
     ADD_TEST(complexRelativePaths  ${CMAKE_CTEST_COMMAND}
       --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/Complex"
+      "${CMake_SOURCE_DIR}/Tests/ComplexRelativePaths"
       "${CMake_BINARY_DIR}/Tests/ComplexRelativePaths"
       --build-generator ${CMAKE_GENERATOR}
       --build-project complex
