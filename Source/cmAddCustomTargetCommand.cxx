@@ -90,6 +90,16 @@ bool cmAddCustomTargetCommand::InitialPass(std::vector<std::string> const& args)
       }
     }
 
+  std::string::size_type pos = args[0].find_first_of("#<>");
+  if(pos != args[0].npos)
+    {
+    cmOStringStream msg;
+    msg << "called with target name containing a \"" << args[0][pos]
+        << "\".  This character is not allowed.";
+    this->SetError(msg.str().c_str());
+    return false;
+    }
+
   // Store the last command line finished.
   if(!currentLine.empty())
     {

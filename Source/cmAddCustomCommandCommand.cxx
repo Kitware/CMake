@@ -171,6 +171,16 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
     return false;
     }
 
+  std::string::size_type pos = output.find_first_of("#<>");
+  if(pos != output.npos)
+    {
+    cmOStringStream msg;
+    msg << "called with OUTPUT containing a \"" << output[pos]
+        << "\".  This character is not allowed.";
+    this->SetError(msg.str().c_str());
+    return false;
+    }
+
   // Choose which mode of the command to use.
   if(source.empty() && output.empty())
     {
