@@ -50,6 +50,8 @@ IF(STAGE2)
 
   INSTALL_TARGETS(/bin SimpleInstallS2)
 ELSE(STAGE2)
+  SUBDIRS(PREORDER TestSubDir)
+  
   # this is stage 1, so create libraries and modules and install everything
   ADD_LIBRARY(test1 STATIC lib1.cxx)
   ADD_LIBRARY(test2 SHARED lib2.cxx)
@@ -65,6 +67,7 @@ ELSE(STAGE2)
   INSTALL_TARGETS(/bin SimpleInstall)
   INSTALL_TARGETS(/lib test1 test2 test3)
   INSTALL_TARGETS(/include lib1.h lib2.h lib3.h)
+
   SET_TARGET_PROPERTIES(SimpleInstall PROPERTIES PRE_INSTALL_SCRIPT 
     ${CMAKE_CURRENT_SOURCE_DIR}/PreInstall.cmake)
   SET_TARGET_PROPERTIES(SimpleInstall PROPERTIES POST_INSTALL_SCRIPT 
