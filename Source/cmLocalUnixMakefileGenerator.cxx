@@ -2515,11 +2515,15 @@ void cmLocalUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
   fout << "\n\n";
 }
 
-cmStdString& cmLocalUnixMakefileGenerator::GetIncludeFlags(const char* lang)
-{
+const char* cmLocalUnixMakefileGenerator::GetIncludeFlags(const char* lang)
+{ 
+  if(!lang)
+    {
+    return "";
+    }
   if(m_LanguageToIncludeFlags.count(lang))
     {
-    return m_LanguageToIncludeFlags[lang];
+    return m_LanguageToIncludeFlags[lang].c_str();
     }
     // Output Include paths
   cmOStringStream includeFlags;
@@ -2621,7 +2625,7 @@ cmStdString& cmLocalUnixMakefileGenerator::GetIncludeFlags(const char* lang)
     }
   flags += m_Makefile->GetDefineFlags();
   m_LanguageToIncludeFlags[lang] = flags;
-  return m_LanguageToIncludeFlags[lang];
+  return m_LanguageToIncludeFlags[lang].c_str();
 }
 
 void cmLocalUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
@@ -2819,11 +2823,12 @@ OutputBuildObjectFromSource(std::ostream& fout,
                             bool shared)
 {
   // Header files shouldn't have build rules.
-  if(source.GetPropertyAsBool("HEADER_FILE_ONLY"))
+  if(source.GetPropertyAsBool("HEADER_FILE_ONLY") ||
+     m_GlobalGenerator->IgnoreFile(source.GetSourceExtension().c_str()))
     {
     return;
     }
-
+    
   std::string outputExt = 
     m_GlobalGenerator->GetLanguageOutputExtensionFromExtension(
       source.GetSourceExtension().c_str());
@@ -2896,11 +2901,8 @@ OutputBuildObjectFromSource(std::ostream& fout,
     { 
     // if the language is not defined and should not be ignored,
     // then produce an error
-    if(!m_GlobalGenerator->IgnoreFile(source.GetSourceExtension().c_str()))
-      {
-      cmSystemTools::Error("Unexpected file type ",
-                           sourceFile.c_str());
-      }
+    cmSystemTools::Error("Unexpected file type ",
+                         sourceFile.c_str());
     }
   flags += this->GetIncludeFlags(lang);
   // expand multi-command semi-colon separated lists

@@ -240,7 +240,7 @@ protected:
    */
   std::string& CreateSafeUniqueObjectFileName(const char* sin);
 
-  cmStdString& GetIncludeFlags(const char* lang);
+  const char* GetIncludeFlags(const char* lang);
 protected:
   int m_MakefileVariableSize;
   std::map<cmStdString, cmStdString> m_MakeVariableMap;
