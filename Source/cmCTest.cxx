@@ -1695,6 +1695,7 @@ void cmCTest::ProcessDirectory(std::vector<std::string> &passed,
           {
           nwd = "." + nwd.substr(m_ToplevelPath.size(), nwd.npos);
           }
+        cmSystemTools::ReplaceString(nwd, "\\", "/");
         cres.m_Path = nwd;
         cres.m_CompletionStatus = "Completed";
         m_TestResults.push_back( cres );
