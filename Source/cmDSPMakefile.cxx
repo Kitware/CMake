@@ -446,6 +446,18 @@ void cmDSPMakefile::WriteDSPHeader(std::ostream& fout, const char *libName,
   std::string libMultiLineDebugOptions;
   std::string libMultiLineOptimizedOptions;
 
+  // suppoirt override in output directory
+  std::string libPath = "";
+  if (m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH"))
+    {
+    libPath = m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH");
+    }
+  std::string exePath = "";
+  if (m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH"))
+    {
+    exePath = m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
+    }
+
   std::vector<std::string>::iterator i;
   std::vector<std::string>& libdirs = m_Makefile->GetLinkDirectories();
   for(i = libdirs.begin(); i != libdirs.end(); ++i)
@@ -540,6 +552,10 @@ void cmDSPMakefile::WriteDSPHeader(std::ostream& fout, const char *libName,
       cmSystemTools::ReplaceString(line, "BUILD_INCLUDES",
                                    m_IncludeOptions.c_str());
       cmSystemTools::ReplaceString(line, "OUTPUT_LIBNAME",libName);
+      cmSystemTools::ReplaceString(line, "OUTPUT_LIBRARY_PATH",
+                                   exePath.c_str());
+      cmSystemTools::ReplaceString(line, "OUTPUT_EXECUTABLE_PATH",
+                                   exePath.c_str());
       cmSystemTools::ReplaceString(line, 
                                    "EXTRA_DEFINES", 
 				   m_Makefile->GetDefineFlags());
