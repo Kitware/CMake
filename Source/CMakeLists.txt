@@ -719,6 +719,7 @@ IF(BUILD_TESTING)
       --build-nocmake 
       --build-noclean
       --build-makeprogram ${CMake_SOURCE_DIR}/bootstrap
+      --build-generator "${CMAKE_GENERATOR}"
       --test-command ${CMake_BINARY_DIR}/Tests/BootstrapTest/Bootstrap.cmk/cmake)
   ENDIF(UNIX AND CMAKE_RUN_LONG_TESTS AND NOT CMAKE_SKIP_BOOTSTRAP_TEST)
 
