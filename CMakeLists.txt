@@ -34,6 +34,6 @@ SET(EXECUTABLE_OUTPUT_PATH ${CMake_BINARY_DIR}/Source CACHE PATH
   "Where to put the executables for CMake"
 )
 
-INCLUDE_REGULAR_EXPRESSION("^(\\.\\./)?(cm|FLTK|CMake).*")
+INCLUDE_REGULAR_EXPRESSION("^(\\.\\./)?(cm|FLTK|CMake|form).*")
 
 

@@ -1,5 +1,7 @@
 PROJECT(CMAKE_FORM)
 
+INCLUDE_REGULAR_EXPRESSION("^.*$")
+
 SOURCE_FILES(FORM_SRCS
              fld_arg.c
              fld_attr.c

@@ -72,7 +72,7 @@ extern void _nc_leaks_dump_entry(void);
 /* doalloc.c */
 extern void *_nc_doalloc(void *, size_t);
 #if !HAVE_STRDUP
-#define strdup _nc_strdup
+/* #define strdup _nc_strdup */
 extern char *_nc_strdup(const char *);
 #endif
 
