@@ -418,7 +418,7 @@ struct FindSrcByName : std::binary_function<cmSourceFile, cmSourceFile, bool>
   public:
     bool operator () (const cmSourceFile &f, const cmSourceFile &test) const
     {
-      return !stricmp(f.GetSourceName().c_str(),test.GetSourceName().c_str());
+      return !strcmp(f.GetSourceName().c_str(),test.GetSourceName().c_str());
     }
 };
 
