@@ -1,7 +1,7 @@
 PROJECT(VSExternalInclude)
 
 IF(${CMAKE_GENERATOR} MATCHES "Visual Studio 6")
-  SET(PROJECT_EXT dps)
+  SET(PROJECT_EXT dsp)
 ELSE(${CMAKE_GENERATOR} MATCHES "Visual Studio 6")
   SET(PROJECT_EXT vcproj)
 ENDIF(${CMAKE_GENERATOR} MATCHES "Visual Studio 6")

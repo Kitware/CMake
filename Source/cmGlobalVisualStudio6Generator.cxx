@@ -477,9 +477,9 @@ void cmGlobalVisualStudio6Generator::WriteProject(std::ostream& fout,
         const char* cacheValue
           = m_CMakeInstance->GetCacheDefinition(libPath.c_str());
         if(cacheValue && *cacheValue)
-          {
+          { 
           fout << "Begin Project Dependency\n";
-          fout << "Project_Dep_Name " << j->first << "\n";
+          fout << "Project_Dep_Name " << j->first.c_str() << "\n";
           fout << "End Project Dependency\n";
           }
         }
@@ -494,8 +494,14 @@ void cmGlobalVisualStudio6Generator::WriteProject(std::ostream& fout,
     {
     if(*i != dspname)
       {
+      std::string depName = *i;
+      if(strncmp(depName.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
+        {
+        depName.erase(depName.begin(), depName.begin() + 27);
+        }
+          
       fout << "Begin Project Dependency\n";
-      fout << "Project_Dep_Name " << *i << "\n";
+      fout << "Project_Dep_Name " << depName << "\n";
       fout << "End Project Dependency\n";
       }
     }
