@@ -1004,7 +1004,12 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
       {
       cmSystemTools::ReplaceString(line, "CM_STATIC_LIB_ARGS",
                                    staticLibOptions.c_str());
+      } 
+    if(m_Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"))
+      {
+      cmSystemTools::ReplaceString(line, "/nologo", "");
       }
+    
     cmSystemTools::ReplaceString(line, "CM_LIBRARIES",
                                  libOptions.c_str());
     cmSystemTools::ReplaceString(line, "CM_DEBUG_LIBRARIES",
