@@ -358,7 +358,11 @@ case $system in
 	CMAKE_SHLIB_LINK_FLAGS=''
 	CMAKE_MODULE_BUILD_FLAGS='-shared -Wl,-expect_unresolved,\\*'
 	CMAKE_MODULE_LINK_FLAGS=''
-        CMAKE_SHLIB_RUNTIME_FLAG="-Wl,-rpath,"
+        if test $ac_cv_prog_gxx = yes; then
+          CMAKE_SHLIB_RUNTIME_FLAG="-Wl,-rpath,"
+        else
+          CMAKE_SHLIB_RUNTIME_FLAG="-rpath,"
+        fi
         CMAKE_SHLIB_RUNTIME_SEP=":"
 	;;
     RISCos-*)
