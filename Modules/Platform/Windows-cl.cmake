@@ -73,6 +73,29 @@ IF(CMAKE_GENERATOR MATCHES "NMake Makefiles")
       SET(CMAKE_COMPILER_2005 1)
     ENDIF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*VERSION=1[4-9][0-9][0-9].*" )
   ENDIF(NOT CMAKE_COMPILER_RETURN)
+  # try to figure out if we are running the free command line
+  # tools from Microsoft.  These tools do not provide debug libraries,
+  # so the link flags used have to be different.
+  FILE(WRITE ${CMAKE_BINARY_DIR}/CMakeTmp/testForFreeVC.cxx
+    "#include<iostream>\n int main(){return 0;}\n")
+  EXEC_PROGRAM(${CMAKE_CXX_COMPILER} ${CMAKE_BINARY_DIR}/CMakeTmp
+    ARGS /nologo /MD /EHsc
+    \"${CMAKE_BINARY_DIR}/CMakeTmp/testForFreeVC.cxx\" 
+    OUTPUT_VARIABLE CMAKE_COMPILER_OUTPUT 
+    RETURN_VALUE CMAKE_COMPILER_RETURN
+    )
+  MESSAGE("OUTPUT_VARIABLE ${OUTPUT_VARIABLE}")
+  IF(CMAKE_COMPILER_RETURN)
+    IF("${CMAKE_COMPILER_RETURN}" EQUAL "2")
+      SET(CMAKE_USING_VC_FREE_TOOLS 1)
+    ELSE("${CMAKE_COMPILER_RETURN}" EQUAL "2")
+      SET(CMAKE_USING_VC_FREE_TOOLS 0)
+    ENDIF("${CMAKE_COMPILER_RETURN}" EQUAL "2")
+  ELSE(CMAKE_COMPILER_RETURN)
+    SET(CMAKE_USING_VC_FREE_TOOLS 0)
+  ENDIF(CMAKE_COMPILER_RETURN)
+
+
 ENDIF(CMAKE_GENERATOR MATCHES "NMake Makefiles")
 
 
@@ -92,19 +115,34 @@ IF(CMAKE_COMPILER_2005)
   SET (CMAKE_STANDARD_LIBRARIES "kernel32.lib" CACHE STRING 
      "Libraries linked by defalut with all applications.")
 ELSE(CMAKE_COMPILER_2005)
-  SET(CMAKE_BUILD_TYPE_INIT Debug)
-  SET (CMAKE_CXX_FLAGS_INIT "/W3 /Zm1000 /GX /GR")
-  SET (CMAKE_CXX_FLAGS_DEBUG_INIT "/MDd /Zi /Od /GZ")
-  SET (CMAKE_CXX_FLAGS_MINSIZEREL_INIT "/MD /O1 /D NDEBUG")
-  SET (CMAKE_CXX_FLAGS_RELEASE_INIT "/MD /O2 /D NDEBUG")
-  SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT "/MD /Zi /O2 /D NDEBUG")
-  SET (CMAKE_C_FLAGS_INIT "/W3 /Zm1000")
-  SET (CMAKE_C_FLAGS_DEBUG_INIT "/MDd /Zi /Od /GZ")
-  SET (CMAKE_C_FLAGS_MINSIZEREL_INIT "/MD /O1 /D NDEBUG")
-  SET (CMAKE_C_FLAGS_RELEASE_INIT "/MD /O2 /D NDEBUG")
-  SET (CMAKE_C_FLAGS_RELWITHDEBINFO_INIT "/MD /Zi /O2 /D NDEBUG")
-  SET (CMAKE_STANDARD_LIBRARIES "kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib" CACHE STRING 
-     "Libraries linked by defalut with all applications.")
+  IF(CMAKE_USING_VC_FREE_TOOLS)
+    MESSAGE(STATUS "Using FREE VC TOOLS, NO DEBUG available")
+    SET(CMAKE_BUILD_TYPE_INIT Release)
+    SET (CMAKE_CXX_FLAGS_INIT "/W3 /Zm1000 /GX /GR")
+    SET (CMAKE_CXX_FLAGS_DEBUG_INIT "/MTd /Zi /Od /GZ")
+    SET (CMAKE_CXX_FLAGS_MINSIZEREL_INIT "/MT /O1")
+    SET (CMAKE_CXX_FLAGS_RELEASE_INIT "/MT /O2")
+    SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT "/MT /Zi /O2")
+    SET (CMAKE_C_FLAGS_INIT "/W3 /Zm1000 /GX /GR")
+    SET (CMAKE_C_FLAGS_DEBUG_INIT "/MTd /Zi /Od /GZ")
+    SET (CMAKE_C_FLAGS_MINSIZEREL_INIT "/MT /O1")
+    SET (CMAKE_C_FLAGS_RELEASE_INIT "/MT /O2")
+    SET (CMAKE_C_FLAGS_RELWITHDEBINFO_INIT "/MT /Zi /O2")
+  ELSE(CMAKE_USING_VC_FREE_TOOLS)
+    SET(CMAKE_BUILD_TYPE_INIT Debug)
+    SET (CMAKE_CXX_FLAGS_INIT "/W3 /Zm1000 /GX /GR")
+    SET (CMAKE_CXX_FLAGS_DEBUG_INIT "/MDd /Zi /Od /GZ")
+    SET (CMAKE_CXX_FLAGS_MINSIZEREL_INIT "/MD /O1 /D NDEBUG")
+    SET (CMAKE_CXX_FLAGS_RELEASE_INIT "/MD /O2 /D NDEBUG")
+    SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT "/MD /Zi /O2 /D NDEBUG")
+    SET (CMAKE_C_FLAGS_INIT "/W3 /Zm1000")
+    SET (CMAKE_C_FLAGS_DEBUG_INIT "/MDd /Zi /Od /GZ")
+    SET (CMAKE_C_FLAGS_MINSIZEREL_INIT "/MD /O1 /D NDEBUG")
+    SET (CMAKE_C_FLAGS_RELEASE_INIT "/MD /O2 /D NDEBUG")
+    SET (CMAKE_C_FLAGS_RELWITHDEBINFO_INIT "/MD /Zi /O2 /D NDEBUG")
+    SET (CMAKE_STANDARD_LIBRARIES "kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib" CACHE STRING 
+      "Libraries linked by defalut with all applications.")
+  ENDIF(CMAKE_USING_VC_FREE_TOOLS)
 ENDIF(CMAKE_COMPILER_2005)
 
 
