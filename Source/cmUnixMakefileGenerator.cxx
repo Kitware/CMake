@@ -1459,7 +1459,7 @@ void cmUnixMakefileGenerator::OutputSourceObjectBuildRules(std::ostream& fout)
               }
             compileCommand += "$(INCLUDE_FLAGS) -c ";
             compileCommand += source->GetFullPath();
-            compileCommand +=+ " -o ";
+            compileCommand += " -o ";
             compileCommand += objectFile;
             }
           else
