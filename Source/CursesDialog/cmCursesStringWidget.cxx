@@ -29,12 +29,13 @@ bool cmCursesStringWidget::HandleInput(int& key, FORM* form, WINDOW* w)
   // <Enter> is used to change edit mode (like <Esc> in vi).
   while(1) 
     {
-    if (!m_InEdit && ( key != 10 ) )
+    // If resize occured during edit, move out of edit mode
+    if (!m_InEdit && ( key != 10 && key != KEY_ENTER ) )
       {
       return false;
       }
     // 10 == enter
-    if (key == 10) 
+    if (key == 10 || key == KEY_ENTER) 
       {
       if (m_InEdit)
 	{
@@ -53,6 +54,7 @@ bool cmCursesStringWidget::HandleInput(int& key, FORM* form, WINDOW* w)
 	strcpy(originalStr, buf);
 	}
       }
+    // esc
     else if (key == 27)
       {
       if (m_InEdit)
@@ -73,7 +75,25 @@ bool cmCursesStringWidget::HandleInput(int& key, FORM* form, WINDOW* w)
       {
       form_driver(form, REQ_NEXT_CHAR);
       }
-    else if ( key == ctrl('d') || key == 127 )
+    else if ( key == ctrl('k') )
+      {
+      form_driver(form, REQ_CLR_EOL);
+      }
+    else if ( key == ctrl('a') )
+      {
+      form_driver(form, REQ_BEG_FIELD);
+      }
+    else if ( key == ctrl('e') )
+      {
+      form_driver(form, REQ_END_FIELD);
+      }
+    else if ( key == ctrl('d') || key == 127 || 
+	      key == KEY_BACKSPACE )
+      {
+      form_driver(form, REQ_DEL_PREV);
+      }
+    else if ( key == ctrl('d') || key == 127 || 
+	      key == KEY_BACKSPACE || key == KEY_DC )
       {
       form_driver(form, REQ_DEL_PREV);
       }
@@ -101,6 +121,5 @@ const char* cmCursesStringWidget::GetString()
 
 const char* cmCursesStringWidget::GetValue()
 {
-  std::cout << field_buffer(m_Field, 0) << std::endl;
   return field_buffer(m_Field, 0);
 }

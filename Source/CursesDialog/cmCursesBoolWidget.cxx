@@ -14,7 +14,7 @@ cmCursesBoolWidget::cmCursesBoolWidget(int width, int height,
 bool cmCursesBoolWidget::HandleInput(int& key, FORM* form, WINDOW* w)
 {
   // 10 == enter
-  if (key == 10)
+  if (key == 10 || key == KEY_ENTER)
     {
     if (this->GetValueAsBool())
       {

@@ -36,11 +36,25 @@ public:
   // list of current composites.
   bool LookForCacheEntry(const char* key);
 
+  static const int MIN_WIDTH;
+  static const int MIN_HEIGHT;
+  static const int IDEAL_WIDTH;
+  static const int MAX_WIDTH;
+
+  // Description:
+  // This method should normally  called only by the form.
+  // The only exception is during a resize.
+  void UpdateStatusBar();
+
+  // Description:
+  // This method should normally  called only by the form.
+  // The only exception is during a resize.
+  void PrintKeys();
+
 protected:
   cmCursesMainForm(const cmCursesMainForm& from);
   void operator=(const cmCursesMainForm&);
 
-  void UpdateCurrentEntry();
   void RunCMake(bool generateMakefiles);
   void FillCacheManagerFromUI();
 
@@ -49,6 +63,7 @@ protected:
   WINDOW* m_Window;
   std::string m_WhereSource;
   int m_Height;
+
 };
 
 #endif // __cmCursesMainForm_h

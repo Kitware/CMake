@@ -24,7 +24,7 @@ void onsig(int sig)
     getmaxyx(w, y, x);
     myform->SetWindow(w);
     myform->Render(1,1,x,y);
-    std::cerr << "Size change: " << x << " " << y << std::endl;
+    myform->UpdateStatusBar();
     }
   signal(SIGWINCH, onsig);
 }
@@ -32,9 +32,9 @@ void onsig(int sig)
 int main(int argc, char** argv)
 {
 
-  if ( argc != 2 )
+  if ( argc > 2 )
     {
-    std::cerr << "Usage: " << argv[0] << " source_directory" 
+    std::cerr << "Usage: " << argv[0] << " source_directory." 
 	      << std::endl;
     return -1;
     }
@@ -57,7 +57,14 @@ int main(int argc, char** argv)
   int x,y;
   getmaxyx(w, y, x);
 
-  myform = new cmCursesMainForm(argv[1], newCache);
+  if ( argc == 2 )
+    {
+    myform = new cmCursesMainForm(argv[1], newCache);
+    }
+  else
+    {
+    myform = new cmCursesMainForm("", newCache);
+    }
   myform->InitializeUI(w);
   myform->Render(1, 1, x, y);
   myform->HandleInput();
