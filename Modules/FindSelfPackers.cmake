@@ -6,7 +6,7 @@
 # Examples:
 # UPX: http://wildsau.idv.uni-linz.ac.at/mfx/upx.html
 
-INCLUDE(${CMAKE_ROOT}/Modules/FindCygwin.cmake)
+INCLUDE(FindCygwin)
 
 FIND_PROGRAM(SELF_PACKER_FOR_EXECUTABLE
   upx

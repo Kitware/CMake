@@ -2,7 +2,7 @@
 # this module looks for some usual Unix commands
 #
 
-INCLUDE(${CMAKE_ROOT}/Modules/FindCygwin.cmake)
+INCLUDE(FindCygwin)
 
 FIND_PROGRAM(BASH
   bash

@@ -5,7 +5,7 @@
 # WGET_EXECUTABLE: This variable defines the full path to the wget tool.
 # WGET_FOUND: True if wget has been found.
 
-INCLUDE(${CMAKE_ROOT}/Modules/FindCygwin.cmake)
+INCLUDE(FindCygwin)
 
 FIND_PROGRAM(WGET_EXECUTABLE
   wget

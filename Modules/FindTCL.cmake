@@ -18,9 +18,9 @@
 #  TK_WISH                = full path to the wish binary (wish wish80 etc)
 #
 
-INCLUDE(${CMAKE_ROOT}/Modules/CMakeFindFrameworks.cmake)
-INCLUDE(${CMAKE_ROOT}/Modules/FindTclsh.cmake)
-INCLUDE(${CMAKE_ROOT}/Modules/FindWish.cmake)
+INCLUDE(CMakeFindFrameworks)
+INCLUDE(FindTclsh)
+INCLUDE(FindWish)
 
 GET_FILENAME_COMPONENT(TCL_TCLSH_PATH "${TCL_TCLSH}" PATH)
 GET_FILENAME_COMPONENT(TK_WISH_PATH "${TK_WISH}" PATH)

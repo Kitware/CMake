@@ -8,7 +8,7 @@
 ## USAGE: 
 ##   just include Use_wxWindows.cmake 
 ##   in your projects CMakeLists.txt
-## INCLUDE( ${CMAKE_ROOT}/Modules/Use_wxWindows.cmake)
+## INCLUDE(Use_wxWindows)
 ##
 ##   if you are sure you need GL then
 ## SET(WXWINDOWS_USE_GL 1)
@@ -18,7 +18,7 @@
 
 
 
-INCLUDE(${CMAKE_ROOT}/Modules/FindwxWindows.cmake)
+INCLUDE(FindwxWindows)
 
 IF(WXWINDOWS_FOUND)
   

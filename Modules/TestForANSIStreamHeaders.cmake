@@ -3,7 +3,7 @@
 #
 # CMAKE_NO_ANSI_STREAM_HEADERS - defined accoreding to the results
 #
-INCLUDE(${CMAKE_ROOT}/Modules/CheckIncludeFileCXX.cmake)
+INCLUDE(CheckIncludeFileCXX)
 
 IF(NOT CMAKE_NO_ANSI_STREAM_HEADERS)
   CHECK_INCLUDE_FILE_CXX(iostream CMAKE_ANSI_STREAM_HEADERS)

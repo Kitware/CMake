@@ -14,23 +14,23 @@ IF (BUILD_DOCUMENTATION)
   #
   # Check for the tools
   #
-  INCLUDE(${CMAKE_ROOT}/Modules/FindUnixCommands.cmake)
-  INCLUDE(${CMAKE_ROOT}/Modules/FindDoxygen.cmake)
-  INCLUDE(${CMAKE_ROOT}/Modules/FindGnuplot.cmake)
-  INCLUDE(${CMAKE_ROOT}/Modules/FindHTMLHelp.cmake)
-  INCLUDE(${CMAKE_ROOT}/Modules/FindPerl.cmake)
-  INCLUDE(${CMAKE_ROOT}/Modules/FindWget.cmake)
+  INCLUDE(FindUnixCommands)
+  INCLUDE(FindDoxygen)
+  INCLUDE(FindGnuplot)
+  INCLUDE(FindHTMLHelp)
+  INCLUDE(FindPerl)
+  INCLUDE(FindWget)
 
   OPTION(DOCUMENTATION_HTML_HELP 
-         "Build the HTML Help file (CHM)." OFF)
+    "Build the HTML Help file (CHM)." OFF)
 
   OPTION(DOCUMENTATION_HTML_TARZ 
-	 "Build a compressed tar archive of the HTML doc." OFF)
+    "Build a compressed tar archive of the HTML doc." OFF)
 
   MARK_AS_ADVANCED(
     DOCUMENTATION_HTML_HELP
     DOCUMENTATION_HTML_TARZ
-  )
+    )
 
   # 
   # The documentation process is controled by a batch file.

@@ -5,7 +5,7 @@
 
 # Load the compiler settings used for VTK.
 IF(VTK_BUILD_SETTINGS_FILE)
-  INCLUDE(${CMAKE_ROOT}/Modules/CMakeImportBuildSettings.cmake)
+  INCLUDE(CMakeImportBuildSettings)
   CMAKE_IMPORT_BUILD_SETTINGS(${VTK_BUILD_SETTINGS_FILE})
 ENDIF(VTK_BUILD_SETTINGS_FILE)
 

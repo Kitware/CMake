@@ -14,7 +14,7 @@
 # None of the above will be defined unles zlib can be found.
 
 # PNG depends on Zlib
-INCLUDE( ${CMAKE_ROOT}/Modules/FindZLIB.cmake )
+INCLUDE(FindZLIB)
 
 IF(ZLIB_FOUND)
   FIND_PATH(PNG_PNG_INCLUDE_DIR png.h

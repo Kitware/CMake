@@ -38,7 +38,7 @@
 ##
 ##   # just include Use_wxWindows.cmake 
 ##   # in your projects CMakeLists.txt
-## INCLUDE( ${CMAKE_ROOT}/Modules/Use_wxWindows.cmake)
+## INCLUDE(Use_wxWindows)
 ## 
 ## ------------------------------------------------------------------
 ## Author Jan Woetzel <http://www.mip.informatik.uni-kiel.de/~jw> (07/2003)

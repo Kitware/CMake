@@ -6,8 +6,8 @@
 # CMAKE_USE_PTHREADS_INIT       - are we using pthreads
 # CMAKE_HP_PTHREADS_INIT             - are we using hp pthreads
 
-INCLUDE (${CMAKE_ROOT}/Modules/CheckIncludeFile.cmake)
-INCLUDE (${CMAKE_ROOT}/Modules/CheckLibraryExists.cmake)
+INCLUDE (CheckIncludeFile)
+INCLUDE (CheckLibraryExists)
 
 # Do we have sproc?
 IF(CMAKE_SYSTEM MATCHES IRIX)

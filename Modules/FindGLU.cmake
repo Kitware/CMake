@@ -4,7 +4,7 @@
 #
 #
 
-INCLUDE(${CMAKE_ROOT}/Modules/FindOpenGL.cmake)
+INCLUDE(FindOpenGL)
 
 IF (OPENGL_GLU_FOUND)
   SET (GLU_LIBRARY ${OPENGL_LIBRARIES})

@@ -2,7 +2,7 @@
 # this module looks for gnuplot
 #
 
-INCLUDE(${CMAKE_ROOT}/Modules/FindCygwin.cmake)
+INCLUDE(FindCygwin)
 
 FIND_PROGRAM(GNUPLOT
   NAMES 

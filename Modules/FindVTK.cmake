@@ -108,7 +108,7 @@ IF(VTK_DIR)
       # We found VTK 4.0 (UseVTK.cmake exists, but not VTKConfig.cmake).
       SET(VTK_FOUND 1)
       # Load settings for VTK 4.0.
-      INCLUDE(${CMAKE_ROOT}/Modules/UseVTKConfig40.cmake)
+      INCLUDE(UseVTKConfig40)
     ELSE(EXISTS ${VTK_DIR}/UseVTK.cmake)
       # We did not find VTK.
       SET(VTK_FOUND 0)

@@ -95,7 +95,7 @@ ELSE (WIN32)
   # It's not true on OSX.
 
   IF (OPENGL_gl_LIBRARY)
-    INCLUDE( ${CMAKE_ROOT}/Modules/FindX11.cmake )
+    INCLUDE(FindX11)
     IF (X11_FOUND)
       IF (NOT APPLE)
         SET (OPENGL_LIBRARIES ${X11_LIBRARIES})

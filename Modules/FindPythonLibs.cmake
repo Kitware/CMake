@@ -8,7 +8,7 @@
 #  PYTHON_DEBUG_LIBRARIES = the full path to the debug library found
 #
 
-INCLUDE(${CMAKE_ROOT}/Modules/CMakeFindFrameworks.cmake)
+INCLUDE(CMakeFindFrameworks)
 
 IF(WIN32)
   FIND_LIBRARY(PYTHON_DEBUG_LIBRARY

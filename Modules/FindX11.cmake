@@ -65,8 +65,8 @@ IF (UNIX)
   ENDIF(X11_X11_LIB)
 
   IF(X11_FOUND)
-    INCLUDE(${CMAKE_ROOT}/Modules/CheckFunctionExists.cmake)
-    INCLUDE(${CMAKE_ROOT}/Modules/CheckLibraryExists.cmake)
+    INCLUDE(CheckFunctionExists)
+    INCLUDE(CheckLibraryExists)
 
     # Translated from an autoconf-generated configure script.
     # See libs.m4 in autoconf's m4 directory.

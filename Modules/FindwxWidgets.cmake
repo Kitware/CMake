@@ -1,1 +1,1 @@
-INCLUDE( ${CMAKE_ROOT}/Modules/FindwxWindows.cmake)
+INCLUDE(FindwxWindows)
