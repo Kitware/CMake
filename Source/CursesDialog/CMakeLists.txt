@@ -6,6 +6,7 @@ SOURCE_FILES( CURSES_SRCS
               cmCursesFilePathWidget
               cmCursesForm
               cmCursesLabelWidget
+              cmCursesLongMessageForm
               cmCursesMainForm
               cmCursesPathWidget
               cmCursesStringWidget

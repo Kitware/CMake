@@ -71,15 +71,20 @@ bool cmListFileCache::CacheFile(const char* path)
   std::vector<std::string> arguments;
   cmListFile inFile;
   inFile.m_ModifiedTime = cmSystemTools::ModifiedTime(path);
+  bool parseError;
   while ( fin )
     {
     cmListFileFunction inFunction;
     if(cmSystemTools::ParseFunction(fin, 
                                     inFunction.m_Name,
                                     inFunction.m_Arguments,
-                                    path))
+                                    path, parseError))
       {
       inFile.m_Functions.push_back(inFunction);
+      }
+    if (parseError)
+      {
+      inFile.m_ModifiedTime = 0;
       }
     }
   m_ListFileCache[path] = inFile;

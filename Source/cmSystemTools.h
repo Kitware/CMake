@@ -133,7 +133,7 @@ public:
   static bool ParseFunction(std::ifstream&, 
                             std::string& name,
                             std::vector<std::string>& arguments,
-                            const char* filename);
+                            const char* filename, bool& parseError);
 
   /**
    *  Extract white-space separated arguments from a string.

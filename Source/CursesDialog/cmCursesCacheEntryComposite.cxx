@@ -71,3 +71,15 @@ cmCursesCacheEntryComposite::~cmCursesCacheEntryComposite()
   delete m_IsNewLabel;
   delete m_Entry;
 }
+
+const char* cmCursesCacheEntryComposite::GetValue()
+{
+  if (m_Label)
+    {
+    return m_Label->GetValue();
+    }
+  else
+    {
+    return 0;
+    }
+}

@@ -107,9 +107,11 @@ void ctest::ProcessDirectory(int &passed, int &failed)
   cmRegularExpression var(this->m_RegExp.c_str());
   cmRegularExpression dartStuff("([\t\n ]*<DartMeasurement.*/DartMeasurement[a-zA-Z]*>[\t ]*[\n]*)");
 
+  bool parseError;
   while ( fin )
     {
-    if(cmSystemTools::ParseFunction(fin, name, args, "DartTestfile.txt"))
+    if(cmSystemTools::ParseFunction(fin, name, args, "DartTestfile.txt",
+				    parseError))
       {
       if (name == "SUBDIRS")
         {

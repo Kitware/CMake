@@ -12,6 +12,7 @@ public:
 			      const cmCacheManager::CacheEntry& value, 
 			      bool isNew);
   ~cmCursesCacheEntryComposite();
+  const char* GetValue();
 
   friend class cmCursesMainForm;
 
