@@ -69,19 +69,22 @@ private:
 			  const char* filter);
   void WriteDSPEndGroup(std::ostream& fout);
   void WriteDSPHeader(std::ostream& fout);
-  void WriteDSPBuildRules(std::ostream& fout);
+  void WriteDSPBuildRules(std::ostream& fout, const char *extensions);
   void WriteDSPBuildRule(std::ostream& fout, const char*);
   void WriteDSPFooter(std::ostream& fout);
   void WriteDSPBuildRule(std::ostream& fout);
   void WriteCustomRule(std::ostream& fout,
 		       const char* source,
 		       const char* result,
-		       const char* command);
+		       const char* command,
+                       std::vector<std::string>& depends);
 
   std::string m_IncludeOptions;
   std::string m_DebugLibraryOptions;
   std::string m_ReleaseLibraryOptions;
   cmMakefile* m_Makefile;
+
+  std::vector<std::string> m_Configurations;
 };
 
 #endif

@@ -346,6 +346,18 @@ public:
    */
   void ExpandVariables();
 
+  struct customCommand
+  {
+    std::string m_Source;
+    std::string m_Result;
+    std::string m_Command;
+    std::vector<std::string> m_Depends;
+  };
+
+  std::vector<customCommand>& GetCustomCommands() {
+    return m_CustomCommands; };
+  
+      
   /** Recursivly read and create a cmMakefile object for
    *  all CMakeLists.txt files in the GetSubDirectories list.
    *  Once the file is found, it ReadListFile is called on
@@ -359,6 +371,7 @@ public:
    *  be filled.
    */
   void GenerateCacheOnly();
+
 protected:
   std::string m_Prefix;
   std::vector<std::string> m_AuxSourceDirectories; // 
@@ -381,13 +394,6 @@ protected:
   std::vector<std::string> m_LinkLibrariesWin32;
   std::vector<std::string> m_LinkLibrariesUnix;
   std::string m_DefineFlags;
-  struct customCommand
-  {
-    std::string m_Source;
-    std::string m_Result;
-    std::string m_Command;
-    std::vector<std::string> m_Depends;
-  };
   std::vector<customCommand> m_CustomCommands;
   typedef std::map<std::string, cmCommand*> RegisteredCommandsMap;
   typedef std::map<std::string, std::string> DefinitionMap;

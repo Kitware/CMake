@@ -16,7 +16,7 @@
 #include "cmDSPMakefile.h"
 #include "cmStandardIncludes.h"
 #include "cmSystemTools.h"
-
+#include "cmRegularExpression.h"
 
 cmDSPMakefile::~cmDSPMakefile()
 {
@@ -170,16 +170,22 @@ void cmDSPMakefile::WriteDSPBuildRule(std::ostream& fout)
   dsprule += m_Makefile->GetStartOutputDirectory();
   dsprule += " -B";
   dsprule += m_Makefile->GetHomeOutputDirectory();
+
+  std::vector<std::string> depends;
   this->WriteCustomRule(fout, makefileIn.c_str(), 
 			dspname.c_str(),
-			dsprule.c_str());
+			dsprule.c_str(),
+			depends);
 }
 
 void cmDSPMakefile::WriteDSPFile(std::ostream& fout)
 {
   this->WriteDSPHeader(fout);
   this->WriteDSPBeginGroup(fout, "Source Files", "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat");
-  this->WriteDSPBuildRules(fout);
+  this->WriteDSPBuildRules(fout,"cpp;c;cxx;rc;def;r;odl;idl;hpj;bat");
+  this->WriteDSPEndGroup(fout);
+  this->WriteDSPBeginGroup(fout, "Header Files", "h;hpp;hxx;hm;inl");
+  this->WriteDSPBuildRules(fout,"h;hpp;hxx;hm;inl");
   this->WriteDSPEndGroup(fout);
   this->WriteDSPBuildRule(fout);
   this->WriteDSPFooter(fout);
@@ -189,14 +195,34 @@ void cmDSPMakefile::WriteDSPFile(std::ostream& fout)
 void cmDSPMakefile::WriteCustomRule(std::ostream& fout,
                                     const char* source,
                                     const char* result,
-                                    const char* command)
+                                    const char* command,
+                                    std::vector<std::string>& depends)
 {
   fout << "# Begin Source File\n\n";
   fout << "SOURCE=" << source << "\n\n";
-  fout << "# Begin Custom Build\n\n";
-  fout << '\"' << result << "\" : $(SOURCE) \"$(INTDIR)\" \"$(OUTDIR)\"\n";
-  fout << "  " << command << "\n\n";
-  fout << "# End Custom Build\n\n";
+
+  std::vector<std::string>::iterator i;
+  for(i = m_Configurations.begin(); i != m_Configurations.end(); ++i)
+    {
+    if (i == m_Configurations.begin())
+      {
+      fout << "!IF  \"$(CFG)\" == " << i->c_str() << std::endl;
+      }
+    else 
+      {
+      fout << "!ELSEIF  \"$(CFG)\" == " << i->c_str() << std::endl;
+      }
+    fout << "# Begin Custom Build\n\n";
+    fout << '\"' << result << "\" : \"$(SOURCE)\" \"$(INTDIR)\" \"$(OUTDIR)\" ";
+    for (int i = 0; i < depends.size(); i++)
+      {
+      fout << "\"" << depends[i].c_str() << "\" ";
+      }
+    fout << "\n  " << command << "\n\n";
+    fout << "# End Custom Build\n\n";
+    }
+  
+  fout << "!ENDIF\n\n";
   fout << "# End Source File\n";
 }
 
@@ -241,8 +267,28 @@ void cmDSPMakefile::SetBuildType(BuildType b)
       m_DSPFooterTemplate += "/CMake/Source/EXEFooter.dsptemplate";
       break;
     }
-}
 
+  // once the build type is set, determine what configurations are
+  // possible
+  std::ifstream fin(m_DSPHeaderTemplate.c_str());
+  cmRegularExpression reg("# Name ");
+  if(!fin)
+    {
+    cmSystemTools::Error("Error Reading ", m_DSPHeaderTemplate.c_str());
+    }
+  char buffer[2048];
+  while(fin)
+    {
+    fin.getline(buffer, 2048);
+    std::string line = buffer;
+    cmSystemTools::ReplaceString(line, "OUTPUT_LIBNAME", 
+                                 m_Makefile->GetLibraryName());
+    if (reg.find(line))
+      {
+      m_Configurations.push_back(line.substr(reg.end()));
+      }
+    }
+}
   
 void cmDSPMakefile::WriteDSPHeader(std::ostream& fout)
 {
@@ -290,15 +336,58 @@ void cmDSPMakefile::WriteDSPFooter(std::ostream& fout)
 }
 
 					
-void cmDSPMakefile::WriteDSPBuildRules(std::ostream& fout)
+void cmDSPMakefile::WriteDSPBuildRules(std::ostream& fout, const char *ext)
 {
+  // make a list if matching extentions
+  std::vector<std::string> exts;
+  std::string inExts = ext;
+  
+  std::string::size_type pos = inExts.find(';');
+  std::string::size_type lastPos = 0;
+  while (pos != std::string::npos)
+    {
+    std::string anExt = inExts.substr(lastPos, pos - lastPos);
+    exts.push_back(anExt);
+    lastPos = pos + 1;
+    pos = inExts.find(';',lastPos);
+    }
+  exts.push_back(inExts.substr(lastPos,inExts.size() - lastPos));
+  
+  // loop over any classes
   std::vector<cmClassFile>& Classes = m_Makefile->GetClasses();
   for(int i = 0; i < Classes.size(); ++i)
     {
     if(!Classes[i].m_IsExecutable && !Classes[i].m_AbstractClass && 
        !Classes[i].m_HeaderFileOnly)
       {
-      this->WriteDSPBuildRule(fout, Classes[i].m_FullPath.c_str());
+      // is this class of the appropriate type ?
+      if (std::find(exts.begin(),exts.end(),Classes[i].m_ClassExtension)
+          != exts.end())
+        {
+        this->WriteDSPBuildRule(fout, Classes[i].m_FullPath.c_str());
+        }
+      }
+    }
+  // loop over any custom commands
+  std::vector<cmMakefile::customCommand>& ccoms = 
+    this->GetMakefile()->GetCustomCommands();
+  int numCust = ccoms.size();
+  for (int j = 0; j < numCust; j++)
+    {
+    cmMakefile::customCommand &cc = ccoms[j];
+    // is the source of the command the correct type
+    pos = cc.m_Source.rfind('.');
+    if(pos != std::string::npos)
+      {
+      if (std::find(exts.begin(),exts.end(),
+                    cc.m_Source.substr(pos+1,cc.m_Source.size() - pos - 1))
+          != exts.end())
+        {
+        this->WriteCustomRule(fout, cc.m_Source.c_str(), 
+                              cc.m_Result.c_str(), 
+                              cc.m_Command.c_str(),
+                              cc.m_Depends);
+        }
       }
     }
 }
