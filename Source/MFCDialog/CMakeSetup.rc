@@ -106,7 +106,6 @@ BEGIN
     GROUPBOX        "Cache Values",IDC_FRAME,10,44,432,140
     CTEXT           "Right click on a cache value for additional options (delete, ignore, and help).\nPress Configure to update and display new values in red.\nPress OK to generate selected build files and exit.",
                     IDC_MouseHelpCaption,0,191,442,27
-    LTEXT           "Static",IDC_CMAKE_VERSION,3,221,92,13,SS_CENTERIMAGE
     PUSHBUTTON      "OK",IDC_OK,166,219,51,15
     COMBOBOX        IDC_Generator,345,7,97,50,CBS_DROPDOWN | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
