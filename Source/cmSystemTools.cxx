@@ -308,7 +308,7 @@ bool cmSystemTools::RunSingleCommand(
   
   std::vector<std::string> args;
   std::string arg;
-  
+
   // Split the command into an argv array.
   for(const char* c = command; *c;)
     {
@@ -350,8 +350,20 @@ bool cmSystemTools::RunSingleCommand(
       // Parse an unquoted argument.
       while(*c && *c != ' ' && *c != '\t')
         {
-        arg.append(1, *c);
-        ++c;
+        if(*c == '\\')
+          {
+          ++c;
+          if(*c)
+            {
+            arg.append(1, *c);
+            ++c;
+            }
+          }
+        else
+          {
+          arg.append(1, *c);
+          ++c;
+          }
         }
       args.push_back(arg);
       }
