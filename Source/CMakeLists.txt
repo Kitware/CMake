@@ -98,8 +98,6 @@ CONFIGURE_FILE(
 ADD_EXECUTABLE(cmaketest cmaketest.cxx cmSystemTools.cxx)
 
 IF(BUILD_TESTING)
-  IF (DART_ROOT)
-
     ADD_TEST(DumpDocumentation ${CMake_BINARY_DIR}/Source/DumpDocumentation
       ${CMake_BINARY_DIR}/CMakeDoc.html)
 
@@ -158,8 +156,6 @@ IF(BUILD_TESTING)
       TestDriverTest
       ${CMake_BINARY_DIR}/Tests/Wrapping/bin
       TestDriverTest subdir/test3)
-
-  ENDIF (DART_ROOT)
 ENDIF(BUILD_TESTING)
 
 
