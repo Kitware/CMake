@@ -6,5 +6,6 @@ SUBDIRS(Source Modules Templates)
 INCLUDE (${CMAKE_ROOT}/Modules/Dart.cmake)
 
 
+INCLUDE_REGULAR_EXPRESSION("^cm.*")
 
 
