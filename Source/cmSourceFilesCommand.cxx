@@ -71,7 +71,7 @@ bool cmSourceFilesCommand::InitialPass(std::vector<std::string> const& args)
       }
     else
       {
-      file.SetName(i->c_str(), m_Makefile->GetCurrentDirectory(),
+      file.SetName(copy.c_str(), m_Makefile->GetCurrentDirectory(),
                    m_Makefile->GetSourceExtensions(),
                    m_Makefile->GetHeaderExtensions());
       }
