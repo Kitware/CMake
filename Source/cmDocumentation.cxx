@@ -27,6 +27,10 @@ static const cmDocumentationEntry cmDocumentationStandardOptions[] =
    "Usage describes the basic command line interface and its options.  "
    "If a listfile command is specified, help for that specific command is "
    "printed."},
+  {"--help-list-commands [file]", "List available listfile commands and exit.",
+   "The list contains all commands for which help may be obtained by using "
+   "the --help argument followed by a command name.  If a file is specified, "
+   "the help is written into it."},
   {"--help-full [file]", "Print full help and exit.",
    "Full help displays most of the documentation provided by the UNIX "
    "man page.  It is provided for use on non-UNIX platforms, but is "
@@ -175,6 +179,7 @@ void cmDocumentation::PrintDocumentation(Type ht, std::ostream& os)
   switch (ht)
     {
     case cmDocumentation::Usage:     this->PrintDocumentationUsage(os); break;
+    case cmDocumentation::List:      this->PrintDocumentationList(os); break;
     case cmDocumentation::Full:      this->PrintDocumentationFull(os); break;
     case cmDocumentation::HTML:      this->PrintDocumentationHTML(os); break;
     case cmDocumentation::Man:       this->PrintDocumentationMan(os); break;
@@ -211,7 +216,7 @@ bool cmDocumentation::PrintRequestedDocumentation(std::ostream& os)
       // Argument was not a command.  Complain.
       os << "Help argument \"" << i->second.c_str()
          << "\" is not a CMake command.  "
-         << "Use --help-full to see all commands.\n";
+         << "Use --help-list-commands to see all commands.\n";
       return false;
       }
     
@@ -286,6 +291,10 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv)
     else if(strcmp(argv[i], "--help-man") == 0)
       {
       type = cmDocumentation::Man;
+      }
+    else if(strcmp(argv[i], "--help-list-commands") == 0)
+      {
+      type = cmDocumentation::List;
       }
     else if(strcmp(argv[i], "--copyright") == 0)
       {
@@ -525,7 +534,7 @@ void cmDocumentation::PrintSectionUsage(std::ostream& os,
     if(op->name)
       {
       os << "  " << op->name;
-      this->TextIndent = "                             ";
+      this->TextIndent = "                                ";
       int align = static_cast<int>(strlen(this->TextIndent))-4;
       for(int i = static_cast<int>(strlen(op->name)); i < align; ++i)
         {
@@ -789,6 +798,19 @@ void cmDocumentation::PrintDocumentationUsage(std::ostream& os)
 {
   this->CreateUsageDocumentation();
   this->Print(UsageForm, os);
+}
+
+//----------------------------------------------------------------------------
+void cmDocumentation::PrintDocumentationList(std::ostream& os)
+{
+  for(cmDocumentationEntry* entry = &this->CommandsSection[0];
+      entry->brief; ++entry)
+    {
+    if(entry->name)
+      {
+      os << entry->name << std::endl;
+      }
+    }
 }
 
 //----------------------------------------------------------------------------

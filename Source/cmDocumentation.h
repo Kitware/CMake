@@ -28,7 +28,7 @@ public:
   // High-level interface for standard documents:
   
   /** Types of help provided.  */
-  enum Type { None, Usage, Full, HTML, Man, Copyright, Version };
+  enum Type { None, Usage, List, Full, HTML, Man, Copyright, Version };
   
   /**
    * Check command line arguments for documentation options.  Returns
@@ -124,6 +124,7 @@ private:
   void PrintCopyright(std::ostream& os);
   void PrintVersion(std::ostream& os);
   void PrintDocumentationUsage(std::ostream& os);
+  void PrintDocumentationList(std::ostream& os);
   void PrintDocumentationFull(std::ostream& os);
   void PrintDocumentationHTML(std::ostream& os);
   void PrintDocumentationMan(std::ostream& os);
