@@ -181,6 +181,7 @@ cmLibHandle cmDynamicLoader::OpenLibrary(const char* libname )
 
 int cmDynamicLoader::CloseLibrary(cmLibHandle lib)
 {
+  NSUnLinkModule(lib, FALSE);
   return 0;
 }
 
