@@ -80,7 +80,8 @@ cmake::cmake()
   // encode the MAKEFLAGS variable in a strange way.
   if(getenv("MAKEFLAGS"))
     {
-    putenv("MAKEFLAGS=");
+    static char makeflags[] = "MAKEFLAGS=";
+    putenv(makeflags);
     }  
   
   m_Local = false;
