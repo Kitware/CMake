@@ -697,6 +697,16 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
     std::string libpath = this->ConvertToOutputForExisting(libDir->c_str());
     if(emitted.insert(libpath).second)
       {
+      std::string fullLibPath;
+      if(!m_WindowsShell)
+        {
+        fullLibPath = "\"`cd ";
+        }
+      fullLibPath += libpath;
+      if(!m_WindowsShell)
+        {
+        fullLibPath += ";pwd`\"";
+        }
       std::string::size_type pos = libDir->find(libPathFlag.c_str());
       if((pos == std::string::npos || pos > 0)
          && libDir->find("${") == std::string::npos)
@@ -704,13 +714,10 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
         linkLibs += libPathFlag;
         if(outputRuntime)
           {
-          std::string rpath = "\"`cd ";
-          rpath += libpath;
-          rpath += ";pwd`\"";
-          runtimeDirs.push_back( rpath );
+          runtimeDirs.push_back( fullLibPath );
           }
         }
-      linkLibs += libpath;
+      linkLibs += fullLibPath;
       linkLibs += " ";
       }
     }
