@@ -128,10 +128,13 @@ bool cmSetSourceFilesPropertiesCommand::InitialPass(
     // get the source file
     cmSourceFile* sf =
       m_Makefile->GetOrCreateSource(args[i].c_str(), generated);
-    // now loop through all the props and set them
-    for (k = 0; k < propertyPairs.size(); k = k + 2)
+    if(sf)
       {
-      sf->SetProperty(propertyPairs[k].c_str(),propertyPairs[k+1].c_str());
+      // now loop through all the props and set them
+      for (k = 0; k < propertyPairs.size(); k = k + 2)
+        {
+        sf->SetProperty(propertyPairs[k].c_str(),propertyPairs[k+1].c_str());
+        }
       }
     }
   return true;
