@@ -29,7 +29,7 @@ FIND_LIBRARY(PYTHON_LIBRARY
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.1\\InstallPath]/libs
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.0\\InstallPath]/libs
 )
-  
+
 FIND_PATH(PYTHON_INCLUDE_PATH Python.h
   /usr/include
   /usr/include/python2.1
@@ -39,3 +39,10 @@ FIND_PATH(PYTHON_INCLUDE_PATH Python.h
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.0\\InstallPath]/include
 )
 
+IF (WIN32)
+  MARK_AS_ADVANCED(
+    PYTHON_DEBUG_LIBRARY 
+    PYTHON_LIBRARY 
+    PYTHON_INCLUDE_PATH
+  )
+ENDIF(WIN32)
