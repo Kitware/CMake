@@ -769,7 +769,7 @@ static void reginsert (char op, char* opnd) {
     place = opnd;               // Op node, where operand used to be.
     *place++ = op;
     *place++ = '\0';
-    *place++ = '\0';
+    *place = '\0';
 }
 
 

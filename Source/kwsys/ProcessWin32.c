@@ -696,7 +696,7 @@ const char* kwsysProcess_GetErrorString(kwsysProcess* cp)
 /*--------------------------------------------------------------------------*/
 void kwsysProcess_Execute(kwsysProcess* cp)
 {
-  int i=0;
+  int i;
 
   /* Windows child startup control data.  */
   STARTUPINFO si;
@@ -870,7 +870,6 @@ int kwsysProcess_WaitForData(kwsysProcess* cp, int pipes, char** data, int* leng
       {
       /* Timeout has already expired.  */
       expired = 1;
-      done = 1;
       break;
       }
     if(timeoutTime.QuadPart < 0)
@@ -1001,7 +1000,7 @@ int kwsysProcess_WaitForData(kwsysProcess* cp, int pipes, char** data, int* leng
 int kwsysProcess_WaitForExit(kwsysProcess* cp, double* userTimeout)
 {
   int i;
-  int pipe = 0;
+  int pipe;
   
   /* Make sure we are executing a process.  */
   if(cp->State != kwsysProcess_State_Executing)
@@ -1314,7 +1313,6 @@ void kwsysProcessCleanErrorMessage(kwsysProcess* cp)
   if(length > 0 && cp->ErrorMessage[length-1] == '.')
     {
     cp->ErrorMessage[length-1] = 0;
-    --length;
     }
 }
 
