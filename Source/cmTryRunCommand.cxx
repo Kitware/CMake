@@ -94,9 +94,9 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv)
     if (fullPath.size() > 1)
       {
       std::string finalCommand = fullPath;
+      finalCommand = cmSystemTools::ConvertToOutputPath(fullPath.c_str());
       if(runArgs.size())
         {
-        finalCommand = cmSystemTools::ConvertToOutputPath(fullPath.c_str());
         finalCommand += runArgs;
         }
       cmSystemTools::RunCommand(finalCommand.c_str(), output, retVal, 0, false);
