@@ -46,6 +46,7 @@
 #include "cmFLTKWrapUICommand.cxx"
 #include "cmGetFilenameComponentCommand.cxx"
 #include "cmGetSourceFilePropertyCommand.cxx"
+#include "cmITKWrapTclCommand.cxx"
 #include "cmIfCommand.cxx"
 #include "cmIncludeCommand.cxx"
 #include "cmIncludeDirectoryCommand.cxx"
@@ -114,6 +115,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmFLTKWrapUICommand);
   commands.push_back(new cmGetFilenameComponentCommand);
   commands.push_back(new cmGetSourceFilePropertyCommand);
+  commands.push_back(new cmITKWrapTclCommand);
   commands.push_back(new cmIfCommand);
   commands.push_back(new cmIncludeCommand);
   commands.push_back(new cmIncludeDirectoryCommand);
