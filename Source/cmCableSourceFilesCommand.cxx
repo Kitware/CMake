@@ -48,17 +48,13 @@ void cmCableSourceFilesCommand::WriteConfiguration() const
   
   cmRegularExpression needCdataBlock("[&<>]");
   
-  // Look for the files on a path relative to the current CMakeLists.txt.
-  std::string curPath = m_Makefile->GetCurrentDirectory();
-  curPath += "/";
-  
   os << indent << "<Headers>" << std::endl;
   for(Entries::const_iterator f = m_Entries.begin();
       f != m_Entries.end(); ++f)
     {
     // Look for the normal include file.
     std::string header = *f+".h";
-    if(cmSystemTools::FileExists((curPath+header).c_str()))
+    if(this->SourceFileExists(header))
       {
       os << indent << "  <File name=\"" << header.c_str() << "\"/>"
          << std::endl;
@@ -70,11 +66,48 @@ void cmCableSourceFilesCommand::WriteConfiguration() const
     
     // Look for an instantiation file.
     std::string txx = *f+".txx";
-    if(cmSystemTools::FileExists((curPath+txx).c_str()))
+    if(this->SourceFileExists(txx))
       {
       os << indent << "  <File name=\"" << txx.c_str()
          << "\" purpose=\"instantiate\"/>" << std::endl;
       }
     }
   os << indent << "</Headers>" << std::endl;
+}
+
+
+/**
+ * Search the include path for the specified file.
+ */
+bool cmCableSourceFilesCommand::SourceFileExists(const std::string& name) const
+{
+  // We must locate the file in the include path so that we can detect
+  // its extension, and whether there is more than one to find.
+  std::string file = name;
+  m_Makefile->ExpandVariablesInString(file);
+      
+  // See if the file just exists here.  The compiler's search path will
+  // locate it.
+  if(cmSystemTools::FileExists(file.c_str()))
+    {
+    return true;
+    }
+  
+  // We must look for the file in the include search path.
+  const std::vector<std::string>& includeDirectories =
+    m_Makefile->GetIncludeDirectories();
+  
+  for(std::vector<std::string>::const_iterator dir = includeDirectories.begin();
+      dir != includeDirectories.end(); ++dir)
+    {
+    std::string path = *dir + "/";
+    m_Makefile->ExpandVariablesInString(path);
+    if(cmSystemTools::FileExists((path+file).c_str()))
+      {
+      return true;
+      }
+    }
+
+  // We couldn't locate the source file.
+  return false;
 }

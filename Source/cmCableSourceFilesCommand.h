@@ -68,7 +68,8 @@ public:
     }
 
   virtual void WriteConfiguration() const;
-
+  bool SourceFileExists(const std::string&) const;
+  
   cmTypeMacro(cmCableSourceFilesCommand, cmCableCommand);
 protected:
   typedef cmCablePackageEntryCommand::Entries  Entries;
