@@ -226,6 +226,7 @@ public:
   static bool FileIsDirectory(const char* name);
   static void Glob(const char *directory, const char *regexp,
                    std::vector<std::string>& files);
+  static void GlobDirs(const char *fullPath, std::vector<std::string>& files);
   
   static std::string GetCurrentWorkingDirectory();
   static std::string GetProgramPath(const char*);

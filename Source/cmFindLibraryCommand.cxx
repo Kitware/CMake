@@ -77,7 +77,8 @@ bool cmFindLibraryCommand::InitialPass(std::vector<std::string>& args)
       else
         {
         cmSystemTools::ExpandRegistryValues(args[j]);
-        path.push_back(args[j]);
+        // Glob the entry in case of wildcards.
+        cmSystemTools::GlobDirs(args[j].c_str(), path);
         }
       }
     }
@@ -94,7 +95,9 @@ bool cmFindLibraryCommand::InitialPass(std::vector<std::string>& args)
       std::string exp = args[j];
       m_Makefile->ExpandVariablesInString(exp);
       cmSystemTools::ExpandRegistryValues(exp);
-      path.push_back(exp);
+      
+      // Glob the entry in case of wildcards.
+      cmSystemTools::GlobDirs(exp.c_str(), path);
       }
     }
 

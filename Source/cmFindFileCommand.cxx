@@ -76,7 +76,8 @@ bool cmFindFileCommand::InitialPass(std::vector<std::string>& args)
     // expand variables
     std::string exp = args[j];
     m_Makefile->ExpandVariablesInString(exp);
-    path.push_back(exp);
+    // Glob the entry in case of wildcards.
+    cmSystemTools::GlobDirs(exp.c_str(), path);
     }
 
   // add the standard path

@@ -1305,3 +1305,37 @@ void cmSystemTools::Glob(const char *directory, const char *regexp,
     }
 }
 
+
+void cmSystemTools::GlobDirs(const char *fullPath,
+                             std::vector<std::string>& files)
+{
+  std::string path = fullPath;
+  int pos = path.find("/*");
+  if(pos == std::string::npos)
+    {
+    files.push_back(fullPath);
+    return;
+    }
+  std::string startPath = path.substr(0, pos);
+  std::string finishPath = path.substr(pos+2);
+
+  cmDirectory d;
+  if (d.Load(startPath.c_str()))
+    {
+    for (int i = 0; i < d.GetNumberOfFiles(); ++i)
+      {
+      if((std::string(d.GetFile(i)) != ".")
+         && (std::string(d.GetFile(i)) != ".."))
+        {
+        std::string fname = startPath;
+        fname +="/";
+        fname += d.GetFile(i);
+        if(cmSystemTools::FileIsDirectory(fname.c_str()))
+          {
+          fname += finishPath;
+          cmSystemTools::GlobDirs(fname.c_str(), files);
+          }
+        }
+      }
+    }
+}
