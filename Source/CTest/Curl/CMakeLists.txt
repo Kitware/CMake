@@ -70,7 +70,6 @@ SET(libCurl_SRCS
   multi.c
   netrc.c
   progress.c
-  security.c
   sendf.c
   share.c
   speedcheck.c
