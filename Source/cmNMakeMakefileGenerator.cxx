@@ -155,7 +155,8 @@ void cmNMakeMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     "CMAKE_OBJECT_FILE_SUFFIX               = @CMAKE_OBJECT_FILE_SUFFIX@\n"
     "CMAKE_EXECUTABLE_SUFFIX                = @CMAKE_EXECUTABLE_SUFFIX@\n"
     "CMAKE_STATICLIB_SUFFIX                 = @CMAKE_STATICLIB_SUFFIX@\n"
-    "CMAKE_SHLIB_SUFFIX                     = @CMAKE_SHLIB_SUFFIX@\n";
+    "CMAKE_SHLIB_SUFFIX                     = @CMAKE_SHLIB_SUFFIX@\n"
+    "RM = del\n";
 
   std::string buildType = "CMAKE_CXX_FLAGS_";
   buildType +=  m_Makefile->GetDefinition("CMAKE_BUILD_TYPE");

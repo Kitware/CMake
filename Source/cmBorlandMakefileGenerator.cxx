@@ -99,7 +99,8 @@ void cmBorlandMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     "CMAKE_STATICLIB_SUFFIX              = @CMAKE_STATICLIB_SUFFIX@\n"
     "CMAKE_SHLIB_SUFFIX                  = @CMAKE_SHLIB_SUFFIX@\n" 
     "CMAKE_LINKER_FLAGS                  = @CMAKE_LINKER_FLAGS@ @LINKER_BUILD_FLAGS@\n"
-    "CMAKE_CXX_FLAGS      = -P @CMAKE_CXX_FLAGS@ @BUILD_FLAGS@\n";
+    "CMAKE_CXX_FLAGS      = -P @CMAKE_CXX_FLAGS@ @BUILD_FLAGS@\n"
+    "RM = del";
   std::string buildType = "CMAKE_CXX_FLAGS_";
   buildType +=  m_Makefile->GetDefinition("CMAKE_BUILD_TYPE");
   buildType = cmSystemTools::UpperCase(buildType);

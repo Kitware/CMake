@@ -249,7 +249,7 @@ void cmUnixMakefileGenerator::OutputMakefile(const char* file)
                        "Default target executed when no arguments are given to make",
                        "default_target",
                        0,
-                       "$(MAKE) -$(MAKEFLAGS) cmake.depends",
+                       "$(MAKE) -$(MAKEFLAGS) cmake.depends_mark",
                        "$(MAKE) -$(MAKEFLAGS) all");
 
   this->OutputTargetRules(fout);
@@ -584,7 +584,7 @@ void cmUnixMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
   std::string depend = "$(";
   depend += name;
   depend += "_SRC_OBJS) $(" + std::string(name) + "_DEPEND_LIBS)";
-  std::string command = "rm -f lib";
+  std::string command = "$(RM) lib";
   command += name;
   command += "$(SHLIB_SUFFIX)";
   std::string command2 = "$(CMAKE_CXX_COMPILER)  $(CMAKE_SHLIB_LINK_FLAGS) "
@@ -618,7 +618,7 @@ void cmUnixMakefileGenerator::OutputModuleLibraryRule(std::ostream& fout,
   std::string target = m_LibraryOutputPath + "lib" + std::string(name) + "$(MODULE_SUFFIX)";
   std::string depend =  "$(";
   depend += std::string(name) + "_SRC_OBJS) $(" + std::string(name) + "_DEPEND_LIBS)";
-  std::string command = "rm -f lib" + std::string(name) + "$(MODULE_SUFFIX)";
+  std::string command = "$(RM) lib" + std::string(name) + "$(MODULE_SUFFIX)";
   std::string command2 = "$(CMAKE_CXX_COMPILER)  $(CMAKE_MODULE_LINK_FLAGS) "
     "$(CMAKE_MODULE_BUILD_FLAGS) $(CMAKE_CXX_FLAGS) -o \\\n";
   command2 += "\t  ";
@@ -972,7 +972,7 @@ void cmUnixMakefileGenerator::BuildInSubDirectory(std::ostream& fout,
     {
     fout << "\t@if test ! -d " << directory 
          << "; then $(MAKE) rebuild_cache; fi\n"
-      "\tcd " << directory
+      "\t@cd " << directory
          << "; $(MAKE) -$(MAKEFLAGS) " << target1 << "\n";
     }
   if(target2)
@@ -1048,7 +1048,7 @@ void cmUnixMakefileGenerator::OutputSubDirectoryRules(std::ostream& fout)
     return;
     }
   this->OutputSubDirectoryVars(fout, "SUBDIR_BUILD", "build",
-                               "cmake.depends",
+                               "cmake.depends_mark",
                                "all",
                                SubDirectories);
   this->OutputSubDirectoryVars(fout, "SUBDIR_CLEAN", "clean",
@@ -1279,6 +1279,7 @@ void cmUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     "SHLIB_SUFFIX             = @CMAKE_SHLIB_SUFFIX@\n"
     "MODULE_SUFFIX            = @CMAKE_MODULE_SUFFIX@\n"
     "THREAD_LIBS              = @CMAKE_THREAD_LIBS@\n"
+    "RM = rm -f\n"
     "\n"
     "# set up the path to the rulesgen program\n"
     "CMAKE_COMMAND = ${CMAKE_COMMAND}"
@@ -1474,7 +1475,7 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
   this->OutputMakeRule(fout, 
                        "Default build rule",
                        "all",
-                       "cmake.depends $(TARGETS) $(SUBDIR_BUILD)",
+                       "cmake.depends_mark $(TARGETS) $(SUBDIR_BUILD)",
                        0);
   if (m_Makefile->IsOn("QT_WRAP_CPP") || 
       m_Makefile->IsOn("QT_WRAP_UI")  ||
@@ -1484,7 +1485,7 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                          "remove generated files and dependency file",
                          "clean",
                          "$(SUBDIR_CLEAN)",
-                         "rm -f $(CLEAN_OBJECT_FILES) $(EXECUTABLES)"
+                         "-@ $(RM) $(CLEAN_OBJECT_FILES) $(EXECUTABLES)"
                          " $(TARGETS) ${GENERATED_QT_FILES}"
                          " ${GENERATED_FLTK_FILES}",
                          "make depend");
@@ -1495,23 +1496,27 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                          "remove generated files",
                          "clean",
                          "$(SUBDIR_CLEAN)",
-                         "rm -f $(CLEAN_OBJECT_FILES) $(EXECUTABLES)"
+                         "-@ $(RM) $(CLEAN_OBJECT_FILES) $(EXECUTABLES)"
                          " $(TARGETS)");
     }
+  {
+  std::string cmake_depends_mark = "@cd ";
+  cmake_depends_mark += m_Makefile->GetHomeOutputDirectory();
+  cmake_depends_mark += " ; $(MAKE) depend";
   this->OutputMakeRule(fout, 
                        "Rule to build the cmake.depends and Makefile as side effect",
-                       "cmake.depends",
+                       "cmake.depends_mark",
                        "$(CMAKE_MAKEFILE_SOURCES) ",
-                       "$(CMAKE_COMMAND) "
-                       "-S$(CMAKE_CURRENT_SOURCE) -O$(CMAKE_CURRENT_BINARY) "
-                       "-H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)");
+                       cmake_depends_mark.c_str());
+  }
   this->OutputMakeRule(fout, 
                        "Rule to force the build of cmake.depends",
                        "depend",
                        "$(SUBDIR_DEPEND)",
                        "$(CMAKE_COMMAND) "
                        "-S$(CMAKE_CURRENT_SOURCE) -O$(CMAKE_CURRENT_BINARY) "
-                       "-H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)");  
+                       "-H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)\n"
+                       "\t-@ $(RM) cmake.depends_mark ; echo mark > cmake.depends_mark");
   this->OutputMakeRule(fout, 
                        "Rebuild CMakeCache.txt file",
                        "rebuild_cache",
