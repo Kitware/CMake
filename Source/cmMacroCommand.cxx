@@ -71,12 +71,21 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
       cmSystemTools::Error(error.str().c_str());
       return true;
       }
+
+    // set the value of argc
     cmOStringStream argcDefStream;
     argcDefStream << expandedArguments.size();
     std::string argcDef = argcDefStream.str();
     
+    // declare varuiables for ARGV ARGN but do not compute until needed
+    std::string argvDef;
+    std::string argnDef;
+    bool argnDefInitialized = false;
+    bool argvDefInitialized = false;
+    
     // Invoke all the functions that were collected in the block.
     cmListFileFunction newLFF;
+    // for each function
     for(unsigned int c = 0; c < m_Functions.size(); ++c)
       {
       // Replace the formal arguments and then invoke the command.
@@ -85,6 +94,7 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
       newLFF.m_Name = m_Functions[c].m_Name;
       newLFF.m_FilePath = m_Functions[c].m_FilePath;
       newLFF.m_Line = m_Functions[c].m_Line;
+      // for each argument of the current function
       for (std::vector<cmListFileArgument>::const_iterator k = 
              m_Functions[c].m_Arguments.begin();
            k != m_Functions[c].m_Arguments.end(); ++k)
@@ -99,64 +109,65 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
           cmSystemTools::ReplaceString(tmps, variable.c_str(),
                                        expandedArguments[j-1].c_str());
           }
-        // replace argc, argv arguments
-        for (unsigned int j = 1; j < m_Args.size(); ++j)
+        // replace argc
+        cmSystemTools::ReplaceString(tmps, "${ARGC}",argcDef.c_str());
+        
+        // repleace ARGN
+        if (tmps.find("${ARGN}") != std::string::npos)
           {
-          variable = "${ARGC}";
-          cmSystemTools::ReplaceString(tmps, variable.c_str(),argcDef.c_str());
-          }
-        for (unsigned int j = 1; j < m_Args.size(); ++j)
-          {
-          variable = "${ARGV}";
-          std::vector<std::string>::iterator eit;
-          std::string var = "";
-          for ( eit = expandedArguments.begin();
-            eit != expandedArguments.end();
-            ++ eit )
+          if (!argnDefInitialized)
             {
-            if ( var.size() > 0 )
+            std::vector<std::string>::iterator eit;
+            std::vector<std::string>::size_type cnt = 0;
+            for ( eit = expandedArguments.begin();
+                  eit != expandedArguments.end();
+                  ++ eit )
               {
-              var += ";";
-              }
-            var += *eit;
-            }
-          cmSystemTools::ReplaceString(tmps, variable.c_str(),var.c_str());
-          }
-        for (unsigned int j = 1; j < m_Args.size(); ++j)
-          {
-          variable = "${ARGN}";
-          std::vector<std::string>::iterator eit;
-          std::string var = "";
-          std::vector<std::string>::size_type cnt = 0;
-          for ( eit = expandedArguments.begin();
-            eit != expandedArguments.end();
-            ++ eit )
-            {
-            if ( cnt >= m_Args.size()-1 )
-              {
-              if ( var.size() > 0 )
+              if ( cnt >= m_Args.size()-1 )
                 {
-                var += ";";
+                if ( argnDef.size() > 0 )
+                  {
+                  argnDef += ";";
+                  }
+                argnDef += *eit;
                 }
-              var += *eit;
+              cnt ++;
               }
-            cnt ++;
+            argnDefInitialized = true;
             }
-          cmSystemTools::ReplaceString(tmps, variable.c_str(),var.c_str());
+          cmSystemTools::ReplaceString(tmps, "${ARGN}", argnDef.c_str());
           }
-        for (unsigned int j = 1; j < m_Args.size(); ++j)
+        
+        // if the current argument of the current function has ${ARGV in it
+        // then try replacing ARGV values
+        if (tmps.find("${ARGV") != std::string::npos)
           {
-          // since this could be slow, first check if there is an ARGV
-          // only then do the inner loop. PS std::string sucks
           char argvName[60];
-          if (tmps.find("${ARGV") != std::string::npos)
+          
+          // repleace ARGV, compute it only once
+          if (!argvDefInitialized)
             {
-            for (unsigned int t = 0; t < expandedArguments.size(); ++t)
+            std::vector<std::string>::iterator eit;
+            for ( eit = expandedArguments.begin();
+                  eit != expandedArguments.end();
+                  ++ eit )
               {
-              sprintf(argvName,"${ARGV%i}",t);
-              cmSystemTools::ReplaceString(tmps, argvName,
-                                           expandedArguments[t].c_str());
+              if ( argvDef.size() > 0 )
+                {
+                argvDef += ";";
+                }
+              argvDef += *eit;
               }
+            argvDefInitialized = true;
+            }
+          cmSystemTools::ReplaceString(tmps, "${ARGV}", argvDef.c_str());
+          
+          // also replace the ARGV1 ARGV2 ... etc
+          for (unsigned int t = 0; t < expandedArguments.size(); ++t)
+            {
+            sprintf(argvName,"${ARGV%i}",t);
+            cmSystemTools::ReplaceString(tmps, argvName,
+                                         expandedArguments[t].c_str());
             }
           }
         
