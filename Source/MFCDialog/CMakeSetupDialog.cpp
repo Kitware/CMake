@@ -423,6 +423,7 @@ void CMakeSetupDialog::OnBuildProjects()
     {
     cmSystemTools::Error(
       "Error in generation process, project files may be invalid");
+    cmSystemTools::ResetErrorOccuredFlag();
     }
   // update the GUI with any new values in the caused by the
   // generation process

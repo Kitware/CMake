@@ -238,7 +238,6 @@ int cmake::Generate(const std::vector<std::string>& args)
   
   if(cmSystemTools::GetErrorOccuredFlag())
     {
-    cmSystemTools::ResetErrorOccuredFlag();
     return -1;
     }
   return 0;
