@@ -832,8 +832,6 @@ void cmLocalUnixMakefileGenerator::OutputLibraryRule(std::ostream& fout,
   // collect up the link libraries
   cmOStringStream linklibs;
   this->OutputLinkLibraries(linklibs, name, t);
-  const char* targetLinkFlags = t.GetProperty("LINK_FLAGS");
-  std::string allLinkFlags;
   for(std::vector<std::string>::iterator i = commands.begin();
       i != commands.end(); ++i)
     {
@@ -1332,8 +1330,8 @@ void cmLocalUnixMakefileGenerator::OutputBuildTargetInDirWindows(std::ostream& f
   const char* makeTarget = library;
   std::string currentDir = 
     cmSystemTools::ConvertToOutputPath(m_Makefile->GetCurrentOutputDirectory());
-  std::string wpath = cmSystemTools::ConvertToOutputPath(path);
-  std::string wfullpath = cmSystemTools::ConvertToOutputPath(fullpath);
+  std::string wpath = this->ConvertToOutputForExisting(path);
+  std::string wfullpath = this->ConvertToOutputForExisting(fullpath);
   if(libOutPath && strcmp( libOutPath, "" ) != 0)
     {
     makeTarget = wfullpath.c_str();
@@ -1363,8 +1361,8 @@ void cmLocalUnixMakefileGenerator::OutputBuildTargetInDir(std::ostream& fout,
     {
     makeTarget = fullpath;
     }
-  fout << cmSystemTools::ConvertToOutputPath(fullpath)
-       << ":\n\tcd " << cmSystemTools::ConvertToOutputPath(path)
+  fout << this->ConvertToOutputForExisting(fullpath)
+       << ":\n\tcd " << this->ConvertToOutputForExisting(path)
        << "; $(MAKE) $(MAKESILENT) cmake.depends"
        << "; $(MAKE) $(MAKESILENT) cmake.check_depends"
        << "; $(MAKE) $(MAKESILENT) -f cmake.check_depends"
@@ -1515,7 +1513,7 @@ void cmLocalUnixMakefileGenerator::BuildInSubDirectoryWindows(std::ostream& fout
 {
   if(target1)
     {
-    std::string dir = cmSystemTools::ConvertToOutputPath(directory);
+    std::string dir = this->ConvertToOutputForExisting(directory);
     if(dir[0] == '\"')
       {
       dir = dir.substr(1, dir.size()-2);
@@ -1539,7 +1537,7 @@ void cmLocalUnixMakefileGenerator::BuildInSubDirectoryWindows(std::ostream& fout
     fout << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) " << target2 << "\n";
     }
   std::string currentDir = m_Makefile->GetCurrentOutputDirectory();
-  fout << "\tcd " << cmSystemTools::ConvertToOutputPath(currentDir.c_str()) << "\n\n";
+  fout << "\tcd " << this->ConvertToOutputForExisting(currentDir.c_str()) << "\n\n";
 }
 
 
@@ -1919,9 +1917,12 @@ cmLocalUnixMakefileGenerator::ConvertToOutputForExisting(const char* p)
   // if there is one
   if(ret.find(' ') != std::string::npos)
     {
-    if(!cmSystemTools::GetShortPath(ret.c_str(), ret))
+    if(cmSystemTools::FileExists(p))
       {
-      ret = p;
+      if(!cmSystemTools::GetShortPath(ret.c_str(), ret))
+        {
+        ret = p;
+        }
       }
     }
   return ret;
