@@ -139,6 +139,32 @@ bool cmTarget::HasCxx() const
 void
 cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
 {
+  // There are two key parts of the dependency analysis: (1)
+  // determining the libraries in the link line, and (2) constructing
+  // the dependency graph for those libraries.
+  //
+  // The latter is done using the cache entries that record the
+  // dependencies of each library.
+  //
+  // The former is a more thorny issue, since it is not clear how to
+  // determine if two libraries listed on the link line refer to the a
+  // single library or not. For example, consider the link "libraries"
+  //    /usr/lib/libtiff.so -ltiff 
+  // Is this one library or two? The solution implemented here is the
+  // simplest (and probably the only practical) one: two libraries are
+  // the same if their "link strings" are identical. Thus, the two
+  // libraries above are considered distinct. This also means that for
+  // dependency analysis to be effective, the CMake user must specify
+  // libraries build by his project without using any linker flags or
+  // file extensions. That is,
+  //    LINK_LIBRARIES( One Two )
+  // instead of
+  //    LINK_LIBRARIES( -lOne ${binarypath}/libTwo.a )
+  // The former is probably what most users would do, but it never
+  // hurts to document the assumptions. :-) Therefore, in the analysis
+  // code, the "canonical name" of a library is simply its name as
+  // given to a LINK_LIBRARIES command.
+
   typedef std::vector< std::string > LinkLine;
 
   // Maps the canonical names to the full objects of m_LinkLibraries.
@@ -146,7 +172,8 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
 
   // The unique list of libraries on the orginal link line. They
   // correspond to lib_map keys. However, lib_map will also get
-  // further populated by the dependency analysis.
+  // further populated by the dependency analysis, while this will be
+  // unchanged.
   LinkLine orig_libs;
 
   // The list canonical names in the order they were orginally
@@ -156,6 +183,10 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
   // The dependency maps.
   DependencyMap dep_map, dep_map_implicit;
 
+
+  // 1. Determine the list of unique libraries in the original link
+  // line.
+
   LinkLibraries::iterator lib;
   for(lib = m_LinkLibraries.begin(); lib != m_LinkLibraries.end(); ++lib)
     {
@@ -163,7 +194,7 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
     // if a variable expands to nothing.
     if (lib->first.size() == 0) continue;
 
-    std::string cname = lib->first;
+    const std::string& cname = lib->first;
     lib_order.push_back( cname );
     if( lib_map.end() == lib_map.find( cname ) )
       {
@@ -172,11 +203,18 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
       }
     }
 
+  // 2. Gather the dependencies.
+
+  // If LIBRARY_OUTPUT_PATH is not set, then we must add search paths
+  // for all the new libraries added by the dependency analysis.
+  const char* libOutPath = mf.GetDefinition("LIBRARY_OUTPUT_PATH");
+  bool addLibDirs = (libOutPath==0 || strcmp(libOutPath,"")==0);
+
   // First, get the explicit dependencies for those libraries that
-  // have specified them
+  // have specified them.
   for( LinkLine::iterator i = orig_libs.begin(); i != orig_libs.end(); ++i )
     {
-    this->GatherDependencies( mf, *i, dep_map, lib_map );
+    this->GatherDependencies( mf, *i, dep_map, lib_map, addLibDirs );
     }
 
   // For the rest, get implicit dependencies. A library x depends
@@ -216,7 +254,10 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
 	dep_map[ i->first ] = i->second;
 	}
 
-  // Create a new link line order.
+  // 3. Create a new link line, trying as much as possible to keep the
+  // original link line order.
+
+  // Get the link line as canonical names.
   std::set<std::string> done, visited;
   std::vector<std::string> link_line;
   for( LinkLine::iterator i = orig_libs.begin(); i != orig_libs.end(); ++i )
@@ -224,19 +265,14 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
     Emit( *i, dep_map, done, visited, link_line );
     }
 
-
-  // If LIBRARY_OUTPUT_PATH is not set, then we must add search paths
-  // for all the new libraries added by the dependency analysis.
-  const char* libOutPath = mf.GetDefinition("LIBRARY_OUTPUT_PATH");
-  bool addLibDirs = (libOutPath==0 || strcmp(libOutPath,"")==0);
+  // Translate the canonical names into internal objects.
   m_LinkLibraries.clear();
   for( std::vector<std::string>::reverse_iterator i = link_line.rbegin();
        i != link_line.rend(); ++i )
     {
     // Some of the libraries in the new link line may not have been in
     // the orginal link line, but were added by the dependency
-    // analysis. For these libraries, we assume the GENERAL type and
-    // add the name of the library.
+    // analysis.
     if( lib_map.find(*i) == lib_map.end() )
       {
       if( addLibDirs )
@@ -317,7 +353,8 @@ void cmTarget::Emit( const std::string& lib,
 void cmTarget::GatherDependencies( const cmMakefile& mf,
                                    const std::string& lib,
                                    DependencyMap& dep_map,
-                                   LibTypeMap& lib_map ) const
+                                   LibTypeMap& lib_map,
+                                   bool addLibDirs )
 {
   // If the library is already in the dependency map, then it has
   // already been fully processed.
@@ -343,7 +380,20 @@ void cmTarget::GatherDependencies( const cmMakefile& mf,
       std::string l = depline.substr( start, end-start );
       if( l.size() != 0 )
         {
-        const std::string cname = l; 
+        if( addLibDirs )
+          {
+          const char* libpath = mf.GetDefinition( l.c_str() );
+          if( libpath )
+            {
+            // Don't add a link directory that is already present.
+              if(std::find(m_LinkDirectories.begin(),
+                           m_LinkDirectories.end(), libpath) == m_LinkDirectories.end())
+                {
+                m_LinkDirectories.push_back(libpath);
+                }
+            }
+          }
+        const std::string& cname = l; 
         std::string linkType = l;
         linkType += "_LINK_TYPE";
         cmTarget::LinkLibraryType llt = cmTarget::GENERAL;
@@ -361,7 +411,7 @@ void cmTarget::GatherDependencies( const cmMakefile& mf,
           }
         lib_map[ cname ] = std::make_pair(l,llt); 
         dep_map[ lib ].insert( cname );
-        GatherDependencies( mf, cname, dep_map, lib_map );
+        GatherDependencies( mf, cname, dep_map, lib_map, addLibDirs );
         }
       start = end+1; // skip the ;
       end = depline.find( ";", start );

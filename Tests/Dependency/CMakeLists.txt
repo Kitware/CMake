@@ -1,27 +1,25 @@
 PROJECT( Dependency )
 
-SET( LIBRARY_OUTPUT_PATH ${Dependency_BINARY_DIR}/Lib )
-SET( CMAKE_ANALYZE_LIB_DEPENDS "ON" )
-
 # There is one executable that depends on eight libraries. The
 # system has the following dependency graph:
 #
-#                    +----------- NoDepC  <----  EXECUTABLE
-#                    |                            |    |
-#                    V                            |    |
-#                                                 |    |
-#                  NoDepA  <----- NoDepB  <-------+    |
-#                                                      |
-#                    ^                                 |
+#                    +----------- NoDepC  <----  EXECUTABLE ---+
+#                    |                            |    |       |
+#                    V                            |    |       |
+#                                                 |    |       |
+#                  NoDepA  <----- NoDepB  <-------+    |       |
+#                                                      |       |
+#                    ^                                 |       V
 #                    |                                 |
-#      One  <------ Four ----->  Two  <----- Five  <---+
-#                                |           
-#       ^           ^  ^         | ^         ^  ^
-#       |           |  +-----+   | |         |  +----+
-#       |           |        |   | |         |       |
-#       +--------- Three  <------+ +------- SixA    SixB
-#                            |                       |
-#                            +-----------------------+
+#      One  <------ Four ----->  Two  <----- Five  <---|----- SixB
+#                                |                     |       |
+#       ^           ^  ^         |  ^         ^        |       |
+#       |           |  +-----+   |   \        |        |       |
+#       |           |        |   |    \       |        |       |
+#       +--------- Three  <------+      --- SixA  <----+       |
+#                            |                                 |
+#                            |                                 |
+#                            +---------------------------------+
 # NoDepA:
 # NoDepB: NoDepA
 # NoDepC: NoDepA

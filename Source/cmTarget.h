@@ -121,7 +121,7 @@ private:
   typedef std::map< std::string, std::set< std::string > > DependencyMap;
 
   /**
-   * Maps a canonical library name to it's proper type
+   * Maps a library name to its internal structure
    */
   typedef std::map< std::string, std::pair<std::string,LinkLibraryType> > LibTypeMap;
 
@@ -141,11 +141,15 @@ private:
 
   /**
    * Finds the explicit dependencies for \param lib, if they have been
-   * specified, and inserts them into \param dep_map.
+   * specified, and inserts them into \param dep_map. It also adds the
+   * maps from the library names to internal structures for any
+   * libraries introduced by the analysis. \param addLibDirs is true
+   * if paths to newly found libraries should be added to the search
+   * path.
    */
   void GatherDependencies( const cmMakefile& mf, const std::string& lib,
                            DependencyMap& dep_map,
-                           LibTypeMap& lib_map ) const;
+                           LibTypeMap& lib_map, bool addLibDirs );
 
   /**
    * Returns true if lib1 depends on lib2 according to \param

@@ -163,11 +163,18 @@ IF(BUILD_TESTING)
       ${CMake_BINARY_DIR}/Tests/Wrapping/bin
       TestDriverTest subdir/test3)
 
-    ADD_TEST(dependency ${CMake_BINARY_DIR}/Source/cmaketest 
+    ADD_TEST(dependency_w_libout ${CMake_BINARY_DIR}/Source/cmaketest 
       ${CMake_SOURCE_DIR}/Tests/Dependency 
-      ${CMake_BINARY_DIR}/Tests/Dependency
+      ${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut
       exec
-      ${CMake_BINARY_DIR}/Tests/Dependency/Exec
+      ${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut/Exec
+      Dependency CMAKE_ARGS -DLIBRARY_OUTPUT_PATH:PATH=${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut/Lib)
+
+    ADD_TEST(dependency_wo_lib_out ${CMake_BINARY_DIR}/Source/cmaketest 
+      ${CMake_SOURCE_DIR}/Tests/Dependency 
+      ${CMake_BINARY_DIR}/Tests/Dependency/WOLibOut
+      exec
+      ${CMake_BINARY_DIR}/Tests/Dependency/WOLibOut/Exec
       Dependency)
 
   ENDIF (DART_ROOT)
