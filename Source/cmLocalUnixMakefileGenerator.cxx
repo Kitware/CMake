@@ -1244,6 +1244,7 @@ void cmLocalUnixMakefileGenerator::OutputUtilityRule(std::ostream& fout,
     }
   std::string comment = "Utility";
   std::string depends;
+  depends = "$(" + this->CreateMakeVariable(name, "_DEPEND_LIBS") + ")";
   std::string replaceVars;
   const std::vector<cmCustomCommand> &ccs = t.GetPostBuildCommands();
   for(std::vector<cmCustomCommand>::const_iterator i = ccs.begin();
@@ -1322,6 +1323,7 @@ void cmLocalUnixMakefileGenerator::OutputDependLibs(std::ostream& fout)
         || (l->second.GetType() == cmTarget::MODULE_LIBRARY)
         || (l->second.GetType() == cmTarget::STATIC_LIBRARY)
         || (l->second.GetType() == cmTarget::EXECUTABLE)
+        || (l->second.GetType() == cmTarget::UTILITY)
         || (l->second.GetType() == cmTarget::WIN32_EXECUTABLE))
       {
       fout << this->CreateMakeVariable(l->first.c_str(), "_DEPEND_LIBS") << " = ";
