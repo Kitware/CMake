@@ -13,7 +13,8 @@ typedef struct
 static int InitialPass(void *inf, void *mf, int argc, char *argv[])
 {
   char* file;
-  const char* str;
+  char* str;
+  const char* cstr;
   char buffer[1024];
   void *source_file;
   cmLoadedCommandInfo *info = (cmLoadedCommandInfo *)inf;
@@ -93,19 +94,19 @@ static int InitialPass(void *inf, void *mf, int argc, char *argv[])
   info->CAPI->AddDefineFlag(mf, "-DADDED_DEFINITION");
 
   source_file = info->CAPI->CreateSourceFile();
-  str = info->CAPI->SourceFileGetSourceName(source_file);
-  sprintf(buffer, "Shold be empty (source file name): [%s]", str);
+  cstr = info->CAPI->SourceFileGetSourceName(source_file);
+  sprintf(buffer, "Shold be empty (source file name): [%s]", cstr);
   info->CAPI->DisplaySatus(mf, buffer);
-  str = info->CAPI->SourceFileGetFullPath(source_file);
-  sprintf(buffer, "Shold be empty (source file full path): [%s]", str);
+  cstr = info->CAPI->SourceFileGetFullPath(source_file);
+  sprintf(buffer, "Shold be empty (source file full path): [%s]", cstr);
   info->CAPI->DisplaySatus(mf, buffer);
   if ( info->CAPI->SourceFileGetPropertyAsBool(source_file, "SOME_PROPERTY") )
     {
     info->CAPI->SetError(mf, "Property SOME_PROPERTY should not be defined");
     return 0;
     }
-  str = info->CAPI->SourceFileGetProperty(source_file, "ABSTRACT");
-  sprintf(buffer, "Shold be 0 (source file abstract property): [%p]", str);
+  cstr = info->CAPI->SourceFileGetProperty(source_file, "ABSTRACT");
+  sprintf(buffer, "Shold be 0 (source file abstract property): [%p]", cstr);
   info->CAPI->DisplaySatus(mf, buffer);
 
   info->CAPI->DestroySourceFile(source_file);
