@@ -173,6 +173,7 @@ public:
     {
     m_cmHomeDirectory = dir;
     cmSystemTools::ConvertToUnixSlashes(m_cmHomeDirectory);
+    this->AddDefinition("CMAKE_SOURCE_DIR", this->GetHomeDirectory());
     }
   const char* GetHomeDirectory() 
     {
@@ -182,6 +183,7 @@ public:
     {
     m_HomeOutputDirectory = lib;
     cmSystemTools::ConvertToUnixSlashes(m_HomeOutputDirectory);
+    this->AddDefinition("CMAKE_BINARY_DIR", this->GetHomeOutputDirectory());
     }
   const char* GetHomeOutputDirectory()
     {

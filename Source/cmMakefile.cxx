@@ -388,11 +388,7 @@ std::string cmMakefile::GetParentListFileName(const char *currentFileName)
 
 void cmMakefile::ExpandVariables()
 {
-  // make sure binary and source dir are defined
-  this->AddDefinition("CMAKE_BINARY_DIR", this->GetHomeOutputDirectory());
-  this->AddDefinition("CMAKE_SOURCE_DIR", this->GetHomeDirectory());
-
-   // Now expand varibles in the include and link strings
+  // Now expand varibles in the include and link strings
   std::vector<std::string>::iterator j, begin, end;
   begin = m_IncludeDirectories.begin();
   end = m_IncludeDirectories.end();
