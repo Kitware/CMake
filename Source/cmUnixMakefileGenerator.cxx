@@ -692,7 +692,15 @@ void cmUnixMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout,
   target = this->ConvertToOutputPath(target.c_str());
   std::string depend = "$(";
   depend += this->CreateMakeVariable(name, "_SRC_OBJS") + ")";
-  std::string command = "$(CMAKE_AR) $(CMAKE_AR_ARGS) ";
+  std::string command;
+  if(t.HasCxx())
+    {
+    command = "$(CMAKE_CXX_AR) $(CMAKE_CXX_AR_ARGS) ";
+    }
+  else
+    {
+    command = "$(CMAKE_AR) $(CMAKE_AR_ARGS) ";
+    }
   command += target;
   command += " $(";
   command += this->CreateMakeVariable(name, "_SRC_OBJS") + ")";
@@ -1499,6 +1507,8 @@ void cmUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     "CMAKE_RANLIB        = @CMAKE_RANLIB@\n"
     "CMAKE_AR            = @CMAKE_AR@\n"
     "CMAKE_AR_ARGS       = @CMAKE_AR_ARGS@\n"
+    "CMAKE_CXX_AR            = @CMAKE_CXX_AR@\n"
+    "CMAKE_CXX_AR_ARGS       = @CMAKE_CXX_AR_ARGS@\n"
     "CMAKE_C_COMPILER    = @CMAKE_C_COMPILER@\n"
     "CMAKE_C_FLAGS       = @CMAKE_C_FLAGS@\n"
     "CMAKE_SHLIB_CFLAGS  = @CMAKE_SHLIB_CFLAGS@\n"

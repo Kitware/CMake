@@ -149,8 +149,8 @@ AC_SUBST(CMAKE_NO_ANSI_FOR_SCOPE)
 
 # find make to use to build cmake, prefer gmake
 AC_PATH_PROGS(CMAKE_AR_TMP, ar)
-CMAKE_AR="$CMAKE_AR_TMP"
-CMAKE_AR_ARGS="cr"
+CMAKE_CXX_AR="$CMAKE_AR_TMP"
+CMAKE_CXX_AR_ARGS="cr"
 # if on SunOS and not using gXX then use the compiler to make .a libs
 case $system in 
    SunOS-5*)
@@ -158,8 +158,8 @@ case $system in
 	:
    else
       echo "Using $CXX -xar -o for creating .a libraries"
-      CMAKE_AR="$CXX"
-      CMAKE_AR_ARGS="-xar -o"
+      CMAKE_CXX_AR="$CXX"
+      CMAKE_CXX_AR_ARGS="-xar -o"
    fi
    ;;
    IRIX*)
@@ -167,13 +167,13 @@ case $system in
 	:
    else
       echo "Using $CXX -xar -o for creating .a libraries"
-      CMAKE_AR="$CXX"
-      CMAKE_AR_ARGS="-ar -o"
+      CMAKE_CXX_AR="$CXX"
+      CMAKE_CXX_AR_ARGS="-ar -o"
    fi
    ;;
 esac
-AC_SUBST(CMAKE_AR)
-AC_SUBST(CMAKE_AR_ARGS)
+AC_SUBST(CMAKE_CXX_AR)
+AC_SUBST(CMAKE_CXX_AR_ARGS)
 
 CMAKE_COMPILER_IS_GNUGXX=0
 if test $ac_cv_prog_gxx = yes; then

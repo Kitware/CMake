@@ -2,11 +2,11 @@
 # CMakeLocal.make.in should be in the directory where you run configure
 # in, which need not be the source directory
 #
-SET (CMAKE_AR                 "@CMAKE_AR@" CACHE FILEPATH 
-     "Archive program used to make archive libraries.")
+SET (CMAKE_CXX_AR                 "@CMAKE_CXX_AR@" CACHE FILEPATH 
+     "Archive program used to make archive libraries of c++ object files.")
 
-SET (CMAKE_AR_ARGS            "@CMAKE_AR_ARGS@" CACHE STRING 
-     "Arguments for CMAKE_AR program to create an archive library.")
+SET (CMAKE_CXX_AR_ARGS            "@CMAKE_CXX_AR_ARGS@" CACHE STRING 
+     "Arguments for CMAKE_CXX_AR program to create an archive library.")
 
 SET (CMAKE_CXX_COMPILER       "@CXX@" CACHE FILEPATH 
      "Name of C++ compiler used.")
@@ -39,8 +39,8 @@ SET (CMAKE_NO_EXPLICIT_TEMPLATE_INSTANTIATION       @CMAKE_NO_EXPLICIT_TEMPLATE_
 
 MARK_AS_ADVANCED(
 CMAKE_CXX_COMPILER
-CMAKE_AR
-CMAKE_AR_ARGS
+CMAKE_CXX_AR
+CMAKE_CXX_AR_ARGS
 CMAKE_TEMPLATE_FLAGS
 CMAKE_NO_ANSI_STREAM_HEADERS
 CMAKE_NO_ANSI_FOR_SCOPE
