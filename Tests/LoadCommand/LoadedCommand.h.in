@@ -18,3 +18,6 @@
 /* Check for headers */
 #cmakedefine HAVE_SYS_PRCTL_H
 #cmakedefine HAVE_SYS_PRAFASDFCTL_H
+
+/* Check for libraries */
+#cmakedefine HAVE_LIBM

@@ -24,6 +24,9 @@ INCLUDE (${CMAKE_ROOT}/Modules/CheckIncludeFile.cmake)
 CHECK_INCLUDE_FILE("sys/prctl.h"    HAVE_SYS_PRCTL_H)
 CHECK_INCLUDE_FILE("sys/prafasdfctl.h"    HAVE_SYS_PRAFASDFCTL_H)
 
+INCLUDE (${CMAKE_ROOT}/Modules/CheckLibraryExists.cmake)
+CHECK_LIBRARY_EXISTS(m ceil "" HAVE_LIBM)
+
 CONFIGURE_FILE(${LoadedCommand_SOURCE_DIR}/LoadedCommand.h.in
                ${LoadedCommand_BINARY_DIR}/LoadedCommand.h)
 
