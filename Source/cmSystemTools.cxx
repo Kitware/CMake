@@ -304,12 +304,22 @@ bool cmSystemTools::IsOn(const char* val)
 
 bool cmSystemTools::IsNOTFOUND(const char* val)
 {
-  cmsys::RegularExpression reg("-NOTFOUND$");
-  if(reg.find(val))
+  int len = strlen(val);
+  const char* notfound = "-NOTFOUND";
+  const int lenNotFound = 9;
+  if(len < lenNotFound)
+    {
+    return false;
+    }
+  if(strncmp((val + (len - lenNotFound)), notfound, lenNotFound) == 0)
     {
     return true;
     }
-  return std::string("NOTFOUND") == val;
+  if(strcmp(val, "NOTFOUND") == 0)
+    {
+    return true;
+    }
+  return false;
 }
 
 
