@@ -1016,34 +1016,37 @@ int cmCTest::BuildDirectory()
     }
 
   int cc;
-  std::string srcdir = m_DartConfiguration["SourceDirectory"] + "/";
-  std::string bindir = m_DartConfiguration["BuildDirectory"] + "/";
-  std::string srcdirrep;
-  std::string bindirrep;
-  for ( cc = srcdir.size()-2; cc > 0; cc -- )
+  if ( m_DartConfiguration["SourceDirectory"].size() > 20 ||
+    m_DartConfiguration["BuildDirectory"].size() > 20 )
     {
-    if ( srcdir[cc] == '/' )
+    std::string srcdir = m_DartConfiguration["SourceDirectory"] + "/";
+    std::string bindir = m_DartConfiguration["BuildDirectory"] + "/";
+    std::string srcdirrep;
+    std::string bindirrep;
+    for ( cc = srcdir.size()-2; cc > 0; cc -- )
       {
-      srcdirrep = srcdir.c_str() + cc;
-      srcdirrep = "/..." + srcdirrep;
-      break;
+      if ( srcdir[cc] == '/' )
+        {
+        srcdirrep = srcdir.c_str() + cc;
+        srcdirrep = "/..." + srcdirrep;
+        srcdir = srcdir.substr(0, cc+1);
+        break;
+        }
       }
-    }
-  for ( cc = bindir.size()-2; cc > 0; cc -- )
-    {
-    if ( bindir[cc] == '/' )
+    for ( cc = bindir.size()-2; cc > 0; cc -- )
       {
-      bindirrep = bindir.c_str() + cc;
-      bindirrep = "/..." + bindirrep;
-      break;
+      if ( bindir[cc] == '/' )
+        {
+        bindirrep = bindir.c_str() + cc;
+        bindirrep = "/..." + bindirrep;
+        bindir = bindir.substr(0, cc+1);
+        break;
+        }
       }
+
+    cmSystemTools::ReplaceString(output, srcdir.c_str(), "/.../"); //srcdirrep.c_str());
+    cmSystemTools::ReplaceString(output, bindir.c_str(), "/.../"); //bindirrep.c_str());
     }
-
-  //std::cout << "Use " << srcdirrep.c_str() << std::endl;
-  //std::cout << "Use " << bindirrep.c_str() << std::endl;
-
-  cmSystemTools::ReplaceString(output, srcdir.c_str(), srcdirrep.c_str());
-  cmSystemTools::ReplaceString(output, bindir.c_str(), bindirrep.c_str());
 
   // Parsing of output for errors and warnings.
 
