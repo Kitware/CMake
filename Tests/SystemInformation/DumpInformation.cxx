@@ -11,7 +11,11 @@ int main(int, char*[])
     }
   while(!feof(file))
     {
-    putc(fgetc(file), stdout);
+    int ch = fgetc(file);
+    if(ch != EOF)
+      {
+      putc(ch, stdout);
+      }
     }
   fclose(file);
   return 0;
