@@ -2001,7 +2001,7 @@ CURLcode ftp_perform(struct connectdata *conn,
       struct tm *tm;
 #ifdef HAVE_LOCALTIME_R
       struct tm buffer;
-      tm = (struct tm *)localtime_r(&data->info.filetime, &buffer);
+      tm = (struct tm *)localtime_r((time_t*)&data->info.filetime, &buffer);
 #else
       tm = localtime((time_t *)&data->info.filetime);
 #endif
