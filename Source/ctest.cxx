@@ -320,7 +320,7 @@ int main (int argc, char *argv[])
 
     float percent = float(passed.size()) * 100.0f / total;
     fprintf(stderr,"\n%.0f%% tests passed, %i tests failed out of %i\n",
-            percent, failed.size(), total);
+            percent, int(failed.size()), total);
 
     if (failed.size()) 
       {
