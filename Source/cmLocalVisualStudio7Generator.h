@@ -89,7 +89,8 @@ private:
   std::string EscapeForXML(const char* s);
   std::string ConvertToXMLOutputPath(const char* path);
   std::string ConvertToXMLOutputPathSingle(const char* path);
-  void OutputDefineFlags(std::ostream& fout);
+  void OutputDefineFlags(const char* flags,
+                         std::ostream& fout);
   void OutputTargetRules(std::ostream& fout,
                          const cmTarget &target, 
                          const char *libName);

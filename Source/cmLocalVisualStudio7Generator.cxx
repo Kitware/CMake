@@ -284,11 +284,16 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
 { 
   // create a map of xml tags to the values they should have in the output
   // for example, "BufferSecurityCheck" = "TRUE"
-  // first fill this table with the values for the configuration Debug, Release, etc,
-  // Then parse the command line flags specified in CMAKE_CXX_FLAGS and CMAKE_C_FLAGS
+  // first fill this table with the values for the configuration
+  // Debug, Release, etc,
+  // Then parse the command line flags specified in CMAKE_CXX_FLAGS
+  // and CMAKE_C_FLAGS
   // and overwrite or add new values to this map
   std::map<cmStdString, cmStdString> flagMap;
-
+  // since the default is on for this, but if /EHsc is found
+  // in the flags it will be turned on and we have /EHSC on by
+  // default in the CXX flags, then this is the only way to turn this off
+  flagMap["ExceptionHandling"] = "FALSE";
   const char* mfcFlag = m_Makefile->GetDefinition("CMAKE_MFC_FLAG");
   if(!mfcFlag)
     {
@@ -431,7 +436,16 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   // now fill the flagMap from the command line flags, and
   // if a flag is used, it will be removed from the flags string by
   // this function call
-  this->FillFlagMapFromCommandFlags(flagMap, &cmLocalVisualStudio7GeneratorFlagTable[0], flags);
+  this->FillFlagMapFromCommandFlags(flagMap, 
+                                    &cmLocalVisualStudio7GeneratorFlagTable[0],
+                                    flags);
+  std::string defineFlags = m_Makefile->GetDefineFlags();
+  // now check the define flags for flags other than -D and
+  // put them in the map, the -D flags will be left in the defineFlags
+  // variable as -D is not in the flagMap
+  this->FillFlagMapFromCommandFlags(flagMap, 
+                                    &cmLocalVisualStudio7GeneratorFlagTable[0],
+                                    defineFlags); 
   // output remaining flags that were not mapped to anything
   fout << this->EscapeForXML(flags.c_str()).c_str();
   fout << " -DCMAKE_INTDIR=\\&quot;" << configName << "\\&quot;" 
@@ -478,7 +492,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
       }
     fout << "," << exportSymbol;
     }
-  this->OutputDefineFlags(fout);
+  this->OutputDefineFlags(defineFlags.c_str(), fout);
   fout << "\"\n";
   fout << "\t\t\t\tAssemblerListingLocation=\"" << configName << "\"\n";
   fout << "\t\t\t\tObjectFile=\"" << configName << "\\\"\n";
@@ -500,9 +514,10 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     std::string ipath = this->ConvertToXMLOutputPath(i->c_str());
     fout << ipath << ";";
     }
+  // add the -D flags to the RC tool 
   fout << "\"\n"
        << "\t\t\t\tPreprocessorDefinitions=\"" << pre;
-  this->OutputDefineFlags(fout);
+  this->OutputDefineFlags(defineFlags.c_str(), fout);
   fout << "\" />\n";
   fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCMIDLTool\"/>\n";
   this->OutputTargetRules(fout, target, libName);
@@ -842,9 +857,10 @@ void cmLocalVisualStudio7Generator::OutputLibraries(std::ostream& fout,
     }
 }
 
-void cmLocalVisualStudio7Generator::OutputDefineFlags(std::ostream& fout)
+void cmLocalVisualStudio7Generator::OutputDefineFlags(const char* flags,
+                                                      std::ostream& fout)
 {
-  std::string defs = m_Makefile->GetDefineFlags();
+  std::string defs = flags;
   cmSystemTools::ReplaceString(defs, "/D","-D");
   std::string::size_type pos = defs.find("-D");
   bool done = pos == std::string::npos;
