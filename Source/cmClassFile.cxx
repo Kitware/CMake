@@ -49,6 +49,7 @@ void cmClassFile::SetName(const char* name, const char* dir)
   hname += ".cxx";
   if(cmSystemTools::FileExists(hname.c_str()))
     {
+    m_ClassExtension = "cxx";
     m_HeaderFileOnly = false;
     m_FullPath = hname;
     return;
@@ -59,6 +60,7 @@ void cmClassFile::SetName(const char* name, const char* dir)
   if(cmSystemTools::FileExists(hname.c_str()))
   {
     m_HeaderFileOnly = false;
+    m_ClassExtension = "c";
     m_FullPath = hname;
     return;
   }
@@ -67,18 +69,39 @@ void cmClassFile::SetName(const char* name, const char* dir)
   if(cmSystemTools::FileExists(hname.c_str()))
   {
     m_HeaderFileOnly = false;
+    m_ClassExtension = "txx";
     m_FullPath = hname;
     return;
   }
   hname = pathname;
   hname += ".h";
-  if(!cmSystemTools::FileExists(hname.c_str()))
+  if(cmSystemTools::FileExists(hname.c_str()))
     {
-    cmSystemTools::Error("can not find file ", hname.c_str());
-    cmSystemTools::Error("Tried .txx .cxx .c for ", hname.c_str());
+    m_ClassExtension = "h";
+    m_FullPath = hname;
+    return;
     }
+  
+  cmSystemTools::Error("can not find file ", hname.c_str());
+  cmSystemTools::Error("Tried .txx .cxx .c for ", hname.c_str());
 }
 
+void cmClassFile::SetName(const char* name, const char* dir, const char *ext,
+                          bool hfo)
+{
+  m_HeaderFileOnly = hfo;
+  m_ClassName = name;
+  std::string pathname = dir;
+  if(pathname != "")
+    {
+    pathname += "/";
+    }
+  
+  pathname += m_ClassName + "." + ext;
+  m_FullPath = pathname;
+  m_ClassExtension = ext;
+  return;
+}
 
 void cmClassFile::Print()
 {

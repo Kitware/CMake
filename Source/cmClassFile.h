@@ -46,6 +46,14 @@ public:
   void SetName(const char* name, const char* dir);
 
   /**
+   * Set the name of the file, given the directory the file should be in.  IN
+   * this version the extesion is provided in the call. This is useful for
+   * generated files that do not exist prior to the build.  
+   */
+  void SetName(const char* name, const char* dir, const char *ext, 
+               bool headerFileOnly);
+
+  /**
    * Print the structure to std::cout.
    */
   void Print();
@@ -75,6 +83,12 @@ public:
    * (In most cases this is the name of the class.)
    */
   std::string m_ClassName;
+
+  /**
+   * The file name associated with stripped off directory and extension.
+   * (In most cases this is the name of the class.)
+   */
+  std::string m_ClassExtension;
 
   /**
    * The dependencies of this class are gathered here.
