@@ -23,7 +23,6 @@ class cmDependInformation;
 class cmMakeDepend;
 class cmTarget;
 class cmSourceFile;
-class cmSubDirectory;
 
 /** \class cmLocalUnixMakefileGenerator
  * \brief Write a LocalUnix makefiles.

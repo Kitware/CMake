@@ -22,7 +22,6 @@
 #include "cmMakeDepend.h"
 #include "cmCacheManager.h"
 #include "cmGeneratedFileStream.h"
-#include "cmSubDirectory.h"
 
 #include <cmsys/RegularExpression.hxx>
 
