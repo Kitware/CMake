@@ -56,7 +56,7 @@ IF(WIN32)
 
 ELSE(WIN32)
 
-  FIND_PROGRAM(CMAKE_WX_CONFIG wx-config)
+  FIND_PROGRAM(CMAKE_WX_CONFIG wx-config ../wx/bin ../../wx/bin)
   SET(CMAKE_WX_CXX_FLAGS "`${CMAKE_WX_CONFIG} --cflags`")
   SET(WXWINDOWS_LIBRARY "`${CMAKE_WX_CONFIG} --libs`")
 
