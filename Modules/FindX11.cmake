@@ -50,4 +50,11 @@ IF (UNIX)
 
   # Deprecated variable fro backwards compatibility with CMake 1.4
   SET (X11_LIBRARY ${X11_X11_LIBRARY})
+
+MARK_AS_ADVANCED(
+  X11_X11_LIBRARY
+  X11_Xext_LIBRARY
+  X11_INCLUDE_DIR
+)
+
 ENDIF (UNIX)

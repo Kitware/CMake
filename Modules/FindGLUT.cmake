@@ -19,7 +19,7 @@ IF (WIN32)
     )
 
     FIND_LIBRARY( GLUT_glut_LIBRARY glut32
-      ${OPENGL_LIBRARY_PATH}
+      ${OPENGL_LIBRARY_DIR}
       /usr/lib
       /usr/lib/w32api
       /usr/local/lib
@@ -35,7 +35,7 @@ IF (WIN32)
 
     FIND_LIBRARY( GLUT_glut_LIBRARY glut
       ${GLUT_ROOT_PATH}/Release
-      ${OPENGL_LIBRARY_PATH}
+      ${OPENGL_LIBRARY_DIR}
     )
 
   ENDIF(CYGWIN)
@@ -45,7 +45,7 @@ ELSE (WIN32)
   IF (APPLE)
 # These values for Apple could probably do with improvement.
     FIND_PATH( GLUT_INCLUDE_DIR GL/glut.h
-      ${OPENGL_LIBRARY_PATH}
+      ${OPENGL_LIBRARY_DIR}
     )
     SET(GLUT_glut_LIBRARY "-framework Glut" CACHE STRING "GLUT library for OSX")
   ELSE (APPLE)
@@ -107,5 +107,8 @@ IF(GLUT_INCLUDE_DIR)
 ENDIF(GLUT_INCLUDE_DIR)
 
 MARK_AS_ADVANCED(
-  GLUT_INCLUDE_PATH
+  GLUT_INCLUDE_DIR
+  GLUT_glut_LIBRARY
+  GLUT_Xmu_LIBRARY
+  GLUT_Xi_LIBRARY
 )

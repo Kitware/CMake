@@ -16,7 +16,6 @@
 IF (WIN32)
   IF (CYGWIN)
 
-
     FIND_PATH(OPENGL_INCLUDE_DIR GL/gl.h
       /usr/include
       /usr/X11R6/include
@@ -56,7 +55,6 @@ IF (WIN32)
 
 ELSE (WIN32)
 
-
   # The first line below is to make sure that the proper headers
   # are used on a Linux machine with the NVidia drivers installed.
   # They replace Mesa with NVidia's own library but normally do not
@@ -92,6 +90,15 @@ ELSE (WIN32)
           /usr/X11R6/lib
   )
 
+# On Unix OpenGL most certainly always requires X11.
+# Feel free to tighten up these conditions if you don't think this is always true.
+  IF (OPENGL_gl_LIBRARY)
+    INCLUDE( ${CMAKE_ROOT}/Modules/FindX11.cmake )
+    IF (X11_FOUND)
+      SET (OPENGL_LIBRARIES ${X11_LIBRARIES})
+    ENDIF (X11_FOUND)
+  ENDIF (OPENGL_gl_LIBRARY)
+
   FIND_LIBRARY(OPENGL_glu_LIBRARY
     NAMES MesaGLU GLU
     PATHS /usr/lib
@@ -101,15 +108,7 @@ ELSE (WIN32)
           /usr/X11R6/lib
   )
 
-
-
-  ENDIF(OPENGL_glu_LIBRARY)
-  ENDIF(OPENGL_gl_LIBRARY)
-  ENDIF(OPENGL_INCLUDE_DIR)
-
 ENDIF (WIN32)
-
-
 
 
 SET( OPENGL_FOUND "NO" )
@@ -140,3 +139,10 @@ IF(OPENGL_INCLUDE_DIR)
   SET(OPENGL_INCLUDE_PATH ${OPENGL_INCLUDE_DIR})
 
 ENDIF(OPENGL_INCLUDE_DIR)
+
+MARK_AS_ADVANCED(
+  OPENGL_INCLUDE_DIR
+  OPENGL_xmesa_INCLUDE_DIR
+  OPENGL_glu_LIBRARY
+  OPENGL_gl_LIBRARY
+)

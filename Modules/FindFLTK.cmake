@@ -6,6 +6,8 @@
 # FLTK_WRAP_UI, This allows the FLTK_WRAP_UI command to work.
 # FLTK_INCLUDE_DIR, where to find include files
 # FLTK_LIBRARIES, list of fltk libraries
+# FLTK_VERSION_1.0.11 Use this Version
+# FLTK_VERSION_1.1 Use this Version
 # FLTK_FOUND, Don't use FLTK if false.
 
 
@@ -14,14 +16,14 @@
 # FLTK_GL_LIBRARY, the full path to fltk_gl.lib
 # FLTK_FORMS_LIBRARY, the full path to fltk_forms.lib
 
-OPTION(USE_FLTK_VERSION_1.0.11 "Use FLTK version 1.0.11" 1)
-OPTION(USE_FLTK_VERSION_1.1 "Use FLTK version 1.1" 0)
+OPTION(FLTK_VERSION_1.0.11 "Use FLTK version 1.0.11" 1)
+OPTION(FLTK_VERSION_1.1 "Use FLTK version 1.1" 0)
 
 # Exclusion between the two version
 
-IF(USE_FLTK_VERSION_1.0.11)
-  SET(USE_FLTK_VERSION_1.1 0)
-ENDIF(USE_FLTK_VERSION_1.0.11)
+IF(FLTK_VERSION_1.0.11)
+  SET(FLTK_VERSION_1.1 0)
+ENDIF(FLTK_VERSION_1.0.11)
 
 FIND_PATH(FLTK_INCLUDE_DIR FL/Fl.h
   /usr/local/include
@@ -43,14 +45,14 @@ ENDIF(UNIX)
 # Make sure that the FLTK include path has been set
 # So the FLTK_LIBRARY does not appear the first time
 IF(FLTK_INCLUDE_DIR)
-  IF(USE_FLTK_VERSION_1.0.11)
+  IF(FLTK_VERSION_1.0.11)
       FIND_LIBRARY(FLTK_BASE_LIBRARY  NAMES fltk fltkd
            PATHS /usr/lib /usr/local/lib
            /usr/local/fltk/lib
            /usr/X11R6/lib ${FLTK_INCLUDE_DIR}/lib
       )
-  ENDIF(USE_FLTK_VERSION_1.0.11)
-  IF(USE_FLTK_VERSION_1.1)
+  ENDIF(FLTK_VERSION_1.0.11)
+  IF(FLTK_VERSION_1.1)
     FIND_LIBRARY(FLTK_BASE_LIBRARY  NAMES fltk fltkd
       PATHS /usr/lib /usr/local/lib /usr/local/fltk/lib
       /usr/X11R6/lib  ${FLTK_INCLUDE_DIR}/lib
@@ -67,7 +69,7 @@ IF(FLTK_INCLUDE_DIR)
       PATHS /usr/lib /usr/local/lib /usr/local/fltk/lib
       /usr/X11R6/lib  ${FLTK_INCLUDE_DIR}/lib
     )
-  ENDIF(USE_FLTK_VERSION_1.1)
+  ENDIF(FLTK_VERSION_1.1)
   SET( FLTK_LIBRARIES ${FLTK_BASE_LIBRARY} ${FLTK_GL_LIBRARY}
     ${FLTK_FORMS_LIBRARY}  ${FLTK_IMAGES_LIBRARY} ${FLTK_PLATFORM_DEPENDENT_LIBS}
   )
@@ -99,6 +101,18 @@ IF(FLTK_FLUID_EXECUTABLE)
       SET (FLTK_INCLUDE_PATH ${FLTK_INCLUDE_DIR})
       SET (FLTK_FLUID_EXE ${FLTK_FLUID_EXECUTABLE})
       SET (FLTK_LIBRARY ${FLTK_LIBRARIES})
+      SET (USE_FLTK_VERSION_1.0.11 ${FLTK_VERSION_1.0.11})
+      SET (USE_FLTK_VERSION_1.1 ${FLTK_VERSION_1.1})
     ENDIF(FLTK_LIBRARIES)
   ENDIF(FLTK_INCLUDE_DIR)
 ENDIF(FLTK_FLUID_EXECUTABLE)
+
+MARK_AS_ADVANCED(
+  FLTK_VERSION_1.0.11
+  FLTK_VERSION_1.1
+  FLTK_INCLUDE_DIR
+  FLTK_BASE_LIBRARY
+  FLTK_GL_LIBRARY
+  FLTK_FORMS_LIBRARY
+  FLTK_IMAGES_LIBRARY
+)
