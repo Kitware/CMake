@@ -370,9 +370,55 @@ std::string cmLocalUnixMakefileGenerator::GetFullTargetName(const char* n,
 // Output the rules for any targets
 void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
 {
+  const cmTargets &tgts = m_Makefile->GetTargets();
+
+  // add the help target
+  fout << "help:\n";
+  fout << "\t@echo \"The following are some of the valid targets for this Makefile:\"\n";
+  fout << "\t@echo \"  all (the default if no target is provided)\"\n";
+  fout << "\t@echo \"  clean\"\n";
+  fout << "\t@echo \"  depend\"\n";
+  fout << "\t@echo \"  rebuild_cache\"\n";
+
+  // libraries
+  for(cmTargets::const_iterator l = tgts.begin(); 
+      l != tgts.end(); l++)
+    {
+    if((l->second.GetType() == cmTarget::STATIC_LIBRARY) ||
+       (l->second.GetType() == cmTarget::SHARED_LIBRARY) ||
+       (l->second.GetType() == cmTarget::MODULE_LIBRARY))
+      {
+      std::string path = m_LibraryOutputPath;
+      path += this->GetFullTargetName(l->first.c_str(), l->second);
+      fout << "\t@echo \"  " << cmSystemTools::ConvertToOutputPath(path.c_str()) << "\"\n";
+      }
+    }
+  // executables
+  for(cmTargets::const_iterator l = tgts.begin(); 
+      l != tgts.end(); l++)
+    {
+    if ((l->second.GetType() == cmTarget::EXECUTABLE ||
+         l->second.GetType() == cmTarget::WIN32_EXECUTABLE) &&
+        l->second.IsInAll())
+      {
+      fout << "\t@echo \"  " << l->first << "\"\n";
+      }
+    }
+  // list utilities last
+  for(cmTargets::const_iterator l = tgts.begin(); 
+      l != tgts.end(); l++)
+    {
+    if (l->second.GetType() == cmTarget::UTILITY &&
+        l->second.IsInAll())
+      {
+      fout << "\t@echo \"  " << l->first << "\"\n";
+      }
+    }
+  fout << "\n\n";
+    
+  
   // for each target add to the list of targets
   fout << "TARGETS = ";
-  const cmTargets &tgts = m_Makefile->GetTargets();
   // list libraries first
   for(cmTargets::const_iterator l = tgts.begin(); 
       l != tgts.end(); l++)
