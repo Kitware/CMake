@@ -615,6 +615,7 @@ void CMakeSetupDialog::RunCMake(bool generateProjectFiles)
   m_BuildPathChanged = false;
   // put the cursor back
   ::SetCursor(LoadCursor(NULL, IDC_ARROW));
+  m_OKButton.EnableWindow(true);
   cmSystemTools::ResetErrorOccuredFlag();
 }
 
@@ -731,7 +732,7 @@ void CMakeSetupDialog::FillCacheGUIFromCacheManager()
       {
       if(i.GetPropertyAsBool("ADVANCED"))
         {
-	m_CacheEntriesList.RemoveProperty(key);
+        m_CacheEntriesList.RemoveProperty(key);
         continue;
         }
       }
