@@ -109,6 +109,7 @@ static const char* cmCTestWarningMatches[] = {
   "([^ :]+):([0-9]+): Warning",
   "\\([0-9]*\\): remark #[0-9]*",
   "\".*\", line [0-9]+: remark\\([0-9]*\\):",
+  "cc-[0-9]* CC: REMARK File = .*, Line = [0-9]*",
   0
 };
 
