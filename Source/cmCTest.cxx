@@ -3694,7 +3694,7 @@ int cmCTest::RunConfigurationScript(const std::string& total_script_arg)
   const char *cvsCheckOut = mf->GetDefinition("CTEST_CVS_CHECKOUT");
   if (backup && !cvsCheckOut)
     {
-    cmSystemTools::Error("Backup was requested without a cvs checkout");    
+    cmSystemTools::Error("Backup was requested without specifying CTEST_CVS_CHECKOUT.");    
     return 3;
     }
 
@@ -3824,7 +3824,7 @@ int cmCTest::RunConfigurationDashboard(cmMakefile *mf,
                                           m_Verbose, 0 /*m_TimeOut*/);
     if (!res || retVal != 0)
       {
-      cmSystemTools::Error("Unable to perform cvs checkout ");    
+      cmSystemTools::Error("Unable to perform cvs checkout:\n", output.c_str());    
       return 6;
       }
     }
@@ -3863,7 +3863,7 @@ int cmCTest::RunConfigurationDashboard(cmMakefile *mf,
                                           m_Verbose, 0 /*m_TimeOut*/);
     if (!res || retVal != 0)
       {
-      cmSystemTools::Error("Unable to perform cvs checkout ");    
+      cmSystemTools::Error("Unable to perform cvs checkout:", output.c_str());    
       this->RestoreBackupDirectories(backup, srcDir, binDir,
         backupSrcDir.c_str(), 
         backupBinDir.c_str());
@@ -3888,7 +3888,7 @@ int cmCTest::RunConfigurationDashboard(cmMakefile *mf,
     {
     if (!cmSystemTools::MakeDirectory(binDir))
       {
-      cmSystemTools::Error("Unable to create the binary directory");    
+      cmSystemTools::Error("Unable to create the binary directory:\n", binDir);    
       this->RestoreBackupDirectories(backup, srcDir, binDir,
         backupSrcDir.c_str(), 
         backupBinDir.c_str());
@@ -3920,7 +3920,7 @@ int cmCTest::RunConfigurationDashboard(cmMakefile *mf,
                                           m_Verbose, 0 /*m_TimeOut*/);
     if (!res || retVal != 0)
       {
-      cmSystemTools::Error("Unable to perform cvs checkout ");    
+      cmSystemTools::Error("Unable to perform cvs checkout:\n", output.c_str());    
       this->RestoreBackupDirectories(backup, srcDir, binDir,
                                      backupSrcDir.c_str(), 
                                      backupBinDir.c_str());
@@ -3958,7 +3958,7 @@ int cmCTest::RunConfigurationDashboard(cmMakefile *mf,
             m_Verbose, 0 /*m_TimeOut*/);
           if (!res || retVal != 0)
             {
-            cmSystemTools::Error("Unable to perform extra cvs updates");    
+            cmSystemTools::Error("Unable to perform extra cvs updates:\n", output.c_str());
             this->RestoreBackupDirectories(backup, srcDir, binDir,
               backupSrcDir.c_str(), 
               backupBinDir.c_str());
@@ -3996,6 +3996,7 @@ int cmCTest::RunConfigurationDashboard(cmMakefile *mf,
   // do an initial cmake to setup the DartConfig file
   const char *cmakeCmd = mf->GetDefinition("CTEST_CMAKE_COMMAND");
   int cmakeFailed = 0;
+  std::string cmakeFailedOuput;
   if (cmakeCmd)
     {
     command = cmakeCmd;
@@ -4015,6 +4016,7 @@ int cmCTest::RunConfigurationDashboard(cmMakefile *mf,
       {
       // even if this fails continue to the next step
       cmakeFailed = 1;
+      cmakeFailedOuput = output;
       }
     }
 
@@ -4044,10 +4046,10 @@ int cmCTest::RunConfigurationDashboard(cmMakefile *mf,
                                      backupBinDir.c_str());
       if (cmakeFailed)
         {
-        cmSystemTools::Error("Unable to run cmake");    
+        cmSystemTools::Error("Unable to run cmake:\n", cmakeFailedOuput.c_str());    
         return 10;
         }
-      cmSystemTools::Error("Unable to run ctest");    
+      cmSystemTools::Error("Unable to run ctest:\n", output.c_str());    
       if (!res)
         {
         return 11;
