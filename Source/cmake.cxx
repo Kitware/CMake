@@ -25,8 +25,9 @@
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 # include "cmVariableWatch.h"
 # include "cmVersion.h"
-# include "cmLocalUnixMakefileGenerator2.h"
 #endif
+
+#include "cmLocalUnixMakefileGenerator2.h"
 
 // only build kdevelop generator on non-windows platforms
 // when not bootstrapping cmake
@@ -291,20 +292,11 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       }
     else if(arg.find("-S",0) == 0)
       {
-      directoriesSet = true;
-      m_Local = true;
-      std::string path = arg.substr(2);
-      path = cmSystemTools::CollapseFullPath(path.c_str());
-      cmSystemTools::ConvertToUnixSlashes(path);
-      this->SetStartDirectory(path.c_str());
+      // There is no local generate anymore.  Ignore -S option.
       }
     else if(arg.find("-O",0) == 0)
       {
-      directoriesSet = true;
-      std::string path = arg.substr(2);
-      path = cmSystemTools::CollapseFullPath(path.c_str());
-      cmSystemTools::ConvertToUnixSlashes(path);
-      this->SetStartOutputDirectory(path.c_str());
+      // There is no local generate anymore.  Ignore -O option.
       }
     else if(arg.find("-B",0) == 0)
       {
@@ -839,13 +831,11 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
       return result;
       }
 
-#ifdef CMAKE_BUILD_WITH_CMAKE
     // Internal CMake dependency scanning support.
     else if (args[1] == "cmake_depends" && args.size() >= 5)
       {
       return cmLocalUnixMakefileGenerator2::ScanDependencies(args)? 0 : 1;
       }
-#endif
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
     // Write registry value
@@ -1664,10 +1654,8 @@ int cmake::CheckBuildSystem()
       }
     }
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
   // We do not need to rerun CMake.  Check dependency integrity.
   cmLocalUnixMakefileGenerator2::CheckDependencies(mf);
-#endif
 
   // No need to rerun.
   return 0;

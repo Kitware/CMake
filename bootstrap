@@ -36,6 +36,8 @@ CMAKE_CXX_SOURCES="\
   cmake  \
   cmakewizard  \
   cmakemain \
+  cmDepends \
+  cmDependsC \
   cmMakeDepend \
   cmMakefile \
   cmGeneratedFileStream \
@@ -48,6 +50,7 @@ CMAKE_CXX_SOURCES="\
   cmLocalXCodeGenerator \
   cmXCodeObject \
   cmLocalUnixMakefileGenerator \
+  cmLocalUnixMakefileGenerator2 \
   cmBootstrapCommands \
   cmCommands \
   cmTarget \

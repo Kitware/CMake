@@ -16,7 +16,7 @@
 =========================================================================*/
 
 #include "cmGlobalUnixMakefileGenerator.h"
-#include "cmLocalUnixMakefileGenerator.h"
+#include "cmLocalUnixMakefileGenerator2.h"
 #include "cmMakefile.h"
 #include "cmake.h"
 
@@ -31,6 +31,7 @@ void cmGlobalUnixMakefileGenerator::EnableLanguage(std::vector<std::string>const
                                                    cmMakefile *mf)
 {
   mf->AddDefinition("CMAKE_CFG_INTDIR",".");
+  mf->AddDefinition("CMAKE_GENERATOR_NEW", "1");
   this->cmGlobalGenerator::EnableLanguage(languages, mf);
   std::string path;
   for(std::vector<std::string>::const_iterator l = languages.begin();
@@ -73,7 +74,7 @@ void cmGlobalUnixMakefileGenerator::EnableLanguage(std::vector<std::string>const
 ///! Create a local generator appropriate to this Global Generator
 cmLocalGenerator *cmGlobalUnixMakefileGenerator::CreateLocalGenerator()
 {
-  cmLocalGenerator *lg = new cmLocalUnixMakefileGenerator;
+  cmLocalGenerator* lg = new cmLocalUnixMakefileGenerator2;
   lg->SetGlobalGenerator(this);
   return lg;
 }
