@@ -114,13 +114,16 @@ void cmDSPWriter::OutputDSPFile()
       case cmTarget::UTILITY:
         this->SetBuildType(UTILITY, l->first.c_str());
         break;
-      case cmTarget::INSTALL:
+      case cmTarget::INSTALL_FILES:
+	break;
+      case cmTarget::INSTALL_PROGRAMS:
 	break;
       default:
 	cmSystemTools::Error("Bad target type", l->first.c_str());
 	break;
       }
-    if (l->second.GetType() != cmTarget::INSTALL)
+    if ((l->second.GetType() != cmTarget::INSTALL_FILES)
+        && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))
       {
       this->CreateSingleDSP(l->first.c_str(),l->second);
       }

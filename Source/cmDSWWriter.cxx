@@ -171,7 +171,8 @@ void cmDSWWriter::WriteDSWFile(std::ostream& fout)
           }
         }
       // Write the project into the DSW file
-      if (l->second.GetType() != cmTarget::INSTALL)
+      if ((l->second.GetType() != cmTarget::INSTALL_FILES)
+          && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))
         {
         this->WriteProject(fout, si->c_str(), dir.c_str(), 
                            pg->GetDSPWriter(),l->second);

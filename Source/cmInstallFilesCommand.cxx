@@ -52,9 +52,9 @@ bool cmInstallFilesCommand::InitialPass(std::vector<std::string>& args)
 
   cmTargets &tgts = m_Makefile->GetTargets();
   std::vector<std::string>::iterator s = args.begin();
-  if (tgts.find("INSTALL") != tgts.end())
+  if (tgts.find("INSTALL_FILES") != tgts.end())
     {
-    tgts["INSTALL"].SetInstallPath(args[0].c_str());
+    tgts["INSTALL_FILES"].SetInstallPath(args[0].c_str());
     }
   ++s;
   for (;s != args.end(); ++s)
@@ -71,7 +71,7 @@ void cmInstallFilesCommand::FinalPass()
   std::string testf;
   std::string ext = m_FinalArgs[0];
 
-  if (tgts.find("INSTALL") == tgts.end())
+  if (tgts.find("INSTALL_FILES") == tgts.end())
     {
     return;
     }
@@ -98,7 +98,7 @@ void cmInstallFilesCommand::FinalPass()
           {
           testf = c->GetSourceName() + ext;
           // add to the result
-          tgts["INSTALL"].GetSourceLists().push_back(testf);
+          tgts["INSTALL_FILES"].GetSourceLists().push_back(testf);
           }
         }
       // if one wasn't found then assume it is a single class
@@ -106,7 +106,7 @@ void cmInstallFilesCommand::FinalPass()
         {
         testf = temps + ext;
         // add to the result
-        tgts["INSTALL"].GetSourceLists().push_back(testf);
+        tgts["INSTALL_FILES"].GetSourceLists().push_back(testf);
         }
       }
     }
@@ -120,7 +120,7 @@ void cmInstallFilesCommand::FinalPass()
     // for each argument, get the files 
     for (;s != files.end(); ++s)
       {
-      tgts["INSTALL"].GetSourceLists().push_back(*s);
+      tgts["INSTALL_FILES"].GetSourceLists().push_back(*s);
       }
     }
 }

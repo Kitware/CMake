@@ -122,11 +122,13 @@ void cmMakefile::AddDefaultCommands()
 #if defined(__APPLE__)
   this->AddDefinition("APPLE", "1");
 #endif
-  // always creat an empty install target
+  // always creat an empty install targets for files and programs.
   cmTarget target;
-  target.SetType(cmTarget::INSTALL);
   target.SetInAll(false);
-  m_Targets.insert(cmTargets::value_type("INSTALL",target));
+  target.SetType(cmTarget::INSTALL_FILES);
+  m_Targets.insert(cmTargets::value_type("INSTALL_FILES", target));
+  target.SetType(cmTarget::INSTALL_PROGRAMS);
+  m_Targets.insert(cmTargets::value_type("INSTALL_PROGRAMS", target));
 }
 
 cmMakefile::~cmMakefile()

@@ -38,64 +38,72 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =========================================================================*/
-#include "cmTarget.h"
-#include "cmMakefile.h"
+#ifndef cmInstallProgramsCommand_h
+#define cmInstallProgramsCommand_h
 
-void cmTarget::GenerateSourceFilesFromSourceLists(const cmMakefile &mf)
+#include "cmStandardIncludes.h"
+#include "cmCommand.h"
+
+/** \class cmInstallProgramsCommand
+ * \brief Specifies where to install some programs
+ *
+ * cmInstallProgramsCommand specifies the relative path where a list of
+ * programs should be installed.  
+ */
+class cmInstallProgramsCommand : public cmCommand
 {
-  // this is only done for non install targets
-  if ((this->m_TargetType == cmTarget::INSTALL_FILES)
-      || (this->m_TargetType == cmTarget::INSTALL_PROGRAMS))
+public:
+  /**
+   * This is a virtual constructor for the command.
+   */
+  virtual cmCommand* Clone() 
     {
-    return;
+    return new cmInstallProgramsCommand;
     }
 
-  // for each src lists add the classes
-  for (std::vector<std::string>::const_iterator s = m_SourceLists.begin();
-       s != m_SourceLists.end(); ++s)
+  /**
+   * This is called when the command is first encountered in
+   * the CMakeLists.txt file.
+   */
+  virtual bool InitialPass(std::vector<std::string>& args);
+
+  /**
+   * The name of the command as specified in CMakeList.txt.
+   */
+  virtual const char* GetName() { return "INSTALL_PROGRAMS";}
+
+  /**
+   * Succinct documentation.
+   */
+  virtual const char* GetTerseDocumentation() 
     {
-    // replace any variables
-    std::string temps = *s;
-    mf.ExpandVariablesInString(temps);
-    // look for a srclist
-    if (mf.GetSources().find(temps) != mf.GetSources().end())
-      {
-      const std::vector<cmSourceFile> &clsList = 
-        mf.GetSources().find(temps)->second;
-      // if we ahave a limited build list, use it
-      m_SourceFiles.insert(m_SourceFiles.end(), 
-                           clsList.begin(), 
-                           clsList.end());
-      }
-    // if one wasn't found then assume it is a single class
-    else
-      {
-      cmSourceFile file;
-      file.SetIsAnAbstractClass(false);
-      file.SetName(temps.c_str(), mf.GetCurrentDirectory(),
-                   mf.GetSourceExtensions(),
-                   mf.GetHeaderExtensions());
-      m_SourceFiles.push_back(file);
-      }
+    return "Create install rules for programs";
     }
+  
+  /**
+   * This is called at the end after all the information
+   * specified by the command is accumulated. Most commands do
+   * not implement this method.  At this point, reading and
+   * writing to the cache can be done.
+   */
+  virtual void FinalPass();
 
-  // expand any link library variables whle we are at it
-  LinkLibraries::iterator p = m_LinkLibraries.begin();
-  for (;p != m_LinkLibraries.end(); ++p)
+  /**
+   * More documentation.
+   */
+  virtual const char* GetFullDocumentation()
     {
-    mf.ExpandVariablesInString(p->first);    
+    return
+      "INSTALL_PROGRAMS(path file file ...)\n"
+      "INSTALL_PROGRAMS(path regexp)\n"
+      "Create rules to install the listed programs into the path. Path is relative to the variable CMAKE_INSTALL_PREFIX. There are two forms for this command. In the first the programs can be specified explicitly.  In the second form any program in the current directory that match the regular expression will be installed.";
     }
-}
+  
+  cmTypeMacro(cmInstallProgramsCommand, cmCommand);
 
-void cmTarget::MergeLibraries(const LinkLibraries &ll)
-{
-  typedef std::vector<std::pair<std::string,LinkLibraryType> > LinkLibraries;
+ private:
+  std::vector<std::string> m_FinalArgs;
+};
 
-  LinkLibraries::const_iterator p = ll.begin();
-  for (;p != ll.end(); ++p)
-    {
-    m_LinkLibraries.push_back(*p);
-    }
 
-}
-
+#endif

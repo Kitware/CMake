@@ -38,64 +38,69 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =========================================================================*/
-#include "cmTarget.h"
-#include "cmMakefile.h"
+#include "cmInstallProgramsCommand.h"
+#include "cmCacheManager.h"
 
-void cmTarget::GenerateSourceFilesFromSourceLists(const cmMakefile &mf)
+// cmExecutableCommand
+bool cmInstallProgramsCommand::InitialPass(std::vector<std::string>& args)
 {
-  // this is only done for non install targets
-  if ((this->m_TargetType == cmTarget::INSTALL_FILES)
-      || (this->m_TargetType == cmTarget::INSTALL_PROGRAMS))
+  if(args.size() < 2)
+    {
+    this->SetError("called with incorrect number of arguments");
+    return false;
+    }
+
+  cmTargets &tgts = m_Makefile->GetTargets();
+  std::vector<std::string>::iterator s = args.begin();
+  if (tgts.find("INSTALL_PROGRAMS") != tgts.end())
+    {
+    tgts["INSTALL_PROGRAMS"].SetInstallPath(args[0].c_str());
+    }
+  ++s;
+  for (;s != args.end(); ++s)
+    {
+    m_FinalArgs.push_back(*s);
+    }
+  
+  return true;
+}
+
+void cmInstallProgramsCommand::FinalPass() 
+{
+  cmTargets &tgts = m_Makefile->GetTargets();
+
+  if (tgts.find("INSTALL_PROGRAMS") == tgts.end())
     {
     return;
     }
-
-  // for each src lists add the classes
-  for (std::vector<std::string>::const_iterator s = m_SourceLists.begin();
-       s != m_SourceLists.end(); ++s)
+  
+  // two different options
+  if (m_FinalArgs.size() > 1)
     {
-    // replace any variables
-    std::string temps = *s;
-    mf.ExpandVariablesInString(temps);
-    // look for a srclist
-    if (mf.GetSources().find(temps) != mf.GetSources().end())
+    // for each argument, get the programs 
+    for (std::vector<std::string>::iterator s = m_FinalArgs.begin();
+         s != m_FinalArgs.end(); ++s)
       {
-      const std::vector<cmSourceFile> &clsList = 
-        mf.GetSources().find(temps)->second;
-      // if we ahave a limited build list, use it
-      m_SourceFiles.insert(m_SourceFiles.end(), 
-                           clsList.begin(), 
-                           clsList.end());
-      }
-    // if one wasn't found then assume it is a single class
-    else
-      {
-      cmSourceFile file;
-      file.SetIsAnAbstractClass(false);
-      file.SetName(temps.c_str(), mf.GetCurrentDirectory(),
-                   mf.GetSourceExtensions(),
-                   mf.GetHeaderExtensions());
-      m_SourceFiles.push_back(file);
+      // replace any variables
+      std::string temps = *s;
+      m_Makefile->ExpandVariablesInString(temps);
+      // add to the result
+      tgts["INSTALL_PROGRAMS"].GetSourceLists().push_back(temps);
       }
     }
-
-  // expand any link library variables whle we are at it
-  LinkLibraries::iterator p = m_LinkLibraries.begin();
-  for (;p != m_LinkLibraries.end(); ++p)
+  else     // reg exp list
     {
-    mf.ExpandVariablesInString(p->first);    
+    std::vector<std::string> programs;
+    cmSystemTools::Glob(m_Makefile->GetCurrentDirectory(),
+                        m_FinalArgs[0].c_str(), programs);
+    
+    std::vector<std::string>::iterator s = programs.begin();
+    // for each argument, get the programs 
+    for (;s != programs.end(); ++s)
+      {
+      tgts["INSTALL_PROGRAMS"].GetSourceLists().push_back(*s);
+      }
     }
 }
 
-void cmTarget::MergeLibraries(const LinkLibraries &ll)
-{
-  typedef std::vector<std::pair<std::string,LinkLibraryType> > LinkLibraries;
-
-  LinkLibraries::const_iterator p = ll.begin();
-  for (;p != ll.end(); ++p)
-    {
-    m_LinkLibraries.push_back(*p);
-    }
-
-}
-
+      
