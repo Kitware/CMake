@@ -133,6 +133,10 @@ defined(HAVE_LIBSSL) && defined(HAVE_LIBCRYPTO)
 #pragma warning ( disable : 4312 ) /* Allow cast from long to char* */
 struct _RPC_ASYNC_STATE;
 #endif
+/* Disable unnecessary warnings on Borland */
+#ifdef __BORLANDC__
+#pragma warn -8004
+#endif
 #if !defined(__GNUC__) || defined(__MINGW32__)
 #define sclose(x) closesocket(x)
 #define sread(x,y,z) recv(x,y,z,0)
