@@ -1,0 +1,21 @@
+#include "includefile"
+
+int CheckMethod(const char* var, const char* val )
+{
+  if ( !var )
+    {
+    printf("Var not specified\n");
+    return 1;
+    }
+  if ( !val )
+    {
+    printf("Val not specified\n");
+    return 1;
+    }
+  if ( strcmp(var, val) != 0)
+    {
+    printf("Var (%s) and Val (%s) are not the same...\n", var, val);
+    return 1;
+    }
+  return 0;
+}

@@ -168,6 +168,11 @@ IF(BUILD_TESTING)
       ${CMake_BINARY_DIR}/Tests/SystemInformation 
       DumpInformation)
 
+    ADD_TEST(StringFileTest ${EXECUTABLE_OUTPUT_PATH}/cmaketest 
+      ${CMake_SOURCE_DIR}/Tests/StringFileTest
+      ${CMake_BINARY_DIR}/Tests/StringFileTest
+      StringFileTest)
+
     ADD_TEST(TryCompile ${EXECUTABLE_OUTPUT_PATH}/cmaketest 
       ${CMake_SOURCE_DIR}/Tests/TryCompile
       ${CMake_BINARY_DIR}/Tests/TryCompile 
