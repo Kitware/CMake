@@ -131,6 +131,7 @@ void cmGlobalGenerator::Generate()
     m_CMakeInstance->UpdateProgress("Generating", 
                                     (i+1.0f)/m_LocalGenerators.size());
     }
+  m_CMakeInstance->UpdateProgress("Generating done", -1);
 }
 
 void cmGlobalGenerator::LocalGenerate()
