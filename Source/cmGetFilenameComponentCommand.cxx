@@ -39,7 +39,8 @@ bool cmGetFilenameComponentCommand::InitialPass(std::vector<std::string> const& 
   
   std::string result;
   std::string filename = args[1];
-
+  std::string storeArgs;
+  std::string programArgs;
   if (args[2] == "PATH")
     {
     result = cmSystemTools::GetFilenamePath(filename);
@@ -47,6 +48,21 @@ bool cmGetFilenameComponentCommand::InitialPass(std::vector<std::string> const& 
   else if (args[2] == "NAME")
     {
     result = cmSystemTools::GetFilenameName(filename);
+    }
+  else if (args[2] == "PROGRAM")
+    {
+    for(int i=2; i < args.size(); ++i)
+      {
+      if(args[i] == "PROGRAM_ARGS")
+        {
+        i++;
+        if(i < args.size())
+          {
+          storeArgs = args[i];
+          }
+        }
+      }
+    cmSystemTools::SplitProgramFromArgs(filename.c_str(), result, programArgs);
     }
   else if (args[2] == "EXT")
     {
@@ -65,6 +81,14 @@ bool cmGetFilenameComponentCommand::InitialPass(std::vector<std::string> const& 
 
   if(args.size() == 4 && args[3] == "CACHE")
     {
+    if(programArgs.size() && storeArgs.size())
+      {
+      m_Makefile->AddCacheDefinition(storeArgs.c_str(),
+                                     programArgs.c_str(),
+                                     "",
+                                     args[2] == "PATH" ? cmCacheManager::FILEPATH
+                                     : cmCacheManager::STRING);
+      }
     m_Makefile->AddCacheDefinition(args[0].c_str(),
                                    result.c_str(),
                                    "",
@@ -73,6 +97,10 @@ bool cmGetFilenameComponentCommand::InitialPass(std::vector<std::string> const& 
     }
   else 
     {
+    if(programArgs.size() && storeArgs.size())
+      {
+      m_Makefile->AddDefinition(storeArgs.c_str(), programArgs.c_str());
+      }
     m_Makefile->AddDefinition(args[0].c_str(), result.c_str());
     }
 

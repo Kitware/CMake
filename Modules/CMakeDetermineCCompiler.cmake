@@ -8,12 +8,11 @@
 IF(NOT CMAKE_C_COMPILER)
   # if the user has specified CC via the environment, then use that without checking
   IF($ENV{CC} MATCHES ".+")
-    SET(CMAKE_C_COMPILER_INIT $ENV{CC})
-    # make sure we can find it
-    FIND_PROGRAM(CMAKE_C_COMPILER_FULLPATH NAMES $ENV{CC})
-    IF(NOT CMAKE_C_COMPILER_FULLPATH)
-      MESSAGE(SEND_ERROR "Could not find compiler set in environment variable CC:\n$ENV{CC}, make sure CC does not have flags in it, use CFLAGS instead.") 
-    ENDIF(NOT CMAKE_C_COMPILER_FULLPATH)
+    GET_FILENAME_COMPONENT(CMAKE_C_COMPILER_INIT $ENV{CC} PROGRAM PROGRAM_ARGS CMAKE_C_FLAGS_ENV_INIT)
+    IF(EXISTS ${CMAKE_C_COMPILER_INIT})
+    ELSE(EXISTS ${CMAKE_C_COMPILER_INIT})
+      MESSAGE(SEND_ERROR "Could not find compiler set in environment variable CC:\n$ENV{CC}.") 
+    ENDIF(EXISTS ${CMAKE_C_COMPILER_INIT})
   ELSE($ENV{CC} MATCHES ".+")
   # if not in the envionment then search for the compiler in the path
     SET(CMAKE_C_COMPILER_LIST ${CMAKE_GENERATOR_CC} gcc cc cl bcc )  

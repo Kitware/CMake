@@ -266,9 +266,14 @@ public:
 
   ///! return path of a full filename (no trailing slashes).
   static std::string GetFilenamePath(const std::string&);
+
   
   ///! return file name of a full filename (i.e. file name without path).
   static std::string GetFilenameName(const std::string&);
+  
+  ///! Split a program from its arguments and handle spaces in the paths.
+  static void SplitProgramFromArgs(const char* path, 
+                                   std::string& program, std::string& args);
   
   ///! return file extension of a full filename (dot included).
   static std::string GetFilenameExtension(const std::string&);

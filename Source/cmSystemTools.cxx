@@ -2423,3 +2423,52 @@ cmSystemTools::FileFormat cmSystemTools::GetFileFormat(const char* cext)
 #endif // __APPLE__
   return cmSystemTools::UNKNOWN_FILE_FORMAT;
 }
+
+
+void cmSystemTools::SplitProgramFromArgs(const char* path, 
+                                         std::string& program, std::string& args)
+{
+  if(cmSystemTools::FileExists(path))
+    {
+    program = path;
+    args = "";
+    return;
+    }
+  std::vector<std::string> e;
+  std::string findProg = cmSystemTools::FindProgram(path, e);
+  if(findProg.size())
+    {
+    program = findProg;
+    args = "";
+    return;
+    }
+  std::string dir = path;
+  std::string::size_type spacePos = dir.rfind(' ');
+  if(spacePos == std::string::npos)
+    {
+    program = "";
+    args = "";
+    return;
+    }
+  while(spacePos != std::string::npos)
+    {
+    std::string tryProg = dir.substr(0, spacePos);
+    if(cmSystemTools::FileExists(tryProg.c_str()))
+      {
+      program = tryProg;
+      args = dir.substr(spacePos, dir.size()-spacePos);
+      return;
+      } 
+    findProg = cmSystemTools::FindProgram(tryProg.c_str(), e);
+    if(findProg.size())
+      {
+      program = findProg;
+      args = dir.substr(spacePos, dir.size()-spacePos);
+      return;
+      }
+    spacePos = dir.rfind(' ', spacePos--);
+    }
+  program = "";
+  args = "";
+}
+

@@ -158,7 +158,7 @@ SET (CMAKE_INSTALL_PREFIX    /usr/local CACHE PATH
 # on the initial values computed in the platform/*.cmake files
 # use _INIT variables so that this only happens the first time
 # and you can set these flags in the cmake cache
-SET (CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} ${CMAKE_CXX_FLAGS_INIT}" CACHE STRING
+SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_ENV_INIT} $ENV{CXXFLAGS} ${CMAKE_CXX_FLAGS_INIT}" CACHE STRING
      "Flags used by the compiler during all build types.")
 SET (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG_INIT}" CACHE STRING
      "Flags used by the compiler during debug builds.")
@@ -168,7 +168,7 @@ SET (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE_INIT}" CACHE STRING
      "Flags used by the compiler during release builds (/MD /Ob1 /Oi /Ot /Oy /Gs will produce slightly less optimized but smaller files).")
 SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT}" CACHE STRING
      "Flags used by the compiler during Release with Debug Info builds.")
-SET (CMAKE_C_FLAGS " $ENV{CFLAGS} ${CMAKE_C_FLAGS_INIT}" CACHE STRING
+SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS_ENV_INIT} $ENV{CFLAGS} ${CMAKE_C_FLAGS_INIT}" CACHE STRING
      "Flags for C compiler.")
 SET (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG_INIT}" CACHE STRING
      "Flags used by the compiler during debug builds.")
