@@ -354,7 +354,7 @@ bool SystemTools::ReadRegistryValue(const char *key, kwsys_stl::string &value)
   second = primary.substr(start+1, valuenamepos-start-1);
   primary = primary.substr(0, start);
   
-  HKEY primaryKey;
+  HKEY primaryKey = HKEY_CURRENT_USER;
   if (primary == "HKEY_CURRENT_USER")
     {
     primaryKey = HKEY_CURRENT_USER;
@@ -443,7 +443,7 @@ bool SystemTools::WriteRegistryValue(const char *key, const char *value)
   second = primary.substr(start+1, valuenamepos-start-1);
   primary = primary.substr(0, start);
   
-  HKEY primaryKey;
+  HKEY primaryKey = HKEY_CURRENT_USER;
   if (primary == "HKEY_CURRENT_USER")
     {
     primaryKey = HKEY_CURRENT_USER;
@@ -527,7 +527,7 @@ bool SystemTools::DeleteRegistryValue(const char *key)
   second = primary.substr(start+1, valuenamepos-start-1);
   primary = primary.substr(0, start);
   
-  HKEY primaryKey;
+  HKEY primaryKey = HKEY_CURRENT_USER;
   if (primary == "HKEY_CURRENT_USER")
     {
     primaryKey = HKEY_CURRENT_USER;
@@ -662,11 +662,15 @@ bool SystemTools::FileExists(const char* filename)
 kwsys_stl::string SystemTools::Capitalized(const kwsys_stl::string& s)
 {
   kwsys_stl::string n;
+  if(s.size() == 0)
+    {
+    return n;
+    }
   n.resize(s.size());
-  n[0] = toupper(s[0]);
+  n[0] = static_cast<kwsys_stl::string::value_type>(toupper(s[0]));
   for (size_t i = 1; i < s.size(); i++)
     {
-    n[i] = tolower(s[i]);
+    n[i] = static_cast<kwsys_stl::string::value_type>(tolower(s[i]));
     }
   return n;
 }
@@ -679,7 +683,7 @@ kwsys_stl::string SystemTools::LowerCase(const kwsys_stl::string& s)
   n.resize(s.size());
   for (size_t i = 0; i < s.size(); i++)
     {
-    n[i] = tolower(s[i]);
+    n[i] = static_cast<kwsys_stl::string::value_type>(tolower(s[i]));
     }
   return n;
 }
@@ -691,7 +695,7 @@ kwsys_stl::string SystemTools::UpperCase(const kwsys_stl::string& s)
   n.resize(s.size());
   for (size_t i = 0; i < s.size(); i++)
     {
-    n[i] = toupper(s[i]);
+    n[i] = static_cast<kwsys_stl::string::value_type>(toupper(s[i]));
     }
   return n;
 }
