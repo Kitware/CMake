@@ -77,18 +77,20 @@ IF(NOT KWSYS_NAMESPACE)
   SET(KWSYS_USE_Process 1)
   SET(KWSYS_USE_RegularExpression 1)
   SET(KWSYS_USE_SystemTools 1)
-
-  # Enable testing.
-  INCLUDE(${CMAKE_ROOT}/Modules/Dart.cmake)
-  MARK_AS_ADVANCED(BUILD_TESTING DART_ROOT TCL_TCLSH)
-  IF(BUILD_TESTING)
-    ENABLE_TESTING()
-  ENDIF(BUILD_TESTING)
 ENDIF(NOT KWSYS_NAMESPACE)
 
 #-----------------------------------------------------------------------------
 # The project name is that of the specified namespace.
 PROJECT(${KWSYS_NAMESPACE})
+
+# Enable testing if building standalone.
+IF(KWSYS_STANDALONE)
+  INCLUDE(${CMAKE_ROOT}/Modules/Dart.cmake)
+  MARK_AS_ADVANCED(BUILD_TESTING DART_ROOT TCL_TCLSH)
+  IF(BUILD_TESTING)
+    ENABLE_TESTING()
+  ENDIF(BUILD_TESTING)
+ENDIF(KWSYS_STANDALONE)
 
 # Do full dependency headers.
 INCLUDE_REGULAR_EXPRESSION("^.*$")
