@@ -101,12 +101,12 @@ CM_MULTILINE_LIBRARIES
 !ELSEIF  "$(CFG)" == "OUTPUT_LIBNAME - Win32 Release MinSize"
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "EXECUTABLE_OUTPUT_PATHReleaseMinSize"
+# PROP BASE Output_Dir "ReleaseMinSize"
 # PROP BASE Intermediate_Dir "ReleaseMinSize"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "ReleaseMinSize"
+# PROP Output_Dir "EXECUTABLE_OUTPUT_PATHReleaseMinSize"
 # PROP Intermediate_Dir "ReleaseMinSize"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GR /GX /Zm1000 /O1 /Gs /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS"  /FD /c
