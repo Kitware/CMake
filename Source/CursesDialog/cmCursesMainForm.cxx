@@ -613,8 +613,6 @@ int cmCursesMainForm::Configure()
 
 int cmCursesMainForm::Generate()
 {
-  m_CMakeInstance->Generate();
-  
   int x,y;
   getmaxyx(stdscr, y, x);
 
