@@ -1370,6 +1370,16 @@ void cmUnixMakefileGenerator::ComputeSystemInfo()
 {
   if (m_CacheOnly)
     {
+      if(m_Makefile->GetDefinition("CMAKE_CXX_COMPILER"))
+	{
+          std::string env = "CXX=${CMAKE_CXX_COMPILER}";
+          m_Makefile->ExpandVariablesInString(env);
+	  putenv(env.c_str());
+	  env = "CC=${CMAKE_C_COMPILER}";
+	  m_Makefile->ExpandVariablesInString(env);
+	  putenv(env.c_str());
+	}
+      
       // currently we run configure shell script here to determine the info
       std::string output;
       std::string cmd = "cd ";
