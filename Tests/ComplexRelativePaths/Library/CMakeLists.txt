@@ -22,12 +22,14 @@ ADD_LIBRARY(CMakeTestLibrary LibrarySources)
 
 IF(WIN32)
   IF(NOT CYGWIN)
-    TARGET_LINK_LIBRARIES(CMakeTestLibrary
+    IF(NOT BORLAND)
+      TARGET_LINK_LIBRARIES(CMakeTestLibrary
                       debug 
                       user32.lib)
-    TARGET_LINK_LIBRARIES(CMakeTestLibrary
+      TARGET_LINK_LIBRARIES(CMakeTestLibrary
                       optimized 
                       kernel32.lib)
+    ENDIF(NOT BORLAND)
   ENDIF(NOT CYGWIN)
 ENDIF(WIN32)
 
