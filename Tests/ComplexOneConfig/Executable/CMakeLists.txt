@@ -13,6 +13,7 @@ LINK_LIBRARIES(${COMPLEX_LIBS})
 
 
 ADD_EXECUTABLE(complex complex)
+ADD_EXECUTABLE(complex.file complex.file.cxx)
 IF (UNIX)
   TARGET_LINK_LIBRARIES(complex CMakeLib cmsys ${CMAKE_DL_LIBS})
 ELSE(UNIX)
