@@ -1508,9 +1508,13 @@ bool cmSystemTools::RunCommand(const char* command,
         std::string shortCmd;
         std::string cmd = quoted.match(1);
         std::string args = quoted.match(2);
-        if(!cmSystemTools::GetShortPath(cmd.c_str(), shortCmd))
+        if(! cmSystemTools::FileExists(cmd.c_str()) )
           {
-          cmSystemTools::Error("GetShortPath failed for " , cmd.c_str());
+          shortCmd = cmd;
+          }
+        else if(!cmSystemTools::GetShortPath(cmd.c_str(), shortCmd))
+          {
+         cmSystemTools::Error("GetShortPath failed for " , cmd.c_str());
           return false;
           }
         shortCmd += " ";
