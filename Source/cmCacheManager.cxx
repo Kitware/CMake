@@ -318,8 +318,11 @@ bool cmCacheManager::SaveCache(const char* path)
     CacheEntryType t = ce.m_Type;
     if(t == cmCacheManager::UNINITIALIZED)
       {
+      /*
+	// This should be added in, but is not for now.
       cmSystemTools::Error("Cache entry \"", (*i).first.c_str(), 
                            "\" is uninitialized");
+      */
       }
     else if(t != INTERNAL)
       {
@@ -595,7 +598,7 @@ void cmCacheManager::CacheIterator::Begin()
 bool cmCacheManager::CacheIterator::Find(const char* key)
 {
   m_Position = m_Container.m_Cache.find(key);
-  return this->IsAtEnd();
+  return !this->IsAtEnd();
 }
 
 void cmCacheManager::CacheIterator::Next() 
