@@ -2578,16 +2578,16 @@ cmLocalUnixMakefileGenerator::CreateMakeVariable(const char* s, const char* s2)
       str1 = str1.substr(0, size - str2.size());
       }
     char buffer[5];
-    int i = 0;
-    sprintf(buffer, "%04d", i);
+    int ni = 0;
+    sprintf(buffer, "%04d", ni);
     ret = str1 + str2 + buffer;
-    while(m_ShortMakeVariableMap.count(ret) && i < 1000)
+    while(m_ShortMakeVariableMap.count(ret) && ni < 1000)
       {
-      ++i;
-      sprintf(buffer, "%04d", i);
+      ++ni;
+      sprintf(buffer, "%04d", ni);
       ret = str1 + str2 + buffer;
       }
-    if(i == 1000)
+    if(ni == 1000)
       {
       cmSystemTools::Error("Borland makefile varible length too long");
       return unmodified;
