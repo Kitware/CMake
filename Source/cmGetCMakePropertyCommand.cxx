@@ -26,7 +26,7 @@ bool cmGetCMakePropertyCommand::InitialPass(
     return false;
     }
   
-  int cc;
+  std::vector<std::string>::size_type cc;
   std::string variable = args[0];
   std::string output = "";
 
