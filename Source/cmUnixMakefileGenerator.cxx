@@ -422,7 +422,7 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
 
   // concatenate all paths or no?
   bool runtimeConcatenate = ( runtimeSep!="" );
-  if(runtimeFlag == "")
+  if(runtimeFlag == "" || m_Makefile->IsOn("CMAKE_SKIP_RPATH") )
     {
     outputRuntime = false;
     }
