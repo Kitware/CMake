@@ -931,14 +931,14 @@ int kwsysProcess_WaitForData(kwsysProcess* cp, char** data, int* length,
   int user;
   int done = 0;
   int expired = 0;
-  int pipeId = 0;
+  int pipeId = kwsysProcess_Pipe_None;
   DWORD w;
 
   /* Make sure we are executing a process.  */
   if(cp->State != kwsysProcess_State_Executing || cp->Killed ||
      cp->TimeoutExpired)
     {
-    return 0;
+    return kwsysProcess_Pipe_None;
     }
 
   /* Record the time at which user timeout period starts.  */
@@ -1002,7 +1002,13 @@ int kwsysProcess_WaitForData(kwsysProcess* cp, char** data, int* length,
         /* Report this data.  */
         *data = cp->Pipe[cp->CurrentIndex].DataBuffer;
         *length = cp->Pipe[cp->CurrentIndex].DataLength;
-        pipeId = (1 << cp->CurrentIndex);
+        switch(cp->CurrentIndex)
+          {
+          case KWSYSPE_PIPE_STDOUT:
+            pipeId = kwsysProcess_Pipe_STDOUT; break;
+          case KWSYSPE_PIPE_STDERR:
+            pipeId = kwsysProcess_Pipe_STDERR; break;
+          }
         done = 1;
         }
       }
@@ -1047,13 +1053,13 @@ int kwsysProcess_WaitForData(kwsysProcess* cp, char** data, int* length,
       kwsysProcess_Kill(cp);
       cp->TimeoutExpired = 1;
       cp->Killed = 0;
-      return 0;
+      return kwsysProcess_Pipe_None;
       }
     }
   else
     {
     /* The children have terminated and no more data are available.  */
-    return 0;
+    return kwsysProcess_Pipe_None;
     }
 }
 

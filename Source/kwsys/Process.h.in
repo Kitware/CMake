@@ -60,6 +60,7 @@
 #define kwsysProcess_Execute             kwsys(Process_Execute)
 #define kwsysProcess_WaitForData         kwsys(Process_WaitForData)
 #define kwsysProcess_Pipes_e             kwsys(Process_Pipes_e)
+#define kwsysProcess_Pipe_None           kwsys(Process_Pipe_None)
 #define kwsysProcess_Pipe_STDOUT         kwsys(Process_Pipe_STDOUT)
 #define kwsysProcess_Pipe_STDERR         kwsys(Process_Pipe_STDERR)
 #define kwsysProcess_Pipe_Timeout        kwsys(Process_Pipe_Timeout)
@@ -228,8 +229,8 @@ kwsysEXPORT void kwsysProcess_Execute(kwsysProcess* cp);
  *
  * Return value will be one of:
  *
- *   0            = No more data will be available from the child process,
- *                  or no process has been executed.  WaitForExit should
+ *   Pipe_None    = No more data will be available from the child process,
+ *    ( == 0)       or no process has been executed.  WaitForExit should
  *                  be called to wait for the process to terminate.
  *   Pipe_STDOUT  = Data have been read from the child's stdout pipe.
  *   Pipe_STDERR  = Data have been read from the child's stderr pipe.
@@ -241,8 +242,9 @@ kwsysEXPORT int kwsysProcess_WaitForData(kwsysProcess* cp, char** data,
                                          int* length, double* timeout);
 enum kwsysProcess_Pipes_e
 {
-  kwsysProcess_Pipe_STDOUT=1,
-  kwsysProcess_Pipe_STDERR=2,
+  kwsysProcess_Pipe_None,
+  kwsysProcess_Pipe_STDOUT,
+  kwsysProcess_Pipe_STDERR,
   kwsysProcess_Pipe_Timeout=255
 };
 
@@ -317,6 +319,7 @@ kwsysEXPORT void kwsysProcess_Kill(kwsysProcess* cp);
 # undef kwsysProcess_Execute
 # undef kwsysProcess_WaitForData
 # undef kwsysProcess_Pipes_e
+# undef kwsysProcess_Pipe_None
 # undef kwsysProcess_Pipe_STDOUT
 # undef kwsysProcess_Pipe_STDERR
 # undef kwsysProcess_Pipe_Timeout

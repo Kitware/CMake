@@ -497,7 +497,7 @@ int kwsysProcess_WaitForData(kwsysProcess* cp, char** data, int* length,
   kwsysProcessTime userStartTime;
   int user = 0;
   int expired = 0;
-  int pipeId = 0;
+  int pipeId = kwsysProcess_Pipe_None;
   int numReady = 0;
 
   /* Record the time at which user timeout period starts.  */
@@ -542,7 +542,13 @@ int kwsysProcess_WaitForData(kwsysProcess* cp, char** data, int* length,
             /* Report this data.  */
             *data = cp->PipeBuffer;
             *length = n;
-            pipeId = (1 << i);
+            switch(i)
+              {
+              case KWSYSPE_PIPE_STDOUT:
+                pipeId = kwsysProcess_Pipe_STDOUT; break;
+              case KWSYSPE_PIPE_STDERR:
+                pipeId = kwsysProcess_Pipe_STDERR; break;
+              };
             break;
             }
           }
@@ -663,13 +669,13 @@ int kwsysProcess_WaitForData(kwsysProcess* cp, char** data, int* length,
       cp->Killed = 0;
       cp->TimeoutExpired = 1;
       cp->PipesLeft = 0;
-      return 0;
+      return kwsysProcess_Pipe_None;
       }
     }
   else
     {
     /* No pipes are left open.  */
-    return 0;
+    return kwsysProcess_Pipe_None;
     }
 }
 
