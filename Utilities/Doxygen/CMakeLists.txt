@@ -7,10 +7,6 @@ IF (BUILD_DOCUMENTATION)
 
   INCLUDE (${CMAKE_ROOT}/Modules/FindVTK.cmake)
 
-  IF (USE_VTK_FILE)
-    INCLUDE (${USE_VTK_FILE})
-  ENDIF (USE_VTK_FILE)
-
   #
   # Configure the script and the doxyfile, then add target
   #
