@@ -670,6 +670,7 @@ cmLocalUnixMakefileGenerator2
   std::string customName = output;
   cmSystemTools::ReplaceString(customName, "../", "___");
   cmSystemTools::ReplaceString(customName, "/", "_");
+  cmSystemTools::ReplaceString(customName, ":", "_");
   std::string ruleFileName = dir;
   ruleFileName += "/";
   ruleFileName += customName;
