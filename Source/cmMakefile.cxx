@@ -327,7 +327,7 @@ void cmMakefile::ParseDirectory(const char* dir)
 void cmMakefile::ExpandVaribles()
 {
   // make sure binary and source dir are defined
-  this->AddDefinition("CMAKE_BINARY_DIR", this->GetOutputDirectory());
+  this->AddDefinition("CMAKE_BINARY_DIR", this->GetOutputHomeDirectory());
   this->AddDefinition("CMAKE_SOURCE_DIR", this->GetHomeDirectory());
 
    // Now expand varibles in the include and link strings

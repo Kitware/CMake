@@ -42,6 +42,13 @@ void cmConfigureFileNoAutoconf::FinalPass()
                          m_InputFile.c_str());
     return;
     }
+  cmSystemTools::ConvertToUnixSlashes(m_OuputFile);
+  std::string::size_type pos = m_OuputFile.rfind('/');
+  if(pos != std::string::npos)
+    {
+    std::string path = m_OuputFile.substr(0, pos);
+    cmSystemTools::MakeDirectory(path.c_str());
+    }
   std::ofstream fout(m_OuputFile.c_str());
   if(!fout)
     {
