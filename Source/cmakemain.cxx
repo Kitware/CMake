@@ -53,6 +53,10 @@ static const cmDocumentationEntry cmDocumentationDescription[] =
 static const cmDocumentationEntry cmDocumentationOptions[] =
 {
   CMAKE_STANDARD_OPTIONS_TABLE,
+  {"-E", "CMake command mode.",
+   "For true platform independence, CMake provides a list of commands "
+   "that can be used on all systems. Run with -E help for the usage "
+   "information."},
   {"-i", "Run in wizard mode.",
    "Wizard mode runs cmake interactively without a GUI.  The user is "
    "prompted to answer questions about the project configuration.  "
