@@ -95,11 +95,7 @@ MACRO(CHECK_LIBRARY_EXISTS_CONCAT LIBRARY SYMBOL VARIABLE)
 ENDMACRO(CHECK_LIBRARY_EXISTS_CONCAT)
 
 # Check for all needed libraries
-
-# We do not need this because we do not use ldap.
-# CHECK_LIBRARY_EXISTS_CONCAT("dl"     dlopen       HAVE_LIBDL)
-SET(HAVE_LIBDL 0 CACHE INTERNAL "We do not need libdl.")
-
+CHECK_LIBRARY_EXISTS_CONCAT("dl"     dlopen       HAVE_LIBDL)
 CHECK_LIBRARY_EXISTS_CONCAT("ucb"    gethostname  HAVE_LIBUCB)
 CHECK_LIBRARY_EXISTS_CONCAT("socket" connect      HAVE_LIBSOCKET)
 CHECK_LIBRARY_EXISTS("c" gethostbyname "" NOT_NEED_LIBNSL)
@@ -118,9 +114,7 @@ IF(CMAKE_USE_OPENSSL)
 ENDIF(CMAKE_USE_OPENSSL)
 
 # Check for symbol dlopen (same as HAVE_LIBDL)
-# We do not need this because we do not use ldap.
-# CHECK_LIBRARY_EXISTS("${CURL_LIBS}" dlopen "" HAVE_DLOPEN)
-SET(HAVE_DLOPEN 0 CACHE INTERNAL "We do not need dlopen.")
+CHECK_LIBRARY_EXISTS("${CURL_LIBS}" dlopen "" HAVE_DLOPEN)
 
 # For other tests to use the same libraries
 SET(CMAKE_REQUIRED_LIBRARIES ${CURL_LIBS})
