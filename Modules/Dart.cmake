@@ -97,7 +97,7 @@ IF(BUILD_TESTING)
   # add testing targets
   IF(TCL_TCLSH)
     ADD_CUSTOM_TARGET(Experimental 
-    ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Start Build Test)
+    ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Start Configure Build Test)
     ADD_CUSTOM_TARGET(ExperimentalSubmit 
     ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Submit)
 
@@ -120,11 +120,13 @@ IF(BUILD_TESTING)
 
     # Continuous
     ADD_CUSTOM_TARGET(Continuous 
-    ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Continuous Start Update Build Test Submit)
+    ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Continuous Start Update Configure Build Test Submit)
     ADD_CUSTOM_TARGET(ContinuousStart
     ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Continuous Start)
     ADD_CUSTOM_TARGET(ContinuousUpdate
     ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Continuous Update)
+    ADD_CUSTOM_TARGET(ContinuousConfigure
+    ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Continuous Configure)
     ADD_CUSTOM_TARGET(ContinuousBuild   
     ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Continuous Build)
     ADD_CUSTOM_TARGET(ContinuousTest 
@@ -136,11 +138,13 @@ IF(BUILD_TESTING)
 
     # Nightly
     ADD_CUSTOM_TARGET(Nightly 
-    ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Start Update Build Test Submit)
+    ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Start Update Configure Build Test Submit)
     ADD_CUSTOM_TARGET(NightlyStart
     ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Start)
     ADD_CUSTOM_TARGET(NightlyUpdate
     ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Update)
+    ADD_CUSTOM_TARGET(NightlyConfigure
+    ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Configure)
     ADD_CUSTOM_TARGET(NightlyBuild   
     ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Build)
     ADD_CUSTOM_TARGET(NightlyTest 
