@@ -80,7 +80,7 @@ int cmGlobalVisualStudio6Generator::TryCompile(const char *,
   makeCommand = cmSystemTools::FindProgram(makeCommand.c_str(), mp);
   if(makeCommand.size() == 0)
     {
-    std::string e = "Generator cannot find make program \"";
+    std::string e = "Generator cannot find Visual Studio 6 msdev program \"";
     e += originalCommand;
     e += "\" specified by CMAKE_MAKE_PROGRAM cache entry.  ";
     e += "Please fix the setting.";
@@ -88,8 +88,6 @@ int cmGlobalVisualStudio6Generator::TryCompile(const char *,
     return 1;
     }
   makeCommand = cmSystemTools::ConvertToOutputPath(makeCommand.c_str());
-  std::string lowerCaseCommand = makeCommand;
-  cmSystemTools::LowerCase(lowerCaseCommand);
 
   /**
    * Run an executable command and put the stdout in output.
