@@ -121,37 +121,44 @@ case $system in
 	CMAKE_SHLIB_CFLAGS=""
 	CMAKE_SHLIB_LD_LIBS='${LIBS}'
 	CMAKE_SHLIB_SUFFIX="..o"
+	CMAKE_MODULE_SUFFIX="..o"
 	CMAKE_DL_LIBS=""
         AC_CHECK_LIB(ld,printf, CMAKE_DL_LIBS="-lld")
 	CMAKE_SHLIB_LINK_FLAGS=""
+	CMAKE_MODULE_LINK_FLAGS=""
         CMAKE_SHLIB_RUNTIME_FLAG=""
         CMAKE_SHLIB_RUNTIME_SEP=""
 	;;
     Darwin-*)
-        CMAKE_SHLIB_CFLAGS=""
-        CMAKE_SHLIB_LD_LIBS=""
-        CMAKE_SHLIB_SUFFIX=".dylib"
-        CMAKE_MODULE_SUFFIX=".so"
-        CMAKE_DL_LIBS=""
-        CMAKE_SHLIB_BUILD_FLAGS="-dynamiclib -undefined warning" #undefined warning must go away post 10.1
-        CMAKE_SHLIB_LINK_FLAGS=""
-        CMAKE_MODULE_BUILD_FLAGS="-bundle -undefined warning" #undefined warning must go away post 10.1
-        CMAKE_MODULE_LINK_FLAGS=""
+	CMAKE_SHLIB_CFLAGS=""
+	CMAKE_SHLIB_LD_LIBS=""
+	CMAKE_SHLIB_SUFFIX=".dylib"
+	CMAKE_MODULE_SUFFIX=".so"
+	CMAKE_DL_LIBS=""
+	CMAKE_SHLIB_BUILD_FLAGS="-dynamiclib -undefined warning" #undefined warning must go away once dylibs link in
+	CMAKE_SHLIB_LINK_FLAGS=""
+	CMAKE_MODULE_BUILD_FLAGS="-bundle -undefined warning" #undefined warning must go away once dylibs link in
+	CMAKE_MODULE_LINK_FLAGS=""
         CMAKE_SHLIB_RUNTIME_FLAG=""
         CMAKE_SHLIB_RUNTIME_SEP=":"
-        ;;
+	;;
     HP-UX-*.08.*|HP-UX-*.09.*|HP-UX-*.10.*)
 	CMAKE_SHLIB_CFLAGS="+z"
 	CMAKE_SHLIB_LD_LIBS=""
 	CMAKE_SHLIB_SUFFIX=".sl"
+	CMAKE_MODULE_SUFFIX=".sl"
 	CMAKE_DL_LIBS="-ldld"
 	CMAKE_SHLIB_BUILD_FLAGS='+Z -Wl,-E -b'
 	CMAKE_SHLIB_LINK_FLAGS='-Wl,+s'
+	CMAKE_MODULE_BUILD_FLAGS='+Z -Wl,-E -b'
+	CMAKE_MODULE_LINK_FLAGS='-Wl,+s'
         CMAKE_SHLIB_RUNTIME_FLAG='-Wl,+b,'
         CMAKE_SHLIB_RUNTIME_SEP=':'
         if test "$CC" = "gcc" -o `$CC -v 2>&1 | grep -c gcc` != "0" ; then
   	  CMAKE_SHLIB_BUILD_FLAGS='-shared -Wl,-E -Wl,-b'
 	  CMAKE_SHLIB_LINK_FLAGS='-Wl,+s'
+  	  CMAKE_MODULE_BUILD_FLAGS='-shared -Wl,-E -Wl,-b'
+	  CMAKE_MODULE_LINK_FLAGS='-Wl,+s'
           CMAKE_SHLIB_RUNTIME_FLAG='-Wl,+b,'
           CMAKE_SHLIB_RUNTIME_SEP=':'
         fi
@@ -160,8 +167,10 @@ case $system in
 	CMAKE_SHLIB_CFLAGS=""
 	CMAKE_SHLIB_LD_LIBS=""
 	CMAKE_SHLIB_SUFFIX=".so"
+	CMAKE_MODULE_SUFFIX=".so"
 	CMAKE_DL_LIBS=""
 	CMAKE_SHLIB_BUILD_FLAGS="-shared -rdata_shared"
+	CMAKE_MODULE_BUILD_FLAGS="-shared -rdata_shared"
         CMAKE_SHLIB_RUNTIME_FLAG="-Wl,-rpath,"
         CMAKE_SHLIB_RUNTIME_SEP=":"
 	;;
@@ -169,8 +178,10 @@ case $system in
 	CMAKE_SHLIB_CFLAGS=""
 	CMAKE_SHLIB_LD_LIBS=""
 	CMAKE_SHLIB_SUFFIX=".so"
+	CMAKE_MODULE_SUFFIX=".so"
 	CMAKE_DL_LIBS=""
 	CMAKE_SHLIB_BUILD_FLAGS="-shared -rdata_shared"
+	CMAKE_MODULE_BUILD_FLAGS="-shared -rdata_shared"
         CMAKE_SHLIB_RUNTIME_FLAG="-Wl,-rpath,"
         CMAKE_SHLIB_RUNTIME_SEP=":"
 	;;
@@ -178,16 +189,20 @@ case $system in
 	CMAKE_SHLIB_CFLAGS="-fPIC"
 	CMAKE_SHLIB_LD_LIBS=""
 	CMAKE_SHLIB_SUFFIX=".so"
+	CMAKE_MODULE_SUFFIX=".so"
 	CMAKE_SHLIB_BUILD_FLAGS="-shared"
+	CMAKE_MODULE_BUILD_FLAGS="-shared"
 	if test "$have_dl" = yes; then
 	    CMAKE_DL_LIBS="-ldl"
 	    CMAKE_SHLIB_LINK_FLAGS="-rdynamic"
+	    CMAKE_MODULE_LINK_FLAGS="-rdynamic"
             CMAKE_SHLIB_RUNTIME_FLAG="-Wl,-rpath,"
             CMAKE_SHLIB_RUNTIME_SEP=":"
 	else
 	    AC_CHECK_HEADER(dld.h, [
 		CMAKE_DL_LIBS="-ldld"
 		CMAKE_SHLIB_LINK_FLAGS=""
+		CMAKE_MODULE_LINK_FLAGS=""
                 CMAKE_SHLIB_RUNTIME_FLAG="-Wl,-rpath,"
                 CMAKE_SHLIB_RUNTIME_SEP=""])
 	fi
@@ -196,8 +211,11 @@ case $system in
         CMAKE_SHLIB_CFLAGS=""
         CMAKE_DL_LIBS="-lgdi32" 
         CMAKE_SHLIB_BUILD_FLAGS="-shared"
+        CMAKE_MODULE_BUILD_FLAGS="-shared"
         CMAKE_SHLIB_SUFFIX=".dll"
+        CMAKE_MODULE_SUFFIX=".dll"
         CMAKE_SHLIB_LINK_FLAGS=""
+        CMAKE_MODULE_LINK_FLAGS=""
         CMAKE_SHLIB_RUNTIME_FLAG=""
         CMAKE_SHLIB_RUNTIME_SEP=""
         ;;
@@ -205,8 +223,10 @@ case $system in
 	CMAKE_SHLIB_CFLAGS="-K PIC"
 	CMAKE_SHLIB_LD_LIBS=""
 	CMAKE_SHLIB_SUFFIX=".so"
+	CMAKE_MODULE_SUFFIX=".so"
 	CMAKE_DL_LIBS="-ldl"
 	CMAKE_SHLIB_LINK_FLAGS=""
+	CMAKE_MODULE_LINK_FLAGS=""
         CMAKE_SHLIB_RUNTIME_FLAG=""
         CMAKE_SHLIB_RUNTIME_SEP=""
 	;;
@@ -214,8 +234,10 @@ case $system in
 	CMAKE_SHLIB_CFLAGS="-K PIC"
 	CMAKE_SHLIB_LD_LIBS=""
 	CMAKE_SHLIB_SUFFIX=".so"
+	CMAKE_MODULE_SUFFIX=".so"
 	CMAKE_DL_LIBS="-ldl"
 	CMAKE_SHLIB_LINK_FLAGS="-Wl,-Bexport"
+	CMAKE_MODULE_LINK_FLAGS="-Wl,-Bexport"
         CMAKE_SHLIB_RUNTIME_FLAG=""
         CMAKE_SHLIB_RUNTIME_SEP=""
 	;;
@@ -225,17 +247,22 @@ case $system in
 	    CMAKE_SHLIB_CFLAGS="-fPIC"
 	    CMAKE_SHLIB_LD_LIBS=""
 	    CMAKE_SHLIB_SUFFIX=".so"
+	    CMAKE_MODULE_SUFFIX=".so"
 	    CMAKE_DL_LIBS=""
 	    CMAKE_SHLIB_BUILD_FLAGS="-shared"
 	    CMAKE_SHLIB_LINK_FLAGS=""
+	    CMAKE_MODULE_BUILD_FLAGS="-shared"
+	    CMAKE_MODULE_LINK_FLAGS=""
             CMAKE_SHLIB_RUNTIME_FLAG="-Wl,-rpath,"
             CMAKE_SHLIB_RUNTIME_SEP=":"
 	else
 	    CMAKE_SHLIB_CFLAGS=""
 	    CMAKE_SHLIB_LD_LIBS=""
 	    CMAKE_SHLIB_SUFFIX="..o"
+	    CMAKE_MODULE_SUFFIX="..o"
 	    CMAKE_DL_LIBS=""
 	    CMAKE_SHLIB_LINK_FLAGS=""
+	    CMAKE_MODULE_LINK_FLAGS=""
             CMAKE_SHLIB_RUNTIME_FLAG=""
             CMAKE_SHLIB_RUNTIME_SEP=""
 	fi
@@ -244,8 +271,10 @@ case $system in
 	CMAKE_SHLIB_CFLAGS=""
 	CMAKE_SHLIB_LD_LIBS=""
 	CMAKE_SHLIB_SUFFIX=".so"
+	CMAKE_MODULE_SUFFIX=".so"
 	CMAKE_DL_LIBS=""
 	CMAKE_SHLIB_LINK_FLAGS=""
+	CMAKE_MODULE_LINK_FLAGS=""
         CMAKE_SHLIB_RUNTIME_FLAG=""
         CMAKE_SHLIB_RUNTIME_SEP=""
 	;;
@@ -255,8 +284,10 @@ case $system in
 	# Hack: make package name same as library name
 	CMAKE_SHLIB_LD_LIBS=""
 	CMAKE_SHLIB_SUFFIX=".so"
+	CMAKE_MODULE_SUFFIX=".so"
 	CMAKE_DL_LIBS=""
 	CMAKE_SHLIB_LINK_FLAGS=""
+	CMAKE_MODULE_LINK_FLAGS=""
         CMAKE_SHLIB_RUNTIME_FLAG=""
         CMAKE_SHLIB_RUNTIME_SEP=""
 	;;
@@ -265,8 +296,10 @@ case $system in
 	CMAKE_SHLIB_CFLAGS="-fpic"
 	CMAKE_SHLIB_LD_LIBS=""
 	CMAKE_SHLIB_SUFFIX=".so"
+	CMAKE_MODULE_SUFFIX=".so"
 	CMAKE_DL_LIBS=""
 	CMAKE_SHLIB_LINK_FLAGS=""
+	CMAKE_MODULE_LINK_FLAGS=""
         CMAKE_SHLIB_RUNTIME_FLAG=""
         CMAKE_SHLIB_RUNTIME_SEP=""
 	;;
@@ -275,9 +308,12 @@ case $system in
 	CMAKE_SHLIB_CFLAGS=""
 	CMAKE_SHLIB_LD_LIBS=""
 	CMAKE_SHLIB_SUFFIX=".so"
+	CMAKE_MODULE_SUFFIX=".so"
 	CMAKE_DL_LIBS=""
 	CMAKE_SHLIB_BUILD_FLAGS='-shared -Wl,-expect_unresolved,\\*'
 	CMAKE_SHLIB_LINK_FLAGS=''
+	CMAKE_MODULE_BUILD_FLAGS='-shared -Wl,-expect_unresolved,\\*'
+	CMAKE_MODULE_LINK_FLAGS=''
         CMAKE_SHLIB_RUNTIME_FLAG="-Wl,-rpath,"
         CMAKE_SHLIB_RUNTIME_SEP=":"
 	;;
@@ -285,8 +321,10 @@ case $system in
 	CMAKE_SHLIB_CFLAGS="-G 0"
 	CMAKE_SHLIB_LD_LIBS=""
 	CMAKE_SHLIB_SUFFIX="..o"
+	CMAKE_MODULE_SUFFIX="..o"
 	CMAKE_DL_LIBS=""
 	CMAKE_SHLIB_LINK_FLAGS="-Wl,-D,08000000"
+	CMAKE_MODULE_LINK_FLAGS="-Wl,-D,08000000"
         CMAKE_SHLIB_RUNTIME_FLAG=""
         CMAKE_SHLIB_RUNTIME_SEP=""
 	;;
@@ -297,8 +335,10 @@ case $system in
 	CMAKE_SHLIB_CFLAGS="-Kpic -belf"
 	CMAKE_SHLIB_LD_LIBS=""
 	CMAKE_SHLIB_SUFFIX=".so"
+	CMAKE_MODULE_SUFFIX=".so"
 	CMAKE_DL_LIBS=""
 	CMAKE_SHLIB_LINK_FLAGS="-belf -Wl,-Bexport"
+	CMAKE_SHLIB_MODULE_FLAGS="-belf -Wl,-Bexport"
         CMAKE_SHLIB_RUNTIME_FLAG=""
         CMAKE_SHLIB_RUNTIME_SEP=""
 	;;
@@ -306,8 +346,10 @@ case $system in
 	CMAKE_SHLIB_CFLAGS="-K PIC"
 	CMAKE_SHLIB_LD_LIBS=""
 	CMAKE_SHLIB_SUFFIX=".so"
+	CMAKE_MODULE_SUFFIX=".so"
 	CMAKE_DL_LIBS="-ldl"
 	CMAKE_SHLIB_LINK_FLAGS=""
+	CMAKE_MODULE_LINK_FLAGS=""
         CMAKE_SHLIB_RUNTIME_FLAG=""
         CMAKE_SHLIB_RUNTIME_SEP=""
 	;;
@@ -315,9 +357,12 @@ case $system in
 	CMAKE_SHLIB_CFLAGS="-PIC"
 	CMAKE_SHLIB_LD_LIBS=""
 	CMAKE_SHLIB_SUFFIX=".so"
+	CMAKE_MODULE_SUFFIX=".so"
 	CMAKE_DL_LIBS="-ldl"
 	CMAKE_SHLIB_BUILD_FLAGS='-shared -Wl,-r -nostdlib'
 	CMAKE_SHLIB_LINK_FLAGS=''
+	CMAKE_MODULE_BUILD_FLAGS='-shared -Wl,-r -nostdlib'
+	CMAKE_MODULE_LINK_FLAGS=''
         CMAKE_SHLIB_RUNTIME_FLAG="-Wl,-R,"
         CMAKE_SHLIB_RUNTIME_SEP=":"
 	;;
@@ -325,14 +370,19 @@ case $system in
 	CMAKE_SHLIB_CFLAGS="-KPIC"
 	CMAKE_SHLIB_LD_LIBS='${LIBS}'
 	CMAKE_SHLIB_SUFFIX=".so"
+	CMAKE_MODULE_SUFFIX=".so"
 	CMAKE_DL_LIBS="-ldl"
 	CMAKE_SHLIB_BUILD_FLAGS='-G'
 	CMAKE_SHLIB_LINK_FLAGS=''
+	CMAKE_MODULE_BUILD_FLAGS='-G'
+	CMAKE_MODULE_LINK_FLAGS=''
         CMAKE_SHLIB_RUNTIME_FLAG="-R "
         CMAKE_SHLIB_RUNTIME_SEP=":"
         if test "$CC" = "gcc" -o `$CC -v 2>&1 | grep -c gcc` != "0" ; then
 	  CMAKE_SHLIB_BUILD_FLAGS='-Wl,-G'
 	  CMAKE_SHLIB_LINK_FLAGS=''
+	  CMAKE_MODULE_BUILD_FLAGS='-Wl,-G'
+	  CMAKE_MODULE_LINK_FLAGS=''
           CMAKE_SHLIB_RUNTIME_FLAG="-Wl,-R,"
           CMAKE_SHLIB_RUNTIME_SEP=":"
         fi
@@ -340,9 +390,11 @@ case $system in
     ULTRIX-4.*)
 	CMAKE_SHLIB_CFLAGS="-G 0"
 	CMAKE_SHLIB_SUFFIX="..o"
+	CMAKE_MODULE_SUFFIX="..o"
 	CMAKE_SHLIB_LD_LIBS=""
 	CMAKE_DL_LIBS=""
 	CMAKE_SHLIB_LINK_FLAGS="-Wl,-D,08000000"
+	CMAKE_MODULE_LINK_FLAGS="-Wl,-D,08000000"
         CMAKE_SHLIB_RUNTIME_FLAG=""
         CMAKE_SHLIB_RUNTIME_SEP=""
 	;;
@@ -350,13 +402,16 @@ case $system in
 	CMAKE_SHLIB_CFLAGS="-K PIC"
 	CMAKE_SHLIB_LD_LIBS=""
 	CMAKE_SHLIB_SUFFIX=".so"
+	CMAKE_MODULE_SUFFIX=".so"
 	CMAKE_DL_LIBS="-ldl"
 	CMAKE_SHLIB_LINK_FLAGS="-Wl,-Bexport"
+	CMAKE_MODULE_LINK_FLAGS="-Wl,-Bexport"
         CMAKE_SHLIB_RUNTIME_FLAG=""
         CMAKE_SHLIB_RUNTIME_SEP=""
 	;;
 esac
 export CMAKE_SHLIB_SUFFIX
+export CMAKE_MODULE_SUFFIX
 
 # If we're running gcc, then change the C flags for compiling shared
 # libraries to the right flags for gcc, instead of those for the
@@ -367,6 +422,9 @@ fi
 # if running on cygwin remove -fPIC flag
 case $system in 
   CYGWIN_NT*)
+    CMAKE_SHLIB_CFLAGS=""
+    ;;
+  Darwin*) #don't need -fPIC on Darwin (on by default)
     CMAKE_SHLIB_CFLAGS=""
     ;;
 esac
@@ -381,11 +439,14 @@ CMAKE_LD_SEARCH_FLAGS="${LD_SEARCH_FLAGS}"
 
 AC_SUBST(CMAKE_SHLIB_LINK_FLAGS)
 AC_SUBST(CMAKE_SHLIB_BUILD_FLAGS)
+AC_SUBST(CMAKE_MODULE_LINK_FLAGS)
+AC_SUBST(CMAKE_MODULE_BUILD_FLAGS)
 AC_SUBST(CMAKE_SHLIB_CFLAGS)
 AC_SUBST(CMAKE_LIB_EXT)
 AC_SUBST(CMAKE_DL_LIBS)
 AC_SUBST(CMAKE_SHLIB_LD_LIBS)
 AC_SUBST(CMAKE_SHLIB_SUFFIX)
+AC_SUBST(CMAKE_MODULE_SUFFIX)
 AC_SUBST(CMAKE_SHLIB_RUNTIME_FLAG)
 AC_SUBST(CMAKE_SHLIB_RUNTIME_SEP)
 

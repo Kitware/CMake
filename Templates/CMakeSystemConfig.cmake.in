@@ -32,13 +32,19 @@ SET (CMAKE_SHLIB_CFLAGS       "@CMAKE_SHLIB_CFLAGS@" CACHE STRING
         "Flag used for building shared library objects" )
 SET (CMAKE_SHLIB_BUILD_FLAGS  "@CMAKE_SHLIB_BUILD_FLAGS@" CACHE STRING
         "Flag used by CXX to build a shared library")
+SET (CMAKE_MODULE_BUILD_FLAGS  "@CMAKE_MODULE_BUILD_FLAGS@" CACHE STRING
+        "Flag used by CXX to build a shared library")
 SET (CMAKE_SHLIB_SUFFIX       @CMAKE_SHLIB_SUFFIX@ CACHE STRING 
         "Shared library suffix")
+SET (CMAKE_MODULE_SUFFIX       @CMAKE_MODULE_SUFFIX@ CACHE STRING 
+        "Module library suffix")
 SET (CMAKE_THREAD_LIBS        "@CMAKE_THREAD_LIBS@" CACHE STRING
         "Thread library used")
 SET (CMAKE_DL_LIBS            "@CMAKE_DL_LIBS@" CACHE STRING 
         "Dynamic link library to link in.")
 SET (CMAKE_SHLIB_LINK_FLAGS   "@CMAKE_SHLIB_LINK_FLAGS@" CACHE STRING
+        "Flags used to link a shared library.")
+SET (CMAKE_MODULE_LINK_FLAGS   "@CMAKE_MODULE_LINK_FLAGS@" CACHE STRING
         "Flags used to link a shared library.")
 SET (CMAKE_SHLIB_LD_LIBS      "@CMAKE_SHLIB_LD_LIBS@" CACHE STRING 
         "Libraries used by LD for shared libraries")
