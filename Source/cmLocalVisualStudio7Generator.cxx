@@ -299,7 +299,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     {
     inlineFunctions = 1;
     optimized =2;
-    pre = "WIN32,NDEBUG,_WINDOWS";
+    pre = "WIN32,_WINDOWS";
     flags += flagsRelease;
     runtime = 2;
     }
@@ -308,7 +308,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     inlineFunctions = 1;
     runtime = 2;
     optimized = 1;
-    pre = "WIN32,NDEBUG,_WINDOWS";
+    pre = "WIN32,_WINDOWS";
     flags += flagsMinSize;
     }
   else if(strcmp(configName, "RelWithDebInfo") == 0)
@@ -316,7 +316,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     inlineFunctions = 1;
     optimized = 2;
     runtime = 2;
-    pre = "WIN32,NDEBUG,_WINDOWS";
+    pre = "WIN32,_WINDOWS";
     flags += flagsDebugRel;
     std::string libpath = m_LibraryOutputPath + 
         "$(OutDir)/" + libName + debugPostfix + ".pdb";
