@@ -3749,10 +3749,6 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
           ++i;
           }
         }
-      if(i < args.size())
-        {
-        --i;
-        }
       }
     if(arg.find("--test-command",0) == 0 && i < args.size() - 1)
       {
