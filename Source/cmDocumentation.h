@@ -123,6 +123,8 @@ private:
   void PrintDocumentationFull(std::ostream& os);
   void PrintDocumentationHTML(std::ostream& os);
   void PrintDocumentationMan(std::ostream& os);
+  void PrintDocumentationCommand(std::ostream& os,
+                                 cmDocumentationEntry* entry);
   
   void CreateUsageDocumentation();
   void CreateFullDocumentation();

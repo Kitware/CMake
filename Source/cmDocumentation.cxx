@@ -21,18 +21,25 @@
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationStandardOptions[] =
 {
-  {"--copyright", "Print the CMake copyright and exit.", 0},
-  {"--help", "Print usage information and exit.",
-   "Usage describes the basic command line interface and its options."},
-  {"--help-full", "Print full help and exit.",
+  {"--copyright [file]", "Print the CMake copyright and exit.",
+   "If a file is specified, the copyright is written into it."},
+  {"--help [command]", "Print usage information and exit.",
+   "Usage describes the basic command line interface and its options.  "
+   "If a listfile command is specified, help for that specific command is "
+   "printed."},
+  {"--help-full [file]", "Print full help and exit.",
    "Full help displays most of the documentation provided by the UNIX "
    "man page.  It is provided for use on non-UNIX platforms, but is "
-   "also convenient if the man page is not installed."},
-  {"--help-html", "Print full help in HTML format.",
-   "This option is used by CMake authors to help produce web pages."},
-  {"--help-man", "Print a UNIX man page and exit.",
-   "This option is used by CMake authors to generate the UNIX man page."},
-  {"--version", "Show program name/version banner and exit.", 0},
+   "also convenient if the man page is not installed.  If a file is "
+   "specified, the help is written into it."},
+  {"--help-html [file]", "Print full help in HTML format.",
+   "This option is used by CMake authors to help produce web pages.  "
+   "If a file is specified, the help is written into it."},
+  {"--help-man [file]", "Print a UNIX man page and exit.",
+   "This option is used by the cmake build to generate the UNIX man page.  "
+   "If a file is specified, the help is written into it."},
+  {"--version [file]", "Show program name/version banner and exit.",
+   "If a file is specified, the version is written into it."},
   {0,0,0}
 };
 
@@ -186,6 +193,28 @@ bool cmDocumentation::PrintRequestedDocumentation(std::ostream& os)
   for(RequestedMapType::const_iterator i = this->RequestedMap.begin();
       i != this->RequestedMap.end(); ++i)
     {
+    // Special case for printing help for a single command.
+    if(i->first == cmDocumentation::Usage && i->second.length() > 0 &&
+       !this->CommandsSection.empty())
+      {
+      // Check if the argument to the usage request was a command.
+      for(cmDocumentationEntry* entry = &this->CommandsSection[0];
+          entry->brief; ++entry)
+        {
+        if(entry->name && (strcmp(entry->name, i->second.c_str()) == 0))
+          {
+          this->PrintDocumentationCommand(os, entry);
+          return true;
+          }
+        }
+      
+      // Argument was not a command.  Complain.
+      os << "Help argument \"" << i->second.c_str()
+         << "\" is not a CMake command.  "
+         << "Use --help-full to see all commands.\n";
+      return false;
+      }
+    
     // If a file name was given, use it.  Otherwise, default to the
     // given stream.
     std::ofstream* fout = 0;
@@ -781,6 +810,20 @@ void cmDocumentation::PrintDocumentationMan(std::ostream& os)
      << cmSystemTools::GetCurrentDateTime("%B %d, %Y").c_str()
      << "\" \"CMake " CMake_VERSION_FULL "\"\n";
   this->Print(ManForm, os);
+}
+
+//----------------------------------------------------------------------------
+void cmDocumentation::PrintDocumentationCommand(std::ostream& os,
+                                                cmDocumentationEntry* entry)
+{
+  cmDocumentationEntry singleCommandSection[3] =
+    {
+      {entry->name, entry->brief, entry->full},
+      {0,0,0}
+    };
+  this->ClearSections();
+  this->AddSection(0, &singleCommandSection[0]);
+  this->Print(TextForm, os);
 }
 
 //----------------------------------------------------------------------------
