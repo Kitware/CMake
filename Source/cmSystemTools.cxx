@@ -1105,6 +1105,14 @@ std::string cmSystemTools::FindProgram(const char* name,
       {
       return cmSystemTools::CollapseFullPath(tryPath.c_str());
       }
+#ifdef _WIN32
+    tryPath += ".com";
+    if(cmSystemTools::FileExists(tryPath.c_str()) &&
+       !cmSystemTools::FileIsDirectory(tryPath.c_str()))
+      {
+      return cmSystemTools::CollapseFullPath(tryPath.c_str());
+      }
+#endif
     tryPath += cmSystemTools::GetExecutableExtension();
     if(cmSystemTools::FileExists(tryPath.c_str()) &&
        !cmSystemTools::FileIsDirectory(tryPath.c_str()))
