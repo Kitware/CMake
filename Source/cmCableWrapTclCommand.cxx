@@ -308,7 +308,7 @@ void cmCableWrapTclCommand::GenerateCableFiles() const
   depends.push_back(packageConfigName);
   
   std::vector<std::string> outputs;
-  outputs.push_back(packageTclFileName+".cxx");
+  outputs.push_back(packageTclFullName+".cxx");
   
   m_Makefile->AddCustomCommand(packageConfigName.c_str(),
                                command.c_str(),
@@ -479,7 +479,7 @@ void cmCableWrapTclCommand::GenerateCableClassFiles(const char* name,
   depends.push_back(classXmlName);
   
   std::vector<std::string> outputs;
-  outputs.push_back(classTclFileName+".cxx");
+  outputs.push_back(classTclFullName+".cxx");
   
   m_Makefile->AddCustomCommand(classConfigName.c_str(),
                                command.c_str(),

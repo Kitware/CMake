@@ -129,7 +129,9 @@ void cmVTKWrapPythonCommand::FinalPass()
   for(int classNum = 0; classNum < lastClass; classNum++)
     {
     m_Makefile->AddSource(m_WrapClasses[classNum],m_SourceList.c_str());
-    std::string res = m_WrapClasses[classNum].GetSourceName() + ".cxx";
+    std::string res = m_Makefile->GetCurrentOutputDirectory();
+    res += "/";
+    res += m_WrapClasses[classNum].GetSourceName() + ".cxx";
     std::vector<std::string> args;
     args.push_back(m_WrapHeaders[classNum]);
     args.push_back(hints);

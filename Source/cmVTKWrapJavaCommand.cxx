@@ -124,7 +124,9 @@ void cmVTKWrapJavaCommand::FinalPass()
     m_Makefile->AddSource(m_WrapClasses[classNum],m_SourceList.c_str());
 
     // wrap java
-    std::string res = m_WrapClasses[classNum].GetSourceName() + ".cxx";
+    std::string res = m_Makefile->GetCurrentOutputDirectory();
+    res += "/";
+    res += m_WrapClasses[classNum].GetSourceName() + ".cxx";
     std::string res2 = resultDirectory + "/" + 
       m_OriginalNames[classNum] + ".java";
     

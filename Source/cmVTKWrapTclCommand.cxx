@@ -161,15 +161,14 @@ void cmVTKWrapTclCommand::FinalPass()
   for(int classNum = 0; classNum < lastClass; classNum++)
     {
     m_Makefile->AddSource(m_WrapClasses[classNum],m_SourceList.c_str());
-    std::string res = m_WrapClasses[classNum].GetSourceName() + ".cxx";
     std::vector<std::string> args;
     args.push_back(m_WrapHeaders[classNum]);
     args.push_back(hints);
     args.push_back((m_WrapClasses[classNum].IsAnAbstractClass() ? "0" : "1"));
-    std::string tmp = m_Makefile->GetCurrentOutputDirectory();
-    tmp += "/";
-    tmp += m_WrapClasses[classNum].GetSourceName() + ".cxx";
-    args.push_back(tmp);
+    std::string res = m_Makefile->GetCurrentOutputDirectory();
+    res += "/";
+    res += m_WrapClasses[classNum].GetSourceName() + ".cxx";
+    args.push_back(res);
     
     m_Makefile->AddCustomCommand(m_WrapHeaders[classNum].c_str(),
                                  wtcl.c_str(), args, depends, 

@@ -126,7 +126,9 @@ void cmQTWrapCPPCommand::FinalPass()
     m_Makefile->AddSource(m_WrapClasses[classNum],m_SourceList.c_str());
 
     // set up moc command
-    std::string res = m_WrapClasses[classNum].GetSourceName() + ".cxx";
+    std::string res = m_Makefile->GetCurrentOutputDirectory();
+    res += "/";
+    res += m_WrapClasses[classNum].GetSourceName() + ".cxx";
     
     std::vector<std::string> args;
     args.push_back("-o");
