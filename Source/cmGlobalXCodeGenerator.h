@@ -20,6 +20,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmXCodeObject.h"
 class cmTarget;
+class cmSourceFile;
 
 /** \class cmGlobalXCodeGenerator
  * \brief Write a Unix makefiles.
@@ -66,7 +67,8 @@ public:
 private:
   // create cmXCodeObject from these functions so that memory can be managed
   // correctly.  All objects created are stored in m_XCodeObjects.
-  cmXCodeObject* CreateObject(cmXCodeObject::PBXType ptype, cmXCodeObject::Type type);
+  cmXCodeObject* CreateObject(cmXCodeObject::PBXType ptype);
+  cmXCodeObject* CreateObject(cmXCodeObject::Type type);
   cmXCodeObject* CreateString(const char* s);
   
   // delete all objects in the m_XCodeObjects vector.
@@ -78,6 +80,8 @@ private:
   void  WriteXCodePBXProj(std::ostream& fout,
                           cmLocalGenerator* root,
                           std::vector<cmLocalGenerator*>& generators);
+  cmXCodeObject* CreateXCodeSourceFile(cmLocalGenerator* gen, cmSourceFile* sf);
+  void CreateXCodeTargets(cmLocalGenerator* gen, std::vector<cmXCodeObject*>&);  
   
   std::vector<cmXCodeObject*> m_XCodeObjects;
   cmXCodeObject* m_RootObject;

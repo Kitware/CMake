@@ -14,6 +14,8 @@ cmXCodeObject::cmXCodeObject(PBXType ptype, Type type)
   m_IsA = ptype;
   cmOStringStream str;
   str << (void*)this;
+  str << (void*)this;
+  str << (void*)this;
   m_Id = str.str();
   m_Type = type;
   if(m_Type == OBJECT)
@@ -40,7 +42,6 @@ void cmXCodeObject::Print(std::ostream& out)
   std::map<cmStdString, cmXCodeObject*>::iterator i;
   for(i = m_ObjectAttributes.begin(); i != m_ObjectAttributes.end(); ++i)
     { 
-    
     cmXCodeObject* object = i->second;
     cmXCodeObject::Indent(3, out);
     if(i->first == "isa")
@@ -78,7 +79,10 @@ void cmXCodeObject::Print(std::ostream& out)
       {
       out << i->first << " = " << object->m_String << ";\n";
       }
-        
+    else
+      {
+      out << "what is this?? " << i->first << "\n";
+      }
     }
   cmXCodeObject::Indent(2, out);
   out << "};\n";
