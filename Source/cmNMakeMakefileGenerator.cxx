@@ -304,14 +304,15 @@ void cmNMakeMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
   std::string depend = "$(";
   depend += name;
   depend += "_SRC_OBJS) $(" + std::string(name) + "_DEPEND_LIBS)";
-  std::string command = "link /dll ";
+  std::string command = "link /dll @<<\n";
   command += "$(" + std::string(name) + "_SRC_OBJS) /out:";
-  command += m_LibraryOutputPath +  std::string(name) + ".dll \\\n";
+  command += m_LibraryOutputPath +  std::string(name) + ".dll ";
   std::strstream linklibs;
   this->OutputLinkLibraries(linklibs, name, t);
   linklibs << std::ends;
   command += linklibs.str();
   delete [] linklibs.str();
+  command += "\n<<\n";
   m_QuoteNextCommand = false;
   this->OutputMakeRule(fout, "rules for a shared library",
                        target.c_str(),
@@ -333,11 +334,12 @@ void cmNMakeMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout,
   std::string target = m_LibraryOutputPath + std::string(name) + ".lib";
   std::string depend = "$(";
   depend += std::string(name) + "_SRC_OBJS)";
-  std::string command = "link -lib /nologo /out:";
+  std::string command = "link -lib @<<\n\t/nologo /out:";
   command += m_LibraryOutputPath;
   command += name;
   command += ".lib $(";
   command += std::string(name) + "_SRC_OBJS)";
+  command += "\n<<\n";
   std::string comment = "rule to build static library: ";
   comment += name;
   m_QuoteNextCommand = false;
