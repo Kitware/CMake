@@ -95,9 +95,9 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateString(const char* s)
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalXCodeGenerator::CreateXCodeObjects(cmLocalGenerator* root,
+void cmGlobalXCodeGenerator::CreateXCodeObjects(cmLocalGenerator* ,
                                                 std::vector<cmLocalGenerator*>& 
-                                                generators)
+                                                )
 {
   delete m_RootObject;
   this->ClearXCodeObjects(); 
