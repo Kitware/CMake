@@ -89,7 +89,7 @@ CommandLineArguments::~CommandLineArguments()
 }
 
 //----------------------------------------------------------------------------
-void CommandLineArguments::Initialize(int argc, char* argv[])
+void CommandLineArguments::Initialize(int argc, const char* const argv[])
 {
   int cc;
 
