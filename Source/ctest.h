@@ -42,17 +42,22 @@ public:
   /**
    * Try to build the project
    */
-  void BuildDirectory();
+  int BuildDirectory();
+
+  /**
+   * Try to run tests of the project
+   */
+  int TestDirectory();
 
   /**
    * Do revision control update of directory
    */
-  void UpdateDirectory();
+  int UpdateDirectory();
 
   /**
    * Do configure the project
    */
-  void ConfigureDirectory();
+  int ConfigureDirectory();
 
   /**
    * Run the test for a directory and any subdirectories
@@ -129,7 +134,13 @@ private:
   std::string             m_ToplevelPath;
   tm_DartConfigurationMap m_DartConfiguration;
   int                     m_Tests[LAST_TEST];
+  
+  std::string             m_CurrentTag;
 
+  std::string             m_StartBuild;
+  std::string             m_EndBuild;
+  std::string             m_StartTest;
+  std::string             m_EndTest;
 
   /**
    * Generate the Dart compatible output
