@@ -1033,6 +1033,40 @@ cmLocalUnixMakefileGenerator2
                       no_commands);
   }
 
+  // Write special "test" target to run ctest.
+  if(m_Makefile->IsOn("CMAKE_TESTING_ENABLED"))
+    {
+    std::string ctest;
+    if(m_Makefile->GetDefinition("CMake_BINARY_DIR"))
+      {
+      // We are building CMake itself.  Use the ctest that comes with
+      // this version of CMake instead of the one used to build it.
+      ctest = m_ExecutableOutputPath;
+      ctest += "ctest";
+      ctest += cmSystemTools::GetExecutableExtension();
+      ctest = this->ConvertToRelativeOutputPath(ctest.c_str());
+      }
+    else
+      {
+      // We are building another project.  Use the ctest that comes with
+      // the CMake building it.
+      ctest = m_Makefile->GetRequiredDefinition("CMAKE_COMMAND");
+      ctest = cmSystemTools::GetFilenamePath(ctest.c_str());
+      ctest += "/";
+      ctest += "ctest";
+      ctest += cmSystemTools::GetExecutableExtension();
+      ctest = this->ConvertToOutputForExisting(ctest.c_str());
+      }
+    std::vector<std::string> no_depends;
+    std::vector<std::string> commands;
+    std::string cmd = ctest;
+    cmd += " $(ARGS)";
+    commands.push_back(cmd);
+    this->WriteMakeRule(makefileStream,
+                        "Special rule to drive testing with ctest.",
+                        "Running tests...", "test", no_depends, commands);
+    }
+
   // Write special "install" target to run cmake_install.cmake script.
   {
   std::vector<std::string> no_depends;
