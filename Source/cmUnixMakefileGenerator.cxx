@@ -1,25 +1,37 @@
-#include "cmUnixMakefile.h"
+#include "cmUnixMakefileGenerator.h"
+#include "cmMakefile.h"
+#include "cmStandardIncludes.h"
 #include "cmSystemTools.h"
-#include <fstream>
-#include <iostream>
+#include "cmClassFile.h"
+#include "cmMakeDepend.h"
+
+void cmUnixMakefileGenerator::GenerateMakefile()
+{
+  cmMakeDepend md;
+  md.SetMakefile(m_Makefile);
+  md.DoDepends();
+  this->OutputMakefile("CMakeTargets.make"); 
+}
+
 
 // Output the depend information for all the classes 
 // in the makefile.  These would have been generated
-// by the class cmMakeDepend in the main of CMakeBuildTargets.
-void cmUnixMakefile::OutputDepends(std::ostream& fout)
+// by the class cmMakeDepend GenerateMakefile
+void cmUnixMakefileGenerator::OutputDepends(std::ostream& fout)
 {
-  for(int i = 0; i < m_Classes.size(); i++)
+  std::vector<cmClassFile>& Classes = m_Makefile->GetClasses();
+  for(unsigned int i = 0; i < Classes.size(); i++)
     {
-    if(!m_Classes[i].m_AbstractClass && !m_Classes[i].m_HeaderFileOnly)
+    if(!Classes[i].m_AbstractClass && !Classes[i].m_HeaderFileOnly)
       {
-      if( m_Classes[i].m_Depends.size())
+      if( Classes[i].m_Depends.size())
 	{
-	fout << m_Classes[i].m_ClassName << ".o : \\\n";
+	fout << Classes[i].m_ClassName << ".o : \\\n";
 	for(std::vector<std::string>::iterator j =  
-	      m_Classes[i].m_Depends.begin();
-	    j != m_Classes[i].m_Depends.end(); ++j)
+	      Classes[i].m_Depends.begin();
+	    j != Classes[i].m_Depends.end(); ++j)
 	  {
-	  if(j+1 == m_Classes[i].m_Depends.end())
+	  if(j+1 == Classes[i].m_Depends.end())
 	    {
 	    fout << *j << " \n";
 	    }
@@ -63,15 +75,16 @@ inline std::string FixDirectoryName(const char* dir)
 // 4. Rules to build in sub directories
 // 5. The name of the library being built, if it is a library
 
-void cmUnixMakefile::OutputMakefile(const char* file)
+void cmUnixMakefileGenerator::OutputMakefile(const char* file)
 {
-  if( m_TemplateDirectories.size() )
+  std::vector<std::string>& auxSourceDirs = m_Makefile->GetAuxSourceDirectories();
+  if( auxSourceDirs.size() )
     {
     // For the case when this is running as a remote build
     // on unix, make the directory
     
-    for(std::vector<std::string>::iterator i = m_TemplateDirectories.begin();
-        i != m_TemplateDirectories.end(); ++i)
+    for(std::vector<std::string>::iterator i = auxSourceDirs.begin();
+        i != auxSourceDirs.end(); ++i)
       {
       cmSystemTools::MakeDirectory(i->c_str());
       }
@@ -80,12 +93,12 @@ void cmUnixMakefile::OutputMakefile(const char* file)
   std::ofstream fout(file);
   if(!fout)
     {
-    std::cerr  << "Error can not open " << file << " for write" << std::endl;
+    cmSystemTools::Error("Error can not open for write: ", file);
     return;
     }
   // Output Include paths
   fout << "INCLUDE_FLAGS = ";
-  std::vector<std::string>& includes = m_BuildFlags.GetIncludeDirectories();
+  std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();
   std::vector<std::string>::iterator i;
   for(i = includes.begin(); i != includes.end(); ++i)
     {
@@ -96,22 +109,23 @@ void cmUnixMakefile::OutputMakefile(const char* file)
   fout << "\n";
   // see if there are files to compile in this makefile
   // These are used for both libraries and executables
-  if(m_Classes.size() )
+  std::vector<cmClassFile>& Classes = m_Makefile->GetClasses();
+  if(Classes.size() )
     {
     // Ouput Library name if there are SRC_OBJS
-    if(strlen(this->GetLibraryName()) > 0)
+    if(strlen(m_Makefile->GetLibraryName()) > 0)
       {
-      fout << "LIBRARY = " <<  this->GetLibraryName() << "\n\n";
+      fout << "LIBRARY = " <<  m_Makefile->GetLibraryName() << "\n\n";
       fout << "BUILD_LIB_FILE = lib${LIBRARY}${CMAKE_LIB_EXT}\n\n";
       }
     // Output SRC_OBJ list for all the classes to be compiled
     fout << "SRC_OBJ = \\\n";
-    for(int i = 0; i < m_Classes.size(); i++)
+    for(unsigned int i = 0; i < Classes.size(); i++)
       {
-      if(!m_Classes[i].m_AbstractClass && !m_Classes[i].m_HeaderFileOnly)
+      if(!Classes[i].m_AbstractClass && !Classes[i].m_HeaderFileOnly)
 	{
-	fout << m_Classes[i].m_ClassName << ".o ";
-	if(i ==  m_Classes.size() -1)
+	fout << Classes[i].m_ClassName << ".o ";
+	if(i ==  Classes.size() -1)
 	  {
 	  fout << "\n\n";
 	  }
@@ -123,34 +137,43 @@ void cmUnixMakefile::OutputMakefile(const char* file)
       }
     fout << "\n";
     }
+  std::vector<std::string>& MakeVerbatim = m_Makefile->GetMakeVerbatim();
   // Ouput user make text embeded in the input file
-  for(int i =0; i < m_MakeVerbatim.size(); i++)
+  for(unsigned int i =0; i < MakeVerbatim.size(); i++)
     {
-    fout << m_MakeVerbatim[i] << "\n";
+    fout << MakeVerbatim[i] << "\n";
     }
   fout << "\n\n";
 
   // Output rules for building executables  
-  if( m_Executables )
+  if( m_Makefile->HasExecutables() )
     {
     // collect all the flags needed for linking libraries
     std::string linkLibs;        
     std::vector<std::string>::iterator j;
-    std::vector<std::string>& libdirs = m_BuildFlags.GetLinkDirectories();
+    std::vector<std::string>& libdirs = m_Makefile->GetLinkDirectories();
     for(j = libdirs.begin(); j != libdirs.end(); ++j)
-      {
-      linkLibs += "-L";
+      { 
+      if((*j).find("-L") == std::string::npos 
+         && (*j).find("${") == std::string::npos)
+        {
+        linkLibs += "-L";
+        }
       linkLibs += *j;
       linkLibs += " ";
       }
-    std::vector<std::string>& libs = m_BuildFlags.GetLinkLibraries();
+    std::vector<std::string>& libs = m_Makefile->GetLinkLibraries();
     for(j = libs.begin(); j != libs.end(); ++j)
       {
-      linkLibs += "-l";
+      if((*j).find("-l") == std::string::npos 
+         && (*j).find("${") == std::string::npos)
+        {
+        linkLibs += "-l";
+        }
       linkLibs += *j;
       linkLibs += " ";
       }
-    std::vector<std::string>& libsUnix = m_BuildFlags.GetLinkLibrariesUnix();
+    std::vector<std::string>& libsUnix = m_Makefile->GetLinkLibrariesUnix();
     for(j = libsUnix.begin(); j != libsUnix.end(); ++j)
       {
       linkLibs += *j;
@@ -163,16 +186,15 @@ void cmUnixMakefile::OutputMakefile(const char* file)
     fout << "CMAKE_DEPEND_LIBS = ";
     this->OutputDependLibraries(fout);
     // Now create rules for all of the executables to be built
-    for(int i = 0; i < m_Classes.size(); i++)
+    for(unsigned int i = 0; i < Classes.size(); i++)
       {
-      if(!m_Classes[i].m_AbstractClass && !m_Classes[i].m_HeaderFileOnly)
+      if(!Classes[i].m_AbstractClass && !Classes[i].m_HeaderFileOnly)
 	{ 
-        std::string DotO = m_Classes[i].m_ClassName;
+        std::string DotO = Classes[i].m_ClassName;
         DotO += ".o";
-        
-        fout << m_Classes[i].m_ClassName << ": " << DotO << " ";
+        fout << Classes[i].m_ClassName << ": " << DotO << " ";
         fout << "${CMAKE_DEPEND_LIBS}\n";
-	fout << "\t${CXX}  ${CXX_FLAGS}  " 
+	fout << "\t${CXX}  ${CXX_FLAGS}  " << m_Makefile->GetDefineFlags()
 	     << DotO.c_str() << " "
              << linkLibs.c_str() 
 	     << " -o $@ ""\n\n";
@@ -180,12 +202,12 @@ void cmUnixMakefile::OutputMakefile(const char* file)
       }
     // ouput the list of executables
     fout << "EXECUTABLES = \\\n";
-    for(int i = 0; i < m_Classes.size(); i++)
+    for(unsigned int i = 0; i < Classes.size(); i++)
       {
-      if(!m_Classes[i].m_AbstractClass && !m_Classes[i].m_HeaderFileOnly)
+      if(!Classes[i].m_AbstractClass && !Classes[i].m_HeaderFileOnly)
 	{ 
-        fout << m_Classes[i].m_ClassName;
-	if(i < m_Classes.size()-1)
+        fout << Classes[i].m_ClassName;
+	if(i < Classes.size()-1)
 	  {
 	    fout << " \\";
 	  }
@@ -195,15 +217,18 @@ void cmUnixMakefile::OutputMakefile(const char* file)
     fout << "\n";
     }
   // Output Sub directory build rules
-  if( m_SubDirectories.size() )
+  const std::vector<std::string>& SubDirectories
+    = m_Makefile->GetSubDirectories();
+    
+  if( SubDirectories.size() )
     {
     fout << "SUBDIR_BUILD = \\\n";
-    int i;
-    for(i =0; i < m_SubDirectories.size(); i++)
+    unsigned int i;
+    for(i =0; i < SubDirectories.size(); i++)
       { 
-      std::string subdir = FixDirectoryName(m_SubDirectories[i].c_str());
+      std::string subdir = FixDirectoryName(SubDirectories[i].c_str());
       fout << "build_" << subdir.c_str();
-      if(i == m_SubDirectories.size()-1)
+      if(i == SubDirectories.size()-1)
 	{
 	fout << " \n\n";
 	}
@@ -214,11 +239,11 @@ void cmUnixMakefile::OutputMakefile(const char* file)
       }
     fout << std::endl;
     fout << "SUBDIR_CLEAN = \\\n";
-    for(i =0; i < m_SubDirectories.size(); i++)
+    for(i =0; i < SubDirectories.size(); i++)
       { 
-      std::string subdir = FixDirectoryName(m_SubDirectories[i].c_str());
+      std::string subdir = FixDirectoryName(SubDirectories[i].c_str());
       fout << "clean_" << subdir.c_str();
-      if(i == m_SubDirectories.size()-1)
+      if(i == SubDirectories.size()-1)
 	{
 	fout << " \n\n";
 	}
@@ -230,27 +255,30 @@ void cmUnixMakefile::OutputMakefile(const char* file)
     fout << std::endl;
     fout << "alldirs : ${SUBDIR_BUILD}\n\n";
 
-    for(i =0; i < m_SubDirectories.size(); i++)
+    for(i =0; i < SubDirectories.size(); i++)
       {
-      std::string subdir = FixDirectoryName(m_SubDirectories[i].c_str());
+      std::string subdir = FixDirectoryName(SubDirectories[i].c_str());
       fout << "build_" << subdir.c_str() << ":\n";
-      fout << "\tcd " << m_SubDirectories[i].c_str()
+      fout << "\tcd " << SubDirectories[i].c_str()
 	   << "; ${MAKE} -${MAKEFLAGS} CMakeTargets.make\n";
-      fout << "\tcd " << m_SubDirectories[i].c_str()
+      fout << "\tcd " << SubDirectories[i].c_str()
 	   << "; ${MAKE} -${MAKEFLAGS} all\n\n";
 
       fout << "clean_" << subdir.c_str() << ": \n";
-      fout << "\tcd " << m_SubDirectories[i].c_str() 
+      fout << "\tcd " << SubDirectories[i].c_str() 
 	   << "; ${MAKE} -${MAKEFLAGS} clean\n\n";
       }
     }
   this->OutputDepends(fout);
 }
 
-void cmUnixMakefile::OutputDependLibraries(std::ostream& fout)
+
+// output the list of libraries that the executables 
+// in this makefile will depend on.
+void cmUnixMakefileGenerator::OutputDependLibraries(std::ostream& fout)
 {
-  std::vector<std::string>& libs = m_BuildFlags.GetLinkLibraries();
-  std::vector<std::string>& libdirs = m_BuildFlags.GetLinkDirectories();
+  std::vector<std::string>& libs = m_Makefile->GetLinkLibraries();
+  std::vector<std::string>& libdirs = m_Makefile->GetLinkDirectories();
   std::vector<std::string>::iterator dir, lib, endlibs, enddirs;
   for(lib = libs.begin(); lib != libs.end(); ++lib)
     {

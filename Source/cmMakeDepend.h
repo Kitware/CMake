@@ -22,8 +22,7 @@
 #include "cmMakefile.h"
 #include "cmClassFile.h"
 #include "cmRegularExpression.h"
-#include <vector>
-#include <string>
+#include "cmStandardIncludes.h"
 
 
 // This structure stores the depend information 

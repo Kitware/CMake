@@ -1,7 +1,7 @@
-#include "cmUnixMakefile.h"
+#include "cmMakefile.h"
+#include "cmStandardIncludes.h"
 #include "cmMakeDepend.h"
-#include <iostream>
-
+#include "cmUnixMakefileGenerator.h"
 
 // This is the main program used to gentrate makefile fragments 
 // from CMakeLists.txt input files.   
@@ -12,10 +12,9 @@ main(int ac, char** av)
     std::cerr << "Usage: " << av[0] << " Makefile.in  -Ipath ..." << std::endl;
     return -1;
     }
-  // Create a unix makefile
-  cmUnixMakefile mf;
-  // Create a depends object
-  cmMakeDepend md;
+  // Create a makefile
+  cmMakefile mf;
+  mf.AddDefinition("UNIX", "1");
   // Parse the command line
   if(ac > 2)
     {
@@ -42,16 +41,12 @@ main(int ac, char** av)
 	}
       }
     }
+  mf.SetMakefileGenerator(new cmUnixMakefileGenerator);
   // Read and parse the input makefile
   if(!mf.ReadMakefile(av[1]))
     {
     std::cerr << "Usage: " << av[0] << " Makefile.in  -Ipath ..." << std::endl;
     return -1;
     }
-  // Set the makefile object on the depend object
-  md.SetMakefile(&mf);
-  // compute the depend information
-  md.DoDepends();
-  // Ouput the result
-  mf.OutputMakefile("CMakeTargets.make");
+  mf.GenerateMakefile();
 }

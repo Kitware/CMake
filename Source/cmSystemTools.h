@@ -18,13 +18,8 @@
  */
 #ifndef cmSystemTools_h
 #define cmSystemTools_h
-#ifdef _MSC_VER
-#pragma warning ( disable : 4786 )
-#endif
 
-#include <string>
-#include <vector>
-#include <fstream>
+#include "cmStandardIncludes.h"
 
 class cmSystemTools
 {
@@ -43,10 +38,6 @@ public:
                             const char* replace,
                             const char* with);
   /**
-   *  Remove extra spaces and the trailing \ from a string.
-   */
-  static std::string CleanUpName(const char* name);
-  /**
    * Replace windows slashes with unix style slashes
    */
   static void ConvertToUnixSlashes(std::string& path);
@@ -61,20 +52,30 @@ public:
   static int Grep(const char* dir, const char* file, const char* expression);
   
   /**
-   * Extract the right hand side of an asignment varibale = value
+   * remove /cygdrive/d and replace with d:/
    */
-  static std::string ExtractVariable(const char* varible,
-                                     const char* line);
-  
+  static void ConvertCygwinPath(std::string& pathname);
+
   /**
-   * Read a list from a file into the array of strings.
-   * This function assumes that the first line of the
-   * list has been read.  For example: NAME = \ was already
-   * read in.   The reading stops when there are no more
-   * continuation characters.
+   * Read a cmake function from an input file.  This
+   * returns the name of the function and a list of its 
+   * arguments.
    */
-  static void ReadList(std::vector<std::string>& stringList, 
-                       std::ifstream& fin);
+  static bool ParseFunction(std::ifstream&, 
+                            std::string& name,
+                            std::vector<std::string>& arguments);
+  /**
+   *  Extract space separated arguments from a string.
+   *  Double quoted strings are accepted with spaces.
+   *  This is called by ParseFunction.
+   */
+  static void GetArguments(std::string& line,
+                           std::vector<std::string>& arguments);
+  /**
+   * Display an error message.
+   */
+  static void Error(const char* m, const char* m2=0 );
+  
 };
 
 

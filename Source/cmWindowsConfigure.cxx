@@ -1,8 +1,7 @@
 #include "cmWindowsConfigure.h"
+#include "cmStandardIncludes.h"
 #include "cmSystemTools.h"
-#include <fstream>
 #include <windows.h>
-
 
 bool cmWindowsConfigure::Configure(const char* file)
 {

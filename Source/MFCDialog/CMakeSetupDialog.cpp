@@ -6,7 +6,7 @@
 #include "CMakeSetupDialog.h"
 #include "../cmDSWMakefile.h"
 #include "../cmWindowsConfigure.h"
-
+#include "../cmMSProjectGenerator.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -269,19 +269,21 @@ void CMakeSetupDialog::OnOK()
     }
   
   
-  cmDSWMakefile builder;
-  // Set the ITK home directory
-  builder.SetHomeDirectory(m_WhereSource);
+  cmMakefile mf;
+  mf.SetMakefileGenerator(new cmMSProjectGenerator);
+  mf.SetHomeDirectory(m_WhereSource);
+
+  // Set the output directory
+  mf.SetOutputDirectory(m_WhereBuild);
+  // set the directory which contains the CMakeLists.txt
+  mf.SetCurrentDirectory(m_WhereSource);
+  // Create the master DSW file and all children dsp files for ITK
   // Set the CMakeLists.txt file
   CString makefileIn = m_WhereSource;
   makefileIn += "/CMakeLists.txt";
-  builder.ReadMakefile(makefileIn);
-  // Set the output directory
-  builder.SetOutputDirectory(m_WhereBuild);
-  // set the directory which contains the CMakeLists.txt
-  builder.SetCurrentDirectory(m_WhereSource);
-  // Create the master DSW file and all children dsp files for ITK
-  builder.OutputDSWFile();
+  mf.ReadMakefile(makefileIn);
+  // Move this to the cache editor
+  mf.GenerateMakefile();
   CDialog::OnOK();
   this->SaveToRegistry();
 }

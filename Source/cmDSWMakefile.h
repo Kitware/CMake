@@ -18,28 +18,27 @@
  */
 #ifndef cmDSWMakefile_h
 #define cmDSWMakefile_h
-#ifdef _MSC_VER
-#pragma warning ( disable : 4786 )
-#endif
-
+#include "cmStandardIncludes.h"
 #include "cmMakefile.h"
-#include <vector>
+
 class cmDSPMakefile;
+class cmMSProjectGenerator;
 
-
-class cmDSWMakefile : public cmMakefile
+class cmDSWMakefile 
 {
 public:
+  cmDSWMakefile(cmMakefile*);
   virtual void OutputDSWFile();
 private:
   void FindAllCMakeListsFiles(const char* subdir,
-			      std::vector<cmDSPMakefile*>&);
+			      std::vector<cmMSProjectGenerator*>&);
   void WriteDSWFile(std::ostream& fout);
   void WriteDSWHeader(std::ostream& fout);
   void WriteProject(std::ostream& fout, 
-		     const char* name, const char* path,
-                    cmMakefile* project);
+                    const char* name, const char* path,
+                    cmDSPMakefile* project);
   void WriteDSWFooter(std::ostream& fout);
+  cmMakefile* m_Makefile;
 };
 
 #endif

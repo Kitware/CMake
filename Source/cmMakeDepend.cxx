@@ -1,13 +1,6 @@
-#ifdef _MSC_VER
-#pragma warning ( disable : 4786 )
-#endif
 #include "cmMakeDepend.h"
+#include "cmStandardIncludes.h"
 #include "cmSystemTools.h"
-#include <fstream>
-#include <iostream>
-#include <algorithm>
-#include <functional>
-
 
 cmMakeDepend::cmMakeDepend()
 {
@@ -43,8 +36,7 @@ void cmMakeDepend::SetMakefile(cmMakefile* makefile)
   m_Makefile = makefile;
   
   // Now extract any include paths from the makefile flags
-  cmCollectFlags& flags = m_Makefile->GetBuildFlags();
-  std::vector<std::string>& includes = flags.GetIncludeDirectories();
+  std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();
   std::vector<std::string>::iterator j;
   for(j = includes.begin(); j != includes.end(); ++j)
     {
@@ -76,7 +68,7 @@ void cmMakeDepend::DoDepends()
   // The size of the m_DependInformation will change as
   // Depend is called so do not use an iterater but rather
   // depend on the size of the array.
-  int j = 0;
+  unsigned int j = 0;
   while(j != m_DependInformation.size())
     {
     cmDependInformation* info = m_DependInformation[j];
@@ -94,7 +86,6 @@ void cmMakeDepend::DoDepends()
     cmDependInformation* info = *i;
     // Remove duplicate depends
     info->RemoveDuplicateIndices();
-    std::vector<cmClassFile>::iterator j = m_Makefile->m_Classes.begin();
     // find the class 
     if(info->m_ClassFileIndex != -1)
       {
@@ -115,14 +106,14 @@ void cmMakeDepend::Depend(cmDependInformation* info)
   const char* path = info->m_FullPath.c_str();
   if(!path)
     {
-    std::cerr << "no full path for object"  << std::endl;
+    cmSystemTools::Error("no full path for object", 0);
     return;
     }
   
   std::ifstream fin(path);
   if(!fin)
     {
-    std::cerr << "error can not open " << info->m_FullPath << std::endl;
+    cmSystemTools::Error("error can not open ", info->m_FullPath.c_str());
     return;
     }
   char line[255];
@@ -142,8 +133,8 @@ void cmMakeDepend::Depend(cmDependInformation* info)
 	// if a < is not found then move on
 	if(qstart == std::string::npos)
 	  {
-	  std::cerr << "unknown include directive " << currentline 
-		    << std::endl;
+	  cmSystemTools::Error("unknown include directive ", 
+                               currentline.c_str() );
 	  continue;
 	  }
 	else
@@ -162,7 +153,11 @@ void cmMakeDepend::Depend(cmDependInformation* info)
 	{
 	if(m_Verbose)
 	  {
-	  std::cerr  << "skipping " << includeFile << " for file " << path << std::endl;
+          std::string message = "Skipping ";
+          message += includeFile;
+          message += " for file ";
+          message += path;
+	  cmSystemTools::Error(message.c_str(), 0);
 	  }
 	continue;
 	}
@@ -196,7 +191,7 @@ void cmMakeDepend::Depend(cmDependInformation* info)
 // object if one is not found
 int cmMakeDepend::FindInformation(const char* fname)
 {
-  int i = 0;
+  unsigned int i = 0;
   
   while(i < m_DependInformation.size())
     {
@@ -245,6 +240,7 @@ std::string cmMakeDepend::FullPath(const char* fname)
     {
       return std::string(fname);
     }
+  
   for(std::vector<std::string>::iterator i = m_IncludeDirectories.begin();
       i != m_IncludeDirectories.end(); ++i)
     {
@@ -256,7 +252,7 @@ std::string cmMakeDepend::FullPath(const char* fname)
       return path;
       }
     }
-  std::cerr << "Depend: File not found " << fname  << std::endl;
+  cmSystemTools::Error("Depend: File not found ", fname);
   return std::string(fname);
 }
 
@@ -274,7 +270,8 @@ void cmMakeDepend::AddFileToSearchPath(const char* file)
   if(pos != std::string::npos)
     {
     std::string path = filepath.substr(0, pos);
-    if(std::find(m_IncludeDirectories.begin(), m_IncludeDirectories.end(), path)
+    if(std::find(m_IncludeDirectories.begin(),
+                 m_IncludeDirectories.end(), path)
        == m_IncludeDirectories.end())
       {
       m_IncludeDirectories.push_back(path);

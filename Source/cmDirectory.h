@@ -16,11 +16,8 @@
 #ifndef __cmDirectory_h
 #define __cmDirectory_h
 
-#include <iostream>
-#include <string>
-#include <vector>
-
-
+#include "cmStandardIncludes.h"
+#include "cmSystemTools.h"
 /** \class cmDirectory
  * \brief Portable directory/filename traversal.
  * 

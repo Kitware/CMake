@@ -91,9 +91,8 @@ cmDirectory
     return 0;
     }
   
-  dirent* d =0;
   dir = opendir(name);
-  for ( d = readdir(dir); d; d = readdir(dir) )
+  for (dirent* d = readdir(dir); d; d = readdir(dir) )
     {
     m_Files.push_back(d->d_name);
     }
@@ -114,7 +113,7 @@ cmDirectory
 {
   if ( index >= m_Files.size() )
     {
-	std::cerr << "Bad index for GetFile on cmDirectory\n";
+    cmSystemTools::Error("Bad index for GetFile on cmDirectory\n", 0);
     return 0;
     }
   return m_Files[index].c_str();

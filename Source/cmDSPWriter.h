@@ -20,15 +20,14 @@
  */
 #ifndef cmDSPMakefile_h
 #define cmDSPMakefile_h
-#ifdef _MSC_VER
-#pragma warning ( disable : 4786 )
-#endif
+#include "cmStandardIncludes.h"
 #include "cmMakefile.h"
-#include <vector>
 
-class cmDSPMakefile : public cmMakefile
+class cmDSPMakefile 
 {
 public:
+  cmDSPMakefile(cmMakefile*);
+  ~cmDSPMakefile();
   void OutputDSPFile();
   enum BuildType { STATIC_LIBRARY, DLL, EXECUTABLE };
   void SetBuildType(BuildType );
@@ -37,6 +36,10 @@ public:
   std::vector<std::string> GetCreatedProjectNames() 
     {
       return m_CreatedProjectNames;
+    }
+  cmMakefile* GetMakefile() 
+    {
+      return m_Makefile;
     }
   
 private:
@@ -64,6 +67,7 @@ private:
   std::string m_IncludeOptions;
   std::string m_DebugLibraryOptions;
   std::string m_ReleaseLibraryOptions;
+  cmMakefile* m_Makefile;
 };
 
 #endif

@@ -32,7 +32,7 @@
 #ifndef cmRegularExpression_h
 #define cmRegularExpression_h
 
-#include <string>
+#include "cmStandardIncludes.h"
 
 const int NSUBEXP = 10;
 

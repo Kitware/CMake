@@ -115,8 +115,9 @@
 //
 
 #include "cmRegularExpression.h"	// Include class specification 
+#include "cmStandardIncludes.h"
 #include <stdio.h>
-#include <string>
+
 
 // cmRegularExpression -- Copies the given regular expression.
 

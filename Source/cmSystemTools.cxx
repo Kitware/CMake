@@ -3,7 +3,7 @@
 #include <sys/stat.h>
 #include "cmRegularExpression.h"
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || defined(__BORLANDC__)
 #include <windows.h>
 #include <direct.h>
 inline int Mkdir(const char* dir)
@@ -19,39 +19,6 @@ inline int Mkdir(const char* dir)
   return mkdir(dir, 00700);
 }
 #endif
-
-// remove extra spaces and the "\" character from the name
-// of the class as it is in the CMakeLists.txt
-std::string cmSystemTools::CleanUpName(const char* name)
-{
-  std::string className = name;
-  size_t i =0;
-  while(className[i] == ' ' || className[i] == '\t')
-    {
-    i++;
-    }
-  if(i)
-    {
-    className = className.substr(i, className.size());
-    } 
-  size_t pos = className.find('\\');
-  if(pos != std::string::npos)
-    {
-    className = className.substr(0, pos);
-    }
-  
-  pos = className.find(' ');
-  if(pos != std::string::npos)
-    {
-    className = className.substr(0, pos);
-    }
-  pos = className.find('\t');
-  if(pos != std::string::npos)
-    {
-    className = className.substr(0, pos);
-    }
-  return className;
-}
 
 
 bool cmSystemTools::MakeDirectory(const char* path)
@@ -121,29 +88,6 @@ bool cmSystemTools::FileExists(const char* filename)
   }
 }
 
-// Read a list from a CMakeLists.txt file open stream.
-// assume the stream has just read "VAR = \"
-// read until there is not a "\" at the end of the line.
-void cmSystemTools::ReadList(std::vector<std::string>& stringList, 
-                             std::ifstream& fin)
-{
-  char inbuffer[2048];
-  bool done = false;
-  while ( !done )
-    {
-    fin.getline(inbuffer, sizeof(inbuffer) );
-    std::string inname = inbuffer;
-    if(inname.find('\\') == std::string::npos)
-      {
-      done = true;
-      }
-    if(inname.size())
-      {
-      stringList.push_back(cmSystemTools::CleanUpName(inname.c_str()));
-      }
-    }
-}
-
 
 // convert windows slashes to unix slashes \ with /
 void cmSystemTools::ConvertToUnixSlashes(std::string& path)
@@ -179,26 +123,167 @@ int cmSystemTools::Grep(const char* dir, const char* file, const char* expressio
   return count;
 }
 
-std::string cmSystemTools::ExtractVariable(const char* variable,
-                                           const char* l)
+  
+void cmSystemTools::ConvertCygwinPath(std::string& pathname)
 {
-  std::string line = l;
-  size_t varstart = line.find(variable);
-  size_t start = line.find("=");
-  if(start != std::string::npos && start > varstart )
+  if(pathname.find("/cygdrive/") != std::string::npos)
     {
-    start++;
-    while(line[start] == ' ' && start < line.size())
-      {
-      start++;
-      }
-    size_t end = line.size()-1;
-    while(line[end] == ' ' && end > start)
-      {
-      end--;
-      }
-    return line.substr(start, end).c_str();
+    std::string cygStuff = pathname.substr(0, 11);
+    std::string replace;
+    replace += cygStuff.at(10);
+    replace += ":";
+    cmSystemTools::ReplaceString(pathname, cygStuff.c_str(), replace.c_str());
     }
-  return std::string("");
 }
 
+
+bool cmSystemTools::ParseFunction(std::ifstream& fin,
+                                  std::string& name,
+                                  std::vector<std::string>& arguments)
+{
+  name = "";
+  arguments = std::vector<std::string>();
+  const int BUFFER_SIZE = 4096;
+  char inbuffer[BUFFER_SIZE];
+  if(!fin)
+    {
+    return false;
+    }
+  
+  if(fin.getline(inbuffer, BUFFER_SIZE ) )
+    {
+    cmRegularExpression blankLine("^$");
+    cmRegularExpression comment("^#.*");
+    cmRegularExpression oneLiner("[ \t]*([A-Za-z_0-9]*).*\\((.*)\\)");
+    cmRegularExpression multiLine("[ \t]*([A-Za-z_0-9]*).*\\((.*)");
+    cmRegularExpression lastLine("(.*)\\)");
+
+    // BEGIN VERBATIM JUNK SHOULD BE REMOVED
+    cmRegularExpression verbatim("BEGIN MAKE VERBATIM");
+    if(verbatim.find(inbuffer))
+      {
+      cmRegularExpression endVerbatim("END MAKE VERBATIM");
+      name = "VERBATIM";
+      bool done = false;
+      while(!done)
+        {
+        if(fin.getline(inbuffer, BUFFER_SIZE))
+          {
+          if(endVerbatim.find(inbuffer))
+            {
+            done = true;
+            }
+          else
+            {
+            arguments.push_back(inbuffer);
+            }
+          }
+        else
+          {
+          done = true;
+          }
+        }
+      return true;
+      }
+    // END VERBATIM JUNK SHOULD BE REMOVED
+
+    // check for black line or comment
+    if(blankLine.find(inbuffer) || comment.find(inbuffer))
+      {
+      return false;
+      }
+    // look for a oneline fun(arg arg2) 
+    else if(oneLiner.find(inbuffer))
+      {
+      // the arguments are the second match
+      std::string args = oneLiner.match(2);
+      name = oneLiner.match(1);
+      // break up the arguments
+      cmSystemTools::GetArguments(args, arguments);
+      return true;
+      }
+    // look for a start of a multiline with no trailing ")"  fun(arg arg2 
+    else if(multiLine.find(inbuffer))
+      {
+      name = multiLine.match(1);
+      std::string args = multiLine.match(2);
+      cmSystemTools::GetArguments(args, arguments);
+      // Read lines until the closing paren is hit
+      bool done = false;
+      while(!done)
+        {
+        // read lines until the end paren is found
+        if(fin.getline(inbuffer, BUFFER_SIZE ) )
+          {
+          if(lastLine.find(inbuffer))
+            {
+            done = true;
+            std::string args = lastLine.match(1);
+            cmSystemTools::GetArguments(args, arguments);
+            }
+          else
+            {
+            std::string line = inbuffer;
+            cmSystemTools::GetArguments(line, arguments);
+            }
+          }
+        }
+      return true;
+      }
+    else
+      {
+      cmSystemTools::Error("Parse error in read function ", inbuffer);
+      return false;
+      }
+    }
+  return false;
+
+}
+
+void cmSystemTools::GetArguments(std::string& line,
+                                 std::vector<std::string>& arguments)
+{
+  cmRegularExpression argument("[\t ]*([-/\\\\{}\\$A-Za-z_0-9]+)[\t ]*");
+  cmRegularExpression argumentWithSpaces("[\t ]*\"([- /\\\\{}\\$A-Za-z_0-9]+)\"[\t ]*");
+  std::string arg(" ");
+  while(arg.length() )
+    {
+    arg = "";
+    long endpos;
+
+    if (argumentWithSpaces.find(line.c_str()))
+      {
+      arg = argumentWithSpaces.match(1);
+      endpos = argumentWithSpaces.end(1);
+      }
+    else if(argument.find(line.c_str()))
+      {
+      arg = argument.match(1);
+      endpos = argument.end(1);
+      }
+    if(arg.length())
+      {
+      arguments.push_back(arg);
+      line = line.substr(endpos, line.length() - endpos);
+      }
+    }
+}
+
+void cmSystemTools::Error(const char* m1, const char* m2)
+{
+  std::string message = "CMake Error: ";
+  if(m1)
+    {
+    message += m1;
+    }
+  if(m2)
+    {
+    message += m2;
+    }
+#ifdef _WIN32
+//  MessageBox(0, message.c_str(), 0, MB_OK);
+  std::cerr << message.c_str() << std::endl;
+#else
+  std::cerr << message.c_str() << std::endl;
+#endif
+}

@@ -21,7 +21,7 @@
  */
 #ifndef cmWindowsConfigure_h
 #define cmWindowsConfigure_h
-#include <string>
+#include "cmStandardIncludes.h"
 
 class cmWindowsConfigure
 {

@@ -1,9 +1,6 @@
-#ifdef _MSC_VER
-#pragma warning ( disable : 4786 )
-#endif
 #include "cmClassFile.h"
+#include "cmStandardIncludes.h"
 #include "cmSystemTools.h"
-#include <iostream>
 
 
 
@@ -62,8 +59,8 @@ void cmClassFile::SetName(const char* name, const char* dir)
   hname += ".h";
   if(!cmSystemTools::FileExists(hname.c_str()))
     {
-    std::cerr << "ERROR, can not find file " << hname;
-    std::cerr << "Tried .txx .cxx .c " << std::endl;
+    cmSystemTools::Error("can not find file ", hname.c_str());
+    cmSystemTools::Error("Tried .txx .cxx .c for ", hname.c_str());
     }
 }
 

@@ -19,12 +19,17 @@
  */
 #ifndef cmClassFile_h
 #define cmClassFile_h
-#include <string>
-#include <vector>
+#include "cmStandardIncludes.h"
 
 
 struct cmClassFile
 {
+  cmClassFile()
+    {
+      m_AbstractClass = false;
+      m_HeaderFileOnly = false;
+    }
+  
   /**
    * Set the name of the file, given the directory
    * the file should be in.   Extensions are tried on 

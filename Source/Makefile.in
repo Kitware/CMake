@@ -10,26 +10,68 @@ VPATH         = @srcdir@
 @MAKEINCLUDE@ @MAKEQUOTE@@CMAKE_CONFIG_DIR@/CMake/CMakeSimpleRules.make@MAKEQUOTE@
 
 OBJS = \
-cmClassFile.o \
-cmDirectory.o \
-cmMakefile.o \
-cmUnixMakefile.o \
+CMakeBuildTargets.o  \
 cmMakeDepend.o \
+cmMakefile.o \
+cmAbstractFilesRule.o \
+cmMakefileGenerator.o \
+cmAddTargetRule.o  \
+cmProjectRule.o \
+cmAuxSourceDirectoryRule.o \
 cmRegularExpression.o \
+cmClassFile.o \
+cmSourceFilesRule.o \
+cmSourceFilesRequireRule.o \
+cmSubdirRule.o \
 cmSystemTools.o \
-CMakeBuildTargets.o \
-cmCollectFlags.o
+cmDirectory.o \
+cmUnixDefinesRule.o \
+cmExecutablesRule.o \
+cmTestsRule.o \
+cmUnixLibrariesRule.o \
+cmFindIncludeRule.o \
+cmFindLibraryRule.o \
+cmUnixMakefileGenerator.o \
+cmFindProgramRule.o \
+cmIncludeDirectoryRule.o \
+cmWin32DefinesRule.o \
+cmLibraryRule.o \
+cmWin32LibrariesRule.o \
+cmLinkDirectoriesRule.o \
+cmLinkLibrariesRule.o 
 
 
-cmCollectFlags.o : cmCollectFlags.h cmCollectFlags.cxx cmSystemTools.h
-cmSystemTools.o : cmSystemTools.h cmSystemTools.cxx cmSystemTools.h
-cmDirectory.o : cmDirectory.h cmDirectory.cxx cmSystemTools.h
-cmClassFile.o : cmClassFile.h cmClassFile.cxx cmSystemTools.h
-cmMakefile.o : cmMakefile.h cmMakefile.cxx cmClassFile.h cmSystemTools.h
-cmUnixMakefile.o : cmUnixMakefile.h cmUnixMakefile.cxx cmMakefile.h cmClassFile.h
-cmMakeDepend.o : cmMakeDepend.h cmMakeDepend.cxx  cmMakefile.h cmClassFile.h cmRegularExpression.h
-cmRegularExpression.o : cmRegularExpression.h cmRegularExpression.cxx
-CMakeBuildTargets.o : CMakeBuildTargets.cxx cmMakefile.h cmMakeDepend.h
+cmCollectFlags.o : $(srcdir)/*.h 
+CMakeBuildTargets.o  : $(srcdir)/*.h
+cmMakeDepend.o : $(srcdir)/*.h
+cmMakefile.o : $(srcdir)/*.h
+cmAbstractFilesRule.o : $(srcdir)/*.h
+cmMakefileGenerator.o : $(srcdir)/*.h
+cmAddTargetRule.o  : $(srcdir)/*.h
+cmProjectRule.o : $(srcdir)/*.h
+cmAuxSourceDirectoryRule.o : $(srcdir)/*.h
+cmRegularExpression.o : $(srcdir)/*.h
+cmClassFile.o : $(srcdir)/*.h
+cmSourceFilesRule.o : $(srcdir)/*.h
+cmSourceFilesRequireRule.o : $(srcdir)/*.h
+cmSubdirRule.o : $(srcdir)/*.h
+cmSystemTools.o : $(srcdir)/*.h
+cmDirectory.o : $(srcdir)/*.h
+cmUnixDefinesRule.o : $(srcdir)/*.h
+cmExecutablesRule.o : $(srcdir)/*.h
+cmTestsRule.o : $(srcdir)/*.h
+cmUnixLibrariesRule.o : $(srcdir)/*.h
+cmFindIncludeRule.o : $(srcdir)/*.h
+cmFindLibraryRule.o : $(srcdir)/*.h
+cmUnixMakefileGenerator.o : $(srcdir)/*.h
+cmFindProgramRule.o : $(srcdir)/*.h
+cmIncludeDirectoryRule.o : $(srcdir)/*.h
+cmWin32DefinesRule.o : $(srcdir)/*.h
+cmLibraryRule.o : $(srcdir)/*.h
+cmWin32LibrariesRule.o : $(srcdir)/*.h
+cmLinkDirectoriesRule.o : $(srcdir)/*.h 
+cmLinkLibrariesRule.o  : $(srcdir)/*.h 
+
 
 CMakeBuildTargets: ${OBJS}
 	${CXX}  ${OBJS} ${CXX_FLAGS}  -o CMakeBuildTargets
