@@ -24,9 +24,10 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args)
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  // SET (VAR ) // this is a no-op
+  // SET (VAR) // Removes the definition of VAR.
   if (args.size() == 1)
     {
+    m_Makefile->RemoveDefinition(args[0].c_str());
     return true;
     }
 // here are the options 
