@@ -2060,14 +2060,14 @@ void cmLocalUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
     if (l->second.GetInstallPath() != "")
       {
       // first make the directories for each target 
-      fout << "\t@if [ ! -d \"$(DESTDIR)\"" << prefix << l->second.GetInstallPath() << 
-        " ] ; then \\\n";
-      fout << "\t   echo \"Making directory \"$(DESTDIR)\"" << prefix 
-           << l->second.GetInstallPath() << " \"; \\\n";
-      fout << "\t   mkdir -p \"$(DESTDIR)\"" << prefix << l->second.GetInstallPath() 
-           << "; \\\n";
-      fout << "\t   chmod 755 \"$(DESTDIR)\"" <<  prefix << l->second.GetInstallPath() 
-           << "; \\\n";
+      fout << "\t@if [ ! -d \"$(DESTDIR)" << prefix << l->second.GetInstallPath() << 
+        "\"] ; then \\\n";
+      fout << "\t   echo \"Making directory \\\"$(DESTDIR)" << prefix 
+           << l->second.GetInstallPath() << "\\\" \"; \\\n";
+      fout << "\t   mkdir -p \"$(DESTDIR)" << prefix << l->second.GetInstallPath() 
+           << "\"; \\\n";
+      fout << "\t   chmod 755 \"$(DESTDIR)" <<  prefix << l->second.GetInstallPath() 
+           << "\"; \\\n";
       fout << "\t else true; \\\n";
       fout << "\t fi\n";
       std::string fname;
