@@ -214,7 +214,7 @@ cmDocumentation::Type cmDocumentation::CheckOptions(int argc, char** argv)
 void cmDocumentation::Print(Form f, std::ostream& os)
 {
   this->CurrentForm = f;
-  for(int i=0; i < this->Sections.size(); ++i)
+  for(unsigned int i=0; i < this->Sections.size(); ++i)
     {
     this->PrintSection(os, this->Sections[i], this->Names[i]);
     }
@@ -541,7 +541,7 @@ void cmDocumentation::PrintColumn(std::ostream& os, const char* text)
   int column = 0;
   bool newSentence = false;
   bool firstLine = true;
-  int width = this->TextWidth - strlen(this->TextIndent);
+  int width = this->TextWidth - static_cast<int>(strlen(this->TextIndent));
   
   // Loop until the end of the text.
   while(*l)
