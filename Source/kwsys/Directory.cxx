@@ -96,7 +96,7 @@ bool Directory::Load(const char* name)
   struct _finddata_t data;      // data of current file
   
   // Now put them into the file array
-  size_t srchHandle = _findfirst(buf, &data);
+  intptr_t srchHandle = _findfirst(buf, &data);
   delete [] buf;
   
   if ( srchHandle == -1 )
