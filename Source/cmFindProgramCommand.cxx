@@ -40,28 +40,35 @@ bool cmFindProgramCommand::Invoke(std::vector<std::string>& args)
     m_Makefile->AddDefinition(define, cacheValue);
     return true;
     }
+
   // if it is not in the cache, then search the system path
+  // add any user specified paths
   std::vector<std::string> path;
-  cmSystemTools::GetPath(path);
-  for(; i != args.end(); ++i)
+  for (unsigned int j = 2; j < args.size(); j++)
     {
-    for(unsigned int k=0; k < path.size(); k++)
-      {
-      std::string tryPath = path[k];
-      tryPath += "/";
-      tryPath += *i;
+    // expand variables
+    std::string exp = args[j];
+    m_Makefile->ExpandVariablesInString(exp);
+    path.push_back(exp);
+    }
+  cmSystemTools::GetPath(path);
+
+  for(unsigned int k=0; k < path.size(); k++)
+    {
+    std::string tryPath = path[k];
+    tryPath += "/";
+    tryPath += *i;
 #ifdef _WIN32
-      tryPath += ".exe";
+    tryPath += ".exe";
 #endif
-      if(cmSystemTools::FileExists(tryPath.c_str()))
-        {
-        // Save the value in the cache
-        cmCacheManager::GetInstance()->AddCacheEntry(define,
-                                                     tryPath.c_str(),
-                                                     cmCacheManager::FILEPATH);
-        m_Makefile->AddDefinition(define, tryPath.c_str());
-        return true;
-        }
+    if(cmSystemTools::FileExists(tryPath.c_str()))
+      {
+      // Save the value in the cache
+      cmCacheManager::GetInstance()->AddCacheEntry(define,
+                                                   tryPath.c_str(),
+                                                   cmCacheManager::FILEPATH);
+      m_Makefile->AddDefinition(define, tryPath.c_str());
+      return true;
       }
     }
   return false;

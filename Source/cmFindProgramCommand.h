@@ -53,7 +53,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "FIND_PROGRARM";}
+  virtual const char* GetName() { return "FIND_PROGRAM";}
 
   /**
    * Succinct documentation.
@@ -69,7 +69,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "FIND_PROGRAM(NAME executable1 executable2 ...)";
+      "FIND_PROGRAM(NAME executable1 extrapath extrapath ...)";
     }
   
   cmTypeMacro(cmFindProgramCommand, cmCommand);
