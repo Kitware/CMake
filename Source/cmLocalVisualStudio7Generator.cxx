@@ -250,7 +250,6 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   if(target.HasCxx())
     {
     flags = m_Makefile->GetDefinition("CMAKE_CXX_FLAGS");
-    flags += " -TP ";
     }
   else
     {
@@ -725,13 +724,19 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
       {
       std::string source = cc->first;
       const cmSourceGroup::Commands& commands = cc->second.m_Commands;
-      const char* compileFlags = 0;
+      std::string compileFlags;
       std::string additionalDeps;
       if(cc->second.m_SourceFile)
         {
         // Check for extra compiler flags.
         compileFlags = cc->second.m_SourceFile->GetProperty("COMPILE_FLAGS");
-        
+        if(cmSystemTools::GetFileFormat(
+             cc->second.m_SourceFile->GetSourceExtension().c_str())
+           == cmSystemTools::CXX_FILE_FORMAT)
+          {
+          // force a C++ file type
+          compileFlags += " /TP ";
+          }
         // Check for extra object-file dependencies.
         const char* deps =
           cc->second.m_SourceFile->GetProperty("OBJECT_DEPENDS");
@@ -765,12 +770,13 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
           totalCommandStr = this->CombineCommands(commands, totalCommand,
                                                   source.c_str());
           const char* comment = totalCommand.m_Comment.c_str();
+          const char* flags = compileFlags.size() ? compileFlags.c_str(): 0;
           this->WriteCustomRule(fout, source.c_str(), totalCommandStr.c_str(), 
                                 (*comment?comment:"Custom Rule"),
                                 totalCommand.m_Depends,
-                                totalCommand.m_Outputs, compileFlags);
+                                totalCommand.m_Outputs, flags);
           }
-        else if(compileFlags || additionalDeps.length())
+        else if(compileFlags.size() || additionalDeps.length())
           {
           for(std::vector<std::string>::iterator i = configs->begin(); 
               i != configs->end(); ++i)
@@ -779,7 +785,7 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
                  << "\t\t\t\t\tName=\""  << *i << "|Win32\">\n"
                  << "\t\t\t\t\t<Tool\n"
                  << "\t\t\t\t\tName=\"VCCLCompilerTool\"\n";
-            if(compileFlags)
+            if(compileFlags.size())
               {
               fout << "\t\t\t\t\tAdditionalOptions=\""
                    << compileFlags << "\"\n";

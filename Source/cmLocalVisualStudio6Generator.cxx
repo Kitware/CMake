@@ -289,11 +289,18 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
       std::string source = cc->first;
       const cmSourceGroup::Commands& commands = cc->second.m_Commands;
       std::vector<std::string> depends;
-      const char* compileFlags = 0;
+      std::string compileFlags;
       if(cc->second.m_SourceFile)
         {
         // Check for extra compiler flags.
         compileFlags = cc->second.m_SourceFile->GetProperty("COMPILE_FLAGS");
+        if(cmSystemTools::GetFileFormat(
+             cc->second.m_SourceFile->GetSourceExtension().c_str())
+           == cmSystemTools::CXX_FILE_FORMAT)
+          {
+          // force a C++ file type
+          compileFlags += " /TP ";
+          }
         
         // Check for extra object-file dependencies.
         const char* dependsValue =
@@ -329,13 +336,14 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
           std::string totalCommandStr;
           totalCommandStr = this->CombineCommands(commands, totalCommand,
                                                   source.c_str());
-          const char* comment = totalCommand.m_Comment.c_str();
+          const char* comment = totalCommand.m_Comment.c_str(); 
+          const char* flags = compileFlags.size() ? compileFlags.c_str(): 0;
           this->WriteCustomRule(fout, source.c_str(), totalCommandStr.c_str(), 
                                 (*comment?comment:"Custom Rule"),
                                 totalCommand.m_Depends, 
-                                totalCommand.m_Outputs, compileFlags);
+                                totalCommand.m_Outputs, flags);
           }
-        else if(compileFlags)
+        else if(compileFlags.size())
           {
           for(std::vector<std::string>::iterator i
                 = m_Configurations.begin(); i != m_Configurations.end(); ++i)
@@ -895,8 +903,6 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
       flagsDebugRel += " -DCMAKE_INTDIR=\\\"RelWithDebInfo\\\" ";
       flags = " ";
       flags = m_Makefile->GetDefinition("CMAKE_CXX_FLAGS");
-      // force a C++ file type
-      flags += " /TP ";
       }
     // if C and the target is not CXX
     else if(gen->GetLanguageEnabled("C") && !target.HasCxx())
