@@ -72,12 +72,12 @@ int main()
 
   /* Parse the error pipe handle.  */
   while(*cmdLine && *cmdLine == ' ') { ++cmdLine; }
-  sscanf(cmdLine, "%d", &errorPipe);
+  sscanf(cmdLine, "%p", &errorPipe);
 
   /* Parse the kill event handle.  */
   while(*cmdLine && *cmdLine != ' ') { ++cmdLine; }
   while(*cmdLine && *cmdLine == ' ') { ++cmdLine; }
-  sscanf(cmdLine, "%d", &killEvent);
+  sscanf(cmdLine, "%p", &killEvent);
   
   /* Skip to the beginning of the command line of the real child.  */
   while(*cmdLine && *cmdLine != ' ') { ++cmdLine; }
