@@ -73,6 +73,14 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
    "a dashboard test. All tests are ModeTest, where Mode can be Experimental, "
    "Nightly, and Continuous, and Test can be Start, Update, Configure, "
    "Build, Test, Coverage, and Submit."},
+  {"-M <TestModel>", "Sets the model for a dashboard",
+   "This option tells ctest to act as a Dart client "
+   "where the TestModel can be Experimental, "
+   "Nightly, and Continuous. Combining -M and -T is similar to -D"},
+  {"-T <action>", "Sets the dashboard action to perform",
+   "This option tells ctest to act as a Dart client "
+   "and perform some action such as start, build, test etc. "
+   "Combining -M and -T is similar to -D"},
   {"-S <ConfigScript>", "Execute a dashboard for a configuration",
    "This option tells ctest to load in a configuration script which sets "
    "a number of parameters such as the binary and source directories. Then "
