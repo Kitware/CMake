@@ -33,7 +33,7 @@ CFG=OUTPUT_LIBNAME - Win32 Debug
 !MESSAGE "OUTPUT_LIBNAME - Win32 Debug" (based on "Win32 (x86) Application")
 !MESSAGE "OUTPUT_LIBNAME - Win32 MinSizeRel" (based on "Win32 (x86) Application")
 !MESSAGE "OUTPUT_LIBNAME - Win32 Release" (based on "Win32 (x86) Application")
-!MESSAGE "OUTPUT_LIBNAME - Win32 ReleaseWithDebugInfo" (based on "Win32 (x86) Application")
+!MESSAGE "OUTPUT_LIBNAME - Win32 RelWithDebInfo" (based on "Win32 (x86) Application")
 !MESSAGE 
 
 # Begin Project
@@ -129,23 +129,23 @@ LINK32=link.exe
 CM_MULTILINE_OPTIMIZED_LIBRARIES
 CM_MULTILINE_LIBRARIES
 
-!ELSEIF  "$(CFG)" == "OUTPUT_LIBNAME - Win32 ReleaseWithDebugInfo"
+!ELSEIF  "$(CFG)" == "OUTPUT_LIBNAME - Win32 RelWithDebInfo"
 
 # PROP BASE Use_MFC CMAKE_MFC_FLAG
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "ReleaseWithDebugInfo"
-# PROP BASE Intermediate_Dir "ReleaseWithDebugInfo"
+# PROP BASE Output_Dir "RelWithDebInfo"
+# PROP BASE Intermediate_Dir "RelWithDebInfo"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC CMAKE_MFC_FLAG
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "EXECUTABLE_OUTPUT_PATHReleaseWithDebugInfo"
-# PROP Intermediate_Dir "ReleaseWithDebugInfo"
+# PROP Output_Dir "EXECUTABLE_OUTPUT_PATHRelWithDebInfo"
+# PROP Intermediate_Dir "RelWithDebInfo"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo  /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS"  /FD /c
 # ADD CPP /nologo  /D "WIN32"  /D "NDEBUG" /D "_CONSOLE" /D "_MBCS"  /FD /c
 # ADD CPP BUILD_INCLUDES EXTRA_DEFINES /D "OUTPUT_LIBNAME_EXPORTS"
 # ADD CPP CMAKE_CXX_FLAGS
-# ADD CPP CMAKE_CXX_FLAGS_RELWITHDEBUGINFO
+# ADD CPP CMAKE_CXX_FLAGS_RELWITHDEBINFO
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -164,4 +164,4 @@ CM_MULTILINE_LIBRARIES
 # Name "OUTPUT_LIBNAME - Win32 Release"
 # Name "OUTPUT_LIBNAME - Win32 Debug"
 # Name "OUTPUT_LIBNAME - Win32 MinSizeRel"
-# Name "OUTPUT_LIBNAME - Win32 ReleaseWithDebugInfo"
+# Name "OUTPUT_LIBNAME - Win32 RelWithDebInfo"
