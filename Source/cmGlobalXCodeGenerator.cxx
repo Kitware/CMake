@@ -455,6 +455,7 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
     std::vector<cmSourceFile*> &classes = l->second.GetSourceFiles();
     // add all the sources
     std::vector<cmXCodeObject*> externalObjFiles;
+    std::vector<cmXCodeObject*> headerFiles;
     for(std::vector<cmSourceFile*>::iterator i = classes.begin(); 
         i != classes.end(); ++i)
       {
@@ -465,6 +466,10 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
       if(strcmp(filetype->GetString(), "\"compiled.mach-o.objfile\"") == 0)
         {
         externalObjFiles.push_back(xsf);
+        }
+      else if((*i)->GetPropertyAsBool("HEADER_FILE_ONLY"))
+        {
+        headerFiles.push_back(xsf);
         }
       else
         {
@@ -477,6 +482,11 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
     headerBuildPhase->AddAttribute("buildActionMask",
                                    this->CreateString("2147483647"));
     buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
+    for(std::vector<cmXCodeObject*>::iterator i = headerFiles.begin();
+        i != headerFiles.end(); ++i)
+      {
+      buildFiles->AddObject(*i);
+      }
     headerBuildPhase->AddAttribute("files", buildFiles);
     headerBuildPhase->AddAttribute("runOnlyForDeploymentPostprocessing",
                                    this->CreateString("0"));
