@@ -34,6 +34,7 @@
 #include <time.h>
 #include <math.h>
 #include <float.h>
+#include "cmDynamicLoader.h"
 
 #define SAFEDIV(x,y) (((y)!=0)?((x)/(y)):(0))
 
@@ -3932,6 +3933,9 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
     int retv = this->RunCMakeAndTest(output);
     cmSystemTools::ResetErrorOccuredFlag();
     cmListFileCache::GetInstance()->ClearCache();
+#ifdef CMAKE_BUILD_WITH_CMAKE
+    cmDynamicLoader::FlushCache();
+#endif
     return retv;
     }
 
