@@ -5,6 +5,7 @@
 # GTK_INCLUDE_DIR   - Directories to include to use GTK
 # GTK_LIBRARIES     - Files to link against to use GTK
 # GTK_FOUND         - If false, don't try to use GTK
+# GTK_GL_FOUND      - If false, don't try to use GTK's GL features
 
 # don't even bother under WIN32
 IF(UNIX)
@@ -130,8 +131,11 @@ IF(UNIX)
                            ${GTK_glib_INCLUDE_PATH} )
     SET( GTK_LIBRARIES  ${GTK_gtk_LIBRARY}
                         ${GTK_gdk_LIBRARY}
-                        ${GTK_gmodule_LIBRARY}
                         ${GTK_glib_LIBRARY} )
+
+    IF(GTK_gmodule_LIBRARY)
+      SET(GTK_LIBRARIES ${GTK_LIBRARIES} ${GTK_gmodule_LIBRARY})
+    ENDIF(GTK_gmodule_LIBRARY)
     IF(GTK_gthread_LIBRARY)
       SET(GTK_LIBRARIES ${GTK_LIBRARIES} ${GTK_gthread_LIBRARY})
     ENDIF(GTK_gthread_LIBRARY)
