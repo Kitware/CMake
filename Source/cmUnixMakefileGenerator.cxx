@@ -1183,7 +1183,7 @@ void cmUnixMakefileGenerator::BuildInSubDirectory(std::ostream& fout,
          << "; then $(MAKE) rebuild_cache; fi\n";
     if (!silent) 
       {
-      fout << "\techo Building " << target1 << " in directory " << directory << "\n";
+      fout << "\techo " << directory << ": building " << target1 << "\n";
       }
     fout << "\t@cd " << directory
          << "; $(MAKE) -$(MAKEFLAGS) " << target1 << "\n";
@@ -1192,7 +1192,7 @@ void cmUnixMakefileGenerator::BuildInSubDirectory(std::ostream& fout,
     {
     if (!silent) 
       {
-      fout << "\techo Building " << target2 << " in directory " << directory << "\n";
+      fout << "\techo " << directory << ": building " << target2 << "\n";
       }
     fout << "\t@cd " << directory
          << "; $(MAKE) -$(MAKEFLAGS) " << target2 << "\n";
@@ -1280,7 +1280,7 @@ void cmUnixMakefileGenerator::OutputSubDirectoryRules(std::ostream& fout)
                                "default_target",
                                0, "$(TARGETS)",
                                SubDirectories,
-                               true);
+                               false);
   this->OutputSubDirectoryVars(fout, "SUBDIR_CLEAN", "clean",
                                "clean",
                                0, 0,

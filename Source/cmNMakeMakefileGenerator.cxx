@@ -238,7 +238,7 @@ void cmNMakeMakefileGenerator::BuildInSubDirectory(std::ostream& fout,
          << "$(MAKE) $(MAKESILENT) rebuild_cache\n";
     if (!silent) 
       {
-      fout << "\techo Building " << target1 << " in directory " << directory << "\n";
+      fout << "\techo " << directory << ": building " << target1 << "\n";
       }
     fout << "\tcd " << dir << "\n"
          << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) " << target1 << "\n";
@@ -247,7 +247,7 @@ void cmNMakeMakefileGenerator::BuildInSubDirectory(std::ostream& fout,
     {
     if (!silent) 
       {
-      fout << "\techo Building " << target2 << " in directory " << directory << "\n";
+      fout << "\techo " << directory << ": building " << target2 << "\n";
       }
     fout << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) " << target2 << "\n";
     }

@@ -49,7 +49,7 @@ SET (CMAKE_BUILD_TYPE Debug CACHE STRING
 SET (CMAKE_CXX_COMPILER cl CACHE FILEPATH
      "Name of C++ compiler used.")
 
-SET (CMAKE_CXX_FLAGS "/W3 /Zm1000 /GX /GR" CACHE STRING
+SET (CMAKE_CXX_FLAGS "/nologo /W3 /Zm1000 /GX /GR" CACHE STRING
      "Flags used by the compiler during all build types, /GX /GR are for exceptions and rtti in VC++, /Zm1000 increases the compiler's memory allocation to support ANSI C++/stdlib.")
 
 SET (CMAKE_CXX_FLAGS_DEBUG "/MDd /Zi /Od /GZ" CACHE STRING
@@ -69,7 +69,7 @@ SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO "/MD /Zi /O2" CACHE STRING
 SET (CMAKE_C_COMPILER cl CACHE FILEPATH
      "Name of C compiler used.")
 
-SET (CMAKE_C_FLAGS "/W3 /Zm1000" CACHE STRING
+SET (CMAKE_C_FLAGS "/nologo /W3 /Zm1000" CACHE STRING
      "Flags for C compiler.")
 
 SET (CMAKE_C_LIBPATH_FLAG "-LIBPATH:" CACHE STRING
