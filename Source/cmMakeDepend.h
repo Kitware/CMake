@@ -131,6 +131,16 @@ private:
    */
   void Depend(cmDependInformation* info);
 
+  /**
+   * Compute the depend information for this class.
+   */
+  void DependWalk(cmDependInformation* info, const char* file);
+  
+  /**
+   * Add a dependency.  Possibly walk it for more dependencies.
+   */
+  void AddDependency(cmDependInformation* info, const char* file);
+
   /** 
    * Find the full path name for the given file name.
    * This uses the include directories.

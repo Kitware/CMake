@@ -114,8 +114,7 @@ void cmMakeDepend::DoDepends()
     }
 }
 
-// This function actually reads the file
-// and scans it for #include directives
+
 void cmMakeDepend::Depend(cmDependInformation* info)
 {
   const char* path = info->m_FullPath.c_str();
@@ -125,12 +124,66 @@ void cmMakeDepend::Depend(cmDependInformation* info)
     return;
     }
   
-  std::ifstream fin(path);
-  if(!fin)
+  // If the file exists, use it to find dependency information.
+  if(cmSystemTools::FileExists(path))
     {
-    cmSystemTools::Error("error can not open ", info->m_FullPath.c_str());
+    // The cmClassFile may have had hints for dependencies.  Delete any that
+    // exist since we can find the dependencies for real.
+    if(info->m_ClassFileIndex != -1)
+      {
+      cmClassFile& cFile = m_Makefile->m_Classes[info->m_ClassFileIndex];
+      cFile.m_Depends.erase(cFile.m_Depends.begin(), cFile.m_Depends.end());
+      }
+    
+    // Use the real file to find its dependencies.
+    this->DependWalk(info, path);
+    info->m_DependDone = true;
     return;
     }
+  
+  // The file doesn't exist.  See if the cmClassFile for it has any files
+  // specified as dependency hints.
+  if(info->m_ClassFileIndex != -1)
+    {
+    // Get the cmClassFile corresponding to this.
+    cmClassFile& cFile = m_Makefile->m_Classes[info->m_ClassFileIndex];
+    // See if there are any hints for finding dependencies for the missing
+    // file.
+    if(!cFile.m_Depends.empty())
+      {
+      // Initial dependencies have been given.  Use them to begin the
+      // recursion.
+      for(std::vector<std::string>::iterator file =
+            cFile.m_Depends.begin(); file != cFile.m_Depends.end(); ++file)
+        {
+        this->AddDependency(info, file->c_str());
+        }
+      
+      // Erase the dependency hints from the cmClassFile.  They will be
+      // put in again as real dependencies later.
+      cFile.m_Depends.erase(cFile.m_Depends.begin(), cFile.m_Depends.end());
+      
+      // Found dependency information.  We are done.
+      return;
+      }    
+    }
+  
+  // Couldn't find any dependency information.
+  cmSystemTools::Error("error cannot find dependencies for ", path);
+}
+
+
+// This function actually reads the file specified and scans it for
+// #include directives
+void cmMakeDepend::DependWalk(cmDependInformation* info, const char* file)
+{
+  std::ifstream fin(file);
+  if(!fin)
+    {
+    cmSystemTools::Error("error can not open ", file);
+    return;
+    }
+  
   char line[255];
   while(!fin.eof() && !fin.fail())
     {
@@ -171,33 +224,40 @@ void cmMakeDepend::Depend(cmDependInformation* info)
           std::string message = "Skipping ";
           message += includeFile;
           message += " for file ";
-          message += path;
+          message += file;
 	  cmSystemTools::Error(message.c_str(), 0);
 	  }
 	continue;
 	}
-      // find the index of the include file in the
-      // m_DependInformation array, if it is not
-      // there then FindInformation will create it
-      int index = this->FindInformation(includeFile.c_str());
-      // add the index to the depends of the current 
-      // depend info object
-      info->m_Indices.push_back(index);
-      // Get the depend information object for the include file
-      cmDependInformation* dependInfo = m_DependInformation[index];
-      // if the depends are not known for an include file, then compute them
-      // recursively 
-      if(!dependInfo->m_DependDone)
-	{
-	// stop the recursion here
-	dependInfo->m_DependDone = true;
-	this->Depend(dependInfo);
-	}
-      // add the depends of the included file to the includer
-      info->MergeInfo(dependInfo);
+      
+      // Add this file and all its dependencies.
+      this->AddDependency(info, includeFile.c_str());
       }
     }
-  info->m_DependDone = true;
+}
+
+
+void cmMakeDepend::AddDependency(cmDependInformation* info, const char* file)
+{
+  // find the index of the include file in the
+  // m_DependInformation array, if it is not
+  // there then FindInformation will create it
+  int index = this->FindInformation(file);
+  // add the index to the depends of the current 
+  // depend info object
+  info->m_Indices.push_back(index);
+  // Get the depend information object for the include file
+  cmDependInformation* dependInfo = m_DependInformation[index];
+  // if the depends are not known for an include file, then compute them
+  // recursively 
+  if(!dependInfo->m_DependDone)
+    {
+    // stop the recursion here
+    dependInfo->m_DependDone = true;
+    this->Depend(dependInfo);
+    }
+  // add the depends of the included file to the includer
+  info->MergeInfo(dependInfo);
 }
 
 
@@ -271,7 +331,7 @@ std::string cmMakeDepend::FullPath(const char* fname)
       return path;
       }
     }
-  cmSystemTools::Error("Depend: File not found ", fname);
+  
   return std::string(fname);
 }
 
