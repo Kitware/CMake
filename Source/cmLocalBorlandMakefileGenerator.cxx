@@ -221,7 +221,7 @@ void cmLocalBorlandMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout
   command += "-e";
   command += target;
   command += " ";
-  cmStringStream linklibs;
+  cmOStringStream linklibs;
   this->OutputLinkLibraries(linklibs, name, t);
   // then the linker options -L and libraries (any other order will fail!)
   command += linklibs.str();
@@ -321,7 +321,7 @@ void cmLocalBorlandMakefileGenerator::OutputExecutableRule(std::ostream& fout,
     {
     command += " -tWC ";
     }
-  cmStringStream linklibs;
+  cmOStringStream linklibs;
   this->OutputLinkLibraries(linklibs, 0, t);
   command += linklibs.str();
   command += " $(" +  this->CreateMakeVariable(name, "_SRC_OBJS") + ")";

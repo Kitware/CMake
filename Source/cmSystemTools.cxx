@@ -1083,7 +1083,7 @@ bool cmSystemTools::FilesDiffer(const char* source,
   if(statSource.st_size != static_cast<long>(finSource.gcount()) ||
      statSource.st_size != static_cast<long>(finDestination.gcount()))
     {
-    cmStringStream msg;
+    cmOStringStream msg;
     msg << "FilesDiffer failed to read files (allocated: " 
         << statSource.st_size << ", read source: " <<  finSource.gcount() 
         << ", read dest: " << finDestination.gcount();
@@ -1190,7 +1190,7 @@ void cmSystemTools::cmCopyFile(const char* source,
 
   if (statSource.st_size != statDestination.st_size)
     {
-    cmStringStream msg;
+    cmOStringStream msg;
     msg << "CopyFile failed to copy files (sizes differ, source: " 
         << statSource.st_size << " , dest: " << statDestination.st_size;
     cmSystemTools::Error(msg.str().c_str());
@@ -1426,7 +1426,7 @@ bool RunCommandViaPopen(const char* command,
   if (WIFSIGNALED(retVal))
     {
     retVal = WTERMSIG(retVal);
-    cmStringStream error;
+    cmOStringStream error;
     error << "\nProcess terminated due to ";
     switch (retVal)
       {

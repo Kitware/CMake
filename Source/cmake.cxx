@@ -95,7 +95,7 @@ void cmake::AddCommand(cmCommand* wg)
 
 void cmake::Usage(const char* program)
 {
-  cmStringStream errorStream;
+  cmOStringStream errorStream;
 
   errorStream << "cmake version " << cmMakefile::GetMajorVersion()
             << "." << cmMakefile::GetMinorVersion() << "\n";
@@ -332,7 +332,7 @@ int cmake::AddCMakePaths(const char *arg0)
   if(!cmSystemTools::FileExists(cMakeSelf.c_str()))
     {
     failures.push_back(cMakeSelf);
-    cmStringStream msg;
+    cmOStringStream msg;
     msg << "CMAKE can not find the command line program cmake.\n";
     msg << "  argv[0] = \"" << arg0 << "\"\n";
     msg << "  Attempted paths:\n";
@@ -444,7 +444,7 @@ int cmake::AddCMakePaths(const char *arg0)
 
 void CMakeCommandUsage(const char* program)
 {
-  cmStringStream errorStream;
+  cmOStringStream errorStream;
 
   errorStream 
     << "cmake version " << cmMakefile::GetMajorVersion()

@@ -35,7 +35,7 @@ bool cmCMakeMinimumRequired::InitialPass(std::vector<std::string> const& args)
   sscanf(args[1].c_str(), "%f", &reqVersion);
   if(reqVersion > version)
     {
-    cmStringStream str;
+    cmOStringStream str;
     str << "WARNING: This project requires version: " << args[1].c_str() << " of cmake.\n"
         << "You are running version: " << version;
     cmSystemTools::Message(str.str().c_str());

@@ -162,65 +162,76 @@ struct cmStdString : public std::string
     StdString(s, pos, n) {}
 };
 
-// Define cmStringStream wrapper to hide differences between
-// std::stringstream and the old strstream.
+// Define cmOStringStream and cmIStringStream wrappers to hide
+// differences between std::stringstream and the old strstream.
 #if !defined(CMAKE_NO_ANSI_STRING_STREAM)
-class cmStringStream: public std::ostringstream
+class cmOStringStream: public std::ostringstream
 {
 public:
-  cmStringStream() {}
+  cmOStringStream() {}
 private:
-  cmStringStream(const cmStringStream&);
-  void operator=(const cmStringStream&);
+  cmOStringStream(const cmOStringStream&);
+  void operator=(const cmOStringStream&);
 };
-class cmInputStringStream: public std::istringstream
+class cmIStringStream: public std::istringstream
 {
 public:
   typedef std::istringstream Superclass;
-  cmInputStringStream() {}
-  cmInputStringStream(const char* c) : Superclass(c) {}
+  cmIStringStream() {}
+  cmIStringStream(const std::string& s): Superclass(s) {}
 private:
-  cmInputStringStream(const cmInputStringStream&);
-  void operator=(const cmInputStringStream&);
+  cmIStringStream(const cmIStringStream&);
+  void operator=(const cmIStringStream&);
 };
 #else
-class cmStrStreamCleanup
+class cmOStrStreamCleanup
 {
 public:
-  cmStrStreamCleanup(std::ostrstream& ostr): m_StrStream(ostr) {}
-  ~cmStrStreamCleanup() { m_StrStream.rdbuf()->freeze(0); }
-  static void IgnoreUnusedVariable(const cmStrStreamCleanup&) {}
+  cmOStrStreamCleanup(std::ostrstream& ostr): m_OStrStream(ostr) {}
+  ~cmOStrStreamCleanup() { m_OStrStream.rdbuf()->freeze(0); }
+  static void IgnoreUnusedVariable(const cmOStrStreamCleanup&) {}
 protected:
-  std::ostrstream& m_StrStream;
+  std::ostrstream& m_OStrStream;
 };
 
-class cmStringStream: public std::ostrstream
+class cmOStringStream: public std::ostrstream
 {
 public:
   typedef std::ostrstream Superclass;
-  cmStringStream() {}
+  cmOStringStream() {}
   std::string str()
     {
-      cmStrStreamCleanup cleanup(*this);
-      cmStrStreamCleanup::IgnoreUnusedVariable(cleanup);
-      int pcount = this->pcount();
-      const char* ptr = this->Superclass::str();
-      return std::string(ptr?ptr:"", pcount);
+    cmOStrStreamCleanup cleanup(*this);
+    cmOStrStreamCleanup::IgnoreUnusedVariable(cleanup);
+    int pcount = this->pcount();
+    const char* ptr = this->Superclass::str();
+    return std::string(ptr?ptr:"", pcount);
     }
 private:
-  cmStringStream(const cmStringStream&);
-  void operator=(const cmStringStream&);
+  cmOStringStream(const cmOStringStream&);
+  void operator=(const cmOStringStream&);
 };
-class cmInputStringStream: public std::istrstream
+
+class cmIStringStream: private std::string, public std::istrstream
 {
 public:
-  typedef std::istrstream Superclass;
-  cmInputStringStream(const char* c) : Superclass(c) {}
+  typedef std::string StdString;
+  typedef std::istrstream IStrStream;
+  cmIStringStream(): StdString(), IStrStream(this->StdString::c_str()) {}
+  cmIStringStream(const std::string& s):
+    StdString(s), IStrStream(this->StdString::c_str()) {}
+  std::string str() const { return *this; }
+  void str(const std::string& s)
+    {
+    // Very dangerous.  If this throws, the object is hosed.  When the
+    // destructor is later called, the program is hosed too.
+    this->~cmIStringStream();
+    new (this) cmIStringStream(s);
+    }
 private:
-  cmInputStringStream(const cmInputStringStream&);
-  void operator=(const cmInputStringStream&);
+  cmIStringStream(const cmIStringStream&);
+  void operator=(const cmIStringStream&);
 };
 #endif
-
 
 #endif

@@ -475,7 +475,7 @@ int ctest::BuildDirectory()
   // 1 - error
   // > 1 - warning
   std::vector<int>         markedLines;
-  cmInputStringStream istr(coutput);
+  cmIStringStream istr(coutput);
   while(istr)
     {
     char buffer[1024];

@@ -84,7 +84,7 @@ std::string cmLocalNMakeMakefileGenerator::ShortPathCommand(const char* command)
     cmRegularExpression removeIntDir("(.*)(/|\\\\)\\$\\(IntDir\\)(.*)");
     if(removeIntDir.find(c))
       {
-	c = removeIntDir.match(1) + removeIntDir.match(3);
+        c = removeIntDir.match(1) + removeIntDir.match(3);
       }
     std::string unixPath = c;
     // since the command may already be a windows path, convert it
@@ -407,7 +407,7 @@ void cmLocalNMakeMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
 
   command += " $(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
 
-  cmStringStream linklibs;
+  cmOStringStream linklibs;
   this->OutputLinkLibraries(linklibs, name, t);
   command += linklibs.str();
 
@@ -528,7 +528,7 @@ void cmLocalNMakeMakefileGenerator::OutputExecutableRule(std::ostream& fout,
     command +=  " /subsystem:windows ";
     }
   
-  cmStringStream linklibs;
+  cmOStringStream linklibs;
   this->OutputLinkLibraries(linklibs, 0, t);
   command += linklibs.str();
 
@@ -614,16 +614,16 @@ void cmLocalNMakeMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
       // if it ends in .lib, then it is a full path and should
       // be escaped, and does not need .lib added
       if(reg.find(lib->first))
-	{
-	librariesLinked +=  ShortPath(lib->first.c_str());
-	librariesLinked += " ";
-	}
+        {
+        librariesLinked +=  ShortPath(lib->first.c_str());
+        librariesLinked += " ";
+        }
       else
-	{
+        {
         librariesLinked += m_LibraryLinkOption;
-	librariesLinked += lib->first;
-	librariesLinked += m_StaticLibraryExtension + " ";
-	}
+        librariesLinked += lib->first;
+        librariesLinked += m_StaticLibraryExtension + " ";
+        }
       }
     }
   linkLibs += librariesLinked;

@@ -347,7 +347,7 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
       l != tgts.end(); l++)
     {
     if (l->second.GetType() == cmTarget::UTILITY &&
-	l->second.IsInAll())
+        l->second.IsInAll())
       {
       fout << " \\\n" << l->first.c_str();
       }
@@ -545,14 +545,14 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
         {
         librariesLinked += "-l";
         file = libname.match(1);
-	librariesLinked += file;
+        librariesLinked += file;
         librariesLinked += " ";
         }
       else if(libname_noprefix.find(file))
         {
         librariesLinked += "-l";
         file = libname_noprefix.match(1);
-	librariesLinked += file;
+        librariesLinked += file;
         librariesLinked += " ";
         }
       }
@@ -652,7 +652,7 @@ void cmLocalUnixMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
   libName = cmSystemTools::ConvertToOutputPath(libName.c_str());
   command2 += libName + " \\\n";
   command2 += "\t  $(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
-  cmStringStream linklibs;
+  cmOStringStream linklibs;
   this->OutputLinkLibraries(linklibs, name, t);
   command2 += linklibs.str();
   std::string customCommands = this->CreateTargetRules(t, name);
@@ -694,7 +694,7 @@ void cmLocalUnixMakefileGenerator::OutputModuleLibraryRule(std::ostream& fout,
   libName = cmSystemTools::ConvertToOutputPath(libName.c_str());
   command2 += libName + " \\\n";
   command2 += "\t  $(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
-  cmStringStream linklibs;
+  cmOStringStream linklibs;
   this->OutputLinkLibraries(linklibs, std::string(name).c_str(), t);
   command2 += linklibs.str();
   std::string customCommands = this->CreateTargetRules(t, name);
@@ -771,7 +771,7 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
       "$(CMAKE_C_COMPILER) $(CMAKE_C_SHLIB_LINK_FLAGS) $(CMAKE_C_FLAGS) ";
     }
   command += "$(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
-  cmStringStream linklibs;
+  cmOStringStream linklibs;
   this->OutputLinkLibraries(linklibs, 0, t);
   command += linklibs.str();
   std::string outputFile = m_ExecutableOutputPath + name;
@@ -859,7 +859,7 @@ void cmLocalUnixMakefileGenerator::OutputTargets(std::ostream& fout)
         // This is handled by the OutputInstallRules method
       case cmTarget::INSTALL_PROGRAMS:
         // This is handled by the OutputInstallRules method
-	break;
+        break;
       }
     }
 }
@@ -1414,14 +1414,14 @@ void cmLocalUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
       // the custom command, as the command will be fired when the other target 
       // is built.  
       if ( cr->GetSourceName().compare(tgt->first) !=0)
-	{
-	cmSourceGroup& sourceGroup = 
-	  m_Makefile->FindSourceGroup(cr->GetSourceName().c_str(),
-				      sourceGroups);
-	cmCustomCommand cc(*cr);
-	cc.ExpandVariables(*m_Makefile);
-	sourceGroup.AddCustomCommand(cc);
-	}
+        {
+        cmSourceGroup& sourceGroup = 
+          m_Makefile->FindSourceGroup(cr->GetSourceName().c_str(),
+                                      sourceGroups);
+        cmCustomCommand cc(*cr);
+        cc.ExpandVariables(*m_Makefile);
+        sourceGroup.AddCustomCommand(cc);
+        }
       }
     }
 
@@ -1622,53 +1622,53 @@ void cmLocalUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
       {
       // first make the directories for each target 
       fout << "\t@if [ ! -d $(DESTDIR)" << prefix << l->second.GetInstallPath() << 
-	" ] ; then \\\n";
+        " ] ; then \\\n";
       fout << "\t   echo \"Making directory $(DESTDIR)" << prefix 
-	   << l->second.GetInstallPath() << " \"; \\\n";
+           << l->second.GetInstallPath() << " \"; \\\n";
       fout << "\t   mkdir -p $(DESTDIR)" << prefix << l->second.GetInstallPath() 
-	   << "; \\\n";
+           << "; \\\n";
       fout << "\t   chmod 755 $(DESTDIR)" <<  prefix << l->second.GetInstallPath() 
-	   << "; \\\n";
+           << "; \\\n";
       fout << "\t else true; \\\n";
       fout << "\t fi\n";
       // now install the target
       switch (l->second.GetType())
-	{
-	case cmTarget::STATIC_LIBRARY:
-	  fout << "\t$(INSTALL_DATA) " << m_LibraryOutputPath << "lib" 
+        {
+        case cmTarget::STATIC_LIBRARY:
+          fout << "\t$(INSTALL_DATA) " << m_LibraryOutputPath << "lib" 
                << l->first;
           fout << ".a";
-	  fout << " $(DESTDIR)" << prefix << l->second.GetInstallPath() << "\n";
-	  break;
-	case cmTarget::SHARED_LIBRARY:
-	  fout << "\t$(INSTALL_DATA) " << m_LibraryOutputPath << "lib" 
+          fout << " $(DESTDIR)" << prefix << l->second.GetInstallPath() << "\n";
+          break;
+        case cmTarget::SHARED_LIBRARY:
+          fout << "\t$(INSTALL_DATA) " << m_LibraryOutputPath << "lib" 
                << l->first;
           fout << m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
-	  fout << " $(DESTDIR)" << prefix << l->second.GetInstallPath() << "\n";
-	  break;
-	case cmTarget::MODULE_LIBRARY:
-	  fout << "\t$(INSTALL_DATA) " << m_LibraryOutputPath << "lib" 
+          fout << " $(DESTDIR)" << prefix << l->second.GetInstallPath() << "\n";
+          break;
+        case cmTarget::MODULE_LIBRARY:
+          fout << "\t$(INSTALL_DATA) " << m_LibraryOutputPath << "lib" 
                << l->first;
           fout << m_Makefile->GetDefinition("CMAKE_MODULE_SUFFIX");
-	  fout << " $(DESTDIR)" << prefix << l->second.GetInstallPath() << "\n";
-	  break;
-	case cmTarget::WIN32_EXECUTABLE:
-	case cmTarget::EXECUTABLE:
+          fout << " $(DESTDIR)" << prefix << l->second.GetInstallPath() << "\n";
+          break;
+        case cmTarget::WIN32_EXECUTABLE:
+        case cmTarget::EXECUTABLE:
           fout << "\t$(INSTALL_PROGRAM) " << m_ExecutableOutputPath 
                << l->first
                << cmSystemTools::GetExecutableExtension()
-	       << " $(DESTDIR)" << prefix << l->second.GetInstallPath() << "\n";
-	  break;
-	case cmTarget::INSTALL_FILES:
-	  {
+               << " $(DESTDIR)" << prefix << l->second.GetInstallPath() << "\n";
+          break;
+        case cmTarget::INSTALL_FILES:
+          {
           std::string sourcePath = m_Makefile->GetCurrentDirectory();
           std::string binaryPath = m_Makefile->GetCurrentOutputDirectory();
           sourcePath += "/";
           binaryPath += "/";
-	  const std::vector<std::string> &sf = l->second.GetSourceLists();
-	  std::vector<std::string>::const_iterator i;
-	  for (i = sf.begin(); i != sf.end(); ++i)
-	    {
+          const std::vector<std::string> &sf = l->second.GetSourceLists();
+          std::vector<std::string>::const_iterator i;
+          for (i = sf.begin(); i != sf.end(); ++i)
+            {
             std::string f = *i;
             if(f.substr(0, sourcePath.length()) == sourcePath)
               {
@@ -1678,7 +1678,7 @@ void cmLocalUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
               {
               f = f.substr(binaryPath.length());
               }
-	    fout << "\t@echo \"Installing " << f.c_str() << " \"\n"; 
+            fout << "\t@echo \"Installing " << f.c_str() << " \"\n"; 
             // avoid using install-sh to install install-sh
             // does not work on windows.... 
            if(*i == "install-sh")
@@ -1689,21 +1689,21 @@ void cmLocalUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
               {
               fout << "\t   @$(INSTALL_DATA) ";
               }
-	    fout << *i
-		 << " $(DESTDIR)" << prefix << l->second.GetInstallPath() << "\n";
-	    }
-	  }
-	  break;
-	case cmTarget::INSTALL_PROGRAMS:
-	  {
+            fout << *i
+                 << " $(DESTDIR)" << prefix << l->second.GetInstallPath() << "\n";
+            }
+          }
+          break;
+        case cmTarget::INSTALL_PROGRAMS:
+          {
           std::string sourcePath = m_Makefile->GetCurrentDirectory();
           std::string binaryPath = m_Makefile->GetCurrentOutputDirectory();
           sourcePath += "/";
           binaryPath += "/";
-	  const std::vector<std::string> &sf = l->second.GetSourceLists();
-	  std::vector<std::string>::const_iterator i;
-	  for (i = sf.begin(); i != sf.end(); ++i)
-	    {
+          const std::vector<std::string> &sf = l->second.GetSourceLists();
+          std::vector<std::string>::const_iterator i;
+          for (i = sf.begin(); i != sf.end(); ++i)
+            {
             std::string f = *i;
             if(f.substr(0, sourcePath.length()) == sourcePath)
               {
@@ -1713,7 +1713,7 @@ void cmLocalUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
               {
               f = f.substr(binaryPath.length());
               }
-	    fout << "\t@echo \"Installing " << f.c_str() << " \"\n"; 
+            fout << "\t@echo \"Installing " << f.c_str() << " \"\n"; 
             // avoid using install-sh to install install-sh
             // does not work on windows.... 
            if(*i == "install-sh")
@@ -1724,15 +1724,15 @@ void cmLocalUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
               {
               fout << "\t   @$(INSTALL_PROGRAM) ";
               }
-	    fout << *i
-		 << " $(DESTDIR)" << prefix << l->second.GetInstallPath() << "\n";
-	    }
-	  }
-	  break;
+            fout << *i
+                 << " $(DESTDIR)" << prefix << l->second.GetInstallPath() << "\n";
+            }
+          }
+          break;
         case cmTarget::UTILITY:
         default:
           break;
-	}
+        }
       }
     }
 }
@@ -1941,7 +1941,7 @@ void cmLocalUnixMakefileGenerator::OutputSourceObjectBuildRules(std::ostream& fo
       target != targets.end(); ++target)
     {
     bool shared = ((target->second.GetType() == cmTarget::SHARED_LIBRARY) ||
-		   (target->second.GetType() == cmTarget::MODULE_LIBRARY));
+                   (target->second.GetType() == cmTarget::MODULE_LIBRARY));
     std::string exportsDef = "";
     if(shared)
       {
@@ -2060,14 +2060,14 @@ void cmLocalUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
         // for nmake and borland, the echo should not be quoted
         if(strcmp(m_GlobalGenerator->GetName(), "Unix Makefiles") == 0)
           {
-	  cmSystemTools::ReplaceString(echostring, "\\\n", " ");
+          cmSystemTools::ReplaceString(echostring, "\\\n", " ");
           cmSystemTools::ReplaceString(echostring, " \t", "   ");
           cmSystemTools::ReplaceString(echostring, "\n\t", "\"\n\techo \"");
           fout << "\techo \"" << echostring.c_str() << "\"\n";
           }
         else
           {
-	  cmSystemTools::ReplaceString(echostring, "\n\t", "\n\techo ");
+          cmSystemTools::ReplaceString(echostring, "\n\t", "\n\techo ");
           fout << "\techo " << echostring.c_str() << "\n";
           }
         }
