@@ -26,7 +26,15 @@ IF(FLTK_VERSION_1.1)
   SET(FLTK_VERSION_1.0.11 0)
 ENDIF(FLTK_VERSION_1.1)
 
+# look for both Fl.h and Fl.H
 FIND_PATH(FLTK_INCLUDE_DIR FL/Fl.h
+  /usr/local/include
+  /usr/include
+  /usr/local/fltk
+  /usr/X11R6/include
+)
+
+FIND_PATH(FLTK_INCLUDE_DIR FL/Fl.H
   /usr/local/include
   /usr/include
   /usr/local/fltk
