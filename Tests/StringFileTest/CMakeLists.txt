@@ -37,7 +37,7 @@ FOREACH(var
     savar
     tuvar
     tlvar)
-  FILE(APPEND "${file}" "#define ${var} \"${${var}}\"")
+  FILE(APPEND "${file}" "#define ${var} \"${${var}}\"\n")
 ENDFOREACH(var)
 
 STRING(REGEX REPLACE "includefile" "${file}" outfile "${infile}")
