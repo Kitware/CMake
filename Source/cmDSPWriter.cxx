@@ -325,6 +325,7 @@ void cmDSPWriter::WriteCustomRule(std::ostream& fout,
       }
     fout << "\n";
 
+    fout << "# PROP Ignore_Default_Tool 1\n";
     fout << "# Begin Custom Build\n\n";
     if(outputs.size() == 0)
       {
