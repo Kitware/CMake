@@ -3,7 +3,7 @@ int testExtraStuff3();
 int testExtraStuff();
 int testExtraStuff2();
 
-int test1(int ac, char** av)
+int test1(int ac, char* av[])
 {
   if(!testExtraStuff2())
     {
