@@ -456,8 +456,7 @@ static BOOL RealPopenCreateProcess(const char *cmdstring,
   
   // Free the buffer.
  
-  char* str = 0;
-  str = strcpy(new char[strlen((char*)lpMsgBuf)+1], (char*)lpMsgBuf); 
+  char* str = strcpy(new char[strlen((char*)lpMsgBuf)+1], (char*)lpMsgBuf); 
   LocalFree( lpMsgBuf );
   
   output += "CreateProcessError: ";
