@@ -22,6 +22,7 @@ IF(CABLE_BUILD_DIR)
                LIBRARY_OUTPUT_PATH
                EXECUTABLE_OUTPUT_PATH
                MAKECOMMAND
+               CMAKE_INSTALL_PREFIX
              INCLUDE_INTERNALS
                CABLE_LIBRARY_PATH
                CABLE_EXECUTABLE_PATH)
