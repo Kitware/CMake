@@ -27,7 +27,7 @@
 #include <stdlib.h>
 
 #include "llist.h"
-#include "memory.h"
+#include "curl_memory.h"
 
 /* this must be the last include file */
 #include "memdebug.h"

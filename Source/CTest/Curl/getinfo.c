@@ -32,7 +32,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <stdlib.h>
-#include "memory.h"
+#include "curl_memory.h"
 
 /* Make this the last #include */
 #include "memdebug.h"

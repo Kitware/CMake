@@ -41,7 +41,7 @@
 #include "strequal.h"
 #include "base64.h"
 #include "http_negotiate.h"
-#include "memory.h"
+#include "curl_memory.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>

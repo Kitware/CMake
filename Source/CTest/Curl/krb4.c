@@ -60,7 +60,7 @@
 #include "ftp.h"
 #include "sendf.h"
 #include "krb4.h"
-#include "memory.h"
+#include "curl_memory.h"
 
 #if defined(HAVE_INET_NTOA_R) && !defined(HAVE_INET_NTOA_R_DECL)
 #include "inet_ntoa_r.h"

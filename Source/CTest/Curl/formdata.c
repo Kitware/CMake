@@ -115,7 +115,7 @@ Content-Disposition: form-data; name="FILECONTENT"
 #include <sys/stat.h>
 #include "formdata.h"
 #include "strequal.h"
-#include "memory.h"
+#include "curl_memory.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>

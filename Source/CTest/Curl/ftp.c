@@ -92,7 +92,7 @@
 #include "ssluse.h"
 #include "connect.h"
 #include "strerror.h"
-#include "memory.h"
+#include "curl_memory.h"
 #include "inet_ntop.h"
 
 #if defined(HAVE_INET_NTOA_R) && !defined(HAVE_INET_NTOA_R_DECL)

@@ -36,7 +36,7 @@
 #endif
 
 #include <curl/curl.h>
-#include "memory.h"
+#include "curl_memory.h"
 
 #include "memdebug.h"
 

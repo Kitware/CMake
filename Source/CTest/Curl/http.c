@@ -93,7 +93,7 @@
 #include "share.h"
 #include "hostip.h"
 #include "http.h"
-#include "memory.h"
+#include "curl_memory.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>

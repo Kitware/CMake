@@ -145,7 +145,7 @@ void idn_free (void *ptr); /* prototype from idn-free.h, not provided by
 #ifdef HAVE_KRB4
 #include "security.h"
 #endif
-#include "memory.h"
+#include "curl_memory.h"
 
 /* The last #include file should be: */
 #include "memdebug.h"

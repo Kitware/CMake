@@ -85,7 +85,7 @@
 
 #include "inet_ntop.h"
 
-#include "memory.h"
+#include "curl_memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"
 

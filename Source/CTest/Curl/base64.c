@@ -41,7 +41,7 @@
 #include <curl/mprintf.h>
 
 #include "base64.h"
-#include "memory.h"
+#include "curl_memory.h"
 
 /* include memdebug.h last */
 #include "memdebug.h"
