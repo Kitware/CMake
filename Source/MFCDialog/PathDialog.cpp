@@ -180,8 +180,9 @@ int CPathDialog::DoModal()
     pidl = SHBrowseForFolder(&m_bi);
     if (pidl!=NULL) 
       {
-      //not need do this because OnOK function did
-      //bSucceeded = SHGetPathFromIDList(pidl, m_szPathName);
+#if defined(_WIN64) && defined(__INTEL_COMPILER)
+# pragma warning ( disable : 167)
+#endif
       // In C++: 
       pMalloc->Free(pidl);
       //In C:
