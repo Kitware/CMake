@@ -65,18 +65,8 @@ int main(int ac, char** av)
     Usage(av[0]);
     return -1;
     }
-
   // set the cmake root directory
-  std::string root = cmSystemTools::GetProgramPath(av[0]);
-  std::string::size_type slashPos = root.rfind("/");
-  if(slashPos != std::string::npos)      
-    {
-    root = root.substr(0, slashPos);
-    }
-  cmCacheManager::GetInstance()->AddCacheEntry
-    ("CMAKE_ROOT", root.c_str(),
-     "Path to CMake installation.", cmCacheManager::INTERNAL);
-
+  std::string root = CMAKE_ROOT_DIR;
 
   // Create a makefile
   cmMakefile mf;
@@ -138,6 +128,9 @@ int main(int ac, char** av)
   // Read and parse the input makefile
   mf.MakeStartDirectoriesCurrent();
   cmCacheManager::GetInstance()->LoadCache(&mf);
+  cmCacheManager::GetInstance()->AddCacheEntry
+    ("CMAKE_ROOT", root.c_str(),
+     "Path to CMake installation.", cmCacheManager::INTERNAL);
   
   // Find our own exectuable.
   std::string cMakeSelf = cmSystemTools::FindProgram(av[0]);
