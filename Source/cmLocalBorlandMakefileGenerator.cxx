@@ -23,7 +23,7 @@
 #include "cmCacheManager.h"
 #include "cmGeneratedFileStream.h"
 #include "windows.h"
-
+#include <stdio.h>
 
 cmLocalBorlandMakefileGenerator::cmLocalBorlandMakefileGenerator()
 {

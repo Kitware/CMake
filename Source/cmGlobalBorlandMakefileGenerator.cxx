@@ -19,8 +19,8 @@
 #include "cmMakefile.h"
 #include "cmake.h"
 
-void cmGlobalBorlandMakefileGenerator::EnableLanguage(const char* lang,
-                                                    cmMakefile *mf)
+void cmGlobalBorlandMakefileGenerator::EnableLanguage(const char*,
+                                                      cmMakefile *mf)
 {
   // now load the settings
   if(!mf->GetDefinition("CMAKE_ROOT"))
