@@ -100,18 +100,18 @@ cmLocalUnixMakefileGenerator::AddDependenciesToSourceFile(cmDependInformation co
   visited->insert(info);
     
   // add this dependency and the recurse
-  if(info->m_FullPath != "")
+  // now recurse with info's dependencies
+  for(cmDependInformation::DependencySet::const_iterator d = 
+        info->m_DependencySet.begin();
+      d != info->m_DependencySet.end(); ++d)
     {
-    // now recurse with info's dependencies
-    for(cmDependInformation::DependencySet::const_iterator d = 
-          info->m_DependencySet.begin();
-        d != info->m_DependencySet.end(); ++d)
-      {
-      if (visited->find(*d) == visited->end())
+    if (visited->find(*d) == visited->end())
+      { 
+      if((*d)->m_FullPath != "")
         {
         i->GetDepends().push_back((*d)->m_FullPath);
-        this->AddDependenciesToSourceFile(*d,i,visited);
         }
+      this->AddDependenciesToSourceFile(*d,i,visited);
       }
     }
 }
