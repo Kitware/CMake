@@ -45,7 +45,7 @@ void cmCableSourceFilesCommand::FinalPass()
  * Write the CABLE configuration code to indicate header dependencies for
  * a package.
  */
-void cmCableSourceFilesCommand::WriteConfiguration() const
+bool cmCableSourceFilesCommand::WriteConfiguration()
 {
   std::ostream& os = m_CableData->GetOutputStream();
   cmCableData::Indentation indent = m_CableData->GetIndentation();
@@ -77,6 +77,8 @@ void cmCableSourceFilesCommand::WriteConfiguration() const
       }
     }
   os << indent << "</Headers>" << std::endl;
+  
+  return true;
 }
 
 

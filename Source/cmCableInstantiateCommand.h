@@ -62,7 +62,7 @@ public:
       "template non-classes (functions, operators, etc).";
     }
 
-  virtual void WriteConfiguration() const;  
+  virtual bool WriteConfiguration();
 
   cmTypeMacro(cmCableInstantiateCommand, cmCablePackageCommand);
 protected:

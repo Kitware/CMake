@@ -19,16 +19,22 @@
 /**
  * Write the CABLE configuration code to define this WrapperSet.
  */
-void cmCableWrapCommand::WriteConfiguration() const
+bool cmCableWrapCommand::WriteConfiguration()
 {
+  if(m_Entries.size() < 2)
+    {
+    this->SetError("called with incorrect number of arguments");
+    return false;
+    }
+  
   std::ostream& os = m_CableData->GetOutputStream();
   cmCableData::Indentation indent = m_CableData->GetIndentation();
   
   cmRegularExpression needCdataBlock("[&<>]");
   
-  os << indent << "<WrapperSet>" << std::endl;
-  for(Entries::const_iterator e = m_Entries.begin();
-      e != m_Entries.end(); ++e)
+  Entries::const_iterator e = m_Entries.begin();
+  os << indent << "<WrapperSet name=\"" << e->c_str() << "\">" << std::endl;
+  for(++e;e != m_Entries.end(); ++e)
     {
     os << indent << "  <Element>";
     if(needCdataBlock.find(e->c_str()))
@@ -42,4 +48,6 @@ void cmCableWrapCommand::WriteConfiguration() const
     os << "</Element>" << std::endl;
     }
   os << indent << "</WrapperSet>" << std::endl;
+  
+  return true;
 }

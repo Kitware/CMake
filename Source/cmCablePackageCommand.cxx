@@ -100,6 +100,7 @@ bool cmCablePackageCommand::Invoke(std::vector<std::string>& args)
 
   // Add custom rules to the makefile to generate this package's source
   // files.
+  {
   std::string command = "${CABLE}";
   m_Makefile->ExpandVariablesInString(command);
   std::vector<std::string> depends;
@@ -115,6 +116,27 @@ bool cmCablePackageCommand::Invoke(std::vector<std::string>& args)
                                command.c_str(),
                                depends,
                                outputs, m_TargetName.c_str());
+  }
+
+  // Add custom rules to the makefile to generate this package's xml files.
+  {
+  std::string command = "${GCCXML}";
+  m_Makefile->ExpandVariablesInString(command);
+  std::vector<std::string> depends;
+  depends.push_back(command);
+  std::string input = "Cxx/"+m_PackageName+"_cxx.cxx";
+  std::string output = "Cxx/"+m_PackageName+"_cxx.xml";
+  command = "\""+command+"\" ${CXX_FLAGS} -fsyntax-only -fxml=" + output + " -c " + input;
+  
+  std::vector<std::string> outputs;
+  outputs.push_back("Cxx/"+m_PackageName+"_cxx.xml");
+  
+  // A rule for the package's source files.
+  m_Makefile->AddCustomCommand(input.c_str(),
+                               command.c_str(),
+                               depends,
+                               outputs, m_TargetName.c_str());
+  }  
   
   // add the source list to the target
   m_Makefile->GetTargets()[m_TargetName.c_str()].GetSourceLists().push_back(m_PackageName);

@@ -22,7 +22,7 @@
 /**
  * Write the CABLE configuration code to define this InstantiationSet.
  */
-void cmCableInstantiateCommand::WriteConfiguration() const
+bool cmCableInstantiateCommand::WriteConfiguration()
 {
   std::ostream& os = m_CableData->GetOutputStream();
   cmCableData::Indentation indent = m_CableData->GetIndentation();
@@ -45,4 +45,6 @@ void cmCableInstantiateCommand::WriteConfiguration() const
     os << "</Element>" << std::endl;
     }
   os << indent << "</InstantiationSet>" << std::endl;
+  
+  return true;
 }

@@ -67,7 +67,7 @@ public:
       "Generates a Package's Headers block in the CABLE configuration.";
     }
 
-  virtual void WriteConfiguration() const;
+  virtual bool WriteConfiguration();
   bool SourceFileExists(const std::string&) const;
   
   cmTypeMacro(cmCableSourceFilesCommand, cmCableCommand);

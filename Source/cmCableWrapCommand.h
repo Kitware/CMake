@@ -59,7 +59,7 @@ public:
       "Generates a WrapSet in the CABLE configuration.";
     }
 
-  virtual void WriteConfiguration() const;
+  virtual bool WriteConfiguration();
   
   cmTypeMacro(cmCableWrapCommand, cmCablePackageCommand);
 };
