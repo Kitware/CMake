@@ -10,7 +10,6 @@ cmSourceFile.cxx
 cmSystemTools.cxx
 cmDirectory.cxx
 cmDynamicLoader.cxx
-cmDynamicLoaderC.c
 cmCommands.cxx
 cmTarget.cxx
 cmCustomCommand.cxx

@@ -16,20 +16,7 @@
 =========================================================================*/
 #include "cmDynamicLoader.h"
 
-extern "C"
-{
-cmDynamicLoaderFunction cmDynamicLoaderGetSymbolAddress(cmLibHandle,
-                                                        const char*);
-}
-
-// Dispatch to C implementation.
-cmDynamicLoaderFunction cmDynamicLoader::GetSymbolAddress(cmLibHandle lib,
-                                                          const char* sym)
-{
-  return cmDynamicLoaderGetSymbolAddress(lib, sym);
-}
-
-// This file is actually 4 different implementations.
+// This file is actually several different implementations.
 // 1. HP machines which uses shl_load
 // 2. Apple OSX which uses NSLinkModule
 // 3. Windows which uses LoadLibrary
@@ -51,6 +38,19 @@ cmLibHandle cmDynamicLoader::OpenLibrary(const char* libname )
 int cmDynamicLoader::CloseLibrary(cmLibHandle lib)
 {
   return 0;
+}
+
+cmDynamicLoaderFunction
+cmDynamicLoader::GetSymbolAddress(cmLibHandle lib, const char* sym)
+{ 
+  void* addr;
+  int status;
+  
+  status = shl_findsym (&lib, sym, TYPE_PROCEDURE, &addr);
+  void* result = (status < 0) ? (void*)0 : addr;
+  
+  // Hack to cast pointer-to-data to pointer-to-function.
+  return *reinterpret_cast<cmDynamicLoaderFunction*>(&result);
 }
 
 const char* cmDynamicLoader::LibPrefix()
@@ -90,6 +90,22 @@ cmLibHandle cmDynamicLoader::OpenLibrary(const char* libname )
 int cmDynamicLoader::CloseLibrary(cmLibHandle lib)
 {
   return 0;
+}
+
+cmDynamicLoaderFunction
+cmDynamicLoader::GetSymbolAddress(cmLibHandle lib, const char* sym)
+{
+  void *result=0;
+  if(NSIsSymbolNameDefined(sym))
+    {
+    NSSymbol symbol= NSLookupAndBindSymbol(sym);
+    if(symbol)
+      {
+      result = NSAddressOfSymbol(symbol);
+      }
+    }
+  // Hack to cast pointer-to-data to pointer-to-function.
+  return *reinterpret_cast<cmDynamicLoaderFunction*>(&result);
 }
 
 const char* cmDynamicLoader::LibPrefix()
@@ -134,6 +150,23 @@ cmLibHandle cmDynamicLoader::OpenLibrary(const char* libname )
 int cmDynamicLoader::CloseLibrary(cmLibHandle lib)
 {
   return (int)FreeLibrary(lib);
+}
+
+cmDynamicLoaderFunction
+cmDynamicLoader::GetSymbolAddress(cmLibHandle lib, const char* sym)
+{ 
+  void* result = 0;
+#ifdef UNICODE
+        wchar_t *wsym = new wchar_t [mbstowcs(NULL, sym, 32000)];
+        mbstowcs(wsym, sym, 32000);
+        void *ret = GetProcAddress(lib, wsym);
+        delete [] wsym;
+        result = ret;
+#else
+  result = GetProcAddress(lib, sym);
+#endif
+  // Hack to cast pointer-to-data to pointer-to-function.
+  return *reinterpret_cast<cmDynamicLoaderFunction*>(&result);
 }
 
 const char* cmDynamicLoader::LibPrefix()
@@ -186,6 +219,15 @@ cmLibHandle cmDynamicLoader::OpenLibrary(const char* libname )
 int cmDynamicLoader::CloseLibrary(cmLibHandle lib)
 {
   return (int)dlclose(lib);
+}
+
+cmDynamicLoaderFunction
+cmDynamicLoader::GetSymbolAddress(cmLibHandle lib, const char* sym)
+{ 
+  void* result = dlsym(lib, sym);
+  
+  // Hack to cast pointer-to-data to pointer-to-function.
+  return *reinterpret_cast<cmDynamicLoaderFunction*>(&result);
 }
 
 const char* cmDynamicLoader::LibPrefix()
