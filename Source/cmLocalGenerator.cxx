@@ -134,7 +134,7 @@ void cmLocalGenerator::GenerateInstallRules()
       const char* postinstall = l->second.GetProperty("POST_INSTALL_SCRIPT");
       if ( preinstall )
         {
-        fout << "INCLUDE(" << preinstall << ")" << std::endl;
+        fout << "INCLUDE(\"" << preinstall << "\")" << std::endl;
         }
 
       std::string fname;
@@ -235,7 +235,7 @@ void cmLocalGenerator::GenerateInstallRules()
         }
       if ( postinstall )
         {
-        fout << "INCLUDE(" << postinstall << ")" << std::endl;
+        fout << "INCLUDE(\"" << postinstall << "\")" << std::endl;
         }
       }
     }
