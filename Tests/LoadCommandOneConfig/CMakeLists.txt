@@ -7,7 +7,7 @@ SET (TEST_COMMAND_TEST1 1)
 TRY_COMPILE(COMPILE_OK 
     ${LoadedCommand_BINARY_DIR}/CMakeCommands 
     ${LoadedCommand_SOURCE_DIR}/CMakeCommands 
-    CMAKE_LOADED_COMMANDS cmCMAKE_TEST_COMMAND)
+    CMAKE_LOADED_COMMANDS)
 
 # if the compile was OK, try loading the command
 IF (COMPILE_OK)
