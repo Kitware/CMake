@@ -89,6 +89,10 @@ IF(BUILD_TESTING)
     ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Test)
     ADD_CUSTOM_TARGET(ExperimentalCoverage 
     ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Coverage)
+    ADD_CUSTOM_TARGET(ExperimentalDashboardStart 
+    ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental DashboardStart)
+    ADD_CUSTOM_TARGET(ExperimentalDashboardEnd 
+    ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental DashboardEnd)
 
     # Continuous
     ADD_CUSTOM_TARGET(Continuous 
