@@ -19,10 +19,16 @@
 // cmTargetLinkLibrariesCommand
 bool cmTargetLinkLibrariesCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
-  if(argsIn.size() < 2)
+  // must have one argument
+  if(argsIn.size() < 1)
     {
     this->SetError("called with incorrect number of arguments");
     return false;
+    }
+  // but we might not have any libs after variable expansion
+  if(argsIn.size() < 2)
+    {
+    return true;
     }
   std::vector<std::string> args;
   cmSystemTools::ExpandListArguments(argsIn, args);
