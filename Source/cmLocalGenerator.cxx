@@ -295,6 +295,8 @@ void cmLocalGenerator::GenerateInstallRules()
     }
   if ( toplevel_install )
     {
+    fout << "FILE(WRITE \"" << homedir.c_str() << "/install_manifest.txt\" "
+         << "\"\")" << std::endl;
     fout << "FOREACH(file ${CMAKE_INSTALL_MANIFEST_FILES})" << std::endl
       << "  FILE(APPEND \"" << homedir.c_str() << "/install_manifest.txt\" "
       << "\"${file}\\n\")" << std::endl
