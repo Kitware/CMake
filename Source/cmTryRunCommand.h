@@ -66,7 +66,10 @@ public:
       "          <ARGUMENTS <arg1> <arg2>...>)\n"
       "Try compiling a srcfile.  Return the success or failure in "
       "COMPILE_RESULT_VAR.  Then if the compile succeeded, run the "
-      "executable and return the result in RUN_RESULT_VAR.";
+      "executable and return the result in RUN_RESULT_VAR."
+      "If the executable was built, but failed for to run for some "
+      "reason, then RUN_RESULT_VAR will be set to FAILED_TO_RUN, and "
+      "the output will be in the COMPILE_RESULT_VAR.";
     }
   
   cmTypeMacro(cmTryRunCommand, cmCommand);

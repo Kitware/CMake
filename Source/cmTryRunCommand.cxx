@@ -61,7 +61,7 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv)
         if ( argv.size() <= (i+1) )
           {
           cmSystemTools::Error(
-            "OUTPUT_VARIABLE specified but there is no variable");
+                               "OUTPUT_VARIABLE specified but there is no variable");
           return false;
           }
         outputVariable = argv[i+1];
@@ -75,7 +75,7 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv)
   std::string binaryDirectory = argv[2] + "/CMakeTmp";
   if (!res)
     {
-    int retVal;
+    int retVal = -1;
     std::string output;
     std::string command;
     command = binaryDirectory;
@@ -110,25 +110,34 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv)
         finalCommand += runArgs;
         }
       int timeout = 0;
-      cmSystemTools::RunSingleCommand(finalCommand.c_str(), &output, &retVal, 
-        0, false, timeout);
+      bool worked = cmSystemTools::RunSingleCommand(finalCommand.c_str(),
+                                                    &output, &retVal,
+                                                    0, false, timeout);
       if(outputVariable.size())
         {
         // if the TryCompileCore saved output in this outputVariable then
         // prepend that output to this output
-        const char* compileOutput = m_Makefile->GetDefinition(outputVariable.c_str());
+        const char* compileOutput
+          = m_Makefile->GetDefinition(outputVariable.c_str());
         if(compileOutput)
           {
           output = std::string(compileOutput) + output;
           }
         m_Makefile->AddDefinition(outputVariable.c_str(), output.c_str());
         }
-      
       // set the run var
       char retChar[1000];
-      sprintf(retChar,"%i",retVal);
+      if(worked)
+        {
+        sprintf(retChar,"%i",retVal);
+        }
+      else
+        {
+        strcpy(retChar, "FAILED_TO_RUN");
+        }
       m_Makefile->AddCacheDefinition(argv[0].c_str(), retChar,
-                                      "Result of TRY_RUN", cmCacheManager::INTERNAL);
+                                     "Result of TRY_RUN",
+                                     cmCacheManager::INTERNAL);
       }
     }
   
