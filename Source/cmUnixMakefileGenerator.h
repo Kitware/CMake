@@ -163,6 +163,10 @@ protected:
 				       const char* path,
 				       const char* library,
 				       const char* fullpath);
+  virtual void OutputBuildExecutableInDir(std::ostream& fout,
+                                          const char* path,
+                                          const char* library,
+                                          const char* fullpath);
   ///! return true if the two paths are the same
   virtual bool SamePath(const char* path1, const char* path2);
   virtual std::string GetOutputExtension(const char* sourceExtension);

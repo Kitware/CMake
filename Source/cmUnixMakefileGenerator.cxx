@@ -868,39 +868,66 @@ void cmUnixMakefileGenerator::OutputDependLibs(std::ostream& fout)
     if(cacheValue &&
        (!this->SamePath(m_Makefile->GetCurrentOutputDirectory(), cacheValue)))
       {
-      std::string library = m_LibraryPrefix;
-      library += *lib;
-      std::string libpath = cacheValue;
       // add the correct extension
       std::string ltname = *lib+"_LIBRARY_TYPE";
       const char* libType
         = m_Makefile->GetDefinition(ltname.c_str());
-      if(libType && std::string(libType) == "SHARED")
+      // if it was a library..
+      if (libType)
         {
-        library += m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
+        std::string library = m_LibraryPrefix;
+        library += *lib;
+        std::string libpath = cacheValue;
+        if(libType && std::string(libType) == "SHARED")
+          {
+          library += m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
+          }
+        else if(libType && std::string(libType) == "MODULE")
+          {
+          library += m_Makefile->GetDefinition("CMAKE_MODULE_SUFFIX");
+          }
+        else if(libType && std::string(libType) == "STATIC")
+          {
+          library += m_StaticLibraryExtension;
+          }
+        else
+          {
+          cmSystemTools::Error("Unknown library type!");
+          return;
+          }
+        if(m_LibraryOutputPath.size())
+          {
+          libpath = m_LibraryOutputPath;
+          }
+        else
+          {
+          libpath += "/";
+          }
+        libpath += library;
+        // put out a rule to build the library if it does not exist
+        this->OutputBuildLibraryInDir(fout,
+                                      cacheValue,
+                                      library.c_str(),
+                                      libpath.c_str());
         }
-      else if(libType && std::string(libType) == "MODULE")
-	{
-	library += m_Makefile->GetDefinition("CMAKE_MODULE_SUFFIX");
-	}
+      // something other than a library...
       else
         {
-        library += m_StaticLibraryExtension;
+        std::string exepath = cacheValue;
+        if(m_ExecutableOutputPath.size())
+          {
+          exepath = m_ExecutableOutputPath;
+          }
+        else
+          {
+          exepath += "/";
+          }
+        exepath += *lib;
+        this->OutputBuildExecutableInDir(fout,
+                                         cacheValue,
+                                         lib->c_str(),
+                                         exepath.c_str());
         }
-      if(m_LibraryOutputPath.size())
-        {
-        libpath = m_LibraryOutputPath;
-        }
-      else
-        {
-        libpath += "/";
-        }
-      libpath += library;
-      // put out a rule to build the library if it does not exist
-      this->OutputBuildLibraryInDir(fout,
-				    cacheValue,
-				    library.c_str(),
-				    libpath.c_str());
       }
     }
 }
@@ -912,6 +939,25 @@ void cmUnixMakefileGenerator::OutputBuildLibraryInDir(std::ostream& fout,
 {
   const char* makeTarget = library;
   const char* libOutPath = m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH");
+  if(libOutPath && strcmp( libOutPath, "" ) != 0)
+    {
+    makeTarget = fullpath;
+    }
+  fout << cmSystemTools::EscapeSpaces(fullpath)
+       << ":\n\tcd " << cmSystemTools::EscapeSpaces(path)
+       << "; $(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.depends"
+       << "; $(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.check_depends"
+       << "; $(MAKE) -$(MAKEFLAGS) $(MAKESILENT) -f cmake.check_depends"
+       << "; $(MAKE) $(MAKESILENT) " << makeTarget << "\n\n"; 
+}
+
+void cmUnixMakefileGenerator::OutputBuildExecutableInDir(std::ostream& fout,
+                                                         const char* path,
+                                                         const char* library,
+                                                         const char* fullpath)
+{
+  const char* makeTarget = library;
+  const char* libOutPath = m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
   if(libOutPath && strcmp( libOutPath, "" ) != 0)
     {
     makeTarget = fullpath;
@@ -1017,7 +1063,13 @@ void cmUnixMakefileGenerator::OutputExeDepend(std::ostream& fout,
     // add the correct extension
     if (m_Makefile->GetDefinition("CMAKE_EXECUTABLE_SUFFIX"))
       {
-      exepath += m_Makefile->GetDefinition("CMAKE_EXECUTABLE_SUFFIX");
+      std::string replaceVars = 
+        m_Makefile->GetDefinition("CMAKE_EXECUTABLE_SUFFIX");
+      if (!strcmp(replaceVars.c_str(),"@CMAKE_EXECUTABLE_SUFFIX@"))
+        {
+        replaceVars = "";
+        }
+      exepath += replaceVars;
       }
     fout << this->ConvertToNativePath(cmSystemTools::EscapeSpaces(exepath.c_str()).c_str())
          << " ";
