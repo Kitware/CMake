@@ -462,26 +462,11 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
     // if linking a c executable use the C runtime flag as cc
     // may not be the same program that creates shared libaries
     // and may have different flags
-    if( tgt.GetType() == cmTarget::EXECUTABLE)
-      {
-      runtimeFlag = this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_LINK_FLAGS");
-      }
-    else
-      {
-      runtimeFlag = this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_RUNTIME_FLAG");
-      }
+    runtimeFlag = this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_RUNTIME_FLAG");
     runtimeSep = this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_RUNTIME_FLAG_SEP");
     }
   else
     { 
-    if( tgt.GetType() == cmTarget::EXECUTABLE)
-      {
-      runtimeFlag = this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS");
-      }
-    else
-      {
-      runtimeFlag = this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_RUNTIME_CXX_FLAG");
-      }
     runtimeFlag = this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_RUNTIME_CXX_FLAG");
     runtimeSep = this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_RUNTIME_CXX_FLAG_SEP");
     }
@@ -500,6 +485,21 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
   std::string libLinkFlag = this->GetSafeDefinition("CMAKE_LINK_LIBRARY_FLAG");
   // collect all the flags needed for linking libraries
   std::string linkLibs;
+  
+  // Flags to link an executable to shared libraries.
+  if( tgt.GetType() == cmTarget::EXECUTABLE)
+    {
+    if(cxx)
+      {
+      linkLibs = this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS");
+      }
+    else
+      {
+      linkLibs = this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_LINK_FLAGS");
+      }
+    linkLibs += " ";
+    }
+  
   const std::vector<std::string>& libdirs = tgt.GetLinkDirectories();
   for(std::vector<std::string>::const_iterator libDir = libdirs.begin();
       libDir != libdirs.end(); ++libDir)
