@@ -38,31 +38,31 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =========================================================================*/
-#ifndef cmBorlandMakefileGenerator2_h
-#define cmBorlandMakefileGenerator2_h
+#ifndef cmBorlandMakefileGenerator_h
+#define cmBorlandMakefileGenerator_h
 
 #include "cmNMakeMakefileGenerator.h"
 
-/** \class cmBorlandMakefileGenerator2
+/** \class cmBorlandMakefileGenerator
  * \brief Write an NMake makefile.
  *
- * cmBorlandMakefileGenerator2 produces a Unix makefile from its
+ * cmBorlandMakefileGenerator produces a Unix makefile from its
  * member m_Makefile.
  */
-class cmBorlandMakefileGenerator2 : public cmNMakeMakefileGenerator
+class cmBorlandMakefileGenerator : public cmNMakeMakefileGenerator
 {
 public:
   ///! Set cache only and recurse to false by default.
-  cmBorlandMakefileGenerator2();
+  cmBorlandMakefileGenerator();
 
-  virtual ~cmBorlandMakefileGenerator2();
+  virtual ~cmBorlandMakefileGenerator();
   
   ///! Get the name for the generator.
-  virtual const char* GetName() {return "Borland Makefiles2";}
+  virtual const char* GetName() {return "Borland Makefiles";}
 
   ///! virtual copy constructor
   virtual cmMakefileGenerator* CreateObject() 
-    { return new cmBorlandMakefileGenerator2;}
+    { return new cmBorlandMakefileGenerator;}
 
   ///! figure out about the current system information
   virtual void ComputeSystemInfo(); 

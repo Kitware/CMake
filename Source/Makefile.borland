@@ -9,9 +9,6 @@
 .cxx.obj: 
   bcc32 -Pcxx -c -DCMAKE_ROOT_DIR='"."' {$< } 
 
-.cpp.obj: 
-  bcc32 -Pcxx -c -DCMAKE_ROOT_DIR='"."' {$< } 
-
 
 OBJS = \
 cmake.obj  \
@@ -28,7 +25,6 @@ cmMSProjectGenerator.obj \
 cmDSPWriter.obj \
 cmDSWWriter.obj \
 cmNMakeMakefileGenerator.obj \
-cmBorlandMakefileGenerator2.obj \
 cmBorlandMakefileGenerator.obj \
 cmCommands.obj \
 cmTarget.obj \

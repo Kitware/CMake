@@ -10,6 +10,7 @@ ENDIF(FLTK_LIBRARY)
 
 SOURCE_FILES(SRCS
 cmake.cxx
+cmakewizard.cxx
 cmMakeDepend.cxx
 cmMakefile.cxx
 cmMakefileGenerator.cxx
@@ -37,8 +38,7 @@ ADD_DEFINITIONS(-DCMAKE_BUILD_WITH_CMAKE)
 
 IF (WIN32)
   SOURCE_FILES(SRCS cmDSWWriter.cxx cmDSPWriter.cxx cmMSProjectGenerator.cxx)
-  SOURCE_FILES(SRCS cmBorlandMakefileGenerator2.cxx)
-  SOURCE_FILES(SRCS cmBorlandMakefileGenerator.cpp)
+  SOURCE_FILES(SRCS cmBorlandMakefileGenerator.cxx)
   SOURCE_FILES(SRCS cmNMakeMakefileGenerator.cxx)
   IF(NOT UNIX)
     IF(  NOT BORLAND )
@@ -67,7 +67,6 @@ LINK_LIBRARIES(CMakeLib)
 LINK_DIRECTORIES(${CMake_BINARY_DIR}/Source)
 
 ADD_EXECUTABLE(cmake cmakemain)
-ADD_EXECUTABLE(cmakewizard cmakewizard)
 ADD_EXECUTABLE(DumpDocumentation cmDumpDocumentation)
 
 ADD_EXECUTABLE(ctest ctest.cxx cmSystemTools.cxx cmRegularExpression.cxx)

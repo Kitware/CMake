@@ -95,11 +95,7 @@ SOURCE=.\cmNMakeMakefileGenerator.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmBorlandMakefileGenerator.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\cmBorlandMakefileGenerator2.cxx
+SOURCE=.\cmBorlandMakefileGenerator.cxx
 # End Source File
 # Begin Source File
 
@@ -116,6 +112,10 @@ SOURCE=.\cmCommands.cxx
 # Begin Source File
 
 SOURCE=.\cmCustomCommand.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=.\cmakewizard.cxx
 # End Source File
 # Begin Source File
 

@@ -1,18 +1,15 @@
-#include "cmCacheManager.h"
+#include "cmakewizard.h"
 #include "cmake.h"
+#include "cmCacheManager.h"
 
-bool advanced = false;
-  
-void Ask(const char* key, cmCacheManager::CacheEntry & entry)
+cmakewizard::cmakewizard()
 {
-  if(!advanced)
-    {
-    if(cmCacheManager::GetInstance()->IsAdvanced(key))
-      {
-      return;
-      }
-    }
+  m_ShowAdvanced = false;
+}
+
   
+void cmakewizard::AskUser(const char* key, cmCacheManager::CacheEntry & entry)
+{
   std::cout << "Variable Name: " << key << "\n";
   std::cout << "Description:   " << entry.m_HelpString << "\n";
   std::cout << "Current Value: " << entry.m_Value.c_str() << "\n";
@@ -36,15 +33,8 @@ void Ask(const char* key, cmCacheManager::CacheEntry & entry)
   std::cout << "\n";
 }
 
-
-int main(int ac, char** av)
+bool cmakewizard::AskAdvanced()
 {
-  std::vector<std::string> args;
-  for(int j=0; j < ac; ++j)
-    {
-    args.push_back(av[j]);
-    }
-  cmSystemTools::DisableRunCommandOutput();
   std::cout << "Would you like to see advanced options? [No]:";  
   char buffer[4096];
   buffer[0] = 0;
@@ -53,9 +43,24 @@ int main(int ac, char** av)
     {
     if(buffer[0] == 'y' || buffer[0] == 'Y')
       {
-      advanced = true;
+      return true;
       }
     }
+  return false;
+}
+
+
+void cmakewizard::ShowMessage(const char* m)
+{
+  std::cout << m << "\n";
+}
+
+
+
+void cmakewizard::RunWizard(std::vector<std::string> const& args)
+{
+  m_ShowAdvanced = this->AskAdvanced();
+  cmSystemTools::DisableRunCommandOutput();
   cmake make;
   cmCacheManager::CacheEntryMap askedCache;
   bool asked = false;
@@ -64,9 +69,9 @@ int main(int ac, char** av)
     {
     asked = false;
     // run cmake
-    std::cout << "Please wait while cmake processes CMakeLists.txt files....\n";
+    this->ShowMessage("Please wait while cmake processes CMakeLists.txt files....\n");
     make.Generate(args);
-    std::cout << "\n";
+    this->ShowMessage("\n");
     // load the cache from disk
     cmCacheManager::GetInstance()->
       LoadCache(cmSystemTools::GetCurrentWorkingDirectory().c_str());
@@ -88,22 +93,26 @@ int main(int ac, char** av)
         cmCacheManager::CacheEntry& e = askedCache.find(key)->second;
         if(e.m_Value != ce.m_Value)
           {
-          Ask(key.c_str(), ce);
-          asked = true;
+          if(m_ShowAdvanced || !cmCacheManager::GetInstance()->IsAdvanced(key.c_str()))
+            {
+            this->AskUser(key.c_str(), ce);
+            asked = true;
+            }
           }
         }
       else
-        {
-        Ask(key.c_str(), ce);
-        asked = true;
+        {    
+        if(m_ShowAdvanced || !cmCacheManager::GetInstance()->IsAdvanced(key.c_str()))
+          {
+          this->AskUser(key.c_str(), ce);
+          asked = true;
+          }
         }
       askedCache[key] = i->second;
       }
     cmCacheManager::GetInstance()->
       SaveCache(cmSystemTools::GetCurrentWorkingDirectory().c_str());
-
     }
   while(asked);
-  std::cout << "CMake complete, run make to build project.\n";
-  return 0;
+  this->ShowMessage("CMake complete, run make to build project.\n");
 }

@@ -93,7 +93,7 @@ IsFunctionBlocked(const char *name, const std::vector<std::string> &args,
 
 bool cmForEachFunctionBlocker::
 ShouldRemove(const char *name, const std::vector<std::string> &args, 
-             cmMakefile &mf) 
+             cmMakefile &) 
 {
   if (!strcmp(name,"ENDFOREACH") && args[0] == m_Args[0])
     {

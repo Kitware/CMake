@@ -15,6 +15,7 @@ all: cmake
 
 OBJS = \
 cmake.o  \
+cmakewizard.o  \
 cmakemain.o \
 cmMakeDepend.o \
 cmMakefile.o \
