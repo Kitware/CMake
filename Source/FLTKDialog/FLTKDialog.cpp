@@ -12,6 +12,7 @@ int main()
        = new CMakeSetupGUIImplementation;
 
   gui->Show();
+  gui->LoadCacheFromDiskToGUI();
 
   Fl::run();
 
