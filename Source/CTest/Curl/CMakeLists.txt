@@ -31,64 +31,64 @@ INCLUDE (${LIBCURL_SOURCE_DIR}/CMake/CheckSymbolExists.cmake)
 INCLUDE (${CMAKE_ROOT}/Modules/CheckTypeSize.cmake)
 
 SET(libCurl_SRCS
-    file.c
-    timeval.c
-    base64.c
-    hostip.c
-    progress.c
-    formdata.c
-    cookie.c
-    http.c
-    sendf.c
-    ftp.c
-    url.c
-    dict.c
-    if2ip.c
-    speedcheck.c
-    getdate.c
-    ldap.c
-    ssluse.c
-    version.c
-    getenv.c
-    escape.c
-    mprintf.c
-    telnet.c
-    getpass.c
-    netrc.c
-    getinfo.c
-    transfer.c
-    strequal.c
-    easy.c
-    security.c
-    krb4.c
-    http_chunks.c
-    strtok.c
-    connect.c
-    llist.c
-    hash.c
-    multi.c
-    content_encoding.c
-    )
+  file.c
+  timeval.c
+  base64.c
+  hostip.c
+  progress.c
+  formdata.c
+  cookie.c
+  http.c
+  sendf.c
+  ftp.c
+  url.c
+  dict.c
+  if2ip.c
+  speedcheck.c
+  getdate.c
+  ldap.c
+  ssluse.c
+  version.c
+  getenv.c
+  escape.c
+  mprintf.c
+  telnet.c
+  getpass.c
+  netrc.c
+  getinfo.c
+  transfer.c
+  strequal.c
+  easy.c
+  security.c
+  krb4.c
+  http_chunks.c
+  strtok.c
+  connect.c
+  llist.c
+  hash.c
+  multi.c
+  content_encoding.c
+  )
 
 OPTION(CURL_MALLOC_DEBUG "Debug mallocs in Curl" OFF)
 MARK_AS_ADVANCED(CURL_MALLOC_DEBUG)
 IF(CURL_MALLOC_DEBUG)
   SET(libCurl_SRCS ${libCurl_SRCS}
     memdebug.c
-  )
+    )
 ENDIF(CURL_MALLOC_DEBUG)
 
 # On windows preload settings
-#IF(WIN32)
-#  INCLUDE(${LIBCURL_SOURCE_DIR}/Platforms/WindowsCache.cmake)
-#ENDIF(WIN32)
+IF(WIN32)
+  INCLUDE(${LIBCURL_SOURCE_DIR}/Platforms/WindowsCache.cmake)
+ENDIF(WIN32)
 
 # This macro checks if the symbol exists in the library and if it
 # does, it appends library to the list.
 SET(CURL_LIBS "")
 MACRO(CHECK_LIBRARY_EXISTS_CONCAT LIBRARY SYMBOL VARIABLE)
   CHECK_LIBRARY_EXISTS("${LIBRARY};${CURL_LIBS}" ${SYMBOL} "" 
-                       ${VARIABLE})
+    ${VARIABLE})
   IF(${VARIABLE})
     SET(CURL_LIBS ${CURL_LIBS} ${LIBRARY})
   ENDIF(${VARIABLE})
@@ -108,7 +108,10 @@ CHECK_LIBRARY_EXISTS_CONCAT("ws2_32" getch        HAVE_LIBWS2_32)
 CHECK_LIBRARY_EXISTS_CONCAT("winmm"  getch        HAVE_LIBWINMM)
 CHECK_LIBRARY_EXISTS_CONCAT("z"      inflateEnd   HAVE_LIBZ)
 CHECK_LIBRARY_EXISTS_CONCAT("crypto" CRYPTO_lock  HAVE_LIBCRYPTO)
-CHECK_LIBRARY_EXISTS_CONCAT("ssl"    SSL_connect  HAVE_LIBSSL)
+
+IF(CMAKE_USE_OPENSSL)
+  CHECK_LIBRARY_EXISTS_CONCAT("ssl"    SSL_connect  HAVE_LIBSSL)
+ENDIF(CMAKE_USE_OPENSSL)
 
 # Check for symbol dlopen (same as HAVE_LIBDL)
 CHECK_LIBRARY_EXISTS("${CURL_LIBS}" dlopen "" HAVE_DLOPEN)
@@ -171,7 +174,7 @@ CHECK_INCLUDE_FILE_CONCAT("sys/socket.h"     HAVE_SYS_SOCKET_H)
 CHECK_INCLUDE_FILE_CONCAT("netinet/in.h"     HAVE_NETINET_IN_H)
 CHECK_INCLUDE_FILE_CONCAT("net/if.h"         HAVE_NET_IF_H)
 CHECK_INCLUDE_FILE_CONCAT("netinet/if_ether.h" 
-                          HAVE_NETINET_IF_ETHER_H)
+  HAVE_NETINET_IF_ETHER_H)
 CHECK_INCLUDE_FILE_CONCAT("sys/select.h"    HAVE_SYS_SELECT_H)
 CHECK_INCLUDE_FILE_CONCAT("utime.h"         HAVE_UTIME_H)
 CHECK_INCLUDE_FILE_CONCAT("netinet/in.h"    HAVE_NETINET_IN_H)
@@ -268,19 +271,19 @@ ENDIF(NOT HAVE_SIGSETJMP)
 MACRO(CURL_INTERNAL_TEST CURL_TEST)
   IF("${CURL_TEST}" MATCHES "^${CURL_TEST}$")
     SET(MACRO_CHECK_FUNCTION_DEFINITIONS 
-	"-D${CURL_TEST} ${CMAKE_REQUIRED_FLAGS}")
+      "-D${CURL_TEST} ${CMAKE_REQUIRED_FLAGS}")
     IF(CMAKE_REQUIRED_LIBRARIES)
       SET(CURL_TEST_ADD_LIBRARIES
-          "-DLINK_LIBRARIES:STRING=${CMAKE_REQUIRED_LIBRARIES}")
+        "-DLINK_LIBRARIES:STRING=${CMAKE_REQUIRED_LIBRARIES}")
     ENDIF(CMAKE_REQUIRED_LIBRARIES)
 
     MESSAGE(STATUS "Performing Curl Test ${CURL_TEST}")
     TRY_COMPILE(${CURL_TEST}
-                ${CMAKE_BINARY_DIR}
-                ${LIBCURL_SOURCE_DIR}/CMake/CurlTests.c
-                CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_FUNCTION_DEFINITIONS}
-                            "${CURL_TEST_ADD_LIBRARIES}"
-                OUTPUT_VARIABLE OUTPUT)
+      ${CMAKE_BINARY_DIR}
+      ${LIBCURL_SOURCE_DIR}/CMake/CurlTests.c
+      CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_FUNCTION_DEFINITIONS}
+      "${CURL_TEST_ADD_LIBRARIES}"
+      OUTPUT_VARIABLE OUTPUT)
     IF(${CURL_TEST})
       SET(${CURL_TEST} 1 CACHE INTERNAL "Curl test ${FUNCTION}")
       MESSAGE(STATUS "Performing Curl Test ${CURL_TEST} - Success")
@@ -296,40 +299,40 @@ ENDMACRO(CURL_INTERNAL_TEST)
 
 # Do curl specific tests
 FOREACH(CURL_TEST 
-        TIME_WITH_SYS_TIME
-        HAVE_O_NONBLOCK
-        HAVE_GETHOSTBYADDR_R_5
-        HAVE_GETHOSTBYADDR_R_7
-        HAVE_GETHOSTBYADDR_R_8
-        HAVE_GETHOSTBYADDR_R_5_REENTRANT
-        HAVE_GETHOSTBYADDR_R_7_REENTRANT
-        HAVE_GETHOSTBYADDR_R_8_REENTRANT
-        HAVE_GETHOSTBYNAME_R_3
-        HAVE_GETHOSTBYNAME_R_5
-        HAVE_GETHOSTBYNAME_R_6
-        HAVE_GETHOSTBYNAME_R_3_REENTRANT
-        HAVE_GETHOSTBYNAME_R_5_REENTRANT
-        HAVE_GETHOSTBYNAME_R_6_REENTRANT
-        HAVE_SOCKLEN_T
-        HAVE_IN_ADDR_T
-        STDC_HEADERS
-        RETSIGTYPE_TEST
-	HAVE_INET_NTOA_R_DECL
-	HAVE_INET_NTOA_R_DECL_REENTRANT
-        HAVE_GETADDRINFO
-        )
+    TIME_WITH_SYS_TIME
+    HAVE_O_NONBLOCK
+    HAVE_GETHOSTBYADDR_R_5
+    HAVE_GETHOSTBYADDR_R_7
+    HAVE_GETHOSTBYADDR_R_8
+    HAVE_GETHOSTBYADDR_R_5_REENTRANT
+    HAVE_GETHOSTBYADDR_R_7_REENTRANT
+    HAVE_GETHOSTBYADDR_R_8_REENTRANT
+    HAVE_GETHOSTBYNAME_R_3
+    HAVE_GETHOSTBYNAME_R_5
+    HAVE_GETHOSTBYNAME_R_6
+    HAVE_GETHOSTBYNAME_R_3_REENTRANT
+    HAVE_GETHOSTBYNAME_R_5_REENTRANT
+    HAVE_GETHOSTBYNAME_R_6_REENTRANT
+    HAVE_SOCKLEN_T
+    HAVE_IN_ADDR_T
+    STDC_HEADERS
+    RETSIGTYPE_TEST
+    HAVE_INET_NTOA_R_DECL
+    HAVE_INET_NTOA_R_DECL_REENTRANT
+    HAVE_GETADDRINFO
+    )
   CURL_INTERNAL_TEST(${CURL_TEST})
 ENDFOREACH(CURL_TEST)
 
 # Check for reentrant
 FOREACH(CURL_TEST
-        HAVE_GETHOSTBYADDR_R_5
-        HAVE_GETHOSTBYADDR_R_7
-        HAVE_GETHOSTBYADDR_R_8
-        HAVE_GETHOSTBYNAME_R_3
-        HAVE_GETHOSTBYNAME_R_5
-        HAVE_GETHOSTBYNAME_R_6
-	HAVE_INET_NTOA_R_DECL_REENTRANT)
+    HAVE_GETHOSTBYADDR_R_5
+    HAVE_GETHOSTBYADDR_R_7
+    HAVE_GETHOSTBYADDR_R_8
+    HAVE_GETHOSTBYNAME_R_3
+    HAVE_GETHOSTBYNAME_R_5
+    HAVE_GETHOSTBYNAME_R_6
+    HAVE_INET_NTOA_R_DECL_REENTRANT)
   IF(NOT ${CURL_TEST})
     IF(${CURL_TEST}_REENTRANT)
       SET(NEED_REENTRANT 1)
@@ -339,12 +342,12 @@ ENDFOREACH(CURL_TEST)
 
 IF(NEED_REENTRANT)
   FOREACH(CURL_TEST
-          HAVE_GETHOSTBYADDR_R_5
-          HAVE_GETHOSTBYADDR_R_7
-          HAVE_GETHOSTBYADDR_R_8
-          HAVE_GETHOSTBYNAME_R_3
-          HAVE_GETHOSTBYNAME_R_5
-          HAVE_GETHOSTBYNAME_R_6)
+      HAVE_GETHOSTBYADDR_R_5
+      HAVE_GETHOSTBYADDR_R_7
+      HAVE_GETHOSTBYADDR_R_8
+      HAVE_GETHOSTBYNAME_R_3
+      HAVE_GETHOSTBYNAME_R_5
+      HAVE_GETHOSTBYNAME_R_6)
     SET(${CURL_TEST} 0)
     IF(${CURL_TEST}_REENTRANT)
       SET(${CURL_TEST} 1)
@@ -381,10 +384,10 @@ ENDIF(NOT HAVE_ZLIB_H)
 
 SET(HAVE_SOME_NONBLOCK 0)
 FOREACH(CURL_TEST
-        HAVE_FIONBIO
-        HAVE_IOCTLSOCKET
-        HAVE_IOCTLSOCKET_CASE
-        HAVE_O_NONBLOCK)
+    HAVE_FIONBIO
+    HAVE_IOCTLSOCKET
+    HAVE_IOCTLSOCKET_CASE
+    HAVE_O_NONBLOCK)
   IF(${CURL_TEST})
     SET(HAVE_SOME_NONBLOCK 1)
   ENDIF(${CURL_TEST})
@@ -405,7 +408,7 @@ INCLUDE_DIRECTORIES(${LIBCURL_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${LIBCURL_BINARY_DIR})
 ADD_DEFINITIONS(-DHAVE_CONFIG_H)
 CONFIGURE_FILE(${LIBCURL_SOURCE_DIR}/config.h.in
-               ${LIBCURL_BINARY_DIR}/config.h)
+  ${LIBCURL_BINARY_DIR}/config.h)
 
 ADD_LIBRARY(Curl STATIC ${libCurl_SRCS})
 
