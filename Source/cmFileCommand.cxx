@@ -100,6 +100,7 @@ bool cmFileCommand::HandleWriteCommand(std::vector<std::string> const& args,
     }
   file << message;
   file.close();
+  m_Makefile->AddWrittenFile(fileName.c_str());
   return true;
 }
 

@@ -2357,5 +2357,26 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
   return 1;
 }
 
+void cmMakefile::AddWrittenFile(const char* file)
+{ this->GetCMakeInstance()->AddWrittenFile(file); }
 
+bool cmMakefile::HasWrittenFile(const char* file)
+{ return this->GetCMakeInstance()->HasWrittenFile(file); }
 
+bool cmMakefile::CheckInfiniteLoops()
+{
+  std::vector<std::string>::iterator it;
+  for ( it = m_ListFiles.begin();
+    it != m_ListFiles.end();
+    ++ it )
+    {
+    if ( this->HasWrittenFile(it->c_str()) )
+      {
+      cmOStringStream str;
+      str << "File " << it->c_str() << " is written by WRITE_FILE (or FILE WRITE) command and should not be used as input to CMake. Please use CONFIGURE_FILE to be safe. Refer to the note next to FILE WRITE command.";
+      cmSystemTools::Error(str.str().c_str());
+      return false;
+      }
+    }
+  return true;
+}

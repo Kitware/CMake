@@ -326,6 +326,7 @@ void cmGlobalGenerator::Configure()
         }
       m_CMakeInstance->UpdateProgress("Configuring", 
                                     0.9f+0.1f*(i+1.0f)/m_LocalGenerators.size());
+      m_LocalGenerators[i]->GetMakefile()->CheckInfiniteLoops();
       }
     }
 

@@ -257,7 +257,11 @@ class cmake
   ///! Debug the try compile stuff by not delelting the files
   bool GetDebugTryCompile(){return m_DebugTryCompile;}
   void DebugTryCompileOn(){m_DebugTryCompile = true;}
-  
+
+  ///! Get the list of files written by CMake using FILE(WRITE / WRITE_FILE
+  void AddWrittenFile(const char* file);
+  bool HasWrittenFile(const char* file);
+
 protected:
   typedef cmGlobalGenerator* (*CreateGeneratorFunctionType)();
   typedef std::map<cmStdString, CreateGeneratorFunctionType> RegisteredGeneratorsMap;
@@ -272,6 +276,8 @@ protected:
   std::string m_HomeOutputDirectory;
   std::string m_cmStartDirectory; 
   std::string m_StartOutputDirectory;
+
+  std::set<cmStdString> m_WrittenFiles;
 
   ///! return true if the same cmake was used to make the cache.
   bool CacheVersionMatches();

@@ -67,7 +67,13 @@ public:
       "  WRITE_FILE(filename \"message to write\"... [APPEND])\n"
       "The first argument is the file name, the rest of the arguments are "
       "messages to write. If the argument APPEND is specified, then "
-      "the message will be appended.";
+      "the message will be appended.\n"
+      "NOTE 1: FILE WRITE and FILE APPEND do exactly the same as this one "
+      "but add some more functionality.\n"
+      "NOTE 2: When using WRITE_FILE the produced file cannot be used as an "
+      "input to CMake (CONFIGURE_FILE, source file ...) because it will "
+      "lead to infinite loop. Use CONFIGURE_FILE if you want to generate "
+      "input files to CMake.";
     }
   
   cmTypeMacro(cmWriteFileCommand, cmCommand);

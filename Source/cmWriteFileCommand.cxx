@@ -55,6 +55,7 @@ bool cmWriteFileCommand::InitialPass(std::vector<std::string> const& args)
     }
   file << message << std::endl;
   file.close();
+  m_Makefile->AddWrittenFile(fileName.c_str());
 
   return true;
 }

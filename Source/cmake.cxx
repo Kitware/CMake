@@ -1416,3 +1416,13 @@ void cmake::GetGeneratorDocumentation(std::vector<cmDocumentationEntry>& v)
   cmDocumentationEntry empty = {0,0,0};
   v.push_back(empty);
 }
+
+void cmake::AddWrittenFile(const char* file)
+{
+  m_WrittenFiles.insert(file);
+}
+
+bool cmake::HasWrittenFile(const char* file)
+{
+  return m_WrittenFiles.find(file) != m_WrittenFiles.end();
+}
