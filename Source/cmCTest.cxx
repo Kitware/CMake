@@ -702,7 +702,7 @@ int cmCTest::UpdateDirectory()
             << "\t\t\t<PreviousRevision>" << srevision2 << "</PreviousRevision>\n"
             << "\t\t\t<Author>" << sauthor1<< "</Author>\n"
             << "\t\t\t<Date>" << sdate1 << "</Date>\n"
-            << "\t\t\t<Comment>" << comment1 << "</Comment>\n"
+            << "\t\t\t<Comment>" << this->MakeXMLSafe(comment1) << "</Comment>\n"
             << "\t\t\t<Email>" << semail1 << "</Email>\n"
             << "\t\t</Revisions>\n"
             << "\t\t<Revisions>\n"
@@ -710,7 +710,7 @@ int cmCTest::UpdateDirectory()
             << "\t\t\t<PreviousRevision>" << srevision2 << "</PreviousRevision>\n"
             << "\t\t\t<Author>" << sauthor2<< "</Author>\n"
             << "\t\t\t<Date>" << sdate2 << "</Date>\n"
-            << "\t\t\t<Comment>" << comment2 << "</Comment>\n"
+            << "\t\t\t<Comment>" << this->MakeXMLSafe(comment2) << "</Comment>\n"
             << "\t\t\t<Email>" << semail2 << "</Email>\n"
             << "\t\t</Revisions>" << std::endl;
           }
