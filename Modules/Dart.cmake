@@ -86,6 +86,15 @@ IF(BUILD_TESTING)
     ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Submit)
 
   IF (UNIX)
+    # Make targets for Experimental builds
+    ADD_CUSTOM_TARGET(ExperimentalBuild   
+    ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Start Build)
+    ADD_CUSTOM_TARGET(ExperimentalTest 
+    ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Test)
+    ADD_CUSTOM_TARGET(ExperimentalCoverage 
+    ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Coverage)
+
+    # Nightly
     ADD_CUSTOM_TARGET(Nightly 
     ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Start Build Test Submit)
     ADD_CUSTOM_TARGET(NightlyBuild   
