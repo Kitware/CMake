@@ -677,7 +677,7 @@ IF(BUILD_TESTING)
             --build-run-dir "${CMake_BINARY_DIR}/Tests/Java/"
             --test-command ${JAVA_RUNTIME} -classpath hello.jar HelloWorld)
         ELSE("${JNI_FILE}" MATCHES JDK1_2)
-          MESSAGE("No Java Test because ${JNI_FILE} does not contain JDK1_2 define")
+          MESSAGE("No Java Test because ${JNI_H} does not contain JDK1_2 define")
         ENDIF("${JNI_FILE}" MATCHES JDK1_2)
       ELSE(JNI_H) 
         MESSAGE("No Java Test because jni.h could not be found. tried:\n${JNIPATH}/../include and ${JNIPATH}/../java/include")
