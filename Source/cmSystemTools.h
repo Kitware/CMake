@@ -237,7 +237,10 @@ public:
 
   ///! Generate a temporary file name
   static std::string TemporaryFileName();
-  
+
+  ///! change directory the the directory specified
+  static int ChangeDirectory(const char* dir);
+    
 private:
   static bool s_ErrorOccured;
 };

@@ -906,6 +906,10 @@ bool cmSystemTools::FileIsDirectory(const char* name)
     }
 }
 
+int cmSystemTools::ChangeDirectory(const char *dir)
+{
+  return Chdir(dir);
+}
 
 std::string cmSystemTools::GetCurrentWorkingDirectory()
 {
