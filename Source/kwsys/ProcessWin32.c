@@ -975,10 +975,10 @@ int kwsysProcess_WaitForExit(kwsysProcess* cp, double* userTimeout)
                              &cp->ExitCode))
     {
     /* The child exited.  */
-    cp->State = kwsysProcess_State_Exited;
     if(cp->ExitCode & 0xC0000000)
       {
       /* Child terminated due to exceptional behavior.  */
+      cp->State = kwsysProcess_State_Exception;
       switch (cp->ExitCode)
         {
         case CONTROL_C_EXIT:          
@@ -1016,6 +1016,7 @@ int kwsysProcess_WaitForExit(kwsysProcess* cp, double* userTimeout)
     else
       {
       /* Child exited normally.  */
+      cp->State = kwsysProcess_State_Exited;
       cp->ExitException = kwsysProcess_Exception_None;
       cp->ExitValue = cp->ExitCode & 0x000000FF;
       }
