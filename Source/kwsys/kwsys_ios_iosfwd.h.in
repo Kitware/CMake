@@ -23,7 +23,6 @@
 
 #if @KWSYS_NAMESPACE@_IOS_USE_ANSI
 # include <iosfwd>
-# include <fstream>
 #else
 class fstream;
 class ifstream;
