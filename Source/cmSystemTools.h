@@ -86,6 +86,12 @@ public:
   static void GetPath(std::vector<std::string>& path);
 
   /**
+   *  Get the file extension (including ".") needed for an executable
+   *  on the current platform ("" for unix, ".exe" for Windows).
+   */
+  static const char* GetExecutableExtension();
+  
+  /**
    * Display an error message.
    */
   static void Error(const char* m, const char* m2=0 );

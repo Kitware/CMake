@@ -29,6 +29,7 @@ cmMakefile::cmMakefile()
   m_DefineFlags = " ";
   m_MakefileGenerator = 0;
   this->AddDefaultCommands();
+  this->AddDefaultDefinitions();
 }
 
 void cmMakefile::AddDefaultCommands()
@@ -523,5 +524,17 @@ void cmMakefile::GenerateCacheOnly()
     }
 }
 
-  
 
+/**
+ * Add the default definitions to the makefile.  These values must not
+ * be dependent on anything that isn't known when this cmMakefile instance
+ * is constructed.
+ */
+void cmMakefile::AddDefaultDefinitions()
+{
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  this->AddDefinition("CMAKE_CFG","$(CFG)");
+#else
+  this->AddDefinition("CMAKE_CFG",".");
+#endif
+}

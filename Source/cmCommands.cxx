@@ -39,6 +39,7 @@
 #include "cmWrapExcludeFilesCommand.cxx"
 #include "cmWrapTclCommand.cxx"
 #include "cmBuildSharedLibrariesCommand.cxx"
+#include "cmUtilitySourceCommand.cxx"
 
 void GetPredefinedCommands(std::list<cmCommand*>& commands)
 {
@@ -75,6 +76,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmWrapExcludeFilesCommand);  
   commands.push_back(new cmWrapTclCommand);
   commands.push_back(new cmBuildSharedLibrariesCommand);
+  commands.push_back(new cmUtilitySourceCommand);
 }
 
   

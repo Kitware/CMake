@@ -65,6 +65,17 @@ void cmSystemTools::GetPath(std::vector<std::string>& path)
     }
 }
 
+
+const char* cmSystemTools::GetExecutableExtension()
+{
+#if defined(_WIN32)
+  return ".exe";
+#else
+  return "";
+#endif  
+}
+
+
 bool cmSystemTools::MakeDirectory(const char* path)
 {
   std::string dir = path;

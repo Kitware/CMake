@@ -420,7 +420,7 @@ private:
 				// to the m_Classes array 
   void PrintStringVector(const char* s, std::vector<std::string>& v);
   void AddDefaultCommands();
-  
+  void AddDefaultDefinitions();
 };
 
 
