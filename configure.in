@@ -41,6 +41,7 @@ else
 fi
 
 CMAKE_ANSI_CFLAGS=""
+CMAKE_ANSI_CXXFLAGS=""
 # on hp use -Aa for ansi
 if test $ac_cv_prog_gxx = no; then
 case $system in
@@ -60,7 +61,7 @@ case $system in
         echo 'void f(){}' > conftest.c
         if test -z "`${CC} -LANG:std -c conftest.c 2>&1`"; then
           echo "$ac_t""yes" 1>&6
-          CMAKE_ANSI_CFLAGS="-LANG:std"
+          CMAKE_ANSI_CXXFLAGS="-LANG:std"
         else
           echo "$ac_t""no" 1>&6
         fi
@@ -69,6 +70,7 @@ case $system in
 esac
 fi
 AC_SUBST(CMAKE_ANSI_CFLAGS)
+AC_SUBST(CMAKE_ANSI_CXXFLAGS)
 
 # if we are not running g++ then we might need some other flags
 # to get the templates compiled correctly
