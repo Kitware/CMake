@@ -268,7 +268,7 @@ void SystemTools::ReplaceString(kwsys_std::string& source,
   searchPos = searchPos - src + orig;
   
   // initialize the result
-  source.clear();
+  source.erase(source.begin(),source.end());
   do
     {
     *searchPos = '\0';
