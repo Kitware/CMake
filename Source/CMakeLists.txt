@@ -659,21 +659,29 @@ IF(BUILD_TESTING)
 
     INCLUDE(FindJava)
     IF(JAVA_COMPILE AND JAVA_RUNTIME AND JAVA_ARCHIVE)
-      EXEC_PROGRAM(${JAVA_COMPILE} ARGS -version OUTPUT_VARIABLE OUT)
-      IF(OUT MATCHES "invalid flag")
-        MESSAGE("Skipping Java Test because ${JAVA_COMPILE} -version produced: ${OUT}")
-      ELSE(OUT MATCHES "invalid flag")
-        ADD_TEST(Java ${CMAKE_CTEST_COMMAND}
-          --build-and-test 
-          "${CMake_SOURCE_DIR}/Tests/Java"
-          "${CMake_BINARY_DIR}/Tests/Java"
-          --build-generator ${CMAKE_GENERATOR}
-          --build-project hello
-          --build-makeprogram ${MAKEPROGRAM}
-          --build-two-config 
-          --build-run-dir "${CMake_BINARY_DIR}/Tests/Java/"
-          --test-command ${JAVA_RUNTIME} -classpath hello.jar HelloWorld)
-      ENDIF(OUT MATCHES "invalid flag")
+      GET_FILENAME_COMPONENT(JNIPATH ${JAVA_COMPILE} PATH)
+      FIND_FILE(JNI_H jni.h
+        "${JNIPATH}/../include"
+        "${JNIPATH}/../java/include")
+      IF(JNI_H)
+        FILE(READ ${JNI_H} JNI_FILE)
+        IF("${JNI_FILE}" MATCHES JDK1_2)
+          ADD_TEST(Java ${CMAKE_CTEST_COMMAND}
+            --build-and-test 
+            "${CMake_SOURCE_DIR}/Tests/Java"
+            "${CMake_BINARY_DIR}/Tests/Java"
+            --build-generator ${CMAKE_GENERATOR}
+            --build-project hello
+            --build-makeprogram ${MAKEPROGRAM}
+            --build-two-config 
+            --build-run-dir "${CMake_BINARY_DIR}/Tests/Java/"
+            --test-command ${JAVA_RUNTIME} -classpath hello.jar HelloWorld)
+        ELSE("${JNI_FILE}" MATCHES JDK1_2)
+          MESSAGE("No Java Test because ${JNI_FILE} does not contain JDK1_2 define")
+        ENDIF("${JNI_FILE}" MATCHES JDK1_2)
+      ELSE(JNI_H) 
+        MESSAGE("No Java Test because jni.h could not be found. tried:\n${JNIPATH}/../include and ${JNIPATH}/../java/include")
+      ENDIF(JNI_H) 
     ENDIF(JAVA_COMPILE AND JAVA_RUNTIME AND JAVA_ARCHIVE)
   ENDIF(CMAKE_GENERATOR MATCHES "Makefiles")
   
