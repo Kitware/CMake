@@ -145,7 +145,6 @@ int main (int argc, char **argv)
   makeCommand = cmSystemTools::ConvertToOutputPath(makeCommand.c_str());
   std::string lowerCaseCommand = makeCommand;
   cmSystemTools::LowerCase(lowerCaseCommand);
-  std::string dartMakeCommand = DART_MAKECOMMAND;
   // if msdev is the make program then do the following
   // MSDEV 6.0
   if(lowerCaseCommand.find("msdev") != std::string::npos)

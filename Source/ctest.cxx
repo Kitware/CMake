@@ -64,7 +64,6 @@ std::string ctest::FindExecutable(const char *exe)
       {
       return fullPath;
       }
-    std::string tried = dir;
     dir += "/";
     dir += m_ConfigType;
     dir += "/";

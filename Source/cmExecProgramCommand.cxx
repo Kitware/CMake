@@ -32,7 +32,6 @@ bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& args)
   bool haveoutput_variable = false;
   std::string return_variable;
   bool havereturn_variable = false;
-  std::string e_command;
   for(size_t i=0; i < args.size(); ++i)
     {
     if(args[i] == "OUTPUT_VARIABLE")

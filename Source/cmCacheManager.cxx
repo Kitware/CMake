@@ -128,11 +128,6 @@ bool cmCacheManager::LoadCache(const char* path,
   const int bsize = 4096;
   char buffer[bsize];
   char *realbuffer;
-  // input line is:         key:type=value
-  cmRegularExpression reg("^([^:]*):([^=]*)=(.*[^\t ]|[\t ]*)[\t ]*$");
-  // input line is:         "key":type=value
-  cmRegularExpression regQuoted("^\"([^\"]*)\":([^=]*)=(.*[^\t ]|[\t ]*)[\t ]*$");
-
   std::string entryKey;
   while(fin)
     {

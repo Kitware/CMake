@@ -88,8 +88,6 @@ bool cmListFileCache::CacheFile(const char* path)
     cmSystemTools::Error("cmListFileCache: error can not open file ", path);
     return false;
     }
-  std::string name;
-  std::vector<std::string> arguments;
   cmListFile inFile;
   inFile.m_ModifiedTime = cmSystemTools::ModifiedTime(path);
   bool parseError;

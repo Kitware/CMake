@@ -76,7 +76,6 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args)
                   outputDirectory.c_str(), "cxx",!headerFileOnly);
       std::string origname = cdir + "/" + *i;
       std::string hname   = header_file.GetFullPath();
-      std::string cxxname = source_file.GetFullPath();
       m_WrapUserInterface.push_back(origname);
       // add starting depends
       source_file.GetDepends().push_back(hname);

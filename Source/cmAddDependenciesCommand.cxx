@@ -35,7 +35,6 @@ bool cmAddDependenciesCommand::InitialPass(std::vector<std::string> const& argsI
     {
     std::vector<std::string>::const_iterator s = args.begin();
     ++s;
-    std::string depend_target;
     for (; s != args.end(); ++s)
       {
       tgts[target_name].AddUtility(s->c_str());

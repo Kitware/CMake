@@ -34,7 +34,6 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
 
   std::string source, command, target;
   std::vector<std::string> command_args, depends, outputs;
-  std::string outDir = m_Makefile->GetCurrentOutputDirectory();
 
   enum tdoing {
     doing_source,
