@@ -27,6 +27,41 @@
 #include <stdio.h>
 #include <time.h>
 
+#ifdef HAVE_CURL
+static struct tm* GetNightlyTime(std::string str)
+{
+  int hour;
+  int min;
+  int sec;
+  char stz[100];
+  int tz;
+  struct tm* lctime;
+  time_t tctime = time(0);
+  //Convert the nightly start time to seconds. Since we are
+  //providing only a time and a timezone, the current date of
+  //the local machine is assumed. Consequently, nightlySeconds
+  //is the time at which the nightly dashboard was opened or
+  //will be opened on the date of the current client machine.
+  //As such, this time may be in the past or in the future.
+  time_t ntime = curl_getdate(str.c_str(), &tctime);
+  tctime = time(0);
+  //std::cout << "Seconds: " << tctime << std::endl;
+  if ( ntime > tctime )
+    {
+    // If nightlySeconds is in the past, this is the current
+    // open dashboard, then return nightlySeconds.  If
+    // nightlySeconds is in the future, this is the next
+    // dashboard to be opened, so subtract 24 hours to get the
+    // time of the current open dashboard
+    ntime -= (24 * 60 * 60 );
+    //std::cout << "Pick yesterday" << std::endl;
+    }
+  //std::cout << "nightlySeconds: " << ntime << std::endl;
+  lctime = gmtime(&ntime);
+  return lctime;
+}
+#endif
+
 static std::string CleanString(std::string str)
 {
   std::string::size_type spos = str.find_first_not_of(" \n\t");
@@ -287,35 +322,7 @@ void cmCTest::Initialize()
       //std::cout << "TestModel: " << m_TestModel << std::endl;
       if ( m_TestModel == cmCTest::NIGHTLY )
         {
-        int hour;
-        int min;
-        int sec;
-        char stz[100];
-        int tz;
-        tctime = time(0);
-        //Convert the nightly start time to seconds. Since we are
-        //providing only a time and a timezone, the current date of
-        //the local machine is assumed. Consequently, nightlySeconds
-        //is the time at which the nightly dashboard was opened or
-        //will be opened on the date of the current client machine.
-        //As such, this time may be in the past or in the future.
-        time_t ntime = curl_getdate(
-          m_DartConfiguration["NightlyStartTime"].c_str(), 
-          &tctime);
-        tctime = time(0);
-        //std::cout << "Seconds: " << tctime << std::endl;
-        if ( ntime > tctime )
-          {
-          // If nightlySeconds is in the past, this is the current
-          // open dashboard, then return nightlySeconds.  If
-          // nightlySeconds is in the future, this is the next
-          // dashboard to be opened, so subtract 24 hours to get the
-          // time of the current open dashboard
-          ntime -= (24 * 60 * 60 );
-          //std::cout << "Pick yesterday" << std::endl;
-          }
-        //std::cout << "nightlySeconds: " << ntime << std::endl;
-        lctime = gmtime(&ntime);
+        lctime = ::GetNightlyTime(m_DartConfiguration["NightlyStartTime"]);
         }
 #endif
       char datestring[100];
@@ -476,14 +483,15 @@ int cmCTest::UpdateDirectory()
   std::string extra_update_opts;
   if ( m_TestModel == cmCTest::NIGHTLY )
     {
-    time_t currenttime = time(0);
-    struct tm* t = localtime(&currenttime);
+    struct tm* t = ::GetNightlyTime(m_DartConfiguration["NightlyStartTime"]);
     char current_time[1024];
-    strftime(current_time, 1000, "%Y-%m-%d ", t);
+    strftime(current_time, 1000, "%Y-%m-%d %H:%M:%S %Z", t);
+    std::string today_update_date = current_time;
    
-    std::string today_update_date = current_time + 
-      m_DartConfiguration["NightlyStartTime"];
+    //std::string today_update_date = current_time + 
+    //  m_DartConfiguration["NightlyStartTime"];
     extra_update_opts += "-D \"" + today_update_date +"\"";
+    //std::cout << "Update: " << extra_update_opts << std::endl;
     }
 
   std::string command = cvsCommand + " -z3 update " + cvsOptions +
