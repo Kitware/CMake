@@ -89,6 +89,12 @@ int main (int argc, char *argv[])
   // arguments to run tests.
   if(argc > 1 || !cmSystemTools::FileExists("DartTestfile.txt"))
     {
+    if(argc == 1)
+      {
+      std::cout << "*********************************" << std::endl;
+      std::cout << "No test configuration file found!" << std::endl;
+      std::cout << "*********************************" << std::endl;
+      }
     cmDocumentation doc;
     if(doc.CheckOptions(argc, argv))
       {
