@@ -797,19 +797,19 @@ void cmMakefile::AddIncludeDirectory(const char* inc, bool before)
     }
 }
 
-
 void cmMakefile::AddDefinition(const char* name, const char* value)
 {
   if (!value )
     {
     return;
     }
-  m_Definitions.erase( DefinitionMap::key_type(name));
-  m_Definitions.insert(DefinitionMap::value_type(name, value));
+  m_TemporaryDefinitionKey = name;
+  m_Definitions[m_TemporaryDefinitionKey] = value;
   cmVariableWatch* vv = this->GetVariableWatch();
   if ( vv )
     {
-    vv->VariableAccessed(name, cmVariableWatch::VARIABLE_MODIFIED_ACCESS);
+    vv->VariableAccessed(m_TemporaryDefinitionKey, 
+                         cmVariableWatch::VARIABLE_MODIFIED_ACCESS);
     }
 }
 
@@ -1034,7 +1034,6 @@ void cmMakefile::AddUtilityCommand(const char* utilityName,
 cmSourceFile *cmMakefile::GetSourceFileWithOutput(const char *cname)
 {
   std::string name = cname;
-  std::string out;
 
   // look through all the source files that have custom commands
   // and see if the custom command has the passed source file as an output
@@ -1046,7 +1045,7 @@ cmSourceFile *cmMakefile::GetSourceFileWithOutput(const char *cname)
     if ((*i)->GetCustomCommand())
       {
       // is the output of the custom command match the source files name
-      out = (*i)->GetCustomCommand()->GetOutput();
+      const std::string &out = (*i)->GetCustomCommand()->GetOutput();
       if (out.rfind(name) != out.npos &&
           out.rfind(name) == out.size() - name.size())
         {
@@ -1432,14 +1431,6 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
             result += var;
             result += "@";
             }
-          // do nothing, we remove the variable
-/*          else
-            {
-            result += (markerStartSize == 5 ? "$ENV{" : "${");
-            result += var;
-            result += "}";
-            }
-*/
           }
         // lookup var, and replace it
         currentPos = endVariablePos+1;
@@ -1573,10 +1564,12 @@ void cmMakefile::ExpandArguments(
   std::vector<std::string>& outArgs)
 {
   std::vector<cmListFileArgument>::const_iterator i;
+  std::string value;
+  outArgs.reserve(inArgs.size());
   for(i = inArgs.begin(); i != inArgs.end(); ++i)
     {
     // Expand the variables in the argument.
-    std::string value = i->Value;
+    value = i->Value;
     this->ExpandVariablesInString(value);
     
     // If the argument is quoted, it should be one argument.
@@ -1678,21 +1671,17 @@ cmSourceFile* cmMakefile::GetSource(const char* sourceName) const
   // if the source is provided with a full path use it, otherwise
   // by default it is in the current source dir
   std::string path = cmSystemTools::GetFilenamePath(sourceName);
-  std::string s = sourceName;
   if (path.empty())
     {
-    s = this->GetCurrentDirectory();
-    s += "/";
-    s += cmSystemTools::GetFilenameName(sourceName);
     path = this->GetCurrentDirectory();
     }
+
   std::string sname = 
-    cmSystemTools::GetFilenameWithoutLastExtension(s);
+    cmSystemTools::GetFilenameWithoutLastExtension(sourceName);
 
   // compute the extension
-  std::string ext;
-  ext = cmSystemTools::GetFilenameLastExtension(s);
-  s = s.substr(0, s.length()-ext.length());
+  std::string ext
+    = cmSystemTools::GetFilenameLastExtension(sourceName);
   if ( ext.length() && ext[0] == '.' )
     {
     ext = ext.substr(1);
@@ -1715,19 +1704,7 @@ cmSourceFile* cmMakefile::GetSource(const char* sourceName) const
     return 0;
     }
     
-  s = this->GetCurrentOutputDirectory();
-  s += "/";
-  s += cmSystemTools::GetFilenameName(sourceName);
   path = this->GetCurrentOutputDirectory();
-
-  // compute the extension
-  ext = cmSystemTools::GetFilenameLastExtension(s);
-  s = s.substr(0, s.length()-ext.length());
-  if ( ext.length() && ext[0] == '.' )
-    {
-    ext = ext.substr(1);
-    }
-
   for(std::vector<cmSourceFile*>::const_iterator i = m_SourceFiles.begin();
       i != m_SourceFiles.end(); ++i)
     {

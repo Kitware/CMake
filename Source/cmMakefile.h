@@ -669,6 +669,9 @@ private:
   typedef std::map<cmStdString, cmData*> DataMap;
   DataMap m_DataMap;
   bool m_Inheriting;
+
+  // used in AddDefinition for performance improvement
+  DefinitionMap::key_type  m_TemporaryDefinitionKey;
 };
 
 
