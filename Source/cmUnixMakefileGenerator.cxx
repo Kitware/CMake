@@ -48,6 +48,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmGeneratedFileStream.h"
 
 cmUnixMakefileGenerator::cmUnixMakefileGenerator()
+  :m_ObjectFileExtension(".o"),
+   m_ExecutableExtension(""),
+   m_StaticLibraryExtension(".a"),
+   m_SharedLibraryExtension("$(SHLIB_SUFFIX)"),
+   m_LibraryPrefix("lib")
 {
   m_CacheOnly = false;
   m_Recurse = false;
@@ -309,7 +314,8 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
          l->second.GetType() == cmTarget::WIN32_EXECUTABLE) &&
         l->second.IsInAll())
       {
-      fout << " \\\n" << m_ExecutableOutputPath << l->first.c_str();
+      fout << " \\\n" << m_ExecutableOutputPath << l->first.c_str() 
+           << m_ExecutableExtension;
       }
     }
   // list utilities last
@@ -336,7 +342,8 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
 	  {
 	    if(!i->IsAHeaderFileOnly())
 	      {
-		fout << "\\\n" << i->GetSourceName() << ".o ";
+              fout << "\\\n" << i->GetSourceName() 
+                   << m_ObjectFileExtension << " ";
 	      }
 	  }
 	fout << "\n\n";
@@ -964,7 +971,7 @@ void cmUnixMakefileGenerator::OutputObjectDepends(std::ostream& fout)
         {
         if(!source->GetDepends().empty())
           {
-          fout << source->GetSourceName() << ".o :";
+          fout << source->GetSourceName() << m_ObjectFileExtension << " :";
           // Iterate through all the dependencies for this source.
           for(std::vector<std::string>::const_iterator dep =
                 source->GetDepends().begin();
@@ -1407,7 +1414,7 @@ OutputBuildObjectFromSource(std::ostream& fout,
 {
             
   std::string comment = "Build ";
-  std::string objectFile = std::string(shortName) + ".o";
+  std::string objectFile = std::string(shortName) + m_ObjectFileExtension;
   comment += objectFile + "  From ";
   comment += source.GetFullPath();
   std::string compileCommand;
@@ -1449,7 +1456,8 @@ OutputBuildObjectFromSource(std::ostream& fout,
 
 void cmUnixMakefileGenerator::OutputSourceObjectBuildRules(std::ostream& fout)
 {
-  fout << "# Rules to build .o files from their sources:\n";
+  fout << "# Rules to build " << m_ObjectFileExtension 
+       << " files from their sources:\n";
 
   std::set<std::string> rules;
   

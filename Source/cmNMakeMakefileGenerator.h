@@ -72,6 +72,30 @@ protected:
                                    const char* directory,
                                    const char* target1,
                                    const char* target2);
+  void OutputMakeRule(std::ostream& fout, 
+                      const char* comment,
+                      const char* target,
+                      const char* depends, 
+                      const char* command,
+                      const char* command2=0,
+                      const char* command3=0,
+                      const char* command4=0); 
+  
+  
+  virtual void OutputBuildObjectFromSource(std::ostream& fout,
+                                           const char* shortName,
+                                           const cmSourceFile& source,
+                                           const char* extraCompileFlags,
+                                           bool sharedTarget); 
+  virtual void OutputSharedLibraryRule(std::ostream&, const char* name,
+                                       const cmTarget &);
+  virtual void OutputModuleLibraryRule(std::ostream&, const char* name, 
+                                       const cmTarget &);
+  virtual void OutputStaticLibraryRule(std::ostream&, const char* name,
+                                       const cmTarget &);
+  virtual void OutputExecutableRule(std::ostream&, const char* name,
+                                    const cmTarget &);
+  
 };
 
 #endif

@@ -49,6 +49,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 cmNMakeMakefileGenerator::cmNMakeMakefileGenerator()
 {
+  this->SetObjectFileExtension(".obj");
+  this->SetExecutableExtension(".exe");
 }
 
 cmNMakeMakefileGenerator::~cmNMakeMakefileGenerator()
@@ -57,6 +59,17 @@ cmNMakeMakefileGenerator::~cmNMakeMakefileGenerator()
 
 void cmNMakeMakefileGenerator::ComputeSystemInfo()
 {
+  // now load the settings
+  if(!m_Makefile->GetDefinition("CMAKE_ROOT"))
+    {
+    cmSystemTools::Error(
+      "CMAKE_ROOT has not been defined, bad GUI or driver program");
+    return;
+    }
+  std::string fpath = 
+    m_Makefile->GetDefinition("CMAKE_ROOT");
+  fpath += "/Templates/CMakeNMakeWindowsSystemConfig.cmake";
+  m_Makefile->ReadListFile(NULL,fpath.c_str());
 }
 
 void cmNMakeMakefileGenerator::OutputMakeVariables(std::ostream& fout)
@@ -66,7 +79,11 @@ void cmNMakeMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     "# general varibles used in the makefile\n"
     "\n"
     "# Path to cmake\n"
-    "CMAKE_COMMAND = ${CMAKE_COMMAND}\n";
+    "CMAKE_COMMAND = ${CMAKE_COMMAND}\n"    
+    "CMAKE_C_COMPILER    = @CMAKE_C_COMPILER@\n"
+    "CMAKE_CFLAGS        = @CMAKE_C_FLAGS@\n"
+    "CMAKE_CXX_COMPILER  = @CMAKE_CXX_COMPILER@\n"
+    "CMAKE_CXXFLAGS      = @CMAKE_CXX_FLAGS@\n";
   std::string replaceVars = variables;
   m_Makefile->ExpandVariablesInString(replaceVars);
   fout << replaceVars.c_str();
@@ -115,3 +132,145 @@ void cmNMakeMakefileGenerator::BuildInSubDirectory(std::ostream& fout,
     fout << "\t$(MAKE) -$(MAKEFLAGS) " << target2 << "\n";
     }
 }
+
+// This needs to be overriden because nmake requires commands to be quoted
+// if the are full paths to the executable????
+
+void cmNMakeMakefileGenerator::OutputMakeRule(std::ostream& fout, 
+                                              const char* comment,
+                                              const char* target,
+                                              const char* depends, 
+                                              const char* command,
+                                              const char* command2,
+                                              const char* command3,
+                                              const char* command4)
+{
+  if(!target)
+    {
+    cmSystemTools::Error("no target for OutputMakeRule");
+    return;
+    }
+  
+  std::string replace;
+  if(comment)
+    {
+    replace = comment;
+    m_Makefile->ExpandVariablesInString(replace);
+    fout << "#---------------------------------------------------------\n";
+    fout << "# " << comment;
+    fout << "\n#\n";
+    }
+  fout << "\n";
+  replace = target;
+  m_Makefile->ExpandVariablesInString(replace);
+  fout << replace.c_str() << ": ";
+  if(depends)
+    {
+    replace = depends;
+    m_Makefile->ExpandVariablesInString(replace);
+    fout << replace.c_str();
+    }
+  fout << "\n";
+  if(command)
+    {
+    replace = command;
+    m_Makefile->ExpandVariablesInString(replace);
+    fout << "\t\"" << replace.c_str() << "\"\n";
+    }
+  if(command2)
+    {
+    replace = command2;
+    m_Makefile->ExpandVariablesInString(replace);
+    fout << "\t\"" << replace.c_str() << "\"\n";
+    }
+  if(command3)
+    {
+    replace = command3;
+    m_Makefile->ExpandVariablesInString(replace);
+    fout << "\t\"" << replace.c_str() << "\"\n";
+    }
+  if(command4)
+    {
+    replace = command4;
+    m_Makefile->ExpandVariablesInString(replace);
+    fout << "\t\"" << replace.c_str() << "\"\n";
+    }
+  fout << "\n";
+}
+
+void 
+cmNMakeMakefileGenerator::
+OutputBuildObjectFromSource(std::ostream& fout,
+                            const char* shortName,
+                            const cmSourceFile& source,
+                            const char* extraCompileFlags,
+                            bool shared)
+{ 
+  std::string comment = "Build ";
+  std::string objectFile = std::string(shortName) + ".obj";
+  comment += objectFile + "  From ";
+  comment += source.GetFullPath();
+  std::string compileCommand;
+  std::string ext = source.GetSourceExtension();
+  if(ext == "c" )
+    {
+    compileCommand = "$(CMAKE_C_COMPILER) $(CMAKE_CFLAGS) ";
+    compileCommand += extraCompileFlags;
+    if(shared)
+      {
+      compileCommand += "$(CMAKE_SHLIB_CFLAGS) ";
+      }
+    compileCommand += "$(INCLUDE_FLAGS) -c ";
+    compileCommand += source.GetFullPath();
+    compileCommand += " /Fo";
+    compileCommand += objectFile;
+    }
+  else
+    {
+    compileCommand = "$(CMAKE_CXX_COMPILER) $(CMAKE_CXXFLAGS) ";
+    compileCommand += extraCompileFlags;
+    if(shared)
+      {
+      compileCommand += "$(CMAKE_SHLIB_CFLAGS) ";
+      }
+    compileCommand += "$(INCLUDE_FLAGS) -c ";
+    compileCommand += source.GetFullPath();
+    compileCommand += " /Fo";
+    compileCommand += objectFile;
+    }
+  this->OutputMakeRule(fout,
+                       comment.c_str(),
+                       objectFile.c_str(),
+                       source.GetFullPath().c_str(),
+                       compileCommand.c_str());
+}
+
+void cmNMakeMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout, 
+                                                       const char* name,
+                                                       const cmTarget &target)
+{
+  cmUnixMakefileGenerator::OutputSharedLibraryRule(fout, name, target);
+}
+
+void cmNMakeMakefileGenerator::OutputModuleLibraryRule(std::ostream& fout, 
+                                                       const char* name, 
+                                                       const cmTarget &target)
+{
+  cmUnixMakefileGenerator::OutputModuleLibraryRule(fout, name, target);
+}
+
+void cmNMakeMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout, 
+                                                       const char* name,
+                                                       const cmTarget &target)
+{
+  cmUnixMakefileGenerator::OutputStaticLibraryRule(fout, name, target);
+}
+
+void cmNMakeMakefileGenerator::OutputExecutableRule(std::ostream& fout,
+                                                    const char* name,
+                                                    const cmTarget &target)
+{
+  cmUnixMakefileGenerator::OutputExecutableRule(fout, name, target);
+}
+
+  

@@ -151,11 +151,21 @@ protected:
                       const char* command2 = 0,
                       const char* command3 = 0,
                       const char* command4 = 0);
+  void SetObjectFileExtension(const char* e) { m_ObjectFileExtension = e;}
+  void SetExecutableExtension(const char* e) { m_ExecutableExtension = e;}
+  void SetStaticLibraryExtension(const char* e) {m_StaticLibraryExtension = e;}
+  void SetSharedLibraryExtension(const char* e) {m_SharedLibraryExtension = e;}
+  void SetLibraryPrefix(const char* e) { m_LibraryPrefix = e;}
 private:
   bool m_CacheOnly;
   bool m_Recurse;
   std::string m_ExecutableOutputPath;
   std::string m_LibraryOutputPath;
+  std::string m_ObjectFileExtension;
+  std::string m_ExecutableExtension;
+  std::string m_StaticLibraryExtension;
+  std::string m_SharedLibraryExtension;
+  std::string m_LibraryPrefix;
 };
 
 #endif
