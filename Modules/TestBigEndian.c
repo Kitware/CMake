@@ -6,5 +6,5 @@ int main () {
     char c[sizeof (long)];
   } u;
   u.l = 1;
-  exit (u.c[sizeof (long) - 1] == 1);
+  return (u.c[sizeof (long) - 1] == 1)?1:0;
 }
