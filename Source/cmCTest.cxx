@@ -4222,7 +4222,7 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
   out << "Running make command: " << makeCommand.c_str() << "\n";
   retVal = 0;
   std::string output;
-  if (!cmSystemTools::RunSingleCommand(makeCommand.c_str(), (m_Verbose?&output:0), &retVal, 0, false))
+  if (!cmSystemTools::RunSingleCommand(makeCommand.c_str(), &output, &retVal, 0, false))
     {
     out << "Error: " << makeCommand.c_str() <<  "  execution failed\n";
     out << output.c_str() << "\n";
