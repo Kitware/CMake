@@ -6,13 +6,21 @@
 # as a default compiler
 
 IF(NOT CMAKE_C_COMPILER)
-  SET(CMAKE_C_COMPILER_LIST ${CMAKE_GENERATOR_CC} gcc cc cl bcc )  
+  # if the user has specified CC via the environment, then use that without checking
   IF($ENV{CC} MATCHES ".+")
-    SET(CMAKE_C_COMPILER_LIST $ENV{CXX})
+    SET(CMAKE_C_COMPILER_INIT $ENV{CC})
+    # make sure we can find it
+    FIND_PROGRAM(CMAKE_C_COMPILER_FULLPATH NAMES $ENV{CC})
+    IF(NOT CMAKE_C_COMPILER_FULLPATH)
+      MESSAGE(SEND_ERROR "Could not find compiler set in environment variable CC:\n$ENV{CC}, make sure CC does not have flags in it, use CFLAGS instead.") 
+    ENDIF(NOT CMAKE_C_COMPILER_FULLPATH)
+  ELSE($ENV{CC} MATCHES ".+")
+  # if not in the envionment then search for the compiler in the path
+    SET(CMAKE_C_COMPILER_LIST ${CMAKE_GENERATOR_CC} gcc cc cl bcc )  
+    FIND_PROGRAM(CMAKE_C_COMPILER_FULLPATH NAMES ${CMAKE_C_COMPILER_LIST} )
+    GET_FILENAME_COMPONENT(CMAKE_C_COMPILER_INIT
+                           ${CMAKE_C_COMPILER_FULLPATH} NAME)
   ENDIF($ENV{CC} MATCHES ".+")
-  FIND_PROGRAM(CMAKE_C_COMPILER_FULLPATH NAMES ${CMAKE_C_COMPILER_LIST} )
-  GET_FILENAME_COMPONENT(CMAKE_C_COMPILER_INIT
-                         ${CMAKE_C_COMPILER_FULLPATH} NAME)
   # set this to notfound right after so that it is searched for each time this
   # file is included
   SET(CMAKE_C_COMPILER ${CMAKE_C_COMPILER_INIT} CACHE STRING "C compiler")

@@ -6,20 +6,23 @@
 # as a default compiler
 
 IF(NOT CMAKE_CXX_COMPILER)
-  SET(CMAKE_CXX_COMPILER_LIST ${CMAKE_GENERATOR_CXX} c++ g++ CC aCC cl bcc )
+  # if the user has specified CC via the environment, then use that without checking
   IF($ENV{CXX} MATCHES ".+")
-    SET(CMAKE_CXX_COMPILER_LIST $ENV{CXX})
+    SET(CMAKE_CXX_COMPILER_INIT $ENV{CXX})
+    # make sure we can find it
+    FIND_PROGRAM(CMAKE_CXX_COMPILER_FULLPATH NAMES $ENV{CXX})
+    IF(NOT CMAKE_CXX_COMPILER_FULLPATH)
+      MESSAGE(SEND_ERROR "Could not find compiler set in environment variable CXX:\n$ENV{CXX}, make sure CXX does not have flags in it, use CXXFLAGS instead.")
+    ENDIF(NOT CMAKE_CXX_COMPILER_FULLPATH)
+  ELSE($ENV{CXX} MATCHES ".+")
+  # if not in the envionment then search for the compiler in the path
+    SET(CMAKE_CXX_COMPILER_LIST ${CMAKE_GENERATOR_CXX} c++ g++ CC aCC cl bcc )
+    FIND_PROGRAM(CMAKE_CXX_COMPILER_FULLPATH NAMES ${CMAKE_CXX_COMPILER_LIST})
+    GET_FILENAME_COMPONENT(CMAKE_CXX_COMPILER_INIT
+                           ${CMAKE_CXX_COMPILER_FULLPATH} NAME)
   ENDIF($ENV{CXX} MATCHES ".+")
-  FIND_PROGRAM(CMAKE_CXX_COMPILER_FULLPATH NAMES ${CMAKE_CXX_COMPILER_LIST})
-  GET_FILENAME_COMPONENT(CMAKE_CXX_COMPILER_INIT
-                         ${CMAKE_CXX_COMPILER_FULLPATH} NAME)
   SET(CMAKE_CXX_COMPILER ${CMAKE_CXX_COMPILER_INIT} 
       CACHE STRING "C++ compiler") 
-  IF($ENV{CXX} MATCHES ".+")
-    IF(NOT CMAKE_CXX_COMPILER)
-       MESSAGE(SEND_ERROR "Could not find compiler set in environment variable CXX:\n$ENV{CXX}, make sure CXX does not have flags in it, use CXXFLAGS instead.")
-    ENDIF(NOT CMAKE_CXX_COMPILER) 
-  ENDIF($ENV{CXX} MATCHES ".+")
 ENDIF(NOT CMAKE_CXX_COMPILER)
 MARK_AS_ADVANCED(CMAKE_CXX_COMPILER)
 
