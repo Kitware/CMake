@@ -49,6 +49,31 @@ IF(NOT SHOULD_FAIL)
 ELSE(NOT SHOULD_FAIL)
   MESSAGE("Test failed")
 ENDIF(NOT SHOULD_FAIL)
+TRY_COMPILE(CMAKE_ANSI_FOR_SCOPE   ${TryCompile_BINARY_DIR}/CMakeTmp 
+    ${CMAKE_ROOT}/Modules/TestForAnsiForScope.cxx OUTPUT_VARIABLE OUT)
+IF (CMAKE_ANSI_FOR_SCOPE)
+   MESSAGE("Compiler supports ansi for")
+ELSE(CMAKE_ANSI_FOR_SCOPE)
+   MESSAGE("Compiler does not support ansi for scope")
+ENDIF(CMAKE_ANSI_FOR_SCOPE)
+MESSAGE("output from TRY_COMPILE ${OUT} ")
 
- 
+TRY_COMPILE(CMAKE_ANSI_FOR_SCOPE   ${TryCompile_BINARY_DIR}/CMakeTmp 
+    ${CMAKE_ROOT}/Modules/TestForAnsiForScope.cxx OUTPUT_VARIABLE OUT)
+IF (CMAKE_ANSI_FOR_SCOPE)
+   MESSAGE("Compiler supports ansi for")
+ELSE(CMAKE_ANSI_FOR_SCOPE)
+   MESSAGE("Compiler does not support ansi for scope")
+ENDIF(CMAKE_ANSI_FOR_SCOPE)
+MESSAGE("output from TRY_COMPILE ${OUT} ")
+        
+
+MESSAGE("use the module now")
+INCLUDE(${CMAKE_ROOT}/Modules/TestForANSIForScope.cmake)
+IF (CMAKE_ANSI_FOR_SCOPE)
+   MESSAGE("Compiler supports ansi for")
+ELSE(CMAKE_ANSI_FOR_SCOPE)
+   MESSAGE("Compiler does not support ansi for scope")
+ENDIF(CMAKE_ANSI_FOR_SCOPE)
+
 ADD_EXECUTABLE(TryCompile pass.c)
