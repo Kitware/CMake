@@ -15,7 +15,6 @@
 =========================================================================*/
 #include "cmIncludeCommand.h"
 
-#include <iostream.h>
 
 // cmIncludeCommand
 bool cmIncludeCommand::InitialPass(std::vector<std::string>& args)

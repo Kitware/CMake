@@ -15,7 +15,6 @@
 =========================================================================*/
 #include "cmLoadCacheCommand.h"
 
-#include <iostream.h>
 
 // cmLoadcacheCommand
 bool cmLoadCacheCommand::InitialPass(std::vector<std::string>& args)
