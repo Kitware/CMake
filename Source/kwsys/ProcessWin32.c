@@ -821,7 +821,7 @@ void kwsysProcess_Execute(kwsysProcess* cp)
     (unsigned short)(cp->HideWindow?SW_HIDE:SW_SHOWDEFAULT);
   
   /* Connect the child's output pipes to the threads.  */
-  si.StartupInfo.dwFlags = STARTF_USESTDHANDLES;
+  si.StartupInfo.dwFlags |= STARTF_USESTDHANDLES;
 
   /* Create stderr pipe to be shared by all processes in the pipeline.
      Neither end is directly inherited.  */
