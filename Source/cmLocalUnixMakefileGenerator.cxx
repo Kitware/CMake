@@ -595,7 +595,7 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
           runtimeDirs.push_back( libpath );
           }
         }  
-      cmRegularExpression libname("lib([^/]*)(\\.so|\\.lib|\\.dll|\\.sl|\\.a|\\.dylib).*");
+      cmRegularExpression libname("^lib([^/]*)(\\.so|\\.lib|\\.dll|\\.sl|\\.a|\\.dylib).*");
       cmRegularExpression libname_noprefix("([^/]*)(\\.so|\\.lib|\\.dll|\\.sl|\\.a|\\.dylib).*");
       if(libname.find(file))
         {
