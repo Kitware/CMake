@@ -604,13 +604,13 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
         {
         fout << "\t\t\t\tGenerateDebugInformation=\"TRUE\"\n";
         }
-      if( target.GetType() == cmTarget::EXECUTABLE)
+      if ( target.GetPropertyAsBool("WIN32_EXECUTABLE") )
         {
-        fout << "\t\t\t\tSubSystem=\"1\"\n";
+        fout << "\t\t\t\tSubSystem=\"2\"\n";
         }
       else
         {      
-        fout << "\t\t\t\tSubSystem=\"2\"\n";
+        fout << "\t\t\t\tSubSystem=\"1\"\n";
         }
       fout << "\t\t\t\tStackReserveSize=\"" 
            << m_Makefile->GetDefinition("CMAKE_CXX_STACK_SIZE") << "\"/>\n";
