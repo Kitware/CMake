@@ -69,16 +69,20 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  FIND_LIBRARY(VAR libraryName\n"
-      "               [NAMES name1 name2 ...]\n"
+      "  FIND_LIBRARY(<VAR> NAMES name1 [name2 ...]\n"
       "               [PATHS path1 path2 ...]\n"
-      "               [DOC helpstring])\n"
-      "Find the library by looking in paths specified in the command.  "
-      "A cache entry named by VAR is created to "
-      "store the result.  VAR-NOTFOUND is the value used if the library was "
-      "not found.  CMake will continue to look as long as the value "
-      "is not found.  If DOC is specified the next argument is the "
-      "documentation string for the cache entry VAR.";
+      "               [DOC \"docstring\"])\n"
+      "Find a library named by one of the names given after the NAMES "
+      "argument.  Paths specified after the PATHS argument are searched "
+      "in the order specified.  A cache entry named by <VAR> is created "
+      "to store the result.  If the library is not found, the result "
+      "will be <VAR>-NOTFOUND.  If DOC is specified then the next "
+      "argument is treated as a documentation string for the cache "
+      "entry <VAR>.\n"
+      "  FIND_LIBRARY(VAR libraryName [path1 path2 ...])\n"
+      "Find a library with the given name by searching in the specified "
+      "paths.  This is a short-hand signature for the command that is "
+      "sufficient in many cases.";
     }
   
   cmTypeMacro(cmFindLibraryCommand, cmCommand);

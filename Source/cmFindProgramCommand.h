@@ -69,19 +69,23 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  FIND_PROGRAM(VAR executableName\n"
-      "               [NAMES name1 name2 ...]\n"
+      "  FIND_PROGRAM(<VAR> NAMES name1 [name2 ...]\n"
       "               [PATHS path1 path2 ...]\n"
       "               [NO_SYSTEM_PATH]\n"
-      "               [DOC helpstring])\n"
-      "Find the executable in the system PATH or in any extra paths "
-      "specified in the command.  A cache entry named by VAR is created to "
-      "store the result.  VAR-NOTFOUND is the value used if the program was "
-      "not found.  CMake will continue to look as long as the value "
-      "is not found.  If DOC is specified the next argument is the "
-      "documentation string for the cache entry VAR.  "
-      "If NO_SYSTEM_PATH is specified the contents of system PATH are not "
-      "used.";
+      "               [DOC \"docstring\"])\n"
+      "Find an executable named by one of the names given after the NAMES "
+      "argument.  Paths specified after the PATHS argument are searched "
+      "in the order specified.  If the NO_SYSTEM_PATH argument is not "
+      "specified, the search continues with the system search path "
+      "specified by the PATH environment variable.  A cache entry named "
+      "by <VAR> is created to store the result.  If the program is not "
+      "found, the result will be <VAR>-NOTFOUND.  If DOC is specified "
+      "then the next argument is treated as a documentation string for "
+      "the cache entry <VAR>.\n"
+      "  FIND_PROGRAM(VAR executableName [path1 path2 ...])\n"
+      "Find a program with the given name by searching in the specified "
+      "paths.  This is a short-hand signature for the command that is "
+      "sufficient in many cases.";
     }
   
   cmTypeMacro(cmFindProgramCommand, cmCommand);
