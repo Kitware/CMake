@@ -1995,10 +1995,10 @@ cmLocalUnixMakefileGenerator2
   for(std::vector<std::string>::const_iterator i = objects.begin();
       i != objects.end(); ++i)
     {
-    // TODO: Make sure we don't escape spaces and quote.
+    std::string object = this->ConvertToRelativePath(i->c_str());
     ruleFileStream
       << " \\\n"
-      << "\"" << this->ConvertToRelativeOutputPath(i->c_str()) << "\"";
+      << this->ConvertToQuotedOutputPath(object.c_str());
     }
   ruleFileStream
     << "\n";
@@ -2008,14 +2008,16 @@ cmLocalUnixMakefileGenerator2
   variableNameExternal = this->CreateMakeVariable(target.GetName(),
                                                   "_EXTERNAL_OBJECTS");
   ruleFileStream
+    << "\n"
     << "# External object files for target " << target.GetName() << "\n"
     << variableNameExternal.c_str() << " =";
   for(std::vector<std::string>::const_iterator i = external_objects.begin();
       i != external_objects.end(); ++i)
     {
+    std::string object = this->ConvertToRelativePath(i->c_str());
     ruleFileStream
       << " \\\n"
-      << "\"" << this->ConvertToRelativeOutputPath(i->c_str()) << "\"";
+      << this->ConvertToQuotedOutputPath(object.c_str());
     }
   ruleFileStream
     << "\n"
@@ -2315,6 +2317,51 @@ cmLocalUnixMakefileGenerator2::ConvertToRelativeOutputPath(const char* p)
 
   // Now convert it to an output path.
   return cmSystemTools::ConvertToOutputPath(relative.c_str());
+}
+
+//----------------------------------------------------------------------------
+std::string
+cmLocalUnixMakefileGenerator2::ConvertToQuotedOutputPath(const char* p)
+{
+  // Split the path into its components.
+  std::vector<std::string> components;
+  cmSystemTools::SplitPath(p, components);
+
+  // Return an empty path if there are no components.
+  if(components.empty())
+    {
+    return "\"\"";
+    }
+
+  // Begin the quoted result with the root component.
+  std::string result = "\"";
+  result += components[0];
+
+  // Now add the rest of the components separated by the proper slash
+  // direction for this platform.
+  bool first = true;
+  for(unsigned int i=1; i < components.size(); ++i)
+    {
+    // Only the last component can be empty to avoid double slashes.
+    if(components[i].length() > 0 || (i == (components.size()-1)))
+      {
+      if(!first)
+        {
+#if defined(_WIN32) && !defined(__CYGWIN__)
+        result += "\\";
+#else
+        result += "/";
+#endif
+        }
+      result += components[i];
+      first = false;
+      }
+    }
+
+  // Close the quoted result.
+  result += "\"";
+
+  return result;
 }
 
 //----------------------------------------------------------------------------

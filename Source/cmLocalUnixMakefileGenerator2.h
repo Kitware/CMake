@@ -199,6 +199,7 @@ protected:
   const char* GetSourceFileLanguage(const cmSourceFile& source);
   std::string ConvertToFullPath(const std::string& localPath);
   std::string ConvertToRelativeOutputPath(const char* p);
+  std::string ConvertToQuotedOutputPath(const char* p);
   void ConfigureOutputPaths();
   void FormatOutputPath(std::string& path, const char* name);
 
