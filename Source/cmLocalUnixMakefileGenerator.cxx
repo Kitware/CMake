@@ -2498,7 +2498,7 @@ void cmLocalUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
   // CMake versions below 2.0 would add the source tree to the -I path
   // automatically.  Preserve compatibility.
   const char* versionValue =
-    this->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
+    m_Makefile->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
   if(versionValue)
     {
     int major = 0;
