@@ -32,11 +32,19 @@ public:
   
   /**
    * Check command line arguments for documentation options.  Returns
-   * the type of help to be provided.  If non-zero, the result should
-   * be passed to PrintDocumentation to produce the desired
-   * documentation.
+   * true if documentation options are found, and false otherwise.
+   * When true is returned, PrintRequestedDocumentation should be
+   * called.
    */
-  Type CheckOptions(int argc, char** argv);
+  bool CheckOptions(int argc, char** argv);
+  
+  /**
+   * Print help requested on the command line.  Call after
+   * CheckOptions returns true.  Returns true on success, and false
+   * otherwise.  Failure can occur when output files specified on the
+   * command line cannot be written.
+   */
+  bool PrintRequestedDocumentation(std::ostream& os);
   
   /** Print help of the given type.  */
   void PrintDocumentation(Type ht, std::ostream& os);
@@ -134,6 +142,9 @@ private:
   Form CurrentForm;
   const char* TextIndent;
   int TextWidth;
+  
+  typedef std::map<Type, cmStdString> RequestedMapType;
+  RequestedMapType RequestedMap;
 };
 
 #endif

@@ -178,17 +178,69 @@ void cmDocumentation::PrintDocumentation(Type ht, std::ostream& os)
 }
 
 //----------------------------------------------------------------------------
-cmDocumentation::Type cmDocumentation::CheckOptions(int argc, char** argv)
+bool cmDocumentation::PrintRequestedDocumentation(std::ostream& os)
+{
+  bool result = true;
+  
+  // Loop over requested documentation types.
+  for(RequestedMapType::const_iterator i = this->RequestedMap.begin();
+      i != this->RequestedMap.end(); ++i)
+    {
+    // If a file name was given, use it.  Otherwise, default to the
+    // given stream.
+    std::ofstream* fout = 0;
+    std::ostream* s = &os;
+    if(i->second.length() > 0)
+      {
+#ifdef _WIN32
+      fout = new ofstream(i->second.c_str(), ios::out | ios::binary);
+#else
+      fout = new ofstream(i->second.c_str(), ios::out);
+#endif
+      if(fout)
+        {
+        s = fout;
+        }
+      else
+        {
+        result = false;
+        }
+      }
+    
+    // Print this documentation type to the stream.
+    this->PrintDocumentation(i->first, *s);
+    
+    // Check for error.
+    if(!*s)
+      {
+      result = false;
+      }
+    
+    // Close the file if we wrote one.
+    if(fout)
+      {
+      delete fout;
+      }
+    }
+  return result;
+}
+
+//----------------------------------------------------------------------------
+bool cmDocumentation::CheckOptions(int argc, char** argv)
 {
   // Providing zero arguments gives usage information.
   if(argc == 1)
     {
-    return cmDocumentation::Usage;
+    this->RequestedMap[cmDocumentation::Usage] = "";
+    return true;
     }
   
   // Search for supported help options.
+  bool result = false;
   for(int i=1; i < argc; ++i)
     {
+    // Check if this is a supported help option.
+    Type type = cmDocumentation::None;
     if((strcmp(argv[i], "-help") == 0) ||
        (strcmp(argv[i], "--help") == 0) ||
        (strcmp(argv[i], "/?") == 0) ||
@@ -196,33 +248,48 @@ cmDocumentation::Type cmDocumentation::CheckOptions(int argc, char** argv)
        (strcmp(argv[i], "-h") == 0) ||
        (strcmp(argv[i], "-H") == 0))
       {
-      return cmDocumentation::Usage;
+      type = cmDocumentation::Usage;
       }
-    if(strcmp(argv[i], "--help-full") == 0)
+    else if(strcmp(argv[i], "--help-full") == 0)
       {
-      return cmDocumentation::Full;
+      type = cmDocumentation::Full;
       }
-    if(strcmp(argv[i], "--help-html") == 0)
+    else if(strcmp(argv[i], "--help-html") == 0)
       {
-      return cmDocumentation::HTML;
+      type = cmDocumentation::HTML;
       }
-    if(strcmp(argv[i], "--help-man") == 0)
+    else if(strcmp(argv[i], "--help-man") == 0)
       {
-      return cmDocumentation::Man;
+      type = cmDocumentation::Man;
       }
-    if(strcmp(argv[i], "--copyright") == 0)
+    else if(strcmp(argv[i], "--copyright") == 0)
       {
-      return cmDocumentation::Copyright;
+      type = cmDocumentation::Copyright;
       }
-    if((strcmp(argv[i], "--version") == 0) || 
-       (strcmp(argv[i], "-version") == 0) || 
-       (strcmp(argv[i], "-V") == 0) || 
-       (strcmp(argv[i], "/V") == 0))
+    else if((strcmp(argv[i], "--version") == 0) || 
+            (strcmp(argv[i], "-version") == 0) || 
+            (strcmp(argv[i], "-V") == 0) || 
+            (strcmp(argv[i], "/V") == 0))
       {
-      return cmDocumentation::Version;
+      type = cmDocumentation::Version;
+      }
+    if(type)
+      {
+      // This is a help option.  See if there is a file name given.
+      result = true;
+      if((i+1 < argc) && (argv[i+1][0] != '-') &&
+         (strcmp(argv[i+1], "/V") != 0) && (strcmp(argv[i+1], "/?") != 0))
+        {
+        this->RequestedMap[type] = argv[i+1];
+        i = i+1;
+        }
+      else
+        {
+        this->RequestedMap[type] = "";
+        }
       }
     }
-  return cmDocumentation::None;
+  return result;
 }
 
 //----------------------------------------------------------------------------

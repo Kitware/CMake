@@ -93,7 +93,7 @@ int main(int ac, char** av)
 int do_cmake(int ac, char** av)
 {
   cmDocumentation doc;
-  if(cmDocumentation::Type ht = doc.CheckOptions(ac, av))
+  if(doc.CheckOptions(ac, av))
     {
     // Construct and print requested documentation.
     cmake hcm;
@@ -107,8 +107,8 @@ int do_cmake(int ac, char** av)
     doc.SetGeneratorsSection(&generators[0]);
     doc.SetOptionsSection(cmDocumentationOptions);
     doc.SetCommandsSection(&commands[0]);
-    doc.PrintDocumentation(ht, std::cout);
-  
+    int result = doc.PrintRequestedDocumentation(std::cout)? 0:1;
+    
     // If we were run with no arguments, but a CMakeLists.txt file
     // exists, the user may have been trying to use the old behavior
     // of cmake to build a project in-source.  Print a message
@@ -121,7 +121,7 @@ int do_cmake(int ac, char** av)
       doc.Print(cmDocumentation::UsageForm, std::cerr);
       return 1;
       }
-    return 0;
+    return result;
     }
   
   bool wiz = false;

@@ -93,7 +93,7 @@ void CMakeErrorHandler(const char* message, const char* title, bool&, void* clie
 int main(int argc, char** argv)
 {
   cmDocumentation doc;
-  if(cmDocumentation::Type ht = doc.CheckOptions(argc, argv))
+  if(doc.CheckOptions(argc, argv))
     {
     cmake hcm;
     std::vector<cmDocumentationEntry> commands;
@@ -103,8 +103,7 @@ int main(int argc, char** argv)
     doc.SetDescriptionSection(cmDocumentationDescription);
     doc.SetOptionsSection(cmDocumentationOptions);
     doc.SetCommandsSection(&commands[0]);
-    doc.PrintDocumentation(ht, std::cout);
-    return 0;
+    return doc.PrintRequestedDocumentation(std::cout)? 0:1;
     }  
   
   bool debug = false;
