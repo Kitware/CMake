@@ -34,5 +34,5 @@ SET(SOURCES main.cpp)
 
 ADD_EXECUTABLE(VSExternalInclude ${SOURCES})
 
-# target depends on lib1
+# target depends on lib2
 ADD_DEPENDENCIES(VSExternalInclude lib2)
