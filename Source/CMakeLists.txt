@@ -1,13 +1,26 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 1.5)
 
 SET(SRCS
+  cmBootstrapCommands.cxx
   cmCacheManager.cxx
   cmCacheManager.h
-  cmBootstrapCommands.cxx
   cmCommands.cxx
   cmCommands.h
   cmCustomCommand.cxx
   cmCustomCommand.h
+  cmDepends.cxx
+  cmDepends.h
+  cmDependsC.cxx
+  cmDependsC.h
+  cmDependsFortran.cxx
+  cmDependsFortran.h
+  cmDependsFortranLexer.c
+  cmDependsFortranParser.c
+  cmDependsFortranParser.h
+  cmDependsJavaLexer.cxx
+  cmDependsJavaParser.cxx
+  cmDependsJavaParserHelper.cxx
+  cmDependsJavaParserHelper.h
   cmDocumentation.cxx
   cmDynamicLoader.cxx
   cmDynamicLoader.h
@@ -17,6 +30,7 @@ SET(SRCS
   cmGlobalGenerator.h
   cmGlobalUnixMakefileGenerator.cxx
   cmGlobalUnixMakefileGenerator.h
+  cmGlobalXCodeGenerator.cxx
   cmListFileCache.cxx
   cmListFileCache.h
   cmListFileLexer.c
@@ -25,6 +39,7 @@ SET(SRCS
   cmLocalUnixMakefileGenerator.cxx
   cmLocalUnixMakefileGenerator.h
   cmLocalUnixMakefileGenerator2.cxx
+  cmLocalXCodeGenerator.cxx
   cmMakeDepend.cxx
   cmMakeDepend.h
   cmMakefile.cxx
@@ -41,27 +56,14 @@ SET(SRCS
   cmVariableWatch.h
   cmVersion.cxx
   cmVersion.h
+  cmXCodeObject.cxx
   cmXMLParser.cxx
   cmXMLParser.h
-  cmXCodeObject.cxx
-  cmLocalXCodeGenerator.cxx
-  cmGlobalXCodeGenerator.cxx
   cmake.cxx
   cmake.h
   cmakewizard.cxx
   cmakewizard.h
-
-  cmDepends.h
-  cmDepends.cxx
-  cmDependsC.h
-  cmDependsC.cxx
-  cmDependsFortran.h
-  cmDependsFortran.cxx
-  cmDependsFortranLexer.c
-  cmDependsFortranParser.h
-  cmDependsFortranParser.c
   )
-
 
 # configure the .h file
 CONFIGURE_FILE(
