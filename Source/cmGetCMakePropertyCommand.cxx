@@ -47,6 +47,22 @@ bool cmGetCMakePropertyCommand::InitialPass(
       output += vars[cc];
       }
     }
+  else if ( args[1] == "COMMANDS" )
+    {
+    cmake::RegisteredCommandsMap::iterator cmds 
+        = m_Makefile->GetCMakeInstance()->GetCommands()->begin();
+    for (cc=0 ; 
+      cmds != m_Makefile->GetCMakeInstance()->GetCommands()->end(); 
+      ++ cmds )
+      {
+      if ( cc > 0 )
+        {
+        output += ";";
+        }
+      output += cmds->first.c_str();
+      cc++;
+      }
+    }
   else
     {
     std::string emsg = "Unknown CMake property: " + args[1];

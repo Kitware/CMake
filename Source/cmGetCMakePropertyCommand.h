@@ -57,7 +57,7 @@ public:
         "Get a property from the CMake.  The value of the property is" 
         "stored in the variable VAR. If the property is not found,"
         "CMake will report an error. The properties include: VARIABLES, "
-        "CACHE_VARIABLES.";
+        "CACHE_VARIABLES, COMMANDS.";
     }
   
   cmTypeMacro(cmGetCMakePropertyCommand, cmCommand);

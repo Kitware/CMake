@@ -50,6 +50,8 @@ class cmVariableWatch;
 class cmake
 {
  public:
+  typedef std::map<cmStdString, cmCommand*> RegisteredCommandsMap;
+
   ///! construct an instance of cmake
   cmake();
   ///! destruct an instance of cmake
@@ -193,6 +195,9 @@ class cmake
    */
   cmCommand *GetCommand(const char *name);
 
+  /** Get list of all commands */
+  RegisteredCommandsMap* GetCommands() { return &m_Commands; }
+
   /** Check if a command exists. */
   bool CommandExists(const char* name) const;
     
@@ -242,7 +247,6 @@ class cmake
   
 protected:
   typedef cmGlobalGenerator* (*CreateGeneratorFunctionType)();
-  typedef std::map<cmStdString, cmCommand*> RegisteredCommandsMap;
   typedef std::map<cmStdString, CreateGeneratorFunctionType> RegisteredGeneratorsMap;
   RegisteredCommandsMap m_Commands;
   RegisteredGeneratorsMap m_Generators;

@@ -6,11 +6,17 @@ CONFIGURE_FILE(${DumpInformation_SOURCE_DIR}/DumpInformation.h.in
 ${DumpInformation_BINARY_DIR}/DumpInformation.h)
 ADD_EXECUTABLE(DumpInformation DumpInformation.cxx)
 
-WRITE_FILE(${DumpInformation_BINARY_DIR}/AllVariables.txt "")
-GET_CMAKE_PROPERTY(VARS VARIABLES)
-FOREACH(var ${VARS})
-  WRITE_FILE(${DumpInformation_BINARY_DIR}/AllVariables.txt 
-             "${var} \"${${var}}\"" APPEND)
-  #MESSAGE(STATUS "Variable ${var} \"${${var}}\"")
-ENDFOREACH(var ${VARS})
+FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/AllVariables.txt "")
+GET_CMAKE_PROPERTY(res VARIABLES)
+FOREACH(var ${res})
+  FILE(APPEND ${CMAKE_CURRENT_BINARY_DIR}/AllVariables.txt 
+             "${var} \"${${var}}\"\n")
+ENDFOREACH(var ${res})
+
+FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/AllCommands.txt "")
+GET_CMAKE_PROPERTY(res COMMANDS)
+FOREACH(var ${res})
+  FILE(APPEND ${CMAKE_CURRENT_BINARY_DIR}/AllCommands.txt 
+             "${var}\n")
+ENDFOREACH(var ${res})
 
