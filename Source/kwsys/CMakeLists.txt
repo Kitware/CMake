@@ -9,8 +9,8 @@
 #  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
 #  See http://www.cmake.org/HTML/Copyright.html for details.
 #
-#     This software is distributed WITHOUT ANY WARRANTY; without even 
-#     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+#     This software is distributed WITHOUT ANY WARRANTY; without even
+#     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
 #     PURPOSE.  See the above copyright notices for more information.
 #
 #=============================================================================
@@ -73,7 +73,7 @@
 IF(NOT KWSYS_NAMESPACE)
   SET(KWSYS_NAMESPACE "kwsys")
   SET(KWSYS_STANDALONE 1)
-  
+
   # Enable all components.
   SET(KWSYS_USE_Base64 1)
   SET(KWSYS_USE_Directory 1)
@@ -185,7 +185,7 @@ FOREACH(header algorithm deque iterator list map numeric queue set stack string
   CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/kwsys_std.h.in
                  ${KWSYS_HEADER_DIR}/std/${header}
                  @ONLY IMMEDIATE)
-  
+
   # Create an install target for the header wrapper.
   IF(KWSYS_HEADER_INSTALL_DIR)
     INSTALL_FILES(${KWSYS_HEADER_INSTALL_DIR}/${KWSYS_NAMESPACE}/std
@@ -265,7 +265,7 @@ ENDIF(KWSYS_USE_Base64)
 FOREACH(c ${KWSYS_CLASSES})
   # Add this source to the list of source files for the library.
   SET(KWSYS_SRCS ${KWSYS_SRCS} ${c}.cxx)
-  
+
   # Configure the header for this class.
   CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/${c}.hxx.in ${KWSYS_HEADER_DIR}/${c}.hxx
                  @ONLY IMMEDIATE)
@@ -333,7 +333,7 @@ IF(KWSYS_USE_Process)
     IF(EXECUTABLE_OUTPUT_PATH)
       SET(BIN_DIR ${EXECUTABLE_OUTPUT_PATH})
     ENDIF(EXECUTABLE_OUTPUT_PATH)
-    
+
     SET(CFG_INTDIR "/${CMAKE_CFG_INTDIR}")
     IF(CMAKE_BUILD_TOOL MATCHES "make")
       SET(CFG_INTDIR "")
@@ -359,7 +359,7 @@ IF(KWSYS_USE_Process)
         OUTPUTS ${CMAKE_CURRENT_BINARY_DIR}/${KWSYS_NAMESPACE}ProcessFwd9xEnc.c
         DEPENDS ${CMD} ${FWD})
     ENDIF("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" GREATER 1.6)
-    
+
     # Make sure build occurs in proper order.
     ADD_DEPENDENCIES(${KWSYS_NAMESPACE} ${KWSYS_NAMESPACE}ProcessFwd9x
                      ${KWSYS_NAMESPACE}EncodeExecutable)
