@@ -1,0 +1,52 @@
+srcdir        = @srcdir@
+VPATH         = @srcdir@
+
+FLTK_LIB_DIR = @FLTK_LIB_DIR@
+FLTK_INCLUDE_DIR = @FLTK_INCLUDE_DIR@
+
+CMAKE_CONFIG_DIR = @CMAKE_CONFIG_DIR@
+CXX           = @CXX@
+CXXFLAGS      = -DCMAKE_ROOT_DIR='"@CMAKE_ROOT_DIR@"' @CXXFLAGS@ -I${FLTK_INCLUDE_DIR} -DCMAKE_HAS_AUTOCONF -I${CMAKE_CONFIG_DIR}/Source
+
+.SUFFIXES: .cxx .java .class
+
+all: CMakeSetupGUI
+
+.cxx.o:
+	${CXX} ${CXXFLAGS} -c $< -o $@
+
+
+OBJS = \
+CMakeSetupGUI.o \
+CMakeSetupGUIImplementation.o \
+FLTKDialog.o \
+FLTKPropertyItemRow.o \
+FLTKPropertyList.o \
+../cmCableClassSet.o \
+../cmCacheManager.o \
+../cmCommands.o \
+../cmCustomCommand.o \
+../cmDirectory.o \
+../cmMakeDepend.o \
+../cmMakefile.o \
+../cmMakefileGenerator.o \
+../cmRegularExpression.o \
+../cmSourceFile.o \
+../cmSourceGroup.o \
+../cmSystemTools.o \
+../cmTarget.o \
+../cmUnixMakefileGenerator.o \
+../cmake.o
+
+
+DEPENDS = $(srcdir)/*.h    $(srcdir)/*.fl   ../cmConfigure.h 
+
+CMakeSetupGUI.o : $(DEPENDS)
+CMakeSetupGUIImplementation.o  : $(DEPENDS)
+FLTKDialog.o  : $(DEPENDS)
+FLTKPropertyList.o : $(DEPENDS)
+
+
+CMakeSetupGUI: ${OBJS}
+	${CXX} ${OBJS} ${CXXFLAGS} -L${FLTK_LIB_DIR}  -lfltk -lGL -o CMakeSetupGUI
+
