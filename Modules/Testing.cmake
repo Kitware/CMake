@@ -144,7 +144,7 @@ IF(BUILD_TESTING)
   ADD_CUSTOM_TARGET(NightlySubmit 
   "${TCLSHCOMMAND} Testing/Utilities/DashboardManager.tcl Nightly Submit")
   ADD_CUSTOM_TARGET(NightlyDashboardStart 
-  "${TCLSHCOMMAND} Testing/Utilities/DashboardManager.tcl Nightly DashboardStart)
+  "${TCLSHCOMMAND} Testing/Utilities/DashboardManager.tcl Nightly DashboardStart")
   ADD_CUSTOM_TARGET(NightlyDashboardEnd 
   "${TCLSHCOMMAND} Testing/Utilities/DashboardManager.tcl Nightly DashboardEnd")
   ADD_CUSTOM_TARGET(ExperimentalBuild 
