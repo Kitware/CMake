@@ -55,10 +55,14 @@ class cmIfFunctionBlocker : public cmFunctionBlocker
 public:
   cmIfFunctionBlocker() {m_Not = false;}
   virtual ~cmIfFunctionBlocker() {}
-  virtual bool IsFunctionBlocked(const char *name, const std::vector<std::string> &args, 
+  virtual bool IsFunctionBlocked(const char *name, 
+                                 const std::vector<std::string> &args, 
                                  const cmMakefile &mf) const;
-  virtual bool ShouldRemove(const char *name, const std::vector<std::string> &args, 
+  virtual bool ShouldRemove(const char *name, 
+                            const std::vector<std::string> &args, 
                             const cmMakefile &mf) const;
+  virtual void ScopeEnded(const cmMakefile &mf) const;
+  
   std::string m_Define;
   bool m_Not;
 };

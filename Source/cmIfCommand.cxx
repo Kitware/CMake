@@ -68,6 +68,15 @@ ShouldRemove(const char *name, const std::vector<std::string> &args,
   return !this->IsFunctionBlocked(name,args,mf);
 }
 
+void cmIfFunctionBlocker::
+ScopeEnded(const cmMakefile &mf) const
+{
+  cmSystemTools::Error("The end of a CMakeLists file was reached with an IF statement that was not closed properly. Within the directory: ", 
+                       mf.GetCurrentDirectory(),
+                       (m_Not ? " The arguments to the if were: NOT " : " The arguments to the if were: "),
+                       m_Define.c_str());
+}
+
 bool cmIfCommand::Invoke(std::vector<std::string>& args)
 {
   if(args.size() < 1 )

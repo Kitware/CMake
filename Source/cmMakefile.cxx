@@ -290,6 +290,19 @@ bool cmMakefile::ReadListFile(const char* filename, const char* external)
         }
       }
     }
+
+  // send scope ended to and funciton blockers
+  if (filename)
+    {
+    // loop over all function blockers to see if any block this command
+    std::set<cmFunctionBlocker *>::const_iterator pos;
+    for (pos = m_FunctionBlockers.begin(); 
+         pos != m_FunctionBlockers.end(); ++pos)
+      {
+      (*pos)->ScopeEnded(*this);
+      }
+    }
+  
   return true;
 }
 

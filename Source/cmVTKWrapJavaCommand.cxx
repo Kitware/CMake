@@ -58,6 +58,7 @@ bool cmVTKWrapJavaCommand::Invoke(std::vector<std::string>& args)
 
   // add in a depend in the vtkVTKWrapJava executable
   m_Makefile->AddUtility("vtkWrapJava");
+  m_Makefile->AddUtility("vtkParseJava");
   
   // what is the current source dir
   std::string cdir = m_Makefile->GetCurrentDirectory();
@@ -108,25 +109,25 @@ void cmVTKWrapJavaCommand::FinalPass()
   
   // wrap all the .h files
   depends.push_back(wjava);
+  depends.push_back(pjava);
   for(int classNum = 0; classNum < lastClass; classNum++)
     {
     m_Makefile->AddSource(m_WrapClasses[classNum],m_SourceList.c_str());
 
     // wrap java
     std::string res = m_WrapClasses[classNum].GetSourceName() + ".cxx";
+    std::string res2 = m_OriginalNames[classNum] + ".java";
+    std::vector<std::string> resvec;
+    resvec.push_back(res);
+    resvec.push_back(res2);
+    
     std::string cmd = wjava + " " + m_WrapHeaders[classNum] + " "
-      + hints + (m_WrapClasses[classNum].IsAnAbstractClass() ? " 0 " : " 1 ") + " > " + m_WrapClasses[classNum].GetSourceName() + ".cxx";
-    m_Makefile->AddCustomCommand(m_WrapHeaders[classNum].c_str(),
-                                 cmd.c_str(), depends, 
-                                 res.c_str(), m_LibraryName.c_str());
-
-    // parse java
-    res = m_WrapClasses[classNum].GetSourceName() + ".cxx";
-    cmd = pjava + " " + m_WrapHeaders[classNum] + " "
+      + hints + (m_WrapClasses[classNum].IsAnAbstractClass() ? " 0 " : " 1 ") + " > " + m_WrapClasses[classNum].GetSourceName() + ".cxx\\\n\t" + 
+      pjava + " " + m_WrapHeaders[classNum] + " "
       + hints + (m_WrapClasses[classNum].IsAnAbstractClass() ? " 0 " : " 1 ") + " > " + m_OriginalNames[classNum] + ".java";
     m_Makefile->AddCustomCommand(m_WrapHeaders[classNum].c_str(),
                                  cmd.c_str(), depends, 
-                                 res.c_str(), m_LibraryName.c_str());
+                                 resvec, m_LibraryName.c_str());
     }
 }
 

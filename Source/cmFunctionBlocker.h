@@ -59,11 +59,19 @@ public:
                                  const cmMakefile &mf) const = 0;
 
   /**
-   * should this function blocker be removed, useful when one function adds a blocker
-   * and another must remove it
+   * should this function blocker be removed, useful when one function adds a
+   * blocker and another must remove it 
    */
-  virtual bool ShouldRemove(const char *name, const std::vector<std::string> &args, 
+  virtual bool ShouldRemove(const char *name, 
+                            const std::vector<std::string> &args, 
                             const cmMakefile &mf) const {return false;}
+
+  /**
+   * When the end of a CMakeList file is reached this method is called.  It
+   * is not called on the end of an INCLUDE cmake file, just at the end of a
+   * regular CMakeList file 
+   */
+  virtual void ScopeEnded(const cmMakefile &mf) const {}
 };
 
 #endif
