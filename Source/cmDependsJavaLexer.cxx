@@ -1039,7 +1039,7 @@ YY_RULE_SETUP
 case 5:
 YY_RULE_SETUP
 #line 94 "cmDependsJavaLexer.in.l"
-{ BEGIN(INITIAL); return STRINGLITERAL; }
+{ BEGIN(INITIAL); return jp_STRINGLITERAL; }
   YY_BREAK
 case 6:
 YY_RULE_SETUP
@@ -1049,510 +1049,510 @@ YY_RULE_SETUP
 case 7:
 YY_RULE_SETUP
 #line 97 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return ABSTRACT; }
+{ KEYWORD; return jp_ABSTRACT; }
   YY_BREAK
 case 8:
 YY_RULE_SETUP
 #line 98 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return ASSERT; }
+{ KEYWORD; return jp_ASSERT; }
   YY_BREAK
 case 9:
 YY_RULE_SETUP
 #line 99 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return BOOLEAN_TYPE; }
+{ KEYWORD; return jp_BOOLEAN_TYPE; }
   YY_BREAK
 case 10:
 YY_RULE_SETUP
 #line 100 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return BREAK; }
+{ KEYWORD; return jp_BREAK; }
   YY_BREAK
 case 11:
 YY_RULE_SETUP
 #line 101 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return BYTE_TYPE; }
+{ KEYWORD; return jp_BYTE_TYPE; }
   YY_BREAK
 case 12:
 YY_RULE_SETUP
 #line 102 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return CASE; }
+{ KEYWORD; return jp_CASE; }
   YY_BREAK
 case 13:
 YY_RULE_SETUP
 #line 103 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return CATCH; }
+{ KEYWORD; return jp_CATCH; }
   YY_BREAK
 case 14:
 YY_RULE_SETUP
 #line 104 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return CHAR_TYPE; }
+{ KEYWORD; return jp_CHAR_TYPE; }
   YY_BREAK
 case 15:
 YY_RULE_SETUP
 #line 105 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return CLASS; }
+{ KEYWORD; return jp_CLASS; }
   YY_BREAK
 case 16:
 YY_RULE_SETUP
 #line 106 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return CONTINUE; }
+{ KEYWORD; return jp_CONTINUE; }
   YY_BREAK
 case 17:
 YY_RULE_SETUP
 #line 107 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return DEFAULT; }
+{ KEYWORD; return jp_DEFAULT; }
   YY_BREAK
 case 18:
 YY_RULE_SETUP
 #line 108 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return DO; }
+{ KEYWORD; return jp_DO; }
   YY_BREAK
 case 19:
 YY_RULE_SETUP
 #line 109 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return DOUBLE_TYPE; }
+{ KEYWORD; return jp_DOUBLE_TYPE; }
   YY_BREAK
 case 20:
 YY_RULE_SETUP
 #line 110 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return ELSE; }
+{ KEYWORD; return jp_ELSE; }
   YY_BREAK
 case 21:
 YY_RULE_SETUP
 #line 111 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return EXTENDS; }
+{ KEYWORD; return jp_EXTENDS; }
   YY_BREAK
 case 22:
 YY_RULE_SETUP
 #line 112 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return FINAL; }
+{ KEYWORD; return jp_FINAL; }
   YY_BREAK
 case 23:
 YY_RULE_SETUP
 #line 113 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return FINALLY; }
+{ KEYWORD; return jp_FINALLY; }
   YY_BREAK
 case 24:
 YY_RULE_SETUP
 #line 114 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return FLOAT_TYPE; }
+{ KEYWORD; return jp_FLOAT_TYPE; }
   YY_BREAK
 case 25:
 YY_RULE_SETUP
 #line 115 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return FOR; }
+{ KEYWORD; return jp_FOR; }
   YY_BREAK
 case 26:
 YY_RULE_SETUP
 #line 116 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return IF; }
+{ KEYWORD; return jp_IF; }
   YY_BREAK
 case 27:
 YY_RULE_SETUP
 #line 117 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return IMPLEMENTS; }
+{ KEYWORD; return jp_IMPLEMENTS; }
   YY_BREAK
 case 28:
 YY_RULE_SETUP
 #line 118 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return IMPORT; }
+{ KEYWORD; return jp_IMPORT; }
   YY_BREAK
 case 29:
 YY_RULE_SETUP
 #line 119 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return INSTANCEOF; }
+{ KEYWORD; return jp_INSTANCEOF; }
   YY_BREAK
 case 30:
 YY_RULE_SETUP
 #line 120 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return INT_TYPE; }
+{ KEYWORD; return jp_INT_TYPE; }
   YY_BREAK
 case 31:
 YY_RULE_SETUP
 #line 121 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return INTERFACE; }
+{ KEYWORD; return jp_INTERFACE; }
   YY_BREAK
 case 32:
 YY_RULE_SETUP
 #line 122 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return LONG_TYPE; }
+{ KEYWORD; return jp_LONG_TYPE; }
   YY_BREAK
 case 33:
 YY_RULE_SETUP
 #line 123 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return NATIVE; }
+{ KEYWORD; return jp_NATIVE; }
   YY_BREAK
 case 34:
 YY_RULE_SETUP
 #line 124 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return NEW; }
+{ KEYWORD; return jp_NEW; }
   YY_BREAK
 case 35:
 YY_RULE_SETUP
 #line 125 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return PACKAGE; }
+{ KEYWORD; return jp_PACKAGE; }
   YY_BREAK
 case 36:
 YY_RULE_SETUP
 #line 126 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return PRIVATE; }
+{ KEYWORD; return jp_PRIVATE; }
   YY_BREAK
 case 37:
 YY_RULE_SETUP
 #line 127 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return PROTECTED; }
+{ KEYWORD; return jp_PROTECTED; }
   YY_BREAK
 case 38:
 YY_RULE_SETUP
 #line 128 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return PUBLIC; }
+{ KEYWORD; return jp_PUBLIC; }
   YY_BREAK
 case 39:
 YY_RULE_SETUP
 #line 129 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return RETURN; }
+{ KEYWORD; return jp_RETURN; }
   YY_BREAK
 case 40:
 YY_RULE_SETUP
 #line 130 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return SHORT_TYPE; }
+{ KEYWORD; return jp_SHORT_TYPE; }
   YY_BREAK
 case 41:
 YY_RULE_SETUP
 #line 131 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return STATIC; }
+{ KEYWORD; return jp_STATIC; }
   YY_BREAK
 case 42:
 YY_RULE_SETUP
 #line 132 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return STRICTFP; }
+{ KEYWORD; return jp_STRICTFP; }
   YY_BREAK
 case 43:
 YY_RULE_SETUP
 #line 133 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return SUPER; }
+{ KEYWORD; return jp_SUPER; }
   YY_BREAK
 case 44:
 YY_RULE_SETUP
 #line 134 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return SWITCH; }
+{ KEYWORD; return jp_SWITCH; }
   YY_BREAK
 case 45:
 YY_RULE_SETUP
 #line 135 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return SYNCHRONIZED; }
+{ KEYWORD; return jp_SYNCHRONIZED; }
   YY_BREAK
 case 46:
 YY_RULE_SETUP
 #line 136 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return THIS; }
+{ KEYWORD; return jp_THIS; }
   YY_BREAK
 case 47:
 YY_RULE_SETUP
 #line 137 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return THROW; }
+{ KEYWORD; return jp_THROW; }
   YY_BREAK
 case 48:
 YY_RULE_SETUP
 #line 138 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return THROWS; }
+{ KEYWORD; return jp_THROWS; }
   YY_BREAK
 case 49:
 YY_RULE_SETUP
 #line 139 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return TRANSIENT; }
+{ KEYWORD; return jp_TRANSIENT; }
   YY_BREAK
 case 50:
 YY_RULE_SETUP
 #line 140 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return TRY; }
+{ KEYWORD; return jp_TRY; }
   YY_BREAK
 case 51:
 YY_RULE_SETUP
 #line 141 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return VOID; }
+{ KEYWORD; return jp_VOID; }
   YY_BREAK
 case 52:
 YY_RULE_SETUP
 #line 142 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return VOLATILE; }
+{ KEYWORD; return jp_VOLATILE; }
   YY_BREAK
 case 53:
 YY_RULE_SETUP
 #line 143 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return WHILE; }
+{ KEYWORD; return jp_WHILE; }
   YY_BREAK
 case 54:
 YY_RULE_SETUP
 #line 145 "cmDependsJavaLexer.in.l"
-{ PRIMITIVE; return BOOLEANLITERAL; }
+{ PRIMITIVE; return jp_BOOLEANLITERAL; }
   YY_BREAK
 case 55:
 /* rule 55 can match eol */
 YY_RULE_SETUP
 #line 146 "cmDependsJavaLexer.in.l"
-{ PRIMITIVE; return CHARACTERLITERAL; }
+{ PRIMITIVE; return jp_CHARACTERLITERAL; }
   YY_BREAK
 case 56:
 YY_RULE_SETUP
 #line 147 "cmDependsJavaLexer.in.l"
-{ PRIMITIVE; return DECIMALINTEGERLITERAL; }
+{ PRIMITIVE; return jp_DECIMALINTEGERLITERAL; }
   YY_BREAK
 case 57:
 YY_RULE_SETUP
 #line 148 "cmDependsJavaLexer.in.l"
-{ PRIMITIVE; return FLOATINGPOINTLITERAL; }
+{ PRIMITIVE; return jp_FLOATINGPOINTLITERAL; }
   YY_BREAK
 case 58:
 YY_RULE_SETUP
 #line 149 "cmDependsJavaLexer.in.l"
-{ PRIMITIVE; return HEXINTEGERLITERAL; }
+{ PRIMITIVE; return jp_HEXINTEGERLITERAL; }
   YY_BREAK
 case 59:
 YY_RULE_SETUP
 #line 150 "cmDependsJavaLexer.in.l"
-{ PRIMITIVE; return NULLLITERAL; }
+{ PRIMITIVE; return jp_NULLLITERAL; }
   YY_BREAK
 case 60:
 YY_RULE_SETUP
 #line 152 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return AND; }
+{ SYMBOL; return jp_AND; }
   YY_BREAK
 case 61:
 YY_RULE_SETUP
 #line 153 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return ANDAND; }
+{ SYMBOL; return jp_ANDAND; }
   YY_BREAK
 case 62:
 YY_RULE_SETUP
 #line 154 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return ANDEQUALS; }
+{ SYMBOL; return jp_ANDEQUALS; }
   YY_BREAK
 case 63:
 YY_RULE_SETUP
 #line 155 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return BRACKETEND; }
+{ SYMBOL; return jp_BRACKETEND; }
   YY_BREAK
 case 64:
 YY_RULE_SETUP
 #line 156 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return BRACKETSTART; }
+{ SYMBOL; return jp_BRACKETSTART; }
   YY_BREAK
 case 65:
 YY_RULE_SETUP
 #line 157 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return CARROT; }
+{ SYMBOL; return jp_CARROT; }
   YY_BREAK
 case 66:
 YY_RULE_SETUP
 #line 158 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return CARROTEQUALS; }
+{ SYMBOL; return jp_CARROTEQUALS; }
   YY_BREAK
 case 67:
 YY_RULE_SETUP
 #line 159 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return COLON; }
+{ SYMBOL; return jp_COLON; }
   YY_BREAK
 case 68:
 YY_RULE_SETUP
 #line 160 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return COMMA; }
+{ SYMBOL; return jp_COMMA; }
   YY_BREAK
 case 69:
 YY_RULE_SETUP
 #line 161 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return CURLYEND; }
+{ SYMBOL; return jp_CURLYEND; }
   YY_BREAK
 case 70:
 YY_RULE_SETUP
 #line 162 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return CURLYSTART; }
+{ SYMBOL; return jp_CURLYSTART; }
   YY_BREAK
 case 71:
 YY_RULE_SETUP
 #line 163 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return DIVIDE; }
+{ SYMBOL; return jp_DIVIDE; }
   YY_BREAK
 case 72:
 YY_RULE_SETUP
 #line 164 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return DIVIDEEQUALS; }
+{ SYMBOL; return jp_DIVIDEEQUALS; }
   YY_BREAK
 case 73:
 YY_RULE_SETUP
 #line 165 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return DOLLAR; }
+{ SYMBOL; return jp_DOLLAR; }
   YY_BREAK
 case 74:
 YY_RULE_SETUP
 #line 166 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return DOT; }
+{ SYMBOL; return jp_DOT; }
   YY_BREAK
 case 75:
 YY_RULE_SETUP
 #line 167 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return EQUALS; }
+{ SYMBOL; return jp_EQUALS; }
   YY_BREAK
 case 76:
 YY_RULE_SETUP
 #line 168 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return EQUALSEQUALS; }
+{ SYMBOL; return jp_EQUALSEQUALS; }
   YY_BREAK
 case 77:
 YY_RULE_SETUP
 #line 169 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return EXCLAMATION; }
+{ SYMBOL; return jp_EXCLAMATION; }
   YY_BREAK
 case 78:
 YY_RULE_SETUP
 #line 170 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return EXCLAMATIONEQUALS; }
+{ SYMBOL; return jp_EXCLAMATIONEQUALS; }
   YY_BREAK
 case 79:
 YY_RULE_SETUP
 #line 171 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return GREATER; }
+{ SYMBOL; return jp_GREATER; }
   YY_BREAK
 case 80:
 YY_RULE_SETUP
 #line 172 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return GTEQUALS; }
+{ SYMBOL; return jp_GTEQUALS; }
   YY_BREAK
 case 81:
 YY_RULE_SETUP
 #line 173 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return GTGT; }
+{ SYMBOL; return jp_GTGT; }
   YY_BREAK
 case 82:
 YY_RULE_SETUP
 #line 174 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return GTGTEQUALS; }
+{ SYMBOL; return jp_GTGTEQUALS; }
   YY_BREAK
 case 83:
 YY_RULE_SETUP
 #line 175 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return GTGTGT; }
+{ SYMBOL; return jp_GTGTGT; }
   YY_BREAK
 case 84:
 YY_RULE_SETUP
 #line 176 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return GTGTGTEQUALS; }
+{ SYMBOL; return jp_GTGTGTEQUALS; }
   YY_BREAK
 case 85:
 YY_RULE_SETUP
 #line 177 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return LESLESEQUALS; }
+{ SYMBOL; return jp_LESLESEQUALS; }
   YY_BREAK
 case 86:
 YY_RULE_SETUP
 #line 178 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return LESSTHAN; }
+{ SYMBOL; return jp_LESSTHAN; }
   YY_BREAK
 case 87:
 YY_RULE_SETUP
 #line 179 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return LTEQUALS; }
+{ SYMBOL; return jp_LTEQUALS; }
   YY_BREAK
 case 88:
 YY_RULE_SETUP
 #line 180 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return LTLT; }
+{ SYMBOL; return jp_LTLT; }
   YY_BREAK
 case 89:
 YY_RULE_SETUP
 #line 181 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return MINUS; }
+{ SYMBOL; return jp_MINUS; }
   YY_BREAK
 case 90:
 YY_RULE_SETUP
 #line 182 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return MINUSEQUALS; }
+{ SYMBOL; return jp_MINUSEQUALS; }
   YY_BREAK
 case 91:
 YY_RULE_SETUP
 #line 183 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return MINUSMINUS; }
+{ SYMBOL; return jp_MINUSMINUS; }
   YY_BREAK
 case 92:
 YY_RULE_SETUP
 #line 184 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return PAREEND; }
+{ SYMBOL; return jp_PAREEND; }
   YY_BREAK
 case 93:
 YY_RULE_SETUP
 #line 185 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return PARESTART; }
+{ SYMBOL; return jp_PARESTART; }
   YY_BREAK
 case 94:
 YY_RULE_SETUP
 #line 186 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return PERCENT; }
+{ SYMBOL; return jp_PERCENT; }
   YY_BREAK
 case 95:
 YY_RULE_SETUP
 #line 187 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return PERCENTEQUALS; }
+{ SYMBOL; return jp_PERCENTEQUALS; }
   YY_BREAK
 case 96:
 YY_RULE_SETUP
 #line 188 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return PIPE; }
+{ SYMBOL; return jp_PIPE; }
   YY_BREAK
 case 97:
 YY_RULE_SETUP
 #line 189 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return PIPEEQUALS; }
+{ SYMBOL; return jp_PIPEEQUALS; }
   YY_BREAK
 case 98:
 YY_RULE_SETUP
 #line 190 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return PIPEPIPE; }
+{ SYMBOL; return jp_PIPEPIPE; }
   YY_BREAK
 case 99:
 YY_RULE_SETUP
 #line 191 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return PLUS; }
+{ SYMBOL; return jp_PLUS; }
   YY_BREAK
 case 100:
 YY_RULE_SETUP
 #line 192 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return PLUSEQUALS; }
+{ SYMBOL; return jp_PLUSEQUALS; }
   YY_BREAK
 case 101:
 YY_RULE_SETUP
 #line 193 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return PLUSPLUS; }
+{ SYMBOL; return jp_PLUSPLUS; }
   YY_BREAK
 case 102:
 YY_RULE_SETUP
 #line 194 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return QUESTION; }
+{ SYMBOL; return jp_QUESTION; }
   YY_BREAK
 case 103:
 YY_RULE_SETUP
 #line 195 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return SEMICOL; }
+{ SYMBOL; return jp_SEMICOL; }
   YY_BREAK
 case 104:
 YY_RULE_SETUP
 #line 196 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return TILDE; }
+{ SYMBOL; return jp_TILDE; }
   YY_BREAK
 case 105:
 YY_RULE_SETUP
 #line 197 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return TIMES; }
+{ SYMBOL; return jp_TIMES; }
   YY_BREAK
 case 106:
 YY_RULE_SETUP
 #line 198 "cmDependsJavaLexer.in.l"
-{ SYMBOL; return TIMESEQUALS; }
+{ SYMBOL; return jp_TIMESEQUALS; }
   YY_BREAK
 case 107:
 YY_RULE_SETUP
 #line 200 "cmDependsJavaLexer.in.l"
 { 
   yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
-  return NAME; 
+  return jp_NAME; 
 }
   YY_BREAK
 case 108:
@@ -1574,7 +1574,7 @@ YY_RULE_SETUP
   std::cerr << "Unknown character: " << yytext[0] 
     << " (" << (int)yytext[0] << ")" << std::endl; 
   yyextra->Error("Unknown character"); 
-  return ERROR; 
+  return jp_ERROR; 
 }
   YY_BREAK
 case 111:

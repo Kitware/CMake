@@ -51,9 +51,9 @@ static void cmDependsJavaError(yyscan_t yyscanner, const char* message);
 #define YYMAXDEPTH 1000000
 
 
-#define CHECKEMPTY(cnt) yyGetParser->CheckEmpty(__LINE__, cnt, yyvsp);
-#define ELEMENTSTART(cnt) yyGetParser->PrepareElement(&yyval)
-#define STORECLASS(str) yyGetParser->AddClassFound(str); yyGetParser->DeallocateParserType(&(str))
+#define jpCheckEmpty(cnt) yyGetParser->CheckEmpty(__LINE__, cnt, yyvsp);
+#define jpElementStart(cnt) yyGetParser->PrepareElement(&yyval)
+#define jpStoreClass(str) yyGetParser->AddClassFound(str); yyGetParser->DeallocateParserType(&(str))
 /* Disable some warnings in the generated code.  */
 #ifdef __BORLANDC__
 # pragma warn -8004 /* Variable assigned a value that is not used.  */
@@ -75,113 +75,113 @@ static void cmDependsJavaError(yyscan_t yyscanner, const char* message);
 
 /*-------------------------------------------------------------------------*/
 /* Tokens */
-%token ABSTRACT
-%token ASSERT
-%token BOOLEAN_TYPE
-%token BREAK
-%token BYTE_TYPE
-%token CASE
-%token CATCH
-%token CHAR_TYPE
-%token CLASS
-%token CONTINUE
-%token DEFAULT
-%token DO
-%token DOUBLE_TYPE
-%token ELSE
-%token EXTENDS
-%token FINAL
-%token FINALLY
-%token FLOAT_TYPE
-%token FOR
-%token IF
-%token IMPLEMENTS
-%token IMPORT
-%token INSTANCEOF
-%token INT_TYPE
-%token INTERFACE
-%token LONG_TYPE
-%token NATIVE
-%token NEW
-%token PACKAGE
-%token PRIVATE
-%token PROTECTED
-%token PUBLIC
-%token RETURN
-%token SHORT_TYPE
-%token STATIC
-%token STRICTFP
-%token SUPER
-%token SWITCH
-%token SYNCHRONIZED
-%token THIS
-%token THROW
-%token THROWS
-%token TRANSIENT
-%token TRY
-%token VOID
-%token VOLATILE
-%token WHILE
+%token jp_ABSTRACT
+%token jp_ASSERT
+%token jp_BOOLEAN_TYPE
+%token jp_BREAK
+%token jp_BYTE_TYPE
+%token jp_CASE
+%token jp_CATCH
+%token jp_CHAR_TYPE
+%token jp_CLASS
+%token jp_CONTINUE
+%token jp_DEFAULT
+%token jp_DO
+%token jp_DOUBLE_TYPE
+%token jp_ELSE
+%token jp_EXTENDS
+%token jp_FINAL
+%token jp_FINALLY
+%token jp_FLOAT_TYPE
+%token jp_FOR
+%token jp_IF
+%token jp_IMPLEMENTS
+%token jp_IMPORT
+%token jp_INSTANCEOF
+%token jp_INT_TYPE
+%token jp_INTERFACE
+%token jp_LONG_TYPE
+%token jp_NATIVE
+%token jp_NEW
+%token jp_PACKAGE
+%token jp_PRIVATE
+%token jp_PROTECTED
+%token jp_PUBLIC
+%token jp_RETURN
+%token jp_SHORT_TYPE
+%token jp_STATIC
+%token jp_STRICTFP
+%token jp_SUPER
+%token jp_SWITCH
+%token jp_SYNCHRONIZED
+%token jp_THIS
+%token jp_THROW
+%token jp_THROWS
+%token jp_TRANSIENT
+%token jp_TRY
+%token jp_VOID
+%token jp_VOLATILE
+%token jp_WHILE
 
-%token BOOLEANLITERAL
-%token CHARACTERLITERAL
-%token DECIMALINTEGERLITERAL
-%token FLOATINGPOINTLITERAL
-%token HEXINTEGERLITERAL
-%token NULLLITERAL
-%token STRINGLITERAL
+%token jp_BOOLEANLITERAL
+%token jp_CHARACTERLITERAL
+%token jp_DECIMALINTEGERLITERAL
+%token jp_FLOATINGPOINTLITERAL
+%token jp_HEXINTEGERLITERAL
+%token jp_NULLLITERAL
+%token jp_STRINGLITERAL
 
-%token NAME
+%token jp_NAME
 
-%token AND
-%token ANDAND
-%token ANDEQUALS
-%token BRACKETEND
-%token BRACKETSTART
-%token CARROT
-%token CARROTEQUALS
-%token COLON
-%token COMMA
-%token CURLYEND
-%token CURLYSTART
-%token DIVIDE
-%token DIVIDEEQUALS
-%token DOLLAR
-%token DOT
-%token EQUALS
-%token EQUALSEQUALS
-%token EXCLAMATION
-%token EXCLAMATIONEQUALS
-%token GREATER
-%token GTEQUALS
-%token GTGT
-%token GTGTEQUALS
-%token GTGTGT
-%token GTGTGTEQUALS
-%token LESLESEQUALS
-%token LESSTHAN
-%token LTEQUALS
-%token LTLT
-%token MINUS
-%token MINUSEQUALS
-%token MINUSMINUS
-%token PAREEND
-%token PARESTART
-%token PERCENT
-%token PERCENTEQUALS
-%token PIPE
-%token PIPEEQUALS
-%token PIPEPIPE
-%token PLUS
-%token PLUSEQUALS
-%token PLUSPLUS
-%token QUESTION
-%token SEMICOL
-%token TILDE
-%token TIMES
-%token TIMESEQUALS
+%token jp_AND
+%token jp_ANDAND
+%token jp_ANDEQUALS
+%token jp_BRACKETEND
+%token jp_BRACKETSTART
+%token jp_CARROT
+%token jp_CARROTEQUALS
+%token jp_COLON
+%token jp_COMMA
+%token jp_CURLYEND
+%token jp_CURLYSTART
+%token jp_DIVIDE
+%token jp_DIVIDEEQUALS
+%token jp_DOLLAR
+%token jp_DOT
+%token jp_EQUALS
+%token jp_EQUALSEQUALS
+%token jp_EXCLAMATION
+%token jp_EXCLAMATIONEQUALS
+%token jp_GREATER
+%token jp_GTEQUALS
+%token jp_GTGT
+%token jp_GTGTEQUALS
+%token jp_GTGTGT
+%token jp_GTGTGTEQUALS
+%token jp_LESLESEQUALS
+%token jp_LESSTHAN
+%token jp_LTEQUALS
+%token jp_LTLT
+%token jp_MINUS
+%token jp_MINUSEQUALS
+%token jp_MINUSMINUS
+%token jp_PAREEND
+%token jp_PARESTART
+%token jp_PERCENT
+%token jp_PERCENTEQUALS
+%token jp_PIPE
+%token jp_PIPEEQUALS
+%token jp_PIPEPIPE
+%token jp_PLUS
+%token jp_PLUSEQUALS
+%token jp_PLUSPLUS
+%token jp_QUESTION
+%token jp_SEMICOL
+%token jp_TILDE
+%token jp_TIMES
+%token jp_TIMESEQUALS
 
-%token ERROR
+%token jp_ERROR
 
 /*-------------------------------------------------------------------------*/
 /* grammar */
@@ -190,8 +190,8 @@ static void cmDependsJavaError(yyscan_t yyscanner, const char* message);
 Goal:
 CompilationUnit
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
@@ -199,65 +199,65 @@ CompilationUnit
 Literal:
 IntegerLiteral
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 |
-FLOATINGPOINTLITERAL
+jp_FLOATINGPOINTLITERAL
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 |
-BOOLEANLITERAL
+jp_BOOLEANLITERAL
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 |
-CHARACTERLITERAL
+jp_CHARACTERLITERAL
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 |
-STRINGLITERAL
+jp_STRINGLITERAL
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 |
-NULLLITERAL
+jp_NULLLITERAL
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 
 IntegerLiteral:
-DECIMALINTEGERLITERAL
+jp_DECIMALINTEGERLITERAL
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 |
-HEXINTEGERLITERAL	
+jp_HEXINTEGERLITERAL	
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
@@ -265,74 +265,74 @@ HEXINTEGERLITERAL
 Type:
 PrimitiveType
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 |
 ReferenceType
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 
 PrimitiveType:
-BYTE_TYPE
+jp_BYTE_TYPE
 {
-  ELEMENTSTART(0);
+  jpElementStart(0);
 }
 |
-SHORT_TYPE
+jp_SHORT_TYPE
 {
-  ELEMENTSTART(0);
+  jpElementStart(0);
 }
 |
-INT_TYPE
+jp_INT_TYPE
 {
-  ELEMENTSTART(0);
+  jpElementStart(0);
 }
 |
-LONG_TYPE
+jp_LONG_TYPE
 {
-  ELEMENTSTART(0);
+  jpElementStart(0);
 }
 |
-CHAR_TYPE
+jp_CHAR_TYPE
 {
-  ELEMENTSTART(0);
+  jpElementStart(0);
 }
 |
-FLOAT_TYPE
+jp_FLOAT_TYPE
 {
-  ELEMENTSTART(0);
+  jpElementStart(0);
 }
 |
-DOUBLE_TYPE
+jp_DOUBLE_TYPE
 {
-  ELEMENTSTART(0);
+  jpElementStart(0);
 }
 |
-BOOLEAN_TYPE
+jp_BOOLEAN_TYPE
 {
-  ELEMENTSTART(0);
+  jpElementStart(0);
 }
 
 ReferenceType:
 ClassOrInterfaceType
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 |
 ArrayType
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
@@ -340,9 +340,9 @@ ArrayType
 ClassOrInterfaceType:
 Name
 {
-  ELEMENTSTART(1);
-  STORECLASS($<str>1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpStoreClass($<str>1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
@@ -350,8 +350,8 @@ Name
 ClassType:
 ClassOrInterfaceType
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
@@ -359,8 +359,8 @@ ClassOrInterfaceType
 InterfaceType:
 ClassOrInterfaceType
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
@@ -368,17 +368,17 @@ ClassOrInterfaceType
 ArrayType:
 PrimitiveType Dims
 {
-  ELEMENTSTART(2);
-  CHECKEMPTY(2);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 |
 Name Dims
 {
-  ELEMENTSTART(2);
-  STORECLASS($<str>1);
-  CHECKEMPTY(2);
+  jpElementStart(2);
+  jpStoreClass($<str>1);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
@@ -386,70 +386,70 @@ Name Dims
 Name:
 SimpleName
 {
-  ELEMENTSTART(1);
+  jpElementStart(1);
   $<str>$ = $<str>1;
 }
 |
 QualifiedName
 {
-  ELEMENTSTART(1);
+  jpElementStart(1);
   $<str>$ = $<str>1;
 }
 
 SimpleName:
 Identifier
 {
-  ELEMENTSTART(1);
+  jpElementStart(1);
   $<str>$ = $<str>1;
 }
 
 Identifier:
-NAME
+jp_NAME
 {
-  ELEMENTSTART(1);
+  jpElementStart(1);
   $<str>$ = $<str>1;
 }
 |
-DOLLAR NAME
+jp_DOLLAR jp_NAME
 {
-  ELEMENTSTART(2);
+  jpElementStart(2);
   $<str>$ = $<str>2;
 }
 
 QualifiedName:
-Name DOT Identifier
+Name jp_DOT Identifier
 {
-  ELEMENTSTART(3);
+  jpElementStart(3);
   yyGetParser->AddClassFound($<str>1);
   yyGetParser->UpdateCombine($<str>1, $<str>3);
   yyGetParser->DeallocateParserType(&($<str>1));
   $<str>$ = const_cast<char*>(yyGetParser->GetCurrentCombine());
 }
 |
-Name DOT CLASS
+Name jp_DOT jp_CLASS
 {
-  ELEMENTSTART(3);
-  STORECLASS($<str>1);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpStoreClass($<str>1);
+  jpCheckEmpty(3);
   yyGetParser->SetCurrentCombine("");
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 |
-Name DOT THIS
+Name jp_DOT jp_THIS
 {
-  ELEMENTSTART(3);
-  STORECLASS($<str>1);
+  jpElementStart(3);
+  jpStoreClass($<str>1);
   yyGetParser->SetCurrentCombine("");
-  CHECKEMPTY(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 |
-SimpleType DOT CLASS
+SimpleType jp_DOT jp_CLASS
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
@@ -457,16 +457,16 @@ SimpleType DOT CLASS
 SimpleType:
 PrimitiveType
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 |
-VOID
+jp_VOID
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
@@ -474,65 +474,65 @@ VOID
 CompilationUnit:
 PackageDeclarationopt ImportDeclarations TypeDeclarations
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 
 PackageDeclarationopt:
 {
-  ELEMENTSTART(0);
+  jpElementStart(0);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 |
 PackageDeclaration
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 
 ImportDeclarations:
 {
-  ELEMENTSTART(0);
+  jpElementStart(0);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 |
 ImportDeclarations ImportDeclaration
 {
-  ELEMENTSTART(2);
-  CHECKEMPTY(2);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 
 TypeDeclarations:
 {
-  ELEMENTSTART(0);
+  jpElementStart(0);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 |
 TypeDeclarations TypeDeclaration
 {
-  ELEMENTSTART(2);
-  CHECKEMPTY(2);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 
 PackageDeclaration:
-PACKAGE Name SEMICOL
+jp_PACKAGE Name jp_SEMICOL
 {
-  ELEMENTSTART(3);
+  jpElementStart(3);
   yyGetParser->SetCurrentPackage($<str>2);
   yyGetParser->DeallocateParserType(&($<str>2));
   yyGetParser->SetCurrentCombine("");
-  CHECKEMPTY(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
@@ -540,36 +540,36 @@ PACKAGE Name SEMICOL
 ImportDeclaration:
 SingleTypeImportDeclaration
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 |
 TypeImportOnDemandDeclaration
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 
 SingleTypeImportDeclaration:
-IMPORT Name SEMICOL
+jp_IMPORT Name jp_SEMICOL
 {
-  ELEMENTSTART(3);
+  jpElementStart(3);
   yyGetParser->AddPackagesImport($<str>2);
   yyGetParser->DeallocateParserType(&($<str>2));
   yyGetParser->SetCurrentCombine("");
-  CHECKEMPTY(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 
 TypeImportOnDemandDeclaration:
-IMPORT Name DOT TIMES SEMICOL
+jp_IMPORT Name jp_DOT jp_TIMES jp_SEMICOL
 {
-  ELEMENTSTART(5);
+  jpElementStart(5);
   std::string str = $<str>2;
   str += ".*";
   yyGetParser->AddPackagesImport(str.c_str());
@@ -582,24 +582,24 @@ IMPORT Name DOT TIMES SEMICOL
 TypeDeclaration:
 ClassDeclaration
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 |
 InterfaceDeclaration
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 |
-SEMICOL
+jp_SEMICOL
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
@@ -607,41 +607,41 @@ SEMICOL
 Modifiers:
 Modifier
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 |
 Modifiers Modifier
 {
-  ELEMENTSTART(2);
-  CHECKEMPTY(2);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 
 Modifier:
-PUBLIC | PROTECTED | PRIVATE |
-STATIC |
-ABSTRACT | FINAL | NATIVE | SYNCHRONIZED | TRANSIENT | VOLATILE |
-STRICTFP
+jp_PUBLIC | jp_PROTECTED | jp_PRIVATE |
+jp_STATIC |
+jp_ABSTRACT | jp_FINAL | jp_NATIVE | jp_SYNCHRONIZED | jp_TRANSIENT | jp_VOLATILE |
+jp_STRICTFP
 
 ClassHeader:
-Modifiersopt CLASS Identifier
+Modifiersopt jp_CLASS Identifier
 {
   yyGetParser->StartClass($<str>3);
-  ELEMENTSTART(3);
+  jpElementStart(3);
   yyGetParser->DeallocateParserType(&($<str>3));
-  CHECKEMPTY(3);
+  jpCheckEmpty(3);
 }
 
 
 ClassDeclaration:
 ClassHeader ClassBody
 {
-  ELEMENTSTART(2);
-  CHECKEMPTY(2);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
   yyGetParser->EndClass();
@@ -649,8 +649,8 @@ ClassHeader ClassBody
 |
 ClassHeader Interfaces ClassBody
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(2);
+  jpElementStart(3);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
   yyGetParser->EndClass();
@@ -658,8 +658,8 @@ ClassHeader Interfaces ClassBody
 |
 ClassHeader Super ClassBody
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
   yyGetParser->EndClass();
@@ -667,8 +667,8 @@ ClassHeader Super ClassBody
 |
 ClassHeader Super Interfaces ClassBody
 {
-  ELEMENTSTART(4);
-  CHECKEMPTY(4);
+  jpElementStart(4);
+  jpCheckEmpty(4);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
   yyGetParser->EndClass();
@@ -676,33 +676,33 @@ ClassHeader Super Interfaces ClassBody
 
 Modifiersopt:
 {
-  ELEMENTSTART(0);
+  jpElementStart(0);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 |
 Modifiers
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 
 Super:
-EXTENDS ClassType
+jp_EXTENDS ClassType
 {
-  ELEMENTSTART(2);
-  CHECKEMPTY(2);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 
 Interfaces:
-IMPLEMENTS InterfaceTypeList
+jp_IMPLEMENTS InterfaceTypeList
 {
-  ELEMENTSTART(2);
-  CHECKEMPTY(2);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
@@ -710,40 +710,40 @@ IMPLEMENTS InterfaceTypeList
 InterfaceTypeList:
 InterfaceType
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 |
-InterfaceTypeList COMMA InterfaceType
+InterfaceTypeList jp_COMMA InterfaceType
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 
 ClassBody:
-CURLYSTART ClassBodyDeclarations CURLYEND
+jp_CURLYSTART ClassBodyDeclarations jp_CURLYEND
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 
 ClassBodyDeclarations:
 {
-  ELEMENTSTART(1);
+  jpElementStart(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 |
 ClassBodyDeclarations ClassBodyDeclaration
 {
-  ELEMENTSTART(2);
-  CHECKEMPTY(2);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
@@ -751,32 +751,32 @@ ClassBodyDeclarations ClassBodyDeclaration
 ClassBodyDeclaration:
 ClassMemberDeclaration
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 |
 StaticInitializer
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 |
 ConstructorDeclaration
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 |
 TypeDeclaration
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
@@ -784,39 +784,39 @@ TypeDeclaration
 ClassMemberDeclaration:
 FieldDeclaration
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 |
 MethodDeclaration
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 
 FieldDeclaration:
-Modifiersopt Type VariableDeclarators SEMICOL
+Modifiersopt Type VariableDeclarators jp_SEMICOL
 {
-  ELEMENTSTART(4);
+  jpElementStart(4);
 }
 
 VariableDeclarators:
 VariableDeclarator
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 |
-VariableDeclarators COMMA VariableDeclarator
+VariableDeclarators jp_COMMA VariableDeclarator
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
@@ -824,16 +824,16 @@ VariableDeclarators COMMA VariableDeclarator
 VariableDeclarator:
 VariableDeclaratorId
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 |
-VariableDeclaratorId EQUALS VariableInitializer
+VariableDeclaratorId jp_EQUALS VariableInitializer
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
@@ -841,17 +841,17 @@ VariableDeclaratorId EQUALS VariableInitializer
 VariableDeclaratorId:
 Identifier
 {
-  ELEMENTSTART(1);
+  jpElementStart(1);
   yyGetParser->DeallocateParserType(&($<str>1));
-  CHECKEMPTY(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 |
-VariableDeclaratorId BRACKETSTART BRACKETEND
+VariableDeclaratorId jp_BRACKETSTART jp_BRACKETEND
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
@@ -859,41 +859,41 @@ VariableDeclaratorId BRACKETSTART BRACKETEND
 VariableInitializer:
 Expression
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 |
 ArrayInitializer
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 
 MethodDeclaration:
-MethodHeader SEMICOL
+MethodHeader jp_SEMICOL
 {
-  ELEMENTSTART(2);
-  CHECKEMPTY(2);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 |
 MethodHeader MethodBody
 {
-  ELEMENTSTART(2);
-  CHECKEMPTY(2);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 |
-MethodHeader MethodBody SEMICOL
+MethodHeader MethodBody jp_SEMICOL
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
@@ -901,17 +901,17 @@ MethodHeader MethodBody SEMICOL
 MethodHeader:
 Modifiersopt Type MethodDeclarator Throwsopt
 {
-  ELEMENTSTART(4);
-  CHECKEMPTY(4);
+  jpElementStart(4);
+  jpCheckEmpty(4);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-Modifiersopt VOID MethodDeclarator Throwsopt
+Modifiersopt jp_VOID MethodDeclarator Throwsopt
 {
-  ELEMENTSTART(4);
-  CHECKEMPTY(4);
+  jpElementStart(4);
+  jpCheckEmpty(4);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -919,7 +919,7 @@ Modifiersopt VOID MethodDeclarator Throwsopt
 
 Throwsopt:
 {
-  ELEMENTSTART(0);
+  jpElementStart(0);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -927,33 +927,33 @@ Throwsopt:
 |
 Throws
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 MethodDeclarator:
-Identifier PARESTART FormalParameterListopt PAREEND
+Identifier jp_PARESTART FormalParameterListopt jp_PAREEND
 {
-  ELEMENTSTART(4);
+  jpElementStart(4);
   yyGetParser->DeallocateParserType(&($<str>1));
-  CHECKEMPTY(4);
+  jpCheckEmpty(4);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-MethodDeclarator BRACKETSTART BRACKETEND
+MethodDeclarator jp_BRACKETSTART jp_BRACKETEND
 {
-  ELEMENTSTART(3);
+  jpElementStart(3);
 
 }
 
 FormalParameterListopt:
 {
-  ELEMENTSTART(0);
+  jpElementStart(0);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -964,14 +964,14 @@ FormalParameterList
 FormalParameterList:
 FormalParameter
 {
-  ELEMENTSTART(1);
+  jpElementStart(1);
 
 }
 |
-FormalParameterList COMMA FormalParameter
+FormalParameterList jp_COMMA FormalParameter
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -980,18 +980,18 @@ FormalParameterList COMMA FormalParameter
 FormalParameter:
 Modifiersopt Type VariableDeclaratorId
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 Throws:
-THROWS ClassTypeList
+jp_THROWS ClassTypeList
 {
-  ELEMENTSTART(2);
-  CHECKEMPTY(2);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1000,14 +1000,14 @@ THROWS ClassTypeList
 ClassTypeList:
 ClassType
 {
-  ELEMENTSTART(1);
+  jpElementStart(1);
 
 }
 |
-ClassTypeList COMMA ClassType
+ClassTypeList jp_COMMA ClassType
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1016,18 +1016,18 @@ ClassTypeList COMMA ClassType
 MethodBody:
 Block
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 StaticInitializer:
-STATIC Block
+jp_STATIC Block
 {
-  ELEMENTSTART(2);
-  CHECKEMPTY(2);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1036,38 +1036,38 @@ STATIC Block
 ConstructorDeclaration:
 Modifiersopt ConstructorDeclarator Throwsopt ConstructorBody
 {
-  ELEMENTSTART(4);
-  CHECKEMPTY(4);
+  jpElementStart(4);
+  jpCheckEmpty(4);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-Modifiersopt ConstructorDeclarator Throwsopt ConstructorBody SEMICOL
+Modifiersopt ConstructorDeclarator Throwsopt ConstructorBody jp_SEMICOL
 {
-  ELEMENTSTART(5);
-  CHECKEMPTY(5);
+  jpElementStart(5);
+  jpCheckEmpty(5);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 ConstructorDeclarator:
-SimpleName PARESTART FormalParameterListopt PAREEND
+SimpleName jp_PARESTART FormalParameterListopt jp_PAREEND
 {
-  ELEMENTSTART(4);
+  jpElementStart(4);
   yyGetParser->DeallocateParserType(&($<str>1));
-  CHECKEMPTY(4);
+  jpCheckEmpty(4);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 ConstructorBody:
-CURLYSTART ExplicitConstructorInvocationopt BlockStatementsopt CURLYEND
+jp_CURLYSTART ExplicitConstructorInvocationopt BlockStatementsopt jp_CURLYEND
 {
-  ELEMENTSTART(4);
-  CHECKEMPTY(4);
+  jpElementStart(4);
+  jpCheckEmpty(4);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1075,7 +1075,7 @@ CURLYSTART ExplicitConstructorInvocationopt BlockStatementsopt CURLYEND
 
 ExplicitConstructorInvocationopt:
 {
-  ELEMENTSTART(0);
+  jpElementStart(0);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1083,46 +1083,46 @@ ExplicitConstructorInvocationopt:
 |
 ExplicitConstructorInvocationopt ExplicitConstructorInvocation
 {
-  ELEMENTSTART(2);
-  CHECKEMPTY(2);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 ExplicitConstructorInvocation:
-THIS PARESTART ArgumentListopt PAREEND SEMICOL
+jp_THIS jp_PARESTART ArgumentListopt jp_PAREEND jp_SEMICOL
 {
-  ELEMENTSTART(5);
-  CHECKEMPTY(5);
+  jpElementStart(5);
+  jpCheckEmpty(5);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-SUPER PARESTART ArgumentListopt PAREEND SEMICOL
+jp_SUPER jp_PARESTART ArgumentListopt jp_PAREEND jp_SEMICOL
 {
-  ELEMENTSTART(5);
-  CHECKEMPTY(5);
+  jpElementStart(5);
+  jpCheckEmpty(5);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 InterfaceHeader:
-Modifiersopt INTERFACE Identifier
+Modifiersopt jp_INTERFACE Identifier
 {
   yyGetParser->StartClass($<str>3);
-  ELEMENTSTART(3);
+  jpElementStart(3);
   yyGetParser->DeallocateParserType(&($<str>3));
-  CHECKEMPTY(3);
+  jpCheckEmpty(3);
 }
 
 InterfaceDeclaration:
 InterfaceHeader ExtendsInterfacesopt InterfaceBody
 {
-  ELEMENTSTART(2);
-  CHECKEMPTY(2);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
   yyGetParser->EndClass();
@@ -1130,44 +1130,44 @@ InterfaceHeader ExtendsInterfacesopt InterfaceBody
 
 ExtendsInterfacesopt:
 {
-  ELEMENTSTART(0);
+  jpElementStart(0);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 }
 |
 ExtendsInterfaces
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 ExtendsInterfaces:
-EXTENDS InterfaceType
+jp_EXTENDS InterfaceType
 {
-  ELEMENTSTART(2);
-  CHECKEMPTY(2);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-ExtendsInterfaces COMMA InterfaceType
+ExtendsInterfaces jp_COMMA InterfaceType
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 InterfaceBody:
-CURLYSTART InterfaceMemberDeclarations CURLYEND
+jp_CURLYSTART InterfaceMemberDeclarations jp_CURLYEND
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1175,7 +1175,7 @@ CURLYSTART InterfaceMemberDeclarations CURLYEND
 
 InterfaceMemberDeclarations:
 {
-  ELEMENTSTART(0);
+  jpElementStart(0);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1183,7 +1183,7 @@ InterfaceMemberDeclarations:
 |
 InterfaceMemberDeclarations InterfaceMemberDeclaration
 {
-  ELEMENTSTART(2);
+  jpElementStart(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1192,8 +1192,8 @@ InterfaceMemberDeclarations InterfaceMemberDeclaration
 InterfaceMemberDeclaration:
 ConstantDeclaration
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1201,8 +1201,8 @@ ConstantDeclaration
 |
 AbstractMethodDeclaration
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1210,16 +1210,16 @@ AbstractMethodDeclaration
 |
 ClassDeclaration
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-ClassDeclaration SEMICOL
+ClassDeclaration jp_SEMICOL
 {
-  ELEMENTSTART(2);
+  jpElementStart(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1227,16 +1227,16 @@ ClassDeclaration SEMICOL
 |
 InterfaceDeclaration
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-InterfaceDeclaration SEMICOL
+InterfaceDeclaration jp_SEMICOL
 {
-  ELEMENTSTART(2);
+  jpElementStart(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1245,8 +1245,8 @@ InterfaceDeclaration SEMICOL
 ConstantDeclaration:
 FieldDeclaration
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1255,37 +1255,37 @@ FieldDeclaration
 AbstractMethodDeclaration:
 MethodHeader Semicols
 {
-  ELEMENTSTART(2);
-  CHECKEMPTY(2);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 Semicols:
-SEMICOL
+jp_SEMICOL
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-Semicols SEMICOL
+Semicols jp_SEMICOL
 {
-  ELEMENTSTART(2);
-  CHECKEMPTY(2);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 ArrayInitializer:
-CURLYSTART VariableInitializersOptional CURLYEND
+jp_CURLYSTART VariableInitializersOptional jp_CURLYEND
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1293,7 +1293,7 @@ CURLYSTART VariableInitializersOptional CURLYEND
 
 VariableInitializersOptional:
 {
-  ELEMENTSTART(1);
+  jpElementStart(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1301,17 +1301,17 @@ VariableInitializersOptional:
 |
 VariableInitializers
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-VariableInitializers COMMA
+VariableInitializers jp_COMMA
 {
-  ELEMENTSTART(2);
-  CHECKEMPTY(2);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1320,26 +1320,26 @@ VariableInitializers COMMA
 VariableInitializers:
 VariableInitializer
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-VariableInitializers COMMA VariableInitializer
+VariableInitializers jp_COMMA VariableInitializer
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 Block:
-CURLYSTART BlockStatementsopt CURLYEND
+jp_CURLYSTART BlockStatementsopt jp_CURLYEND
 {
-  ELEMENTSTART(4);
+  jpElementStart(4);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1347,7 +1347,7 @@ CURLYSTART BlockStatementsopt CURLYEND
 
 BlockStatementsopt:
 {
-  ELEMENTSTART(1);
+  jpElementStart(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1355,8 +1355,8 @@ BlockStatementsopt:
 |
 BlockStatements
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1365,8 +1365,8 @@ BlockStatements
 BlockStatements:
 BlockStatement
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1374,8 +1374,8 @@ BlockStatement
 |
 BlockStatements BlockStatement
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(2);
+  jpElementStart(1);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1384,8 +1384,8 @@ BlockStatements BlockStatement
 BlockStatement:
 LocalVariableDeclarationStatement
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1393,8 +1393,8 @@ LocalVariableDeclarationStatement
 |
 Statement
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1402,18 +1402,18 @@ Statement
 |
 ClassDeclaration
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 LocalVariableDeclarationStatement:
-LocalVariableDeclaration SEMICOL
+LocalVariableDeclaration jp_SEMICOL
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(2);
+  jpElementStart(1);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1422,8 +1422,8 @@ LocalVariableDeclaration SEMICOL
 LocalVariableDeclaration:
 Modifiers Type VariableDeclarators
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(3);
+  jpElementStart(1);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1431,8 +1431,8 @@ Modifiers Type VariableDeclarators
 |
 Type VariableDeclarators
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(2);
+  jpElementStart(1);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1441,8 +1441,8 @@ Type VariableDeclarators
 Statement:
 StatementWithoutTrailingSubstatement
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1450,8 +1450,8 @@ StatementWithoutTrailingSubstatement
 |
 LabeledStatement
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1459,8 +1459,8 @@ LabeledStatement
 |
 IfThenStatement
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1468,8 +1468,8 @@ IfThenStatement
 |
 IfThenElseStatement
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1477,8 +1477,8 @@ IfThenElseStatement
 |
 WhileStatement
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1486,8 +1486,8 @@ WhileStatement
 |
 ForStatement
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1496,8 +1496,8 @@ ForStatement
 StatementNoShortIf:
 StatementWithoutTrailingSubstatement
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1505,8 +1505,8 @@ StatementWithoutTrailingSubstatement
 |
 LabeledStatementNoShortIf
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1514,8 +1514,8 @@ LabeledStatementNoShortIf
 |
 IfThenElseStatementNoShortIf
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1523,8 +1523,8 @@ IfThenElseStatementNoShortIf
 |
 WhileStatementNoShortIf
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1532,8 +1532,8 @@ WhileStatementNoShortIf
 |
 ForStatementNoShortIf
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1542,8 +1542,8 @@ ForStatementNoShortIf
 StatementWithoutTrailingSubstatement:
 Block
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1551,8 +1551,8 @@ Block
 |
 EmptyStatement
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1560,8 +1560,8 @@ EmptyStatement
 |
 ExpressionStatement
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1569,8 +1569,8 @@ ExpressionStatement
 |
 SwitchStatement
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1578,8 +1578,8 @@ SwitchStatement
 |
 DoStatement
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1587,8 +1587,8 @@ DoStatement
 |
 BreakStatement
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1596,8 +1596,8 @@ BreakStatement
 |
 ContinueStatement
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1605,8 +1605,8 @@ ContinueStatement
 |
 ReturnStatement
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1614,8 +1614,8 @@ ReturnStatement
 |
 SynchronizedStatement
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1623,8 +1623,8 @@ SynchronizedStatement
 |
 ThrowStatement
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1632,8 +1632,8 @@ ThrowStatement
 |
 TryStatement
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1641,49 +1641,49 @@ TryStatement
 |
 AssertStatement
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 EmptyStatement:
-SEMICOL
+jp_SEMICOL
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 LabeledStatement:
-Identifier COLON Statement
+Identifier jp_COLON Statement
 {
-  ELEMENTSTART(3);
+  jpElementStart(3);
   yyGetParser->DeallocateParserType(&($<str>1));
-  CHECKEMPTY(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 LabeledStatementNoShortIf:
-Identifier COLON StatementNoShortIf
+Identifier jp_COLON StatementNoShortIf
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 ExpressionStatement:
-StatementExpression SEMICOL
+StatementExpression jp_SEMICOL
 {
-  ELEMENTSTART(2);
-  CHECKEMPTY(2);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1692,8 +1692,8 @@ StatementExpression SEMICOL
 StatementExpression:
 Assignment
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1701,8 +1701,8 @@ Assignment
 |
 PreIncrementExpression
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1710,8 +1710,8 @@ PreIncrementExpression
 |
 PreDecrementExpression
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1719,8 +1719,8 @@ PreDecrementExpression
 |
 PostIncrementExpression
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1728,8 +1728,8 @@ PostIncrementExpression
 |
 PostDecrementExpression
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1737,8 +1737,8 @@ PostDecrementExpression
 |
 MethodInvocation
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1746,60 +1746,60 @@ MethodInvocation
 |
 ClassInstanceCreationExpression
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 IfThenStatement:
-IF PARESTART Expression PAREEND Statement
+jp_IF jp_PARESTART Expression jp_PAREEND Statement
 {
-  ELEMENTSTART(5);
-  CHECKEMPTY(5);
+  jpElementStart(5);
+  jpCheckEmpty(5);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 IfThenElseStatement:
-IF PARESTART Expression PAREEND StatementNoShortIf ELSE Statement
+jp_IF jp_PARESTART Expression jp_PAREEND StatementNoShortIf jp_ELSE Statement
 {
-  ELEMENTSTART(7);
-  CHECKEMPTY(7);
+  jpElementStart(7);
+  jpCheckEmpty(7);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 IfThenElseStatementNoShortIf:
-IF PARESTART Expression PAREEND StatementNoShortIf ELSE StatementNoShortIf
+jp_IF jp_PARESTART Expression jp_PAREEND StatementNoShortIf jp_ELSE StatementNoShortIf
 {
-  ELEMENTSTART(7);
-  CHECKEMPTY(7);
+  jpElementStart(7);
+  jpCheckEmpty(7);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 SwitchStatement:
-SWITCH PARESTART Expression PAREEND SwitchBlock
+jp_SWITCH jp_PARESTART Expression jp_PAREEND SwitchBlock
 {
-  ELEMENTSTART(5);
+  jpElementStart(5);
 
 }
 
 SwitchBlock:
-CURLYSTART SwitchBlockStatementGroups SwitchLabelsopt CURLYEND
+jp_CURLYSTART SwitchBlockStatementGroups SwitchLabelsopt jp_CURLYEND
 {
-  ELEMENTSTART(4);
+  jpElementStart(4);
 
 }
 
 SwitchLabelsopt:
 {
-  ELEMENTSTART(0);
+  jpElementStart(0);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1807,8 +1807,8 @@ SwitchLabelsopt:
 |
 SwitchLabels
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1816,7 +1816,7 @@ SwitchLabels
 
 SwitchBlockStatementGroups:
 {
-  ELEMENTSTART(0);
+  jpElementStart(0);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1824,8 +1824,8 @@ SwitchBlockStatementGroups:
 |
 SwitchBlockStatementGroups SwitchBlockStatementGroup
 {
-  ELEMENTSTART(2);
-  CHECKEMPTY(2);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1834,8 +1834,8 @@ SwitchBlockStatementGroups SwitchBlockStatementGroup
 SwitchBlockStatementGroup:
 SwitchLabels BlockStatements
 {
-  ELEMENTSTART(2);
-  CHECKEMPTY(2);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1844,8 +1844,8 @@ SwitchLabels BlockStatements
 SwitchLabels:
 SwitchLabel
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1853,64 +1853,64 @@ SwitchLabel
 |
 SwitchLabels SwitchLabel
 {
-  ELEMENTSTART(2);
-  CHECKEMPTY(2);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 SwitchLabel:
-CASE ConstantExpression COLON
+jp_CASE ConstantExpression jp_COLON
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-DEFAULT COLON
+jp_DEFAULT jp_COLON
 {
-  ELEMENTSTART(2);
-  CHECKEMPTY(2);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 WhileStatement:
-WHILE PARESTART Expression PAREEND Statement
+jp_WHILE jp_PARESTART Expression jp_PAREEND Statement
 {
-  ELEMENTSTART(5);
+  jpElementStart(5);
 
 }
 
 WhileStatementNoShortIf:
-WHILE PARESTART Expression PAREEND StatementNoShortIf
+jp_WHILE jp_PARESTART Expression jp_PAREEND StatementNoShortIf
 {
-  ELEMENTSTART(5);
+  jpElementStart(5);
 
 }
 
 DoStatement:
-DO Statement WHILE PARESTART Expression PAREEND SEMICOL
+jp_DO Statement jp_WHILE jp_PARESTART Expression jp_PAREEND jp_SEMICOL
 {
-  ELEMENTSTART(7);
+  jpElementStart(7);
 
 }
 
 ForStatement:
-FOR PARESTART ForInitopt SEMICOL Expressionopt SEMICOL ForUpdateopt PAREEND
+jp_FOR jp_PARESTART ForInitopt jp_SEMICOL Expressionopt jp_SEMICOL ForUpdateopt jp_PAREEND
 Statement
 {
-  ELEMENTSTART(9);
+  jpElementStart(9);
 
 }
 
 ForUpdateopt:
 {
-  ELEMENTSTART(1);
+  jpElementStart(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1918,8 +1918,8 @@ ForUpdateopt:
 |
 ForUpdate
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1927,7 +1927,7 @@ ForUpdate
 
 ForInitopt:
 {
-  ELEMENTSTART(0);
+  jpElementStart(0);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1935,18 +1935,18 @@ ForInitopt:
 |
 ForInit
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 ForStatementNoShortIf:
-FOR PARESTART ForInitopt SEMICOL Expressionopt SEMICOL ForUpdateopt PAREEND
+jp_FOR jp_PARESTART ForInitopt jp_SEMICOL Expressionopt jp_SEMICOL ForUpdateopt jp_PAREEND
 StatementNoShortIf
 {
-  ELEMENTSTART(9);
+  jpElementStart(9);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1954,7 +1954,7 @@ StatementNoShortIf
 
 Expressionopt:
 {
-  ELEMENTSTART(0);
+  jpElementStart(0);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1962,8 +1962,8 @@ Expressionopt:
 |
 Expression
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1972,8 +1972,8 @@ Expression
 ForInit:
 StatementExpressionList
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1981,8 +1981,8 @@ StatementExpressionList
 |
 LocalVariableDeclaration
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -1991,8 +1991,8 @@ LocalVariableDeclaration
 ForUpdate:
 StatementExpressionList
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2001,47 +2001,47 @@ StatementExpressionList
 StatementExpressionList:
 StatementExpression
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-StatementExpressionList COMMA StatementExpression
+StatementExpressionList jp_COMMA StatementExpression
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 AssertStatement:
-ASSERT Expression SEMICOL
+jp_ASSERT Expression jp_SEMICOL
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-ASSERT Expression COLON Expression SEMICOL
+jp_ASSERT Expression jp_COLON Expression jp_SEMICOL
 {
-  ELEMENTSTART(5);
-  CHECKEMPTY(5);
+  jpElementStart(5);
+  jpCheckEmpty(5);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 BreakStatement:
-BREAK Identifieropt SEMICOL
+jp_BREAK Identifieropt jp_SEMICOL
 {
-  ELEMENTSTART(3);
+  jpElementStart(3);
   yyGetParser->DeallocateParserType(&($<str>2));
-  CHECKEMPTY(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2049,7 +2049,7 @@ BREAK Identifieropt SEMICOL
 
 Identifieropt:
 {
-  ELEMENTSTART(0);
+  jpElementStart(0);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2057,65 +2057,65 @@ Identifieropt:
 |
 Identifier
 {
-  ELEMENTSTART(1);
+  jpElementStart(1);
 
 }
 
 ContinueStatement:
-CONTINUE Identifieropt SEMICOL
+jp_CONTINUE Identifieropt jp_SEMICOL
 {
-  ELEMENTSTART(3);
+  jpElementStart(3);
   yyGetParser->DeallocateParserType(&($<str>2));
-  CHECKEMPTY(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 ReturnStatement:
-RETURN Expressionopt SEMICOL
+jp_RETURN Expressionopt jp_SEMICOL
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 ThrowStatement:
-THROW Expression SEMICOL
+jp_THROW Expression jp_SEMICOL
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 SynchronizedStatement:
-SYNCHRONIZED PARESTART Expression PAREEND Block
+jp_SYNCHRONIZED jp_PARESTART Expression jp_PAREEND Block
 {
-  ELEMENTSTART(5);
-  CHECKEMPTY(5);
+  jpElementStart(5);
+  jpCheckEmpty(5);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 TryStatement:
-TRY Block Catches
+jp_TRY Block Catches
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-TRY Block Catchesopt Finally
+jp_TRY Block Catchesopt Finally
 {
-  ELEMENTSTART(4);
-  CHECKEMPTY(4);
+  jpElementStart(4);
+  jpCheckEmpty(4);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2123,7 +2123,7 @@ TRY Block Catchesopt Finally
 
 Catchesopt:
 {
-  ELEMENTSTART(1);
+  jpElementStart(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2131,8 +2131,8 @@ Catchesopt:
 |
 Catches
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2141,8 +2141,8 @@ Catches
 Catches:
 CatchClause
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2150,25 +2150,25 @@ CatchClause
 |
 Catches CatchClause
 {
-  ELEMENTSTART(2);
-  CHECKEMPTY(2);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 CatchClause:
-CATCH PARESTART FormalParameter PAREEND Block
+jp_CATCH jp_PARESTART FormalParameter jp_PAREEND Block
 {
-  ELEMENTSTART(5);
+  jpElementStart(5);
 
 }
 
 Finally:
-FINALLY Block
+jp_FINALLY Block
 {
-  ELEMENTSTART(2);
-  CHECKEMPTY(2);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2177,8 +2177,8 @@ FINALLY Block
 Primary:
 PrimaryNoNewArray
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2186,8 +2186,8 @@ PrimaryNoNewArray
 |
 ArrayCreationExpression
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2196,23 +2196,23 @@ ArrayCreationExpression
 PrimaryNoNewArray:
 Literal
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-THIS
+jp_THIS
 {
-  ELEMENTSTART(1);
+  jpElementStart(1);
 
 }
 |
-PARESTART Expression PAREEND
+jp_PARESTART Expression jp_PAREEND
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2220,8 +2220,8 @@ PARESTART Expression PAREEND
 |
 ClassInstanceCreationExpression
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2229,8 +2229,8 @@ ClassInstanceCreationExpression
 |
 FieldAccess
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2238,8 +2238,8 @@ FieldAccess
 |
 MethodInvocation
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2247,18 +2247,18 @@ MethodInvocation
 |
 ArrayAccess
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 ClassInstanceCreationExpression:
-New ClassType PARESTART ArgumentListopt PAREEND ClassBodyOpt
+New ClassType jp_PARESTART ArgumentListopt jp_PAREEND ClassBodyOpt
 {
-  ELEMENTSTART(6);
-  CHECKEMPTY(6);
+  jpElementStart(6);
+  jpCheckEmpty(6);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2266,7 +2266,7 @@ New ClassType PARESTART ArgumentListopt PAREEND ClassBodyOpt
 
 ClassBodyOpt:
 {
-  ELEMENTSTART(0);
+  jpElementStart(0);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2274,8 +2274,8 @@ ClassBodyOpt:
 |
 ClassBody
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2283,7 +2283,7 @@ ClassBody
 
 ArgumentListopt:
 {
-  ELEMENTSTART(0);
+  jpElementStart(0);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2291,8 +2291,8 @@ ArgumentListopt:
 |
 ArgumentList
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2301,17 +2301,17 @@ ArgumentList
 ArgumentList:
 Expression
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-ArgumentList COMMA Expression
+ArgumentList jp_COMMA Expression
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2320,8 +2320,8 @@ ArgumentList COMMA Expression
 ArrayCreationExpression:
 New PrimitiveType DimExprs Dimsopt
 {
-  ELEMENTSTART(4);
-  CHECKEMPTY(4);
+  jpElementStart(4);
+  jpCheckEmpty(4);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2329,8 +2329,8 @@ New PrimitiveType DimExprs Dimsopt
 |
 New ClassOrInterfaceType DimExprs Dimsopt
 {
-  ELEMENTSTART(4);
-  CHECKEMPTY(4);
+  jpElementStart(4);
+  jpCheckEmpty(4);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2338,8 +2338,8 @@ New ClassOrInterfaceType DimExprs Dimsopt
 |
 New PrimitiveType Dims ArrayInitializer
 {
-  ELEMENTSTART(4);
-  CHECKEMPTY(4);
+  jpElementStart(4);
+  jpCheckEmpty(4);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2347,8 +2347,8 @@ New PrimitiveType Dims ArrayInitializer
 |
 New ClassOrInterfaceType Dims ArrayInitializer
 {
-  ELEMENTSTART(4);
-  CHECKEMPTY(4);
+  jpElementStart(4);
+  jpCheckEmpty(4);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2356,7 +2356,7 @@ New ClassOrInterfaceType Dims ArrayInitializer
 
 Dimsopt:
 {
-  ELEMENTSTART(0);
+  jpElementStart(0);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2364,8 +2364,8 @@ Dimsopt:
 |
 Dims
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2374,8 +2374,8 @@ Dims
 DimExprs:
 DimExpr
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2383,134 +2383,134 @@ DimExpr
 |
 DimExprs DimExpr
 {
-  ELEMENTSTART(2);
-  CHECKEMPTY(2);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 DimExpr:
-BRACKETSTART Expression BRACKETEND
+jp_BRACKETSTART Expression jp_BRACKETEND
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 Dims:
-BRACKETSTART BRACKETEND
+jp_BRACKETSTART jp_BRACKETEND
 {
-  ELEMENTSTART(2);
+  jpElementStart(2);
 
 }
 |
-Dims BRACKETSTART BRACKETEND
+Dims jp_BRACKETSTART jp_BRACKETEND
 {
-  ELEMENTSTART(3);
+  jpElementStart(3);
 
 }
 
 FieldAccess:
-Primary DOT Identifier
+Primary jp_DOT Identifier
 {
-  ELEMENTSTART(3);
+  jpElementStart(3);
   yyGetParser->DeallocateParserType(&($<str>3));
-  CHECKEMPTY(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-SUPER DOT Identifier
+jp_SUPER jp_DOT Identifier
 {
-  ELEMENTSTART(3);
+  jpElementStart(3);
   yyGetParser->DeallocateParserType(&($<str>3));
-  CHECKEMPTY(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-THIS DOT Identifier
+jp_THIS jp_DOT Identifier
 {
-  ELEMENTSTART(3);
+  jpElementStart(3);
   yyGetParser->DeallocateParserType(&($<str>3));
-  CHECKEMPTY(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-Primary DOT THIS
+Primary jp_DOT jp_THIS
 {
-  ELEMENTSTART(3);
+  jpElementStart(3);
   yyGetParser->DeallocateParserType(&($<str>3));
-  CHECKEMPTY(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 MethodInvocation:
-Name PARESTART ArgumentListopt PAREEND
+Name jp_PARESTART ArgumentListopt jp_PAREEND
 {
-  ELEMENTSTART(4);
+  jpElementStart(4);
   yyGetParser->DeallocateParserType(&($<str>1));
-  CHECKEMPTY(4);
+  jpCheckEmpty(4);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-Primary DOT Identifier PARESTART ArgumentListopt PAREEND
+Primary jp_DOT Identifier jp_PARESTART ArgumentListopt jp_PAREEND
 {
-  ELEMENTSTART(6);
+  jpElementStart(6);
   yyGetParser->DeallocateParserType(&($<str>1));
   yyGetParser->DeallocateParserType(&($<str>3));
-  CHECKEMPTY(6);
+  jpCheckEmpty(6);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-SUPER DOT Identifier PARESTART ArgumentListopt PAREEND
+jp_SUPER jp_DOT Identifier jp_PARESTART ArgumentListopt jp_PAREEND
 {
-  ELEMENTSTART(6);
+  jpElementStart(6);
   yyGetParser->DeallocateParserType(&($<str>3));
-  CHECKEMPTY(6);
+  jpCheckEmpty(6);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-THIS DOT Identifier PARESTART ArgumentListopt PAREEND
+jp_THIS jp_DOT Identifier jp_PARESTART ArgumentListopt jp_PAREEND
 {
-  ELEMENTSTART(6);
+  jpElementStart(6);
   yyGetParser->DeallocateParserType(&($<str>3));
-  CHECKEMPTY(6);
+  jpCheckEmpty(6);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 ArrayAccess:
-Name BRACKETSTART Expression BRACKETEND
+Name jp_BRACKETSTART Expression jp_BRACKETEND
 {
-  ELEMENTSTART(4);
+  jpElementStart(4);
   yyGetParser->DeallocateParserType(&($<str>1));
-  CHECKEMPTY(4);
+  jpCheckEmpty(4);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-PrimaryNoNewArray BRACKETSTART Expression BRACKETEND
+PrimaryNoNewArray jp_BRACKETSTART Expression jp_BRACKETEND
 {
-  ELEMENTSTART(4);
-  CHECKEMPTY(4);
+  jpElementStart(4);
+  jpCheckEmpty(4);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2519,8 +2519,8 @@ PrimaryNoNewArray BRACKETSTART Expression BRACKETEND
 PostfixExpression:
 Primary
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2528,17 +2528,17 @@ Primary
 |
 Name
 {
-  ELEMENTSTART(1);
+  jpElementStart(1);
   yyGetParser->DeallocateParserType(&($<str>1));
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-ArrayType DOT CLASS
+ArrayType jp_DOT jp_CLASS
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2546,8 +2546,8 @@ ArrayType DOT CLASS
 |
 PostIncrementExpression
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2555,28 +2555,28 @@ PostIncrementExpression
 |
 PostDecrementExpression
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 PostIncrementExpression:
-PostfixExpression PLUSPLUS
+PostfixExpression jp_PLUSPLUS
 {
-  ELEMENTSTART(2);
-  CHECKEMPTY(2);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 PostDecrementExpression:
-PostfixExpression MINUSMINUS
+PostfixExpression jp_MINUSMINUS
 {
-  ELEMENTSTART(2);
-  CHECKEMPTY(2);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2585,8 +2585,8 @@ PostfixExpression MINUSMINUS
 UnaryExpression:
 PreIncrementExpression
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2594,26 +2594,26 @@ PreIncrementExpression
 |
 PreDecrementExpression
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-PLUS UnaryExpression
+jp_PLUS UnaryExpression
 {
-  ELEMENTSTART(2);
-  CHECKEMPTY(2);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-MINUS UnaryExpression
+jp_MINUS UnaryExpression
 {
-  ELEMENTSTART(2);
-  CHECKEMPTY(2);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2621,28 +2621,28 @@ MINUS UnaryExpression
 |
 UnaryExpressionNotPlusMinus
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 PreIncrementExpression:
-PLUSPLUS UnaryExpression
+jp_PLUSPLUS UnaryExpression
 {
-  ELEMENTSTART(2);
-  CHECKEMPTY(2);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 PreDecrementExpression:
-MINUSMINUS UnaryExpression
+jp_MINUSMINUS UnaryExpression
 {
-  ELEMENTSTART(2);
-  CHECKEMPTY(2);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2651,26 +2651,26 @@ MINUSMINUS UnaryExpression
 UnaryExpressionNotPlusMinus:
 PostfixExpression
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-TILDE UnaryExpression
+jp_TILDE UnaryExpression
 {
-  ELEMENTSTART(2);
-  CHECKEMPTY(2);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-EXCLAMATION UnaryExpression
+jp_EXCLAMATION UnaryExpression
 {
-  ELEMENTSTART(2);
-  CHECKEMPTY(2);
+  jpElementStart(2);
+  jpCheckEmpty(2);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2678,70 +2678,70 @@ EXCLAMATION UnaryExpression
 |
 CastExpression
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 CastExpression:
-PARESTART PrimitiveType Dimsopt PAREEND UnaryExpression
+jp_PARESTART PrimitiveType Dimsopt jp_PAREEND UnaryExpression
 {
-  ELEMENTSTART(5);
-  CHECKEMPTY(5);
+  jpElementStart(5);
+  jpCheckEmpty(5);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-PARESTART Expression PAREEND UnaryExpressionNotPlusMinus
+jp_PARESTART Expression jp_PAREEND UnaryExpressionNotPlusMinus
 {
-  ELEMENTSTART(4);
-  CHECKEMPTY(4);
+  jpElementStart(4);
+  jpCheckEmpty(4);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-PARESTART Name Dims PAREEND UnaryExpressionNotPlusMinus
+jp_PARESTART Name Dims jp_PAREEND UnaryExpressionNotPlusMinus
 {
-  ELEMENTSTART(5);
+  jpElementStart(5);
 
 }
 
 MultiplicativeExpression:
 UnaryExpression
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-MultiplicativeExpression TIMES UnaryExpression
+MultiplicativeExpression jp_TIMES UnaryExpression
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-MultiplicativeExpression DIVIDE UnaryExpression
+MultiplicativeExpression jp_DIVIDE UnaryExpression
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-MultiplicativeExpression PERCENT UnaryExpression
+MultiplicativeExpression jp_PERCENT UnaryExpression
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2750,26 +2750,26 @@ MultiplicativeExpression PERCENT UnaryExpression
 AdditiveExpression:
 MultiplicativeExpression
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-AdditiveExpression PLUS MultiplicativeExpression
+AdditiveExpression jp_PLUS MultiplicativeExpression
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-AdditiveExpression MINUS MultiplicativeExpression
+AdditiveExpression jp_MINUS MultiplicativeExpression
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2778,35 +2778,35 @@ AdditiveExpression MINUS MultiplicativeExpression
 ShiftExpression:
 AdditiveExpression
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-ShiftExpression LTLT AdditiveExpression
+ShiftExpression jp_LTLT AdditiveExpression
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-ShiftExpression GTGT AdditiveExpression
+ShiftExpression jp_GTGT AdditiveExpression
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-ShiftExpression GTGTGT AdditiveExpression
+ShiftExpression jp_GTGTGT AdditiveExpression
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2815,53 +2815,53 @@ ShiftExpression GTGTGT AdditiveExpression
 RelationalExpression:
 ShiftExpression
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-RelationalExpression LESSTHAN ShiftExpression
+RelationalExpression jp_LESSTHAN ShiftExpression
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-RelationalExpression GREATER ShiftExpression
+RelationalExpression jp_GREATER ShiftExpression
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-RelationalExpression LTEQUALS ShiftExpression
+RelationalExpression jp_LTEQUALS ShiftExpression
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-RelationalExpression GTEQUALS ShiftExpression
+RelationalExpression jp_GTEQUALS ShiftExpression
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-RelationalExpression INSTANCEOF ReferenceType
+RelationalExpression jp_INSTANCEOF ReferenceType
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2870,26 +2870,26 @@ RelationalExpression INSTANCEOF ReferenceType
 EqualityExpression:
 RelationalExpression
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-EqualityExpression EQUALSEQUALS RelationalExpression
+EqualityExpression jp_EQUALSEQUALS RelationalExpression
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-EqualityExpression EXCLAMATIONEQUALS RelationalExpression
+EqualityExpression jp_EXCLAMATIONEQUALS RelationalExpression
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2898,17 +2898,17 @@ EqualityExpression EXCLAMATIONEQUALS RelationalExpression
 AndExpression:
 EqualityExpression
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-AndExpression AND EqualityExpression
+AndExpression jp_AND EqualityExpression
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2917,17 +2917,17 @@ AndExpression AND EqualityExpression
 ExclusiveOrExpression:
 AndExpression
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-ExclusiveOrExpression CARROT AndExpression
+ExclusiveOrExpression jp_CARROT AndExpression
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2936,17 +2936,17 @@ ExclusiveOrExpression CARROT AndExpression
 InclusiveOrExpression:
 ExclusiveOrExpression
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-InclusiveOrExpression PIPE ExclusiveOrExpression
+InclusiveOrExpression jp_PIPE ExclusiveOrExpression
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2955,17 +2955,17 @@ InclusiveOrExpression PIPE ExclusiveOrExpression
 ConditionalAndExpression:
 InclusiveOrExpression
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-ConditionalAndExpression ANDAND InclusiveOrExpression
+ConditionalAndExpression jp_ANDAND InclusiveOrExpression
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2974,17 +2974,17 @@ ConditionalAndExpression ANDAND InclusiveOrExpression
 ConditionalOrExpression:
 ConditionalAndExpression
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-ConditionalOrExpression PIPEPIPE ConditionalAndExpression
+ConditionalOrExpression jp_PIPEPIPE ConditionalAndExpression
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -2993,17 +2993,17 @@ ConditionalOrExpression PIPEPIPE ConditionalAndExpression
 ConditionalExpression:
 ConditionalOrExpression
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-ConditionalOrExpression QUESTION Expression COLON ConditionalExpression
+ConditionalOrExpression jp_QUESTION Expression jp_COLON ConditionalExpression
 {
-  ELEMENTSTART(5);
-  CHECKEMPTY(5);
+  jpElementStart(5);
+  jpCheckEmpty(5);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -3012,8 +3012,8 @@ ConditionalOrExpression QUESTION Expression COLON ConditionalExpression
 AssignmentExpression:
 ConditionalExpression
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -3021,8 +3021,8 @@ ConditionalExpression
 |
 Assignment
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -3031,8 +3031,8 @@ Assignment
 Assignment:
 LeftHandSide AssignmentOperator AssignmentExpression
 {
-  ELEMENTSTART(3);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -3041,9 +3041,9 @@ LeftHandSide AssignmentOperator AssignmentExpression
 LeftHandSide:
 Name
 {
-  ELEMENTSTART(1);
+  jpElementStart(1);
   yyGetParser->DeallocateParserType(&($<str>1));
-  CHECKEMPTY(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -3051,8 +3051,8 @@ Name
 |
 FieldAccess
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -3060,117 +3060,117 @@ FieldAccess
 |
 ArrayAccess
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 AssignmentOperator:
-EQUALS
+jp_EQUALS
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-TIMESEQUALS
+jp_TIMESEQUALS
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-DIVIDEEQUALS
+jp_DIVIDEEQUALS
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-PERCENTEQUALS
+jp_PERCENTEQUALS
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-PLUSEQUALS
+jp_PLUSEQUALS
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-MINUSEQUALS
+jp_MINUSEQUALS
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-LESLESEQUALS
+jp_LESLESEQUALS
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-GTGTEQUALS
+jp_GTGTEQUALS
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-GTGTGTEQUALS
+jp_GTGTGTEQUALS
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-ANDEQUALS
+jp_ANDEQUALS
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-CARROTEQUALS
+jp_CARROTEQUALS
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-PIPEEQUALS
+jp_PIPEEQUALS
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -3179,8 +3179,8 @@ PIPEEQUALS
 Expression:
 AssignmentExpression
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
@@ -3189,28 +3189,28 @@ AssignmentExpression
 ConstantExpression:
 Expression
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 
 New:
-NEW
+jp_NEW
 {
-  ELEMENTSTART(1);
-  CHECKEMPTY(1);
+  jpElementStart(1);
+  jpCheckEmpty(1);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
 }
 |
-Name DOT NEW
+Name jp_DOT jp_NEW
 {
-  ELEMENTSTART(3);
-  STORECLASS($<str>1);
-  CHECKEMPTY(3);
+  jpElementStart(3);
+  jpStoreClass($<str>1);
+  jpCheckEmpty(3);
   $<str>$ = 0;
   yyGetParser->SetCurrentCombine("");
 
