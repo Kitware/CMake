@@ -22,9 +22,9 @@
 static const cmDocumentationEntry cmDocumentationStandardOptions[] =
 {
   {"--copyright", "Print the CMake copyright and exit.", 0},
-  {"--usage", "Print usage information and exit.",
+  {"--help", "Print usage information and exit.",
    "Usage describes the basic command line interface and its options."},
-  {"--help", "Print full help and exit.",
+  {"--help-full", "Print full help and exit.",
    "Full help displays most of the documentation provided by the UNIX "
    "man page.  It is provided for use on non-UNIX platforms, but is "
    "also convenient if the man page is not installed."},
@@ -33,6 +33,14 @@ static const cmDocumentationEntry cmDocumentationStandardOptions[] =
   {"--man", "Print a UNIX man page and exit.",
    "This option is used by CMake authors to generate the UNIX man page."},
   {"--version", "Show program name/version banner and exit.", 0},
+  {0,0,0}
+};
+
+//----------------------------------------------------------------------------
+static const cmDocumentationEntry cmDocumentationCommandsHeader[] =
+{
+  {0,
+   "The following commands are available in CMakeLists.txt code:", 0},
   {0,0,0}
 };
 
@@ -80,7 +88,7 @@ const cmDocumentationEntry cmDocumentationCopyright[] =
 //----------------------------------------------------------------------------
 cmDocumentation::cmDocumentation()
 {
-  this->Commands = 0;
+  this->SetCommands(0);
   this->Description = 0;
   this->Name = 0;
   this->UsageHelp = 0;  
@@ -267,7 +275,7 @@ void cmDocumentation::PrintHelp(std::ostream& os)
   os << "--------------------------------------------------------------------------\n";
   this->PrintHelpSection(os, &this->Options[0]);
   os << "--------------------------------------------------------------------------\n";
-  this->PrintHelpSection(os, this->Commands);
+  this->PrintHelpSection(os, &this->Commands[0]);
 }
 
 //----------------------------------------------------------------------------
@@ -284,7 +292,7 @@ void cmDocumentation::PrintHelpHTML(std::ostream& os)
     }
   this->PrintHelpHTMLSection(os, this->Description, 0);
   this->PrintHelpHTMLSection(os, &this->Options[0], "Command-line Options");
-  this->PrintHelpHTMLSection(os, this->Commands, "CMakeLists.txt Commands");
+  this->PrintHelpHTMLSection(os, &this->Commands[0], "Listfile Commands");
   os << "</body>\n"
      << "</html>\n";
 }
@@ -299,7 +307,7 @@ void cmDocumentation::PrintManPage(std::ostream& os)
   this->PrintManSection(os, this->UsageHelp, "SYNOPSIS");
   this->PrintManSection(os, this->Description, "DESCRIPTION");
   this->PrintManSection(os, &this->Options[0], "OPTIONS");
-  this->PrintManSection(os, this->Commands, "COMMANDS");
+  this->PrintManSection(os, &this->Commands[0], "COMMANDS");
   this->PrintManSection(os, cmDocumentationCopyright, "COPYRIGHT");
   os << ".SH MAILING LIST\n";
   os << "For help and discussion about using cmake, a mailing list is\n"
@@ -403,7 +411,7 @@ void cmDocumentation::PrintColumn(std::ostream& os, int width,
               }
             lastHadBlanks = false;
             }
-            
+          
           // First word on line.  Print indentation unless this is the
           // first line.
           os << (firstLine?"":indent);
@@ -539,14 +547,14 @@ cmDocumentation::Type cmDocumentation::CheckOptions(int argc, char** argv)
 {
   for(int i=1; i < argc; ++i)
     {
-    if((strcmp(argv[i], "/?") == 0) ||
-       (strcmp(argv[i], "-usage") == 0) ||
-       (strcmp(argv[i], "--usage") == 0))
+    if((strcmp(argv[i], "-help") == 0) ||
+       (strcmp(argv[i], "--help") == 0) ||
+       (strcmp(argv[i], "/?") == 0) ||
+       (strcmp(argv[i], "-usage") == 0))
       {
       return cmDocumentation::Usage;
       }
-    if((strcmp(argv[i], "-help") == 0) ||
-       (strcmp(argv[i], "--help") == 0))
+    if(strcmp(argv[i], "--help-full") == 0)
       {
       return cmDocumentation::Help;
       }
@@ -588,4 +596,24 @@ void cmDocumentation::SetOptions(const cmDocumentationEntry* d)
     }
   cmDocumentationEntry empty = {0,0,0};
   this->Options.push_back(empty);
+}
+
+//----------------------------------------------------------------------------
+void cmDocumentation::SetCommands(const cmDocumentationEntry* d)
+{
+  this->Commands.erase(this->Commands.begin(), this->Commands.end());
+  for(const cmDocumentationEntry* op = cmDocumentationCommandsHeader;
+      op->brief; ++op)
+    {
+    this->Commands.push_back(*op);
+    }
+  if(d)
+    {
+    for(const cmDocumentationEntry* op = d; op->brief; ++op)
+      {
+      this->Commands.push_back(*op);
+      }
+    }
+  cmDocumentationEntry empty = {0,0,0};
+  this->Commands.push_back(empty);
 }

@@ -35,7 +35,7 @@ public:
   void PrintCopyright(std::ostream& os);
   void PrintVersion(std::ostream& os);
   
-  void SetCommands(const cmDocumentationEntry* d)    {this->Commands = d;}
+  void SetCommands(const cmDocumentationEntry* d);
   void SetDescription(const cmDocumentationEntry* d) {this->Description = d;}
   void SetName(const cmDocumentationEntry* d)        {this->Name = d;}
   void SetOptions(const cmDocumentationEntry* d);
@@ -59,7 +59,7 @@ private:
   void PrintUsageSection(std::ostream& os,
                          const cmDocumentationEntry* section);
   
-  const cmDocumentationEntry* Commands;
+  std::vector<cmDocumentationEntry> Commands;
   const cmDocumentationEntry* Description;
   const cmDocumentationEntry* Name;
   std::vector<cmDocumentationEntry> Options;
