@@ -194,6 +194,12 @@ int main()
   cmPassed("CMAKE_IS_FUN is defined.");
 #endif
   
+#if defined(CMAKE_ARGV1) && defined(CMAKE_ARGV2) && defined(CMAKE_ARGV3) && defined(CMAKE_ARGV4) 
+  cmPassed("Variable args for MACROs are working.");
+#else
+  cmFailed("Variable args for MACROs are failing.");
+#endif
+
   // ----------------------------------------------------------------------
   // Test SET, VARIABLE_REQUIRES
 

@@ -17,6 +17,19 @@ ENDMACRO(ASSERT)
 ASSERT(Complex_BINARY_DIR "The PROJECT command is broken")
 
 #
+# Define a var args macro, it must take two or four args
+#
+MACRO(TEST_ARGC value1 value2)
+  ADD_DEFINITIONS(${value1} ${value2})
+  IF (${ARGC} MATCHES 4)
+    ADD_DEFINITIONS(${ARGV2} ${ARGV3})
+  ENDIF (${ARGC} MATCHES 4)
+ENDMACRO(TEST_ARGC)
+ 
+# invoke the macro
+TEST_ARGC(-DCMAKE_ARGV1 -DCMAKE_ARGV2 -DCMAKE_ARGV3 -DCMAKE_ARGV4)
+
+#
 # Use the ansi CXX compile flag for building cmake
 #
 IF (CMAKE_ANSI_CXXFLAGS)
