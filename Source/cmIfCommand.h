@@ -28,6 +28,7 @@
 class cmIfFunctionBlocker : public cmFunctionBlocker
 {
 public:
+  virtual ~cmIfFunctionBlocker() {}
   virtual bool IsFunctionBlocked(const char *name, const std::vector<std::string> &args, 
                                  const cmMakefile &mf) const;
   virtual bool ShouldRemove(const char *name, const std::vector<std::string> &args, 
