@@ -203,8 +203,8 @@ void cmLocalCodeWarriorGenerator::WriteSettingList(std::ostream& fout,
       }
     }
   
-  std::vector<std::string>& links = l->GetLinkDirectories();
-  std::vector<std::string>::iterator j = links.begin();
+  const std::vector<std::string>& links = l->GetLinkDirectories();
+  std::vector<std::string>::const_iterator j = links.begin();
   for(;j != links.end(); ++j)
     {
     fout << "<SETTING>\n";
@@ -521,7 +521,7 @@ void cmLocalCodeWarriorGenerator::WriteSettingList(std::ostream& fout,
   fout << "<SETTING><NAME>MWProject_MachO_outfile</NAME><VALUE>";
   fout << m_TargetOutputFiles[std::string(tgtName)];
   fout << "</VALUE></SETTING>\n";
-  fout << "<SETTING><NAME>MWProject_MachO_filecreator</NAME><VALUE>????</VALUE></SETTING>\n";
+  fout << "<SETTING><NAME>MWProject_MachO_filecreator</NAME><VALUE>????" << "</VALUE></SETTING>\n";
   fout << "<SETTING><NAME>MWProject_MachO_filetype</NAME><VALUE>";
   fout << targetOutputType;
   fout << "</VALUE></SETTING>\n";
