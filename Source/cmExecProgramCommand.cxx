@@ -114,6 +114,10 @@ bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& args)
     {
     result = cmSystemTools::RunCommand(command.c_str(), output, retVal, 0, verbose);
     }
+  if(!result)
+    {
+    retVal = -1;
+    }  
 
   if ( output_variable.size() > 0 )
     {    
@@ -139,6 +143,6 @@ bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& args)
     m_Makefile->AddDefinition(return_variable.c_str(), buffer);
     }
   
-  return result;
+  return true;
 }
 
