@@ -7,8 +7,21 @@ AC_SUBST(CMAKE_CONFIG_DIR)
 #
 # check for some programs we use
 #
+
+# save the CFLAGS and CXXFLAGS specified by the user
+save_CFLAGS=$CFLAGS
+save_CXXFLAGS=$CXXFLAGS
+
 AC_PROG_CC
 AC_PROG_CXX
+
+
+# restore the flags specified by the user and get rid of any flags
+# found by autoconf (we do not want -02 -g by default)
+CFLAGS=$save_CFLAGS
+CXXFLAGS=$save_CXXFLAGS
+
+
 AC_PROG_RANLIB
 AC_PROG_INSTALL
 
