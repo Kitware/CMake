@@ -69,7 +69,7 @@ public:
   virtual const char* FullDocumentation()
     {
     return
-      "ADD_TARGET(Name \"command to run\");";
+      "ADD_TARGET(Name \"command to run\")";
     }
 };
 

@@ -396,7 +396,7 @@ int cmMakefile::DumpDocumentationToFile(const char *fileName)
     terse = (*j).second->TerseDocumentation();
     full = (*j).second->FullDocumentation();
     f << name << " - " << terse << std::endl
-      << "\t" << full << std::endl << std::endl;
+      << "Usage: " << full << std::endl << std::endl;
     }
   
 
