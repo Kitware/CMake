@@ -47,9 +47,11 @@ int main (int argc, char *argv[])
   // now build the test
   std::string makeCommand = MAKEPROGRAM;
   makeCommand += " ";
-  makeCommand += executableName;
 #ifdef _WIN32
+  makeCommand += executableName;
   makeCommand += ".dsw /MAKE \"ALL_BUILD - Release\" /REBUILD";
+#else
+  makeCommand += " all";
 #endif  
   if (!cmSystemTools::RunCommand(makeCommand.c_str(), output))
     {
