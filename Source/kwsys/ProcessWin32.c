@@ -442,11 +442,12 @@ void kwsysProcess_SetCommand(kwsysProcess* cp, char const* const* command)
   if(command)
     {
     /* We need to construct a single string representing the command
-       and its arguments.  We will surround each argument with
-       double-quotes so it can contain spaces.  We need to escape
-       double-quotes and all backslashes before them.  We also need to
-       escape backslashes at the end of an argument because they come
-       before the closing double-quote for the argument.  */
+       and its arguments.  We will surround each argument containing
+       spaces with double-quotes.  Inside a double-quoted argument, we
+       need to escape double-quotes and all backslashes before them.
+       We also need to escape backslashes at the end of an argument
+       because they come before the closing double-quote for the
+       argument.  */
     char* cmd;
     char const* const* arg;
     int length = 0;
@@ -456,38 +457,56 @@ void kwsysProcess_SetCommand(kwsysProcess* cp, char const* const* command)
       /* Keep track of how many backslashes have been encountered in a
          row in this argument.  */
       int backslashes = 0;
+      int spaces = 0;
       const char* c;
 
-      /* Add the length of the argument, plus 3 for the double quotes
-         and space separating the arguments.  */
-      length += (int)strlen(*arg) + 3;
-      
-      /* Scan the string to find characters that need escaping.  */
+      /* Scan the string for spaces.  If there are no spaces, we can
+         pass the argument verbatim.  */
       for(c=*arg; *c; ++c)
         {
-        if(*c == '\\')
+        if(*c == ' ' || *c == '\t')
           {
-          /* Found a backslash.  It may need to be escaped later.  */
-          ++backslashes;
-          }
-        else if(*c == '"')
-          {
-          /* Found a double-quote.  We need to escape it and all
-             immediately preceding backslashes.  */
-          length += backslashes + 1;
-          backslashes = 0;
-          }
-        else
-          {
-          /* Found another character.  This eliminates the possibility
-             that any immediately preceding backslashes will be
-             escaped.  */
-          backslashes = 0;
+          spaces = 1;
+          break;
           }
         }
       
-      /* We need to escape all ending backslashes. */
-      length += backslashes;
+      /* Add the length of the argument, plus 1 for the space
+         separating the arguments.  */
+      length += (int)strlen(*arg) + 1;
+      
+      if(spaces)
+        {
+        /* Add 2 for double quotes since spaces are present.  */
+        length += 2;
+
+        /* Scan the string to find characters that need escaping.  */
+        for(c=*arg; *c; ++c)
+          {
+          if(*c == '\\')
+            {
+            /* Found a backslash.  It may need to be escaped later.  */
+            ++backslashes;
+            }
+          else if(*c == '"')
+            {
+            /* Found a double-quote.  We need to escape it and all
+               immediately preceding backslashes.  */
+            length += backslashes + 1;
+            backslashes = 0;
+            }
+          else
+            {
+            /* Found another character.  This eliminates the possibility
+               that any immediately preceding backslashes will be
+               escaped.  */
+            backslashes = 0;
+            }
+          }
+      
+        /* We need to escape all ending backslashes. */
+        length += backslashes;
+        }
       }
     
     /* Allocate enough space for the command.  We do not need an extra
@@ -502,65 +521,88 @@ void kwsysProcess_SetCommand(kwsysProcess* cp, char const* const* command)
       /* Keep track of how many backslashes have been encountered in a
          row in an argument.  */
       int backslashes = 0;
+      int spaces = 0;
       const char* c;
+
+      /* Scan the string for spaces.  If there are no spaces, we can
+         pass the argument verbatim.  */
+      for(c=*arg; *c; ++c)
+        {
+        if(*c == ' ' || *c == '\t')
+          {
+          spaces = 1;
+          break;
+          }
+        }      
       
       /* Add the separating space if this is not the first argument.  */
       if(arg != command)
         {
         *cmd++ = ' ';
         }
-
-      /* Add the opening double-quote for this argument.  */
-      *cmd++ = '"';
-
-      /* Add the characters of the argument, possibly escaping them.  */
-      for(c=*arg; *c; ++c)
+      
+      if(spaces)
         {
-        if(*c == '\\')
+        /* Add the opening double-quote for this argument.  */
+        *cmd++ = '"';
+        
+        /* Add the characters of the argument, possibly escaping them.  */
+        for(c=*arg; *c; ++c)
           {
-          /* Found a backslash.  It may need to be escaped later.  */
-          ++backslashes;
-          *cmd++ = '\\';
-          }
-        else if(*c == '"')
-          {
-          /* Add enough backslashes to escape any that preceded the
-             double-quote.  */
-          while(backslashes > 0)
+          if(*c == '\\')
             {
-            --backslashes;
+            /* Found a backslash.  It may need to be escaped later.  */
+            ++backslashes;
             *cmd++ = '\\';
             }
-          
-          /* Add the backslash to escape the double-quote.  */
-          *cmd++ = '\\';
-          
-          /* Add the double-quote itself.  */
-          *cmd++ = '"';
+          else if(*c == '"')
+            {
+            /* Add enough backslashes to escape any that preceded the
+               double-quote.  */
+            while(backslashes > 0)
+              {
+              --backslashes;
+              *cmd++ = '\\';
+              }
+            
+            /* Add the backslash to escape the double-quote.  */
+            *cmd++ = '\\';
+            
+            /* Add the double-quote itself.  */
+            *cmd++ = '"';
+            }
+          else
+            {
+            /* We encountered a normal character.  This eliminates any
+               escaping needed for preceding backslashes.  Add the
+               character.  */
+            backslashes = 0;
+            *cmd++ = *c;
+            }
           }
-        else
+        
+        /* Add enough backslashes to escape any trailing ones.  */
+        while(backslashes > 0)
           {
-          /* We encountered a normal character.  This eliminates any
-             escaping needed for preceding backslashes.  Add the
-             character.  */
-          backslashes = 0;
+          --backslashes;
+          *cmd++ = '\\';
+          }
+
+        /* Add the closing double-quote for this argument.  */
+        *cmd++ = '"';
+        }
+      else
+        {
+        /* No spaces.  Add the argument verbatim.  */
+        for(c=*arg; *c; ++c)
+          {
           *cmd++ = *c;
           }
         }
-      
-      /* Add enough backslashes to escape any trailing ones.  */
-      while(backslashes > 0)
-        {
-        --backslashes;
-        *cmd++ = '\\';
-        }
-
-      /* Add the opening double-quote for this argument.  */
-      *cmd++ = '"';
       }
     
     /* Add the terminating null character to the command line.  */
-    *cmd++ = 0;
+    *cmd = 0;
     }
 }
 
