@@ -91,7 +91,12 @@ IF(BUILD_TESTING)
       ${CMake_BINARY_DIR}/Tests/Complex 
       complex 
       ${CMake_BINARY_DIR}/Tests/Complex/bin )
-
+    ADD_TEST(Example ${CMake_BINARY_DIR}/Source/cmaketest 
+      ${CMake_SOURCE_DIR}/Example
+      ${CMake_BINARY_DIR}/Example
+      helloDemo
+      ${CMake_BINARY_DIR}/Example/Demo
+      HELLO )
   ENDIF (DART_ROOT)
 ENDIF(BUILD_TESTING)
 

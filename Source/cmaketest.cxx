@@ -28,6 +28,11 @@ int main (int argc, char *argv[])
     {
     executableDirectory = argv[4];
     }
+  const char* projectName = executableName;
+  if(argc > 5)
+    {
+    projectName = argv[5];
+    }
   
   /**
    * Run an executable command and put the stdout in output.
@@ -37,6 +42,7 @@ int main (int argc, char *argv[])
   // change to the tests directory and run cmake
   // use the cmake object instead of calling cmake
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
+  std::cout << "Changing into directory: " << binaryDirectory << "\n";
   cmSystemTools::ChangeDirectory(binaryDirectory);
   cmake cm;
   std::vector<std::string> args;
@@ -57,7 +63,7 @@ int main (int argc, char *argv[])
   std::string generator = "-G";
   generator += CMAKE_GENERATOR;
   args.push_back(generator);
-
+  std::cout << "Generating build files...\n";
   if (cm.Generate(args) != 0)
     {
     std::cerr << "Error: cmake execution failed\n";
@@ -65,6 +71,7 @@ int main (int argc, char *argv[])
     cmSystemTools::ChangeDirectory(cwd.c_str());
     return 1;
     }
+  std::cout << "Done Generating build files.\n";
   cmListFileCache::GetInstance()->ClearCache();
   // now build the test
   std::string makeCommand = MAKEPROGRAM;
@@ -97,7 +104,7 @@ int main (int argc, char *argv[])
       }
 #endif
     makeCommand += " ";
-    makeCommand += executableName;
+    makeCommand += projectName;
     makeCommand += ".dsw /MAKE \"ALL_BUILD - Debug\" /REBUILD";
     }
   else
@@ -105,6 +112,7 @@ int main (int argc, char *argv[])
     // assume a make sytle program
     makeCommand += " all";
     }
+  std::cout << "Running make command: " << makeCommand.c_str() << " ...\n";
   if (!cmSystemTools::RunCommand(makeCommand.c_str(), output))
     {
     std::cerr << "Error: " << makeCommand.c_str() <<  "  execution failed\n";
@@ -168,6 +176,7 @@ int main (int argc, char *argv[])
 #if defined(_WIN32) && !defined(__CYGWIN__)      
   cmSystemTools::ConvertToWindowsSlashes(fullPath);
 #endif
+  std::cout << "Running test executable: " << fullPath.c_str() << "\n";
   if (!cmSystemTools::RunCommand(fullPath.c_str(), output))
     {
     std::cerr << "Error: " << fullPath.c_str() << "  execution failed\n";
