@@ -27,21 +27,6 @@ bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& argsIn)
   std::vector<std::string> args;
   m_Makefile->ExpandSourceListArguments(argsIn, args, 3);
 
-  // Now check and see if the value has been stored in the cache
-  // already, if so use that value and don't look for the program
-  const char* QT_WRAP_UI_value = m_Makefile->GetDefinition("QT_WRAP_UI");
-  if (QT_WRAP_UI_value==0)
-    {
-    this->SetError("called with QT_WRAP_UI undefined");
-    return false;
-    }
-  
-  if(cmSystemTools::IsOff(QT_WRAP_UI_value))
-    {
-    this->SetError("called with QT_WRAP_UI off : ");
-    return false;
-    }
-
   // what is the current source dir
   std::string cdir = m_Makefile->GetCurrentDirectory();
 
