@@ -159,6 +159,22 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
     isValid = true;
     return false;
     }
+
+  // this is a super ugly hack. Basically old versiosn of VTK and ITK have a
+  // bad test to check for more recent versions of CMake in the
+  // CMakeLists.txt file for libtiff. So when we reved CMake up to 2.0 the
+  // test started failing because the minor version went to zero this causes
+  // the test to pass
+  if (args.size() == 3 &&
+      (makefile->GetDefinition("VTKTIFF_SOURCE_DIR") ||
+       makefile->GetDefinition("ITKTIFF_SOURCE_DIR")) &&
+      args[0] == "CMAKE_MINOR_VERSION" &&
+      args[1] == "MATCHES")
+    {
+    isValid = true;
+    return true;
+    }
+  
   
   // store the reduced args in this vector
   std::deque<std::string> newArgs;
