@@ -40,24 +40,27 @@ cmake::cmake()
 
 void cmake::Usage(const char* program)
 {
-  std::cerr << "cmake version " << cmMakefile::GetMajorVersion()
-            << "." << cmMakefile::GetMinorVersion() << " - " 
-            << cmMakefile::GetReleaseVersion() << "\n";
-  std::cerr << "Usage: " << program << " [srcdir] [options]\n" 
+  std::strstream errorStream;
+
+  errorStream << "cmake version " << cmMakefile::GetMajorVersion()
+            << "." << cmMakefile::GetMinorVersion() << "\n";
+  errorStream << "Usage: " << program << " [srcdir] [options]\n" 
             << "Where cmake is run from the directory where you want the object files written.  If srcdir is not specified, the current directory is used for both source and object files.\n";
-  std::cerr << "Options are:\n";
-  std::cerr << "\n-i (puts cmake in wizard mode, not available for ccmake)\n";
-  std::cerr << "\n-DVAR:TYPE=VALUE (create a cache file entry)\n";
-  std::cerr << "\n-Cpath_to_initial_cache (a cmake list file that is used to pre-load the cache with values.)\n";
-  std::cerr << "\n[-GgeneratorName] (where generator name can be one of these: ";
+  errorStream << "Options are:\n";
+  errorStream << "\n-i (puts cmake in wizard mode, not available for ccmake)\n";
+  errorStream << "\n-DVAR:TYPE=VALUE (create a cache file entry)\n";
+  errorStream << "\n-Cpath_to_initial_cache (a cmake list file that is used to pre-load the cache with values.)\n";
+  errorStream << "\n[-GgeneratorName] (where generator name can be one of these: ";
   std::vector<std::string> names;
   cmMakefileGenerator::GetRegisteredGenerators(names);
   for(std::vector<std::string>::iterator i =names.begin();
       i != names.end(); ++i)
     {
-    std::cerr << "\"" << i->c_str() << "\" ";
+    errorStream << "\"" << i->c_str() << "\" ";
     }
-  std::cerr << ")\n";
+  errorStream << ")\n";
+
+  cmSystemTools::Error(errorStream.str());
 }
 
 // Parse the args
