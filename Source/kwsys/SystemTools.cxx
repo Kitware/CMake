@@ -970,17 +970,15 @@ unsigned long SystemTools::FileLength(const char* filename)
 
 int SystemTools::Strucmp(const char *s1, const char *s2)
 {
-//  return strcasecmp(s1,s2);
-//
 // lifted from Graphvis http://www.graphviz.org 
   while ((*s1 != '\0') 
-         && (tolower(*(unsigned char *)s1) == tolower(*(unsigned char *)s2)))
+         && (tolower(*s1) == tolower(*s2)))
     {
       s1++;
       s2++;
     }
  
-  return tolower(*(unsigned char *) s1) - tolower(*(unsigned char *) s2);
+  return tolower(*s1) - tolower(*s2);
 
 }
 
