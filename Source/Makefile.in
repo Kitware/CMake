@@ -25,6 +25,8 @@ cmRegularExpression.o \
 cmSourceFile.o \
 cmSystemTools.o \
 cmDirectory.o \
+cmGlobalCodeWarriorGenerator.o \
+cmLocalCodeWarriorGenerator.o \
 cmGlobalUnixMakefileGenerator.o \
 cmLocalUnixMakefileGenerator.o \
 cmCommands.o \
@@ -48,6 +50,8 @@ cmRegularExpression.o : $(DEPENDS)
 cmSourceFile.o : $(DEPENDS)
 cmDirectory.o : $(DEPENDS)
 cmCustomCommand.o : $(DEPENDS)
+cmGlobalCodeWarriorGenerator.o : $(DEPENDS)
+cmLocalCodeWarriorGenerator.o : $(DEPENDS)
 cmGlobalUnixMakefileGenerator.o : $(DEPENDS)
 cmLocalUnixMakefileGenerator.o : $(DEPENDS)
 cmCommands.o : $(DEPENDS) $(srcdir)/*Command*.cxx
