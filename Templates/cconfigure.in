@@ -20,28 +20,6 @@ CFLAGS=$save_CFLAGS
 AC_PROG_RANLIB
 AC_PROG_INSTALL
 
-AC_CHECK_SIZEOF(int, 4)
-CMAKE_SIZEOF_INT=$ac_cv_sizeof_int
-AC_SUBST(CMAKE_SIZEOF_INT)
-AC_CHECK_SIZEOF(long, 4)
-CMAKE_SIZEOF_LONG=$ac_cv_sizeof_long
-AC_SUBST(CMAKE_SIZEOF_LONG)
-AC_CHECK_SIZEOF(void *, 4)
-CMAKE_SIZEOF_VOID_P=$ac_cv_sizeof_void_p
-AC_SUBST(CMAKE_SIZEOF_VOID_P)
-AC_CHECK_SIZEOF(char, 1)
-CMAKE_SIZEOF_CHAR=$ac_cv_sizeof_char
-AC_SUBST(CMAKE_SIZEOF_CHAR)
-AC_CHECK_SIZEOF(short, 2)
-CMAKE_SIZEOF_SHORT=$ac_cv_sizeof_short
-AC_SUBST(CMAKE_SIZEOF_SHORT)
-AC_CHECK_SIZEOF(float, 4)
-CMAKE_SIZEOF_FLOAT=$ac_cv_sizeof_float
-AC_SUBST(CMAKE_SIZEOF_FLOAT)
-AC_CHECK_SIZEOF(double, 8)
-CMAKE_SIZEOF_DOUBLE=$ac_cv_sizeof_double
-AC_SUBST(CMAKE_SIZEOF_DOUBLE)
-
 # check for X11 support
 AC_PATH_XTRA
 CMAKE_HAS_X=0
@@ -57,13 +35,6 @@ if test $ac_cv_c_bigendian = yes; then
 fi
 AC_SUBST(CMAKE_WORDS_BIGENDIAN)
 
-
-# some stuff Tcl uses
-#
-AC_CHECK_HEADER(limits.h, HAVE_LIMITS_H=-DHAVE_LIMITS_H,HAVE_LIMITS_H="")
-AC_SUBST(CMAKE_HAVE_LIMITS_H)
-AC_HAVE_HEADERS(unistd.h, HAVE_UNISTD_H=-DHAVE_UNISTD_H,HAVE_UNISTD_H="")
-AC_SUBST(CMAKE_HAVE_UNISTD_H)
 
 # Step 1: set the variable "system" to hold the name and version number
 # for the system.  This can usually be done via the "uname" command, but

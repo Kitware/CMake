@@ -100,17 +100,7 @@ SET (CMAKE_BUILD_TOOL make CACHE INTERNAL
 SET (CMAKE_ANSI_CFLAGS        "@CMAKE_ANSI_CFLAGS@" CACHE INTERNAL 
      "What flags are required by the c++ compiler to make it ansi.")
 
-
-SET (CMAKE_SIZEOF_INT       @CMAKE_SIZEOF_INT@   CACHE INTERNAL "Size of int data type")
-SET (CMAKE_SIZEOF_LONG      @CMAKE_SIZEOF_LONG@   CACHE INTERNAL "Size of long data type")
-SET (CMAKE_SIZEOF_VOID_P    @CMAKE_SIZEOF_VOID_P@  CACHE INTERNAL "Size of void* data type")
-SET (CMAKE_SIZEOF_CHAR      @CMAKE_SIZEOF_CHAR@  CACHE INTERNAL "Size of char data type")
-SET (CMAKE_SIZEOF_SHORT     @CMAKE_SIZEOF_SHORT@  CACHE INTERNAL "Size of short data type")
-SET (CMAKE_SIZEOF_FLOAT     @CMAKE_SIZEOF_FLOAT@  CACHE INTERNAL "Size of float data type")
-SET (CMAKE_SIZEOF_DOUBLE    @CMAKE_SIZEOF_DOUBLE@  CACHE INTERNAL "Size of double data type")
-
 FIND_PROGRAM(CMAKE_MAKE_PROGRAM NAMES gmake make )
-
 
 IF(CMAKE_SYSTEM MATCHES "HP-UX.*")
    SET (CMAKE_C_SHLIB_LINK_FLAGS "-Wl,+s" CACHE INTERNAL "shared link flags for cc")
