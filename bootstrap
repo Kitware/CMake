@@ -18,7 +18,7 @@
 #=========================================================================
 
 CMAKE_KNOWN_C_COMPILERS="cc gcc xlc icc tcc"
-CMAKE_KNOWN_CXX_COMPILERS="CC g++ c++ xlC icc como aCC"
+CMAKE_KNOWN_CXX_COMPILERS="aCC xlC CC g++ c++ icc como "
 CMAKE_KNOWN_MAKE_PROCESSORS="make gmake"
 
 CMAKE_CXX_SOURCES="\
