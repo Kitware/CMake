@@ -44,7 +44,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Set attributes for a specific list of files.";
+    return "Get a property for a file";
     }
   
   /**
@@ -53,9 +53,10 @@ public:
   virtual const char* GetFullDocumentation()
     {
       return
-        "GET_SOURCE_FILE_PROPERTY(VAR file [ABSTRACT|WRAP_EXCLUDE|COMPILE_FLAGS]) "
-        "Get a property from a source file.   The value of the property is stored  "
-        "in the variable VAR.";
+        "GET_SOURCE_FILE_PROPERTY(VAR file property) "
+        "Get a property from a source file.   The value of the property is " 
+        " stored in the variable VAR. If the property is not found, var "
+        "will be set to NOT_FOUND";
     }
   
   cmTypeMacro(cmGetSourceFilePropertyCommand, cmCommand);

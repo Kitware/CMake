@@ -17,8 +17,8 @@
 #include "cmGetSourceFilePropertyCommand.h"
 
 // cmSetSourceFilePropertyCommand
-bool cmGetSourceFilePropertyCommand::InitialPass(std::vector<std::string> const& 
-                                                 args)
+bool cmGetSourceFilePropertyCommand::InitialPass(
+  std::vector<std::string> const& args)
 {
   if(args.size() != 3 )
     {
@@ -28,28 +28,18 @@ bool cmGetSourceFilePropertyCommand::InitialPass(std::vector<std::string> const&
   const char* var = args[0].c_str();
   const char* file = args[1].c_str();
   cmSourceFile* sf = m_Makefile->GetSource(file);
+
   if(sf)
     {
-    if(args[2] == "ABSTRACT")
+    const char *prop = sf->GetProperty(args[2].c_str());
+    if (prop)
       {
-      m_Makefile->AddDefinition(var, sf->GetPropertyAsBool("ABSTRACT"));
-      }
-    if(args[2] == "WRAP_EXCLUDE")
-      {
-      m_Makefile->AddDefinition(var, sf->GetPropertyAsBool("WRAP_EXCLUDE"));
-      }
-    if(args[2] == "COMPILE_FLAGS")
-      {
-      m_Makefile->AddDefinition(var, sf->GetProperty("COMPILE_FLAGS"));
+      m_Makefile->AddDefinition(var, prop);
+      return true;
       }
     }
-  else
-    {
-    std::string m = "Could not find source file: ";
-    m += file;
-    this->SetError(m.c_str());
-    return false;
-    }
+
+  m_Makefile->AddDefinition(var, "NOT_FOUND");
   return true;
 }
 
