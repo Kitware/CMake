@@ -263,8 +263,8 @@ bool cmGlob::FindFiles(const std::string& inexpr)
   std::string::size_type cc;
   std::string expr = inexpr;
 
-  m_Internals->Expressions.empty();
-  m_Internals->Files.empty();
+  m_Internals->Expressions.clear();
+  m_Internals->Files.clear();
 
   if ( !cmsys::SystemTools::FileIsFullPath(expr.c_str()) )
     {
@@ -273,7 +273,6 @@ bool cmGlob::FindFiles(const std::string& inexpr)
     }
 
   int skip = 0;
-
   int last_slash = 0;
   for ( cc = 0; cc < expr.size(); cc ++ )
     {
