@@ -283,10 +283,9 @@ void cmLocalUnixMakefileGenerator::OutputMakefile(const char* file,
 
 
 
-std::string 
-cmLocalUnixMakefileGenerator::GetOutputExtension(const char* s)
-{
 #if defined(_WIN32) && ! defined(__CYGWIN__) 
+std::string cmLocalUnixMakefileGenerator::GetOutputExtension(const char* s)
+{
   std::string sourceExtension = s;
   if(sourceExtension == "def")
     {
@@ -301,10 +300,13 @@ cmLocalUnixMakefileGenerator::GetOutputExtension(const char* s)
     return ".res";
     }
   return ".obj";
-#else
-  return ".o";
-#endif
 }
+#else
+std::string cmLocalUnixMakefileGenerator::GetOutputExtension(const char*)
+{
+  return ".o";
+}
+#endif
 
 
 
