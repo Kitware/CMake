@@ -182,8 +182,23 @@ void cmMSDotNETGenerator::WriteSLNFile(std::ostream& fout)
     ctest += "ctest";
     ctest += cmSystemTools::GetExecutableExtension();
     }
-  m_Makefile->AddUtilityCommand("RUN_TESTS", ctest.c_str(), "-D $(IntDir)",
-                                false);
+  // if we found ctest
+  if (cmSystemTools::FileExists(ctest.c_str()))
+    {
+    // Create a full path filename for output Testfile
+    std::string fname;
+    fname = m_Makefile->GetStartOutputDirectory();
+    fname += "/";
+    fname += "DartTestfile.txt";
+    
+    // If the file doesn't exist, then ENABLE_TESTING hasn't been run
+    if (cmSystemTools::FileExists(fname.c_str()))
+      {
+      m_Makefile->AddUtilityCommand("RUN_TESTS", ctest.c_str(), "-D $(IntDir)",
+                                    false);
+      }
+    }
+  
   m_Makefile->FindSubDirectoryCMakeListsFiles(allListFiles);
   // For each cmMakefile, create a VCProj for it, and
   // add it to this SLN file
