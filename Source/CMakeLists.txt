@@ -12,7 +12,6 @@ cmCommands.cxx
 cmTarget.cxx
 cmCustomCommand.cxx
 cmCacheManager.cxx
-cmCableClassSet.cxx
 cmSourceGroup.cxx
 cmListFileCache.cxx
 cmake.h
@@ -28,7 +27,6 @@ cmCommands.h
 cmTarget.h
 cmCustomCommand.h
 cmCacheManager.h
-cmCableClassSet.h
 cmSourceGroup.h
 cmListFileCache.h
 )

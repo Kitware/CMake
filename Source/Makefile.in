@@ -29,7 +29,6 @@ cmCommands.o \
 cmTarget.o \
 cmCustomCommand.o \
 cmCacheManager.o \
-cmCableClassSet.o \
 cmListFileCache.o \
 cmSourceGroup.o
 
@@ -50,7 +49,6 @@ cmUnixMakefileGenerator.o : $(DEPENDS)
 cmCommands.o : $(DEPENDS) $(srcdir)/*Command*.cxx
 cmTarget.o : $(DEPENDS)
 cmCacheManager.o : $(DEPENDS)
-cmCableClassSet.o: $(DEPENDS)
 cmSourceGroup.o : $(DEPENDS)
 
 

@@ -244,6 +244,13 @@ void cmMakefile::ExecuteCommand(std::string &name,
       delete usedCommand;
       }
     }
+  else if((name == "CABLE_WRAP_TCL") || (name == "CABLE_CLASS_SET") ||
+          (name == "CONFIGURE_GCCXML"))
+    {
+    cmSystemTools::Error("The command ", name.c_str(),
+                         " is not implemented in this version of CMake.\n"
+                         "Contact cable@public.kitware.com for more information.");
+    }
   else
     {
     cmSystemTools::Error("unknown CMake command:", name.c_str(), 
