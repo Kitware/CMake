@@ -93,3 +93,37 @@ VTK_WRAP_JAVA (wraplibJava Java_SRCS SRCS)
 ADD_CUSTOM_TARGET(${VTK_JAVA_HOME}/vtkIncluded.java
                   echo "Triggering custom target vtkIncluded.java")
 
+#
+# QT Wrappers
+#
+SET (QT_WRAP_CPP "On")
+SET (QT_MOC_EXE "echo")
+QT_WRAP_CPP (wraplibQT QT_SRCS SRCS)
+
+SET (QT_WRAP_UI "On")
+SET (QT_UIC_EXE "echo")
+QT_WRAP_UI (wraplibQTUI QTUI_H_SRCS QTUI_S_SRCS SRCS)
+
+#
+# FLTK Wrappers
+#
+# Since FLTK_FLUID_EXE is supposed to create a .cxx/.h from a .fl/.fld,
+# create an empty one so that the dependencies can be met.
+#
+SOURCE_FILES (FLTK_SRCS
+  fltk1.fl
+)
+SET (FLTK_WRAP_UI "On")
+SET (FLTK_FLUID_EXE "echo")
+FLTK_WRAP_UI (wraplibFLTK FLTK_SRCS)
+ADD_LIBRARY (wraplibFLTK)
+CONFIGURE_FILE(
+  ${Wrapping_SOURCE_DIR}/fltk1.fl
+  ${Wrapping_BINARY_DIR}/fltk1.cxx
+  COPYONLY)
+
+#
+# Mangled Mesa
+#
+USE_MANGLED_MESA (${Wrapping_SOURCE_DIR} ${Wrapping_BINARY_DIR}/mangled_mesa)
+
