@@ -86,12 +86,12 @@ std::string cmNMakeMakefileGenerator::ShortPathCommand(const char* command)
       {
 	c = removeIntDir.match(1) + removeIntDir.match(3);
       }
-    std::string unix = c;
+    std::string unixPath = c;
     // since the command may already be a windows path, convert it
     // to unix so we can use SplitProgramPath on it.
-    cmSystemTools::ConvertToUnixSlashes(unix);
+    cmSystemTools::ConvertToUnixSlashes(unixPath);
     std::string path, file;
-    cmSystemTools::SplitProgramPath(unix.c_str(), path, file);
+    cmSystemTools::SplitProgramPath(unixPath.c_str(), path, file);
     // do a short path on the directory, because ShortPath will
     // not work for files that do not exist
     path = this->ShortPath(path.c_str());
