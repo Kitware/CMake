@@ -2128,8 +2128,9 @@ cmLocalUnixMakefileGenerator2
 
   // Dispatch the scan for each language.
   std::string const& lang = args[2];
-  if(lang == "C" || lang == "CXX")
+  if(lang == "C" || lang == "CXX" || lang == "RC")
     {
+    // TODO: Handle RC (resource files) dependencies correctly.
     return cmLocalUnixMakefileGenerator2::ScanDependenciesC(objFile, srcFile,
                                                             includes);
     }
