@@ -22,6 +22,10 @@
 
 #include <sys/types.h>
 
+#if defined( _MSC_VER )
+typedef unsigned short mode_t;
+#endif
+
 /* Define these macros temporarily to keep the code readable.  */
 #if !defined (KWSYS_NAMESPACE) && !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
 # define kwsys_stl @KWSYS_NAMESPACE@_stl
