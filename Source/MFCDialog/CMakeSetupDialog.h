@@ -22,8 +22,8 @@ protected:
   void LoadFromRegistry();
   void ReadRegistryValue(HKEY hKey,
 			 CString *val,
-			 char *key,
-			 char *adefault);
+			 const char *key,
+			 const char *aadefault);
 // Dialog Data
   //{{AFX_DATA(CMakeSetupDialog)
   enum { IDD = IDD_CMakeSetupDialog_DIALOG };
@@ -40,7 +40,7 @@ protected:
 // Implementation
 protected:
   HICON m_hIcon;
-  
+  CString m_RegistryKey;
   // Generated message map functions
   //{{AFX_MSG(CMakeSetupDialog)
   virtual BOOL OnInitDialog();

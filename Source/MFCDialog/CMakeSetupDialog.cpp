@@ -65,13 +65,35 @@ BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
 CMakeSetupDialog::CMakeSetupDialog(CWnd* pParent /*=NULL*/)
   : CDialog(CMakeSetupDialog::IDD, pParent)
 {
+  CString startPath = _pgmptr;
+  startPath.Replace('\\', '_');
+  startPath.Replace(':', '_');
+  startPath.Replace(".EXE", "");
+  startPath.Replace(".exe", "");
+  m_RegistryKey  = "Software\\Kitware\\CMakeSetup\\Settings\\";
+  // _pgmptr should be the directory from which cmake was run from
+  // use it as the unique key for the dialog
+  m_RegistryKey += startPath;
+  
   //{{AFX_DATA_INIT(CMakeSetupDialog)
   m_WhereSource = _T("");
   m_WhereBuild = _T("");
   //}}AFX_DATA_INIT
   // Note that LoadIcon does not require a subsequent DestroyIcon in Win32
   m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
-  m_WhereSource = _T("");
+  // Guess the initial source directory based on the location
+  // of this program, it should be in CMake/Source/
+  startPath = _pgmptr;
+  int removePos = startPath.Find("\\CMake\\Source");
+  if(removePos == -1)
+    {
+    removePos = startPath.Find("/CMake/Source");
+    }
+  if(removePos != -1)
+    {
+    startPath = startPath.Left(removePos);
+    }
+  m_WhereSource = startPath;
   this->LoadFromRegistry();
 }
 
@@ -273,7 +295,7 @@ void CMakeSetupDialog::SaveToRegistry()
   DWORD dwDummy;
 
   if(RegCreateKeyEx(HKEY_CURRENT_USER, 
-		    _T("Software\\Kitware\\CMakeSetup\\Settings"),
+		    m_RegistryKey,
 		    0, "", REG_OPTION_NON_VOLATILE, KEY_READ|KEY_WRITE, 
 		    NULL, &hKey, &dwDummy) != ERROR_SUCCESS) 
     {
@@ -294,9 +316,9 @@ void CMakeSetupDialog::SaveToRegistry()
 
 
 void CMakeSetupDialog::ReadRegistryValue(HKEY hKey,
-					    CString *val,
-					    char *key,
-					    char *adefault)
+                                         CString *val,
+                                         const char *key,
+                                         const char *adefault)
 {
   DWORD dwType, dwSize;
   char *pb;
@@ -321,7 +343,7 @@ void CMakeSetupDialog::LoadFromRegistry()
 { 
   HKEY hKey;
   if(RegOpenKeyEx(HKEY_CURRENT_USER, 
-		  _T("Software\\Kitware\\CMakeSetup\\Settings"), 
+		  m_RegistryKey, 
 		  0, KEY_READ, &hKey) != ERROR_SUCCESS)
     {
     return;
