@@ -521,3 +521,15 @@ main () {
     return 0;
 }
 #endif
+#ifdef HAVE_LONG_LONG_CONSTANT
+int main()
+{
+  long long c = 0x8000000000000000LL;
+  long long k = 0x7FFFFFFFFFFFFFFFLL;
+  if ( c == 0x8000000000000000LL && c != k )
+    {
+    return 0;
+    }
+  return 1;
+}
+#endif

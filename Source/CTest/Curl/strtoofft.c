@@ -111,10 +111,17 @@ curlx_strtoll(const char *nptr, char **endptr, int base)
     }
   }
   else {
+#ifdef HAVE_LONG_LONG_CONSTANT
+    if (is_negative)
+      value = 0x8000000000000000LL;
+    else
+      value = 0x7FFFFFFFFFFFFFFFLL;
+#else
     if (is_negative)
       value = 0x8000000000000000L;
     else
       value = 0x7FFFFFFFFFFFFFFFL;
+#endif
 
     errno = ERANGE;
   }

@@ -504,3 +504,6 @@
 
 /* the signed version of size_t */
 #cmakedefine ssize_t ${ssize_t}
+
+/* define if the compiler supports number 0x3627676LL */
+#cmakedefine HAVE_LONG_LONG_CONSTANT ${HAVE_LONG_LONG_CONSTANT}
