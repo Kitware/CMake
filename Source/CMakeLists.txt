@@ -502,6 +502,7 @@ IF(BUILD_TESTING)
     "${CMake_SOURCE_DIR}/Tests/Jump"
     "${CMake_BINARY_DIR}/Tests/Jump/NoLibOut"
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Jump/NoLibOut/Executable"
+    --build-run-dir "${CMake_BINARY_DIR}/Tests/Jump/NoLibOut/Executable"
     --build-project Jump 
     --build-generator ${CMAKE_GENERATOR}
     --build-makeprogram ${MAKEPROGRAM}
