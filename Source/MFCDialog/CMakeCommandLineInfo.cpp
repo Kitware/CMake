@@ -57,12 +57,23 @@ int CMakeCommandLineInfo::GetBoolValue(const CString& v) {
 void CMakeCommandLineInfo::ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast)
 {
   // Construct the full name of the argument.
+  cmStdString param = lpszParam;
   cmStdString value;
   if(bFlag)
     {
-    value = "-";
+    // Since bFlag is set, either a - or a / was removed from the
+    // parameter value.  Assume it was a - unless the second character
+    // was a / which indicates a network path argument.
+    if(param.length() > 0 && param[0] == '/')
+      {
+      value = "/";
+      }
+    else
+      {
+      value = "-";
+      }
     }
-  value += lpszParam;
+  value += param;
   
   // Add the argument and reset the argv table in case strings were
   // moved.
