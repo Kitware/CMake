@@ -559,8 +559,9 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
           }
         }  
       cmRegularExpression reg(regexp.c_str());
-      cmRegularExpression libname("lib(.*)(\\.so|\\.sl|\\.a|\\.dylib).*");
-      cmRegularExpression libname_noprefix("(.*)(\\.so|\\.sl|\\.a|\\.dylib).*");
+      cmRegularExpression libname("lib([^/]*)(\\.so|\\.lib|\\.dll|\\.sl|\\.a|\\.dylib).*");
+      cmRegularExpression libname_noprefix("([^/]*)(\\.so|\\.lib|\\.dll|\\.sl|\\.a|\\.dylib).*");
+
       if(libname.find(file))
         {
         librariesLinked += libLinkFlag;
