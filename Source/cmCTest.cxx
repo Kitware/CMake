@@ -23,10 +23,10 @@
 #include "cmGlob.h"
 #include "cmDynamicLoader.h"
 
-#include "cmcTestBuildHandler.h"
-#include "cmcTestScriptHandler.h"
-#include "cmcTestUpdateHandler.h"
-#include "cmcTestConfigureHandler.h"
+#include "cmCTestBuildHandler.h"
+#include "cmCTestScriptHandler.h"
+#include "cmCTestUpdateHandler.h"
+#include "cmCTestConfigureHandler.h"
 
 #include "cmCTestSubmit.h"
 #include "curl/curl.h"
