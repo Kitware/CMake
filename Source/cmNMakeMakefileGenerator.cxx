@@ -69,6 +69,7 @@ cmNMakeMakefileGenerator::~cmNMakeMakefileGenerator()
 std::string cmNMakeMakefileGenerator::ShortPath(const char* path)
 {
   std::string ret = path;
+  cmSystemTools::ConvertToWindowsSlashes(ret);
   // if there are no spaces in path, then just return path
   if(ret.find(' ') == std::string::npos)
     {

@@ -83,12 +83,12 @@ void cmBorlandMakefileGenerator2::OutputMakeVariables(std::ostream& fout)
   const char* variables = 
     "# general varibles used in the makefile\n"
     "\n"
-    "# Path to cmake\n"
-    "CMAKE_COMMAND = ${CMAKE_COMMAND}\n"    
     "CMAKE_STANDARD_WINDOWS_LIBRARIES = @CMAKE_STANDARD_WINDOWS_LIBRARIES@\n"
-    "CMAKE_C_COMPILER    = @CMAKE_C_COMPILER@ \n"
     "CMAKE_C_FLAGS        = @CMAKE_C_FLAGS@ @BUILD_FLAGS@\n"
-    "CMAKE_CXX_COMPILER  = @CMAKE_CXX_COMPILER@\n"
+    "CMAKE_OBJECT_FILE_SUFFIX            = @CMAKE_OBJECT_FILE_SUFFIX@\n"
+    "CMAKE_EXECUTABLE_SUFFIX             = @CMAKE_EXECUTABLE_SUFFIX@\n"
+    "CMAKE_STATICLIB_SUFFIX              = @CMAKE_STATICLIB_SUFFIX@\n"
+    "CMAKE_SHLIB_SUFFIX                  = @CMAKE_SHLIB_SUFFIX@\n"
     "CMAKE_CXXFLAGS      = -P @CMAKE_CXX_FLAGS@ @BUILD_FLAGS@\n";
   std::string buildType = "CMAKE_CXX_FLAGS_";
   buildType +=  m_Makefile->GetDefinition("CMAKE_BUILD_TYPE");
@@ -98,6 +98,21 @@ void cmBorlandMakefileGenerator2::OutputMakeVariables(std::ostream& fout)
                               buildType.c_str()));
   std::string replaceVars = variables;
   m_Makefile->ExpandVariablesInString(replaceVars);
+  
+  std::string ccompiler = m_Makefile->GetDefinition("CMAKE_C_COMPILER");
+  cmSystemTools::ConvertToWindowsSlashes(ccompiler);
+  fout << "CMAKE_C_COMPILER  = " << cmSystemTools::EscapeSpaces(ccompiler.c_str())
+       << "\n";
+  std::string cxxcompiler = m_Makefile->GetDefinition("CMAKE_CXX_COMPILER");
+  cmSystemTools::ConvertToWindowsSlashes(cxxcompiler);
+  fout << "CMAKE_CXX_COMPILER  = " << cmSystemTools::EscapeSpaces(cxxcompiler.c_str())
+       << "\n";
+
+  
+  std::string cmakecommand = m_Makefile->GetDefinition("CMAKE_COMMAND");
+  cmSystemTools::ConvertToWindowsSlashes(cmakecommand);
+  fout << "CMAKE_COMMAND = " << cmSystemTools::EscapeSpaces(cmakecommand.c_str()) << "\n";
+
   fout << replaceVars.c_str();
   fout << "CMAKE_CURRENT_SOURCE = " 
        << ShortPath(m_Makefile->GetStartDirectory() )
@@ -302,18 +317,20 @@ void cmBorlandMakefileGenerator2::OutputSharedLibraryRule(std::ostream& fout,
                                                        const char* name,
                                                        const cmTarget &t)
 {
-  std::string target = m_LibraryOutputPath + name + ".dll";
+  std::string target = m_LibraryOutputPath + name;
+  std::string libpath = target + ".lib";
+  target += ".dll";
+  cmSystemTools::ConvertToWindowsSlashes(libpath);
+  cmSystemTools::ConvertToWindowsSlashes(target);
+  target = cmSystemTools::EscapeSpaces(target.c_str());
+  libpath = cmSystemTools::EscapeSpaces(libpath.c_str());
   std::string depend = "$(";
   depend += name;
   depend += "_SRC_OBJS) $(" + std::string(name) + "_DEPEND_LIBS)";
   std::string command = "$(CMAKE_CXX_COMPILER) -tWD  @&&|\n";
-  std::string dllpath = m_LibraryOutputPath +  std::string(name);
-  std::string libpath = dllpath + ".lib";
-  dllpath += ".dll";
-  cmSystemTools::ConvertToWindowsSlashes(dllpath);
   // must be executable name
   command += "-e";
-  command += cmSystemTools::EscapeSpaces(dllpath.c_str());
+  command += target;
   command += " ";
   std::strstream linklibs;
   this->OutputLinkLibraries(linklibs, name, t);
@@ -324,7 +341,7 @@ void cmBorlandMakefileGenerator2::OutputSharedLibraryRule(std::ostream& fout,
   // then list of object files
   command += " $(" + std::string(name) + "_SRC_OBJS) ";
   std::string command2 = "implib -w ";
-  command2 += libpath + " " + dllpath;
+  command2 += libpath + " " + target;
   const std::vector<cmSourceFile>& sources = t.GetSourceFiles();
   for(std::vector<cmSourceFile>::const_iterator i = sources.begin();
       i != sources.end(); ++i)
@@ -357,16 +374,16 @@ void cmBorlandMakefileGenerator2::OutputStaticLibraryRule(std::ostream& fout,
                                                        const cmTarget &)
 {
   std::string target = m_LibraryOutputPath + std::string(name) + ".lib";
+  cmSystemTools::ConvertToWindowsSlashes(target);
+  target = cmSystemTools::EscapeSpaces(target.c_str());
   std::string depend = "$(";
   depend += std::string(name) + "_SRC_OBJS)";
   std::string command = "tlib  @&&|\n\t /u ";
-  std::string libpath = m_LibraryOutputPath + std::string(name) + ".lib";
-  cmSystemTools::ConvertToWindowsSlashes(libpath);
-  command += cmSystemTools::EscapeSpaces(libpath.c_str());
+  command += target;
   std::string deleteCommand = "if exist ";
-  deleteCommand +=  libpath;
+  deleteCommand +=  target;
   deleteCommand += " del ";
-  deleteCommand += libpath;
+  deleteCommand += target;
   command += " $(";
   command += std::string(name) + "_SRC_OBJS)";
   command += "\n|\n";
@@ -385,15 +402,14 @@ void cmBorlandMakefileGenerator2::OutputExecutableRule(std::ostream& fout,
                                                     const char* name,
                                                     const cmTarget &t)
 {
-  std::string target = m_ExecutableOutputPath + name;
-  target += ".exe";
+  std::string target = m_ExecutableOutputPath + name + m_ExecutableExtension;
+  cmSystemTools::ConvertToWindowsSlashes(target);
+  target = cmSystemTools::EscapeSpaces(target.c_str());
   std::string depend = "$(";
   depend += std::string(name) + "_SRC_OBJS) $(" + std::string(name) + "_DEPEND_LIBS)";
   std::string command = 
     "$(CMAKE_CXX_COMPILER) ";
-  std::string path = m_ExecutableOutputPath + name + ".exe";
-  command += " -e" + 
-    cmSystemTools::EscapeSpaces(path.c_str());
+  command += " -e" + target;
   if(t.GetType() == cmTarget::WIN32_EXECUTABLE)
     {
     command +=  " -tWM ";

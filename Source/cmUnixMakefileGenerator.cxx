@@ -235,12 +235,13 @@ void cmUnixMakefileGenerator::OutputMakefile(const char* file)
   for(std::vector<std::string>::const_iterator i = lfiles.begin();
       i !=  lfiles.end(); ++i)
     {
-    fout << " " << cmSystemTools::EscapeSpaces(i->c_str());
+    fout << " " << this->ConvertToNativePath(cmSystemTools::EscapeSpaces(i->c_str()).c_str());
     }
   // Add the cache to the list
   std::string cacheFile = m_Makefile->GetHomeOutputDirectory();
   cacheFile += "/CMakeCache.txt";
-  fout << " " << cmSystemTools::EscapeSpaces(cacheFile.c_str());
+  fout << " " << 
+    this->ConvertToNativePath(cmSystemTools::EscapeSpaces(cacheFile.c_str()).c_str());
   fout << "\n\n\n";
   this->OutputMakeVariables(fout);
   // Set up the default target as the VERY first target, so that make with no arguments will run it
@@ -309,21 +310,21 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
         {
         path = path + l->first + m_StaticLibraryExtension;
         fout << " \\\n" 
-             << cmSystemTools::EscapeSpaces(path.c_str());
+             << this->ConvertToNativePath(cmSystemTools::EscapeSpaces(path.c_str()).c_str());
         }
       else if(l->second.GetType() == cmTarget::SHARED_LIBRARY)
         {
         path = path + l->first + 
           m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
         fout << " \\\n" 
-             << cmSystemTools::EscapeSpaces(path.c_str());
+             << this->ConvertToNativePath(cmSystemTools::EscapeSpaces(path.c_str()).c_str());
         }
       else if(l->second.GetType() == cmTarget::MODULE_LIBRARY)
         {
         path = path + l->first + 
           m_Makefile->GetDefinition("CMAKE_MODULE_SUFFIX");
         fout << " \\\n" 
-             << cmSystemTools::EscapeSpaces(path.c_str());
+             << this->ConvertToNativePath(cmSystemTools::EscapeSpaces(path.c_str()).c_str());
         }
       }
     }
@@ -337,7 +338,7 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
       {
       std::string path = m_ExecutableOutputPath + l->first +
         m_ExecutableExtension;
-      fout << " \\\n" << cmSystemTools::EscapeSpaces(path.c_str());
+      fout << " \\\n" << this->ConvertToNativePath(cmSystemTools::EscapeSpaces(path.c_str()).c_str());
       }
     }
   // list utilities last

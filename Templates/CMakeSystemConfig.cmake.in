@@ -101,7 +101,7 @@ SET (CMAKE_X_CFLAGS           "@X_CFLAGS@" CACHE STRING
      "X11 extra flags.")
 
 SET (CMAKE_HAS_X              @CMAKE_HAS_X@ CACHE INTERNAL 
-     "Is X11 around".)
+     "Is X11 around.")
 
 SET (CMAKE_NO_ANSI_STREAM_HEADERS @CMAKE_NO_ANSI_STREAM_HEADERS@ CACHE INTERNAL 
      "Does the compiler support headers like iostream.")

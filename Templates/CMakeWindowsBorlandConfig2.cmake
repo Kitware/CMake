@@ -53,5 +53,19 @@ SET (CMAKE_SHLIB_SUFFIX ".dll" CACHE STRING
 
 SET (CMAKE_MODULE_SUFFIX ".dll" CACHE STRING 
      "Module library suffix.")
+SET (CMAKE_OBJECT_FILE_SUFFIX ".obj" CACHE STRING 
+     "Object file suffix.")
+
+SET (CMAKE_EXECUTABLE_SUFFIX ".exe" CACHE STRING 
+     "Executable suffix.")
+
+SET (CMAKE_STATICLIB_SUFFIX ".lib" CACHE STRING 
+     "Static library suffix.")
+
+SET (CMAKE_SHLIB_SUFFIX ".dll" CACHE STRING 
+     "Shared library suffix.")
+
+SET (CMAKE_MODULE_SUFFIX ".dll" CACHE STRING 
+     "Module library suffix.")
 
 FIND_PROGRAM(CMAKE_MAKE_PROGRAM make ${BCB_BIN_PATH})
