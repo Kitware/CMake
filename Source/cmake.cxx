@@ -323,6 +323,10 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       cmSystemTools::ConvertToUnixSlashes(path);
       this->SetHomeOutputDirectory(path.c_str());
       }
+    else if((i < args.size()-1) && (arg.find("--check-rerun",0) == 0))
+      {
+      m_CheckRerun = args[++i];
+      }
     else if(arg.find("-V",0) == 0)
       {
         m_Verbose = true;
@@ -1258,6 +1262,12 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
   if(m_ScriptMode || !m_Local || !this->CacheVersionMatches() ||
      !cmSystemTools::FileExists(systemFile.c_str()) )
     {
+    // Check whether we should really do a generate.
+    if(!this->CheckRerun())
+      {
+      return 0;
+      }
+
     // If we are doing global generate, we better set start and start
     // output directory to the root of the project.
     std::string oldstartdir = this->GetStartDirectory();
@@ -1550,4 +1560,66 @@ void cmake::UpdateConversionPathTable()
         }
       }
     }
+}
+
+int cmake::CheckRerun()
+{
+  // If no file is provided for the check, we have to rerun.
+  if(m_CheckRerun.size() == 0)
+    {
+    return 1;
+    }
+
+  // If the file provided does not exist, we have to rerun.
+  if(!cmSystemTools::FileExists(m_CheckRerun.c_str()))
+    {
+    return 1;
+    }
+
+  // Read the rerun check file and use it to decide whether to do the
+  // global generate.
+  cmake cm;
+  cmGlobalGenerator gg;
+  gg.SetCMakeInstance(&cm);
+  std::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
+  lg->SetGlobalGenerator(&gg);
+  cmMakefile* mf = lg->GetMakefile();
+  if(!mf->ReadListFile(0, m_CheckRerun.c_str()) ||
+     cmSystemTools::GetErrorOccuredFlag())
+    {
+    // There was an error reading the file.  Just rerun.
+    return 1;
+    }
+
+  // Get the set of dependencies and outputs.
+  const char* dependsStr = mf->GetDefinition("CMAKE_MAKEFILE_DEPENDS");
+  const char* outputsStr = mf->GetDefinition("CMAKE_MAKEFILE_OUTPUTS");
+  if(!dependsStr || !outputsStr)
+    {
+    // Not enough information was provided to do the test.  Just rerun.
+    return 1;
+    }
+  std::vector<std::string> depends;
+  std::vector<std::string> outputs;
+  cmSystemTools::ExpandListArgument(dependsStr, depends);
+  cmSystemTools::ExpandListArgument(outputsStr, outputs);
+
+  // If any output is older than any dependency then rerun.
+  for(std::vector<std::string>::iterator dep = depends.begin();
+      dep != depends.end(); ++dep)
+    {
+    for(std::vector<std::string>::iterator out = outputs.begin();
+        out != outputs.end(); ++out)
+      {
+      int result = 0;
+      if(!cmSystemTools::FileTimeCompare(out->c_str(), dep->c_str(), &result) ||
+         result < 0)
+        {
+        return 1;
+        }
+      }
+    }
+
+  // No need to rerun.
+  return 0;
 }

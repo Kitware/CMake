@@ -289,6 +289,7 @@ protected:
   
   ///! used by Run
   int LocalGenerate();
+  int CheckRerun();
 
   /**
    * Generate CMAKE_ROOT and CMAKE_COMMAND cache entries
@@ -309,6 +310,7 @@ private:
   std::string m_CMakeCommand;
   std::string m_CXXEnvironment;
   std::string m_CCEnvironment;
+  std::string m_CheckRerun;
   bool m_DebugTryCompile;
   
   void UpdateConversionPathTable();
