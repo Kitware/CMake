@@ -50,7 +50,7 @@ class PropertyItemRow  : public Fl_Tile
     static void BrowsePathCallback(  Fl_Widget *, void *);
     static void ColorSelectionCallback(   Fl_Widget * widget, void * data);
 
-    static void FillCacheManagerFromCacheGUI( void );
+    static void SaveCacheFromGUI( void );
 
   public:
     
