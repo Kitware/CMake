@@ -31,6 +31,7 @@ ENDIF(CMAKE_SYSTEM MATCHES "OSF1-V.*")
 
 
 ADD_DEFINITIONS(-DCMAKE_IS_FUN)
+ADD_DEFINITIONS(-DCMAKE_IS_REALLY_FUN)
 
 SET(TEST_SEP "a b c")
 SEPARATE_ARGUMENTS(TEST_SEP)
@@ -147,20 +148,20 @@ FIND_LIBRARY(FIND_DUMMY_LIB
 # Test SET_SOURCE_FILES_PROPERTIES 
 #
 SET_SOURCE_FILES_PROPERTIES(nonexisting_file2 
-	                    GENERATED 
-	                    ABSTRACT 
-                            WRAP_EXCLUDE 
-                            COMPILE_FLAGS "-foo -bar")
+  GENERATED 
+  ABSTRACT 
+  WRAP_EXCLUDE 
+  COMPILE_FLAGS "-foo -bar")
 
 GET_SOURCE_FILE_PROPERTY(FILE_HAS_ABSTRACT nonexisting_file2 ABSTRACT)
 GET_SOURCE_FILE_PROPERTY(FILE_HAS_WRAP_EXCLUDE nonexisting_file2 WRAP_EXCLUDE)
 GET_SOURCE_FILE_PROPERTY(FILE_COMPILE_FLAGS nonexisting_file2 COMPILE_FLAGS)
 
 SET_SOURCE_FILES_PROPERTIES(nonexisting_file3 PROPERTIES
-	                    GENERATED 1
-	                    ABSTRACT 1
-                            WRAP_EXCLUDE 1
-                            COMPILE_FLAGS "-foo -bar")
+  GENERATED 1
+  ABSTRACT 1
+  WRAP_EXCLUDE 1
+  COMPILE_FLAGS "-foo -bar")
 GET_SOURCE_FILE_PROPERTY(FILE_HAS_ABSTRACT nonexisting_file3 ABSTRACT)
 GET_SOURCE_FILE_PROPERTY(FILE_HAS_WRAP_EXCLUDE nonexisting_file3 WRAP_EXCLUDE)
 GET_SOURCE_FILE_PROPERTY(FILE_COMPILE_FLAGS nonexisting_file3 COMPILE_FLAGS)
@@ -181,8 +182,8 @@ IF (WIN32)
       COPYONLY IMMEDIATE)
     EXEC_PROGRAM(${CMAKE_COMMAND} ARGS "-E write_regv \"${hkey}\" \"${dir}\"")
     FIND_PATH(REGISTRY_TEST_PATH
-              ${file}
-              "[${hkey}]" DOC "Registry_Test_Path")
+      ${file}
+      "[${hkey}]" DOC "Registry_Test_Path")
     EXEC_PROGRAM(${CMAKE_COMMAND} ARGS "-E delete_regv \"${hkey}\"")
     EXEC_PROGRAM(${CMAKE_COMMAND} ARGS "-E remove \"${dir}/${file}\"")
   ENDIF (NOT UNIX)
@@ -238,7 +239,7 @@ IF("x${RESULT}" MATCHES "^xa\\[b\\]c\\[d\\]e$")
 ENDIF("x${RESULT}" MATCHES "^xa\\[b\\]c\\[d\\]e$")
 IF(NOT STRING_REGEX_PASSED)
   MESSAGE(SEND_ERROR
-          "STRING(REGEX REPLACE ... ) test failed (\"${RESULT}\" v. \"a[b]c[d]e\")")
+    "STRING(REGEX REPLACE ... ) test failed (\"${RESULT}\" v. \"a[b]c[d]e\")")
 ENDIF(NOT STRING_REGEX_PASSED)
 
 #

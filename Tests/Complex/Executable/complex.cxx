@@ -15,6 +15,9 @@ extern "C" {
 int cm_passed = 0;
 int cm_failed = 0;
 
+#ifndef CMAKE_IS_REALLY_FUN
+This is a problem. Looks like ADD_DEFINITIONS and REMOVE_DEFINITIONS does not work
+#endif
 // Here is a stupid function that tries to use std::string methods
 // so that the dec cxx compiler will instantiate the stuff that
 // we are using from the CMakeLib library....

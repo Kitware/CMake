@@ -1,3 +1,5 @@
+REMOVE_DEFINITIONS(-DCMAKE_IS_REALLY_FUN)
+
 #
 # Small utility used to create file
 # UTILITY_SOURCE is used for coverage and for getting the exact name
