@@ -296,30 +296,30 @@ void cmLocalUnixMakefileGenerator::OutputMakefile(const char* file,
 
 
 
-#if defined(_WIN32) && ! defined(__CYGWIN__) 
 std::string cmLocalUnixMakefileGenerator::GetOutputExtension(const char* s)
 {
-  std::string sourceExtension = s;
-  if(sourceExtension == "def")
+  if(m_Makefile->IsOn("WIN32") && !(m_Makefile->IsOn("CYGWIN") || m_Makefile->IsOn("MINGW")))
     {
-    return "";
+    std::string sourceExtension = s;
+    if(sourceExtension == "def")
+      {
+      return "";
+      }
+    if(sourceExtension == "ico" || sourceExtension == "rc2")
+      {
+      return "";
+      }
+    if(sourceExtension == "rc")
+      {
+      return ".res";
+      }
+    return ".obj";
     }
-  if(sourceExtension == "ico" || sourceExtension == "rc2")
+  else
     {
-    return "";
+    return ".o";
     }
-  if(sourceExtension == "rc")
-    {
-    return ".res";
-    }
-  return ".obj";
 }
-#else
-std::string cmLocalUnixMakefileGenerator::GetOutputExtension(const char*)
-{
-  return ".o";
-}
-#endif
 
 std::string cmLocalUnixMakefileGenerator::GetFullTargetName(const char* n,
                                                             const cmTarget& t)
@@ -1051,19 +1051,21 @@ void cmLocalUnixMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
     linkFlags += this->GetSafeDefinition(build.c_str());
     linkFlags += " ";
     }
-#ifdef _WIN32
-  const std::vector<cmSourceFile*>& sources = t.GetSourceFiles();
-  for(std::vector<cmSourceFile*>::const_iterator i = sources.begin();
-      i != sources.end(); ++i)
+  if(m_Makefile->IsOn("WIN32") && !(m_Makefile->IsOn("CYGWIN") || m_Makefile->IsOn("MINGW")))
     {
-    if((*i)->GetSourceExtension() == "def")
+    const std::vector<cmSourceFile*>& sources = t.GetSourceFiles();
+    for(std::vector<cmSourceFile*>::const_iterator i = sources.begin();
+        i != sources.end(); ++i)
       {
-      linkFlags += this->GetSafeDefinition("CMAKE_LINK_DEF_FILE_FLAG");
-      linkFlags += cmSystemTools::ConvertToOutputPath((*i)->GetFullPath().c_str());
-      linkFlags += " ";
+      if((*i)->GetSourceExtension() == "def")
+        {
+        linkFlags += this->GetSafeDefinition("CMAKE_LINK_DEF_FILE_FLAG");
+        linkFlags += cmSystemTools::ConvertToOutputPath((*i)->GetFullPath().c_str());
+        linkFlags += " ";
+        }
       }
     }
-#endif
+  
   const char* targetPrefix = t.GetProperty("PREFIX");
   if(!targetPrefix)
     {
