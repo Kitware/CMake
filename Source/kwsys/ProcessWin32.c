@@ -673,7 +673,8 @@ void kwsysProcess_Execute(kwsysProcess* cp)
   cp->TimeoutTime = kwsysProcessTimeFromDouble(-1);
   
   /* CREATE THE CHILD PROCESS */
-  if(!CreateProcess(0, cp->RealCommand, 0, 0, TRUE, CREATE_NEW_CONSOLE, 0,
+  if(!CreateProcess(0, cp->RealCommand, 0, 0, TRUE,
+                    cp->Win9x? CREATE_NEW_CONSOLE:DETACHED_PROCESS, 0,
                     0, &si, &cp->ProcessInformation))
     {
     kwsysProcessCleanup(cp, 1);
