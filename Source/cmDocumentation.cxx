@@ -229,15 +229,16 @@ void cmDocumentation::PrintUsageSection(std::ostream& os,
                                         const cmDocumentationEntry* section)
 {
   if(!section) { return; }
-  long flags = static_cast<long>(os.flags());
-  os.setf(flags | std::ios::left);
   for(const cmDocumentationEntry* op = section; op->brief; ++op)
     {
     if(op->name)
       {
-      os << "  ";
-      os.width(25);
-      os << op->name << "= " << op->brief << "\n";
+      os << "  " << op->name;
+      for(int i = static_cast<int>(strlen(op->name)); i < 25; ++i)
+        {
+        os << " ";
+        }
+      os << "= " << op->brief << "\n";
       }
     else
       {
@@ -246,7 +247,6 @@ void cmDocumentation::PrintUsageSection(std::ostream& os,
       os << "\n";
       }
     }  
-  os.setf(flags);
 }
 
 //----------------------------------------------------------------------------
