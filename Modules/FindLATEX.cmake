@@ -6,7 +6,6 @@
 #  BIBTEX_COMPILER       = the full path to the BibTeX compiler
 #  MAKEINDEX_COMPILER    = the full path to the MakeIndex compiler
 #  DVIPS_CONVERTER       = the full path to the DVIPS converter
-#  DVIPDF_CONVERTER      = the full path to the DVIPDF converter
 #  PS2PDF_CONVERTER      = the full path to the PS2PDF converter
 #
 
@@ -66,19 +65,14 @@ FIND_PROGRAM(DVIPS_CONVERTER
   PATHS ${MIKTEX_BINARY_PATH}
 )
 
-FIND_PROGRAM(DVIPDF_CONVERTER
-  NAMES dvipdf
-  PATHS ${GHOSTSCRIPT_LIBRARY_PATH}
-)
-
 IF (WIN32)
   FIND_PROGRAM(PS2PDF_CONVERTER
-    NAMES ps2pdf13.bat
+    NAMES ps2pdf14.bat
     PATHS ${GHOSTSCRIPT_LIBRARY_PATH}
   )
 ELSE (WIN32)
   FIND_PROGRAM(PS2PDF_CONVERTER
-    NAMES ps2pdf
+    NAMES ps2pdf14 psd2pdf
   )
 ENDIF (WIN32)
 
@@ -86,7 +80,6 @@ MARK_AS_ADVANCED(
   LATEX_COMPILER
   BIBTEX_COMPILER
   MAKEINDEX_COMPILER
-  DVIPDF_CONVERTER
   DVIPS_CONVERTER
   PS2PDF_CONVERTER
 )
