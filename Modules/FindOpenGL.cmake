@@ -26,6 +26,7 @@ IF (WIN32)
 
     FIND_PATH(OPENGL_INCLUDE_DIR GL/gl.h
       /usr/include
+      /usr/include/w32api
       /usr/X11R6/include
     )
 
