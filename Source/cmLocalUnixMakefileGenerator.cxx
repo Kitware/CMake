@@ -1890,8 +1890,9 @@ OutputBuildObjectFromSource(std::ostream& fout,
   comment += objectFile + "  From ";
   comment += source.GetFullPath();
   std::string compileCommand;
-  std::string ext = source.GetSourceExtension();
-  if(ext == "c" )
+  cmSystemTools::e_FileFormat format = 
+    cmSystemTools::GetFileFormat(source.GetSourceExtension().c_str());
+  if( format == cmSystemTools::C_FILE_FORMAT )
     {
     compileCommand = "$(CMAKE_C_COMPILER) $(CMAKE_C_FLAGS) ";
     compileCommand += extraCompileFlags;
@@ -1905,7 +1906,7 @@ OutputBuildObjectFromSource(std::ostream& fout,
     compileCommand += " -o ";
     compileCommand += objectFile;
     }
-  else
+  else if ( format == cmSystemTools::CXX_FILE_FORMAT )
     {
     compileCommand = "$(CMAKE_CXX_COMPILER) $(CMAKE_CXX_FLAGS) ";
     compileCommand += extraCompileFlags;
