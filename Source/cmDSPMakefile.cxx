@@ -128,7 +128,7 @@ void cmDSPMakefile::WriteDSPBuildRule(std::ostream& fout)
   makefileIn += "/";
   makefileIn += "CMakeLists.txt";
   std::string dsprule = GetHomeDirectory();
-  dsprule += "/CMake/pcbuilderCMD ";
+  dsprule += "/CMake/Source/CMakeSetupCMD ";
   dsprule += makefileIn;
   dsprule += " -DSP -H";
   dsprule += this->GetHomeDirectory();
