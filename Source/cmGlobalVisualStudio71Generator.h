@@ -32,7 +32,7 @@ public:
   ///! Get the name for the generator.
   virtual const char* GetName() {
     return cmGlobalVisualStudio71Generator::GetActualName();}
-  static const char* GetActualName() {return "Visual Studio 71";}
+  static const char* GetActualName() {return "Visual Studio 7 .NET 2003";}
 
   ///! Create a local generator appropriate to this Global Generator
   virtual cmLocalGenerator *CreateLocalGenerator();
