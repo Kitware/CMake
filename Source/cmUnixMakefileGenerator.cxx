@@ -516,7 +516,7 @@ void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
         l->first << "_SRC_OBJS} \n";
       fout << "\trm -f lib" << l->first << "$(SHLIB_SUFFIX)\n";
       fout << "\t$(CMAKE_CXX_COMPILER)  ${CMAKE_SHLIB_LINK_FLAGS} "
-        "${CMAKE_SHLIB_BUILD_FLAGS} ${CMAKE_CXX_FLAGS} -o \\\n";
+        "${CMAKE_SHLIB_BUILD_FLAGS} ${CMAKE_CXXFLAGS} -o \\\n";
       fout << "\t  " << m_LibraryOutputPath << "lib" << l->first << "$(SHLIB_SUFFIX) \\\n";
       fout << "\t  ${" << l->first << 
         "_SRC_OBJS} ";
