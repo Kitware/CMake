@@ -729,7 +729,11 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
       if(cc->second.m_SourceFile)
         {
         // Check for extra compiler flags.
-        compileFlags = cc->second.m_SourceFile->GetProperty("COMPILE_FLAGS");
+        const char* cflags = cc->second.m_SourceFile->GetProperty("COMPILE_FLAGS");
+        if(cflags)
+          {
+          compileFlags = cc->second.m_SourceFile->GetProperty("COMPILE_FLAGS");
+          }
         if(cmSystemTools::GetFileFormat(
              cc->second.m_SourceFile->GetSourceExtension().c_str())
            == cmSystemTools::CXX_FILE_FORMAT)

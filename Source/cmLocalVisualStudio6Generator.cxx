@@ -293,7 +293,11 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
       if(cc->second.m_SourceFile)
         {
         // Check for extra compiler flags.
-        compileFlags = cc->second.m_SourceFile->GetProperty("COMPILE_FLAGS");
+        const char* cflags = cc->second.m_SourceFile->GetProperty("COMPILE_FLAGS");
+        if(cflags)
+          {
+          compileFlags = cflags;
+          }
         if(cmSystemTools::GetFileFormat(
              cc->second.m_SourceFile->GetSourceExtension().c_str())
            == cmSystemTools::CXX_FILE_FORMAT)
