@@ -293,20 +293,9 @@ bool cmSystemTools::IsOff(const char* val)
           v == "N" || cmSystemTools::IsNOTFOUND(v.c_str()) || v == "IGNORE");
 }
 
-bool cmSystemTools::RunSingleCommand(
-  const char* command, 
-  std::string* output,
-  int *retVal, 
-  const char* dir,
-  bool verbose,
-  int timeout)
+std::vector<cmStdString> cmSystemTools::ParseArguments(const char* command)
 {
-  if(s_DisableRunCommandOutput)
-    {
-    verbose = false;
-    }
-  
-  std::vector<std::string> args;
+  std::vector<cmStdString> args;
   std::string arg;
 
   bool win_path = false;
@@ -365,19 +354,37 @@ bool cmSystemTools::RunSingleCommand(
       }
     }
   
+  return args;
+}
+
+bool cmSystemTools::RunSingleCommand(
+  const char* command, 
+  std::string* output,
+  int *retVal, 
+  const char* dir,
+  bool verbose,
+  int timeout)
+{
+  if(s_DisableRunCommandOutput)
+    {
+    verbose = false;
+    }
+
+  std::vector<cmStdString> args = cmSystemTools::ParseArguments(command);
+
+  if(args.size() < 1)
+    {
+    return false;
+    }
+  
   std::vector<const char*> argv;
-  for(std::vector<std::string>::const_iterator a = args.begin();
+  for(std::vector<cmStdString>::const_iterator a = args.begin();
       a != args.end(); ++a)
     {
     argv.push_back(a->c_str());
     }
   argv.push_back(0);
-  
-  if(argv.size() < 2)
-    {
-    return false;
-    }
-  
+
   if ( output )
     {
     *output = "";

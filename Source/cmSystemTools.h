@@ -179,6 +179,11 @@ public:
    */
   static bool RunSingleCommand(const char* command, std::string* output = 0,
     int* retVal = 0, const char* dir = 0, bool verbose = true, int timeout = 0);
+
+  /**
+   * Parse arguments out of a single string command
+   */
+  static std::vector<cmStdString> ParseArguments(const char* command);
     
   static void EnableMessages() { s_DisableMessages = false; }
   static void DisableMessages() { s_DisableMessages = true; }
