@@ -54,7 +54,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-
   
 /**
  *
@@ -111,12 +110,12 @@ cmDirectory
 ::Load(const char* name)
 {
   DIR* dir = opendir(name);
-  if ( !dir ) 
+
+  if (!dir)
     {
     return 0;
     }
-  
-  dir = opendir(name);
+
   for (dirent* d = readdir(dir); d; d = readdir(dir) )
     {
     m_Files.push_back(d->d_name);
