@@ -1465,7 +1465,6 @@ bool WindowsRunCommand(const char* command, const char* dir,
   CloseHandle(read_stdout);
   CloseHandle(write_stdin);
   retVal = exit;
-  std::cerr << std::endl << "End of WindowsRunCommand(" << command << ")" << std::endl << std::flush;
   return true;
  
 }
