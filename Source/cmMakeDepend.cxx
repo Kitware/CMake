@@ -98,14 +98,12 @@ void cmMakeDepend::DoDepends()
       i != m_DependInformation.end(); ++i)
     {
     cmDependInformation* info = *i;
-    // Remove duplicate depends
-    info->RemoveDuplicateIndices();
     // find the class 
     if(info->m_ClassFileIndex != 0)
       {
       cmClassFile& cfile = *(info->m_ClassFileIndex);
-      for( std::vector<int>::iterator indx = info->m_Indices.begin();
-	   indx != info->m_Indices.end(); ++indx)
+      for( cmDependInformation::IndexSet::const_iterator indx = info->m_IndexSet.begin();
+	   indx != info->m_IndexSet.end(); ++indx)
 	{
 	cfile.m_Depends.push_back(m_DependInformation[*indx]->m_FullPath);
 	}
@@ -164,7 +162,7 @@ void cmMakeDepend::Depend(cmDependInformation* info)
       
       // Found dependency information.  We are done.
       return;
-      }    
+      }
     }
   
   // Couldn't find any dependency information.
@@ -244,7 +242,7 @@ void cmMakeDepend::AddDependency(cmDependInformation* info, const char* file)
   int index = this->FindInformation(file);
   // add the index to the depends of the current 
   // depend info object
-  info->m_Indices.push_back(index);
+  info->m_IndexSet.insert(index);
   // Get the depend information object for the include file
   cmDependInformation* dependInfo = m_DependInformation[index];
   // if the depends are not known for an include file, then compute them
@@ -286,28 +284,13 @@ int cmMakeDepend::FindInformation(const char* fname)
   return m_DependInformation.size()-1;
 }
 
-// remove duplicate indices from the depend information 
-void cmDependInformation::RemoveDuplicateIndices()
-{
-  // sort the array
-  std::sort(m_Indices.begin(), m_Indices.end(), std::less<int>());
-  // remove duplicates
-  std::vector<int>::iterator new_end = 
-    std::unique(m_Indices.begin(), m_Indices.end());
-  m_Indices.erase(new_end, m_Indices.end());
-}
 
-// add the depend information from info to the m_Indices varible of this class.
+// add the depend information from info to the m_IndexSet varible of this class.
 void cmDependInformation::MergeInfo(cmDependInformation* info)
 {
-  if(this == info)
+  if(this != info)
     {
-      return;
-    }
-  std::vector<int>::iterator i = info->m_Indices.begin();
-  for(; i!= info->m_Indices.end(); ++i)
-    {
-    m_Indices.push_back(*i);
+    m_IndexSet.insert(info->m_IndexSet.begin(), info->m_IndexSet.end());
     }
 }
 

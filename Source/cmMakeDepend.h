@@ -39,10 +39,12 @@ struct cmDependInformation
     }
 
   /**
-   * A list of indices into the m_DependInformation array of cmMakeDepend.
+   * A set of indices into the m_DependInformation array of cmMakeDepend.
    * The index represents the files that this file depends on.
+   * This must be a "set" to keep indices unique.
    */
-  std::vector<int> m_Indices;	
+  typedef std::set<int> IndexSet;
+  IndexSet m_IndexSet;	
 
   /**
    * Full path to this file.
@@ -70,11 +72,6 @@ struct cmDependInformation
    * This method adds the dependencies of another file to this one.
    */
   void MergeInfo(cmDependInformation*);
-  
-  /**
-   * This method removes duplicate depends from the index list.
-   */
-  void RemoveDuplicateIndices();
 };
 
 
