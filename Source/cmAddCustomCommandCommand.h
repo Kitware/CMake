@@ -108,33 +108,4 @@ public:
 };
 
 
-/*
-  
-target: normal depends
-  pre rules
-  normal rules
-  post rules
-
-output1: source other depends
-  rule
-  
-output2: source other dpeends
-  rule
-
-
-another option is
-
-output1: depends
-  rule
-      
-output2: depends
-  rule
-
-
-  
-use case1 - an executable that depending on args create diff output files
-
-*/
-
-
 #endif
