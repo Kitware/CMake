@@ -21,7 +21,8 @@
 #
 
 SELF="$0"
-CVSROOT=:pserver:anonymous@www.cmake.org:/cvsroot/CMake
+CVSROOT=":pserver:anonymous@www.cmake.org:/cvsroot/CMake"
+CVSROOT_GREP=":pserver:anonymous@www.cmake.org:[0-9]*/cvsroot/CMake"
 TAG="Release-1-6"
 VERSION="1.6.beta2"
 RELEASE="1"
@@ -83,9 +84,11 @@ setup()
 clean()
 {
     setup || return 1
-    echo "Cleaning up ${RELEASE_ROOT}"
-    rm -rf cmake-*
-    rm -rf ReleaseUtilities
+    echo "Cleaning up ${RELEASE_ROOT}" &&
+    rm -rf cmake-* &&
+    rm -rf ReleaseUtilities &&
+    rm -rf Tarballs &&
+    rm -rf Install
 }
 
 #-----------------------------------------------------------------------------
@@ -99,7 +102,7 @@ cvs_login()
         else
             CVSPASS=""
         fi
-        if [ -z "`grep \"$CVSROOT\" ${CVSPASS} /dev/null`" ]; then
+        if [ -z "`grep \"$CVSROOT_GREP\" ${CVSPASS} /dev/null`" ]; then
             echo "cmake" | cvs -q -z3 -d $CVSROOT login
         else
             echo "Already logged in."
