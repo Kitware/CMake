@@ -2132,6 +2132,10 @@ int cmCTest::TestDirectory(bool memcheck)
       }
 
     float percent = float(passed.size()) * 100.0f / total;
+    if ( failed.size() > 0 &&  percent > 99)
+      {
+      percent = 99;
+      }
     fprintf(stderr,"\n%.0f%% tests passed, %i tests failed out of %i\n",
             percent, int(failed.size()), total);
 
