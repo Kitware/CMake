@@ -16,6 +16,53 @@
 =========================================================================*/
 #include <Directory.hxx>
 
+#include <std/string>
+#include <std/vector>
+
+namespace KWSYS_NAMESPACE
+{
+
+//----------------------------------------------------------------------------
+class DirectoryInternals
+{
+public:
+  // Array of Files
+  kwsys_std::vector<kwsys_std::string> Files;
+  
+  // Path to Open'ed directory
+  kwsys_std::string Path;
+};
+
+//----------------------------------------------------------------------------
+Directory::Directory()
+{
+  this->Internal = new DirectoryInternals;
+}
+
+//----------------------------------------------------------------------------
+Directory::~Directory()
+{
+  delete this->Internal;
+}
+
+//----------------------------------------------------------------------------
+unsigned long Directory::GetNumberOfFiles()
+{
+  return this->Internal->Files.size();
+}
+
+//----------------------------------------------------------------------------
+const char* Directory::GetFile(unsigned long dindex)
+{
+  if ( dindex >= this->Internal->Files.size() )
+    {
+    return 0;
+    }
+  return this->Internal->Files[dindex].c_str();
+}
+
+} // namespace KWSYS_NAMESPACE
+
 // First microsoft compilers
 
 #ifdef _MSC_VER
@@ -60,10 +107,10 @@ bool Directory::Load(const char* name)
   // Loop through names
   do 
     {
-    m_Files.push_back(data.name);
+    this->Internal->Files.push_back(data.name);
     } 
   while ( _findnext(srchHandle, &data) != -1 );
-  m_Path = name;
+  this->Internal->Path = name;
   return _findclose(srchHandle) != -1;
 }
 
@@ -75,7 +122,7 @@ bool Directory::Load(const char* name)
 
 #include <sys/types.h>
 #include <dirent.h>
-  
+
 namespace KWSYS_NAMESPACE
 {
 
@@ -90,27 +137,13 @@ bool Directory::Load(const char* name)
 
   for (dirent* d = readdir(dir); d; d = readdir(dir) )
     {
-    m_Files.push_back(d->d_name);
+    this->Internal->Files.push_back(d->d_name);
     }
-  m_Path = name;
+  this->Internal->Path = name;
   closedir(dir);
   return 1;
 }
-  
+
 } // namespace KWSYS_NAMESPACE
 
 #endif
-
-namespace KWSYS_NAMESPACE
-{
-
-const char* Directory::GetFile(size_t dindex)
-{
-  if ( dindex >= m_Files.size() )
-    {
-    return 0;
-    }
-  return m_Files[dindex].c_str();
-}
-
-} // namespace KWSYS_NAMESPACE

@@ -35,10 +35,4 @@
 #  include <strstream.h>
 #endif
 
-#if defined(KWSYS_NO_STD_NAMESPACE)
-# define kwsys_std
-#else
-# define kwsys_std std
-#endif
-
 #endif

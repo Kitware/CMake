@@ -51,6 +51,20 @@ IF(KWSYS_INCLUDE_INSTALL_DIR)
                 FILES ${KWSYS_INCLUDES})
 ENDIF(KWSYS_INCLUDE_INSTALL_DIR)
 
+#-----------------------------------------------------------------------------
+# Create STL header wrappers to block warnings in the STL headers.
+FOREACH(header algorithm deque iterator list map numeric queue set stack string
+               utility vector)
+  SET(KWSYS_STL_HEADER "${header}")
+  CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/kwsys_std.h.in
+                 ${PROJECT_BINARY_DIR}/../${KWSYS_NAMESPACE}/std/${header}
+                 @ONLY IMMEDIATE)
+  IF(KWSYS_INCLUDE_INSTALL_DIR)
+    INSTALL_FILES(${KWSYS_INCLUDE_INSTALL_DIR}/${KWSYS_NAMESPACE}
+      FILES ${PROJECT_BINARY_DIR}/../${KWSYS_NAMESPACE}/std/${header})
+  ENDIF(KWSYS_INCLUDE_INSTALL_DIR)
+ENDFOREACH(header)
+
 IF(KWSYS_DEFAULTS)
   INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/..)
   ADD_EXECUTABLE(test1 test1.cxx)

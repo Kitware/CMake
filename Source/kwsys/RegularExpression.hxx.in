@@ -35,9 +35,9 @@
 #ifndef @KWSYS_NAMESPACE@_RegularExpression_hxx
 #define @KWSYS_NAMESPACE@_RegularExpression_hxx
 
-#include <@KWSYS_NAMESPACE@/StandardIncludes.hxx>
+#include <@KWSYS_NAMESPACE@/Configure.hxx>
 
-#include <string>
+#include <@KWSYS_NAMESPACE@/std/string>
 
 namespace @KWSYS_NAMESPACE@
 {

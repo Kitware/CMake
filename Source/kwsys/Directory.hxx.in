@@ -17,17 +17,12 @@
 #ifndef @KWSYS_NAMESPACE@_Directory_hxx
 #define @KWSYS_NAMESPACE@_Directory_hxx
 
-#ifdef _MSC_VER
-#pragma warning ( disable : 4786 )
-#endif
-
-#include <@KWSYS_NAMESPACE@/StandardIncludes.hxx>
-
-#include <string>
-#include <vector>
+#include <@KWSYS_NAMESPACE@/Configure.hxx>
 
 namespace @KWSYS_NAMESPACE@
 {
+
+class DirectoryInternals;
 
 /** \class Directory
  * \brief Portable directory/filename traversal.
@@ -37,33 +32,34 @@ namespace @KWSYS_NAMESPACE@
  *
  * Directory currently works with Windows and Unix operating systems.
  */
-
 class Directory 
 {
 public:
+  Directory();
+  ~Directory();
+  
   /**
    * Load the specified directory and load the names of the files
    * in that directory. 0 is returned if the directory can not be 
    * opened, 1 if it is opened.   
    */
-  bool Load(const char* dir);
-
+  bool Load(const char*);
+  
   /**
    * Return the number of files in the current directory.
    */
-  size_t GetNumberOfFiles() { return m_Files.size();}
-
+  unsigned long GetNumberOfFiles();
+  
   /**
    * Return the file at the given index, the indexing is 0 based
    */
-  const char* GetFile(size_t );
-
-private:
-  kwsys_std::vector<kwsys_std::string> m_Files; // Array of Files
-  kwsys_std::string m_Path;               // Path to Open'ed directory
-
-}; // End Class: Directory
+  const char* GetFile(unsigned long);
   
+private:
+  // Private implementation details.
+  DirectoryInternals* Internal;
+}; // End Class: Directory
+
 } // namespace @KWSYS_NAMESPACE@
 
 #endif

@@ -7,4 +7,10 @@
 #cmakedefine KWSYS_NO_ANSI_STRING_STREAM
 #cmakedefine KWSYS_NO_ANSI_FOR_SCOPE
 
+#if defined(KWSYS_NO_STD_NAMESPACE)
+# define kwsys_std
+#else
+# define kwsys_std std
+#endif
+
 #endif
