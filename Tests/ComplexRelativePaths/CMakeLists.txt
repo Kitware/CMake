@@ -49,6 +49,15 @@ LOAD_CACHE(${Complex_SOURCE_DIR}/Cache
            INCLUDE_INTERNALS
              CACHE_TEST_VAR_INTERNAL)
 
+LOAD_CACHE(${Complex_BINARY_DIR} READ_WITH_PREFIX foo CACHE_TEST_VAR_INTERNAL)
+IF(${fooCACHE_TEST_VAR_INTERNAL} MATCHES bar)
+  MESSAGE("Load cache worked")
+ELSE(${fooCACHE_TEST_VAR_INTERNAL} MATCHES bar)
+  MESSAGE(FATAL_ERROR "Load cache with prefix failed")
+ENDIF(${fooCACHE_TEST_VAR_INTERNAL} MATCHES bar)
+
+
+
 #
 # Specify include and lib dirs 
 # (BEFORE is for coverage)
