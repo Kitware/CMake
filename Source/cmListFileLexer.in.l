@@ -171,8 +171,8 @@ static void cmListFileLexerAppend(cmListFileLexer* lexer, const char* text,
 %%
 
 /*--------------------------------------------------------------------------*/
-void cmListFileLexerSetToken(cmListFileLexer* lexer, const char* text,
-                             int length)
+static void cmListFileLexerSetToken(cmListFileLexer* lexer, const char* text,
+                                    int length)
 {
   /* Set the token line and column number.  */
   lexer->token.line = lexer->line;
@@ -206,8 +206,8 @@ void cmListFileLexerSetToken(cmListFileLexer* lexer, const char* text,
 }
 
 /*--------------------------------------------------------------------------*/
-void cmListFileLexerAppend(cmListFileLexer* lexer, const char* text,
-                           int length)
+static void cmListFileLexerAppend(cmListFileLexer* lexer, const char* text,
+                                  int length)
 {
   char* temp;
   int newSize;
