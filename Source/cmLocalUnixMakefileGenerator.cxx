@@ -907,7 +907,7 @@ void cmLocalUnixMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
     if((*i)->GetSourceExtension() == "def")
       {
       linkFlags += this->GetSafeDefinition("CMAKE_LINK_DEF_FILE_FLAG");
-      linkFlags += (*i)->GetFullPath();
+      linkFlags += cmSystemTools::ConvertToOutputPath((*i)->GetFullPath().c_str());
       linkFlags += " ";
       }
     }
