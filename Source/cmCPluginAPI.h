@@ -172,7 +172,6 @@ define the different types of compiles a library may be
 Finally we define the key data structures and function prototypes
 =========================================================================*/
   typedef const char* (*CM_DOC_FUNCTION)();
-  typedef const char* (*CM_NAME_FUNCTION)();
   typedef int (*CM_INITIAL_PASS_FUNCTION)(void *info, void *mf, 
                                           int argc, char *[]);
   typedef void (*CM_FINAL_PASS_FUNCTION)(void *info, void *mf);
@@ -188,6 +187,7 @@ Finally we define the key data structures and function prototypes
     CM_DESTRUCTOR_FUNCTION Destructor;
     CM_DOC_FUNCTION GetTerseDocumentation;
     CM_DOC_FUNCTION GetFullDocumentation;  
+    const char *Name;
     void *ClientData;
   } cmLoadedCommandInfo;
 

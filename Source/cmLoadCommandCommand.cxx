@@ -38,7 +38,6 @@ public:
     {
       cmLoadedCommand *newC = new cmLoadedCommand;
       // we must copy when we clone
-      newC->m_commandName = this->m_commandName;
       memcpy(&newC->info,&this->info,sizeof(info));
       return newC;
     }
@@ -68,9 +67,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() {
-    return m_commandName.c_str();
-  }
+  virtual const char* GetName() { return info.Name; }
   
   /**
    * Succinct documentation.
@@ -105,7 +102,6 @@ public:
   cmTypeMacro(cmLoadedCommand, cmCommand);
 
   cmLoadedCommandInfo info;
-  std::string m_commandName;
 };
 
 bool cmLoadedCommand::InitialPass(std::vector<std::string> const& args)
@@ -193,15 +189,6 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& argsIn)
     {
     // Look for the symbol cmLoad, cmGetFactoryCompilerUsed,
     // and cmGetFactoryVersion in the library
-    CM_NAME_FUNCTION nameFunction
-      = (CM_NAME_FUNCTION)
-      cmDynamicLoader::GetSymbolAddress(lib, "cmGetName");
-    if ( !nameFunction )
-      {
-      nameFunction = 
-	(CM_NAME_FUNCTION)(
-	  cmDynamicLoader::GetSymbolAddress(lib, "_cmGetName"));
-      }
     CM_INIT_FUNCTION initFunction
       = (CM_INIT_FUNCTION)
       cmDynamicLoader::GetSymbolAddress(lib, "cmInitializeCommand");
@@ -213,11 +200,10 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& argsIn)
       }
     // if the symbol is found call it to set the name on the 
     // function blocker
-    if(nameFunction)
+    if(initFunction)
       {
       // create a function blocker and set it up
       cmLoadedCommand *f = new cmLoadedCommand();
-      f->m_commandName = (*nameFunction)();
       if (!initFunction)
         {
         this->SetError("Attempt to load command failed. "
