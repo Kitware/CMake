@@ -645,6 +645,7 @@ int cmCursesMainForm::Configure(int noconfigure)
   this->FillCacheManagerFromUI();
   this->m_CMakeInstance->GetCacheManager()->SaveCache(
     m_CMakeInstance->GetHomeOutputDirectory());
+  this->LoadCache(0);
   
   // Get rid of previous errors
   m_Errors = std::vector<std::string>();
