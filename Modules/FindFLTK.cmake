@@ -49,6 +49,10 @@ IF(UNIX)
   SET( FLTK_PLATFORM_DEPENDENT_LIBS ${CMAKE_X_LIBS}  -lm)
 ENDIF(UNIX)
 
+IF(APPLE)
+  SET( FLTK_PLATFORM_DEPENDENT_LIBS  -framework Carbon -framework Cocoa -framework ApplicationServices -lz )
+ENDIF(APPLE)
+
 # Make sure that the FLTK include path has been set
 # So the FLTK_LIBRARY does not appear the first time
 IF(FLTK_INCLUDE_DIR)
