@@ -224,7 +224,7 @@ void cmLocalKdevelopGenerator::CreateNewProjectFile(const std::string& dir, cons
   fout<<"      </environments>\n";
   fout<<"    </make>\n";
   fout<<"  </kdevcustomproject>\n";
-  fout<<"  <kdevfileCreate>\n";
+  fout<<"  <kdevfilecreate>\n";
   fout<<"    <filetypes/>\n";
   fout<<"    <useglobaltypes>\n";
   fout<<"      <type ext=\"ui\" />\n";
