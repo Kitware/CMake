@@ -102,6 +102,7 @@ int main(int argc, char** argv)
     cmake hcm;
     std::vector<cmDocumentationEntry> commands;
     hcm.GetCommandDocumentation(commands);
+    doc.SetName("ccmake");
     doc.SetNameSection(cmDocumentationName);
     doc.SetUsageSection(cmDocumentationUsage);
     doc.SetDescriptionSection(cmDocumentationDescription);

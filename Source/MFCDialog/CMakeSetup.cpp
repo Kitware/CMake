@@ -112,6 +112,7 @@ BOOL CMakeSetup::InitInstance()
     std::vector<cmDocumentationEntry> generators;
     hcm.GetCommandDocumentation(commands);
     hcm.GetGeneratorDocumentation(generators);
+    doc.SetName("CMakeSetup");
     doc.SetNameSection(cmDocumentationName);
     doc.SetUsageSection(cmDocumentationUsage);
     doc.SetDescriptionSection(cmDocumentationDescription);

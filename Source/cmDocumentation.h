@@ -50,6 +50,10 @@ public:
   void PrintDocumentation(Type ht, std::ostream& os);
   
   /** Set the program name for standard document generation.  */
+  void SetName(const char* name);
+
+  /** Set the program name section for standard document
+   * generation.  */
   void SetNameSection(const cmDocumentationEntry*);
 
   /** Set the program usage for standard document generation.  */
@@ -134,7 +138,9 @@ private:
                   const cmDocumentationEntry* section,
                   const cmDocumentationEntry* footer,
                   std::vector<cmDocumentationEntry>&);
+  const char* GetNameString();
 
+  std::string NameString;
   std::vector<cmDocumentationEntry> NameSection;
   std::vector<cmDocumentationEntry> UsageSection;
   std::vector<cmDocumentationEntry> DescriptionSection;

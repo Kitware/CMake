@@ -113,6 +113,7 @@ int do_cmake(int ac, char** av)
     std::vector<cmDocumentationEntry> generators;
     hcm.GetCommandDocumentation(commands);
     hcm.GetGeneratorDocumentation(generators);
+    doc.SetName("cmake");
     doc.SetNameSection(cmDocumentationName);
     doc.SetUsageSection(cmDocumentationUsage);
     doc.SetDescriptionSection(cmDocumentationDescription);
