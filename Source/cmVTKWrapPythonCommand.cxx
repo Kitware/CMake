@@ -106,6 +106,8 @@ void cmVTKWrapPythonCommand::FinalPass()
   std::vector<std::string> depends;
   std::string wpython = "${VTK_WRAP_PYTHON_EXE}";
   std::string hints = "${VTK_WRAP_HINTS}";
+
+  m_Makefile->ExpandVariablesInString(hints);
   
   // Create the init file 
   std::string res = m_LibraryName;
@@ -123,14 +125,19 @@ void cmVTKWrapPythonCommand::FinalPass()
   
   // wrap all the .h files
   depends.push_back(wpython);
+  depends.push_back(hints);
   for(int classNum = 0; classNum < lastClass; classNum++)
     {
     m_Makefile->AddSource(m_WrapClasses[classNum],m_SourceList.c_str());
     std::string res = m_WrapClasses[classNum].GetSourceName() + ".cxx";
-    std::string cmd = m_WrapHeaders[classNum] + " "
-      + hints + (m_WrapClasses[classNum].IsAnAbstractClass() ? " 0 " : " 1 ") + " > " + m_WrapClasses[classNum].GetSourceName() + ".cxx";
+    std::vector<std::string> args;
+    args.push_back(m_WrapHeaders[classNum]);
+    args.push_back(hints);
+    args.push_back((m_WrapClasses[classNum].IsAnAbstractClass() ? "0" : "1"));
+    args.push_back(">");
+    args.push_back(res);
     m_Makefile->AddCustomCommand(m_WrapHeaders[classNum].c_str(),
-                                 wpython.c_str(), cmd.c_str(), depends, 
+                                 wpython.c_str(), args, depends, 
                                  res.c_str(), m_LibraryName.c_str());
     }
   

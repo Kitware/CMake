@@ -341,9 +341,16 @@ std::string cmSystemTools::EscapeSpaces(const char* str)
 #if defined(_WIN32) && !defined(__CYGWIN__)
   std::string result;
   
-  result = "\"";
-  result += cmSystemTools::HandleNetworkPaths(str);
-  return result+"\"";
+  // if there are spaces
+  std::string temp = str;
+  if (temp.find(" ") != std::string::npos)
+    {
+    result = "\"";
+    result += cmSystemTools::HandleNetworkPaths(str);
+    return result+"\"";
+    }
+  return cmSystemTools::HandleNetworkPaths(str);
+  
 #else
   std::string result = "";
   for(const char* ch = str; *ch != '\0'; ++ch)

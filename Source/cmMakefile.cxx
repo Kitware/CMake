@@ -461,7 +461,7 @@ void cmMakefile::RemoveSource(cmSourceFile& cmfile,const char *srclist)
 
 void cmMakefile::AddCustomCommand(const char* source,
                                   const char* command,
-                                  const char* commandArgs,
+                                  const std::vector<std::string>& commandArgs,
                                   const std::vector<std::string>& depends,
                                   const std::vector<std::string>& outputs,
                                   const char *target) 
@@ -470,7 +470,17 @@ void cmMakefile::AddCustomCommand(const char* source,
   if (m_Targets.find(target) != m_Targets.end())
     {
     std::string c = cmSystemTools::EscapeSpaces(command);
-    cmCustomCommand cc(source,c.c_str(),commandArgs,depends,outputs);
+
+    std::string combinedArgs;
+    int i;
+    
+    for (i = 0; i < commandArgs.size(); ++i)
+      {
+      combinedArgs += cmSystemTools::EscapeSpaces(commandArgs[i].c_str());
+      combinedArgs += " ";
+      }
+    
+    cmCustomCommand cc(source,c.c_str(),combinedArgs.c_str(),depends,outputs);
     m_Targets[target].GetCustomCommands().push_back(cc);
     std::string cacheCommand = command;
     this->ExpandVariablesInString(cacheCommand);
@@ -484,7 +494,7 @@ void cmMakefile::AddCustomCommand(const char* source,
 
 void cmMakefile::AddCustomCommand(const char* source,
                                   const char* command,
-                                  const char* commandArgs,
+                                  const std::vector<std::string>& commandArgs,
                                   const std::vector<std::string>& depends,
                                   const char* output, 
                                   const char *target) 

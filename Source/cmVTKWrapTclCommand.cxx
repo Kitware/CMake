@@ -139,6 +139,8 @@ void cmVTKWrapTclCommand::FinalPass()
   std::string wtcl = "${VTK_WRAP_TCL_EXE}";
   std::string hints = "${VTK_WRAP_HINTS}";
   
+  m_Makefile->ExpandVariablesInString(hints);
+
   // Create the init file 
   std::string res = m_LibraryName;
   res += "Init.cxx";
@@ -155,14 +157,23 @@ void cmVTKWrapTclCommand::FinalPass()
   
   // wrap all the .h files
   depends.push_back(wtcl);
+  depends.push_back(hints);
   for(int classNum = 0; classNum < lastClass; classNum++)
     {
     m_Makefile->AddSource(m_WrapClasses[classNum],m_SourceList.c_str());
     std::string res = m_WrapClasses[classNum].GetSourceName() + ".cxx";
-    std::string cmd = m_WrapHeaders[classNum] + " "
-		+ hints + (m_WrapClasses[classNum].IsAnAbstractClass() ? " 0 " : " 1 ") + " > " + m_WrapClasses[classNum].GetSourceName() + ".cxx";
+    std::vector<std::string> args;
+    args.push_back(m_WrapHeaders[classNum]);
+    args.push_back(hints);
+    args.push_back((m_WrapClasses[classNum].IsAnAbstractClass() ? "0" : "1"));
+    args.push_back(">");
+    std::string tmp = m_Makefile->GetCurrentOutputDirectory();
+    tmp += "/";
+    tmp += m_WrapClasses[classNum].GetSourceName() + ".cxx";
+    args.push_back(tmp);
+    
     m_Makefile->AddCustomCommand(m_WrapHeaders[classNum].c_str(),
-                                 wtcl.c_str(), cmd.c_str(), depends, 
+                                 wtcl.c_str(), args, depends, 
                                  res.c_str(), m_LibraryName.c_str());
     }
   

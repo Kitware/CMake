@@ -213,8 +213,11 @@ void cmCableWrapTclCommand::GenerateCableFiles() const
   m_Makefile->ExpandVariablesInString(command);
   std::vector<std::string> depends;
   depends.push_back(command);
-  std::string commandArgs = " "+packageConfigName+
-    " -tcl "+packageTclFullName+".cxx";
+  std::vector<std::string> commandArgs;
+  commandArgs.push_back(packageConfigName);
+  commandArgs.push_back("-tcl");
+  std::string tmp = packageTclFullName+".cxx";
+  commandArgs.push_back(tmp);
   
   depends.push_back(packageConfigName);
   
@@ -223,7 +226,7 @@ void cmCableWrapTclCommand::GenerateCableFiles() const
   
   m_Makefile->AddCustomCommand(packageConfigName.c_str(),
                                command.c_str(),
-                               commandArgs.c_str(),
+                               commandArgs,
                                depends,
                                outputs, m_TargetName.c_str());
 
@@ -341,30 +344,31 @@ void cmCableWrapTclCommand::GenerateCableClassFiles(const char* name,
       }
     }
   
-  std::string commandArgs = this->GetGccXmlFlagsFromCache();
-  commandArgs += " ";
-  commandArgs += m_Makefile->GetDefineFlags();
-  commandArgs += " -I\"";
-  commandArgs += m_Makefile->GetStartDirectory();
-  commandArgs += "\"";
+  std::vector<std::string> commandArgs;
+  commandArgs.push_back(this->GetGccXmlFlagsFromCache());
+  commandArgs.push_back(m_Makefile->GetDefineFlags());
+  commandArgs.push_back("-I");
+  commandArgs.push_back(m_Makefile->GetStartDirectory());
     
   const std::vector<std::string>& includes = 
     m_Makefile->GetIncludeDirectories();
   for(std::vector<std::string>::const_iterator i = includes.begin();
       i != includes.end(); ++i)
     {
-      commandArgs += " -I";
-      commandArgs += cmSystemTools::EscapeSpaces(i->c_str());
+      commandArgs.push_back("-I");
+      commandArgs.push_back(cmSystemTools::EscapeSpaces(i->c_str()));
     }
-  
-  commandArgs += " -fxml="+classXmlName+" "+classCxxName;
+  std::string tmp = "-fxml=";
+  tmp += classXmlName;
+  commandArgs.push_back(tmp);
+  commandArgs.push_back(classCxxName);
   
   std::vector<std::string> outputs;
   outputs.push_back(classXmlName);
   
   m_Makefile->AddCustomCommand(classCxxName.c_str(),
 			       command.c_str(),
-			       commandArgs.c_str(),
+			       commandArgs,
 			       depends,
 			       outputs, m_TargetName.c_str());
   }
@@ -374,7 +378,11 @@ void cmCableWrapTclCommand::GenerateCableClassFiles(const char* name,
   std::string command = this->GetCableFromCache();
   std::vector<std::string> depends;
   depends.push_back(command);
-  std::string commandArgs = " "+classConfigName+" -tcl "+classTclFullName+".cxx";
+  std::vector<std::string > commandArgs;
+  commandArgs.push_back(classConfigName);
+  commandArgs.push_back("-tcl");
+  std::string tmp = classTclFullName+".cxx";
+  commandArgs.push_back(tmp);  
   
   depends.push_back(classConfigName);
   depends.push_back(classXmlName);
@@ -384,8 +392,7 @@ void cmCableWrapTclCommand::GenerateCableClassFiles(const char* name,
   
   m_Makefile->AddCustomCommand(classConfigName.c_str(),
                                command.c_str(),
-                               commandArgs.c_str(),
-                               depends,
+                               commandArgs, depends,
                                outputs, m_TargetName.c_str());
   }
 

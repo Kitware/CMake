@@ -266,6 +266,7 @@ void cmDSPWriter::WriteDSPFile(std::ostream& fout,
           totalCommandStr += "\n\t";
           temp= c->second.m_Command;
           cmSystemTools::ConvertToWindowsSlashes(temp);
+          temp = cmSystemTools::EscapeSpaces(temp.c_str());
           totalCommandStr += temp;
           totalCommandStr += " ";
           totalCommandStr += c->second.m_Arguments;

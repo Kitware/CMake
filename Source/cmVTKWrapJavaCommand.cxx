@@ -112,9 +112,13 @@ void cmVTKWrapJavaCommand::FinalPass()
   std::string hints = "${VTK_WRAP_HINTS}";
   std::string resultDirectory = "${VTK_JAVA_HOME}";
 
+  m_Makefile->ExpandVariablesInString(hints);
+
   // wrap all the .h files
   depends.push_back(wjava);
+  depends.push_back(hints);
   depends2.push_back(pjava);
+  depends2.push_back(hints);
   for(int classNum = 0; classNum < lastClass; classNum++)
     {
     m_Makefile->AddSource(m_WrapClasses[classNum],m_SourceList.c_str());
@@ -124,16 +128,26 @@ void cmVTKWrapJavaCommand::FinalPass()
     std::string res2 = resultDirectory + "/" + 
       m_OriginalNames[classNum] + ".java";
     
-    std::string cmd =  " " + m_WrapHeaders[classNum] + " "
-      + hints + (m_WrapClasses[classNum].IsAnAbstractClass() ? " 0 " : " 1 ") + " > " + m_WrapClasses[classNum].GetSourceName() + ".cxx";
+    std::vector<std::string> args;
+    args.push_back(m_WrapHeaders[classNum]);
+    args.push_back(hints);
+    args.push_back((m_WrapClasses[classNum].IsAnAbstractClass() ? "0" : "1"));
+    args.push_back(">");
+    args.push_back(res);
+
     m_Makefile->AddCustomCommand(m_WrapHeaders[classNum].c_str(),
-                                 wjava.c_str(), cmd.c_str(), depends, 
+                                 wjava.c_str(), args, depends, 
                                  res.c_str(), m_LibraryName.c_str());
 
-    cmd =  " " + m_WrapHeaders[classNum] + " "
-      + hints + (m_WrapClasses[classNum].IsAnAbstractClass() ? " 0 " : " 1 ") + " > " + res2;
+    std::vector<std::string> args2;
+    args2.push_back(m_WrapHeaders[classNum]);
+    args2.push_back(hints);
+    args2.push_back((m_WrapClasses[classNum].IsAnAbstractClass() ? "0" : "1"));
+    args2.push_back(">");
+    args2.push_back(res2);
+
     m_Makefile->AddCustomCommand(m_WrapHeaders[classNum].c_str(),
-                                 pjava.c_str(), cmd.c_str(), depends2, 
+                                 pjava.c_str(), args2, depends2, 
                                  res2.c_str(), m_LibraryName.c_str());
     alldepends.push_back(res2);
     }

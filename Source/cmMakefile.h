@@ -136,14 +136,14 @@ public:
    */
   void AddCustomCommand(const char* source,
                         const char* command,
-                        const char* commandArgs,
+                        const std::vector<std::string>& commandArgs,
                         const std::vector<std::string>& depends,
                         const std::vector<std::string>& outputs,
                         const char *target);
 
   void AddCustomCommand(const char* source,
                         const char* command,
-                        const char* commandArgs,
+                        const std::vector<std::string>& commandArgs,
                         const std::vector<std::string>& depends,
                         const char* output,
                         const char* target);
