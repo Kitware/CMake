@@ -936,18 +936,21 @@ void cmMSDotNETGenerator::OutputLibraries(std::ostream& fout,
   cmTarget::LinkLibraries::const_iterator j;
   for(j = libs.begin(); j != libs.end(); ++j)
     { 
-    std::string lib = j->first;
-    if(j->first.find(".lib") == std::string::npos)
+    if(j->first != libName)
       {
-      lib += ".lib";
+      std::string lib = j->first;
+      if(j->first.find(".lib") == std::string::npos)
+        {
+        lib += ".lib";
+        }
+      lib = this->ConvertToXMLOutputPath(lib.c_str());
+      if (j->second == cmTarget::GENERAL
+          || (j->second == cmTarget::DEBUG && strcmp(configName, "DEBUG") == 0)
+          || (j->second == cmTarget::OPTIMIZED && strcmp(configName, "DEBUG") != 0))
+        {
+        fout << lib << " ";
+        }
       }
-    lib = this->ConvertToXMLOutputPath(lib.c_str());
-     if (j->second == cmTarget::GENERAL
-         || (j->second == cmTarget::DEBUG && strcmp(configName, "DEBUG") == 0)
-         || (j->second == cmTarget::OPTIMIZED && strcmp(configName, "DEBUG") != 0))
-       {
-       fout << lib << " ";
-       }
     }
 }
 
