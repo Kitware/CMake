@@ -383,7 +383,8 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     }  
   
   std::string extraLinkOptions;
-  if(target.GetType() == cmTarget::EXECUTABLE)
+  if((target.GetType() == cmTarget::EXECUTABLE) ||
+     (target.GetType() == cmTarget::WIN32_EXECUTABLE))
     {
     extraLinkOptions = m_Makefile->GetDefinition("CMAKE_EXE_LINKER_FLAGS");
     }
