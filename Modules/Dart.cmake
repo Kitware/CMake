@@ -150,9 +150,13 @@ IF(BUILD_TESTING)
 
     # add testing targets
     IF(TCL_TCLSH)
-      ADD_CUSTOM_TARGET(Experimental 
+      SET(DART_EXPERIMENTAL_NAME Experimental)
+      IF(DART_EXPERIMENTAL_USE_PROJECT_NAME)
+        SET(DART_EXPERIMENTAL_NAME "${DART_EXPERIMENTAL_NAME}${PROJECT_NAME}")
+      ENDIF(DART_EXPERIMENTAL_USE_PROJECT_NAME)
+      ADD_CUSTOM_TARGET(${DART_EXPERIMENTAL_NAME}
         ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Start Update Configure Build Test)
-      ADD_CUSTOM_TARGET(ExperimentalSubmit 
+      ADD_CUSTOM_TARGET(${DART_EXPERIMENTAL_NAME}Submit 
         ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Submit)
 
       # for non IDE based builds nmake and make 
