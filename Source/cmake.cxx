@@ -1277,8 +1277,6 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
     return 0;
     }
 
-  int ret = 0;
-
   // now run the global generate
   // Check the state of the build system to see if we need to regenerate.
   if(!this->CheckBuildSystem())
@@ -1292,7 +1290,7 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
   std::string oldstartoutputdir = this->GetStartOutputDirectory();
   this->SetStartDirectory(this->GetHomeDirectory());
   this->SetStartOutputDirectory(this->GetHomeOutputDirectory());
-  ret = this->Configure();
+  int ret = this->Configure();
   if (ret || m_ScriptMode)
     {
     return ret;
