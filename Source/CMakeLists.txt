@@ -452,7 +452,7 @@ IF(BUILD_TESTING)
     "${CMake_SOURCE_DIR}/Tests/Jump"
     "${CMake_BINARY_DIR}/Tests/Jump/WithLibOut"
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Jump/WithLibOut/Executable"
-    --build-project Dependency 
+    --build-project Jump
     --build-generator ${CMAKE_GENERATOR}
     --build-makeprogram ${MAKEPROGRAM}
     --build-options
@@ -465,7 +465,7 @@ IF(BUILD_TESTING)
     "${CMake_SOURCE_DIR}/Tests/Jump"
     "${CMake_BINARY_DIR}/Tests/Jump/NoLibOut"
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Jump/NoLibOut/Executable"
-    --build-project Dependency 
+    --build-project Jump 
     --build-generator ${CMAKE_GENERATOR}
     --build-makeprogram ${MAKEPROGRAM}
     --test-command jumpExecutable
