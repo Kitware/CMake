@@ -45,7 +45,8 @@ IF(BUILD_TESTING)
       SET (DROP_SITE_MODE "active")
     ENDIF(DROP_METHOD MATCHES http)
 
-    SET (TRIGGER_SITE "http://${DROP_SITE}/cgi-bin/Submit-Random-TestingResults.pl")
+    SET (TRIGGER_SITE "http://${DROP_SITE}/cgi-bin/Submit-Random-TestingResults.cgi")
+    SET (COMPRESS_SUBMISSION ON)
 
     # Project Home Page
     SET (PROJECT_URL "http://www.kitware.com")
