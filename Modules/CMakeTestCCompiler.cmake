@@ -13,13 +13,13 @@ ENDIF(NOT CMAKE_C_COMPILER_WORKS)
 
 IF(NOT CMAKE_C_COMPILER_WORKS)
   MESSAGE(STATUS "Check for working C compiler: ${CMAKE_C_COMPILER} -- broken")
+  FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeError.log
+    "Determining if the C compiler works failed with "
+    "the following output:\n${OUTPUT}\n\n")
   MESSAGE(FATAL_ERROR "The C compiler \"${CMAKE_C_COMPILER}\" "
     "is not able to compile a simple test program.\nIt fails "
     "with the following output:\n ${OUTPUT}\n\n"
     "CMake will not be able to correctly generate this project.")
-  FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeError.log
-    "Determining if the C compiler works failed with "
-    "the following output:\n${OUTPUT}\n\n")
 ELSE(NOT CMAKE_C_COMPILER_WORKS)
   MESSAGE(STATUS "Check for working C compiler: ${CMAKE_C_COMPILER} -- works")
   FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeOutput.log
