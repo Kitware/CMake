@@ -17,7 +17,7 @@
 #include "cmMakefile.h"
 #include "cmStandardIncludes.h"
 #include "cmSystemTools.h"
-#include "cmClassFile.h"
+#include "cmSourceFile.h"
 #include "cmMakeDepend.h"
 #include "cmCacheManager.h"
 
