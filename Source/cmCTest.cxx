@@ -3332,6 +3332,7 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output, int *re
   if(cmSystemTools::SameFile(argv[0], m_CTestSelf.c_str()))
     {
     cmCTest inst;
+    inst.m_ConfigType = m_ConfigType;
     std::vector<std::string> args;
     for(unsigned int i =0; i < argv.size(); ++i)
       {
