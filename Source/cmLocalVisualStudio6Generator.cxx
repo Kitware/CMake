@@ -1065,6 +1065,12 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
        target.GetType() <= cmTarget::MODULE_LIBRARY)
       {
       const char* linkLanguage = target.GetLinkerLanguage(this->GetGlobalGenerator());
+      if(!linkLanguage)
+        {
+        cmSystemTools::Error("CMake can not determine linker language for target:",
+                             target.GetName());
+        return;
+        }
       // if CXX is on and the target contains cxx code then add the cxx flags
       std::string baseFlagVar = "CMAKE_";
       baseFlagVar += linkLanguage;

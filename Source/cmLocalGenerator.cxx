@@ -598,6 +598,12 @@ void cmLocalGenerator::CreateCustomTargetsAndCommands(std::set<cmStdString> cons
       case cmTarget::EXECUTABLE: 
         {
         const char* llang = target.GetLinkerLanguage(this->GetGlobalGenerator());
+        if(!llang)
+          {
+          cmSystemTools::Error("CMake can not determine linker language for target:",
+                               target.GetName());
+          return;
+          }
         // if the language is not in the set lang then create custom
         // commands to build the target
         if(lang.count(llang) == 0)
@@ -988,6 +994,12 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
         linkFlags += " ";
         } 
       const char* linkLanguage = target.GetLinkerLanguage(this->GetGlobalGenerator());
+      if(!linkLanguage)
+        {
+        cmSystemTools::Error("CMake can not determine linker language for target:",
+                             target.GetName());
+        return;
+        }
       std::string langVar = "CMAKE_";
       langVar += linkLanguage;
       std::string flagsVar = langVar + "_FLAGS";
@@ -1056,6 +1068,12 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
   buildType = cmSystemTools::UpperCase(buildType);
 
   const char* linkLanguage = tgt.GetLinkerLanguage(this->GetGlobalGenerator());
+  if(!linkLanguage)
+    {
+    cmSystemTools::Error("CMake can not determine linker language for target:",
+                         tgt.GetName());
+    return;
+    }
   std::string runTimeFlagVar = "CMAKE_SHARED_LIBRARY_RUNTIME_";
   runTimeFlagVar += linkLanguage;
   runTimeFlagVar += "_FLAG";

@@ -329,6 +329,12 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   if(strcmp(configType, "10") != 0)
     {
     const char* linkLanguage = target.GetLinkerLanguage(this->GetGlobalGenerator());
+    if(!linkLanguage)
+      {
+      cmSystemTools::Error("CMake can not determine linker language for target:",
+                           target.GetName());
+      return;
+      }
     std::string baseFlagVar = "CMAKE_";
     baseFlagVar += linkLanguage;
     baseFlagVar += "_FLAGS";
@@ -629,6 +635,12 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
         fout << "\t\t\t\tGenerateDebugInformation=\"TRUE\"\n";
         }
       const char* linkLanguage = target.GetLinkerLanguage(this->GetGlobalGenerator());
+      if(!linkLanguage)
+        {
+        cmSystemTools::Error("CMake can not determine linker language for target:",
+                             target.GetName());
+        return;
+        }
       std::string stackVar = "CMAKE_";
       stackVar += linkLanguage;
       stackVar += "_STACK_SIZE";
@@ -697,8 +709,14 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
         {      
         fout << "\t\t\t\tSubSystem=\"1\"\n";
         } 
-      const char* linkLanguage = target.GetLinkerLanguage(this->GetGlobalGenerator());
-      std::string stackVar = "CMAKE_";
+      const char* linkLanguage = target.GetLinkerLanguage(this->GetGlobalGenerator()); 
+      if(!linkLanguage)
+        {
+        cmSystemTools::Error("CMake can not determine linker language for target:",
+                             target.GetName());
+        return;
+        }
+     std::string stackVar = "CMAKE_";
       stackVar += linkLanguage;
       stackVar += "_STACK_SIZE";
       const char* stackVal = m_Makefile->GetDefinition(stackVar.c_str());

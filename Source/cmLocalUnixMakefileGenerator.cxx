@@ -876,6 +876,12 @@ void cmLocalUnixMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
                                                            const cmTarget &t)
 {
   const char* linkLanguage = t.GetLinkerLanguage(this->GetGlobalGenerator());
+  if(!linkLanguage)
+    {
+    cmSystemTools::Error("CMake can not determine linker language target:",
+                         t.GetName());
+    return;
+    }
   std::string createRule = "CMAKE_";
   createRule += linkLanguage;
   createRule += "_CREATE_SHARED_LIBRARY";
@@ -922,6 +928,12 @@ void cmLocalUnixMakefileGenerator::OutputModuleLibraryRule(std::ostream& fout,
                                                       const cmTarget &t)
 {
   const char* linkLanguage = t.GetLinkerLanguage(this->GetGlobalGenerator());
+  if(!linkLanguage)
+    {
+    cmSystemTools::Error("CMake can not determine linker language for target:",
+                        t.GetName());
+    return;
+    }
   std::string createRule = "CMAKE_";
   createRule += linkLanguage;
   createRule += "_CREATE_SHARED_MODULE";
@@ -954,6 +966,12 @@ void cmLocalUnixMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout,
                                                       const cmTarget &t)
 {
   const char* linkLanguage = t.GetLinkerLanguage(this->GetGlobalGenerator());
+  if(!linkLanguage)
+    {
+    cmSystemTools::Error("CMake can not determine linker language for target:",
+                         t.GetName());
+    return;
+    }
   std::string createRule = "CMAKE_";
   createRule += linkLanguage;
   createRule += "_CREATE_STATIC_LIBRARY";
@@ -1034,7 +1052,12 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
     linkFlags += " ";
     }
   const char* linkLanguage = t.GetLinkerLanguage(this->GetGlobalGenerator());
-
+  if(!linkLanguage)
+    {
+    cmSystemTools::Error("CMake can not determine linker language for target:",
+                         t.GetName());
+    return;
+    }
   std::string langVar = "CMAKE_";
   langVar += linkLanguage;
   
