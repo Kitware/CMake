@@ -32,6 +32,13 @@ cmLocalGenerator::~cmLocalGenerator()
 
 void cmLocalGenerator::Configure()
 {
+  // set the PROJECT_SOURCE_DIR and PROJECT_BIN_DIR to default values
+  // just in case the project does not include a PROJECT command
+  m_Makefile->AddDefinition("PROJECT_BINARY_DIR",
+                            m_Makefile->GetHomeOutputDirectory());
+  m_Makefile->AddDefinition("PROJECT_SOURCE_DIR",
+                            m_Makefile->GetHomeDirectory());
+  
   // find & read the list file
   std::string currentStart = m_Makefile->GetStartDirectory();
   currentStart += "/CMakeLists.txt";
