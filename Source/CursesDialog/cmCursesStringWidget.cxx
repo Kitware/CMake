@@ -162,18 +162,21 @@ bool cmCursesStringWidget::HandleInput(int& key, cmCursesMainForm* fm,
       {
       form_driver(form, REQ_CLR_EOL);
       }
-    else if ( key == ctrl('a') )
+    else if ( key == ctrl('a') || key == KEY_HOME )
       {
       form_driver(form, REQ_BEG_FIELD);
       }
-    else if ( key == ctrl('e') )
+    else if ( key == ctrl('e') || key == KEY_END )
       {
       form_driver(form, REQ_END_FIELD);
       }
     else if ( key == ctrl('d') || key == 127 || 
               key == KEY_BACKSPACE || key == KEY_DC )
       {
-      form_driver(form, REQ_DEL_PREV);
+      if ( form->curcol > 0 )
+        {
+        form_driver(form, REQ_DEL_PREV);
+        }
       }
     else
       {
