@@ -348,6 +348,7 @@ bool TryExecutable(const char *dir, const char *file,
 
 cmCTest::cmCTest() 
 { 
+  m_ForceNewCTestProcess   = false;
   m_TomorrowTag            = false;
   m_BuildNoCMake           = false;
   m_BuildNoClean           = false;
@@ -3330,7 +3331,7 @@ int cmCTest::RunMakeCommand(const char* command, std::string* output,
 int cmCTest::RunTest(std::vector<const char*> argv, std::string* output, int *retVal,
   std::ostream* log)
 {
-  if(cmSystemTools::SameFile(argv[0], m_CTestSelf.c_str()))
+  if(cmSystemTools::SameFile(argv[0], m_CTestSelf.c_str()) && !m_ForceNewCTestProcess)
     {
     cmCTest inst;
     inst.m_ConfigType = m_ConfigType;
@@ -4170,6 +4171,10 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
     if( arg.find("--tomorrow-tag",0) == 0 )
       {
       m_TomorrowTag = true;
+      }
+    if( arg.find("--force-new-ctest-process",0) == 0 )
+      {
+      m_ForceNewCTestProcess = true;
       }
     if( arg.find("--interactive-debug-mode",0) == 0 && i < args.size() - 1 )
       {

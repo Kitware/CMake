@@ -142,6 +142,8 @@ public:
   bool m_DartMode;
   bool m_ShowOnly;
 
+  bool m_ForceNewCTestProcess;
+
   bool m_RunConfigurationScript;
   tm_VectorOfStrings m_ConfigurationScripts;
 
