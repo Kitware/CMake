@@ -215,6 +215,23 @@ bool cmDependsFortran::WriteDependencies(std::ostream& os)
       @touch foo.mod.hack
       @touch foo.mod.default
 
+  Solution 4:
+
+  When scanning dependencies and providing a module:
+    - Create a .mod.provided.
+    - Add .mod.proxy rule depending on corresponding .o.requires.
+
+  When scanning dependencies and requiring a module:
+    - Search the module path for a .mod.provided or a .mod.
+    - If a .mod.provided is found depend on the corresponding .mod.stamp
+      (it is provided by CMake in another directory)
+    - Else, if a .mod is found depend on it directly
+      (it is provided in another directory by a non-CMake project)
+    - Else:
+      - Add the empty proxy rule (if it is provided locally this will hook it)
+      - Depend on a local .mod.stamp (it might be provided locally)
+      - Create the dummy local .mod.stamp (it might not be provided locally)
+
   */
 
   return true;
