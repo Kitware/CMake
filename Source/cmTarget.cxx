@@ -19,7 +19,6 @@
 
 #include <map>
 #include <set>
-#include <cassert>
 
 
 void cmTarget::GenerateSourceFilesFromSourceLists( cmMakefile &mf)
@@ -75,7 +74,6 @@ void cmTarget::MergeLinkLibraries( cmMakefile& mf,
 {
   // Only add on libraries we haven't added on before.
   // Assumption: the global link libraries could only grow, never shrink
-  assert( libs.size() >= m_PrevLinkedLibraries.size() );
   LinkLibraries::const_iterator i = libs.begin();
   i += m_PrevLinkedLibraries.size();
   for( ; i != libs.end(); ++i )
