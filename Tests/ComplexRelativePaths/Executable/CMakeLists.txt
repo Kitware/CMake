@@ -25,11 +25,12 @@ TARGET_LINK_LIBRARIES(complex
 
 #
 # Output the files required by 'complex' to a file.
-# The 'complex' executable will then test if this file exists and remove it.
-# The contents of this file is not tested (absolute paths).
 #
-#OUTPUT_REQUIRED_FILES(${Complex_SOURCE_DIR}/Executable/complex.cxx 
-#	              ${Complex_BINARY_DIR}/Executable/complex-required.txt)  
+# This test has been moved to the 'required' subdir so that it
+# has no side-effects on the current Makefile (duplicated source file
+# due to source list expansion done twice).
+#
+SUBDIRS(required)
 
 #
 # Extra coverage.Not used.

@@ -516,7 +516,7 @@ int main()
   // the file was removed the last time 'complex' was run, and it is
   // only created during a build.
 
-  // TestAndRemoveFile(BINARY_DIR "/Executable/complex-required.txt");
+  TestAndRemoveFile(BINARY_DIR "/Executable/required/complex-required.txt");
 
   // ----------------------------------------------------------------------
   // Summary
