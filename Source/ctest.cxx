@@ -18,6 +18,8 @@
 #include "cmRegularExpression.h"
 #include "cmSystemTools.h"
 
+#include <strstream>
+
 #include <stdio.h>
 #include <time.h>
 
@@ -41,6 +43,70 @@ static std::string CurrentTime()
   time_t currenttime = time(0);
   return ::CleanString(ctime(&currenttime));
 }
+
+static const char* cmCTestErrorMatches[] = {
+  "^[Bb]us [Ee]rror",
+  "^[Ss]egmentation [Vv]iolation",
+  "^[Ss]egmentation [Ff]ault",
+  "([^ :]+):([0-9]+): ([^ \\t])",
+  "([^:]+): error[ \\t]*[0-9]+[ \\t]*:",
+  "^Error ([0-9]+):",
+  "^Error ",
+  "^\"[^\"]+\", line [0-9]+: [^Ww]",
+  "^cc[^C]*CC: ERROR File = ([^,]+), Line = ([0-9]+)",
+  "^ld([^:])*:([ \\t])*ERROR([^:])*:",
+  "^ild:([ \\t])*\\(undefined symbol\\)",
+  "([^ :]+) : (error|fatal error|catastrophic error)",
+  "([^:]+): (Error:|error|undefined reference|multiply defined)",
+  "([^:]+)\\(([^\\)]+)\\) : (error|fatal error|catastrophic error)",
+  "^fatal error C[0-9]+:",
+  ": syntax error ",
+  "^collect2: ld returned 1 exit status",
+  "Unsatisfied symbols:",
+  "Undefined symbols:",
+  "^Undefined[ \\t]+first referenced",
+  "^CMake Error:",
+  ":[ \\t]cannot find",
+  0
+};
+
+static const char* cmCTestErrorExceptions[] = {
+  0
+};
+
+static const char* cmCTestWarningMatches[] = {
+  "([^ :]+):([0-9]+): warning:",
+  "^cc[^C]*CC: WARNING File = ([^,]+), Line = ([0-9]+)",
+  "^ld([^:])*:([ \\t])*WARNING([^:])*:",
+  "([^:]+): warning ([0-9]+):",
+  "^\"[^\"]+\", line [0-9]+: [Ww]arning",
+  "([^:]+): warning[ \\t]*[0-9]+[ \\t]*:",
+  "^Warning ([0-9]+):",
+  "^Warning ",
+  "([^ :]+) : warning",
+  "([^:]+): warning",
+  0
+};
+
+static const char* cmCTestWarningExceptions[] = {
+  "/usr/openwin/include/X11/Xlib\\.h:[0-9]+: warning: ANSI C\\+\\+ forbids declaration",
+  "/usr/openwin/include/X11/Xutil\\.h:[0-9]+: warning: ANSI C\\+\\+ forbids declaration",
+  "/usr/openwin/include/X11/XResource\\.h:[0-9]+: warning: ANSI C\\+\\+ forbids declaration",
+  "WARNING 84 :",
+  "WARNING 47 :",
+  "makefile:",
+  "Makefile:",
+  "warning:  Clock skew detected.  Your build may be incomplete.",
+  "/usr/openwin/include/GL/[^:]+:",
+  "bind_at_load",
+  "XrmQGetResource",
+  "IceFlush",
+  "warning LNK4089: all references to .GDI32.dll. discarded by .OPT:REF",
+  "warning LNK4089: all references to .USER32.dll. discarded by .OPT:REF",
+  "ld32: WARNING 85: definition of dataKey in",
+  0
+};
+
 
 bool TryExecutable(const char *dir, const char *file,
                    std::string *fullPath, const char *subdir)
@@ -357,8 +423,200 @@ void ctest::BuildDirectory()
     }
   // To do:
   // Add parsing of output for errors and warnings.
+
+  cmCTestBuildErrorWarning cerw;
+  char* coutput = new char[ output.size() + 1];
+  memcpy(coutput, output.c_str(), output.size());
+  int cc;
+  
+  std::vector<std::string> lines;
+
+  // Lines are marked: 
+  // 0 - nothing
+  // 1 - error
+  // > 1 - warning
+  std::vector<int>         markedLines;
+  std::istrstream istr(coutput);
+  while(istr)
+    {
+    char buffer[1024];
+    std::string line;
+    while ( istr )
+      {
+      buffer[0] = 0;
+      istr.getline(buffer, 1023);
+      buffer[1023] = 0;
+      line += buffer;
+      if ( strlen(buffer) < 1023 )
+        {
+        break;
+        }
+      }
+    lines.push_back(line);
+    markedLines.push_back(0);
+    //std::cout << "Line [" << line << "]" << std::endl;
+    }
+  
+  // Errors
+  for ( cc = 0; cmCTestErrorMatches[cc]; cc ++ )
+    {
+    cmRegularExpression re(cmCTestErrorMatches[cc]);
+    std::vector<std::string>::size_type kk;
+    for ( kk = 0; kk < lines.size(); kk ++ )
+      {
+      if ( re.find(lines[kk]) )
+        {
+        markedLines[kk] = 1;
+        }
+      }    
+    }
+  // Warnings
+  for ( cc = 0; cmCTestWarningMatches[cc]; cc ++ )
+    {
+    cmRegularExpression re(cmCTestWarningMatches[cc]);
+    std::vector<std::string>::size_type kk;
+    for ( kk = 0; kk < lines.size(); kk ++ )
+      {
+      if ( re.find(lines[kk]) )
+        {
+        markedLines[kk] += 2;
+        }
+      }    
+    }
+  for ( cc = 0; cmCTestErrorExceptions[cc]; cc ++ )
+    {
+    cmRegularExpression re(cmCTestErrorExceptions[cc]);
+    std::vector<int>::size_type kk;
+    for ( kk =0; kk < markedLines.size(); kk ++ )
+      {
+      if ( markedLines[cc] == 1 )
+        {
+        if ( re.find(lines[kk]) )
+          {
+          markedLines[cc] = 0;
+          }
+        }
+      }
+    }
+  for ( cc = 0; cmCTestWarningExceptions[cc]; cc ++ )
+    {
+    cmRegularExpression re(cmCTestWarningExceptions[cc]);
+    std::vector<int>::size_type kk;
+    for ( kk =0; kk < markedLines.size(); kk ++ )
+      {
+      if ( markedLines[cc] > 1 )
+        {
+        if ( re.find(lines[kk]) )
+          {
+          markedLines[cc] = 0;
+          }
+        }
+      }
+    }
+  std::vector<cmCTestBuildErrorWarning> errorsWarnings;
+
+  std::vector<int>::size_type kk;
+  cmCTestBuildErrorWarning errorwarning;
+  for ( kk =0; kk < markedLines.size(); kk ++ )
+    {
+    bool found = false;
+    if ( markedLines[kk] == 1 )
+      {
+      std::cout << "Error: " << lines[kk] << std::endl;
+      errorwarning.m_Error = true;
+      found = true;
+      }
+    else if ( markedLines[kk] > 1 )
+      {
+      std::cout << "Warning: " << lines[kk] << std::endl;
+      errorwarning.m_Error = false;
+      found = true;
+      }
+    if ( found )
+      {
+      errorwarning.m_LogLine     = kk;
+      errorwarning.m_Text        = lines[kk];
+      errorwarning.m_PreContext  = "";
+      errorwarning.m_PostContext = "";
+      std::vector<int>::size_type jj;
+      for ( jj = kk; 
+            jj > 0 && jj > kk - 6 /* && markedLines[jj] == 0 */; 
+            jj -- );
+      for (; jj < kk; jj ++ )
+        {
+        errorwarning.m_PreContext += lines[jj] + "\n";
+        }
+      for ( jj = kk+1; 
+            jj < lines.size() && jj < kk + 6 /* && markedLines[jj] == 0*/; 
+            jj ++ )
+        {
+        errorwarning.m_PostContext += lines[jj] + "\n";
+        }
+      errorsWarnings.push_back(errorwarning);
+      }
+    }
+  /*
+  this->GenerateDartBuildOutput(std::cout, 
+                                errorsWarnings);
+  */
 }
 
+
+void ctest::GenerateDartBuildOutput(std::ostream& os, 
+                                    std::vector<cmCTestBuildErrorWarning> ew)
+{
+  time_t tctime = time(0);
+  struct tm *lctime = gmtime(&tctime);
+  char datestring[100];
+  sprintf(datestring, "%4d%02d%02d-%d%d",
+          lctime->tm_year + 1900,
+          lctime->tm_mon,
+          lctime->tm_mday,
+          lctime->tm_hour,
+          lctime->tm_min);
+
+  os << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+     << "<Site BuildName=\"" << m_DartConfiguration["BuildName"]
+     << "\" BuildStamp=\"" << datestring << "-Experimental\" Name=\""
+     << m_DartConfiguration["Site"] << "\">\n"
+     << "<Build>\n"
+     << "  <StartDateTime>" << ::CurrentTime() << "</StartDateTime>\n"
+     << "  <BuildCommand>" << m_DartConfiguration["MakeCommand"]
+     << "</BuildCommand>" << std::endl;
+    
+  std::vector<cmCTestBuildErrorWarning>::iterator it;
+  for ( it = ew.begin(); it != ew.end(); it++ )
+    {
+    cmCTestBuildErrorWarning *cm = &(*it);
+    os << "  <" << (cm->m_Error ? "Error" : "Warning") << ">\n"
+       << "    <BuildLogLine>" << cm->m_LogLine << "</BuildLogLine>\n"
+       << "    <Text>" << cm->m_Text << "</Text>" << std::endl;
+    if ( cm->m_SourceFile.size() > 0 )
+      {
+      os << "    <SourceFile>" << cm->m_SourceFile << "</SourceFile>" 
+         << std::endl;
+      }
+    if ( cm->m_SourceFileTail.size() > 0 )
+      {
+      os << "    <SourceFileTail>" << cm->m_SourceFileTail 
+         << "</SourceFileTail>" << std::endl;
+      }
+    if ( cm->m_LineNumber >= 0 )
+      {
+      os << "    <SourceLineNumber>" << cm->m_LineNumber 
+         << "</SourceLineNumber>" << std::endl;
+      }
+    os << "    <PreContext>" << cm->m_PreContext << "</PreContext>\n"
+       << "    <PostContext>" << cm->m_PostContext << "</PostContext>\n"
+       << "  </" << (cm->m_Error ? "Error" : "Warning") << ">" 
+       << std::endl;
+    }
+  os << "  <Log Encoding=\"base64\" Compression=\"/bin/gzip\">\n    </Log>\n"
+     << "  <EndDateTime>" << ::CurrentTime() << "</EndDateTime>\n"
+     << "</Build>\n"
+     << "</Site>" << std::endl;
+}
+  
 void ctest::ProcessDirectory(std::vector<std::string> &passed, 
                              std::vector<std::string> &failed)
 {
@@ -547,13 +805,12 @@ void ctest::GenerateDartOutput(std::ostream& os)
           lctime->tm_hour,
           lctime->tm_min);
 
-  os << "Try to create dart output file" << std::endl;
   os << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
      << "<Site BuildName=\"" << m_DartConfiguration["BuildName"]
      << "\" BuildStamp=\"" << datestring << "-Experimental\" Name=\""
      << m_DartConfiguration["Site"] << "\">\n"
      << "<Testing>\n"
-     << "  <StartDateTime>" << ::CurrentTime() << " </StartDateTime>\n"
+     << "  <StartDateTime>" << ::CurrentTime() << "</StartDateTime>\n"
      << "  <TestList>\n";
   tm_TestResultsVector::size_type cc;
   for ( cc = 0; cc < m_TestResults.size(); cc ++ )

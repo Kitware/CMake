@@ -61,11 +61,6 @@ public:
                         std::vector<std::string> &failed);
 
   /**
-   * Generate the Dart compatible output
-   */
-  void GenerateDartOutput(std::ostream& os);
-
-  /**
    * Find the executable for a test
    */
   std::string FindExecutable(const char *exe);
@@ -115,6 +110,18 @@ private:
     std::string m_Output;
   };
 
+  struct cmCTestBuildErrorWarning
+  {
+    bool        m_Error;
+    int         m_LogLine;
+    std::string m_Text;
+    std::string m_SourceFile;
+    std::string m_SourceFileTail;
+    int         m_LineNumber;
+    std::string m_PreContext;
+    std::string m_PostContext;
+  };
+
   typedef std::vector<cmCTestTestResult> tm_TestResultsVector;
   typedef std::map<std::string, std::string> tm_DartConfigurationMap;
 
@@ -122,5 +129,14 @@ private:
   std::string             m_ToplevelPath;
   tm_DartConfigurationMap m_DartConfiguration;
   int                     m_Tests[LAST_TEST];
+
+
+  /**
+   * Generate the Dart compatible output
+   */
+  void GenerateDartOutput(std::ostream& os);
+  void GenerateDartBuildOutput(std::ostream& os, 
+                               std::vector<cmCTestBuildErrorWarning>);
+  
 };
 
