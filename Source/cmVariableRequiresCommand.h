@@ -86,7 +86,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "VARIABLE_REQUIRES(TEST_VARIBLE RESULT_VARIBLE "
+      "VARIABLE_REQUIRES(TEST_VARIABLE RESULT_VARIABLE "
       "REQUIRED_VARIABLE1 REQUIRED_VARIABLE2 ...) "
       "The first argument (TEST_VARIABLE) is the name of the varible to be "
       "tested, if that varible is false nothing else is done. If "
