@@ -2,12 +2,15 @@ CMAKE_MINIMUM_REQUIRED(VERSION 1.5)
 
 # configure the .h file
 CONFIGURE_FILE(
-  ${CMake_SOURCE_DIR}/Source/cmConfigure.cmake.h.in 
-  ${CMake_BINARY_DIR}/Source/cmConfigure.h )
+  "${CMake_SOURCE_DIR}/Source/cmConfigure.cmake.h.in"
+  "${CMake_BINARY_DIR}/Source/cmConfigure.h"
+  )
 
 # add the include path to find the .h 
-INCLUDE_DIRECTORIES(${CMake_BINARY_DIR}/Source)
-INCLUDE_DIRECTORIES(${CMake_SOURCE_DIR}/Source)
+INCLUDE_DIRECTORIES(
+  "${CMake_BINARY_DIR}/Source"
+  "${CMake_SOURCE_DIR}/Source"
+  )
 
 # let cmake know it is supposed to use it
 ADD_DEFINITIONS(-DCMAKE_BUILD_WITH_CMAKE)
@@ -121,7 +124,7 @@ ENDIF (WIN32)
 
 # create a library used by the command line and the GUI
 ADD_LIBRARY(CMakeLib ${SRCS})
-TARGET_LINK_LIBRARIES(CMakeLib cmsys cmexpat cmzlib)
+TARGET_LINK_LIBRARIES(CMakeLib cmsys ${CMAKE_EXPAT_LIBRARIES} cmzlib)
 IF (UNIX)
   TARGET_LINK_LIBRARIES(CMakeLib ${CMAKE_DL_LIBS})
 ENDIF (UNIX)
@@ -133,7 +136,10 @@ ENDIF(CMAKE_BUILD_ON_VISUAL_STUDIO)
 #
 # CTestLib
 #
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/Source/CTest)
+INCLUDE_DIRECTORIES(
+  "${CMAKE_SOURCE_DIR}/Source/CTest"
+  ${CMAKE_XMLRPC_INCLUDES}
+  )
 #
 # Sources for CTestLib
 #
@@ -156,7 +162,7 @@ SET(CMTEST_SRCS cmCTest.cxx
 
 # Build CTestLib
 ADD_LIBRARY(CTestLib ${CMTEST_SRCS})
-TARGET_LINK_LIBRARIES(CTestLib CMakeLib ${CMAKE_CURL_LIBRARIES})
+TARGET_LINK_LIBRARIES(CTestLib CMakeLib ${CMAKE_CURL_LIBRARIES} ${CMAKE_XMLRPC_LIBRARIES})
 
 # Build CMake executable
 ADD_EXECUTABLE(cmake cmakemain.cxx)

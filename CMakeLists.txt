@@ -64,16 +64,22 @@ SUBDIRS(Source/kwsys)
 #-----------------------------------------------------------------------------
 # Build Curl library for CTest.
 SUBDIRS(Source/CTest/Curl)
+SET(CMAKE_CURL_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/Source/CTest/Curl")
+SET(CMAKE_CURL_LIBRARIES "Curl")
 
 #-----------------------------------------------------------------------------
 # Build expat library for CMake and CTest.
 INCLUDE_DIRECTORIES(${CMake_BINARY_DIR}/Utilities)
+SUBDIRS(Utilities/cmexpat Utilities/cmzlib)
 SET(CMAKE_EXPAT_INCLUDES "${CMAKE_CURRENT_BINARY_DIR}/Utilities/cmexpat")
 SET(CMAKE_EXPAT_LIBRARIES "cmexpat")
-SET(CMAKE_CURL_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/Source/CTest/Curl")
-SET(CMAKE_CURL_LIBRARIES "Curl")
-SUBDIRS(Utilities/cmexpat Utilities/cmzlib)
+
 SUBDIRS(Utilities/cmxmlrpc)
+SET(CMAKE_XMLRPC_INCLUDES
+  "${CMAKE_CURRENT_SOURCE_DIR}/Utilities/cmxmlrpc"
+  "${CMAKE_CURRENT_BINARY_DIR}/Utilities/cmxmlrpc"
+  )
+SET(CMAKE_XMLRPC_LIBRARIES "cmXMLRPC")
 
 IF (UNIX)
   INCLUDE (${CMake_SOURCE_DIR}/Modules/FindCurses.cmake OPTIONAL)
