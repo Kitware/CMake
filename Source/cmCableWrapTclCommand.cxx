@@ -252,46 +252,44 @@ void cmCableWrapTclCommand::GenerateCableClassFiles(const char* name,
     cmSystemTools::Error("Error opening file for writing: ",
                          classCxxName.c_str());
     }
-  
+
+  // Generate the rule to have GCC-XML parse the classes to be wrapped.
   {
-  std::string command = "${GCCXML}";
-  m_Makefile->ExpandVariablesInString(command);
-  // Only add the rule if GCC-XML is available.
-  if((command != "") && (command != "${GCCXML}"))
+  std::string command = this->GetGccXmlFromCache();
+  std::vector<std::string> depends;
+  depends.push_back(command);
+  
+  std::string commandArgs = this->GetGccXmlFlagsFromCache();
+  commandArgs += " ";
+  commandArgs += m_Makefile->GetDefineFlags();
+  commandArgs += " -I\"";
+  commandArgs += m_Makefile->GetStartDirectory();
+  commandArgs += "\"";
+    
+  const std::vector<std::string>& includes = 
+    m_Makefile->GetIncludeDirectories();
+  for(std::vector<std::string>::const_iterator i = includes.begin();
+      i != includes.end(); ++i)
     {
-    std::vector<std::string> depends;
-    depends.push_back(command);
-    command = cmSystemTools::EscapeSpaces(command.c_str());
-    
-    std::string defineFlags = m_Makefile->GetDefineFlags();
-    std::string includeFlags = "-I";
-    includeFlags += std::string("\"") + m_Makefile->GetStartDirectory() + "\"";
-    
-    const std::vector<std::string>& includes = 
-      m_Makefile->GetIncludeDirectories();
-    for(std::vector<std::string>::const_iterator i = includes.begin();
-        i != includes.end(); ++i)
-      {
-      includeFlags += " -I";
-      includeFlags += cmSystemTools::EscapeSpaces(i->c_str());
-      }
-    
-    command += " "+defineFlags+" "+includeFlags+" -fsyntax-only \"-fxml="+classXmlName+"\" "+classCxxName;
-    
-    std::vector<std::string> outputs;
-    outputs.push_back(classXmlName);
-    
-    m_Makefile->AddCustomCommand(classCxxName.c_str(),
-                                 command.c_str(),
-                                 "",
-                                 depends,
-                                 outputs, m_TargetName.c_str());
+      commandArgs += " -I";
+      commandArgs += cmSystemTools::EscapeSpaces(i->c_str());
     }
+  
+  commandArgs += " -fsyntax-only -fxml="+classXmlName+" "+classCxxName;
+  
+  std::vector<std::string> outputs;
+  outputs.push_back(classXmlName);
+  
+  m_Makefile->AddCustomCommand(classCxxName.c_str(),
+			       command.c_str(),
+			       commandArgs.c_str(),
+			       depends,
+			       outputs, m_TargetName.c_str());
   }
 
+  // Generate the rule to run cable on the GCC-XML output to generate wrappers.
   {
-  std::string command = "${CABLE}";
-  m_Makefile->ExpandVariablesInString(command);
+  std::string command = this->GetCableFromCache();
   std::vector<std::string> depends;
   depends.push_back(command);
   std::string commandArgs = " "+classConfigName+" -tcl "+classTclFullName+".cxx";
@@ -320,4 +318,65 @@ void cmCableWrapTclCommand::GenerateCableClassFiles(const char* name,
     }
   file.GetDepends().push_back("wrapCalls.h");
   m_Makefile->AddSource(file, m_TargetName.c_str());
+}
+
+
+/**
+ * Get the "GCCXML" cache entry value.  If there is no cache entry for GCCXML,
+ * one will be created and initialized to NOTFOUND.
+ */
+std::string cmCableWrapTclCommand::GetGccXmlFromCache() const
+{
+  const char* gccxml =
+    cmCacheManager::GetInstance()->GetCacheValue("GCCXML");
+  if(gccxml)
+    { return gccxml; }
+
+  m_Makefile->AddDefinition("GCCXML","NOTFOUND");
+  cmCacheManager::GetInstance()->AddCacheEntry("GCCXML",
+					       "NOTFOUND",
+					       "Path to GCC-XML executable.",
+					       cmCacheManager::FILEPATH);
+  return "NOTFOUND";
+}
+
+
+/**
+ * Get the "GCCXML_FLAGS" cache entry value.  If there is no cache
+ * entry for GCCXML_FLAGS, one will be created and initialized "".
+ */
+std::string cmCableWrapTclCommand::GetGccXmlFlagsFromCache() const
+{
+  const char* gccxmlFlags =
+    cmCacheManager::GetInstance()->GetCacheValue("GCCXML_FLAGS");
+  if(gccxmlFlags)
+    { return gccxmlFlags; }
+
+  m_Makefile->AddDefinition("GCCXML_FLAGS","");
+  cmCacheManager::GetInstance()->AddCacheEntry(
+    "GCCXML_FLAGS",
+    "",
+    "Flags to GCC-XML to get it to parse the native compiler's headers.",
+    cmCacheManager::STRING);
+  return "";
+}
+
+
+/**
+ * Get the "CABLE" cache entry value.  If there is no cache entry for CABLE,
+ * one will be created and initialized to NOTFOUND.
+ */
+std::string cmCableWrapTclCommand::GetCableFromCache() const
+{
+  const char* cable =
+    cmCacheManager::GetInstance()->GetCacheValue("CABLE");
+  if(cable)
+    { return cable; }
+
+  m_Makefile->AddDefinition("CABLE","NOTFOUND");
+  cmCacheManager::GetInstance()->AddCacheEntry("CABLE",
+					       "NOTFOUND",
+					       "Path to CABLE executable.",
+					       cmCacheManager::FILEPATH);
+  return "NOTFOUND";
 }
