@@ -25,8 +25,8 @@
 
 #include <ctype.h>
 #include <errno.h>
-#ifdef QNX /* TODO: Find real preprocessor for QNX. */
-# include <malloc.h> /* for malloc/free on some systems */
+#ifdef __QNX__
+# include <malloc.h> /* for malloc/free on QNX */
 #endif
 #include <stdio.h>
 #include <stdlib.h>
