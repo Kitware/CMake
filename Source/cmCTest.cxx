@@ -1499,6 +1499,31 @@ int cmCTest::CoverageDirectory()
 
     for ( cc = 0; cc < gfiles.size(); cc ++ )
       {
+      int do_coverage = 1;
+      std::string coverage_dir = cmSystemTools::GetFilenamePath(gfiles[cc].c_str());
+      std::string builDir = m_DartConfiguration["BuildDirectory"];
+      do
+        {
+        std::string coverage_file = coverage_dir + "/.NoDartCoverage";
+        if ( cmSystemTools::FileExists(coverage_file.c_str()) )
+          {
+          do_coverage = 0;
+          break;
+          }
+        // is there a parent directory we can check
+        std::string::size_type pos = coverage_dir.rfind('/');
+        // if we could not find the directory return 0
+        if(pos == std::string::npos)
+          {
+          break;
+          }
+        coverage_dir = coverage_dir.substr(0, pos);
+        }
+      while (coverage_dir.size() >= builDir.size());
+      if ( !do_coverage )
+        {
+        continue;
+        }
       //std::cout << "\t" << gfiles[cc] << std::endl;
       std::ifstream ifile(gfiles[cc].c_str());
       if ( !ifile )
@@ -1620,10 +1645,10 @@ int cmCTest::CoverageDirectory()
         break;
         }
       coverage_dir = coverage_dir.substr(0, pos);
-      
+
       }
     while (coverage_dir.size() >= sourceDirectory.size());
-    
+
     if (!do_coverage)
       {
       if ( m_Verbose )
