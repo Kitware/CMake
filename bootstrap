@@ -21,6 +21,17 @@ CMAKE_KNOWN_C_COMPILERS="cc gcc xlc icc tcc"
 CMAKE_KNOWN_CXX_COMPILERS="aCC xlC CC g++ c++ icc como "
 CMAKE_KNOWN_MAKE_PROCESSORS="make gmake"
 
+CMAKE_PROBLEMATIC_FILES="\
+  CMakeCache.txt \
+  CMakeSystem.cmake \
+  CMakeCCompiler.cmake \
+  CMakeCXXCompiler.cmake \
+  Source/cmConfigure.h \
+  Source/CTest/Curl/config.h \
+  Utilities/cmexpat/expatConfig.h \
+  Utilities/cmexpat/expatDllConfig.h \
+  "
+
 CMAKE_CXX_SOURCES="\
   cmake  \
   cmakewizard  \
@@ -331,6 +342,36 @@ fi
 echo "---------------------------------------------"
 # Get CMake version
 echo "`cmake_version`"
+
+# Check for in-source build
+cmake_in_source_build=
+if [ -f "${cmake_binary_dir}/Source/cmake.cxx" -a \
+     -f "${cmake_binary_dir}/Source/cmake.h" ]; then
+  if [ -n "${cmake_verbose}" ]; then
+    echo "Warning: This is an in-source build"
+  fi
+  cmake_in_source_build=TRUE
+fi
+
+# If this is not an in-source build, then Bootstrap stuff should not exist.
+if [ -z "${cmake_in_source_build}" ]; then
+  # Did somebody bootstrap in the source tree?
+  if [ -e "${cmake_source_dir}/Bootstrap.cmk" ]; then
+    cmake_error 10 "Found directory \"${cmake_source_dir}/Bootstrap.cmk\".
+Looks like somebody did bootstrap CMake in the source tree, but now you are
+trying to do bootstrap in the binary tree. Please remove Bootstrap.cmk
+directory from the source tree."
+  fi
+  # Is there a cache in the source tree?
+  for cmake_problematic_file in ${CMAKE_PROBLEMATIC_FILES}; do
+    if [ -e "${cmake_source_dir}/${cmake_problematic_file}" ]; then
+      cmake_error 10 "Found \"${cmake_source_dir}/${cmake_problematic_file}\".
+Looks like somebody tried to build CMake in the source tree, but now you are
+trying to do bootstrap in the binary tree. Please remove \"${cmake_problematic_file}\"
+from the source tree."
+    fi
+  done
+fi
 
 # Make bootstrap directory
 [ -d "${cmake_bootstrap_dir}" ] || mkdir "${cmake_bootstrap_dir}"
