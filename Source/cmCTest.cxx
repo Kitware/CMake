@@ -2666,15 +2666,33 @@ int cmCTest::RunConfigurationScript()
   if (cvsCmd)
     {
     command = cvsCmd;
-    output.empty();
-    retVal = 0;
-    res = cmSystemTools::RunSingleCommand(command.c_str(), &output, 
-                                          &retVal, binDir,
-                                          m_Verbose, 0 /*m_TimeOut*/);
-    if (!res || retVal != 0)
+    char updateVar[40];
+    int i;
+    for (i = 1; i < 10; ++i)
       {
-      cmSystemTools::Error("Unable to perform cvs update");    
-      return -5;
+      sprintf(updateVar,"CTEST_EXTRA_UPDATES_%i",i);
+      const char *updateVal = mf->GetDefinition(updateVar);
+      if (updateVal)
+        {
+        std::vector<std::string> cvsArgs;
+        cmSystemTools::ExpandListArgument(updateVal,cvsArgs);
+        if (cvsArgs.size() == 2)
+          {
+          std::string fullCommand = command;
+          fullCommand += " update ";
+          fullCommand += cvsArgs[1];
+          output.empty();
+          retVal = 0;
+          res = cmSystemTools::RunSingleCommand(fullCommand.c_str(), &output, 
+                                                &retVal, cvsArgs[0].c_str(),
+                                                m_Verbose, 0 /*m_TimeOut*/);
+          if (!res || retVal != 0)
+            {
+            cmSystemTools::Error("Unable to perform extra cvs updates");    
+            return -5;
+            }
+          }
+        }
       }
     }
   
