@@ -42,12 +42,22 @@ bool cmTargetLinkLibrariesCommand::InitialPass(std::vector<std::string> const& a
     if (*i == "debug")
       {
       ++i;
+      if(i == args.end())
+        {
+        this->SetError("The \"debug\" argument must be followed by a library");
+        return false;
+        }
       m_Makefile->AddLinkLibraryForTarget(args[0].c_str(),i->c_str(),
                                           cmTarget::DEBUG);
       }
     else if (*i == "optimized")
       {
       ++i;
+      if(i == args.end())
+        {
+        this->SetError("The \"optimized\" argument must be followed by a library");
+        return false;
+        }
       m_Makefile->AddLinkLibraryForTarget(args[0].c_str(),i->c_str(),
                                  cmTarget::OPTIMIZED);
       }
