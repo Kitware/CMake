@@ -38,6 +38,8 @@ cmSourceGroup.o
 
 DEPENDS = cmConfigure.h
 
+cmakewizard.o : $(DEPENDS)
+cmListFileCache.o : $(DEPENDS)
 cmCollectFlags.o : $(DEPENDS)
 cmake.o  : $(DEPENDS)
 cmakemain.o  : $(DEPENDS)
