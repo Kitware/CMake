@@ -260,7 +260,8 @@ IF(BUILD_TESTING)
         ${CMake_SOURCE_DIR}/Tests/Wrapping 
         ${CMake_BINARY_DIR}/Tests/Wrapping
         qtwrapping
-        ${CMake_BINARY_DIR}/Tests/Wrapping/bin)
+        ${CMake_BINARY_DIR}/Tests/Wrapping/bin
+        wrapping)
     ENDIF (QT_FOUND)
 
     ADD_TEST(testdriver1 ${EXECUTABLE_OUTPUT_PATH}/cmaketest 
