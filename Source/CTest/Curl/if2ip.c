@@ -111,8 +111,13 @@ char *Curl_if2ip(const char *interface, char *buf, int buf_size)
     else {
       struct in_addr in;
 
-      struct sockaddr_in *s = (struct sockaddr_in *)&req.ifr_dstaddr;
-      memcpy(&in, &(s->sin_addr.s_addr), sizeof(in));
+      union {
+        struct sockaddr_in *sin;
+        struct sockaddr *s;
+      } soadd;
+
+      soadd.s = &req.ifr_dstaddr;
+      memcpy(&in, &(soadd.sin->sin_addr.s_addr), sizeof(in));
 #if defined(HAVE_INET_NTOA_R)
       ip = inet_ntoa_r(in,buf,buf_size);
 #else
