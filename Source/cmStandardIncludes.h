@@ -252,6 +252,9 @@ private:
 };
 #endif
 
+/* Poison this operator to avoid common mistakes.  */
+extern void operator << (std::ostream&, const cmOStringStream&);
+
 /** Standard documentation entry for cmDocumentation's formatting.  */
 struct cmDocumentationEntry
 {

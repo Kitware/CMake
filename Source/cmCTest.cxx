@@ -4508,7 +4508,7 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
           }
         else
           {
-          std::cerr << out << "\n";
+          std::cerr << out.str() << "\n";
           }
         return 1;
         }
@@ -4527,7 +4527,7 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
       }
     else
       {
-      std::cerr << out << "\n";
+      std::cerr << out.str() << "\n";
       }
     return 1;
     }
@@ -4607,7 +4607,7 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
           }
         else
           {
-          std::cerr << out << "\n";
+          std::cerr << out.str() << "\n";
           }
         return 1;
         }
@@ -4639,7 +4639,7 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
       }
     else
       {
-      std::cerr << out << "\n";
+      std::cerr << out.str() << "\n";
       }
     return 1;
     }
@@ -4671,7 +4671,7 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
       }
     else
       {
-      std::cout << out << "\n";
+      std::cout << out.str() << "\n";
       }
     return retVal;
     }
