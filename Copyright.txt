@@ -1,15 +1,21 @@
-The Insight Segmentation and Registration Toolkit (ITK) was initially
-developed under contract to the National Library of Medicine at the 
-National Institutes of Health.
+CMake was initially developed by Kitware with the following sponsorship:
 
-The ITK copyright is as follows:
+ * National Library of Medicine at the National Institutes of Health
+   as part of the Insight Segmentation and Registration Toolkit (ITK).
 
+ * US National Labs (Los Alamos, Livermore, Sandia) ASCI Parallel 
+   Visualization Initiative.
 
-Copyright (c) 2002 Insight Consortium
+ * Kitware, Inc.
+
+The CMake copyright is as follows:
+
+Copyright (c) 2002 Kitware, Inc., Insight Consortium
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
+modification, are permitted provided that the following conditions are
+met:
 
  * Redistributions of source code must retain the above copyright notice,
    this list of conditions and the following disclaimer.
@@ -18,13 +24,13 @@ modification, are permitted provided that the following conditions are met:
    this list of conditions and the following disclaimer in the documentation
    and/or other materials provided with the distribution.
 
- * The name of the Insight Consortium, or the names of any consortium
-   members, or of any contributors, may not be used to endorse or promote
-   products derived from this software without specific prior written
-   permission.
+ * The names of Kitware, Inc., the Insight Consortium, or the names of
+   any consortium members, or of any contributors, may not be used to
+   endorse or promote products derived from this software without
+   specific prior written permission.
 
- * Modified source versions must be plainly marked as such, and must not be
-   misrepresented as being the original software.
+ * Modified source versions must be plainly marked as such, and must
+   not be misrepresented as being the original software.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER AND CONTRIBUTORS ``AS IS''
 AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -37,5 +43,4 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
-See also the ITK web site: http://www.itk.org for more information.
+See also the CMake web site: http://www.cmake.org for more information.
