@@ -32,7 +32,6 @@ bool cmCTestRunScriptCommand::InitialPass(std::vector<std::string> const& args)
     {
     cmCTestScriptHandler::RunScript(m_CTest, args[i].c_str());
     }
-  
   return true;
 }
 

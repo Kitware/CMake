@@ -75,7 +75,6 @@ cmCTestScriptHandler::cmCTestScriptHandler()
 {
   m_Verbose = false; 
   m_Backup = false; 
-  m_ScriptHasRun = false;
   m_EmptyBinDir = false;
   m_EmptyBinDirOnce = false;
   m_Makefile = 0;
@@ -191,17 +190,16 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
 
   m_LocalGenerator = m_GlobalGenerator->CreateLocalGenerator();
   m_LocalGenerator->SetGlobalGenerator(m_GlobalGenerator);
+  m_Makefile = m_LocalGenerator->GetMakefile();
   
   // set a variable with the path to the current script
-  m_LocalGenerator->GetMakefile()->AddDefinition("CTEST_SCRIPT_DIRECTORY",
-                                   cmSystemTools::GetFilenamePath(
-                                     script).c_str());
-  m_LocalGenerator->GetMakefile()->AddDefinition("CTEST_SCRIPT_NAME",
-                                   cmSystemTools::GetFilenameName(
-                                     script).c_str());
-  m_LocalGenerator->GetMakefile()->AddDefinition("CTEST_EXECUTABLE_NAME",
-                                   m_CTest->GetCTestExecutable());
-
+  m_Makefile->AddDefinition("CTEST_SCRIPT_DIRECTORY",
+                            cmSystemTools::GetFilenamePath(script).c_str());
+  m_Makefile->AddDefinition("CTEST_SCRIPT_NAME",
+                            cmSystemTools::GetFilenameName(script).c_str());
+  m_Makefile->AddDefinition("CTEST_EXECUTABLE_NAME",
+                            m_CTest->GetCTestExecutable());
+  m_Makefile->AddDefinition("CTEST_RUN_CURRENT_SCRIPT", true);
   this->UpdateElapsedTime();
   
   // add any ctest specific commands, probably should have common superclass
@@ -223,17 +221,16 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   // add the script arg if defined
   if (script_arg.size())
     {
-    m_LocalGenerator->GetMakefile()->AddDefinition(
-      "CTEST_SCRIPT_ARG", script_arg.c_str());
+    m_Makefile->AddDefinition("CTEST_SCRIPT_ARG", script_arg.c_str());
     }
 
   // always add a function blocker to update the elapsed time
   cmCTestScriptFunctionBlocker *f = new cmCTestScriptFunctionBlocker();
   f->m_CTestScriptHandler = this;
-  m_LocalGenerator->GetMakefile()->AddFunctionBlocker(f);
+  m_Makefile->AddFunctionBlocker(f);
   
   // finally read in the script
-  if (!m_LocalGenerator->GetMakefile()->ReadListFile(0, script.c_str()))
+  if (!m_Makefile->ReadListFile(0, script.c_str()))
     {
     return 2;
     }
@@ -246,9 +243,6 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
 // extract variabels from the script to set ivars
 int cmCTestScriptHandler::ExtractVariables()
 {
-  // get some info that should be set
-  m_Makefile = m_LocalGenerator->GetMakefile();
-
   // Temporary variables
   const char* minInterval;
   const char* contDuration;
@@ -361,7 +355,9 @@ int cmCTestScriptHandler::RunConfigurationScript(const std::string& total_script
     {
     return result;
     }
-  if (!m_ScriptHasRun)
+  
+  // only run the curent script if we should
+  if (m_Makefile && m_Makefile->IsOn("CTEST_RUN_CURRENT_SCRIPT"))
     {
     return this->RunCurrentScript();
     }
@@ -372,7 +368,8 @@ int cmCTestScriptHandler::RunCurrentScript()
 {
   int result;
 
-  m_ScriptHasRun = true;
+  // do not run twice
+  m_Makefile->AddDefinition("CTEST_RUN_CURRENT_SCRIPT", false);
 
   // no popup widows
   cmSystemTools::SetRunCommandHideConsole(true);

@@ -121,7 +121,6 @@ private:
   bool m_Backup;
   bool m_EmptyBinDir;
   bool m_EmptyBinDirOnce;
-  bool m_ScriptHasRun;
   
   cmStdString m_SourceDir;
   cmStdString m_BinaryDir;
