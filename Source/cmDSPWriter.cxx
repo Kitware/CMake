@@ -128,7 +128,7 @@ void cmDSPWriter::OutputDSPFile()
     // so don't build a projectfile for it
     if ((l->second.GetType() != cmTarget::INSTALL_FILES)
         && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS)
-        && (l->first != "INCLUDE_EXTERNAL_MSPROJECT"))
+        && (l->first.compare(0,26, "INCLUDE_EXTERNAL_MSPROJECT") != 0))
       {
       this->CreateSingleDSP(l->first.c_str(),l->second);
       }

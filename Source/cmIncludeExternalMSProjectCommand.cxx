@@ -26,7 +26,11 @@ bool cmIncludeExternalMSProjectCommand::InitialPass(std::vector<std::string> con
       }
     }
 
-    m_Makefile->AddUtilityCommand("INCLUDE_EXTERNAL_MSPROJECT", "echo", "\"Include external project\"",
+    std::string utility_name("INCLUDE_EXTERNAL_MSPROJECT");
+    utility_name += "_";
+    utility_name += args[0];
+
+    m_Makefile->AddUtilityCommand(utility_name.c_str(), "echo", "\"Include external project\"",
                                   false, name_and_location, depends);
 
   }
