@@ -2009,11 +2009,11 @@ void cmCTest::ProcessDirectory(cmCTest::tm_VectorOfStrings &passed,
     cres.m_Name = testname;
     if ( m_ShowOnly )
       {
-      fprintf(stderr,"%3d/%3d Testing %-30s\n", cnt, tmsize, testname.c_str());
+      fprintf(stderr,"%3d/%3ud Testing %-30s\n", cnt, tmsize, testname.c_str());
       }
     else
       {
-      fprintf(stderr,"%3d/%3d Testing %-30s ", cnt, tmsize, testname.c_str());
+      fprintf(stderr,"%3d/%3ud Testing %-30s ", cnt, tmsize, testname.c_str());
       fflush(stderr);
       }
     //std::cerr << "Testing " << args[0] << " ... ";
