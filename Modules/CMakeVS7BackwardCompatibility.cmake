@@ -9,3 +9,4 @@ SET (CMAKE_SIZEOF_DOUBLE    8   CACHE INTERNAL "Size of double data type")
 SET (CMAKE_NO_ANSI_FOR_SCOPE 0 CACHE INTERNAL 
          "Does the compiler support ansi for scope.")
 SET (CMAKE_USE_WIN32_THREADS  TRUE CACHE BOOL    "Use the win32 thread library.")
+SET (CMAKE_WORDS_BIGENDIAN 0 CACHE INTERNAL "endianness of bytes")
