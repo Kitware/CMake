@@ -8,8 +8,6 @@ QApplication app(argc,argv);
 
 qtwrapping qtw;
 app.setMainWidget(&qtw);
-qtw.show();
 
-int ret=app.exec();
-return ret;
+return 0;
 }
