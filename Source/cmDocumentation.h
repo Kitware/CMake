@@ -28,7 +28,7 @@ public:
   // High-level interface for standard documents:
   
   /** Types of help provided.  */
-  enum Type { None, Usage, List, Full, HTML, Man, Copyright, Version };
+  enum Type { None, Usage, Single, List, Full, HTML, Man, Copyright, Version };
   
   /**
    * Check command line arguments for documentation options.  Returns
@@ -47,7 +47,7 @@ public:
   bool PrintRequestedDocumentation(std::ostream& os);
   
   /** Print help of the given type.  */
-  void PrintDocumentation(Type ht, std::ostream& os);
+  bool PrintDocumentation(Type ht, std::ostream& os);
   
   /** Set the program name for standard document generation.  */
   void SetName(const char* name);
@@ -121,13 +121,14 @@ private:
   void PrintColumn(std::ostream& os, const char* text);
   void PrintHTMLEscapes(std::ostream& os, const char* text);
 
-  void PrintCopyright(std::ostream& os);
-  void PrintVersion(std::ostream& os);
-  void PrintDocumentationUsage(std::ostream& os);
-  void PrintDocumentationList(std::ostream& os);
-  void PrintDocumentationFull(std::ostream& os);
-  void PrintDocumentationHTML(std::ostream& os);
-  void PrintDocumentationMan(std::ostream& os);
+  bool PrintCopyright(std::ostream& os);
+  bool PrintVersion(std::ostream& os);
+  bool PrintDocumentationList(std::ostream& os);
+  bool PrintDocumentationSingle(std::ostream& os);
+  bool PrintDocumentationUsage(std::ostream& os);
+  bool PrintDocumentationFull(std::ostream& os);
+  bool PrintDocumentationHTML(std::ostream& os);
+  bool PrintDocumentationMan(std::ostream& os);
   void PrintDocumentationCommand(std::ostream& os,
                                  cmDocumentationEntry* entry);
   
@@ -140,6 +141,7 @@ private:
                   const cmDocumentationEntry* footer,
                   std::vector<cmDocumentationEntry>&);
   const char* GetNameString();
+  bool IsOption(const char* arg);
 
   std::string NameString;
   std::vector<cmDocumentationEntry> NameSection;
@@ -150,7 +152,8 @@ private:
   std::vector<cmDocumentationEntry> GeneratorsSection;
   std::vector<cmDocumentationEntry> SeeAlsoSection;
   std::string SeeAlsoString;
-  
+  std::string SingleCommand;
+
   std::vector< const char* > Names;
   std::vector< const cmDocumentationEntry* > Sections;
   Form CurrentForm;

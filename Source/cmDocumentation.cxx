@@ -23,14 +23,14 @@ static const cmDocumentationEntry cmDocumentationStandardOptions[] =
 {
   {"--copyright [file]", "Print the CMake copyright and exit.",
    "If a file is specified, the copyright is written into it."},
-  {"--help [command]", "Print usage information and exit.",
-   "Usage describes the basic command line interface and its options.  "
-   "If a listfile command is specified, help for that specific command is "
-   "printed."},
-  {"--help-list-commands [file]", "List available listfile commands and exit.",
+  {"--help", "Print usage information and exit.",
+   "Usage describes the basic command line interface and its options."},
+  {"--help-command cmd [file]", "Print help for a single command and exit.",
+   "Full documentation specific to the given command is displayed."},
+  {"--help-command-list [file]", "List available listfile commands and exit.",
    "The list contains all commands for which help may be obtained by using "
-   "the --help argument followed by a command name.  If a file is specified, "
-   "the help is written into it."},
+   "the --help-command argument followed by a command name.  If a file is "
+   "specified, the help is written into it."},
   {"--help-full [file]", "Print full help and exit.",
    "Full help displays most of the documentation provided by the UNIX "
    "man page.  It is provided for use on non-UNIX platforms, but is "
@@ -131,7 +131,7 @@ cmDocumentation::cmDocumentation()
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentation::PrintCopyright(std::ostream& os)
+bool cmDocumentation::PrintCopyright(std::ostream& os)
 {
   os << "CMake version " CMake_VERSION_FULL "\n";
   for(const cmDocumentationEntry* op = cmDocumentationCopyright;
@@ -150,12 +150,14 @@ void cmDocumentation::PrintCopyright(std::ostream& os)
       }
     os << "\n";
     }
+  return true;
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentation::PrintVersion(std::ostream& os)
+bool cmDocumentation::PrintVersion(std::ostream& os)
 {
   os << this->GetNameString() << " version " CMake_VERSION_FULL "\n";
+  return true;
 }
 
 //----------------------------------------------------------------------------
@@ -174,18 +176,19 @@ void cmDocumentation::ClearSections()
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentation::PrintDocumentation(Type ht, std::ostream& os)
+bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os)
 {
   switch (ht)
     {
-    case cmDocumentation::Usage:     this->PrintDocumentationUsage(os); break;
-    case cmDocumentation::List:      this->PrintDocumentationList(os); break;
-    case cmDocumentation::Full:      this->PrintDocumentationFull(os); break;
-    case cmDocumentation::HTML:      this->PrintDocumentationHTML(os); break;
-    case cmDocumentation::Man:       this->PrintDocumentationMan(os); break;
-    case cmDocumentation::Copyright: this->PrintCopyright(os); break;
-    case cmDocumentation::Version:   this->PrintVersion(os); break;
-    default: break;
+    case cmDocumentation::Usage:     return this->PrintDocumentationUsage(os);
+    case cmDocumentation::Single:    return this->PrintDocumentationSingle(os);
+    case cmDocumentation::List:      return this->PrintDocumentationList(os);
+    case cmDocumentation::Full:      return this->PrintDocumentationFull(os);
+    case cmDocumentation::HTML:      return this->PrintDocumentationHTML(os);
+    case cmDocumentation::Man:       return this->PrintDocumentationMan(os);
+    case cmDocumentation::Copyright: return this->PrintCopyright(os);
+    case cmDocumentation::Version:   return this->PrintVersion(os);
+    default: return false;
     }
 }
 
@@ -216,7 +219,7 @@ bool cmDocumentation::PrintRequestedDocumentation(std::ostream& os)
       // Argument was not a command.  Complain.
       os << "Help argument \"" << i->second.c_str()
          << "\" is not a CMake command.  "
-         << "Use --help-list-commands to see all commands.\n";
+         << "Use --help-command-list to see all commands.\n";
       return false;
       }
     
@@ -238,10 +241,7 @@ bool cmDocumentation::PrintRequestedDocumentation(std::ostream& os)
       }
     
     // Print this documentation type to the stream.
-    this->PrintDocumentation(i->first, *s);
-    
-    // Check for error.
-    if(!*s)
+    if(!this->PrintDocumentation(i->first, *s) || !*s)
       {
       result = false;
       }
@@ -292,7 +292,16 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv)
       {
       type = cmDocumentation::Man;
       }
-    else if(strcmp(argv[i], "--help-list-commands") == 0)
+    else if(strcmp(argv[i], "--help-command") == 0)
+      {
+      type = cmDocumentation::Single;
+      if((i+1 < argc) && !this->IsOption(argv[i+1]))
+        {
+        this->SingleCommand = argv[i+1];
+        i = i+1;
+        }
+      }
+    else if(strcmp(argv[i], "--help-command-list") == 0)
       {
       type = cmDocumentation::List;
       }
@@ -310,8 +319,7 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv)
       {
       // This is a help option.  See if there is a file name given.
       result = true;
-      if((i+1 < argc) && (argv[i+1][0] != '-') &&
-         (strcmp(argv[i+1], "/V") != 0) && (strcmp(argv[i+1], "/?") != 0))
+      if((i+1 < argc) && !this->IsOption(argv[i+1]))
         {
         this->RequestedMap[type] = argv[i+1];
         i = i+1;
@@ -794,15 +802,42 @@ void cmDocumentation::PrintHTMLEscapes(std::ostream& os, const char* text)
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentation::PrintDocumentationUsage(std::ostream& os)
+bool cmDocumentation::PrintDocumentationSingle(std::ostream& os)
 {
-  this->CreateUsageDocumentation();
-  this->Print(UsageForm, os);
+  if(this->CommandsSection.empty())
+    {
+    os << "Internal error: commands list is empty." << std::endl;
+    return false;
+    }
+  if(this->SingleCommand.length() == 0)
+    {
+    os << "Argument --help-command needs a command name.\n";
+    return false;
+    }
+  for(cmDocumentationEntry* entry = &this->CommandsSection[0];
+      entry->brief; ++entry)
+    {
+    if(entry->name && this->SingleCommand == entry->name)
+      {
+      this->PrintDocumentationCommand(os, entry);
+      return true;
+      }
+    }
+  // Argument was not a command.  Complain.
+  os << "Argument \"" << this->SingleCommand.c_str()
+     << "\" to --help-command is not a CMake command.  "
+     << "Use --help-command-list to see all commands.\n";
+  return false;
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentation::PrintDocumentationList(std::ostream& os)
+bool cmDocumentation::PrintDocumentationList(std::ostream& os)
 {
+  if(this->CommandsSection.empty())
+    {
+    os << "Internal error: commands list is empty." << std::endl;
+    return false;
+    }
   for(cmDocumentationEntry* entry = &this->CommandsSection[0];
       entry->brief; ++entry)
     {
@@ -811,32 +846,44 @@ void cmDocumentation::PrintDocumentationList(std::ostream& os)
       os << entry->name << std::endl;
       }
     }
+  return true;
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentation::PrintDocumentationFull(std::ostream& os)
+bool cmDocumentation::PrintDocumentationUsage(std::ostream& os)
+{
+  this->CreateUsageDocumentation();
+  this->Print(UsageForm, os);
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmDocumentation::PrintDocumentationFull(std::ostream& os)
 {
   this->CreateFullDocumentation();
   this->Print(TextForm, os);
+  return true;
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentation::PrintDocumentationHTML(std::ostream& os)
+bool cmDocumentation::PrintDocumentationHTML(std::ostream& os)
 {
   this->CreateFullDocumentation();
   os << "<html><body>\n";
   this->Print(HTMLForm, os);
   os << "</body></html>\n";
+  return true;
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentation::PrintDocumentationMan(std::ostream& os)
+bool cmDocumentation::PrintDocumentationMan(std::ostream& os)
 {
   this->CreateManDocumentation();
   os << ".TH " << this->GetNameString() << " 1 \""
      << cmSystemTools::GetCurrentDateTime("%B %d, %Y").c_str()
      << "\" \"" << this->GetNameString() << " " CMake_VERSION_FULL "\"\n";
   this->Print(ManForm, os);
+  return true;
 }
 
 //----------------------------------------------------------------------------
@@ -983,4 +1030,12 @@ const char* cmDocumentation::GetNameString()
     {
     return "CMake";
     }
+}
+
+//----------------------------------------------------------------------------
+bool cmDocumentation::IsOption(const char* arg)
+{
+  return ((arg[0] == '-') ||
+          (strcmp(arg, "/V") == 0) ||
+          (strcmp(arg, "/?") == 0));
 }
