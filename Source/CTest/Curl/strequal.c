@@ -38,10 +38,10 @@ int curl_strequal(const char *first, const char *second)
 {
 #if defined(HAVE_STRCASECMP)
   return !(strcasecmp)(first, second);
-#elif defined(HAVE_STRCMPI)
-  return !(strcmpi)(first, second);
 #elif defined(HAVE_STRICMP)
   return !(stricmp)(first, second);
+#elif defined(HAVE_STRCMPI)
+  return !(strcmpi)(first, second);
 #else
   while (*first && *second) {
     if (toupper(*first) != toupper(*second)) {
@@ -58,10 +58,10 @@ int curl_strnequal(const char *first, const char *second, size_t max)
 {
 #if defined(HAVE_STRCASECMP)
   return !strncasecmp(first, second, max);
-#elif defined(HAVE_STRCMPI)
-  return !strncmpi(first, second, max);
 #elif defined(HAVE_STRICMP)
   return !strnicmp(first, second, max);
+#elif defined(HAVE_STRCMPI)
+  return !strncmpi(first, second, max);
 #else
   while (*first && *second && max) {
     if (toupper(*first) != toupper(*second)) {
