@@ -23,9 +23,9 @@ STRING(TOLOWER "CMake" tlvar)
 
 # Escaping test
 SET(var "\\ \" \  \t \n \r \# \( \) \0")
-MESSAGE(STATUS "Output: [${var}]")
+MESSAGE("Output: [${var}]")
 SET(var \\ \" \  \t \n \r \# \( \) \0)
-MESSAGE(STATUS "Output: [${var}]")
+MESSAGE("Output: [${var}]")
 
 # Make directories test
 FILE(MAKE_DIRECTORY 
@@ -67,7 +67,10 @@ FILE(WRITE "${CMAKE_CURRENT_BINARY_DIR}/OutputFile.h" "${outfile}")
 
 # Test file glob
 FILE(GLOB_RECURSE src_files "${CMAKE_CURRENT_SOURCE_DIR}/*")
-MESSAGE(STATUS "Files in ${CMAKE_CURRENT_SOURCE_DIR} are ${src_files}")
-FILE(GLOB src_files "${CMAKE_CURRENT_SOURCE_DIR}/[sS][!a-su-zA-Z0-9][^a-qs-zA-Z0-9]ing?ile*.cxx")
+MESSAGE("Files in ${CMAKE_CURRENT_SOURCE_DIR} are ${src_files}")
+SET(expr "${CMAKE_CURRENT_SOURCE_DIR}/[sS][!a-su-zA-Z0-9][^a-qs-zA-Z0-9]ing?ile*.cxx")
+MESSAGE("Glob expression is [${expr}].")
+FILE(GLOB src_files "${expr}")
+MESSAGE("Globbed files [${src_files}].")
 
 ADD_EXECUTABLE(StringFileTest ${src_files})
