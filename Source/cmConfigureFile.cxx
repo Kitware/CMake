@@ -85,6 +85,7 @@ void cmConfigureFile::FinalPass()
   const int bufSize = 4096;
   char buffer[bufSize];
   std::string inLine;
+  cmRegularExpression cmdefine("#cmakedefine[ \t]*([A-Za-z_0-9]*)");
   while(fin)
     {
     fin.getline(buffer, bufSize);
@@ -93,6 +94,22 @@ void cmConfigureFile::FinalPass()
       inLine = buffer;
       m_Makefile->ExpandVariablesInString(inLine);
       m_Makefile->RemoveVariablesInString(inLine);
+      // look for special cmakedefine symbol and handle it
+      // is the symbol defined
+      if (cmdefine.find(inLine))
+        {
+        const char *def = m_Makefile->GetDefinition(cmdefine.match(1).c_str());
+        if(!cmSystemTools::IsOff(def))
+          {
+          cmSystemTools::ReplaceString(inLine,
+                                       "#cmakedefine", "#define");
+          }
+        else
+          {
+          cmSystemTools::ReplaceString(inLine,
+                                       "#cmakedefine", "#undef");
+          }
+        }
       fout << inLine << "\n";
       }
     }
