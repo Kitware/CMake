@@ -136,19 +136,27 @@ void cmDSPWriter::OutputDSPFile()
 
 void cmDSPWriter::CreateSingleDSP(const char *lname, cmTarget &target)
 {
+  // add to the list of projects
+  std::string pname = lname;
+  m_CreatedProjectNames.push_back(pname);
+  // create the dsp.cmake file
   std::string fname;
   fname = m_Makefile->GetStartOutputDirectory();
   fname += "/";
   fname += lname;
   fname += ".dsp";
-  std::string pname = lname;
-  m_CreatedProjectNames.push_back(pname);
+  // save the name of the real dsp file
+  std::string realDSP = fname;
+  fname += ".cmake";
   std::ofstream fout(fname.c_str());
   if(!fout)
     {
     cmSystemTools::Error("Error Writing ", fname.c_str());
     }
   this->WriteDSPFile(fout,lname,target);
+  fout.close();
+  // if the dsp file has changed, then write it.
+  cmSystemTools::CopyFileIfDifferent(fname.c_str(), realDSP.c_str());
 }
 
 
@@ -159,13 +167,13 @@ void cmDSPWriter::AddDSPBuildRule(cmSourceGroup& sourceGroup)
   {
     return;
   }
-  dspname += ".dsp";
+  dspname += ".dsp.cmake";
   std::string makefileIn = m_Makefile->GetStartDirectory();
   makefileIn += "/";
   makefileIn += "CMakeLists.txt";
   makefileIn = cmSystemTools::HandleNetworkPaths(makefileIn.c_str());
   makefileIn = cmSystemTools::EscapeSpaces(makefileIn.c_str());
-  std::string dsprule = "${CMAKE_COMMAND} ";
+  std::string dsprule = "${CMAKE_COMMAND}";
   m_Makefile->ExpandVariablesInString(dsprule);
   dsprule = cmSystemTools::HandleNetworkPaths(dsprule.c_str());
   std::string args = makefileIn;
@@ -179,12 +187,30 @@ void cmDSPWriter::AddDSPBuildRule(cmSourceGroup& sourceGroup)
   args += cmSystemTools::HandleNetworkPaths(m_Makefile->GetHomeOutputDirectory());
   args += "\"";
   m_Makefile->ExpandVariablesInString(args);
+
+  std::string configFile = 
+    m_Makefile->GetDefinition("CMAKE_ROOT");
+  configFile += "/Templates/CMakeWindowsSystemConfig.cmake";
+  std::vector<std::string> listFiles = m_Makefile->GetListFiles();
+  bool found = false;
+  for(std::vector<std::string>::iterator i = listFiles.begin();
+      i != listFiles.end(); ++i)
+    {
+    if(*i == configFile)
+      {
+      found  = true;
+      }
+    }
+  if(!found)
+    {
+    listFiles.push_back(configFile);
+    }
   
   std::vector<std::string> outputs;
   outputs.push_back(dspname);
   cmCustomCommand cc(makefileIn.c_str(), dsprule.c_str(),
                      args.c_str(),
-		     m_Makefile->GetListFiles(), 
+		     listFiles, 
 		     outputs);
   sourceGroup.AddCustomCommand(cc);
 }
@@ -455,7 +481,7 @@ cmDSPWriter::CombineCommands(const cmSourceGroup::Commands &commands,
       c != commands.end(); ++c)
     {
     totalCommandStr += "\n\t";
-    temp= c->second.m_Command;
+    temp= c->second.m_Command; 
     cmSystemTools::ConvertToWindowsSlashes(temp);
     temp = cmSystemTools::EscapeSpaces(temp.c_str());
     totalCommandStr += temp;
