@@ -48,6 +48,14 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args)
 
   m_Makefile->AddDefinition("PROJECT_NAME", args[0].c_str());
 
+  // Set the CMAKE_PROJECT_NAME variable to be the highest-level
+  // project name in the tree.  This is always the first PROJECT
+  // command encountered.
+  if(!m_Makefile->GetDefinition("CMAKE_PROJECT_NAME"))
+    {
+    m_Makefile->AddDefinition("CMAKE_PROJECT_NAME", args[0].c_str());
+    }
+
   std::vector<std::string> languages;
   if(args.size() > 1)
     {
