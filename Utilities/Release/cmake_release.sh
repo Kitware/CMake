@@ -506,6 +506,18 @@ cygwin_package()
 }
 
 #-----------------------------------------------------------------------------
+cygwin_upload()
+{
+    setup || return 1
+    echo "------- Copying cywgin packages to www.cmake.org. -------"
+    scp Cygwin/Package/cmake-${VERSION}-${RELEASE}-src.tar.bz2 \
+        Cygwin/Package/cmake-${VERSION}-${RELEASE}.tar.bz2 \
+        Cygwin/Package/setup.hint \
+        www.cmake.org:/projects/FTP/pub/cmake/cygwin
+    echo "---- Done copying cygwin packages to www.cmake.org. -----"
+}
+
+#-----------------------------------------------------------------------------
 osx_install()
 {
     [ -z "${DONE_osx_install}" ] || return 0 ; DONE_osx_install="yes"
