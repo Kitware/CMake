@@ -704,6 +704,10 @@ int cmCTest::UpdateDirectory()
           {
           comment1 = "Locally modified file\n";
           }
+        if ( mod == 'C' )
+          {
+          comment1 = "Conflict while updating\n";
+          }
         std::string path = cmSystemTools::GetFilenamePath(file);
         std::string fname = cmSystemTools::GetFilenameName(file);
         if ( path != current_path )
