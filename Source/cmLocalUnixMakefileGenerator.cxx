@@ -547,7 +547,7 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
       std::string dir, file;
       cmSystemTools::SplitProgramPath(lib->first.c_str(),
                                       dir, file);
-      std::string libpath = cmSystemTools::ConvertToOutputPath(dir.c_str());
+      std::string libpath = this->ConvertToOutputForExisting(dir.c_str());
       if(emitted.insert(libpath).second)
         {
         linkLibs += libPathFlag;
