@@ -1219,7 +1219,8 @@ kwsys_stl::string SystemTools::FindLibrary(const char* name,
     tryPath += "/";
     tryPath += name;
     tryPath += ".lib";
-    if(SystemTools::FileExists(tryPath.c_str()))
+    if(SystemTools::FileExists(tryPath.c_str()) 
+       && !SystemTools::FileIsDirectory(tryPath.c_str()))
       {
       return SystemTools::CollapseFullPath(tryPath.c_str());
       }
@@ -1228,7 +1229,8 @@ kwsys_stl::string SystemTools::FindLibrary(const char* name,
     tryPath += "/lib";
     tryPath += name;
     tryPath += ".so";
-    if(SystemTools::FileExists(tryPath.c_str()))
+    if(SystemTools::FileExists(tryPath.c_str()) 
+       && !SystemTools::FileIsDirectory(tryPath.c_str()))
       {
       return SystemTools::CollapseFullPath(tryPath.c_str());
       }
@@ -1236,7 +1238,8 @@ kwsys_stl::string SystemTools::FindLibrary(const char* name,
     tryPath += "/lib";
     tryPath += name;
     tryPath += ".a";
-    if(SystemTools::FileExists(tryPath.c_str()))
+    if(SystemTools::FileExists(tryPath.c_str()) 
+       && !SystemTools::FileIsDirectory(tryPath.c_str()))
       {
       return SystemTools::CollapseFullPath(tryPath.c_str());
       }
@@ -1244,7 +1247,8 @@ kwsys_stl::string SystemTools::FindLibrary(const char* name,
     tryPath += "/lib";
     tryPath += name;
     tryPath += ".sl";
-    if(SystemTools::FileExists(tryPath.c_str()))
+    if(SystemTools::FileExists(tryPath.c_str()) 
+       && !SystemTools::FileIsDirectory(tryPath.c_str()))
       {
       return SystemTools::CollapseFullPath(tryPath.c_str());
       }
@@ -1252,7 +1256,8 @@ kwsys_stl::string SystemTools::FindLibrary(const char* name,
     tryPath += "/lib";
     tryPath += name;
     tryPath += ".dylib";
-    if(SystemTools::FileExists(tryPath.c_str()))
+    if(SystemTools::FileExists(tryPath.c_str()) 
+       && !SystemTools::FileIsDirectory(tryPath.c_str()))
       {
       return SystemTools::CollapseFullPath(tryPath.c_str());
       }
@@ -1260,7 +1265,8 @@ kwsys_stl::string SystemTools::FindLibrary(const char* name,
     tryPath += "/lib";
     tryPath += name;
     tryPath += ".dll";
-    if(SystemTools::FileExists(tryPath.c_str()))
+    if(SystemTools::FileExists(tryPath.c_str()) 
+       && !SystemTools::FileIsDirectory(tryPath.c_str()))
       {
       return SystemTools::CollapseFullPath(tryPath.c_str());
       }
