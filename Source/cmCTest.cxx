@@ -129,6 +129,7 @@ static const char* cmCTestErrorMatches[] = {
   ": internal link edit command failed",
   ": Unrecognized option \\`.*\\'",
   "\", line [0-9]+\\.[0-9]+: [0-9]+-[0-9]+ \\([^W]\\)",
+  "ld: 0706-006 Cannot find or open library file: -l ",
   0
 };
 
