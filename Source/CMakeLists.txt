@@ -522,7 +522,7 @@ IF(BUILD_TESTING)
       --build-makeprogram ${MAKEPROGRAM}
       --build-exe-dir ${CMake_BINARY_DIR}/Tests/UseWX
       --build-project UsewxWindows
-      --build-options CMAKE_ARGS -DCMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE:FILEPATH=${CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE}
+      --build-options -DCMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE:FILEPATH=${CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE}
       --test-command UseWX
     )
 
