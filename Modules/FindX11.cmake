@@ -39,21 +39,14 @@ IF (UNIX)
     /usr/X11R6/lib
   )
 
-  SET (CMAKE_X_LIBS "${CMAKE_X_PRE_LIBS} ${CMAKE_X_LIBS} ${CMAKE_X_EXTRA_LIBS}" 
-       CACHE STRING 
-       "Libraries and options used in X11 programs.")
-
-  SET (CMAKE_X_CFLAGS           "${CMAKE_X_CFLAGS}" CACHE STRING 
-       "X11 extra flags.")
-
   IF(CMAKE_X11_INCLUDE_PATH)
 
     IF(CMAKE_X11_LIBDIR)
-      SET( CMAKE_X_LIBS ${CMAKE_X_LIBS} ${CMAKE_X11_LIBDIR} )
+      SET( CMAKE_X_LIBS "${CMAKE_X_LIBS};${CMAKE_X11_LIBDIR}" )
     ENDIF(CMAKE_X11_LIBDIR)
 
     IF(CMAKE_Xext_LIBDIR)
-      SET( CMAKE_X_LIBS ${CMAKE_X_LIBS} ${CMAKE_Xext_LIBDIR} )
+      SET( CMAKE_X_LIBS "${CMAKE_X_LIBS};${CMAKE_Xext_LIBDIR}" )
     ENDIF(CMAKE_Xext_LIBDIR)
 
   ENDIF(CMAKE_X11_INCLUDE_PATH)
@@ -64,5 +57,13 @@ IF (UNIX)
       SET(CMAKE_HAS_X 1)
     ENDIF(CMAKE_X_LIBS)
   ENDIF(CMAKE_X11_INCLUDE_PATH)
+  IF(CMAKE_HAS_X)
+    SET (CMAKE_X_LIBS "${CMAKE_X_PRE_LIBS};${CMAKE_X_LIBS};${CMAKE_X_EXTRA_LIBS}" 
+         CACHE STRING 
+         "Libraries and options used in X11 programs.")
+
+    SET (CMAKE_X_CFLAGS           "${CMAKE_X_CFLAGS}" CACHE STRING 
+         "X11 extra flags.")
+  ENDIF(CMAKE_HAS_X)
   SET (CMAKE_HAS_X ${CMAKE_HAS_X} CACHE INTERNAL "Is X11 around.")
 ENDIF (UNIX)
