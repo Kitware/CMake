@@ -473,6 +473,7 @@ cat>"test.c"<<EOF
 #include <stdio.h>
 int main(){ printf("1\n"); return 0; }
 EOF
+cmake_original_make_flags="${cmake_make_flags}"
 if [ "x${cmake_parallel_make}" != "x" ]; then
   cmake_make_flags="${cmake_make_flags} -j ${cmake_parallel_make}"
 fi
@@ -481,6 +482,17 @@ for a in ${cmake_make_processors}; do
     cmake_make_processor="${a}"
   fi
 done
+cmake_full_make_flags="${cmake_make_flags}"
+if [ "x${cmake_original_make_flags}" != "x${cmake_make_flags}" ]; then
+  if [ -z "${cmake_make_processor}" ]; then
+    cmake_make_flags="${cmake_original_make_flags}"
+    for a in ${cmake_make_processors}; do
+      if [ -z "${cmake_make_processor}" ] && cmake_try_make "${a}" "${cmake_make_flags}" >> cmake_bootstrap.log 2>&1; then
+        cmake_make_processor="${a}"
+      fi
+    done
+  fi
+fi
 cd "${cmake_bootstrap_dir}"
 rm -rf "${cmake_bootstrap_dir}/${TMPFILE}"
 
@@ -488,7 +500,12 @@ if [ -z "${cmake_make_processor}" ]; then
   cmake_error 8 "Cannot find appropriate Makefile processor on this system.
 Please specify one using environment variable MAKE."
 fi
-echo "Make processor on this system is: ${cmake_make_processor}"
+echo "Makefile processor on this system is: ${cmake_make_processor}"
+if [ "x${cmake_full_make_flags}" != "x${cmake_make_flags}" ]; then
+  echo "---------------------------------------------"
+  echo "Makefile processor ${cmake_make_processor} does not support parallel build"
+  echo "---------------------------------------------"
+fi
 
 # Ok, we have CC, CXX, and MAKE.
 
