@@ -182,7 +182,7 @@ void cmSystemTools::ReplaceString(std::string& source,
 // Example : 
 //      HKEY_LOCAL_MACHINE\SOFTWARE\Python\PythonCore\2.1\InstallPath
 //      =>  will return the data of the "default" value of the key
-//      HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.4:Root
+//      HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.4§Root
 //      =>  will return the data of the "Root" value of the key
 bool ReadAValue(std::string &res, const char *key)
 {
@@ -256,7 +256,7 @@ bool ReadAValue(std::string &res, const char *key)
 void cmSystemTools::ExpandRegistryValues(std::string& source)
 {
 #if _WIN32  
-  cmRegularExpression regEntry("\\[(HKEY[A-Za-z_ §0-9\\.\\\\]*)\\]");
+  cmRegularExpression regEntry("\\[(HKEY.*)\\]");
   
   // check for black line or comment
   while (regEntry.find(source))
