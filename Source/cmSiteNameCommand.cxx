@@ -78,12 +78,16 @@ bool cmSiteNameCommand::Invoke(std::vector<std::string>& args)
     std::string nsOutput;
     cmSystemTools::RunCommand(nsCmd.c_str(),
                               nsOutput);
-    cmRegularExpression reg(".*Name:(.*)\n");
+    std::string RegExp = ".*Name:[ \t\n]*";
+    RegExp += host;
+    RegExp += "\\.([^ \t\n\r]*)[ \t\n\r]*Address:";
+    cmRegularExpression reg( RegExp.c_str() );
     if(reg.find(nsOutput.c_str()))
       {
       siteName = reg.match(1);
       }
     }
+
   cmCacheManager::GetInstance()->
     AddCacheEntry("SITE",
                   siteName.c_str(),
