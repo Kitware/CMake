@@ -14,7 +14,7 @@ ENDIF(NOT CMAKE_C_COMPILER_WORKS)
 IF(NOT CMAKE_C_COMPILER_WORKS)
   MESSAGE(STATUS "Check for working C compiler: ${CMAKE_C_COMPILER} -- broken")
   MESSAGE(FATAL_ERROR "The C compiler \"${CMAKE_C_COMPILER}\" "
-    "is not able to compile a simple tests program.\nIt fails "
+    "is not able to compile a simple test program.\nIt fails "
     "with the following output:\n ${OUTPUT}\n\n"
     "CMake will not be able to correctly generate this project.")
 ELSE(NOT CMAKE_C_COMPILER_WORKS)

@@ -13,7 +13,7 @@ ENDIF(NOT CMAKE_CXX_COMPILER_WORKS)
 IF(NOT CMAKE_CXX_COMPILER_WORKS)
   MESSAGE(STATUS "Check for working CXX compiler: ${CMAKE_CXX_COMPILER} -- broken")
   MESSAGE(FATAL_ERROR "The C++ compiler \"${CMAKE_CXX_COMPILER}\" "
-    "is not able to compile a simple tests program.\nIt fails "
+    "is not able to compile a simple test program.\nIt fails "
     "with the following output:\n ${OUTPUT}\n\n"
     "CMake will not be able to correctly generate this project.")
 ELSE(NOT CMAKE_CXX_COMPILER_WORKS)
