@@ -69,12 +69,11 @@ CMakeSetupDialog::CMakeSetupDialog(CWnd* pParent /*=NULL*/)
   m_RegistryKey  = "Software\\Kitware\\CMakeSetup\\Settings\\StartPath";
   
   //{{AFX_DATA_INIT(CMakeSetupDialog)
-  m_WhereSource = _T("");
-  m_WhereBuild = _T("");
-  //}}AFX_DATA_INIT
+	m_WhereBuild = _T("");
+	m_WhereSource = _T("");
+	//}}AFX_DATA_INIT
   // Note that LoadIcon does not require a subsequent DestroyIcon in Win32
   m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
-  this->LoadFromRegistry();
   m_BuildPathChanged = false;
 }
 
@@ -82,9 +81,11 @@ void CMakeSetupDialog::DoDataExchange(CDataExchange* pDX)
 {
   CDialog::DoDataExchange(pDX);
   //{{AFX_DATA_MAP(CMakeSetupDialog)
+	DDX_Control(pDX, IDC_WhereSource, m_WhereSourceControl);
+	DDX_Control(pDX, IDC_WhereBuild, m_WhereBuildControl);
 	DDX_Control(pDX, IDC_LIST2, m_CacheEntriesList);
-  DDX_Text(pDX, IDC_WhereSource, m_WhereSource);
-  DDX_Text(pDX, IDC_WhereBuild, m_WhereBuild);
+	DDX_CBString(pDX, IDC_WhereBuild, m_WhereBuild);
+	DDX_CBString(pDX, IDC_WhereSource, m_WhereSource);
 	//}}AFX_DATA_MAP
 }
 
@@ -93,18 +94,20 @@ BEGIN_MESSAGE_MAP(CMakeSetupDialog, CDialog)
   ON_WM_SYSCOMMAND()
   ON_WM_PAINT()
   ON_WM_QUERYDRAGICON()
+  ON_BN_CLICKED(IDC_BuildProjects, OnBuildProjects)
+  ON_CBN_EDITCHANGE(IDC_WhereBuild, OnChangeWhereBuild)
   ON_BN_CLICKED(IDC_BUTTON2, OnBrowseWhereSource)
   ON_BN_CLICKED(IDC_BUTTON3, OnBrowseWhereBuild)
-  ON_BN_CLICKED(IDC_BuildProjects, OnBuildProjects)
-  ON_EN_CHANGE(IDC_WhereBuild, OnChangeWhereBuild)
-  ON_EN_CHANGE(IDC_WhereSource, OnChangeWhereSource)
-  //}}AFX_MSG_MAP
-  END_MESSAGE_MAP()
+  ON_CBN_SELENDOK(IDC_WhereBuild, OnSelendokWhereBuild)
+  ON_CBN_SELENDOK(IDC_WhereSource, OnSelendokWhereSource)
+  ON_CBN_EDITCHANGE(IDC_WhereSource, OnChangeWhereSource)
+	//}}AFX_MSG_MAP
+END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CMakeSetupDialog message handlers
 
-  BOOL CMakeSetupDialog::OnInitDialog()
+BOOL CMakeSetupDialog::OnInitDialog()
 {
   CDialog::OnInitDialog();
 
@@ -130,10 +133,15 @@ BEGIN_MESSAGE_MAP(CMakeSetupDialog, CDialog)
   //  when the application's main window is not a dialog
   SetIcon(m_hIcon, TRUE);			// Set big icon
   SetIcon(m_hIcon, FALSE);		// Set small icon
+  // Load source and build dirs from registry
+  this->LoadFromRegistry();
+  // try to load the cmake cache from disk
   this->LoadCacheFromDiskToGUI();
   return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
+
+// About dialog invoke
 void CMakeSetupDialog::OnSysCommand(UINT nID, LPARAM lParam)
 {
   if ((nID & 0xFFF0) == IDM_ABOUTBOX)
@@ -184,13 +192,23 @@ HCURSOR CMakeSetupDialog::OnQueryDragIcon()
 }
 
 
-void CMakeSetupDialog::OnBrowseWhereSource() 
+
+// Insane Microsoft way of setting the initial directory
+// for the Shbrowseforfolder function...
+//  SetSelProc
+//  Callback procedure to set the initial selection of the browser.
+int CALLBACK CMakeSetupDialog_SetSelProc( HWND hWnd, UINT uMsg,
+                                          LPARAM lParam, LPARAM lpData )
 {
-  this->UpdateData();
-  Browse(m_WhereSource, "Enter Path to Source");
-  this->UpdateData(false);
+  if (uMsg==BFFM_INITIALIZED)
+    {
+    ::SendMessage(hWnd, BFFM_SETSELECTION, TRUE, lpData );
+    }
+  return 0;
 }
 
+
+// Browse button
 bool CMakeSetupDialog::Browse(CString &result, const char *title)
 {
 // don't know what to do with initial right now...
@@ -201,27 +219,23 @@ bool CMakeSetupDialog::Browse(CString &result, const char *title)
   bi.pidlRoot = NULL;
   bi.pszDisplayName = (LPTSTR)szPathName;
   bi.lpszTitle = title;
-  bi.ulFlags = BIF_BROWSEINCLUDEFILES  ;
-  bi.lpfn = NULL;
-
+  bi.ulFlags = BIF_BROWSEINCLUDEFILES;
+  // set up initial directory code
+  bi.lpfn = CMakeSetupDialog_SetSelProc;
+  bi.lParam = (LPARAM)(LPCSTR) result;
+  // open the directory chooser
   LPITEMIDLIST pidl = SHBrowseForFolder(&bi);
-
+  // get the result
   bool bSuccess = (SHGetPathFromIDList(pidl, szPathName) ? true : false);
   if(bSuccess)
     {
     result = szPathName;
     }
-  
   return bSuccess;
 }
 
 
-void CMakeSetupDialog::OnBrowseWhereBuild() 
-{
-  this->UpdateData();
-  Browse(m_WhereBuild, "Enter Path to Build");
-  this->UpdateData(false);
-}
+
 
 void CMakeSetupDialog::SaveToRegistry()
 { 
@@ -237,12 +251,52 @@ void CMakeSetupDialog::SaveToRegistry()
     }
   else
     {
-    RegSetValueEx(hKey, _T("WhereSource"), 0, REG_SZ, 
-		  (CONST BYTE *)(const char *)m_WhereSource, 
-		  m_WhereSource.GetLength());
-    RegSetValueEx(hKey, _T("WhereBuild"), 0, REG_SZ, 
-		  (CONST BYTE *)(const char *)m_WhereBuild, 
-		  m_WhereBuild.GetLength());
+    // load some values
+    CString regvalue;
+    this->ReadRegistryValue(hKey, &(regvalue),"WhereSource","C:\\");
+    if(m_WhereSource != regvalue)
+      {
+      regvalue = "";
+      this->ReadRegistryValue(hKey, &(regvalue),"WhereSource3","");
+      RegSetValueEx(hKey, _T("WhereSource4"), 0, REG_SZ, 
+                    (CONST BYTE *)(const char *)regvalue, 
+                    regvalue.GetLength());
+      regvalue = "";
+      this->ReadRegistryValue(hKey, &(regvalue),"WhereSource2","");
+      RegSetValueEx(hKey, _T("WhereSource3"), 0, REG_SZ, 
+                    (CONST BYTE *)(const char *)regvalue, 
+                    regvalue.GetLength());
+      regvalue = "";
+      this->ReadRegistryValue(hKey, &(regvalue),"WhereSource","");
+      RegSetValueEx(hKey, _T("WhereSource2"), 0, REG_SZ, 
+                    (CONST BYTE *)(const char *)regvalue, 
+                    regvalue.GetLength());
+      RegSetValueEx(hKey, _T("WhereSource"), 0, REG_SZ, 
+                    (CONST BYTE *)(const char *)m_WhereSource, 
+                    m_WhereSource.GetLength());
+      }
+    this->ReadRegistryValue(hKey, &(regvalue),"WhereBuild","C:\\");
+    if(m_WhereBuild != regvalue)
+      {
+      regvalue = "";
+      this->ReadRegistryValue(hKey, &(regvalue),"WhereBuild3","");
+      RegSetValueEx(hKey, _T("WhereBuild4"), 0, REG_SZ, 
+                    (CONST BYTE *)(const char *)regvalue, 
+                    regvalue.GetLength());
+      regvalue = "";
+      this->ReadRegistryValue(hKey, &(regvalue),"WhereBuild2","");
+      RegSetValueEx(hKey, _T("WhereBuild3"), 0, REG_SZ, 
+                    (CONST BYTE *)(const char *)regvalue, 
+                    regvalue.GetLength());
+      regvalue = "";
+      this->ReadRegistryValue(hKey, &(regvalue),"WhereBuild","");
+      RegSetValueEx(hKey, _T("WhereBuild2"), 0, REG_SZ, 
+                    (CONST BYTE *)(const char *)regvalue, 
+                    regvalue.GetLength());
+      RegSetValueEx(hKey, _T("WhereBuild"), 0, REG_SZ, 
+                    (CONST BYTE *)(const char *)m_WhereBuild, 
+                    m_WhereBuild.GetLength());
+      }
     }
   RegCloseKey(hKey);
 }
@@ -283,13 +337,57 @@ void CMakeSetupDialog::LoadFromRegistry()
     }
   else
     {
-    // save some values
+    // load some values
     this->ReadRegistryValue(hKey, &(m_WhereSource),"WhereSource","C:\\");
     this->ReadRegistryValue(hKey, &(m_WhereBuild),"WhereBuild","C:\\");
+    m_WhereSourceControl.AddString(m_WhereSource);
+    m_WhereBuildControl.AddString(m_WhereBuild);
+
+    CString regvalue;
+    this->ReadRegistryValue(hKey, &(regvalue),"WhereSource2","C:\\");
+    m_WhereSourceControl.AddString(regvalue);
+    regvalue = "";
+    this->ReadRegistryValue(hKey, &(regvalue),"WhereBuild2","C:\\");
+    m_WhereBuildControl.AddString(regvalue);
+
+    regvalue = "";
+    this->ReadRegistryValue(hKey, &(regvalue),"WhereSource3","C:\\");
+    m_WhereSourceControl.AddString(regvalue);
+    regvalue = "";
+    this->ReadRegistryValue(hKey, &(regvalue),"WhereBuild3","C:\\");
+    m_WhereBuildControl.AddString(regvalue);
+
+    regvalue = "";
+    this->ReadRegistryValue(hKey, &(regvalue),"WhereSource4","C:\\");
+    m_WhereSourceControl.AddString(regvalue);
+    regvalue = "";
+    this->ReadRegistryValue(hKey, &(regvalue),"WhereBuild4","C:\\");
+    m_WhereBuildControl.AddString(regvalue);
     }
   RegCloseKey(hKey);
 }
 
+
+
+// Callback for browse source button
+void CMakeSetupDialog::OnBrowseWhereSource() 
+{
+  this->UpdateData();
+  Browse(m_WhereSource, "Enter Path to Source");
+  this->UpdateData(false);
+  this->OnChangeWhereSource();
+}
+
+// Callback for browser build button
+void CMakeSetupDialog::OnBrowseWhereBuild() 
+{
+  this->UpdateData();
+  Browse(m_WhereBuild, "Enter Path to Build");
+  this->UpdateData(false);
+  this->OnChangeWhereBuild();
+}
+
+// Callback for build projects button
 void CMakeSetupDialog::OnBuildProjects() 
 {
   if(!cmSystemTools::FileExists(m_WhereBuild))
@@ -359,7 +457,46 @@ void CMakeSetupDialog::OnBuildProjects()
 }
 
 
- // copy from the cache manager to the cache edit list box
+
+
+// callback for combo box menu where build selection
+void CMakeSetupDialog::OnSelendokWhereBuild() 
+{
+  m_WhereBuildControl.GetLBText(m_WhereBuildControl.GetCurSel(), m_WhereBuild);
+  this->UpdateData(FALSE);
+  this->OnChangeWhereBuild();
+}
+
+// callback for combo box menu where source selection
+void CMakeSetupDialog::OnSelendokWhereSource() 
+{
+  m_WhereSourceControl.GetLBText(m_WhereSourceControl.GetCurSel(), m_WhereSource);
+  this->UpdateData(FALSE);
+  this->OnChangeWhereSource();
+}
+
+// callback for chaing source directory
+void CMakeSetupDialog::OnChangeWhereSource() 
+{
+}
+
+// callback for changing the build directory
+void CMakeSetupDialog::OnChangeWhereBuild() 
+{
+  this->UpdateData();
+  std::string cachefile = m_WhereBuild;
+  cachefile += "/CMakeCache.txt";
+  m_CacheEntriesList.RemoveAll();
+  if(cmSystemTools::FileExists(cachefile.c_str()))
+    {
+    m_CacheEntriesList.ShowWindow(SW_SHOW);
+    this->LoadCacheFromDiskToGUI();
+    m_BuildPathChanged = true;
+    }
+}
+
+
+// copy from the cache manager to the cache edit list box
 void CMakeSetupDialog::FillCacheGUIFromCacheManager()
 {
   const cmCacheManager::CacheEntryMap &cache =
@@ -412,7 +549,7 @@ void CMakeSetupDialog::FillCacheGUIFromCacheManager()
   this->UpdateData(FALSE);
 }
 
-  // copy from the list box to the cache manager
+// copy from the list box to the cache manager
 void CMakeSetupDialog::FillCacheManagerFromCacheGUI()
 { 
     cmCacheManager::GetInstance()->GetCacheMap();
@@ -431,29 +568,6 @@ void CMakeSetupDialog::FillCacheManagerFromCacheGUI()
 }
 
   
-  
-
-void CMakeSetupDialog::OnChangeWhereBuild() 
-{
-  this->UpdateData();
-  std::string cachefile = m_WhereBuild;
-  cachefile += "/CMakeCache.txt";
-  if(cmSystemTools::FileExists(cachefile.c_str()))
-    {
-    m_CacheEntriesList.ShowWindow(SW_SHOW);
-    this->LoadCacheFromDiskToGUI();
-    m_BuildPathChanged = true;
-    }
-  else
-    {
-    m_CacheEntriesList.RemoveAll();
-    }
-}
-
-void CMakeSetupDialog::OnChangeWhereSource() 
-{
-  this->UpdateData();
-}
 
 //! Load cache file from m_WhereBuild and display in GUI editor
 void CMakeSetupDialog::LoadCacheFromDiskToGUI()
@@ -495,3 +609,5 @@ void CMakeSetupDialog::SaveCacheFromGUI()
     cmCacheManager::GetInstance()->SaveCache(m_WhereBuild);
     }
 }
+
+

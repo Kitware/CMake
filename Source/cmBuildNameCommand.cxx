@@ -72,7 +72,7 @@ bool cmBuildNameCommand::Invoke(std::vector<std::string>& args)
       }
     }
 
-  std::string compiler = "-${CMAKE_CXX}";
+  std::string compiler = "-${CMAKE_CXX_COMPILER}";
   m_Makefile->ExpandVariablesInString ( compiler );
   buildname += compiler;
   

@@ -36,6 +36,8 @@ protected:
   CString	m_WhereSource;
   CString	m_WhereBuild;
   bool          m_BuildPathChanged;
+  CComboBox     m_WhereSourceControl;
+  CComboBox     m_WhereBuildControl;
   CPropertyList m_CacheEntriesList;
   //}}AFX_DATA
   
@@ -66,7 +68,9 @@ protected:
   virtual void OnBuildProjects();
   afx_msg void OnBrowseWhereBuild();
   afx_msg void OnChangeWhereBuild();
+  afx_msg void OnSelendokWhereBuild();
   afx_msg void OnChangeWhereSource();
+  afx_msg void OnSelendokWhereSource();
   //}}AFX_MSG
   DECLARE_MESSAGE_MAP()
 };

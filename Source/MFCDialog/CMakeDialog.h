@@ -27,9 +27,13 @@ protected:
 // Dialog Data
   //{{AFX_DATA(CMakeSetupDialog)
 	enum { IDD = IDD_CMakeSetupDialog_DIALOG };
+	CComboBox	m_WhereSourceControl;
+	CComboBox	m_WhereBuildControl;
 	CListBox	m_CacheEntriesList;
   CString	m_WhereITK;
   CString	m_WhereBuildITK;
+	CString	m_WhereBuild;
+	CString	m_WhereSource;
 	//}}AFX_DATA
   
   // ClassWizard generated virtual function overrides
@@ -54,6 +58,13 @@ protected:
 	afx_msg void OnBuildProjects();
 	afx_msg void OnChangeWhereBuild();
 	afx_msg void OnChangeWhereSource();
+	afx_msg void OnEditchangeWhereBuild();
+	afx_msg void OnEditchangeWhereSource();
+	afx_msg void OnSelchangeWhereSource();
+	afx_msg void OnSelchangeWhereBuild();
+	afx_msg void OnEditupdateWhereBuild();
+	afx_msg void OnCloseupWhereBuild();
+	afx_msg void OnSelendokWhereBuild();
 	//}}AFX_MSG
   DECLARE_MESSAGE_MAP()
 };

@@ -86,7 +86,7 @@ bool cmSetCommand::Invoke(std::vector<std::string>& args)
       }
     if(args[i] == "CACHE")
       {
-      cache == true;
+      cache = true;
       }
     // if this is to be cached, find the value and type
     if(cache)
