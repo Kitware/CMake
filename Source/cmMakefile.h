@@ -45,8 +45,8 @@ public:
    * Return major and minor version numbers for cmake.
    */
   static unsigned int GetMajorVersion() { return 1;}
-  static unsigned int GetMinorVersion() { return 5;}
-  static const char *GetReleaseVersion() { return "development";}
+  static unsigned int GetMinorVersion() { return 6;}
+  static const char *GetReleaseVersion() { return "beta 1";}
   
   /**
    * Return the major and minor version of the cmake that
