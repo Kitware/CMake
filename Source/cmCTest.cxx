@@ -304,6 +304,7 @@ bool TryExecutable(const char *dir, const char *file,
 
 cmCTest::cmCTest() 
 { 
+  m_BuildNoCMake           = false;
   m_BuildNoClean           = false;
   m_BuildTwoConfig         = false;
   m_UseIncludeRegExp       = false;
@@ -3703,6 +3704,11 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
       i++;
       m_BuildTarget = args[i];
       }
+    if(arg.find("--build-nocmake",0) == 0 && i < args.size() - 1)
+      {
+      i++;
+      m_BuildNoCMake = true;
+      }
     if(arg.find("--build-run-dir",0) == 0 && i < args.size() - 1)
       {
       i++;
@@ -3848,8 +3854,10 @@ void CMakeStdoutCallback(const char* m, int len, void* s)
   out->append(m, len);
 }
 
+
 int cmCTest::RunCMakeAndTest(std::string* outstring)
 {  
+  unsigned int k;
   cmSystemTools::ResetErrorOccuredFlag();
   cmListFileCache::GetInstance()->ClearCache();
   std::string cmakeOutString;
@@ -3872,39 +3880,22 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
     cmSystemTools::MakeDirectory(m_BinaryDir.c_str());
     }
   cmSystemTools::ChangeDirectory(m_BinaryDir.c_str());
-  std::vector<std::string> args;
-  args.push_back(m_CMakeSelf);
-  args.push_back(m_SourceDir);
-  if(m_BuildGenerator.size())
+  if(!m_BuildNoCMake)
     {
-    std::string generator = "-G";
-    generator += m_BuildGenerator;
-    args.push_back(generator);
-    }
-  
-  unsigned int k;
-  for(k=0; k < m_BuildOptions.size(); ++k)
-    {
-    args.push_back(m_BuildOptions[k]);
-    }
-  if (cm.Run(args) != 0)
-    {
-    out << "Error: cmake execution failed\n";
-    out << cmakeOutString << "\n";
-    // return to the original directory
-    cmSystemTools::ChangeDirectory(cwd.c_str());
-    if(outstring)
+    std::vector<std::string> args;
+    args.push_back(m_CMakeSelf);
+    args.push_back(m_SourceDir);
+    if(m_BuildGenerator.size())
       {
-      *outstring = out.str();
+      std::string generator = "-G";
+      generator += m_BuildGenerator;
+      args.push_back(generator);
       }
-    else
+    
+    for(k=0; k < m_BuildOptions.size(); ++k)
       {
-      std::cerr << out << "\n";
+      args.push_back(m_BuildOptions[k]);
       }
-    return 1;
-    }
-  if(m_BuildTwoConfig)
-    {
     if (cm.Run(args) != 0)
       {
       out << "Error: cmake execution failed\n";
@@ -3921,7 +3912,27 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
         }
       return 1;
       }
+    if(m_BuildTwoConfig)
+      {
+      if (cm.Run(args) != 0)
+        {
+        out << "Error: cmake execution failed\n";
+        out << cmakeOutString << "\n";
+        // return to the original directory
+        cmSystemTools::ChangeDirectory(cwd.c_str());
+        if(outstring)
+          {
+          *outstring = out.str();
+          }
+        else
+          {
+          std::cerr << out << "\n";
+          }
+        return 1;
+        }
+      } 
     }
+  
   cmSystemTools::SetErrorCallback(0, 0);
   out << cmakeOutString << "\n";
   if(m_BuildMakeProgram.size() == 0)
@@ -4029,7 +4040,7 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
     }
   
   // command line make program
-
+  
   out << "Running make command: " << makeCommand.c_str() << "\n";
   retVal = 0;
   std::string output;
@@ -4068,7 +4079,6 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
     cmSystemTools::ChangeDirectory(cwd.c_str());
     return 1;
     }
-
   out << output;
   
   if(m_TestCommand.size() == 0)

@@ -308,7 +308,8 @@ private:
   std::vector<std::string> m_TestCommandArgs;
   bool                     m_BuildTwoConfig;
   bool                     m_BuildNoClean;
-  std::string             m_NotesFiles;
+  bool                     m_BuildNoCMake;
+  std::string              m_NotesFiles;
 
   //! Reread the configuration file
   void UpdateCTestConfiguration();
