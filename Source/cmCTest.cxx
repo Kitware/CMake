@@ -1143,7 +1143,14 @@ int cmCTest::CoverageDirectory()
   std::string sourceDirectory = m_DartConfiguration["SourceDirectory"];
   if ( sourceDirectory.size() == 0 )
     {
-    std::cerr << "Cannot find SourceDirectory  key in the DartConfiguration.tcl" << std::endl;
+    std::cerr << "Cannot find SourceDirectory key in the DartConfiguration.tcl" << std::endl;
+    return 1;
+    }
+
+  std::string coverageCommand = m_DartConfiguration["CoverageCommand"];
+  if ( coverageCommand.size() == 0 )
+    {
+    std::cerr << "Coverage command not defined in DartConfiguration.tcl" << std::endl;
     return 1;
     }
   cdirs.push_back(sourceDirectory);
@@ -1237,10 +1244,10 @@ int cmCTest::CoverageDirectory()
 
   std::string opath = m_ToplevelPath + "/Testing/Temporary/Coverage";
   cmSystemTools::MakeDirectory(opath.c_str());
-  
+
   for ( cc = 0; cc < files.size(); cc ++ )
     {
-    std::string command = "gcov -l \"" + files[cc] + "\"";
+    std::string command = coverageCommand + " -l \"" + files[cc] + "\"";
     std::string output;
     int retVal = 0;
     //std::cout << "Run gcov on " << files[cc] << std::flush;
@@ -1258,7 +1265,9 @@ int cmCTest::CoverageDirectory()
       }
     else
       {
-      //std::cout << " - fail" << std::endl;
+      std::cout << "Run gcov on " << files[cc] << std::flush;
+      std::cout << " [" << command << "]" << std::endl;
+      std::cout << " - fail" << std::endl;
       }
     }
   

@@ -74,6 +74,7 @@ IF(BUILD_TESTING)
     DOC "Path to Rational purify command, used for memory error detection."
     )
   FIND_PROGRAM(SCPCOMMAND scp DOC "Path to scp command, used by some Dart clients for submitting results to a Dart server (when not using ftp for submissions)")
+  FIND_PROGRAM(COVERAGE_COMMAND gcov DOC "Path to the coverage program that Dart client uses for performing coverage inspection")
 
   # find a tcl shell command
   INCLUDE(${CMAKE_ROOT}/Modules/FindTclsh.cmake)
@@ -121,6 +122,7 @@ IF(BUILD_TESTING)
     CVS_UPDATE_OPTIONS
     DART_TESTING_TIMEOUT
     SCPCOMMAND
+    COVERAGE_COMMAND
     DELIVER_CONTINUOUS_EMAIL
     )
   #  BUILDNAME 
