@@ -356,7 +356,7 @@ fi
 # If this is not an in-source build, then Bootstrap stuff should not exist.
 if [ -z "${cmake_in_source_build}" ]; then
   # Did somebody bootstrap in the source tree?
-  if [ -e "${cmake_source_dir}/Bootstrap.cmk" ]; then
+  if [ -d "${cmake_source_dir}/Bootstrap.cmk" ]; then
     cmake_error 10 "Found directory \"${cmake_source_dir}/Bootstrap.cmk\".
 Looks like somebody did bootstrap CMake in the source tree, but now you are
 trying to do bootstrap in the binary tree. Please remove Bootstrap.cmk
@@ -364,7 +364,7 @@ directory from the source tree."
   fi
   # Is there a cache in the source tree?
   for cmake_problematic_file in ${CMAKE_PROBLEMATIC_FILES}; do
-    if [ -e "${cmake_source_dir}/${cmake_problematic_file}" ]; then
+    if [ -f "${cmake_source_dir}/${cmake_problematic_file}" ]; then
       cmake_error 10 "Found \"${cmake_source_dir}/${cmake_problematic_file}\".
 Looks like somebody tried to build CMake in the source tree, but now you are
 trying to do bootstrap in the binary tree. Please remove \"${cmake_problematic_file}\"
