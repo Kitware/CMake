@@ -211,6 +211,9 @@ ENDFOREACH(c)
 IF(KWSYS_USE_Process)
   SET(KWSYS_H_FILES ${KWSYS_H_FILES} Process)
 ENDIF(KWSYS_USE_Process)
+IF(KWSYS_USE_Base64)
+  SET(KWSYS_H_FILES ${KWSYS_H_FILES} Base64)
+ENDIF(KWSYS_USE_Base64)
 
 #-----------------------------------------------------------------------------
 # Build a list of sources for the library based on components that are
@@ -229,6 +232,11 @@ IF(KWSYS_USE_Process)
     SET(KWSYS_SRCS ProcessUNIX.c)
   ENDIF(NOT UNIX)
 ENDIF(KWSYS_USE_Process)
+
+# Add proper sources for Base64 encoding
+IF(KWSYS_USE_Base64)
+  SET(KWSYS_SRCS ${KWSYS_SRCS} Base64.c)
+ENDIF(KWSYS_USE_Base64)
 
 # Configure headers of C++ classes and construct the list of sources.
 FOREACH(c ${KWSYS_CLASSES})
