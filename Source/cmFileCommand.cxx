@@ -170,8 +170,16 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
     if ( !cmsys::SystemTools::FileIsFullPath(i->c_str()) )
       {
       std::string expr = m_Makefile->GetCurrentDirectory();
-      expr += "/" + *i;
-      g.FindFiles(expr);
+      // Handle script mode
+      if ( expr.size() > 0 )
+        {
+        expr += "/" + *i;
+        g.FindFiles(expr);
+        }
+      else
+        {
+        g.FindFiles(*i);
+        }
       }
     else
       {
