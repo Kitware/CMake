@@ -33,6 +33,7 @@ public:
   virtual void SaveCacheFromGUI( void );
   virtual void LoadCacheFromDiskToGUI( void );
   virtual void FillCacheGUIFromCacheManager( void );
+  virtual void FillCacheManagerFromCacheGUI( void );
 
 private:
   fltk::PropertyList   m_CacheEntriesList;

@@ -7,6 +7,7 @@
 #include "../cmCacheManager.h"
 #include "../cmMakefile.h"
 #include <iostream>
+#include "FLTKPropertyList.h"
 
 
 
@@ -254,6 +255,12 @@ void
 CMakeSetupGUIImplementation
 ::SaveCacheFromGUI( void )
 {
+  this->FillCacheManagerFromCacheGUI();
+  if( m_WhereBuild != "" )
+  {
+    cmCacheManager::GetInstance()->SaveCache( 
+                                  m_WhereBuild.c_str() );
+  }
 }
 
 
@@ -339,5 +346,30 @@ CMakeSetupGUIImplementation
   Fl::check();
 }
 
+
+
+/**
+ * Fill cache manager from Cache GUI 
+ */
+void
+CMakeSetupGUIImplementation
+::FillCacheManagerFromCacheGUI( void )
+{
+  cmCacheManager::GetInstance()->GetCacheMap();
+  std::set<fltk::PropertyItem*> items = m_CacheEntriesList.GetItems();
+  for(std::set<fltk::PropertyItem*>::iterator i = items.begin();
+      i != items.end(); ++i)
+    {
+      fltk::PropertyItem* item = *i; 
+      cmCacheManager::CacheEntry *entry = 
+        cmCacheManager::GetInstance()->GetCacheEntry(
+          (const char*)item->m_propName.c_str() );
+      if (entry)
+        {
+        entry->m_Value = item->m_curValue;
+        }
+    }
+
+}
 
 
