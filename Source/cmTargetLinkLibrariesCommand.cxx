@@ -54,7 +54,8 @@ bool cmTargetLinkLibrariesCommand::InitialPass(std::vector<std::string> const& a
     const char* ldir = m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH");
     if (cmSystemTools::IsOff(ldir))
       {
-      const char* dir = m_Makefile->GetDefinition(i->c_str());
+      std::string libPath = *i + "_CMAKE_PATH";
+      const char* dir = m_Makefile->GetDefinition(libPath.c_str());
       if( dir )
         {
         m_Makefile->AddLinkDirectoryForTarget(args[0].c_str(), dir );

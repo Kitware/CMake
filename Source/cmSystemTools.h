@@ -253,7 +253,7 @@ public:
   static std::string GetFilenameExtension(const std::string&);
   
   ///! return file name without extension of a full filename.
-  static std::string GetFilenameNameWithoutExtension(const std::string&);
+  static std::string GetFilenameWithoutExtension(const std::string&);
   
   static long int ModifiedTime(const char* filename);
 

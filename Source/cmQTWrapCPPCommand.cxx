@@ -25,7 +25,7 @@ bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& argsIn)
     return false;
     }
   std::vector<std::string> args;
-  cmSystemTools::ExpandListArguments(argsIn, args);
+  m_Makefile->ExpandSourceListArguments(argsIn, args, 2);
 
   // Now check and see if the value has been stored in the cache
   // already, if so use that value and don't look for the program
@@ -50,37 +50,28 @@ bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& argsIn)
   m_SourceList = args[1];
   
   // get the list of classes for this library
-  cmMakefile::SourceMap &Classes = m_Makefile->GetSources();
-
-
-  for(std::vector<std::string>::const_iterator j = (args.begin() + 2);
+  for(std::vector<std::string>::iterator j = (args.begin() + 2);
       j != args.end(); ++j)
     {   
-    cmMakefile::SourceMap::iterator l = Classes.find(*j);
-    if (l == Classes.end())
+    cmSourceFile *curr = m_Makefile->GetSource(j->c_str());
+    
+    // if we should wrap the class
+    if (!curr || !curr->GetWrapExclude())
       {
-      this->SetError("bad source list passed to QTWrapCPPCommand");
-      return false;
-      }
-    for(std::vector<cmSourceFile*>::iterator i = l->second.begin(); 
-        i != l->second.end(); i++)
-      {
-      cmSourceFile &curr = *(*i);
-      // if we should wrap the class
-      if (!curr.GetWrapExclude())
+      cmSourceFile file;
+      if (curr)
         {
-        cmSourceFile file;
-        file.SetIsAnAbstractClass(curr.IsAnAbstractClass());
-        std::string newName = "moc_" + curr.GetSourceName();
-        file.SetName(newName.c_str(), m_Makefile->GetCurrentOutputDirectory(),
-                     "cxx",false);
-        std::string hname = cdir + "/" + curr.GetSourceName() + "." +
-            curr.GetSourceExtension();
-        m_WrapHeaders.push_back(hname);
-        // add starting depends
-        file.GetDepends().push_back(hname);
-        m_WrapClasses.push_back(file);
+        file.SetIsAnAbstractClass(curr->IsAnAbstractClass());
         }
+      std::string srcName = cmSystemTools::GetFilenameWithoutExtension(*j);
+      std::string newName = "moc_" + srcName;
+      file.SetName(newName.c_str(), m_Makefile->GetCurrentOutputDirectory(),
+                   "cxx",false);
+      std::string hname = cdir + "/" + *j;
+      m_WrapHeaders.push_back(hname);
+      // add starting depends
+      file.GetDepends().push_back(hname);
+      m_WrapClasses.push_back(file);
       }
     }
   
@@ -94,7 +85,14 @@ void cmQTWrapCPPCommand::FinalPass()
   size_t lastClass = m_WrapClasses.size();
   std::vector<std::string> depends;
   std::string moc_exe = "${QT_MOC_EXE}";
+  std::string sourceListValue;
 
+  // was the list already populated
+  const char *def = m_Makefile->GetDefinition(m_SourceList.c_str());  
+  if (def)
+    {
+    sourceListValue = def;
+    }
 
   // wrap all the .h files
   depends.push_back(moc_exe);
@@ -110,7 +108,12 @@ void cmQTWrapCPPCommand::FinalPass()
   for(size_t classNum = 0; classNum < lastClass; classNum++)
     {
     // Add output to build list
-    m_Makefile->AddSource(m_WrapClasses[classNum],m_SourceList.c_str());
+    m_Makefile->AddSource(m_WrapClasses[classNum]);
+    if (sourceListValue.size() > 0)
+      {
+      sourceListValue += ";";
+      }
+    sourceListValue += m_WrapClasses[classNum].GetSourceName() + ".cxx";
 
     // set up moc command
     std::string res = m_Makefile->GetCurrentOutputDirectory();
@@ -131,7 +134,7 @@ void cmQTWrapCPPCommand::FinalPass()
     }
 
   m_Makefile->AddDefinition("GENERATED_QT_FILES",moc_list.c_str());
-
+  m_Makefile->AddDefinition(m_SourceList.c_str(), sourceListValue.c_str());
 }
 
 

@@ -26,7 +26,7 @@ bool cmInstallFilesCommand::InitialPass(std::vector<std::string> const& argsIn)
     return false;
     }
   std::vector<std::string> args;
-  cmSystemTools::ExpandListArguments(argsIn, args);
+  m_Makefile->ExpandSourceListArguments(argsIn, args, 2);
 
   // Create an INSTALL_FILES target specifically for this path.
   m_TargetName = "INSTALL_FILES_"+args[0];
@@ -63,26 +63,9 @@ void cmInstallFilesCommand::FinalPass()
       {
       // replace any variables
       std::string temps = *s;
-      // look for a srclist
-      if (m_Makefile->GetSources().find(temps) != m_Makefile->GetSources().end())
-        {
-        const std::vector<cmSourceFile*> &clsList = 
-          m_Makefile->GetSources().find(temps)->second;
-        std::vector<cmSourceFile*>::const_iterator c = clsList.begin();
-        for (; c != clsList.end(); ++c)
-          {
-          testf = (*c)->GetSourceName() + ext;
-          // add to the result
-          targetSourceLists.push_back(testf);
-          }
-        }
-      // if one wasn't found then assume it is a single class
-      else
-        {
-        testf = temps + ext;
-        // add to the result
-        targetSourceLists.push_back(testf);
-        }
+      testf = temps + ext;
+      // add to the result
+      targetSourceLists.push_back(testf);
       }
     }
   else     // reg exp list

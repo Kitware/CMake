@@ -25,10 +25,19 @@ bool cmVTKWrapTclCommand::InitialPass(std::vector<std::string> const& argsIn)
     return false;
     }
   std::vector<std::string> args;
-  cmSystemTools::ExpandListArguments(argsIn, args);
+  
   // keep the library name
-  m_LibraryName = args[0];
+  m_LibraryName = argsIn[0];
 
+  if (argsIn[1] == std::string("SOURCES"))
+    {
+    m_Makefile->ExpandSourceListArguments(argsIn, args, 3);
+    }
+  else
+    {
+    m_Makefile->ExpandSourceListArguments(argsIn, args, 2);
+    }
+  
   // Now check and see if the value has been stored in the cache
   // already, if so use that value and don't look for the program
   if(!m_Makefile->IsOn("VTK_WRAP_TCL"))
@@ -39,7 +48,7 @@ bool cmVTKWrapTclCommand::InitialPass(std::vector<std::string> const& argsIn)
   // extract the sources and commands parameters
   std::vector<std::string> sources;
   bool doing_sources = true;
-
+  
   for(std::vector<std::string>::const_iterator j = (args.begin() + 1);
       j != args.end(); ++j)
     {   
@@ -73,34 +82,28 @@ bool cmVTKWrapTclCommand::InitialPass(std::vector<std::string> const& argsIn)
     // get the resulting source list name
     m_SourceList = sources[0];
 
-    cmMakefile::SourceMap &Classes = m_Makefile->GetSources();
     for(std::vector<std::string>::iterator j = (sources.begin() + 1);
         j != sources.end(); ++j)
       {   
-      cmMakefile::SourceMap::iterator l = Classes.find(*j);
-      if (l == Classes.end())
-	{
-	this->SetError("bad source list passed to VTKWrapTclCommand");
-	return false;
-	}
-      for(std::vector<cmSourceFile*>::iterator i = l->second.begin(); 
-          i != l->second.end(); i++)
+      cmSourceFile *curr = m_Makefile->GetSource(j->c_str());
+      
+      // if we should wrap the class
+      if (!curr || !curr->GetWrapExclude())
         {
-        cmSourceFile &curr = *(*i);
-        // if we should wrap the class
-        if (!curr.GetWrapExclude())
+        cmSourceFile file;
+        if (curr)
           {
-          cmSourceFile file;
-          file.SetIsAnAbstractClass(curr.IsAnAbstractClass());
-          std::string newName = curr.GetSourceName() + "Tcl";
-          file.SetName(newName.c_str(), m_Makefile->GetCurrentOutputDirectory(),
-                       "cxx",false);
-          std::string hname = cdir + "/" + curr.GetSourceName() + ".h";
-          m_WrapHeaders.push_back(hname);
-          // add starting depends
-          file.GetDepends().push_back(hname);
-          m_WrapClasses.push_back(file);
+          file.SetIsAnAbstractClass(curr->IsAnAbstractClass());
           }
+        std::string srcName = cmSystemTools::GetFilenameWithoutExtension(*j);
+        std::string newName = srcName + "Tcl";
+        std::string hname = cdir + "/" + srcName + ".h";
+        file.SetName(newName.c_str(), m_Makefile->GetCurrentOutputDirectory(),
+                     "cxx",false);
+        m_WrapHeaders.push_back(hname);
+        // add starting depends
+        file.GetDepends().push_back(hname);
+        m_WrapClasses.push_back(file);
         }
       }
     }
@@ -117,6 +120,15 @@ void cmVTKWrapTclCommand::FinalPass()
   std::string hints = "${VTK_WRAP_HINTS}";
   
   m_Makefile->ExpandVariablesInString(hints);
+  std::string sourceListValue;
+  
+  // was the list already populated
+  const char *def = m_Makefile->GetDefinition(m_SourceList.c_str());  
+  if (def)
+    {
+    sourceListValue = def;
+    sourceListValue += ";";
+    }
 
   // Create the init file 
   std::string res = m_LibraryName;
@@ -130,8 +142,9 @@ void cmVTKWrapTclCommand::FinalPass()
   newName += "Init";
   cfile.SetName(newName.c_str(), m_Makefile->GetCurrentOutputDirectory(),
                 "cxx",false);
-  m_Makefile->AddSource(cfile,m_SourceList.c_str());
-  
+  m_Makefile->AddSource(cfile);
+  sourceListValue += newName + ".cxx";
+
   // wrap all the .h files
   depends.push_back(wtcl);
   if (strcmp("${VTK_WRAP_HINTS}",hints.c_str()))
@@ -140,7 +153,7 @@ void cmVTKWrapTclCommand::FinalPass()
     }
   for(size_t classNum = 0; classNum < lastClass; classNum++)
     {
-    m_Makefile->AddSource(m_WrapClasses[classNum],m_SourceList.c_str());
+    m_Makefile->AddSource(m_WrapClasses[classNum]);
     std::vector<std::string> args;
     args.push_back(m_WrapHeaders[classNum]);
     if (strcmp("${VTK_WRAP_HINTS}",hints.c_str()))
@@ -152,12 +165,15 @@ void cmVTKWrapTclCommand::FinalPass()
     res += "/";
     res += m_WrapClasses[classNum].GetSourceName() + ".cxx";
     args.push_back(res);
+    sourceListValue += ";";
+    sourceListValue += m_WrapClasses[classNum].GetSourceName() + ".cxx";
     
     m_Makefile->AddCustomCommand(m_WrapHeaders[classNum].c_str(),
                                  wtcl.c_str(), args, depends, 
                                  res.c_str(), m_LibraryName.c_str());
+
     }
-  
+  m_Makefile->AddDefinition(m_SourceList.c_str(), sourceListValue.c_str());  
 }
 
 bool cmVTKWrapTclCommand::CreateInitFile(std::string& res) 

@@ -34,8 +34,16 @@ bool cmSourceFilesCommand::InitialPass(std::vector<std::string> const& argsIn)
     }
   std::vector<std::string> args;
   cmSystemTools::ExpandListArguments(argsIn, args);
-
+  std::string sourceListValue;
+  
+  // was the list already populated
   std::string name = args[0];
+  const char *def = m_Makefile->GetDefinition(name.c_str());  
+  if (def)
+    {
+    sourceListValue = def;
+    }
+  
   
   int generated = 0;
 
@@ -54,8 +62,12 @@ bool cmSourceFilesCommand::InitialPass(std::vector<std::string> const& argsIn)
     if(sf)
       {
       // if the source file is already in the makefile,
-      // then add the pointer to the source list without creating a cmSourceFile
-      m_Makefile->GetSources()[name].push_back(sf);
+      // then add the pointer to the source list without creating cmSourceFile
+      if (sourceListValue.size() > 0)
+        {
+        sourceListValue += ";";
+        }
+      sourceListValue += copy;
       continue;
       }
     cmSourceFile file;
@@ -79,11 +91,13 @@ bool cmSourceFilesCommand::InitialPass(std::vector<std::string> const& argsIn)
 	}
       else
 	{
-	file.SetName(name_no_ext.c_str(), m_Makefile->GetCurrentOutputDirectory(), 
+	file.SetName(name_no_ext.c_str(), 
+                     m_Makefile->GetCurrentOutputDirectory(), 
 		     ext.c_str(), false);
 	}
       }
     else
+      {
       // if this is a full path then 
       if((path.size() && path[0] == '/') ||
 	 (path.size() > 1 && path[1] == ':'))
@@ -99,9 +113,16 @@ bool cmSourceFilesCommand::InitialPass(std::vector<std::string> const& argsIn)
 		     m_Makefile->GetSourceExtensions(),
 		     m_Makefile->GetHeaderExtensions());
 	}    
-    m_Makefile->AddSource(file, name.c_str());
+      }
+    m_Makefile->AddSource(file);
+    if (sourceListValue.size() > 0)
+      {
+      sourceListValue += ";";
+      }
+    sourceListValue += copy;
     }
 
+  m_Makefile->AddDefinition(name.c_str(), sourceListValue.c_str());  
   return true;
 }
 

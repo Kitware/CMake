@@ -407,8 +407,9 @@ void cmMSDotNETGenerator::WriteProjectDepends(std::ostream& fout,
       if(j->first != dspname)
 	{
         // is the library part of this SLN ? If so add dependency
+        std::string libPath = j->first + "_CMAKE_PATH";
         const char* cacheValue
-          = m_Makefile->GetDefinition(j->first.c_str());
+          = m_Makefile->GetDefinition(libPath.c_str());
         if(cacheValue)
           {
           fout << "\t\t{" << this->CreateGUID(dspname) << "}." << depcount << " = {"

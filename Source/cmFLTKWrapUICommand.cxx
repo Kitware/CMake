@@ -48,39 +48,33 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args)
   m_Target              = args[0];  // Target that will use the generated files
   m_GUISourceList       = args[1];  // Source List of the GUI source files 
 
-  cmMakefile::SourceMap &GUISources = m_Makefile->GetSources();
- 
+  std::vector<std::string> newArgs;
+  m_Makefile->ExpandSourceListArguments(args,newArgs, 1);
+  
   // get the list of GUI files from which .cxx and .h will be generated 
-  cmMakefile::SourceMap::iterator l = GUISources.find( m_GUISourceList );
-  if (l == GUISources.end())
-    {
-    this->SetError("bad source list passed to FLTKWrapUICommand");
-    return false;
-    }
-
   std::string outputDirectory = m_Makefile->GetCurrentOutputDirectory();
 
   // Some of the generated files are *.h so the directory "GUI" 
   // where they are created have to be added to the include path
   m_Makefile->AddIncludeDirectory( outputDirectory.c_str() );
 
-  for(std::vector<cmSourceFile*>::iterator i = l->second.begin(); 
-      i != l->second.end(); i++)
+  for(std::vector<std::string>::iterator i = (newArgs.begin() + 1); 
+      i != newArgs.end(); i++)
     {
-    cmSourceFile &curr = *(*i);
+    cmSourceFile *curr = m_Makefile->GetSource(i->c_str());
     // if we should use the source GUI 
     // to generate .cxx and .h files
-    if (!curr.GetWrapExclude())
+    if (!curr || !curr->GetWrapExclude())
       {
       cmSourceFile header_file;
       cmSourceFile source_file;
+      std::string srcName = cmSystemTools::GetFilenameWithoutExtension(*i);
       const bool headerFileOnly = true;
-      header_file.SetName(curr.GetSourceName().c_str(), 
+      header_file.SetName(srcName.c_str(), 
                   outputDirectory.c_str(), "h",headerFileOnly);
-      source_file.SetName(curr.GetSourceName().c_str(), 
+      source_file.SetName(srcName.c_str(), 
                   outputDirectory.c_str(), "cxx",!headerFileOnly);
-      std::string origname = cdir + "/" + curr.GetSourceName() + "." +
-          curr.GetSourceExtension();
+      std::string origname = cdir + "/" + *i;
       std::string hname   = header_file.GetFullPath();
       std::string cxxname = source_file.GetFullPath();
       m_WrapUserInterface.push_back(origname);
@@ -90,7 +84,6 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args)
       header_file.GetDepends().push_back(origname);
       m_GeneratedHeadersClasses.push_back(header_file);
       m_GeneratedSourcesClasses.push_back(source_file);
-
       }
     }
   

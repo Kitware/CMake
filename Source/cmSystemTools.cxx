@@ -1865,7 +1865,7 @@ std::string cmSystemTools::GetFilenameExtension(const std::string& filename)
  * Return file name without extension of a full filename (i.e. without path).
  * Warning: it considers the longest extension (for example: .tar.gz)
  */
-std::string cmSystemTools::GetFilenameNameWithoutExtension(const std::string& filename)
+std::string cmSystemTools::GetFilenameWithoutExtension(const std::string& filename)
 {
   std::string name = cmSystemTools::GetFilenameName(filename);
   std::string::size_type dot_pos = name.find(".");

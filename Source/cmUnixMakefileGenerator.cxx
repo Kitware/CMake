@@ -942,7 +942,8 @@ void cmUnixMakefileGenerator::OutputDependLibs(std::ostream& fout)
     // loop over the list of directories that the libraries might
     // be in, looking for an ADD_LIBRARY(lib...) line. This would
     // be stored in the cache
-    const char* cacheValue = m_Makefile->GetDefinition(lib->c_str());
+    std::string libPath = *lib + "_CMAKE_PATH";
+    const char* cacheValue = m_Makefile->GetDefinition(libPath.c_str());
     // if cache and not the current directory add a rule, to
     // jump into the directory and build for the first time
     if(cacheValue &&
@@ -1058,7 +1059,9 @@ bool cmUnixMakefileGenerator::SamePath(const char* path1, const char* path2)
 void cmUnixMakefileGenerator::OutputLibDepend(std::ostream& fout,
                                               const char* name)
 {
-  const char* cacheValue = m_Makefile->GetDefinition(name);
+  std::string libPath = name;
+  libPath += "_CMAKE_PATH";
+  const char* cacheValue = m_Makefile->GetDefinition(libPath.c_str());
   if(cacheValue )
     {
     // if there is a cache value, then this is a library that cmake
@@ -1112,7 +1115,9 @@ void cmUnixMakefileGenerator::OutputLibDepend(std::ostream& fout,
 void cmUnixMakefileGenerator::OutputExeDepend(std::ostream& fout,
                                               const char* name)
 {
-  const char* cacheValue = m_Makefile->GetDefinition(name);
+  std::string exePath = name;
+  exePath += "_CMAKE_PATH";
+  const char* cacheValue = m_Makefile->GetDefinition(exePath.c_str());
   if(cacheValue )
     {
     // if there is a cache value, then this is a executable/utility that cmake

@@ -143,39 +143,35 @@ void cmMakeDepend::GenerateDependInformation(cmDependInformation* info)
   if(!found)
     {
     // Try to find the file amongst the sources
-    cmMakefile::SourceMap srcmap = m_Makefile->GetSources();
-    cmMakefile::SourceMap::iterator l;
-    for (l= srcmap.begin() ; l!=srcmap.end() ; l++)
+    cmSourceFile *srcFile = 
+      m_Makefile->GetSource(cmSystemTools::GetFilenameWithoutExtension(path).c_str());
+    if (srcFile)
       {
-      for(std::vector<cmSourceFile*>::iterator i = l->second.begin();
-          i != l->second.end(); i++)
+      if (srcFile->GetFullPath() == path)
         {
-        if ((*i)->GetFullPath() == path)
-          {
-          found=true;
-          }
-        else
-          {
-          //try to guess which include path to use
-          for(std::vector<std::string>::iterator t = 
+        found=true;
+        }
+      else
+        {
+        //try to guess which include path to use
+        for(std::vector<std::string>::iterator t = 
               m_IncludeDirectories.begin();
-              t != m_IncludeDirectories.end(); ++t)
+            t != m_IncludeDirectories.end(); ++t)
+          {
+          std::string incpath = *t;
+          incpath = incpath + "/";
+          incpath = incpath + path;
+          if (srcFile->GetFullPath() == incpath)
             {
-            std::string incpath = *t;
-            incpath = incpath + "/";
-            incpath = incpath + path;
-            if ((*i)->GetFullPath() == incpath)
-              {
-              // set the path to the guessed path
-              info->m_FullPath = incpath; 
-              found=true;
-              }
+            // set the path to the guessed path
+            info->m_FullPath = incpath; 
+            found=true;
             }
           }
         }
       }
     }
-
+  
   if(!found)
     {
     // Couldn't find any dependency information.

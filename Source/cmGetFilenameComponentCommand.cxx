@@ -54,7 +54,7 @@ bool cmGetFilenameComponentCommand::InitialPass(std::vector<std::string> const& 
     }
   else if (args[2] == "NAME_WE")
     {
-    result = cmSystemTools::GetFilenameNameWithoutExtension(filename);
+    result = cmSystemTools::GetFilenameWithoutExtension(filename);
     }
   else 
     {

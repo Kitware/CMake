@@ -154,16 +154,6 @@ void cmMakefile::Print() const
 {
   // print the class lists
   std::cout << "classes:\n";
-  for(SourceMap::const_iterator l = m_Sources.begin();
-      l != m_Sources.end(); l++)
-    {
-    std::cout << " Class list named: " << l->first << std::endl;
-    for(std::vector<cmSourceFile*>::const_iterator i = l->second.begin();
-        i != l->second.end(); i++)
-      {
-      (*i)->Print();
-      }
-    }
 
   std::cout << " m_Targets: ";
   for (cmTargets::const_iterator l = m_Targets.begin();
@@ -364,27 +354,6 @@ bool cmMakefile::ReadListFile(const char* filename, const char* external)
   return true;
 }
 
-  
-
-cmSourceFile *cmMakefile::GetSource(const char *srclist, const char *cname)
-{
-  SourceMap::iterator sl = m_Sources.find(srclist);
-  // find the src list
-  if (sl == m_Sources.end())
-    {
-    return 0;
-    }
-  // find the class
-  for (std::vector<cmSourceFile*>::iterator i = sl->second.begin();
-       i != sl->second.end(); ++i)
-    {
-    if ((*i)->GetSourceName() == cname)
-      {
-      return *i;
-      }
-    }
-  return 0;
-}
 
 void cmMakefile::AddCommand(cmCommand* wg)
 {
@@ -443,26 +412,6 @@ void cmMakefile::GenerateMakefile()
   m_MakefileGenerator->GenerateMakefile();
 }
 
-
-void cmMakefile::AddSource(cmSourceFile& cmfile, const char *srclist)
-{
-  m_Sources[srclist].push_back(this->AddSource(cmfile));
-}
-
-
-void cmMakefile::RemoveSource(cmSourceFile& cmfile, const char *srclist)
-{
-  std::vector<cmSourceFile*> &maplist = m_Sources[srclist];
-  for( std::vector<cmSourceFile*>::iterator f = maplist.begin(); 
-       f != maplist.end(); ++f)
-    {
-    if((*f)->GetSourceName() == cmfile.GetSourceName())
-      {
-      maplist.erase(f);
-      return;
-      }
-    }
-}
 
 void cmMakefile::AddCustomCommand(const char* source,
                                   const char* command,
@@ -711,8 +660,10 @@ void cmMakefile::AddLibrary(const char* lname, int shared,
   m_Targets.insert(cmTargets::value_type(lname,target));
 
   // Add an entry into the cache 
+  std::string libPath = lname;
+  libPath += "_CMAKE_PATH";
   cmCacheManager::GetInstance()->
-    AddCacheEntry(lname,
+    AddCacheEntry(libPath.c_str(),
                   this->GetCurrentOutputDirectory(),
                   "Path to a library", cmCacheManager::INTERNAL);
 
@@ -778,8 +729,10 @@ void cmMakefile::AddExecutable(const char *exeName,
   
   
   // Add an entry into the cache 
+  std::string exePath = exeName;
+  exePath += "_CMAKE_PATH";
   cmCacheManager::GetInstance()->
-    AddCacheEntry(exeName,
+    AddCacheEntry(exePath.c_str(),
                   this->GetCurrentOutputDirectory(),
                   "Path to an executable", cmCacheManager::INTERNAL);
 }
@@ -1368,7 +1321,7 @@ cmData* cmMakefile::LookupData(const char* name) const
     }
 }
 
-cmSourceFile* cmMakefile::GetSource(const char* sourceName)
+cmSourceFile* cmMakefile::GetSource(const char* sourceName) const
 {
   std::string s = sourceName;
   std::string ext;
@@ -1378,7 +1331,7 @@ cmSourceFile* cmMakefile::GetSource(const char* sourceName)
     ext = s.substr(pos+1, s.size() - pos-1);
     s = s.substr(0, pos);
     }
-  for(std::vector<cmSourceFile*>::iterator i = m_SourceFiles.begin();
+  for(std::vector<cmSourceFile*>::const_iterator i = m_SourceFiles.begin();
       i != m_SourceFiles.end(); ++i)
     {
     if((*i)->GetSourceName() == s 
@@ -1411,3 +1364,34 @@ void cmMakefile::EnableLanguage(const char* lang)
   m_MakefileGenerator->EnableLanguage(lang);
 }
 
+void cmMakefile::ExpandSourceListArguments(
+  std::vector<std::string> const& arguments, 
+  std::vector<std::string>& newargs, int start)
+{
+  // first figure out if we need to handle version 1.2 style source lists
+  int oldVersion = 1;
+  const char* versionValue
+    = this->GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
+  if (versionValue && atof(versionValue) > 1.2)
+    {
+    oldVersion = 0;
+    }
+  
+  // now expand the args
+  std::vector<std::string> tmpArgs;
+  int i;
+  for(i = 0; i < arguments.size(); ++i)
+    {
+    // is the arg defined ?, if so use the def
+    const char *def = this->GetDefinition(arguments[i].c_str());
+    if (def && oldVersion && i >= start)
+      {
+      tmpArgs.push_back(def);
+      }
+    else
+      {
+      tmpArgs.push_back(arguments[i]);
+      }
+    }
+  cmSystemTools::ExpandListArguments(tmpArgs, newargs);
+}

@@ -266,7 +266,7 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)
                 "cxx", 
                 false);
   m_Makefile->AddSource(cfile);
-  sourceListValue = args[1].c_str();
+  sourceListValue = args[1] + ".cxx";
     
   for(i = testsBegin; i != tests.end(); ++i)
     {

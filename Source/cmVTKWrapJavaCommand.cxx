@@ -25,7 +25,7 @@ bool cmVTKWrapJavaCommand::InitialPass(std::vector<std::string> const& argsIn)
     return false;
     }
   std::vector<std::string> args;
-  cmSystemTools::ExpandListArguments(argsIn, args);
+  m_Makefile->ExpandSourceListArguments(argsIn, args, 2);
 
   // Now check and see if the value has been stored in the cache
   // already, if so use that value and don't look for the program
@@ -42,35 +42,29 @@ bool cmVTKWrapJavaCommand::InitialPass(std::vector<std::string> const& argsIn)
   m_SourceList = args[1];
   
   // get the list of classes for this library
-  cmMakefile::SourceMap &Classes = m_Makefile->GetSources();
   for(std::vector<std::string>::const_iterator j = (args.begin() + 2);
       j != args.end(); ++j)
     {   
-    cmMakefile::SourceMap::iterator l = Classes.find(*j);
-    if (l == Classes.end())
+    cmSourceFile *curr = m_Makefile->GetSource(j->c_str());
+
+    // if we should wrap the class
+    if (!curr || !curr->GetWrapExclude())
       {
-      this->SetError("bad source list passed to VTKWrapJavaCommand");
-      return false;
-      }
-    for(std::vector<cmSourceFile*>::iterator i = l->second.begin(); 
-        i != l->second.end(); i++)
-      {
-      cmSourceFile &curr = *(*i);
-      // if we should wrap the class
-      if (!curr.GetWrapExclude())
+      cmSourceFile file;
+      if (curr)
         {
-        cmSourceFile file;
-        file.SetIsAnAbstractClass(curr.IsAnAbstractClass());
-        std::string newName = curr.GetSourceName() + "Java";
-        file.SetName(newName.c_str(), m_Makefile->GetCurrentOutputDirectory(),
-                     "cxx",false);
-        std::string hname = cdir + "/" + curr.GetSourceName() + ".h";
-        m_WrapHeaders.push_back(hname);
-        // add starting depends
-        file.GetDepends().push_back(hname);
-        m_WrapClasses.push_back(file);
-        m_OriginalNames.push_back(curr.GetSourceName());
+        file.SetIsAnAbstractClass(curr->IsAnAbstractClass());
         }
+      std::string srcName = cmSystemTools::GetFilenameWithoutExtension(*j);
+      std::string newName = srcName + "Java";
+      file.SetName(newName.c_str(), m_Makefile->GetCurrentOutputDirectory(),
+                   "cxx",false);
+      std::string hname = cdir + "/" + srcName + ".h";
+      m_WrapHeaders.push_back(hname);
+      // add starting depends
+      file.GetDepends().push_back(hname);
+      m_WrapClasses.push_back(file);
+      m_OriginalNames.push_back(srcName);
       }
     }
   
@@ -89,8 +83,16 @@ void cmVTKWrapJavaCommand::FinalPass()
   std::string pjava = "${VTK_PARSE_JAVA_EXE}";
   std::string hints = "${VTK_WRAP_HINTS}";
   std::string resultDirectory = "${VTK_JAVA_HOME}";
+  std::string sourceListValue;
 
   m_Makefile->ExpandVariablesInString(hints);
+
+  // was the list already populated
+  const char *def = m_Makefile->GetDefinition(m_SourceList.c_str());  
+  if (def)
+    {
+    sourceListValue = def;
+    }
 
   // wrap all the .h files
   depends.push_back(wjava);
@@ -102,7 +104,12 @@ void cmVTKWrapJavaCommand::FinalPass()
     }
   for(size_t classNum = 0; classNum < lastClass; classNum++)
     {
-    m_Makefile->AddSource(m_WrapClasses[classNum],m_SourceList.c_str());
+    m_Makefile->AddSource(m_WrapClasses[classNum]);
+    if (sourceListValue.size() > 0)
+      {
+      sourceListValue += ";";
+      }
+    sourceListValue += m_WrapClasses[classNum].GetSourceName() + ".cxx";
 
     // wrap java
     std::string res = m_Makefile->GetCurrentOutputDirectory();
@@ -146,6 +153,7 @@ void cmVTKWrapJavaCommand::FinalPass()
                                 alldepends,
                                 empty);
   
+  m_Makefile->AddDefinition(m_SourceList.c_str(), sourceListValue.c_str());  
 }
 
 

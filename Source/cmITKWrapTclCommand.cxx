@@ -58,7 +58,7 @@ bool cmITKWrapTclCommand::InitialPass(std::vector<std::string> const& argsIn)
 bool cmITKWrapTclCommand::CreateCableRule(const char* configFile)
 {
   std::string tclFile =
-    cmSystemTools::GetFilenameNameWithoutExtension(configFile);
+    cmSystemTools::GetFilenameWithoutExtension(configFile);
   tclFile += "_tcl";
   
   std::string inFile = m_Makefile->GetCurrentDirectory();
@@ -138,8 +138,10 @@ bool cmITKWrapTclCommand::CreateCableRule(const char* configFile)
   // Set dependency hints.
   file.GetDepends().push_back(inFile.c_str());
   file.GetDepends().push_back("CableTclFacility/ctCalls.h");
-  m_Makefile->AddSource(file, m_TargetName.c_str());
-  
+  m_Makefile->AddSource(file);
+  std::string srcname = file.GetSourceName() + ".cxx";
+  m_Makefile->AddDefinition(m_TargetName.c_str(), 
+                            srcname.c_str());  
   return true;
 }
 

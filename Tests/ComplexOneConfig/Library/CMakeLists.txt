@@ -18,7 +18,7 @@ SOURCE_FILES(LibrarySources
   GENERATED 
   nonexisting_file)
 SOURCE_FILES_REMOVE(LibrarySources create_file.cxx GENERATED nonexisting_file) 
-ADD_LIBRARY(CMakeTestLibrary LibrarySources)
+ADD_LIBRARY(CMakeTestLibrary ${LibrarySources})
 
 IF(WIN32)
   IF(NOT CYGWIN)
@@ -37,7 +37,7 @@ ENDIF(WIN32)
 # Create shared library
 #
 SOURCE_FILES(SharedLibrarySources sharedFile)
-ADD_LIBRARY(CMakeTestLibraryShared SHARED SharedLibrarySources)
+ADD_LIBRARY(CMakeTestLibraryShared SHARED ${SharedLibrarySources})
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DTEST_C_FLAGS")
 ADD_LIBRARY(CMakeTestCLibraryShared SHARED testConly.c)
 

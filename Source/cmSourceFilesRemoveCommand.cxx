@@ -17,7 +17,7 @@
 #include "cmSourceFilesRemoveCommand.h"
 
 // cmSourceFilesRemoveCommand
-bool cmSourceFilesRemoveCommand::InitialPass(std::vector<std::string> const& argsIn)
+bool cmSourceFilesRemoveCommand::InitialPass(std::vector<std::string> const& args)
 {
   const char* versionValue
     = m_Makefile->GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
@@ -26,56 +26,60 @@ bool cmSourceFilesRemoveCommand::InitialPass(std::vector<std::string> const& arg
     this->SetError("The SOURCE_FILES_REMOVE command has been deprecated in CMake version 1.4. You should use the REMOVE command instead.\n");
     return false;
     }
-  if(argsIn.size() < 1 )
+  
+  if(args.size() < 2 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  std::vector<std::string> args;
-  cmSystemTools::ExpandListArguments(argsIn, args);
 
-  int generated = 0;
-  for(std::vector<std::string>::const_iterator i = (args.begin() + 1);
-      i != args.end(); ++i)
+  const char* variable = args[0].c_str(); // VAR is always first
+  // get the old value
+  const char* cacheValue
+    = m_Makefile->GetDefinition(variable);
+
+  // expand the variable
+  std::vector<std::string> varArgsExpanded;
+  std::vector<std::string> temp;
+  temp.push_back(std::string(cacheValue));
+  cmSystemTools::ExpandListArguments(temp, varArgsExpanded);
+  
+  // expand the args
+  // check for REMOVE(VAR v1 v2 ... vn) 
+  std::vector<std::string> argsExpanded;
+  std::vector<std::string> temp2;
+  for(unsigned int j = 1; j < args.size(); ++j)
     {
-    std::string copy = *i;
-    if ( copy == "GENERATED" )
-      {
-      generated = 1;
-      continue;
-      }
-    cmSourceFile file;
-    if ( generated )
-      {
-      // This file will be generated, so we should not check
-      // if it exist. 
-      std::string ext = cmSystemTools::GetFilenameExtension(copy);
-      std::string path = cmSystemTools::GetFilenamePath(copy);
-      std::string name_no_ext = cmSystemTools::GetFilenameName(copy.c_str());
-      name_no_ext = name_no_ext.substr(0, name_no_ext.length()-ext.length());
-      if ( ext.length() && ext[0] == '.' )
-	{
-	ext = ext.substr(1);
-	}
-      if((path.size() && path[0] == '/') ||
-	 (path.size() > 1 && path[1] == ':'))
-	{
-	file.SetName(name_no_ext.c_str(), path.c_str(), ext.c_str(), false);
-	}
-      else
-	{
-	file.SetName(name_no_ext.c_str(), m_Makefile->GetCurrentOutputDirectory(), 
-		     ext.c_str(), false);
-	}
-      }
-    else
-      {
-      file.SetName((*i).c_str(), m_Makefile->GetCurrentDirectory(),
-		   m_Makefile->GetSourceExtensions(),
-		   m_Makefile->GetHeaderExtensions());
-      }
-    m_Makefile->RemoveSource(file, args[0].c_str());
+    temp2.push_back(args[j]);
     }
+  cmSystemTools::ExpandListArguments(temp2, argsExpanded);
+  
+  // now create the new value
+  std::string value;
+  for(unsigned int j = 0; j < varArgsExpanded.size(); ++j)
+    {
+    int found = 0;
+    for(unsigned int k = 0; k < argsExpanded.size(); ++k)
+      {
+      if (varArgsExpanded[j] == argsExpanded[k])
+        {
+        found = 1;
+        break;
+        }
+      }
+    if (!found)
+      {
+      if (value.size())
+        {
+        value += ";";
+        }
+      value += varArgsExpanded[j];
+      }
+    }
+  
+  // add the definition
+  m_Makefile->AddDefinition(variable, value.c_str());
+
   return true;
 }
 

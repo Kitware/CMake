@@ -26,6 +26,7 @@ bool cmAuxSourceDirectoryCommand::InitialPass(std::vector<std::string> const& ar
     return false;
     }
   
+  std::string sourceListValue;
   std::string templateDirectory = args[0];
   m_Makefile->AddExtraDirectory(templateDirectory.c_str());
   std::string tdir = m_Makefile->GetCurrentDirectory();
@@ -61,11 +62,17 @@ bool cmAuxSourceDirectoryCommand::InitialPass(std::vector<std::string> const& ar
                          m_Makefile->GetSourceExtensions(),
                          m_Makefile->GetHeaderExtensions());
           cmfile.SetIsAnAbstractClass(false);
-          m_Makefile->AddSource(cmfile,args[1].c_str());
+          m_Makefile->AddSource(cmfile);
+          if (sourceListValue.size() > 0)
+            {
+            sourceListValue += ";";
+            }
+          sourceListValue += cmfile.GetSourceName();
           }
         }
       }
     }
+  m_Makefile->AddDefinition(args[1].c_str(), sourceListValue.c_str());  
   return true;
 }
 

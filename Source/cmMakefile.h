@@ -218,12 +218,12 @@ public:
   /**
    * Add a class/source file to the build.
    */
-  void AddSource(cmSourceFile& ,const char *srcListName);
+  //void AddSource(cmSourceFile& ,const char *srcListName);
 
   /**
    * Remove a class/source file from the build.
    */
-  void RemoveSource(cmSourceFile& ,const char *srcListName);
+  //void RemoveSource(cmSourceFile& ,const char *srcListName);
 
   /**
    * Add a source group for consideration when adding a new source.
@@ -375,18 +375,21 @@ public:
     return m_IncludeDirectories;
     }
 
-  /**
-   * Return a list of source files in this makefile.
+  /** Expand out any arguements in the vector that have ; separated
+   *  strings into multiple arguements.  A new vector is created 
+   *  containing the expanded versions of all arguments in argsIn.
+   * This method differes from the one in cmSystemTools in that if
+   * the CmakeLists file is version 1.2 or earlier it will check for
+   * source lists being used without ${} around them
    */
-  typedef std::map<cmStdString,std::vector<cmSourceFile*> > SourceMap;
-  const SourceMap &GetSources() const {return  m_Sources;}
-  SourceMap &GetSources() {return  m_Sources;}
-  cmSourceFile* GetSource(const char *srclist, const char *sourceName);
-  
+  void ExpandSourceListArguments(std::vector<std::string> const& argsIn,
+                                 std::vector<std::string>& argsOut,
+                                 int startArgumentIndex);
+
   /** Get a cmSourceFile pointer for a given source name, if the name is
    *  not found, then a null pointer is returned.
    */
-  cmSourceFile* GetSource(const char* sourceName);
+  cmSourceFile* GetSource(const char* sourceName) const;
   ///! Add a new cmSourceFile to the list of sources for this makefile.
   cmSourceFile* AddSource(cmSourceFile const&);
   
@@ -524,9 +527,7 @@ protected:
 
   // libraries, classes, and executables
   cmTargets m_Targets;
-  SourceMap m_Sources; 
   std::vector<cmSourceFile*> m_SourceFiles;
-  
 
   std::vector<std::string> m_SubDirectories; // list of sub directories
   struct StringSet : public std::set<cmStdString>

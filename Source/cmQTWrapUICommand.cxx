@@ -25,7 +25,7 @@ bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& argsIn)
     return false;
     }
   std::vector<std::string> args;
-  cmSystemTools::ExpandListArguments(argsIn, args);
+  m_Makefile->ExpandSourceListArguments(argsIn, args, 3);
 
   // Now check and see if the value has been stored in the cache
   // already, if so use that value and don't look for the program
@@ -49,63 +49,66 @@ bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& argsIn)
   m_LibraryName = args[0];
   m_HeaderList = args[1];
   m_SourceList = args[2];
+  std::string sourceListValue;
+  const char *def = m_Makefile->GetDefinition(m_SourceList.c_str());  
+  if (def)
+    {
+    sourceListValue = def;
+    }
  
   // get the list of classes for this library
-  cmMakefile::SourceMap &Classes = m_Makefile->GetSources();
-
-
-  for(std::vector<std::string>::const_iterator j = (args.begin() + 3);
+  for(std::vector<std::string>::iterator j = (args.begin() + 3);
       j != args.end(); ++j)
-    {  
-    cmMakefile::SourceMap::iterator l = Classes.find(*j);
-    if (l == Classes.end())
+    {   
+    cmSourceFile *curr = m_Makefile->GetSource(j->c_str());
+    
+    // if we should wrap the class
+    if (!curr || !curr->GetWrapExclude())
       {
-      this->SetError("bad source list passed to QTWrapUICommand");
-      return false;
-      }
-    for(std::vector<cmSourceFile*>::iterator i = l->second.begin(); 
-        i != l->second.end(); i++)
-      {
-      cmSourceFile &curr = *(*i);
-      // if we should wrap the class
-      if (!curr.GetWrapExclude())
+      cmSourceFile header_file;
+      cmSourceFile source_file;
+      cmSourceFile moc_file;
+      std::string srcName = cmSystemTools::GetFilenameWithoutExtension(*j);
+      header_file.SetName(srcName.c_str(), 
+                          m_Makefile->GetCurrentOutputDirectory(),
+                          "h",false);
+      source_file.SetName(srcName.c_str(), 
+                          m_Makefile->GetCurrentOutputDirectory(),
+                          "cxx",false);
+      std::string moc_source_name("moc_");
+      moc_source_name = moc_source_name + srcName;
+      moc_file.SetName(moc_source_name.c_str(), 
+                       m_Makefile->GetCurrentOutputDirectory(),
+                       "cxx",false);
+      std::string origname = cdir + "/" + *j;
+      std::string hname = header_file.GetFullPath();
+      m_WrapUserInterface.push_back(origname);
+      // add starting depends
+      moc_file.GetDepends().push_back(hname);
+      source_file.GetDepends().push_back(hname);
+      source_file.GetDepends().push_back(origname);
+      header_file.GetDepends().push_back(origname);
+      m_WrapHeadersClasses.push_back(header_file);
+      m_WrapSourcesClasses.push_back(source_file);
+      m_WrapMocClasses.push_back(moc_file);
+      m_Makefile->AddSource(header_file);
+      m_Makefile->AddSource(source_file);
+      m_Makefile->AddSource(moc_file);
+      
+      // create the list of sources
+      if (sourceListValue.size() > 0)
         {
-        cmSourceFile header_file;
-        cmSourceFile source_file;
-        cmSourceFile moc_file;
-        header_file.SetName(curr.GetSourceName().c_str(), 
-                    m_Makefile->GetCurrentOutputDirectory(),
-                     "h",false);
-        source_file.SetName(curr.GetSourceName().c_str(), 
-                    m_Makefile->GetCurrentOutputDirectory(),
-                     "cxx",false);
-        std::string moc_source_name("moc_");
-        moc_source_name = moc_source_name + curr.GetSourceName().c_str();
-        moc_file.SetName(moc_source_name.c_str(), 
-                    m_Makefile->GetCurrentOutputDirectory(),
-                     "cxx",false);
-        std::string origname = cdir + "/" + curr.GetSourceName() + "." +
-            curr.GetSourceExtension();
-        std::string hname = header_file.GetFullPath();
-        m_WrapUserInterface.push_back(origname);
-        // add starting depends
-        moc_file.GetDepends().push_back(hname);
-        source_file.GetDepends().push_back(hname);
-        source_file.GetDepends().push_back(origname);
-        header_file.GetDepends().push_back(origname);
-        m_WrapHeadersClasses.push_back(header_file);
-        m_WrapSourcesClasses.push_back(source_file);
-        m_WrapMocClasses.push_back(moc_file);
-        m_Makefile->AddSource(header_file,
-            m_HeaderList.c_str());
-        m_Makefile->AddSource(source_file,
-            m_SourceList.c_str());
-        m_Makefile->AddSource(moc_file,
-            m_SourceList.c_str());
+        sourceListValue += ";";
         }
+      sourceListValue += header_file.GetSourceName() + ".h";
+      sourceListValue += ";";
+      sourceListValue += source_file.GetSourceName() + ".cxx";
+      sourceListValue += ";";
+      sourceListValue += moc_file.GetSourceName() + ".cxx";
       }
     }
   
+  m_Makefile->AddDefinition(m_SourceList.c_str(), sourceListValue.c_str());  
   return true;
 }
 

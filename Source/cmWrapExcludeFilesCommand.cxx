@@ -33,22 +33,42 @@ bool cmWrapExcludeFilesCommand::InitialPass(std::vector<std::string> const& args
     return false;
     }
   std::vector<std::string> args; 
-  cmSystemTools::ExpandListArguments(argsIn, args);
-  cmMakefile::SourceMap &Classes = m_Makefile->GetSources();
+  m_Makefile->ExpandSourceListArguments(argsIn, args, 0);
+
   for(std::vector<std::string>::const_iterator j = args.begin();
       j != args.end(); ++j)
     {   
-    for(cmMakefile::SourceMap::iterator l = Classes.begin(); 
-        l != Classes.end(); l++)
+    // if the file is already in the makefile just set properites on it
+    cmSourceFile* sf = m_Makefile->GetSource(j->c_str());
+    if(sf)
       {
-      for(std::vector<cmSourceFile*>::iterator i = l->second.begin(); 
-          i != l->second.end(); i++)
+      sf->SetWrapExclude(true);
+      }
+    // if file is not already in the makefile, then add it
+    else
+      { 
+      std::string newfile = *j;
+      cmSourceFile file; 
+      std::string path = cmSystemTools::GetFilenamePath(newfile);
+      // set the flags
+      file.SetWrapExclude(true);
+      // if this is a full path then 
+      if((path.size() && path[0] == '/') ||
+         (path.size() > 1 && path[1] == ':'))
         {
-        if((*i)->GetSourceName() == (*j))
-          {
-          (*i)->SetWrapExclude(true);
-          }
+        file.SetName(cmSystemTools::GetFilenameName(newfile.c_str()).c_str(), 
+                     path.c_str(),
+                     m_Makefile->GetSourceExtensions(),
+                     m_Makefile->GetHeaderExtensions());
         }
+      else
+        {
+        file.SetName(newfile.c_str(), m_Makefile->GetCurrentDirectory(),
+                     m_Makefile->GetSourceExtensions(),
+                     m_Makefile->GetHeaderExtensions());
+        }    
+      // add the source file to the makefile
+      m_Makefile->AddSource(file);
       }
     }
   return true;

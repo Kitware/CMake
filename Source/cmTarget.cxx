@@ -39,19 +39,6 @@ void cmTarget::GenerateSourceFilesFromSourceLists( cmMakefile &mf)
     std::string temps = *s;
     mf.ExpandVariablesInString(temps);
 
-    // look for a srclist, this is old code we really don't want
-    // any source lists in the future.
-    if (mf.GetSources().find(temps) != mf.GetSources().end())
-      {
-      const std::vector<cmSourceFile*> &clsList = 
-        mf.GetSources().find(temps)->second;
-      // if we ahave a limited build list, use it
-      m_SourceFiles.insert(m_SourceFiles.end(), 
-                           clsList.begin(), 
-                           clsList.end());
-      done = 1;
-      }
-
     // Next if one wasn't found then assume it is a single class
     if (!done && mf.GetSource(temps.c_str()))
       {
@@ -64,25 +51,16 @@ void cmTarget::GenerateSourceFilesFromSourceLists( cmMakefile &mf)
     // where a source list would be passed into here, by making it
     // a vector we need to possibly lookup the variable to maintain
     // CMake 1.2 compatability.
+    const char* versionValue
+      = mf.GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
     if (!done)
       {
-      const char* versionValue
-        = mf.GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
       if (!versionValue || atof(versionValue) <= 1.2)
         {
         const char* varValue = 
           mf.GetDefinition(temps.c_str());
         // if the definition exists
-        // and it has an extension in it then assume it is a source file
-        // the problem is that ADD_EXECUTABLE creates a definition with the
-        // same name as the executable which could be the same name as the
-        // source file without the extension, so if you do this:
-        // ADD_EXECUTABLE(foo foo) where foo.cxx is a source file, then
-        // foo will be varValue will be defined to the path of the executable, but
-        // not a source list as we expect, so look for a "." in the string to see
-        // if it is a file or not.
-        if (varValue
-            && strchr(varValue, '.'))
+        if (varValue)
           {
           std::vector<std::string> tval;
           tval.push_back(varValue);
@@ -340,7 +318,10 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
     {
     if( addLibDirs )
       {
-      const char* libpath = mf.GetDefinition( k->c_str() );
+      // who the hell knows what this is, I think that K contains the
+      // name of a library but ... Ken
+      std::string libPathStr = *k + "_CMAKE_PATH";
+      const char* libpath = mf.GetDefinition( libPathStr.c_str() );
       if( libpath )
         {
         // Don't add a link directory that is already present.

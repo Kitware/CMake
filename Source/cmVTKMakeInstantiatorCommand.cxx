@@ -28,11 +28,10 @@ cmVTKMakeInstantiatorCommand
     return false;
     }
   std::vector<std::string> args;
-  cmSystemTools::ExpandListArguments(argsIn, args);
-
-  m_ClassName = args[0];
+  m_Makefile->ExpandSourceListArguments(argsIn, args, 2);
+  std::string sourceListValue;
   
-  std::string outSourceList = args[1];
+  m_ClassName = args[0];
   
   std::vector<cmStdString> inSourceLists;
   m_ExportMacro = "-";
@@ -112,32 +111,17 @@ cmVTKMakeInstantiatorCommand
   for(std::vector<cmStdString>::const_iterator s = inSourceLists.begin();
       s != inSourceLists.end(); ++s)
     {
-    // Find the source list specified.
-    cmMakefile::SourceMap::iterator srcListIter =
-      m_Makefile->GetSources().find(*s);
+    std::string srcName = cmSystemTools::GetFilenameWithoutExtension(*s);
+    cmSourceFile *sf = m_Makefile->GetSource(s->c_str());
     
-    if(srcListIter == m_Makefile->GetSources().end())
+    // Wrap-excluded and abstract classes do not have a New() method.
+    // vtkIndent and vtkTimeStamp are special cases and are not
+    // vtkObject subclasses.
+    if(
+      (!sf || (!sf->GetWrapExclude() && !sf->GetIsAnAbstractClass())) &&
+      ((srcName != "vtkIndent") && (srcName != "vtkTimeStamp")))
       {
-      std::string errStr = "No source list named " + *s;
-      this->SetError(errStr.c_str());
-      return false;
-      }
-    
-    std::vector<cmSourceFile*>& srcList = srcListIter->second;
-    
-    // Collect the names of the classes.
-    for(std::vector<cmSourceFile*>::iterator src = srcList.begin();
-        src != srcList.end();++src)
-      {
-      // Wrap-excluded and abstract classes do not have a New() method.
-      // vtkIndent and vtkTimeStamp are special cases and are not
-      // vtkObject subclasses.
-      if(!(*src)->GetWrapExclude() && !(*src)->GetIsAnAbstractClass()
-         && ((*src)->GetSourceName() != "vtkIndent")
-         && ((*src)->GetSourceName() != "vtkTimeStamp"))
-        {
-        m_Classes.push_back((*src)->GetSourceName());
-        }
+      m_Classes.push_back(srcName);
       }
     }    
   
@@ -173,7 +157,8 @@ cmVTKMakeInstantiatorCommand
   file.SetName(fileName.c_str(), filePath.c_str(),
                m_Makefile->GetSourceExtensions(),
                m_Makefile->GetHeaderExtensions());
-  m_Makefile->AddSource(file, outSourceList.c_str());
+  m_Makefile->AddSource(file);
+  sourceListValue += file.GetSourceName() + ".cxx";
   }
 
   size_t numClasses = m_Classes.size();
@@ -207,9 +192,12 @@ cmVTKMakeInstantiatorCommand
     file.SetName(fileName.c_str(), filePath.c_str(),
                  m_Makefile->GetSourceExtensions(),
                  m_Makefile->GetHeaderExtensions());
-    m_Makefile->AddSource(file, outSourceList.c_str());
+    m_Makefile->AddSource(file);
+    sourceListValue += ";";
+    sourceListValue += file.GetSourceName() + ".cxx";
     }
 
+  m_Makefile->AddDefinition(args[1].c_str(), sourceListValue.c_str());  
   return true;
 }
 
