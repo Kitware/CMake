@@ -5,8 +5,13 @@
 void* runner(void*);
 
 int res = 0;
-int main()
-{
+#ifdef __CLASSIC_C__
+int main(){
+  int ac;
+  char*av[];
+#else
+int main(int ac, char*av[]){
+#endif
   pthread_t tid[2];
   pthread_create(&tid[0], 0, runner, (void*)1);
   pthread_create(&tid[1], 0, runner, (void*)2);
@@ -14,7 +19,7 @@ int main()
   usleep(1); // for strange behavior on single-processor sun
   pthread_join(tid[0], 0);
   pthread_join(tid[1], 0);
-  
+  if(ac > 1000){return *av[0];}
   return res;
 }
 

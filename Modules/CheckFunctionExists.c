@@ -1,16 +1,19 @@
 #ifdef CHECK_FUNCTION_EXISTS
 
 char CHECK_FUNCTION_EXISTS();
-
-int main(int ac, char*av[])
-{
-  int ret = 0;
+#ifdef __CLASSIC_C__
+int main(){
+  int ac;
+  char*av[];
+#else
+int main(int ac, char*av[]){
+#endif
   CHECK_FUNCTION_EXISTS();
-  if(ac > 100)
+  if(ac > 1000)
     {
-    ret = *av[0];
+    return *av[0];
     }
-  return ret;
+  return 0;
 }
 
 #else  /* CHECK_FUNCTION_EXISTS */
