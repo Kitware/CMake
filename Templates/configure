@@ -4479,6 +4479,7 @@ esac
 fi
 
 CMAKE_ANSI_CFLAGS=""
+CMAKE_ANSI_CXXFLAGS=""
 # on hp use -Aa for ansi
 if test $ac_cv_cxx_compiler_gnu = no; then
 case $system in
@@ -4498,7 +4499,7 @@ case $system in
         echo 'void f(){}' > conftest.c
         if test -z "`${CC} -LANG:std -c conftest.c 2>&1`"; then
           echo "$ac_t""yes" 1>&6
-          CMAKE_ANSI_CFLAGS="-LANG:std"
+          CMAKE_ANSI_CXXFLAGS="-LANG:std"
         else
           echo "$ac_t""no" 1>&6
         fi
@@ -4525,7 +4526,7 @@ fi
 # check no g++ compilers to see if they have the standard
 # ansi stream files (without the .h)
 if test $ac_cv_cxx_compiler_gnu = no; then
-  echo "$as_me:4528: checking ansi standard C++ stream headers " >&5
+  echo "$as_me:4529: checking ansi standard C++ stream headers " >&5
 echo $ECHO_N "checking ansi standard C++ stream headers ... $ECHO_C" >&6
   rm -rf conftest.*
   cat > conftest.cc <<!
@@ -4541,7 +4542,7 @@ fi
 
 # check to see if stl is in the std namespace
 if test $ac_cv_cxx_compiler_gnu = no; then
-  echo "$as_me:4544: checking ansi standard namespace support " >&5
+  echo "$as_me:4545: checking ansi standard namespace support " >&5
 echo $ECHO_N "checking ansi standard namespace support ... $ECHO_C" >&6
   rm -rf conftest.*
   cat > conftest.cc <<!
@@ -4558,7 +4559,7 @@ fi
 
 # check to see if for scoping is supported
 if test $ac_cv_cxx_compiler_gnu = no; then
-  echo "$as_me:4561: checking ansi for scope support " >&5
+  echo "$as_me:4562: checking ansi for scope support " >&5
 echo $ECHO_N "checking ansi for scope support ... $ECHO_C" >&6
   rm -rf conftest.*
   cat > conftest.cc <<!
@@ -4581,7 +4582,7 @@ for ac_prog in gmake make
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
-echo "$as_me:4584: checking for $ac_word" >&5
+echo "$as_me:4585: checking for $ac_word" >&5
 echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
 if test "${ac_cv_path_RUNMAKE+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -4598,7 +4599,7 @@ for ac_dir in $ac_dummy; do
   test -z "$ac_dir" && ac_dir=.
   if $as_executable_p "$ac_dir/$ac_word"; then
    ac_cv_path_RUNMAKE="$ac_dir/$ac_word"
-   echo "$as_me:4601: found $ac_dir/$ac_word" >&5
+   echo "$as_me:4602: found $ac_dir/$ac_word" >&5
    break
 fi
 done
@@ -4609,10 +4610,10 @@ fi
 RUNMAKE=$ac_cv_path_RUNMAKE
 
 if test -n "$RUNMAKE"; then
-  echo "$as_me:4612: result: $RUNMAKE" >&5
+  echo "$as_me:4613: result: $RUNMAKE" >&5
 echo "${ECHO_T}$RUNMAKE" >&6
 else
-  echo "$as_me:4615: result: no" >&5
+  echo "$as_me:4616: result: no" >&5
 echo "${ECHO_T}no" >&6
 fi
 
@@ -4623,7 +4624,7 @@ for ac_prog in ar
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
-echo "$as_me:4626: checking for $ac_word" >&5
+echo "$as_me:4627: checking for $ac_word" >&5
 echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
 if test "${ac_cv_path_CMAKE_AR_TMP+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -4640,7 +4641,7 @@ for ac_dir in $ac_dummy; do
   test -z "$ac_dir" && ac_dir=.
   if $as_executable_p "$ac_dir/$ac_word"; then
    ac_cv_path_CMAKE_AR_TMP="$ac_dir/$ac_word"
-   echo "$as_me:4643: found $ac_dir/$ac_word" >&5
+   echo "$as_me:4644: found $ac_dir/$ac_word" >&5
    break
 fi
 done
@@ -4651,10 +4652,10 @@ fi
 CMAKE_AR_TMP=$ac_cv_path_CMAKE_AR_TMP
 
 if test -n "$CMAKE_AR_TMP"; then
-  echo "$as_me:4654: result: $CMAKE_AR_TMP" >&5
+  echo "$as_me:4655: result: $CMAKE_AR_TMP" >&5
 echo "${ECHO_T}$CMAKE_AR_TMP" >&6
 else
-  echo "$as_me:4657: result: no" >&5
+  echo "$as_me:4658: result: no" >&5
 echo "${ECHO_T}no" >&6
 fi
 
@@ -4793,7 +4794,7 @@ rm -f confdef2opt.sed
 : ${CONFIG_STATUS=./config.status}
 ac_clean_files_save=$ac_clean_files
 ac_clean_files="$ac_clean_files $CONFIG_STATUS"
-{ echo "$as_me:4796: creating $CONFIG_STATUS" >&5
+{ echo "$as_me:4797: creating $CONFIG_STATUS" >&5
 echo "$as_me: creating $CONFIG_STATUS" >&6;}
 cat >$CONFIG_STATUS <<_ACEOF
 #! $SHELL
@@ -4961,7 +4962,7 @@ cat >>$CONFIG_STATUS <<\EOF
     echo "$ac_cs_version"; exit 0 ;;
   --he | --h)
     # Conflict between --help and --header
-    { { echo "$as_me:4964: error: ambiguous option: $1
+    { { echo "$as_me:4965: error: ambiguous option: $1
 Try \`$0 --help' for more information." >&5
 echo "$as_me: error: ambiguous option: $1
 Try \`$0 --help' for more information." >&2;}
@@ -4980,7 +4981,7 @@ Try \`$0 --help' for more information." >&2;}
     ac_need_defaults=false;;
 
   # This is an error.
-  -*) { { echo "$as_me:4983: error: unrecognized option: $1
+  -*) { { echo "$as_me:4984: error: unrecognized option: $1
 Try \`$0 --help' for more information." >&5
 echo "$as_me: error: unrecognized option: $1
 Try \`$0 --help' for more information." >&2;}
@@ -5016,7 +5017,7 @@ do
   case "$ac_config_target" in
   # Handling of arguments.
   "CMakeSystemConfig.cmake" ) CONFIG_FILES="$CONFIG_FILES CMakeSystemConfig.cmake" ;;
-  *) { { echo "$as_me:5019: error: invalid argument: $ac_config_target" >&5
+  *) { { echo "$as_me:5020: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
    { (exit 1); exit 1; }; };;
   esac
@@ -5137,6 +5138,7 @@ s,@CMAKE_USE_WIN32_THREADS@,$CMAKE_USE_WIN32_THREADS,;t t
 s,@CMAKE_HP_PTHREADS@,$CMAKE_HP_PTHREADS,;t t
 s,@CMAKE_THREAD_LIBS@,$CMAKE_THREAD_LIBS,;t t
 s,@CMAKE_ANSI_CFLAGS@,$CMAKE_ANSI_CFLAGS,;t t
+s,@CMAKE_ANSI_CXXFLAGS@,$CMAKE_ANSI_CXXFLAGS,;t t
 s,@CMAKE_TEMPLATE_FLAGS@,$CMAKE_TEMPLATE_FLAGS,;t t
 s,@CMAKE_NO_ANSI_STREAM_HEADERS@,$CMAKE_NO_ANSI_STREAM_HEADERS,;t t
 s,@CMAKE_NO_STD_NAMESPACE@,$CMAKE_NO_STD_NAMESPACE,;t t
@@ -5260,7 +5262,7 @@ done; }
   esac
 
   if test x"$ac_file" != x-; then
-    { echo "$as_me:5263: creating $ac_file" >&5
+    { echo "$as_me:5265: creating $ac_file" >&5
 echo "$as_me: creating $ac_file" >&6;}
     rm -f "$ac_file"
   fi
@@ -5278,7 +5280,7 @@ echo "$as_me: creating $ac_file" >&6;}
       -) echo $tmp/stdin ;;
       [\\/$]*)
          # Absolute (can't be DOS-style, as IFS=:)
-         test -f "$f" || { { echo "$as_me:5281: error: cannot find input file: $f" >&5
+         test -f "$f" || { { echo "$as_me:5283: error: cannot find input file: $f" >&5
 echo "$as_me: error: cannot find input file: $f" >&2;}
    { (exit 1); exit 1; }; }
          echo $f;;
@@ -5291,7 +5293,7 @@ echo "$as_me: error: cannot find input file: $f" >&2;}
            echo $srcdir/$f
          else
            # /dev/null tree
-           { { echo "$as_me:5294: error: cannot find input file: $f" >&5
+           { { echo "$as_me:5296: error: cannot find input file: $f" >&5
 echo "$as_me: error: cannot find input file: $f" >&2;}
    { (exit 1); exit 1; }; }
          fi;;

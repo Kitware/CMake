@@ -1,6 +1,9 @@
 # a simple test case
 PROJECT (Complex)
 
+# use the ansi CXX compile flag for building cmake
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_ANSI_CXXFLAGS}")  
+
 ADD_DEFINITIONS(-DCMAKE_IS_FUN)
 SUBDIRS(Library Executable)
 SUBDIR_DEPENDS(Executable Library)
