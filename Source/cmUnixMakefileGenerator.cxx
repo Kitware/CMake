@@ -232,6 +232,14 @@ void cmUnixMakefileGenerator::OutputMakefile(const char* file)
   fout << " " << m_Makefile->GetHomeOutputDirectory() << "/CMakeCache.txt\n";
   fout << "\n\n";
   this->OutputMakeVariables(fout);
+  // Set up the default target as the VERY first target, so that make with no arguments will run it
+  this->OutputMakeRule(fout, 
+                       "Default target executed when no arguments are given to make",
+                       "default_target",
+                       0,
+                       "$(MAKE) -$(MAKEFLAGS) cmake.depends",
+                       "$(MAKE) -$(MAKEFLAGS) all");
+
   this->OutputTargetRules(fout);
   this->OutputDependLibs(fout);
   this->OutputTargets(fout);
@@ -1303,12 +1311,6 @@ void cmUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
 
 void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
 {
-  this->OutputMakeRule(fout, 
-                       "Default target executed when no arguments are given to make",
-                       "default_target",
-                       0,
-                       "$(MAKE) -$(MAKEFLAGS) cmake.depends",
-                       "$(MAKE) -$(MAKEFLAGS) all");
   this->OutputMakeRule(fout, 
                        "Default build rule",
                        "all",
