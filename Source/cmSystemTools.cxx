@@ -784,15 +784,58 @@ bool cmSystemTools::FilesDiffer(const char* source,
     {
     return true;
     }
-  
+  const int buffer_length = 4096;
+  char bufferSource[buffer_length];
+  char bufferDest[buffer_length];
   while(finSource && finDestination)
     {
-    char s, d;
-    finSource >> s;
-    finDestination >> d;
-    if(s != d)
+    if(finSource.getline(bufferSource, buffer_length, '\n')
+       || finSource.gcount())
       {
-      return true;
+      if(finDestination.getline(bufferDest, buffer_length, '\n') 
+         || finDestination.gcount())
+        {
+        // both if statements passed
+        if(finSource.eof())
+          {
+          if(!finDestination.eof())
+            { 
+            return true;
+            }
+          if(finSource.gcount() != finDestination.gcount())
+            {
+            return true;
+            }
+          if(strncmp(bufferSource, bufferDest, finSource.gcount()) != 0)
+            {
+            return true;
+            }
+          }
+        else if(finSource.fail())
+          {
+          if(!finDestination.fail())
+            { 
+            return true;
+            }
+          if(strcmp(bufferSource, bufferDest) != 0)
+            {
+            return true;
+            }
+          finSource.clear(finSource.rdstate() & ~std::ios::failbit);
+          finDestination.clear(finDestination.rdstate() & ~std::ios::failbit);
+          }
+        else
+          {
+          if(strcmp(bufferSource, bufferDest) != 0)
+            {
+            return true;
+            }
+          }
+        }
+      else
+        {
+        return true;
+        }
       }
     }
   return false;

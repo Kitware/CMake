@@ -20,6 +20,7 @@
 // include the generator
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #include "cmMSProjectGenerator.h"
+#include "cmMSDotNETGenerator.h"
 #include "cmBorlandMakefileGenerator.h"
 #include "cmNMakeMakefileGenerator.h"
 #else
@@ -31,6 +32,7 @@ cmake::cmake()
   m_Verbose = false;
 #if defined(_WIN32) && !defined(__CYGWIN__)  
   cmMakefileGenerator::RegisterGenerator(new cmMSProjectGenerator);
+  cmMakefileGenerator::RegisterGenerator(new cmMSDotNETGenerator);
   cmMakefileGenerator::RegisterGenerator(new cmNMakeMakefileGenerator);
   cmMakefileGenerator::RegisterGenerator(new cmBorlandMakefileGenerator);
 #else

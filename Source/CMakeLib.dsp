@@ -151,6 +151,18 @@ SOURCE=.\cmMSProjectGenerator.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=.\cmMSDotNETGenerator.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=.\cmSLNWriter.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=.\cmVCProjWriter.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=.\cmRegularExpression.cxx
 # End Source File
 # Begin Source File
