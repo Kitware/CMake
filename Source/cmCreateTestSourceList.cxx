@@ -304,7 +304,7 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args)
                 cmSystemTools::GetFilenameExtension(args[1]).c_str()+1, 
                 false);
   m_Makefile->AddSource(cfile);
-  sourceListValue = args[1];
+  sourceListValue = cfile.GetFullPath();
     
   for(i = testsBegin; i != tests.end(); ++i)
     {
