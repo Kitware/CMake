@@ -231,7 +231,7 @@ void cmCableWrapTclCommand::GenerateCableFiles() const
   cmSourceFile file;
   file.SetName(packageTclFileName.c_str(), outDir.c_str(), "cxx", false);
   // Set dependency hints.
-  file.GetDepends().push_back("wrapCalls.h");
+  file.GetDepends().push_back("WrapTclFacility/wrapCalls.h");
   m_Makefile->AddSource(file, m_TargetName.c_str());
 }
 
@@ -398,7 +398,7 @@ void cmCableWrapTclCommand::GenerateCableClassFiles(const char* name,
     {
     file.GetDepends().push_back(*source);
     }
-  file.GetDepends().push_back("wrapCalls.h");
+  file.GetDepends().push_back("WrapTclFacility/wrapCalls.h");
   m_Makefile->AddSource(file, m_TargetName.c_str());
 }
 
