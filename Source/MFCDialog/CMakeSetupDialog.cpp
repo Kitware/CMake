@@ -654,13 +654,12 @@ void CMakeSetupDialog::OnChangeWhereBuild()
   cache_file += "/CMakeCache.txt";
 
   cmCacheManager *cachem = this->m_CMakeInstance->GetCacheManager();
-
+  cmCacheManager::CacheIterator it = cachem->NewIterator();
   if (cmSystemTools::FileExists(cache_file.c_str()) &&
       cachem->LoadCache(path.c_str()) &&
-      cachem->GetCacheEntry("CMAKE_HOME_DIRECTORY"))
+      it.Find("CMAKE_HOME_DIRECTORY"))
     {
-    path = ConvertToWindowsPath(
-      cachem->GetCacheEntry("CMAKE_HOME_DIRECTORY")->m_Value.c_str());
+    path = ConvertToWindowsPath(it.GetValue());
     this->m_WhereSource = path.c_str();
     this->m_WhereSourceControl.SetWindowText(this->m_WhereSource);
     this->OnChangeWhereSource();
@@ -698,33 +697,33 @@ void CMakeSetupDialog::FillCacheGUIFromCacheManager()
       !i.IsAtEnd(); i.Next())
     {
     const char* key = i.GetName();
-    cmCacheManager::CacheEntry value = i.GetEntry();
 
     // if value has trailing space or tab, enclose it in single quotes
     // to enforce the fact that it has 'invisible' trailing stuff
-    if (value.m_Value.size() && 
-        (value.m_Value[value.m_Value.size() - 1] == ' ' || 
-         value.m_Value[value.m_Value.size() - 1] == '\t'))
+    std::string value = i.GetValue();
+    if (value.size() && 
+        (value[value.size() - 1] == ' ' || 
+         value[value.size() - 1] == '\t'))
       {
-      value.m_Value = '\'' + value.m_Value +  '\'';
+      value = '\'' + value +  '\'';
       }
 
     if(!m_AdvancedValues)
       {
-      if(cachem->IsAdvanced(key))
+      if(i.GetPropertyAsBool("ADVANCED"))
         {
 	m_CacheEntriesList.RemoveProperty(key);
         continue;
         }
       }
-    switch(value.m_Type )
+    switch(i.GetType() )
       {
       case cmCacheManager::BOOL:
-        if(cmSystemTools::IsOn(value.m_Value.c_str()))
+        if(cmSystemTools::IsOn(value.c_str()))
           {
           m_CacheEntriesList.AddProperty(key,
                                          "ON",
-                                         value.m_HelpString.c_str(),
+                                         i.GetProperty("HELPSTRING"),
                                          CPropertyList::COMBO,"ON|OFF",
                                          reverseOrder 
             );
@@ -733,7 +732,7 @@ void CMakeSetupDialog::FillCacheGUIFromCacheManager()
           {
           m_CacheEntriesList.AddProperty(key,
                                          "OFF",
-                                         value.m_HelpString.c_str(),
+                                         i.GetProperty("HELPSTRING"),
                                          CPropertyList::COMBO,"ON|OFF",
                                          reverseOrder
             );
@@ -741,24 +740,24 @@ void CMakeSetupDialog::FillCacheGUIFromCacheManager()
         break;
       case cmCacheManager::PATH:
         m_CacheEntriesList.AddProperty(key, 
-                                       value.m_Value.c_str(),
-                                       value.m_HelpString.c_str(),
+                                       value.c_str(),
+                                       i.GetProperty("HELPSTRING"),
                                        CPropertyList::PATH,"",
                                        reverseOrder
           );
         break;
       case cmCacheManager::FILEPATH:
         m_CacheEntriesList.AddProperty(key, 
-                                       value.m_Value.c_str(),
-                                       value.m_HelpString.c_str(),
+                                       value.c_str(),
+                                       i.GetProperty("HELPSTRING"),
                                        CPropertyList::FILE,"",
                                        reverseOrder
           );
         break;
       case cmCacheManager::STRING:
         m_CacheEntriesList.AddProperty(key,
-                                       value.m_Value.c_str(),
-                                       value.m_HelpString.c_str(),
+                                       value.c_str(),
+                                       i.GetProperty("HELPSTRING"),
                                        CPropertyList::EDIT,"",
                                        reverseOrder
           );
@@ -800,13 +799,12 @@ void CMakeSetupDialog::FillCacheManagerFromCacheGUI()
 { 
   cmCacheManager *cachem = this->m_CMakeInstance->GetCacheManager();
   std::set<CPropertyItem*> items = m_CacheEntriesList.GetItems();
+  cmCacheManager::CacheIterator it = cachem->NewIterator();
   for(std::set<CPropertyItem*>::iterator i = items.begin();
       i != items.end(); ++i)
     {
     CPropertyItem* item = *i; 
-    cmCacheManager::CacheEntry *entry = cachem->GetCacheEntry(
-        (const char*)item->m_propName);
-    if (entry)
+    if ( it.Find((const char*)item->m_propName) )
       {
       // if value is enclosed in single quotes ('foo') then remove them
       // they were used to enforce the fact that it had 'invisible' 
@@ -815,12 +813,12 @@ void CMakeSetupDialog::FillCacheManagerFromCacheGUI()
           item->m_curValue[0] == '\'' && 
           item->m_curValue[item->m_curValue.GetLength() - 1] == '\'') 
         {
-        entry->m_Value = item->m_curValue.Mid(1, 
-                                              item->m_curValue.GetLength() - 2);
+        it.SetValue(item->m_curValue.Mid(
+	  1, item->m_curValue.GetLength() - 2));
         }
       else
         {
-        entry->m_Value = item->m_curValue;
+        it.SetValue(item->m_curValue);
         }
       }
     }
@@ -836,10 +834,11 @@ void CMakeSetupDialog::LoadCacheFromDiskToGUI()
     {
     cachem->LoadCache(m_WhereBuild);
     this->FillCacheGUIFromCacheManager();
-    if(cachem->GetCacheEntry("CMAKE_GENERATOR"))
+    cmCacheManager::CacheIterator it = 
+      cachem->GetCacheIterator("CMAKE_GENERATOR");
+    if(!it.IsAtEnd())
       {
-      std::string curGen = 
-        cachem->GetCacheEntry("CMAKE_GENERATOR")->m_Value;
+      std::string curGen = it.GetValue();
       if(m_GeneratorChoiceString != curGen.c_str())
         {
         m_GeneratorChoiceString = curGen.c_str();
@@ -1128,19 +1127,18 @@ void CMakeSetupDialog::ShowAdvancedValues()
       !i.IsAtEnd(); i.Next())
     {
     const char* key = i.GetName();
-    const cmCacheManager::CacheEntry& value = i.GetEntry();
-    if(!cachem->IsAdvanced(key))
+    if(!i.GetPropertyAsBool("ADVANCED"))
       {
       continue;
       }
-    switch(value.m_Type )
+    switch(i.GetType() )
       {
       case cmCacheManager::BOOL:
-        if(cmSystemTools::IsOn(value.m_Value.c_str()))
+        if(cmSystemTools::IsOn(i.GetValue()))
           {
           m_CacheEntriesList.AddProperty(key,
                                          "ON",
-                                         value.m_HelpString.c_str(),
+                                         i.GetProperty("HELPSTRING"),
                                          CPropertyList::COMBO,"ON|OFF",
                                          true 
             );
@@ -1149,7 +1147,7 @@ void CMakeSetupDialog::ShowAdvancedValues()
           {
           m_CacheEntriesList.AddProperty(key,
                                          "OFF",
-                                         value.m_HelpString.c_str(),
+                                         i.GetProperty("HELPSTRING"),
                                          CPropertyList::COMBO,"ON|OFF",
                                          true
             );
@@ -1157,24 +1155,24 @@ void CMakeSetupDialog::ShowAdvancedValues()
         break;
       case cmCacheManager::PATH:
         m_CacheEntriesList.AddProperty(key, 
-                                       value.m_Value.c_str(),
-                                       value.m_HelpString.c_str(),
+				       i.GetValue(),
+				       i.GetProperty("HELPSTRING"),
                                        CPropertyList::PATH,"",
                                        true
           );
         break;
       case cmCacheManager::FILEPATH:
         m_CacheEntriesList.AddProperty(key, 
-                                       value.m_Value.c_str(),
-                                       value.m_HelpString.c_str(),
+                                       i.GetValue(),
+				       i.GetProperty("HELPSTRING"),
                                        CPropertyList::FILE,"",
                                        true
           );
         break;
       case cmCacheManager::STRING:
         m_CacheEntriesList.AddProperty(key,
-                                       value.m_Value.c_str(),
-                                       value.m_HelpString.c_str(),
+                                       i.GetValue(),
+				       i.GetProperty("HELPSTRING"),
                                        CPropertyList::EDIT,"",
                                        true
           );
@@ -1194,8 +1192,7 @@ void CMakeSetupDialog::RemoveAdvancedValues()
       !i.IsAtEnd(); i.Next())
     {
     const char* key = i.GetName();
-    const cmCacheManager::CacheEntry& value = i.GetEntry();
-    if(cachem->IsAdvanced(key))
+    if(i.GetPropertyAsBool("ADVANCED"))
       {
       m_CacheEntriesList.RemoveProperty(key);
       }
@@ -1246,15 +1243,17 @@ void CMakeSetupDialog::ChangeDirectoriesFromFile(const char* buffer)
 
   cmCacheManager *cachem = this->m_CMakeInstance->GetCacheManager();
 
+  cmCacheManager::CacheIterator it = 
+    cachem->NewIterator();
+
   if (cmSystemTools::FileExists(cache_file.c_str()) &&
       cachem->LoadCache(path.c_str()) &&
-      cachem->GetCacheEntry("CMAKE_HOME_DIRECTORY"))
+      it.Find("CMAKE_HOME_DIRECTORY"))
     {
     path = ConvertToWindowsPath(path.c_str());
     this->m_WhereBuild = path.c_str();
 
-    path = ConvertToWindowsPath(
-      cachem->GetCacheEntry("CMAKE_HOME_DIRECTORY")->m_Value.c_str());
+    path = ConvertToWindowsPath(it.GetName());
     this->m_WhereSource = path.c_str();
     }
   else
