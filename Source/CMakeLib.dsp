@@ -117,6 +117,10 @@ SOURCE=.\cmDSWWriter.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=.\cmMakeDepend.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=.\cmMakefile.cxx
 # End Source File
 # Begin Source File
@@ -146,6 +150,10 @@ SOURCE=.\cmSystemTools.cxx
 # Begin Source File
 
 SOURCE=.\cmTarget.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=.\cmUnixMakefileGenerator.cxx
 # End Source File
 # End Group
 # Begin Group "Header Files"
