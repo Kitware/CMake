@@ -45,7 +45,7 @@ int main(int ac, char** av)
     if ( args[1] == "copy" && args.size() == 4 )
       {
       cmSystemTools::cmCopyFile(args[2].c_str(), args[3].c_str());
-      return 0;
+      return cmSystemTools::GetErrorOccuredFlag();
       }
     if ( args[1] == "remove" && args.size() > 2 )
       {
