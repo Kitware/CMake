@@ -820,6 +820,38 @@ kwsys_stl::string SystemTools::UpperCase(const kwsys_stl::string& s)
   return n;
 }
 
+// Return a cropped string 
+kwsys_stl::string SystemTools::Crop(const kwsys_stl::string& s, 
+                                    size_t max_len)
+{
+  if (!s.size() || max_len == 0 || max_len >= s.size())
+    {
+    return s;
+    }
+
+  kwsys_stl::string n;
+  n.reserve(max_len);
+
+  size_t middle = max_len / 2;
+
+  n += s.substr(0, middle);
+  n += s.substr(s.size() - (max_len - middle), kwsys_stl::string::npos);
+
+  if (max_len > 2)
+    {
+    n[middle] = '.';
+    if (max_len > 3)
+      {
+      n[middle - 1] = '.';
+      if (max_len > 4)
+        {
+        n[middle + 1] = '.';
+        }
+      }
+    }
+
+  return n;
+}
 
 // convert windows slashes to unix slashes 
 void SystemTools::ConvertToUnixSlashes(kwsys_stl::string& path)
@@ -1218,7 +1250,7 @@ int SystemTools::Strucmp(const char *s1, const char *s2)
 
 }
 
-// return true if the file exists
+// return file's modified time
 long int SystemTools::ModifiedTime(const char* filename)
 {
   struct stat fs;
@@ -1232,6 +1264,19 @@ long int SystemTools::ModifiedTime(const char* filename)
     }
 }
 
+// return file's creation time
+long int SystemTools::CreationTime(const char* filename)
+{
+  struct stat fs;
+  if (stat(filename, &fs) != 0) 
+    {
+    return 0;
+    }
+  else
+    {
+    return fs.st_ctime >= 0 ? (long int)fs.st_ctime : 0;
+    }
+}
 
 kwsys_stl::string SystemTools::GetLastSystemError()
 {
@@ -1986,6 +2031,136 @@ SystemTools::GetFilenameWithoutLastExtension(const kwsys_stl::string& filename)
     {
     return name;
     }
+}
+
+bool SystemTools::FileHasSignature(const char *filename,
+                                   const char *signature, 
+                                   unsigned long offset)
+{
+  if (!filename || !signature)
+    {
+    return false;
+    }
+
+  FILE *fp;
+  fp = fopen(filename, "rb");
+  if (!fp)
+    {
+    return false;
+    }
+
+  fseek(fp, offset, SEEK_SET);
+
+  bool res = false;
+  size_t signature_len = strlen(signature);
+  char *buffer = new char [signature_len];
+
+  if (fread(buffer, 1, signature_len, fp) == signature_len)
+    {
+    res = (!strncmp(buffer, signature, signature_len) ? true : false);
+    }
+
+  delete [] buffer;
+
+  fclose(fp);
+  return res;
+}
+
+bool SystemTools::LocateFileInDir(const char *filename, 
+                                  const char *dir, 
+                                  kwsys_stl::string& filename_found,
+                                  int try_filename_dirs)
+{
+  if (!filename || !dir)
+    {
+    return false;
+    }
+
+  // Get the basename of 'filename'
+
+  kwsys_stl::string filename_base = SystemTools::GetFilenameName(filename);
+
+  // Check if 'dir' is really a directory 
+  // If win32 and matches something like C:, accept it as a dir
+
+  kwsys_stl::string real_dir;
+  if (!SystemTools::FileIsDirectory(dir))
+    {
+#if _WIN32
+    size_t dir_len = strlen(dir);
+    if (dir_len < 2 || dir[dir_len - 1] != ':')
+      {
+#endif
+      real_dir = SystemTools::GetFilenamePath(dir);
+      dir = real_dir.c_str();
+#if _WIN32
+      }
+#endif
+    }
+
+  // Try to find the file in 'dir'
+
+  bool res = false;
+  if (filename_base.size() && dir)
+    {
+    size_t dir_len = strlen(dir);
+    int need_slash = 
+      (dir_len && dir[dir_len - 1] != '/' && dir[dir_len - 1] != '\\');
+
+    kwsys_stl::string temp = dir;
+    if (need_slash)
+      {
+      temp += "/";
+      }
+    temp += filename_base;
+
+    if (SystemTools::FileExists(filename_found.c_str()))
+      {
+      res = true;
+      filename_found = temp;
+      }
+
+    // If not found, we can try harder by appending part of the file to
+    // to the directory to look inside.
+    // Example: if we were looking for /foo/bar/yo.txt in /d1/d2, then
+    // try to find yo.txt in /d1/d2/bar, then /d1/d2/foo/bar, etc.
+
+    else if (try_filename_dirs)
+      {
+      kwsys_stl::string filename_dir(filename);
+      kwsys_stl::string filename_dir_base;
+      kwsys_stl::string filename_dir_bases;
+      do
+        {
+        filename_dir = SystemTools::GetFilenamePath(filename_dir);
+        filename_dir_base = SystemTools::GetFilenameName(filename_dir);
+#if _WIN32
+        if (!filename_dir_base.size() || 
+            filename_dir_base[filename_dir_base.size() - 1] == ':')
+#else
+        if (!filename_dir_base.size())
+#endif
+          {
+          break;
+          }
+
+        filename_dir_bases = filename_dir_base + "/" + filename_dir_bases;
+
+        temp = dir;
+        if (need_slash)
+          {
+          temp += "/";
+          }
+        temp += filename_dir_bases;
+
+        res = SystemTools::LocateFileInDir(
+          filename_base.c_str(), temp.c_str(), filename_found, 0);
+
+        } while (!res && filename_dir_base.size());
+      }
+    }
+    
+  return res;
 }
 
 bool SystemTools::FileIsFullPath(const char* in_name)

@@ -120,6 +120,12 @@ public:
   static kwsys_stl::string UpperCase(const kwsys_stl::string&);
   
   /**
+   * Return the string cropped to a given length by removing chars in the
+   * center of the string and replacing them with an ellipsis (...)
+   */
+  static kwsys_stl::string Crop(const kwsys_stl::string&, size_t max_len);
+  
+  /**
    * do a case-independent string comparison
    */
   static int Strucmp(const char *s1, const char *s2);
@@ -207,6 +213,29 @@ public:
   static bool FileIsDirectory(const char* name);
   
   static kwsys_stl::string GetCurrentWorkingDirectory();
+
+  ///! return true if the file has a given signature (first set of bytes)
+  static bool FileHasSignature(const char* filename, const char *signature, unsigned long offset = 0);
+
+  /**
+  *  Try to locate the file 'filename' in the directory 'dir'.
+  *  If 'filename' is a fully qualified filename, the basename of the file is
+  *  used to check for its existence in 'dir'.
+  *  If 'dir' is not a directory, GetFilenamePath() is called on 'dir' to
+  *  get its directory first (thus, you can pass a filename as 'dir', as
+  *  a convenience).
+  *  'filename_found' is assigned the fully qualified name/path of the file
+  *  if it is found (not touched otherwise).
+  *  If 'try_filename_dirs' is true, try to find the file using the
+  *  components of its path, i.e. if we are looking for c:/foo/bar/bill.txt, 
+  *  first look for bill.txt in 'dir', then in 'dir'/bar, then in 'dir'/foo/bar
+  *  etc.
+  *  Return true if the file was found, false otherwise.
+  */
+  static bool LocateFileInDir(const char *filename, 
+                              const char *dir, 
+                              kwsys_stl::string& filename_found,
+                              int try_filename_dirs = 0);
   
   /**
    * Given the path to a program executable, get the directory part of
@@ -304,7 +333,11 @@ public:
   /** Return whether the path represents a full path (not relative).  */
   static bool FileIsFullPath(const char*);
   
+  /** Return file's modified time.  */
   static long int ModifiedTime(const char* filename);
+
+  /** Return file's creation time (Win32: works only for NTFS, not FAT).  */
+  static long int CreationTime(const char* filename);
 
   ///! for windows return the short path for the given path, unix just a pass through
   static bool GetShortPath(const char* path, kwsys_stl::string& result);
