@@ -47,18 +47,22 @@ public:
 private:
   bool m_Verbose;
   cmCTest *m_CTest;
+  bool ShouldIDoCoverage(const char* file, const char* srcDir,
+    const char* binDir, bool verbose);
+  bool StartLogFile(std::ofstream& ostr, int logFileCount);
+  void StopLogFile(std::ofstream& ostr, int logFileCount);
 
   struct cmCTestCoverage
-  {
+    {
     cmCTestCoverage()
       {
-        m_AbsolutePath = "";
-        m_FullPath = "";
-        m_Covered = false;
-        m_Tested = 0;
-        m_UnTested = 0;
-        m_Lines.clear();
-        m_Show = false;
+      m_AbsolutePath = "";
+      m_FullPath = "";
+      m_Covered = false;
+      m_Tested = 0;
+      m_UnTested = 0;
+      m_Lines.clear();
+      m_Show = false;
       }
     std::string      m_AbsolutePath;
     std::string      m_FullPath;
@@ -67,7 +71,7 @@ private:
     int              m_UnTested;
     std::vector<int> m_Lines;
     bool             m_Show;
-  };
+    };
 
   typedef std::map<std::string, cmCTestCoverage> tm_CoverageMap;
 };
