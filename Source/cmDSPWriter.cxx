@@ -657,7 +657,9 @@ void cmDSPWriter::WriteDSPHeader(std::ostream& fout, const char *libName,
     m_Makefile->GetDefinition("CMAKE_EXTRA_LINK_FLAGS");
   if(extraLinkOptions.size())
     {
+    libOptions += " ";
     libOptions += extraLinkOptions;
+    libOptions += " ";
     libMultiLineOptions += "# ADD LINK32 ";
     libMultiLineOptions +=  extraLinkOptions;
     libMultiLineOptions += " \n";
