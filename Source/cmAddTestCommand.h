@@ -92,7 +92,9 @@ public:
     {
     return
       "ADD_TEST(testname exename arg1 arg2 arg3 ...)\n"
-      "This command adds a test target to the current directory. "
+      "If the ENABLE_TESTING command has been run, this command adds a"
+      "test target to the current directory. If ENABLE_TESTING has not"
+      "been run, this command does nothing.\n"
       "The tests are run by the testing subsystem by executing exename "
       "with the specified arguments. exename can be either an executable "
       "built by built by this project or an arbitrary executable on the "

@@ -78,28 +78,32 @@ void cmAddTestCommand::FinalPass()
   fname += "/";
   fname += "DartTestfile.txt";
   
-  // Open the output Testfile
-  std::ofstream fout(fname.c_str(), std::ios::app);
-  if (!fout)
-    {
-    cmSystemTools::Error("Error Writing ", fname.c_str());
-    return;
-    }
 
-  std::vector<std::string>::iterator it;
+  // If the file doesn't exist, then ENABLE_TESTING hasn't been run
+  if (cmSystemTools::FileExists(fname.c_str()))
+    {
+    // Open the output Testfile
+    std::ofstream fout(fname.c_str(), std::ios::app);
+    if (!fout)
+      {
+        cmSystemTools::Error("Error Writing ", fname.c_str());
+        return;
+      }
+
+    std::vector<std::string>::iterator it;
 
   // for each arg in the test
-  fout << "ADD_TEST(";
-  it = m_Args.begin();
-  fout << (*it).c_str();
-  ++it;
-  for (; it != m_Args.end(); ++it)
-    {
-    fout << " " << (*it).c_str();
-    }
-  fout << ")" << std::endl;
-  fout.close();
-  
+    fout << "ADD_TEST(";
+    it = m_Args.begin();
+    fout << (*it).c_str();
+    ++it;
+    for (; it != m_Args.end(); ++it)
+      {
+        fout << " " << (*it).c_str();
+      }
+    fout << ")" << std::endl;
+    fout.close();
+    }  
   return;
 }
 
