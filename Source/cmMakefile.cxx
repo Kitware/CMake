@@ -464,6 +464,7 @@ void cmMakefile::GenerateTestfile()
     }
 
   fout << std::endl;
+  fout.close();
 }
 
 void cmMakefile::AddSource(cmSourceFile& cmfile, const char *srclist)
