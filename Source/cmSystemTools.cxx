@@ -203,9 +203,9 @@ void cmSystemTools::ReplaceString(std::string& source,
 //      HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.4;Root
 //      =>  will return the data of the "Root" value of the key
 
+#if defined(_WIN32) && !defined(__CYGWIN__)
 bool cmSystemTools::ReadRegistryValue(const char *key, std::string &value)
 {
-#if defined(_WIN32) && !defined(__CYGWIN__)
 
   std::string primary = key;
   std::string second;
@@ -276,9 +276,14 @@ bool cmSystemTools::ReadRegistryValue(const char *key, std::string &value)
         }
       }
     }
-#endif
   return false;
 }
+#else
+bool cmSystemTools::ReadRegistryValue(const char *, std::string &)
+{
+  return false;
+}
+#endif
 
 
 // Write a registry value.
@@ -288,10 +293,9 @@ bool cmSystemTools::ReadRegistryValue(const char *key, std::string &value)
 //      HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.4;Root
 //      =>  will set the data of the "Root" value of the key
 
+#if defined(_WIN32) && !defined(__CYGWIN__)
 bool cmSystemTools::WriteRegistryValue(const char *key, const char *value)
 {
-#if defined(_WIN32) && !defined(__CYGWIN__)
-
   std::string primary = key;
   std::string second;
   std::string valuename;
@@ -357,10 +361,14 @@ bool cmSystemTools::WriteRegistryValue(const char *key, const char *value)
     {
     return true;
     }
-#endif
   return false;
 }
-
+#else
+bool cmSystemTools::WriteRegistryValue(const char *, const char *)
+{
+  return false;
+}
+#endif
 
 // Delete a registry value.
 // Example : 
@@ -369,10 +377,9 @@ bool cmSystemTools::WriteRegistryValue(const char *key, const char *value)
 //      HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.4;Root
 //      =>  will delete  the data of the "Root" value of the key
 
+#if defined(_WIN32) && !defined(__CYGWIN__)
 bool cmSystemTools::DeleteRegistryValue(const char *key)
 {
-#if defined(_WIN32) && !defined(__CYGWIN__)
-
   std::string primary = key;
   std::string second;
   std::string valuename;
@@ -431,16 +438,20 @@ bool cmSystemTools::DeleteRegistryValue(const char *key)
       return true;
       }
     }
-#endif
   return false;
 }
-
+#else
+bool cmSystemTools::DeleteRegistryValue(const char *)
+{
+  return false;
+}
+#endif
 
 // replace replace with with as many times as it shows up in source.
 // write the result into source.
+#if defined(_WIN32) && !defined(__CYGWIN__)
 void cmSystemTools::ExpandRegistryValues(std::string& source)
 {
-#if defined(_WIN32) && !defined(__CYGWIN__)
   // Regular expression to match anything inside [...] that begins in HKEY.
   // Note that there is a special rule for regular expressions to match a
   // close square-bracket inside a list delimited by square brackets.
@@ -468,8 +479,12 @@ void cmSystemTools::ExpandRegistryValues(std::string& source)
       cmSystemTools::ReplaceString(source, reg.c_str(), "/registry");
       }
     }
-#endif  
 }
+#else
+void cmSystemTools::ExpandRegistryValues(std::string&)
+{
+}
+#endif  
 
 
 std::string cmSystemTools::EscapeQuotes(const char* str)
@@ -1050,8 +1065,8 @@ bool cmSystemTools::FilesDiffer(const char* source,
   finSource.read(source_buf, statSource.st_size);
   finDestination.read(dest_buf, statSource.st_size);
 
-  if(statSource.st_size != finSource.gcount() ||
-     statSource.st_size != finDestination.gcount())
+  if(statSource.st_size != static_cast<long>(finSource.gcount()) ||
+     statSource.st_size != static_cast<long>(finDestination.gcount()))
     {
     std::strstream msg;
     msg << "FilesDiffer failed to read files (allocated: " 

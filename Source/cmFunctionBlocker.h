@@ -32,22 +32,22 @@ public:
    * should a function be blocked
    */
   virtual bool IsFunctionBlocked(const char *name, const std::vector<std::string> &args, 
-                                 cmMakefile &mf) = 0;
+                                 cmMakefile&mf) = 0;
 
   /**
    * should this function blocker be removed, useful when one function adds a
    * blocker and another must remove it 
    */
-  virtual bool ShouldRemove(const char *name, 
-                            const std::vector<std::string> &args, 
-                            cmMakefile &mf) {return false;}
+  virtual bool ShouldRemove(const char *, 
+                            const std::vector<std::string>&,
+                            cmMakefile&) {return false;}
 
   /**
    * When the end of a CMakeList file is reached this method is called.  It
    * is not called on the end of an INCLUDE cmake file, just at the end of a
    * regular CMakeList file 
    */
-  virtual void ScopeEnded(cmMakefile &mf) {}
+  virtual void ScopeEnded(cmMakefile&) {}
 
   virtual ~cmFunctionBlocker() {}
 

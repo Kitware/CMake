@@ -662,10 +662,10 @@ void cmMakefile::AddGlobalLinkInformation(const char* name, cmTarget& target)
   // for these targets do not add anything
   switch(target.GetType())
     {
-    case cmTarget::UTILITY:
-    case cmTarget::INSTALL_FILES:
-    case cmTarget::INSTALL_PROGRAMS:
-      return;
+    case cmTarget::UTILITY: return;
+    case cmTarget::INSTALL_FILES: return;
+    case cmTarget::INSTALL_PROGRAMS: return;
+    default:;
     }
   std::vector<std::string>::iterator j;
   for(j = m_LinkDirectories.begin();

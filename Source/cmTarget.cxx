@@ -128,6 +128,7 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
                               "optimized", "Library is used for debug links only", 
                               cmCacheManager::STATIC);
         break;
+      case cmTarget::GENERAL: break;
       }
     }
   // Add the explicit dependency information for this target. This is

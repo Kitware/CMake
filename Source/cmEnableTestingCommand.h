@@ -54,8 +54,7 @@ public:
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool InitialPass(std::vector<std::string> const& args) {
-    return true;};
+  virtual bool InitialPass(std::vector<std::string> const&) {return true;}
 
   /**
    * This is called at the end after all the information
