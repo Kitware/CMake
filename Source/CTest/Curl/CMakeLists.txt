@@ -59,7 +59,6 @@ SET(libCurl_SRCS
     easy.c
     security.c
     krb4.c
-    memdebug.c
     http_chunks.c
     strtok.c
     connect.c
@@ -68,6 +67,14 @@ SET(libCurl_SRCS
     multi.c
     content_encoding.c
     )
+
+OPTION(CURL_MALLOC_DEBUG "Debug mallocs in Curl" OFF)
+MARK_AS_ADVANCED(CURL_MALLOC_DEBUG)
+IF(CURL_MALLOC_DEBUG)
+  SET(libCurl_SRCS ${libCurl_SRCS}
+    memdebug.c
+  )
+ENDIF(CURL_MALLOC_DEBUG)
 
 # On windows preload settings
 #IF(WIN32)
