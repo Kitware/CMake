@@ -119,7 +119,7 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args)
   // see if this is already in the cache
   cmCacheManager::CacheIterator it = 
     m_Makefile->GetCacheManager()->GetCacheIterator(variable);
-  if(!it.IsAtEnd())
+  if(!it.IsAtEnd() && (it.GetType() != cmCacheManager::UNINITIALIZED))
     {
     // if the set is trying to CACHE the value but the value
     // is already in the cache and the type is not internal
