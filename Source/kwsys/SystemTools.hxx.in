@@ -338,6 +338,9 @@ public:
   static kwsys_stl::string FileExistsInParentDirectories(const char* fname,
     const char* directory, const char* toplevel);
 
+  /** Delay the execution for a specified amount of time specified in miliseconds */
+  static void Delay(unsigned int msec);
+
 protected:
   // these two functions can be called from ConvertToOutputPath
   /**

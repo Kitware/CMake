@@ -2100,6 +2100,15 @@ kwsys_stl::string SystemTools::FileExistsInParentDirectories(const char* fname,
   return "";
 }
 
+void SystemTools::Delay(unsigned int msec)
+{
+#ifdef _WIN32
+  Sleep(msec);
+#else
+  usleep(msec * 1000);
+#endif
+}
+
 // These must NOT be initialized.  Default initialization to zero is
 // necessary.
 unsigned int SystemToolsManagerCount;
