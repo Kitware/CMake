@@ -48,11 +48,12 @@ EOF
 CreatePackage
 
 # Create the release tarballs.
-echo "Creating cmake-$VERSION-$PLATFORM.tar"
+INTERNAL_NAME="cmake-$VERSION-$PLATFORM-files"
+echo "Creating ${INTERNAL_NAME}.tar"
 cd ${INSTALL_DIR}${PREFIX}
-if ${TAR} cvf ${INSTALL_DIR}/cmake-$VERSION-$PLATFORM.tar ${INSTALL_SUBDIRS} \
-     > ${LOG_DIR}/cmake-$VERSION-$PLATFORM.log 2>&1 ; then : ; else
-  echo "Error, see ${LOG_DIR}/cmake-$VERSION-$PLATFORM.log"
+if ${TAR} cvf ${INSTALL_DIR}/${INTERNAL_NAME}.tar ${INSTALL_SUBDIRS} \
+     > ${LOG_DIR}/${INTERNAL_NAME}.log 2>&1 ; then : ; else
+  echo "Error, see ${LOG_DIR}/${INTERNAL_NAME}.log"
   exit 1
 fi
 
@@ -61,7 +62,7 @@ cd ${INSTALL_DIR}
 ${CAT} >> README <<EOF
 CMake $VERSION binary for $PLATFORM
 
-Extract the file "cmake-$VERSION-$PLATFORM.tar" into your
+Extract the file "${INTERNAL_NAME}.tar" into your
 destination directory.  The following files will be extracted:
 
 ${FILES}
@@ -70,7 +71,7 @@ EOF
 
 TARBALL="${TARBALL_DIR}/CMake$VERSION-$PLATFORM.tar"
 echo "Creating CMake$VERSION-$PLATFORM.tar"
-if ${TAR} cvf $TARBALL README cmake-$VERSION-$PLATFORM.tar \
+if ${TAR} cvf $TARBALL README ${INTERNAL_NAME}.tar \
      > ${LOG_DIR}/CMake$VERSION-$PLATFORM.log 2>&1 ; then : ; else
   "Error, see ${LOG_DIR}/CMake$VERSION-$PLATFORM.log"
   exit 1
