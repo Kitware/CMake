@@ -12,9 +12,10 @@
 
 
 # The following settings should not be used in general.
-# FLTK_BASE_LIBRARY, the full path to fltk.lib
-# FLTK_GL_LIBRARY, the full path to fltk_gl.lib
-# FLTK_FORMS_LIBRARY, the full path to fltk_forms.lib
+# FLTK_BASE_LIBRARY    = the full path to fltk.lib
+# FLTK_GL_LIBRARY      = the full path to fltk_gl.lib
+# FLTK_FORMS_LIBRARY   = the full path to fltk_forms.lib
+# FLTK_IMAGES_LIBRARY  = the full path to fltk_images.lib
 
 OPTION(FLTK_VERSION_1.1    "Use FLTK version 1.1"    1)
 OPTION(FLTK_VERSION_1.0.11 "Use FLTK version 1.0.11" 0)
