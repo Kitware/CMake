@@ -50,14 +50,12 @@ SET(SRCS
   cmGlobalGenerator.h
   cmGlobalUnixMakefileGenerator.cxx
   cmGlobalUnixMakefileGenerator.h
-  cmGlobalXCodeGenerator.cxx
   cmListFileCache.cxx
   cmListFileCache.h
   cmListFileLexer.c
   cmLocalGenerator.cxx
   cmLocalGenerator.h
   cmLocalUnixMakefileGenerator2.cxx
-  cmLocalXCodeGenerator.cxx
   cmMakeDepend.cxx
   cmMakeDepend.h
   cmMakefile.cxx
@@ -75,7 +73,6 @@ SET(SRCS
   cmVariableWatch.h
   cmVersion.cxx
   cmVersion.h
-  cmXCodeObject.cxx
   cmXMLParser.cxx
   cmXMLParser.h
   cmake.cxx
@@ -90,6 +87,14 @@ IF(UNIX)
     cmGlobalKdevelopGenerator.cxx
     cmLocalKdevelopGenerator.cxx)
 ENDIF(UNIX)
+# XCode only works on apple
+IF(APPLE)
+  SET(SRCS ${SRCS}
+    cmXCodeObject.cxx
+    cmGlobalXCodeGenerator.cxx
+    cmLocalXCodeGenerator.cxx
+    cmLocalXCodeGenerator.h)
+ENDIF(APPLE)
 
 
 IF (WIN32)

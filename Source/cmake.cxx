@@ -52,7 +52,6 @@
 #else
 #endif
 #include "cmGlobalUnixMakefileGenerator.h"
-#include "cmGlobalXCodeGenerator.h"
 
 #ifdef CMAKE_USE_KDEVELOP
 # include "cmGlobalKdevelopGenerator.h"
@@ -61,6 +60,8 @@
 #include <stdlib.h> // required for atoi
 
 #ifdef __APPLE__
+#  include "cmGlobalXCodeGenerator.h"
+#  define CMAKE_USE_XCODE 1
 #  include <sys/types.h>
 #  include <sys/time.h>
 #  include <sys/resource.h>
@@ -1413,8 +1414,10 @@ void cmake::AddDefaultGenerators()
 #endif
   m_Generators[cmGlobalUnixMakefileGenerator::GetActualName()] =
     &cmGlobalUnixMakefileGenerator::New;
+#ifdef CMAKE_USE_XCODE
   m_Generators[cmGlobalXCodeGenerator::GetActualName()] =
     &cmGlobalXCodeGenerator::New;
+#endif
 #ifdef CMAKE_USE_KDEVELOP
   m_Generators[cmGlobalKdevelopGenerator::GetActualName()] =
      &cmGlobalKdevelopGenerator::New;
