@@ -3,10 +3,16 @@
 SET (NIGHTLY_START_TIME "22:00:00 EDT")
 
 # Dart server to submit results (used by client)
-SET (DROP_SITE "public.kitware.com")
-SET (DROP_LOCATION "/incoming")
-SET (DROP_SITE_USER "ftpuser")
-SET (DROP_SITE_PASSWORD "public")
+IF(DROP_METHOD MATCHES http)
+  SET (DROP_SITE "public.kitware.com")
+  SET (DROP_LOCATION "/cgi-bin/HTTPUploadDartFile.cgi")
+ELSE(DROP_METHOD MATCHES http)
+  SET (DROP_SITE "public.kitware.com")
+  SET (DROP_LOCATION "/incoming")
+  SET (DROP_SITE_USER "ftpuser")
+  SET (DROP_SITE_PASSWORD "public")
+ENDIF(DROP_METHOD MATCHES http)
+
 SET (TRIGGER_SITE 
        "http://${DROP_SITE}/cgi-bin/Submit-CMake-TestingResults.pl")
 
