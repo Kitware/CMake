@@ -90,6 +90,11 @@ void cmSystemTools::GetPath(std::vector<std::string>& path)
   const char* pathSep = ":";
 #endif
   std::string pathEnv = getenv("PATH");
+  // A hack to make the below algorithm work.  
+  if(pathEnv[pathEnv.length()-1] != ':')
+    {
+    pathEnv += ":";  
+    }
   std::string::size_type start =0;
   bool done = false;
   while(!done)
