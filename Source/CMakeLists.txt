@@ -81,7 +81,20 @@ IF (WIN32)
 		    cmWin32ProcessExecution.cxx
 		    cmWin32ProcessExecution.h
                     )
-    IF(  NOT BORLAND )
+  ENDIF(NOT UNIX)
+ENDIF (WIN32)
+
+# create a library used by the command line and the GUI
+ADD_LIBRARY(CMakeLib ${SRCS})
+TARGET_LINK_LIBRARIES(CMakeLib cmsys)
+
+# always link in the library
+# the library is found here
+LINK_DIRECTORIES(${CMake_BINARY_DIR}/Source)
+
+IF (WIN32)
+  IF(NOT UNIX)
+    IF( NOT BORLAND )
       LINK_LIBRARIES( rpcrt4.lib )
       ADD_EXECUTABLE(cmw9xcom cmw9xcom.cxx)
       TARGET_LINK_LIBRARIES(cmw9xcom CMakeLib)
@@ -89,15 +102,6 @@ IF (WIN32)
     ENDIF( NOT BORLAND )
   ENDIF(NOT UNIX)
 ENDIF (WIN32)
-
-# create a library used by the command line and the GUI
-ADD_LIBRARY(CMakeLib ${SRCS})
-
-TARGET_LINK_LIBRARIES(CMakeLib cmsys)
-
-# always link in the library
-# the library is found here
-LINK_DIRECTORIES(${CMake_BINARY_DIR}/Source)
 
 ADD_EXECUTABLE(cmake cmakemain.cxx)
 ADD_EXECUTABLE(DumpDocumentation cmDumpDocumentation)
@@ -111,7 +115,6 @@ ENDIF (UNIX)
 TARGET_LINK_LIBRARIES(cmake CMakeLib)
 TARGET_LINK_LIBRARIES(DumpDocumentation CMakeLib)
 
-SET(CMAKE_BUILD_WITH_CURL 1)
 IF(CMAKE_BUILD_WITH_CURL)
   SUBDIRS(CTest)
   SET(CMTEST_SRCS ${CMTEST_SRCS} CTest/cmCTestSubmit.cxx)

@@ -45,6 +45,11 @@ public:
   virtual bool InitialPass(std::vector<std::string> const& args);
 
   /**
+   * Verify that the ordering in CMake is correct.
+   */
+  virtual void FinalPass();
+
+  /**
    * The name of the command as specified in CMakeList.txt.
    */
   virtual const char* GetName() { return "TARGET_LINK_LIBRARIES";}
@@ -74,6 +79,9 @@ public:
     }
   
   cmTypeMacro(cmTargetLinkLibrariesCommand, cmCommand);
+private:
+  std::vector<std::string> m_HasLocation;
+  std::string m_TargetName;
 };
 
 

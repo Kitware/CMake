@@ -57,6 +57,9 @@ SET(KWSYS_USE_Process 1)
 SET(KWSYS_HEADER_ROOT ${CMake_BINARY_DIR}/Source)
 SUBDIRS(Source/kwsys)
 
+SET(CMAKE_BUILD_WITH_CURL 1)
+SUBDIRS(Source/CTest/Curl)
+
 SUBDIRS(Source Modules Templates Utilities)
 ENABLE_TESTING()
 
