@@ -39,6 +39,12 @@ public:
    */
   void SetBuildType(BuildType);
 
+  BuildType GetBuildType()
+    {
+      return m_BuildType;
+    }
+  
+
   /**
    * Return array of created DSP names in a STL vector.
    * Each executable must have its own dsp.
@@ -86,7 +92,7 @@ private:
   std::string m_DebugDLLLibraryOptions;
   std::string m_ReleaseDLLLibraryOptions;
   cmMakefile* m_Makefile;
-
+  BuildType m_BuildType;
   std::vector<std::string> m_Configurations;
 };
 

@@ -18,7 +18,7 @@
 #include "cmSystemTools.h"
 #include "cmDSPMakefile.h"
 #include "cmMSProjectGenerator.h"
-#include <windows.h>
+//#include <windows.h>
 
 
 cmDSWMakefile::cmDSWMakefile(cmMakefile* m)
@@ -126,13 +126,16 @@ void cmDSWMakefile::WriteProject(std::ostream& fout,
   std::vector<std::string>::iterator i, end;
   i = project->GetMakefile()->GetLinkLibraries().begin();
   end = project->GetMakefile()->GetLinkLibraries().end();
-  for(;i!= end; ++i)
+  if(project->GetBuildType() != cmDSPMakefile::STATIC_LIBRARY)
     {
-    if (strcmp(i->c_str(),dspname))
+    for(;i!= end; ++i)
       {
-      fout << "Begin Project Dependency\n";
-      fout << "Project_Dep_Name " << *i << "\n";
-      fout << "End Project Dependency\n";
+      if (strcmp(i->c_str(),dspname))
+        {
+        fout << "Begin Project Dependency\n";
+        fout << "Project_Dep_Name " << *i << "\n";
+        fout << "End Project Dependency\n";
+        }
       }
     }
   fout << "}}}\n\n";

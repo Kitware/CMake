@@ -261,6 +261,7 @@ void cmDSPMakefile::WriteDSPEndGroup(std::ostream& fout)
 
 void cmDSPMakefile::SetBuildType(BuildType b)
 {
+  m_BuildType = b;
   switch(b)
     {
     case STATIC_LIBRARY:
