@@ -2,7 +2,7 @@
 
 # check for some ANSI flags in the CXX compiler if it is not gnu
 IF(NOT CMAKE_COMPILER_IS_GNUCXX)
-  INCLUDE(${CMAKE_ROOT}/Modules/TestCXXAcceptFlag.cmake)
+  INCLUDE(${CMAKE_ROOT}/Modules/TestCXXAcceptsFlag.cmake)
   SET(CMAKE_TRY_ANSI_CXX_FLAGS "")
   IF(CMAKE_SYSTEM MATCHES "IRIX.*")
     SET(CMAKE_TRY_ANSI_CXX_FLAGS "-LANG:std")
