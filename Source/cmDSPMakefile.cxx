@@ -163,6 +163,8 @@ void cmDSPMakefile::WriteDSPFile(std::ostream& fout,
                                  const char *libName,
                                  cmTarget &target)
 {
+  target.GenerateSourceFilesFromSourceLists(*m_Makefile);
+
   // Write the DSP file's header.
   this->WriteDSPHeader(fout, libName, target);
   
@@ -170,7 +172,6 @@ void cmDSPMakefile::WriteDSPFile(std::ostream& fout,
   std::vector<cmSourceGroup> sourceGroups = m_Makefile->GetSourceGroups();
   
   // get the classes from the source lists then add them to the groups
-  target.GenerateSourceFilesFromSourceLists(*m_Makefile);
   std::vector<cmSourceFile> classes = target.GetSourceFiles();
   for(std::vector<cmSourceFile>::iterator i = classes.begin(); 
       i != classes.end(); i++)
