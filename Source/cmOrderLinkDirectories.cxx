@@ -187,7 +187,9 @@ void cmOrderLinkDirectories::OrderPaths(std::vector<cmStdString>&
 {
   cmOrderLinkDirectoriesCompare comp;
   comp.This = this;
-  std::sort(orderedPaths.begin(), orderedPaths.end(), comp);
+  // for some reason when cmake is run on InsightApplication 
+  // if std::sort is used here cmake crashes, but stable_sort works
+  std::stable_sort(orderedPaths.begin(), orderedPaths.end(), comp);
 }
 
 //-------------------------------------------------------------------
