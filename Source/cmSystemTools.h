@@ -43,6 +43,12 @@ public:
                             const char* with);
 
   /**
+   * Return a string equivalent to the input string, but with all " " replaced
+   * with "\ " to escape the spaces.
+   */
+  static std::string EscapeSpaces(const char*);
+  
+  /**
    * Replace Windows file system slashes with Unix-style slashes.
    */
   static void ConvertToUnixSlashes(std::string& path);

@@ -70,8 +70,8 @@ bool cmUtilitySourceCommand::Invoke(std::vector<std::string>& args)
   
   // Construct the cache entry for the executable's location.
   std::string utilityExecutable =
-    "\""+utilityDirectory+"/"+cmakeCFGout+"/"
-    +utilityName+cmSystemTools::GetExecutableExtension()+"\"";
+    utilityDirectory+"/"+cmakeCFGout+"/"
+    +utilityName+cmSystemTools::GetExecutableExtension();
   
   // Enter the value into the cache.
   cmCacheManager::GetInstance()->AddCacheEntry(cacheEntry.c_str(),

@@ -129,6 +129,22 @@ void cmSystemTools::ReplaceString(std::string& source,
     }
 }
 
+
+std::string cmSystemTools::EscapeSpaces(const char* str)
+{
+  std::string result = "";
+  for(const char* ch = str; *ch != '\0'; ++ch)
+    {
+    if(*ch == ' ')
+      {
+      result += '\\';
+      }
+    result += *ch;
+    }
+  return result;
+}
+
+
 // return true if the file exists
 bool cmSystemTools::FileExists(const char* filename)
 {

@@ -322,7 +322,7 @@ void cmDSPMakefile::WriteCustomRule(std::ostream& fout,
       for(std::set<std::string>::const_iterator d = depends.begin();
           d != depends.end(); ++d)
         {
-        fout << " " << d->c_str();
+        fout << " \"" << d->c_str() << "\"";
         }
       fout << "\n  " << command << "\n\n";
       }
