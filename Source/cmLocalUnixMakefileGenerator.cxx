@@ -687,7 +687,7 @@ void cmLocalUnixMakefileGenerator::OutputModuleLibraryRule(std::ostream& fout,
   else
     {
     command2 = "$(CMAKE_C_LINK_SHARED)  $(CMAKE_SHLIB_LINK_FLAGS) "
-      "$(CMAKE_SHLIB_BUILD_FLAGS) -o \\\n";
+      "$(CMAKE_MODULE_BUILD_FLAGS) -o \\\n";
     }
   command2 += "\t  ";
   std::string libName = m_LibraryOutputPath + "lib" + std::string(name) + "$(MODULE_SUFFIX)";
