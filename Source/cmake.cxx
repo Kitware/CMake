@@ -1269,6 +1269,12 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
     return -1;
     }
 
+  // In script mode we terminate after running the script.
+  if(m_ScriptMode)
+    {
+    return 0;
+    }
+
   this->PreLoadCMakeFiles();
 
   std::string systemFile = this->GetHomeOutputDirectory();
