@@ -27,6 +27,9 @@ USER_CXXFLAGS = @CXXFLAGS@
 # This is the path to the top of the Source tree
 topdir = @fullSrcDir@
 
+# This is the directory that contains the source for the CMakeLists.txt file
+currentdir = `cd ${srcdir}; pwd`
+
 # This is the directory configure was run in
 # where the binaries will be placed
 CMAKE_CONFIG_DIR = @CMAKE_CONFIG_DIR@
