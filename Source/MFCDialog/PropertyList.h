@@ -19,7 +19,7 @@
 #define IDC_PROPBTNCTRL  714
 #define IDC_PROPCHECKBOXCTRL 715
 
-#include <list>
+#include "../cmStandardIncludes.h"
 
 /////////////////////////////////////////////////////////////////////////////
 //CPropertyList Items
@@ -63,7 +63,7 @@ public:
                   const char* value,
                   int type,
                   const char* comboItems);
-  std::list<CPropertyItem*> GetItems() 
+  std::set<CPropertyItem*> GetItems() 
     {
       return m_PropertyItems;
     }
@@ -130,7 +130,7 @@ protected:
   BOOL m_bDivIsSet;
   HCURSOR m_hCursorArrow;
   HCURSOR m_hCursorSize;
-  std::list<CPropertyItem*> m_PropertyItems;
+  std::set<CPropertyItem*> m_PropertyItems;
 };
 
 /////////////////////////////////////////////////////////////////////////////

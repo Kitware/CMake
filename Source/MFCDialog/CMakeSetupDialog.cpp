@@ -453,8 +453,8 @@ void CMakeSetupDialog::FillCacheManagerFromCacheEditor()
 { 
   cmCacheManager::CacheEntryMap cache =
     cmCacheManager::GetInstance()->GetCacheMap();
-  std::list<CPropertyItem*> items = m_CacheEntriesList.GetItems();
-  for(std::list<CPropertyItem*>::iterator i = items.begin();
+  std::set<CPropertyItem*> items = m_CacheEntriesList.GetItems();
+  for(std::set<CPropertyItem*>::iterator i = items.begin();
       i != items.end(); ++i)
     {
     CPropertyItem* item = *i; 

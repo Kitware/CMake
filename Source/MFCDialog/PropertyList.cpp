@@ -20,7 +20,7 @@ CPropertyList::CPropertyList()
 
 CPropertyList::~CPropertyList()
 {
-  for(std::list<CPropertyItem*>::iterator i = m_PropertyItems.begin();
+  for(std::set<CPropertyItem*>::iterator i = m_PropertyItems.begin();
       i != m_PropertyItems.end(); ++i)
     {
     delete *i;
@@ -118,7 +118,7 @@ int CPropertyList::AddPropItem(CPropertyItem* pItem)
 {
   int nIndex = AddString(_T(""));
   SetItemDataPtr(nIndex,pItem);
-  m_PropertyItems.push_back(pItem);
+  m_PropertyItems.insert(pItem);
   return nIndex;
 }
 
@@ -143,8 +143,25 @@ int CPropertyList::AddProperty(const char* name,
       return i;
       }
     }
+  // if it is not in the displayed list, then
+  // check for it in the m_PropertyItems list as
+  // a removed item
+  for(std::set<CPropertyItem*>::iterator 
+        p = m_PropertyItems.begin();
+      p != m_PropertyItems.end(); ++p)
+    {
+    if((*p)->m_propName == name)
+      {
+      pItem = *p;
+      pItem->m_Removed = false;
+      }
+    }
   // if it is not found, then create a new one
-  pItem = new CPropertyItem(name, value, type, comboItems);
+  if(!pItem)
+    {
+    pItem = new CPropertyItem(name, value, type, comboItems);
+    }
+  
   return this->AddPropItem(pItem);
 }
 
