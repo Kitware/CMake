@@ -273,6 +273,8 @@ protected:
    */
   int AddCMakePaths(const char *arg0);
 
+  void SetDirectoriesFromFile(const char* arg);
+  
   cmVariableWatch* m_VariableWatch;
 
 private:

@@ -329,14 +329,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     else
       {
       directoriesSet = true;
-      this->SetHomeOutputDirectory
-        (cmSystemTools::GetCurrentWorkingDirectory().c_str());
-      this->SetStartOutputDirectory
-        (cmSystemTools::GetCurrentWorkingDirectory().c_str());
-      this->SetHomeDirectory
-        (cmSystemTools::CollapseFullPath(arg.c_str()).c_str());
-      this->SetStartDirectory
-        (cmSystemTools::CollapseFullPath(arg.c_str()).c_str());
+      this->SetDirectoriesFromFile(arg.c_str());
       }
     }
   if(!directoriesSet)
@@ -355,6 +348,97 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     this->SetStartDirectory(this->GetHomeDirectory());
     this->SetStartOutputDirectory(this->GetHomeOutputDirectory());
     }
+}
+
+//----------------------------------------------------------------------------
+void cmake::SetDirectoriesFromFile(const char* arg)
+{
+  // Check if the argument refers to a CMakeCache.txt or
+  // CMakeLists.txt file.
+  std::string listPath;
+  std::string cachePath;
+  bool argIsFile = false;
+  if(cmSystemTools::FileIsDirectory(arg))
+    {
+    std::string path = cmSystemTools::CollapseFullPath(arg);
+    cmSystemTools::ConvertToUnixSlashes(path);
+    std::string cacheFile = path;
+    cacheFile += "/CMakeCache.txt";
+    std::string listFile = path;
+    listFile += "/CMakeLists.txt";
+    if(cmSystemTools::FileExists(cacheFile.c_str()))
+      {
+      cachePath = path;
+      }
+    if(cmSystemTools::FileExists(listFile.c_str()))
+      {
+      listPath = path;
+      }
+    }
+  else if(cmSystemTools::FileExists(arg))
+    {
+    argIsFile = true;
+    std::string fullPath = cmSystemTools::CollapseFullPath(arg);
+    std::string name = cmSystemTools::GetFilenameName(fullPath.c_str());
+    name = cmSystemTools::LowerCase(name);
+    if(name == "cmakecache.txt")
+      {
+      cachePath = cmSystemTools::GetFilenamePath(fullPath.c_str());
+      }
+    else if(name == "cmakelists.txt")
+      {
+      listPath = cmSystemTools::GetFilenamePath(fullPath.c_str());
+      }
+    }
+  
+  // If there is a CMakeCache.txt file, use its settings.
+  if(cachePath.length() > 0)
+    {
+    cmCacheManager* cachem = this->GetCacheManager();
+    cmCacheManager::CacheIterator it = cachem->NewIterator();
+    if(cachem->LoadCache(cachePath.c_str()) && it.Find("CMAKE_HOME_DIRECTORY"))
+      {
+      this->SetHomeOutputDirectory(cachePath.c_str());      
+      this->SetStartOutputDirectory(cachePath.c_str());      
+      this->SetHomeDirectory(it.GetValue());
+      this->SetStartDirectory(it.GetValue());
+      return;
+      }
+    }
+  
+  // If there is a CMakeLists.txt file, use it as the source tree.
+  if(listPath.length() > 0)
+    {
+    this->SetHomeDirectory(listPath.c_str());
+    this->SetStartDirectory(listPath.c_str());
+    
+    if(argIsFile)
+      {
+      // Source CMakeLists.txt file given.  It was probably dropped
+      // onto the executable in a GUI.  Default to an in-source build.
+      this->SetHomeOutputDirectory(listPath.c_str());      
+      this->SetStartOutputDirectory(listPath.c_str());      
+      }
+    else
+      {
+      // Source directory given on command line.  Use current working
+      // directory as build tree.
+      std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
+      this->SetHomeOutputDirectory(cwd.c_str());
+      this->SetStartOutputDirectory(cwd.c_str());      
+      }
+    return;
+    }
+  
+  // We didn't find a CMakeLists.txt or CMakeCache.txt file from the
+  // argument.  Assume it is the path to the source tree, and use the
+  // current working directory as the build tree.
+  std::string full = cmSystemTools::CollapseFullPath(arg);
+  std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
+  this->SetHomeDirectory(full.c_str());
+  this->SetStartDirectory(full.c_str());
+  this->SetHomeOutputDirectory(cwd.c_str());
+  this->SetStartOutputDirectory(cwd.c_str());      
 }
 
 // at the end of this CMAKE_ROOT and CMAKE_COMMAND should be added to the cache
