@@ -133,7 +133,7 @@ int main(int argc, char** argv)
     touchwin(stdscr);
     endwin();
     delete myform;
-    std::cerr << "Error running cmake::LoadCache().  Aboriting.\n";
+    std::cerr << "Error running cmake::LoadCache().  Aborting.\n";
     return 1;
     }
 
