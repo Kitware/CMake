@@ -1,0 +1,75 @@
+{\rtf1\ansi\ansicpg1252\uc1 \deff0\deflang1033\deflangfe1033{\fonttbl{\f0\froman\fcharset0\fprq2{\*\panose 02020603050405020304}Times New Roman;}{\f1\fswiss\fcharset0\fprq2{\*\panose 020b0604020202020204}Arial;}
+{\f28\froman\fcharset238\fprq2 Times New Roman CE;}{\f29\froman\fcharset204\fprq2 Times New Roman Cyr;}{\f31\froman\fcharset161\fprq2 Times New Roman Greek;}{\f32\froman\fcharset162\fprq2 Times New Roman Tur;}
+{\f33\froman\fcharset177\fprq2 Times New Roman (Hebrew);}{\f34\froman\fcharset178\fprq2 Times New Roman (Arabic);}{\f35\froman\fcharset186\fprq2 Times New Roman Baltic;}{\f36\fswiss\fcharset238\fprq2 Arial CE;}{\f37\fswiss\fcharset204\fprq2 Arial Cyr;}
+{\f39\fswiss\fcharset161\fprq2 Arial Greek;}{\f40\fswiss\fcharset162\fprq2 Arial Tur;}{\f41\fswiss\fcharset177\fprq2 Arial (Hebrew);}{\f42\fswiss\fcharset178\fprq2 Arial (Arabic);}{\f43\fswiss\fcharset186\fprq2 Arial Baltic;}}
+{\colortbl;\red0\green0\blue0;\red0\green0\blue255;\red0\green255\blue255;\red0\green255\blue0;\red255\green0\blue255;\red255\green0\blue0;\red255\green255\blue0;\red255\green255\blue255;\red0\green0\blue128;\red0\green128\blue128;\red0\green128\blue0;
+\red128\green0\blue128;\red128\green0\blue0;\red128\green128\blue0;\red128\green128\blue128;\red192\green192\blue192;}{\stylesheet{\ql \li0\ri0\widctlpar\aspalpha\aspnum\faauto\adjustright\rin0\lin0\itap0 
+\fs24\lang1033\langfe1033\cgrid\langnp1033\langfenp1033 \snext0 Normal;}{\*\cs10 \additive Default Paragraph Font;}}{\info{\author deneb}{\operator deneb}{\creatim\yr2002\mo12\dy12\hr11\min56}{\revtim\yr2002\mo12\dy12\hr11\min59}{\version2}{\edmins3}
+{\nofpages2}{\nofwords645}{\nofchars3680}{\*\company Dell Computer Corporation}{\nofcharsws4519}{\vern8269}}\widowctrl\ftnbj\aenddoc\noxlattoyen\expshrtn\noultrlspc\dntblnsbdb\nospaceforul\hyphcaps0\horzdoc\dghspace120\dgvspace120\dghorigin1701
+\dgvorigin1984\dghshow0\dgvshow3\jcompress\viewkind4\viewscale100\nolnhtadjtbl \fet0\sectd \linex0\sectdefaultcl {\*\pnseclvl1\pnucrm\pnstart1\pnindent720\pnhang{\pntxta .}}{\*\pnseclvl2\pnucltr\pnstart1\pnindent720\pnhang{\pntxta .}}{\*\pnseclvl3
+\pndec\pnstart1\pnindent720\pnhang{\pntxta .}}{\*\pnseclvl4\pnlcltr\pnstart1\pnindent720\pnhang{\pntxta )}}{\*\pnseclvl5\pndec\pnstart1\pnindent720\pnhang{\pntxtb (}{\pntxta )}}{\*\pnseclvl6\pnlcltr\pnstart1\pnindent720\pnhang{\pntxtb (}{\pntxta )}}
+{\*\pnseclvl7\pnlcrm\pnstart1\pnindent720\pnhang{\pntxtb (}{\pntxta )}}{\*\pnseclvl8\pnlcltr\pnstart1\pnindent720\pnhang{\pntxtb (}{\pntxta )}}{\*\pnseclvl9\pnlcrm\pnstart1\pnindent720\pnhang{\pntxtb (}{\pntxta )}}\pard\plain 
+\ql \li0\ri0\nowidctlpar\faauto\rin0\lin0\itap0 \fs24\lang1033\langfe1033\cgrid\langnp1033\langfenp1033 {\b\f1\fs16 CMake Version 1.4 patch 7
+\par 
+\par }{\f1\fs16 This is the 1.4 release of CMake for Windows. If you find bugs send them to kitware@kitware.com with a subject of CMake Bug. See http://www.cmake.org for additional information.
+\par 
+\par Changes from 1.4.6 to 1.4.7
+\par 
+\par This patch contains two bug fixes. The SET_SOURCEFILE_PROPERTIES command use to specify compile flags for a file was incorrectly applying the same flags to all subsequent files. The dependency computation 
+was incorrect and would occasionally miss some dependencies.
+\par 
+\par Changes from 1.4.5 to 1.4.6
+\par 
+\par A fix for Borland compilers building Windows applications (WinMain() not main()). A fix in the VTK wrap Tcl command to support Tcl 8.4. A fix to ccmake.cxx to support compilation of CMake itself under some DEC OSF compiler.
+\par 
+\par Changes from 1.4.4 to 1.4.5
+\par 
+\par A fix was made to custom commands on dotNet which fixes a Java build issue with VTK on that platform. A fix to the Borland makefiles to better handle long paths. A fix to CMake\rquote 
+s CmakeList.txt file to remove an extra closing ENDIF that later versions of CMak
+e will complain about (for those of you who are building old versions of CMake with new versions). Some resource include fixes for Windows projects that must compile resource files.
+\par 
+\par Changes from 1.4 patch 3 to patch 4
+\par 
+\par Mainly minor bug fixes. The IF and E
+LSE command has been modified so that the IF and ELSE clauses cannot both be executed. Some fixes to compiler warnings and memory leaks in the output of the CREATE_TEST_SOURCELIST command. A fix to NMake builds on windows 98 when long link lines are used.
+ Minor fixes to the FindTCL and FindFLTK modules.
+\par 
+\par Changes from 1.4 patch 2 to patch 3
+\par 
+\par The LINK_LIBRARIES command now works with no arguments. A problem with setting the source path in the CMSetup dialog was fixed. Searching using registry entries in the FIND_LIBRARY command was broken.
+\par 
+\par Changes from 1.4 patch 1 to patch 2
+\par 
+\par The CREATE_TEST_SOURCELIST command was fixed so that it can handle C projects as well as C++. It now takes its arguments with file extensions. This command was not in CMake 1.2.  There w
+as a bug fix to the ITKWrapTcl command. There was a fix for NMake and Borland supporting jumping out of a directory to build a library in another directory. The CMake user interface now supports dragging and dropping files into CMake, selecting an output 
+d
+irectory will automatically set the source directory if a cache file is found. A fix was made to support the run command in a directory functionality of cmake -E on windows. Some minor fixes were made to the FindTCL, FindJNI, FindOpenGL and FindGLU module
+s. 
+\par 
+\par Changes from 1.4 final to 1.4 patch 1
+\par 
+\par Variables of the form $\{foo\} in CMake are always replaced. If foo is not defined then the replacement is empty. A number of commands were modified to accept less arguments since an argument may be a variable, which expands to nothing. For example 
+
+\par 
+\par TARGET_LINK_LIBRARIES( mylib $\{alib\})
+\par 
+\par Will not work if $\{alib\} resolves to nothing. 
+\par 
+\par Changes from 1.4 beta 3 to 1.4 final
+\par 
+\par Better error checking on IF commands.  A fix for custom rules on UNIX, NMake, Borland makefiles. A FindJava modules was added. A bunch of fixes in handling lists of files. A fix to the install command. 
+\par 
+\par Changes from 1.4 beta 1 to beta 3
+\par 
+\par Many fixes in finding OpenGL GLU and GLUT libraries. Fixes to the IF and ELSE statement when using MATCHES. Changes to the Dart module so that Nightly targets show up for Nmake and Borland Make. 
+\par 
+\par Changes from 1.2 to 1.4
+\par 
+\par CMake now supports lists (a.k.a. vectors) as variables where elements of the list are separa
+ted by semicolons. The SET and REMOVE commands can be used to manipulate lists. These should be used instead of SOURCE_FILES and SOURCE_FILES_REMOVE. Most commands that take a variable number of arguments will accept a list now. The IF command can now do 
+n
+umeric and strcmp comparisons. Support for MS Visual Studio .NET has been added. Significant cleanup in handling network paths and paths with spaces. Library dependencies are now computed and transitive. So if lib A depends on B which depends on C, linkin
+g
+ B into A will automatically link C into A as well.  Added additional command line options to cmake to delete files, create directories during the build process. Essentially providing some simple commands in a cross platform executable since not all shell
+s have the same capabilities. A variety of bug fixes and improvements to Modules. Improved performance, significantly less file sta}{\f1\fs20 ts than before.
+\par }}
