@@ -17,13 +17,16 @@
 #include "cmAbstractFilesCommand.h"
 
 // cmAbstractFilesCommand
-bool cmAbstractFilesCommand::InitialPass(std::vector<std::string> const& args)
+bool cmAbstractFilesCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
-  if(args.size() < 1 )
+  if(argsIn.size() < 1 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
+  std::vector<std::string> args;
+  cmSystemTools::ExpandListArguments(argsIn, args);
+
   bool ret = true;
   std::string m = "could not find source file(s):\n";
 

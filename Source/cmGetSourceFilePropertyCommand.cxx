@@ -20,7 +20,7 @@
 bool cmGetSourceFilePropertyCommand::InitialPass(std::vector<std::string> const& 
                                                  args)
 {
-  if(args.size() < 3 )
+  if(args.size() != 3 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;
@@ -38,7 +38,7 @@ bool cmGetSourceFilePropertyCommand::InitialPass(std::vector<std::string> const&
       {
       m_Makefile->AddDefinition(var, sf->GetWrapExclude());
       }
-    if(args[2] == "FLAGS")
+    if(args[2] == "COMPILE_FLAGS")
       {
       m_Makefile->AddDefinition(var, sf->GetCompileFlags());
       }

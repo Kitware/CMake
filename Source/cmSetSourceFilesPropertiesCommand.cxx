@@ -18,14 +18,16 @@
 
 // cmSetSourceFilesPropertiesCommand
 bool cmSetSourceFilesPropertiesCommand::InitialPass(std::vector<std::string> const& 
-                                                 args)
+                                                 argsIn)
 {
-  if(args.size() < 2 )
+  if(argsIn.size() < 2 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  
+  std::vector<std::string> args;
+  cmSystemTools::ExpandListArguments(argsIn, args);
+
   std::vector<std::string>::const_iterator j;
   // first collect up all the flags that need to be set on the file
   bool abstract = false;
@@ -46,7 +48,7 @@ bool cmSetSourceFilesPropertiesCommand::InitialPass(std::vector<std::string> con
       {
       generated = true;
       }
-    else if(*j == "FLAGS")
+    else if(*j == "COMPILE_FLAGS")
       {
       ++j;
       if(j == args.end())
@@ -61,7 +63,7 @@ bool cmSetSourceFilesPropertiesCommand::InitialPass(std::vector<std::string> con
   for(j = args.begin(); j != args.end(); ++j)
     {   
     // at the sign of the first property exit the loop
-    if(*j == "ABSTRACT" || *j == "WRAP_EXCLUDE" || *j == "FLAGS")
+    if(*j == "ABSTRACT" || *j == "WRAP_EXCLUDE" || *j == "COMPILE_FLAGS")
       {
       break;
       }

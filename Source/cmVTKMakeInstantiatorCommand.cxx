@@ -20,14 +20,16 @@
 
 bool
 cmVTKMakeInstantiatorCommand
-::InitialPass(std::vector<std::string> const& args)
+::InitialPass(std::vector<std::string> const& argsIn)
 {
-  if(args.size() < 3)
+  if(argsIn.size() < 3)
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  
+  std::vector<std::string> args;
+  cmSystemTools::ExpandListArguments(argsIn, args);
+
   m_ClassName = args[0];
   
   std::string outSourceList = args[1];

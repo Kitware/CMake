@@ -20,7 +20,7 @@
 // cmMakeDirectoryCommand
 bool cmMakeDirectoryCommand::InitialPass(std::vector<std::string> const& args)
 {
-  if(args.size() < 1 )
+  if(args.size() != 1 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;

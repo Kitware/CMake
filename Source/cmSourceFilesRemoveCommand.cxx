@@ -17,13 +17,16 @@
 #include "cmSourceFilesRemoveCommand.h"
 
 // cmSourceFilesRemoveCommand
-bool cmSourceFilesRemoveCommand::InitialPass(std::vector<std::string> const& args)
+bool cmSourceFilesRemoveCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
-  if(args.size() < 1 )
+  if(argsIn.size() < 1 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
+  std::vector<std::string> args;
+  cmSystemTools::ExpandListArguments(argsIn, args);
+
   int generated = 0;
   for(std::vector<std::string>::const_iterator i = (args.begin() + 1);
       i != args.end(); ++i)

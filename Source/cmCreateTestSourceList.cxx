@@ -27,7 +27,7 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)
     }
 
   std::vector<std::string> args;
-  cmSystemTools::ExpandListArguments(argsIn, args, true);
+  cmSystemTools::ExpandListArguments(argsIn, args);
   
   std::vector<std::string>::iterator i = args.begin();
 

@@ -1045,10 +1045,16 @@ bool RunCommandViaSystem(const char* command,
     cmSystemTools::RemoveFile(tempFile.c_str());
     return false;
     }
+  bool multiLine = false;
   while(fin)
     {
     fin.getline(buffer, BUFFER_SIZE);
     output += buffer;
+    if(multiLine)
+      {
+      output += "\n";
+      }
+    multiLine = true;
     }
   fin.close();
   cmSystemTools::RemoveFile(tempFile.c_str());
@@ -1609,8 +1615,7 @@ void cmSystemTools::GlobDirs(const char *fullPath,
 
 
 void cmSystemTools::ExpandListArguments(std::vector<std::string> const& arguments, 
-                                        std::vector<std::string>& newargs,
-                                        bool ignore_empty)
+                                        std::vector<std::string>& newargs)
 {
   std::vector<std::string>::const_iterator i;
   for(i = arguments.begin();i != arguments.end(); ++i)
@@ -1631,7 +1636,7 @@ void cmSystemTools::ExpandListArguments(std::vector<std::string> const& argument
           {
           len = i->size()-start;
           }
-        if (ignore_empty == false || len > 0)
+        if (len > 0)
           {
           newargs.push_back(i->substr(start, len));
           }

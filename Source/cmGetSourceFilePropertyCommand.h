@@ -53,7 +53,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
       return
-        "GET_SOURCE_FILE_PROPERTY(VAR file [ABSTRACT|WRAP_EXCLUDE|FLAGS]) "
+        "GET_SOURCE_FILE_PROPERTY(VAR file [ABSTRACT|WRAP_EXCLUDE|COMPILE_FLAGS]) "
         "Get a property from a source file.   The value of the property is stored  "
         "in the variable VAR.";
     }

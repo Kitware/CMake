@@ -17,14 +17,15 @@
 #include "cmWrapExcludeFilesCommand.h"
 
 // cmWrapExcludeFilesCommand
-bool cmWrapExcludeFilesCommand::InitialPass(std::vector<std::string> const& args)
+bool cmWrapExcludeFilesCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
-  if(args.size() < 1 )
+  if(argsIn.size() < 1 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-
+  std::vector<std::string> args; 
+  cmSystemTools::ExpandListArguments(argsIn, args);
   cmMakefile::SourceMap &Classes = m_Makefile->GetSources();
   for(std::vector<std::string>::const_iterator j = args.begin();
       j != args.end(); ++j)

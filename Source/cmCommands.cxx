@@ -68,7 +68,6 @@
 #include "cmSetSourceFilesPropertiesCommand.cxx"
 #include "cmSiteNameCommand.cxx"
 #include "cmSourceFilesCommand.cxx"
-#include "cmSourceFilesFlagsCommand.cxx"
 #include "cmSourceFilesRemoveCommand.cxx"
 #include "cmSourceGroupCommand.cxx"
 #include "cmSubdirCommand.cxx"
@@ -137,7 +136,6 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmSetSourceFilesPropertiesCommand);
   commands.push_back(new cmSiteNameCommand);
   commands.push_back(new cmSourceFilesCommand);
-  commands.push_back(new cmSourceFilesFlagsCommand);
   commands.push_back(new cmSourceFilesRemoveCommand);
   commands.push_back(new cmSourceGroupCommand);
   commands.push_back(new cmSubdirCommand);

@@ -18,13 +18,15 @@
 #include "cmCacheManager.h"
 
 // cmExecutableCommand
-bool cmInstallFilesCommand::InitialPass(std::vector<std::string> const& args)
+bool cmInstallFilesCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
-  if(args.size() < 2)
+  if(argsIn.size() < 2)
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
+  std::vector<std::string> args;
+  cmSystemTools::ExpandListArguments(argsIn, args);
 
   // Create an INSTALL_FILES target specifically for this path.
   m_TargetName = "INSTALL_FILES_"+args[0];

@@ -25,7 +25,7 @@ bool cmVariableRequiresCommand::InitialPass(std::vector<std::string> const& args
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  m_Arguments = args;
+  cmSystemTools::ExpandListArguments(args, m_Arguments);
   return true;
 }
 

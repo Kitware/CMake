@@ -19,7 +19,7 @@
 // cmProjectCommand
 bool cmProjectCommand::InitialPass(std::vector<std::string> const& args)
 {
-  if(args.size() < 1 || args.size() > 1)
+  if(args.size() != 1 )
     {
     this->SetError("PROJECT called with incorrect number of arguments");
     return false;

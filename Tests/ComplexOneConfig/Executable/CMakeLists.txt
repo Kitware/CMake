@@ -1,8 +1,8 @@
 #
 # Create exe. 
 #
+SET_SOURCE_FILES_PROPERTIES(complex COMPILE_FLAGS "-DSET_SOURCE_FILES_PROPERTIES")
 ADD_EXECUTABLE(complex complex)
-
 SET(COMPLEX_LIBS CMakeTestLibrary;CMakeTestLibraryShared)
 TARGET_LINK_LIBRARIES(complex ${COMPLEX_LIBS})
 

@@ -17,13 +17,16 @@
 #include "cmSubdirCommand.h"
 
 // cmSubdirCommand
-bool cmSubdirCommand::InitialPass(std::vector<std::string> const& args)
+bool cmSubdirCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
-  if(args.size() < 1 )
+  if(argsIn.size() < 1 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
+  std::vector<std::string> args;
+  cmSystemTools::ExpandListArguments(argsIn, args);
+
   for(std::vector<std::string>::const_iterator i = args.begin();
       i != args.end(); ++i)
     {

@@ -31,12 +31,12 @@ bool cmFindFileCommand::InitialPass(std::vector<std::string> const& argsIn)
   std::string helpString = "Where can the ";
   helpString += argsIn[1] + " file be found";
   size_t size = argsIn.size();
-  std::vector<std::string> args;
+  std::vector<std::string> argst;
   for(unsigned int j = 0; j < size; ++j)
     {
     if(argsIn[j] != "DOC")
       {
-      args.push_back(argsIn[j]);
+      argst.push_back(argsIn[j]);
       }
     else
       {
@@ -47,6 +47,9 @@ bool cmFindFileCommand::InitialPass(std::vector<std::string> const& argsIn)
       break;
       }
     }
+  std::vector<std::string> args;
+  cmSystemTools::ExpandListArguments(argst, args);
+
   std::vector<std::string>::const_iterator i = args.begin();
   // Use the first argument as the name of something to be defined
   const char* define = (*i).c_str();

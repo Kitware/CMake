@@ -159,7 +159,7 @@ void cmLBDepend::DependWalk(cmDependInformation* info)
 // cmOutputRequiredFilesCommand
 bool cmOutputRequiredFilesCommand::InitialPass(std::vector<std::string> const& args)
 {
-  if(args.size() < 2 )
+  if(args.size() != 2 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;

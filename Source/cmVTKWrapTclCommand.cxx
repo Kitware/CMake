@@ -17,14 +17,15 @@
 #include "cmVTKWrapTclCommand.h"
 
 // cmVTKWrapTclCommand
-bool cmVTKWrapTclCommand::InitialPass(std::vector<std::string> const& args)
+bool cmVTKWrapTclCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
-  if(args.size() < 3 )
+  if(argsIn.size() < 3 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-
+  std::vector<std::string> args;
+  cmSystemTools::ExpandListArguments(argsIn, args);
   // keep the library name
   m_LibraryName = args[0];
 

@@ -17,14 +17,16 @@
 #include "cmSourceFilesCommand.h"
 
 // cmSourceFilesCommand
-bool cmSourceFilesCommand::InitialPass(std::vector<std::string> const& args)
+bool cmSourceFilesCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
-  if(args.size() < 1 )
+  if(argsIn.size() < 1 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  
+  std::vector<std::string> args;
+  cmSystemTools::ExpandListArguments(argsIn, args);
+
   std::string name = args[0];
   
   int generated = 0;

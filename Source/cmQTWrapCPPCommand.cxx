@@ -17,13 +17,15 @@
 #include "cmQTWrapCPPCommand.h"
 
 // cmQTWrapCPPCommand
-bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& args)
+bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
-  if(args.size() < 3 )
+  if(argsIn.size() < 3 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
+  std::vector<std::string> args;
+  cmSystemTools::ExpandListArguments(argsIn, args);
 
   // Now check and see if the value has been stored in the cache
   // already, if so use that value and don't look for the program

@@ -23,7 +23,7 @@ bool cmUseMangledMesaCommand::InitialPass(std::vector<std::string> const& args)
   // expected two arguments:
   // arguement one: the full path to gl_mangle.h
   // arguement two : directory for output of edited headers
-  if(args.size() < 2)
+  if(args.size() != 2)
     {
     this->SetError("called with incorrect number of arguments");
     return false;

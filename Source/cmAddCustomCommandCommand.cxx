@@ -18,17 +18,19 @@
 
 
 // cmAddCustomCommandCommand
-bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args)
+bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
   /* Let's complain at the end of this function about the lack of a particular
      arg. For the moment, let's say that SOURCE, COMMAND, TARGET are always 
      required.
   */
-  if (args.size() < 6)
+  if (argsIn.size() < 6)
     {
       this->SetError("called with wrong number of arguments.");
       return false;
     }
+  std::vector<std::string> args;
+  cmSystemTools::ExpandListArguments(argsIn, args);
 
   std::string source, command, target;
   std::vector<std::string> command_args, depends, outputs;

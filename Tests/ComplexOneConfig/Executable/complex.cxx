@@ -95,6 +95,11 @@ void TestDir(const char* filename)
 
 int main()
 {
+#ifdef SET_SOURCE_FILES_PROPERTIES
+  cmPassed("SET_SOURCE_FILES_PROPERTIES set FLAGS passed on an ADD_EXECUTABLE source");
+#else
+  cmFailed("SET_SOURCE_FILES_PROPERTIES set FLAGS passed on an ADD_EXECUTABLE source");
+#endif
   if(sharedFunction() != 1)
     {
     cmFailed("Call to sharedFunction from shared library failed.");
@@ -120,6 +125,14 @@ int main()
   else
     {
     cmPassed("Call to file2 function returned 1.");
+    }
+  if(PropertyTest() != 1)
+    {
+    cmFailed("Call to PropertyTest function from library failed.");
+    }
+  else
+    {
+    cmPassed("Call to PropertyTest function returned 1.");
     }
 
   // ----------------------------------------------------------------------
