@@ -67,6 +67,7 @@ public:
                   int type,
                   const char* comboItems,
                   bool reverseOrder);
+  void RemoveProperty(const char* name);
   void HideControls();
   std::set<CPropertyItem*> GetItems() 
     {

@@ -614,6 +614,20 @@ void CPropertyList::OnRButtonUp( UINT nFlags, CPoint point )
                       rect.TopLeft().y + point.y, this, NULL);
 }
 
+void CPropertyList::RemoveProperty(const char* name)
+{
+  for(int i =0; i < this->GetCount(); ++i)
+    {
+    CPropertyItem* pItem = (CPropertyItem*) GetItemDataPtr(i);
+    if(pItem->m_propName == name)
+      {
+      m_PropertyItems.erase(pItem);
+      delete pItem; 
+      this->DeleteString(i);
+      return;
+      }
+    }
+}
 
 void CPropertyList::OnDelete()
 { 

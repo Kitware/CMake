@@ -601,6 +601,7 @@ void CMakeSetupDialog::FillCacheGUIFromCacheManager()
           );
         break;
       case cmCacheManager::INTERNAL:
+	m_CacheEntriesList.RemoveProperty(key);
         break;
       }
     }
@@ -645,16 +646,6 @@ void CMakeSetupDialog::LoadCacheFromDiskToGUI()
         {
         m_GeneratorChoiceString = curGen.c_str();
         this->UpdateData(FALSE);
-  //        m_GeneratorChoice.SetWindowText(m_GeneratorChoiceString); 
-//          int c = m_GeneratorChoice.GetCount();
-//          int j = m_GeneratorChoice.FindStringExact(0, curGen.c_str());
-//          if (j != CB_ERR)
-//            {
-//            m_GeneratorChoice.SetCurSel(j);
-//            }
-        
-//          m_GeneratorChoice.SelectString(0, curGen.c_str());
-//          this->UpdateData(FALSE);
         }
       }
     }
