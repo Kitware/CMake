@@ -85,8 +85,9 @@ cd ${INSTALL_DIR}
 ${CAT} >> README <<EOF
 CMake $VERSION binary for $PLATFORM
 
-Extract the file "${INTERNAL_NAME}.tar" into your
-destination directory.  The following files will be extracted:
+Extract the file "${INTERNAL_NAME}.tar" into your destination
+directory (typically /usr/local).  The following files will be
+extracted:
 
 ${FILES}
 
