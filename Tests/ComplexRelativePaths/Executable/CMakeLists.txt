@@ -16,6 +16,16 @@ ADD_EXECUTABLE(complex complex)
 TARGET_LINK_LIBRARIES(complex 
                       CMakeLib)
 
+IF(WIN32)
+  # we must copy the dll to the correct location
+  FIND_FILE(CMAKE_DLL CMakeLib.dll ${Complex_BINARY_DIR}/../../Source ${Complex_BINARY_DIR}/../../Source/Debug)
+  IF (CMAKE_DLL)
+    CONFIGURE_FILE(
+        ${CMAKE_DLL}
+        ${Complex_BINARY_DIR}/CMakeLib.dll COPYONLY)
+  ENDIF (CMAKE_DLL)
+ENDIF (WIN32)
+
 #
 # Output the files required by 'complex' to a file.
 #
