@@ -3,7 +3,6 @@
 #
 PROJECT (Complex)
 
-CMAKE_MINIMUM_REQUIRED(VERSION 1.3)
 
   
 #
@@ -137,6 +136,13 @@ IF (WIN32)
     EXEC_PROGRAM(${CCOMMAND_COMMAND} ARGS "remove \"${dir}/${file}\"")
   ENDIF (NOT UNIX)
 ENDIF (WIN32)
+
+#
+# Test a set and a remove
+#
+SET(REMOVE_STRING a b c d e f)
+SET(removeVar1 c e)
+REMOVE(REMOVE_STRING ${removeVar1} f)
 
 #
 # Configure file 

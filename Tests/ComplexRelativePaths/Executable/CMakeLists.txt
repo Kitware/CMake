@@ -1,9 +1,10 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 1.3)
 #
 # Create exe. 
 #
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DTEST_CXX_FLAGS")
-SET_SOURCE_FILES_PROPERTIES(complex 
-                            COMPILE_FLAGS "-DFILE_HAS_EXTRA_COMPILE_FLAGS")
+SET_SOURCE_FILES_PROPERTIES(complex COMPILE_FLAGS 
+                            "-DFILE_HAS_EXTRA_COMPILE_FLAGS")
 ADD_EXECUTABLE(complex complex)
 SET(COMPLEX_LIBS CMakeTestLibrary;CMakeTestLibraryShared;CMakeTestCLibraryShared)
 
@@ -19,7 +20,7 @@ LINK_DIRECTORIES(${Complex_BINARY_DIR}/../../Source)
 TARGET_LINK_LIBRARIES(complex 
                       CMakeLib
                       debug CMakeLib
-                      optimized CMakeLib)
+                      optimized CgMakeLib)
 
 #
 # Output the files required by 'complex' to a file.
@@ -35,5 +36,9 @@ SUBDIRS(Temp)
 #
 INSTALL_TARGETS(/tmp complex)
 INSTALL_PROGRAMS(/tmp complex)
+
+CONFIGURE_FILE(
+  ${Complex_SOURCE_DIR}/Executable/cmVersion.h.in
+  ${Complex_BINARY_DIR}/cmVersion.h)
 
 SOURCE_GROUP(A_GROUP ".cxx")

@@ -1,4 +1,5 @@
 #include "cmTestConfigure.h"
+#include "cmVersion.h"
 #include "ExtraSources/file1.h"
 #include "file2.h"
 #include "sharedFile.h"
@@ -655,6 +656,18 @@ int main()
     {
     cmFailed("CMAKE_MINIMUM_REQUIRED_VERSION is not set to the expected 1.3");
     }
+
+  // ----------------------------------------------------------------------
+  // Test REMOVE command
+  if (strcmp("a;b;d",REMOVE_STRING))
+    {
+    cmPassed("REMOVE is working");
+    }
+  else
+    {
+    cmFailed("REMOVE is not working");
+    }
+
   // ----------------------------------------------------------------------
   // Summary
 
