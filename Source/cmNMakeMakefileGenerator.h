@@ -98,6 +98,11 @@ protected:
   virtual void OutputLinkLibraries(std::ostream& fout,
                                    const char* targetLibrary,
                                    const cmTarget &tgt);
+private:
+  bool m_QuoteNextCommand;      // if this is true, OutputMakeRule
+                                // will not quote the next commands
+                                // it is reset to false after each
+                                // call to OutputMakeRule
 };
 
 #endif

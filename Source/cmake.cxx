@@ -55,7 +55,7 @@ cmake::cmake()
   m_Verbose = false;
 #if defined(_WIN32) && !defined(__CYGWIN__)  
   cmMakefileGenerator::RegisterGenerator(new cmMSProjectGenerator);
-//  cmMakefileGenerator::RegisterGenerator(new cmNMakeMakefileGenerator);
+  cmMakefileGenerator::RegisterGenerator(new cmNMakeMakefileGenerator);
   cmMakefileGenerator::RegisterGenerator(new cmBorlandMakefileGenerator);
 #else
   cmMakefileGenerator::RegisterGenerator(new cmUnixMakefileGenerator);

@@ -54,6 +54,7 @@ cmNMakeMakefileGenerator::cmNMakeMakefileGenerator()
   this->SetLibraryPrefix("");
   this->SetSharedLibraryExtension(".dll");
   this->SetStaticLibraryExtension(".lib");
+  m_QuoteNextCommand = true; // most of the time command should be quoted
 }
 
 cmNMakeMakefileGenerator::~cmNMakeMakefileGenerator()
@@ -186,31 +187,43 @@ void cmNMakeMakefileGenerator::OutputMakeRule(std::ostream& fout,
     fout << replace.c_str();
     }
   fout << "\n";
+  const char* startCommand = "\t\"";
+  const char* endCommand = "\"\n";
+  if(!m_QuoteNextCommand)
+    {
+    startCommand = "\t";
+    endCommand = "\n";
+    }
   if(command)
     {
     replace = command;
     m_Makefile->ExpandVariablesInString(replace);
-    fout << "\t\"" << replace.c_str() << "\"\n";
+    fout << startCommand << replace.c_str() << endCommand;
     }
   if(command2)
     {
     replace = command2;
     m_Makefile->ExpandVariablesInString(replace);
-    fout << "\t\"" << replace.c_str() << "\"\n";
+    fout << startCommand << replace.c_str() << endCommand;
     }
   if(command3)
     {
     replace = command3;
     m_Makefile->ExpandVariablesInString(replace);
-    fout << "\t\"" << replace.c_str() << "\"\n";
+    fout << startCommand << replace.c_str() << endCommand;
     }
   if(command4)
     {
     replace = command4;
     m_Makefile->ExpandVariablesInString(replace);
-    fout << "\t\"" << replace.c_str() << "\"\n";
+    fout << startCommand << replace.c_str() << endCommand;
     }
   fout << "\n";
+  // reset m_QuoteNextCommand, as the default should be to quote the 
+  // commands.   We need the quotes when the command has a full path
+  // to an executable.  However, the quotes break things like the
+  // linker command.
+  m_QuoteNextCommand = true;
 }
 
 void 
@@ -262,6 +275,7 @@ OutputBuildObjectFromSource(std::ostream& fout,
     compileCommand += " /Fo";
     compileCommand += objectFile;
     }
+  m_QuoteNextCommand = false;
   this->OutputMakeRule(fout,
                        comment.c_str(),
                        objectFile.c_str(),
@@ -285,6 +299,7 @@ void cmNMakeMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
   linklibs << std::ends;
   command += linklibs.str();
   delete [] linklibs.str();
+  m_QuoteNextCommand = false;
   this->OutputMakeRule(fout, "rules for a shared library",
                        target.c_str(),
                        depend.c_str(),
@@ -312,6 +327,7 @@ void cmNMakeMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout,
   command += std::string(name) + "_SRC_OBJS)";
   std::string comment = "rule to build static library: ";
   comment += name;
+  m_QuoteNextCommand = false;
   this->OutputMakeRule(fout,
                        comment.c_str(),
                        target.c_str(),
@@ -338,6 +354,7 @@ void cmNMakeMakefileGenerator::OutputExecutableRule(std::ostream& fout,
   command += linklibs.str();
   std::string comment = "rule to build executable: ";
   comment += name;
+  m_QuoteNextCommand = false;
   this->OutputMakeRule(fout, 
                        comment.c_str(),
                        target.c_str(),

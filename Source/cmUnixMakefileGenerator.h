@@ -144,13 +144,13 @@ protected:
                                       const std::vector<std::string>&
                                       SubDirectories);
   virtual void OutputMakeRule(std::ostream&, 
-                      const char* comment,
-                      const char* target,
-                      const char* depends, 
-                      const char* command,
-                      const char* command2 = 0,
-                      const char* command3 = 0,
-                      const char* command4 = 0);
+                              const char* comment,
+                              const char* target,
+                              const char* depends, 
+                              const char* command,
+                              const char* command2 = 0,
+                              const char* command3 = 0,
+                              const char* command4 = 0);
   void SetObjectFileExtension(const char* e) { m_ObjectFileExtension = e;}
   void SetExecutableExtension(const char* e) { m_ExecutableExtension = e;}
   void SetStaticLibraryExtension(const char* e) {m_StaticLibraryExtension = e;}
