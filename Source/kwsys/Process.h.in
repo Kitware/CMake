@@ -109,10 +109,10 @@ kwsysEXPORT int kwsysProcess_AddCommand(kwsysProcess* cp,
                                         char const* const* command);
 
 /**
- * Set the timeout for the child process.  The timeout period begins
- * when the child is executed.  If the child has not terminated when
- * the timeout expires, it will be killed.  A non-positive (<= 0)
- * value will disable the timeout.
+ * Set the timeout in seconds for the child process.  The timeout
+ * period begins when the child is executed.  If the child has not
+ * terminated when the timeout expires, it will be killed.  A
+ * non-positive (<= 0) value will disable the timeout.
  */
 kwsysEXPORT void kwsysProcess_SetTimeout(kwsysProcess* cp, double timeout);
 
