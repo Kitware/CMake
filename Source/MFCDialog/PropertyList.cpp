@@ -185,6 +185,7 @@ void CPropertyList::AddProperty(const char* name,
         pItem->m_HelpString = helpString;
         InvalidateList();
         }
+      pItem->m_Advanced = advanced;
       return;
       }
     }
@@ -718,10 +719,14 @@ void CPropertyList::RemoveAll()
   for(int i =0; i < c; ++i)
     {
     CPropertyItem* pItem = (CPropertyItem*) GetItemDataPtr(0);
-    m_PropertyItems.erase(pItem);
-    delete pItem;
     this->DeleteString(0);
     }
+  for(std::set<CPropertyItem*>::iterator ii = m_PropertyItems.begin();
+      ii != m_PropertyItems.end(); ++ii)
+    {
+    delete *ii;
+    }
+  m_PropertyItems.clear();
   m_Dirty = false;
   this->HideControls();
   InvalidateList();
