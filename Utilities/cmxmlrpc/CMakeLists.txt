@@ -5,6 +5,9 @@ INCLUDE_REGULAR_EXPRESSION("^.*$")
 # Include all the necessary files for macros
 SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake")
 
+OPTION(HAVE_UNICODE_WCHAR "Enable Unicode Support" YES)
+MARK_AS_ADVANCED(HAVE_UNICODE_WCHAR)
+
 # Check if header file exists and add it to the list.
 SET(CURRENT_INCLUDES)
 INCLUDE (CheckIncludeFiles)
