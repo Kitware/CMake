@@ -18,7 +18,7 @@
 // cmOptionCommand
 bool cmOptionCommand::Invoke(std::vector<std::string>& args)
 {
-  if(args.size() < 1)
+  if(args.size() < 2)
     {
     this->SetError("called with incorrect number of arguments");
     return false;
@@ -32,12 +32,15 @@ bool cmOptionCommand::Invoke(std::vector<std::string>& args)
     {
     cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
                                                  false,
-                                                 "Option command");
-    m_Makefile->AddDefinition(args[0].c_str(), "0");
+                                                 args[1].c_str());
+    m_Makefile->AddDefinition(args[0].c_str(), "Off");
     }
   else
     {
     m_Makefile->AddDefinition(args[0].c_str(), cacheValue);
+    cmCacheManager::GetInstance()->
+      AddCacheEntry(args[0].c_str(),
+                    cmSystemTools::IsOn(cacheValue), args[1].c_str());
     }
 
   return true;

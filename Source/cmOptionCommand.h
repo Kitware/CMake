@@ -66,7 +66,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "OPTION(USE_MPI)\n"
+      "OPTION(USE_MPI \"help string decribing the option\")\n"
       "Provide an option for the user to select";
     }
   
