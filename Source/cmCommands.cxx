@@ -46,6 +46,7 @@
 #include "cmFLTKWrapUICommand.cxx"
 #include "cmGetFilenameComponentCommand.cxx"
 #include "cmGetSourceFilePropertyCommand.cxx"
+#include "cmGetTargetPropertyCommand.cxx"
 #include "cmITKWrapTclCommand.cxx"
 #include "cmIfCommand.cxx"
 #include "cmIncludeCommand.cxx"
@@ -69,6 +70,7 @@
 #include "cmSeparateArgumentsCommand.cxx"
 #include "cmSetCommand.cxx"
 #include "cmSetSourceFilesPropertiesCommand.cxx"
+#include "cmSetTargetPropertiesCommand.cxx"
 #include "cmSiteNameCommand.cxx"
 #include "cmSourceFilesCommand.cxx"
 #include "cmSourceFilesRemoveCommand.cxx"
@@ -128,6 +130,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmFLTKWrapUICommand);
   commands.push_back(new cmGetFilenameComponentCommand);
   commands.push_back(new cmGetSourceFilePropertyCommand);
+  commands.push_back(new cmGetTargetPropertyCommand);
   commands.push_back(new cmITKWrapTclCommand);
   commands.push_back(new cmIfCommand);
   commands.push_back(new cmIncludeCommand);
@@ -154,6 +157,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmSeparateArgumentsCommand);
   commands.push_back(new cmSetCommand);
   commands.push_back(new cmSetSourceFilesPropertiesCommand);
+  commands.push_back(new cmSetTargetPropertiesCommand);
   commands.push_back(new cmSiteNameCommand);
   commands.push_back(new cmSourceFilesCommand);
   commands.push_back(new cmSourceFilesRemoveCommand);

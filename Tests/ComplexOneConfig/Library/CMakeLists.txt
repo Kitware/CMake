@@ -40,6 +40,14 @@ SOURCE_FILES(SharedLibrarySources sharedFile)
 ADD_LIBRARY(CMakeTestLibraryShared SHARED ${SharedLibrarySources})
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DTEST_C_FLAGS")
 ADD_LIBRARY(CMakeTestCLibraryShared SHARED testConly.c)
+SET_TARGET_PROPERTIES(CMakeTestCLibraryShared PROPERTIES FOO BAR)
+SET_TARGET_PROPERTIES(CMakeTestCLibraryShared PROPERTIES LINK_FLAGS "-lm")
+GET_TARGET_PROPERTY(FOO_BAR_VAR CMakeTestCLibraryShared FOO)
+IF(${FOO_BAR_VAR} MATCHES "BAR")
+ELSE(${FOO_BAR_VAR} MATCHES "BAR")
+  MESSAGE(SEND_ERROR "SET_TARGET_PROPERTIES or GET_TARGET_PROPERTY failed, FOO_BAR_VAR should be BAR, but is ${FOO_BAR_VAR}")
+ENDIF(${FOO_BAR_VAR} MATCHES "BAR")
+
 
 #
 # Attach a post-build custom-command to the lib.

@@ -333,31 +333,41 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
     {
     if (l->second.IsInAll())
       {
+      const char* targetPrefix = l->second.GetProperty("PREFIX");
+      const char* targetSuffix = l->second.GetProperty("SUFFIX");
       std::string path = m_LibraryOutputPath;
-      if(l->second.GetType() == cmTarget::STATIC_LIBRARY)
+      const char* prefixVar = 0;
+      const char* suffixVar = 0;
+      switch(l->second.GetType())
         {
-        path +=
-          this->GetSafeDefinition("CMAKE_STATIC_LIBRARY_PREFIX") +
-          l->first
-          + this->GetSafeDefinition("CMAKE_STATIC_LIBRARY_SUFFIX");
-        fout << " \\\n" 
-             << cmSystemTools::ConvertToOutputPath(path.c_str());
+        case cmTarget::STATIC_LIBRARY:
+          prefixVar = "CMAKE_STATIC_LIBRARY_PREFIX";
+          suffixVar = "CMAKE_STATIC_LIBRARY_SUFFIX";
+          break;
+        case cmTarget::SHARED_LIBRARY:
+          prefixVar = "CMAKE_SHARED_LIBRARY_PREFIX";
+          suffixVar = "CMAKE_SHARED_LIBRARY_SUFFIX";
+          break;
+        case cmTarget::MODULE_LIBRARY:
+          prefixVar = "CMAKE_SHARED_MODULE_PREFIX";
+          suffixVar = "CMAKE_SHARED_MODULE_SUFFIX";
+          break;
         }
-      else if(l->second.GetType() == cmTarget::SHARED_LIBRARY)
+      // if it is a library this will be set
+      if(prefixVar)
         {
+        // if there is no prefix on the target use the cmake definition
+        if(!targetPrefix)
+          {
+          targetPrefix = this->GetSafeDefinition(prefixVar);
+          }
+        // if there is no suffix on the target use the cmake definition
+        if(!targetSuffix)
+          {
+          targetSuffix = this->GetSafeDefinition(suffixVar);
+          }
         path +=
-          this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_PREFIX") +
-          l->first
-          + this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_SUFFIX");
-        fout << " \\\n" 
-             << cmSystemTools::ConvertToOutputPath(path.c_str());
-        }
-      else if(l->second.GetType() == cmTarget::MODULE_LIBRARY)
-        {
-        path +=
-          this->GetSafeDefinition("CMAKE_SHARED_MODULE_PREFIX") +
-          l->first
-          + this->GetSafeDefinition("CMAKE_SHARED_MODULE_SUFFIX");
+          targetPrefix + l->first + targetSuffix;
         fout << " \\\n" 
              << cmSystemTools::ConvertToOutputPath(path.c_str());
         }
@@ -822,6 +832,8 @@ void cmLocalUnixMakefileGenerator::OutputLibraryRule(std::ostream& fout,
   // collect up the link libraries
   cmOStringStream linklibs;
   this->OutputLinkLibraries(linklibs, name, t);
+  const char* targetLinkFlags = t.GetProperty("LINK_FLAGS");
+  std::string allLinkFlags;
   for(std::vector<std::string>::iterator i = commands.begin();
       i != commands.end(); ++i)
     {
@@ -876,9 +888,25 @@ void cmLocalUnixMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
       }
     }
 #endif
+  const char* targetPrefix = t.GetProperty("PREFIX");
+  if(!targetPrefix)
+    {
+    targetPrefix = this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_PREFIX");
+    }
+  const char* targetSuffix = t.GetProperty("SUFFIX");
+  if(!targetSuffix)
+    {
+    targetSuffix = this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_SUFFIX");
+    }
+  const char* targetLinkFlags = t.GetProperty("LINK_FLAGS");
+  if(targetLinkFlags)
+    {
+    linkFlags += targetLinkFlags;
+    linkFlags += " ";
+    }
   this->OutputLibraryRule(fout, name, t,
-                          this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_PREFIX"),
-                          this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_SUFFIX"),
+                          targetPrefix,
+                          targetSuffix,
                           createRule,
                           "shared library",
                           linkFlags.c_str());
@@ -908,9 +936,25 @@ void cmLocalUnixMakefileGenerator::OutputModuleLibraryRule(std::ostream& fout,
     linkFlags += this->GetSafeDefinition(build.c_str());
     linkFlags += " ";
     }
+  const char* targetPrefix = t.GetProperty("PREFIX");
+  if(!targetPrefix)
+    {
+    targetPrefix = this->GetSafeDefinition("CMAKE_SHARED_MODULE_PREFIX");
+    }
+  const char* targetSuffix = t.GetProperty("SUFFIX");
+  if(!targetSuffix)
+    {
+    targetSuffix = this->GetSafeDefinition("CMAKE_SHARED_MODULE_SUFFIX");
+    }
+  const char* targetLinkFlags = t.GetProperty("LINK_FLAGS");
+  if(targetLinkFlags)
+    {
+    linkFlags += targetLinkFlags;
+    linkFlags += " ";
+    }
   this->OutputLibraryRule(fout, name, t,
-                          this->GetSafeDefinition("CMAKE_SHARED_MODULE_PREFIX"),
-                          this->GetSafeDefinition("CMAKE_SHARED_MODULE_SUFFIX"),
+                          targetPrefix,
+                          targetSuffix,
                           createRule,
                           "shared module",
                           linkFlags.c_str());
@@ -929,10 +973,20 @@ void cmLocalUnixMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout,
   else
     {
     createRule = "CMAKE_C_CREATE_STATIC_LIBRARY";
+    }  
+  const char* targetPrefix = t.GetProperty("PREFIX");
+  if(!targetPrefix)
+    {
+    targetPrefix = this->GetSafeDefinition("CMAKE_STATIC_LIBRARY_PREFIX");
+    }
+  const char* targetSuffix = t.GetProperty("SUFFIX");
+  if(!targetSuffix)
+    {
+    targetSuffix = this->GetSafeDefinition("CMAKE_STATIC_LIBRARY_SUFFIX");
     }
   this->OutputLibraryRule(fout, name, t,
-                          this->GetSafeDefinition("CMAKE_STATIC_LIBRARY_PREFIX"),
-                          this->GetSafeDefinition("CMAKE_STATIC_LIBRARY_SUFFIX"),
+                          targetPrefix,
+                          targetSuffix,
                           createRule,
                           "static library", 0);
   
@@ -1008,8 +1062,12 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
     linkFlags +=  this->GetSafeDefinition("CMAKE_CREATE_CONSOLE_EXE");
     linkFlags += " ";
     }
-  
-
+  const char* targetLinkFlags = t.GetProperty("LINK_FLAGS");
+  if(targetLinkFlags)
+    {
+    linkFlags += targetLinkFlags;
+    linkFlags += " ";
+    }
   for(std::vector<std::string>::iterator i = commands.begin();
       i != commands.end(); ++i)
     {

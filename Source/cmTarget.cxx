@@ -544,3 +544,39 @@ void cmTarget::GatherDependencies( const cmMakefile& mf,
     DeleteDependency( dep_map, lib, lib); // cannot depend on itself
     }
 }
+
+
+void cmTarget::SetProperty(const char* prop, const char* value)
+{
+  if (!prop)
+    {
+    return;
+    }
+  if (!value)
+    {
+    value = "NOTFOUND";
+    }
+  m_Properties[prop] = value;
+}
+
+const char *cmTarget::GetProperty(const char* prop) const
+{
+  std::map<cmStdString,cmStdString>::const_iterator i = 
+    m_Properties.find(prop);
+  if (i != m_Properties.end())
+    {
+    return i->second.c_str();
+    }
+  return 0;
+}
+
+bool cmTarget::GetPropertyAsBool(const char* prop) const
+{
+  std::map<cmStdString,cmStdString>::const_iterator i = 
+    m_Properties.find(prop);
+  if (i != m_Properties.end())
+    {
+    return cmSystemTools::IsOn(i->second.c_str());
+    }
+  return false;
+}

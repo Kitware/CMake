@@ -125,6 +125,11 @@ public:
 
   void AnalyzeLibDependencies( const cmMakefile& mf );
 
+  ///! Set/Get a property of this target file
+  void SetProperty(const char *prop, const char *value);
+  const char *GetProperty(const char *prop) const;
+  bool GetPropertyAsBool(const char *prop) const;
+
 private:
   /**
    * A list of direct dependencies. Use in conjunction with DependencyMap.
@@ -177,7 +182,8 @@ private:
    * dep_map.
    */
   void GatherDependencies( const cmMakefile& mf, const std::string& lib,
-                           DependencyMap& dep_map );
+                           DependencyMap& dep_map ); 
+
 
 private:
   std::vector<cmCustomCommand> m_CustomCommands;
@@ -190,7 +196,8 @@ private:
   bool m_InAll;
   std::string m_InstallPath;
   std::set<cmStdString> m_Utilities;
-  bool m_RecordDependencies;
+  bool m_RecordDependencies; 
+  std::map<cmStdString,cmStdString> m_Properties;
 };
 
 typedef std::map<cmStdString,cmTarget> cmTargets;
