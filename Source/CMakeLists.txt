@@ -659,7 +659,7 @@ IF(BUILD_TESTING)
 
     INCLUDE(FindJava)
     IF(JAVA_COMPILE AND JAVA_RUNTIME AND JAVA_ARCHIVE)
-      EXEC_PROGRAM(${CMAKE_Java_COMPILER} -version OUTPUT_VARIABLE OUT)
+      EXEC_PROGRAM(${JAVA_COMPILE} ARGS -version OUTPUT_VARIABLE OUT)
       IF(OUT MATCHES "invalid flag")
         MESSAGE("This java does not even know what version it is!")
       ELSE(OUT MATCHES "invalid flag")
