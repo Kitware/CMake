@@ -54,14 +54,20 @@ void cmGlobalUnixMakefileGenerator::EnableLanguage(const char* lang,
         putenv(envCC);
 #endif
         }
-      if (!m_CMakeInstance->GetIsInTryCompile())
+      if (m_CMakeInstance->GetIsInTryCompile())
         {
-        std::string cmd = root;
-        cmd += "/Templates/cconfigure";
-        cmSystemTools::RunCommand(cmd.c_str(), output, 
-                                  cmSystemTools::ConvertToOutputPath(
-                                    mf->GetHomeOutputDirectory()).c_str());
+        cmSystemTools::Error("This should not have happen. "
+                             "If you see this message, you are probably using a "
+                             "broken CMakeLists.txt file or a problematic release of "
+                             "CMake");
         }
+
+      std::string cmd = root;
+      cmd += "/Templates/cconfigure";
+      cmSystemTools::RunCommand(cmd.c_str(), output, 
+                                cmSystemTools::ConvertToOutputPath(
+                                  mf->GetHomeOutputDirectory()).c_str());
+        
       std::string fpath = mf->GetHomeOutputDirectory();
       fpath += "/CCMakeSystemConfig.cmake";
       mf->ReadListFile(0,fpath.c_str());
@@ -100,13 +106,18 @@ void cmGlobalUnixMakefileGenerator::EnableLanguage(const char* lang,
 #endif
         }
       std::string cmd = root;
-      if (!m_CMakeInstance->GetIsInTryCompile())
+      if (m_CMakeInstance->GetIsInTryCompile())
         {
-        cmd += "/Templates/cxxconfigure";
-        cmSystemTools::RunCommand(cmd.c_str(), output, 
-                                  cmSystemTools::ConvertToOutputPath(
-                                    mf->GetHomeOutputDirectory()).c_str());
+        cmSystemTools::Error("This should not have happen. "
+                             "If you see this message, you are probably using a "
+                             "broken CMakeLists.txt file or a problematic release of "
+                             "CMake");
         }
+      cmd += "/Templates/cxxconfigure";
+      cmSystemTools::RunCommand(cmd.c_str(), output, 
+                                cmSystemTools::ConvertToOutputPath(
+                                  mf->GetHomeOutputDirectory()).c_str());
+      
       std::string fpath = mf->GetHomeOutputDirectory();
       fpath += "/CXXCMakeSystemConfig.cmake";
       mf->ReadListFile(0,fpath.c_str());
