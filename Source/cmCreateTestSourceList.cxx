@@ -257,15 +257,17 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)
   fout.close();
 
   // Create the source list
-
   cmSourceFile cfile;
+  std::string sourceListValue;
+  
   cfile.SetIsAnAbstractClass(false);
   cfile.SetName(args[1].c_str(), 
                 m_Makefile->GetCurrentOutputDirectory(),
                 "cxx", 
                 false);
-  m_Makefile->AddSource(cfile, sourceList);
-  
+  m_Makefile->AddSource(cfile);
+  sourceListValue = args[1].c_str();
+    
   for(i = testsBegin; i != tests.end(); ++i)
     {
     cmSourceFile cfile;
@@ -274,9 +276,12 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)
                   m_Makefile->GetCurrentDirectory(),
                   m_Makefile->GetSourceExtensions(), 
                   m_Makefile->GetHeaderExtensions());
-    m_Makefile->AddSource(cfile, sourceList);
+    m_Makefile->AddSource(cfile);
+    sourceListValue += ";";
+    sourceListValue += *i;
     }
 
+  m_Makefile->AddDefinition(sourceList, sourceListValue.c_str());
   return true;
 }
 

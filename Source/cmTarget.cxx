@@ -50,12 +50,21 @@ void cmTarget::GenerateSourceFilesFromSourceLists( cmMakefile &mf)
     // if one wasn't found then assume it is a single class
     else
       {
-      cmSourceFile file;
-      file.SetIsAnAbstractClass(false);
-      file.SetName(temps.c_str(), mf.GetCurrentDirectory(),
-                   mf.GetSourceExtensions(),
-                   mf.GetHeaderExtensions());
-      m_SourceFiles.push_back(mf.AddSource(file));
+      // if the source file is already in the makefile, use it
+      if (mf.GetSource(temps.c_str()))
+        {
+        m_SourceFiles.push_back(mf.GetSource(temps.c_str()));
+        }
+      // otherwise try to create it
+      else
+        {
+        cmSourceFile file;
+        file.SetIsAnAbstractClass(false);
+        file.SetName(temps.c_str(), mf.GetCurrentDirectory(),
+                     mf.GetSourceExtensions(),
+                     mf.GetHeaderExtensions());
+        m_SourceFiles.push_back(mf.AddSource(file));
+        }
       }
     }
 

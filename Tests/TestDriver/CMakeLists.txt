@@ -10,5 +10,5 @@ CREATE_TEST_SOURCELIST(testSrcs
 	               subdir/test3 
                        EXTRA_INCLUDE testArgs.h FUNCTION testProccessArgs)
 
-ADD_EXECUTABLE(TestDriverTest testSrcs ${Extra_SRCS})
+ADD_EXECUTABLE(TestDriverTest ${testSrcs} ${Extra_SRCS})
 
