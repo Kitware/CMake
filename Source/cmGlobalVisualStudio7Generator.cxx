@@ -43,7 +43,8 @@ void cmGlobalVisualStudio7Generator::EnableLanguage(const char*,
 int cmGlobalVisualStudio7Generator::TryCompile(const char *, 
                                                const char *bindir, 
                                                const char *projectName,
-                                               const char *targetName)
+                                               const char *targetName,
+                                               std::string *output)
 {
   // now build the test
   std::string makeCommand = 
@@ -61,8 +62,6 @@ int cmGlobalVisualStudio7Generator::TryCompile(const char *,
   /**
    * Run an executable command and put the stdout in output.
    */
-  std::string output;
-
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
   cmSystemTools::ChangeDirectory(bindir);
 
@@ -77,7 +76,7 @@ int cmGlobalVisualStudio7Generator::TryCompile(const char *,
 #endif
   makeCommand += " ";
   makeCommand += projectName;
-  makeCommand += ".sln /rebuild Debug /project ";
+  makeCommand += ".sln /build Debug /project ";
   if (targetName)
     {
     makeCommand += targetName;
@@ -88,7 +87,8 @@ int cmGlobalVisualStudio7Generator::TryCompile(const char *,
     }
   
   int retVal;
-  if (!cmSystemTools::RunCommand(makeCommand.c_str(), output, retVal))
+  if (!cmSystemTools::RunCommand(makeCommand.c_str(), *output, retVal, 
+                                 0, false))
     {
     cmSystemTools::Error("Generator: execution of devenv failed.");
     // return to the original directory
@@ -571,3 +571,14 @@ std::string cmGlobalVisualStudio7Generator::CreateGUID(const char* name)
   return ret;
 }
 
+void cmGlobalVisualStudio7Generator::LocalGenerate()
+{
+  // load the possible configuraitons
+  this->GenerateConfigurations();
+  this->cmGlobalGenerator::LocalGenerate();
+}
+
+std::vector<std::string> *cmGlobalVisualStudio7Generator::GetConfigurations()
+{
+  return &m_Configurations;
+};

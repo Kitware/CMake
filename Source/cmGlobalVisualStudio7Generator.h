@@ -48,7 +48,8 @@ public:
    * loaded commands, not as part of the usual build process.
    */
   virtual int TryCompile(const char *srcdir, const char *bindir,
-                         const char *projectName, const char *targetName);
+                         const char *projectName, const char *targetName,
+                         std::string *output);
 
   /**
    * Generate the all required files for building this project/tree. This
@@ -58,6 +59,13 @@ public:
   virtual void Generate();
 
   /**
+   * Generate the required files for building this directory. This
+   * basically creates a single LocalGenerators and
+   * requests that it Generate.  
+   */
+  virtual void LocalGenerate();
+
+  /**
    * Generate the DSW workspace file.
    */
   virtual void OutputSLNFile();
@@ -65,10 +73,7 @@ public:
   /**
    * Get the list of configurations
    */
-  std::vector<std::string> *GetConfigurations() 
-    {
-      return &m_Configurations;
-    };
+  std::vector<std::string> *GetConfigurations();
       
 private:
   void SetupTests();
