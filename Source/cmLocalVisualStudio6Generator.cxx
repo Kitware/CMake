@@ -664,7 +664,7 @@ cmLocalVisualStudio6Generator::CreateTargetRules(const cmTarget &target,
       }
     else
       {
-      customRuleCode += "\t";
+      customRuleCode += "\\\n\t";
       }
     customRuleCode += this->ConvertToRelativeOutputPath(cc.GetCommand().c_str()) + " " + cc.GetArguments();
     }
@@ -683,7 +683,7 @@ cmLocalVisualStudio6Generator::CreateTargetRules(const cmTarget &target,
       }
     else
       {
-      customRuleCode += "\t";
+      customRuleCode += "\\\n\t";
       }
     customRuleCode += this->ConvertToRelativeOutputPath(cc.GetCommand().c_str()) + " " + cc.GetArguments();
     }
@@ -704,7 +704,7 @@ cmLocalVisualStudio6Generator::CreateTargetRules(const cmTarget &target,
       }
     else
       {
-      customRuleCode += "\t";
+      customRuleCode += "\\\n\t";
       }
     customRuleCode += 
       this->ConvertToRelativeOutputPath(cc.GetCommand().c_str()) + 
