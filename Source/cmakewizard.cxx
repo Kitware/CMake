@@ -31,11 +31,11 @@ cmakewizard::cmakewizard()
   
 void cmakewizard::AskUser(const char* key, cmCacheManager::CacheIterator& iter)
 {
-  std::cout << "Variable Name: " << key << "\n";
+  printf("Variable Name: %s\n", key);
   const char* helpstring = iter.GetProperty("HELPSTRING");
-  std::cout << "Description:   " << (helpstring?helpstring:"(none)") << "\n";
-  std::cout << "Current Value: " << iter.GetValue() << "\n";
-  std::cout << "New Value (Enter to keep current value): ";
+  printf("Description: %s\n", (helpstring?helpstring:"(none)"));
+  printf("Current Value: %s\n", iter.GetValue());
+  printf("New Value (Enter to keep current value): ");
   char buffer[4096];
   buffer[0] = 0;
   fgets(buffer, sizeof(buffer)-1, stdin);
@@ -67,12 +67,12 @@ void cmakewizard::AskUser(const char* key, cmCacheManager::CacheIterator& iter)
       iter.SetValue(value.c_str());
       }
     }
-  std::cout << "\n";
+  printf("\n");
 }
 
 bool cmakewizard::AskAdvanced()
 {
-  std::cout << "Would you like to see advanced options? [No]:";  
+  printf("Would you like to see advanced options? [No]:");  
   char buffer[4096];
   buffer[0] = 0;
   fgets(buffer, sizeof(buffer)-1, stdin);
@@ -89,7 +89,7 @@ bool cmakewizard::AskAdvanced()
 
 void cmakewizard::ShowMessage(const char* m)
 {
-  std::cout << m << "\n";
+  printf("%s\n", m);
 }
 
 
