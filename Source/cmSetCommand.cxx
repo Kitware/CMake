@@ -30,69 +30,55 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args)
     m_Makefile->RemoveDefinition(args[0].c_str());
     return true;
     }
-// here are the options 
-//  SET (VAR) 
-//  SET (VAR value )
-//  SET (VAR CACHE TYPE "doc String")
-//  SET (VAR value CACHE TYPE "doc string")
 
+  // here are the remaining options 
+  //  SET (VAR value )
+  //  SET (VAR CACHE TYPE "doc String" [FORCE])
+  //  SET (VAR value CACHE TYPE "doc string" [FORCE])
   const char* variable = args[0].c_str(); // VAR is always first
   std::string value;  // optional
   bool cache = false; // optional
   bool force = false; // optional
-  cmCacheManager::CacheEntryType type = cmCacheManager::STRING; // required if cache
+  cmCacheManager::CacheEntryType type 
+    = cmCacheManager::STRING; // required if cache
   const char* docstring = 0; // required if cache
   std::string::size_type cacheStart = 0;
   
-  // check for SET(VAR v1 v2 ... vn) 
-  // and create
-  if(args.size() > 2)
-    {
-    if(args[1] != "CACHE" && args[2] != "CACHE")
-      {
-      value = args[1];
-      for(size_t i =2; i < args.size(); ++i)
-        {
-        value += ";";
-        value += args[i];
-        }
-      m_Makefile->AddDefinition(variable, value.c_str());
-      return true;
-      }
-    }
-
   // look for FORCE argument
   if (args.size() > 4 && args[args.size()-1] == "FORCE")
     {
     force = true;
     }
+
+  // check for cache signature
+  if (args.size() > 3 && args[args.size() - 3 - (force ? 1 : 0)] == "CACHE")
+    {
+    cache = true;
+    }
   
-  std::vector<std::string>::size_type arg4, arg5;
-  arg4 = 4 + (force ? 1 : 0);
-  arg5 = 5 + (force ? 1 : 0);
-  if(args.size() == 2)
+  // collect any values into a single semi-colon seperated value list
+  if(args.size() > 
+     static_cast<unsigned short>(1 + (cache ? 3 : 0) + (force ? 1 : 0)))
     {
-    // SET (VAR value )
-    value= args[1];
-    }
-  else if(args.size() == arg4)
-    {
-    // SET (VAR CACHE TYPE "doc String")
-    cache = true;
-    cacheStart = 1;
-    }
-  else if(args.size() == arg5)
-    {
-    //  SET (VAR value CACHE TYPE "doc string")
-    cache = true;
     value = args[1];
-    cacheStart = 2;
+    size_t endPos = args.size() - (cache ? 3 : 0) - (force ? 1 : 0);
+    for(size_t i = 2; i < endPos; ++i)
+      {
+      value += ";";
+      value += args[i];
+      }
     }
-  else
+
+  // we should be nice and try to catch some simple screwups if the last or
+  // next to last args are CACHE then they screwed up.  If they used FORCE
+  // without CACHE they screwed up
+  if (args[args.size() - 1] == "CACHE" ||
+      args.size() > 1 && args[args.size() - 2] == "CACHE" ||
+      force && !cache)
     {
     std::string message;
     message += "Syntax error in SET:\n";
-    message += "CACHE requires TYPE and document string SET command:\n";
+    message += "See the help for the SET command:\n";
     message += "SET (";
     for(std::vector<std::string>::const_iterator i = args.begin();
         i != args.end(); ++i)
@@ -103,19 +89,14 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args)
     this->SetError(message.c_str());
     return false;
     }
+  
   if(cache)
     {
-    if(args[cacheStart] != "CACHE")
-      {
-      std::string error = "Error in arguments to cache, expected CACHE found:";
-      error += args[cacheStart];
-      error += "\n";
-      this->SetError(error.c_str());
-      return false;
-      }
+    cacheStart = args.size() - 3 - (force ? 1 : 0);
     type = cmCacheManager::StringToType(args[cacheStart+1].c_str());
     docstring = args[cacheStart+2].c_str();
     }
+
   // see if this is already in the cache
   cmCacheManager::CacheIterator it = 
     m_Makefile->GetCacheManager()->GetCacheIterator(variable);
