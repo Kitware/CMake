@@ -328,6 +328,10 @@ std::string cmLocalGenerator::GetFullTargetName(const char* n,
 
 std::string cmLocalGenerator::ConvertToRelativeOutputPath(const char* p)
 {
+  if ( m_Makefile->GetDefinition("CMAKE_NO_RELATIVE_PATHS") )
+    {
+    return cmSystemTools::ConvertToOutputPath(p);
+    }
   // do not use relative paths for network build trees
   // the network paths do not work
   const char* outputDirectory = m_Makefile->GetHomeOutputDirectory();

@@ -1366,26 +1366,47 @@ int cmCTest::CoverageDirectory()
 
   std::string opath = m_ToplevelPath + "/Testing/Temporary/Coverage";
   cmSystemTools::MakeDirectory(opath.c_str());
+  cfiles.clear();
+  cmCTest::tm_VectorOfStrings ncfiles;
+  cmCTest::tm_VectorOfStrings missing_files;
 
   for ( cc = 0; cc < files.size(); cc ++ )
     {
-    std::string command = coverageCommand + " -o \"" + 
-      cmSystemTools::GetFilenamePath(files[cc]) + 
-      "\" -l \"" + files[cc] + "\"";
+    std::string currPath = cmSystemTools::GetFilenamePath(files[cc]);
+    std::string command = coverageCommand + " -o \"" + currPath + "\" -l \"" + files[cc] + "\"";
     std::string output;
     int retVal = 0;
-    //std::cout << "Run gcov on " << files[cc] << std::flush;
+    std::cerr << "Run gcov on " << files[cc] << " in directory: " << currPath.c_str() << std::endl;
     //std::cout << "   --- Run [" << command << "]" << std::endl;
     bool res = true;
     if ( !m_ShowOnly )
       {
       res = cmSystemTools::RunSingleCommand(command.c_str(), &output, 
-        &retVal, opath.c_str(),
+        &retVal, currPath.c_str(),
         m_Verbose, 0 /*m_TimeOut*/);
       }
     if ( res && retVal == 0 )
       {
       //std::cout << " - done" << std::endl;
+      glob = currPath + "/*";
+      if ( !cmSystemTools::SimpleGlob(glob, ncfiles, 1) )
+        {
+        std::cerr << "Cannot found any coverage files" << std::endl;
+        return 1;
+        }
+      cfiles.insert(cfiles.end(), ncfiles.begin(), ncfiles.end());
+      std::vector<cmStdString> gcovlines;
+      cmSystemTools::Split(output.c_str(), gcovlines);
+      std::vector<cmStdString>::iterator git;
+      const char* message = "Could not open source file";
+      for ( git = gcovlines.begin(); git != gcovlines.end(); ++git )
+        {
+        if ( strncmp(git->c_str(), message, strlen(message) ) == 0 )
+          {
+          std::cerr << "Problem: " << git->c_str() << std::endl;
+          missing_files.push_back(git->c_str() + strlen(message));
+          }
+        }
       }
     else
       {
@@ -1396,12 +1417,6 @@ int cmCTest::CoverageDirectory()
     }
   
   files.clear();
-  glob = opath + "/*";
-  if ( !cmSystemTools::SimpleGlob(glob, cfiles, 1) )
-    {
-    std::cerr << "Cannot found any coverage files" << std::endl;
-    return 1;
-    }
   std::map<std::string, cmCTest::tm_VectorOfStrings > sourcefiles;
   for ( cc = 0; cc < cfiles.size(); cc ++ )
     {
@@ -1435,6 +1450,13 @@ int cmCTest::CoverageDirectory()
   //     {
   //     std::cout << "File: " << files[cc] << std::endl;
   //     }
+  std::cout << "---------------------------------------------------------------" << std::endl;
+  std::cout << "The following files were missing:" << std::endl;
+  for ( cc = 0; cc < missing_files.size(); cc ++ )
+    {
+    std::cout << "File: " << missing_files[cc] << std::endl;
+    }
+  std::cout << "---------------------------------------------------------------" << std::endl;
 
   std::map<std::string, cmCTest::tm_VectorOfStrings >::iterator it;
   cmCTest::tm_CoverageMap coverageresults;
@@ -3223,6 +3245,10 @@ int cmCTest::RunConfigurationScript()
 
     // we must now checkout the src dir
     output = "";
+    if ( m_Verbose )
+      {
+      std::cerr << "Run cvs: " << cvsCheckOut << std::endl;
+      }
     res = cmSystemTools::RunSingleCommand(cvsCheckOut, &output, 
       &retVal, ctestRoot,
       m_Verbose, 0 /*m_TimeOut*/);
@@ -3283,6 +3309,10 @@ int cmCTest::RunConfigurationScript()
           fullCommand += cvsArgs[1];
           output = "";
           retVal = 0;
+          if ( m_Verbose )
+            {
+            std::cerr << "Run CVS: " << fullCommand.c_str() << std::endl;
+            }
           res = cmSystemTools::RunSingleCommand(fullCommand.c_str(), &output, 
             &retVal, cvsArgs[0].c_str(),
             m_Verbose, 0 /*m_TimeOut*/);
@@ -3334,6 +3364,10 @@ int cmCTest::RunConfigurationScript()
     output = "";
     command += "\"";
     retVal = 0;
+    if ( m_Verbose )
+      {
+      std::cerr << "Run cmake command: " << command.c_str() << std::endl;
+      }
     res = cmSystemTools::RunSingleCommand(command.c_str(), &output, 
       &retVal, binDir,
       m_Verbose, 0 /*m_TimeOut*/);
@@ -3348,6 +3382,10 @@ int cmCTest::RunConfigurationScript()
   command = ctestCmd;
   output = "";
   retVal = 0;
+  if ( m_Verbose )
+    {
+    std::cerr << "Run ctest command: " << command.c_str() << std::endl;
+    }
   res = cmSystemTools::RunSingleCommand(command.c_str(), &output, 
     &retVal, binDir,
     m_Verbose, 0 /*m_TimeOut*/);
