@@ -81,8 +81,7 @@ void cmBorlandMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     "NULL=\n"
     "!ELSE \n"
     "NULL=nul\n"
-    "!ENDIF \n"
-    "RM = del\n";
+    "!ENDIF \n";
   std::string buildType = "CMAKE_CXX_FLAGS_";
   buildType +=  m_Makefile->GetDefinition("CMAKE_BUILD_TYPE");
   buildType = cmSystemTools::UpperCase(buildType);
@@ -99,7 +98,8 @@ void cmBorlandMakefileGenerator::OutputMakeVariables(std::ostream& fout)
 
   std::string replaceVars = variables;
   m_Makefile->ExpandVariablesInString(replaceVars);
-  
+  std::string ccommand = m_Makefile->GetDefinition("CCOMMAND_COMMAND");
+  fout << "RM = " << this->ConvertToOutputPath(ccommand.c_str()) << " remove -f\n";
   std::string ccompiler = m_Makefile->GetDefinition("CMAKE_C_COMPILER");
   fout << "CMAKE_C_COMPILER  = " 
        << this->ConvertToOutputPath(ccompiler.c_str())

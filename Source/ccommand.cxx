@@ -51,7 +51,14 @@ int main(int ac, char** av)
       {
       for ( std::string::size_type cc = 2; cc < args.size(); cc ++ )
 	{
-	cmSystemTools::RemoveFile(args[cc].c_str());
+        if(args[cc] != "-f")
+          {
+          if(args[cc] == "\\-f")
+            {
+            args[cc] = "-f";
+            }
+          cmSystemTools::RemoveFile(args[cc].c_str());
+          }
 	}
       return 0;
       }
