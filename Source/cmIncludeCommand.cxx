@@ -43,7 +43,6 @@ bool cmIncludeCommand::InitialPass(std::vector<std::string> const& args)
     std::string mfile = m_Makefile->GetModulesFile(module.c_str());
     if ( mfile.size() )
       {
-      std::cout << "Module found: " << mfile.c_str() << std::endl;
       fname = mfile.c_str();
       }
     }
