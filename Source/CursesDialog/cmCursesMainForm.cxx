@@ -504,7 +504,7 @@ void cmCursesMainForm::UpdateStatusBar()
   pos_form_cursor(m_Form);
 }
 
-void cmCursesMainForm::RunCMake(bool generateMakefiles)
+int cmCursesMainForm::RunCMake(bool generateMakefiles)
 {
 
   int x,y;
@@ -557,6 +557,12 @@ void cmCursesMainForm::RunCMake(bool generateMakefiles)
     CurrentForm = msgs;
     msgs->Render(1,1,x,y);
     msgs->HandleInput();
+    // If they typed the wrong source directory, we report
+    // an error and exit
+    if ( retVal == -2 )
+      {
+      return retVal;
+      }
     CurrentForm = this;
     this->Render(1,1,x,y);
     }
@@ -565,6 +571,7 @@ void cmCursesMainForm::RunCMake(bool generateMakefiles)
   this->InitializeUI();
   this->Render(1, 1, x, y);
   
+  return 0;
 }
 
 void cmCursesMainForm::AddError(const char* message, const char* title)

@@ -370,7 +370,7 @@ int cmake::Generate(const std::vector<std::string>& args, bool buildMakefiles)
       message += cacheStart;
       message += "\nRe-run cmake with a different source directory.";
       cmSystemTools::Error(message.c_str());
-      return -1;
+      return -2;
       }
     }
   mf.AddCacheDefinition("CMAKE_HOME_DIRECTORY", mf.GetHomeDirectory(),

@@ -85,7 +85,7 @@ public:
   /**
    * Used to run cmake.
    */
-  void RunCMake(bool generateMakefiles);
+  int RunCMake(bool generateMakefiles);
 
 protected:
   cmCursesMainForm(const cmCursesMainForm& from);
