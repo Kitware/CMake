@@ -823,8 +823,9 @@ void cmMakefile::ExpandVariablesInString(std::string& source,
   
   // start by look for $ or @ in the string
   std::string::size_type markerPos = source.find_first_of("$@");
-  // if not found then leave quick as nothing needs to be expanded
-  if(markerPos == std::string::npos && markerPos > source.size()-1)
+  // if not found, or found as the last character, then leave quickly as
+  // nothing needs to be expanded
+  if((markerPos == std::string::npos) || (markerPos >= source.size()-1))
     {
     return;
     }
@@ -832,14 +833,14 @@ void cmMakefile::ExpandVariablesInString(std::string& source,
   std::string::size_type currentPos =0; // start at 0 
   std::string result; // string with replacements
   // go until the the end of the string
-  while(markerPos != std::string::npos)
+  while((markerPos != std::string::npos) && (markerPos < source.size()-1))
     {
     // grab string from currentPos to the start of the variable
     // and add it to the result
     result += source.substr(currentPos, markerPos - currentPos);
     char endVariableMarker;     // what is the end of the variable @ or }
     int markerStartSize = 1;    // size of the start marker 1 or 2
-    if(source[markerPos] == '$' )
+    if(source[markerPos] == '$')
       {
       // ${var} case
       if(source[markerPos+1] == '{')
