@@ -17,11 +17,11 @@
 // Program extracts documentation describing commands from
 // the CMake system.
 // 
-#include "cmMakefile.h"
+#include "cmake.h"
 
 int main(int ac, char** av)
 {
-  cmMakefile makefile;
+  cmake cmi;
   const char* outname = "cmake.html";
   if(ac > 1)
     {
@@ -33,6 +33,6 @@ int main(int ac, char** av)
     std::cerr << "failed to open output file: " << outname << "\n";
     return -1;
     }
-  makefile.DumpDocumentationToFile(fout);
+  cmi.DumpDocumentationToFile(fout);
   return 0;
 }
