@@ -144,7 +144,7 @@ SystemTools::GetTime(void)
   {
 #if defined(HAVE_FTIME)
   struct TIMEB t;
-  FTIME(&t);
+  ::FTIME(&t);
   return (double)t.time + (double)t.millitm * (double)0.001;
 #else /* !HAVE_FTIME */
   time_t secs;
