@@ -10,6 +10,9 @@ SET(CTEST_CUSTOM_WARNING_EXCEPTION
   "libCurl.*has no symbols"
   "not sorted slower link editing will result"
   "stl_deque.h:479"
+  "Utilities/cmzlib/"      
+  "Source/CTest/Curl"      
+  "Utilities/cmexpat/"      
   )
 
 
