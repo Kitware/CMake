@@ -221,7 +221,6 @@ void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
   // the executable
   for(lib = libs.begin(); lib != libs.end(); ++lib)
     {
-    bool found = false;
     // loop over the list of directories that the libraries might
     // be in, looking for an ADD_LIBRARY(lib...) line. This would
     // be stored in the cache
@@ -234,7 +233,6 @@ void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
       libpath += *lib;
       libpath += "${CMAKE_LIB_EXT}";
       fout << libpath << " ";
-      found = true;
       }
     }
 
