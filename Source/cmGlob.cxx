@@ -182,16 +182,16 @@ void cmGlob::RecurseDirectory(const std::string& dir, bool dir_only)
 #endif
 
     fullname = dir + "/" + fname;
-    if ( !dir_only || !cmsys::SystemTools::FileIsDirectory(fullname.c_str()) )
+    if ( !dir_only || !cmsys::SystemTools::FileIsDirectory(realname.c_str()) )
       {
       if ( m_Internals->Expressions[m_Internals->Expressions.size()-1].find(fname.c_str()) )
         {
-        m_Internals->Files.push_back(fullname);
+        m_Internals->Files.push_back(realname);
         }
       }
-    if ( cmsys::SystemTools::FileIsDirectory(fullname.c_str()) )
+    if ( cmsys::SystemTools::FileIsDirectory(realname.c_str()) )
       {
-      this->RecurseDirectory(fullname, dir_only);
+      this->RecurseDirectory(realname, dir_only);
       }
     }
 }
@@ -251,7 +251,7 @@ void cmGlob::ProcessDirectory(std::string::size_type start,
     //std::cout << "Match: " << m_Internals->TextExpressions[start].c_str() << std::endl;
     //std::cout << "Full name: " << fullname << std::endl;
 
-    if ( (!dir_only || !last) && !cmsys::SystemTools::FileIsDirectory(fullname.c_str()) )
+    if ( (!dir_only || !last) && !cmsys::SystemTools::FileIsDirectory(realname.c_str()) )
       {
       continue;
       }
