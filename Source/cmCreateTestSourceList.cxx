@@ -96,7 +96,7 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)
     "#include <ctype.h>\n"
     "#include <stdio.h>\n"
     "#include <string.h>\n"
-    "#include <malloc.h>\n";
+    "#include <stdlib.h>\n";
   if(extraInclude.size())
     {
     fout << "#include \"" << extraInclude << "\"\n";
