@@ -1135,7 +1135,7 @@ OutputSubDirectoryVars(std::ostream& fout,
   for(unsigned int i =0; i < SubDirectories.size(); i++)
     {
     std::string subdir = FixDirectoryName(SubDirectories[i].c_str());
-    fout << target << "_" << subdir.c_str() << ":";
+    fout << target << "_" << subdir.c_str() << ": $(TARGETS)";
     
     // Make each subdirectory depend on previous one.  This forces
     // parallel builds (make -j 2) to build in same order as a single
