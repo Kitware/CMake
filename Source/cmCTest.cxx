@@ -4887,7 +4887,7 @@ void cmCTest::SetTestsToRunInformation(const char* in)
     std::unique(m_TestsToRun.begin(), m_TestsToRun.end());
   m_TestsToRun.erase(new_end, m_TestsToRun.end());
   std::cout << "Running tests: ";
-  for(int i =0; i < m_TestsToRun.size(); ++i)
+  for(unsigned int i =0; i < m_TestsToRun.size(); ++i)
     {
     std::cout << m_TestsToRun[i] << " ";
     }
