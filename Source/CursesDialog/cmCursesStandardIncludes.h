@@ -30,7 +30,8 @@ inline void curses_move(unsigned int x, unsigned int y)
 
 inline void curses_clear()
 {
-  clear();
+  erase();
+  clearok(stdscr, TRUE);
 }
 
 #undef move
