@@ -23,11 +23,11 @@
 #include "cmCablePackageEntryCommand.cxx"
 #include "cmCableSourceFilesCommand.cxx"
 #include "cmCableWrapCommand.cxx"
-#include "cmConfigureFile.cxx"
+#include "cmConfigureFileCommand.cxx"
 #include "cmConfigureFileNoAutoconf.cxx"
 #include "cmElseCommand.cxx"
 #include "cmEndIfCommand.cxx"
-#include "cmExecProgram.cxx"
+#include "cmExecProgramCommand.cxx"
 #include "cmFindFileCommand.cxx"
 #include "cmFindIncludeCommand.cxx"
 #include "cmFindLibraryCommand.cxx"
@@ -39,6 +39,7 @@
 #include "cmIncludeRegularExpressionCommand.cxx"
 #include "cmLinkDirectoriesCommand.cxx"
 #include "cmLinkLibrariesCommand.cxx"
+#include "cmMakeDirectoryCommand.cxx"
 #include "cmOptionCommand.cxx"
 #include "cmProjectCommand.cxx"
 #include "cmSetCommand.cxx"
@@ -74,11 +75,11 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmCablePackageCommand);
   commands.push_back(new cmCableSourceFilesCommand);
   commands.push_back(new cmCableWrapCommand);
-  commands.push_back(new cmConfigureFile);
+  commands.push_back(new cmConfigureFileCommand);
   commands.push_back(new cmConfigureFileNoAutoconf);
   commands.push_back(new cmElseCommand);
   commands.push_back(new cmEndIfCommand);
-  commands.push_back(new cmExecProgram);
+  commands.push_back(new cmExecProgramCommand);
   commands.push_back(new cmFindFileCommand);
   commands.push_back(new cmFindIncludeCommand);
   commands.push_back(new cmFindLibraryCommand);
@@ -90,6 +91,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmIncludeRegularExpressionCommand);
   commands.push_back(new cmLinkDirectoriesCommand);
   commands.push_back(new cmLinkLibrariesCommand);
+  commands.push_back(new cmMakeDirectoryCommand);
   commands.push_back(new cmOptionCommand);
   commands.push_back(new cmProjectCommand);
   commands.push_back(new cmSetCommand);

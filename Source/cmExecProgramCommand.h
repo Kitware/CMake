@@ -38,19 +38,60 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =========================================================================*/
-#include "cmExecProgram.h"
-#include "cmSystemTools.h"
+#ifndef cmExecProgramCommand_h
+#define cmExecProgramCommand_h
 
-// cmExecProgram
-bool cmExecProgram::Invoke(std::vector<std::string>& args)
+#include "cmStandardIncludes.h"
+#include "cmCommand.h"
+
+/** \class cmExecProgramCommand
+ * \brief Command that adds a target to the build system.
+ *
+ * cmExecProgramCommand adds an extra target to the build system.
+ * This is useful when you would like to add special
+ * targets like "install,", "clean," and so on.
+ */
+class cmExecProgramCommand : public cmCommand
 {
-  if(args.size() < 1 )
+public:
+  /**
+   * This is a virtual constructor for the command.
+   */
+  virtual cmCommand* Clone() 
     {
-    this->SetError("called with incorrect number of arguments");
-    return false;
+    return new cmExecProgramCommand;
     }
-  std::string output;
-  cmSystemTools::RunCommand(args[0].c_str(), output);
-  return true;
-}
 
+  /**
+   * This is called when the command is first encountered in
+   * the CMakeLists.txt file.
+   */
+  virtual bool Invoke(std::vector<std::string>& args);
+  
+  /**
+   * The name of the command as specified in CMakeList.txt.
+   */
+  virtual const char* GetName() 
+    {return "EXEC_PROGRAM";}
+  
+  /**
+   * Succinct documentation.
+   */
+  virtual const char* GetTerseDocumentation() 
+    {
+    return "Run and executable program during the processing of the CMakeList.txt file.";
+    }
+  
+  /**
+   * More documentation.
+   */
+  virtual const char* GetFullDocumentation()
+    {
+    return
+      "EXEC_PROGRAM(Executble )";
+    }
+  
+  cmTypeMacro(cmExecProgramCommand, cmCommand);
+};
+
+#endif

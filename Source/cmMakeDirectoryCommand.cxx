@@ -38,63 +38,19 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =========================================================================*/
-#ifndef cmConfigureFile_h
-#define cmConfigureFile_h
+#include "cmMakeDirectoryCommand.h"
+#include "cmDirectory.h"
 
-#include "cmStandardIncludes.h"
-#include "cmCommand.h"
-
-class cmConfigureFile : public cmCommand
+// cmMakeDirectoryCommand
+bool cmMakeDirectoryCommand::Invoke(std::vector<std::string>& args)
 {
-public:
-  virtual cmCommand* Clone() 
+  if(args.size() < 1 )
     {
-      return new cmConfigureFile;
+    this->SetError("called with incorrect number of arguments");
+    return false;
     }
+  m_Makefile->ExpandVariablesInString(args[0]);
+  cmSystemTools::MakeDirectory(args[0].c_str());
+  return true;
+}
 
-  /**
-   * This is called when the command is first encountered in
-   * the input file.
-   */
-  virtual bool Invoke(std::vector<std::string>& args);
-
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  virtual const char* GetName() { return "CONFIGURE_FILE";}
-
-  /**
-   * Succinct documentation.
-   */
-  virtual const char* GetTerseDocumentation() 
-    {
-    return "Create a file from an autoconf style file.in file.";
-    }
-  
-  /**
-   * Longer documentation.
-   */
-  virtual const char* GetFullDocumentation()
-    {
-      return
-        "CONFIGURE_FILE(InputFile OutputFile)\n"
-	"The Input and Ouput files have to have full paths.\n"
-	"They can also use variables like CMAKE_BINARY_DIR,CMAKE_SOURCE_DIR.\n"
-        "This command replaces any variables in the input file with their\n"
-        "values as determined by CMake. If a variables in not defined, it\n"
-        "will be replaced with nothing.";
-    }
-
-  /**
-   * Create the header files in this pass.  This is so
-   * all varibles can be expaned.
-   */
-  virtual void FinalPass();
-private:
-  std::string m_InputFile;
-  std::string m_OuputFile;
-};
-
-
-
-#endif

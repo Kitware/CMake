@@ -75,7 +75,7 @@ void cmMakefile::AddDefaultCommands()
     {
     this->AddCommand(*i);
     }
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__CYGWIN__)
   this->AddDefinition("WIN32", "1");
 #else
   this->AddDefinition("UNIX", "1");
@@ -726,66 +726,6 @@ cmMakefile::FindSubDirectoryCMakeListsFiles(std::vector<cmMakefile*>&
       // recurse into nextDir
       mf->FindSubDirectoryCMakeListsFiles(makefiles);
       }
-    }
-}
-
-      
-void cmMakefile::GenerateCacheOnly()
-{
-  std::vector<cmMakefile*> makefiles;
-  this->FindSubDirectoryCMakeListsFiles(makefiles);
-  for(std::vector<cmMakefile*>::iterator i = makefiles.begin();
-      i != makefiles.end(); ++i)
-    {
-    cmMakefile* mf = *i;
-    std::string source = mf->GetHomeDirectory();
-    source += "/CMake/CMakeMakefileTemplate.in";
-    cmSystemTools::MakeDirectory(mf->GetStartOutputDirectory());
-    std::string dest = mf->GetStartOutputDirectory();
-    dest += "/Makefile";
-    std::ofstream fout(dest.c_str());
-    std::cout << "cmake: creating : " << dest.c_str() << "\n";
-    if(!fout)
-      {
-      cmSystemTools::Error("Failed to open file for write " , dest.c_str());
-      }
-    else
-      {
-      if(strcmp(mf->GetHomeDirectory(), 
-                mf->GetHomeOutputDirectory()) == 0)
-        {
-        fout << "srcdir        = .\n\n";
-        }
-      else
-        {
-        fout << "srcdir        = " <<  mf->GetStartDirectory() << "\n";
-        fout << "VPATH         = " <<  mf->GetStartDirectory() << "\n";
-        }
-      }
-    fout << "include "
-         << mf->GetHomeOutputDirectory() << "/CMake/CMakeMaster.make\n";
-    dest = mf->GetStartOutputDirectory();
-    dest += "/CMakeTargets.make";
-    // make sure there is a CMakeTargets.make file as some
-    // makes require it to exist
-    if(!cmSystemTools::FileExists(dest.c_str()))
-      {
-	std::cout << "cmake: creating : " << dest.c_str() << "\n";
-	std::ofstream fout(dest.c_str());
-	if(!fout)
-	  { 
-	    cmSystemTools::Error("Failed to open file for write " , dest.c_str());
-	  }
-	fout << "#Initial CMakeTargets.make file created only to keep \n";
-	fout << "#certain makes happy that don't like to include makefiles\n";
-	fout << "#that do not exist\n";
-      }
-    }
-
-  // CLEAN up the makefiles created
-  for(unsigned int i =0; i < makefiles.size(); ++i)
-    {
-      delete makefiles[i];
     }
 }
 

@@ -38,20 +38,22 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =========================================================================*/
-#ifndef cmExecProgram_h
-#define cmExecProgram_h
+#ifndef cmMakeDirectoryCommand_h
+#define cmMakeDirectoryCommand_h
 
 #include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
-/** \class cmExecProgram
- * \brief Command that adds a target to the build system.
+/** \class cmMakeDirectoryCommand
+ * \brief Specify auxiliary source code directories.
  *
- * cmExecProgram adds an extra target to the build system.
- * This is useful when you would like to add special
- * targets like "install,", "clean," and so on.
+ * cmMakeDirectoryCommand specifies source code directories
+ * that must be built as part of this build process. This directories
+ * are not recursively processed like the SUBDIR command (cmSubdirCommand).
+ * A side effect of this command is to create a subdirectory in the build
+ * directory structure.
  */
-class cmExecProgram : public cmCommand
+class cmMakeDirectoryCommand : public cmCommand
 {
 public:
   /**
@@ -59,7 +61,7 @@ public:
    */
   virtual cmCommand* Clone() 
     {
-    return new cmExecProgram;
+    return new cmMakeDirectoryCommand;
     }
 
   /**
@@ -67,19 +69,19 @@ public:
    * the CMakeLists.txt file.
    */
   virtual bool Invoke(std::vector<std::string>& args);
-  
+
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() 
-    {return "EXEC_PROGRAM";}
+  virtual const char* GetName() { return "MAKE_DIRECTORY";}
   
   /**
    * Succinct documentation.
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Run and executable program during the processing of the CMakeList.txt file.";
+    return "Create a directory in the build tree if it does not exist.\n"
+           "Parent directories will be created if the do not exist..";
     }
   
   /**
@@ -88,10 +90,12 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "EXEC_PROGRAM(Executble )";
+      "MAKE_DIRECTORY(directory)";
     }
   
-  cmTypeMacro(cmExecProgram, cmCommand);
+  cmTypeMacro(cmMakeDirectoryCommand, cmCommand);
 };
+
+
 
 #endif

@@ -40,7 +40,7 @@ cmSourceFile.o : $(DEPENDS)
 cmDirectory.o : $(DEPENDS)
 cmCustomCommand.o : $(DEPENDS)
 cmUnixMakefileGenerator.o : $(DEPENDS)
-cmCommands.o : $(DEPENDS) $(srcdir)/*.cxx
+cmCommands.o : $(DEPENDS) $(srcdir)/*Command*.cxx
 cmTarget.o : $(DEPENDS)
 cmCacheManager.o : $(DEPENDS)
 cmSourceGroup.o : $(DEPENDS)

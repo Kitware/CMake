@@ -466,13 +466,6 @@ public:
    */
   void FindSubDirectoryCMakeListsFiles(std::vector<cmMakefile*>& makefiles);
   
-  /** Generate the cache file only.  This is done
-   *  by calling FindSubDirectoryCMakeListsFiles which
-   *  will cause all the rules to fire, and the cache to
-   *  be filled.
-   */
-  void GenerateCacheOnly();
-
   /**
    * find what source group this source is in
    */

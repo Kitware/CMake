@@ -104,14 +104,23 @@ int main(int ac, char** av)
 	std::string path = arg.substr(2);
 	mf.SetHomeOutputDirectory(path.c_str());
 	}
+      if(arg.find("-D",0) == 0)
+	{
+	std::string value = arg.substr(2);
+        mf.AddDefinition(value.c_str(), true);
+	}
       }
     }
   // Only generate makefiles if not trying to make the cache
-  if(!makeCache)
+  cmUnixMakefileGenerator* gen = new cmUnixMakefileGenerator;
+  mf.SetMakefileGenerator(gen);
+  if(makeCache)
     {
-    mf.SetMakefileGenerator(new cmUnixMakefileGenerator);
+    // generate only enough for the cache
+    gen->SetCacheOnlyOn();
+    // generate for this makefile and all below it
+    gen->SetRecurseOn();
     }
-  
 
   // Read and parse the input makefile
   mf.MakeStartDirectoriesCurrent();
@@ -137,14 +146,7 @@ int main(int ac, char** av)
     Usage(av[0]);
     return -1;
     }
-  if(makeCache)
-    {
-    mf.GenerateCacheOnly();
-    }
-  else
-    {
-    mf.GenerateMakefile();
-    }
+  mf.GenerateMakefile();
   cmCacheManager::GetInstance()->SaveCache(&mf);
   if(makeCache)
     {

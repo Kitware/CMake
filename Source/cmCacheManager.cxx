@@ -185,13 +185,30 @@ bool cmCacheManager::SaveCache(const char* path) const
   for( std::map<std::string, CacheEntry>::const_iterator i = m_Cache.begin();
        i != m_Cache.end(); ++i)
     {
+    const CacheEntry& ce = (*i).second; 
+    CacheEntryType t = ce.m_Type;
+    if(t != INTERNAL)
+      {
+      // Format is key:type=value
+      cmCacheManager::OutputHelpString(fout, ce.m_HelpString);
+      fout << (*i).first.c_str() << ":"
+           << cmCacheManagerTypes[t] << "="
+           << ce.m_Value << "\n";
+      }
+    }
+  for( std::map<std::string, CacheEntry>::const_iterator i = m_Cache.begin();
+       i != m_Cache.end(); ++i)
+    {
     const CacheEntry& ce = (*i).second;
     CacheEntryType t = ce.m_Type;
-    // Format is key:type=value
-    cmCacheManager::OutputHelpString(fout, ce.m_HelpString);
-    fout << (*i).first.c_str() << ":"
-         << cmCacheManagerTypes[t] << "="
-         << ce.m_Value << "\n";
+    if(t == INTERNAL)
+      {
+      // Format is key:type=value
+      cmCacheManager::OutputHelpString(fout, ce.m_HelpString);
+      fout << (*i).first.c_str() << ":"
+           << cmCacheManagerTypes[t] << "="
+           << ce.m_Value << "\n";
+      }
     }
   fout << "\n";
   fout.close();
@@ -279,7 +296,10 @@ void cmCacheManager::PrintCache(std::ostream& out) const
   for(std::map<std::string, CacheEntry>::const_iterator i = m_Cache.begin();
       i != m_Cache.end(); ++i)
     {
-    out << (*i).first.c_str() << " = " << (*i).second.m_Value.c_str() << std::endl;
+    if((*i).second.m_Type != INTERNAL)
+      {
+      out << (*i).first.c_str() << " = " << (*i).second.m_Value.c_str() << std::endl;
+      }
     }
   out << "\n\n";
   out << "To change values in the CMakeCache, \nedit CMakeCache.txt in your output directory.\n";

@@ -38,22 +38,28 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =========================================================================*/
-#include "cmConfigureFile.h"
+#include "cmConfigureFileCommand.h"
 
-// cmConfigureFile
-bool cmConfigureFile::Invoke(std::vector<std::string>& args)
+// cmConfigureFileCommand
+bool cmConfigureFileCommand::Invoke(std::vector<std::string>& args)
 {
-  if(args.size() != 2 )
+  if(args.size() < 2 )
     {
     this->SetError("called with incorrect number of arguments, expected 2");
     return false;
     }
   m_InputFile = args[0];
   m_OuputFile = args[1];
+  m_CopyOnly = false;
+  if(args[2] == "COPYONLY")
+    {
+    m_CopyOnly  = true;
+    }
+  
   return true;
 }
 
-void cmConfigureFile::FinalPass()
+void cmConfigureFileCommand::FinalPass()
 {
   m_Makefile->ExpandVariablesInString(m_InputFile);
   m_Makefile->ExpandVariablesInString(m_OuputFile);
@@ -92,24 +98,25 @@ void cmConfigureFile::FinalPass()
     if(fin)
       {
       inLine = buffer;
-      m_Makefile->ExpandVariablesInString(inLine);
-      // This call will remove all tcl variable substitutions of the form ${Foo}
-      // m_Makefile->RemoveVariablesInString(inLine);
-      
-      // look for special cmakedefine symbol and handle it
-      // is the symbol defined
-      if (cmdefine.find(inLine))
+      if(!m_CopyOnly)
         {
-        const char *def = m_Makefile->GetDefinition(cmdefine.match(1).c_str());
-        if(!cmSystemTools::IsOff(def))
+        m_Makefile->ExpandVariablesInString(inLine);
+        m_Makefile->RemoveVariablesInString(inLine);
+        // look for special cmakedefine symbol and handle it
+        // is the symbol defined
+        if (cmdefine.find(inLine))
           {
-          cmSystemTools::ReplaceString(inLine,
-                                       "#cmakedefine", "#define");
-          }
-        else
-          {
-          cmSystemTools::ReplaceString(inLine,
-                                       "#cmakedefine", "#undef");
+          const char *def = m_Makefile->GetDefinition(cmdefine.match(1).c_str());
+          if(!cmSystemTools::IsOff(def))
+            {
+            cmSystemTools::ReplaceString(inLine,
+                                         "#cmakedefine", "#define");
+            }
+          else
+            {
+            cmSystemTools::ReplaceString(inLine,
+                                         "#cmakedefine", "#undef");
+            }
           }
         }
       fout << inLine << "\n";

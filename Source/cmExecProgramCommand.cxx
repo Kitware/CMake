@@ -38,65 +38,34 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =========================================================================*/
-#ifndef cmUnixMakefileGenerator_h
-#define cmUnixMakefileGenerator_h
+#include "cmExecProgramCommand.h"
+#include "cmSystemTools.h"
 
-#include "cmMakefile.h"
-#include "cmMakefileGenerator.h"
-
-/** \class cmUnixMakefileGenerator
- * \brief Write a Unix makefiles.
- *
- * cmUnixMakefileGenerator produces a Unix makefile from its
- * member m_Makefile.
- */
-class cmUnixMakefileGenerator : public cmMakefileGenerator
+// cmExecProgramCommand
+bool cmExecProgramCommand::Invoke(std::vector<std::string>& args)
 {
-public:
-  ///! Set cache only and recurse to false by default.
-  cmUnixMakefileGenerator();
-  
-  /**
-   * If cache only is on.
-   * and only stub makefiles are generated, and no depends, for speed.
-   * The default is OFF.
-   **/
-  void SetCacheOnlyOn()  {m_CacheOnly = true;}
-  void SetCacheOnlyOff()  {m_CacheOnly = false;}
-  /**
-   * If recurse is on, then all the makefiles below this one are parsed as well.
-   */
-  void SetRecurseOn() {m_Recurse = true;}
-  void SetRecurseOff() {m_Recurse = false;}
-  
-  /**
-   * Produce the makefile (in this case a Unix makefile).
-   */
-  virtual void GenerateMakefile();
+  if(args.size() < 1 )
+    {
+    this->SetError("called with incorrect number of arguments");
+    return false;
+    }
+  std::string output;
+    m_Makefile->ExpandVariablesInString(args[0]);
+    m_Makefile->ExpandVariablesInString(args[1]);
+  if(args.size() == 2)
+    {
+    cmSystemTools::MakeDirectory(args[1].c_str());
+    std::string command;
+    command = "cd ";
+    command += args[1].c_str();
+    command += "; ";
+    command += args[0].c_str();
+    cmSystemTools::RunCommand(command.c_str(), output);
+    }
+  else
+    {
+    cmSystemTools::RunCommand(args[0].c_str(), output);
+    }
+  return true;
+}
 
-  /**
-   * Output the depend information for all the classes 
-   * in the makefile.  These would have been generated
-   * by the class cmMakeDepend.
-   */
-  void OutputObjectDepends(std::ostream&);
-
-private:
-  void RecursiveGenerateCacheOnly();
-  void GenerateCacheOnly();
-  void OutputMakefile(const char* file);
-  void OutputMakeFlags(std::ostream&);
-  void OutputVerbatim(std::ostream&);
-  void OutputTargetRules(std::ostream& fout);
-  void OutputLinkLibraries(std::ostream&, const char*, const cmTarget &);
-  void OutputTargets(std::ostream&);
-  void OutputSubDirectoryRules(std::ostream&);
-  void OutputDependInformation(std::ostream&);
-  void OutputDependencies(std::ostream&);
-  void OutputCustomRules(std::ostream&);
-private:
-  bool m_CacheOnly;
-  bool m_Recurse;
-};
-
-#endif

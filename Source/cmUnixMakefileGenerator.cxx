@@ -46,14 +46,34 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmMakeDepend.h"
 #include "cmCacheManager.h"
 
+cmUnixMakefileGenerator::cmUnixMakefileGenerator()
+{
+  m_CacheOnly = false;
+  m_Recurse = false;
+}
+
 void cmUnixMakefileGenerator::GenerateMakefile()
 {
-  // Generate depends 
-  cmMakeDepend md;
-  md.SetMakefile(m_Makefile);
-  md.DoDepends();
-  // output the makefile fragment
-  this->OutputMakefile("CMakeTargets.make"); 
+  if(m_CacheOnly)
+    {
+    // Generate the cache only stuff
+    this->GenerateCacheOnly();
+    // if recurse then generate for all sub- makefiles
+    if(m_Recurse)
+      {
+      this->RecursiveGenerateCacheOnly();
+      }
+    }
+  // normal makefile output
+  else
+    {
+    // Generate depends 
+    cmMakeDepend md;
+    md.SetMakefile(m_Makefile);
+    md.DoDepends();
+    // output the makefile fragment
+    this->OutputMakefile("CMakeTargets.make"); 
+    }
 }
 
 
@@ -538,4 +558,77 @@ void cmUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
       fout << "# End of source group \"" << name.c_str() << "\"\n\n";
       }
     }  
+}
+
+
+void cmUnixMakefileGenerator::GenerateCacheOnly()
+{
+  
+  std::string source = m_Makefile->GetHomeDirectory();
+  source += "/CMake/CMakeMakefileTemplate.in";
+  cmSystemTools::MakeDirectory(m_Makefile->GetStartOutputDirectory());
+  std::string dest = m_Makefile->GetStartOutputDirectory();
+  dest += "/Makefile";
+  std::ofstream fout(dest.c_str());
+  std::cout << "cmake: creating : " << dest.c_str() << "\n";
+  if(!fout)
+    {
+    cmSystemTools::Error("Failed to open file for write " , dest.c_str());
+    }
+  else
+    {
+    if(strcmp(m_Makefile->GetHomeDirectory(), 
+              m_Makefile->GetHomeOutputDirectory()) == 0)
+      {
+      fout << "srcdir        = .\n\n";
+      }
+    else
+      {
+      fout << "srcdir        = " <<  m_Makefile->GetStartDirectory() << "\n";
+      fout << "VPATH         = " <<  m_Makefile->GetStartDirectory() << "\n";
+      }
+    }
+  fout << "include "
+       << m_Makefile->GetHomeOutputDirectory() << "/CMake/CMakeMaster.make\n";
+  dest = m_Makefile->GetStartOutputDirectory();
+  dest += "/CMakeTargets.make";
+  // make sure there is a CMakeTargets.make file as some
+  // makes require it to exist
+  if(!cmSystemTools::FileExists(dest.c_str()))
+    {
+    std::cout << "cmake: creating : " << dest.c_str() << "\n";
+    std::ofstream fout(dest.c_str());
+    if(!fout)
+      { 
+      cmSystemTools::Error("Failed to open file for write " , dest.c_str());
+      }
+    fout << "#Initial CMakeTargets.make file created only to keep \n";
+    fout << "#certain makes happy that don't like to include makefiles\n";
+    fout << "#that do not exist\n";
+    }
+}
+
+void cmUnixMakefileGenerator::RecursiveGenerateCacheOnly()
+{ 
+  std::vector<cmMakefile*> makefiles;
+  m_Makefile->FindSubDirectoryCMakeListsFiles(makefiles);
+  for(std::vector<cmMakefile*>::iterator i = makefiles.begin();
+      i != makefiles.end(); ++i)
+    {
+    cmMakefile* mf = *i;
+    if(m_Makefile->GetDefinition("RUN_CONFIGURE"))
+      {
+      mf->AddDefinition("RUN_CONFIGURE", true);
+      }
+    cmUnixMakefileGenerator* gen = new cmUnixMakefileGenerator;
+    gen->SetCacheOnlyOn();
+    gen->SetRecurseOff();
+    mf->SetMakefileGenerator(gen);
+    mf->GenerateMakefile();
+    }
+  // CLEAN up the makefiles created
+  for(unsigned int i =0; i < makefiles.size(); ++i)
+    {
+      delete makefiles[i];
+    }
 }

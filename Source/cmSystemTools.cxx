@@ -563,6 +563,10 @@ bool cmSystemTools::IsOff(const char* val)
 bool cmSystemTools::RunCommand(const char* command, 
                                std::string& output)
 {
+  const int BUFFER_SIZE = 4096;
+  char buffer[BUFFER_SIZE];
+
+#if defined(WIN32) && !defined(__CYGWIN__)
   std::string commandToFile = command;
   commandToFile += " > ";
   std::string tempFile;
@@ -576,8 +580,6 @@ bool cmSystemTools::RunCommand(const char* command,
                          tempFile.c_str());
     return false;
     }
-  const int BUFFER_SIZE = 4096;
-  char buffer[BUFFER_SIZE];
   while(fin)
     {
     fin.getline(buffer, BUFFER_SIZE);
@@ -585,6 +587,22 @@ bool cmSystemTools::RunCommand(const char* command,
     }
   cmSystemTools::RemoveFile(tempFile.c_str());
   return true;
+#else
+  std::cout << "runing " << command << std::endl;
+  FILE* cpipe = popen(command, "r");
+  if(!cpipe)
+    {
+    return false;
+    }
+  fgets(buffer, BUFFER_SIZE, cpipe);
+  while(!feof(cpipe))
+    {
+    std::cout << buffer;
+    output += buffer;
+    fgets(buffer, BUFFER_SIZE, cpipe);
+    }
+  fclose(cpipe);
+#endif
 }
 
 #ifdef _MSC_VER

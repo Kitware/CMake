@@ -38,65 +38,65 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =========================================================================*/
-#ifndef cmUnixMakefileGenerator_h
-#define cmUnixMakefileGenerator_h
+#ifndef cmConfigureFileCommand_h
+#define cmConfigureFileCommand_h
 
-#include "cmMakefile.h"
-#include "cmMakefileGenerator.h"
+#include "cmStandardIncludes.h"
+#include "cmCommand.h"
 
-/** \class cmUnixMakefileGenerator
- * \brief Write a Unix makefiles.
- *
- * cmUnixMakefileGenerator produces a Unix makefile from its
- * member m_Makefile.
- */
-class cmUnixMakefileGenerator : public cmMakefileGenerator
+class cmConfigureFileCommand : public cmCommand
 {
 public:
-  ///! Set cache only and recurse to false by default.
-  cmUnixMakefileGenerator();
-  
-  /**
-   * If cache only is on.
-   * and only stub makefiles are generated, and no depends, for speed.
-   * The default is OFF.
-   **/
-  void SetCacheOnlyOn()  {m_CacheOnly = true;}
-  void SetCacheOnlyOff()  {m_CacheOnly = false;}
-  /**
-   * If recurse is on, then all the makefiles below this one are parsed as well.
-   */
-  void SetRecurseOn() {m_Recurse = true;}
-  void SetRecurseOff() {m_Recurse = false;}
-  
-  /**
-   * Produce the makefile (in this case a Unix makefile).
-   */
-  virtual void GenerateMakefile();
+  virtual cmCommand* Clone() 
+    {
+      return new cmConfigureFileCommand;
+    }
 
   /**
-   * Output the depend information for all the classes 
-   * in the makefile.  These would have been generated
-   * by the class cmMakeDepend.
+   * This is called when the command is first encountered in
+   * the input file.
    */
-  void OutputObjectDepends(std::ostream&);
+  virtual bool Invoke(std::vector<std::string>& args);
 
+  /**
+   * The name of the command as specified in CMakeList.txt.
+   */
+  virtual const char* GetName() { return "CONFIGURE_FILE";}
+
+  /**
+   * Succinct documentation.
+   */
+  virtual const char* GetTerseDocumentation() 
+    {
+    return "Create a file from an autoconf style file.in file.";
+    }
+  
+  /**
+   * Longer documentation.
+   */
+  virtual const char* GetFullDocumentation()
+    {
+      return
+        "CONFIGURE_FILE(InputFile OutputFile [COPYONLY])\n"
+	"The Input and Ouput files have to have full paths.\n"
+	"They can also use variables like CMAKE_BINARY_DIR,CMAKE_SOURCE_DIR.\n"
+        "This command replaces any variables in the input file with their\n"
+        "values as determined by CMake. If a variables in not defined, it\n"
+        "will be replaced with nothing.  If COPYONLY is passed in, then\n"
+        "then no varible expansion will take place.\n";
+    }
+
+  /**
+   * Create the header files in this pass.  This is so
+   * all varibles can be expaned.
+   */
+  virtual void FinalPass();
 private:
-  void RecursiveGenerateCacheOnly();
-  void GenerateCacheOnly();
-  void OutputMakefile(const char* file);
-  void OutputMakeFlags(std::ostream&);
-  void OutputVerbatim(std::ostream&);
-  void OutputTargetRules(std::ostream& fout);
-  void OutputLinkLibraries(std::ostream&, const char*, const cmTarget &);
-  void OutputTargets(std::ostream&);
-  void OutputSubDirectoryRules(std::ostream&);
-  void OutputDependInformation(std::ostream&);
-  void OutputDependencies(std::ostream&);
-  void OutputCustomRules(std::ostream&);
-private:
-  bool m_CacheOnly;
-  bool m_Recurse;
+  std::string m_InputFile;
+  std::string m_OuputFile;
+  bool m_CopyOnly;
 };
+
+
 
 #endif
