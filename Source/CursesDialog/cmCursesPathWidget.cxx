@@ -75,6 +75,11 @@ void cmCursesPathWidget::OnTab(cmCursesMainForm* fm, WINDOW* w)
     cstr = cstr.substr(0, cstr.size()-1);
     }
 
+  if ( cmSystemTools::FileIsDirectory(cstr.c_str()) )
+    {
+    cstr += "/";
+    }
+
   this->SetString(cstr.c_str());
   touchwin(w); 
   wrefresh(w); 
