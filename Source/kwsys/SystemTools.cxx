@@ -2079,7 +2079,7 @@ kwsys_stl::string SystemTools::FileExistsInParentDirectories(const char* fname,
   SystemTools::ConvertToUnixSlashes(file);
   kwsys_stl::string dir = directory;
   SystemTools::ConvertToUnixSlashes(dir);
-  while ( 1 )
+  while ( !dir.empty() )
     {
     kwsys_stl::string path = dir + "/" + file;
     if ( SystemTools::FileExists(path.c_str()) )
