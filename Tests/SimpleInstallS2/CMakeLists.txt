@@ -70,10 +70,14 @@ ENDIF(STAGE2)
 ADD_CUSTOM_COMMAND(
   TARGET ${install_target}
   POST_BUILD
-  COMMAND ${CMAKE_COMMAND}
-  ARGS -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
-  -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_install.cmake"
+  COMMAND ${CMAKE_CTEST_COMMAND}
+  ARGS --build-and-test
+       ${CMAKE_SOURCE_DIR}
+       ${CMAKE_BINARY_DIR}
+       --build-generator ${CMAKE_GENERATOR}
+       --build-project ${PROJECT_NAME}
+       --build-makeprogram ${CMAKE_MAKE_PROGRAM}
+       --build-noclean
+       --build-target install
   COMMENT "Install Project"
   )
-
-
