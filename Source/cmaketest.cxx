@@ -149,6 +149,7 @@ int main (int argc, char *argv[])
   // MSDEV 7.0 .NET
   else if (lowerCaseCommand.find("devenv") != std::string::npos)
     {
+#if defined(_WIN32) && !defined(__CYGWIN__)      
     if(makeCommand.find(' ') != std::string::npos)
       {
       char *buffer = new char[makeCommand.size()+1];
@@ -159,6 +160,7 @@ int main (int argc, char *argv[])
         }
       delete [] buffer;\
       }
+#endif
     makeCommand += " ";
     makeCommand += projectName;
     makeCommand += ".sln /rebuild Debug /project ALL_BUILD";
