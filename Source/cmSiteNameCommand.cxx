@@ -102,8 +102,8 @@ bool cmSiteNameCommand::InitialPass(std::vector<std::string> const& args)
           nslookup_cmd += " ";
           nslookup_cmd += host;
           std::string nsOutput;
-          cmSystemTools::RunCommand(nslookup_cmd.c_str(),
-                                    nsOutput);
+          cmSystemTools::RunSingleCommand(nslookup_cmd.c_str(),
+                                          &nsOutput);
 
           // got the domain name
           if (nsOutput.length())
