@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "CMakeSetup.h"
+#include "MakeHelp.h"
 #include "PathDialog.h"
 #include "CMakeSetupDialog.h"
 #include "CMakeCommandLineInfo.h" 
@@ -86,7 +87,7 @@ CMakeSetupDialog::CMakeSetupDialog(const CMakeCommandLineInfo& cmdInfo,
   m_WhereSource = cmdInfo.m_WhereSource;
   m_WhereBuild = cmdInfo.m_WhereBuild;
   m_GeneratorChoiceString = _T("");
-  //}}AFX_DATA_INIT
+	//}}AFX_DATA_INIT
   // Note that LoadIcon does not require a subsequent DestroyIcon in Win32
   m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
   m_BuildPathChanged = false;
@@ -106,6 +107,7 @@ void CMakeSetupDialog::DoDataExchange(CDataExchange* pDX)
 {
   CDialog::DoDataExchange(pDX);
   //{{AFX_DATA_MAP(CMakeSetupDialog)
+	DDX_Control(pDX, IDC_HELP_BUTTON, m_HelpButton);
 	DDX_Control(pDX, IDC_Generator, m_GeneratorChoice);
 	DDX_Control(pDX, IDC_OK, m_OKButton);
 	DDX_Control(pDX, IDCANCEL, m_CancelButton);
@@ -137,8 +139,9 @@ BEGIN_MESSAGE_MAP(CMakeSetupDialog, CDialog)
 	ON_WM_SIZE()
   ON_WM_GETMINMAXINFO()
 	ON_BN_CLICKED(IDC_OK, OnOk)
-  ON_BN_CLICKED(IDCANCEL, OnCancel)
 	ON_CBN_EDITCHANGE(IDC_Generator, OnEditchangeGenerator)
+  ON_BN_CLICKED(IDCANCEL, OnCancel)
+	ON_BN_CLICKED(IDC_HELP_BUTTON, OnHelpButton)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -605,14 +608,6 @@ void CMakeSetupDialog::FillCacheGUIFromCacheManager()
     }
   const cmCacheManager::CacheEntryMap &cache =
     cmCacheManager::GetInstance()->GetCacheMap();
-  if(cache.size() == 0)
-    {
-    m_OKButton.EnableWindow(false);
-    }
-  else
-    {
-    m_OKButton.EnableWindow(true);
-    }
 
   for(cmCacheManager::CacheEntryMap::const_iterator i = cache.begin();
       i != cache.end(); ++i)
@@ -670,6 +665,28 @@ void CMakeSetupDialog::FillCacheGUIFromCacheManager()
         break;
       }
     }
+  m_OKButton.EnableWindow(false);
+  if(cache.size() > 0)
+    {
+    bool enable = true;
+    items = m_CacheEntriesList.GetItems();
+    for(std::set<CPropertyItem*>::iterator i = items.begin();
+        i != items.end(); ++i)
+      {
+      CPropertyItem* item = *i;
+      if(item->m_NewValue)
+        {
+        // if one new value then disable to OK button
+        enable = false;
+        break;
+        }
+      }
+    if(enable)
+      {
+      m_OKButton.EnableWindow(true);
+      }
+    }
+
   // redraw the list
   m_CacheEntriesList.SetTopIndex(0);
   m_CacheEntriesList.Invalidate();
@@ -797,6 +814,12 @@ void CMakeSetupDialog::OnSize(UINT nType, int cx, int cy)
                             cRect.top + deltay, 
                             0, 0,
                             SWP_NOSIZE | SWP_NOZORDER);
+    m_HelpButton.GetWindowRect(&cRect);
+    this->ScreenToClient(&cRect);
+    m_HelpButton.SetWindowPos(&wndTop, cRect.left + deltax/2, 
+                              cRect.top + deltay, 
+                              0, 0,
+                              SWP_NOSIZE | SWP_NOZORDER);
     }
   
 }
@@ -971,4 +994,10 @@ int CMakeSetupDialog::CreateShortcut()
   psl->Release ();
 
   return 0;
+}
+
+void CMakeSetupDialog::OnHelpButton() 
+{
+  CMakeHelp dialog;
+  dialog.DoModal();
 }

@@ -9,6 +9,7 @@
 #define IDD_CMakeSetupDialog_DIALOG     102
 #define IDS_CREATESHORTCUT              102
 #define IDR_MAINFRAME                   128
+#define IDD_CMAKE_HELP_DIALOG           133
 #define IDC_WhereSource                 1001
 #define IDC_BUTTON2                     1002
 #define IDC_WhereBuild                  1003
@@ -22,14 +23,16 @@
 #define IDC_OK                          1018
 #define IDC_Generator                   1019
 #define IDC_GeneratorLabel              1020
+#define IDC_HELP_BUTTON                 1021
+#define IDC_EDIT1                       1025
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        133
+#define _APS_NEXT_RESOURCE_VALUE        134
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1021
+#define _APS_NEXT_CONTROL_VALUE         1026
 #define _APS_NEXT_SYMED_VALUE           102
 #endif
 #endif

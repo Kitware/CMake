@@ -85,12 +85,12 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,178,7,50,14,WS_GROUP
 END
 
-IDD_CMakeSetupDialog_DIALOG DIALOGEX 0, 0, 389, 225
+IDD_CMakeSetupDialog_DIALOG DIALOGEX 0, 0, 389, 241
 STYLE WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | 
     WS_SYSMENU | WS_THICKFRAME
 EXSTYLE WS_EX_APPWINDOW
 CAPTION "CMakeSetupDialog"
-FONT 8, "MS Sans Serif", 0, 0, 0x1
+FONT 8, "MS Sans Serif"
 BEGIN
     COMBOBOX        IDC_WhereSource,96,6,133,66,CBS_DROPDOWN | 
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
@@ -98,21 +98,32 @@ BEGIN
     COMBOBOX        IDC_WhereBuild,96,26,133,68,CBS_DROPDOWN | 
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
     PUSHBUTTON      "Browse...",IDC_BUTTON3,230,25,34,13
-    DEFPUSHBUTTON   "Configure",IDC_BuildProjects,88,202,67,15
-    PUSHBUTTON      "Cancel",IDCANCEL,220,201,67,15
+    DEFPUSHBUTTON   "Configure",IDC_BuildProjects,70,223,67,15
+    PUSHBUTTON      "Cancel",IDCANCEL,202,223,67,15
     LISTBOX         IDC_LIST2,15,55,356,122,LBS_OWNERDRAWVARIABLE | 
                     LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | 
                     WS_HSCROLL
     RTEXT           "Where is the source code:",IDC_STATIC,6,7,86,9
     RTEXT           "Where to build the binaries:",IDC_STATIC,5,27,90,9
     GROUPBOX        "Cache Values",IDC_FRAME,9,43,369,141
-    CTEXT           "Right click on cache entries for additional options",
-                    IDC_MouseHelpCaption,106,189,156,8
-    LTEXT           "Static",IDC_CMAKE_VERSION,3,211,58,13,SS_CENTERIMAGE
-    PUSHBUTTON      "OK",IDC_OK,160,202,56,14
+    LTEXT           "Right click on a cache value for additional options and help.\nPress Configure to update and display new values in red.\nPress OK to generate selected build files and exit.",
+                    IDC_MouseHelpCaption,103,190,197,27
+    LTEXT           "Static",IDC_CMAKE_VERSION,3,227,52,13,SS_CENTERIMAGE
+    PUSHBUTTON      "OK",IDC_OK,142,223,56,14
     COMBOBOX        IDC_Generator,275,25,103,50,CBS_DROPDOWN | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
     LTEXT           "Build For:",IDC_GeneratorLabel,279,10,103,12
+    PUSHBUTTON      "Help",IDC_HELP_BUTTON,274,223,57,15
+END
+
+IDD_CMAKE_HELP_DIALOG DIALOG DISCARDABLE  0, 0, 365, 183
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "CMake Help"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,155,159,50,14
+    EDITTEXT        IDC_EDIT1,7,7,351,152,ES_MULTILINE | ES_READONLY | NOT 
+                    WS_BORDER
 END
 
 
@@ -178,6 +189,15 @@ BEGIN
     IDD_CMakeSetupDialog_DIALOG, DIALOG
     BEGIN
         RIGHTMARGIN, 388
+        BOTTOMMARGIN, 238
+    END
+
+    IDD_CMAKE_HELP_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 358
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 176
     END
 END
 #endif    // APSTUDIO_INVOKED

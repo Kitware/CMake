@@ -36,6 +36,7 @@ protected:
 // Dialog Data
   //{{AFX_DATA(CMakeSetupDialog)
 	enum { IDD = IDD_CMakeSetupDialog_DIALOG };
+	CButton	m_HelpButton;
 	CComboBox	m_GeneratorChoice;
 	CButton	m_OKButton;
 	CButton	m_CancelButton;
@@ -89,6 +90,7 @@ protected:
   afx_msg void OnGetMinMaxInfo( MINMAXINFO FAR* lpMMI );
 	afx_msg void OnOk();
 	afx_msg void OnEditchangeGenerator();
+	afx_msg void OnHelpButton();
 	//}}AFX_MSG
   DECLARE_MESSAGE_MAP()
     

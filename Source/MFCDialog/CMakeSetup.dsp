@@ -111,6 +111,10 @@ SOURCE=.\CMakeSetupDialog.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\MakeHelp.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\PathDialog.cpp
 # End Source File
 # Begin Source File
@@ -137,6 +141,10 @@ SOURCE=.\CMakeSetup.h
 # Begin Source File
 
 SOURCE=.\CMakeSetupDialog.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\MakeHelp.h
 # End Source File
 # Begin Source File
 

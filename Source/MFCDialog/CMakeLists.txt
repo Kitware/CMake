@@ -1,5 +1,6 @@
 SOURCE_FILES(SRCS 
 CMakeSetup.cpp
+MakeHelp.cpp
 CMakeSetup.rc
 CMakeSetupDialog.cpp
 PathDialog.cpp
