@@ -397,6 +397,11 @@ void cmMakefile::ExpandVariblesInString(std::string& source)
     variable += "}";
     cmSystemTools::ReplaceString(source, variable.c_str(),
                                  (*i).second.c_str());
+    variable = "@";
+    variable += (*i).first;
+    variable += "@";
+    cmSystemTools::ReplaceString(source, variable.c_str(),
+                                 (*i).second.c_str());
     }
 }
 

@@ -310,7 +310,8 @@ public:
    * Expand all defined varibles in the string.  
    * Defined varibles come from the m_Definitions map.
    * They are expanded with ${var} where var is the
-   * entry in the m_Definitions map.
+   * entry in the m_Definitions map.  Also @var@ is
+   * expanded to match autoconf style expansions.
    */
   void ExpandVariblesInString(std::string& source);
 protected:
