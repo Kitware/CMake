@@ -230,9 +230,9 @@ void cmUnixMakefileGenerator::OutputMakefile(const char* file)
                    "Default target executed when no arguments are given to make, first make sure cmake.depends exists, cmake.check_depends is up-to-date, check the sources, then build the all target",
                    "default_target",
                    0,
-                   "$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.depends > cmake.depends.out",
-                   "$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.check_depends >> cmake.depends.out",
-                   "$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) -f cmake.check_depends >> cmake.depends.out",
+                   "$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.depends",
+                   "$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.check_depends",
+                   "$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) -f cmake.check_depends",
                    "$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) all");
   
   this->OutputTargetRules(fout);
