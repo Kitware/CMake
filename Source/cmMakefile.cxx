@@ -42,7 +42,8 @@ bool cmMakefile::ReadMakefile(const char* filename)
     {
     std::string line = inbuffer;
     cmClassFile file;
-    if(line.find("SOURCE_FILES") != std::string::npos)
+    std::string::size_type pos = line.find("SOURCE_FILES");
+    if((pos != std::string::npos) && (pos == 0 ) )
       {
       if(line.find("\\") != std::string::npos)
 	{
