@@ -555,6 +555,7 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
       cmRegularExpression libname_noprefix("([^/]*)(\\.so|\\.lib|\\.dll|\\.sl|\\.a|\\.dylib).*");
       if(libname.find(file))
         {
+        // Library had "lib" prefix.
         librariesLinked += libLinkFlag;
         file = libname.match(1);
         librariesLinked += file;
@@ -566,6 +567,7 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
         }
       else if(libname_noprefix.find(file))
         {
+        // Library had no "lib" prefix.
         librariesLinked += libLinkFlag;
         file = libname_noprefix.match(1);
         librariesLinked += file;
@@ -573,6 +575,13 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
           {
           librariesLinked +=  linkSuffix;
           }
+        librariesLinked += " ";
+        }
+      else
+        {
+        // Error parsing the library name.  Just use the full path.
+        // The linker will give an error if it is invalid.
+        librariesLinked += lib->first;
         librariesLinked += " ";
         }
       }
