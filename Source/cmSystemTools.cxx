@@ -686,22 +686,25 @@ std::string cmSystemTools::FindLibrary(const char* name,
       {
       return cmSystemTools::CollapseFullPath(tryPath.c_str());
       }
-    tryPath = "lib";
-    tryPath += *p;
+    tryPath = *p;
+    tryPath += "/lib";
+    tryPath += name;
     tryPath + ".so";
     if(cmSystemTools::FileExists(tryPath.c_str()))
       {
       return cmSystemTools::CollapseFullPath(tryPath.c_str());
       }
-    tryPath = "lib";
-    tryPath += *p;
+    tryPath = *p;
+    tryPath = "/lib";
+    tryPath += name;
     tryPath + ".a";
     if(cmSystemTools::FileExists(tryPath.c_str()))
       {
       return cmSystemTools::CollapseFullPath(tryPath.c_str());
       }
-    tryPath = "lib";
-    tryPath += *p;
+    tryPath = *p;
+    tryPath = "/lib";
+    tryPath += name;
     tryPath + ".sl";
     if(cmSystemTools::FileExists(tryPath.c_str()))
       {
