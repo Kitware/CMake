@@ -204,16 +204,12 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& argsIn)
       {
       // create a function blocker and set it up
       cmLoadedCommand *f = new cmLoadedCommand();
-      if (!initFunction)
-        {
-        this->SetError("Attempt to load command failed. "
-		       "No init function found.");
-        return false;
-        }
       (*initFunction)(&f->info);
       m_Makefile->AddCommand(f);
       return true;
       }
+    this->SetError("Attempt to load command failed. "
+                   "No init function found.");
     }
   return false;
 }
