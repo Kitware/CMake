@@ -222,11 +222,13 @@ void cmake::SetArgs(cmMakefile& builder, const std::vector<std::string>& args)
 }
 
 // at the end of this CMAKE_ROOT and CMAKE_COMMAND should be added to the cache
-void cmake::AddCMakePaths(const std::vector<std::string>& args)
+int cmake::AddCMakePaths(const std::vector<std::string>& args)
 {
   // Find our own executable.
+  std::vector<cmStdString> failures;
   std::string cMakeSelf = args[0];
   cmSystemTools::ConvertToUnixSlashes(cMakeSelf);
+  failures.push_back(cMakeSelf);
   cMakeSelf = cmSystemTools::FindProgram(cMakeSelf.c_str());
   if(!cmSystemTools::FileExists(cMakeSelf.c_str()))
     {
@@ -245,14 +247,24 @@ void cmake::AddCMakePaths(const std::vector<std::string>& args)
 #ifdef CMAKE_PREFIX
   if(!cmSystemTools::FileExists(cMakeSelf.c_str()))
     {
+    failures.push_back(cMakeSelf);
     cMakeSelf = CMAKE_PREFIX "/bin/cmake";
     }
 #endif
   if(!cmSystemTools::FileExists(cMakeSelf.c_str()))
     {
-    cmSystemTools::Error("CMAKE can not find the command line program cmake. "
-                         "Attempted path: ", cMakeSelf.c_str());
-    return;
+    failures.push_back(cMakeSelf);
+    cmStringStream msg;
+    msg << "CMAKE can not find the command line program cmake.\n";
+    msg << "  argv[0] = \"" << args[0].c_str() << "\"\n";
+    msg << "  Attempted paths:\n";
+    std::vector<cmStdString>::iterator i;
+    for(i=failures.begin(); i != failures.end(); ++i)
+      {
+      msg << "    \"" << i->c_str() << "\"\n";
+      }
+    cmSystemTools::Error(msg.str().c_str());
+    return 0;
     }
   // Save the value in the cache
   cmCacheManager::GetInstance()->AddCacheEntry
@@ -337,11 +349,12 @@ void cmake::AddCMakePaths(const std::vector<std::string>& args)
     cmSystemTools::Error("Could not find CMAKE_ROOT !!!\n", 
                          "Modules directory not in directory:\n",
                          modules.c_str());
-    return;  
+    return 0;
     }
   cmCacheManager::GetInstance()->AddCacheEntry
     ("CMAKE_ROOT", cMakeRoot.c_str(),
      "Path to CMake installation.", cmCacheManager::INTERNAL);
+  return 1;
 }
 
 
@@ -452,7 +465,10 @@ int cmake::Generate(const std::vector<std::string>& args, bool buildMakefiles)
   
 
   // setup CMAKE_ROOT and CMAKE_COMMAND
-  this->AddCMakePaths(args);
+  if(!this->AddCMakePaths(args))
+    {
+    return -3;
+    }
 
   // reset any system configuration information
   cmMakefileGenerator::ClearEnabledLanguages();

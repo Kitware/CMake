@@ -55,7 +55,7 @@ class cmake
   /**
    * Generate CMAKE_ROOT and CMAKE_COMMAND cache entries
    */
-  void AddCMakePaths(const std::vector<std::string>&);
+  int AddCMakePaths(const std::vector<std::string>&);
 
   /**
    * constructor
