@@ -2820,7 +2820,6 @@ int cmCTest::RunMakeCommand(const char* command, std::string* output,
 
 int cmCTest::RunTest(std::vector<const char*> argv, std::string* output, int *retVal)
 {
-#if 0
   if(cmSystemTools::SameFile(argv[0], m_CTestSelf.c_str()))
     {
     cmCTest inst;
@@ -2840,7 +2839,6 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output, int *re
       }
     return cmsysProcess_State_Exited;
     }
-#endif  
   std::vector<char> tempOutput;
   if ( output )
     {
@@ -3000,7 +2998,7 @@ int cmCTest::RunConfigurationScript()
         size = 4999;
         }
       strncpy(ctestEnvStatic[i], envArgs[i].c_str(), size);
-      ctestEnvStatic[i][4999] = 0;
+      ctestEnvStatic[i][size] = 0;
       putenv(ctestEnvStatic[i]);
       }
     }

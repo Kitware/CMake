@@ -150,7 +150,7 @@ void cmGlobalGenerator::EnableLanguage(const char* lang,
         }
       strncpy(envCC, env.c_str(), size);
       envCC[size] = 0;
-      putenv(envCC);
+      putenv(envCC); 
       }
     } 
   
@@ -178,7 +178,7 @@ void cmGlobalGenerator::EnableLanguage(const char* lang,
         size = 4999;
         }
       strncpy(envCXX, env.c_str(), size);
-      envCXX[4999] = 0;
+      envCXX[size] = 0;
       putenv(envCXX);
       }
     }

@@ -877,7 +877,7 @@ void cmake::SetGlobalGenerator(cmGlobalGenerator *gg)
       size = 4999;
       }
     strncpy(envCC, env.c_str(), size);
-    envCC[4999] = 0;
+    envCC[size] = 0;
     putenv(envCC); 
     
     // Restore CXX
@@ -893,7 +893,7 @@ void cmake::SetGlobalGenerator(cmGlobalGenerator *gg)
       size = 4999;
       }
     strncpy(envCXX, env.c_str(), size);
-    envCXX[4999] = 0;
+    envCXX[size] = 0;
     putenv(envCXX);
     }
 
