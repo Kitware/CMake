@@ -22,6 +22,7 @@
 #include <@KWSYS_NAMESPACE@/Configure.h>
 
 #include <sys/types.h>
+#include <stdarg.h>
 
 #if defined( _MSC_VER )
 typedef unsigned short mode_t;
@@ -187,6 +188,17 @@ public:
     const char* str1, const char* str2);
   static char* AppendStrings(
     const char* str1, const char* str2, const char* str3);
+
+  /** 
+   * Estimate the length of the string that will be produced
+   * from printing the given format string and arguments.  The
+   * returned length will always be at least as large as the string
+   * that will result from printing.
+   * WARNING: since va_arg is called to iterate of the argument list,
+   * you will not be able to use this 'ap' anymore from the beginning.
+   * It's up to you to call va_end though.
+   */
+  static int EstimateFormatLength(const char *format, va_list ap);
 
   /** -----------------------------------------------------------------
    *               Filename Manipulation Routines

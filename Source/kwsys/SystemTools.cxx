@@ -1096,6 +1096,75 @@ kwsys_stl::string SystemTools::CropString(const kwsys_stl::string& s,
   return n;
 }
 
+//----------------------------------------------------------------------------
+int SystemTools::EstimateFormatLength(const char *format, va_list ap)
+{
+  if (!format)
+    {
+    return 0;
+    }
+
+  // Quick-hack attempt at estimating the length of the string.
+  // Should never under-estimate.
+  
+  // Start with the length of the format string itself.
+
+  int length = strlen(format);
+  
+  // Increase the length for every argument in the format.
+
+  const char* cur = format;
+  while(*cur)
+    {
+    if(*cur++ == '%')
+      {
+      // Skip "%%" since it doesn't correspond to a va_arg.
+      if(*cur != '%')
+        {
+        while(!int(isalpha(*cur)))
+          {
+          ++cur;
+          }
+        switch (*cur)
+          {
+          case 's':
+          {
+          // Check the length of the string.
+          char* s = va_arg(ap, char*);
+          if(s)
+            {
+            length += strlen(s);
+            }
+          } break;
+          case 'e':
+          case 'f':
+          case 'g':
+          {
+          // Assume the argument contributes no more than 64 characters.
+          length += 64;
+            
+          // Eat the argument.
+          static_cast<void>(va_arg(ap, double));
+          } break;
+          default:
+          {
+          // Assume the argument contributes no more than 64 characters.
+          length += 64;
+            
+          // Eat the argument.
+          static_cast<void>(va_arg(ap, int));
+          } break;
+          }
+        }
+      
+      // Move past the characters just tested.
+      ++cur;
+      }
+    }
+  
+  return length;
+}
+
 // convert windows slashes to unix slashes 
 void SystemTools::ConvertToUnixSlashes(kwsys_stl::string& path)
 {
