@@ -142,11 +142,15 @@ static CURLcode AllowServerConnect(struct SessionHandle *data,
     /* we have received data here */
     {
       int s;
+#ifdef __hpux     
+      int size = sizeof(struct sockaddr_in);
+#else 
       socklen_t size = sizeof(struct sockaddr_in);
+#endif
       struct sockaddr_in add;
 
-      getsockname(sock, (struct sockaddr *) &add, (socklen_t *)&size);
-      s=(int)accept(sock, (struct sockaddr *) &add, (socklen_t *)&size);
+      getsockname(sock, (struct sockaddr *) &add, &size);
+      s=(int)accept(sock, (struct sockaddr *) &add, &size);
 
       sclose(sock); /* close the first socket */
 
@@ -1220,7 +1224,11 @@ CURLcode ftp_use_port(struct connectdata *conn)
   if(! *myhost) {
     /* pick a suitable default here */
 
+#ifdef __hpux     
+    int sslen;
+#else 
     socklen_t sslen;
+#endif
     
     sslen = sizeof(sa);
     if (getsockname(conn->firstsocket, (struct sockaddr *)&sa, &sslen) < 0) {
@@ -1259,7 +1267,11 @@ CURLcode ftp_use_port(struct connectdata *conn)
       if(bind(portsock, (struct sockaddr *)&sa, size) >= 0) {
         /* we succeeded to bind */
         struct sockaddr_in add;
+#ifdef __hpux     
+        int socksize = sizeof(add);
+#else 
         socklen_t socksize = sizeof(add);
+#endif
 
         if(getsockname(portsock, (struct sockaddr *) &add,
                        &socksize)<0) {

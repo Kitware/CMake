@@ -269,9 +269,13 @@ static CURLcode bindlocal(struct connectdata *conn,
           /* we succeeded to bind */
           struct sockaddr_in add;
         
-          size = sizeof(add);
+#ifdef __hpux
+          int gsize = sizeof(add);
+#else
+          socklen_t gsize = sizeof(add);
+#endif
           if(getsockname(sockfd, (struct sockaddr *) &add,
-                         (socklen_t *)&size)<0) {
+                         &gsize)<0) {
             failf(data, "getsockname() failed");
             return CURLE_HTTP_PORT_FAILED;
           }
@@ -337,7 +341,11 @@ static
 int socketerror(int sockfd)
 {
   int err = 0;
+#ifdef __hpux
+  int errSize = sizeof(err);
+#else
   socklen_t errSize = sizeof(err);
+#endif
 
   if( -1 == getsockopt(sockfd, SOL_SOCKET, SO_ERROR,
                        (void *)&err, &errSize))
