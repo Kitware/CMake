@@ -196,7 +196,7 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
   fileRef->AddAttribute("path", this->CreateString(
     lg->ConvertToRelativeOutputPath(sf->GetFullPath().c_str()).c_str()));
   fileRef->AddAttribute("refType", this->CreateString("4"));
-  fileRef->AddAttribute("sourceTree", this->CreateString("\"<absolute>\""));
+  fileRef->AddAttribute("sourceTree", this->CreateString("<absolute>"));
   return buildFile;
 }
 
@@ -205,6 +205,7 @@ void cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
                                                 std::vector<cmXCodeObject*>& targets,
                                                 cmXCodeObject* mainGroupChildren)
 {
+  m_CurrentLocalGenerator = gen;
   m_CurrentMakefile = gen->GetMakefile();
   cmTargets &tgts = gen->GetMakefile()->GetTargets();
   for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); l++)
@@ -250,29 +251,134 @@ void cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
     buildPhases->AddObject(sourceBuildPhase);
     buildPhases->AddObject(headerBuildPhase);
     buildPhases->AddObject(frameworkBuildPhase);
-    switch(l->second.GetType())
-      {
-      case cmTarget::STATIC_LIBRARY:
-        targets.push_back(this->CreateStaticLibrary(l->second, buildPhases));
-        break;
-      case cmTarget::SHARED_LIBRARY:
-        targets.push_back(this->CreateSharedLibrary(l->second, buildPhases));
-        break;
-      case cmTarget::MODULE_LIBRARY:
-        targets.push_back(this->CreateSharedLibrary(l->second, buildPhases));
-        break;
-      case cmTarget::EXECUTABLE:  
-        targets.push_back(this->CreateExecutable(l->second, buildPhases));
-        break;
-      case cmTarget::UTILITY:
-        break;
-      case cmTarget::INSTALL_FILES:
-        break;
-      case cmTarget::INSTALL_PROGRAMS:
-        break;
-      }
+    targets.push_back(this->CreateXCodeTarget(l->second, buildPhases));
     }
+  
 }
+
+
+void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
+                                                 cmXCodeObject* buildSettings,
+                                                 std::string& fileType,
+                                                 std::string& productType,
+                                                 std::string& productName)
+{
+  std::string flags;
+  bool shared = ((target.GetType() == cmTarget::SHARED_LIBRARY) ||
+                 (target.GetType() == cmTarget::MODULE_LIBRARY));
+  const char* lang = target.GetLinkerLanguage(this);
+  if(lang)
+    {
+    // Add language-specific flags.
+    m_CurrentLocalGenerator->AddLanguageFlags(flags, lang);
+    
+    // Add shared-library flags if needed.
+    m_CurrentLocalGenerator->AddSharedFlags(flags, lang, shared);
+    }
+    // Add include directory flags.
+//  this->AppendFlags(flags, this->GetIncludeFlags(lang));
+    
+    // Add include directory flags.
+    m_CurrentLocalGenerator->AppendFlags(flags,
+                                       m_CurrentMakefile->GetDefineFlags());
+  cmSystemTools::ReplaceString(flags, "\"", "\\\"");
+  productName = target.GetName();
+  switch(target.GetType())
+    {
+    case cmTarget::STATIC_LIBRARY:
+      productName += ".a";
+      productType = "com.apple.product-type.library.static";
+      fileType = "compiled.mach-o.archive.ar";
+      buildSettings->AddAttribute("LIBRARY_STYLE", 
+                                  this->CreateString("STATIC"));
+      break;
+    case cmTarget::MODULE_LIBRARY:
+      buildSettings->AddAttribute("LIBRARY_STYLE", 
+                                  this->CreateString("DYNAMIC"));
+      productName += ".so";
+      buildSettings->AddAttribute("OTHER_LDFLAGS",
+                                  this->CreateString("-bundle"));
+      productType = "com.apple.product-type.library.dynamic";
+      fileType = "compiled.mach-o.dylib";
+      break;
+    case cmTarget::SHARED_LIBRARY:
+      buildSettings->AddAttribute("LIBRARY_STYLE", 
+                                  this->CreateString("DYNAMIC"));
+      productName += ".dylib";
+      buildSettings->AddAttribute("DYLIB_COMPATIBILITY_VERSION", 
+                                  this->CreateString("1"));
+      buildSettings->AddAttribute("DYLIB_CURRENT_VERSION", 
+                                  this->CreateString("1"));
+      buildSettings->AddAttribute("OTHER_LDFLAGS",
+                                  this->CreateString("-dynamiclib"));
+      productType = "com.apple.product-type.library.dynamic";
+      fileType = "compiled.mach-o.dylib";
+      break;
+    case cmTarget::EXECUTABLE:  
+      fileType = "compiled.mach-o.executable";
+      productType = "com.apple.product-type.tool";
+      break;
+    case cmTarget::UTILITY:
+      break;
+    case cmTarget::INSTALL_FILES:
+      break;
+    case cmTarget::INSTALL_PROGRAMS:
+      break;
+    }
+  buildSettings->AddAttribute("INSTALL_PATH", 
+                              this->CreateString("/usr/local/bin"));
+  buildSettings->AddAttribute("OPTIMIZATION_CFLAGS", 
+                              this->CreateString(""));
+  buildSettings->AddAttribute("OTHER_CFLAGS", 
+                              this->CreateString(flags.c_str()));
+  buildSettings->AddAttribute("OTHER_LDFLAGS",
+                              this->CreateString(""));
+  buildSettings->AddAttribute("OTHER_REZFLAGS", 
+                              this->CreateString(""));
+  buildSettings->AddAttribute("SECTORDER_FLAGS",
+                              this->CreateString(""));
+  buildSettings->AddAttribute("WARNING_CFLAGS",
+                              this->CreateString(
+                                "-Wmost -Wno-four-char-constants"
+                                " -Wno-unknown-pragmas"));
+  buildSettings->AddAttribute("PRODUCT_NAME", 
+                              this->CreateString(target.GetName()));
+}
+
+cmXCodeObject*
+cmGlobalXCodeGenerator::CreateXCodeTarget(cmTarget& cmtarget,
+                                          cmXCodeObject* buildPhases)
+{
+  cmXCodeObject* target = this->CreateObject(cmXCodeObject::PBXNativeTarget);
+  target->AddAttribute("buildPhases", buildPhases);
+  cmXCodeObject* buildRules = this->CreateObject(cmXCodeObject::OBJECT_LIST);
+  target->AddAttribute("buildRules", buildRules);
+  cmXCodeObject* buildSettings =
+    this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
+  std::string fileTypeString;
+  std::string productTypeString;
+  std::string productName;
+  this->CreateBuildSettings(cmtarget, 
+                            buildSettings, fileTypeString, 
+                            productTypeString, productName);
+  target->AddAttribute("buildSettings", buildSettings);
+  cmXCodeObject* dependencies = this->CreateObject(cmXCodeObject::OBJECT_LIST);
+  target->AddAttribute("dependencies", dependencies);
+  target->AddAttribute("name", this->CreateString(cmtarget.GetName()));
+  target->AddAttribute("productName",this->CreateString(cmtarget.GetName()));
+  cmXCodeObject* fileRef = this->CreateObject(cmXCodeObject::PBXFileReference);
+  fileRef->AddAttribute("explicitFileType", 
+                        this->CreateString(fileTypeString.c_str()));
+  fileRef->AddAttribute("includedInIndex", this->CreateString("0"));
+  fileRef->AddAttribute("path", this->CreateString(productName.c_str()));
+  fileRef->AddAttribute("refType", this->CreateString("3"));
+  fileRef->AddAttribute("sourceTree", this->CreateString("BUILT_PRODUCTS_DIR"));
+  target->AddAttribute("productReference", this->CreateObjectReference(fileRef));
+  target->AddAttribute("productType", 
+                       this->CreateString(productTypeString.c_str()));
+  return target;
+}
+
 
 // to force the location of a target
 //6FE4372B07AAF276004FB461 = {
@@ -283,155 +389,6 @@ void cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
 //isa = PBXBuildStyle;
 //name = Development;
 //};
-cmXCodeObject* cmGlobalXCodeGenerator::CreateExecutable(cmTarget& cmtarget,
-                                                        cmXCodeObject* buildPhases)
-{
-  cmXCodeObject* target = this->CreateObject(cmXCodeObject::PBXNativeTarget);
-  target->AddAttribute("buildPhases", buildPhases);
-  cmXCodeObject* buildRules = this->CreateObject(cmXCodeObject::OBJECT_LIST);
-  target->AddAttribute("buildRules", buildRules);
-  cmXCodeObject* buildSettings =
-    this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
-  buildSettings->AddAttribute("INSTALL_PATH", 
-                              this->CreateString("/usr/local/bin"));
-  buildSettings->AddAttribute("OPTIMIZATION_CFLAGS", 
-                              this->CreateString(""));
-  std::cerr << m_CurrentMakefile->GetDefineFlags() << "\n";
-  buildSettings->AddAttribute("OTHER_CFLAGS", 
-                              this->CreateString(m_CurrentMakefile->GetDefineFlags()));
-  buildSettings->AddAttribute("OTHER_LDFLAGS",
-                              this->CreateString(""));
-  buildSettings->AddAttribute("OTHER_REZFLAGS", 
-                              this->CreateString(""));
-  buildSettings->AddAttribute("PRODUCT_NAME", 
-                              this->CreateString(cmtarget.GetName()));
-  buildSettings->AddAttribute("SECTORDER_FLAGS",
-                              this->CreateString(""));
-  buildSettings->AddAttribute("WARNING_CFLAGS", 
-                              this->CreateString("-Wmost -Wno-four-char-constants -Wno-unknown-pragmas"));
-  target->AddAttribute("buildSettings", buildSettings);
-  cmXCodeObject* dependencies = this->CreateObject(cmXCodeObject::OBJECT_LIST);
-  target->AddAttribute("dependencies", dependencies);
-  target->AddAttribute("name", this->CreateString(cmtarget.GetName()));
-  target->AddAttribute("productName",this->CreateString(cmtarget.GetName()));
-  cmXCodeObject* fileRef = this->CreateObject(cmXCodeObject::PBXFileReference);
-  fileRef->AddAttribute("explicitFileType", 
-                        this->CreateString("\"compiled.mach-o.executable\""));
-  fileRef->AddAttribute("includedInIndex", this->CreateString("0"));
-  fileRef->AddAttribute("path", this->CreateString(cmtarget.GetName()));
-  fileRef->AddAttribute("refType", this->CreateString("3"));
-  fileRef->AddAttribute("sourceTree", this->CreateString("BUILT_PRODUCTS_DIR"));
-  target->AddAttribute("productReference", this->CreateObjectReference(fileRef));
-  target->AddAttribute("productType", 
-                       this->CreateString("\"com.apple.product-type.tool\""));
-  return target;
-}
-
-//----------------------------------------------------------------------------
-cmXCodeObject* cmGlobalXCodeGenerator::CreateStaticLibrary(cmTarget& cmtarget,
-                                                           cmXCodeObject* buildPhases)
-{
-  cmXCodeObject* target = this->CreateObject(cmXCodeObject::PBXNativeTarget);
-  target->AddAttribute("buildPhases", buildPhases);
-  cmXCodeObject* buildRules = this->CreateObject(cmXCodeObject::OBJECT_LIST);
-  target->AddAttribute("buildRules", buildRules);
-  cmXCodeObject* buildSettings =
-    this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
-  buildSettings->AddAttribute("INSTALL_PATH", 
-                              this->CreateString("/usr/local/bin"));
-  buildSettings->AddAttribute("LIBRARY_STYLE", 
-                              this->CreateString("STATIC"));
-  buildSettings->AddAttribute("OPTIMIZATION_CFLAGS", 
-                              this->CreateString(""));
-  std::cerr << m_CurrentMakefile->GetDefineFlags() << "\n";
-  buildSettings->AddAttribute("OTHER_CFLAGS", 
-                              this->CreateString(m_CurrentMakefile->GetDefineFlags()));
-  buildSettings->AddAttribute("OTHER_LDFLAGS",
-                              this->CreateString(""));
-  buildSettings->AddAttribute("OTHER_REZFLAGS", 
-                              this->CreateString(""));
-  buildSettings->AddAttribute("PRODUCT_NAME", 
-                              this->CreateString(cmtarget.GetName()));
-  buildSettings->AddAttribute("SECTORDER_FLAGS",
-                              this->CreateString(""));
-  buildSettings->AddAttribute("WARNING_CFLAGS", 
-                              this->CreateString("-Wmost -Wno-four-char-constants -Wno-unknown-pragmas"));
-  target->AddAttribute("buildSettings", buildSettings);
-  cmXCodeObject* dependencies = this->CreateObject(cmXCodeObject::OBJECT_LIST);
-  target->AddAttribute("dependencies", dependencies);
-  target->AddAttribute("name", this->CreateString(cmtarget.GetName()));
-  target->AddAttribute("productName",this->CreateString(cmtarget.GetName()));
-  cmXCodeObject* fileRef = this->CreateObject(cmXCodeObject::PBXFileReference);
-  fileRef->AddAttribute("explicitFileType", 
-                        this->CreateString("\"compiled.mach-o.archive.ar\""));
-  fileRef->AddAttribute("includedInIndex", this->CreateString("0"));
-  fileRef->AddAttribute("path", this->CreateString(cmtarget.GetName()));
-  fileRef->AddAttribute("refType", this->CreateString("3"));
-  fileRef->AddAttribute("sourceTree", this->CreateString("BUILT_PRODUCTS_DIR"));
-  target->AddAttribute("productReference", this->CreateObjectReference(fileRef));
-  target->AddAttribute("productType", 
-                       this->CreateString("\"com.apple.product-type.library.static\""));
-  return target;
-}
-
-//----------------------------------------------------------------------------
-cmXCodeObject* cmGlobalXCodeGenerator::CreateSharedLibrary(cmTarget& cmtarget,
-                                                           cmXCodeObject* buildPhases)
-{
-  cmXCodeObject* target = this->CreateObject(cmXCodeObject::PBXNativeTarget);
-  target->AddAttribute("buildPhases", buildPhases);
-  cmXCodeObject* buildRules = this->CreateObject(cmXCodeObject::OBJECT_LIST);
-  target->AddAttribute("buildRules", buildRules);
-  cmXCodeObject* buildSettings =
-    this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
-  buildSettings->AddAttribute("DYLIB_COMPATIBILITY_VERSION", 
-                              this->CreateString("1"));
-  buildSettings->AddAttribute("DYLIB_CURRENT_VERSION", 
-                              this->CreateString("1"));
-  buildSettings->AddAttribute("INSTALL_PATH", 
-                              this->CreateString("/usr/local/lib"));
-  buildSettings->AddAttribute("LIBRARY_STYLE", 
-                              this->CreateString("DYNAMIC"));
-  buildSettings->AddAttribute("OPTIMIZATION_CFLAGS", 
-                              this->CreateString(""));
-  std::cerr << m_CurrentMakefile->GetDefineFlags() << "\n" ;
-  buildSettings->AddAttribute("OTHER_CFLAGS", 
-                              this->CreateString(m_CurrentMakefile->GetDefineFlags()));
-  const char* libFlag = "-dynamiclib";
-  if(cmtarget.GetType() == cmTarget::MODULE_LIBRARY)
-    {
-    libFlag = "-bundle";
-    }
-  buildSettings->AddAttribute("OTHER_LDFLAGS",
-                              this->CreateString(libFlag));
-  
-  buildSettings->AddAttribute("OTHER_REZFLAGS", 
-                              this->CreateString(""));
-  buildSettings->AddAttribute("PRODUCT_NAME", 
-                              this->CreateString(cmtarget.GetName()));
-  buildSettings->AddAttribute("SECTORDER_FLAGS",
-                              this->CreateString(""));
-  buildSettings->AddAttribute("WARNING_CFLAGS", 
-                              this->CreateString("-Wmost -Wno-four-char-constants -Wno-unknown-pragmas"));
-  target->AddAttribute("buildSettings", buildSettings);
-  cmXCodeObject* dependencies = this->CreateObject(cmXCodeObject::OBJECT_LIST);
-  target->AddAttribute("dependencies", dependencies);
-  target->AddAttribute("name", this->CreateString(cmtarget.GetName()));
-  target->AddAttribute("productName",this->CreateString(cmtarget.GetName()));
-  cmXCodeObject* fileRef = this->CreateObject(cmXCodeObject::PBXFileReference);
-  fileRef->AddAttribute("explicitFileType", 
-                        this->CreateString("\"compiled.mach-o.dylib\""));
-  fileRef->AddAttribute("includedInIndex", this->CreateString("0"));
-  std::string path = cmtarget.GetName();
-  path += ".dylib";
-  fileRef->AddAttribute("path", this->CreateString(path.c_str()));
-  fileRef->AddAttribute("refType", this->CreateString("3"));
-  fileRef->AddAttribute("sourceTree", this->CreateString("BUILT_PRODUCTS_DIR"));
-  target->AddAttribute("productReference", this->CreateObjectReference(fileRef));
-  target->AddAttribute("productType", 
-                       this->CreateString("\"com.apple.product-type.library.dynamic\""));
-  return target;
-}
 
 //----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::CreateXCodeObjects(cmLocalGenerator* ,
@@ -461,7 +418,7 @@ void cmGlobalXCodeGenerator::CreateXCodeObjects(cmLocalGenerator* ,
   cmXCodeObject* mainGroupChildren = this->CreateObject(cmXCodeObject::OBJECT_LIST);
   mainGroup->AddAttribute("children", mainGroupChildren);
   mainGroup->AddAttribute("refType", this->CreateString("4"));
-  mainGroup->AddAttribute("sourceTree", this->CreateString("\"<group>\""));
+  mainGroup->AddAttribute("sourceTree", this->CreateString("<group>"));
 
   m_RootObject = this->CreateObject(cmXCodeObject::PBXProject);
   group = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);

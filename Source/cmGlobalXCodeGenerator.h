@@ -48,7 +48,8 @@ public:
    * Try to determine system infomation such as shared library
    * extension, pthreads, byte order etc.  
    */
-  virtual void EnableLanguage(std::vector<std::string>const& languages, cmMakefile *);
+  virtual void EnableLanguage(std::vector<std::string>const& languages, 
+                              cmMakefile *);
   /**
    * Try running cmake and building a file. This is used for dynalically
    * loaded commands, not as part of the usual build process.
@@ -71,6 +72,15 @@ private:
   cmXCodeObject* CreateObject(cmXCodeObject::Type type);
   cmXCodeObject* CreateString(const char* s);
   cmXCodeObject* CreateObjectReference(cmXCodeObject*);
+  cmXCodeObject* CreateXCodeTarget(cmTarget& target,
+                                   cmXCodeObject* buildPhases);
+  void CreateBuildSettings(cmTarget& target,
+                           cmXCodeObject* buildSettings,
+                           std::string& fileType,
+                           std::string& productType,
+                           std::string& projectName);
+  
+  // deprecated  TODO FIXME
   cmXCodeObject* CreateExecutable(cmTarget& cmtarget,
                                   cmXCodeObject* buildPhases);
   cmXCodeObject* CreateStaticLibrary(cmTarget& cmtarget,
@@ -94,6 +104,7 @@ private:
   std::vector<cmXCodeObject*> m_XCodeObjects;
   cmXCodeObject* m_RootObject;
   cmMakefile* m_CurrentMakefile;
+  cmLocalGenerator* m_CurrentLocalGenerator;
 };
 
 #endif

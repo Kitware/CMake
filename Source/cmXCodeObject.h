@@ -19,7 +19,9 @@ public:
   cmXCodeObject(PBXType ptype, Type type);
   void SetString(const char* s)
     {
-      m_String = s;
+      m_String = "\"";
+      m_String += s;
+      m_String += "\"";
     }
   
   void AddAttribute(const char* name, cmXCodeObject* value)

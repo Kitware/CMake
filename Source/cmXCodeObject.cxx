@@ -77,14 +77,7 @@ void cmXCodeObject::Print(std::ostream& out)
       for(j = object->m_ObjectAttributes.begin(); j != object->m_ObjectAttributes.end(); ++j)
         {
         cmXCodeObject::Indent(4, out);
-        if(object->m_String.size() )
-          {
-          out << j->first << " = " << j->second->m_String << ";\n";
-          }
-        else
-          {
-          out << j->first << " = " << "\"\";\n";
-          }
+        out << j->first << " = " << j->second->m_String << ";\n";
         }
       cmXCodeObject::Indent(3, out);
       out << "};\n";
@@ -95,14 +88,7 @@ void cmXCodeObject::Print(std::ostream& out)
       }
     else if(object->m_Type == STRING)
       {
-      if(object->m_String.size() )
-        {
-        out << i->first << " = " << object->m_String << ";\n";
-        }
-      else
-        {
-        out << i->first << " = " << "\"\";\n";
-        }
+      out << i->first << " = " << object->m_String << ";\n";
       }
     else
       {
