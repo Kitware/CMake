@@ -30,6 +30,7 @@ ELSE (WIN32)
       /usr/local/include 
       /usr/openwin/share/include 
       /opt/graphics/OpenGL/include 
+      /opt/graphics/OpenGL/contrib/libglut
       /usr/X11R6/include 
     )
     MARK_AS_ADVANCED(
@@ -41,6 +42,7 @@ ELSE (WIN32)
       /usr/lib 
       /usr/local/lib 
       /opt/graphics/OpenGL/lib 
+      /opt/graphics/OpenGL/contrib/libglut
       /usr/openwin/lib 
       /usr/X11R6/lib
     )
