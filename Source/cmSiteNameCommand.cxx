@@ -66,8 +66,8 @@ bool cmSiteNameCommand::InitialPass(std::vector<std::string> const& args)
   if (!cmSystemTools::IsOff(hostname_cmd.c_str()))
     {
     std::string host;
-    cmSystemTools::RunCommand(hostname_cmd.c_str(),
-                              host);
+    cmSystemTools::RunSingleCommand(hostname_cmd.c_str(),
+      &host);
     
     // got the hostname
     if (host.length())
