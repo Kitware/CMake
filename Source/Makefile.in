@@ -25,6 +25,7 @@ cmCommands.o \
 cmTarget.o \
 cmCustomCommand.o \
 cmCacheManager.o \
+cmCableClassSet.o \
 cmSourceGroup.o
 
 DEPENDS = $(srcdir)/*.h  ${CMAKE_CONFIG_DIR}/CMake/Source/cmConfigure.h
@@ -43,6 +44,7 @@ cmUnixMakefileGenerator.o : $(DEPENDS)
 cmCommands.o : $(DEPENDS) $(srcdir)/*Command*.cxx
 cmTarget.o : $(DEPENDS)
 cmCacheManager.o : $(DEPENDS)
+cmCableClassSet.o: $(DEPENDS)
 cmSourceGroup.o : $(DEPENDS)
 
 
