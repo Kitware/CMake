@@ -135,7 +135,7 @@ protected:
   void AppendLibDepends(const cmTarget& target,
                         std::vector<std::string>& depends);
   void AppendLibDepend(std::vector<std::string>& depends, const char* name);
-  std::string GetRecursiveMakeCall(const char* tgt, bool silent);
+  std::string GetRecursiveMakeCall(const char* tgt);
   void WriteJumpAndBuildRules(std::ostream& makefileStream);
 
   static bool ScanDependenciesC(const char* objFile, const char* srcFile,

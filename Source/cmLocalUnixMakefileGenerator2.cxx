@@ -54,7 +54,8 @@ void cmLocalUnixMakefileGenerator2::SetEmptyCommand(const char* cmd)
 //----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator2::Generate(bool fromTheTop)
 {
-  // TODO: Think about unifying generation of "@" for silent commands.
+  // TODO: Handle EXECUTABLE_OUTPUT_PATH and LIBRARY_OUTPUT_PATH when
+  // superclass generator is not called.
 
 #ifdef CMLUMG_WRITE_OLD_MAKEFILE
   // Generate old style for now.
@@ -424,7 +425,7 @@ cmLocalUnixMakefileGenerator2
   cmOStringStream depCmd;
   // TODO: Account for source file properties and directory-level
   // definitions when scanning for dependencies.
-  depCmd << "@$(CMAKE_COMMAND) -E cmake_depends " << lang << " "
+  depCmd << "$(CMAKE_COMMAND) -E cmake_depends " << lang << " "
          << this->ConvertToRelativeOutputPath(obj.c_str()) << " "
          << this->ConvertToRelativeOutputPath(source.GetFullPath().c_str());
   std::vector<std::string> includeDirs;
@@ -786,6 +787,14 @@ cmLocalUnixMakefileGenerator2
       << "\n";
     }
 
+  if(m_Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"))
+    {
+    makefileStream
+      << "# Produce verbose output by default.\n"
+      << "VERBOSE = 1\n"
+      << "\n";
+    }
+
   std::string cmakecommand =
     this->ConvertToOutputForExisting(
       m_Makefile->GetRequiredDefinition("CMAKE_COMMAND"));
@@ -867,7 +876,7 @@ cmLocalUnixMakefileGenerator2
   std::vector<std::string> no_depends;
   std::vector<std::string> commands;
   commands.push_back(
-    "@$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)");
+    "$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)");
   this->WriteMakeRule(makefileStream,
                       "Special rule to re-run CMake using make.",
                       "Running CMake to regenerate build system...",
@@ -883,7 +892,7 @@ cmLocalUnixMakefileGenerator2
     std::vector<std::string> no_depends;
     std::vector<std::string> commands;
     commands.push_back(
-      "@$(CMAKE_EDIT_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)");
+      "$(CMAKE_EDIT_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)");
     this->WriteMakeRule(makefileStream,
                         "Special rule to re-run CMake cache editor using make.",
                         "Running CMake cache editor...",
@@ -896,7 +905,7 @@ cmLocalUnixMakefileGenerator2
     std::vector<std::string> no_depends;
     std::vector<std::string> commands;
     commands.push_back(
-      "@$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) -i");
+      "$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) -i");
     this->WriteMakeRule(makefileStream,
                         "Special rule to re-run CMake cache editor using make.",
                         "Running interactive CMake command-line interface...",
@@ -923,7 +932,7 @@ cmLocalUnixMakefileGenerator2
   std::string cmakefileName = m_Makefile->GetStartOutputDirectory();
   cmakefileName += "/" CMLUMG_MAKEFILE_NAME ".cmake";
   std::string runRule =
-    "@$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)";
+    "$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)";
   runRule += " --check-build-system ";
   runRule += this->ConvertToRelativeOutputPath(cmakefileName.c_str());
 
@@ -948,17 +957,18 @@ cmLocalUnixMakefileGenerator2
   std::vector<std::string> no_commands;
 
   // Write special target to silence make output.  This must be after
-  // the default target in case VERBOSE is set (which changes the name).
-  if(!m_Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"))
-    {
-    std::vector<std::string> no_depends;
-    this->WriteMakeRule(makefileStream,
-                        "Suppress display of executed commands.",
-                        0,
-                        "$(VERBOSE).SILENT",
-                        no_depends,
-                        no_commands);
-    }
+  // the default target in case VERBOSE is set (which changes the
+  // name).  The setting of CMAKE_VERBOSE_MAKEFILE to ON will cause a
+  // "VERBOSE=1" to be added as a make variable which will change the
+  // name of this special target.  This gives a make-time choice to
+  // the user.
+  std::vector<std::string> no_depends;
+  this->WriteMakeRule(makefileStream,
+                      "Suppress display of executed commands.",
+                      0,
+                      "$(VERBOSE).SILENT",
+                      no_depends,
+                      no_commands);
 
   // Special target to cleanup operation of make tool.
   std::vector<std::string> depends;
@@ -1111,22 +1121,22 @@ cmLocalUnixMakefileGenerator2
   // Recursively handle pre-order directories.
   std::string preTarget = pass;
   preTarget += ".pre-order";
-  commands.push_back(this->GetRecursiveMakeCall(preTarget.c_str(), true));
+  commands.push_back(this->GetRecursiveMakeCall(preTarget.c_str()));
 
   // Recursively build the local targets in this directory.
   if(local1)
     {
-    commands.push_back(this->GetRecursiveMakeCall(local1, true));
+    commands.push_back(this->GetRecursiveMakeCall(local1));
     }
   if(local2)
     {
-    commands.push_back(this->GetRecursiveMakeCall(local2, true));
+    commands.push_back(this->GetRecursiveMakeCall(local2));
     }
 
   // Recursively handle post-order directories.
   std::string postTarget = pass;
   postTarget += ".post-order";
-  commands.push_back(this->GetRecursiveMakeCall(postTarget.c_str(), true));
+  commands.push_back(this->GetRecursiveMakeCall(postTarget.c_str()));
 
   // Write the rule.
   std::string preEcho = "Entering directory ";
@@ -1193,12 +1203,12 @@ cmLocalUnixMakefileGenerator2
     // On Windows we must perform each step separately and then change
     // back because the shell keeps the working directory between
     // commands.
-    std::string cmd = "@cd ";
+    std::string cmd = "cd ";
     cmd += this->ConvertToOutputForExisting(subdir);
     commands.push_back(cmd);
 
     // Build the target for this pass.
-    commands.push_back(this->GetRecursiveMakeCall(pass, true));
+    commands.push_back(this->GetRecursiveMakeCall(pass));
 
     // Change back to the starting directory.  Any trailing slash must
     // be removed to avoid problems with Borland Make.
@@ -1212,7 +1222,7 @@ cmLocalUnixMakefileGenerator2
       {
       back = back.substr(0, back.size()-1);
       }
-    cmd = "@cd ";
+    cmd = "cd ";
     cmd += this->ConvertToOutputForExisting(back.c_str());
     commands.push_back(cmd);
     }
@@ -1221,12 +1231,12 @@ cmLocalUnixMakefileGenerator2
     // On UNIX we must construct a single shell command to change
     // directory and build because make resets the directory between
     // each command.
-    std::string cmd = "@cd ";
+    std::string cmd = "cd ";
     cmd += this->ConvertToOutputForExisting(subdir);
 
     // Build the target for this pass.
     cmd += " && ";
-    cmd += this->GetRecursiveMakeCall(pass, false);
+    cmd += this->GetRecursiveMakeCall(pass);
 
     // Add the command as a single line.
     commands.push_back(cmd);
@@ -1653,7 +1663,7 @@ cmLocalUnixMakefileGenerator2
     }
 
   // Add a command to remove any existing files for this library.
-  std::string remove = "@$(CMAKE_COMMAND) -E remove -f ";
+  std::string remove = "$(CMAKE_COMMAND) -E remove -f ";
   remove += targetFullPathReal;
   if(targetFullPathSO != targetFullPathReal)
     {
@@ -1677,7 +1687,7 @@ cmLocalUnixMakefileGenerator2
   // Add a rule to create necessary symlinks for the library.
   if(targetFullPath != targetFullPathReal)
     {
-    std::string symlink = "@$(CMAKE_COMMAND) -E cmake_symlink_library ";
+    std::string symlink = "$(CMAKE_COMMAND) -E cmake_symlink_library ";
     symlink += targetFullPathReal;
     symlink += " ";
     symlink += targetFullPathSO;
@@ -2066,14 +2076,10 @@ cmLocalUnixMakefileGenerator2
 //----------------------------------------------------------------------------
 std::string
 cmLocalUnixMakefileGenerator2
-::GetRecursiveMakeCall(const char* tgt, bool silent)
+::GetRecursiveMakeCall(const char* tgt)
 {
   // Call make on the given file.
   std::string cmd;
-  if(silent)
-    {
-    cmd += "@";
-    }
   cmd += "$(MAKE) -f " CMLUMG_MAKEFILE_NAME " ";
 
   // Pass down verbosity level.
@@ -2137,22 +2143,21 @@ cmLocalUnixMakefileGenerator2
       // On Windows we must perform each step separately and then jump
       // back because the shell keeps the working directory between
       // commands.
-      std::string cmd = "@cd ";
+      std::string cmd = "cd ";
       cmd += this->ConvertToOutputForExisting(destination);
       commands.push_back(cmd);
 
       // Check the build system in destination directory.
-      commands.push_back(this->GetRecursiveMakeCall("cmake_check_build_system",
-                                                    true));
+      commands.push_back(this->GetRecursiveMakeCall("cmake_check_build_system"));
 
       // Build the targets's dependencies.
-      commands.push_back(this->GetRecursiveMakeCall(dep.c_str(), true));
+      commands.push_back(this->GetRecursiveMakeCall(dep.c_str()));
 
       // Build the target.
-      commands.push_back(this->GetRecursiveMakeCall(tgt.c_str(), true));
+      commands.push_back(this->GetRecursiveMakeCall(tgt.c_str()));
 
       // Jump back to the starting directory.
-      cmd = "@cd ";
+      cmd = "cd ";
       cmd += this->ConvertToOutputForExisting(m_Makefile->GetStartOutputDirectory());
       commands.push_back(cmd);
       }
@@ -2160,20 +2165,20 @@ cmLocalUnixMakefileGenerator2
       {
       // On UNIX we must construct a single shell command to jump and
       // build because make resets the directory between each command.
-      std::string cmd = "@cd ";
+      std::string cmd = "cd ";
       cmd += this->ConvertToOutputForExisting(destination);
 
       // Check the build system in destination directory.
       cmd += " && ";
-      cmd += this->GetRecursiveMakeCall("cmake_check_build_system", false);
+      cmd += this->GetRecursiveMakeCall("cmake_check_build_system");
 
       // Build the targets's dependencies.
       cmd += " && ";
-      cmd += this->GetRecursiveMakeCall(dep.c_str(), false);
+      cmd += this->GetRecursiveMakeCall(dep.c_str());
 
       // Build the target.
       cmd += " && ";
-      cmd += this->GetRecursiveMakeCall(tgt.c_str(), false);
+      cmd += this->GetRecursiveMakeCall(tgt.c_str());
 
       // Add the command as a single line.
       commands.push_back(cmd);
