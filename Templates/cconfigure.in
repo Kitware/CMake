@@ -465,8 +465,11 @@ export CMAKE_MODULE_SUFFIX
 if test $ac_cv_prog_gcc = yes; then
   CMAKE_SHLIB_CFLAGS="-fPIC"
 fi
-# if running on cygwin remove -fPIC flag
+# if running on cygwin, AIX, or Darwin remove -fPIC flag
 case $system in 
+  AIX-*)
+    CMAKE_SHLIB_CFLAGS=""
+    ;;
   CYGWIN_NT*)
     CMAKE_SHLIB_CFLAGS=""
     ;;
