@@ -315,6 +315,22 @@ void CMakeSetupDialog::LoadFromRegistry()
 
 void CMakeSetupDialog::OnBuildProjects() 
 {
+  if(!cmSystemTools::FileExists(m_WhereBuild))
+    {
+    std::string message =
+      "Build directory does not exist, should I create it?\n\n"
+      "Directory: ";
+    message += (const char*)m_WhereBuild;
+    if(MessageBox(message.c_str(), "Create Directory", MB_OKCANCEL) == IDOK)
+      {
+      cmSystemTools::MakeDirectory(m_WhereBuild);
+      }
+    else
+      {
+      MessageBox("Build Project aborted, nothing done.");
+      return;
+      }
+    }
   ::SetCursor(LoadCursor(NULL, IDC_WAIT));
   // get all the info from the screen
   this->UpdateData();
