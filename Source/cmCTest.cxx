@@ -2992,7 +2992,7 @@ std::string cmCTest::GenerateRegressionImages(const std::string& xml)
           << "\t\t\t<NamedMeasurement" 
           << " name=\"" << measurementfile.match(idx) << "\""
           << " text=\"text/string\""
-          << "><Value>File " << filename << " not found</Value></NamedMeasurement>" 
+          << "><Value>File " << filename.c_str() << " not found</Value></NamedMeasurement>" 
           << std::endl;
         std::cout << "File \"" << filename.c_str() << "\" not found." << std::endl;
         }
