@@ -275,7 +275,7 @@ IF(KWSYS_USE_Process)
       ${PROJECT_BINARY_DIR}/${KWSYS_NAMESPACE}ProcessFwd9xEnc.c
       PROPERTIES GENERATED 1)
     SET(KWSYS_H_FILES ${KWSYS_H_FILES} ProcessWin32Kill)
-    SET(KWSYS_SRCS ${KWSYS_SRCS} ProcessWin32Kill.cxx)
+    SET(KWSYS_SRCS ${KWSYS_SRCS} ProcessWin32Kill.c)
   ELSE(NOT UNIX)
     # Use the UNIX implementation.
     SET(KWSYS_SRCS ${KWSYS_SRCS} ProcessUNIX.c)
