@@ -149,14 +149,14 @@ public:
    */
   static const char* GetExecutableExtension();
 
-  typedef  void (*ErrorCallback)(const char*, const char*, bool&);
+  typedef  void (*ErrorCallback)(const char*, const char*, bool&, void*);
   /**
    *  Set the function used by GUI's to display error messages
    *  Function gets passed: message as a const char*, 
    *  title as a const char*, and a reference to bool that when
    *  set to false, will disable furthur messages (cancel).
    */
-  static void SetErrorCallback(ErrorCallback f);
+  static void SetErrorCallback(ErrorCallback f, void* clientData=0);
 
   /**
    * Display an error message.
@@ -308,6 +308,7 @@ private:
   static bool s_DisableMessages;
   static bool s_DisableRunCommandOutput;
   static ErrorCallback s_ErrorCallback;
+  static void* s_ErrorCallbackClientData;
 };
 
 

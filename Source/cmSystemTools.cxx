@@ -74,7 +74,8 @@ bool cmSystemTools::s_DisableRunCommandOutput = false;
 bool cmSystemTools::s_ErrorOccured = false;
 bool cmSystemTools::s_DisableMessages = false;
 
-void (*cmSystemTools::s_ErrorCallback)(const char*, const char*, bool&);
+void (*cmSystemTools::s_ErrorCallback)(const char*, const char*, bool&, void*);
+void* cmSystemTools::s_ErrorCallbackClientData = 0;
 
 // adds the elements of the env variable path to the arg passed in
 void cmSystemTools::GetPath(std::vector<std::string>& path)
@@ -984,9 +985,10 @@ void cmSystemTools::Error(const char* m1, const char* m2,
 }
 
 
-void cmSystemTools::SetErrorCallback(ErrorCallback f)
+void cmSystemTools::SetErrorCallback(ErrorCallback f, void* clientData)
 {
   s_ErrorCallback = f;
+  s_ErrorCallbackClientData = clientData;
 }
 
 void cmSystemTools::Message(const char* m1, const char *title)
@@ -997,7 +999,7 @@ void cmSystemTools::Message(const char* m1, const char *title)
     }
   if(s_ErrorCallback)
     {
-    (*s_ErrorCallback)(m1, title, s_DisableMessages);
+    (*s_ErrorCallback)(m1, title, s_DisableMessages, s_ErrorCallbackClientData);
     return;
     }
   else
