@@ -84,40 +84,6 @@ bool cmSiteNameCommand::InitialPass(std::vector<std::string> const& args)
       if(host.length())
         {
         siteName = host;
-
-        temp = m_Makefile->GetDefinition("NSLOOKUP");
-        std::string nslookup_cmd;
-        if(temp)
-          {
-          nslookup_cmd = temp;
-          }
-        else
-          {
-          nslookup_cmd = cmSystemTools::FindProgram("nslookup", paths);
-          }
-
-        // try to find the domain name for this computer
-        if (!cmSystemTools::IsOff(nslookup_cmd.c_str()))
-          {
-          nslookup_cmd += " ";
-          nslookup_cmd += host;
-          std::string nsOutput;
-          cmSystemTools::RunSingleCommand(nslookup_cmd.c_str(),
-                                          &nsOutput);
-
-          // got the domain name
-          if (nsOutput.length())
-            {
-            std::string RegExp = ".*Name:[ \t\n]*";
-            RegExp += host;
-            RegExp += "\\.([^ \t\n\r]*)[ \t\n\r]*Address:";
-            cmsys::RegularExpression reg( RegExp.c_str() );
-            if(reg.find(nsOutput.c_str()))
-              {
-              siteName += '.' + cmSystemTools::LowerCase(reg.match(1));
-              }
-            }
-          }
         }
       }
     }
