@@ -125,6 +125,7 @@ protected:
                                       const char* target,
                                       const char* target1,
                                       const char* target2,
+                                      const char* depend,
                                       const std::vector<std::string>&
                                       SubDirectories);
   virtual void OutputMakeRule(std::ostream&, 

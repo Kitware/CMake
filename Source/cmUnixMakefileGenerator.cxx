@@ -1108,8 +1108,13 @@ OutputSubDirectoryVars(std::ostream& fout,
                        const char* target,
                        const char* target1,
                        const char* target2,
+                       const char* depend,
                        const std::vector<std::string>& SubDirectories)
 {
+  if(!depend)
+    {
+    depend = "";
+    }
   if( SubDirectories.size() == 0)
     {
     return;
@@ -1135,7 +1140,7 @@ OutputSubDirectoryVars(std::ostream& fout,
   for(unsigned int i =0; i < SubDirectories.size(); i++)
     {
     std::string subdir = FixDirectoryName(SubDirectories[i].c_str());
-    fout << target << "_" << subdir.c_str() << ": $(TARGETS)";
+    fout << target << "_" << subdir.c_str() << ": " << depend;
     
     // Make each subdirectory depend on previous one.  This forces
     // parallel builds (make -j 2) to build in same order as a single
@@ -1172,19 +1177,19 @@ void cmUnixMakefileGenerator::OutputSubDirectoryRules(std::ostream& fout)
                                "SUBDIR_BUILD",
                                "default_target",
                                "default_target",
-                               0,
+                               0, "$(TARGETS)",
                                SubDirectories);
   this->OutputSubDirectoryVars(fout, "SUBDIR_CLEAN", "clean",
                                "clean",
-                               0,
+                               0, 0,
                                SubDirectories);
   this->OutputSubDirectoryVars(fout, "SUBDIR_DEPEND", "depend",
                                "depend",
-                               0,
+                               0, 0,
                                SubDirectories);
   this->OutputSubDirectoryVars(fout, "SUBDIR_INSTALL", "install",
                                "install",
-                               0,
+                               0, 0,
                                SubDirectories);
 }
 
