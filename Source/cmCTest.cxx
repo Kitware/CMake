@@ -2271,9 +2271,9 @@ int cmCTest::TestDirectory(bool memcheck)
 
   if ( m_DartMode )
     {
-    std::ofstream ofs;
+    std::ofstream xmlfile;
     if( !this->OpenOutputFile(m_CurrentTag, 
-        (memcheck ? (m_CompatibilityMode?"Purify.xml":"MemCheck.xml") : "Test.xml"), ofs) )
+        (memcheck ? (m_CompatibilityMode?"Purify.xml":"MemCheck.xml") : "Test.xml"), xmlfile) )
       {
       std::cerr << "Cannot create " << (memcheck ? "memory check" : "testing")
         << " XML file" << std::endl;
@@ -2281,11 +2281,11 @@ int cmCTest::TestDirectory(bool memcheck)
       }
     if ( memcheck )
       {
-      this->GenerateDartMemCheckOutput(ofs);
+      this->GenerateDartMemCheckOutput(xmlfile);
       }
     else
       {
-      this->GenerateDartTestOutput(ofs);
+      this->GenerateDartTestOutput(xmlfile);
       }
     }
 
