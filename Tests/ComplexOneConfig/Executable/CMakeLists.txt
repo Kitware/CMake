@@ -13,7 +13,11 @@ LINK_LIBRARIES(${COMPLEX_LIBS})
 
 
 ADD_EXECUTABLE(complex complex)
-TARGET_LINK_LIBRARIES(complex CMakeLib)
+IF (UNIX)
+  TARGET_LINK_LIBRARIES(complex CMakeLib ${CMAKE_DL_LIBS})
+ELSE(UNIX)
+  TARGET_LINK_LIBRARIES(complex CMakeLib)
+ENDIF (UNIX)
 
 #
 # Output the files required by 'complex' to a file.
