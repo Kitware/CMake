@@ -78,4 +78,30 @@ void cmCableCommand::SetupCableData()
   // command as its owner.
   pathName += "/cable_config.xml";
   m_CableData = new cmCableData(this, pathName);
+  
+  // We must add a custom rule to cause the cable_config.xml to be re-built
+  // when it is removed.  Rebuilding it means re-running CMake.
+  std::string cMakeLists = m_Makefile->GetStartDirectory();
+  cMakeLists += "/";
+  cMakeLists += "CMakeLists.txt";
+  std::string command = m_Makefile->GetHomeOutputDirectory();  
+  command += "/CMake/Source/";
+  command += cmSystemTools::GetCMakeExecutableName();
+  command += " " + cMakeLists;
+  command += " ";
+  command += cmSystemTools::GetCMakeExecutableOptions();
+  command += " -H";
+  command += m_Makefile->GetHomeDirectory();
+  command += " -S";
+  command += m_Makefile->GetStartDirectory();
+  command += " -O";
+  command += m_Makefile->GetStartOutputDirectory();
+  command += " -B";
+  command += m_Makefile->GetHomeOutputDirectory();
+
+  std::vector<std::string> depends;
+  m_Makefile->AddCustomCommand(cMakeLists.c_str(), 
+                               "cable_config.xml",
+                               command.c_str(),
+                               depends);  
 }
