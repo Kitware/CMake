@@ -383,6 +383,87 @@ void cmMakefile::GenerateMakefile()
     }
   // now do the generation
   m_MakefileGenerator->GenerateMakefile();
+
+  // generate any testing files
+  this->GenerateTestfile();
+}
+
+void cmMakefile::GenerateTestfile()
+{
+  if (m_Tests.empty() && this->GetSubDirectories().empty())
+    {
+    return;
+    }
+
+  // Create a full path filename for output Testfile
+  std::string fname;
+  fname = this->GetCurrentOutputDirectory();
+  fname += "/";
+  fname += "Testfile";
+
+  // Open the output Testfile
+  std::ofstream fout(fname.c_str());
+  if (!fout)
+    {
+    cmSystemTools::Error("Error Writing ", fname.c_str());
+    return;
+    }
+  
+  fout << "# CMake generated Testfile for " << std::endl
+            << "#\tSource directory: "
+            << this->GetCurrentDirectory()
+            << std::endl
+            << "#\tBuild directory: " << this->GetCurrentOutputDirectory()
+            << std::endl
+            << "# " << std::endl
+            << "# This file replicates the SUBDIRS() and ADD_TEST() commands from the source"
+            << std::endl
+            << "# tree CMakeLists.txt file, skipping any SUBDIRS() or ADD_TEST() commands"
+            << std::endl
+            << "# that are excluded by CMake control structures, i.e. IF() commands."
+            << std::endl
+            << "#" 
+            << std::endl << std::endl;
+
+  // write out the subdirs for the current directory
+  if (!this->GetSubDirectories().empty())
+    {
+    fout << "SUBDIRS(";
+    const std::vector<std::string>& subdirs = this->GetSubDirectories();
+    std::vector<std::string>::const_iterator i = subdirs.begin();
+    fout << (*i).c_str();
+    ++i;
+    for(; i != subdirs.end(); ++i)
+      {
+      fout << " " << (*i).c_str();
+      }
+    fout << ")" << std::endl << std::endl;;
+    }
+
+  
+  // write out each test
+  std::vector<std::vector<std::string> >::iterator testIt;
+  std::vector<std::string>::iterator it;
+
+  // for each test
+  for (testIt = m_Tests.begin(); testIt != m_Tests.end(); ++testIt)
+    {
+    if (!(*testIt).empty())
+      {
+      // for each arg in the test
+      fout << "ADD_TEST(";
+      it = (*testIt).begin();
+      fout << (*it).c_str();
+      ++it;
+      for (; it != (*testIt).end(); ++it)
+        {
+        fout << " " << (*it).c_str();
+        }
+      fout << ")" << std::endl;
+      }
+    }
+
+  fout << std::endl;
 }
 
 void cmMakefile::AddSource(cmSourceFile& cmfile, const char *srclist)
@@ -487,6 +568,11 @@ void cmMakefile::AddDefinition(const char* name, bool value)
     m_Definitions.erase( DefinitionMap::key_type(name));
     m_Definitions.insert(DefinitionMap::value_type(name, "OFF"));
     }
+}
+
+void cmMakefile::AddTest(const std::vector<std::string> &args)
+{
+  m_Tests.push_back(args);
 }
 
 void cmMakefile::SetProjectName(const char* p)

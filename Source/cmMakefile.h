@@ -110,6 +110,17 @@ public:
    * Produce the output makefile.
    */
   void GenerateMakefile();
+
+  /**
+   * Produce the output testfile. This produces a file in the build directory
+   * called Testfile with a syntax similar to CMakeLists.txt.  It contains
+   * the SUBDIRS() and ADD_TEST() commands from the source CMakeLists.txt
+   * file with CMake variables expanded.  Only the subdirs and tests
+   * within the valid control structures are replicated in Testfile
+   * (i.e. SUBDIRS() and ADD_TEST() commands within IF() commands that are
+   * not entered by CMake are not replicated in Testfile).
+   */
+  void GenerateTestfile();
   
   /**
    * Print the object state to std::cout.
@@ -210,6 +221,11 @@ public:
    * Add bool variable definition to the build. 
    */
   void AddDefinition(const char* name, bool);
+
+  /**
+   * Add a test to the build.
+   */
+  void AddTest(const std::vector<std::string> &args);
 
   /**
    * Specify the name of the project for this build.
@@ -510,7 +526,9 @@ protected:
   std::vector<std::string> m_Utilities;
   std::vector<std::string> m_UtilityDirectories;
   std::vector<std::string> m_ListFiles; // list of command files loaded
-
+  std::vector<std::vector<std::string> > m_Tests; // list of tests and args
+  
+  
   cmTarget::LinkLibraries m_LinkLibraries;
 
   std::string m_IncludeFileRegularExpression;
