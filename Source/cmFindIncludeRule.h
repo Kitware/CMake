@@ -22,7 +22,7 @@
 /** \class cmFindIncludeRule
  * \brief Define a rule that searches for an include file.
  *
- * cmFindIncludeRule is used to define a variable include
+ * cmFindIncludeRule is used to define a CMake variable include
  * path location by specifying a file and list of directories.
  */
 class cmFindIncludeRule : public cmRuleMaker
@@ -74,7 +74,7 @@ public:
   virtual const char* FullDocumentation()
     {
     return
-      "FIND_INCLUDE(DEFINE try1 try2 ...);";
+      "FIND_INCLUDE(DEFINE try1 try2 ...)";
     }
 };
 

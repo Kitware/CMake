@@ -1,3 +1,18 @@
+/*=========================================================================
+
+  Program:   Insight Segmentation & Registration Toolkit
+  Module:    $RCSfile$
+  Language:  C++
+  Date:      $Date$
+  Version:   $Revision$
+
+
+  Copyright (c) 2000 National Library of Medicine
+  All rights reserved.
+
+  See COPYRIGHT.txt for copyright details.
+
+=========================================================================*/
 #ifndef cmFindLibraryRule_h
 #define cmFindLibraryRule_h
 
@@ -5,31 +20,62 @@
 #include "cmRuleMaker.h"
 
 
+/** \class cmFindLibraryRule
+ * \brief Define a rule to search for a library.
+ *
+ * cmFindLibraryRule is used to define a CMake variable
+ * that specifies a library. The rule searches for a given
+ * file in a list of directories.
+ */
 class cmFindLibraryRule : public cmRuleMaker
 {
 public:
+  /**
+   * This is a virtual constructor for the rule.
+   */
   virtual cmRuleMaker* Clone() 
     {
-      return new cmFindLibraryRule;
+    return new cmFindLibraryRule;
     }
-  // This is called when the rule is firt encountered in
-  // the input file
-  virtual bool Invoke(std::vector<std::string>& args);
-  virtual void FinalPass() { }
-  virtual bool IsInherited() { return true;  }
 
-  // This is the name used in the input file.
-  virtual const char* GetName() { return "FIND_LIBRARY";}
+  /**
+   * This is called when the rule is first encountered in
+   * the CMakeLists.txt file.
+   */
+  virtual bool Invoke(std::vector<std::string>& args);
+
+  /**
+   * This is called at the end after all the information
+   * specified by the rules is accumulated.
+   */
+  virtual void FinalPass() { }
+  
+  /**
+   * This determines if the rule gets propagated down
+   * to makefiles located in subdirectories.
+   */
+  virtual bool IsInherited() {return true;}
+
+  /**
+   * The name of the rule as specified in CMakeList.txt.
+   */
+  virtual const char* GetName() {return "FIND_LIBRARY";}
+
+  /**
+   * Succinct documentation.
+   */
   virtual const char* TerseDocumentation() 
     {
-      return "Set a name for the entire project. One argument.";
+    return "Find a library.";
     }
   
-  // Return full documentation for the rule
+  /**
+   * More documentation.
+   */
   virtual const char* FullDocumentation()
     {
-      return
-        "FIND_LIBRARY(DEFINE try1 try2);";
+    return
+      "FIND_LIBRARY(DEFINE try1 try2)";
     }
 };
 

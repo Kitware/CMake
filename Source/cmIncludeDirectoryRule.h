@@ -1,35 +1,79 @@
+/*=========================================================================
+
+  Program:   Insight Segmentation & Registration Toolkit
+  Module:    $RCSfile$
+  Language:  C++
+  Date:      $Date$
+  Version:   $Revision$
+
+
+  Copyright (c) 2000 National Library of Medicine
+  All rights reserved.
+
+  See COPYRIGHT.txt for copyright details.
+
+=========================================================================*/
 #ifndef cmIncludeDirectoryRule_h
 #define cmIncludeDirectoryRule_h
 
 #include "cmStandardIncludes.h"
 #include "cmRuleMaker.h"
 
-
+/** \class cmIncludeDirectoryRule
+ * \brief Add include directories to the build.
+ *
+ * cmIncludeDirectoryRule is used to specify directory locations
+ * to search for included files.
+ */
 class cmIncludeDirectoryRule : public cmRuleMaker
 {
 public:
+  /**
+   * This is a virtual constructor for the rule.
+   */
   virtual cmRuleMaker* Clone() 
     {
-      return new cmIncludeDirectoryRule;
+    return new cmIncludeDirectoryRule;
     }
-  // This is called when the rule is firt encountered in
-  // the input file
-  virtual bool Invoke(std::vector<std::string>& args);
-  virtual void FinalPass() { }
-  virtual bool IsInherited() { return true;  }
 
-  // This is the name used in the input file.
+  /**
+   * This is called when the rule is first encountered in
+   * the CMakeLists.txt file.
+   */
+  virtual bool Invoke(std::vector<std::string>& args);
+
+  /**
+   * This is called at the end after all the information
+   * specified by the rules is accumulated.
+   */
+  virtual void FinalPass() { }
+
+  /**
+   * This determines if the rule gets propagated down
+   * to makefiles located in subdirectories.
+   */
+  virtual bool IsInherited() {return true;}
+
+  /**
+   * The name of the rule as specified in CMakeList.txt.
+   */
   virtual const char* GetName() { return "INCLUDE_DIRECTORIES";}
+
+  /**
+   * Succinct documentation.
+   */
   virtual const char* TerseDocumentation() 
     {
-      return "Add include directories to the build.";
+    return "Add include directories to the build.";
     }
   
-  // Return full documentation for the rule
+  /**
+   * More documentation.
+   */
   virtual const char* FullDocumentation()
     {
-      return
-        "INCLUDE_DIRECTORIES(dir1 dir2 ...).\n";
+    return
+      "INCLUDE_DIRECTORIES(dir1 dir2 ...).\n";
     }
 };
 

@@ -1,39 +1,84 @@
+/*=========================================================================
+
+  Program:   Insight Segmentation & Registration Toolkit
+  Module:    $RCSfile$
+  Language:  C++
+  Date:      $Date$
+  Version:   $Revision$
+
+
+  Copyright (c) 2000 National Library of Medicine
+  All rights reserved.
+
+  See COPYRIGHT.txt for copyright details.
+
+=========================================================================*/
 #ifndef cmWin32LibrariesRule_h
 #define cmWin32LibrariesRule_h
 
 #include "cmStandardIncludes.h"
 #include "cmRuleMaker.h"
 
-
+/** \class cmWin32LibrariesRule
+ * \brief Specify a list of libraries for Win32 platforms.
+ *
+ * cmWin32LibrariesRule specifies a list of libraries for Win32 platforms
+ * only. Both user and system libraries can be listed.
+ */
 class cmWin32LibrariesRule  : public cmRuleMaker
 {
 public:
+  /**
+   * Constructor.
+   */
   cmWin32LibrariesRule();
+
+  /**
+   * This is a virtual constructor for the rule.
+   */
   virtual cmRuleMaker* Clone() 
     {
-      return new cmWin32LibrariesRule ;
+    return new cmWin32LibrariesRule ;
     }
-  // This is called when the rule is firt encountered in
-  // the input file
-  virtual bool Invoke(std::vector<std::string>& args);
-  virtual void FinalPass() { }
-  virtual bool IsInherited() { return true;  }
 
-  // This is the name used in the input file.
+  /**
+   * This is called when the rule is first encountered in
+   * the CMakeLists.txt file.
+   */
+  virtual bool Invoke(std::vector<std::string>& args);
+
+  /**
+   * This is called at the end after all the information
+   * specified by the rules is accumulated.
+   */
+  virtual void FinalPass() { }
+
+  /**
+   * This determines if the rule gets propagated down
+   * to makefiles located in subdirectories.
+   */
+  virtual bool IsInherited() {return true;}
+
+  /**
+   * The name of the rule as specified in CMakeList.txt.
+   */
   virtual const char* GetName() { return "WIN32_LIBRARIES";}
+
+  /**
+   * Succinct documentation.
+   */
   virtual const char* TerseDocumentation() 
     {
-      return "Set a name for the library to be built. One argument.";
+    return "Add libraries that are only used for Win32 programs.";
     }
   
-  // Return full documentation for the rule
+  /**
+   * More documentation.
+   */
   virtual const char* FullDocumentation()
     {
-      return
-        "Set the name for the library in this makefile.  \n"
-        "This takes one argument.\n"
-        "LIBRARY(libraryname);\n"
-        "There can be only one library per CMakeLists.txt file.\n";
+    return
+      "WIN32_LIBRARIES(library -lm ...)";
     }
 };
 
