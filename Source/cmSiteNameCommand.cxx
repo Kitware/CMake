@@ -49,7 +49,7 @@ bool cmSiteNameCommand::InitialPass(std::vector<std::string> const& args)
     return false;
     }
   const char* cacheValue
-    = m_Makefile->GetDefinition("SITE");
+    = m_Makefile->GetDefinition(args[0].c_str());
   if(cacheValue)
     {
     return true;
@@ -102,7 +102,7 @@ bool cmSiteNameCommand::InitialPass(std::vector<std::string> const& args)
     }
   
   m_Makefile->
-    AddCacheDefinition("SITE",
+    AddCacheDefinition(args[0].c_str(),
                        siteName.c_str(),
                        "Name of the computer/site where compile is being run",
                        cmCacheManager::STRING);

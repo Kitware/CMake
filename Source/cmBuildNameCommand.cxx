@@ -48,8 +48,7 @@ bool cmBuildNameCommand::InitialPass(std::vector<std::string> const& args)
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  const char* cacheValue
-    = m_Makefile->GetDefinition("BUILDNAME");
+  const char* cacheValue = m_Makefile->GetDefinition(args[0].c_str());
   if(cacheValue)
     {
     // do we need to correct the value? 
@@ -60,7 +59,7 @@ bool cmBuildNameCommand::InitialPass(std::vector<std::string> const& args)
       cmSystemTools::ReplaceString(cv,"/", "_");
       cmSystemTools::ReplaceString(cv,"(", "_");
       cmSystemTools::ReplaceString(cv,")", "_");
-      m_Makefile->AddCacheDefinition("BUILDNAME",
+      m_Makefile->AddCacheDefinition(args[0].c_str(),
                                      cv.c_str(),
                                      "Name of build.",
                                      cmCacheManager::STRING);
@@ -95,7 +94,7 @@ bool cmBuildNameCommand::InitialPass(std::vector<std::string> const& args)
   cmSystemTools::ReplaceString(buildname,
                                ")", "_");
   
-  m_Makefile->AddCacheDefinition("BUILDNAME",
+  m_Makefile->AddCacheDefinition(args[0].c_str(),
                                  buildname.c_str(),
                                  "Name of build.",
                                  cmCacheManager::STRING);
