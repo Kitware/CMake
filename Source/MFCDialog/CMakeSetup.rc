@@ -66,7 +66,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_MAINFRAME           ICON    DISCARDABLE     "res\\CMakeSetupDialog.ico"
+IDR_MAINFRAME           ICON    DISCARDABLE     "res\\idr_main.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -89,7 +89,7 @@ IDD_CMakeSetupDialog_DIALOG DIALOGEX 0, 0, 375, 226
 STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
 CAPTION "CMakeSetupDialog"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "Close",IDOK,231,206,50,14
     PUSHBUTTON      "Browse...",IDC_BUTTON2,269,5,43,13
