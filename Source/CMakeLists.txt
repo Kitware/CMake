@@ -18,10 +18,8 @@ cmSourceGroup.cxx
 cmListFileCache.cxx
 cmGlobalGenerator.cxx
 cmGlobalUnixMakefileGenerator.cxx
-cmGlobalCodeWarriorGenerator.cxx
 cmLocalGenerator.cxx
 cmLocalUnixMakefileGenerator.cxx
-cmLocalCodeWarriorGenerator.cxx
 cmake.h
 cmakewizard.h
 cmMakeDepend.h
@@ -39,10 +37,8 @@ cmSourceGroup.h
 cmListFileCache.h
 cmGlobalGenerator.h
 cmGlobalUnixMakefileGenerator.h
-cmGlobalCodeWarriorGenerator.h
 cmLocalGenerator.h
 cmLocalUnixMakefileGenerator.h
-cmLocalCodeWarriorGenerator.h
 )
 
 # configure the .h file

@@ -75,6 +75,7 @@ protected:
   CPropertyList m_CacheEntriesList;
   CStatic       m_MouseHelp;
   CStatic       m_VersionDisplay;
+  CStatic       m_StatusDisplay;
   CButton       m_Configure;
   CString m_GeneratorChoiceString;
   BOOL    m_AdvancedValues;

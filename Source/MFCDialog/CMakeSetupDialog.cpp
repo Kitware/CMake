@@ -171,6 +171,8 @@ void CMakeSetupDialog::DoDataExchange(CDataExchange* pDX)
 {
   CDialog::DoDataExchange(pDX);
   //{{AFX_DATA_MAP(CMakeSetupDialog)
+	DDX_Control(pDX, IDC_CMAKE_VERSION, m_VersionDisplay);
+	DDX_Control(pDX, IDC_PROGRESS, m_StatusDisplay);
 	DDX_Control(pDX, IDC_AdvancedValues, m_AdvancedValuesControl);
 	DDX_Control(pDX, IDC_BuildForLabel, m_BuildForLabel);
 	DDX_Control(pDX, IDC_BROWSE_SOURCE, m_BrowseSource);
@@ -186,7 +188,6 @@ void CMakeSetupDialog::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_WhereBuild, m_WhereBuildControl);
 	DDX_Control(pDX, IDC_LIST2, m_CacheEntriesList);
 	DDX_Control(pDX, IDC_MouseHelpCaption, m_MouseHelp);
-	DDX_Control(pDX, IDC_CMAKE_VERSION, m_VersionDisplay);
 	DDX_Control(pDX, IDC_BuildProjects, m_Configure);
 	DDX_CBStringExact(pDX, IDC_Generator, m_GeneratorChoiceString);
 	DDX_Check(pDX, IDC_AdvancedValues, m_AdvancedValues);
@@ -918,56 +919,58 @@ void CMakeSetupDialog::OnSize(UINT nType, int cx, int cy)
     m_AdvancedValuesControl.GetWindowRect(&cRect);
     this->ScreenToClient(&cRect);
     m_AdvancedValuesControl.SetWindowPos(&wndTop, cRect.left + deltax, 
-                                 cRect.top, 
-                                 0, 0,
-                                 SWP_NOSIZE | SWP_NOZORDER);
+                                         cRect.top, 
+                                         0, 0,
+                                         SWP_NOCOPYBITS | 
+                                         SWP_NOSIZE | SWP_NOZORDER);
     m_BuildForLabel.GetWindowRect(&cRect);
     this->ScreenToClient(&cRect);
     m_BuildForLabel.SetWindowPos(&wndTop, cRect.left + deltax, 
                                  cRect.top, 
                                  0, 0,
-                                 SWP_NOSIZE | SWP_NOZORDER);
+                                 SWP_NOCOPYBITS | SWP_NOSIZE | SWP_NOZORDER);
     m_GeneratorChoice.GetWindowRect(&cRect);
     this->ScreenToClient(&cRect);
     m_GeneratorChoice.SetWindowPos(&wndTop, cRect.left + deltax, 
                                    cRect.top, 
                                    0, 0,
-                                   SWP_NOSIZE | SWP_NOZORDER);
+                                   SWP_NOCOPYBITS | SWP_NOSIZE | SWP_NOZORDER);
     m_BrowseSource.GetWindowRect(&cRect);
     this->ScreenToClient(&cRect);
     m_BrowseSource.SetWindowPos(&wndTop, cRect.left + deltax, 
                                 cRect.top, 
                                 0, 0,
-                                 SWP_NOSIZE | SWP_NOZORDER);
+                                SWP_NOCOPYBITS | SWP_NOSIZE | SWP_NOZORDER);
     m_BrowseBuild.GetWindowRect(&cRect);
     this->ScreenToClient(&cRect);
     m_BrowseBuild.SetWindowPos(&wndTop, cRect.left + deltax, 
-                                 cRect.top, 
-                                 0, 0,
-                                 SWP_NOSIZE | SWP_NOZORDER);
+                               cRect.top, 
+                               0, 0,
+                               SWP_NOCOPYBITS | SWP_NOSIZE | SWP_NOZORDER);
     
     m_WhereSourceControl.GetWindowRect(&cRect);
     m_WhereSourceControl.SetWindowPos(&wndTop, cRect.left, cRect.top, 
                                       cRect.Width() + deltax, 
                                       cRect.Height() + deltay, 
+                                      SWP_NOCOPYBITS | 
                                       SWP_NOMOVE | SWP_NOZORDER);
     m_WhereBuildControl.GetWindowRect(&cRect);
     m_WhereBuildControl.SetWindowPos(&wndTop, cRect.left, cRect.top, 
-                                      cRect.Width() + deltax, 
-                                      cRect.Height() + deltay, 
-                                      SWP_NOMOVE | SWP_NOZORDER);
+                                     cRect.Width() + deltax, 
+                                     cRect.Height() + deltay, 
+                                     SWP_NOCOPYBITS | 
+                                     SWP_NOMOVE | SWP_NOZORDER);
     m_ListFrame.GetWindowRect(&cRect);
     m_ListFrame.SetWindowPos(&wndTop, cRect.left, cRect.top, 
                              cRect.Width() + deltax, 
                              cRect.Height() + deltay, 
-                             SWP_NOMOVE | SWP_NOZORDER);
+                             SWP_NOCOPYBITS | SWP_NOMOVE | SWP_NOZORDER);
     m_CacheEntriesList.GetWindowRect(&cRect);
     m_CacheEntriesList.SetWindowPos(&wndTop, cRect.left, cRect.top, 
-                             cRect.Width() + deltax, 
-                             cRect.Height() + deltay, 
-                             SWP_NOMOVE | SWP_NOZORDER);
-    m_VersionDisplay.SetWindowPos(&wndTop, 5, cy-23, 0, 0,
-                                  SWP_NOSIZE | SWP_NOZORDER);
+                                    cRect.Width() + deltax, 
+                                    cRect.Height() + deltay, 
+                                    SWP_NOCOPYBITS | SWP_NOMOVE | SWP_NOZORDER);
+
 
     deltax = int(deltax + m_deltaXRemainder);
     m_deltaXRemainder = float(deltax%2);
@@ -976,32 +979,44 @@ void CMakeSetupDialog::OnSize(UINT nType, int cx, int cy)
     m_MouseHelp.SetWindowPos(&wndTop, cRect.left + deltax/2, 
                              cRect.top + deltay, 
                              0, 0,
-                             SWP_NOSIZE | SWP_NOZORDER);
+                             SWP_NOCOPYBITS | SWP_NOSIZE | SWP_NOZORDER);
+
+    m_VersionDisplay.GetWindowRect(&cRect);
+    m_VersionDisplay.SetWindowPos(&wndBottom, 5, cy-23, 
+                                  cRect.Width() + deltax/2,  cRect.Height(),
+                                  SWP_NOCOPYBITS);
+
+    m_StatusDisplay.GetWindowRect(&cRect);
+    this->ScreenToClient(&cRect);
+    m_StatusDisplay.SetWindowPos(&wndBottom, cRect.left + deltax/2, 
+                                 cRect.top + deltay, 
+                                 cRect.Width() + deltax/2,  cRect.Height(),
+                                 SWP_NOCOPYBITS);
 
     m_Configure.GetWindowRect(&cRect);
     this->ScreenToClient(&cRect);
     m_Configure.SetWindowPos(&wndTop, cRect.left + deltax/2, 
                                  cRect.top + deltay, 
                                  0, 0,
-                                 SWP_NOSIZE | SWP_NOZORDER);
+                                 SWP_NOCOPYBITS | SWP_NOSIZE);
     m_CancelButton.GetWindowRect(&cRect);
     this->ScreenToClient(&cRect);
     m_CancelButton.SetWindowPos(&wndTop, cRect.left + deltax/2, 
                                 cRect.top + deltay, 
                                 0, 0,
-                                SWP_NOSIZE | SWP_NOZORDER);
+                                SWP_NOCOPYBITS | SWP_NOSIZE);
     m_OKButton.GetWindowRect(&cRect);
     this->ScreenToClient(&cRect);
     m_OKButton.SetWindowPos(&wndTop, cRect.left + deltax/2, 
                             cRect.top + deltay, 
                             0, 0,
-                            SWP_NOSIZE | SWP_NOZORDER);
+                            SWP_NOCOPYBITS | SWP_NOSIZE);
     m_HelpButton.GetWindowRect(&cRect);
     this->ScreenToClient(&cRect);
     m_HelpButton.SetWindowPos(&wndTop, cRect.left + deltax/2, 
                               cRect.top + deltay, 
                               0, 0,
-                              SWP_NOSIZE | SWP_NOZORDER);
+                              SWP_NOCOPYBITS | SWP_NOSIZE);
     }
   
 }

@@ -30,7 +30,6 @@
 #include "cmGlobalNMakeMakefileGenerator.h"
 #include "cmWin32ProcessExecution.h"
 #else
-#include "cmGlobalCodeWarriorGenerator.h"
 #include "cmGlobalUnixMakefileGenerator.h"
 #endif
 
@@ -622,7 +621,6 @@ void cmake::GetRegisteredGenerators(std::vector<std::string>& names)
   names.push_back(cmGlobalBorlandMakefileGenerator::GetActualName());
   names.push_back(cmGlobalNMakeMakefileGenerator::GetActualName());
 #else
-  names.push_back(cmGlobalCodeWarriorGenerator::GetActualName());
   names.push_back(cmGlobalUnixMakefileGenerator::GetActualName());
 #endif
 }
@@ -652,11 +650,6 @@ cmGlobalGenerator* cmake::CreateGlobalGenerator(const char* name)
     ret->SetCMakeInstance(this);
     }
 #else
-  if (!strcmp(name,cmGlobalCodeWarriorGenerator::GetActualName()))
-    {
-    ret = new cmGlobalCodeWarriorGenerator;
-    ret->SetCMakeInstance(this);
-    }
   if (!strcmp(name,cmGlobalUnixMakefileGenerator::GetActualName()))
     {
     ret = new cmGlobalUnixMakefileGenerator;
