@@ -19,6 +19,11 @@
 #include "cmake.h"
 #include "cmMakefile.h"
 
+cmGlobalGenerator::cmGlobalGenerator()
+{
+  m_LanguagesEnabled = false;
+}
+
 cmGlobalGenerator::~cmGlobalGenerator()
 {
   // Delete any existing cmLocalGenerators
@@ -62,6 +67,7 @@ void cmGlobalGenerator::Configure()
   // set the Start directories
   lg->GetMakefile()->SetStartDirectory(m_CMakeInstance->GetHomeDirectory());
   lg->GetMakefile()->SetStartOutputDirectory(m_CMakeInstance->GetHomeOutputDirectory());
+  lg->GetMakefile()->MakeStartDirectoriesCurrent();
   
   // now do it
   this->RecursiveConfigure(lg);
@@ -94,6 +100,7 @@ void cmGlobalGenerator::RecursiveConfigure(cmLocalGenerator *lg)
     currentDir += "/";
     currentDir += subdirs[i];
     lg2->GetMakefile()->SetStartDirectory(currentDir.c_str());
+    lg2->GetMakefile()->MakeStartDirectoriesCurrent();
   
     this->RecursiveConfigure(lg2);
     }
@@ -119,6 +126,7 @@ void cmGlobalGenerator::LocalGenerate()
   // set the Start directories
   lg->GetMakefile()->SetStartDirectory(m_CMakeInstance->GetHomeDirectory());
   lg->GetMakefile()->SetStartOutputDirectory(m_CMakeInstance->GetHomeOutputDirectory());
+  lg->GetMakefile()->MakeStartDirectoriesCurrent();
   
   // now do trhe configure
   lg->Configure();

@@ -42,7 +42,7 @@ public:
    * some steps to save time, such as dependency generation for the
    * makefiles. This is done by a direct invocation from make. 
    */
-  virtual void Generate(bool fromTheTop);
+  virtual void Generate(bool fromTheTop) {};
 
   /**
    * Process the CMakeLists files for this directory to fill in the
@@ -59,8 +59,7 @@ public:
     return m_GlobalGenerator; };
 
   ///! Set the Global Generator, done on creation by the GlobalGenerator
-  void SetGlobalGenerator(cmGlobalGenerator *gg) {
-    m_GlobalGenerator = gg; };
+  void SetGlobalGenerator(cmGlobalGenerator *gg);
   
 protected:
   bool m_FromTheTop;

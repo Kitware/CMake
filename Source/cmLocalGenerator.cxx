@@ -15,11 +15,14 @@
 
 =========================================================================*/
 #include "cmLocalGenerator.h"
+#include "cmGlobalGenerator.h"
+#include "cmake.h"
 #include "cmMakefile.h"
 
 cmLocalGenerator::cmLocalGenerator()
 {
   m_Makefile = new cmMakefile;
+  m_Makefile->SetLocalGenerator(this);
 }
 
 cmLocalGenerator::~cmLocalGenerator()
@@ -34,3 +37,14 @@ void cmLocalGenerator::Configure()
   currentStart += "/CMakeLists.txt";
   m_Makefile->ReadListFile(currentStart.c_str());
 }
+
+void cmLocalGenerator::SetGlobalGenerator(cmGlobalGenerator *gg)
+{
+  m_GlobalGenerator = gg; 
+
+  // setup the home directories
+  m_Makefile->SetHomeDirectory(
+    gg->GetCMakeInstance()->GetHomeDirectory());
+  m_Makefile->SetHomeOutputDirectory(
+    gg->GetCMakeInstance()->GetHomeOutputDirectory());
+};

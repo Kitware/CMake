@@ -41,5 +41,7 @@ void cmGlobalNMakeMakefileGenerator::EnableLanguage(const char* lang,
 ///! Create a local generator appropriate to this Global Generator
 cmLocalGenerator *cmGlobalNMakeMakefileGenerator::CreateLocalGenerator()
 {
-  return new cmLocalNMakeMakefileGenerator;
+  cmLocalGenerator *lg = new cmLocalNMakeMakefileGenerator;
+  lg->SetGlobalGenerator(this);
+  return lg;
 }

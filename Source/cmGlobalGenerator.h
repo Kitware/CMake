@@ -34,6 +34,7 @@ class cmGlobalGenerator
 {
 public:
   ///! Free any memory allocated with the GlobalGenerator
+  cmGlobalGenerator();
   virtual ~cmGlobalGenerator();
   
   ///! Create a local generator appropriate to this Global Generator
