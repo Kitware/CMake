@@ -30,7 +30,8 @@ char **argv;
 
   mywindow=XCreateSimpleWindow(mydisplay,
                                DefaultRootWindow(mydisplay),
-                               myhint.x, myhint.y, myhint.width, myhint.height, 5,
+                               myhint.x, myhint.y, myhint.width, 
+                               myhint.height, 5,
                                myforeground, mybackground );
   XDestroyWindow(mydisplay, mywindow);
   XCloseDisplay(mydisplay);
@@ -40,8 +41,11 @@ char **argv;
 
 #else
 
+#include "stdio.h"
+
 int main()
 {
+  printf("No X on this computer\n");
   return 0;
 }
 
