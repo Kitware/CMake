@@ -702,6 +702,12 @@ void cmSystemTools::ConvertToUnixSlashes(std::string& path)
     path[pos] = '/';
     pos++;
     }
+  // Remove all // from the path just like most unix shells
+  while((pos = path.find("//", 0)) != std::string::npos)
+    {
+    cmSystemTools::ReplaceString(path, "//", "/");
+    }
+  
   // remove any trailing slash
   if(path.size() && path[path.size()-1] == '/')
     {
@@ -1700,7 +1706,6 @@ void cmSystemTools::SplitProgramPath(const char* in_name,
       dir = "";
       }
     }
-  
   if((dir != "") && !cmSystemTools::FileIsDirectory(dir.c_str()))
     {
     std::string oldDir = in_name;
