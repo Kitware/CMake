@@ -257,7 +257,20 @@ void cmCableWrapTclCommand::GenerateCableClassFiles(const char* name,
     std::vector<std::string> depends;
     depends.push_back(command);
     command = cmSystemTools::EscapeSpaces(command.c_str());
-    command += " ${CMAKE_CXXFLAGS} ${INCLUDE_FLAGS} -fsyntax-only -fxml=" + classXmlName + " " + classCxxName;
+    
+    std::string defineFlags = m_Makefile->GetDefineFlags();
+    std::string includeFlags = "-I";
+    includeFlags += m_Makefile->GetStartDirectory();
+    
+    const std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();
+    for(std::vector<std::string>::const_iterator i = includes.begin();
+        i != includes.end(); ++i)
+      {
+      includeFlags += " -I";
+      includeFlags += cmSystemTools::EscapeSpaces(i->c_str());
+      }
+    
+    command += " "+defineFlags+" "+includeFlags+" -fsyntax-only -fxml="+classXmlName+" "+classCxxName;
     
     std::vector<std::string> outputs;
     outputs.push_back(classXmlName);
