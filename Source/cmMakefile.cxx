@@ -44,6 +44,7 @@ cmMakefile::cmMakefile()
 
   m_HeaderFileExtensions.push_back( "h" );
   m_HeaderFileExtensions.push_back( "txx" );
+  m_HeaderFileExtensions.push_back( "in" );
   
   m_DefineFlags = " ";
   m_MakefileGenerator = 0;
