@@ -142,6 +142,8 @@ setupTransport(xmlrpc_env * const envP,
 #if MUST_BUILD_CURL_CLIENT
     else if (strcmp(transportName, "curl") == 0)
         clientTransportOps = xmlrpc_curl_transport_ops;
+    else if (strcmp(transportName, "libcurl") == 0)
+        clientTransportOps = xmlrpc_curl_transport_ops;
 #endif
 #if MUST_BUILD_LIBWWW_CLIENT
     else if (strcmp(transportName, "libwww") == 0)

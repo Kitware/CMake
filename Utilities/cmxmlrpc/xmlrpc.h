@@ -29,6 +29,7 @@
 
 #include <stddef.h>
 #include <stdarg.h>
+#include <xmlrpc_config.h>
 
 #ifdef HAVE_UNICODE_WCHAR
 #include <wchar.h>

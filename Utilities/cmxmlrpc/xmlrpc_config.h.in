@@ -16,6 +16,9 @@
 */
 #include "xmlrpc_amconfig.h"
 
+#ifndef __xmlrpc_config_h__
+#define __xmlrpc_config_h__
+
 
 #define VA_LIST_IS_ARRAY @VA_LIST_IS_ARRAY_DEFINE@
 
@@ -74,4 +77,6 @@ __inline BOOL setenv(const char* name, const char* value, int i)
 {
   return (SetEnvironmentVariable(name, value) != 0) ? TRUE : FALSE;
 }
+#endif
+
 #endif
