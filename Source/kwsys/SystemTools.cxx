@@ -937,18 +937,18 @@ char* SystemTools::ReplaceChars(char* str, const char *toreplace, char replaceme
 }
 
 // Returns if string starts with another string
-bool vtkString::StringStartsWith(const char* str1, const char* str2)
+bool SystemTools::StringStartsWith(const char* str1, const char* str2)
 {
   if (!str1 || !str2)
     {
     return false;
     }
   size_t len1 = strlen(str1), len2 = strlen(str2);
-  return len1 >= len2 && !strncmp(str1, str2, len2) ? true : false
+  return len1 >= len2 && !strncmp(str1, str2, len2) ? true : false;
 }
 
 // Returns if string ends with another string
-bool vtkString::StringEndsWith(const char* str1, const char* str2)
+bool SystemTools::StringEndsWith(const char* str1, const char* str2)
 {
   if (!str1 || !str2)
     {
