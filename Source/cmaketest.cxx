@@ -84,9 +84,9 @@ int main (int argc, char *argv[])
                           makeCommand.size()+1) != 0)
         {
         makeCommand = buffer;
-        delete [] buffer;
         }
 #endif
+      delete [] buffer;\
       }
     makeCommand += " ";
     makeCommand += executableName;
