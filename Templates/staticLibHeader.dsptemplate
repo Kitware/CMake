@@ -65,7 +65,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
+# ADD LIB32 /nologo CM_STATIC_LIB_ARGS
 
 CMAKE_CUSTOM_RULE_CODE
 
@@ -93,7 +93,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"LIBRARY_OUTPUT_PATHDebug\OUTPUT_LIBNAMEDEBUG_POSTFIX.lib"
+# ADD LIB32 /nologo CM_STATIC_LIB_ARGS /out:"LIBRARY_OUTPUT_PATHDebug\OUTPUT_LIBNAMEDEBUG_POSTFIX.lib"
 
 CMAKE_CUSTOM_RULE_CODE
 
@@ -122,7 +122,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
+# ADD LIB32 /nologo CM_STATIC_LIB_ARGS
 
 CMAKE_CUSTOM_RULE_CODE
 
@@ -150,7 +150,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
+# ADD LIB32 /nologo CM_STATIC_LIB_ARGS
 
 CMAKE_CUSTOM_RULE_CODE
 

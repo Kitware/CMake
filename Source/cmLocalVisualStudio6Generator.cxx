@@ -979,7 +979,15 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
     {
     cmSystemTools::Error("Error Reading ", m_DSPHeaderTemplate.c_str());
     }
-
+  std::string staticLibOptions;
+  if(target.GetType() == cmTarget::STATIC_LIBRARY )
+    { 
+    if(const char* libflags = target.GetProperty("STATIC_LIBRARY_FLAGS"))
+      {
+      staticLibOptions = libflags;
+      }
+    }
+  
   std::string line;
   while(cmSystemTools::GetLineFromStream(fin, line))
     {
@@ -992,7 +1000,11 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
                                  customRuleCode.c_str());
     cmSystemTools::ReplaceString(line, "CMAKE_MFC_FLAG",
                                  mfcFlag);
-
+    if(target.GetType() == cmTarget::STATIC_LIBRARY )
+      {
+      cmSystemTools::ReplaceString(line, "CM_STATIC_LIB_ARGS",
+                                   staticLibOptions.c_str());
+      }
     cmSystemTools::ReplaceString(line, "CM_LIBRARIES",
                                  libOptions.c_str());
     cmSystemTools::ReplaceString(line, "CM_DEBUG_LIBRARIES",

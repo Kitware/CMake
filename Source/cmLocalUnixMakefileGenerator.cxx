@@ -1355,7 +1355,7 @@ void cmLocalUnixMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout,
     createRule = "CMAKE_C_CREATE_STATIC_LIBRARY";
     }  
   std::string linkFlags;
-  const char* targetLinkFlags = t.GetProperty("LINK_FLAGS");
+  const char* targetLinkFlags = t.GetProperty("STATIC_LIBRARY_FLAGS");
   if(targetLinkFlags)
     {
     linkFlags += targetLinkFlags;

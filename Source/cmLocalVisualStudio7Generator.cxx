@@ -534,8 +534,12 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       std::string libpath = m_LibraryOutputPath + 
         "$(OutDir)/" + libName + debugPostfix + ".lib";
       fout << "\t\t\t<Tool\n"
-           << "\t\t\t\tName=\"VCLibrarianTool\"\n"
-           << "\t\t\t\t\tOutputFile=\"" 
+           << "\t\t\t\tName=\"VCLibrarianTool\"\n";
+      if(const char* libflags = target.GetProperty("STATIC_LIBRARY_FLAGS"))
+        {
+        fout << "\t\t\t\tAdditionalOptions=\"" << libflags << "\"\n";
+        }
+      fout << "\t\t\t\tOutputFile=\"" 
            << this->ConvertToXMLOutputPathSingle(libpath.c_str()) << ".\"/>\n";
       break;
     }
