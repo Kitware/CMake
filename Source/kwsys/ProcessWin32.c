@@ -63,7 +63,7 @@ Q190351 and Q150956.
 /* The maximum amount to read from a pipe at a time.  */
 #define KWSYSPE_PIPE_BUFFER_SIZE 1024
 
-#define kwsysEncodedWriteArrayProcessFwd9x kwsys(EncodedWriteArrayProcessFwd9x)
+#define kwsysEncodedWriteArrayProcessFwd9x kw_sys(EncodedWriteArrayProcessFwd9x)
 
 typedef LARGE_INTEGER kwsysProcessTime;
 

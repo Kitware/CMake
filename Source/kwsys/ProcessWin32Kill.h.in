@@ -20,9 +20,9 @@
    namespace.  These macros are used internally to kwsys only, and are
    not visible to user code.  Use kwsysHeaderDump.pl to reproduce
    these macros after making changes to the interface.  */
-#define kwsys(x) @KWSYS_NAMESPACE@##x
+#define kw_sys(x) @KWSYS_NAMESPACE@##x
 #define kwsysEXPORT                      @KWSYS_NAMESPACE@_EXPORT
-#define kwsysProcessWin32Kill            kwsys(ProcessWin32Kill)
+#define kwsysProcessWin32Kill            kw_sys(ProcessWin32Kill)
 
 #if defined(__cplusplus)
 extern "C"
