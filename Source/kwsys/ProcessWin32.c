@@ -1268,7 +1268,6 @@ int kwsysProcess_WaitForData(kwsysProcess* cp, char** data, int* length,
       {
       /* The process timeout has expired.  Kill the child now.  */
       kwsysProcess_Kill(cp);
-      cp->State = kwsysProcess_State_Expired;
       cp->TimeoutExpired = 1;
       cp->Killed = 0;
       return kwsysProcess_Pipe_None;
@@ -1409,11 +1408,8 @@ void kwsysProcess_Kill(kwsysProcess* cp)
       }
     }
 
-  /* Wait for windows to finish cleaning up the children.  */
-  for(i=0; i < cp->NumberOfCommands; ++i)
-    {
-    WaitForSingleObject(cp->ProcessInformation[i].hProcess, INFINITE);
-    }
+  /* We are killing the children and ignoring all data.  Do not wait
+     for them to exit.  */
 }
 
 /*--------------------------------------------------------------------------*/
