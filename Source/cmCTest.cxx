@@ -413,6 +413,7 @@ void cmCTest::UpdateCTestConfiguration()
   if ( m_DartMode )
     {
     m_TimeOut = atoi(m_DartConfiguration["TimeOut"].c_str());
+    m_CompressXMLFiles = cmSystemTools::IsOn(m_DartConfiguration["CompressSubmission"].c_str());
     }
 }
 

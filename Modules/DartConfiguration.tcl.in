@@ -48,6 +48,7 @@ CoverageCommand: @COVERAGE_COMMAND@
 GunzipCommand: @GUNZIPCOMMAND@
 CompressionCommand: @COMPRESSIONCOMMAND@
 CompressionType: @COMPRESSIONCOMMAND@
+CompressSubmission: @COMPRESS_SUBMISSION@
 
 # Testing options
 # TimeOut is the amount of time in seconds to wait for processes
