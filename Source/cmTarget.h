@@ -55,7 +55,7 @@ class cmTarget
 {
 public:
   enum TargetType { EXECUTABLE, WIN32_EXECUTABLE, STATIC_LIBRARY,
-                    SHARED_LIBRARY, UTILITY, INSTALL_FILES, INSTALL_PROGRAMS };
+                    SHARED_LIBRARY, MODULE_LIBRARY, UTILITY, INSTALL_FILES, INSTALL_PROGRAMS };
 
   /**
    * Return the type of target.

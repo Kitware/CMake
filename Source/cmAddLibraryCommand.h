@@ -86,9 +86,11 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "ADD_LIBRARY(libname [SHARED | STATIC] srclist srclist srclist ...)\n"
-      "Adds a library target.  If the keyword SHARED or STATIC appears, it\n"
-      "sets the library type.  If neither keyword appears as the second\n"
+      "ADD_LIBRARY(libname [SHARED | STATIC | MODULE] srclist srclist ...)\n"
+      "Adds a library target.  SHARED, STATIC or MODULE keywords are used\n"
+      "to set the library type.  If the keywork MODULE appears, the library\n"
+      "type is set to MH_BUNDLE on systems which use dyld. Systems without\n"
+      "dyld MODULE is treated like SHARED. If no keywords appear as the second\n"
       "argument, the type defaults to the current value of BUILD_SHARED_LIBS.\n"
       "If this variable is not set, the type defaults to STATIC.";
     }

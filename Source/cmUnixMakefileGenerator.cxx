@@ -281,6 +281,11 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
         fout << " \\\n" << m_LibraryOutputPath << "lib" << l->first.c_str()
              << m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
         }
+      else if(l->second.GetType() == cmTarget::MODULE_LIBRARY)
+        {
+        fout << " \\\n" << m_LibraryOutputPath << "lib" << l->first.c_str()
+             << m_Makefile->GetDefinition("CMAKE_MODULE_SUFFIX");
+        }
       }
     }
   // executables
@@ -539,6 +544,22 @@ void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
       this->OutputLinkLibraries(fout, l->first.c_str(), l->second);
       fout << "\n\n";
       }
+    else if (l->second.GetType() == cmTarget::MODULE_LIBRARY)
+      {
+      fout << "#---------------------------------------------------------\n";
+      fout << "# rules for a shared module library\n";
+      fout << "#\n";
+      fout << m_LibraryOutputPath << "lib" << l->first << "$(MODULE_SUFFIX):  ${" << 
+        l->first << "_SRC_OBJS} \n";
+      fout << "\trm -f lib" << l->first << "$(MODULE_SUFFIX)\n";
+      fout << "\t$(CMAKE_CXX_COMPILER)  ${CMAKE_MODULE_LINK_FLAGS} "
+        "${CMAKE_MODULE_BUILD_FLAGS} ${CMAKE_CXXFLAGS} -o \\\n";
+      fout << "\t  " << m_LibraryOutputPath << "lib" << l->first << "$(MODULE_SUFFIX) \\\n";
+      fout << "\t  ${" << l->first << 
+        "_SRC_OBJS} ";
+      this->OutputLinkLibraries(fout, l->first.c_str(), l->second);
+      fout << "\n\n";
+      }
     else if ((l->second.GetType() == cmTarget::EXECUTABLE)
              || (l->second.GetType() == cmTarget::WIN32_EXECUTABLE))
       {
@@ -608,6 +629,10 @@ void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
         {
         libpath += m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
         }
+      else if (libType && std::string(libType) == "MODULE")
+	{
+	libpath += m_Makefile->GetDefinition("CMAKE_MODULE_SUFFIX");
+	}
       else
         {
         libpath += ".a";
@@ -642,6 +667,10 @@ void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
         {
         library += m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
         }
+      else if(libType && std::string(libType) == "MODULE")
+	{
+	library += m_Makefile->GetDefinition("CMAKE_MODULE_SUFFIX");
+	}
       else
         {
         library += ".a";
@@ -994,12 +1023,15 @@ void cmUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     "CMAKE_CXX_COMPILER  = @CMAKE_CXX_COMPILER@\n"
     "CMAKE_CXXFLAGS      = @CMAKE_CXX_FLAGS@ @CMAKE_TEMPLATE_FLAGS@\n"
     "\n"
-    "CMAKE_SHLIB_BUILD_FLAGS = @CMAKE_SHLIB_BUILD_FLAGS@\n"
-    "CMAKE_SHLIB_LINK_FLAGS = @CMAKE_SHLIB_LINK_FLAGS@\n"
-    "DL_LIBS              = @CMAKE_DL_LIBS@\n"
-    "SHLIB_LD_LIBS        = @CMAKE_SHLIB_LD_LIBS@\n"
-    "SHLIB_SUFFIX         = @CMAKE_SHLIB_SUFFIX@\n"
-    "THREAD_LIBS          = @CMAKE_THREAD_LIBS@\n"
+    "CMAKE_SHLIB_BUILD_FLAGS  = @CMAKE_SHLIB_BUILD_FLAGS@\n"
+    "CMAKE_SHLIB_LINK_FLAGS   = @CMAKE_SHLIB_LINK_FLAGS@\n"
+    "CMAKE_MODULE_BUILD_FLAGS = @CMAKE_MODULE_BUILD_FLAGS@\n"
+    "CMAKE_MODULE_LINK_FLAGS  = @CMAKE_MODULE_LINK_FLAGS@\n"
+    "DL_LIBS                  = @CMAKE_DL_LIBS@\n"
+    "SHLIB_LD_LIBS            = @CMAKE_SHLIB_LD_LIBS@\n"
+    "SHLIB_SUFFIX             = @CMAKE_SHLIB_SUFFIX@\n"
+    "MODULE_SUFFIX            = @CMAKE_MODULE_SUFFIX@\n"
+    "THREAD_LIBS              = @CMAKE_THREAD_LIBS@\n"
     "\n"
     "# set up the path to the rulesgen program\n"
     "CMAKE_COMMAND = ${CMAKE_COMMAND}\n"
@@ -1063,6 +1095,12 @@ void cmUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
 	  fout << "\t$(INSTALL_DATA) " << m_LibraryOutputPath << "lib" 
                << l->first;
           fout << m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
+	  fout << " " << prefix << l->second.GetInstallPath() << "\n";
+	  break;
+	case cmTarget::MODULE_LIBRARY:
+	  fout << "\t$(INSTALL_DATA) " << m_LibraryOutputPath << "lib" 
+               << l->first;
+          fout << m_Makefile->GetDefinition("CMAKE_MODULE_SUFFIX");
 	  fout << " " << prefix << l->second.GetInstallPath() << "\n";
 	  break;
 	case cmTarget::WIN32_EXECUTABLE:
@@ -1263,7 +1301,8 @@ void cmUnixMakefileGenerator::OutputSourceObjectBuildRules(std::ostream& fout)
   for(std::map<cmStdString, cmTarget>::const_iterator target = targets.begin(); 
       target != targets.end(); ++target)
     {
-    bool shared = (target->second.GetType() == cmTarget::SHARED_LIBRARY);
+    bool shared = ((target->second.GetType() == cmTarget::SHARED_LIBRARY) ||
+		   (target->second.GetType() == cmTarget::MODULE_LIBRARY));
     std::string exportsDef = "";
     if(shared)
       {

@@ -243,7 +243,7 @@ public:
   /**
    * Set the name of the library.
    */
-  void AddLibrary(const char *libname, bool shared,
+  void AddLibrary(const char *libname, int shared,
                   const std::vector<std::string> &srcs);
 
   /**
