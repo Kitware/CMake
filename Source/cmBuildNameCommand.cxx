@@ -68,18 +68,18 @@ bool cmBuildNameCommand::InitialPass(std::vector<std::string>& args)
       if(reg.find(buildname.c_str()))
 	{
 	buildname = reg.match(1) + "-" + reg.match(2);
-        cmSystemTools::ReplaceString(buildname,
-                                     "/", "_");
-        cmSystemTools::ReplaceString(buildname,
-                                     "(", "_");
-        cmSystemTools::ReplaceString(buildname,
-                                     ")", "_");
 	}
       }
     }
   std::string compiler = "-${CMAKE_CXX_COMPILER}";
   m_Makefile->ExpandVariablesInString ( compiler );
-  buildname += compiler;
+  buildname += cmSystemTools::GetFilenameName(compiler);
+  cmSystemTools::ReplaceString(buildname,
+                               "/", "_");
+  cmSystemTools::ReplaceString(buildname,
+                               "(", "_");
+  cmSystemTools::ReplaceString(buildname,
+                               ")", "_");
   
   cmCacheManager::GetInstance()->
     AddCacheEntry("BUILDNAME",
