@@ -129,15 +129,15 @@ void cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
         l != languages.end(); ++l)
       {
       const char* lang = l->c_str();
-      std::string src = m_ConfiguredFilesPath;
-      src += "/CMake";
-      src += lang;
-      src += "Compiler.cmake";
-      std::string dst = rootBin;
-      dst += "/CMake";
-      dst += lang;
-      dst += "Compiler.cmake";
-      cmSystemTools::CopyFileIfDifferent(src.c_str(), dst.c_str());
+      std::string src2 = m_ConfiguredFilesPath;
+      src2 += "/CMake";
+      src2 += lang;
+      src2 += "Compiler.cmake";
+      std::string dst2 = rootBin;
+      dst2 += "/CMake";
+      dst2 += lang;
+      dst2 += "Compiler.cmake";
+      cmSystemTools::CopyFileIfDifferent(src2.c_str(), dst2.c_str());
       }
     rootBin = m_ConfiguredFilesPath;
     }
