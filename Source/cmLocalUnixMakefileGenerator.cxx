@@ -2432,6 +2432,15 @@ void cmLocalUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                          "$(CMAKE_EDIT_COMMAND) "
                          "-H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)");
     }
+  else
+    {
+    this->OutputMakeRule(fout, 
+                         "edit CMakeCache.txt",
+                         "edit_cache",
+                         0,
+                         "$(CMAKE_COMMAND) "
+                         "-H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) -i");
+    }
   
   this->OutputMakeRule(fout, 
                        "CMakeCache.txt",
