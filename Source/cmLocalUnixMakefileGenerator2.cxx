@@ -1605,6 +1605,14 @@ cmLocalUnixMakefileGenerator2
   const char* linkLanguage =
     target.GetLinkerLanguage(this->GetGlobalGenerator());
 
+  // Make sure we have a link language.
+  if(!linkLanguage)
+    {
+    cmSystemTools::Error("Cannot determine link language for target \"",
+                         target.GetName(), "\".");
+    return;
+    }
+
   // Build a list of compiler flags and linker flags.
   std::string flags;
   std::string linkFlags;
