@@ -155,7 +155,11 @@ std::string cmCTest::MakeXMLSafe(const std::string& str)
   for (std::string::size_type  pos = 0; pos < str.size(); pos ++ )
     {
     unsigned char ch = str[pos];
-    if ( (ch > 126 || ch < 32) && ch != 9  && ch != 10 && ch != 13 )
+    if ( ch == '\r' )
+      {
+      // Ignore extra CR characters.
+      }
+    else if ( (ch > 126 || ch < 32) && ch != 9  && ch != 10 && ch != 13 )
       {
       char buffer[33];
       sprintf(buffer, "&lt;%d&gt;", (int)ch);
