@@ -146,26 +146,28 @@ void cmNMakeMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     "# general varibles used in the makefile\n"
     "\n"
     "# Path to cmake\n"
-    "CMAKE_COMMAND                       = ${CMAKE_COMMAND}\n"    
-    "CMAKE_STANDARD_WINDOWS_LIBRARIES    = @CMAKE_STANDARD_WINDOWS_LIBRARIES@\n"
-    "CMAKE_C_COMPILER                    = @CMAKE_C_COMPILER@\n"
-    "CMAKE_C_FLAGS                       = @CMAKE_C_FLAGS@ @BUILD_FLAGS@\n"
+    "CMAKE_COMMAND                          = ${CMAKE_COMMAND}\n"    
+    "CMAKE_STANDARD_WINDOWS_LIBRARIES       = @CMAKE_STANDARD_WINDOWS_LIBRARIES@\n"
+    "CMAKE_C_COMPILER                       = @CMAKE_C_COMPILER@\n"
+    "CMAKE_C_FLAGS                          = @CMAKE_C_FLAGS@ @BUILD_FLAGS@\n"
 
-    "CMAKE_C_OUTPUT_OBJECT_FILE_FLAG     = @CMAKE_C_OUTPUT_OBJECT_FILE_FLAG@\n"
-    "CMAKE_C_OUTPUT_EXECUTABLE_FILE_FLAG = @CMAKE_C_OUTPUT_EXECUTABLE_FILE_FLAG@\n"
-    "CMAKE_LINKER                        = @CMAKE_LINKER@\n"
-    "CMAKE_C_LINK_EXECUTABLE_FLAG        = @CMAKE_C_LINK_EXECUTABLE_FLAG@\n"
-    "CMAKE_C_LIBPATH_FLAG                = @CMAKE_C_LIBPATH_FLAG@\n"
-    "CMAKE_LINKER_FLAGS                  = @CMAKE_LINKER_FLAGS@ @LINKER_BUILD_FLAGS@\n"
-    "CMAKE_LINKER_SHARED_LIBRARY_FLAG    = @CMAKE_LINKER_SHARED_LIBRARY_FLAG@\n"
-    "CMAKE_LINKER_STATIC_LIBRARY_FLAG    = @CMAKE_LINKER_STATIC_LIBRARY_FLAG@\n"
-    "CMAKE_LINKER_OUTPUT_FILE_FLAG       = @CMAKE_LINKER_OUTPUT_FILE_FLAG@\n"
-    "CMAKE_CXXFLAGS                      = @CMAKE_CXX_FLAGS@ @BUILD_FLAGS@\n"
-    "CMAKE_CXX_COMPILER                  = @CMAKE_CXX_COMPILER@\n"
-    "CMAKE_OBJECT_FILE_SUFFIX            = @CMAKE_OBJECT_FILE_SUFFIX@\n"
-    "CMAKE_EXECUTABLE_SUFFIX             = @CMAKE_EXECUTABLE_SUFFIX@\n"
-    "CMAKE_STATICLIB_SUFFIX              = @CMAKE_STATICLIB_SUFFIX@\n"
-    "CMAKE_SHLIB_SUFFIX                  = @CMAKE_SHLIB_SUFFIX@\n";
+    "CMAKE_C_OUTPUT_OBJECT_FILE_FLAG        = @CMAKE_C_OUTPUT_OBJECT_FILE_FLAG@\n"
+    "CMAKE_C_OUTPUT_EXECUTABLE_FILE_FLAG    = @CMAKE_C_OUTPUT_EXECUTABLE_FILE_FLAG@\n"
+    "CMAKE_C_LINK_EXECUTABLE_FLAG           = @CMAKE_C_LINK_EXECUTABLE_FLAG@\n"
+    "CMAKE_C_LIBPATH_FLAG                   = @CMAKE_C_LIBPATH_FLAG@\n"
+    "CMAKE_CXX_FLAGS                        = @CMAKE_CXX_FLAGS@ @BUILD_FLAGS@\n"
+    "CMAKE_CXX_COMPILER                     = @CMAKE_CXX_COMPILER@\n"
+    "CMAKE_LINKER                           = @CMAKE_LINKER@\n"
+    "CMAKE_LINKER_FLAGS                     = @CMAKE_LINKER_FLAGS@ @LINKER_BUILD_FLAGS@\n"
+    "CMAKE_LINKER_SHARED_LIBRARY_FLAG       = @CMAKE_LINKER_SHARED_LIBRARY_FLAG@\n"
+    "CMAKE_LINKER_OUTPUT_FILE_FLAG          = @CMAKE_LINKER_OUTPUT_FILE_FLAG@\n"
+    "CMAKE_LIBRARY_MANAGER                  = @CMAKE_LIBRARY_MANAGER@\n"
+    "CMAKE_LIBRARY_MANAGER_FLAGS            = @CMAKE_LIBRARY_MANAGER_FLAGS@\n"
+    "CMAKE_LIBRARY_MANAGER_OUTPUT_FILE_FLAG = @CMAKE_LIBRARY_MANAGER_OUTPUT_FILE_FLAG@\n"
+    "CMAKE_OBJECT_FILE_SUFFIX               = @CMAKE_OBJECT_FILE_SUFFIX@\n"
+    "CMAKE_EXECUTABLE_SUFFIX                = @CMAKE_EXECUTABLE_SUFFIX@\n"
+    "CMAKE_STATICLIB_SUFFIX                 = @CMAKE_STATICLIB_SUFFIX@\n"
+    "CMAKE_SHLIB_SUFFIX                     = @CMAKE_SHLIB_SUFFIX@\n";
 
   std::string buildType = "CMAKE_CXX_FLAGS_";
   buildType +=  m_Makefile->GetDefinition("CMAKE_BUILD_TYPE");
@@ -184,19 +186,19 @@ void cmNMakeMakefileGenerator::OutputMakeVariables(std::ostream& fout)
   std::string replaceVars = variables;
   m_Makefile->ExpandVariablesInString(replaceVars);
   fout << replaceVars.c_str();
-  fout << "CMAKE_CURRENT_SOURCE                = " 
+  fout << "CMAKE_CURRENT_SOURCE                   = " 
        << ShortPath(m_Makefile->GetStartDirectory() )
        << "\n";
-  fout << "CMAKE_CURRENT_BINARY                = " 
+  fout << "CMAKE_CURRENT_BINARY                   = " 
        << ShortPath(m_Makefile->GetStartOutputDirectory())
        << "\n";
-  fout << "CMAKE_SOURCE_DIR                    = " 
+  fout << "CMAKE_SOURCE_DIR                       = " 
        << ShortPath(m_Makefile->GetHomeDirectory()) << "\n";
-  fout << "CMAKE_BINARY_DIR                    = " 
+  fout << "CMAKE_BINARY_DIR                       = " 
        << ShortPath(m_Makefile->GetHomeOutputDirectory() )
        << "\n";
   // Output Include paths
-  fout << "INCLUDE_FLAGS                       = ";
+  fout << "INCLUDE_FLAGS                          = ";
   std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();
   std::vector<std::string>::iterator i;
   fout << "-I" << cmSystemTools::EscapeSpaces(m_Makefile->GetStartDirectory()) << " ";
@@ -367,7 +369,7 @@ OutputBuildObjectFromSource(std::ostream& fout,
   // assume c++ if not c rc or def
   else
     {
-    compileCommand = "$(CMAKE_CXX_COMPILER) $(CMAKE_CXXFLAGS) ";
+    compileCommand = "$(CMAKE_CXX_COMPILER) $(CMAKE_CXX_FLAGS) ";
     compileCommand += extraCompileFlags;
     if(shared)
       {
@@ -396,8 +398,8 @@ void cmNMakeMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
   std::string depend = "$(";
   depend += name;
   depend += "_SRC_OBJS) $(" + std::string(name) + "_DEPEND_LIBS)";
-  std::string command = "$(CMAKE_LINKER) $(CMAKE_LINKER_SHARED_LIBRARY_FLAG) $(CMAKE_LINKER_FLAGS) @<<\n\t";
-  command += " $(" + std::string(name) + "_SRC_OBJS) $(CMAKE_LINKER_OUTPUT_FILE_FLAG)";
+  std::string command = "$(CMAKE_LINKER) $(CMAKE_LINKER_SHARED_LIBRARY_FLAG) @<<\n\t";
+  command += " $(" + std::string(name) + "_SRC_OBJS) $(CMAKE_LINKER_FLAGS) $(CMAKE_LINKER_OUTPUT_FILE_FLAG)";
   std::string dllpath = m_LibraryOutputPath +  std::string(name) + m_SharedLibraryExtension;
   command += cmSystemTools::EscapeSpaces(dllpath.c_str());
   command += " ";
@@ -438,7 +440,7 @@ void cmNMakeMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout,
   std::string target = m_LibraryOutputPath + std::string(name) + m_StaticLibraryExtension;
   std::string depend = "$(";
   depend += std::string(name) + "_SRC_OBJS)";
-  std::string command = "$(CMAKE_LINKER) $(CMAKE_LINKER_STATIC_LIBRARY_FLAG) $(CMAKE_LINKER_FLAGS) @<<\n\t $(CMAKE_LINKER_OUTPUT_FILE_FLAG)";
+  std::string command = "$(CMAKE_LIBRARY_MANAGER) $(CMAKE_LIBRARY_MANAGER_FLAGS) @<<\n\t $(CMAKE_LIBRARY_MANAGER_OUTPUT_FILE_FLAG)";
   std::string libpath = m_LibraryOutputPath + std::string(name) + m_StaticLibraryExtension;
   command += cmSystemTools::EscapeSpaces(libpath.c_str());
   command += " $(";
@@ -463,7 +465,7 @@ void cmNMakeMakefileGenerator::OutputExecutableRule(std::ostream& fout,
   std::string depend = "$(";
   depend += std::string(name) + "_SRC_OBJS) $(" + std::string(name) + "_DEPEND_LIBS)";
   std::string command = 
-    "$(CMAKE_CXX_COMPILER) $(CMAKE_CXXFLAGS) ";
+    "$(CMAKE_CXX_COMPILER) $(CMAKE_CXX_FLAGS) ";
   command += "$(" + std::string(name) + "_SRC_OBJS) ";
   std::string path = m_ExecutableOutputPath + name + m_ExecutableExtension;
   command += " $(CMAKE_C_OUTPUT_EXECUTABLE_FILE_FLAG)" + 

@@ -557,7 +557,7 @@ void cmUnixMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
   command += name;
   command += "$(SHLIB_SUFFIX)";
   std::string command2 = "$(CMAKE_CXX_COMPILER)  $(CMAKE_SHLIB_LINK_FLAGS) "
-    "$(CMAKE_SHLIB_BUILD_FLAGS) $(CMAKE_CXXFLAGS) -o \\\n";
+    "$(CMAKE_SHLIB_BUILD_FLAGS) $(CMAKE_CXX_FLAGS) -o \\\n";
   command2 += "\t  ";
   command2 += m_LibraryOutputPath + "lib" + std::string(name) + "$(SHLIB_SUFFIX) \\\n";
   command2 += "\t  $(" + std::string(name) + "_SRC_OBJS) ";
@@ -582,7 +582,7 @@ void cmUnixMakefileGenerator::OutputModuleLibraryRule(std::ostream& fout,
   depend += std::string(name) + "_SRC_OBJS) $(" + std::string(name) + "_DEPEND_LIBS)";
   std::string command = "rm -f lib" + std::string(name) + "$(MODULE_SUFFIX)";
   std::string command2 = "$(CMAKE_CXX_COMPILER)  $(CMAKE_MODULE_LINK_FLAGS) "
-    "$(CMAKE_MODULE_BUILD_FLAGS) $(CMAKE_CXXFLAGS) -o \\\n";
+    "$(CMAKE_MODULE_BUILD_FLAGS) $(CMAKE_CXX_FLAGS) -o \\\n";
   command2 += "\t  ";
   command2 += m_LibraryOutputPath + "lib" + std::string(name) + "$(MODULE_SUFFIX) \\\n";
   command2 += "\t  $(" + std::string(name) + "_SRC_OBJS) ";
@@ -634,7 +634,7 @@ void cmUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
   std::string depend = "$(";
   depend += std::string(name) + "_SRC_OBJS) $(" + std::string(name) + "_DEPEND_LIBS)";
   std::string command = 
-    "$(CMAKE_CXX_COMPILER) $(CMAKE_SHLIB_LINK_FLAGS) $(CMAKE_CXXFLAGS) ";
+    "$(CMAKE_CXX_COMPILER) $(CMAKE_SHLIB_LINK_FLAGS) $(CMAKE_CXX_FLAGS) ";
   command += "$(" + std::string(name) + "_SRC_OBJS) ";
   std::strstream linklibs;
   this->OutputLinkLibraries(linklibs, 0, t);
@@ -1192,7 +1192,7 @@ void cmUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     "CMAKE_SHLIB_CFLAGS  = @CMAKE_SHLIB_CFLAGS@\n"
     "\n"
     "CMAKE_CXX_COMPILER  = @CMAKE_CXX_COMPILER@\n"
-    "CMAKE_CXXFLAGS      = @CMAKE_CXX_FLAGS@\n"
+    "CMAKE_CXX_FLAGS     = @CMAKE_CXX_FLAGS@\n"
     "\n"
     "CMAKE_SHLIB_BUILD_FLAGS  = @CMAKE_SHLIB_BUILD_FLAGS@\n"
     "CMAKE_SHLIB_LINK_FLAGS   = @CMAKE_SHLIB_LINK_FLAGS@\n"
@@ -1504,7 +1504,7 @@ OutputBuildObjectFromSource(std::ostream& fout,
     }
   else
     {
-    compileCommand = "$(CMAKE_CXX_COMPILER) $(CMAKE_CXXFLAGS) ";
+    compileCommand = "$(CMAKE_CXX_COMPILER) $(CMAKE_CXX_FLAGS) ";
     compileCommand += extraCompileFlags;
     if(shared)
       {

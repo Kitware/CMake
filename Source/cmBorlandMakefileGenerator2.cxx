@@ -89,7 +89,7 @@ void cmBorlandMakefileGenerator2::OutputMakeVariables(std::ostream& fout)
     "CMAKE_EXECUTABLE_SUFFIX             = @CMAKE_EXECUTABLE_SUFFIX@\n"
     "CMAKE_STATICLIB_SUFFIX              = @CMAKE_STATICLIB_SUFFIX@\n"
     "CMAKE_SHLIB_SUFFIX                  = @CMAKE_SHLIB_SUFFIX@\n"
-    "CMAKE_CXXFLAGS      = -P @CMAKE_CXX_FLAGS@ @BUILD_FLAGS@\n";
+    "CMAKE_CXX_FLAGS      = -P @CMAKE_CXX_FLAGS@ @BUILD_FLAGS@\n";
   std::string buildType = "CMAKE_CXX_FLAGS_";
   buildType +=  m_Makefile->GetDefinition("CMAKE_BUILD_TYPE");
   buildType = cmSystemTools::UpperCase(buildType);
@@ -292,7 +292,7 @@ OutputBuildObjectFromSource(std::ostream& fout,
   // assume c++ if not c rc or def
   else
     {
-    compileCommand = "$(CMAKE_CXX_COMPILER) $(CMAKE_CXXFLAGS) ";
+    compileCommand = "$(CMAKE_CXX_COMPILER) $(CMAKE_CXX_FLAGS) ";
     compileCommand += extraCompileFlags;
     if(shared)
       {
