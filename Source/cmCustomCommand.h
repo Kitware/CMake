@@ -48,19 +48,19 @@ public:
     {return m_Command + " " + m_Arguments;}
   
   ///! Return the command to execute
-  std::string GetCommand() const {return m_Command;}
+  const std::string &GetCommand() const {return m_Command;}
   void SetCommand(const char *cmd) {m_Command = cmd;}
 
   ///! Return the output
-  std::string GetOutput() const {return m_Output;}
+  const std::string &GetOutput() const {return m_Output;}
   void SetOutput(const char *cm) {m_Output = cm;}
 
   ///! Return the comment
-  std::string GetComment() const {return m_Comment;}
+  const std::string &GetComment() const {return m_Comment;}
   void SetComment(const char *cm) {m_Comment = cm;}
 
   ///! Return the commands arguments
-  std::string GetArguments() const {return m_Arguments;}
+  const std::string &GetArguments() const {return m_Arguments;}
   void SetArguments(const char *arg) {m_Arguments = arg;}
   
   /**
