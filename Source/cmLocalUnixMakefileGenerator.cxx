@@ -2517,7 +2517,7 @@ cmLocalUnixMakefileGenerator::CreateMakeVariable(const char* s, const char* s2)
   std::string ret = unmodified;
   // if the string is greater the 32 chars it is an invalid vairable name
   // for borland make
-  if(ret.size() > m_MakefileVariableSize)
+  if(static_cast<int>(ret.size()) > m_MakefileVariableSize)
     {
     int keep = m_MakefileVariableSize - 8;
     int size = keep + 3;
@@ -2525,11 +2525,11 @@ cmLocalUnixMakefileGenerator::CreateMakeVariable(const char* s, const char* s2)
     std::string str2 = s2;
     // we must shorten the combined string by 4 charactors
     // keep no more than 24 charactors from the second string
-    if(str2.size() > keep)
+    if(static_cast<int>(str2.size()) > keep)
       {
       str2 = str2.substr(0, keep);
       }
-    if(str1.size() + str2.size() > size)
+    if(static_cast<int>(str1.size()) + static_cast<int>(str2.size()) > size)
       {
       str1 = str1.substr(0, size - str2.size());
       }
