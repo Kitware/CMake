@@ -214,6 +214,22 @@ public:
   void AddLinkDirectory(const char*);
 
   /**
+   * Get the list of link directories
+   */
+  std::vector<std::string>& GetLinkDirectories()
+    {
+    return m_LinkDirectories;
+    }
+  const std::vector<std::string>& GetLinkDirectories() const
+    {
+    return m_LinkDirectories;
+    }
+  void SetLinkDirectories(const std::vector<std::string>& vec)
+    {
+    m_LinkDirectories = vec;
+    }
+
+  /**
    * Add a subdirectory to the build.
    */
   void AddSubDirectory(const char*, bool includeTopLevel=true, bool preorder = false);
@@ -393,6 +409,10 @@ public:
     {
       m_IncludeFileRegularExpression = regex;
     }
+  const char* GetIncludeRegularExpression()
+    { 
+      return m_IncludeFileRegularExpression.c_str();
+    }
 
   /** 
    * Set a regular expression that include files that are not found
@@ -427,6 +447,10 @@ public:
   const std::vector<std::string>& GetIncludeDirectories() const
     { 
     return m_IncludeDirectories;
+    }
+  void SetIncludeDirectories(const std::vector<std::string>& vec)
+    {
+    m_IncludeDirectories = vec;
     }
 
   /** Expand out any arguements in the vector that have ; separated

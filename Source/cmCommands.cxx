@@ -81,6 +81,7 @@
 #include "cmExportLibraryDependencies.cxx"
 #include "cmFLTKWrapUICommand.cxx"
 #include "cmGetCMakePropertyCommand.cxx"
+#include "cmGetDirectoryPropertyCommand.cxx"
 #include "cmGetSourceFilePropertyCommand.cxx"
 #include "cmGetTargetPropertyCommand.cxx"
 #include "cmITKWrapTclCommand.cxx"
@@ -89,6 +90,7 @@
 #include "cmLoadCacheCommand.cxx"
 #include "cmOutputRequiredFilesCommand.cxx"
 #include "cmRemoveCommand.cxx"
+#include "cmSetDirectoryPropertiesCommand.cxx"
 #include "cmSetTargetPropertiesCommand.cxx"
 #include "cmSourceFilesCommand.cxx"
 #include "cmSourceFilesRemoveCommand.cxx"
@@ -171,6 +173,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmExportLibraryDependenciesCommand);
   commands.push_back(new cmFLTKWrapUICommand);
   commands.push_back(new cmGetCMakePropertyCommand);
+  commands.push_back(new cmGetDirectoryPropertyCommand);
   commands.push_back(new cmGetSourceFilePropertyCommand);
   commands.push_back(new cmGetTargetPropertyCommand);
   commands.push_back(new cmITKWrapTclCommand);
@@ -180,6 +183,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmLoadCommandCommand);
   commands.push_back(new cmOutputRequiredFilesCommand);
   commands.push_back(new cmRemoveCommand);
+  commands.push_back(new cmSetDirectoryPropertiesCommand);
   commands.push_back(new cmSetTargetPropertiesCommand);
   commands.push_back(new cmSourceFilesCommand);
   commands.push_back(new cmSourceFilesRemoveCommand);
