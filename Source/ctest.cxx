@@ -132,6 +132,8 @@ void ctest::ProcessDirectory(int &passed, std::vector<std::string> &failed)
     return;
     }
 
+  int firstTest = 1;
+  
   std::string name;
   std::vector<std::string> args;
   cmRegularExpression ireg(this->m_IncludeRegExp.c_str());
@@ -154,7 +156,6 @@ void ctest::ProcessDirectory(int &passed, std::vector<std::string> &failed)
           nwd += *j;
           if (cmSystemTools::FileIsDirectory(nwd.c_str()))
             {
-            std::cerr << "Changing directory into " << nwd.c_str() << "\n";
             cmSystemTools::ChangeDirectory(nwd.c_str());
             this->ProcessDirectory(passed, failed);
             }
@@ -180,6 +181,12 @@ void ctest::ProcessDirectory(int &passed, std::vector<std::string> &failed)
             ereg.find(args[0].c_str()))
           {
           continue;
+          }
+        if (firstTest)
+          {
+          std::string nwd = cmSystemTools::GetCurrentWorkingDirectory();
+          std::cerr << "Changing directory into " << nwd.c_str() << "\n";
+          firstTest = 0;
           }
         fprintf(stderr,"Testing %-30s ",args[0].c_str());
         fflush(stderr);
