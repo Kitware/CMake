@@ -48,7 +48,7 @@ void cmTarget::TraceVSDependencies(std::string projFile,
   for(std::vector<cmSourceFile*>::const_iterator i = classes.begin(); 
       i != classes.end(); ++i)
     {
-    std::string name = (*i)->GetSourceName();
+    name = (*i)->GetSourceName();
     if ((*i)->GetSourceExtension() != "rule")
       {
       name += ".";
@@ -72,7 +72,7 @@ void cmTarget::TraceVSDependencies(std::string projFile,
            i != c.GetDepends().end(); ++i)
         {
         srcFilesToProcess.push(*i);
-        srcFilesQueued.insert(name);
+        srcFilesQueued.insert(*i);
         }
       }
     }
@@ -88,7 +88,7 @@ void cmTarget::TraceVSDependencies(std::string projFile,
         {
         // then add the source to this target and add it to the queue
         classes.push_back(outsf);
-        std::string name = outsf->GetSourceName();
+        name = outsf->GetSourceName();
         if (outsf->GetSourceExtension() != "rule")
           {
           name += ".";
