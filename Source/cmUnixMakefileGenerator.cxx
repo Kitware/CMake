@@ -1241,7 +1241,7 @@ void cmUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
               }
 	    fout << *i
 		 << " " << prefix << l->second.GetInstallPath() << "; \\\n";
-	    fout << "\t elif [ -f $(srcdir)/" << *i << " ] ; then \\\n";
+	    fout << "\t elif [ -f $(CMAKE_CURRENT_SOURCE)/" << *i << " ] ; then \\\n";
             // avoid using install-sh to install install-sh
             // does not work on windows....
             if(*i == "install-sh")
@@ -1252,7 +1252,7 @@ void cmUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
               {
               fout << "\t   $(INSTALL_DATA) ";
               }
-	    fout << "$(srcdir)/" << *i 
+	    fout << "$(CMAKE_CURRENT_SOURCE)/" << *i 
 		 << " " << prefix << l->second.GetInstallPath() << "; \\\n";
 	    fout << "\telse \\\n";
 	    fout << "\t   echo \" ERROR!!! Unable to find: " << *i 
@@ -1281,7 +1281,7 @@ void cmUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
               }
 	    fout << *i
 		 << " " << prefix << l->second.GetInstallPath() << "; \\\n";
-	    fout << "\t elif [ -f $(srcdir)/" << *i << " ] ; then \\\n";
+	    fout << "\t elif [ -f $(CMAKE_CURRENT_SOURCE)/" << *i << " ] ; then \\\n";
             // avoid using install-sh to install install-sh
             // does not work on windows....
             if(*i == "install-sh")
@@ -1292,7 +1292,7 @@ void cmUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
               {
               fout << "\t   $(INSTALL_PROGRAM) ";
               }
-	    fout << "$(srcdir)/" << *i 
+	    fout << "$(CMAKE_CURRENT_SOURCE)/" << *i 
 		 << " " << prefix << l->second.GetInstallPath() << "; \\\n";
 	    fout << "\telse \\\n";
 	    fout << "\t   echo \" ERROR!!! Unable to find: " << *i 
