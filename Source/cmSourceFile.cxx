@@ -90,8 +90,12 @@ void cmSourceFile::SetName(const char* name, const char* dir,
 	  m_SourceName = hname.substr(0, pos);
 	}
       }
-    
-    m_HeaderFileOnly = false;
+
+    // See if the file is a header file
+    if(std::find( headerExts.begin(), headerExts.end(), m_SourceExtension ) == headerExts.end())
+      m_HeaderFileOnly = false;
+    else
+      m_HeaderFileOnly = true;
     m_FullPath = hname;
     return;
     }
