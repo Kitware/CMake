@@ -359,6 +359,7 @@ void cmMakefile::GenerateMakefile()
   for (cmTargets::iterator l = m_Targets.begin();
        l != m_Targets.end(); l++)
     {
+    l->second.GenerateSourceFilesFromSourceLists(*this);
     l->second.MergeLibraries(m_LinkLibraries);
     }
   // now do the generation

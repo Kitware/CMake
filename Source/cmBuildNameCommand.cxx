@@ -55,7 +55,7 @@ bool cmBuildNameCommand::Invoke(std::vector<std::string>& args)
     m_Makefile->AddDefinition("BUILDNAME", cacheValue);
     return true;
     }
-  std::string buildname = "WinNT-VC60";
+  std::string buildname = "WinNT";
   if(m_Makefile->GetDefinition("UNIX"))
     {
     buildname = "";
@@ -70,10 +70,9 @@ bool cmBuildNameCommand::Invoke(std::vector<std::string>& args)
 	buildname = reg.match(1) + "-" + reg.match(2);
 	}
       }
-
     }
 
-  std::string compiler = "-${CXX}";
+  std::string compiler = "-${CMAKE_CXX}";
   m_Makefile->ExpandVariablesInString ( compiler );
   buildname += compiler;
   

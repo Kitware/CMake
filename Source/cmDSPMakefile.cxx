@@ -163,8 +163,6 @@ void cmDSPMakefile::WriteDSPFile(std::ostream& fout,
                                  const char *libName,
                                  cmTarget &target)
 {
-  target.GenerateSourceFilesFromSourceLists(*m_Makefile);
-
   // Write the DSP file's header.
   this->WriteDSPHeader(fout, libName, target);
   

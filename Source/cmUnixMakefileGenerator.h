@@ -86,7 +86,6 @@ private:
   void GenerateCacheOnly();
   void OutputMakefile(const char* file);
   void OutputMakeFlags(std::ostream&);
-  void OutputVerbatim(std::ostream&);
   void OutputTargetRules(std::ostream& fout);
   void OutputLinkLibraries(std::ostream&, const char*, const cmTarget &);
   void OutputTargets(std::ostream&);
@@ -94,6 +93,19 @@ private:
   void OutputDependInformation(std::ostream&);
   void OutputDependencies(std::ostream&);
   void OutputCustomRules(std::ostream&);
+  void OutputMakeVariables(std::ostream&);
+  void OutputMakeRules(std::ostream&);
+  void OutputSubDirectoryVars(std::ostream& fout,
+                              const char* var,
+                              const char* target,
+                              const char* target1,
+                              const char* target2,
+                              const std::vector<std::string>& SubDirectories);
+  void OutputMakeRule(std::ostream&, 
+                      const char* comment,
+                      const char* target,
+                      const char* depends, 
+                      const char* command);
 private:
   bool m_CacheOnly;
   bool m_Recurse;

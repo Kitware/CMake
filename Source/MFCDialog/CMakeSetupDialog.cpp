@@ -353,7 +353,16 @@ void CMakeSetupDialog::OnBuildProjects()
   makefile.MakeStartDirectoriesCurrent();
   CString makefileIn = m_WhereSource;
   makefileIn += "/CMakeLists.txt";
-  makefile.ReadListFile(makefileIn);
+  makefile.ReadListFile(makefileIn); 
+  if(!cmCacheManager::GetInstance()->GetCacheValue("CMAKE_CXX"))
+    {
+    if(!makefile.GetDefinition("CMAKE_CXX"))
+      {
+      makefile.AddDefinition("CMAKE_CXX", "VC60");
+      }
+    cmCacheManager::GetInstance()->AddCacheEntry("CMAKE_CXX", "VC60",
+                                                 "Compiler used", cmCacheManager::STRING);
+    }
   // Generate the project files
   makefile.GenerateMakefile();
   // Save the cache

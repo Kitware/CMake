@@ -85,7 +85,6 @@ void cmMakeDepend::SetMakefile(cmMakefile* makefile)
   for(cmTargets::iterator l = tgts.begin(); 
       l != tgts.end(); l++)
     {
-    l->second.GenerateSourceFilesFromSourceLists(*m_Makefile);
     std::vector<cmSourceFile> &classes = l->second.GetSourceFiles();
     for(std::vector<cmSourceFile>::iterator i = classes.begin(); 
         i != classes.end(); ++i)

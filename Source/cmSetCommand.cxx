@@ -52,6 +52,20 @@ bool cmSetCommand::Invoke(std::vector<std::string>& args)
     {
       return true;
     }
+  if(args[1] == "CACHE")
+    { 
+    const char* type = "STRING"; // default type is string
+    if(args.size() > 2)
+      {
+      type = args[2].c_str();
+      }
+    m_Makefile->AddDefinition(args[0].c_str(), "");
+    cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
+                                                 "",
+						 "Value Computed by CMake",
+                                                 cmCacheManager::StringToType(type));
+    return true;
+    }
   
   // expand value
   m_Makefile->ExpandVariablesInString(args[1]);
@@ -60,10 +74,15 @@ bool cmSetCommand::Invoke(std::vector<std::string>& args)
   // should we store the result in the cache ?
   if (args.size() > 2 && args[2] == "CACHE")
     {
+    const char* type = "STRING"; // default type is string
+    if(args.size() > 3)
+      {
+      type = args[3].c_str();
+      }
     cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
                                                  args[1].c_str(),
 						 "Value Computed by CMake",
-                                                 cmCacheManager::STRING);
+                                                 cmCacheManager::StringToType(type));
     }
   return true;
 }

@@ -53,7 +53,10 @@ bool cmBuildSharedLibrariesCommand::Invoke(std::vector<std::string>& args)
       AddCacheEntry("BUILD_SHARED_LIBS",
                     false,
                     "If ON, the resulting project or makefiles will "
-                    "produce shared libraries.");
+                    "produce shared libraries.  WARNING! On some "
+                    "UNIX platforms, changing this setting will require"
+                    " removing all .o files, as they will have to be recompiled "
+                    " with -fpic or some other flag.");
     m_Makefile->AddDefinition("BUILD_SHARED_LIBS", false);
     }
   else

@@ -60,13 +60,13 @@ bool cmProjectCommand::Invoke(std::vector<std::string>& args)
   cmCacheManager::GetInstance()->
     AddCacheEntry(bindir.c_str(),
 		  m_Makefile->GetCurrentOutputDirectory(),
-		  "Value Computed by CMake", cmCacheManager::PATH);
+		  "Value Computed by CMake", cmCacheManager::STATIC);
   m_Makefile->AddDefinition(srcdir.c_str(),
 	  m_Makefile->GetCurrentDirectory());
   cmCacheManager::GetInstance()->
     AddCacheEntry(srcdir.c_str(),
 		  m_Makefile->GetCurrentDirectory(),
-		  "Value Computed by CMake", cmCacheManager::PATH);
+		  "Value Computed by CMake", cmCacheManager::STATIC);
   
   return true;
 }

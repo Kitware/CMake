@@ -72,7 +72,7 @@ void cmUnixMakefileGenerator::GenerateMakefile()
     md.SetMakefile(m_Makefile);
     md.DoDepends();
     // output the makefile fragment
-    this->OutputMakefile("CMakeTargets.make"); 
+    this->OutputMakefile("Makefile"); 
     }
 }
 
@@ -99,15 +99,62 @@ void cmUnixMakefileGenerator::OutputMakefile(const char* file)
     cmSystemTools::Error("Error can not open for write: ", file);
     return;
     }
+  fout << "# CMAKE generated Makefile, DO NOT EDIT!\n"
+       << "# Generated from the following files:\n# "
+       << m_Makefile->GetHomeOutputDirectory() << "/CMakeCache.txt\n";
+  std::vector<std::string> lfiles = m_Makefile->GetListFiles();
+  // sort the array
+  std::sort(lfiles.begin(), lfiles.end(), std::less<std::string>());
+  // remove duplicates
+  std::vector<std::string>::iterator new_end = 
+    std::unique(lfiles.begin(), lfiles.end());
+  lfiles.erase(new_end, lfiles.end());
+
+  for(std::vector<std::string>::const_iterator i = lfiles.begin();
+      i !=  lfiles.end(); ++i)
+    {
+    fout << "# " << i->c_str() << "\n";
+    }
+  fout << "\n\n";
+  // create a make variable with all of the sources for this Makefile
+  // for depend purposes.
+  fout << "CMAKE_MAKEFILE_SOURCES = ";
+  for(std::vector<std::string>::const_iterator i = lfiles.begin();
+      i !=  lfiles.end(); ++i)
+    {
+    fout << " " << i->c_str();
+    }
+  // Add the cache to the list
+  fout << " " << m_Makefile->GetHomeOutputDirectory() << "/CMakeCache.txt\n";
+  fout << "\n\n";
+  this->OutputMakeVariables(fout);
   this->OutputMakeFlags(fout);
-  this->OutputVerbatim(fout);
   this->OutputTargetRules(fout);
   this->OutputDependencies(fout);
   this->OutputTargets(fout);
   this->OutputSubDirectoryRules(fout);
-  this->OutputObjectDepends(fout);
+  std::string dependName;
+  if(!this->m_CacheOnly)
+    {
+    dependName = m_Makefile->GetStartOutputDirectory();
+    dependName += "/cmake.depends";
+    std::ofstream dependout(dependName.c_str());
+    if(!dependout)
+      {
+       cmSystemTools::Error("Error can not open for write: ", dependName.c_str());
+       return;
+      }
+    this->OutputObjectDepends(dependout);
+    }
   this->OutputCustomRules(fout);
+  this->OutputMakeRules(fout);
+  // only add the depend include if the depend file exists
+  if(cmSystemTools::FileExists(dependName.c_str()))
+    {
+    fout << "include cmake.depends\n";
+    }
 }
+
 
 // Output the rules for any targets
 void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
@@ -116,13 +163,22 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
   fout << "TARGETS = ";
   const cmTargets &tgts = m_Makefile->GetTargets();
   // list libraries first
+  bool dll = cmCacheManager::GetInstance()->IsOn("BUILD_SHARED_LIBS");
   for(cmTargets::const_iterator l = tgts.begin(); 
       l != tgts.end(); l++)
     {
     if (l->second.GetType() == cmTarget::LIBRARY &&
 	l->second.IsInAll())
       {
-      fout << " \\\nlib" << l->first.c_str() << "${CMAKE_LIB_EXT}";
+      fout << " \\\nlib" << l->first.c_str();
+      if(dll)
+        {
+        fout << m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
+        }
+      else
+        {
+        fout << ".a";
+        }
       }
     }
   // executables
@@ -147,7 +203,6 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
       }
     }
   fout << "\n\n";
-  
   // get the classes from the source lists then add them to the groups
   for(cmTargets::const_iterator l = tgts.begin(); 
       l != tgts.end(); l++)
@@ -164,6 +219,13 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
       }
     fout << "\n\n";
     }
+  fout << "CLEAN_OBJECT_FILES = ";
+  for(cmTargets::const_iterator l = tgts.begin(); 
+      l != tgts.end(); l++)
+    {
+    fout << "${" << l->first << "_SRC_OBJS} ";
+    }
+  fout << "\n";
 }
 
 
@@ -201,7 +263,10 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
     if(targetLibrary && (lib->first == targetLibrary)) continue;
     // don't look at debug libraries
     if (lib->second == cmTarget::DEBUG) continue;
-    
+    // skip zero size library entries, this may happen
+    // if a variable expands to nothing.
+    if (lib->first.size() == 0) continue;
+    // if it is a full path break it into -L and -l
     if(lib->first.find('/') != std::string::npos)
       {
       std::string dir, file;
@@ -218,6 +283,7 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
       librariesLinked += file;
       librariesLinked += " ";
       }
+    // not a full path, so add -l name
     else
       {
       std::string::size_type pos = lib->first.find("-l");
@@ -237,7 +303,6 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
     // For executables, add these a second time so order does not matter
     linkLibs += librariesLinked;
     }
-  linkLibs += " ${LOCAL_LINK_FLAGS} ";
   fout << linkLibs;
 }
 
@@ -254,19 +319,19 @@ void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
       fout << "#---------------------------------------------------------\n";
       fout << "# rules for a library\n";
       fout << "#\n";
-      fout << "lib" << l->first << ".a: ${KIT_OBJ} ${" << 
+      fout << "lib" << l->first << ".a: ${" << 
         l->first << "_SRC_OBJS} \n";
-      fout << "\t${AR} cr lib" << l->first << ".a ${KIT_OBJ} ${" << 
+      fout << "\t${CMAKE_AR} cr lib" << l->first << ".a ${" << 
         l->first << "_SRC_OBJS} \n";
-      fout << "\t${RANLIB} lib" << l->first << ".a\n";
+      fout << "\t${CMAKE_RANLIB} lib" << l->first << ".a\n";
       fout << std::endl;
 
-      fout << "lib" << l->first << "$(SHLIB_SUFFIX): ${KIT_OBJ} ${" << 
+      fout << "lib" << l->first << "$(SHLIB_SUFFIX):  ${" << 
         l->first << "_SRC_OBJS} \n";
       fout << "\trm -f lib" << l->first << "$(SHLIB_SUFFIX)\n";
-      fout << "\t$(CXX) ${CXX_FLAGS} ${CMAKE_SHLIB_BUILD_FLAGS} -o \\\n";
+      fout << "\t$(CMAKE_CXX) ${CMAKE_SHLIB_LINK_FLAGS} ${CMAKE_CXX_FLAGS} ${CMAKE_SHLIB_BUILD_FLAGS} -o \\\n";
       fout << "\t  lib" << l->first << "$(SHLIB_SUFFIX) \\\n";
-      fout << "\t  ${KIT_OBJ} ${" << l->first << 
+      fout << "\t  ${" << l->first << 
         "_SRC_OBJS} ";
       this->OutputLinkLibraries(fout, l->first.c_str(), l->second);
       fout << "\n\n";
@@ -275,7 +340,7 @@ void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
       {
       fout << l->first << ": ${" << 
         l->first << "_SRC_OBJS} ${CMAKE_DEPEND_LIBS}\n";
-      fout << "\t${CXX}  ${CXX_FLAGS} ${" << 
+      fout << "\t${CMAKE_CXX}  ${CMAKE_CXXFLAGS} ${" << 
         l->first << "_SRC_OBJS} ";
       this->OutputLinkLibraries(fout, NULL,l->second);
       fout << " -o " << l->first << "\n\n";
@@ -304,9 +369,47 @@ void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
       {
       std::string libpath = cacheValue;
       libpath += "/lib";
-      libpath += lib2->first;
-      libpath += "${CMAKE_LIB_EXT}";
+      libpath += lib2->first; 
+      bool dll = cmCacheManager::GetInstance()->IsOn("BUILD_SHARED_LIBS");
+      if(dll)
+        {
+        libpath += m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
+        }
+      else
+        {
+        libpath += ".a";
+        }
       fout << libpath << " ";
+      }
+    }
+  fout << "\n\n";
+  for(lib2 = libs.begin(); lib2 != libs.end(); ++lib2)
+    {
+    // loop over the list of directories that the libraries might
+    // be in, looking for an ADD_LIBRARY(lib...) line. This would
+    // be stored in the cache
+    const char* cacheValue
+      = cmCacheManager::GetInstance()->GetCacheValue(lib2->first.c_str());
+    if(cacheValue)
+      {
+      std::string library = "lib";
+      library += lib2->first; 
+      bool dll = cmCacheManager::GetInstance()->IsOn("BUILD_SHARED_LIBS");
+      if(dll)
+        {
+        library += m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
+        }
+      else
+        {
+        library += ".a";
+        }
+      std::string libpath = cacheValue;
+      libpath += "/";
+      libpath += library;
+      // put out a rule to build the library if it does not exist
+      fout << libpath.c_str()
+           << ":\n\tcd " << cacheValue 
+           << "; make " << library.c_str() << "\n\n";
       }
     }
 
@@ -324,7 +427,7 @@ void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
       {
       std::string expression = "TARGETS =.*";
       expression += util->c_str();
-      if(cmSystemTools::Grep(dir->c_str(), "CMakeTargets.make",
+      if(cmSystemTools::Grep(dir->c_str(), "Makefile",
                              expression.c_str()))
         {
         fout << *util << " ";
@@ -350,25 +453,12 @@ void cmUnixMakefileGenerator::OutputMakeFlags(std::ostream& fout)
     fout << "-I" << cmSystemTools::EscapeSpaces(i->c_str()).c_str() << " ";
     }
   fout << m_Makefile->GetDefineFlags();
-  fout << " ${LOCAL_INCLUDE_FLAGS} ";
   fout << "\n\n";
   fout << "default_target: all\n\n";
   // see if there are files to compile in this makefile
   // These are used for both libraries and executables
 }
 
-// output verbatim section
-void cmUnixMakefileGenerator::OutputVerbatim(std::ostream& fout)
-{
-    std::vector<std::string>& MakeVerbatim = m_Makefile->GetMakeVerbatim();
-  // Ouput user make text embeded in the input file
-  for(unsigned int i =0; i < MakeVerbatim.size(); i++)
-    {
-    fout << MakeVerbatim[i] << "\n";
-    }
-  fout << "\n\n";
-  
-}
 
 // fix up names of directories so they can be used
 // as targets in makefiles.
@@ -391,6 +481,54 @@ inline std::string FixDirectoryName(const char* dir)
   return s;
 }
 
+void 
+cmUnixMakefileGenerator::
+OutputSubDirectoryVars(std::ostream& fout,
+                       const char* var,
+                       const char* target,
+                       const char* target1,
+                       const char* target2,
+                       const std::vector<std::string>& SubDirectories)
+{
+  if( SubDirectories.size() == 0)
+    {
+    return;
+    }
+  fout << "# Variable for making " << target << " in subdirectories.\n";
+  fout << var << " = \\\n";
+  unsigned int i;
+  for(i =0; i < SubDirectories.size(); i++)
+    { 
+    std::string subdir = FixDirectoryName(SubDirectories[i].c_str());
+    fout << target << "_" << subdir.c_str();
+    if(i == SubDirectories.size()-1)
+      {
+      fout << " \n\n";
+      }
+    else
+      {
+      fout << " \\\n";
+      }
+    }
+  fout << "# Targets for making " << target << " in subdirectories.\n";
+  for(int i =0; i < SubDirectories.size(); i++)
+    {
+    std::string subdir = FixDirectoryName(SubDirectories[i].c_str());
+    fout << target << "_" << subdir.c_str() << ":\n";
+    if(target1)
+      {
+      fout << "\tcd " << SubDirectories[i].c_str()
+           << "; ${MAKE} -${MAKEFLAGS} " << target1 << "\n";
+      }
+    if(target2)
+      {
+      fout << "\tcd " << SubDirectories[i].c_str()
+           << "; ${MAKE} -${MAKEFLAGS} " << target2 << "\n";
+      }
+    }
+  fout << "\n\n";
+}
+
 
 // output rules for decending into sub directories
 void cmUnixMakefileGenerator::OutputSubDirectoryRules(std::ostream& fout)
@@ -403,52 +541,18 @@ void cmUnixMakefileGenerator::OutputSubDirectoryRules(std::ostream& fout)
     {
     return;
     }
-  fout << "SUBDIR_BUILD = \\\n";
-  unsigned int i;
-  for(i =0; i < SubDirectories.size(); i++)
-    { 
-    std::string subdir = FixDirectoryName(SubDirectories[i].c_str());
-    fout << "build_" << subdir.c_str();
-    if(i == SubDirectories.size()-1)
-      {
-      fout << " \n\n";
-      }
-    else
-      {
-      fout << " \\\n";
-      }
-    }
-  fout << std::endl;
-  fout << "SUBDIR_CLEAN = \\\n";
-  for(i =0; i < SubDirectories.size(); i++)
-    { 
-    std::string subdir = FixDirectoryName(SubDirectories[i].c_str());
-    fout << "clean_" << subdir.c_str();
-    if(i == SubDirectories.size()-1)
-      {
-      fout << " \n\n";
-      }
-    else
-      {
-      fout << " \\\n";
-      }
-    }
-  fout << std::endl;
-  fout << "alldirs : ${SUBDIR_BUILD}\n\n";
-
-  for(i =0; i < SubDirectories.size(); i++)
-    {
-    std::string subdir = FixDirectoryName(SubDirectories[i].c_str());
-    fout << "build_" << subdir.c_str() << ":\n";
-    fout << "\tcd " << SubDirectories[i].c_str()
-         << "; ${MAKE} -${MAKEFLAGS} CMakeTargets.make\n";
-    fout << "\tcd " << SubDirectories[i].c_str()
-         << "; ${MAKE} -${MAKEFLAGS} all\n\n";
-
-    fout << "clean_" << subdir.c_str() << ": \n";
-    fout << "\tcd " << SubDirectories[i].c_str() 
-         << "; ${MAKE} -${MAKEFLAGS} clean\n\n";
-    }
+  this->OutputSubDirectoryVars(fout, "SUBDIR_BUILD", "build",
+                               "cmake.depends",
+                               "all",
+                               SubDirectories);
+  this->OutputSubDirectoryVars(fout, "SUBDIR_CLEAN", "clean",
+                               "clean",
+                               0,
+                               SubDirectories);
+  this->OutputSubDirectoryVars(fout, "SUBDIR_DEPEND", "depend",
+                               "depend",
+                               0,
+                               SubDirectories);
 }
 
 
@@ -585,49 +689,12 @@ void cmUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
 
 void cmUnixMakefileGenerator::GenerateCacheOnly()
 {
-  
-  std::string source = m_Makefile->GetHomeDirectory();
-  source += "/CMake/CMakeMakefileTemplate.in";
   cmSystemTools::MakeDirectory(m_Makefile->GetStartOutputDirectory());
   std::string dest = m_Makefile->GetStartOutputDirectory();
   dest += "/Makefile";
-  std::ofstream fout(dest.c_str());
-  std::cout << "cmake: creating : " << dest.c_str() << "\n";
-  if(!fout)
-    {
-    cmSystemTools::Error("Failed to open file for write " , dest.c_str());
-    }
-  else
-    {
-    if(strcmp(m_Makefile->GetHomeDirectory(), 
-              m_Makefile->GetHomeOutputDirectory()) == 0)
-      {
-      fout << "srcdir        = .\n\n";
-      }
-    else
-      {
-      fout << "srcdir        = " <<  m_Makefile->GetStartDirectory() << "\n";
-      fout << "VPATH         = " <<  m_Makefile->GetStartDirectory() << "\n";
-      }
-    }
-  fout << "include "
-       << m_Makefile->GetHomeOutputDirectory() << "/CMake/CMakeMaster.make\n";
-  dest = m_Makefile->GetStartOutputDirectory();
-  dest += "/CMakeTargets.make";
-  // make sure there is a CMakeTargets.make file as some
-  // makes require it to exist
-  if(!cmSystemTools::FileExists(dest.c_str()))
-    {
-    std::cout << "cmake: creating : " << dest.c_str() << "\n";
-    std::ofstream fout(dest.c_str());
-    if(!fout)
-      { 
-      cmSystemTools::Error("Failed to open file for write " , dest.c_str());
-      }
-    fout << "#Initial CMakeTargets.make file created only to keep \n";
-    fout << "#certain makes happy that don't like to include makefiles\n";
-    fout << "#that do not exist\n";
-    }
+  std::cout << "cmake: creating : " << dest.c_str() << std::endl;
+  this->OutputMakefile(dest.c_str());
+  return;
 }
 
 void cmUnixMakefileGenerator::RecursiveGenerateCacheOnly()
@@ -654,3 +721,150 @@ void cmUnixMakefileGenerator::RecursiveGenerateCacheOnly()
       delete makefiles[i];
     }
 }
+
+void cmUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
+{
+  if(strcmp(m_Makefile->GetHomeDirectory(), 
+            m_Makefile->GetHomeOutputDirectory()) == 0)
+    {
+    fout << "srcdir        = .\n\n";
+    }
+  else
+    {
+    fout << "srcdir        = " <<  m_Makefile->GetStartDirectory() << "\n";
+    fout << "VPATH         = " <<  m_Makefile->GetStartDirectory() << "\n";
+    }
+  const char* variables = 
+    "# the standard shell for make\n"
+    "SHELL = /bin/sh\n"
+    "\n"
+    "CMAKE_LIB_EXT          = @CMAKE_LIB_EXT@\n"
+    "CMAKE_RANLIB        = @CMAKE_RANLIB@\n"
+    "CMAKE_AR        = @CMAKE_AR@\n"
+    "CMAKE_CC            = @CMAKE_CC@\n"
+    "CMAKE_CFLAGS        = @CMAKE_CC_FLAGS@ @CMAKE_SHLIB_CFLAGS@ \n"
+    "\n"
+    "CMAKE_CXX           = @CMAKE_CXX@\n"
+    "CMAKE_CXXFLAGS      = @CMAKE_CXX_FLAGS@ @CMAKE_SHLIB_CFLAGS@ @CMAKE_TEMPLATE_FLAGS@ \n"
+    "\n"
+    "CMAKE_SHLIB_BUILD_FLAGS = @CMAKE_SHLIB_BUILD_FLAGS@\n"
+    "CMAKE_SHLIB_LINK_FLAGS = @CMAKE_SHLIB_LINK_FLAGS@\n"
+    "DL_LIBS              = @CMAKE_DL_LIBS@\n"
+    "SHLIB_LD_LIBS        = @CMAKE_SHLIB_LD_LIBS@\n"
+    "SHLIB_SUFFIX         = @CMAKE_SHLIB_SUFFIX@\n"
+    "THREAD_LIBS          = @CMAKE_THREAD_LIBS@\n"
+    "\n"
+    "# set up the path to the rulesgen program\n"
+    "CMAKE = ${CMAKE_BINARY_DIR}/CMake/Source/CMakeBuildTargets\n"
+    "\n"
+    "\n"
+    "\n";
+  std::string replaceVars = variables;
+  m_Makefile->ExpandVariablesInString(replaceVars);
+  fout << replaceVars.c_str();
+  fout << "CMAKE_CURRENT_SOURCE = " << m_Makefile->GetStartDirectory() << "\n";
+  fout << "CMAKE_CURRENT_BINARY = " << m_Makefile->GetStartOutputDirectory() << "\n";
+}
+
+
+void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
+{
+  this->OutputMakeRule(fout, 
+                       "# tell make about .cxx and .java",
+                       ".SUFFIXES", ".cxx .java .class", 0);
+  this->OutputMakeRule(fout, 
+                       "# build c file",
+                       ".c.o", 
+                       0,
+                       "${CMAKE_CC} ${CMAKE_CFLAGS} ${INCLUDE_FLAGS} -c $< -o $@");
+  this->OutputMakeRule(fout, 
+                       "# build cplusplus file",
+                       ".cxx.o", 
+                       0,
+                       "${CMAKE_CXX} ${CMAKE_CXXFLAGS} ${INCLUDE_FLAGS} -c $< -o $@");  this->OutputMakeRule(fout, 
+                       "Default build rule",
+                       "all",
+                       "Makefile cmake.depends ${TARGETS} ${SUBDIR_BUILD} ${CMAKE}",
+                       0);
+  this->OutputMakeRule(fout, 
+                       "rule to build cmake from source",
+                       "${CMAKE}", "${CMAKE_SOURCE_DIR}/CMake/Source/*.cxx "
+                       "${CMAKE_SOURCE_DIR}/CMake/Source/*.h",
+                       "cd ${CMAKE_BINARY_DIR}/CMake/Source; "
+                       "${MAKE} CMakeBuildTargets");
+  this->OutputMakeRule(fout, 
+                       "remove generated files",
+                       "clean",
+                       "${SUBDIR_CLEAN}",
+                       "rm -f ${CLEAN_OBJECT_FILES} ${EXECUTABLES} ${TARGETS}");
+  this->OutputMakeRule(fout, 
+                       "Rule to build the Makefile",
+                       "Makefile",
+                       "${CMAKE} ${CMAKE_MAKEFILE_SOURCES} ",
+                       "${CMAKE} ${CMAKE_CURRENT_SOURCE}/CMakeLists.txt "
+                       "-S${CMAKE_CURRENT_SOURCE} -O${CMAKE_CURRENT_BINARY} "
+                       "-H${CMAKE_SOURCE_DIR} -B${CMAKE_BINARY_DIR}");  
+  this->OutputMakeRule(fout, 
+                       "Rule to build the cmake.depends",
+                       "cmake.depends",
+                       "${CMAKE} ${CMAKE_MAKEFILE_SOURCES} ",
+                       "${CMAKE} ${CMAKE_CURRENT_SOURCE}/CMakeLists.txt "
+                       "-S${CMAKE_CURRENT_SOURCE} -O${CMAKE_CURRENT_BINARY} "
+                       "-H${CMAKE_SOURCE_DIR} -B${CMAKE_BINARY_DIR}");
+  this->OutputMakeRule(fout, 
+                       "Rule to force the build of cmake.depends",
+                       "depend",
+                       "${SUBDIR_DEPEND}",
+                       "${CMAKE} ${CMAKE_CURRENT_SOURCE}/CMakeLists.txt "
+                       "-S${CMAKE_CURRENT_SOURCE} -O${CMAKE_CURRENT_BINARY} "
+                       "-H${CMAKE_SOURCE_DIR} -B${CMAKE_BINARY_DIR}");  
+  this->OutputMakeRule(fout, 
+                       "Rebuild the cache",
+                       "rebuild_cache",
+                       "${CMAKE_BINARY_DIR}/CMakeCache.txt",
+                       "${CMAKE} ${CMAKE_SOURCE_DIR}/CMakeLists.txt "
+                       "-MakeCache -S${CMAKE_SOURCE_DIR} -O${CMAKE_BINARY_DIR} "
+                       "-H${CMAKE_SOURCE_DIR} -B${CMAKE_BINARY_DIR}");
+  
+}
+
+void cmUnixMakefileGenerator::OutputMakeRule(std::ostream& fout, 
+                                             const char* comment,
+                                             const char* target,
+                                             const char* depends, 
+                                             const char* command)
+{
+  if(!target)
+    {
+    cmSystemTools::Error("no target for OutputMakeRule");
+    return;
+    }
+  
+  std::string replace;
+  if(comment)
+    {
+    replace = comment;
+    m_Makefile->ExpandVariablesInString(replace);
+    fout << "# " << comment;
+    }
+  fout << "\n";
+  replace = target;
+  m_Makefile->ExpandVariablesInString(replace);
+  fout << replace.c_str() << ": ";
+  if(depends)
+    {
+    replace = depends;
+    m_Makefile->ExpandVariablesInString(replace);
+    fout << replace.c_str();
+    }
+  fout << "\n";
+  if(command)
+    {
+    replace = command;
+    m_Makefile->ExpandVariablesInString(replace);
+    fout << "\t" << replace.c_str() << "\n\n";
+    }
+  fout << "\n\n\n";
+
+}
+

@@ -53,7 +53,7 @@ class cmMakefile;
 class cmCacheManager
 {
 public:
-  enum CacheEntryType{ BOOL=0, PATH, FILEPATH, STRING, INTERNAL  };
+  enum CacheEntryType{ BOOL=0, PATH, FILEPATH, STRING, INTERNAL,STATIC };
   struct CacheEntry
   {
     std::string m_Value;
