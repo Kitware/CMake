@@ -1061,10 +1061,10 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
     }
   else
     {
-    flags += this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_LINK_FLAGS");
-    flags += " ";
     rules.push_back(m_Makefile->GetDefinition("CMAKE_C_LINK_EXECUTABLE"));
     flags += this->GetSafeDefinition("CMAKE_C_FLAGS");
+    flags += " ";
+    flags += this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_C_FLAGS");
     flags += " ";
     }
   cmOStringStream linklibs;
