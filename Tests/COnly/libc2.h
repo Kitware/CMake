@@ -1,5 +1,5 @@
 #ifdef _WIN32
-#  ifdef c2_EXPORTS
+#  ifdef testc2_EXPORTS
 #    define CM_TEST_LIB_EXPORT  __declspec( dllexport )
 #  else
 #    define CM_TEST_LIB_EXPORT  __declspec( dllimport )
