@@ -45,7 +45,6 @@
 // TODO: Add "help" target.
 // TODO: Identify remaining relative path violations.
 // TODO: Add test to drive installation through native build system.
-// TODO: External object file feature.
 // TODO: Need test for separate executable/library output path.
 
 //----------------------------------------------------------------------------
@@ -279,18 +278,26 @@ cmLocalUnixMakefileGenerator2
   // First generate the object rule files.  Save a list of all object
   // files for this target.
   std::vector<std::string> objects;
+  std::vector<std::string> external_objects;
   std::vector<std::string> provides_requires;
   const std::vector<cmSourceFile*>& sources = target.GetSourceFiles();
   for(std::vector<cmSourceFile*>::const_iterator source = sources.begin();
       source != sources.end(); ++source)
     {
     if(!(*source)->GetPropertyAsBool("HEADER_FILE_ONLY") &&
-       !(*source)->GetCustomCommand() &&
-       !m_GlobalGenerator->IgnoreFile((*source)->GetSourceExtension().c_str()))
+       !(*source)->GetCustomCommand())
       {
-      // Generate this object file's rule file.
-      this->GenerateObjectRuleFile(target, *(*source), objects,
-                                   provides_requires);
+      if(!m_GlobalGenerator->IgnoreFile((*source)->GetSourceExtension().c_str()))
+        {
+        // Generate this object file's rule file.
+        this->GenerateObjectRuleFile(target, *(*source), objects,
+                                     provides_requires);
+        }
+      else if((*source)->GetPropertyAsBool("EXTERNAL_OBJECT"))
+        {
+        // This is an external object file.  Just add it.
+        external_objects.push_back((*source)->GetFullPath());
+        }
       }
     }
 
@@ -345,19 +352,23 @@ cmLocalUnixMakefileGenerator2
     {
     case cmTarget::STATIC_LIBRARY:
       this->WriteStaticLibraryRule(ruleFileStream, ruleFileName.c_str(),
-                                   target, objects, provides_requires);
+                                   target, objects, external_objects,
+                                   provides_requires);
       break;
     case cmTarget::SHARED_LIBRARY:
       this->WriteSharedLibraryRule(ruleFileStream, ruleFileName.c_str(),
-                                   target, objects, provides_requires);
+                                   target, objects, external_objects,
+                                   provides_requires);
       break;
     case cmTarget::MODULE_LIBRARY:
       this->WriteModuleLibraryRule(ruleFileStream, ruleFileName.c_str(),
-                                   target, objects, provides_requires);
+                                   target, objects, external_objects,
+                                   provides_requires);
       break;
     case cmTarget::EXECUTABLE:
       this->WriteExecutableRule(ruleFileStream, ruleFileName.c_str(),
-                                target, objects, provides_requires);
+                                target, objects, external_objects,
+                                provides_requires);
       break;
     default:
       break;
@@ -1408,7 +1419,8 @@ cmLocalUnixMakefileGenerator2
 ::WriteExecutableRule(std::ostream& ruleFileStream,
                       const char* ruleFileName,
                       const cmTarget& target,
-                      std::vector<std::string>& objects,
+                      const std::vector<std::string>& objects,
+                      const std::vector<std::string>& external_objects,
                       const std::vector<std::string>& provides_requires)
 {
   // Write the dependency generation rule.
@@ -1503,10 +1515,17 @@ cmLocalUnixMakefileGenerator2
   // Construct object file lists that may be needed to expand the
   // rule.
   std::string variableName;
-  this->WriteObjectsVariable(ruleFileStream, target, objects, variableName);
-  std::string objs = "$(";
-  objs += variableName;
-  objs += ")";
+  std::string variableNameExternal;
+  this->WriteObjectsVariable(ruleFileStream, target, objects, external_objects,
+                             variableName, variableNameExternal);
+  std::string buildObjs = "$(";
+  buildObjs += variableName;
+  buildObjs += ") $(";
+  buildObjs += variableNameExternal;
+  buildObjs += ")";
+  std::string cleanObjs = "$(";
+  cleanObjs += variableName;
+  cleanObjs += ")";
 
   // Expand placeholders in the commands.
   for(std::vector<std::string>::iterator i = commands.begin();
@@ -1514,7 +1533,7 @@ cmLocalUnixMakefileGenerator2
     {
     this->ExpandRuleVariables(*i,
                               linkLanguage,
-                              objs.c_str(),
+                              buildObjs.c_str(),
                               targetOutPath.c_str(),
                               linklibs.str().c_str(),
                               0,
@@ -1541,7 +1560,7 @@ cmLocalUnixMakefileGenerator2
   // Write clean target.
   std::vector<std::string> cleanFiles;
   cleanFiles.push_back(targetOutPath.c_str());
-  cleanFiles.push_back(objs);
+  cleanFiles.push_back(cleanObjs);
   this->WriteTargetCleanRule(ruleFileStream, target, cleanFiles);
 
   // Write the driving make target.
@@ -1554,7 +1573,8 @@ cmLocalUnixMakefileGenerator2
 ::WriteStaticLibraryRule(std::ostream& ruleFileStream,
                          const char* ruleFileName,
                          const cmTarget& target,
-                         std::vector<std::string>& objects,
+                         const std::vector<std::string>& objects,
+                         const std::vector<std::string>& external_objects,
                          const std::vector<std::string>& provides_requires)
 {
   const char* linkLanguage =
@@ -1565,7 +1585,8 @@ cmLocalUnixMakefileGenerator2
 
   std::string extraFlags;
   this->AppendFlags(extraFlags, target.GetProperty("STATIC_LIBRARY_FLAGS"));
-  this->WriteLibraryRule(ruleFileStream, ruleFileName, target, objects,
+  this->WriteLibraryRule(ruleFileStream, ruleFileName, target,
+                         objects, external_objects,
                          linkRuleVar.c_str(), extraFlags.c_str(),
                          provides_requires);
 }
@@ -1576,7 +1597,8 @@ cmLocalUnixMakefileGenerator2
 ::WriteSharedLibraryRule(std::ostream& ruleFileStream,
                          const char* ruleFileName,
                          const cmTarget& target,
-                         std::vector<std::string>& objects,
+                         const std::vector<std::string>& objects,
+                         const std::vector<std::string>& external_objects,
                          const std::vector<std::string>& provides_requires)
 {
   const char* linkLanguage =
@@ -1602,7 +1624,8 @@ cmLocalUnixMakefileGenerator2
         }
       }
     }
-  this->WriteLibraryRule(ruleFileStream, ruleFileName, target, objects,
+  this->WriteLibraryRule(ruleFileStream, ruleFileName, target,
+                         objects, external_objects,
                          linkRuleVar.c_str(), extraFlags.c_str(),
                          provides_requires);
 }
@@ -1613,7 +1636,8 @@ cmLocalUnixMakefileGenerator2
 ::WriteModuleLibraryRule(std::ostream& ruleFileStream,
                          const char* ruleFileName,
                          const cmTarget& target,
-                         std::vector<std::string>& objects,
+                         const std::vector<std::string>& objects,
+                         const std::vector<std::string>& external_objects,
                          const std::vector<std::string>& provides_requires)
 {
   const char* linkLanguage =
@@ -1626,7 +1650,8 @@ cmLocalUnixMakefileGenerator2
   this->AppendFlags(extraFlags, target.GetProperty("LINK_FLAGS"));
   this->AddConfigVariableFlags(extraFlags, "CMAKE_MODULE_LINKER_FLAGS");
   // TODO: .def files should be supported here also.
-  this->WriteLibraryRule(ruleFileStream, ruleFileName, target, objects,
+  this->WriteLibraryRule(ruleFileStream, ruleFileName, target,
+                         objects, external_objects,
                          linkRuleVar.c_str(), extraFlags.c_str(),
                          provides_requires);
 }
@@ -1637,7 +1662,8 @@ cmLocalUnixMakefileGenerator2
 ::WriteLibraryRule(std::ostream& ruleFileStream,
                    const char* ruleFileName,
                    const cmTarget& target,
-                   std::vector<std::string>& objects,
+                   const std::vector<std::string>& objects,
+                   const std::vector<std::string>& external_objects,
                    const char* linkRuleVar,
                    const char* extraFlags,
                    const std::vector<std::string>& provides_requires)
@@ -1653,6 +1679,11 @@ cmLocalUnixMakefileGenerator2
   std::vector<std::string> depends;
   for(std::vector<std::string>::const_iterator obj = objects.begin();
       obj != objects.end(); ++obj)
+    {
+    depends.push_back(*obj);
+    }
+  for(std::vector<std::string>::const_iterator obj = external_objects.begin();
+      obj != external_objects.end(); ++obj)
     {
     depends.push_back(*obj);
     }
@@ -1745,10 +1776,17 @@ cmLocalUnixMakefileGenerator2
   // Construct object file lists that may be needed to expand the
   // rule.
   std::string variableName;
-  this->WriteObjectsVariable(ruleFileStream, target, objects, variableName);
-  std::string objs = "$(";
-  objs += variableName;
-  objs += ")";
+  std::string variableNameExternal;
+  this->WriteObjectsVariable(ruleFileStream, target, objects, external_objects,
+                             variableName, variableNameExternal);
+  std::string buildObjs = "$(";
+  buildObjs += variableName;
+  buildObjs += ") $(";
+  buildObjs += variableNameExternal;
+  buildObjs += ")";
+  std::string cleanObjs = "$(";
+  cleanObjs += variableName;
+  cleanObjs += ")";
 
   // Expand placeholders in the commands.
   for(std::vector<std::string>::iterator i = commands.begin();
@@ -1761,10 +1799,10 @@ cmLocalUnixMakefileGenerator2
     // needed.
     this->ExpandRuleVariables(*i,
                               linkLanguage,
-                              objs.c_str(),
+                              buildObjs.c_str(),
                               targetOutPathReal.c_str(),
                               linklibs.str().c_str(),
-                              0, 0, 0, objs.c_str(),
+                              0, 0, 0, buildObjs.c_str(),
                               targetOutPathBase.c_str(),
                               targetNameSO.c_str(),
                               linkFlags.c_str());
@@ -1793,7 +1831,7 @@ cmLocalUnixMakefileGenerator2
   this->WriteConvenienceRules(ruleFileStream, target, targetOutPath.c_str());
 
   // Write clean target.
-  cleanFiles.push_back(objs);
+  cleanFiles.push_back(cleanObjs);
   this->WriteTargetCleanRule(ruleFileStream, target, cleanFiles);
 
   // Write the driving make target.
@@ -1806,7 +1844,9 @@ cmLocalUnixMakefileGenerator2
 ::WriteObjectsVariable(std::ostream& ruleFileStream,
                        const cmTarget& target,
                        const std::vector<std::string>& objects,
-                       std::string& variableName)
+                       const std::vector<std::string>& external_objects,
+                       std::string& variableName,
+                       std::string& variableNameExternal)
 {
   // Write a make variable assignment that lists all objects for the
   // target.
@@ -1816,6 +1856,23 @@ cmLocalUnixMakefileGenerator2
     << variableName.c_str() << " =";
   for(std::vector<std::string>::const_iterator i = objects.begin();
       i != objects.end(); ++i)
+    {
+    ruleFileStream
+      << " \\\n"
+      << "\"" << this->ConvertToRelativeOutputPath(i->c_str()) << "\"";
+    }
+  ruleFileStream
+    << "\n";
+
+  // Write a make variable assignment that lists all external objects
+  // for the target.
+  variableNameExternal = this->CreateMakeVariable(target.GetName(),
+                                                  "_EXTERNAL_OBJECTS");
+  ruleFileStream
+    << "# External object files for target " << target.GetName() << "\n"
+    << variableNameExternal.c_str() << " =";
+  for(std::vector<std::string>::const_iterator i = external_objects.begin();
+      i != external_objects.end(); ++i)
     {
     ruleFileStream
       << " \\\n"
