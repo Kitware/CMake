@@ -105,7 +105,6 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args)
     "  (void)type; (void)retVal;\n"
     "  fprintf(stderr, message);\n"
     "  exit(1);\n"
-    "  return 0;\n"
     "}\n"
     "#endif\n";
   if(extraInclude.size())
