@@ -121,9 +121,13 @@ int main()
       {
       Failed("Unable to remove " BINARY_DIR "/postbuild.txt (does not imply that this test failed, but it *will* be corrupted thereafter if this file is not removed).");
       }
+    else
+      {
+      Passed("Find and remove " BINARY_DIR "/postbuild.txt (created as a post-build custom command for the shared lib).");
+      }
     }
 
-  std::cout << "Passed:" << passed << "\n";
+  std::cout << "Passed: " << passed << "\n";
   if(failed)
     {
     std::cout << "Failed: " << failed << "\n";
