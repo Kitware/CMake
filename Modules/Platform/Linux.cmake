@@ -1,6 +1,4 @@
 # GCC is the default compiler on Linux.
-INCLUDE(${CMAKE_ROOT}/Modules/Platform/gcc.cmake)
-
 SET(CMAKE_DL_LIBS "-ldl")
 SET(CMAKE_SHARED_LIBRARY_C_FLAGS "-fPIC")        
 SET(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "-shared")

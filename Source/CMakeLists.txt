@@ -119,6 +119,9 @@ TARGET_LINK_LIBRARIES(cmake CMakeLib)
 TARGET_LINK_LIBRARIES(DumpDocumentation CMakeLib)
 
 IF(CMAKE_BUILD_WITH_CURL)
+  # Don't even look for this as we don't use that part of curl
+  # and linking in the the library can cause problems.
+  SET(HAVE_LIBCRYPTO 0)
   SUBDIRS(CTest)
   SET(CMTEST_SRCS ${CMTEST_SRCS} CTest/cmCTestSubmit.cxx)
   ADD_DEFINITIONS(-DHAVE_CURL)

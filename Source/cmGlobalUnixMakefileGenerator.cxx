@@ -32,11 +32,8 @@ void cmGlobalUnixMakefileGenerator::EnableLanguage(const char* lang,
 {
   mf->AddDefinition("CMAKE_CFG_INTDIR",".");
   this->cmGlobalGenerator::EnableLanguage(lang, mf);
-  if(!lang)
-    {
-    lang = "CXX";
-    }
-  if(lang[0] == 'C')
+  std::string path;
+  if(strcmp(lang, "C") == 0)
     {
     if(!mf->GetDefinition("CMAKE_C_COMPILER"))
       {
@@ -44,7 +41,7 @@ void cmGlobalUnixMakefileGenerator::EnableLanguage(const char* lang,
       return;
       }
     const char* cc = mf->GetRequiredDefinition("CMAKE_C_COMPILER");
-    std::string path = cmSystemTools::FindProgram(cc);
+    path = cmSystemTools::FindProgram(cc);
     if(path.size() == 0)
       {
       std::string message = "your C compiler: ";
@@ -62,28 +59,28 @@ void cmGlobalUnixMakefileGenerator::EnableLanguage(const char* lang,
           " and re-run CMake.";
       cmSystemTools::Error(message.c_str());
       }
-    if(strcmp(lang, "CXX") == 0)
+    }
+  if(strcmp(lang, "CXX") == 0)
+    {
+    const char* cxx = mf->GetRequiredDefinition("CMAKE_CXX_COMPILER");
+    path = cmSystemTools::FindProgram(cxx);
+    if(path.size() == 0)
       {
-      const char* cxx = mf->GetRequiredDefinition("CMAKE_CXX_COMPILER");
-      path = cmSystemTools::FindProgram(cxx);
-      if(path.size() == 0)
+      std::string message = "your C++ compiler: ";
+      if(cxx)
         {
-        std::string message = "your C++ compiler: ";
-        if(cxx)
-          {
-          message +=  cxx;
-          }
-        else
-          {
-          message +=  "(NULL)";
-          }
-        
-        message += " was not found in your path.   "
-          "For CMake to correctly use try compile commands, the compiler must "
-          "be in your path.   Please add the compiler to your PATH environment,"
-          " and re-run CMake.";
-        cmSystemTools::Error(message.c_str());
+        message +=  cxx;
         }
+      else
+        {
+        message +=  "(NULL)";
+        }
+      
+      message += " was not found in your path.   "
+        "For CMake to correctly use try compile commands, the compiler must "
+        "be in your path.   Please add the compiler to your PATH environment,"
+        " and re-run CMake.";
+      cmSystemTools::Error(message.c_str());
       }
     }
 }

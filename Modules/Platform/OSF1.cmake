@@ -29,7 +29,6 @@ ENDIF(CMAKE_SYSTEM MATCHES "OSF1-V.*")
 
 IF(CMAKE_COMPILER_IS_GNUCXX)
   # include the gcc flags 
-  INCLUDE(${CMAKE_ROOT}/Modules/Platform/gcc.cmake)
 ELSE (CMAKE_COMPILER_IS_GNUCXX)
   # use default OSF compiler flags
   SET (CMAKE_C_FLAGS_INIT "")

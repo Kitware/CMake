@@ -89,7 +89,6 @@ bool cmListFileCache::CacheFile(const char* path, bool requireProjectCommand)
     {
     return false;
     }
-
   // Get a pointer to a persistent copy of the name.
   const char* filename = this->GetUniqueStringPointer(path);
 

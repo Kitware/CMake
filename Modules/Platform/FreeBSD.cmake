@@ -7,4 +7,3 @@ IF(EXISTS /usr/include/dlfcn.h)
   SET(CMAKE_SHARED_LIBRARY_RUNTIME_FLAG_SEP ":")   # : or empty
 ENDIF(EXISTS /usr/include/dlfcn.h)
 # include the gcc flags 
-INCLUDE(${CMAKE_ROOT}/Modules/Platform/gcc.cmake)

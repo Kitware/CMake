@@ -995,21 +995,21 @@ static RuleVariables ruleReplaceVars[] =
   {"<CMAKE_SHARED_MODULE_CREATE_CXX_FLAGS>", "CMAKE_SHARED_MODULE_CREATE_CXX_FLAGS"}, 
   {"<CMAKE_SHARED_MODULE_CREATE_FORTAN_FLAGS>", "CMAKE_SHARED_MODULE_CREATE_FORTAN_FLAGS"}, 
   {"<CMAKE_SHARED_MODULE_C_FLAGS>", "CMAKE_SHARED_MODULE_C_FLAGS"},
-  {"<CMAKE_SHARED_MODULE_FORTRAN_FLAGS>", "CMAKE_SHARED_MODULE_FORTRAN_FLAGS"},
+  {"<CMAKE_SHARED_MODULE_Fortran_FLAGS>", "CMAKE_SHARED_MODULE_Fortran_FLAGS"},
   {"<CMAKE_SHARED_MODULE_CXX_FLAGS>", "CMAKE_SHARED_MODULE_CXX_FLAGS"},
   {"<CMAKE_SHARED_LIBRARY_C_FLAGS>", "CMAKE_SHARED_LIBRARY_C_FLAGS"},
-  {"<CMAKE_SHARED_LIBRARY_FORTRAN_FLAGS>", "CMAKE_SHARED_LIBRARY_FORTRAN_FLAGS"},
+  {"<CMAKE_SHARED_LIBRARY_Fortran_FLAGS>", "CMAKE_SHARED_LIBRARY_Fortran_FLAGS"},
   {"<CMAKE_SHARED_LIBRARY_CXX_FLAGS>", "CMAKE_SHARED_LIBRARY_CXX_FLAGS"},
   {"<CMAKE_CXX_LINK_FLAGS>", "CMAKE_CXX_LINK_FLAGS"},
 
   {"<CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS>", "CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS"},
-  {"<CMAKE_SHARED_LIBRARY_CREATE_FORTRAN_FLAGS>", "CMAKE_SHARED_LIBRARY_CREATE_FORTRAN_FLAGS"},
+  {"<CMAKE_SHARED_LIBRARY_CREATE_Fortran_FLAGS>", "CMAKE_SHARED_LIBRARY_CREATE_Fortran_FLAGS"},
   {"<CMAKE_SHARED_MODULE_CREATE_C_FLAGS>", "CMAKE_SHARED_MODULE_CREATE_C_FLAGS"},
   {"<CMAKE_SHARED_LIBRARY_SONAME_C_FLAG>", "CMAKE_SHARED_LIBRARY_SONAME_C_FLAG"},
-  {"<CMAKE_SHARED_LIBRARY_SONAME_FORTRAN_FLAG>", "CMAKE_SHARED_LIBRARY_SONAME_FORTRAN_FLAG"},
+  {"<CMAKE_SHARED_LIBRARY_SONAME_Fortran_FLAG>", "CMAKE_SHARED_LIBRARY_SONAME_Fortran_FLAG"},
   {"<CMAKE_SHARED_LIBRARY_SONAME_CXX_FLAG>", "CMAKE_SHARED_LIBRARY_SONAME_CXX_FLAG"},
   {"<CMAKE_C_LINK_FLAGS>", "CMAKE_C_LINK_FLAGS"},
-  {"<CMAKE_FORTRAN_LINK_FLAGS>", "CMAKE_FORTRAN_LINK_FLAGS"},
+  {"<CMAKE_Fortran_LINK_FLAGS>", "CMAKE_Fortran_LINK_FLAGS"},
 
   {"<CMAKE_AR>", "CMAKE_AR"},
   {"<CMAKE_RANLIB>", "CMAKE_RANLIB"},
@@ -1037,8 +1037,8 @@ cmLocalUnixMakefileGenerator::ExpandRuleVariables(std::string& s,
   std::string ccompiler = this->ConvertToOutputForExisting(
     m_Makefile->GetSafeDefinition("CMAKE_C_COMPILER"));
   std::string fcompiler = this->ConvertToOutputForExisting(
-    m_Makefile->GetSafeDefinition("CMAKE_FORTRAN_COMPILER"));
-  cmSystemTools::ReplaceString(s, "<CMAKE_FORTRAN_COMPILER>", fcompiler.c_str());
+    m_Makefile->GetSafeDefinition("CMAKE_Fortran_COMPILER"));
+  cmSystemTools::ReplaceString(s, "<CMAKE_Fortran_COMPILER>", fcompiler.c_str());
   cmSystemTools::ReplaceString(s, "<CMAKE_CXX_COMPILER>", cxxcompiler.c_str());
   cmSystemTools::ReplaceString(s, "<CMAKE_C_COMPILER>", ccompiler.c_str());
   if(linkFlags)
@@ -1297,7 +1297,7 @@ void cmLocalUnixMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
     {
     if(t.HasFortran())
       { 
-      createRule = "CMAKE_FORTRAN_CREATE_SHARED_LIBRARY";
+      createRule = "CMAKE_Fortran_CREATE_SHARED_LIBRARY";
       }
     else
       {
@@ -1351,11 +1351,19 @@ void cmLocalUnixMakefileGenerator::OutputModuleLibraryRule(std::ostream& fout,
   if(t.HasCxx())
     {
     createRule = "CMAKE_CXX_CREATE_SHARED_MODULE";
-    }
+    } 
   else
     {
-    createRule = "CMAKE_C_CREATE_SHARED_MODULE";
+    if(t.HasFortran())
+      { 
+      createRule = "CMAKE_Fortran_CREATE_SHARED_MODULE";
+      }
+    else
+      {
+      createRule = "CMAKE_C_CREATE_SHARED_MODULE";
+      }
     }
+  
   std::string buildType =  m_Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   buildType = cmSystemTools::UpperCase(buildType); 
   std::string linkFlags = m_Makefile->GetSafeDefinition("CMAKE_MODULE_LINKER_FLAGS");
@@ -1391,8 +1399,16 @@ void cmLocalUnixMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout,
     }
   else
     {
-    createRule = "CMAKE_C_CREATE_STATIC_LIBRARY";
-    }  
+    if(t.HasFortran())
+      { 
+      createRule = "CMAKE_Fortran_CREATE_STATIC_LIBRARY";
+      }
+    else
+      {
+      createRule = "CMAKE_C_CREATE_STATIC_LIBRARY";
+      }
+    }
+  
   std::string linkFlags;
   const char* targetLinkFlags = t.GetProperty("STATIC_LIBRARY_FLAGS");
   if(targetLinkFlags)
@@ -1482,10 +1498,10 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
     {
     if(t.HasFortran())
       {
-      rules.push_back(m_Makefile->GetRequiredDefinition("CMAKE_FORTRAN_LINK_EXECUTABLE"));
-      flags += m_Makefile->GetSafeDefinition("CMAKE_FORTRAN_FLAGS");
+      rules.push_back(m_Makefile->GetRequiredDefinition("CMAKE_Fortran_LINK_EXECUTABLE"));
+      flags += m_Makefile->GetSafeDefinition("CMAKE_Fortran_FLAGS");
       flags += " ";
-      flags += m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_FORTRAN_FLAGS");
+      flags += m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_Fortran_FLAGS");
       flags += " ";
       }
     else
@@ -2879,24 +2895,24 @@ OutputBuildObjectFromSource(std::ostream& fout,
       }
     case cmSystemTools::FORTRAN_FILE_FORMAT:
        {
-       rules.push_back(m_Makefile->GetRequiredDefinition("CMAKE_FORTRAN_COMPILE_OBJECT"));
-       flags += m_Makefile->GetSafeDefinition("CMAKE_FORTRAN_FLAGS");
+       rules.push_back(m_Makefile->GetRequiredDefinition("CMAKE_Fortran_COMPILE_OBJECT"));
+       flags += m_Makefile->GetSafeDefinition("CMAKE_Fortran_FLAGS");
        flags += " "; 
        if(buildType.size())
          {
-         std::string build = "CMAKE_FORTRAN_FLAGS_";
+         std::string build = "CMAKE_Fortran_FLAGS_";
          build += buildType;
          flags +=  m_Makefile->GetSafeDefinition(build.c_str());
          flags += " ";
          }
        if(shared)
          {
-         flags += m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_FORTRAN_FLAGS");
+         flags += m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_Fortran_FLAGS");
          flags += " ";
          }
        if(cmSystemTools::IsOn(m_Makefile->GetDefinition("BUILD_SHARED_LIBS")))
          {
-         flags += m_Makefile->GetSafeDefinition("CMAKE_SHARED_BUILD_FORTRAN_FLAGS");
+         flags += m_Makefile->GetSafeDefinition("CMAKE_SHARED_BUILD_Fortran_FLAGS");
          flags += " ";
          }
        break;

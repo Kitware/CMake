@@ -51,4 +51,3 @@ ELSE(CMAKE_COMPILER_IS_GNUCXX)
 
 ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 # set flags for gcc support
-INCLUDE(${CMAKE_ROOT}/Modules/Platform/gcc.cmake)

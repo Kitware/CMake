@@ -57,7 +57,9 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args)
     }
   else
     {
-    m_Makefile->EnableLanguage(0);
+    // if no language is specified do c and c++
+    m_Makefile->EnableLanguage("C");
+    m_Makefile->EnableLanguage("CXX");
     }
   return true;
 }

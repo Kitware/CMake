@@ -60,6 +60,4 @@ ENDIF(NOT CMAKE_COMPILER_IS_GNUCXX_RUN)
 CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeCXXCompiler.cmake.in 
                ${CMAKE_BINARY_DIR}/CMakeCXXCompiler.cmake IMMEDIATE)
 
-
-   
-      
+SET(CMAKE_CXX_COMPILER_ENV_VAR "CXX")

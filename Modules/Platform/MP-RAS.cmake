@@ -7,5 +7,3 @@ ENDIF(CMAKE_SYSTEM MATCHES "MP-RAS-02*.")
 
 
 
-# include the gcc flags 
-INCLUDE(${CMAKE_ROOT}/Modules/Platform/gcc.cmake)

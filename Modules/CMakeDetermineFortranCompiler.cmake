@@ -5,38 +5,55 @@
 # the cmake variable CMAKE_GENERATOR_CC which can be defined by a generator
 # as a default compiler
 
-IF(NOT CMAKE_FORTRAN_COMPILER)
+IF(NOT CMAKE_Fortran_COMPILER)
   # prefer the environment variable CC
   IF($ENV{FC} MATCHES ".+")
-    GET_FILENAME_COMPONENT(CMAKE_FORTRAN_COMPILER_INIT $ENV{FC} PROGRAM PROGRAM_ARGS CMAKE_FORTRAN_FLAGS_ENV_INIT)
-    IF(EXISTS ${CMAKE_FORTRAN_COMPILER_INIT})
-    ELSE(EXISTS ${CMAKE_FORTRAN_COMPILER_INIT})
+    GET_FILENAME_COMPONENT(CMAKE_Fortran_COMPILER_INIT $ENV{FC} PROGRAM PROGRAM_ARGS CMAKE_Fortran_FLAGS_ENV_INIT)
+    IF(EXISTS ${CMAKE_Fortran_COMPILER_INIT})
+    ELSE(EXISTS ${CMAKE_Fortran_COMPILER_INIT})
       MESSAGE(FATAL_ERROR "Could not find compiler set in environment variable FC:\n$ENV{FC}.") 
-    ENDIF(EXISTS ${CMAKE_FORTRAN_COMPILER_INIT})
+    ENDIF(EXISTS ${CMAKE_Fortran_COMPILER_INIT})
   ENDIF($ENV{FC} MATCHES ".+")
 
   # next try prefer the compiler specified by the generator
   IF(CMAKE_GENERATOR_FC) 
-    IF(NOT CMAKE_FORTRAN_COMPILER_INIT)
-      SET(CMAKE_FORTRAN_COMPILER_INIT ${CMAKE_GENERATOR_FC})
-    ENDIF(NOT CMAKE_FORTRAN_COMPILER_INIT)
+    IF(NOT CMAKE_Fortran_COMPILER_INIT)
+      SET(CMAKE_Fortran_COMPILER_INIT ${CMAKE_GENERATOR_FC})
+    ENDIF(NOT CMAKE_Fortran_COMPILER_INIT)
   ENDIF(CMAKE_GENERATOR_FC)
 
 
   # if no compiler has been specified yet, then look for one
-  IF(NOT CMAKE_FORTRAN_COMPILER_INIT)
-  # if not in the envionment then search for the compiler in the path
-    SET(CMAKE_FORTRAN_COMPILER_LIST g77 ifort f77 f90 epcf90 efc ecc)  
-    FIND_PROGRAM(CMAKE_FORTRAN_COMPILER_FULLPATH NAMES ${CMAKE_FORTRAN_COMPILER_LIST} )
-    GET_FILENAME_COMPONENT(CMAKE_FORTRAN_COMPILER_INIT
-                           ${CMAKE_FORTRAN_COMPILER_FULLPATH} NAME)
-    SET(CMAKE_FORTRAN_COMPILER_FULLPATH "${CMAKE_FORTRAN_COMPILER_FULLPATH}" CACHE INTERNAL "full path to the compiler cmake found")
-  ENDIF(NOT CMAKE_FORTRAN_COMPILER_INIT)
+  IF(NOT CMAKE_Fortran_COMPILER_INIT)
+  # if not in the envionment then search for the compiler in the path# Known compilers:
+  #  f77/f90/f95: generic compiler names
+  #  g77: GNU Fortran 77 compiler
+  #  gfortran: putative GNU Fortran 95+ compiler (in progress)
+  #  fort77: native F77 compiler under HP-UX (and some older Crays)
+  #  frt: Fujitsu F77 compiler
+  #  pgf77/pgf90/pgf95: Portland Group F77/F90/F95 compilers
+  #  xlf/xlf90/xlf95: IBM (AIX) F77/F90/F95 compilers
+  #  lf95: Lahey-Fujitsu F95 compiler
+  #  fl32: Microsoft Fortran 77 "PowerStation" compiler
+  #  af77: Apogee F77 compiler for Intergraph hardware running CLIX
+  #  epcf90: "Edinburgh Portable Compiler" F90
+  #  fort: Compaq (now HP) Fortran 90/95 compiler for Tru64 and Linux/Alpha
+  #  ifc: Intel Fortran 95 compiler for Linux/x86
+  #  efc: Intel Fortran 95 compiler for IA64
+  #  the order is 95 or newer compilers first, then 90, then 77 or older compilers, gnu is always last in the group,
+  #  so if you paid for a compiler it is picked by default
+    SET(CMAKE_Fortran_COMPILER_LIST ifort ifc efc f95 pgf95  lf95 xlf95 fort gfortran f90  pgf90   xlf90   epcf90 
+        f77  fort77 frt pgf77  xlf  fl32 af77 g77  )  
+    FIND_PROGRAM(CMAKE_Fortran_COMPILER_FULLPATH NAMES ${CMAKE_Fortran_COMPILER_LIST} )
+    GET_FILENAME_COMPONENT(CMAKE_Fortran_COMPILER_INIT
+                           ${CMAKE_Fortran_COMPILER_FULLPATH} NAME)
+    SET(CMAKE_Fortran_COMPILER_FULLPATH "${CMAKE_Fortran_COMPILER_FULLPATH}" CACHE INTERNAL "full path to the compiler cmake found")
+  ENDIF(NOT CMAKE_Fortran_COMPILER_INIT)
 
-  SET(CMAKE_FORTRAN_COMPILER ${CMAKE_FORTRAN_COMPILER_INIT} CACHE STRING "Fortran compiler")
-ENDIF(NOT CMAKE_FORTRAN_COMPILER)
+  SET(CMAKE_Fortran_COMPILER ${CMAKE_Fortran_COMPILER_INIT} CACHE STRING "Fortran compiler")
+ENDIF(NOT CMAKE_Fortran_COMPILER)
 
-MARK_AS_ADVANCED(CMAKE_FORTRAN_COMPILER)  
+MARK_AS_ADVANCED(CMAKE_Fortran_COMPILER)  
 
 FIND_PROGRAM(CMAKE_AR NAMES ar )
 
@@ -49,12 +66,12 @@ MARK_AS_ADVANCED(CMAKE_RANLIB)
 IF(NOT CMAKE_COMPILER_IS_GNUG77_RUN)
   # test to see if the Fortran compiler is gnu
   
-  IF(CMAKE_FORTRAN_FLAGS)
-    SET(CMAKE_BOOT_FORTRAN_FLAGS ${CMAKE_FORTRAN_FLAGS})
-  ELSE(CMAKE_FORTRAN_FLAGS)
-    SET(CMAKE_BOOT_FORTRAN_FLAGS $ENV{FFLAGS})
-  ENDIF(CMAKE_FORTRAN_FLAGS)
-  EXEC_PROGRAM(${CMAKE_FORTRAN_COMPILER} ARGS ${CMAKE_BOOT_FORTRAN_FLAGS} -E "\"${CMAKE_ROOT}/Modules/CMakeTestGNU.c\"" OUTPUT_VARIABLE CMAKE_COMPILER_OUTPUT RETURN_VALUE CMAKE_COMPILER_RETURN)
+  IF(CMAKE_Fortran_FLAGS)
+    SET(CMAKE_BOOT_Fortran_FLAGS ${CMAKE_Fortran_FLAGS})
+  ELSE(CMAKE_Fortran_FLAGS)
+    SET(CMAKE_BOOT_Fortran_FLAGS $ENV{FFLAGS})
+  ENDIF(CMAKE_Fortran_FLAGS)
+  EXEC_PROGRAM(${CMAKE_Fortran_COMPILER} ARGS ${CMAKE_BOOT_Fortran_FLAGS} -E "\"${CMAKE_ROOT}/Modules/CMakeTestGNU.c\"" OUTPUT_VARIABLE CMAKE_COMPILER_OUTPUT RETURN_VALUE CMAKE_COMPILER_RETURN)
   SET(CMAKE_COMPILER_IS_GNUG77_RUN 1)
   IF(NOT CMAKE_COMPILER_RETURN)
     IF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*THIS_IS_GNU.*" )
@@ -81,3 +98,4 @@ ENDIF(NOT CMAKE_COMPILER_IS_GNUG77_RUN)
 CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeFortranCompiler.cmake.in 
                ${CMAKE_BINARY_DIR}/CMakeFortranCompiler.cmake IMMEDIATE)
 MARK_AS_ADVANCED(CMAKE_AR)
+SET(CMAKE_Fortran_COMPILER_ENV_VAR "FC")

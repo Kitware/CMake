@@ -27,13 +27,6 @@ cmGlobalBorlandMakefileGenerator::cmGlobalBorlandMakefileGenerator()
 void cmGlobalBorlandMakefileGenerator::EnableLanguage(const char* l,
                                                       cmMakefile *mf)
 {
-  // now load the settings
-  if(!mf->GetDefinition("CMAKE_ROOT"))
-    {
-    cmSystemTools::Error(
-      "CMAKE_ROOT has not been defined, bad GUI or driver program");
-    return;
-    }
   std::string outdir = m_CMakeInstance->GetStartOutputDirectory();
   mf->AddDefinition("BORLAND", "1");
   mf->AddDefinition("CMAKE_GENERATOR_CC", "bcc32");

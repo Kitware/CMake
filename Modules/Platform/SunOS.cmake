@@ -46,5 +46,3 @@ ELSE(CMAKE_COMPILER_IS_GNUCXX)
       "<CMAKE_CXX_COMPILER> -xar -o <TARGET> <OBJECTS> "
       "<CMAKE_RANLIB> <TARGET> ")
 ENDIF(CMAKE_COMPILER_IS_GNUCXX)
-# include the gcc flags 
-INCLUDE(${CMAKE_ROOT}/Modules/Platform/gcc.cmake)

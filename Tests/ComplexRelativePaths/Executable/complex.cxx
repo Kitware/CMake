@@ -118,9 +118,9 @@ int main()
   cmLibHandle handle = cmDynamicLoader::OpenLibrary(lib.c_str());
   if(!handle)
     {
-    std::string err = "Can not open CMakeTestModule:";
+    std::string err = "Can not open CMakeTestModule:\n";
     err += lib;
-    cmFailed(lib.c_str());
+    cmFailed(err.c_str());
     }
   else
     {
