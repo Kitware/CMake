@@ -1,0 +1,173 @@
+/*=========================================================================
+
+  Program:   KWSys - Kitware System Library
+  Module:    $RCSfile$
+
+  Copyright (c) Kitware, Inc., Insight Consortium.  All rights reserved.
+  See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
+
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+     PURPOSE.  See the above copyright notices for more information.
+
+=========================================================================*/
+#ifndef @KWSYS_NAMESPACE@_CommandLineArguments_hxx
+#define @KWSYS_NAMESPACE@_CommandLineArguments_hxx
+
+#include <@KWSYS_NAMESPACE@/Configure.h>
+#include <@KWSYS_NAMESPACE@/Configure.hxx>
+
+#include <@KWSYS_NAMESPACE@/stl/string>
+
+/* Define this macro temporarily to keep the code readable.  */
+#if !defined (KWSYS_NAMESPACE) && !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
+# define kwsys_stl @KWSYS_NAMESPACE@_stl
+#endif
+
+namespace @KWSYS_NAMESPACE@
+{
+
+class CommandLineArgumentsInternal;
+
+/** \class CommandLineArguments
+ * \brief Command line arguments processing code.
+ *
+ * Find specified arguments with optional options and execute specified methods
+ * or set given variables.
+ */
+
+class @KWSYS_NAMESPACE@_EXPORT CommandLineArguments
+{
+public:
+  CommandLineArguments();
+  ~CommandLineArguments();
+
+  /**
+   * Various argument types.
+   */
+  enum ArgumentTypeEnum { 
+    NO_ARGUMENT,    // The option takes no argument             --foo
+    CONCAT_ARGUMENT,// The option takes argument after no space --foobar
+    SPACE_ARGUMENT, // The option takes argument after space    --foo bar
+    EQUAL_ARGUMENT  // The option takes argument after equal    --foo=bar
+  };
+
+  /**
+   * Various string types.
+   */
+  enum VariableTypeEnum {
+    NO_VARIABLE_TYPE = 0, // The variable is not specified
+    INT_TYPE,             // The variable is integer (int)
+    BOOL_TYPE,            // The vairable is boolean (bool)
+    DOUBLE_TYPE,          // The variable is float (double)
+    STRING_TYPE,          // The variable is string (char*)
+    STL_STRING_TYPE       // The variable is string (char*)
+  };
+
+  /**
+   * Prototypes for callbacks for callback interface.
+   */
+  typedef int(*CallbackType)(const char* argument, const char* value, 
+    void* call_data);
+  typedef int(*ErrorCallbackType)(const char* argument, void* client_data);
+
+  struct CallbackStructure
+    {
+    const char* Argument;
+    int ArgumentType;
+    CallbackType Callback;
+    void* CallData;
+    void* Variable;
+    int VariableType;
+    const char* Help;
+    };
+ 
+  /**
+   * Initialize internal data structures. This should be called before parsing.
+   */
+  void Initialize(int argc, char* argv[]);
+
+  /**
+   * Initialize internal data structure and pass arguments one by one. This is
+   * convinience method for use from scripting languages where argc and argv
+   * are not available.
+   */
+  void Initialize();
+  void ProcessArgument(const char* arg);
+
+  /**
+   * This method will parse arguments and call apropriate methods. 
+   */
+  int Parse();
+
+  /**
+   * This method will add a callback for a specific argument. The arguments to
+   * it are argument, argument type, callback method, and call data. The
+   * argument help specifies the help string used with this option. The
+   * callback and call_data can be skipped.
+   */
+  void AddCallback(const char* argument, ArgumentTypeEnum type, CallbackType callback, 
+                   void* call_data, const char* help);
+
+  /**
+   * Add handler for argument which is going to set the variable to the
+   * specified value.
+   */
+  void AddArgument(const char* argument, ArgumentTypeEnum type, VariableTypeEnum vtype, void* variable, const char* help);
+  void AddArgument(const char* argument, ArgumentTypeEnum type, bool* variable, const char* help);
+  void AddArgument(const char* argument, ArgumentTypeEnum type, int* variable, const char* help);
+  void AddArgument(const char* argument, ArgumentTypeEnum type, double* variable, const char* help);
+  void AddArgument(const char* argument, ArgumentTypeEnum type, char** variable, const char* help);
+  void AddArgument(const char* argument, ArgumentTypeEnum type, kwsys_stl::string* variable, const char* help);
+  void AddBooleanArgument(const char* argument, bool* variable, const char* help);
+  void AddBooleanArgument(const char* argument, int* variable, const char* help);
+
+  /**
+   * Set the callbacks for error handling.
+   */
+  void SetClientData(void* client_data);
+  void SetUnknownArgumentCallback(ErrorCallbackType callback);
+
+  /**
+   * Get remaining arguments. It allocates space for argv, so you have to call
+   * delete[] on it.
+   */
+  void GetRemainingArguments(int* argc, char*** argv);
+
+  /**
+   * Return string containing help. If the argument is specified, only return
+   * help for that argument.
+   */
+  const char* GetHelp() { return this->Help.c_str(); }
+  const char* GetHelp(const char* arg);
+
+  /**
+   * Get / Set the help line length. Default length is 80.
+   */
+  void SetLineLength();
+  unsigned int GetLineLength();
+
+protected:
+
+  void GenerateHelp();
+
+  typedef CommandLineArgumentsInternal Internal;
+  Internal* Internals;
+  kwsys_stl::string Help;
+
+  unsigned int LineLength;
+};
+
+} // namespace @KWSYS_NAMESPACE@
+
+/* Undefine temporary macro.  */
+#if !defined (KWSYS_NAMESPACE) && !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
+# undef kwsys_stl
+#endif
+
+#endif
+
+
+
+
+

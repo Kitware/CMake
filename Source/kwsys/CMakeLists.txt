@@ -78,6 +78,7 @@ IF(NOT KWSYS_NAMESPACE)
   SET(KWSYS_USE_Process 1)
   SET(KWSYS_USE_RegularExpression 1)
   SET(KWSYS_USE_SystemTools 1)
+  SET(KWSYS_USE_CommandLineArguments 1)
 ENDIF(NOT KWSYS_NAMESPACE)
 
 #-----------------------------------------------------------------------------
@@ -248,11 +249,19 @@ IF(KWSYS_USE_SystemTools)
 ENDIF(KWSYS_USE_SystemTools)
 
 # Add selected C++ classes.
-FOREACH(c Directory RegularExpression SystemTools)
+FOREACH(c Directory RegularExpression SystemTools CommandLineArguments)
   IF(KWSYS_USE_${c})
     SET(KWSYS_CLASSES ${KWSYS_CLASSES} ${c})
   ENDIF(KWSYS_USE_${c})
 ENDFOREACH(c)
+
+IF(KWSYS_USE_CommandLineArguments)
+  IF(NOT ParaView_SOURCE_DIR)
+    IF(NOT KWSYS_STANDALONE)
+      MESSAGE("Command Line Arguments is experimental code for now")
+    ENDIF(NOT KWSYS_STANDALONE)
+  ENDIF(NOT ParaView_SOURCE_DIR)
+ENDIF(KWSYS_USE_CommandLineArguments)
 
 # Add selected C components.
 FOREACH(c Process Base64)
@@ -411,9 +420,11 @@ IF(KWSYS_STANDALONE)
   ADD_EXECUTABLE(testIOS testIOS.cxx)
   ADD_EXECUTABLE(testProcess testProcess.c)
   ADD_EXECUTABLE(test1 test1.cxx)
+  ADD_EXECUTABLE(testCommandLineArguments testCommandLineArguments.cxx)
   TARGET_LINK_LIBRARIES(testIOS ${KWSYS_NAMESPACE})
   TARGET_LINK_LIBRARIES(testProcess ${KWSYS_NAMESPACE}_c)
   TARGET_LINK_LIBRARIES(test1 ${KWSYS_NAMESPACE})
+  TARGET_LINK_LIBRARIES(testCommandLineArguments ${KWSYS_NAMESPACE})
 
   IF(BUILD_TESTING)
     ADD_TEST(testProcess-1 testProcess 1)
