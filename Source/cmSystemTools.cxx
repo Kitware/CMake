@@ -316,6 +316,21 @@ bool cmSystemTools::FileExists(const char* filename)
 }
 
 
+// Return a capitalized string (i.e the first letter is uppercased, all other
+// are lowercased)
+std::string cmSystemTools::Capitalized(std::string& s)
+{
+  std::string n;
+  n.resize(s.size());
+  n[0] = toupper(s[0]);
+  for (size_t i = 1; i < s.size(); i++)
+    {
+    n[i] = tolower(s[i]);
+    }
+  return n;
+}  
+
+
 // convert windows slashes to unix slashes \ with /
 void cmSystemTools::ConvertToUnixSlashes(std::string& path)
 {

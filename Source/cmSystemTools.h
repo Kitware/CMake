@@ -79,6 +79,12 @@ public:
   static std::string EscapeSpaces(const char*);
   
   /**
+   * Return a capitalized string (i.e the first letter is uppercased, all other
+   * are lowercased).
+   */
+  static std::string Capitalized(std::string&);
+  
+  /**
    * Replace Windows file system slashes with Unix-style slashes.
    */
   static void ConvertToUnixSlashes(std::string& path);
