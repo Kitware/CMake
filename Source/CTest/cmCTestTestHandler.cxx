@@ -1198,6 +1198,10 @@ void cmCTestTestHandler::SetExcludeRegExp(const char *arg)
 //----------------------------------------------------------------------
 void cmCTestTestHandler::SetTestsToRunInformation(const char* in)
 {
+  if ( !in )
+    {
+    return;
+    }
   this->TestsToRunString = in;
   // if the argument is a file, then read it and use the contents as the string
   if(cmSystemTools::FileExists(in))
