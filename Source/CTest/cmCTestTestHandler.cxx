@@ -613,13 +613,7 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
       }
     cres.m_Output = output;
     cres.m_ReturnValue = retVal;
-    std::string nwd = it->m_Directory;
-    if ( nwd.size() > m_CTest->GetToplevelPath().size() )
-      {
-      nwd = "." + nwd.substr(m_CTest->GetToplevelPath().size(), nwd.npos);
-      }
-    cmSystemTools::ReplaceString(nwd, "\\", "/");
-    cres.m_Path = nwd;
+    cres.m_Path = it->m_Directory.c_str();
     cres.m_CompletionStatus = "Completed";
     m_TestResults.push_back( cres );
     }
@@ -664,8 +658,9 @@ void cmCTestTestHandler::GenerateDartMemCheckOutput(std::ostream& os)
   for ( cc = 0; cc < m_TestResults.size(); cc ++ )
     {
     cmCTestTestResult *result = &m_TestResults[cc];
-    os << "\t\t<Test>" << cmCTest::MakeXMLSafe(result->m_Path) 
-      << "/" << cmCTest::MakeXMLSafe(result->m_Name)
+    std::string testPath = result->m_Path + "/" + result->m_Name;
+    os << "\t\t<Test>" << cmCTest::MakeXMLSafe(
+      m_CTest->GetShortPathToFile(testPath.c_str()))
       << "</Test>" << std::endl;
     }
   os << "\t</TestList>\n";
@@ -697,11 +692,13 @@ void cmCTestTestHandler::GenerateDartMemCheckOutput(std::ostream& os)
       {
       os << "failed";
       }
+    std::string testPath = result->m_Path + "/" + result->m_Name;
     os << "\">\n"
       << "\t\t<Name>" << cmCTest::MakeXMLSafe(result->m_Name) << "</Name>\n"
-      << "\t\t<Path>" << cmCTest::MakeXMLSafe(result->m_Path) << "</Path>\n"
-      << "\t\t<FullName>" << cmCTest::MakeXMLSafe(result->m_Path) 
-      << "/" << cmCTest::MakeXMLSafe(result->m_Name) << "</FullName>\n"
+      << "\t\t<Path>" << cmCTest::MakeXMLSafe(
+        m_CTest->GetShortPathToFile(result->m_Path.c_str())) << "</Path>\n"
+      << "\t\t<FullName>" << cmCTest::MakeXMLSafe(
+        m_CTest->GetShortPathToFile(testPath.c_str())) << "</FullName>\n"
       << "\t\t<FullCommandLine>" 
       << cmCTest::MakeXMLSafe(result->m_FullCommandLine) 
       << "</FullCommandLine>\n"
@@ -769,8 +766,9 @@ void cmCTestTestHandler::GenerateDartTestOutput(std::ostream& os)
   for ( cc = 0; cc < m_TestResults.size(); cc ++ )
     {
     cmCTestTestResult *result = &m_TestResults[cc];
-    os << "\t\t<Test>" << cmCTest::MakeXMLSafe(result->m_Path) 
-      << "/" << cmCTest::MakeXMLSafe(result->m_Name)
+    std::string testPath = result->m_Path + "/" + result->m_Name;
+    os << "\t\t<Test>" << cmCTest::MakeXMLSafe(
+      m_CTest->GetShortPathToFile(testPath.c_str()))
       << "</Test>" << std::endl;
     }
   os << "\t</TestList>\n";
@@ -790,11 +788,13 @@ void cmCTestTestHandler::GenerateDartTestOutput(std::ostream& os)
       {
       os << "failed";
       }
+    std::string testPath = result->m_Path + "/" + result->m_Name;
     os << "\">\n"
       << "\t\t<Name>" << cmCTest::MakeXMLSafe(result->m_Name) << "</Name>\n"
-      << "\t\t<Path>" << cmCTest::MakeXMLSafe(result->m_Path) << "</Path>\n"
-      << "\t\t<FullName>" << cmCTest::MakeXMLSafe(result->m_Path) 
-      << "/" << cmCTest::MakeXMLSafe(result->m_Name) << "</FullName>\n"
+      << "\t\t<Path>" << cmCTest::MakeXMLSafe(
+        m_CTest->GetShortPathToFile(result->m_Path.c_str())) << "</Path>\n"
+      << "\t\t<FullName>" << cmCTest::MakeXMLSafe(
+        m_CTest->GetShortPathToFile(testPath.c_str())) << "</FullName>\n"
       << "\t\t<FullCommandLine>" 
       << cmCTest::MakeXMLSafe(result->m_FullCommandLine) 
       << "</FullCommandLine>\n"
