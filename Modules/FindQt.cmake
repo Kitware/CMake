@@ -25,7 +25,7 @@ FIND_PATH(QT_INCLUDE_DIR qt.h
   /usr/include/qt
   /usr/include 
   C:/Progra~1/qt/include
-         )
+  )
 
 FIND_LIBRARY(QT_QT_LIBRARY 
   NAMES qt qt-mt
@@ -36,22 +36,22 @@ FIND_LIBRARY(QT_QT_LIBRARY
   /usr/lib
   /usr/share/qt3/lib
   C:/Progra~1/qt/lib
-            )
+  )
 
 FIND_PROGRAM(QT_MOC_EXECUTABLE moc
   $ENV{QTDIR}/bin C:/Progra~1/qt/bin
-            )
+  )
 
 FIND_PROGRAM(QT_UIC_EXECUTABLE uic
   $ENV{QTDIR}/bin C:/Progra~1/qt/bin
-            )
+  )
 
 
 IF (WIN32)
   FIND_LIBRARY(QT_QTMAIN_LIBRARY qtmain
     $ENV{QTDIR}/lib C:/Progra~1/qt/lib
     DOC "This Library is only needed by and included with Qt3 on MSWindows. It should be NOTFOUND, undefined or IGNORE otherwise."
-              )
+    )
 ENDIF (WIN32)
 
 
@@ -64,53 +64,53 @@ IF (QT_UIC_EXECUTABLE)
 ENDIF (QT_UIC_EXECUTABLE)
 
 
-  IF(QT_INCLUDE_DIR)
+IF(QT_INCLUDE_DIR)
   IF(QT_QT_LIBRARY)
-SET( QT_LIBRARIES ${QT_LIBRARIES} ${QT_QT_LIBRARY} )
-  SET( QT_FOUND "YES" )
-  SET( QT_DEFINITIONS "")
+    SET( QT_LIBRARIES ${QT_LIBRARIES} ${QT_QT_LIBRARY} )
+    SET( QT_FOUND "YES" )
+    SET( QT_DEFINITIONS "")
 
-  IF (WIN32)
-IF (QT_QTMAIN_LIBRARY)
-# for version 3
-  SET (QT_DEFINITIONS -DQT_DLL)
-  SET (QT_LIBRARIES imm32.lib  ${QT_QT_LIBRARY} ${QT_QTMAIN_LIBRARY} )
-ELSE (QT_QTMAIN_LIBRARY)
-# for version 2
-  SET (QT_LIBRARIES imm32.lib ws2_32.lib  ${QT_QT_LIBRARY} )
-  ENDIF (QT_QTMAIN_LIBRARY)
-  ELSE (WIN32)
-  SET (QT_LIBRARIES ${QT_QT_LIBRARY} )
-ENDIF (WIN32)
+    IF (WIN32)
+      IF (QT_QTMAIN_LIBRARY)
+        # for version 3
+        SET (QT_DEFINITIONS -DQT_DLL)
+        SET (QT_LIBRARIES imm32.lib  ${QT_QT_LIBRARY} ${QT_QTMAIN_LIBRARY} )
+      ELSE (QT_QTMAIN_LIBRARY)
+        # for version 2
+        SET (QT_LIBRARIES imm32.lib ws2_32.lib  ${QT_QT_LIBRARY} )
+      ENDIF (QT_QTMAIN_LIBRARY)
+    ELSE (WIN32)
+      SET (QT_LIBRARIES ${QT_QT_LIBRARY} )
+    ENDIF (WIN32)
 
-# Backwards compatibility for CMake1.4 and 1.2
-  SET (QT_MOC_EXE ${QT_MOC_EXECUTABLE} )
-SET (QT_UIC_EXE ${QT_UIC_EXECUTABLE} )
+    # Backwards compatibility for CMake1.4 and 1.2
+    SET (QT_MOC_EXE ${QT_MOC_EXECUTABLE} )
+    SET (QT_UIC_EXE ${QT_UIC_EXECUTABLE} )
 
-  IF(UNIX)
-  INCLUDE( ${CMAKE_ROOT}/Modules/FindX11.cmake )
-  IF (X11_FOUND)
-  SET (QT_LIBRARIES ${QT_LIBRARIES} ${X11_LIBRARIES})
-  ENDIF (X11_FOUND)
-  IF (CMAKE_DL_LIBS)
-  SET (QT_LIBRARIES ${QT_LIBRARIES} ${CMAKE_DL_LIBS})
-  ENDIF (CMAKE_DL_LIBS)
-ENDIF(UNIX)
-  IF(QT_QT_LIBRARY MATCHES "qt-mt")
-  INCLUDE( ${CMAKE_ROOT}/Modules/FindThreads.cmake )
-SET(QT_LIBRARIES ${QT_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
-  ENDIF(QT_QT_LIBRARY MATCHES "qt-mt")
+    IF(UNIX)
+      INCLUDE( ${CMAKE_ROOT}/Modules/FindX11.cmake )
+      IF (X11_FOUND)
+        SET (QT_LIBRARIES ${QT_LIBRARIES} ${X11_LIBRARIES})
+      ENDIF (X11_FOUND)
+      IF (CMAKE_DL_LIBS)
+        SET (QT_LIBRARIES ${QT_LIBRARIES} ${CMAKE_DL_LIBS})
+      ENDIF (CMAKE_DL_LIBS)
+    ENDIF(UNIX)
+    IF(QT_QT_LIBRARY MATCHES "qt-mt")
+      INCLUDE( ${CMAKE_ROOT}/Modules/FindThreads.cmake )
+      SET(QT_LIBRARIES ${QT_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+    ENDIF(QT_QT_LIBRARY MATCHES "qt-mt")
 
   ENDIF(QT_QT_LIBRARY)
 ENDIF(QT_INCLUDE_DIR)
 
 
-  MARK_AS_ADVANCED(
-    QT_INCLUDE_DIR
-    QT_QT_LIBRARY
-    QT_QTMAIN_LIBRARY
-    QT_UIC_EXECUTABLE
-    QT_MOC_EXECUTABLE
-    QT_WRAP_CPP
-    QT_WRAP_UI
-                  )
+MARK_AS_ADVANCED(
+  QT_INCLUDE_DIR
+  QT_QT_LIBRARY
+  QT_QTMAIN_LIBRARY
+  QT_UIC_EXECUTABLE
+  QT_MOC_EXECUTABLE
+  QT_WRAP_CPP
+  QT_WRAP_UI
+  )
