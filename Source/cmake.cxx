@@ -66,10 +66,13 @@ void cmake::Usage(const char* program)
 {
   std::cerr << "cmake version " << cmMakefile::GetMajorVersion()
             << "." << cmMakefile::GetMinorVersion() << "\n";
-  std::cerr << "Usage: " << program << " srcdir [options]\n" 
-            << "Where cmake is run from the directory where you want the object files written\n";
+  std::cerr << "Usage: " << program << " [srcdir] [options]\n" 
+            << "Where cmake is run from the directory where you want the object files written.  If srcdir is not specified, the current directory is used for both source and object files.\n";
   std::cerr << "Options are:\n";
-  std::cerr << "[-GgeneratorName] (where generator name can be one of these: ";
+  std::cerr << "\n-i (puts cmake in wizard mode, not available for ccmake)\n";
+  std::cerr << "\n-DVAR:TYPE=VALUE (create a cache file entry)\n";
+  std::cerr << "\n-Cpath_to_initial_cache (a cmake list file that is used to pre-load the cache with values.)\n";
+  std::cerr << "\n[-GgeneratorName] (where generator name can be one of these: ";
   std::vector<std::string> names;
   cmMakefileGenerator::GetRegisteredGenerators(names);
   for(std::vector<std::string>::iterator i =names.begin();
@@ -77,13 +80,12 @@ void cmake::Usage(const char* program)
     {
     std::cerr << "\"" << i->c_str() << "\" ";
     }
-  std::cerr << ")";
-  std::cerr << "\n-DVAR:TYPE=VALUE (create a cache file entry)";
-  std::cerr << "\n-i (puts cmake in wizard mode, not available for ccmake)\n";
+  std::cerr << ")\n";
 }
 
 // Parse the args
-void cmake::SetCacheArgs(cmMakefile& , const std::vector<std::string>& args)
+void cmake::SetCacheArgs(cmMakefile& builder,
+                         const std::vector<std::string>& args)
 { 
   for(unsigned int i=1; i < args.size(); ++i)
     {
@@ -106,6 +108,16 @@ void cmake::SetCacheArgs(cmMakefile& , const std::vector<std::string>& args)
         std::cerr << "Parse error in command line argument: " << arg << "\n"
                   << "Should be: VAR:type=value\n";
         }        
+      }
+    else if(arg.find("-C",0) == 0)
+      {
+      std::string path = arg.substr(2);
+      std::cerr << "loading initial cache file " << path.c_str() << "\n";
+      if(!builder.ReadListFile(path.c_str()))
+        {
+        std::cerr << "Error in reading cmake initial cache file:"
+                  << path.c_str() << "\n";
+        }
       }
     }
 }
@@ -172,6 +184,10 @@ void cmake::SetArgs(cmMakefile& builder, const std::vector<std::string>& args)
 	m_Verbose = true;
       }
     else if(arg.find("-D",0) == 0)
+      {
+      // skip for now
+      }
+    else if(arg.find("-C",0) == 0)
       {
       // skip for now
       }
