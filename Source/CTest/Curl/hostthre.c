@@ -341,6 +341,7 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
     conn->data->set.timeout ? conn->data->set.timeout :
     CURL_TIMEOUT_RESOLVE; /* default name resolve timeout */
   ticks = GetTickCount();
+  (void)ticks;
 
   status = WaitForSingleObject(td->thread_hnd, 1000UL*timeout);
   if (status == WAIT_OBJECT_0 || status == WAIT_ABANDONED) {
