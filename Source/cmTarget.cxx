@@ -206,7 +206,8 @@ bool cmTarget::HasCxx() const
   for(std::vector<cmSourceFile*>::const_iterator i =  m_SourceFiles.begin();
       i != m_SourceFiles.end(); ++i)
     {
-    if((*i)->GetSourceExtension() != "c")
+    if((*i)->GetSourceExtension() != "c" &&
+       (*i)->GetSourceExtension() != "h")
       {
       return true;
       }

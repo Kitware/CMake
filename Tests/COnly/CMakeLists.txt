@@ -1,3 +1,3 @@
 # a simple C only test case
 PROJECT (conly C)
-ADD_EXECUTABLE (conly conly.c)
+ADD_EXECUTABLE (conly conly.c foo.c foo.h)
