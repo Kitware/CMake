@@ -1242,7 +1242,6 @@ bool cmMakefile::IsFunctionBlocked(const char *name,
     }
 
   // loop over all function blockers to see if any block this command
-  std::list<cmFunctionBlocker *>::iterator pos;
   std::vector<std::string> expandedArguments;
   for(std::vector<std::string>::const_iterator i = args.begin();
       i != args.end(); ++i)
@@ -1255,8 +1254,10 @@ bool cmMakefile::IsFunctionBlocked(const char *name,
       expandedArguments.push_back(tmps);
       }
     }
-  for (pos = m_FunctionBlockers.begin(); 
-       pos != m_FunctionBlockers.end(); ++pos)
+  // evaluate in reverse, this is critical for balanced IF statements etc
+  std::list<cmFunctionBlocker *>::reverse_iterator pos;
+  for (pos = m_FunctionBlockers.rbegin(); 
+       pos != m_FunctionBlockers.rend(); ++pos)
     {
     if ((*pos)->NeedExpandedVariables()) 
       {

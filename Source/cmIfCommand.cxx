@@ -25,6 +25,13 @@ IsFunctionBlocked(const char *name, const std::vector<std::string> &args,
     {
     if (args == m_Args)
       {
+      // if it was an else statement then we should change state
+      // and block this Else Command
+      if (!strcmp(name,"ELSE"))
+        {
+        m_IsBlocking = !m_IsBlocking;
+        return true;
+        }
       return false;
       }
     else if(args.empty())
