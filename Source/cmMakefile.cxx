@@ -16,7 +16,6 @@
 =========================================================================*/
 #include "cmMakefile.h"
 #include "cmCommand.h"
-#include "cmStandardIncludes.h"
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
 #include "cmGlobalGenerator.h"
