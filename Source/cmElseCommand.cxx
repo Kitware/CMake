@@ -17,7 +17,7 @@
 #include "cmElseCommand.h"
 #include "cmCacheManager.h"
 
-bool cmElseCommand::InitialPass(std::vector<std::string> const& args)
+bool cmElseCommand::InitialPass(std::vector<std::string> const&)
 {
   this->SetError("An ELSE command was found outside of a proper IF ENDIF structure. Or its arguments did not match the opening IF command.");
   return false;
