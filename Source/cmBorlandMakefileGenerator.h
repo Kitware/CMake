@@ -4,7 +4,7 @@
 #include "cmMakefile.h"
 #include "cmMakefileGenerator.h"
 
-/** \class cmBorlandMakefileGenerator
+/** \class cmBorlandMakefileGenerator 
  * \brief Write Borland BCB5 compatible makefiles.
  *
  * cmBorlandMakefileGenerator produces Borland BCB5 compatible makefiles

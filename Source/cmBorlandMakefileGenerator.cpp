@@ -14,7 +14,7 @@ cmBorlandMakefileGenerator::cmBorlandMakefileGenerator()
 //---------------------------------------------------------------------------
 void cmBorlandMakefileGenerator::GenerateMakefile() 
 {
-  // suppoirt override in output directories
+  // support override in output directories
   if (m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH"))
     {
     m_LibraryOutputPath = m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH");
@@ -140,21 +140,14 @@ void cmBorlandMakefileGenerator::OutputMakefile(const char* file)
   fout << m_Makefile->ExpandVariablesInString(replace);
   replace = "BCB              = $(BCBBINPATH)/.. \n";
   fout << m_Makefile->ExpandVariablesInString(replace);
-//  replace = "OUTDIRLIB        = @LIBRARY_OUTPUT_PATH@ \n";
-//  fout << cmSystemTools::ConvertToWindowsSlashes(m_Makefile->ExpandVariablesInString(replace));
-//  replace = "OUTDIREXE        = @EXECUTABLE_OUTPUT_PATH@ \n";
-//  fout << m_Makefile->ExpandVariablesInString(replace);
-
   replace = "OUTDIRLIB        = ";
   replace += m_LibraryOutputPath;
   replace += "\n";
   fout << cmSystemTools::ConvertToWindowsSlashes(replace);
-
   replace = "OUTDIREXE        = ";
   replace += m_ExecutableOutputPath;
   replace += "\n";
   fout << cmSystemTools::ConvertToWindowsSlashes(replace);
-
   replace = "USERDEFINES      = @DEFS_USER@ \n";
   fout << m_Makefile->ExpandVariablesInString(replace);
   replace = "SYSDEFINES       = @DEFS_SYS@ \n";
@@ -178,9 +171,6 @@ void cmBorlandMakefileGenerator::OutputMakefile(const char* file)
   fout << "CMAKE_CURRENT_BINARY = " << m_Makefile->GetStartOutputDirectory() << "\n";
   fout << "OBJDIR               = " << m_Makefile->GetStartOutputDirectory() << "\n";
   fout << "CMAKEDEFINES         = " << m_Makefile->GetDefineFlags() << "\n";
-  fout << "LINK_LIB = \\ \n";
-  fout << "  import32.lib \\ \n";
-  fout << "  cw32mti.lib \n\n";
   //
   // create a make variable with all of the sources for this makefile for depend purposes.
   //
@@ -196,13 +186,10 @@ void cmBorlandMakefileGenerator::OutputMakefile(const char* file)
   for (std::vector<std::string>::const_iterator i=lfiles.begin();
        i!=lfiles.end(); ++i)
     {
-    dir = *i;
-//    cmSystemTools::ConvertToWindowsSlashes(dir);
-    fout << "  " << dir << " \\\n";
+    fout << "  " << *i << " \\\n";
     }
   dir = m_Makefile->GetHomeOutputDirectory();
   dir += "/CMakeCache.txt";
-//  cmSystemTools::ConvertToWindowsSlashes(dir);
   fout << "  " << dir << "\n\n";
   //
   // Output Include paths
@@ -220,7 +207,7 @@ void cmBorlandMakefileGenerator::OutputMakefile(const char* file)
   //
   // for each target add to the list of targets
   //
-  fout << "TARGETS = ";
+  fout << "TARGETS = ";              
   const cmTargets &tgts = m_Makefile->GetTargets();
   // list libraries first
   for (cmTargets::const_iterator l=tgts.begin();
@@ -283,7 +270,29 @@ void cmBorlandMakefileGenerator::OutputMakefile(const char* file)
       }
     }
   //
+  // Create the link dir list - use same for all targets
+  //
+  std::vector<std::string> linkdirs = m_Makefile->GetLinkDirectories();
+  replace = "@BCB_BIN_PATH@/../lib";
+  m_Makefile->ExpandVariablesInString(replace);
+  linkdirs.push_back(replace);
+  replace = "@BCB_BIN_PATH@/../lib/debug";
+  m_Makefile->ExpandVariablesInString(replace);
+  linkdirs.push_back(replace);
+  fout << "LINK_DIR =";
+  for (std::vector<std::string>::const_iterator d=linkdirs.begin(); d!=linkdirs.end(); d++)
+    {
+    std::string temp = cmSystemTools::EscapeSpaces(d->c_str());
+    fout << temp << ";";
+    }
+  fout << "\n\n";
+  //
   // Create the link lib list for each target
+  // We also want to make all of these lib/bpi dependencies of the
+  // target, but Borland MAKE is very annoying and insists on the full
+  // path being used on the dependency line.
+  // If lib is a target add OUTDIRLIB
+  // otherwise try to find full path....
   //
   // do .lib files
   std::string libname;
@@ -302,27 +311,38 @@ void cmBorlandMakefileGenerator::OutputMakefile(const char* file)
            l!=libs.end(); l++)
         {
         if ((t->first!=l->first) &&
-            (t->second.GetType()!=cmTarget::INSTALL_FILES
+               (t->second.GetType()!=cmTarget::INSTALL_FILES
              || t->second.GetType()!=cmTarget::INSTALL_PROGRAMS))
           {
-          // if this lib is not a target then don't add OUTDIRLIB to it
-          if (tgts.find(l->first)==tgts.end())
-            libname = l->first;
-          else
-            libname = "$(OUTDIRLIB)/" + l->first;
-          if (libname.find(".bpi")!=std::string::npos) continue;
+          // Get the lib name
+          libname = l->first;
+          // reject any bpi files
+          if (l->first.find(".bpi")!=std::string::npos) continue;
+          // make sure it has .lib extension
           cmSystemTools::ReplaceString(libname, ".lib", "");
           libname += ".lib";
+          // if this lib is not a target then don't add OUTDIRLIB to it
+          // but do try to find complete path
+          if (tgts.find(l->first)==tgts.end())
+            {
+            std::string path = cmSystemTools::FindFile(libname.c_str(),linkdirs);
+            if (path.size()) libname = path;
+            }
+          else
+            {
+            libname = "$(OUTDIRLIB)\\" + libname;
+            }
           fout << " \\\n  " << cmSystemTools::EscapeSpaces(libname.c_str());
           }
         }
       fout << "\n\n";
       }
     }
-  // do .bpi package files
+  // Create the link bpi list for each target : see notes above for lib files
   for (cmTargets::const_iterator t=tgts.begin(); t!=tgts.end(); t++)
     {
     cmTarget::LinkLibraries const& libs = t->second.GetLinkLibraries();
+
     if ((t->second.GetType() == cmTarget::STATIC_LIBRARY)   ||
         (t->second.GetType() == cmTarget::SHARED_LIBRARY)   ||
         (t->second.GetType() == cmTarget::MODULE_LIBRARY)   ||
@@ -330,37 +350,34 @@ void cmBorlandMakefileGenerator::OutputMakefile(const char* file)
         (t->second.GetType() == cmTarget::WIN32_EXECUTABLE))
       {
       fout << t->first << "_LINK_BPI = ";
-      for (cmTarget::LinkLibraries::const_iterator l=libs.begin(); 
-           l!=libs.end(); l++) 
+      for (cmTarget::LinkLibraries::const_iterator l=libs.begin();
+           l!=libs.end(); l++)
         {
         if ((t->first!=l->first) &&
-            (t->second.GetType()!=cmTarget::INSTALL_FILES 
-             || t->second.GetType()!=cmTarget::INSTALL_PROGRAMS)) 
+               (t->second.GetType()!=cmTarget::INSTALL_FILES
+             || t->second.GetType()!=cmTarget::INSTALL_PROGRAMS))
           {
-          // if this lib is not a target then don't add OUTDIRLIB to it
+          // Get the lib name
+          libname = l->first;
+          // only allow bpi files
+          if (l->first.find(".bpi")==std::string::npos) continue;
+          // if this bpi is not a target then don't add OUTDIRLIB to it
+          // but do try to find complete path
           if (tgts.find(l->first)==tgts.end())
-            libname = l->first;
+            {
+            std::string path = cmSystemTools::FindFile(libname.c_str(),linkdirs);
+            if (path.size()) libname = path;
+            }
           else
-            libname = "$(OUTDIRLIB)/" + l->first;
-          if (libname.find(".bpi")==std::string::npos) continue;
+            {
+            libname = "$(OUTDIRLIB)\\" + libname + ".bpi";
+            }
           fout << " \\\n  " << cmSystemTools::EscapeSpaces(libname.c_str());
           }
         }
       fout << "\n\n";
       }
     }
-  //
-  // Create the link dir list - use same for all targets
-  //
-  std::vector<std::string> dirs = m_Makefile->GetLinkDirectories();
-  fout << "LINK_DIR =";
-  for (std::vector<std::string>::const_iterator d=dirs.begin(); d!=dirs.end(); d++) 
-    {
-    std::string temp = cmSystemTools::EscapeSpaces(d->c_str());
-    fout << temp << ";";
-    }
-  fout << "\n\n";
-
   //
   // The project rule - Build All targets
   //
@@ -418,22 +435,25 @@ void cmBorlandMakefileGenerator::OutputMakefile(const char* file)
 // output the list of libraries that the executables in this makefile will depend on.
 void cmBorlandMakefileGenerator::OutputDependencies(std::ostream& fout) 
 {
-    // not required under win32
+    // not required with the Borland generator
+    // .autodepend
+    // is added to the start of the makefile to enable automatic dependency
+    // checking of source files
 }
 
-void cmBorlandMakefileGenerator::OutputTargets(std::ostream& fout) 
+void cmBorlandMakefileGenerator::OutputTargets(std::ostream& fout)
 {
   // Do Libraries first as executables may depend on them
   const cmTargets &tgts = m_Makefile->GetTargets();
-  for (cmTargets::const_iterator l=tgts.begin(); l!=tgts.end(); l++) 
+  for (cmTargets::const_iterator l=tgts.begin(); l!=tgts.end(); l++)
     {
-    if (l->second.GetType() == cmTarget::STATIC_LIBRARY) 
+    if (l->second.GetType() == cmTarget::STATIC_LIBRARY)
       {
       //
       // WARNING. TLIB fails with Unix style Forward slashes - use $(OUTDIRLIB)\\
       //
       fout << "# this should be a static library \n";
-      fout << "$(OUTDIRLIB)\\" << l->first << ".lib : ${" << l->first << "_SRC_OBJS} \n";
+      fout << "$(OUTDIRLIB)\\" << l->first << ".lib : ${" << l->first << "_SRC_OBJS} ${" << l->first << "_LINK_LIB} ${" << l->first << "_LINK_BPI} \n";
       std::string Libname = "$(OUTDIRLIB)\\" + l->first + ".lib";
       fout << "  TLib.exe $(LINKFLAGS_STATIC) /u " << Libname.c_str() << " @&&| \n";
       fout << "    $? \n";
@@ -442,53 +462,53 @@ void cmBorlandMakefileGenerator::OutputTargets(std::ostream& fout)
     if (l->second.GetType() == cmTarget::SHARED_LIBRARY)
       {
       fout << "# this should be a shared (DLL) library \n";
-      fout << "$(OUTDIRLIB)/" << l->first << ".dll : ${" << l->first << "_SRC_OBJS} \n";
+      fout << "$(OUTDIRLIB)\\" << l->first << ".dll : ${" << l->first << "_SRC_OBJS} ${" << l->first << "_LINK_LIB} ${" << l->first << "_LINK_BPI} \n";
       fout << "  @ilink32.exe @&&| \n";
-      fout << "    -L\"$(BCB)/lib\" -L$(LINK_DIR) $(LINKFLAGS_DLL) $(LINKFLAGS_DEBUG) \"$(BCB)/lib/c0d32.obj\" ";
+      fout << "    -L$(LINK_DIR) $(LINKFLAGS_DLL) $(LINKFLAGS_DEBUG) \"$(BCB)/lib/c0d32.obj\" ";
       fout << "$(" << l->first << "_SRC_OBJS) ";
       fout << "$(" << l->first << "_LINK_BPI) , $<, $*, ";
-      fout << "$(" << l->first << "_LINK_LIB) $(LINK_LIB) \n";
+      fout << "$(" << l->first << "_LINK_LIB) import32.lib cw32mti.lib \n";
       fout << "| \n";
-      fout << "  @implib -w " << "$(OUTDIRLIB)/" << l->first << ".lib " << "$(OUTDIRLIB)/" << l->first << ".dll \n\n";
+      fout << "  @implib -w " << "$(OUTDIRLIB)\\" << l->first << ".lib " << "$(OUTDIRLIB)\\" << l->first << ".dll \n\n";
       }
-    if (l->second.GetType() == cmTarget::MODULE_LIBRARY) 
+    if (l->second.GetType() == cmTarget::MODULE_LIBRARY)
       {
       fout << "# this should be a Borland Package library \n";
-      fout << "$(OUTDIRLIB)/" << l->first << ".bpl : ${" << l->first << "_SRC_OBJS} \n";
+      fout << "$(OUTDIRLIB)\\" << l->first << ".bpl : ${" << l->first << "_SRC_OBJS} ${" << l->first << "_LINK_LIB} ${" << l->first << "_LINK_BPI} \n";
       fout << "  @ilink32.exe @&&| \n";
-      fout << "    -L\"$(BCB)/lib\" -L$(LINK_DIR) $(LINKFLAGS_BPL) $(LINKFLAGS_DEBUG) \"$(BCB)/lib/c0pkg32.obj\" ";
-      fout << "$(" << l->first << "_SRC_OBJS) ";
-      fout << "$(" << l->first << "_LINK_BPI) , $<, $*, ";
-      fout << "$(" << l->first << "_LINK_LIB) $(LINK_LIB) \n";
+      fout << "    -L\"$(BCB)/lib\" -L$(LINK_DIR) $(LINKFLAGS_BPL) $(LINKFLAGS_DEBUG) \"$(BCB)/lib/c0pkg32.obj \" ";
+      fout << "$(" << l->first << "_LINK_BPI) memmgr.lib sysinit.obj ";
+      fout << "$(" << l->first << "_SRC_OBJS) , $<, $*, ";
+      fout << "$(" << l->first << "_LINK_LIB) import32.lib cp32mti.lib \n";
       fout << "| \n";
       }
     }
   // Do Executables
-  for (cmTargets::const_iterator l=tgts.begin(); l!=tgts.end(); l++) 
+  for (cmTargets::const_iterator l=tgts.begin(); l!=tgts.end(); l++)
     {
-    if (l->second.GetType()==cmTarget::WIN32_EXECUTABLE) 
+    if (l->second.GetType()==cmTarget::WIN32_EXECUTABLE)
       {
-      fout << l->first << ".exe : ${" << l->first << "_SRC_OBJS} \n";
+      fout << l->first << ".exe : ${" << l->first << "_SRC_OBJS} ${" << l->first << "_LINK_LIB} ${" << l->first << "_LINK_BPI} \n";
       fout << "  @ilink32.exe @&&| \n";
       fout << "    -L\"$(BCB)/lib\" -L$(LINK_DIR) $(LINKFLAGS_EXE) $(LINKFLAGS_DEBUG) \"$(BCB)/lib/c0w32.obj\" ";
       fout << "$(" << l->first << "_SRC_OBJS) ";
       fout << "$(" << l->first << "_LINK_BPI) , $<, $*, ";
-      fout << "$(" << l->first << "_LINK_LIB) $(LINK_LIB) \n";
+      fout << "$(" << l->first << "_LINK_LIB) import32.lib cw32mti.lib \n";
       fout << "| \n\n";
       }
-    else if (l->second.GetType()==cmTarget::EXECUTABLE) 
+    else if (l->second.GetType()==cmTarget::EXECUTABLE)
       {
-      fout << l->first << ".exe : ${" << l->first << "_SRC_OBJS} \n";
+      fout << l->first << ".exe : ${" << l->first << "_SRC_OBJS} ${" << l->first << "_LINK_LIB} ${" << l->first << "_LINK_BPI} \n";
       fout << "  @ilink32.exe @&&| \n";
       fout << "    -L\"$(BCB)/lib\" -L$(LINK_DIR) $(LINKFLAGS_EXE) $(LINKFLAGS_DEBUG) \"$(BCB)/lib/c0x32.obj\" ";
       fout << "$(" << l->first << "_SRC_OBJS) , $<, $*, ";
-      fout << "$(" << l->first << "_LINK_LIB) $(LINK_LIB) \n";
+      fout << "$(" << l->first << "_LINK_LIB) import32.lib cw32mti.lib \n";
       fout << "| \n\n";
       }
     }
 }
 //---------------------------------------------------------------------------
-void cmBorlandMakefileGenerator::OutputSubDirectoryRules(std::ostream& fout) 
+void cmBorlandMakefileGenerator::OutputSubDirectoryRules(std::ostream& fout)
 {
   // output rules for decending into sub directories
   const std::vector<std::string>& SubDirectories = m_Makefile->GetSubDirectories();
@@ -569,7 +589,7 @@ void cmBorlandMakefileGenerator::OutputSubDirectoryVars(std::ostream& fout,
 //   (tab)   command...
 
 // This routine is copied direct from unix makefile generator
-void cmBorlandMakefileGenerator::OutputCustomRules(std::ostream& fout) 
+void cmBorlandMakefileGenerator::OutputCustomRules(std::ostream& fout)
 {
   // We may be modifying the source groups temporarily, so make a copy.
   std::vector<cmSourceGroup> sourceGroups = m_Makefile->GetSourceGroups();
@@ -659,8 +679,6 @@ void cmBorlandMakefileGenerator::OutputCustomRules(std::ostream& fout)
       fout << "# End of source group \"" << name.c_str() << "\"\n\n";
       }
     }
-
-  fout << "# End Custom Rules \n";
 }
 
 
