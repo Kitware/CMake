@@ -33,24 +33,21 @@ int cmTryCompileCommand::CoreTryCompileCode(
   const char* projectName = 0;
   const char* targetName = 0;
   std::string tmpString;
-
-  // do we have a srcfile signature
-  if (argv.size() == 3 || argv[3] == "CMAKE_FLAGS" || argv[3] == "COMPILE_DEFINITIONS" ||
-      argv[3] == "OUTPUT_VARIABLE")
-    {
-    srcFileSignature = true;
-    }
-
+  int extraArgs = 0;
+  
   // look for CMAKE_FLAGS and store them
   std::vector<std::string> cmakeFlags;
   for (i = 3; i < argv.size(); ++i)
     {
     if (argv[i] == "CMAKE_FLAGS")
       {
+      extraArgs++;
+      ++i;
       for (; i < argv.size() && argv[i] != "COMPILE_DEFINITIONS" && 
              argv[i] != "OUTPUT_VARIABLE"; 
            ++i)
         {
+        extraArgs++;
         cmakeFlags.push_back(argv[i]);
         }
       break;
@@ -69,6 +66,7 @@ int cmTryCompileCommand::CoreTryCompileCode(
           "OUTPUT_VARIABLE specified but there is no variable");
         return -1;
         }
+      extraArgs += 2;
       outputVariable = argv[i+1];
       break;
       }
@@ -80,21 +78,30 @@ int cmTryCompileCommand::CoreTryCompileCode(
     {
     if (argv[i] == "COMPILE_DEFINITIONS")
       {
-      // only valid for srcfile signatures
-      if (!srcFileSignature)
-        {
-        cmSystemTools::Error(
-          "COMPILE_FLAGS specified on a srcdir type TRY_COMPILE");
-        return -1;
-        }
+      extraArgs++;
       for (i = i + 1; i < argv.size() && argv[i] != "CMAKE_FLAGS" && 
              argv[i] != "OUTPUT_VARIABLE"; 
            ++i)
         {
+        extraArgs++;
         compileFlags.push_back(argv[i]);
         }
       break;
       }
+    }
+
+  // do we have a srcfile signature
+  if (argv.size() - extraArgs == 3)
+    {
+    srcFileSignature = true;
+    }
+
+  // only valid for srcfile signatures
+  if (!srcFileSignature && compileFlags.size())
+    {
+    cmSystemTools::Error(
+      "COMPILE_FLAGS specified on a srcdir type TRY_COMPILE");
+    return -1;
     }
 
   // compute the binary dir when TRY_COMPILE is called with a src file
@@ -203,7 +210,7 @@ int cmTryCompileCommand::CoreTryCompileCode(
     {
     projectName = argv[3].c_str();
     
-    if (argv.size() == 5)
+    if (argv.size() - extraArgs == 5)
       {
       targetName = argv[4].c_str();
       }

@@ -75,7 +75,7 @@ public:
     {
     return
       "  TRY_COMPILE(RESULT_VAR bindir srcdir\n"
-      "              projectName <CMAKE_FLAGS <Flags>>\n"
+      "              projectName <targetname> <CMAKE_FLAGS <Flags>>\n"
       "              <OUTPUT_VARIABLE var>)\n"
       "Try compiling a program.  Return the success or failure in RESULT_VAR.  "
       "If <target name> is specified then build just that target "
