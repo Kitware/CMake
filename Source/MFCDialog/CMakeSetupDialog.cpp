@@ -95,6 +95,7 @@ CMakeSetupDialog::CMakeSetupDialog(CWnd* pParent /*=NULL*/)
     startPath = startPath.Left(removePos);
     }
   m_WhereSource = startPath;
+  m_WhereBuild = startPath;
   this->LoadFromRegistry();
   m_BuildPathChanged = false;
 }
