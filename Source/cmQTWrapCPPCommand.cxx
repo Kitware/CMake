@@ -76,7 +76,22 @@ bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& argsIn)
       std::string newName = "moc_" + srcName;
       file.SetName(newName.c_str(), m_Makefile->GetCurrentOutputDirectory(),
                    "cxx",false);
-      std::string hname = cdir + "/" + *j;
+      std::string hname;
+      if ( (*j)[0] == '/' || (*j)[1] == ':' )
+        {
+        hname = *j;
+        }
+      else
+        {
+        if ( curr && curr->GetPropertyAsBool("GENERATED") )
+          {
+          hname = std::string( m_Makefile->GetCurrentOutputDirectory() ) + "/" + *j;
+          }
+        else
+          {
+          hname = cdir + "/" + *j;
+          }
+        }
       m_WrapHeaders.push_back(hname);
       // add starting depends
       file.GetDepends().push_back(hname);
