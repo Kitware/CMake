@@ -180,61 +180,91 @@ bool cmCTestSubmit::SubmitUsingHTTP(const std::string& localprefix,
   /* In windows, this will init the winsock stuff */
   ::curl_global_init(CURL_GLOBAL_ALL);
 
-  /* get a curl handle */
-  curl = curl_easy_init();
-  if(curl) 
+  std::string::size_type cc, kk;
+  for ( cc = 0; cc < files.size(); cc ++ )
     {
-
-    // Using proxy
-    if ( m_HTTPProxyType > 0 )
+    /* get a curl handle */
+    curl = curl_easy_init();
+    if(curl) 
       {
-      curl_easy_setopt(curl, CURLOPT_PROXY, m_HTTPProxy.c_str()); 
-      switch (m_HTTPProxyType)
+
+      // Using proxy
+      if ( m_HTTPProxyType > 0 )
         {
-        case 2:
-          curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS4);
-          break;
-        case 3:
-          curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
-          break;
-        default:
-          curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);           
+        curl_easy_setopt(curl, CURLOPT_PROXY, m_HTTPProxy.c_str()); 
+        switch (m_HTTPProxyType)
+          {
+          case 2:
+            curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS4);
+            break;
+          case 3:
+            curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
+            break;
+          default:
+            curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);           
+          }
         }
-      }
 
-    std::string::size_type cc;
-    for ( cc = 0; cc < files.size(); cc ++ )
-      {
-      std::string local_file = localprefix + "/" + files[cc];
-      std::string upload_as = url;
-      std::string remote_file = remoteprefix + files[cc];
-  
-      struct HttpPost *formpost=NULL;
-      struct HttpPost *lastptr=NULL;
-      
-      /* Fill in the file upload field */
-      curl_formadd(&formpost,
-                   &lastptr,
-                   CURLFORM_COPYNAME, "FileData",
-                   CURLFORM_FILE, local_file.c_str(),
-                   CURLFORM_END);
-      curl_formadd(&formpost,
-                   &lastptr,
-                   CURLFORM_COPYNAME, "FileName",
-                   CURLFORM_COPYCONTENTS, remote_file.c_str(),
-                   CURLFORM_END);
+      /* enable uploading */
+      curl_easy_setopt(curl, CURLOPT_UPLOAD, TRUE) ;
 
-      curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
-      std::cout << "upload file: " << local_file.c_str() << " to " 
-                << upload_as.c_str() << std::endl;
-                
+      /* HTTP PUT please */
+      curl_easy_setopt(curl, CURLOPT_PUT, TRUE);
       ::curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
+
+      std::string local_file = localprefix + "/" + files[cc];
+      std::string remote_file = remoteprefix + files[cc];
+      std::string ofile = "";
+      for ( kk = 0; kk < remote_file.size(); kk ++ )
+        {
+        char c = remote_file[kk];
+        char hex[4] = { 0, 0, 0, 0 };
+        hex[0] = c;
+        switch ( c )
+          {
+          case '+':
+          case '?':
+          case '/':
+          case '\\':
+          case '&':
+          case ' ':
+          case '=':
+          case '%':
+            sprintf(hex, "%%%02X", (int)c);
+            ofile.append(hex);
+            break;
+            break;
+          default: 
+            ofile.append(hex);
+          }
+        }
+      std::string upload_as = url + "?FileName=" + ofile;
+
+      struct stat st;
+      if ( ::stat(local_file.c_str(), &st) )
+        {
+        return false;
+        }
+
+      ftpfile = ::fopen(local_file.c_str(), "rb");
+      
+      std::cout << "upload file: " << local_file.c_str() << " to " 
+                << upload_as.c_str() << " Size: " << st.st_size << std::endl;
+
+                
       // specify target
       ::curl_easy_setopt(curl,CURLOPT_URL, upload_as.c_str());
+
+      // now specify which file to upload
+      ::curl_easy_setopt(curl, CURLOPT_INFILE, ftpfile);
+
+      // and give the size of the upload (optional)
+      ::curl_easy_setopt(curl, CURLOPT_INFILESIZE, st.st_size);
 
       // Now run off and do what you've been told!
       res = ::curl_easy_perform(curl);
 
+      fclose(ftpfile);
       if ( res )
         {
         std::cout << "Error when uploading" << std::endl;
@@ -242,9 +272,9 @@ bool cmCTestSubmit::SubmitUsingHTTP(const std::string& localprefix,
         ::curl_global_cleanup(); 
         return false;
         }
+      // always cleanup
+      ::curl_easy_cleanup(curl);
       }
-    // always cleanup
-    ::curl_easy_cleanup(curl);
     }
   ::curl_global_cleanup(); 
   return true;
