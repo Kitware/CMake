@@ -595,22 +595,31 @@ CMAKE_ANSI_CFLAGS=""
 if test $ac_cv_prog_gcc = no; then
 case $system in
     HP-UX-*)
-        echo $ac_n "checking whether ${CC} accepts -Aa""... $ac_c" 1>&6
-        echo 'void f(){}' > conftest.c
-        if test -z "`${CC} -Aa -c conftest.c 2>&1`"; then
-          echo "$ac_t""yes" 1>&6
-          CMAKE_ANSI_CFLAGS="$CMAKE_ANSI_CFLAGS -Aa"
-        else
-          echo "$ac_t""no" 1>&6
-        fi
-        echo $ac_n "checking whether ${CC} accepts -Ae""... $ac_c" 1>&6
-        if test -z "`${CC} -Ae -c conftest.c 2>&1`"; then
-          echo "$ac_t""yes" 1>&6
-          CMAKE_ANSI_CFLAGS="$CMAKE_ANSI_CFLAGS -Ae"
-        else
-          echo "$ac_t""no" 1>&6
-        fi
-        rm -f conftest*
+        CFLAGS_ORIG="$FLAGS"
+        CFLAGS="-Aa $CFLAGS"
+        AC_MSG_CHECKING([whether ${CC} accepts -Aa])
+        AC_TRY_COMPILE([
+        void foo() {}
+        ],,[
+        AC_MSG_RESULT(yes)
+        CMAKE_ANSI_CFLAGS="$CMAKE_ANSI_CFLAGS -Aa"
+        ],[
+        AC_MSG_RESULT(no)
+        ])
+        CFLAGS="$CFLAGS_ORIG"
+
+        CFLAGS_ORIG="$FLAGS"
+        CFLAGS="-Ae $CFLAGS"
+        AC_MSG_CHECKING([whether ${CC} accepts -Ae])
+        AC_TRY_COMPILE([
+        void foo() {}
+        ],,[
+        AC_MSG_RESULT(yes)
+        CMAKE_ANSI_CFLAGS="$CMAKE_ANSI_CFLAGS -Ae"
+        ],[
+        AC_MSG_RESULT(no)
+        ])
+        CFLAGS="$CFLAGS_ORIG"
 	;;   
 esac
 fi

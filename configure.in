@@ -67,39 +67,54 @@ CMAKE_ANSI_CXXFLAGS=""
 if test $ac_cv_prog_gxx = no; then
 case $system in
     HP-UX-*.08.*|HP-UX-*.09.*|HP-UX-*.10.*)
-        echo $ac_n "checking whether ${CC} accepts -Aa""... $ac_c" 1>&6
-        echo 'void f(){}' > conftest.c
-        if test -z "`${CC} -Aa -c conftest.c 2>&1`"; then
-          echo "$ac_t""yes" 1>&6
-          CMAKE_ANSI_CFLAGS="-Aa"
-        else
-          echo "$ac_t""no" 1>&6
-        fi
-        rm -f conftest*
+        CFLAGS_ORIG="$FLAGS"
+        CFLAGS="-Aa $CFLAGS"
+        AC_MSG_CHECKING([whether ${CC} accepts -Aa])
+        AC_TRY_COMPILE([
+        void foo() {}
+        ],,[
+        AC_MSG_RESULT(yes)
+        CMAKE_ANSI_CFLAGS="$CMAKE_ANSI_CFLAGS -Aa"
+        ],[
+        AC_MSG_RESULT(no)
+        ])
+        CFLAGS="$CFLAGS_ORIG"
 	;;  
-    IRIX-5* | IRIX-6* | IRIX64-6* | IRIX-64-6*)
-        echo $ac_n "checking whether ${CXX} accepts -LANG:std""... $ac_c" 1>&6
-        echo 'void f(){}' > conftest.c
-        if test -z "`${CXX} -LANG:std -c conftest.c 2>&1`"; then
-          echo "$ac_t""yes" 1>&6
-	  CMAKE_ANSI_CXXFLAGS="-LANG:std"
-        else
-          echo "$ac_t""no" 1>&6
-        fi
-        rm -f conftest*
-	;;     
+     IRIX-5* | IRIX-6* | IRIX64-6* | IRIX-64-6*)
+        CXXFLAGS_ORIG="$CXXFLAGS"
+        CXXFLAGS="-LANG:std $CXXFLAGS"
+        AC_MSG_CHECKING([whether ${CXX} accepts -LANG:std])
+        AC_LANG_SAVE
+        AC_LANG_CPLUSPLUS
+        AC_TRY_COMPILE([
+        void foo() {}
+        ],,[
+        AC_MSG_RESULT(yes)
+        CMAKE_ANSI_CXXFLAGS="-LANG:std"
+        ],[
+        AC_MSG_RESULT(no)
+        ])
+        AC_LANG_RESTORE
+        CXXFLAGS="$CXXFLAGS_ORIG"
+	;;
      OSF1-*)
-        echo $ac_n "checking whether ${CXX} accepts -std strict_ansi -nopure_cname""... $ac_c" 1>&6
-        echo 'void f(){}' > conftest.c
-        if test -z "`${CXX} -std strict_ansi -nopure_cname -c conftest.c 2>&1`"; then
-          echo "$ac_t""yes" 1>&6
-          CMAKE_ANSI_CXXFLAGS="-std strict_ansi -nopure_cname"
-        else
-          echo "$ac_t""no" 1>&6
-        fi
-        rm -f conftest*
-        ;;  
 
+        CXXFLAGS_ORIG="$CXXFLAGS"
+        CXXFLAGS="-std strict_ansi -nopure_cname $CXXFLAGS"
+        AC_MSG_CHECKING([whether ${CXX} accepts -std strict_ansi -nopure_cname])
+        AC_LANG_SAVE
+        AC_LANG_CPLUSPLUS
+        AC_TRY_COMPILE([
+        void foo() {}
+        ],,[
+        AC_MSG_RESULT(yes)
+        CMAKE_ANSI_CXXFLAGS="-std strict_ansi -nopure_cname"
+        ],[
+        AC_MSG_RESULT(no)
+        ])
+        AC_LANG_RESTORE
+        CXXFLAGS="$CXXFLAGS_ORIG"
+	;;
 esac
 fi
 AC_SUBST(CMAKE_ANSI_CFLAGS)
@@ -108,61 +123,77 @@ AC_SUBST(CMAKE_ANSI_CXXFLAGS)
 # check non-g++ compilers to see if they have the standard 
 # ansi stream files (without the .h)
 if test $ac_cv_prog_gxx = no; then
+  CXXFLAGS_ORIG="$CXXFLAGS"
+  CXXFLAGS="$CMAKE_ANSI_CXXFLAGS $CXXFLAGS"
   AC_MSG_CHECKING( ansi standard C++ stream headers ) 
-  rm -rf conftest.*
-  cat > conftest.cc <<!
-#include <iostream>
-!
-  if test -z "`${CXX} $CMAKE_ANSI_CXXFLAGS $CXXFLAGS $CPPFLAGS  -c conftest.cc 2>&1`"; then
-    echo "$ac_t""yes" 1>&6
-  else
-    AC_DEFINE(CMAKE_NO_ANSI_STREAM_HEADERS)
-    echo "$ac_t""no" 1>&6
-  fi
+  AC_LANG_SAVE
+  AC_LANG_CPLUSPLUS
+  AC_TRY_COMPILE([
+  #include <iostream>
+  ],,[
+  AC_MSG_RESULT(yes)
+  ],[
+  CMAKE_NO_ANSI_STREAM_HEADERS=1
+  AC_MSG_RESULT(no)
+  ])
+  AC_LANG_RESTORE
+  CXXFLAGS="$CXXFLAGS_ORIG"
 fi
 
 # check non-g++ compilers to see if they have std::stringstream
-AC_MSG_CHECKING( for ansi standard C++ stringstream ) 
-rm -rf conftest.*
-cat > conftest.cc <<!
+CXXFLAGS_ORIG="$CXXFLAGS"
+CXXFLAGS="$CMAKE_ANSI_CXXFLAGS $CXXFLAGS"
+AC_MSG_CHECKING([for ansi standard C++ stringstream])
+AC_LANG_SAVE
+AC_LANG_CPLUSPLUS
+AC_TRY_COMPILE([
 #include <sstream>
-!
-if test -z "`${CXX} $CMAKE_ANSI_CXXFLAGS $CXXFLAGS $CPPFLAGS  -c conftest.cc 2>&1`"; then
-  echo "$ac_t""yes" 1>&6
-else
-  AC_DEFINE(CMAKE_NO_ANSI_STRING_STREAM)
-  echo "$ac_t""no" 1>&6
-fi
+],,[
+AC_MSG_RESULT(yes)
+],[
+CMAKE_NO_ANSI_STRING_STREAM=1
+AC_MSG_RESULT(no)
+])
+AC_LANG_RESTORE
+CXXFLAGS="$CXXFLAGS_ORIG"
 
 # check to see if stl is in the std namespace
 if test $ac_cv_prog_gxx = no; then
-  AC_MSG_CHECKING( ansi standard namespace support ) 
-  rm -rf conftest.*
-  cat > conftest.cc <<!
-#include <list>
-void foo() { std::list<int> l; }
-!
-  if test -z "`${CXX} $CMAKE_ANSI_CXXFLAGS $CXXFLAGS $CPPFLAGS -c conftest.cc 2>&1`"; then
-    echo "$ac_t""yes" 1>&6
-  else
-    AC_DEFINE(CMAKE_NO_STD_NAMESPACE)
-    echo "$ac_t""no" 1>&6
-  fi
+  CXXFLAGS_ORIG="$CXXFLAGS"
+  CXXFLAGS="$CMAKE_ANSI_CXXFLAGS $CXXFLAGS"
+  AC_MSG_CHECKING([whether the std namespace is supported])
+  AC_LANG_SAVE
+  AC_LANG_CPLUSPLUS
+  AC_TRY_COMPILE([
+  #include <list>
+  void foo() { std::list<int>(); }
+  ],,[
+  AC_MSG_RESULT(yes)
+  ],[
+  CMAKE_NO_STD_NAMESPACE=1
+  AC_MSG_RESULT(no)
+  ])
+  AC_LANG_RESTORE
+  CXXFLAGS="$CXXFLAGS_ORIG"
 fi
 
 # check to see if for scoping is supported
 if test $ac_cv_prog_gxx = no; then
-  AC_MSG_CHECKING( ansi for scope support ) 
-  rm -rf conftest.*
-  cat > conftest.cc <<!
-void foo() { for(int i;;); for(int i;;); }
-!
-  if test -z "`${CXX} $CMAKE_ANSI_CXXFLAGS $CXXFLAGS $CPPFLAGS -c conftest.cc 2>&1`"; then
-    echo "$ac_t""yes" 1>&6
-  else
-    AC_DEFINE(CMAKE_NO_ANSI_FOR_SCOPE)
-    echo "$ac_t""no" 1>&6
-  fi
+  CXXFLAGS_ORIG="$CXXFLAGS"
+  CXXFLAGS="$CMAKE_ANSI_CXXFLAGS $CXXFLAGS"
+  AC_MSG_CHECKING([ansi for scope support])
+  AC_LANG_SAVE
+  AC_LANG_CPLUSPLUS
+  AC_TRY_COMPILE([
+  void foo() { for(int i;;); for(int i;;); }
+  ],,[
+  AC_MSG_RESULT(yes)
+  ],[
+  CMAKE_NO_ANSI_FOR_SCOPE=1
+  AC_MSG_RESULT(no)
+  ])
+  AC_LANG_RESTORE
+  CXXFLAGS="$CXXFLAGS_ORIG"
 fi
 
 # find make to use to build cmake, prefer gmake
