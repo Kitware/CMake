@@ -60,7 +60,7 @@ IF (WIN32)
                     cmBorlandMakefileGenerator.cxx
                     cmNMakeMakefileGenerator.cxx
                     cmMSDotNETGenerator.cxx
-                    cmDSWWriter.cxx 
+                    cmDSWWriter.h 
                     cmDSPWriter.h 
                     cmMSProjectGenerator.h
                     cmBorlandMakefileGenerator.h
