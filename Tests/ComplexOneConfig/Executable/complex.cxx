@@ -57,24 +57,24 @@ bool TestLibraryOrder(bool shouldFail)
   orderLibs.SetLinkInformation(target, cmTarget::GENERAL, "A");
   bool ret = orderLibs.DetermineLibraryPathOrder();
   orderLibs.GetLinkerInformation(sortedpaths, linkItems);
-  std::cerr << "Sorted Link Paths:\n";
+  std::cout << "Sorted Link Paths:\n";
   for(std::vector<cmStdString>::iterator i = sortedpaths.begin();
       i != sortedpaths.end(); ++i)
     {
-    std::cerr << *i << "\n";
+    std::cout << *i << "\n";
     }
-  std::cerr << "Link Items: \n";
+  std::cout << "Link Items: \n";
   for(std::vector<cmStdString>::iterator i = linkItems.begin();
       i != linkItems.end(); ++i)
     {
-    std::cerr << *i << "\n";
+    std::cout << *i << "\n";
     }
   if(!(linkItems[0] == "A" && 
        linkItems[1] == "B" && 
        linkItems[2] == "C" && 
        linkItems[3] == "-lm" ))
     {
-    std::cerr << "fail because link items should be A B C -lm and the are not\n";
+    std::cout << "fail because link items should be A B C -lm and the are not\n";
     return shouldFail;
     }
   
@@ -82,16 +82,18 @@ bool TestLibraryOrder(bool shouldFail)
   // if this is not the fail test then the order should be f B C A
   if(!shouldFail)
     {
-    if(!(sortedpaths[0][sortedpaths[0].size()-1] == 'f' &&
-         sortedpaths[1][sortedpaths[1].size()-1] == 'B' &&
-         sortedpaths[2][sortedpaths[2].size()-1] == 'C' &&
-         sortedpaths[3][sortedpaths[3].size()-1] == 'A' ))
+    char order[5];
+    order[4] = 0;
+    for(int i =0; i < 4; ++i)
       {
-      std::cerr << "fail because order should be /lib/extra/stuff B C A and it is not\n";
+      order[i] = sortedpaths[i][sortedpaths[i].size()-1];
+      }
+    if(!(strcmp(order, "fBCA") == 0 || strcmp(order, "BCAf") == 0))
+      {
+      std::cout << "fail because order should be /lib/extra/stuff B C A and it is not\n";
       return false;
       }
     }
-  
   return ret;
 }
 
@@ -999,6 +1001,29 @@ int main()
 #else
   cmPassed("CMake SET CACHE FORCE");
 #endif
+
+  // first run with shouldFail = true, this will
+  // run with A B C as set by the CMakeList.txt file.
+  if(!TestLibraryOrder(true))
+    {
+    cmPassed("CMake cmOrderLinkDirectories failed when it should.");
+    }
+  else
+    {
+    cmFailed("CMake cmOrderLinkDirectories failed to fail when given an impossible set of paths.");
+    }
+  // next run with shouldPass = true, this will 
+  // run with B/libA.a removed and should create the order
+  // B C A
+  if(TestLibraryOrder(false))
+    {
+    cmPassed("CMake cmOrderLinkDirectories worked.");
+    }
+  else
+    {
+    cmFailed("CMake cmOrderLinkDirectories failed.");
+    }
+  
   // ----------------------------------------------------------------------
   // Summary
 
