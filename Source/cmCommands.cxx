@@ -13,7 +13,6 @@
 #include "cmAuxSourceDirectoryCommand.cxx"
 #include "cmBuildCommand.cxx"
 #include "cmBuildNameCommand.cxx"
-#include "cmBuildSharedLibrariesCommand.cxx"
 #include "cmCableClassSetCommand.cxx"
 #include "cmCableWrapTclCommand.cxx"
 #include "cmConfigureFileCommand.cxx"
@@ -65,7 +64,6 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmAuxSourceDirectoryCommand);
   commands.push_back(new cmBuildCommand);
   commands.push_back(new cmBuildNameCommand);
-  commands.push_back(new cmBuildSharedLibrariesCommand);
   commands.push_back(new cmCableClassSetCommand);
   commands.push_back(new cmCableWrapTclCommand);
   commands.push_back(new cmConfigureFileCommand);
