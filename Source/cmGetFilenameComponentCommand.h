@@ -1,0 +1,107 @@
+/*=========================================================================
+
+  Program:   Insight Segmentation & Registration Toolkit
+  Module:    $RCSfile$
+  Language:  C++
+  Date:      $Date$
+  Version:   $Revision$
+
+Copyright (c) 2001 Insight Consortium
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+ * Redistributions of source code must retain the above copyright notice,
+   this list of conditions and the following disclaimer.
+
+ * Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+ * The name of the Insight Consortium, nor the names of any consortium members,
+   nor of any contributors, may be used to endorse or promote products derived
+   from this software without specific prior written permission.
+
+  * Modified source versions must be plainly marked as such, and must not be
+    misrepresented as being the original software.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER AND CONTRIBUTORS ``AS IS''
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHORS OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+=========================================================================*/
+#ifndef cmGetFilenameComponentCommand_h
+#define cmGetFilenameComponentCommand_h
+
+#include "cmCommand.h"
+
+/** \class cmGetFilenameComponentCommand
+ * \brief Get a specific component of a filename.
+ *
+ * cmGetFilenameComponentCommand is a utility command used to get the path,
+ * name, extension or name without extension of a full filename. 
+ * Warning: as a utility command, the resulting value is not put in the cache.
+ */
+class cmGetFilenameComponentCommand : public cmCommand
+{
+public:
+  /**
+   * This is a virtual constructor for the command.
+   */
+  virtual cmCommand* Clone() 
+    {
+    return new cmGetFilenameComponentCommand;
+    }
+
+  /**
+   * This is called when the command is first encountered in
+   * the CMakeLists.txt file.
+   */
+  virtual bool Invoke(std::vector<std::string>& args);
+
+  /**
+   * This determines if the command gets propagated down
+   * to makefiles located in subdirectories.
+   */
+  virtual bool IsInherited() { return true;  }
+
+  /**
+   * The name of the command as specified in CMakeList.txt.
+   */
+  virtual const char* GetName() { return "GET_FILENAME_COMPONENT";}
+
+  /**
+   * Succinct documentation.
+   */
+  virtual const char* GetTerseDocumentation() 
+    {
+    return "Get a specific component of a full filename.";
+    }
+  
+  /**
+   * More documentation.
+   */
+  virtual const char* GetFullDocumentation()
+    {
+    return
+      "GET_FILENAME_COMPONENT(VarName FileName PATH|NAME|EXT|NAME_WE)\n"
+      "Set VarName to be the path (PATH), file name (NAME), file "
+      "extension (EXT) or file name without extension (NAME_WE) of FileName.\n"
+      "Note that the path is converted to Unix slashes format and has no "
+      "trailing slashes. The longest file extension is always considered.";
+    }
+  
+  cmTypeMacro(cmGetFilenameComponentCommand, cmCommand);
+};
+
+
+
+#endif

@@ -35,6 +35,7 @@
 #include "cmFindLibraryCommand.cxx"
 #include "cmFindPathCommand.cxx"
 #include "cmFindProgramCommand.cxx"
+#include "cmGetFilenameComponentCommand.cxx"
 #include "cmIfCommand.cxx"
 #include "cmIncludeCommand.cxx"
 #include "cmIncludeDirectoryCommand.cxx"
@@ -91,6 +92,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmFindLibraryCommand);
   commands.push_back(new cmFindPathCommand);
   commands.push_back(new cmFindProgramCommand);
+  commands.push_back(new cmGetFilenameComponentCommand);
   commands.push_back(new cmIfCommand);
   commands.push_back(new cmIncludeCommand);
   commands.push_back(new cmIncludeDirectoryCommand);
