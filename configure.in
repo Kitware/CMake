@@ -146,7 +146,7 @@ fi
 # find make to use to build cmake, prefer gmake
 AC_PATH_PROGS(RUNMAKE, gmake make)
 
-AC_OUTPUT(Makefile Source/Makefile)
+AC_OUTPUT(Source/InitialConfigureFlags.cmake Makefile Source/Makefile)
 # build cmake
 $RUNMAKE 
 # run cmake 
