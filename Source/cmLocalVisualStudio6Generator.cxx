@@ -863,6 +863,10 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
         }
       if ( m_Makefile->GetDefinition("CMAKE_CXX_FLAGS") )
         {
+        if ( flags.size() > 0 )
+          {
+          flags += " ";
+          }
         flags += m_Makefile->GetDefinition("CMAKE_CXX_FLAGS");
         }
 
