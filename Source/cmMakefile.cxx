@@ -2345,14 +2345,14 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
     if(!fout)
       {
       cmSystemTools::Error(
-        "Could not open file for write in copy operatation ", 
+        "Could not open file for write in copy operation ", 
                            tempOutputFile.c_str());
       return 0;
       }
     std::ifstream fin(sinfile.c_str());
     if(!fin)
       {
-      cmSystemTools::Error("Could not open file for read in copy operatation ",
+      cmSystemTools::Error("Could not open file for read in copy operation ",
                            sinfile.c_str());
       return 0;
       }
