@@ -626,7 +626,7 @@ cmLocalVisualStudio6Generator::CreateTargetRules(const cmTarget &target,
     if (!init)
       {
       // header stuff
-      customRuleCode = "PreLink_Cmds=";
+      customRuleCode += "PreLink_Cmds=";
       init = true;
       }
     else
@@ -645,7 +645,7 @@ cmLocalVisualStudio6Generator::CreateTargetRules(const cmTarget &target,
     if (!init)
       {
       // header stuff
-      customRuleCode = "PreLink_Cmds=";
+      customRuleCode += "PreLink_Cmds=";
       init = true;
       }
     else
@@ -666,7 +666,7 @@ cmLocalVisualStudio6Generator::CreateTargetRules(const cmTarget &target,
     if (!init)
       {
       // header stuff
-      customRuleCode = "PostBuild_Cmds=";
+      customRuleCode += "PostBuild_Cmds=";
       init = true;
       }
     else
