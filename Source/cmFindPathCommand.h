@@ -49,7 +49,7 @@ public:
    * This determines if the command gets propagated down
    * to makefiles located in subdirectories.
    */
-  virtual bool IsInherited() {return true;}
+  virtual bool IsInherited() {return false;}
 
   /**
    * The name of the command as specified in CMakeList.txt.

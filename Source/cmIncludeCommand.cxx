@@ -25,19 +25,21 @@ bool cmIncludeCommand::InitialPass(std::vector<std::string> const& args)
       this->SetError("called with wrong number of arguments.  "
                      "Include only takes one file.");
     }
-  bool exists = cmSystemTools::FileExists(args[0].c_str());
-  if(args.size() == 2 && args[1] == "OPTIONAL" && !exists)
+  bool optional = false;
+  if(args.size() == 2)
     {
-    return true;
+    optional = args[1] == "OPTIONAL";
     }
-  if(!exists)
+  
+  bool readit = m_Makefile->ReadListFile( m_Makefile->GetCurrentListFile(), 
+                                          args[0].c_str());
+  if(!optional && !readit)
     {
-    std::string error = "Include file not found: " + args[0] + "\n";
-    this->SetError(error.c_str());
+    std::string m = "Could not find include file:";
+    m += args[0];
+    this->SetError(m.c_str());
     return false;
     }
-  m_Makefile->ReadListFile( m_Makefile->GetCurrentListFile(), 
-                            args[0].c_str());
   return true;
 }
 

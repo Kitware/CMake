@@ -323,7 +323,6 @@ bool cmMakefile::ReadListFile(const char* filename, const char* external)
     cmListFileCache::GetInstance()->GetFileCache(filenametoread);
   if(!lf)
     {
-    cmSystemTools::Error("error can not open file ", filenametoread);
     return false;
     }
   // add this list file to the list of dependencies

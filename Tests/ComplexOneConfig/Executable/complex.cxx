@@ -635,7 +635,7 @@ int main()
 #ifndef REGISTRY_TEST_PATH
   cmFailed("the CONFIGURE_FILE command is broken, REGISTRY_TEST_PATH is not defined.");
 #else
-  if(strcmp(REGISTRY_TEST_PATH, BINARY_DIR "/registry_dir") != 0)
+  if(stricmp(REGISTRY_TEST_PATH, BINARY_DIR "/registry_dir") != 0)
     {
     cmFailed("the 'read registry value' function or CONFIGURE_FILE command is broken. REGISTRY_TEST_PATH == ", 
              REGISTRY_TEST_PATH);

@@ -77,10 +77,15 @@ cmListFile* cmListFileCache::GetFileCache(const char* path)
 
 bool cmListFileCache::CacheFile(const char* path)
 {
+  if(!cmSystemTools::FileExists(path))
+    {
+    return false;
+    }
+    
   std::ifstream fin(path);
   if(!fin)
     {
-    cmSystemTools::Error("error can not open file ", path);
+    cmSystemTools::Error("cmListFileCache: error can not open file ", path);
     return false;
     }
   std::string name;
