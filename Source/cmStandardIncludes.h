@@ -76,6 +76,7 @@
 // include the "c" string header
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #if !defined(_WIN32) && defined(__COMO__)
 // Hack for como strict mode to avoid defining _SVID_SOURCE or _BSD_SOURCE.
