@@ -55,6 +55,7 @@ SET(KWSYS_USE_Directory 1)
 SET(KWSYS_USE_RegularExpression 1)
 SET(KWSYS_USE_Base64 1)
 SET(KWSYS_USE_Process 1)
+SET(KWSYS_USE_CommandLineArguments 1)
 SET(KWSYS_HEADER_ROOT ${CMake_BINARY_DIR}/Source)
 SUBDIRS(Source/kwsys)
 
