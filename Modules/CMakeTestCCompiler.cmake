@@ -3,11 +3,14 @@
 # and like the most basic of programs.   If not, a fatel error
 # is set and cmake stops processing commands and will not generate
 # any makefiles or projects.
-MESSAGE(STATUS "Check for working C compiler: ${CMAKE_C_COMPILER}")
-WRITE_FILE(${CMAKE_BINARY_DIR}/CMakeTmp/testCCompiler.c "int main(){return 0;}")
-TRY_COMPILE(CMAKE_C_COMPILER_WORKS ${CMAKE_BINARY_DIR} 
-            ${CMAKE_BINARY_DIR}/CMakeTmp/testCCompiler.c
-            OUTPUT_VARIABLE OUTPUT)
+IF(NOT CMAKE_C_COMPILER_WORKS)
+  MESSAGE(STATUS "Check for working C compiler: ${CMAKE_C_COMPILER}")
+  WRITE_FILE(${CMAKE_BINARY_DIR}/CMakeTmp/testCCompiler.c "int main(){return 0;}")
+  TRY_COMPILE(CMAKE_C_COMPILER_WORKS ${CMAKE_BINARY_DIR} 
+              ${CMAKE_BINARY_DIR}/CMakeTmp/testCCompiler.c
+              OUTPUT_VARIABLE OUTPUT)
+ENDIF(NOT CMAKE_C_COMPILER_WORKS)
+
 IF(NOT CMAKE_C_COMPILER_WORKS)
    MESSAGE(STATUS "Check for working C compiler: ${CMAKE_C_COMPILER} -- broken")
    MESSAGE(FATAL_ERROR "The C compiler \"${CMAKE_C_COMPILER}\" "
