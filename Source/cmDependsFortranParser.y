@@ -33,6 +33,9 @@ Run bison like this:
 
   bison --yacc --name-prefix=cmDependsFortran_yy --defines=cmDependsFortranParserTokens.h -ocmDependsFortranParser.c cmDependsFortranParser.y
 
+Modify cmDependsFortranParser.c:
+  - remove the yyerrorlab label and associated code
+
 */
 
 /* Configure the parser to use a lexer object.  */

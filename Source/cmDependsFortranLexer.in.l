@@ -51,6 +51,7 @@ Modify cmDependsFortranLexer.h:
       #ifdef __cplusplus
       }
       #endif
+  - remove the block that includes unistd.h
 
 */
 
