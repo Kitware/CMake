@@ -49,6 +49,7 @@ protected:
   void OutputSubDirectoryRules(std::ostream&);
   void OutputDependInformation(std::ostream&);
   void OutputDependLibraries(std::ostream&);
+  void OutputCustomRules(std::ostream&);
 };
 
 #endif

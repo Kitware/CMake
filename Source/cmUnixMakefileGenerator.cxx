@@ -59,6 +59,7 @@ void cmUnixMakefileGenerator::OutputMakefile(const char* file)
   this->OutputExecutableRules(fout);
   this->OutputSubDirectoryRules(fout);
   this->OutputDepends(fout);
+  this->OutputCustomRules(fout);
 }
 
 // Output the LIBRARY and SRC_OBJS list based on
@@ -365,4 +366,25 @@ void cmUnixMakefileGenerator::OutputDepends(std::ostream& fout)
 	}
       }
     }
+}
+
+
+// Output each custom rule in the following format:
+// m_Result: m_Depends[0] m_Depends[1] ...
+//   (tab)   m_Command
+void cmUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
+{
+  for(std::vector<cmMakefile::customCommand>::const_iterator c =
+        m_Makefile->GetCustomCommands().begin();
+      c != m_Makefile->GetCustomCommands().end(); ++c)
+    {
+    fout << c->m_Result.c_str() << ":";
+    for(std::vector<std::string>::const_iterator d = c->m_Depends.begin();
+        d != c->m_Depends.end(); ++ d)
+      {
+      fout << " " << d->c_str();
+      }
+    fout << "\n\t" << c->m_Command.c_str() << "\n\n";
+    }
+  
 }
