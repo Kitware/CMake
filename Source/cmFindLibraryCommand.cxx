@@ -49,34 +49,7 @@ bool cmFindLibraryCommand::Invoke(std::vector<std::string>& args)
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  // Now check and see if the value has been stored in the cache
-  // already, if so use that value and don't look for the program
-  std::string helpString = "Where can the ";
-  if(args[1] == "NAMES")
-    {
-    for(unsigned int i=2; (args[i] != "PATHS" && i < args.size()); ++i)
-      {
-      helpString = "( ";
-      helpString +=  args[i];
-      helpString +=  " ";
-      }
-    }
-  else
-    {
-    helpString += args[1];
-    }
-  helpString += " library be found";
-  const char* cacheValue
-    = cmCacheManager::GetInstance()->GetCacheValue(args[0].c_str());
-  if(cacheValue && strcmp(cacheValue, "NOTFOUND"))
-    { 
-    m_Makefile->AddDefinition(args[0].c_str(), cacheValue);
-    cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
-                                                 cacheValue,
-                                                 helpString.c_str(),
-                                                 cmCacheManager::FILEPATH);
-    return true;
-    }
+
   std::vector<std::string> path;
   std::vector<std::string> names;
   bool foundName = false;
@@ -124,6 +97,34 @@ bool cmFindLibraryCommand::Invoke(std::vector<std::string>& args)
       path.push_back(exp);
       }
     }
+
+  std::string helpString = "Where can ";
+  if (names.size() == 1)
+    {
+    helpString += "the " + names[0] + " library be found";
+    }
+  else
+    {
+    helpString += "one of the " + names[0];
+    for (unsigned int j = 1; j < names.size() - 1; ++j)
+      {
+      helpString += ", " + names[j];
+      }
+    helpString += " or " + names[names.size() - 1] + " libraries be found";
+    }
+
+  const char* cacheValue
+    = cmCacheManager::GetInstance()->GetCacheValue(args[0].c_str());
+  if(cacheValue && strcmp(cacheValue, "NOTFOUND"))
+    { 
+    m_Makefile->AddDefinition(args[0].c_str(), cacheValue);
+    cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
+                                                 cacheValue,
+                                                 helpString.c_str(),
+                                                 cmCacheManager::FILEPATH);
+    return true;
+    }
+
   std::string library;
   for(std::vector<std::string>::iterator i = names.begin();
       i != names.end() ; ++i)
