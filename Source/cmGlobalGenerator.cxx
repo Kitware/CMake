@@ -330,6 +330,16 @@ const char* cmGlobalGenerator::GetLanguageOutputExtensionFromExtension(const cha
     return "";
     }
   const char* lang = this->GetLanguageFromExtension(ext);
+  if(!lang || *lang == 0)
+    {
+    // if no language is found then check to see if it is already an
+    // ouput extension for some language.  In that case it should be ignored
+    // and in this map, so it will not be compiled but will just be used.
+    if(m_OutputExtensions.count(ext))
+      {
+      return ext;
+      }
+    }
   return this->GetLanguageOutputExtensionForLanguage(lang);
 }
 
@@ -362,6 +372,11 @@ void cmGlobalGenerator::SetLanguageEnabled(const char* l, cmMakefile* mf)
   if(outputExtension)
     {
     m_LanguageToOutputExtension[l] = outputExtension;
+    m_OutputExtensions[outputExtension] = outputExtension;
+    if(outputExtension[0] == '.')
+      {
+      m_OutputExtensions[outputExtension+1] = outputExtension+1;
+      }
     }
   
   std::string linkerPrefVar = std::string("CMAKE_") + 
@@ -676,6 +691,7 @@ void cmGlobalGenerator::EnableLanguagesFromGenerator(cmGlobalGenerator *gen )
   this->m_IgnoreExtensions = gen->m_IgnoreExtensions;
   this->m_LanguageToOutputExtension = gen->m_LanguageToOutputExtension;
   this->m_LanguageToLinkerPreference = gen->m_LanguageToLinkerPreference;
+  this->m_OutputExtensions = gen->m_OutputExtensions;
 }
 
 //----------------------------------------------------------------------------

@@ -133,6 +133,7 @@ private:
   // in EnableLanguagesFromGenerator 
   std::map<cmStdString, bool> m_IgnoreExtensions;
   std::map<cmStdString, bool> m_LanguageEnabled;
+  std::map<cmStdString, cmStdString> m_OutputExtensions;
   std::map<cmStdString, cmStdString> m_LanguageToOutputExtension;
   std::map<cmStdString, cmStdString> m_ExtensionToLanguage;
   std::map<cmStdString, cmStdString> m_LanguageToLinkerPreference;

@@ -465,6 +465,7 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
       }
     }
   fout << "\n\n";
+  std::string outputName;
   // get the classes from the source lists then add them to the groups
   for(cmTargets::const_iterator l = tgts.begin(); 
       l != tgts.end(); l++)
@@ -524,7 +525,17 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
             {
             std::string ofname = (*i)->GetSourceName() + outExt;
             ofname = this->CreateSafeUniqueObjectFileName(ofname.c_str());
-            fout << "\\\n\"" << this->ConvertToMakeTarget(ConvertToRelativeOutputPath(ofname.c_str()).c_str()) << "\" ";
+            outputName = this->ConvertToMakeTarget(ConvertToRelativeOutputPath(ofname.c_str()).c_str());
+            fout << "\\\n";
+            // if it already is double quoted because of spaces don't do it again.
+            if(outputName.size() && outputName[0] != '\"')
+              {
+              fout << "\"" << outputName <<  "\" ";
+              }
+            else
+              {
+              fout << outputName << " ";
+              }
             }
           }
         }
@@ -541,7 +552,18 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
               (*i)->GetSourceExtension().c_str());
           if(outExt.size() && (*i)->GetPropertyAsBool("EXTERNAL_OBJECT") )
             {
-            fout << "\\\n\"" << this->ConvertToMakeTarget(ConvertToRelativeOutputPath((*i)->GetFullPath().c_str()).c_str()) << "\" ";
+            outputName =
+              this->ConvertToMakeTarget(ConvertToRelativeOutputPath((*i)->GetFullPath().c_str()).c_str());
+            fout << "\\\n";
+            // if it already is double quoted because of spaces don't do it again.
+            if(outputName.size() && outputName[0] != '\"')
+               {
+              fout << "\"" << outputName <<  "\" ";
+              }
+            else
+              {
+              fout << outputName << " ";
+              }
             }
           }
         }
