@@ -91,11 +91,16 @@ ADD_EXECUTABLE(DumpDocumentation cmDumpDocumentation)
 ADD_EXECUTABLE(ctest ctest.cxx cmSystemTools.cxx cmRegularExpression.cxx)
 ADD_EXECUTABLE(ccommand ccommand.cxx cmSystemTools.cxx cmMakefile.cxx)
 
+IF (NOT DART_ROOT)
+SET(MAKEPROGRAM ${CMAKE_MAKE_PROGRAM})
+ENDIF (NOT DART_ROOT)
+
 CONFIGURE_FILE(
   ${CMake_SOURCE_DIR}/Source/cmaketest.h.in 
   ${CMake_BINARY_DIR}/Source/cmaketest.h ESCAPE_QUOTES)
 
 ADD_EXECUTABLE(cmaketest cmaketest.cxx cmSystemTools.cxx)
+
 
 IF(BUILD_TESTING)
     ADD_TEST(DumpDocumentation ${CMake_BINARY_DIR}/Source/DumpDocumentation
@@ -156,6 +161,7 @@ IF(BUILD_TESTING)
       TestDriverTest
       ${CMake_BINARY_DIR}/Tests/Wrapping/bin
       TestDriverTest subdir/test3)
+
 ENDIF(BUILD_TESTING)
 
 
