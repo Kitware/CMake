@@ -325,7 +325,13 @@ public:
    */
   const char* GetDefineFlags()
     {return m_DefineFlags.c_str();}
-
+  
+  /**
+   * Get the vector of used command instances.
+   */
+  const std::vector<cmCommand*>& GetUsedCommands() const
+    {return m_UsedCommands;}
+  
   /**
    * Dump documentation to a file. If 0 is returned, the
    * operation failed.
