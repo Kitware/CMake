@@ -189,6 +189,9 @@ private:
   std::vector<cmStdString> m_CustomTestsIgnore;
   std::vector<cmStdString> m_CustomMemCheckIgnore;
 
+  int m_CustomMaximumPassedTestOutputSize;
+  int m_CustomMaximumFailedTestOutputSize;
+
   std::string             m_StartTest;
   std::string             m_EndTest;
   double                  m_ElapsedTestingTime;
@@ -211,6 +214,9 @@ private:
                                      std::string& log, int* results);
   bool ProcessMemCheckPurifyOutput(const std::string& str, 
                                    std::string& log, int* results);
+
+  //! Clean test output to specified length
+  bool CleanTestOutput(std::string& output, size_t length);
 
   std::string TestsToRunString;
   bool m_UseUnion;

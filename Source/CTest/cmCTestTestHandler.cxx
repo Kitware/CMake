@@ -198,6 +198,9 @@ cmCTestTestHandler::cmCTestTestHandler()
   m_UseIncludeRegExp       = false;
   m_UseExcludeRegExp       = false;
   m_UseExcludeRegExpFirst  = false;
+
+  m_CustomMaximumPassedTestOutputSize = 1 * 1024;
+  m_CustomMaximumFailedTestOutputSize = 300 * 1024;
 }
 
 //----------------------------------------------------------------------
@@ -218,6 +221,12 @@ void cmCTestTestHandler::PopulateCustomVectors(cmMakefile *mf)
   cmCTest::PopulateCustomVector(mf, 
                              "CTEST_CUSTOM_MEMCHECK_IGNORE", 
                              m_CustomMemCheckIgnore);
+  cmCTest::PopulateCustomInteger(mf, 
+                             "CTEST_CUSTOM_MAXIMUM_PASSED_TEST_OUTPUT_SIZE", 
+                             m_CustomMaximumPassedTestOutputSize);
+  cmCTest::PopulateCustomInteger(mf, 
+                             "CTEST_CUSTOM_MAXIMUM_FAILED_TEST_OUTPUT_SIZE", 
+                             m_CustomMaximumFailedTestOutputSize);
 }
 
 
@@ -645,6 +654,15 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
           cres.m_RegressionImages = this->GenerateRegressionImages(dartString);
           }
         }
+      }
+
+    if ( cres.m_Status == cmCTestTestHandler::COMPLETED )
+      {
+      this->CleanTestOutput(output, static_cast<size_t>(m_CustomMaximumPassedTestOutputSize));
+      }
+    else
+      {
+      this->CleanTestOutput(output, static_cast<size_t>(m_CustomMaximumFailedTestOutputSize));
       }
 
     cres.m_Output = output;
@@ -1638,5 +1656,64 @@ void cmCTestTestHandler::SetTestsToRunInformation(const char* in)
     buff[fin.gcount()] = 0;
     this->TestsToRunString = buff;
     }
+}
+
+bool cmCTestTestHandler::CleanTestOutput(std::string& output, size_t remove_threshold)
+{
+  if ( remove_threshold == 0 )
+    {
+    return true;
+    }
+  if ( output.find("CTEST_FULL_OUTPUT") != output.npos )
+    {
+    return true;
+    }
+  cmOStringStream ostr;
+  std::string::size_type cc;
+  std::string::size_type skipsize;
+  int inTag = 0;
+  int skipped = 0;
+  for ( cc = 0; cc < output.size(); cc ++ )
+    {
+    int ch = output[cc];
+    if ( ch < 0 || ch > 255 )
+      {
+      break;
+      }
+    if ( ch == '<' )
+      {
+      inTag = 1;
+      }
+    if ( !inTag )
+      {
+      int notskip = 0;
+      // Skip
+      if ( skipsize < remove_threshold )
+        {
+        ostr << static_cast<char>(ch);
+        notskip = 1;
+        }
+      skipsize ++;
+      if ( notskip && skipsize >= remove_threshold )
+        {
+        skipped = 1;
+        }
+      }
+    else
+      {
+      ostr << static_cast<char>(ch);
+      }
+    if ( ch == '>' )
+      {
+      inTag = 0;
+      }
+    }
+  if ( skipped )
+    {
+    ostr << "..." << std::endl << "The rest of the test output was removed since it exceeds the threshold of "
+      << remove_threshold << " characters." << std::endl;
+    }
+  output = ostr.str();
+  return true;
 }
 
