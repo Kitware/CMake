@@ -414,9 +414,10 @@ std::string cmBorlandMakefileGenerator::CreateMakeVariable(const char* s, const 
   std::string unmodified = s;
   unmodified += s2;
   // see if th
-  if(m_MakeVariableMap.count(unmodified))
+  std::map<cmStdString, cmStdString>::iterator i = m_MakeVariableMap.find(unmodified);
+  if(i != m_MakeVariableMap.end())
     {
-    return m_MakeVariableMap[unmodified];
+    return i->second;
     }
   std::string ret = unmodified;
   // if the string is greater the 32 chars it is an invalid vairable name

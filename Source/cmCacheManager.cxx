@@ -443,31 +443,34 @@ void cmCacheManager::OutputHelpString(std::ofstream& fout,
 
 void cmCacheManager::RemoveCacheEntry(const char* key)
 {
-  if(m_Cache.count(key))
-  {  
-    m_Cache.erase(key);
-  }
+  CacheEntryMap::iterator i = m_Cache.find(key);
+  if(i != m_Cache.end())
+    {
+    m_Cache.erase(i);
+    }
   else
-  {
-    std::cerr << "Failed to remove entry" << std::endl;
-  }
+    {
+    std::cerr << "Failed to remove entry:" << key << std::endl;
+    }
 }
 
 
 cmCacheManager::CacheEntry *cmCacheManager::GetCacheEntry(const char* key)
 {
-  if(m_Cache.count(key))
+  CacheEntryMap::iterator i = m_Cache.find(key);
+  if(i != m_Cache.end())
     {
-    return &(m_Cache.find(key)->second);
+    return &i->second;
     }
   return 0;
 }
 
 const char* cmCacheManager::GetCacheValue(const char* key) const
 {
-  if(m_Cache.count(key))
+  CacheEntryMap::const_iterator i = m_Cache.find(key);
+  if(i != m_Cache.end())
     {
-    return m_Cache.find(key)->second.m_Value.c_str();
+    return i->second.m_Value.c_str();
     }
   return 0;
 }
