@@ -25,7 +25,7 @@ GET_FILENAME_COMPONENT(TCL_TCLSH_PATH ${TCL_TCLSH} PATH)
 GET_FILENAME_COMPONENT(TK_WISH_PATH ${TK_WISH} PATH)
 
 FIND_LIBRARY(TCL_LIBRARY
-  NAMES tcl tcl84 tcl83 tcl82 tcl80 
+  NAMES tcl tcl84 tcl8.4 tcl83 tcl8.3 tcl82 tcl8.2 tcl80 tcl8.0
   PATHS  
   /usr/lib 
   /usr/local/lib
