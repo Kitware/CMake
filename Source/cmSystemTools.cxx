@@ -1474,3 +1474,37 @@ void cmSystemTools::GlobDirs(const char *fullPath,
       }
     }
 }
+
+
+void cmSystemTools::ExpandListArguments(std::vector<std::string> const& arguments, 
+                                        std::vector<std::string>& newargs)
+{
+  std::vector<std::string>::const_iterator i;
+  for(i = arguments.begin();i != arguments.end(); ++i)
+    {
+    if(i->find(';') != std::string::npos)
+      {
+      std::string::size_type start = 0;
+      std::string::size_type endpos = 0;
+      while(endpos != std::string::npos)
+        {
+        endpos = i->find(';', start); 
+        std::string::size_type len;
+        if(endpos != std::string::npos)
+          {
+          len = endpos - start;
+          }
+        else
+          {
+          len = i->size()-start;
+          }
+        newargs.push_back(i->substr(start, len));
+        start = endpos+1;
+        }
+      }
+    else
+      {
+      newargs.push_back(*i);
+      }
+    }
+}

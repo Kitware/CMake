@@ -40,20 +40,27 @@ void cmMSDotNETGenerator::GenerateMakefile()
   while(endpos != std::string::npos)
     {
     endpos = configTypes.find(' ', start);
+    std::string config;
+    std::string::size_type len;
     if(endpos != std::string::npos)
       {
-      std::string config = configTypes.substr(start, endpos - start);
-      if(config == "Debug" || config == "Release" ||
-         config == "MinSizeRel" || config == "RelWithDebInfo")
-        {
-        m_Configurations.push_back(config);
-        }
-      else
-        {
-        cmSystemTools::Error("Invalid configuration type in CMAKE_CONFIGURATION_TYPES: ",
-                             config.c_str(),
-                             " (Valid types are Debug,Release,MinSizeRel,RelWithDebInfo)");
-        }
+      len = endpos - start;
+      }
+    else
+      {
+      len = configTypes.size() - start;
+      }
+    config = configTypes.substr(start, len);
+    if(config == "Debug" || config == "Release" ||
+       config == "MinSizeRel" || config == "RelWithDebInfo")
+      {
+      m_Configurations.push_back(config);
+      }
+    else
+      {
+      cmSystemTools::Error("Invalid configuration type in CMAKE_CONFIGURATION_TYPES: ",
+                           config.c_str(),
+                           " (Valid types are Debug,Release,MinSizeRel,RelWithDebInfo)");
       }
     start = endpos+1;
     }

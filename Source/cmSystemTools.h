@@ -43,6 +43,13 @@ public:
                             const char* replace,
                             const char* with);
 
+  /** Expand out any arguements in the vector that have ; separated
+   *  strings into multiple arguements.  A new vector is created 
+   *  containing the expanded versions of all arguments in argsIn.
+   */
+  static void ExpandListArguments(std::vector<std::string> const& argsIn,
+                                  std::vector<std::string>& argsOut);
+
   /**
    * Look for and replace registry values in a string
    */
