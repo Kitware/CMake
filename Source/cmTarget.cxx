@@ -67,7 +67,7 @@ void cmTarget::TraceVSDependencies(std::string projFile,
       for(std::vector<std::string>::iterator id = depends.begin();
           id != depends.end(); ++id)
         {
-        // if there is a cutom rule to generate that dependency
+        // if there is a custom rule to generate that dependency
         // then add it to the list
         cmSourceFile* outsf = 
           makefile->GetSourceFileWithOutput(id->c_str());
@@ -107,7 +107,7 @@ void cmTarget::TraceVSDependencies(std::string projFile,
   // add in the project file itself
   srcFilesToProcess.push(projFile);
   srcFilesQueued.insert(projFile);
-  // add in the library depends for cusotm targets
+  // add in the library depends for custom targets
   if (this->GetType() == cmTarget::UTILITY)
     {
     for (std::vector<cmCustomCommand>::iterator ic = 

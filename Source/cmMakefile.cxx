@@ -422,7 +422,7 @@ bool cmMakefile::ReadListFile(const char* filename_in, const char* external_in)
     this->ExecuteCommand(lf->m_Functions[i]);
     }
 
-  // send scope ended to and funciton blockers
+  // send scope ended to and function blockers
   if (filename)
     {
     // loop over all function blockers to see if any block this command

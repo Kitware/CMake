@@ -66,7 +66,7 @@ IF(CMAKE_C_COMPILER)
 ENDIF(CMAKE_C_COMPILER)
 IF(CMAKE_CXX_COMPILER)
   GET_FILENAME_COMPONENT(CMAKE_BASE_NAME ${CMAKE_CXX_COMPILER} NAME_WE)
-  # since the gnu compiler has several names force gcc
+  # since the gnu compiler has several names force g++
   IF(CMAKE_COMPILER_IS_GNUCXX)
      SET(CMAKE_BASE_NAME g++)
   ENDIF(CMAKE_COMPILER_IS_GNUCXX)
