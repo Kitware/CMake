@@ -1,12 +1,32 @@
 #ifdef WIN32
 
-#define __WIN32 
-#define _WINDOWS
-#define __WINDOWS__
-#define __WXMSW__
-#define __WIN32__
-#define WINVER 0x0400
-#define STRICT
+#ifndef __WIN32
+#  define __WIN32 
+#endif 
+
+#ifndef _WINDOWS
+#  define _WINDOWS
+#endif
+
+#ifndef __WINDOWS__
+#  define __WINDOWS__
+#endif
+
+#ifndef __WXMSW__
+#  define __WXMSW__
+#endif
+
+#ifndef __WIN32__
+#  define __WIN32__
+#endif
+
+#ifndef WINVER
+#  define WINVER 0x0400
+#endif
+
+#ifndef STRICT
+#  define STRICT
+#endif
 
 
 #include "wx/defs.h"
