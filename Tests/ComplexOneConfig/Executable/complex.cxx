@@ -425,6 +425,18 @@ int main()
   cmPassed("SHOULD_NOT_BE_DEFINED_GREATER is not defined.");
 #endif
   
+#ifdef SHOULD_NOT_BE_DEFINED_EQUAL
+  cmFailed("IF or SET is broken, SHOULD_NOT_BE_DEFINED_EQUAL is defined.");
+#else
+  cmPassed("SHOULD_NOT_BE_DEFINED_EQUAL is not defined.");
+#endif
+
+#ifndef SHOULD_BE_DEFINED_EQUAL
+  cmFailed("IF or SET is broken, SHOULD_BE_DEFINED_EQUAL is not defined.\n");
+#else
+  cmPassed("SHOULD_BE_DEFINED_EQUAL is defined.");
+#endif
+
 #ifndef SHOULD_BE_DEFINED_GREATER
   cmFailed("IF or SET is broken, SHOULD_BE_DEFINED_GREATER is not defined.\n");
 #else
