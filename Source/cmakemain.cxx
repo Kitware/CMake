@@ -53,6 +53,16 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
    "Wizard mode runs cmake interactively without a GUI.  The user is "
    "prompted to answer questions about the project configuration.  "
    "The answers are used to set cmake cache values."},
+  {"-L[A][H]", "List non-advanced cached variables.",
+   "List cache variables will run CMake and list all the variables from the "
+   "CMake cache that are not marked as INTERNAL or ADVANCED. This will "
+   "effectively display current CMake settings, which can be then changed "
+   "with -D option. Changing some of the variable may result in more "
+   "variables being created. If A is specified, then it will display also "
+   "advanced variables. If H is specified, it will also display help for "
+   "each variable."},
+  {"-N", "View mode only.",
+   "Only load the cache. Do not actually run configure and generate steps."},
   {0,0,0}
 };
 
@@ -113,6 +123,10 @@ int do_cmake(int ac, char** av)
   
   bool wiz = false;
   bool command = false;
+  bool list_cached = false;
+  bool list_all_cached = false;
+  bool list_help = false;
+  bool view_only = false;
   std::vector<std::string> args;
   for(int i =0; i < ac; ++i)
     {
@@ -123,6 +137,28 @@ int do_cmake(int ac, char** av)
     else if (strcmp(av[i], "-E") == 0)
       {
       command = true;
+      }
+    else if (strcmp(av[i], "-N") == 0)
+      {
+      view_only = true;
+      }
+    else if (strcmp(av[i], "-L") == 0)
+      {
+      list_cached = true;
+      }
+    else if (strcmp(av[i], "-LA") == 0)
+      {
+      list_all_cached = true;
+      }
+    else if (strcmp(av[i], "-LH") == 0)
+      {
+      list_cached = true;
+      list_help = true;
+      }
+    else if (strcmp(av[i], "-LAH") == 0)
+      {
+      list_all_cached = true;
+      list_help = true;
       }
     else 
       {
@@ -143,7 +179,35 @@ int do_cmake(int ac, char** av)
     }
   cmake cm;  
   cm.SetProgressCallback(updateProgress, 0);
-  return cm.Run(args); 
+  int res = cm.Run(args, view_only);
+  if ( list_cached || list_all_cached )
+    {
+    cmCacheManager::CacheIterator it = cm.GetCacheManager()->GetCacheIterator();
+    std::cout << "-- Cache values" << std::endl;
+    for ( it.Begin(); !it.IsAtEnd(); it.Next() )
+      {
+      cmCacheManager::CacheEntryType t = it.GetType();
+      if ( t != cmCacheManager::INTERNAL && t != cmCacheManager::STATIC &&
+           t != cmCacheManager::UNINITIALIZED )
+        {
+        bool advanced = it.PropertyExists("ADVANCED");
+        if ( list_all_cached || !advanced)
+          {
+          if ( list_help )
+            {
+            std::cout << "// " << it.GetProperty("HELPSTRING") << std::endl;
+            }
+          std::cout << it.GetName() << ":" << cmCacheManager::TypeToString(it.GetType()) 
+            << "=" << it.GetValue() << std::endl;
+          if ( list_help )
+            {
+            std::cout << std::endl;
+            }
+          }
+        }
+      }
+    }
+  return res;
 }
 
 void updateProgress(const char *msg, float prog, void*)
