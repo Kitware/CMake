@@ -745,7 +745,10 @@ int cmCTest::ProcessTests()
   if ( m_Tests[COVERAGE_TEST] || m_Tests[ALL_TEST] )
     {
     this->UpdateCTestConfiguration();
-    this->CoverageHandler->CoverageDirectory(this);
+    if (this->CoverageHandler->CoverageDirectory(this))
+      {
+      res |= cmCTest::COVERAGE_ERRORS;
+      }
     }
   if ( m_Tests[MEMCHECK_TEST] || m_Tests[ALL_TEST] )
     {

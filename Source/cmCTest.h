@@ -133,7 +133,8 @@ public:
     CONFIGURE_ERRORS = 0x02,
     BUILD_ERRORS = 0x04,
     TEST_ERRORS = 0x08,
-    MEMORY_ERRORS = 0x10
+    MEMORY_ERRORS = 0x10,
+    COVERAGE_ERRORS = 0x20
   };
 
   int GenerateNotesFile(const char* files);
