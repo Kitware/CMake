@@ -299,7 +299,8 @@ void cmGlobalGenerator::Configure()
       for(cmTarget::LinkLibraries::iterator lib = libs.begin();
           lib != libs.end(); ++lib)
         {
-        if(cmSystemTools::IsNOTFOUND(lib->first.c_str()))
+        if(lib->first.size() > 9 && 
+           cmSystemTools::IsNOTFOUND(lib->first.c_str()))
           {
           std::string varName = lib->first.substr(0, lib->first.size()-9);
           notFoundMap.insert(varName);
@@ -311,7 +312,8 @@ void cmGlobalGenerator::Configure()
       for( std::vector<std::string>::iterator lib = incs.begin();
            lib != incs.end(); ++lib)
         {
-        if(cmSystemTools::IsNOTFOUND(lib->c_str()))
+        if(lib->size() > 9 && 
+           cmSystemTools::IsNOTFOUND(lib->c_str()))
           {
           std::string varName = lib->substr(0, lib->size()-9); 
           notFoundMap.insert(varName);
