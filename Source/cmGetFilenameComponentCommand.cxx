@@ -39,6 +39,7 @@ bool cmGetFilenameComponentCommand::InitialPass(std::vector<std::string> const& 
   
   std::string result;
   std::string filename = args[1];
+  cmSystemTools::ExpandRegistryValues(filename);
   std::string storeArgs;
   std::string programArgs;
   if (args[2] == "PATH")
