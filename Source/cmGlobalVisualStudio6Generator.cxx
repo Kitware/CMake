@@ -171,6 +171,11 @@ void cmGlobalVisualStudio6Generator::Generate()
       {
       gen[0]->GetMakefile()->
         AddUtilityCommand("ALL_BUILD", "echo","\"Build all projects\"",false,srcs);
+      std::string cmake_command = 
+        m_LocalGenerators[0]->GetMakefile()->GetDefinition("CMAKE_COMMAND");
+      gen[0]->GetMakefile()->
+        AddUtilityCommand("INSTALL", cmake_command.c_str(),
+          "-DBUILD_TYPE=$(IntDir) -P cmake_install.cmake",false,srcs);
       }
     }
   
@@ -217,6 +222,7 @@ void cmGlobalVisualStudio6Generator::WriteDSWFile(std::ostream& fout,
   unsigned int i;
   bool doneAllBuild = false;
   bool doneRunTests = false;
+  bool doneInstall = false;
 
   for(i = 0; i < generators.size(); ++i)
     {
@@ -304,6 +310,17 @@ void cmGlobalVisualStudio6Generator::WriteDSWFile(std::ostream& fout,
             else
               {
               doneAllBuild = true;
+              }
+            }
+          if(l->first == "INSTALL")
+            {
+            if(doneInstall)
+              {
+              skip = true;
+              }
+            else
+              {
+              doneInstall = true;
               }
             }
           if(l->first == "RUN_TESTS")

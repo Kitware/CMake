@@ -256,6 +256,11 @@ void cmGlobalVisualStudio7Generator::Generate()
       {
       gen[0]->GetMakefile()->
         AddUtilityCommand("ALL_BUILD", "echo","\"Build all projects\"",false,srcs);
+      std::string cmake_command = 
+        m_LocalGenerators[0]->GetMakefile()->GetDefinition("CMAKE_COMMAND");
+      gen[0]->GetMakefile()->
+        AddUtilityCommand("INSTALL", cmake_command.c_str(),
+          "-DBUILD_TYPE=$(IntDir) -P cmake_install.cmake",false,srcs);
       }
     }
   
@@ -314,6 +319,7 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout,
   homedir += "/";
   bool doneAllBuild = false;
   bool doneRunTests = false;
+  bool doneInstall  = false;
   
   // For each cmMakefile, create a VCProj for it, and
   // add it to this SLN file
@@ -405,6 +411,17 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout,
             else
               {
               doneAllBuild = true;
+              }
+            }
+          if(l->first == "INSTALL")
+            {
+            if(doneInstall)
+              {
+              skip = true;
+              }
+            else
+              {
+              doneInstall = true;
               }
             }
           if(l->first == "RUN_TESTS")
