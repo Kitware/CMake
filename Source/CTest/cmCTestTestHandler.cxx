@@ -407,6 +407,7 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
       cmSystemTools::ChangeDirectory(it->m_Directory.c_str());
       }
     cres.m_Name = testname;
+    cres.m_Path = it->m_Directory.c_str();
     if(m_TestsToRun.size() && 
        std::find(m_TestsToRun.begin(), m_TestsToRun.end(), cnt) == m_TestsToRun.end())
       {
@@ -448,6 +449,7 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
         args[1].Value.c_str() << "\n";
       if ( !m_CTest->GetShowOnly() )
         {
+        cres.m_FullCommandLine = actualCommand;
         m_TestResults.push_back( cres ); 
         failed.push_back(testname);
         continue;
@@ -611,9 +613,9 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
           }
         }
       }
+
     cres.m_Output = output;
     cres.m_ReturnValue = retVal;
-    cres.m_Path = it->m_Directory.c_str();
     cres.m_CompletionStatus = "Completed";
     m_TestResults.push_back( cres );
     }
