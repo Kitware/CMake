@@ -24,6 +24,8 @@
 
 class cmMakefile;
 class cmLocalGenerator;
+class cmGlobalGenerator;
+class cmake;
 
 /** \class cmCTestScriptHandler
  * \brief A class that handles ctest -S invocations
@@ -91,6 +93,9 @@ private:
   
   cmMakefile *m_Makefile;
   cmLocalGenerator *m_LocalGenerator;
+  cmGlobalGenerator *m_GlobalGenerator;
+  cmake *m_CMake;
+  
 };
 
 #endif

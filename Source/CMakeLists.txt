@@ -111,6 +111,8 @@ ADD_EXECUTABLE(DumpDocumentation cmDumpDocumentation)
 
 SET(CMTEST_SRCS ctest.cxx cmCTest.cxx 
   CTest/cmCTestScriptHandler.cxx
+  CTest/cmCTestUpdateHandler.cxx
+  CTest/cmCTestConfigureHandler.cxx
 )
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/Source/CTest)

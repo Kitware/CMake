@@ -48,7 +48,9 @@ cmCTestScriptHandler::cmCTestScriptHandler()
   m_Backup = false; 
   m_Makefile = 0;
   m_LocalGenerator = 0;
-
+  m_CMake = 0;
+  m_GlobalGenerator = 0;
+  
   // the *60 is becuase the settings are in minutes but GetTime is seconds
   m_MinimumInterval = 30*60;
 }
@@ -57,16 +59,23 @@ cmCTestScriptHandler::cmCTestScriptHandler()
 //----------------------------------------------------------------------
 cmCTestScriptHandler::~cmCTestScriptHandler()
 {
-  if (m_Makefile)
-    {
-    delete m_Makefile;
-    }
+  // local generator owns the makefile
   m_Makefile = 0;
   if (m_LocalGenerator)
     {
     delete m_LocalGenerator;
     }
   m_LocalGenerator = 0;
+  if (m_GlobalGenerator)
+    {
+    delete m_GlobalGenerator;
+    }
+  m_GlobalGenerator = 0;
+  if (m_CMake)
+    {
+    delete m_CMake;
+    }
+  m_CMake = 0;
 }
 
 
@@ -121,18 +130,20 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
     }
 
   // create a cmake instance to read the configuration script
-  cmake cm;
-  cmGlobalGenerator gg;
-  gg.SetCMakeInstance(&cm);
-
   // read in the list file to fill the cache
-  if (m_LocalGenerator)
+  if (m_CMake)
     {
+    delete m_CMake;
+    delete m_GlobalGenerator;
     delete m_LocalGenerator;
     }
-  m_LocalGenerator = gg.CreateLocalGenerator();
-  m_LocalGenerator->SetGlobalGenerator(&gg);
+  m_CMake = new cmake;
+  m_GlobalGenerator = new cmGlobalGenerator;
+  m_GlobalGenerator->SetCMakeInstance(m_CMake);
 
+  m_LocalGenerator = m_GlobalGenerator->CreateLocalGenerator();
+  m_LocalGenerator->SetGlobalGenerator(m_GlobalGenerator);
+  
   // set a variable with the path to the current script
   m_LocalGenerator->GetMakefile()->AddDefinition("CTEST_SCRIPT_DIRECTORY",
                                    cmSystemTools::GetFilenamePath(
@@ -163,14 +174,31 @@ int cmCTestScriptHandler::ExtractVariables()
 {
   // get some info that should be set
   m_Makefile = m_LocalGenerator->GetMakefile();
+
+  m_SourceDir.clear();
+  m_BinaryDir.clear();
+  m_CTestCmd.clear();
   
-  m_SourceDir = m_Makefile->GetDefinition("CTEST_SOURCE_DIRECTORY");
-  m_BinaryDir = m_Makefile->GetDefinition("CTEST_BINARY_DIRECTORY");
-  m_CTestCmd  = m_Makefile->GetDefinition("CTEST_COMMAND");
+  if (m_Makefile->GetDefinition("CTEST_SOURCE_DIRECTORY"))
+    {
+    m_SourceDir = m_Makefile->GetDefinition("CTEST_SOURCE_DIRECTORY");
+    }
+  if (m_Makefile->GetDefinition("CTEST_BINARY_DIRECTORY"))
+    {
+    m_BinaryDir = m_Makefile->GetDefinition("CTEST_BINARY_DIRECTORY");
+    }
+  if (m_Makefile->GetDefinition("CTEST_COMMAND"))
+    {
+    m_CTestCmd  = m_Makefile->GetDefinition("CTEST_COMMAND");
+    }
   m_Backup    = m_Makefile->IsOn("CTEST_BACKUP_AND_RESTORE");
 
   // in order to backup and restore we also must have the cvs root
-  m_CVSCheckOut = m_Makefile->GetDefinition("CTEST_CVS_CHECKOUT");
+  m_CVSCheckOut.clear();
+  if (m_Makefile->GetDefinition("CTEST_CVS_CHECKOUT"))
+    {
+    m_CVSCheckOut = m_Makefile->GetDefinition("CTEST_CVS_CHECKOUT");
+    }
   if (m_Backup && m_CVSCheckOut.empty())
     {
     cmSystemTools::Error(
@@ -213,7 +241,11 @@ int cmCTestScriptHandler::ExtractVariables()
       atof(m_Makefile->GetDefinition("CTEST_CONTINUOUS_MINIMUM_INTERVAL"));
     }
   
-  m_CVSCmd = m_Makefile->GetDefinition("CTEST_CVS_COMMAND");
+  m_CVSCmd.clear();
+  if (m_Makefile->GetDefinition("CTEST_CVS_COMMAND"))
+    {
+    m_CVSCmd = m_Makefile->GetDefinition("CTEST_CVS_COMMAND");
+    }
   
   return 0;
 }

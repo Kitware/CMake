@@ -24,6 +24,8 @@
 
 class cmMakefile;
 class cmCTestScriptHandler;
+class cmCTestUpdateHandler;
+class cmCTestConfigureHandler;
 
 class cmCTest
 {
@@ -52,6 +54,18 @@ public:
    */
   int ProcessTests();
 
+  /*
+   * A utility function that returns the nightly time
+   */
+  static struct tm* cmCTest::GetNightlyTime(std::string str, 
+                                            bool verbose, 
+                                            bool tomorrowtag);
+  
+  /*
+   * Is the tomorrow tag set?
+   */
+  bool GetTomorrowTag() { return m_TomorrowTag; };
+      
   /**
    * Try to build the project
    */
@@ -66,16 +80,6 @@ public:
    * Try to get coverage of the project
    */
   int CoverageDirectory();
-
-  /**
-   * Do revision control update of directory
-   */
-  int UpdateDirectory();
-
-  /**
-   * Do configure the project
-   */
-  int ConfigureDirectory();
 
   /**
    * Do submit testing results
@@ -109,10 +113,13 @@ public:
    * Set the cmake test mode (experimental, nightly, continuous).
    */
   void SetTestModel(int mode);
-
+  int GetTestModel() { return m_TestModel; };
+  
   std::string GetTestModelString();
   static int GetTestModelFromString(const char* str);
 
+  std::string GetDartConfiguration(const char *name);
+  
   /**
    * constructor and destructor
    */
@@ -132,7 +139,6 @@ public:
   std::string m_ConfigType;
   bool m_Verbose;
   bool m_DartMode;
-  bool m_ShowOnly;
 
   bool m_ForceNewCTestProcess;
 
@@ -155,14 +161,46 @@ public:
 
   int GenerateNotesFile(const char* files);
 
+  bool OpenOutputFile(const std::string& path, 
+                      const std::string& name, std::ofstream& stream);  
+  static std::string MakeXMLSafe(const std::string&);
+  static std::string MakeURLSafe(const std::string&);
+  
+  /*
+   * return the current tag
+   */
+  std::string GetCurrentTag();
+
+  ///! Get the current time as string
+  std::string CurrentTime();
+  
+  ///! Should we only show what we would do?
+  bool GetShowOnly();
+  
+  //! Start CTest XML output file
+  void StartXML(std::ostream& ostr);
+
+  //! End CTest XML output file
+  void EndXML(std::ostream& ostr);
+
+  //! Run command specialized for make and configure. Returns process status
+  // and retVal is return value or exception.
+  int RunMakeCommand(const char* command, std::string* output,
+    int* retVal, const char* dir, bool verbose, int timeout, 
+    std::ofstream& ofs);
+
 private:
-  // this is a helper class than handles running test scripts
-  cmCTestScriptHandler *ScriptHandler;
+  // these are helper classes
+  cmCTestScriptHandler    *ScriptHandler;
+  cmCTestUpdateHandler    *UpdateHandler;
+  cmCTestConfigureHandler *ConfigureHandler;
   
   void SetTestsToRunInformation(const char*);
   void ExpandTestsToRunInformation(int numPossibleTests);
   std::string TestsToRunString;
   
+  bool m_ShowOnly;
+
   enum {
     FIRST_TEST     = 0,
     UPDATE_TEST    = 1,
@@ -260,12 +298,6 @@ private:
 
   typedef std::vector<cmCTestTestProperties> tm_ListOfTests;
 
-  // Some structures needed for cvs update
-  struct StringPair : 
-    public std::pair<std::string, std::string>{};
-  struct UpdateFiles : public std::vector<StringPair>{};
-  struct AuthorsToUpdatesMap : 
-    public std::map<std::string, UpdateFiles>{};
 
   struct cmCTestCoverage
   {
@@ -381,17 +413,6 @@ private:
                                std::vector<cmCTestBuildErrorWarning>,
                                double elapsed_time);
 
-  bool OpenOutputFile(const std::string& path, 
-                      const std::string& name, std::ofstream& stream);  
-  std::string MakeXMLSafe(const std::string&);
-  std::string MakeURLSafe(const std::string&);
-
-  //! Run command specialized for make and configure. Returns process status
-  // and retVal is return value or exception.
-  int RunMakeCommand(const char* command, std::string* output,
-    int* retVal, const char* dir, bool verbose, int timeout, 
-    std::ofstream& ofs);
-
   //! Run command specialized for tests. Returns process status and retVal is
   // return value or exception.
   int RunTest(std::vector<const char*> args, std::string* output, int *retVal, 
@@ -399,12 +420,6 @@ private:
 
   std::string GenerateRegressionImages(const std::string& xml);
   const char* GetTestStatus(int status);
-
-  //! Start CTest XML output file
-  void StartXML(std::ostream& ostr);
-
-  //! End CTest XML output file
-  void EndXML(std::ostream& ostr);
 
   //! Create not from files.
   int GenerateDartNotesOutput(std::ostream& os, const tm_VectorOfStrings& files);
@@ -421,9 +436,6 @@ private:
   bool InitializeMemoryChecking();
   ///! Find the running cmake
   void FindRunningCMake(const char* arg0);
-
-  ///! Get the current time as string
-  std::string CurrentTime();
 
   ///! Maximum size of testing string
   std::string::size_type m_MaximumPassedTestResultSize;
