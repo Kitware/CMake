@@ -129,7 +129,7 @@ static void cmListFileLexerDestroy(cmListFileLexer* lexer);
   return 1;
 }
 
-([^ \t\r\n\(\)\"\\]|\\.)+ {
+([^ \t\r\n\(\)#\\\"]|\\.)([^ \t\r\n\(\)#\\]|\\.)* {
   lexer->token.type = cmListFileLexer_Token_ArgumentUnquoted;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
   lexer->column += yyleng;
