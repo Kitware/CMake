@@ -104,6 +104,8 @@ void cmVTKWrapJavaCommand::FinalPass()
   int lastClass = m_WrapClasses.size();
   std::vector<std::string> depends;
   std::vector<std::string> depends2;
+  std::vector<std::string> alldepends;  
+  std::vector<std::string> empty;
   std::string wjava = "${VTK_WRAP_JAVA_EXE}";
   std::string pjava = "${VTK_PARSE_JAVA_EXE}";
   std::string hints = "${VTK_WRAP_HINTS}";
@@ -118,7 +120,8 @@ void cmVTKWrapJavaCommand::FinalPass()
 
     // wrap java
     std::string res = m_WrapClasses[classNum].GetSourceName() + ".cxx";
-    std::string res2 = m_OriginalNames[classNum] + ".java";
+    std::string res2 = resultDirectory + "/" + 
+      m_OriginalNames[classNum] + ".java";
     
     std::string cmd = wjava + " " + m_WrapHeaders[classNum] + " "
       + hints + (m_WrapClasses[classNum].IsAnAbstractClass() ? " 0 " : " 1 ") + " > " + m_WrapClasses[classNum].GetSourceName() + ".cxx";
@@ -127,11 +130,19 @@ void cmVTKWrapJavaCommand::FinalPass()
                                  res.c_str(), m_LibraryName.c_str());
 
     cmd = pjava + " " + m_WrapHeaders[classNum] + " "
-      + hints + (m_WrapClasses[classNum].IsAnAbstractClass() ? " 0 " : " 1 ") + " > " + resultDirectory + "/" + m_OriginalNames[classNum] + ".java";
+      + hints + (m_WrapClasses[classNum].IsAnAbstractClass() ? " 0 " : " 1 ") + " > " + res2;
     m_Makefile->AddCustomCommand(m_WrapHeaders[classNum].c_str(),
                                  cmd.c_str(), depends2, 
                                  res2.c_str(), m_LibraryName.c_str());
+    alldepends.push_back(res2);
     }
+
+  m_Makefile->AddUtilityCommand((m_LibraryName+"JavaClasses").c_str(),
+                                "",
+                                true,
+                                alldepends,
+                                empty);
+  
 }
 
 

@@ -482,12 +482,24 @@ void cmMakefile::AddExecutable(const char *exeName,
 
 
 void cmMakefile::AddUtilityCommand(const char* utilityName,
-                                   const char* command)
+                                   const char* command,
+                                   bool all)
+{
+  std::vector<std::string> empty;
+  this->AddUtilityCommand(utilityName,command,all,
+                          empty,empty);
+}
+
+void cmMakefile::AddUtilityCommand(const char* utilityName,
+                                   const char* command,
+                                   bool all,
+                                   const std::vector<std::string> &dep,
+                                   const std::vector<std::string> &out)
 {
   cmTarget target;
   target.SetType(cmTarget::UTILITY);
-  std::vector<std::string> empty;
-  cmCustomCommand cc(utilityName, command, empty, empty);
+  target.SetInAll(all);
+  cmCustomCommand cc(utilityName, command, dep, out);
   target.GetCustomCommands().push_back(cc);
   m_Targets.insert(cmTargets::value_type(utilityName,target));
 }

@@ -95,7 +95,7 @@ void cmDSWMakefile::WriteDSWFile(std::ostream& fout)
   allListFiles.push_back(m_Makefile);
   // add a special target that depends on ALL projects for easy build
   // of Debug only
-  m_Makefile->AddUtilityCommand("ALL_BUILD", "echo \"Build all projects\"");
+  m_Makefile->AddUtilityCommand("ALL_BUILD", "echo \"Build all projects\"", false);
   
   m_Makefile->FindSubDirectoryCMakeListsFiles(allListFiles);
   // For each cmMakefile, create a DSP for it, and
@@ -144,7 +144,7 @@ void cmDSWMakefile::WriteDSWFile(std::ostream& fout)
             for(cmTargets::const_iterator al = atgts.begin();
                 al != atgts.end(); ++al)
               {
-              if(al->second.GetType() != cmTarget::UTILITY)
+              if(al->second.IsInAll())
                 {
                 l->second.GetLinkLibraries().push_back(
                   cmTarget::LinkLibraries::value_type(al->first, cmTarget::GENERAL));

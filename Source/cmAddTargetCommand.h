@@ -38,32 +38,61 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =========================================================================*/
-#include "cmAddCustomTargetCommand.h"
+#ifndef cmAddTargetCommand_h
+#define cmAddTargetCommand_h
 
-// cmAddCustomTargetCommand
-bool cmAddCustomTargetCommand::Invoke(std::vector<std::string>& args)
+#include "cmStandardIncludes.h"
+#include "cmCommand.h"
+
+/** \class cmAddTargetCommand
+ * \brief Command that adds a target to the build system.
+ *
+ * cmAddTargetCommand adds an extra target to the build system.
+ * This is useful when you would like to add special
+ * targets like "install,", "clean," and so on.
+ */
+class cmAddTargetCommand : public cmCommand
 {
-  bool all = false;
+public:
+  /**
+   * This is a virtual constructor for the command.
+   */
+  virtual cmCommand* Clone() 
+    {
+    return new cmAddTargetCommand;
+    }
+
+  /**
+   * This is called when the command is first encountered in
+   * the CMakeLists.txt file.
+   */
+  virtual bool Invoke(std::vector<std::string>& args);
   
-  if(args.size() < 2 )
+  /**
+   * The name of the command as specified in CMakeList.txt.
+   */
+  virtual const char* GetName() 
+    {return "ADD_TARGET";}
+  
+  /**
+   * Succinct documentation.
+   */
+  virtual const char* GetTerseDocumentation() 
     {
-    this->SetError("called with incorrect number of arguments");
-    return false;
+    return "Add an extra target to the build system.";
     }
-  m_Makefile->ExpandVariablesInString(args[0]);
-  m_Makefile->ExpandVariablesInString(args[1]);
-
-    // all target option
-  if (args.size() >= 3)
+  
+  /**
+   * More documentation.
+   */
+  virtual const char* GetFullDocumentation()
     {
-    if (args[2] == "ALL")
-      {
-      all = true;
-      }
+    return
+      "ADD_TARGET(Name \"command to run\" ALL)\n"
+      "Add a target to the make process. The third argument ALL is optional. If it is specified then the target will be added to the all target." ;
     }
-  m_Makefile->AddUtilityCommand(args[0].c_str(), 
-                                args[1].c_str(), all);
+  
+  cmTypeMacro(cmAddTargetCommand, cmCommand);
+};
 
-  return true;
-}
-
+#endif

@@ -38,22 +38,19 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =========================================================================*/
-#include "cmAddCustomTargetCommand.h"
+#include "cmAddTargetCommand.h"
 
-// cmAddCustomTargetCommand
-bool cmAddCustomTargetCommand::Invoke(std::vector<std::string>& args)
+// cmAddTargetCommand
+bool cmAddTargetCommand::Invoke(std::vector<std::string>& args)
 {
   bool all = false;
-  
   if(args.size() < 2 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  m_Makefile->ExpandVariablesInString(args[0]);
-  m_Makefile->ExpandVariablesInString(args[1]);
-
-    // all target option
+  
+  // all target option
   if (args.size() >= 3)
     {
     if (args[2] == "ALL")
@@ -61,9 +58,9 @@ bool cmAddCustomTargetCommand::Invoke(std::vector<std::string>& args)
       all = true;
       }
     }
+  std::vector<std::string> dep;
   m_Makefile->AddUtilityCommand(args[0].c_str(), 
                                 args[1].c_str(), all);
-
   return true;
 }
 

@@ -90,7 +90,8 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "ADD_CUSTOM_TARGET(Name \"command to run\")";
+      "ADD_CUSTOM_TARGET(Name \"command to run\" ALL)\n"
+      "The ALL option is optional. If it is specified it indicates that this target should be added to the Build all target.";
     }
   
   cmTypeMacro(cmAddCustomTargetCommand, cmCommand);

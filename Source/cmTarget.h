@@ -66,6 +66,13 @@ public:
   void SetType(TargetType f) { m_TargetType = f; }
   
   /**
+   * Indicate whether the target is part of the all target
+   */
+  bool IsInAll() const { return m_InAll; }
+  bool GetInAll() const { return m_InAll; }
+  void SetInAll(bool f) { m_InAll = f; }
+
+  /**
    * Get the list of the custom commands for this target
    */
   const std::vector<cmCustomCommand> &GetCustomCommands() const {return m_CustomCommands;}
@@ -110,6 +117,7 @@ private:
   TargetType m_TargetType;
   std::vector<cmSourceFile> m_SourceFiles;
   LinkLibraries m_LinkLibraries;
+  bool m_InAll;
 };
 
 typedef std::map<std::string,cmTarget> cmTargets;

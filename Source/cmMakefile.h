@@ -140,7 +140,13 @@ public:
    * a command that is run every time a target is built.
    */
   void AddUtilityCommand(const char* utilityName,
-                         const char* command);
+                         const char* command,
+                         bool all);
+  void AddUtilityCommand(const char* utilityName,
+                         const char* command,
+                         bool all,
+                         const std::vector<std::string> &depends,
+                         const std::vector<std::string> &outputs);
 
   /**
    * Add a utility on which this project depends. A utility is an executable
