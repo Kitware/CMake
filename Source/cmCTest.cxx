@@ -1806,6 +1806,19 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
   double timeout = m_TimeOut;
   int retVal = 0;
   
+  // if the generator and make program are not specified then it is an error
+  if (!m_BuildGenerator.size() || !m_BuildMakeProgram.size())
+    {
+    if(outstring)
+      {
+      *outstring =  
+        "--build-and-test requires that both the generator and makeprogram "
+        "be provided using the --build-generator and --build-makeprogram "
+        "command line options. ";
+      }
+    return 1;
+    }
+    
   // default to the build type of ctest itself
   if(m_ConfigType.size() == 0)
     {
