@@ -372,7 +372,8 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
           }
         if (command)
           {
-          std::string script = this->ConstructScript(command->GetCommandLines());
+          std::string script =
+            this->ConstructScript(command->GetCommandLines(), "\\\n\t");
           const char* comment = command->GetComment();
           const char* flags = compileFlags.size() ? compileFlags.c_str(): 0;
           this->WriteCustomRule(fout, source.c_str(), script.c_str(), 
