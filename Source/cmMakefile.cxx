@@ -2213,6 +2213,7 @@ std::string cmMakefile::FindLibrary(const char* name,
   // Add the system search path to our path.
   std::vector<std::string> path;
   cmSystemTools::GetPath(path, "CMAKE_LIBRARY_PATH");
+  cmSystemTools::GetPath(path, "LIB");
   cmSystemTools::GetPath(path);
   // now add the path
   path.insert(path.end(), userPaths.begin(), userPaths.end());
