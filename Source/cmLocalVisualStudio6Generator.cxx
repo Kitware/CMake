@@ -895,22 +895,27 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
       flagsDebugRel += " -DCMAKE_INTDIR=\\\"RelWithDebInfo\\\" ";
       flags = " ";
       flags = m_Makefile->GetDefinition("CMAKE_CXX_FLAGS");
-      flags += " ";
+      // force a C++ file type
+      flags += " /TP ";
       }
     // if C and the target is not CXX
     else if(gen->GetLanguageEnabled("C") && !target.HasCxx())
       {
-      flagsRelease += m_Makefile->GetDefinition("CMAKE_CXX_FLAGS_RELEASE");
+      flagsRelease += m_Makefile->GetDefinition("CMAKE_C_FLAGS_RELEASE");
       flagsRelease += " -DCMAKE_INTDIR=\\\"Release\\\"";
-      flagsMinSize += m_Makefile->GetDefinition("CMAKE_CXX_FLAGS_MINSIZEREL");
+      flagsMinSize += m_Makefile->GetDefinition("CMAKE_C_FLAGS_MINSIZEREL");
       flagsMinSize += " -DCMAKE_INTDIR=\\\"MinSizeRel\\\"";
-      flagsDebug += m_Makefile->GetDefinition("CMAKE_CXX_FLAGS_DEBUG");
+      flagsDebug += m_Makefile->GetDefinition("CMAKE_C_FLAGS_DEBUG");
       flagsDebug += " -DCMAKE_INTDIR=\\\"Debug\\\"";
-      flagsDebugRel += m_Makefile->GetDefinition("CMAKE_CXX_FLAGS_RELWITHDEBINFO");
+      flagsDebugRel += m_Makefile->GetDefinition("CMAKE_C_FLAGS_RELWITHDEBINFO");
       flagsDebugRel += " -DCMAKE_INTDIR=\\\"RelWithDebInfo\\\"";
       flags = " ";
       flags = m_Makefile->GetDefinition("CMAKE_C_FLAGS");
       }
+    // The template files have CXX FLAGS in them, that need to be replaced.
+    // There are not separate CXX and C template files, so we use the same
+    // variable names.   The previous code sets up flags* variables to contain
+    // the correct C or CXX flags
     cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_RELEASE", flagsRelease.c_str());
     cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_MINSIZEREL", flagsMinSize.c_str());
     cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_DEBUG", flagsDebug.c_str());
