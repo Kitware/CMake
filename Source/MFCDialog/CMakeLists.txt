@@ -1,4 +1,4 @@
-SOURCE_FILES(SRCS 
+SET( SRCS 
 CMakeSetup.cpp
 MakeHelp.cpp
 CMakeSetup.rc
@@ -13,5 +13,5 @@ CMakeCommandLineInfo.cpp
 ADD_DEFINITIONS(-D_AFXDLL)
 SET(CMAKE_MFC_FLAG 6)
 
-ADD_EXECUTABLE(CMakeSetup WIN32 SRCS)
+ADD_EXECUTABLE(CMakeSetup WIN32 ${SRCS})
 ADD_DEPENDENCIES(CMakeSetup cmake)
