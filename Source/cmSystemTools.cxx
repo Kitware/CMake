@@ -174,6 +174,10 @@ void cmSystemTools::ReplaceString(std::string& source,
 
 std::string cmSystemTools::EscapeSpaces(const char* str)
 {
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  std::string result = str;
+  return "\""+result+"\"";
+#else
   std::string result = "";
   for(const char* ch = str; *ch != '\0'; ++ch)
     {
@@ -184,6 +188,7 @@ std::string cmSystemTools::EscapeSpaces(const char* str)
     result += *ch;
     }
   return result;
+#endif
 }
 
 
