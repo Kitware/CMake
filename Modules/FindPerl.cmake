@@ -9,6 +9,7 @@ INCLUDE(${CMAKE_ROOT}/Modules/FindCygwin.cmake)
 FIND_PROGRAM(PERL_EXECUTABLE
   perl
   "C:/Perl/bin" 
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\ActiveState\\ActivePerl\\804]/bin
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\ActiveState\\ActivePerl\\628]/bin
   ${CYGWIN_INSTALL_PATH}/bin
 )
