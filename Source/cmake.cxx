@@ -23,6 +23,14 @@
 #include "cmCommand.h"
 #include "cmVariableWatch.h"
 
+// only build kdevelop generator on non-windows platforms
+// when not bootstrapping cmake
+#if !defined(_WIN32)
+# if defined(CMAKE_BUILD_WITH_CMAKE)
+#   define CMAKE_USE_KDEVELOP
+# endif
+#endif
+
 // include the generator
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #  include "cmGlobalVisualStudio6Generator.h"
@@ -37,7 +45,10 @@
 #else
 #endif
 #include "cmGlobalUnixMakefileGenerator.h"
-#include "cmGlobalKdevelopGenerator.h"
+
+#ifdef CMAKE_USE_KDEVELOP
+# include "cmGlobalKdevelopGenerator.h"
+#endif
 
 #include <stdlib.h> // required for atoi
 
@@ -1415,7 +1426,7 @@ void cmake::AddDefaultGenerators()
 #endif
   m_Generators[cmGlobalUnixMakefileGenerator::GetActualName()] =
     &cmGlobalUnixMakefileGenerator::New;
-#if !defined(_WIN32)
+#ifdef CMAKE_USE_KDEVELOP
   m_Generators[cmGlobalKdevelopGenerator::GetActualName()] =
      &cmGlobalKdevelopGenerator::New;
 #endif
