@@ -603,6 +603,17 @@ public:
    * if so then return it
    */
   cmSourceFile *GetSourceFileWithOutput(const char *outName);
+
+  /**
+   * Add a macro to the list of macros. The arguments should be name of the
+   * macro and a documentation signature of it 
+   */
+  void AddMacro(const char* name, const char* signature);
+
+  /**
+   * Get a list of macros as a ; separated string
+   */
+  void GetListOfMacros(std::string& macros);
   
 protected:
   // add link libraries and directories to the target
@@ -669,6 +680,9 @@ private:
   typedef std::map<cmStdString, cmData*> DataMap;
   DataMap m_DataMap;
   bool m_Inheriting;
+
+  typedef std::map<cmStdString, cmStdString> StringStringMap;
+  StringStringMap m_MacrosMap;
 
   // used in AddDefinition for performance improvement
   DefinitionMap::key_type  m_TemporaryDefinitionKey;

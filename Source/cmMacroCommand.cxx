@@ -30,6 +30,15 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
       if(!expandedArguments.empty() && (expandedArguments[0] == m_Args[0]))
         {
         m_Executing = true;
+        std::string name = m_Args[0];
+        std::vector<std::string>::size_type cc;
+        name += "(";
+        for ( cc = 0; cc < m_Args.size(); cc ++ )
+          {
+          name += " " + m_Args[cc];
+          }
+        name += " )";
+        mf.AddMacro(m_Args[0].c_str(), name.c_str());
         return true;
         }
       }

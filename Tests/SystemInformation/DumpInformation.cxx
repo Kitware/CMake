@@ -54,6 +54,7 @@ int main(int,char *[])
       DumpInformation_BINARY_DIR "/SystemInformation.out",
       DumpInformation_BINARY_DIR "/AllVariables.txt",
       DumpInformation_BINARY_DIR "/AllCommands.txt",
+      DumpInformation_BINARY_DIR "/AllMacros.txt",
       DumpInformation_BINARY_DIR "/../../Source/cmConfigure.h",
       DumpInformation_BINARY_DIR "/../../CMakeCache.txt", 
       DumpInformation_BINARY_DIR "/../../CMakeOutput.log",

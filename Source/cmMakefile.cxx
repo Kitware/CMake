@@ -2003,6 +2003,31 @@ cmVariableWatch *cmMakefile::GetVariableWatch() const
   return 0;
 }
 
+void cmMakefile::AddMacro(const char* name, const char* signature)
+{
+  if ( !name || !signature )
+    {
+    return;
+    }
+  m_MacrosMap[name] = signature;
+}
+
+void cmMakefile::GetListOfMacros(std::string& macros)
+{
+  StringStringMap::iterator it;
+  macros = "";
+  int cc;
+  for ( it = m_MacrosMap.begin(); it != m_MacrosMap.end(); ++it )
+    {
+    if ( cc > 0 )
+      {
+      macros += ";";
+      }
+    macros += it->first;
+    cc ++;
+    }
+}
+
 cmCacheManager *cmMakefile::GetCacheManager() const
 {
   return this->GetCMakeInstance()->GetCacheManager();

@@ -63,6 +63,10 @@ bool cmGetCMakePropertyCommand::InitialPass(
       cc++;
       }
     }
+  else if ( args[1] == "MACROS" )
+    {
+    m_Makefile->GetListOfMacros(output);
+    }
   else
     {
     std::string emsg = "Unknown CMake property: " + args[1];
