@@ -20,6 +20,7 @@ CFG=OUTPUT_LIBNAME - Win32 Debug
 !MESSAGE "OUTPUT_LIBNAME - Win32 Debug" (based on "Win32 (x86) Generic Project")
 !MESSAGE "OUTPUT_LIBNAME - Win32 MinSizeRel" (based on "Win32 (x86) Generic Project")
 !MESSAGE "OUTPUT_LIBNAME - Win32 Release" (based on "Win32 (x86) Generic Project")
+!MESSAGE "OUTPUT_LIBNAME - Win32 ReleaseWithDebugInfo" (based on "Win32 (x86) Generic Project")
 !MESSAGE 
 
 # Begin Project
@@ -67,6 +68,19 @@ MTL=midl.exe
 # PROP Intermediate_Dir "MinSizeRel"
 # PROP Target_Dir ""
 
+!ELSEIF  "$(CFG)" == "OUTPUT_LIBNAME - Win32 ReleaseWithDebugInfo"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "ReleaseWithDebugInfo"
+# PROP BASE Intermediate_Dir "ReleaseWithDebugInfo"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "EXECUTABLE_OUTPUT_PATHReleaseWithDebugInfo"
+# PROP Intermediate_Dir "ReleaseWithDebugInfo"
+# PROP Target_Dir ""
+
 !ENDIF 
 
 # Begin Target
@@ -74,3 +88,4 @@ MTL=midl.exe
 # Name "OUTPUT_LIBNAME - Win32 Release"
 # Name "OUTPUT_LIBNAME - Win32 Debug"
 # Name "OUTPUT_LIBNAME - Win32 MinSizeRel"
+# Name "OUTPUT_LIBNAME - Win32 ReleaseWithDebugInfo"

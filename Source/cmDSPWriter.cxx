@@ -629,6 +629,10 @@ void cmDSPWriter::WriteDSPHeader(std::ostream& fout, const char *libName,
                                    m_Makefile->
                                    GetDefinition("CMAKE_CXX_FLAGS_DEBUG"));
       cmSystemTools::ReplaceString(line,
+                                   "CMAKE_CXX_FLAGS_RELWITHDEBUGINFO",
+                                   m_Makefile->
+                                   GetDefinition("CMAKE_CXX_FLAGS_RELWITHDEBUGINFO"));
+      cmSystemTools::ReplaceString(line,
                                    "CMAKE_CXX_FLAGS",
                                    m_Makefile->
                                    GetDefinition("CMAKE_CXX_FLAGS"));

@@ -33,6 +33,7 @@ CFG=OUTPUT_LIBNAME - Win32 Debug
 !MESSAGE "OUTPUT_LIBNAME - Win32 Debug" (based on "Win32 (x86) Application")
 !MESSAGE "OUTPUT_LIBNAME - Win32 MinSizeRel" (based on "Win32 (x86) Application")
 !MESSAGE "OUTPUT_LIBNAME - Win32 Release" (based on "Win32 (x86) Application")
+!MESSAGE "OUTPUT_LIBNAME - Win32 ReleaseWithDebugInfo" (based on "Win32 (x86) Application")
 !MESSAGE 
 
 # Begin Project
@@ -128,6 +129,34 @@ LINK32=link.exe
 CM_MULTILINE_OPTIMIZED_LIBRARIES
 CM_MULTILINE_LIBRARIES
 
+!ELSEIF  "$(CFG)" == "OUTPUT_LIBNAME - Win32 ReleaseWithDebugInfo"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "ReleaseWithDebugInfo"
+# PROP BASE Intermediate_Dir "ReleaseWithDebugInfo"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "EXECUTABLE_OUTPUT_PATHReleaseWithDebugInfo"
+# PROP Intermediate_Dir "ReleaseWithDebugInfo"
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo  /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS"  /FD /c
+# ADD CPP /nologo  /D "WIN32"  /D "NDEBUG" /D "_CONSOLE" /D "_MBCS"  /FD /c
+# ADD CPP BUILD_INCLUDES EXTRA_DEFINES /D "OUTPUT_LIBNAME_EXPORTS"
+# ADD CPP CMAKE_CXX_FLAGS
+# ADD CPP CMAKE_CXX_FLAGS_RELWITHDEBUGINFO
+# ADD BASE RSC /l 0x409 /d "NDEBUG"
+# ADD RSC /l 0x409 /d "NDEBUG"
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LINK32=link.exe
+# ADD BASE LINK32  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /IGNORE:4089
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /IGNORE:4089
+CM_MULTILINE_OPTIMIZED_LIBRARIES
+CM_MULTILINE_LIBRARIES
+
 !ENDIF 
 
 # Begin Target
@@ -135,3 +164,4 @@ CM_MULTILINE_LIBRARIES
 # Name "OUTPUT_LIBNAME - Win32 Release"
 # Name "OUTPUT_LIBNAME - Win32 Debug"
 # Name "OUTPUT_LIBNAME - Win32 MinSizeRel"
+# Name "OUTPUT_LIBNAME - Win32 ReleaseWithDebugInfo"

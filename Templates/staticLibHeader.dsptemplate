@@ -33,6 +33,7 @@ CFG=OUTPUT_LIBNAME - Win32 Debug
 !MESSAGE "OUTPUT_LIBNAME - Win32 Debug" (based on "Win32 (x86) Static Library")
 !MESSAGE "OUTPUT_LIBNAME - Win32 MinSizeRel" (based on "Win32 (x86) Static Library")
 !MESSAGE "OUTPUT_LIBNAME - Win32 Release" (based on "Win32 (x86) Static Library")
+!MESSAGE "OUTPUT_LIBNAME - Win32 ReleaseWithDebugInfo" (based on "Win32 (x86) Static Library")
 # Begin Project
 # PROP AllowPerConfigDependencies 0
 # PROP Scc_ProjName ""
@@ -117,6 +118,31 @@ LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo
 
+!ELSEIF  "$(CFG)" == "OUTPUT_LIBNAME - Win32 ReleaseWithDebugInfo"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "ReleaseWithDebugInfo"
+# PROP BASE Intermediate_Dir "ReleaseWithDebugInfo"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "LIBRARY_OUTPUT_PATHReleaseWithDebugInfo"
+# PROP Intermediate_Dir "ReleaseWithDebugInfo"
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB"  /FD /c
+# ADD CPP /nologo /D "NDEBUG" /D "WIN32" /D "_MBCS" /D "_LIB"  /FD /c
+# ADD CPP BUILD_INCLUDES EXTRA_DEFINES /D "OUTPUT_LIBNAME_EXPORTS"
+# ADD CPP CMAKE_CXX_FLAGS
+# ADD CPP CMAKE_CXX_FLAGS_RELWITHDEBUGINFO
+# ADD BASE RSC /l 0x409 /d "NDEBUG"
+# ADD RSC /l 0x409 /d "NDEBUG"
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LIB32=link.exe -lib
+# ADD BASE LIB32 /nologo
+# ADD LIB32 /nologo
 
 !ENDIF 
 
@@ -125,4 +151,5 @@ LIB32=link.exe -lib
 # Name "OUTPUT_LIBNAME - Win32 Release"
 # Name "OUTPUT_LIBNAME - Win32 Debug"
 # Name "OUTPUT_LIBNAME - Win32 MinSizeRel"
+# Name "OUTPUT_LIBNAME - Win32 ReleaseWithDebugInfo"
 

@@ -20,6 +20,7 @@ CFG=OUTPUT_LIBNAME - Win32 Debug
 !MESSAGE "OUTPUT_LIBNAME - Win32 Debug" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE "OUTPUT_LIBNAME - Win32 MinSizeRel" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE "OUTPUT_LIBNAME - Win32 Release" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "OUTPUT_LIBNAME - Win32 ReleaseWithDebugInfo" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE 
 
 # ITK DSP Header file
@@ -132,6 +133,36 @@ LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /stack:0x989680 /dll /machine:I386 
 # ADD LINK32 CM_OPTIMIZED_LIBRARIES CM_LIBRARIES kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /stack:0x989680 /dll /machine:I386
 
+!ELSEIF  "$(CFG)" == "OUTPUT_LIBNAME - Win32 ReleaseWithDebugInfo"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "ReleaseWithDebugInfo"
+# PROP BASE Intermediate_Dir "ReleaseWithDebugInfo"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "LIBRARY_OUTPUT_PATHReleaseWithDebugInfo"
+# PROP Intermediate_Dir "ReleaseWithDebugInfo"
+# PROP Ignore_Export_Lib 0
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "OUTPUT_LIBNAME_EXPORTS" /FD /c
+# ADD CPP /nologo /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL"  /FD /c
+# ADD CPP BUILD_INCLUDES EXTRA_DEFINES /D "OUTPUT_LIBNAME_EXPORTS"
+# ADD CPP CMAKE_CXX_FLAGS
+# ADD CPP CMAKE_CXX_FLAGS_RELWITHDEBUGINFO
+# ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
+# ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
+# ADD BASE RSC /l 0x409 /d "NDEBUG"
+# ADD RSC /l 0x409 /d "NDEBUG"
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LINK32=link.exe
+# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
+# ADD LINK32 CM_OPTIMIZED_LIBRARIES CM_LIBRARIES kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386
+
+
 !ENDIF 
 
 # Begin Target
@@ -139,3 +170,4 @@ LINK32=link.exe
 # Name "OUTPUT_LIBNAME - Win32 Release"
 # Name "OUTPUT_LIBNAME - Win32 Debug"
 # Name "OUTPUT_LIBNAME - Win32 MinSizeRel"
+# Name "OUTPUT_LIBNAME - Win32 ReleaseWithDebugInfo"
