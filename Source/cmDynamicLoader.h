@@ -69,6 +69,10 @@ public:
   // Description:
   // Return the last error produced from a calls made on this class.
   static const char* LastError();
+
+  // Description:
+  // Flush the cache of dynamic loader.
+  static void FlushCache();
   
 protected:
   cmDynamicLoader() {};

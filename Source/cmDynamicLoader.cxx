@@ -356,3 +356,8 @@ const char* cmDynamicLoader::LastError()
   return dlerror(); 
 }
 #endif
+
+void cmDynamicLoader::FlushCache()
+{
+  cmDynamicLoaderCache::GetInstance()->FlushCache();
+}
