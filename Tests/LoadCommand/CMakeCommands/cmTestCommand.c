@@ -59,6 +59,7 @@ CM_PLUGIN_EXPORT const char *cmGetName()
   return "CMAKE_TEST_COMMAND";
 }
 
+#ifdef MUCHO_MUDSLIDE
 void CM_PLUGIN_EXPORT cmInitializeCommand(cmLoadedCommandInfo *info)
 {
   info->InitialPass = InitialPass;
@@ -66,6 +67,7 @@ void CM_PLUGIN_EXPORT cmInitializeCommand(cmLoadedCommandInfo *info)
   info->Destructor = Destructor;
   info->m_Inherited = 0;
 }
+#endif
 
 
 
