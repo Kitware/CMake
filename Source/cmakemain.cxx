@@ -184,7 +184,9 @@ int do_cmake(int ac, char** av)
       {
       wiz = true;
       }
-    else if (strcmp(av[i], "-E") == 0)
+    // if command has already been set, then
+    // do not eat the -E 
+    else if (!command && strcmp(av[i], "-E") == 0)
       {
       command = true;
       }
