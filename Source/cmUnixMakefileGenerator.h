@@ -120,7 +120,8 @@ protected:
   virtual void BuildInSubDirectory(std::ostream& fout,
                                    const char* directory,
                                    const char* target1,
-                                   const char* target2);
+                                   const char* target2,
+                                   bool silent = false);
 
   virtual void OutputSubDirectoryVars(std::ostream& fout,
                                       const char* var,
@@ -129,7 +130,9 @@ protected:
                                       const char* target2,
                                       const char* depend,
                                       const std::vector<std::string>&
-                                      SubDirectories);
+                                      SubDirectories,
+                                      bool silent = false);
+
   virtual void OutputMakeRule(std::ostream&, 
                               const char* comment,
                               const char* target,

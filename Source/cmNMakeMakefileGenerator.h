@@ -49,7 +49,8 @@ protected:
   virtual void BuildInSubDirectory(std::ostream& fout,
                                    const char* directory,
                                    const char* target1,
-                                   const char* target2);
+                                   const char* target2,
+                                   bool silent = false);
   void OutputMakeRule(std::ostream& fout, 
                       const char* comment,
                       const char* target,

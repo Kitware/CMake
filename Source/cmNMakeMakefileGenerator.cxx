@@ -225,23 +225,30 @@ void cmNMakeMakefileGenerator::OutputMakeVariables(std::ostream& fout)
 
 
 void cmNMakeMakefileGenerator::BuildInSubDirectory(std::ostream& fout,
-                                                  const char* directory,
-                                                  const char* target1,
-                                                  const char* target2)
+                                                   const char* directory,
+                                                   const char* target1,
+                                                   const char* target2,
+                                                   bool silent)
 {
   if(target1)
     {
     std::string dir = this->ConvertToOutputPath(directory);
     fout << "\tif not exist \"" << dir << "\\$(NULL)\""
          << " " 
-         << "$(MAKE) $(MAKESILENT) rebuild_cache\n"
-         << "\techo Building " << target1 << " in directory " << directory << "\n"
-         << "\tcd " << dir << "\n"
+         << "$(MAKE) $(MAKESILENT) rebuild_cache\n";
+    if (!silent) 
+      {
+      fout << "\techo Building " << target1 << " in directory " << directory << "\n";
+      }
+    fout << "\tcd " << dir << "\n"
          << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) " << target1 << "\n";
     }
   if(target2)
     {
-    fout << "\techo Building " << target2 << " in directory " << directory << "\n";
+    if (!silent) 
+      {
+      fout << "\techo Building " << target2 << " in directory " << directory << "\n";
+      }
     fout << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) " << target2 << "\n";
     }
   std::string currentDir = m_Makefile->GetCurrentOutputDirectory();
