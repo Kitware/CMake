@@ -118,6 +118,11 @@ extern int putenv (char *__string) __THROW;
 # endif
 #endif
 
+#ifdef _MSC_VER
+typedef unsigned short mode_t;
+#endif
+
+
 #ifdef CM_HAS_STD_BUT_NOT_FOR_IOSTREAM
 // some compilers have std:: but not for the stream library,
 // so we have to bring it into the std namespace by hand.

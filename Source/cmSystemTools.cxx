@@ -35,6 +35,7 @@
 #include <string.h>
 #include <windows.h>
 #include <direct.h>
+#include <io.h>
 #define _unlink unlink
 #else
 #include <sys/types.h>
