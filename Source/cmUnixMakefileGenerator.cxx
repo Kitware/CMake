@@ -352,7 +352,8 @@ void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
       this->OutputLinkLibraries(fout, l->first.c_str(), l->second);
       fout << "\n\n";
       }
-    else if (l->second.GetType() == cmTarget::EXECUTABLE)
+    else if ((l->second.GetType() == cmTarget::EXECUTABLE)
+             || (l->second.GetType() == cmTarget::WIN32_EXECUTABLE))
       {
       fout << l->first << ": ${" << 
         l->first << "_SRC_OBJS} ${CMAKE_DEPEND_LIBS}\n";
