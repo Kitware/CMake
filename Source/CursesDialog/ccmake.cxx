@@ -30,8 +30,8 @@
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationName[] =
 {
-  {"ccmake",
-   "- Curses Interface for CMake.", 0},
+  {0,
+   "  ccmake - Curses Interface for CMake.", 0},
   {0,0,0}
 };
 
@@ -39,7 +39,7 @@ static const cmDocumentationEntry cmDocumentationName[] =
 static const cmDocumentationEntry cmDocumentationUsage[] =
 {
   {0,
-   "ccmake <path-to-source>", 0},
+   "  ccmake <path-to-source>", 0},
   {0,0,0}
 };
 
@@ -88,10 +88,15 @@ int main(int argc, char** argv)
   cmDocumentation doc;
   if(cmDocumentation::Type ht = doc.CheckOptions(argc, argv))
     {
-    doc.SetName(cmDocumentationName);
-    doc.SetUsage(cmDocumentationUsage);
-    doc.SetDescription(cmDocumentationDescription);
-    doc.Print(ht, std::cout);
+    cmake hcm;
+    std::vector<cmDocumentationEntry> commands;
+    hcm.GetCommandDocumentation(commands);
+    doc.SetNameSection(cmDocumentationName);
+    doc.SetUsageSection(cmDocumentationUsage);
+    doc.SetDescriptionSection(cmDocumentationDescription);
+    doc.SetOptionsSection(0);
+    doc.SetCommandsSection(&commands[0]);
+    doc.PrintDocumentation(ht, std::cout);
     return 0;
     }  
   

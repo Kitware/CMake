@@ -24,8 +24,8 @@
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationName[] =
 {
-  {"cmake",
-   "- Cross-Platform Makefile Generator.", 0},
+  {0,
+   "  cmake - Cross-Platform Makefile Generator.", 0},
   {0,0,0}
 };
 
@@ -33,7 +33,7 @@ static const cmDocumentationEntry cmDocumentationName[] =
 static const cmDocumentationEntry cmDocumentationUsage[] =
 {
   {0,
-   "cmake [options] <path-to-source>", 0},
+   "  cmake [options] <path-to-source>", 0},
   {0,0,0}
 };
 
@@ -74,12 +74,12 @@ int do_cmake(int ac, char** av)
     cmake hcm;
     std::vector<cmDocumentationEntry> commands;
     hcm.GetCommandDocumentation(commands);
-    doc.SetName(cmDocumentationName);
-    doc.SetUsage(cmDocumentationUsage);
-    doc.SetDescription(cmDocumentationDescription);
-    doc.SetOptions(cmDocumentationOptions);
-    doc.SetCommands(&commands[0]);
-    doc.Print(ht, std::cout);
+    doc.SetNameSection(cmDocumentationName);
+    doc.SetUsageSection(cmDocumentationUsage);
+    doc.SetDescriptionSection(cmDocumentationDescription);
+    doc.SetOptionsSection(cmDocumentationOptions);
+    doc.SetCommandsSection(&commands[0]);
+    doc.PrintDocumentation(ht, std::cout);
     return 0;
     }
   
