@@ -428,12 +428,11 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
   std::vector<std::string> runtimeDirs;
 
   bool cxx = tgt.HasCxx(); 
-  // this may look strange, but the only reason for CXX and C SHLIB flags
-  // is for the hp where ld is used for linking shared libraries 
-  // but we still need to use the compiler version of the flags for the hp
-  // So for EXECUTABLE targets we want to use the CXX Flags for run time path stuff
   if(!cxx )
     {
+    // if linking a c executable use the C runtime flag as cc
+    // may not be the same program that creates shared libaries
+    // and may have different flags
     if( tgt.GetType() == cmTarget::EXECUTABLE)
       {
       if(m_Makefile->GetDefinition("CMAKE_C_SHLIB_RUNTIME_FLAG"))
