@@ -2583,7 +2583,7 @@ void cmLocalUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
   this->OutputMakeRule(fout,
                        "CMakeCache.txt",
                        "rebuild_cache",
-                       "$(CMAKE_BINARY_DIR)/CMakeCache.txt",
+                       0,
                        "$(CMAKE_COMMAND) "
                        "-H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)");  
 
