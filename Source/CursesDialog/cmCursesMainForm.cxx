@@ -349,7 +349,6 @@ void cmCursesMainForm::UpdateStatusBar()
     m_Fields[index-2]));
   const char* curField = lbl->GetValue();
 
-  // We want to display this on the right
   char help[128];
   const char* helpString;
   cmCacheManager::CacheEntry *entry = 
@@ -406,6 +405,7 @@ void cmCursesMainForm::UpdateStatusBar()
 
   bar[width] = '\0';
 
+  // We want to display this on the right
   char version[cmCursesMainForm::MAX_WIDTH];
   char vertmp[128];
   sprintf(vertmp,"CMake Version %d.%d", cmMakefile::GetMajorVersion(),
