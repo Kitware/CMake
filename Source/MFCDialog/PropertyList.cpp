@@ -50,6 +50,7 @@ BEGIN_MESSAGE_MAP(CPropertyList, CListBox)
   ON_BN_CLICKED(IDC_PROPCHECKBOXCTRL, OnCheckBox)
   ON_COMMAND(42, OnDelete)
   ON_COMMAND(43, OnHelp)
+  ON_COMMAND(44, OnIgnore)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -607,6 +608,7 @@ void CPropertyList::OnRButtonUp( UINT nFlags, CPoint point )
   BOOL loc;
   m_curSel = ItemFromPoint(point,loc);
   menu.CreatePopupMenu();
+  menu.AppendMenu(MF_STRING | MF_ENABLED, 44, "Ignore Cache Entry");
   menu.AppendMenu(MF_STRING | MF_ENABLED, 42, "Delete Cache Entry");
   menu.AppendMenu(MF_STRING | MF_ENABLED, 43, "Help For Cache Entry");
   menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, 
@@ -628,6 +630,19 @@ void CPropertyList::RemoveProperty(const char* name)
       }
     }
 }
+
+void CPropertyList::OnIgnore()
+{
+  if(m_curSel == -1 || this->GetCount() <= 0)
+    {
+    return;
+    }
+  CPropertyItem* pItem = (CPropertyItem*) GetItemDataPtr(m_curSel);
+  pItem->m_curValue = "IGNORE";
+  InvalidateList();
+}
+
+
 
 void CPropertyList::OnDelete()
 { 

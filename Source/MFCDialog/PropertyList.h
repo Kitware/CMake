@@ -122,6 +122,7 @@ protected:
   afx_msg void OnKillfocusEditBox();
   afx_msg void OnChangeEditBox();
   afx_msg void OnButton();
+  afx_msg void OnIgnore();
   afx_msg void OnDelete();
   afx_msg void OnHelp();
   afx_msg void OnCheckBox();

@@ -106,8 +106,8 @@ BEGIN
     RTEXT           "Where is the source code:",IDC_STATIC,6,7,86,9
     RTEXT           "Where to build the binaries:",IDC_STATIC,5,27,90,9
     GROUPBOX        "Cache Values",IDC_FRAME,9,44,406,140
-    LTEXT           "Right click on a cache value for additional options and help.\nPress Configure to update and display new values in red.\nPress OK to generate selected build files and exit.",
-                    IDC_MouseHelpCaption,114,190,197,27
+    LTEXT           "Right click on a cache value for additional options (delete, ignore, and help).\nPress Configure to update and display new values in red.\nPress OK to generate selected build files and exit.",
+                    IDC_MouseHelpCaption,102,190,228,27
     LTEXT           "Static",IDC_CMAKE_VERSION,3,227,92,13,SS_CENTERIMAGE
     PUSHBUTTON      "OK",IDC_OK,156,223,51,15
     COMBOBOX        IDC_Generator,311,7,103,50,CBS_DROPDOWN | CBS_SORT | 
