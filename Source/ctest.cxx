@@ -86,6 +86,35 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
    "and incrementing by Stride. Any additional numbers after Stride are considered individual "
    "test numbers.  Start, End,or stride can be empty.  Optionally a file can be given that contains "
    "the same syntax as the command line."},
+  {"--interactive-debug-mode [0|1]", "Set the interactive mode to 0 or 1.",
+   "This option causes ctest to run tests in either an interactive mode or a non-interactive mode. "
+   "On Windows this means that in non-interactive mode, all system debug pop up windows are blocked. "
+   "In dashboard mode (Experimental, Nightly, Continuous), the default is non-interactive.  "
+   "When just running tests not for a dashboard the default is to allow popups and interactive "
+   "debugging."},
+  {"--build-and-test", "Build and run a test.",
+   "This option allows a test to be compiled and then run. "
+   "CMake is run on the source tree and then based on the generator the build is run. "
+   "The arguments to this command line are the source and binary directories. "
+   "Other options that affect this mode are --build-target --build-nocmake, --build-run-dir, "
+   "--build-two-config, --build-exe-dir, --build-generator, --build-project," 
+   "--build-makeprogram "
+   "--build-noclean, --build-options"},
+  {"--build-target", "Specify a specific target to build.", 
+   "This option goes with the --build-and-test option, if left out the all target is built." },
+  {"--build-nocmake", "Run the build without running cmake first.", 
+   "Skip the cmake step." },
+  {"--build-run-dir", "Specify directory to run programs from.", 
+   "Directory where programs will be after it has been compiled." },
+  {"--build-two-config", "Run CMake twice", "" },
+  {"--build-exe-dir", "Specify the directory for the executable.", "" },
+  {"--build-generator", "Specify the generator to use.", "" },
+  {"--build-project", "Specify the name of the project to build.", "" },
+  {"--build-makeprogram", "Specify the make program to use.", "" },
+  {"--build-noclean", "Skip the make clean step.", "" },
+  {"--build-options", "Add extra options to the build step.", "" },
+  {"--tomorrow-tag", "Nightly or experimental starts with next day tag.", 
+   "This is useful if the build will not finish in one day." },
   {0,0,0}
 };
 
@@ -101,8 +130,6 @@ static const cmDocumentationEntry cmDocumentationSeeAlso[] =
 int main (int argc, char *argv[])
 {
   cmSystemTools::EnableMSVCDebugHook();
-  cmSystemTools::PutEnv("DART_TEST_FROM_DART=1");
-  cmSystemTools::PutEnv("DASHBOARD_TEST_FROM_CTEST=1");
   int nocwd = 0;
 
   if ( cmSystemTools::GetCurrentWorkingDirectory().size() == 0 )
