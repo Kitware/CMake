@@ -6,7 +6,11 @@
 # MPI_LIBRARY      = the library to link against (mpi mpich etc)
 #
 
-FIND_PATH(MPI_INCLUDE_PATH mpi.h /usr/local/include /usr/include /usr/local/mpi/include)
+FIND_PATH(MPI_INCLUDE_PATH mpi.h 
+          /usr/local/include 
+          /usr/include 
+          /usr/include/mpi
+          /usr/local/mpi/include)
 
 FIND_LIBRARY(MPI_LIBRARY 
              NAMES mpi mpich
