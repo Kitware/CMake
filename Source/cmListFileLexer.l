@@ -34,6 +34,7 @@ Modify cmListFileLexer.c:
 /* Disable features we do not need. */
 #define YY_NEVER_INTERACTIVE 1
 #define YY_NO_UNPUT 1
+#define YY_NO_UNISTD_H 1
 #define ECHO
 
 /* Setup the proper yylex declaration.  */
