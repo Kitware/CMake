@@ -175,12 +175,14 @@ private:
   {
     cmCTestCoverage()
       {
+        m_AbsolutePath = "";
         m_FullPath = "";
         m_Covered = false;
         m_Tested = 0;
         m_UnTested = 0;
         m_Lines.clear();
       }
+    std::string      m_AbsolutePath;
     std::string      m_FullPath;
     bool             m_Covered;
     int              m_Tested;
