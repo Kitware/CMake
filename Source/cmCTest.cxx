@@ -30,11 +30,6 @@
 #ifdef HAVE_CURL
 static struct tm* GetNightlyTime(std::string str)
 {
-  int hour;
-  int min;
-  int sec;
-  char stz[100];
-  int tz;
   struct tm* lctime;
   time_t tctime = time(0);
   //Convert the nightly start time to seconds. Since we are
@@ -391,7 +386,7 @@ void cmCTest::Finalize()
 {
 }
 
-std::string cmCTest::FindExecutable(const char *exe)
+std::string cmCTest::FindTheExecutable(const char *exe)
 {
   std::string fullPath = "";
   std::string dir;
@@ -1595,7 +1590,7 @@ void cmCTest::ProcessDirectory(std::vector<std::string> &passed,
           }
         //std::cerr << "Testing " << args[0] << " ... ";
         // find the test executable
-        std::string testCommand = this->FindExecutable(args[1].Value.c_str());
+        std::string testCommand = this->FindTheExecutable(args[1].Value.c_str());
         testCommand = cmSystemTools::ConvertToOutputPath(testCommand.c_str());
 
         // continue if we did not find the executable

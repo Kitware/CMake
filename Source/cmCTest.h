@@ -87,7 +87,7 @@ public:
   /**
    * Find the executable for a test
    */
-  std::string FindExecutable(const char *exe);
+  std::string FindTheExecutable(const char *exe);
 
   /**
    * Set the cmake test
