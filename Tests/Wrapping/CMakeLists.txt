@@ -51,6 +51,9 @@ FIND_FILE(VTK_WRAP_HINTS hints ${Wrapping_SOURCE_DIR})
 SET (VTK_WRAP_TCL "On")
 SET (VTK_WRAP_TCL_EXE "echo")
 VTK_WRAP_TCL (wraplibTCL TCL_SRCS SRCS)
+ADD_CUSTOM_TARGET(wraplibTCL ALL 
+      ${CMAKE_COMMAND} -E echo "dummy target"  
+      ) 
 
 #
 # Wrap VTK -> Python
@@ -58,6 +61,9 @@ VTK_WRAP_TCL (wraplibTCL TCL_SRCS SRCS)
 SET (VTK_WRAP_PYTHON "On")
 SET (VTK_WRAP_PYTHON_EXE "echo")
 VTK_WRAP_PYTHON (wraplibPython Python_SRCS SRCS)
+ADD_CUSTOM_TARGET(wraplibPython ALL 
+      ${CMAKE_COMMAND} -E echo "dummy target"  
+      ) 
 
 #
 # Wrap VTK -> Java
@@ -75,6 +81,9 @@ CONFIGURE_FILE(
   ${Wrapping_SOURCE_DIR}/dummy
   ${VTK_JAVA_HOME}/vtkIncluded.java
   COPYONLY IMMEDIATE)
+ADD_CUSTOM_TARGET(wraplibJava ALL 
+      ${CMAKE_COMMAND} -E echo "dummy target"  
+      ) 
 
 #
 # QT Wrappers
