@@ -92,6 +92,16 @@ CMAKE_shared_ok="yes"
 #                       Flags to pass to the compiler when linking object
 #			files into an executable application binary such
 #			as tclsh.
+#       CMAKE_SHLIB_RUNTIME_FLAG -
+#                       Flag used to specify the runtime directories (e.g. "-R" or
+#                       "-Wl,-rpath,"). If null, no attempt is make to specify the
+#                       runtime paths.
+#       CMAKE_SHLIB_RUNTIME_SEP -
+#                       If null, then each path is a separate argument. If not null,
+#                       then all the directories are joined together, separated by
+#                       $(CMAKE_SHLIB_RUNTIME_SEP) and appended to
+#                       $(CMAKE_SHLIB_RUNTIME_FLAG). When not null, this is
+#                       typically a colon ":".
 #--------------------------------------------------------------------
 
 
@@ -114,6 +124,8 @@ case $system in
 	CMAKE_DL_LIBS=""
         AC_CHECK_LIB(ld,printf, CMAKE_DL_LIBS="-lld")
 	CMAKE_SHLIB_LINK_FLAGS=""
+        CMAKE_SHLIB_RUNTIME_FLAG=""
+        CMAKE_SHLIB_RUNTIME_SEP=""
 	;;
     HP-UX-*.08.*|HP-UX-*.09.*|HP-UX-*.10.*)
 	CMAKE_SHLIB_CFLAGS="+z"
@@ -121,10 +133,14 @@ case $system in
 	CMAKE_SHLIB_SUFFIX=".sl"
 	CMAKE_DL_LIBS="-ldld"
 	CMAKE_SHLIB_BUILD_FLAGS='+Z -Wl,-E -Wl,-b'
-	CMAKE_SHLIB_LINK_FLAGS='-Wl,+s -Wl,+b,${LIB_RUNTIME_DIR}'
+	CMAKE_SHLIB_LINK_FLAGS='-Wl,+s'
+        CMAKE_SHLIB_RUNTIME_FLAG='-Wl,+b,'
+        CMAKE_SHLIB_RUNTIME_SEP=':'
         if test "$CC" = "gcc" -o `$CC -v 2>&1 | grep -c gcc` != "0" ; then
   	  CMAKE_SHLIB_BUILD_FLAGS='-shared -Wl,-E -Wl,-b'
-	  CMAKE_SHLIB_LINK_FLAGS='-Wl,+s -Wl,+b,${LIB_RUNTIME_DIR}'
+	  CMAKE_SHLIB_LINK_FLAGS='-Wl,+s'
+          CMAKE_SHLIB_RUNTIME_FLAG='-Wl,+b,'
+          CMAKE_SHLIB_RUNTIME_SEP=':'
         fi
 	;;
     IRIX-5.*)
@@ -133,6 +149,8 @@ case $system in
 	CMAKE_SHLIB_SUFFIX=".so"
 	CMAKE_DL_LIBS=""
 	CMAKE_SHLIB_BUILD_FLAGS="-shared -rdata_shared"
+        CMAKE_SHLIB_RUNTIME_FLAG="-Wl,-rpath,"
+        CMAKE_SHLIB_RUNTIME_SEP=":"
 	;;
     IRIX-6* | IRIX64-6* | IRIX-64-6*)
 	CMAKE_SHLIB_CFLAGS=""
@@ -140,6 +158,8 @@ case $system in
 	CMAKE_SHLIB_SUFFIX=".so"
 	CMAKE_DL_LIBS=""
 	CMAKE_SHLIB_BUILD_FLAGS="-shared -rdata_shared"
+        CMAKE_SHLIB_RUNTIME_FLAG="-Wl,-rpath"
+        CMAKE_SHLIB_RUNTIME_SEP=":"
 	;;
     Linux*)
 	CMAKE_SHLIB_CFLAGS="-fPIC"
@@ -149,10 +169,14 @@ case $system in
 	if test "$have_dl" = yes; then
 	    CMAKE_DL_LIBS="-ldl"
 	    CMAKE_SHLIB_LINK_FLAGS="-rdynamic"
+            CMAKE_SHLIB_RUNTIME_FLAG="-Wl,-rpath,"
+            CMAKE_SHLIB_RUNTIME_SEP=":"
 	else
 	    AC_CHECK_HEADER(dld.h, [
 		CMAKE_DL_LIBS="-ldld"
-		CMAKE_SHLIB_LINK_FLAGS=""])
+		CMAKE_SHLIB_LINK_FLAGS=""
+                CMAKE_SHLIB_RUNTIME_FLAG="-Wl,-rpath,"
+                CMAKE_SHLIB_RUNTIME_SEP=""])
 	fi
 	;;
     CYGWIN_NT*)
@@ -160,6 +184,8 @@ case $system in
         CMAKE_DL_LIBS="-lgdi32" 
         CMAKE_SHLIB_SUFFIX=".dll"
         CMAKE_SHLIB_LINK_FLAGS="-shared"
+        CMAKE_SHLIB_RUNTIME_FLAG=""
+        CMAKE_SHLIB_RUNTIME_SEP=""
         ;;
     MP-RAS-02*)
 	CMAKE_SHLIB_CFLAGS="-K PIC"
@@ -167,6 +193,8 @@ case $system in
 	CMAKE_SHLIB_SUFFIX=".so"
 	CMAKE_DL_LIBS="-ldl"
 	CMAKE_SHLIB_LINK_FLAGS=""
+        CMAKE_SHLIB_RUNTIME_FLAG=""
+        CMAKE_SHLIB_RUNTIME_SEP=""
 	;;
     MP-RAS-*)
 	CMAKE_SHLIB_CFLAGS="-K PIC"
@@ -174,6 +202,8 @@ case $system in
 	CMAKE_SHLIB_SUFFIX=".so"
 	CMAKE_DL_LIBS="-ldl"
 	CMAKE_SHLIB_LINK_FLAGS="-Wl,-Bexport"
+        CMAKE_SHLIB_RUNTIME_FLAG=""
+        CMAKE_SHLIB_RUNTIME_SEP=""
 	;;
     NetBSD-*|FreeBSD-*)
 	# Not available on all versions:  check for include file.
@@ -183,12 +213,16 @@ case $system in
 	    CMAKE_SHLIB_SUFFIX=".so"
 	    CMAKE_DL_LIBS=""
 	    CMAKE_SHLIB_LINK_FLAGS="-shared"
+            CMAKE_SHLIB_RUNTIME_FLAG="-Wl,-rpath,"
+            CMAKE_SHLIB_RUNTIME_SEP=":"
 	else
 	    CMAKE_SHLIB_CFLAGS=""
 	    CMAKE_SHLIB_LD_LIBS=""
 	    CMAKE_SHLIB_SUFFIX="..o"
 	    CMAKE_DL_LIBS=""
 	    CMAKE_SHLIB_LINK_FLAGS=""
+            CMAKE_SHLIB_RUNTIME_FLAG=""
+            CMAKE_SHLIB_RUNTIME_SEP=""
 	fi
 	;;
     NEXTSTEP-*)
@@ -197,6 +231,8 @@ case $system in
 	CMAKE_SHLIB_SUFFIX=".so"
 	CMAKE_DL_LIBS=""
 	CMAKE_SHLIB_LINK_FLAGS=""
+        CMAKE_SHLIB_RUNTIME_FLAG=""
+        CMAKE_SHLIB_RUNTIME_SEP=""
 	;;
     OSF1-1.[012])
 	# OSF/1 1.[012] from OSF, and derivatives, including Paragon OSF/1
@@ -206,6 +242,8 @@ case $system in
 	CMAKE_SHLIB_SUFFIX=".so"
 	CMAKE_DL_LIBS=""
 	CMAKE_SHLIB_LINK_FLAGS=""
+        CMAKE_SHLIB_RUNTIME_FLAG=""
+        CMAKE_SHLIB_RUNTIME_SEP=""
 	;;
     OSF1-1.*)
 	# OSF/1 1.3 from OSF using ELF, and derivatives, including AD2
@@ -214,6 +252,8 @@ case $system in
 	CMAKE_SHLIB_SUFFIX=".so"
 	CMAKE_DL_LIBS=""
 	CMAKE_SHLIB_LINK_FLAGS=""
+        CMAKE_SHLIB_RUNTIME_FLAG=""
+        CMAKE_SHLIB_RUNTIME_SEP=""
 	;;
     OSF1-V*)
         # Digital OSF/1
@@ -222,7 +262,9 @@ case $system in
 	CMAKE_SHLIB_SUFFIX=".so"
 	CMAKE_DL_LIBS=""
 	CMAKE_SHLIB_BUILD_FLAGS='-shared -Wl,-expect_unresolved,"*"'
-	CMAKE_SHLIB_LINK_FLAGS='-Wl,-rpath,${LIB_RUNTIME_DIR}'
+	CMAKE_SHLIB_LINK_FLAGS=''
+        CMAKE_SHLIB_RUNTIME_FLAG="-Wl,-rpath,"
+        CMAKE_SHLIB_RUNTIME_SEP=":"
 	;;
     RISCos-*)
 	CMAKE_SHLIB_CFLAGS="-G 0"
@@ -230,6 +272,8 @@ case $system in
 	CMAKE_SHLIB_SUFFIX="..o"
 	CMAKE_DL_LIBS=""
 	CMAKE_SHLIB_LINK_FLAGS="-Wl,-D,08000000"
+        CMAKE_SHLIB_RUNTIME_FLAG=""
+        CMAKE_SHLIB_RUNTIME_SEP=""
 	;;
     SCO_SV-3.2*)
         # Note, dlopen is available only on SCO 3.2.5 and greater.  However,
@@ -240,6 +284,8 @@ case $system in
 	CMAKE_SHLIB_SUFFIX=".so"
 	CMAKE_DL_LIBS=""
 	CMAKE_SHLIB_LINK_FLAGS="-belf -Wl,-Bexport"
+        CMAKE_SHLIB_RUNTIME_FLAG=""
+        CMAKE_SHLIB_RUNTIME_SEP=""
 	;;
      SINIX*5.4*)
 	CMAKE_SHLIB_CFLAGS="-K PIC"
@@ -247,6 +293,8 @@ case $system in
 	CMAKE_SHLIB_SUFFIX=".so"
 	CMAKE_DL_LIBS="-ldl"
 	CMAKE_SHLIB_LINK_FLAGS=""
+        CMAKE_SHLIB_RUNTIME_FLAG=""
+        CMAKE_SHLIB_RUNTIME_SEP=""
 	;;
     SunOS-4*)
 	CMAKE_SHLIB_CFLAGS="-PIC"
@@ -254,7 +302,9 @@ case $system in
 	CMAKE_SHLIB_SUFFIX=".so"
 	CMAKE_DL_LIBS="-ldl"
 	CMAKE_SHLIB_BUILD_FLAGS='-shared -Wl,-r -nostdlib'
-	CMAKE_SHLIB_LINK_FLAGS='-Wl,-L${LIB_RUNTIME_DIR}'
+	CMAKE_SHLIB_LINK_FLAGS=''
+        CMAKE_SHLIB_RUNTIME_FLAG="-Wl,-R,"
+        CMAKE_SHLIB_RUNTIME_SEP=":"
 	;;
     SunOS-5*)
 	CMAKE_SHLIB_CFLAGS="-KPIC"
@@ -262,10 +312,14 @@ case $system in
 	CMAKE_SHLIB_SUFFIX=".so"
 	CMAKE_DL_LIBS="-ldl"
 	CMAKE_SHLIB_BUILD_FLAGS='-G'
-	CMAKE_SHLIB_LINK_FLAGS='-R ${LIB_RUNTIME_DIR}'
+	CMAKE_SHLIB_LINK_FLAGS=''
+        CMAKE_SHLIB_RUNTIME_FLAG="-R "
+        CMAKE_SHLIB_RUNTIME_SEP=":"
         if test "$CC" = "gcc" -o `$CC -v 2>&1 | grep -c gcc` != "0" ; then
 	  CMAKE_SHLIB_BUILD_FLAGS='-Wl,-G'
-	  CMAKE_SHLIB_LINK_FLAGS='-Wl,-R,${LIB_RUNTIME_DIR}'
+	  CMAKE_SHLIB_LINK_FLAGS=''
+          CMAKE_SHLIB_RUNTIME_FLAG="-Wl,-R,"
+          CMAKE_SHLIB_RUNTIME_SEP=":"
         fi
 	;;
     ULTRIX-4.*)
@@ -274,6 +328,8 @@ case $system in
 	CMAKE_SHLIB_LD_LIBS=""
 	CMAKE_DL_LIBS=""
 	CMAKE_SHLIB_LINK_FLAGS="-Wl,-D,08000000"
+        CMAKE_SHLIB_RUNTIME_FLAG=""
+        CMAKE_SHLIB_RUNTIME_SEP=""
 	;;
     UNIX_SV*)
 	CMAKE_SHLIB_CFLAGS="-K PIC"
@@ -281,6 +337,8 @@ case $system in
 	CMAKE_SHLIB_SUFFIX=".so"
 	CMAKE_DL_LIBS="-ldl"
 	CMAKE_SHLIB_LINK_FLAGS="-Wl,-Bexport"
+        CMAKE_SHLIB_RUNTIME_FLAG=""
+        CMAKE_SHLIB_RUNTIME_SEP=""
 	;;
 esac
 export CMAKE_SHLIB_SUFFIX
@@ -309,6 +367,8 @@ AC_SUBST(CMAKE_LIB_EXT)
 AC_SUBST(CMAKE_DL_LIBS)
 AC_SUBST(CMAKE_SHLIB_LD_LIBS)
 AC_SUBST(CMAKE_SHLIB_SUFFIX)
+AC_SUBST(CMAKE_SHLIB_RUNTIME_FLAG)
+AC_SUBST(CMAKE_SHLIB_RUNTIME_SEP)
 
 
 ##########################

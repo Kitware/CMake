@@ -38,6 +38,10 @@ SET (CMAKE_SHLIB_LINK_FLAGS   "@CMAKE_SHLIB_LINK_FLAGS@" CACHE STRING
         "Flags used to link a shared library.")
 SET (CMAKE_SHLIB_LD_LIBS      "@CMAKE_SHLIB_LD_LIBS@" CACHE STRING 
         "Libraries used by LD for shared libraries")
+SET (CMAKE_SHLIB_RUNTIME_FLAG "@CMAKE_SHLIB_RUNTIME_FLAG@" CACHE STRING
+        "Flag used to specify run-time search paths")
+SET (CMAKE_SHLIB_RUNTIME_SEP "@CMAKE_SHLIB_RUNTIME_SEP@" CACHE STRING
+        "If null, each runtime path is a separate option. Otherwise, they are all joined, separated by this.")
 # support for X11
 SET (CMAKE_X_LIBS             "@X_PRE_LIBS@ @X_LIBS@ -lX11 -lXext @X_EXTRA_LIBS@" CACHE STRING "Libraries and options used in X11 programs")
 SET (CMAKE_X_CFLAGS           "@X_CFLAGS@" CACHE STRING "X11 extra flags")

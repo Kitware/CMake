@@ -254,8 +254,30 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
   // Try to emit each search path once
   std::set<std::string> emitted;
 
+  // Embed runtime search paths if possible and if required.
+  bool outputRuntime = cmCacheManager::GetInstance()->IsOn("BUILD_SHARED_LIBS");
+  std::string runtimeFlag;
+  std::string runtimeSep;
+  std::vector<std::string> runtimeDirs;
+
+  if(m_Makefile->GetDefinition("CMAKE_SHLIB_RUNTIME_FLAG"))
+    {
+    runtimeFlag = m_Makefile->GetDefinition("CMAKE_SHLIB_RUNTIME_FLAG");
+    }
+  if(m_Makefile->GetDefinition("CMAKE_SHLIB_RUNTIME_SEP"))
+    {
+    runtimeSep = m_Makefile->GetDefinition("CMAKE_SHLIB_RUNTIME_SEP");
+    }
+
+  // concatenate all paths or no?
+  bool runtimeConcatenate = ( runtimeSep!="" );
+  if(runtimeFlag == "")
+    {
+    outputRuntime = false;
+    }
+
   // collect all the flags needed for linking libraries
-  std::string linkLibs;        
+  std::string linkLibs;
   std::vector<std::string>& libdirs = m_Makefile->GetLinkDirectories();
   for(std::vector<std::string>::iterator libDir = libdirs.begin();
       libDir != libdirs.end(); ++libDir)
@@ -270,6 +292,10 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
            && libDir->find("${") == std::string::npos)
           {
           linkLibs += "-L";
+          if(outputRuntime)
+            {
+            runtimeDirs.push_back( libpath );
+            }
           }
         linkLibs += libpath;
         linkLibs += " ";
@@ -306,6 +332,10 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
           linkLibs += "-L";
           linkLibs += libpath;
           linkLibs += " ";
+          if(outputRuntime)
+            {
+            runtimeDirs.push_back( libpath );
+            }
           }
         }
       cmRegularExpression libname("lib(.*)\\.(.*)");
@@ -337,6 +367,26 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
     linkLibs += librariesLinked;
     }
   fout << linkLibs;
+
+  if(outputRuntime && runtimeDirs.size()>0)
+    {
+    fout << runtimeFlag;
+    std::vector<std::string>::iterator itr = runtimeDirs.begin();
+    fout << *itr;
+    ++itr;
+    for( ; itr != runtimeDirs.end(); ++itr )
+      {
+      if(runtimeConcatenate)
+        {
+        fout << runtimeSep << *itr;
+        }
+      else
+        {
+        fout << " " << runtimeFlag << *itr;
+        }
+      }
+    fout << " ";
+    }
 }
 
 
