@@ -2820,7 +2820,6 @@ int cmCTest::RunMakeCommand(const char* command, std::string* output,
 
 int cmCTest::RunTest(std::vector<const char*> argv, std::string* output, int *retVal)
 {
-  std::string cmd = argv[0];
 #if 0
   if(cmSystemTools::SameFile(argv[0], m_CTestSelf.c_str()))
     {
