@@ -106,6 +106,11 @@ void cmDSPMakefile::OutputDSPFile()
       case cmTarget::UTILITY:
         this->SetBuildType(UTILITY, l->first.c_str());
         break;
+      case cmTarget::INSTALL:
+	break;
+      default:
+	cmSystemTools::Error("Bad target type", l->first.c_str());
+	break;
       }
     if (l->second.GetType() != cmTarget::INSTALL)
       {
