@@ -2,6 +2,8 @@
 //
 
 #include "stdafx.h"
+// a fun undef for DOT NET
+#undef DEBUG
 #include "CMakeSetup.h"
 #include "MakeHelp.h"
 #include "PathDialog.h"
