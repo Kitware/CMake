@@ -1260,7 +1260,7 @@ bool RunCommandViaSystem(const char* command,
   if(dir)
     {
     commandInDir = "cd ";
-    commandInDir += dir;
+    commandInDir += cmSystemTools::ConvertToOutputPath(dir);
     commandInDir += " && ";
     commandInDir += command;
     }
