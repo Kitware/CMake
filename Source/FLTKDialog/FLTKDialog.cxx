@@ -16,7 +16,7 @@
 =========================================================================*/
 
 #include "CMakeSetupGUIImplementation.h"
-#include "FL/Fl.h"
+#include "FL/Fl.H"
 #include "FL/fl_ask.H"
 
 int main(int argc, char * argv[] ) 
