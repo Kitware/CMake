@@ -67,6 +67,7 @@ static void *liblber = NULL;
 
 static void DynaOpen(void)
 {
+  (void)liblber;
 #if defined(HAVE_DLOPEN) || defined(HAVE_LIBDL)
   if (libldap == NULL) {
     /*
