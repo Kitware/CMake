@@ -435,8 +435,18 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout,
          int depcount = 0;
          for(iter = depends.begin(); iter != depends.end(); ++iter)
            {
+           std::string guid = this->GetGUID(iter->c_str());
+           if(guid.size() == 0)
+             {
+             std::string m = "Target: ";
+             m += l->first;
+             m += " depends on unknown target: ";
+             m += iter->c_str();
+             cmSystemTools::Error(m.c_str());
+             }
+           
            fout << "\t\t{" << this->GetGUID(name.c_str()) << "}." << depcount << " = {"
-                << this->GetGUID(iter->c_str()) << "}\n";
+                << guid.c_str() << "}\n";
            depcount++;
            }
          }
@@ -532,8 +542,18 @@ void cmGlobalVisualStudio7Generator::WriteProjectDepends(std::ostream& fout,
           = m_CMakeInstance->GetCacheDefinition(libPath.c_str());
         if(cacheValue && *cacheValue)
           {
+          std::string guid = this->GetGUID(j->first.c_str());
+          if(guid.size() == 0)
+            {
+            std::string m = "Target: ";
+            m += dspname;
+            m += " depends on unknown target: ";
+            m += j->first.c_str();
+            cmSystemTools::Error(m.c_str());
+            }
+          
           fout << "\t\t{" << this->GetGUID(dspname) << "}." << depcount << " = {"
-               << this->GetGUID(j->first.c_str()) << "}\n";
+               << guid << "}\n";
           depcount++;
           }
         }
@@ -559,8 +579,18 @@ void cmGlobalVisualStudio7Generator::WriteProjectDepends(std::ostream& fout,
         // target names anyways.
         name.erase(name.begin(), name.begin() + 27);
         }
+      std::string guid = this->GetGUID(name.c_str());
+      if(guid.size() == 0)
+        {
+        std::string m = "Target: ";
+        m += dspname;
+        m += " depends on unknown target: ";
+        m += name.c_str();
+        cmSystemTools::Error(m.c_str());
+        }
+          
       fout << "\t\t{" << this->GetGUID(dspname) << "}." << depcount << " = {"
-           << this->GetGUID(name.c_str()) << "}\n";
+           << guid << "}\n";
       depcount++;
       }
     }
@@ -634,9 +664,9 @@ std::string cmGlobalVisualStudio7Generator::GetGUID(const char* name)
     {
     return std::string(storedGUID);
     }
-  cmSystemTools::Error("Internal CMake Error, Could not find GUID for target: ",
+  cmSystemTools::Error("Unknown Target referenced : ",
                        name);
-  return guidStoreName;
+  return "";
 }
 
 

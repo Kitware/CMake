@@ -295,8 +295,17 @@ void cmGlobalVisualStudio71Generator::WriteProjectDepends(std::ostream& fout,
         // target names anyways.
         name.erase(name.begin(), name.begin() + 27);
         }
-      fout << "\t\t{" << this->GetGUID(name.c_str()) << "} = {"
-           << this->GetGUID(name.c_str()) << "}\n";
+      std::string guid = this->GetGUID(name.c_str());
+      if(guid.size() == 0)
+        {
+        std::string m = "Target: ";
+        m += target.GetName();
+        m += " depends on unknown target: ";
+        m += name;
+        cmSystemTools::Error(m.c_str());
+        }
+          
+      fout << "\t\t{" << guid << "} = {" << guid << "}\n";
       }
     }
 }
