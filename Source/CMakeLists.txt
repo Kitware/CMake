@@ -630,14 +630,16 @@ IF(BUILD_TESTING)
   ENDIF (CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE OR WXWINDOWS_INCLUDE_DIR)
 
   IF(UNIX)
-    IF("x${CMAKE_INSTALL_PREFIX}" MATCHES "^x${CMake_BINARY_DIR}/Tests/TestShellInstall/Prefix$")
+    STRING(COMPARE EQUAL "${CMAKE_INSTALL_PREFIX}" "${CMake_BINARY_DIR}/Tests/TestShellInstall/Prefix"
+           PREFIX_IS_FOR_TEST)
+    IF(PREFIX_IS_FOR_TEST)
       CONFIGURE_FILE(
         ${CMake_SOURCE_DIR}/Tests/TestInstall.sh.in
         ${CMake_BINARY_DIR}/Tests/TestShellInstall/TestInstall.sh
         @ONLY IMMEDIATE
         )
       ADD_TEST(ShellInstall /bin/sh ${CMake_BINARY_DIR}/Tests/TestShellInstall/TestShellInstall.sh)
-    ENDIF("x${CMAKE_INSTALL_PREFIX}" MATCHES "^x${CMake_BINARY_DIR}/Tests/TestShellInstall/Prefix$")
+    ENDIF(PREFIX_IS_FOR_TEST)
   ENDIF(UNIX)
 
 ENDIF(BUILD_TESTING)
