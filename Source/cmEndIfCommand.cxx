@@ -19,6 +19,13 @@
 
 bool cmEndIfCommand::InitialPass(std::vector<std::string> const&)
 {
+  const char* versionValue
+    = m_Makefile->GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
+  if (!versionValue || (atof(versionValue) <= 1.4))
+    {
+    return true;
+    }
+  
   this->SetError("An ENDIF command was found outside of a proper IF ENDIF structure. Or its arguments did not match the opening IF command.");
   return false;
 }

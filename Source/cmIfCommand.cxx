@@ -81,6 +81,13 @@ ShouldRemove(const char *name, const std::vector<std::string> &args,
 void cmIfFunctionBlocker::
 ScopeEnded(cmMakefile &mf)
 {
+  const char* versionValue
+    = mf.GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
+  if (!versionValue || (atof(versionValue) <= 1.4))
+    {
+    return;
+    }
+  
   std::string errmsg = "The end of a CMakeLists file was reached with an IF statement that was not closed properly.\nWithin the directory: ";
   errmsg += mf.GetCurrentDirectory();
   errmsg += "\nThe arguments are: ";
