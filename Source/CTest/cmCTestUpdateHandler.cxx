@@ -403,13 +403,11 @@ int cmCTestUpdateHandler::ProcessHandler()
     << "\t<UpdateCommand>" << m_CTest->MakeXMLSafe(command)
     << "</UpdateCommand>\n"
     << "\t<UpdateReturnStatus>";
-  int failed = 0;
   if ( !res || retVal )
     {
     os << "Update error: ";
     os << m_CTest->MakeXMLSafe(goutput);
     std::cerr << "Update with command: " << command << " failed" << std::endl;
-    failed = 1;
     }
   os << "</UpdateReturnStatus>" << std::endl;
 
