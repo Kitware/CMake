@@ -9,7 +9,7 @@ MACRO(CHECK_VARIABLE_EXISTS VAR VARIABLE)
   IF("${VARIABLE}" MATCHES "^${VARIABLE}$")
     SET(MACRO_CHECK_VARIABLE_DEFINITIONS 
       "-DCHECK_VARIABLE_EXISTS=${VAR} ${CMAKE_REQUIRED_FLAGS}")
-    MESSAGE(STATUS "Looking for ${VARIABLE}")
+    MESSAGE(STATUS "Looking for ${VAR}")
     IF(CMAKE_REQUIRED_LIBRARIES)
       SET(CHECK_VARIABLE_EXISTS_ADD_LIBRARIES 
         "-DLINK_LIBRARIES:STRING=${CMAKE_REQUIRED_LIBRARIES}")
@@ -22,13 +22,13 @@ MACRO(CHECK_VARIABLE_EXISTS VAR VARIABLE)
       OUTPUT_VARIABLE OUTPUT)
     IF(${VARIABLE})
       SET(${VARIABLE} 1 CACHE INTERNAL "Have variable ${VAR}")
-      MESSAGE(STATUS "Looking for ${VARIABLE} - found")
+      MESSAGE(STATUS "Looking for ${VAR} - found")
       FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeOutput.log 
         "Determining if the variable ${VAR} exists passed with the following output:\n"
         "${OUTPUT}\n\n")
     ELSE(${VARIABLE})
       SET(${VARIABLE} "" CACHE INTERNAL "Have variable ${VAR}")
-      MESSAGE(STATUS "Looking for ${VARIABLE} - not found")
+      MESSAGE(STATUS "Looking for ${VAR} - not found")
       FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeError.log 
         "Determining if the variable ${VAR} exists failed with the following output:\n"
         "${OUTPUT}\n\n")
