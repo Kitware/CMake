@@ -47,13 +47,13 @@
 #      SET(KWSYS_LIBRARY_INSTALL_DIR /lib)
 #      SET(KWSYS_HEADER_INSTALL_DIR /include)
 #
-#  KWSYS_FORCE_OLD_STREAMS = Force use of old non-ANSI C++ streams even if
-#                            new streams are available.  This may be used
-#                            by projects that cannot configure their
-#                            streams library.
+#  KWSYS_IOS_FORCE_OLD = Force use of old non-ANSI C++ streams even if
+#                        new streams are available.  This may be used
+#                        by projects that cannot configure their
+#                        streams library.
 #    Example:
 #
-#      SET(KWSYS_FORCE_OLD_STREAMS 1)
+#      SET(KWSYS_IOS_FORCE_OLD 1)
 #
 
 # Once configured, kwsys should be used as follows from C or C++ code:
@@ -109,48 +109,49 @@ ENDIF(CMAKE_ANSI_CFLAGS)
 
 #-----------------------------------------------------------------------------
 # Configure the standard library header wrappers based on compiler's
-# capabilities and parent project's request.
-INCLUDE(${CMAKE_ROOT}/Modules/CheckIncludeFileCXX.cmake)
-INCLUDE(${CMAKE_ROOT}/Modules/TestForSTDNamespace.cmake)
-CHECK_INCLUDE_FILE_CXX("sstream" CMAKE_HAS_ANSI_STRING_STREAM)
-CHECK_INCLUDE_FILE_CXX("iosfwd" CMAKE_ANSI_IOSFWD_HEADER)
+# capabilities and parent project's request.  Enforce 0/1 as only
+# possible values for configuration into Configure.hxx.
+INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/kwsysPlatformCxxTests.cmake)
 
-# Enforce 0/1 as only possible values.  Needed for the means by which
-# Configure.hxx is implemented.
-IF(CMAKE_NO_STD_NAMESPACE)
-  SET(CMAKE_NO_STD_NAMESPACE 1)
-ELSE(CMAKE_NO_STD_NAMESPACE)
-  SET(CMAKE_NO_STD_NAMESPACE 0)
-ENDIF(CMAKE_NO_STD_NAMESPACE)
+KWSYS_PLATFORM_CXX_TEST(KWSYS_STL_HAVE_STD
+  "Checking whether STL classes are in std namespace" DIRECT)
 
-IF(CMAKE_ANSI_IOSFWD_HEADER)
-  SET(CMAKE_NO_ANSI_STREAM_HEADERS 0)
-ELSE(CMAKE_ANSI_IOSFWD_HEADER)
-  SET(CMAKE_NO_ANSI_STREAM_HEADERS 1)
-ENDIF(CMAKE_ANSI_IOSFWD_HEADER)
+IF(KWSYS_IOS_FORCE_OLD)
+  SET(KWSYS_IOS_HAVE_ANSI 0)
+ELSE(KWSYS_IOS_FORCE_OLD)
+  KWSYS_PLATFORM_CXX_TEST(KWSYS_IOS_HAVE_ANSI
+    "Checking whether ANSI stream headers are available" DIRECT)
+ENDIF(KWSYS_IOS_FORCE_OLD)
 
-IF(CMAKE_HAS_ANSI_STRING_STREAM)
-  SET(CMAKE_NO_ANSI_STRING_STREAM 0)
-ELSE(CMAKE_HAS_ANSI_STRING_STREAM)
-  SET(CMAKE_NO_ANSI_STRING_STREAM 1)
-ENDIF(CMAKE_HAS_ANSI_STRING_STREAM)
+IF(KWSYS_IOS_HAVE_ANSI)
+  KWSYS_PLATFORM_CXX_TEST(KWSYS_IOS_HAVE_STD
+    "Checking whether ANSI streams are in std namespace" DIRECT)
+  KWSYS_PLATFORM_CXX_TEST(KWSYS_IOS_HAVE_SSTREAM
+    "Checking whether ANSI string stream is available" DIRECT)
+ELSE(KWSYS_IOS_HAVE_ANSI)
+  SET(KWSYS_IOS_HAVE_STD 0)
+  SET(KWSYS_IOS_HAVE_SSTREAM 0)
+ENDIF(KWSYS_IOS_HAVE_ANSI)
 
-IF(KWSYS_FORCE_OLD_STREAMS)
-  SET(CMAKE_NO_ANSI_STREAM_HEADERS 1)
-  SET(CMAKE_NO_ANSI_STRING_STREAM 1)
-ENDIF(KWSYS_FORCE_OLD_STREAMS)
+IF(KWSYS_IOS_HAVE_SSTREAM)
+  SET(KWSYS_IOS_HAVE_STRSTREAM_H 0)
+  SET(KWSYS_IOS_HAVE_STRSTREA_H 0)
+ELSE(KWSYS_IOS_HAVE_SSTREAM)
+  KWSYS_PLATFORM_CXX_TEST(KWSYS_IOS_HAVE_STRSTREAM_H
+    "Checking whether strstream.h is available" DIRECT)
+  IF(KWSYS_IOS_HAVE_STRSTREAM_H)
+    SET(KWSYS_IOS_HAVE_STRSTREA_H 0)
+  ELSE(KWSYS_IOS_HAVE_STRSTREAM_H)
+    KWSYS_PLATFORM_CXX_TEST(KWSYS_IOS_HAVE_STRSTREA_H
+      "Checking whether strstrea.h is available" DIRECT)
+  ENDIF(KWSYS_IOS_HAVE_STRSTREAM_H)
+ENDIF(KWSYS_IOS_HAVE_SSTREAM)
 
 IF(KWSYS_NAMESPACE MATCHES "^kwsys$")
   SET(KWSYS_NAME_IS_KWSYS 1)
 ELSE(KWSYS_NAMESPACE MATCHES "^kwsys$")
   SET(KWSYS_NAME_IS_KWSYS 0)
 ENDIF(KWSYS_NAMESPACE MATCHES "^kwsys$")
-
-# Set names that are used in creating Configure.hxx for these test
-# results.
-SET(KWSYS_NO_STD_NAMESPACE ${CMAKE_NO_STD_NAMESPACE})
-SET(KWSYS_NO_ANSI_STREAM_HEADERS ${CMAKE_NO_ANSI_STREAM_HEADERS})
-SET(KWSYS_NO_ANSI_STRING_STREAM ${CMAKE_NO_ANSI_STRING_STREAM})
 
 # Choose default shared/static build if not specified.
 IF(KWSYS_BUILD_SHARED MATCHES "^KWSYS_BUILD_SHARED$")
@@ -179,14 +180,14 @@ FOREACH(header algorithm deque iterator list map numeric queue set stack string
                utility vector)
   # Configure the header wrapper.
   SET(KWSYS_STL_HEADER "${header}")
-  CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/kwsys_std.h.in
-                 ${KWSYS_HEADER_DIR}/std/${header}
+  CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/kwsys_stl.h.in
+                 ${KWSYS_HEADER_DIR}/stl/${header}
                  @ONLY IMMEDIATE)
 
   # Create an install target for the header wrapper.
   IF(KWSYS_HEADER_INSTALL_DIR)
-    INSTALL_FILES(${KWSYS_HEADER_INSTALL_DIR}/${KWSYS_NAMESPACE}/std
-      FILES ${KWSYS_HEADER_DIR}/std/${header})
+    INSTALL_FILES(${KWSYS_HEADER_INSTALL_DIR}/${KWSYS_NAMESPACE}/stl
+      FILES ${KWSYS_HEADER_DIR}/stl/${header})
   ENDIF(KWSYS_HEADER_INSTALL_DIR)
 ENDFOREACH(header)
 
@@ -195,14 +196,14 @@ ENDFOREACH(header)
 # may be included.
 FOREACH(header iostream fstream sstream iosfwd)
   # Configure the header wrapper.
-  CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/kwsys_std_${header}.h.in
-                 ${KWSYS_HEADER_DIR}/std/${header}
+  CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/kwsys_ios_${header}.h.in
+                 ${KWSYS_HEADER_DIR}/ios/${header}
                  @ONLY IMMEDIATE)
 
   # Create an install target for the header wrapper.
   IF(KWSYS_HEADER_INSTALL_DIR)
-    INSTALL_FILES(${KWSYS_HEADER_INSTALL_DIR}/${KWSYS_NAMESPACE}/std
-      FILES ${KWSYS_HEADER_DIR}/std/${header})
+    INSTALL_FILES(${KWSYS_HEADER_INSTALL_DIR}/${KWSYS_NAMESPACE}/ios
+      FILES ${KWSYS_HEADER_DIR}/ios/${header})
   ENDIF(KWSYS_HEADER_INSTALL_DIR)
 ENDFOREACH(header)
 
@@ -366,8 +367,10 @@ ENDIF(KWSYS_USE_Process)
 # Setup testing if not being built as part of another project.
 IF(KWSYS_STANDALONE)
   INCLUDE_DIRECTORIES(${KWSYS_HEADER_ROOT})
+  ADD_EXECUTABLE(testIOS testIOS.cxx)
   ADD_EXECUTABLE(testProcess testProcess.c)
   ADD_EXECUTABLE(test1 test1.cxx)
+  TARGET_LINK_LIBRARIES(testIOS ${KWSYS_NAMESPACE})
   TARGET_LINK_LIBRARIES(testProcess ${KWSYS_NAMESPACE})
   TARGET_LINK_LIBRARIES(test1 ${KWSYS_NAMESPACE})
 ENDIF(KWSYS_STANDALONE)

@@ -16,8 +16,8 @@
 
 #include KWSYS_HEADER(Configure.hxx)
 
-#include KWSYS_HEADER(std/string)
-#include KWSYS_HEADER(std/vector)
+#include KWSYS_HEADER(stl/string)
+#include KWSYS_HEADER(stl/vector)
 
 namespace KWSYS_NAMESPACE
 {
@@ -27,10 +27,10 @@ class DirectoryInternals
 {
 public:
   // Array of Files
-  kwsys_std::vector<kwsys_std::string> Files;
+  kwsys_stl::vector<kwsys_stl::string> Files;
   
   // Path to Open'ed directory
-  kwsys_std::string Path;
+  kwsys_stl::string Path;
 };
 
 //----------------------------------------------------------------------------

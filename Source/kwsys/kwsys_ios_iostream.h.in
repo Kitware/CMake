@@ -1,0 +1,48 @@
+/*=========================================================================
+
+  Program:   KWSys - Kitware System Library
+  Module:    $RCSfile$
+
+  Copyright (c) Kitware, Inc., Insight Consortium.  All rights reserved.
+  See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
+
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+     PURPOSE.  See the above copyright notices for more information.
+
+=========================================================================*/
+#ifndef @KWSYS_NAMESPACE@_ios_iostream
+#define @KWSYS_NAMESPACE@_ios_iostream
+
+#include <@KWSYS_NAMESPACE@/Configure.hxx>
+
+#ifdef _MSC_VER
+#pragma warning (push, 1)
+#pragma warning (disable: 4702)
+#endif
+
+#if @KWSYS_NAMESPACE@_IOS_HAVE_ANSI
+# include <iostream>
+#else
+# include <iostream.h>
+#endif
+
+#if !@KWSYS_NAMESPACE@_IOS_HAVE_SSTREAM
+namespace @KWSYS_NAMESPACE@_ios
+{
+  using @KWSYS_NAMESPACE@_ios_namespace::ostream;
+  using @KWSYS_NAMESPACE@_ios_namespace::istream;
+  using @KWSYS_NAMESPACE@_ios_namespace::ios;
+  using @KWSYS_NAMESPACE@_ios_namespace::cout;
+  using @KWSYS_NAMESPACE@_ios_namespace::cerr;
+  using @KWSYS_NAMESPACE@_ios_namespace::cin;
+  using @KWSYS_NAMESPACE@_ios_namespace::endl;
+  using @KWSYS_NAMESPACE@_ios_namespace::flush;
+}
+#endif
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
+#endif

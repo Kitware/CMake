@@ -14,15 +14,16 @@
 #ifndef @KWSYS_NAMESPACE@_SystemTools_hxx
 #define @KWSYS_NAMESPACE@_SystemTools_hxx
 
-#include <@KWSYS_NAMESPACE@/std/iosfwd>
-#include <@KWSYS_NAMESPACE@/std/string>
-#include <@KWSYS_NAMESPACE@/std/vector>
+#include <@KWSYS_NAMESPACE@/ios/iosfwd>
+#include <@KWSYS_NAMESPACE@/stl/string>
+#include <@KWSYS_NAMESPACE@/stl/vector>
 
 #include <@KWSYS_NAMESPACE@/Configure.h>
 
-/* Define this macro temporarily to keep the code readable.  */
-#if !defined (KWSYS_NAMESPACE) && !defined(@KWSYS_NAMESPACE@_NAME_IS_KWSYS)
-# define kwsys_std @KWSYS_NAMESPACE@_std
+/* Define these macros temporarily to keep the code readable.  */
+#if !defined (KWSYS_NAMESPACE) && !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
+# define kwsys_stl @KWSYS_NAMESPACE@_stl
+# define kwsys_ios @KWSYS_NAMESPACE@_ios
 #endif
 
 namespace @KWSYS_NAMESPACE@
@@ -41,7 +42,7 @@ public:
    * then an underscore is prepended.  Note that this can produce
    * identifiers that the standard reserves (_[A-Z].* and __.*).
    */
-  static kwsys_std::string MakeCindentifier(const char* s);
+  static kwsys_stl::string MakeCindentifier(const char* s);
   
   /**
    * Make a new directory if it is not there.  This function
@@ -63,14 +64,14 @@ public:
    * Replace replace all occurances of the string in
    * the source string.
    */
-  static void ReplaceString(kwsys_std::string& source,
+  static void ReplaceString(kwsys_stl::string& source,
                             const char* replace,
                             const char* with);
 
   /**
    * Read a registry value
    */
-  static bool ReadRegistryValue(const char *key, kwsys_std::string &value);
+  static bool ReadRegistryValue(const char *key, kwsys_stl::string &value);
 
   /**
    * Write a registry value
@@ -86,17 +87,17 @@ public:
    * Return a capitalized string (i.e the first letter is uppercased,
    * all other are lowercased).
    */
-  static kwsys_std::string Capitalized(const kwsys_std::string&);
+  static kwsys_stl::string Capitalized(const kwsys_stl::string&);
   
   /**
    * Return a lower case string
    */
-  static kwsys_std::string LowerCase(const kwsys_std::string&);
+  static kwsys_stl::string LowerCase(const kwsys_stl::string&);
   
   /**
    * Return a lower case string
    */
-  static kwsys_std::string UpperCase(const kwsys_std::string&);
+  static kwsys_stl::string UpperCase(const kwsys_stl::string&);
   
   /**
    * do a case-independent string comparison
@@ -106,13 +107,13 @@ public:
   /**
    * Replace Windows file system slashes with Unix-style slashes.
    */
-  static void ConvertToUnixSlashes(kwsys_std::string& path);
+  static void ConvertToUnixSlashes(kwsys_stl::string& path);
   
   /**
    * For windows this calles ConvertToWindowsOutputPath and for unix
    * it calls ConvertToUnixOutputPath
    */
-  static kwsys_std::string ConvertToOutputPath(const char*);
+  static kwsys_stl::string ConvertToOutputPath(const char*);
   
   /** Return true if a file exists in the current directory.  */
   static bool FileExists(const char* filename);
@@ -122,11 +123,11 @@ public:
    *  Add the paths from the environment variable PATH to the 
    *  string vector passed in.
    */
-  static void GetPath(kwsys_std::vector<kwsys_std::string>& path);
+  static void GetPath(kwsys_stl::vector<kwsys_stl::string>& path);
 
   /** Read an environment variable.  */
   static const char* GetEnv(const char* key);
-  static bool GetEnv(const char* key, kwsys_std::string& result);
+  static bool GetEnv(const char* key, kwsys_stl::string& result);
 
   /**
    *  Get the file extension (including ".") needed for an executable
@@ -158,32 +159,32 @@ public:
   static bool RemoveADirectory(const char* source);
 
   ///! Find a file in the system PATH, with optional extra paths.
-  static kwsys_std::string FindFile(const char* name,
-                              const kwsys_std::vector<kwsys_std::string>& path= kwsys_std::vector<kwsys_std::string>());
+  static kwsys_stl::string FindFile(const char* name,
+                              const kwsys_stl::vector<kwsys_stl::string>& path= kwsys_stl::vector<kwsys_stl::string>());
 
   ///! Find an executable in the system PATH, with optional extra paths.
-  static kwsys_std::string FindProgram(const char* name,
-                                 const kwsys_std::vector<kwsys_std::string>& path = kwsys_std::vector<kwsys_std::string>(),
+  static kwsys_stl::string FindProgram(const char* name,
+                                 const kwsys_stl::vector<kwsys_stl::string>& path = kwsys_stl::vector<kwsys_stl::string>(),
                                  bool no_system_path = false);
 
   ///! Find a library in the system PATH, with optional extra paths.
-  static kwsys_std::string FindLibrary(const char* name,
-                                 const kwsys_std::vector<kwsys_std::string>& path);
+  static kwsys_stl::string FindLibrary(const char* name,
+                                 const kwsys_stl::vector<kwsys_stl::string>& path);
   
   ///! return true if the file is a directory.
   static bool FileIsDirectory(const char* name);
   
-  static kwsys_std::string GetCurrentWorkingDirectory();
+  static kwsys_stl::string GetCurrentWorkingDirectory();
   
   /**
    * Given the path to a program executable, get the directory part of
    * the path with the file stripped off.  If there is no directory
    * part, the empty string is returned.
    */
-  static kwsys_std::string GetProgramPath(const char*);
+  static kwsys_stl::string GetProgramPath(const char*);
   static bool SplitProgramPath(const char* in_name, 
-                               kwsys_std::string& dir, 
-                               kwsys_std::string& file,
+                               kwsys_stl::string& dir, 
+                               kwsys_stl::string& file,
                                bool errorReport = true);
   
   /**
@@ -192,32 +193,32 @@ public:
    * (which defaults to the current working directory).  The full path
    * is returned.
    */
-  static kwsys_std::string CollapseFullPath(const char* in_relative);
-  static kwsys_std::string CollapseFullPath(const char* in_relative,
+  static kwsys_stl::string CollapseFullPath(const char* in_relative);
+  static kwsys_stl::string CollapseFullPath(const char* in_relative,
                                       const char* in_base);
   
   ///! return path of a full filename (no trailing slashes).
-  static kwsys_std::string GetFilenamePath(const kwsys_std::string&);
+  static kwsys_stl::string GetFilenamePath(const kwsys_stl::string&);
 
   
   ///! return file name of a full filename (i.e. file name without path).
-  static kwsys_std::string GetFilenameName(const kwsys_std::string&);
+  static kwsys_stl::string GetFilenameName(const kwsys_stl::string&);
   
   ///! Split a program from its arguments and handle spaces in the paths.
   static void SplitProgramFromArgs(const char* path, 
-                                   kwsys_std::string& program, kwsys_std::string& args);
+                                   kwsys_stl::string& program, kwsys_stl::string& args);
   
   ///! return longest file extension of a full filename (dot included).
-  static kwsys_std::string GetFilenameExtension(const kwsys_std::string&);
+  static kwsys_stl::string GetFilenameExtension(const kwsys_stl::string&);
   
   ///! return shortest file extension of a full filename (dot included).
-  static kwsys_std::string GetFilenameLastExtension(const kwsys_std::string& filename);
+  static kwsys_stl::string GetFilenameLastExtension(const kwsys_stl::string& filename);
   
   ///! return file name without extension of a full filename.
-  static kwsys_std::string GetFilenameWithoutExtension(const kwsys_std::string&);
+  static kwsys_stl::string GetFilenameWithoutExtension(const kwsys_stl::string&);
   
   ///! return file name without its last (shortest) extension.
-  static kwsys_std::string GetFilenameWithoutLastExtension(const kwsys_std::string&);
+  static kwsys_stl::string GetFilenameWithoutLastExtension(const kwsys_stl::string&);
   
   /** Return whether the path represents a full path (not relative).  */
   static bool FileIsFullPath(const char*);
@@ -225,19 +226,19 @@ public:
   static long int ModifiedTime(const char* filename);
 
   ///! for windows return the short path for the given path, unix just a pass through
-  static bool GetShortPath(const char* path, kwsys_std::string& result);
+  static bool GetShortPath(const char* path, kwsys_stl::string& result);
   
   ///! change directory the the directory specified
   static int ChangeDirectory(const char* dir);
 
   /** Split a string on its newlines into multiple lines.  Returns
       false only if the last line stored had no newline.  */
-  static bool Split(const char* s, kwsys_std::vector<kwsys_std::string>& l);
+  static bool Split(const char* s, kwsys_stl::vector<kwsys_stl::string>& l);
   
-  static kwsys_std::string GetCurrentDateTime(const char* format);
+  static kwsys_stl::string GetCurrentDateTime(const char* format);
 
   /** Get the result of strerror(errno).  */
-  static kwsys_std::string GetLastSystemError();
+  static kwsys_stl::string GetLastSystemError();
   
   /** When building DEBUG with MSVC, this enables a hook that prevents
    * error dialogs from popping up if the program is being run from
@@ -252,7 +253,7 @@ public:
    * end-of-file was reached. If the has_newline argument is specified, it will
    * be true when the line read had a newline character.
    */
-  static bool GetLineFromStream(kwsys_std::istream& istr, kwsys_std::string& line,
+  static bool GetLineFromStream(kwsys_ios::istream& istr, kwsys_stl::string& line,
                                 bool* has_newline=0);
   
 protected:
@@ -261,7 +262,7 @@ protected:
    * Convert the path to a string that can be used in a unix makefile.
    * double slashes are removed, and spaces are escaped.
    */
-  static kwsys_std::string ConvertToUnixOutputPath(const char*);
+  static kwsys_stl::string ConvertToUnixOutputPath(const char*);
   
   /**
    * Convert the path to string that can be used in a windows project or
@@ -269,14 +270,15 @@ protected:
    * the string, the slashes are converted to windows style backslashes, and
    * if there are spaces in the string it is double quoted.
    */
-  static kwsys_std::string ConvertToWindowsOutputPath(const char*);
+  static kwsys_stl::string ConvertToWindowsOutputPath(const char*);
 };
 
 } // namespace @KWSYS_NAMESPACE@
 
-/* Undefine temporary macro.  */
-#if !defined (KWSYS_NAMESPACE) && !defined(@KWSYS_NAMESPACE@_NAME_IS_KWSYS)
-# undef kwsys_std
+/* Undefine temporary macros.  */
+#if !defined (KWSYS_NAMESPACE) && !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
+# undef kwsys_stl
+# undef kwsys_ios
 #endif
 
 #endif

@@ -15,8 +15,8 @@
 #include KWSYS_HEADER(SystemTools.hxx)
 #include KWSYS_HEADER(Directory.hxx)
 
-#include KWSYS_HEADER(std/iostream)
-#include KWSYS_HEADER(std/fstream)
+#include KWSYS_HEADER(ios/iostream)
+#include KWSYS_HEADER(ios/fstream)
 
 #ifdef _MSC_VER
 # pragma warning (disable: 4786)
@@ -155,25 +155,25 @@ SystemTools::GetTime(void)
 }
 
 // adds the elements of the env variable path to the arg passed in
-void SystemTools::GetPath(kwsys_std::vector<kwsys_std::string>& path)
+void SystemTools::GetPath(kwsys_stl::vector<kwsys_stl::string>& path)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
   const char* pathSep = ";";
 #else
   const char* pathSep = ":";
 #endif
-  kwsys_std::string pathEnv = getenv("PATH");
+  kwsys_stl::string pathEnv = getenv("PATH");
   // A hack to make the below algorithm work.  
   if(pathEnv[pathEnv.length()-1] != ':')
     {
     pathEnv += pathSep;
     }
-  kwsys_std::string::size_type start =0;
+  kwsys_stl::string::size_type start =0;
   bool done = false;
   while(!done)
     {
-    kwsys_std::string::size_type endpos = pathEnv.find(pathSep, start);
-    if(endpos != kwsys_std::string::npos)
+    kwsys_stl::string::size_type endpos = pathEnv.find(pathSep, start);
+    if(endpos != kwsys_stl::string::npos)
       {
       path.push_back(pathEnv.substr(start, endpos-start));
       start = endpos+1;
@@ -183,7 +183,7 @@ void SystemTools::GetPath(kwsys_std::vector<kwsys_std::string>& path)
       done = true;
       }
     }
-  for(kwsys_std::vector<kwsys_std::string>::iterator i = path.begin();
+  for(kwsys_stl::vector<kwsys_stl::string>::iterator i = path.begin();
       i != path.end(); ++i)
     {
     SystemTools::ConvertToUnixSlashes(*i);
@@ -195,7 +195,7 @@ const char* SystemTools::GetEnv(const char* key)
   return getenv(key);
 }
 
-bool SystemTools::GetEnv(const char* key, kwsys_std::string& result)
+bool SystemTools::GetEnv(const char* key, kwsys_stl::string& result)
 {
   const char* v = getenv(key);
   if(v)
@@ -225,20 +225,20 @@ bool SystemTools::MakeDirectory(const char* path)
     {
     return true;
     }
-  kwsys_std::string dir = path;
+  kwsys_stl::string dir = path;
   if(dir.size() == 0)
     {
     return false;
     }
   SystemTools::ConvertToUnixSlashes(dir);
 
-  kwsys_std::string::size_type pos = dir.find(':');
-  if(pos == kwsys_std::string::npos)
+  kwsys_stl::string::size_type pos = dir.find(':');
+  if(pos == kwsys_stl::string::npos)
     {
     pos = 0;
     }
-  kwsys_std::string topdir;
-  while((pos = dir.find('/', pos)) != kwsys_std::string::npos)
+  kwsys_stl::string topdir;
+  while((pos = dir.find('/', pos)) != kwsys_stl::string::npos)
     {
     topdir = dir.substr(0, pos);
     Mkdir(topdir.c_str());
@@ -273,7 +273,7 @@ bool SystemTools::MakeDirectory(const char* path)
 
 // replace replace with with as many times as it shows up in source.
 // write the result into source.
-void SystemTools::ReplaceString(kwsys_std::string& source,
+void SystemTools::ReplaceString(kwsys_stl::string& source,
                                    const char* replace,
                                    const char* with)
 {
@@ -318,21 +318,21 @@ void SystemTools::ReplaceString(kwsys_std::string& source,
 //      =>  will return the data of the "Root" value of the key
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
-bool SystemTools::ReadRegistryValue(const char *key, kwsys_std::string &value)
+bool SystemTools::ReadRegistryValue(const char *key, kwsys_stl::string &value)
 {
 
-  kwsys_std::string primary = key;
-  kwsys_std::string second;
-  kwsys_std::string valuename;
+  kwsys_stl::string primary = key;
+  kwsys_stl::string second;
+  kwsys_stl::string valuename;
  
   size_t start = primary.find("\\");
-  if (start == kwsys_std::string::npos)
+  if (start == kwsys_stl::string::npos)
     {
     return false;
     }
 
   size_t valuenamepos = primary.find(";");
-  if (valuenamepos != kwsys_std::string::npos)
+  if (valuenamepos != kwsys_stl::string::npos)
     {
     valuename = primary.substr(valuenamepos+1);
     }
@@ -393,7 +393,7 @@ bool SystemTools::ReadRegistryValue(const char *key, kwsys_std::string &value)
   return false;
 }
 #else
-bool SystemTools::ReadRegistryValue(const char *, kwsys_std::string &)
+bool SystemTools::ReadRegistryValue(const char *, kwsys_stl::string &)
 {
   return false;
 }
@@ -410,18 +410,18 @@ bool SystemTools::ReadRegistryValue(const char *, kwsys_std::string &)
 #if defined(_WIN32) && !defined(__CYGWIN__)
 bool SystemTools::WriteRegistryValue(const char *key, const char *value)
 {
-  kwsys_std::string primary = key;
-  kwsys_std::string second;
-  kwsys_std::string valuename;
+  kwsys_stl::string primary = key;
+  kwsys_stl::string second;
+  kwsys_stl::string valuename;
  
   size_t start = primary.find("\\");
-  if (start == kwsys_std::string::npos)
+  if (start == kwsys_stl::string::npos)
     {
     return false;
     }
 
   size_t valuenamepos = primary.find(";");
-  if (valuenamepos != kwsys_std::string::npos)
+  if (valuenamepos != kwsys_stl::string::npos)
     {
     valuename = primary.substr(valuenamepos+1);
     }
@@ -494,18 +494,18 @@ bool SystemTools::WriteRegistryValue(const char *, const char *)
 #if defined(_WIN32) && !defined(__CYGWIN__)
 bool SystemTools::DeleteRegistryValue(const char *key)
 {
-  kwsys_std::string primary = key;
-  kwsys_std::string second;
-  kwsys_std::string valuename;
+  kwsys_stl::string primary = key;
+  kwsys_stl::string second;
+  kwsys_stl::string valuename;
  
   size_t start = primary.find("\\");
-  if (start == kwsys_std::string::npos)
+  if (start == kwsys_stl::string::npos)
     {
     return false;
     }
 
   size_t valuenamepos = primary.find(";");
-  if (valuenamepos != kwsys_std::string::npos)
+  if (valuenamepos != kwsys_stl::string::npos)
     {
     valuename = primary.substr(valuenamepos+1);
     }
@@ -640,9 +640,9 @@ bool SystemTools::FileExists(const char* filename)
 
 // Return a capitalized string (i.e the first letter is uppercased, all other
 // are lowercased)
-kwsys_std::string SystemTools::Capitalized(const kwsys_std::string& s)
+kwsys_stl::string SystemTools::Capitalized(const kwsys_stl::string& s)
 {
-  kwsys_std::string n;
+  kwsys_stl::string n;
   n.resize(s.size());
   n[0] = toupper(s[0]);
   for (size_t i = 1; i < s.size(); i++)
@@ -654,9 +654,9 @@ kwsys_std::string SystemTools::Capitalized(const kwsys_std::string& s)
 
 
 // Return a lower case string 
-kwsys_std::string SystemTools::LowerCase(const kwsys_std::string& s)
+kwsys_stl::string SystemTools::LowerCase(const kwsys_stl::string& s)
 {
-  kwsys_std::string n;
+  kwsys_stl::string n;
   n.resize(s.size());
   for (size_t i = 0; i < s.size(); i++)
     {
@@ -666,9 +666,9 @@ kwsys_std::string SystemTools::LowerCase(const kwsys_std::string& s)
 }
 
 // Return a lower case string 
-kwsys_std::string SystemTools::UpperCase(const kwsys_std::string& s)
+kwsys_stl::string SystemTools::UpperCase(const kwsys_stl::string& s)
 {
-  kwsys_std::string n;
+  kwsys_stl::string n;
   n.resize(s.size());
   for (size_t i = 0; i < s.size(); i++)
     {
@@ -679,10 +679,10 @@ kwsys_std::string SystemTools::UpperCase(const kwsys_std::string& s)
 
 
 // convert windows slashes to unix slashes 
-void SystemTools::ConvertToUnixSlashes(kwsys_std::string& path)
+void SystemTools::ConvertToUnixSlashes(kwsys_stl::string& path)
 {
-  kwsys_std::string::size_type pos = 0;
-  while((pos = path.find('\\', pos)) != kwsys_std::string::npos)
+  kwsys_stl::string::size_type pos = 0;
+  while((pos = path.find('\\', pos)) != kwsys_stl::string::npos)
     {
     path[pos] = '/';
     pos++;
@@ -696,7 +696,7 @@ void SystemTools::ConvertToUnixSlashes(kwsys_std::string& path)
   start_find = 1;
 #endif
 
-  while((pos = path.find("//", start_find)) != kwsys_std::string::npos)
+  while((pos = path.find("//", start_find)) != kwsys_stl::string::npos)
     {
     SystemTools::ReplaceString(path, "//", "/");
     }
@@ -712,7 +712,7 @@ void SystemTools::ConvertToUnixSlashes(kwsys_std::string& path)
     {
     if (getenv("HOME"))
       {
-      path = kwsys_std::string(getenv("HOME")) + path.substr(1);
+      path = kwsys_stl::string(getenv("HOME")) + path.substr(1);
       }
     }
   
@@ -724,20 +724,20 @@ void SystemTools::ConvertToUnixSlashes(kwsys_std::string& path)
 }
 
 // change // to /, and escape any spaces in the path
-kwsys_std::string SystemTools::ConvertToUnixOutputPath(const char* path)
+kwsys_stl::string SystemTools::ConvertToUnixOutputPath(const char* path)
 {
-  kwsys_std::string ret = path;
+  kwsys_stl::string ret = path;
   
   // remove // except at the beginning might be a cygwin drive
-  kwsys_std::string::size_type pos = 1;
-  while((pos = ret.find("//", pos)) != kwsys_std::string::npos)
+  kwsys_stl::string::size_type pos = 1;
+  while((pos = ret.find("//", pos)) != kwsys_stl::string::npos)
     {
     ret.erase(pos, 1);
     }
   // now escape spaces if there is a space in the path
-  if(ret.find(" ") != kwsys_std::string::npos)
+  if(ret.find(" ") != kwsys_stl::string::npos)
     {
-    kwsys_std::string result = "";
+    kwsys_stl::string result = "";
     char lastch = 1;
     for(const char* ch = ret.c_str(); *ch != '\0'; ++ch)
       {
@@ -754,7 +754,7 @@ kwsys_std::string SystemTools::ConvertToUnixOutputPath(const char* path)
   return ret;
 }
 
-kwsys_std::string SystemTools::ConvertToOutputPath(const char* path)
+kwsys_stl::string SystemTools::ConvertToOutputPath(const char* path)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
   return SystemTools::ConvertToWindowsOutputPath(path);
@@ -764,12 +764,12 @@ kwsys_std::string SystemTools::ConvertToOutputPath(const char* path)
 }
 
 // remove double slashes not at the start
-kwsys_std::string SystemTools::ConvertToWindowsOutputPath(const char* path)
+kwsys_stl::string SystemTools::ConvertToWindowsOutputPath(const char* path)
 {  
-  kwsys_std::string ret = path;
-  kwsys_std::string::size_type pos = 0;
+  kwsys_stl::string ret = path;
+  kwsys_stl::string::size_type pos = 0;
   // first convert all of the slashes
-  while((pos = ret.find('/', pos)) != kwsys_std::string::npos)
+  while((pos = ret.find('/', pos)) != kwsys_stl::string::npos)
     {
     ret[pos] = '\\';
     pos++;
@@ -791,16 +791,16 @@ kwsys_std::string SystemTools::ConvertToWindowsOutputPath(const char* path)
       return ret;
       }
     }
-  while((pos = ret.find("\\\\", pos)) != kwsys_std::string::npos)
+  while((pos = ret.find("\\\\", pos)) != kwsys_stl::string::npos)
     {
     ret.erase(pos, 1);
     }
   // now double quote the path if it has spaces in it
   // and is not already double quoted
-  if(ret.find(" ") != kwsys_std::string::npos
+  if(ret.find(" ") != kwsys_stl::string::npos
      && ret[0] != '\"')
     {
-    kwsys_std::string result;
+    kwsys_stl::string result;
     result = "\"" + ret + "\"";
     ret = result;
     }
@@ -845,13 +845,13 @@ bool SystemTools::FilesDiffer(const char* source,
     }
 
 #if defined(_WIN32) || defined(__CYGWIN__)
-  kwsys_std::ifstream finSource(source, (kwsys_std::ios::binary |
-                                         kwsys_std::ios::in));
-  kwsys_std::ifstream finDestination(destination, (kwsys_std::ios::binary |
-                                                   kwsys_std::ios::in));
+  kwsys_ios::ifstream finSource(source, (kwsys_ios::ios::binary |
+                                         kwsys_ios::ios::in));
+  kwsys_ios::ifstream finDestination(destination, (kwsys_ios::ios::binary |
+                                                   kwsys_ios::ios::in));
 #else
-  kwsys_std::ifstream finSource(source);
-  kwsys_std::ifstream finDestination(destination);
+  kwsys_ios::ifstream finSource(source);
+  kwsys_ios::ifstream finDestination(destination);
 #endif
   if(!finSource || !finDestination)
     {
@@ -894,31 +894,31 @@ bool SystemTools::CopyFileAlways(const char* source, const char* destination)
   // If destination is a directory, try to create a file with the same
   // name as the source in that directory.
 
-  kwsys_std::string new_destination;
+  kwsys_stl::string new_destination;
   if(SystemTools::FileExists(destination) &&
      SystemTools::FileIsDirectory(destination))
     {
     new_destination = destination;
     SystemTools::ConvertToUnixSlashes(new_destination);
     new_destination += '/';
-    kwsys_std::string source_name = source;
+    kwsys_stl::string source_name = source;
     new_destination += SystemTools::GetFilenameName(source_name);
     destination = new_destination.c_str();
     }
 
   // Create destination directory
 
-  kwsys_std::string destination_dir = destination;
+  kwsys_stl::string destination_dir = destination;
   destination_dir = SystemTools::GetFilenamePath(destination_dir);
   SystemTools::MakeDirectory(destination_dir.c_str());
 
   // Open files
 
 #if defined(_WIN32) || defined(__CYGWIN__)
-  kwsys_std::ifstream fin(source, 
-                    kwsys_std::ios::binary | kwsys_std::ios::in);
+  kwsys_ios::ifstream fin(source, 
+                    kwsys_ios::ios::binary | kwsys_ios::ios::in);
 #else
-  kwsys_std::ifstream fin(source);
+  kwsys_ios::ifstream fin(source);
 #endif
   if(!fin)
     {
@@ -926,11 +926,11 @@ bool SystemTools::CopyFileAlways(const char* source, const char* destination)
     }
 
 #if defined(_WIN32) || defined(__CYGWIN__)
-  kwsys_std::ofstream fout(destination, 
-                     kwsys_std::ios::binary | kwsys_std::ios::out | kwsys_std::ios::trunc);
+  kwsys_ios::ofstream fout(destination, 
+                     kwsys_ios::ios::binary | kwsys_ios::ios::out | kwsys_ios::ios::trunc);
 #else
-  kwsys_std::ofstream fout(destination, 
-                     kwsys_std::ios::out | kwsys_std::ios::trunc);
+  kwsys_ios::ofstream fout(destination, 
+                     kwsys_ios::ios::out | kwsys_ios::ios::trunc);
 #endif
   if(!fout)
     {
@@ -1021,7 +1021,7 @@ long int SystemTools::ModifiedTime(const char* filename)
 }
 
 
-kwsys_std::string SystemTools::GetLastSystemError()
+kwsys_stl::string SystemTools::GetLastSystemError()
 {
   int e = errno;
   return strerror(e);
@@ -1042,7 +1042,7 @@ bool SystemTools::RemoveADirectory(const char* source)
     if (strcmp(dir.GetFile(static_cast<unsigned long>(fileNum)),".") &&
         strcmp(dir.GetFile(static_cast<unsigned long>(fileNum)),".."))
       {
-      kwsys_std::string fullPath = source;
+      kwsys_stl::string fullPath = source;
       fullPath += "/";
       fullPath += dir.GetFile(static_cast<unsigned long>(fileNum));
       if(SystemTools::FileIsDirectory(fullPath.c_str()))
@@ -1070,17 +1070,17 @@ bool SystemTools::RemoveADirectory(const char* source)
  * the system search path.  Returns the full path to the file if it is
  * found.  Otherwise, the empty string is returned.
  */
-kwsys_std::string SystemTools::FindFile(const char* name, 
-                                       const kwsys_std::vector<kwsys_std::string>& userPaths)
+kwsys_stl::string SystemTools::FindFile(const char* name, 
+                                       const kwsys_stl::vector<kwsys_stl::string>& userPaths)
 {
   // Add the system search path to our path first
-  kwsys_std::vector<kwsys_std::string> path;
+  kwsys_stl::vector<kwsys_stl::string> path;
   SystemTools::GetPath(path);
   // now add the additional paths
   path.insert(path.end(), userPaths.begin(), userPaths.end());
   // now look for the file
-  kwsys_std::string tryPath;
-  for(kwsys_std::vector<kwsys_std::string>::const_iterator p = path.begin();
+  kwsys_stl::string tryPath;
+  for(kwsys_stl::vector<kwsys_stl::string>::const_iterator p = path.begin();
       p != path.end(); ++p)
     {
     tryPath = *p;
@@ -1101,9 +1101,9 @@ kwsys_std::string SystemTools::FindFile(const char* name,
  * the system search path.  Returns the full path to the executable if it is
  * found.  Otherwise, the empty string is returned.
  */
-kwsys_std::string SystemTools::FindProgram(
+kwsys_stl::string SystemTools::FindProgram(
   const char* name,
-  const kwsys_std::vector<kwsys_std::string>& userPaths,
+  const kwsys_stl::vector<kwsys_stl::string>& userPaths,
   bool no_system_path)
 {
   if(!name)
@@ -1116,7 +1116,7 @@ kwsys_std::string SystemTools::FindProgram(
     {
     return SystemTools::CollapseFullPath(name);
     }
-  kwsys_std::string tryPath = name;
+  kwsys_stl::string tryPath = name;
   tryPath += SystemTools::GetExecutableExtension();
   if(SystemTools::FileExists(tryPath.c_str()) &&
      !SystemTools::FileIsDirectory(tryPath.c_str()))
@@ -1125,7 +1125,7 @@ kwsys_std::string SystemTools::FindProgram(
     }
 
   // Add the system search path to our path.
-  kwsys_std::vector<kwsys_std::string> path;
+  kwsys_stl::vector<kwsys_stl::string> path;
   if (!no_system_path)
     {
     SystemTools::GetPath(path);
@@ -1133,7 +1133,7 @@ kwsys_std::string SystemTools::FindProgram(
   // now add the additional paths
   path.insert(path.end(), userPaths.begin(), userPaths.end());
   
-  for(kwsys_std::vector<kwsys_std::string>::const_iterator p = path.begin();
+  for(kwsys_stl::vector<kwsys_stl::string>::const_iterator p = path.begin();
       p != path.end(); ++p)
     {
     tryPath = *p;
@@ -1173,8 +1173,8 @@ kwsys_std::string SystemTools::FindProgram(
  * the system search path.  Returns the full path to the library if it is
  * found.  Otherwise, the empty string is returned.
  */
-kwsys_std::string SystemTools::FindLibrary(const char* name,
-                                       const kwsys_std::vector<kwsys_std::string>& userPaths)
+kwsys_stl::string SystemTools::FindLibrary(const char* name,
+                                       const kwsys_stl::vector<kwsys_stl::string>& userPaths)
 {
   // See if the executable exists as written.
   if(SystemTools::FileExists(name) &&
@@ -1184,12 +1184,12 @@ kwsys_std::string SystemTools::FindLibrary(const char* name,
     }
   
   // Add the system search path to our path.
-  kwsys_std::vector<kwsys_std::string> path;
+  kwsys_stl::vector<kwsys_stl::string> path;
   SystemTools::GetPath(path);
    // now add the additional paths
   path.insert(path.end(), userPaths.begin(), userPaths.end());
-  kwsys_std::string tryPath;
-  for(kwsys_std::vector<kwsys_std::string>::const_iterator p = path.begin();
+  kwsys_stl::string tryPath;
+  for(kwsys_stl::vector<kwsys_stl::string>::const_iterator p = path.begin();
       p != path.end(); ++p)
     {
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -1263,23 +1263,23 @@ int SystemTools::ChangeDirectory(const char *dir)
   return Chdir(dir);
 }
 
-kwsys_std::string SystemTools::GetCurrentWorkingDirectory()
+kwsys_stl::string SystemTools::GetCurrentWorkingDirectory()
 {
   char buf[2048];
-  kwsys_std::string path = Getcwd(buf, 2048);
+  kwsys_stl::string path = Getcwd(buf, 2048);
   return path;
 }
 
-kwsys_std::string SystemTools::GetProgramPath(const char* in_name)
+kwsys_stl::string SystemTools::GetProgramPath(const char* in_name)
 {
-  kwsys_std::string dir, file;
+  kwsys_stl::string dir, file;
   SystemTools::SplitProgramPath(in_name, dir, file);
   return dir;
 }
 
 bool SystemTools::SplitProgramPath(const char* in_name,
-                                   kwsys_std::string& dir,
-                                   kwsys_std::string& file,
+                                   kwsys_stl::string& dir,
+                                   kwsys_stl::string& file,
                                    bool)
 {
   dir = in_name;
@@ -1288,8 +1288,8 @@ bool SystemTools::SplitProgramPath(const char* in_name,
   
   if(!SystemTools::FileIsDirectory(dir.c_str()))
     {
-    kwsys_std::string::size_type slashPos = dir.rfind("/");
-    if(slashPos != kwsys_std::string::npos)
+    kwsys_stl::string::size_type slashPos = dir.rfind("/");
+    if(slashPos != kwsys_stl::string::npos)
       {
       file = dir.substr(slashPos+1);
       dir = dir.substr(0, slashPos);
@@ -1302,7 +1302,7 @@ bool SystemTools::SplitProgramPath(const char* in_name,
     }
   if(!(dir == "") && !SystemTools::FileIsDirectory(dir.c_str()))
     {
-    kwsys_std::string oldDir = in_name;
+    kwsys_stl::string oldDir = in_name;
     SystemTools::ConvertToUnixSlashes(oldDir);
     dir = in_name;
     return false;
@@ -1310,19 +1310,19 @@ bool SystemTools::SplitProgramPath(const char* in_name,
   return true;
 }
 
-kwsys_std::string SystemTools::CollapseFullPath(const char* in_relative)
+kwsys_stl::string SystemTools::CollapseFullPath(const char* in_relative)
 {
   return SystemTools::CollapseFullPath(in_relative, 0);
 }
 
-kwsys_std::string SystemTools::CollapseFullPath(const char* in_relative,
+kwsys_stl::string SystemTools::CollapseFullPath(const char* in_relative,
                                             const char* in_base)
 {
-  kwsys_std::string dir, file;
+  kwsys_stl::string dir, file;
   SystemTools::SplitProgramPath(in_relative, dir, file, false);
   
   // Save original working directory.
-  kwsys_std::string orig = SystemTools::GetCurrentWorkingDirectory();
+  kwsys_stl::string orig = SystemTools::GetCurrentWorkingDirectory();
   
   // Change to base of relative path.
   if(in_base)
@@ -1338,7 +1338,7 @@ kwsys_std::string SystemTools::CollapseFullPath(const char* in_relative,
     }
   
   // Get the resulting directory.
-  kwsys_std::string newDir = SystemTools::GetCurrentWorkingDirectory();
+  kwsys_stl::string newDir = SystemTools::GetCurrentWorkingDirectory();
   
   // Add the file back on to the directory.
   SystemTools::ConvertToUnixSlashes(newDir);
@@ -1354,7 +1354,7 @@ kwsys_std::string SystemTools::CollapseFullPath(const char* in_relative,
 # endif
   
   // Resolve relative path.
-  kwsys_std::string newDir;
+  kwsys_stl::string newDir;
   if(!(dir == ""))
     {
     realpath(dir.c_str(), resolved_name);
@@ -1375,7 +1375,7 @@ kwsys_std::string SystemTools::CollapseFullPath(const char* in_relative,
   Chdir(orig.c_str());
   
   // Construct and return the full path.
-  kwsys_std::string newPath = newDir;
+  kwsys_stl::string newPath = newDir;
   if(!(file == ""))
     {
     newPath += "/";
@@ -1384,14 +1384,14 @@ kwsys_std::string SystemTools::CollapseFullPath(const char* in_relative,
   return newPath;
 }
 
-bool SystemTools::Split(const char* str, kwsys_std::vector<kwsys_std::string>& lines)
+bool SystemTools::Split(const char* str, kwsys_stl::vector<kwsys_stl::string>& lines)
 {
-  kwsys_std::string data(str);
-  kwsys_std::string::size_type lpos = 0;
+  kwsys_stl::string data(str);
+  kwsys_stl::string::size_type lpos = 0;
   while(lpos < data.length())
     {
-    kwsys_std::string::size_type rpos = data.find_first_of("\n", lpos);
-    if(rpos == kwsys_std::string::npos)
+    kwsys_stl::string::size_type rpos = data.find_first_of("\n", lpos);
+    if(rpos == kwsys_stl::string::npos)
       {
       // Line ends at end of string without a newline.
       lines.push_back(data.substr(lpos));
@@ -1416,13 +1416,13 @@ bool SystemTools::Split(const char* str, kwsys_std::vector<kwsys_std::string>& l
  * Return path of a full filename (no trailing slashes).
  * Warning: returned path is converted to Unix slashes format.
  */
-kwsys_std::string SystemTools::GetFilenamePath(const kwsys_std::string& filename)
+kwsys_stl::string SystemTools::GetFilenamePath(const kwsys_stl::string& filename)
 {
-  kwsys_std::string fn = filename;
+  kwsys_stl::string fn = filename;
   SystemTools::ConvertToUnixSlashes(fn);
   
-  kwsys_std::string::size_type slash_pos = fn.rfind("/");
-  if(slash_pos != kwsys_std::string::npos)
+  kwsys_stl::string::size_type slash_pos = fn.rfind("/");
+  if(slash_pos != kwsys_stl::string::npos)
     {
     return fn.substr(0, slash_pos);
     }
@@ -1436,13 +1436,13 @@ kwsys_std::string SystemTools::GetFilenamePath(const kwsys_std::string& filename
 /**
  * Return file name of a full filename (i.e. file name without path).
  */
-kwsys_std::string SystemTools::GetFilenameName(const kwsys_std::string& filename)
+kwsys_stl::string SystemTools::GetFilenameName(const kwsys_stl::string& filename)
 {
-  kwsys_std::string fn = filename;
+  kwsys_stl::string fn = filename;
   SystemTools::ConvertToUnixSlashes(fn);
   
-  kwsys_std::string::size_type slash_pos = fn.rfind("/");
-  if(slash_pos != kwsys_std::string::npos)
+  kwsys_stl::string::size_type slash_pos = fn.rfind("/");
+  if(slash_pos != kwsys_stl::string::npos)
     {
     return fn.substr(slash_pos + 1);
     }
@@ -1457,11 +1457,11 @@ kwsys_std::string SystemTools::GetFilenameName(const kwsys_std::string& filename
  * Return file extension of a full filename (dot included).
  * Warning: this is the longest extension (for example: .tar.gz)
  */
-kwsys_std::string SystemTools::GetFilenameExtension(const kwsys_std::string& filename)
+kwsys_stl::string SystemTools::GetFilenameExtension(const kwsys_stl::string& filename)
 {
-  kwsys_std::string name = SystemTools::GetFilenameName(filename);
-  kwsys_std::string::size_type dot_pos = name.find(".");
-  if(dot_pos != kwsys_std::string::npos)
+  kwsys_stl::string name = SystemTools::GetFilenameName(filename);
+  kwsys_stl::string::size_type dot_pos = name.find(".");
+  if(dot_pos != kwsys_stl::string::npos)
     {
     return name.substr(dot_pos);
     }
@@ -1475,11 +1475,11 @@ kwsys_std::string SystemTools::GetFilenameExtension(const kwsys_std::string& fil
  * Return file extension of a full filename (dot included).
  * Warning: this is the shortest extension (for example: .tar.gz)
  */
-kwsys_std::string SystemTools::GetFilenameLastExtension(const kwsys_std::string& filename)
+kwsys_stl::string SystemTools::GetFilenameLastExtension(const kwsys_stl::string& filename)
 {
-  kwsys_std::string name = SystemTools::GetFilenameName(filename);
-  kwsys_std::string::size_type dot_pos = name.rfind(".");
-  if(dot_pos != kwsys_std::string::npos)
+  kwsys_stl::string name = SystemTools::GetFilenameName(filename);
+  kwsys_stl::string::size_type dot_pos = name.rfind(".");
+  if(dot_pos != kwsys_stl::string::npos)
     {
     return name.substr(dot_pos);
     }
@@ -1493,11 +1493,11 @@ kwsys_std::string SystemTools::GetFilenameLastExtension(const kwsys_std::string&
  * Return file name without extension of a full filename (i.e. without path).
  * Warning: it considers the longest extension (for example: .tar.gz)
  */
-kwsys_std::string SystemTools::GetFilenameWithoutExtension(const kwsys_std::string& filename)
+kwsys_stl::string SystemTools::GetFilenameWithoutExtension(const kwsys_stl::string& filename)
 {
-  kwsys_std::string name = SystemTools::GetFilenameName(filename);
-  kwsys_std::string::size_type dot_pos = name.find(".");
-  if(dot_pos != kwsys_std::string::npos)
+  kwsys_stl::string name = SystemTools::GetFilenameName(filename);
+  kwsys_stl::string::size_type dot_pos = name.find(".");
+  if(dot_pos != kwsys_stl::string::npos)
     {
     return name.substr(0, dot_pos);
     }
@@ -1513,12 +1513,12 @@ kwsys_std::string SystemTools::GetFilenameWithoutExtension(const kwsys_std::stri
  * Warning: it considers the last extension (for example: removes .gz
  * from .tar.gz)
  */
-kwsys_std::string
-SystemTools::GetFilenameWithoutLastExtension(const kwsys_std::string& filename)
+kwsys_stl::string
+SystemTools::GetFilenameWithoutLastExtension(const kwsys_stl::string& filename)
 {
-  kwsys_std::string name = SystemTools::GetFilenameName(filename);
-  kwsys_std::string::size_type dot_pos = name.rfind(".");
-  if(dot_pos != kwsys_std::string::npos)
+  kwsys_stl::string name = SystemTools::GetFilenameName(filename);
+  kwsys_stl::string::size_type dot_pos = name.rfind(".");
+  if(dot_pos != kwsys_stl::string::npos)
     {
     return name.substr(0, dot_pos);
     }
@@ -1530,7 +1530,7 @@ SystemTools::GetFilenameWithoutLastExtension(const kwsys_std::string& filename)
 
 bool SystemTools::FileIsFullPath(const char* in_name)
 {
-  kwsys_std::string name = in_name;
+  kwsys_stl::string name = in_name;
 #if defined(_WIN32)
   // On Windows, the name must be at least two characters long.
   if(name.length() < 2)
@@ -1562,7 +1562,7 @@ bool SystemTools::FileIsFullPath(const char* in_name)
   return false;
 }
 
-bool SystemTools::GetShortPath(const char* path, kwsys_std::string& shortPath)
+bool SystemTools::GetShortPath(const char* path, kwsys_stl::string& shortPath)
 {
 #if defined(WIN32) && !defined(__CYGWIN__)  
   const int size = int(strlen(path)) +1; // size of return
@@ -1604,7 +1604,7 @@ bool SystemTools::GetShortPath(const char* path, kwsys_std::string& shortPath)
 }
 
 void SystemTools::SplitProgramFromArgs(const char* path, 
-                                         kwsys_std::string& program, kwsys_std::string& args)
+                                         kwsys_stl::string& program, kwsys_stl::string& args)
 {
   if(SystemTools::FileExists(path))
     {
@@ -1612,25 +1612,25 @@ void SystemTools::SplitProgramFromArgs(const char* path,
     args = "";
     return;
     }
-  kwsys_std::vector<kwsys_std::string> e;
-  kwsys_std::string findProg = SystemTools::FindProgram(path, e);
+  kwsys_stl::vector<kwsys_stl::string> e;
+  kwsys_stl::string findProg = SystemTools::FindProgram(path, e);
   if(findProg.size())
     {
     program = findProg;
     args = "";
     return;
     }
-  kwsys_std::string dir = path;
-  kwsys_std::string::size_type spacePos = dir.rfind(' ');
-  if(spacePos == kwsys_std::string::npos)
+  kwsys_stl::string dir = path;
+  kwsys_stl::string::size_type spacePos = dir.rfind(' ');
+  if(spacePos == kwsys_stl::string::npos)
     {
     program = "";
     args = "";
     return;
     }
-  while(spacePos != kwsys_std::string::npos)
+  while(spacePos != kwsys_stl::string::npos)
     {
-    kwsys_std::string tryProg = dir.substr(0, spacePos);
+    kwsys_stl::string tryProg = dir.substr(0, spacePos);
     if(SystemTools::FileExists(tryProg.c_str()))
       {
       program = tryProg;
@@ -1650,7 +1650,7 @@ void SystemTools::SplitProgramFromArgs(const char* path,
   args = "";
 }
 
-kwsys_std::string SystemTools::GetCurrentDateTime(const char* format)
+kwsys_stl::string SystemTools::GetCurrentDateTime(const char* format)
 {
   char buf[1024];
   time_t t;
@@ -1659,20 +1659,20 @@ kwsys_std::string SystemTools::GetCurrentDateTime(const char* format)
   return buf;
 }
 
-kwsys_std::string SystemTools::MakeCindentifier(const char* s)
+kwsys_stl::string SystemTools::MakeCindentifier(const char* s)
 {
-  kwsys_std::string str(s);
+  kwsys_stl::string str(s);
   if (str.find_first_of("0123456789") == 0)
     {
     str = "_" + str;
     }
 
-  kwsys_std::string permited_chars("_"
+  kwsys_stl::string permited_chars("_"
                              "abcdefghijklmnopqrstuvwxyz"
                              "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                              "0123456789");
-  kwsys_std::string::size_type pos = 0;
-  while ((pos = str.find_first_not_of(permited_chars, pos)) != kwsys_std::string::npos)
+  kwsys_stl::string::size_type pos = 0;
+  while ((pos = str.find_first_not_of(permited_chars, pos)) != kwsys_stl::string::npos)
     {
     str[pos] = '_';
     }
@@ -1682,7 +1682,7 @@ kwsys_std::string SystemTools::MakeCindentifier(const char* s)
 // Due to a buggy stream library on the HP and another on Mac OSX, we
 // need this very carefully written version of getline.  Returns true
 // if any data were read before the end-of-file was reached.
-bool SystemTools::GetLineFromStream(kwsys_std::istream& is, kwsys_std::string& line,
+bool SystemTools::GetLineFromStream(kwsys_ios::istream& is, kwsys_stl::string& line,
                                     bool *has_newline /* = 0 */)
 {
   const int bufferSize = 1024;
@@ -1714,7 +1714,7 @@ bool SystemTools::GetLineFromStream(kwsys_std::istream& is, kwsys_std::string& l
       }
 
     // The fail bit may be set.  Clear it.
-    is.clear(is.rdstate() & ~kwsys_std::ios::failbit);
+    is.clear(is.rdstate() & ~kwsys_ios::ios::failbit);
     }
   return haveData;
 }

@@ -840,7 +840,7 @@ void         regdump ();
 static char* regprop ();
 #endif
 
-bool RegularExpression::find (kwsys_std::string const& s) 
+bool RegularExpression::find (kwsys_stl::string const& s) 
 {
   return find(s.c_str());
 }

@@ -35,11 +35,11 @@
 #include <@KWSYS_NAMESPACE@/Configure.h>
 #include <@KWSYS_NAMESPACE@/Configure.hxx>
 
-#include <@KWSYS_NAMESPACE@/std/string>
+#include <@KWSYS_NAMESPACE@/stl/string>
 
 /* Define this macro temporarily to keep the code readable.  */
-#if !defined (KWSYS_NAMESPACE) && !defined(@KWSYS_NAMESPACE@_NAME_IS_KWSYS)
-# define kwsys_std @KWSYS_NAMESPACE@_std
+#if !defined (KWSYS_NAMESPACE) && !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
+# define kwsys_stl @KWSYS_NAMESPACE@_stl
 #endif
 
 namespace @KWSYS_NAMESPACE@
@@ -221,17 +221,17 @@ public:
    * Matches the regular expression to the given std string.
    * Returns true if found, and sets start and end indexes accordingly.
    */
-  bool find (kwsys_std::string const&);               
+  bool find (kwsys_stl::string const&);               
 
   /**
    * Index to start of first find.
    */
-  inline kwsys_std::string::size_type start() const;
+  inline kwsys_stl::string::size_type start() const;
 
   /**
    * Index to end of first find.
    */
-  inline kwsys_std::string::size_type end() const;
+  inline kwsys_stl::string::size_type end() const;
 
   /**
    * Returns true if two regular expressions have the same
@@ -265,9 +265,9 @@ public:
    * Destructor.
    */
   // awf added
-  kwsys_std::string::size_type start(int n) const;
-  kwsys_std::string::size_type end(int n) const;
-  kwsys_std::string match(int n) const;
+  kwsys_stl::string::size_type start(int n) const;
+  kwsys_stl::string::size_type end(int n) const;
+  kwsys_stl::string match(int n) const;
   
   enum { NSUBEXP = 10 };
 private: 
@@ -316,7 +316,7 @@ inline RegularExpression::~RegularExpression ()
 /**
  * Set the start position for the regular expression.
  */
-inline kwsys_std::string::size_type RegularExpression::start () const 
+inline kwsys_stl::string::size_type RegularExpression::start () const 
 {
   return(this->startp[0] - searchstring);
 }
@@ -325,7 +325,7 @@ inline kwsys_std::string::size_type RegularExpression::start () const
 /**
  * Returns the start/end index of the last item found.
  */
-inline kwsys_std::string::size_type RegularExpression::end () const 
+inline kwsys_stl::string::size_type RegularExpression::end () const 
 {
   return(this->endp[0] - searchstring);
 }
@@ -360,7 +360,7 @@ inline void RegularExpression::set_invalid ()
 /**
  * Return start index of nth submatch. start(0) is the start of the full match.
  */
-inline kwsys_std::string::size_type RegularExpression::start(int n) const
+inline kwsys_stl::string::size_type RegularExpression::start(int n) const
 {
   return this->startp[n] - searchstring;
 }
@@ -369,7 +369,7 @@ inline kwsys_std::string::size_type RegularExpression::start(int n) const
 /**
  * Return end index of nth submatch. end(0) is the end of the full match.
  */
-inline kwsys_std::string::size_type RegularExpression::end(int n) const
+inline kwsys_stl::string::size_type RegularExpression::end(int n) const
 {
   return this->endp[n] - searchstring;
 }
@@ -377,16 +377,16 @@ inline kwsys_std::string::size_type RegularExpression::end(int n) const
 /**
  * Return nth submatch as a string.
  */
-inline kwsys_std::string RegularExpression::match(int n) const
+inline kwsys_stl::string RegularExpression::match(int n) const
 {
-  return kwsys_std::string(this->startp[n], this->endp[n] - this->startp[n]);
+  return kwsys_stl::string(this->startp[n], this->endp[n] - this->startp[n]);
 }
 
 } // namespace @KWSYS_NAMESPACE@
 
 /* Undefine temporary macro.  */
-#if !defined (KWSYS_NAMESPACE) && !defined(@KWSYS_NAMESPACE@_NAME_IS_KWSYS)
-# undef kwsys_std
+#if !defined (KWSYS_NAMESPACE) && !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
+# undef kwsys_stl
 #endif
 
 #endif
