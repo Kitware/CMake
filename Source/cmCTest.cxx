@@ -2123,14 +2123,17 @@ void cmCTest::PopulateCustomVector(cmMakefile* mf, const char* def, tm_VectorOfS
     }
 }
 
-std::string cmCTest::GetShortPathToFile(const char* fname)
+std::string cmCTest::GetShortPathToFile(const char* cfname)
 {
   const std::string& sourceDir = GetDartConfiguration("SourceDirectory");
   const std::string& buildDir = GetDartConfiguration("BuildDirectory");
+  std::string fname = cmSystemTools::CollapseFullPath(cfname);
 
   // Find relative paths to both directories
-  std::string srcRelpath = cmSystemTools::RelativePath(sourceDir.c_str(), fname);
-  std::string bldRelpath = cmSystemTools::RelativePath(buildDir.c_str(), fname);
+  std::string srcRelpath
+    = cmSystemTools::RelativePath(sourceDir.c_str(), fname.c_str());
+  std::string bldRelpath
+    = cmSystemTools::RelativePath(buildDir.c_str(), fname.c_str());
 
   // If any contains "." it is not parent directory
   bool inSrc = srcRelpath.find("..") == srcRelpath.npos;
