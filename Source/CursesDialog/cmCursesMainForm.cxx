@@ -93,23 +93,19 @@ bool cmCursesMainForm::LookForCacheEntry(const char* key)
 // Create new cmCursesCacheEntryComposite entries from the cache
 void cmCursesMainForm::InitializeUI()
 {
-
-  // Get the cache entries.
-  const cmCacheManager::CacheEntryMap &cache = 
-    cmCacheManager::GetInstance()->GetCacheMap();
-
   // Create a vector of cmCursesCacheEntryComposite's
   // which contain labels, entries and new entry markers
   std::vector<cmCursesCacheEntryComposite*>* newEntries =
     new std::vector<cmCursesCacheEntryComposite*>;
-  newEntries->reserve(cache.size());
+  newEntries->reserve(cmCacheManager::GetInstance()->GetSize());
 
   // Count non-internal and non-static entries
   int count=0;
-  for(cmCacheManager::CacheEntryMap::const_iterator i = cache.begin();
-      i != cache.end(); ++i)
+  for(cmCacheManager::CacheIterator i = 
+        cmCacheManager::GetInstance()->NewIterator();
+      !i.IsAtEnd(); i.Next())
     {
-    const cmCacheManager::CacheEntry& value = i->second;
+    const cmCacheManager::CacheEntry& value = i.GetEntry();
     if ( value.m_Type != cmCacheManager::INTERNAL &&
 	 value.m_Type != cmCacheManager::STATIC )
       {
@@ -133,11 +129,12 @@ void cmCursesMainForm::InitializeUI()
     // Create the composites.
 
     // First add entries which are new
-    for(cmCacheManager::CacheEntryMap::const_iterator i = cache.begin();
-	i != cache.end(); ++i)
+    for(cmCacheManager::CacheIterator i = 
+          cmCacheManager::GetInstance()->NewIterator();
+        !i.IsAtEnd(); i.Next())
       {
-      const char* key = i->first.c_str();
-      const cmCacheManager::CacheEntry& value = i->second;
+      const char* key = i.GetName();
+      const cmCacheManager::CacheEntry& value = i.GetEntry();
       if ( value.m_Type == cmCacheManager::INTERNAL || 
 	   value.m_Type == cmCacheManager::STATIC )
 	{
@@ -154,11 +151,12 @@ void cmCursesMainForm::InitializeUI()
       }
 
     // then add entries which are old
-    for(cmCacheManager::CacheEntryMap::const_iterator i = cache.begin();
-	i != cache.end(); ++i)
+    for(cmCacheManager::CacheIterator i = 
+          cmCacheManager::GetInstance()->NewIterator();
+        !i.IsAtEnd(); i.Next())
       {
-      const char* key = i->first.c_str();
-      const cmCacheManager::CacheEntry& value = i->second;
+      const char* key = i.GetName();
+      const cmCacheManager::CacheEntry& value = i.GetEntry();
       if ( value.m_Type == cmCacheManager::INTERNAL || 
 	   value.m_Type == cmCacheManager::STATIC )
 	{
@@ -615,7 +613,6 @@ void cmCursesMainForm::FillCacheManagerFromUI()
 { 
   std::string tmpString;
   
-  cmCacheManager::GetInstance()->GetCacheMap();
   int size = m_Entries->size();
   for(int i=0; i < size; i++)
     {
