@@ -624,14 +624,9 @@ IF(BUILD_TESTING)
   ENDIF (APPLE)
 
   IF (CTEST_TEST_CTEST)
-    ADD_TEST(CTestTest ${CMAKE_CTEST_COMMAND} --force-new-ctest-process
-      --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/CTestTest"
-      "${CMake_BINARY_DIR}/Tests/CTestTest"
-      --build-generator ${CMAKE_GENERATOR}
-      --build-makeprogram ${MAKEPROGRAM}
-      --build-project CTestTest
-      --test-command ${CMAKE_CTEST_COMMAND} --force-new-ctest-process
+    CONFIGURE_FILE("${CMake_SOURCE_DIR}/Tests/CTestTest/test.cmake.in"
+      "${CMake_BINARY_DIR}/Tests/CTestTest/test.cmake" @ONLY)
+    ADD_TEST(CTestTest ${CMAKE_CTEST_COMMAND}
       -S "${CMake_BINARY_DIR}/Tests/CTestTest/test.cmake" -V
       )
 
