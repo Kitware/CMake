@@ -141,14 +141,11 @@ protected:
                               const char* command2 = 0,
                               const char* command3 = 0,
                               const char* command4 = 0);
-  virtual void OutputBuildLibraryInDir(std::ostream& fout,
-				       const char* path,
-				       const char* library,
-				       const char* fullpath);
-  virtual void OutputBuildExecutableInDir(std::ostream& fout,
-                                          const char* path,
-                                          const char* library,
-                                          const char* fullpath);
+  virtual void OutputBuildTargetInDir(std::ostream& fout,
+                                      const char* path,
+                                      const char* library,
+                                      const char* fullpath,
+                                      const char* outputPath);
   ///! return true if the two paths are the same
   virtual bool SamePath(const char* path1, const char* path2);
   virtual std::string GetOutputExtension(const char* sourceExtension);

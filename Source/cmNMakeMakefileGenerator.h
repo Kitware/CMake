@@ -79,10 +79,11 @@ protected:
                                    const cmTarget &tgt);
   virtual std::string GetOutputExtension(const char* sourceExtension); 
   virtual void OutputIncludeMakefile(std::ostream&, const char* file);
-  virtual void OutputBuildLibraryInDir(std::ostream& fout,
-				       const char* path,
-				       const char* library,
-				       const char* fullpath); 
+  virtual void OutputBuildTargetInDir(std::ostream& fout,
+                                      const char* path,
+                                      const char* library,
+                                      const char* fullpath,
+                                      const char* outputPath); 
   ///! return true if the two paths are the same (checks short paths)
   virtual bool SamePath(const char* path1, const char* path2);
   void SetLibraryPathOption(const char* lib){ m_LibraryPathOption = lib;}

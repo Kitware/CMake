@@ -676,22 +676,27 @@ bool cmNMakeMakefileGenerator::SamePath(const char* path1, const char* path2)
     cmSystemTools::LowerCase(ShortPath(path2));
 }
 
-void cmNMakeMakefileGenerator::OutputBuildLibraryInDir(std::ostream& fout,
-						       const char* path,
-						       const char* ,
-						       const char* fullpath)
+void cmNMakeMakefileGenerator::OutputBuildTargetInDir(std::ostream& fout,
+                                                      const char* path,
+                                                      const char* library,
+                                                      const char* fullpath,
+                                                      const char* libOutPath)
 {
-
+  const char* makeTarget = library;
   std::string currentDir = 
     this->ConvertToOutputPath(m_Makefile->GetCurrentOutputDirectory());
   std::string wpath = this->ConvertToOutputPath(path);
   std::string wfullpath = this->ConvertToOutputPath(fullpath);
+  if(libOutPath && strcmp( libOutPath, "" ) != 0)
+    {
+    makeTarget = wfullpath.c_str();
+    }
   fout << wfullpath
        << ":\n\tcd " << wpath  << "\n"
        << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.depends\n"
        << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.check_depends\n"
        << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) -f cmake.check_depends\n"
-       << "\t$(MAKE) $(MAKESILENT) " << wfullpath
+       << "\t$(MAKE) $(MAKESILENT) " << makeTarget
        << "\n\tcd " << currentDir << "\n";
 }
 

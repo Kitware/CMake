@@ -986,10 +986,13 @@ void cmUnixMakefileGenerator::OutputDependLibs(std::ostream& fout)
           }
         libpath += library;
         // put out a rule to build the library if it does not exist
-        this->OutputBuildLibraryInDir(fout,
-                                      cacheValue,
-                                      library.c_str(),
-                                      libpath.c_str());
+        this->OutputBuildTargetInDir(fout,
+                                     cacheValue,
+                                     library.c_str(),
+                                     libpath.c_str(),
+                                     m_Makefile->
+                                     GetDefinition("LIBRARY_OUTPUT_PATH")
+                                     );
         }
       // something other than a library...
       else
@@ -1004,23 +1007,26 @@ void cmUnixMakefileGenerator::OutputDependLibs(std::ostream& fout)
           exepath += "/";
           }
         exepath += *lib;
-        this->OutputBuildExecutableInDir(fout,
-                                         cacheValue,
-                                         lib->c_str(),
-                                         exepath.c_str());
+        this->OutputBuildTargetInDir(fout,
+                                      cacheValue,
+                                      lib->c_str(),
+                                      exepath.c_str(),
+                                      m_Makefile->
+                                     GetDefinition("EXECUTABLE_OUTPUT_PATH")
+                                      );
         }
       }
     }
 }
 
-void cmUnixMakefileGenerator::OutputBuildLibraryInDir(std::ostream& fout,
-						      const char* path,
-						      const char* library,
-						      const char* fullpath)
+void cmUnixMakefileGenerator::OutputBuildTargetInDir(std::ostream& fout,
+                                                     const char* path,
+                                                     const char* library,
+                                                     const char* fullpath,
+                                                     const char* outputPath)
 {
   const char* makeTarget = library;
-  const char* libOutPath = m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH");
-  if(libOutPath && strcmp( libOutPath, "" ) != 0)
+  if(outputPath && strcmp( outputPath, "" ) != 0)
     {
     makeTarget = fullpath;
     }
@@ -1029,27 +1035,10 @@ void cmUnixMakefileGenerator::OutputBuildLibraryInDir(std::ostream& fout,
        << "; $(MAKE) $(MAKESILENT) cmake.depends"
        << "; $(MAKE) $(MAKESILENT) cmake.check_depends"
        << "; $(MAKE) $(MAKESILENT) -f cmake.check_depends"
-       << "; $(MAKE) $(MAKESILENT) " << makeTarget << "\n\n"; 
+       << "; $(MAKE) $(MAKESILENT) "
+       << this->ConvertToOutputPath(makeTarget) << "\n\n"; 
 }
 
-void cmUnixMakefileGenerator::OutputBuildExecutableInDir(std::ostream& fout,
-                                                         const char* path,
-                                                         const char* library,
-                                                         const char* fullpath)
-{
-  const char* makeTarget = library;
-  const char* libOutPath = m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
-  if(libOutPath && strcmp( libOutPath, "" ) != 0)
-    {
-    makeTarget = fullpath;
-    }
-  fout << this->ConvertToOutputPath(fullpath)
-       << ":\n\tcd " << this->ConvertToOutputPath(path)
-       << "; $(MAKE) $(MAKESILENT) cmake.depends"
-       << "; $(MAKE) $(MAKESILENT) cmake.check_depends"
-       << "; $(MAKE) $(MAKESILENT) -f cmake.check_depends"
-       << "; $(MAKE) $(MAKESILENT) " << makeTarget << "\n\n"; 
-}
 
 bool cmUnixMakefileGenerator::SamePath(const char* path1, const char* path2)
 {
