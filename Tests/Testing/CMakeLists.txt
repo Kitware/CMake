@@ -34,7 +34,10 @@ FIND_LIBRARY(CMAKE_LIB
              ${Testing_BINARY_DIR}/../../Source/MinSizeRel
              ${Testing_BINARY_DIR}/../../Source/RelWithDebInfo)
 
-LINK_LIBRARIES(${CMAKE_LIB})
+# Specify the same one for debug/optimized to increase coverage
+LINK_LIBRARIES(${CMAKE_LIB}
+               debug ${CMAKE_LIB}
+               optimized ${CMAKE_LIB})
 
 #
 # Include Dart

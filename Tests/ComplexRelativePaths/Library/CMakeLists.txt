@@ -8,10 +8,15 @@ ADD_EXECUTABLE(create_file create_file.cxx)
 
 #
 # Create static library
-# SOURCE_FILES_REMOVE is used for Coverage
+# SOURCE_FILES_REMOVE is used for Coverage. empty.h is included for coverage
 #
 AUX_SOURCE_DIRECTORY(ExtraSources LibrarySources)
-SOURCE_FILES(LibrarySources file2 create_file.cxx GENERATED nonexisting_file)
+SOURCE_FILES(LibrarySources 
+  file2 
+  empty 
+  create_file.cxx 
+  GENERATED 
+  nonexisting_file)
 SOURCE_FILES_REMOVE(LibrarySources create_file.cxx GENERATED nonexisting_file) 
 ADD_LIBRARY(CMakeTestLibrary LibrarySources)
 

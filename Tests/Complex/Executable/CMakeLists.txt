@@ -17,7 +17,11 @@ FIND_LIBRARY(CMAKE_LIB
              ${Complex_BINARY_DIR}/../../Source/MinSizeRel
              ${Complex_BINARY_DIR}/../../Source/RelWithDebInfo)
 
-TARGET_LINK_LIBRARIES(complex ${CMAKE_LIB})
+# Specify the same one for debug/optimized to increase coverage
+TARGET_LINK_LIBRARIES(complex 
+                      ${CMAKE_LIB}
+                      debug ${CMAKE_LIB}
+                      optimized ${CMAKE_LIB})
 
 #
 # Output the files required by 'complex' to a file.

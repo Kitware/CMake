@@ -157,6 +157,30 @@ int main()
   // ----------------------------------------------------------------------
   // Test various IF/ELSE combinations
 
+#ifdef SHOULD_NOT_BE_DEFINED_NOT
+  cmFailed("IF or SET is broken, SHOULD_NOT_BE_DEFINED_NOT is defined.");
+#else
+  cmPassed("SHOULD_NOT_BE_DEFINED_NOT is not defined.");
+#endif
+  
+#ifndef SHOULD_BE_DEFINED_NOT
+  cmFailed("IF or SET is broken, SHOULD_BE_DEFINED_NOT is not defined.\n");
+#else
+  cmPassed("SHOULD_BE_DEFINED_NOT is defined.");
+#endif
+  
+#ifdef SHOULD_NOT_BE_DEFINED_NOT2
+  cmFailed("IF or SET is broken, SHOULD_NOT_BE_DEFINED_NOT2 is defined.");
+#else
+  cmPassed("SHOULD_NOT_BE_DEFINED_NOT2 is not defined.");
+#endif
+  
+#ifndef SHOULD_BE_DEFINED_NOT2
+  cmFailed("IF or SET is broken, SHOULD_BE_DEFINED_NOT2 is not defined.\n");
+#else
+  cmPassed("SHOULD_BE_DEFINED_NOT2 is defined.");
+#endif
+  
 #ifdef SHOULD_NOT_BE_DEFINED_AND
   cmFailed("IF or SET is broken, SHOULD_NOT_BE_DEFINED_AND is defined.");
 #else
@@ -167,6 +191,18 @@ int main()
   cmFailed("IF or SET is broken, SHOULD_BE_DEFINED_AND is not defined.\n");
 #else
   cmPassed("SHOULD_BE_DEFINED_AND is defined.");
+#endif
+  
+#ifdef SHOULD_NOT_BE_DEFINED_AND2
+  cmFailed("IF or SET is broken, SHOULD_NOT_BE_DEFINED_AND2 is defined.");
+#else
+  cmPassed("SHOULD_NOT_BE_DEFINED_AND2 is not defined.");
+#endif
+  
+#ifndef SHOULD_BE_DEFINED_AND2
+  cmFailed("IF or SET is broken, SHOULD_BE_DEFINED_AND2 is not defined.\n");
+#else
+  cmPassed("SHOULD_BE_DEFINED_AND2 is defined.");
 #endif
   
 #ifdef SHOULD_NOT_BE_DEFINED_OR
@@ -181,6 +217,18 @@ int main()
   cmPassed("SHOULD_BE_DEFINED_OR is defined.");
 #endif
   
+#ifdef SHOULD_NOT_BE_DEFINED_OR2
+  cmFailed("IF or SET is broken, SHOULD_NOT_BE_DEFINED_OR2 is defined.");
+#else
+  cmPassed("SHOULD_NOT_BE_DEFINED_OR2 is not defined.");
+#endif
+  
+#ifndef SHOULD_BE_DEFINED_OR2
+  cmFailed("IF or SET is broken, SHOULD_BE_DEFINED_OR2 is not defined.\n");
+#else
+  cmPassed("SHOULD_BE_DEFINED_OR2 is defined.");
+#endif
+  
 #ifdef SHOULD_NOT_BE_DEFINED_MATCHES
   cmFailed("IF or SET is broken, SHOULD_NOT_BE_DEFINED_MATCHES is defined.");
 #else
@@ -193,6 +241,18 @@ int main()
   cmPassed("SHOULD_BE_DEFINED_MATCHES is defined.");
 #endif
   
+#ifdef SHOULD_NOT_BE_DEFINED_MATCHES2
+  cmFailed("IF or SET is broken, SHOULD_NOT_BE_DEFINED_MATCHES2 is defined.");
+#else
+  cmPassed("SHOULD_NOT_BE_DEFINED_MATCHES2 is not defined.");
+#endif
+  
+#ifndef SHOULD_BE_DEFINED_MATCHES2
+  cmFailed("IF or SET is broken, SHOULD_BE_DEFINED_MATCHES2 is not defined.\n");
+#else
+  cmPassed("SHOULD_BE_DEFINED_MATCHES2 is defined.");
+#endif
+  
 #ifdef SHOULD_NOT_BE_DEFINED_COMMAND
   cmFailed("IF or SET is broken, SHOULD_NOT_BE_DEFINED_COMMAND is defined.");
 #else
@@ -203,6 +263,18 @@ int main()
   cmFailed("IF or SET is broken, SHOULD_BE_DEFINED_COMMAND is not defined.\n");
 #else
   cmPassed("SHOULD_BE_DEFINED_COMMAND is defined.");
+#endif
+  
+#ifdef SHOULD_NOT_BE_DEFINED_COMMAND2
+  cmFailed("IF or SET is broken, SHOULD_NOT_BE_DEFINED_COMMAND2 is defined.");
+#else
+  cmPassed("SHOULD_NOT_BE_DEFINED_COMMAND2 is not defined.");
+#endif
+  
+#ifndef SHOULD_BE_DEFINED_COMMAND2
+  cmFailed("IF or SET is broken, SHOULD_BE_DEFINED_COMMAND2 is not defined.\n");
+#else
+  cmPassed("SHOULD_BE_DEFINED_COMMAND2 is defined.");
 #endif
   
   // ----------------------------------------------------------------------
