@@ -20,6 +20,10 @@
 #include "cmMakefile.h"
 #include <stdlib.h> // required for atof
 
+#if defined(_WIN32) && !defined(__CYGWIN__) 
+#include <windows.h>
+#endif
+
 cmGlobalGenerator::cmGlobalGenerator()
 {
 // do nothing duh
@@ -38,7 +42,7 @@ cmGlobalGenerator::~cmGlobalGenerator()
 
 
 void cmGlobalGenerator::EnableLanguage(const char* lang, 
-                                                   cmMakefile *mf)
+                                       cmMakefile *mf)
 {
   if(m_FindMakeProgramFile.size() == 0)
     {
@@ -93,6 +97,17 @@ void cmGlobalGenerator::EnableLanguage(const char* lang,
       !this->GetLanguageEnabled("C") && !this->GetLanguageEnabled("CXX") &&
       !this->GetLanguageEnabled("JAVA"))
     {
+#if defined(_WIN32) && !defined(__CYGWIN__) 
+    /* Windows version number data.  */
+    OSVERSIONINFO osvi;
+    ZeroMemory(&osvi, sizeof(osvi));
+    osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+    GetVersionEx (&osvi);
+    cmOStringStream windowsVersionString;
+    windowsVersionString << osvi.dwMajorVersion << "." << osvi.dwMinorVersion;
+    windowsVersionString.str();
+    mf->AddDefinition("CMAKE_SYSTEM_VERSION", windowsVersionString.str().c_str());
+#endif
     // Read the DetermineSystem file
     std::string systemFile = root;
     systemFile += "/Modules/CMakeDetermineSystem.cmake";
