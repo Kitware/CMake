@@ -237,6 +237,7 @@ bool cmListFileCacheParseFunction(cmListFileLexer* lexer,
     }
 
   // Arguments.
+  unsigned long lastLine = cmListFileLexer_GetCurrentLine(lexer);
   while((token = cmListFileLexer_Scan(lexer)))
     {
     if(token->type == cmListFileLexer_Token_ParenRight)
@@ -269,11 +270,12 @@ bool cmListFileCacheParseFunction(cmListFileLexer* lexer,
       cmSystemTools::Error(error.str().c_str());
       return false;
       }
+    lastLine = cmListFileLexer_GetCurrentLine(lexer);
     }
 
   cmOStringStream error;
   error << "Error in cmake code at\n"
-        << filename << ":" << cmListFileLexer_GetCurrentLine(lexer) << ":\n"
+        << filename << ":" << lastLine << ":\n"
         << "Parse error.  Function missing ending \")\".  "
         << "End of file reached.";
   cmSystemTools::Error(error.str().c_str());
