@@ -151,19 +151,18 @@ void cmDSPWriter::AddDSPBuildRule(cmSourceGroup& sourceGroup)
   m_Makefile->ExpandVariablesInString(dsprule);
   dsprule = cmSystemTools::ConvertToOutputPath(dsprule.c_str());
   std::string args = makefileIn;
-  args += " -H\"";
+  args += " -H";
   args +=
     cmSystemTools::ConvertToOutputPath(m_Makefile->GetHomeDirectory());
-  args += "\" -S\"";
+  args += " -S";
   args +=
     cmSystemTools::ConvertToOutputPath(m_Makefile->GetStartDirectory());
-  args += "\" -O\"";
+  args += " -O";
   args += 
     cmSystemTools::ConvertToOutputPath(m_Makefile->GetStartOutputDirectory());
-  args += "\" -B\"";
+  args += " -B";
   args += 
     cmSystemTools::ConvertToOutputPath(m_Makefile->GetHomeOutputDirectory());
-  args += "\"";
   m_Makefile->ExpandVariablesInString(args);
 
   std::string configFile = 
