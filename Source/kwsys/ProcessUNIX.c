@@ -9,8 +9,8 @@ Version:   $Revision$
 Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
 See http://www.cmake.org/HTML/Copyright.html for details.
 
-This software is distributed WITHOUT ANY WARRANTY; without even 
-the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+This software is distributed WITHOUT ANY WARRANTY; without even
+the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
 PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -21,7 +21,7 @@ PURPOSE.  See the above copyright notices for more information.
 /*
 
 Implementation for UNIX
-  
+
 On UNIX, a child process is forked to exec the program.  Three
 output pipes from the child are read by the parent process using a
 select call to block until data are ready.  Two of the pipes are
@@ -85,59 +85,59 @@ struct kwsysProcess_s
 
   /* Descriptors for the read ends of the child's output pipes. */
   int PipeReadEnds[KWSYSPE_PIPE_COUNT];
-  
+
   /* Descriptors for the write ends of the child's output pipes. */
   int PipeWriteEnds[KWSYSPE_PIPE_COUNT];
-  
+
   /* Buffer for pipe data.  */
   char PipeBuffer[KWSYSPE_PIPE_BUFFER_SIZE];
 
   /* Process ID returned by the fork.  */
   pid_t ForkPID;
-  
+
   /* Flag for whether the child reported an error.  */
   int ChildError;
-  
+
   /* The timeout length.  */
   double Timeout;
 
   /* The working directory for the process. */
   char* WorkingDirectory;
-  
+
   /* Time at which the child started.  Negative for no timeout.  */
   kwsysProcessTime StartTime;
-  
+
   /* Time at which the child will timeout.  Negative for no timeout.  */
   kwsysProcessTime TimeoutTime;
-  
+
   /* Flag for whether the timeout expired.  */
   int TimeoutExpired;
-  
+
   /* The old SIGCHLD handler.  */
   struct sigaction OldSigChldAction;
-  
+
   /* The number of pipes left open during execution.  */
   int PipesLeft;
-  
+
   /* File descriptor set for call to select.  */
   fd_set PipeSet;
 
   /* The current status of the child process. */
   int State;
-  
+
   /* The exceptional behavior that terminated the child process, if
    * any.  */
   int ExitException;
-  
+
   /* The exit code of the child process.  */
   int ExitCode;
-  
+
   /* The exit value of the child process, if any.  */
   int ExitValue;
-  
+
   /* Whether the process was killed.  */
   int Killed;
-  
+
   /* Buffer for error message in case of failure.  */
   char ErrorMessage[KWSYSPE_PIPE_BUFFER_SIZE+1];
   int ErrorMessageLength;
@@ -165,7 +165,7 @@ void kwsysProcess_Delete(kwsysProcess* cp)
     {
     kwsysProcess_WaitForExit(cp, 0);
     }
-  
+
   /* Free memory.  */
   kwsysProcess_SetCommand(cp, 0);
   kwsysProcess_SetWorkingDirectory(cp, 0);
@@ -198,7 +198,7 @@ void kwsysProcess_SetCommand(kwsysProcess* cp, char const* const* command)
       cp->Command[i] = strdup(command[i]);
       }
     cp->Command[n] = 0;
-    }  
+    }
 }
 
 /*--------------------------------------------------------------------------*/
@@ -289,35 +289,35 @@ void kwsysProcess_Execute(kwsysProcess* cp)
 {
   int i;
   struct sigaction newSigChldAction;
-  
+
   /* Do not execute a second copy simultaneously.  */
   if(cp->State == kwsysProcess_State_Executing)
     {
     return;
     }
-  
+
   /* Initialize the control structure for a new process.  */
   kwsysProcessInitialize(cp);
-  
+
   /* We want no special handling of SIGCHLD.  Repeat call until it is
      not interrupted.  */
   memset(&newSigChldAction, 0, sizeof(struct sigaction));
   newSigChldAction.sa_handler = SIG_DFL;
   while((sigaction(SIGCHLD, &newSigChldAction, &cp->OldSigChldAction) < 0) &&
         (errno == EINTR));
-  
+
   /* Create pipes for subprocess output.  */
   for(i=0; i < KWSYSPE_PIPE_COUNT; ++i)
     {
     int p[2];
-    
+
     /* Create the pipe.  */
     if(pipe(p) < 0)
       {
       kwsysProcessCleanup(cp, 1);
       return;
       }
-    
+
     /* Set close-on-exec flag on the pipe's ends.  */
     if((fcntl(p[0], F_SETFD, FD_CLOEXEC) < 0) ||
        (fcntl(p[1], F_SETFD, FD_CLOEXEC) < 0))
@@ -325,17 +325,17 @@ void kwsysProcess_Execute(kwsysProcess* cp)
       kwsysProcessCleanup(cp, 1);
       return;
       }
-    
+
     /* Store the pipe.  */
     cp->PipeReadEnds[i] = p[0];
     cp->PipeWriteEnds[i] = p[1];
     }
-  
+
   /* The timeout period starts now.  */
   cp->StartTime = kwsysProcessTimeGetCurrent();
   cp->TimeoutTime.tv_sec = -1;
   cp->TimeoutTime.tv_usec = -1;
-  
+
   /* Fork off a child process.  */
   cp->ForkPID = fork();
   if(cp->ForkPID < 0)
@@ -343,29 +343,29 @@ void kwsysProcess_Execute(kwsysProcess* cp)
     kwsysProcessCleanup(cp, 1);
     return;
     }
-  
-  /* If this is the child process, run the real process.  */  
+
+  /* If this is the child process, run the real process.  */
   if(cp->ForkPID == 0)
     {
     /* We used to close stdin, but some programs do not like being run
        without stdin.  Just use whatever stdin the parent program is
        using.  */
     /*close(0);*/
-    
+
     /* Setup the stdout/stderr pipes.  */
     dup2(cp->PipeWriteEnds[KWSYSPE_PIPE_STDOUT], 1);
     dup2(cp->PipeWriteEnds[KWSYSPE_PIPE_STDERR], 2);
-    
+
     /* Clear the close-on-exec flag for stdout, stderr, and the child
        error report pipe.  All other pipe handles will be closed when
        exec succeeds.  */
     fcntl(1, F_SETFD, 0);
     fcntl(2, F_SETFD, 0);
     fcntl(cp->PipeWriteEnds[KWSYSPE_PIPE_ERROR], F_SETFD, 0);
-    
+
     /* Restore all default signal handlers. */
     kwsysProcessRestoreDefaultSignalHandlers();
-    
+
     /* Change to the working directory specified, if any.  */
     if(cp->WorkingDirectory)
       {
@@ -379,23 +379,23 @@ void kwsysProcess_Execute(kwsysProcess* cp)
         kwsysProcessChildErrorExit(cp);
         }
       }
-    
+
     /* Execute the real process.  If successful, this does not return.  */
     execvp(cp->Command[0], cp->Command);
-    
+
     /* Failure.  Report error to parent and terminate.  */
     kwsysProcessChildErrorExit(cp);
     }
-  
+
   /* The parent process does not need the pipe write ends.  */
   for(i=0; i < KWSYSPE_PIPE_COUNT; ++i)
     {
     kwsysProcessCleanupDescriptor(&cp->PipeWriteEnds[i]);
     }
-  
+
   /* All the pipes are now open.  */
   cp->PipesLeft = KWSYSPE_PIPE_COUNT;
-  
+
   /* The process has now started.  */
   cp->State = kwsysProcess_State_Executing;
 }
@@ -414,17 +414,17 @@ int kwsysProcess_WaitForData(kwsysProcess* cp, int pipes, char** data, int* leng
   int expired = 0;
   int pipeId = 0;
   int numReady = 0;
-  
+
   /* Record the time at which user timeout period starts.  */
   if(userTimeout)
     {
     userStartTime = kwsysProcessTimeGetCurrent();
     }
-  
+
   /* Calculate the time at which a timeout will expire, and whether it
      is the user or process timeout.  */
   user = kwsysProcessGetTimeoutTime(cp, userTimeout, &timeoutTime);
-  
+
   /* Data can only be available when pipes are open.  If the process
      is not running, cp->PipesLeft will be 0.  */
   while(cp->PipesLeft > 0)
@@ -437,10 +437,10 @@ int kwsysProcess_WaitForData(kwsysProcess* cp, int pipes, char** data, int* leng
          FD_ISSET(cp->PipeReadEnds[i], &cp->PipeSet))
         {
         int n;
-        
+
         /* We are handling this pipe now.  Remove it from the set.  */
         FD_CLR(cp->PipeReadEnds[i], &cp->PipeSet);
-        
+
         /* The pipe is ready to read without blocking.  Keep trying to
            read until the operation is not interrupted.  */
         while(((n = read(cp->PipeReadEnds[i], cp->PipeBuffer,
@@ -482,17 +482,17 @@ int kwsysProcess_WaitForData(kwsysProcess* cp, int pipes, char** data, int* leng
           }
         }
       }
-    
+
     /* If we have data, break early.  */
     if(pipeId)
       {
       break;
       }
-    
+
     /* Make sure the set is empty (it should always be empty here
        anyway).  */
     FD_ZERO(&cp->PipeSet);
-    
+
     /* Add the pipe reading ends that are still open.  */
     max = -1;
     for(i=0; i < KWSYSPE_PIPE_COUNT; ++i)
@@ -506,14 +506,14 @@ int kwsysProcess_WaitForData(kwsysProcess* cp, int pipes, char** data, int* leng
           }
         }
       }
-  
+
     /* Make sure we have a non-empty set.  */
     if(max < 0)
       {
       /* All pipes have closed.  Child has terminated.  */
       break;
       }
-    
+
     /* Setup a timeout if required.  */
     if(timeoutTime.tv_sec < 0)
       {
@@ -529,12 +529,12 @@ int kwsysProcess_WaitForData(kwsysProcess* cp, int pipes, char** data, int* leng
       expired = 1;
       break;
       }
-    
+
     /* Run select to block until data are available.  Repeat call
        until it is not interrupted.  */
     while(((numReady = select(max+1, &cp->PipeSet, 0, 0, timeout)) < 0) &&
           (errno == EINTR));
-    
+
     /* Check result of select.  */
     if(numReady == 0)
       {
@@ -547,7 +547,7 @@ int kwsysProcess_WaitForData(kwsysProcess* cp, int pipes, char** data, int* leng
       /* Select returned an error.  Leave the error description in the
          pipe buffer.  */
       strncpy(cp->ErrorMessage, strerror(errno), KWSYSPE_PIPE_BUFFER_SIZE);
-      
+
       /* Kill the child now.  */
       kwsysProcess_Kill(cp);
       cp->Killed = 0;
@@ -555,7 +555,7 @@ int kwsysProcess_WaitForData(kwsysProcess* cp, int pipes, char** data, int* leng
       cp->PipesLeft = 0;
       }
     }
-  
+
   /* Update the user timeout.  */
   if(userTimeout)
     {
@@ -569,7 +569,7 @@ int kwsysProcess_WaitForData(kwsysProcess* cp, int pipes, char** data, int* leng
       *userTimeout = 0;
       }
     }
-  
+
   /* Check what happened.  */
   if(pipeId)
     {
@@ -607,13 +607,13 @@ int kwsysProcess_WaitForExit(kwsysProcess* cp, double* userTimeout)
   int result = 0;
   int status = 0;
   int pipe = 0;
-  
+
   /* Make sure we are executing a process.  */
   if(cp->State != kwsysProcess_State_Executing)
     {
     return 1;
     }
-  
+
   /* Wait for all the pipes to close.  Ignore all data.  */
   while((pipe = kwsysProcess_WaitForData(cp, 0, 0, 0, userTimeout)) > 0)
     {
@@ -633,7 +633,7 @@ int kwsysProcess_WaitForExit(kwsysProcess* cp, double* userTimeout)
     kwsysProcessCleanup(cp, 1);
     return 1;
     }
-  
+
   /* Check whether the child reported an error invoking the process.  */
   if(cp->ChildError)
     {
@@ -643,7 +643,7 @@ int kwsysProcess_WaitForExit(kwsysProcess* cp, double* userTimeout)
     cp->State = kwsysProcess_State_Error;
     return 1;
     }
-  
+
   /* Determine the outcome.  */
   if(cp->Killed)
     {
@@ -694,7 +694,7 @@ int kwsysProcess_WaitForExit(kwsysProcess* cp, double* userTimeout)
     strcpy(cp->ErrorMessage, "Error getting child return code.");
     cp->State = kwsysProcess_State_Error;
     }
-  
+
   /* Normal cleanup.  */
   kwsysProcessCleanup(cp, 0);
   return 1;
@@ -702,13 +702,13 @@ int kwsysProcess_WaitForExit(kwsysProcess* cp, double* userTimeout)
 
 /*--------------------------------------------------------------------------*/
 void kwsysProcess_Kill(kwsysProcess* cp)
-{  
+{
   /* Make sure we are executing a process.  */
   if(cp->State != kwsysProcess_State_Executing)
     {
     return;
     }
-  
+
   /* Kill the child.  */
   cp->Killed = 1;
   kill(cp->ForkPID, SIGKILL);
@@ -748,18 +748,18 @@ static void kwsysProcessInitialize(kwsysProcess* cp)
 static void kwsysProcessCleanup(kwsysProcess* cp, int error)
 {
   int i;
-  
+
   /* If cleaning up due to an error, report the error message.  */
   if(error)
     {
     strncpy(cp->ErrorMessage, strerror(errno), KWSYSPE_PIPE_BUFFER_SIZE);
     cp->State = kwsysProcess_State_Error;
     }
-  
+
   /* Restore the SIGCHLD handler.  */
   while((sigaction(SIGCHLD, &cp->OldSigChldAction, 0) < 0) &&
         (errno == EINTR));
-  
+
   /* Close pipe handles.  */
   for(i=0; i < KWSYSPE_PIPE_COUNT; ++i)
     {
@@ -794,10 +794,10 @@ static int kwsysProcessGetTimeoutTime(kwsysProcess* cp, double* userTimeout,
     kwsysProcessTime length = kwsysProcessTimeFromDouble(cp->Timeout);
     cp->TimeoutTime = kwsysProcessTimeAdd(cp->StartTime, length);
     }
-  
+
   /* Start with process timeout.  */
   *timeoutTime = cp->TimeoutTime;
-  
+
   /* Check if the user timeout is earlier.  */
   if(userTimeout)
     {
@@ -854,7 +854,7 @@ static kwsysProcessTime kwsysProcessTimeGetCurrent()
 /*--------------------------------------------------------------------------*/
 static double kwsysProcessTimeToDouble(kwsysProcessTime t)
 {
-  return (double)t.tv_sec + t.tv_usec*0.000001;  
+  return (double)t.tv_sec + t.tv_usec*0.000001;
 }
 
 /*--------------------------------------------------------------------------*/
@@ -910,10 +910,10 @@ static void kwsysProcessChildErrorExit(kwsysProcess* cp)
   /* Construct the error message.  */
   char buffer[KWSYSPE_PIPE_BUFFER_SIZE];
   strncpy(buffer, strerror(errno), KWSYSPE_PIPE_BUFFER_SIZE);
-  
+
   /* Report the error to the parent through the special pipe.  */
   write(cp->PipeWriteEnds[KWSYSPE_PIPE_ERROR], buffer, strlen(buffer));
-  
+
   /* Terminate without cleanup.  */
   _exit(1);
 }
