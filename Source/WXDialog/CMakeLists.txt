@@ -29,6 +29,12 @@ IF ( CMAKE_WX_CAN_COMPILE )
 
   INSTALL_TARGETS(/bin wxCMakeSetup)
 
+  IF(BUILD_TESTING)
+    ADD_TEST(wxCMakeSetupRunTest 
+             ${CMake_BINARY_DIR}/Source/wxCMakeSetup 
+             -Q -A:ON -B:${CMake_BINARY_DIR}/Tests/Simple 
+             -H:${CMake_SOURCE_DIR}/Tests/Simple)
+  ENDIF(BUILD_TESTING)
 ELSE ( CMAKE_WX_CAN_COMPILE )
 
   MESSAGE("Cannot find wxWindows libraries and/or header files")
