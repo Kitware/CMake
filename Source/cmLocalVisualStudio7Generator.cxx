@@ -1238,7 +1238,16 @@ void cmLocalVisualStudio7Generator::ConfigureFinalPass()
     static_cast<cmGlobalVisualStudio7Generator *>(m_GlobalGenerator);
   for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); l++)
     {
-    gg->CreateGUID(l->first.c_str());
+    if (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
+      { 
+      cmCustomCommand cc = l->second.GetPostBuildCommands()[0];
+      std::vector<std::string> stuff = cc.GetDepends();
+      gg->CreateGUID(stuff[0].c_str());
+      }
+    else
+      {
+      gg->CreateGUID(l->first.c_str()); 
+      }
     }
   
 }

@@ -80,7 +80,7 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(std::ostream& fout,
     cmTargets &tgts = generators[i]->GetMakefile()->GetTargets();
     cmTargets::iterator l = tgts.begin();
     for(std::vector<std::string>::iterator si = dspnames.begin(); 
-        l != tgts.end(); ++l)
+        l != tgts.end() && si != dspnames.end(); ++l)
       {
       // special handling for the current makefile
       if(mf == generators[0]->GetMakefile())
@@ -118,7 +118,7 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(std::ostream& fout,
       // Write the project into the SLN file
       if (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
         {
-        cmCustomCommand cc = l->second.GetPreLinkCommands()[0];
+        cmCustomCommand cc = l->second.GetPostBuildCommands()[0];
         
         // dodgy use of the cmCustomCommand's members to store the 
         // arguments from the INCLUDE_EXTERNAL_MSPROJECT command
@@ -202,7 +202,7 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(std::ostream& fout,
     cmTargets::iterator l = tgts.begin();
     std::string dir = mf->GetStartDirectory();
     for(std::vector<std::string>::iterator si = dspnames.begin(); 
-        l != tgts.end(); ++l)
+        l != tgts.end() && si != dspnames.end(); ++l)
       {
       if ((l->second.GetType() != cmTarget::INSTALL_FILES)
           && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))
