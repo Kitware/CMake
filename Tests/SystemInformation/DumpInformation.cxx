@@ -5,6 +5,8 @@
 void cmDumpInformationPrintFile(const char* name, FILE* fout)
 {
   fprintf(fout,
+          "Avoid ctest truncation of output: CTEST_FULL_OUTPUT\n");
+  fprintf(fout,
           "================================================================\n");
   struct stat fs;
   if(stat(name, &fs) != 0)
