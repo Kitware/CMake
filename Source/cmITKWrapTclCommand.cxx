@@ -70,8 +70,15 @@ bool cmITKWrapTclCommand::CreateCableRule(const char* configFile)
   // Generate the rule to run cable to generate wrappers.
   std::string command = this->GetCableFromCache();
   std::vector<std::string> depends;
-  depends.push_back(command);
-  std::vector<std::string > commandArgs;
+  
+  // Special case for CMake's wrapping test.  Don't add dependency if
+  // it is a dummy executable.
+  if(command != "echo")
+    {
+    depends.push_back(command);
+    }
+  
+  std::vector<std::string> commandArgs;
   commandArgs.push_back(inFile);
   commandArgs.push_back("-tcl");  
   std::string tmp = tclFile+".cxx";
