@@ -57,7 +57,10 @@ public:
         "stored in the variable VAR.  If the property is not found, var "
         "will be set to NOT_FOUND.  Use SET_TARGET_PROPERTIES to set "
         "property values.  Properties are usually used to control how "
-        "a target is built.";
+        "a target is built.  The read-only property \"LOCATION\" specifies "
+        "the full path to the file on disk that will be created for the "
+        "target.  This is very useful for executable targets to get "
+        "the path to the executable file for use in a custom command.";
     }
   
   cmTypeMacro(cmGetTargetPropertyCommand, cmCommand);
