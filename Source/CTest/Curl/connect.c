@@ -132,23 +132,27 @@ int Curl_nonblock(curl_socket_t sockfd,    /* operate on this */
 {
 #undef SETBLOCK
 #ifdef HAVE_O_NONBLOCK
-  /* most recent unix versions */
-  int flags;
+    {
+    /* most recent unix versions */
+    int flags;
 
-  flags = fcntl(sockfd, F_GETFL, 0);
-  if (TRUE == nonblock)
-    return fcntl(sockfd, F_SETFL, flags | O_NONBLOCK);
-  else
-    return fcntl(sockfd, F_SETFL, flags & (~O_NONBLOCK));
+    flags = fcntl(sockfd, F_GETFL, 0);
+    if (TRUE == nonblock)
+      return fcntl(sockfd, F_SETFL, flags | O_NONBLOCK);
+    else
+      return fcntl(sockfd, F_SETFL, flags & (~O_NONBLOCK));
+    }
 #define SETBLOCK 1
 #endif
 
 #ifdef HAVE_FIONBIO
-  /* older unix versions */
-  int flags;
+    {
+    /* older unix versions */
+    int flags;
 
-  flags = nonblock;
-  return ioctl(sockfd, FIONBIO, &flags);
+    flags = nonblock;
+    return ioctl(sockfd, FIONBIO, &flags);
+    }
 #define SETBLOCK 2
 #endif
 
