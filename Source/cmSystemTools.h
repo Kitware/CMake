@@ -96,6 +96,11 @@ public:
   static std::string Capitalized(const std::string&);
   
   /**
+   * Return a lower case string
+   */
+  static std::string LowerCase(const std::string&);
+  
+  /**
    * Replace Windows file system slashes with Unix-style slashes.
    */
   static const char *ConvertToUnixSlashes(std::string& path);
