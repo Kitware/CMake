@@ -69,11 +69,15 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)
   ++i;
 
   // Name of the test driver
-
+  // make sure they specified an extension
+  if (cmSystemTools::GetFilenameExtension(*i).size() < 1)
+    {
+    this->SetError("You must specify a file extenion for the test driver file.");
+    return false;
+    }
   std::string driver = m_Makefile->GetCurrentOutputDirectory();
   driver += "/";
   driver += *i;
-  driver += ".cxx";
   ++i;
 
   std::ofstream fout(driver.c_str());
@@ -119,20 +123,29 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)
       {
       break;
       }
-    std::string func_name = *i;
+    std::string func_name;
+    if (cmSystemTools::GetFilenamePath(*i).size() > 0)
+      {
+      func_name = cmSystemTools::GetFilenamePath(*i) + "/" + 
+        cmSystemTools::GetFilenameWithoutLastExtension(*i);
+      }
+    else
+      {
+      func_name = cmSystemTools::GetFilenameWithoutLastExtension(*i);
+      }
     cmSystemTools::ConvertToUnixSlashes(func_name);
     cmSystemTools::ReplaceString(func_name, " ", "_");
     cmSystemTools::ReplaceString(func_name, "/", "_");
     cmSystemTools::ReplaceString(func_name, ":", "_");
     tests_func_name.push_back(func_name);
-    fout << "int " << func_name << "(int, char**);\n";
+    fout << "int " << func_name << "(int, char*[]);\n";
     }
 
   fout << 
     "\n"
     "// Create map\n"
     "\n"
-    "typedef int (*MainFuncPointer)(int , char**);\n"
+    "typedef int (*MainFuncPointer)(int , char*[]);\n"
     "struct functionMapEntry\n"
     "{\n"
     "  const char* name;\n"
@@ -145,9 +158,19 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)
   std::vector<std::string>::iterator j;
   for(i = testsBegin, j = tests_func_name.begin(); i != tests.end(); ++i, ++j)
     {
+    std::string func_name;
+    if (cmSystemTools::GetFilenamePath(*i).size() > 0)
+      {
+      func_name = cmSystemTools::GetFilenamePath(*i) + "/" + 
+        cmSystemTools::GetFilenameWithoutLastExtension(*i);
+      }
+    else
+      {
+      func_name = cmSystemTools::GetFilenameWithoutLastExtension(*i);
+      }
     fout << 
       "  {\n"
-      "    \"" << *i << "\",\n"
+      "    \"" << func_name << "\",\n"
       "    " << *j << "\n"
       "  },\n";
     numTests++;
@@ -177,7 +200,7 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)
     "  return new_string;\n"
     "}\n"
     "\n"
-    "int main(int ac, char** av)\n"
+    "int main(int ac, char *av[])\n"
     "{\n"
     "  int NumTests, i, testNum, partial_match;\n"
     "  char *arg, *test_name;\n"
@@ -266,12 +289,12 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)
   std::string sourceListValue;
   
   cfile.SetIsAnAbstractClass(false);
-  cfile.SetName(args[1].c_str(), 
+  cfile.SetName(cmSystemTools::GetFilenameWithoutExtension(args[1]).c_str(), 
                 m_Makefile->GetCurrentOutputDirectory(),
                 "cxx", 
                 false);
   m_Makefile->AddSource(cfile);
-  sourceListValue = args[1] + ".cxx";
+  sourceListValue = args[1];
     
   for(i = testsBegin; i != tests.end(); ++i)
     {
