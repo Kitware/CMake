@@ -96,12 +96,12 @@ cmMakefile::~cmMakefile()
     }
   std::list<cmFunctionBlocker *>::iterator pos;
   for (pos = m_FunctionBlockers.begin(); 
-       pos != m_FunctionBlockers.end(); pos = m_FunctionBlockers.begin())
+       pos != m_FunctionBlockers.end(); ++pos)
     {
     cmFunctionBlocker* b = *pos;
-    m_FunctionBlockers.remove(*pos);
     delete b;
     }
+  m_FunctionBlockers.clear();
 }
 
 void cmMakefile::PrintStringVector(const char* s, const std::vector<std::string>& v) const
