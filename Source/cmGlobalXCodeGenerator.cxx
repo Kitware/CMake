@@ -240,10 +240,9 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
   cmCustomCommandLine makecommand;
   makecommand.push_back("make");
   makecommand.push_back("-C");
-  makecommand.push_back(this->ConvertToRelativeOutputPath(dir.c_str()));
+  makecommand.push_back(dir.c_str());
   makecommand.push_back("-f");
-  makecommand.push_back(this->ConvertToRelativeOutputPath(
-                          m_CurrentXCodeHackMakefile.c_str()));
+  makecommand.push_back(m_CurrentXCodeHackMakefile.c_str());
   cmCustomCommandLines commandLines;
   commandLines.push_back(makecommand);
   mf->AddUtilityCommand("XCODE_DEPEND_HELPER", false, no_output, no_depends,
