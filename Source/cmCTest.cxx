@@ -208,7 +208,6 @@ static const char* cmCTestMemCheckResultStrings[] = {
 std::string cmCTest::MakeXMLSafe(const std::string& str)
 {
   cmOStringStream ost;
-  char buffer[10];
   // By uncommenting the lcnt code, it will put newline every 120 characters
   //int lcnt = 0;
   for (std::string::size_type  pos = 0; pos < str.size(); pos ++ )
@@ -216,6 +215,7 @@ std::string cmCTest::MakeXMLSafe(const std::string& str)
     unsigned char ch = str[pos];
     if ( (ch > 126 || ch < 32) && ch != 9  && ch != 10 && ch != 13 )
       {
+      char buffer[33];
       sprintf(buffer, "&lt;%d&gt;", (int)ch);
       //sprintf(buffer, "&#x%0x;", (unsigned int)ch);
       ost << buffer;
