@@ -1205,8 +1205,15 @@ std::string cmSystemTools::CollapseFullPath(const char* in_name)
   char resolved_name[5024];
 #  endif
 # endif
-  realpath(dir.c_str(), resolved_name);
-  dir = resolved_name;
+  if(dir != "")
+    {
+    realpath(dir.c_str(), resolved_name);
+    dir = resolved_name;
+    }
+  else
+    {
+    dir = cmSystemTools::GetCurrentWorkingDirectory();
+    }
   return dir + "/" + file;
 #endif
 }
