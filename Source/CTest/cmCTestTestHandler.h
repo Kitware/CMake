@@ -57,6 +57,8 @@ public:
   ///! pass the -I argument down
   void SetTestsToRunInformation(const char*);
 
+  typedef std::vector<cmListFileArgument> tm_VectorOfListFileArgs;
+
 private:
 
   enum { // Memory checkers
@@ -151,7 +153,6 @@ private:
                         std::vector<cmStdString> &failed,
                         bool memcheck);
 
-  typedef std::vector<cmListFileArgument> tm_VectorOfListFileArgs;
   struct cmCTestTestProperties
     {
     cmStdString m_Name;
