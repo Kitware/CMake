@@ -643,8 +643,7 @@ IF(BUILD_TESTING)
       ${CMake_BINARY_DIR}/Tests/BootstrapTest
       --build-nocmake 
       --build-makeprogram ${CMake_SOURCE_DIR}/bootstrap
-      --test-command ${CMake_BINARY_DIR}/Tests/BootstrapTest/Bootstrap.cmk/cmake --version)
-
+      --test-command ${CMake_BINARY_DIR}/Tests/BootstrapTest/Bootstrap.cmk/cmake)
   ENDIF(UNIX)
 
   IF(CMAKE_GENERATOR MATCHES "Makefiles")
