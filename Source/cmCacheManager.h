@@ -64,8 +64,12 @@ public:
     CacheIterator(cmCacheManager &cm) : m_Container(cm) {
       this->Begin();
     }
-    CacheIterator(cmCacheManager &cm, const char* key) : m_Container(cm) {
-      this->Find(key);
+    CacheIterator(cmCacheManager &cm, const char* key) : m_Container(cm) 
+      {
+      if ( key )
+        {
+        this->Find(key);
+        }
     }
   private:
     CacheEntry const& GetEntry() const { return m_Position->second; }
@@ -105,7 +109,7 @@ public:
   void PrintCache(std::ostream&) const;
   
   ///! Get the iterator for an entry with a given key.
-  cmCacheManager::CacheIterator GetCacheIterator(const char *key);
+  cmCacheManager::CacheIterator GetCacheIterator(const char *key=0);
   
   ///! Remove an entry from the cache
   void RemoveCacheEntry(const char* key);
