@@ -5,7 +5,7 @@
 # any makefiles or projects.
 IF(NOT CMAKE_C_COMPILER_WORKS)
   MESSAGE(STATUS "Check for working C compiler: ${CMAKE_C_COMPILER}")
-  FILE(WRITE ${CMAKE_BINARY_DIR}/CMakeTmp/testCCompiler.c "int main(){return 0;}")
+  FILE(WRITE ${CMAKE_BINARY_DIR}/CMakeTmp/testCCompiler.c "int main(){return 0;}\n")
   TRY_COMPILE(CMAKE_C_COMPILER_WORKS ${CMAKE_BINARY_DIR} 
     ${CMAKE_BINARY_DIR}/CMakeTmp/testCCompiler.c
     OUTPUT_VARIABLE OUTPUT)

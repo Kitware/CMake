@@ -34,7 +34,7 @@ MACRO(CHECK_TYPE_SIZE TYPE VARIABLE)
     ELSE(HAVE_${VARIABLE})
       MESSAGE(STATUS "Check size of ${TYPE} - failed")
       FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeError.log 
-        "Determining size of ${TYPE} failed with the following output:\n${OUTPUT}\n")
+        "Determining size of ${TYPE} failed with the following output:\n${OUTPUT}\n\n")
     ENDIF(HAVE_${VARIABLE})
   ENDIF("HAVE_${VARIABLE}" MATCHES "^HAVE_${VARIABLE}$")
   SET(CMAKE_ALLOW_UNKNOWN_VARIABLE_READ_ACCESS )

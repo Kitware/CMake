@@ -5,7 +5,7 @@
 # any makefiles or projects.
 IF(NOT CMAKE_CXX_COMPILER_WORKS)
   MESSAGE(STATUS "Check for working CXX compiler: ${CMAKE_CXX_COMPILER}")
-  FILE(WRITE ${CMAKE_BINARY_DIR}/CMakeTmp/testCXXCompiler.cxx "int main(){return 0;}")
+  FILE(WRITE ${CMAKE_BINARY_DIR}/CMakeTmp/testCXXCompiler.cxx "int main(){return 0;}\n")
   TRY_COMPILE(CMAKE_CXX_COMPILER_WORKS ${CMAKE_BINARY_DIR} 
     ${CMAKE_BINARY_DIR}/CMakeTmp/testCXXCompiler.cxx
     OUTPUT_VARIABLE OUTPUT)

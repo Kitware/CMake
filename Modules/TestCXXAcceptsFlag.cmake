@@ -17,6 +17,6 @@ MACRO(CHECK_CXX_ACCEPTS_FLAG FLAGS  VARIABLE)
     MESSAGE(STATUS "Checking to see if CXX compiler acepts flag ${FLAGS} - yes")
   ELSE(${VARIABLE})
     FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeError.log
-      "Determining if the CXX compiler accepts the flag ${FLAGS} failed with the following output:\n${OUTPUT}\n")
+      "Determining if the CXX compiler accepts the flag ${FLAGS} failed with the following output:\n${OUTPUT}\n\n")
   ENDIF(${VARIABLE})
 ENDMACRO(CHECK_CXX_ACCEPTS_FLAG)

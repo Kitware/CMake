@@ -11,6 +11,6 @@ MACRO(TEST_BIG_ENDIAN VARIABLE)
     OUTPUT_VARIABLE OUTPUT)
   IF(NOT HAVE_${VARIABLE})
     FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeError.log 
-      "Determining the endianes of the system failed with the following output:\n${OUTPUT}\n")
+      "Determining the endianes of the system failed with the following output:\n${OUTPUT}\n\n")
   ENDIF(NOT HAVE_${VARIABLE})
 ENDMACRO(TEST_BIG_ENDIAN)

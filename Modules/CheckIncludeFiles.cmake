@@ -35,7 +35,7 @@ MACRO(CHECK_INCLUDE_FILES INCLUDE VARIABLE)
       FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeError.log 
         "Determining if files ${INCLUDE} "
         "exist failed with the following output:\n"
-        "${OUTPUT}\n")
+        "${OUTPUT}\n\n")
     ENDIF(${VARIABLE})
   ENDIF("${VARIABLE}" MATCHES "^${VARIABLE}$")
 ENDMACRO(CHECK_INCLUDE_FILES)

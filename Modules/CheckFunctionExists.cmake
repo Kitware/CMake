@@ -29,7 +29,7 @@ MACRO(CHECK_FUNCTION_EXISTS FUNCTION VARIABLE)
       SET(${VARIABLE} "" CACHE INTERNAL "Have function ${FUNCTION}")
       FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeError.log 
         "Determining if the function ${FUNCTION} exists failed with the following output:\n"
-        "${OUTPUT}\n")
+        "${OUTPUT}\n\n")
     ENDIF(${VARIABLE})
   ENDIF("${VARIABLE}" MATCHES "^${VARIABLE}$")
 ENDMACRO(CHECK_FUNCTION_EXISTS)

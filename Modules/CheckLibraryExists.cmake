@@ -34,7 +34,7 @@ MACRO(CHECK_LIBRARY_EXISTS LIBRARY FUNCTION LOCATION VARIABLE)
       FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeError.log 
         "Determining if the function ${FUNCTION} exists in the ${LIBRARY} "
         "failed with the following output:\n"
-        "${OUTPUT}\n")
+        "${OUTPUT}\n\n")
     ENDIF(${VARIABLE})
   ENDIF("${VARIABLE}" MATCHES "^${VARIABLE}$")
 ENDMACRO(CHECK_LIBRARY_EXISTS)

@@ -28,7 +28,7 @@ MACRO(CHECK_VARIABLE_EXISTS VAR VARIABLE)
       MESSAGE(STATUS "Looking for ${VARIABLE} - not found")
       FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeError.log 
         "Determining if the variable ${VAR} exists failed with the following output:\n"
-        "${OUTPUT}\n")
+        "${OUTPUT}\n\n")
     ENDIF(${VARIABLE})
   ENDIF("${VARIABLE}" MATCHES "^${VARIABLE}$")
 ENDMACRO(CHECK_VARIABLE_EXISTS)
