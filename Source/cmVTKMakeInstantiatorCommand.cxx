@@ -121,20 +121,20 @@ cmVTKMakeInstantiatorCommand
       return false;
       }
     
-    std::vector<cmSourceFile>& srcList = srcListIter->second;
+    std::vector<cmSourceFile*>& srcList = srcListIter->second;
     
     // Collect the names of the classes.
-    for(std::vector<cmSourceFile>::iterator src = srcList.begin();
+    for(std::vector<cmSourceFile*>::iterator src = srcList.begin();
         src != srcList.end();++src)
       {
       // Wrap-excluded and abstract classes do not have a New() method.
       // vtkIndent and vtkTimeStamp are special cases and are not
       // vtkObject subclasses.
-      if(!src->GetWrapExclude() && !src->GetIsAnAbstractClass()
-         && (src->GetSourceName() != "vtkIndent")
-         && (src->GetSourceName() != "vtkTimeStamp"))
+      if(!(*src)->GetWrapExclude() && !(*src)->GetIsAnAbstractClass()
+         && ((*src)->GetSourceName() != "vtkIndent")
+         && ((*src)->GetSourceName() != "vtkTimeStamp"))
         {
-        m_Classes.push_back(src->GetSourceName());
+        m_Classes.push_back((*src)->GetSourceName());
         }
       }
     }    

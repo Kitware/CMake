@@ -40,6 +40,14 @@ bool cmSourceFilesCommand::InitialPass(std::vector<std::string> const& args)
       generated = 1;
       continue;
       }
+    cmSourceFile* sf = m_Makefile->GetSource(copy.c_str());
+    if(sf)
+      {
+      // if the source file is already in the makefile,
+      // then add the pointer to the source list without creating a cmSourceFile
+      m_Makefile->GetSources()[name].push_back(sf);
+      continue;
+      }
     cmSourceFile file;
     file.SetIsAnAbstractClass(false);
     std::string path = cmSystemTools::GetFilenamePath(copy);

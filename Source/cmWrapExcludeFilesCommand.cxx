@@ -32,12 +32,12 @@ bool cmWrapExcludeFilesCommand::InitialPass(std::vector<std::string> const& args
     for(cmMakefile::SourceMap::iterator l = Classes.begin(); 
         l != Classes.end(); l++)
       {
-      for(std::vector<cmSourceFile>::iterator i = l->second.begin(); 
+      for(std::vector<cmSourceFile*>::iterator i = l->second.begin(); 
           i != l->second.end(); i++)
         {
-        if(i->GetSourceName() == (*j))
+        if((*i)->GetSourceName() == (*j))
           {
-          i->SetWrapExclude(true);
+          (*i)->SetWrapExclude(true);
           }
         }
       }

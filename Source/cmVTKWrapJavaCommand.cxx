@@ -50,10 +50,10 @@ bool cmVTKWrapJavaCommand::InitialPass(std::vector<std::string> const& args)
       this->SetError("bad source list passed to VTKWrapJavaCommand");
       return false;
       }
-    for(std::vector<cmSourceFile>::iterator i = l->second.begin(); 
+    for(std::vector<cmSourceFile*>::iterator i = l->second.begin(); 
         i != l->second.end(); i++)
       {
-      cmSourceFile &curr = *i;
+      cmSourceFile &curr = *(*i);
       // if we should wrap the class
       if (!curr.GetWrapExclude())
         {

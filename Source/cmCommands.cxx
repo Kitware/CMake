@@ -46,6 +46,7 @@
 #include "cmForEachCommand.cxx"
 #include "cmFLTKWrapUICommand.cxx"
 #include "cmGetFilenameComponentCommand.cxx"
+#include "cmGetSourceFilePropertyCommand.cxx"
 #include "cmIfCommand.cxx"
 #include "cmIncludeCommand.cxx"
 #include "cmIncludeDirectoryCommand.cxx"
@@ -64,6 +65,7 @@
 #include "cmOutputRequiredFilesCommand.cxx"
 #include "cmProjectCommand.cxx"
 #include "cmSetCommand.cxx"
+#include "cmSetSourceFilesPropertiesCommand.cxx"
 #include "cmSiteNameCommand.cxx"
 #include "cmSourceFilesCommand.cxx"
 #include "cmSourceFilesFlagsCommand.cxx"
@@ -113,6 +115,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmForEachCommand);
   commands.push_back(new cmFLTKWrapUICommand);
   commands.push_back(new cmGetFilenameComponentCommand);
+  commands.push_back(new cmGetSourceFilePropertyCommand);
   commands.push_back(new cmIfCommand);
   commands.push_back(new cmIncludeCommand);
   commands.push_back(new cmIncludeDirectoryCommand);
@@ -131,6 +134,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmOutputRequiredFilesCommand);  
   commands.push_back(new cmProjectCommand);
   commands.push_back(new cmSetCommand);
+  commands.push_back(new cmSetSourceFilesPropertiesCommand);
   commands.push_back(new cmSiteNameCommand);
   commands.push_back(new cmSourceFilesCommand);
   commands.push_back(new cmSourceFilesFlagsCommand);

@@ -147,10 +147,10 @@ void cmMakeDepend::GenerateDependInformation(cmDependInformation* info)
     cmMakefile::SourceMap::iterator l;
     for (l= srcmap.begin() ; l!=srcmap.end() ; l++)
       {
-      for(std::vector<cmSourceFile>::iterator i = l->second.begin();
+      for(std::vector<cmSourceFile*>::iterator i = l->second.begin();
           i != l->second.end(); i++)
         {
-        if (i->GetFullPath() == path)
+        if ((*i)->GetFullPath() == path)
           {
           found=true;
           }
@@ -164,7 +164,7 @@ void cmMakeDepend::GenerateDependInformation(cmDependInformation* info)
             std::string incpath = *t;
             incpath = incpath + "/";
             incpath = incpath + path;
-            if (i->GetFullPath() == incpath)
+            if ((*i)->GetFullPath() == incpath)
               {
               // set the path to the guessed path
               info->m_FullPath = incpath; 
@@ -272,16 +272,16 @@ void cmMakeDepend::GenerateMakefileDependencies()
   for(cmTargets::const_iterator l = tgts.begin(); 
       l != tgts.end(); l++)
     {
-    const std::vector<cmSourceFile> &classes = l->second.GetSourceFiles();
-    for(std::vector<cmSourceFile>::const_iterator i = classes.begin(); 
+    const std::vector<cmSourceFile*> &classes = l->second.GetSourceFiles();
+    for(std::vector<cmSourceFile*>::const_iterator i = classes.begin(); 
         i != classes.end(); ++i)
       {
-      if(!i->GetIsAHeaderFileOnly())
+      if(!(*i)->GetIsAHeaderFileOnly())
         {
         cmDependInformation* info =
-          this->GetDependInformation(i->GetFullPath().c_str());
+          this->GetDependInformation((*i)->GetFullPath().c_str());
         this->AddFileToSearchPath(info->m_FullPath.c_str());
-        info->m_cmSourceFile = &*i;
+        info->m_cmSourceFile = *i;
         this->GenerateDependInformation(info);
         }
       }

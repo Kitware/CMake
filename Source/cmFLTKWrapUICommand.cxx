@@ -64,10 +64,10 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args)
   // where they are created have to be added to the include path
   m_Makefile->AddIncludeDirectory( outputDirectory.c_str() );
 
-  for(std::vector<cmSourceFile>::iterator i = l->second.begin(); 
+  for(std::vector<cmSourceFile*>::iterator i = l->second.begin(); 
       i != l->second.end(); i++)
     {
-    cmSourceFile &curr = *i;
+    cmSourceFile &curr = *(*i);
     // if we should use the source GUI 
     // to generate .cxx and .h files
     if (!curr.GetWrapExclude())
@@ -139,8 +139,9 @@ void cmFLTKWrapUICommand::FinalPass()
     m_Makefile->AddCustomCommand(m_WrapUserInterface[classNum].c_str(),
                                  fluid_exe.c_str(), cxxargs, depends, 
                                  outputs, m_Target.c_str() );
+    cmSourceFile* sf = m_Makefile->AddSource(m_GeneratedSourcesClasses[classNum]);
     
-    m_Makefile->GetTargets()[m_Target].GetSourceFiles().push_back( m_GeneratedSourcesClasses[classNum] );
+    m_Makefile->GetTargets()[m_Target].GetSourceFiles().push_back( sf );
         
     }
 }

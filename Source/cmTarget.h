@@ -67,9 +67,9 @@ public:
   /**
    * Get the list of the source files used by this target
    */
-  const std::vector<cmSourceFile> &GetSourceFiles() const 
+  const std::vector<cmSourceFile*> &GetSourceFiles() const 
     {return m_SourceFiles;}
-  std::vector<cmSourceFile> &GetSourceFiles() {return m_SourceFiles;}
+  std::vector<cmSourceFile*> &GetSourceFiles() {return m_SourceFiles;}
 
   /**
    * Get the list of the source files used by this target
@@ -95,7 +95,7 @@ public:
    * Generate the SourceFilesList from the SourceLists. This should only be
    * done once to be safe.  
    */
-  void GenerateSourceFilesFromSourceLists(const cmMakefile &mf);
+  void GenerateSourceFilesFromSourceLists(cmMakefile &mf);
 
   /** Add a utility on which this project depends. A utility is an executable
    * name as would be specified to the ADD_EXECUTABLE or UTILITY_SOURCE
@@ -109,7 +109,7 @@ private:
   std::vector<cmCustomCommand> m_CustomCommands;
   std::vector<std::string> m_SourceLists;
   TargetType m_TargetType;
-  std::vector<cmSourceFile> m_SourceFiles;
+  std::vector<cmSourceFile*> m_SourceFiles;
   LinkLibraries m_LinkLibraries;
   bool m_InAll;
   std::string m_InstallPath;

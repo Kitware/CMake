@@ -25,23 +25,23 @@ bool cmSourceFilesFlagsCommand::InitialPass(std::vector<std::string> const&
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  cmMakefile::SourceMap &Classes = m_Makefile->GetSources();
+  
   std::vector<std::string>::const_iterator j = args.begin();
   std::string flags = *j;
   ++j;
   for(;j != args.end(); ++j)
     {   
-    for(cmMakefile::SourceMap::iterator l = Classes.begin(); 
-        l != Classes.end(); l++)
+    cmSourceFile* sf = m_Makefile->GetSource(j->c_str());
+    if(sf)
       {
-      for(std::vector<cmSourceFile>::iterator i = l->second.begin(); 
-          i != l->second.end(); i++)
-        {
-        if(i->GetSourceName() == (*j) || i->GetSourceName()+"."+i->GetSourceExtension() == (*j))
-          {
-          i->SetCompileFlags(flags.c_str());
-          }
-        }
+      sf->SetCompileFlags(flags.c_str());
+      }
+    else
+      {
+      std::string m = "could not find source file ";
+      m += *j;
+      this->SetError(m.c_str());
+      return false;
       }
     }
   return true;

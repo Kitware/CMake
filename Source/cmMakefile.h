@@ -401,10 +401,17 @@ public:
   /**
    * Return a list of source files in this makefile.
    */
-  typedef std::map<cmStdString,std::vector<cmSourceFile> > SourceMap;
+  typedef std::map<cmStdString,std::vector<cmSourceFile*> > SourceMap;
   const SourceMap &GetSources() const {return  m_Sources;}
   SourceMap &GetSources() {return  m_Sources;}
-  cmSourceFile *GetSource(const char *srclist, const char *sourceName);
+  cmSourceFile* GetSource(const char *srclist, const char *sourceName);
+  
+  /** Get a cmSourceFile pointer for a given source name, if the name is
+   *  not found, then a null pointer is returned.
+   */
+  cmSourceFile* GetSource(const char* sourceName);
+  ///! Add a new cmSourceFile to the list of sources for this makefile.
+  cmSourceFile* AddSource(cmSourceFile const&);
   
   /**
    * Obtain a list of auxiliary source directories.
@@ -533,6 +540,8 @@ protected:
   // libraries, classes, and executables
   cmTargets m_Targets;
   SourceMap m_Sources; 
+  std::vector<cmSourceFile*> m_SourceFiles;
+  
 
   std::vector<std::string> m_SubDirectories; // list of sub directories
   struct StringSet : public std::set<cmStdString>

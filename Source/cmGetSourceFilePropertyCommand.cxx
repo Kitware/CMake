@@ -14,39 +14,42 @@
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
-#include "cmAbstractFilesCommand.h"
+#include "cmGetSourceFilePropertyCommand.h"
 
-// cmAbstractFilesCommand
-bool cmAbstractFilesCommand::InitialPass(std::vector<std::string> const& args)
+// cmSetSourceFilePropertyCommand
+bool cmGetSourceFilePropertyCommand::InitialPass(std::vector<std::string> const& 
+                                                 args)
 {
-  if(args.size() < 1 )
+  if(args.size() < 3 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  bool ret = true;
-  std::string m = "could not find source file(s):\n";
-
-  cmMakefile::SourceMap &Classes = m_Makefile->GetSources();
-  for(std::vector<std::string>::const_iterator j = args.begin();
-      j != args.end(); ++j)
-    {  
-    cmSourceFile* sf = m_Makefile->GetSource(j->c_str());
-    if(sf)
-      {
-      sf->SetIsAnAbstractClass(true);
-      }
-    else
-      {
-      m += *j;
-      m += "\n";
-      ret = false;
-      } 
-    }
-  if(!ret)
+  const char* var = args[0].c_str();
+  const char* file = args[1].c_str();
+  cmSourceFile* sf = m_Makefile->GetSource(file);
+  if(sf)
     {
-    this->SetError(m.c_str());
+    if(args[2] == "ABSTRACT")
+      {
+      m_Makefile->AddDefinition(var, sf->IsAnAbstractClass());
+      }
+    if(args[2] == "WRAP_EXCLUDE")
+      {
+      m_Makefile->AddDefinition(var, sf->GetWrapExclude());
+      }
+    if(args[2] == "FLAGS")
+      {
+      m_Makefile->AddDefinition(var, sf->GetCompileFlags());
+      }
     }
-  return ret;
+  else
+    {
+    std::string m = "Could not find source file: ";
+    m += file;
+    this->SetError(m.c_str());
+    return false;
+    }
+  return true;
 }
 

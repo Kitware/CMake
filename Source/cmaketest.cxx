@@ -16,6 +16,7 @@
 =========================================================================*/
 #include "cmaketest.h"
 #include "cmSystemTools.h"
+#include "cmRegularExpression.h"
 #include "cmake.h"
 #include "cmListFileCache.h"
 #include "cmMakefileGenerator.h"
@@ -24,13 +25,14 @@
 #endif
 
 // this is a test driver program for cmake.
-int main (int argc, char *argv[])
+int main (int argc, char **argv)
 {
   if (argc < 4)
     {
     std::cerr << "Usage: " << argv[0] << " test-src-dir test-bin-dir test-executable\n";
     return 1;
     }
+
   // does the directory exist ?
   if (!cmSystemTools::FileIsDirectory(argv[2]))
     {
@@ -140,7 +142,11 @@ int main (int argc, char *argv[])
   makeCommand = cmSystemTools::ConvertToOutputPath(makeCommand.c_str());
   std::string lowerCaseCommand = makeCommand;
   cmSystemTools::LowerCase(lowerCaseCommand);
-
+  std::string dartMakeCommand = DART_MAKECOMMAND;
+  std::string buildtype = "Debug";
+#ifdef  CMAKE_INTDIR
+  buildtype = CMAKE_INTDIR;
+#endif
   // if msdev is the make program then do the following
   // MSDEV 6.0
   if(lowerCaseCommand.find("msdev") != std::string::npos)
@@ -162,7 +168,8 @@ int main (int argc, char *argv[])
 #endif
     makeCommand += " ";
     makeCommand += projectName;
-    makeCommand += ".dsw /MAKE \"ALL_BUILD - Debug\" /REBUILD";
+    makeCommand += ".dsw /MAKE \"ALL_BUILD - ";
+    makeCommand += buildtype + "\" /REBUILD";
     }
   // MSDEV 7.0 .NET
   else if (lowerCaseCommand.find("devenv") != std::string::npos)
@@ -181,7 +188,8 @@ int main (int argc, char *argv[])
 #endif
     makeCommand += " ";
     makeCommand += projectName;
-    makeCommand += ".sln /rebuild Debug /project ALL_BUILD";
+    makeCommand += ".sln /rebuild ";
+    makeCommand += buildtype + " /project ALL_BUILD";
     }
   // command line make program
   else
@@ -228,7 +236,7 @@ int main (int argc, char *argv[])
     fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
     }
   // try the Debug extension
-  tryPath = "Debug/";
+  tryPath = buildtype + "/";
   tryPath += cmSystemTools::GetFilenameName(executableName);
   if(cmSystemTools::FileExists(tryPath.c_str()))
     {
@@ -248,7 +256,8 @@ int main (int argc, char *argv[])
     fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
     }
   tryPath = executableDirectory;
-  tryPath += "/Debug/";
+  tryPath += "/";
+  tryPath += buildtype + "/";
   tryPath += executableName;
   tryPath += cmSystemTools::GetExecutableExtension();
   if(cmSystemTools::FileExists(tryPath.c_str()))

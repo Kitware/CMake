@@ -104,6 +104,11 @@ void cmMakefile::AddDefaultCommands()
 
 cmMakefile::~cmMakefile()
 {
+  for(std::vector<cmSourceFile*>::iterator i = m_SourceFiles.begin();
+      i != m_SourceFiles.end(); ++i)
+    {
+    delete *i;
+    }
   for(unsigned int i=0; i < m_UsedCommands.size(); i++)
     {
     delete m_UsedCommands[i];
@@ -153,10 +158,10 @@ void cmMakefile::Print() const
       l != m_Sources.end(); l++)
     {
     std::cout << " Class list named: " << l->first << std::endl;
-    for(std::vector<cmSourceFile>::const_iterator i = l->second.begin();
+    for(std::vector<cmSourceFile*>::const_iterator i = l->second.begin();
         i != l->second.end(); i++)
       {
-      i->Print();
+      (*i)->Print();
       }
     }
 
@@ -361,12 +366,12 @@ cmSourceFile *cmMakefile::GetSource(const char *srclist, const char *cname)
     return 0;
     }
   // find the class
-  for (std::vector<cmSourceFile>::iterator i = sl->second.begin();
+  for (std::vector<cmSourceFile*>::iterator i = sl->second.begin();
        i != sl->second.end(); ++i)
     {
-    if (i->GetSourceName() == cname)
+    if ((*i)->GetSourceName() == cname)
       {
-      return &(*i);
+      return *i;
       }
     }
   return 0;
@@ -423,24 +428,23 @@ void cmMakefile::GenerateMakefile()
 
 void cmMakefile::AddSource(cmSourceFile& cmfile, const char *srclist)
 {
-  m_Sources[srclist].push_back(cmfile);
+  m_Sources[srclist].push_back(this->AddSource(cmfile));
 }
 
-struct FindSrcByName : std::binary_function<cmSourceFile, cmSourceFile, bool>
+struct FindSrcByName : std::binary_function<cmSourceFile*, cmSourceFile*, bool>
 {
   public:
-    bool operator () (const cmSourceFile &f, const cmSourceFile &test) const
+    bool operator () (const cmSourceFile *f, const cmSourceFile *test) const
     {
-      return !strcmp(f.GetSourceName().c_str(),test.GetSourceName().c_str());
+      return (f->GetSourceName() == test->GetSourceName());
     }
 };
 
 void cmMakefile::RemoveSource(cmSourceFile& cmfile,const char *srclist)
 {
-  std::vector<cmSourceFile> &maplist = m_Sources[srclist];
-  std::vector<cmSourceFile>::iterator f =
-    std::find_if(maplist.begin(), maplist.end(), std::bind2nd(FindSrcByName(),cmfile));
-//  std::vector<cmSourceFile>::iterator f = find_if(maplist.begin(), maplist.end(), matches(srclist);
+  std::vector<cmSourceFile*> &maplist = m_Sources[srclist];
+  std::vector<cmSourceFile*>::iterator f =
+    std::find_if(maplist.begin(), maplist.end(), std::bind2nd(FindSrcByName(),&cmfile));
   if (f!=maplist.end())
     {
       maplist.erase(f);
@@ -1288,3 +1292,33 @@ cmData* cmMakefile::LookupData(const char* name) const
     }
 }
 
+cmSourceFile* cmMakefile::GetSource(const char* sourceName)
+{
+  for(std::vector<cmSourceFile*>::iterator i = m_SourceFiles.begin();
+      i != m_SourceFiles.end(); ++i)
+    {
+    if((*i)->GetSourceName() == sourceName 
+       || (*i)->GetSourceName()+"."+(*i)->GetSourceExtension() == sourceName)
+      {
+      return *i;
+      }
+    }
+  return 0;
+}
+
+
+
+cmSourceFile* cmMakefile::AddSource(cmSourceFile const&sf)
+{
+  // check to see if it exists
+  cmSourceFile* ret = this->GetSource(sf.GetSourceName().c_str());
+  if(ret && ret->GetSourceExtension() == sf.GetSourceExtension())
+    {
+    return ret;
+    }
+  ret = new cmSourceFile(sf);
+  m_SourceFiles.push_back(ret);
+  return ret;
+}
+
+  

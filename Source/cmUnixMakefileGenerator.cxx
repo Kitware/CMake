@@ -110,18 +110,18 @@ void cmUnixMakefileGenerator::ProcessDepends(const cmMakeDepend &md)
   cmTargets &tgts = m_Makefile->GetTargets();
   for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); l++)
     {
-    std::vector<cmSourceFile> &classes = l->second.GetSourceFiles();
-    for(std::vector<cmSourceFile>::iterator i = classes.begin(); 
+    std::vector<cmSourceFile*> &classes = l->second.GetSourceFiles();
+    for(std::vector<cmSourceFile*>::iterator i = classes.begin(); 
         i != classes.end(); ++i)
       {
-      if(!i->GetIsAHeaderFileOnly())
+      if(!(*i)->GetIsAHeaderFileOnly())
         {
         // get the depends
         const cmDependInformation *info = 
-          md.GetDependInformationForSourceFile(*i);
+          md.GetDependInformationForSourceFile(*(*i));
         
         // Delete any hints from the source file's dependencies.
-        i->GetDepends().erase(i->GetDepends().begin(), i->GetDepends().end());
+        (*i)->GetDepends().erase((*i)->GetDepends().begin(), (*i)->GetDepends().end());
         
         // Now add the real dependencies for the file.
         if (info)
@@ -134,7 +134,7 @@ void cmUnixMakefileGenerator::ProcessDepends(const cmMakeDepend &md)
             // not found.
             if((*d)->m_FullPath != "")
               {
-              i->GetDepends().push_back((*d)->m_FullPath);
+              (*i)->GetDepends().push_back((*d)->m_FullPath);
               }
             }
           }
@@ -359,34 +359,34 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
   for(cmTargets::const_iterator l = tgts.begin(); 
       l != tgts.end(); l++)
     {
-    std::vector<cmSourceFile> classes = l->second.GetSourceFiles();
+    std::vector<cmSourceFile*> classes = l->second.GetSourceFiles();
     if (classes.begin() != classes.end())
       {
       fout << this->CreateMakeVariable(l->first.c_str(), "_SRC_OBJS") << " = ";
-      for(std::vector<cmSourceFile>::iterator i = classes.begin(); 
+      for(std::vector<cmSourceFile*>::iterator i = classes.begin(); 
           i != classes.end(); i++)
         {
-        if(!i->IsAHeaderFileOnly())
+        if(!(*i)->IsAHeaderFileOnly())
           {
-          std::string outExt(this->GetOutputExtension(i->GetSourceExtension().c_str()));
+          std::string outExt(this->GetOutputExtension((*i)->GetSourceExtension().c_str()));
           if(outExt.size())
             {
-            fout << "\\\n" << this->ConvertToOutputPath(i->GetSourceName().c_str())
+            fout << "\\\n" << this->ConvertToOutputPath((*i)->GetSourceName().c_str())
                  << outExt.c_str() << " ";
             }
           }
         }
       fout << "\n\n";
       fout << this->CreateMakeVariable(l->first.c_str(), "_SRC_OBJS_QUOTED") << " = ";
-      for(std::vector<cmSourceFile>::iterator i = classes.begin(); 
+      for(std::vector<cmSourceFile*>::iterator i = classes.begin(); 
           i != classes.end(); i++)
         {
-        if(!i->IsAHeaderFileOnly())
+        if(!(*i)->IsAHeaderFileOnly())
           {
-          std::string outExt(this->GetOutputExtension(i->GetSourceExtension().c_str()));
+          std::string outExt(this->GetOutputExtension((*i)->GetSourceExtension().c_str()));
           if(outExt.size())
             {
-            fout << "\\\n\"" << this->ConvertToOutputPath(i->GetSourceName().c_str())
+            fout << "\\\n\"" << this->ConvertToOutputPath((*i)->GetSourceName().c_str())
                  << outExt.c_str() << "\" ";
             }
           }
@@ -398,7 +398,7 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
   for(cmTargets::const_iterator l = tgts.begin(); 
       l != tgts.end(); l++)
     {
-    std::vector<cmSourceFile> classes = l->second.GetSourceFiles();
+    std::vector<cmSourceFile*> classes = l->second.GetSourceFiles();
     if (classes.begin() != classes.end())
       {
       fout << "$(" << this->CreateMakeVariable(l->first.c_str(), "_SRC_OBJS")
@@ -1224,19 +1224,19 @@ bool cmUnixMakefileGenerator::OutputObjectDepends(std::ostream& fout)
       target != targets.end(); ++target)
     {
     // Iterate over every source for this target.
-    const std::vector<cmSourceFile>& sources = target->second.GetSourceFiles();
-    for(std::vector<cmSourceFile>::const_iterator source = sources.begin(); 
+    const std::vector<cmSourceFile*>& sources = target->second.GetSourceFiles();
+    for(std::vector<cmSourceFile*>::const_iterator source = sources.begin(); 
         source != sources.end(); ++source)
       {
-      if(!source->IsAHeaderFileOnly())
+      if(!(*source)->IsAHeaderFileOnly())
         {
-        if(!source->GetDepends().empty())
+        if(!(*source)->GetDepends().empty())
           {
-          fout << source->GetSourceName() << m_ObjectFileExtension << " :";
+          fout << (*source)->GetSourceName() << m_ObjectFileExtension << " :";
           // Iterate through all the dependencies for this source.
           for(std::vector<std::string>::const_iterator dep =
-                source->GetDepends().begin();
-              dep != source->GetDepends().end(); ++dep)
+                (*source)->GetDepends().begin();
+              dep != (*source)->GetDepends().end(); ++dep)
             {
             fout << " \\\n" 
                  << this->ConvertToOutputPath(dep->c_str());
@@ -1274,17 +1274,17 @@ void cmUnixMakefileGenerator::OutputCheckDepends(std::ostream& fout)
       target != targets.end(); ++target)
     {
     // Iterate over every source for this target.
-    const std::vector<cmSourceFile>& sources = target->second.GetSourceFiles();
-    for(std::vector<cmSourceFile>::const_iterator source = sources.begin(); 
+    const std::vector<cmSourceFile*>& sources = target->second.GetSourceFiles();
+    for(std::vector<cmSourceFile*>::const_iterator source = sources.begin(); 
         source != sources.end(); ++source)
       {
-      if(!source->IsAHeaderFileOnly())
+      if(!(*source)->IsAHeaderFileOnly())
         {
-        if(!source->GetDepends().empty())
+        if(!(*source)->GetDepends().empty())
           {
           for(std::vector<std::string>::const_iterator dep =
-                source->GetDepends().begin();
-              dep != source->GetDepends().end(); ++dep)
+                (*source)->GetDepends().begin();
+              dep != (*source)->GetDepends().end(); ++dep)
             {
             std::string dependfile = 
               this->ConvertToOutputPath(dep->c_str());
@@ -1702,14 +1702,14 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
       target != targets.end(); ++target)
     {
     // Iterate over every source for this target.
-    const std::vector<cmSourceFile>& sources = target->second.GetSourceFiles();
-    for(std::vector<cmSourceFile>::const_iterator source = sources.begin(); 
+    const std::vector<cmSourceFile*>& sources = target->second.GetSourceFiles();
+    for(std::vector<cmSourceFile*>::const_iterator source = sources.begin(); 
         source != sources.end(); ++source)
       {
-      if(!source->IsAHeaderFileOnly())
+      if(!(*source)->IsAHeaderFileOnly())
         {
           allsources += " \\\n";
-          allsources += source->GetFullPath();
+          allsources += (*source)->GetFullPath();
         }
       }
     }
@@ -1810,7 +1810,9 @@ OutputBuildObjectFromSource(std::ostream& fout,
 {
   // Header files shouldn't have build rules.
   if(source.IsAHeaderFileOnly())
+    {
     return;
+    }
 
   std::string comment = "Build ";
   std::string objectFile = std::string(shortName) + m_ObjectFileExtension;
@@ -1877,11 +1879,11 @@ void cmUnixMakefileGenerator::OutputSourceObjectBuildRules(std::ostream& fout)
       exportsDef = "-D"+target->first+"_EXPORTS ";
       }
     // Iterate over every source for this target.
-    const std::vector<cmSourceFile>& sources = target->second.GetSourceFiles();
-    for(std::vector<cmSourceFile>::const_iterator source = sources.begin(); 
+    const std::vector<cmSourceFile*>& sources = target->second.GetSourceFiles();
+    for(std::vector<cmSourceFile*>::const_iterator source = sources.begin(); 
         source != sources.end(); ++source)
       {
-      if(!source->IsAHeaderFileOnly())
+      if(!(*source)->IsAHeaderFileOnly())
         {
         std::string shortName;
         std::string sourceName;
@@ -1889,18 +1891,18 @@ void cmUnixMakefileGenerator::OutputSourceObjectBuildRules(std::ostream& fout)
         // directory, we want to use the relative path for the
         // filename of the object file.  Otherwise, we will use just
         // the filename portion.
-        if((cmSystemTools::GetFilenamePath(source->GetFullPath()).find(m_Makefile->GetCurrentDirectory()) == 0)
-           || (cmSystemTools::GetFilenamePath(source->GetFullPath()).find(m_Makefile->
+        if((cmSystemTools::GetFilenamePath((*source)->GetFullPath()).find(m_Makefile->GetCurrentDirectory()) == 0)
+           || (cmSystemTools::GetFilenamePath((*source)->GetFullPath()).find(m_Makefile->
                                                                           GetCurrentOutputDirectory()) == 0))
           {
-          sourceName = source->GetSourceName()+"."+source->GetSourceExtension();
-          shortName = source->GetSourceName();
+          sourceName = (*source)->GetSourceName()+"."+(*source)->GetSourceExtension();
+          shortName = (*source)->GetSourceName();
           
           // The path may be relative.  See if a directory needs to be
           // created for the output file.  This is a ugly, and perhaps
           // should be moved elsewhere.
           std::string relPath =
-            cmSystemTools::GetFilenamePath(source->GetSourceName());
+            cmSystemTools::GetFilenamePath((*source)->GetSourceName());
           if(relPath != "")
             {
             std::string outPath = m_Makefile->GetCurrentOutputDirectory();
@@ -1910,22 +1912,22 @@ void cmUnixMakefileGenerator::OutputSourceObjectBuildRules(std::ostream& fout)
           }
         else
           {
-          sourceName = source->GetFullPath();
-          shortName = cmSystemTools::GetFilenameName(source->GetSourceName());
+          sourceName = (*source)->GetFullPath();
+          shortName = cmSystemTools::GetFilenameName((*source)->GetSourceName());
           }
         std::string shortNameWithExt = shortName +
-          source->GetSourceExtension();
+          (*source)->GetSourceExtension();
         // Only output a rule for each .o once.
         if(rules.find(shortNameWithExt) == rules.end())
           {
-          if(source->GetCompileFlags())
+          if((*source)->GetCompileFlags())
             {
-            exportsDef += source->GetCompileFlags();
+            exportsDef += (*source)->GetCompileFlags();
             exportsDef += " ";
             }
           this->OutputBuildObjectFromSource(fout,
                                             shortName.c_str(),
-                                            *source,
+                                            *(*source),
                                             exportsDef.c_str(),
                                             shared);
           rules.insert(shortNameWithExt);

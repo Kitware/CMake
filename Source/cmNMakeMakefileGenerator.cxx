@@ -445,14 +445,14 @@ void cmNMakeMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
   command += linklibs.str();
   delete [] linklibs.str();
 
-  const std::vector<cmSourceFile>& sources = t.GetSourceFiles();
-  for(std::vector<cmSourceFile>::const_iterator i = sources.begin();
+  const std::vector<cmSourceFile*>& sources = t.GetSourceFiles();
+  for(std::vector<cmSourceFile*>::const_iterator i = sources.begin();
       i != sources.end(); ++i)
     {
-    if(i->GetSourceExtension() == "def")
+    if((*i)->GetSourceExtension() == "def")
       {
       command += "/DEF:";
-      command += i->GetFullPath();
+      command += (*i)->GetFullPath();
       }
     }
 

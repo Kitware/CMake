@@ -64,12 +64,12 @@ void cmInstallFilesCommand::FinalPass()
       // look for a srclist
       if (m_Makefile->GetSources().find(temps) != m_Makefile->GetSources().end())
         {
-        const std::vector<cmSourceFile> &clsList = 
+        const std::vector<cmSourceFile*> &clsList = 
           m_Makefile->GetSources().find(temps)->second;
-        std::vector<cmSourceFile>::const_iterator c = clsList.begin();
+        std::vector<cmSourceFile*>::const_iterator c = clsList.begin();
         for (; c != clsList.end(); ++c)
           {
-          testf = c->GetSourceName() + ext;
+          testf = (*c)->GetSourceName() + ext;
           // add to the result
           targetSourceLists.push_back(testf);
           }

@@ -104,6 +104,18 @@ void cmDSPWriter::OutputDSPFile()
         && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS)
         && (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) != 0))
       {
+      // check to see if the dsp is going into a sub-directory
+      std::string::size_type pos = l->first.rfind('/');
+      if(pos != std::string::npos)
+        {
+        std::string dir = m_Makefile->GetStartOutputDirectory();
+        dir += "/";
+        dir += l->first.substr(0, pos);
+        if(!cmSystemTools::MakeDirectory(dir.c_str()))
+          {
+          cmSystemTools::Error("Error creating directory ", dir.c_str());
+          }
+        }
       this->CreateSingleDSP(l->first.c_str(),l->second);
       }
     }
@@ -201,15 +213,15 @@ void cmDSPWriter::WriteDSPFile(std::ostream& fout,
   std::vector<cmSourceGroup> sourceGroups = m_Makefile->GetSourceGroups();
   
   // get the classes from the source lists then add them to the groups
-  std::vector<cmSourceFile> classes = target.GetSourceFiles();
-  for(std::vector<cmSourceFile>::iterator i = classes.begin(); 
+  std::vector<cmSourceFile*> classes = target.GetSourceFiles();
+  for(std::vector<cmSourceFile*>::iterator i = classes.begin(); 
       i != classes.end(); i++)
     {
     // Add the file to the list of sources.
-    std::string source = i->GetFullPath();
+    std::string source = (*i)->GetFullPath();
     cmSourceGroup& sourceGroup = m_Makefile->FindSourceGroup(source.c_str(),
                                                              sourceGroups);
-    sourceGroup.AddSource(source.c_str(), &(*i));
+    sourceGroup.AddSource(source.c_str(), *i);
     }
   
   // add any custom rules to the source groups
@@ -785,25 +797,19 @@ void cmDSPWriter::WriteDSPHeader(std::ostream& fout, const char *libName,
       cmSystemTools::ReplaceString(line, 
                                    "EXTRA_DEFINES", 
 				   m_Makefile->GetDefineFlags());
-      cmSystemTools::ReplaceString(line,
-                                   "CMAKE_CXX_FLAGS_RELEASE",
-                                   m_Makefile->
-                                   GetDefinition("CMAKE_CXX_FLAGS_RELEASE"));
-      cmSystemTools::ReplaceString(line,
-                                   "CMAKE_CXX_FLAGS_MINSIZEREL",
-                                   m_Makefile->
-                                   GetDefinition("CMAKE_CXX_FLAGS_MINSIZEREL")
-        );
-      cmSystemTools::ReplaceString(line,
-                                   "CMAKE_CXX_FLAGS_DEBUG",
-                                   m_Makefile->
-                                   GetDefinition("CMAKE_CXX_FLAGS_DEBUG"));
-      cmSystemTools::ReplaceString(line,
-                                   "CMAKE_CXX_FLAGS_RELWITHDEBINFO",
-                                   m_Makefile->
-                                   GetDefinition("CMAKE_CXX_FLAGS_RELWITHDEBINFO"));
-      cmSystemTools::ReplaceString(line,
-                                   "CMAKE_CXX_FLAGS",
+      std::string flags = m_Makefile->GetDefinition("CMAKE_CXX_FLAGS_RELEASE");
+      flags += " -DCMAKE_INTDIR=\\\"Release\\\"";
+      cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_RELEASE", flags.c_str());
+      flags = m_Makefile->GetDefinition("CMAKE_CXX_FLAGS_MINSIZEREL");
+      flags += " -DCMAKE_INTDIR=\\\"MinSizeRel\\\"";
+      cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_MINSIZEREL", flags.c_str());
+      flags = m_Makefile->GetDefinition("CMAKE_CXX_FLAGS_DEBUG");
+      flags += " -DCMAKE_INTDIR=\\\"Debug\\\"";
+      cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_DEBUG", flags.c_str());
+      flags = m_Makefile->GetDefinition("CMAKE_CXX_FLAGS_RELWITHDEBINFO");
+      flags += " -DCMAKE_INTDIR=\\\"RelWithDebInfo\\\"";
+      cmSystemTools::ReplaceString(line,"CMAKE_CXX_FLAGS_RELWITHDEBINFO", flags.c_str());
+      cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS",
                                    m_Makefile->
                                    GetDefinition("CMAKE_CXX_FLAGS"));
       

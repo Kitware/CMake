@@ -161,7 +161,11 @@ OutputBuildObjectFromSource(std::ostream& fout,
     }
   // Header files shouldn't have build rules.
   if(source.IsAHeaderFileOnly())
+    {
     return;
+    }
+  
+
 
   std::string comment = "Build ";
   std::string objectFile = std::string(shortName) + 
@@ -248,14 +252,14 @@ void cmBorlandMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
   command += " $(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
   std::string command2 = "implib -w ";
   command2 += libpath + " " + target;
-  const std::vector<cmSourceFile>& sources = t.GetSourceFiles();
-  for(std::vector<cmSourceFile>::const_iterator i = sources.begin();
+  const std::vector<cmSourceFile*>& sources = t.GetSourceFiles();
+  for(std::vector<cmSourceFile*>::const_iterator i = sources.begin();
       i != sources.end(); ++i)
     {
-    if(i->GetSourceExtension() == "def")
+    if((*i)->GetSourceExtension() == "def")
       {
       command += "";
-      command += i->GetFullPath();
+      command += (*i)->GetFullPath();
       }
     }
   command += "\n|\n";

@@ -60,6 +60,7 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)
     "#include <ctype.h>\n"
     "#include <stdio.h>\n"
     "#include <string.h>\n"
+
     "\n"
     "// Forward declare test functions\n"
     "\n";

@@ -17,7 +17,7 @@
 #include "cmTarget.h"
 #include "cmMakefile.h"
 
-void cmTarget::GenerateSourceFilesFromSourceLists(const cmMakefile &mf)
+void cmTarget::GenerateSourceFilesFromSourceLists( cmMakefile &mf)
 {
   // this is only done for non install targets
   if ((this->m_TargetType == cmTarget::INSTALL_FILES)
@@ -36,7 +36,7 @@ void cmTarget::GenerateSourceFilesFromSourceLists(const cmMakefile &mf)
     // look for a srclist
     if (mf.GetSources().find(temps) != mf.GetSources().end())
       {
-      const std::vector<cmSourceFile> &clsList = 
+      const std::vector<cmSourceFile*> &clsList = 
         mf.GetSources().find(temps)->second;
       // if we ahave a limited build list, use it
       m_SourceFiles.insert(m_SourceFiles.end(), 
@@ -51,7 +51,7 @@ void cmTarget::GenerateSourceFilesFromSourceLists(const cmMakefile &mf)
       file.SetName(temps.c_str(), mf.GetCurrentDirectory(),
                    mf.GetSourceExtensions(),
                    mf.GetHeaderExtensions());
-      m_SourceFiles.push_back(file);
+      m_SourceFiles.push_back(mf.AddSource(file));
       }
     }
 

@@ -151,19 +151,22 @@ void cmSourceFile::Print() const
 {
   if(m_AbstractClass)
     {
-    std::cout <<  "Abstract ";
+    std::cerr <<  "Abstract ";
     }
   else
     {
-    std::cout << "Concrete ";
+    std::cerr << "Concrete ";
     }
   if(m_HeaderFileOnly)
     {
-    std::cout << "Header file ";
+    std::cerr << "Header file ";
     }
   else
     {
-    std::cout << "CXX file ";
+    std::cerr << "CXX file ";
     }
-  std::cout << m_SourceName << std::endl;
+  std::cerr << "m_CompileFlags: " << m_CompileFlags << "\n";
+  std::cerr << "m_FullPath: " <<  m_FullPath << "\n";
+  std::cerr << "m_SourceName: " << m_SourceName << std::endl;
+  std::cerr << "m_SourceExtension: " << m_SourceExtension << "\n";
 }
