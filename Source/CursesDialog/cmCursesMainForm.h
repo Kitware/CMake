@@ -10,7 +10,7 @@ class cmCursesCacheEntryComposite;
 class cmCursesMainForm : public cmCursesForm
 {
 public:
-  cmCursesMainForm(std::vector<string> const& args);
+  cmCursesMainForm(std::vector<std::string> const& args);
   virtual ~cmCursesMainForm();
   
   // Description:
