@@ -308,7 +308,7 @@ cmLocalUnixMakefileGenerator2
   if(!objects.empty())
     {
     ruleFileStream
-      << "# Include rules for object files.\n";
+      << "# Include make rules for object files.\n";
     for(std::vector<std::string>::const_iterator obj = objects.begin();
         obj != objects.end(); ++obj)
       {
@@ -339,10 +339,6 @@ cmLocalUnixMakefileGenerator2
     depends.push_back((*obj)+".depends");
     }
   depends.push_back(ruleFileName);
-  std::string touchCmd = "@touch ";
-  touchCmd += this->ConvertToRelativeOutputPath(depTarget.c_str());
-  // TODO: Construct dependency generation rule and append command.
-  commands.push_back(touchCmd);
   this->OutputMakeRule(ruleFileStream, depComment.c_str(), depTarget.c_str(),
                        depends, commands);
   }
@@ -474,7 +470,7 @@ cmLocalUnixMakefileGenerator2
   depComment += objName;
   cmOStringStream depCmd;
   // TODO: Account for source file properties and directory-level
-  // definitions.
+  // definitions when scanning for dependencies.
   depCmd << "$(CMAKE_COMMAND) -E cmake_depends " << lang << " "
          << this->ConvertToRelativeOutputPath(obj.c_str()) << " "
          << this->ConvertToRelativeOutputPath(source.GetFullPath().c_str());
