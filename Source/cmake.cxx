@@ -748,7 +748,7 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
           result = 1;
           }
         }
-      return 0;
+      return result;
       }
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
