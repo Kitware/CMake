@@ -752,19 +752,30 @@ int cmMakefile::DumpDocumentationToFile(const char *fileName)
 
 void cmMakefile::ExpandVariablesInString(std::string& source) const
 {
+  this->ExpandVariablesInString(source, false);
+}
+
+void cmMakefile::ExpandVariablesInString(std::string& source, 
+                                         bool escapeQuotes) const
+{
   for(DefinitionMap::const_iterator i = m_Definitions.begin();
       i != m_Definitions.end(); ++i)
     {
+    std::string replace = (*i).second;
+    if (escapeQuotes)
+      {
+      replace = cmSystemTools::EscapeQuotes(replace.c_str());
+      }
     std::string variable = "${";
     variable += (*i).first;
     variable += "}";
     cmSystemTools::ReplaceString(source, variable.c_str(),
-                                 (*i).second.c_str());
+                                 replace.c_str());
     variable = "@";
     variable += (*i).first;
     variable += "@";
     cmSystemTools::ReplaceString(source, variable.c_str(),
-                                 (*i).second.c_str());
+                                 replace.c_str());
     }
 }
 
