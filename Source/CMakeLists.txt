@@ -16,6 +16,7 @@ cmCacheManager.cxx
 cmSourceGroup.cxx
 cmListFileCache.cxx
 cmListFileLexer.c
+cmGeneratedFileStream.cxx
 cmGlob.cxx
 cmGlobalGenerator.cxx
 cmGlobalUnixMakefileGenerator.cxx

@@ -92,8 +92,7 @@ void cmLocalGenerator::GenerateInstallRules()
     toplevel_install = 1;
     }
   file += "/cmake_install.cmake";
-  cmGeneratedFileStream tempFile(file.c_str());
-  std::ostream&  fout = tempFile.GetStream();
+  cmGeneratedFileStream fout(file.c_str(), true);
 
   fout << "# Install script for directory: " << m_Makefile->GetCurrentDirectory() 
     << std::endl << std::endl;

@@ -38,6 +38,7 @@ CMAKE_CXX_SOURCES="\
   cmakemain \
   cmMakeDepend \
   cmMakefile \
+  cmGeneratedFileStream \
   cmGlobalGenerator \
   cmLocalGenerator \
   cmSourceFile \

@@ -237,12 +237,9 @@ cmLocalUnixMakefileGenerator2
   // Open the rule file.  This should be copy-if-different because the
   // rules may depend on this file itself.
   std::string ruleFileNameFull = this->ConvertToFullPath(ruleFileName);
-  cmGeneratedFileStream ruleFile(ruleFileNameFull.c_str());
-  std::ostream& ruleFileStream = ruleFile.GetStream();
+  cmGeneratedFileStream ruleFileStream(ruleFileNameFull.c_str(), true);
   if(!ruleFileStream)
     {
-    // TODO: Produce error message that accounts for generated stream
-    // .tmp.
     return;
     }
   this->WriteDisclaimer(ruleFileStream);
@@ -354,12 +351,9 @@ cmLocalUnixMakefileGenerator2
   std::string ruleFileName = obj;
   ruleFileName += ".make";
   std::string ruleFileNameFull = this->ConvertToFullPath(ruleFileName);
-  cmGeneratedFileStream ruleFile(ruleFileNameFull.c_str());
-  std::ostream& ruleFileStream = ruleFile.GetStream();
+  cmGeneratedFileStream ruleFileStream(ruleFileNameFull.c_str(), true);
   if(!ruleFileStream)
     {
-    // TODO: Produce error message that accounts for generated stream
-    // .tmp.
     return;
     }
   this->WriteDisclaimer(ruleFileStream);
@@ -532,12 +526,9 @@ cmLocalUnixMakefileGenerator2
   // Open the rule file.  This should be copy-if-different because the
   // rules may depend on this file itself.
   std::string ruleFileNameFull = this->ConvertToFullPath(ruleFileName);
-  cmGeneratedFileStream ruleFile(ruleFileNameFull.c_str());
-  std::ostream& ruleFileStream = ruleFile.GetStream();
+  cmGeneratedFileStream ruleFileStream(ruleFileNameFull.c_str(), true);
   if(!ruleFileStream)
     {
-    // TODO: Produce error message that accounts for generated stream
-    // .tmp.
     return;
     }
   this->WriteDisclaimer(ruleFileStream);

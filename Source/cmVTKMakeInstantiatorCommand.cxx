@@ -127,16 +127,16 @@ cmVTKMakeInstantiatorCommand
   std::string fullName = headerPath+"/"+fileName;
   
   // Generate the output file with copy-if-different.
-  cmGeneratedFileStream fout(fullName.c_str());
+  cmGeneratedFileStream fout(fullName.c_str(), true);
   
   // Actually generate the code in the file.
   if(!oldVersion)
     {
-    this->GenerateHeaderFile(fout.GetStream());
+    this->GenerateHeaderFile(fout);
     }
   else
     {
-    this->OldGenerateHeaderFile(fout.GetStream());
+    this->OldGenerateHeaderFile(fout);
     }
   }
   
@@ -147,16 +147,16 @@ cmVTKMakeInstantiatorCommand
   
   // Generate the output file with copy-if-different.
   {
-  cmGeneratedFileStream fout(fullName.c_str());
+  cmGeneratedFileStream fout(fullName.c_str(), true);
   
   // Actually generate the code in the file.
   if(!oldVersion)
     {
-    this->GenerateImplementationFile(fout.GetStream());
+    this->GenerateImplementationFile(fout);
     }
   else
     {
-    this->OldGenerateImplementationFile(fout.GetStream());
+    this->OldGenerateImplementationFile(fout);
     }
   }
   
@@ -188,13 +188,13 @@ cmVTKMakeInstantiatorCommand
     
       // Generate the output file with copy-if-different.
       {
-      cmGeneratedFileStream fout(fullName.c_str());
+      cmGeneratedFileStream fout(fullName.c_str(), true);
     
       size_t thisBlockSize =
         (block < numFullBlocks)? groupSize:lastBlockSize;
     
       // Actually generate the code in the file.
-      this->OldGenerateCreationFile(fout.GetStream(),
+      this->OldGenerateCreationFile(fout,
                                     block*groupSize, 
                                     static_cast<int>(thisBlockSize));
       }

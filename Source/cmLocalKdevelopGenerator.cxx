@@ -120,12 +120,9 @@ void cmLocalKdevelopGenerator::MergeProjectFiles(const std::string& outputDir,
     }
   oldProjectFile.close();
 
-  cmGeneratedFileStream tempFile(filename.c_str());
-  tempFile.SetAlwaysCopy(true);
-  std::ostream&  fout = tempFile.GetStream();
+  cmGeneratedFileStream fout(filename.c_str(), false);
   if(!fout)
     {
-    cmSystemTools::Error("Error can not open for write: ", filename.c_str());
     return;
     }
 
@@ -174,13 +171,9 @@ void cmLocalKdevelopGenerator::CreateNewProjectFile(const std::string& outputDir
                                                     const std::string& cmakeFilePattern)
 {
 
-  cmGeneratedFileStream tempFile(filename.c_str());
-  tempFile.SetAlwaysCopy(true);
-
-  std::ostream&  fout = tempFile.GetStream();
+  cmGeneratedFileStream fout(filename.c_str(), false);
   if(!fout)
     {
-    cmSystemTools::Error("Error can not open for write: ", filename.c_str());
     return;
     }
 
@@ -371,12 +364,9 @@ bool cmLocalKdevelopGenerator::CreateFilelistFile(const std::string& outputDir, 
     }
 
   //now write the new filename
-  cmGeneratedFileStream tempFile(filename.c_str());
-  tempFile.SetAlwaysCopy(true);
-  std::ostream&  fout = tempFile.GetStream();
+  cmGeneratedFileStream fout(filename.c_str(), false);
   if(!fout)
     {
-    cmSystemTools::Error("Error can not open for write: ", filename.c_str());
     return false;
     }
    
