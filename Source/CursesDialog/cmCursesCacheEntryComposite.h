@@ -23,10 +23,10 @@
 class cmCursesCacheEntryComposite
 {
 public:
-  cmCursesCacheEntryComposite(const char* key);
+  cmCursesCacheEntryComposite(const char* key, int labelwidth, int entrywidth);
   cmCursesCacheEntryComposite(const char* key,
 			      const cmCacheManager::CacheEntry& value, 
-			      bool isNew);
+			      bool isNew, int labelwidth, int entrywidth);
   ~cmCursesCacheEntryComposite();
   const char* GetValue();
 
@@ -40,6 +40,8 @@ protected:
   cmCursesLabelWidget* m_IsNewLabel;
   cmCursesWidget* m_Entry;
   std::string m_Key;
+  int m_LabelWidth;
+  int m_EntryWidth;
 };
 
 #endif // __cmCursesCacheEntryComposite_h

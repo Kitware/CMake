@@ -33,8 +33,9 @@ inline int ctrl(int z)
     return (z&037);
 } 
 
-cmCursesMainForm::cmCursesMainForm(std::vector<std::string> const& args) :
-  m_Args(args)
+cmCursesMainForm::cmCursesMainForm(std::vector<std::string> const& args,
+				   int initWidth) :
+  m_Args(args), m_InitialWidth(initWidth)
 {
   m_NumberOfPages = 0;
   m_Fields = 0;
@@ -116,12 +117,14 @@ void cmCursesMainForm::InitializeUI()
       }
     }
 
+  int entrywidth = m_InitialWidth - 35;
+
   cmCursesCacheEntryComposite* comp;
   if ( count == 0 )
     {
     // If cache is empty, display a label saying so and a
     // dummy entry widget (does not respond to input)
-    comp = new cmCursesCacheEntryComposite("EMPTY CACHE");
+    comp = new cmCursesCacheEntryComposite("EMPTY CACHE", 30, 30);
     comp->m_Entry = new cmCursesDummyWidget(1, 1, 1, 1);
     newEntries->push_back(comp);
     }
@@ -144,7 +147,8 @@ void cmCursesMainForm::InitializeUI()
       if (!this->LookForCacheEntry(key))
 	{
 	newEntries->push_back(new cmCursesCacheEntryComposite(key, value,
-							      true));
+							      true, 30,
+							      entrywidth));
 	m_OkToGenerate = false;
 	}
       }
@@ -164,7 +168,8 @@ void cmCursesMainForm::InitializeUI()
       if (this->LookForCacheEntry(key))
 	{
 	newEntries->push_back(new cmCursesCacheEntryComposite(key, value,
-							      false));
+							      false, 30,
+							      entrywidth));
 	}
       }
     }
@@ -266,6 +271,7 @@ void cmCursesMainForm::Render(int left, int top, int width, int height)
 
   // Wrong window size
   if ( width < cmCursesMainForm::MIN_WIDTH  || 
+       width < m_InitialWidth               ||
        height < cmCursesMainForm::MIN_HEIGHT )
     {
     return;
@@ -337,6 +343,7 @@ void cmCursesMainForm::PrintKeys()
   int x,y;
   getmaxyx(stdscr, y, x);
   if ( x < cmCursesMainForm::MIN_WIDTH  || 
+       x < m_InitialWidth               ||
        y < cmCursesMainForm::MIN_HEIGHT )
     {
     return;
@@ -405,12 +412,15 @@ void cmCursesMainForm::UpdateStatusBar()
   getmaxyx(stdscr, y, x);
   // If window size is too small, display error and return
   if ( x < cmCursesMainForm::MIN_WIDTH  || 
+       x < m_InitialWidth               ||
        y < cmCursesMainForm::MIN_HEIGHT )
     {
     curses_clear();
     curses_move(0,0);
     printw("Window is too small. A size of at least %dx%d is required.",
-	   cmCursesMainForm::MIN_WIDTH, cmCursesMainForm::MIN_HEIGHT);
+	   (cmCursesMainForm::MIN_WIDTH < m_InitialWidth ?
+	    m_InitialWidth : cmCursesMainForm::MIN_WIDTH), 
+	   cmCursesMainForm::MIN_HEIGHT);
     touchwin(stdscr); 
     wrefresh(stdscr); 
     return;

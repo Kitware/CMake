@@ -117,7 +117,7 @@ int main(int argc, char** argv)
 
   cmCursesMainForm* myform;
 
-  myform = new cmCursesMainForm(args);
+  myform = new cmCursesMainForm(args, x);
 
   cmSystemTools::SetErrorCallback(CMakeErrorHandler);
 

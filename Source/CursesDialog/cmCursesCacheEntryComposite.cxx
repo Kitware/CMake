@@ -23,19 +23,22 @@
 #include "cmCursesDummyWidget.h"
 #include "../cmSystemTools.h"
 
-cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(const char* key) :
-  m_Key(key)
+cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(const char* key,
+							 int labelwidth,
+							 int entrywidth) :
+  m_Key(key), m_LabelWidth(labelwidth), m_EntryWidth(entrywidth)
 {
-  m_Label = new cmCursesLabelWidget(30, 1, 1, 1, key);
+  m_Label = new cmCursesLabelWidget(m_LabelWidth, 1, 1, 1, key);
   m_IsNewLabel = new cmCursesLabelWidget(1, 1, 1, 1, " ");
   m_Entry = 0;
 }
 
 cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
-  const char* key, const cmCacheManager::CacheEntry& value, bool isNew) :
-  m_Key(key)
+  const char* key, const cmCacheManager::CacheEntry& value, bool isNew, 
+  int labelwidth, int entrywidth) 
+  : m_Key(key), m_LabelWidth(labelwidth), m_EntryWidth(entrywidth)
 {
-  m_Label = new cmCursesLabelWidget(30, 1, 1, 1, key);
+  m_Label = new cmCursesLabelWidget(m_LabelWidth, 1, 1, 1, key);
   if (isNew)
     {
     m_IsNewLabel = new cmCursesLabelWidget(1, 1, 1, 1, "*");
@@ -49,7 +52,7 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
   switch ( value.m_Type )
     {
     case  cmCacheManager::BOOL:
-      m_Entry = new cmCursesBoolWidget(30, 1, 1, 1);
+      m_Entry = new cmCursesBoolWidget(m_EntryWidth, 1, 1, 1);
       if (cmSystemTools::IsOn(value.m_Value.c_str()))
 	{
 	static_cast<cmCursesBoolWidget*>(m_Entry)->SetValueAsBool(true);
@@ -60,17 +63,17 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
 	}
       break;
     case cmCacheManager::PATH:
-      m_Entry = new cmCursesPathWidget(30, 1, 1, 1);
+      m_Entry = new cmCursesPathWidget(m_EntryWidth, 1, 1, 1);
       static_cast<cmCursesPathWidget*>(m_Entry)->SetString(
 	value.m_Value.c_str());
       break;
     case cmCacheManager::FILEPATH:
-      m_Entry = new cmCursesFilePathWidget(30, 1, 1, 1);
+      m_Entry = new cmCursesFilePathWidget(m_EntryWidth, 1, 1, 1);
       static_cast<cmCursesFilePathWidget*>(m_Entry)->SetString(
 	value.m_Value.c_str());
       break;
     case cmCacheManager::STRING:
-      m_Entry = new cmCursesStringWidget(30, 1, 1, 1);
+      m_Entry = new cmCursesStringWidget(m_EntryWidth, 1, 1, 1);
       static_cast<cmCursesStringWidget*>(m_Entry)->SetString(
 	value.m_Value.c_str());
       break;

@@ -31,7 +31,7 @@ class cmCursesCacheEntryComposite;
 class cmCursesMainForm : public cmCursesForm
 {
 public:
-  cmCursesMainForm(std::vector<std::string> const& args);
+  cmCursesMainForm(std::vector<std::string> const& args, int initwidth);
   virtual ~cmCursesMainForm();
   
   /**
@@ -129,6 +129,7 @@ protected:
   // Number of pages displayed
   int m_NumberOfPages;
 
+  int m_InitialWidth;
 };
 
 #endif // __cmCursesMainForm_h
