@@ -424,6 +424,7 @@ void cmGlobalGenerator::Generate()
   for (i = 0; i < m_LocalGenerators.size(); ++i)
     {
     m_LocalGenerators[i]->Generate(true);
+    m_LocalGenerators[i]->GenerateInstallRules();
     m_CMakeInstance->UpdateProgress("Generating", 
                                     (i+1.0f)/m_LocalGenerators.size());
     }

@@ -21,6 +21,7 @@
 
 class cmMakefile;
 class cmGlobalGenerator;
+class cmTarget;
 
 /** \class cmLocalGenerator
  * \brief Create required build files for a directory.
@@ -55,6 +56,11 @@ public:
    */
   virtual void ConfigureFinalPass();
 
+  /**
+   * Generate the install rules files in this directory.
+   */
+  virtual void GenerateInstallRules();
+
   ///! Get the makefile for this generator
   cmMakefile *GetMakefile() {
     return this->m_Makefile; };
@@ -65,8 +71,16 @@ public:
 
   ///! Set the Global Generator, done on creation by the GlobalGenerator
   void SetGlobalGenerator(cmGlobalGenerator *gg);
+  
+  /** Get the full name of the target's file, without path.  */
+  std::string GetFullTargetName(const char* n, const cmTarget& t);
+
+  virtual const char* GetSafeDefinition(const char*);
+
   std::string ConvertToRelativeOutputPath(const char* p);
 protected:
+  virtual void AddInstallRule(ostream& fout, const char* dest, int type, const char* files);
+  
   bool m_FromTheTop;
   cmMakefile *m_Makefile;
   cmGlobalGenerator *m_GlobalGenerator;

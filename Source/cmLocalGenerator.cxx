@@ -18,6 +18,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmake.h"
 #include "cmMakefile.h"
+#include "cmGeneratedFileStream.h"
 
 cmLocalGenerator::cmLocalGenerator()
 {
@@ -62,6 +63,230 @@ void cmLocalGenerator::ConfigureFinalPass()
 {
   m_Makefile->ConfigureFinalPass();
 }
+
+void cmLocalGenerator::GenerateInstallRules()
+{
+  const cmTargets &tgts = m_Makefile->GetTargets();
+  const char* prefix
+    = m_Makefile->GetDefinition("CMAKE_INSTALL_PREFIX");
+  if (!prefix)
+    {
+    prefix = "/usr/local";
+    }
+
+  std::string file = m_Makefile->GetStartOutputDirectory();
+  file += "/cmake_install.cmake";
+  cmGeneratedFileStream tempFile(file.c_str());
+  std::ostream&  fout = tempFile.GetStream();
+
+  fout << "# Install script for directory: " << m_Makefile->GetCurrentDirectory() 
+    << std::endl << std::endl;
+
+  std::string libOutPath = "";
+  if (m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH"))
+    {
+    libOutPath = m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH");
+    if(libOutPath.size())
+      {
+      if(libOutPath[libOutPath.size() -1] != '/')
+        {
+        libOutPath += "/";
+        }
+      }
+    }
+
+  std::string exeOutPath = "";
+  if (m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH"))
+    {
+    exeOutPath =
+      m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
+    if(exeOutPath.size())
+      {
+      if(exeOutPath[exeOutPath.size() -1] != '/')
+        {
+        exeOutPath += "/";
+        }
+      }
+    }
+
+  std::string destination;
+  for(cmTargets::const_iterator l = tgts.begin(); 
+    l != tgts.end(); l++)
+    {
+    if (l->second.GetInstallPath() != "")
+      {
+      destination = prefix + l->second.GetInstallPath();
+      const char* dest = destination.c_str();
+      int type = l->second.GetType();
+
+      std::string fname;
+      const char* files;
+      // now install the target
+      switch (type)
+        {
+      case cmTarget::STATIC_LIBRARY:
+      case cmTarget::SHARED_LIBRARY:
+      case cmTarget::MODULE_LIBRARY:
+        fname = libOutPath;
+        fname += this->GetFullTargetName(l->first.c_str(), l->second);
+        files = cmSystemTools::ConvertToOutputPath(fname.c_str()).c_str();
+        this->AddInstallRule(fout, dest, type, files);
+        break;
+      case cmTarget::WIN32_EXECUTABLE:
+      case cmTarget::EXECUTABLE:
+        fname = exeOutPath;
+        fname += this->GetFullTargetName(l->first.c_str(), l->second);
+        files = cmSystemTools::ConvertToOutputPath(fname.c_str()).c_str();
+        this->AddInstallRule(fout, dest, type, files);
+        break;
+      case cmTarget::INSTALL_FILES:
+          {
+          std::string sourcePath = m_Makefile->GetCurrentDirectory();
+          std::string binaryPath = m_Makefile->GetCurrentOutputDirectory();
+          sourcePath += "/";
+          binaryPath += "/";
+          const std::vector<std::string> &sf = l->second.GetSourceLists();
+          std::vector<std::string>::const_iterator i;
+          for (i = sf.begin(); i != sf.end(); ++i)
+            {
+            std::string f = *i;
+            if(f.substr(0, sourcePath.length()) == sourcePath)
+              {
+              f = f.substr(sourcePath.length());
+              }
+            else if(f.substr(0, binaryPath.length()) == binaryPath)
+              {
+              f = f.substr(binaryPath.length());
+              }
+
+            files = cmSystemTools::ConvertToOutputPath(i->c_str()).c_str();
+            this->AddInstallRule(fout, dest, type, files);
+            }
+          }
+        break;
+      case cmTarget::INSTALL_PROGRAMS:
+          {
+          std::string sourcePath = m_Makefile->GetCurrentDirectory();
+          std::string binaryPath = m_Makefile->GetCurrentOutputDirectory();
+          sourcePath += "/";
+          binaryPath += "/";
+          const std::vector<std::string> &sf = l->second.GetSourceLists();
+          std::vector<std::string>::const_iterator i;
+          for (i = sf.begin(); i != sf.end(); ++i)
+            {
+            std::string f = *i;
+            if(f.substr(0, sourcePath.length()) == sourcePath)
+              {
+              f = f.substr(sourcePath.length());
+              }
+            else if(f.substr(0, binaryPath.length()) == binaryPath)
+              {
+              f = f.substr(binaryPath.length());
+              }
+            files = cmSystemTools::ConvertToOutputPath(i->c_str()).c_str();
+            this->AddInstallRule(fout, dest, type, files);
+            }
+          }
+        break;
+      case cmTarget::UTILITY:
+      default:
+        break;
+        }
+      }
+    }
+  cmMakefile* mf = this->GetMakefile();
+  if ( !mf->GetSubDirectories().empty() )
+    {
+    const std::vector<std::string>& subdirs = mf->GetSubDirectories();
+    std::vector<std::string>::const_iterator i = subdirs.begin();
+    for(; i != subdirs.end(); ++i)
+      {
+      std::string odir = mf->GetCurrentOutputDirectory();
+      odir += "/" + (*i);
+      fout << "INCLUDE(" <<  cmSystemTools::ConvertToOutputPath(odir.c_str())
+        << "/cmake_install.cmake)" << std::endl;
+      }
+    fout << std::endl;;
+    }
+}
+
+void cmLocalGenerator::AddInstallRule(ostream& fout, const char* dest, int type, const char* files)
+{
+  std::string sfiles = files;
+  std::string destination = cmSystemTools::ConvertToOutputPath(dest);
+  std::string stype;
+  switch ( type )
+    {
+  case cmTarget::INSTALL_PROGRAMS: 
+  case cmTarget::EXECUTABLE:  
+  case cmTarget::WIN32_EXECUTABLE: stype = "EXECUTABLE"; break;
+  case cmTarget::STATIC_LIBRARY:   stype = "STATIC_LIBRARY"; break;
+  case cmTarget::SHARED_LIBRARY:   stype = "SHARED_LIBRARY"; break;
+  case cmTarget::MODULE_LIBRARY:   stype = "MODULE"; break;
+  case cmTarget::INSTALL_FILES:
+  default:                         stype = "FILE"; break;
+    }
+  fout 
+    << "MESSAGE(STATUS \"Install " << stype << ": " << sfiles.c_str() << "\")\n" 
+    << "FILE(INSTALL DESTINATION " << destination.c_str() 
+    << " TYPE " << stype.c_str() << " FILES " << sfiles.c_str() << ")\n";
+}
+
+const char* cmLocalGenerator::GetSafeDefinition(const char* def)
+{
+  const char* ret = m_Makefile->GetDefinition(def);
+  if(!ret)
+    {
+    return "";
+    }
+  return ret;
+}
+
+std::string cmLocalGenerator::GetFullTargetName(const char* n,
+  const cmTarget& t)
+{
+  const char* targetPrefix = t.GetProperty("PREFIX");
+  const char* targetSuffix = t.GetProperty("SUFFIX");
+  const char* prefixVar = 0;
+  const char* suffixVar = 0;
+  switch(t.GetType())
+    {
+  case cmTarget::STATIC_LIBRARY:
+    prefixVar = "CMAKE_STATIC_LIBRARY_PREFIX";
+    suffixVar = "CMAKE_STATIC_LIBRARY_SUFFIX";
+    break;
+  case cmTarget::SHARED_LIBRARY:
+    prefixVar = "CMAKE_SHARED_LIBRARY_PREFIX";
+    suffixVar = "CMAKE_SHARED_LIBRARY_SUFFIX";
+    break;
+  case cmTarget::MODULE_LIBRARY:
+    prefixVar = "CMAKE_SHARED_MODULE_PREFIX";
+    suffixVar = "CMAKE_SHARED_MODULE_SUFFIX";
+    break;
+  case cmTarget::EXECUTABLE:
+  case cmTarget::WIN32_EXECUTABLE:
+    targetSuffix = cmSystemTools::GetExecutableExtension();
+  case cmTarget::UTILITY:
+  case cmTarget::INSTALL_FILES:
+  case cmTarget::INSTALL_PROGRAMS:
+    break;
+    }
+  // if there is no prefix on the target use the cmake definition
+  if(!targetPrefix && prefixVar)
+    {
+    targetPrefix = this->GetSafeDefinition(prefixVar);
+    }
+  // if there is no suffix on the target use the cmake definition
+  if(!targetSuffix && suffixVar)
+    {
+    targetSuffix = this->GetSafeDefinition(suffixVar);
+    }
+  std::string name = targetPrefix?targetPrefix:"";
+  name += n;
+  name += targetSuffix?targetSuffix:"";
+  return name;
+}
+
 
 std::string cmLocalGenerator::ConvertToRelativeOutputPath(const char* p)
 {
