@@ -126,6 +126,11 @@ void cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
     for(std::vector<std::string>::const_iterator l = languages.begin();
         l != languages.end(); ++l)
       {
+      if(*l == "NONE")
+        {
+        this->SetLanguageEnabled("NONE", mf);
+        continue;
+        }
       const char* lang = l->c_str();
       std::string src2 = m_ConfiguredFilesPath;
       src2 += "/CMake";
@@ -196,6 +201,12 @@ void cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
       l != languages.end(); ++l)
     {
     const char* lang = l->c_str();
+    if(*l == "NONE")
+      {
+      this->SetLanguageEnabled("NONE", mf);
+      continue;
+      }
+
     if(!this->GetLanguageEnabled(lang) )
       {  
       if (m_CMakeInstance->GetIsInTryCompile())
@@ -301,6 +312,11 @@ void cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
       l != languages.end(); ++l)
     {
     const char* lang = l->c_str();
+    if(*l == "NONE")
+      {
+      this->SetLanguageEnabled("NONE", mf);
+      continue;
+      }
     std::string langLoadedVar = "CMAKE_";
     langLoadedVar += lang;
     langLoadedVar += "_INFORMATION_LOADED";
