@@ -2148,6 +2148,20 @@ void cmCTest::PopulateCustomVector(cmMakefile* mf, const char* def, tm_VectorOfS
     }
 }
 
+void cmCTest::PopulateCustomInteger(cmMakefile* mf, const char* def, int& val)
+{
+  if ( !def)
+    {
+    return;
+    }
+  const char* dval = mf->GetDefinition(def);
+  if ( !dval )
+    {
+    return;
+    }
+  val = atoi(dval);
+}
+
 std::string cmCTest::GetShortPathToFile(const char* cfname)
 {
   const std::string& sourceDir = GetDartConfiguration("SourceDirectory");

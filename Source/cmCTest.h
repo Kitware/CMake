@@ -172,6 +172,7 @@ public:
 
   static void PopulateCustomVector(cmMakefile* mf, const char* definition, 
                                    tm_VectorOfStrings& vec);
+  static void PopulateCustomInteger(cmMakefile* mf, const char* def, int& val);
 
   std::string GetToplevelPath();
   
