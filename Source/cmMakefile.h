@@ -496,6 +496,7 @@ public:
    *  returns false if no entry defined.
    */
   bool IsOn(const char* name) const;
+  bool IsSet(const char* name) const;
 
   /**
    * Get a list of preprocessor define flags.

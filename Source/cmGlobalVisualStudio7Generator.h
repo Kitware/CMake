@@ -97,7 +97,6 @@ protected:
   virtual void WriteSLNFooter(std::ostream& fout);
   virtual void WriteSLNHeader(std::ostream& fout);
 
-  void SetupTests();
   void GenerateConfigurations(cmMakefile* mf);
 
   void WriteExternalProject(std::ostream& fout, 

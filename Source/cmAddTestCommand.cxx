@@ -44,7 +44,7 @@ void cmAddTestCommand::FinalPass()
   std::string fname;
   fname = m_Makefile->GetStartOutputDirectory();
   fname += "/";
-  if ( m_Makefile->IsOn("DART_ROOT") )
+  if ( m_Makefile->IsSet("DART_ROOT") )
     {
     fname += "DartTestfile.txt";
     }

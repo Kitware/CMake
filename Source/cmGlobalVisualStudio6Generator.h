@@ -78,7 +78,6 @@ public:
                             std::vector<cmLocalGenerator*>& generators);
 private:
   void GenerateConfigurations(cmMakefile* mf);
-  void SetupTests();
   void WriteDSWFile(std::ostream& fout);
   void WriteDSWHeader(std::ostream& fout);
   void WriteProject(std::ostream& fout, 

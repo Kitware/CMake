@@ -142,6 +142,7 @@ protected:
   void FindMakeProgram(cmMakefile*);
 
   void ConfigureRelativePaths();
+  void SetupTests();
   
   bool m_ForceUnixPaths;
   cmStdString m_FindMakeProgramFile;

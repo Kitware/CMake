@@ -1232,6 +1232,27 @@ bool cmMakefile::IsOn(const char* name) const
   return cmSystemTools::IsOn(value);
 }
 
+bool cmMakefile::IsSet(const char* name) const
+{
+  const char* value = this->GetDefinition(name);
+  if ( !value )
+    {
+    return false;
+    }
+
+  if ( ! *value )
+    {
+    return false;
+    }
+
+  if ( cmSystemTools::IsNOTFOUND(value) )
+    {
+    return false;
+    }
+
+  return true;
+}
+
 const char* cmMakefile::GetRequiredDefinition(const char* name) const
 {
   const char* ret = this->GetDefinition(name);

@@ -37,7 +37,7 @@ void cmEnableTestingCommand::CreateDartTestfileForMakefile(cmMakefile *mf)
   std::string fname;
   fname = mf->GetStartOutputDirectory();
   fname += "/";
-  if ( m_Makefile->IsOn("DART_ROOT") )
+  if ( m_Makefile->IsSet("DART_ROOT") )
     {
     fname += "DartTestfile.txt";
     }
