@@ -118,7 +118,7 @@ int cmTryCompileCommand::CoreTryCompileCode(
   // do not allow recursive try Compiles
   if (!strcmp(binaryDirectory,mf->GetHomeOutputDirectory()))
     {
-    cmSystemTools::Error("Attempt at a recursive or nested TRY_COMPILE", 
+    cmSystemTools::Error("Attempt at a recursive or nested TRY_COMPILE in directory ",
                          binaryDirectory);
     return -1;
     }
