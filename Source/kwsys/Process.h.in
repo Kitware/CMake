@@ -31,6 +31,7 @@
 #define kwsysProcess_Delete              kwsys(Process_Delete)
 #define kwsysProcess_SetCommand          kwsys(Process_SetCommand)
 #define kwsysProcess_SetTimeout          kwsys(Process_SetTimeout)
+#define kwsysProcess_SetWorkingDirectory kwsys(Process_SetWorkingDirectory)
 #define kwsysProcess_State_Starting      kwsys(Process_State_Starting)
 #define kwsysProcess_State_Error         kwsys(Process_State_Error)
 #define kwsysProcess_State_Exception     kwsys(Process_State_Exception)
@@ -96,6 +97,12 @@ kwsysEXPORT void kwsysProcess_SetCommand(kwsysProcess* cp,
  * value will disable the timeout.
  */
 kwsysEXPORT void kwsysProcess_SetTimeout(kwsysProcess* cp, double timeout);
+
+/**
+ * Set the working directory for the child process. The working directory can
+ * be absolute or relative to the current directory. 
+ */
+kwsysEXPORT void kwsysProcess_SetWorkingDirectory(kwsysProcess* cp, const char* dir);
 
 /**
  * Get the current state of the Process instance.  Possible states are:
@@ -254,6 +261,7 @@ kwsysEXPORT void kwsysProcess_Kill(kwsysProcess* cp);
 # undef kwsysProcess_Delete
 # undef kwsysProcess_SetCommand
 # undef kwsysProcess_SetTimeout
+# undef kwsysProcess_SetWorkingDirectory
 # undef kwsysProcess_State_Starting
 # undef kwsysProcess_State_Error
 # undef kwsysProcess_State_Exception

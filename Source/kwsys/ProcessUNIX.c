@@ -99,6 +99,9 @@ struct kwsysProcess_s
   
   /* The timeout length.  */
   double Timeout;
+
+  /* The working directory for the process. */
+  char* WorkingDirectory;
   
   /* Time at which the child started.  Negative for no timeout.  */
   kwsysProcessTime StartTime;
@@ -203,6 +206,29 @@ void kwsysProcess_SetTimeout(kwsysProcess* cp, double timeout)
   if(cp->Timeout < 0)
     {
     cp->Timeout = 0;
+    }
+}
+
+/*--------------------------------------------------------------------------*/
+void kwsysProcess_SetWorkingDirectory(kwsysProcess* cp, const char* dir)
+{
+  if(cp->WorkingDirectory == dir)
+    {
+    return;
+    }
+  if(cp->WorkingDirectory && dir && strcmp(cp->WorkingDirectory, dir) == 0)
+    {
+    return;
+    }
+  if(cp->WorkingDirectory)
+    {
+    free(cp->WorkingDirectory);
+    cp->WorkingDirectory = 0;
+    }
+  if(dir)
+    {
+    cp->WorkingDirectory = (char*) malloc(strlen(dir) + 1);
+    strcpy(cp->WorkingDirectory, dir);
     }
 }
 
