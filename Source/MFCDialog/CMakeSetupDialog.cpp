@@ -71,10 +71,10 @@ CMakeSetupDialog::CMakeSetupDialog(const CMakeCommandLineInfo& cmdInfo,
   m_RegistryKey  = "Software\\Kitware\\CMakeSetup\\Settings\\StartPath";
   
   //{{AFX_DATA_INIT(CMakeSetupDialog)
-	m_WhereSource = cmdInfo.m_WhereSource;
-	m_WhereBuild = cmdInfo.m_WhereBuild;
-	m_GeneratorChoiceString = _T("");
-	//}}AFX_DATA_INIT
+  m_WhereSource = cmdInfo.m_WhereSource;
+  m_WhereBuild = cmdInfo.m_WhereBuild;
+  m_GeneratorChoiceString = _T("");
+  //}}AFX_DATA_INIT
   // Note that LoadIcon does not require a subsequent DestroyIcon in Win32
   m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
   m_BuildPathChanged = false;
@@ -271,49 +271,80 @@ void CMakeSetupDialog::SaveToRegistry()
     }
   else
     {
-    // load some values
+    // save some values
     CString regvalue;
-    this->ReadRegistryValue(hKey, &(regvalue),"WhereSource","C:\\");
+    this->ReadRegistryValue(hKey, &(regvalue),"WhereSource1","C:\\");
+    int shiftEnd = 9;
     if(m_WhereSource != regvalue)
       {
-      regvalue = "";
-      this->ReadRegistryValue(hKey, &(regvalue),"WhereSource3","");
-      RegSetValueEx(hKey, _T("WhereSource4"), 0, REG_SZ, 
-                    (CONST BYTE *)(const char *)regvalue, 
-                    regvalue.GetLength());
-      regvalue = "";
-      this->ReadRegistryValue(hKey, &(regvalue),"WhereSource2","");
-      RegSetValueEx(hKey, _T("WhereSource3"), 0, REG_SZ, 
-                    (CONST BYTE *)(const char *)regvalue, 
-                    regvalue.GetLength());
-      regvalue = "";
-      this->ReadRegistryValue(hKey, &(regvalue),"WhereSource","");
-      RegSetValueEx(hKey, _T("WhereSource2"), 0, REG_SZ, 
-                    (CONST BYTE *)(const char *)regvalue, 
-                    regvalue.GetLength());
-      RegSetValueEx(hKey, _T("WhereSource"), 0, REG_SZ, 
+      char keyName[1024];
+      char keyName2[1024];
+      int i;
+      for (i = 2; i < 10; ++i)
+        {
+        regvalue = "";
+        sprintf(keyName,"WhereSource%i",i);
+        this->ReadRegistryValue(hKey, &(regvalue),keyName,"");
+        // check for short circuit, if the new value is already in
+        // the list then we stop
+        if (m_WhereSource == regvalue)
+          {
+          shiftEnd = i - 1;
+          }
+        }
+      
+      for (i = shiftEnd; i; --i)
+        {
+        regvalue = "";
+        sprintf(keyName,"WhereSource%i",i);
+        sprintf(keyName2,"WhereSource%i",i+1);
+        
+        this->ReadRegistryValue(hKey, &(regvalue),keyName,"");
+        if (strlen(regvalue))
+          {
+          RegSetValueEx(hKey, _T(keyName2), 0, REG_SZ, 
+                        (CONST BYTE *)(const char *)regvalue, 
+                        regvalue.GetLength());
+          }
+        }
+      RegSetValueEx(hKey, _T("WhereSource1"), 0, REG_SZ, 
                     (CONST BYTE *)(const char *)m_WhereSource, 
                     m_WhereSource.GetLength());
       }
-    this->ReadRegistryValue(hKey, &(regvalue),"WhereBuild","C:\\");
+    
+    this->ReadRegistryValue(hKey, &(regvalue),"WhereBuild1","C:\\");
     if(m_WhereBuild != regvalue)
       {
-      regvalue = "";
-      this->ReadRegistryValue(hKey, &(regvalue),"WhereBuild3","");
-      RegSetValueEx(hKey, _T("WhereBuild4"), 0, REG_SZ, 
-                    (CONST BYTE *)(const char *)regvalue, 
-                    regvalue.GetLength());
-      regvalue = "";
-      this->ReadRegistryValue(hKey, &(regvalue),"WhereBuild2","");
-      RegSetValueEx(hKey, _T("WhereBuild3"), 0, REG_SZ, 
-                    (CONST BYTE *)(const char *)regvalue, 
-                    regvalue.GetLength());
-      regvalue = "";
-      this->ReadRegistryValue(hKey, &(regvalue),"WhereBuild","");
-      RegSetValueEx(hKey, _T("WhereBuild2"), 0, REG_SZ, 
-                    (CONST BYTE *)(const char *)regvalue, 
-                    regvalue.GetLength());
-      RegSetValueEx(hKey, _T("WhereBuild"), 0, REG_SZ, 
+      int i;
+      char keyName[1024];
+      char keyName2[1024];
+      for (i = 2; i < 10; ++i)
+        {
+        regvalue = "";
+        sprintf(keyName,"WhereBuild%i",i);
+        this->ReadRegistryValue(hKey, &(regvalue),keyName,"");
+        // check for short circuit, if the new value is already in
+        // the list then we stop
+        if (m_WhereBuild == regvalue)
+          {
+          shiftEnd = i - 1;
+          }
+        }
+      for (i = shiftEnd; i; --i)
+        {
+        regvalue = "";
+        sprintf(keyName,"WhereBuild%i",i);
+        sprintf(keyName2,"WhereBuild%i",i+1);
+        
+        this->ReadRegistryValue(hKey, &(regvalue),keyName,"");
+        if (strlen(regvalue))
+          {
+          RegSetValueEx(hKey, _T(keyName2), 0, REG_SZ, 
+                        (CONST BYTE *)(const char *)regvalue, 
+                        regvalue.GetLength());
+          }
+        }
+      RegSetValueEx(hKey, _T("WhereBuild1"), 0, REG_SZ, 
                     (CONST BYTE *)(const char *)m_WhereBuild, 
                     m_WhereBuild.GetLength());
       }
@@ -360,35 +391,35 @@ void CMakeSetupDialog::LoadFromRegistry()
     // load some values
     if (m_WhereSource.IsEmpty()) 
       {
-      this->ReadRegistryValue(hKey, &(m_WhereSource),"WhereSource","C:\\");
+      this->ReadRegistryValue(hKey, &(m_WhereSource),"WhereSource1","C:\\");
       }
     if (m_WhereBuild.IsEmpty()) 
       {
-      this->ReadRegistryValue(hKey, &(m_WhereBuild),"WhereBuild","C:\\");
+      this->ReadRegistryValue(hKey, &(m_WhereBuild),"WhereBuild1","C:\\");
       }
     m_WhereSourceControl.AddString(m_WhereSource);
     m_WhereBuildControl.AddString(m_WhereBuild);
 
+    char keyname[1024];
     CString regvalue;
-    this->ReadRegistryValue(hKey, &(regvalue),"WhereSource2","C:\\");
-    m_WhereSourceControl.AddString(regvalue);
-    regvalue = "";
-    this->ReadRegistryValue(hKey, &(regvalue),"WhereBuild2","C:\\");
-    m_WhereBuildControl.AddString(regvalue);
-
-    regvalue = "";
-    this->ReadRegistryValue(hKey, &(regvalue),"WhereSource3","C:\\");
-    m_WhereSourceControl.AddString(regvalue);
-    regvalue = "";
-    this->ReadRegistryValue(hKey, &(regvalue),"WhereBuild3","C:\\");
-    m_WhereBuildControl.AddString(regvalue);
-
-    regvalue = "";
-    this->ReadRegistryValue(hKey, &(regvalue),"WhereSource4","C:\\");
-    m_WhereSourceControl.AddString(regvalue);
-    regvalue = "";
-    this->ReadRegistryValue(hKey, &(regvalue),"WhereBuild4","C:\\");
-    m_WhereBuildControl.AddString(regvalue);
+    int i;
+    for (i = 2; i <= 10; ++i)
+      {
+      sprintf(keyname,"WhereSource%i",i);
+      regvalue = "";
+      this->ReadRegistryValue(hKey, &(regvalue),keyname,"C:\\");
+      if (strcmp("C:\\",regvalue))
+        {
+        m_WhereSourceControl.AddString(regvalue);
+        }
+      sprintf(keyname,"WhereBuild%i",i);
+      regvalue = "";
+      this->ReadRegistryValue(hKey, &(regvalue),keyname,"C:\\");
+      if (strcmp("C:\\",regvalue))
+        {
+        m_WhereBuildControl.AddString(regvalue);
+        }
+      }
     }
   RegCloseKey(hKey);
 }
