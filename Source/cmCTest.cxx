@@ -1752,6 +1752,7 @@ void cmCTest::ProcessDirectory(cmCTest::tm_VectorOfStrings &passed,
       // find the test executable
       std::string actualCommand = this->FindTheExecutable(args[1].Value.c_str());
       std::string testCommand = cmSystemTools::ConvertToOutputPath(actualCommand.c_str());
+      std::string memcheckcommand = "";
 
       // continue if we did not find the executable
       if (testCommand == "")
@@ -1771,9 +1772,12 @@ void cmCTest::ProcessDirectory(cmCTest::tm_VectorOfStrings &passed,
         {
         cmCTest::tm_VectorOfStrings::size_type pp;
         arguments.push_back(m_MemoryTester.c_str());
+        memcheckcommand = m_MemoryTester;
         for ( pp = 0; pp < m_MemoryTesterOptionsParsed.size(); pp ++ )
           {
           arguments.push_back(m_MemoryTesterOptionsParsed[pp].c_str());
+          memcheckcommand += " ";
+          memcheckcommand += cmSystemTools::EscapeSpaces(m_MemoryTesterOptionsParsed[pp].c_str());
           }
         }
       arguments.push_back(actualCommand.c_str());
@@ -1796,7 +1800,11 @@ void cmCTest::ProcessDirectory(cmCTest::tm_VectorOfStrings &passed,
 
       if ( m_Verbose )
         {
-        std::cout << std::endl << "Test command: " << testCommand << std::endl;
+        std::cout << std::endl << (memcheck?"MemCheck":"Test") << " command: " << testCommand << std::endl;
+        if ( memcheck )
+          {
+          std::cout << "Memory check command: " << memcheckcommand << std::endl;
+          }
         }
       int res = 0;
       if ( !m_ShowOnly )
@@ -1889,6 +1897,7 @@ void cmCTest::ProcessDirectory(cmCTest::tm_VectorOfStrings &passed,
 
 bool cmCTest::InitializeMemoryChecking()
 {
+  // Setup the command
   if ( cmSystemTools::FileExists(m_DartConfiguration["MemoryCheckCommand"].c_str()) )
     {
     m_MemoryTester 
@@ -1911,6 +1920,7 @@ bool cmCTest::InitializeMemoryChecking()
     return false;
     }
 
+  // Setup the options
   if ( m_DartConfiguration["MemoryCheckCommandOptions"].size() )
     {
     m_MemoryTesterOptions = m_DartConfiguration["MemoryCheckCommandOptions"];
@@ -1929,6 +1939,16 @@ bool cmCTest::InitializeMemoryChecking()
     if ( !m_MemoryTesterOptions.size() )
       {
       m_MemoryTesterOptions = "-q --skin=memcheck --leak-check=yes --show-reachable=yes --workaround-gcc296-bugs=yes --num-callers=100";
+      }
+    if ( m_DartConfiguration["MemoryCheckSuppressionFile"].size() )
+      {
+      if ( !cmSystemTools::FileExists(m_DartConfiguration["MemoryCheckSuppressionFile"].c_str()) )
+        {
+        std::cerr << "Cannot find memory checker suppression file: " 
+          << m_DartConfiguration["MemoryCheckSuppressionFile"].c_str() << std::endl;
+        return false;
+        }
+      m_MemoryTesterOptions += " --suppressions=" + cmSystemTools::EscapeSpaces(m_DartConfiguration["MemoryCheckSuppressionFile"].c_str()) + "";
       }
     }
   else if ( m_MemoryTester.find("purify") )
