@@ -36,11 +36,11 @@ CreateExtraFiles
 
 # Create the manifest file.
 echo "Writing MANIFEST..."
-${MKDIR} -p ${INSTALL_DIR}${PREFIX}/doc/cmake
-${TOUCH} ${INSTALL_DIR}${PREFIX}/doc/cmake/MANIFEST
+${MKDIR} -p ${INSTALL_DIR}${PREFIX}${DOC_DIR}
+${TOUCH} ${INSTALL_DIR}${PREFIX}${DOC_DIR}/MANIFEST
 cd ${INSTALL_DIR}${PREFIX}
 FILES=`${FIND} ${INSTALL_SUBDIRS} -type f |sed 's/^\.\///'`
-${CAT} >> ${INSTALL_DIR}${PREFIX}/doc/cmake/MANIFEST <<EOF
+${CAT} >> ${INSTALL_DIR}${PREFIX}${DOC_DIR}/MANIFEST <<EOF
 ${FILES}
 EOF
 

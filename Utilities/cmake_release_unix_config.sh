@@ -40,7 +40,7 @@ CFLAGS=""
 CXXFLAGS=""
 PREFIX="/usr/local"
 INSTALL_SUBDIRS="bin share doc"
-
+DOC_DIR="/doc/cmake"
 # Functions can be replaced by configuration file.
 
 # Create extra files in the installation tree.  This allows
