@@ -236,6 +236,9 @@ void cmUnixMakefileGenerator::OutputMakefile(const char* file)
     {
     fout << "include cmake.depends\n";
     }
+
+
+
 }
 
 
@@ -890,6 +893,7 @@ void cmUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
       fout << "# End of source group \"" << name.c_str() << "\"\n\n";
       }
     }  
+
 }
 
 
@@ -1102,6 +1106,22 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                        ".cxx.o", 
                        0,
                        "${CMAKE_CXX_COMPILER} ${CMAKE_CXXFLAGS} ${INCLUDE_FLAGS} -c $< -o $@");  
+  this->OutputMakeRule(fout, 
+                       "# build cplusplus file",
+                       ".cpp.o", 
+                       0,
+                       "${CMAKE_CXX_COMPILER} ${CMAKE_CXXFLAGS} ${INCLUDE_FLAGS} -c $< -o $@");  
+  this->OutputMakeRule(fout, 
+                       "# build cplusplus file",
+                       ".cc.o", 
+                       0,
+                       "${CMAKE_CXX_COMPILER} ${CMAKE_CXXFLAGS} ${INCLUDE_FLAGS} -c $< -o $@");  
+  this->OutputMakeRule(fout, 
+                       "# build cplusplus file",
+                       ".C.o", 
+                       0,
+                       "${CMAKE_CXX_COMPILER} ${CMAKE_CXXFLAGS} ${INCLUDE_FLAGS} -c $< -o $@");  
+
   // only include the cmake.depends and not the Makefile, as
   // building one will cause the other to be built
   this->OutputMakeRule(fout, 
@@ -1156,6 +1176,42 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                        "Makefile cmake.depends",
                        0);
   
+
+  // Write special rules for source files coming from other packages
+  // (not in the current build or source directories)
+
+  fout << "# Write special rules for source files coming from other packages\n";
+  fout << "# (not in the current build or source directories)\n";
+
+  // Iterate over every target.
+  std::map<std::string, cmTarget>& targets = m_Makefile->GetTargets();
+  for(std::map<std::string, cmTarget>::const_iterator target = targets.begin(); 
+      target != targets.end(); ++target)
+    {
+    // Iterate over every source for this target.
+    const std::vector<cmSourceFile>& sources = target->second.GetSourceFiles();
+    for(std::vector<cmSourceFile>::const_iterator source = sources.begin(); 
+        source != sources.end(); ++source)
+      {
+      if(!source->IsAHeaderFileOnly() && 
+	 (cmSystemTools::GetFilenamePath(source->GetFullPath()) 
+	  != m_Makefile->GetCurrentOutputDirectory()) &&
+	 (cmSystemTools::GetFilenamePath(source->GetFullPath()) 
+	    != m_Makefile->GetCurrentDirectory()))
+        {
+	fout << cmSystemTools::GetFilenameName(source->GetSourceName()) << ".o : " << source->GetFullPath() << "\n";
+	std::string ext = source->GetSourceExtension();
+	if ( ext == "cxx" || ext == "cc" || ext == "cpp" || ext == "C" )
+	  {
+	  fout << "\t${CMAKE_CXX_COMPILER} ${CMAKE_CXXFLAGS} ${INCLUDE_FLAGS} -c $< -o $@\n\n";
+	  }
+	else if ( ext == "c" )
+ 	  {
+	  fout << "\t${CMAKE_C_COMPILER} ${CMAKE_CFLAGS} ${INCLUDE_FLAGS} -c $< -o $@\n\n";
+	  }
+        }
+      }
+    }
 }
 
 void cmUnixMakefileGenerator::OutputMakeRule(std::ostream& fout, 
@@ -1194,7 +1250,7 @@ void cmUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
     m_Makefile->ExpandVariablesInString(replace);
     fout << "\t" << replace.c_str() << "\n\n";
     }
-  fout << "\n\n\n";
+  fout << "\n";
 
 }
 
