@@ -932,8 +932,10 @@ int ctest::CoverageDirectory()
                 << "\t\t<Report>" << std::endl;
     for ( cc = 0; cc < lines.size(); cc ++ )
       {
-      cfileoutput << "\t\t<Line Number=\"" << cc << "\" Count=\"" 
-                  << cov.m_Lines[cc] << "\">" << lines[cc] << "</Line>" << std::endl;
+      cfileoutput << "\t\t<Line Number=\"" 
+                  << static_cast<int>(cc) << "\" Count=\""
+                  << cov.m_Lines[cc] << "\">"
+                  << lines[cc] << "</Line>" << std::endl;
       }
     cfileoutput << "\t\t</Report>\n"
                 << "\t</File>" << std::endl;
