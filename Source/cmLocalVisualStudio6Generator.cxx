@@ -253,6 +253,11 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
               m_Makefile->GetStartOutputDirectory(),
               libName, count);
       std::vector<std::string> args;
+      // This is a hack to fix a problem with cmCustomCommand
+      // The cmCustomCommand should store the arguments as a vector
+      // and not a string, and the cmAddCustomTargetCommand should
+      // not EscapeSpaces.
+      args.push_back("This is really a single argument do not escape spaces");
       args.push_back(cc.GetArguments());
       m_Makefile->AddCustomCommandToOutput(output, 
                                            cc.GetCommand().c_str(), 

@@ -570,12 +570,31 @@ AddCustomCommandToOutput(const char* outputIn,
   command = cmSystemTools::EscapeSpaces(command.c_str());  
   
   unsigned int i;
+  bool escapeSpaces = true;
   for (i = 0; i < commandArgs.size(); ++i)
     {
     expandC = commandArgs[i].c_str();
-    this->ExpandVariablesInString(expandC);
-    combinedArgs += cmSystemTools::EscapeSpaces(expandC.c_str());
-    combinedArgs += " ";
+    // This is a hack to fix a problem with cmCustomCommand
+    // The cmCustomCommand should store the arguments as a vector
+    // and not a string, and the cmAddCustomTargetCommand should
+    // not EscapeSpaces.
+    if(expandC == "This is really a single argument do not escape spaces")
+      {
+      escapeSpaces = false;
+      }
+    else
+      {
+      this->ExpandVariablesInString(expandC);
+      if(escapeSpaces)
+        {
+        combinedArgs += cmSystemTools::EscapeSpaces(expandC.c_str());
+        }
+      else
+        {
+        combinedArgs += expandC;
+        }
+      combinedArgs += " ";
+      }
     }
   cmSourceFile *file = 0;
 
