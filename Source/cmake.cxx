@@ -845,10 +845,11 @@ int cmake::DoPreConfigureChecks()
   srcList += "/CMakeLists.txt";
   if(!cmSystemTools::FileExists(srcList.c_str()))
     {
-    cmSystemTools::Error(
-      "The source directory does not appear to contain CMakeLists.txt.\n"
-      "Specify --help for usage, or press the help button on the CMake GUI.");
-    abort();
+    cmOStringStream err;
+    err << "The source directory \"" << this->GetHomeDirectory()
+        << "\" does not appear to contain CMakeLists.txt.\n"
+        << "Specify --help for usage, or press the help button on the CMake GUI.";
+    cmSystemTools::Error(err.str().c_str());
     return -2;
     }
   
