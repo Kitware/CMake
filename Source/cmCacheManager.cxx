@@ -201,7 +201,7 @@ bool cmCacheManager::LoadCache(const char* path,
       {
       continue;
       }
-    while(realbuffer[0] == '/')
+    while(realbuffer[0] == '/' && realbuffer[1] == '/')
       {
       e.m_HelpString += &realbuffer[2];
       fin.getline(realbuffer, bsize);
