@@ -107,19 +107,21 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args)
     type = cmCacheManager::StringToType(args[cacheStart+1].c_str());
     docstring = args[cacheStart+2].c_str();
     }
-  // get the current cache value for the variable
-  const char* cacheValue = 
-    m_Makefile->GetDefinition(variable);
-  if(cacheValue)
+  // see if this is already in the cache
+  cmCacheManager::CacheIterator it = 
+    m_Makefile->GetCacheManager()->GetCacheIterator(variable);
+  if(!it.IsAtEnd())
     {
-    // if it is not a cached value, or it is a cached
-    // value that is not internal keep the value found
-    // in the cache
+    // if the set is trying to CACHE the value but the value
+    // is already in the cache and the type is not internal
+    // then leave now without setting any definitions in the cache
+    // or the makefile
     if(cache && type != cmCacheManager::INTERNAL)
       {
       return true;
       }
     }
+  
   // if it is meant to be in the cache then define it in the cache
   if(cache)
     {
