@@ -1738,8 +1738,7 @@ static void kwsysProcessKill(pid_t process_id)
 #else
     char fname[4096];
 #endif
-    const int bufferSize = 1024;
-    char buffer[1025];  /* should be buffersize +1 but fails to build on hp cc*/
+    char buffer[KWSYSPE_PIPE_BUFFER_SIZE+1];
     struct dirent* d;
 
     /* Each process has a directory in /proc whose name is the pid.
@@ -1762,7 +1761,7 @@ static void kwsysProcessKill(pid_t process_id)
           FILE* f = fopen(fname, "r");
           if(f)
             {
-            int nread = fread(buffer, 1, bufferSize, f);
+            int nread = fread(buffer, 1, KWSYSPE_PIPE_BUFFER_SIZE, f);
             buffer[nread] = '\0';
             if(nread > 0)
               {
