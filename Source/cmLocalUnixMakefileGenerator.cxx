@@ -1261,6 +1261,9 @@ void cmLocalUnixMakefileGenerator::OutputLibraryRule(std::ostream& fout,
                          depend.c_str(),
                          commands);
     }
+
+  // Add a target with the canonical name (no prefix, suffix or path).
+  this->OutputMakeRule(fout, comment, name, tgt.c_str(), 0);
 }
 
 void cmLocalUnixMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,  
@@ -1536,6 +1539,15 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
                          target.c_str(),
                          depend.c_str(),
                          commands);
+    }
+
+  // Add a target with the canonical name (no prefix, suffix or path).
+  // Note that on some platforms the "local target" added above will
+  // actually be the canonical name and will have set "target"
+  // correctly.  Do not duplicate this target.
+  if(target != name)
+    {
+    this->OutputMakeRule(fout, comment.c_str(), name, target.c_str(), 0);
     }
 }
 

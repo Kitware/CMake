@@ -479,15 +479,6 @@ int cmGlobalGenerator::TryCompile(const char *, const char *bindir,
     {
     makeCommand += " ";
     makeCommand += target;
-#if defined(_WIN32) || defined(__CYGWIN__)
-    std::string tmp = target;
-    // if the target does not already end in . something 
-    // then assume .exe
-    if(tmp.size() < 4 || tmp[tmp.size()-4] != '.')
-      {
-      makeCommand += ".exe";
-      }
-#endif // WIN32
     }
   else
     {
