@@ -10,7 +10,7 @@ SOURCE_FILES( CURSES_SRCS
               cmCursesPathWidget
               cmCursesStringWidget
               cmCursesWidget
-              ccurses
+              ccmake
             )
 
 INCLUDE_DIRECTORIES(${CMake_SOURCE_DIR}/Source/CursesDialog/form)
@@ -24,4 +24,4 @@ ENDIF(CURSES_EXTRA_LIBRARY)
 
 LINK_LIBRARIES(cmForm)
 
-ADD_EXECUTABLE(ccurses CURSES_SRCS)
+ADD_EXECUTABLE(ccmake CURSES_SRCS)
