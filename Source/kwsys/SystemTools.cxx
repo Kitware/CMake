@@ -910,6 +910,11 @@ bool SystemTools::FilesDiffer(const char* source,
  */
 bool SystemTools::CopyFileAlways(const char* source, const char* destination)
 {
+  // If files are the same do not copy
+  if ( SystemTools::SameFile(source, destination) )
+    {
+    return true;
+    }
   const int bufferSize = 4096;
   char buffer[bufferSize];
 
