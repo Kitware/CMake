@@ -39,6 +39,7 @@ bool cmITKWrapTclCommand::InitialPass(std::vector<std::string> const& argsIn)
   cmSystemTools::ExpandListArguments(argsIn, args);
   // keep the target name
   m_TargetName = args[0];
+  m_Target = &m_Makefile->GetTargets()[m_TargetName.c_str()];
   
   // Prepare the dependency generator.
   m_MakeDepend->SetMakefile(m_Makefile);
@@ -49,9 +50,6 @@ bool cmITKWrapTclCommand::InitialPass(std::vector<std::string> const& argsIn)
     if(!this->CreateCableRule((*i).c_str())) { return false; }
     }
   
-  // Add the source list to the target.
-  m_Makefile->GetTargets()[m_TargetName.c_str()].GetSourceLists().push_back(m_TargetName);
-
   return true;
 }
 
@@ -132,16 +130,18 @@ bool cmITKWrapTclCommand::CreateCableRule(const char* configFile)
                                commandArgs, depends,
                                outputs, m_TargetName.c_str());
   
-  // Add the generated source to the package's source list.
+  // Add the source to the makefile.
   cmSourceFile file;
   file.SetName(tclFile.c_str(), outDir.c_str(), "cxx", false);
   // Set dependency hints.
   file.GetDepends().push_back(inFile.c_str());
   file.GetDepends().push_back("CableTclFacility/ctCalls.h");
   m_Makefile->AddSource(file);
+  
+  // Add the generated source to the package's source list.
   std::string srcname = file.GetSourceName() + ".cxx";
-  m_Makefile->AddDefinition(m_TargetName.c_str(), 
-                            srcname.c_str());  
+  m_Target->GetSourceLists().push_back(srcname);
+  
   return true;
 }
 

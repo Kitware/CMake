@@ -60,6 +60,7 @@ public:
   cmTypeMacro(cmITKWrapTclCommand, cmCommand);
 protected:
   cmStdString m_TargetName;
+  cmTarget* m_Target;
   
   bool CreateCableRule(const char* configFile);
   std::string GetCableFromCache() const;
