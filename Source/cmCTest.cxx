@@ -849,7 +849,7 @@ int cmCTest::ConfigureDirectory()
       std::string end_time = ::CurrentTime();
       os << "\t<EndDateTime>" << end_time << "</EndDateTime>\n"
          << "</Configure>\n"
-         << "</site>" << std::endl;
+         << "</Site>" << std::endl;
       }    
     }
   else
