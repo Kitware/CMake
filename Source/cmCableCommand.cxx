@@ -81,29 +81,33 @@ void cmCableCommand::SetupCableData()
   
   // We must add a custom rule to cause the cable_config.xml to be re-built
   // when it is removed.  Rebuilding it means re-running CMake.
-  std::string cMakeLists = m_Makefile->GetStartDirectory();
+  std::string cMakeLists = "\"";
+  cMakeLists += m_Makefile->GetStartDirectory();
   cMakeLists += "/";
-  cMakeLists += "CMakeLists.txt";
+  cMakeLists += "CMakeLists.txt\"";
 
   std::string command;
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  command = m_Makefile->GetHomeDirectory();  
-  command += "/CMake/Source/CMakeSetupCMD ";
+  command = "\"";
+  command += m_Makefile->GetHomeDirectory();
+  command += "/CMake/Source/CMakeSetupCMD\" ";
   command += cMakeLists;
   command += " -DSP";
 #else
-  command = m_Makefile->GetHomeOutputDirectory();  
-  command += "/CMake/Source/CMakeBuildTargets ";
+  command = "\"";
+  command += m_Makefile->GetHomeOutputDirectory();  
+  command += "/CMake/Source/CMakeBuildTargets\" ";
   command += cMakeLists;
 #endif
-  command += " -H";
+  command += " -H\"";
   command += m_Makefile->GetHomeDirectory();
-  command += " -S";
+  command += "\" -S\"";
   command += m_Makefile->GetStartDirectory();
-  command += " -O";
+  command += "\" -O\"";
   command += m_Makefile->GetStartOutputDirectory();
-  command += " -B";
+  command += "\" -B\"";
   command += m_Makefile->GetHomeOutputDirectory();
+  command += "\"";
 
   std::vector<std::string> depends;
   m_Makefile->AddCustomCommand(cMakeLists.c_str(), 

@@ -157,20 +157,23 @@ void cmDSPMakefile::WriteDSPBuildRule(std::ostream& fout)
 {
   std::string dspname = *(m_CreatedProjectNames.end()-1);
   dspname += ".dsp";
-  std::string makefileIn = m_Makefile->GetStartDirectory();
+  std::string makefileIn = "\"";
+  makefileIn += m_Makefile->GetStartDirectory();
   makefileIn += "/";
-  makefileIn += "CMakeLists.txt";
-  std::string dsprule = m_Makefile->GetHomeDirectory();
-  dsprule += "/CMake/Source/CMakeSetupCMD ";
-  dsprule += makefileIn;
-  dsprule += " -DSP -H";
+  makefileIn += "CMakeLists.txt\"";
+  std::string dsprule = "\"";
   dsprule += m_Makefile->GetHomeDirectory();
-  dsprule += " -S";
+  dsprule += "/CMake/Source/CMakeSetupCMD\" ";
+  dsprule += makefileIn;
+  dsprule += " -DSP -H\"";
+  dsprule += m_Makefile->GetHomeDirectory();
+  dsprule += "\" -S\"";
   dsprule += m_Makefile->GetStartDirectory();
-  dsprule += " -O";
+  dsprule += "\" -O\"";
   dsprule += m_Makefile->GetStartOutputDirectory();
-  dsprule += " -B";
+  dsprule += "\" -B\"";
   dsprule += m_Makefile->GetHomeOutputDirectory();
+  dsprule += "\"";
 
   std::set<std::string> depends;
   std::set<std::string> outputs;
@@ -186,20 +189,23 @@ void cmDSPMakefile::AddDSPBuildRule(cmSourceGroup& sourceGroup)
 {
   std::string dspname = *(m_CreatedProjectNames.end()-1);
   dspname += ".dsp";
-  std::string makefileIn = m_Makefile->GetStartDirectory();
+  std::string makefileIn = "\"";
+  makefileIn += m_Makefile->GetStartDirectory();
   makefileIn += "/";
-  makefileIn += "CMakeLists.txt";
-  std::string dsprule = m_Makefile->GetHomeDirectory();
-  dsprule += "/CMake/Source/CMakeSetupCMD ";
-  dsprule += makefileIn;
-  dsprule += " -DSP -H";
+  makefileIn += "CMakeLists.txt\"";
+  std::string dsprule = "\"";
   dsprule += m_Makefile->GetHomeDirectory();
-  dsprule += " -S";
+  dsprule += "/CMake/Source/CMakeSetupCMD\" ";
+  dsprule += makefileIn;
+  dsprule += " -DSP -H\"";
+  dsprule += m_Makefile->GetHomeDirectory();
+  dsprule += "\" -S\"";
   dsprule += m_Makefile->GetStartDirectory();
-  dsprule += " -O";
+  dsprule += "\" -O\"";
   dsprule += m_Makefile->GetStartOutputDirectory();
-  dsprule += " -B";
+  dsprule += "\" -B\"";
   dsprule += m_Makefile->GetHomeOutputDirectory();
+  dsprule += "\"";
 
   std::vector<std::string> depends;
   std::vector<std::string> outputs;
@@ -316,7 +322,7 @@ void cmDSPMakefile::WriteCustomRule(std::ostream& fout,
       for(std::set<std::string>::const_iterator d = depends.begin();
           d != depends.end(); ++d)
         {
-        fout << " \"" << d->c_str() << "\"";
+        fout << " " << d->c_str();
         }
       fout << "\n  " << command << "\n\n";
       }
