@@ -6,9 +6,9 @@
 
 CVS_TAG="-r Release-1-4"
 PKG=cmake
-VER=1.4.6
+VER=1.4.7
 REL=1
-PREVER=1.4.5
+PREVER=1.4.6
 PREREL=1
 
 CVSROOT=":pserver:anonymous@www.cmake.org:/cvsroot/CMake"

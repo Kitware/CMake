@@ -1,5 +1,5 @@
 RELEASE_TAG="Release-1-4"
-VERSION="1.4.6"
+VERSION="1.4.7"
 PLATFORM="hpux-static"
 CC="cc"
 CXX="aCC"
