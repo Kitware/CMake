@@ -57,8 +57,8 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)
   // Create the test driver file
 
   fout << 
+    "#include <ctype.h>\n"
     "#include <stdio.h>\n"
-    "#include <stdlib.h>\n"
     "#include <string.h>\n"
     "\n"
     "// Forward declare test functions\n"
