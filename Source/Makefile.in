@@ -13,64 +13,27 @@ OBJS = \
 CMakeBuildTargets.o  \
 cmMakeDepend.o \
 cmMakefile.o \
-cmAbstractFilesCommand.o \
 cmMakefileGenerator.o \
-cmAddTargetCommand.o  \
-cmProjectCommand.o \
-cmAuxSourceDirectoryCommand.o \
 cmRegularExpression.o \
 cmClassFile.o \
-cmSourceFilesCommand.o \
-cmSourceFilesRequireCommand.o \
-cmSubdirCommand.o \
 cmSystemTools.o \
 cmDirectory.o \
-cmUnixDefinesCommand.o \
-cmExecutablesCommand.o \
-cmTestsCommand.o \
-cmUnixLibrariesCommand.o \
-cmFindIncludeCommand.o \
-cmFindLibraryCommand.o \
 cmUnixMakefileGenerator.o \
-cmFindProgramCommand.o \
-cmIncludeDirectoryCommand.o \
-cmWin32DefinesCommand.o \
-cmLibraryCommand.o \
-cmWin32LibrariesCommand.o \
-cmLinkDirectoriesCommand.o \
-cmLinkLibrariesCommand.o 
+cmCommands.o
 
 
 cmCollectFlags.o : $(srcdir)/*.h 
 CMakeBuildTargets.o  : $(srcdir)/*.h
 cmMakeDepend.o : $(srcdir)/*.h
 cmMakefile.o : $(srcdir)/*.h
-cmAbstractFilesCommand.o : $(srcdir)/*.h
 cmMakefileGenerator.o : $(srcdir)/*.h
-cmAddTargetCommand.o  : $(srcdir)/*.h
-cmProjectCommand.o : $(srcdir)/*.h
 cmAuxSourceDirectoryCommand.o : $(srcdir)/*.h
 cmRegularExpression.o : $(srcdir)/*.h
 cmClassFile.o : $(srcdir)/*.h
-cmSourceFilesCommand.o : $(srcdir)/*.h
-cmSourceFilesRequireCommand.o : $(srcdir)/*.h
-cmSubdirCommand.o : $(srcdir)/*.h
-cmSystemTools.o : $(srcdir)/*.h
 cmDirectory.o : $(srcdir)/*.h
-cmUnixDefinesCommand.o : $(srcdir)/*.h
-cmExecutablesCommand.o : $(srcdir)/*.h
-cmTestsCommand.o : $(srcdir)/*.h
-cmUnixLibrariesCommand.o : $(srcdir)/*.h
-cmFindIncludeCommand.o : $(srcdir)/*.h
-cmFindLibraryCommand.o : $(srcdir)/*.h
 cmUnixMakefileGenerator.o : $(srcdir)/*.h
-cmFindProgramCommand.o : $(srcdir)/*.h
-cmIncludeDirectoryCommand.o : $(srcdir)/*.h
-cmWin32DefinesCommand.o : $(srcdir)/*.h
-cmLibraryCommand.o : $(srcdir)/*.h
-cmWin32LibrariesCommand.o : $(srcdir)/*.h
-cmLinkDirectoriesCommand.o : $(srcdir)/*.h 
-cmLinkLibrariesCommand.o  : $(srcdir)/*.h 
+cmCommands.o : $(srcdir)/*.h
+
 
 
 CMakeBuildTargets: ${OBJS}

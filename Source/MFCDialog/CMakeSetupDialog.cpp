@@ -265,8 +265,7 @@ void CMakeSetupDialog::OnOK()
     error += configSrc;
     ::MessageBox(0, error.c_str(), "config ERROR", MB_OK);
     }
-  
-  
+
   cmMakefile mf;
   mf.SetMakefileGenerator(new cmMSProjectGenerator);
   mf.SetHomeDirectory(m_WhereSource);

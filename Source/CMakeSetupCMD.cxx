@@ -69,7 +69,7 @@ int main(int ac, char** av)
   cmMSProjectGenerator* pg = new cmMSProjectGenerator;
   if(arg.find("-DSP", 0) != std::string::npos)
     {
-    pg->BuildDSPOff();
+    pg->BuildDSWOff();
     }
   else
     {

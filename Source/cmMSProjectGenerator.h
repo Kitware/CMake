@@ -46,9 +46,12 @@ public:
   virtual void GenerateMakefile();
 
   /**
-   * Turn off the generation of a Microsoft Visual C++ DSP file.
+   * Turn off the generation of a Microsoft Visual C++ DSW file.
+   * This causes only the dsp file to be created.  This
+   * is used to run as a command line program from inside visual
+   * studio.
    */
-  void BuildDSPOff() 
+  void BuildDSWOff() 
     {m_BuildDSW = false;}
 
   /**

@@ -53,7 +53,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /machine:I386
-# ADD LINK32 /nologo /subsystem:windows /machine:I386
+# ADD LINK32 Release/CMakeLib.lib /nologo /subsystem:windows /machine:I386
 
 !ELSEIF  "$(CFG)" == "CMakeSetup - Win32 Debug"
 
@@ -66,6 +66,7 @@ LINK32=link.exe
 # PROP Use_Debug_Libraries 1
 # PROP Output_Dir ".."
 # PROP Intermediate_Dir "Debug"
+# PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /Yu"stdafx.h" /FD /GZ /c
 # ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /FD /GZ /c
@@ -79,7 +80,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
+# ADD LINK32 Debug/CMakeLib.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
 
 !ENDIF 
 
@@ -92,14 +93,6 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=..\cmAbstractFilesCommand.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmAddTargetCommand.cxx
-# End Source File
-# Begin Source File
-
 SOURCE=.\CMakeSetup.cpp
 # End Source File
 # Begin Source File
@@ -108,127 +101,7 @@ SOURCE=.\CMakeSetup.rc
 # End Source File
 # Begin Source File
 
-SOURCE=..\CMakeSetupCMD.cxx
-# End Source File
-# Begin Source File
-
 SOURCE=.\CMakeSetupDialog.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmAuxSourceDirectoryCommand.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmClassFile.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmDirectory.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmDSPMakefile.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmDSWMakefile.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmExecutablesCommand.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmFindIncludeCommand.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmFindLibraryCommand.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmFindProgramCommand.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmIncludeDirectoryCommand.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmLibraryCommand.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmLinkDirectoriesCommand.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmLinkLibrariesCommand.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmMakeDepend.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmMakefile.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmMakefileGenerator.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmMSProjectGenerator.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmProjectCommand.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmRegularExpression.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmSourceFilesRequireCommand.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmSourceFilesCommand.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmSubdirCommand.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmSystemTools.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmTestsCommand.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmUnixDefinesCommand.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmUnixLibrariesCommand.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmWin32DefinesCommand.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmWin32LibrariesCommand.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmWindowsConfigure.cxx
 # End Source File
 # Begin Source File
 
@@ -241,159 +114,11 @@ SOURCE=.\StdAfx.cpp
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
-SOURCE=..\cmAbstractFilesCommand.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmAddTargetCommand.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\CMakeSetup.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\CMakeSetup.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\CMakeSetupDialog.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmAuxSourceDirectoryCommand.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmClassFile.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmDirectory.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmDSPBuilder.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmDSPMakefile.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmDSWBuilder.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmDSWMakefile.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmExecutablesCommand.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmFindIncludeCommand.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmFindLibraryCommand.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmFindProgramCommand.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmIncludeDirectoryCommand.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmLibraryCommand.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmLinkDirectoriesCommand.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmLinkLibrariesCommand.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmMakeDepend.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmMakefile.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmMakefile2.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmMakefileGenerator.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmMSProjectGenerator.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmProjectCommand.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmRegularExpression.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmCommandMaker.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmSourceFilesRequireCommand.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmSourceFilesCommand.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmStandardIncludes.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmSubdirCommand.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmSystemTools.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmTestsCommand.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmUnixDefinesCommand.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmUnixLibrariesCommand.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmWin32DefinesCommand.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmWin32LibrariesCommand.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\cmWindowsConfigure.h
 # End Source File
 # Begin Source File
 
