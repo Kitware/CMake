@@ -1273,7 +1273,8 @@ bool RunCommandViaWin32(const char* command,
                         int timeout)
 {
 #if defined(__BORLANDC__)
-  return cmWin32ProcessExecution::BorlandRunCommand(command, dir, output, retVal, 
+  return cmWin32ProcessExecution::BorlandRunCommand(command, dir, output, 
+                                                    retVal, 
                                                     verbose, timeout);
 #else // Visual studio
   ::SetLastError(ERROR_SUCCESS);

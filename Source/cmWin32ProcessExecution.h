@@ -132,9 +132,9 @@ public:
    * will display it in our app. Consequently, we check for input in
    * our app and send it off to the write end of the stdin pipe.
    */ 
-  bool BorlandRunCommand(const char* command, const char* dir, 
-                         std::string& output, int& retVal, bool verbose,
-                         int timeout);
+  static bool BorlandRunCommand(const char* command, const char* dir, 
+                                std::string& output, int& retVal, bool verbose,
+                                int timeout);
 
 private:
   bool PrivateOpen(const char*, const char*, int, int);
