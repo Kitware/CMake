@@ -887,7 +887,7 @@ void cmLocalUnixMakefileGenerator::OutputLibraryRule(std::ostream& fout,
   this->OutputMakeRule(fout,
                        comment,
                        name,
-                       this->ConvertToRelativeOutputPath(tgt.c_str()).c_str(), 
+                       tgt.c_str(),
                        0); 
 
 }
@@ -1040,17 +1040,15 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
 #endif
   target += name;
   target += cmSystemTools::GetExecutableExtension();  
-  target = this->ConvertToRelativeOutputPath(target.c_str());
   bool needsLocalTarget = false;
   if(m_UseRelativePaths)
     {
-    cmSystemTools::ConvertToUnixSlashes(target);
-    std::string tgt = this->ConvertToMakeTarget(target.c_str());
+    std::string tgt =
+      this->ConvertToMakeTarget(this->ConvertToRelativeOutputPath(target.c_str()).c_str());
     if(tgt.find('/', 0) != tgt.npos)
       {
       needsLocalTarget = true;
       }
-    target = cmSystemTools::ConvertToOutputPath(target.c_str());
     }
   else
     {
@@ -1146,7 +1144,7 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
     this->ExpandRuleVariables(*i, 
                               linkLanguage,
                               objs.c_str(), 
-                              target.c_str(),
+                              this->ConvertToRelativeOutputPath(target.c_str()).c_str(),
                               linklibs.str().c_str(),
                               0,
                               0,
@@ -1167,10 +1165,9 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
   // try-compile to work in this case.
   if(needsLocalTarget)
     {
-    depend = target;
+    depend = this->ConvertToRelativeOutputPath(target.c_str());
     target = name;
     target += cmSystemTools::GetExecutableExtension();
-    target = this->ConvertToRelativeOutputPath(target.c_str());
     commands.resize(0);
     this->OutputMakeRule(fout, 
                          comment.c_str(),
@@ -1184,7 +1181,8 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
   // correctly.  Do not duplicate this target. 
   if(target != name) 
     { 
-    this->OutputMakeRule(fout, comment.c_str(), name, target.c_str(), 0); 
+    this->OutputMakeRule(fout, comment.c_str(), name,
+                         this->ConvertToRelativeOutputPath(target.c_str()).c_str(), 0); 
     } 
 }
 
@@ -2172,7 +2170,6 @@ void cmLocalUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
 
   std::string checkCache = m_Makefile->GetHomeOutputDirectory();
   checkCache += "/cmake.check_cache";
-  checkCache = this->ConvertToRelativeOutputPath(checkCache.c_str());
   std::vector<std::string> cmake_depends;
   cmake_depends.push_back("$(CMAKE_MAKEFILE_SOURCES)");
   
@@ -2247,7 +2244,6 @@ void cmLocalUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
     }
   std::string cacheFile = m_Makefile->GetHomeOutputDirectory();
   cacheFile += "/CMakeCache.txt";
-  cacheFile = this->ConvertToRelativeOutputPath(cacheFile.c_str());
   this->OutputMakeRule(fout, 
                        "CMakeCache.txt",
                        cacheFile.c_str(),
