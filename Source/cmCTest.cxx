@@ -2077,7 +2077,7 @@ void cmCTest::ProcessDirectory(cmCTest::tm_VectorOfStrings &passed,
   std::ofstream *olog = 0;
   if ( !m_ShowOnly && tmsize > 0 && 
     this->OpenOutputFile("Temporary", 
-      (memcheck?"LastMemCheck.xml":"LastTest.log"), ofs) )
+      (memcheck?"LastMemCheck.log":"LastTest.log"), ofs) )
     {
     olog = &ofs;
     }
