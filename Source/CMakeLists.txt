@@ -661,7 +661,7 @@ IF(BUILD_TESTING)
     IF(JAVA_COMPILE AND JAVA_RUNTIME AND JAVA_ARCHIVE)
       EXEC_PROGRAM(${JAVA_COMPILE} ARGS -version OUTPUT_VARIABLE OUT)
       IF(OUT MATCHES "invalid flag")
-        MESSAGE("This java does not even know what version it is!")
+        MESSAGE("Skipping Java Test because ${JAVA_COMPILE} -version produced: ${OUT}")
       ELSE(OUT MATCHES "invalid flag")
         ADD_TEST(Java ${CMAKE_CTEST_COMMAND}
           --build-and-test 
