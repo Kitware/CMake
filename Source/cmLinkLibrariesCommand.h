@@ -69,14 +69,16 @@ public:
     {
     return
       "  LINK_LIBRARIES(library1 <debug | optimized> library2 ...)\n"
+      "This is an old CMake command for linking libraries.  Use "
+      "TARGET_LINK_LIBRARIES unless you have a good reason for every target "
+      "to link to the same set of libraries.\n"
       "Specify a list of libraries to be linked into "
       "any following targets (typically added with the ADD_EXECUTABLE "
       "or ADD_LIBRARY calls).  This command is passed "
       "down to all subdirectories.  "
       "The debug and optimized strings may be used to indicate that "
       "the next library listed is to be used only for that specific "
-      "type of build.  Considure using TARGET_LINK_LIBRARIES for more "
-      "specific linking control.";
+      "type of build.";
     }
   
   cmTypeMacro(cmLinkLibrariesCommand, cmCommand);
