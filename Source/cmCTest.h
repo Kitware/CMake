@@ -23,6 +23,7 @@
 #include "cmListFileCache.h"
 
 class cmMakefile;
+class cmCTestBuildHandler;
 class cmCTestScriptHandler;
 class cmCTestUpdateHandler;
 class cmCTestConfigureHandler;
@@ -66,11 +67,6 @@ public:
    */
   bool GetTomorrowTag() { return m_TomorrowTag; };
       
-  /**
-   * Try to build the project
-   */
-  int BuildDirectory();
-
   /**
    * Try to run tests of the project
    */
@@ -189,8 +185,12 @@ public:
     int* retVal, const char* dir, bool verbose, int timeout, 
     std::ofstream& ofs);
 
+  static void PopulateCustomVector(cmMakefile* mf, const char* definition, 
+                                   tm_VectorOfStrings& vec);
+
 private:
   // these are helper classes
+  cmCTestBuildHandler    *BuildHandler;
   cmCTestScriptHandler    *ScriptHandler;
   cmCTestUpdateHandler    *UpdateHandler;
   cmCTestConfigureHandler *ConfigureHandler;
@@ -277,18 +277,6 @@ private:
     int         m_TestCount;
   };
 
-  struct cmCTestBuildErrorWarning
-  {
-    bool        m_Error;
-    int         m_LogLine;
-    std::string m_Text;
-    std::string m_SourceFile;
-    std::string m_SourceFileTail;
-    int         m_LineNumber;
-    std::string m_PreContext;
-    std::string m_PostContext;
-  };
-
   struct cmCTestTestProperties
     {
     cmStdString m_Name;
@@ -333,8 +321,6 @@ private:
   std::string             m_CurrentTag;
   bool                    m_TomorrowTag;
 
-  std::string             m_StartBuild;
-  std::string             m_EndBuild;
   std::string             m_StartTest;
   std::string             m_EndTest;
   double                  m_ElapsedTestingTime;
@@ -374,12 +360,6 @@ private:
   
 
   int ReadCustomConfigurationFileTree(const char* dir);
-  void PopulateCustomVector(cmMakefile* mf, const char* definition, tm_VectorOfStrings& vec);
-
-  tm_VectorOfStrings       m_CustomErrorMatches;
-  tm_VectorOfStrings       m_CustomErrorExceptions;
-  tm_VectorOfStrings       m_CustomWarningMatches;
-  tm_VectorOfStrings       m_CustomWarningExceptions;
 
   tm_VectorOfStrings       m_CustomTestsIgnore;
   tm_VectorOfStrings       m_CustomMemCheckIgnore;
@@ -409,9 +389,6 @@ private:
    */
   void GenerateDartTestOutput(std::ostream& os);
   void GenerateDartMemCheckOutput(std::ostream& os);
-  void GenerateDartBuildOutput(std::ostream& os, 
-                               std::vector<cmCTestBuildErrorWarning>,
-                               double elapsed_time);
 
   //! Run command specialized for tests. Returns process status and retVal is
   // return value or exception.

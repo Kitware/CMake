@@ -110,6 +110,7 @@ ADD_EXECUTABLE(cmake cmakemain.cxx)
 ADD_EXECUTABLE(DumpDocumentation cmDumpDocumentation)
 
 SET(CMTEST_SRCS ctest.cxx cmCTest.cxx 
+  CTest/cmCTestBuildHandler.cxx
   CTest/cmCTestScriptHandler.cxx
   CTest/cmCTestUpdateHandler.cxx
   CTest/cmCTestConfigureHandler.cxx
