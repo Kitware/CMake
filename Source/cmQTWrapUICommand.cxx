@@ -111,7 +111,7 @@ bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& argsIn)
       m_Makefile->AddSource(source_file);
       m_Makefile->AddSource(moc_file);
       
-      // create the list of sources
+      // create the list of headers 
       if (headerListValue.size() > 0)
         {
         headerListValue += ";";
