@@ -437,6 +437,8 @@ bool cmSystemTools::RunSingleCommand(
   std::vector<char> tempOutput;
   char* data;
   int length;
+  if ( output || verbose )
+    {
   while(cmsysProcess_WaitForData(cp, &data, &length, 0))
     {
     if ( output )
@@ -447,6 +449,7 @@ bool cmSystemTools::RunSingleCommand(
       {
       cmSystemTools::Stdout(data, length);
       }
+    }
     }
   
   cmsysProcess_WaitForExit(cp, 0);

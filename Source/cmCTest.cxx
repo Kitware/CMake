@@ -4212,7 +4212,7 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
   out << "Running make command: " << makeCommand.c_str() << "\n";
   retVal = 0;
   std::string output;
-  if (!cmSystemTools::RunSingleCommand(makeCommand.c_str(), &output, &retVal, 0, false))
+  if (!cmSystemTools::RunSingleCommand(makeCommand.c_str(), (m_Verbose?&output:0), &retVal, 0, false))
     {
     out << "Error: " << makeCommand.c_str() <<  "  execution failed\n";
     out << output.c_str() << "\n";
@@ -4464,7 +4464,12 @@ void cmCTest::PopulateCustomVector(cmMakefile* mf, const char* def, tm_VectorOfS
     }
   std::vector<std::string> slist;
   cmSystemTools::ExpandListArgument(dval, slist);
-  vec.insert(vec.end(), slist.begin(), slist.end());
+  std::vector<std::string>::iterator it;
+
+  for ( it = slist.begin(); it != slist.end(); ++it )
+    {
+    vec.push_back(it->c_str());
+    }
 }
 
 int cmCTest::ExecuteCommands(tm_VectorOfStrings& vec)
