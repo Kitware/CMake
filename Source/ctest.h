@@ -50,6 +50,11 @@ public:
   int TestDirectory();
 
   /**
+   * Try to get coverage of the project
+   */
+  int CoverageDirectory();
+
+  /**
    * Do revision control update of directory
    */
   int UpdateDirectory();
@@ -127,8 +132,26 @@ private:
     std::string m_PostContext;
   };
 
+  struct cmCTestCoverage
+  {
+    cmCTestCoverage()
+      {
+        m_FullPath = "";
+        m_Covered = false;
+        m_Tested = 0;
+        m_UnTested = 0;
+        m_Lines.clear();
+      }
+    std::string      m_FullPath;
+    bool             m_Covered;
+    int              m_Tested;
+    int              m_UnTested;
+    std::vector<int> m_Lines;
+  };
+
   typedef std::vector<cmCTestTestResult> tm_TestResultsVector;
   typedef std::map<std::string, std::string> tm_DartConfigurationMap;
+  typedef std::map<std::string, cmCTestCoverage> tm_CoverageMap;
 
   tm_TestResultsVector    m_TestResults;
   std::string             m_ToplevelPath;
@@ -149,8 +172,8 @@ private:
   void GenerateDartBuildOutput(std::ostream& os, 
                                std::vector<cmCTestBuildErrorWarning>);
 
-  bool OpenFile(const std::string& path, 
-                const std::string& name, std::ofstream& stream);  
+  bool OpenOutputFile(const std::string& path, 
+                      const std::string& name, std::ofstream& stream);  
   std::string MakeXMLSafe(const std::string&);
 };
 
