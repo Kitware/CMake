@@ -240,9 +240,7 @@ void cmMSDotNETGenerator::WriteSLNFile(std::ostream& fout)
                   }
                 else
                   {
-                  l->second.GetLinkLibraries().push_back(
-                    cmTarget::LinkLibraries::value_type(al->first,
-                                                        cmTarget::GENERAL));
+                  l->second.AddLinkLibrary(al->first,cmTarget::GENERAL);
                   }
                 }
               }
@@ -907,7 +905,7 @@ void cmMSDotNETGenerator::OutputModuleDefinitionFile(std::ostream& fout,
 void cmMSDotNETGenerator::OutputLibraryDirectories(std::ostream& fout,
                                                    const char*,
                                                    const char*,
-                                                   const cmTarget &)
+                                                   const cmTarget &tgt)
 {
   bool hasone = false;
   if(m_LibraryOutputPath.size())
@@ -922,8 +920,8 @@ void cmMSDotNETGenerator::OutputLibraryDirectories(std::ostream& fout,
     }
     
   std::set<std::string> pathEmitted;
-  std::vector<std::string>::iterator i;
-  std::vector<std::string>& libdirs = m_Makefile->GetLinkDirectories();
+  std::vector<std::string>::const_iterator i;
+  const std::vector<std::string>& libdirs = tgt.GetLinkDirectories();
   for(i = libdirs.begin(); i != libdirs.end(); ++i)
     {
     std::string lpath = *i;

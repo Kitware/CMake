@@ -162,6 +162,14 @@ IF(BUILD_TESTING)
       ${CMake_BINARY_DIR}/Tests/Wrapping/bin
       TestDriverTest subdir/test3)
 
+    ADD_TEST(dependency ${CMake_BINARY_DIR}/Source/cmaketest 
+      ${CMake_SOURCE_DIR}/Tests/Dependency 
+      ${CMake_BINARY_DIR}/Tests/Dependency
+      exec
+      ${CMake_BINARY_DIR}/Tests/Dependency/Exec
+      Dependency)
+
+  ENDIF (DART_ROOT)
 ENDIF(BUILD_TESTING)
 
 

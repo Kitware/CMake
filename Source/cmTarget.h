@@ -79,7 +79,8 @@ public:
   enum LinkLibraryType {GENERAL, DEBUG, OPTIMIZED};
   typedef std::vector<std::pair<std::string,LinkLibraryType> > LinkLibraries;
   const LinkLibraries &GetLinkLibraries() const {return m_LinkLibraries;}
-  LinkLibraries &GetLinkLibraries() {return m_LinkLibraries;}
+
+  const std::vector<std::string>& GetLinkDirectories() const {return m_LinkDirectories;}
 
   /**
    * Set the path where this target should be installed. This is relative to
@@ -88,10 +89,22 @@ public:
   std::string GetInstallPath() const {return m_InstallPath;}
   void SetInstallPath(const char *name) {m_InstallPath = name;}
   
+  void AddLinkLibrary(cmMakefile& mf,
+                      const char *target, const char* lib, 
+                      LinkLibraryType llt);
+
+  void AddLinkLibrary(const std::string& lib, 
+                      LinkLibraryType llt);
+
   /**
    * Merge Link Libraries into this targets current list 
    */
   void MergeLibraries(const LinkLibraries &ll);
+
+  /**
+   * Merge Link Directories into this targets current list 
+   */
+  void MergeDirectories(const std::vector<std::string> &ld);
     
   /**
    * Generate the SourceFilesList from the SourceLists. This should only be
@@ -107,12 +120,59 @@ public:
   ///! Get the utilities used by this target
   std::set<std::string>const& GetUtilities() const { return m_Utilities; }
 
+  void AnalyzeLibDependencies( const cmMakefile& mf );
+
+private:
+  /**
+   * This map holds the dependency graph. map[x] returns a set of
+   * direct dependencies of x.
+   */
+  typedef std::map< std::string, std::set< std::string > > DependencyMap;
+
+  /**
+   * For each library in the link line, return a canonical name. The
+   * orginal library names have complicated forms, such as "x",
+   * "libx.so", "/full/path/libx.a", "-lx", and "-framework x".
+   */
+  std::string CanonicalLibraryName( const std::string& lib ) const;
+
+  /**
+   * Emits the library \param lib and all its dependencies into
+   * link_line.  \param emitted keeps track of the libraries that have
+   * been emitted to avoid duplicates--it is more efficient than
+   * searching link_line. \param visited is used detect cycles. Note
+   * that \param link_line is in reverse order, in that the
+   * dependencies of a library are listed before the library itself.
+   */
+  void Emit( const std::string& lib,
+             const DependencyMap& dep_map,
+             std::set<std::string>& emitted,
+             std::set<std::string>& visited,
+             std::vector<std::string>& link_line ) const;
+
+  /**
+   * Finds the explicit dependencies for \param lib, if they have been
+   * specified, and inserts them into \param dep_map.
+   */
+  void GatherDependencies( const cmMakefile& mf, const std::string& lib,
+                           DependencyMap& dep_map ) const;
+
+  /**
+   * Returns true if lib1 depends on lib2 according to \param
+   * dep_map. \param visited is used to prevent infinite loops when
+   * cycles are present.
+   */
+  bool DependsOn( const std::string& lib1, const std::string& lib2,
+                  const DependencyMap& dep_map,
+                  std::set<std::string>& visited ) const;
+
 private:
   std::vector<cmCustomCommand> m_CustomCommands;
   std::vector<std::string> m_SourceLists;
   TargetType m_TargetType;
   std::vector<cmSourceFile*> m_SourceFiles;
   LinkLibraries m_LinkLibraries;
+  std::vector<std::string> m_LinkDirectories;
   bool m_InAll;
   std::string m_InstallPath;
   std::set<std::string> m_Utilities;

@@ -480,8 +480,8 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
 
   // collect all the flags needed for linking libraries
   std::string linkLibs;
-  std::vector<std::string>& libdirs = m_Makefile->GetLinkDirectories();
-  for(std::vector<std::string>::iterator libDir = libdirs.begin();
+  const std::vector<std::string>& libdirs = tgt.GetLinkDirectories();
+  for(std::vector<std::string>::const_iterator libDir = libdirs.begin();
       libDir != libdirs.end(); ++libDir)
     { 
     std::string libpath = this->ConvertToOutputPath(libDir->c_str());
@@ -564,11 +564,6 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
 
   linkLibs += librariesLinked;
 
-  if(!targetLibrary)
-    {
-    // For executables, add these a second time so order does not matter
-    linkLibs += librariesLinked;
-    }
   fout << linkLibs;
 
   if(outputRuntime && runtimeDirs.size()>0)

@@ -429,6 +429,8 @@ void cmMakefile::GenerateMakefile()
     {
     l->second.GenerateSourceFilesFromSourceLists(*this);
     l->second.MergeLibraries(m_LinkLibraries);
+    l->second.MergeDirectories(m_LinkDirectories);
+    l->second.AnalyzeLibDependencies(*this);
     }
   // now do the generation
   m_MakefileGenerator->GenerateMakefile();
@@ -521,9 +523,7 @@ void cmMakefile::AddLinkLibraryForTarget(const char *target,
 {
   if (m_Targets.find(target) != m_Targets.end())
     {
-    m_Targets[target].GetLinkLibraries().
-      push_back(
-        std::pair<std::string, cmTarget::LinkLibraryType>(lib,llt));
+    m_Targets[target].AddLinkLibrary( *this, target, lib, llt );
     }
   else
     {
@@ -695,6 +695,15 @@ void cmMakefile::AddLibrary(const char* lname, int shared,
 		      "Whether a library is static, shared or module.",
 		      cmCacheManager::INTERNAL);
     }
+
+  // Clear its dependencies. Otherwise, dependencies might persist
+  // over changes in CMakeLists.txt, making the information stale and
+  // hence useless.
+  std::string depname = lname;
+  depname += "_LIB_DEPENDS";
+  cmCacheManager::GetInstance()->
+    AddCacheEntry(depname.c_str(), "",
+                  "Dependencies for target", cmCacheManager::INTERNAL);
 }
 
 void cmMakefile::AddExecutable(const char *exeName, 
@@ -861,7 +870,7 @@ void cmMakefile::ExpandVariables()
     }
 }
 
-bool cmMakefile::IsOn(const char* name)
+bool cmMakefile::IsOn(const char* name) const
 {
   const char* value = this->GetDefinition(name);
   return cmSystemTools::IsOn(value);

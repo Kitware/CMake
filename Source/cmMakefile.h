@@ -391,14 +391,6 @@ public:
     }
 
   /**
-   * Get a list of link directories in the build.
-   */
-  std::vector<std::string>& GetLinkDirectories()
-    { 
-    return m_LinkDirectories;
-    }
-  
-  /**
    * Return a list of source files in this makefile.
    */
   typedef std::map<cmStdString,std::vector<cmSourceFile*> > SourceMap;
@@ -440,7 +432,7 @@ public:
   /** Test a boolean cache entry to see if it is true or false, 
    *  returns false if no entry defined.
    */
-  bool IsOn(const char* name);
+  bool IsOn(const char* name) const;
 
   /**
    * Get a list of preprocessor define flags.

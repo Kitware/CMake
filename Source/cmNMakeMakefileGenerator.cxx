@@ -578,8 +578,8 @@ void cmNMakeMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
         
   if (lib_path_opt.size())
     {
-    std::vector<std::string>& libdirs = m_Makefile->GetLinkDirectories();
-    for(std::vector<std::string>::iterator libDir = libdirs.begin();
+    const std::vector<std::string>& libdirs = tgt.GetLinkDirectories();
+    for(std::vector<std::string>::const_iterator libDir = libdirs.begin();
         libDir != libdirs.end(); ++libDir)
       { 
       std::string libpath = ShortPath(libDir->c_str());

@@ -169,8 +169,7 @@ void cmDSWWriter::WriteDSWFile(std::ostream& fout)
                   }
                 else
                   {
-                  l->second.GetLinkLibraries().push_back(
-                    cmTarget::LinkLibraries::value_type(al->first, cmTarget::GENERAL));
+                  l->second.AddLinkLibrary(al->first, cmTarget::GENERAL);
                   }
                 }
               }

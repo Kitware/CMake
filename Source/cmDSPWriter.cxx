@@ -653,8 +653,8 @@ void cmDSPWriter::WriteDSPHeader(std::ostream& fout, const char *libName,
       libMultiLineOptions += " \n";
       }
     }
-  std::vector<std::string>::iterator i;
-  std::vector<std::string>& libdirs = m_Makefile->GetLinkDirectories();
+  std::vector<std::string>::const_iterator i;
+  const std::vector<std::string>& libdirs = target.GetLinkDirectories();
   for(i = libdirs.begin(); i != libdirs.end(); ++i)
     {
     std::string path = *i;
