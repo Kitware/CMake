@@ -36,6 +36,13 @@
 
 #define SAFEDIV(x,y) (((y)!=0)?((x)/(y)):(0))
 
+// provide some more detailed info on the return code for ctest
+#define CTEST_UPDATE_ERRORS 0x01
+#define CTEST_CONFIGURE_ERRORS 0x02
+#define CTEST_BUILD_ERRORS 0x04
+#define CTEST_TEST_ERRORS 0x08
+#define CTEST_MEMORY_ERRORS 0x10
+
 static struct tm* GetNightlyTime(std::string str)
 {
   struct tm* lctime;
@@ -2382,7 +2389,7 @@ int cmCTest::ProcessTests()
     update_count = this->UpdateDirectory(); 
     if ( update_count < 0 )
       {
-      res += 1;
+      res |= CTEST_UPDATE_ERRORS;
       }
     }
   if ( m_TestModel == cmCTest::CONTINUOUS && !update_count )
@@ -2391,15 +2398,24 @@ int cmCTest::ProcessTests()
     }
   if ( m_Tests[CONFIGURE_TEST] || m_Tests[ALL_TEST] )
     {
-    res += this->ConfigureDirectory();
+    if (this->ConfigureDirectory())
+      {
+      res |= CTEST_CONFIGURE_ERRORS;
+      }
     }
   if ( m_Tests[BUILD_TEST] || m_Tests[ALL_TEST] )
     {
-    res += this->BuildDirectory();
+    if (this->BuildDirectory())
+      {
+      res |= CTEST_BUILD_ERRORS;
+      }
     }
   if ( m_Tests[TEST_TEST] || m_Tests[ALL_TEST] || notest )
     {
-    res += this->TestDirectory(false);
+    if (this->TestDirectory(false))
+      {
+      res |= CTEST_TEST_ERRORS;
+      }
     }
   if ( m_Tests[COVERAGE_TEST] || m_Tests[ALL_TEST] )
     {
@@ -2407,7 +2423,10 @@ int cmCTest::ProcessTests()
     }
   if ( m_Tests[MEMCHECK_TEST] || m_Tests[ALL_TEST] )
     {
-    res += this->TestDirectory(true);
+    if (this->TestDirectory(true))
+      {
+      res |= CTEST_MEMORY_ERRORS;
+      }
     }
   if ( m_Tests[SUBMIT_TEST] || m_Tests[ALL_TEST] )
     {
@@ -2759,36 +2778,6 @@ const char* cmCTest::GetTestStatus(int status)
 }
 
 
-void cmCTestRemoveDirectory(const char *binDir)
-{
-  cmsys::Directory dir;
-  dir.Load(binDir);
-  size_t fileNum;
-  for (fileNum = 0; fileNum <  dir.GetNumberOfFiles(); ++fileNum)
-    {
-    if (strcmp(dir.GetFile(static_cast<unsigned long>(fileNum)),".") &&
-        strcmp(dir.GetFile(static_cast<unsigned long>(fileNum)),".."))
-      {
-      std::string fullPath = binDir;
-      fullPath += "/";
-      fullPath += dir.GetFile(static_cast<unsigned long>(fileNum));
-      if(cmSystemTools::FileIsDirectory(fullPath.c_str()))
-        {
-        cmCTestRemoveDirectory(fullPath.c_str());
-        }
-      else
-        {
-        if(!cmSystemTools::RemoveFile(fullPath.c_str()))
-          {
-          std::string m = "Remove failed on file: ";
-          m += fullPath;
-          cmSystemTools::ReportLastSystemError(m.c_str());
-          }
-        }
-      }
-    }
-}
-
 int cmCTest::RunConfigurationScript()
 {
   m_ConfigurationScript = 
@@ -2830,7 +2819,8 @@ int cmCTest::RunConfigurationScript()
   const char *binDir = mf->GetDefinition("CTEST_BINARY_DIRECTORY");
   const char *ctestCmd = mf->GetDefinition("CTEST_COMMAND");
   const char *ctestEnv = mf->GetDefinition("CTEST_ENVIRONMENT");
-
+  bool backup = mf->IsOn("CTEST_BACKUP_AND_RESTORE");
+    
   // make sure the required info is here
   if (!srcDir || !binDir || !ctestCmd)
     {
@@ -2865,7 +2855,31 @@ int cmCTest::RunConfigurationScript()
       putenv(ctestEnvStatic[i]);
       }
     }
+
+  // compute the backup names
+  std::string backupSrcDir = srcDir;
+  backupSrcDir += "_CMakeBackup";
+  std::string backupBinDir = binDir;
+  backupBinDir += "_CMakeBackup";
+
+  // backup the binary and src directories if requested
+  if (backup)
+    {
+    // if for some reason those directories exist then first delete them
+    if (cmSystemTools::FileExists(backupSrcDir.c_str()))
+      {
+      cmSystemTools::RemoveADirectory(backupSrcDir.c_str());
+      }
+    if (cmSystemTools::FileExists(backupBinDir.c_str()))
+      {
+      cmSystemTools::RemoveADirectory(backupBinDir.c_str());
+      }
     
+    // first rename the src and binary directories 
+    rename(srcDir, backupSrcDir.c_str());
+    rename(binDir, backupBinDir.c_str());
+    }
+
   // clear the binary directory?
   if (mf->IsOn("CTEST_START_WITH_EMPTY_BINARY_DIRECTORY"))
     {
@@ -2874,7 +2888,7 @@ int cmCTest::RunConfigurationScript()
     check += "/CMakeCache.txt";
     if (cmSystemTools::FileExists(check.c_str()))
       {
-      cmCTestRemoveDirectory(binDir);
+      cmSystemTools::RemoveADirectory(binDir);
       }
     }
   
@@ -2977,9 +2991,27 @@ int cmCTest::RunConfigurationScript()
                                         &retVal, binDir,
                                         m_Verbose, 0 /*m_TimeOut*/);
 
-  // the main ctest return values need to be fixed
-  if (!res /* || retVal != 0 */)
+  // did something critical fail in ctest
+  if (!res || 
+      retVal | CTEST_BUILD_ERRORS)
     {
+    // if we backed up the dirs and the build failed, then restore
+    // the backed up dirs
+    if (backup)
+      {
+      // if for some reason those directories exist then first delete them
+      if (cmSystemTools::FileExists(srcDir))
+        {
+        cmSystemTools::RemoveADirectory(srcDir);
+        }
+      if (cmSystemTools::FileExists(binDir))
+        {
+        cmSystemTools::RemoveADirectory(binDir);
+        }
+      // rename the src and binary directories 
+      rename(backupSrcDir.c_str(), srcDir);
+      rename(backupBinDir.c_str(), binDir);
+      }
     cmSystemTools::Error("Unable to run ctest");    
     return -8;
     }
