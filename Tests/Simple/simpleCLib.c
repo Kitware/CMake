@@ -8,4 +8,5 @@ int FooBar()
     {
     printf("Count: %d/%d\n", class, private);
     }
+  return 0;
 }
