@@ -232,12 +232,19 @@ protected:
 
   /** Output an echo command to the Makefile */
   void OutputEcho(std::ostream& fout, const char *msg);
+  
+  /**
+   * Convert source file name to a safe object file name. Safe here means that
+   * it will not clash with compilers or linkers.
+   */
+  std::string& CreateSafeUniqueObjectFileName(const char* sin);
 
   ///! final processing for a path to be put in a makefile
 protected:
   int m_MakefileVariableSize;
   std::map<cmStdString, cmStdString> m_MakeVariableMap;
   std::map<cmStdString, cmStdString> m_ShortMakeVariableMap;
+  std::map<cmStdString, cmStdString> m_UniqueObjectNamesMap;
   bool m_IgnoreLibPrefix;
   std::string m_IncludeDirective;
   std::string m_MakeSilentFlag;

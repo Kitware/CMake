@@ -536,8 +536,9 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
           if(outExt.size() && !(*i)->GetPropertyAsBool("EXTERNAL_OBJECT") )
             {
             fout << "\\\n";
-            fout << this->ConvertToMakeTarget(this->ConvertToRelativeOutputPath((*i)->GetSourceName().c_str()).c_str())
-              << outExt.c_str() << " ";
+            std::string ofname = (*i)->GetSourceName() + outExt;
+            ofname = this->CreateSafeUniqueObjectFileName(ofname.c_str());
+            fout << this->ConvertToMakeTarget(this->ConvertToRelativeOutputPath(ofname.c_str()).c_str());
             }
           }
         }
@@ -569,8 +570,9 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
           std::string outExt(this->GetOutputExtension((*i)->GetSourceExtension().c_str()));
           if(outExt.size() && !(*i)->GetPropertyAsBool("EXTERNAL_OBJECT") )
             {
-            fout << "\\\n\"" << this->ConvertToMakeTarget(ConvertToRelativeOutputPath((*i)->GetSourceName().c_str()).c_str())
-                 << outExt.c_str() << "\" ";
+            std::string ofname = (*i)->GetSourceName() + outExt;
+            ofname = this->CreateSafeUniqueObjectFileName(ofname.c_str());
+            fout << "\\\n\"" << this->ConvertToMakeTarget(ConvertToRelativeOutputPath(ofname.c_str()).c_str()) << "\" ";
             }
           }
         }
@@ -2691,6 +2693,7 @@ OutputBuildObjectFromSource(std::ostream& fout,
   std::string comment = "object file";
   std::string objectFile = std::string(shortName) + 
     this->GetOutputExtension(source.GetSourceExtension().c_str());
+  objectFile = this->CreateSafeUniqueObjectFileName(objectFile.c_str());
   objectFile = this->ConvertToRelativeOutputPath(objectFile.c_str());
   cmSystemTools::FileFormat format = 
     cmSystemTools::GetFileFormat(source.GetSourceExtension().c_str());
@@ -3058,6 +3061,45 @@ std::string cmLocalUnixMakefileGenerator::LowerCasePath(const char* path)
 #endif
 }
   
+std::string&
+cmLocalUnixMakefileGenerator::CreateSafeUniqueObjectFileName(const char* sin)
+{
+  std::map<cmStdString,cmStdString>::iterator it = m_UniqueObjectNamesMap.find(sin);
+  if ( it == m_UniqueObjectNamesMap.end() )
+    {
+    std::string ssin = sin;
+    bool done = false;
+    int cc = 0;
+    char rpstr[100];
+    sprintf(rpstr, "_p_");
+    cmSystemTools::ReplaceString(ssin, "+", rpstr);
+    std::string sssin = sin;
+    do
+      {
+      done = true;
+      for ( it = m_UniqueObjectNamesMap.begin();
+        it != m_UniqueObjectNamesMap.end();
+        ++ it )
+        {
+        if ( it->second == ssin )
+          {
+          done = false;
+          }
+        }
+      if ( done )
+        {
+        break;
+        }
+      sssin = ssin;
+      cmSystemTools::ReplaceString(ssin, "_p_", rpstr);
+      sprintf(rpstr, "_p%d_", cc++);
+      }
+    while ( !done );
+    m_UniqueObjectNamesMap[sin] = ssin;
+    }
+  return m_UniqueObjectNamesMap[sin];
+}
+
 std::string
 cmLocalUnixMakefileGenerator::CreateMakeVariable(const char* sin, const char* s2in)
 {
