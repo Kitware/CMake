@@ -501,8 +501,7 @@ public:
   /**
    * execute a single CMake command
    */
-  void cmMakefile::ExecuteCommand(std::string &name,
-                                  std::vector<std::string> &args);
+  void ExecuteCommand(std::string &name, std::vector<std::string> &args);
   
     
 protected:
