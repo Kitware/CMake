@@ -470,6 +470,12 @@ void cmMakefile::AddLibrary(const char* lname, const std::vector<std::string> &s
   target.SetInAll(true);
   target.GetSourceLists() = srcs;
   m_Targets.insert(cmTargets::value_type(lname,target));
+
+  // Add an entry into the cache 
+  cmCacheManager::GetInstance()->
+    AddCacheEntry(lname,
+                  this->GetCurrentOutputDirectory(),
+                  "Path to a library", cmCacheManager::INTERNAL);
 }
 
 void cmMakefile::AddExecutable(const char *exeName, 
@@ -480,6 +486,12 @@ void cmMakefile::AddExecutable(const char *exeName,
   target.SetInAll(true);
   target.GetSourceLists() = srcs;
   m_Targets.insert(cmTargets::value_type(exeName,target));
+  
+  // Add an entry into the cache 
+  cmCacheManager::GetInstance()->
+    AddCacheEntry(exeName,
+                  this->GetCurrentOutputDirectory(),
+                  "Path to an executable", cmCacheManager::INTERNAL);
 }
 
 

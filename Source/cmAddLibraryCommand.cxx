@@ -54,12 +54,6 @@ bool cmAddLibraryCommand::Invoke(std::vector<std::string>& args)
   std::vector<std::string> srclists(++s, args.end());
   
   m_Makefile->AddLibrary(args[0].c_str(),srclists);
-
-  // Add an entry into the cache 
-  cmCacheManager::GetInstance()->
-    AddCacheEntry(args[0].c_str(),
-                  m_Makefile->GetCurrentOutputDirectory(),
-                  "Path to a library", cmCacheManager::INTERNAL);
   return true;
 }
 

@@ -54,11 +54,6 @@ bool cmAddExecutableCommand::Invoke(std::vector<std::string>& args)
   std::vector<std::string> srclists(++s, args.end());
   
   m_Makefile->AddExecutable(args[0].c_str(),srclists); 
-  // Add an entry into the cache 
-  cmCacheManager::GetInstance()->
-    AddCacheEntry(args[0].c_str(),
-                  m_Makefile->GetCurrentOutputDirectory(),
-                  "Path to an executable", cmCacheManager::INTERNAL);
   return true;
 }
 
