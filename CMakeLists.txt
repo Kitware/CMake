@@ -33,7 +33,7 @@ SUBDIRS(Source Modules Templates Utilities)
 ENABLE_TESTING()
 
 # Include the standard Dart testing module
-INCLUDE (${CMake_SOURCE_DIR}/Modules/Dart.cmake)
+INCLUDE (${CMAKE_ROOT}/Modules/Dart.cmake)
 INCLUDE (${CMake_BINARY_DIR}/Bootstrap/Source/InitialConfigureFlags.cmake
          OPTIONAL)
 
