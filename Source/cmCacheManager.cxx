@@ -252,16 +252,10 @@ bool cmCacheManager::LoadCache(const char* path,
     {
     std::string currentcwd = path;
     std::string oldcwd = this->GetCacheValue("CMAKE_CACHEFILE_DIR");
-    if ( currentcwd[0] >= 'A' && currentcwd[0] <= 'Z' &&
-         currentcwd[1] == ':' )
-      {
-      currentcwd[0] = currentcwd[0] - 'A' + 'a';
-      }
-    if ( oldcwd[0] >= 'A' && oldcwd[0] <= 'Z' &&
-         oldcwd[1] == ':' )
-      {
-      oldcwd[0] = oldcwd[0] - 'A' + 'a';
-      }
+#ifdef _WIN32
+    currentcwd = cmSystemTools::LowerCase(currentcwd);
+    oldcwd = cmSystemTools::LowerCase(oldcwd);
+#endif // _WIN32
     cmSystemTools::ConvertToUnixSlashes(currentcwd);
     if(cmSystemTools::CollapseFullPath(oldcwd.c_str()) 
        != cmSystemTools::CollapseFullPath(currentcwd.c_str()))
