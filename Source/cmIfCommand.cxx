@@ -133,7 +133,7 @@ bool cmIfCommand::InvokeInitialPass(const std::vector<cmListFileArgument>& args)
 
 // order of operations, 
 // EXISTS COMMAND DEFINED 
-// MATCHES LESS GREATER EQUAL STRLESS STRGREATER
+// MATCHES LESS GREATER EQUAL STRLESS STRGREATER STREQUAL 
 // AND OR
 //
 // There is an issue on whether the arguments should be values of references,
@@ -357,32 +357,34 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
         }
 
       if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
-          (*(argP1) == "STRLESS" || *(argP1) == "STRGREATER")) 
+          (*(argP1) == "STRLESS" || 
+           *(argP1) == "STREQUAL" || 
+           *(argP1) == "STRGREATER")) 
         {
         def = cmIfCommand::GetVariableOrString(arg->c_str(), makefile);
         def2 = cmIfCommand::GetVariableOrString((argP2)->c_str(), makefile);
+        int val = strcmp(def,def2);
+        int result;
         if (*(argP1) == "STRLESS")
           {
-          if(strcmp(def,def2) < 0)
-            {
-            *arg = "1";
-            }
-          else
-            {
-            *arg = "0";
-            }
+          result = (val < 0);
+          }
+        else if (*(argP1) == "STRGREATER")
+          {
+          result = (val > 0);
+          }
+        else // strequal
+          {
+          result = (val == 0);
+          }
+        if(result)
+          {
+          *arg = "1";
           }
         else
           {
-          if(strcmp(def,def2) > 0)
-            {
-            *arg = "1";
-            }
-          else
-            {
-            *arg = "0";
-            }
-          }          
+          *arg = "0";
+          }
         newArgs.erase(argP2);
         newArgs.erase(argP1);
         argP1 = arg;
