@@ -8,6 +8,30 @@
 int cm_passed = 0;
 int cm_failed = 0;
 
+// Here is a stupid function that tries to use std::string methods
+// so that the dec cxx compiler will instantiate the stuff that
+// we are using from the CMakeLib library....
+
+void ForceStringUse()
+{
+  std::vector<std::string> v;
+  std::vector<std::string> v2;
+  v = v2;
+  std::string cachetest = CACHE_TEST_VAR_INTERNAL;
+  v.push_back(cachetest);
+  v2 = v;
+  std::string x(5,'x');  
+  char buff[5];
+  x.copy(buff, 1, 0);
+  std::string::size_type pos = 0;
+  x.replace(pos, pos, pos, 'x');
+  std::string copy = cachetest;
+  cachetest.find("bar");
+  cachetest.rfind("bar");
+  copy.append(cachetest);
+  copy = cachetest.substr(0, cachetest.size());
+}
+
 // ======================================================================
 
 void cmFailed(const char* Message, const char* m2= "")
@@ -471,18 +495,7 @@ int main()
   cmFailed("the LOAD_CACHE or CONFIGURE_FILE command is broken, "
          "CACHE_TEST_VAR_INTERNAL is not defined.");
 #else
-  std::vector<std::string> v;
-  std::vector<std::string> v2;
-  v = v2;
   std::string cachetest = CACHE_TEST_VAR_INTERNAL;
-  v.push_back(cachetest);
-  v2 = v;
-  std::string x(5,'x');
-  std::string copy = cachetest;
-  cachetest.find("bar");
-  cachetest.rfind("bar");
-  copy.append(cachetest);
-  copy = cachetest.substr(0, cachetest.size());
   if(cachetest != "bar")
     {
     cmFailed("the LOAD_CACHE or CONFIGURE_FILE command is broken, "
