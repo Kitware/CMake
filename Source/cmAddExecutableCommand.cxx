@@ -27,7 +27,7 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& argsIn)
     }
   std::vector<std::string> args;
   cmSystemTools::ExpandListArguments(argsIn, args);
-  std::vector<std::string>::const_iterator s = args.begin();
+  std::vector<std::string>::iterator s = args.begin();
 
   std::string exename = *s;
 
