@@ -616,8 +616,21 @@ IF(BUILD_TESTING)
       )
 
   ENDIF (CTEST_TEST_CTEST)
-
-
+  # see if we can find a fortran compiler on the machine
+  # if so, add the fortran test and see if it works.
+  INCLUDE(CMakeDetermineFortranCompiler)
+  IF(CMAKE_Fortran_COMPILER_FULLPATH)
+    ADD_TEST(Fortran ${CMAKE_CTEST_COMMAND}
+      --build-and-test 
+      "${CMake_SOURCE_DIR}/Tests/Fortran"
+      "${CMake_BINARY_DIR}/Tests/Fortran"
+      --build-generator ${CMAKE_GENERATOR}
+      --build-project Simple
+      --build-makeprogram ${MAKEPROGRAM}
+      --build-two-config
+      --test-command testf)
+  ENDIF(CMAKE_Fortran_COMPILER_FULLPATH)
+     
   IF (CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE OR WXWINDOWS_INCLUDE_DIR)
     # Will be set if the wxwindows gui is on
     ADD_TEST(UseWX ${CMAKE_CTEST_COMMAND}
