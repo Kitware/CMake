@@ -400,6 +400,7 @@ bool cmSystemTools::RunSingleCommand(
   cmsysProcess_SetTimeout(cp, timeout);
   cmsysProcess_Execute(cp);
   
+  std::vector<char> tempOutput;
   char* data;
   int length;
   while(cmsysProcess_WaitForData(cp, (cmsysProcess_Pipe_STDOUT |
@@ -408,7 +409,7 @@ bool cmSystemTools::RunSingleCommand(
     {
     if ( output )
       {
-      output->append(data, length);
+      tempOutput.insert(tempOutput.end(), data, data+length);
       }
     if(verbose)
       {
@@ -417,6 +418,10 @@ bool cmSystemTools::RunSingleCommand(
     }
   
   cmsysProcess_WaitForExit(cp, 0);
+  if ( output )
+    {
+    output->append(&*tempOutput.begin(), tempOutput.size());
+    }
   
   bool result = true;
   if(cmsysProcess_GetState(cp) == cmsysProcess_State_Exited)

@@ -2432,6 +2432,7 @@ int cmCTest::RunMakeCommand(const char* command, std::string* output,
 
 int cmCTest::RunTest(std::vector<const char*> argv, std::string* output, int *retVal)
 {
+  std::vector<char> tempOutput;
   if ( output )
     {
     *output = "";
@@ -2454,7 +2455,7 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output, int *re
     {
     if ( output )
       {
-      output->append(data, length);
+      tempOutput.insert(tempOutput.end(), data, data+length);
       }
     if ( m_Verbose )
       {
@@ -2464,6 +2465,10 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output, int *re
     }
   
   cmsysProcess_WaitForExit(cp, 0);
+  if(output)
+    {
+    output->append(&*tempOutput.begin(), tempOutput.size());
+    }
 
   int result = cmsysProcess_GetState(cp);
 
