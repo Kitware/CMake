@@ -19,7 +19,7 @@
 // cmLibraryCommand
 bool cmAddLibraryCommand::Invoke(std::vector<std::string>& args)
 {
-  if(args.size() < 2 )
+  if(args.size() < 1 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;
