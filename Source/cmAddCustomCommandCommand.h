@@ -46,12 +46,6 @@ public:
   virtual bool InitialPass(std::vector<std::string> const& args);
 
   /**
-   * This determines if the command gets propagated down
-   * to makefiles located in subdirectories.
-   */
-  virtual bool IsInherited() {return true;}
-
-  /**
    * The name of the command as specified in CMakeList.txt.
    */
   virtual const char* GetName() {return "ADD_CUSTOM_COMMAND";}
