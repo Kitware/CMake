@@ -799,10 +799,22 @@ void cmUnixMakefileGenerator::OutputUtilityRule(std::ostream& fout,
     }
   std::string comment = "Rule to build Utility ";
   comment += name;
+  std::string depends;
+  const std::vector<cmCustomCommand> &ccs = t.GetCustomCommands();
+  for(std::vector<cmCustomCommand>::const_iterator i = ccs.begin();
+      i != ccs.end(); ++i)
+    {
+      const std::vector<std::string>  & dep = i->GetDepends();
+      for(std::vector<std::string>::const_iterator d = dep.begin();
+	  d != dep.end(); ++d)
+	{
+	  depends +=  *d + "\\\n";
+	}
+    }
   this->OutputMakeRule(fout, 
                        comment.c_str(),
                        name,
-                       0,
+                       depends.c_str(),
                        cc);
 }
 
