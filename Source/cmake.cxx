@@ -1160,6 +1160,13 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
     cmSystemTools::Error("Problem processing arguments. Aborting.\n");
     return -1;
     }
+
+  std::string pre_load = this->GetHomeDirectory();
+  pre_load += "/PreLoad.cmake";
+  if ( cmSystemTools::FileExists(pre_load.c_str()) )
+    {
+    this->ReadListFile(pre_load.c_str());
+    }
  
   std::string systemFile = this->GetHomeOutputDirectory();
   systemFile += "/CMakeSystem.cmake";

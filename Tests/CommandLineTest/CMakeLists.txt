@@ -23,3 +23,13 @@ ELSE(DUMP_DOC_EXE)
 ENDIF(DUMP_DOC_EXE)
 
 ADD_EXECUTABLE(CommandLineTest CommandLineTest.cxx)
+
+IF(THIS_SHOULD_BE_SET)
+  MESSAGE(STATUS "***************************")
+  MESSAGE(STATUS "PreLoad.cmake works fine.")
+  MESSAGE(STATUS "***************************")
+ELSE(THIS_SHOULD_BE_SET)
+  MESSAGE("***************************")
+  MESSAGE(FATAL_ERROR "PreLoad.cmake does not work.")
+ENDIF(THIS_SHOULD_BE_SET)
+  
