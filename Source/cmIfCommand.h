@@ -105,6 +105,11 @@ public:
   static bool IsTrue(const std::vector<std::string> &args, 
                      bool &isValid, const cmMakefile *mf);
   
+  // Get a definition from the makefile.  If it doesn't exist,
+  // return the original string.
+  static const char* GetVariableOrString(const char* str,
+                                         const cmMakefile* mf);
+  
   cmTypeMacro(cmIfCommand, cmCommand);
 };
 

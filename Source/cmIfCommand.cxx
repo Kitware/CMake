@@ -200,11 +200,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args, bool &isValid,
 
   if (args.size() == 3 && (args[1] == "MATCHES"))
     {
-    def = makefile->GetDefinition(args[0].c_str());
-    if (!def)
-      {
-      def = args[0].c_str();
-      }
+    def = cmIfCommand::GetVariableOrString(args[0].c_str(), makefile);
     cmRegularExpression regEntry(args[2].c_str());
     
     // check for black line or comment
@@ -217,8 +213,8 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args, bool &isValid,
   
   if (args.size() == 3 && (args[1] == "LESS"))
     {
-    def = makefile->GetDefinition(args[0].c_str());
-    def2 = makefile->GetDefinition(args[2].c_str());
+    def = cmIfCommand::GetVariableOrString(args[0].c_str(), makefile);
+    def2 = cmIfCommand::GetVariableOrString(args[2].c_str(), makefile);
     if (!def)
       {
       def = args[0].c_str();
@@ -236,16 +232,8 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args, bool &isValid,
 
   if (args.size() == 3 && (args[1] == "GREATER"))
     {
-    def = makefile->GetDefinition(args[0].c_str());
-    def2 = makefile->GetDefinition(args[2].c_str());
-    if (!def)
-      {
-      def = args[0].c_str();
-      }
-    if (!def2)
-      {
-      def2 = args[2].c_str();
-      }    
+    def = cmIfCommand::GetVariableOrString(args[0].c_str(), makefile);
+    def2 = cmIfCommand::GetVariableOrString(args[2].c_str(), makefile);
     if(atof(def) <= atof(def2))
       {
       isTrue = false;
@@ -255,8 +243,8 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args, bool &isValid,
 
   if (args.size() == 3 && (args[1] == "STRLESS"))
     {
-    def = makefile->GetDefinition(args[0].c_str());
-    def2 = makefile->GetDefinition(args[2].c_str());
+    def = cmIfCommand::GetVariableOrString(args[0].c_str(), makefile);
+    def2 = cmIfCommand::GetVariableOrString(args[2].c_str(), makefile);
     if(strcmp(def,def2) >= 0)
       {
       isTrue = false;
@@ -266,8 +254,8 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args, bool &isValid,
 
   if (args.size() == 3 && (args[1] == "STRGREATER"))
     {
-    def = makefile->GetDefinition(args[0].c_str());
-    def2 = makefile->GetDefinition(args[2].c_str());
+    def = cmIfCommand::GetVariableOrString(args[0].c_str(), makefile);
+    def2 = cmIfCommand::GetVariableOrString(args[2].c_str(), makefile);
     if(strcmp(def,def2) <= 0)
       {
       isTrue = false;
@@ -276,4 +264,15 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args, bool &isValid,
     }
 
   return isTrue;
+}
+
+const char* cmIfCommand::GetVariableOrString(const char* str,
+                                             const cmMakefile* mf)
+{
+  const char* def = mf->GetDefinition(str);
+  if(!def)
+    {
+    def = str;
+    }
+  return def;
 }
