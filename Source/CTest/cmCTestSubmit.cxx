@@ -291,31 +291,31 @@ bool cmCTestSubmit::TriggerUsingHTTP(const std::vector<std::string>& files,
   /* In windows, this will init the winsock stuff */
   ::curl_global_init(CURL_GLOBAL_ALL);
   
-  /* get a curl handle */
-  curl = curl_easy_init();
-  if(curl) 
+  std::string::size_type cc, kk;
+  for ( cc = 0; cc < files.size(); cc ++ )
     {
-    // Using proxy
-    if ( m_HTTPProxyType > 0 )
+    /* get a curl handle */
+    curl = curl_easy_init();
+    if(curl) 
       {
-      curl_easy_setopt(curl, CURLOPT_PROXY, m_HTTPProxy.c_str()); 
-      switch (m_HTTPProxyType)
+      // Using proxy
+      if ( m_HTTPProxyType > 0 )
         {
-        case 2:
-          curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS4);
-          break;
-        case 3:
-          curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
-          break;
-        default:
-          curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);           
+        curl_easy_setopt(curl, CURLOPT_PROXY, m_HTTPProxy.c_str()); 
+        switch (m_HTTPProxyType)
+          {
+          case 2:
+            curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS4);
+            break;
+          case 3:
+            curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
+            break;
+          default:
+            curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);           
+          }
         }
-      }
 
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
-    std::string::size_type cc, kk;
-    for ( cc = 0; cc < files.size(); cc ++ )
-      {
+      curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
       std::string file = remoteprefix + files[cc];
       std::string ofile = "";
       for ( kk = 0; kk < file.size(); kk ++ )
@@ -352,9 +352,9 @@ bool cmCTestSubmit::TriggerUsingHTTP(const std::vector<std::string>& files,
         ::curl_global_cleanup(); 
         return false;
         }
+      // always cleanup
+      ::curl_easy_cleanup(curl);
       }
-    // always cleanup
-    ::curl_easy_cleanup(curl);
     }
   ::curl_global_cleanup(); 
   return true;
