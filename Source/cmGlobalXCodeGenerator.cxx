@@ -24,7 +24,17 @@
 
 
 //TODO
-// per file flags
+// EXECUTABLE_OUTPUT_PATH/LIBRARY_OUTPUT_PATH
+// LinkDirectories
+// correct placment of include paths
+// custom commands
+// custom targets
+// ALL_BUILD
+// RUN_TESTS
+
+
+
+// per file flags howto
 // 115281011528101152810000 = {
 //    fileEncoding = 4;
 // isa = PBXFileReference;
@@ -188,11 +198,17 @@ cmXCodeObject*
 cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg, 
                                               cmSourceFile* sf)
 {
+  std::string flags;
+  // Add flags from source file properties.
+  m_CurrentLocalGenerator
+    ->AppendFlags(flags, sf->GetProperty("COMPILE_FLAGS"));
+
   cmXCodeObject* fileRef = this->CreateObject(cmXCodeObject::PBXFileReference);
   m_MainGroupChildren->AddObject(fileRef);
   cmXCodeObject* buildFile = this->CreateObject(cmXCodeObject::PBXBuildFile);
   buildFile->AddAttribute("fileRef", this->CreateObjectReference(fileRef));
   cmXCodeObject* settings = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
+  settings->AddAttribute("COMPILER_FLAGS", this->CreateString(flags.c_str()));
   buildFile->AddAttribute("settings", settings);
   fileRef->AddAttribute("fileEncoding", this->CreateString("4"));
   const char* lang = 
@@ -212,7 +228,7 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
   // default to c++
   else
     {
-      sourcecode += ".cpp.cpp";
+    sourcecode += ".cpp.cpp";
     }
 
   fileRef->AddAttribute("lastKnownFileType", 
@@ -300,6 +316,20 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   std::string flags;
   bool shared = ((target.GetType() == cmTarget::SHARED_LIBRARY) ||
                  (target.GetType() == cmTarget::MODULE_LIBRARY));
+  if(shared)
+    {
+    flags += "-D";
+    if(const char* custom_export_name = target.GetProperty("DEFINE_SYMBOL"))
+      {
+        flags += custom_export_name;
+      }
+    else
+      {
+      std::string in = target.GetName();
+      in += "_EXPORTS";
+      flags += cmSystemTools::MakeCindentifier(in.c_str());
+      }
+    }
   const char* lang = target.GetLinkerLanguage(this);
   if(lang)
     {
@@ -309,6 +339,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     // Add shared-library flags if needed.
     m_CurrentLocalGenerator->AddSharedFlags(flags, lang, shared);
     }
+
     // Add include directory flags.
   m_CurrentLocalGenerator->
     AppendFlags(flags, m_CurrentLocalGenerator->GetIncludeFlags(lang));
@@ -546,12 +577,15 @@ void cmGlobalXCodeGenerator::AddLinkTarget(cmXCodeObject* target ,
   files->AddObject(buildfile);
 }
 
-void cmGlobalXCodeGenerator::AddLinkFlag(cmXCodeObject* target,
-                                         const char* flag)
+void cmGlobalXCodeGenerator::AddLinkLibrary(cmXCodeObject* target,
+                                            const char* library)
 {
-  if(cmSystemTools::FileIsFullPath(flag))
+  // if the library is a full path then create a file reference
+  // and build file and add them to the PBXFrameworksBuildPhase
+  // for the target
+  if(cmSystemTools::FileIsFullPath(library))
     {
-    std::string libPath = flag;
+    std::string libPath = library;
     cmXCodeObject* fileRef = 
       this->CreateObject(cmXCodeObject::PBXFileReference);
     if(libPath[libPath.size()-1] == 'a')
@@ -586,12 +620,20 @@ void cmGlobalXCodeGenerator::AddLinkFlag(cmXCodeObject* target,
     }
   else
     {
+    // if the library is not a full path then add it with a -l flag
+    // to the settings of the target
     cmXCodeObject* settings = target->GetObject("buildSettings");
     cmXCodeObject* ldflags = settings->GetObject("OTHER_LDFLAGS");
     std::string link = ldflags->GetString();
     cmSystemTools::ReplaceString(link, "\"", "");
-    link += " -l";
-    link +=  flag;
+    cmsys::RegularExpression reg("^([ \t]*\\-[lWRB])|([ \t]*\\-framework)|(\\${)|([ \t]*\\-pthread)|([ \t]*`)");
+    // if the library is not already in the form required by the compiler
+    // add a -l infront of the name
+    if(!reg.find(library))
+      {
+      link += " -l";
+      }
+    link +=  library;
     ldflags->SetString(link.c_str());
     }
 }
@@ -624,7 +666,7 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
       {
       if(cmtarget->GetType() != cmTarget::STATIC_LIBRARY)
         {
-        this->AddLinkFlag(target, j->first.c_str());
+        this->AddLinkLibrary(target, j->first.c_str());
         }
       }
     }
@@ -668,13 +710,15 @@ void cmGlobalXCodeGenerator::CreateXCodeObjects(cmLocalGenerator* ,
   m_MainGroupChildren = 0;
   cmXCodeObject* group = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
   group->AddAttribute("COPY_PHASE_STRIP", this->CreateString("NO"));
-  cmXCodeObject* developBuildStyle = this->CreateObject(cmXCodeObject::PBXBuildStyle);
+  cmXCodeObject* developBuildStyle = 
+    this->CreateObject(cmXCodeObject::PBXBuildStyle);
   developBuildStyle->AddAttribute("name", this->CreateString("Development"));
   developBuildStyle->AddAttribute("buildSettings", group);
   
   group = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
   group->AddAttribute("COPY_PHASE_STRIP", this->CreateString("YES"));
-  cmXCodeObject* deployBuildStyle = this->CreateObject(cmXCodeObject::PBXBuildStyle);
+  cmXCodeObject* deployBuildStyle =
+    this->CreateObject(cmXCodeObject::PBXBuildStyle);
   deployBuildStyle->AddAttribute("name", this->CreateString("Deployment"));
   deployBuildStyle->AddAttribute("buildSettings", group);
 
@@ -730,9 +774,10 @@ void cmGlobalXCodeGenerator::CreateXCodeObjects(cmLocalGenerator* ,
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalXCodeGenerator::OutputXCodeProject(cmLocalGenerator* root,
-                                                std::vector<cmLocalGenerator*>& 
-                                                generators)
+void
+cmGlobalXCodeGenerator::OutputXCodeProject(cmLocalGenerator* root,
+                                           std::vector<cmLocalGenerator*>& 
+                                           generators)
 {
   if(generators.size() == 0)
     {
@@ -757,10 +802,10 @@ void cmGlobalXCodeGenerator::OutputXCodeProject(cmLocalGenerator* root,
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalXCodeGenerator::WriteXCodePBXProj(std::ostream& fout,
-                                               cmLocalGenerator* ,
-                                               std::vector<cmLocalGenerator*>& 
-  )
+void 
+cmGlobalXCodeGenerator::WriteXCodePBXProj(std::ostream& fout,
+                                          cmLocalGenerator* ,
+                                          std::vector<cmLocalGenerator*>& )
 {
   fout << "// !$*UTF8*$!\n";
   fout << "{\n";
@@ -779,9 +824,10 @@ void cmGlobalXCodeGenerator::WriteXCodePBXProj(std::ostream& fout,
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalXCodeGenerator::GetDocumentation(cmDocumentationEntry& entry) const
+void cmGlobalXCodeGenerator::GetDocumentation(cmDocumentationEntry& entry)
+  const
 {
   entry.name = this->GetName();
-  entry.brief = "NOT YET WORKING, Will generates XCode project files.";
+  entry.brief = "Generate XCode project files.";
   entry.full = "";
 }

@@ -99,8 +99,8 @@ private:
                        cmXCodeObject* dependTarget);
   void AddLinkTarget(cmXCodeObject* target,
                      cmXCodeObject* dependTarget);
-  void AddLinkFlag(cmXCodeObject* target,
-                   const char*);
+  void AddLinkLibrary(cmXCodeObject* target,
+                      const char*);
 private:
   std::vector<cmXCodeObject*> m_XCodeObjects;
   cmXCodeObject* m_RootObject;
