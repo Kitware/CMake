@@ -78,7 +78,15 @@ void cmSourceFile::SetName(const char* name, const char* dir)
     if(pos != std::string::npos)
       {
       m_SourceExtension = hname.substr(pos+1, hname.size()-pos);
-      m_SourceName = hname.substr(0, pos);
+      std::string::size_type pos2 = hname.rfind('/');
+      if(pos2 != std::string::npos)
+	{
+	  m_SourceName = hname.substr(pos2+1, pos - pos2-1);
+	}
+      else
+	{
+	  m_SourceName = hname.substr(0, pos);
+	}
       }
     
     m_HeaderFileOnly = false;

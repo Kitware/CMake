@@ -47,11 +47,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // include configure generated  header to define
 // CMAKE_NO_ANSI_STREAM_HEADERS and CMAKE_NO_STD_NAMESPACE
-#ifdef CMAKE_HAS_AUTOCONF
+#if defined(CMAKE_HAS_AUTOCONF) || defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmConfigure.h"
-#endif
-#ifdef CMAKE_BUILD_WITH_CMAKE
-#include "cmConfigure.cmake.h"
 #endif
 
 #ifdef _MSC_VER

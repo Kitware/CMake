@@ -27,7 +27,7 @@ cmSourceGroup.cxx
 # configure the .h file
 CONFIGURE_FILE(
 ${CMake_SOURCE_DIR}/Source/cmConfigure.cmake.h.in 
-${CMake_BINARY_DIR}/Source/cmConfigure.cmake.h )
+${CMake_BINARY_DIR}/Source/cmConfigure.h )
 # add the include path to find the .h 
 INCLUDE_DIRECTORIES(${CMake_BINARY_DIR}/Source)
 # let cmake know it is supposed to use it
