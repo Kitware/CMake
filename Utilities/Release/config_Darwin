@@ -1,7 +1,7 @@
 PLATFORM="darwin"
 CC="cc"
 CXX="c++"
-WX_PREFIX=/Users/andy/vtk/wx
+WX_PREFIX=/Users/kitware/Andy/vtk/wx
 WX_RESOURCES=${WX_PREFIX}/lib/libwx_mac-2.3.rsrc
 
 # Write entries into the cache file before building cmake.
