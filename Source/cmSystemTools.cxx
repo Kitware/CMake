@@ -846,8 +846,8 @@ bool cmSystemTools::ParseFunction(std::ifstream& fin,
           if(lastLine.find(inbuffer))
             {
             done = true;
-            std::string args = lastLine.match(1);
-            cmSystemTools::GetArguments(args, arguments);
+            std::string gargs = lastLine.match(1);
+            cmSystemTools::GetArguments(gargs, arguments);
             }
           else
             {

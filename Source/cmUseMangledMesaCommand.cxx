@@ -109,8 +109,8 @@ CopyAndFullPathMesaHeader(const char* source,
         std::string includeFile = includeLine.match(1);
         if(glDirLine.find(includeFile.c_str()))
           {
-          std::string file = glDirLine.match(3);
-          fout << "#include \"" << outdir << "/" << file.c_str() << "\"\n";
+          std::string gfile = glDirLine.match(3);
+          fout << "#include \"" << outdir << "/" << gfile.c_str() << "\"\n";
           }
         else if(glLine.find(includeFile.c_str()))
           {

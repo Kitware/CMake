@@ -125,11 +125,11 @@ bool cmFindProgramCommand::InitialPass(std::vector<std::string> const& argsIn)
       cmSystemTools::GlobDirs(exp.c_str(), path);
       }
     }
-  for(std::vector<std::string>::iterator i = names.begin();
-      i != names.end() ; ++i)
+  for(std::vector<std::string>::iterator it = names.begin();
+      it != names.end() ; ++it)
     {
     // Try to find the program.
-    std::string result = cmSystemTools::FindProgram(i->c_str(), 
+    std::string result = cmSystemTools::FindProgram(it->c_str(), 
                                                     path, 
                                                     no_system_path);
     if(result != "")

@@ -1212,12 +1212,12 @@ OutputSubDirectoryVars(std::ostream& fout,
     }
   fout << "# Variable for making " << target << " in subdirectories.\n";
   fout << var << " = \\\n";
-  unsigned int i;
-  for(i =0; i < SubDirectories.size(); i++)
+  unsigned int ii;
+  for(ii =0; ii < SubDirectories.size(); ii++)
     { 
-    std::string subdir = FixDirectoryName(SubDirectories[i].c_str());
+    std::string subdir = FixDirectoryName(SubDirectories[ii].c_str());
     fout << target << "_" << subdir.c_str();
-    if(i == SubDirectories.size()-1)
+    if(ii == SubDirectories.size()-1)
       {
       fout << " \n\n";
       }
@@ -1228,15 +1228,15 @@ OutputSubDirectoryVars(std::ostream& fout,
     }
   fout << "# Targets for making " << target << " in subdirectories.\n";
   std::string last = "";
-  for(unsigned int i =0; i < SubDirectories.size(); i++)
+  for(unsigned int cc =0; cc < SubDirectories.size(); cc++)
     {
-    std::string subdir = FixDirectoryName(SubDirectories[i].c_str());
+    std::string subdir = FixDirectoryName(SubDirectories[cc].c_str());
     fout << target << "_" << subdir.c_str() << ": " << depend;
     
     // Make each subdirectory depend on previous one.  This forces
     // parallel builds (make -j 2) to build in same order as a single
     // threaded build to avoid dependency problems.
-    if(i > 0)
+    if(cc > 0)
       {
       fout << " " << target << "_" << last.c_str();
       }
@@ -1245,7 +1245,7 @@ OutputSubDirectoryVars(std::ostream& fout,
     last = subdir;
     std::string dir = m_Makefile->GetCurrentOutputDirectory();
     dir += "/";
-    dir += SubDirectories[i];
+    dir += SubDirectories[cc];
     this->BuildInSubDirectory(fout, dir.c_str(),
                               target1, target2, silent);
     }
@@ -1384,10 +1384,10 @@ void cmLocalUnixMakefileGenerator::OutputCheckDepends(std::ostream& fout)
     }
   fout << "\n\n";
   fout << "# if a .h file is removed then run make dependlocal\n\n";
-  for(std::set<std::string>::iterator i = emitted.begin();
-      i != emitted.end(); ++i)
+  for(std::set<std::string>::iterator it = emitted.begin();
+      it != emitted.end(); ++it)
     {
-    fout << *i << ":\n"
+    fout << *it << ":\n"
          << "\t$(MAKE) $(MAKESILENT) dependlocal\n\n";
     }
 }

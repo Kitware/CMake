@@ -71,8 +71,8 @@ void cmGlobalUnixMakefileGenerator::EnableLanguage(const char* lang,
           = mf->GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
         if (!versionValue || atof(versionValue) <= 1.4)
           {
-          std::string fpath = root + "/Modules/CMakeBackwardCompatibilityC.cmake";
-          mf->ReadListFile(0,fpath.c_str());
+          std::string ifpath = root + "/Modules/CMakeBackwardCompatibilityC.cmake";
+          mf->ReadListFile(0,ifpath.c_str());
           }
         }
       }

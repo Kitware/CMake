@@ -289,13 +289,13 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)
     
   for(i = testsBegin; i != tests.end(); ++i)
     {
-    cmSourceFile cfile;
-    cfile.SetProperty("ABSTRACT","0");
-    cfile.SetName(i->c_str(), 
+    cmSourceFile icfile;
+    icfile.SetProperty("ABSTRACT","0");
+    icfile.SetName(i->c_str(), 
                   m_Makefile->GetCurrentDirectory(),
                   m_Makefile->GetSourceExtensions(), 
                   m_Makefile->GetHeaderExtensions());
-    m_Makefile->AddSource(cfile);
+    m_Makefile->AddSource(icfile);
     sourceListValue += ";";
     sourceListValue += *i;
     }
