@@ -49,7 +49,7 @@ int main(int ac, char** av)
       }
     if ( args[1] == "remove" && args.size() > 2 )
       {
-      for ( int cc = 2; cc < args.size(); cc ++ )
+      for ( std::string::size_type cc = 2; cc < args.size(); cc ++ )
 	{
 	cmSystemTools::RemoveFile(args[cc].c_str());
 	}
