@@ -356,6 +356,31 @@ int cmake::Generate(const std::vector<std::string>& args, bool buildMakefiles)
   // Read and parse the input makefile
   mf.MakeStartDirectoriesCurrent();
   cmCacheManager::GetInstance()->LoadCache(&mf);
+  if(mf.GetDefinition("CMAKE_START_DIRECTORY"))
+    {
+    std::string cacheStart = 
+      cmSystemTools::CollapseFullPath(mf.GetDefinition("CMAKE_START_DIRECTORY"));
+    std::string currentStart = 
+      cmSystemTools::CollapseFullPath(mf.GetStartDirectory());
+#ifdef _WIN32
+    cacheStart = cmSystemTools::LowerCase(cacheStart);
+    currentStart = cmSystemTools::LowerCase(currentStart);
+#endif
+    if(cacheStart != currentStart)
+      {
+      std::string message = "Error: source directory: ";
+      message += currentStart;
+      message += "\nDoes not match source directory used to generate cache: ";
+      message += cacheStart;
+      message += "\nRe-run cmake with a different source directory.";
+      cmSystemTools::Error(message.c_str());
+      return -1;
+      }
+    }
+  mf.AddCacheDefinition("CMAKE_START_DIRECTORY", mf.GetStartDirectory(),
+                        "Start directory with the top level CMakeLists.txt file for this project",
+                        cmCacheManager::INTERNAL);
+  
   // extract command line arguments that might add cache entries
   this->SetCacheArgs(mf, args);
   // no generator specified on the command line
