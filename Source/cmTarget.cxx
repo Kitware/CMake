@@ -34,10 +34,13 @@ void cmTarget::GenerateSourceFilesFromSourceLists( cmMakefile &mf)
   for (std::vector<std::string>::const_iterator s = m_SourceLists.begin();
        s != m_SourceLists.end(); ++s)
     {
+    int done = 0;
     // replace any variables
     std::string temps = *s;
     mf.ExpandVariablesInString(temps);
-    // look for a srclist
+
+    // look for a srclist, this is old code we really don't want
+    // any source lists in the future.
     if (mf.GetSources().find(temps) != mf.GetSources().end())
       {
       const std::vector<cmSourceFile*> &clsList = 
@@ -46,28 +49,70 @@ void cmTarget::GenerateSourceFilesFromSourceLists( cmMakefile &mf)
       m_SourceFiles.insert(m_SourceFiles.end(), 
                            clsList.begin(), 
                            clsList.end());
+      done = 1;
       }
-    // if one wasn't found then assume it is a single class
-    else
+
+    // Next if one wasn't found then assume it is a single class
+    if (!done && mf.GetSource(temps.c_str()))
       {
-      // if the source file is already in the makefile, use it
-      if (mf.GetSource(temps.c_str()))
+      m_SourceFiles.push_back(mf.GetSource(temps.c_str()));
+      done = 1;
+      }
+
+    // if it wasn't a source file listed with the makefile
+    // see if it is a variable. This is for old CMake 1.2 compatability 
+    // where a source list would be passed into here, by making it
+    // a vector we need to possibly lookup the variable to maintain
+    // CMake 1.2 compatability.
+    if (!done)
+      {
+      const char* versionValue
+        = mf.GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
+      if (!versionValue || atof(versionValue) <= 1.2)
         {
-        m_SourceFiles.push_back(mf.GetSource(temps.c_str()));
+        const char* varValue = 
+          mf.GetDefinition(temps.c_str());
+        if (varValue)
+          {
+          std::vector<std::string> tval;
+          tval.push_back(varValue);
+          std::vector<std::string> args;
+          cmSystemTools::ExpandListArguments(tval, args);
+          int i;
+          for (i = 0; i < args.size(); ++i)
+            {
+            if (mf.GetSource(args[i].c_str()))
+              {
+              m_SourceFiles.push_back(mf.GetSource(args[i].c_str()));
+              }
+            else
+              {
+              cmSourceFile file;
+              file.SetIsAnAbstractClass(false);
+              file.SetName(args[i].c_str(), mf.GetCurrentDirectory(),
+                           mf.GetSourceExtensions(),
+                           mf.GetHeaderExtensions());
+              m_SourceFiles.push_back(mf.AddSource(file));
+              }
+            }
+          done = 1;
+          }
         }
-      // otherwise try to create it
-      else
-        {
-        cmSourceFile file;
-        file.SetIsAnAbstractClass(false);
-        file.SetName(temps.c_str(), mf.GetCurrentDirectory(),
-                     mf.GetSourceExtensions(),
-                     mf.GetHeaderExtensions());
-        m_SourceFiles.push_back(mf.AddSource(file));
-        }
+      }
+      
+    // if we still are not done, try to create the SourceFile structure
+    if (!done)
+      {
+      cmSourceFile file;
+      file.SetIsAnAbstractClass(false);
+      file.SetName(temps.c_str(), mf.GetCurrentDirectory(),
+                   mf.GetSourceExtensions(),
+                   mf.GetHeaderExtensions());
+      m_SourceFiles.push_back(mf.AddSource(file));
+      done = 1;
       }
     }
-
+  
   // expand any link library variables whle we are at it
   LinkLibraries::iterator p = m_LinkLibraries.begin();
   for (;p != m_LinkLibraries.end(); ++p)
