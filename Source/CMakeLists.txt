@@ -1,5 +1,9 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 1.3)
 
+IF(WIN32)
+  SET(BUILD_SHARED_LIBS 1)
+ENDIF(WIN32)
+
 SET(SRCS
 cmake.cxx
 cmakewizard.cxx
@@ -73,13 +77,9 @@ ENDIF (WIN32)
 
 SET(SRCS ${SRCS} cmUnixMakefileGenerator.cxx cmUnixMakefileGenerator.h)
 
-
 # create a library used by the command line and the GUI
-IF (WIN32)
-  ADD_LIBRARY(CMakeLib SHARED ${SRCS})
-ELSE (WIN32)
-  ADD_LIBRARY(CMakeLib ${SRCS})
-ENDIF (WIN32)
+ADD_LIBRARY(CMakeLib ${SRCS})
+
 
 # always link in the library
 # the library is found here
