@@ -618,7 +618,7 @@ IF(BUILD_TESTING)
   ENDIF (CTEST_TEST_CTEST)
   # see if we can find a fortran compiler on the machine
   # if so, add the fortran test and see if it works.
-  INCLUDE(${CMake_SOURCE_DIR}/Modules/CMakeDetermineFortranCompiler.cmake)
+#  INCLUDE(${CMake_SOURCE_DIR}/Modules/CMakeDetermineFortranCompiler.cmake)
   IF(CMAKE_Fortran_COMPILER_FULLPATH)
     ADD_TEST(Fortran ${CMAKE_CTEST_COMMAND}
       --build-and-test 
