@@ -64,6 +64,29 @@ public:
         }
       return 0;
     }
+  // serach the attribute list for an object of the specified type
+  cmXCodeObject* GetObject(cmXCodeObject::PBXType t)
+    {
+      for(std::vector<cmXCodeObject*>::iterator i = m_List.begin();
+          i != m_List.end(); ++i)
+        {
+        cmXCodeObject* o = *i;
+        if(o->m_IsA == t)
+          {
+          return o;
+          }
+        }
+      return 0;
+    }
+  
+  cmXCodeObject* GetPBXTargetDependency()
+    {
+      return m_PBXTargetDependency;
+    }
+  void SetPBXTargetDependency(cmXCodeObject* d)
+    {
+      m_PBXTargetDependency = d;
+    }
   
 private:
   cmTarget* m_cmTarget;
@@ -72,6 +95,7 @@ private:
   PBXType m_IsA;
   cmStdString m_String;
   cmXCodeObject* m_Object;
+  cmXCodeObject* m_PBXTargetDependency;
   std::vector<cmXCodeObject*> m_List;
   std::map<cmStdString, cmXCodeObject*> m_ObjectAttributes;
 };

@@ -20,7 +20,10 @@ cmXCodeObject::~cmXCodeObject()
 //----------------------------------------------------------------------------
 cmXCodeObject::cmXCodeObject(PBXType ptype, Type type)
 {
-//  m_cmTarget = 0;
+  m_PBXTargetDependency = 0;
+  m_cmTarget = 0;
+  m_Object =0;
+  
   m_IsA = ptype;
   cmOStringStream str;
   str << (void*)this;
