@@ -86,7 +86,7 @@ void cmGlobalGenerator::EnableLanguage(const char* lang,
   if(!isLocal &&
      !this->GetLanguageEnabled("C") && 
      lang[0] == 'C')
-    {
+    {  
     if (m_CMakeInstance->GetIsInTryCompile())
       {
       cmSystemTools::Error("This should not have happen. "
@@ -104,6 +104,18 @@ void cmGlobalGenerator::EnableLanguage(const char* lang,
     determineCFile += "/Modules/CMakeDetermineCCompiler.cmake";
     mf->ReadListFile(0,determineCFile.c_str());
     this->SetLanguageEnabled("C");
+    // put CC in the environment in case user scripts want
+    // to run configure
+    // see man putenv for explaination of this stupid code...
+    if(mf->GetDefinition("CMAKE_C_COMPILER"))
+      { 
+      static char envCC[5000];
+      std::string env = "CC=${CMAKE_C_COMPILER}";
+      mf->ExpandVariablesInString(env);
+      strncpy(envCC, env.c_str(), 4999);
+      envCC[4999] = 0;
+      putenv(envCC);
+      }
     } 
   
   // check for a CXX compiler and configure it
@@ -116,6 +128,18 @@ void cmGlobalGenerator::EnableLanguage(const char* lang,
     determineCFile += "/Modules/CMakeDetermineCXXCompiler.cmake";
     mf->ReadListFile(0,determineCFile.c_str());
     this->SetLanguageEnabled("CXX");
+    // put CXX in the environment in case user scripts want
+    // to run configure
+    // see man putenv for explaination of this stupid code...
+    static char envCXX[5000];
+    if(mf->GetDefinition("CMAKE_CXX_COMPILER"))
+      {
+      std::string env = "CXX=${CMAKE_CXX_COMPILER}";
+      mf->ExpandVariablesInString(env);
+      strncpy(envCXX, env.c_str(), 4999);
+      envCXX[4999] = 0;
+      putenv(envCXX);
+      }
     }
  
     
