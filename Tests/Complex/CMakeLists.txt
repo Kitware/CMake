@@ -221,12 +221,13 @@ STRING(REGEX MATCHALL "b" RESULT "abcb")
 IF(NOT RESULT)
   MESSAGE(SEND_ERROR "STRING(REGEX MATCHALL ... ) test failed.")
 ENDIF(NOT RESULT)
-STRING(REGEX REPLACE "(b)" "[\\1]" RESULT "abcde")
-IF("x${RESULT}" MATCHES "^xa\\[b\\]cde$")
+STRING(REGEX REPLACE ".([bd])." "[\\1]" RESULT "a(b)c(d)e")
+IF("x${RESULT}" MATCHES "^xa\\[b\\]c\\[d\\]e$")
   SET(STRING_REGEX_PASSED 1)
-ENDIF("x${RESULT}" MATCHES "^xa\\[b\\]cde$")
+ENDIF("x${RESULT}" MATCHES "^xa\\[b\\]c\\[d\\]e$")
 IF(NOT STRING_REGEX_PASSED)
-  MESSAGE(SEND_ERROR "STRING(REGEX REPLACE ... ) test failed.")
+  MESSAGE(SEND_ERROR
+          "STRING(REGEX REPLACE ... ) test failed (\"${RESULT}\" v. \"a[b]c[d]e\")")
 ENDIF(NOT STRING_REGEX_PASSED)
 
 #

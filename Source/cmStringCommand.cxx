@@ -254,7 +254,7 @@ bool cmStringCommand::RegexReplace(std::vector<std::string> const& args)
     std::string::size_type r = re.end();
     
     // Concatenate the part of the input that was not matched.
-    output += input.substr(base, l-base);
+    output += input.substr(base, l);
     
     // Make sure the match had some text.
     if(r-l == 0)
@@ -282,7 +282,7 @@ bool cmStringCommand::RegexReplace(std::vector<std::string> const& args)
         if((start != std::string::npos) && (end != std::string::npos) &&
            (start >= 0) && (start <= len) && (end >= 0) && (end <= len))
           {
-          output += input.substr(base+l, r-l);
+          output += input.substr(base+start, end-start);
           }
         else
           {
