@@ -196,7 +196,7 @@ public:
    * not the same as !IsOn(...) because there are a number of
    * ambiguous values such as "/usr/local/bin" a path will result in
    * IsON and IsOff both returning false. Note that the special path
-   * NOTFOUND will cause IsOff to return true. 
+   * NOTFOUND or IGNORE will cause IsOff to return true. 
    */
   static bool IsOff(const char* val);
 

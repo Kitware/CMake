@@ -819,7 +819,7 @@ bool cmSystemTools::IsOff(const char* val)
     *c = toupper(*c);
     }
   return (v == "OFF" || v == "0" || v == "NO" || v == "FALSE" || 
-	  v == "N" || v == "NOTFOUND");
+	  v == "N" || v == "NOTFOUND" || v == "IGNORE");
 }
 
 
