@@ -149,6 +149,12 @@ BOOL CMakeSetupDialog::OnInitDialog()
 {
   CDialog::OnInitDialog();
 
+  // Add "Create shortcut" menu item to system menu.
+
+  // IDM_CREATESHORTCUT must be in the system command range.
+  ASSERT((IDM_CREATESHORTCUT & 0xFFF0) == IDM_CREATESHORTCUT);
+  ASSERT(IDM_CREATESHORTCUT < 0xF000);
+
   // Add "About..." menu item to system menu.
 
   // IDM_ABOUTBOX must be in the system command range.
@@ -158,12 +164,24 @@ BOOL CMakeSetupDialog::OnInitDialog()
   CMenu* pSysMenu = GetSystemMenu(FALSE);
   if (pSysMenu != NULL)
     {
+    CString strCreateShortcutMenu;
+    strCreateShortcutMenu.LoadString(IDS_CREATESHORTCUT);
+    if (!strCreateShortcutMenu.IsEmpty())
+      {
+      pSysMenu->AppendMenu(MF_SEPARATOR);
+      pSysMenu->AppendMenu(MF_STRING, 
+                           IDM_CREATESHORTCUT, 
+                           strCreateShortcutMenu);
+      }
+
     CString strAboutMenu;
     strAboutMenu.LoadString(IDS_ABOUTBOX);
     if (!strAboutMenu.IsEmpty())
       {
       pSysMenu->AppendMenu(MF_SEPARATOR);
-      pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, strAboutMenu);
+      pSysMenu->AppendMenu(MF_STRING, 
+                           IDM_ABOUTBOX, 
+                           strAboutMenu);
       }
     }
 
@@ -206,6 +224,10 @@ void CMakeSetupDialog::OnSysCommand(UINT nID, LPARAM lParam)
     {
     CAboutDlg dlgAbout;
     dlgAbout.DoModal();
+    }
+  else if ((nID & 0xFFF0) == IDM_CREATESHORTCUT)
+    {
+    CreateShortcut();
     }
   else
     {
@@ -815,4 +837,138 @@ void CMakeSetupDialog::OnEditchangeGenerator()
 {
 	// TODO: Add your control notification handler code here
 	
+}
+
+
+// Create a shortcut on the desktop with the current Source/Build dir.
+int CMakeSetupDialog::CreateShortcut() 
+{
+  //  m_WhereSource = cmdInfo.m_WhereSource;
+  //  m_WhereBuild = cmdInfo.m_WhereBuild;
+
+  // Find the desktop folder and create the link name
+
+  HKEY hKey;
+  if(RegOpenKeyEx(HKEY_CURRENT_USER, 
+      "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders", 
+		  0, KEY_READ, &hKey) != ERROR_SUCCESS)
+    {
+    AfxMessageBox ("Create shortcut: unable to find 'Shell Folders' key in registry!");
+    return 1;
+    }
+  
+  DWORD dwType, dwSize;
+#define MAXPATH 1024
+  char link_name[MAXPATH];
+  dwSize = MAXPATH;
+  if(RegQueryValueEx(hKey, 
+                     (LPCTSTR)"Desktop", 
+                     NULL, 
+                     &dwType, 
+                     (BYTE *)link_name, 
+                     &dwSize) != ERROR_SUCCESS)
+    {
+    AfxMessageBox ("Create shortcut: unable to find 'Desktop' registry value in 'Shell Folders' key!");
+    return 1;
+    }
+  
+  if(dwType != REG_SZ)
+    {
+    AfxMessageBox ("Create shortcut: 'Desktop' registry value in 'Shell Folders' key has wrong type!");
+    return 1;
+    }
+
+  strcat(link_name, "\\CMake - ");
+  std::string current_dir = cmSystemTools::GetFilenameName((LPCTSTR)m_WhereSource);
+  strcat(link_name, current_dir.c_str());
+  strcat(link_name, ".lnk");
+  
+  // Find the path to the current executable
+
+  char path_to_current_exe[MAXPATH];
+  ::GetModuleFileName(NULL, path_to_current_exe, MAXPATH);
+
+  // Create the shortcut
+
+  HRESULT hres;
+  IShellLink *psl;
+
+  // Initialize the COM library
+
+  hres = CoInitialize(NULL);
+
+  if (! SUCCEEDED (hres))
+    {
+    AfxMessageBox ("Create shortcut: unable to initialize the COM library!");
+    return 1;
+    }
+
+  // Create an IShellLink object and get a pointer to the IShellLink 
+  // interface (returned from CoCreateInstance).
+
+  hres = CoCreateInstance(CLSID_ShellLink, 
+                          NULL, 
+                          CLSCTX_INPROC_SERVER,
+                          IID_IShellLink, 
+                          (void **)&psl);
+
+  if (! SUCCEEDED (hres))
+    {
+    AfxMessageBox ("Create shortcut: unable to create IShellLink instance!");
+    return 1;
+    }
+
+  IPersistFile *ppf;
+
+  // Query IShellLink for the IPersistFile interface for 
+  // saving the shortcut in persistent storage.
+
+  hres = psl->QueryInterface(IID_IPersistFile, (void **)&ppf);
+
+  if (SUCCEEDED (hres))
+    { 
+    // Set the path to the shortcut target.
+    hres = psl->SetPath(path_to_current_exe);
+
+    if (! SUCCEEDED (hres))
+      {
+      AfxMessageBox ("Create shortcut: SetPath failed!");
+      }
+    
+    // Set the arguments of the shortcut.
+    CString args = " /H=" + m_WhereSource + " /B=" + m_WhereBuild;
+    hres = psl->SetArguments(args);
+
+    if (! SUCCEEDED (hres))
+      {
+      AfxMessageBox ("Create shortcut: SetArguments failed!");
+      }
+    
+    // Set the description of the shortcut.
+    hres = psl->SetDescription("Shortcut to CMakeSetup");
+    
+    if (! SUCCEEDED (hres))
+      {
+      AfxMessageBox ("Create shortcut: SetDescription failed!");
+      }
+    
+    // Ensure that the string consists of ANSI characters.
+    WORD wsz[MAX_PATH]; 
+    MultiByteToWideChar(CP_ACP, 0, link_name, -1, wsz, MAX_PATH);
+
+    // Save the shortcut via the IPersistFile::Save member function.
+    hres = ppf->Save(wsz, TRUE);
+
+    if (! SUCCEEDED (hres))
+      {
+      AfxMessageBox ("Create shortcut: Save failed!");
+      }
+    
+    // Release the pointer to IPersistFile.
+    ppf->Release ();
+    }
+  // Release the pointer to IShellLink.
+  psl->Release ();
+
+  return 0;
 }

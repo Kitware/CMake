@@ -65,7 +65,8 @@ protected:
   void FillCacheGUIFromCacheManager();
   // copy from the list box to the cache manager
   void FillCacheManagerFromCacheGUI();
-  
+  // Create a shortcut on the desktop with the current Source/Build dir.
+  int CreateShortcut();
   
   HICON m_hIcon;
   CString m_RegistryKey;
