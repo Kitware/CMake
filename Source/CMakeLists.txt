@@ -72,6 +72,8 @@ IF (WIN32)
                     cmLocalVisualStudio6Generator.h
                     cmGlobalVisualStudio7Generator.h
                     cmLocalVisualStudio7Generator.h
+		    cmWin32ProcessExecution.cxx
+		    cmWin32ProcessExecution.h
                     )
     IF(  NOT BORLAND )
       LINK_LIBRARIES( rpcrt4.lib )
