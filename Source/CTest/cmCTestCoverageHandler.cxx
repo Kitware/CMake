@@ -176,7 +176,7 @@ int cmCTestCoverageHandler::ProcessHandler()
 
   std::string coverage_start_time = m_CTest->CurrentTime();
 
-  std::string testingDir = m_CTest->GetToplevelPath() + "/Testing";
+  std::string testingDir = m_CTest->GetBinaryDir() + "/Testing";
   std::string tempDir = testingDir + "/CoverageInfo";
   std::string currentDirectory = cmSystemTools::GetCurrentWorkingDirectory();
   cmSystemTools::MakeDirectory(tempDir.c_str());

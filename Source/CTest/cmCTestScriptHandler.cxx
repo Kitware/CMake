@@ -45,6 +45,7 @@
 #include "cmCTestEmptyBinaryDirectoryCommand.h"
 #include "cmCTestRunScriptCommand.h"
 #include "cmCTestSleepCommand.h"
+#include "cmCTestStartCommand.h"
 
 #define CTEST_INITIAL_CMAKE_OUTPUT_FILE_NAME "CTestInitialCMakeOutput.log"
 
@@ -158,6 +159,15 @@ void cmCTestScriptHandler::UpdateElapsedTime()
 }
 
 //----------------------------------------------------------------------
+void cmCTestScriptHandler::AddCTestCommand(cmCTestCommand* command)
+{
+  cmCTestCommand* newCom = command;
+  newCom->m_CTest = m_CTest;
+  newCom->m_CTestScriptHandler = this;
+  m_CMake->AddCommand(newCom);
+}
+
+//----------------------------------------------------------------------
 // this sets up some variables for thew script to use, creates the required
 // cmake instance and generators, and then reads in the script
 int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
@@ -209,18 +219,10 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   // add any ctest specific commands, probably should have common superclass
   // for ctest commands to clean this up. If a couple more commands are
   // created with the same format lets do that - ken
-  cmCTestCommand* newCom = new cmCTestRunScriptCommand;
-  newCom->m_CTest = m_CTest;
-  newCom->m_CTestScriptHandler = this;
-  m_CMake->AddCommand(newCom);
-  newCom = new cmCTestEmptyBinaryDirectoryCommand;
-  newCom->m_CTest = m_CTest;
-  newCom->m_CTestScriptHandler = this;
-  m_CMake->AddCommand(newCom);
-  newCom = new cmCTestSleepCommand;
-  newCom->m_CTest = m_CTest;
-  newCom->m_CTestScriptHandler = this;
-  m_CMake->AddCommand(newCom);
+  this->AddCTestCommand(new cmCTestRunScriptCommand);
+  this->AddCTestCommand(new cmCTestEmptyBinaryDirectoryCommand);
+  this->AddCTestCommand(new cmCTestSleepCommand);
+  this->AddCTestCommand(new cmCTestStartCommand);
   
   // add the script arg if defined
   if (script_arg.size())

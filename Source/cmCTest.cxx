@@ -227,7 +227,7 @@ cmCTest::cmCTest()
   m_BuildNoClean           = false;
   m_BuildTwoConfig         = false;
   m_Verbose                = false;
-  m_DartMode               = false;
+  m_ProduceXML             = false;
   m_ShowOnly               = false;
   m_RunConfigurationScript = false;
   m_TestModel              = cmCTest::EXPERIMENTAL;
@@ -266,23 +266,23 @@ cmCTest::~cmCTest()
     }
 }
 
-int cmCTest::Initialize()
+int cmCTest::Initialize(const char* binary_dir)
 {
   if(!m_InteractiveDebugMode)
     {
     this->BlockTestErrorDiagnostics();
     }
   
-  m_ToplevelPath = cmSystemTools::GetCurrentWorkingDirectory();
-  cmSystemTools::ConvertToUnixSlashes(m_ToplevelPath);
-  if ( !this->ReadCustomConfigurationFileTree(m_ToplevelPath.c_str()) )
+  m_BinaryDir = binary_dir;
+  cmSystemTools::ConvertToUnixSlashes(m_BinaryDir);
+  if ( !this->ReadCustomConfigurationFileTree(m_BinaryDir.c_str()) )
     {
     return 0;
     }
   this->UpdateCTestConfiguration();
-  if ( m_DartMode )
+  if ( m_ProduceXML )
     {
-    std::string testingDir = m_ToplevelPath + "/Testing";
+    std::string testingDir = m_BinaryDir + "/Testing";
     if ( cmSystemTools::FileExists(testingDir.c_str()) )
       {
       if ( !cmSystemTools::FileIsDirectory(testingDir.c_str()) )
@@ -410,7 +410,7 @@ void cmCTest::UpdateCTestConfiguration()
     m_DartConfiguration[key] = value;
     }
   fin.close();
-  if ( m_DartMode )
+  if ( m_ProduceXML )
     {
     m_TimeOut = atoi(m_DartConfiguration["TimeOut"].c_str());
     m_CompressXMLFiles = cmSystemTools::IsOn(m_DartConfiguration["CompressSubmission"].c_str());
@@ -495,7 +495,7 @@ bool cmCTest::OpenOutputFile(const std::string& path,
                      const std::string& name, cmGeneratedFileStream& stream,
                      bool compress)
 {
-  std::string testingDir = m_ToplevelPath + "/Testing";
+  std::string testingDir = m_BinaryDir + "/Testing";
   if ( path.size() > 0 )
     {
     testingDir += "/" + path;
@@ -574,7 +574,7 @@ int cmCTest::SubmitResults()
   if ( this->AddIfExists(files, "Coverage.xml") )
     {
     cmCTest::tm_VectorOfStrings gfiles;
-    std::string gpath = m_ToplevelPath + "/Testing/" + m_CurrentTag;
+    std::string gpath = m_BinaryDir + "/Testing/" + m_CurrentTag;
     std::string::size_type glen = gpath.size() + 1;
     gpath = gpath + "/CoverageLog*";
     //std::cout << "Globbing for: " << gpath.c_str() << std::endl;
@@ -623,7 +623,7 @@ int cmCTest::SubmitResults()
       cmCTest::MakeURLSafe(m_DartConfiguration["DropSitePassword"]) + "@" + 
       m_DartConfiguration["DropSite"] + 
       cmCTest::MakeURLSafe(m_DartConfiguration["DropLocation"]);
-    if ( !submit.SubmitUsingFTP(m_ToplevelPath+"/Testing/"+m_CurrentTag, 
+    if ( !submit.SubmitUsingFTP(m_BinaryDir+"/Testing/"+m_CurrentTag, 
         files, prefix, url) )
       {
       std::cerr << "  Problems when submitting via FTP" << std::endl;
@@ -655,7 +655,7 @@ int cmCTest::SubmitResults()
       url += "@";
       }
     url += m_DartConfiguration["DropSite"] + m_DartConfiguration["DropLocation"];
-    if ( !submit.SubmitUsingHTTP(m_ToplevelPath+"/Testing/"+m_CurrentTag, files, prefix, url) )
+    if ( !submit.SubmitUsingHTTP(m_BinaryDir+"/Testing/"+m_CurrentTag, files, prefix, url) )
       {
       std::cerr << "  Problems when submitting via HTTP" << std::endl;
       ofs << "  Problems when submitting via HTTP" << std::endl;
@@ -681,7 +681,7 @@ int cmCTest::SubmitResults()
     url += m_DartConfiguration["DropSite"] + ":" + m_DartConfiguration["DropLocation"];
     
     if ( !submit.SubmitUsingSCP(m_DartConfiguration["ScpCommand"],
-        m_ToplevelPath+"/Testing/"+m_CurrentTag, files, prefix, url) )
+        m_BinaryDir+"/Testing/"+m_CurrentTag, files, prefix, url) )
       {
       std::cerr << "  Problems when submitting via SCP" << std::endl;
       ofs << "  Problems when submitting via SCP" << std::endl;
@@ -696,7 +696,7 @@ int cmCTest::SubmitResults()
 
 bool cmCTest::CTestFileExists(const std::string& filename)
 {
-  std::string testingDir = m_ToplevelPath + "/Testing/" + m_CurrentTag + "/" +
+  std::string testingDir = m_BinaryDir + "/Testing/" + m_CurrentTag + "/" +
     filename;
   return cmSystemTools::FileExists(testingDir.c_str());
 }
@@ -780,7 +780,7 @@ int cmCTest::ProcessTests()
     }
   if ( !notest )
     {
-    std::string notes_dir = m_ToplevelPath + "/Testing/Notes";
+    std::string notes_dir = m_BinaryDir + "/Testing/Notes";
     if ( cmSystemTools::FileIsDirectory(notes_dir.c_str()) )
       {
       cmsys::Directory d;
@@ -1218,7 +1218,7 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
       }
     if( arg.find("-D",0) == 0 && i < args.size() - 1 )
       {
-      this->m_DartMode = true;
+      this->m_ProduceXML = true;
       i++;
       std::string targ = args[i];
       if ( targ == "Experimental" )
@@ -1419,7 +1419,7 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
     if( ( arg.find("-T",0) == 0 ) && 
       (i < args.size() -1) )
       {
-      this->m_DartMode = true;
+      this->m_ProduceXML = true;
       i++;
       if ( !this->SetTest(args[i].c_str(), false) )
         {
@@ -1496,7 +1496,7 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
 
     if(arg.find("-A",0) == 0 && i < args.size() - 1)
       {
-      this->m_DartMode = true;
+      this->m_ProduceXML = true;
       this->SetTest("Notes");
       i++;
       this->SetNotesFiles(args[i].c_str());
@@ -1617,7 +1617,7 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
       }
     else
       {
-      if ( !this->Initialize() )
+      if ( !this->Initialize(cmSystemTools::GetCurrentWorkingDirectory().c_str()) )
         {
         res = 12;
         }
@@ -2285,9 +2285,9 @@ std::string cmCTest::GetCurrentTag()
   return m_CurrentTag;
 }
 
-std::string cmCTest::GetToplevelPath()
+std::string cmCTest::GetBinaryDir()
 {
-  return m_ToplevelPath;
+  return m_BinaryDir;
 }
 
 std::string cmCTest::GetConfigType()
@@ -2300,7 +2300,12 @@ bool cmCTest::GetShowOnly()
   return m_ShowOnly;
 }
 
+void cmCTest::SetProduceXML(bool v)
+{
+  m_ProduceXML = v;
+}
+
 bool cmCTest::GetProduceXML()
 {
-  return m_DartMode;
+  return m_ProduceXML;
 }

@@ -26,6 +26,7 @@ class cmMakefile;
 class cmLocalGenerator;
 class cmGlobalGenerator;
 class cmake;
+class cmCTestCommand;
 
 /** \class cmCTestScriptHandler
  * \brief A class that handles ctest -S invocations
@@ -115,6 +116,9 @@ private:
 
   int RunConfigurationScript(const std::string& script);
   int RunConfigurationDashboard();
+
+  // Add ctest command
+  void AddCTestCommand(cmCTestCommand* command);
 
   std::vector<cmStdString> m_ConfigurationScripts;
 

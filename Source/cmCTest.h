@@ -38,7 +38,7 @@ public:
   /**
    * Initialize and finalize testing
    */
-  int Initialize();
+  int Initialize(const char* binary_dir);
   void Finalize();
 
   /**
@@ -110,13 +110,51 @@ public:
   //! Set the notes files to be created.
   void SetNotesFiles(const char* notes);
 
-  std::string m_ConfigType;
-  bool m_Verbose;
-  bool m_DartMode;
+  static void PopulateCustomVector(cmMakefile* mf, const char* definition, 
+                                   tm_VectorOfStrings& vec);
+  static void PopulateCustomInteger(cmMakefile* mf, const char* def, int& val);
 
-  bool m_ForceNewCTestProcess;
+  ///! Get the current time as string
+  std::string CurrentTime();
+  
+  ///! Open file in the output directory and set the stream
+  bool OpenOutputFile(const std::string& path, 
+                      const std::string& name,
+                      cmGeneratedFileStream& stream,
+                      bool compress = false);
 
-  bool m_RunConfigurationScript;
+  ///! Convert string to something that is XML safe
+  static std::string MakeXMLSafe(const std::string&);
+
+  ///! Should we only show what we would do?
+  bool GetShowOnly();
+  
+  //! Start CTest XML output file
+  void StartXML(std::ostream& ostr);
+
+  //! End CTest XML output file
+  void EndXML(std::ostream& ostr);
+
+  //! Run command specialized for make and configure. Returns process status
+  // and retVal is return value or exception.
+  int RunMakeCommand(const char* command, std::string* output,
+    int* retVal, const char* dir, bool verbose, int timeout, 
+    std::ofstream& ofs);
+
+  /*
+   * return the current tag
+   */
+  std::string GetCurrentTag();
+
+  //! Get the path to the build tree
+  std::string GetBinaryDir();
+  
+  //! Get the short path to the file. This means if the file is in binary or
+  //source directory, it will become /.../relative/path/to/file
+  std::string GetShortPathToFile(const char* fname);
+
+  //! Get the path to CTest
+  const char* GetCTestExecutable() { return m_CTestSelf.c_str(); }
 
   enum {
     EXPERIMENTAL,
@@ -134,60 +172,29 @@ public:
     COVERAGE_ERRORS = 0x20
   };
 
-  int GenerateNotesFile(const char* files);
-
-  bool OpenOutputFile(const std::string& path, 
-                      const std::string& name,
-                      cmGeneratedFileStream& stream,
-                      bool compress = false);
-  static std::string MakeXMLSafe(const std::string&);
-  static std::string MakeURLSafe(const std::string&);
-  
-  /*
-   * return the current tag
-   */
-  std::string GetCurrentTag();
-
-  ///! Get the current time as string
-  std::string CurrentTime();
-  
-  ///! Should we only show what we would do?
-  bool GetShowOnly();
-  
   ///! Are we producing XML
   bool GetProduceXML();
+  void SetProduceXML(bool v);
 
-  //! Start CTest XML output file
-  void StartXML(std::ostream& ostr);
-
-  //! End CTest XML output file
-  void EndXML(std::ostream& ostr);
-
-  //! Run command specialized for make and configure. Returns process status
-  // and retVal is return value or exception.
-  int RunMakeCommand(const char* command, std::string* output,
-    int* retVal, const char* dir, bool verbose, int timeout, 
-    std::ofstream& ofs);
-
-  static void PopulateCustomVector(cmMakefile* mf, const char* definition, 
-                                   tm_VectorOfStrings& vec);
-  static void PopulateCustomInteger(cmMakefile* mf, const char* def, int& val);
-
-  std::string GetToplevelPath();
-  
   //! Run command specialized for tests. Returns process status and retVal is
   // return value or exception.
   int RunTest(std::vector<const char*> args, std::string* output, int *retVal, 
     std::ostream* logfile);
 
-  //! Get the path to CTest
-  const char* GetCTestExecutable() { return m_CTestSelf.c_str(); }
-
-  //! Get the short path to the file. This means if the file is in binary or
-  //source directory, it will become /.../relative/path/to/file
-  std::string GetShortPathToFile(const char* fname);
-
 private:
+
+  std::string m_ConfigType;
+  bool m_Verbose;
+  bool m_ProduceXML;
+
+  bool m_ForceNewCTestProcess;
+
+  bool m_RunConfigurationScript;
+
+  int GenerateNotesFile(const char* files);
+
+  static std::string MakeURLSafe(const std::string&);
+  
   // these are helper classes
   typedef std::map<cmStdString,cmCTestGenericHandler*> t_TestingHandlers;
   t_TestingHandlers m_TestingHandlers;
@@ -212,7 +219,6 @@ private:
   //! Map of configuration properties
   typedef std::map<cmStdString, cmStdString> tm_DartConfigurationMap;
 
-  std::string             m_ToplevelPath;
   tm_DartConfigurationMap m_DartConfiguration;
   int                     m_Tests[LAST_TEST];
   

@@ -316,7 +316,7 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
     m_MemoryTesterOptions = m_CTest->GetDartConfiguration("ValgrindCommandOptions");
     }
 
-  m_MemoryTesterOutputFile = m_CTest->GetToplevelPath() + "/Testing/Temporary/MemoryChecker.log";
+  m_MemoryTesterOutputFile = m_CTest->GetBinaryDir() + "/Testing/Temporary/MemoryChecker.log";
   m_MemoryTesterOutputFile = cmSystemTools::EscapeSpaces(m_MemoryTesterOutputFile.c_str());
 
   if ( m_MemoryTester.find("valgrind") != std::string::npos )
