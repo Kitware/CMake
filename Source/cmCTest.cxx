@@ -14,6 +14,8 @@
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
+#include "curl/curl.h"
+
 #include "cmCTest.h"
 #include "cmake.h"
 #include "cmMakefile.h"
@@ -31,7 +33,6 @@
 #include "cmCTestConfigureHandler.h"
 
 #include "cmCTestSubmit.h"
-#include "curl/curl.h"
 
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/Process.h>

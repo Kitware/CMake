@@ -427,3 +427,34 @@ void main(void) {
                       ? 1 : -1];
 int main () { ; return 0; }
 #endif
+#ifdef HAVE_IOCTLSOCKET
+#include <windows.h>
+
+int
+main ()
+{
+
+/* ioctlsocket source code */
+ int socket;
+ unsigned long flags = ioctlsocket(socket, FIONBIO, &flags);
+
+  ;
+  return 0;
+}
+
+#endif
+#ifdef HAVE_IOCTLSOCKET_CASE
+#include <windows.h>
+
+int
+main ()
+{
+
+/* IoctlSocket source code */
+ int socket;
+ int flags = IoctlSocket(socket, FIONBIO, (long)1);
+
+  ;
+  return 0;
+}
+#endif
