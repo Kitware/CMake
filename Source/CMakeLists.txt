@@ -79,10 +79,7 @@ LINK_DIRECTORIES(${CMake_BINARY_DIR}/Source)
 
 ADD_EXECUTABLE(cmake cmakemain.cxx)
 ADD_EXECUTABLE(DumpDocumentation cmDumpDocumentation)
-
 ADD_EXECUTABLE(ctest ctest.cxx cmSystemTools.cxx cmRegularExpression.cxx)
-ADD_EXECUTABLE(ccommand ccommand.cxx cmSystemTools.cxx cmMakefile.cxx)
-
 
 IF (UNIX)
   INCLUDE (${CMake_SOURCE_DIR}/Modules/FindCurses.cmake OPTIONAL)
@@ -214,6 +211,5 @@ INCLUDE (${CMAKE_SOURCE_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
 
 INSTALL_TARGETS(/bin cmake)
 INSTALL_TARGETS(/bin ctest)
-INSTALL_TARGETS(/bin ccommand)
 INSTALL_TARGETS(/bin cmaketest)
 

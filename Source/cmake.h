@@ -41,6 +41,12 @@ class cmake
    */
   int Generate(const std::vector<std::string>&, bool buildMakefiles = true);
 
+  /** 
+   * Execute commands during the build process. Supports options such
+   * as echo, remove file etc.
+   */
+  static int CMakeCommand(std::vector<std::string>&);
+
   ///! Parse command line arguments
   void SetArgs(cmMakefile& builder, const std::vector<std::string>&);
   ///! Parse command line arguments that might set cache values

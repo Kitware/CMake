@@ -21,6 +21,7 @@
 int main(int ac, char** av)
 {
   bool wiz = false;
+  bool command = false;
   std::vector<std::string> args;
   for(int i =0; i < ac; ++i)
     {
@@ -30,18 +31,31 @@ int main(int ac, char** av)
       }
     else
       {
-      args.push_back(av[i]);
+      if (strcmp(av[i], "-E") == 0)
+        {
+        command = true;
+        }
+      else 
+        {
+        args.push_back(av[i]);
+        }
       }
     }
-  if(!wiz)
+
+  if(command)
     {
-    cmake cm;
-    int ret = cm.Generate(args);
-    cmMakefileGenerator::UnRegisterGenerators();
+    int ret = cmake::CMakeCommand(args);
     return ret;
     }
-  cmakewizard wizard;
-  wizard.RunWizard(args); 
+  if (wiz)
+    {
+    cmakewizard wizard;
+    wizard.RunWizard(args); 
+    cmMakefileGenerator::UnRegisterGenerators();
+    return 0;
+    }
+  cmake cm;
+  int ret = cm.Generate(args);
   cmMakefileGenerator::UnRegisterGenerators();
-  return 0;
+  return ret;  
 }

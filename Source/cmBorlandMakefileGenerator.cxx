@@ -102,8 +102,6 @@ void cmBorlandMakefileGenerator::OutputMakeVariables(std::ostream& fout)
 
   std::string replaceVars = variables;
   m_Makefile->ExpandVariablesInString(replaceVars);
-  std::string ccommand = m_Makefile->GetDefinition("CCOMMAND_COMMAND");
-  fout << "RM = " << this->ConvertToOutputPath(ccommand.c_str()) << " remove -f\n";
   std::string ccompiler = m_Makefile->GetDefinition("CMAKE_C_COMPILER");
   fout << "CMAKE_C_COMPILER  = " 
        << this->ConvertToOutputPath(ccompiler.c_str())
@@ -123,6 +121,7 @@ void cmBorlandMakefileGenerator::OutputMakeVariables(std::ostream& fout)
   std::string cmakecommand = m_Makefile->GetDefinition("CMAKE_COMMAND");
   fout << "CMAKE_COMMAND = " 
        << this->ShortPath(cmakecommand.c_str()) << "\n";
+  fout << "RM = " << this->ShortPath(cmakecommand.c_str()) << " -E remove -f\n";
 
   fout << replaceVars.c_str();
   fout << "CMAKE_CURRENT_SOURCE = " 
