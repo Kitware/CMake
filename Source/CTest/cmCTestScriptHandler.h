@@ -110,6 +110,8 @@ private:
 
   bool m_Verbose;
   bool m_Backup;
+  bool m_EmptyBinDir;
+  bool m_EmptyBinDirOnce;
 
   cmStdString m_SourceDir;
   cmStdString m_BinaryDir;
@@ -119,8 +121,14 @@ private:
   cmStdString m_CVSCheckOut;
   cmStdString m_CTestCmd;
   cmStdString m_CVSCmd;
+  cmStdString m_CTestEnv;
+  cmStdString m_InitCache;
+  cmStdString m_CMakeCmd;
+  cmStdString m_CMOutFile;
+  std::vector<cmStdString> m_ExtraUpdates;
 
   double m_MinimumInterval;
+  double m_ContinuousDuration;
   
   cmMakefile *m_Makefile;
   cmLocalGenerator *m_LocalGenerator;
