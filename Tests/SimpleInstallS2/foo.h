@@ -3,7 +3,7 @@ extern "C" {
 #endif
 
 extern char* foo;
-extern int SomeFunctionInFoo(int i);
+extern int SomeFunctionInFoo();
 
 #ifdef __cplusplus
 }

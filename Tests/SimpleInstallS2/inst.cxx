@@ -18,5 +18,5 @@ int main ()
     return 1;
     }
   printf("Foo: %s\n", foo);
-  return SomeFunctionInFoo(-5);
+  return SomeFunctionInFoo()-5;
 }

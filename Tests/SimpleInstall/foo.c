@@ -1,6 +1,6 @@
 char* foo = "Foo";
 
-int SomeFunctionInFoo(int i)
+int SomeFunctionInFoo()
 {
-  return i + 5;
+  return 5;
 }
