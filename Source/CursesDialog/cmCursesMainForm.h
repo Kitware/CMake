@@ -10,7 +10,8 @@ class cmCursesCacheEntryComposite;
 class cmCursesMainForm : public cmCursesForm
 {
 public:
-  cmCursesMainForm(const char* whereSource, bool newCache);
+  cmCursesMainForm(const char* whereSource, const char* whereCMake,
+                   bool newCache);
   virtual ~cmCursesMainForm();
   
   // Description:
@@ -62,6 +63,7 @@ protected:
   FIELD** m_Fields;
   WINDOW* m_Window;
   std::string m_WhereSource;
+  std::string m_WhereCMake;
   int m_Height;
 
 };

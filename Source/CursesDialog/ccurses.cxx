@@ -59,11 +59,11 @@ int main(int argc, char** argv)
 
   if ( argc == 2 )
     {
-    myform = new cmCursesMainForm(argv[1], newCache);
+    myform = new cmCursesMainForm(argv[1], argv[0], newCache);
     }
   else
     {
-    myform = new cmCursesMainForm("", newCache);
+    myform = new cmCursesMainForm("", argv[0], newCache);
     }
   myform->InitializeUI(w);
   myform->Render(1, 1, x, y);

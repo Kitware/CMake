@@ -21,8 +21,9 @@ inline int ctrl(int z)
 } 
 
 cmCursesMainForm::cmCursesMainForm(const char* whereSource, 
+                                   const char* whereCMake,
 				   bool newCache) :
-  m_WhereSource(whereSource)
+  m_WhereSource(whereSource), m_WhereCMake(whereCMake)
 {
   m_Fields = 0;
   m_Window = 0;
@@ -331,7 +332,7 @@ void cmCursesMainForm::RunCMake(bool generateMakefiles)
   cmake make;
   // create the arguments for the cmake object
   std::vector<std::string> args;
-  args.push_back("cmake");
+  args.push_back(m_WhereCMake);
   if (m_WhereSource != "")
     {
     std::string arg;
