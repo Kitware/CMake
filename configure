@@ -1035,7 +1035,7 @@ echo "configure:1034: checking ansi standard C++ stream headers " >&5
   cat > conftest.cc <<!
 #include <iostream>
 !
-  if test -z "`${CXX} -c conftest.cc 2>&1`"; then
+  if test -z "`${CXX} $CXXFLAGS $CPPFLAGS  -c conftest.cc 2>&1`"; then
     echo "$ac_t""yes" 1>&6
   else
     cat >> confdefs.h <<\EOF
@@ -1048,15 +1048,14 @@ fi
 
 # check to see if stl is in the std namespace
 if test $ac_cv_prog_gxx = no; then
-  echo "******"
   echo $ac_n "checking ansi standard namespace support ""... $ac_c" 1>&6
-echo "configure:1054: checking ansi standard namespace support " >&5 
+echo "configure:1053: checking ansi standard namespace support " >&5 
   rm -rf conftest.*
   cat > conftest.cc <<!
 #include <list>
 void foo() { std::list<int> l; }
 !
-  if test -z "`${CXX} -c conftest.cc 2>&1`"; then
+  if test -z "`${CXX} $CXXFLAGS $CPPFLAGS -c conftest.cc 2>&1`"; then
     echo "$ac_t""yes" 1>&6
   else
     cat >> confdefs.h <<\EOF

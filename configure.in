@@ -68,7 +68,7 @@ if test $ac_cv_prog_gxx = no; then
   cat > conftest.cc <<!
 #include <iostream>
 !
-  if test -z "`${CXX} -c conftest.cc 2>&1`"; then
+  if test -z "`${CXX} $CXXFLAGS $CPPFLAGS  -c conftest.cc 2>&1`"; then
     echo "$ac_t""yes" 1>&6
   else
     AC_DEFINE(CMAKE_NO_ANSI_STREAM_HEADERS)
@@ -78,14 +78,13 @@ fi
 
 # check to see if stl is in the std namespace
 if test $ac_cv_prog_gxx = no; then
-  echo "******"
   AC_MSG_CHECKING( ansi standard namespace support ) 
   rm -rf conftest.*
   cat > conftest.cc <<!
 #include <list>
 void foo() { std::list<int> l; }
 !
-  if test -z "`${CXX} -c conftest.cc 2>&1`"; then
+  if test -z "`${CXX} $CXXFLAGS $CPPFLAGS -c conftest.cc 2>&1`"; then
     echo "$ac_t""yes" 1>&6
   else
     AC_DEFINE(CMAKE_NO_STD_NAMESPACE)
