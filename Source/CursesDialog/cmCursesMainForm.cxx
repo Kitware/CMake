@@ -520,7 +520,7 @@ void cmCursesMainForm::FillCacheManagerFromUI()
       tmpString = (*m_Entries)[i]->m_Entry->GetValue();
 
       // Remove trailing spaces, convert path to unix slashes
-      string tmpSubString = 
+      std::string tmpSubString = 
 	tmpString.substr(0,tmpString.find_last_not_of(" ")+1);
       if ( entry->m_Type == cmCacheManager::PATH || 
 	   entry->m_Type == cmCacheManager::FILEPATH )
