@@ -252,7 +252,7 @@ bool cmCacheManager::LoadCache(const char* path,
     {
     std::string currentcwd = path;
     std::string oldcwd = this->GetCacheValue("CMAKE_CACHEFILE_DIR");
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__CYGWIN__)
     currentcwd = cmSystemTools::LowerCase(currentcwd);
     oldcwd = cmSystemTools::LowerCase(oldcwd);
 #endif // _WIN32
