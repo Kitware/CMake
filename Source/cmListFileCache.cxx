@@ -220,7 +220,7 @@ bool cmListFileCache::ParseFunction(std::ifstream& fin,
         // read lines until the end paren is found
         if(fin.getline(inbuffer, BUFFER_SIZE ) )
           {
-          ++line;
+          if(line) { ++*line; }
           RemoveComments(inbuffer);
           // Check for comment lines and ignore them.
           if(blankLine.find(inbuffer))
