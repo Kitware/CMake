@@ -458,8 +458,10 @@ void cmMakefile::AddCustomCommand(const char* source,
     for(std::vector<std::string>::const_iterator d = outputs.begin();
         d != outputs.end(); ++d)
       {
+      std::vector<std::string> depends2 = depends;
+      depends2.push_back(source);
       this->AddCustomCommandToOutput(d->c_str(), command, commandArgs, 
-                                     source, depends, comment);
+                                     0, depends2, comment);
       // add the output to the target?
       std::string sname = *d;
       sname += ".rule";
