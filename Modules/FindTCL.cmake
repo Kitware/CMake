@@ -4,9 +4,11 @@
 # the library is. This code sets the following variables:
 #
 #  TCL_LIBRARY      = the full path to the tcl library found (tcl tcl80 etc)
+#  TCL_STUB_LIBRARY  = the full path to the tcl stub library found
 #  TCL_INCLUDE_PATH = the path to where tcl.h can be found
 #  TCL_TCLSH        = the full path to the tclsh binary (tcl tcl80 etc)
 #  TK_LIBRARY       = the full path to the tk library found (tk tk80 etc)
+#  TK_STUB_LIBRARY  = the full path to the tk stub library found
 #  TK_INCLUDE_PATH  = the path to where tk.h can be found
 #  TK_INTERNAL_PATH = the path to where tkWinInt.h can be found
 #  TK_WISH          = the full path to the wish binary (wish wish80 etc)
@@ -34,8 +36,38 @@ FIND_LIBRARY(TCL_LIBRARY
   "${TK_WISH_PATH}/../lib"
 )
 
+FIND_LIBRARY(TCL_STUB_LIBRARY
+  NAMES tclstub tclstub84 tclstub8.4 tclstub83 tclstub8.3 tclstub82 tclstub8.2 tclstub80 tclstub8.0
+  PATHS  
+  /usr/lib 
+  /usr/local/lib
+  "C:/Program Files/Tcl/lib" 
+  "C:/Tcl/lib" 
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.4;Root]/lib
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.3;Root]/lib
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.2;Root]/lib
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.0;Root]/lib
+  "${TCL_TCLSH_PATH}/../lib"
+  "${TK_WISH_PATH}/../lib"
+)
+
 FIND_LIBRARY(TK_LIBRARY 
   NAMES tk tk84 tk8.4 tk83 tk8.3 tk82 tk8.2 tk80 tk8.0
+  PATHS 
+  /usr/lib 
+  /usr/local/lib
+  "C:/Program Files/Tcl/lib" 
+  "C:/Tcl/lib" 
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.4;Root]/lib
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.3;Root]/lib
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.2;Root]/lib
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.0;Root]/lib
+  "${TCL_TCLSH_PATH}/../lib"
+  "${TK_WISH_PATH}/../lib"
+)
+
+FIND_LIBRARY(TK_STUB_LIBRARY 
+  NAMES tkstub tkstub84 tkstub8.4 tkstub83 tkstub8.3 tkstub82 tkstub8.2 tkstub80 tkstub8.0
   PATHS 
   /usr/lib 
   /usr/local/lib
@@ -100,7 +132,9 @@ IF (WIN32)
     TCL_INCLUDE_PATH
     TK_INCLUDE_PATH
     TCL_LIBRARY
+    TCL_STUB_LIBRARY
     TK_LIBRARY  
+    TK_STUB_LIBRARY  
     )
 ENDIF(WIN32)
 
