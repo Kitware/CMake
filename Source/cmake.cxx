@@ -254,17 +254,13 @@ void cmake::AddCMakePaths(const std::vector<std::string>& args)
   // Find ccommand
   std::string cCommand = cmSystemTools::GetFilenamePath(cMakeSelf) +
     "/ccommand" + cmSystemTools::GetFilenameExtension(cMakeSelf);
-  if( !cmSystemTools::FileExists(cCommand.c_str()))
+  if( cmSystemTools::FileExists(cCommand.c_str()))
     {
-    cmSystemTools::Error("CMAKE can not find the command line program "
-			 "ccommand. Attempted path: ", cCommand.c_str());
-    return;
+    // Save the value in the cache
+    cmCacheManager::GetInstance()->AddCacheEntry
+      ("CCOMMAND_COMMAND",cCommand.c_str(),
+       "Path to CMakeCommand executable.", cmCacheManager::INTERNAL);
     }
-
-  // Save the value in the cache
-  cmCacheManager::GetInstance()->AddCacheEntry
-    ("CCOMMAND_COMMAND",cCommand.c_str(),
-     "Path to CMakeCommand executable.", cmCacheManager::INTERNAL);
 
   // Find and save the command to edit the cache
   std::string editCacheCommand = cmSystemTools::GetFilenamePath(cMakeSelf) +
