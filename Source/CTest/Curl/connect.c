@@ -141,6 +141,8 @@ int Curl_nonblock(int socket,    /* operate on this */
 #ifndef SETBLOCK
 #error "no non-blocking method was found/used/set"
 #endif
+  (void)socket;
+  (void)nonblock;
 }
 
 /*

@@ -126,7 +126,7 @@ int GetWebFile(void)
   return retVal;
 }
 
-int main(int argc, char **argv)
+int main(/*int argc, char **argv*/)
 {
   int retVal = 0;
   curl_global_init(CURL_GLOBAL_DEFAULT);

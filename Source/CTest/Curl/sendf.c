@@ -228,6 +228,7 @@ CURLcode Curl_write(struct connectdata *conn, int sockfd,
                     ssize_t *written)
 {
   ssize_t bytes_written;
+  (void)conn;
 
 #ifdef USE_SSLEAY
   /* SSL_write() is said to return 'int' while write() and send() returns
@@ -342,6 +343,7 @@ int Curl_read(struct connectdata *conn,
 {
   ssize_t nread;
   *n=0; /* reset amount to zero */
+  (void)conn;
 
 #ifdef USE_SSLEAY
   if (conn->ssl.use) {
