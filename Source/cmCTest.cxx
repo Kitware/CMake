@@ -544,7 +544,7 @@ void cmCTest::SetTestModel(int mode)
   m_TestModel = mode;
 }
 
-bool cmCTest::SetTest(const char* ttype)
+bool cmCTest::SetTest(const char* ttype, bool report)
 {
   if ( cmSystemTools::LowerCase(ttype) == "all" )
     {
@@ -588,7 +588,10 @@ bool cmCTest::SetTest(const char* ttype)
     }
   else
     {
-    std::cerr << "Don't know about test \"" << ttype << "\" yet..." << std::endl;
+    if ( report )
+      {
+      std::cerr << "Don't know about test \"" << ttype << "\" yet..." << std::endl;
+      }
     return false;
     }
   return true;
@@ -4256,7 +4259,9 @@ int cmCTest::GenerateNotesFile(const char* cfiles)
 int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
 {
   this->FindRunningCMake(args[0].c_str());
+  const char* ctestExec = "ctest";
   bool cmakeAndTest = false;
+  bool performSomeTest = true;
   for(unsigned int i=1; i < args.size(); ++i)
     {
     std::string arg = args[i];
@@ -4340,7 +4345,8 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
         this->SetTestModel(cmCTest::EXPERIMENTAL);
         this->SetTest("Test");
         }
-      else if ( targ == "ExperimentalMemCheck" || targ == "ExperimentalPurify" )
+      else if ( targ == "ExperimentalMemCheck"
+        || targ == "ExperimentalPurify" )
         {
         this->SetTestModel(cmCTest::EXPERIMENTAL);
         this->SetTest("MemCheck");
@@ -4391,7 +4397,8 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
         this->SetTestModel(cmCTest::CONTINUOUS);
         this->SetTest("Test");
         }
-      else if ( targ == "ContinuousMemCheck" || targ == "ContinuousPurify" )
+      else if ( targ == "ContinuousMemCheck"
+        || targ == "ContinuousPurify" )
         {
         this->SetTestModel(cmCTest::CONTINUOUS);
         this->SetTest("MemCheck");
@@ -4442,7 +4449,8 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
         this->SetTestModel(cmCTest::NIGHTLY);
         this->SetTest("Test");
         }
-      else if ( targ == "NightlyMemCheck" || targ == "NightlyPurify" )
+      else if ( targ == "NightlyMemCheck"
+        || targ == "NightlyPurify" )
         {
         this->SetTestModel(cmCTest::NIGHTLY);
         this->SetTest("MemCheck");
@@ -4478,6 +4486,23 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
         this->SetTest("Coverage");
         this->SetTest("Submit");
         }
+      else
+        {
+        performSomeTest = false;
+        std::cerr << "CTest -D called with incorrect option: " << targ << std::endl;
+        std::cerr << "Available options are:" << std::endl
+          << "  " << ctestExec << " -D Continuous" << std::endl
+          << "  " << ctestExec << " -D Continuous(Start|Update|Configure|Build)" << std::endl
+          << "  " << ctestExec << " -D Continuous(Test|Coverage|MemCheck|Submit)" << std::endl
+          << "  " << ctestExec << " -D Experimental" << std::endl
+          << "  " << ctestExec << " -D Experimental(Start|Update|Configure|Build)" << std::endl
+          << "  " << ctestExec << " -D Experimental(Test|Coverage|MemCheck|Submit)" << std::endl
+          << "  " << ctestExec << " -D Nightly" << std::endl
+          << "  " << ctestExec << " -D Nightly(Start|Update|Configure|Build)" << std::endl
+          << "  " << ctestExec << " -D Nightly(Test|Coverage|MemCheck|Submit)" << std::endl
+          << "  " << ctestExec << " -D NightlyMemoryCheck" << std::endl;
+          ;
+        }
       }
 
     if( ( arg.find("-T",0) == 0 ) && 
@@ -4485,7 +4510,22 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
       {
       this->m_DartMode = true;
       i++;
-      this->SetTest(args[i].c_str());
+      if ( !this->SetTest(args[i].c_str(), false) )
+        {
+        performSomeTest = false;
+        std::cerr << "CTest -T called with incorrect option: " << args[i].c_str() << std::endl;
+        std::cerr << "Available options are:" << std::endl
+          << "  " << ctestExec << " -T all" << std::endl
+          << "  " << ctestExec << " -T start" << std::endl
+          << "  " << ctestExec << " -T update" << std::endl
+          << "  " << ctestExec << " -T configure" << std::endl
+          << "  " << ctestExec << " -T build" << std::endl
+          << "  " << ctestExec << " -T test" << std::endl
+          << "  " << ctestExec << " -T coverage" << std::endl
+          << "  " << ctestExec << " -T memcheck" << std::endl
+          << "  " << ctestExec << " -T notes" << std::endl
+          << "  " << ctestExec << " -T submit" << std::endl;
+        }
       }
 
     if( ( arg.find("-M",0) == 0 || arg.find("--test-model",0) == 0 ) &&
@@ -4493,19 +4533,26 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
       {
       i++;
       std::string const& str = args[i];
-      if ( str == "NIGHTLY" || str == "nightly" || str == "Nightly" )
+      if ( cmSystemTools::LowerCase(str) == "nightly" )
         {
         this->SetTestModel(cmCTest::NIGHTLY);
         }
-      else if ( str == "CONTINUOUS" || str == "continuous" || 
-        str == "Continuous" )
+      else if ( cmSystemTools::LowerCase(str) == "continuous" )
         {
         this->SetTestModel(cmCTest::CONTINUOUS);
-        std::cout << "Continuous" << std::endl;
+        }
+      else if ( cmSystemTools::LowerCase(str) == "experimental" )
+        {
+        this->SetTestModel(cmCTest::EXPERIMENTAL);
         }
       else
         {
-        this->SetTestModel(cmCTest::EXPERIMENTAL);
+        performSomeTest = false;
+        std::cerr << "CTest -M called with incorrect option: " << str.c_str() << std::endl;
+        std::cerr << "Available options are:" << std::endl
+          << "  " << ctestExec << " -M Continuous" << std::endl
+          << "  " << ctestExec << " -M Experimental" << std::endl
+          << "  " << ctestExec << " -M Nightly" << std::endl;
         }
       }
 
@@ -4642,25 +4689,29 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
     return retv;
     }
 
-  int res;
-  // call process directory
-  if (this->m_RunConfigurationScript)
+  if(performSomeTest )
     {
-    res = this->RunConfigurationScript();
-    }
-  else
-    {
-    if ( !this->Initialize() )
+    int res;
+    // call process directory
+    if (this->m_RunConfigurationScript)
       {
-      res = 12;
+      res = this->RunConfigurationScript();
       }
     else
       {
-      res = this->ProcessTests();
+      if ( !this->Initialize() )
+        {
+        res = 12;
+        }
+      else
+        {
+        res = this->ProcessTests();
+        }
+      this->Finalize();
       }
-    this->Finalize();
+    return res;
     }
-  return res;
+  return 1;
 }
 
 void cmCTest::FindRunningCMake(const char* arg0)

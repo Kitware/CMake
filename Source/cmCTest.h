@@ -113,7 +113,7 @@ public:
   /**
    * Set the cmake test
    */
-  bool SetTest(const char*);
+  bool SetTest(const char*, bool report = true);
 
   /**
    * Set the cmake test mode (experimental, nightly, continuous).
