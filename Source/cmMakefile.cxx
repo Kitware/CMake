@@ -496,7 +496,7 @@ void cmMakefile::AddCustomCommand(const char* source,
   else
     {
     this->AddCustomCommandToTarget(target, command, commandArgs, 
-                                   cmTarget::POST_BUILD, comment);
+                                   cmTarget::POST_BUILD, comment, depends);
     }
 }
 
@@ -619,6 +619,18 @@ AddCustomCommandToTarget(const char* target, const char* command,
                          cmTarget::CustomCommandType type,
                          const char *comment) 
 {
+  std::vector<std::string> empty;
+  this->AddCustomCommandToTarget(target,command,commandArgs,type,
+                                 comment, empty);
+}
+
+void cmMakefile::
+AddCustomCommandToTarget(const char* target, const char* command,
+                         const std::vector<std::string>& commandArgs,
+                         cmTarget::CustomCommandType type,
+                         const char *comment,  
+                         const std::vector<std::string>& depends)
+{
   // find the target, 
   if (m_Targets.find(target) != m_Targets.end())
     {
@@ -637,7 +649,7 @@ AddCustomCommandToTarget(const char* target, const char* command,
       combinedArgs += " ";
       }
     
-    cmCustomCommand cc(c.c_str(),combinedArgs.c_str());
+    cmCustomCommand cc(c.c_str(),combinedArgs.c_str(),depends,0);
     if ( comment && comment[0] )
       {
       cc.SetComment(comment);

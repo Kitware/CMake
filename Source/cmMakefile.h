@@ -133,6 +133,12 @@ public:
                                 const std::vector<std::string>& commandArgs,
                                 cmTarget::CustomCommandType type,
                                 const char *comment = 0);
+  void AddCustomCommandToTarget(const char* target,
+                                const char* command,
+                                const std::vector<std::string>& commandArgs,
+                                cmTarget::CustomCommandType type,
+                                const char *comment,
+                                const std::vector<std::string>& depends);
   
   /**
    * Add a custom command to the build.
