@@ -110,7 +110,7 @@ inline bool IsWinNT()
 //--------------------------------------------------------------------------- 
 bool cmWin32ProcessExecution::BorlandRunCommand(
   const char* command, const char* dir, 
-  std::string& output, int& retVal, bool verbose, int /* timeout */) 
+  std::string& output, int& retVal, bool verbose, int /* timeout */, bool hideWindows) 
 {
   //verbose = true;
   //std::cerr << std::endl 
@@ -170,7 +170,11 @@ bool cmWin32ProcessExecution::BorlandRunCommand(
   si.dwFlags = STARTF_USESTDHANDLES|STARTF_USESHOWWINDOW;
   si.hStdOutput = newstdout;
   si.hStdError = newstdout;
-  si.wShowWindow = SW_SHOWDEFAULT; // SW_HIDE;
+  si.wShowWindow = SW_SHOWDEFAULT;
+  if(hideWindows)
+    {
+    si.wShowWindow = SW_HIDE;
+    }
  
 //set the new handles for the child process si.hStdInput = newstdin;
   char* commandAndArgs = strcpy(new char[strlen(command)+1], command);
@@ -285,7 +289,8 @@ static BOOL RealPopenCreateProcess(const char *cmdstring,
                                    HANDLE hStdin,
                                    HANDLE hStdout,
                                    HANDLE hStderr,
-                                   HANDLE *hProcess)
+                                   HANDLE *hProcess,
+                                   bool hideWindows)
 {
   PROCESS_INFORMATION piProcInfo;
   STARTUPINFO siStartInfo;
@@ -404,7 +409,11 @@ static BOOL RealPopenCreateProcess(const char *cmdstring,
   siStartInfo.hStdInput = hStdin;
   siStartInfo.hStdOutput = hStdout;
   siStartInfo.hStdError = hStderr;
-  siStartInfo.wShowWindow = SW_SHOWDEFAULT; // SW_HIDE;
+  siStartInfo.wShowWindow = SW_SHOWDEFAULT; 
+  if(hideWindows)
+    {
+    siStartInfo.wShowWindow = SW_HIDE;
+    }
 
   //std::cout << "Create process: " << s2 << std::endl;
   if (CreateProcess(NULL,
@@ -617,7 +626,7 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
                                 hChildStdinRd,
                                 hChildStdoutWr,
                                 hChildStdoutWr,
-                                &hProcess))
+                                &hProcess, m_HideWindows))
       return NULL;
     }
   else 
@@ -628,7 +637,7 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
                                 hChildStdinRd,
                                 hChildStdoutWr,
                                 hChildStderrWr,
-                                &hProcess))
+                                &hProcess, m_HideWindows))
       return NULL;
     }
 

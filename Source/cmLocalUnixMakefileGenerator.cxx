@@ -22,14 +22,13 @@
 #include "cmMakeDepend.h"
 #include "cmCacheManager.h"
 #include "cmGeneratedFileStream.h"
+#include <stdio.h>
 
 cmLocalUnixMakefileGenerator::cmLocalUnixMakefileGenerator()
-  :m_SharedLibraryExtension("$(SHLIB_SUFFIX)"),
-   m_ObjectFileExtension(".o"),
-   m_ExecutableExtension(cmSystemTools::GetExecutableExtension()),
-   m_StaticLibraryExtension(".a"),
-   m_LibraryPrefix("lib")
 {
+  m_WindowsShell = false;
+  m_IncludeDirective = "include";
+  m_MakefileVariableSize = 0;
 }
 
 cmLocalUnixMakefileGenerator::~cmLocalUnixMakefileGenerator()
@@ -203,8 +202,11 @@ void cmLocalUnixMakefileGenerator::OutputMakefile(const char* file,
     fout << "# " << i->c_str() << "\n";
     }
   fout << "\n\n";
-  fout << "# Suppresses display of executed commands\n";
-  fout << ".SILENT:\n";
+  if(!m_Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"))
+    {
+    fout << "# Suppresses display of executed commands\n";
+    fout << ".SILENT:\n";
+    }
   fout << "# disable some common implicit rules to speed things up\n";
   fout << ".SUFFIXES:\n";
   fout << ".SUFFIXES:.hpuxmakemusthaverule\n";
@@ -275,21 +277,33 @@ void cmLocalUnixMakefileGenerator::OutputMakefile(const char* file,
   // only add the depend include if the depend file exists
   if(cmSystemTools::FileExists(dependName.c_str()))
     {
-    this->OutputIncludeMakefile(fout, "cmake.depends");
+    fout << m_IncludeDirective << " cmake.depends\n";
     }
 }
 
-void cmLocalUnixMakefileGenerator::OutputIncludeMakefile(std::ostream& fout,
-                                                    const char* file)
-{
-  fout << "include " << file << "\n";
-}
 
 
 std::string 
-cmLocalUnixMakefileGenerator::GetOutputExtension(const char*)
+cmLocalUnixMakefileGenerator::GetOutputExtension(const char* s)
 {
-  return m_ObjectFileExtension;
+  std::string sourceExtension = s;
+#if defined(_WIN32) && ! defined(__CYGWIN__) 
+  if(sourceExtension == "def")
+    {
+    return "";
+    }
+  if(sourceExtension == "ico" || sourceExtension == "rc2")
+    {
+    return "";
+    }
+  if(sourceExtension == "rc")
+    {
+    return ".res";
+    }
+  return ".obj";
+#else
+  return ".o";
+#endif
 }
 
 
@@ -306,24 +320,31 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
     {
     if (l->second.IsInAll())
       {
-      std::string path = m_LibraryOutputPath + m_LibraryPrefix;
+      std::string path = m_LibraryOutputPath;
       if(l->second.GetType() == cmTarget::STATIC_LIBRARY)
         {
-        path = path + l->first + m_StaticLibraryExtension;
+        path +=
+          this->GetSafeDefinition("CMAKE_STATIC_LIBRARY_PREFIX") +
+          l->first
+          + this->GetSafeDefinition("CMAKE_STATIC_LIBRARY_SUFFIX");
         fout << " \\\n" 
              << cmSystemTools::ConvertToOutputPath(path.c_str());
         }
       else if(l->second.GetType() == cmTarget::SHARED_LIBRARY)
         {
-        path = path + l->first + 
-          m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
+        path +=
+          this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_PREFIX") +
+          l->first
+          + this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_SUFFIX");
         fout << " \\\n" 
              << cmSystemTools::ConvertToOutputPath(path.c_str());
         }
       else if(l->second.GetType() == cmTarget::MODULE_LIBRARY)
         {
-        path = path + l->first + 
-          m_Makefile->GetDefinition("CMAKE_MODULE_SUFFIX");
+        path +=
+          this->GetSafeDefinition("CMAKE_SHARED_MODULE_PREFIX") +
+          l->first
+          + this->GetSafeDefinition("CMAKE_SHARED_MODULE_SUFFIX");
         fout << " \\\n" 
              << cmSystemTools::ConvertToOutputPath(path.c_str());
         }
@@ -338,7 +359,7 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
         l->second.IsInAll())
       {
       std::string path = m_ExecutableOutputPath + l->first +
-        m_ExecutableExtension;
+        cmSystemTools::GetExecutableExtension();
       fout << " \\\n" << cmSystemTools::ConvertToOutputPath(path.c_str());
       }
     }
@@ -366,10 +387,12 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
         {
         if(!(*i)->GetPropertyAsBool("HEADER_FILE_ONLY"))
           {
-          std::string outExt(this->GetOutputExtension((*i)->GetSourceExtension().c_str()));
+          std::string outExt(
+            this->GetOutputExtension((*i)->GetSourceExtension().c_str()));
           if(outExt.size())
             {
-            fout << "\\\n" << cmSystemTools::ConvertToOutputPath((*i)->GetSourceName().c_str())
+            fout << "\\\n" 
+                 << cmSystemTools::ConvertToOutputPath((*i)->GetSourceName().c_str())
                  << outExt.c_str() << " ";
             }
           }
@@ -441,38 +464,28 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
     // and may have different flags
     if( tgt.GetType() == cmTarget::EXECUTABLE)
       {
-      if(m_Makefile->GetDefinition("CMAKE_C_SHLIB_RUNTIME_FLAG"))
-        {
-        runtimeFlag = m_Makefile->GetDefinition("CMAKE_C_SHLIB_RUNTIME_FLAG");
-        }
+      runtimeFlag = this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_LINK_FLAGS");
       }
     else
       {
-      if(m_Makefile->GetDefinition("CMAKE_SHLIB_RUNTIME_FLAG"))
-        {
-        runtimeFlag = m_Makefile->GetDefinition("CMAKE_SHLIB_RUNTIME_FLAG");
-        }
+      runtimeFlag = this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_RUNTIME_FLAG");
       }
-    if(m_Makefile->GetDefinition("CMAKE_SHLIB_RUNTIME_SEP"))
-      {
-      runtimeSep = m_Makefile->GetDefinition("CMAKE_SHLIB_RUNTIME_SEP");
-      }    
+    runtimeSep = this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_RUNTIME_FLAG_SEP");
     }
   else
-    {
-    if(m_Makefile->GetDefinition("CMAKE_CXX_SHLIB_RUNTIME_FLAG"))
+    { 
+    if( tgt.GetType() == cmTarget::EXECUTABLE)
       {
-      runtimeFlag = m_Makefile->GetDefinition("CMAKE_CXX_SHLIB_RUNTIME_FLAG");
+      runtimeFlag = this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS");
       }
-  
-    if(m_Makefile->GetDefinition("CMAKE_CXX_SHLIB_RUNTIME_SEP"))
+    else
       {
-      runtimeSep = m_Makefile->GetDefinition("CMAKE_CXX_SHLIB_RUNTIME_SEP");
-      }    
+      runtimeFlag = this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_RUNTIME_CXX_FLAG");
+      }
+    runtimeFlag = this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_RUNTIME_CXX_FLAG");
+    runtimeSep = this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_RUNTIME_CXX_FLAG_SEP");
     }
   
-
-
   // concatenate all paths or no?
   bool runtimeConcatenate = ( runtimeSep!="" );
   if(runtimeFlag == "" || m_Makefile->IsOn("CMAKE_SKIP_RPATH") )
@@ -483,7 +496,8 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
   // Some search paths should never be emitted
   emitted.insert("");
   emitted.insert("/usr/lib");
-
+  std::string libPathFlag = m_Makefile->GetDefinition("CMAKE_LIBRARY_PATH_FLAG");
+  std::string libLinkFlag = this->GetSafeDefinition("CMAKE_LINK_LIBRARY_FLAG");
   // collect all the flags needed for linking libraries
   std::string linkLibs;
   const std::vector<std::string>& libdirs = tgt.GetLinkDirectories();
@@ -493,11 +507,11 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
     std::string libpath = cmSystemTools::ConvertToOutputPath(libDir->c_str());
     if(emitted.insert(libpath).second)
       {
-      std::string::size_type pos = libDir->find("-L");
+      std::string::size_type pos = libDir->find(libPathFlag.c_str());
       if((pos == std::string::npos || pos > 0)
          && libDir->find("${") == std::string::npos)
         {
-        linkLibs += "-L";
+        linkLibs += libPathFlag;
         if(outputRuntime)
           {
           runtimeDirs.push_back( libpath );
@@ -508,6 +522,11 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
       }
     }
 
+  std::string linkSuffix = this->GetSafeDefinition("CMAKE_LINK_LIBRARY_SUFFIX");
+  std::string regexp = ".*\\";
+  regexp += linkSuffix;
+  regexp += "$";
+  cmRegularExpression hasSuffix(linkSuffix.c_str());
   std::string librariesLinked;
   const cmTarget::LinkLibraries& libs = tgt.GetLinkLibraries();
   for(cmTarget::LinkLibraries::const_iterator lib = libs.begin();
@@ -531,28 +550,37 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
       std::string libpath = cmSystemTools::ConvertToOutputPath(dir.c_str());
       if(emitted.insert(libpath).second)
         {
-        linkLibs += "-L";
+        linkLibs += libPathFlag;
         linkLibs += libpath;
         linkLibs += " ";
         if(outputRuntime)
           {
           runtimeDirs.push_back( libpath );
           }
-        }
+        }  
+      cmRegularExpression reg(regexp.c_str());
       cmRegularExpression libname("lib(.*)(\\.so|\\.sl|\\.a|\\.dylib).*");
       cmRegularExpression libname_noprefix("(.*)(\\.so|\\.sl|\\.a|\\.dylib).*");
       if(libname.find(file))
         {
-        librariesLinked += "-l";
+        librariesLinked += libLinkFlag;
         file = libname.match(1);
         librariesLinked += file;
+        if(linkSuffix.size() && !hasSuffix.find(file))
+          {
+          librariesLinked += linkSuffix;
+          }
         librariesLinked += " ";
         }
       else if(libname_noprefix.find(file))
         {
-        librariesLinked += "-l";
+        librariesLinked += libLinkFlag;
         file = libname_noprefix.match(1);
         librariesLinked += file;
+        if(linkSuffix.size() && !hasSuffix.find(file))
+          {
+          librariesLinked +=  linkSuffix;
+          }
         librariesLinked += " ";
         }
       }
@@ -561,9 +589,13 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
       {
       if(!reg.find(lib->first))
         {
-        librariesLinked += "-l";
+        librariesLinked += libLinkFlag;
         }
       librariesLinked += lib->first;
+      if(linkSuffix.size() && !hasSuffix.find(lib->first))
+        {
+        librariesLinked += linkSuffix;
+        }
       librariesLinked += " ";
       }
     }
@@ -592,6 +624,10 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
         }
       }
     fout << " ";
+    }
+  if(m_Makefile->GetDefinition("CMAKE_STANDARD_LIBRARIES"))
+    {
+    fout << m_Makefile->GetDefinition("CMAKE_STANDARD_LIBRARIES") << " ";
     }
 }
 
@@ -624,91 +660,187 @@ std::string cmLocalUnixMakefileGenerator::CreateTargetRules(const cmTarget &targ
   return customRuleCode;
 }
 
+struct RuleVariables
+{
+  const char* replace;
+  const char* lookup;
+};
+
+static RuleVariables ruleReplaceVars[] =
+{
+  {"<CMAKE_CXX_COMPILER>", "CMAKE_CXX_COMPILER"},
+  {"<CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS>", "CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS"},
+  {"<CMAKE_SHARED_MODULE_CREATE_CXX_FLAGS>", "CMAKE_SHARED_MODULE_CREATE_CXX_FLAGS"}, 
+  {"<CMAKE_CXX_LINK_FLAGS>", "CMAKE_CXX_LINK_FLAGS"},
+
+  {"<CMAKE_C_COMPILER>", "CMAKE_C_COMPILER"},
+  {"<CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS>", "CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS"},
+  {"<CMAKE_SHARED_MODULE_CREATE_C_FLAGS>", "CMAKE_SHARED_MODULE_CREATE_C_FLAGS"}, 
+  {"<CMAKE_C_LINK_FLAGS>", "CMAKE_C_LINK_FLAGS"},
+
+  {"<CMAKE_AR>", "CMAKE_AR"},
+  {"<CMAKE_RANLIB>", "CMAKE_RANLIB"},
+  {0}
+};
+
+
+
+ 
+void 
+cmLocalUnixMakefileGenerator::ExpandRuleVariables(std::string& s,
+                                                  const char* objects,
+                                                  const char* target,
+                                                  const char* linkLibs,
+                                                  const char* source,
+                                                  const char* object,
+                                                  const char* flags,
+                                                  const char* objectsquoted,
+                                                  const char* targetBase)
+{ 
+  if(flags)
+    {
+    cmSystemTools::ReplaceString(s, "<FLAGS>", flags);
+    }
+    
+  if(source)
+    {
+    cmSystemTools::ReplaceString(s, "<SOURCE>", source);
+    }
+  if(object)
+    {
+    cmSystemTools::ReplaceString(s, "<OBJECT>", object);
+    }
+  if(objects)
+    {
+    cmSystemTools::ReplaceString(s, "<OBJECTS>", objects);
+    }
+  if(objectsquoted)
+    {
+    cmSystemTools::ReplaceString(s, "<OBJECTS_QUOTED>", objectsquoted);
+    }
+  if(target)
+    {
+    cmSystemTools::ReplaceString(s, "<TARGET>", target);
+    }
+  if(targetBase)
+    {
+    cmSystemTools::ReplaceString(s, "<TARGET_BASE>", targetBase);
+    }
+  if(linkLibs)
+    {
+    cmSystemTools::ReplaceString(s, "<LINK_LIBRARIES>", linkLibs);
+    }
+  
+  RuleVariables* rv = ruleReplaceVars;
+  while(rv->replace)
+    {
+    cmSystemTools::ReplaceString(s, rv->replace,
+                                 this->GetSafeDefinition(rv->lookup));
+    rv++;
+    }  
+}
+
+  
+void cmLocalUnixMakefileGenerator::OutputLibraryRule(std::ostream& fout,  
+                                                     const char* name, 
+                                                     const cmTarget &t,
+                                                     const char* prefix,
+                                                     const char* suffix,
+                                                     const char* createVariable,
+                                                     const char* comment
+                                                     )
+{
+  // create the library name
+  std::string targetNameBase = prefix;
+  targetNameBase += name;
+  
+  std::string targetName = prefix;
+  targetName += name;
+  targetName +=  suffix;
+  // create the target full path name
+  std::string targetFullPath = m_LibraryOutputPath + targetName;
+  std::string targetBaseFullPath = m_LibraryOutputPath + targetNameBase;
+  targetBaseFullPath =
+    cmSystemTools::ConvertToOutputPath(targetBaseFullPath.c_str());
+  targetFullPath = cmSystemTools::ConvertToOutputPath(targetFullPath.c_str());
+  // get the objects that are used to link this library
+  std::string objs = "$(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
+  std::string objsQuoted = "$(" + this->CreateMakeVariable(name, "_SRC_OBJS_QUOTED") + ") ";
+  // create a variable with the objects that this library depends on
+  std::string depend = objs + " $(" 
+    + this->CreateMakeVariable(name, "_DEPEND_LIBS") + ")";
+  // collect up the build rules
+  std::vector<std::string> rules;
+  std::string command = "$(RM) " +  targetFullPath;
+  rules.push_back(command);
+  rules.push_back(m_Makefile->GetDefinition(createVariable));
+  // expand multi-command semi-colon separated lists
+  // of commands into separate commands
+  std::vector<std::string> commands;
+  cmSystemTools::ExpandListArguments(rules, commands);
+  // collect custom commands for this target and add them to the list
+  std::string customCommands = this->CreateTargetRules(t, name);
+  if(customCommands.size() > 0)
+    {
+    commands.push_back(customCommands);
+    }
+  // collect up the link libraries
+  cmOStringStream linklibs;
+  this->OutputLinkLibraries(linklibs, name, t);
+  for(std::vector<std::string>::iterator i = commands.begin();
+      i != commands.end(); ++i)
+    {
+    this->ExpandRuleVariables(*i, 
+                              objs.c_str(), 
+                              targetFullPath.c_str(),
+                              linklibs.str().c_str(),
+                              0, 0, 0, objsQuoted.c_str(),
+                              targetBaseFullPath.c_str());
+    }
+  this->OutputMakeRule(fout, comment,
+                       targetFullPath.c_str(),
+                       depend.c_str(),
+                       commands);
+}
 
 void cmLocalUnixMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,  
-                                                      const char* name, 
-                                                      const cmTarget &t)
+                                                           const char* name, 
+                                                           const cmTarget &t)
 {
-  std::string target = m_LibraryOutputPath + "lib" + name + "$(SHLIB_SUFFIX)";
-  std::string depend = "$(";
-  depend += this->CreateMakeVariable(name, "_SRC_OBJS");
-  depend += ") $(" + this->CreateMakeVariable(name, "_DEPEND_LIBS") + ")";
-  std::string command = "$(RM) lib";
-  command += name;
-  command += "$(SHLIB_SUFFIX)";
-  std::string command2;
+  const char* createRule;
   if(t.HasCxx())
     {
-    command2 = "$(CMAKE_CXX_LINK_SHARED)  $(CMAKE_CXX_SHLIB_LINK_FLAGS) "
-      "$(CMAKE_CXX_SHLIB_BUILD_FLAGS) $(CMAKE_CXX_FLAGS) -o \\\n";
+    createRule = "CMAKE_CXX_CREATE_SHARED_LIBRARY";
     }
   else
     {
-    command2 = "$(CMAKE_C_LINK_SHARED)  $(CMAKE_SHLIB_LINK_FLAGS) "
-      "$(CMAKE_SHLIB_BUILD_FLAGS)  -o \\\n";
+    createRule = "CMAKE_C_CREATE_SHARED_LIBRARY";
     }
-  command2 += "\t  ";
-  std::string libName = m_LibraryOutputPath + "lib" + std::string(name) + "$(SHLIB_SUFFIX)";
-  libName = cmSystemTools::ConvertToOutputPath(libName.c_str());
-  command2 += libName + " \\\n";
-  command2 += "\t  $(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
-  cmOStringStream linklibs;
-  this->OutputLinkLibraries(linklibs, name, t);
-  command2 += linklibs.str();
-  std::string customCommands = this->CreateTargetRules(t, name);
-  const char* cc = 0;
-  if(customCommands.size() > 0)
-    {
-    cc = customCommands.c_str();
-    }
-  this->OutputMakeRule(fout, "rules for a shared library",
-                       target.c_str(),
-                       depend.c_str(),
-                       command.c_str(),
-                       command2.c_str(),
-                       cc);
+  this->OutputLibraryRule(fout, name, t,
+                          this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_PREFIX"),
+                          this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_SUFFIX"),
+                          createRule,
+                          "shared library");
 }
 
 void cmLocalUnixMakefileGenerator::OutputModuleLibraryRule(std::ostream& fout, 
                                                       const char* name, 
                                                       const cmTarget &t)
 {
-  std::string target = m_LibraryOutputPath + "lib" + std::string(name) + "$(MODULE_SUFFIX)";
-  std::string depend =  "$(";
-  depend += this->CreateMakeVariable(name, "_SRC_OBJS") 
-    + ") $(" + this->CreateMakeVariable(name, "_DEPEND_LIBS") + ")";
-  std::string command = "$(RM) lib" + std::string(name) + "$(MODULE_SUFFIX)";
-  std::string command2;
+  const char* createRule;
   if(t.HasCxx())
     {
-    command2 = "$(CMAKE_CXX_LINK_SHARED)  $(CMAKE_CXX_MODULE_LINK_FLAGS) "
-      "$(CMAKE_CXX_MODULE_BUILD_FLAGS) $(CMAKE_CXX_FLAGS) -o \\\n";
+    createRule = "CMAKE_CXX_CREATE_SHARED_MODULE";
     }
   else
     {
-    command2 = "$(CMAKE_C_LINK_SHARED)  $(CMAKE_SHLIB_LINK_FLAGS) "
-      "$(CMAKE_MODULE_BUILD_FLAGS) -o \\\n";
+    createRule = "CMAKE_C_CREATE_SHARED_MODULE";
     }
-  command2 += "\t  ";
-  std::string libName = m_LibraryOutputPath + "lib" + std::string(name) + "$(MODULE_SUFFIX)";
-  libName = cmSystemTools::ConvertToOutputPath(libName.c_str());
-  command2 += libName + " \\\n";
-  command2 += "\t  $(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
-  cmOStringStream linklibs;
-  this->OutputLinkLibraries(linklibs, std::string(name).c_str(), t);
-  command2 += linklibs.str();
-  std::string customCommands = this->CreateTargetRules(t, name);
-  const char* cc = 0;
-  if(customCommands.size() > 0)
-    {
-    cc = customCommands.c_str();
-    }
-  this->OutputMakeRule(fout, "rules for a shared module library",
-                       target.c_str(),
-                       depend.c_str(),
-                       command.c_str(),
-                       command2.c_str(),
-                       cc); 
+  this->OutputLibraryRule(fout, name, t,
+                          this->GetSafeDefinition("CMAKE_SHARED_MODULE_PREFIX"),
+                          this->GetSafeDefinition("CMAKE_SHARED_MODULE_SUFFIX"),
+                          createRule,
+                          "shared module");
 }
 
 
@@ -716,81 +848,85 @@ void cmLocalUnixMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout,
                                                       const char* name, 
                                                       const cmTarget &t)
 {
-  std::string target = m_LibraryOutputPath + "lib" + std::string(name) + ".a";
-  target = cmSystemTools::ConvertToOutputPath(target.c_str());
-  std::string depend = "$(";
-  depend += this->CreateMakeVariable(name, "_SRC_OBJS") + ")";
-  std::string command;
+  const char* createRule;
   if(t.HasCxx())
     {
-    command = "$(CMAKE_CXX_AR) $(CMAKE_CXX_AR_ARGS) ";
+    createRule = "CMAKE_CXX_CREATE_STATIC_LIBRARY";
     }
   else
     {
-    command = "$(CMAKE_AR) $(CMAKE_AR_ARGS) ";
+    createRule = "CMAKE_C_CREATE_STATIC_LIBRARY";
     }
-  command += target;
-  command += " $(";
-  command += this->CreateMakeVariable(name, "_SRC_OBJS") + ")";
-  std::string command2 = "$(CMAKE_RANLIB) ";
-  command2 += target;
-  std::string comment = "rule to build static library: ";
-  comment += name;
-  std::string customCommands = this->CreateTargetRules(t, name);
-  const char* cc = 0;
-  if(customCommands.size() > 0)
-    {
-    cc = customCommands.c_str();
-    }
-  this->OutputMakeRule(fout,
-                       comment.c_str(),
-                       target.c_str(),
-                       depend.c_str(),
-                       command.c_str(),
-                       command2.c_str(),
-                       cc);
+  this->OutputLibraryRule(fout, name, t,
+                          this->GetSafeDefinition("CMAKE_STATIC_LIBRARY_PREFIX"),
+                          this->GetSafeDefinition("CMAKE_STATIC_LIBRARY_SUFFIX"),
+                          createRule,
+                          "static library");
+  
 }
 
 void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
                                                    const char* name,
                                                    const cmTarget &t)
 {
-  std::string target = m_ExecutableOutputPath + name + m_ExecutableExtension;
+  std::string flags;
+  std::string target = m_ExecutableOutputPath + name 
+    + cmSystemTools::GetExecutableExtension(); 
+  std::string objs = "$(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
   std::string depend = "$(";
   depend += this->CreateMakeVariable(name, "_SRC_OBJS") 
     + ") $(" + this->CreateMakeVariable(name, "_DEPEND_LIBS") + ")";
-  std::string command;
+  std::vector<std::string> rules;
   if(t.HasCxx())
     {
-    command = 
-      "$(CMAKE_CXX_COMPILER) $(CMAKE_CXX_SHLIB_LINK_FLAGS) $(CMAKE_CXX_FLAGS) ";
+    rules.push_back(m_Makefile->GetDefinition("CMAKE_CXX_LINK_EXECUTABLE"));
+    flags += this->GetSafeDefinition("CMAKE_CXX_FLAGS");
+    flags += " ";
     }
   else
     {
-    command = 
-      "$(CMAKE_C_COMPILER) $(CMAKE_C_SHLIB_LINK_FLAGS) $(CMAKE_C_FLAGS) ";
+    rules.push_back(m_Makefile->GetDefinition("CMAKE_C_LINK_EXECUTABLE"));
+    flags += this->GetSafeDefinition("CMAKE_C_FLAGS");
+    flags += " ";
     }
-  command += "$(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
   cmOStringStream linklibs;
   this->OutputLinkLibraries(linklibs, 0, t);
-  command += linklibs.str();
-  std::string outputFile = m_ExecutableOutputPath + name;
-  command += " -o " + cmSystemTools::ConvertToOutputPath(outputFile.c_str());
-  std::string comment = "rule to build executable: ";
-  comment += name;
+  std::string comment = "executable";
   
+  std::vector<std::string> commands;
+  cmSystemTools::ExpandListArguments(rules, commands);
   std::string customCommands = this->CreateTargetRules(t, name);
-  const char* cc = 0;
   if(customCommands.size() > 0)
     {
-    cc = customCommands.c_str();
+    commands.push_back(customCommands.c_str());
+    }
+  std::string linkFlags;
+  if(t.GetType() == cmTarget::WIN32_EXECUTABLE)
+    {
+    linkFlags +=  this->GetSafeDefinition("CMAKE_CREATE_WIN32_EXE");
+    linkFlags += " ";
+    }
+  else
+    {
+    linkFlags +=  this->GetSafeDefinition("CMAKE_CREATE_CONSOLE_EXE");
+    linkFlags += " ";
+    }
+    
+  for(std::vector<std::string>::iterator i = commands.begin();
+      i != commands.end(); ++i)
+    {
+    cmSystemTools::ReplaceString(*i, "<LINK_FLAGS>", linkFlags.c_str());
+    this->ExpandRuleVariables(*i, 
+                              objs.c_str(), 
+                              target.c_str(),
+                              linklibs.str().c_str(),
+                              0, 0, flags.c_str());
     }
   this->OutputMakeRule(fout, 
                        comment.c_str(),
                        target.c_str(),
                        depend.c_str(),
-                       command.c_str(),
-                       cc);
+                       commands);
 }
 
 
@@ -805,8 +941,7 @@ void cmLocalUnixMakefileGenerator::OutputUtilityRule(std::ostream& fout,
     {
     cc = customCommands.c_str();
     }
-  std::string comment = "Rule to build Utility ";
-  comment += name;
+  std::string comment = "Utility";
   std::string depends;
   std::string replaceVars;
   const std::vector<cmCustomCommand> &ccs = t.GetCustomCommands();
@@ -953,20 +1088,25 @@ void cmLocalUnixMakefileGenerator::OutputDependLibs(std::ostream& fout)
       // if it was a library..
       if (libType)
         {
-        std::string library = m_LibraryPrefix;
-        library += *lib;
+        std::string library;
         std::string libpath = cacheValue;
         if(libType && std::string(libType) == "SHARED")
           {
-          library += m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
+          library = this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_PREFIX");
+          library += *lib;
+          library += this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_SUFFIX");
           }
         else if(libType && std::string(libType) == "MODULE")
           {
-          library += m_Makefile->GetDefinition("CMAKE_MODULE_SUFFIX");
+          library = this->GetSafeDefinition("CMAKE_SHARED_MODULE_PREFIX");
+          library += *lib;
+          library += this->GetSafeDefinition("CMAKE_SHARED_MODULE_SUFFIX");
           }
         else if(libType && std::string(libType) == "STATIC")
           {
-          library += m_StaticLibraryExtension;
+          library = this->GetSafeDefinition("CMAKE_STATIC_LIBRARY_PREFIX");
+          library += *lib;
+          library += this->GetSafeDefinition("CMAKE_STATIC_LIBRARY_SUFFIX");
           }
         else
           {
@@ -1039,7 +1179,17 @@ void cmLocalUnixMakefileGenerator::OutputBuildTargetInDir(std::ostream& fout,
 
 bool cmLocalUnixMakefileGenerator::SamePath(const char* path1, const char* path2)
 {
-  return strcmp(path1, path2) == 0;
+  if (strcmp(path1, path2) == 0)
+    {
+    return true;
+    }
+#if defined(_WIN32) || defined(__APPLE__)
+  return 
+    cmSystemTools::LowerCase(this->ConvertToOutputForExisting(path1)) ==
+    cmSystemTools::LowerCase(this->ConvertToOutputForExisting(path2));
+#else
+  return false;
+#endif
 }
 
 void cmLocalUnixMakefileGenerator::OutputLibDepend(std::ostream& fout,
@@ -1060,38 +1210,39 @@ void cmLocalUnixMakefileGenerator::OutputLibDepend(std::ostream& fout,
       if(m_LibraryOutputPath.size())
         {
         libpath = m_LibraryOutputPath;
-        libpath += m_LibraryPrefix;
         }
       else
         {
         libpath = cacheValue;
         libpath += "/";
-        libpath += m_LibraryPrefix;
         }
       }
     else
       {
       // library is in current Makefile so use lib as a prefix
       libpath = m_LibraryOutputPath;
-      libpath += m_LibraryPrefix;
       }
-    // add the library name
-    libpath += name;
     // add the correct extension
     std::string ltname = name;
     ltname += "_LIBRARY_TYPE";
     const char* libType = m_Makefile->GetDefinition(ltname.c_str());
     if(libType && std::string(libType) == "SHARED")
       {
-      libpath += m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
+      libpath += this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_PREFIX");
+      libpath += name;
+      libpath += this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_SUFFIX");
       }
     else if (libType && std::string(libType) == "MODULE")
       {
-      libpath += m_Makefile->GetDefinition("CMAKE_MODULE_SUFFIX");
+      libpath += this->GetSafeDefinition("CMAKE_SHARED_MODULE_PREFIX");
+      libpath += name;
+      libpath += this->GetSafeDefinition("CMAKE_SHARED_MODULE_SUFFIX");
       }
     else if (libType && std::string(libType) == "STATIC")
       {
-      libpath += m_StaticLibraryExtension;
+      libpath += this->GetSafeDefinition("CMAKE_STATIC_LIBRARY_PREFIX");
+      libpath += name;
+      libpath += this->GetSafeDefinition("CMAKE_STATIC_LIBRARY_SUFFIX");
       }
     fout << cmSystemTools::ConvertToOutputPath(libpath.c_str()) << " ";
     }
@@ -1131,7 +1282,7 @@ void cmLocalUnixMakefileGenerator::OutputExeDepend(std::ostream& fout,
     // add the library name
     exepath += name;
     // add the correct extension
-    exepath += m_ExecutableExtension;
+    exepath += cmSystemTools::GetExecutableExtension();
     fout << cmSystemTools::ConvertToOutputPath(exepath.c_str()) << " ";
     }
 }
@@ -1160,12 +1311,50 @@ inline std::string FixDirectoryName(const char* dir)
 }
 
 
+void cmLocalUnixMakefileGenerator::BuildInSubDirectoryWindows(std::ostream& fout,
+                                                              const char* directory,
+                                                              const char* target1,
+                                                              const char* target2,
+                                                              bool silent)
+{
+  if(target1)
+    {
+    std::string dir = cmSystemTools::ConvertToOutputPath(directory);
+    fout << "\tif not exist \"" << dir << "\\$(NULL)\""
+         << " " 
+         << "$(MAKE) $(MAKESILENT) rebuild_cache\n";
+    if (!silent) 
+      {
+      fout << "\techo " << directory << ": building " << target1 << "\n";
+      }
+    fout << "\tcd " << dir << "\n"
+         << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) " << target1 << "\n";
+    }
+  if(target2)
+    {
+    if (!silent) 
+      {
+      fout << "\techo " << directory << ": building " << target2 << "\n";
+      }
+    fout << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) " << target2 << "\n";
+    }
+  std::string currentDir = m_Makefile->GetCurrentOutputDirectory();
+  fout << "\tcd " << cmSystemTools::ConvertToOutputPath(currentDir.c_str()) << "\n\n";
+}
+
+
 void cmLocalUnixMakefileGenerator::BuildInSubDirectory(std::ostream& fout,
                                                   const char* dir,
                                                   const char* target1,
                                                   const char* target2,
                                                   bool silent)
 {
+  if(m_WindowsShell)
+    {
+    this->BuildInSubDirectoryWindows(fout, dir, target1, target2, silent);
+    return;
+    }
+  
   std::string directory = cmSystemTools::ConvertToOutputPath(dir);
   if(target1)
     {
@@ -1313,7 +1502,9 @@ bool cmLocalUnixMakefileGenerator::OutputObjectDepends(std::ostream& fout)
                 (*source)->GetDepends().begin();
               dep != (*source)->GetDepends().end(); ++dep)
             {
-            fout << (*source)->GetSourceName() << m_ObjectFileExtension << " : "
+            fout << (*source)->GetSourceName()
+                 << this->GetOutputExtension(
+                   (*source)->GetSourceExtension().c_str()) << " : "
                  << cmSystemTools::ConvertToOutputPath(dep->c_str()) << "\n";
             ret = true;
             }
@@ -1511,69 +1702,65 @@ void cmLocalUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
     }  
 }
 
+std::string 
+cmLocalUnixMakefileGenerator::ConvertToOutputForExisting(const char* p)
+{
+  std::string ret = cmSystemTools::ConvertToOutputPath(p);
+  cmSystemTools::GetShortPath(ret.c_str(), ret);
+  return ret;
+}
+
+
 void cmLocalUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
 {
   const char* variables = 
     "# the standard shell for make\n"
     "SHELL = /bin/sh\n"
-    "\n"
-    "CMAKE_RANLIB        = @CMAKE_RANLIB@\n"
-    "CMAKE_AR            = @CMAKE_AR@\n"
-    "CMAKE_AR_ARGS       = @CMAKE_AR_ARGS@\n"
-    "CMAKE_CXX_AR            = @CMAKE_CXX_AR@\n"
-    "CMAKE_CXX_AR_ARGS       = @CMAKE_CXX_AR_ARGS@\n"
-    "CMAKE_C_FLAGS    =    @CMAKE_C_FLAGS@\n"
-    "CMAKE_C_COMPILER    = @CMAKE_C_COMPILER@\n"
-    "CMAKE_C_LINK_SHARED    = @CMAKE_C_LINK_SHARED@\n"
-    "CMAKE_CXX_LINK_SHARED       = @CMAKE_CXX_LINK_SHARED@\n"
-    "CMAKE_SHLIB_CFLAGS  = @CMAKE_SHLIB_CFLAGS@\n"
-    
-    "CMAKE_CXX_SHLIB_CFLAGS = @CMAKE_CXX_SHLIB_CFLAGS@\n"
-    "CMAKE_CXX_SHLIB_BUILD_FLAGS = @CMAKE_CXX_SHLIB_BUILD_FLAGS@\n"
-    "CMAKE_CXX_SHLIB_LINK_FLAGS = @CMAKE_CXX_SHLIB_LINK_FLAGS@\n"
-    "CMAKE_CXX_MODULE_BUILD_FLAGS = @CMAKE_CXX_MODULE_BUILD_FLAGS@\n"
-    "CMAKE_CXX_MODULE_LINK_FLAGS = @CMAKE_CXX_MODULE_LINK_FLAGS@\n"
-    "CMAKE_CXX_SHLIB_RUNTIME_FLAG = @CMAKE_CXX_SHLIB_RUNTIME_FLAG@\n"
-    "CMAKE_CXX_SHLIB_RUNTIME_SEP = @CMAKE_CXX_SHLIB_RUNTIME_SEP@\n"
-
-    "\n"
-    "CMAKE_CXX_COMPILER  = @CMAKE_CXX_COMPILER@\n"
-    "CMAKE_CXX_FLAGS     = @CMAKE_CXX_FLAGS@\n"
-    "\n"
-    "CMAKE_SHLIB_BUILD_FLAGS  = @CMAKE_SHLIB_BUILD_FLAGS@\n"
-    "CMAKE_SHLIB_LINK_FLAGS   = @CMAKE_SHLIB_LINK_FLAGS@\n"
-    "CMAKE_C_SHLIB_LINK_FLAGS   = @CMAKE_C_SHLIB_LINK_FLAGS@\n"
-    "CMAKE_MODULE_BUILD_FLAGS = @CMAKE_MODULE_BUILD_FLAGS@\n"
-    "CMAKE_MODULE_LINK_FLAGS  = @CMAKE_MODULE_LINK_FLAGS@\n"
-    "CMAKE_C_SHLIB_RUNTIME_FLAG = @CMAKE_C_SHLIB_RUNTIME_FLAG@\n"
-    "CMAKE_SHLIB_RUNTIME_FLAG = @CMAKE_SHLIB_RUNTIME_FLAG@\n"
-    "CMAKE_SHLIB_RUNTIME_SEP = @CMAKE_SHLIB_RUNTIME_SEP@\n"
-    "SHLIB_LD_LIBS            = @CMAKE_SHLIB_LD_LIBS@\n"
-    "SHLIB_SUFFIX             = @CMAKE_SHLIB_SUFFIX@\n"
-    "MODULE_SUFFIX            = @CMAKE_MODULE_SUFFIX@\n"
-    "RM = rm -f\n"
     "\n";
-  std::string replaceVars = variables;
-  m_Makefile->ExpandVariablesInString(replaceVars);
-  fout << replaceVars.c_str();
+  if(!m_WindowsShell)
+    {
+    fout << variables;
+    }
+  else
+    {
+    fout << 
+      "!IF \"$(OS)\" == \"Windows_NT\"\n"
+      "NULL=\n"
+      "!ELSE \n"
+      "NULL=nul\n"
+      "!ENDIF \n";
+    }
+  if(m_MakeSilentFlag.size())
+    {
+    fout << "MAKESILENT                             = " << m_MakeSilentFlag << "\n";
+    }
+  
+  std::string cmakecommand = this->ConvertToOutputForExisting(
+    m_Makefile->GetDefinition("CMAKE_COMMAND"));
   fout << "CMAKE_COMMAND = "
-       << cmSystemTools::ConvertToOutputPath(m_Makefile->GetDefinition("CMAKE_COMMAND"))
+       << cmakecommand
        << "\n";
+  fout << "RM = " << cmakecommand.c_str() << " -E remove -f\n"; 
+
   if(m_Makefile->GetDefinition("CMAKE_EDIT_COMMAND"))
     {
     fout << "CMAKE_EDIT_COMMAND = "
-         << cmSystemTools::ConvertToOutputPath(m_Makefile->GetDefinition("CMAKE_EDIT_COMMAND"))
+         << this->ConvertToOutputForExisting(m_Makefile->GetDefinition("CMAKE_EDIT_COMMAND"))
          << "\n";
     }
 
   fout << "CMAKE_CURRENT_SOURCE = " << 
-    cmSystemTools::ConvertToOutputPath(m_Makefile->GetStartDirectory()) << "\n";
+    cmSystemTools::ConvertToOutputPath(m_Makefile->GetStartDirectory()) 
+       << "\n";
   fout << "CMAKE_CURRENT_BINARY = " << 
-    cmSystemTools::ConvertToOutputPath(m_Makefile->GetStartOutputDirectory()) << "\n";
+    cmSystemTools::ConvertToOutputPath(m_Makefile->GetStartOutputDirectory())
+       << "\n";
   fout << "CMAKE_SOURCE_DIR = " << 
-    cmSystemTools::ConvertToOutputPath(m_Makefile->GetHomeDirectory()) << "\n";
+    cmSystemTools::ConvertToOutputPath(m_Makefile->GetHomeDirectory())
+       << "\n";
   fout << "CMAKE_BINARY_DIR = " << 
-    cmSystemTools::ConvertToOutputPath(m_Makefile->GetHomeOutputDirectory()) << "\n";
+    cmSystemTools::ConvertToOutputPath(m_Makefile->GetHomeOutputDirectory())
+       << "\n";
   // Output Include paths
   fout << "INCLUDE_FLAGS = ";
   std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();
@@ -1740,12 +1927,12 @@ void cmLocalUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
 void cmLocalUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
 {
   this->OutputMakeRule(fout, 
-                       "Default build rule",
+                       "default build rule",
                        "all",
                        "cmake.depends $(TARGETS) $(SUBDIR_BUILD)",
                        0);
   this->OutputMakeRule(fout, 
-                       "remove generated files",
+                       "clean generated files",
                        "clean",
                        "$(SUBDIR_CLEAN)",
                        "-@ $(RM) $(CLEAN_OBJECT_FILES) "
@@ -1771,7 +1958,7 @@ void cmLocalUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
     }
 
   this->OutputMakeRule(fout, 
-                       "Rule to build the cmake.depends and Makefile as side effect, if a source cmakelist file is out of date.",
+                       "dependencies.",
                        "cmake.depends",
                        "$(CMAKE_MAKEFILE_SOURCES)",
                        "$(CMAKE_COMMAND) "
@@ -1779,7 +1966,7 @@ void cmLocalUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                        "-H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)"
     );
   this->OutputMakeRule(fout, 
-                       "Rule to build the cmake.check_depends and Makefile as side effect, if any source file has changed.",
+                       "dependencies",
                        "cmake.check_depends",
                        allsources.c_str(),
                        "$(CMAKE_COMMAND) "
@@ -1788,15 +1975,14 @@ void cmLocalUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
     );
   
   this->OutputMakeRule(fout, 
-                       "Rule to force the build of cmake.depends",
+                       "dependencies",
                        "depend",
                        "$(SUBDIR_DEPEND)",
                        "$(CMAKE_COMMAND) "
                        "-S$(CMAKE_CURRENT_SOURCE) -O$(CMAKE_CURRENT_BINARY) "
                        "-H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)");  
   this->OutputMakeRule(fout, 
-                       "Rule to force the build of cmake.depends "
-                       "in the current directory only.",
+                       "dependencies",
                        "dependlocal",
                        0,
                        "$(CMAKE_COMMAND) "
@@ -1804,7 +1990,7 @@ void cmLocalUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                        "-H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)");  
 
   this->OutputMakeRule(fout, 
-                       "Rebuild CMakeCache.txt file",
+                       "CMakeCache.txt",
                        "rebuild_cache",
                        "$(CMAKE_BINARY_DIR)/CMakeCache.txt",
                        "$(CMAKE_COMMAND) "
@@ -1814,7 +2000,7 @@ void cmLocalUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
   if(m_Makefile->GetDefinition("CMAKE_EDIT_COMMAND"))
     {
     this->OutputMakeRule(fout, 
-                         "Edit the CMakeCache.txt file with ccmake or CMakeSetup",
+                         "edit CMakeCache.txt",
                          "edit_cache",
                          0,
                          "$(CMAKE_EDIT_COMMAND) "
@@ -1822,7 +2008,7 @@ void cmLocalUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
     }
   
   this->OutputMakeRule(fout, 
-                       "Create CMakeCache.txt file",
+                       "CMakeCache.txt",
                        "$(CMAKE_BINARY_DIR)/CMakeCache.txt",
                        0,
                        "$(CMAKE_COMMAND) "
@@ -1861,10 +2047,10 @@ void cmLocalUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
   if (cmSystemTools::FileExists(ctest.c_str()))
     {
     this->OutputMakeRule(fout, 
-                         "run any tests",
+                         "tests",
                          "test",
                          "",
-                         cmSystemTools::ConvertToOutputPath(ctest.c_str()).c_str());
+                         this->ConvertToOutputForExisting(ctest.c_str()).c_str());
     }
 }
 
@@ -1882,55 +2068,120 @@ OutputBuildObjectFromSource(std::ostream& fout,
     return;
     }
 
-  std::string comment = "Build ";
-  std::string objectFile = std::string(shortName) + m_ObjectFileExtension;
+  std::string comment = "object file";
+  std::string objectFile = std::string(shortName) + 
+    this->GetOutputExtension(source.GetSourceExtension().c_str());
   objectFile = cmSystemTools::ConvertToOutputPath(objectFile.c_str());
-  comment += objectFile + "  From ";
-  comment += source.GetFullPath();
   std::string compileCommand;
-  cmSystemTools::e_FileFormat format = 
+  cmSystemTools::FileFormat format = 
     cmSystemTools::GetFileFormat(source.GetSourceExtension().c_str());
-  if( format == cmSystemTools::C_FILE_FORMAT )
+  std::vector<std::string> rules;
+  std::string flags;
+  if(extraCompileFlags)
     {
-    compileCommand = "$(CMAKE_C_COMPILER) $(CMAKE_C_FLAGS) ";
-    compileCommand += extraCompileFlags;
-    if(shared)
-      {
-      compileCommand += "$(CMAKE_SHLIB_CFLAGS) ";
-      }
-    compileCommand += "$(INCLUDE_FLAGS) -c ";
-    compileCommand += 
-      cmSystemTools::ConvertToOutputPath(source.GetFullPath().c_str());
-    compileCommand += " -o ";
-    compileCommand += objectFile;
+    flags += extraCompileFlags;
     }
-  else if ( format == cmSystemTools::CXX_FILE_FORMAT )
+  flags += "$(INCLUDE_FLAGS) ";
+  std::string sourceFile = 
+    cmSystemTools::ConvertToOutputPath(source.GetFullPath().c_str()); 
+  std::string buildType =  this->GetSafeDefinition("CMAKE_BUILD_TYPE");
+  buildType = cmSystemTools::UpperCase(buildType);
+  switch(format)
     {
-    compileCommand = "$(CMAKE_CXX_COMPILER) $(CMAKE_CXX_FLAGS) ";
-    compileCommand += extraCompileFlags;
-    if(shared)
+    case cmSystemTools::C_FILE_FORMAT:
       {
-      compileCommand += "$(CMAKE_SHLIB_CFLAGS) ";
+      rules.push_back(m_Makefile->GetDefinition("CMAKE_C_COMPILE_OBJECT"));
+      flags += this->GetSafeDefinition("CMAKE_C_FLAGS");
+      flags += " ";
+      if(shared)
+        {
+        flags += this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_C_FLAGS");
+        flags += this->GetSafeDefinition("CMAKE_C_FLAGS");
+        flags += " ";
+        if(buildType.size())
+          {
+          std::string build = "CMAKE_C_FLAGS_";
+          build += buildType;
+          flags +=  this->GetSafeDefinition(build.c_str());
+          flags += " ";
+          }
+        }
+      break;
       }
-    compileCommand += "$(INCLUDE_FLAGS) -c ";
-    compileCommand += 
-      cmSystemTools::ConvertToOutputPath(source.GetFullPath().c_str());
-    compileCommand += " -o ";
-    compileCommand += objectFile;
+    case cmSystemTools::CXX_FILE_FORMAT:
+      {
+      rules.push_back(m_Makefile->GetDefinition("CMAKE_CXX_COMPILE_OBJECT"));
+      flags += this->GetSafeDefinition("CMAKE_CXX_FLAGS");
+      flags += " "; 
+      if(buildType.size())
+        {
+        std::string build = "CMAKE_CXX_FLAGS_";
+        build += buildType;
+        flags +=  this->GetSafeDefinition(build.c_str());
+        flags += " ";
+        }
+      if(shared)
+        {
+        flags += this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_CXX_FLAGS");
+        flags += " ";
+        }
+      break;
+      }
+    case cmSystemTools::HEADER_FILE_FORMAT:
+      return;
+      break;
+    case cmSystemTools::DEFINITION_FILE_FORMAT:
+      return;
+      break;
+    case cmSystemTools::RESOURCE_FILE_FORMAT:
+      {
+      flags = " $(INCLUDE_FLAGS) ";
+      // use rc rule here if it is defined
+      const char* rule = m_Makefile->GetDefinition("CMAKE_COMPILE_RESOURCE");
+      if(rule)
+        {
+        rules.push_back(rule);
+        }
+      }
+      break;
+    case cmSystemTools::NO_FILE_FORMAT:
+    case cmSystemTools::JAVA_FILE_FORMAT:
+    case cmSystemTools::STATIC_LIBRARY_FILE_FORMAT:
+    case cmSystemTools::SHARED_LIBRARY_FILE_FORMAT:
+    case cmSystemTools::MODULE_FILE_FORMAT:
+    case cmSystemTools::OBJECT_FILE_FORMAT:
+    case cmSystemTools::UNKNOWN_FILE_FORMAT:
+      cmSystemTools::Error("Unexpected file type ",
+                           sourceFile.c_str());
+      break;
+    } 
+  // expand multi-command semi-colon separated lists
+  // of commands into separate commands
+  std::vector<std::string> commands;
+  cmSystemTools::ExpandListArguments(rules, commands);
+  for(std::vector<std::string>::iterator i = commands.begin();
+      i != commands.end(); ++i)
+    {
+    this->ExpandRuleVariables(*i,
+                              0, // no objects
+                              0, // no target
+                              0, // no link libs
+                              sourceFile.c_str(),
+                              objectFile.c_str(),
+                              flags.c_str() );
     }
   this->OutputMakeRule(fout,
                        comment.c_str(),
                        objectFile.c_str(),
-                       cmSystemTools::ConvertToOutputPath(source.GetFullPath().
-                                                 c_str()).c_str(),
-                       compileCommand.c_str());
+                       sourceFile.c_str(),
+                       commands);
 }
 
 
 
 void cmLocalUnixMakefileGenerator::OutputSourceObjectBuildRules(std::ostream& fout)
 {
-  fout << "# Rules to build " << m_ObjectFileExtension 
+  fout << "# Rules to build " << this->GetOutputExtension("")
        << " files from their sources:\n";
 
   std::set<std::string> rules;
@@ -2006,14 +2257,42 @@ void cmLocalUnixMakefileGenerator::OutputSourceObjectBuildRules(std::ostream& fo
     }
 }
 
+
 void cmLocalUnixMakefileGenerator::OutputMakeRule(std::ostream& fout, 
-                                             const char* comment,
-                                             const char* target,
-                                             const char* depends, 
-                                             const char* command,
-                                             const char* command2,
-                                             const char* command3,
-                                             const char* command4)
+                                                  const char* comment,
+                                                  const char* target,
+                                                  const char* depends, 
+                                                  const char* command,
+                                                  const char* command2,
+                                                  const char* command3,
+                                                  const char* command4)
+{
+  std::vector<std::string> commands;
+  if(command)
+    {
+    commands.push_back(command);
+    }
+  if(command2)
+    {
+    commands.push_back(command2);
+    }
+  if(command3)
+    {
+    commands.push_back(command3);
+    }
+  if(command4)
+    {
+    commands.push_back(command4);
+    }
+  this->OutputMakeRule(fout, comment, target, depends, commands);
+}
+
+
+void cmLocalUnixMakefileGenerator::OutputMakeRule(std::ostream& fout, 
+                                                  const char* comment,
+                                                  const char* target,
+                                                  const char* depends, 
+                                                  const std::vector<std::string>& commands)
 {
   if(!target)
     {
@@ -2043,37 +2322,115 @@ void cmLocalUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
     fout << replace.c_str();
     }
   fout << "\n";
-
-  const char* commands[] = { command, command2, command3, command4 };
-
-  for (unsigned int i = 0; i < sizeof(commands) / sizeof(commands[0]); ++i) 
+  int count = 0;
+  for (std::vector<std::string>::const_iterator i = commands.begin();
+       i != commands.end(); ++i) 
     {
-    if(commands[i])
+    replace = *i;
+    m_Makefile->ExpandVariablesInString(replace);
+    if(count == 0 && replace[0] != '-' && replace.find("echo") != 0  
+       && replace.find("$(MAKE)") != 0)
       {
-      replace = commands[i];
-      m_Makefile->ExpandVariablesInString(replace);
-      if(replace[0] != '-' && replace.find("echo") != 0  
-         && replace.find("$(MAKE)") != 0)
+      std::string echostring = "Building ";
+      echostring += comment;
+      echostring += " ";
+      echostring += target;
+      echostring += "...";
+      
+      // for unix we want to quote the output of echo
+      // for nmake and borland, the echo should not be quoted
+      if(strcmp(m_GlobalGenerator->GetName(), "Unix Makefiles") == 0)
         {
-        std::string echostring = replace;
-        // for unix we want to quote the output of echo
-        // for nmake and borland, the echo should not be quoted
-        if(strcmp(m_GlobalGenerator->GetName(), "Unix Makefiles") == 0)
-          {
-          cmSystemTools::ReplaceString(echostring, "\\\n", " ");
-          cmSystemTools::ReplaceString(echostring, " \t", "   ");
-          cmSystemTools::ReplaceString(echostring, "\n\t", "\"\n\techo \"");
-          fout << "\techo \"" << echostring.c_str() << "\"\n";
-          }
-        else
-          {
-          cmSystemTools::ReplaceString(echostring, "\n\t", "\n\techo ");
-          fout << "\techo " << echostring.c_str() << "\n";
-          }
+        cmSystemTools::ReplaceString(echostring, "\\\n", " ");
+        cmSystemTools::ReplaceString(echostring, " \t", "   ");
+        cmSystemTools::ReplaceString(echostring, "\n\t", "\"\n\techo \"");
+        fout << "\techo \"" << echostring.c_str() << "\"\n";
         }
-      fout << "\t" << replace.c_str() << "\n";
+      else
+        {
+        cmSystemTools::ReplaceString(echostring, "\n\t", "\n\techo ");
+        fout << "\techo " << echostring.c_str() << "\n";
+        }
       }
+    fout << "\t" << replace.c_str() << "\n";
+    count++;
     }
   fout << "\n";
 }
 
+const char* cmLocalUnixMakefileGenerator::GetSafeDefinition(const char* def)
+{
+  const char* ret = m_Makefile->GetDefinition(def);
+  if(!ret)
+    {
+    return "";
+    }
+  return ret;
+}
+
+std::string cmLocalUnixMakefileGenerator::LowerCasePath(const char* path)
+{
+#ifdef _WIN32
+   return cmSystemTools::LowerCase(path);
+#else
+   return std::string(path);
+#endif
+}
+  
+std::string
+cmLocalUnixMakefileGenerator::CreateMakeVariable(const char* s, const char* s2)
+{
+  if(!m_MakefileVariableSize)
+    {
+    return std::string(s) + std::string(s2);
+    }
+  std::string unmodified = s;
+  unmodified += s2;
+  // see if th
+  std::map<cmStdString, cmStdString>::iterator i = m_MakeVariableMap.find(unmodified);
+  if(i != m_MakeVariableMap.end())
+    {
+    return i->second;
+    }
+  std::string ret = unmodified;
+  // if the string is greater the 32 chars it is an invalid vairable name
+  // for borland make
+  if(ret.size() > m_MakefileVariableSize)
+    {
+    int keep = m_MakefileVariableSize - 8;
+    int size = keep + 3;
+    std::string str1 = s;
+    std::string str2 = s2;
+    // we must shorten the combined string by 4 charactors
+    // keep no more than 24 charactors from the second string
+    if(str2.size() > keep)
+      {
+      str2 = str2.substr(0, keep);
+      }
+    if(str1.size() + str2.size() > size)
+      {
+      str1 = str1.substr(0, size - str2.size());
+      }
+    char buffer[5];
+    int i = 0;
+    sprintf(buffer, "%04d", i);
+    ret = str1 + str2 + buffer;
+    while(m_ShortMakeVariableMap.count(ret) && i < 1000)
+      {
+      ++i;
+      sprintf(buffer, "%04d", i);
+      ret = str1 + str2 + buffer;
+      }
+    if(i == 1000)
+      {
+      cmSystemTools::Error("Borland makefile varible length too long");
+      return unmodified;
+      }
+    // once an unused variable is found 
+    m_ShortMakeVariableMap[ret] = "1";
+    }
+  // always make an entry into the unmodified to varible map
+  m_MakeVariableMap[unmodified] = ret;
+  return ret;
+
+}

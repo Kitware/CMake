@@ -106,7 +106,13 @@ bool cmIfCommand::InitialPass(std::vector<std::string> const& args)
   
   if (!isValid)
     {
-    this->SetError("An IF command had incorrect arguments");
+    std::string err = "An IF command had incorrect arguments: ";
+    for(int i =0; i < args.size(); ++i)
+      {
+      err += args[i];
+      err += " ";
+      }
+    this->SetError(err.c_str());
     return false;
     }
   
@@ -169,6 +175,15 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args, bool &isValid,
     }
 
   if (args.size() == 2 && (args[0] == "EXISTS"))
+    {
+    if(!cmSystemTools::FileExists(args[1].c_str()))
+      {
+      isTrue = false;
+      }
+    isValid = true;
+    }
+
+  if (args.size() == 2 && (args[0] == "MATCHES"))
     {
     if(!cmSystemTools::FileExists(args[1].c_str()))
       {
@@ -263,7 +278,6 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args, bool &isValid,
       }
     isValid = true;
     }
-
   return isTrue;
 }
 

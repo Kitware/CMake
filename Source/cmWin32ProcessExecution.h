@@ -45,10 +45,13 @@ class cmWin32ProcessExecution
 public:
   cmWin32ProcessExecution()
     {
+    m_HideWindows = false;
     this->SetConsoleSpawn("w9xpopen.exe");
     this->Initialize();
     }
-
+  ///! If true windows will be created hidden.
+  void SetHideWindows(bool v) { m_HideWindows = v;  }
+  
   /**
    * Initialize the process execution datastructure. Do not call while
    * running the process.
@@ -133,7 +136,7 @@ public:
    */ 
   static bool BorlandRunCommand(const char* command, const char* dir, 
                                 std::string& output, int& retVal, bool verbose,
-                                int timeout);
+                                int timeout, bool hideWindows);
 
 private:
   bool PrivateOpen(const char*, const char*, int, int);
@@ -156,6 +159,7 @@ private:
   std::string m_Output;
   std::string m_ConsoleSpawn;
   bool m_Verbose;
+  bool m_HideWindows;
 };
 
 

@@ -15,33 +15,25 @@
 
 =========================================================================*/
 #include "cmGlobalNMakeMakefileGenerator.h"
-#include "cmLocalNMakeMakefileGenerator.h"
+#include "cmLocalUnixMakefileGenerator.h"
 #include "cmMakefile.h"
 
-void cmGlobalNMakeMakefileGenerator::EnableLanguage(const char*,
+void cmGlobalNMakeMakefileGenerator::EnableLanguage(const char* l,
                                                     cmMakefile *mf)
 {
-  // now load the settings
-  if(!mf->GetDefinition("CMAKE_ROOT"))
-    {
-    cmSystemTools::Error(
-      "CMAKE_ROOT has not been defined, bad GUI or driver program");
-    return;
-    }
-  if(!this->GetLanguageEnabled("CXX"))
-    {
-    std::string fpath = 
-      mf->GetDefinition("CMAKE_ROOT");
-    fpath += "/Templates/CMakeNMakeWindowsSystemConfig.cmake";
-    mf->ReadListFile(NULL,fpath.c_str());
-    this->SetLanguageEnabled("CXX");
-    }
+  // pick a default 
+  mf->AddDefinition("CMAKE_GENERATOR_CC", "cl");
+  mf->AddDefinition("CMAKE_GENERATOR_CXX", "cl");
+  
+  this->cmGlobalUnixMakefileGenerator::EnableLanguage(l, mf);
 }
 
 ///! Create a local generator appropriate to this Global Generator
 cmLocalGenerator *cmGlobalNMakeMakefileGenerator::CreateLocalGenerator()
 {
-  cmLocalGenerator *lg = new cmLocalNMakeMakefileGenerator;
+  cmLocalUnixMakefileGenerator *lg = new cmLocalUnixMakefileGenerator;
+  lg->SetWindowsShell(true);
+  lg->SetMakeSilentFlag("/nologo");
   lg->SetGlobalGenerator(this);
   return lg;
 }

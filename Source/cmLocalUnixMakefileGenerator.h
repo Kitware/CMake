@@ -60,12 +60,45 @@ public:
    */
   virtual void OutputCheckDepends(std::ostream&);
 
+  /**
+   * Set to true if the shell being used is the windows shell.
+   * This controls if statements in the makefile and the SHELL variable.
+   * The default is false.
+   */
+  void SetWindowsShell(bool v)  {m_WindowsShell = v;}
+
+  ///! Set the string used to include one makefile into another default is include.
+  void SetIncludeDirective(const char* s) { m_IncludeDirective = s; }
+
+  ///! Set the flag used to keep the make program silent.
+  void SetMakeSilentFlag(const char* s) { m_MakeSilentFlag = s; }
+
+  ///! Set max makefile variable size, default is 0 which means unlimited.
+  void SetMakefileVariableSize(int s) { m_MakefileVariableSize = s; }
+
 protected:
+  virtual const char* GetSafeDefinition(const char*);
   virtual void ProcessDepends(const cmMakeDepend &md);
   virtual void OutputMakefile(const char* file, bool withDepends);
   virtual void OutputTargetRules(std::ostream& fout);
   virtual void OutputLinkLibraries(std::ostream&, const char* name, const cmTarget &);
-
+  void OutputLibraryRule(std::ostream& fout,  
+                         const char* name, 
+                         const cmTarget &t,
+                         const char* prefix,
+                         const char* suffix,
+                         const char* createRule,
+                         const char* comment
+    );
+  void ExpandRuleVariables(std::string& string,
+                           const char* objects=0,
+                           const char* target=0,
+                           const char* linkLibs=0,
+                           const char* source=0,
+                           const char* object =0,
+                           const char* flags = 0,
+                           const char* objectsquoted = 0,
+                           const char* targetBase = 0);
   virtual void OutputSharedLibraryRule(std::ostream&, const char* name,
                                        const cmTarget &);
   virtual void OutputModuleLibraryRule(std::ostream&, const char* name, 
@@ -99,6 +132,12 @@ protected:
                                    const char* target2,
                                    bool silent = false);
 
+  virtual void BuildInSubDirectoryWindows(std::ostream& fout,
+                                          const char* directory,
+                                          const char* target1,
+                                          const char* target2,
+                                          bool silent = false);
+  
   virtual void OutputSubDirectoryVars(std::ostream& fout,
                                       const char* var,
                                       const char* target,
@@ -108,6 +147,12 @@ protected:
                                       const std::vector<std::string>&
                                       SubDirectories,
                                       bool silent = false);
+
+  virtual void OutputMakeRule(std::ostream&, 
+                              const char* comment,
+                              const char* target,
+                              const char* depends, 
+                              const std::vector<std::string>& commands);
 
   virtual void OutputMakeRule(std::ostream&, 
                               const char* comment,
@@ -125,33 +170,25 @@ protected:
   ///! return true if the two paths are the same
   virtual bool SamePath(const char* path1, const char* path2);
   virtual std::string GetOutputExtension(const char* sourceExtension);
-  virtual void OutputIncludeMakefile(std::ostream&, const char* file);
-  void SetObjectFileExtension(const char* e) { m_ObjectFileExtension = e;}
-  void SetExecutableExtension(const char* e) { m_ExecutableExtension = e;}
-  void SetStaticLibraryExtension(const char* e) {m_StaticLibraryExtension = e;}
-  void SetSharedLibraryExtension(const char* e) {m_SharedLibraryExtension = e;}
-  void SetLibraryPrefix(const char* e) { m_LibraryPrefix = e;}
   std::string CreateTargetRules(const cmTarget &target,
                                 const char* targetName);
-  virtual std::string CreateMakeVariable(const char* s, const char* s2)
-    {
-      return std::string(s) + std::string(s2);
-    }
+  virtual std::string CreateMakeVariable(const char* s, const char* s2);
   
   ///! if the OS is case insensitive then return a lower case of the path.
-  virtual std::string LowerCasePath(const char* path)
-    {
-      return std::string(path);
-    }
-  
+  virtual std::string LowerCasePath(const char* path);
+
+  ///! for existing files convert to output path and short path if spaces
+  std::string ConvertToOutputForExisting(const char*);
 protected:
+  int m_MakefileVariableSize;
+  std::map<cmStdString, cmStdString> m_MakeVariableMap;
+  std::map<cmStdString, cmStdString> m_ShortMakeVariableMap;
+  
+  std::string m_IncludeDirective;
+  std::string m_MakeSilentFlag;
   std::string m_ExecutableOutputPath;
   std::string m_LibraryOutputPath;
-  std::string m_SharedLibraryExtension;
-  std::string m_ObjectFileExtension;
-  std::string m_ExecutableExtension;
-  std::string m_StaticLibraryExtension;
-  std::string m_LibraryPrefix;
+  bool m_WindowsShell;
 private:
 };
 

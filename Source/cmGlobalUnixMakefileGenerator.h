@@ -44,7 +44,7 @@ public:
   /**
    * Try to determine system infomation, get it from another generator
    */
-  virtual void EnableLanguagesFromGenerator(cmGlobalGenerator *, cmMakefile *);
+  virtual void EnableLanguagesFromGenerator(cmGlobalGenerator *);
 
 };
 

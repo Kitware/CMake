@@ -61,9 +61,7 @@ IF (WIN32)
   IF(NOT UNIX)
     SET(SRCS ${SRCS}
                     cmGlobalBorlandMakefileGenerator.cxx
-                    cmLocalBorlandMakefileGenerator.cxx
                     cmGlobalNMakeMakefileGenerator.cxx
-                    cmLocalNMakeMakefileGenerator.cxx
                     cmGlobalVisualStudio6Generator.cxx
                     cmLocalVisualStudio6Generator.cxx
                     cmGlobalVisualStudio7Generator.cxx

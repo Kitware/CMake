@@ -321,7 +321,7 @@ public:
   /**
    * Come constants for different file formats.
    */
-  enum e_FileFormat {
+  enum FileFormat {
     NO_FILE_FORMAT = 0,
     C_FILE_FORMAT,
     CXX_FILE_FORMAT,
@@ -339,7 +339,7 @@ public:
   /**
    * Determine the file type based on the extension
    */
-  static e_FileFormat GetFileFormat(const char* ext);
+  static FileFormat GetFileFormat(const char* ext);
 
   /**
    * On Windows 9x we need a comspec (command.com) substitute to run
@@ -349,6 +349,11 @@ public:
   static void SetWindows9xComspecSubstitute(const char*);
   static const char* GetWindows9xComspecSubstitute();
 
+  /** Windows if this is true, the CreateProcess in RunCommand will
+   *  not show new consol windows when running programs.   
+   */
+  static void SetRunCommandHideConsole(bool v){s_RunCommandHideConsole = v;}
+  static bool GetRunCommandHideConsole(){ return s_RunCommandHideConsole;}
 protected:
   // these two functions can be called from ConvertToOutputPath
   /**
@@ -366,6 +371,7 @@ protected:
   static std::string ConvertToWindowsOutputPath(const char*);
 
 private:
+  static bool s_RunCommandHideConsole;
   static bool s_ErrorOccured;
   static bool s_DisableMessages;
   static bool s_DisableRunCommandOutput;

@@ -15,11 +15,11 @@
 
 =========================================================================*/
 #include "cmGlobalBorlandMakefileGenerator.h"
-#include "cmLocalBorlandMakefileGenerator.h"
+#include "cmLocalUnixMakefileGenerator.h"
 #include "cmMakefile.h"
 #include "cmake.h"
 
-void cmGlobalBorlandMakefileGenerator::EnableLanguage(const char*,
+void cmGlobalBorlandMakefileGenerator::EnableLanguage(const char* l,
                                                       cmMakefile *mf)
 {
   // now load the settings
@@ -37,20 +37,21 @@ void cmGlobalBorlandMakefileGenerator::EnableLanguage(const char*,
     message += outdir;
     cmSystemTools::Error(message.c_str());
     }
-  if(!this->GetLanguageEnabled("CXX"))
-    {
-    std::string fpath = 
-      mf->GetDefinition("CMAKE_ROOT");
-    fpath += "/Templates/CMakeBorlandWindowsSystemConfig.cmake";
-    mf->ReadListFile(NULL,fpath.c_str());
-    this->SetLanguageEnabled("CXX");
-    }
+  mf->AddDefinition("BORLAND", "1");
+  mf->AddDefinition("CMAKE_GENERATOR_CC", "bcc32");
+  mf->AddDefinition("CMAKE_GENERATOR_CXX", "bcc32");
+  
+  this->cmGlobalUnixMakefileGenerator::EnableLanguage(l, mf);
 }
 
 ///! Create a local generator appropriate to this Global Generator
 cmLocalGenerator *cmGlobalBorlandMakefileGenerator::CreateLocalGenerator()
 {
-  cmLocalGenerator *lg = new cmLocalBorlandMakefileGenerator;
+  cmLocalUnixMakefileGenerator *lg = new cmLocalUnixMakefileGenerator;
+  lg->SetIncludeDirective("!include");
+  lg->SetWindowsShell(true);
+  lg->SetMakefileVariableSize(32);
+
   lg->SetGlobalGenerator(this);
   return lg;
 }

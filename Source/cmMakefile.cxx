@@ -1403,8 +1403,7 @@ int cmMakefile::TryCompile(const char *srcdir, const char *bindir,
     cm.SetCacheArgs(*cmakeArgs);
     }
   // to save time we pass the EnableLanguage info directly
-  gg->EnableLanguagesFromGenerator(m_LocalGenerator->GetGlobalGenerator(),
-                                   this);
+  gg->EnableLanguagesFromGenerator(m_LocalGenerator->GetGlobalGenerator());
   
   if (cm.Configure() != 0)
     {

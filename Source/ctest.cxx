@@ -195,6 +195,10 @@ void ctest::Initialize()
     fin.getline(buffer, 1023);
     buffer[1023] = 0;
     std::string line = ::CleanString(buffer);
+    if(line.size() == 0)
+      {
+      continue;
+      }
     while ( fin && (line[line.size()-1] == '\\') )
       {
       line = line.substr(0, line.size()-1);
@@ -204,10 +208,6 @@ void ctest::Initialize()
       line += ::CleanString(buffer);
       }
     if ( line[0] == '#' )
-      {
-      continue;
-      }
-    if ( line.size() == 0 )
       {
       continue;
       }

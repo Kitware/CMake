@@ -60,6 +60,8 @@ IF(CMAKE_SYSTEM_VERSION)
   SET(CMAKE_SYSTEM ${CMAKE_SYSTEM}-${CMAKE_SYSTEM_VERSION})
 ENDIF(CMAKE_SYSTEM_VERSION)
 
+
 # configure variables set in this file for fast reload
 CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeSystem.cmake.in 
-               ${PROJECT_BINARY_DIR}/CMakeSystem.cmake)
+               ${PROJECT_BINARY_DIR}/CMakeSystem.cmake IMMEDIATE)
+

@@ -219,9 +219,9 @@ class cmIStringStream: private std::string, public std::istrstream
 public:
   typedef std::string StdString;
   typedef std::istrstream IStrStream;
-  cmIStringStream(): StdString(), IStrStream(this->StdString::c_str()) {}
+  cmIStringStream(): StdString(), IStrStream(StdString::c_str()) {}
   cmIStringStream(const std::string& s):
-    StdString(s), IStrStream(this->StdString::c_str()) {}
+    StdString(s), IStrStream(StdString::c_str()) {}
   std::string str() const { return *this; }
   void str(const std::string& s)
     {

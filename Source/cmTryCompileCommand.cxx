@@ -135,7 +135,7 @@ int cmTryCompileCommand::CoreTryCompileCode(
       }
     
     std::string source = argv[2];
-    cmSystemTools::e_FileFormat format = 
+    cmSystemTools::FileFormat format = 
       cmSystemTools::GetFileFormat( 
         cmSystemTools::GetFilenameExtension(source).c_str());
     if ( format == cmSystemTools::C_FILE_FORMAT )

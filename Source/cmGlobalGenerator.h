@@ -79,8 +79,7 @@ public:
   /**
    * Try to determine system infomation, get it from another generator
    */
-  virtual void EnableLanguagesFromGenerator(cmGlobalGenerator *gen, 
-                                            cmMakefile *mf);
+  virtual void EnableLanguagesFromGenerator(cmGlobalGenerator *gen);
 
   /**
    * Try running cmake and building a file. This is used for dynalically
@@ -98,7 +97,9 @@ public:
   cmake *GetCMakeInstance() {
     return this->m_CMakeInstance; };
 
+  void SetConfiguredFilesPath(const char* s){m_ConfiguredFilesPath = s;}
 protected:
+  cmStdString m_ConfiguredFilesPath;
   cmake *m_CMakeInstance;
   std::vector<cmLocalGenerator *> m_LocalGenerators;
 

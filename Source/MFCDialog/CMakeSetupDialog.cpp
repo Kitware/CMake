@@ -122,6 +122,7 @@ CMakeSetupDialog::CMakeSetupDialog(const CMakeCommandLineInfo& cmdInfo,
                                    CWnd* pParent /*=NULL*/)
   : CDialog(CMakeSetupDialog::IDD, pParent)
 {
+  cmSystemTools::SetRunCommandHideConsole(true);
   cmSystemTools::SetErrorCallback(MFCMessageCallback);
   m_RegistryKey  = "Software\\Kitware\\CMakeSetup\\Settings\\StartPath";
   m_CacheEntriesList.m_CMakeSetupDialog = this;

@@ -176,7 +176,6 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& argsIn)
   // the file must exist
   std::string fullPath = cmDynamicLoader::LibPrefix();
   fullPath += "cm" + argsIn[0] + cmDynamicLoader::LibExtension();
-
   std::vector<std::string> args;
   cmSystemTools::ExpandListArguments(argsIn, args);
 
@@ -196,7 +195,10 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& argsIn)
   fullPath = cmSystemTools::FindFile(fullPath.c_str(), path);
   if (fullPath == "")
     {
-    this->SetError("Attempt to load command failed.");
+    fullPath = "Attempt to load command failed from file : ";
+    fullPath += cmDynamicLoader::LibPrefix();
+    fullPath += "cm" + argsIn[0] + cmDynamicLoader::LibExtension();
+    this->SetError(fullPath.c_str());
     return false;
     }
 

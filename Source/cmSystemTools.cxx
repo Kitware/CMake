@@ -124,7 +124,7 @@ cmSystemTools::GetTime(void)
 #endif /* !HAVE_FTIME */
   }
 }
-
+bool cmSystemTools::s_RunCommandHideConsole = false;
 bool cmSystemTools::s_DisableRunCommandOutput = false;
 bool cmSystemTools::s_ErrorOccured = false;
 bool cmSystemTools::s_DisableMessages = false;
@@ -251,10 +251,15 @@ void cmSystemTools::ReplaceString(std::string& source,
                                    const char* replace,
                                    const char* with)
 {
+  // get out quick if string is not found
+  std::string::size_type start = source.find(replace);
+  if(start ==  std::string::npos)
+    {
+    return;
+    }
+  std::string rest;
   std::string::size_type lengthReplace = strlen(replace);
   std::string::size_type lengthWith = strlen(with);
-  std::string rest;
-  std::string::size_type start = source.find(replace);
   while(start != std::string::npos)
     {
     rest = source.substr(start+lengthReplace);
@@ -1330,7 +1335,8 @@ bool RunCommandViaWin32(const char* command,
 #if defined(__BORLANDC__)
   return cmWin32ProcessExecution::BorlandRunCommand(command, dir, output, 
                                                     retVal, 
-                                                    verbose, timeout);
+                                                    verbose, timeout, 
+                                                    cmSystemTools::GetRunCommandHideConsole());
 #else // Visual studio
   ::SetLastError(ERROR_SUCCESS);
   if ( ! command )
@@ -1338,13 +1344,13 @@ bool RunCommandViaWin32(const char* command,
     cmSystemTools::Error("No command specified");
     return false;
     }
-  //std::cout << "Command: " << command << std::endl;
-  if ( dir )
-    {
-    //std::cout << "Dir: " << dir << std::endl;
-    }
 
   cmWin32ProcessExecution resProc;
+  if(cmSystemTools::GetRunCommandHideConsole())
+    {
+    resProc.SetHideWindows(true);
+    }
+  
   if ( cmSystemTools::GetWindows9xComspecSubstitute() )
     {
     resProc.SetConsoleSpawn(cmSystemTools::GetWindows9xComspecSubstitute() );
@@ -2367,7 +2373,7 @@ bool cmSystemTools::SimpleGlob(const std::string& glob,
   return res;
 }
 
-cmSystemTools::e_FileFormat cmSystemTools::GetFileFormat(const char* cext)
+cmSystemTools::FileFormat cmSystemTools::GetFileFormat(const char* cext)
 {
   if ( ! cext || *cext == 0 )
     {

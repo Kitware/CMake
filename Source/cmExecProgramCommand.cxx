@@ -118,6 +118,15 @@ bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& args)
     {    
     std::string::size_type first = output.find_first_not_of(" \n\t\r");
     std::string::size_type last = output.find_last_not_of(" \n\t\r");
+    if(first == std::string::npos)
+      {
+      first = 0;
+      }
+    if(last == std::string::npos)
+      {
+      last = output.size()-1;
+      }
+    
     std::string coutput = std::string(output, first, last-first+1);
     m_Makefile->AddDefinition(output_variable.c_str(), coutput.c_str());
     }
