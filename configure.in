@@ -110,18 +110,16 @@ if test $ac_cv_prog_gxx = no; then
 fi
 
 # check non-g++ compilers to see if they have std::stringstream
-if test $ac_cv_prog_gxx = no; then
-  AC_MSG_CHECKING( for ansi standard C++ stringstream ) 
-  rm -rf conftest.*
-  cat > conftest.cc <<!
+AC_MSG_CHECKING( for ansi standard C++ stringstream ) 
+rm -rf conftest.*
+cat > conftest.cc <<!
 #include <sstream>
 !
-  if test -z "`${CXX} $CMAKE_ANSI_CXXFLAGS $CXXFLAGS $CPPFLAGS  -c conftest.cc 2>&1`"; then
-    echo "$ac_t""yes" 1>&6
-  else
-    AC_DEFINE(CMAKE_NO_ANSI_STRING_STREAM)
-    echo "$ac_t""no" 1>&6
-  fi
+if test -z "`${CXX} $CMAKE_ANSI_CXXFLAGS $CXXFLAGS $CPPFLAGS  -c conftest.cc 2>&1`"; then
+  echo "$ac_t""yes" 1>&6
+else
+  AC_DEFINE(CMAKE_NO_ANSI_STRING_STREAM)
+  echo "$ac_t""no" 1>&6
 fi
 
 # check to see if stl is in the std namespace
