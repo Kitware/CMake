@@ -1520,7 +1520,7 @@ bool cmSystemTools::RunCommand(const char* command,
         //return WindowsRunCommand(shortCmd.c_str(), dir, 
         //output, retVal, verbose);
         return RunCommandViaWin32(shortCmd.c_str(), dir, 
-                                  output, retVal, verbose);
+                                  output, retVal, verbose, timeout);
         }
       else
         {
