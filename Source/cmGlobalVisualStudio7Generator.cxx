@@ -20,8 +20,8 @@
 #include "cmake.h"
 #include "windows.h"
 
-void cmGlobalVisualStudio7Generator::EnableLanguage(const char* lang, 
-                                                   cmMakefile *mf)
+void cmGlobalVisualStudio7Generator::EnableLanguage(const char*, 
+                                                    cmMakefile *mf)
 {
   if (!m_LanguagesEnabled)
     {

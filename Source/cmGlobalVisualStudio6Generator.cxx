@@ -19,7 +19,7 @@
 #include "cmMakefile.h"
 #include "cmake.h"
 
-void cmGlobalVisualStudio6Generator::EnableLanguage(const char* lang, 
+void cmGlobalVisualStudio6Generator::EnableLanguage(const char*, 
                                                     cmMakefile *mf)
 {
   if (!m_LanguagesEnabled)

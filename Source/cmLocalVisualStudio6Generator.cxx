@@ -30,7 +30,7 @@ cmLocalVisualStudio6Generator::~cmLocalVisualStudio6Generator()
 }
 
 
-void cmLocalVisualStudio6Generator::Generate(bool fromTheTop)
+void cmLocalVisualStudio6Generator::Generate(bool /* fromTheTop */)
 {
   // this is misnammed right now, it doesn't really generate the makefile but
   // instead sets up the Makefile for generation

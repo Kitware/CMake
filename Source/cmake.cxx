@@ -109,7 +109,7 @@ void cmake::ReadListFile(const char *path)
 {
   // if a generator was not yet created, temporarily create one
   cmGlobalGenerator *gg = this->GetGlobalGenerator();
-  bool created;
+  bool created = false;
   
   // if a generator was not specified use a generic one
   if (!gg)

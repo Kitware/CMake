@@ -18,7 +18,7 @@
 #include "cmLocalNMakeMakefileGenerator.h"
 #include "cmMakefile.h"
 
-void cmGlobalNMakeMakefileGenerator::EnableLanguage(const char* lang,
+void cmGlobalNMakeMakefileGenerator::EnableLanguage(const char*,
                                                     cmMakefile *mf)
 {
   // now load the settings
