@@ -66,7 +66,8 @@ public:
    */
   virtual void Generate();
 
-private:
+private: 
+  std::string ConvertToRelativeOutputPath(const char* p);
   void CreateCustomCommands(cmXCodeObject* buildPhases,
                             cmXCodeObject* sourceBuildPhase,
                             cmXCodeObject* headerBuildPhase,
@@ -114,6 +115,9 @@ private:
   void ConfigureOutputPaths();
   void CreateXCodeDependHackTarget(std::vector<cmXCodeObject*>& targets);
   std::string GetTargetFullPath(cmTarget*);
+  bool SpecialTargetEmitted(std::string const& tname);
+  void AddExtraTargets(cmLocalGenerator* root, 
+                       std::vector<cmLocalGenerator*>& gens);
 private:
   std::vector<cmXCodeObject*> m_XCodeObjects;
   cmXCodeObject* m_RootObject;
@@ -124,9 +128,11 @@ private:
   std::string m_LibraryOutputPath;
   std::string m_ExecutableOutputPath;
   cmLocalGenerator* m_CurrentLocalGenerator;
+  std::set<cmStdString> m_TargetDoneSet;
   bool m_DoneAllBuild;
   bool m_DoneXCodeHack;
   std::string m_CurrentXCodeHackMakefile;
+  std::string m_OutputDir;
 };
 
 #endif

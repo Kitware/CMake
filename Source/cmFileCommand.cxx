@@ -580,27 +580,43 @@ bool cmFileCommand::HandleInstallCommand(
           }
         switch( itype )
           {
-        case cmTarget::MODULE_LIBRARY:
-        case cmTarget::SHARED_LIBRARY:
-        case cmTarget::EXECUTABLE:
-        case cmTarget::INSTALL_PROGRAMS:
-
-          if ( !cmSystemTools::SetPermissions(destfile.c_str(), 
-#if defined( _MSC_VER ) || defined( __MINGW32__ )
-              S_IREAD | S_IWRITE | S_IEXEC
-#elif defined( __BORLANDC__ )
-              S_IRUSR | S_IWUSR | S_IXUSR
-#else
-              S_IRUSR | S_IWUSR | S_IXUSR | 
-              S_IRGRP | S_IXGRP | 
-              S_IROTH | S_IXOTH 
-#endif
-          ) )
+          case cmTarget::STATIC_LIBRARY:
+#if defined(__APPLE_CC__)
             {
-            cmOStringStream err;
-            err << "Problem setting permissions on file: " << destfile.c_str();
-            perror(err.str().c_str());
+            std::string ranlib = "ranlib ";
+            ranlib += destfile;
+            if(!cmSystemTools::RunSingleCommand(ranlib.c_str()))
+              {
+              std::string err = "ranlib failed: ";
+              err += ranlib;
+              this->SetError(err.c_str());
+              }
             }
+#endif
+            break;
+            
+          case cmTarget::MODULE_LIBRARY:
+          case cmTarget::SHARED_LIBRARY:
+          case cmTarget::EXECUTABLE:
+          case cmTarget::INSTALL_PROGRAMS:
+            
+            if ( !cmSystemTools::SetPermissions(destfile.c_str(), 
+#if defined( _MSC_VER ) || defined( __MINGW32__ )
+                                                S_IREAD | S_IWRITE | S_IEXEC
+#elif defined( __BORLANDC__ )
+                                                S_IRUSR | S_IWUSR | S_IXUSR
+#else
+                                                S_IRUSR | S_IWUSR | S_IXUSR | 
+                                                S_IRGRP | S_IXGRP | 
+                                                S_IROTH | S_IXOTH 
+#endif
+                   ) )
+              {
+              cmOStringStream err;
+              err << "Problem setting permissions on file: " 
+                  << destfile.c_str();
+              perror(err.str().c_str());
+              }
           }
         smanifest_files += ";";
         smanifest_files += destfile.substr(destDirLength);

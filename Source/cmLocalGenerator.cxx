@@ -388,6 +388,10 @@ std::string cmLocalGenerator::ConvertToRelativeOutputPath(const char* p)
     {
     return cmSystemTools::ConvertToOutputPath(p);
     }
+  // NOTE, much of this was copied to 
+  // cmGlobalXCodeGenerator::ConvertToRelativeOutputPath
+  // fixes here should be made there as well.
+
   // copy to a string class
   std::string pathIn = p;
   // check to see if the path is already relative, it is

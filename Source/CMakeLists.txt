@@ -708,7 +708,10 @@ IF(BUILD_TESTING)
       )
   ENDIF (CTEST_TEST_CTEST AND CMAKE_RUN_LONG_TESTS)
 
-  IF(UNIX AND CMAKE_RUN_LONG_TESTS)
+  IF("${CMAKE_GENERATOR}" MATCHES XCode)
+    SET(CMAKE_SKIP_BOOTSTRAP_TEST 1)
+  ENDIF("${CMAKE_GENERATOR}" MATCHES XCode)
+  IF(UNIX AND CMAKE_RUN_LONG_TESTS AND NOT CMAKE_SKIP_BOOTSTRAP_TEST)
     ADD_TEST(BootstrapTest ${CMAKE_CTEST_COMMAND}
       --build-and-test
       ${CMake_SOURCE_DIR}
@@ -717,7 +720,7 @@ IF(BUILD_TESTING)
       --build-noclean
       --build-makeprogram ${CMake_SOURCE_DIR}/bootstrap
       --test-command ${CMake_BINARY_DIR}/Tests/BootstrapTest/Bootstrap.cmk/cmake)
-  ENDIF(UNIX AND CMAKE_RUN_LONG_TESTS)
+  ENDIF(UNIX AND CMAKE_RUN_LONG_TESTS AND NOT CMAKE_SKIP_BOOTSTRAP_TEST)
 
   IF(CMAKE_GENERATOR MATCHES "Makefiles")
     # see if we can find a fortran compiler on the machine
