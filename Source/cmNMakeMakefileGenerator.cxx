@@ -521,8 +521,21 @@ void cmNMakeMakefileGenerator::OutputExecutableRule(std::ostream& fout,
   std::string depend = "$(";
   depend += this->CreateMakeVariable(name, "_SRC_OBJS") + ") $(" + 
     this->CreateMakeVariable(name, "_DEPEND_LIBS") +  ")";
-  std::string command = 
-    "$(CMAKE_CXX_COMPILER) $(CMAKE_CXX_FLAGS) ";
+  std::string command;
+  if(t.HasCxx())
+    {
+    command = "$(CMAKE_CXX_COMPILER) $(CMAKE_CXX_FLAGS) ";
+    }
+  else
+    {
+    command = "${CMAKE_C_COMPILER} $(CMAKE_C_FLAGS) ";
+    }
+  bool hide_param = m_Makefile->IsOn("CMAKE_LINKER_HIDE_PARAMETERS");
+  if (hide_param)
+    {
+    command += " @<<\n\t";
+    }
+
   command += "$(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
   std::string path = m_ExecutableOutputPath + name + m_ExecutableExtension;
 
@@ -553,6 +566,11 @@ void cmNMakeMakefileGenerator::OutputExecutableRule(std::ostream& fout,
   if(customCommands.size() > 0)
     {
     cc = customCommands.c_str();
+    } 
+  if (hide_param)
+    {
+    command += "\n";
+    command += "<<\n";
     }
   this->OutputMakeRule(fout, 
                        comment.c_str(),
