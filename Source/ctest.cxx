@@ -81,6 +81,11 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
    "appropriate options."},
   {"-A <Notes file>", "Add a notes file with submission",
    "This option tells ctest to include a notes file when submitting dashboard. "},
+  {"-I [Start,End,Stride,test#,test#|Test file]", "Run a specific number of tests by number.",
+   "This option causes ctest to run tests starting at number Start, ending at number End, "
+   "and incrementing by Stride. Any additional numbers after Stride are considered individual "
+   "test numbers.  Start, End,or stride can be empty.  Optionally a file can be given that contains "
+   "the same syntax as the command line."},
   {0,0,0}
 };
 

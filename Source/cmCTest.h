@@ -157,6 +157,8 @@ public:
                                 const char *backupSrc, const char *backupBin);
 
 private:
+  void SetTestsToRunInformation(const char*);
+  
   enum {
     FIRST_TEST     = 0,
     UPDATE_TEST    = 1,
@@ -330,6 +332,8 @@ private:
   bool                     m_BuildNoClean;
   bool                     m_BuildNoCMake;
   std::string              m_NotesFiles;
+  std::vector<int>         m_TestsToRun;
+  
 
   int ReadCustomConfigurationFileTree(const char* dir);
   void PopulateCustomVector(cmMakefile* mf, const char* definition, tm_VectorOfStrings& vec);
