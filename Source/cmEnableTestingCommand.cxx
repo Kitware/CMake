@@ -18,6 +18,12 @@
 
 // we do this in the final pass so that we now the subdirs have all 
 // been defined
+bool cmEnableTestingCommand::InitialPass(std::vector<std::string> const&)
+{
+  m_Makefile->AddDefinition("CMAKE_TESTING_ENABLED","1");
+  return true;
+}
+
 void cmEnableTestingCommand::FinalPass()
 {
   // Create a full path filename for output Testfile
