@@ -70,7 +70,7 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)
 
   // Name of the test driver
   // make sure they specified an extension
-  if (cmSystemTools::GetFilenameExtension(*i).size() < 1)
+  if (cmSystemTools::GetFilenameExtension(*i).size() < 2)
     {
     this->SetError("You must specify a file extenion for the test driver file.");
     return false;
@@ -146,11 +146,11 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)
     "// Create map\n"
     "\n"
     "typedef int (*MainFuncPointer)(int , char*[]);\n"
-    "struct functionMapEntry\n"
+    "typedef struct\n"
     "{\n"
     "  const char* name;\n"
     "  MainFuncPointer func;\n"
-    "};\n"
+    "} functionMapEntry;\n"
     "\n"
     "functionMapEntry cmakeGeneratedFunctionMapEntries[] = {\n";
 
@@ -291,7 +291,7 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)
   cfile.SetIsAnAbstractClass(false);
   cfile.SetName(cmSystemTools::GetFilenameWithoutExtension(args[1]).c_str(), 
                 m_Makefile->GetCurrentOutputDirectory(),
-                "cxx", 
+                cmSystemTools::GetFilenameExtension(args[1]).c_str()+1, 
                 false);
   m_Makefile->AddSource(cfile);
   sourceListValue = args[1];
