@@ -55,7 +55,7 @@ protected:
 			 const char *aadefault);
   void ShowAdvancedValues();
   void RemoveAdvancedValues();
-// Dialog Data
+  // Dialog Data
   //{{AFX_DATA(CMakeSetupDialog)
 	enum { IDD = IDD_CMakeSetupDialog_DIALOG };
 	CButton	m_HelpButton;

@@ -97,7 +97,9 @@ void cmLocalUnixMakefileGenerator::Generate(bool fromTheTop)
     this->ProcessDepends(md);
     }
   // output the makefile fragment
-  this->OutputMakefile("Makefile", !fromTheTop); 
+  std::string dest = m_Makefile->GetStartOutputDirectory();
+  dest += "/Makefile";
+  this->OutputMakefile(dest.c_str(), !fromTheTop); 
 }
 
 void cmLocalUnixMakefileGenerator::ProcessDepends(const cmMakeDepend &md)

@@ -52,6 +52,9 @@ void cmGlobalGenerator::ClearEnabledLanguages()
 
 void cmGlobalGenerator::Configure()
 {
+  // reset theLanguages
+  m_LanguagesEnabled = false;
+  
   // Delete any existing cmLocalGenerators
   int i;
   for (i = 0; i < m_LocalGenerators.size(); ++i)
@@ -65,8 +68,8 @@ void cmGlobalGenerator::Configure()
   m_LocalGenerators.push_back(lg);
 
   // set the Start directories
-  lg->GetMakefile()->SetStartDirectory(m_CMakeInstance->GetHomeDirectory());
-  lg->GetMakefile()->SetStartOutputDirectory(m_CMakeInstance->GetHomeOutputDirectory());
+  lg->GetMakefile()->SetStartDirectory(m_CMakeInstance->GetStartDirectory());
+  lg->GetMakefile()->SetStartOutputDirectory(m_CMakeInstance->GetStartOutputDirectory());
   lg->GetMakefile()->MakeStartDirectoriesCurrent();
   
   // now do it
@@ -124,8 +127,8 @@ void cmGlobalGenerator::LocalGenerate()
   cmLocalGenerator *lg = this->CreateLocalGenerator();
 
   // set the Start directories
-  lg->GetMakefile()->SetStartDirectory(m_CMakeInstance->GetHomeDirectory());
-  lg->GetMakefile()->SetStartOutputDirectory(m_CMakeInstance->GetHomeOutputDirectory());
+  lg->GetMakefile()->SetStartDirectory(m_CMakeInstance->GetStartDirectory());
+  lg->GetMakefile()->SetStartOutputDirectory(m_CMakeInstance->GetStartOutputDirectory());
   lg->GetMakefile()->MakeStartDirectoriesCurrent();
   
   // now do trhe configure

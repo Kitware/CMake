@@ -18,18 +18,81 @@
 // running cmake. Most cmake based GUIS should primarily create an instance
 // of this class and communicate with it.
 
-#include "cmMakefile.h"
 #include "cmStandardIncludes.h"
+#include "cmSystemTools.h"
+
+class cmGlobalGenerator;
+class cmLocalGenerator;
+class cmCacheManager;
+class cmMakefile;
 
 class cmake
 {
  public:
+  ///! construct an instance of cmake
+  cmake();
+  ///! destruct an instance of cmake
+  ~cmake();
 
   /**
-   * Generate the SourceFilesList from the SourceLists. This should only be
-   * done once to be safe.  
+   * Return major and minor version numbers for cmake.
    */
-  void Usage(const char *program);
+  static unsigned int GetMajorVersion(); 
+  static unsigned int GetMinorVersion(); 
+  static const char *GetReleaseVersion();
+
+  //@{
+  /**
+   * Set/Get the home directory (or output directory) in the project. The
+   * home directory is the top directory of the project. It is where
+   * cmake was run. Remember that CMake processes
+   * CMakeLists files by recursing up the tree starting at the StartDirectory
+   * and going up until it reaches the HomeDirectory.  
+   */
+  void SetHomeDirectory(const char* dir);
+  const char* GetHomeDirectory() const
+    {
+    return m_cmHomeDirectory.c_str();
+    }
+  void SetHomeOutputDirectory(const char* lib);
+  const char* GetHomeOutputDirectory() const
+    {
+    return m_HomeOutputDirectory.c_str();
+    }
+  //@}
+
+  //@{
+  /**
+   * Set/Get the start directory (or output directory). The start directory
+   * is the directory of the CMakeLists.txt file that started the current
+   * round of processing. Remember that CMake processes CMakeLists files by
+   * recursing up the tree starting at the StartDirectory and going up until
+   * it reaches the HomeDirectory.  
+   */
+  void SetStartDirectory(const char* dir) 
+    {
+      m_cmStartDirectory = dir;
+      cmSystemTools::ConvertToUnixSlashes(m_cmStartDirectory);
+    }
+  const char* GetStartDirectory() const
+    {
+      return m_cmStartDirectory.c_str();
+    }
+  void SetStartOutputDirectory(const char* lib)
+    {
+      m_StartOutputDirectory = lib;
+      cmSystemTools::ConvertToUnixSlashes(m_StartOutputDirectory);
+    }
+  const char* GetStartOutputDirectory() const
+    {
+      return m_StartOutputDirectory.c_str();
+    }
+  //@}
+
+  /**
+   * Handle a command line invocation of cmake.
+   */
+  int Run(const std::vector<std::string>&args);
 
   /**
    * Generate the SourceFilesList from the SourceLists. This should only be
@@ -41,7 +104,35 @@ class cmake
    * If you only want to parse the CMakeLists.txt files,
    * but not actually generate the makefiles, use buildMakefiles = false.
    */
-  int Generate(const std::vector<std::string>&, bool buildMakefiles = true);
+  int Generate();
+
+  /**
+   * Configure the cmMakefiles. This routine will create a GlobalGenerator if
+   * one has not already been set. It will then Call Configure on the
+   * GlobalGenerator. This in turn will read in an process all the CMakeList
+   * files for the tree. It will not produce any actual Makefiles, or
+   * workspaces. Generate does that.  */
+  int Configure(const char *cmakeexec, const std::vector<std::string> *args = 0);
+
+  ///! Create a GlobalGenerator
+  cmGlobalGenerator* CreateGlobalGenerator(const char* name);
+
+  ///! Return the global generator assigned to this instance of cmake
+  cmGlobalGenerator* GetGlobalGenerator() { return m_GlobalGenerator; };
+
+  ///! Return the global generator assigned to this instance of cmake
+  void SetGlobalGenerator(cmGlobalGenerator *);
+
+  ///! Get the names of the current registered generators
+  void GetRegisteredGenerators(std::vector<std::string>& names);
+
+  ///! get the cmCachemManager used by this invocation of cmake
+  cmCacheManager *GetCacheManager() { return m_CacheManager; }
+  
+  /**
+   * Given a variable name, return its value (as a string).
+   */
+  const char* GetCacheDefinition(const char*) const;
 
   /** 
    * Execute commands during the build process. Supports options such
@@ -49,36 +140,43 @@ class cmake
    */
   static int CMakeCommand(std::vector<std::string>&);
 
-  ///! Parse command line arguments
-  void SetArgs(cmMakefile& builder, const std::vector<std::string>&);
-  ///! Parse command line arguments that might set cache values
-  void SetCacheArgs(cmMakefile& builder, const std::vector<std::string>&);
+  /**
+   * Is cmake in the process of a local cmake invocation. If so, we know the
+   * cache is already configured and ready to go. 
+   */
+  bool GetLocal() 
+    {
+      return m_Local;
+    }
+  
+  ///! Display command line useage
+  void Usage(const char *program);
 
+  ///! Parse command line arguments
+  void SetArgs(const std::vector<std::string>&);
+
+protected:
+  cmGlobalGenerator *m_GlobalGenerator;
+  cmCacheManager *m_CacheManager;
+  std::string m_cmHomeDirectory; 
+  std::string m_HomeOutputDirectory;
+  std::string m_cmStartDirectory; 
+  std::string m_StartOutputDirectory;
+
+  ///! Parse command line arguments that might set cache values
+  void SetCacheArgs(const std::vector<std::string>&);
+
+  ///! read in a cmake list file to initialize the cache
+  void ReadListFile(const char *path);
+  
   /**
    * Generate CMAKE_ROOT and CMAKE_COMMAND cache entries
    */
-  int AddCMakePaths(const std::vector<std::string>&);
+  int AddCMakePaths(const char *arg0);
 
-  /**
-   * constructor
-   */
-  cmake();
-  ~cmake();
+  ///! used by Run
+  int LocalGenerate();
 
-  ///! Create a named generator
-  cmMakefileGenerator* CreateGenerator(const char* name);
-  ///! Register a generator
-  void RegisterGenerator(cmMakefileGenerator*);
-  ///! Get the names of the current registered generators
-  void GetRegisteredGenerators(std::vector<std::string>& names);
-
-  ///! get the cmCachemManager used by this invocation of cmake
-  cmCacheManager *GetCacheManager() {
-    return &m_CacheManager; }
-  
-protected:
-  std::map<cmStdString, cmMakefileGenerator*> m_RegisteredGenerators;
-  cmCacheManager m_CacheManager;
 private:
   bool m_Verbose;
   bool m_Local;

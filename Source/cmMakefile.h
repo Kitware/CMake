@@ -27,7 +27,7 @@
 
 class cmFunctionBlocker;
 class cmCommand;
-class cmMakefileGenerator;
+class cmLocalGenerator;
 class cmMakeDepend;
 
 /** \class cmMakefile
@@ -96,11 +96,11 @@ public:
    * dependent, although the interface is through a generic
    * superclass.
    */
-  void SetMakefileGenerator(cmMakefileGenerator*);
+  void SetLocalGenerator(cmLocalGenerator*);
   
   ///! Get the current makefile generator.
-  cmMakefileGenerator* GetMakefileGenerator() 
-    { return m_MakefileGenerator;}
+  cmLocalGenerator* GetLocalGenerator() 
+    { return m_LocalGenerator;}
 
   /**
    * Produce the output makefile.
@@ -485,15 +485,6 @@ public:
    */
   void ExpandVariables();  
 
-  /** Recursivly read and create a cmMakefile object for
-   *  all CMakeLists.txt files in the GetSubDirectories list.
-   *  Once the file is found, it ReadListFile is called on
-   *  the cmMakefile created for it.  CreateObject is called on 
-   *  the prototype to create a cmMakefileGenerator for each cmMakefile that 
-   *  is created.
-   */
-  void FindSubDirectoryCMakeListsFiles(std::vector<cmMakefile*>& makefiles);
-  
   /**
    * find what source group this source is in
    */
@@ -519,14 +510,9 @@ public:
    * Set/Get the name of the parent directories CMakeLists file
    * given a current CMakeLists file name
    */
-  void SetCacheManager(cmCacheManager *cm) {
-    this->m_CacheManager = cm; }
-  cmCacheManager *GetCacheManager() {
-    return m_CacheManager; }
+  cmCacheManager *GetCacheManager() const;
 
 protected:
-  cmCacheManager *m_CacheManager;
-  
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(const char* name, cmTarget& target);
   
@@ -573,7 +559,7 @@ protected:
   DefinitionMap m_Definitions;
   RegisteredCommandsMap m_Commands;
   std::vector<cmCommand*> m_UsedCommands;
-  cmMakefileGenerator* m_MakefileGenerator;
+  cmLocalGenerator* m_LocalGenerator;
   bool IsFunctionBlocked(const char *name, std::vector<std::string> const& args);
   
 private:

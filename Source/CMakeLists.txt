@@ -5,7 +5,6 @@ cmake.cxx
 cmakewizard.cxx
 cmMakeDepend.cxx
 cmMakefile.cxx
-cmMakefileGenerator.cxx
 cmRegularExpression.cxx
 cmSourceFile.cxx
 cmSystemTools.cxx
@@ -17,6 +16,10 @@ cmCustomCommand.cxx
 cmCacheManager.cxx
 cmSourceGroup.cxx
 cmListFileCache.cxx
+cmGlobalGenerator.cxx
+cmGlobalUnixMakefileGenerator.cxx
+cmLocalGenerator.cxx
+cmLocalUnixMakefileGenerator.cxx
 cmake.h
 cmakewizard.h
 cmMakeDepend.h
@@ -33,6 +36,10 @@ cmCustomCommand.h
 cmCacheManager.h
 cmSourceGroup.h
 cmListFileCache.h
+cmGlobalGenerator.h
+cmGlobalUnixMakefileGenerator.h
+cmLocalGenerator.h
+cmLocalUnixMakefileGenerator.h
 )
 
 # configure the .h file
@@ -50,18 +57,22 @@ ADD_DEFINITIONS(-DCMAKE_BUILD_WITH_CMAKE)
 IF (WIN32)
   IF(NOT UNIX)
     SET(SRCS ${SRCS}
-                    cmDSWWriter.cxx 
-                    cmDSPWriter.cxx 
-                    cmMSProjectGenerator.cxx
-                    cmBorlandMakefileGenerator.cxx
-                    cmNMakeMakefileGenerator.cxx
-                    cmMSDotNETGenerator.cxx
-                    cmDSWWriter.h 
-                    cmDSPWriter.h 
-                    cmMSProjectGenerator.h
-                    cmBorlandMakefileGenerator.h
-                    cmNMakeMakefileGenerator.h
-                    cmMSDotNETGenerator.h
+                    cmGlobalBorlandMakefileGenerator.cxx
+                    cmLocalBorlandMakefileGenerator.cxx
+                    cmGlobalNMakeMakefileGenerator.cxx
+                    cmLocalNMakeMakefileGenerator.cxx
+                    cmGlobalVisualStudio6Generator.cxx
+                    cmLocalVisualStudio6Generator.cxx
+                    cmGlobalVisualStudio7Generator.cxx
+                    cmLocalVisualStudio7Generator.cxx
+                    cmGlobalBorlandMakefileGenerator.h
+                    cmLocalBorlandMakefileGenerator.h
+                    cmGlobalNMakeMakefileGenerator.h
+                    cmLocalNMakeMakefileGenerator.h
+                    cmGlobalVisualStudio6Generator.h
+                    cmLocalVisualStudio6Generator.h
+                    cmGlobalVisualStudio7Generator.h
+                    cmLocalVisualStudio7Generator.h
                     )
     IF(  NOT BORLAND )
       LINK_LIBRARIES( rpcrt4.lib )
@@ -69,8 +80,6 @@ IF (WIN32)
     ENDIF( NOT BORLAND )
   ENDIF(NOT UNIX)
 ENDIF (WIN32)
-
-SET(SRCS ${SRCS} cmUnixMakefileGenerator.cxx cmUnixMakefileGenerator.h)
 
 # create a library used by the command line and the GUI
 ADD_LIBRARY(CMakeLib ${SRCS})
@@ -110,9 +119,6 @@ CONFIGURE_FILE(
 
 ADD_EXECUTABLE(cmaketest cmaketest.cxx)
 TARGET_LINK_LIBRARIES(cmaketest CMakeLib)
-
-#ADD_LIBRARY(TEST_PLUGIN SHARED cmSimpleCommandPlugin.c)
-#TARGET_LINK_LIBRARIES(TEST_PLUGIN CMakeLib)
 
 IF(BUILD_TESTING)
     ADD_TEST(DumpDocumentation ${CMake_BINARY_DIR}/Source/DumpDocumentation

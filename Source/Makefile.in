@@ -19,12 +19,14 @@ cmakewizard.o  \
 cmakemain.o \
 cmMakeDepend.o \
 cmMakefile.o \
-cmMakefileGenerator.o \
+cmGlobalGenerator.o \
+cmLocalGenerator.o \
 cmRegularExpression.o \
 cmSourceFile.o \
 cmSystemTools.o \
 cmDirectory.o \
-cmUnixMakefileGenerator.o \
+cmGlobalUnixMakefileGenerator.o \
+cmLocalUnixMakefileGenerator.o \
 cmCommands.o \
 cmTarget.o \
 cmCustomCommand.o \
@@ -39,13 +41,15 @@ cmake.o  : $(DEPENDS)
 cmakemain.o  : $(DEPENDS)
 cmMakeDepend.o : $(DEPENDS)
 cmMakefile.o : $(DEPENDS)
-cmMakefileGenerator.o : $(DEPENDS)
+cmGlobalGenerator.o : $(DEPENDS)
+cmLocalGenerator.o : $(DEPENDS)
 cmAuxSourceDirectoryCommand.o : $(DEPENDS)
 cmRegularExpression.o : $(DEPENDS)
 cmSourceFile.o : $(DEPENDS)
 cmDirectory.o : $(DEPENDS)
 cmCustomCommand.o : $(DEPENDS)
-cmUnixMakefileGenerator.o : $(DEPENDS)
+cmGlobalUnixMakefileGenerator.o : $(DEPENDS)
+cmLocalUnixMakefileGenerator.o : $(DEPENDS)
 cmCommands.o : $(DEPENDS) $(srcdir)/*Command*.cxx
 cmTarget.o : $(DEPENDS)
 cmCacheManager.o : $(DEPENDS)

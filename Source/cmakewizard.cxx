@@ -98,7 +98,7 @@ void cmakewizard::RunWizard(std::vector<std::string> const& args)
     asked = false;
     // run cmake
     this->ShowMessage("Please wait while cmake processes CMakeLists.txt files....\n");
-    make.Generate(args);
+    make.Configure(args[0].c_str(),&args);
     this->ShowMessage("\n");
     // load the cache from disk
     cmCacheManager *cachem = make.GetCacheManager();
@@ -140,5 +140,6 @@ void cmakewizard::RunWizard(std::vector<std::string> const& args)
     cachem->SaveCache(cmSystemTools::GetCurrentWorkingDirectory().c_str());
     }
   while(asked);
+  make.Generate();
   this->ShowMessage("CMake complete, run make to build project.\n");
 }
