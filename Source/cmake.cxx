@@ -286,7 +286,6 @@ int cmake::Generate(const std::vector<std::string>& args)
   // so users can edit the values in the cache:
   // LIBRARY_OUTPUT_PATH
   // EXECUTABLE_OUTPUT_PATH
-  // BUILD_SHARED_LIBS
   if(!cmCacheManager::GetInstance()->GetCacheValue("LIBRARY_OUTPUT_PATH"))
     {
     cmCacheManager::GetInstance()->AddCacheEntry("LIBRARY_OUTPUT_PATH", "",
@@ -298,14 +297,7 @@ int cmake::Generate(const std::vector<std::string>& args)
     cmCacheManager::GetInstance()->AddCacheEntry("EXECUTABLE_OUTPUT_PATH", "",
                                                  "Single output directory for building all executables.",
                                                  cmCacheManager::PATH);
-    }
-  if(!cmCacheManager::GetInstance()->GetCacheValue("BUILD_SHARED_LIBS"))
-    {
-    cmCacheManager::GetInstance()->AddCacheEntry("BUILD_SHARED_LIBS", "OFF",
-                                                 "Build with shared libraries.",
-                                                 cmCacheManager::BOOL);
-    } 
-  
+    }  
   
   cmCacheManager::GetInstance()->SaveCache(&mf);
   
