@@ -125,7 +125,10 @@ void cmVTKWrapPythonCommand::FinalPass()
   
   // wrap all the .h files
   depends.push_back(wpython);
-  depends.push_back(hints);
+  if (strcmp("${VTK_WRAP_HINTS}",hints.c_str()))
+    {
+    depends.push_back(hints);
+    }
   for(int classNum = 0; classNum < lastClass; classNum++)
     {
     m_Makefile->AddSource(m_WrapClasses[classNum],m_SourceList.c_str());
@@ -134,7 +137,10 @@ void cmVTKWrapPythonCommand::FinalPass()
     res += m_WrapClasses[classNum].GetSourceName() + ".cxx";
     std::vector<std::string> args;
     args.push_back(m_WrapHeaders[classNum]);
-    args.push_back(hints);
+    if (strcmp("${VTK_WRAP_HINTS}",hints.c_str()))
+      {
+      args.push_back(hints);
+      }
     args.push_back((m_WrapClasses[classNum].IsAnAbstractClass() ? "0" : "1"));
     args.push_back(res);
     m_Makefile->AddCustomCommand(m_WrapHeaders[classNum].c_str(),

@@ -116,9 +116,12 @@ void cmVTKWrapJavaCommand::FinalPass()
 
   // wrap all the .h files
   depends.push_back(wjava);
-  depends.push_back(hints);
   depends2.push_back(pjava);
-  depends2.push_back(hints);
+  if (strcmp("${VTK_WRAP_HINTS}",hints.c_str()))
+    {
+    depends.push_back(hints);
+    depends2.push_back(hints);
+    }
   for(int classNum = 0; classNum < lastClass; classNum++)
     {
     m_Makefile->AddSource(m_WrapClasses[classNum],m_SourceList.c_str());
@@ -132,7 +135,10 @@ void cmVTKWrapJavaCommand::FinalPass()
     
     std::vector<std::string> args;
     args.push_back(m_WrapHeaders[classNum]);
-    args.push_back(hints);
+    if (strcmp("${VTK_WRAP_HINTS}",hints.c_str()))
+      {
+      args.push_back(hints);
+      }
     args.push_back((m_WrapClasses[classNum].IsAnAbstractClass() ? "0" : "1"));
     args.push_back(res);
 
@@ -142,7 +148,10 @@ void cmVTKWrapJavaCommand::FinalPass()
 
     std::vector<std::string> args2;
     args2.push_back(m_WrapHeaders[classNum]);
-    args2.push_back(hints);
+    if (strcmp("${VTK_WRAP_HINTS}",hints.c_str()))
+      {
+      args2.push_back(hints);
+      }
     args2.push_back((m_WrapClasses[classNum].IsAnAbstractClass() ? "0" : "1"));
     args2.push_back(res2);
 
