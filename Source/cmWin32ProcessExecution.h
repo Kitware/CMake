@@ -23,6 +23,11 @@
  * Written by Bill Tutt <billtut@microsoft.com>.  Minor tweaks
  * and 2.0 integration by Fredrik Lundh <fredrik@pythonware.com>
  * Return code handling by David Bolen <db3l@fitlinxx.com>.
+ *
+ * Modified for CMake.
+ *
+ * For more information, please check Microsoft Knowledge Base
+ * Articles Q190351 and Q150956.
  */
 
 #include "cmStandardIncludes.h"
