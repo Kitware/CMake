@@ -353,7 +353,9 @@ void cmake::HandleBootstrap(cmMakefile& mf, const std::string& args0)
   if (cmSystemTools::GetFilenameNameWithoutExtension(args0) == 
       "bootstrap")
     {
-    int done = 0;
+    // if the user specified a generator on the command line we do not
+    // need to prompt the user
+    int done = (mf.GetMakefileGenerator() != 0);
     
     while (!done)
       {
@@ -384,7 +386,6 @@ void cmake::HandleBootstrap(cmMakefile& mf, const std::string& args0)
         else
           {
           mf.SetMakefileGenerator(gen);
-          mf.AddDefinition("CMAKE_BOOTSTRAP","1");
           std::cout << 
             "\n\nThank You. CMake will now generate the appropriate files for\nbeing built with " << names[choice-1].c_str() << "\n\n";
           }
@@ -395,12 +396,13 @@ void cmake::HandleBootstrap(cmMakefile& mf, const std::string& args0)
           count -1 << "\n";
         }
       }
+    mf.AddDefinition("CMAKE_BOOTSTRAP","1");
     }
 }
 
 int cmake::Generate(const std::vector<std::string>& args, bool buildMakefiles)
 {
-  if(args.size() == 1 && !cmSystemTools::FileExists("CMakeLists.txt"))
+   if(args.size() == 1 && !cmSystemTools::FileExists("CMakeLists.txt"))
     {
     this->Usage(args[0].c_str());
     return -1;
