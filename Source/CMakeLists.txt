@@ -463,7 +463,7 @@ IF(BUILD_TESTING)
     QT_QT_LIBRARY
     QT_UIC_EXE)
 
-  IF (QT_FOUND)
+  IF (QT_FOUND AND QT_UIC_EXECUTABLE)
     ADD_TEST(qtwrapping  ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/Wrapping"
@@ -474,7 +474,7 @@ IF(BUILD_TESTING)
       --build-exe-dir "${CMake_BINARY_DIR}/Tests/Wrapping/bin"
       --test-command qtwrapping
       )
-  ENDIF (QT_FOUND)
+  ENDIF (QT_FOUND AND QT_UIC_EXECUTABLE)
 
   ADD_TEST(testdriver1 ${CMAKE_CTEST_COMMAND}
     --build-and-test
