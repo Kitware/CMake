@@ -1,0 +1,30 @@
+#include <stdio.h>
+#include <pthread.h>
+#include <unistd.h>
+
+void* runner(void*);
+
+int res = 0;
+int main()
+{
+  pthread_t tid[2];
+  pthread_create(&tid[0], 0, runner, (void*)1);
+  pthread_create(&tid[1], 0, runner, (void*)2);
+  
+  usleep(1); // for strange behavior on single-processor sun
+  pthread_join(tid[0], 0);
+  pthread_join(tid[1], 0);
+  
+  return res;
+}
+
+void* runner(void* args)
+{
+  int cc;
+  for ( cc = 0; cc < 10; cc ++ )
+    {
+    printf("%d CC: %d\n", (int)args, cc);
+    }
+  res ++;
+  return 0;
+}
