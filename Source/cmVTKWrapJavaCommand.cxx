@@ -132,7 +132,6 @@ void cmVTKWrapJavaCommand::FinalPass()
     args.push_back(m_WrapHeaders[classNum]);
     args.push_back(hints);
     args.push_back((m_WrapClasses[classNum].IsAnAbstractClass() ? "0" : "1"));
-    args.push_back(">");
     args.push_back(res);
 
     m_Makefile->AddCustomCommand(m_WrapHeaders[classNum].c_str(),
@@ -143,7 +142,6 @@ void cmVTKWrapJavaCommand::FinalPass()
     args2.push_back(m_WrapHeaders[classNum]);
     args2.push_back(hints);
     args2.push_back((m_WrapClasses[classNum].IsAnAbstractClass() ? "0" : "1"));
-    args2.push_back(">");
     args2.push_back(res2);
 
     m_Makefile->AddCustomCommand(m_WrapHeaders[classNum].c_str(),

@@ -134,7 +134,6 @@ void cmVTKWrapPythonCommand::FinalPass()
     args.push_back(m_WrapHeaders[classNum]);
     args.push_back(hints);
     args.push_back((m_WrapClasses[classNum].IsAnAbstractClass() ? "0" : "1"));
-    args.push_back(">");
     args.push_back(res);
     m_Makefile->AddCustomCommand(m_WrapHeaders[classNum].c_str(),
                                  wpython.c_str(), args, depends, 

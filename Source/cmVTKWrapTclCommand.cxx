@@ -166,7 +166,6 @@ void cmVTKWrapTclCommand::FinalPass()
     args.push_back(m_WrapHeaders[classNum]);
     args.push_back(hints);
     args.push_back((m_WrapClasses[classNum].IsAnAbstractClass() ? "0" : "1"));
-    args.push_back(">");
     std::string tmp = m_Makefile->GetCurrentOutputDirectory();
     tmp += "/";
     tmp += m_WrapClasses[classNum].GetSourceName() + ".cxx";
