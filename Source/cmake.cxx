@@ -359,7 +359,7 @@ int cmake::AddCMakePaths(const char *arg0)
   intdir = CMAKE_INTDIR;
 #endif
   cMakeSelf = CMAKE_BUILD_DIR;
-  cMakeSelf += "/Source/";
+  cMakeSelf += "/bin/";
   cMakeSelf += intdir;
   cMakeSelf += "/cmake";
   cMakeSelf += cmSystemTools::GetExecutableExtension();
