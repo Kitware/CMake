@@ -547,12 +547,14 @@ const char *Curl_strerror(struct connectdata *conn, int err)
   }
 #endif /* end of HAVE_GLIBC_STRERROR_R */
 #else /* HAVE_STRERROR_R */
-  char *msg = strerror(err);
-  if ( !msg )
-    {
-    msg = "Unknown System Error";
-    }
-  strncpy(buf, msg, max);
+  {
+    char *msg = strerror(err);
+    if ( !msg )
+      {
+      msg = "Unknown System Error";
+      }
+    strncpy(buf, msg, max);
+  }
 #endif /* end of HAVE_STRERROR_R */
 #endif /* end of ! Windows */
 
