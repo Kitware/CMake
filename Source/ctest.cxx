@@ -143,6 +143,15 @@ void ctest::ProcessDirectory(int &passed, int &failed)
         // find the test executable
         std::string testCommand = 
 			cmSystemTools::EscapeSpaces(this->FindExecutable(args[1].c_str()).c_str());
+
+        // continue if we did not find the executable
+        if (testCommand == "")
+          {
+          std::cerr << "Unable to find executable: " << 
+            args[1].c_str() << "\n";
+          continue;
+          }
+        
         // add the arguments
         std::vector<std::string>::iterator j = args.begin();
         ++j;
