@@ -12,7 +12,7 @@
 #include "../cmCacheManager.h"
 #include "FLTKPropertyList.h"
 #include "CMakeSetupGUIImplementation.h"
-
+#include <stdio.h>
 
 
 namespace fltk {
