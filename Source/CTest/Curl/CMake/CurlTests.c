@@ -43,6 +43,9 @@ main ()
 #error "O_NONBLOCK does not work on this platform"
 #endif
   int socket;
+#ifndef fcntl
+  (void)fcntl;
+#endif
   int flags = fcntl(socket, F_SETFL, flags | O_NONBLOCK);
 
   ;
@@ -63,6 +66,9 @@ int type;
 struct hostent h;
 struct hostent_data hdata;
 int rc;
+#ifndef gethostbyaddr_r
+  (void)gethostbyaddr_r;
+#endif
 rc = gethostbyaddr_r(address, length, type, &h, &hdata);
   ;
   return 0;
@@ -82,6 +88,9 @@ int type;
 struct hostent h;
 struct hostent_data hdata;
 int rc;
+#ifndef gethostbyaddr_r
+  (void)gethostbyaddr_r;
+#endif
 rc = gethostbyaddr_r(address, length, type, &h, &hdata);
   ;
   return 0;
@@ -102,6 +111,9 @@ char buffer[8192];
 int h_errnop;
 struct hostent * hp;
 
+#ifndef gethostbyaddr_r
+  (void)gethostbyaddr_r;
+#endif
 hp = gethostbyaddr_r(address, length, type, &h,
                      buffer, 8192, &h_errnop);
   ;
@@ -124,6 +136,9 @@ char buffer[8192];
 int h_errnop;
 struct hostent * hp;
 
+#ifndef gethostbyaddr_r
+  (void)gethostbyaddr_r;
+#endif
 hp = gethostbyaddr_r(address, length, type, &h,
                      buffer, 8192, &h_errnop);
   ;
@@ -146,6 +161,9 @@ int h_errnop;
 struct hostent * hp;
 int rc;
 
+#ifndef gethostbyaddr_r
+  (void)gethostbyaddr_r;
+#endif
 rc = gethostbyaddr_r(address, length, type, &h,
                      buffer, 8192, &hp, &h_errnop);
   ;
@@ -169,6 +187,9 @@ int h_errnop;
 struct hostent * hp;
 int rc;
 
+#ifndef gethostbyaddr_r
+  (void)gethostbyaddr_r;
+#endif
 rc = gethostbyaddr_r(address, length, type, &h,
                      buffer, 8192, &hp, &h_errnop);
   ;
@@ -182,16 +203,14 @@ rc = gethostbyaddr_r(address, length, type, &h,
 #undef NULL
 #define NULL (void *)0
 
-#if 0
-int
-gethostbyname_r(const char *, struct hostent *, struct hostent_data *);
-#endif
-
 int
 main ()
 {
 
 struct hostent_data data;
+#ifndef gethostbyname_r
+  (void)gethostbyname_r;
+#endif
 gethostbyname_r(NULL, NULL, NULL);
   ;
   return 0;
@@ -205,16 +224,14 @@ gethostbyname_r(NULL, NULL, NULL);
 #undef NULL
 #define NULL (void *)0
 
-#if 0
-int
-gethostbyname_r(const char *, struct hostent *, struct hostent_data *);
-#endif
-
 int
 main ()
 {
 
 struct hostent_data data;
+#ifndef gethostbyname_r
+  (void)gethostbyname_r;
+#endif
 gethostbyname_r(NULL, NULL, NULL);
   ;
   return 0;
@@ -227,15 +244,12 @@ gethostbyname_r(NULL, NULL, NULL);
 #undef NULL
 #define NULL (void *)0
 
-#if 0
-struct hostent *
-gethostbyname_r(const char *, struct hostent *, char *, int, int *);
-#endif
-
 int
 main ()
 {
-
+#ifndef gethostbyname_r
+  (void)gethostbyname_r;
+#endif
 gethostbyname_r(NULL, NULL, NULL, 0, NULL);
   ;
   return 0;
@@ -248,15 +262,13 @@ gethostbyname_r(NULL, NULL, NULL, 0, NULL);
 #undef NULL
 #define NULL (void *)0
 
-#if 0
-struct hostent *
-gethostbyname_r(const char *, struct hostent *, char *, int, int *);
-#endif
-
 int
 main ()
 {
 
+#ifndef gethostbyname_r
+  (void)gethostbyname_r;
+#endif
 gethostbyname_r(NULL, NULL, NULL, 0, NULL);
   ;
   return 0;
@@ -268,16 +280,13 @@ gethostbyname_r(NULL, NULL, NULL, 0, NULL);
 #undef NULL
 #define NULL (void *)0
 
-#if 0
-int
-gethostbyname_r(const char *, struct hostent *, char *, size_t,
-struct hostent **, int *);
-#endif
-
 int
 main ()
 {
 
+#ifndef gethostbyname_r
+  (void)gethostbyname_r;
+#endif
 gethostbyname_r(NULL, NULL, NULL, 0, NULL, NULL);
   ;
   return 0;
@@ -290,16 +299,13 @@ gethostbyname_r(NULL, NULL, NULL, 0, NULL, NULL);
 #undef NULL
 #define NULL (void *)0
 
-#if 0
-int
-gethostbyname_r(const char *, struct hostent *, char *, size_t,
-struct hostent **, int *);
-#endif
-
 int
 main ()
 {
 
+#ifndef gethostbyname_r
+  (void)gethostbyname_r;
+#endif
 gethostbyname_r(NULL, NULL, NULL, 0, NULL, NULL);
   ;
   return 0;
@@ -370,8 +376,10 @@ typedef void (*func_type)();
 
 int main()
 {
+#ifndef inet_ntoa_r
   func_type func;
   func = (func_type)inet_ntoa_r;
+#endif
   return 0;
 }
 #endif
@@ -383,8 +391,10 @@ typedef void (*func_type)();
 
 int main()
 {
+#ifndef inet_ntoa_r
   func_type func;
   func = (func_type)&inet_ntoa_r;
+#endif
   return 0;
 }
 #endif
@@ -400,6 +410,9 @@ void main(void) {
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
+#ifndef getaddrinfo
+    (void)getaddrinfo;
+#endif
     error = getaddrinfo("127.0.0.1", "8080", &hints, &ai);
     if (error) {
         exit(1);
