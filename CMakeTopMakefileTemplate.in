@@ -5,4 +5,4 @@ topall:
 	cd . ;  ${MAKE} -${MAKEFLAGS} CMakeTargets.make
 	cd . ;  ${MAKE} -${MAKEFLAGS} all
 
-@MAKEINCLUDE@ @MAKEQUOTE@@CMAKE_CONFIG_DIR@/CMake/CMakeMaster.make@MAKEQUOTE@
+include @CMAKE_CONFIG_DIR@/CMake/CMakeMaster.make

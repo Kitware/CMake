@@ -8,8 +8,8 @@ VPATH         = @srcdir@
 
 # let cmake know that this was done with autoconf
 KIT_FLAGS = -DCMAKE_HAS_AUTOCONF  -I${CMAKE_CONFIG_DIR}/CMake/Source 
-@MAKEINCLUDE@ @MAKEQUOTE@@CMAKE_CONFIG_DIR@/CMake/CMakeVariables.make@MAKEQUOTE@
-@MAKEINCLUDE@ @MAKEQUOTE@@CMAKE_CONFIG_DIR@/CMake/CMakeSimpleRules.make@MAKEQUOTE@
+include @CMAKE_CONFIG_DIR@/CMake/CMakeVariables.make
+include @CMAKE_CONFIG_DIR@/CMake/CMakeSimpleRules.make
 
 OBJS = \
 CMakeBuildTargets.o  \

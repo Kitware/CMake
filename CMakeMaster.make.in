@@ -4,18 +4,18 @@ CMAKE_LIB_EXT          = @CMAKE_LIB_EXT@
 
 #------------------------------------------------------------------------------
 # Include all variable settings
-@MAKEINCLUDE@ @MAKEQUOTE@@CMAKE_CONFIG_DIR@/CMake/CMakeVariables.make@MAKEQUOTE@
+include @CMAKE_CONFIG_DIR@/CMake/CMakeVariables.make
 
 #------------------------------------------------------------------------------
 # Include generated rules
-@MAKEINCLUDE@ @MAKEQUOTE@CMakeTargets.make@MAKEQUOTE@
+include CMakeTargets.make
 
 #------------------------------------------------------------------------------
 # Include user-editable defines.
-@MAKEINCLUDE@ @MAKEQUOTE@@CMAKE_CONFIG_DIR@/CMakeLocal.make@MAKEQUOTE@
+include @CMAKE_CONFIG_DIR@/CMakeLocal.make
 
 #------------------------------------------------------------------------------
 # Include General Build Rules
-@MAKEINCLUDE@ @MAKEQUOTE@@CMAKE_CONFIG_DIR@/CMake/CMakeRules.make@MAKEQUOTE@
+include @CMAKE_CONFIG_DIR@/CMake/CMakeRules.make
 
 

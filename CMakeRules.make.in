@@ -1,5 +1,5 @@
 # rules for building .o files from source files
-@MAKEINCLUDE@ @MAKEQUOTE@@CMAKE_CONFIG_DIR@/CMake/CMakeSimpleRules.make@MAKEQUOTE@
+include @CMAKE_CONFIG_DIR@/CMake/CMakeSimpleRules.make
 
 #
 # Makefile for 
