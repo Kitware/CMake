@@ -153,20 +153,6 @@ int cmTryCompileCommand::CoreTryCompileCode(
       return -1;
       }
 
-    if ( format == cmSystemTools::CXX_FILE_FORMAT )
-      {
-      fprintf(fout, "IF (CMAKE_ANSI_CXXFLAGS)\n");
-      fprintf(fout, "  SET(CMAKE_CXX_FLAGS \"${CMAKE_CXX_FLAGS}"
-              " ${CMAKE_ANSI_CXXFLAGS}\")\n");
-      fprintf(fout, "ENDIF (CMAKE_ANSI_CXXFLAGS)\n");
-      }
-
-    if ( format == cmSystemTools::C_FILE_FORMAT )
-      {
-      fprintf(fout, "IF (CMAKE_ANSI_CFLAGS)\n");
-      fprintf(fout, "  SET(CMAKE_C_FLAGS \"${CMAKE_C_FLAGS} ${CMAKE_ANSI_CFLAGS}\")\n");
-      fprintf(fout, "ENDIF (CMAKE_ANSI_CFLAGS)\n");
-      }
     fprintf(fout, "ADD_DEFINITIONS(${COMPILE_DEFINITIONS})\n");
     fprintf(fout, "INCLUDE_DIRECTORIES(${INCLUDE_DIRECTORIES})\n");
     fprintf(fout, "LINK_DIRECTORIES(${LINK_DIRECTORIES})\n");
