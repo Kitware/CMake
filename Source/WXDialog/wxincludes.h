@@ -70,6 +70,7 @@
 #include "wx/statbox.h"
 #include "wx/stattext.h"
 #include "wx/textctrl.h"
+#include "wx/timer.h"
 
 #endif
 
