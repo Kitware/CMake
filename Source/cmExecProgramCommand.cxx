@@ -49,6 +49,7 @@ bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& args)
         return false;
         }
       output_variable = args[i];
+      haveoutput_variable = false;
       count ++;
       }
     else if(args[i] == "RETURN_VALUE")
@@ -66,6 +67,7 @@ bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& args)
         return false;
         }
       return_variable = args[i];
+      havereturn_variable = false;
       count ++;
       }
     else if(args[i] == "ARGS")
@@ -94,17 +96,22 @@ bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& args)
     {
     command = args[0];
     }
+  bool verbose = true;
+  if(output_variable.size() > 0)
+    {
+    verbose = false;
+    }
   int retVal = 0;
   std::string output;
   if(args.size() - count == 2)
     {
     cmSystemTools::MakeDirectory(args[1].c_str());
     cmSystemTools::RunCommand(command.c_str(), output, retVal,
-                              cmSystemTools::ConvertToOutputPath(args[1].c_str()).c_str());
+                              cmSystemTools::ConvertToOutputPath(args[1].c_str()).c_str(), verbose);
     }
   else
     {
-    cmSystemTools::RunCommand(command.c_str(), output, retVal);
+    cmSystemTools::RunCommand(command.c_str(), output, retVal, 0, verbose);
     }
 
   if ( output_variable.size() > 0 )
