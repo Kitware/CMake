@@ -109,7 +109,6 @@ void cmTarget::GenerateSourceFilesFromSourceLists( cmMakefile &mf)
                    mf.GetSourceExtensions(),
                    mf.GetHeaderExtensions());
       m_SourceFiles.push_back(mf.AddSource(file));
-      done = 1;
       }
     }
   

@@ -197,10 +197,9 @@ std::string cmCTest::MakeXMLSafe(const std::string& str)
 
 std::string cmCTest::MakeURLSafe(const std::string& str)
 {
-  std::string::size_type pos = 0;
   cmOStringStream ost;
   char buffer[10];
-  for ( pos = 0; pos < str.size(); pos ++ )
+  for ( std::string::size_type pos = 0; pos < str.size(); pos ++ )
     {
     unsigned char ch = str[pos];
     if ( ( ch > 126 || ch < 32 ||

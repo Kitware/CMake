@@ -79,7 +79,6 @@ bool cmSetSourceFilesPropertiesCommand::InitialPass(
       }
     else if(*j == "PROPERTIES")
       {
-      doingFiles = false;
       // now loop through the rest of the arguments, new style
       ++j;
       while (j != args.end())
