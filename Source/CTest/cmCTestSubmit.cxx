@@ -90,4 +90,5 @@ bool cmCTestSubmit::SubmitUsingSCP(const std::string& localprefix,
                                    const std::string& url)
 {
   std::cout << "SubmitUsingSCP is not yet implemented" << std::endl;
+  return false;
 }
