@@ -189,6 +189,9 @@ void cmDSPMakefile::WriteDSPFile(std::ostream& fout)
   this->WriteDSPBeginGroup(fout, "XML Files", "xml");
   this->WriteDSPBuildRules(fout,"xml");
   this->WriteDSPEndGroup(fout);
+  this->WriteDSPBeginGroup(fout, "Text Files", "txt");
+  this->WriteDSPBuildRules(fout,"txt");
+  this->WriteDSPEndGroup(fout);
   this->WriteDSPBuildRule(fout);
   this->WriteDSPFooter(fout);
 }
