@@ -2010,6 +2010,46 @@ bool SystemTools::SetPermissions(const char* file, mode_t mode)
   return true;
 }
 
+std::string SystemTools::GetParentDirectory(const char* fileOrDir)
+{
+  if ( !fileOrDir || !*fileOrDir )
+    {
+    return "";
+    }
+  std::string res = fileOrDir;
+  SystemTools::ConvertToUnixSlashes(res);
+  std::string::size_type cc = res.size()-1;
+  if ( res[cc] == '/' )
+    {
+    cc --;
+    }
+  for ( ; cc > 0; cc -- )
+    {
+    if ( res[cc] == '/' )
+      {
+      break;
+      }
+    }
+  return res.substr(0, cc);
+}
+
+bool SystemTools::IsSubDirectory(const char* cSubdir, const char* cDir)
+{
+  std::string subdir = cSubdir;
+  std::string dir = cDir;
+  SystemTools::ConvertToUnixSlashes(dir);
+  std::string path = subdir;
+  do
+    {
+    path = SystemTools::GetParentDirectory(path.c_str());
+    if ( dir == path )
+      {
+      return true;
+      }
+    }
+  while ( path.size() > dir.size() );
+  return false;
+}
 
 // These must NOT be initialized.  Default initialization to zero is
 // necessary.

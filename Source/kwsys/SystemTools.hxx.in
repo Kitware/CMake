@@ -316,6 +316,12 @@ public:
   static bool GetPermissions(const char* file, mode_t& mode);
   static bool SetPermissions(const char* file, mode_t mode);
 
+  /** Get the parent directory of the directory or file */
+  static std::string GetParentDirectory(const char* fileOrDir);
+
+  /** Check if the given file or directory is in subdirectory of dir */
+  static bool IsSubDirectory(const char* fileOrDir, const char* dir);
+
 protected:
   // these two functions can be called from ConvertToOutputPath
   /**
