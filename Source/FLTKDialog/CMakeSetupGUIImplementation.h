@@ -32,6 +32,7 @@ public:
   virtual void LoadCacheFromDiskToGUI( void );
   virtual void FillCacheGUIFromCacheManager( void );
   virtual void FillCacheManagerFromCacheGUI( void );
+	virtual void SetPathToExecutable( const char * path );
 
 private:  
   virtual bool VerifyBinaryPath( const std::string & path ) const;

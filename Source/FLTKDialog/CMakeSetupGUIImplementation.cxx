@@ -1,14 +1,14 @@
 
 #include "CMakeSetupGUIImplementation.h"
-#include "FL/fl_file_chooser.H"
-#include "FL/filename.H"
-#include "FL/fl_ask.H"
+#include "Fl/fl_file_chooser.H"
+#include "Fl/filename.H"
+#include "Fl/fl_ask.H"
 #include "cstring"
 #include "../cmCacheManager.h"
 #include "../cmMakefile.h"
 #include <iostream>
 #include "FLTKPropertyList.h"
-#include "FL/fl_draw.H"
+#include "Fl/fl_draw.H"
 #include "../cmake.h"
 
 
@@ -20,22 +20,6 @@ CMakeSetupGUIImplementation
 ::CMakeSetupGUIImplementation()
 {
   m_BuildPathChanged = false;
-
-// Construct the full path to cmake executable
-
-#if defined(_WIN32)
-  char fname[1024];
-  ::GetModuleFileName(NULL,fname,1023);  // Didn't found this method. (?)
-  m_PathToExecutable = cmSystemTools::GetProgramPath(fname).c_str();
-  m_PathToExecutable += "/cmake.exe";
-#else
-  char fullPathToCMake[1024];
-  filename_absolute( fullPathToCMake, "../cmake" );
-  m_PathToExecutable = fullPathToCMake;
-#endif
-
-  std::cout << "Path to CMake executable " << m_PathToExecutable << std::endl;
-  
 }
 
 
@@ -127,6 +111,47 @@ CMakeSetupGUIImplementation
 }
 
 
+
+
+
+/**
+ * Set path to executable. Used to get the path to CMake
+ */
+void
+CMakeSetupGUIImplementation
+::SetPathToExecutable( const char * path )
+{
+  m_PathToExecutable = path;
+  
+  char expandedPath[1024];
+  filename_expand( expandedPath, path );
+  
+  char absolutePath[1024];
+  filename_absolute( absolutePath, expandedPath );
+
+  char * p = absolutePath + strlen( absolutePath );
+  while( *p != '/'  && *p != '\\' ) 
+  {
+    p--;
+  }
+  p--;
+  while( *p != '/'  && *p != '\\' ) 
+  {
+    p--;
+  }
+  *p = '\0';
+  
+  std::cout << "absolutePath = " << absolutePath << std::endl;
+  
+  m_PathToExecutable = absolutePath;
+
+#if defined(_WIN32)
+  m_PathToExecutable += "/CMake.exe";
+#else
+  m_PathToExecutable += "/cmake";
+#endif
+  std::cout << "Path to CMake executable = "  << m_PathToExecutable << std::endl;
+}
 
 
 
@@ -358,7 +383,7 @@ CMakeSetupGUIImplementation
     {
     cmCacheManager::GetInstance()->LoadCache( m_WhereBuild.c_str() );
     this->FillCacheGUIFromCacheManager();
-	}
+  }
 }
    
 
