@@ -105,18 +105,6 @@ public:
   static bool FileExists(const char* filename);
 
   /**
-   * Return the number of times the given expression occurs in the file
-   * specified by the concatenation of dir/file.
-   */
-  static int Grep(const char* dir, const char* file, const char* expression);
-  
-  /**
-   * Convert a path containing a cygwin drive specifier to its natural
-   * equivalent.
-   */
-  static void ConvertCygwinPath(std::string& pathname);
-
-  /**
    * Read a CMake command (or function) from an input file.  This
    * returns the name of the function and a list of its 
    * arguments.

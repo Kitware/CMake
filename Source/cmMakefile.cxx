@@ -805,8 +805,12 @@ int cmMakefile::DumpDocumentationToFile(std::ostream& f)
   const char *name;
   const char *terse;
   const char *full;
-
-  f << "<html><ul>\n";
+  char tmp[1024];
+  sprintf(tmp,"Version %d.%d", cmMakefile::GetMajorVersion(),
+          cmMakefile::GetMinorVersion());
+  f << "<html>\n";
+  f << "<h1>Documentation for commands of CMake " << tmp << "</h1>\n";
+  f << "<ul>\n";
   for(RegisteredCommandsMap::iterator j = m_Commands.begin();
       j != m_Commands.end(); ++j)
     {

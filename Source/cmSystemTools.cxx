@@ -404,38 +404,6 @@ void cmSystemTools::CleanUpWindowsSlashes(std::string& path)
 }
 
 
-int cmSystemTools::Grep(const char* dir, const char* file,
-                        const char* expression)
-{
-  std::string path = dir;
-  path += "/";
-  path += file;
-  std::ifstream fin(path.c_str());
-  char buffer[2056];
-  int count = 0;
-  cmRegularExpression reg(expression);
-  while(fin)
-    {
-    fin.getline(buffer, sizeof(buffer));
-    count += reg.find(buffer);
-    }
-  return count;
-}
-
-  
-void cmSystemTools::ConvertCygwinPath(std::string& pathname)
-{
-  if(pathname.find("/cygdrive/") != std::string::npos)
-    {
-    std::string cygStuff = pathname.substr(0, 11);
-    std::string replace;
-    replace += cygStuff.at(10);
-    replace += ":";
-    cmSystemTools::ReplaceString(pathname, cygStuff.c_str(), replace.c_str());
-    }
-}
-
-
 bool cmSystemTools::ParseFunction(std::ifstream& fin,
                                   std::string& name,
                                   std::vector<std::string>& arguments)
