@@ -631,18 +631,15 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
         command += args[cc];
 	}
 
-      if ( cmSystemTools::ChangeDirectory( directory.c_str() ) == 0 )
+      int retval = 0;
+      if ( cmSystemTools::RunCommand(command.c_str(), output, retval, 
+				     directory.c_str(), true) )
 	{
-	std::cout << "Change directory to: " << directory << std::endl;
-	cmSystemTools::RunCommand(command.c_str(), output, 0, true);	
 	std::cout << output.c_str();
-	}
-      else
-	{
-	std::cout << "Cannot change directory to: " << directory << std::endl;
-	}
+	return retval;
+	}	
 
-      return 0;
+      return 1;
     }
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
