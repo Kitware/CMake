@@ -46,6 +46,7 @@ Modify cmDependsFortranParser.c:
 #define cmDependsFortran_yyerror(x) \
         cmDependsFortranError(yyscanner, x)
 
+/*-------------------------------------------------------------------------*/
 #include "cmDependsFortranLexer.h"  /* Interface to lexer object.  */
 #include "cmDependsFortranParser.h" /* Interface to parser object.  */
 #include "cmDependsFortranParserTokens.h" /* Need YYSTYPE for YY_DECL.  */
@@ -72,6 +73,8 @@ static void cmDependsFortranError(yyscan_t yyscanner, const char* message);
   char* string;
 }
 
+/*-------------------------------------------------------------------------*/
+/* Tokens */
 %token USE F_INCLUDE MODULE EOSTMT
 %token CPP_INCLUDE F90PPR_INCLUDE COCO_INCLUDE
 %token F90PPR_DEFINE CPP_DEFINE F90PPR_UNDEF CPP_UNDEF
@@ -80,6 +83,8 @@ static void cmDependsFortranError(yyscan_t yyscanner, const char* message);
 %token UNTERMINATED_STRING
 %token <string> CPP_TOENDL STRING WORD
 
+/*-------------------------------------------------------------------------*/
+/* grammar */
 %%
 
 code: /* empty */ | code stmt ;
@@ -170,6 +175,7 @@ misc_code:
 ;
 
 %%
+/* End of grammar */
 
 /*--------------------------------------------------------------------------*/
 void cmDependsFortranError(yyscan_t yyscanner, const char* message)
