@@ -486,7 +486,7 @@ void cmMakefile::SetProjectName(const char* p)
 void cmMakefile::AddLibrary(const char* lname, const std::vector<std::string> &srcs)
 {
   cmTarget target;
-  target.SetIsALibrary(1);
+  target.SetType(cmTarget::LIBRARY);
   target.GetSourceLists() = srcs;
   m_Targets.insert(cmTargets::value_type(lname,target));
 }
@@ -495,9 +495,21 @@ void cmMakefile::AddExecutable(const char *exeName,
                                const std::vector<std::string> &srcs)
 {
   cmTarget target;
-  target.SetIsALibrary(0);
+  target.SetType(cmTarget::EXECUTABLE);
   target.GetSourceLists() = srcs;
   m_Targets.insert(cmTargets::value_type(exeName,target));
+}
+
+
+void cmMakefile::AddUtilityCommand(const char* utilityName,
+                                   const char* command)
+{
+  cmTarget target;
+  target.SetType(cmTarget::UTILITY);
+  std::vector<std::string> empty;
+  cmCustomCommand cc(utilityName, command, empty, empty);
+  target.GetCustomCommands().push_back(cc);
+  m_Targets.insert(cmTargets::value_type(utilityName,target));
 }
 
 

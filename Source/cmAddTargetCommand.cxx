@@ -43,17 +43,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // cmAddTargetCommand
 bool cmAddTargetCommand::Invoke(std::vector<std::string>& args)
 {
-  if(args.size() < 1 )
+  if(args.size() < 2 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  return false;
-  
-//    for(std::vector<std::string>::iterator i = args.begin();
-//        i != args.end(); ++i)
-//      {
-//      m_Makefile->Add((*i).c_str());
-//      }
+  std::vector<std::string> dep;
+  m_Makefile->AddUtilityCommand(args[0].c_str(), 
+                                args[1].c_str());
+  return true;
 }
 

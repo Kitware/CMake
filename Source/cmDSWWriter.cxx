@@ -91,8 +91,13 @@ void cmDSWMakefile::WriteDSWFile(std::ostream& fout)
   // CMakeLists.txt files that are in sub directories of
   // this one.
   std::vector<cmMakefile*> allListFiles;
-  m_Makefile->FindSubDirectoryCMakeListsFiles(allListFiles);
+  // add this makefile to the list
+  allListFiles.push_back(m_Makefile);
+  // add a special target that depends on ALL projects for easy build
+  // of Debug only
+  m_Makefile->AddUtilityCommand("ALL_BUILD", "echo \"Build all projects\"");
   
+  m_Makefile->FindSubDirectoryCMakeListsFiles(allListFiles);
   // For each cmMakefile, create a DSP for it, and
   // add it to this DSW file
   for(std::vector<cmMakefile*>::iterator k = allListFiles.begin();
@@ -119,15 +124,52 @@ void cmDSWMakefile::WriteDSWFile(std::ostream& fout)
     std::vector<std::string> dspnames = pg->GetDSPMakefile()->GetCreatedProjectNames();
     const cmTargets &tgts = pg->GetDSPMakefile()->GetMakefile()->GetTargets();
     cmTargets::const_iterator l = tgts.begin();
+    std::vector<std::string> originalUtilities;
+    bool addedUtilities = false;
     for(std::vector<std::string>::iterator si = dspnames.begin(); 
         l != tgts.end(); ++l, ++si)
       {
+      // special handling for the current makefile
+      if(mf == m_Makefile)
+        {
+        dir = "."; // no subdirectory for project generated
+        // if this is the special ALL_BUILD utility, then
+        // make it depend on every other non UTILITY project.
+        // This is done by adding the names to the GetUtilities
+        // vector on the makefile
+        if(l->first == "ALL_BUILD")
+          {
+          addedUtilities = true;
+          originalUtilities = m_Makefile->GetUtilities();
+          for(std::vector<cmMakefile*>::iterator a = allListFiles.begin();
+              a != allListFiles.end(); ++a)
+            {
+            const cmTargets &atgts = (*a)->GetTargets();
+            for(cmTargets::const_iterator al = atgts.begin();
+                al != atgts.end(); ++al)
+              {
+              if(al->second.GetType() != cmTarget::UTILITY)
+                {
+                m_Makefile->GetUtilities().push_back(al->first);
+                }
+              }
+            }
+          }
+        }
       // Write the project into the DSW file
       this->WriteProject(fout, si->c_str(), dir.c_str(), 
                          pg->GetDSPMakefile(),l->second);
+      if(addedUtilities)
+        {
+        m_Makefile->GetUtilities() = originalUtilities;
+        }
+      
       }
     // delete the cmMakefile which also deletes the cmMSProjectGenerator
-    delete mf;
+    if(mf != m_Makefile)
+      {
+      delete mf;
+      }
     }
   // Write the footer for the DSW file
   this->WriteDSWFooter(fout);
@@ -141,7 +183,8 @@ void cmDSWMakefile::WriteProject(std::ostream& fout,
 				 const char* dspname,
 				 const char* dir,
                                  cmDSPMakefile* project,
-                                 const cmTarget &l)
+                                 const cmTarget &l
+                                 )
 {
   fout << "#########################################################"
     "######################\n\n";
@@ -159,7 +202,7 @@ void cmDSWMakefile::WriteProject(std::ostream& fout,
     {
     if(j->first != dspname)
       {
-      if (!l.IsALibrary() || 
+      if (!(l.GetType() == cmTarget::LIBRARY) || 
           project->GetLibraryBuildType() == cmDSPMakefile::DLL)
         {
         // is the library part of this DSW ? If so add dependency

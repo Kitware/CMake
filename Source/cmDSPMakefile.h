@@ -57,7 +57,7 @@ public:
   cmDSPMakefile(cmMakefile*);
   ~cmDSPMakefile();
   void OutputDSPFile();
-  enum BuildType {STATIC_LIBRARY, DLL, EXECUTABLE};
+  enum BuildType {STATIC_LIBRARY, DLL, EXECUTABLE, UTILITY};
 
   /**
    * Specify the type of the build: static, dll, or executable.
@@ -107,6 +107,7 @@ private:
   void WriteDSPFooter(std::ostream& fout);
   void AddDSPBuildRule(cmSourceGroup&);
   void WriteCustomRule(std::ostream& fout,
+                       const char* source,
                        const char* command,
                        const std::set<std::string>& depends,
                        const std::set<std::string>& outputs);

@@ -54,12 +54,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 class cmTarget
 {
 public:
+  enum TargetType { EXECUTABLE, LIBRARY, UTILITY };
   /**
-   * is this target a library?
+   * Return the type of target.
    */
-  bool IsALibrary() const { return m_IsALibrary; }
-  bool GetIsALibrary() const { return m_IsALibrary; }
-  void SetIsALibrary(bool f) { m_IsALibrary = f; }
+  TargetType GetType() const
+    {
+      return m_TargetType;
+    }
+  
+  void SetType(TargetType f) { m_TargetType = f; }
   
   /**
    * Get the list of the custom commands for this target
@@ -103,7 +107,7 @@ public:
 private:
   std::vector<cmCustomCommand> m_CustomCommands;
   std::vector<std::string> m_SourceLists;
-  bool m_IsALibrary;
+  TargetType m_TargetType;
   std::vector<cmSourceFile> m_SourceFiles;
   LinkLibraries m_LinkLibraries;
 };

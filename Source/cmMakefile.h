@@ -95,6 +95,10 @@ public:
    * superclass.
    */
   void SetMakefileGenerator(cmMakefileGenerator*);
+  
+  ///! Get the current makefile generator.
+  cmMakefileGenerator* GetMakefileGenerator() 
+    { return m_MakefileGenerator;}
 
   /**
    * Produce the output makefile.
@@ -130,6 +134,13 @@ public:
    * Add an executable to the build.
    */
   void AddExecutable(const char *exename, const std::vector<std::string> &srcs);
+
+  /**
+   * Add a utility to the build.  A utiltity target is
+   * a command that is run every time a target is built.
+   */
+  void AddUtilityCommand(const char* utilityName,
+                         const char* command);
 
   /**
    * Add a utility on which this project depends. A utility is an executable

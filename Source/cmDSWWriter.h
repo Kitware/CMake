@@ -66,8 +66,6 @@ public:
   virtual void OutputDSWFile();
 
 private:
-  void FindAllCMakeListsFiles(const char* subdir,
-			      std::vector<cmMSProjectGenerator*>&);
   void WriteDSWFile(std::ostream& fout);
   void WriteDSWHeader(std::ostream& fout);
   void WriteProject(std::ostream& fout, 
