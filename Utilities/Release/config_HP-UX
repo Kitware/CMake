@@ -1,6 +1,7 @@
 PLATFORM="hpux-static"
 CC="cc"
 CXX="aCC"
+export PATH=/usr/local/bin:/usr/bin:/opt/ansic/bin:/usr/ccs/bin:/usr/contrib/bin:/opt/nettladm/bin:/opt/pd/bin:/opt/upgrade/bin:/usr/bin/X11:/usr/contrib/bin/X11:/opt/atok/bin:/opt/asx/bin/X11:/opt/xdevice/bin:/opt/egb/bin:/opt/vje/bin:/opt/resmon/bin:/opt/hparray/bin:/opt/langtools/bin:/opt/imake/bin:/opt/aCC/bin
 
 # Write entries into the cache file before building cmake.
 write_cache()
