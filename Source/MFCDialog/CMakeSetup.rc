@@ -98,8 +98,8 @@ BEGIN
     COMBOBOX        IDC_WhereBuild,96,26,133,68,CBS_DROPDOWN | 
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
     PUSHBUTTON      "Browse...",IDC_BUTTON3,230,25,34,13
-    DEFPUSHBUTTON   "Configure",IDC_BuildProjects,70,223,67,15
-    PUSHBUTTON      "Cancel",IDCANCEL,202,223,67,15
+    DEFPUSHBUTTON   "Configure",IDC_BuildProjects,81,223,67,15
+    PUSHBUTTON      "Cancel",IDCANCEL,213,223,67,15
     LISTBOX         IDC_LIST2,15,53,393,126,LBS_OWNERDRAWVARIABLE | 
                     LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | 
                     WS_HSCROLL
@@ -107,13 +107,13 @@ BEGIN
     RTEXT           "Where to build the binaries:",IDC_STATIC,5,27,90,9
     GROUPBOX        "Cache Values",IDC_FRAME,9,44,406,140
     LTEXT           "Right click on a cache value for additional options and help.\nPress Configure to update and display new values in red.\nPress OK to generate selected build files and exit.",
-                    IDC_MouseHelpCaption,103,190,197,27
+                    IDC_MouseHelpCaption,114,190,197,27
     LTEXT           "Static",IDC_CMAKE_VERSION,3,227,52,13,SS_CENTERIMAGE
-    PUSHBUTTON      "OK",IDC_OK,142,223,56,14
+    PUSHBUTTON      "OK",IDC_OK,153,223,56,14
     COMBOBOX        IDC_Generator,311,7,103,50,CBS_DROPDOWN | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
     LTEXT           "Build For:",IDC_GeneratorLabel,277,9,31,9
-    PUSHBUTTON      "Help",IDC_HELP_BUTTON,274,223,57,15
+    PUSHBUTTON      "Help",IDC_HELP_BUTTON,285,223,57,15
     CONTROL         "Show Advanced Values",IDC_AdvancedValues,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,277,28,98,9
 END
