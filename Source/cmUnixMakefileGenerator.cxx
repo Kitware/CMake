@@ -26,7 +26,7 @@
 cmUnixMakefileGenerator::cmUnixMakefileGenerator()
   :m_SharedLibraryExtension("$(SHLIB_SUFFIX)"),
    m_ObjectFileExtension(".o"),
-   m_ExecutableExtension(""),
+   m_ExecutableExtension(cmSystemTools::GetExecutableExtension()),
    m_StaticLibraryExtension(".a"),
    m_LibraryPrefix("lib")
 {
@@ -758,7 +758,7 @@ void cmUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
                                                    const char* name,
                                                    const cmTarget &t)
 {
-  std::string target = m_ExecutableOutputPath + name;
+  std::string target = m_ExecutableOutputPath + name + m_ExecutableExtension;
   std::string depend = "$(";
   depend += this->CreateMakeVariable(name, "_SRC_OBJS") 
     + ") $(" + this->CreateMakeVariable(name, "_DEPEND_LIBS") + ")";
@@ -1134,16 +1134,7 @@ void cmUnixMakefileGenerator::OutputExeDepend(std::ostream& fout,
     // add the library name
     exepath += name;
     // add the correct extension
-    if (m_Makefile->GetDefinition("CMAKE_EXECUTABLE_SUFFIX"))
-      {
-      std::string replaceVars = 
-        m_Makefile->GetDefinition("CMAKE_EXECUTABLE_SUFFIX");
-      if (!strcmp(replaceVars.c_str(),"@CMAKE_EXECUTABLE_SUFFIX@"))
-        {
-        replaceVars = "";
-        }
-      exepath += replaceVars;
-      }
+    exepath += m_ExecutableExtension;
     fout << this->ConvertToOutputPath(exepath.c_str()) << " ";
     }
 }
@@ -1811,7 +1802,7 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                        "remove generated files",
                        "clean",
                        "$(SUBDIR_CLEAN)",
-                       "-@ $(RM) $(CLEAN_OBJECT_FILES) $(EXECUTABLES)"
+                       "-@ $(RM) $(CLEAN_OBJECT_FILES) "
                        " $(TARGETS) $(GENERATED_QT_FILES) $(GENERATED_FLTK_FILES)");
 
   // collect up all the sources
