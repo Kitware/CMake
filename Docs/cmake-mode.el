@@ -14,10 +14,10 @@
 ; Regular expressions used by line indentation function.
 (defconst cmake-regex-quoted "\"\\([^\n\"\\\\]\\|\\\\.\\)*\"")
 (defconst cmake-regex-arguments (concat "\\(" cmake-regex-quoted
-                                        "\\|" "[^\n()\\\\]"
+                                        "\\|" "[^\n()#\\\\]"
                                         "\\|" "\\\\."
                                         "\\)*"))
-(defconst cmake-regex-comment "#[^\n]*")
+(defconst cmake-regex-comment "#.*")
 (defconst cmake-regex-identifier "[A-Za-z][A-Za-z0-9_]*")
 (defconst cmake-indent-comment-line (concat "^[ \t]*" cmake-regex-comment))
 (defconst cmake-indent-blank-regex "^[ \t]*$")
@@ -29,8 +29,8 @@
                                            ")[ \t]*"
                                            "\\(" cmake-regex-comment "\\)?"
                                            "\n"))
-(defconst cmake-indent-begin-regex "^[ \t]*\\(IF\\|MACRO\\|FOREACH\\|ELSE\\)")
-(defconst cmake-indent-end-regex "^[ \t]*\\(ENDIF\\|ENDFOREACH\\|ENDMACRO\\|ELSE\\)")
+(defconst cmake-indent-begin-regex "^[ \t]*\\(IF\\|MACRO\\|FOREACH\\|ELSE\\)[ \t]*(")
+(defconst cmake-indent-end-regex "^[ \t]*\\(ENDIF\\|ENDFOREACH\\|ENDMACRO\\|ELSE\\)[ \t]*(")
 
 ; Line indentation function.
 (defun cmake-indent ()
