@@ -104,6 +104,12 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
                               const char *target, const char* lib, 
                               LinkLibraryType llt)
 {
+  // Never add a self dependency, even if the user asks for it.
+  if(strcmp( target, lib ) == 0)
+    {
+    return;
+    }
+
   m_LinkLibraries.push_back( std::pair<std::string, cmTarget::LinkLibraryType>(lib,llt) );
 
   if(llt != cmTarget::GENERAL)
