@@ -143,7 +143,7 @@ bool wxCMakeSetup::OnInit()
 {
   cmSystemTools::DisableRunCommandOutput();
   cmCommandLineInfo cm;
-  cm.SetValidArguments("ABGH");
+  cm.SetValidArguments("ABGHQ");
   cm.ParseCommandLine(wxApp::argc, wxApp::argv);
 
   this->SetVendorName("Andy");
