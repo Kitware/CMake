@@ -1255,7 +1255,7 @@ void cmMakefile::RegisterData(cmData* data)
 {
   std::string name = data->GetName();
   DataMap::const_iterator d = m_DataMap.find(name);
-  if((d != m_DataMap.end()) && (d->second != NULL) && (d->second != data))
+  if((d != m_DataMap.end()) && (d->second != 0) && (d->second != data))
     {
     delete d->second;
     }
@@ -1270,7 +1270,7 @@ void cmMakefile::RegisterData(cmData* data)
 void cmMakefile::RegisterData(const char* name, cmData* data)
 {
   DataMap::const_iterator d = m_DataMap.find(name);
-  if((d != m_DataMap.end()) && (d->second != NULL) && (d->second != data))
+  if((d != m_DataMap.end()) && (d->second != 0) && (d->second != data))
     {
     delete d->second;
     }
@@ -1291,7 +1291,7 @@ cmData* cmMakefile::LookupData(const char* name) const
     }
   else
     {
-    return NULL;
+    return 0;
     }
 }
 

@@ -80,7 +80,7 @@ void cmMakeDepend::SetMakefile(const cmMakefile* makefile)
 
 const cmDependInformation* cmMakeDepend::FindDependencies(const char* file)
 {
-  cmDependInformation* info = this->GetDependInformation(file,NULL);
+  cmDependInformation* info = this->GetDependInformation(file,0);
   this->GenerateDependInformation(info);
   return info;
 }
@@ -280,7 +280,7 @@ void cmMakeDepend::GenerateMakefileDependencies()
       if(!(*i)->GetPropertyAsBool("HEADER_FILE_ONLY"))
         {
         cmDependInformation* info =
-          this->GetDependInformation((*i)->GetFullPath().c_str(),NULL);
+          this->GetDependInformation((*i)->GetFullPath().c_str(),0);
         this->AddFileToSearchPath(info->m_FullPath.c_str());
         info->m_cmSourceFile = *i;
         this->GenerateDependInformation(info);

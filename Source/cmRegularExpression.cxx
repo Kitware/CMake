@@ -47,7 +47,7 @@ cmRegularExpression::cmRegularExpression (const cmRegularExpression& rxp) {
   this->startp[0] = rxp.startp[0];		// Copy pointers into last
   this->endp[0] = rxp.endp[0];			// Successful "find" operation
   this->regmust = rxp.regmust;			// Copy field
-  if (rxp.regmust != NULL) {
+  if (rxp.regmust != 0) {
     char* dum = rxp.program;
     ind = 0;
     while (dum != rxp.regmust) {
@@ -222,7 +222,7 @@ const unsigned char MAGIC = 0234;
 #define	UCHARAT(p)	((const unsigned char*)(p))[0]
 
 
-#define	FAIL(m)	{ regerror(m); return(NULL); }
+#define	FAIL(m)	{ regerror(m); return(0); }
 #define	ISMULT(c)	((c) == '*' || (c) == '+' || (c) == '?')
 #define	META	"^$.[()|?+*\\"
 
@@ -301,7 +301,7 @@ void cmRegularExpression::compile (const char* exp) {
     register unsigned long len;
              int         flags;
 
-    if (exp == NULL) {
+    if (exp == 0) {
       //RAISE Error, SYM(cmRegularExpression), SYM(No_Expr),
       printf ("cmRegularExpression::compile(): No expression supplied.\n");
       return;
@@ -318,7 +318,7 @@ void cmRegularExpression::compile (const char* exp) {
 	printf ("cmRegularExpression::compile(): Error in compile.\n");
 	return;
       }
-    this->startp[0] = this->endp[0] = this->searchstring = NULL;
+    this->startp[0] = this->endp[0] = this->searchstring = 0;
 
     // Small enough for pointer-storage convention? 
     if (regsize >= 32767L) {	// Probably could be 65535L. 
@@ -329,12 +329,12 @@ void cmRegularExpression::compile (const char* exp) {
 
     // Allocate space. 
 //#ifndef WIN32
-    if (this->program != NULL) delete [] this->program;  
+    if (this->program != 0) delete [] this->program;  
 //#endif
     this->program = new char[regsize];
     this->progsize = (int) regsize;
 
-    if (this->program == NULL) {
+    if (this->program == 0) {
       //RAISE Error, SYM(cmRegularExpression), SYM(Out_Of_Memory),
       printf ("cmRegularExpression::compile(): Out of memory.\n"); 
       return;
@@ -350,7 +350,7 @@ void cmRegularExpression::compile (const char* exp) {
     // Dig out information for optimizations.
     this->regstart = '\0';		// Worst-case defaults.
     this->reganch = 0;
-    this->regmust = NULL;
+    this->regmust = 0;
     this->regmlen = 0;
     scan = this->program + 1;	// First BRANCH.
     if (OP(regnext(scan)) == END) {	// Only one top-level choice.
@@ -371,9 +371,9 @@ void cmRegularExpression::compile (const char* exp) {
 	 // absence of others. 
 	 //
 	if (flags & SPSTART) {
-	    longest = NULL;
+	    longest = 0;
 	    len = 0;
-	    for (; scan != NULL; scan = regnext(scan))
+	    for (; scan != 0; scan = regnext(scan))
 		if (OP(scan) == EXACTLY && strlen(OPERAND(scan)) >= len) {
 		    longest = OPERAND(scan);
 		    len = int(strlen(OPERAND(scan)));
@@ -415,13 +415,13 @@ static char* reg (int paren, int *flagp) {
 	ret = regnode(OPEN + parno);
     }
     else
-	ret = NULL;
+	ret = 0;
 
     // Pick up the branches, linking them together.
     br = regbranch(&flags);
-    if (br == NULL)
-	return (NULL);
-    if (ret != NULL)
+    if (br == 0)
+	return (0);
+    if (ret != 0)
 	regtail(ret, br);	// OPEN -> first.
     else
 	ret = br;
@@ -431,8 +431,8 @@ static char* reg (int paren, int *flagp) {
     while (*regparse == '|') {
 	regparse++;
 	br = regbranch(&flags);
-	if (br == NULL)
-	    return (NULL);
+	if (br == 0)
+	    return (0);
 	regtail(ret, br);	// BRANCH -> BRANCH.
 	if (!(flags & HASWIDTH))
 	    *flagp &= ~HASWIDTH;
@@ -444,7 +444,7 @@ static char* reg (int paren, int *flagp) {
     regtail(ret, ender);
 
     // Hook the tails of the branches to the closing node.
-    for (br = ret; br != NULL; br = regnext(br))
+    for (br = ret; br != 0; br = regnext(br))
 	regoptail(br, ender);
 
     // Check for proper termination.
@@ -484,19 +484,19 @@ static char* regbranch (int *flagp) {
     *flagp = WORST;		// Tentatively.
 
     ret = regnode(BRANCH);
-    chain = NULL;
+    chain = 0;
     while (*regparse != '\0' && *regparse != '|' && *regparse != ')') {
 	latest = regpiece(&flags);
-	if (latest == NULL)
-	    return (NULL);
+	if (latest == 0)
+	    return (0);
 	*flagp |= flags & HASWIDTH;
-	if (chain == NULL)	// First piece.
+	if (chain == 0)	// First piece.
 	    *flagp |= flags & SPSTART;
 	else
 	    regtail(chain, latest);
 	chain = latest;
     }
-    if (chain == NULL)		// Loop ran zero times.
+    if (chain == 0)		// Loop ran zero times.
 	regnode(NOTHING);
 
     return (ret);
@@ -519,8 +519,8 @@ static char* regpiece (int *flagp) {
     int            flags;
 
     ret = regatom(&flags);
-    if (ret == NULL)
-	return (NULL);
+    if (ret == 0)
+	return (0);
 
     op = *regparse;
     if (!ISMULT(op)) {
@@ -643,8 +643,8 @@ static char* regatom (int *flagp) {
 	    break;
 	case '(':
 	    ret = reg(1, &flags);
-	    if (ret == NULL)
-		return (NULL);
+	    if (ret == 0)
+		return (0);
 	    *flagp |= flags & (HASWIDTH | SPSTART);
 	    break;
 	case '\0':
@@ -778,7 +778,7 @@ static void regtail (char* p, const char* val) {
     scan = p;
     for (;;) {
 	temp = regnext(scan);
-	if (temp == NULL)
+	if (temp == 0)
 	    break;
 	scan = temp;
     }
@@ -797,7 +797,7 @@ static void regtail (char* p, const char* val) {
  */
 static void regoptail (char* p, const char* val) {
     // "Operandless" and "op != BRANCH" are synonymous in practice.
-    if (p == NULL || p == &regdummy || OP(p) != BRANCH)
+    if (p == 0 || p == &regdummy || OP(p) != BRANCH)
 	return;
     regtail(OPERAND(p), val);
 }
@@ -856,14 +856,14 @@ bool cmRegularExpression::find (const char* string) {
     }
     
     // If there is a "must appear" string, look for it.
-    if (this->regmust != NULL) {
+    if (this->regmust != 0) {
 	s = string;
-	while ((s = strchr(s, this->regmust[0])) != NULL) {
+	while ((s = strchr(s, this->regmust[0])) != 0) {
 	    if (strncmp(s, this->regmust, this->regmlen) == 0)
 		break;		// Found it.
 	    s++;
 	}
-	if (s == NULL)		// Not present.
+	if (s == 0)		// Not present.
 	    return (0);
     }
      
@@ -878,7 +878,7 @@ bool cmRegularExpression::find (const char* string) {
     s = string;
     if (this->regstart != '\0')
 	// We know what char it must start with.
-	while ((s = strchr(s, this->regstart)) != NULL) {
+	while ((s = strchr(s, this->regstart)) != 0) {
 	    if (regtry(s, this->startp, this->endp, this->program))
 		return (1);
 	    s++;
@@ -913,8 +913,8 @@ static int regtry (const char* string, const char* *start,
     sp1 = start;
     ep = end;
     for (i = NSUBEXP; i > 0; i--) {
-	*sp1++ = NULL;
-	*ep++ = NULL;
+	*sp1++ = 0;
+	*ep++ = 0;
     }
     if (regmatch(prog + 1)) {
 	start[0] = string;
@@ -943,7 +943,7 @@ static int regmatch (const char* prog) {
 
     scan = prog;
 
-    while (scan != NULL) {
+    while (scan != 0) {
 
 	next = regnext(scan);
 
@@ -976,12 +976,12 @@ static int regmatch (const char* prog) {
 		}
 		break;
 	    case ANYOF:
-		if (*reginput == '\0' || strchr(OPERAND(scan), *reginput) == NULL)
+		if (*reginput == '\0' || strchr(OPERAND(scan), *reginput) == 0)
 		    return (0);
 		reginput++;
 		break;
 	    case ANYBUT:
-		if (*reginput == '\0' || strchr(OPERAND(scan), *reginput) != NULL)
+		if (*reginput == '\0' || strchr(OPERAND(scan), *reginput) != 0)
 		    return (0);
 		reginput++;
 		break;
@@ -1010,7 +1010,7 @@ static int regmatch (const char* prog) {
 			// Don't set startp if some later invocation of the
 			// same parentheses already has. 
 			//
-			if (regstartp[no] == NULL)
+			if (regstartp[no] == 0)
 			    regstartp[no] = save;
 			return (1);
 		    }
@@ -1039,7 +1039,7 @@ static int regmatch (const char* prog) {
 			// Don't set endp if some later invocation of the
 			// same parentheses already has. 
 			//
-			if (regendp[no] == NULL)
+			if (regendp[no] == 0)
 			    regendp[no] = save;
 			return (1);
 		    }
@@ -1060,7 +1060,7 @@ static int regmatch (const char* prog) {
 				return (1);
 			    reginput = save;
 			    scan = regnext(scan);
-			} while (scan != NULL && OP(scan) == BRANCH);
+			} while (scan != 0 && OP(scan) == BRANCH);
 			return (0);
 			// NOTREACHED
 		    }
@@ -1138,13 +1138,13 @@ static int regrepeat (const char* p) {
 	    }
 	    break;
 	case ANYOF:
-	    while (*scan != '\0' && strchr(opnd, *scan) != NULL) {
+	    while (*scan != '\0' && strchr(opnd, *scan) != 0) {
 		count++;
 		scan++;
 	    }
 	    break;
 	case ANYBUT:
-	    while (*scan != '\0' && strchr(opnd, *scan) == NULL) {
+	    while (*scan != '\0' && strchr(opnd, *scan) == 0) {
 		count++;
 		scan++;
 	    }
@@ -1166,11 +1166,11 @@ static const char* regnext (register const char* p) {
     register int offset;
 
     if (p == &regdummy)
-	return (NULL);
+	return (0);
 
     offset = NEXT(p);
     if (offset == 0)
-	return (NULL);
+	return (0);
 
     if (OP(p) == BACK)
 	return (p - offset);
@@ -1183,11 +1183,11 @@ static char* regnext (register char* p) {
     register int offset;
 
     if (p == &regdummy)
-	return (NULL);
+	return (0);
 
     offset = NEXT(p);
     if (offset == 0)
-	return (NULL);
+	return (0);
 
     if (OP(p) == BACK)
 	return (p - offset);

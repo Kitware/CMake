@@ -280,7 +280,7 @@ private:
  */
 inline cmRegularExpression::cmRegularExpression () 
 { 
-  this->program = NULL;
+  this->program = 0;
 }
 
 /**
@@ -289,7 +289,7 @@ inline cmRegularExpression::cmRegularExpression ()
  */
 inline cmRegularExpression::cmRegularExpression (const char* s) 
 {  
-  this->program = NULL;
+  this->program = 0;
   compile(s);
 }
 
@@ -335,7 +335,7 @@ inline bool cmRegularExpression::operator!= (const cmRegularExpression& r) const
  */
 inline bool cmRegularExpression::is_valid () const 
 {
-  return (this->program != NULL);
+  return (this->program != 0);
 }
 
 
@@ -344,7 +344,7 @@ inline void cmRegularExpression::set_invalid ()
 //#ifndef WIN32
   delete [] this->program;
 //#endif
-  this->program = NULL;
+  this->program = 0;
 }
 
 /**
