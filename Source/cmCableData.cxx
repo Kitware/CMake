@@ -25,12 +25,12 @@
 cmCableData::cmCableData(const cmCableCommand* owner,
                          const std::string& configurationFile):
   m_Owner(owner),
+  m_OutputFileName(configurationFile),
+  m_OutputFile(configurationFile.c_str()),
   m_Indentation(0),
   m_Package(NULL),
   m_PackageNamespaceDepth(0),
-  m_PackageClassIndex(-1),
-  m_OutputFileName(configurationFile),
-  m_OutputFile(m_OutputFileName.c_str())
+  m_PackageClassIndex(-1)
 {
   this->InitializeOutputFile();
 }

@@ -79,22 +79,22 @@ private:
    * The cmCableCommand which created this instance of cmCableCommand.
    */
   const cmCableCommand* m_Owner;
+
+  /**
+   * The name of the output file opened as m_OutputFile.
+   */
+  std::string m_OutputFileName;  
+  
+  /**
+   * The output file to which the configuration is written.
+   */
+  std::ofstream m_OutputFile;
   
   /**
    * Current indentation for output.
    */
   Indentation m_Indentation;
   
-  /**
-   * The name of the output file opened as m_OutputFile.
-   */
-  std::string m_OutputFileName;
-  
-  /**
-   * The output file to which the configuration is written.
-   */
-  std::ofstream m_OutputFile;
-
   /**
    * The stack of namespaces.
    */
