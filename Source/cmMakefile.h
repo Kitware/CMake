@@ -225,7 +225,8 @@ public:
   /**
    * Set the name of the library.
    */
-  void AddLibrary(const char *libname, const std::vector<std::string> &srcs);
+  void AddLibrary(const char *libname, bool shared,
+                  const std::vector<std::string> &srcs);
 
   /**
    * Add a class/source file to the build.

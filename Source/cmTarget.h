@@ -54,7 +54,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 class cmTarget
 {
 public:
-  enum TargetType { EXECUTABLE, WIN32_EXECUTABLE, LIBRARY, UTILITY, INSTALL };
+  enum TargetType { EXECUTABLE, WIN32_EXECUTABLE, STATIC_LIBRARY,
+                    SHARED_LIBRARY, UTILITY, INSTALL };
 
   /**
    * Return the type of target.

@@ -86,7 +86,11 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "ADD_LIBRARY(libname srclist srclist srclist ...)";
+      "ADD_LIBRARY(libname [SHARED | STATIC] srclist srclist srclist ...)\n"
+      "Adds a library target.  If the keyword SHARED or STATIC appears, it\n"
+      "sets the library type.  If neither keyword appears as the second\n"
+      "argument, the type defaults to the current value of BUILD_SHARED_LIBS.\n"
+      "If this variable is not set, the type defaults to STATIC.";
     }
   
   cmTypeMacro(cmAddLibraryCommand, cmCommand);

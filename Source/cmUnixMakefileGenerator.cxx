@@ -242,11 +242,6 @@ void cmUnixMakefileGenerator::OutputMakefile(const char* file)
 }
 
 
-bool cmUnixMakefileGenerator::BuildingSharedLibs() const
-{
-  return !cmSystemTools::IsOff(m_Makefile->GetDefinition("BUILD_SHARED_LIBS"));
-}
-
 
 // Output the rules for any targets
 void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
@@ -255,21 +250,20 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
   fout << "TARGETS = ";
   const cmTargets &tgts = m_Makefile->GetTargets();
   // list libraries first
-  bool dll = this->BuildingSharedLibs();
   for(cmTargets::const_iterator l = tgts.begin(); 
       l != tgts.end(); l++)
     {
-    if (l->second.GetType() == cmTarget::LIBRARY &&
-	l->second.IsInAll())
+    if (l->second.IsInAll())
       {
-      fout << " \\\n" << m_LibraryOutputPath << "lib" << l->first.c_str();
-      if(dll)
+      if(l->second.GetType() == cmTarget::STATIC_LIBRARY)
         {
-        fout << m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
+        fout << " \\\n" << m_LibraryOutputPath << "lib" << l->first.c_str()
+             << ".a";
         }
-      else
+      else if(l->second.GetType() == cmTarget::SHARED_LIBRARY)
         {
-        fout << ".a";
+        fout << " \\\n" << m_LibraryOutputPath << "lib" << l->first.c_str()
+             << m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
         }
       }
     }
@@ -341,7 +335,7 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
   std::set<std::string> emitted;
 
   // Embed runtime search paths if possible and if required.
-  bool outputRuntime = this->BuildingSharedLibs();
+  bool outputRuntime = true;
   std::string runtimeFlag;
   std::string runtimeSep;
   std::vector<std::string> runtimeDirs;
@@ -487,17 +481,15 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
 
 void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
 {
-  bool dll = this->BuildingSharedLibs();
-  
   // for each target
   const cmTargets &tgts = m_Makefile->GetTargets();
   for(cmTargets::const_iterator l = tgts.begin(); 
       l != tgts.end(); l++)
     {
-    if (l->second.GetType() == cmTarget::LIBRARY)
+    if (l->second.GetType() == cmTarget::STATIC_LIBRARY)
       {
       fout << "#---------------------------------------------------------\n";
-      fout << "# rules for a library\n";
+      fout << "# rules for a static library\n";
       fout << "#\n";
       fout << m_LibraryOutputPath << "lib" << l->first << ".a: ${" << 
         l->first << "_SRC_OBJS} \n";
@@ -506,8 +498,13 @@ void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
         l->first << "_SRC_OBJS} \n";
       fout << "\t${CMAKE_RANLIB} "
            << m_LibraryOutputPath << "lib" << l->first << ".a\n";
-      fout << std::endl;
-
+      fout << "\n\n";
+      }
+    else if (l->second.GetType() == cmTarget::SHARED_LIBRARY)
+      {
+      fout << "#---------------------------------------------------------\n";
+      fout << "# rules for a shared library\n";
+      fout << "#\n";
       fout << m_LibraryOutputPath << "lib" << l->first << "$(SHLIB_SUFFIX):  ${" << 
         l->first << "_SRC_OBJS} \n";
       fout << "\trm -f lib" << l->first << "$(SHLIB_SUFFIX)\n";
@@ -524,12 +521,8 @@ void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
       {
       fout << m_ExecutableOutputPath << l->first << ": ${" << 
         l->first << "_SRC_OBJS} ${CMAKE_DEPEND_LIBS}\n";
-      fout << "\t${CMAKE_CXX_COMPILER} ";
-      if (dll)
-        {
-        fout << "${CMAKE_SHLIB_LINK_FLAGS} ";
-        }
-      fout << "${CMAKE_CXXFLAGS} ${" << l->first << "_SRC_OBJS} ";
+      fout << "\t${CMAKE_CXX_COMPILER} ${CMAKE_SHLIB_LINK_FLAGS} ${CMAKE_CXXFLAGS} "
+           << "${" << l->first << "_SRC_OBJS} ";
       this->OutputLinkLibraries(fout, NULL,l->second);
       fout << " -o " << m_ExecutableOutputPath << l->first << "\n\n";
       }
@@ -550,7 +543,6 @@ void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
   // Search the list of libraries that will be linked into
   // the executable
   emitted.clear();
-  bool dll = this->BuildingSharedLibs();
   for(lib2 = libs.begin(); lib2 != libs.end(); ++lib2)
     {
     if( ! emitted.insert(lib2->first).second ) continue;
@@ -586,7 +578,10 @@ void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
       // add the library name
       libpath += lib2->first;
       // add the correct extension
-      if(dll)
+      std::string ltname = lib2->first+"_LIBRARY_TYPE";
+      const char* libType
+        = cmCacheManager::GetInstance()->GetCacheValue(ltname.c_str());
+      if(libType && std::string(libType) == "SHARED")
         {
         libpath += m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
         }
@@ -615,16 +610,19 @@ void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
       {
       std::string library = "lib";
       library += lib2->first; 
-      bool dll = this->BuildingSharedLibs();
-      if(dll)
+      std::string libpath = cacheValue;
+      // add the correct extension
+      std::string ltname = lib2->first+"_LIBRARY_TYPE";
+      const char* libType
+        = cmCacheManager::GetInstance()->GetCacheValue(ltname.c_str());
+      if(libType && std::string(libType) == "SHARED")
         {
-        library += m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
+        libpath += m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
         }
       else
         {
-        library += ".a";
+        libpath += ".a";
         }
-      std::string libpath = cacheValue;
       if(m_LibraryOutputPath.size())
         {
         libpath = m_LibraryOutputPath;
@@ -953,10 +951,11 @@ void cmUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     "CMAKE_AR            = @CMAKE_AR@\n"
     "CMAKE_AR_ARGS       = @CMAKE_AR_ARGS@\n"
     "CMAKE_C_COMPILER    = @CMAKE_C_COMPILER@\n"
-    "CMAKE_CFLAGS        = @CMAKE_C_FLAGS@ @CMAKE_SHLIB_CFLAGS@ \n"
+    "CMAKE_CFLAGS        = @CMAKE_C_FLAGS@\n"
+    "CMAKE_SHLIB_CFLAGS  = @CMAKE_SHLIB_CFLAGS@\n"
     "\n"
     "CMAKE_CXX_COMPILER  = @CMAKE_CXX_COMPILER@\n"
-    "CMAKE_CXXFLAGS      = @CMAKE_CXX_FLAGS@ @CMAKE_SHLIB_CFLAGS@ @CMAKE_TEMPLATE_FLAGS@ \n"
+    "CMAKE_CXXFLAGS      = @CMAKE_CXX_FLAGS@ @CMAKE_TEMPLATE_FLAGS@\n"
     "\n"
     "CMAKE_SHLIB_BUILD_FLAGS = @CMAKE_SHLIB_BUILD_FLAGS@\n"
     "CMAKE_SHLIB_LINK_FLAGS = @CMAKE_SHLIB_LINK_FLAGS@\n"
@@ -971,12 +970,6 @@ void cmUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     "\n"
     "\n";
   std::string replaceVars = variables;
-  bool dll = this->BuildingSharedLibs();
-  if(!dll)
-    {
-    // if not a dll then remove the shlib -fpic flag
-    m_Makefile->AddDefinition("CMAKE_SHLIB_CFLAGS", "");
-    }
   
   m_Makefile->ExpandVariablesInString(replaceVars);
   fout << replaceVars.c_str();
@@ -987,7 +980,6 @@ void cmUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
 
 void cmUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
 {
-  bool dll = this->BuildingSharedLibs();
   const char* root
     = cmCacheManager::GetInstance()->GetCacheValue("CMAKE_ROOT");
   fout << "INSTALL = " << root << "/Templates/install-sh -c\n";
@@ -1024,17 +1016,16 @@ void cmUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
       // now install the target
       switch (l->second.GetType())
 	{
-	case cmTarget::LIBRARY:
+	case cmTarget::STATIC_LIBRARY:
 	  fout << "\t$(INSTALL_DATA) " << m_LibraryOutputPath << "lib" 
                << l->first;
-	  if(dll)
-	    {
-	      fout << m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
-	    }
-	  else
-	    {
-	      fout << ".a";
-	    }
+          fout << ".a";
+	  fout << " " << prefix << l->second.GetInstallPath() << "\n";
+	  break;
+	case cmTarget::SHARED_LIBRARY:
+	  fout << "\t$(INSTALL_DATA) " << m_LibraryOutputPath << "lib" 
+               << l->first;
+          fout << m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
 	  fout << " " << prefix << l->second.GetInstallPath() << "\n";
 	  break;
 	case cmTarget::WIN32_EXECUTABLE:
@@ -1094,35 +1085,6 @@ void cmUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
 
 void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
 {
-  this->OutputMakeRule(fout, 
-                       "# tell make about .cxx and .java",
-                       ".SUFFIXES", ".cxx .java .class", 0);
-  this->OutputMakeRule(fout, 
-                       "# build c file",
-                       ".c.o", 
-                       0,
-                       "${CMAKE_C_COMPILER} ${CMAKE_CFLAGS} ${INCLUDE_FLAGS} -c $< -o $@");
-  this->OutputMakeRule(fout, 
-                       "# build cplusplus file",
-                       ".cxx.o", 
-                       0,
-                       "${CMAKE_CXX_COMPILER} ${CMAKE_CXXFLAGS} ${INCLUDE_FLAGS} -c $< -o $@");  
-  this->OutputMakeRule(fout, 
-                       "# build cplusplus file",
-                       ".cpp.o", 
-                       0,
-                       "${CMAKE_CXX_COMPILER} ${CMAKE_CXXFLAGS} ${INCLUDE_FLAGS} -c $< -o $@");  
-  this->OutputMakeRule(fout, 
-                       "# build cplusplus file",
-                       ".cc.o", 
-                       0,
-                       "${CMAKE_CXX_COMPILER} ${CMAKE_CXXFLAGS} ${INCLUDE_FLAGS} -c $< -o $@");  
-  this->OutputMakeRule(fout, 
-                       "# build cplusplus file",
-                       ".C.o", 
-                       0,
-                       "${CMAKE_CXX_COMPILER} ${CMAKE_CXXFLAGS} ${INCLUDE_FLAGS} -c $< -o $@");  
-
   // only include the cmake.depends and not the Makefile, as
   // building one will cause the other to be built
   this->OutputMakeRule(fout, 
@@ -1178,38 +1140,66 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                        0);
   
 
-  // Write special rules for source files coming from other packages
-  // (not in the current build or source directories)
+  fout << "# Rules to build .o files from their sources:\n";
 
-  fout << "# Write special rules for source files coming from other packages\n";
-  fout << "# (not in the current build or source directories)\n";
-
+  std::set<std::string> rules;
+  
   // Iterate over every target.
   std::map<std::string, cmTarget>& targets = m_Makefile->GetTargets();
   for(std::map<std::string, cmTarget>::const_iterator target = targets.begin(); 
       target != targets.end(); ++target)
     {
+    bool shared = (target->second.GetType() == cmTarget::SHARED_LIBRARY);
     // Iterate over every source for this target.
     const std::vector<cmSourceFile>& sources = target->second.GetSourceFiles();
     for(std::vector<cmSourceFile>::const_iterator source = sources.begin(); 
         source != sources.end(); ++source)
       {
-      if(!source->IsAHeaderFileOnly() && 
-	 (cmSystemTools::GetFilenamePath(source->GetFullPath()) 
-	  != m_Makefile->GetCurrentOutputDirectory()) &&
-	 (cmSystemTools::GetFilenamePath(source->GetFullPath()) 
-	    != m_Makefile->GetCurrentDirectory()))
+     if(!source->IsAHeaderFileOnly())
         {
-	fout << cmSystemTools::GetFilenameName(source->GetSourceName()) << ".o : " << source->GetFullPath() << "\n";
-	std::string ext = source->GetSourceExtension();
-	if ( ext == "cxx" || ext == "cc" || ext == "cpp" || ext == "C" )
-	  {
-	  fout << "\t${CMAKE_CXX_COMPILER} ${CMAKE_CXXFLAGS} ${INCLUDE_FLAGS} -c $< -o $@\n\n";
-	  }
-	else if ( ext == "c" )
- 	  {
-	  fout << "\t${CMAKE_C_COMPILER} ${CMAKE_CFLAGS} ${INCLUDE_FLAGS} -c $< -o $@\n\n";
-	  }
+        std::string shortName;
+        // If the full path to the source file includes this
+        // directory, we want to use the relative path for the
+        // filename of the object file.  Otherwise, we will use just
+        // the filename portion.
+        if((cmSystemTools::GetFilenamePath(source->GetFullPath()).find(m_Makefile->GetCurrentDirectory()) == 0)
+           || (cmSystemTools::GetFilenamePath(source->GetFullPath()).find(m_Makefile->GetCurrentOutputDirectory()) == 0))
+          {
+          shortName = source->GetSourceName();
+          
+          // The path may be relative.  See if a directory needs to be
+          // created for the output file.  This is a ugly, and perhaps
+          // should be moved elsewhere.
+          std::string relPath =
+            cmSystemTools::GetFilenamePath(source->GetSourceName());
+          if(relPath != "")
+            {
+            std::string outPath = m_Makefile->GetCurrentOutputDirectory();
+            outPath += "/"+relPath;
+            cmSystemTools::MakeDirectory(outPath.c_str());
+            }
+          }
+        else
+          {
+          shortName = cmSystemTools::GetFilenameName(source->GetSourceName());
+          }
+        // Only output a rule for each .o once.
+        if(rules.find(shortName) == rules.end())
+          {
+          rules.insert(shortName);
+          fout << shortName.c_str() << ".o : " << source->GetFullPath() << "\n";
+          std::string ext = source->GetSourceExtension();
+          if ( ext == "cxx" || ext == "cc" || ext == "cpp" || ext == "C" )
+            {
+            fout << "\t${CMAKE_CXX_COMPILER} ${CMAKE_CXXFLAGS} "
+                 << (shared? "${CMAKE_SHLIB_CFLAGS} ":"") << "${INCLUDE_FLAGS} -c $< -o $@\n\n";
+            }
+          else if ( ext == "c" )
+            {
+            fout << "\t${CMAKE_C_COMPILER} ${CMAKE_CFLAGS} "
+                 << (shared? "${CMAKE_SHLIB_CFLAGS} ":"") << "${INCLUDE_FLAGS} -c $< -o $@\n\n";
+            }
+          }
         }
       }
     }

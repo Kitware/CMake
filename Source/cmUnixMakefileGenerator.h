@@ -94,7 +94,6 @@ private:
   void RecursiveGenerateCacheOnly();
   void ProcessDepends(const cmMakeDepend &md);
   void GenerateCacheOnly();
-  bool BuildingSharedLibs() const;
   void OutputMakefile(const char* file);
   void OutputMakeFlags(std::ostream&);
   void OutputTargetRules(std::ostream& fout);

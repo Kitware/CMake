@@ -541,10 +541,11 @@ void cmMakefile::SetProjectName(const char* p)
   m_ProjectName = p;
 }
 
-void cmMakefile::AddLibrary(const char* lname, const std::vector<std::string> &srcs)
+void cmMakefile::AddLibrary(const char* lname, bool shared,
+                            const std::vector<std::string> &srcs)
 {
   cmTarget target;
-  target.SetType(cmTarget::LIBRARY);
+  target.SetType(shared? cmTarget::SHARED_LIBRARY : cmTarget::STATIC_LIBRARY);
   target.SetInAll(true);
   target.GetSourceLists() = srcs;
   m_Targets.insert(cmTargets::value_type(lname,target));
@@ -554,6 +555,15 @@ void cmMakefile::AddLibrary(const char* lname, const std::vector<std::string> &s
     AddCacheEntry(lname,
                   this->GetCurrentOutputDirectory(),
                   "Path to a library", cmCacheManager::INTERNAL);
+
+  // Add an entry into the cache
+  std::string ltname = lname;
+  ltname += "_LIBRARY_TYPE";
+  cmCacheManager::GetInstance()->
+    AddCacheEntry(ltname.c_str(),
+                  shared? "SHARED":"STATIC",
+                  "Whether a library is static or shared.",
+                  cmCacheManager::INTERNAL);
 }
 
 void cmMakefile::AddExecutable(const char *exeName, 

@@ -50,10 +50,35 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string>& args)
     return false;
     }
   
-  std::vector<std::string>::iterator s = args.begin();
-  std::vector<std::string> srclists(++s, args.end());
+  // Library type defaults to value of BUILD_SHARED_LIBS, if it exists,
+  // otherwise it defaults to static library.
+  bool shared = !cmSystemTools::IsOff(m_Makefile->GetDefinition("BUILD_SHARED_LIBS"));
   
-  m_Makefile->AddLibrary(args[0].c_str(),srclists);
+  std::vector<std::string>::iterator s = args.begin();
+  ++s;
+  
+  // If the second argument is "SHARED" or "STATIC", then it controls
+  // the type of library.  Otherwise, it is treated as a source or
+  // source list name.
+  if(s != args.end())
+    {
+    std::string libType = *s;
+    m_Makefile->ExpandVariablesInString(libType);
+    if(libType == "STATIC")
+      {
+      ++s;
+      shared = false;
+      }
+    else if(libType == "SHARED")
+      {
+      ++s;
+      shared = true;
+      }
+    }
+  std::vector<std::string> srclists(s, args.end());  
+  
+  m_Makefile->AddLibrary(args[0].c_str(), shared, srclists);
+  
   return true;
 }
 

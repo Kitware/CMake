@@ -215,8 +215,7 @@ void cmDSWWriter::WriteProject(std::ostream& fout,
     {
     if(j->first != dspname)
       {
-      if (!(target.GetType() == cmTarget::LIBRARY) || 
-          project->GetLibraryBuildType() == cmDSPWriter::DLL)
+      if (target.GetType() != cmTarget::STATIC_LIBRARY)
         {
         // is the library part of this DSW ? If so add dependency
         const char* cacheValue

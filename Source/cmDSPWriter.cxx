@@ -88,11 +88,6 @@ void cmDSPWriter::OutputDSPFile()
     }
   
   // Create the DSP or set of DSP's for libraries and executables
-  m_LibraryBuildType = STATIC_LIBRARY;
-  if(!cmSystemTools::IsOff(m_Makefile->GetDefinition("BUILD_SHARED_LIBS")))
-    {
-    m_LibraryBuildType = DLL;
-    }
 
   // clear project names
   m_CreatedProjectNames.clear();
@@ -104,8 +99,11 @@ void cmDSPWriter::OutputDSPFile()
     {
     switch(l->second.GetType())
       {
-      case cmTarget::LIBRARY:
-        this->SetBuildType(m_LibraryBuildType, l->first.c_str());
+      case cmTarget::STATIC_LIBRARY:
+        this->SetBuildType(STATIC_LIBRARY, l->first.c_str());
+        break;
+      case cmTarget::SHARED_LIBRARY:
+        this->SetBuildType(DLL, l->first.c_str());
         break;
       case cmTarget::EXECUTABLE:
         this->SetBuildType(EXECUTABLE,l->first.c_str());
@@ -538,8 +536,9 @@ void cmDSPWriter::WriteDSPHeader(std::ostream& fout, const char *libName,
     {
     // add libraries to executables and dlls (but never include
     // a library in a library, bad recursion)
-    if (target.GetType() != cmTarget::LIBRARY || 
-        (m_LibraryBuildType == DLL && libName != j->first))
+    if ((target.GetType() != cmTarget::SHARED_LIBRARY
+         && target.GetType() != cmTarget::STATIC_LIBRARY) || 
+        (target.GetType() == cmTarget::SHARED_LIBRARY && libName != j->first))
       {
       std::string lib = j->first;
       if(j->first.find(".lib") == std::string::npos)
