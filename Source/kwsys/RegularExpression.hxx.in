@@ -49,13 +49,13 @@ namespace @KWSYS_NAMESPACE@
 
 const int RegularExpressionNSUBEXP = 10;
 
-/** \class cmRegularExpression
+/** \class RegularExpression
  * \brief Implements pattern matching with regular expressions.
  *
  * This is the header file for the regular expression class.  An object of
  * this class contains a regular expression, in a special "compiled" format.
  * This compiled format consists of several slots all kept as the objects
- * private data.  The cmRegularExpression class provides a convenient way to
+ * private data.  The RegularExpression class provides a convenient way to
  * represent regular expressions.  It makes it easy to search for the same
  * regular expression in many different strings without having to compile a
  * string to regular expression format more than necessary.
@@ -67,7 +67,7 @@ const int RegularExpressionNSUBEXP = 10;
  * regular  expression  is  a  sequence  of  characters used to
  * search for exact character matches. However, many times  the
  * exact  sequence to be found is not known, or only a match at
- * the beginning or end of a string is desired. The cmRegularExpression regu-
+ * the beginning or end of a string is desired. The RegularExpression regu-
  * lar  expression  class implements regular expression pattern
  * matching as is found and implemented in many  UNIX  commands
  * and utilities.
@@ -79,7 +79,7 @@ const int RegularExpressionNSUBEXP = 10;
  *    
  * Is written as follows in C++
  *
- *    cmRegularExpression re("([a-z]+)\\.cc");
+ *    RegularExpression re("([a-z]+)\\.cc");
  *    re.find(filename);
  *    cerr << re.match(1);
  *
@@ -117,12 +117,12 @@ const int RegularExpressionNSUBEXP = 10;
  * characters "ab"  followed  by  numbers  in  the  series  one
  * through nine.
  *
- * There are three constructors for cmRegularExpression.  One just creates an
- * empty cmRegularExpression object.  Another creates a cmRegularExpression
+ * There are three constructors for RegularExpression.  One just creates an
+ * empty RegularExpression object.  Another creates a RegularExpression
  * object and initializes it with a regular expression that is given in the
- * form of a char*.  The third takes a reference to a cmRegularExpression
+ * form of a char*.  The third takes a reference to a RegularExpression
  * object as an argument and creates an object initialized with the
- * information from the given cmRegularExpression object.
+ * information from the given RegularExpression object.
  *
  * The  find  member function  finds   the  first  occurence   of  the regualr
  * expression of that object in the string given to find as an argument.  Find
