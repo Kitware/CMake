@@ -106,7 +106,13 @@ private:
   void OutputMakefile(const char* file);
   void OutputMakeFlags(std::ostream&);
   void OutputTargetRules(std::ostream& fout);
-  void OutputLinkLibraries(std::ostream&, const char*, const cmTarget &);
+  void OutputLinkLibraries(std::ostream&, const char* name, const cmTarget &);
+
+  void OutputSharedLibraryRule(std::ostream&, const char* name, const cmTarget &);
+  void OutputModuleLibraryRule(std::ostream&, const char* name, const cmTarget &);
+  void OutputStaticLibraryRule(std::ostream&, const char* name, const cmTarget &);
+  void OutputExecutableRule(std::ostream&, const char* name, const cmTarget &);
+  
   void OutputTargets(std::ostream&);
   void OutputSubDirectoryRules(std::ostream&);
   void OutputDependInformation(std::ostream&);
@@ -127,7 +133,10 @@ private:
                       const char* comment,
                       const char* target,
                       const char* depends, 
-                      const char* command);
+                      const char* command,
+                      const char* command2 = 0,
+                      const char* command3 = 0,
+                      const char* command4 = 0);
 private:
   bool m_CacheOnly;
   bool m_Recurse;

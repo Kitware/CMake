@@ -512,6 +512,113 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
 }
 
 
+void cmUnixMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,  
+                                                      const char* name, 
+                                                      const cmTarget &t)
+{
+  std::string target = m_LibraryOutputPath + "lib" + name + "$(SHLIB_SUFFIX)";
+  std::string depend = "${";
+  depend += name;
+  depend += "_SRC_OBJS} ${" + std::string(name) + "_DEPEND_LIBS}";
+  std::string command = "rm -f lib";
+  command += name;
+  command += "$(SHLIB_SUFFIX)";
+  std::string command2 = "$(CMAKE_CXX_COMPILER)  ${CMAKE_SHLIB_LINK_FLAGS} "
+    "${CMAKE_SHLIB_BUILD_FLAGS} ${CMAKE_CXXFLAGS} -o \\\n";
+  command2 += "\t  ";
+  command2 += m_LibraryOutputPath + "lib" + std::string(name) + "$(SHLIB_SUFFIX) \\\n";
+  command2 += "\t  ${" + std::string(name) + "_SRC_OBJS} ";
+  std::strstream linklibs;
+  this->OutputLinkLibraries(linklibs, name, t);
+  linklibs << std::ends;
+  command2 += linklibs.str();
+  delete [] linklibs.str();
+  this->OutputMakeRule(fout, "rules for a shared library",
+                       target.c_str(),
+                       depend.c_str(),
+                       command.c_str(),
+                       command2.c_str());
+}
+
+void cmUnixMakefileGenerator::OutputModuleLibraryRule(std::ostream& fout, 
+                                                      const char* name, 
+                                                      const cmTarget &t)
+{
+  std::string target = m_LibraryOutputPath + "lib" + std::string(name) + "$(MODULE_SUFFIX)";
+  std::string depend =  "${";
+  depend += std::string(name) + "_SRC_OBJS} ${" + std::string(name) + "_DEPEND_LIBS}";
+  std::string command = "rm -f lib" + std::string(name) + "$(MODULE_SUFFIX)";
+  std::string command2 = "$(CMAKE_CXX_COMPILER)  ${CMAKE_MODULE_LINK_FLAGS} "
+    "${CMAKE_MODULE_BUILD_FLAGS} ${CMAKE_CXXFLAGS} -o \\\n";
+  command2 += "\t  ";
+  command2 += m_LibraryOutputPath + "lib" + std::string(name) + "$(MODULE_SUFFIX) \\\n";
+  command2 += "\t  ${" + std::string(name) + "_SRC_OBJS} ";
+  std::strstream linklibs;
+  this->OutputLinkLibraries(linklibs, std::string(name).c_str(), t);
+  linklibs << std::ends;
+  command2 += linklibs.str();
+  delete [] linklibs.str();
+  this->OutputMakeRule(fout, "rules for a shared module library",
+                       target.c_str(),
+                       depend.c_str(),
+                       command.c_str(),
+                       command2.c_str()); 
+}
+
+
+void cmUnixMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout,
+                                                      const char* name, 
+                                                      const cmTarget & t)
+{
+  std::string target = m_LibraryOutputPath + "lib" + std::string(name) + ".a";
+  std::string depend = "${";
+  depend += std::string(name) + "_SRC_OBJS}";
+  std::string command = "${CMAKE_AR} ${CMAKE_AR_ARGS} ";
+  command += m_LibraryOutputPath;
+  command += "lib";
+  command += name;
+  command += ".a ${";
+  command += std::string(name) + "_SRC_OBJS}";
+  std::string command2 = "${CMAKE_RANLIB} ";
+  command2 += m_LibraryOutputPath;
+  command2 += "lib";
+  command2 += std::string(name) + ".a";
+  std::string comment = "rule to build static library: ";
+  comment += name;
+  this->OutputMakeRule(fout,
+                       comment.c_str(),
+                       target.c_str(),
+                       depend.c_str(),
+                       command.c_str(),
+                       command2.c_str());
+}
+
+void cmUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
+                                                   const char* name,
+                                                   const cmTarget & t)
+{
+  std::string target = m_ExecutableOutputPath + name;
+  std::string depend = "${";
+  depend += std::string(name) + "_SRC_OBJS} ${" + std::string(name) + "_DEPEND_LIBS}";
+  std::string command = 
+    "${CMAKE_CXX_COMPILER} ${CMAKE_SHLIB_LINK_FLAGS} ${CMAKE_CXXFLAGS} ";
+  command += "${" + std::string(name) + "_SRC_OBJS} ";
+  std::strstream linklibs;
+  this->OutputLinkLibraries(linklibs, 0, t);
+  linklibs << std::ends;
+  command += linklibs.str();
+  command += " -o " + m_ExecutableOutputPath + name;
+  std::string comment = "rule to build executable: ";
+  comment += name;
+  this->OutputMakeRule(fout, 
+                       comment.c_str(),
+                       target.c_str(),
+                       depend.c_str(),
+                       command.c_str());
+}
+
+  
+
 void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
 {
   // for each target
@@ -519,64 +626,26 @@ void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
   for(cmTargets::const_iterator l = tgts.begin(); 
       l != tgts.end(); l++)
     {
-    if (l->second.GetType() == cmTarget::STATIC_LIBRARY)
+    switch(l->second.GetType())
       {
-      fout << "#---------------------------------------------------------\n";
-      fout << "# rules for a static library\n";
-      fout << "#\n";
-      fout << m_LibraryOutputPath << "lib" << l->first << ".a: ${" << 
-        l->first << "_SRC_OBJS} \n";
-      fout << "\t${CMAKE_AR} ${CMAKE_AR_ARGS} "
-           << m_LibraryOutputPath << "lib" << l->first << ".a ${" << 
-        l->first << "_SRC_OBJS} \n";
-      fout << "\t${CMAKE_RANLIB} "
-           << m_LibraryOutputPath << "lib" << l->first << ".a\n";
-      fout << "\n\n";
-      }
-    else if (l->second.GetType() == cmTarget::SHARED_LIBRARY)
-      {
-      fout << "#---------------------------------------------------------\n";
-      fout << "# rules for a shared library\n";
-      fout << "#\n";
-      fout << m_LibraryOutputPath << "lib" << l->first << "$(SHLIB_SUFFIX):  ${" << 
-        l->first << "_SRC_OBJS} ${" << l->first << "_DEPEND_LIBS} \n";
-      fout << "\trm -f lib" << l->first << "$(SHLIB_SUFFIX)\n";
-      fout << "\t$(CMAKE_CXX_COMPILER)  ${CMAKE_SHLIB_LINK_FLAGS} "
-        "${CMAKE_SHLIB_BUILD_FLAGS} ${CMAKE_CXXFLAGS} -o \\\n";
-      fout << "\t  " << m_LibraryOutputPath << "lib" << l->first << "$(SHLIB_SUFFIX) \\\n";
-      fout << "\t  ${" << l->first << 
-        "_SRC_OBJS} ";
-      this->OutputLinkLibraries(fout, l->first.c_str(), l->second);
-      fout << "\n\n";
-      }
-    else if (l->second.GetType() == cmTarget::MODULE_LIBRARY)
-      {
-      fout << "#---------------------------------------------------------\n";
-      fout << "# rules for a shared module library\n";
-      fout << "#\n";
-      fout << m_LibraryOutputPath << "lib" << l->first << "$(MODULE_SUFFIX):  ${" << 
-        l->first << "_SRC_OBJS} ${" << l->first << "_DEPEND_LIBS} \n";
-      fout << "\trm -f lib" << l->first << "$(MODULE_SUFFIX)\n";
-      fout << "\t$(CMAKE_CXX_COMPILER)  ${CMAKE_MODULE_LINK_FLAGS} "
-        "${CMAKE_MODULE_BUILD_FLAGS} ${CMAKE_CXXFLAGS} -o \\\n";
-      fout << "\t  " << m_LibraryOutputPath << "lib" << l->first << "$(MODULE_SUFFIX) \\\n";
-      fout << "\t  ${" << l->first << 
-        "_SRC_OBJS} ";
-      this->OutputLinkLibraries(fout, l->first.c_str(), l->second);
-      fout << "\n\n";
-      }
-    else if ((l->second.GetType() == cmTarget::EXECUTABLE)
-             || (l->second.GetType() == cmTarget::WIN32_EXECUTABLE))
-      {
-      fout << m_ExecutableOutputPath << l->first << ": ${" << 
-        l->first << "_SRC_OBJS} ${" << l->first << "_DEPEND_LIBS}\n";
-      fout << "\t${CMAKE_CXX_COMPILER} ${CMAKE_SHLIB_LINK_FLAGS} ${CMAKE_CXXFLAGS} "
-           << "${" << l->first << "_SRC_OBJS} ";
-      this->OutputLinkLibraries(fout, NULL,l->second);
-      fout << " -o " << m_ExecutableOutputPath << l->first << "\n\n";
+      case cmTarget::STATIC_LIBRARY:
+        this->OutputStaticLibraryRule(fout, l->first.c_str(), l->second);
+        break;
+      case cmTarget::SHARED_LIBRARY:
+        this->OutputSharedLibraryRule(fout, l->first.c_str(), l->second);
+        break;
+      case cmTarget::MODULE_LIBRARY:
+        this->OutputModuleLibraryRule(fout, l->first.c_str(), l->second);
+        break;
+      case cmTarget::EXECUTABLE:
+      case cmTarget::WIN32_EXECUTABLE:
+        this->OutputExecutableRule(fout, l->first.c_str(), l->second);
+        break;
+        
       }
     }
 }
+
 
 
 // For each target that is an executable or shared library, generate
@@ -768,9 +837,12 @@ void cmUnixMakefileGenerator::OutputMakeFlags(std::ostream& fout)
     }
   fout << m_Makefile->GetDefineFlags();
   fout << "\n\n";
-  fout << "default_target: all\n\n";
-  // see if there are files to compile in this makefile
-  // These are used for both libraries and executables
+  this->OutputMakeRule(fout, 
+                       "Default target executed when no arguments are given to make",
+                       "default_target",
+                       0,
+                       "${MAKE} -${MAKEFLAGS} cmake.depends",
+                       "${MAKE} -${MAKEFLAGS} all");
 }
 
 
@@ -1425,7 +1497,10 @@ void cmUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
                                              const char* comment,
                                              const char* target,
                                              const char* depends, 
-                                             const char* command)
+                                             const char* command,
+                                             const char* command2,
+                                             const char* command3,
+                                             const char* command4)
 {
   if(!target)
     {
@@ -1438,7 +1513,9 @@ void cmUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
     {
     replace = comment;
     m_Makefile->ExpandVariablesInString(replace);
+    fout << "#---------------------------------------------------------\n";
     fout << "# " << comment;
+    fout << "\n#\n";
     }
   fout << "\n";
   replace = target;
@@ -1455,10 +1532,27 @@ void cmUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
     {
     replace = command;
     m_Makefile->ExpandVariablesInString(replace);
-    fout << "\t" << replace.c_str() << "\n\n";
+    fout << "\t" << replace.c_str() << "\n";
+    }
+  if(command2)
+    {
+    replace = command2;
+    m_Makefile->ExpandVariablesInString(replace);
+    fout << "\t" << replace.c_str() << "\n";
+    }
+  if(command3)
+    {
+    replace = command3;
+    m_Makefile->ExpandVariablesInString(replace);
+    fout << "\t" << replace.c_str() << "\n";
+    }
+  if(command4)
+    {
+    replace = command4;
+    m_Makefile->ExpandVariablesInString(replace);
+    fout << "\t" << replace.c_str() << "\n";
     }
   fout << "\n";
-
 }
 
 
