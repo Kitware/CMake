@@ -145,7 +145,7 @@ IF(BUILD_TESTING)
   # add testing targets
   IF(TCL_TCLSH)
     ADD_CUSTOM_TARGET(Experimental 
-    ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Start Configure Build Test)
+    ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Start Update Configure Build Test)
     ADD_CUSTOM_TARGET(ExperimentalSubmit 
     ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Submit)
 
@@ -155,6 +155,10 @@ IF(BUILD_TESTING)
     # Make targets for Experimental builds
     ADD_CUSTOM_TARGET(ExperimentalStart
     ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Start)
+    ADD_CUSTOM_TARGET(ExperimentalUpdate   
+    ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Start Update)
+    ADD_CUSTOM_TARGET(ExperimentalConfigure   
+    ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Start Configure)
     ADD_CUSTOM_TARGET(ExperimentalBuild   
     ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Start Build)
     ADD_CUSTOM_TARGET(ExperimentalTest 
