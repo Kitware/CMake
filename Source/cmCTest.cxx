@@ -27,8 +27,13 @@
 #include <stdio.h>
 #include <time.h>
 #include <math.h>
+#include <float.h>
 
-#define FIXNUM(x) ((isnan(x))?((0)):((isinf(x))?(0):(x)))
+#ifdef _WIN32
+# define FIXNUM(x) (_finite(x)?(x):(0))
+#else
+# define FIXNUM(x) (finite(x)?(x):(0))
+#endif
 
 #ifdef HAVE_CURL
 static struct tm* GetNightlyTime(std::string str)
