@@ -61,6 +61,11 @@ public:
   std::string m_FullPath;
   
   /**
+   * Full path not including file name.
+   */
+  std::string m_PathOnly;
+  
+  /**
    * Name used to #include this file.
    */
   std::string m_IncludeName;
@@ -154,8 +159,11 @@ protected:
   cmsys::RegularExpression m_IncludeFileRegularExpression;
   cmsys::RegularExpression m_ComplainFileRegularExpression;
   std::vector<std::string> m_IncludeDirectories;
+  typedef std::map<cmStdString, cmStdString> FileToPathMap;
+  typedef std::map<cmStdString, FileToPathMap> DirectoryToFileToPathMap;
   typedef std::map<cmStdString, cmDependInformation*> DependInformationMap;
   DependInformationMap m_DependInformationMap;
+  DirectoryToFileToPathMap m_DirectoryToFileToPathMap;
 };
 
 #endif

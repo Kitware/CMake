@@ -230,10 +230,7 @@ void cmMakeDepend::DependWalk(cmDependInformation* info)
 void cmMakeDepend::AddDependency(cmDependInformation* info, const char* file)
 {
   cmDependInformation* dependInfo = 
-    this->GetDependInformation(file,
-                               cmSystemTools::GetFilenamePath(
-                                 cmSystemTools::CollapseFullPath(
-                                   info->m_FullPath.c_str())).c_str());
+    this->GetDependInformation(file, info->m_PathOnly.c_str());
   this->GenerateDependInformation(dependInfo);
   info->AddDependencies(dependInfo);
 }
@@ -257,6 +254,7 @@ cmDependInformation* cmMakeDepend::GetDependInformation(const char* file,
     // Didn't find an instance.  Create a new one and save it.
     cmDependInformation* info = new cmDependInformation;
     info->m_FullPath = fullPath;
+    info->m_PathOnly = cmSystemTools::GetFilenamePath(fullPath.c_str());
     info->m_IncludeName = file;
     m_DependInformationMap[fullPath] = info;
     return info;
@@ -291,9 +289,31 @@ void cmMakeDepend::GenerateMakefileDependencies()
 // find the full path to fname by searching the m_IncludeDirectories array
 std::string cmMakeDepend::FullPath(const char* fname, const char *extraPath)
 {
+  DirectoryToFileToPathMap::iterator m;
+  if(extraPath)
+    {
+    m = m_DirectoryToFileToPathMap.find(extraPath);
+    }
+  else
+    {
+    m = m_DirectoryToFileToPathMap.find("");
+    }
+  
+  if(m != m_DirectoryToFileToPathMap.end())
+    {
+    FileToPathMap& map = m->second;
+    FileToPathMap::iterator p = map.find(fname);
+    if(p != map.end())
+      {
+      return p->second;
+      }
+    }
+
   if(cmSystemTools::FileExists(fname))
     {
-      return std::string(cmSystemTools::CollapseFullPath(fname));
+    std::string fp = cmSystemTools::CollapseFullPath(fname);
+    m_DirectoryToFileToPathMap[extraPath? extraPath: ""][fname] = fp;
+    return fp;
     }
   
   for(std::vector<std::string>::iterator i = m_IncludeDirectories.begin();
@@ -307,7 +327,9 @@ std::string cmMakeDepend::FullPath(const char* fname, const char *extraPath)
     path = path + fname;
     if(cmSystemTools::FileExists(path.c_str()))
       {
-      return cmSystemTools::CollapseFullPath(path.c_str());
+      std::string fp = cmSystemTools::CollapseFullPath(path.c_str());
+      m_DirectoryToFileToPathMap[extraPath? extraPath: ""][fname] = fp;
+      return fp;
       }
     }
 
@@ -321,7 +343,9 @@ std::string cmMakeDepend::FullPath(const char* fname, const char *extraPath)
     path = path + fname;
     if(cmSystemTools::FileExists(path.c_str()))
       {
-      return cmSystemTools::CollapseFullPath(path.c_str());
+      std::string fp = cmSystemTools::CollapseFullPath(path.c_str());
+      m_DirectoryToFileToPathMap[extraPath][fname] = fp;
+      return fp;
       }
     }
   

@@ -1904,8 +1904,11 @@ void cmLocalUnixMakefileGenerator::OutputCheckDepends(std::ostream& fout)
                 (*source)->GetDepends().begin();
               dep != (*source)->GetDepends().end(); ++dep)
             {
-            std::string dependfile = 
-              cmSystemTools::ConvertToOutputPath(cmSystemTools::CollapseFullPath(dep->c_str()).c_str());
+            // do not call CollapseFullPath on dep here, because it already
+            // has been done because m_FullPath on cmDependInformation
+            // always is it called.  If it is called here, network builds are
+            // very slow because of the number of stats
+            std::string dependfile = cmSystemTools::ConvertToOutputPath(dep->c_str());
             // use the lower path function to create uniqe names
             std::string lowerpath = this->LowerCasePath(dependfile.c_str());
             if(emittedLowerPath.insert(lowerpath).second)
