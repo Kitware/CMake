@@ -198,10 +198,10 @@ bool cmSystemTools::ParseFunction(std::ifstream& fin,
   if(fin.getline(inbuffer, BUFFER_SIZE ) )
     {
     cmRegularExpression blankLine("^$");
-    cmRegularExpression comment("^#.*");
-    cmRegularExpression oneLiner("[ \t]*([A-Za-z_0-9]*).*\\((.*)\\)");
-    cmRegularExpression multiLine("[ \t]*([A-Za-z_0-9]*).*\\((.*)");
-    cmRegularExpression lastLine("(.*)\\)");
+    cmRegularExpression comment("^#.*$");
+    cmRegularExpression oneLiner("^[ \t]*([A-Za-z_0-9]*)[ \t]*\\((.*)\\)[ \t]*$");
+    cmRegularExpression multiLine("^[ \t]*([A-Za-z_0-9]*)[ \t]*\\((.*)$");
+    cmRegularExpression lastLine("^(.*)\\)[ \t]*$");
 
     // BEGIN VERBATIM JUNK SHOULD BE REMOVED
     cmRegularExpression verbatim("BEGIN MAKE VERBATIM");
@@ -294,25 +294,52 @@ bool cmSystemTools::ParseFunction(std::ifstream& fin,
 void cmSystemTools::GetArguments(std::string& line,
                                  std::vector<std::string>& arguments)
 {
-  cmRegularExpression argument("[\t ]*([-/\\.\\\\{}\\$A-Za-z_0-9]+)[\t ]*");
-  cmRegularExpression argumentWithSpaces("[\t ]*\"([-\\. /\\\\{}\\$A-Za-z_0-9]+)\"[\t ]*");
-  std::string arg(" ");
-  while(arg.length() )
-    {
-    arg = "";
-    long endpos;
+  // Match a normal argument (not quoted, no spaces).
+  cmRegularExpression normalArgument("[\t ]*([^\" \t]+)[\t ]*");
+  // Match a quoted argument (surrounded by double quotes, spaces allowed).
+  cmRegularExpression quotedArgument("[\t ]*(\"[^\"]*\")[\t ]*");
 
-    if (argumentWithSpaces.find(line.c_str()))
+  bool done = false;
+  while(!done)
+    {
+    std::string arg;
+    long endpos;
+    bool foundQuoted = quotedArgument.find(line.c_str());
+    bool foundNormal = normalArgument.find(line.c_str());
+
+    if(foundQuoted && foundNormal)
       {
-      arg = argumentWithSpaces.match(1);
-      endpos = argumentWithSpaces.end(1);
-      }
-    else if(argument.find(line.c_str()))
+      // Both matches were found.  Take the earlier one.
+      if(normalArgument.start(1) < quotedArgument.start(1))
+        {
+        arg = normalArgument.match(1);
+        endpos = normalArgument.end(1);
+        }
+      else
+        {
+        arg = quotedArgument.match(1);
+        endpos = quotedArgument.end(1);
+        // Strip off the double quotes on the ends.
+        arg = arg.substr(1, arg.length()-2);
+        }
+      }    
+    else if (foundQuoted)
       {
-      arg = argument.match(1);
-      endpos = argument.end(1);
+      arg = quotedArgument.match(1);
+      endpos = quotedArgument.end(1);
+      // Strip off the double quotes on the ends.
+      arg = arg.substr(1, arg.length()-2);
       }
-    if(arg.length())
+    else if(foundNormal)
+      {
+      arg = normalArgument.match(1);
+      endpos = normalArgument.end(1);
+      }
+    else
+      {
+      done = true;
+      }
+    if(!done)
       {
       arguments.push_back(arg);
       line = line.substr(endpos, line.length() - endpos);
