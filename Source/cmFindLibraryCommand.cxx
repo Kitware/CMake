@@ -71,6 +71,7 @@ bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn)
         }
       else
         {
+        cmSystemTools::ExpandRegistryValues(args[j]);
         // Glob the entry in case of wildcards.
         cmSystemTools::GlobDirs(args[j].c_str(), path);
         }
