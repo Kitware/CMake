@@ -99,6 +99,10 @@ public:
 protected:
   std::string GetSupportDirectory(const char*);
   bool FindVcIncludeFlags();
+  bool FindGccIncludeFlags();
+  bool FindMproIncludeFlags();
+  bool CompilerIsGCC() const;
+  bool CompilerIsMipsPro() const;
   
 private:
   std::string m_SupportDir;

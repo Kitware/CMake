@@ -78,6 +78,25 @@ bool cmConfigureGccXmlCommand::InitialPass(std::vector<std::string>& args)
 #else
   // On UNIX, we have to determine which compiler is being used, and
   // attempt to use that compiler's support directory.
+  if(this->CompilerIsGCC())
+    {
+    if(!this->FindGccIncludeFlags())
+      {
+      return false;
+      }
+    }
+  else if(this->CompilerIsMipsPro())
+    {
+    if(!this->FindMproIncludeFlags())
+      {
+      return false;
+      }
+    }
+  else
+    {
+    this->SetError("Compiler is not supported by GCC-XML!");
+    return false;
+    }
 #endif
   
   // Add the cache entry with the flags found.
@@ -121,6 +140,7 @@ std::string cmConfigureGccXmlCommand::GetSupportDirectory(const char* exeLoc)
   return dir;
 }
 
+
 /**
  * Find the flags needed to use the Visual C++ support library.
  */
@@ -131,7 +151,7 @@ bool cmConfigureGccXmlCommand::FindVcIncludeFlags()
   
   if(!flagsFile)
     {
-    std::string err = "Cannot open GCC-XML flags file \""+fname+"\"";
+    std::string err = "Cannot open GCC-XML flags file \""+fname+"\".";
     this->SetError(err.c_str());
     return false;
     }
@@ -141,7 +161,7 @@ bool cmConfigureGccXmlCommand::FindVcIncludeFlags()
   flagsFile.getline(buf, 4096);
   if(!flagsFile)
     {
-    std::string err = "Error reading from GCC-XML flags file \""+fname+"\"";
+    std::string err = "Error reading from GCC-XML flags file \""+fname+"\".";
     this->SetError(err.c_str());
     return false;
     }
@@ -149,4 +169,93 @@ bool cmConfigureGccXmlCommand::FindVcIncludeFlags()
   m_Flags = buf;
   
   return true;
+}
+
+
+/**
+ * Find the flags needed to use the GCC support library.
+ */
+bool cmConfigureGccXmlCommand::FindGccIncludeFlags()
+{
+  std::string supportDir = m_SupportDir+"/GccInclude";
+  if(!cmSystemTools::FileIsDirectory(supportDir.c_str()))
+    {
+    std::string err = "No GCC support library for GCC-XML.  Couldn't find directory \""+supportDir+"\".";
+    this->SetError(err.c_str());
+    return false;
+    }
+  
+  // Try to run the find_gcc_options command.
+  std::string command = supportDir+"/find_gcc_options";
+  std::string flags;
+  if(!cmSystemTools::RunCommand(command.c_str(), flags))
+    {
+    this->SetError("Could not run find_gcc_options!");
+    return false;
+    }
+  
+  // Use the result of the command as the flags.
+  m_Flags = flags;
+  
+  return true;
+}
+
+
+/**
+ * Find the flags needed to use the MIPSpro support library.
+ */
+bool cmConfigureGccXmlCommand::FindMproIncludeFlags()
+{
+  std::string supportDir = m_SupportDir+"/MproInclude";
+  if(!cmSystemTools::FileIsDirectory(supportDir.c_str()))
+    {
+    std::string err = "No MIPSpro support library for GCC-XML.  Couldn't find directory \""+supportDir+"\".";
+    this->SetError(err.c_str());
+    return false;
+    }
+  
+  // Try to run the find_mpro_options command.
+  std::string command = supportDir+"/find_mpro_options";
+  std::string flags;
+  if(!cmSystemTools::RunCommand(command.c_str(), flags))
+    {
+    this->SetError("Could not run find_mpro_options!");
+    return false;
+    }
+  
+  // Use the result of the command as the flags.  Also prefix on the
+  // include path flag for the support directory.
+  m_Flags = "-I"+supportDir+" "+flags;
+  
+  return true;
+}
+
+
+/**
+ * Determine whether the compiler is GCC.
+ */
+bool cmConfigureGccXmlCommand::CompilerIsGCC() const
+{
+  const char* isGNU = m_Makefile->GetDefinition("CMAKE_COMPILER_IS_GNUCXX");
+  return (isGNU && !cmSystemTools::IsOff(isGNU));
+}
+
+
+/**
+ * Determine whether the compiler is MipsPro.
+ */
+bool cmConfigureGccXmlCommand::CompilerIsMipsPro() const
+{
+  const char* compiler = m_Makefile->GetDefinition("CMAKE_CXX_COMPILER");
+  if(!compiler) { return false; }
+  std::string command = compiler;
+  command += " -version";
+  std::string output;
+  if(!cmSystemTools::RunCommand(command.c_str(), output, false))
+    { return false; }
+  if(output.find("MIPSpro") != std::string::npos)
+    {
+    return true;
+    }
+  return false;
 }
