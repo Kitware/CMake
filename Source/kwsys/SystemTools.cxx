@@ -1016,6 +1016,29 @@ bool SystemTools::CopyFileAlways(const char* source, const char* destination)
   return true;
 }
 
+// return size of file; also returns zero if no file exists
+unsigned long SystemTools::FileLength(const char* filename)
+{
+  struct stat fs;
+  if (stat(filename, &fs) != 0) 
+    {
+      return 0;
+    }
+  else
+    {
+      return fs.st_size;
+    }
+}
+
+int SystemTools::Strucmp(const char *s1, const char *s2)
+{
+#ifdef _WIN32
+  return _stricmp(s1,s2);
+#else
+  return strcasecmp(s1,s2);
+#endif
+}
+
 // return true if the file exists
 long int SystemTools::ModifiedTime(const char* filename)
 {
@@ -1040,6 +1063,45 @@ kwsys_std::string SystemTools::GetLastSystemError()
 bool SystemTools::RemoveFile(const char* source)
 {
   return unlink(source) != 0 ? false : true;
+}
+
+char *SystemTools
+::RealPath(const char *path, char *resolved_path)
+{
+#if defined(_WIN32)
+  char pathpart[itk::IOCommon::ITK_MAXPATHLEN];
+  strcpy(pathpart,path);
+  char fnamepart[itk::IOCommon::ITK_MAXPATHLEN];
+  char *slash;
+
+  if((slash = strrchr(pathpart,'/')) == NULL)
+    {
+      slash = strrchr(pathpart,'\\');
+    }
+
+  if(slash == NULL) // no path part, so just use current dir.
+    {
+      Getcwd(pathpart,sizeof(pathpart));
+      strcpy(fnamepart,path);
+    } 
+  else // change directory to path part, getcwd to find OS resolved path
+    {
+      *slash = '\0';
+      strcpy(fnamepart,slash+1);
+
+      char savedir[itk::IOCommon::ITK_MAXPATHLEN];
+      Getcwd(savedir,sizeof(savedir));
+      Chdir(pathpart);
+      Getcwd(pathpart,sizeof(pathpart));
+      Chdir(savedir);
+    }
+  strcpy(resolved_path,pathpart);
+  strcat(resolved_path,"/");
+  strcat(resolved_path,fnamepart);
+  return resolved_path;
+#else
+  return realpath(path,resolved_path);
+#endif
 }
 
 /**
