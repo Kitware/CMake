@@ -106,7 +106,7 @@ void cmLocalUnixMakefileGenerator2::GenerateMakefile()
   {
   std::vector<std::string> depends;
   std::vector<std::string> commands;
-  //commands.push_back(runRule);
+  commands.push_back(runRule);
   commands.push_back(depRule);
   commands.push_back(allRule);
   this->OutputMakeRule(
@@ -343,6 +343,46 @@ cmLocalUnixMakefileGenerator2
   this->OutputMakeRule(ruleFileStream, depComment.c_str(), depTarget.c_str(),
                        depends, commands);
   }
+
+  // Write the requires rule.
+  {
+  std::vector<std::string> depends;
+  std::vector<std::string> commands;
+  std::string reqComment = "requirements for ";
+  reqComment += target.GetName();
+  std::string reqTarget = target.GetName();
+  reqTarget += ".requires";
+  for(std::vector<std::string>::const_iterator obj = objects.begin();
+      obj != objects.end(); ++obj)
+    {
+    depends.push_back(*obj);
+    }
+  depends.push_back(ruleFileName);
+  this->OutputMakeRule(ruleFileStream, reqComment.c_str(), reqTarget.c_str(),
+                       depends, commands);
+  }
+
+#if 0
+  // Write the build rule.
+  {
+  std::vector<std::string> depends;
+  std::vector<std::string> commands;
+  std::string buildComment = " target ";
+  buildComment += objName;
+  for(std::vector<std::string>::const_iterator obj = objects.begin();
+      obj != objects.end(); ++obj)
+    {
+    depends.push_back(*obj);
+    }
+  depends.push_back(ruleFileName);
+  std::string touchCmd = "@touch ";
+  touchCmd += this->ConvertToRelativeOutputPath(obj.c_str());
+  // TODO: Construct build rule and append command.
+  commands.push_back(touchCmd);
+  this->OutputMakeRule(ruleFileStream, buildComment.c_str(), obj.c_str(),
+                       depends, commands);
+  }
+#endif
 }
 
 //----------------------------------------------------------------------------
@@ -398,13 +438,13 @@ cmLocalUnixMakefileGenerator2
     << "\n\n";
 
   // Write the dependency generation rule.
+  std::string depTarget = obj;
+  depTarget += ".depends";
   {
   std::vector<std::string> depends;
   std::vector<std::string> commands;
   std::string depComment = "dependencies for ";
   depComment += objName;
-  std::string depTarget = obj;
-  depTarget += ".depends";
   depends.push_back(source.GetFullPath());
   depends.push_back(ruleFileName);
   std::string touchCmd = "@touch ";
@@ -412,6 +452,22 @@ cmLocalUnixMakefileGenerator2
   // TODO: Construct dependency generation rule and append command.
   commands.push_back(touchCmd);
   this->OutputMakeRule(ruleFileStream, depComment.c_str(), depTarget.c_str(),
+                       depends, commands);
+  }
+
+  // Write the build rule.
+  {
+  std::vector<std::string> depends;
+  std::vector<std::string> commands;
+  std::string buildComment = "object ";
+  buildComment += objName;
+  depends.push_back(depTarget);
+  depends.push_back(ruleFileName);
+  std::string touchCmd = "@touch ";
+  touchCmd += this->ConvertToRelativeOutputPath(obj.c_str());
+  // TODO: Construct build rule and append command.
+  commands.push_back(touchCmd);
+  this->OutputMakeRule(ruleFileStream, buildComment.c_str(), obj.c_str(),
                        depends, commands);
   }
 }
