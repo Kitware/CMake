@@ -117,6 +117,23 @@ IF(CMAKE_ANSI_CFLAGS)
 ENDIF(CMAKE_ANSI_CFLAGS)
 
 #-----------------------------------------------------------------------------
+# Adjust compiler flags for some platforms.
+IF(NOT CMAKE_COMPILER_IS_GNUCXX)
+  IF(CMAKE_SYSTEM MATCHES "OSF1-V.*")
+    STRING(REGEX MATCH "-timplicit_local"
+      KWSYS_CXX_FLAGS_HAVE_IMPLICIT_LOCAL "${CMAKE_CXX_FLAGS}")
+    STRING(REGEX MATCH "-no_implicit_include"
+      KWSYS_CXX_FLAGS_HAVE_NO_IMPLICIT_INCLUDE "${CMAKE_CXX_FLAGS}")
+    IF(NOT KWSYS_CXX_FLAGS_HAVE_IMPLICIT_LOCAL)
+      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -timplicit_local")
+    ENDIF(NOT KWSYS_CXX_FLAGS_HAVE_IMPLICIT_LOCAL)
+    IF(NOT KWSYS_CXX_FLAGS_HAVE_NO_IMPLICIT_INCLUDE)
+      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -no_implicit_include")
+    ENDIF(NOT KWSYS_CXX_FLAGS_HAVE_NO_IMPLICIT_INCLUDE)
+  ENDIF(CMAKE_SYSTEM MATCHES "OSF1-V.*")
+ENDIF(NOT CMAKE_COMPILER_IS_GNUCXX)
+
+#-----------------------------------------------------------------------------
 # Configure the standard library header wrappers based on compiler's
 # capabilities and parent project's request.  Enforce 0/1 as only
 # possible values for configuration into Configure.hxx.
