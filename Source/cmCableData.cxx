@@ -22,13 +22,14 @@
  * The cmCableData instance is owned by one cmCableCommand, which is given
  * to this constructor.
  */
-cmCableData::cmCableData(const cmCableCommand* owner):
+cmCableData::cmCableData(const cmCableCommand* owner,
+                         const std::string& configurationFile):
   m_Owner(owner),
   m_Indentation(0),
   m_Package(NULL),
   m_PackageNamespaceDepth(0)
 {
-  this->OpenOutputFile("cable_config.xml");
+  this->OpenOutputFile(configurationFile);
 }
 
 

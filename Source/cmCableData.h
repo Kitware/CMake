@@ -28,7 +28,7 @@ class cmCablePackageCommand;
 class cmCableData
 {
 public:
-  cmCableData(const cmCableCommand*);
+  cmCableData(const cmCableCommand*, const std::string&);
   ~cmCableData();
   
   /**

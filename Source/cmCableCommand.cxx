@@ -68,5 +68,7 @@ void cmCableCommand::SetupCableData()
   // We didn't find another cmCableCommand with a valid cmCableData.
   // We must allocate the new cmCableData ourselves, and with this
   // command as its owner.
-  m_CableData = new cmCableData(this);
+  std::string pathName = m_Makefile->GetStartOutputDirectory();
+  pathName += "/cable_config.xml";
+  m_CableData = new cmCableData(this, pathName);
 }
