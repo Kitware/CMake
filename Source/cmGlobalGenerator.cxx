@@ -34,6 +34,155 @@ cmGlobalGenerator::~cmGlobalGenerator()
   m_LocalGenerators.clear();
 }
 
+
+void cmGlobalGenerator::EnableLanguage(const char* lang, 
+                                                   cmMakefile *mf)
+{
+  if(m_FindMakeProgramFile.size() == 0)
+    {
+    cmSystemTools::Error(
+      "Generator implementation error, "
+      "all generators must specify m_FindMakeProgramFile");
+    }
+  std::string root = mf->GetDefinition("CMAKE_ROOT");
+  if(!mf->GetDefinition("CMAKE_MAKE_PROGRAM")
+     || cmSystemTools::IsOff(mf->GetDefinition("CMAKE_MAKE_PROGRAM")))
+    {
+    std::string setMakeProgram = root;
+    setMakeProgram += "/Modules/";
+    setMakeProgram += m_FindMakeProgramFile;
+    mf->ReadListFile(0, setMakeProgram.c_str());
+    } 
+  if(!mf->GetDefinition("CMAKE_MAKE_PROGRAM")
+     || cmSystemTools::IsOff(mf->GetDefinition("CMAKE_MAKE_PROGRAM")))
+    {
+    cmSystemTools::Error("EnableLanguage was unable to find a CMAKE_MAKE_PROGRAM");
+    return;
+    }
+  std::string makeProgram = mf->GetDefinition("CMAKE_MAKE_PROGRAM");
+  if(makeProgram.find(' ') != makeProgram.npos)
+    {
+    cmSystemTools::GetShortPath(makeProgram.c_str(), makeProgram);
+    this->GetCMakeInstance()->AddCacheEntry("CMAKE_MAKE_PROGRAM", makeProgram.c_str(),
+                                            "make program",
+                                            cmCacheManager::FILEPATH);
+    }
+    
+  bool isLocal = m_CMakeInstance->GetLocal();
+  // if no lang specified use CXX
+  if(!lang )
+    {
+    lang = "CXX";
+    }
+  std::string rootBin = mf->GetHomeOutputDirectory();
+  if(m_ConfiguredFilesPath.size())
+    {
+    rootBin = m_ConfiguredFilesPath;
+    }
+  bool needCBackwards = false;
+  bool needCXXBackwards = false;
+  
+  // check for a C compiler and configure it
+  if(!isLocal &&
+     !this->GetLanguageEnabled("C") && 
+     lang[0] == 'C')
+    {
+    if (m_CMakeInstance->GetIsInTryCompile())
+      {
+      cmSystemTools::Error("This should not have happen. "
+                           "If you see this message, you are probably using a "
+                           "broken CMakeLists.txt file or a problematic release of "
+                           "CMake");
+      }
+    needCBackwards = true;
+    // Read the DetermineSystem file
+    std::string systemFile = root;
+    systemFile += "/Modules/CMakeDetermineSystem.cmake";
+    mf->ReadListFile(0, systemFile.c_str());
+    // read determine C compiler
+    std::string determineCFile = root;
+    determineCFile += "/Modules/CMakeDetermineCCompiler.cmake";
+    mf->ReadListFile(0,determineCFile.c_str());
+    this->SetLanguageEnabled("C");
+    } 
+  
+  // check for a CXX compiler and configure it
+  if(!isLocal &&
+     !this->GetLanguageEnabled("CXX") &&
+     strcmp(lang, "CXX") == 0)
+    {
+    needCXXBackwards = true;
+    std::string determineCFile = root;
+    determineCFile += "/Modules/CMakeDetermineCXXCompiler.cmake";
+    mf->ReadListFile(0,determineCFile.c_str());
+    this->SetLanguageEnabled("CXX");
+    }
+ 
+    
+  std::string fpath = rootBin;
+  if(!mf->GetDefinition("CMAKE_SYSTEM_LOADED"))
+    {
+    fpath += "/CMakeSystem.cmake";
+    mf->ReadListFile(0,fpath.c_str());
+    }
+  // if C,  then enable C
+  if(lang[0] == 'C' && !mf->GetDefinition("CMAKE_C_COMPILER_LOADED"))
+    {
+    fpath = rootBin;
+    fpath += "/CMakeCCompiler.cmake";
+    mf->ReadListFile(0,fpath.c_str());
+    }
+  if(strcmp(lang, "CXX") == 0 && !mf->GetDefinition("CMAKE_CXX_COMPILER_LOADED"))
+    {
+    fpath = rootBin;
+    fpath += "/CMakeCXXCompiler.cmake";
+    mf->ReadListFile(0,fpath.c_str());
+    }
+  if(!mf->GetDefinition("CMAKE_SYSTEM_SPECIFIC_INFORMATION_LOADED"))
+    {
+    fpath = root;
+    fpath += "/Modules/CMakeSystemSpecificInformation.cmake";
+    mf->ReadListFile(0,fpath.c_str());
+    }
+  
+  if(!isLocal)
+    {
+    // At this point we should have enough info for a try compile
+    // which is used in the backward stuff
+    if(needCBackwards)
+      {
+      if (!m_CMakeInstance->GetIsInTryCompile())
+        {
+        // for old versions of CMake ListFiles
+        const char* versionValue
+          = mf->GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
+        if (!versionValue || atof(versionValue) <= 1.4)
+          {
+          std::string ifpath = root + "/Modules/CMakeBackwardCompatibilityC.cmake";
+          mf->ReadListFile(0,ifpath.c_str()); 
+          }
+        }
+      }
+    if(needCXXBackwards)
+      {
+      if (!m_CMakeInstance->GetIsInTryCompile())
+        {
+        // for old versions of CMake ListFiles
+        const char* versionValue
+          = mf->GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
+        if (!versionValue || atof(versionValue) <= 1.4)
+          {
+          std::string fpath = root + "/Modules/CMakeBackwardCompatibilityCXX.cmake";
+          mf->ReadListFile(0,fpath.c_str()); 
+          }
+        }
+      }
+    // if we are from the top, always define this
+    mf->AddDefinition("RUN_CONFIGURE", true);
+    }
+}
+
+
 void cmGlobalGenerator::SetLanguageEnabled(const char* l)
 {
   m_LanguageEnabled[l] = true;
@@ -215,19 +364,23 @@ cmLocalGenerator *cmGlobalGenerator::CreateLocalGenerator()
 
 void cmGlobalGenerator::EnableLanguagesFromGenerator(cmGlobalGenerator *gen )
 {
-  // create a temp generator
-  cmLocalGenerator *lg = this->CreateLocalGenerator();
-  lg->GetMakefile()->SetStartDirectory(m_CMakeInstance->GetStartDirectory());
-  lg->GetMakefile()->SetStartOutputDirectory(m_CMakeInstance->GetStartOutputDirectory());
-  lg->GetMakefile()->MakeStartDirectoriesCurrent();
-
-  // for each existing language call enable Language
-  std::map<cmStdString, bool>::const_iterator i = 
-    gen->m_LanguageEnabled.begin();
-  for (;i != gen->m_LanguageEnabled.end(); ++i)
+  this->SetConfiguredFilesPath(
+    gen->GetCMakeInstance()->GetHomeOutputDirectory());
+  const char* make =
+    gen->GetCMakeInstance()->GetCacheDefinition("CMAKE_MAKE_PROGRAM");
+  this->GetCMakeInstance()->AddCacheEntry("CMAKE_MAKE_PROGRAM", make,
+                                          "make program",
+                                          cmCacheManager::FILEPATH);
+  // if C,  then enable C
+  if(gen->GetLanguageEnabled("C"))
     {
-    this->EnableLanguage(i->first.c_str(),lg->GetMakefile());
+    this->SetLanguageEnabled("C");
     }
-  delete lg;
+  
+  // if CXX 
+  if(gen->GetLanguageEnabled("CXX"))
+    {
+    this->SetLanguageEnabled("CXX");
+    }
 }
 

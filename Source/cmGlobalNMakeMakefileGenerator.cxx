@@ -18,21 +18,18 @@
 #include "cmLocalUnixMakefileGenerator.h"
 #include "cmMakefile.h"
 
+
+cmGlobalNMakeMakefileGenerator::cmGlobalNMakeMakefileGenerator()
+{
+  m_FindMakeProgramFile = "CMakeNMakeFindMake.cmake";
+}
+
 void cmGlobalNMakeMakefileGenerator::EnableLanguage(const char* l,
                                                     cmMakefile *mf)
 {
   // pick a default 
   mf->AddDefinition("CMAKE_GENERATOR_CC", "cl");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "cl");
-  if(!mf->GetDefinition("CMAKE_MAKE_PROGRAM")
-     || cmSystemTools::IsOff(mf->GetDefinition("CMAKE_MAKE_PROGRAM")))
-    {
-    std::string setMakeProgram = mf->GetDefinition("CMAKE_ROOT");
-    setMakeProgram += "/Modules/CMakeNMakeFindMake.cmake";
-    mf->ReadListFile(0, setMakeProgram.c_str());
-    }
-  
-
   this->cmGlobalUnixMakefileGenerator::EnableLanguage(l, mf);
 }
 

@@ -107,7 +107,7 @@ IF(BUILD_TESTING)
 
 # for non IDE based builds nmake and make 
 # add all these extra targets 
-  IF(${CMAKE_BUILD_TOOL} MATCHES make)
+  IF(${CMAKE_MAKE_PROGRAM} MATCHES make)
     # Make targets for Experimental builds
     ADD_CUSTOM_TARGET(ExperimentalStart
     ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Start)
@@ -161,7 +161,7 @@ IF(BUILD_TESTING)
     ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly DashboardStart)
     ADD_CUSTOM_TARGET(NightlyDashboardEnd 
     ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly DashboardEnd)
-  ENDIF (${CMAKE_BUILD_TOOL} MATCHES make)
+  ENDIF (${CMAKE_MAKE_PROGRAM} MATCHES make)
 
   ELSE(TCL_TCLSH)
     MESSAGE("Could not find TCL_TCLSH, disabling testing." "Error")   

@@ -737,8 +737,16 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
         }      
       }
     }
-  std::string extraLinkOptions = 
-    m_Makefile->GetDefinition("CMAKE_EXTRA_LINK_FLAGS");
+  std::string extraLinkOptions;
+  if(target.GetType() == cmTarget::EXECUTABLE)
+    {
+    extraLinkOptions = m_Makefile->GetDefinition("CMAKE_EXE_LINKER_FLAGS");
+    }
+  if(target.GetType() == cmTarget::SHARED_LIBRARY)
+    {
+    extraLinkOptions = m_Makefile->GetDefinition("CMAKE_SHARED_LINKER_FLAGS");
+    }
+
   if(extraLinkOptions.size())
     {
     libOptions += " ";

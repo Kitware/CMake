@@ -44,11 +44,9 @@ SET(CMAKE_COMPILE_RESOURCE "rc <FLAGS> /fo<OBJECT> <SOURCE>")
 SET(CMAKE_CXX_LINK_EXECUTABLE
     "<CMAKE_CXX_COMPILER> /nologo ${CMAKE_START_TEMP_FILE} <FLAGS> <OBJECTS> /Fe<TARGET> -link <CMAKE_CXX_LINK_FLAGS> <LINK_FLAGS> <LINK_LIBRARIES>${CMAKE_END_TEMP_FILE}")
 
-SET (CMAKE_BUILD_TYPE Debug CACHE STRING 
-     "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel.")
-
 SET(CMAKE_CREATE_WIN32_EXE /subsystem:windows)
-
+# default to Debug builds
+SET(CMAKE_BUILD_TYPE_INIT Debug)
 SET (CMAKE_CXX_FLAGS_INIT "/W3 /Zm1000 /GX /GR")
 SET (CMAKE_CXX_FLAGS_DEBUG_INIT "/MDd /Zi /Od /GZ")
 SET (CMAKE_CXX_FLAGS_MINSIZEREL_INIT "/MD /O1")
@@ -64,6 +62,21 @@ SET (CMAKE_C_FLAGS_RELWITHDEBINFO_INIT "/MD /Zi /O2")
 SET (CMAKE_STANDARD_LIBRARIES "kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib" CACHE STRING 
      "Libraries linked by defalut with all applications.")
 MARK_AS_ADVANCED(CMAKE_STANDARD_LIBRARIES)
+
+IF(CMAKE_GENERATOR MATCHES "Visual Studio 6")
+   SET (CMAKE_NO_BUILD_TYPE 1)
+ENDIF(CMAKE_GENERATOR MATCHES "Visual Studio 6")
+IF(CMAKE_GENERATOR MATCHES "Visual Studio 7")
+  SET (CMAKE_CONFIGURATION_TYPES "Debug Release MinSizeRel RelWithDebInfo" CACHE STRING 
+     "Space separated list of supported configuration types, only supports Debug, Release, MinSizeRel, and RelWithDebInfo, anything else will be ignored.")
+  SET (CMAKE_CXX_WARNING_LEVEL "3" CACHE STRING
+       "Size of stack for programs.")
+  SET (CMAKE_CXX_STACK_SIZE "10000000" CACHE STRING
+       "Size of stack for programs.")
+  MARK_AS_ADVANCED(CMAKE_CONFIGURATION_TYPES CMAKE_CXX_STACK_SIZE CMAKE_CXX_WARNING_LEVEL)
+  SET (CMAKE_NOT_USING_CONFIG_FLAGS 1)
+ENDIF(CMAKE_GENERATOR MATCHES "Visual Studio 7")
+
 
 # executable linker flags
 SET (CMAKE_LINK_DEF_FILE_FLAG "/DEF:")

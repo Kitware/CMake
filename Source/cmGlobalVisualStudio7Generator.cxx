@@ -20,25 +20,22 @@
 #include "cmake.h"
 #include "windows.h"
 
-void cmGlobalVisualStudio7Generator::EnableLanguage(const char*, 
+
+cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator()
+{
+  m_FindMakeProgramFile = "CMakeVS7FindMake.cmake";
+}
+
+
+void cmGlobalVisualStudio7Generator::EnableLanguage(const char* lang, 
                                                     cmMakefile *mf)
 {
-  // now load the settings
-  if(!mf->GetDefinition("CMAKE_ROOT"))
-    {
-    cmSystemTools::Error(
-      "CMAKE_ROOT has not been defined, bad GUI or driver program");
-    return;
-    }
-  if(!this->GetLanguageEnabled("CXX"))
-    {
-    std::string fpath = 
-      mf->GetDefinition("CMAKE_ROOT");
-    fpath += "/Templates/CMakeDotNetSystemConfig.cmake";
-    mf->ReadListFile(NULL,fpath.c_str());
-    this->SetLanguageEnabled("CXX");
-    }
+  mf->AddDefinition("CMAKE_GENERATOR_CC", "cl");
+  mf->AddDefinition("CMAKE_GENERATOR_CXX", "cl");
+  this->cmGlobalGenerator::EnableLanguage(lang, mf);
 }
+
+
 
 int cmGlobalVisualStudio7Generator::TryCompile(const char *, 
                                                const char *bindir, 

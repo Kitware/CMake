@@ -27,6 +27,7 @@
 class cmGlobalNMakeMakefileGenerator : public cmGlobalUnixMakefileGenerator
 {
 public:
+  cmGlobalNMakeMakefileGenerator();
   ///! Get the name for the generator.
   virtual const char* GetName() {
     return cmGlobalNMakeMakefileGenerator::GetActualName();}

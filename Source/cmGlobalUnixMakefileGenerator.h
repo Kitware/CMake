@@ -27,6 +27,7 @@
 class cmGlobalUnixMakefileGenerator : public cmGlobalGenerator
 {
 public:
+  cmGlobalUnixMakefileGenerator();
   ///! Get the name for the generator.
   virtual const char* GetName() {
     return cmGlobalUnixMakefileGenerator::GetActualName();}
@@ -40,11 +41,6 @@ public:
    * extension, pthreads, byte order etc.  
    */
   virtual void EnableLanguage(const char*, cmMakefile *mf);
-
-  /**
-   * Try to determine system infomation, get it from another generator
-   */
-  virtual void EnableLanguagesFromGenerator(cmGlobalGenerator *);
 
 };
 

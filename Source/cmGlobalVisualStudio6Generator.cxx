@@ -19,24 +19,15 @@
 #include "cmMakefile.h"
 #include "cmake.h"
 
-void cmGlobalVisualStudio6Generator::EnableLanguage(const char*, 
+cmGlobalVisualStudio6Generator::cmGlobalVisualStudio6Generator()
+{
+  m_FindMakeProgramFile = "CMakeVS6FindMake.cmake";
+}
+
+void cmGlobalVisualStudio6Generator::EnableLanguage(const char* lang, 
                                                     cmMakefile *mf)
 {
-  // now load the settings
-  if(!mf->GetDefinition("CMAKE_ROOT"))
-    {
-    cmSystemTools::Error(
-      "CMAKE_ROOT has not been defined, bad GUI or driver program");
-    return;
-    }
-  if(!this->GetLanguageEnabled("CXX"))
-    {
-    std::string fpath = 
-      mf->GetDefinition("CMAKE_ROOT");
-    fpath += "/Templates/CMakeWindowsSystemConfig.cmake";
-    mf->ReadListFile(NULL,fpath.c_str());
-    this->SetLanguageEnabled("CXX");
-    }
+  this->cmGlobalGenerator::EnableLanguage(lang, mf);
 }
 
 int cmGlobalVisualStudio6Generator::TryCompile(const char *, 
@@ -63,7 +54,6 @@ int cmGlobalVisualStudio6Generator::TryCompile(const char *,
    */
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
   cmSystemTools::ChangeDirectory(bindir);
-
   // if there are spaces in the makeCommand, assume a full path
   // and convert it to a path with no spaces in it as the
   // RunCommand does not like spaces
@@ -85,7 +75,6 @@ int cmGlobalVisualStudio6Generator::TryCompile(const char *,
     makeCommand += "ALL_BUILD";
     }
   makeCommand += " - Debug\"";
-
   int retVal;
   if (!cmSystemTools::RunCommand(makeCommand.c_str(), *output, retVal, 0, false))
     {

@@ -29,6 +29,8 @@ class cmTarget;
 class cmGlobalVisualStudio6Generator : public cmGlobalGenerator
 {
 public:
+  cmGlobalVisualStudio6Generator();
+  
   ///! Get the name for the generator.
   virtual const char* GetName() {
     return cmGlobalVisualStudio6Generator::GetActualName();}

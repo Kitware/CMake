@@ -144,10 +144,6 @@ IF(CMAKE_USER_MAKE_RULES_OVERRIDE)
 ENDIF(CMAKE_USER_MAKE_RULES_OVERRIDE)
 
 SET(CMAKE_VERBOSE_MAKEFILE FALSE CACHE BOOL "If this value is on, makefiles will be generated without the .SILENT directive, and all commands will be echoed to the console during the make.  This is useful for debugging only.")
-# default build type is none
-SET (CMAKE_BUILD_TYPE "" CACHE STRING 
-     "Choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel.")
-
 
 SET (CMAKE_INSTALL_PREFIX    /usr/local CACHE PATH 
      "Install path prefix, prepended onto install directories.")
@@ -158,76 +154,88 @@ SET (CMAKE_INSTALL_PREFIX    /usr/local CACHE PATH
 # and you can set these flags in the cmake cache
 SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_ENV_INIT} $ENV{CXXFLAGS} ${CMAKE_CXX_FLAGS_INIT}" CACHE STRING
      "Flags used by the compiler during all build types.")
-SET (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG_INIT}" CACHE STRING
-     "Flags used by the compiler during debug builds.")
-SET (CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL_INIT}" CACHE STRING
-     "Flags used by the compiler during release minsize builds.")
-SET (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE_INIT}" CACHE STRING
-     "Flags used by the compiler during release builds (/MD /Ob1 /Oi /Ot /Oy /Gs will produce slightly less optimized but smaller files).")
-SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT}" CACHE STRING
-     "Flags used by the compiler during Release with Debug Info builds.")
+
 SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS_ENV_INIT} $ENV{CFLAGS} ${CMAKE_C_FLAGS_INIT}" CACHE STRING
      "Flags for C compiler.")
-SET (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG_INIT}" CACHE STRING
-     "Flags used by the compiler during debug builds.")
-SET (CMAKE_C_FLAGS_MINSIZEREL "${CMAKE_C_FLAGS_MINSIZEREL_INIT}" CACHE STRING
-     "Flags used by the compiler during release minsize builds.")
-SET (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE_INIT}" CACHE STRING
-     "Flags used by the compiler during release builds (/MD /Ob1 /Oi /Ot /Oy /Gs will produce slightly less optimized but smaller files).")
-SET (CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO_INIT}" CACHE STRING
-     "Flags used by the compiler during Release with Debug Info builds.")
 
 SET (CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS_INIT}
      CACHE STRING "Flags used by the linker.")
 
-SET (CMAKE_EXE_LINKER_FLAGS_DEBUG ${CMAKE_EXE_LINKER_FLAGS_DEBUG_INIT} CACHE STRING
+IF(NOT CMAKE_NOT_USING_CONFIG_FLAGS)
+# default build type is none
+  IF(NOT CMAKE_NO_BUILD_TYPE)
+    SET (CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE_INIT} CACHE STRING 
+      "Choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel.")
+  ENDIF(NOT CMAKE_NO_BUILD_TYPE)
+
+  SET (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG_INIT}" CACHE STRING
+     "Flags used by the compiler during debug builds.")
+  SET (CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL_INIT}" CACHE STRING
+      "Flags used by the compiler during release minsize builds.")
+  SET (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE_INIT}" CACHE STRING
+     "Flags used by the compiler during release builds (/MD /Ob1 /Oi /Ot /Oy /Gs will produce slightly less optimized but smaller files).")
+  SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT}" CACHE STRING
+     "Flags used by the compiler during Release with Debug Info builds.")
+  SET (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG_INIT}" CACHE STRING
+      "Flags used by the compiler during debug builds.")
+  SET (CMAKE_C_FLAGS_MINSIZEREL "${CMAKE_C_FLAGS_MINSIZEREL_INIT}" CACHE STRING
+      "Flags used by the compiler during release minsize builds.")
+  SET (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE_INIT}" CACHE STRING
+     "Flags used by the compiler during release builds (/MD /Ob1 /Oi /Ot /Oy /Gs will produce slightly less optimized but smaller files).")
+  SET (CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO_INIT}" CACHE STRING
+     "Flags used by the compiler during Release with Debug Info builds.")
+
+  SET (CMAKE_EXE_LINKER_FLAGS_DEBUG ${CMAKE_EXE_LINKER_FLAGS_DEBUG_INIT} CACHE STRING
      "Flags used by the linker during debug builds.")
 
-SET (CMAKE_EXE_LINKER_FLAGS_MINSIZEREL ${CMAKE_EXE_LINKER_FLAGS_MINSIZEREL_INIT} CACHE STRING
+  SET (CMAKE_EXE_LINKER_FLAGS_MINSIZEREL ${CMAKE_EXE_LINKER_FLAGS_MINSIZEREL_INIT} CACHE STRING
      "Flags used by the linker during release minsize builds.")
 
-SET (CMAKE_EXE_LINKER_FLAGS_RELEASE ${CMAKE_EXE_LINKER_FLAGS_RELEASE_INIT} "" CACHE STRING
+  SET (CMAKE_EXE_LINKER_FLAGS_RELEASE ${CMAKE_EXE_LINKER_FLAGS_RELEASE_INIT} "" CACHE STRING
      "Flags used by the linker during release builds.")
 
-SET (CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO 
+  SET (CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO 
      ${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO_INIT} CACHE STRING
      "Flags used by the linker during Release with Debug Info builds.")
   
+  SET (CMAKE_SHARED_LINKER_FLAGS_DEBUG ${CMAKE_SHARED_LINKER_FLAGS_DEBUG_INIT} CACHE STRING
+     "Flags used by the linker during debug builds.")
+
+  SET (CMAKE_SHARED_LINKER_FLAGS_MINSIZEREL ${CMAKE_SHARED_LINKER_FLAGS_MINSIZEREL_INIT}
+     CACHE STRING
+     "Flags used by the linker during release minsize builds.")
+
+  SET (CMAKE_SHARED_LINKER_FLAGS_RELEASE ${CMAKE_SHARED_LINKER_FLAGS_RELEASE_INIT} "" CACHE STRING
+     "Flags used by the linker during release builds.")
+
+  SET (CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO 
+     ${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO_INIT} CACHE STRING
+     "Flags used by the linker during Release with Debug Info builds.")
+
+  SET (CMAKE_MODULE_LINKER_FLAGS_DEBUG ${CMAKE_MODULE_LINKER_FLAGS_DEBUG_INIT} CACHE STRING
+     "Flags used by the linker during debug builds.")
+
+  SET (CMAKE_MODULE_LINKER_FLAGS_MINSIZEREL ${CMAKE_MODULE_LINKER_FLAGS_MINSIZEREL_INIT}
+     CACHE STRING
+     "Flags used by the linker during release minsize builds.")
+
+  SET (CMAKE_MODULE_LINKER_FLAGS_RELEASE ${CMAKE_MODULE_LINKER_FLAGS_RELEASE_INIT} "" CACHE STRING
+     "Flags used by the linker during release builds.")
+
+  SET (CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO 
+     ${CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO_INIT} CACHE STRING
+     "Flags used by the linker during Release with Debug Info builds.")
+ENDIF(NOT CMAKE_NOT_USING_CONFIG_FLAGS)
+
+
+
 # shared linker flags
 SET (CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS_INIT}
      CACHE STRING "Flags used by the linker.")
 
-SET (CMAKE_SHARED_LINKER_FLAGS_DEBUG ${CMAKE_SHARED_LINKER_FLAGS_DEBUG_INIT} CACHE STRING
-     "Flags used by the linker during debug builds.")
-
-SET (CMAKE_SHARED_LINKER_FLAGS_MINSIZEREL ${CMAKE_SHARED_LINKER_FLAGS_MINSIZEREL_INIT}
-     CACHE STRING
-     "Flags used by the linker during release minsize builds.")
-
-SET (CMAKE_SHARED_LINKER_FLAGS_RELEASE ${CMAKE_SHARED_LINKER_FLAGS_RELEASE_INIT} "" CACHE STRING
-     "Flags used by the linker during release builds.")
-
-SET (CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO 
-     ${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO_INIT} CACHE STRING
-     "Flags used by the linker during Release with Debug Info builds.")
-
 # module linker flags
 SET (CMAKE_MODULE_LINKER_FLAGS ${CMAKE_MODULE_LINKER_FLAGS_INIT}
      CACHE STRING "Flags used by the linker.")
-
-SET (CMAKE_MODULE_LINKER_FLAGS_DEBUG ${CMAKE_MODULE_LINKER_FLAGS_DEBUG_INIT} CACHE STRING
-     "Flags used by the linker during debug builds.")
-
-SET (CMAKE_MODULE_LINKER_FLAGS_MINSIZEREL ${CMAKE_MODULE_LINKER_FLAGS_MINSIZEREL_INIT}
-     CACHE STRING
-     "Flags used by the linker during release minsize builds.")
-
-SET (CMAKE_MODULE_LINKER_FLAGS_RELEASE ${CMAKE_MODULE_LINKER_FLAGS_RELEASE_INIT} "" CACHE STRING
-     "Flags used by the linker during release builds.")
-
-SET (CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO 
-     ${CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO_INIT} CACHE STRING
-     "Flags used by the linker during Release with Debug Info builds.")
 
 SET(CMAKE_BUILD_TOOL ${CMAKE_MAKE_PROGRAM} CACHE INTERNAL 
      "What is the target build tool cmake is generating for.")

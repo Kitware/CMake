@@ -74,7 +74,7 @@ public:
    * Try to determine system infomation such as shared library
    * extension, pthreads, byte order etc.  
    */
-  virtual void EnableLanguage(const char*, cmMakefile *) {};
+  virtual void EnableLanguage(const char*, cmMakefile *);
 
   /**
    * Try to determine system infomation, get it from another generator
@@ -99,6 +99,7 @@ public:
 
   void SetConfiguredFilesPath(const char* s){m_ConfiguredFilesPath = s;}
 protected:
+  cmStdString m_FindMakeProgramFile;
   cmStdString m_ConfiguredFilesPath;
   cmake *m_CMakeInstance;
   std::vector<cmLocalGenerator *> m_LocalGenerators;

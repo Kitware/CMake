@@ -27,6 +27,7 @@
 class cmGlobalBorlandMakefileGenerator : public cmGlobalNMakeMakefileGenerator
 {
 public:
+  cmGlobalBorlandMakefileGenerator();
   ///! Get the name for the generator.
   virtual const char* GetName() {
     return cmGlobalBorlandMakefileGenerator::GetActualName();}
