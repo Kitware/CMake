@@ -803,6 +803,13 @@ int cmCTest::ConfigureDirectory()
   bool res = true;
   if ( !m_ShowOnly )
     {
+    std::ofstream os; 
+    if ( !this->OpenOutputFile("", "Configure.xml", os) )
+      {
+      std::cout << "Cannot open log file" << std::endl;
+      }
+    std::string start_time = ::CurrentTime();
+
     res = cmSystemTools::RunCommand(cCommand.c_str(), output, 
                                     retVal, buildDirectory.c_str(),
                                     m_Verbose);
@@ -812,6 +819,28 @@ int cmCTest::ConfigureDirectory()
       ofs << output;
       ofs.close();
       }
+    
+    if ( os )
+      {
+      os << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+         << "<Site BuildName=\"" << m_DartConfiguration["BuildName"]
+         << "\" BuildStamp=\"" << m_CurrentTag << "-"
+         << this->GetTestModelString() << "\" Name=\""
+         << m_DartConfiguration["Site"] << "\">\n"
+         << "<Configure>\n"
+         << "\t<StartDateTime>" << start_time << "</StartDateTime>" << std::endl;
+      if ( retVal )
+        {
+        os << retVal;
+        }
+      os << "<ConfigureCommand>" << cCommand.c_str() << "</ConfigureCommand>" << std::endl;
+      //std::cout << "End" << std::endl;
+      os << "<Log>" << output << "</Log>" << std::endl;
+      std::string end_time = ::CurrentTime();
+      os << "\t<EndDateTime>" << end_time << "</EndDateTime>\n"
+         << "</Configure>\n"
+         << "</site>" << std::endl;
+      }    
     }
   else
     {
@@ -1721,6 +1750,10 @@ int cmCTest::SubmitResults()
   if ( this->CTestFileExists("Update.xml") )
     {
     files.push_back("Update.xml");
+    }
+  if ( this->CTestFileExists("Configure.xml") )
+    {
+    files.push_back("Configure.xml");
     }
   if ( this->CTestFileExists("Build.xml") )
     {
