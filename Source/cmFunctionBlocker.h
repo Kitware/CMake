@@ -72,6 +72,8 @@ public:
    * regular CMakeList file 
    */
   virtual void ScopeEnded(const cmMakefile &mf) const {}
+
+  virtual ~cmFunctionBlocker() {}
 };
 
 #endif

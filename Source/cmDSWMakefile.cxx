@@ -96,7 +96,6 @@ void cmDSWMakefile::WriteDSWFile(std::ostream& fout)
   // add a special target that depends on ALL projects for easy build
   // of Debug only
   m_Makefile->AddUtilityCommand("ALL_BUILD", "echo \"Build all projects\"", false);
-  
   m_Makefile->FindSubDirectoryCMakeListsFiles(allListFiles);
   // For each cmMakefile, create a DSP for it, and
   // add it to this DSW file
@@ -104,8 +103,18 @@ void cmDSWMakefile::WriteDSWFile(std::ostream& fout)
       k != allListFiles.end(); ++k)
     {
     cmMakefile* mf = *k;
-    // Create an MS generator with DSW off, so it only creates dsp files
-    cmMSProjectGenerator* pg = new cmMSProjectGenerator;
+    cmMSProjectGenerator* pg = 0;
+    // if not this makefile, then create a new generator
+    if(m_Makefile != mf)
+      {
+      // Create an MS generator with DSW off, so it only creates dsp files
+      pg = new cmMSProjectGenerator;
+      }
+    else
+      {
+      pg = (cmMSProjectGenerator*)m_Makefile->GetMakefileGenerator();
+      }
+    // make sure the generator is building dsp files
     pg->BuildDSWOff();
     mf->SetMakefileGenerator(pg);
     mf->GenerateMakefile();

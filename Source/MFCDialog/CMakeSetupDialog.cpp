@@ -219,6 +219,17 @@ int CALLBACK CMakeSetupDialog_SetSelProc( HWND hWnd, UINT uMsg,
   return 0;
 }
 
+inline void ILFree(LPITEMIDLIST pidl)
+{
+  LPMALLOC pMalloc;     
+  if (pidl)     
+    { 
+    SHGetMalloc(&pMalloc); 
+    pMalloc->Free( pidl);
+    pMalloc->Release();  
+    }
+}
+
 
 // Browse button
 bool CMakeSetupDialog::Browse(CString &result, const char *title)
@@ -243,6 +254,7 @@ bool CMakeSetupDialog::Browse(CString &result, const char *title)
     {
     result = szPathName;
     }
+  ILFree(pidl);
   return bSuccess;
 }
 

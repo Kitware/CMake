@@ -111,6 +111,14 @@ cmMakefile::~cmMakefile()
       delete d->second;
       }
     }
+  std::set<cmFunctionBlocker *>::const_iterator pos;
+  for (pos = m_FunctionBlockers.begin(); 
+       pos != m_FunctionBlockers.end(); ++pos)
+    {
+    cmFunctionBlocker* b = *pos;
+    m_FunctionBlockers.erase(*pos);
+    delete b;
+    }
   delete m_MakefileGenerator;
 }
 
@@ -189,7 +197,10 @@ bool cmMakefile::ReadListFile(const char* filename, const char* external)
   // keep track of the current file being read
   if (filename)
     {
-    m_cmCurrentListFile= filename;
+    if(m_cmCurrentListFile != filename)
+      {
+      m_cmCurrentListFile = filename;
+      }
     }
 
   // if this is not a remote makefile
@@ -342,6 +353,10 @@ void cmMakefile::AddCommand(cmCommand* wg)
   // Set the make file 
 void cmMakefile::SetMakefileGenerator(cmMakefileGenerator* mf)
 {
+  if(mf == m_MakefileGenerator)
+  {
+    return;
+  }
   delete m_MakefileGenerator;
   m_MakefileGenerator = mf;
   mf->SetMakefile(this);
@@ -836,7 +851,7 @@ bool cmMakefile::IsFunctionBlocked(const char *name,
 }
 
 void cmMakefile::RemoveFunctionBlocker(const char *name,
-								       const std::vector<std::string> &args)
+				       const std::vector<std::string> &args)
 {
   // loop over all function blockers to see if any block this command
   std::set<cmFunctionBlocker *>::const_iterator pos;
@@ -845,7 +860,9 @@ void cmMakefile::RemoveFunctionBlocker(const char *name,
     {
     if ((*pos)->ShouldRemove(name, args, *this))
       {
+      cmFunctionBlocker* b = *pos;
       m_FunctionBlockers.erase(*pos);
+      delete b;
       return;
       }
     }

@@ -70,12 +70,24 @@ cmCacheManager::CacheEntryType cmCacheManager::StringToType(const char* s)
 }
 
     
+struct CleanUpCacheManager
+{
+  ~CleanUpCacheManager()
+  {
+    delete cmCacheManager::GetInstance();
+  }
+  void Use() {}
+};
+
+CleanUpCacheManager cleanup;
+
 cmCacheManager* cmCacheManager::s_Instance = 0;
 
 cmCacheManager* cmCacheManager::GetInstance()
 {
   if(!cmCacheManager::s_Instance)
     {
+    cleanup.Use();
     cmCacheManager::s_Instance = new cmCacheManager;
     }
   return cmCacheManager::s_Instance;

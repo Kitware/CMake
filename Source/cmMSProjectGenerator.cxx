@@ -54,11 +54,15 @@ void cmMSProjectGenerator::GenerateMakefile()
 {
   if(m_BuildDSW)
     {
+    delete m_DSWMakefile;
+    m_DSWMakefile = 0;
     m_DSWMakefile = new cmDSWMakefile(m_Makefile);
     m_DSWMakefile->OutputDSWFile();
     }
   else
     {
+    delete m_DSPMakefile;
+    m_DSPMakefile = 0;
     m_DSPMakefile = new cmDSPMakefile(m_Makefile);
     m_DSPMakefile->OutputDSPFile();
     }

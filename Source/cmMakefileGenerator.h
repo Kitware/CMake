@@ -82,6 +82,7 @@ public:
    */
   virtual void ComputeSystemInfo() = 0;
 
+  virtual ~cmMakefileGenerator(){};
 protected:
   cmMakefile* m_Makefile;
 };
