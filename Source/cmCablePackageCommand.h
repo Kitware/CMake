@@ -30,7 +30,7 @@ class cmCablePackageCommand : public cmCableCommand
 {
 public:
   cmCablePackageCommand() {}
-  virtual ~cmCablePackageCommand() {}
+  virtual ~cmCablePackageCommand();
 
   /**
    * This is a virtual constructor for the command.

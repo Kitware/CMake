@@ -16,6 +16,23 @@
 #include "cmCablePackageCommand.h"
 #include "cmCacheManager.h"
 
+
+cmCablePackageCommand::~cmCablePackageCommand()
+{
+  // If we are the owner of the cmCableData, we must delete it here.
+  // For most cmCableCommands, the cmCableCommand destructor will take
+  // care of this.  If this package happens to be the last one, and is
+  // the owner, then the destructor of cmCableData will call back to a method
+  // in this class after the package part of it has been freed!
+  if(m_CableData && m_CableData->OwnerIs(this))
+    {
+    delete m_CableData;
+    // Make sure our superclass's destructor doesn't try to delete the
+    // cmCableData too.
+    m_CableData = NULL;
+    }
+}
+
 // cmCablePackageCommand
 bool cmCablePackageCommand::Invoke(std::vector<std::string>& args)
 {
@@ -30,7 +47,7 @@ bool cmCablePackageCommand::Invoke(std::vector<std::string>& args)
   
   // The argument is the package name.
   m_PackageName = args[0];
-  
+
   // Ask the cable data to begin the package.  This may call another
   // cmCablePackageCommand's WritePackageFooter().  This will call
   // this cmCablePackageCommand's WritePackageHeader().
