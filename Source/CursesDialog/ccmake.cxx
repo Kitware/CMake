@@ -96,8 +96,6 @@ int main(int argc, char** argv)
 
   cmSystemTools::DisableRunCommandOutput();
 
-  cmCacheManager::GetInstance()->LoadCache(cacheDir.c_str());
-
   if (debug)
     {
     cmCursesForm::DebugStart();
@@ -128,6 +126,7 @@ int main(int argc, char** argv)
   cmCursesMainForm* myform;
 
   myform = new cmCursesMainForm(args, x);
+  myform->LoadCache(cacheDir.c_str());
 
   cmSystemTools::SetErrorCallback(CMakeErrorHandler);
 

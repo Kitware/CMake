@@ -22,6 +22,7 @@
 #include "cmCursesStandardIncludes.h"
 
 class cmCursesCacheEntryComposite;
+class cmake;
 
 /** \class cmCursesMainForm
  * \brief The main page of ccmake
@@ -87,6 +88,11 @@ public:
    */
   int RunCMake(bool generateMakefiles);
 
+  /**
+   * Used by main program
+   */
+  void LoadCache(const char *dir);
+  
 protected:
   cmCursesMainForm(const cmCursesMainForm& from);
   void operator=(const cmCursesMainForm&);
@@ -130,6 +136,7 @@ protected:
   int m_NumberOfPages;
 
   int m_InitialWidth;
+  cmake *m_CMakeInstance;
 };
 
 #endif // __cmCursesMainForm_h

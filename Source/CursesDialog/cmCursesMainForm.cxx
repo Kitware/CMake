@@ -46,6 +46,7 @@ cmCursesMainForm::cmCursesMainForm(std::vector<std::string> const& args,
   m_HelpMessage.push_back("Welcome to ccmake, curses based user interface for CMake.");
   m_HelpMessage.push_back("");
   m_HelpMessage.push_back(s_ConstHelpMessage);
+  m_CMakeInstance = new cmake;
 }
 
 cmCursesMainForm::~cmCursesMainForm()
@@ -68,6 +69,11 @@ cmCursesMainForm::~cmCursesMainForm()
       }
     }
   delete m_Entries;
+  if (this->m_CMakeInstance)
+    {
+    delete this->m_CMakeInstance;
+    this->m_CMakeInstance = 0;
+    }  
 }
 
 // See if a cache entry is in the list of entries in the ui.
@@ -97,12 +103,12 @@ void cmCursesMainForm::InitializeUI()
   // which contain labels, entries and new entry markers
   std::vector<cmCursesCacheEntryComposite*>* newEntries =
     new std::vector<cmCursesCacheEntryComposite*>;
-  newEntries->reserve(cmCacheManager::GetInstance()->GetSize());
+  newEntries->reserve(this->m_CMakeInstance->GetCacheManager()->GetSize());
 
   // Count non-internal and non-static entries
   int count=0;
   for(cmCacheManager::CacheIterator i = 
-        cmCacheManager::GetInstance()->NewIterator();
+        this->m_CMakeInstance->GetCacheManager()->NewIterator();
       !i.IsAtEnd(); i.Next())
     {
     const cmCacheManager::CacheEntry& value = i.GetEntry();
@@ -130,7 +136,7 @@ void cmCursesMainForm::InitializeUI()
 
     // First add entries which are new
     for(cmCacheManager::CacheIterator i = 
-          cmCacheManager::GetInstance()->NewIterator();
+          this->m_CMakeInstance->GetCacheManager()->NewIterator();
         !i.IsAtEnd(); i.Next())
       {
       const char* key = i.GetName();
@@ -152,7 +158,7 @@ void cmCursesMainForm::InitializeUI()
 
     // then add entries which are old
     for(cmCacheManager::CacheIterator i = 
-          cmCacheManager::GetInstance()->NewIterator();
+          this->m_CMakeInstance->GetCacheManager()->NewIterator();
         !i.IsAtEnd(); i.Next())
       {
       const char* key = i.GetName();
@@ -212,7 +218,8 @@ void cmCursesMainForm::RePost()
     std::vector<cmCursesCacheEntryComposite*>::iterator it;
     for (it = m_Entries->begin(); it != m_Entries->end(); ++it)
       {
-      if (!m_AdvancedMode && cmCacheManager::GetInstance()->IsAdvanced(
+      if (!m_AdvancedMode && 
+          this->m_CMakeInstance->GetCacheManager()->IsAdvanced(
 	(*it)->GetValue()))
 	{
 	continue;
@@ -230,8 +237,8 @@ void cmCursesMainForm::RePost()
   std::vector<cmCursesCacheEntryComposite*>::iterator it;
   for (it = m_Entries->begin(); it != m_Entries->end(); ++it)
     {
-    if (!m_AdvancedMode && cmCacheManager::GetInstance()->IsAdvanced(
-      (*it)->GetValue()))
+    if (!m_AdvancedMode && 
+        this->m_CMakeInstance->GetCacheManager()->IsAdvanced((*it)->GetValue()))
       {
       continue;
       }
@@ -289,7 +296,7 @@ void cmCursesMainForm::Render(int left, int top, int width, int height)
     std::vector<cmCursesCacheEntryComposite*>::iterator it;
     for (it = m_Entries->begin(); it != m_Entries->end(); ++it)
       {
-      if (!m_AdvancedMode && cmCacheManager::GetInstance()->IsAdvanced(
+      if (!m_AdvancedMode && this->m_CMakeInstance->GetCacheManager()->IsAdvanced(
 	(*it)->GetValue()))
 	{
 	continue;
@@ -305,7 +312,7 @@ void cmCursesMainForm::Render(int left, int top, int width, int height)
   std::vector<cmCursesCacheEntryComposite*>::iterator it;
   for (it = m_Entries->begin(); it != m_Entries->end(); ++it)
     {
-    if (!m_AdvancedMode && cmCacheManager::GetInstance()->IsAdvanced(
+    if (!m_AdvancedMode && this->m_CMakeInstance->GetCacheManager()->IsAdvanced(
       (*it)->GetValue()))
       {
       continue;
@@ -438,7 +445,7 @@ void cmCursesMainForm::UpdateStatusBar()
   char help[128];
   const char* helpString;
   cmCacheManager::CacheEntry *entry = 
-    cmCacheManager::GetInstance()->GetCacheEntry(curField);
+    this->m_CMakeInstance->GetCacheManager()->GetCacheEntry(curField);
   if (entry)
     {
     helpString = entry->m_HelpString.c_str();
@@ -526,12 +533,20 @@ int cmCursesMainForm::RunCMake(bool generateMakefiles)
   refresh();
   endwin();
   std::cerr << "Running CMake, please wait...\n\r";
+
+  // free the old cmake and create a new one here
+  if (this->m_CMakeInstance)
+    {
+    delete this->m_CMakeInstance;
+    this->m_CMakeInstance = 0;
+    }
+  this->m_CMakeInstance = new cmake;
+
   // always save the current gui values to disk
   this->FillCacheManagerFromUI();
-  cmCacheManager::GetInstance()->SaveCache(cmSystemTools::GetCurrentWorkingDirectory().c_str());
+  this->m_CMakeInstance->GetCacheManager()->SaveCache(
+    cmSystemTools::GetCurrentWorkingDirectory().c_str());
 
-  // create a cmake object
-  cmake make;
   // create the arguments for the cmake object
   std::string whereCMake = cmSystemTools::GetProgramPath(m_Args[0].c_str());
   whereCMake += "/cmake";
@@ -543,7 +558,7 @@ int cmCursesMainForm::RunCMake(bool generateMakefiles)
 
   // run the generate process
   m_OkToGenerate = true;
-  int retVal = make.Generate(m_Args, generateMakefiles);
+  int retVal = this->m_CMakeInstance->Generate(m_Args, generateMakefiles);
 
   initscr(); /* Initialization */ 
   noecho(); /* Echo off */ 
@@ -617,7 +632,7 @@ void cmCursesMainForm::FillCacheManagerFromUI()
   for(int i=0; i < size; i++)
     {
     cmCacheManager::CacheEntry *entry = 
-      cmCacheManager::GetInstance()->GetCacheEntry(
+      this->m_CMakeInstance->GetCacheManager()->GetCacheEntry(
 	(*m_Entries)[i]->m_Key.c_str());
     if (entry)
       {
@@ -761,7 +776,7 @@ void cmCursesMainForm::HandleInput()
 	const char* curField = lbl->GetValue();
 	const char* helpString=0;
 	cmCacheManager::CacheEntry *entry = 
-	  cmCacheManager::GetInstance()->GetCacheEntry(curField);
+	  this->m_CMakeInstance->GetCacheManager()->GetCacheEntry(curField);
 	if (entry)
 	  {
 	  helpString = entry->m_HelpString.c_str();
@@ -854,7 +869,7 @@ void cmCursesMainForm::HandleInput()
 	// (index always corresponds to the value field)
 	cmCursesWidget* lbl = reinterpret_cast<cmCursesWidget*>(field_userptr(
 	  m_Fields[index-2]));
-	cmCacheManager::GetInstance()->RemoveCacheEntry(lbl->GetValue());
+	this->m_CMakeInstance->GetCacheManager()->RemoveCacheEntry(lbl->GetValue());
 
 	std::string nextVal;
 	if (nextCur)
@@ -892,6 +907,14 @@ void cmCursesMainForm::HandleInput()
     wrefresh(stdscr); 
     }
 }
+
+void cmCursesMainForm::LoadCache(const char *dir)
+
+{
+  m_CMakeInstance->GetCacheManager()->LoadCache(dir); 
+}
+  
+
 
 const char* cmCursesMainForm::s_ConstHelpMessage = 
 "CMake is used to configure and generate build files for software projects. "
