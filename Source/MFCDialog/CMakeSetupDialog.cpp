@@ -970,27 +970,30 @@ void CMakeSetupDialog::OnSize(UINT nType, int cx, int cy)
                                     cRect.Height() + deltay, 
                                     SWP_NOCOPYBITS | SWP_NOMOVE | SWP_NOZORDER);
 
+    m_StatusDisplay.GetWindowRect(&cRect);
+    this->ScreenToClient(&cRect);
+    m_StatusDisplay.SetWindowPos(&wndBottom, cRect.left, 
+                                 cRect.top + deltay, 
+                                 cRect.Width() + deltax,  cRect.Height(),
+                                 SWP_NOCOPYBITS);
 
-    deltax = int(deltax + m_deltaXRemainder);
-    m_deltaXRemainder = float(deltax%2);
     m_MouseHelp.GetWindowRect(&cRect);
     this->ScreenToClient(&cRect);
-    m_MouseHelp.SetWindowPos(&wndTop, cRect.left + deltax/2, 
+    m_MouseHelp.SetWindowPos(&wndTop, cRect.left , 
                              cRect.top + deltay, 
-                             0, 0,
-                             SWP_NOCOPYBITS | SWP_NOSIZE | SWP_NOZORDER);
+                             cRect.Width() +  deltax, cRect.Height(),
+                             SWP_NOCOPYBITS | SWP_NOZORDER);
+    
+    deltax = int(deltax + m_deltaXRemainder);
+    m_deltaXRemainder = float(deltax%2);
 
     m_VersionDisplay.GetWindowRect(&cRect);
-    m_VersionDisplay.SetWindowPos(&wndBottom, 5, cy-23, 
+    this->ScreenToClient(&cRect);
+    m_VersionDisplay.SetWindowPos(&wndBottom, cRect.left, cRect.top + deltay, 
                                   cRect.Width() + deltax/2,  cRect.Height(),
                                   SWP_NOCOPYBITS);
 
-    m_StatusDisplay.GetWindowRect(&cRect);
-    this->ScreenToClient(&cRect);
-    m_StatusDisplay.SetWindowPos(&wndBottom, cRect.left + deltax/2, 
-                                 cRect.top + deltay, 
-                                 cRect.Width() + deltax/2,  cRect.Height(),
-                                 SWP_NOCOPYBITS);
+   
 
     m_Configure.GetWindowRect(&cRect);
     this->ScreenToClient(&cRect);

@@ -575,7 +575,17 @@ void CPropertyList::OnMouseMove(UINT nFlags, CPoint point)
     //set the cursor to a sizing cursor if the cursor is over the row divider
     ::SetCursor(m_hCursorSize);
   else
+    { 
+    BOOL loc;
+    int curSel = ItemFromPoint(point,loc);
+    if(!loc)
+      {
+      CPropertyItem* pItem = (CPropertyItem*) GetItemDataPtr(curSel);
+      m_CMakeSetupDialog->SetDlgItemText(IDC_PROGRESS, pItem->m_HelpString);
+      }
     CListBox::OnMouseMove(nFlags, point);
+    }
+  
 }
 
 void CPropertyList::InvertLine(CDC* pDC,CPoint ptFrom,CPoint ptTo)
