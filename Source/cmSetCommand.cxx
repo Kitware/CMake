@@ -39,6 +39,7 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args)
   const char* variable = args[0].c_str(); // VAR is always first
   std::string value;  // optional
   bool cache = false; // optional
+  bool force = false; // optional
   cmCacheManager::CacheEntryType type = cmCacheManager::STRING; // required if cache
   const char* docstring = 0; // required if cache
   std::string::size_type cacheStart = 0;
@@ -60,19 +61,24 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args)
       }
     }
   
-    
+  // look for FORCE argument
+  if (args.size() > 4 && args[args.size()-1] == "FORCE")
+    {
+    force = true;
+    }
+  
   if(args.size() == 2)
     {
-      // SET (VAR value )
-      value= args[1];
+    // SET (VAR value )
+    value= args[1];
     }
-  else if(args.size() == 4)
+  else if(args.size() == 4 + (force ? 1 : 0))
     {
     // SET (VAR CACHE TYPE "doc String")
     cache = true;
     cacheStart = 1;
     }
-  else if(args.size() == 5)
+  else if(args.size() == 5 + (force ? 1 : 0))
     {
     //  SET (VAR value CACHE TYPE "doc string")
     cache = true;
@@ -116,7 +122,7 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args)
     // is already in the cache and the type is not internal
     // then leave now without setting any definitions in the cache
     // or the makefile
-    if(cache && type != cmCacheManager::INTERNAL)
+    if(cache && type != cmCacheManager::INTERNAL && !force)
       {
       return true;
       }
