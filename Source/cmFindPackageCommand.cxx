@@ -17,11 +17,14 @@
 #include "cmFindPackageCommand.h"
 #include <cmsys/RegularExpression.hxx>
 
+#ifdef CMAKE_BUILD_WITH_CMAKE
 #include "cmVariableWatch.h"
+#endif
 
 void cmFindPackageNeedBackwardsCompatibility(const std::string& variable,
                                              int access_type, void* )
 {
+#ifdef CMAKE_BUILD_WITH_CMAKE
   if(access_type == cmVariableWatch::UNKNOWN_VARIABLE_READ_ACCESS)
     {
     std::string message = "An attempt was made to access a variable: ";
@@ -36,6 +39,10 @@ void cmFindPackageNeedBackwardsCompatibility(const std::string& variable,
       "the case of the argument to FIND_PACKAGE.";
     cmSystemTools::Error(message.c_str());
     }
+#else
+  (void)variable;
+  (void)access_type;
+#endif
 }
 
 //----------------------------------------------------------------------------
@@ -196,6 +203,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
                               m_Makefile->GetDefinition(foundVar.c_str()));
     }
 
+#ifdef CMAKE_BUILD_WITH_CMAKE
   if(!(upperDir == this->Variable))
     {
     if(needCompatibility)
@@ -225,6 +233,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
         );
       }
     }
+#endif
 
   return result;
 }

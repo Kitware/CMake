@@ -618,7 +618,14 @@ public:
    * given a current CMakeLists file name
    */
   cmCacheManager *GetCacheManager() const;
+
+  /**
+   * Get the variable watch. This is used to determine when certain variables
+   * are accessed.
+   */
+#ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* GetVariableWatch() const;
+#endif
 
   //! Determine wether this is a local or global build.
   bool GetLocal() const;

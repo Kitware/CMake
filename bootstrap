@@ -38,22 +38,17 @@ CMAKE_CXX_SOURCES="\
   cmakemain \
   cmMakeDepend \
   cmMakefile \
-  cmDocumentation \
-  cmGlob \
   cmGlobalGenerator \
   cmLocalGenerator \
   cmSourceFile \
   cmSystemTools \
   cmGlobalUnixMakefileGenerator \
   cmLocalUnixMakefileGenerator \
-  cmLocalUnixMakefileGenerator2 \
   cmCommands \
   cmTarget \
   cmCustomCommand \
   cmCacheManager \
   cmListFileCache \
-  cmVariableWatch \
-  cmVersion \
   cmSourceGroup"
 
 CMAKE_C_SOURCES="\

@@ -19,6 +19,8 @@
 #include "cmCacheManager.h"
 #include "cmDynamicLoader.h"
 #include "cmListFileCache.h"
+
+#ifdef CMAKE_BUILD_WITH_CMAKE
 #include "cmDocumentation.h"
 
 //----------------------------------------------------------------------------
@@ -98,6 +100,7 @@ static const cmDocumentationEntry cmDocumentationNOTE[] =
    "  cmake .", 0},
   {0,0,0}
 };
+#endif
 
 int do_cmake(int ac, char** av);
 void updateProgress(const char *msg, float prog, void *cd);
@@ -115,7 +118,9 @@ int main(int ac, char** av)
 
 int do_cmake(int ac, char** av)
 {
+#ifdef CMAKE_BUILD_WITH_CMAKE
   cmDocumentation doc;
+#endif
   int nocwd = 0;
 
   if ( cmSystemTools::GetCurrentWorkingDirectory().size() == 0 )
@@ -124,6 +129,7 @@ int do_cmake(int ac, char** av)
     nocwd = 1;
     }
 
+#ifdef CMAKE_BUILD_WITH_CMAKE
   if(doc.CheckOptions(ac, av) || nocwd)
     {
     // Construct and print requested documentation.
@@ -156,6 +162,7 @@ int do_cmake(int ac, char** av)
       }
     return result;
     }
+#endif
   
   bool wiz = false;
   bool command = false;

@@ -210,9 +210,6 @@ class cmake
    */
   bool GetLocal() { return m_Local; }
   
-  ///! Display command line useage
-  void Usage(const char *program);
-
   ///! Parse command line arguments
   void SetArgs(const std::vector<std::string>&);
 

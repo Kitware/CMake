@@ -21,10 +21,16 @@
 #include "cmLocalGenerator.h"
 #include "cmCommands.h"
 #include "cmCommand.h"
-#include "cmVariableWatch.h"
-#include "cmVersion.h"
 
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+# include "cmVariableWatch.h"
+# include "cmVersion.h"
+#endif
+
+
+#if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmLocalUnixMakefileGenerator2.h"
+#endif
 
 // only build kdevelop generator on non-windows platforms
 // when not bootstrapping cmake
@@ -69,6 +75,7 @@
 void cmNeedBackwardsCompatibility(const std::string& variable, 
                                   int access_type, void* )
 {
+#ifdef CMAKE_BUILD_WITH_CMAKE
   if (access_type == cmVariableWatch::UNKNOWN_VARIABLE_READ_ACCESS)
     {
     std::string message = "An attempt was made to access a variable: ";
@@ -81,6 +88,10 @@ void cmNeedBackwardsCompatibility(const std::string& variable,
       "include a CMake module to test for the feature this variable defines.";
     cmSystemTools::Error(message.c_str());
     }
+#else
+  (void)variable;
+  (void)access_type;
+#endif
 }
 
 cmake::cmake()
@@ -115,18 +126,21 @@ cmake::cmake()
   m_GlobalGenerator = 0;
   m_ProgressCallback = 0;
   m_ProgressCallbackClientData = 0;
-  m_VariableWatch = new cmVariableWatch;
   m_ScriptMode = false;
 
-  this->AddDefaultGenerators();
-  this->AddDefaultCommands();
-
+#ifdef CMAKE_BUILD_WITH_CMAKE
+  m_VariableWatch = new cmVariableWatch;
   m_VariableWatch->AddWatch("CMAKE_WORDS_BIGENDIAN",
                             cmNeedBackwardsCompatibility);
   m_VariableWatch->AddWatch("CMAKE_SIZEOF_INT",
                             cmNeedBackwardsCompatibility);
   m_VariableWatch->AddWatch("CMAKE_X_LIBS",
                             cmNeedBackwardsCompatibility);
+#endif
+
+  this->AddDefaultGenerators();
+  this->AddDefaultCommands();
+
 }
 
 cmake::~cmake()
@@ -142,7 +156,9 @@ cmake::~cmake()
     {
     delete (*j).second;
     }
+#ifdef CMAKE_BUILD_WITH_CMAKE
   delete m_VariableWatch;
+#endif
 }
 
 bool cmake::CommandExists(const char* name) const
@@ -172,30 +188,6 @@ void cmake::AddCommand(cmCommand* wg)
     m_Commands.erase(pos);
     }
   m_Commands.insert( RegisteredCommandsMap::value_type(name, wg));
-}
-
-void cmake::Usage(const char* program)
-{
-  cmOStringStream errorStream;
-
-  errorStream << "cmake version " << cmVersion::GetCMakeVersion() << "\n";
-  errorStream << "Usage: " << program << " [srcdir] [options]\n" 
-            << "Where cmake is run from the directory where you want the object files written.  If srcdir is not specified, the current directory is used for both source and object files.\n";
-  errorStream << "Options are:\n";
-  errorStream << "\n-i (puts cmake in wizard mode, not available for ccmake)\n";
-  errorStream << "\n-DVAR:TYPE=VALUE (create a cache file entry)\n";
-  errorStream << "\n-Cpath_to_initial_cache (a cmake list file that is used to pre-load the cache with values.)\n";
-  errorStream << "\n[-GgeneratorName] (where generator name can be one of these: ";
-  std::vector<std::string> names;
-  this->GetRegisteredGenerators(names);
-  for(std::vector<std::string>::iterator i =names.begin();
-      i != names.end(); ++i)
-    {
-    errorStream << "\"" << i->c_str() << "\" ";
-    }
-  errorStream << ")\n";
-
-  cmSystemTools::Error(errorStream.str().c_str());
 }
 
 // Parse the args
@@ -654,8 +646,13 @@ void CMakeCommandUsage(const char* program)
 {
   cmOStringStream errorStream;
 
+#ifdef CMAKE_BUILD_WITH_CMAKE
   errorStream 
     << "cmake version " << cmVersion::GetCMakeVersion() << "\n";
+#else
+  errorStream 
+    << "cmake bootstrap\n";
+#endif
 
   errorStream 
     << "Usage: " << program << " -E [command] [arguments ...]\n"
@@ -824,11 +821,13 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
       return result;
       }
 
+#ifdef CMAKE_BUILD_WITH_CMAKE
     // Internal CMake dependency scanning support.
     else if (args[1] == "cmake_depends" && args.size() >= 5)
       {
       return cmLocalUnixMakefileGenerator2::ScanDependencies(args)? 0 : 1;
       }
+#endif
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
     // Write registry value
@@ -1384,6 +1383,7 @@ const char* cmake::GetCacheDefinition(const char* name) const
 
 int cmake::DumpDocumentationToFile(std::ostream& f)
 {
+#ifdef CMAKE_BUILD_WITH_CMAKE
   // Loop over all registered commands and print out documentation
   const char *name;
   const char *terse;
@@ -1404,6 +1404,9 @@ int cmake::DumpDocumentationToFile(std::ostream& f)
       << "<br><i>Usage:</i> " << full << "</li>" << std::endl << std::endl;
     }
   f << "</ul></html>\n";
+#else
+  (void)f;
+#endif
   return 1;
 }
 

@@ -156,6 +156,7 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
     return false;
     }
 
+#ifdef CMAKE_BUILD_WITH_CMAKE
   std::vector<std::string>::const_iterator i = args.begin();
 
   i++; // Get rid of subcommand
@@ -200,6 +201,11 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
     }
   m_Makefile->AddDefinition(variable.c_str(), output.c_str());
   return true;
+#else
+  (void)recurse;
+  this->SetError("GLOB is not implemented in the bootstrap CMake");
+  return false;
+#endif
 }
 
 //----------------------------------------------------------------------------

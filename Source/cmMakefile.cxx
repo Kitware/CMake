@@ -24,7 +24,9 @@
 #include "cmCacheManager.h"
 #include "cmFunctionBlocker.h"
 #include "cmListFileCache.h"
-#include "cmVariableWatch.h"
+#ifdef CMAKE_BUILD_WITH_CMAKE
+#  include "cmVariableWatch.h"
+#endif
 #include "cmake.h"
 #include <stdlib.h> // required for atoi
 
@@ -900,12 +902,15 @@ void cmMakefile::AddDefinition(const char* name, const char* value)
     }
   m_TemporaryDefinitionKey = name;
   m_Definitions[m_TemporaryDefinitionKey] = value;
+
+#ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* vv = this->GetVariableWatch();
   if ( vv )
     {
     vv->VariableAccessed(m_TemporaryDefinitionKey, 
                          cmVariableWatch::VARIABLE_MODIFIED_ACCESS);
     }
+#endif
 }
 
 
@@ -958,11 +963,13 @@ void cmMakefile::AddDefinition(const char* name, bool value)
     m_Definitions.erase( DefinitionMap::key_type(name));
     m_Definitions.insert(DefinitionMap::value_type(name, "OFF"));
     }
+#ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* vv = this->GetVariableWatch();
   if ( vv )
     {
     vv->VariableAccessed(name, cmVariableWatch::VARIABLE_MODIFIED_ACCESS);
     }
+#endif
 }
 
 
@@ -983,11 +990,13 @@ void cmMakefile::AddCacheDefinition(const char* name, bool value, const char* do
 void cmMakefile::RemoveDefinition(const char* name)
 {
   m_Definitions.erase(DefinitionMap::key_type(name));
+#ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* vv = this->GetVariableWatch();
   if ( vv )
     {
     vv->VariableAccessed(name, cmVariableWatch::VARIABLE_REMOVED_ACCESS);
     }
+#endif
 }
 
 void cmMakefile::SetProjectName(const char* p)
@@ -1373,6 +1382,7 @@ const char* cmMakefile::GetDefinition(const char* name) const
     {
     def = this->GetCacheManager()->GetCacheValue(name);
     }
+#ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* vv = this->GetVariableWatch();
   if ( vv )
     {
@@ -1398,6 +1408,7 @@ const char* cmMakefile::GetDefinition(const char* name) const
         }
       }
     }
+#endif
   return def;
 }
 
@@ -2134,6 +2145,7 @@ cmake *cmMakefile::GetCMakeInstance() const
   return 0;
 }
 
+#ifdef CMAKE_BUILD_WITH_CMAKE
 cmVariableWatch *cmMakefile::GetVariableWatch() const
 {
   if ( this->GetCMakeInstance() &&
@@ -2143,6 +2155,7 @@ cmVariableWatch *cmMakefile::GetVariableWatch() const
     }
   return 0;
 }
+#endif
 
 void cmMakefile::AddMacro(const char* name, const char* signature)
 {
