@@ -75,7 +75,7 @@ bool cmCursesStringWidget::HandleInput(int& key, cmCursesMainForm* fm,
 
   FORM* form = fm->GetForm();
   // 10 == enter
-  if (!m_InEdit && ( key != 10 ) )
+  if (!m_InEdit && ( key != 10 && key != KEY_ENTER ) )
     {
     return false;
     }
