@@ -46,7 +46,7 @@ bool cmWriteFileCommand::InitialPass(std::vector<std::string> const& argsIn)
                          fileName.c_str());
     return false;
     }
-  file << message << endl;
+  file << message << std::endl;
   file.close();
 
   return true;
