@@ -760,6 +760,13 @@ void cmUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     "\n"
     "\n";
   std::string replaceVars = variables;
+  bool dll = cmCacheManager::GetInstance()->IsOn("BUILD_SHARED_LIBS");
+  if(!dll)
+    {
+    // if not a dll then remove the shlib -fpic flag
+    m_Makefile->AddDefinition("CMAKE_SHLIB_CFLAGS", "");
+    }
+  
   m_Makefile->ExpandVariablesInString(replaceVars);
   fout << replaceVars.c_str();
   fout << "CMAKE_CURRENT_SOURCE = " << m_Makefile->GetStartDirectory() << "\n";

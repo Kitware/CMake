@@ -111,7 +111,7 @@ bool cmCacheManager::LoadCache(const char* path,
   const int bsize = 4096;
   char buffer[bsize];
   // input line is:         key:type=value
-  cmRegularExpression reg("(.*):(.*)=(.*)");
+  cmRegularExpression reg("^([^:]*):([^=]*)=(.*)$");
   while(fin)
     {
     // Format is key:type=value
