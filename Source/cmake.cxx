@@ -408,6 +408,22 @@ int cmake::Generate(const std::vector<std::string>& args, bool buildMakefiles)
     }
   cmMakefileGenerator* gen = mf.GetMakefileGenerator();
   gen->SetLocal(m_Local);
+  const char* genName = mf.GetDefinition("CMAKE_GENERATOR");
+  if(genName)
+    {
+    if(strcmp(gen->GetName(), genName) != 0)
+      {
+      std::string message = "Error: generator : ";
+      message += gen->GetName();
+      message += "\nDoes not match the generator used previously: ";
+      message += genName;
+      message +=
+        "\nEither remove the CMakeCache.txt file or choose a different"
+        " binary directory.";
+      cmSystemTools::Error(message.c_str());
+      return -2;
+      }
+    }
   if(!mf.GetDefinition("CMAKE_GENERATOR"))
     {
     mf.AddCacheDefinition("CMAKE_GENERATOR",
