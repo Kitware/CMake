@@ -350,7 +350,6 @@ std::string cmLocalUnixMakefileGenerator::GetBaseTargetName(const char* n,
       prefixVar = "CMAKE_SHARED_MODULE_PREFIX";
       break;
     case cmTarget::EXECUTABLE:
-    case cmTarget::WIN32_EXECUTABLE:
     case cmTarget::UTILITY:
     case cmTarget::INSTALL_FILES:
     case cmTarget::INSTALL_PROGRAMS:
@@ -383,7 +382,6 @@ std::string cmLocalUnixMakefileGenerator::GetFullTargetName(const char* n,
       suffixVar = "CMAKE_SHARED_MODULE_SUFFIX";
       break;
     case cmTarget::EXECUTABLE:
-    case cmTarget::WIN32_EXECUTABLE:
       targetSuffix = cmSystemTools::GetExecutableExtension();
     case cmTarget::UTILITY:
     case cmTarget::INSTALL_FILES:
@@ -454,8 +452,7 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
   for(cmTargets::const_iterator l = tgts.begin(); 
       l != tgts.end(); l++)
     {
-    if ((l->second.GetType() == cmTarget::EXECUTABLE ||
-         l->second.GetType() == cmTarget::WIN32_EXECUTABLE))
+    if ( l->second.GetType() == cmTarget::EXECUTABLE )
       {
       path = "... ";
       path += l->first + cmSystemTools::GetExecutableExtension();
@@ -499,8 +496,7 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
   for(cmTargets::const_iterator l = tgts.begin(); 
       l != tgts.end(); l++)
     {
-    if ((l->second.GetType() == cmTarget::EXECUTABLE ||
-         l->second.GetType() == cmTarget::WIN32_EXECUTABLE) &&
+    if (l->second.GetType() == cmTarget::EXECUTABLE &&
         l->second.IsInAll())
       {
       path = m_ExecutableOutputPath;
@@ -676,8 +672,7 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
   std::string linkLibs;
   
   // Flags to link an executable to shared libraries.
-  if( tgt.GetType() == cmTarget::EXECUTABLE ||
-      tgt.GetType() == cmTarget::WIN32_EXECUTABLE )
+  if( tgt.GetType() == cmTarget::EXECUTABLE )
     {
     if(cxx)
       {
@@ -1320,6 +1315,16 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
                                                         const cmTarget &t)
 {
   std::string linkFlags;
+  bool win32_executable = false;
+  bool macosx_bundle = false;
+  if ( t.GetPropertyAsBool("WIN32_EXECUTABLE") )
+    {
+    win32_executable = true;
+    }
+  if ( t.GetPropertyAsBool("MACOSX_BUNDLE") )
+    {
+    macosx_bundle = true;
+    }
 
   std::string buildType =  this->GetSafeDefinition("CMAKE_BUILD_TYPE");
   buildType = cmSystemTools::UpperCase(buildType);
@@ -1335,6 +1340,14 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
       target += "/";
       }
     }
+#ifdef __APPLE__
+  if ( macosx_bundle )
+    {
+    // Make bundle directories
+    target += name;
+    target += ".app/Contents/MacOS/";
+    }
+#endif
   target += name;
   target += cmSystemTools::GetExecutableExtension();  
   target = this->ConvertToRelativeOutputPath(target.c_str());
@@ -1384,6 +1397,7 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
   std::string comment = "executable";
   
   std::vector<std::string> commands;
+  
   std::string customCommands = this->CreatePreBuildRules(t, name);
   if(customCommands.size() > 0)
     {
@@ -1406,7 +1420,7 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
     linkFlags += " ";
    }
   
-  if(t.GetType() == cmTarget::WIN32_EXECUTABLE)
+  if(win32_executable)
     {
     linkFlags +=  this->GetSafeDefinition("CMAKE_CREATE_WIN32_EXE");
     linkFlags += " ";
@@ -1526,7 +1540,6 @@ void cmLocalUnixMakefileGenerator::OutputTargets(std::ostream& fout)
         this->OutputModuleLibraryRule(fout, l->first.c_str(), l->second);
         break;
       case cmTarget::EXECUTABLE:
-      case cmTarget::WIN32_EXECUTABLE:
         this->OutputExecutableRule(fout, l->first.c_str(), l->second);
         break;
       case cmTarget::UTILITY:
@@ -1564,8 +1577,7 @@ void cmLocalUnixMakefileGenerator::OutputDependLibs(std::ostream& fout)
         || (l->second.GetType() == cmTarget::MODULE_LIBRARY)
         || (l->second.GetType() == cmTarget::STATIC_LIBRARY)
         || (l->second.GetType() == cmTarget::EXECUTABLE)
-        || (l->second.GetType() == cmTarget::UTILITY)
-        || (l->second.GetType() == cmTarget::WIN32_EXECUTABLE))
+        || (l->second.GetType() == cmTarget::UTILITY))
       {
       fout << this->CreateMakeVariable(l->first.c_str(), "_DEPEND_LIBS") << " = ";
       
@@ -2434,7 +2446,6 @@ void cmLocalUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
                << installNameReal << "\" \"" << installNameSO << "\" \"" << installName
                << "\"\n";
           }; break;
-        case cmTarget::WIN32_EXECUTABLE:
         case cmTarget::EXECUTABLE:
           fname = m_ExecutableOutputPath;
           fname += this->GetFullTargetName(l->first.c_str(), l->second);

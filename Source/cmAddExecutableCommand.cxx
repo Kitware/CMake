@@ -30,16 +30,62 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args)
 
   ++s;
   bool use_win32 = false;
-
-  if (*s == "WIN32")
+  bool use_macbundle = false;
+  while ( s != args.end() )
     {
-    ++s;
-    use_win32 = true;
+    if (*s == "WIN32")
+      {
+      ++s;
+      use_win32 = true;
+      }
+    else if ( *s == "MACBUNDLE" )
+      {
+      ++s;
+      use_macbundle = true;
+      }
+    else
+      {
+      break;
+      }
     }
 
   std::vector<std::string> srclists(s, args.end());
-  m_Makefile->AddExecutable(exename.c_str(), srclists, use_win32); 
-  
+  cmTarget* tgt = m_Makefile->AddExecutable(exename.c_str(), srclists); 
+  if ( use_win32 )
+    {
+    tgt->SetProperty("WIN32_EXECUTABLE", "ON");
+    }
+  if ( use_macbundle)
+    {
+    tgt->SetProperty("MACOSX_BUNDLE", "ON");
+#ifdef __APPLE__
+    cmListFileFunction func;
+    func.m_Name = "CONFIGURE_FILE";
+    std::string f1 = m_Makefile->GetModulesFile("MacOSXBundleInfo.plist.in");
+    if ( f1.size() == 0 )
+      {
+      this->SetError("could not find Mac OSX bundle template file.");
+      return false;
+      }
+    std::string macdir = m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
+    if ( macdir.size() == 0 )
+      {
+      macdir = m_Makefile->GetCurrentOutputDirectory();
+      if(macdir.size() && macdir[macdir.size()-1] != '/')
+        {
+        macdir += "/";
+        }
+      }
+    macdir += exename + ".app/Contents/";
+    std::string f2 = macdir + "Info.plist";
+    macdir += "MacOS";
+    cmSystemTools::MakeDirectory(macdir.c_str());
+
+    func.m_Arguments.push_back(cmListFileArgument(f1, true));
+    func.m_Arguments.push_back(cmListFileArgument(f2, true));
+    m_Makefile->ExecuteCommand(func);
+#endif
+    }
+
   return true;
 }
-

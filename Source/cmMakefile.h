@@ -165,10 +165,8 @@ public:
   /**
    * Add an executable to the build.
    */
-  void AddExecutable(const char *exename, 
+  cmTarget* AddExecutable(const char *exename, 
                      const std::vector<std::string> &srcs);
-  void AddExecutable(const char *exename, 
-                     const std::vector<std::string> &srcs, bool win32);
 
   /**
    * Add a utility to the build.  A utiltity target is
@@ -617,6 +615,11 @@ public:
    * Get a list of macros as a ; separated string
    */
   void GetListOfMacros(std::string& macros);
+
+  /**
+   * Return a location of a file in cmake or custom modules directory
+   */
+  std::string GetModulesFile(const char* name);
   
 protected:
   // add link libraries and directories to the target

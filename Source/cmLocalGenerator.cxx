@@ -165,7 +165,6 @@ void cmLocalGenerator::GenerateInstallRules()
           }
         }
         break;
-      case cmTarget::WIN32_EXECUTABLE:
       case cmTarget::EXECUTABLE:
         fname = exeOutPath;
         fname += this->GetFullTargetName(l->first.c_str(), l->second);
@@ -253,8 +252,7 @@ void cmLocalGenerator::AddInstallRule(std::ostream& fout, const char* dest,
   switch ( type )
     {
   case cmTarget::INSTALL_PROGRAMS: stype = "PROGRAM"; break;
-  case cmTarget::EXECUTABLE:  
-  case cmTarget::WIN32_EXECUTABLE: stype = "EXECUTABLE"; break;
+  case cmTarget::EXECUTABLE: stype = "EXECUTABLE"; break;
   case cmTarget::STATIC_LIBRARY:   stype = "STATIC_LIBRARY"; break;
   case cmTarget::SHARED_LIBRARY:   stype = "SHARED_LIBRARY"; break;
   case cmTarget::MODULE_LIBRARY:   stype = "MODULE"; break;
@@ -302,7 +300,6 @@ std::string cmLocalGenerator::GetFullTargetName(const char* n,
     suffixVar = "CMAKE_SHARED_MODULE_SUFFIX";
     break;
   case cmTarget::EXECUTABLE:
-  case cmTarget::WIN32_EXECUTABLE:
     targetSuffix = cmSystemTools::GetExecutableExtension();
   case cmTarget::UTILITY:
   case cmTarget::INSTALL_FILES:

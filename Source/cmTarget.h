@@ -29,7 +29,7 @@ class cmSourceFile;
 class cmTarget
 {
 public:
-  enum TargetType { EXECUTABLE, WIN32_EXECUTABLE, STATIC_LIBRARY,
+  enum TargetType { EXECUTABLE, STATIC_LIBRARY,
                     SHARED_LIBRARY, MODULE_LIBRARY, UTILITY, INSTALL_FILES, 
                     INSTALL_PROGRAMS };
 

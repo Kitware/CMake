@@ -97,9 +97,6 @@ void cmLocalVisualStudio6Generator::OutputDSPFile()
       case cmTarget::EXECUTABLE:
         this->SetBuildType(EXECUTABLE,l->first.c_str(), l->second);
         break;
-      case cmTarget::WIN32_EXECUTABLE:
-        this->SetBuildType(WIN32_EXECUTABLE,l->first.c_str(), l->second);
-        break;
       case cmTarget::UTILITY:
         this->SetBuildType(UTILITY, l->first.c_str(), l->second);
         break;
@@ -581,16 +578,20 @@ void cmLocalVisualStudio6Generator::SetBuildType(BuildType b,
       m_DSPFooterTemplate += "/DLLFooter.dsptemplate";
       break;
     case EXECUTABLE:
-      m_DSPHeaderTemplate = root;
-      m_DSPHeaderTemplate += "/EXEHeader.dsptemplate";
-      m_DSPFooterTemplate = root;
-      m_DSPFooterTemplate += "/EXEFooter.dsptemplate";
-      break;
-    case WIN32_EXECUTABLE:
-      m_DSPHeaderTemplate = root;
-      m_DSPHeaderTemplate += "/EXEWinHeader.dsptemplate";
-      m_DSPFooterTemplate = root;
-      m_DSPFooterTemplate += "/EXEFooter.dsptemplate";
+      if ( target.GetPropertyAsBool("WIN32_EXECUTABLE") )
+        {
+        m_DSPHeaderTemplate = root;
+        m_DSPHeaderTemplate += "/EXEWinHeader.dsptemplate";
+        m_DSPFooterTemplate = root;
+        m_DSPFooterTemplate += "/EXEFooter.dsptemplate";
+        }
+      else
+        {
+        m_DSPHeaderTemplate = root;
+        m_DSPHeaderTemplate += "/EXEHeader.dsptemplate";
+        m_DSPFooterTemplate = root;
+        m_DSPFooterTemplate += "/EXEFooter.dsptemplate";
+        }
       break;
     case UTILITY:
       m_DSPHeaderTemplate = root;

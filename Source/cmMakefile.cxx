@@ -1053,29 +1053,16 @@ void cmMakefile::AddLibrary(const char* lname, int shared,
     }
 }
 
-void cmMakefile::AddExecutable(const char *exeName, 
+cmTarget* cmMakefile::AddExecutable(const char *exeName, 
                                const std::vector<std::string> &srcs)
 {
-  this->AddExecutable(exeName,srcs,false);
-}
-
-void cmMakefile::AddExecutable(const char *exeName, 
-                               const std::vector<std::string> &srcs,
-                               bool win32)
-{
   cmTarget target;
-  if (win32)
-    {
-    target.SetType(cmTarget::WIN32_EXECUTABLE);
-    }
-  else
-    {
-    target.SetType(cmTarget::EXECUTABLE);
-    }
+  target.SetType(cmTarget::EXECUTABLE);
   target.SetInAll(true);
   target.GetSourceLists() = srcs;
   this->AddGlobalLinkInformation(exeName, target);
-  m_Targets.insert(cmTargets::value_type(exeName,target));
+  cmTargets::iterator it = 
+    m_Targets.insert(cmTargets::value_type(exeName,target)).first;
   
   // Add an entry into the cache 
   std::string exePath = exeName;
@@ -1084,6 +1071,7 @@ void cmMakefile::AddExecutable(const char *exeName,
     AddCacheEntry(exePath.c_str(),
                   this->GetCurrentOutputDirectory(),
                   "Path to an executable", cmCacheManager::INTERNAL);
+  return &it->second;
 }
 
 
@@ -2185,4 +2173,36 @@ std::string cmMakefile::FindLibrary(const char* name,
     }
   
   return cmSystemTools::FindLibrary(name, path);
+}
+
+std::string cmMakefile::GetModulesFile(const char* filename)
+{
+  std::vector<std::string> modulePath;
+  const char* def = this->GetDefinition("CMAKE_MODULE_PATH");
+  if(def)
+    {
+    cmSystemTools::ExpandListArgument(def, modulePath);
+    }
+
+  // Also search in the standard modules location.
+  def = this->GetDefinition("CMAKE_ROOT");
+  if(def)
+    {
+    std::string rootModules = def;
+    rootModules += "/Modules";
+    modulePath.push_back(rootModules);
+    }
+  //std::string  Look through the possible module directories.
+  for(std::vector<std::string>::iterator i = modulePath.begin();
+    i != modulePath.end(); ++i)
+    {
+    std::string itempl = *i;
+    cmSystemTools::ConvertToUnixSlashes(itempl);
+    itempl += filename;
+    if(cmSystemTools::FileExists(itempl.c_str()))
+      {
+      return itempl;
+      }
+    }
+  return "";
 }

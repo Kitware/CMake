@@ -235,7 +235,6 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
       configType = "2";
       break;
     case cmTarget::EXECUTABLE: 
-    case cmTarget::WIN32_EXECUTABLE:  
       configType = "1";
       break; 
     case cmTarget::UTILITY:
@@ -491,8 +490,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     }  
   
   std::string extraLinkOptions;
-  if((target.GetType() == cmTarget::EXECUTABLE) ||
-     (target.GetType() == cmTarget::WIN32_EXECUTABLE))
+  if(target.GetType() == cmTarget::EXECUTABLE)
     {
     extraLinkOptions = m_Makefile->GetDefinition("CMAKE_EXE_LINKER_FLAGS");
     }
@@ -575,7 +573,6 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       fout << "\t\t\t\tImportLibrary=\"" << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"/>\n";
       break;
     case cmTarget::EXECUTABLE:
-    case cmTarget::WIN32_EXECUTABLE:
 
       fout << "\t\t\t<Tool\n"
            << "\t\t\t\tName=\"VCLinkerTool\"\n"

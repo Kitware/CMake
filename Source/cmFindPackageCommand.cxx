@@ -219,50 +219,24 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
 //----------------------------------------------------------------------------
 bool cmFindPackageCommand::FindModule(bool& found, bool quiet)
 {
-  // Search the CMAKE_MODULE_PATH for a Find<name>.cmake module.
-  found = false;
-  std::string module;
-  std::vector<std::string> modulePath;
-  const char* def = m_Makefile->GetDefinition("CMAKE_MODULE_PATH");
-  if(def)
+  std::string module = "/Find";
+  module += this->Name;
+  module += ".cmake";
+  std::string mfile = m_Makefile->GetModulesFile(module.c_str());
+  if ( mfile.size() )
     {
-    cmSystemTools::ExpandListArgument(def, modulePath);
-    }
-  
-  // Also search in the standard modules location.
-  def = m_Makefile->GetDefinition("CMAKE_ROOT");
-  if(def)
-    {
-    std::string rootModules = def;
-    rootModules += "/Modules";
-    modulePath.push_back(rootModules);
-    }
-  
-  // Look through the possible module directories.
-  for(std::vector<std::string>::iterator i = modulePath.begin();
-      i != modulePath.end(); ++i)
-    {
-    module = *i;
-    cmSystemTools::ConvertToUnixSlashes(module);
-    module += "/Find";
-    module += this->Name;
-    module += ".cmake";
-    if(cmSystemTools::FileExists(module.c_str()))
+    if(quiet)
       {
-      found = true;
-      
-      if(quiet)
-        {
-        // Tell the module that is about to be read that it should find
-        // quietly.
-        std::string quietly = this->Name;
-        quietly += "_FIND_QUIETLY";
-        m_Makefile->AddDefinition(quietly.c_str(), "1");
-        }
-      
-      // Load the module we found.
-      return this->ReadListFile(module.c_str());
+      // Tell the module that is about to be read that it should find
+      // quietly.
+      std::string quietly = this->Name;
+      quietly += "_FIND_QUIETLY";
+      m_Makefile->AddDefinition(quietly.c_str(), "1");
       }
+
+    // Load the module we found.
+    found = true;
+    return this->ReadListFile(mfile.c_str());
     }
   return true;
 }

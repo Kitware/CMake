@@ -187,7 +187,11 @@ void cmAddExecutable(void *arg, const char *exename,
     {
     srcs2.push_back(srcs[i]);
     }
-  mf->AddExecutable(exename, srcs2, (win32 ? true : false));
+ cmTarget* tg =  mf->AddExecutable(exename, srcs2);
+ if ( win32 )
+   {
+   tg->SetProperty("WIN32_EXECUTABLE", "ON");
+   }
 }
 
 void cmAddUtilityCommand(void *arg, const char* utilityName,
