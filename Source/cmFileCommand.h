@@ -72,13 +72,20 @@ public:
       "  FILE(GLOB variable [globbing expressions]...)\n"
       "WRITE will write a message into a file called 'filename'. It "
       "overwrites the file if it already exists, and creates the file "
-      "if it does not exists.\n\n"
+      "if it does not exists.\n"
       "APPEND will write a message into a file same as WRITE, except "
-      "it will append it to the end of the file\n\n"
+      "it will append it to the end of the file\n"
       "READ will read the content of a file and store it into the "
-      "variable.\n\n"
-      "GLOB will generate a list of all files that match the expressions "
-      "and store it into the variable.\n\n"; }
+      "variable.\n"
+      "GLOB will generate a list of all files that match the globbing "
+      "expressions and store it into the variable. Globbing expressions "
+      "are similar to regular expressions, but much simpler..\n"
+      "Examples of globbing expressions:\n"
+      "   *.cxx      - match all files with extension cxx\n"
+      "   *.vt?      - match all files with extension vta, vtb, ... vtz\n"
+      "   f[3-5].txt - match files f3.txt, f4.txt, f5.txt\n"
+      "MAKE_DIRECTORY will create a directory at the specified location"; 
+    }
   
   cmTypeMacro(cmFileCommand, cmCommand);
 
@@ -86,6 +93,7 @@ protected:
   bool HandleWriteCommand(std::vector<std::string> const& args, bool append);
   bool HandleReadCommand(std::vector<std::string> const& args);
   bool HandleGlobCommand(std::vector<std::string> const& args);
+  bool HandleMakeDirectoryCommand(std::vector<std::string> const& args);
 };
 
 

@@ -43,6 +43,10 @@ bool cmFileCommand::InitialPass(std::vector<std::string> const& args)
     {
     return this->HandleGlobCommand(args);
     }
+  else if ( subCommand == "MAKE_DIRECTORY" )
+    {
+    return this->HandleMakeDirectoryCommand(args);
+    }
 
   std::string e = "does not recognize sub-command "+subCommand;
   this->SetError(e.c_str());
@@ -173,5 +177,38 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args)
       }
     }
   m_Makefile->AddDefinition(variable.c_str(), output.c_str());
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmFileCommand::HandleMakeDirectoryCommand(std::vector<std::string> const& args)
+{
+  if(args.size() < 2 )
+    {
+    this->SetError("called with incorrect number of arguments");
+    return false;
+    }
+
+  std::vector<std::string>::const_iterator i = args.begin();
+
+  i++; // Get rid of subcommand
+
+  std::string expr;
+  for ( ; i != args.end(); ++i )
+    {
+    const std::string* cdir = &(*i);
+    if ( !cmsys::SystemTools::FileIsFullPath(i->c_str()) )
+      {
+      expr = m_Makefile->GetCurrentDirectory();
+      expr += "/" + *i;
+      cdir = &expr;
+      }
+    if ( !cmSystemTools::MakeDirectory(cdir->c_str()) )
+      {
+      std::string error = "problem creating directory: " + *cdir;
+      this->SetError(error.c_str());
+      return false;
+      }
+    }
   return true;
 }
