@@ -82,7 +82,7 @@ bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& argsIn)
                        m_Makefile->GetCurrentOutputDirectory(),
                        "cxx",false);
       std::string origname;
-      if ( (*j)[0] == '/' )
+      if ( (*j)[0] == '/' || (*j)[1] == ':' )
         {
         origname = *j;
         }
