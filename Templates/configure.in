@@ -542,7 +542,8 @@ fi
 # find make to use to build cmake, prefer gmake
 AC_PATH_PROGS(RUNMAKE, gmake make)
 AC_PATH_PROGS(CMAKE_AR_TMP, ar)
-CMAKE_AR="$CMAKE_AR_TMP cr"
+CMAKE_AR="$CMAKE_AR_TMP"
+CMAKE_AR_ARGS="cr"
 # if on SunOS and not using gXX then use the compiler to make .a libs
 case $system in 
    SunOS-5*)
@@ -551,9 +552,11 @@ case $system in
    else
       echo "Using $CXX -xar -o for creating .a libraries"
       CMAKE_AR="$CXX -xar -o"
+      CMAKE_AR_ARGS="-xar -o"
    fi
 esac
 AC_SUBST(CMAKE_AR)
+AC_SUBST(CMAKE_AR_ARGS)
 
 # generate output files.
 # create mkdir files just to make some of the directories

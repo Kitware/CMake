@@ -3045,7 +3045,8 @@ fi
 test -n "$CMAKE_AR_TMP" && break
 done
 
-CMAKE_AR="$CMAKE_AR_TMP cr"
+CMAKE_AR="$CMAKE_AR_TMP"
+CMAKE_AR_ARGS="cr"
 # if on SunOS and not using gXX then use the compiler to make .a libs
 case $system in 
    SunOS-5*)
@@ -3054,8 +3055,10 @@ case $system in
    else
       echo "Using $CXX -xar -o for creating .a libraries"
       CMAKE_AR="$CXX -xar -o"
+      CMAKE_AR_ARGS="-xar -o"
    fi
 esac
+
 
 
 # generate output files.
@@ -3243,6 +3246,7 @@ s%@CMAKE_NO_ANSI_STREAM_HEADERS@%$CMAKE_NO_ANSI_STREAM_HEADERS%g
 s%@RUNMAKE@%$RUNMAKE%g
 s%@CMAKE_AR_TMP@%$CMAKE_AR_TMP%g
 s%@CMAKE_AR@%$CMAKE_AR%g
+s%@CMAKE_AR_ARGS@%$CMAKE_AR_ARGS%g
 
 CEOF
 EOF

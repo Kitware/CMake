@@ -16,6 +16,8 @@ SET (CMAKE_RANLIB             "@RANLIB@" CACHE FILEPATH
         " Library randomizer program used on archive libraries." )
 SET (CMAKE_AR                 "@CMAKE_AR@" CACHE FILEPATH 
         " Archive program used to make archive libraries." )
+SET (CMAKE_AR_ARGS            "@CMAKE_AR_ARGS@" CACHE STRING 
+        " Arguments for CMAKE_AR program to create an archive library." )
 SET (CMAKE_CXX_COMPILER       "@CXX@" CACHE FILEPATH "CXX compiler used.")
 SET (CMAKE_CXX_FLAGS          "@CXXFLAGS@" CACHE STRING 
         "Flags used by CXX compiler")
