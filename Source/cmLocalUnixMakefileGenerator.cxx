@@ -1735,9 +1735,9 @@ bool cmLocalUnixMakefileGenerator::OutputObjectDepends(std::ostream& fout)
                 (*source)->GetDepends().begin();
               dep != (*source)->GetDepends().end(); ++dep)
             {
-            fout << (*source)->GetSourceName()
-                 << this->GetOutputExtension(
-                   (*source)->GetSourceExtension().c_str()) << " : "
+            std::string s = (*source)->GetSourceName();
+            s += this->GetOutputExtension((*source)->GetSourceExtension().c_str());
+            fout << cmSystemTools::ConvertToOutputPath(s.c_str()) << " : "
                  << cmSystemTools::ConvertToOutputPath(dep->c_str()) << "\n";
             ret = true;
             }
