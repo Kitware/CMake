@@ -1262,8 +1262,9 @@ int cmCTest::CoverageDirectory()
 
   for ( cc = 0; cc < files.size(); cc ++ )
     {
-    std::string command = coverageCommand + " -o \"" + files[cc] + "\"";
-    command += " -l \"" + files[cc] + "\"";
+    std::string command = coverageCommand + " -o \"" + 
+      cmSystemTools::GetFilenamePath(files[cc]) + 
+      "\" -l \"" + files[cc] + "\"";
     std::string output;
     int retVal = 0;
     //std::cout << "Run gcov on " << files[cc] << std::flush;
