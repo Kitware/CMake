@@ -90,7 +90,7 @@ BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
   END_MESSAGE_MAP();
 
 
-void MFCMessageCallback(const char* m, const char* title, bool& nomore)
+void MFCMessageCallback(const char* m, const char* title, bool& nomore, void*)
 { 
   std::string message = m;
   message += "\n\n(Press  Cancel to suppress any further messages.)";
