@@ -63,7 +63,8 @@ public:
     m_Name(name),
     m_TempName(m_Name+".tmp"),
     m_Stream(m_TempName.c_str()),
-    m_Copied(false)
+    m_Copied(false),
+    m_AlwaysCopy(false)
     {}
   
   /**
@@ -87,7 +88,11 @@ public:
    * real file name to occur.
    */
   void close() { this->DoCopy(); }
-  
+  /**
+   * If always copy is true, then copy the file all the time without
+   *  checking for differences.  The default is false.
+   */
+  bool SetAlwaysCopy(bool v) { m_AlwaysCopy = v; return v;}
 private:
   /**
    * The name of the real file where output will be copied if it has changed.
@@ -110,14 +115,29 @@ private:
   bool m_Copied;
 
   /**
-   * Closes the temporary file and does the copy-if-different to the real file.
+   *  If always copy is true, then copy the file all the time without
+   *  checking for differences.  The default is false.
+   */
+  bool m_AlwaysCopy;
+  
+  /**
+   * Closes the temporary file and does the copy-if-different to the
+   * real file.
    */
   void DoCopy()
     {
     if(!m_Copied)
       {
       m_Stream.close();
-      cmSystemTools::CopyFileIfDifferent(m_TempName.c_str(), m_Name.c_str());
+      if(m_AlwaysCopy)
+        {
+        cmSystemTools::cmCopyFile(m_TempName.c_str(), m_Name.c_str());
+        }
+      else
+        {
+        cmSystemTools::CopyFileIfDifferent(m_TempName.c_str(),
+                                           m_Name.c_str());
+        }
       cmSystemTools::RemoveFile(m_TempName.c_str());
       m_Copied = true;
       }

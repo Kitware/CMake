@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmSourceFile.h"
 #include "cmMakeDepend.h"
 #include "cmCacheManager.h"
+#include "cmGeneratedFileStream.h"
 
 cmUnixMakefileGenerator::cmUnixMakefileGenerator()
 {
@@ -93,7 +94,12 @@ void cmUnixMakefileGenerator::OutputMakefile(const char* file)
       cmSystemTools::MakeDirectory(i->c_str());
       }
     }
-  std::ofstream fout(file);
+  // Create a stream that writes to a temporary file
+  // then does a copy at the end.   This is to allow users
+  // to hit control-c during the make of the makefile
+  cmGeneratedFileStream tempFile(file);
+  tempFile.SetAlwaysCopy(true);
+  std::ostream&  fout = tempFile.GetStream();
   if(!fout)
     {
     cmSystemTools::Error("Error can not open for write: ", file);
@@ -950,6 +956,12 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                        "${CMAKE_COMMAND}",
                        0,
                        "echo \"cmake might be out of date\"");
+  this->OutputMakeRule(fout, 
+                       "Rule to keep make from removing Makefiles "
+                       "if control-C is hit during a run of cmake.",
+                       ".PRECIOUS",
+                       "Makefile cmake.depends",
+                       0);
   
 }
 
