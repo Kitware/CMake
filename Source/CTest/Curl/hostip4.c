@@ -403,15 +403,22 @@ Curl_addrinfo *Curl_he2ai(struct hostent *he, int port)
   Curl_addrinfo *ai;
   Curl_addrinfo *prevai = NULL;
   Curl_addrinfo *firstai = NULL;
-  struct sockaddr_in *addr;
   int i;
-  struct in_addr *curr;
+
+  union {
+    struct in_addr *addr;
+    char* list;
+  } curr;
+  union {
+    struct sockaddr_in* addr_in;
+    struct sockaddr* addr;
+  } address;
 
   if(!he)
     /* no input == no output! */
     return NULL;
 
-  for(i=0; (curr = (struct in_addr *)he->h_addr_list[i]); i++) {
+  for(i=0; (curr.list = he->h_addr_list[i]); i++) {
 
     ai = calloc(1, sizeof(Curl_addrinfo) + sizeof(struct sockaddr_in));
 
@@ -431,15 +438,15 @@ Curl_addrinfo *Curl_he2ai(struct hostent *he, int port)
     ai->ai_addrlen = sizeof(struct sockaddr_in);
     /* make the ai_addr point to the address immediately following this struct
        and use that area to store the address */
-    ai->ai_addr = (struct sockaddr *) ((char*)ai + sizeof(Curl_addrinfo));
+    ai->ai_addr = (struct sockaddr *) (ai + 1);
 
     /* leave the rest of the struct filled with zero */
 
-    addr = (struct sockaddr_in *)ai->ai_addr; /* storage area for this info */
+    address.addr = ai->ai_addr; /* storage area for this info */
 
-    memcpy((char *)&(addr->sin_addr), curr, sizeof(struct in_addr));
-    addr->sin_family = he->h_addrtype;
-    addr->sin_port = htons((unsigned short)port);
+    memcpy((char *)&(address.addr_in->sin_addr), curr.addr, sizeof(struct in_addr));
+    address.addr_in->sin_family = he->h_addrtype;
+    address.addr_in->sin_port = htons((unsigned short)port);
 
     prevai = ai;
   }
