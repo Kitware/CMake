@@ -104,9 +104,10 @@ void cmWrapTclCommand::FinalPass()
     std::string res = m_WrapClasses[classNum].m_ClassName + ".cxx";
     std::string cmd = wtcl + " " + m_WrapHeaders[classNum] + " "
 		+ hints + (m_WrapClasses[classNum].m_AbstractClass ? " 0 " : " 1 ") + " > " + m_WrapClasses[classNum].m_ClassName + ".cxx";
-    m_Makefile->AddCustomCommand(m_WrapHeaders[classNum].c_str(), 
-                                 res.c_str(), 
-                                 cmd.c_str(), depends);
+    m_Makefile->AddCustomCommand(m_WrapHeaders[classNum].c_str(),
+                                 cmd.c_str(),
+                                 depends,
+                                 res.c_str());
     }
   
 }

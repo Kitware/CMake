@@ -170,42 +170,127 @@ void cmDSPMakefile::WriteDSPBuildRule(std::ostream& fout)
   dsprule += " -B";
   dsprule += m_Makefile->GetHomeOutputDirectory();
 
-  std::vector<std::string> depends;
-  this->WriteCustomRule(fout, makefileIn.c_str(), 
-			dspname.c_str(),
-			dsprule.c_str(),
-			depends);
+  std::set<std::string> depends;
+  std::set<std::string> outputs;
+  outputs.insert(outputs.begin(), dspname);
+  fout << "# Begin Source File\n\n";
+  fout << "SOURCE=" << makefileIn.c_str() << "\n\n";
+  this->WriteCustomRule(fout, dsprule.c_str(), depends, outputs);
+  fout << "# End Source File\n";
 }
+
+
+void cmDSPMakefile::AddDSPBuildRule(cmSourceGroup& sourceGroup)
+{
+  std::string dspname = *(m_CreatedProjectNames.end()-1);
+  dspname += ".dsp";
+  std::string makefileIn = m_Makefile->GetStartDirectory();
+  makefileIn += "/";
+  makefileIn += "CMakeLists.txt";
+  std::string dsprule = m_Makefile->GetHomeDirectory();
+  dsprule += "/CMake/Source/CMakeSetupCMD ";
+  dsprule += makefileIn;
+  dsprule += " -DSP -H";
+  dsprule += m_Makefile->GetHomeDirectory();
+  dsprule += " -S";
+  dsprule += m_Makefile->GetStartDirectory();
+  dsprule += " -O";
+  dsprule += m_Makefile->GetStartOutputDirectory();
+  dsprule += " -B";
+  dsprule += m_Makefile->GetHomeOutputDirectory();
+
+  std::vector<std::string> depends;
+  std::vector<std::string> outputs;
+  outputs.push_back(dspname);
+  sourceGroup.AddCustomCommand(makefileIn.c_str(), dsprule.c_str(),
+                               depends, outputs);
+}
+
 
 void cmDSPMakefile::WriteDSPFile(std::ostream& fout)
 {
+  // Write the DSP file's header.
   this->WriteDSPHeader(fout);
-  this->WriteDSPBeginGroup(fout, "Source Files", "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat");
-  this->WriteDSPBuildRules(fout,"cpp;c;cxx;rc;def;r;odl;idl;hpj;bat");
-  this->WriteDSPEndGroup(fout);
-  this->WriteDSPBeginGroup(fout, "Header Files", "h;hpp;hxx;hm;inl");
-  this->WriteDSPBuildRules(fout,"h;hpp;hxx;hm;inl");
-  this->WriteDSPEndGroup(fout);
-  this->WriteDSPBeginGroup(fout, "XML Files", "xml");
-  this->WriteDSPBuildRules(fout,"xml");
-  this->WriteDSPEndGroup(fout);
-  this->WriteDSPBeginGroup(fout, "Text Files", "txt");
-  this->WriteDSPBuildRules(fout,"txt");
-  this->WriteDSPEndGroup(fout);
-  this->WriteDSPBuildRule(fout);
+  
+  // We may be modifying the source groups temporarily, so make a copy.
+  std::vector<cmSourceGroup> sourceGroups = m_Makefile->GetSourceGroups();
+  
+  // Find the group in which the CMakeLists.txt source belongs, and add
+  // the rule to generate this DSP file.
+  for(std::vector<cmSourceGroup>::reverse_iterator sg = sourceGroups.rbegin();
+      sg != sourceGroups.rend(); ++sg)
+    {
+    if(sg->Matches("CMakeLists.txt"))
+      {
+      this->AddDSPBuildRule(*sg);
+      break;
+      }    
+    }
+  
+  // Loop through every source group.
+  for(std::vector<cmSourceGroup>::const_iterator sg = sourceGroups.begin();
+      sg != sourceGroups.end(); ++sg)
+    {
+    const std::vector<std::string>& sources = sg->GetSources();
+    const cmSourceGroup::CustomCommands& customCommands = sg->GetCustomCommands();
+    // If the group is empty, don't write it at all.
+    if(sources.empty() && customCommands.empty())
+      { continue; }
+    
+    // If the group has a name, write the header.
+    std::string name = sg->GetName();
+    if(name != "")
+      {
+      this->WriteDSPBeginGroup(fout, name.c_str(), "");
+      }
+    
+    // Loop through each source in the source group.
+    for(std::vector<std::string>::const_iterator s = sources.begin();
+        s != sources.end(); ++s)
+      {
+      this->WriteDSPBuildRule(fout, s->c_str());
+      }    
+    
+    // Loop through each custom command in the source group.
+    for(cmSourceGroup::CustomCommands::const_iterator cc =
+          customCommands.begin(); cc != customCommands.end(); ++ cc)
+      {
+      std::string source = cc->first;
+      const cmSourceGroup::Commands& commands = cc->second;
+
+      fout << "# Begin Source File\n\n";
+      fout << "SOURCE=" << source << "\n\n";
+      
+      // Loop through every command generating code from the current source.
+      for(cmSourceGroup::Commands::const_iterator c = commands.begin();
+          c != commands.end(); ++c)
+        {
+        std::string command = c->first;
+        const cmSourceGroup::CommandFiles& commandFiles = c->second;
+        this->WriteCustomRule(fout, command.c_str(), commandFiles.m_Depends,
+                              commandFiles.m_Outputs);
+        }      
+      
+      fout << "# End Source File\n";
+      }
+    
+    // If the group has a name, write the footer.
+    if(name != "")
+      {
+      this->WriteDSPEndGroup(fout);
+      }
+    }  
+
+  // Write the DSP file's footer.
   this->WriteDSPFooter(fout);
 }
 
 
 void cmDSPMakefile::WriteCustomRule(std::ostream& fout,
-                                    const char* source,
-                                    const char* result,
                                     const char* command,
-                                    std::vector<std::string>& depends)
+                                    const std::set<std::string>& depends,
+                                    const std::set<std::string>& outputs)
 {
-  fout << "# Begin Source File\n\n";
-  fout << "SOURCE=" << source << "\n\n";
-
   std::vector<std::string>::iterator i;
   for(i = m_Configurations.begin(); i != m_Configurations.end(); ++i)
     {
@@ -218,17 +303,27 @@ void cmDSPMakefile::WriteCustomRule(std::ostream& fout,
       fout << "!ELSEIF  \"$(CFG)\" == " << i->c_str() << std::endl;
       }
     fout << "# Begin Custom Build\n\n";
-    fout << '\"' << result << "\" : \"$(SOURCE)\" \"$(INTDIR)\" \"$(OUTDIR)\" ";
-    for (int i = 0; i < depends.size(); i++)
+    fout << "BuildCommand = " << command << "\n\n";    
+    
+    // Write a rule for every output generated by this command.
+    for(std::set<std::string>::const_iterator output = outputs.begin();
+        output != outputs.end(); ++output)
       {
-      fout << "\"" << depends[i].c_str() << "\" ";
+      fout << "\"" << output->c_str()
+           << "\" :  \"$(SOURCE)\" \"$(INTDIR)\" \"$(OUTDIR)\"";
+      // Write out all the dependencies for this rule.
+      for(std::set<std::string>::const_iterator d = depends.begin();
+          d != depends.end(); ++d)
+        {
+        fout << " \"" << d->c_str() << "\"";
+        }
+      fout << "\n  $(BuildCommand)\n\n";
       }
-    fout << "\n  " << command << "\n\n";
+    
     fout << "# End Custom Build\n\n";
     }
   
   fout << "!ENDIF\n\n";
-  fout << "# End Source File\n";
 }
 
 
@@ -339,61 +434,6 @@ void cmDSPMakefile::WriteDSPFooter(std::ostream& fout)
     }
 }
 
-					
-void cmDSPMakefile::WriteDSPBuildRules(std::ostream& fout, const char *ext)
-{
-  // make a list if matching extentions
-  std::vector<std::string> exts;
-  std::string inExts = ext;
-  
-  std::string::size_type pos = inExts.find(';');
-  std::string::size_type lastPos = 0;
-  while (pos != std::string::npos)
-    {
-    std::string anExt = inExts.substr(lastPos, pos - lastPos);
-    exts.push_back(anExt);
-    lastPos = pos + 1;
-    pos = inExts.find(';',lastPos);
-    }
-  exts.push_back(inExts.substr(lastPos,inExts.size() - lastPos));
-  
-  // loop over any classes
-  std::vector<cmClassFile>& Classes = m_Makefile->GetClasses();
-  for(int i = 0; i < Classes.size(); ++i)
-    {
-    if(!Classes[i].m_IsExecutable && !Classes[i].m_HeaderFileOnly)
-      {
-      // is this class of the appropriate type ?
-      if (std::find(exts.begin(),exts.end(),Classes[i].m_ClassExtension)
-          != exts.end())
-        {
-        this->WriteDSPBuildRule(fout, Classes[i].m_FullPath.c_str());
-        }
-      }
-    }
-  // loop over any custom commands
-  std::vector<cmMakefile::customCommand>& ccoms = 
-    this->GetMakefile()->GetCustomCommands();
-  int numCust = ccoms.size();
-  for (int j = 0; j < numCust; j++)
-    {
-    cmMakefile::customCommand &cc = ccoms[j];
-    // is the source of the command the correct type
-    pos = cc.m_Source.rfind('.');
-    if(pos != std::string::npos)
-      {
-      if (std::find(exts.begin(),exts.end(),
-                    cc.m_Source.substr(pos+1,cc.m_Source.size() - pos - 1))
-          != exts.end())
-        {
-        this->WriteCustomRule(fout, cc.m_Source.c_str(), 
-                              cc.m_Result.c_str(), 
-                              cc.m_Command.c_str(),
-                              cc.m_Depends);
-        }
-      }
-    }
-}
 
 void cmDSPMakefile::WriteDSPBuildRule(std::ostream& fout, const char* path)
 {
@@ -402,5 +442,3 @@ void cmDSPMakefile::WriteDSPBuildRule(std::ostream& fout, const char* path)
        << path << "\n";
   fout << "# End Source File\n";
 }
-
-

@@ -42,6 +42,7 @@
 #include "cmBuildSharedLibrariesCommand.cxx"
 #include "cmUtilitySourceCommand.cxx"
 #include "cmIncludeRegularExpressionCommand.cxx"
+#include "cmSourceGroupCommand.cxx"
 
 void GetPredefinedCommands(std::list<cmCommand*>& commands)
 {
@@ -81,6 +82,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmBuildSharedLibrariesCommand);
   commands.push_back(new cmUtilitySourceCommand);
   commands.push_back(new cmIncludeRegularExpressionCommand);
+  commands.push_back(new cmSourceGroupCommand);
 }
 
   

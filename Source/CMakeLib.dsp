@@ -125,6 +125,10 @@ SOURCE=.\cmRegularExpression.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=.\cmSourceGroup.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=.\cmSystemTools.cxx
 # End Source File
 # Begin Source File

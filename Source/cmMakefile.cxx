@@ -27,10 +27,14 @@
 cmMakefile::cmMakefile()
 {
   // Setup the default include file regular expression.
+  // Should be changed to something like "\\.(h|hh|hpp|hxx)$" or "^.*$"
   m_IncludeFileRegularExpression = "^itk|^vtk|^vnl|^vcl|^f2c";
   
   m_DefineFlags = " ";
   m_MakefileGenerator = 0;
+  this->AddSourceGroup("", "^.*$");
+  this->AddSourceGroup("Source Files", "\\.(cpp|C|c|cxx|rc|def|r|odl|idl|hpj|bat)$");
+  this->AddSourceGroup("Header Files", "\\.(h|hh|hpp|hxx|hm|inl)$");
   this->AddDefaultCommands();
   this->AddDefaultDefinitions();
 }
@@ -249,21 +253,33 @@ void cmMakefile::GenerateMakefile()
 void cmMakefile::AddClass(cmClassFile& cmfile)
 {
   m_Classes.push_back(cmfile);
+
+  if(!cmfile.m_IsExecutable && !cmfile.m_HeaderFileOnly)
+    {
+    // Add the file to the list of sources.
+    std::string source = cmfile.m_FullPath;
+    cmSourceGroup& sourceGroup = this->FindSourceGroup(source.c_str());
+    sourceGroup.AddSource(source.c_str());
+    }
 }
 
-
+void cmMakefile::AddCustomCommand(const char* source,
+                                  const char* command,
+                                  const std::vector<std::string>& depends,
+                                  const std::vector<std::string>& outputs) 
+{
+  cmSourceGroup& sourceGroup = this->FindSourceGroup(source);
+  sourceGroup.AddCustomCommand(source, command, depends, outputs);
+}
 
 void cmMakefile::AddCustomCommand(const char* source,
-                               const char* result,
-                               const char* command,
-                               std::vector<std::string>& depends)
+                                  const char* command,
+                                  const std::vector<std::string>& depends,
+                                  const char* output) 
 {
-  cmMakefile::customCommand customCommand;
-  customCommand.m_Source = source;
-  customCommand.m_Result = result;
-  customCommand.m_Command = command;
-  customCommand.m_Depends = depends;
-  m_CustomCommands.push_back(customCommand);
+  std::vector<std::string> outputs;
+  outputs.push_back(output);
+  this->AddCustomCommand(source, command, depends, outputs);
 }
 
 void cmMakefile::AddDefineFlag(const char* flag)
@@ -335,6 +351,25 @@ void cmMakefile::SetLibraryName(const char* l)
   m_LibraryName = l;
 }
 
+void cmMakefile::AddSourceGroup(const char* name, const char* regex)
+{
+  // First see if the group exists.  If so, replace its regular expression.
+  for(std::vector<cmSourceGroup>::iterator sg = m_SourceGroups.begin();
+      sg != m_SourceGroups.end(); ++sg)
+    {
+    std::string sgName = sg->GetName();
+    if(sgName == name)
+      {
+      // We only want to set the regular expression.  If there are already
+      // source files in the group, we don't want to remove them.
+      sg->SetGroupRegex(regex);
+      return;
+      }
+    }
+  
+  // The group doesn't exist.  Add it.
+  m_SourceGroups.push_back(cmSourceGroup(name, regex));
+}
 
 void cmMakefile::AddExtraDirectory(const char* dir)
 {
@@ -548,4 +583,33 @@ void cmMakefile::AddDefaultDefinitions()
 #else
   this->AddDefinition("CMAKE_CFG_OUTDIR",".");
 #endif
+}
+
+/**
+ * Find a source group whose regular expression matches the filename
+ * part of the given source name.  Search backward through the list of
+ * source groups, and take the first matching group found.  This way
+ * non-inherited SOURCE_GROUP commands will have precedence over
+ * inherited ones.
+ */
+cmSourceGroup& cmMakefile::FindSourceGroup(const char* source)
+{
+  std::string file = source;
+  std::string::size_type pos = file.rfind('/');
+  if(pos != std::string::npos)
+    {
+    file = file.substr(pos, file.length()-pos);
+    }
+
+  for(std::vector<cmSourceGroup>::reverse_iterator sg = m_SourceGroups.rbegin();
+      sg != m_SourceGroups.rend(); ++sg)
+    {
+    if(sg->Matches(file.c_str()))
+      {
+      return *sg;
+      }
+    }
+  
+  // Shouldn't get here, but just in case, return the default group.
+  return m_SourceGroups.front();
 }

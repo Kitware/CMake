@@ -60,17 +60,19 @@ bool cmCablePackageCommand::Invoke(std::vector<std::string>& args)
   // files.
   std::string command = "${CABLE}";
   m_Makefile->ExpandVariablesInString(command);
-  std::vector<std::string> depends;  
+  std::vector<std::string> depends;
   depends.push_back(command);
   command += " cable_config.xml";
   
-  std::string packageFile = "Cxx/"+m_PackageName+"_cxx.cxx";
+  std::vector<std::string> outputs;
+  outputs.push_back("Cxx/"+m_PackageName+"_cxx.cxx");
+  outputs.push_back("Cxx/"+m_PackageName+"_cxx.h");
   
-  // A rule for the package's source file.
+  // A rule for the package's source files.
   m_Makefile->AddCustomCommand("cable_config.xml",
-                               packageFile.c_str(),
                                command.c_str(),
-                               depends);
+                               depends,
+                               outputs);
   
   return true;
 }

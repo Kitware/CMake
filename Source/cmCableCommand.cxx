@@ -107,7 +107,7 @@ void cmCableCommand::SetupCableData()
 
   std::vector<std::string> depends;
   m_Makefile->AddCustomCommand(cMakeLists.c_str(), 
-                               "cable_config.xml",
                                command.c_str(),
-                               depends);  
+                               depends,
+                               "cable_config.xml");
 }

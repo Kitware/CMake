@@ -22,7 +22,8 @@ cmSystemTools.o \
 cmDirectory.o \
 cmUnixMakefileGenerator.o \
 cmCommands.o \
-cmCacheManager.o
+cmCacheManager.o \
+cmSourceGroup.o
 
 DEPENDS = $(srcdir)/*.h ${CMAKE_CONFIG_DIR}/CMake/Source/cmConfigure.h
 
@@ -38,6 +39,7 @@ cmDirectory.o : $(DEPENDS)
 cmUnixMakefileGenerator.o : $(DEPENDS)
 cmCommands.o : $(DEPENDS)
 cmCacheManager.o : $(DEPENDS)
+cmSourceGroup.o : $(DEPENDS)
 
 
 

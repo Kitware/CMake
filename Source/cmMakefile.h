@@ -19,6 +19,7 @@
 #include "cmStandardIncludes.h"
 #include "cmClassFile.h"
 #include "cmSystemTools.h"
+#include "cmSourceGroup.h"
 
 class cmCommand;
 class cmMakefileGenerator;
@@ -74,9 +75,15 @@ public:
    * Add a custom command to the build.
    */
   void AddCustomCommand(const char* source,
-                     const char* result,
-                     const char* command,
-                     std::vector<std::string>& depends);
+                        const char* command,
+                        const std::vector<std::string>& depends,
+                        const std::vector<std::string>& outputs);
+
+  void AddCustomCommand(const char* source,
+                        const char* command,
+                        const std::vector<std::string>& depends,
+                        const char* output);
+  
   /**
    * Add a define flag to the build.
    */
@@ -146,6 +153,11 @@ public:
    */
   void AddClass(cmClassFile& );
 
+  /**
+   * Add a source group for consideration when adding a new source.
+   */
+  void AddSourceGroup(const char* name, const char* regex);
+  
   /**
    * Add an auxiliary directory to the build.
    */
@@ -370,6 +382,12 @@ public:
     {return m_UsedCommands;}
   
   /**
+   * Get the vector source groups.
+   */
+  const std::vector<cmSourceGroup>& GetSourceGroups() const
+    { return m_SourceGroups; }
+  
+  /**
    * Dump documentation to a file. If 0 is returned, the
    * operation failed.
    */
@@ -387,19 +405,7 @@ public:
   /**
    * Expand variables in the makefiles ivars such as link directories etc
    */
-  void ExpandVariables();
-
-  struct customCommand
-  {
-    std::string m_Source;
-    std::string m_Result;
-    std::string m_Command;
-    std::vector<std::string> m_Depends;
-  };
-
-  std::vector<customCommand>& GetCustomCommands() {
-    return m_CustomCommands; };
-  
+  void ExpandVariables();  
       
   /** Recursivly read and create a cmMakefile object for
    *  all CMakeLists.txt files in the GetSubDirectories list.
@@ -440,7 +446,7 @@ protected:
   std::vector<std::string> m_LinkLibrariesUnix;
   std::string m_IncludeFileRegularExpression;
   std::string m_DefineFlags;
-  std::vector<customCommand> m_CustomCommands;
+  std::vector<cmSourceGroup> m_SourceGroups;
   typedef std::map<std::string, cmCommand*> RegisteredCommandsMap;
   typedef std::map<std::string, std::string> DefinitionMap;
   DefinitionMap m_Definitions;
@@ -461,6 +467,8 @@ private:
   void PrintStringVector(const char* s, std::vector<std::string>& v);
   void AddDefaultCommands();
   void AddDefaultDefinitions();
+  
+  cmSourceGroup& FindSourceGroup(const char* source);
 };
 
 
