@@ -336,6 +336,11 @@ int cmCTestBuildHandler::BuildDirectory(cmCTest *ctest_inst)
         }
       }    
     }
+  
+  // the two follwing blocks of code appear wrong to me - Ken
+  // I belive that the middle if tests should be %2 type tests
+  // need to close the loop with Andy
+  
   // Errors exceptions
   for ( cc = 0; cc < m_CustomErrorExceptions.size(); cc ++ )
     {
@@ -458,47 +463,71 @@ void cmCTestBuildHandler::GenerateDartBuildOutput(
      << "</BuildCommand>" << std::endl;
     
   std::vector<cmCTestBuildErrorWarning>::iterator it;
-  for ( it = ew.begin(); it != ew.end(); it++ )
+  
+  // only report the first 50 warnings and first 50 errors
+  unsigned short numErrorsAllowed = 2;
+  unsigned short numWarningsAllowed = 10;
+
+  for ( it = ew.begin(); 
+        it != ew.end() && (numErrorsAllowed || numWarningsAllowed); it++ )
     {
     cmCTestBuildErrorWarning *cm = &(*it);
-    os << "\t<" << (cm->m_Error ? "Error" : "Warning") << ">\n"
-       << "\t\t<BuildLogLine>" << cm->m_LogLine << "</BuildLogLine>\n"
-       << "\t\t<Text>" << m_CTest->MakeXMLSafe(cm->m_Text) 
-       << "\n</Text>" << std::endl;
-    std::vector<cmCTestCompileErrorWarningRex>::iterator rit;
-    for ( rit = m_ErrorWarningFileLineRegex.begin();
-      rit != m_ErrorWarningFileLineRegex.end(); ++ rit )
+    if (cm->m_Error && numErrorsAllowed ||
+        !cm->m_Error && numWarningsAllowed)
       {
-      cmsys::RegularExpression* re = &rit->m_RegularExpression;
-      if ( re->find(cm->m_Text.c_str() ) )
+      if (cm->m_Error)
         {
-        cm->m_SourceFile = re->match(rit->m_FileIndex);
-        cm->m_LineNumber = atoi(re->match(rit->m_LineIndex).c_str());
-        break;
+        numErrorsAllowed--;
         }
-      }
-    if ( cm->m_SourceFile.size() > 0 )
-      {
-      os << "\t\t<SourceFile>" << cm->m_SourceFile << "</SourceFile>" 
+      else
+        {
+        numWarningsAllowed--;
+        }
+      os << "\t<" << (cm->m_Error ? "Error" : "Warning") << ">\n"
+         << "\t\t<BuildLogLine>" << cm->m_LogLine << "</BuildLogLine>\n"
+         << "\t\t<Text>" << m_CTest->MakeXMLSafe(cm->m_Text) 
+         << "\n</Text>" << std::endl;
+      std::vector<cmCTestCompileErrorWarningRex>::iterator rit;
+      for ( rit = m_ErrorWarningFileLineRegex.begin();
+            rit != m_ErrorWarningFileLineRegex.end(); ++ rit )
+        {
+        cmsys::RegularExpression* re = &rit->m_RegularExpression;
+        if ( re->find(cm->m_Text.c_str() ) )
+          {
+          cm->m_SourceFile = re->match(rit->m_FileIndex);
+          cm->m_LineNumber = atoi(re->match(rit->m_LineIndex).c_str());
+          break;
+          }
+        }
+      if ( cm->m_SourceFile.size() > 0 )
+        {
+        os << "\t\t<SourceFile>" << cm->m_SourceFile << "</SourceFile>" 
+           << std::endl;
+        }
+      if ( cm->m_SourceFileTail.size() > 0 )
+        {
+        os << "\t\t<SourceFileTail>" << cm->m_SourceFileTail 
+           << "</SourceFileTail>" << std::endl;
+        }
+      if ( cm->m_LineNumber >= 0 )
+        {
+        os << "\t\t<SourceLineNumber>" << cm->m_LineNumber 
+           << "</SourceLineNumber>" << std::endl;
+        }
+      os << "\t\t<PreContext>" << m_CTest->MakeXMLSafe(cm->m_PreContext) 
+         << "</PreContext>\n"
+         << "\t\t<PostContext>" << m_CTest->MakeXMLSafe(cm->m_PostContext);
+      // is this the last warning or error, if so notify
+      if (cm->m_Error && !numErrorsAllowed ||
+          !cm->m_Error && !numWarningsAllowed)
+        {
+        os << "\nThe maximum number of reported warnings or errors has been reached!!!\n";
+        }
+      os << "</PostContext>\n"
+         << "\t\t<RepeatCount>0</RepeatCount>\n"
+         << "</" << (cm->m_Error ? "Error" : "Warning") << ">\n\n" 
          << std::endl;
       }
-    if ( cm->m_SourceFileTail.size() > 0 )
-      {
-      os << "\t\t<SourceFileTail>" << cm->m_SourceFileTail 
-         << "</SourceFileTail>" << std::endl;
-      }
-    if ( cm->m_LineNumber >= 0 )
-      {
-      os << "\t\t<SourceLineNumber>" << cm->m_LineNumber 
-         << "</SourceLineNumber>" << std::endl;
-      }
-    os << "\t\t<PreContext>" << m_CTest->MakeXMLSafe(cm->m_PreContext) 
-       << "</PreContext>\n"
-       << "\t\t<PostContext>" << m_CTest->MakeXMLSafe(cm->m_PostContext) 
-       << "</PostContext>\n"
-       << "\t\t<RepeatCount>0</RepeatCount>\n"
-       << "</" << (cm->m_Error ? "Error" : "Warning") << ">\n\n" 
-       << std::endl;
     }
   os << "\t<Log Encoding=\"base64\" Compression=\"/bin/gzip\">\n\t</Log>\n"
      << "\t<EndDateTime>" << m_EndBuild << "</EndDateTime>\n"
