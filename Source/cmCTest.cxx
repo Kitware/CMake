@@ -1203,15 +1203,19 @@ int cmCTest::BuildDirectory()
         {
         ll = kk - 6;
         }
-      for ( jj = kk; 
-            jj > 0 && jj > ll /* && markedLines[jj] == 0 */; 
+      for ( jj = kk-1; 
+            jj > 0 && jj > ll && markedLines[jj] != markedLines[kk]; 
             jj -- );
+      while ( markedLines[jj] == markedLines[kk] && jj < kk )
+        {
+        jj ++;
+        }
       for (; jj < kk; jj ++ )
         {
         errorwarning.m_PreContext += lines[jj] + "\n";
         }
       for ( jj = kk+1; 
-            jj < lines.size() && jj < kk + 7 /* && markedLines[jj] == 0*/; 
+            jj < lines.size() && jj < kk + 7 && markedLines[jj] != markedLines[kk]; 
             jj ++ )
         {
         errorwarning.m_PostContext += lines[jj] + "\n";
