@@ -79,6 +79,7 @@
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmAbstractFilesCommand.cxx"
 #include "cmAuxSourceDirectoryCommand.cxx"
+#include "cmEndWhileCommand.cxx"
 #include "cmExportLibraryDependencies.cxx"
 #include "cmEnableLanguageCommand.cxx"
 #include "cmFLTKWrapUICommand.cxx"
@@ -104,6 +105,7 @@
 #include "cmQTWrapUICommand.cxx"
 #include "cmUseMangledMesaCommand.cxx"
 #include "cmUtilitySourceCommand.cxx"
+#include "cmWhileCommand.cxx"
 #include "cmWrapExcludeFilesCommand.cxx"
 
 // This one must be last because it includes windows.h and
@@ -173,6 +175,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmAbstractFilesCommand);
   commands.push_back(new cmAuxSourceDirectoryCommand);
   commands.push_back(new cmEnableLanguageCommand);
+  commands.push_back(new cmEndWhileCommand);
   commands.push_back(new cmExportLibraryDependenciesCommand);
   commands.push_back(new cmFLTKWrapUICommand);
   commands.push_back(new cmGetCMakePropertyCommand);
@@ -198,6 +201,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmQTWrapUICommand);
   commands.push_back(new cmUseMangledMesaCommand);
   commands.push_back(new cmUtilitySourceCommand);
+  commands.push_back(new cmWhileCommand);
   commands.push_back(new cmWrapExcludeFilesCommand);
 #endif
 }
