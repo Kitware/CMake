@@ -91,7 +91,8 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)
   fout << 
     "#include <ctype.h>\n"
     "#include <stdio.h>\n"
-    "#include <string.h>\n";
+    "#include <string.h>\n"
+    "#include <malloc.h>\n";
   if(extraInclude.size())
     {
     fout << "#include \"" << extraInclude << "\"\n";
@@ -156,11 +157,12 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)
     "};\n"
     "\n"
     "// Allocate and create a lowercased copy of string\n"
+    "// (note that it has to be free'd manually)\n"
     "\n"
     "char* lowercase(const char *string)\n"
     "{\n"
     "  char *new_string, *p;\n"
-    "  new_string = new char[strlen(string) + 1];\n"
+    "  new_string = (char *)malloc(sizeof(char) * (size_t)(strlen(string) + 1));\n"
     "  if (!new_string)\n"
     "    {\n"
     "    return NULL;\n"
@@ -235,9 +237,9 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)
     "      {\n"
     "      return (*cmakeGeneratedFunctionMapEntries[i].func)(ac - 1, av + 1);\n"
     "      }\n"
-    "    delete [] test_name;\n"
+    "    free(test_name);\n"
     "    }\n"
-    "  delete [] arg;\n"
+    "  free(arg);\n"
     "  \n"
     "  // If the test was not found but there is only one test, then\n"
     "  // run it with the arguments\n"
