@@ -7,12 +7,12 @@ PROJECT (Wrapping)
 # Lib and exe path
 #
 SET (LIBRARY_OUTPUT_PATH 
-     ${Wrapping_BINARY_DIR}/bin/ CACHE PATH 
-     "Single output directory for building all libraries.")
+  ${Wrapping_BINARY_DIR}/bin/ CACHE PATH 
+  "Single output directory for building all libraries.")
 
 SET (EXECUTABLE_OUTPUT_PATH 
-     ${Wrapping_BINARY_DIR}/bin/ CACHE PATH 
-     "Single output directory for building all executables.")
+  ${Wrapping_BINARY_DIR}/bin/ CACHE PATH 
+  "Single output directory for building all executables.")
 
 #
 # Where will executable tests be written ?
@@ -37,11 +37,11 @@ SET(WRAP ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/Wrap)
 SET (SRCS
   vtkExcluded
   vtkIncluded
-)
+  )
 
 WRAP_EXCLUDE_FILES (
   vtkExcluded
-)
+  )
 
 #
 # Specify (empty) VTK hint files
@@ -55,8 +55,8 @@ SET (VTK_WRAP_TCL "On")
 SET (VTK_WRAP_TCL_EXE "${WRAP}")
 VTK_WRAP_TCL (wraplibTCL TCL_SRCS SRCS)
 ADD_CUSTOM_TARGET(wraplibTCL ALL 
-      ${CMAKE_COMMAND} -E echo "dummy target"  
-      ) 
+  ${CMAKE_COMMAND} -E echo "dummy target"  
+  ) 
 
 #
 # Wrap VTK -> Python
@@ -65,8 +65,8 @@ SET (VTK_WRAP_PYTHON "On")
 SET (VTK_WRAP_PYTHON_EXE "${WRAP}")
 VTK_WRAP_PYTHON (wraplibPython Python_SRCS SRCS)
 ADD_CUSTOM_TARGET(wraplibPython ALL 
-      ${CMAKE_COMMAND} -E echo "dummy target"  
-      ) 
+  ${CMAKE_COMMAND} -E echo "dummy target"  
+  ) 
 
 #
 # Wrap VTK -> Java
@@ -85,8 +85,8 @@ CONFIGURE_FILE(
   ${VTK_JAVA_HOME}/vtkIncluded.java
   COPYONLY IMMEDIATE)
 ADD_CUSTOM_TARGET(wraplibJava ALL 
-      ${CMAKE_COMMAND} -E echo "dummy target"  
-      ) 
+  ${CMAKE_COMMAND} -E echo "dummy target"  
+  ) 
 
 #
 # QT Wrappers
@@ -99,24 +99,24 @@ INCLUDE( ${CMAKE_ROOT}/Modules/FindQt.cmake )
 
 IF (QT_FOUND)
 
-ADD_EXECUTABLE (qtwrapping qtwrappingmain.cxx QTUI_S_SRCS)
+  INCLUDE_DIRECTORIES( ${QT_INCLUDE_DIR} )
+  INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR} )
 
-INCLUDE_DIRECTORIES( ${QT_INCLUDE_DIR} )
-INCLUDE_DIRECTORIES( ./ )
+  LINK_LIBRARIES( ${QT_LIBRARIES} )
 
-LINK_LIBRARIES( ${QT_LIBRARIES} )
-IF(UNIX)
-  LINK_LIBRARIES(-lX11 -lpthread)
-ENDIF(UNIX)
+  QT_WRAP_CPP (wraplibQT QT_SRCS SRCS)
+  CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/foo.ui.in
+    ${CMAKE_CURRENT_BINARY_DIR}/foo.ui)
 
-QT_WRAP_CPP (wraplibQT QT_SRCS SRCS)
+  SET (QT_WRAP_UI "On")
+  SET (QT_UIC_EXE "${QT_UIC_EXECUTABLE}")
+  SET (QTUI_SRCS
+    qtwrapping.ui
+    ${CMAKE_CURRENT_BINARY_DIR}/foo.ui
+    )
+  QT_WRAP_UI (qtwrapping QTUI_H_SRCS QTUI_S_SRCS QTUI_SRCS)
 
-SET (QT_WRAP_UI "On")
-SET (QT_UIC_EXE "echo")
-SET (QTUI_SRCS
-  qtwrapping.ui
-)
-QT_WRAP_UI (qtwrapping QTUI_H_SRCS QTUI_S_SRCS QTUI_SRCS)
+  ADD_EXECUTABLE (qtwrapping qtwrappingmain.cxx QTUI_S_SRCS)
 
 ENDIF (QT_FOUND)
 
@@ -128,7 +128,7 @@ ENDIF (QT_FOUND)
 #
 SET (FLTK_SRCS
   fltk1.fl
-)
+  )
 SET (FLTK_WRAP_UI "On")
 SET (FLTK_FLUID_EXECUTABLE "echo")
 FLTK_WRAP_UI (wraplibFLTK FLTK_SRCS)
@@ -151,11 +151,11 @@ USE_MANGLED_MESA (${Wrapping_BINARY_DIR} ${Wrapping_BINARY_DIR}/mangled_mesa)
 # Instantiator
 #
 VTK_MAKE_INSTANTIATOR(vtkWraplibInstantiator 
-                      Instantiator_SRCS
-                      SRCS
-                      EXPORT_MACRO VTK_WRAPLIB_EXPORT
-                      HEADER_LOCATION ${Wrapping_BINARY_DIR}
-                      GROUP_SIZE 5)
+  Instantiator_SRCS
+  SRCS
+  EXPORT_MACRO VTK_WRAPLIB_EXPORT
+  HEADER_LOCATION ${Wrapping_BINARY_DIR}
+  GROUP_SIZE 5)
 
 #
 # ITK Tcl Wrapping
@@ -165,5 +165,5 @@ SET(CABLE_INCLUDE_DIR ${Wrapping_SOURCE_DIR})
 ADD_LIBRARY(wrapITK)
 ITK_WRAP_TCL(wrapITK itkWrapperConfig.cxx)
 CONFIGURE_FILE(${Wrapping_SOURCE_DIR}/itkWrapperConfig.cxx
-	       ${Wrapping_BINARY_DIR}/itkWrapperConfig_tcl.cxx
-               COPYONLY IMMEDIATE)
+  ${Wrapping_BINARY_DIR}/itkWrapperConfig_tcl.cxx
+  COPYONLY IMMEDIATE)
