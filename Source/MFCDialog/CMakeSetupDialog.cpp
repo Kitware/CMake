@@ -586,6 +586,11 @@ void CMakeSetupDialog::SaveCacheFromGUI()
 
 void CMakeSetupDialog::OnSize(UINT nType, int cx, int cy) 
 {
+  if (nType == SIZE_MINIMIZED)
+    {
+    CDialog::OnSize(nType, cx, cy);
+    return;
+    }  
   if (m_oldCX == -1)
     {
     m_oldCX = cx;
