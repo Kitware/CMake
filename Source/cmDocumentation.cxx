@@ -122,7 +122,7 @@ cmDocumentation::cmDocumentation()
 //----------------------------------------------------------------------------
 void cmDocumentation::PrintCopyright(std::ostream& os)
 {
-  os << "CMake version " CMake_VERSION_STRING "\n";
+  os << "CMake version " CMake_VERSION_FULL "\n";
   for(const cmDocumentationEntry* op = cmDocumentationCopyright;
       op->brief; ++op)
     {
@@ -144,7 +144,7 @@ void cmDocumentation::PrintCopyright(std::ostream& os)
 //----------------------------------------------------------------------------
 void cmDocumentation::PrintVersion(std::ostream& os)
 {
-  os << "CMake version " CMake_VERSION_STRING "\n";
+  os << "CMake version " CMake_VERSION_FULL "\n";
 }
 
 //----------------------------------------------------------------------------
@@ -764,7 +764,7 @@ void cmDocumentation::PrintDocumentationMan(std::ostream& os)
   this->CreateManDocumentation();
   os << ".TH CMake 1 \""
      << cmSystemTools::GetCurrentDateTime("%B %d, %Y").c_str()
-     << "\" \"CMake " CMake_VERSION_STRING "\"\n";
+     << "\" \"CMake " CMake_VERSION_FULL "\"\n";
   this->Print(ManForm, os);
 }
 

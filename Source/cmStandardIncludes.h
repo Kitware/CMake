@@ -28,7 +28,11 @@
 // CMAKE_NO_STD_NAMESPACE, and other macros.
 #include "cmConfigure.h"
 
-#define CMake_VERSION_STRING \
+#define CMake_VERSION \
+  CMAKE_TO_STRING(CMake_VERSION_MAJOR) "." \
+  CMAKE_TO_STRING(CMake_VERSION_MINOR)
+
+#define CMake_VERSION_FULL \
   CMAKE_TO_STRING(CMake_VERSION_MAJOR) "." \
   CMAKE_TO_STRING(CMake_VERSION_MINOR) "." \
   CMAKE_TO_STRING(CMake_VERSION_PATCH)

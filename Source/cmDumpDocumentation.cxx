@@ -66,7 +66,7 @@ int DumpHTML(const char* outname)
   cmDocumentation doc;
   std::vector<cmDocumentationEntry> commands;
   cmi.GetCommandDocumentation(commands);
-  doc.AddSection("Documentation for Commands of CMake " CMake_VERSION_STRING,
+  doc.AddSection("Documentation for Commands of CMake " CMake_VERSION_FULL,
                  &commands[0]);
   doc.Print(cmDocumentation::HTMLForm, fout);
   
@@ -78,12 +78,15 @@ int DumpForCoverage()
   cmake cmi;
   cmDocumentation doc;
   std::vector<cmDocumentationEntry> commands;
+  std::vector<cmDocumentationEntry> generators;
   cmi.GetCommandDocumentation(commands);
+  cmi.GetGeneratorDocumentation(generators);
   doc.SetNameSection(cmDocumentationName);
   doc.SetUsageSection(cmDocumentationUsage);
   doc.SetDescriptionSection(cmDocumentationDescription);
   doc.SetOptionsSection(cmDocumentationOptions);
   doc.SetCommandsSection(&commands[0]);
+  doc.SetGeneratorsSection(&generators[0]);
   doc.PrintDocumentation(cmDocumentation::Usage, std::cout);
   doc.PrintDocumentation(cmDocumentation::Full, std::cout);
   doc.PrintDocumentation(cmDocumentation::HTML, std::cout);
