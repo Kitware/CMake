@@ -193,6 +193,12 @@ bool cmMakefile::CommandExists(const char* name) const
 void cmMakefile::ExecuteCommand(std::string &name,
                                 std::vector<std::string> const& arguments)
 {
+  // quick return if blocked
+  if(this->IsFunctionBlocked(name.c_str(), arguments))
+    {
+    return;
+    }
+  // execute the command
   RegisteredCommandsMap::iterator pos = m_Commands.find(name);
   if(pos != m_Commands.end())
     {
@@ -342,12 +348,8 @@ bool cmMakefile::ReadListFile(const char* filename, const char* external)
   for(size_t i =0; i < numberFunctions; ++i)
     {
     cmListFileFunction& curFunction = lf->m_Functions[i];
-    if(!this->IsFunctionBlocked(curFunction.m_Name.c_str(),
-                                curFunction.m_Arguments))
-      {
-      this->ExecuteCommand(curFunction.m_Name,
-                           curFunction.m_Arguments);
-      }
+    this->ExecuteCommand(curFunction.m_Name,
+                         curFunction.m_Arguments);
     }
 
   // send scope ended to and funciton blockers

@@ -21,10 +21,16 @@ bool cmForEachFunctionBlocker::
 IsFunctionBlocked(const char *name, const std::vector<std::string> &args, 
                   cmMakefile &mf) 
 {
+  // prevent recusion and don't let this blobker blobk its own commands
+  if (m_Executing)
+    {
+    return false;
+    }
   
   // at end of for each execute recorded commands
   if (!strcmp(name,"ENDFOREACH") && args[0] == m_Args[0])
     {
+    m_Executing = true;
     std::string variable = "${";
     variable += m_Args[0];
     variable += "}"; 
@@ -90,7 +96,7 @@ bool cmForEachCommand::InitialPass(std::vector<std::string> const& argsIn)
   std::vector<std::string> args;
   cmSystemTools::ExpandListArguments(argsIn, args);
 
-  if(args.size() < 2 )
+  if(args.size() < 1)
     {
     this->SetError("called with incorrect number of arguments");
     return false;

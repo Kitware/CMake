@@ -29,7 +29,7 @@
 class cmForEachFunctionBlocker : public cmFunctionBlocker
 {
 public:
-  cmForEachFunctionBlocker() {}
+  cmForEachFunctionBlocker() {m_Executing = false;}
   virtual ~cmForEachFunctionBlocker() {}
   virtual bool IsFunctionBlocked(const char *name, 
                                  const std::vector<std::string> &args, 
@@ -44,6 +44,7 @@ public:
   std::vector<std::string> m_Args;
   std::vector<std::string> m_Commands;
   std::vector<std::vector<std::string> > m_CommandArguments;
+  bool m_Executing;
 };
 
 /** \class cmForEachCommand

@@ -164,13 +164,13 @@ REMOVE(REMOVE_STRING ${removeVar1} f)
 # Test an IF inside a FOREACH.
 #
 FOREACH(x "a")
-  IF(1)
+  IF(${x} MATCHES "a")
     # Should always execute.
     SET(IF_INSIDE_FOREACH_THEN_EXECUTED 1)
-  ELSE(1)
+  ELSE(${x} MATCHES "a")
     # Should never execute.
     SET(IF_INSIDE_FOREACH_ELSE_EXECUTED 1)
-  ENDIF(1)
+  ENDIF(${x} MATCHES "a")
 ENDFOREACH(x)
 
 
