@@ -2961,10 +2961,10 @@ int cmCTest::ProcessTests()
       {
       cmsys::Directory d;
       d.Load(notes_dir.c_str());
-      unsigned long cc;
-      for ( cc = 0; cc < d.GetNumberOfFiles(); cc ++ )
+      unsigned long kk;
+      for ( kk = 0; kk < d.GetNumberOfFiles(); kk ++ )
         {
-        const char* file = d.GetFile(cc);
+        const char* file = d.GetFile(kk);
         std::string fullname = notes_dir + "/" + file;
         if ( cmSystemTools::FileExists(fullname.c_str()) &&
           !cmSystemTools::FileIsDirectory(fullname.c_str()) )
