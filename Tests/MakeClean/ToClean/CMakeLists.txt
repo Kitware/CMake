@@ -1,0 +1,22 @@
+PROJECT(ToClean)
+
+# Build a simple project.
+ADD_EXECUTABLE(toclean toclean.cxx)
+
+# List some build-time-generated files.
+GET_TARGET_PROPERTY(TOCLEAN_FILES toclean LOCATION)
+SET(TOCLEAN_FILES ${TOCLEAN_FILES}
+  "${ToClean_BINARY_DIR}/toclean${CMAKE_CXX_OUTPUT_EXTENSION}")
+#SET(TOCLEAN_FILES ${TOCLEAN_FILES}
+#  "${ToClean_BINARY_DIR}/toclean.dir/toclean${CMAKE_CXX_OUTPUT_EXTENSION}")
+
+# Create a file that must be registered for cleaning.
+FILE(WRITE "${ToClean_BINARY_DIR}/Registered.txt"
+  "File registered for cleaning.\n")
+SET_DIRECTORY_PROPERTIES(PROPERTIES
+  ADDITIONAL_MAKE_CLEAN_FILES "${ToClean_BINARY_DIR}/Registered.txt")
+SET(TOCLEAN_FILES ${TOCLEAN_FILES} "${ToClean_BINARY_DIR}/Registered.txt")
+
+# Configure a file listing these build-time-generated files.
+CONFIGURE_FILE(${ToClean_SOURCE_DIR}/ToCleanFiles.cmake.in
+               ${ToClean_BINARY_DIR}/ToCleanFiles.cmake @ONLY IMMEDIATE)
