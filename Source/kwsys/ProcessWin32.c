@@ -133,8 +133,11 @@ struct kwsysProcess_s
   /* The status of the process.  */
   int State;
   
-  /* The command line to execute. */
+  /* The command line to execute.  */
   char* Command;
+  
+  /* The working directory for the child process.  */
+  char* WorkingDirectory;
   
   /* On Win9x platforms, the path to the forwarding executable.  */
   char* Win9x;
@@ -417,6 +420,7 @@ void kwsysProcess_Delete(kwsysProcess* cp)
   
   /* Free memory.  */
   kwsysProcess_SetCommand(cp, 0);
+  kwsysProcess_SetWorkingDirectory(cp, 0);
   if(cp->Win9x)
     {
     _unlink(cp->Win9x);
@@ -607,6 +611,30 @@ void kwsysProcess_SetTimeout(kwsysProcess* cp, double timeout)
 }
 
 /*--------------------------------------------------------------------------*/
+void kwsysProcess_SetWorkingDirectory(kwsysProcess* cp, const char* dir)
+{
+  if(cp->WorkingDirectory)
+    {
+    free(cp->WorkingDirectory);
+    cp->WorkingDirectory = 0;
+    }
+  if(dir && dir[0])
+    {
+    /* We must convert the working directory to a full path.  */
+    DWORD length = GetFullPathName(dir, 0, 0, 0);
+    if(length > 0)
+      {
+      cp->WorkingDirectory = (char*)malloc(length);
+      if(!GetFullPathName(dir, length, cp->WorkingDirectory, 0))
+        {
+        free(cp->WorkingDirectory);
+        cp->WorkingDirectory = 0;
+        }
+      }
+    }
+}
+
+/*--------------------------------------------------------------------------*/
 int kwsysProcess_GetState(kwsysProcess* cp)
 {
   return cp->State;
@@ -749,7 +777,7 @@ void kwsysProcess_Execute(kwsysProcess* cp)
   /* CREATE THE CHILD PROCESS */
   if(!CreateProcess(0, cp->RealCommand, 0, 0, TRUE,
                     cp->Win9x? CREATE_NEW_CONSOLE:DETACHED_PROCESS, 0,
-                    0, &si, &cp->ProcessInformation))
+                    cp->WorkingDirectory, &si, &cp->ProcessInformation))
     {
     kwsysProcessCleanup(cp, 1);
     return;
