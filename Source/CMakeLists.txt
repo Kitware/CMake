@@ -108,7 +108,7 @@ ENDIF (WIN32)
 
 # create a library used by the command line and the GUI
 ADD_LIBRARY(CMakeLib ${SRCS})
-TARGET_LINK_LIBRARIES(CMakeLib cmsys)
+TARGET_LINK_LIBRARIES(CMakeLib cmsys cmexpat)
 
 # always link in the library
 # the library is found here
