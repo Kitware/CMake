@@ -204,10 +204,6 @@ private:
   bool ProcessMemCheckPurifyOutput(const std::string& str, 
                                    std::string& log, int* results);
 
-  ///! Maximum size of testing string
-  std::string::size_type m_MaximumPassedTestResultSize;
-  std::string::size_type m_MaximumFailedTestResultSize;
-
   std::string TestsToRunString;
   
 };

@@ -197,9 +197,6 @@ cmCTestTestHandler::cmCTestTestHandler()
   m_UseIncludeRegExp       = false;
   m_UseExcludeRegExp       = false;
   m_UseExcludeRegExpFirst  = false;
-
-  m_MaximumPassedTestResultSize  = 100 * 1024;
-  m_MaximumFailedTestResultSize  = 200 * 1024;
 }
 
 //----------------------------------------------------------------------
@@ -213,26 +210,6 @@ void cmCTestTestHandler::PopulateCustomVectors(cmMakefile *mf)
                                 m_CustomPreMemCheck);
   cmCTest::PopulateCustomVector(mf, "CTEST_CUSTOM_POST_MEMCHECK", 
                                 m_CustomPostMemCheck);
-
-  const char* maxstr = 
-    mf->GetDefinition("CTEST_CUSTOM_PASSED_TEST_STRING_MAXLEN");
-  if ( maxstr )
-    {
-    long val = atoi(maxstr);
-    if ( val > 0 )
-      {
-      m_MaximumPassedTestResultSize = val;
-      }
-    }
-  maxstr = mf->GetDefinition("CTEST_CUSTOM_FAILED_TEST_STRING_MAXLEN");
-  if ( maxstr )
-    {
-    long val = atoi(maxstr);
-    if ( val > 0 )
-      {
-      m_MaximumFailedTestResultSize = val;
-      }
-    }
 
   cmCTest::PopulateCustomVector(mf,
                              "CTEST_CUSTOM_TESTS_IGNORE", 
@@ -843,27 +820,7 @@ void cmCTestTestHandler::GenerateDartTestOutput(std::ostream& os)
     os 
       << "\t\t\t<Measurement>\n"
       << "\t\t\t\t<Value>";
-    size_t truncate = result->m_Output.size();
-    if ( result->m_Status == cmCTestTestHandler::COMPLETED )
-      {
-      if ( result->m_Output.size() > m_MaximumPassedTestResultSize )
-        {
-        truncate = m_MaximumPassedTestResultSize;
-        }
-      }
-    else
-      {
-      if ( result->m_Output.size() > m_MaximumFailedTestResultSize )
-        {
-        truncate = m_MaximumFailedTestResultSize;
-        }
-      }
-    os << cmCTest::MakeXMLSafe(result->m_Output.substr(0, truncate));
-    if ( truncate < result->m_Output.size() )
-      {
-      os << "...\n\nThe output was stirpped because it excedes maximum allowed size: "
-        << truncate << std::endl;
-      }
+    os << cmCTest::MakeXMLSafe(result->m_Output);
     os
       << "</Value>\n"
       << "\t\t\t</Measurement>\n"
