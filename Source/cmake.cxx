@@ -410,7 +410,7 @@ int cmake::AddCMakePaths(const char *arg0)
   if (getenv("CMAKE_ROOT"))
     {
     cMakeRoot = getenv("CMAKE_ROOT");
-    modules = cMakeRoot + "/Modules/FindVTK.cmake";
+    modules = cMakeRoot + "/Modules/CMakeDefaultMakeRuleVariables.cmake";
     }
   if(!cmSystemTools::FileExists(modules.c_str()))
     {
@@ -422,21 +422,21 @@ int cmake::AddCMakePaths(const char *arg0)
       cMakeRoot = cMakeRoot.substr(0, slashPos);
       }
     // is there no Modules direcory there?
-    modules = cMakeRoot + "/Modules/FindVTK.cmake"; 
+    modules = cMakeRoot + "/Modules/CMakeDefaultMakeRuleVariables.cmake"; 
     }
   
   if (!cmSystemTools::FileExists(modules.c_str()))
     {
     // try exe/../share/cmake
     cMakeRoot += "/share/CMake";
-    modules = cMakeRoot + "/Modules/FindVTK.cmake";
+    modules = cMakeRoot + "/Modules/CMakeDefaultMakeRuleVariables.cmake";
     }
 #ifdef CMAKE_ROOT_DIR
   if (!cmSystemTools::FileExists(modules.c_str()))
     {
     // try compiled in root directory
     cMakeRoot = CMAKE_ROOT_DIR;
-    modules = cMakeRoot + "/Modules/FindVTK.cmake";
+    modules = cMakeRoot + "/Modules/CMakeDefaultMakeRuleVariables.cmake";
     }
 #endif
 #ifdef CMAKE_PREFIX
@@ -444,7 +444,7 @@ int cmake::AddCMakePaths(const char *arg0)
     {
     // try compiled in install prefix
     cMakeRoot = CMAKE_PREFIX "/share/CMake";
-    modules = cMakeRoot + "/Modules/FindVTK.cmake";
+    modules = cMakeRoot + "/Modules/CMakeDefaultMakeRuleVariables.cmake";
     }
 #endif
   if (!cmSystemTools::FileExists(modules.c_str()))
@@ -452,14 +452,14 @@ int cmake::AddCMakePaths(const char *arg0)
     // try 
     cMakeRoot  = cmSystemTools::GetProgramPath(cMakeSelf.c_str());
     cMakeRoot += "/share/CMake";
-    modules = cMakeRoot +  "/Modules/FindVTK.cmake";
+    modules = cMakeRoot +  "/Modules/CMakeDefaultMakeRuleVariables.cmake";
     }
   if(!cmSystemTools::FileExists(modules.c_str()))
     {
     // next try exe
     cMakeRoot  = cmSystemTools::GetProgramPath(cMakeSelf.c_str());
     // is there no Modules direcory there?
-    modules = cMakeRoot + "/Modules/FindVTK.cmake"; 
+    modules = cMakeRoot + "/Modules/CMakeDefaultMakeRuleVariables.cmake"; 
     }
   if (!cmSystemTools::FileExists(modules.c_str()))
     {
