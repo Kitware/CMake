@@ -68,7 +68,6 @@ private:
    * List of header files that pprovide the source for m_WrapClasses.
    */
   std::vector<std::string> m_WrapHeaders;
-  std::vector<std::string> m_OriginalNames;
   std::string m_LibraryName;
   std::string m_SourceList;
 };

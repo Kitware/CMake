@@ -103,7 +103,6 @@ bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& args)
         // add starting depends
         file.GetDepends().push_back(hname);
         m_WrapClasses.push_back(file);
-        m_OriginalNames.push_back(curr.GetSourceName());
         }
       }
     }
@@ -123,7 +122,13 @@ void cmQTWrapCPPCommand::FinalPass()
   // wrap all the .h files
   depends.push_back(moc_exe);
 
-  std::string moc_list(""); 
+  const char * GENERATED_QT_FILES_value=
+      m_Makefile->GetDefinition("GENERATED_QT_FILES"); 
+  std::string moc_list("");
+  if (GENERATED_QT_FILES_value!=0)
+    {
+    moc_list=moc_list+GENERATED_QT_FILES_value;
+    }
 
   for(int classNum = 0; classNum < lastClass; classNum++)
     {
