@@ -154,7 +154,7 @@ int cmTryCompileCommand::CoreTryCompileCode(
       }
     else if ( format == cmSystemTools::CXX_FILE_FORMAT )
       {
-      fprintf(fout, "PROJECT(CMAKE_TRY_COMPILE CXX)\n");      
+      fprintf(fout, "PROJECT(CMAKE_TRY_COMPILE C CXX)\n");      
       }
     else if ( format == cmSystemTools::FORTRAN_FILE_FORMAT )
       {
