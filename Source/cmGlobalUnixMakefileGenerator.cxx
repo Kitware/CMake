@@ -54,14 +54,29 @@ void cmGlobalUnixMakefileGenerator::EnableLanguage(const char* lang,
         putenv(envCC);
 #endif
         }
-      std::string cmd = root;
-      cmd += "/Templates/cconfigure";
-      cmSystemTools::RunCommand(cmd.c_str(), output, 
-                                cmSystemTools::ConvertToOutputPath(mf->GetHomeOutputDirectory()).c_str());
+      if (!m_CMakeInstance->GetIsInTryCompile())
+        {
+        std::string cmd = root;
+        cmd += "/Templates/cconfigure";
+        cmSystemTools::RunCommand(cmd.c_str(), output, 
+                                  cmSystemTools::ConvertToOutputPath(
+                                    mf->GetHomeOutputDirectory()).c_str());
+        }
       std::string fpath = mf->GetHomeOutputDirectory();
       fpath += "/CCMakeSystemConfig.cmake";
       mf->ReadListFile(0,fpath.c_str());
       this->SetLanguageEnabled("C");
+      if (!m_CMakeInstance->GetIsInTryCompile())
+        {
+        // for old versions of CMake ListFiles
+        const char* versionValue
+          = mf->GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
+        if (!versionValue || atof(versionValue) <= 1.4)
+          {
+          std::string fpath = root + "/Modules/CMakeBackwardCompatibilityC.cmake";
+          mf->ReadListFile(NULL,fpath.c_str());
+          }
+        }
       }
     // if CXX 
     if(!this->GetLanguageEnabled("CXX")  && strcmp(lang, "CXX") == 0)
@@ -85,26 +100,31 @@ void cmGlobalUnixMakefileGenerator::EnableLanguage(const char* lang,
 #endif
         }
       std::string cmd = root;
-      cmd += "/Templates/cxxconfigure";
-      cmSystemTools::RunCommand(cmd.c_str(), output, 
-                                cmSystemTools::ConvertToOutputPath(mf->GetHomeOutputDirectory()).c_str());
+      if (!m_CMakeInstance->GetIsInTryCompile())
+        {
+        cmd += "/Templates/cxxconfigure";
+        cmSystemTools::RunCommand(cmd.c_str(), output, 
+                                  cmSystemTools::ConvertToOutputPath(
+                                    mf->GetHomeOutputDirectory()).c_str());
+        }
       std::string fpath = mf->GetHomeOutputDirectory();
       fpath += "/CXXCMakeSystemConfig.cmake";
       mf->ReadListFile(0,fpath.c_str());
       this->SetLanguageEnabled("CXX");
       
-      // for old versions of CMake ListFiles
       if (!m_CMakeInstance->GetIsInTryCompile())
         {
+        // for old versions of CMake ListFiles
         const char* versionValue
           = mf->GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
         if (!versionValue || atof(versionValue) <= 1.4)
           {
-          fpath = root + "/Modules/TestForANSIStreamHeaders.cmake";
+          fpath = root + "/Modules/CMakeBackwardCompatibilityCXX.cmake";
           mf->ReadListFile(NULL,fpath.c_str());
           }
         }
       }
+    
     // if we are from the top, always define this
     mf->AddDefinition("RUN_CONFIGURE", true);
     }
