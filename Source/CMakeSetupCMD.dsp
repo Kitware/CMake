@@ -107,15 +107,7 @@ SOURCE=.\cmDirectory.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmDSPBuilder.cxx
-# End Source File
-# Begin Source File
-
 SOURCE=.\cmDSPMakefile.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=.\cmDSWBuilder.cxx
 # End Source File
 # Begin Source File
 
@@ -128,10 +120,6 @@ SOURCE=.\cmMakeDepend.cxx
 # Begin Source File
 
 SOURCE=.\cmMakefile.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=.\cmPCBuilder.cxx
 # End Source File
 # Begin Source File
 
