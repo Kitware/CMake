@@ -774,27 +774,21 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
       return 0;
     }
 
-    // Clock command
+    // Command to change directory and run a program.
     else if (args[1] == "chdir" && args.size() >= 4)
       {
       std::string directory = args[2];
-      unsigned pos = 3;
       if(!cmSystemTools::FileExists(directory.c_str()))
         {
-        directory += " ";
-        directory += args[3];
-        if(!cmSystemTools::FileExists(directory.c_str()))
-          {
-          cmSystemTools::Error("Directory does not exist for chdir command (try1): ", args[2].c_str());
-          cmSystemTools::Error("Directory does not exist for chdir command (try2): ", directory.c_str());
-          }
-        pos = 4;
+        cmSystemTools::Error("Directory does not exist for chdir command: ",
+                             args[2].c_str());
+        return 0;
         }
-      
+
       std::string command = "\"";
-      command += args[pos];
+      command += args[3];
       command += "\"";
-      for (std::string::size_type cc = pos+1; cc < args.size(); cc ++)
+      for (std::string::size_type cc = 4; cc < args.size(); cc ++)
         {
         command += " \"";
         command += args[cc];
