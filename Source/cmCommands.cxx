@@ -58,6 +58,7 @@
 #include "cmMessageCommand.cxx"
 #include "cmOptionCommand.cxx"
 #include "cmProjectCommand.cxx"
+#include "cmSeparateArgumentsCommand.cxx"
 #include "cmSetCommand.cxx"
 #include "cmSetSourceFilesPropertiesCommand.cxx"
 #include "cmSiteNameCommand.cxx"
@@ -87,7 +88,6 @@
 #include "cmLoadCacheCommand.cxx"
 #include "cmOutputRequiredFilesCommand.cxx"
 #include "cmRemoveCommand.cxx"
-#include "cmSeparateArgumentsCommand.cxx"
 #include "cmSetTargetPropertiesCommand.cxx"
 #include "cmSourceFilesCommand.cxx"
 #include "cmSourceFilesRemoveCommand.cxx"
@@ -150,6 +150,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmMessageCommand);
   commands.push_back(new cmOptionCommand);
   commands.push_back(new cmProjectCommand);
+  commands.push_back(new cmSeparateArgumentsCommand);
   commands.push_back(new cmSetCommand);
   commands.push_back(new cmSetSourceFilesPropertiesCommand);
   commands.push_back(new cmSiteNameCommand);
@@ -177,7 +178,6 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmLoadCommandCommand);
   commands.push_back(new cmOutputRequiredFilesCommand);
   commands.push_back(new cmRemoveCommand);
-  commands.push_back(new cmSeparateArgumentsCommand);
   commands.push_back(new cmSetTargetPropertiesCommand);
   commands.push_back(new cmSourceFilesCommand);
   commands.push_back(new cmSourceFilesRemoveCommand);
