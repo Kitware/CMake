@@ -267,9 +267,8 @@ bool cmGlob::FindFiles(const std::string& inexpr)
     expr += "/" + inexpr;
     }
 
-  int skip = 0;
-
 #if defined( CM_GLOB_SUPPORT_NETWORK_PATHS )
+  int skip = 0;
   // Handle network paths
   if ( expr[0] == '/' && expr[1] == '/' )
     {
