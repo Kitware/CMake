@@ -125,7 +125,7 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)
     "    }\n"
     "  strcpy(new_string, string);\n"
     "  char *p = new_string;\n"
-    "  while (*p != NULL)\n"
+    "  while (*p != 0)\n"
     "    {\n"
     "    *p = tolower(*p);\n"
     "    ++p;\n"
