@@ -18,7 +18,7 @@ SET (HAVE_UNISTD_H   1)
 SET (CMAKE_C_COMPILER ${BCB_BIN_PATH}/bcc32  CACHE FILEPATH
      "Name of C compiler used.")
 
-SET (CMAKE_C_FLAGS "-w- -whid -waus -wpar -tWM" CACHE STRING
+SET (CMAKE_C_FLAGS "-w- -whid -waus -tWM" CACHE STRING
      "Flags for C compiler.")
 
 SET (CMAKE_BUILD_TYPE Debug CACHE STRING 
