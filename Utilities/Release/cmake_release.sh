@@ -462,7 +462,7 @@ cygwin_package_script()
     utilities || return 1
     echo "Creating cygwin packaging script ..." &&
     (
-        cp ReleaseUtilities/cmake-cygwin-package.sh cmake-${VERSION}-${RELEASE}.sh &&
+        cp ReleaseUtilities/cygwin-package.sh.in cmake-${VERSION}-${RELEASE}.sh &&
         chmod u+x cmake-${VERSION}-${RELEASE}.sh
     ) >Logs/cygwin_package_script.log 2>&1 || error_log Logs/cygwin_package_script.log
 }
