@@ -21,6 +21,9 @@ SET (CMAKE_USE_WIN32_THREADS 1 CACHE BOOL
 SET (CMAKE_MAKE_PROGRAM "devenv" CACHE STRING 
      "Program used to build from dsp files.")
 
+SET (BUILDNAME "Win32-DotNET-devenv" CACHE STRING 
+     "Name used by dart to specify the build name.")
+
 SET (CMAKE_CONFIGURATION_TYPES "Debug Release MinSizeRel RelWithDebInfo" CACHE STRING 
      "Space separated list of supported configuration types, only supports Debug, Release, MinSizeRel, and RelWithDebInfo, anything else will be ignored.")
 
@@ -36,6 +39,7 @@ SET (CMAKE_SIZEOF_DOUBLE    8   CACHE INTERNAL "Size of double data type")
 # The following variables are advanced 
 
 MARK_AS_ADVANCED(
+BUILDNAME
 CMAKE_CXX_USE_RTTI
 CMAKE_CXX_COMPILER
 CMAKE_CXX_STACK_SIZE
