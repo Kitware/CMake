@@ -798,6 +798,9 @@ void cmMakefile::InitializeFromParent()
   // link libraries
   this->m_LinkLibraries = parent->m_LinkLibraries;
   
+  // link directories
+  this->m_LinkDirectories = parent->m_LinkDirectories;
+  
   // the initial project name
   this->m_ProjectName = parent->m_ProjectName;
 }
