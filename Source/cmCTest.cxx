@@ -764,7 +764,7 @@ int cmCTest::UpdateDirectory()
     cmsys::RegularExpression revision("^revision +([^ ]*) *$");
     cmsys::RegularExpression end_of_file("^=============================================================================$");
     cmsys::RegularExpression end_of_comment("^----------------------------$");
-    std::string current_path = "";
+    std::string current_path = "<no-path>";
     bool first_file = true;
 
     cmCTest::AuthorsToUpdatesMap authors_files_map;
