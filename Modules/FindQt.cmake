@@ -49,12 +49,18 @@ FIND_LIBRARY(QT_QASSISTANTCLIENT_LIBRARY
   C:/Progra~1/qt/lib
   )
 
-FIND_PROGRAM(QT_MOC_EXECUTABLE moc
-  $ENV{QTDIR}/bin C:/Progra~1/qt/bin
+FIND_PROGRAM(QT_MOC_EXECUTABLE 
+  NAMES moc moc-qt3
+  PATHS
+  $ENV{QTDIR}/bin
+  "C:/Program Files/qt/bin"
+  C:/Progra~1/qt/bin 
+  /usr/bin
+  
   )
 
 FIND_PROGRAM(QT_UIC_EXECUTABLE uic
-  $ENV{QTDIR}/bin C:/Progra~1/qt/bin
+  $ENV{QTDIR}/bin C:/Progra~1/qt/bin /usr/bin
   )
 
 
