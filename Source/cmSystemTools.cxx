@@ -2291,6 +2291,7 @@ bool cmSystemTools::SimpleGlob(const std::string& glob,
                                std::vector<std::string>& files, 
                                int type /* = 0 */)
 {
+  files.clear();
   if ( glob[glob.size()-1] != '*' )
     {
     return false;
