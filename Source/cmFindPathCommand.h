@@ -81,7 +81,8 @@ public:
       "<VAR> is created to store the result.  If the file is not "
       "found, the result will be <VAR>-NOTFOUND.  If DOC is specified "
       "then the next argument is treated as a documentation string for "
-      "the cache entry <VAR>.\n";
+      "the cache entry <VAR>.  The environment variable CMAKE_INCLUDE_PATH "
+      "is searched as well as the PATH variable.\n";
     }
   
   cmTypeMacro(cmFindPathCommand, cmCommand);

@@ -87,7 +87,8 @@ public:
       "  FIND_LIBRARY(VAR libraryName [path1 path2 ...])\n"
       "Find a library with the given name by searching in the specified "
       "paths.  This is a short-hand signature for the command that is "
-      "sufficient in many cases.";
+      "sufficient in many cases.  The environment variable CMAKE_LIBRARY_PATH "
+      "is searched as well as the PATH variable.\n";
     }
   
   cmTypeMacro(cmFindLibraryCommand, cmCommand);

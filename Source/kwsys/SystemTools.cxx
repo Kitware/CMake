@@ -158,14 +158,18 @@ SystemTools::GetTime(void)
 }
 
 // adds the elements of the env variable path to the arg passed in
-void SystemTools::GetPath(kwsys_stl::vector<kwsys_stl::string>& path)
+void SystemTools::GetPath(kwsys_stl::vector<kwsys_stl::string>& path, const char* env)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
   const char* pathSep = ";";
 #else
   const char* pathSep = ":";
 #endif
-  kwsys_stl::string pathEnv = getenv("PATH");
+  if(!env)
+    {
+    env = "PATH";
+    }
+  kwsys_stl::string pathEnv = getenv(env);
   // A hack to make the below algorithm work.  
   if(pathEnv[pathEnv.length()-1] != ':')
     {

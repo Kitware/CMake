@@ -75,7 +75,7 @@ bool cmFindPathCommand::InitialPass(std::vector<std::string> const& argsIn)
     // Glob the entry in case of wildcards.
     cmSystemTools::GlobDirs(exp.c_str(), path);
     }
-
+  cmSystemTools::GetPath(path, "CMAKE_INCLUDE_PATH");
   // add the standard path
   cmSystemTools::GetPath(path);
   unsigned int k;

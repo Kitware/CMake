@@ -121,9 +121,10 @@ public:
   static unsigned long FileLength(const char *filename);
   /**
    *  Add the paths from the environment variable PATH to the 
-   *  string vector passed in.
+   *  string vector passed in.  If env is set then the value
+   *  of env will be used instead of PATH.
    */
-  static void GetPath(kwsys_stl::vector<kwsys_stl::string>& path);
+  static void GetPath(kwsys_stl::vector<kwsys_stl::string>& path, const char* env=0);
 
   /** Read an environment variable.  */
   static const char* GetEnv(const char* key);
