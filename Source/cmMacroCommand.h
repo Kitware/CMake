@@ -101,7 +101,12 @@ public:
       "but before the matching ENDMACRO, are not invoked until the macro "
       "is invoked.  When it is invoked, the commands recorded in the "
       "macro are first modified by replacing formal parameters (${arg1}) with "
-      "the arguments passed, and then invoked as normal commands.";
+      "the arguments passed, and then invoked as normal commands. In "
+      "addition to referencing the formal parameters you can reference "
+      "the variable ARGC which will be set to the number of arguments "
+      "passed into the function as well as ARGV0 ARGV1 ARGV2 ... which "
+      "will have the actual values of the arguments passed in. This "
+      "fascilitates creating macros with optional arguments.";
     }
   
   cmTypeMacro(cmMacroCommand, cmCommand);
