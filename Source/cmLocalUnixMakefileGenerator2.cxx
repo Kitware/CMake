@@ -368,7 +368,7 @@ cmLocalUnixMakefileGenerator2
   std::string depEcho = "Scanning ";
   depEcho += lang;
   depEcho += " dependencies of ";
-  depEcho += obj;
+  depEcho += this->ConvertToRelativeOutputPath(obj.c_str());
   depEcho += "...";
 
   // Add a command to call CMake to scan dependencies.  CMake will
@@ -462,7 +462,7 @@ cmLocalUnixMakefileGenerator2
   std::string buildEcho = "Building ";
   buildEcho += lang;
   buildEcho += " object ";
-  buildEcho += obj;
+  buildEcho += this->ConvertToRelativeOutputPath(obj.c_str());
   buildEcho += "...";
   this->WriteMakeRule(ruleFileStream, 0, buildEcho.c_str(),
                       obj.c_str(), depends, commands);
@@ -532,6 +532,7 @@ cmLocalUnixMakefileGenerator2
       {
       replace = *dep;
       m_Makefile->ExpandVariablesInString(replace);
+      replace = this->ConvertToRelativeOutputPath(replace.c_str());
       replace = this->ConvertToMakeTarget(replace.c_str());
       os << tgt.c_str() << space << ": " << replace.c_str() << "\n";
       }
@@ -1035,10 +1036,10 @@ cmLocalUnixMakefileGenerator2
       i != objects.end(); ++i)
     {
     objs += space;
-    objs += *i;
+    objs += this->ConvertToRelativeOutputPath(i->c_str());
     objsQuoted += space;
     objsQuoted += "\"";
-    objsQuoted += *i;
+    objsQuoted += this->ConvertToRelativeOutputPath(i->c_str());
     objsQuoted += "\"";
     space = " ";
     }
@@ -1065,7 +1066,7 @@ cmLocalUnixMakefileGenerator2
   std::string buildEcho = "Linking ";
   buildEcho += linkLanguage;
   buildEcho += " executable ";
-  buildEcho += targetFullPath;
+  buildEcho += this->ConvertToRelativeOutputPath(targetFullPath.c_str());
   buildEcho += "...";
   this->WriteMakeRule(ruleFileStream, 0, buildEcho.c_str(),
                       targetFullPath.c_str(), depends, commands);
@@ -1147,7 +1148,7 @@ cmLocalUnixMakefileGenerator2
   std::string extraFlags;
   this->AppendFlags(extraFlags, target.GetProperty("LINK_FLAGS"));
   this->AddConfigVariableFlags(extraFlags, "CMAKE_MODULE_LINKER_FLAGS");
-  // TODO: Should .def files be supported here also?
+  // TODO: .def files should be supported here also.
   this->WriteLibraryRule(ruleFileStream, ruleFileName, target, objects,
                          linkRuleVar.c_str(), extraFlags.c_str());
 }
@@ -1162,6 +1163,8 @@ cmLocalUnixMakefileGenerator2
                    const char* linkRuleVar,
                    const char* extraFlags)
 {
+  // TODO: Merge the methods that call this method to avoid
+  // code duplication.
   std::vector<std::string> commands;
 
   // Build list of dependencies.  TODO: depend on other targets.
@@ -1273,10 +1276,10 @@ cmLocalUnixMakefileGenerator2
       i != objects.end(); ++i)
     {
     objs += space;
-    objs += *i;
+    objs += this->ConvertToRelativeOutputPath(i->c_str());
     objsQuoted += space;
     objsQuoted += "\"";
-    objsQuoted += *i;
+    objsQuoted += this->ConvertToRelativeOutputPath(i->c_str());
     objsQuoted += "\"";
     space = " ";
     }
@@ -1310,7 +1313,7 @@ cmLocalUnixMakefileGenerator2
     default:
       buildEcho += " library "; break;
     }
-  buildEcho += targetFullPath.c_str();
+  buildEcho += this->ConvertToRelativeOutputPath(targetFullPath.c_str());
   buildEcho += "...";
   this->WriteMakeRule(ruleFileStream, 0, buildEcho.c_str(),
                       targetFullPath.c_str(), depends, commands);
@@ -1613,8 +1616,10 @@ cmLocalUnixMakefileGenerator2
     dep += ".dir/";
     dep += jump->first;
     dep += ".depends";
+    dep = this->ConvertToRelativeOutputPath(dep.c_str());
     std::string tgt = jump->first;
     tgt += ".requires";
+    tgt = this->ConvertToRelativeOutputPath(tgt.c_str());
 
     // Build the jump-and-build command list.
     commands.clear();
