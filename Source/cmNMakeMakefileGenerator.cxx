@@ -239,14 +239,17 @@ void cmNMakeMakefileGenerator::BuildInSubDirectory(std::ostream& fout,
     {
     std::string dir = directory;
     cmSystemTools::ConvertToWindowsSlashes(dir);
-    fout << "\tif not exist " << cmSystemTools::EscapeSpaces(dir.c_str())
+    dir = cmSystemTools::EscapeSpaces(dir.c_str());
+    fout << "\tif not exist " << dir
          << " " 
          << "$(MAKE) rebuild_cache\n"
-         << "\tcd .\\" << directory << "\n"
+         << "\techo Building " << target1 << " in directory " << directory << "\n"
+         << "\tcd " << dir << "\n"
          << "\t$(MAKE) -$(MAKEFLAGS) " << target1 << "\n";
     }
   if(target2)
     {
+    fout << "\techo Building " << target2 << " in directory " << directory << "\n";
     fout << "\t$(MAKE) -$(MAKEFLAGS) " << target2 << "\n";
     }
   std::string currentDir = m_Makefile->GetCurrentOutputDirectory();
@@ -296,31 +299,33 @@ void cmNMakeMakefileGenerator::OutputMakeRule(std::ostream& fout,
     fout << replace.c_str();
     }
   fout << "\n";
-  const char* startCommand = "\t";
-  const char* endCommand = "\n";
   if(command)
     {
     replace = ShortPathCommand(command);
     m_Makefile->ExpandVariablesInString(replace);
-    fout << startCommand << replace.c_str() << endCommand;
+    fout << "\t" << "echo " << replace.c_str() << "\n";
+    fout << "\t" << replace.c_str() << "\n";
     }
   if(command2)
     {
     replace = ShortPathCommand(command2);
     m_Makefile->ExpandVariablesInString(replace);
-    fout << startCommand << replace.c_str() << endCommand;
+    fout << "\t" << "echo " << replace.c_str() << "\n";
+    fout << "\t" << replace.c_str() << "\n";
     }
   if(command3)
     {
     replace = ShortPathCommand(command3);
     m_Makefile->ExpandVariablesInString(replace);
-    fout << startCommand << replace.c_str() << endCommand;
+    fout << "\t" << "echo " << replace.c_str() << "\n";
+    fout << "\t" << replace.c_str() << "\n";
     }
   if(command4)
     {
     replace = ShortPathCommand(command4);
     m_Makefile->ExpandVariablesInString(replace);
-    fout << startCommand << replace.c_str() << endCommand;
+    fout << "\t" << "echo " << replace.c_str() << "\n";
+    fout << "\t" << replace.c_str() << "\n";
     }
   fout << "\n";
 }

@@ -100,7 +100,7 @@ void cmBorlandMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     "CMAKE_SHLIB_SUFFIX                  = @CMAKE_SHLIB_SUFFIX@\n" 
     "CMAKE_LINKER_FLAGS                  = @CMAKE_LINKER_FLAGS@ @LINKER_BUILD_FLAGS@\n"
     "CMAKE_CXX_FLAGS      = -P @CMAKE_CXX_FLAGS@ @BUILD_FLAGS@\n"
-    "RM = del";
+    "RM = del\n";
   std::string buildType = "CMAKE_CXX_FLAGS_";
   buildType +=  m_Makefile->GetDefinition("CMAKE_BUILD_TYPE");
   buildType = cmSystemTools::UpperCase(buildType);
@@ -165,100 +165,6 @@ void cmBorlandMakefileGenerator::OutputMakeVariables(std::ostream& fout)
 }
 
 
-void cmBorlandMakefileGenerator::BuildInSubDirectory(std::ostream& fout,
-                                                  const char* directory,
-                                                  const char* target1,
-                                                  const char* target2)
-{
-  if(target1)
-    {
-    std::string dir = directory;
-    cmSystemTools::ConvertToWindowsSlashes(dir);
-    fout << "\tif not exist " << cmSystemTools::EscapeSpaces(dir.c_str())
-         << " " 
-         << "$(MAKE) rebuild_cache\n"
-         << "\tcd .\\" << directory << "\n"
-         << "\t$(MAKE) -$(MAKEFLAGS) " << target1 << "\n";
-    }
-  if(target2)
-    {
-    fout << "\t$(MAKE) -$(MAKEFLAGS) " << target2 << "\n";
-    }
-  std::string currentDir = m_Makefile->GetCurrentOutputDirectory();
-  cmSystemTools::ConvertToWindowsSlashes(currentDir);
-  fout << "\tcd " << cmSystemTools::EscapeSpaces(currentDir.c_str()) << "\n";
-}
-
-
-
-
-// This needs to be overriden because nmake requires commands to be quoted
-// if the are full paths to the executable????
-
-void cmBorlandMakefileGenerator::OutputMakeRule(std::ostream& fout, 
-                                              const char* comment,
-                                              const char* target,
-                                              const char* depends, 
-                                              const char* command,
-                                              const char* command2,
-                                              const char* command3,
-                                              const char* command4)
-{
-  if(!target)
-    {
-    cmSystemTools::Error("no target for OutputMakeRule");
-    return;
-    }
-  
-  std::string replace;
-  if(comment)
-    {
-    replace = comment;
-    m_Makefile->ExpandVariablesInString(replace);
-    fout << "#---------------------------------------------------------\n";
-    fout << "# " << comment;
-    fout << "\n#\n";
-    }
-  fout << "\n";
-  replace = target;
-  m_Makefile->ExpandVariablesInString(replace);
-  replace = cmSystemTools::EscapeSpaces(replace.c_str());
-  fout << replace.c_str() << ": ";
-  if(depends)
-    {
-    replace = depends;
-    m_Makefile->ExpandVariablesInString(replace);
-    fout << replace.c_str();
-    }
-  fout << "\n";
-  const char* startCommand = "\t";
-  const char* endCommand = "\n";
-  if(command)
-    {
-    replace = ShortPathCommand(command);
-    m_Makefile->ExpandVariablesInString(replace);
-    fout << startCommand << replace.c_str() << endCommand;
-    }
-  if(command2)
-    {
-    replace = ShortPathCommand(command2);
-    m_Makefile->ExpandVariablesInString(replace);
-    fout << startCommand << replace.c_str() << endCommand;
-    }
-  if(command3)
-    {
-    replace = ShortPathCommand(command3);
-    m_Makefile->ExpandVariablesInString(replace);
-    fout << startCommand << replace.c_str() << endCommand;
-    }
-  if(command4)
-    {
-    replace = ShortPathCommand(command4);
-    m_Makefile->ExpandVariablesInString(replace);
-    fout << startCommand << replace.c_str() << endCommand;
-    }
-  fout << "\n";
-}
 
 void 
 cmBorlandMakefileGenerator::
@@ -499,14 +405,5 @@ bool cmBorlandMakefileGenerator::SamePath(const char* path1, const char* path2)
     cmSystemTools::LowerCase(ShortPath(path1)) ==
     cmSystemTools::LowerCase(ShortPath(path2));
 }
-
-void cmBorlandMakefileGenerator::OutputBuildLibraryInDir(std::ostream& fout,
-						       const char* path,
-						       const char* s,
-						       const char* fullpath)
-{
-  cmNMakeMakefileGenerator::OutputBuildLibraryInDir(fout, path, s, fullpath);
-}
-
 
 

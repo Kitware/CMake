@@ -972,11 +972,13 @@ void cmUnixMakefileGenerator::BuildInSubDirectory(std::ostream& fout,
     {
     fout << "\t@if test ! -d " << directory 
          << "; then $(MAKE) rebuild_cache; fi\n"
-      "\t@cd " << directory
+         << "\techo Building " << target1 << " in directory " << directory << "\n"
+         << "\t@cd " << directory
          << "; $(MAKE) -$(MAKEFLAGS) " << target1 << "\n";
     }
   if(target2)
     {
+    fout << "\techo Building " << target2 << " in directory " << directory << "\n";
     fout << "\t@cd " << directory
          << "; $(MAKE) -$(MAKEFLAGS) " << target2 << "\n";
     }
@@ -1029,7 +1031,10 @@ OutputSubDirectoryVars(std::ostream& fout,
     
     fout << "\n";
     last = subdir;
-    this->BuildInSubDirectory(fout, SubDirectories[i].c_str(),
+    std::string dir = m_Makefile->GetCurrentOutputDirectory();
+    dir += "/";
+    dir += SubDirectories[i];
+    this->BuildInSubDirectory(fout, dir.c_str(),
                               target1, target2);
     }
   fout << "\n\n";
@@ -1499,24 +1504,23 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                          "-@ $(RM) $(CLEAN_OBJECT_FILES) $(EXECUTABLES)"
                          " $(TARGETS)");
     }
-  {
-  std::string cmake_depends_mark = "@cd ";
-  cmake_depends_mark += m_Makefile->GetHomeOutputDirectory();
-  cmake_depends_mark += " ; $(MAKE) depend";
-  this->OutputMakeRule(fout, 
-                       "Rule to build the cmake.depends and Makefile as side effect",
-                       "cmake.depends_mark",
-                       "$(CMAKE_MAKEFILE_SOURCES) ",
-                       cmake_depends_mark.c_str());
-  }
+  fout << "# Suppresses display of executed commands\n";
+  fout << ".SILENT:\n";
+  fout << "\n#Rule to build the cmake.depends and Makefile as side effect\n";
+  fout << "cmake.depends_mark: $(CMAKE_MAKEFILE_SOURCES)\n";
+  this->BuildInSubDirectory(fout, 
+                            m_Makefile->GetHomeOutputDirectory(),
+                            "depend", 0);
   this->OutputMakeRule(fout, 
                        "Rule to force the build of cmake.depends",
                        "depend",
                        "$(SUBDIR_DEPEND)",
                        "$(CMAKE_COMMAND) "
                        "-S$(CMAKE_CURRENT_SOURCE) -O$(CMAKE_CURRENT_BINARY) "
-                       "-H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)\n"
-                       "\t-@ $(RM) cmake.depends_mark ; echo mark > cmake.depends_mark");
+                       "-H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)",
+                       "-$(RM) cmake.depends_mark",
+                       "echo mark > cmake.depends_mark"
+    );
   this->OutputMakeRule(fout, 
                        "Rebuild CMakeCache.txt file",
                        "rebuild_cache",
@@ -1735,24 +1739,28 @@ void cmUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
     {
     replace = command;
     m_Makefile->ExpandVariablesInString(replace);
+    fout << "\t" << "echo " << replace.c_str() << "\n";
     fout << "\t" << replace.c_str() << "\n";
     }
   if(command2)
     {
     replace = command2;
     m_Makefile->ExpandVariablesInString(replace);
+    fout << "\t" << "echo " << replace.c_str() << "\n";
     fout << "\t" << replace.c_str() << "\n";
     }
   if(command3)
     {
     replace = command3;
     m_Makefile->ExpandVariablesInString(replace);
+    fout << "\t" << "echo " << replace.c_str() << "\n";
     fout << "\t" << replace.c_str() << "\n";
     }
   if(command4)
     {
     replace = command4;
     m_Makefile->ExpandVariablesInString(replace);
+    fout << "\t" << "echo " << replace.c_str() << "\n";
     fout << "\t" << replace.c_str() << "\n";
     }
   fout << "\n";

@@ -68,19 +68,6 @@ public:
   virtual void ComputeSystemInfo(); 
 protected:
   virtual void OutputMakeVariables(std::ostream&);
-  virtual void BuildInSubDirectory(std::ostream& fout,
-                                   const char* directory,
-                                   const char* target1,
-                                   const char* target2);
-  void OutputMakeRule(std::ostream& fout, 
-                      const char* comment,
-                      const char* target,
-                      const char* depends, 
-                      const char* command,
-                      const char* command2=0,
-                      const char* command3=0,
-                      const char* command4=0); 
-  
   
   virtual void OutputBuildObjectFromSource(std::ostream& fout,
                                            const char* shortName,
@@ -96,10 +83,6 @@ protected:
   virtual void OutputExecutableRule(std::ostream&, const char* name,
                                     const cmTarget &);
   virtual std::string GetOutputExtension(const char* sourceExtension); 
-  virtual void OutputBuildLibraryInDir(std::ostream& fout,
-				       const char* path,
-				       const char* library,
-				       const char* fullpath); 
   ///! return true if the two paths are the same (checks short paths)
   virtual bool SamePath(const char* path1, const char* path2);
 };
