@@ -422,6 +422,10 @@ public:
     {
       m_ComplainFileRegularExpression = regex;
     }
+  const char* GetComplainRegularExpression()
+    {
+    return m_ComplainFileRegularExpression.c_str();
+    }
 
   /**
    * Get the list of targets
