@@ -95,7 +95,9 @@ protected:
                                        const cmTarget &);
   virtual void OutputExecutableRule(std::ostream&, const char* name,
                                     const cmTarget &);
-  
+  virtual void OutputLinkLibraries(std::ostream& fout,
+                                   const char* targetLibrary,
+                                   const cmTarget &tgt);
 };
 
 #endif

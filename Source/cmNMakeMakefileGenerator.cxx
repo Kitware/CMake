@@ -51,6 +51,9 @@ cmNMakeMakefileGenerator::cmNMakeMakefileGenerator()
 {
   this->SetObjectFileExtension(".obj");
   this->SetExecutableExtension(".exe");
+  this->SetLibraryPrefix("");
+  this->SetSharedLibraryExtension(".dll");
+  this->SetStaticLibraryExtension(".lib");
 }
 
 cmNMakeMakefileGenerator::~cmNMakeMakefileGenerator()
@@ -80,10 +83,17 @@ void cmNMakeMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     "\n"
     "# Path to cmake\n"
     "CMAKE_COMMAND = ${CMAKE_COMMAND}\n"    
-    "CMAKE_C_COMPILER    = @CMAKE_C_COMPILER@\n"
-    "CMAKE_CFLAGS        = @CMAKE_C_FLAGS@\n"
+    "CMAKE_STANDARD_WINDOWS_LIBRARIES = @CMAKE_STANDARD_WINDOWS_LIBRARIES@\n"
+    "CMAKE_C_COMPILER    = @CMAKE_C_COMPILER@ \n"
+    "CMAKE_CFLAGS        = @CMAKE_CFLAGS@ @BUILD_FLAGS@\n"
     "CMAKE_CXX_COMPILER  = @CMAKE_CXX_COMPILER@\n"
-    "CMAKE_CXXFLAGS      = @CMAKE_CXX_FLAGS@\n";
+    "CMAKE_CXXFLAGS      = @CMAKE_CXX_FLAGS@ @BUILD_FLAGS@\n";
+  std::string buildType = "CMAKE_CXX_FLAGS_";
+  buildType +=  m_Makefile->GetDefinition("CMAKE_BUILD_TYPE");
+  buildType = cmSystemTools::UpperCase(buildType);
+  m_Makefile->AddDefinition("BUILD_FLAGS",
+                            m_Makefile->GetDefinition(
+                              buildType.c_str()));
   std::string replaceVars = variables;
   m_Makefile->ExpandVariablesInString(replaceVars);
   fout << replaceVars.c_str();
@@ -122,7 +132,9 @@ void cmNMakeMakefileGenerator::BuildInSubDirectory(std::ostream& fout,
 {
   if(target1)
     {
-    fout << "\tif not exist " << directory << " " 
+    std::string dir = directory;
+    cmSystemTools::ConvertToWindowsSlashes(dir);
+    fout << "\tif not exist " << dir.c_str() << " " 
          << "$(MAKE) rebuild_cache\n"
          << "\tcd \".\\" << directory << "\"\n"
          << "\t$(MAKE) -$(MAKEFLAGS) " << target1 << "\n";
@@ -131,6 +143,9 @@ void cmNMakeMakefileGenerator::BuildInSubDirectory(std::ostream& fout,
     {
     fout << "\t$(MAKE) -$(MAKEFLAGS) " << target2 << "\n";
     }
+  std::string currentDir = m_Makefile->GetCurrentOutputDirectory();
+  cmSystemTools::ConvertToWindowsSlashes(currentDir);
+  fout << "\tcd \"" << currentDir.c_str() << "\"\n";
 }
 
 // This needs to be overriden because nmake requires commands to be quoted
@@ -225,6 +240,15 @@ OutputBuildObjectFromSource(std::ostream& fout,
     compileCommand += " /Fo";
     compileCommand += objectFile;
     }
+  else if (ext == "rc")
+    {
+    std::cerr << "rc file " << source.GetFullPath() << "\n";
+    }
+  else if (ext == "def")
+    {
+    std::cerr << "def file " << source.GetFullPath() << "\n";
+    }
+  // assume c++ if not c rc or def
   else
     {
     compileCommand = "$(CMAKE_CXX_COMPILER) $(CMAKE_CXXFLAGS) ";
@@ -247,30 +271,127 @@ OutputBuildObjectFromSource(std::ostream& fout,
 
 void cmNMakeMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout, 
                                                        const char* name,
-                                                       const cmTarget &target)
+                                                       const cmTarget &t)
 {
-  cmUnixMakefileGenerator::OutputSharedLibraryRule(fout, name, target);
+  std::string target = m_LibraryOutputPath + name + ".dll";
+  std::string depend = "$(";
+  depend += name;
+  depend += "_SRC_OBJS) $(" + std::string(name) + "_DEPEND_LIBS)";
+  std::string command = "link /dll ";
+  command += "$(" + std::string(name) + "_SRC_OBJS) /out:";
+  command += m_LibraryOutputPath +  std::string(name) + ".dll \\\n";
+  std::strstream linklibs;
+  this->OutputLinkLibraries(linklibs, name, t);
+  linklibs << std::ends;
+  command += linklibs.str();
+  delete [] linklibs.str();
+  this->OutputMakeRule(fout, "rules for a shared library",
+                       target.c_str(),
+                       depend.c_str(),
+                       command.c_str());
 }
 
 void cmNMakeMakefileGenerator::OutputModuleLibraryRule(std::ostream& fout, 
                                                        const char* name, 
                                                        const cmTarget &target)
 {
-  cmUnixMakefileGenerator::OutputModuleLibraryRule(fout, name, target);
+  this->OutputSharedLibraryRule(fout, name, target);
 }
 
 void cmNMakeMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout, 
                                                        const char* name,
-                                                       const cmTarget &target)
+                                                       const cmTarget &)
 {
-  cmUnixMakefileGenerator::OutputStaticLibraryRule(fout, name, target);
+  std::string target = m_LibraryOutputPath + std::string(name) + ".lib";
+  std::string depend = "$(";
+  depend += std::string(name) + "_SRC_OBJS)";
+  std::string command = "link -lib /nologo /out:";
+  command += m_LibraryOutputPath;
+  command += name;
+  command += ".lib $(";
+  command += std::string(name) + "_SRC_OBJS)";
+  std::string comment = "rule to build static library: ";
+  comment += name;
+  this->OutputMakeRule(fout,
+                       comment.c_str(),
+                       target.c_str(),
+                       depend.c_str(),
+                       command.c_str());
 }
 
 void cmNMakeMakefileGenerator::OutputExecutableRule(std::ostream& fout,
                                                     const char* name,
-                                                    const cmTarget &target)
+                                                    const cmTarget &t)
 {
-  cmUnixMakefileGenerator::OutputExecutableRule(fout, name, target);
+  std::string target = m_ExecutableOutputPath + name;
+  target += ".exe";
+  std::string depend = "$(";
+  depend += std::string(name) + "_SRC_OBJS) $(" + std::string(name) + "_DEPEND_LIBS)";
+  std::string command = 
+    "$(CMAKE_CXX_COMPILER) $(CMAKE_CXXFLAGS) ";
+  command += "$(" + std::string(name) + "_SRC_OBJS) ";
+  command += " /Fe" + m_ExecutableOutputPath + name;
+  command += ".exe /link ";
+  std::strstream linklibs;
+  this->OutputLinkLibraries(linklibs, 0, t);
+  linklibs << std::ends;
+  command += linklibs.str();
+  std::string comment = "rule to build executable: ";
+  comment += name;
+  this->OutputMakeRule(fout, 
+                       comment.c_str(),
+                       target.c_str(),
+                       depend.c_str(),
+                       command.c_str());
 }
 
   
+void cmNMakeMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
+                                                   const char* targetLibrary,
+                                                   const cmTarget &tgt)
+{
+  // Try to emit each search path once
+  std::set<std::string> emitted;
+
+  // Embed runtime search paths if possible and if required.
+  // collect all the flags needed for linking libraries
+  std::string linkLibs;
+  std::vector<std::string>& libdirs = m_Makefile->GetLinkDirectories();
+  for(std::vector<std::string>::iterator libDir = libdirs.begin();
+      libDir != libdirs.end(); ++libDir)
+    { 
+    std::string libpath = cmSystemTools::EscapeSpaces(libDir->c_str());
+    if(emitted.insert(libpath).second)
+      {
+      linkLibs += "-LIBPATH:";
+      linkLibs += libpath;
+      linkLibs += " ";
+      }
+    }
+
+  std::string librariesLinked;
+  const cmTarget::LinkLibraries& libs = tgt.GetLinkLibraries();
+  for(cmTarget::LinkLibraries::const_iterator lib = libs.begin();
+      lib != libs.end(); ++lib)
+    {
+    // Don't link the library against itself!
+    if(targetLibrary && (lib->first == targetLibrary)) continue;
+
+// ** should fix this later, it should check to see if this is 
+// a debug build and add the library
+// don't look at debug libraries
+//    if (lib->second == cmTarget::DEBUG) continue;
+    // skip zero size library entries, this may happen
+    // if a variable expands to nothing.
+    if (lib->first.size() == 0) continue;
+    // if it is a full path break it into -L and -l
+    if(emitted.insert(lib->first).second)
+      {
+      linkLibs += lib->first;
+      linkLibs += ".lib ";
+      }
+    linkLibs += librariesLinked;
+
+    fout << linkLibs << "$(CMAKE_STANDARD_WINDOWS_LIBRARIES) ";
+    }
+}
