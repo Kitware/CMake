@@ -552,7 +552,10 @@ protected:
   SourceMap m_Sources; 
 
   std::vector<std::string> m_SubDirectories; // list of sub directories
-  std::map<std::string, std::set<std::string> >  m_SubdirDepends;
+  struct StringSet : public std::set<std::string>
+  {
+  };
+  std::map<std::string, StringSet >  m_SubdirDepends;
   
   // The include and link-library paths.  These may have order
   // dependency, so they must be vectors (not set).
