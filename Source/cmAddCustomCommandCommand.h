@@ -104,7 +104,7 @@ public:
       "build rule.  It is the target (library, executable, or custom target) "
       "that will use the output generated from this rule.  This is necessary "
       "to choose a project file in which to generate the rule for Visual "
-      "Studio.\n\n"
+      "Studio.\n"
       "Example of usage:\n"
       "  ADD_CUSTOM_COMMAND(\n"
       "    TARGET tiff\n"
