@@ -52,9 +52,13 @@ IF(BUILD_TESTING)
   # make program just needs to use CMAKE_MAKE_PROGRAM which is required
   # to be defined by cmake 
   SET(MAKEPROGRAM ${CMAKE_MAKE_PROGRAM})
-  OPTION(VERBOSE_BUILD "Show the actual output of the build, or if off show a . for each 1024 bytes." "OFF")
-  OPTION(BUILD_ERROR_REPORT_LIMIT "Limit of reported errors, -1 reports all." -1 )  
-  OPTION(BUILD_WARNING_REPORT_LIMIT "Limit of reported warnings, -1 reports all." -1 )  
+  OPTION(DART_VERBOSE_BUILD "Show the actual output of the build, or if off show a . for each 1024 bytes." "OFF")
+  OPTION(DART_BUILD_ERROR_REPORT_LIMIT "Limit of reported errors, -1 reports all." -1 )  
+  OPTION(DART_BUILD_WARNING_REPORT_LIMIT "Limit of reported warnings, -1 reports all." -1 )  
+
+  SET(VERBOSE_BUILD ${DART_VERBOSE_BUILD})
+  SET(BUILD_ERROR_REPORT_LIMIT ${DART_BUILD_ERROR_REPORT_LIMIT})
+  SET(BUILD_WARNING_REPORT_LIMIT ${DART_BUILD_WARNING_REPORT_LIMIT})
 
   FIND_PROGRAM(CVSCOMMAND cvs )
   SET(CVS_UPDATE_OPTIONS "-d -A -P" CACHE STRING "Options passed to the cvs update command.")
@@ -99,9 +103,9 @@ IF(BUILD_TESTING)
   SET (DELIVER_CONTINUOUS_EMAIL "Off" CACHE BOOL "Should Dart server send email when build errors are found in Continuous builds?")
 
   MARK_AS_ADVANCED(
-    VERBOSE_BUILD
-    BUILD_WARNING_REPORT_LIMIT 
-    BUILD_ERROR_REPORT_LIMIT     
+    DART_VERBOSE_BUILD
+    DART_BUILD_WARNING_REPORT_LIMIT 
+    DART_BUILD_ERROR_REPORT_LIMIT     
     SITE 
     MAKECOMMAND 
     JAVACOMMAND 
