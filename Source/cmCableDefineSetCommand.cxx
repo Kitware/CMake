@@ -13,14 +13,14 @@
   See COPYRIGHT.txt for copyright details.
 
 =========================================================================*/
-#include "cmCabilDefineSetCommand.h"
+#include "cmCableDefineSetCommand.h"
 #include "cmCacheManager.h"
 
 #include "cmRegularExpression.h"
 
 
-// cmCabilDefineSetCommand
-bool cmCabilDefineSetCommand::Invoke(std::vector<std::string>& args)
+// cmCableDefineSetCommand
+bool cmCableDefineSetCommand::Invoke(std::vector<std::string>& args)
 {
   if(args.size() < 2)
     {
@@ -44,9 +44,9 @@ bool cmCabilDefineSetCommand::Invoke(std::vector<std::string>& args)
 
 
 /**
- * Write the CABIL configuration code to define this Set.
+ * Write the CABLE configuration code to define this Set.
  */
-void cmCabilDefineSetCommand::WriteConfiguration(std::ostream& os) const
+void cmCableDefineSetCommand::WriteConfiguration(std::ostream& os) const
 {
   cmRegularExpression needCdataBlock("[&<>]");
   
@@ -77,13 +77,13 @@ void cmCabilDefineSetCommand::WriteConfiguration(std::ostream& os) const
 
 /**
  * Given the string representing a set element, automatically generate
- * the CABIL element tag for it.
+ * the CABLE element tag for it.
  *
  * **This function determines how the output language of all
- * CABIL-generated wrappers will look!**
+ * CABLE-generated wrappers will look!**
  */
 std::string
-cmCabilDefineSetCommand::GenerateTag(const std::string& element) const
+cmCableDefineSetCommand::GenerateTag(const std::string& element) const
 {
   // Hold the regular expressions for matching against the element.
   cmRegularExpression regex;

@@ -13,20 +13,20 @@
   See COPYRIGHT.txt for copyright details.
 
 =========================================================================*/
-#ifndef cmCabilInstantiateCommand_h
-#define cmCabilInstantiateCommand_h
+#ifndef cmCableInstantiateCommand_h
+#define cmCableInstantiateCommand_h
 
 #include "cmStandardIncludes.h"
-#include "cmCabilCommand.h"
+#include "cmCableCommand.h"
 
-/** \class cmCabilInstantiateCommand
+/** \class cmCableInstantiateCommand
  * \brief Define a command that generates a rule for explicit template
  * instantiations.
  *
- * cmCabilInstantiateCommand is used to generate a rule in a CABIL
+ * cmCableInstantiateCommand is used to generate a rule in a CABLE
  * configuration file to create explicit template instantiations.
  */
-class cmCabilInstantiateCommand : public cmCabilCommand
+class cmCableInstantiateCommand : public cmCableCommand
 {
 public:
   /**
@@ -34,7 +34,7 @@ public:
    */
   virtual cmCommand* Clone() 
     {
-    return new cmCabilInstantiateCommand;
+    return new cmCableInstantiateCommand;
     }
 
   /**
@@ -58,14 +58,14 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "CABIL_INSTANTIATE";}
+  virtual const char* GetName() { return "CABLE_INSTANTIATE";}
 
   /**
    * Succinct documentation.
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Define CABIL InstantiationSet.";
+    return "Define CABLE InstantiationSet.";
     }
   
   /**
@@ -74,22 +74,22 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "CABIL_INSTANTIATE(cabil_config_file member1 member2 ...)\n"
-      "Generates an InstantiationSet in the CABIL configuration.  It is\n"
+      "CABLE_INSTANTIATE(cable_config_file member1 member2 ...)\n"
+      "Generates an InstantiationSet in the CABLE configuration.  It is\n"
       "assumed that all members of the set are explicit instantiations of\n"
       "template non-classes (functions, operators, etc).";
     }
 
   virtual void WriteConfiguration(std::ostream&) const;  
 
-  cmTypeMacro(cmCabilInstantiateCommand, cmCabilCommand);
+  cmTypeMacro(cmCableInstantiateCommand, cmCableCommand);
 protected:
   typedef std::vector<std::string>  Elements;
   
   /**
    * The output file to which to write the configuration.
    */
-  cmCabilData::OutputFile* m_OutputFile;
+  cmCableData::OutputFile* m_OutputFile;
 
   /**
    * The elements describing the set of instantiations.

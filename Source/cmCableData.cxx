@@ -13,14 +13,14 @@
   See COPYRIGHT.txt for copyright details.
 
 =========================================================================*/
-#include "cmCabilData.h"
+#include "cmCableData.h"
 #include "cmCacheManager.h"
 
 
 /**
  * Free all data that was stored here.
  */
-cmCabilData::~cmCabilData()
+cmCableData::~cmCableData()
 {
   for(OutputFiles::iterator i = m_OutputFiles.begin();
       i != m_OutputFiles.end(); ++i)
@@ -33,8 +33,8 @@ cmCabilData::~cmCabilData()
 /**
  * The constructor attempts to open the file for writing.
  */
-cmCabilData::OutputFile
-::OutputFile(std::string file, const cmCabilCommand* command):
+cmCableData::OutputFile
+::OutputFile(std::string file, const cmCableCommand* command):
   m_FileStream(file.c_str()),
   m_FirstReferencingCommand(command),
   m_LastReferencingCommand(command)
@@ -49,7 +49,7 @@ cmCabilData::OutputFile
 /**
  * Destructor closes the file, if it was open.
  */
-cmCabilData::OutputFile
+cmCableData::OutputFile
 ::~OutputFile()
 {
   if(m_FileStream)
@@ -61,7 +61,7 @@ cmCabilData::OutputFile
  * Get the output stream associated with this OutputFile.
  */
 std::ostream&
-cmCabilData::OutputFile
+cmCableData::OutputFile
 ::GetStream()
 {
   return m_FileStream;
@@ -69,24 +69,24 @@ cmCabilData::OutputFile
 
 
 void
-cmCabilData::OutputFile
-::SetLastReferencingCommand(const cmCabilCommand* command)
+cmCableData::OutputFile
+::SetLastReferencingCommand(const cmCableCommand* command)
 {
   m_LastReferencingCommand = command;
 }
 
 
 bool
-cmCabilData::OutputFile
-::FirstReferencingCommandIs(const cmCabilCommand* command) const
+cmCableData::OutputFile
+::FirstReferencingCommandIs(const cmCableCommand* command) const
 {
   return (m_FirstReferencingCommand == command);
 }
 
 
 bool
-cmCabilData::OutputFile
-::LastReferencingCommandIs(const cmCabilCommand* command) const
+cmCableData::OutputFile
+::LastReferencingCommandIs(const cmCableCommand* command) const
 {
   return (m_LastReferencingCommand == command);
 }
@@ -96,9 +96,9 @@ cmCabilData::OutputFile
  * Get the OutputFile for the file with the given name.  Automatically
  * maintains first and last referencing commands.
  */
-cmCabilData::OutputFile*
-cmCabilData::GetOutputFile(const std::string& name,
-                           const cmCabilCommand* command)
+cmCableData::OutputFile*
+cmCableData::GetOutputFile(const std::string& name,
+                           const cmCableCommand* command)
 {
   OutputFiles::iterator f = m_OutputFiles.find(name);
   // If the file hasn't yet been opened, create an entry for it.

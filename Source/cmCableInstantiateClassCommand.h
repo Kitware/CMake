@@ -13,21 +13,21 @@
   See COPYRIGHT.txt for copyright details.
 
 =========================================================================*/
-#ifndef cmCabilInstantiateClassCommand_h
-#define cmCabilInstantiateClassCommand_h
+#ifndef cmCableInstantiateClassCommand_h
+#define cmCableInstantiateClassCommand_h
 
 #include "cmStandardIncludes.h"
-#include "cmCabilInstantiateCommand.h"
+#include "cmCableInstantiateCommand.h"
 
-/** \class cmCabilInstantiateClassCommand
+/** \class cmCableInstantiateClassCommand
  * \brief Define a command that generates a rule for explicit template
  * instantiations of classes.
  *
- * cmCabilInstantiateCommand is used to generate a rule in a CABIL
+ * cmCableInstantiateCommand is used to generate a rule in a CABLE
  * configuration file to create explicit template instantiations of
  * classes.
  */
-class cmCabilInstantiateClassCommand : public cmCabilInstantiateCommand
+class cmCableInstantiateClassCommand : public cmCableInstantiateCommand
 {
 public:
   /**
@@ -35,20 +35,20 @@ public:
    */
   virtual cmCommand* Clone() 
     {
-    return new cmCabilInstantiateClassCommand;
+    return new cmCableInstantiateClassCommand;
     }
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "CABIL_INSTANTIATE_CLASS";}
+  virtual const char* GetName() { return "CABLE_INSTANTIATE_CLASS";}
 
   /**
    * Succinct documentation.
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Define CABIL InstantiationSet of classes.";
+    return "Define CABLE InstantiationSet of classes.";
     }
   
   /**
@@ -57,17 +57,17 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "CABIL_INSTANTIATE_CLASS(cabil_config_file member1 member2 ...)\n"
-      "Generates an InstantiationSet in the CABIL configuration.  It is\n"
+      "CABLE_INSTANTIATE_CLASS(cable_config_file member1 member2 ...)\n"
+      "Generates an InstantiationSet in the CABLE configuration.  It is\n"
       "assumed that all members of the set are explicit instantiations of\n"
       "template classes (not functions, operators, etc).";
     }
 
   virtual void WriteConfiguration(std::ostream&) const;  
 
-  cmTypeMacro(cmCabilInstantiateClassCommand, cmCabilInstantiateCommand);
+  cmTypeMacro(cmCableInstantiateClassCommand, cmCableInstantiateCommand);
 protected:
-  typedef cmCabilInstantiateCommand::Elements  Elements;
+  typedef cmCableInstantiateCommand::Elements  Elements;
 };
 
 

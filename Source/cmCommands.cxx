@@ -24,11 +24,11 @@
 #include "cmWin32DefinesCommand.cxx"
 #include "cmWin32LibrariesCommand.cxx"
 #include "cmConfigureFileNoAutoconf.cxx"
-#include "cmCabilCommand.cxx"
-#include "cmCabilData.cxx"
-#include "cmCabilDefineSetCommand.cxx"
-#include "cmCabilInstantiateCommand.cxx"
-#include "cmCabilInstantiateClassCommand.cxx"
+#include "cmCableCommand.cxx"
+#include "cmCableData.cxx"
+#include "cmCableDefineSetCommand.cxx"
+#include "cmCableInstantiateCommand.cxx"
+#include "cmCableInstantiateClassCommand.cxx"
 #include "cmFindFileCommand.cxx"
 #include "cmWrapExcludeFilesCommand.cxx"
 #include "cmWrapTclCommand.cxx"
@@ -57,9 +57,9 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmWin32DefinesCommand);
   commands.push_back(new cmWin32LibrariesCommand);
   commands.push_back(new cmConfigureFileNoAutoconf);
-  commands.push_back(new cmCabilDefineSetCommand);
-  commands.push_back(new cmCabilInstantiateCommand);
-  commands.push_back(new cmCabilInstantiateClassCommand);
+  commands.push_back(new cmCableDefineSetCommand);
+  commands.push_back(new cmCableInstantiateCommand);
+  commands.push_back(new cmCableInstantiateClassCommand);
   commands.push_back(new cmFindFileCommand);
   commands.push_back(new cmWrapExcludeFilesCommand);  
   commands.push_back(new cmWrapTclCommand);

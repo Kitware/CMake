@@ -13,58 +13,58 @@
   See COPYRIGHT.txt for copyright details.
 
 =========================================================================*/
-#include "cmCabilCommand.h"
+#include "cmCableCommand.h"
 #include "cmCacheManager.h"
 
-// cmCabilCommand
+// cmCableCommand
 
 
 /**
- * Constructor initializes to empty m_CabilData.
+ * Constructor initializes to empty m_CableData.
  */
-cmCabilCommand::cmCabilCommand(): m_CabilData(0)
+cmCableCommand::cmCableCommand(): m_CableData(0)
 {
 }
 
 
 /**
- * Destructor frees the cmCabilData only if this command is its owner.
+ * Destructor frees the cmCableData only if this command is its owner.
  */
-cmCabilCommand::~cmCabilCommand()
+cmCableCommand::~cmCableCommand()
 {
-  if(m_CabilData && m_CabilData->OwnerIs(this))
+  if(m_CableData && m_CableData->OwnerIs(this))
     {
-    delete m_CabilData;
+    delete m_CableData;
     }
 }
 
 
 /**
- * Write a CABIL configuration file header.
+ * Write a CABLE configuration file header.
  */
-void cmCabilCommand::WriteConfigurationHeader(std::ostream& os) const
+void cmCableCommand::WriteConfigurationHeader(std::ostream& os) const
 {
   os << "<?xml version=\"1.0\"?>" << std::endl
-     << "<CabilConfiguration>" << std::endl;
+     << "<CableConfiguration>" << std::endl;
 }
 
 
 /**
- * Write a CABIL configuration file footer.
+ * Write a CABLE configuration file footer.
  */
-void cmCabilCommand::WriteConfigurationFooter(std::ostream& os) const
+void cmCableCommand::WriteConfigurationFooter(std::ostream& os) const
 {
-  os << "</CabilConfiguration>" << std::endl;
+  os << "</CableConfiguration>" << std::endl;
 }
 
 
 /**
- * Ensure that this cmCabilCommand has a valid m_CabilData pointer.
+ * Ensure that this cmCableCommand has a valid m_CableData pointer.
  */
-void cmCabilCommand::SetupCabilData()
+void cmCableCommand::SetupCableData()
 {
   // Only do something if the pointer is invalid.
-  if(m_CabilData)
+  if(m_CableData)
     { return; }
   
   // Look through the vector of commands from the makefile.
@@ -73,19 +73,19 @@ void cmCabilCommand::SetupCabilData()
   for(std::vector<cmCommand*>::const_iterator commandIter =
         usedCommands.begin(); commandIter != usedCommands.end(); ++commandIter)
     {
-    // If this command is a cmCabilCommand, see if it has a cmCabilData
+    // If this command is a cmCableCommand, see if it has a cmCableData
     // instance.
-    cmCabilCommand* command = cmCabilCommand::SafeDownCast(*commandIter);
+    cmCableCommand* command = cmCableCommand::SafeDownCast(*commandIter);
     if(command)
-      { m_CabilData = command->m_CabilData; }
+      { m_CableData = command->m_CableData; }
     
-    // If we found an instance of cmCabilData, then we are done.
-    if(m_CabilData)
+    // If we found an instance of cmCableData, then we are done.
+    if(m_CableData)
       { return; }
     }
   
-  // We didn't find another cmCabilCommand with a valid cmCabilData.
-  // We must allocate the new cmCabilData ourselves, and with this
+  // We didn't find another cmCableCommand with a valid cmCableData.
+  // We must allocate the new cmCableData ourselves, and with this
   // command as its owner.
-  m_CabilData = new cmCabilData(this);
+  m_CableData = new cmCableData(this);
 }

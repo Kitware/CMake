@@ -13,33 +13,33 @@
   See COPYRIGHT.txt for copyright details.
 
 =========================================================================*/
-#ifndef cmCabilData_h
-#define cmCabilData_h
+#ifndef cmCableData_h
+#define cmCableData_h
 
 #include "cmStandardIncludes.h"
 #include "cmCommand.h"
 
-class cmCabilCommand;
+class cmCableCommand;
 
-/** \class cmCabilData
- * \brief Hold data in one location for all cmCabilCommand subclasses.
+/** \class cmCableData
+ * \brief Hold data in one location for all cmCableCommand subclasses.
  */
-class cmCabilData
+class cmCableData
 {
 public:
   /**
-   * The cmCabilData instance is owned by one cmCabilCommand, which is given
+   * The cmCableData instance is owned by one cmCableCommand, which is given
    * to this constructor.
    */
-  cmCabilData(const cmCabilCommand* owner): m_Owner(owner) {}
+  cmCableData(const cmCableCommand* owner): m_Owner(owner) {}
   
-  ~cmCabilData();
+  ~cmCableData();
   
   /**
-   * Returns true if the given cmCabilCommand is the owner of this
-   * cmCabilData.
+   * Returns true if the given cmCableCommand is the owner of this
+   * cmCableData.
    */
-  bool OwnerIs(const cmCabilCommand* owner) const
+  bool OwnerIs(const cmCableCommand* owner) const
     { return (owner == m_Owner); }  
   
   /**
@@ -50,27 +50,27 @@ public:
   class OutputFile
   {
   public:
-    OutputFile(std::string, const cmCabilCommand*);
+    OutputFile(std::string, const cmCableCommand*);
     ~OutputFile();
     std::ostream& GetStream();
-    void SetLastReferencingCommand(const cmCabilCommand*);
-    bool FirstReferencingCommandIs(const cmCabilCommand*) const;
-    bool LastReferencingCommandIs(const cmCabilCommand*) const;
+    void SetLastReferencingCommand(const cmCableCommand*);
+    bool FirstReferencingCommandIs(const cmCableCommand*) const;
+    bool LastReferencingCommandIs(const cmCableCommand*) const;
   private:
     std::ofstream m_FileStream;
-    const cmCabilCommand* m_FirstReferencingCommand;
-    const cmCabilCommand* m_LastReferencingCommand;
+    const cmCableCommand* m_FirstReferencingCommand;
+    const cmCableCommand* m_LastReferencingCommand;
   };
   
-  OutputFile* GetOutputFile(const std::string&, const cmCabilCommand*);
+  OutputFile* GetOutputFile(const std::string&, const cmCableCommand*);
   
 private:
   typedef std::map<std::string, OutputFile*>  OutputFiles;
   
   /**
-   * The cmCabilCommand which created this instance of cmCabilCommand.
+   * The cmCableCommand which created this instance of cmCableCommand.
    */
-  const cmCabilCommand* m_Owner;
+  const cmCableCommand* m_Owner;
   
   /**
    * Hold all output streams by file name.

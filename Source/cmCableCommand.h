@@ -13,42 +13,42 @@
   See COPYRIGHT.txt for copyright details.
 
 =========================================================================*/
-#ifndef cmCabilCommand_h
-#define cmCabilCommand_h
+#ifndef cmCableCommand_h
+#define cmCableCommand_h
 
 #include "cmStandardIncludes.h"
 #include "cmCommand.h"
-#include "cmCabilData.h"
+#include "cmCableData.h"
 
-/** \class cmCabilCommand
- * \brief Superclass for all cmCabil command classes.
+/** \class cmCableCommand
+ * \brief Superclass for all cmCable command classes.
  *
- * cmCabilCommand is the superclass for all CABIL-related commands.
- * The C++ Automated Bindings for Interpreted Languages (CABIL,
- * pronounced "sawbill") tool is configured using an XML input file.
- * The input format is quite flexible, but XML is hard for humans to
- * write by hand.  The CABIL commands in CMake are designed to simplify
- * the interface with only a small loss in functionality.  These commands
- * can be used to automatically generate CABIL configuration files.
+ * cmCableCommand is the superclass for all CABLE-related commands.
+ * The C++ Automated Bindings for Language Extension (CABLE) tool is
+ * configured using an XML input file.  The input format is quite
+ * flexible, but XML is hard for humans to write by hand.  The CABLE
+ * commands in CMake are designed to simplify the interface with only
+ * a small loss in functionality.  These commands can be used to
+ * automatically generate CABLE configuration files.
  */
-class cmCabilCommand : public cmCommand
+class cmCableCommand : public cmCommand
 {
 public:
-  cmCabilCommand();
-  virtual ~cmCabilCommand();
+  cmCableCommand();
+  virtual ~cmCableCommand();
   
   void WriteConfigurationHeader(std::ostream&) const;
   void WriteConfigurationFooter(std::ostream&) const;
   
-  cmTypeMacro(cmCabilCommand, cmCommand);
+  cmTypeMacro(cmCableCommand, cmCommand);
 protected:
-  void SetupCabilData();
+  void SetupCableData();
   
   /**
-   * The cmCabilData holding common information for all cmCabilCommand
+   * The cmCableData holding common information for all cmCableCommand
    * instances.
    */
-  cmCabilData* m_CabilData;
+  cmCableData* m_CableData;
 };
 
 

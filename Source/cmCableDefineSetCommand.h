@@ -13,20 +13,20 @@
   See COPYRIGHT.txt for copyright details.
 
 =========================================================================*/
-#ifndef cmCabilDefineSetCommand_h
-#define cmCabilDefineSetCommand_h
+#ifndef cmCableDefineSetCommand_h
+#define cmCableDefineSetCommand_h
 
 #include "cmStandardIncludes.h"
-#include "cmCabilCommand.h"
+#include "cmCableCommand.h"
 
-/** \class cmCabilDefineSetCommand
- * \brief Define a command that adds a CABIL Set definition.
+/** \class cmCableDefineSetCommand
+ * \brief Define a command that adds a CABLE Set definition.
  *
- * cmCabilDefineSetCommand is used to define a named CABIL Set.
- * The set can be referenced in other CABIL command arguments
+ * cmCableDefineSetCommand is used to define a named CABLE Set.
+ * The set can be referenced in other CABLE command arguments
  * with a '$' followed by the set name.
  */
-class cmCabilDefineSetCommand : public cmCabilCommand
+class cmCableDefineSetCommand : public cmCableCommand
 {
 public:
   /**
@@ -34,7 +34,7 @@ public:
    */
   virtual cmCommand* Clone()
     {
-      return new cmCabilDefineSetCommand;
+      return new cmCableDefineSetCommand;
     }
 
   /**
@@ -53,14 +53,14 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "CABIL_DEFINE_SET";}
+  virtual const char* GetName() { return "CABLE_DEFINE_SET";}
 
   /**
    * Succinct documentation.
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Define a CABIL Set.";
+    return "Define a CABLE Set.";
     }
   
   /**
@@ -69,15 +69,15 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "CABIL_DEFINE_SET(name_of_set member1 member2 ...)\n"
-      "Generates a Set definition in the CABIL configuration.  Tags are\n"
-      "automatically generated.  The sets are referenced in other CABIL\n"
+      "CABLE_DEFINE_SET(name_of_set member1 member2 ...)\n"
+      "Generates a Set definition in the CABLE configuration.  Tags are\n"
+      "automatically generated.  The sets are referenced in other CABLE\n"
       "commands by a '$' immediately followed by the set name (ex. $SetName).";
     }
 
   virtual void WriteConfiguration(std::ostream&) const;
   
-  cmTypeMacro(cmCabilDefineSetCommand, cmCabilCommand);
+  cmTypeMacro(cmCableDefineSetCommand, cmCableCommand);
   
 private:
   std::string GenerateTag(const std::string&) const;

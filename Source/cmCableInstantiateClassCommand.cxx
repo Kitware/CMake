@@ -13,17 +13,17 @@
   See COPYRIGHT.txt for copyright details.
 
 =========================================================================*/
-#include "cmCabilInstantiateClassCommand.h"
+#include "cmCableInstantiateClassCommand.h"
 #include "cmCacheManager.h"
 
 #include "cmRegularExpression.h"
 
 
 /**
- * Write the CABIL configuration code to define this InstantiationSet.
+ * Write the CABLE configuration code to define this InstantiationSet.
  * This includes the "class" keyword to do class template instantiations.
  */
-void cmCabilInstantiateClassCommand::WriteConfiguration(std::ostream& os) const
+void cmCableInstantiateClassCommand::WriteConfiguration(std::ostream& os) const
 {
   cmRegularExpression needCdataBlock("[&<>]");
   

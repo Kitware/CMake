@@ -13,14 +13,14 @@
   See COPYRIGHT.txt for copyright details.
 
 =========================================================================*/
-#include "cmCabilInstantiateCommand.h"
+#include "cmCableInstantiateCommand.h"
 #include "cmCacheManager.h"
 
-#include "cmCabilDefineSetCommand.h"
+#include "cmCableDefineSetCommand.h"
 #include "cmRegularExpression.h"
 
-// cmCabilInstantiateCommand
-bool cmCabilInstantiateCommand::Invoke(std::vector<std::string>& args)
+// cmCableInstantiateCommand
+bool cmCableInstantiateCommand::Invoke(std::vector<std::string>& args)
 {
   if(args.size() < 2)
     {
@@ -28,8 +28,8 @@ bool cmCabilInstantiateCommand::Invoke(std::vector<std::string>& args)
     return false;
     }
   
-  // This command instance needs to use the cmCabilData instance.
-  this->SetupCabilData();
+  // This command instance needs to use the cmCableData instance.
+  this->SetupCableData();
   
   // The output file must be opened in the output directory.
   std::string file = m_Makefile->GetStartOutputDirectory();
@@ -42,7 +42,7 @@ bool cmCabilInstantiateCommand::Invoke(std::vector<std::string>& args)
   file += "/" + *arg++;
   
   // Get the OutputFile corresponding to this file name.
-  m_OutputFile = m_CabilData->GetOutputFile(file, this);
+  m_OutputFile = m_CableData->GetOutputFile(file, this);
   
   // The rest of the arguments are the elements to be placed in the set.
   for(; arg != args.end(); ++arg)
@@ -54,7 +54,7 @@ bool cmCabilInstantiateCommand::Invoke(std::vector<std::string>& args)
 }
 
 
-void cmCabilInstantiateCommand::FinalPass()
+void cmCableInstantiateCommand::FinalPass()
 {
   // If this command is the first to reference its output file, write the
   // header information.
@@ -70,10 +70,10 @@ void cmCabilInstantiateCommand::FinalPass()
           usedCommands.begin();
         commandIter != usedCommands.end(); ++commandIter)
       {
-      // If this command is a cmCabilDefineSetCommand, ask it to write its
+      // If this command is a cmCableDefineSetCommand, ask it to write its
       // configuration code to the output file.
-      cmCabilDefineSetCommand* command =
-        cmCabilDefineSetCommand::SafeDownCast(*commandIter);
+      cmCableDefineSetCommand* command =
+        cmCableDefineSetCommand::SafeDownCast(*commandIter);
       if(command)
         {
         command->WriteConfiguration(m_OutputFile->GetStream());
@@ -94,9 +94,9 @@ void cmCabilInstantiateCommand::FinalPass()
 
 
 /**
- * Write the CABIL configuration code to define this InstantiationSet.
+ * Write the CABLE configuration code to define this InstantiationSet.
  */
-void cmCabilInstantiateCommand::WriteConfiguration(std::ostream& os) const
+void cmCableInstantiateCommand::WriteConfiguration(std::ostream& os) const
 {
   cmRegularExpression needCdataBlock("[&<>]");
   
