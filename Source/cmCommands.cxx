@@ -23,6 +23,7 @@
 #include "cmUnixLibrariesCommand.cxx"
 #include "cmWin32DefinesCommand.cxx"
 #include "cmWin32LibrariesCommand.cxx"
+#include "cmWin32IncludeDirectoryCommand.cxx"
 #include "cmConfigureFileNoAutoconf.cxx"
 #include "cmCableCommand.cxx"
 #include "cmCableData.cxx"
@@ -63,6 +64,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmUnixLibrariesCommand);
   commands.push_back(new cmWin32DefinesCommand);
   commands.push_back(new cmWin32LibrariesCommand);
+  commands.push_back(new cmWin32IncludeDirectoryCommand);
   commands.push_back(new cmConfigureFileNoAutoconf);
   commands.push_back(new cmCableDefineSetCommand);
   commands.push_back(new cmCableOpenNamespaceCommand);
