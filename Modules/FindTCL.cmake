@@ -9,15 +9,46 @@
 #  TK_INCLUDE_PATH  = the path to where tk.h can be found
 #
 
-# try to find the Tcl libraries in a few places and names
 FIND_LIBRARY(TCL_LIBRARY
-             NAMES tcl tcl83 tcl82 tcl80 
-             PATHS  /usr/lib "C:/Program Files/Tcl/lib" /usr/local/lib)
+  NAMES tcl tcl84 tcl83 tcl82 tcl80 
+  PATHS  
+  /usr/lib 
+  /usr/local/lib
+  "C:/Program Files/Tcl/lib" 
+  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.4§Root]/lib
+  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.3§Root]/lib
+  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.2§Root]/lib
+  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.0§Root]/lib
+)
 
 FIND_LIBRARY(TK_LIBRARY 
-             NAMES tk tk83 tk82 tk80
-             PATHS /usr/lib "C:/Program Files/Tcl/lib" /usr/local/lib)
+  NAMES tk tk84 tk83 tk82 tk80
+  PATHS 
+  /usr/lib 
+  /usr/local/lib
+  "C:/Program Files/Tcl/lib" 
+  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.4§Root]/lib
+  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.3§Root]/lib
+  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.2§Root]/lib
+  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.0§Root]/lib
+)
 
-# add in the include path    
-FIND_PATH(TCL_INCLUDE_PATH tcl.h "C:/Program Files/Tcl/include" /usr/include /usr/local/include)
-FIND_PATH(TK_INCLUDE_PATH tk.h "C:/Program Files/Tcl/include" /usr/include /usr/local/include)
+FIND_PATH(TCL_INCLUDE_PATH tcl.h 
+  /usr/include 
+  /usr/local/include
+  "C:/Program Files/Tcl/include" 
+  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.4§Root]/include
+  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.3§Root]/include
+  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.2§Root]/include
+  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.0§Root]/include
+)
+
+FIND_PATH(TK_INCLUDE_PATH tk.h 
+  /usr/include 
+  /usr/local/include
+  "C:/Program Files/Tcl/include" 
+  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.4§Root]/include
+  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.3§Root]/include
+  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.2§Root]/include
+  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.0§Root]/include
+)
