@@ -82,7 +82,7 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
 
   if(llt != cmTarget::GENERAL)
     {
-    std::string linkTypeName = this->CanonicalLibraryName(lib);
+    std::string linkTypeName = lib;
     linkTypeName += "_LINK_TYPE";
     switch(llt)
       {
@@ -163,7 +163,7 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
     // if a variable expands to nothing.
     if (lib->first.size() == 0) continue;
 
-    std::string cname = this->CanonicalLibraryName(lib->first);
+    std::string cname = lib->first;
     lib_order.push_back( cname );
     if( lib_map.end() == lib_map.find( cname ) )
       {
@@ -278,43 +278,6 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
 
 
 
-std::string cmTarget::CanonicalLibraryName( const std::string& lib ) const
-{
-  cmRegularExpression reg("((^[ \t]*\\-l)|(^[ \t]*\\-framework[ \t]*))(.+)");
-  if(lib.find('/') != std::string::npos
-     && !reg.find(lib))
-    {
-    std::string dir, file;
-    cmSystemTools::SplitProgramPath(lib.c_str(),
-                                      dir, file);
-    cmRegularExpression libname("lib(.*)(\\.so|\\.sl|\\.a|\\.dylib).*");
-    cmRegularExpression libname_noprefix("(.*)(\\.so|\\.sl|\\.a|\\.dylib|\\.lib).*");
-    if(libname.find(file))
-      {
-      return libname.match(1);
-      }
-    else if(libname_noprefix.find(file))
-      {
-      return libname_noprefix.match(1);
-      }
-    else
-      {
-      return file;
-      }
-    }
-  else
-    {
-    if(!reg.find(lib))
-      {
-      return lib;
-      }
-    else
-      {
-      return reg.match(4);
-      }
-    }
-}
-
 
 void cmTarget::Emit( const std::string& lib,
                      const DependencyMap& dep_map,
@@ -380,7 +343,7 @@ void cmTarget::GatherDependencies( const cmMakefile& mf,
       std::string l = depline.substr( start, end-start );
       if( l.size() != 0 )
         {
-        const std::string cname = CanonicalLibraryName(l);
+        const std::string cname = l;
         lib_map[ cname ] = std::make_pair(l,GENERAL); // ** FIXME: we need to store the correct type here
         dep_map[ lib ].insert( cname );
         GatherDependencies( mf, cname, dep_map, lib_map );

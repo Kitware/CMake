@@ -126,13 +126,6 @@ private:
   typedef std::map< std::string, std::pair<std::string,LinkLibraryType> > LibTypeMap;
 
   /**
-   * For each library in the link line, return a canonical name. The
-   * orginal library names have complicated forms, such as "x",
-   * "libx.so", "/full/path/libx.a", "-lx", and "-framework x".
-   */
-  std::string CanonicalLibraryName( const std::string& lib ) const;
-
-  /**
    * Emits the library \param lib and all its dependencies into
    * link_line.  \param emitted keeps track of the libraries that have
    * been emitted to avoid duplicates--it is more efficient than
