@@ -104,7 +104,6 @@ private:
   void ProcessDepends(const cmMakeDepend &md);
   void GenerateCacheOnly();
   void OutputMakefile(const char* file);
-  void OutputMakeFlags(std::ostream&);
   void OutputTargetRules(std::ostream& fout);
   void OutputLinkLibraries(std::ostream&, const char* name, const cmTarget &);
 

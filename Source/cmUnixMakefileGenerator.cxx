@@ -232,7 +232,6 @@ void cmUnixMakefileGenerator::OutputMakefile(const char* file)
   fout << " " << m_Makefile->GetHomeOutputDirectory() << "/CMakeCache.txt\n";
   fout << "\n\n";
   this->OutputMakeVariables(fout);
-  this->OutputMakeFlags(fout);
   this->OutputTargetRules(fout);
   this->OutputDependLibs(fout);
   this->OutputTargets(fout);
@@ -257,9 +256,6 @@ void cmUnixMakefileGenerator::OutputMakefile(const char* file)
     {
     fout << "include cmake.depends\n";
     }
-
-
-
 }
 
 
@@ -816,35 +812,6 @@ void cmUnixMakefileGenerator::OutputLibDepend(std::ostream& fout,
 }
 
 
-// output make include flags
-void cmUnixMakefileGenerator::OutputMakeFlags(std::ostream& fout)
-{
-  // Output Include paths
-  fout << "INCLUDE_FLAGS = ";
-  std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();
-  std::vector<std::string>::iterator i;
-  fout << "-I" << m_Makefile->GetStartDirectory() << " ";
-  for(i = includes.begin(); i != includes.end(); ++i)
-    {
-    std::string include = *i;
-    // Don't output a -I for the standard include path "/usr/include".
-    // This can cause problems with certain standard library
-    // implementations because the wrong headers may be found first.
-    if(include != "/usr/include")
-      {
-      fout << "-I" << cmSystemTools::EscapeSpaces(i->c_str()).c_str() << " ";
-      }
-    }
-  fout << m_Makefile->GetDefineFlags();
-  fout << "\n\n";
-  this->OutputMakeRule(fout, 
-                       "Default target executed when no arguments are given to make",
-                       "default_target",
-                       0,
-                       "$(MAKE) -$(MAKEFLAGS) cmake.depends",
-                       "$(MAKE) -$(MAKEFLAGS) all");
-}
-
 
 // fix up names of directories so they can be used
 // as targets in makefiles.
@@ -1124,16 +1091,6 @@ void cmUnixMakefileGenerator::RecursiveGenerateCacheOnly()
 
 void cmUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
 {
-  if(strcmp(m_Makefile->GetHomeDirectory(), 
-            m_Makefile->GetHomeOutputDirectory()) == 0)
-    {
-    fout << "srcdir        = .\n\n";
-    }
-  else
-    {
-    fout << "srcdir        = " <<  m_Makefile->GetStartDirectory() << "\n";
-    fout << "VPATH         = " <<  m_Makefile->GetStartDirectory() << "\n";
-    }
   const char* variables = 
     "# the standard shell for make\n"
     "SHELL = /bin/sh\n"
@@ -1172,6 +1129,24 @@ void cmUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
   fout << "CMAKE_CURRENT_BINARY = " << m_Makefile->GetStartOutputDirectory() << "\n";
   fout << "CMAKE_SOURCE_DIR = " << m_Makefile->GetHomeDirectory() << "\n";
   fout << "CMAKE_BINARY_DIR = " << m_Makefile->GetHomeOutputDirectory() << "\n";
+  // Output Include paths
+  fout << "INCLUDE_FLAGS = ";
+  std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();
+  std::vector<std::string>::iterator i;
+  fout << "-I" << m_Makefile->GetStartDirectory() << " ";
+  for(i = includes.begin(); i != includes.end(); ++i)
+    {
+    std::string include = *i;
+    // Don't output a -I for the standard include path "/usr/include".
+    // This can cause problems with certain standard library
+    // implementations because the wrong headers may be found first.
+    if(include != "/usr/include")
+      {
+      fout << "-I" << cmSystemTools::EscapeSpaces(i->c_str()).c_str() << " ";
+      }
+    }
+  fout << m_Makefile->GetDefineFlags();
+  fout << "\n\n";
 }
 
 
@@ -1328,8 +1303,12 @@ void cmUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
 
 void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
 {
-  // only include the cmake.depends and not the Makefile, as
-  // building one will cause the other to be built
+  this->OutputMakeRule(fout, 
+                       "Default target executed when no arguments are given to make",
+                       "default_target",
+                       0,
+                       "$(MAKE) -$(MAKEFLAGS) cmake.depends",
+                       "$(MAKE) -$(MAKEFLAGS) all");
   this->OutputMakeRule(fout, 
                        "Default build rule",
                        "all",
