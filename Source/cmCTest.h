@@ -247,7 +247,7 @@ private:
 
   //! Run command specialized for tests. Returns process status and retVal is
   // return value or exception.
-  int RunTest( const char* command, std::string* output, int *retVal);
+  int RunTest(std::vector<const char*> args, std::string* output, int *retVal);
 
   std::string GenerateRegressionImages(const std::string& xml);
   const char* GetTestStatus(int status);

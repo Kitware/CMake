@@ -1716,6 +1716,8 @@ void cmCTest::ProcessDirectory(std::vector<std::string> &passed,
         std::string testCommand = this->FindTheExecutable(args[1].Value.c_str());
         testCommand = cmSystemTools::ConvertToOutputPath(testCommand.c_str());
 
+        std::string actualCommand = testCommand;
+
         // continue if we did not find the executable
         if (testCommand == "")
           {
@@ -1729,11 +1731,16 @@ void cmCTest::ProcessDirectory(std::vector<std::string> &passed,
         std::vector<cmListFileArgument>::const_iterator j = args.begin();
         ++j;
         ++j;
+        std::vector<const char*> arguments;
+        arguments.push_back(actualCommand.c_str());
         for(;j != args.end(); ++j)
           {   
           testCommand += " ";
           testCommand += cmSystemTools::EscapeSpaces(j->Value.c_str());
+          arguments.push_back(j->Value.c_str());
           }
+        arguments.push_back(0);
+
         /**
          * Run an executable command and put the stdout in output.
          */
@@ -1750,7 +1757,7 @@ void cmCTest::ProcessDirectory(std::vector<std::string> &passed,
         int res = 0;
         if ( !m_ShowOnly )
           {
-          res = this->RunTest(testCommand.c_str(), &output, &retVal);
+          res = this->RunTest(arguments, &output, &retVal);
           }
         clock_finish = cmSystemTools::GetTime();
 
@@ -2410,23 +2417,8 @@ int cmCTest::RunMakeCommand(const char* command, std::string* output,
   return result;
 }
 
-int cmCTest::RunTest( const char* command, std::string* output, int *retVal)
+int cmCTest::RunTest(std::vector<const char*> argv, std::string* output, int *retVal)
 {
-  std::vector<cmStdString> args = cmSystemTools::ParseArguments(command);
-
-  if(args.size() < 1)
-    {
-    return false;
-    }
-  
-  std::vector<const char*> argv;
-  for(std::vector<cmStdString>::const_iterator a = args.begin();
-      a != args.end(); ++a)
-    {
-    argv.push_back(a->c_str());
-    }
-  argv.push_back(0);
-
   if ( output )
     {
     *output = "";
