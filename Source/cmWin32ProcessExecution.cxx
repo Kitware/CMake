@@ -256,7 +256,6 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
   BOOL fSuccess;
   int fd1, fd2, fd3;
   //FILE *f1, *f2, *f3;
-  long file_count;
 
   saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
   saAttr.bInheritHandle = TRUE;
@@ -369,25 +368,26 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
           PERROR("CloseHandle");
 	  break;
 	}
-      file_count = 1;
       break;
 	
     case POPEN_2:
     case POPEN_4: 
       if ( 1 ) 
 	{
-	char *m1,  *m2;
+        // Comment this out. Maybe we will need it in the future.
+        // file IO access to the process might be cool.
+	//char *m1,  *m2;
 	
-	if (mode && _O_TEXT) 
-	  {
-	  m1 = "r";
-	  m2 = "w";
-	  } 
-	else 
-	  {
-	  m1 = "rb";
-	  m2 = "wb";
-	  }
+	//if (mode && _O_TEXT) 
+	//  {
+	//  m1 = "r";
+	//  m2 = "w";
+	//  } 
+	//else 
+	//  {
+	//  m1 = "rb";
+	//  m2 = "wb";
+	//  }
 
 	fd1 = _open_osfhandle(TO_INTPTR(hChildStdinWrDup), mode);
 	//f1 = _fdopen(fd1, m2);
@@ -401,25 +401,26 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
           PERROR("CloseHandle");              
           }
 
-	file_count = 2;
 	break;
 	}
 	
     case POPEN_3:
       if ( 1) 
 	{
-	char *m1, *m2;
+        // Comment this out. Maybe we will need it in the future.
+        // file IO access to the process might be cool.
+	//char *m1, *m2;
       
-	if (mode && _O_TEXT) 
-	  {
-	  m1 = "r";
-	  m2 = "w";
-	  } 
-	else 
-	  {
-	  m1 = "rb";
-	  m2 = "wb";
-	  }
+	//if (mode && _O_TEXT) 
+	//  {
+	//  m1 = "r";
+	//  m2 = "w";
+	//  } 
+	//else 
+	//  {
+	//  m1 = "rb";
+	//  m2 = "wb";
+	//  }
 
 
 	fd1 = _open_osfhandle(TO_INTPTR(hChildStdinWrDup), mode);
@@ -430,7 +431,6 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
 	//f3 = _fdopen(fd3, m1);	
         PERROR("_open_osfhandle");
 
-	file_count = 3;
 	break;
 	}
     }
@@ -556,11 +556,10 @@ bool cmWin32ProcessExecution::PrivateClose(int timeout)
 
   std::string output = "";
   bool done = false;
-  int stdoutloc = 0;
-  int stderrloc = 0;
   while(!done)
     {
     Sleep(10);
+    bool have_some = false;
     struct _stat fsout;
     struct _stat fserr;
     int rout = _fstat(this->m_pStdOut, &fsout);
@@ -572,7 +571,6 @@ bool cmWin32ProcessExecution::PrivateClose(int timeout)
     if (fserr.st_size > 0)
       {
       //std::cout << "Some error" << std::endl;
-      int dist = fserr.st_size;
       char buffer[1023];
       int len = read(this->m_pStdErr, buffer, 1023);
       buffer[len] = 0;
@@ -581,11 +579,11 @@ bool cmWin32ProcessExecution::PrivateClose(int timeout)
 	std::cout << buffer << std::flush;
 	}
       output += buffer;
+      have_some = true;
       }
     if (fsout.st_size > 0)
       {
       //std::cout << "Some output" << std::endl;
-      int dist = fsout.st_size;
       char buffer[1023];
       int len = read(this->m_pStdOut, buffer, 1023);
       buffer[len] = 0;
@@ -594,14 +592,18 @@ bool cmWin32ProcessExecution::PrivateClose(int timeout)
 	std::cout << buffer << std::flush;
 	}
       output += buffer;
+      have_some = true;
       }
     unsigned long exitCode;
-    GetExitCodeProcess(hProcess,&exitCode);
-    if (exitCode != STILL_ACTIVE)
+    if ( ! have_some )
       {
-      //std::cout << "STILL_ACTIVE = " << STILL_ACTIVE << std::endl;
-      //std::cout << "Process is not active any more: " << exitCode << std::endl;
-      break;
+      GetExitCodeProcess(hProcess,&exitCode);
+      if (exitCode != STILL_ACTIVE)
+        {
+        //std::cout << "STILL_ACTIVE = " << STILL_ACTIVE << std::endl;
+        //std::cout << "Process is not active any more: " << exitCode << std::endl;
+        break;
+        }
       }
     }  
 
