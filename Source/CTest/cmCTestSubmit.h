@@ -41,27 +41,27 @@ public:
   /**
    * Submit file using various ways
    */
-  bool SubmitUsingFTP(const std::string& localprefix, 
-                      const std::vector<std::string>& files,
-                      const std::string& remoteprefix, 
-                      const std::string& url);
-  bool SubmitUsingHTTP(const std::string& localprefix, 
-                       const std::vector<std::string>& files,
-                       const std::string& remoteprefix, 
-                       const std::string& url);
-  bool SubmitUsingSCP(const std::string& localprefix, 
-                      const std::vector<std::string>& files,
-                      const std::string& remoteprefix, 
-                      const std::string& url);
+  bool SubmitUsingFTP(const cmStdString& localprefix, 
+                      const std::vector<cmStdString>& files,
+                      const cmStdString& remoteprefix, 
+                      const cmStdString& url);
+  bool SubmitUsingHTTP(const cmStdString& localprefix, 
+                       const std::vector<cmStdString>& files,
+                       const cmStdString& remoteprefix, 
+                       const cmStdString& url);
+  bool SubmitUsingSCP(const cmStdString& localprefix, 
+                      const std::vector<cmStdString>& files,
+                      const cmStdString& remoteprefix, 
+                      const cmStdString& url);
 
-  bool TriggerUsingHTTP(const std::vector<std::string>& files,
-                        const std::string& remoteprefix, 
-                        const std::string& url);
+  bool TriggerUsingHTTP(const std::vector<cmStdString>& files,
+                        const cmStdString& remoteprefix, 
+                        const cmStdString& url);
 
 private:
-  std::string m_HTTPProxy;
+  cmStdString m_HTTPProxy;
   int         m_HTTPProxyType;
-  std::string m_FTPProxy;
+  cmStdString m_FTPProxy;
   int         m_FTPProxyType;
   bool        m_Verbose;
 };

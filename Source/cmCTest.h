@@ -24,6 +24,8 @@
 class cmCTest
 {
 public:
+  typedef std::vector<cmStdString> tm_VectorOfStrings;
+
   /**
    * Run a dashboard using a specified confiuration script
    */
@@ -55,7 +57,7 @@ public:
   /**
    * Try to run tests of the project
    */
-  int TestDirectory();
+  int TestDirectory(bool memcheck);
 
   /**
    * Try to get coverage of the project
@@ -86,8 +88,9 @@ public:
   /**
    * Run the test for a directory and any subdirectories
    */
-  void ProcessDirectory(std::vector<std::string> &passed, 
-                        std::vector<std::string> &failed);
+  void ProcessDirectory(tm_VectorOfStrings &passed, 
+                        tm_VectorOfStrings &failed,
+                        bool memcheck);
 
   /**
    * Find the executable for a test
@@ -143,7 +146,7 @@ private:
     BUILD_TEST     = 4,
     TEST_TEST      = 5,
     COVERAGE_TEST  = 6,
-    PURIFY_TEST    = 7,
+    MEMCHECK_TEST  = 7,
     SUBMIT_TEST    = 8,
     ALL_TEST       = 9,
     LAST_TEST      = 10
@@ -161,6 +164,40 @@ private:
     BAD_COMMAND,
     COMPLETED
   };
+
+  enum { // Memory checkers
+    UNKNOWN = 0,
+    VALGRIND,
+    PURIFY,
+    BOUNDS_CHECKER
+  };
+
+  enum { // Memory faults
+    ABR = 0,
+    ABW,
+    ABWL,
+    COR,
+    EXU,
+    FFM,
+    FIM,
+    FMM,
+    FMR,
+    FMW,
+    FUM,
+    IPR,
+    IPW,
+    MAF,
+    MLK,
+    MPK,
+    NPR,
+    ODS,
+    PAR,
+    PLK,
+    UMC,
+    UMR,
+    NO_MEMORY_FAULT
+  };
+
 
   struct cmCTestTestResult
   {
@@ -235,10 +272,20 @@ private:
 
   int                     m_TimeOut;
 
+  std::string             m_MemoryTester;
+  std::string             m_MemoryTesterOptions;
+  int                     m_MemoryTesterStyle;
+  std::string             m_MemoryTesterOutputFile;
+  tm_VectorOfStrings      m_MemoryTesterOptionsParsed;
+  int                     m_MemoryTesterGlobalResults[NO_MEMORY_FAULT];
+
+  int                     m_CompatibilityMode;
+
   /**
    * Generate the Dart compatible output
    */
   void GenerateDartTestOutput(std::ostream& os);
+  void GenerateDartMemCheckOutput(std::ostream& os);
   void GenerateDartBuildOutput(std::ostream& os, 
                                std::vector<cmCTestBuildErrorWarning>);
 
@@ -259,6 +306,20 @@ private:
 
   std::string GenerateRegressionImages(const std::string& xml);
   const char* GetTestStatus(int status);
+
+  //! Start CTest XML output file
+  void StartXML(ostream& ostr);
+
+  //! End CTest XML output file
+  void EndXML(ostream& ostr);
+
+  //! Parse Valgrind/Purify/Bounds Checker result out of the output string. After running,
+  // log holds the output and results hold the different memmory errors.
+  bool ProcessMemCheckOutput(const std::string& str, std::string& log, int* results);
+  bool ProcessMemCheckValgrindOutput(const std::string& str, std::string& log, int* results);
+
+  //! Initialize memory checking subsystem.
+  bool InitializeMemoryChecking();
 };
 
 #endif

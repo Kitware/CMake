@@ -37,7 +37,7 @@ cmCTestSubmit::cmCTestSubmit() : m_HTTPProxy(), m_FTPProxy()
       }
     if ( getenv("HTTP_PROXY_TYPE") )
       {
-      std::string type = getenv("HTTP_PROXY_TYPE");
+      cmStdString type = getenv("HTTP_PROXY_TYPE");
       // HTTP/SOCKS4/SOCKS5
       if ( type == "HTTP" )
         {
@@ -66,7 +66,7 @@ cmCTestSubmit::cmCTestSubmit() : m_HTTPProxy(), m_FTPProxy()
       }
     if ( getenv("FTP_PROXY_TYPE") )
       {
-      std::string type = getenv("FTP_PROXY_TYPE");
+      cmStdString type = getenv("FTP_PROXY_TYPE");
       // HTTP/SOCKS4/SOCKS5
       if ( type == "HTTP" )
         {
@@ -92,10 +92,10 @@ cmCTestSubmit::cmCTestSubmit() : m_HTTPProxy(), m_FTPProxy()
     }
 }
 
-bool cmCTestSubmit::SubmitUsingFTP(const std::string& localprefix, 
-  const std::vector<std::string>& files,
-  const std::string& remoteprefix, 
-  const std::string& url)
+bool cmCTestSubmit::SubmitUsingFTP(const cmStdString& localprefix, 
+  const std::vector<cmStdString>& files,
+  const cmStdString& remoteprefix, 
+  const cmStdString& url)
 {
   CURL *curl;
   CURLcode res;
@@ -105,7 +105,7 @@ bool cmCTestSubmit::SubmitUsingFTP(const std::string& localprefix,
   /* In windows, this will init the winsock stuff */
   ::curl_global_init(CURL_GLOBAL_ALL);
 
-  std::string::size_type cc;
+  cmStdString::size_type cc;
   for ( cc = 0; cc < files.size(); cc ++ )
     {
     /* get a curl handle */
@@ -132,8 +132,8 @@ bool cmCTestSubmit::SubmitUsingFTP(const std::string& localprefix,
       // enable uploading
       ::curl_easy_setopt(curl, CURLOPT_UPLOAD, TRUE) ;
 
-      std::string local_file = localprefix + "/" + files[cc];
-      std::string upload_as = url + "/" + remoteprefix + files[cc];
+      cmStdString local_file = localprefix + "/" + files[cc];
+      cmStdString upload_as = url + "/" + remoteprefix + files[cc];
 
       struct stat st;
       if ( ::stat(local_file.c_str(), &st) )
@@ -184,10 +184,10 @@ bool cmCTestSubmit::SubmitUsingFTP(const std::string& localprefix,
 }
 
 // Uploading files is simpler
-bool cmCTestSubmit::SubmitUsingHTTP(const std::string& localprefix, 
-  const std::vector<std::string>& files,
-  const std::string& remoteprefix, 
-  const std::string& url)
+bool cmCTestSubmit::SubmitUsingHTTP(const cmStdString& localprefix, 
+  const std::vector<cmStdString>& files,
+  const cmStdString& remoteprefix, 
+  const cmStdString& url)
 {
   CURL *curl;
   CURLcode res;
@@ -196,7 +196,7 @@ bool cmCTestSubmit::SubmitUsingHTTP(const std::string& localprefix,
   /* In windows, this will init the winsock stuff */
   ::curl_global_init(CURL_GLOBAL_ALL);
 
-  std::string::size_type cc, kk;
+  cmStdString::size_type cc, kk;
   for ( cc = 0; cc < files.size(); cc ++ )
     {
     /* get a curl handle */
@@ -231,9 +231,9 @@ bool cmCTestSubmit::SubmitUsingHTTP(const std::string& localprefix,
         ::curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
         }
 
-      std::string local_file = localprefix + "/" + files[cc];
-      std::string remote_file = remoteprefix + files[cc];
-      std::string ofile = "";
+      cmStdString local_file = localprefix + "/" + files[cc];
+      cmStdString remote_file = remoteprefix + files[cc];
+      cmStdString ofile = "";
       for ( kk = 0; kk < remote_file.size(); kk ++ )
         {
         char c = remote_file[kk];
@@ -256,7 +256,7 @@ bool cmCTestSubmit::SubmitUsingHTTP(const std::string& localprefix,
           ofile.append(hex);
           }
         }
-      std::string upload_as = url + "?FileName=" + ofile;
+      cmStdString upload_as = url + "?FileName=" + ofile;
 
       struct stat st;
       if ( ::stat(local_file.c_str(), &st) )
@@ -301,16 +301,16 @@ bool cmCTestSubmit::SubmitUsingHTTP(const std::string& localprefix,
   return true;
 }
 
-bool cmCTestSubmit::TriggerUsingHTTP(const std::vector<std::string>& files,
-  const std::string& remoteprefix, 
-  const std::string& url)
+bool cmCTestSubmit::TriggerUsingHTTP(const std::vector<cmStdString>& files,
+  const cmStdString& remoteprefix, 
+  const cmStdString& url)
 {
   CURL *curl;
 
   /* In windows, this will init the winsock stuff */
   ::curl_global_init(CURL_GLOBAL_ALL);
 
-  std::string::size_type cc, kk;
+  cmStdString::size_type cc, kk;
   for ( cc = 0; cc < files.size(); cc ++ )
     {
     /* get a curl handle */
@@ -339,8 +339,8 @@ bool cmCTestSubmit::TriggerUsingHTTP(const std::vector<std::string>& files,
         {
         ::curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
         }
-      std::string file = remoteprefix + files[cc];
-      std::string ofile = "";
+      cmStdString file = remoteprefix + files[cc];
+      cmStdString ofile = "";
       for ( kk = 0; kk < file.size(); kk ++ )
         {
         char c = file[kk];
@@ -363,7 +363,7 @@ bool cmCTestSubmit::TriggerUsingHTTP(const std::vector<std::string>& files,
           ofile.append(hex);
           }
         }
-      std::string turl = url + "?xmlfile=" + ofile;
+      cmStdString turl = url + "?xmlfile=" + ofile;
       if ( m_Verbose )
         {
         std::cout << "  Trigger url: " << turl.c_str() << std::endl;
@@ -386,10 +386,10 @@ bool cmCTestSubmit::TriggerUsingHTTP(const std::vector<std::string>& files,
   return true;
 }
 
-bool cmCTestSubmit::SubmitUsingSCP(const std::string&, 
-  const std::vector<std::string>&,
-  const std::string&, 
-  const std::string&)
+bool cmCTestSubmit::SubmitUsingSCP(const cmStdString&, 
+  const std::vector<cmStdString>&,
+  const cmStdString&, 
+  const cmStdString&)
 {
   std::cout << "SubmitUsingSCP is not yet implemented" << std::endl;
   return false;

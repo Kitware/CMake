@@ -62,7 +62,7 @@ void cmCursesPathWidget::OnTab(cmCursesMainForm* fm, WINDOW* w)
     {
     glob = cstr + "*";
     }
-  std::vector<std::string> dirs;
+  std::vector<cmStdString> dirs;
 
   cmSystemTools::SimpleGlob(glob.c_str(), dirs, (m_Type == cmCacheManager::PATH?-1:0));
   if ( m_CurrentIndex < dirs.size() )

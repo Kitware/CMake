@@ -197,10 +197,10 @@ int main (int argc, char *argv[])
         inst.SetTestModel(cmCTest::EXPERIMENTAL);
         inst.SetTest("Test");
         }
-      else if ( targ == "ExperimentalPurify" )
+      else if ( targ == "ExperimentalMemCheck" || targ == "ExperimentalPurify" )
         {
         inst.SetTestModel(cmCTest::EXPERIMENTAL);
-        inst.SetTest("Purify");
+        inst.SetTest("MemCheck");
         }
       else if ( targ == "ExperimentalCoverage" )
         {
@@ -248,10 +248,10 @@ int main (int argc, char *argv[])
         inst.SetTestModel(cmCTest::CONTINUOUS);
         inst.SetTest("Test");
         }
-      else if ( targ == "ContinuousPurify" )
+      else if ( targ == "ContinuousMemCheck" || targ == "ContinuousPurify" )
         {
         inst.SetTestModel(cmCTest::CONTINUOUS);
-        inst.SetTest("Purify");
+        inst.SetTest("MemCheck");
         }
       else if ( targ == "ContinuousCoverage" )
         {
@@ -299,10 +299,10 @@ int main (int argc, char *argv[])
         inst.SetTestModel(cmCTest::NIGHTLY);
         inst.SetTest("Test");
         }
-      else if ( targ == "NightlyPurify" )
+      else if ( targ == "NightlyMemCheck" || targ == "NightlyPurify" )
         {
         inst.SetTestModel(cmCTest::NIGHTLY);
-        inst.SetTest("Purify");
+        inst.SetTest("MemCheck");
         }
       else if ( targ == "NightlyCoverage" )
         {
@@ -320,7 +320,7 @@ int main (int argc, char *argv[])
         inst.SetTest("Start");
         inst.SetTest("Configure");
         inst.SetTest("Build");
-        inst.SetTest("Purify");
+        inst.SetTest("MemCheck");
         inst.SetTest("Coverage");
         inst.SetTest("Submit");
         }
@@ -331,7 +331,7 @@ int main (int argc, char *argv[])
         inst.SetTest("Update");
         inst.SetTest("Configure");
         inst.SetTest("Build");
-        inst.SetTest("Purify");
+        inst.SetTest("MemCheck");
         inst.SetTest("Coverage");
         inst.SetTest("Submit");
         }

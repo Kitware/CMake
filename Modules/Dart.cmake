@@ -69,7 +69,9 @@ IF(BUILD_TESTING)
     DOC "Path to program used to compress files for transfer to the dart server")
   FIND_PROGRAM(GUNZIPCOMMAND gunzip DOC "Path to gunzip executable")
   FIND_PROGRAM(JAVACOMMAND java DOC "Path to java command, used by the Dart server to create html.")
-  FIND_PROGRAM(PURIFYCOMMAND purify 
+  FIND_PROGRAM(MEMORYCHECK_COMMAND
+    NAMES purify valgrind boundscheck
+    PATHS
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Rational Software\\Purify\\Setup;InstallFolder]"
     DOC "Path to Rational purify command, used for memory error detection."
     )
@@ -95,11 +97,25 @@ IF(BUILD_TESTING)
     ELSE(WIN32)
       SET(DART_NAME_COMPONENT "NAME")
     ENDIF(WIN32)
+    SET(BUILD_NAME_SYSTEM_NAME "${CMAKE_SYSTEM_NAME}")
+    IF(WIN32)
+      SET(BUILD_NAME_SYSTEM_NAME "Win32")
+    ENDIF(WIN32)
     IF(UNIX OR BORLAND)
       GET_FILENAME_COMPONENT(DART_CXX_NAME "${CMAKE_CXX_COMPILER}" ${DART_NAME_COMPONENT})
     ELSE(UNIX OR BORLAND)
       GET_FILENAME_COMPONENT(DART_CXX_NAME "${CMAKE_BUILD_TOOL}" ${DART_NAME_COMPONENT})
     ENDIF(UNIX OR BORLAND)
+    IF(DART_CXX_NAME MATCHES "msdev")
+      SET(DART_CXX_NAME "vs60")
+    ENDIF(DART_CXX_NAME MATCHES "msdev")
+    IF(DART_CXX_NAME MATCHES "devenv")
+      IF(CMAKE_GENERATOR MATCHES "^Visual Studio 7$")
+        SET(DART_CXX_NAME "vs70")
+      ELSE(CMAKE_GENERATOR MATCHES "^Visual Studio 7$")
+        SET(DART_CXX_NAME "vs71")
+      ENDIF(CMAKE_GENERATOR MATCHES "^Visual Studio 7$")
+    ENDIF(DART_CXX_NAME MATCHES "devenv")
     SET(BUILDNAME "${CMAKE_SYSTEM_NAME}-${DART_CXX_NAME}")
     MESSAGE(STATUS "Using Buildname: ${BUILDNAME}")
   ENDIF(NOT BUILDNAME)
@@ -140,7 +156,7 @@ IF(BUILD_TESTING)
 
     # configure files
     CONFIGURE_FILE(
-      ${DART_ROOT}/Source/Client/Utility.conf.in
+      ${DART_ROOT}/Source/Client/Dart.conf.in
       ${PROJECT_BINARY_DIR}/DartConfiguration.tcl )
 
     #

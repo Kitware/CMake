@@ -139,7 +139,7 @@ public:
    * want to find. 0 means all files, -1 means directories, 1 means
    * files only. This method returns true if search was succesfull.
    */
-  static bool SimpleGlob(const std::string& glob, std::vector<std::string>& files, 
+  static bool SimpleGlob(const cmStdString& glob, std::vector<cmStdString>& files, 
                          int type = 0);
   
   ///! Copy a file.

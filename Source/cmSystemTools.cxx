@@ -909,8 +909,8 @@ void cmSystemTools::ExpandListArgument(const std::string& arg,
     }
 }
 
-bool cmSystemTools::SimpleGlob(const std::string& glob, 
-                               std::vector<std::string>& files, 
+bool cmSystemTools::SimpleGlob(const cmStdString& glob, 
+                               std::vector<cmStdString>& files, 
                                int type /* = 0 */)
 {
   files.clear();

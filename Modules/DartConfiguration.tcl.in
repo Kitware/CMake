@@ -40,6 +40,8 @@ ScpCommand: @SCPCOMMAND@
 PurifyCommand: @PURIFYCOMMAND@
 ValgrindCommand: @VALGRIND_COMMAND@
 ValgrindCommandOptions: @VALGRIND_COMMAND_OPTIONS@
+MemoryCheckCommand: @MEMORYCHECK_COMMAND@
+MemoryCheckCommandOptions: @MEMORYCHECK_COMMAND_OPTIONS@
 CoverageCommand: @COVERAGE_COMMAND@
 # Compression commands
 GunzipCommand: @GUNZIPCOMMAND@
