@@ -218,7 +218,9 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff)
     cmCommand* usedCommand = rm->Clone();
     usedCommand->SetMakefile(this);
     bool keepCommand = false;
-    if(usedCommand->GetEnabled() && !cmSystemTools::GetFatalErrorOccured())
+    if(usedCommand->GetEnabled() && !cmSystemTools::GetFatalErrorOccured()  &&
+      (!this->GetCMakeInstance()->GetScriptMode() || 
+       usedCommand->IsScriptable()))
       {
       // if not running in inherit mode or
       // if the command is inherited then InitialPass it.
@@ -232,6 +234,10 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff)
             << usedCommand->GetError();
           cmSystemTools::Error(error.str().c_str());
           result = false;
+          if ( this->GetCMakeInstance()->GetScriptMode() )
+            {
+            cmSystemTools::SetFatalErrorOccured();
+            }
           }
         else
           {
@@ -240,6 +246,16 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff)
           m_UsedCommands.push_back(usedCommand);
           }
         }
+      }
+    else if ( this->GetCMakeInstance()->GetScriptMode() && !usedCommand->IsScriptable() )
+      {
+      cmOStringStream error;
+      error << "Error in cmake code at\n"
+        << lff.m_FilePath << ":" << lff.m_Line << ":\n"
+        << "Command " << usedCommand->GetName() << " not scriptable" << std::endl;
+      cmSystemTools::Error(error.str().c_str());
+      result = false;
+      cmSystemTools::SetFatalErrorOccured();
       }
     // if the Cloned command was not used 
     // then delete it
@@ -278,7 +294,6 @@ bool cmMakefile::ReadListFile(const char* filename_in, const char* external_in)
   // used to watch for blockers going out of scope
   // e.g. mismatched IF statement
   std::set<cmFunctionBlocker *> originalBlockers;
-
 
   const char* external = 0;
   std::string external_abs;

@@ -219,7 +219,7 @@ class cmake
   void SetIsInTryCompile(bool i) { m_InTryCompile = i; }
   
   ///! Parse command line arguments that might set cache values
-  void SetCacheArgs(const std::vector<std::string>&);
+  bool SetCacheArgs(const std::vector<std::string>&);
 
   typedef  void (*ProgressCallback)(const char*msg, float progress, void *);
   /**
@@ -243,6 +243,14 @@ class cmake
 
   ///! Do all the checks before running configure
   int DoPreConfigureChecks();
+
+  /**
+   * Set and get the script mode option. In script mode there is no generator
+   * and no cache. Also, language are not enabled, so add_executable and things
+   * do not do anything.
+   */
+  void SetScriptMode(bool mode) { m_ScriptMode = mode; }
+  bool GetScriptMode() { return m_ScriptMode; }
   
 protected:
   typedef cmGlobalGenerator* (*CreateGeneratorFunctionType)();
@@ -282,6 +290,7 @@ private:
   bool m_Verbose;
   bool m_Local;
   bool m_InTryCompile;
+  bool m_ScriptMode;
   std::string m_CMakeCommand;
   const char* m_CXXEnvironment;
   const char* m_CCEnvironment;

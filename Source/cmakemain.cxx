@@ -149,6 +149,7 @@ int do_cmake(int ac, char** av)
   bool list_all_cached = false;
   bool list_help = false;
   bool view_only = false;
+  bool script_mode = false;
   std::vector<std::string> args;
   for(int i =0; i < ac; ++i)
     {
@@ -182,6 +183,11 @@ int do_cmake(int ac, char** av)
       list_all_cached = true;
       list_help = true;
       }
+    else if (strncmp(av[i], "-M", 2) == 0)
+      {
+      script_mode = true;
+      args.push_back(av[i]);
+      }
     else 
       {
       args.push_back(av[i]);
@@ -200,6 +206,7 @@ int do_cmake(int ac, char** av)
     }
   cmake cm;  
   cm.SetProgressCallback(updateProgress, 0);
+  cm.SetScriptMode(script_mode);
   int res = cm.Run(args, view_only);
   if ( list_cached || list_all_cached )
     {

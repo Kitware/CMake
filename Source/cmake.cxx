@@ -95,6 +95,7 @@ cmake::cmake()
   m_ProgressCallback = 0;
   m_ProgressCallbackClientData = 0;
   m_VariableWatch = new cmVariableWatch;
+  m_ScriptMode = false;
 
   this->AddDefaultGenerators();
   this->AddDefaultCommands();
@@ -178,7 +179,7 @@ void cmake::Usage(const char* program)
 }
 
 // Parse the args
-void cmake::SetCacheArgs(const std::vector<std::string>& args)
+bool cmake::SetCacheArgs(const std::vector<std::string>& args)
 { 
   for(unsigned int i=1; i < args.size(); ++i)
     {
@@ -199,15 +200,34 @@ void cmake::SetCacheArgs(const std::vector<std::string>& args)
         {
         std::cerr << "Parse error in command line argument: " << arg << "\n"
                   << "Should be: VAR:type=value\n";
+        cmSystemTools::Error("No cmake scrpt provided.");
+        return false;
         }        
       }
     else if(arg.find("-C",0) == 0)
       {
       std::string path = arg.substr(2);
+      if ( path.size() == 0 )
+        {
+        cmSystemTools::Error("No initial cache file provided.");
+        return false;
+        }
       std::cerr << "loading initial cache file " << path.c_str() << "\n";
       this->ReadListFile(path.c_str());
       }
+    else if(arg.find("-M",0) == 0)
+      {
+      std::string path = arg.substr(2);
+      if ( path.size() == 0 )
+        {
+        cmSystemTools::Error("No cmake scrpt provided.");
+        return false;
+        }
+      std::cerr << "Running cmake script file " << path.c_str() << "\n";
+      this->ReadListFile(path.c_str());
+      }
     }
+  return true;
 }
 
 void cmake::ReadListFile(const char *path)
@@ -285,6 +305,10 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       // skip for now
       }
     else if(arg.find("-C",0) == 0)
+      {
+      // skip for now
+      }
+    else if(arg.find("-M",0) == 0)
       {
       // skip for now
       }
@@ -856,7 +880,11 @@ int cmake::DoPreConfigureChecks()
 
 int cmake::Configure()
 {
-  int res = this->DoPreConfigureChecks();
+  int res = 0;
+  if ( !m_ScriptMode )
+    {
+    res = this->DoPreConfigureChecks();
+    }
   if ( res < 0 )
     {
     return -2;
@@ -970,7 +998,10 @@ int cmake::Configure()
     // user can select another.
     m_CacheManager->RemoveCacheEntry("CMAKE_GENERATOR");
     }
-  this->m_CacheManager->SaveCache(this->GetHomeOutputDirectory());
+  if ( !m_ScriptMode )
+    {
+    this->m_CacheManager->SaveCache(this->GetHomeOutputDirectory());
+    }
   if(cmSystemTools::GetErrorOccuredFlag())
     {
     return -1;
@@ -1004,15 +1035,22 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
   // set the cmake command
   m_CMakeCommand = args[0];
   
-  // load the cache
-  if(this->LoadCache() < 0)
+  if ( !m_ScriptMode )
     {
-    cmSystemTools::Error("Error executing cmake::LoadCache().  Aborting.\n");
+    // load the cache
+    if(this->LoadCache() < 0)
+      {
+      cmSystemTools::Error("Error executing cmake::LoadCache().  Aborting.\n");
+      return -1;
+      }
+    }
+
+  // Add any cache args
+  if ( !this->SetCacheArgs(args) )
+    {
+    cmSystemTools::Error("Problem processing arguments. Aborting.\n");
     return -1;
     }
-  
-  // Add any cache args
-  this->SetCacheArgs(args);
  
   std::string systemFile = this->GetHomeOutputDirectory();
   systemFile += "/CMakeSystem.cmake";
@@ -1026,7 +1064,7 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
   // if not local or the cmake version has changed since the last run
   // of cmake, or CMakeSystem.cmake file is not in the root binary
   // directory, run a global generate
-  if(!m_Local || !this->CacheVersionMatches() ||
+  if(m_ScriptMode || !m_Local || !this->CacheVersionMatches() ||
      !cmSystemTools::FileExists(systemFile.c_str()) )
     {
     // If we are doing global generate, we better set start and start
@@ -1038,7 +1076,7 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
     bool saveLocalFlag = m_Local;
     m_Local = false;
     ret = this->Configure();
-    if (ret)
+    if (ret || m_ScriptMode)
       {
       return ret;
       }
