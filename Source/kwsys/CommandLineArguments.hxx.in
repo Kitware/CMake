@@ -34,6 +34,39 @@ class CommandLineArgumentsInternal;
  *
  * Find specified arguments with optional options and execute specified methods
  * or set given variables.
+ *
+ * The two interfaces it knows are callback based and variable based. For
+ * callback based, you have to register callback for particular argument using
+ * AddCallback method. When that argument is passed, the callback will be
+ * called with argument, value, and call data. For boolean (NO_ARGUMENT)
+ * arguments, the value is "1". If the callback returns 0 the argument parsing
+ * will stop with an error.
+ *
+ * For the variable interface you associate variable with each argument. When
+ * the argument is specified, the variable is set to the specified value casted
+ * to the apropriate type. For boolean (NO_ARGUMENT), the value is "1".
+ *
+ * Both interfaces can be used at the same time. 
+ *
+ * Possible argument types are:
+ *   NO_ARGUMENT     - The argument takes no value             : --A
+ *   CONCAT_ARGUMENT - The argument takes value after no space : --Aval
+ *   SPACE_ARGUMENT  - The argument takes value after space    : --A val 
+ *   EQUAL_ARGUMENT  - The argument takes value after equal    : --A=val
+ *
+ * Example use:
+ *
+ * kwsys::CommandLineArguments arg;
+ * arg.Initialize(argc, argv);
+ * typedef kwsys::CommandLineArguments argT;
+ * arg.AddArgument("--something", argT::EQUAL_ARGUMENT, &some_variable, 
+ *                 "This is help string for --something");
+ * if ( !arg.Parse() )
+ *   {
+ *   kwsys_ios::cerr << "Problem parsing arguments" << kwsys_ios::endl;
+ *   res = 1;
+ *   }
+ * 
  */
 
 class @KWSYS_NAMESPACE@_EXPORT CommandLineArguments
@@ -46,14 +79,15 @@ public:
    * Various argument types.
    */
   enum ArgumentTypeEnum { 
-    NO_ARGUMENT,    // The option takes no argument             --foo
-    CONCAT_ARGUMENT,// The option takes argument after no space --foobar
-    SPACE_ARGUMENT, // The option takes argument after space    --foo bar
-    EQUAL_ARGUMENT  // The option takes argument after equal    --foo=bar
+    NO_ARGUMENT,
+    CONCAT_ARGUMENT,
+    SPACE_ARGUMENT,
+    EQUAL_ARGUMENT
   };
 
   /**
-   * Various string types.
+   * Various variable types. When using the variable interface, this specifies
+   * what type the variable is.
    */
   enum VariableTypeEnum {
     NO_VARIABLE_TYPE = 0, // The variable is not specified
@@ -96,21 +130,34 @@ public:
    * argument help specifies the help string used with this option. The
    * callback and call_data can be skipped.
    */
-  void AddCallback(const char* argument, ArgumentTypeEnum type, CallbackType callback, 
-                   void* call_data, const char* help);
+  void AddCallback(const char* argument, ArgumentTypeEnum type, 
+    CallbackType callback, void* call_data, const char* help);
 
   /**
    * Add handler for argument which is going to set the variable to the
-   * specified value.
+   * specified value. If the argument is specified, the option is casted to the
+   * apropriate type.
    */
-  void AddArgument(const char* argument, ArgumentTypeEnum type, VariableTypeEnum vtype, void* variable, const char* help);
-  void AddArgument(const char* argument, ArgumentTypeEnum type, bool* variable, const char* help);
-  void AddArgument(const char* argument, ArgumentTypeEnum type, int* variable, const char* help);
-  void AddArgument(const char* argument, ArgumentTypeEnum type, double* variable, const char* help);
-  void AddArgument(const char* argument, ArgumentTypeEnum type, char** variable, const char* help);
-  void AddArgument(const char* argument, ArgumentTypeEnum type, kwsys_stl::string* variable, const char* help);
-  void AddBooleanArgument(const char* argument, bool* variable, const char* help);
-  void AddBooleanArgument(const char* argument, int* variable, const char* help);
+  void AddArgument(const char* argument, ArgumentTypeEnum type, bool* variable,
+    const char* help);
+  void AddArgument(const char* argument, ArgumentTypeEnum type, int* variable,
+    const char* help);
+  void AddArgument(const char* argument, ArgumentTypeEnum type, 
+    double* variable, const char* help);
+  void AddArgument(const char* argument, ArgumentTypeEnum type, 
+    char** variable, const char* help);
+  void AddArgument(const char* argument, ArgumentTypeEnum type,
+    kwsys_stl::string* variable, const char* help);
+
+  /**
+   * Add handler for boolean argument. The argument does not take any option
+   * and if it is specified, the value of the variable is true/1, otherwise it
+   * is false/0.
+   */
+  void AddBooleanArgument(const char* argument, bool* variable, const char*
+    help);
+  void AddBooleanArgument(const char* argument, int* variable, const char*
+    help);
 
   /**
    * Set the callbacks for error handling.
@@ -132,13 +179,15 @@ public:
   const char* GetHelp(const char* arg);
 
   /**
-   * Get / Set the help line length. Default length is 80.
+   * Get / Set the help line length. This length is used when generating the
+   * help page. Default length is 80.
    */
   void SetLineLength(unsigned int);
   unsigned int GetLineLength();
 
   /**
-   * Get the executable name (argv0)
+   * Get the executable name (argv0). This is only available when using
+   * Initialize with argc/argv.
    */
   const char* GetArgv0();
 
@@ -149,8 +198,11 @@ public:
   unsigned int GetLastArgument();
 
 protected:
-
   void GenerateHelp();
+
+  //! This is internal method that registers variable with argument
+  void AddArgument(const char* argument, ArgumentTypeEnum type,
+    VariableTypeEnum vtype, void* variable, const char* help);
 
   typedef CommandLineArgumentsInternal Internal;
   Internal* Internals;
