@@ -484,8 +484,8 @@ bool cmFileCommand::HandleInstallCommand(
           {
           perror("problem doing chmod.");
           }
-        smanifest_files += ";" + destfile;
         }
+      smanifest_files += ";" + destfile;
       }
     else
       {
