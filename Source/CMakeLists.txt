@@ -52,7 +52,7 @@ ADD_LIBRARY(CMakeLib SRCS)
 # always link in the library
 LINK_LIBRARIES(CMakeLib)
 # the library is found here
-LINK_DIRECTORIES(${CMake_BINARY_DIR}/Sources)
+LINK_DIRECTORIES(${CMake_BINARY_DIR}/Source)
 
 ADD_EXECUTABLE(cmake cmakemain)
 ADD_EXECUTABLE(DumpDocumentation cmDumpDocumentation)
