@@ -60,6 +60,7 @@ ELSE(STAGE2)
   SET(install_target SimpleInstall)
 
   ADD_DEPENDENCIES(SimpleInstall test3)
+  ADD_DEPENDENCIES(test2 test3)
 
   INSTALL_TARGETS(/bin SimpleInstall)
   INSTALL_TARGETS(/lib test1 test2 test3)
