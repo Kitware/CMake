@@ -140,6 +140,18 @@ IF(OPENGL_INCLUDE_DIR)
 
 ENDIF(OPENGL_INCLUDE_DIR)
 
+# On OSX, OpenGL is always there - this will need refining for those using OpenGL with X11
+IF (APPLE)
+  SET (OPENGL_FOUND "YES")
+  SET (OPENGL_GLU_FOUND "YES")
+  SET (OPENGL_LIBRARIES "-framework AGL -framework OpenGL" CACHE STRING "OpenGL lib for OSX")
+  SET (OPENGL_LIBRARY ${OPENGL_LIBRARIES} CACHE STRING "OpenGL lib for OSX (for CMake 1.4)")
+  SET (OPENGL_gl_LIBRARY "-framework OpenGL" CACHE STRING "OpenGL lib for OSX")
+  SET (OPENGL_glu_LIBRARY "-framework AGL" CACHE STRING "AGL lib for OSX")
+ENDIF (APPLE)
+
+
+
 MARK_AS_ADVANCED(
   OPENGL_INCLUDE_DIR
   OPENGL_xmesa_INCLUDE_DIR
