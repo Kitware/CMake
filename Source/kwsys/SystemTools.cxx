@@ -235,15 +235,9 @@ const char* SystemTools::GetExecutableExtension()
 
 bool SystemTools::MakeDirectory(const char* path)
 {
-  if(SystemTools::FileIsDirectory(path))
-    {
-    return true;
-    }
-
-  // Do not make a directory on top of a file.
   if(SystemTools::FileExists(path))
     {
-    return false;
+    return true;
     }
   kwsys_stl::string dir = path;
   if(dir.size() == 0)
