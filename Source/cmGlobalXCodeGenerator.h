@@ -123,6 +123,11 @@ private:
   bool SpecialTargetEmitted(std::string const& tname);
   void AddExtraTargets(cmLocalGenerator* root, 
                        std::vector<cmLocalGenerator*>& gens);
+  cmXCodeObject* CreateBuildPhase(const char* name, 
+                                  const char* name2,
+                                  cmTarget& cmtarget,
+                                  const std::vector<cmCustomCommand>&);
+  void CreateReRunCMakeFile(cmLocalGenerator* root);
 private:
   std::vector<cmXCodeObject*> m_XCodeObjects;
   cmXCodeObject* m_RootObject;
@@ -136,6 +141,7 @@ private:
   std::set<cmStdString> m_TargetDoneSet;
   bool m_DoneAllBuild;
   bool m_DoneXCodeHack;
+  std::string m_CurrentReRunCMakeMakefile;
   std::string m_CurrentXCodeHackMakefile;
   std::string m_OutputDir; 
   std::vector<std::string> m_CurrentOutputDirectoryComponents;
