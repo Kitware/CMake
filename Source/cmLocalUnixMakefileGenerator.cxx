@@ -1548,11 +1548,9 @@ void cmLocalUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     "CMAKE_C_SHLIB_RUNTIME_FLAG = @CMAKE_C_SHLIB_RUNTIME_FLAG@\n"
     "CMAKE_SHLIB_RUNTIME_FLAG = @CMAKE_SHLIB_RUNTIME_FLAG@\n"
     "CMAKE_SHLIB_RUNTIME_SEP = @CMAKE_SHLIB_RUNTIME_SEP@\n"
-    "DL_LIBS                  = @CMAKE_DL_LIBS@\n"
     "SHLIB_LD_LIBS            = @CMAKE_SHLIB_LD_LIBS@\n"
     "SHLIB_SUFFIX             = @CMAKE_SHLIB_SUFFIX@\n"
     "MODULE_SUFFIX            = @CMAKE_MODULE_SUFFIX@\n"
-    "THREAD_LIBS              = @CMAKE_THREAD_LIBS@\n"
     "RM = rm -f\n"
     "\n";
   std::string replaceVars = variables;
