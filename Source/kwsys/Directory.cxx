@@ -48,7 +48,7 @@ Directory::~Directory()
 //----------------------------------------------------------------------------
 unsigned long Directory::GetNumberOfFiles()
 {
-  return this->Internal->Files.size();
+  return static_cast<unsigned long>(this->Internal->Files.size());
 }
 
 //----------------------------------------------------------------------------
