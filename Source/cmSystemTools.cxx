@@ -942,6 +942,7 @@ std::string cmSystemTools::FindLibrary(const char* name,
   for(std::vector<std::string>::const_iterator p = path.begin();
       p != path.end(); ++p)
     {
+#if defined(_WIN32) && !defined(__CYGWIN__)
     tryPath = *p;
     tryPath += "/";
     tryPath += name;
@@ -950,6 +951,7 @@ std::string cmSystemTools::FindLibrary(const char* name,
       {
       return cmSystemTools::CollapseFullPath(tryPath.c_str());
       }
+#else
     tryPath = *p;
     tryPath += "/lib";
     tryPath += name;
@@ -974,6 +976,7 @@ std::string cmSystemTools::FindLibrary(const char* name,
       {
       return cmSystemTools::CollapseFullPath(tryPath.c_str());
       }
+#endif
     }
   
   // Couldn't find the library.
