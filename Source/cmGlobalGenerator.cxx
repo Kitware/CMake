@@ -436,7 +436,7 @@ void cmGlobalGenerator::Configure()
   // now do it
   this->RecursiveConfigure(lg,0.0f,0.9f);
 
-  std::set<std::string> notFoundMap;
+  std::set<cmStdString> notFoundMap;
   // after it is all done do a ConfigureFinalPass
   cmCacheManager* manager = 0;
   for (i = 0; i < m_LocalGenerators.size(); ++i)
@@ -480,7 +480,7 @@ void cmGlobalGenerator::Configure()
   if(notFoundMap.size())
     {
     std::string notFoundVars;
-    for(std::set<std::string>::iterator ii = notFoundMap.begin();
+    for(std::set<cmStdString>::iterator ii = notFoundMap.begin();
         ii != notFoundMap.end(); ++ii)
       { 
       notFoundVars += *ii;

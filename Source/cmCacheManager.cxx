@@ -74,7 +74,7 @@ bool cmCacheManager::LoadCache(const char* path)
 bool cmCacheManager::LoadCache(const char* path,
                                bool internal)
 {
-  std::set<std::string> emptySet;
+  std::set<cmStdString> emptySet;
   return this->LoadCache(path, internal, emptySet, emptySet);
 }
 
@@ -155,8 +155,8 @@ bool cmCacheManager::ParseEntry(const char* entry,
 
 bool cmCacheManager::LoadCache(const char* path,
                                bool internal,
-                               std::set<std::string>& excludes,
-                               std::set<std::string>& includes)
+                               std::set<cmStdString>& excludes,
+                               std::set<cmStdString>& includes)
 {
   std::string cacheFile = path;
   cacheFile += "/CMakeCache.txt";

@@ -98,7 +98,7 @@ int cmakewizard::RunWizard(std::vector<std::string> const& args)
   make.SetCMakeCommand(args[0].c_str());
   make.LoadCache();
   make.SetCacheArgs(args);
-  std::map<std::string,std::string> askedCache;
+  std::map<cmStdString, cmStdString> askedCache;
   bool asked = false;
   // continue asking questions until no new questions are asked
   do

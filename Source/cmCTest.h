@@ -206,7 +206,7 @@ private:
   };
   
   //! Map of configuration properties
-  typedef std::map<std::string, std::string> tm_DartConfigurationMap;
+  typedef std::map<cmStdString, cmStdString> tm_DartConfigurationMap;
 
   std::string             m_ToplevelPath;
   tm_DartConfigurationMap m_DartConfiguration;

@@ -103,8 +103,8 @@ public:
   bool LoadCache(const char* path);
   bool LoadCache(const char* path, bool internal);
   bool LoadCache(const char* path, bool internal, 
-                 std::set<std::string>& excludes,
-                 std::set<std::string>& includes);
+                 std::set<cmStdString>& excludes,
+                 std::set<cmStdString>& includes);
 
   ///! Save cache for given makefile.  Saves to ouput home CMakeCache.txt.
   bool SaveCache(cmMakefile*) ;

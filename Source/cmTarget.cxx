@@ -44,7 +44,7 @@ void cmTarget::TraceVSDependencies(std::string projFile,
   std::vector<cmSourceFile*> & classes = this->GetSourceFiles();
   // use a deck to keep track of processed source files
   std::queue<std::string> srcFilesToProcess;
-  std::set<std::string> srcFilesQueued;
+  std::set<cmStdString> srcFilesQueued;
   std::string name;
   std::vector<cmSourceFile*> newClasses;
   for(std::vector<cmSourceFile*>::const_iterator i = classes.begin(); 

@@ -1413,7 +1413,7 @@ const char* cmMakefile::GetSafeDefinition(const char* def) const
 
 std::vector<std::string> cmMakefile::GetDefinitions(int cacheonly /* = 0 */) const
 {
-  std::map<std::string, int> definitions;
+  std::map<cmStdString, int> definitions;
   if ( !cacheonly )
     {
     DefinitionMap::const_iterator it;
@@ -1430,7 +1430,7 @@ std::vector<std::string> cmMakefile::GetDefinitions(int cacheonly /* = 0 */) con
   
   std::vector<std::string> res;
 
-  std::map<std::string, int>::iterator fit;
+  std::map<cmStdString, int>::iterator fit;
   for ( fit = definitions.begin(); fit != definitions.end(); fit ++ )
     {
     res.push_back(fit->first);

@@ -693,7 +693,7 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
                                                   const cmTarget &tgt)
 {
   // Try to emit each search path once
-  std::set<std::string> emitted;
+  std::set<cmStdString> emitted;
 
   // Embed runtime search paths if possible and if required.
   bool outputRuntime = true;
@@ -1660,7 +1660,7 @@ void cmLocalUnixMakefileGenerator::OutputDependLibs(std::ostream& fout)
 {
   // Build a set of libraries that will be linked into any target in
   // this directory.
-  std::set<std::string> used;
+  std::set<cmStdString> used;
   
   // for each target
   const cmTargets &tgts = m_Makefile->GetTargets();
@@ -1669,7 +1669,7 @@ void cmLocalUnixMakefileGenerator::OutputDependLibs(std::ostream& fout)
       l != tgts.end(); l++)
     {
     // Each dependency should only be emitted once per target.
-    std::set<std::string> emitted;
+    std::set<cmStdString> emitted;
     if ((l->second.GetType() == cmTarget::SHARED_LIBRARY)
         || (l->second.GetType() == cmTarget::MODULE_LIBRARY)
         || (l->second.GetType() == cmTarget::STATIC_LIBRARY)
@@ -1734,7 +1734,7 @@ void cmLocalUnixMakefileGenerator::OutputDependLibs(std::ostream& fout)
   // build them in this makefile.  If the library is in another
   // directory, add a rule to jump to that directory and make sure it
   // exists.
-  for(std::set<std::string>::const_iterator lib = used.begin();
+  for(std::set<cmStdString>::const_iterator lib = used.begin();
       lib != used.end(); ++lib)
     {
     // loop over the list of directories that the libraries might
@@ -2315,8 +2315,8 @@ bool cmLocalUnixMakefileGenerator::OutputObjectDepends(std::ostream& fout)
 // by the class cmMakeDepend GenerateMakefile
 void cmLocalUnixMakefileGenerator::OutputCheckDepends(std::ostream& fout)
 {
-  std::set<std::string> emittedLowerPath;
-  std::set<std::string> emitted;
+  std::set<cmStdString> emittedLowerPath;
+  std::set<cmStdString> emitted;
   // Iterate over every target.
   std::map<cmStdString, cmTarget>& targets = m_Makefile->GetTargets();
   fout << "# Suppresses display of executed commands\n";
@@ -2362,7 +2362,7 @@ void cmLocalUnixMakefileGenerator::OutputCheckDepends(std::ostream& fout)
       }
     }
   fout << "\n\n# if any of these files changes run make dependlocal\n";
-  std::set<std::string>::iterator i;
+  std::set<cmStdString>::iterator i;
   for(i = emitted.begin(); i != emitted.end(); ++i)
     {
     fout << "cmake.depends: " << *i << "\n";
@@ -2371,7 +2371,7 @@ void cmLocalUnixMakefileGenerator::OutputCheckDepends(std::ostream& fout)
        << "\t$(MAKE) $(MAKESILENT) dependlocal\n\n";
   fout << "\n\n";
   fout << "# if a .h file is removed then run make dependlocal\n\n";
-  for(std::set<std::string>::iterator it = emitted.begin();
+  for(std::set<cmStdString>::iterator it = emitted.begin();
       it != emitted.end(); ++it)
     {
     fout << *it << ":\n"
@@ -2387,7 +2387,7 @@ void cmLocalUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
   // we cannot provide multiple rules for a single output
   // so we will keep track of outputs to make sure we don't write
   // two rules. First found wins
-  std::set<std::string> processedOutputs;
+  std::set<cmStdString> processedOutputs;
   
   // first output all custom rules
   const std::vector<cmSourceFile*>& sources = m_Makefile->GetSourceFiles();
@@ -2964,7 +2964,7 @@ void cmLocalUnixMakefileGenerator::OutputSourceObjectBuildRules(std::ostream& fo
 {
   fout << "# Rules to build source files :\n\n";
 
-  std::set<std::string> rules;
+  std::set<cmStdString> rules;
   
   // Iterate over every target.
   std::map<cmStdString, cmTarget>& targets = m_Makefile->GetTargets();

@@ -36,7 +36,7 @@ bool cmLoadCacheCommand::InitialPass(std::vector<std::string> const& args)
   // and they can not be overridden.
   bool excludeFiles=false;
   unsigned int i;
-  std::set<std::string> excludes;
+  std::set<cmStdString> excludes;
 
   for(i=0; i<args.size(); i++)
     {
@@ -58,7 +58,7 @@ bool cmLoadCacheCommand::InitialPass(std::vector<std::string> const& args)
   // If this set is empty, no internal cache entries are
   // brought in.
   bool includeFiles=false;
-  std::set<std::string> includes;
+  std::set<cmStdString> includes;
 
   for(i=0; i<args.size(); i++)
     {
