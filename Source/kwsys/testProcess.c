@@ -74,6 +74,7 @@ int test5(int argc, const char* argv[])
 {
   int r;
   const char* cmd[4];
+  (void)argc;
   cmd[0] = argv[0];
   cmd[1] = "run";
   cmd[2] = "4";
