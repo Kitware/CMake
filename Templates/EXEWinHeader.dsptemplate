@@ -32,7 +32,7 @@ CFG=OUTPUT_LIBNAME - Win32 Debug
 !MESSAGE 
 !MESSAGE "OUTPUT_LIBNAME - Win32 Release" (based on "Win32 (x86) Application")
 !MESSAGE "OUTPUT_LIBNAME - Win32 Debug" (based on "Win32 (x86) Application")
-!MESSAGE "OUTPUT_LIBNAME - Win32 Release MinSize" (based on "Win32 (x86) Application")
+!MESSAGE "OUTPUT_LIBNAME - Win32 MinSizeRel" (based on "Win32 (x86) Application")
 !MESSAGE 
 
 # Begin Project
@@ -98,7 +98,7 @@ CM_MULTILINE_DEBUG_LIBRARIES
 CM_MULTILINE_LIBRARIES
 
 
-!ELSEIF  "$(CFG)" == "OUTPUT_LIBNAME - Win32 Release MinSize"
+!ELSEIF  "$(CFG)" == "OUTPUT_LIBNAME - Win32 MinSizeRel"
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
 # PROP BASE Output_Dir "ReleaseMinSize"
@@ -128,4 +128,4 @@ CM_MULTILINE_LIBRARIES
 
 # Name "OUTPUT_LIBNAME - Win32 Release"
 # Name "OUTPUT_LIBNAME - Win32 Debug"
-# Name "OUTPUT_LIBNAME - Win32 Release MinSize"
+# Name "OUTPUT_LIBNAME - Win32 MinSizeRel"

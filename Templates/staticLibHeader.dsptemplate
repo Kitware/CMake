@@ -32,7 +32,7 @@ CFG=OUTPUT_LIBNAME - Win32 Debug
 !MESSAGE 
 !MESSAGE "OUTPUT_LIBNAME - Win32 Release" (based on "Win32 (x86) Static Library")
 !MESSAGE "OUTPUT_LIBNAME - Win32 Debug" (based on "Win32 (x86) Static Library")
-!MESSAGE "OUTPUT_LIBNAME - Win32 Release MinSize" (based on "Win32 (x86) Static Library")
+!MESSAGE "OUTPUT_LIBNAME - Win32 MinSizeRel" (based on "Win32 (x86) Static Library")
 # Begin Project
 # PROP AllowPerConfigDependencies 0
 # PROP Scc_ProjName ""
@@ -84,7 +84,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-!ELSEIF  "$(CFG)" == "OUTPUT_LIBNAME - Win32 Release MinSize"
+!ELSEIF  "$(CFG)" == "OUTPUT_LIBNAME - Win32 MinSizeRel"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -116,5 +116,5 @@ LIB32=link.exe -lib
 
 # Name "OUTPUT_LIBNAME - Win32 Release"
 # Name "OUTPUT_LIBNAME - Win32 Debug"
-# Name "OUTPUT_LIBNAME - Win32 Release MinSize"
+# Name "OUTPUT_LIBNAME - Win32 MinSizeRel"
 
