@@ -32,17 +32,22 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args)
   m_Makefile->ExpandVariablesInString(exename);
 
   ++s;
+  bool use_win32 = false;
+
   if (*s == "WIN32")
     {
     ++s;
-    std::vector<std::string> srclists(s, args.end());
-    m_Makefile->AddExecutable(exename.c_str(),srclists, true); 
+    use_win32 = true;
     }
-  else
+
+  std::vector<std::string> srclists(s, args.end());
+  for(std::vector<std::string>::iterator j = srclists.begin();
+      j != srclists.end(); ++j)
     {
-    std::vector<std::string> srclists(s, args.end());
-    m_Makefile->AddExecutable(exename.c_str(),srclists, false); 
+    m_Makefile->ExpandVariablesInString(*j);
     }
+
+  m_Makefile->AddExecutable(exename.c_str(), srclists, use_win32); 
   
   return true;
 }
