@@ -781,6 +781,7 @@ void kwsysProcess_Execute(kwsysProcess* cp)
   
   /* Connect the child's output pipes to the threads.  */
   si.dwFlags = STARTF_USESTDHANDLES;
+  si.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
   si.hStdOutput = cp->Pipe[CMPE_PIPE_STDOUT].Write;
   si.hStdError = cp->Pipe[CMPE_PIPE_STDERR].Write;
   
