@@ -836,7 +836,7 @@ kwsys_stl::string SystemTools::AddSpaceBetweenCapitalizedWords(
         {
         n += ' ';
         }
-      n += s[0];
+      n += s[i];
       }
     }
   return n;
