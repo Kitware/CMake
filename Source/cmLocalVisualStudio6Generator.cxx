@@ -1,13 +1,13 @@
 /*=========================================================================
 
-  Program:   Insight Segmentation & Registration Toolkit
+  Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile$
   Language:  C++
   Date:      $Date$
   Version:   $Revision$
 
-  Copyright (c) 2002 Insight Consortium. All rights reserved.
-  See ITKCopyright.txt or http://www.itk.org/HTML/Copyright.htm for details.
+  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
+  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
      This software is distributed WITHOUT ANY WARRANTY; without even 
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
@@ -97,12 +97,12 @@ void cmLocalVisualStudio6Generator::OutputDSPFile()
         this->SetBuildType(UTILITY, l->first.c_str());
         break;
       case cmTarget::INSTALL_FILES:
-	break;
+        break;
       case cmTarget::INSTALL_PROGRAMS:
-	break;
+        break;
       default:
-	cmSystemTools::Error("Bad target type", l->first.c_str());
-	break;
+        cmSystemTools::Error("Bad target type", l->first.c_str());
+        break;
       }
     // INCLUDE_EXTERNAL_MSPROJECT command only affects the workspace
     // so don't build a projectfile for it
@@ -205,8 +205,8 @@ void cmLocalVisualStudio6Generator::AddDSPBuildRule(cmSourceGroup& sourceGroup)
   outputs.push_back(dspname);
   cmCustomCommand cc(makefileIn.c_str(), dsprule.c_str(),
                      args.c_str(),
-		     listFiles, 
-		     outputs);
+                     listFiles, 
+                     outputs);
   sourceGroup.AddCustomCommand(cc);
 }
 
@@ -362,7 +362,7 @@ void cmLocalVisualStudio6Generator::WriteCustomRule(std::ostream& fout,
     // Write out the dependencies for the rule.
     fout << "USERDEP__HACK=";
     for(std::set<std::string>::const_iterator d = depends.begin();
-	d != depends.end(); ++d)
+        d != depends.end(); ++d)
       {
       fout << "\\\n\t" << 
         cmSystemTools::ConvertToOutputPath(d->c_str());
@@ -394,8 +394,8 @@ void cmLocalVisualStudio6Generator::WriteCustomRule(std::ostream& fout,
 
 
 void cmLocalVisualStudio6Generator::WriteDSPBeginGroup(std::ostream& fout, 
-					const char* group,
-					const char* filter)
+                                        const char* group,
+                                        const char* filter)
 {
   fout << "# Begin Group \"" << group << "\"\n"
     "# PROP Default_Filter \"" << filter << "\"\n";
@@ -802,7 +802,7 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
                                      cmSystemTools::ConvertToOutputPath(exePath.c_str())).c_str());
       cmSystemTools::ReplaceString(line, 
                                    "EXTRA_DEFINES", 
-				   m_Makefile->GetDefineFlags());
+                                   m_Makefile->GetDefineFlags());
       std::string flags = m_Makefile->GetDefinition("CMAKE_CXX_FLAGS_RELEASE");
       flags += " -DCMAKE_INTDIR=\\\"Release\\\"";
       cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_RELEASE", flags.c_str());

@@ -1,13 +1,13 @@
 /*=========================================================================
 
-  Program:   Insight Segmentation & Registration Toolkit
+  Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile$
   Language:  C++
   Date:      $Date$
   Version:   $Revision$
 
-  Copyright (c) 2002 Insight Consortium. All rights reserved.
-  See ITKCopyright.txt or http://www.itk.org/HTML/Copyright.htm for details.
+  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
+  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
      This software is distributed WITHOUT ANY WARRANTY; without even 
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
@@ -36,7 +36,7 @@ void cmSourceFile::SetName(const char* name, const char* dir,
   // the name might include the full path already, so
   // check for this case
   if (name &&  (name[0] == '/' || 
-		(name[0] != '\0' && name[1] == ':')))
+                (name[0] != '\0' && name[1] == ':')))
     {
     pathname = "";
     }
@@ -58,13 +58,13 @@ void cmSourceFile::SetName(const char* name, const char* dir,
       m_SourceExtension = hname.substr(pos+1, hname.size()-pos);
       std::string::size_type pos2 = hname.rfind('/');
       if(pos2 != std::string::npos)
-	{
-	  m_SourceName = hname.substr(pos2+1, pos - pos2-1);
-	}
+        {
+          m_SourceName = hname.substr(pos2+1, pos - pos2-1);
+        }
       else
-	{
-	  m_SourceName = hname.substr(0, pos);
-	}
+        {
+          m_SourceName = hname.substr(0, pos);
+        }
       }
 
     // See if the file is a header file
@@ -163,8 +163,8 @@ void cmSourceFile::SetProperty(const char* prop, const char* value)
     }
   if (!value)
     {
-	value = "NOTFOUND";
-	}
+        value = "NOTFOUND";
+        }
   m_Properties[prop] = value;
 }
 

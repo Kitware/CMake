@@ -1,13 +1,13 @@
 /*=========================================================================
 
-  Program:   Insight Segmentation & Registration Toolkit
+  Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile$
   Language:  C++
   Date:      $Date$
   Version:   $Revision$
 
-  Copyright (c) 2002 Insight Consortium. All rights reserved.
-  See ITKCopyright.txt or http://www.itk.org/HTML/Copyright.htm for details.
+  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
+  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
      This software is distributed WITHOUT ANY WARRANTY; without even 
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
@@ -102,8 +102,8 @@ private:
   void WriteProjectStart(std::ostream& fout, const char *libName,
                          const cmTarget &tgt, std::vector<cmSourceGroup> &sgs);
   void WriteVCProjBeginGroup(std::ostream& fout, 
-			  const char* group,
-			  const char* filter);
+                          const char* group,
+                          const char* filter);
   void WriteVCProjEndGroup(std::ostream& fout);
   std::string CombineCommands(const cmSourceGroup::Commands &commands,
                               cmSourceGroup::CommandFiles &totalCommand,
@@ -124,8 +124,8 @@ private:
   std::string m_DSPHeaderTemplate;
   std::string m_DSPFooterTemplate;
   void WriteDSPBeginGroup(std::ostream& fout, 
-			  const char* group,
-			  const char* filter);
+                          const char* group,
+                          const char* filter);
   void WriteDSPEndGroup(std::ostream& fout);
 
 

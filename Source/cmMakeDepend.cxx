@@ -1,13 +1,13 @@
 /*=========================================================================
 
-  Program:   Insight Segmentation & Registration Toolkit
+  Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile$
   Language:  C++
   Date:      $Date$
   Version:   $Revision$
 
-  Copyright (c) 2002 Insight Consortium. All rights reserved.
-  See ITKCopyright.txt or http://www.itk.org/HTML/Copyright.htm for details.
+  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
+  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
      This software is distributed WITHOUT ANY WARRANTY; without even 
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
@@ -210,17 +210,17 @@ void cmMakeDepend::DependWalk(cmDependInformation* info)
       std::string includeFile = includeLine.match(1);
       // see if the include matches the regular expression
       if(!m_IncludeFileRegularExpression.find(includeFile))
-	{
-	if(m_Verbose)
-	  {
+        {
+        if(m_Verbose)
+          {
           std::string message = "Skipping ";
           message += includeFile;
           message += " for file ";
           message += info->m_FullPath.c_str();
-	  cmSystemTools::Error(message.c_str(), 0);
-	  }
-	continue;
-	}
+          cmSystemTools::Error(message.c_str(), 0);
+          }
+        continue;
+        }
       
       // Add this file and all its dependencies.
       this->AddDependency(info, includeFile.c_str());

@@ -1,13 +1,13 @@
 /*=========================================================================
 
-  Program:   Insight Segmentation & Registration Toolkit
+  Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile$
   Language:  C++
   Date:      $Date$
   Version:   $Revision$
 
-  Copyright (c) 2002 Insight Consortium. All rights reserved.
-  See ITKCopyright.txt or http://www.itk.org/HTML/Copyright.htm for details.
+  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
+  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
      This software is distributed WITHOUT ANY WARRANTY; without even 
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
@@ -40,7 +40,7 @@ void onsig(int)
     noecho(); /* Echo off */ 
     cbreak(); /* nl- or cr not needed */ 
     keypad(stdscr,TRUE); /* Use key symbols as 
-			    KEY_DOWN*/ 
+                            KEY_DOWN*/ 
     refresh();
     int x,y;
     getmaxyx(stdscr, y, x);
@@ -117,9 +117,9 @@ int main(int argc, char** argv)
     {
     endwin();
     std::cerr << "Window is too small. A size of at least "
-	      << cmCursesMainForm::MIN_WIDTH << " x " 
-	      <<  cmCursesMainForm::MIN_HEIGHT
-	      << " is required to run ccmake." <<  std::endl;
+              << cmCursesMainForm::MIN_WIDTH << " x " 
+              <<  cmCursesMainForm::MIN_HEIGHT
+              << " is required to run ccmake." <<  std::endl;
     return 1;
     }
 

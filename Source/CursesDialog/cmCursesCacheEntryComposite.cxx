@@ -1,13 +1,13 @@
 /*=========================================================================
 
-  Program:   Insight Segmentation & Registration Toolkit
+  Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile$
   Language:  C++
   Date:      $Date$
   Version:   $Revision$
 
-  Copyright (c) 2002 Insight Consortium. All rights reserved.
-  See ITKCopyright.txt or http://www.itk.org/HTML/Copyright.htm for details.
+  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
+  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
      This software is distributed WITHOUT ANY WARRANTY; without even 
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
@@ -24,8 +24,8 @@
 #include "../cmSystemTools.h"
 
 cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(const char* key,
-							 int labelwidth,
-							 int entrywidth) :
+                                                         int labelwidth,
+                                                         int entrywidth) :
   m_Key(key), m_LabelWidth(labelwidth), m_EntryWidth(entrywidth)
 {
   m_Label = new cmCursesLabelWidget(m_LabelWidth, 1, 1, 1, key);
@@ -54,28 +54,28 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
     case  cmCacheManager::BOOL:
       m_Entry = new cmCursesBoolWidget(m_EntryWidth, 1, 1, 1);
       if (cmSystemTools::IsOn(it.GetValue()))
-	{
-	static_cast<cmCursesBoolWidget*>(m_Entry)->SetValueAsBool(true);
-	}
+        {
+        static_cast<cmCursesBoolWidget*>(m_Entry)->SetValueAsBool(true);
+        }
       else
-	{
-	static_cast<cmCursesBoolWidget*>(m_Entry)->SetValueAsBool(false);
-	}
+        {
+        static_cast<cmCursesBoolWidget*>(m_Entry)->SetValueAsBool(false);
+        }
       break;
     case cmCacheManager::PATH:
       m_Entry = new cmCursesPathWidget(m_EntryWidth, 1, 1, 1);
       static_cast<cmCursesPathWidget*>(m_Entry)->SetString(
-	it.GetValue());
+        it.GetValue());
       break;
     case cmCacheManager::FILEPATH:
       m_Entry = new cmCursesFilePathWidget(m_EntryWidth, 1, 1, 1);
       static_cast<cmCursesFilePathWidget*>(m_Entry)->SetString(
-	it.GetValue());
+        it.GetValue());
       break;
     case cmCacheManager::STRING:
       m_Entry = new cmCursesStringWidget(m_EntryWidth, 1, 1, 1);
       static_cast<cmCursesStringWidget*>(m_Entry)->SetString(
-	it.GetValue());
+        it.GetValue());
       break;
     case cmCacheManager::UNINITIALIZED:
       cmSystemTools::Error("Found an undefined variable: ", it.GetName());      

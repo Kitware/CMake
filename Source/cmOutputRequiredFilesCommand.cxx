@@ -1,13 +1,13 @@
 /*=========================================================================
 
-  Program:   Insight Segmentation & Registration Toolkit
+  Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile$
   Language:  C++
   Date:      $Date$
   Version:   $Revision$
 
-  Copyright (c) 2002 Insight Consortium. All rights reserved.
-  See ITKCopyright.txt or http://www.itk.org/HTML/Copyright.htm for details.
+  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
+  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
      This software is distributed WITHOUT ANY WARRANTY; without even 
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
@@ -46,39 +46,39 @@ void cmLBDepend::DependWalk(cmDependInformation* info)
       size_t qend;
       // if a quote is not found look for a <
       if(qstart == std::string::npos)
-	{
-	qstart = currentline.find('<', 8);
-	// if a < is not found then move on
-	if(qstart == std::string::npos)
-	  {
-	  cmSystemTools::Error("unknown include directive ", 
+        {
+        qstart = currentline.find('<', 8);
+        // if a < is not found then move on
+        if(qstart == std::string::npos)
+          {
+          cmSystemTools::Error("unknown include directive ", 
                                currentline.c_str() );
-	  continue;
-	  }
-	else
-	  {
-	  qend = currentline.find('>', qstart+1);
-	  }
-	}
+          continue;
+          }
+        else
+          {
+          qend = currentline.find('>', qstart+1);
+          }
+        }
       else
-	{
-	qend = currentline.find('\"', qstart+1);
-	}
+        {
+        qend = currentline.find('\"', qstart+1);
+        }
       // extract the file being included
       std::string includeFile = currentline.substr(qstart+1, qend - qstart-1);
       // see if the include matches the regular expression
       if(!m_IncludeFileRegularExpression.find(includeFile))
-	{
-	if(m_Verbose)
-	  {
+        {
+        if(m_Verbose)
+          {
           std::string message = "Skipping ";
           message += includeFile;
           message += " for file ";
           message += info->m_FullPath.c_str();
-	  cmSystemTools::Error(message.c_str(), 0);
-	  }
-	continue;
-	}
+          cmSystemTools::Error(message.c_str(), 0);
+          }
+        continue;
+        }
       
       // Add this file and all its dependencies.
       this->AddDependency(info, includeFile.c_str());

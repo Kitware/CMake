@@ -1,13 +1,13 @@
 /*=========================================================================
 
-  Program:   Insight Segmentation & Registration Toolkit
+  Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile$
   Language:  C++
   Date:      $Date$
   Version:   $Revision$
 
-  Copyright (c) 2002 Insight Consortium. All rights reserved.
-  See ITKCopyright.txt or http://www.itk.org/HTML/Copyright.htm for details.
+  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
+  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
      This software is distributed WITHOUT ANY WARRANTY; without even 
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
@@ -54,8 +54,8 @@ public:
     {
       return
         "CONFIGURE_FILE(InputFile OutputFile [COPYONLY] [ESCAPE_QUOTES] [IMMEDIATE] [@ONLY])\n"
-	"The Input and Ouput files have to have full paths.\n"
-	"They can also use variables like CMAKE_BINARY_DIR,CMAKE_SOURCE_DIR. "
+        "The Input and Ouput files have to have full paths.\n"
+        "They can also use variables like CMAKE_BINARY_DIR,CMAKE_SOURCE_DIR. "
         "This command replaces any variables in the input file with their "
         "values as determined by CMake. If a variables in not defined, it "
         "will be replaced with nothing.  If COPYONLY is passed in, then "

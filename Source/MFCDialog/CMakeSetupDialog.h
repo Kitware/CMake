@@ -1,13 +1,13 @@
 /*=========================================================================
 
-  Program:   Insight Segmentation & Registration Toolkit
+  Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile$
   Language:  C++
   Date:      $Date$
   Version:   $Revision$
 
-  Copyright (c) 2002 Insight Consortium. All rights reserved.
-  See ITKCopyright.txt or http://www.itk.org/HTML/Copyright.htm for details.
+  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
+  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
      This software is distributed WITHOUT ANY WARRANTY; without even 
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
@@ -37,7 +37,7 @@ class CMakeSetupDialog : public CDialog
 // Construction
 public:
   CMakeSetupDialog(const CMakeCommandLineInfo& cmdInfo, 
-                   CWnd* pParent = NULL);	
+                   CWnd* pParent = NULL);       
   // return the cmake that is currently being used
   cmake *GetCMakeInstance() {
     return m_CMakeInstance; }
@@ -50,21 +50,21 @@ protected:
   void LoadFromRegistry();
   bool Browse(CString&, const char* title);
   void ReadRegistryValue(HKEY hKey,
-			 CString *val,
-			 const char *key,
-			 const char *aadefault);
+                         CString *val,
+                         const char *key,
+                         const char *aadefault);
   void ShowAdvancedValues();
   void RemoveAdvancedValues();
   // Dialog Data
   //{{AFX_DATA(CMakeSetupDialog)
-	enum { IDD = IDD_CMakeSetupDialog_DIALOG };
-	CButton	m_HelpButton;
-	CComboBox	m_GeneratorChoice;
-	CButton	m_OKButton;
-	CButton	m_CancelButton;
-  CString	m_WhereSource;
-  CString	m_WhereBuild;
-  CButton	m_ListFrame;
+        enum { IDD = IDD_CMakeSetupDialog_DIALOG };
+        CButton m_HelpButton;
+        CComboBox       m_GeneratorChoice;
+        CButton m_OKButton;
+        CButton m_CancelButton;
+  CString       m_WhereSource;
+  CString       m_WhereBuild;
+  CButton       m_ListFrame;
   bool          m_BuildPathChanged;
   CComboBox     m_WhereSourceControl;
   CComboBox     m_WhereBuildControl;
@@ -72,14 +72,14 @@ protected:
   CStatic       m_MouseHelp;
   CStatic       m_VersionDisplay;
   CButton       m_Configure;
-	CString	m_GeneratorChoiceString;
-	BOOL	m_AdvancedValues;
-	//}}AFX_DATA
+        CString m_GeneratorChoiceString;
+        BOOL    m_AdvancedValues;
+        //}}AFX_DATA
   
   // ClassWizard generated virtual function overrides
   //{{AFX_VIRTUAL(CMakeSetupDialog)
 protected:
-  virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
+  virtual void DoDataExchange(CDataExchange* pDX);      // DDX/DDV support
   //}}AFX_VIRTUAL
   
 // Implementation

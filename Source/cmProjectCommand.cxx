@@ -1,13 +1,13 @@
 /*=========================================================================
 
-  Program:   Insight Segmentation & Registration Toolkit
+  Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile$
   Language:  C++
   Date:      $Date$
   Version:   $Revision$
 
-  Copyright (c) 2002 Insight Consortium. All rights reserved.
-  See ITKCopyright.txt or http://www.itk.org/HTML/Copyright.htm for details.
+  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
+  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
      This software is distributed WITHOUT ANY WARRANTY; without even 
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
@@ -44,9 +44,9 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& argsIn)
   srcdir = "PROJECT_SOURCE_DIR";
 
   m_Makefile->AddDefinition(bindir.c_str(),
-	  m_Makefile->GetCurrentOutputDirectory());
+          m_Makefile->GetCurrentOutputDirectory());
   m_Makefile->AddDefinition(srcdir.c_str(),
-	  m_Makefile->GetCurrentDirectory());
+          m_Makefile->GetCurrentDirectory());
 
   m_Makefile->AddDefinition("PROJECT_NAME", args[0].c_str());
 

@@ -1,13 +1,13 @@
 /*=========================================================================
 
-  Program:   Insight Segmentation & Registration Toolkit
+  Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile$
   Language:  C++
   Date:      $Date$
   Version:   $Revision$
 
-  Copyright (c) 2002 Insight Consortium. All rights reserved.
-  See ITKCopyright.txt or http://www.itk.org/HTML/Copyright.htm for details.
+  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
+  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
      This software is distributed WITHOUT ANY WARRANTY; without even 
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
@@ -23,7 +23,7 @@ inline int ctrl(int z)
 } 
 
 cmCursesStringWidget::cmCursesStringWidget(int width, int height, 
-					   int left, int top) :
+                                           int left, int top) :
   cmCursesWidget(width, height, left, top)
 {
   m_InEdit = false;
@@ -35,7 +35,7 @@ cmCursesStringWidget::cmCursesStringWidget(int width, int height,
 
 
 bool cmCursesStringWidget::HandleInput(int& key, cmCursesMainForm* fm, 
-				       WINDOW* w)
+                                       WINDOW* w)
 {
   int x,y;
 
@@ -61,18 +61,18 @@ bool cmCursesStringWidget::HandleInput(int& key, cmCursesMainForm* fm,
     getmaxyx(stdscr, y, x);
     // If window too small, handle 'q' only
     if ( x < cmCursesMainForm::MIN_WIDTH  || 
-	 y < cmCursesMainForm::MIN_HEIGHT )
+         y < cmCursesMainForm::MIN_HEIGHT )
       {
       // quit
       if ( key == 'q' )
-	{
-	return false;
-	}
+        {
+        return false;
+        }
       else
-	{
-	key=getch(); 
-	continue;
-	}
+        {
+        key=getch(); 
+        continue;
+        }
       }
 
     // If resize occured during edit, move out of edit mode
@@ -84,33 +84,33 @@ bool cmCursesStringWidget::HandleInput(int& key, cmCursesMainForm* fm,
     if (key == 10 || key == KEY_ENTER) 
       {
       if (m_InEdit)
-	{
-	cmCursesForm::LogMessage("String widget leaving edit.");
-	m_InEdit = false;
-	fm->PrintKeys();
-	delete[] originalStr;	
-	// trick to force forms to update the field buffer
-	form_driver(form, REQ_NEXT_FIELD);
-	form_driver(form, REQ_PREV_FIELD);
-	return true;
-	}
+        {
+        cmCursesForm::LogMessage("String widget leaving edit.");
+        m_InEdit = false;
+        fm->PrintKeys();
+        delete[] originalStr;   
+        // trick to force forms to update the field buffer
+        form_driver(form, REQ_NEXT_FIELD);
+        form_driver(form, REQ_PREV_FIELD);
+        return true;
+        }
       else
-	{
-	cmCursesForm::LogMessage("String widget entering edit.");
-	m_InEdit = true;
-	fm->PrintKeys();
-	char* buf = field_buffer(m_Field, 0);
-	originalStr = new char[strlen(buf)+1];
-	strcpy(originalStr, buf);
-	}
+        {
+        cmCursesForm::LogMessage("String widget entering edit.");
+        m_InEdit = true;
+        fm->PrintKeys();
+        char* buf = field_buffer(m_Field, 0);
+        originalStr = new char[strlen(buf)+1];
+        strcpy(originalStr, buf);
+        }
       }
     else if ( key == KEY_DOWN || key == ctrl('n') ||
-	      key == KEY_UP || key == ctrl('p') ||
-	      key == KEY_NPAGE || key == ctrl('d') ||
-	      key == KEY_PPAGE || key == ctrl('u'))
+              key == KEY_UP || key == ctrl('p') ||
+              key == KEY_NPAGE || key == ctrl('d') ||
+              key == KEY_PPAGE || key == ctrl('u'))
       {
       m_InEdit = false;
-      delete[] originalStr;	
+      delete[] originalStr;     
       // trick to force forms to update the field buffer
       form_driver(form, REQ_NEXT_FIELD);
       form_driver(form, REQ_PREV_FIELD);
@@ -120,15 +120,15 @@ bool cmCursesStringWidget::HandleInput(int& key, cmCursesMainForm* fm,
     else if (key == 27)
       {
       if (m_InEdit)
-	{
-	m_InEdit = false;
-	fm->PrintKeys();
-	this->SetString(originalStr);
-	delete[] originalStr;
-	touchwin(w); 
-	wrefresh(w); 
-	return true;
-	}
+        {
+        m_InEdit = false;
+        fm->PrintKeys();
+        this->SetString(originalStr);
+        delete[] originalStr;
+        touchwin(w); 
+        wrefresh(w); 
+        return true;
+        }
       }
     else if ( key == KEY_LEFT || key == ctrl('b') )
       {
@@ -151,7 +151,7 @@ bool cmCursesStringWidget::HandleInput(int& key, cmCursesMainForm* fm,
       form_driver(form, REQ_END_FIELD);
       }
     else if ( key == ctrl('d') || key == 127 || 
-	      key == KEY_BACKSPACE || key == KEY_DC )
+              key == KEY_BACKSPACE || key == KEY_DC )
       {
       form_driver(form, REQ_DEL_PREV);
       }

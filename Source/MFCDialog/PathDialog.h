@@ -1,13 +1,13 @@
 /*=========================================================================
 
-  Program:   Insight Segmentation & Registration Toolkit
+  Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile$
   Language:  C++
   Date:      $Date$
   Version:   $Revision$
 
-  Copyright (c) 2002 Insight Consortium. All rights reserved.
-  See ITKCopyright.txt or http://www.itk.org/HTML/Copyright.htm for details.
+  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
+  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
      This software is distributed WITHOUT ANY WARRANTY; without even 
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
@@ -35,12 +35,12 @@ class CPathDialog;
 // CPathDialogSub - intercepts messages from child controls
 class CPathDialogSub : public CWnd
 {
-	friend CPathDialog;
+        friend CPathDialog;
 public:
-	CPathDialog* m_pPathDialog;
+        CPathDialog* m_pPathDialog;
 protected:
     afx_msg void OnOK();              // OK button clicked
-	afx_msg void OnChangeEditPath();
+        afx_msg void OnChangeEditPath();
     DECLARE_MESSAGE_MAP()
 private:
 };
@@ -50,37 +50,37 @@ private:
 
 class CPathDialog
 {
-	friend CPathDialogSub;
+        friend CPathDialogSub;
 // Construction
 public:
-	CPathDialog(LPCTSTR lpszCaption=NULL,
-		LPCTSTR lpszTitle=NULL,
-		LPCTSTR lpszInitialPath=NULL, 
-		CWnd* pParent = NULL);
+        CPathDialog(LPCTSTR lpszCaption=NULL,
+                LPCTSTR lpszTitle=NULL,
+                LPCTSTR lpszInitialPath=NULL, 
+                CWnd* pParent = NULL);
 
-	CString GetPathName();
-	virtual int DoModal();
+        CString GetPathName();
+        virtual int DoModal();
 
-	static int Touch(LPCTSTR lpPath, BOOL bValidate=TRUE);
-	static int MakeSurePathExists(LPCTSTR lpPath);
-	static BOOL IsFileNameValid(LPCTSTR lpFileName);
-	static int ConcatPath(LPTSTR lpRoot, LPCTSTR lpMorePath);
+        static int Touch(LPCTSTR lpPath, BOOL bValidate=TRUE);
+        static int MakeSurePathExists(LPCTSTR lpPath);
+        static BOOL IsFileNameValid(LPCTSTR lpFileName);
+        static int ConcatPath(LPTSTR lpRoot, LPCTSTR lpMorePath);
 
 private:
-	static int CALLBACK BrowseCallbackProc(HWND hwnd,UINT uMsg,LPARAM lParam, LPARAM pData);
+        static int CALLBACK BrowseCallbackProc(HWND hwnd,UINT uMsg,LPARAM lParam, LPARAM pData);
 
-	LPCTSTR m_lpszCaption;
-	LPCTSTR m_lpszInitialPath;
+        LPCTSTR m_lpszCaption;
+        LPCTSTR m_lpszInitialPath;
 
-	TCHAR m_szPathName[MAX_PATH];
+        TCHAR m_szPathName[MAX_PATH];
 
-	BROWSEINFO m_bi;
-	HWND m_hWnd;
-	CWnd*	m_pParentWnd;
-	BOOL m_bParentDisabled;
-	BOOL m_bGetSuccess;
+        BROWSEINFO m_bi;
+        HWND m_hWnd;
+        CWnd*   m_pParentWnd;
+        BOOL m_bParentDisabled;
+        BOOL m_bGetSuccess;
 
-	CPathDialogSub m_PathDialogSub;
+        CPathDialogSub m_PathDialogSub;
 
 };
 

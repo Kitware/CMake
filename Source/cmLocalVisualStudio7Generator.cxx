@@ -1,13 +1,13 @@
 /*=========================================================================
 
-  Program:   Insight Segmentation & Registration Toolkit
+  Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile$
   Language:  C++
   Date:      $Date$
   Version:   $Revision$
 
-  Copyright (c) 2002 Insight Consortium. All rights reserved.
-  See ITKCopyright.txt or http://www.itk.org/HTML/Copyright.htm for details.
+  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
+  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
      This software is distributed WITHOUT ANY WARRANTY; without even 
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
@@ -178,8 +178,8 @@ void cmLocalVisualStudio7Generator::AddVCProjBuildRule(cmSourceGroup& sourceGrou
   outputs.push_back(dspname);
   cmCustomCommand cc(makefileIn.c_str(), dsprule.c_str(),
                      args.c_str(),
-		     listFiles, 
-		     outputs);
+                     listFiles, 
+                     outputs);
   sourceGroup.AddCustomCommand(cc);
 }
 
@@ -500,7 +500,7 @@ void cmLocalVisualStudio7Generator::OutputLibraryDirectories(std::ostream& fout,
         fout << ",";
         }
       std::string lpathi = lpath + "$(INTDIR)";
-	  fout << this->ConvertToXMLOutputPath(lpathi.c_str()) << "," << lpath;
+          fout << this->ConvertToXMLOutputPath(lpathi.c_str()) << "," << lpath;
       hasone = true;
       }
     }
@@ -731,7 +731,7 @@ void cmLocalVisualStudio7Generator::WriteCustomRule(std::ostream& fout,
     // Write out the dependencies for the rule.
     std::string temp;
     for(std::set<std::string>::const_iterator d = depends.begin();
-	d != depends.end(); ++d)
+        d != depends.end(); ++d)
       {
       fout << this->ConvertToXMLOutputPath(d->c_str())
            << ";";
@@ -765,8 +765,8 @@ void cmLocalVisualStudio7Generator::WriteCustomRule(std::ostream& fout,
 
 
 void cmLocalVisualStudio7Generator::WriteVCProjBeginGroup(std::ostream& fout, 
-					const char* group,
-					const char* )
+                                        const char* group,
+                                        const char* )
 {
   fout << "\t\t<Filter\n"
        << "\t\t\tName=\"" << group << "\"\n"

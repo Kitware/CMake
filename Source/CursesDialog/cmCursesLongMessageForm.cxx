@@ -1,13 +1,13 @@
 /*=========================================================================
 
-  Program:   Insight Segmentation & Registration Toolkit
+  Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile$
   Language:  C++
   Date:      $Date$
   Version:   $Revision$
 
-  Copyright (c) 2002 Insight Consortium. All rights reserved.
-  See ITKCopyright.txt or http://www.itk.org/HTML/Copyright.htm for details.
+  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
+  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
      This software is distributed WITHOUT ANY WARRANTY; without even 
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
@@ -26,8 +26,8 @@ inline int ctrl(int z)
 } 
 
 cmCursesLongMessageForm::cmCursesLongMessageForm(std::vector<std::string> 
-						 const& messages, const char* 
-						 title)
+                                                 const& messages, const char* 
+                                                 title)
 {
   // Append all messages into on big string
   std::vector<std::string>::const_iterator it;
@@ -80,7 +80,7 @@ void cmCursesLongMessageForm::UpdateStatusBar()
   char version[cmCursesMainForm::MAX_WIDTH];
   char vertmp[128];
   sprintf(vertmp,"CMake Version %d.%d - %s", cmake::GetMajorVersion(),
-	  cmake::GetMinorVersion(),cmake::GetReleaseVersion());
+          cmake::GetMinorVersion(),cmake::GetReleaseVersion());
   int sideSpace = (width-strlen(vertmp));
   for(int i=0; i<sideSpace; i++) { version[i] = ' '; }
   sprintf(version+sideSpace, "%s", vertmp);
