@@ -443,19 +443,28 @@ void cmDSPMakefile::WriteDSPHeader(std::ostream& fout, const char *libName,
         {
         libOptions += " ";
         libOptions += j->first;
-        libOptions += ".lib ";
+        if(j->first.find(".lib") == std::string::npos)
+          {
+          libOptions += ".lib ";
+          }
         }
       if (j->second == cmTarget::DEBUG)
         {
         libDebugOptions += " ";
         libDebugOptions += j->first;
-        libDebugOptions += ".lib ";
+        if(j->first.find(".lib") == std::string::npos)
+          {
+          libDebugOptions += ".lib ";
+          }
         }
       if (j->second == cmTarget::OPTIMIZED)
         {
         libOptimizedOptions += " ";
         libOptimizedOptions += j->first;
-        libOptimizedOptions += ".lib ";
+        if(j->first.find(".lib") == std::string::npos)
+          {
+          libOptimizedOptions += ".lib ";
+          }
         }      
       }
     }
