@@ -39,11 +39,12 @@ void CMakeErrorHandler(const char* message, const char* title, bool& disable)
 int main(int argc, char** argv)
 {
   unsigned int i;
+  int j;
   cmake msg;
   std::vector<std::string> args;
-  for(i =0; i < argc; ++i)
+  for(j =0; j < argc; ++j)
     {
-    args.push_back(argv[i]);
+    args.push_back(argv[j]);
     }
 
   for(i=1; i < args.size(); ++i)
