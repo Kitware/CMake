@@ -769,6 +769,13 @@ void CMakeSetupDialog::LoadCacheFromDiskToGUI()
         cmCacheManager::GetInstance()->GetCacheEntry("CMAKE_GENERATOR")->m_Value;
       if(m_GeneratorChoiceString != curGen.c_str())
         {
+        std::string message = "Warning: it is not possible to change generators for a binary tree, switching back to ";
+        message +=  curGen;
+        message += ".\nIf you want to build for ";
+        message += m_GeneratorChoiceString;
+        message += ", delete all the files in the binary directory or specify a new binary directory.";
+        ::MessageBox(0, message.c_str(), "Warning",
+                     MB_OKCANCEL|MB_TASKMODAL);
         m_GeneratorChoiceString = curGen.c_str();
         this->UpdateData(FALSE);
         }
