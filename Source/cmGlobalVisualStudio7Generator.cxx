@@ -475,14 +475,9 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout,
     for(std::vector<std::string>::iterator si = dspnames.begin(); 
         l != tgts.end() && si != dspnames.end(); ++l)
       {
-       if (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
-         {
-         cmCustomCommand cc = l->second.GetPostBuildCommands()[0];
-         std::string project = cc.GetCommand();
-         this->WriteProjectConfigurations(fout, project.c_str(), l->second.IsInAll());
-         }
-       else if ((l->second.GetType() != cmTarget::INSTALL_FILES)
-                && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))
+       if ((l->second.GetType() != cmTarget::INSTALL_FILES)
+                && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS)
+                && (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) != 0) )
         {
         this->WriteProjectDepends(fout, si->c_str(), dir.c_str(),l->second);
         ++si;
@@ -508,7 +503,13 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout,
     for(std::vector<std::string>::iterator si = dspnames.begin(); 
         l != tgts.end() && si != dspnames.end(); ++l)
       {
-      if ((l->second.GetType() != cmTarget::INSTALL_FILES)
+      if(strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
+        {
+        cmCustomCommand cc = l->second.GetPostBuildCommands()[0];
+        std::string name = cc.GetCommand();
+        this->WriteProjectConfigurations(fout, name.c_str(), l->second.IsInAll());
+        }
+      else if ((l->second.GetType() != cmTarget::INSTALL_FILES)
           && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))
         {
         this->WriteProjectConfigurations(fout, si->c_str(), l->second.IsInAll());
@@ -582,8 +583,19 @@ void cmGlobalVisualStudio7Generator::WriteProjectDepends(std::ostream& fout,
     {
     if(*i != dspname)
       {
+      std::string name = *i;
+      if(strncmp(name.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
+        {
+        // kind of weird removing the first 27 letters.
+        // my recommendatsions:
+        // use cmCustomCommand::GetCommand() to get the project name
+        // or get rid of the target name starting with "INCLUDE_EXTERNAL_MSPROJECT_" and use another 
+        // indicator/flag somewhere.  These external project names shouldn't conflict with cmake 
+        // target names anyways.
+        name.erase(name.begin(), name.begin() + 27);
+        }
       fout << "\t\t{" << this->GetGUID(dspname) << "}." << depcount << " = {"
-           << this->GetGUID(i->c_str()) << "}\n";
+           << this->GetGUID(name.c_str()) << "}\n";
       depcount++;
       }
     }
