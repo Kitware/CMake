@@ -28,11 +28,24 @@ bool cmInstallTargetsCommand::InitialPass(std::vector<std::string> const& args)
   cmTargets &tgts = m_Makefile->GetTargets();
   std::vector<std::string>::const_iterator s = args.begin();
   ++s;
+  std::string runtime_dir = "/bin";
   for (;s != args.end(); ++s)
     {
-    if (tgts.find(*s) != tgts.end())
+    if (*s == "RUNTIME_DIRECTORY")
+      {
+      ++s;
+      if ( s == args.end() )
+        {
+        this->SetError("called with RUNTIME_DIRECTORY but no actual directory");
+        return false;
+        }
+
+      runtime_dir = *s;
+      }
+    else if (tgts.find(*s) != tgts.end())
       {
       tgts[*s].SetInstallPath(args[0].c_str());
+      tgts[*s].SetRuntimeInstallPath(runtime_dir.c_str());
       }
     }
   

@@ -127,12 +127,37 @@ void cmLocalGenerator::GenerateInstallRules()
       switch (type)
         {
       case cmTarget::STATIC_LIBRARY:
-      case cmTarget::SHARED_LIBRARY:
       case cmTarget::MODULE_LIBRARY:
         fname = libOutPath;
         fname += this->GetFullTargetName(l->first.c_str(), l->second);
         files = fname.c_str();
         this->AddInstallRule(fout, dest, type, files);
+        break;
+      case cmTarget::SHARED_LIBRARY:
+        {
+        // Special code to handle DLL
+        fname = libOutPath;
+        fname += this->GetFullTargetName(l->first.c_str(), l->second);
+        std::string ext = cmSystemTools::GetFilenameExtension(fname);
+        ext = cmSystemTools::LowerCase(ext);
+        if ( ext == ".dll" )
+          {
+          std::string libname = libOutPath;
+          libname += cmSystemTools::GetFilenameWithoutExtension(fname);
+          libname += ".lib";
+          std::cout << "This is dll: " << libname << std::endl;
+          files = libname.c_str();
+          this->AddInstallRule(fout, dest, cmTarget::STATIC_LIBRARY, files, true);
+          std::string dlldest = prefix + l->second.GetRuntimeInstallPath();
+          files = fname.c_str();
+          this->AddInstallRule(fout, dlldest.c_str(), type, files);
+          }
+        else
+          {
+          files = fname.c_str();
+          this->AddInstallRule(fout, dest, type, files);
+          }
+        }
         break;
       case cmTarget::WIN32_EXECUTABLE:
       case cmTarget::EXECUTABLE:
@@ -213,14 +238,15 @@ void cmLocalGenerator::GenerateInstallRules()
     }
 }
 
-void cmLocalGenerator::AddInstallRule(std::ostream& fout, const char* dest, int type, const char* files)
+void cmLocalGenerator::AddInstallRule(std::ostream& fout, const char* dest, 
+  int type, const char* files, bool optional)
 {
   std::string sfiles = files;
   std::string destination = dest;
   std::string stype;
   switch ( type )
     {
-  case cmTarget::INSTALL_PROGRAMS: 
+  case cmTarget::INSTALL_PROGRAMS: stype = "PROGRAM"; break;
   case cmTarget::EXECUTABLE:  
   case cmTarget::WIN32_EXECUTABLE: stype = "EXECUTABLE"; break;
   case cmTarget::STATIC_LIBRARY:   stype = "STATIC_LIBRARY"; break;
@@ -232,7 +258,8 @@ void cmLocalGenerator::AddInstallRule(std::ostream& fout, const char* dest, int 
   fout 
     << "MESSAGE(STATUS \"Install " << stype << ": " << sfiles.c_str() << "\")\n" 
     << "FILE(INSTALL DESTINATION \"" << destination.c_str() 
-    << "\" TYPE " << stype.c_str() << " FILES \"" << sfiles.c_str() << "\")\n";
+    << "\" TYPE " << stype.c_str() << (optional?" OPTIONAL":"") 
+    << " FILES \"" << sfiles.c_str() << "\")\n";
 }
 
 const char* cmLocalGenerator::GetSafeDefinition(const char* def)

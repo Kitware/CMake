@@ -237,6 +237,14 @@ bool cmFileCommand::HandleInstallCommand(std::vector<std::string> const& args)
 
   std::string destination = "";
   std::string stype = "FILES";
+  const char* build_type = m_Makefile->GetDefinition("BUILD_TYPE");
+  std::string extra_dir = "";
+  if ( build_type )
+    {
+    extra_dir = build_type;
+    }
+
+
   std::vector<std::string> files;
   int itype = cmTarget::INSTALL_FILES;
 
@@ -245,6 +253,7 @@ bool cmFileCommand::HandleInstallCommand(std::vector<std::string> const& args)
 
   std::string expr;
   bool in_files = false;
+  bool optional = false;
   for ( ; i != args.size(); ++i )
     {
     const std::string* cstr = &args[i];
@@ -258,6 +267,11 @@ bool cmFileCommand::HandleInstallCommand(std::vector<std::string> const& args)
       {
       i++;
       stype = args[i];
+      if ( args[i+1] == "OPTIONAL" )
+        {
+        i++;
+        optional = true;
+        }
       in_files = false;
       }
     else if ( *cstr == "FILES" && !in_files)
@@ -289,6 +303,10 @@ bool cmFileCommand::HandleInstallCommand(std::vector<std::string> const& args)
     {
     itype = cmTarget::EXECUTABLE;
     }
+  else if ( stype == "PROGRAM" ) 
+    {
+    itype = cmTarget::INSTALL_PROGRAMS;
+    }
   else if ( stype == "STATIC_LIBRARY" ) 
     {
     itype = cmTarget::STATIC_LIBRARY;
@@ -301,12 +319,6 @@ bool cmFileCommand::HandleInstallCommand(std::vector<std::string> const& args)
     {
     itype = cmTarget::MODULE_LIBRARY;
     }
-
-  for ( i = 0; i < files.size(); i ++ )
-    {
-    std::cout << " " << files[i];
-    }
-  std::cout << std::endl;
 
   if ( !cmSystemTools::FileExists(destination.c_str()) )
     {
@@ -329,33 +341,62 @@ bool cmFileCommand::HandleInstallCommand(std::vector<std::string> const& args)
   for ( i = 0; i < files.size(); i ++ )
     {
     std::string destfile = destination + "/" + cmSystemTools::GetFilenameName(files[i]);
-
-    if ( !cmSystemTools::CopyFileAlways(files[i].c_str(), destination.c_str()) )
-      {
-      std::string errstring = "cannot copy file: " + files[i] + 
-        " to directory : " + destination + ".";
-      this->SetError(errstring.c_str());
-      return false;
-      }
+    std::string ctarget = files[i].c_str();
     switch( itype )
       {
     case cmTarget::MODULE_LIBRARY:
+    case cmTarget::STATIC_LIBRARY:
     case cmTarget::SHARED_LIBRARY:
     case cmTarget::EXECUTABLE:
-
-      if ( !cmSystemTools::SetPermissions(destfile.c_str(), 
-#if defined( _MSC_VER ) || defined( __MINGW32__ )
-          S_IREAD | S_IWRITE | S_IEXEC
-#elif defined( __BORLANDC__ )
-          S_IRUSR | S_IWUSR | S_IXUSR
-#else
-          S_IRUSR | S_IWUSR | S_IXUSR | 
-          S_IRGRP | S_IXGRP | 
-          S_IROTH | S_IXOTH 
-#endif
-         ) )
+      if ( extra_dir.size() > 0 )
         {
-        perror("problem doing chmod.");
+        cmOStringStream str;
+        str << cmSystemTools::GetFilenamePath(ctarget) << "/" << extra_dir << "/" 
+          << cmSystemTools::GetFilenameName(ctarget);
+        ctarget = str.str();
+        }
+      break;
+      }
+
+    if ( cmSystemTools::FileExists(ctarget.c_str()) )
+      {
+      if ( !cmSystemTools::CopyFileAlways(ctarget.c_str(), destination.c_str()) )
+        {
+        std::string errstring = "cannot copy file: " + ctarget + 
+          " to directory : " + destination + ".";
+        this->SetError(errstring.c_str());
+        return false;
+        }
+      switch( itype )
+        {
+      case cmTarget::MODULE_LIBRARY:
+      case cmTarget::SHARED_LIBRARY:
+      case cmTarget::EXECUTABLE:
+      case cmTarget::INSTALL_PROGRAMS:
+
+        if ( !cmSystemTools::SetPermissions(destfile.c_str(), 
+#if defined( _MSC_VER ) || defined( __MINGW32__ )
+            S_IREAD | S_IWRITE | S_IEXEC
+#elif defined( __BORLANDC__ )
+            S_IRUSR | S_IWUSR | S_IXUSR
+#else
+            S_IRUSR | S_IWUSR | S_IXUSR | 
+            S_IRGRP | S_IXGRP | 
+            S_IROTH | S_IXOTH 
+#endif
+        ) )
+          {
+          perror("problem doing chmod.");
+          }
+        }
+      }
+    else
+      {
+      if ( !optional )
+        {
+        std::string errstring = "cannot find file: " + ctarget + " to install.";
+        this->SetError(errstring.c_str());
+        return false;
         }
       }
     }

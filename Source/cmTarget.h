@@ -119,6 +119,12 @@ public:
   std::string GetInstallPath() const {return m_InstallPath;}
   void SetInstallPath(const char *name) {m_InstallPath = name;}
   
+  /**
+   * Set the path where this target (if it has a runtime part) should be
+   * installed. This is relative to INSTALL_PREFIX
+   */
+  std::string GetRuntimeInstallPath() const {return m_RuntimeInstallPath;}
+  void SetRuntimeInstallPath(const char *name) {m_RuntimeInstallPath = name;}
   
   /**
    * Generate the SourceFilesList from the SourceLists. This should only be
@@ -213,6 +219,7 @@ private:
   std::vector<std::string> m_LinkDirectories;
   bool m_InAll;
   std::string m_InstallPath;
+  std::string m_RuntimeInstallPath;
   std::set<cmStdString> m_Utilities;
   bool m_RecordDependencies; 
   std::map<cmStdString,cmStdString> m_Properties;
