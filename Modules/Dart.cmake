@@ -92,18 +92,16 @@ IF(BUILD_TESTING)
   ENDIF(NOT UPDATE_TYPE)
 
   IF(UPDATE_TYPE MATCHES "[Cc][Vv][Ss]")
-    MESSAGE("This is a CVS repository")
+    MESSAGE(STATUS "This is a CVS repository")
     SET(UPDATE_COMMAND "${CVSCOMMAND}")
     SET(UPDATE_OPTIONS "${CVS_UPDATE_OPTIONS}")
   ELSE(UPDATE_TYPE MATCHES "[Cc][Vv][Ss]")
     IF(UPDATE_TYPE MATCHES "[Ss][Vv][Nn]")
-      MESSAGE("This is a SVN repository")
+      MESSAGE(STATUS "This is a SVN repository")
       SET(UPDATE_COMMAND "${SVNCOMMAND}")
       SET(UPDATE_OPTIONS "${SVN_UPDATE_OPTIONS}")
     ENDIF(UPDATE_TYPE MATCHES "[Ss][Vv][Nn]")
   ENDIF(UPDATE_TYPE MATCHES "[Cc][Vv][Ss]")
-
-  MESSAGE("Update command: ${UPDATE_COMMAND}")
 
   SET(DART_TESTING_TIMEOUT 1500 CACHE STRING "Time alloted for a test before Dart will kill the test.")
 
