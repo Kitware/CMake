@@ -14,8 +14,6 @@ CXX           = @CXX@
 CXXFLAGS      = @ITK_SHLIB_CFLAGS@ @EXTRA_GCC_FLAG@ @ITK_TEMPLATE_FLAGS@ 
 
 
-USER_CFLAGS   = @CFLAGS@
-USER_CXXFLAGS = @CXXFLAGS@
 
 X_EXTRA_LIBS  = @X_EXTRA_LIBS@
 X_PRE_LIBS    = @X_PRE_LIBS@
@@ -83,27 +81,32 @@ INSTALL         = @INSTALL@
 LIB_INSTALL_DIR = $(INSTALL_ROOT)$(exec_prefix)/lib
 BIN_INSTALL_DIR = $(INSTALL_ROOT)$(exec_prefix)/bin
 
+# set up the path to the rulesgen program
+CMAKE = @CMAKE_OBJ_DIR@/CMake/Source/CMakeBuildTargets
+KIT_OBJ =  ${SRC_OBJ} ${EXTRA_KIT_OBJ}
+BUILD_LIB_FILE  = lib${ME}${ITK_LIB_EXT}
 
-# leave this as a place holder for users to add compile flags
-LOCAL_CXXFLAGS =
-LOCAL_CFLAGS =
+# ***** BEGIN VARIBLES THAT CAN BE OVERRIDDEN IN CMakeLocal.make.in **************
+
 LOCAL_BUILD_TARGETS = 
 LOCAL_LINK_FLAGS =
+USER_CFLAGS   = @CFLAGS@
+USER_CXXFLAGS = @CXXFLAGS@
 
-# Add the compiler include flags
-# right now we include vxl and Common and the config directories
+# ***** END VARIBLES THAT CAN BE OVERRIDDEN IN CMakeLocal.make.in **************
+
+
+
+# compile line flags
 INCLUDE_FLAGS = -I. \
 	-I${CONFIG_DIR}/Code/Insight3DParty/vxl \
 	-I${CONFIG_DIR} \
 	-I${topdir}/Code/Common \
 	-I${topdir}/Code/Insight3DParty/vxl 
 
-CXX_FLAGS = ${CPPFLAGS} ${LOCAL_CXXFLAGS} ${CXXFLAGS} \
+CXX_FLAGS = ${CPPFLAGS} ${USER_CXXFLAGS} ${CXXFLAGS} \
 	    ${KIT_FLAGS} ${INCLUDE_FLAGS}
 
-CC_FLAGS = ${CPPFLAGS} ${LOCAL_CFLAGS} ${CFLAGS} 
+CC_FLAGS = ${CPPFLAGS} ${USER_CFLAGS} ${CFLAGS} 
 
-# set up the path to the rulesgen program
-CMAKE = @CMAKE_OBJ_DIR@/CMake/Source/CMakeBuildTargets
-KIT_OBJ =  ${SRC_OBJ}
-BUILD_LIB_FILE  = lib${ME}${ITK_LIB_EXT}
+

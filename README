@@ -1,20 +1,6 @@
-CMakeMaster.make     -> main file to be included by makefiles
-CMakeVariables.make  -> all make varibles are set in this file
-CMakeRules.make      -> All build rules are here
-CMakeLocal.make      -> Place for hand configuration
-CMakeLists.txt       -> File in each directory that contains classes, exe, etc
-CMakeTargets.make    -> generated rules for make style build
 
-Windows / Visual Studio 6.0
-CMakeSetup.exe   -> window MFC based GUI for configure on windows
-CMakeSetupCMD.exe            -> windows command line version of CMakeConfigure
-
-Unix 
-configure            -> run on unix to configure for build
-CMakeBuildTargets    -> Unix program to read CMakeLists.txt and generate CMakeTargets.make
-
-
-CMakeLists.txt:
+CMakeLists.txt        -> File in each directory that contains classes, exe, etc
+CMakeLists.txt contains the following:
 WIN32_CLASSES =
 UNIX_CLASSES  = 
 ABSTRACT_CLASSES =
@@ -25,6 +11,46 @@ BEGIN MAKE VERBATIM
 ... # copy stuff into CMakeTargets.make directly
 END MAKE VERBATIM
 TEMPLATE_INSTANCE_DIR = 
+
+Windows / Visual Studio 6.0 programs
+CMakeSetup.exe      -> window MFC based GUI for configure on windows
+CMakeSetupCMD.exe   -> windows command line version of CMakeConfigure
+To Build on Windows:
+load CMake/Source/CMakeSetup.dsw
+Build it
+Run it
+Specify paths
+
+Load ITK.dsw
+Build Common, Numerics, then any of the many executables, or do a Batch build 
+with debug only.
+
+
+Unix scripts and programs:
+configure             -> run on unix to configure for build
+CMakeBuildTargets     -> Unix program to read CMakeLists.txt and generate CMakeTargets.make
+makefile fragments:
+CMakeMaster.make      -> main file to be included by makefiles
+CMakeVariables.make   -> all make varibles are set in this file
+CMakeRules.make       -> All build rules are here
+CMakeLocal.make       -> Place for hand configuration
+CMakeTargets.make     -> generated rules for make style build
+MakefileTemplate.make -> master makefile template used by configure to generate Makefiles
+
+Unix install:
+In place:
+./configure
+make
+
+Other directory:
+mkdir Insight-build
+cd Insight-build
+../Insight/configure
+make
+
+
 TODO:
 Fix cmUnixMakefile.cxx and cmDSPMakefile.cxx 
 to read libraries and -I stuff from a config file
+
+
