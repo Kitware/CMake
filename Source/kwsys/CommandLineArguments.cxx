@@ -80,6 +80,7 @@ public:
   typedef CommandLineArgumentsSetOfStrings SetOfStrings;
 
   VectorOfStrings Argv;
+  String Argv0;
   CallbacksMap Callbacks;
 
   CommandLineArguments::ErrorCallbackType UnknownArgumentCallback;
@@ -110,6 +111,7 @@ void CommandLineArguments::Initialize(int argc, const char* const argv[])
   int cc;
 
   this->Initialize();
+  this->Internals->Argv0 = argv[0];
   for ( cc = 1; cc < argc; cc ++ )
     {
     this->ProcessArgument(argv[cc]);
@@ -119,13 +121,7 @@ void CommandLineArguments::Initialize(int argc, const char* const argv[])
 //----------------------------------------------------------------------------
 void CommandLineArguments::Initialize(int argc, char* argv[])
 {
-  int cc;
-
-  this->Initialize();
-  for ( cc = 1; cc < argc; cc ++ )
-    {
-    this->ProcessArgument(argv[cc]);
-    }
+  this->Initialize(argc, static_cast<const char* const*>(argv));
 }
 
 //----------------------------------------------------------------------------
@@ -148,6 +144,7 @@ int CommandLineArguments::Parse()
   CommandLineArguments::Internal::VectorOfStrings matches;
   for ( cc = 0; cc < this->Internals->Argv.size(); cc ++ )
     {
+    this->Internals->LastArgument = cc;
     matches.clear();
     CommandLineArguments::Internal::String& arg = this->Internals->Argv[cc];
     CommandLineArguments::Internal::CallbacksMap::iterator it;
@@ -201,6 +198,7 @@ int CommandLineArguments::Parse()
         {
         if ( cc == this->Internals->Argv.size()-1 )
           {
+          this->Internals->LastArgument --;
           return 0;
           }
         // Value is the next argument
@@ -211,6 +209,7 @@ int CommandLineArguments::Parse()
         {
         if ( arg.size() == sarg.size() || *(arg.c_str() + sarg.size()) != '=' )
           {
+          this->Internals->LastArgument --;
           return 0;
           }
         // Value is everythng followed the '=' sign
@@ -227,6 +226,7 @@ int CommandLineArguments::Parse()
         {
         if ( !cs->Callback(sarg.c_str(), value, cs->CallData) )
           {
+          this->Internals->LastArgument --;
           return 0;
           }
         }
@@ -289,6 +289,7 @@ int CommandLineArguments::Parse()
         else
           {
           kwsys_ios::cerr << "Got unknown argument type: \"" << cs->VariableType << "\"" << kwsys_ios::endl;
+          this->Internals->LastArgument --;
           return 0;
           }
         }
@@ -301,6 +302,7 @@ int CommandLineArguments::Parse()
         if ( !this->Internals->UnknownArgumentCallback(arg.c_str(), 
             this->Internals->ClientData) )
           {
+          this->Internals->LastArgument --;
           return 0;
           }
         return 1;
@@ -308,12 +310,11 @@ int CommandLineArguments::Parse()
       else
         {
         kwsys_ios::cerr << "Got unknown argument: \"" << arg.c_str() << "\"" << kwsys_ios::endl;
+        this->Internals->LastArgument --;
         return 0;
         }
       }
     }
-  // We are done parsing, so remember what was the last argument
-  this->Internals->LastArgument = cc;
   return 1;
 }
 
@@ -324,11 +325,14 @@ void CommandLineArguments::GetRemainingArguments(int* argc, char*** argv)
     = this->Internals->Argv.size() - this->Internals->LastArgument + 1;
   CommandLineArguments::Internal::VectorOfStrings::size_type cc;
 
+  // Copy Argv0 as the first argument
   char** args = new char*[ size ];
-  args[0] = new char[ this->Internals->Argv[0].size() + 1 ];
-  strcpy(args[0], this->Internals->Argv[0].c_str());
+  args[0] = new char[ this->Internals->Argv0.size() + 1 ];
+  strcpy(args[0], this->Internals->Argv0.c_str());
   int cnt = 1;
-  for ( cc = this->Internals->LastArgument; 
+
+  // Copy everything after the LastArgument, since that was not parsed.
+  for ( cc = this->Internals->LastArgument+1; 
     cc < this->Internals->Argv.size(); cc ++ )
     {
     args[cnt] = new char[ this->Internals->Argv[cc].size() + 1];
