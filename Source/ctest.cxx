@@ -339,7 +339,8 @@ std::string ctest::FindExecutable(const char *exe)
   cmSystemTools::SplitProgramPath(exe, dir, file);
   if(m_ConfigType != "")
     {
-    if(TryExecutable(dir.c_str(), file.c_str(), &fullPath, m_ConfigType.c_str()))
+    if(TryExecutable(dir.c_str(), file.c_str(), &fullPath, 
+                     m_ConfigType.c_str()))
       {
       return fullPath;
       }
@@ -366,7 +367,7 @@ std::string ctest::FindExecutable(const char *exe)
     return fullPath;
     }
 
-    if (TryExecutable(dir.c_str(),file.c_str(),&fullPath,"Debug"))
+  if (TryExecutable(dir.c_str(),file.c_str(),&fullPath,"Debug"))
     {
     return fullPath;
     }
@@ -792,8 +793,9 @@ void ctest::ProcessDirectory(std::vector<std::string> &passed,
         fflush(stderr);
         //std::cerr << "Testing " << args[0] << " ... ";
         // find the test executable
-        std::string testCommand = 
-          cmSystemTools::EscapeSpaces(this->FindExecutable(args[1].c_str()).c_str());
+        std::string testCommand = this->FindExecutable(args[1].c_str());
+        testCommand = cmSystemTools::ConvertToOutputPath(testCommand.c_str());
+
         // continue if we did not find the executable
         if (testCommand == "")
           {
@@ -802,7 +804,6 @@ void ctest::ProcessDirectory(std::vector<std::string> &passed,
           continue;
           }
         
-        testCommand = cmSystemTools::ConvertToOutputPath(testCommand.c_str());
         // add the arguments
         std::vector<std::string>::iterator j = args.begin();
         ++j;
