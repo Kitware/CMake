@@ -472,8 +472,12 @@ int cmCTest::UpdateDirectory()
      << "\t<BuildStamp>" << m_CurrentTag << "-Experimental</BuildStamp>\n"
      << "\t<StartDateTime>" << start_time << "</StartDateTime>\n"
      << "\t<UpdateCommand>" << command << "</UpdateCommand>\n"
-     << "\t<UpdateReturnStatus>" << retVal 
-     << "</UpdateReturnStatus>" << std::endl;
+     << "\t<UpdateReturnStatus>";
+  if ( retVal )
+    {
+    os << retVal;
+    }
+  os << "</UpdateReturnStatus>" << std::endl;
 
   std::vector<cmStdString> lines;
   cmSystemTools::Split(output.c_str(), lines);
