@@ -86,6 +86,14 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateObject(cmXCodeObject::PBXType ptype
   return obj;
 }
 
+cmXCodeObject* cmGlobalXCodeGenerator::CreateString(const char* s)
+{
+  cmXCodeObject* obj = new cmXCodeObject(cmXCodeObject::None, cmXCodeObject::STRING);
+  m_XCodeObjects.push_back(obj);
+  obj->SetString(s);
+  return obj;
+}
+
 //----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::CreateXCodeObjects(cmLocalGenerator* root,
                                                 std::vector<cmLocalGenerator*>& 
@@ -94,17 +102,17 @@ void cmGlobalXCodeGenerator::CreateXCodeObjects(cmLocalGenerator* root,
   delete m_RootObject;
   this->ClearXCodeObjects(); 
   cmXCodeObject* group = this->CreateObject(cmXCodeObject::None, cmXCodeObject::ATTRIBUTE_GROUP);
-  group->AddAttribute("COPY_PHASE_STRIP", "NO");
+  group->AddAttribute("COPY_PHASE_STRIP", this->CreateString("NO"));
   cmXCodeObject* developBuildStyle = this->CreateObject(cmXCodeObject::PBXBuildStyle,
                                                         cmXCodeObject::OBJECT);
-  developBuildStyle->AddAttribute("name", "Development");
+  developBuildStyle->AddAttribute("name", this->CreateString("Development"));
   developBuildStyle->AddAttribute("buildSettings", group);
   
   group = this->CreateObject(cmXCodeObject::None, cmXCodeObject::ATTRIBUTE_GROUP);
-  group->AddAttribute("COPY_PHASE_STRIP", "YES");
+  group->AddAttribute("COPY_PHASE_STRIP", this->CreateString("YES"));
   cmXCodeObject* deployBuildStyle = this->CreateObject(cmXCodeObject::PBXBuildStyle,
                                                        cmXCodeObject::OBJECT);
-  deployBuildStyle->AddAttribute("name", "Deployment");
+  deployBuildStyle->AddAttribute("name", this->CreateString("Deployment"));
   deployBuildStyle->AddAttribute("buildSettings", group);
 
   cmXCodeObject* listObjs = this->CreateObject(cmXCodeObject::None,
@@ -117,7 +125,7 @@ void cmGlobalXCodeGenerator::CreateXCodeObjects(cmLocalGenerator* root,
   group = this->CreateObject(cmXCodeObject::None, cmXCodeObject::ATTRIBUTE_GROUP);
   m_RootObject->AddAttribute("buildSettings", group);
   m_RootObject->AddAttribute("buildSyles", listObjs);
-  m_RootObject->AddAttribute("hasScannedForEncodings", "0");
+  m_RootObject->AddAttribute("hasScannedForEncodings", this->CreateString("0"));
   
 }
 

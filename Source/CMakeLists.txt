@@ -43,6 +43,9 @@ SET(SRCS
   cmVersion.h
   cmXMLParser.cxx
   cmXMLParser.h
+  cmXCodeObject.cxx
+  cmLocalXCodeGenerator.cxx
+  cmGlobalXCodeGenerator.cxx
   cmake.cxx
   cmake.h
   cmakewizard.cxx

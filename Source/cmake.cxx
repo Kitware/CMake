@@ -50,6 +50,7 @@
 #else
 #endif
 #include "cmGlobalUnixMakefileGenerator.h"
+#include "cmGlobalXCodeGenerator.h"
 
 #ifdef CMAKE_USE_KDEVELOP
 # include "cmGlobalKdevelopGenerator.h"
@@ -1443,6 +1444,8 @@ void cmake::AddDefaultGenerators()
 #endif
   m_Generators[cmGlobalUnixMakefileGenerator::GetActualName()] =
     &cmGlobalUnixMakefileGenerator::New;
+  m_Generators[cmGlobalXCodeGenerator::GetActualName()] =
+    &cmGlobalXCodeGenerator::New;
 #ifdef CMAKE_USE_KDEVELOP
   m_Generators[cmGlobalKdevelopGenerator::GetActualName()] =
      &cmGlobalKdevelopGenerator::New;

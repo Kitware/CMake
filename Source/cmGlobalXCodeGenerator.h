@@ -64,7 +64,12 @@ public:
   virtual void Generate();
 
 private:
+  // create cmXCodeObject from these functions so that memory can be managed
+  // correctly.  All objects created are stored in m_XCodeObjects.
   cmXCodeObject* CreateObject(cmXCodeObject::PBXType ptype, cmXCodeObject::Type type);
+  cmXCodeObject* CreateString(const char* s);
+  
+  // delete all objects in the m_XCodeObjects vector.
   void ClearXCodeObjects();
   void CreateXCodeObjects(cmLocalGenerator* root,
                           std::vector<cmLocalGenerator*>& generators);

@@ -6,7 +6,7 @@
 class cmXCodeObject
 {
 public:
-  enum Type { OBJECT_LIST, ATTRIBUTE_GROUP, OBJECT_REF, OBJECT };
+  enum Type { OBJECT_LIST, STRING, ATTRIBUTE_GROUP, OBJECT_REF, OBJECT };
   enum PBXType { PBXGroup, PBXBuildStyle, PBXProject, PBXHeadersBuildPhase, 
                  PBXSourcesBuildPhase, PBXFrameworksBuildPhase, PBXNativeTarget,
                  PBXFileReference, PBXBuildFile, PBXContainerItemProxy, PBXTargetDependency,
@@ -17,10 +17,11 @@ public:
   static const char* PBXTypeNames[];
   
   cmXCodeObject(PBXType ptype, Type type);
-  void AddAttribute(const char* name, const char* value)
+  void SetString(const char* s)
     {
-      m_StringAttributes[name] = value;
+      m_String = s;
     }
+  
   void AddAttribute(const char* name, cmXCodeObject* value)
     {
       m_ObjectAttributes[name] = value;
@@ -45,9 +46,9 @@ private:
   Type m_Type;
   cmStdString m_Id;
   PBXType m_IsA;
+  cmStdString m_String;
   cmXCodeObject* m_Object;
   std::vector<cmXCodeObject*> m_List;
   std::map<cmStdString, cmXCodeObject*> m_ObjectAttributes;
-  std::map<cmStdString, cmStdString> m_StringAttributes;
 };
 #endif

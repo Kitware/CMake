@@ -18,7 +18,7 @@ cmXCodeObject::cmXCodeObject(PBXType ptype, Type type)
   m_Type = type;
   if(m_Type == OBJECT)
     {
-    this->AddAttribute("isa", PBXTypeNames[m_IsA]);
+    this->AddAttribute("isa", 0);
     }
 }
 
@@ -40,10 +40,15 @@ void cmXCodeObject::Print(std::ostream& out)
   std::map<cmStdString, cmXCodeObject*>::iterator i;
   for(i = m_ObjectAttributes.begin(); i != m_ObjectAttributes.end(); ++i)
     { 
+    
     cmXCodeObject* object = i->second;
-    if(object->m_Type == OBJECT_LIST)
+    cmXCodeObject::Indent(3, out);
+    if(i->first == "isa")
+      { 
+      out << i->first << " = " << PBXTypeNames[m_IsA] << ";\n";
+      }
+    else if(object->m_Type == OBJECT_LIST)
       {
-      cmXCodeObject::Indent(3, out);
       out << i->first << " = {\n";
       for(unsigned int k = 0; k < i->second->m_List.size(); k++)
         {
@@ -55,29 +60,25 @@ void cmXCodeObject::Print(std::ostream& out)
       }
     else if(object->m_Type == ATTRIBUTE_GROUP)
       {
-      std::map<cmStdString, cmStdString>::iterator j;
-      cmXCodeObject::Indent(3, out);
+      std::map<cmStdString, cmXCodeObject*>::iterator j;
       out << i->first << " = {\n";
-      for(j = object->m_StringAttributes.begin(); j != object->m_StringAttributes.end(); ++j)
+      for(j = object->m_ObjectAttributes.begin(); j != object->m_ObjectAttributes.end(); ++j)
         {
         cmXCodeObject::Indent(4, out);
-        out << j->first << " = " << j->second << ";\n";
+        out << j->first << " = " << j->second->m_String << ";\n";
         }
       cmXCodeObject::Indent(3, out);
       out << "}\n";
       }
     else if(object->m_Type == OBJECT_REF)
       {
-      cmXCodeObject::Indent(3, out);
       out << i->first << " = " << object->m_Object->m_Id << ";\n";
       }
+    else if(object->m_Type == STRING)
+      {
+      out << i->first << " = " << object->m_String << ";\n";
+      }
         
-    }
-  std::map<cmStdString, cmStdString>::iterator j;
-  for(j = m_StringAttributes.begin(); j != m_StringAttributes.end(); ++j)
-    {
-    cmXCodeObject::Indent(3, out);
-    out << j->first << " = " << j->second << ";\n";
     }
   cmXCodeObject::Indent(2, out);
   out << "};\n";
