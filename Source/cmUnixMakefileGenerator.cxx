@@ -239,6 +239,12 @@ void cmUnixMakefileGenerator::OutputMakefile(const char* file)
 }
 
 
+bool cmUnixMakefileGenerator::BuildingSharedLibs() const
+{
+  return !cmSystemTools::IsOff(m_Makefile->GetDefinition("BUILD_SHARED_LIBS"));
+}
+
+
 // Output the rules for any targets
 void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
 {
@@ -246,7 +252,7 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
   fout << "TARGETS = ";
   const cmTargets &tgts = m_Makefile->GetTargets();
   // list libraries first
-  bool dll = cmCacheManager::GetInstance()->IsOn("BUILD_SHARED_LIBS");
+  bool dll = this->BuildingSharedLibs();
   for(cmTargets::const_iterator l = tgts.begin(); 
       l != tgts.end(); l++)
     {
@@ -332,7 +338,7 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
   std::set<std::string> emitted;
 
   // Embed runtime search paths if possible and if required.
-  bool outputRuntime = cmCacheManager::GetInstance()->IsOn("BUILD_SHARED_LIBS");
+  bool outputRuntime = this->BuildingSharedLibs();
   std::string runtimeFlag;
   std::string runtimeSep;
   std::vector<std::string> runtimeDirs;
@@ -478,9 +484,8 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
 
 void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
 {
- 
-  bool dll = cmCacheManager::GetInstance()->IsOn("BUILD_SHARED_LIBS");
-
+  bool dll = this->BuildingSharedLibs();
+  
   // for each target
   const cmTargets &tgts = m_Makefile->GetTargets();
   for(cmTargets::const_iterator l = tgts.begin(); 
@@ -562,7 +567,7 @@ void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
         libpath += "/lib";
         }
       libpath += lib2->first; 
-      bool dll = cmCacheManager::GetInstance()->IsOn("BUILD_SHARED_LIBS");
+      bool dll = this->BuildingSharedLibs();
       if(dll)
         {
         libpath += m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
@@ -593,7 +598,7 @@ void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
       {
       std::string library = "lib";
       library += lib2->first; 
-      bool dll = cmCacheManager::GetInstance()->IsOn("BUILD_SHARED_LIBS");
+      bool dll = this->BuildingSharedLibs();
       if(dll)
         {
         library += m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
@@ -947,7 +952,7 @@ void cmUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     "\n"
     "\n";
   std::string replaceVars = variables;
-  bool dll = cmCacheManager::GetInstance()->IsOn("BUILD_SHARED_LIBS");
+  bool dll = this->BuildingSharedLibs();
   if(!dll)
     {
     // if not a dll then remove the shlib -fpic flag
@@ -963,7 +968,7 @@ void cmUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
 
 void cmUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
 {
-  bool dll = cmCacheManager::GetInstance()->IsOn("BUILD_SHARED_LIBS");
+  bool dll = this->BuildingSharedLibs();
   const char* root
     = cmCacheManager::GetInstance()->GetCacheValue("CMAKE_ROOT");
   fout << "INSTALL = " << root << "/Templates/install-sh -c\n";
