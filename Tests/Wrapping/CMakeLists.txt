@@ -29,12 +29,6 @@ ENDIF (EXECUTABLE_OUTPUT_PATH)
 ADD_EXECUTABLE (wrapping wrapping.cxx)
 
 #
-# Test Cable
-#
-CABLE_CLASS_SET (Float float)
-CABLE_CLASS_SET (Mesh "itk::Mesh<$Float>")
-
-#
 # Test VTK wrappers
 #
 SOURCE_FILES (SRCS
