@@ -183,6 +183,12 @@ IF(BUILD_TESTING)
       ${CMake_BINARY_DIR}/Tests/Wrapping/bin)
 
     INCLUDE ( ${CMAKE_ROOT}/Modules/FindQt.cmake )
+    MARK_AS_ADVANCED(
+     QT_INCLUDE_PATH
+     QT_MOC_EXE
+     QT_QT_LIBRARY
+     QT_UIC_EXE)
+
     IF (QT_FOUND)
       ADD_TEST(qtwrapping ${CMake_BINARY_DIR}/Source/cmaketest 
         ${CMake_SOURCE_DIR}/Tests/Wrapping 
@@ -254,6 +260,7 @@ IF(BUILD_TESTING)
       ${CMake_BINARY_DIR}/Tests/LinkLine
       LinkLine)
 ENDIF(BUILD_TESTING)
+
 
 
 INCLUDE (${CMAKE_BINARY_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
