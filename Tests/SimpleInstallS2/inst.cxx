@@ -2,6 +2,7 @@
 
 #include "lib1.h"
 #include "lib2.h"
+#include "lib4.h"
 
 #include <stdio.h>
 
@@ -15,6 +16,11 @@ int main ()
   if ( Lib2Func() != 1.0 )
     {
     printf("Problem with lib2\n");
+    return 1;
+    }
+  if ( Lib4Func() != 4.0 )
+    {
+    printf("Problem with lib4\n");
     return 1;
     }
   printf("The value of Foo: %s\n", foo);

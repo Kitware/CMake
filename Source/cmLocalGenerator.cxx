@@ -189,7 +189,27 @@ void cmLocalGenerator::GenerateInstallRules()
         else
           {
           files = fname.c_str();
-          this->AddInstallRule(fout, dest, type, files);
+          std::string properties;
+          const char* lib_version = l->second.GetProperty("VERSION");
+          const char* lib_soversion = l->second.GetProperty("SOVERSION");
+          if(!m_Makefile->GetDefinition("CMAKE_SHARED_LIBRARY_SONAME_C_FLAG"))
+            {
+            // Versioning is supported only for shared libraries and modules,
+            // and then only when the platform supports an soname flag.
+            lib_version = 0;
+            lib_soversion = 0;
+            }
+          if ( lib_version )
+            {
+            properties += " VERSION ";
+            properties += lib_version;
+            }
+          if ( lib_soversion )
+            {
+            properties += " SOVERSION ";
+            properties += lib_soversion;
+            }
+          this->AddInstallRule(fout, dest, type, files, false, properties.c_str());
           }
         }
         break;
@@ -283,7 +303,7 @@ void cmLocalGenerator::GenerateInstallRules()
 }
 
 void cmLocalGenerator::AddInstallRule(std::ostream& fout, const char* dest, 
-  int type, const char* files, bool optional)
+  int type, const char* files, bool optional /* = false */, const char* properties /* = 0 */)
 {
   std::string sfiles = files;
   std::string destination = dest;
@@ -303,7 +323,12 @@ void cmLocalGenerator::AddInstallRule(std::ostream& fout, const char* dest,
     << "MESSAGE(STATUS \"Installing " << destination.c_str() 
     << "/" << fname.c_str() << "\")\n" 
     << "FILE(INSTALL DESTINATION \"" << destination.c_str() 
-    << "\" TYPE " << stype.c_str() << (optional?" OPTIONAL":"") 
+    << "\" TYPE " << stype.c_str() << (optional?" OPTIONAL":"") ;
+  if ( properties && *properties )
+    {
+    fout << " PROPERTIES" << properties;
+    }
+  fout
     << " FILES \"" << sfiles.c_str() << "\")\n";
 }
 

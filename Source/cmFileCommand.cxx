@@ -249,8 +249,6 @@ bool cmFileCommand::HandleInstallCommand(
   std::string destination = "";
   std::string stype = "FILES";
   const char* build_type = m_Makefile->GetDefinition("BUILD_TYPE");
-  const char* debug_postfix 
-    = m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX");
   const char* destdir = cmSystemTools::GetEnv("DESTDIR");
 
   std::string extra_dir = "";
@@ -271,7 +269,10 @@ bool cmFileCommand::HandleInstallCommand(
   std::vector<std::string>::size_type i = 0;
   i++; // Get rid of subcommand
 
+  std::map<cmStdString, const char*> properties;
+
   bool in_files = false;
+  bool in_properties = false;
   bool optional = false;
   for ( ; i != args.size(); ++i )
     {
@@ -281,6 +282,7 @@ bool cmFileCommand::HandleInstallCommand(
       i++;
       destination = args[i];
       in_files = false;
+      in_properties = false;
       }
     else if ( *cstr == "TYPE" && i < args.size()-1 )
       {
@@ -291,11 +293,23 @@ bool cmFileCommand::HandleInstallCommand(
         i++;
         optional = true;
         }
+      in_properties = false;
+      in_files = false;
+      }
+    else if ( *cstr == "PROPERTIES"  )
+      {
+      in_properties = true;
       in_files = false;
       }
     else if ( *cstr == "FILES" && !in_files)
       {
       in_files = true;
+      in_properties = false;
+      }
+    else if ( in_properties && i < args.size()-1 )
+      {
+      properties[args[i]] = args[i+1].c_str();
+      i++;
       }
     else if ( in_files )
       {
@@ -437,9 +451,65 @@ bool cmFileCommand::HandleInstallCommand(
     case cmTarget::MODULE_LIBRARY:
     case cmTarget::STATIC_LIBRARY:
     case cmTarget::SHARED_LIBRARY:
-      if ( debug )
         {
-        fname = fnamewe + debug_postfix + ext;
+        // Handle shared library versioning
+        const char* lib_version = 0;
+        const char* lib_soversion = 0;
+        if ( properties.find("VERSION") != properties.end() )
+          {
+          lib_version = properties["VERSION"];
+          }
+        if ( properties.find("SOVERSION") != properties.end() )
+          {
+          lib_soversion = properties["SOVERSION"];
+          }
+        if ( !lib_version && lib_soversion )
+          {
+          lib_version = lib_soversion;
+          }
+        if ( !lib_soversion && lib_version )
+          {
+          lib_soversion = lib_version;
+          }
+        if ( lib_version && lib_soversion )
+          {
+          std::string libname = destfile;
+          std::string soname = destfile;
+          std::string soname_nopath = fname;
+          soname += ".";
+          soname += lib_soversion;
+          soname_nopath += ".";
+          soname_nopath += lib_soversion;
+
+          fname += ".";
+          fname += lib_version;
+          destfile += ".";
+          destfile += lib_version;
+
+          cmSystemTools::RemoveFile(soname.c_str());
+          cmSystemTools::RemoveFile(libname.c_str());
+
+          if (!cmSystemTools::CreateSymlink(soname_nopath.c_str(), libname.c_str()) )
+            {
+            std::string errstring = "error when creating symlink from: " + libname + " to " + soname_nopath;
+            this->SetError(errstring.c_str());
+            return false;
+            }
+          if ( destfile != soname )
+            {
+            if ( !cmSystemTools::CreateSymlink(fname.c_str(), soname.c_str()) )
+              {
+              std::string errstring = "error when creating symlink from: " + soname + " to " + fname;
+              this->SetError(errstring.c_str());
+              return false;
+              }
+            }
+          }
+        cmOStringStream str;
+        str << cmSystemTools::GetFilenamePath(ctarget) 
+          << "/" << extra_dir << "/" 
+          << fname;
+        ctarget = str.str();
         }
     case cmTarget::EXECUTABLE:
       if ( extra_dir.size() > 0 )
@@ -455,6 +525,7 @@ bool cmFileCommand::HandleInstallCommand(
 
     if ( cmSystemTools::FileExists(ctarget.c_str()) )
       {
+      cmSystemTools::RemoveFile(destfile.c_str());
       if ( !cmSystemTools::CopyFileAlways(ctarget.c_str(), 
           destination.c_str()) )
         {
@@ -482,7 +553,9 @@ bool cmFileCommand::HandleInstallCommand(
 #endif
         ) )
           {
-          perror("problem doing chmod.");
+          cmOStringStream err;
+          err << "Program setting permissions on file: " << destfile.c_str();
+          perror(err.str().c_str());
           }
         }
       smanifest_files += ";" + destfile;
