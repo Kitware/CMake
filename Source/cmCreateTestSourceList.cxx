@@ -202,8 +202,8 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)
     cfile.SetIsAnAbstractClass(false);
     cfile.SetName(i->c_str(), 
                   m_Makefile->GetCurrentDirectory(),
-                  "cxx", 
-                  false);
+                  m_Makefile->GetSourceExtensions(), 
+                  m_Makefile->GetHeaderExtensions());
     m_Makefile->AddSource(cfile, sourceList);
     }
 
