@@ -192,7 +192,8 @@ int main (int argc, char *argv[])
   cmSystemTools::ConvertToWindowsSlashes(fullPath);
 #endif
   std::cout << "Running test executable: " << fullPath.c_str() << "\n";
-  if (!cmSystemTools::RunCommand(fullPath.c_str(), output))
+  int ret = 0;
+  if (!cmSystemTools::RunCommand(fullPath.c_str(), output, ret, true))
     {
     std::cerr << "Error: " << fullPath.c_str() << "  execution failed\n";
     // return to the original directory
@@ -203,5 +204,10 @@ int main (int argc, char *argv[])
   // return to the original directory
   cmSystemTools::ChangeDirectory(cwd.c_str());
   cmMakefileGenerator::UnRegisterGenerators();
-  return 0;
+  if(ret)
+    {
+    cmSystemTools::Error("test executable ", fullPath.c_str(), 
+                         "returned a non-zero value");
+    }
+  return ret;
 }
