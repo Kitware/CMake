@@ -846,6 +846,26 @@ void cmMakefile::AddCacheDefinition(const char* name, const char* value,
     it.Initialized())
     {
     val = it.GetValue();
+    if ( type == cmCacheManager::PATH || type == cmCacheManager::FILEPATH )
+      {
+      std::vector<std::string>::size_type cc;
+      std::vector<std::string> files;
+      std::string nvalue = "";
+      cmSystemTools::ExpandListArgument(val, files);
+      for ( cc = 0; cc < files.size(); cc ++ )
+        {
+        files[cc] = cmSystemTools::CollapseFullPath(files[cc].c_str());
+        if ( cc > 0 )
+          {
+          nvalue += ";";
+          }
+        nvalue += files[cc];
+        }
+
+      this->GetCacheManager()->AddCacheEntry(name, nvalue.c_str(), doc, type);
+      val = it.GetValue();
+      }
+
     }
   this->GetCacheManager()->AddCacheEntry(name, val, doc, type);
   this->AddDefinition(name, val);
