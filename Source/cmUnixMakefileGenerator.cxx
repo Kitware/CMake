@@ -1586,15 +1586,14 @@ void cmUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     "MODULE_SUFFIX            = @CMAKE_MODULE_SUFFIX@\n"
     "THREAD_LIBS              = @CMAKE_THREAD_LIBS@\n"
     "RM = rm -f\n"
-    "\n"
-    "# set up the path to the rulesgen program\n"
-    "CMAKE_COMMAND = ${CMAKE_COMMAND}"
-    "\n"
-    "\n"
     "\n";
   std::string replaceVars = variables;
   m_Makefile->ExpandVariablesInString(replaceVars);
   fout << replaceVars.c_str();
+  fout << "CMAKE_COMMAND = "
+       << this->ConvertToOutputPath(m_Makefile->GetDefinition("CMAKE_COMMAND"))
+       << "\n";
+
   fout << "CMAKE_CURRENT_SOURCE = " << 
     this->ConvertToOutputPath(m_Makefile->GetStartDirectory()) << "\n";
   fout << "CMAKE_CURRENT_BINARY = " << 
