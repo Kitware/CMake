@@ -52,7 +52,8 @@ int main (int argc, char *argv[])
     {
     projectName = argv[5];
     }
-  
+
+  // WARNING: the rest of the args is passed to cmake
 
   /**
    * Run an executable command and put the stdout in output.
@@ -85,6 +86,15 @@ int main (int argc, char *argv[])
   std::string generator = "-G";
   generator += CMAKE_GENERATOR;
   args.push_back(generator);
+
+  if(argc > 6)
+    {
+    for (int j = 6; j < argc ; j++) 
+      {
+      args.push_back(argv[j]);
+      }
+    }
+  
   std::cout << "Generating build files...\n";
 
   cmake cm;
