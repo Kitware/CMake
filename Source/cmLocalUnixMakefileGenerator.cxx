@@ -1000,12 +1000,19 @@ void cmLocalUnixMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout,
     {
     targetSuffix = this->GetSafeDefinition("CMAKE_STATIC_LIBRARY_SUFFIX");
     }
+  std::string linkFlags;
+  const char* targetLinkFlags = t.GetProperty("LINK_FLAGS");
+  if(targetLinkFlags)
+    {
+    linkFlags += targetLinkFlags;
+    linkFlags += " ";
+    }
   this->OutputLibraryRule(fout, name, t,
                           targetPrefix,
                           targetSuffix,
                           createRule,
                           "static library",
-                          t.GetProperty("LINK_FLAGS"));
+                          linkFlags.c_str());
   
 }
 
