@@ -550,6 +550,8 @@ void cmDSPWriter::WriteDSPHeader(std::ostream& fout, const char *libName,
                                    const cmTarget &target, 
                                  std::vector<cmSourceGroup> &)
 {
+  std::set<std::string> pathEmitted;
+  
   // determine the link directories
   std::string libOptions;
   std::string libDebugOptions;
@@ -578,18 +580,22 @@ void cmDSPWriter::WriteDSPHeader(std::ostream& fout, const char *libName,
       {
       libPath += "/";
       }
-    libOptions += " /LIBPATH:\"";
-    libOptions += cmSystemTools::HandleNetworkPaths(libPath.c_str());
-    libOptions += "$(INTDIR)\" ";
-    libOptions += " /LIBPATH:\"";
-    libOptions += cmSystemTools::HandleNetworkPaths(libPath.c_str());
-    libOptions += "\" ";
-    libMultiLineOptions += "# ADD LINK32 /LIBPATH:\"";
-    libMultiLineOptions += cmSystemTools::HandleNetworkPaths(libPath.c_str()); 
-    libMultiLineOptions += "$(INTDIR)\" ";
-    libMultiLineOptions += " /LIBPATH:\"";
-    libMultiLineOptions += cmSystemTools::HandleNetworkPaths(libPath.c_str()); 
-    libMultiLineOptions += "\" \n";
+    std::string lpath = cmSystemTools::HandleNetworkPaths(libPath.c_str());
+    if(pathEmitted.insert(lpath).second)
+      {
+      libOptions += " /LIBPATH:\"";
+      libOptions += lpath;
+      libOptions += "$(INTDIR)\" ";
+      libOptions += " /LIBPATH:\"";
+      libOptions += lpath;
+      libOptions += "\" ";
+      libMultiLineOptions += "# ADD LINK32 /LIBPATH:\"";
+      libMultiLineOptions += lpath;
+      libMultiLineOptions += "$(INTDIR)\" ";
+      libMultiLineOptions += " /LIBPATH:\"";
+      libMultiLineOptions += lpath;
+      libMultiLineOptions += "\" \n";
+      }
     }
   if(exePath.size())
     {
@@ -598,37 +604,50 @@ void cmDSPWriter::WriteDSPHeader(std::ostream& fout, const char *libName,
       {
       exePath += "/";
       }
-    libOptions += " /LIBPATH:\"";
-    libOptions += cmSystemTools::HandleNetworkPaths(exePath.c_str());
-    libOptions += "$(INTDIR)\" ";
-    libOptions += " /LIBPATH:\"";
-    libOptions += cmSystemTools::HandleNetworkPaths(exePath.c_str());
-    libOptions += "\" ";
-    libMultiLineOptions += "# ADD LINK32 /LIBPATH:\"";
-    libMultiLineOptions += cmSystemTools::HandleNetworkPaths(exePath.c_str()); 
-    libMultiLineOptions += "$(INTDIR)\" ";
-    libMultiLineOptions += " /LIBPATH:\"";
-    libMultiLineOptions += cmSystemTools::HandleNetworkPaths(exePath.c_str());
-    libMultiLineOptions += "\" \n";
+    std::string lpath = cmSystemTools::HandleNetworkPaths(exePath.c_str());
+    if(pathEmitted.insert(lpath).second)
+      {
+      libOptions += " /LIBPATH:\"";
+      libOptions += lpath;
+      libOptions += "$(INTDIR)\" ";
+      libOptions += " /LIBPATH:\"";
+      libOptions += lpath;
+      libOptions += "\" ";
+      libMultiLineOptions += "# ADD LINK32 /LIBPATH:\"";
+      libMultiLineOptions += lpath;
+      libMultiLineOptions += "$(INTDIR)\" ";
+      libMultiLineOptions += " /LIBPATH:\"";
+      libMultiLineOptions += lpath;
+      libMultiLineOptions += "\" \n";
+      }
     }
   std::vector<std::string>::iterator i;
   std::vector<std::string>& libdirs = m_Makefile->GetLinkDirectories();
   for(i = libdirs.begin(); i != libdirs.end(); ++i)
     {
-    libOptions += " /LIBPATH:\"";
-    libOptions += cmSystemTools::HandleNetworkPaths(i->c_str());
-    libOptions += "/$(INTDIR)\" ";
-    libOptions += " /LIBPATH:\"";
-    libOptions += cmSystemTools::HandleNetworkPaths(i->c_str());
-    libOptions += "\" ";
-
-    libMultiLineOptions += "# ADD LINK32 /LIBPATH:\"";
-    libMultiLineOptions += cmSystemTools::HandleNetworkPaths(i->c_str()); 
-    libMultiLineOptions += "/$(INTDIR)\" ";
-    libMultiLineOptions += " /LIBPATH:\"";
-    libMultiLineOptions += cmSystemTools::HandleNetworkPaths(i->c_str());
-    libMultiLineOptions += "\" \n";
+    std::string lpath = cmSystemTools::HandleNetworkPaths(i->c_str());
+    if(lpath[lpath.size()-1] != '/')
+      {
+      lpath += "/";
+      }
+    if(pathEmitted.insert(lpath).second)
+      {
+      libOptions += " /LIBPATH:\"";
+      libOptions += lpath;
+      libOptions += "/$(INTDIR)\" ";
+      libOptions += " /LIBPATH:\"";
+      libOptions += lpath;
+      libOptions += "\" ";
+      
+      libMultiLineOptions += "# ADD LINK32 /LIBPATH:\"";
+      libMultiLineOptions += lpath;
+      libMultiLineOptions += "/$(INTDIR)\" ";
+      libMultiLineOptions += " /LIBPATH:\"";
+      libMultiLineOptions += lpath;
+      libMultiLineOptions += "\" \n";
+      }
     }
+  
   // find link libraries
   const cmTarget::LinkLibraries& libs = target.GetLinkLibraries();
   cmTarget::LinkLibraries::const_iterator j;
