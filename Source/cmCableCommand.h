@@ -21,7 +21,15 @@
 #include "cmCabilData.h"
 
 /** \class cmCabilCommand
- * \brief Superclass for all CABIL_ command classes.
+ * \brief Superclass for all cmCabil command classes.
+ *
+ * cmCabilCommand is the superclass for all CABIL-related commands.
+ * The C++ Automated Bindings for Interpreted Languages (CABIL,
+ * pronounced "sawbill") tool is configured using an XML input file.
+ * The input format is quite flexible, but XML is hard for humans to
+ * write by hand.  The CABIL commands in CMake are designed to simplify
+ * the interface with only a small loss in functionality.  These commands
+ * can be used to automatically generate CABIL configuration files.
  */
 class cmCabilCommand : public cmCommand
 {

@@ -17,6 +17,7 @@
 #include "cmCacheManager.h"
 
 #include "cmCabilDefineSetCommand.h"
+#include "cmRegularExpression.h"
 
 // cmCabilInstantiateCommand
 bool cmCabilInstantiateCommand::Invoke(std::vector<std::string>& args)
@@ -97,12 +98,23 @@ void cmCabilInstantiateCommand::FinalPass()
  */
 void cmCabilInstantiateCommand::WriteConfiguration(std::ostream& os) const
 {
+  cmRegularExpression needCdataBlock("[&<>]");
+  
   os << std::endl
      << "  <InstantiationSet>" << std::endl;
   for(Elements::const_iterator e = m_Elements.begin();
       e != m_Elements.end(); ++e)
     {
-    os << "    <Element>" << e->c_str() << "</Element>" << std::endl;
+    os << "    <Element>";
+    if(needCdataBlock.find(e->c_str()))
+      {
+      os << "<![CDATA[" << e->c_str() << "]]>";
+      }
+    else
+      {
+      os << e->c_str();
+      }
+    os << "</Element>" << std::endl;
     }
   os << "  </InstantiationSet>" << std::endl;
 }

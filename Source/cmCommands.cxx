@@ -28,6 +28,7 @@
 #include "cmCabilData.cxx"
 #include "cmCabilDefineSetCommand.cxx"
 #include "cmCabilInstantiateCommand.cxx"
+#include "cmCabilInstantiateClassCommand.cxx"
 #include "cmFindFileCommand.cxx"
 #include "cmWrapTclCommand.cxx"
 
@@ -56,6 +57,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmConfigureFileNoAutoconf);
   commands.push_back(new cmCabilDefineSetCommand);
   commands.push_back(new cmCabilInstantiateCommand);
+  commands.push_back(new cmCabilInstantiateClassCommand);
   commands.push_back(new cmFindFileCommand);
   commands.push_back(new cmWrapTclCommand);
 }

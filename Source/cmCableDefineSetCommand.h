@@ -69,14 +69,22 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "CABIL_DEFINE_SET(name_of_set member1 member2 ...)";
+      "CABIL_DEFINE_SET(name_of_set member1 member2 ...)\n"
+      "Generates a Set definition in the CABIL configuration.  Tags are\n"
+      "automatically generated.  The sets are referenced in other CABIL\n"
+      "commands by a '$' immediately followed by the set name (ex. $SetName).";
     }
 
   virtual void WriteConfiguration(std::ostream&) const;
   
   cmTypeMacro(cmCabilDefineSetCommand, cmCabilCommand);
+  
+private:
+  std::string GenerateTag(const std::string&) const;
+
 private:  
-  typedef std::vector<std::string>  Elements;
+  typedef std::pair<std::string, std::string>  Element;
+  typedef std::vector<Element>  Elements;
   
   /**
    * The name of the set.

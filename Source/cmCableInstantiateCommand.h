@@ -65,7 +65,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Define a rule for creating explicit template instantiations.";
+    return "Define CABIL InstantiationSet.";
     }
   
   /**
@@ -74,13 +74,16 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "CABIL_INSTANTIATE(cabil_config_file member1 member2 ...)";
+      "CABIL_INSTANTIATE(cabil_config_file member1 member2 ...)\n"
+      "Generates an InstantiationSet in the CABIL configuration.  It is\n"
+      "assumed that all members of the set are explicit instantiations of\n"
+      "template non-classes (functions, operators, etc).";
     }
 
   virtual void WriteConfiguration(std::ostream&) const;  
 
   cmTypeMacro(cmCabilInstantiateCommand, cmCabilCommand);
-private:
+protected:
   typedef std::vector<std::string>  Elements;
   
   /**
