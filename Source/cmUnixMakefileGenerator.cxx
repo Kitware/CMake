@@ -607,7 +607,9 @@ void cmUnixMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
   std::string command2 = "$(CMAKE_CXX_COMPILER)  $(CMAKE_SHLIB_LINK_FLAGS) "
     "$(CMAKE_SHLIB_BUILD_FLAGS) $(CMAKE_CXX_FLAGS) -o \\\n";
   command2 += "\t  ";
-  command2 += m_LibraryOutputPath + "lib" + std::string(name) + "$(SHLIB_SUFFIX) \\\n";
+  std::string libName = m_LibraryOutputPath + "lib" + std::string(name) + "$(SHLIB_SUFFIX)";
+  libName = this->ConvertToOutputPath(libName.c_str());
+  command2 += libName + " \\\n";
   command2 += "\t  $(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
   std::strstream linklibs;
   this->OutputLinkLibraries(linklibs, name, t);
@@ -640,7 +642,9 @@ void cmUnixMakefileGenerator::OutputModuleLibraryRule(std::ostream& fout,
   std::string command2 = "$(CMAKE_CXX_COMPILER)  $(CMAKE_MODULE_LINK_FLAGS) "
     "$(CMAKE_MODULE_BUILD_FLAGS) $(CMAKE_CXX_FLAGS) -o \\\n";
   command2 += "\t  ";
-  command2 += m_LibraryOutputPath + "lib" + std::string(name) + "$(MODULE_SUFFIX) \\\n";
+  std::string libName = m_LibraryOutputPath + "lib" + std::string(name) + "$(MODULE_SUFFIX)";
+  libName = this->ConvertToOutputPath(libName.c_str());
+  command2 += libName + " \\\n";
   command2 += "\t  $(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
   std::strstream linklibs;
   this->OutputLinkLibraries(linklibs, std::string(name).c_str(), t);
@@ -667,18 +671,15 @@ void cmUnixMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout,
                                                       const cmTarget &t)
 {
   std::string target = m_LibraryOutputPath + "lib" + std::string(name) + ".a";
+  target = this->ConvertToOutputPath(target.c_str());
   std::string depend = "$(";
   depend += this->CreateMakeVariable(name, "_SRC_OBJS") + ")";
   std::string command = "$(CMAKE_AR) $(CMAKE_AR_ARGS) ";
-  command += m_LibraryOutputPath;
-  command += "lib";
-  command += name;
-  command += ".a $(";
+  command += target;
+  command += " $(";
   command += this->CreateMakeVariable(name, "_SRC_OBJS") + ")";
   std::string command2 = "$(CMAKE_RANLIB) ";
-  command2 += m_LibraryOutputPath;
-  command2 += "lib";
-  command2 += std::string(name) + ".a";
+  command2 += target;
   std::string comment = "rule to build static library: ";
   comment += name;
   std::string customCommands = this->CreateTargetRules(t, name);
@@ -711,7 +712,8 @@ void cmUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
   this->OutputLinkLibraries(linklibs, 0, t);
   linklibs << std::ends;
   command += linklibs.str();
-  command += " -o " + m_ExecutableOutputPath + name;
+  std::string outputFile = m_ExecutableOutputPath + name;
+  command += " -o " + this->ConvertToOutputPath(outputFile.c_str());
   std::string comment = "rule to build executable: ";
   comment += name;
   
@@ -1812,6 +1814,7 @@ OutputBuildObjectFromSource(std::ostream& fout,
 
   std::string comment = "Build ";
   std::string objectFile = std::string(shortName) + m_ObjectFileExtension;
+  objectFile = this->ConvertToOutputPath(objectFile.c_str());
   comment += objectFile + "  From ";
   comment += source.GetFullPath();
   std::string compileCommand;
@@ -1954,7 +1957,7 @@ void cmUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
   fout << "\n";
   replace = target;
   m_Makefile->ExpandVariablesInString(replace);
-  fout << replace.c_str() << ": ";
+  fout << this->ConvertToOutputPath(replace.c_str()) << ": ";
   if(depends)
     {
     replace = depends;
