@@ -375,6 +375,8 @@ cmCTest::cmCTest()
     {
     m_Tests[cc] = 0;
     }
+  m_MaximumPassedTestResultSize  = 100 * 1024;
+  m_MaximumFailedTestResultSize  = 200 * 1024;
 }
 
 int cmCTest::Initialize()
@@ -2962,7 +2964,29 @@ void cmCTest::GenerateDartTestOutput(std::ostream& os)
       }
     os 
       << "\t\t\t<Measurement>\n"
-      << "\t\t\t\t<Value>" << this->MakeXMLSafe(result->m_Output) 
+      << "\t\t\t\t<Value>";
+    size_t truncate = result->m_Output.size();
+    if ( result->m_Status == cmCTest::COMPLETED )
+      {
+      if ( result->m_Output.size() > m_MaximumPassedTestResultSize )
+        {
+        truncate = m_MaximumPassedTestResultSize;
+        }
+      }
+    else
+      {
+      if ( result->m_Output.size() > m_MaximumFailedTestResultSize )
+        {
+        truncate = m_MaximumFailedTestResultSize;
+        }
+      }
+    os << this->MakeXMLSafe(result->m_Output.substr(0, truncate));
+    if ( truncate < result->m_Output.size() )
+      {
+      os << "...\n\nThe output was stirpped because it excedes maximum allowed size: "
+        << truncate << std::endl;
+      }
+    os
       << "</Value>\n"
       << "\t\t\t</Measurement>\n"
       << "\t\t</Results>\n"
@@ -5142,6 +5166,25 @@ int cmCTest::ReadCustomConfigurationFileTree(const char* dir)
   this->PopulateCustomVector(mf, "CTEST_CUSTOM_POST_TEST", m_CustomPostTest);
   this->PopulateCustomVector(mf, "CTEST_CUSTOM_PRE_MEMCHECK", m_CustomPreMemCheck);
   this->PopulateCustomVector(mf, "CTEST_CUSTOM_POST_MEMCHECK", m_CustomPostMemCheck);
+
+  const char* maxstr = mf->GetDefinition("CTEST_CUSTOM_PASSED_TEST_STRING_MAXLEN");
+  if ( maxstr )
+    {
+    long val = atoi(maxstr);
+    if ( val > 0 )
+      {
+      m_MaximumPassedTestResultSize = val;
+      }
+    }
+  maxstr = mf->GetDefinition("CTEST_CUSTOM_FAILED_TEST_STRING_MAXLEN");
+  if ( maxstr )
+    {
+    long val = atoi(maxstr);
+    if ( val > 0 )
+      {
+      m_MaximumFailedTestResultSize = val;
+      }
+    }
 
   return 1;
 }

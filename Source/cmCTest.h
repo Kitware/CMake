@@ -424,6 +424,10 @@ private:
 
   ///! Get the current time as string
   std::string CurrentTime();
+
+  ///! Maximum size of testing string
+  std::string::size_type m_MaximumPassedTestResultSize;
+  std::string::size_type m_MaximumFailedTestResultSize;
 };
 
 #endif
