@@ -2215,7 +2215,7 @@ void cmCTest::ProcessDirectory(cmCTest::tm_VectorOfStrings &passed,
       }
     cres.m_Output = output;
     cres.m_ReturnValue = retVal;
-    std::string nwd = cmSystemTools::GetCurrentWorkingDirectory();
+    std::string nwd = it->m_Directory;
     if ( nwd.size() > m_ToplevelPath.size() )
       {
       nwd = "." + nwd.substr(m_ToplevelPath.size(), nwd.npos);
