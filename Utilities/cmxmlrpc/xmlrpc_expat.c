@@ -73,7 +73,6 @@ static xml_element *xml_element_new (xmlrpc_env *env, char *name)
     XMLRPC_ASSERT(name != NULL);
 
     /* Set up our error-handling preconditions. */
-    retval = NULL;
     name_valid = cdata_valid = children_valid = 0;
 
     /* Allocate our xml_element structure. */
@@ -256,9 +255,6 @@ start_element (void *user_data, XML_Char *name, XML_Char **atts ATTR_UNUSED)
     context = (parse_context*) user_data;
     if (!context->env->fault_occurred) {
 
-        /* Set up our error-handling preconditions. */
-        elem = NULL;
-
         /* Build a new element. */
         elem = xml_element_new(context->env, name);
         XMLRPC_FAIL_IF_FAULT(context->env);
@@ -352,7 +348,6 @@ xml_element *xml_parse (xmlrpc_env *env, const char *xml_data, int xml_len)
     XMLRPC_ASSERT(xml_data != NULL && xml_len >= 0);
 
     /* Set up our error-handling preconditions. */
-    parser = NULL;
     context.root = NULL;
     
     /* Set up the rest of our parse context. */

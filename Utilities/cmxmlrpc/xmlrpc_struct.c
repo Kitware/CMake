@@ -74,7 +74,6 @@ xmlrpc_struct_new(xmlrpc_env* env)
     XMLRPC_ASSERT_ENV_OK(env);
 
     /* Set up error handling preconditions. */
-    strct = NULL;
     strct_valid = 0;
 
     /* Allocate and fill out an empty structure. */

@@ -497,9 +497,6 @@ call_info_set_asynch_data(xmlrpc_env *   const env,
 
     xmlrpc_value *holder;
 
-    /* Error-handling preconditions. */
-    holder = NULL;
-
     XMLRPC_ASSERT_ENV_OK(env);
     XMLRPC_ASSERT_PTR_OK(info);
     XMLRPC_ASSERT(info->_asynch_data_holder == NULL);
@@ -552,7 +549,6 @@ xmlrpc_server_info_new (xmlrpc_env * const env,
     char *url_copy;
 
     /* Error-handling preconditions. */
-    server = NULL;
     url_copy = NULL;
 
     XMLRPC_ASSERT_ENV_OK(env);
@@ -593,7 +589,6 @@ xmlrpc_server_info * xmlrpc_server_info_copy(xmlrpc_env *env,
     XMLRPC_ASSERT_PTR_OK(aserver);
 
     /* Error-handling preconditions. */
-    server = NULL;
     url_copy = NULL;
     auth_copy = NULL;
 
@@ -923,9 +918,8 @@ xmlrpc_server_info_set_basic_auth(xmlrpc_env *         const envP,
     size_t token_len, auth_type_len, auth_header_len;
 
     /* Error-handling preconditions. */
-    raw_token = NULL;
     token = NULL;
-    token_data = auth_type = auth_header = NULL;
+    auth_header = NULL;
 
     XMLRPC_ASSERT_ENV_OK(envP);
     XMLRPC_ASSERT_PTR_OK(serverP);

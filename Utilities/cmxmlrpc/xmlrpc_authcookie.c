@@ -45,7 +45,6 @@ void xmlrpc_authcookie_set ( xmlrpc_env *env,
 
     /* Clear out memory. */
     unencoded = (char *) malloc ( sizeof ( char * ) );
-    token = NULL;
 
     /* Create unencoded string/hash. */
     sprintf(unencoded, "%s:%s", username, password);

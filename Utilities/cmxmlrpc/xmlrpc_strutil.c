@@ -49,7 +49,7 @@ xmlrpc_makePrintable(const char * const input) {
                          input[inputCursor]);
             }
         }
-        output[outputCursor++] = '\0';
+        output[outputCursor+1] = '\0';
     }
     return output;
 }

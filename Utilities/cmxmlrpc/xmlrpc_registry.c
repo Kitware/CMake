@@ -55,7 +55,6 @@ xmlrpc_registry_new(xmlrpc_env *env) {
     XMLRPC_ASSERT_ENV_OK(env);
     
     /* Error-handling preconditions. */
-    methods = NULL;
     registry = NULL;
     registry_valid = 0;
 
@@ -163,9 +162,6 @@ xmlrpc_registry_add_method_w_doc(xmlrpc_env *env,
     XMLRPC_ASSERT_PTR_OK(method_name);
     XMLRPC_ASSERT_PTR_OK(method);
 
-    /* Error-handling preconditions. */
-    method_info = NULL;
-
     /* Store our method and user data into our hash table. */
     method_info = xmlrpc_build_value(env, "(ppss)", (void*) method, user_data,
                                      signature, help);
@@ -198,9 +194,6 @@ xmlrpc_registry_set_default_method(xmlrpc_env *env,
     XMLRPC_ASSERT_PTR_OK(registry);
     XMLRPC_ASSERT_PTR_OK(handler);
 
-    /* Error-handling preconditions. */
-    method_info = NULL;
-    
     /* Store our method and user data into our hash table. */
     method_info = xmlrpc_build_value(env, "(pp)", (void*) handler, user_data);
     XMLRPC_FAIL_IF_FAULT(env);
@@ -235,9 +228,6 @@ xmlrpc_registry_set_preinvoke_method(xmlrpc_env *env,
     XMLRPC_ASSERT_ENV_OK(env);
     XMLRPC_ASSERT_PTR_OK(registry);
     XMLRPC_ASSERT_PTR_OK(handler);
-
-    /* Error-handling preconditions. */
-    method_info = NULL;
 
     /* Store our method and user data into our hash table. */
     method_info = xmlrpc_build_value(env, "(pp)", (void*) handler, user_data);

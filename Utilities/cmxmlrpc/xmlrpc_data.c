@@ -479,7 +479,6 @@ mkWideString(xmlrpc_env *    const envP,
     size_t utf8_len;
 
     /* Error-handling preconditions. */
-    valP = NULL;
     utf8_block = NULL;
     block_is_inited = 0;
 

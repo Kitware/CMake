@@ -277,9 +277,6 @@ xmlrpc_mem_block *xmlrpc_utf8_to_wcs (xmlrpc_env *env,
     xmlrpc_mem_block *output;
     size_t wcs_length;
 
-    /* Error-handling preconditions. */
-    output = NULL;
-
     /* Allocate a memory block large enough to hold any possible output.
     ** We assume that each byte of the input may decode to a whcar_t. */
     output = XMLRPC_TYPED_MEM_BLOCK_NEW(wchar_t, env, utf8_len);
@@ -325,9 +322,6 @@ xmlrpc_mem_block *xmlrpc_wcs_to_utf8 (xmlrpc_env *env,
 
     XMLRPC_ASSERT_ENV_OK(env);
     XMLRPC_ASSERT_PTR_OK(wcs_data);
-
-    /* Error-handling preconditions. */
-    output = NULL;
 
     /* Allocate a memory block large enough to hold any possible output.
     ** We assume that every wchar might encode to the maximum length. */

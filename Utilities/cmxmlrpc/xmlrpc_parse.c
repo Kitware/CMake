@@ -362,7 +362,7 @@ convert_array(xmlrpc_env *env, unsigned *depth, xml_element *elem)
     XMLRPC_ASSERT(elem != NULL);
 
     /* Set up our error-handling preconditions. */
-    array = item = NULL;
+    item = NULL;
     (*depth)++;
 
     /* Allocate an array to hold our values. */
@@ -421,7 +421,7 @@ convert_struct(xmlrpc_env *env, unsigned *depth, xml_element *elem)
     XMLRPC_ASSERT(elem != NULL);
 
     /* Set up our error-handling preconditions. */
-    strct = key = value = NULL;
+    key = value = NULL;
     (*depth)++;
 
     /* Allocate an array to hold our members. */
@@ -497,7 +497,7 @@ convert_params(xmlrpc_env *env, unsigned *depth, xml_element *elem)
     XMLRPC_ASSERT(elem != NULL);
 
     /* Set up our error-handling preconditions. */
-    array = item = NULL;
+    item = NULL;
 
     /* Allocate an array to hold our parameters. */
     array = xmlrpc_build_value(env, "()");

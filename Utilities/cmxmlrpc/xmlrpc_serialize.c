@@ -133,9 +133,6 @@ escape_string(xmlrpc_env * const env,
     XMLRPC_ASSERT_ENV_OK(env);
     XMLRPC_ASSERT(str != NULL);
 
-    /* Set up our error-handling preconditions. */
-    retval = NULL;
-
     /* Sanity-check this string before we print it. */
 #if !defined NDEBUG && defined HAVE_UNICODE_WCHAR
     sanity_check_utf8(str, len);
@@ -596,9 +593,6 @@ xmlrpc_serialize_fault(xmlrpc_env *env,
     XMLRPC_ASSERT_ENV_OK(env);
     XMLRPC_ASSERT(output != NULL);
     XMLRPC_ASSERT(fault != NULL && fault->fault_occurred);
-
-    /* Set up our error-handling preconditions. */
-    strct = NULL;
 
     /* Build a fault structure. */
     strct = xmlrpc_build_value(env, "{s:i,s:s}",
