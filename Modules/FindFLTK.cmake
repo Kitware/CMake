@@ -3,7 +3,7 @@
 #
 
 
-FIND_PATH(FLTK_INCLUDE_PATH FL/FL.H
+FIND_PATH(FLTK_INCLUDE_PATH FL/Fl.h
 /usr/local/include
 /usr/include
 /usr/local/fltk
