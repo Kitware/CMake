@@ -43,12 +43,12 @@ cmMakefile::cmMakefile()
   m_SourceFileExtensions.push_back( "c" );
   m_SourceFileExtensions.push_back( "C" );
   
-  m_SourceFileExtensions.push_back( "M" );
   m_SourceFileExtensions.push_back( "c++" );
   m_SourceFileExtensions.push_back( "cc" );
   m_SourceFileExtensions.push_back( "cpp" );
   m_SourceFileExtensions.push_back( "cxx" );
   m_SourceFileExtensions.push_back( "m" );
+  m_SourceFileExtensions.push_back( "M" ); 
   m_SourceFileExtensions.push_back( "mm" );
 
   m_HeaderFileExtensions.push_back( "h" );
