@@ -25,7 +25,7 @@ IF(BUILD_TESTING)
     INCLUDE(${PROJECT_SOURCE_DIR}/DartConfig.cmake)
   ELSE(EXISTS ${PROJECT_SOURCE_DIR}/DartConfig.cmake)
     # Dashboard is opened for submissions for a 24 hour period starting at
-    # the specified NIGHLY_START_TIME. Time is specified in 24 hour format.
+    # the specified NIGTHLY_START_TIME. Time is specified in 24 hour format.
     SET (NIGHTLY_START_TIME "00:00:00 EDT")
 
     # Dart server to submit results (used by client)
