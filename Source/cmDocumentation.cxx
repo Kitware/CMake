@@ -384,16 +384,20 @@ void cmDocumentation::PrintColumn(std::ostream& os, int width,
           }
         else
           {
-          // If this is the first line not beginning in a blank after
-          // a sequence of lines beginning in blanks, add an extra
+          // If we are switching from a line that has leading blanks
+          // to a line that does not, or vice versa, add an extra
           // newline.
           if(blanks)
             {
+            if(!lastHadBlanks && !firstLine)
+              {
+              os << "\n";
+              }
             lastHadBlanks = true;
             }
           else
             {
-            if(lastHadBlanks)
+            if(lastHadBlanks && !firstLine)
               {
               os << "\n";
               }
