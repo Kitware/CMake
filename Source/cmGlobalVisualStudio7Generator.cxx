@@ -717,11 +717,6 @@ void cmGlobalVisualStudio7Generator::CreateGUID(const char* name)
                                  cmCacheManager::INTERNAL);
 }
 
-void cmGlobalVisualStudio7Generator::LocalGenerate()
-{
-  this->cmGlobalGenerator::LocalGenerate();
-}
-
 std::vector<std::string> *cmGlobalVisualStudio7Generator::GetConfigurations()
 {
   return &m_Configurations;

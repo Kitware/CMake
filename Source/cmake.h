@@ -204,12 +204,6 @@ class cmake
   /** Check if a command exists. */
   bool CommandExists(const char* name) const;
     
-  /**
-   * Is cmake in the process of a local cmake invocation. If so, we know the
-   * cache is already configured and ready to go. 
-   */
-  bool GetLocal() { return m_Local; }
-  
   ///! Parse command line arguments
   void SetArgs(const std::vector<std::string>&);
 
@@ -284,9 +278,6 @@ protected:
   ///! read in a cmake list file to initialize the cache
   void ReadListFile(const char *path);
   
-  ///! used by Run
-  int LocalGenerate();
-
   /**
    * Method called to check build system integrity at build time.
    * Returns 1 if CMake should rerun and 0 otherwise.
@@ -306,7 +297,6 @@ private:
   ProgressCallback m_ProgressCallback;
   void* m_ProgressCallbackClientData;
   bool m_Verbose;
-  bool m_Local;
   bool m_InTryCompile;
   bool m_ScriptMode;
   std::string m_CMakeCommand;

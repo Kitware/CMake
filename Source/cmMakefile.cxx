@@ -2124,10 +2124,6 @@ cmCacheManager *cmMakefile::GetCacheManager() const
   return this->GetCMakeInstance()->GetCacheManager();
 }
 
-bool cmMakefile::GetLocal() const
-{
-  return this->GetCMakeInstance()->GetLocal();
-}
 void cmMakefile::DisplayStatus(const char* message, float s)
 {
   this->GetLocalGenerator()->GetGlobalGenerator()

@@ -257,11 +257,6 @@ bool cmTryCompileCommand::InitialPass(std::vector<std::string> const& argv)
     return false;
     }
 
-  if ( m_Makefile->GetLocal() )
-    {
-    return true;
-    }
-
   cmTryCompileCommand::CoreTryCompileCode(m_Makefile,argv,true);
   
   return true;

@@ -26,11 +26,6 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv)
     return false;
     }
 
-  if ( m_Makefile->GetLocal() )
-    {
-    return true;
-    }
-
   // build an arg list for TryCompile and extract the runArgs
   std::vector<std::string> tryCompile;
   std::string outputVariable;

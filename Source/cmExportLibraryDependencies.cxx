@@ -45,13 +45,6 @@ bool cmExportLibraryDependenciesCommand::InitialPass(std::vector<std::string> co
 
 void cmExportLibraryDependenciesCommand::FinalPass()
 {
-  // don't do anything if local mode
-  if(m_Makefile->GetLocal())
-    {
-    return;
-    }
-    
-
   // Create a full path filename for output
   std::string fname = m_Args[0];
   bool append = false;

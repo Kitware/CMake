@@ -610,9 +610,6 @@ public:
   cmVariableWatch* GetVariableWatch() const;
 #endif
 
-  //! Determine wether this is a local or global build.
-  bool GetLocal() const;
-
   ///! Display progress or status message.
   void DisplayStatus(const char*, float);
   

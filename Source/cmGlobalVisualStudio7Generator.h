@@ -67,13 +67,6 @@ public:
   virtual void Generate();
 
   /**
-   * Generate the required files for building this directory. This
-   * basically creates a single LocalGenerators and
-   * requests that it Generate.  
-   */
-  virtual void LocalGenerate();
-
-  /**
    * Generate the DSW workspace file.
    */
   virtual void OutputSLNFile();

@@ -115,7 +115,6 @@ cmake::cmake()
     cmSystemTools::PutEnv("MAKEFLAGS=");
     }  
   
-  m_Local = false;
   m_Verbose = false;
   m_InTryCompile = false;
   m_CacheManager = new cmCacheManager;
@@ -275,7 +274,6 @@ void cmake::ReadListFile(const char *path)
 // Parse the args
 void cmake::SetArgs(const std::vector<std::string>& args)
 {
-  m_Local = false;
   bool directoriesSet = false;
   for(unsigned int i=1; i < args.size(); ++i)
     {
@@ -363,11 +361,9 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     this->SetStartDirectory
       (cmSystemTools::GetCurrentWorkingDirectory().c_str());
     }
-  if (!m_Local)
-    {
-    this->SetStartDirectory(this->GetHomeDirectory());
-    this->SetStartOutputDirectory(this->GetHomeOutputDirectory());
-    }
+
+  this->SetStartDirectory(this->GetHomeDirectory());
+  this->SetStartOutputDirectory(this->GetHomeOutputDirectory());
 }
 
 //----------------------------------------------------------------------------
@@ -1282,49 +1278,36 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
     }
 
   int ret = 0;
-  // if not local or the cmake version has changed since the last run
-  // of cmake, or CMakeSystem.cmake file is not in the root binary
-  // directory, run a global generate
-  if(m_ScriptMode || !m_Local || !this->CacheVersionMatches() ||
-     !cmSystemTools::FileExists(systemFile.c_str()) )
-    {
-    // Check the state of the build system to see if we need to regenerate.
-    if(!this->CheckBuildSystem())
-      {
-      return 0;
-      }
 
-    // If we are doing global generate, we better set start and start
-    // output directory to the root of the project.
-    std::string oldstartdir = this->GetStartDirectory();
-    std::string oldstartoutputdir = this->GetStartOutputDirectory();
-    this->SetStartDirectory(this->GetHomeDirectory());
-    this->SetStartOutputDirectory(this->GetHomeOutputDirectory());
-    bool saveLocalFlag = m_Local;
-    m_Local = false;
-    ret = this->Configure();
-    if (ret || m_ScriptMode)
-      {
-      return ret;
-      }
-    ret = this->Generate();
-    std::string message = "Build files have been written to: ";
-    message += this->GetHomeOutputDirectory();
-    this->UpdateProgress(message.c_str(), -1);
-    if(ret)
-      {
-      return ret;
-      }
-    m_Local = saveLocalFlag;
-    this->SetStartDirectory(oldstartdir.c_str());
-    this->SetStartOutputDirectory(oldstartoutputdir.c_str());
-    }
-
-  // if we are local do the local thing
-  if (m_Local)
+  // now run the global generate
+  // Check the state of the build system to see if we need to regenerate.
+  if(!this->CheckBuildSystem())
     {
-    ret = this->LocalGenerate();
+    return 0;
     }
+  
+  // If we are doing global generate, we better set start and start
+  // output directory to the root of the project.
+  std::string oldstartdir = this->GetStartDirectory();
+  std::string oldstartoutputdir = this->GetStartOutputDirectory();
+  this->SetStartDirectory(this->GetHomeDirectory());
+  this->SetStartOutputDirectory(this->GetHomeOutputDirectory());
+  ret = this->Configure();
+  if (ret || m_ScriptMode)
+    {
+    return ret;
+    }
+  ret = this->Generate();
+  std::string message = "Build files have been written to: ";
+  message += this->GetHomeOutputDirectory();
+  this->UpdateProgress(message.c_str(), -1);
+  if(ret)
+    {
+    return ret;
+    }
+  this->SetStartDirectory(oldstartdir.c_str());
+  this->SetStartOutputDirectory(oldstartoutputdir.c_str());
+
   return ret;
 }
 
@@ -1335,36 +1318,6 @@ int cmake::Generate()
     return -1;
     }
   m_GlobalGenerator->Generate();
-  if(cmSystemTools::GetErrorOccuredFlag())
-    {
-    return -1;
-    }
-  return 0;
-}
-
-int cmake::LocalGenerate()
-{
-  // Read in the cache
-  m_CacheManager->LoadCache(this->GetHomeOutputDirectory());
-
-  // create the generator based on the cache if it isn't already there
-  const char* genName = m_CacheManager->GetCacheValue("CMAKE_GENERATOR");
-  if(genName)
-    {
-    m_GlobalGenerator = this->CreateGlobalGenerator(genName);
-    // set the global flag for unix style paths on cmSystemTools as 
-    // soon as the generator is set.  This allows gmake to be used
-    // on windows.
-    cmSystemTools::SetForceUnixPaths(m_GlobalGenerator->GetForceUnixPaths());
-    }
-  else
-    {
-    cmSystemTools::Error("Could local Generate called without the GENERATOR being specified in the CMakeCache");
-    return -1;
-    }
-  
-  // do the local generate
-  m_GlobalGenerator->LocalGenerate();
   if(cmSystemTools::GetErrorOccuredFlag())
     {
     return -1;

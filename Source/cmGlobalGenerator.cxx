@@ -108,13 +108,8 @@ void cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
     cmSystemTools::SetFatalErrorOccured();
     return;
     }
-  // setup some variables for the EnableLanguage function
-  bool isLocal = m_CMakeInstance->GetLocal();
-  // if we are from the top, always define this
-  if(!isLocal)
-    {
-    mf->AddDefinition("RUN_CONFIGURE", true);
-    }
+
+  mf->AddDefinition("RUN_CONFIGURE", true);
   bool needTestLanguage = false;
   std::string rootBin = mf->GetHomeOutputDirectory();
   // If the configuration files path has been set,
@@ -168,7 +163,7 @@ void cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
     }
   // **** Step 2, Load the CMakeDetermineSystem.cmake file and find out
   // what platform we are running on
-  if (!isLocal &&  !mf->GetDefinition("CMAKE_SYSTEM_NAME"))
+  if (!mf->GetDefinition("CMAKE_SYSTEM_NAME"))
     {
 #if defined(_WIN32) && !defined(__CYGWIN__) 
     /* Windows version number data.  */
@@ -200,7 +195,7 @@ void cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
       l != languages.end(); ++l)
     {
     const char* lang = l->c_str();
-    if(!isLocal && !this->GetLanguageEnabled(lang) )
+    if(!this->GetLanguageEnabled(lang) )
       {  
       if (m_CMakeInstance->GetIsInTryCompile())
         {
@@ -322,39 +317,36 @@ void cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
     // **** Step 7, Test the compiler for the language just setup
     // At this point we should have enough info for a try compile
     // which is used in the backward stuff
-    if(!isLocal)
+    if(needTestLanguage)
       {
-      if(needTestLanguage)
+      if (!m_CMakeInstance->GetIsInTryCompile())
         {
-        if (!m_CMakeInstance->GetIsInTryCompile())
+        std::string testLang = "CMakeTest";
+        testLang += lang;
+        testLang += "Compiler.cmake";
+        std::string ifpath = mf->GetModulesFile(testLang.c_str());
+        if(!mf->ReadListFile(0,ifpath.c_str()))
           {
-          std::string testLang = "CMakeTest";
-          testLang += lang;
-          testLang += "Compiler.cmake";
-          std::string ifpath = mf->GetModulesFile(testLang.c_str());
-          if(!mf->ReadListFile(0,ifpath.c_str()))
+          cmSystemTools::Error("Could not find cmake module file:", ifpath.c_str());
+          }
+        // **** Step 8, load backwards compatibility stuff for C and CXX
+        // for old versions of CMake ListFiles C and CXX had some
+        // backwards compatibility files they have to load
+        const char* versionValue
+          = mf->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
+        if (atof(versionValue) <= 1.4)
+          {
+          if(strcmp(lang, "C") == 0)
             {
-            cmSystemTools::Error("Could not find cmake module file:", ifpath.c_str());
+            ifpath =  mf->GetModulesFile("CMakeBackwardCompatibilityC.cmake");
+            mf->ReadListFile(0,ifpath.c_str()); 
             }
-          // **** Step 8, load backwards compatibility stuff for C and CXX
-          // for old versions of CMake ListFiles C and CXX had some
-          // backwards compatibility files they have to load
-          const char* versionValue
-            = mf->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
-          if (atof(versionValue) <= 1.4)
+          if(strcmp(lang, "CXX") == 0)
             {
-            if(strcmp(lang, "C") == 0)
-              {
-              ifpath =  mf->GetModulesFile("CMakeBackwardCompatibilityC.cmake");
-              mf->ReadListFile(0,ifpath.c_str()); 
-              }
-            if(strcmp(lang, "CXX") == 0)
-              {
-              ifpath =  mf->GetModulesFile("CMakeBackwardCompatibilityCXX.cmake");
-              mf->ReadListFile(0,ifpath.c_str()); 
-              }
-            
+            ifpath =  mf->GetModulesFile("CMakeBackwardCompatibilityCXX.cmake");
+            mf->ReadListFile(0,ifpath.c_str()); 
             }
+          
           }
         }
       }
@@ -632,28 +624,6 @@ void cmGlobalGenerator::Generate()
                                     (i+1.0f)/m_LocalGenerators.size());
     }
   m_CMakeInstance->UpdateProgress("Generating done", -1);
-}
-
-void cmGlobalGenerator::LocalGenerate()
-{
-  // for this case we create one LocalGenerator
-  // configure it, and then Generate it
-  // start with this directory
-  cmLocalGenerator *lg = this->CreateLocalGenerator();
-
-  // Setup relative path generation.
-  this->ConfigureRelativePaths();
-
-  // set the Start directories
-  lg->GetMakefile()->SetStartDirectory(m_CMakeInstance->GetStartDirectory());
-  lg->GetMakefile()->SetStartOutputDirectory(m_CMakeInstance->GetStartOutputDirectory());
-  lg->GetMakefile()->MakeStartDirectoriesCurrent();
-  
-  // now do trhe configure
-  lg->Configure();
-  lg->ConfigureFinalPass();
-  lg->Generate(false);
-  delete lg;
 }
 
 int cmGlobalGenerator::TryCompile(const char *srcdir, const char *bindir, 
