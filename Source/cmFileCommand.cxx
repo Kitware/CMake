@@ -344,7 +344,7 @@ bool cmFileCommand::HandleInstallCommand(std::vector<std::string> const& args)
     case cmTarget::EXECUTABLE:
 
       if ( !cmSystemTools::SetPermissions(destfile.c_str(), 
-#if defined( _MSC_VER )
+#if defined( _MSC_VER ) || defined( __MINGW32__ )
           S_IREAD | S_IWRITE | S_IEXEC
 #elif defined( __BORLANDC__ )
           S_IRUSR | S_IWUSR | S_IXUSR
