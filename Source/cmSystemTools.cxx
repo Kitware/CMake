@@ -1196,8 +1196,9 @@ bool cmSystemTools::PutEnv(const char* value)
   static cmDeletingCharVector localEnvironment;
   char* envVar = new char[strlen(value)+1];
   strcpy(envVar, value);
-  putenv(envVar);
+  int ret = putenv(envVar);
   // save the pointer in the static vector so that it can
   // be deleted on exit
   localEnvironment.push_back(envVar);
+  return ret == 0;
 }
