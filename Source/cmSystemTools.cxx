@@ -2411,6 +2411,7 @@ cmSystemTools::FileFormat cmSystemTools::GetFileFormat(const char* cext)
   if ( ext == "cxx" || ext == ".cxx" ||
        ext == "cpp" || ext == ".cpp" ||
        ext == "c++" || ext == ".c++" ||
+       ext == "mm" || ext == ".mm" ||
        ext == "cc" || ext == ".cc" ) { return cmSystemTools::CXX_FILE_FORMAT; }
   if ( ext == "java" || ext == ".java" ) { return cmSystemTools::JAVA_FILE_FORMAT; }
   if ( ext == "h" || ext == ".h" || 
