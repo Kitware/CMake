@@ -1,4 +1,5 @@
 void OneFunc();
+void NoDepZ_func();
 
 void TwoFunc()
 {

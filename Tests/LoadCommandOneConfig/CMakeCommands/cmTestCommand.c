@@ -13,7 +13,7 @@ typedef struct
 static int InitialPass(void *inf, void *mf, int argc, char *argv[])
 {
   char* file;
-  char* str;
+  const char* str;
   char buffer[1024];
   void *source_file;
   cmLoadedCommandInfo *info = (cmLoadedCommandInfo *)inf;
