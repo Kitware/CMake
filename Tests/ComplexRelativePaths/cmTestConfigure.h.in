@@ -64,3 +64,6 @@
 // Test IF inside FOREACH
 #cmakedefine IF_INSIDE_FOREACH_THEN_EXECUTED
 #cmakedefine IF_INSIDE_FOREACH_ELSE_EXECUTED
+
+// Test SET CACHE FORCE
+#cmakedefine FORCE_TEST

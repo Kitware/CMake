@@ -68,6 +68,12 @@ LINK_DIRECTORIES(
 )
 
 #
+# check for SET CACHE FORCE
+#
+SET(FORCE_TEST 1 CACHE STRING "a test")
+SET(FORCE_TEST 0 CACHE STRING "a test" FORCE)
+
+#
 # Lib and exe path
 #
 SET (LIBRARY_OUTPUT_PATH 

@@ -809,6 +809,12 @@ int main()
   cmFailed("IF inside a FOREACH block is broken");
 #endif
   
+#ifdef FORCE_TEST
+  cmFailed("CMake SET CACHE FORCE");
+#else
+  cmPassed("CMake SET CACHE FORCE");
+#endif
+
   // ----------------------------------------------------------------------
   // Summary
 
