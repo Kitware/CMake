@@ -10,6 +10,7 @@ extern "C" {
 }
 #include "cmStandardIncludes.h"
 #include "cmSystemTools.h"
+#include "cmDynamicLoader.h"
 
 int cm_passed = 0;
 int cm_failed = 0;
@@ -101,6 +102,31 @@ void TestDir(const char* filename)
 
 int main()
 {
+  std::string lib = BINARY_DIR;
+  lib += "/bin/";
+  lib += cmDynamicLoader::LibPrefix();
+  lib += "CMakeTestModule";
+  lib += cmDynamicLoader::LibExtension();
+  
+  cmLibHandle handle = cmDynamicLoader::OpenLibrary(lib.c_str());
+  if(!handle)
+    {
+    cmFailed("Can not open CMakeTestModule");
+    }
+  else
+    {
+    cmDynamicLoaderFunction fun = 
+      cmDynamicLoader::GetSymbolAddress(handle, "ModuleFunction"); 
+    typedef int (*TEST_FUNCTION)();
+    TEST_FUNCTION testFun = (TEST_FUNCTION)fun;
+    int ret = (*testFun)();
+    if(!ret)
+      {
+      cmFailed("ModuleFunction called from module did not return valid return");
+      }
+    cmPassed("Module loaded and ModuleFunction called correctly");
+    }
+    
   if(sharedFunction() != 1)
     {
     cmFailed("Call to sharedFunction from shared library failed.");

@@ -156,11 +156,22 @@ IF(BUILD_TESTING)
       ${CMake_BINARY_DIR}/Tests/LoadCommand 
       LoadedCommand)
 
+    ADD_TEST(LoadedCommandOneConfig ${CMake_BINARY_DIR}/Source/cmaketest 
+      ${CMake_SOURCE_DIR}/Tests/LoadCommand 
+      ${CMake_BINARY_DIR}/Tests/LoadCommandOneConfig
+      LoadedCommand ONLY_ONE_CONFIG)
+
     ADD_TEST(complex ${CMake_BINARY_DIR}/Source/cmaketest 
       ${CMake_SOURCE_DIR}/Tests/Complex 
       ${CMake_BINARY_DIR}/Tests/Complex 
       complex 
       ${CMake_BINARY_DIR}/Tests/Complex/bin)
+
+    ADD_TEST(complexOneConfig ${CMake_BINARY_DIR}/Source/cmaketest 
+      ${CMake_SOURCE_DIR}/Tests/Complex 
+      ${CMake_BINARY_DIR}/Tests/ComplexOneConfig 
+      complex 
+      ${CMake_BINARY_DIR}/Tests/ComplexOneConfig/bin ONLY_ONE_CONFIG)
 
     ADD_TEST(Example ${CMake_BINARY_DIR}/Source/cmaketest 
       ${CMake_SOURCE_DIR}/Example

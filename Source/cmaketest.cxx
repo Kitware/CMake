@@ -49,7 +49,16 @@ int do_cmaketest (int argc, char **argv)
               << "\t                     CMAKE_ARGS argument ...\n";
     return 1;
     }
-
+  bool onlyOneConfig = false;
+  if(argc > 3)
+    {
+    if(strcmp(argv[argc-1], "ONLY_ONE_CONFIG") == 0)
+      {
+      onlyOneConfig = true;
+      argc--;
+      }
+    }
+    
   // does the directory exist ?
   if (!cmSystemTools::FileIsDirectory(argv[2]))
     {
@@ -138,16 +147,21 @@ int do_cmaketest (int argc, char **argv)
     return 1;
     }
   std::cout << "Done Generating build files.\n";
-
-  std::cout << "Generating build files (again)...\n";
-  if (cm.Run(args) != 0)
+  // if the option ONLY_ONE_CONFIG is passed to the program
+  // only run the config step once
+  if(!onlyOneConfig)
     {
-    std::cerr << "Error: cmake execution failed\n";
-    // return to the original directory
-    cmSystemTools::ChangeDirectory(cwd.c_str());
-    return 1;
+    std::cout << "Generating build files (again)...\n";
+    if (cm.Run(args) != 0)
+      {
+      std::cerr << "Error: cmake execution failed\n";
+      // return to the original directory
+      cmSystemTools::ChangeDirectory(cwd.c_str());
+      return 1;
+      }
+    std::cout << "Done Generating build files (again).\n";
     }
-  std::cout << "Done Generating build files (again).\n";
+  
 
   cmListFileCache::GetInstance()->ClearCache();
 

@@ -38,6 +38,7 @@ ENDIF(WIN32)
 #
 SOURCE_FILES(SharedLibrarySources sharedFile)
 ADD_LIBRARY(CMakeTestLibraryShared SHARED ${SharedLibrarySources})
+ADD_LIBRARY(CMakeTestModule MODULE moduleFile.c)
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DTEST_C_FLAGS")
 ADD_LIBRARY(CMakeTestCLibraryShared SHARED testConly.c)
 SET_TARGET_PROPERTIES(CMakeTestCLibraryShared PROPERTIES FOO BAR)
@@ -55,7 +56,7 @@ ENDIF(${FOO_BAR_VAR} MATCHES "BAR")
 # The 'complex' executable will then test if this file exists and remove it.
 #
 ADD_DEPENDENCIES(CMakeTestLibraryShared create_file)
-
+MESSAGE("complex bin dir is ${Complex_BINARY_DIR}")
 ADD_CUSTOM_COMMAND(COMMAND ${CREATE_FILE_EXE}
                    ARGS "${Complex_BINARY_DIR}/Library/postbuild.txt"
                    TARGET CMakeTestLibraryShared)
