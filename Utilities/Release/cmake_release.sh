@@ -209,7 +209,7 @@ configure()
     echo "Running configure ..." &&
     (
         cd "cmake-${VERSION}-${PLATFORM}" &&
-        export CC CXX CFLAGS CXXFLAGS &&
+        export CC CXX CFLAGS CXXFLAGS PATH LD_LIBRARY_PATH &&
         ../cmake-${VERSION}/configure --prefix=${PREFIX}
     ) >Logs/configure.log 2>&1 || error_log Logs/configure.log
 }
