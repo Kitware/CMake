@@ -147,6 +147,7 @@ static const char* cmCTestErrorMatches[] = {
   "ld: 0706-006 Cannot find or open library file: -l ",
   "ild: \\(argument error\\) can't find library argument ::",
   "^could not be found and will not be loaded.",
+  "s:616 string too big",
   "make: Fatal error: ",
   0
 };
