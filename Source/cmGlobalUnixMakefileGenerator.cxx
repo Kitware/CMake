@@ -14,6 +14,7 @@
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
+
 #include "cmGlobalUnixMakefileGenerator.h"
 #include "cmLocalUnixMakefileGenerator.h"
 #include "cmMakefile.h"
@@ -34,19 +35,35 @@ void cmGlobalUnixMakefileGenerator::EnableLanguage(const char* lang,
       static char envCC[5000];
       if(mf->GetDefinition("CMAKE_CXX_COMPILER"))
         {
+#if !defined(_WIN32) && defined(__COMO__)
+        std::string env = "${CMAKE_CXX_COMPILER}";
+        mf->ExpandVariablesInString(env);
+        strncpy(envCXX, env.c_str(), 4999);
+        envCXX[4999] = 0;
+        setenv("CXX", envCXX, 1);        
+#else
         std::string env = "CXX=${CMAKE_CXX_COMPILER}";
         mf->ExpandVariablesInString(env);
         strncpy(envCXX, env.c_str(), 4999);
         envCXX[4999] = 0;
         putenv(envCXX);
+#endif
         }
       if(mf->GetDefinition("CMAKE_C_COMPILER"))
         {
+#if !defined(_WIN32) && defined(__COMO__)
+        std::string env = "${CMAKE_C_COMPILER}";
+        mf->ExpandVariablesInString(env);
+        strncpy(envCC, env.c_str(), 4999);
+        envCC[4999] = 0;
+        setenv("CC", envCC, 1);        
+#else
         std::string env = "CC=${CMAKE_C_COMPILER}";
         mf->ExpandVariablesInString(env);
         strncpy(envCC, env.c_str(), 4999);
         envCC[4999] = 0;
         putenv(envCC);
+#endif
         }
       std::string output;
       std::string root 
@@ -65,7 +82,7 @@ void cmGlobalUnixMakefileGenerator::EnableLanguage(const char* lang,
                                   cmSystemTools::ConvertToOutputPath(mf->GetHomeOutputDirectory()).c_str());
         std::string fpath = mf->GetHomeOutputDirectory();
         fpath += "/CCMakeSystemConfig.cmake";
-        mf->ReadListFile(NULL,fpath.c_str());
+        mf->ReadListFile(0,fpath.c_str());
         this->SetLanguageEnabled("C");
         }
       // if CXX 
@@ -77,7 +94,7 @@ void cmGlobalUnixMakefileGenerator::EnableLanguage(const char* lang,
                                   cmSystemTools::ConvertToOutputPath(mf->GetHomeOutputDirectory()).c_str());
         std::string fpath = mf->GetHomeOutputDirectory();
         fpath += "/CXXCMakeSystemConfig.cmake";
-        mf->ReadListFile(NULL,fpath.c_str());
+        mf->ReadListFile(0,fpath.c_str());
         this->SetLanguageEnabled("CXX");
         }
       }
