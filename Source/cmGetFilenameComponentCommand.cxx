@@ -51,7 +51,7 @@ bool cmGetFilenameComponentCommand::InitialPass(std::vector<std::string> const& 
     }
   else if (args[2] == "PROGRAM")
     {
-    for(int i=2; i < args.size(); ++i)
+    for(unsigned int i=2; i < args.size(); ++i)
       {
       if(args[i] == "PROGRAM_ARGS")
         {
