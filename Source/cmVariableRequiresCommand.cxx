@@ -63,6 +63,7 @@ void cmVariableRequiresCommand::FinalPass()
   std::string resultVarible = m_Arguments[1];
   bool requirementsMet = true;
   std::string notSet;
+  bool hasAdvanced = false;
   for(unsigned int i = 2; i < m_Arguments.size(); ++i)
     {
     if(!m_Makefile->IsOn(m_Arguments[i].c_str()))
@@ -70,6 +71,10 @@ void cmVariableRequiresCommand::FinalPass()
       requirementsMet = false;
       notSet += m_Arguments[i];
       notSet += "\n";
+      if(cmCacheManager::GetInstance()->IsAdvanced(m_Arguments[i].c_str()))
+        {
+        hasAdvanced = true;
+        }
       }
     }
   const char* reqVar = m_Makefile->GetDefinition(resultVarible.c_str());
@@ -87,7 +92,11 @@ void cmVariableRequiresCommand::FinalPass()
     message += testVarible + " Requires that the following unset varibles are set:\n";
     message += notSet;
     message += "\nPlease set them, or set ";
-    message += testVarible + " to false, and re-configure.";
+    message += testVarible + " to false, and re-configure.\n";
+    if(hasAdvanced)
+      {
+      message += "One or more of the required variables is advanced.  To set the variable, you must turn on advanced mode in cmake.";
+      }
     cmSystemTools::Error(message.c_str());
     }
 }
