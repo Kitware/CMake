@@ -126,7 +126,7 @@ public:
 
   /** Read an environment variable.  */
   static const char* GetEnv(const char* key);
-  static bool GetEnv(const char* key, std::string& result);
+  static bool GetEnv(const char* key, kwsys_std::string& result);
 
   /**
    *  Get the file extension (including ".") needed for an executable
