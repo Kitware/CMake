@@ -15,9 +15,15 @@
 
 =========================================================================*/
 #include "cmListFileCache.h"
+
+#include "cmListFileLexer.h"
 #include "cmSystemTools.h"
 
 #include <cmsys/RegularExpression.hxx>
+
+bool cmListFileCacheParseFunction(cmListFileLexer* lexer,
+                                  cmListFileFunction& function,
+                                  const char* filename);
 
 cmListFileCache* cmListFileCache::Instance = 0;
 
@@ -83,31 +89,83 @@ bool cmListFileCache::CacheFile(const char* path, bool requireProjectCommand)
     {
     return false;
     }
-    
-  std::ifstream fin(path);
-  if(!fin)
+
+  // Create the scanner.
+  cmListFileLexer* lexer = cmListFileLexer_New();
+  if(!lexer)
     {
+    cmSystemTools::Error("cmListFileCache: error allocating lexer ");
+    return false;
+    }
+
+  // Open the file.
+  if(!cmListFileLexer_SetFileName(lexer, path))
+    {
+    cmListFileLexer_Delete(lexer);
     cmSystemTools::Error("cmListFileCache: error can not open file ", path);
     return false;
     }
-  long line=0;
+
+  // Use a simple recursive-descent parser to process the token
+  // stream.
   cmListFile inFile;
   inFile.m_ModifiedTime = cmSystemTools::ModifiedTime(path);
-  bool parseError;
-  while ( fin )
+  bool parseError = false;
+  bool haveNewline = true;
+  cmListFileLexer_Token* token;
+  while(!parseError && (token = cmListFileLexer_Scan(lexer)))
     {
-    cmListFileFunction inFunction;
-    if(cmListFileCache::ParseFunction(fin, inFunction, path, parseError,
-                                      line))
+    if(token->type == cmListFileLexer_Token_Newline)
       {
-      inFunction.m_FilePath = path;
-      inFile.m_Functions.push_back(inFunction);
+      haveNewline = true;
       }
-    if (parseError)
+    else if(token->type == cmListFileLexer_Token_Identifier)
       {
-      inFile.m_ModifiedTime = 0;
+      if(haveNewline)
+        {
+        haveNewline = false;
+        cmListFileFunction inFunction;
+        inFunction.m_Name = token->text;
+        inFunction.m_FilePath = path;
+        inFunction.m_Line = token->line;
+        if(cmListFileCacheParseFunction(lexer, inFunction, path))
+          {
+          inFile.m_Functions.push_back(inFunction);
+          }
+        else
+          {
+          parseError = true;
+          }
+        }
+      else
+        {
+        cmOStringStream error;
+        error << "Error in cmake code at\n"
+              << path << ":" << token->line << ":\n"
+              << "Parse error.  Expected a newline, got \""
+              << token->text << "\".";
+        cmSystemTools::Error(error.str().c_str());
+        parseError = true;
+        }
+      }
+    else
+      {
+      cmOStringStream error;
+      error << "Error in cmake code at\n"
+            << path << ":" << token->line << ":\n"
+            << "Parse error.  Expected a command name, got \""
+            << token->text << "\".";
+      cmSystemTools::Error(error.str().c_str());
+      parseError = true;
       }
     }
+  if (parseError)
+    {
+    inFile.m_ModifiedTime = 0;
+    }
+
+  cmListFileLexer_Delete(lexer);
+
   if(requireProjectCommand)
     {
     bool hasProject = false;
@@ -146,224 +204,71 @@ void cmListFileCache::FlushCache(const char* path)
     }
 }
 
-//----------------------------------------------------------------------------
-inline bool cmListFileCachePreprocessLine(std::string& line)
+bool cmListFileCacheParseFunction(cmListFileLexer* lexer,
+                                  cmListFileFunction& function,
+                                  const char* filename)
 {
-  // Keep track of whether characters are inside a quoted argument.
-  bool quoted = false;
-  
-  // Keep track of whether the line is blank.
-  bool blank = true;
-  
-  // Loop over every character in the line.
-  std::string::iterator c;
-  for(c = line.begin(); c != line.end(); ++c)
+  // Command name has already been parsed.  Read the left paren.
+  cmListFileLexer_Token* token;
+  if(!(token = cmListFileLexer_Scan(lexer)))
     {
-    if((*c == '\\') && (c < line.end()-1))
-      {
-      // A backslash escapes any character, so skip the next
-      // character.
-      ++c;
-      
-      // We have encountered a non-whitespace character.
-      blank = false;
-      }
-    else if(*c == '"')
-      {
-      // A double-quote either starts or ends a quoted argument.
-      quoted = !quoted;
-      
-      // We have encountered a non-whitespace character.
-      blank = false;
-      }
-    else if(*c == '#' && !quoted)
-      {
-      // A pound character outside a double-quoted argument marks the
-      // rest of the line as a comment.  Skip it.
-      break;
-      }
-    else if((*c != ' ') && (*c != '\t') && (*c != '\r'))
-      {
-      // We have encountered a non-whitespace character.
-      blank = false;
-      }
-    }
-  
-  // Erase from the comment character to the end of the line.  If no
-  // comment was present, both iterators are end() iterators and this
-  // does nothing.
-  line.erase(c, line.end());
-  
-  // Return true if there is anything useful on this line.
-  return !blank;
-}
-
-//----------------------------------------------------------------------------
-bool cmListFileCache::ParseFunction(std::ifstream& fin,
-                                    cmListFileFunction& function,
-                                    const char* filename,
-                                    bool& parseError,
-                                    long& line)
-{
-  parseError = false;
-  std::string& name = function.m_Name;
-  std::vector<cmListFileArgument>& arguments = function.m_Arguments;
-  name = "";
-  arguments = std::vector<cmListFileArgument>();
-  std::string inbuffer;
-  if(!fin)
-    {
+    cmOStringStream error;
+    error << "Error in cmake code at\n"
+          << filename << ":" << cmListFileLexer_GetCurrentLine(lexer) << ":\n"
+          << "Parse error.  Function missing opening \"(\".";
+    cmSystemTools::Error(error.str().c_str());
     return false;
     }
-  if(cmSystemTools::GetLineFromStream(fin, inbuffer) )
+  if(token->type != cmListFileLexer_Token_ParenLeft)
     {
-    // Count this line in line numbering.
-    ++line;
-    
-    // Preprocess the line to remove comments.  Only use it if there
-    // is non-whitespace.
-    if(!cmListFileCachePreprocessLine(inbuffer))
-      {
-      return false;
-      }
-    
-    // Regular expressions to match portions of a command invocation.
-    cmsys::RegularExpression oneLiner("^[ \t]*([A-Za-z_0-9]*)[ \t]*\\((.*)\\)[ \t\r]*$");
-    cmsys::RegularExpression multiLine("^[ \t]*([A-Za-z_0-9]*)[ \t]*\\((.*)$");
-    cmsys::RegularExpression lastLine("^(.*)\\)[ \t\r]*$");
+    cmOStringStream error;
+    error << "Error in cmake code at\n"
+          << filename << ":" << cmListFileLexer_GetCurrentLine(lexer) << ":\n"
+          << "Parse error.  Expected \"(\", got \""
+          << token->text << "\".";
+    cmSystemTools::Error(error.str().c_str());
+    return false;
+    }
 
-    // look for a oneline fun(arg arg2) 
-    if(oneLiner.find(inbuffer.c_str()))
+  // Arguments.
+  while((token = cmListFileLexer_Scan(lexer)))
+    {
+    if(token->type == cmListFileLexer_Token_ParenRight)
       {
-      // the arguments are the second match
-      std::string args = oneLiner.match(2);
-      name = oneLiner.match(1);
-      // break up the arguments
-      cmListFileCache::GetArguments(args, arguments);
-        function.m_Line = line;
       return true;
       }
-    // look for a start of a multiline with no trailing ")"  fun(arg arg2 
-    else if(multiLine.find(inbuffer.c_str()))
+    else if(token->type == cmListFileLexer_Token_Identifier ||
+            token->type == cmListFileLexer_Token_ArgumentUnquoted)
       {
-      name = multiLine.match(1);
-      std::string args = multiLine.match(2);
-      cmListFileCache::GetArguments(args, arguments);
-      function.m_Line = line;
-      // Read lines until the closing paren is hit
-      bool done = false;
-      while(!done)
-        {
-        // read lines until the end paren is found
-        if(cmSystemTools::GetLineFromStream(fin, inbuffer) )
-          {
-          // Count this line in line numbering.
-          ++line;
-          
-          // Preprocess the line to remove comments.  Only use it if there
-          // is non-whitespace.
-          if(!cmListFileCachePreprocessLine(inbuffer))
-            {
-            continue;
-            }
-    
-          // Is this the last line?
-          if(lastLine.find(inbuffer.c_str()))
-            {
-            done = true;
-            std::string gargs = lastLine.match(1);
-            cmListFileCache::GetArguments(gargs, arguments);
-            }
-          else
-            {
-            cmListFileCache::GetArguments(inbuffer, arguments);
-            }
-          }
-        else
-          {
-          parseError = true;
-          cmOStringStream error;
-          error << "Error in cmake code at\n"
-                << filename << ":" << line << ":\n"
-                << "Parse error.  Function missing ending \")\".";
-          cmSystemTools::Error(error.str().c_str());
-          return false;
-          }
-        }
-      return true;
+      cmListFileArgument a(cmSystemTools::RemoveEscapes(token->text),
+                           false);
+      function.m_Arguments.push_back(a);
       }
-    else
+    else if(token->type == cmListFileLexer_Token_ArgumentQuoted)
       {
-      parseError = true;
+      cmListFileArgument a(cmSystemTools::RemoveEscapes(token->text),
+                           true);
+      function.m_Arguments.push_back(a);
+      }
+    else if(token->type != cmListFileLexer_Token_Newline)
+      {
+      // Error.
       cmOStringStream error;
       error << "Error in cmake code at\n"
-            << filename << ":" << line << ":\n"
-            << "Parse error.";
+            << filename << ":" << cmListFileLexer_GetCurrentLine(lexer) << ":\n"
+            << "Parse error.  Function missing ending \")\".  "
+            << "Instead found \"" << token->text << "\".";
       cmSystemTools::Error(error.str().c_str());
       return false;
       }
     }
+
+  cmOStringStream error;
+  error << "Error in cmake code at\n"
+        << filename << ":" << cmListFileLexer_GetCurrentLine(lexer) << ":\n"
+        << "Parse error.  Function missing ending \")\".  "
+        << "End of file reached.";
+  cmSystemTools::Error(error.str().c_str());
+
   return false;
-
-}
-
-void cmListFileCache::GetArguments(std::string& line,
-                                 std::vector<cmListFileArgument>& arguments)
-{
-  // Match a normal argument (not quoted, no spaces).
-  cmsys::RegularExpression normalArgument("[ \t]*(([^ \t\r\\]|[\\].)+)[ \t\r]*");
-  // Match a quoted argument (surrounded by double quotes, spaces allowed).
-  cmsys::RegularExpression quotedArgument("[ \t]*(\"([^\"\\]|[\\].)*\")[ \t\r]*");
-
-  bool done = false;
-  while(!done)
-    {
-    std::string arg;
-    std::string::size_type endpos=0;
-    bool quoted = false;
-    bool foundQuoted = quotedArgument.find(line.c_str());
-    bool foundNormal = normalArgument.find(line.c_str());
-
-    if(foundQuoted && foundNormal)
-      {
-      // Both matches were found.  Take the earlier one.
-      // Favor double-quoted version if there is a tie.
-      if(normalArgument.start(1) < quotedArgument.start(1))
-        {
-        arg = normalArgument.match(1);
-        endpos = normalArgument.end(1);
-        }
-      else
-        {
-        arg = quotedArgument.match(1);
-        endpos = quotedArgument.end(1);
-        // Strip off the double quotes on the ends.
-        arg = arg.substr(1, arg.length()-2);
-        quoted = true;
-        }
-      }    
-    else if(foundQuoted)
-      {
-      arg = quotedArgument.match(1);
-      endpos = quotedArgument.end(1);
-      // Strip off the double quotes on the ends.
-      arg = arg.substr(1, arg.length()-2);
-      quoted = true;
-      }
-    else if(foundNormal)
-      {
-      arg = normalArgument.match(1);
-      endpos = normalArgument.end(1);
-      }
-    else
-      {
-      done = true;
-      }
-    if(!done)
-      {
-      cmListFileArgument a(cmSystemTools::RemoveEscapes(arg.c_str()), quoted);
-      arguments.push_back(a);
-      line = line.substr(endpos, line.length() - endpos);
-      }
-    }
 }

@@ -79,25 +79,7 @@ public:
 
   //! Flush cache file out of cache.
   void FlushCache(const char* path);
-    
-  /**
-   * Read a CMake command (or function) from an input file.  This
-   * returns the name of the function and a list of its 
-   * arguments.  The last argument is the name of the file that 
-   * the ifstream points to, and is used for debug info only.
-   */
-  static bool ParseFunction(std::ifstream&, cmListFileFunction& function,
-                            const char* filename, bool& parseError,
-                            long& line);
 
-  /**
-   *  Extract white-space separated arguments from a string.
-   *  Double quoted strings are accepted with spaces.
-   *  This is called by ParseFunction.
-   */
-  static void GetArguments(std::string& line,
-                           std::vector<cmListFileArgument>& arguments);
-  
 private:
   // Cache the file
   bool CacheFile(const char* path, bool requireProjectCommand);
@@ -106,6 +88,5 @@ private:
   ListFileMap m_ListFileCache;  // file name to ListFile map
   static cmListFileCache* Instance; // singelton pointer
 };
-
 
 #endif

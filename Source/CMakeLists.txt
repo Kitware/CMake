@@ -15,6 +15,7 @@ cmCustomCommand.cxx
 cmCacheManager.cxx
 cmSourceGroup.cxx
 cmListFileCache.cxx
+cmListFileLexer.c
 cmGlob.cxx
 cmGlobalGenerator.cxx
 cmGlobalUnixMakefileGenerator.cxx
