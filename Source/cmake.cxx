@@ -32,6 +32,8 @@
 #include "cmGlobalUnixMakefileGenerator.h"
 #endif
 
+#include <stdio.h>
+
 cmake::cmake()
 {
   m_Verbose = false;
