@@ -1158,6 +1158,10 @@ std::string cmSystemTools::RelativePath(const char* local, const char* remote)
     {
     sameCount++;
     }
+  if(sameCount == 0)
+    {
+    return std::string(remote);
+    }
   // put in sameCount number of ../ into the path
   unsigned int i;
   for(i = sameCount; i < fileSplit.size(); ++i)
