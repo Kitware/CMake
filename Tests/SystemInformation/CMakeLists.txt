@@ -4,6 +4,8 @@ INCLUDE_DIRECTORIES("This does not exists")
 GET_DIRECTORY_PROPERTY(incl INCLUDE_DIRECTORIES)
 SET_DIRECTORY_PROPERTIES(PROPERTIES INCLUDE_DIRECTORIES "${DumpInformation_BINARY_DIR};${DumpInformation_SOURCE_DIR}")
 
+MESSAGE("To prevent CTest from stripping output, you have to display: CTEST_FULL_OUTPUT")
+
 
 CONFIGURE_FILE(${DumpInformation_SOURCE_DIR}/SystemInformation.in 
 ${DumpInformation_BINARY_DIR}/SystemInformation.out)
