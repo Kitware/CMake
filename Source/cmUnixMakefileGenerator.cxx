@@ -1112,7 +1112,7 @@ void cmUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     "CMAKE_SHLIB_CFLAGS  = @CMAKE_SHLIB_CFLAGS@\n"
     "\n"
     "CMAKE_CXX_COMPILER  = @CMAKE_CXX_COMPILER@\n"
-    "CMAKE_CXXFLAGS      = @CMAKE_CXX_FLAGS@ @CMAKE_TEMPLATE_FLAGS@\n"
+    "CMAKE_CXXFLAGS      = @CMAKE_CXX_FLAGS@\n"
     "\n"
     "CMAKE_SHLIB_BUILD_FLAGS  = @CMAKE_SHLIB_BUILD_FLAGS@\n"
     "CMAKE_SHLIB_LINK_FLAGS   = @CMAKE_SHLIB_LINK_FLAGS@\n"

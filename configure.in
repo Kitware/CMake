@@ -72,30 +72,6 @@ fi
 AC_SUBST(CMAKE_ANSI_CFLAGS)
 AC_SUBST(CMAKE_ANSI_CXXFLAGS)
 
-# if we are not running g++ then we might need some other flags
-# to get the templates compiled correctly
-CMAKE_TEMPLATE_FLAGS=""
-if test $ac_cv_prog_gxx = no; then
-    echo $ac_n "checking whether ${CXX} accepts -ptused -no_prelink""... $ac_c" 1>&6
-  echo 'void f(){}' > conftest.cc
-  if test -z "`${CXX} -ptused -no_prelink -c conftest.cc 2>&1`"; then
-    echo "$ac_t""yes" 1>&6
-    CMAKE_TEMPLATE_FLAGS="-ptused -no_prelink"
-  else
-    echo "$ac_t""no" 1>&6
-  fi
-  rm -f conftest*
-  echo $ac_n "checking whether ${CXX} accepts -instances=semiexplicit""... $ac_c" 1>&6
-  echo 'void f(){}' > conftest.cc
-  if test -z "`${CXX} -instances=static -c conftest.cc 2>&1`"; then
-    echo "$ac_t""yes" 1>&6
-    CMAKE_TEMPLATE_FLAGS="-instances=static"
-  else
-    echo "$ac_t""no" 1>&6
-  fi
-fi
-AC_SUBST(CMAKE_TEMPLATE_FLAGS)
-
 # check no g++ compilers to see if they have the standard 
 # ansi stream files (without the .h)
 if test $ac_cv_prog_gxx = no; then

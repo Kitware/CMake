@@ -3005,28 +3005,12 @@ fi
 
 
 
-# if we are not running g++ then we might need some other flags
-# to get the templates compiled correctly
-CMAKE_TEMPLATE_FLAGS=""
-if test $ac_cv_prog_gxx = no; then
-    echo $ac_n "checking whether ${CXX} accepts -ptused -no_prelink""... $ac_c" 1>&6
-  echo 'void f(){}' > conftest.cc
-  if test -z "`${CXX} -ptused -no_prelink -c conftest.cc 2>&1`"; then
-    echo "$ac_t""yes" 1>&6
-    CMAKE_TEMPLATE_FLAGS="-ptused -no_prelink"
-  else
-    echo "$ac_t""no" 1>&6
-  fi
-  rm -f conftest*
-fi
-
-
 
 # check no g++ compilers to see if they have the standard 
 # ansi stream files (without the .h)
 if test $ac_cv_prog_gxx = no; then
   echo $ac_n "checking ansi standard C++ stream headers ""... $ac_c" 1>&6
-echo "configure:3030: checking ansi standard C++ stream headers " >&5 
+echo "configure:3014: checking ansi standard C++ stream headers " >&5 
   rm -rf conftest.*
   cat > conftest.cc <<!
 #include <iostream>
@@ -3043,7 +3027,7 @@ fi
 # check to see if stl is in the std namespace
 if test $ac_cv_prog_gxx = no; then
   echo $ac_n "checking ansi standard namespace support ""... $ac_c" 1>&6
-echo "configure:3047: checking ansi standard namespace support " >&5 
+echo "configure:3031: checking ansi standard namespace support " >&5 
   rm -rf conftest.*
   cat > conftest.cc <<!
 #include <list>
@@ -3061,7 +3045,7 @@ fi
 # check to see if for scoping is supported
 if test $ac_cv_prog_gxx = no; then
   echo $ac_n "checking ansi for scope support ""... $ac_c" 1>&6
-echo "configure:3065: checking ansi for scope support " >&5 
+echo "configure:3049: checking ansi for scope support " >&5 
   rm -rf conftest.*
   cat > conftest.cc <<!
 void foo() { for(int i;;); for(int i;;); }
@@ -3086,7 +3070,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:3090: checking for $ac_word" >&5
+echo "configure:3074: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_RUNMAKE'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3126,7 +3110,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:3130: checking for $ac_word" >&5
+echo "configure:3114: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_CMAKE_AR_TMP'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3367,7 +3351,6 @@ s%@CMAKE_HP_PTHREADS@%$CMAKE_HP_PTHREADS%g
 s%@CMAKE_THREAD_LIBS@%$CMAKE_THREAD_LIBS%g
 s%@CMAKE_ANSI_CFLAGS@%$CMAKE_ANSI_CFLAGS%g
 s%@CMAKE_ANSI_CXXFLAGS@%$CMAKE_ANSI_CXXFLAGS%g
-s%@CMAKE_TEMPLATE_FLAGS@%$CMAKE_TEMPLATE_FLAGS%g
 s%@CMAKE_NO_ANSI_STREAM_HEADERS@%$CMAKE_NO_ANSI_STREAM_HEADERS%g
 s%@CMAKE_NO_STD_NAMESPACE@%$CMAKE_NO_STD_NAMESPACE%g
 s%@CMAKE_NO_ANSI_FOR_SCOPE@%$CMAKE_NO_ANSI_FOR_SCOPE%g
