@@ -1154,11 +1154,6 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                        "cmake.depends ${TARGETS} ${SUBDIR_BUILD} ${CMAKE_COMMAND}",
                        0);
   this->OutputMakeRule(fout, 
-                       "run any tests",
-                       "test",
-                       "",
-                       "ctest");
-  this->OutputMakeRule(fout, 
                        "remove generated files",
                        "clean",
                        "${SUBDIR_CLEAN}",
@@ -1223,6 +1218,20 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                          "${CMAKE_COMMAND}",
                          0,
                          "echo \"cmake might be out of date\"");
+    }
+
+  // find ctest
+  std::string ctest = m_Makefile->GetDefinition("CMAKE_COMMAND");
+  ctest = cmSystemTools::GetFilenamePath(ctest.c_str());
+  ctest += "/";
+  ctest += "ctest";
+  if (cmSystemTools::FileExists(ctest.c_str()))
+    {
+    this->OutputMakeRule(fout, 
+                         "run any tests",
+                         "test",
+                         "",
+                         ctest.c_str());
     }
 }
 
