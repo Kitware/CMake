@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmCommands.h"
 #include "cmCacheManager.h"
 #include "cmFunctionBlocker.h"
+#include "cmListFileCache.h"
 #include <stdio.h>  // required for sprintf
 
 // default is not to be building executables
@@ -324,24 +325,27 @@ bool cmMakefile::ReadListFile(const char* filename, const char* external)
     {
     filenametoread= external;
     }
-  
-  std::ifstream fin(filenametoread);
-  if(!fin)
+
+  cmListFile* lf = 
+    cmListFileCache::GetInstance()->GetFileCache(filenametoread);
+  if(!lf)
     {
     cmSystemTools::Error("error can not open file ", filenametoread);
     return false;
     }
+  // add this list file to the list of dependencies
+  m_ListFiles.push_back( filenametoread);
   std::string name;
   std::vector<std::string> arguments;
-  while ( fin )
+  int numberFunctions = lf->m_Functions.size();
+  for(int i =0; i < numberFunctions; ++i)
     {
-    // add this list file to the list of dependencies
-    m_ListFiles.push_back( filenametoread);
-
-    if(cmSystemTools::ParseFunction(fin, name, arguments) &&
-       !this->IsFunctionBlocked(name.c_str(),arguments))
+    cmListFileFunction& curFunction = lf->m_Functions[i];
+    if(!this->IsFunctionBlocked(curFunction.m_Name.c_str(),
+                                curFunction.m_Arguments))
       {
-      this->ExecuteCommand(name,arguments);
+      this->ExecuteCommand(curFunction.m_Name,
+                           curFunction.m_Arguments);
       }
     }
 

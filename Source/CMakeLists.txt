@@ -24,6 +24,7 @@ cmCustomCommand.cxx
 cmCacheManager.cxx
 cmCableClassSet.cxx
 cmSourceGroup.cxx
+cmListFileCache.cxx
 )
 
 # configure the .h file

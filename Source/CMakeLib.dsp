@@ -117,6 +117,10 @@ SOURCE=.\cmDSWWriter.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=.\cmListFileCache.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=.\cmMakeDepend.cxx
 # End Source File
 # Begin Source File

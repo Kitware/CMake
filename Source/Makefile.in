@@ -29,6 +29,7 @@ cmTarget.o \
 cmCustomCommand.o \
 cmCacheManager.o \
 cmCableClassSet.o \
+cmListFileCache.o \
 cmSourceGroup.o
 
 DEPENDS = $(srcdir)/*.h  cmConfigure.h
