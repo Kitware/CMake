@@ -214,13 +214,14 @@ void cmLocalUnixMakefileGenerator::OutputMakefile(const char* file,
   cacheFile += "/CMakeCache.txt";
   fout << " " << cmSystemTools::ConvertToOutputPath(cacheFile.c_str());
   fout << "\n\n\n";
-  this->OutputMakeVariables(fout);
+  this->OutputMakeVariables(fout);  
+
   // Set up the default target as the VERY first target, so that make with no arguments will run it
   this->
     OutputMakeRule(fout, 
                    "Default target executed when no arguments are given to make, first make sure cmake.depends exists, cmake.check_depends is up-to-date, check the sources, then build the all target",
                    "default_target",
-                   0,
+                   "$(CMAKE_BINARY_DIR)/cmake.check_cache",
                    "$(MAKE) $(MAKESILENT) cmake.depends",
                    "$(MAKE) $(MAKESILENT) cmake.check_depends",
                    "$(MAKE) $(MAKESILENT) -f cmake.check_depends",
@@ -1568,6 +1569,7 @@ void cmLocalUnixMakefileGenerator::OutputSubDirectoryRules(std::ostream& fout)
     {
     return;
     }
+  
   this->OutputSubDirectoryVars(fout, 
                                "SUBDIR_BUILD",
                                "default_target",
@@ -2117,6 +2119,12 @@ void cmLocalUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
   this->OutputMakeRule(fout, 
                        "CMakeCache.txt",
                        "rebuild_cache",
+                       "$(CMAKE_BINARY_DIR)/CMakeCache.txt",
+                       "$(CMAKE_COMMAND) "
+                       "-H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)");
+  this->OutputMakeRule(fout, 
+                       "CMakeCache.txt because out-of-date:",
+                       "$(CMAKE_BINARY_DIR)/cmake.check_cache",
                        "$(CMAKE_BINARY_DIR)/CMakeCache.txt",
                        "$(CMAKE_COMMAND) "
                        "-H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)");
