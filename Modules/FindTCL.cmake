@@ -19,7 +19,7 @@ IF(UNIX)
 ENDIF(UNIX)
 
 FIND_PROGRAM(TCL_TCLSH
-  NAMES cygtclsh80 tclsh tclsh84 tclsh83 tclsh82 tclsh80
+  NAMES tclsh tclsh84 tclsh83 tclsh82 tclsh80 cygtclsh80
 )
 
 # if UNIX is defined, then look for the cygwin version first
