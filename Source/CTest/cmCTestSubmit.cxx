@@ -430,8 +430,6 @@ bool cmCTestSubmit::SubmitUsingSCP(
   cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
   //cmsysProcess_SetTimeout(cp, timeout);
 
-  int retVal = 0;
-
   int problems = 0;
 
   std::vector<cmStdString>::const_iterator it;
@@ -439,6 +437,8 @@ bool cmCTestSubmit::SubmitUsingSCP(
     it != files.end();
     it ++ )
     {
+    int retVal;
+
     std::string lfname = localprefix;
     cmSystemTools::ConvertToUnixSlashes(lfname);
     lfname += "/" + *it;
