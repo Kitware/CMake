@@ -37,14 +37,7 @@
  #define _MSE_INT_H
 #endif
 
-#define _BOOL_DEFINED
-#include <sys/time.h>
-#ifndef _XOPEN_SOURCE_EXTENDED
- #define _XOPEN_SOURCE_EXTENDED
-#endif /* XOPEN_SOURCE_EXTENDED */
 #include <curses.h>
-#undef _XOPEN_SOURCE_EXTENDED
-
 #include <eti.h>
 #include <stdarg.h>
 
