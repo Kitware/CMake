@@ -61,6 +61,17 @@ BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
   END_MESSAGE_MAP();
 
 
+void MFCMessageCallback(const char* m, const char* title, bool& nomore)
+{ 
+  std::string message = m;
+  message += "\n\n(Press  Cancel to suppress any further messages.)";
+  if(::MessageBox(0, message.c_str(), title, 
+                  MB_OKCANCEL) == IDCANCEL)
+    {
+    nomore = true;
+    }
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // CMakeSetupDialog dialog
 
@@ -68,6 +79,7 @@ CMakeSetupDialog::CMakeSetupDialog(const CMakeCommandLineInfo& cmdInfo,
                                    CWnd* pParent /*=NULL*/)
   : CDialog(CMakeSetupDialog::IDD, pParent)
 {
+   cmSystemTools::SetErrorCallback(MFCMessageCallback);
   m_RegistryKey  = "Software\\Kitware\\CMakeSetup\\Settings\\StartPath";
   
   //{{AFX_DATA_INIT(CMakeSetupDialog)

@@ -17,9 +17,9 @@ void FLTKMessageCallback(const char* message, const char* title, bool& nomore)
   int ok = 
     fl_ask(message, "Press cancel to suppress any further messages.");
   if(!ok)
-  {
+    {
     nomore = true;
-  }
+    }
 }
 
 /**

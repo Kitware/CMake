@@ -709,16 +709,11 @@ void cmSystemTools::Message(const char* m1, const char *title)
     (*s_ErrorCallback)(m1, title, disableMessages);
     return;
     }
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  std::string message = m1;
-  message += "\n\n(Press  Cancel to suppress any further messages.)";
-  if(::MessageBox(0, message.c_str(), title, 
-                  MB_OKCANCEL) == IDCANCEL)
+  else
     {
-    disableMessages = true;
+    std::cerr << m1 << std::endl;
     }
-#endif
-  std::cerr << m1 << std::endl;
+  
 }
 
 
