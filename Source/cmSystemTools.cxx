@@ -324,20 +324,8 @@ bool cmSystemTools::RunSingleCommand(
       ++c;
       while(*c && *c != '"')
         {
-        if(*c == '\\')
-          {
-          ++c;
-          if(*c)
-            {
-            arg.append(1, *c);
-            ++c;
-            }
-          }
-        else
-          {
-          arg.append(1, *c);
-          ++c;
-          }
+        arg.append(1, *c);
+        ++c;
         }
       if(*c)
         {
