@@ -243,7 +243,8 @@ public:
 
   //! Check if the first string ends with the second one.
   static bool StringEndsWith(const char* str1, const char* str2);
-  
+
+  static bool CreateSymlink(const char* origName, const char* newName);
 private:
   static bool s_ForceUnixPaths;
   static bool s_RunCommandHideConsole;

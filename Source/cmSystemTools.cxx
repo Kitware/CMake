@@ -1060,3 +1060,13 @@ bool cmSystemTools::StringEndsWith(const char* str1, const char* str2)
     }
   return !strncmp(str1 + (strlen(str1)-strlen(str2)), str2, strlen(str2));
 }
+
+bool cmSystemTools::CreateSymlink(const char* origName, const char* newName)
+{
+#if !defined(_WIN32) || defined(__CYGWIN__)
+  return (symlink(origName, newName) >= 0);
+#else
+  // Should we create a copy here?
+  return false;
+#endif
+}
