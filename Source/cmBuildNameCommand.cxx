@@ -52,9 +52,29 @@ bool cmBuildNameCommand::InitialPass(std::vector<std::string>& args)
     = cmCacheManager::GetInstance()->GetCacheValue("BUILDNAME");
   if(cacheValue)
     {
-    m_Makefile->AddDefinition("BUILDNAME", cacheValue);
+    // do we need to correct the value? 
+    cmRegularExpression reg("[()/]");
+    if (reg.find(cacheValue))
+      {
+      std::string cv = cacheValue;
+      cmSystemTools::ReplaceString(cv,"/", "_");
+      cmSystemTools::ReplaceString(cv,"(", "_");
+      cmSystemTools::ReplaceString(cv,")", "_");
+      cmCacheManager::GetInstance()->
+        AddCacheEntry("BUILDNAME",
+                      cv.c_str(),
+                      "Name of build.",
+                      cmCacheManager::STRING);
+      m_Makefile->AddDefinition("BUILDNAME", cv.c_str());
+      }
+    else
+      {
+      m_Makefile->AddDefinition("BUILDNAME", cacheValue);
+      }
     return true;
     }
+
+  
   std::string buildname = "WinNT";
   if(m_Makefile->GetDefinition("UNIX"))
     {
