@@ -191,8 +191,7 @@ public:
    * A temporary file is created in the binaryDir for storing the
    * output because windows does not have popen.
    */
-  static bool RunCommand(const char* command, 
-                         std::string& output);
+  static bool RunCommand(const char* command, std::string& output);
 
   ///! Generate a temporary file name
   static std::string TemporaryFileName();
