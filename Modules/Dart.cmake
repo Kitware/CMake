@@ -75,6 +75,7 @@ IF(BUILD_TESTING)
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Rational Software\\Purify\\Setup;InstallFolder]"
     DOC "Path to Rational purify command, used for memory error detection."
     )
+  SET(MEMORYCHECK_SUPPRESSIONS_FILE "" CACHE FILEPATH "File that contains suppressions for the memmory checker")
   FIND_PROGRAM(SCPCOMMAND scp DOC "Path to scp command, used by some Dart clients for submitting results to a Dart server (when not using ftp for submissions)")
   FIND_PROGRAM(COVERAGE_COMMAND gcov DOC "Path to the coverage program that Dart client uses for performing coverage inspection")
 

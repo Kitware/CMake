@@ -42,6 +42,7 @@ ValgrindCommand: @VALGRIND_COMMAND@
 ValgrindCommandOptions: @VALGRIND_COMMAND_OPTIONS@
 MemoryCheckCommand: @MEMORYCHECK_COMMAND@
 MemoryCheckCommandOptions: @MEMORYCHECK_COMMAND_OPTIONS@
+MemoryCheckSuppressionFile: @MEMORYCHECK_SUPPRESSIONS_FILE@
 CoverageCommand: @COVERAGE_COMMAND@
 # Compression commands
 GunzipCommand: @GUNZIPCOMMAND@
