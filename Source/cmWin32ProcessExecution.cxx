@@ -483,19 +483,26 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
                                           int mode, 
                                           int n)
 {
-  HANDLE hChildStdinRd, hChildStdinWr, hChildStdoutRd, hChildStdoutWr,
-    hChildStderrRd, hChildStderrWr, hChildStdinWrDup, hChildStdoutRdDup,
-    hChildStderrRdDup, hProcess; /* hChildStdoutWrDup; */
+  HANDLE hProcess;
 
   SECURITY_ATTRIBUTES saAttr;
   BOOL fSuccess;
   int fd1, fd2, fd3;
-
+  this->hChildStdinRd = 0;
+  this->hChildStdinWr = 0;
+  this->hChildStdoutRd = 0;
+  this->hChildStdoutWr = 0;
+  this->hChildStderrRd = 0;
+  this->hChildStderrWr = 0;
+  this->hChildStdinWrDup = 0;
+  this->hChildStdoutRdDup = 0;
+  this->hChildStderrRdDup = 0;
+  
   saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
   saAttr.bInheritHandle = TRUE;
   saAttr.lpSecurityDescriptor = NULL;
-
-  if (!CreatePipe(&hChildStdinRd, &hChildStdinWr, &saAttr, 0))
+  
+  if (!CreatePipe(&this->hChildStdinRd, &this->hChildStdinWr, &saAttr, 0))
     {
     m_Output += "CreatePipeError\n";
     return false;
@@ -505,8 +512,8 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
    * the inheritance properties to FALSE. Otherwise, the child inherits
    * the these handles; resulting in non-closeable handles to the pipes
    * being created. */
-  fSuccess = DuplicateHandle(GetCurrentProcess(), hChildStdinWr,
-                             GetCurrentProcess(), &hChildStdinWrDup, 0,
+  fSuccess = DuplicateHandle(GetCurrentProcess(), this->hChildStdinWr,
+                             GetCurrentProcess(), &this->hChildStdinWrDup, 0,
                              FALSE,
                              DUPLICATE_SAME_ACCESS);
   if (!fSuccess)
@@ -520,14 +527,14 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
      that we're using. */
   CloseHandle(hChildStdinWr);
 
-  if (!CreatePipe(&hChildStdoutRd, &hChildStdoutWr, &saAttr, 0))
+  if (!CreatePipe(&this->hChildStdoutRd, &this->hChildStdoutWr, &saAttr, 0))
     {
     m_Output += "CreatePipeError\n";
     return false;
     }
 
-  fSuccess = DuplicateHandle(GetCurrentProcess(), hChildStdoutRd,
-                             GetCurrentProcess(), &hChildStdoutRdDup, 0,
+  fSuccess = DuplicateHandle(GetCurrentProcess(), this->hChildStdoutRd,
+                             GetCurrentProcess(), &this->hChildStdoutRdDup, 0,
                              FALSE, DUPLICATE_SAME_ACCESS);
   if (!fSuccess)
     {
@@ -541,16 +548,16 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
 
   if (n != POPEN_4) 
     {
-    if (!CreatePipe(&hChildStderrRd, &hChildStderrWr, &saAttr, 0))
+    if (!CreatePipe(&this->hChildStderrRd, &this->hChildStderrWr, &saAttr, 0))
       {
       m_Output += "CreatePipeError\n";
       return false;
       }
    fSuccess = DuplicateHandle(GetCurrentProcess(),
-                               hChildStderrRd,
-                               GetCurrentProcess(),
-                               &hChildStderrRdDup, 0,
-                               FALSE, DUPLICATE_SAME_ACCESS);
+                              this->hChildStderrRd,
+                              GetCurrentProcess(),
+                              &this->hChildStderrRdDup, 0,
+                              FALSE, DUPLICATE_SAME_ACCESS);
     if (!fSuccess)
       {
       m_Output += "DuplicateHandleError\n";
@@ -568,14 +575,14 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
         {
         case _O_WRONLY | _O_TEXT:
           /* Case for writing to child Stdin in text mode. */
-          fd1 = _open_osfhandle(TO_INTPTR(hChildStdinWrDup), mode);
+          fd1 = _open_osfhandle(TO_INTPTR(this->hChildStdinWrDup), mode);
           /* We don't care about these pipes anymore,
              so close them. */
           break;
 
         case _O_RDONLY | _O_TEXT:
           /* Case for reading from child Stdout in text mode. */
-          fd1 = _open_osfhandle(TO_INTPTR(hChildStdoutRdDup), mode);
+          fd1 = _open_osfhandle(TO_INTPTR(this->hChildStdoutRdDup), mode);
           /* We don't care about these pipes anymore,
              so close them. */
           break;
@@ -583,14 +590,14 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
         case _O_RDONLY | _O_BINARY:
           /* Case for readinig from child Stdout in
              binary mode. */
-          fd1 = _open_osfhandle(TO_INTPTR(hChildStdoutRdDup), mode);
+          fd1 = _open_osfhandle(TO_INTPTR(this->hChildStdoutRdDup), mode);
           /* We don't care about these pipes anymore,
              so close them. */
           break;
 
         case _O_WRONLY | _O_BINARY:
           /* Case for writing to child Stdin in binary mode. */
-          fd1 = _open_osfhandle(TO_INTPTR(hChildStdinWrDup), mode);
+          fd1 = _open_osfhandle(TO_INTPTR(this->hChildStdinWrDup), mode);
           /* We don't care about these pipes anymore,
              so close them. */
           break;
@@ -601,17 +608,17 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
     case POPEN_4: 
       if ( 1 ) 
         {
-        fd1 = _open_osfhandle(TO_INTPTR(hChildStdinWrDup), mode);
-        fd2 = _open_osfhandle(TO_INTPTR(hChildStdoutRdDup), mode);
+        fd1 = _open_osfhandle(TO_INTPTR(this->hChildStdinWrDup), mode);
+        fd2 = _open_osfhandle(TO_INTPTR(this->hChildStdoutRdDup), mode);
         break;
         }
         
     case POPEN_3:
       if ( 1) 
         {
-        fd1 = _open_osfhandle(TO_INTPTR(hChildStdinWrDup), mode);
-        fd2 = _open_osfhandle(TO_INTPTR(hChildStdoutRdDup), mode);
-        fd3 = _open_osfhandle(TO_INTPTR(hChildStderrRdDup), mode);
+        fd1 = _open_osfhandle(TO_INTPTR(this->hChildStdinWrDup), mode);
+        fd2 = _open_osfhandle(TO_INTPTR(this->hChildStdoutRdDup), mode);
+        fd3 = _open_osfhandle(TO_INTPTR(this->hChildStderrRdDup), mode);
         break;
         }
     }
@@ -621,9 +628,9 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
     if (!RealPopenCreateProcess(cmdstring,
                                 path,
                                 m_ConsoleSpawn.c_str(),
-                                hChildStdinRd,
-                                hChildStdoutWr,
-                                hChildStdoutWr,
+                                this->hChildStdinRd,
+                                this->hChildStdoutWr,
+                                this->hChildStdoutWr,
                                 &hProcess, m_HideWindows,
                                 m_Output))
       return 0;
@@ -633,9 +640,9 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
     if (!RealPopenCreateProcess(cmdstring,
                                 path,
                                 m_ConsoleSpawn.c_str(),
-                                hChildStdinRd,
-                                hChildStdoutWr,
-                                hChildStderrWr,
+                                this->hChildStdinRd,
+                                this->hChildStdoutWr,
+                                this->hChildStderrWr,
                                 &hProcess, m_HideWindows,
                                 m_Output))
       return 0;
@@ -658,39 +665,6 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
    * make sure that no handles to the write end of the output pipe
    * are maintained in this process or else the pipe will not close
    * when the child process exits and the ReadFile will hang. */
-
-  if (!CloseHandle(hChildStdinRd))
-    {
-    m_Output += "CloseHandleError\n";
-    return false;
-    }
-  if(!CloseHandle(hChildStdoutRdDup))
-    {
-    m_Output += "CloseHandleError\n";
-    return false;
-    }
-  if(!CloseHandle(hChildStderrRdDup))
-    {
-    m_Output += "CloseHandleError\n";
-    return false;
-    }
-  if(!CloseHandle(hChildStdinWrDup))
-    {
-    m_Output += "CloseHandleError\n";
-    return false;
-    }
-  if (!CloseHandle(hChildStdoutWr))
-    {
-    m_Output += "CloseHandleError\n";
-    return false;
-    }
-          
-  if ((n != 4) && (!CloseHandle(hChildStderrWr)))
-    {
-    m_Output += "CloseHandleError\n";
-    return false;
-    }
-  
   m_ProcessHandle = hProcess;
   if ( fd1 >= 0 )
     {
@@ -832,6 +806,40 @@ bool cmWin32ProcessExecution::PrivateClose(int /* timeout */)
   CloseHandle(hProcess);
   m_ExitValue = result;
   m_Output += output;
+
+  if (this->hChildStdinRd && !CloseHandle(this->hChildStdinRd))
+    {
+    m_Output += "CloseHandleError\n";
+    return false;
+    }
+  if(this->hChildStdoutRdDup && !CloseHandle(this->hChildStdoutRdDup))
+    {
+    m_Output += "CloseHandleError\n";
+    return false;
+    }
+  if(this->hChildStderrRdDup && !CloseHandle(this->hChildStderrRdDup))
+    {
+    m_Output += "CloseHandleError\n";
+    return false;
+    }
+  if(this->hChildStdinWrDup && !CloseHandle(this->hChildStdinWrDup))
+    {
+    m_Output += "CloseHandleError\n";
+    return false;
+    }
+  if (this->hChildStdoutWr && !CloseHandle(this->hChildStdoutWr))
+    {
+    m_Output += "CloseHandleError\n";
+    return false;
+    }
+          
+  if (this->hChildStderrWr && !CloseHandle(this->hChildStderrWr))
+    {
+    m_Output += "CloseHandleError\n";
+    return false;
+    }
+
+
   if ( result < 0 )
     {
     return false;

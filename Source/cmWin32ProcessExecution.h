@@ -143,13 +143,17 @@ private:
   bool PrivateClose(int timeout);
 
   HANDLE m_ProcessHandle;
-
-  // Comment this out. Maybe we will need it in the future.
-  // file IO access to the process might be cool.
-  // FILE* m_StdIn;
-  // FILE* m_StdOut;
-  // FILE* m_StdErr;
-
+  HANDLE hChildStdinRd;
+  HANDLE hChildStdinWr;
+  HANDLE hChildStdoutRd;
+  HANDLE hChildStdoutWr;
+  HANDLE hChildStderrRd;
+  HANDLE hChildStderrWr;
+  HANDLE hChildStdinWrDup;
+  HANDLE hChildStdoutRdDup;
+  HANDLE hChildStderrRdDup;
+  
+  
   int m_pStdIn;
   int m_pStdOut;
   int m_pStdErr;
