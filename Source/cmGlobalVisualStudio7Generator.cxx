@@ -534,7 +534,7 @@ void cmGlobalVisualStudio7Generator::WriteProjectDepends(std::ostream& fout,
         std::string libPath = j->first + "_CMAKE_PATH";
         const char* cacheValue
           = m_CMakeInstance->GetCacheDefinition(libPath.c_str());
-        if(cacheValue)
+        if(cacheValue && *cacheValue)
           {
           fout << "\t\t{" << this->CreateGUID(dspname) << "}." << depcount << " = {"
                << this->CreateGUID(j->first.c_str()) << "}\n";

@@ -685,7 +685,7 @@ void cmLocalVisualStudio7Generator::OutputLibraries(std::ostream& fout,
         std::string libPath = j->first + "_CMAKE_PATH";
         const char* cacheValue
           = m_GlobalGenerator->GetCMakeInstance()->GetCacheDefinition(libPath.c_str());
-        if(cacheValue && m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX"))
+        if(cacheValue && *cacheValue && m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX"))
           {
           debugPostfix = m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX");
           }
@@ -956,7 +956,7 @@ WriteCustomRule(std::ostream& fout,
         }
       std::string libPath = dep + "_CMAKE_PATH";
       const char* cacheValue = m_Makefile->GetDefinition(libPath.c_str());
-      if (cacheValue)
+      if (cacheValue && *cacheValue)
         { 
         std::string exePath = "";
         if (m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH"))

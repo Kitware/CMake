@@ -471,7 +471,7 @@ void cmLocalVisualStudio6Generator::WriteCustomRule(std::ostream& fout,
         }
       std::string libPath = dep + "_CMAKE_PATH";
       const char* cacheValue = m_Makefile->GetDefinition(libPath.c_str());
-      if (cacheValue)
+      if (cacheValue && *cacheValue)
         {
         std::string exePath = "";
         if (m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH"))
@@ -877,7 +877,7 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
       const char* cacheValue
         = m_GlobalGenerator->GetCMakeInstance()->GetCacheDefinition(
           libPath.c_str());
-      if ( cacheValue && m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX") )
+      if ( cacheValue && *cacheValue && m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX") )
         { 
         libDebug += m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX");
         }

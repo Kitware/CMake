@@ -452,7 +452,7 @@ void cmGlobalVisualStudio6Generator::WriteProject(std::ostream& fout,
         std::string libPath = j->first + "_CMAKE_PATH";
         const char* cacheValue
           = m_CMakeInstance->GetCacheDefinition(libPath.c_str());
-        if(cacheValue)
+        if(cacheValue && *cacheValue)
           {
           fout << "Begin Project Dependency\n";
           fout << "Project_Dep_Name " << j->first << "\n";

@@ -189,7 +189,7 @@ void cmLocalCodeWarriorGenerator::WriteSettingList(std::ostream& fout,
       = GetGlobalGenerator()->GetCMakeInstance()
       ->GetCacheDefinition(libPath.c_str());
 
-    if( cacheValue )
+    if( cacheValue && *cacheValue )
       {
       // just tack it on
       fout << "<SETTING>\n";
@@ -585,7 +585,7 @@ void cmLocalCodeWarriorGenerator::WriteFileList(std::ostream& fout,
       = GetGlobalGenerator()->GetCMakeInstance()
       ->GetCacheDefinition(libPath.c_str());
 
-    if( cacheValue )
+    if( cacheValue && *cacheValue )
       {
       // just tack it on
       fout << "<FILE>\n";
@@ -718,7 +718,7 @@ void cmLocalCodeWarriorGenerator::WriteLinkOrder(std::ostream& fout,
       = GetGlobalGenerator()->GetCMakeInstance()
       ->GetCacheDefinition(libPath.c_str());
 
-    if( cacheValue )
+    if( cacheValue && *cacheValue ) 
       {
       // just tack it on
       fout << "<FILEREF>\n";
@@ -988,7 +988,7 @@ void cmLocalCodeWarriorGenerator::WriteGroup(std::ostream& fout,
       = GetGlobalGenerator()->GetCMakeInstance()
       ->GetCacheDefinition(libPath.c_str());
 
-    if( cacheValue )
+    if( cacheValue && *cacheValue )
       {
       // this is a subtarget reference, it will be taken care of later
       continue;

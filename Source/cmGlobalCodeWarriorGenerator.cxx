@@ -229,7 +229,7 @@ void cmGlobalCodeWarriorGenerator::ComputeTargetOrder(
       std::string libPath = j->first + "_CMAKE_PATH";
       const char* cacheValue
         = m_CMakeInstance->GetCacheDefinition(libPath.c_str());
-      if(cacheValue)
+      if(cacheValue && *cacheValue)
         {
         // so add it to the tgtOrder vector if it isn't already there
         // to do this we need the actual target
