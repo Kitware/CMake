@@ -649,7 +649,7 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
     std::string cdir = m_CurrentMakefile->GetHomeOutputDirectory();
     cdir = this->ConvertToRelativeForMake(cdir.c_str());
     std::string makecmd = "make -C ";
-    makecmd += cdir;? 
+    makecmd += cdir;
     makecmd += " -f ";
     makecmd += 
       this->ConvertToRelativeForMake(m_CurrentReRunCMakeMakefile.c_str());
