@@ -819,14 +819,26 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                        "${CMAKE_COMMAND} ${CMAKE_CURRENT_SOURCE}/CMakeLists.txt "
                        "-S${CMAKE_CURRENT_SOURCE} -O${CMAKE_CURRENT_BINARY} "
                        "-H${CMAKE_SOURCE_DIR} -B${CMAKE_BINARY_DIR}");  
+
+  this->OutputMakeRule(fout, 
+		       "rule to build cmake from source",
+		       "${CMAKE_COMMAND}", "${CMAKE_SOURCE_DIR}/CMake/Source/*.cxx "
+		       "${CMAKE_SOURCE_DIR}/CMake/Source/*.h",
+		       "cd ${CMAKE_BINARY_DIR}/CMake/Source; "
+		       "${MAKE} CMakeBuildTargets");
   this->OutputMakeRule(fout, 
                        "Rebuild the cache",
                        "rebuild_cache",
                        "${CMAKE_BINARY_DIR}/CMakeCache.txt",
                        "${CMAKE_COMMAND} ${CMAKE_SOURCE_DIR}/CMakeLists.txt "
-                       "-S${CMAKE_SOURCE_DIR} -O${CMAKE_BINARY_DIR} "
+                       "-MakeCache -S${CMAKE_SOURCE_DIR} -O${CMAKE_BINARY_DIR} "
                        "-H${CMAKE_SOURCE_DIR} -B${CMAKE_BINARY_DIR}");
-  
+  //  this->OutputMakeRule(fout, 
+  //                     "Rebuild cmake dummy rule",
+  //                     "${CMAKE_COMMAND}",
+  //                     0,
+  //                     "echo \"cmake might be out of date\"");
+    
 }
 
 void cmUnixMakefileGenerator::OutputMakeRule(std::ostream& fout, 
