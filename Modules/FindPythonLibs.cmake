@@ -26,6 +26,7 @@ FIND_LIBRARY(PYTHON_LIBRARY
   /usr/lib/python1.5/config
   /usr/lib/python2.1/config
   /usr/lib/python2.0/config
+  /usr/lib/python2.2/config
   /usr/local/lib
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.1\\InstallPath]/libs
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.0\\InstallPath]/libs
@@ -36,6 +37,7 @@ FIND_PATH(PYTHON_INCLUDE_PATH Python.h
   /usr/include/python1.5
   /usr/include/python2.1
   /usr/include/python2.0
+  /usr/include/python2.2
   /usr/local/include
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.1\\InstallPath]/include
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.0\\InstallPath]/include
