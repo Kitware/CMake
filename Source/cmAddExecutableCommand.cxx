@@ -59,8 +59,6 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args)
     {
     tgt->SetProperty("MACOSX_BUNDLE", "ON");
 #ifdef __APPLE__
-    cmListFileFunction func;
-    func.m_Name = "CONFIGURE_FILE";
     std::string f1 = m_Makefile->GetModulesFile("MacOSXBundleInfo.plist.in");
     if ( f1.size() == 0 )
       {
@@ -80,12 +78,8 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args)
     std::string f2 = macdir + "Info.plist";
     macdir += "MacOS";
     cmSystemTools::MakeDirectory(macdir.c_str());
-
-    func.m_Arguments.push_back(cmListFileArgument(f1, true));
-    func.m_Arguments.push_back(cmListFileArgument(f2, true));
-    func.m_Arguments.push_back(cmListFileArgument("IMMEDIATE", true));
     m_Makefile->AddDefinition("MACOSX_BUNDLE_EXECUTABLE_NAME", exename.c_str());
-    m_Makefile->ExecuteCommand(func);
+    m_Makefile->ConfigureFile(f1.c_str(), f2.c_str(), false, false, false);
 #endif
     }
 
