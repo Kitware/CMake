@@ -10,8 +10,8 @@
 IF(WIN32)
 
   SET (WXWINDOWS_POSSIBLE_LIB_PATHS
-    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\wxWindows_is1;Inno Setup: App Path]/lib"
     $ENV{WXWIN}/lib
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\wxWindows_is1;Inno Setup: App Path]/lib"
   )
 
   FIND_LIBRARY(WXWINDOWS_STATIC_LIBRARY
@@ -25,8 +25,8 @@ IF(WIN32)
   )
 
   SET (WXWINDOWS_POSSIBLE_INCLUDE_PATHS
-    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\wxWindows_is1;Inno Setup: App Path]/include"
     $ENV{WXWIN}/include
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\wxWindows_is1;Inno Setup: App Path]/include"
   )
 
   FIND_PATH(WXWINDOWS_INCLUDE_PATH
