@@ -73,7 +73,19 @@ void cmDSPWriter::OutputDSPFile()
   for(i = includes.begin(); i != includes.end(); ++i)
     {
     m_IncludeOptions +=  " /I ";
-    m_IncludeOptions += cmSystemTools::ConvertToWindowsSlashesAndCleanUp(cmSystemTools::EscapeSpaces(i->c_str()));
+    std::string tmp = cmSystemTools::ConvertToWindowsSlashesAndCleanUp(cmSystemTools::EscapeSpaces(i->c_str()));
+
+    // quote if not already quoted
+    if (tmp[0] != '"')
+      {
+      m_IncludeOptions += "\"";
+      m_IncludeOptions += tmp;
+      m_IncludeOptions += "\"";
+      }
+    else
+      {
+      m_IncludeOptions += tmp;
+      }
     }
   
   // Create the DSP or set of DSP's for libraries and executables
