@@ -67,18 +67,19 @@ void cmAddTestCommand::FinalPass()
     ++it;
     for (; it != m_Args.end(); ++it)
       {
-        if(it->find(" ") != std::string::npos) 
-          {
-            fout << " \"" << *it << "\"";
-          }
-        else
-          {
-            fout << " " << *it;
-          }
+      if((it->find(" ") != std::string::npos) &&
+         (*it->begin() != '"' || *(it->end()-1) != '"'))
+        {
+        fout << " \"" << *it << "\"";
+        }
+      else
+        {
+        fout << " " << *it;
+        }
       }
     fout << ")" << std::endl;
     fout.close();
-    }  
+    }
   return;
 }
 
