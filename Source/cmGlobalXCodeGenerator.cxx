@@ -44,7 +44,7 @@ int cmGlobalXCodeGenerator::TryCompile(const char *,
                                        const char * projectName,
                                        const char * targetName,
                                        std::string * output,
-                                       cmMakefile* mf)
+                                       cmMakefile*)
 {
   // now build the test
   std::string makeCommand = 
