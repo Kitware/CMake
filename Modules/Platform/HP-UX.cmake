@@ -17,7 +17,7 @@ ELSE(CMAKE_COMPILER_IS_GNUCC)
   SET(CMAKE_ANSI_CFLAGS "-Aa -Ae")
   # use ld directly to create shared libraries for hp cc
   SET(CMAKE_C_CREATE_SHARED_LIBRARY
-      "ld <CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS> -o <TARGET> <OBJECTS> <LINK_LIBRARIES>")
+      "ld <CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS> <LINK_FLAGS> -o <TARGET> <OBJECTS> <LINK_LIBRARIES>")
   SET(CMAKE_SHARED_LIBRARY_C_FLAGS "+Z")            # -pic 
   SET(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "-E -b -L/usr/lib")       # -shared
   SET(CMAKE_SHARED_LIBRARY_LINK_FLAGS "-Wl,+s")         # +s, flag for exe link to use shared lib
