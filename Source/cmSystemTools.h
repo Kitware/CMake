@@ -269,8 +269,16 @@ public:
 
   static bool CreateSymlink(const char* origName, const char* newName);
   
-  ///! compute the relative path from local to remote
+  /** compute the relative path from local to remote.  local must 
+      be a directory.  remote can be a file or a directory.  
+      Both remote and local must be full paths.  Basically, if
+      you are in directory local and you want to access the file in remote
+      what is the relative path to do that.  For example:
+      /a/b/c/d to /a/b/c1/d1 -> ../../c1/d1
+      from /usr/src to /usr/src/test/blah/foo.cpp -> test/blah/foo.cpp
+  */
   static std::string RelativePath(const char* local, const char* remote);
+  
   ///! split a path by separator into an array of strings, default is /
   static std::vector<cmStdString> SplitString(const char* s, char separator = '/');
   /** put a string into the environment

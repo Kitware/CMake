@@ -1190,6 +1190,11 @@ std::vector<cmStdString> cmSystemTools::SplitString(const char* p, char sep)
 {
   std::string path = p;
   std::vector<cmStdString> paths;
+  if(path[0] == '/')
+    {
+    path.erase(path.begin());
+    }
+  paths.push_back("/");
   std::string::size_type pos1 = 0;
   std::string::size_type pos2 = path.find(sep, pos1+1);
   while(pos2 != std::string::npos)
@@ -1207,14 +1212,17 @@ std::vector<cmStdString> cmSystemTools::SplitString(const char* p, char sep)
 // compute the relative path from here to there
 std::string cmSystemTools::RelativePath(const char* local, const char* remote)
 {
-#ifdef _WIN32
-  std::string lowerCaseLocal = cmSystemTools::LowerCase(std::string(local));
-  std::string lowerCaseRemote = cmSystemTools::LowerCase(std::string(remote));
-  remote = lowerCaseRemote.c_str();
-  local = lowerCaseLocal.c_str();
-#endif
+  if(!cmSystemTools::FileIsFullPath(local))
+    {
+    cmSystemTools::Error("RelativePath must be passed a full path to local: ", local);
+    }
+  if(!cmSystemTools::FileIsFullPath(remote))
+    {
+    cmSystemTools::Error("RelativePath must be passed a full path to local: ", remote);
+    }
+  
   // check for driveletter: as the start of the path
-  // if not on the same drive then full path to remote must be used.
+  // if not on the same drive then full path to local must be used.
   if(local[0] && local[0] != '/')
     {
     if(remote[0] && local[0] != remote[0])
@@ -1224,31 +1232,62 @@ std::string cmSystemTools::RelativePath(const char* local, const char* remote)
     }
   std::string relativePath;     // result string
   // split up both paths into arrays of strings using / as a separator
-  std::vector<cmStdString> fileSplit = cmSystemTools::SplitString(local);
+  std::vector<cmStdString> fileSplit = cmSystemTools::SplitString(local); 
   std::vector<cmStdString> relativeSplit = cmSystemTools::SplitString(remote);
-  // count up how many mathing directory names there are from the start
+  std::vector<cmStdString> commonPath;
+  std::vector<cmStdString> finalPath;
+  // count up how many matching directory names there are from the start
   unsigned int sameCount = 0;
-  while(sameCount < fileSplit.size()-1 && sameCount < relativeSplit.size()-1 && 
-        fileSplit[sameCount] == relativeSplit[sameCount])
+  while(
+    ((sameCount <= (fileSplit.size()-1)) && (sameCount <= (relativeSplit.size()-1)))
+    && 
+// for windows and apple do a case insensitive string compare    
+#if defined(_WIN32) || defined(__APPLE__)
+    cmSystemTools::Strucmp(fileSplit[sameCount].c_str(),
+                              relativeSplit[sameCount].c_str()) == 0
+#else
+    fileSplit[sameCount] == relativeSplit[sameCount]
+#endif
+    )
     {
+    // put the common parts of the path into the commonPath array
+    commonPath.push_back(fileSplit[sameCount]);
+    // erase the common parts of the path from the original path arrays
+    fileSplit[sameCount] = "";
+    relativeSplit[sameCount] = "";
     sameCount++;
     }
-  if(sameCount == 0)
+
+  // for each entry that is not common in the local or file path 
+  // add a ../ to the finalpath array
+  for(unsigned int i = 0; i < fileSplit.size(); ++i)
     {
-    return std::string(remote);
+    if(fileSplit[i].size())
+      {
+      finalPath.push_back("../");
+      }
     }
-  // put in sameCount number of ../ into the path
-  unsigned int i;
-  for(i = sameCount; i < fileSplit.size(); ++i)
+  // for each entry that is not common in the remote path add it
+  // to the final path
+  for(std::vector<cmStdString>::iterator i = relativeSplit.begin();
+      i != relativeSplit.end(); ++i)
     {
-    relativePath += "../";
+    if(i->size())
+      {
+      finalPath.push_back(*i);
+      }
     }
-  // now put the rest of path that did not match back
-  for(i = sameCount; i < relativeSplit.size()-1; ++i)
+  // now turn the array of directories into a unix path by puttint / 
+  // between each entry that does not already have one
+  for(std::vector<cmStdString>::iterator i = finalPath.begin();
+      i != finalPath.end(); ++i)
     {
-    relativePath += relativeSplit[i] + "/";
+    if(relativePath.size() && relativePath[relativePath.size()-1] != '/')
+      {
+      relativePath += "/";
+      }
+    relativePath += *i;
     }
-  relativePath += relativeSplit[i];
   return relativePath;
 }
 class cmDeletingCharVector : public std::vector<char*>
