@@ -793,7 +793,7 @@ std::string cmSystemTools::FindLibrary(const char* name,
     tryPath = *p;
     tryPath += "/lib";
     tryPath += name;
-    tryPath + ".so";
+    tryPath += ".so";
     if(cmSystemTools::FileExists(tryPath.c_str()))
       {
       return cmSystemTools::CollapseFullPath(tryPath.c_str());
@@ -801,7 +801,7 @@ std::string cmSystemTools::FindLibrary(const char* name,
     tryPath = *p;
     tryPath = "/lib";
     tryPath += name;
-    tryPath + ".a";
+    tryPath += ".a";
     if(cmSystemTools::FileExists(tryPath.c_str()))
       {
       return cmSystemTools::CollapseFullPath(tryPath.c_str());
@@ -809,7 +809,7 @@ std::string cmSystemTools::FindLibrary(const char* name,
     tryPath = *p;
     tryPath = "/lib";
     tryPath += name;
-    tryPath + ".sl";
+    tryPath += ".sl";
     if(cmSystemTools::FileExists(tryPath.c_str()))
       {
       return cmSystemTools::CollapseFullPath(tryPath.c_str());
