@@ -53,6 +53,7 @@ public:
       return m_Position->first.c_str(); } 
     const char* GetProperty(const char*) const ;
     bool GetPropertyAsBool(const char*) const ;
+    bool PropertyExists(const char*) const;
     void SetProperty(const char* property, const char* value);
     void SetProperty(const char* property, bool value);
     const char* GetValue() const { return this->GetEntry().m_Value.c_str(); }

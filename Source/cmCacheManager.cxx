@@ -372,7 +372,7 @@ bool cmCacheManager::SaveCache(const char* path)
        !i.IsAtEnd(); i.Next())
     {
     CacheEntryType t = i.GetType();
-    bool advanced = i.GetPropertyAsBool("ADVANCED");
+    bool advanced = i.PropertyExists("ADVANCED");
     if ( advanced )
       {
       // Format is key:type=value
@@ -397,7 +397,8 @@ bool cmCacheManager::SaveCache(const char* path)
         {
         key = rkey;
         }
-      fout << key.c_str() << ":INTERNAL=1\n";        
+      fout << key.c_str() << ":INTERNAL="
+           << (i.GetPropertyAsBool("ADVANCED") ? "1" : "0") << "\n";
       }
     if(t == cmCacheManager::INTERNAL)
       {
@@ -676,3 +677,20 @@ void cmCacheManager::CacheIterator::SetProperty(const char* p, bool v)
   ent->m_Properties[p] = v ? "ON" : "OFF";
 }
 
+bool cmCacheManager::CacheIterator::PropertyExists(const char* property) const
+{
+  if ( !strcmp(property, "TYPE") || !strcmp(property, "VALUE") )
+    {
+    cmSystemTools::Error("Property \"", property, 
+                         "\" cannot be accessed through the PropertyExists()");
+    return false;
+    }
+  const CacheEntry* ent = &this->GetEntry();
+  std::map<cmStdString,cmStdString>::const_iterator it = 
+    ent->m_Properties.find(property);
+  if ( it == ent->m_Properties.end() )
+    {
+    return false;
+    }
+  return true;
+}

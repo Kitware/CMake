@@ -56,7 +56,7 @@ bool cmMarkAsAdvancedCommand::InitialPass(std::vector<std::string> const& argsIn
       cmSystemTools::Error("This should never happen...");
       return false;
       }
-    if ( overwrite )
+    if ( !it.PropertyExists("ADVANCED") || overwrite )
       {
       it.SetProperty("ADVANCED", value);
       }
