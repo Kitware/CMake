@@ -1920,6 +1920,32 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 fullSrcDir=`cd $srcdir; pwd`
 CMAKE_ROOT_DIR=$fullSrcDir
 
+# Step 1: set the variable "system" to hold the name and version number
+# for the system.  This can usually be done via the "uname" command, but
+# there are a few systems, like Next, where this doesn't work.
+
+echo "$as_me:1927: checking system version (for dynamic loading)" >&5
+echo $ECHO_N "checking system version (for dynamic loading)... $ECHO_C" >&6
+if test -f /usr/lib/NextStep/software_version; then
+  system=NEXTSTEP-`awk '/3/,/3/' /usr/lib/NextStep/software_version`
+else
+    system=`uname -s`-`uname -r`
+    if test "$?" -ne 0 ; then
+	echo "$as_me:1934: result: unknown (can't find uname command)" >&5
+echo "${ECHO_T}unknown (can't find uname command)" >&6
+	system=unknown
+    else
+	# Special check for weird MP-RAS system (uname returns weird
+	# results, and the version is kept in special file).
+
+	if test -r /etc/.relid -a "X`uname -n`" = "X`uname -s`" ; then
+	    system=MP-RAS-`awk '{print $3}' /etc/.relid'`
+	fi
+	echo "$as_me:1944: result: $system" >&5
+echo "${ECHO_T}$system" >&6
+    fi
+fi
+
 CMAKE_ANSI_CFLAGS=""
 # on hp use -Aa for ansi
 if test $ac_cv_cxx_compiler_gnu = no; then
@@ -1975,7 +2001,7 @@ fi
 # check no g++ compilers to see if they have the standard
 # ansi stream files (without the .h)
 if test $ac_cv_cxx_compiler_gnu = no; then
-  echo "$as_me:1978: checking ansi standard C++ stream headers " >&5
+  echo "$as_me:2004: checking ansi standard C++ stream headers " >&5
 echo $ECHO_N "checking ansi standard C++ stream headers ... $ECHO_C" >&6
   rm -rf conftest.*
   cat > conftest.cc <<!
@@ -1994,7 +2020,7 @@ fi
 
 # check to see if stl is in the std namespace
 if test $ac_cv_cxx_compiler_gnu = no; then
-  echo "$as_me:1997: checking ansi standard namespace support " >&5
+  echo "$as_me:2023: checking ansi standard namespace support " >&5
 echo $ECHO_N "checking ansi standard namespace support ... $ECHO_C" >&6
   rm -rf conftest.*
   cat > conftest.cc <<!
@@ -2014,7 +2040,7 @@ fi
 
 # check to see if for scoping is supported
 if test $ac_cv_cxx_compiler_gnu = no; then
-  echo "$as_me:2017: checking ansi for scope support " >&5
+  echo "$as_me:2043: checking ansi for scope support " >&5
 echo $ECHO_N "checking ansi for scope support ... $ECHO_C" >&6
   rm -rf conftest.*
   cat > conftest.cc <<!
@@ -2036,7 +2062,7 @@ for ac_prog in gmake make
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
-echo "$as_me:2039: checking for $ac_word" >&5
+echo "$as_me:2065: checking for $ac_word" >&5
 echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
 if test "${ac_cv_path_RUNMAKE+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -2053,7 +2079,7 @@ for ac_dir in $ac_dummy; do
   test -z "$ac_dir" && ac_dir=.
   if $as_executable_p "$ac_dir/$ac_word"; then
    ac_cv_path_RUNMAKE="$ac_dir/$ac_word"
-   echo "$as_me:2056: found $ac_dir/$ac_word" >&5
+   echo "$as_me:2082: found $ac_dir/$ac_word" >&5
    break
 fi
 done
@@ -2064,10 +2090,10 @@ fi
 RUNMAKE=$ac_cv_path_RUNMAKE
 
 if test -n "$RUNMAKE"; then
-  echo "$as_me:2067: result: $RUNMAKE" >&5
+  echo "$as_me:2093: result: $RUNMAKE" >&5
 echo "${ECHO_T}$RUNMAKE" >&6
 else
-  echo "$as_me:2070: result: no" >&5
+  echo "$as_me:2096: result: no" >&5
 echo "${ECHO_T}no" >&6
 fi
 
@@ -2154,7 +2180,7 @@ DEFS=-DHAVE_CONFIG_H
 : ${CONFIG_STATUS=./config.status}
 ac_clean_files_save=$ac_clean_files
 ac_clean_files="$ac_clean_files $CONFIG_STATUS"
-{ echo "$as_me:2157: creating $CONFIG_STATUS" >&5
+{ echo "$as_me:2183: creating $CONFIG_STATUS" >&5
 echo "$as_me: creating $CONFIG_STATUS" >&6;}
 cat >$CONFIG_STATUS <<_ACEOF
 #! $SHELL
@@ -2326,7 +2352,7 @@ cat >>$CONFIG_STATUS <<\EOF
     echo "$ac_cs_version"; exit 0 ;;
   --he | --h)
     # Conflict between --help and --header
-    { { echo "$as_me:2329: error: ambiguous option: $1
+    { { echo "$as_me:2355: error: ambiguous option: $1
 Try \`$0 --help' for more information." >&5
 echo "$as_me: error: ambiguous option: $1
 Try \`$0 --help' for more information." >&2;}
@@ -2345,7 +2371,7 @@ Try \`$0 --help' for more information." >&2;}
     ac_need_defaults=false;;
 
   # This is an error.
-  -*) { { echo "$as_me:2348: error: unrecognized option: $1
+  -*) { { echo "$as_me:2374: error: unrecognized option: $1
 Try \`$0 --help' for more information." >&5
 echo "$as_me: error: unrecognized option: $1
 Try \`$0 --help' for more information." >&2;}
@@ -2383,7 +2409,7 @@ do
   "Makefile" ) CONFIG_FILES="$CONFIG_FILES Makefile" ;;
   "Source/Makefile" ) CONFIG_FILES="$CONFIG_FILES Source/Makefile" ;;
   "Source/cmConfigure.h" ) CONFIG_HEADERS="$CONFIG_HEADERS Source/cmConfigure.h" ;;
-  *) { { echo "$as_me:2386: error: invalid argument: $ac_config_target" >&5
+  *) { { echo "$as_me:2412: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
    { (exit 1); exit 1; }; };;
   esac
@@ -2588,7 +2614,7 @@ done; }
   esac
 
   if test x"$ac_file" != x-; then
-    { echo "$as_me:2591: creating $ac_file" >&5
+    { echo "$as_me:2617: creating $ac_file" >&5
 echo "$as_me: creating $ac_file" >&6;}
     rm -f "$ac_file"
   fi
@@ -2606,7 +2632,7 @@ echo "$as_me: creating $ac_file" >&6;}
       -) echo $tmp/stdin ;;
       [\\/$]*)
          # Absolute (can't be DOS-style, as IFS=:)
-         test -f "$f" || { { echo "$as_me:2609: error: cannot find input file: $f" >&5
+         test -f "$f" || { { echo "$as_me:2635: error: cannot find input file: $f" >&5
 echo "$as_me: error: cannot find input file: $f" >&2;}
    { (exit 1); exit 1; }; }
          echo $f;;
@@ -2619,7 +2645,7 @@ echo "$as_me: error: cannot find input file: $f" >&2;}
            echo $srcdir/$f
          else
            # /dev/null tree
-           { { echo "$as_me:2622: error: cannot find input file: $f" >&5
+           { { echo "$as_me:2648: error: cannot find input file: $f" >&5
 echo "$as_me: error: cannot find input file: $f" >&2;}
    { (exit 1); exit 1; }; }
          fi;;
@@ -2679,7 +2705,7 @@ for ac_file in : $CONFIG_HEADERS; do test "x$ac_file" = x: && continue
   * )   ac_file_in=$ac_file.in ;;
   esac
 
-  test x"$ac_file" != x- && { echo "$as_me:2682: creating $ac_file" >&5
+  test x"$ac_file" != x- && { echo "$as_me:2708: creating $ac_file" >&5
 echo "$as_me: creating $ac_file" >&6;}
 
   # First look for the input files in the build tree, otherwise in the
@@ -2690,7 +2716,7 @@ echo "$as_me: creating $ac_file" >&6;}
       -) echo $tmp/stdin ;;
       [\\/$]*)
          # Absolute (can't be DOS-style, as IFS=:)
-         test -f "$f" || { { echo "$as_me:2693: error: cannot find input file: $f" >&5
+         test -f "$f" || { { echo "$as_me:2719: error: cannot find input file: $f" >&5
 echo "$as_me: error: cannot find input file: $f" >&2;}
    { (exit 1); exit 1; }; }
          echo $f;;
@@ -2703,7 +2729,7 @@ echo "$as_me: error: cannot find input file: $f" >&2;}
            echo $srcdir/$f
          else
            # /dev/null tree
-           { { echo "$as_me:2706: error: cannot find input file: $f" >&5
+           { { echo "$as_me:2732: error: cannot find input file: $f" >&5
 echo "$as_me: error: cannot find input file: $f" >&2;}
    { (exit 1); exit 1; }; }
          fi;;
@@ -2820,7 +2846,7 @@ cat >>$CONFIG_STATUS <<\EOF
   rm -f $tmp/in
   if test x"$ac_file" != x-; then
     if cmp -s $ac_file $tmp/config.h 2>/dev/null; then
-      { echo "$as_me:2823: $ac_file is unchanged" >&5
+      { echo "$as_me:2849: $ac_file is unchanged" >&5
 echo "$as_me: $ac_file is unchanged" >&6;}
     else
       ac_dir=`$as_expr X"$ac_file" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
