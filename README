@@ -10,7 +10,7 @@ EXECUTABLES =
 # make flags
 # make flags can use these varibles:
 # ${CMAKE_BINARY_DIR}  The root of the build tree where the binaries are
-# ${CMAKE_SOURCE_ROOT} The root of the source tree where configure is
+# ${CMAKE_SOURCE_DIR} The root of the source tree where configure is
 INCLUDE_DIRECTORIES = 
 LINK_DIRECTORIES =
 LINK_LIBRARIES = # use the same name as ME =

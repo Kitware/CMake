@@ -51,7 +51,7 @@ public:
   
   /**
    * Expance varibles for home and binary root in the collected flags.
-   * CMAKE_BINARY_DIR and CMAKE_SOURCE_ROOT are replaced with
+   * CMAKE_BINARY_DIR and CMAKE_SOURCE_DIR are replaced with
    * makefile->GetOutputHomeDirectory() and
    * makefile->GetHomeDirectory()
    */

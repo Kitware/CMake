@@ -34,15 +34,15 @@ bool cmWindowsConfigure::Configure(const char* file)
           toFile += toFileName;
           cmSystemTools::ReplaceString(toFile, "${CMAKE_BINARY_DIR}",
                                        m_WhereBuild.c_str() );
-          cmSystemTools::ReplaceString(toFile, "${CMAKE_SOURCE_ROOT}",
+          cmSystemTools::ReplaceString(toFile, "${CMAKE_SOURCE_DIR}",
                                        m_WhereSource.c_str() );
           cmSystemTools::ReplaceString(fromFile, "${CMAKE_BINARY_DIR}",
                                        m_WhereBuild.c_str() );
-          cmSystemTools::ReplaceString(fromFile, "${CMAKE_SOURCE_ROOT}",
+          cmSystemTools::ReplaceString(fromFile, "${CMAKE_SOURCE_DIR}",
                                        m_WhereSource.c_str() );
           cmSystemTools::ReplaceString(destDir, "${CMAKE_BINARY_DIR}",
                                        m_WhereBuild.c_str() );
-          cmSystemTools::ReplaceString(destDir, "${CMAKE_SOURCE_ROOT}",
+          cmSystemTools::ReplaceString(destDir, "${CMAKE_SOURCE_DIR}",
                                        m_WhereSource.c_str() );
           }
         }

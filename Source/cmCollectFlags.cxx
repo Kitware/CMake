@@ -110,7 +110,7 @@ void cmCollectFlags::ParseDirectory(const char* dir)
 }
 
 
-// expance CMAKE_BINARY_DIR and CMAKE_SOURCE_ROOT in the
+// expance CMAKE_BINARY_DIR and CMAKE_SOURCE_DIR in the
 // include and library directories.
 
 void cmCollectFlags::ExpandVaribles(cmMakefile* makefile)
@@ -124,7 +124,7 @@ void cmCollectFlags::ExpandVaribles(cmMakefile* makefile)
     {
     cmSystemTools::ReplaceString(*j, "${CMAKE_BINARY_DIR}",
 				 makefile->GetOutputHomeDirectory() );
-    cmSystemTools::ReplaceString(*j, "${CMAKE_SOURCE_ROOT}",
+    cmSystemTools::ReplaceString(*j, "${CMAKE_SOURCE_DIR}",
 				 makefile->GetHomeDirectory() );
     }
   begin = m_LinkDirectories.begin();
@@ -133,7 +133,7 @@ void cmCollectFlags::ExpandVaribles(cmMakefile* makefile)
     {
     cmSystemTools::ReplaceString(*j, "${CMAKE_BINARY_DIR}",
 				 makefile->GetOutputHomeDirectory() );
-    cmSystemTools::ReplaceString(*j, "${CMAKE_SOURCE_ROOT}",
+    cmSystemTools::ReplaceString(*j, "${CMAKE_SOURCE_DIR}",
 				 makefile->GetHomeDirectory() );
     }
 }
