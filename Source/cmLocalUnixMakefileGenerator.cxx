@@ -2264,7 +2264,7 @@ void cmLocalUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                        " $(TARGETS) $(GENERATED_QT_FILES) $(GENERATED_FLTK_FILES)");
 
   // collect up all the sources
-  std::string allsources;
+  std::vector<std::string> allsources;
   std::map<cmStdString, cmTarget>& targets = m_Makefile->GetTargets();
   for(std::map<cmStdString,cmTarget>::const_iterator target = targets.begin(); 
       target != targets.end(); ++target)
@@ -2276,8 +2276,7 @@ void cmLocalUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
       {
       if(!(*source)->GetPropertyAsBool("HEADER_FILE_ONLY"))
         {
-          allsources += " \\\n";
-          allsources += cmSystemTools::ConvertToOutputPath((*source)->GetFullPath().c_str());
+          allsources.push_back(cmSystemTools::ConvertToOutputPath((*source)->GetFullPath().c_str()));
         }
       }
     }
@@ -2290,14 +2289,15 @@ void cmLocalUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                        "-S$(CMAKE_CURRENT_SOURCE) -O$(CMAKE_CURRENT_BINARY) "
                        "-H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)"
     );
+  std::vector<std::string> commands;
+  commands.push_back("$(CMAKE_COMMAND) "
+                     "-S$(CMAKE_CURRENT_SOURCE) -O$(CMAKE_CURRENT_BINARY) "
+                     "-H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)");
   this->OutputMakeRule(fout, 
                        "dependencies",
                        "cmake.check_depends",
-                       allsources.c_str(),
-                       "$(CMAKE_COMMAND) "
-                       "-S$(CMAKE_CURRENT_SOURCE) -O$(CMAKE_CURRENT_BINARY) "
-                       "-H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)"
-    );
+                       allsources,
+                       commands);
   
   this->OutputMakeRule(fout, 
                        "dependencies",
@@ -2719,16 +2719,36 @@ void cmLocalUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
 
   replace = target;
   m_Makefile->ExpandVariablesInString(replace);
-  fout << cmSystemTools::ConvertToOutputPath(replace.c_str()) << ":";
-
-  for(std::vector<std::string>::const_iterator dep = depends.begin();
-      dep != depends.end(); ++dep)
+  
+  if(depends.size() > 1)
     {
-    replace = *dep;
-    m_Makefile->ExpandVariablesInString(replace);
-    fout << " " << replace.c_str();
+    // Create a proxy target collecting all the dependencies.  This
+    // allows for very long dependency lists.
+    std::string tgt = cmSystemTools::ConvertToOutputPath(replace.c_str());
+    for(std::vector<std::string>::const_iterator dep = depends.begin();
+        dep != depends.end(); ++dep)
+      {
+      replace = *dep;
+      m_Makefile->ExpandVariablesInString(replace);
+      fout << tgt.c_str() << ".dependency_list:: " << replace.c_str() << "\n";
+      }
+
+    // Forward dependencies through the proxy target.
+    fout << tgt.c_str() << ": " << tgt.c_str() << ".dependency_list\n";
     }
-  fout << "\n";
+  else
+    {
+    fout << cmSystemTools::ConvertToOutputPath(replace.c_str()) << ":";
+  
+    for(std::vector<std::string>::const_iterator dep = depends.begin();
+        dep != depends.end(); ++dep)
+      {
+      replace = *dep;
+      m_Makefile->ExpandVariablesInString(replace);
+      fout << " " << replace.c_str();
+      }
+    fout << "\n";
+    }
   int count = 0;
   for (std::vector<std::string>::const_iterator i = commands.begin();
        i != commands.end(); ++i) 
