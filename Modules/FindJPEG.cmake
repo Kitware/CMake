@@ -4,7 +4,7 @@
 # This module defines
 # JPEG_INCLUDE_DIR, where to find jpeglib.h, etc.
 # JPEG_LIBRARIES, the libraries to link against to use JPEG.
-# JPEG_FOUND, If false, do try to use JPEG.
+# JPEG_FOUND, If false, do not try to use JPEG.
 
 # also defined, but not for general use are
 # JPEG_LIBRARY, where to find the JPEG library.

@@ -8,7 +8,7 @@
 # AVIFILE_INCLUDE_DIR, where to find avifile.h , etc.
 # AVIFILE_LIBRARIES, the libraries to link against to use AVIFILE
 # AVIFILE_DEFINITIONS, definitions to use when compiling code that uses AVIFILE.
-# AVIFILE_FOUND, If false, do try to use AVIFILE.
+# AVIFILE_FOUND, If false, don't try to use AVIFILE.
 
 IF (UNIX)
 

@@ -5,8 +5,8 @@
 # This module defines
 # PNG_INCLUDE_DIR, where to find png.h, etc.
 # PNG_LIBRARIES, the libraries to link against to use PNG.
-# PNG_FOUND, If false, do try to use PNG.
 # PNG_DEFINITIONS - You should ADD_DEFINITONS(${PNG_DEFINITIONS}) before compiling code that includes png library files.
+# PNG_FOUND, If false, do not try to use PNG.
 
 # also defined, but not for general use are
 # PNG_LIBRARY, where to find the PNG library.

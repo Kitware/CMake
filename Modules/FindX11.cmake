@@ -6,6 +6,7 @@
 # X11_LIBRARIES    - link against these to use X11
 # X11_FOUND        - True if X11 is available
 # X11_Xext_FOUND   - True if the X11 extensions are available.
+
 IF (UNIX)
   
   FIND_PATH(X11_INCLUDE_DIR X11/X.h

@@ -1,55 +1,111 @@
 #
-# Try to find GLUT, once done this will define:
+# try to find glut library and include files
 #
-# GLUT_INCLUDE_PATH = where the GLUT include directory can be found
-# GLUT_LIBRARY      = the name of the GLUT library to link with
-#
+# GLUT_INCLUDE_DIR, where to find GL/glut.h, etc.
+# GLUT_LIBRARIES, the libraries to link against to use GLUT.
+# GLUT_FOUND, If false, do not try to use GLUT.
+
+# also defined, but not for general use are
+# GLUT_glut_LIBRARY, where to find the glut library.
+# GLUT_Xmu_LIBRARY, where to find the Xmu library if available.
+# GLUT_Xi_LIBRARY, where to find the Xi Library if available.
 
 IF (WIN32)
-  IF (CYGWIN)
-    FIND_LIBRARY(GLUT_LIBRARY glut32
+
+  IF(CYGWIN)
+
+    FIND_PATH( GLUT_INCLUDE_DIR GL/glut.h
+      /usr/include
+    )
+
+    FIND_LIBRARY( GLUT_glut_LIBRARY glut32
       ${OPENGL_LIBRARY_PATH}
+      /usr/lib
       /usr/lib/w32api
-      /usr/lib 
-      /usr/local/lib 
+      /usr/local/lib
       /usr/X11R6/lib
     )
-  ELSE (CYGWIN)
-    FIND_LIBRARY(GLUT_LIBRARY glut32
+
+
+  ELSE(CYGWIN)
+
+    FIND_PATH( GLUT_INCLUDE_DIR GL/glut.h
+      ${GLUT_ROOT_PATH}/include
+    )
+
+    FIND_LIBRARY( GLUT_glut_LIBRARY glut
+      ${GLUT_ROOT_PATH}/Release
       ${OPENGL_LIBRARY_PATH}
     )
-  ENDIF (CYGWIN)
+
+  ENDIF(CYGWIN)
+
 ELSE (WIN32)
+
   IF (APPLE)
-    SET(GLUT_LIBRARY "-framework Glut" CACHE STRING "GLUT library for OSX")
-  ELSE (APPLE)
-    FIND_PATH(GLUT_INCLUDE_PATH GL/glut.h 
-      ${OPENGL_INCLUDE_PATH}
-      /usr/include 
-      /usr/include/GL
-      /usr/local/include 
-      /usr/openwin/share/include 
-      /opt/graphics/OpenGL/include 
-      /opt/graphics/OpenGL/contrib/libglut
-      /usr/X11R6/include 
+# These values for Apple could probably do with improvement.
+    FIND_PATH( GLUT_INCLUDE_DIR GL/glut.h
+      ${OPENGL_LIBRARY_PATH}
     )
-    MARK_AS_ADVANCED(
-      GLUT_INCLUDE_PATH
+    SET(GLUT_glut_LIBRARY "-framework Glut" CACHE STRING "GLUT library for OSX")
+  ELSE (APPLE)
+
+    FIND_PATH( GLUT_INCLUDE_DIR GL/glut.h
+      /usr/include
+      /usr/include/GL
+      /usr/local/include
+      /usr/openwin/share/include
+      /usr/openwin/include
+      /usr/X11R6/include
+      /usr/include/X11
+      /opt/graphics/OpenGL/include
+      /opt/graphics/OpenGL/contrib/libglut
     )
 
-    FIND_LIBRARY(GLUT_LIBRARY glut
-      ${OPENGL_LIBRARY_PATH}
-      /usr/lib 
-      /usr/local/lib 
-      /opt/graphics/OpenGL/lib 
-      /opt/graphics/OpenGL/contrib/libglut
-      /usr/openwin/lib 
+    FIND_LIBRARY( GLUT_glut_LIBRARY glut
+      /usr/lib
+      /usr/local/lib
+      /usr/openwin/lib
       /usr/X11R6/lib
     )
 
-   ENDIF (APPLE)
+    FIND_LIBRARY( GLUT_Xi_LIBRARY Xi
+      /usr/lib
+      /usr/local/lib
+      /usr/openwin/lib
+      /usr/X11R6/lib
+    )
+
+    FIND_LIBRARY( GLUT_Xmu_LIBRARY Xmu
+      /usr/lib
+      /usr/local/lib
+      /usr/openwin/lib
+      /usr/X11R6/lib
+    )
+
+  ENDIF (APPLE)
+
 ENDIF (WIN32)
 
+SET( GLUT_FOUND "NO" )
+IF(GLUT_INCLUDE_DIR)
+  IF(GLUT_glut_LIBRARY)
+    # Is -lXi and -lXmu required on all platforms that have it?
+    # If not, we need some way to figure out what platform we are on.
+    SET( GLUT_LIBRARIES
+      ${GLUT_glut_LIBRARY}
+      ${GLUT_Xmu_LIBRARY}
+      ${GLUT_Xi_LIBRARY} 
+    )
+    SET( GLUT_FOUND "YES" )
+
+#The following deprecated settings are for backwards compatibility with CMake1.4
+    SET (GLUT_LIBRARY ${GLUT_LIBRARIES})
+    SET (GLUT_INCLUDE_PATH ${GLUT_INCLUDE_DIR})
+
+  ENDIF(GLUT_glut_LIBRARY)
+ENDIF(GLUT_INCLUDE_DIR)
+
 MARK_AS_ADVANCED(
-  GLUT_LIBRARY
+  GLUT_INCLUDE_PATH
 )

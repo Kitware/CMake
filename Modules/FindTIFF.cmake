@@ -4,7 +4,7 @@
 # This module defines
 # TIFF_INCLUDE_DIR, where to find tiff.h, etc.
 # TIFF_LIBRARIES, the libraries to link against to use TIFF.
-# TIFF_FOUND, If false, do try to use TIFF.
+# TIFF_FOUND, If false, do not try to use TIFF.
 
 # also defined, but not for general use are
 # TIFF_LIBRARY, where to find the TIFF library.
