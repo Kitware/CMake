@@ -2,6 +2,7 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 #include "cmListFileCache.h"
+#include "cmMakefileGenerator.h"
 
 // this is a test driver program for cmake.
 int main (int argc, char *argv[])
