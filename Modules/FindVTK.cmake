@@ -123,6 +123,6 @@ IF(VTK_FOUND)
 ELSE(VTK_FOUND)
   # VTK not found, explain to the user how to specify its location.
   IF(NOT VTK_FIND_QUIETLY)
-    MESSAGE(${VTK_DIR_MESSAGE})
+    MESSAGE(FATAL_ERROR ${VTK_DIR_MESSAGE})
   ENDIF(NOT VTK_FIND_QUIETLY)
 ENDIF(VTK_FOUND)
