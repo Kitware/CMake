@@ -882,7 +882,8 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
         libDebug += ".lib";
         }
       lib = cmSystemTools::ConvertToOutputPath(lib.c_str());
-
+      libDebug = cmSystemTools::ConvertToOutputPath(libDebug.c_str());
+      
       if (j->second == cmTarget::GENERAL)
         {
         libOptions += " ";
