@@ -533,11 +533,28 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
           {
           std::string outExt(
             this->GetOutputExtension((*i)->GetSourceExtension().c_str()));
-          if(outExt.size())
+          if(outExt.size() && !(*i)->GetPropertyAsBool("EXTERNAL_OBJECT") )
             {
-            fout << "\\\n" 
-                 << this->ConvertToMakeTarget(this->ConvertToRelativeOutputPath((*i)->GetSourceName().c_str()).c_str())
-                 << outExt.c_str() << " ";
+            fout << "\\\n";
+            fout << this->ConvertToMakeTarget(this->ConvertToRelativeOutputPath((*i)->GetSourceName().c_str()).c_str())
+              << outExt.c_str() << " ";
+            }
+          }
+        }
+      fout << "\n\n";
+      fout << this->CreateMakeVariable(l->first.c_str(), "_EXTERNAL_OBJS") << " = ";
+      for(std::vector<cmSourceFile*>::iterator i = classes.begin(); 
+          i != classes.end(); i++)
+        {
+        if(!(*i)->GetPropertyAsBool("HEADER_FILE_ONLY") && 
+           !(*i)->GetCustomCommand())
+          {
+          std::string outExt(
+            this->GetOutputExtension((*i)->GetSourceExtension().c_str()));
+          if(outExt.size() && (*i)->GetPropertyAsBool("EXTERNAL_OBJECT") )
+            {
+            fout << "\\\n";
+            fout << this->ConvertToMakeTarget(this->ConvertToRelativeOutputPath((*i)->GetFullPath().c_str()).c_str()) << " ";
             }
           }
         }
@@ -550,10 +567,25 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
            !(*i)->GetCustomCommand())
           {
           std::string outExt(this->GetOutputExtension((*i)->GetSourceExtension().c_str()));
-          if(outExt.size())
+          if(outExt.size() && !(*i)->GetPropertyAsBool("EXTERNAL_OBJECT") )
             {
             fout << "\\\n\"" << this->ConvertToMakeTarget(ConvertToRelativeOutputPath((*i)->GetSourceName().c_str()).c_str())
                  << outExt.c_str() << "\" ";
+            }
+          }
+        }
+      fout << "\n\n";
+      fout << this->CreateMakeVariable(l->first.c_str(), "_EXTERNAL_OBJS_QUOTED") << " = ";
+      for(std::vector<cmSourceFile*>::iterator i = classes.begin(); 
+          i != classes.end(); i++)
+        {
+        if(!(*i)->GetPropertyAsBool("HEADER_FILE_ONLY") &&
+           !(*i)->GetCustomCommand())
+          {
+          std::string outExt(this->GetOutputExtension((*i)->GetSourceExtension().c_str()));
+          if(outExt.size() && (*i)->GetPropertyAsBool("EXTERNAL_OBJECT") )
+            {
+            fout << "\\\n\"" << this->ConvertToMakeTarget(ConvertToRelativeOutputPath((*i)->GetFullPath().c_str()).c_str()) << "\" ";
             }
           }
         }
@@ -1115,8 +1147,8 @@ void cmLocalUnixMakefileGenerator::OutputLibraryRule(std::ostream& fout,
     }
 
   // get the objects that are used to link this library
-  std::string objs = "$(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
-  std::string objsQuoted = "$(" + this->CreateMakeVariable(name, "_SRC_OBJS_QUOTED") + ") ";
+  std::string objs = "$(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") $(" + this->CreateMakeVariable(name, "_EXTERNAL_OBJS") + ") ";
+  std::string objsQuoted = "$(" + this->CreateMakeVariable(name, "_SRC_OBJS_QUOTED") + ") $(" + this->CreateMakeVariable(name, "_EXTERNAL_OBJS_QUOTED") + ") ";
   // create a variable with the objects that this library depends on
   std::string depend =
     objs + " $(" + this->CreateMakeVariable(name, "_DEPEND_LIBS") + ")";
@@ -1382,9 +1414,10 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
     {
     needsLocalTarget = true;
     }
-  std::string objs = "$(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
+  std::string objs = "$(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") $(" + this->CreateMakeVariable(name, "_EXTERNAL_OBJS") + ") ";
   std::string depend = "$(";
   depend += this->CreateMakeVariable(name, "_SRC_OBJS") 
+    + ") $(" + this->CreateMakeVariable(name, "_EXTERNAL_OBJS") 
     + ") $(" + this->CreateMakeVariable(name, "_DEPEND_LIBS") + ")";
   std::vector<std::string> rules;
   linkFlags += this->GetSafeDefinition("CMAKE_EXE_LINKER_FLAGS");
@@ -2661,6 +2694,8 @@ OutputBuildObjectFromSource(std::ostream& fout,
       return;
     case cmSystemTools::DEFINITION_FILE_FORMAT:
       return;
+    case cmSystemTools::OBJECT_FILE_FORMAT:
+      return;
     case cmSystemTools::RESOURCE_FILE_FORMAT:
       {
       flags = " $(INCLUDE_FLAGS) ";
@@ -2677,7 +2712,6 @@ OutputBuildObjectFromSource(std::ostream& fout,
     case cmSystemTools::STATIC_LIBRARY_FILE_FORMAT:
     case cmSystemTools::SHARED_LIBRARY_FILE_FORMAT:
     case cmSystemTools::MODULE_FILE_FORMAT:
-    case cmSystemTools::OBJECT_FILE_FORMAT:
     case cmSystemTools::UNKNOWN_FILE_FORMAT:
       cmSystemTools::Error("Unexpected file type ",
                            sourceFile.c_str());

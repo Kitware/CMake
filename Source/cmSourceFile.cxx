@@ -73,6 +73,11 @@ void cmSourceFile::SetName(const char* name, const char* dir,
       this->SetProperty("HEADER_FILE_ONLY","0");
       }
     m_FullPath = hname;
+    if ( m_SourceExtension == "obj" || m_SourceExtension == "o" ||
+      m_SourceExtension == "lo" )
+      {
+      this->SetProperty("EXTERNAL_OBJECT", "1");
+      }
     return;
     }
   
