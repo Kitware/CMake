@@ -1443,3 +1443,8 @@ bool cmMakefile::GetLocal() const
 {
   return m_LocalGenerator->GetGlobalGenerator()->GetCMakeInstance()->GetLocal();
 }
+void cmMakefile::DisplayStatus(const char* message, float s)
+{
+  this->GetLocalGenerator()->GetGlobalGenerator()
+    ->GetCMakeInstance()->UpdateProgress(message, s);
+}

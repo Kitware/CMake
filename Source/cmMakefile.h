@@ -522,6 +522,8 @@ public:
   //! Determine wether this is a local or global build.
   bool GetLocal() const;
 
+  ///! Display progress or status message.
+  void DisplayStatus(const char*, float);
 protected:
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(const char* name, cmTarget& target);

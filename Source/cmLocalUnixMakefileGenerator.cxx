@@ -924,6 +924,7 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
   std::string flags;
   std::string target = m_ExecutableOutputPath + name 
     + cmSystemTools::GetExecutableExtension(); 
+  target = cmSystemTools::ConvertToOutputPath(target.c_str());
   std::string objs = "$(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
   std::string depend = "$(";
   depend += this->CreateMakeVariable(name, "_SRC_OBJS") 

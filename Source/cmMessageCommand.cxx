@@ -30,10 +30,19 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& argsIn)
   std::vector<std::string>::const_iterator i = args.begin();
 
   bool send_error = false;
+  bool status = false;
   if (*i == "SEND_ERROR")
     {
     send_error = true;
     ++i;
+    }
+  else
+    {
+      if (*i == "STATUS")
+        {
+          status = true;
+          ++i;
+        }
     }
 
   for(;i != args.end(); ++i)
@@ -47,7 +56,14 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& argsIn)
     }
   else
     {
-    cmSystemTools::Message(message.c_str());
+      if (status)
+        {
+          m_Makefile->DisplayStatus(message.c_str(), -1);
+        }
+      else
+        {
+          cmSystemTools::Message(message.c_str());
+        }
     }
 
   return true;
