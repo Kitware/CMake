@@ -98,7 +98,7 @@ bool cmCTestSubmit::SubmitUsingFTP(const std::string& localprefix,
 
   /* In windows, this will init the winsock stuff */
   ::curl_global_init(CURL_GLOBAL_ALL);
-  
+
   std::string::size_type cc;
   for ( cc = 0; cc < files.size(); cc ++ )
     {
@@ -169,6 +169,7 @@ bool cmCTestSubmit::SubmitUsingFTP(const std::string& localprefix,
         }
       // always cleanup
       ::curl_easy_cleanup(curl);
+      std::cout << "Uploaded: " + local_file << std::endl;
       }
     }
   ::curl_global_cleanup(); 
@@ -372,9 +373,11 @@ bool cmCTestSubmit::TriggerUsingHTTP(const std::vector<std::string>& files,
         }
       // always cleanup
       ::curl_easy_cleanup(curl);
+      std::cout << std::endl;
       }
     }
   ::curl_global_cleanup(); 
+  std::cout << "Dart server triggered..." << std::endl;
   return true;
 }
 
