@@ -1044,7 +1044,6 @@ int SystemTools::Strucmp(const char *s1, const char *s2)
  
   return tolower(*(unsigned char *) s1) - tolower(*(unsigned char *) s2);
 
-#endif
 }
 
 // return true if the file exists
