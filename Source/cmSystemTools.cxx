@@ -347,7 +347,6 @@ void cmSystemTools::CopyFileIfDifferent(const char* source,
 {
   if(cmSystemTools::FilesDiffer(source, destination))
     {
-    cmSystemTools::Error("doing copy ", destination);
     cmSystemTools::cmCopyFile(source, destination);
     }
 }
