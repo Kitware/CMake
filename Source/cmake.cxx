@@ -1635,10 +1635,7 @@ int cmake::CheckBuildSystem()
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   // We do not need to rerun CMake.  Check dependency integrity.
-  if(const char* depCheck = mf->GetDefinition("CMAKE_DEPENDS_CHECK"))
-    {
-    cmLocalUnixMakefileGenerator2::CheckDependencies(depCheck);
-    }
+  cmLocalUnixMakefileGenerator2::CheckDependencies(mf);
 #endif
 
   // No need to rerun.

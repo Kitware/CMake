@@ -46,6 +46,11 @@ SET(SRCS
   cmake.h
   cmakewizard.cxx
   cmakewizard.h
+
+  cmDepends.h
+  cmDepends.cxx
+  cmDependsC.h
+  cmDependsC.cxx
   )
 
 

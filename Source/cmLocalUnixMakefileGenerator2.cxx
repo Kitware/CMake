@@ -16,17 +16,20 @@
 =========================================================================*/
 #include "cmLocalUnixMakefileGenerator2.h"
 
+#include "cmDepends.h"
+#include "cmDependsC.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 
+#include <memory> // auto_ptr
 #include <queue>
 
 #include <assert.h>
 
 // Quick-switch for generating old makefiles.
-#if 0
+#if 1
 # define CMLUMG_MAKEFILE_NAME "Makefile"
 #else
 # define CMLUMG_WRITE_OLD_MAKEFILE
@@ -237,16 +240,33 @@ void cmLocalUnixMakefileGenerator2::GenerateCMakefile()
 
   // Set the set of files to check for dependency integrity.
   cmakefileStream
-    << "# The set of files whose dependency integrity should be checked:\n"
-    << "SET(CMAKE_DEPENDS_CHECK\n";
-  for(std::set<cmStdString>::const_iterator i = m_CheckDependFiles.begin();
-      i != m_CheckDependFiles.end(); ++i)
+    << "# The set of files whose dependency integrity should be checked:\n";
+  cmakefileStream
+    << "SET(CMAKE_DEPENDS_LANGUAGES\n";
+  for(std::map<cmStdString, IntegrityCheckSet>::const_iterator
+        l = m_CheckDependFiles.begin();
+      l != m_CheckDependFiles.end(); ++l)
     {
     cmakefileStream
-      << "  \"" << this->ConvertToRelativePath(i->c_str()).c_str() << "\"\n";
+      << "  \"" << l->first.c_str() << "\"\n";
     }
   cmakefileStream
     << "  )\n";
+  for(std::map<cmStdString, IntegrityCheckSet>::const_iterator
+        l = m_CheckDependFiles.begin();
+      l != m_CheckDependFiles.end(); ++l)
+    {
+    cmakefileStream
+      << "SET(CMAKE_DEPENDS_CHECK_" << l->first.c_str() << "\n";
+    for(std::set<cmStdString>::const_iterator i = l->second.begin();
+        i != l->second.end(); ++i)
+      {
+      cmakefileStream
+        << "  \"" << this->ConvertToRelativePath(i->c_str()).c_str() << "\"\n";
+      }
+    cmakefileStream
+      << "  )\n";
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -278,7 +298,6 @@ cmLocalUnixMakefileGenerator2
   std::string depBase = dir;
   depBase += "/";
   depBase += target.GetName();
-  std::string depMakeFile = this->GenerateDependsMakeFile(depBase.c_str());
 
   // Construct the rule file name.
   std::string ruleFileName = dir;
@@ -301,13 +320,6 @@ cmLocalUnixMakefileGenerator2
   this->WriteDisclaimer(ruleFileStream);
   ruleFileStream
     << "# Rule file for target " << target.GetName() << ".\n\n";
-
-  // Include the dependencies for the target.
-  ruleFileStream
-    << "# Include any dependencies generated for this rule.\n"
-    << m_IncludeDirective << " "
-    << this->ConvertToOutputForExisting(depMakeFile.c_str()).c_str()
-    << "\n\n";
 
   // Include the rule file for each object.
   if(!objects.empty())
@@ -371,19 +383,27 @@ cmLocalUnixMakefileGenerator2
   // Get the full path name of the object file.
   std::string obj = this->GetObjectFileName(target, source);
 
-  // Save this in the target's list of object files.
-  objects.push_back(obj);
-
-  // The object file should be checked for dependency integrity.
-  m_CheckDependFiles.insert(obj);
-
   // Create the directory containing the object file.  This may be a
   // subdirectory under the target's directory.
   std::string dir = cmSystemTools::GetFilenamePath(obj.c_str());
   cmSystemTools::MakeDirectory(this->ConvertToFullPath(dir).c_str());
 
   // Generate the build-time dependencies file for this object file.
-  std::string depMakeFile = this->GenerateDependsMakeFile(obj.c_str());
+  std::string depMakeFile;
+  std::string depMarkFile;
+  if(!this->GenerateDependsMakeFile(lang, obj.c_str(),
+                                    depMakeFile, depMarkFile))
+    {
+    cmSystemTools::Error("No dependency checker available for language \"",
+                         lang, "\".");
+    return;
+    }
+
+  // Save this in the target's list of object files.
+  objects.push_back(obj);
+
+  // The object file should be checked for dependency integrity.
+  m_CheckDependFiles[lang].insert(obj);
 
   // Open the rule file for writing.  This should be copy-if-different
   // because the rules may depend on this file itself.
@@ -424,8 +444,6 @@ cmLocalUnixMakefileGenerator2
   depends.push_back(ruleFileName);
 
   // Write the dependency generation rule.
-  std::string depTarget = obj;
-  depTarget += ".depends";
   {
   std::string depEcho = "Scanning ";
   depEcho += lang;
@@ -453,7 +471,7 @@ cmLocalUnixMakefileGenerator2
 
   // Write the rule.
   this->WriteMakeRule(ruleFileStream, 0, depEcho.c_str(),
-                      depTarget.c_str(), depends, commands);
+                      depMarkFile.c_str(), depends, commands);
   }
 
   // Write the build rule.
@@ -676,30 +694,28 @@ cmLocalUnixMakefileGenerator2
 }
 
 //----------------------------------------------------------------------------
-std::string
+bool
 cmLocalUnixMakefileGenerator2
-::GenerateDependsMakeFile(const char* file)
+::GenerateDependsMakeFile(const std::string& lang, const char* objFile,
+                          std::string& depMakeFile, std::string& depMarkFile)
 {
-  // Check if the build-time dependencies file exists.
-  std::string depMarkFile = file;
-  depMarkFile += ".depends";
-  std::string depMakeFile = depMarkFile;
-  depMakeFile += ".make";
-  std::string depMakeFileFull = this->ConvertToFullPath(depMakeFile);
-  if(cmSystemTools::FileExists(depMakeFileFull.c_str()))
+  // Construct a checker for the given language.
+  std::auto_ptr<cmDepends>
+    checker(this->GetDependsChecker(lang,
+                                    m_Makefile->GetStartOutputDirectory(),
+                                    objFile));
+  if(checker.get())
     {
-    // The build-time dependencies file already exists.  Check it.
-    this->CheckDependencies(m_Makefile->GetStartOutputDirectory(), file);
+    // Save the make and mark file names.
+    depMakeFile = checker->GetMakeFileName();
+    depMarkFile = checker->GetMarkFileName();
+
+    // Check the dependencies.
+    checker->Check();
+
+    return true;
     }
-  else
-    {
-    // The build-time dependencies file does not exist.  Create an
-    // empty one.
-    std::string depMarkFileFull = this->ConvertToFullPath(depMarkFile);
-    this->WriteEmptyDependMakeFile(file, depMarkFileFull.c_str(),
-                                   depMakeFileFull.c_str());
-    }
-  return depMakeFile;
+  return false;
 }
 
 //----------------------------------------------------------------------------
@@ -2687,6 +2703,19 @@ cmLocalUnixMakefileGenerator2
 }
 
 //----------------------------------------------------------------------------
+cmDepends*
+cmLocalUnixMakefileGenerator2::GetDependsChecker(const std::string& lang,
+                                                 const char* dir,
+                                                 const char* objFile)
+{
+  if(lang == "C" || lang == "CXX" || lang == "RC")
+    {
+    return new cmDependsC(dir, objFile);
+    }
+  return 0;
+}
+
+//----------------------------------------------------------------------------
 bool
 cmLocalUnixMakefileGenerator2
 ::ScanDependencies(std::vector<std::string> const& args)
@@ -2718,292 +2747,49 @@ cmLocalUnixMakefileGenerator2
   if(lang == "C" || lang == "CXX" || lang == "RC")
     {
     // TODO: Handle RC (resource files) dependencies correctly.
-    return cmLocalUnixMakefileGenerator2::ScanDependenciesC(objFile, srcFile,
-                                                            includes);
+    cmDependsC scanner(".", objFile, srcFile, includes);
+    scanner.Write();
+    return true;
     }
   return false;
 }
 
 //----------------------------------------------------------------------------
-void
-cmLocalUnixMakefileGenerator2ScanDependenciesC(
-  std::ifstream& fin,
-  std::set<cmStdString>& encountered,
-  std::queue<cmStdString>& unscanned)
+void cmLocalUnixMakefileGenerator2::CheckDependencies(cmMakefile* mf)
 {
-  // Regular expression to identify C preprocessor include directives.
-  cmsys::RegularExpression
-    includeLine("^[ \t]*#[ \t]*include[ \t]*[<\"]([^\">]+)[\">]");
-
-  // Read one line at a time.
-  std::string line;
-  while(cmSystemTools::GetLineFromStream(fin, line))
+  // Get the list of languages that may have sources to check.
+  const char* langDef = mf->GetDefinition("CMAKE_DEPENDS_LANGUAGES");
+  if(!langDef)
     {
-    // Match include directives.  TODO: Support include regex and
-    // ignore regex.  Possibly also support directory-based inclusion
-    // in dependencies.
-    if(includeLine.find(line.c_str()))
-      {
-      // Get the file being included.
-      std::string includeFile = includeLine.match(1);
-
-      // Queue the file if it has not yet been encountered.
-      if(encountered.find(includeFile) == encountered.end())
-        {
-        encountered.insert(includeFile);
-        unscanned.push(includeFile);
-        }
-      }
+    return;
     }
-}
+  std::vector<std::string> languages;
+  cmSystemTools::ExpandListArgument(langDef, languages);
 
-//----------------------------------------------------------------------------
-bool
-cmLocalUnixMakefileGenerator2
-::ScanDependenciesC(const char* objFile, const char* srcFile,
-                    std::vector<std::string> const& includes)
-{
-  // Walk the dependency graph starting with the source file.
-  std::set<cmStdString> dependencies;
-  std::set<cmStdString> encountered;
-  std::set<cmStdString> scanned;
-  std::queue<cmStdString> unscanned;
-  unscanned.push(srcFile);
-  encountered.insert(srcFile);
-  while(!unscanned.empty())
+  // For each language get the set of files to check.
+  for(std::vector<std::string>::iterator l = languages.begin();
+      l != languages.end(); ++l)
     {
-    // Get the next file to scan.
-    std::string fname = unscanned.front();
-    unscanned.pop();
-
-    // If not a full path, find the file in the include path.
-    std::string fullName;
-    if(cmSystemTools::FileIsFullPath(fname.c_str()))
+    std::string depCheck = "CMAKE_DEPENDS_CHECK_";
+    depCheck += *l;
+    if(const char* fileDef = mf->GetDefinition(depCheck.c_str()))
       {
-      fullName = fname;
-      }
-    else
-      {
-      for(std::vector<std::string>::const_iterator i = includes.begin();
-          i != includes.end(); ++i)
+      // Check each file.  The current working directory is already
+      // correct.
+      std::vector<std::string> files;
+      cmSystemTools::ExpandListArgument(fileDef, files);
+      for(std::vector<std::string>::iterator f = files.begin();
+          f != files.end(); ++f)
         {
-        std::string temp = *i;
-        temp += "/";
-        temp += fname;
-        if(cmSystemTools::FileExists(temp.c_str()))
+        // Construct a checker for the given language.
+        std::auto_ptr<cmDepends>
+          checker(cmLocalUnixMakefileGenerator2
+                  ::GetDependsChecker(*l, ".", f->c_str()));
+        if(checker.get())
           {
-          fullName = temp;
-          break;
+          checker->Check();
           }
         }
       }
-
-    // Scan the file if it was found and has not been scanned already.
-    if(fullName.size() && (scanned.find(fullName) == scanned.end()))
-      {
-      // Record scanned files.
-      scanned.insert(fullName);
-
-      // Try to scan the file.  Just leave it out if we cannot find
-      // it.
-      std::ifstream fin(fullName.c_str());
-      if(fin)
-        {
-        // Add this file as a dependency.
-        dependencies.insert(fullName);
-
-        // Scan this file for new dependencies.
-        cmLocalUnixMakefileGenerator2ScanDependenciesC(fin, encountered,
-                                                       unscanned);
-        }
-      }
     }
-
-  // Write the dependencies to the output file.
-  std::string depMarkFile = objFile;
-  std::string depMakeFile = objFile;
-  depMarkFile += ".depends";
-  depMakeFile += ".depends.make";
-  cmGeneratedFileStream fout(depMakeFile.c_str());
-  fout << "# Dependencies for " << objFile << std::endl;
-  for(std::set<cmStdString>::iterator i=dependencies.begin();
-      i != dependencies.end(); ++i)
-    {
-    fout << objFile << ": "
-         << cmSystemTools::ConvertToOutputPath(i->c_str()).c_str()
-         << std::endl;
-    }
-  fout << std::endl;
-  fout << "# Dependencies for " << depMarkFile.c_str() << std::endl;
-  for(std::set<cmStdString>::iterator i=dependencies.begin();
-      i != dependencies.end(); ++i)
-    {
-    fout << depMarkFile.c_str() << ": "
-         << cmSystemTools::ConvertToOutputPath(i->c_str()).c_str()
-         << std::endl;
-    }
-
-  // If we could write the dependencies, touch the corresponding
-  // depends file to mark dependencies up to date.
-  if(fout)
-    {
-    std::ofstream fmark(depMarkFile.c_str());
-    fmark << "Dependencies updated for " << objFile << "\n";
-    }
-
-  return true;
-}
-
-//----------------------------------------------------------------------------
-void
-cmLocalUnixMakefileGenerator2
-::CheckDependencies(const char* depCheck)
-{
-  // Get the list of files to scan.  This is given through the command
-  // line hook cmake file.
-  std::vector<std::string> files;
-  cmSystemTools::ExpandListArgument(depCheck, files);
-
-  // Check each file.  The current working directory is already
-  // correct.
-  for(std::vector<std::string>::iterator f = files.begin();
-      f != files.end(); ++f)
-    {
-    cmLocalUnixMakefileGenerator2::CheckDependencies(".", f->c_str());
-    }
-}
-
-//----------------------------------------------------------------------------
-void
-cmLocalUnixMakefileGenerator2
-::CheckDependencies(const char* dir, const char* file)
-{
-  // Check the dependencies associated with the given file whose path
-  // is specified relative to the given directory.  If any dependency
-  // is missing then dependencies should be regenerated.
-  bool regenerate = false;
-
-  // Construct the names of the mark and make files.
-  std::string depMarkFileFull = dir;
-  depMarkFileFull += "/";
-  depMarkFileFull += file;
-  depMarkFileFull += ".depends";
-  std::string depMakeFileFull = depMarkFileFull;
-  depMakeFileFull += ".make";
-
-  // Open the dependency makefile.
-  std::ifstream fin(depMakeFileFull.c_str());
-  if(fin)
-    {
-    // Parse dependencies.
-    std::string line;
-    std::string depender;
-    std::string dependee;
-    while(cmSystemTools::GetLineFromStream(fin, line))
-      {
-      // Skip empty lines and comments.
-      std::string::size_type pos = line.find_first_not_of(" \t\r\n");
-      if(pos == std::string::npos || line[pos] == '#')
-        {
-        continue;
-        }
-
-      // Strip leading whitespace.
-      if(pos > 0)
-        {
-        line = line.substr(pos);
-        }
-
-      // Skip lines too short to have a dependency.
-      if(line.size() < 3)
-        {
-        continue;
-        }
-
-      // Find the colon on the line.  Skip the first two characters to
-      // avoid finding the colon in a drive letter on Windows.  Ignore
-      // the line if a colon cannot be found.
-      if((pos = line.find(':', 2)) == std::string::npos)
-        {
-        continue;
-        }
-
-      // Split the line into depender and dependee.
-      depender = line.substr(0, pos);
-      dependee = line.substr(pos+1);
-
-      // Strip whitespace from the dependee.
-      if((pos = dependee.find_first_not_of(" \t\r\n")) != std::string::npos &&
-         pos > 0)
-        {
-        dependee = dependee.substr(pos);
-        }
-      if((pos = dependee.find_last_not_of(" \t\r\n")) != std::string::npos)
-        {
-        dependee = dependee.substr(0, pos+1);
-        }
-
-      // Convert dependee to a full path.
-      if(!cmSystemTools::FileIsFullPath(dependee.c_str()))
-        {
-        dependee = cmSystemTools::CollapseFullPath(dependee.c_str(), dir);
-        }
-
-      // If the dependee does not exist, we need to regenerate
-      // dependencies and the depender should be removed.
-      if(!cmSystemTools::FileExists(dependee.c_str()))
-        {
-        // Strip whitespace from the depender.
-        if((pos = depender.find_last_not_of(" \t\r\n")) != std::string::npos)
-          {
-          depender = depender.substr(0, pos+1);
-          }
-
-        // Convert depender to a full path.
-        if(!cmSystemTools::FileIsFullPath(depender.c_str()))
-          {
-          depender = cmSystemTools::CollapseFullPath(depender.c_str(), dir);
-          }
-
-        // Remove the depender.
-        cmSystemTools::RemoveFile(depender.c_str());
-
-        // Mark the need for regeneration.
-        regenerate = true;
-        }
-      }
-    }
-  else
-    {
-    // Could not open the dependencies file.  It needs to be
-    // regenerated.
-    regenerate = true;
-    }
-
-  // If the dependencies file needs to be regenerated, create an empty
-  // one and delete the mark file.
-  if(regenerate)
-    {
-    cmLocalUnixMakefileGenerator2
-      ::WriteEmptyDependMakeFile(file, depMarkFileFull.c_str(),
-                                 depMakeFileFull.c_str());
-    }
-}
-
-//----------------------------------------------------------------------------
-void
-cmLocalUnixMakefileGenerator2
-::WriteEmptyDependMakeFile(const char* file,
-                           const char* depMarkFileFull,
-                           const char* depMakeFileFull)
-{
-  // Remove the dependency mark file to be sure dependencies will be
-  // regenerated.
-  cmSystemTools::RemoveFile(depMarkFileFull);
-
-  // Write an empty dependency file.
-  cmGeneratedFileStream depFileStream(depMakeFileFull);
-  depFileStream
-    << "# Empty dependencies file for " << file << ".\n"
-    << "# This may be replaced when dependencies are built.\n";
 }

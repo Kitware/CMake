@@ -21,6 +21,7 @@
 
 class cmCustomCommand;
 class cmDependInformation;
+class cmDepends;
 class cmMakeDepend;
 class cmTarget;
 class cmSourceFile;
@@ -57,7 +58,7 @@ public:
   static bool ScanDependencies(std::vector<std::string> const& args);
 
   /** Called from command-line hook to check dependencies.  */
-  static void CheckDependencies(const char* depCheck);
+  static void CheckDependencies(cmMakefile* mf);
 
 protected:
 
@@ -69,7 +70,10 @@ protected:
                               std::vector<std::string>& objects);
   void GenerateCustomRuleFile(const cmCustomCommand& cc);
   void GenerateUtilityRuleFile(const cmTarget& target);
-  std::string GenerateDependsMakeFile(const char* file);
+  bool GenerateDependsMakeFile(const std::string& lang,
+                               const char* objFile,
+                               std::string& depMakeFile,
+                               std::string& depMarkFile);
   void WriteMakeRule(std::ostream& os,
                      const char* comment,
                      const char* preEcho,
@@ -163,12 +167,10 @@ protected:
   std::string GetRecursiveMakeCall(const char* tgt);
   void WriteJumpAndBuildRules(std::ostream& makefileStream);
 
-  static bool ScanDependenciesC(const char* objFile, const char* srcFile,
-                                std::vector<std::string> const& includes);
-  static void CheckDependencies(const char* dir, const char* file);
-  static void WriteEmptyDependMakeFile(const char* file,
-                                       const char* depMarkFileFull,
-                                       const char* depMakeFileFull);
+  static cmDepends* GetDependsChecker(const std::string& lang,
+                                      const char* dir,
+                                      const char* objFile);
+
 private:
   // Map from target name to build directory containing it for
   // jump-and-build targets.
@@ -179,8 +181,11 @@ private:
   };
   std::map<cmStdString, RemoteTarget> m_JumpAndBuild;
 
-  // List the files for which to check dependency integrity.
-  std::set<cmStdString> m_CheckDependFiles;
+  // List the files for which to check dependency integrity.  Each
+  // language has its own list because integrity may be checked
+  // differently.
+  struct IntegrityCheckSet: public std::set<cmStdString> {};
+  std::map<cmStdString, IntegrityCheckSet> m_CheckDependFiles;
 
   // Command used when a rule has no dependencies or commands.
   std::vector<std::string> m_EmptyCommands;
