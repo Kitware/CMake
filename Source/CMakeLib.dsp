@@ -91,7 +91,7 @@ SOURCE=.\cmake.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmNMakeMakefileGenerator.cxx
+SOURCE=.\cmakewizard.cxx
 # End Source File
 # Begin Source File
 
@@ -112,10 +112,6 @@ SOURCE=.\cmCommands.cxx
 # Begin Source File
 
 SOURCE=.\cmCustomCommand.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=.\cmakewizard.cxx
 # End Source File
 # Begin Source File
 
@@ -147,19 +143,15 @@ SOURCE=.\cmMakefileGenerator.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmMSProjectGenerator.cxx
-# End Source File
-# Begin Source File
-
 SOURCE=.\cmMSDotNETGenerator.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmSLNWriter.cxx
+SOURCE=.\cmMSProjectGenerator.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmVCProjWriter.cxx
+SOURCE=.\cmNMakeMakefileGenerator.cxx
 # End Source File
 # Begin Source File
 
