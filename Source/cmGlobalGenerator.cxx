@@ -204,8 +204,8 @@ void cmGlobalGenerator::EnableLanguage(const char* lang,
         {
         // for old versions of CMake ListFiles
         const char* versionValue
-          = mf->GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
-        if (!versionValue || atof(versionValue) <= 1.4)
+          = mf->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
+        if (atof(versionValue) <= 1.4)
           {
           std::string ifpath = root + "/Modules/CMakeBackwardCompatibilityC.cmake";
           mf->ReadListFile(0,ifpath.c_str()); 
@@ -218,8 +218,8 @@ void cmGlobalGenerator::EnableLanguage(const char* lang,
         {
         // for old versions of CMake ListFiles
         const char* versionValue
-          = mf->GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
-        if (!versionValue || atof(versionValue) <= 1.4)
+          = mf->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
+        if (atof(versionValue) <= 1.4)
           {
           std::string nfpath = root + "/Modules/CMakeBackwardCompatibilityCXX.cmake";
           mf->ReadListFile(0,nfpath.c_str()); 
