@@ -36,6 +36,7 @@ public:
     m_AbstractClass = false;
     m_HeaderFileOnly = false;
     m_IsExecutable = false;
+    m_WrapExclude = false;
     }
   
   /**
@@ -62,6 +63,11 @@ public:
    * Indicate whether the class is abstract (non-instantiable).
    */
   bool m_AbstractClass;
+
+  /**
+   * Indicate whether the class should not be wrapped
+   */
+  bool m_WrapExclude;
 
   /**
    * Indicate whether this class is defined with only the header file.
