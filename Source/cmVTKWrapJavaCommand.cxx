@@ -140,6 +140,7 @@ void cmVTKWrapJavaCommand::FinalPass()
 
   m_Makefile->AddUtilityCommand((m_LibraryName+"JavaClasses").c_str(),
                                 "",
+                                "",
                                 true,
                                 alldepends,
                                 empty);

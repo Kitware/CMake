@@ -53,25 +53,32 @@ bool cmAddCustomTargetCommand::InitialPass(std::vector<std::string>& args)
   m_Makefile->ExpandVariablesInString(args[0]);
 
   // all target option
-  std::string result;
+  std::string arguments;
   std::vector<std::string>::iterator s = args.begin();
-  ++s;
+  ++s; // move past args[0] as it is already to be used
   if (args.size() >= 3)
     {
     if (args[1] == "ALL")
       {
       all = true;
-      ++s;
+      ++s; // skip all 
       }
+    }
+  std::string command;
+  if(s != args.end())
+    {
+    command = m_Makefile->ExpandVariablesInString(*s);
+    ++s;
     }
   for (;s != args.end(); ++s)
     {
     m_Makefile->ExpandVariablesInString(*s);
-    result += cmSystemTools::EscapeSpaces(s->c_str());
-    result += " ";
+    arguments += cmSystemTools::EscapeSpaces(s->c_str());
+    arguments += " ";
     }
   m_Makefile->AddUtilityCommand(args[0].c_str(), 
-                                result.c_str(), all);
+                                command.c_str(),
+                                arguments.c_str(), all);
 
   return true;
 }

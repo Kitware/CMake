@@ -152,21 +152,22 @@ void cmDSPWriter::AddDSPBuildRule(cmSourceGroup& sourceGroup)
   std::string dsprule = "${CMAKE_COMMAND} ";
   m_Makefile->ExpandVariablesInString(dsprule);
   dsprule = cmSystemTools::HandleNetworkPaths(dsprule.c_str());
-  dsprule += makefileIn;
-  dsprule += " -DSP -H\"";
-  dsprule += cmSystemTools::HandleNetworkPaths(m_Makefile->GetHomeDirectory());
-  dsprule += "\" -S\"";
-  dsprule += cmSystemTools::HandleNetworkPaths(m_Makefile->GetStartDirectory());
-  dsprule += "\" -O\"";
-  dsprule += cmSystemTools::HandleNetworkPaths(m_Makefile->GetStartOutputDirectory());
-  dsprule += "\" -B\"";
-  dsprule += cmSystemTools::HandleNetworkPaths(m_Makefile->GetHomeOutputDirectory());
-  dsprule += "\"";
-  m_Makefile->ExpandVariablesInString(dsprule);
+  std::string args = makefileIn;
+  args += " -DSP -H\"";
+  args += cmSystemTools::HandleNetworkPaths(m_Makefile->GetHomeDirectory());
+  args += "\" -S\"";
+  args += cmSystemTools::HandleNetworkPaths(m_Makefile->GetStartDirectory());
+  args += "\" -O\"";
+  args += cmSystemTools::HandleNetworkPaths(m_Makefile->GetStartOutputDirectory());
+  args += "\" -B\"";
+  args += cmSystemTools::HandleNetworkPaths(m_Makefile->GetHomeOutputDirectory());
+  args += "\"";
+  m_Makefile->ExpandVariablesInString(args);
   
   std::vector<std::string> outputs;
   outputs.push_back(dspname);
   cmCustomCommand cc(makefileIn.c_str(), dsprule.c_str(),
+                     args.c_str(),
 		     m_Makefile->GetListFiles(), 
 		     outputs);
   sourceGroup.AddCustomCommand(cc);
@@ -263,9 +264,11 @@ void cmDSPWriter::WriteDSPFile(std::ostream& fout,
             c != commands.end(); ++c)
           {
           totalCommandStr += "\n\t";
-          temp= c->first;
+          temp= c->second.m_Command;
           cmSystemTools::ConvertToWindowsSlashes(temp);
           totalCommandStr += temp;
+          totalCommandStr += " ";
+          totalCommandStr += c->second.m_Arguments;
           totalCommand.Merge(c->second);
           }      
         // Create a dummy file with the name of the source if it does

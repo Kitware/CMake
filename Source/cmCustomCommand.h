@@ -53,6 +53,7 @@ class cmCustomCommand
 {
 public:
   cmCustomCommand(const char *src, const char *command,
+                  const char* arguments,
                   std::vector<std::string> dep,
                   std::vector<std::string> out);
   cmCustomCommand(const cmCustomCommand& r);
@@ -69,11 +70,17 @@ public:
   std::string GetSourceName() const {return m_Source;}
   void SetSourceName(const char *name) {m_Source = name;}
 
-  /**
-   * Return the command to execute
-   */
+  ///! Return the command to execute with arguments
+  std::string GetCommandAndArguments() const
+    {return m_Command + " " + m_Arguments;}
+  
+  ///! Return the command to execute
   std::string GetCommand() const {return m_Command;}
   void SetCommand(const char *cmd) {m_Command = cmd;}
+
+  ///! Return the commands arguments
+  std::string GetArguments() const {return m_Arguments;}
+  void SetArguments(const char *arg) {m_Arguments = arg;}
   
   /**
    * Return the vector that holds the list of dependencies
@@ -90,6 +97,7 @@ public:
 private:
   std::string m_Source;
   std::string m_Command;
+  std::string m_Arguments;
   std::vector<std::string> m_Depends;
   std::vector<std::string> m_Outputs;
 };

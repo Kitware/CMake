@@ -45,10 +45,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * The constructor
  */
 cmCustomCommand::cmCustomCommand(const char *src, const char *command,
+                                 const char* arguments,
                                  std::vector<std::string> dep,
                                  std::vector<std::string> out):
   m_Source(src),
   m_Command(command),
+  m_Arguments(arguments),
   m_Depends(dep),
   m_Outputs(out)
 {
@@ -61,6 +63,7 @@ cmCustomCommand::cmCustomCommand(const char *src, const char *command,
 cmCustomCommand::cmCustomCommand(const cmCustomCommand& r):
   m_Source(r.m_Source),
   m_Command(r.m_Command),
+  m_Arguments(r.m_Arguments),
   m_Depends(r.m_Depends),
   m_Outputs(r.m_Outputs)
 {
@@ -70,6 +73,7 @@ void cmCustomCommand::ExpandVariables(const cmMakefile &mf)
 {
   mf.ExpandVariablesInString(m_Source);
   mf.ExpandVariablesInString(m_Command);
+  mf.ExpandVariablesInString(m_Arguments);
 
   for (std::vector<std::string>::iterator i = m_Depends.begin();
        i != m_Depends.end(); ++i)

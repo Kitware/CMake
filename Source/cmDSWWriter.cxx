@@ -102,7 +102,8 @@ void cmDSWWriter::WriteDSWFile(std::ostream& fout)
   allListFiles.push_back(m_Makefile);
   // add a special target that depends on ALL projects for easy build
   // of Debug only
-  m_Makefile->AddUtilityCommand("ALL_BUILD", "echo \"Build all projects\"", false);
+  m_Makefile->AddUtilityCommand("ALL_BUILD", "echo", "\"Build all projects\"",
+                                false);
   m_Makefile->FindSubDirectoryCMakeListsFiles(allListFiles);
   // For each cmMakefile, create a DSP for it, and
   // add it to this DSW file

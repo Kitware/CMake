@@ -470,9 +470,7 @@ void cmMakefile::AddCustomCommand(const char* source,
   if (m_Targets.find(target) != m_Targets.end())
     {
     std::string c = cmSystemTools::EscapeSpaces(command);
-    c += " ";
-    c += commandArgs;
-    cmCustomCommand cc(source,c.c_str(),depends,outputs);
+    cmCustomCommand cc(source,c.c_str(),commandArgs,depends,outputs);
     m_Targets[target].GetCustomCommands().push_back(cc);
     std::string cacheCommand = command;
     this->ExpandVariablesInString(cacheCommand);
@@ -707,15 +705,17 @@ void cmMakefile::AddExecutable(const char *exeName,
 
 void cmMakefile::AddUtilityCommand(const char* utilityName,
                                    const char* command,
+                                   const char* arguments,
                                    bool all)
 {
   std::vector<std::string> empty;
-  this->AddUtilityCommand(utilityName,command,all,
+  this->AddUtilityCommand(utilityName,command,arguments,all,
                           empty,empty);
 }
 
 void cmMakefile::AddUtilityCommand(const char* utilityName,
                                    const char* command,
+                                   const char* arguments,
                                    bool all,
                                    const std::vector<std::string> &dep,
                                    const std::vector<std::string> &out)
@@ -723,7 +723,7 @@ void cmMakefile::AddUtilityCommand(const char* utilityName,
   cmTarget target;
   target.SetType(cmTarget::UTILITY);
   target.SetInAll(all);
-  cmCustomCommand cc(utilityName, command, dep, out);
+  cmCustomCommand cc(utilityName, command, arguments, dep, out);
   target.GetCustomCommands().push_back(cc);
   m_Targets.insert(cmTargets::value_type(utilityName,target));
 }

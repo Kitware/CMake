@@ -167,9 +167,11 @@ public:
    */
   void AddUtilityCommand(const char* utilityName,
                          const char* command,
+                         const char* arguments,
                          bool all);
   void AddUtilityCommand(const char* utilityName,
                          const char* command,
+                         const char* arguments,
                          bool all,
                          const std::vector<std::string> &depends,
                          const std::vector<std::string> &outputs);

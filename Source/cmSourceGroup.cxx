@@ -94,32 +94,40 @@ void cmSourceGroup::AddSource(const char* name)
  */
 void cmSourceGroup::AddCustomCommand(const cmCustomCommand &cmd)
 {
+  std::string commandAndArgs = cmd.GetCommandAndArguments();
   BuildRules::iterator s = m_BuildRules.find(cmd.GetSourceName());
   if(s == m_BuildRules.end())
     {
     // The source was not found.  Add it with this command.
-    m_BuildRules[cmd.GetSourceName()][cmd.GetCommand()].
-      m_Depends.insert(cmd.GetDepends().begin(),cmd.GetDepends().end());
-    m_BuildRules[cmd.GetSourceName()][cmd.GetCommand()].
-      m_Outputs.insert(cmd.GetOutputs().begin(),cmd.GetOutputs().end());
+    CommandFiles& cmdFiles = m_BuildRules[cmd.GetSourceName()][commandAndArgs];
+    cmdFiles.m_Command = cmd.GetCommand();
+    cmdFiles.m_Arguments = cmd.GetArguments();
+    cmdFiles.m_Depends.insert(cmd.GetDepends().begin(),cmd.GetDepends().end());
+    cmdFiles.m_Outputs.insert(cmd.GetOutputs().begin(),cmd.GetOutputs().end());
     return;
     }
   
   // The source already exists.  See if the command exists.
   Commands& commands = s->second;
-  Commands::iterator c = commands.find(cmd.GetCommand());
+  Commands::iterator c = commands.find(commandAndArgs);
   if(c == commands.end())
     {
     // The command did not exist.  Add it.
-    commands[cmd.GetCommand()].m_Depends.insert(cmd.GetDepends().begin(), cmd.GetDepends().end());
-    commands[cmd.GetCommand()].m_Outputs.insert(cmd.GetOutputs().begin(), cmd.GetOutputs().end());
+    commands[commandAndArgs].m_Command = cmd.GetCommand();
+    commands[commandAndArgs].m_Arguments = cmd.GetArguments();
+    commands[commandAndArgs].m_Depends.insert(cmd.GetDepends().begin(),
+                                              cmd.GetDepends().end());
+    commands[commandAndArgs].m_Outputs.insert(cmd.GetOutputs().begin(),
+                                              cmd.GetOutputs().end());
     return;
     }
   
   // The command already exists for this source.  Merge the sets.
   CommandFiles& commandFiles = c->second;
-  commandFiles.m_Depends.insert(cmd.GetDepends().begin(), cmd.GetDepends().end());
-  commandFiles.m_Outputs.insert(cmd.GetOutputs().begin(), cmd.GetOutputs().end());
+  commandFiles.m_Depends.insert(cmd.GetDepends().begin(), 
+                                cmd.GetDepends().end());
+  commandFiles.m_Outputs.insert(cmd.GetOutputs().begin(),
+                                cmd.GetOutputs().end());
 }
 
 void cmSourceGroup::Print() const
@@ -132,7 +140,9 @@ void cmSourceGroup::Print() const
     for(Commands::const_iterator j = i->second.begin();
         j != i->second.end(); ++j)
       {
-      std::cout << "Command: " << j->first.c_str() << "\n";
+      std::cout << "FullCommand: " << j->first.c_str() << "\n";
+      std::cout << "Command: " << j->second.m_Command.c_str() << "\n";
+      std::cout << "Arguments: " << j->second.m_Arguments.c_str() << "\n";
       std::cout << "Command Outputs " << j->second.m_Outputs.size() << "\n";
       std::cout << "Command Depends " << j->second.m_Depends.size() << "\n";
       }

@@ -67,6 +67,8 @@ public:
     
     void Merge(const CommandFiles &r);
     
+    std::string m_Command;
+    std::string m_Arguments;
     std::set<std::string> m_Outputs;
     std::set<std::string> m_Depends;
   };
