@@ -2949,37 +2949,63 @@ std::string cmCTest::GenerateRegressionImages(const std::string& xml)
       if ( cmSystemTools::FileExists(filename.c_str()) )
         {
         long len = cmSystemTools::FileLength(filename.c_str());
-        std::ifstream ifs(filename.c_str(), std::ios::in 
-#ifdef _WIN32
-          | std::ios::binary
-#endif
-        );
-        unsigned char *file_buffer = new unsigned char [ len + 1 ];
-        ifs.read(reinterpret_cast<char*>(file_buffer), len);
-        unsigned char *encoded_buffer = new unsigned char [ static_cast<int>(len * 1.5 + 1) ];
-
-        unsigned long rlen = cmsysBase64_Encode(file_buffer, len, encoded_buffer, 1);
-        unsigned long cc;
-
-        ostr
-          << "\t\t\t<NamedMeasurement" 
-          << " " << measurementfile.match(1) << "=\"" << measurementfile.match(2) << "\""
-          << " " << measurementfile.match(3) << "=\"" << measurementfile.match(4) << "\""
-          << " encoding=\"base64\""
-          << ">" << std::endl << "\t\t\t\t<Value>";
-        for ( cc = 0; cc < rlen; cc ++ )
+        if ( len == 0 )
           {
-          ostr << encoded_buffer[cc];
-          if ( cc % 60 == 0 && cc )
+          std::string k1 = measurementfile.match(1);
+          std::string v1 = measurementfile.match(2);
+          std::string k2 = measurementfile.match(3);
+          std::string v2 = measurementfile.match(4);
+          if ( cmSystemTools::LowerCase(k1) == "type" )
             {
-            ostr << std::endl;
+            v1 = "text/string";
             }
+          if ( cmSystemTools::LowerCase(k2) == "type" )
+            {
+            v2 = "text/string";
+            }          
+          
+          ostr
+            << "\t\t\t<NamedMeasurement" 
+            << " " << k1 << "=\"" << v1 << "\""
+            << " " << k2 << "=\"" << v2 << "\""
+            << " encoding=\"none\""
+            << "><Value>Image " << filename.c_str() 
+            << " is empty</Value></NamedMeasurement>";
           }
-        ostr
-          << "</Value>" << std::endl << "\t\t\t</NamedMeasurement>" 
-          << std::endl;
-        delete [] file_buffer;
-        delete [] encoded_buffer;
+        else
+          {
+          std::ifstream ifs(filename.c_str(), std::ios::in 
+#ifdef _WIN32
+                            | std::ios::binary
+#endif
+            );
+          unsigned char *file_buffer = new unsigned char [ len + 1 ];
+          ifs.read(reinterpret_cast<char*>(file_buffer), len);
+          unsigned char *encoded_buffer = new unsigned char [ static_cast<int>(len * 1.5 + 5) ];
+          
+          unsigned long rlen = cmsysBase64_Encode(file_buffer, len, encoded_buffer, 1);
+          unsigned long cc;
+          
+          ostr
+            << "\t\t\t<NamedMeasurement" 
+          << " " << measurementfile.match(1) << "=\"" << measurementfile.match(2) << "\""
+            << " " << measurementfile.match(3) << "=\"" << measurementfile.match(4) << "\""
+            << " encoding=\"base64\""
+            << ">" << std::endl << "\t\t\t\t<Value>";
+          for ( cc = 0; cc < rlen; cc ++ )
+            {
+            ostr << encoded_buffer[cc];
+            if ( cc % 60 == 0 && cc )
+              {
+              ostr << std::endl;
+              }
+            }
+          ostr
+            << "</Value>" << std::endl << "\t\t\t</NamedMeasurement>" 
+            << std::endl;
+          delete [] file_buffer;
+          delete [] encoded_buffer;
+          }
         }
       else
         {
