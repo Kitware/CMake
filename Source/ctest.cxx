@@ -101,6 +101,15 @@ static const cmDocumentationEntry cmDocumentationSeeAlso[] =
 int main (int argc, char *argv[])
 {
   cmSystemTools::EnableMSVCDebugHook();
+  int nocwd = 0;
+
+  if ( cmSystemTools::GetCurrentWorkingDirectory().size() == 0 )
+    {
+    std::cerr << "Current working directory cannot be established." << std::endl;
+    nocwd = 1;
+    }
+
+
   
   // If there is a testing input file, check for documentation options
   // only if there are actually arguments.  We want running without
@@ -114,7 +123,7 @@ int main (int argc, char *argv[])
       std::cout << "*********************************" << std::endl;
       }
     cmDocumentation doc;
-    if(doc.CheckOptions(argc, argv))
+    if(doc.CheckOptions(argc, argv) || nocwd)
       {
       // Construct and print requested documentation.
       doc.SetName("ctest");

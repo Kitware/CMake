@@ -110,7 +110,15 @@ int main(int ac, char** av)
 int do_cmake(int ac, char** av)
 {
   cmDocumentation doc;
-  if(doc.CheckOptions(ac, av))
+  int nocwd = 0;
+
+  if ( cmSystemTools::GetCurrentWorkingDirectory().size() == 0 )
+    {
+    std::cerr << "Current working directory cannot be established." << std::endl;
+    nocwd = 1;
+    }
+
+  if(doc.CheckOptions(ac, av) || nocwd)
     {
     // Construct and print requested documentation.
     cmake hcm;
