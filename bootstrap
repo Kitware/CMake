@@ -515,6 +515,31 @@ EOF
 fi
 cmake_test_flags=
 
+# If we are on HP-UX, check for -Ae for the C compiler.
+cmake_test_flags="-Ae"
+if [ "x${cmake_system}" = "xHP-UX" ]; then
+  TMPFILE=`cmake_tmp_file`
+  cat > ${TMPFILE}.c <<EOF
+  int main(int argc, char** argv) { (void)argc; (void)argv; return 0; }
+EOF
+  cmake_need_Ae=0
+  if cmake_try_run "${cmake_c_compiler}" "${cmake_c_flags}" "${TMPFILE}.c" >> cmake_bootstrap.log 2>&1; then
+    :
+  else
+    if cmake_try_run "${cmake_c_compiler}" "${cmake_c_flags} ${cmake_test_flags}" "${TMPFILE}.c" >> cmake_bootstrap.log 2>&1; then
+      cmake_need_Ae=1
+    fi
+  fi
+  if [ "x${cmake_need_Ae}" = "x1" ]; then
+    cmake_c_flags="${cmake_c_flags} ${cmake_test_flags}"
+    echo "${cmake_c_compiler} needs ${cmake_test_flags}"
+  else
+    echo "${cmake_c_compiler} does not need ${cmake_test_flags}"
+  fi
+  rm -f "${TMPFILE}.c"
+fi
+cmake_test_flags=
+
 # Just to be safe, let us store compiler and flags to the header file
 
 cmake_report cmConfigure.h.tmp "/*"
