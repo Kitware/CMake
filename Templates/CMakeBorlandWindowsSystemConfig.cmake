@@ -36,8 +36,23 @@ SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO "-Od" CACHE STRING
 SET (CMAKE_CXX_FLAGS_MINSIZEREL "-O1" CACHE STRING
      "Flags used by the compiler during release minsize builds.")
 
-SET (CMAKE_CXX_FLAGS_DEBUG "-Od" CACHE STRING
+SET (CMAKE_CXX_FLAGS_DEBUG "-Od -v" CACHE STRING
      "Flags used by the compiler during debug builds.")
+
+SET (CMAKE_LINKER_FLAGS "" CACHE STRING
+     "Flags used by the linker.")
+
+SET (CMAKE_LINKER_FLAGS_DEBUG "-v" CACHE STRING
+     "Flags used by the linker during debug builds.")
+
+SET (CMAKE_LINKER_FLAGS_MINSIZEREL "" CACHE STRING
+     "Flags used by the linker during release minsize builds.")
+
+SET (CMAKE_LINKER_FLAGS_RELEASE "" CACHE STRING
+     "Flags used by the linker during release builds.")
+
+SET (CMAKE_LINKER_FLAGS_RELWITHDEBINFO "-v" CACHE STRING
+     "Flags used by the linker during Release with Debug Info builds.")
 
 SET (CMAKE_CXX_FLAGS "-w- -whid -waus -wpar" CACHE STRING
      "Flags used by the compiler during all build types, /GX /GR are for exceptions and rtti in VC++, /Zm1000 increases the compiler's memory allocation to support ANSI C++/stdlib.")

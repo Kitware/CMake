@@ -88,7 +88,8 @@ void cmBorlandMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     "CMAKE_OBJECT_FILE_SUFFIX            = @CMAKE_OBJECT_FILE_SUFFIX@\n"
     "CMAKE_EXECUTABLE_SUFFIX             = @CMAKE_EXECUTABLE_SUFFIX@\n"
     "CMAKE_STATICLIB_SUFFIX              = @CMAKE_STATICLIB_SUFFIX@\n"
-    "CMAKE_SHLIB_SUFFIX                  = @CMAKE_SHLIB_SUFFIX@\n"
+    "CMAKE_SHLIB_SUFFIX                  = @CMAKE_SHLIB_SUFFIX@\n" 
+    "CMAKE_LINKER_FLAGS                  = @CMAKE_LINKER_FLAGS@ @LINKER_BUILD_FLAGS@\n"
     "CMAKE_CXX_FLAGS      = -P @CMAKE_CXX_FLAGS@ @BUILD_FLAGS@\n";
   std::string buildType = "CMAKE_CXX_FLAGS_";
   buildType +=  m_Makefile->GetDefinition("CMAKE_BUILD_TYPE");
@@ -96,6 +97,14 @@ void cmBorlandMakefileGenerator::OutputMakeVariables(std::ostream& fout)
   m_Makefile->AddDefinition("BUILD_FLAGS",
                             m_Makefile->GetDefinition(
                               buildType.c_str()));
+  
+  buildType = "CMAKE_LINKER_FLAGS_";
+  buildType +=  m_Makefile->GetDefinition("CMAKE_BUILD_TYPE");
+  buildType = cmSystemTools::UpperCase(buildType);
+  m_Makefile->AddDefinition("LINKER_BUILD_FLAGS",
+                            m_Makefile->GetDefinition(
+                              buildType.c_str()));
+
   std::string replaceVars = variables;
   m_Makefile->ExpandVariablesInString(replaceVars);
   
@@ -327,7 +336,7 @@ void cmBorlandMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
   std::string depend = "$(";
   depend += name;
   depend += "_SRC_OBJS) $(" + std::string(name) + "_DEPEND_LIBS)";
-  std::string command = "$(CMAKE_CXX_COMPILER) -tWD  @&&|\n";
+  std::string command = "$(CMAKE_CXX_COMPILER) -tWD $(CMAKE_LINKER_FLAGS) @&&|\n";
   // must be executable name
   command += "-e";
   command += target;
@@ -409,7 +418,7 @@ void cmBorlandMakefileGenerator::OutputExecutableRule(std::ostream& fout,
   depend += std::string(name) + "_SRC_OBJS) $(" + std::string(name) + "_DEPEND_LIBS)";
   std::string command = 
     "$(CMAKE_CXX_COMPILER) ";
-  command += " -e" + target;
+  command += " $(CMAKE_LINKER_FLAGS) -e" + target;
   if(t.GetType() == cmTarget::WIN32_EXECUTABLE)
     {
     command +=  " -tWM ";
