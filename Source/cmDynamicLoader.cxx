@@ -186,7 +186,7 @@ int cmDynamicLoader::CloseLibrary(cmLibHandle lib)
 }
 
 cmDynamicLoaderFunction
-cmDynamicLoader::GetSymbolAddress(cmLibHandle lib, const char* sym)
+cmDynamicLoader::GetSymbolAddress(cmLibHandle /* lib */, const char* sym)
 {
   void *result=0;
   if(NSIsSymbolNameDefined(sym))
