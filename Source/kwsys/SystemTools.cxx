@@ -13,6 +13,7 @@
 =========================================================================*/
 #include "kwsysPrivate.h"
 #include KWSYS_HEADER(SystemTools.hxx)
+#include KWSYS_HEADER(Directory.hxx)
 
 #include KWSYS_HEADER(std/iostream)
 #include KWSYS_HEADER(std/fstream)
@@ -44,6 +45,10 @@ inline int Mkdir(const char* dir)
 {
   return _mkdir(dir);
 }
+inline int Rmdir(const char* dir)
+{
+  return _rmdir(dir);
+}
 inline const char* Getcwd(char* buf, unsigned int len)
 {
   return _getcwd(buf, len);
@@ -63,6 +68,10 @@ inline int Chdir(const char* dir)
 inline int Mkdir(const char* dir)
 {
   return mkdir(dir, 00777);
+}
+inline int Rmdir(const char* dir)
+{
+  return rmdir(dir);
 }
 inline const char* Getcwd(char* buf, unsigned int len)
 {
@@ -1005,6 +1014,38 @@ bool SystemTools::RemoveFile(const char* source)
   return unlink(source) != 0 ? false : true;
 }
 
+bool SystemTools::RemoveADirectory(const char* source)
+{
+  Directory dir;
+  dir.Load(source);
+  size_t fileNum;
+  for (fileNum = 0; fileNum <  dir.GetNumberOfFiles(); ++fileNum)
+    {
+    if (strcmp(dir.GetFile(static_cast<unsigned long>(fileNum)),".") &&
+        strcmp(dir.GetFile(static_cast<unsigned long>(fileNum)),".."))
+      {
+      kwsys_std::string fullPath = source;
+      fullPath += "/";
+      fullPath += dir.GetFile(static_cast<unsigned long>(fileNum));
+      if(SystemTools::FileIsDirectory(fullPath.c_str()))
+        {
+        if (!SystemTools::RemoveADirectory(fullPath.c_str()))
+          {
+          return false;
+          }
+        }
+      else
+        {
+        if(!SystemTools::RemoveFile(fullPath.c_str()))
+          {
+          return false;
+          }
+        }
+      }
+    }
+
+  return (Rmdir(source) == 0);
+}
 
 /**
  * Find the file the given name.  Searches the given path and then
@@ -1042,9 +1083,10 @@ kwsys_std::string SystemTools::FindFile(const char* name,
  * the system search path.  Returns the full path to the executable if it is
  * found.  Otherwise, the empty string is returned.
  */
-kwsys_std::string SystemTools::FindProgram(const char* name,
-                                       const kwsys_std::vector<kwsys_std::string>& userPaths,
-                                       bool no_system_path)
+kwsys_std::string SystemTools::FindProgram(
+  const char* name,
+  const kwsys_std::vector<kwsys_std::string>& userPaths,
+  bool no_system_path)
 {
   if(!name)
     {

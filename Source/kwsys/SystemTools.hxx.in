@@ -150,6 +150,9 @@ public:
   ///! Remove a file.
   static bool RemoveFile(const char* source);
   
+  ///! Remove a directory
+  static bool RemoveADirectory(const char* source);
+
   ///! Find a file in the system PATH, with optional extra paths.
   static kwsys_std::string FindFile(const char* name,
                               const kwsys_std::vector<kwsys_std::string>& path= kwsys_std::vector<kwsys_std::string>());
