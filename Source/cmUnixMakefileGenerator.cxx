@@ -2106,7 +2106,7 @@ void cmUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
 
   const char* commands[] = { command, command2, command3, command4 };
 
-  for (int i = 0; i < sizeof(commands) / sizeof(commands[0]); ++i) 
+  for (unsigned int i = 0; i < sizeof(commands) / sizeof(commands[0]); ++i) 
     {
     if(commands[i])
       {
