@@ -493,11 +493,6 @@ void cmMakefile::AddDefineFlag(const char* flag)
 
 void cmMakefile::AddLinkLibrary(const char* lib, cmTarget::LinkLibraryType llt)
 {
-  // if it is NOTFOUND then skip it
-  if (!strcmp(lib,"NOTFOUND"))
-    {
-    return;
-    }
   m_LinkLibraries.push_back(
 	  std::pair<std::string, cmTarget::LinkLibraryType>(lib,llt));
 }
@@ -506,12 +501,6 @@ void cmMakefile::AddLinkLibraryForTarget(const char *target,
                                          const char* lib, 
                                          cmTarget::LinkLibraryType llt)
 { 
-  // if it is NOTFOUND then skip it
-  if (!strcmp(lib,"NOTFOUND"))
-    {
-    return;
-    }
-  
   cmTargets::iterator i = m_Targets.find(target);
   if ( i != m_Targets.end())
     {
@@ -578,12 +567,6 @@ void cmMakefile::AddSubDirectory(const char* sub)
 
 void cmMakefile::AddIncludeDirectory(const char* inc, bool before)
 {
-  // if it is NOTFOUND then skip it
-  if (!strcmp(inc,"NOTFOUND"))
-    {
-    return;
-    }
-  
   // Don't add an include directory that is already present.  Yes,
   // this linear search results in n^2 behavior, but n won't be
   // getting much bigger than 20.  We cannot use a set because of
