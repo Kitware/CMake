@@ -39,7 +39,7 @@ FIND_LIBRARY(TCL_LIBRARY
 )
 
 FIND_LIBRARY(TK_LIBRARY 
-  NAMES tk tk84 tk83 tk82 tk80
+  NAMES tk tk84 tk8.4 tk83 tk8.3 tk82 tk8.2 tk80 tk8.0
   PATHS 
   /usr/lib 
   /usr/local/lib
