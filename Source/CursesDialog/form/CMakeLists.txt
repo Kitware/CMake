@@ -2,7 +2,7 @@ PROJECT(CMAKE_FORM)
 
 INCLUDE_REGULAR_EXPRESSION("^.*$")
 
-SOURCE_FILES(FORM_SRCS
+SET(  FORM_SRCS
              fld_arg.c
              fld_attr.c
              fld_current.c
@@ -42,7 +42,7 @@ SOURCE_FILES(FORM_SRCS
              fty_ipv4.c
              fty_num.c
              fty_regex.c
-	     )
+   )
              
 INCLUDE_DIRECTORIES(${CMAKE_FORM_SOURCE_DIR})
-ADD_LIBRARY(cmForm FORM_SRCS)
+ADD_LIBRARY(cmForm ${FORM_SRCS} )
