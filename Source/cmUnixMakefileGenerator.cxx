@@ -1875,7 +1875,7 @@ void cmUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
     if(replace[0] != '-' && replace.find("echo") != 0  
        && replace.find("$(MAKE)") != 0)
       {
-      fout << "\t" << "echo " << replace.c_str() << "\n";
+      fout << "\t" << "echo \"" << replace.c_str() << "\"\n";
       }
     fout << "\t" << replace.c_str() << "\n";
     }
@@ -1886,7 +1886,7 @@ void cmUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
     if(replace[0] != '-' && replace.find("echo") != 0  
        && replace.find("$(MAKE)") != 0)
       {
-      fout << "\t" << "echo " << replace.c_str() << "\n";
+      fout << "\t" << "echo \"" << replace.c_str() << "\"\n";
       }
     fout << "\t" << replace.c_str() << "\n";
     }
@@ -1897,7 +1897,7 @@ void cmUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
     if(replace[0] != '-' && replace.find("echo") != 0  
        && replace.find("$(MAKE)") != 0)
       {
-      fout << "\t" << "echo " << replace.c_str() << "\n";
+      fout << "\t" << "echo \"" << replace.c_str() << "\"\n";
       }
     fout << "\t" << replace.c_str() << "\n";
     }
@@ -1908,7 +1908,7 @@ void cmUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
     if(replace[0] != '-' && replace.find("echo") != 0  
        && replace.find("$(MAKE)") != 0)
       {
-      fout << "\t" << "echo " << replace.c_str() << "\n";
+      fout << "\t" << "echo \"" << replace.c_str() << "\"\n";
       }
     fout << "\t" << replace.c_str() << "\n";
     }
