@@ -382,6 +382,7 @@ cmLocalUnixMakefileGenerator2
     }
 
   // Get the full path name of the object file.
+  // TODO: Remove duplicate objects and warn.
   std::string obj = this->GetObjectFileName(target, source);
 
   // Create the directory containing the object file.  This may be a
@@ -560,19 +561,19 @@ cmLocalUnixMakefileGenerator2
     {
     // Add the provides target to build the object file.
     std::vector<std::string> no_commands;
-    std::vector<std::string> depends;
-    depends.push_back(obj);
+    std::vector<std::string> p_depends;
+    p_depends.push_back(obj);
     this->WriteMakeRule(ruleFileStream, 0, 0,
-                        objectProvides.c_str(), depends, no_commands);
+                        objectProvides.c_str(), p_depends, no_commands);
     }
     {
     // Add the requires target to recursively build the provides
     // target after needed information is up to date.
     std::vector<std::string> no_depends;
-    std::vector<std::string> commands;
-    commands.push_back(this->GetRecursiveMakeCall(objectProvides.c_str()));
+    std::vector<std::string> r_commands;
+    r_commands.push_back(this->GetRecursiveMakeCall(objectProvides.c_str()));
     this->WriteMakeRule(ruleFileStream, 0, 0,
-                        objectRequires.c_str(), no_depends, commands);
+                        objectRequires.c_str(), no_depends, r_commands);
     }
 
     // Add this to the set of provides-requires objects on the target.
