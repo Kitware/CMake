@@ -37,6 +37,7 @@ cmVTKMakeInstantiatorCommand
   std::vector<cmStdString> inSourceLists;
   m_ExportMacro = "-";
   unsigned int groupSize = 10;
+  bool includesMode = false;
   
   // Find the path of the files to be generated.
   std::string filePath = m_Makefile->GetCurrentOutputDirectory();
@@ -46,6 +47,7 @@ cmVTKMakeInstantiatorCommand
     {
     if(args[i] == "GROUP_SIZE")
       {
+      includesMode = false;
       if(++i < args.size())
         {
         std::string gSize = args[i].c_str();
@@ -60,6 +62,7 @@ cmVTKMakeInstantiatorCommand
       }
     else if(args[i] == "HEADER_LOCATION")
       {
+      includesMode = false;
       if(++i < args.size())
         {
         headerPath = args[i];
@@ -73,6 +76,7 @@ cmVTKMakeInstantiatorCommand
       }
     else if(args[i] == "EXPORT_MACRO")
       {
+      includesMode = false;
       if(++i < args.size())
         {
         m_ExportMacro = args[i];
@@ -84,12 +88,24 @@ cmVTKMakeInstantiatorCommand
         return false;
         }
       }
-    // If not an option, it must be another input source list name.
+    else if(args[i] == "INCLUDES")
+      {
+      includesMode = true;
+      }
+    // If not an option, it must be another input source list name or
+    // an include file.
     else
       {
       std::string s = args[i];
       m_Makefile->ExpandVariablesInString(s);
-      inSourceLists.push_back(s);
+      if(!includesMode)
+        {
+        inSourceLists.push_back(s);
+        }
+      else
+        {
+        m_Includes.push_back(s);
+        }
       }
     }
   
@@ -223,7 +239,12 @@ cmVTKMakeInstantiatorCommand
     "#ifndef __" << m_ClassName.c_str() << "_h\n"
     "#define __" << m_ClassName.c_str() << "_h\n"
     "\n"
-    "#include \"vtkInstantiator.h\"\n"
+    "#include \"vtkInstantiator.h\"\n";
+  for(unsigned int i=0;i < m_Includes.size();++i)
+    {
+    os << "#include \"" << m_Includes[i].c_str() << "\"\n";
+    }
+  os <<
     "\n"
     "class " << m_ClassName.c_str() << "Initialize;\n"
     "\n"

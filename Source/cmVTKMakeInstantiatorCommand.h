@@ -55,7 +55,8 @@ public:
       "VTK_MAKE_INSTANTIATOR(className outSourceList\n"
       "                      src-list1 [src-list2 ..]\n"
       "                      EXPORT_MACRO exportMacro\n"
-      "                      [HEADER_LOCATION dir] [GROUP_SIZE groupSize])\n"
+      "                      [HEADER_LOCATION dir] [GROUP_SIZE groupSize]\n"
+      "                      [INCLUDES [file1 file2 ..]])\n"
       "Generates a new class with the given name and adds its files to the\n"
       "given outSourceList.  It registers the classes from the other given\n"
       "source lists with vtkInstantiator when it is loaded.  The output\n"
@@ -71,7 +72,10 @@ public:
       "The GROUP_SIZE option must be followed by a positive integer.\n"
       "As an implementation detail, the registered creation functions may\n"
       "be split up into multiple files.  The groupSize option specifies\n"
-      "the number of classes per file.  Its default is 10.";
+      "the number of classes per file.  Its default is 10.  The INCLUDES\n"
+      "option can be followed by a list of zero or more files.  These files\n"
+      "will be #included by the generated instantiator header, and can be\n"
+      "used to gain access to the specified exportMacro in the C++ code.";
     }
   
   cmTypeMacro(cmVTKMakeInstantiatorCommand, cmCommand);
@@ -79,6 +83,7 @@ public:
 protected:
   std::string m_ClassName;
   std::string m_ExportMacro;
+  std::vector<cmStdString> m_Includes;
   std::vector<cmStdString> m_Classes;
   
   std::string GenerateCreationFileName(unsigned int group);
