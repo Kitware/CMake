@@ -272,7 +272,7 @@ void cmGlobalVisualStudio6Generator::WriteDSWFile(std::ostream& fout,
       // Write the project into the DSW file
       if (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
         {
-        cmCustomCommand cc = l->second.GetPreLinkCommands()[0];
+        cmCustomCommand cc = l->second.GetPostBuildCommands()[0];
         
         // dodgy use of the cmCustomCommand's members to store the 
         // arguments from the INCLUDE_EXTERNAL_MSPROJECT command
