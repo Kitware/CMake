@@ -37,6 +37,17 @@
   typedef void* cmLibHandle;
 #endif
 
+// C++ Does not allow casts from pointer-to-data types to
+// pointer-to-function types.  However, the return type from each
+// platform's symbol lookup implementation is void*.  We need to hide
+// the cast from void* to a pointer-to-function type in C code.  The
+// implementation of cmDynamicLoader::GetSymbolAddress simply calls a
+// C-based implementation in cmDynamicLoaderC.c.  This
+// cmDynamicLoaderFunction type is the return type of
+// cmDynamicLoader::GetSymbolAddress and can be cast to any other
+// pointer-to-function type safely in C++.
+extern "C" { typedef void (*cmDynamicLoaderFunction)(); }
+
 class cmDynamicLoader
 {
 public:
@@ -53,7 +64,7 @@ public:
   
   // Description:
   // Find the address of the symbol in the given library
-  static void* GetSymbolAddress(cmLibHandle, const char*);
+  static cmDynamicLoaderFunction GetSymbolAddress(cmLibHandle, const char*);
 
   // Description:
   // Return the library prefix for the given architecture

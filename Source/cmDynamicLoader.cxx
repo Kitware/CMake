@@ -16,7 +16,20 @@
 =========================================================================*/
 #include "cmDynamicLoader.h"
 
-// This file is actually 3 different implementations.
+extern "C"
+{
+cmDynamicLoaderFunction cmDynamicLoaderGetSymbolAddress(cmLibHandle,
+                                                        const char*);
+}
+
+// Dispatch to C implementation.
+cmDynamicLoaderFunction cmDynamicLoader::GetSymbolAddress(cmLibHandle lib,
+                                                          const char* sym)
+{
+  return cmDynamicLoaderGetSymbolAddress(lib, sym);
+}
+
+// This file is actually 4 different implementations.
 // 1. HP machines which uses shl_load
 // 2. Apple OSX which uses NSLinkModule
 // 3. Windows which uses LoadLibrary
@@ -38,15 +51,6 @@ cmLibHandle cmDynamicLoader::OpenLibrary(const char* libname )
 int cmDynamicLoader::CloseLibrary(cmLibHandle lib)
 {
   return 0;
-}
-
-void* cmDynamicLoader::GetSymbolAddress(cmLibHandle lib, const char* sym)
-{ 
-  void* addr;
-  int status;
-  
-  status = shl_findsym (&lib, sym, TYPE_PROCEDURE, &addr);
-  return (status < 0) ? (void*)0 : addr;
 }
 
 const char* cmDynamicLoader::LibPrefix()
@@ -86,20 +90,6 @@ cmLibHandle cmDynamicLoader::OpenLibrary(const char* libname )
 int cmDynamicLoader::CloseLibrary(cmLibHandle lib)
 {
   return 0;
-}
-
-void* cmDynamicLoader::GetSymbolAddress(cmLibHandle lib, const char* sym)
-{
-  void *result=0;
-  if(NSIsSymbolNameDefined(sym))
-    {
-    NSSymbol symbol= NSLookupAndBindSymbol(sym);
-    if(symbol)
-      {
-      result = NSAddressOfSymbol(symbol);
-      }
-    }
-  return result;
 }
 
 const char* cmDynamicLoader::LibPrefix()
@@ -144,19 +134,6 @@ cmLibHandle cmDynamicLoader::OpenLibrary(const char* libname )
 int cmDynamicLoader::CloseLibrary(cmLibHandle lib)
 {
   return (int)FreeLibrary(lib);
-}
-
-void* cmDynamicLoader::GetSymbolAddress(cmLibHandle lib, const char* sym)
-{ 
-#ifdef UNICODE
-        wchar_t *wsym = new wchar_t [mbstowcs(NULL, sym, 32000)];
-        mbstowcs(wsym, sym, 32000);
-        void *ret = GetProcAddress(lib, wsym);
-        delete [] wsym;
-        return ret;
-#else
-  return GetProcAddress(lib, sym);
-#endif
 }
 
 const char* cmDynamicLoader::LibPrefix()
@@ -209,11 +186,6 @@ cmLibHandle cmDynamicLoader::OpenLibrary(const char* libname )
 int cmDynamicLoader::CloseLibrary(cmLibHandle lib)
 {
   return (int)dlclose(lib);
-}
-
-void* cmDynamicLoader::GetSymbolAddress(cmLibHandle lib, const char* sym)
-{ 
-  return dlsym(lib, sym);
 }
 
 const char* cmDynamicLoader::LibPrefix()
