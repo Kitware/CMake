@@ -41,7 +41,6 @@ PropertyItemRow
   const unsigned int secondColumn =  nameWidth;
 
   const unsigned int rowHeight    =         20;
-  const unsigned int rowSpacing   =         20;
  
   size( nameWidth + textWidth , rowHeight );
 

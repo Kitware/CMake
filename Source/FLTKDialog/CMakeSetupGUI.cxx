@@ -88,7 +88,6 @@ void CMakeSetupGUI::cb_m_OKButton(Fl_Button* o, void* v) {
 }
 
 CMakeSetupGUI::CMakeSetupGUI() {
-  Fl_Window* w;
   { Fl_Window* o = dialogWindow = new Fl_Window(562, 373, "CMakeSetupDialog");
     w = o;
     o->callback((Fl_Callback*)cb_dialogWindow, (void*)(this));
@@ -192,9 +191,11 @@ void CMakeSetupGUI::Show(void) {
 }
 
 bool CMakeSetupGUI::SetBinaryPath(const char *) {
+  return false;
 }
 
 bool CMakeSetupGUI::SetSourcePath(const char *) {
+  return false;
 }
 
 void CMakeSetupGUI::ShowRecentBinaryDirectories(void) {
