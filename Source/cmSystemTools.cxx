@@ -1862,7 +1862,7 @@ void cmSystemTools::ExpandListArguments(std::vector<std::string> const& argument
           std::string::size_type pos = newarg.find("\\;");
           if(pos != std::string::npos)
             {
-            newarg[pos] = ' ';
+            newarg.erase(pos, 1);
             }
           newargs.push_back(newarg);
           }
