@@ -42,7 +42,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmStandardIncludes.h"
 #include "cmSystemTools.h"
 #include "cmRegularExpression.h"
-#include "cmCacheManager.h"
 
 cmDSPWriter::~cmDSPWriter()
 {
