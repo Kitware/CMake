@@ -48,6 +48,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmGeneratedFileStream.h"
 #include "windows.h"
 
+// convert to windows short paths if there are spaces
+// in path
 inline std::string ShortPath(const char* path)
 {
   std::string ret = path;
@@ -75,6 +77,34 @@ inline std::string ShortPath(const char* path)
 }
 
 
+// convert a command to a short path if it has spaces
+// this separates the arguments from the command and puts
+// them back together
+inline std::string ShortPathCommand(const char* command)
+{
+  if(!strchr(command, ' '))
+    {
+    return command;
+    }
+  cmRegularExpression reg("^\"([^\"]*)\"(.*)");
+  if(reg.find(command))
+    {
+    std::string c = reg.match(1);
+    cmRegularExpression removeIntDir("(.*)/\\$\\(IntDir\\)(.*)");
+    if(removeIntDir.find(c))
+      {
+	c = removeIntDir.match(1) + removeIntDir.match(2);
+      }
+    c = ShortPath(c.c_str());
+    std::string ret = c;
+    std::string args = reg.match(2);
+    ret += args;
+    return ret;
+    }
+  return command;
+}
+
+
 cmNMakeMakefileGenerator::cmNMakeMakefileGenerator()
 {
   this->SetObjectFileExtension(".obj");
@@ -88,6 +118,7 @@ cmNMakeMakefileGenerator::cmNMakeMakefileGenerator()
 cmNMakeMakefileGenerator::~cmNMakeMakefileGenerator()
 {
 }
+
 
 void cmNMakeMakefileGenerator::ComputeSystemInfo()
 {
@@ -184,6 +215,9 @@ void cmNMakeMakefileGenerator::BuildInSubDirectory(std::ostream& fout,
   fout << "\tcd " << cmSystemTools::EscapeSpaces(currentDir.c_str()) << "\n";
 }
 
+
+
+
 // This needs to be overriden because nmake requires commands to be quoted
 // if the are full paths to the executable????
 
@@ -232,25 +266,25 @@ void cmNMakeMakefileGenerator::OutputMakeRule(std::ostream& fout,
     }
   if(command)
     {
-    replace = command;
+    replace = ShortPathCommand(command);
     m_Makefile->ExpandVariablesInString(replace);
     fout << startCommand << replace.c_str() << endCommand;
     }
   if(command2)
     {
-    replace = command2;
+    replace = ShortPathCommand(command2);
     m_Makefile->ExpandVariablesInString(replace);
     fout << startCommand << replace.c_str() << endCommand;
     }
   if(command3)
     {
-    replace = command3;
+    replace = ShortPathCommand(command3);
     m_Makefile->ExpandVariablesInString(replace);
     fout << startCommand << replace.c_str() << endCommand;
     }
   if(command4)
     {
-    replace = command4;
+    replace = ShortPathCommand(command4);
     m_Makefile->ExpandVariablesInString(replace);
     fout << startCommand << replace.c_str() << endCommand;
     }
@@ -339,7 +373,8 @@ void cmNMakeMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
   depend += "_SRC_OBJS) $(" + std::string(name) + "_DEPEND_LIBS)";
   std::string command = "link /dll @<<\n";
   command += "$(" + std::string(name) + "_SRC_OBJS) /out:";
-  command += m_LibraryOutputPath +  std::string(name) + ".dll ";
+  std::string dllpath = m_LibraryOutputPath +  std::string(name) + ".dll ";
+  command += cmSystemTools::EscapeSpaces(dllpath.c_str());
   std::strstream linklibs;
   this->OutputLinkLibraries(linklibs, name, t);
   linklibs << std::ends;
@@ -378,9 +413,9 @@ void cmNMakeMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout,
   std::string depend = "$(";
   depend += std::string(name) + "_SRC_OBJS)";
   std::string command = "link -lib @<<\n\t/nologo /out:";
-  command += m_LibraryOutputPath;
-  command += name;
-  command += ".lib $(";
+  std::string libpath = m_LibraryOutputPath + std::string(name) + ".lib";
+  command += cmSystemTools::EscapeSpaces(libpath.c_str());
+  command += " $(";
   command += std::string(name) + "_SRC_OBJS)";
   command += "\n<<\n";
   std::string comment = "rule to build static library: ";
@@ -466,16 +501,25 @@ void cmNMakeMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
     // skip zero size library entries, this may happen
     // if a variable expands to nothing.
     if (lib->first.size() == 0) continue;
-    // if it is a full path break it into -L and -l
     if(emitted.insert(lib->first).second)
       {
-      linkLibs += lib->first;
-      linkLibs += ".lib ";
+      cmRegularExpression reg(".*\\.lib$");
+      // if it ends in .lib, then it is a full path and should
+      // be escaped, and does not need .lib added
+      if(reg.find(lib->first))
+	{
+	librariesLinked +=  ShortPath(lib->first.c_str());
+	librariesLinked += " ";
+	}
+      else
+	{
+	librariesLinked += lib->first;
+	librariesLinked += ".lib ";
+	}
       }
-    linkLibs += librariesLinked;
-
-    fout << linkLibs;
     }
+  linkLibs += librariesLinked;
+  fout << linkLibs;
   fout << "$(CMAKE_STANDARD_WINDOWS_LIBRARIES) ";
 }
 
@@ -505,3 +549,19 @@ void cmNMakeMakefileGenerator::OutputIncludeMakefile(std::ostream& fout,
   fout << "!include " << file << "\n";
 }
 
+
+
+void cmNMakeMakefileGenerator::OutputBuildLibraryInDir(std::ostream& fout,
+						       const char* path,
+						       const char* ,
+						       const char* fullpath)
+{
+
+  std::string currentDir = m_Makefile->GetCurrentOutputDirectory();
+  cmSystemTools::ConvertToWindowsSlashes(currentDir);
+  fout << cmSystemTools::EscapeSpaces(fullpath)
+       << ":\n\tcd " << cmSystemTools::EscapeSpaces(path)
+       << "\n\t$(MAKE) " << cmSystemTools::EscapeSpaces(fullpath)
+       << "\n\tcd " <<
+    cmSystemTools::EscapeSpaces(currentDir.c_str()) << "\n";
+}

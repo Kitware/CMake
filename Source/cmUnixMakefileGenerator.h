@@ -151,6 +151,10 @@ protected:
                               const char* command2 = 0,
                               const char* command3 = 0,
                               const char* command4 = 0);
+  virtual void OutputBuildLibraryInDir(std::ostream& fout,
+				       const char* path,
+				       const char* library,
+				       const char* fullpath);
   virtual std::string GetOutputExtension(const char* sourceExtension);
   virtual void OutputIncludeMakefile(std::ostream&, const char* file);
   void SetObjectFileExtension(const char* e) { m_ObjectFileExtension = e;}

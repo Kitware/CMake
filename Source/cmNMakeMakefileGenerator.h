@@ -100,6 +100,10 @@ protected:
                                    const cmTarget &tgt);
   virtual std::string GetOutputExtension(const char* sourceExtension); 
   virtual void OutputIncludeMakefile(std::ostream&, const char* file);
+  virtual void OutputBuildLibraryInDir(std::ostream& fout,
+				       const char* path,
+				       const char* library,
+				       const char* fullpath);
 private:
   bool m_QuoteNextCommand;      // if this is true, OutputMakeRule
                                 // will not quote the next commands

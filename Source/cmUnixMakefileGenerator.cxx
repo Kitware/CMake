@@ -794,13 +794,23 @@ void cmUnixMakefileGenerator::OutputDependLibs(std::ostream& fout)
         }
       libpath += library;
       // put out a rule to build the library if it does not exist
-      fout << cmSystemTools::EscapeSpaces(libpath.c_str())
-           << ":\n\tcd " << cmSystemTools::EscapeSpaces(cacheValue)
-           << "; $(MAKE) " << m_LibraryOutputPath << library.c_str() << "\n\n";
+      this->OutputBuildLibraryInDir(fout,
+				    cacheValue,
+				    library.c_str(),
+				    libpath.c_str());
       }
     }
 }
 
+void cmUnixMakefileGenerator::OutputBuildLibraryInDir(std::ostream& fout,
+						      const char* path,
+						      const char* ,
+						      const char* fullpath)
+{
+  fout << cmSystemTools::EscapeSpaces(fullpath)
+       << ":\n\tcd " << cmSystemTools::EscapeSpaces(path)
+           << "; $(MAKE) " << fullpath << "\n\n"; 
+}
 void cmUnixMakefileGenerator::OutputLibDepend(std::ostream& fout,
                                               const char* name)
 {
@@ -1005,7 +1015,7 @@ void cmUnixMakefileGenerator::OutputObjectDepends(std::ostream& fout)
                 source->GetDepends().begin();
               dep != source->GetDepends().end(); ++dep)
             {
-            fout << " \\\n" << dep->c_str();
+            fout << " \\\n" << cmSystemTools::EscapeSpaces(dep->c_str());
             }
           fout << "\n\n";
           }
