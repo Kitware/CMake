@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -38,7 +38,7 @@ void cmLocalGenerator::Configure()
                             m_Makefile->GetHomeOutputDirectory());
   m_Makefile->AddDefinition("PROJECT_SOURCE_DIR",
                             m_Makefile->GetHomeDirectory());
-  
+
   // find & read the list file
   std::string currentStart = m_Makefile->GetStartDirectory();
   currentStart += "/CMakeLists.txt";
@@ -47,20 +47,20 @@ void cmLocalGenerator::Configure()
 
 void cmLocalGenerator::SetGlobalGenerator(cmGlobalGenerator *gg)
 {
-  m_GlobalGenerator = gg; 
+  m_GlobalGenerator = gg;
 
   // setup the home directories
   m_Makefile->SetHomeDirectory(
     gg->GetCMakeInstance()->GetHomeDirectory());
   m_Makefile->SetHomeOutputDirectory(
     gg->GetCMakeInstance()->GetHomeOutputDirectory());
-  
+
 }
 
 
 void cmLocalGenerator::ConfigureFinalPass()
-{ 
-  m_Makefile->ConfigureFinalPass(); 
+{
+  m_Makefile->ConfigureFinalPass();
 }
 
 std::string cmLocalGenerator::ConvertToRelativeOutputPath(const char* p)
@@ -68,14 +68,14 @@ std::string cmLocalGenerator::ConvertToRelativeOutputPath(const char* p)
   // do not use relative paths for network build trees
   // the network paths do not work
   const char* outputDirectory = m_Makefile->GetHomeOutputDirectory();
-  if ( outputDirectory && *outputDirectory && *(outputDirectory+1) && 
+  if ( outputDirectory && *outputDirectory && *(outputDirectory+1) &&
     outputDirectory[0] == '/' && outputDirectory[1] == '/' )
     {
     return cmSystemTools::ConvertToOutputPath(p);
     }
-  
+
   // The first time this is called, initialize all
-  // the path ivars that are used.   This can not 
+  // the path ivars that are used.   This can not
   // be moved to the constructor because all the paths are not set yet.
   if(m_CurrentOutputDirectory.size() == 0)
     {
@@ -104,18 +104,18 @@ std::string cmLocalGenerator::ConvertToRelativeOutputPath(const char* p)
     m_CurrentOutputDirectory += "/";
     }
 
-  // Do the work of converting to a relative path 
+  // Do the work of converting to a relative path
   std::string pathIn = p;
   if(pathIn.find('/') == pathIn.npos)
     {
     return pathIn;
     }
-  
+
   if(pathIn.size() && pathIn[0] == '\"')
     {
     pathIn = pathIn.substr(1, pathIn.size()-2);
     }
-  
+
   std::string ret = pathIn;
   if(m_CurrentOutputDirectory.size() <= ret.size())
     {
@@ -162,7 +162,7 @@ std::string cmLocalGenerator::ConvertToRelativeOutputPath(const char* p)
       ret = m_RelativePathToBinaryDir + ret.substr(m_HomeOutputDirectory.size(), ret.npos);
       }
     }
-  
+
   std::string relpath = m_RelativePathToBinaryDir;
   if(relpath.size())
     {
@@ -183,7 +183,7 @@ std::string cmLocalGenerator::ConvertToRelativeOutputPath(const char* p)
     {
     ret = relpath;
     }
-  if(ret.size() 
+  if(ret.size()
      && ret[0] != '\"' && ret[0] != '/' && ret[0] != '.')
     {
     if(ret.size() > 1 && ret[1] != ':')
