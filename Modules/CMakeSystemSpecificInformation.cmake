@@ -168,9 +168,9 @@ SET (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE_INIT}" CACHE STRING
      "Flags used by the compiler during release builds (/MD /Ob1 /Oi /Ot /Oy /Gs will produce slightly less optimized but smaller files).")
 SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT}" CACHE STRING
      "Flags used by the compiler during Release with Debug Info builds.")
-SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS_INIT}" CACHE STRING
+SET (CMAKE_C_FLAGS " $ENV{CFLAGS} ${CMAKE_C_FLAGS_INIT}" CACHE STRING
      "Flags for C compiler.")
-SET (CMAKE_C_FLAGS_DEBUG "$ENV{CFLAGS} ${CMAKE_C_FLAGS_DEBUG_INIT}" CACHE STRING
+SET (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG_INIT}" CACHE STRING
      "Flags used by the compiler during debug builds.")
 SET (CMAKE_C_FLAGS_MINSIZEREL "${CMAKE_C_FLAGS_MINSIZEREL_INIT}" CACHE STRING
      "Flags used by the compiler during release minsize builds.")
