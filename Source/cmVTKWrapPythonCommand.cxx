@@ -151,17 +151,14 @@ bool cmVTKWrapPythonCommand::CreateInitFile(std::string& res)
   int classNum;
   for(classNum = 0; classNum < lastClass; classNum++)
     {
-    if (!m_WrapClasses[classNum].IsAnAbstractClass())
+    std::string cls = m_WrapHeaders[classNum];
+    cls = cls.substr(0,cls.size()-2);
+    std::string::size_type pos = cls.rfind('/');    
+    if(pos != std::string::npos)
       {
-      std::string cls = m_WrapHeaders[classNum];
-      cls = cls.substr(0,cls.size()-2);
-      std::string::size_type pos = cls.rfind('/');    
-      if(pos != std::string::npos)
-        {
-        cls = cls.substr(pos+1);
-        }
-      classes.push_back(cls);
+      cls = cls.substr(pos+1);
       }
+    classes.push_back(cls);
     }
   
   // open the init file
