@@ -427,26 +427,54 @@ bool cmSystemTools::RunSingleCommand(
     verbose = false;
     }
 
-  std::vector<cmStdString> args = cmSystemTools::ParseArguments(command);
-
-  if(args.size() < 1)
+  std::string program;          // store name of program must be in scope function as it
+                                // is put into argv list as a cont char*
+  std::vector<cmStdString> args; // store the program and args program is args[0]
+  std::vector<const char*> argv; // store args in a format so that process cmsysProcess can use it
+  // check to see if the command contains a double quoted string at the start
+  // if so, then just use parse arguments to split things up
+  if(command && *command == '\"')
     {
-    return false;
+    args = cmSystemTools::ParseArguments(command);
     }
-  
-  std::vector<const char*> argv;
+  else
+    {
+    std::string argsTemp; // Store the arguments to the program
+    cmSystemTools::SplitProgramFromArgs(command, program, argsTemp);
+    // if there is no program to run then return false
+    if(program.size() < 1)
+      {
+      // check for a bad call to SplitProgramFromArgs
+      if(strlen(command) >= 1)
+        {
+        cmSystemTools::Error("Error in SplitProgramFromArgs for: ", command);
+        }
+      return false;
+      }
+    argv.push_back(program.c_str()); // put program in as argv[0]
+    if(argsTemp.size())
+      {
+      args = cmSystemTools::ParseArguments(argsTemp.c_str());
+      }
+    }
+  // copy args into argv
   for(std::vector<cmStdString>::const_iterator a = args.begin();
       a != args.end(); ++a)
     {
     argv.push_back(a->c_str());
     }
+  // null terminate array
   argv.push_back(0);
-
+  // if the only argument is null then there is nothing to run and return false
+  if(!argv[0])
+    {
+    return false;
+    }
+  
   if ( output )
     {
     *output = "";
     }
-
   cmsysProcess* cp = cmsysProcess_New();
   cmsysProcess_SetCommand(cp, &*argv.begin());
   cmsysProcess_SetWorkingDirectory(cp, dir);

@@ -17,7 +17,11 @@ int main ()
   printf("Should have ADDED_DEFINITION defined\n");
   return 1;
 #endif
-
+  if(SIZEOF_CHAR != 1)
+    {
+    printf("Size of char is not one, something is broken\n");
+    }
+  
 #ifdef CMAKE_IS_FUN
   return SIZEOF_CHAR-1;
 #else  
