@@ -73,7 +73,8 @@ void cmDSPWriter::OutputDSPFile()
   for(i = includes.begin(); i != includes.end(); ++i)
     {
     m_IncludeOptions +=  " /I ";
-    std::string tmp = cmSystemTools::ConvertToWindowsSlashesAndCleanUp(cmSystemTools::EscapeSpaces(i->c_str()));
+    std::string tmp = cmSystemTools::EscapeSpaces(i->c_str());
+    cmSystemTools::ConvertToWindowsSlashesAndCleanUp(tmp);
 
     // quote if not already quoted
     if (tmp[0] != '"')
