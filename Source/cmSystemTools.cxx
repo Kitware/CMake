@@ -358,7 +358,8 @@ void cmSystemTools::GetArguments(std::string& line,
     }
 }
 
-void cmSystemTools::Error(const char* m1, const char* m2)
+void cmSystemTools::Error(const char* m1, const char* m2,
+                          const char* m3, const char* m4)
 {
   std::string message = "CMake Error: ";
   if(m1)
@@ -368,6 +369,14 @@ void cmSystemTools::Error(const char* m1, const char* m2)
   if(m2)
     {
     message += m2;
+    }
+  if(m3)
+    {
+    message += m3;
+    }
+  if(m4)
+    {
+    message += m4;
     }
   cmSystemTools::s_ErrorOccured = true;
 #if defined(_WIN32) && !defined(__CYGWIN__)

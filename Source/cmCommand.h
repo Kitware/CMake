@@ -120,7 +120,14 @@ public:
    * Return the last error string.
    */
   const char* GetError() 
-    {return m_Error.c_str();}
+    {
+      if(m_Error.length() == 0)
+        {
+        std::string m_Error = this->GetName();
+        m_Error += " uknown error.";
+        }
+      return m_Error.c_str();
+    }
 
   /**
    * Returns true if this class is the given class, or a subclass of it.
