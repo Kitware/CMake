@@ -95,7 +95,7 @@ protected:
                              const char* order, const std::string& last);
   void WriteConvenienceRules(std::ostream& ruleFileStream,
                              const cmTarget& target,
-                             const char* targetFullPath);
+                             const char* targetOutPath);
   void WriteConvenienceRule(std::ostream& ruleFileStream,
                             const char* realTarget,
                             const char* helpTarget);
@@ -138,6 +138,11 @@ protected:
   std::string GetCustomBaseName(const cmCustomCommand& cc);
   const char* GetSourceFileLanguage(const cmSourceFile& source);
   std::string ConvertToFullPath(const std::string& localPath);
+  std::string ConvertToRelativePath(const char* p);
+  std::string ConvertToRelativeOutputPath(const char* p);
+  virtual void ConfigureOutputPaths();
+  void SplitFullPath(const char* p, std::vector<std::string>& components);
+  bool ComparePath(const char* c1, const char* c2);
 
   void AddLanguageFlags(std::string& flags, const char* lang);
   void AddSharedFlags(std::string& flags, const char* lang, bool shared);
@@ -191,6 +196,13 @@ private:
   std::vector<std::string> m_BuildTargets;
   std::vector<std::string> m_InstallTargets;
   std::vector<std::string> m_CleanTargets;
+
+  // The prefix required of a path to be converted to a relative path.
+  // No sequence of ../.. will ever go past this path.
+  std::string m_RelativePathTop;
+
+  // The pre-split current output directory.
+  std::vector<std::string> m_CurrentOutputDirectoryComponents;
 };
 
 #endif

@@ -33,6 +33,7 @@
 
 // TODO: Add "help" target.
 // TODO: Add install targets to m_InstallTargets list.
+// TODO: Identify remaining relative path violations.
 
 //----------------------------------------------------------------------------
 cmLocalUnixMakefileGenerator2::cmLocalUnixMakefileGenerator2()
@@ -194,28 +195,37 @@ void cmLocalUnixMakefileGenerator2::GenerateCMakefile()
                                                            lfiles.end());
   lfiles.erase(new_end, lfiles.end());
 
+  // Build the path to the cache file.
+  std::string cache = m_Makefile->GetHomeOutputDirectory();
+  cache += "/CMakeCache.txt";
+
   // Save the list to the cmake file.
   cmakefileStream
     << "# The corresponding makefile\n"
-    << "# \"" << makefileName << "\"\n"
+    << "# \"" << this->ConvertToRelativePath(makefileName.c_str()).c_str() << "\"\n"
     << "# was generated from the following files:\n"
     << "SET(CMAKE_MAKEFILE_DEPENDS\n"
-    << "  \"" << m_Makefile->GetHomeOutputDirectory() << "/CMakeCache.txt\"\n";
+    << "  \"" << this->ConvertToRelativePath(cache.c_str()).c_str() << "\"\n";
   for(std::vector<std::string>::const_iterator i = lfiles.begin();
       i !=  lfiles.end(); ++i)
     {
     cmakefileStream
-      << "  \"" << i->c_str() << "\"\n";
+      << "  \"" << this->ConvertToRelativePath(i->c_str()).c_str()
+      << "\"\n";
     }
   cmakefileStream
     << "  )\n\n";
+
+  // Build the path to the cache check file.
+  std::string check = m_Makefile->GetHomeOutputDirectory();
+  check += "/cmake.check_cache";
 
   // Set the corresponding makefile in the cmake file.
   cmakefileStream
     << "# The corresponding makefile is:\n"
     << "SET(CMAKE_MAKEFILE_OUTPUTS\n"
-    << "  \"" << makefileName.c_str() << "\"\n"
-    << "  \"" << m_Makefile->GetHomeOutputDirectory() << "/cmake.check_cache\"\n"
+    << "  \"" << this->ConvertToRelativePath(makefileName.c_str()).c_str() << "\"\n"
+    << "  \"" << this->ConvertToRelativePath(check.c_str()).c_str() << "\"\n"
     << "  )\n\n";
 
   // Set the set of files to check for dependency integrity.
@@ -226,7 +236,7 @@ void cmLocalUnixMakefileGenerator2::GenerateCMakefile()
       i != m_CheckDependFiles.end(); ++i)
     {
     cmakefileStream
-      << "  \"" << i->c_str() << "\"\n";
+      << "  \"" << this->ConvertToRelativePath(i->c_str()).c_str() << "\"\n";
     }
   cmakefileStream
     << "  )\n";
@@ -400,7 +410,7 @@ cmLocalUnixMakefileGenerator2
     for(std::vector<std::string>::iterator i = deps.begin();
         i != deps.end(); ++i)
       {
-      depends.push_back(this->ConvertToRelativeOutputPath(i->c_str()));
+      depends.push_back(i->c_str());
       }
     }
   depends.push_back(ruleFileName);
@@ -811,11 +821,14 @@ cmLocalUnixMakefileGenerator2
       m_Makefile->GetRequiredDefinition("CMAKE_COMMAND"));
   makefileStream
     << "# The CMake executable.\n"
-    << "CMAKE_COMMAND = " << cmakecommand.c_str() << "\n"
+    << "CMAKE_COMMAND = "
+    << this->ConvertToRelativeOutputPath(cmakecommand.c_str()).c_str() << "\n"
     << "\n";
   makefileStream
     << "# The command to remove a file.\n"
-    << "RM = " << cmakecommand.c_str() << " -E remove -f\n"
+    << "RM = "
+    << this->ConvertToRelativeOutputPath(cmakecommand.c_str()).c_str()
+    << " -E remove -f\n"
     << "\n";
 
   if(m_Makefile->GetDefinition("CMAKE_EDIT_COMMAND"))
@@ -1241,18 +1254,18 @@ cmLocalUnixMakefileGenerator2
 void
 cmLocalUnixMakefileGenerator2
 ::WriteConvenienceRules(std::ostream& ruleFileStream, const cmTarget& target,
-                        const char* targetFullPath)
+                        const char* targetOutPath)
 {
   // Add a rule to build the target by name.
   std::string localName = this->GetFullTargetName(target.GetName(), target);
   localName = this->ConvertToRelativeOutputPath(localName.c_str());
-  this->WriteConvenienceRule(ruleFileStream, targetFullPath,
+  this->WriteConvenienceRule(ruleFileStream, targetOutPath,
                              localName.c_str());
 
   // Add a target with the canonical name (no prefix, suffix or path).
   if(localName != target.GetName())
     {
-    this->WriteConvenienceRule(ruleFileStream, targetFullPath,
+    this->WriteConvenienceRule(ruleFileStream, targetOutPath,
                                target.GetName());
     }
 }
@@ -1337,7 +1350,6 @@ cmLocalUnixMakefileGenerator2
   depends.push_back(ruleFileName);
 
   // Construct the full path to the executable that will be generated.
-  // TODO: Try to convert this to use a relative path.
   std::string targetFullPath = m_ExecutableOutputPath;
   if(targetFullPath.length() == 0)
     {
@@ -1354,7 +1366,10 @@ cmLocalUnixMakefileGenerator2
 #endif
   targetFullPath += target.GetName();
   targetFullPath += cmSystemTools::GetExecutableExtension();
-  targetFullPath = this->ConvertToRelativeOutputPath(targetFullPath.c_str());
+
+  // Convert to the output path to use in constructing commands.
+  std::string targetOutPath =
+    this->ConvertToRelativeOutputPath(targetFullPath.c_str());
 
   // Get the language to use for linking this executable.
   const char* linkLanguage =
@@ -1421,7 +1436,7 @@ cmLocalUnixMakefileGenerator2
     this->ExpandRuleVariables(*i,
                               linkLanguage,
                               objs.c_str(),
-                              targetFullPath.c_str(),
+                              targetOutPath.c_str(),
                               linklibs.str().c_str(),
                               0,
                               0,
@@ -1436,17 +1451,17 @@ cmLocalUnixMakefileGenerator2
   std::string buildEcho = "Linking ";
   buildEcho += linkLanguage;
   buildEcho += " executable ";
-  buildEcho += this->ConvertToRelativeOutputPath(targetFullPath.c_str());
+  buildEcho += targetOutPath;
   buildEcho += "...";
   this->WriteMakeRule(ruleFileStream, 0, buildEcho.c_str(),
                       targetFullPath.c_str(), depends, commands);
 
   // Write convenience targets.
-  this->WriteConvenienceRules(ruleFileStream, target, targetFullPath.c_str());
+  this->WriteConvenienceRules(ruleFileStream, target, targetOutPath.c_str());
 
   // Write clean target.
   std::vector<std::string> cleanFiles;
-  cleanFiles.push_back(this->ConvertToRelativeOutputPath(targetFullPath.c_str()));
+  cleanFiles.push_back(targetOutPath.c_str());
   cleanFiles.push_back(objs);
   this->WriteTargetCleanRule(ruleFileStream, target, cleanFiles);
 
@@ -1565,10 +1580,13 @@ cmLocalUnixMakefileGenerator2
   // Add a dependency on the rule file itself.
   depends.push_back(ruleFileName);
 
+  // Create set of linking flags.
   const char* linkLanguage =
     target.GetLinkerLanguage(this->GetGlobalGenerator());
   std::string linkFlags;
   this->AppendFlags(linkFlags, extraFlags);
+
+  // Construct the name of the library.
   std::string targetName;
   std::string targetNameSO;
   std::string targetNameReal;
@@ -1577,61 +1595,42 @@ cmLocalUnixMakefileGenerator2
                         targetName, targetNameSO,
                         targetNameReal, targetNameBase);
 
-  std::string outpath;
-  std::string outdir;
-  if(m_UseRelativePaths)
+  // Construct the full path version of the names.
+  std::string outpath = m_LibraryOutputPath;
+  if(outpath.length() == 0)
     {
-    outdir = this->ConvertToRelativeOutputPath(m_LibraryOutputPath.c_str());
+    outpath = m_Makefile->GetStartOutputDirectory();
+    outpath += "/";
     }
-  else
-    {
-    outdir = m_LibraryOutputPath;
-    }
-  if(!m_WindowsShell && m_UseRelativePaths && outdir.size())
-    {
-    outpath =  "\"`cd ";
-    }
-  outpath += outdir;
-  if(!m_WindowsShell && m_UseRelativePaths && outdir.size())
-    {
-    outpath += ";pwd`\"/";
-    }
-  if(outdir.size() == 0 && m_UseRelativePaths && !m_WindowsShell)
-    {
-    outpath = "\"`pwd`\"/";
-    }
-  // The full path versions of the names.
   std::string targetFullPath = outpath + targetName;
   std::string targetFullPathSO = outpath + targetNameSO;
   std::string targetFullPathReal = outpath + targetNameReal;
   std::string targetFullPathBase = outpath + targetNameBase;
-  // If not using relative paths then the output path needs to be
-  // converted here
-  if(!m_UseRelativePaths)
-    {
-    targetFullPath = this->ConvertToRelativeOutputPath(targetFullPath.c_str());
-    targetFullPathSO = this->ConvertToRelativeOutputPath(targetFullPathSO.c_str());
-    targetFullPathReal = this->ConvertToRelativeOutputPath(targetFullPathReal.c_str());
-    targetFullPathBase = this->ConvertToRelativeOutputPath(targetFullPathBase.c_str());
-    }
+
+  // Construct the output path version of the names for use in command
+  // arguments.
+  std::string targetOutPath = this->ConvertToRelativeOutputPath(targetFullPath.c_str());
+  std::string targetOutPathSO = this->ConvertToRelativeOutputPath(targetFullPathSO.c_str());
+  std::string targetOutPathReal = this->ConvertToRelativeOutputPath(targetFullPathReal.c_str());
+  std::string targetOutPathBase = this->ConvertToRelativeOutputPath(targetFullPathBase.c_str());
 
   // Add a command to remove any existing files for this library.
   std::vector<std::string> cleanFiles;
   std::string remove = "$(CMAKE_COMMAND) -E remove -f ";
-  remove += targetFullPathReal;
-  cleanFiles.push_back(targetFullPathReal);
-  if(targetFullPathSO != targetFullPathReal)
+  remove += targetOutPathReal;
+  cleanFiles.push_back(targetOutPathReal);
+  if(targetOutPathSO != targetOutPathReal)
     {
     remove += " ";
-    remove += targetFullPathSO;
-    cleanFiles.push_back(targetFullPathSO);
+    remove += targetOutPathSO;
+    cleanFiles.push_back(targetOutPathSO);
     }
-  if(targetFullPath != targetFullPathSO &&
-     targetFullPath != targetFullPathReal)
+  if(targetOutPath != targetOutPathSO &&
+     targetOutPath != targetOutPathReal)
     {
     remove += " ";
-    remove += targetFullPath;
-    cleanFiles.push_back(targetFullPath);
+    remove += targetOutPath;
+    cleanFiles.push_back(targetOutPath);
     }
   commands.push_back(remove);
 
@@ -1642,14 +1641,14 @@ cmLocalUnixMakefileGenerator2
   cmSystemTools::ExpandListArgument(linkRule, commands);
 
   // Add a rule to create necessary symlinks for the library.
-  if(targetFullPath != targetFullPathReal)
+  if(targetOutPath != targetOutPathReal)
     {
     std::string symlink = "$(CMAKE_COMMAND) -E cmake_symlink_library ";
-    symlink += targetFullPathReal;
+    symlink += targetOutPathReal;
     symlink += " ";
-    symlink += targetFullPathSO;
+    symlink += targetOutPathSO;
     symlink += " ";
-    symlink += targetFullPath;
+    symlink += targetOutPath;
     commands.push_back(symlink);
     }
 
@@ -1674,13 +1673,18 @@ cmLocalUnixMakefileGenerator2
   for(std::vector<std::string>::iterator i = commands.begin();
       i != commands.end(); ++i)
     {
+    // TODO: Fix target output paths to use "cd...;pwd" idiom to pass
+    // a full path to the linker.  This should be done by identifying
+    // a relative path and stripping the directory part off to put in
+    // this format.  This rule is the only place that this idiom is
+    // needed.
     this->ExpandRuleVariables(*i,
                               linkLanguage,
                               objs.c_str(),
-                              targetFullPathReal.c_str(),
+                              targetOutPathReal.c_str(),
                               linklibs.str().c_str(),
                               0, 0, 0, objsQuoted.c_str(),
-                              targetFullPathBase.c_str(),
+                              targetOutPathBase.c_str(),
                               targetNameSO.c_str(),
                               linkFlags.c_str());
     }
@@ -1699,13 +1703,13 @@ cmLocalUnixMakefileGenerator2
     default:
       buildEcho += " library "; break;
     }
-  buildEcho += this->ConvertToRelativeOutputPath(targetFullPath.c_str());
+  buildEcho += targetOutPath.c_str();
   buildEcho += "...";
   this->WriteMakeRule(ruleFileStream, 0, buildEcho.c_str(),
                       targetFullPath.c_str(), depends, commands);
 
   // Write convenience targets.
-  this->WriteConvenienceRules(ruleFileStream, target, targetFullPath.c_str());
+  this->WriteConvenienceRules(ruleFileStream, target, targetOutPath.c_str());
 
   // Write clean target.
   cleanFiles.push_back(objs);
@@ -1956,6 +1960,227 @@ cmLocalUnixMakefileGenerator2
   dir += "/";
   dir += localPath;
   return dir;
+}
+
+//----------------------------------------------------------------------------
+std::string
+cmLocalUnixMakefileGenerator2::ConvertToRelativePath(const char* p)
+{
+  // The path should never be quoted.
+  assert(p[0] != '\"');
+
+  // If the path is already relative or relative paths are disabled
+  // then just return the path.
+  if(m_RelativePathTop.size() == 0 || !cmSystemTools::FileIsFullPath(p))
+    {
+    return p;
+    }
+
+  // If the path does not begin with the minimum relative path prefix
+  // then do not convert it.
+  std::string original = p;
+  if(original.size() < m_RelativePathTop.size() ||
+     !this->ComparePath(original.substr(0, m_RelativePathTop.size()).c_str(),
+                        m_RelativePathTop.c_str()))
+    {
+    return p;
+    }
+
+  // Identify the longest shared path component between the given path
+  // and the current output directory.
+  std::vector<std::string> path;
+  this->SplitFullPath(p, path);
+  unsigned int common=0;
+  while(common < path.size() &&
+        common < m_CurrentOutputDirectoryComponents.size() &&
+        this->ComparePath(path[common].c_str(),
+                          m_CurrentOutputDirectoryComponents[common].c_str()))
+    {
+    ++common;
+    }
+
+  // If the entire path is in common then just return a ".".
+  if(common == path.size())
+    {
+    return ".";
+    }
+
+  // If the entire path is in common except for a trailing slash then
+  // just return a "./".
+  if(common+1 == path.size() && path[common].size() == 0)
+    {
+    return "./";
+    }
+
+  // Construct the relative path.
+  std::string relative;
+
+  // First add enough ../ to get up to the level of the shared portion
+  // of the path.  Leave off the trailing slash.  Note that the last
+  // component of m_CurrentOutputDirectoryComponents will never be
+  // empty because m_CurrentOutputDirectory does not have a trailing
+  // slash.
+  for(unsigned int i=common; i < m_CurrentOutputDirectoryComponents.size(); ++i)
+    {
+    relative += "..";
+    if(i < m_CurrentOutputDirectoryComponents.size()-1)
+      {
+      relative += "/";
+      }
+    }
+
+  // Now add the portion of the destination path that is not included
+  // in the shared portion of the path.  Add a slash the first time
+  // only if there was already something in the path.  If there was a
+  // trailing slash in the input then the last iteration of the loop
+  // will add a slash followed by an empty string which will preserve
+  // the trailing slash in the output.
+  for(unsigned int i=common; i < path.size(); ++i)
+    {
+    if(relative.size() > 0)
+      {
+      relative += "/";
+      }
+    relative += path[i];
+    }
+
+  // Finally return the path.
+  return relative;
+}
+
+//----------------------------------------------------------------------------
+std::string
+cmLocalUnixMakefileGenerator2::ConvertToRelativeOutputPath(const char* p)
+{
+  // Convert the path to a relative path.
+  std::string relative = this->ConvertToRelativePath(p);
+
+  // Now convert it to an output path.
+  return cmSystemTools::ConvertToOutputPath(relative.c_str());
+}
+
+//----------------------------------------------------------------------------
+void
+cmLocalUnixMakefileGenerator2::ConfigureOutputPaths()
+{
+  // Call superclass version first.
+  this->cmLocalUnixMakefileGenerator::ConfigureOutputPaths();
+
+  // Setup fully collapsed paths.
+  m_CurrentOutputDirectory =
+    cmSystemTools::CollapseFullPath(m_Makefile->GetCurrentOutputDirectory());
+  m_HomeOutputDirectory =
+    cmSystemTools::CollapseFullPath(m_Makefile->GetHomeOutputDirectory());
+  m_HomeDirectory =
+    cmSystemTools::CollapseFullPath(m_Makefile->GetHomeDirectory());
+
+  // Identify the longest shared path component between the source
+  // directory and the build directory.
+  std::vector<std::string> source;
+  std::vector<std::string> binary;
+  this->SplitFullPath(m_HomeDirectory.c_str(), source);
+  this->SplitFullPath(m_HomeOutputDirectory.c_str(), binary);
+  unsigned int common=0;
+  while(common < source.size() && common < binary.size() &&
+        this->ComparePath(source[common].c_str(), binary[common].c_str()))
+    {
+    ++common;
+    }
+
+  // Require more than just the root portion of the path to be in
+  // common before allowing relative paths.  Also disallow relative
+  // paths if the build tree is a network path.  The current working
+  // directory on Windows cannot be a network path.  Therefore
+  // relative paths cannot work with network paths.
+  if(common > 1 && source[0] != "//")
+    {
+    // Build the minimum prefix required of a path to be converted to
+    // a relative path.
+    m_RelativePathTop = source[0];
+    for(unsigned int i=1; i < common; ++i)
+      {
+      if(i > 1)
+        {
+        m_RelativePathTop += "/";
+        }
+      m_RelativePathTop += source[i];
+      }
+
+    // Split the current output directory now to save time when
+    // converting paths.
+    this->SplitFullPath(m_CurrentOutputDirectory.c_str(),
+                        m_CurrentOutputDirectoryComponents);
+    }
+}
+
+//----------------------------------------------------------------------------
+void
+cmLocalUnixMakefileGenerator2
+::SplitFullPath(const char* p, std::vector<std::string>& components)
+{
+  // The path is split into its basic components.  This starts with a
+  // root ("/" for UNIX, "c:/" for Windows, "//" for Network) and is
+  // followed by the directory names.  If there is a trailing slash
+  // then the last component is the empty string.  The components can
+  // be recombined as "c[0]c[1]/c[2]/.../c[n]".
+  assert(cmSystemTools::FileIsFullPath(p));
+
+  // Identify the root component.
+  const char* c = p;
+  if(c[0] == '/' && c[1] == '/')
+    {
+    // Network path.
+    components.push_back("//");
+    c += 2;
+    }
+  else if(c[0] == '/')
+    {
+    // Unix path.
+    components.push_back("/");
+    c += 1;
+    }
+  else if(c[0] && c[1] == ':' && c[2] == '/')
+    {
+    // Windows path.
+    std::string root = "_:/";
+    root[0] = c[0];
+    components.push_back(root);
+    c += 3;
+    }
+  else
+    {
+    // Already a relative path.
+    cmSystemTools::Error("SplitFullPath called with path ", p);
+    return;
+    }
+
+  // Parse the remaining components.
+  const char* first = c;
+  const char* last = first;
+  for(;*last; ++last)
+    {
+    if(*last == '/')
+      {
+      // End of a component.  Save it.
+      components.push_back(std::string(first, last-first));
+      first = last+1;
+      }
+    }
+  // Save the last component unless there were no components.
+  if(last != c)
+    {
+    components.push_back(std::string(first, last-first));
+    }
+}
+
+//----------------------------------------------------------------------------
+bool cmLocalUnixMakefileGenerator2::ComparePath(const char* c1, const char* c2)
+{
+#if defined(_WIN32) || defined(__APPLE__)
+  return cmSystemTools::Strucmp(c1, c2) == 0;
+#else
+  return strcmp(c1, c2) == 0;
+#endif
 }
 
 //----------------------------------------------------------------------------
