@@ -319,6 +319,8 @@ void CMakeSetupDialog::OnBuildProjects()
     }
   // Make sure we are working from the cache on disk
   this->LoadCacheFromDiskToGUI();
+
+// duh
   // Create a makefile object
   cmMakefile makefile;
   makefile.SetMakefileGenerator(new cmMSProjectGenerator);
@@ -343,6 +345,8 @@ void CMakeSetupDialog::OnBuildProjects()
   makefile.GenerateMakefile();
   // Save the cache
   cmCacheManager::GetInstance()->SaveCache(&makefile);
+// end duh
+  
   // update the GUI with any new values in the caused by the
   // generation process
   this->LoadCacheFromDiskToGUI();
@@ -471,7 +475,7 @@ void CMakeSetupDialog::LoadCacheFromDiskToGUI()
       ("CMAKE_ROOT", root.c_str(),
        "Path to CMake installation.", cmCacheManager::INTERNAL);
     std::string cMakeCMD = "\""+cmSystemTools::GetProgramPath(fname);
-    cMakeCMD += "/CMakeSetupCMD.exe\"";
+    cMakeCMD += "/cmake.exe\"";
     
     // Save the value in the cache
     cmCacheManager::GetInstance()->AddCacheEntry("CMAKE_COMMAND",

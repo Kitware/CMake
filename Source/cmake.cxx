@@ -46,6 +46,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmMSProjectGenerator.h"
 #else
 #include "cmUnixMakefileGenerator.h"
+#endif
+
 int main(int ac, char** av)
 {
   cmake foo;
@@ -56,7 +58,6 @@ int main(int ac, char** av)
     }
   return foo.Generate(ac,av);
 }
-#endif
 
 void cmake::Usage(const char* program)
 {
