@@ -517,7 +517,7 @@ if test $ac_cv_prog_gxx = no; then
   cat > conftest.cc <<!
 #include <iostream>
 !
-  if test -z "`${CXX} -c conftest.cc 2>&1`"; then
+  if test -z "`${CXX} $CXXFLAGS $CPPFLAGS -c conftest.cc 2>&1`"; then
     echo "$ac_t""yes" 1>&6
   else
     CMAKE_NO_STD_NAMESPACE="1"
@@ -535,7 +535,7 @@ if test $ac_cv_prog_gxx = no; then
 #include <list>
 void foo() { std::list<int> l; }
 !
-  if test -z "`${CXX} -c conftest.cc 2>&1`"; then
+  if test -z "`${CXX} $CXXFLAGS $CPPFLAGS -c conftest.cc 2>&1`"; then
     echo "$ac_t""yes" 1>&6
   else
     CMAKE_NO_ANSI_STREAM_HEADERS="1"
