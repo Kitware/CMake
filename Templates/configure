@@ -2565,9 +2565,9 @@ fi
         CMAKE_SHLIB_RUNTIME_FLAG="-R "
         CMAKE_SHLIB_RUNTIME_SEP=":"
         if test "$CC" = "gcc" -o `$CC -v 2>&1 | grep -c gcc` != "0" ; then
-	  CMAKE_SHLIB_BUILD_FLAGS='-Wl,-G'
+	  CMAKE_SHLIB_BUILD_FLAGS='-shared -nostdlib'
 	  CMAKE_SHLIB_LINK_FLAGS=''
-	  CMAKE_MODULE_BUILD_FLAGS='-Wl,-G'
+	  CMAKE_MODULE_BUILD_FLAGS='-shared -nostdlib'
 	  CMAKE_MODULE_LINK_FLAGS=''
           CMAKE_SHLIB_RUNTIME_FLAG="-Wl,-R,"
           CMAKE_SHLIB_RUNTIME_SEP=":"
