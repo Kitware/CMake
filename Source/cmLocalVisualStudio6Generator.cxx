@@ -259,6 +259,7 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
       {
       if(!cmSystemTools::FileExists(source.c_str()))
         {
+        cmSystemTools::ReplaceString(source, "$(IntDir)/", "");
 #if defined(_WIN32) || defined(__CYGWIN__)
         std::ofstream fout(source.c_str(), 
                            std::ios::binary | std::ios::out | std::ios::trunc);
