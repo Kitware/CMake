@@ -1315,16 +1315,6 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
                                                         const cmTarget &t)
 {
   std::string linkFlags;
-  bool win32_executable = false;
-  bool macosx_bundle = false;
-  if ( t.GetPropertyAsBool("WIN32_EXECUTABLE") )
-    {
-    win32_executable = true;
-    }
-  if ( t.GetPropertyAsBool("MACOSX_BUNDLE") )
-    {
-    macosx_bundle = true;
-    }
 
   std::string buildType =  this->GetSafeDefinition("CMAKE_BUILD_TYPE");
   buildType = cmSystemTools::UpperCase(buildType);
@@ -1341,7 +1331,7 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
       }
     }
 #ifdef __APPLE__
-  if ( macosx_bundle )
+  if ( t.GetPropertyAsBool("MACOSX_BUNDLE") )
     {
     // Make bundle directories
     target += name;
@@ -1420,7 +1410,7 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
     linkFlags += " ";
    }
   
-  if(win32_executable)
+  if ( t.GetPropertyAsBool("WIN32_EXECUTABLE") )
     {
     linkFlags +=  this->GetSafeDefinition("CMAKE_CREATE_WIN32_EXE");
     linkFlags += " ";
