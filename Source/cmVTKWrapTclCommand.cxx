@@ -110,7 +110,7 @@ bool cmVTKWrapTclCommand::InitialPass(std::vector<std::string> const& args)
 void cmVTKWrapTclCommand::FinalPass() 
 {
   // first we add the rules for all the .h to Tcl.cxx files
-  int lastClass = m_WrapClasses.size();
+  size_t lastClass = m_WrapClasses.size();
   std::vector<std::string> depends;
   std::string wtcl = "${VTK_WRAP_TCL_EXE}";
   std::string hints = "${VTK_WRAP_HINTS}";
@@ -137,7 +137,7 @@ void cmVTKWrapTclCommand::FinalPass()
     {
     depends.push_back(hints);
     }
-  for(int classNum = 0; classNum < lastClass; classNum++)
+  for(size_t classNum = 0; classNum < lastClass; classNum++)
     {
     m_Makefile->AddSource(m_WrapClasses[classNum],m_SourceList.c_str());
     std::vector<std::string> args;
@@ -165,8 +165,8 @@ bool cmVTKWrapTclCommand::CreateInitFile(std::string& res)
   std::string kitName = cmSystemTools::Capitalized(m_LibraryName);
   
   std::vector<std::string> classes;
-  int lastClass = m_WrapHeaders.size();
-  int classNum;
+  size_t lastClass = m_WrapHeaders.size();
+  size_t classNum;
   for(classNum = 0; classNum < lastClass; classNum++)
     {
     if (!m_WrapClasses[classNum].IsAnAbstractClass())

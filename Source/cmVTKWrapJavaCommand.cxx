@@ -78,7 +78,7 @@ bool cmVTKWrapJavaCommand::InitialPass(std::vector<std::string> const& args)
 void cmVTKWrapJavaCommand::FinalPass() 
 {
   // first we add the rules for all the .h to Java.cxx files
-  int lastClass = m_WrapClasses.size();
+  size_t lastClass = m_WrapClasses.size();
   std::vector<std::string> depends;
   std::vector<std::string> depends2;
   std::vector<std::string> alldepends;  
@@ -98,7 +98,7 @@ void cmVTKWrapJavaCommand::FinalPass()
     depends.push_back(hints);
     depends2.push_back(hints);
     }
-  for(int classNum = 0; classNum < lastClass; classNum++)
+  for(size_t classNum = 0; classNum < lastClass; classNum++)
     {
     m_Makefile->AddSource(m_WrapClasses[classNum],m_SourceList.c_str());
 

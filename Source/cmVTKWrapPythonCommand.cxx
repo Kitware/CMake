@@ -78,7 +78,7 @@ bool cmVTKWrapPythonCommand::InitialPass(std::vector<std::string> const& args)
 void cmVTKWrapPythonCommand::FinalPass() 
 {
   // first we add the rules for all the .h to Python.cxx files
-  int lastClass = m_WrapClasses.size();
+  size_t lastClass = m_WrapClasses.size();
   std::vector<std::string> depends;
   std::string wpython = "${VTK_WRAP_PYTHON_EXE}";
   std::string hints = "${VTK_WRAP_HINTS}";
@@ -105,7 +105,7 @@ void cmVTKWrapPythonCommand::FinalPass()
     {
     depends.push_back(hints);
     }
-  for(int classNum = 0; classNum < lastClass; classNum++)
+  for(size_t classNum = 0; classNum < lastClass; classNum++)
     {
     m_Makefile->AddSource(m_WrapClasses[classNum],m_SourceList.c_str());
     std::string res = m_Makefile->GetCurrentOutputDirectory();
@@ -129,8 +129,8 @@ void cmVTKWrapPythonCommand::FinalPass()
 bool cmVTKWrapPythonCommand::CreateInitFile(std::string& res) 
 {
   std::vector<std::string> classes;
-  int lastClass = m_WrapHeaders.size();
-  int classNum;
+  size_t lastClass = m_WrapHeaders.size();
+  size_t classNum;
   for(classNum = 0; classNum < lastClass; classNum++)
     {
     std::string cls = m_WrapHeaders[classNum];

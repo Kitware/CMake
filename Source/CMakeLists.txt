@@ -25,6 +25,22 @@ cmCacheManager.cxx
 cmCableClassSet.cxx
 cmSourceGroup.cxx
 cmListFileCache.cxx
+cmake.h
+cmakewizard.h
+cmMakeDepend.h
+cmMakefile.h
+cmMakefileGenerator.h
+cmRegularExpression.h
+cmSourceFile.h
+cmSystemTools.h
+cmDirectory.h
+cmCommands.h
+cmTarget.h
+cmCustomCommand.h
+cmCacheManager.h
+cmCableClassSet.h
+cmSourceGroup.h
+cmListFileCache.h
 )
 
 # configure the .h file
@@ -37,10 +53,20 @@ INCLUDE_DIRECTORIES(${CMake_BINARY_DIR}/Source)
 ADD_DEFINITIONS(-DCMAKE_BUILD_WITH_CMAKE)
 
 IF (WIN32)
-  SOURCE_FILES(SRCS cmDSWWriter.cxx cmDSPWriter.cxx cmMSProjectGenerator.cxx)
-  SOURCE_FILES(SRCS cmBorlandMakefileGenerator.cxx)
-  SOURCE_FILES(SRCS cmNMakeMakefileGenerator.cxx)
-  SOURCE_FILES(SRCS cmMSDotNETGenerator.cxx)
+  SOURCE_FILES(SRCS 
+                    cmDSWWriter.cxx 
+                    cmDSPWriter.cxx 
+                    cmMSProjectGenerator.cxx
+                    cmBorlandMakefileGenerator.cxx
+                    cmNMakeMakefileGenerator.cxx
+                    cmMSDotNETGenerator.cxx
+                    cmDSWWriter.cxx 
+                    cmDSPWriter.h 
+                    cmMSProjectGenerator.h
+                    cmBorlandMakefileGenerator.h
+                    cmNMakeMakefileGenerator.h
+                    cmMSDotNETGenerator.h
+                    )
   IF(NOT UNIX)
     IF(  NOT BORLAND )
       LINK_LIBRARIES( rpcrt4.lib )
@@ -57,7 +83,7 @@ IF (UNIX)
   ENDIF (CURSES_LIBRARY)
 ENDIF (UNIX)
 
-SOURCE_FILES(SRCS cmUnixMakefileGenerator.cxx)
+SOURCE_FILES(SRCS cmUnixMakefileGenerator.cxx cmUnixMakefileGenerator.h)
 
 
 # create a library used by the command line and the GUI

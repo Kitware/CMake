@@ -142,7 +142,7 @@ int main (int argc, char *argv[])
       {
       char *buffer = new char[makeCommand.size()+1];
       if(GetShortPathName(makeCommand.c_str(), buffer, 
-                          makeCommand.size()+1) != 0)
+                          int(makeCommand.size()+1)) != 0)
         {
         makeCommand = buffer;
         }
@@ -161,7 +161,7 @@ int main (int argc, char *argv[])
       {
       char *buffer = new char[makeCommand.size()+1];
       if(GetShortPathName(makeCommand.c_str(), buffer, 
-                          makeCommand.size()+1) != 0)
+                          int(makeCommand.size()+1)) != 0)
         {
         makeCommand = buffer;
         }

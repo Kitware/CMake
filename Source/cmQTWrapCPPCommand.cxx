@@ -89,7 +89,7 @@ void cmQTWrapCPPCommand::FinalPass()
 {
 
   // first we add the rules for all the .h to Moc files
-  int lastClass = m_WrapClasses.size();
+  size_t lastClass = m_WrapClasses.size();
   std::vector<std::string> depends;
   std::string moc_exe = "${QT_MOC_EXE}";
 
@@ -105,7 +105,7 @@ void cmQTWrapCPPCommand::FinalPass()
     moc_list=moc_list+GENERATED_QT_FILES_value;
     }
 
-  for(int classNum = 0; classNum < lastClass; classNum++)
+  for(size_t classNum = 0; classNum < lastClass; classNum++)
     {
     // Add output to build list
     m_Makefile->AddSource(m_WrapClasses[classNum],m_SourceList.c_str());

@@ -101,14 +101,14 @@ void cmFLTKWrapUICommand::FinalPass()
 {
 
   // first we add the rules for all the .fl to .h and .cxx files
-  int lastHeadersClass = m_GeneratedHeadersClasses.size();
+  size_t lastHeadersClass = m_GeneratedHeadersClasses.size();
   std::string fluid_exe = "${FLTK_FLUID_EXE}";
 
 
   std::string outputGUIDirectory = m_Makefile->GetCurrentOutputDirectory();
 
   // Generate code for all the .fl files
-  for(int classNum = 0; classNum < lastHeadersClass; classNum++)
+  for(size_t classNum = 0; classNum < lastHeadersClass; classNum++)
     {
     // set up .fl to .h and .cxx command
     std::string hres = outputGUIDirectory;

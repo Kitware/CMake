@@ -174,10 +174,10 @@ cmVTKMakeInstantiatorCommand
   m_Makefile->AddSource(file, outSourceList.c_str());
   }
 
-  unsigned int numClasses = m_Classes.size();
-  unsigned int numFullBlocks = numClasses / groupSize;
-  unsigned int lastBlockSize = numClasses % groupSize;
-  unsigned int numBlocks = numFullBlocks + ((lastBlockSize>0)? 1:0);
+  size_t numClasses = m_Classes.size();
+  size_t numFullBlocks = numClasses / groupSize;
+  size_t lastBlockSize = numClasses % groupSize;
+  size_t numBlocks = numFullBlocks + ((lastBlockSize>0)? 1:0);
 
   // Generate the files with the ::New() calls to each class.  These
   // are done in groups to keep the translation unit size smaller.

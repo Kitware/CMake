@@ -122,8 +122,10 @@ void cmSourceGroup::Print() const
       std::cout << "FullCommand: " << j->first.c_str() << "\n";
       std::cout << "Command: " << j->second.m_Command.c_str() << "\n";
       std::cout << "Arguments: " << j->second.m_Arguments.c_str() << "\n";
-      std::cout << "Command Outputs " << j->second.m_Outputs.size() << "\n";
-      std::cout << "Command Depends " << j->second.m_Depends.size() << "\n";
+      std::cout << "Command Outputs " 
+		  << static_cast<int>(j->second.m_Outputs.size()) << "\n";
+      std::cout << "Command Depends " 
+		  << static_cast<int>(j->second.m_Depends.size()) << "\n";
       }
     }
 }

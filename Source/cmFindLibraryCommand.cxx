@@ -26,7 +26,7 @@ bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn)
     return false;
     } 
   std::string helpString;
-  unsigned int size = argsIn.size();
+  size_t size = argsIn.size();
   std::vector<std::string> args;
   for(unsigned int j = 0; j < size; ++j)
     {

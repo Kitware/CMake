@@ -54,7 +54,7 @@ std::string cmNMakeMakefileGenerator::ShortPath(const char* path)
   // if there are spaces then call GetShortPathName to get rid of them
   char *buffer = new char[strlen(path)+1];
   if(GetShortPathName(path, buffer, 
-                      strlen(path)+1) != 0)
+                      static_cast<int>(strlen(path)+1)) != 0)
     {
     ret = buffer;
     }

@@ -30,7 +30,7 @@ bool cmFindFileCommand::InitialPass(std::vector<std::string> const& argsIn)
     }
   std::string helpString = "Where can the ";
   helpString += argsIn[1] + " file be found";
-  unsigned int size = argsIn.size();
+  size_t size = argsIn.size();
   std::vector<std::string> args;
   for(unsigned int j = 0; j < size; ++j)
     {

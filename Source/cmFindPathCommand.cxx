@@ -31,7 +31,7 @@ bool cmFindPathCommand::InitialPass(std::vector<std::string> const& argsIn)
   std::string helpString = "What is the path where the file ";
   helpString += argsIn[1] + " can be found";
   std::vector<std::string> args;
-  unsigned int size = argsIn.size();
+  size_t size = argsIn.size();
   for(unsigned int j = 0; j < size; ++j)
     {
     if(argsIn[j] != "DOC")

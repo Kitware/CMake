@@ -376,7 +376,7 @@ void cmRegularExpression::compile (const char* exp) {
 	    for (; scan != NULL; scan = regnext(scan))
 		if (OP(scan) == EXACTLY && strlen(OPERAND(scan)) >= len) {
 		    longest = OPERAND(scan);
-		    len = strlen(OPERAND(scan));
+		    len = int(strlen(OPERAND(scan)));
 		}
 	    this->regmust = longest;
 	    this->regmlen = len;
@@ -675,7 +675,7 @@ static char* regatom (int *flagp) {
 		register char   ender;
 
 		regparse--;
-		len = strcspn(regparse, META);
+		len = int(strcspn(regparse, META));
 		if (len <= 0) {
 		    //RAISE Error, SYM(cmRegularExpression), SYM(Internal_Error),
                     printf ("cmRegularExpression::compile(): Internal error.\n");
@@ -784,9 +784,9 @@ static void regtail (char* p, const char* val) {
     }
 
     if (OP(scan) == BACK)
-	offset = (const char*)scan - val;
+	offset = int(scan - val);
     else
-	offset = val - scan;
+	offset = int(val - scan);
     *(scan + 1) = (offset >> 8) & 0377;
     *(scan + 2) = offset & 0377;
 }
@@ -969,7 +969,7 @@ static int regmatch (const char* prog) {
 		    // Inline the first character, for speed.
 		    if (*opnd != *reginput)
 			return (0);
-		    len = strlen(opnd);
+		    len = int(strlen(opnd));
 		    if (len > 1 && strncmp(opnd, reginput, len) != 0)
 			return (0);
 		    reginput += len;
@@ -1128,7 +1128,7 @@ static int regrepeat (const char* p) {
     opnd = OPERAND(p);
     switch (OP(p)) {
 	case ANY:
-	    count = strlen(scan);
+	    count = int(strlen(scan));
 	    scan += count;
 	    break;
 	case EXACTLY:

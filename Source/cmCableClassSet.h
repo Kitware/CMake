@@ -70,7 +70,7 @@ public:
   
   void AddClass(const char*, cmCableClass*);
   void AddSource(const char* name);
-  unsigned int Size() const;
+  size_t Size() const;
   CableClassMap::const_iterator Begin() const;
   CableClassMap::const_iterator End() const;
 

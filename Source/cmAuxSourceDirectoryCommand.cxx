@@ -35,8 +35,8 @@ bool cmAuxSourceDirectoryCommand::InitialPass(std::vector<std::string> const& ar
   cmDirectory dir;
   if(dir.Load(tdir.c_str()))
     {
-    int numfiles = dir.GetNumberOfFiles();
-    for(int i =0; i < numfiles; ++i)
+    size_t numfiles = dir.GetNumberOfFiles();
+    for(size_t i =0; i < numfiles; ++i)
       {
       std::string file = dir.GetFile(i);
       // Split the filename into base and extension

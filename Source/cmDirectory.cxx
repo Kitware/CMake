@@ -39,7 +39,7 @@ cmDirectory
 ::Load(const char* name)
 {
   char* buf;
-  int n = strlen(name);
+  size_t n = strlen(name);
   if ( name[n - 1] == '/' ) 
     {
     buf = new char[n + 1 + 1];
@@ -53,7 +53,7 @@ cmDirectory
   struct _finddata_t data;	// data of current file
   
   // Now put them into the file array
-  long srchHandle = _findfirst(buf, &data);
+  size_t srchHandle = _findfirst(buf, &data);
   delete [] buf;
   
   if ( srchHandle == -1 )
@@ -109,7 +109,7 @@ cmDirectory
  */
 const char* 
 cmDirectory
-::GetFile(unsigned int index)
+::GetFile(size_t index)
 {
   if ( index >= m_Files.size() )
     {

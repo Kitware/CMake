@@ -86,7 +86,7 @@ void cmCableClassSet::AddSource(const char* name)
 /**
  * Get the size of the internal CableClassMap used to store the set.
  */
-unsigned int cmCableClassSet::Size() const
+size_t cmCableClassSet::Size() const
 {
   return m_CableClassMap.size();
 }

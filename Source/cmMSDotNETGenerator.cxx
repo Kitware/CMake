@@ -360,7 +360,7 @@ void cmMSDotNETGenerator::WriteProject(std::ostream& fout,
                                const char* dspname,
                                const char* dir,
                                cmMSDotNETGenerator*,
-                               const cmTarget& target
+                               const cmTarget&
   )
 {
   std::string d = cmSystemTools::ConvertToOutputPath(dir);
@@ -377,7 +377,7 @@ void cmMSDotNETGenerator::WriteProject(std::ostream& fout,
 // the libraries it uses are also done here
 void cmMSDotNETGenerator::WriteProjectDepends(std::ostream& fout, 
                                       const char* dspname,
-                                      const char* dir,
+                                      const char* ,
                                       cmMSDotNETGenerator*,
                                       const cmTarget& target
   )
@@ -441,10 +441,10 @@ void cmMSDotNETGenerator::WriteProjectConfigurations(std::ostream& fout, const c
 // Write a dsp file into the SLN file,
 // Note, that dependencies from executables to 
 // the libraries it uses are also done here
-void cmMSDotNETGenerator::WriteExternalProject(std::ostream& fout, 
-			       const char* name,
-			       const char* location,
-                               const std::vector<std::string>& dependencies)
+void cmMSDotNETGenerator::WriteExternalProject(std::ostream& , 
+			       const char* ,
+			       const char* ,
+                               const std::vector<std::string>& )
 {
   cmSystemTools::Error("WriteExternalProject not implemented");
 //  fout << "#########################################################"
@@ -907,9 +907,9 @@ void cmMSDotNETGenerator::OutputModuleDefinitionFile(std::ostream& fout,
 }
 
 void cmMSDotNETGenerator::OutputLibraryDirectories(std::ostream& fout,
-                                                   const char* configName,
-                                                   const char* libName,
-                                                   const cmTarget &target)
+                                                   const char*,
+                                                   const char*,
+                                                   const cmTarget &)
 {
   bool hasone = false;
   if(m_LibraryOutputPath.size())
@@ -1197,7 +1197,7 @@ void cmMSDotNETGenerator::WriteCustomRule(std::ostream& fout,
 
 void cmMSDotNETGenerator::WriteVCProjBeginGroup(std::ostream& fout, 
 					const char* group,
-					const char* filter)
+					const char* )
 {
   fout << "\t\t<Filter\n"
        << "\t\t\tName=\"" << group << "\"\n"
@@ -1288,7 +1288,7 @@ void cmMSDotNETGenerator::OutputTargetRules(std::ostream& fout,
 }
 
 void cmMSDotNETGenerator::WriteProjectStart(std::ostream& fout, const char *libName,
-                                       const cmTarget &target, 
+                                       const cmTarget &, 
                                        std::vector<cmSourceGroup> &)
 {
   fout << "<?xml version=\"1.0\" encoding = \"Windows-1252\"?>\n"

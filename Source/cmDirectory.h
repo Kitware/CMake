@@ -42,12 +42,12 @@ public:
   /**
    * Return the number of files in the current directory.
    */
-  std::vector<std::string>::size_type GetNumberOfFiles() { return m_Files.size();}
+  size_t GetNumberOfFiles() { return m_Files.size();}
 
   /**
    * Return the file at the given index, the indexing is 0 based
    */
-  const char* GetFile(unsigned int index);
+  const char* GetFile(size_t );
 
 private:
   std::vector<std::string> m_Files; // Array of Files

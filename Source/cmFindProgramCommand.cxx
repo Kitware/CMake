@@ -29,7 +29,7 @@ bool cmFindProgramCommand::InitialPass(std::vector<std::string> const& argsIn)
     return false;
     }
   std::string doc = "Path to a program.";
-  unsigned int size = argsIn.size();
+  size_t size = argsIn.size();
   std::vector<std::string> args;
   for(unsigned int j = 0; j < size; ++j)
     {

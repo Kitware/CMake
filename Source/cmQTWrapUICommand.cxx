@@ -111,7 +111,7 @@ void cmQTWrapUICommand::FinalPass()
 {
 
   // first we add the rules for all the .ui to .h and .cxx files
-  int lastHeadersClass = m_WrapHeadersClasses.size();
+  size_t lastHeadersClass = m_WrapHeadersClasses.size();
   std::vector<std::string> depends;
   std::string uic_exe = "${QT_UIC_EXE}";
   std::string moc_exe = "${QT_MOC_EXE}";
@@ -128,7 +128,7 @@ void cmQTWrapUICommand::FinalPass()
     ui_list=ui_list+GENERATED_QT_FILES_value;
     } 
 
-  for(int classNum = 0; classNum < lastHeadersClass; classNum++)
+  for(size_t classNum = 0; classNum < lastHeadersClass; classNum++)
     {
     // set up .ui to .h and .cxx command
 
