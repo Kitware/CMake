@@ -6,6 +6,9 @@ SET (HAVE_LIMITS_H   1)
 
 SET (HAVE_UNISTD_H   1)
 
+SET (CMAKE_ANSI_CFLAGS "" CACHE INTERNAL 
+     "What flags are required by the c++ compiler to make it ansi.")
+
 SET (CMAKE_C_COMPILER cl CACHE FILEPATH
      "Name of C compiler used.")
 
