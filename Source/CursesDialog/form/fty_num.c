@@ -107,7 +107,6 @@ static bool Check_Numeric_Field(FIELD * field, const void * argp)
   unsigned char *bp   = (unsigned char *)field_buffer(field,0);
   char *s             = (char *)bp;
   double val          = 0.0;
-  struct lconv* L     = argn->L;
   char buf[64];
 
   while(*bp && *bp==' ') bp++;
@@ -162,9 +161,6 @@ static bool Check_Numeric_Field(FIELD * field, const void * argp)
 +--------------------------------------------------------------------------*/
 static bool Check_Numeric_Character(int c, const void * argp)
 {
-  const numericARG *argn = (const numericARG *)argp;
-  struct lconv* L  = argn->L;  
-
   return (isdigit(c)  || 
 	  c == '+'    || 
 	  c == '-'    || 
