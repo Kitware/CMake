@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include "OutputFile.h"
 
 int main(int, char*[])
