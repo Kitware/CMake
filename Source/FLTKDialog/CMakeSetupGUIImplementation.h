@@ -3,6 +3,7 @@
 #define CMakeSetupGUIImplementation_h
 
 #include "CMakeSetupGUI.h"
+#include "FLTKPropertyList.h"
 
 
 /**
@@ -32,7 +33,10 @@ public:
   virtual void SaveCacheFromGUI( void );
   virtual void LoadCacheFromDiskToGUI( void );
   virtual void FillCacheGUIFromCacheManager( void );
+  virtual void InsertProperties(void);
 
+private:
+  fltk::PropertyList   m_CacheEntriesList;
 };
 
 

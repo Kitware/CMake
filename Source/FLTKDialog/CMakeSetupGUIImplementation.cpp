@@ -6,6 +6,7 @@
 #include "cstring"
 #include "../cmCacheManager.h"
 #include "../cmMakefile.h"
+#include <iostream>
 
 
 
@@ -26,6 +27,23 @@ CMakeSetupGUIImplementation
 ::~CMakeSetupGUIImplementation()
 {
 }
+
+
+
+/**
+ * Insert Properties on the Scroll/Pack widget
+ */
+void
+CMakeSetupGUIImplementation
+::InsertProperties( void )
+{
+  for(unsigned int i=0; i<20; i++) 
+  {
+    std::cout << "new button" << std::endl;
+    new Fl_Button(30,30*i,100,25,"Azucar");
+  }
+}
+
 
 
 
@@ -100,7 +118,8 @@ CMakeSetupGUIImplementation
     return;
   }
 
-  binaryPathTextInput->value( path );
+  SetBinaryPath( path );
+
 }
 
 
@@ -137,6 +156,7 @@ CMakeSetupGUIImplementation
     binaryPathTextInput->value( path );
   }
 
+  LoadCacheFromDiskToGUI();
 }
 
 
@@ -282,7 +302,7 @@ CMakeSetupGUIImplementation
     {
     const char* key = i->first.c_str();
     const cmCacheManager::CacheEntry& value = i->second;
-    /*
+    
     switch(value.m_Type )
       {
       case cmCacheManager::BOOL:
@@ -291,38 +311,38 @@ CMakeSetupGUIImplementation
           m_CacheEntriesList.AddProperty(key,
                                          "ON",
                                          value.m_HelpString.c_str(),
-                                         CPropertyList::CHECKBOX,"");
+                                         fltk::PropertyList::CHECKBOX,"");
           }
         else
           {
           m_CacheEntriesList.AddProperty(key,
                                          "OFF",
                                          value.m_HelpString.c_str(),
-                                         CPropertyList::CHECKBOX,"");
+                                         fltk::PropertyList::CHECKBOX,"");
           }
         break;
       case cmCacheManager::PATH:
         m_CacheEntriesList.AddProperty(key, 
                                        value.m_Value.c_str(),
                                        value.m_HelpString.c_str(),
-                                       CPropertyList::PATH,"");
+                                       fltk::PropertyList::PATH,"");
         break;
       case cmCacheManager::FILEPATH:
         m_CacheEntriesList.AddProperty(key, 
                                        value.m_Value.c_str(),
                                        value.m_HelpString.c_str(),
-                                       CPropertyList::FILE,"");
+                                       fltk::PropertyList::FILE,"");
         break;
       case cmCacheManager::STRING:
         m_CacheEntriesList.AddProperty(key,
                                        value.m_Value.c_str(),
                                        value.m_HelpString.c_str(),
-                                       CPropertyList::EDIT,"");
+                                       fltk::PropertyList::EDIT,"");
         break;
       case cmCacheManager::INTERNAL:
         break;
       }
-    */
+    
     }
   this->UpdateData(false);
 
