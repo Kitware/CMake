@@ -1330,10 +1330,10 @@ bool RunCommandViaSystem(const char* command,
     return false;
     }
   bool multiLine = false;
-  while(fin)
+  std::string line;
+  while(cmSystemTools::GetLineFromStream(fin, line))
     {
-    fin.getline(buffer, BUFFER_SIZE);
-    output += buffer;
+    output += line;
     if(multiLine)
       {
       output += "\n";
@@ -2402,6 +2402,37 @@ std::string cmSystemTools::MakeCindentifier(const char* s)
     str[pos] = '_';
     }
   return str;
+}
+
+// Due to a buggy stream library on the HP and another on Mac OSX, we
+// need this very carefully written version of getline.  Returns true
+// if any data were read before the end-of-file was reached.
+bool cmSystemTools::GetLineFromStream(std::istream& is, std::string& line)
+{
+  const int bufferSize = 1024;
+  char buffer[bufferSize];
+  line = "";
+  bool haveData = false;
+
+  // If no characters are read from the stream, the end of file has
+  // been reached.
+  while((is.getline(buffer, bufferSize), is.gcount() > 0))
+    {
+    haveData = true;
+    line.append(buffer);
+
+    // If newline character was read, the gcount includes the
+    // character, but the buffer does not.  The end of line has been
+    // reached.
+    if(strlen(buffer) == static_cast<size_t>(is.gcount()-1))
+      {
+      break;
+      }
+
+    // The fail bit may be set.  Clear it.
+    is.clear(is.rdstate() & ~std::ios::failbit);
+    }
+  return haveData;
 }
 
 #if defined(_MSC_VER) && defined(_DEBUG)

@@ -125,16 +125,15 @@ bool cmCacheManager::LoadCache(const char* path,
     {
     return false;
     }
-  const int bsize = 4096;
-  char buffer[bsize];
-  char *realbuffer;
+  const char *realbuffer;
+  std::string buffer;
   std::string entryKey;
   while(fin)
     {
     // Format is key:type=value
     CacheEntry e;
-    fin.getline(buffer, bsize);
-    realbuffer = buffer;
+    cmSystemTools::GetLineFromStream(fin, buffer);
+    realbuffer = buffer.c_str();
     while(*realbuffer != '0' &&
           (*realbuffer == ' ' ||
            *realbuffer == '\t' ||
@@ -150,7 +149,8 @@ bool cmCacheManager::LoadCache(const char* path,
     while(realbuffer[0] == '/' && realbuffer[1] == '/')
       {
       e.m_Properties["HELPSTRING"] += &realbuffer[2];
-      fin.getline(realbuffer, bsize);
+      cmSystemTools::GetLineFromStream(fin, buffer);
+      realbuffer = buffer.c_str();
       if(!fin)
         {
         continue;

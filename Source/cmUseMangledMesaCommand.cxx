@@ -98,33 +98,28 @@ CopyAndFullPathMesaHeader(const char* source,
   cmRegularExpression glDirLine("(gl|GL)(/|\\\\)([^<\"]+)");
   // regular expression for gl GL or xmesa in a file (match(1) of above)
   cmRegularExpression glLine("(gl|GL|xmesa)");
-  while(fin)
+  while(cmSystemTools::GetLineFromStream(fin,inLine))
     {
-    fin.getline(buffer, bufSize);
-    if(fin)
+    if(includeLine.find(inLine.c_str()))
       {
-      inLine = buffer;
-      if(includeLine.find(inLine.c_str()))
+      std::string includeFile = includeLine.match(1);
+      if(glDirLine.find(includeFile.c_str()))
         {
-        std::string includeFile = includeLine.match(1);
-        if(glDirLine.find(includeFile.c_str()))
-          {
-          std::string gfile = glDirLine.match(3);
-          fout << "#include \"" << outdir << "/" << gfile.c_str() << "\"\n";
-          }
-        else if(glLine.find(includeFile.c_str()))
-          {
-          fout << "#include \"" << outdir << "/" << includeLine.match(1).c_str() << "\"\n";
-          }
-        else
-          {
-          fout << inLine << "\n";
-          }
+        std::string gfile = glDirLine.match(3);
+        fout << "#include \"" << outdir << "/" << gfile.c_str() << "\"\n";
+        }
+      else if(glLine.find(includeFile.c_str()))
+        {
+        fout << "#include \"" << outdir << "/" << includeLine.match(1).c_str() << "\"\n";
         }
       else
         {
         fout << inLine << "\n";
         }
+      }
+    else
+      {
+      fout << inLine << "\n";
       }
     }
   // close the files before attempting to copy

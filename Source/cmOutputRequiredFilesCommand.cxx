@@ -34,11 +34,10 @@ void cmLBDepend::DependWalk(cmDependInformation* info)
     return;
     }
   
-  char line[255];
-  while(!fin.eof() && !fin.fail())
+  std::string line;
+  while(cmSystemTools::GetLineFromStream(fin, line))
     {
-    fin.getline(line, 255);
-    if(!strncmp(line, "#include", 8))
+    if(!strncmp(line.c_str(), "#include", 8))
       {
       // if it is an include line then create a string class
       std::string currentline = line;

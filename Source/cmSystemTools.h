@@ -377,6 +377,15 @@ public:
    * DART.
    */
   static void EnableMSVCDebugHook();
+
+  /**
+   * Read line from file. Make sure to get everything. Due to a buggy stream
+   * library on the HP and another on Mac OSX, we need this very carefully
+   * written version of getline. Returns true if any data were read before the
+   * end-of-file was reached.
+   */
+  static bool GetLineFromStream(std::istream& istr, std::string& line);
+  
 protected:
   // these two functions can be called from ConvertToOutputPath
   /**

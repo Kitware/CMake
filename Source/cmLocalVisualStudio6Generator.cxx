@@ -532,10 +532,9 @@ void cmLocalVisualStudio6Generator::SetBuildType(BuildType b,
   m_Configurations.erase(m_Configurations.begin(), m_Configurations.end());
   // now add all the configurations possible
   char buffer[2048];
-  while(fin)
+  std::string line;
+  while(cmSystemTools::GetLineFromStream(fin, line))
     {
-    fin.getline(buffer, 2048);
-    std::string line = buffer;
     cmSystemTools::ReplaceString(line, "OUTPUT_LIBNAME_EXPORTS",
                                  exportSymbol.c_str());
     cmSystemTools::ReplaceString(line, "OUTPUT_LIBNAME",libName);
@@ -844,10 +843,9 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
     }
   char buffer[2048];
 
-  while(fin)
+  std::string line;
+  while(cmSystemTools::GetLineFromStream(fin, line))
     {
-    fin.getline(buffer, 2048);
-    std::string line = buffer;
     const char* mfcFlag = m_Makefile->GetDefinition("CMAKE_MFC_FLAG");
     if(!mfcFlag)
       {
@@ -935,8 +933,6 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
     }
 }
 
-
-
 void cmLocalVisualStudio6Generator::WriteDSPFooter(std::ostream& fout)
 {  
   std::ifstream fin(m_DSPFooterTemplate.c_str());
@@ -945,10 +941,9 @@ void cmLocalVisualStudio6Generator::WriteDSPFooter(std::ostream& fout)
     cmSystemTools::Error("Error Reading ",
                          m_DSPFooterTemplate.c_str());
     }
-  char buffer[2048];
-  while(fin)
+  std::string line;
+  while(cmSystemTools::GetLineFromStream(fin, line))
     {
-      fin.getline(buffer, 2048);
-      fout << buffer << std::endl;
+    fout << line << std::endl;
     }
 }

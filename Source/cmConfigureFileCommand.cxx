@@ -105,49 +105,42 @@ void cmConfigureFileCommand::ConfigureFile()
 
     // now copy input to output and expand variables in the
     // input file at the same time
-    const int bufSize = 4096;
-    char buffer[bufSize];
     std::string inLine;
     cmRegularExpression cmdefine("#cmakedefine[ \t]*([A-Za-z_0-9]*)");
-    while(fin)
+    while( cmSystemTools::GetLineFromStream(fin, inLine) )
       {
-      fin.getline(buffer, bufSize);
-      if(fin)
+      m_Makefile->ExpandVariablesInString(inLine, m_EscapeQuotes, m_AtOnly);
+      m_Makefile->RemoveVariablesInString(inLine, m_AtOnly);
+      // look for special cmakedefine symbol and handle it
+      // is the symbol defined
+      if (cmdefine.find(inLine))
         {
-        inLine = buffer;
-        m_Makefile->ExpandVariablesInString(inLine, m_EscapeQuotes, m_AtOnly);
-        m_Makefile->RemoveVariablesInString(inLine, m_AtOnly);
-        // look for special cmakedefine symbol and handle it
-        // is the symbol defined
-        if (cmdefine.find(inLine))
+        const char *def = m_Makefile->GetDefinition(cmdefine.match(1).c_str());
+        if(!cmSystemTools::IsOff(def))
           {
-          const char *def = m_Makefile->GetDefinition(cmdefine.match(1).c_str());
-          if(!cmSystemTools::IsOff(def))
-            {
-            cmSystemTools::ReplaceString(inLine,
-                                         "#cmakedefine", "#define");
-            fout << inLine << "\n";
-            }
-          else
-            {
-            cmSystemTools::ReplaceString(inLine,
-                                         "#cmakedefine", "#undef");
-            fout << "/* " << inLine << " */\n";
-            }
+          cmSystemTools::ReplaceString(inLine,
+            "#cmakedefine", "#define");
+          fout << inLine << "\n";
           }
         else
           {
-          fout << inLine << "\n";
+          cmSystemTools::ReplaceString(inLine,
+            "#cmakedefine", "#undef");
+          fout << "/* " << inLine << " */\n";
           }
+        }
+      else
+        {
+        fout << inLine << "\n";
         }
       }
     // close the files before attempting to copy
     fin.close();
     fout.close();
     cmSystemTools::CopyFileIfDifferent(tempOutputFile.c_str(),
-                                       m_OuputFile.c_str());
+      m_OuputFile.c_str());
     cmSystemTools::RemoveFile(tempOutputFile.c_str());
     }
 }
 
-  
+

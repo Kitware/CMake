@@ -145,16 +145,12 @@ void cmListFileCache::FlushCache(const char* path)
     }
 }
 
-inline void RemoveComments(char* ptr)
+inline void RemoveComments(std::string& line)
 {
-  while(*ptr)
+  std::string::size_type pos = line.find("#");
+  if (pos != std::string::npos )
     {
-    if(*ptr == '#')
-      {
-      *ptr = 0;
-      break;
-      }
-    ++ptr;
+    line.erase(pos);
     }
 }
 
@@ -169,13 +165,12 @@ bool cmListFileCache::ParseFunction(std::ifstream& fin,
   std::vector<cmListFileArgument>& arguments = function.m_Arguments;
   name = "";
   arguments = std::vector<cmListFileArgument>();
-  const int BUFFER_SIZE = 4096;
-  char inbuffer[BUFFER_SIZE];
+  std::string inbuffer;
   if(!fin)
     {
     return false;
     }
-  if(fin.getline(inbuffer, BUFFER_SIZE ) )
+  if(cmSystemTools::GetLineFromStream(fin, inbuffer) )
     {
     ++line;
     RemoveComments(inbuffer);
@@ -185,12 +180,12 @@ bool cmListFileCache::ParseFunction(std::ifstream& fin,
     cmRegularExpression lastLine("^(.*)\\)[ \t\r]*$");
 
     // check for blank line or comment
-    if(blankLine.find(inbuffer) )
+    if(blankLine.find(inbuffer.c_str()) )
       {
       return false;
       }
     // look for a oneline fun(arg arg2) 
-    else if(oneLiner.find(inbuffer))
+    else if(oneLiner.find(inbuffer.c_str()))
       {
       // the arguments are the second match
       std::string args = oneLiner.match(2);
@@ -201,7 +196,7 @@ bool cmListFileCache::ParseFunction(std::ifstream& fin,
       return true;
       }
     // look for a start of a multiline with no trailing ")"  fun(arg arg2 
-    else if(multiLine.find(inbuffer))
+    else if(multiLine.find(inbuffer.c_str()))
       {
       name = multiLine.match(1);
       std::string args = multiLine.match(2);
@@ -212,15 +207,15 @@ bool cmListFileCache::ParseFunction(std::ifstream& fin,
       while(!done)
         {
         // read lines until the end paren is found
-        if(fin.getline(inbuffer, BUFFER_SIZE ) )
+        if(cmSystemTools::GetLineFromStream(fin, inbuffer) )
           {
           ++line;
           RemoveComments(inbuffer);
           // Check for comment lines and ignore them.
-          if(blankLine.find(inbuffer))
+          if(blankLine.find(inbuffer.c_str()))
             { continue; }
           // Is this the last line?
-          if(lastLine.find(inbuffer))
+          if(lastLine.find(inbuffer.c_str()))
             {
             done = true;
             std::string gargs = lastLine.match(1);
@@ -228,8 +223,7 @@ bool cmListFileCache::ParseFunction(std::ifstream& fin,
             }
           else
             {
-            std::string lineB = inbuffer;
-            cmListFileCache::GetArguments(lineB, arguments);
+            cmListFileCache::GetArguments(inbuffer, arguments);
             }
           }
         else

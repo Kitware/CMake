@@ -198,10 +198,10 @@ void cmMakeDepend::DependWalk(cmDependInformation* info)
     }
 
   // TODO: Write real read loop (see cmSystemTools::CopyFile).
-  char line[255];
-  for(fin.getline(line, 255); fin; fin.getline(line, 255))
+  std::string line;
+  while( cmSystemTools::GetLineFromStream(fin, line) )
     {
-    if(includeLine.find(line))
+    if(includeLine.find(line.c_str()))
       {
       // extract the file being included
       std::string includeFile = includeLine.match(1);
