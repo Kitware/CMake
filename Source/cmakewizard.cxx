@@ -89,7 +89,7 @@ void cmakewizard::ShowMessage(const char* m)
 
 
 
-void cmakewizard::RunWizard(std::vector<std::string> const& args)
+int cmakewizard::RunWizard(std::vector<std::string> const& args)
 {
   m_ShowAdvanced = this->AskAdvanced();
   cmSystemTools::DisableRunCommandOutput();
@@ -148,6 +148,10 @@ void cmakewizard::RunWizard(std::vector<std::string> const& args)
     cachem->SaveCache(make.GetHomeOutputDirectory());
     }
   while(asked);
-  make.Generate();
-  this->ShowMessage("CMake complete, run make to build project.\n");
+  if(make.Generate() == 0)
+    {
+    this->ShowMessage("CMake complete, run make to build project.\n");
+    return 0;
+    }
+  return 1;
 }

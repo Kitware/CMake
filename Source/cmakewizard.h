@@ -38,7 +38,7 @@ public:
    *  Run cmake in wizard mode.  This will coninue to ask the user questions 
    *  until there are no more entries in the cache.
    */
-  void RunWizard(std::vector<std::string>const& args);
+  int RunWizard(std::vector<std::string>const& args);
   
 private:
   bool m_ShowAdvanced;

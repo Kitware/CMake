@@ -544,9 +544,10 @@ int cmake::AddCMakePaths(const char *arg0)
   if (!cmSystemTools::FileExists(modules.c_str()))
     {
     // couldn't find modules
-    cmSystemTools::Error("Could not find CMAKE_ROOT !!!\n", 
-                         "Modules directory not in directory:\n",
-                         modules.c_str());
+    cmSystemTools::Error("Could not find CMAKE_ROOT !!!\n"
+                         "CMake has most likely not been installed correctly.\n"
+                         "Modules directory not found in\n",
+                         cMakeRoot.c_str());
     return 0;
     }
   this->m_CacheManager->AddCacheEntry
@@ -1058,6 +1059,10 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
 
 int cmake::Generate()
 {
+  if(!m_GlobalGenerator)
+    {
+    return -1;
+    }
   m_GlobalGenerator->Generate();
   if(cmSystemTools::GetErrorOccuredFlag())
     {

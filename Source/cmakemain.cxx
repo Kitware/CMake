@@ -196,8 +196,7 @@ int do_cmake(int ac, char** av)
   if (wiz)
     {
     cmakewizard wizard;
-    wizard.RunWizard(args); 
-    return 0;
+    return wizard.RunWizard(args); 
     }
   cmake cm;  
   cm.SetProgressCallback(updateProgress, 0);
