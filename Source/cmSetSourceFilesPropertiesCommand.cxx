@@ -96,7 +96,8 @@ bool cmSetSourceFilesPropertiesCommand::InitialPass(
     }
   
   // now loop over all the files
-  int i, k;
+  int i;
+  unsigned int k;
   for(i = 0; i < numFiles; ++i)
     {   
     // if the file is already in the makefile just set properites on it
