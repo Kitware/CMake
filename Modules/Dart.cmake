@@ -76,32 +76,37 @@ IF(BUILD_TESTING)
   #
 
   # add testing targets
-  ADD_CUSTOM_TARGET(Nightly 
-  ${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Start Build Test Submit)
-  ADD_CUSTOM_TARGET(NightlyBuild   
-  ${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Start Build)
-  ADD_CUSTOM_TARGET(NightlyTest 
-  ${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Test)
-  ADD_CUSTOM_TARGET(NightlyCoverage 
-  ${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Coverage)
-  ADD_CUSTOM_TARGET(NightlySubmit 
-  ${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Submit)
-  ADD_CUSTOM_TARGET(NightlyDashboardStart 
-  ${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly DashboardStart)
-  ADD_CUSTOM_TARGET(NightlyDashboardEnd 
-  ${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly DashboardEnd)
-  ADD_CUSTOM_TARGET(ExperimentalBuild 
-  ${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Start Build)
-  ADD_CUSTOM_TARGET(ExperimentalTest 
-  ${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Test)
-  ADD_CUSTOM_TARGET(ExperimentalCoverage 
-  ${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Coverage)
-  ADD_CUSTOM_TARGET(ExperimentalSubmit 
-  ${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Submit)
-  ADD_CUSTOM_TARGET(Experimental 
-  ${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Start Build Test Submit)
+  IF(TCLSHCOMMAND)
+    ADD_CUSTOM_TARGET(Nightly 
+    ${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Start Build Test Submit)
+    ADD_CUSTOM_TARGET(NightlyBuild   
+    ${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Start Build)
+    ADD_CUSTOM_TARGET(NightlyTest 
+    ${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Test)
+    ADD_CUSTOM_TARGET(NightlyCoverage 
+    ${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Coverage)
+    ADD_CUSTOM_TARGET(NightlySubmit 
+    ${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Submit)
+    ADD_CUSTOM_TARGET(NightlyDashboardStart 
+    ${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly DashboardStart)
+    ADD_CUSTOM_TARGET(NightlyDashboardEnd 
+    ${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly DashboardEnd)
+    ADD_CUSTOM_TARGET(ExperimentalBuild 
+    ${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Start Build)
+    ADD_CUSTOM_TARGET(ExperimentalTest 
+    ${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Test)
+    ADD_CUSTOM_TARGET(ExperimentalCoverage 
+    ${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Coverage)
+    ADD_CUSTOM_TARGET(ExperimentalSubmit 
+    ${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Submit)
+    ADD_CUSTOM_TARGET(Experimental 
+    ${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Start Build Test Submit)
 
-  ENABLE_TESTING()
+    ENABLE_TESTING()
+  ELSE(TCLSHCOMMAND)
+    MESSAGE("Could not find TCLSHCOMMAND, disabling testing." "Error")   
+  ENDIF(TCLSHCOMMAND)
+
   ENDIF (DART_ROOT)
 ENDIF(BUILD_TESTING)
 
