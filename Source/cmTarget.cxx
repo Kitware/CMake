@@ -369,7 +369,8 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
                                 "general", "Library is used for both debug and optimized links",
                                 cmCacheManager::STATIC);
           }
-        } break;
+        }
+        break;
       case cmTarget::OPTIMIZED:
         {
         const char* def = mf.GetDefinition(linkTypeName.c_str());
@@ -385,9 +386,10 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
                                 "general", "Library is used for both debug and optimized links",
                                 cmCacheManager::STATIC);
           }
-        } break;
+        }
         break;
-      case cmTarget::GENERAL: break;
+      case cmTarget::GENERAL:
+        break;
       }
     }
   // Add the explicit dependency information for this target. This is
