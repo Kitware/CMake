@@ -107,7 +107,8 @@ bool cmIfCommand::InitialPass(std::vector<std::string> const& args)
   if (!isValid)
     {
     std::string err = "An IF command had incorrect arguments: ";
-    for(int i =0; i < args.size(); ++i)
+    unsigned int i;
+    for(i =0; i < args.size(); ++i)
       {
       err += args[i];
       err += " ";
