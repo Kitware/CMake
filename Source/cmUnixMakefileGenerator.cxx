@@ -214,7 +214,6 @@ void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
 {
   fout << "CMAKE_DEPEND_LIBS = ";
   std::vector<std::string>& libs = m_Makefile->GetLinkLibraries();
-  std::vector<std::string>& libdirs = m_Makefile->GetLinkDirectories();
   std::vector<std::string>::iterator dir, lib;
   // Search the list of libraries that will be linked into
   // the executable
@@ -384,30 +383,27 @@ void cmUnixMakefileGenerator::OutputSubDirectoryRules(std::ostream& fout)
 // by the class cmMakeDepend GenerateMakefile
 void cmUnixMakefileGenerator::OutputObjectDepends(std::ostream& fout)
 {
-  cmMakefile::SourceMap &Sources = m_Makefile->GetSources();
-  for(cmMakefile::SourceMap::iterator l = Sources.begin(); 
-      l != Sources.end(); l++)
+  // Iterate over every target.
+  std::map<std::string, cmTarget>& targets = m_Makefile->GetTargets();
+  for(std::map<std::string, cmTarget>::const_iterator target = targets.begin(); 
+      target != targets.end(); ++target)
     {
-    for(std::vector<cmSourceFile>::iterator i = l->second.begin(); 
-        i != l->second.end(); i++)
+    // Iterate over every source for this target.
+    const std::vector<cmSourceFile>& sources = target->second.GetSourceFiles();
+    for(std::vector<cmSourceFile>::const_iterator source = sources.begin(); 
+        source != sources.end(); ++source)
       {
-      if(!i->IsAHeaderFileOnly())
+      if(!source->IsAHeaderFileOnly())
         {
-        if(i->GetDepends().size())
+        if(!source->GetDepends().empty())
           {
-          fout << i->GetSourceName() << ".o : \\\n";
-          for(std::vector<std::string>::iterator j =  
-                i->GetDepends().begin();
-              j != i->GetDepends().end(); ++j)
+          fout << source->GetSourceName() << ".o :";
+          // Iterate through all the dependencies for this source.
+          for(std::vector<std::string>::const_iterator dep =
+                source->GetDepends().begin();
+              dep != source->GetDepends().end(); ++dep)
             {
-            if(j+1 == i->GetDepends().end())
-              {
-              fout << *j << " \n";
-              }
-            else
-              {
-              fout << *j << " \\\n";
-              }
+            fout << " \\\n" << dep->c_str();
             }
           fout << "\n\n";
           }
