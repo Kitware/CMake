@@ -106,8 +106,17 @@ bool cmCacheManager::LoadCache(const char* path)
 {
   return this->LoadCache(path,true);
 }
+
 bool cmCacheManager::LoadCache(const char* path,
 			       bool internal)
+{
+  std::set<std::string> emptySet;
+  return this->LoadCache(path, internal, emptySet);
+}
+
+bool cmCacheManager::LoadCache(const char* path,
+			       bool internal,
+			       std::set<std::string>& excludes)
 {
   std::string cacheFile = path;
   cacheFile += "/CMakeCache.txt";
@@ -127,6 +136,9 @@ bool cmCacheManager::LoadCache(const char* path,
   cmRegularExpression reg("^([^:]*):([^=]*)=(.*[^\t ]|[\t ]*)[\t ]*$");
   // input line is:         "key":type=value
   cmRegularExpression regQuoted("^\"([^\"]*)\":([^=]*)=(.*[^\t ]|[\t ]*)[\t ]*$");
+
+  std::set<std::string>::const_iterator iter;
+  std::string entryKey;
   while(fin)
     {
     // Format is key:type=value
@@ -148,22 +160,44 @@ bool cmCacheManager::LoadCache(const char* path,
       }
     if(regQuoted.find(buffer))
       {
-      e.m_Type = cmCacheManager::StringToType(regQuoted.match(2).c_str());
-      // only load internal values if internal is set
-      if (internal || e.m_Type != INTERNAL)
+      entryKey = regQuoted.match(1);
+      if ( excludes.find(entryKey) == excludes.end() )
 	{
+	e.m_Type = cmCacheManager::StringToType(regQuoted.match(2).c_str());
+	// only load internal values if internal is set
+	if (internal || e.m_Type != INTERNAL)
+	  {
+	  // If we are loading the cache from another project,
+	  // make all loaded entries internal so that it is
+	  // not visible in the gui
+	  if (!internal)
+	    {
+	    e.m_Type = INTERNAL;
+	    }
 	  e.m_Value = regQuoted.match(3);
-	  m_Cache[regQuoted.match(1)] = e;
+	  m_Cache[entryKey] = e;
+	  }
 	}
       }
     else if (reg.find(buffer))
       {
-      e.m_Type = cmCacheManager::StringToType(reg.match(2).c_str());
-      // only load internal values if internal is set
-      if (internal || e.m_Type != INTERNAL)
+      entryKey = reg.match(1);
+      if ( excludes.find(entryKey) == excludes.end() )
 	{
+	e.m_Type = cmCacheManager::StringToType(reg.match(2).c_str());
+	// only load internal values if internal is set
+	if (internal || e.m_Type != INTERNAL)
+	  {
+	  // If we are loading the cache from another project,
+	  // make all loaded entries internal so that it is
+	  // not visible in the gui
+	  if (!internal)
+	    {
+	    e.m_Type = INTERNAL;
+	    }
 	  e.m_Value = reg.match(3);
-	  m_Cache[reg.match(1)] = e;
+	  m_Cache[entryKey] = e;
+	  }
 	}
       }
     else
