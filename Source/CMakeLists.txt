@@ -109,7 +109,10 @@ ENDIF(CMAKE_BUILD_MFC_DIALOG)
 ADD_EXECUTABLE(cmake cmakemain.cxx)
 ADD_EXECUTABLE(DumpDocumentation cmDumpDocumentation)
 
-SET(CMTEST_SRCS ctest.cxx cmCTest.cxx ctest/cmCTestScriptHandler.cxx)
+SET(CMTEST_SRCS ctest.cxx cmCTest.cxx 
+  CTest/cmCTestScriptHandler.cxx
+)
+
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/Source/CTest)
 
 IF (UNIX)
