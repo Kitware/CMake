@@ -91,17 +91,11 @@ void cmLocalUnixMakefileGenerator2::GenerateMakefile()
   runRule += " --check-rerun ";
   runRule += this->ConvertToRelativeOutputPath(cmakefileName.c_str());
 
-  // Most unix makes will pass the command line flags to make down to
-  // sub-invoked makes via an environment variable.  However, some
-  // makes do not support that, so you have to pass the flags
-  // explicitly.
-  const char* depRule = "$(MAKE) -f Makefile2 $(MAKESILENT) all.depends";
-  const char* allRule = "$(MAKE) -f Makefile2 $(MAKESILENT) all";
-  if(m_PassMakeflags)
-    {
-    depRule = "$(MAKE) -f Makefile2 $(MAKESILENT) -$(MAKEFLAGS) all.depends";
-    allRule = "$(MAKE) -f Makefile2 $(MAKESILENT) -$(MAKEFLAGS) all";
-    }
+  // Construct recursive calls for the "all" rules.
+  std::string depRule;
+  std::string allRule;
+  this->AppendRecursiveMake(depRule, "Makefile2", "all.depends");
+  this->AppendRecursiveMake(allRule, "Makefile2", "all");
 
   // Write the main entry point target.  This must be the VERY first
   // target so that make with no arguments will run it.
@@ -179,6 +173,9 @@ void cmLocalUnixMakefileGenerator2::GenerateMakefile()
       << this->ConvertToOutputForExisting(ruleFileName.c_str()).c_str()
       << "\n";
     }
+
+  // Write jump-and-build rules that were recorded in the map.
+  this->WriteJumpAndBuildRules(makefileStream);
 }
 
 //----------------------------------------------------------------------------
@@ -585,6 +582,21 @@ cmLocalUnixMakefileGenerator2
       obj != objects.end(); ++obj)
     {
     depends.push_back(*obj);
+    }
+
+  // Add dependencies on libraries that will be linked.
+  std::set<cmStdString> emitted;
+  emitted.insert(target.GetName());
+  const cmTarget::LinkLibraries& tlibs = target.GetLinkLibraries();
+  for(cmTarget::LinkLibraries::const_iterator lib = tlibs.begin();
+      lib != tlibs.end(); ++lib)
+    {
+    // Don't emit the same library twice for this target.
+    if(emitted.insert(lib->first).second)
+      {
+      // Add this dependency.
+      this->AppendLibDepend(depends, lib->first.c_str());
+      }
     }
   depends.push_back(ruleFileName);
 
@@ -1084,6 +1096,157 @@ void cmLocalUnixMakefileGenerator2::AppendFlags(std::string& flags,
       flags += " ";
       }
     flags += newFlags;
+    }
+}
+
+//----------------------------------------------------------------------------
+void
+cmLocalUnixMakefileGenerator2
+::AppendLibDepend(std::vector<std::string>& depends, const char* name)
+{
+  // There are a few cases for the name of the target:
+  //  - CMake target in this directory: depend on it.
+  //  - CMake target in another directory: depend and add jump-and-build.
+  //  - Full path to an outside file: depend on it.
+  //  - Other format (like -lm): do nothing.
+
+  // If it is a CMake target there will be a definition for it.
+  std::string dirVar = name;
+  dirVar += "_CMAKE_PATH";
+  const char* dir = m_Makefile->GetDefinition(dirVar.c_str());
+  if(dir && *dir)
+    {
+    // This is a CMake target somewhere in this project.
+    bool jumpAndBuild = false;
+
+    // Get the path to  the library.
+    std::string libPath;
+    if(this->SamePath(m_Makefile->GetCurrentOutputDirectory(), dir))
+      {
+      // The target is in the current directory so this makefile will
+      // know about it already.
+      libPath = m_LibraryOutputPath;
+      }
+    else
+      {
+      // The target is in another directory.  Get the path to it.
+      if(m_LibraryOutputPath.size())
+        {
+        libPath = m_LibraryOutputPath;
+        }
+      else
+        {
+        libPath = dir;
+        libPath += "/";
+        }
+
+      // We need to add a jump-and-build rule for this library.
+      jumpAndBuild = true;
+      }
+
+    // Add the name of the library's file.  This depends on the type
+    // of the library.
+    std::string typeVar = name;
+    typeVar += "_LIBRARY_TYPE";
+    std::string libType = m_Makefile->GetSafeDefinition(typeVar.c_str());
+    std::string prefix;
+    std::string suffix;
+    if(libType == "SHARED")
+      {
+      prefix = m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_PREFIX");
+      suffix = m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_SUFFIX");
+      }
+    else if(libType == "MODULE")
+      {
+      prefix = m_Makefile->GetSafeDefinition("CMAKE_SHARED_MODULE_PREFIX");
+      suffix = m_Makefile->GetSafeDefinition("CMAKE_SHARED_MODULE_SUFFIX");
+      }
+    else if(libType == "STATIC")
+      {
+      prefix = m_Makefile->GetSafeDefinition("CMAKE_STATIC_LIBRARY_PREFIX");
+      suffix = m_Makefile->GetSafeDefinition("CMAKE_STATIC_LIBRARY_SUFFIX");
+      }
+    libPath += prefix;
+    libPath += name;
+    libPath += suffix;
+
+    if(jumpAndBuild)
+      {
+      // We need to add a jump-and-build rule for this library.
+      cmLocalUnixMakefileGenerator2::RemoteTarget rt;
+      rt.m_BuildDirectory = dir;
+      rt.m_FilePath =libPath;
+      m_JumpAndBuild[name] = rt;
+      }
+
+    // Add a dependency on the library.
+    depends.push_back(this->ConvertToRelativeOutputPath(libPath.c_str()));
+    }
+  else
+    {
+    // This is not a CMake target.  If it exists and is a full path we
+    // can depend on it.
+    if(cmSystemTools::FileExists(name) && cmSystemTools::FileIsFullPath(name))
+      {
+      depends.push_back(this->ConvertToRelativeOutputPath(name));
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
+void
+cmLocalUnixMakefileGenerator2
+::AppendRecursiveMake(std::string& cmd, const char* file, const char* tgt)
+{
+  // Call make on the given file.
+  cmd += "$(MAKE) -f ";
+  cmd += file;
+
+  // Pass down verbosity level.
+  cmd += " $(MAKESILENT) ";
+
+  // Most unix makes will pass the command line flags to make down to
+  // sub-invoked makes via an environment variable.  However, some
+  // makes do not support that, so you have to pass the flags
+  // explicitly.
+  if(m_PassMakeflags)
+    {
+    cmd += "-$(MAKEFLAGS) ";
+    }
+
+  // Add the target.
+  cmd += tgt;
+}
+
+//----------------------------------------------------------------------------
+void
+cmLocalUnixMakefileGenerator2
+::WriteJumpAndBuildRules(std::ostream& makefileStream)
+{
+  std::vector<std::string> depends;
+  std::vector<std::string> commands;
+  commands.push_back("");
+  for(std::map<cmStdString, RemoteTarget>::iterator
+        jump = m_JumpAndBuild.begin(); jump != m_JumpAndBuild.end(); ++jump)
+    {
+    const cmLocalUnixMakefileGenerator2::RemoteTarget& rt = jump->second;
+    std::string& cmd = commands[0];
+    if(m_WindowsShell)
+      {
+      // TODO: implement windows version.
+      cmd = "";
+      }
+    else
+      {
+      cmd = "cd ";
+      cmd += this->ConvertToOutputForExisting(rt.m_BuildDirectory.c_str());
+      cmd += "; ";
+      std::string tgt = jump->first;
+      tgt += ".requires";
+      this->AppendRecursiveMake(cmd, "Makefile2", tgt.c_str());
+      }
+    this->OutputMakeRule(makefileStream, "jump rule for",
+                         rt.m_FilePath.c_str(), depends, commands);
     }
 }
 

@@ -90,10 +90,21 @@ protected:
   void AddSharedFlags(std::string& flags, const char* lang, bool shared);
   void AddConfigVariableFlags(std::string& flags, const char* var);
   void AppendFlags(std::string& flags, const char* newFlags);
+  void AppendLibDepend(std::vector<std::string>& depends, const char* name);
+  void AppendRecursiveMake(std::string& cmd, const char* file, const char* tgt);
+  void WriteJumpAndBuildRules(std::ostream& makefileStream);
 
   static bool ScanDependenciesC(const char* objFile, const char* srcFile,
                                 std::vector<std::string> const& includes);
 private:
+  // Map from target name to build directory containing it for
+  // jump-and-build targets.
+  struct RemoteTarget
+  {
+    std::string m_BuildDirectory;
+    std::string m_FilePath;
+  };
+  std::map<cmStdString, RemoteTarget> m_JumpAndBuild;
 };
 
 #endif
