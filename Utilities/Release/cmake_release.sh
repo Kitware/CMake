@@ -275,7 +275,7 @@ utilities()
             rm -rf CheckoutTemp &&
             mkdir CheckoutTemp &&
             cd CheckoutTemp &&
-            cvs -q -z3 -d $CVSROOT co CMake/Utilities/Release &&
+            cvs -q -z3 -d $CVSROOT co -r ${TAG} CMake/Utilities/Release &&
             mv CMake/Utilities/Release ../ReleaseUtilities &&
             cd .. &&
             rm -rf CheckoutTemp
