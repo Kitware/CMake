@@ -237,7 +237,7 @@ CMakeSetupGUIImplementation
   SaveCacheFromGUI();
   
   // set the wait cursor
-  fl_cursor(FL_CURSOR_WAIT,FL_WHITE,FL_BLACK);
+  fl_cursor(FL_CURSOR_WAIT,FL_BLACK,FL_WHITE);
   // get all the info from the dialog
   // this->UpdateData();
   if(!m_BuildPathChanged)
@@ -272,7 +272,7 @@ CMakeSetupGUIImplementation
   // path is up-to-date now
   m_BuildPathChanged = false;
   // put the cursor back
-  fl_cursor(FL_CURSOR_DEFAULT,FL_WHITE,FL_BLACK);
+  fl_cursor(FL_CURSOR_DEFAULT,FL_BLACK,FL_WHITE);
   fl_message("Done !");
 
 }
