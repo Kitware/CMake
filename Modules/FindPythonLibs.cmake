@@ -20,7 +20,7 @@ IF(WIN32)
 ENDIF(WIN32)
 
 FIND_LIBRARY(PYTHON_LIBRARY 
-  NAMES python python21 python2.1 python20 python2.0 python1.5 python15
+  NAMES python python21 python2.1 python20 python2.0 python1.5 python15 python22 python2.2
   PATHS
   /usr/lib
   /usr/lib/python1.5/config
