@@ -4104,7 +4104,8 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
   // See if the executable exists as written.
   std::vector<std::string> failed;
   std::string fullPath;
-  if(cmSystemTools::FileExists(m_TestCommand.c_str()))
+  if(cmSystemTools::FileExists(m_TestCommand.c_str())
+    && !cmSystemTools::FileIsDirectory(m_TestCommand.c_str()))
     {
     fullPath = cmSystemTools::CollapseFullPath(m_TestCommand.c_str());
     }
@@ -4113,7 +4114,8 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
     failed.push_back(m_TestCommand);
     std::string tryPath = m_TestCommand;
     tryPath += cmSystemTools::GetExecutableExtension();
-    if(cmSystemTools::FileExists(tryPath.c_str()))
+    if(cmSystemTools::FileExists(tryPath.c_str())
+       && !cmSystemTools::FileIsDirectory(tryPath.c_str()))
       {
       fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
       }
@@ -4123,7 +4125,8 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
       // try the Debug extension
       tryPath = m_ConfigType + "/";
       tryPath += cmSystemTools::GetFilenameName(m_TestCommand);
-      if(cmSystemTools::FileExists(tryPath.c_str()))
+      if(cmSystemTools::FileExists(tryPath.c_str())
+         && !cmSystemTools::FileIsDirectory(tryPath.c_str()))
         {
         fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
         }
@@ -4131,7 +4134,8 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
         {
         failed.push_back(tryPath);
         tryPath += cmSystemTools::GetExecutableExtension();
-        if(cmSystemTools::FileExists(tryPath.c_str()))
+        if(cmSystemTools::FileExists(tryPath.c_str())
+           && !cmSystemTools::FileIsDirectory(tryPath.c_str()))
           {
           fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
           }
@@ -4142,7 +4146,8 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
           tryPath += "/";
           tryPath += m_TestCommand;
           tryPath += cmSystemTools::GetExecutableExtension();
-          if(cmSystemTools::FileExists(tryPath.c_str()))
+          if(cmSystemTools::FileExists(tryPath.c_str())
+             && !cmSystemTools::FileIsDirectory(tryPath.c_str()))
             {
             fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
             }
@@ -4154,7 +4159,8 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
             tryPath += m_ConfigType + "/";
             tryPath += m_TestCommand;
             tryPath += cmSystemTools::GetExecutableExtension();
-            if(cmSystemTools::FileExists(tryPath.c_str()))
+            if(cmSystemTools::FileExists(tryPath.c_str())
+               && !cmSystemTools::FileIsDirectory(tryPath.c_str()))
               {
               fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
               }
@@ -4210,7 +4216,13 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
     out << m_TestCommandArgs[k] << " ";
     }
   out << "\n";
-  this->RunTest(testCommand, &outs, &retval);
+  int runTestRes = this->RunTest(testCommand, &outs, &retval);
+  if(runTestRes != cmsysProcess_State_Exited || retval != 0)
+    {
+    out << "Test failed to run.\n";
+    retval = 1;
+    }
+   
   out << outs << "\n";
   if(outstring)
     {
