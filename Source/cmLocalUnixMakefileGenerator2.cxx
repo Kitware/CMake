@@ -41,6 +41,7 @@
 // TODO: Identify remaining relative path violations.
 // TODO: Add test to drive installation through native build system.
 // TODO: Is there a case where quoted object list fails and unquoted works?
+// TODO: External object file feature.
 
 // TODO: Fortran support:
 //  - This needs a "provides-requires" mode for the .o files in a target.
