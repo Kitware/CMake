@@ -27,7 +27,7 @@
 class cmVariableWatch
 {
 public:
-  typedef void (WatchMethod)(const std::string& variable, int access_type, void* client_data);
+  typedef void (*WatchMethod)(const std::string& variable, int access_type, void* client_data);
 
   cmVariableWatch();
   ~cmVariableWatch();
@@ -57,7 +57,7 @@ public:
 protected:
   struct Pair
   {
-    WatchMethod* m_Method;
+    WatchMethod m_Method;
     void*        m_ClientData;
     Pair() : m_Method(0), m_ClientData(0) {}
   };
