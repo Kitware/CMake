@@ -679,18 +679,18 @@ cmLocalUnixMakefileGenerator2
   std::string depMakeFile = objFile;
   depMakeFile += ".depends.make";
   std::ofstream fout(depMakeFile.c_str());
-  fout << "# Dependencies for " << objFile << endl;
+  fout << "# Dependencies for " << objFile << std::endl;
   for(std::set<cmStdString>::iterator i=dependencies.begin();
       i != dependencies.end(); ++i)
     {
-    fout << objFile << " : " << i->c_str() << endl;
+    fout << objFile << " : " << i->c_str() << std::endl;
     }
-  fout << endl;
-  fout << "# Dependencies for " << objFile << ".depends" << endl;
+  fout << std::endl;
+  fout << "# Dependencies for " << objFile << ".depends" << std::endl;
   for(std::set<cmStdString>::iterator i=dependencies.begin();
       i != dependencies.end(); ++i)
     {
-    fout << objFile << ".depends : " << i->c_str() << endl;
+    fout << objFile << ".depends : " << i->c_str() << std::endl;
     }
 
   return true;
