@@ -73,11 +73,11 @@ typedef struct timeval kwsysProcessTime;
 
 typedef struct kwsysProcessCreateInformation_s
 {
-  int stdin;
-  int stdout;
-  int stderr;
-  int term;
-  int error[2];
+  int StdIn;
+  int StdOut;
+  int StdErr;
+  int TermPipe;
+  int ErrorPipe[2];
 } kwsysProcessCreateInformation;
 
 /*--------------------------------------------------------------------------*/
@@ -423,11 +423,11 @@ void kwsysProcess_Execute(kwsysProcess* cp)
     cp->PipeReadEnds[i] = p[0];
     if(i == KWSYSPE_PIPE_STDERR)
       {
-      si.stderr = p[1];
+      si.StdErr = p[1];
       }
     else
       {
-      si.term = p[1];
+      si.TermPipe = p[1];
       }
 
     /* Set close-on-exec flag on the pipe's ends.  */
@@ -435,8 +435,8 @@ void kwsysProcess_Execute(kwsysProcess* cp)
        (fcntl(p[1], F_SETFD, FD_CLOEXEC) < 0))
       {
       kwsysProcessCleanup(cp, 1);
-      kwsysProcessCleanupDescriptor(&si.stderr);
-      kwsysProcessCleanupDescriptor(&si.term);
+      kwsysProcessCleanupDescriptor(&si.StdErr);
+      kwsysProcessCleanupDescriptor(&si.TermPipe);
       return;
       }
     }
@@ -460,13 +460,13 @@ void kwsysProcess_Execute(kwsysProcess* cp)
       kwsysProcessCleanupDescriptor(&readEnd);
       if(i > 0)
         {
-        kwsysProcessCleanupDescriptor(&si.stdin);
+        kwsysProcessCleanupDescriptor(&si.StdIn);
         }
-      kwsysProcessCleanupDescriptor(&si.stdout);
-      kwsysProcessCleanupDescriptor(&si.stderr);
-      kwsysProcessCleanupDescriptor(&si.term);
-      kwsysProcessCleanupDescriptor(&si.error[0]);
-      kwsysProcessCleanupDescriptor(&si.error[1]);
+      kwsysProcessCleanupDescriptor(&si.StdOut);
+      kwsysProcessCleanupDescriptor(&si.StdErr);
+      kwsysProcessCleanupDescriptor(&si.TermPipe);
+      kwsysProcessCleanupDescriptor(&si.ErrorPipe[0]);
+      kwsysProcessCleanupDescriptor(&si.ErrorPipe[1]);
       return;
       }
     }
@@ -475,8 +475,8 @@ void kwsysProcess_Execute(kwsysProcess* cp)
   }
 
   /* The parent process does not need the output pipe write ends.  */
-  kwsysProcessCleanupDescriptor(&si.stderr);
-  kwsysProcessCleanupDescriptor(&si.term);
+  kwsysProcessCleanupDescriptor(&si.StdErr);
+  kwsysProcessCleanupDescriptor(&si.TermPipe);
 
   /* All the pipes are now open.  */
   cp->PipesLeft = KWSYSPE_PIPE_COUNT;
@@ -933,12 +933,12 @@ int kwsysProcessCreate(kwsysProcess* cp, int index,
   /* Setup the process's stdin.  */
   if(index > 0)
     {
-    si->stdin = *readEnd;
+    si->StdIn = *readEnd;
     *readEnd = 0;
     }
   else
     {
-    si->stdin = 0;
+    si->StdIn = 0;
     }
 
   /* Setup the process's stdout.  */
@@ -950,7 +950,7 @@ int kwsysProcessCreate(kwsysProcess* cp, int index,
     return 0;
     }
   *readEnd = p[0];
-  si->stdout = p[1];
+  si->StdOut = p[1];
 
   /* Set close-on-exec flag on the pipe's ends.  */
   if((fcntl(p[0], F_SETFD, FD_CLOEXEC) < 0) ||
@@ -961,13 +961,13 @@ int kwsysProcessCreate(kwsysProcess* cp, int index,
   }
 
   /* Create the error reporting pipe.  */
-  if(pipe(si->error) < 0)
+  if(pipe(si->ErrorPipe) < 0)
     {
     return 0;
     }
 
   /* Set close-on-exec flag on the error pipe's write end.  */
-  if(fcntl(si->error[1], F_SETFD, FD_CLOEXEC) < 0)
+  if(fcntl(si->ErrorPipe[1], F_SETFD, FD_CLOEXEC) < 0)
     {
     return 0;
     }
@@ -982,15 +982,15 @@ int kwsysProcessCreate(kwsysProcess* cp, int index,
   if(cp->ForkPIDs[index] == 0)
     {
     /* Close the read end of the error reporting pipe.  */
-    close(si->error[0]);
+    close(si->ErrorPipe[0]);
 
     /* Setup the stdin, stdout, and stderr pipes.  */
     if(index > 0)
       {
-      dup2(si->stdin, 0);
+      dup2(si->StdIn, 0);
       }
-    dup2(si->stdout, 1);
-    dup2(si->stderr, 2);
+    dup2(si->StdOut, 1);
+    dup2(si->StdErr, 2);
 
     /* Clear the close-on-exec flag for stdin, stdout, and stderr.
        Also clear it for the termination pipe.  All other pipe handles
@@ -998,7 +998,7 @@ int kwsysProcessCreate(kwsysProcess* cp, int index,
     fcntl(0, F_SETFD, 0);
     fcntl(1, F_SETFD, 0);
     fcntl(2, F_SETFD, 0);
-    fcntl(si->term, F_SETFD, 0);
+    fcntl(si->TermPipe, F_SETFD, 0);
 
     /* Restore all default signal handlers. */
     kwsysProcessRestoreDefaultSignalHandlers();
@@ -1013,7 +1013,7 @@ int kwsysProcessCreate(kwsysProcess* cp, int index,
       if(r < 0)
         {
         /* Failure.  Report error to parent and terminate.  */
-        kwsysProcessChildErrorExit(si->error[1]);
+        kwsysProcessChildErrorExit(si->ErrorPipe[1]);
         }
       }
 
@@ -1021,11 +1021,11 @@ int kwsysProcessCreate(kwsysProcess* cp, int index,
     execvp(cp->Commands[index][0], cp->Commands[index]);
 
     /* Failure.  Report error to parent and terminate.  */
-    kwsysProcessChildErrorExit(si->error[1]);
+    kwsysProcessChildErrorExit(si->ErrorPipe[1]);
     }
 
   /* We are done with the error reporting pipe write end.  */
-  kwsysProcessCleanupDescriptor(&si->error[1]);
+  kwsysProcessCleanupDescriptor(&si->ErrorPipe[1]);
 
   /* Block until the child's exec call succeeds and closes the error
      pipe or writes data to the pipe to report an error.  */
@@ -1036,7 +1036,7 @@ int kwsysProcessCreate(kwsysProcess* cp, int index,
   while(total < KWSYSPE_PIPE_BUFFER_SIZE && n > 0)
     {
     /* Keep trying to read until the operation is not interrupted.  */
-    while(((n = read(si->error[0], cp->ErrorMessage+total,
+    while(((n = read(si->ErrorPipe[0], cp->ErrorMessage+total,
                      KWSYSPE_PIPE_BUFFER_SIZE-total)) < 0) &&
           (errno == EINTR));
     if(n > 0)
@@ -1046,7 +1046,7 @@ int kwsysProcessCreate(kwsysProcess* cp, int index,
     }
 
   /* We are done with the error reporting pipe read end.  */
-  kwsysProcessCleanupDescriptor(&si->error[0]);
+  kwsysProcessCleanupDescriptor(&si->ErrorPipe[0]);
 
   if(total > 0)
     {
@@ -1059,11 +1059,11 @@ int kwsysProcessCreate(kwsysProcess* cp, int index,
   if(index > 0)
     {
     /* The parent process does not need the input pipe read end.  */
-    kwsysProcessCleanupDescriptor(&si->stdin);
+    kwsysProcessCleanupDescriptor(&si->StdIn);
     }
 
   /* The parent process does not need the output pipe write ends.  */
-  kwsysProcessCleanupDescriptor(&si->stdout);
+  kwsysProcessCleanupDescriptor(&si->StdOut);
 
   return 1;
 }
