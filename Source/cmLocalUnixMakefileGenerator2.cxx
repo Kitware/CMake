@@ -1936,7 +1936,7 @@ cmLocalUnixMakefileGenerator2
         }
 
       // Skip lines too short to have a dependency.
-      if(line.size() < 2)
+      if(line.size() < 3)
         {
         continue;
         }
