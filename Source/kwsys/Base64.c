@@ -87,7 +87,7 @@ void kwsysBase64_Encode2(const unsigned char *src, unsigned char *dest)
 {
   dest[0] = kwsysBase64EncodeChar((src[0] >> 2) & 0x3F);
   dest[1] = kwsysBase64EncodeChar(((src[0] << 4) & 0x30)|((src[1] >> 4) & 0x0F));
-  dest[2] = kwsysBase64EncodeChar(((src[1] << 2) & 0x3C)|((src[2] >> 6) & 0x03));
+  dest[2] = kwsysBase64EncodeChar(((src[1] << 2) & 0x3C));
   dest[3] = '=';
 }
 
