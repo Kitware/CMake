@@ -68,6 +68,7 @@ int main(int ac, char *av[])
       printf("%3d. %s\n", i, cmakeGeneratedFunctionMapEntries[i].name);
       }
     printf("To run a test, enter the test number: ");
+    fflush(stdout);
     testNum = 0;
     scanf("%d", &testNum);
     if (testNum >= NumTests)
