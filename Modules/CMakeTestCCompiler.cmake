@@ -5,18 +5,18 @@
 # any makefiles or projects.
 IF(NOT CMAKE_C_COMPILER_WORKS)
   MESSAGE(STATUS "Check for working C compiler: ${CMAKE_C_COMPILER}")
-  WRITE_FILE(${CMAKE_BINARY_DIR}/CMakeTmp/testCCompiler.c "int main(){return 0;}")
+  FILE(WRITE ${CMAKE_BINARY_DIR}/CMakeTmp/testCCompiler.c "int main(){return 0;}")
   TRY_COMPILE(CMAKE_C_COMPILER_WORKS ${CMAKE_BINARY_DIR} 
-              ${CMAKE_BINARY_DIR}/CMakeTmp/testCCompiler.c
-              OUTPUT_VARIABLE OUTPUT)
+    ${CMAKE_BINARY_DIR}/CMakeTmp/testCCompiler.c
+    OUTPUT_VARIABLE OUTPUT)
 ENDIF(NOT CMAKE_C_COMPILER_WORKS)
 
 IF(NOT CMAKE_C_COMPILER_WORKS)
-   MESSAGE(STATUS "Check for working C compiler: ${CMAKE_C_COMPILER} -- broken")
-   MESSAGE(FATAL_ERROR "The C compiler \"${CMAKE_C_COMPILER}\" "
-                      "is not able to compile a simple tests program.\nIt fails "
-                      "with the following output:\n ${OUTPUT}\n\n"
-                      "CMake will not be able to correctly generate this project.")
+  MESSAGE(STATUS "Check for working C compiler: ${CMAKE_C_COMPILER} -- broken")
+  MESSAGE(FATAL_ERROR "The C compiler \"${CMAKE_C_COMPILER}\" "
+    "is not able to compile a simple tests program.\nIt fails "
+    "with the following output:\n ${OUTPUT}\n\n"
+    "CMake will not be able to correctly generate this project.")
 ELSE(NOT CMAKE_C_COMPILER_WORKS)
   MESSAGE(STATUS "Check for working C compiler: ${CMAKE_C_COMPILER} -- works")
 ENDIF(NOT CMAKE_C_COMPILER_WORKS)

@@ -11,21 +11,21 @@ MACRO(CHECK_INCLUDE_FILE_CXX INCLUDE VARIABLE)
     MESSAGE(STATUS "Checking for CXX include file ${INCLUDE}")
     SET(CHECK_INCLUDE_FILE_VAR ${INCLUDE})
     CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CheckIncludeFile.cxx.in
-                   ${CMAKE_BINARY_DIR}/CMakeTmp/CheckIncludeFile.cxx IMMEDIATE)
+      ${CMAKE_BINARY_DIR}/CMakeTmp/CheckIncludeFile.cxx IMMEDIATE)
     TRY_COMPILE(${VARIABLE}
-               ${CMAKE_BINARY_DIR}
-               ${CMAKE_BINARY_DIR}/CMakeTmp/CheckIncludeFile.cxx
-               OUTPUT_VARIABLE OUTPUT)
+      ${CMAKE_BINARY_DIR}
+      ${CMAKE_BINARY_DIR}/CMakeTmp/CheckIncludeFile.cxx
+      OUTPUT_VARIABLE OUTPUT)
     IF(${VARIABLE})
       MESSAGE(STATUS "Checking for CXX include file ${INCLUDE} -- found")
       SET(${VARIABLE} 1 CACHE INTERNAL "Have include ${INCLUDE}")
     ELSE(${VARIABLE})
       MESSAGE(STATUS "Checking for CXX include file ${INCLUDE} -- not found")
       SET(${VARIABLE} "" CACHE INTERNAL "Have include ${INCLUDE}")
-      WRITE_FILE(${CMAKE_BINARY_DIR}/CMakeError.log 
+      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeError.log 
         "Determining if the include file ${INCLUDE} "
         "exists failed with the following output:\n"
-        "${OUTPUT}\n" APPEND)
+        "${OUTPUT}\n")
     ENDIF(${VARIABLE})
   ENDIF("${VARIABLE}" MATCHES "^${VARIABLE}$")
 ENDMACRO(CHECK_INCLUDE_FILE_CXX)

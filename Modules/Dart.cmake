@@ -133,8 +133,8 @@ IF(BUILD_TESTING)
 
   IF (DART_ROOT)
     # make directories in the binary tree
-    MAKE_DIRECTORY(${PROJECT_BINARY_DIR}/Testing/HTML/TestingResults/Dashboard)
-    MAKE_DIRECTORY(${PROJECT_BINARY_DIR}/Testing/HTML/TestingResults/Sites/${SITE}/${BUILDNAME})
+    FILE(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/Testing/HTML/TestingResults/Dashboard
+      ${PROJECT_BINARY_DIR}/Testing/HTML/TestingResults/Sites/${SITE}/${BUILDNAME})
 
     # configure files
     CONFIGURE_FILE(
@@ -224,7 +224,7 @@ IF(BUILD_TESTING)
 
   ELSE(DART_ROOT)
     # make directories in the binary tree
-    MAKE_DIRECTORY(${PROJECT_BINARY_DIR}/Testing/Temporary)
+    FILE(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/Testing/Temporary)
     GET_FILENAME_COMPONENT(CMAKE_HOST_PATH ${CMAKE_COMMAND} PATH)
     SET(CMAKE_TARGET_PATH ${EXECUTABLE_OUTPUT_PATH})
     FIND_PROGRAM(CMAKE_CTEST_COMMAND ctest ${CMAKE_HOST_PATH} ${CMAKE_TARGET_PATH})
@@ -247,8 +247,8 @@ IF(BUILD_TESTING)
     FOREACH(mode Experimental Nightly Continuous NightlyMemoryCheck)
       ADD_CUSTOM_TARGET(${mode} ${CMAKE_CTEST_COMMAND} -D ${mode})
     ENDFOREACH(mode)
-  
- 
+
+
     # for non IDE based builds nmake and make 
     # add all these extra targets 
     IF(${CMAKE_MAKE_PROGRAM} MATCHES make)

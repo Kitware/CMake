@@ -10,34 +10,32 @@ MACRO(CHECK_INCLUDE_FILES INCLUDE VARIABLE)
   IF("${VARIABLE}" MATCHES "^${VARIABLE}$")
     SET(CHECK_INCLUDE_FILES_CONTENT "/* */\n")
     SET(MACRO_CHECK_INCLUDE_FILES_FLAGS ${CMAKE_REQUIRED_FLAGS})
-    STRING(ASCII 35 POUND)
-    STRING(ASCII 40 41 PARENTS)
     FOREACH(FILE ${INCLUDE})
       SET(CHECK_INCLUDE_FILES_CONTENT
-            "${CHECK_INCLUDE_FILES_CONTENT}${POUND}include <${FILE}>\n")
+        "${CHECK_INCLUDE_FILES_CONTENT}#include <${FILE}>\n")
     ENDFOREACH(FILE)
     SET(CHECK_INCLUDE_FILES_CONTENT
-        "${CHECK_INCLUDE_FILES_CONTENT}\n\nint main${PARENTS}{return 0;}\n")
-    WRITE_FILE(${CMAKE_BINARY_DIR}/CMakeTmp/CheckIncludeFiles.c 
-               "${CHECK_INCLUDE_FILES_CONTENT}")
-    
+      "${CHECK_INCLUDE_FILES_CONTENT}\n\nint main(){return 0;}\n")
+    FILE(WRITE ${CMAKE_BINARY_DIR}/CMakeTmp/CheckIncludeFiles.c 
+      "${CHECK_INCLUDE_FILES_CONTENT}")
+
     MESSAGE(STATUS "Looking for include files ${VARIABLE}")
     TRY_COMPILE(${VARIABLE}
-               ${CMAKE_BINARY_DIR}
-               ${CMAKE_BINARY_DIR}/CMakeTmp/CheckIncludeFiles.c
-               CMAKE_FLAGS 
-                -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_INCLUDE_FILES_FLAGS}
-               OUTPUT_VARIABLE OUTPUT)
+      ${CMAKE_BINARY_DIR}
+      ${CMAKE_BINARY_DIR}/CMakeTmp/CheckIncludeFiles.c
+      CMAKE_FLAGS 
+      -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_INCLUDE_FILES_FLAGS}
+      OUTPUT_VARIABLE OUTPUT)
     IF(${VARIABLE})
       MESSAGE(STATUS "Looking for include files ${VARIABLE} - found")
       SET(${VARIABLE} 1 CACHE INTERNAL "Have include ${VARIABLE}")
     ELSE(${VARIABLE})
       MESSAGE(STATUS "Looking for include files ${VARIABLE} - not found.")
       SET(${VARIABLE} "" CACHE INTERNAL "Have includes ${VARIABLE}")
-      WRITE_FILE(${CMAKE_BINARY_DIR}/CMakeError.log 
+      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeError.log 
         "Determining if files ${INCLUDE} "
         "exist failed with the following output:\n"
-        "${OUTPUT}\n" APPEND)
+        "${OUTPUT}\n")
     ENDIF(${VARIABLE})
   ENDIF("${VARIABLE}" MATCHES "^${VARIABLE}$")
 ENDMACRO(CHECK_INCLUDE_FILES)
