@@ -272,6 +272,13 @@ void cmGlobalCodeWarriorGenerator::WriteGroupList(std::ostream& fout)
 {
   fout << "<GROUPLIST>\n";
   
+  unsigned int i;
+  // for each local generator
+  for (i = 0; i < m_LocalGenerators.size(); ++i)
+    {
+    static_cast<cmLocalCodeWarriorGenerator *>(m_LocalGenerators[i])->WriteGroups(fout);
+    }
+  
   fout << "</GROUPLIST>\n";
 }
 

@@ -57,9 +57,11 @@ public:
   void SetBuildType(BuildType,const char *name);
 
   void WriteTargets(std::ostream& fout);
+  void WriteGroups(std::ostream& fout);
 
 private:
   void WriteTarget(std::ostream& fout, const char *name, cmTarget const *l);
+  void WriteGroup(std::ostream& fout, const char *name, cmTarget const *l);
   void WriteSettingList(std::ostream& fout, const char *name, 
                         cmTarget const *l);
   void WriteFileList(std::ostream& fout, const char *name, cmTarget const *l);

@@ -116,3 +116,36 @@ void cmLocalCodeWarriorGenerator::WriteFileList(std::ostream& fout,
     }
   fout << "</FILELIST>\n";
 }
+
+void cmLocalCodeWarriorGenerator::WriteGroups(std::ostream& fout)
+{
+  cmTargets &tgts = m_Makefile->GetTargets();
+  for(cmTargets::iterator l = tgts.begin(); 
+      l != tgts.end(); l++)
+    {
+    this->WriteGroup(fout,l->first.c_str(),&(l->second));
+    }
+}
+
+void cmLocalCodeWarriorGenerator::WriteGroup(std::ostream& fout,
+                                             const char *tgtName,
+                                             cmTarget const *l)
+{
+  fout << "<GROUP><NAME>" << tgtName << "</NAME>\n";
+
+  // for each file
+  std::vector<cmSourceFile*> const& classes = l->GetSourceFiles();
+  for(std::vector<cmSourceFile*>::const_iterator i = classes.begin(); 
+      i != classes.end(); i++)
+    {
+    std::string source = (*i)->GetFullPath();
+    fout << "<FILEREF>\n";
+    fout << "<TARGETNAME>" << tgtName << "</TARGETNAME>\n";
+    fout << "<PATHTYPE>Name</PATHTYPE>\n";
+    fout << "<PATH>" << source << "</PATH>\n";
+    fout << "<PATHFORMAT>Generic</PATHFORMAT>\n";
+    fout << "</FILEREF>\n";
+    }
+
+  fout << "</GROUP>\n";
+}
