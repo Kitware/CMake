@@ -1,5 +1,6 @@
 #include "cmTestConfigure.h"
 #include "cmTestConfigureEscape.h"
+#include "cmTestGeneratedHeader.h"
 #include "cmVersion.h"
 #include "ExtraSources/file1.h"
 #include "file2.h"
@@ -807,6 +808,12 @@ int main()
   cmPassed("IF inside a FOREACH block works");
 #else
   cmFailed("IF inside a FOREACH block is broken");
+#endif
+
+#if defined(GENERATED_HEADER_INCLUDED)
+  cmPassed("Generated header included by non-generated source works.");
+#else
+  cmFailed("Generated header included by non-generated source failed.");
 #endif
   
 #ifdef FORCE_TEST

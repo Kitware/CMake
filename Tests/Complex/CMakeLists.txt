@@ -61,7 +61,7 @@ INCLUDE_DIRECTORIES(BEFORE
   ${Complex_BINARY_DIR}
 )
 
-INCLUDE_REGULAR_EXPRESSION("^(cmTest|file|sharedFile).*$" ".*")
+INCLUDE_REGULAR_EXPRESSION("^(cmTest|file|sharedFile).*$" "^$")
 
 LINK_DIRECTORIES(
   ${Complex_BINARY_DIR}/Library
