@@ -17,6 +17,7 @@
 
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
+#include "time.h"
 
 void CMakeCommandUsage(const char* program)
 {
@@ -29,11 +30,12 @@ void CMakeCommandUsage(const char* program)
   errorStream 
     << "Usage: " << program << " [command] [arguments ...]\n"
     << "Available commands: \n"
-    << "  copy file destination  - copy file to destination (either file or directory)\n"
-    << "  remove file1 file2 ... - remove the file(s)\n"
+    << "  copy file destination   - copy file to destination (either file or directory)\n"
+    << "  remove file1 file2 ...  - remove the file(s)\n"
+    << "  time command [args] ... - run command and return elapsed time\n"
 #if defined(_WIN32) && !defined(__CYGWIN__)
-    << "  write_regv key value   - write registry value\n"
-    << "  delete_regv key        - delete registry value\n"
+    << "  write_regv key value    - write registry value\n"
+    << "  delete_regv key         - delete registry value\n"
 #endif
     << std::ends;
 
@@ -73,6 +75,38 @@ int main(int ac, char** av)
 	}
       return 0;
       }
+
+    // Clock command
+    else if (args[1] == "time" && args.size() > 2)
+      {
+      std::string command = args[2];
+      std::string output;
+      for (std::string::size_type cc = 3; cc < args.size(); cc ++)
+	{
+        command += " ";
+        command += args[cc];
+	}
+
+      clock_t clock_start, clock_finish;
+      time_t time_start, time_finish;
+
+      time(&time_start);
+      clock_start = clock();
+      
+      cmSystemTools::RunCommand(command.c_str(), output, 0, false);
+
+      clock_finish = clock();
+      time(&time_finish);
+
+      double clocks_per_sec = (double)CLOCKS_PER_SEC;
+      std::cout << "Elapsed time: " 
+                << (time_finish - time_start) << " s. (time)"
+                << ", " 
+                << (double)(clock_finish - clock_start) / clocks_per_sec 
+                << " s. (clock)"
+                << "\n";
+      return 0;
+    }
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
     // Write registry value
