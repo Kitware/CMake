@@ -109,8 +109,7 @@ int main(int ac, char** av)
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmDynamicLoader::FlushCache();
 #endif
-  cmListFileCache* lf = cmListFileCache::GetInstance();
-  lf->ClearCache(); 
+  cmListFileCache::ClearCache();
   return ret;
 }
 

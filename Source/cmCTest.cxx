@@ -1568,11 +1568,10 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
   if(cmakeAndTest)
     {
     cmSystemTools::ResetErrorOccuredFlag();
-    cmListFileCache *lfc = cmListFileCache::GetInstance();
-    lfc->ClearCache();
+    cmListFileCache::ClearCache();
     int retv = this->RunCMakeAndTest(output);
     cmSystemTools::ResetErrorOccuredFlag();
-    lfc->ClearCache();
+    cmListFileCache::ClearCache();
 #ifdef CMAKE_BUILD_WITH_CMAKE
     cmDynamicLoader::FlushCache();
 #endif
