@@ -23,6 +23,8 @@
 
 #include <queue>
 
+#include <assert.h>
+
 // Quick-switch for generating old makefiles.
 #if 0
 # define CMLUMG_MAKEFILE_NAME "Makefile"
@@ -32,8 +34,9 @@
 #endif
 
 // TODO: Add "help" target.
-// TODO: Add install targets to m_InstallTargets list.
 // TODO: Identify remaining relative path violations.
+// TODO: Add test to drive installation through native build system.
+// TODO: Is there a case where quoted object list fails and unquoted works?
 
 //----------------------------------------------------------------------------
 cmLocalUnixMakefileGenerator2::cmLocalUnixMakefileGenerator2()
@@ -146,11 +149,6 @@ void cmLocalUnixMakefileGenerator2::GenerateMakefile()
   this->WritePassRules(makefileStream, "build",
                        "Build targets in this directory.",
                        m_BuildTargets);
-
-  // Write install rules.
-  this->WritePassRules(makefileStream, "install",
-                       "Install files from this directory.",
-                       m_InstallTargets);
 
   // Write clean rules.
   this->WritePassRules(makefileStream, "clean",
@@ -893,6 +891,30 @@ cmLocalUnixMakefileGenerator2
                       "default_target",
                       depends,
                       no_commands);
+  }
+
+  // Write special "install" target to run cmake_install.cmake script.
+  {
+  std::vector<std::string> no_depends;
+  std::vector<std::string> commands;
+  std::string cmd;
+  if(m_Makefile->GetDefinition("CMake_BINARY_DIR"))
+    {
+    // We are building CMake itself.  We cannot use the original
+    // executable to install over itself.
+    cmd = m_ExecutableOutputPath;
+    cmd += "cmake";
+    cmd = this->ConvertToRelativeOutputPath(cmd.c_str());
+    }
+  else
+    {
+    cmd = "$(CMAKE_COMMAND)";
+    }
+  cmd += " -P cmake_install.cmake";
+  commands.push_back(cmd);
+  this->WriteMakeRule(makefileStream,
+                      "Special rule to run installation script.", 0,
+                      "install", no_depends, commands);
   }
 
   // Write special "rebuild_cache" target to re-run cmake.

@@ -194,7 +194,6 @@ private:
   // target rule file writing methods.
   std::vector<std::string> m_DependTargets;
   std::vector<std::string> m_BuildTargets;
-  std::vector<std::string> m_InstallTargets;
   std::vector<std::string> m_CleanTargets;
 
   // The prefix required of a path to be converted to a relative path.
