@@ -84,7 +84,11 @@ public:
       "next argument is included into the generated file. If FUNCTION is "
       "specified, then the next argument is taken as a function name that "
       "is passed a pointer to ac and av.  This can be used to add extra "
-      "command line processing to each test. ";
+      "command line processing to each test. The cmake variable "
+      "CMAKE_TESTDRIVER_BEFORE_TESTMAIN can be set to have code that will be "
+      "placed directly before calling the test main function.   "
+      "CMAKE_TESTDRIVER_AFTER_TESTMAIN can be set to have code that will be "
+      "placed directly after the call to the test main function.";
     }
   
   cmTypeMacro(cmCreateTestSourceList, cmCommand);
