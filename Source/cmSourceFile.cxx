@@ -122,7 +122,6 @@ void cmSourceFile::SetName(const char* name, const char* dir,
     }
   cmSystemTools::Error("can not find file ", pathname.c_str(), 
                        errorMsg.c_str());
-  int a = *(int *)0x00;
 }
 
 
