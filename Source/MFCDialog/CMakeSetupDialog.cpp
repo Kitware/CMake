@@ -67,7 +67,7 @@ void MFCMessageCallback(const char* m, const char* title, bool& nomore)
   std::string message = m;
   message += "\n\n(Press  Cancel to suppress any further messages.)";
   if(::MessageBox(0, message.c_str(), title, 
-                  MB_OKCANCEL) == IDCANCEL)
+                  MB_OKCANCEL|MB_TASKMODAL) == IDCANCEL)
     {
     nomore = true;
     }
