@@ -464,9 +464,8 @@ void cmUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
   for(std::vector<cmSourceGroup>::const_iterator sg =
         sourceGroups.begin(); sg != sourceGroups.end(); ++sg)
     {
-    const cmSourceGroup::CustomCommands& customCommands = 
-      sg->GetCustomCommands();
-    if(customCommands.empty())
+    const cmSourceGroup::BuildRules& buildRules = sg->GetBuildRules();
+    if(buildRules.empty())
       { continue; }
     
     std::string name = sg->GetName();
@@ -476,8 +475,8 @@ void cmUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
       }
     
     // Loop through each source in the source group.
-    for(cmSourceGroup::CustomCommands::const_iterator cc =
-          customCommands.begin(); cc != customCommands.end(); ++ cc)
+    for(cmSourceGroup::BuildRules::const_iterator cc =
+          buildRules.begin(); cc != buildRules.end(); ++ cc)
       {
       std::string source = cc->first;
       const cmSourceGroup::Commands& commands = cc->second;
