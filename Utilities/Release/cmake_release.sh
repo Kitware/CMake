@@ -23,8 +23,8 @@
 #
 
 # Release version number.
-TAG="Release-1-6-2"
-VERSION="1.6.2"
+TAG="Release-1-6-3"
+VERSION="1.6.3"
 RELEASE="1"
 PREVIOUS_VERSION="1.4.7"
 PREVIOUS_RELEASE="1"
@@ -62,7 +62,7 @@ CMake Release Script Usage:
   $0 [command]
 
 Typical usage:
-  Cleanup remote host's release directory:
+  Cleanup remote host release directory:
 
     $0 remote <host> clean
 
@@ -634,6 +634,31 @@ cygwin_upload()
         Cygwin/Package/setup.hint \
         kitware@www.cmake.org:/projects/FTP/pub/cmake/cygwin
     echo "---- Done copying cygwin packages to www.cmake.org. -----"
+}
+
+#-----------------------------------------------------------------------------
+win32_zipfile()
+{
+    setup || return 1
+    echo "Creating windows non-admin install zip file ..." &&
+    (
+        mkdir -p Win32 &&
+        cd "c:/Program Files" &&
+        rm -rf cmake-${VERSION}-x86-win.zip &&
+        zip -r cmake-${VERSION}-x86-win.zip CMake \
+            -x CMake/INSTALL.LOG -x CMake/UNWISE.EXE -x CMake/WiseUpdt.exe &&
+        mv cmake-${VERSION}-x86-win.zip ${RELEASE_ROOT}/Win32 &&
+    ) >Logs/win32_zipfile.log 2>&1 || error_log Logs/win32_zipfile.log
+}
+
+#-----------------------------------------------------------------------------
+win32_upload()
+{
+    setup || return 1
+    echo "------- Copying windows zip file to www.cmake.org. -------"
+    scp Win32/cmake-${VERSION}-x86-win.zip \
+        kitware@www.cmake.org:/projects/FTP/pub/cmake
+    echo "---- Done copying windows zip file to www.cmake.org. -----"
 }
 
 #-----------------------------------------------------------------------------
