@@ -165,7 +165,7 @@ void cmTarget::TraceVSDependencies(std::string projFile,
         // watch for target dependencies,
         std::string libPath = dep + "_CMAKE_PATH";
         const char* cacheValue = makefile->GetDefinition(libPath.c_str());
-        if (cacheValue)
+        if (cacheValue && *cacheValue)
           {
           // add the depend as a utility on the target
           this->AddUtility(dep.c_str());

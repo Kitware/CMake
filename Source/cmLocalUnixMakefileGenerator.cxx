@@ -1575,9 +1575,10 @@ void cmLocalUnixMakefileGenerator::OutputDependLibs(std::ostream& fout)
 
     // if cache and not the current directory add a rule, to
     // jump into the directory and build for the first time
-    if(cacheValue &&
+    if(cacheValue && *cacheValue &&
        (!this->SamePath(m_Makefile->GetCurrentOutputDirectory(), cacheValue)))
       {
+      std::cout << "Cache Value: " << cacheValue << std::endl;
       // add the correct extension
       std::string ltname = *lib+"_LIBRARY_TYPE";
       const char* libType
@@ -1726,7 +1727,7 @@ void cmLocalUnixMakefileGenerator::OutputLibDepend(std::ostream& fout,
   std::string libPath = name;
   libPath += "_CMAKE_PATH";
   const char* cacheValue = m_Makefile->GetDefinition(libPath.c_str());
-  if(cacheValue )
+  if( cacheValue && *cacheValue )
     {
     // if there is a cache value, then this is a library that cmake
     // knows how to build, so we can depend on it
@@ -1783,7 +1784,7 @@ void cmLocalUnixMakefileGenerator::OutputExeDepend(std::ostream& fout,
   std::string exePath = name;
   exePath += "_CMAKE_PATH";
   const char* cacheValue = m_Makefile->GetDefinition(exePath.c_str());
-  if(cacheValue )
+  if( cacheValue && *cacheValue )
     {
     // if there is a cache value, then this is a executable/utility that cmake
     // knows how to build, so we can depend on it
@@ -2168,7 +2169,7 @@ void cmLocalUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
         // watch for target dependencies,
         std::string libPath = dep + "_CMAKE_PATH";
         const char* cacheValue = m_Makefile->GetDefinition(libPath.c_str());
-        if (cacheValue)
+        if ( cacheValue && *cacheValue )
           {
           libPath = cacheValue;
           if (m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH") && 

@@ -64,7 +64,7 @@ bool cmTargetLinkLibrariesCommand::InitialPass(std::vector<std::string> const& a
       std::string libPath = *i + "_CMAKE_PATH";
 
       const char* dir = m_Makefile->GetDefinition(libPath.c_str());
-      if( dir )
+      if( dir && *dir )
         {
         m_Makefile->AddLinkDirectoryForTarget(args[0].c_str(), dir );
         }
@@ -91,7 +91,7 @@ void cmTargetLinkLibrariesCommand::FinalPass()
       {
       libPath = m_HasLocation[cc] + "_CMAKE_PATH";
       const char* dir = m_Makefile->GetDefinition(libPath.c_str());
-      if ( dir )
+      if ( dir && *dir )
         {
         std::string str = "Library " + m_HasLocation[cc] + 
           " is defined using ADD_LIBRARY after the library is used "
