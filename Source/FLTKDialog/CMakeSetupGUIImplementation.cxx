@@ -12,7 +12,15 @@
 #include "../cmake.h"
 #include "../cmMakefileGenerator.h"
 
-
+void FLTKMessageCallback(const char* message, const char* title, bool& nomore)
+{
+  int ok = 
+    fl_ask(message, "Press cancel to suppress any further messages.");
+  if(!ok)
+  {
+    nomore = true;
+  }
+}
 
 /**
  * Constructor
@@ -20,6 +28,7 @@
 CMakeSetupGUIImplementation
 ::CMakeSetupGUIImplementation():m_CacheEntriesList( this )
 {
+  cmSystemTools::SetErrorCallback(FLTKMessageCallback);
   m_BuildPathChanged = false;
 }
 
@@ -359,6 +368,7 @@ CMakeSetupGUIImplementation
   arg += m_WhereBuild;
   args.push_back(arg);
   arg = "-G";
+  m_GeneratorChoiceString = "Unix Makefiles";
   arg += m_GeneratorChoiceString;
   args.push_back(arg);
   // run the generate process

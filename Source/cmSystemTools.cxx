@@ -93,6 +93,8 @@ inline int Chdir(const char* dir)
 
 bool cmSystemTools::s_ErrorOccured = false;
 
+void (*cmSystemTools::s_ErrorCallback)(const char*, const char*, bool&);
+
 // adds the elements of the env variable path to the arg passed in
 void cmSystemTools::GetPath(std::vector<std::string>& path)
 {
@@ -689,14 +691,25 @@ void cmSystemTools::Error(const char* m1, const char* m2,
   cmSystemTools::Message(message.c_str(),"Error");
 }
 
+
+void cmSystemTools::SetErrorCallback(ErrorCallback f)
+{
+  s_ErrorCallback = f;
+}
+
 void cmSystemTools::Message(const char* m1, const char *title)
 {
-#if defined(_WIN32) && !defined(__CYGWIN__)
   static bool disableMessages = false;
   if(disableMessages)
     {
     return;
     }
+  if(s_ErrorCallback)
+    {
+    (*s_ErrorCallback)(m1, title, disableMessages);
+    return;
+    }
+#if defined(_WIN32) && !defined(__CYGWIN__)
   std::string message = m1;
   message += "\n\n(Press  Cancel to suppress any further messages.)";
   if(::MessageBox(0, message.c_str(), title, 

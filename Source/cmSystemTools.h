@@ -156,7 +156,16 @@ public:
    *  on the current platform ("" for unix, ".exe" for Windows).
    */
   static const char* GetExecutableExtension();
-  
+
+  typedef  void (*ErrorCallback)(const char*, const char*, bool&);
+  /**
+   *  Set the function used by GUI's to display error messages
+   *  Function gets passed: message as a const char*, 
+   *  title as a const char*, and a reference to bool that when
+   *  set to false, will disable furthur messages (cancel).
+   */
+  static void SetErrorCallback(ErrorCallback f);
+
   /**
    * Display an error message.
    */
@@ -273,6 +282,7 @@ public:
     
 private:
   static bool s_ErrorOccured;
+  static ErrorCallback s_ErrorCallback;
 };
 
 

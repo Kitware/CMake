@@ -438,7 +438,14 @@ void cmCacheManager::OutputHelpString(std::ofstream& fout,
 
 void cmCacheManager::RemoveCacheEntry(const char* key)
 {
-  m_Cache.erase(key);
+  if(m_Cache.count(key))
+  {  
+    m_Cache.erase(key);
+  }
+  else
+  {
+    std::cerr << "Failed to remove entry" << std::endl;
+  }
 }
 
 
