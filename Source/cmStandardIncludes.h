@@ -89,4 +89,44 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 
+// check for the 720 compiler on the SGI
+// which has some strange properties that I don't think are worth
+// checking for in a general way in configure
+#if defined(__sgi) && !defined(__GNUC__)
+#  if   (_COMPILER_VERSION >= 730)
+#   define CM_SGI_CC_730
+#  elif (_COMPILER_VERSION >= 720)
+#   define CM_SGI_CC_720
+#  endif
+#endif
+
+
+# ifdef CM_SGI_CC_720
+// the 720 sgi compiler has std:: but not for the stream library,
+// so we have to bring it into the std namespace by hand.
+namespace std {
+using ::ostream;
+using ::istream;
+using ::ios;
+using ::cout;
+using ::cerr;
+using ::cin;
+using ::ifstream;
+using ::ofstream;
+using ::strstream;
+using ::endl;
+using ::ends;
+using ::flush;
+}
+// The string class is missing these operators so add them
+inline bool operator!=(std::string const& a, const char* b)
+{ return !(a==std::string(b)); }
+
+inline bool operator==(std::string const& a, const char* b)
+{ return (a==std::string(b)); }
+// for scoping is not ISO, so use the for hack
+#define for if(false) {} else for
+
+# endif
+
 #endif

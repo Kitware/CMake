@@ -710,14 +710,20 @@ void cmSystemTools::cmCopyFile(const char* source,
   const int buffer_length = 4096;
   char buffer[buffer_length];
   std::ifstream fin(source,
-                    std::ios::binary | std::ios::in);
+#ifdef _WIN32                    
+                    std::ios::binary | 
+#endif                    
+                    std::ios::in);
   if(!fin)
     {
     cmSystemTools::Error("CopyFile failed to open input file \"",
                          source, "\"");
     }
   std::ofstream fout(destination,
-                     std::ios::binary | std::ios::out | std::ios::trunc);
+#ifdef _WIN32                     
+                     std::ios::binary | 
+#endif                     
+                     std::ios::out | std::ios::trunc);
   if(!fout)
     {
     cmSystemTools::Error("CopyFile failed to open output file \"",
