@@ -1,5 +1,5 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Developer Studio generated include file.
+// Microsoft Visual C++ generated include file.
 // Used by CMakeSetup.rc
 //
 #define IDM_ABOUTBOX                    0x0010
@@ -26,6 +26,7 @@
 #define IDC_HELP_BUTTON                 1021
 #define IDC_EDIT1                       1025
 #define IDC_AdvancedValues              1027
+#define IDC_PROGRESS                    1028
 
 // Next default values for new objects
 // 
@@ -33,7 +34,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        134
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1028
+#define _APS_NEXT_CONTROL_VALUE         1029
 #define _APS_NEXT_SYMED_VALUE           102
 #endif
 #endif

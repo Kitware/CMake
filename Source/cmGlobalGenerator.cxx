@@ -69,23 +69,31 @@ void cmGlobalGenerator::Configure()
   lg->GetMakefile()->MakeStartDirectoriesCurrent();
   
   // now do it
-  this->RecursiveConfigure(lg);
+  this->RecursiveConfigure(lg,0.0f,0.9f);
 
   // after it is all done do a ConfigureFinalPass
   for (i = 0; i < m_LocalGenerators.size(); ++i)
     {
     m_LocalGenerators[i]->ConfigureFinalPass();
+    m_CMakeInstance->UpdateProgress("Configuring", 
+                                    0.9f+0.1f*(i+1.0f)/m_LocalGenerators.size());
     }
+  m_CMakeInstance->UpdateProgress("Configuring done", -1);
 }
 
 // loop through the directories creating cmLocalGenerators and Configure()
-void cmGlobalGenerator::RecursiveConfigure(cmLocalGenerator *lg)
+void cmGlobalGenerator::RecursiveConfigure(cmLocalGenerator *lg, 
+                                           float startProgress, 
+                                           float endProgress)
 {
   // configure the current directory
   lg->Configure();
-  
+                                  
   // get all the subdirectories
   std::vector<std::string> subdirs = lg->GetMakefile()->GetSubDirectories();
+  float progressPiece = (endProgress - startProgress)/(1.0f+subdirs.size());
+  m_CMakeInstance->UpdateProgress("Configuring",
+                                  startProgress + progressPiece);
   
   // for each subdir recurse
   unsigned int i;
@@ -107,7 +115,9 @@ void cmGlobalGenerator::RecursiveConfigure(cmLocalGenerator *lg)
     lg2->GetMakefile()->SetStartDirectory(currentDir.c_str());
     lg2->GetMakefile()->MakeStartDirectoriesCurrent();
   
-    this->RecursiveConfigure(lg2);
+    this->RecursiveConfigure(lg2, 
+                             startProgress + (i+1.0f)*progressPiece,
+                             startProgress + (i+2.0f)*progressPiece);
     }
 }
 
@@ -118,6 +128,8 @@ void cmGlobalGenerator::Generate()
   for (i = 0; i < m_LocalGenerators.size(); ++i)
     {
     m_LocalGenerators[i]->Generate(true);
+    m_CMakeInstance->UpdateProgress("Generating", 
+                                    (i+1.0f)/m_LocalGenerators.size());
     }
 }
 

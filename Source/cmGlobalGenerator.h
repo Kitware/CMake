@@ -103,7 +103,7 @@ protected:
   std::vector<cmLocalGenerator *> m_LocalGenerators;
 
   ///! used by Configure()
-  void RecursiveConfigure(cmLocalGenerator *lg);
+  void RecursiveConfigure(cmLocalGenerator *lg, float start, float end);
   
 private:
   std::map<cmStdString, bool> m_LanguageEnabled;

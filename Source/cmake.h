@@ -211,6 +211,19 @@ class cmake
   ///! Parse command line arguments that might set cache values
   void SetCacheArgs(const std::vector<std::string>&);
 
+  typedef  void (*ProgressCallback)(const char*msg, float progress, void *);
+  /**
+   *  Set the function used by GUI's to receive progress updates
+   *  Function gets passed: message as a const char*, a progress 
+   *  amount ranging from 0 to 1.0 and client data. The progress
+   *  number provided may be negative in cases where a message is 
+   *  to be displayed without any progress percentage.
+   */
+  void SetProgressCallback(ProgressCallback f, void* clientData=0);
+
+  ///! this is called by generators to update the progress
+  void UpdateProgress(const char *msg, float prog);
+
 protected:
   typedef std::map<cmStdString, cmCommand*> RegisteredCommandsMap;
   RegisteredCommandsMap m_Commands;
@@ -235,6 +248,8 @@ protected:
   int AddCMakePaths(const char *arg0);
 
 private:
+  ProgressCallback m_ProgressCallback;
+  void* m_ProgressCallbackClientData;
   bool m_Verbose;
   bool m_Local;
   bool m_InTryCompile;

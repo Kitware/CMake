@@ -41,6 +41,9 @@ cmake::cmake()
   m_InTryCompile = false;
   m_CacheManager = new cmCacheManager;
   m_GlobalGenerator = 0;
+  m_ProgressCallback = 0;
+  m_ProgressCallbackClientData = 0;
+
   this->AddDefaultCommands();
 }
 
@@ -907,3 +910,17 @@ int cmake::LoadCache()
   return 0;
 }
 
+void cmake::SetProgressCallback(ProgressCallback f, void *cd)
+{
+  m_ProgressCallback = f;
+  m_ProgressCallbackClientData = cd;
+}
+
+void cmake::UpdateProgress(const char *msg, float prog)
+{
+  if(m_ProgressCallback && !m_InTryCompile)
+    {
+    (*m_ProgressCallback)(msg, prog, m_ProgressCallbackClientData);
+    return;
+    }
+}

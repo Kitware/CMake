@@ -103,6 +103,20 @@ void MFCMessageCallback(const char* m, const char* title, bool& nomore, void*)
 
 /////////////////////////////////////////////////////////////////////////////
 // CMakeSetupDialog dialog
+void updateProgress(const char *msg, float prog, void *cd)
+{
+  char tmp[1024];
+  if (prog >= 0)
+    {
+    sprintf(tmp,"%s %i%%",msg,(int)(100*prog));
+    }
+  else
+    {
+    sprintf(tmp,"%s",msg);    
+    }
+  CMakeSetupDialog *self = (CMakeSetupDialog *)cd;
+  self->SetDlgItemText(IDC_PROGRESS, tmp);
+}
 
 CMakeSetupDialog::CMakeSetupDialog(const CMakeCommandLineInfo& cmdInfo,
                                    CWnd* pParent /*=NULL*/)
@@ -147,6 +161,8 @@ CMakeSetupDialog::CMakeSetupDialog(const CMakeCommandLineInfo& cmdInfo,
   m_oldCX = -1;
   m_deltaXRemainder = 0;
   m_CMakeInstance = new cmake;
+  m_CMakeInstance->SetProgressCallback(updateProgress, (void *)this);
+  
 }
 
 void CMakeSetupDialog::DoDataExchange(CDataExchange* pDX)
@@ -268,6 +284,7 @@ BOOL CMakeSetupDialog::OnInitDialog()
   sprintf(tmp,"Version %d.%d - %s", cmake::GetMajorVersion(),
           cmake::GetMinorVersion(), cmake::GetReleaseVersion());
   SetDlgItemText(IDC_CMAKE_VERSION, tmp);
+  SetDlgItemText(IDC_PROGRESS, "");
   this->UpdateData(FALSE);
   return TRUE;  // return TRUE  unless you set the focus to a control
 }
