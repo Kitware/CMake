@@ -186,8 +186,8 @@ void cmCableWrapTclCommand::GenerateCableClassFiles(const char* name,
   std::string className = name;
   std::string groupName = m_TargetName+"_"+indexStr;
   std::string classConfigName = outDir+"/Tcl/"+groupName+"_config_tcl.xml";
-  std::string classCxxName = outDir+"/Tcl/"+groupName+"_cxx_tcl.cxx";
-  std::string classXmlName = outDir+"/Tcl/"+groupName+"_cxx_tcl.xml";
+  std::string classCxxName = outDir+"/Tcl/"+groupName+"_cxx.cxx";
+  std::string classXmlName = outDir+"/Tcl/"+groupName+"_cxx.xml";
   std::string classTclName = outDir+"/Tcl/"+groupName+"_tcl";
   
   cmGeneratedFileStream classConfig(classConfigName.c_str());
