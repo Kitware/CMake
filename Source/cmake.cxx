@@ -1519,9 +1519,14 @@ void cmake::UpdateConversionPathTable()
   if(tablepath)
     {
     std::ifstream table( tablepath );
-    std::string a, b;
-    if( table.is_open() && table.good() )
+    if(!table)
       {
+      cmSystemTools::Error("CMAKE_PATH_TRANSLATION_FILE set to ", tablepath, ". CMake can not open file.");
+      cmSystemTools::ReportLastSystemError("CMake can not open file.");
+      }
+    else
+      {
+      std::string a, b;
       while(!table.eof())
         {
         // two entries per line
