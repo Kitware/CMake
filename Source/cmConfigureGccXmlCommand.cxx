@@ -195,23 +195,23 @@ bool cmConfigureGccXmlCommand::FindGccIncludeFlags()
     {
     this->SetError("Could not run find_gcc_options!");
     return false;
+    }  
+  
+  // Strip newline from end of flags.
+  if((flags.length() > 0)
+     && (flags[flags.length()-1] == '\n'))
+    {
+    flags = flags.substr(0, flags.length()-1);
+    if((flags.length() > 0)
+       && (flags[flags.length()-1] == '\r'))
+      {
+      flags = flags.substr(0, flags.length()-1);
+      }
     }
   
   // Use the result of the command as the flags.
   m_Flags = flags;
   
-  // Strip newline from end of flags.
-  if((m_Flags.length() > 0)
-     && (m_Flags[m_Flags.length()-1] == '\n'))
-    {
-    m_Flags = m_Flags.substr(0, m_Flags.length()-1);
-    if((m_Flags.length() > 0)
-       && (m_Flags[m_Flags.length()-1] == '\r'))
-      {
-      m_Flags = m_Flags.substr(0, m_Flags.length()-1);
-      }
-    }
-    
   return true;
 }
 
@@ -238,22 +238,21 @@ bool cmConfigureGccXmlCommand::FindMproIncludeFlags()
     return false;
     }
   
-  // Use the result of the command as the flags.  Also prefix on the
-  // include path flag for the support directory.
-  m_Flags = "-I"+supportDir+" "+flags;  
-  
   // Strip newline from end of flags.
-  if((m_Flags.length() > 0)
-     && (m_Flags[m_Flags.length()-1] == '\n'))
+  if((flags.length() > 0)
+     && (flags[flags.length()-1] == '\n'))
     {
-    m_Flags = m_Flags.substr(0, m_Flags.length()-1);
-    if((m_Flags.length() > 0)
-       && (m_Flags[m_Flags.length()-1] == '\r'))
+    flags = flags.substr(0, flags.length()-1);
+    if((flags.length() > 0)
+       && (flags[flags.length()-1] == '\r'))
       {
-      m_Flags = m_Flags.substr(0, m_Flags.length()-1);
+      flags = flags.substr(0, flags.length()-1);
       }
     }
-    
+  
+  // Use the result of the command as the flags.
+  m_Flags = flags;
+  
   return true;
 }
 
