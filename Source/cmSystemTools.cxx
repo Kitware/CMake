@@ -1960,8 +1960,23 @@ bool cmSystemTools::GetShortPath(const char* path, std::string& shortPath)
 #if defined(WIN32) && !defined(__CYGWIN__)  
   const int size = int(strlen(path)) +1; // size of return
   char *buffer = new char[size];  // create a buffer
+  char *tempPath = new char[size];  // create a buffer
+  int ret;
+  
+  // if the path passed in has quotes around it, first remove the quotes
+  if (path[0] == '"' && path[strlen(path)-1] == '"')
+    {
+    strcpy(tempPath,path+1);
+    tempPath[strlen(tempPath)-1] = '\0';
+    }
+  else
+    {
+    strcpy(tempPath,path);
+    }
+  
   buffer[0] = 0;
-  int ret = GetShortPathName(path, buffer, size);
+  ret = GetShortPathName(tempPath, buffer, size);
+
   if(buffer[0] == 0 || ret > size)
     {
     if(ret < size)
@@ -1982,12 +1997,14 @@ bool cmSystemTools::GetShortPath(const char* path, std::string& shortPath)
       LocalFree( lpMsgBuf );
       }
     cmSystemTools::Error("Unable to get a short path: ", path);
+    delete [] tempPath;
     return false;
     }
   else
     {
     shortPath = buffer;
     delete [] buffer;
+    delete [] tempPath;
     return true;
     }
 #else
