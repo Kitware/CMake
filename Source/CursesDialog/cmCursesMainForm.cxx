@@ -581,8 +581,8 @@ void cmCursesMainForm::UpdateStatusBar(const char* message)
   // Now print both lines
   curses_move(y-5,0);
   attron(A_STANDOUT);
-  char s[] = "%s";
-  printw(s, bar);
+  char format[] = "%s";
+  printw(format, bar);
   attroff(A_STANDOUT);  
   curses_move(y-4,0);
   printw(version);
