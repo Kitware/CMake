@@ -42,7 +42,7 @@ public:
    * some steps to save time, such as dependency generation for the
    * makefiles. This is done by a direct invocation from make. 
    */
-  virtual void Generate(bool fromTheTop) {};
+  virtual void Generate(bool /* fromTheTop */) {};
 
   /**
    * Process the CMakeLists files for this directory to fill in the
