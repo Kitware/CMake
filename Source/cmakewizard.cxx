@@ -39,22 +39,34 @@ void cmakewizard::AskUser(const char* key, cmCacheManager::CacheIterator& iter)
   char buffer[4096];
   buffer[0] = 0;
   fgets(buffer, sizeof(buffer)-1, stdin);
-  if(buffer[0])
+  char ch = 0;
+          
+  if(strlen(buffer) > 0)
     {
-    std::string value = buffer;
-    if(iter.GetType() == cmCacheManager::PATH ||
-       iter.GetType() == cmCacheManager::FILEPATH)
+    std::string sbuffer = buffer;
+    std::string::size_type pos = sbuffer.find_last_not_of(" \n\r\t");
+    std::string value = "";
+    if ( pos != std::string::npos )
       {
-      cmSystemTools::ConvertToUnixSlashes(value);
+      value = sbuffer.substr(0, pos+1);
       }
-    if(iter.GetType() == cmCacheManager::BOOL)
+    
+    if ( value.size() > 0 )
       {
-      if(!cmSystemTools::IsOn(value.c_str()))
+      if(iter.GetType() == cmCacheManager::PATH ||
+         iter.GetType() == cmCacheManager::FILEPATH)
         {
-        value = "OFF";
+        cmSystemTools::ConvertToUnixSlashes(value);
         }
+      if(iter.GetType() == cmCacheManager::BOOL)
+        {
+        if(!cmSystemTools::IsOn(value.c_str()))
+          {
+          value = "OFF";
+          }
+        }
+      iter.SetValue(value.c_str());
       }
-    iter.SetValue(value.c_str());
     }
   std::cout << "\n";
 }
