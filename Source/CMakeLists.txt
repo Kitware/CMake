@@ -328,6 +328,11 @@ IF(BUILD_TESTING)
              ${CMake_BINARY_DIR}/Tests/Curl
              LIBCURL)
 
+    ADD_TEST(kwsys ${EXECUTABLE_OUTPUT_PATH}/cmaketest
+             ${CMake_SOURCE_DIR}/Source/kwsys
+             ${CMake_BINARY_DIR}/Tests/kwsys
+             test1)
+
     IF (APPLE)
       ADD_TEST(objc++ ${EXECUTABLE_OUTPUT_PATH}/cmaketest
 		        ${CMake_SOURCE_DIR}/Tests/Objc++
