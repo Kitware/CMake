@@ -25,7 +25,7 @@ class cmCursesCacheEntryComposite
 public:
   cmCursesCacheEntryComposite(const char* key, int labelwidth, int entrywidth);
   cmCursesCacheEntryComposite(const char* key,
-			      const cmCacheManager::CacheEntry& value, 
+			      const cmCacheManager::CacheIterator& it, 
 			      bool isNew, int labelwidth, int entrywidth);
   ~cmCursesCacheEntryComposite();
   const char* GetValue();

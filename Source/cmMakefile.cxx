@@ -547,6 +547,10 @@ void cmMakefile::AddIncludeDirectory(const char* inc, bool before)
 
 void cmMakefile::AddDefinition(const char* name, const char* value)
 {
+  if (!value )
+    {
+    return;
+    }
   m_Definitions.erase( DefinitionMap::key_type(name));
   m_Definitions.insert(DefinitionMap::value_type(name, value));
 }

@@ -29,28 +29,44 @@ class cmMakefile;
 class cmCacheManager
 {
 public:
-  enum CacheEntryType{ BOOL=0, PATH, FILEPATH, STRING, INTERNAL,STATIC };
+  enum CacheEntryType{ BOOL=0, PATH, FILEPATH, STRING, INTERNAL,STATIC,UNINITIALIZED };
+
+private:
   struct CacheEntry
   {
     std::string m_Value;
-    std::string m_HelpString;
     CacheEntryType m_Type;
+    std::map<cmStdString,cmStdString> m_Properties;
   };
+
+public:
   class CacheIterator
   {
   public:
     void Begin();
+    bool Find(const char*);
     bool IsAtEnd();
     void Next();
-    const char *GetName() {
-      return position->first.c_str(); } 
-    CacheEntry const &GetEntry() {
-      return position->second; }
-    cmCacheManager const &m_Container;
-    std::map<cmStdString, CacheEntry>::const_iterator position;
-    CacheIterator(cmCacheManager const &foo) : m_Container(foo) {
+    const char *GetName() const {
+      return m_Position->first.c_str(); } 
+    const char* GetProperty(const char*) const ;
+    bool GetPropertyAsBool(const char*) const ;
+    void SetProperty(const char* property, const char* value);
+    void SetProperty(const char* property, bool value);
+    const char* GetValue() const { return this->GetEntry().m_Value.c_str(); }
+    void SetValue(const char*);
+    CacheEntryType GetType() const { return this->GetEntry().m_Type; }
+    cmCacheManager &m_Container;
+    std::map<cmStdString, CacheEntry>::iterator m_Position;
+    CacheIterator(cmCacheManager &foo) : m_Container(foo) {
       this->Begin();
     }
+    CacheIterator(cmCacheManager &foo, const char* key) : m_Container(foo) {
+      this->Find(key);
+    }
+  private:
+    CacheEntry const& GetEntry() const { return m_Position->second; }
+    CacheEntry& GetEntry() { return m_Position->second; }
   };
   friend class cmCacheManager::CacheIterator;
   
@@ -60,7 +76,6 @@ public:
       return CacheIterator(*this);
     } 
   
-  typedef  std::map<cmStdString, CacheEntry> CacheEntryMap;
   /**
    * Types for the cache entries.  These are useful as
    * hints for a cache editor program.  Path should bring
@@ -87,10 +102,8 @@ public:
   ///! Print the cache to a stream
   void PrintCache(std::ostream&) const;
   
-  ///! Get a cache entry object for a key
-  CacheEntry *GetCacheEntry(const char *key);
-  
-  bool IsAdvanced(const char* key);
+  ///! Get the iterator for an entry with a given key.
+  cmCacheManager::CacheIterator GetCacheIterator(const char *key);
   
   ///! Remove an entry from the cache
   void RemoveCacheEntry(const char* key);
@@ -116,7 +129,11 @@ protected:
   ///! Add a BOOL entry into the cache
   void AddCacheEntry(const char* key, bool, const char* helpString);
 
+  ///! Get a cache entry object for a key
+  CacheEntry *GetCacheEntry(const char *key);
+
 private:
+  typedef  std::map<cmStdString, CacheEntry> CacheEntryMap;
   static void OutputHelpString(std::ofstream& fout, 
                                const std::string& helpString);
   CacheEntryMap m_Cache;

@@ -24,39 +24,33 @@ cmakewizard::cmakewizard()
 }
 
   
-void cmakewizard::AskUser(const char* key, cmCacheManager::CacheEntry & entry,
+void cmakewizard::AskUser(const char* key, cmCacheManager::CacheIterator& iter,
                           cmCacheManager *cacheManager)
 {
   std::cout << "Variable Name: " << key << "\n";
-  std::cout << "Description:   " << entry.m_HelpString << "\n";
-  std::cout << "Current Value: " << entry.m_Value.c_str() << "\n";
+  const char* helpstring = iter.GetProperty("HELPSTRING");
+  std::cout << "Description:   " << (helpstring?helpstring:"(none)") << "\n";
+  std::cout << "Current Value: " << iter.GetValue() << "\n";
   std::cout << "New Value (Enter to keep current value): ";
   char buffer[4096];
   buffer[0] = 0;
   std::cin.getline(buffer, sizeof(buffer));
   if(buffer[0])
     {
-    cmCacheManager::CacheEntry *entry = cacheManager->GetCacheEntry(key);
-    if(entry)
+    std::string value = buffer;
+    if(iter.GetType() == cmCacheManager::PATH ||
+       iter.GetType() == cmCacheManager::FILEPATH)
       {
-      entry->m_Value = buffer;
-      if(entry->m_Type == cmCacheManager::PATH ||
-         entry->m_Type == cmCacheManager::FILEPATH)
+      cmSystemTools::ConvertToUnixSlashes(value);
+      }
+    if(iter.GetType() == cmCacheManager::BOOL)
+      {
+      if(!cmSystemTools::IsOn(value.c_str()))
         {
-        cmSystemTools::ConvertToUnixSlashes(entry->m_Value);
-        }
-      if(entry->m_Type == cmCacheManager::BOOL)
-        {
-        if(!cmSystemTools::IsOn(buffer))
-          {
-          entry->m_Value = "OFF";
-          }
+        value = "OFF";
         }
       }
-    else
-      {
-      std::cerr << "strange error, should be in cache but is not... " << key << "\n";
-      }
+    iter.SetValue(value.c_str());
     }
   std::cout << "\n";
 }
@@ -90,7 +84,8 @@ void cmakewizard::RunWizard(std::vector<std::string> const& args)
   m_ShowAdvanced = this->AskAdvanced();
   cmSystemTools::DisableRunCommandOutput();
   cmake make;
-  cmCacheManager::CacheEntryMap askedCache;
+  make.SetArgs(args);
+  std::map<std::string,std::string> askedCache;
   bool asked = false;
   // continue asking questions until no new questions are asked
   do
@@ -98,6 +93,7 @@ void cmakewizard::RunWizard(std::vector<std::string> const& args)
     asked = false;
     // run cmake
     this->ShowMessage("Please wait while cmake processes CMakeLists.txt files....\n");
+
     make.Configure(args[0].c_str(),&args);
     this->ShowMessage("\n");
     // load the cache from disk
@@ -109,33 +105,33 @@ void cmakewizard::RunWizard(std::vector<std::string> const& args)
     for(;!i.IsAtEnd(); i.Next())
       { 
       std::string key = i.GetName();
-      cmCacheManager::CacheEntry ce = i.GetEntry();
-      if(ce.m_Type == cmCacheManager::INTERNAL
-         || ce.m_Type == cmCacheManager::STATIC)
+      if( i.GetType() == cmCacheManager::INTERNAL || 
+          i.GetType() == cmCacheManager::STATIC ||
+          i.GetType() == cmCacheManager::UNINITIALIZED )
         {
         continue;
         }
       if(askedCache.count(key))
         {
-        cmCacheManager::CacheEntry& e = askedCache.find(key)->second;
-        if(e.m_Value != ce.m_Value)
+        std::string& e = askedCache.find(key)->second;
+        if(e != i.GetValue())
           {
-          if(m_ShowAdvanced || !cachem->IsAdvanced(key.c_str()))
+          if(m_ShowAdvanced || !i.GetPropertyAsBool("ADVANCED"))
             {
-            this->AskUser(key.c_str(), ce, cachem);
+            this->AskUser(key.c_str(), i, cachem);
             asked = true;
             }
           }
         }
       else
         {    
-        if(m_ShowAdvanced || !cachem->IsAdvanced(key.c_str()))
+        if(m_ShowAdvanced || !i.GetPropertyAsBool("ADVANCED"))
           {
-          this->AskUser(key.c_str(), ce, cachem);
+          this->AskUser(key.c_str(), i, cachem);
           asked = true;
           }
         }
-      askedCache[key] = i.GetEntry();
+      askedCache[key] = i.GetValue();
       }
     cachem->SaveCache(cmSystemTools::GetCurrentWorkingDirectory().c_str());
     }

@@ -34,7 +34,7 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(const char* key,
 }
 
 cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
-  const char* key, const cmCacheManager::CacheEntry& value, bool isNew, 
+  const char* key, const cmCacheManager::CacheIterator& it, bool isNew, 
   int labelwidth, int entrywidth) 
   : m_Key(key), m_LabelWidth(labelwidth), m_EntryWidth(entrywidth)
 {
@@ -49,11 +49,11 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
     }
 
   m_Entry = 0;
-  switch ( value.m_Type )
+  switch ( it.GetType() )
     {
     case  cmCacheManager::BOOL:
       m_Entry = new cmCursesBoolWidget(m_EntryWidth, 1, 1, 1);
-      if (cmSystemTools::IsOn(value.m_Value.c_str()))
+      if (cmSystemTools::IsOn(it.GetValue()))
 	{
 	static_cast<cmCursesBoolWidget*>(m_Entry)->SetValueAsBool(true);
 	}
@@ -65,17 +65,20 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
     case cmCacheManager::PATH:
       m_Entry = new cmCursesPathWidget(m_EntryWidth, 1, 1, 1);
       static_cast<cmCursesPathWidget*>(m_Entry)->SetString(
-	value.m_Value.c_str());
+	it.GetValue());
       break;
     case cmCacheManager::FILEPATH:
       m_Entry = new cmCursesFilePathWidget(m_EntryWidth, 1, 1, 1);
       static_cast<cmCursesFilePathWidget*>(m_Entry)->SetString(
-	value.m_Value.c_str());
+	it.GetValue());
       break;
     case cmCacheManager::STRING:
       m_Entry = new cmCursesStringWidget(m_EntryWidth, 1, 1, 1);
       static_cast<cmCursesStringWidget*>(m_Entry)->SetString(
-	value.m_Value.c_str());
+	it.GetValue());
+      break;
+    case cmCacheManager::UNINITIALIZED:
+      cmSystemTools::Error("Found an undefined variable: ", it.GetName());      
       break;
     default:
       // TODO : put warning message here

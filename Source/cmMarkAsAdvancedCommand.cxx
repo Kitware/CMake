@@ -42,17 +42,20 @@ bool cmMarkAsAdvancedCommand::InitialPass(std::vector<std::string> const& argsIn
   for(; i < args.size(); ++i)
     {
     std::string variable = args[i];
-    variable += "-ADVANCED";
-    std::string doc = "Advanced flag for variable: ";
-    doc += args[i];
-    // if not CLEAR or FORCE or it is not yet defined,
-    // then define variable-ADVANCED
-    if(overwrite || !m_Makefile->GetDefinition(variable.c_str()))
+    cmCacheManager* manager = m_Makefile->GetCacheManager();
+    cmCacheManager::CacheIterator it = manager->GetCacheIterator(variable.c_str());
+    if ( it.IsAtEnd() )
       {
-      m_Makefile->AddCacheDefinition(variable.c_str(), value,
-                                     doc.c_str(),
-                                     cmCacheManager::INTERNAL);      
+      m_Makefile->AddCacheDefinition(variable.c_str(), 0, 0,
+                                     cmCacheManager::UNINITIALIZED);
       }
+    it.Find(variable.c_str());
+    if ( it.IsAtEnd() )
+      {
+      cmSystemTools::Error("This should never happen...");
+      return false;
+      }
+    it.SetProperty("ADVANCED", value);
     }
   return true;
 }

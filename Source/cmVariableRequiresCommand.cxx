@@ -47,7 +47,9 @@ void cmVariableRequiresCommand::FinalPass()
       requirementsMet = false;
       notSet += m_Arguments[i];
       notSet += "\n";
-      if(m_Makefile->GetCacheManager()->IsAdvanced(m_Arguments[i].c_str()))
+      cmCacheManager::CacheIterator it = 
+        m_Makefile->GetCacheManager()->GetCacheIterator(m_Arguments[i].c_str());
+      if(!it.IsAtEnd() && it.GetPropertyAsBool("ADVANCED"))
         {
         hasAdvanced = true;
         }

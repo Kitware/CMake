@@ -58,11 +58,12 @@ bool cmFindPathCommand::InitialPass(std::vector<std::string> const& argsIn)
     }
   if(cacheValue)
     {
-    cmCacheManager::CacheEntry* e = 
-      m_Makefile->GetCacheManager()->GetCacheEntry(args[0].c_str());
-    if(e)
+    cmCacheManager::CacheIterator it = 
+      m_Makefile->GetCacheManager()->GetCacheIterator(args[0].c_str());
+    if(!it.IsAtEnd())
       {
-      helpString = e->m_HelpString;
+      const char* hs = it.GetProperty("HELPSTRING");
+      helpString = hs?hs:"(none)";
       }
     }
   std::vector<std::string> path;
