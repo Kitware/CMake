@@ -42,7 +42,10 @@ int do_cmaketest (int argc, char **argv)
 {
   if (argc < 4)
     {
-    std::cerr << "Usage: " << argv[0] << " test-src-dir test-bin-dir test-executable\n";
+    std::cerr << "Usage: " << argv[0] 
+              << " test-src-dir test-bin-dir test-executable" << std::endl;
+    std::cerr << "\tOptional arguments:  executable-directory project-name " << std::endl
+              << "\t                     CMAKE_ARGS argument ...\n";
     return 1;
     }
 
