@@ -43,8 +43,8 @@
 // TODO: Add "help" target.
 // TODO: Identify remaining relative path violations.
 // TODO: Add test to drive installation through native build system.
-// TODO: Is there a case where quoted object list fails and unquoted works?
 // TODO: External object file feature.
+// TODO: Need test for separate executable/library output path.
 
 // TODO: Fortran support:
 //  - This needs a "provides-requires" mode for the .o files in a target.
@@ -1490,13 +1490,11 @@ cmLocalUnixMakefileGenerator2
 
   // Construct object file lists that may be needed to expand the
   // rule.
-  this->WriteObjectsVariable(ruleFileStream, target, objects);
+  std::string variableName;
+  this->WriteObjectsVariable(ruleFileStream, target, objects, variableName);
   std::string objs = "$(";
-  objs += target.GetName();
-  objs += "_OBJECTS)";
-  std::string objsQuoted = "$(";
-  objsQuoted += target.GetName();
-  objsQuoted += "_OBJECTS_QUOTED)";
+  objs += variableName;
+  objs += ")";
 
   // Expand placeholders in the commands.
   for(std::vector<std::string>::iterator i = commands.begin();
@@ -1761,13 +1759,11 @@ cmLocalUnixMakefileGenerator2
 
   // Construct object file lists that may be needed to expand the
   // rule.
-  this->WriteObjectsVariable(ruleFileStream, target, objects);
+  std::string variableName;
+  this->WriteObjectsVariable(ruleFileStream, target, objects, variableName);
   std::string objs = "$(";
-  objs += target.GetName();
-  objs += "_OBJECTS)";
-  std::string objsQuoted = "$(";
-  objsQuoted += target.GetName();
-  objsQuoted += "_OBJECTS_QUOTED)";
+  objs += variableName;
+  objs += ")";
 
   // Expand placeholders in the commands.
   for(std::vector<std::string>::iterator i = commands.begin();
@@ -1783,7 +1779,7 @@ cmLocalUnixMakefileGenerator2
                               objs.c_str(),
                               targetOutPathReal.c_str(),
                               linklibs.str().c_str(),
-                              0, 0, 0, objsQuoted.c_str(),
+                              0, 0, 0, objs.c_str(),
                               targetOutPathBase.c_str(),
                               targetNameSO.c_str(),
                               linkFlags.c_str());
@@ -1827,28 +1823,16 @@ void
 cmLocalUnixMakefileGenerator2
 ::WriteObjectsVariable(std::ostream& ruleFileStream,
                        const cmTarget& target,
-                       std::vector<std::string>& objects)
+                       const std::vector<std::string>& objects,
+                       std::string& variableName)
 {
   // Write a make variable assignment that lists all objects for the
   // target.
+  variableName = this->CreateMakeVariable(target.GetName(), "_OBJECTS");
   ruleFileStream
     << "# Object files for target " << target.GetName() << "\n"
-    << target.GetName() << "_OBJECTS =";
-  for(std::vector<std::string>::iterator i = objects.begin();
-      i != objects.end(); ++i)
-    {
-    ruleFileStream
-      << " \\\n"
-      << this->ConvertToRelativeOutputPath(i->c_str());
-    }
-  ruleFileStream
-    << "\n"
-    << "\n";
-
-  ruleFileStream
-    << "# Object files for target " << target.GetName() << "\n"
-    << target.GetName() << "_OBJECTS_QUOTED =";
-  for(std::vector<std::string>::iterator i = objects.begin();
+    << variableName.c_str() << " =";
+  for(std::vector<std::string>::const_iterator i = objects.begin();
       i != objects.end(); ++i)
     {
     ruleFileStream
@@ -2424,7 +2408,7 @@ cmLocalUnixMakefileGenerator2
     // it is an executable.
     std::string typeVar = name;
     typeVar += "_LIBRARY_TYPE";
-    const char* libType = m_Makefile->GetSafeDefinition(typeVar.c_str());
+    const char* libType = m_Makefile->GetDefinition(typeVar.c_str());
 
     // Get the output path for this target type.
     std::string tgtOutputPath;

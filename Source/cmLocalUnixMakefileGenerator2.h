@@ -128,7 +128,8 @@ protected:
                         const char* extraLinkFlags);
   void WriteObjectsVariable(std::ostream& ruleFileStream,
                             const cmTarget& target,
-                            std::vector<std::string>& objects);
+                            const std::vector<std::string>& objects,
+                            std::string& variableName);
   void WriteTargetDependsRule(std::ostream& ruleFileStream,
                               const char* ruleFileName,
                               const cmTarget& target,
