@@ -14,7 +14,7 @@ void cmDumpInformationPrintFile(const char* name, FILE* fout)
     return;
     }
   
-  FILE* fin = fopen(name, "rb");
+  FILE* fin = fopen(name, "r");
   if(fin)
     {
     fprintf(fout,
