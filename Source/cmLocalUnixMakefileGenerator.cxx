@@ -1853,6 +1853,19 @@ void cmLocalUnixMakefileGenerator::OutputLibDepend(std::ostream& fout,
       }
     fout << this->ConvertToRelativeOutputPath(libpath.c_str()) << " ";
     }
+  else
+    {
+    if(cmSystemTools::FileExists(name))
+      {
+      std::string nameStr = name;
+      // if it starts with / or \ or ?:/ or ?:\ then it must be a full path
+      if( (nameStr.size() && (nameStr[0] == '/' || nameStr[0] == '\\')) ||
+        ((nameStr.size() > 3) && (nameStr[1] == ':') && (nameStr[2] == '/' || nameStr[2] == '\\')))
+        {
+        fout << this->ConvertToRelativeOutputPath(name) << " ";
+        }
+      }
+    }
 }
 
 
