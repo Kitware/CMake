@@ -14,7 +14,8 @@
 
 =========================================================================*/
 /**
- * cmMakefile
+ * cmMakefile - used to parse and store the contents of a
+ * CMakeLists.txt makefile in memory.
  */
 #ifndef cmMakefile_h
 #define cmMakefile_h
@@ -23,6 +24,7 @@
 #endif
 
 #include "cmClassFile.h"
+#include "cmCollectFlags.h"
 #include <vector>
 #include <fstream>
 #include <iostream>
@@ -82,10 +84,17 @@ public:
     {
       return m_OutputHomeDirectory.c_str();
     }
+  cmCollectFlags& GetBuildFlags() 
+    {
+      return m_BuildFlags;
+    }
+  const std::vector<std::string>& GetSubDirectories()
+    { 
+      return m_SubDirectories;
+    }
   
 private:
   void ReadTemplateInstanceDirectory(std::string&);
-  void ReadSubdirs(std::ifstream& fin);
   void ReadClasses(std::ifstream& fin, bool t);
   friend class cmMakeDepend;	// make depend needs direct access 
 				// to the m_Classes array
@@ -99,7 +108,8 @@ protected:
   std::string m_LibraryName;	// library name
   std::vector<cmClassFile> m_Classes; // list of classes in makefile
   std::vector<std::string> m_SubDirectories; // list of sub directories
-  std::vector<std::string> m_MakeVerbatim; // list of sub directories
+  std::vector<std::string> m_MakeVerbatim; // lines copied from input file
+  cmCollectFlags m_BuildFlags;
 };
 
 

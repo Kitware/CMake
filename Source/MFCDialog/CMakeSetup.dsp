@@ -108,6 +108,10 @@ SOURCE=..\cmClassFile.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=..\cmCollectFlags.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=..\cmDirectory.cxx
 # End Source File
 # Begin Source File
@@ -232,9 +236,5 @@ SOURCE=.\res\CMakeSetupDialog.ico
 SOURCE=.\res\CMakeSetupDialog.rc2
 # End Source File
 # End Group
-# Begin Source File
-
-SOURCE=.\ReadMe.txt
-# End Source File
 # End Target
 # End Project

@@ -99,6 +99,10 @@ SOURCE=.\cmClassFile.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=.\cmCollectFlags.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=.\cmDirectory.cxx
 # End Source File
 # Begin Source File

@@ -1,8 +1,11 @@
 #include "cmDSPMakefile.h"
 #include "cmSystemTools.h"
+#include "cmCollectFlags.h"
 #include <iostream>
 #include <fstream>
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#undef GetCurrentDirectory
 
 static void Die(const char* message)
 {
@@ -13,28 +16,49 @@ static void Die(const char* message)
 
 void cmDSPMakefile::OutputDSPFile()
 { 
-  m_IncludeOptions = "/STACK:10000000 ";
-  m_IncludeOptions = "/I \"";
-  m_IncludeOptions += this->GetHomeDirectory();
-  m_IncludeOptions += "/Code/Common\" ";
-  m_IncludeOptions += "/I \"";
-  m_IncludeOptions += this->GetHomeDirectory();
-  m_IncludeOptions += "/Code/Insight3DParty/vxl\" ";
-  // Add the Build directory vcl to the -I path for config.h type stuff
-  m_IncludeOptions += "/I \"";
-  m_IncludeOptions += this->GetOutputHomeDirectory();
-  m_IncludeOptions += "/Code/Insight3DParty/vxl\" ";
-  // Add the Build directory to the -I path for config.h type stuff
-  m_IncludeOptions += "/I \"";
-  m_IncludeOptions += this->GetOutputHomeDirectory();
-  m_IncludeOptions += "\" ";
-  m_DebugLibraryOptions = " ITKCommon.lib ITKNumerics.lib ";
-  m_DebugLibraryOptions += " /LIBPATH:\"";
-  m_DebugLibraryOptions += this->GetOutputHomeDirectory();
-  m_DebugLibraryOptions += "/Code/Common/Debug\" ";
-  m_DebugLibraryOptions += " /LIBPATH:\"";
-  m_DebugLibraryOptions += this->GetOutputHomeDirectory();
-  m_DebugLibraryOptions += "/Code/Insight3DParty/vxl/Debug\" ";
+  std::vector<std::string>& includes = m_BuildFlags.GetIncludeDirectories();
+  std::vector<std::string>::iterator i;
+  for(i = includes.begin(); i != includes.end(); ++i)
+    {
+    std::string include = *i;
+    cmSystemTools::ReplaceString(include, "${CMAKE_CONFIG_DIR}",
+				 this->GetOutputHomeDirectory() );
+    cmSystemTools::ReplaceString(include, "${srcdir}",
+				 this->GetHomeDirectory() );
+    m_IncludeOptions +=  "/I \"";
+    m_IncludeOptions += include;
+    m_IncludeOptions += "\" ";
+    }
+  std::vector<std::string>& libs = m_BuildFlags.GetLinkLibraries();
+  for(i = libs.begin(); i != libs.end(); ++i)
+    {
+    m_DebugLibraryOptions += " ";
+    m_DebugLibraryOptions += *i;
+    m_DebugLibraryOptions += ".lib ";
+    }
+  std::vector<std::string>& libswin32 = m_BuildFlags.GetLinkLibrariesWin32();
+  for(i = libswin32.begin(); i != libswin32.end(); ++i)
+    {
+    m_DebugLibraryOptions += " ";
+    m_DebugLibraryOptions += *i;
+    m_DebugLibraryOptions += ".lib ";
+    }
+  std::vector<std::string>& libdirs = m_BuildFlags.GetLinkDirectories();
+  for(i = libdirs.begin(); i != libdirs.end(); ++i)
+    {
+    m_DebugLibraryOptions += " /LIBPATH:\"";
+    m_DebugLibraryOptions += *i;
+    cmSystemTools::ReplaceString(m_DebugLibraryOptions, "${CMAKE_CONFIG_DIR}",
+				 this->GetOutputHomeDirectory() );
+    if(i->find("Debug") == std::string::npos)
+      {
+      if(i->find("Release") == std::string::npos)
+	{
+	m_DebugLibraryOptions += "/Debug\" ";
+	}
+      }
+    }
+  m_DebugLibraryOptions += "/STACK:10000000 ";
   m_ReleaseLibraryOptions = m_DebugLibraryOptions;
   cmSystemTools::ReplaceString(m_ReleaseLibraryOptions, "Debug", "Release");
   // If the output directory is not the m_cmHomeDirectory
@@ -123,7 +147,6 @@ void cmDSPMakefile::WriteDSPBuildRule(std::ostream& fout)
 {
   std::string dspname = *(m_CreatedProjectNames.end()-1);
   dspname += ".dsp";
-#undef GetCurrentDirectory
   std::string makefileIn = this->GetCurrentDirectory();
   makefileIn += "/";
   makefileIn += "CMakeLists.txt";

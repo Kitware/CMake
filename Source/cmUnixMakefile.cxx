@@ -53,7 +53,14 @@ inline std::string FixDirectoryName(const char* dir)
   return s;
 }
 
-// output the makefile to the named file
+// This is where CMakeTargets.make is generated
+// This function ouputs the following:
+// 1. Include flags for the compiler
+// 2. List of .o files that need to be compiled
+// 3. Rules to build executables including -l and -L options
+// 4. Rules to build in sub directories
+// 5. The name of the library being built, if it is a library
+
 void cmUnixMakefile::OutputMakefile(const char* file)
 {
   std::ofstream fout(file);
@@ -62,8 +69,28 @@ void cmUnixMakefile::OutputMakefile(const char* file)
     std::cerr  << "Error can not open " << file << " for write" << std::endl;
     return;
     }
+  // Output Include paths
+  fout << "INCLUDE_FLAGS = ";
+  std::vector<std::string>& includes = m_BuildFlags.GetIncludeDirectories();
+  std::vector<std::string>::iterator i;
+  for(i = includes.begin(); i != includes.end(); ++i)
+    {
+    std::string include = *i;
+    fout << "-I" << i->c_str() << " ";
+    }
+  fout << " ${LOCAL_INCLUDE_FLAGS} ";
+  fout << "\n";
+  // see if there are files to compile in this makefile
+  // These are used for both libraries and executables
   if(m_Classes.size() )
     {
+    // Ouput Library name if there are SRC_OBJS
+    if(strlen(this->GetLibraryName()) > 0)
+      {
+      fout << "ME = " <<  this->GetLibraryName() << "\n\n";
+      fout << "BUILD_LIB_FILE = lib${ME}${ITK_LIB_EXT}\n\n";
+      }
+    // Output SRC_OBJ list for all the classes to be compiled
     fout << "SRC_OBJ = \\\n";
     for(int i = 0; i < m_Classes.size(); i++)
       {
@@ -82,20 +109,41 @@ void cmUnixMakefile::OutputMakefile(const char* file)
       }
     fout << "\n";
     }
-  if(strlen(this->GetLibraryName()) > 0)
-    {
-    fout << "ME = " <<  this->GetLibraryName() << "\n\n";
-    fout << "BUILD_LIB_FILE = lib${ME}${ITK_LIB_EXT}\n\n";
-    }
-
+  // Ouput user make text embeded in the input file
   for(int i =0; i < m_MakeVerbatim.size(); i++)
     {
     fout << m_MakeVerbatim[i] << "\n";
     }
   fout << "\n\n";
 
+  // Output rules for building executables  
   if( m_Executables )
     {
+    // collect all the flags needed for linking libraries
+    std::string linkLibs;        
+    std::vector<std::string>::iterator j;
+    std::vector<std::string>& libdirs = m_BuildFlags.GetLinkDirectories();
+    for(j = libdirs.begin(); j != libdirs.end(); ++j)
+      {
+      linkLibs += "-L";
+      linkLibs += *j;
+      linkLibs += " ";
+      }
+    std::vector<std::string>& libs = m_BuildFlags.GetLinkLibraries();
+    for(j = libs.begin(); j != libs.end(); ++j)
+      {
+      linkLibs += "-l";
+      linkLibs += *j;
+      linkLibs += " ";
+      }
+    std::vector<std::string>& libsUnix = m_BuildFlags.GetLinkLibrariesUnix();
+    for(j = libsUnix.begin(); j != libsUnix.end(); ++j)
+      {
+      linkLibs += *j;
+      linkLibs += " ";
+      }
+    linkLibs += " ${LOCAL_LINK_FLAGS} ";
+    // Now create rules for all of the executables to be built
     for(int i = 0; i < m_Classes.size(); i++)
       {
       if(!m_Classes[i].m_AbstractClass && !m_Classes[i].m_HeaderFileOnly)
@@ -103,10 +151,13 @@ void cmUnixMakefile::OutputMakefile(const char* file)
         std::string DotO = m_Classes[i].m_ClassName;
         DotO += ".o";
         fout << m_Classes[i].m_ClassName << ": " << DotO << "\n";
-	fout << "\t ${CXX}  ${CXX_FLAGS}  " << DotO.c_str() << " -o $@ -L${CMAKE_OBJ_DIR}/Code/Common -lITKCommon \\\n"
-	     << "\t-L${CMAKE_OBJ_DIR}/Code/Insight3DParty/vxl -lITKNumerics -lm ${DL_LIBS}\n\n";
+	fout << "\t${CXX}  ${CXX_FLAGS}  " 
+	     << DotO.c_str() << " "
+             << linkLibs.c_str() 
+	     << " -o $@ ""\n\n";
 	}
       }
+    // ouput the list of executables
     fout << "EXECUTABLES = \\\n";
     for(int i = 0; i < m_Classes.size(); i++)
       {
@@ -122,7 +173,7 @@ void cmUnixMakefile::OutputMakefile(const char* file)
       }
     fout << "\n";
     }
-  
+  // Output Sub directory build rules
   if( m_SubDirectories.size() )
     {
     fout << "SUBDIR_BUILD = \\\n";

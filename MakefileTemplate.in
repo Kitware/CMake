@@ -1,4 +1,4 @@
 srcdir        = @srcdir@
 VPATH         = @srcdir@
 
-@MAKEINCLUDE@ @MAKEQUOTE@@CMAKE_OBJ_DIR@/CMake/CMakeMaster.make@MAKEQUOTE@
+@MAKEINCLUDE@ @MAKEQUOTE@@CMAKE_CONFIG_DIR@/CMake/CMakeMaster.make@MAKEQUOTE@

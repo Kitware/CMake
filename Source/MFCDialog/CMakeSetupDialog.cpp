@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "CMakeSetup.h"
 #include "CMakeSetupDialog.h"
-#include "../cmDSWBuilder.h"
+#include "../cmDSWMakefile.h"
 #include "../itkVC60Configure.h"
 
 #ifdef _DEBUG
@@ -232,19 +232,19 @@ void CMakeSetupDialog::OnOK()
   config.SetWhereBuild(m_WhereBuild);
   config.Configure();
   
-  cmDSWBuilder builder;
+  cmDSWMakefile builder;
   // Set the ITK home directory
   builder.SetHomeDirectory(m_WhereSource);
   // Set the CMakeLists.txt file
   CString makefileIn = m_WhereSource;
   makefileIn += "/CMakeLists.txt";
-  builder.SetInputMakefilePath(makefileIn);
+  builder.ReadMakefile(makefileIn);
   // Set the output directory
   builder.SetOutputDirectory(m_WhereBuild);
   // set the directory which contains the CMakeLists.txt
-  builder.SetMakefileDirectory(m_WhereSource);
+  builder.SetCurrentDirectory(m_WhereSource);
   // Create the master DSW file and all children dsp files for ITK
-  builder.CreateDSWFile();
+  builder.OutputDSWFile();
   CDialog::OnOK();
   this->SaveToRegistry();
 }

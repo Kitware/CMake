@@ -2,23 +2,10 @@
 #pragma warning ( disable : 4786 )
 #endif
 #include "cmClassFile.h"
-#include <sys/stat.h>
+#include "cmSystemTools.h"
 #include <iostream>
 
 
-// Helper function to hide the use of system stat function
-bool cmFileExists(const char* filename)
-{
-  struct stat fs;
-  if (stat(filename, &fs) != 0) 
-  {
-    return false;
-  }
-  else
-  {
-    return true;
-  }
-}
 
 // Set the name of the class and the full path to the file.
 // The class must be found in dir and end in name.cxx, name.txx, 
@@ -37,7 +24,7 @@ void cmClassFile::SetName(const char* name, const char* dir)
   pathname += m_ClassName;
   std::string hname = pathname;
   hname += ".cxx";
-  if(cmFileExists(hname.c_str()))
+  if(cmSystemTools::FileExists(hname.c_str()))
     {
     m_HeaderFileOnly = false;
     m_FullPath = hname;
@@ -46,7 +33,7 @@ void cmClassFile::SetName(const char* name, const char* dir)
   
   hname = pathname;
   hname += ".c";
-  if(cmFileExists(hname.c_str()))
+  if(cmSystemTools::FileExists(hname.c_str()))
   {
     m_HeaderFileOnly = false;
     m_FullPath = hname;
@@ -54,13 +41,19 @@ void cmClassFile::SetName(const char* name, const char* dir)
   }
   hname = pathname;
   hname += ".txx";
-  if(cmFileExists(hname.c_str()))
+  if(cmSystemTools::FileExists(hname.c_str()))
   {
     m_HeaderFileOnly = false;
     m_FullPath = hname;
     return;
   }
-  std::cerr << "file seems to be a header only " << hname << " " << m_ClassName.c_str() << std::endl;
+  hname = pathname;
+  hname += ".h";
+  if(!cmSystemTools::FileExists(hname.c_str()))
+    {
+    std::cerr << "ERROR, can not find file " << hname;
+    std::cerr << "Tried .txx .cxx .c " << std::endl;
+    }
 }
 
 

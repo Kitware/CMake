@@ -16,15 +16,20 @@ main(int ac, char** av)
     for(int i =2; i < ac; i++)
       {
       std::string arg = av[i];
-      if(arg.find("-I",0) != std::string::npos)
-	{
-	std::string path = arg.substr(2);
-	md.AddSearchPath(path.c_str());
-	}
       if(arg.find("-S",0) != std::string::npos)
 	{
 	std::string path = arg.substr(2);
 	mf->SetCurrentDirectory(path.c_str());
+	}
+      if(arg.find("-B",0) != std::string::npos)
+	{
+	std::string path = arg.substr(2);
+	mf->SetOutputHomeDirectory(path.c_str());
+	}
+      if(arg.find("-H",0) != std::string::npos)
+	{
+	std::string path = arg.substr(2);
+	mf->SetHomeDirectory(path.c_str());
 	}
       }
     }

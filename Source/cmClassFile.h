@@ -22,19 +22,25 @@
 #include <string>
 #include <vector>
 
-// helper function returns true if a file exits
-bool cmFileExists(const char* filename);
 
 struct cmClassFile
 {
-  // Set the name of the file
+  /**
+   * Set the name of the file, given the directory
+   * the file should be in.   Extensions are tried on 
+   * the name in the directory to find the actual file.
+   */
   void SetName(const char* name, const char* dir);
+  /**
+   * print the structure to cout
+   */
   void Print();
 
-  bool m_AbstractClass;
-  bool m_HeaderFileOnly;
-  std::string m_FullPath;
-  std::string m_ClassName;
+  bool m_AbstractClass;         // is this an abstract class
+  bool m_HeaderFileOnly;        // is this file only a header file
+  std::string m_FullPath;       // full path to the file
+  std::string m_ClassName;      // class name
+  // list of files that this file depends on
   std::vector<std::string> m_Depends;
 };
 

@@ -32,9 +32,11 @@ CMakeBuildTargets     -> Unix program to read CMakeLists.txt and generate CMakeT
 makefile fragments:
 CMakeMaster.make      -> main file to be included by makefiles
 CMakeVariables.make   -> all make varibles are set in this file
-CMakeRules.make       -> All build rules are here
+CMakeRules.make       -> All build rules are here (except Simple Rules)
+CMakeSimpleRules.make -> simple build rules for .o to .cxx, this is separate to be able
+to build CMakeBuildTargets itself.
 CMakeLocal.make       -> Place for hand configuration
-CMakeTargets.make     -> generated rules for make style build
+CMakeTargets.make     -> generated rules for make style build in each directory
 MakefileTemplate.make -> master makefile template used by configure to generate Makefiles
 
 Unix install:
@@ -50,7 +52,6 @@ make
 
 
 TODO:
-Fix cmUnixMakefile.cxx and cmDSPMakefile.cxx 
-to read libraries and -I stuff from a config file
-
+configure stuff for windows should be a copy configure file
+read in depend regular expression from a file
 

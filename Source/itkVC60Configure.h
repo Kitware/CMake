@@ -25,8 +25,17 @@
 class itkVC60Configure : public cmWindowsConfigure
 {
 public:
+  /** 
+   * implement configure from parent
+   */
   virtual void Configure();
+  /**
+   * create the main itk configure file
+   */
   virtual void GenerateITKConfigHeader();
+  /**
+   * Create the vnl configure file
+   */
   virtual void GenerateVNLConfigHeader();
 protected:
   void CopyFileTo(const char* source,

@@ -26,10 +26,16 @@
 class cmWindowsConfigure
 {
 public:
+  /**
+   * Set the path to the top level of the source directory
+   */
   void SetWhereSource(const char* dir) 
     {
       m_WhereSource = dir;
     }
+  /**
+   * Set the path to the top level of the build directory
+   */
   void SetWhereBuild(const char* dir)
     {
       m_WhereBuild = dir;

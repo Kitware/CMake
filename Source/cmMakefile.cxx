@@ -4,38 +4,10 @@
 #include "cmMakefile.h"
 #include "cmClassFile.h"
 #include "cmDirectory.h"
-
+#include "cmSystemTools.h"
 #include <fstream>
 #include <iostream>
 
-
-// remove extra spaces and the "\" character from the name
-// of the class as it is in the CMakeLists.txt
-inline std::string CleanUpName(const char* name)
-{
-  std::string className = name;
-  size_t i =0;
-  while(className[i] == ' ')
-    {
-    i++;
-    }
-  if(i)
-    {
-    className = className.substr(i, className.size());
-    } 
-  size_t pos = className.find('\\');
-  if(pos != std::string::npos)
-    {
-    className = className.substr(0, pos);
-    }
-  
-  pos = className.find(' ');
-  if(pos != std::string::npos)
-    {
-    className = className.substr(0, pos);
-    }
-  return className;
-}
 
 // default is not to be building executables
 cmMakefile::cmMakefile()
@@ -55,7 +27,10 @@ void cmMakefile::Print()
 
 bool cmMakefile::ReadMakefile(const char* filename)
 {
-  std::cerr << "reading makefile " << filename << std::endl;
+  m_BuildFlags.SetSourceHomeDirectory(this->GetHomeDirectory());
+  m_BuildFlags.SetStartDirectory(this->GetCurrentDirectory());
+  m_BuildFlags.ParseDirectories();
+
   std::ifstream fin(filename);
   if(!fin)
     {
@@ -106,7 +81,7 @@ bool cmMakefile::ReadMakefile(const char* filename)
       {
       if(line.find("\\") != std::string::npos)
 	{
-	this->ReadSubdirs(fin);
+        cmSystemTools::ReadList(m_SubDirectories, fin);
 	}
       }
     else if(line.find("EXECUTABLES") != std::string::npos)
@@ -177,7 +152,7 @@ void cmMakefile::ReadClasses(std::ifstream& fin,
       done = true;
       }
     // remove extra spaces and \ from the class name
-    classname = CleanUpName(classname.c_str());
+    classname = cmSystemTools::CleanUpName(classname.c_str());
     
     // if this is not an abstract list then add new class
     // to the list of classes in this makefile
@@ -204,6 +179,9 @@ void cmMakefile::ReadClasses(std::ifstream& fin,
     }
 }
 
+// Find all of the files in dir as specified from this line:
+// TEMPLATE_INSTANCE_DIRECTORY = dir
+// Add all the files to the m_Classes array.
 
 void cmMakefile::ReadTemplateInstanceDirectory(std::string& line)
 {
@@ -211,7 +189,7 @@ void cmMakefile::ReadTemplateInstanceDirectory(std::string& line)
   if(start != std::string::npos)
     {
     std::string dirname = line.substr(start+1, line.size());
-    dirname = CleanUpName(dirname.c_str());
+    dirname = cmSystemTools::CleanUpName(dirname.c_str());
     std::string tdir = this->GetCurrentDirectory();
     tdir += "/";
     tdir += dirname;
@@ -249,29 +227,4 @@ void cmMakefile::ReadTemplateInstanceDirectory(std::string& line)
     }
 }
 
-
-
-// Read a list of subdirectories from the stream
-void cmMakefile::ReadSubdirs(std::ifstream& fin)
-{
-  char inbuffer[2048];
-  bool done = false;
-
-  while (!done)
-    {  
-    // read a line from the makefile
-    fin.getline(inbuffer, 2047); 
-    // convert to a string class
-    std::string dir = inbuffer;
-    // if the line does not end in \ then we are at the
-    // end of the list
-    if(dir.find('\\') == std::string::npos)
-      {
-      done = true;
-      }
-    // remove extra spaces and \ from the class name
-    dir = CleanUpName(dir.c_str());
-    m_SubDirectories.push_back(dir);
-    }
-}
 

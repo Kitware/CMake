@@ -2,22 +2,26 @@
 #pragma warning ( disable : 4786 )
 #endif
 #include "cmMakeDepend.h"
+#include "cmSystemTools.h"
 #include <fstream>
 #include <iostream>
 #include <algorithm>
 #include <functional>
 
 
-void cmMakeDepend::SetIncludeRegularExpression(const char* prefix)
-{
-  m_IncludeFileRegularExpression.compile(prefix);
-}
-
 cmMakeDepend::cmMakeDepend()
 {
   m_Verbose = false;
   m_IncludeFileRegularExpression.compile("^itk|^vtk|^vnl|^vcl|^f2c");
 }
+
+
+// only files matching this regular expression with be considered
+void cmMakeDepend::SetIncludeRegularExpression(const char* prefix)
+{
+  m_IncludeFileRegularExpression.compile(prefix);
+}
+
 
 cmMakeDepend::~cmMakeDepend()
 { 
@@ -32,11 +36,25 @@ cmMakeDepend::~cmMakeDepend()
 
 // Set the makefile that depends will be made from.
 // The pointer is kept so the cmClassFile array can
-// be updated with the depend information. 
+// be updated with the depend information in the cmMakefile.
 
 void cmMakeDepend::SetMakefile(cmMakefile* makefile)
 {
   m_Makefile = makefile;
+  
+  // Now extract any include paths from the makefile flags
+  cmCollectFlags& flags = m_Makefile->GetBuildFlags();
+  std::vector<std::string>& includes = flags.GetIncludeDirectories();
+  std::vector<std::string>::iterator j;
+  for(j = includes.begin(); j != includes.end(); ++j)
+    {
+    cmSystemTools::ReplaceString(*j, "${CMAKE_CONFIG_DIR}",
+				 m_Makefile->GetOutputHomeDirectory() );
+    cmSystemTools::ReplaceString(*j, "${srcdir}",
+				 m_Makefile->GetHomeDirectory() );
+    this->AddSearchPath(j->c_str());
+    }
+  // Now create cmDependInformation objects for files in the directory
   int index = 0;
   std::vector<cmClassFile>::iterator i = makefile->m_Classes.begin();
   while(i != makefile->m_Classes.end())
@@ -49,7 +67,6 @@ void cmMakeDepend::SetMakefile(cmMakefile* makefile)
       info->m_IncludeName = (*i).m_FullPath;
       m_DependInformation.push_back(info);
       info->m_ClassFileIndex = index;
-      
       }
     ++i;
     index++;
@@ -195,6 +212,9 @@ int cmMakeDepend::FindInformation(const char* fname)
     }
   cmDependInformation* newinfo = new cmDependInformation;
   newinfo->m_FullPath = this->FullPath(fname);
+  // Add the directory where this file was found to the search path
+  // may have been foo/bar.h, but bar may include files from the foo
+  // directory without the foo prefix
   this->AddFileToSearchPath(newinfo->m_FullPath.c_str());
   newinfo->m_IncludeName = fname;
   m_DependInformation.push_back(newinfo);
@@ -204,13 +224,15 @@ int cmMakeDepend::FindInformation(const char* fname)
 // remove duplicate indices from the depend information 
 void cmDependInformation::RemoveDuplicateIndices()
 {
+  // sort the array
   std::sort(m_Indices.begin(), m_Indices.end(), std::less<int>());
+  // remove duplicates
   std::vector<int>::iterator new_end = 
     std::unique(m_Indices.begin(), m_Indices.end());
   m_Indices.erase(new_end, m_Indices.end());
 }
 
-// add the depend information from info to this
+// add the depend information from info to the m_Indices varible of this class.
 void cmDependInformation::MergeInfo(cmDependInformation* info)
 {
   std::vector<int>::iterator i = info->m_Indices.begin();
@@ -226,19 +248,19 @@ std::string cmMakeDepend::FullPath(const char* fname)
   for(std::vector<std::string>::iterator i = m_IncludeDirectories.begin();
       i != m_IncludeDirectories.end(); ++i)
     {
-    if(cmFileExists(fname))
+    if(cmSystemTools::FileExists(fname))
       {
       return std::string(fname);
       }
     std::string path = *i;
     path = path + "/";
     path = path + fname;
-    if(cmFileExists(path.c_str()))
+    if(cmSystemTools::FileExists(path.c_str()))
       {
       return path;
       }
     }
-  std::cerr << "File not found " << fname  << std::endl;
+  std::cerr << "Depend: File not found " << fname  << std::endl;
   return std::string(fname);
 }
 

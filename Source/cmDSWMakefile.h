@@ -24,6 +24,7 @@
 
 #include "cmMakefile.h"
 #include <vector>
+class cmDSPMakefile;
 
 
 class cmDSWMakefile : public cmMakefile
@@ -31,9 +32,10 @@ class cmDSWMakefile : public cmMakefile
 public:
   virtual void OutputDSWFile();
 private:
+  void FindAllCMakeListsFiles(const char* subdir,
+			      std::vector<cmDSPMakefile*>&);
   void WriteDSWFile(std::ostream& fout);
   void WriteDSWHeader(std::ostream& fout);
-  std::vector<std::string> CreateDSPFile(const char* dir);
   void WriteProject(std::ostream& fout, 
 		     const char* name, const char* path);
   void WriteDSWFooter(std::ostream& fout);

@@ -1,8 +1,8 @@
-#include "cmDSWBuilder.h"
-#include "cmDSPBuilder.h"
+#include "cmDSWMakefile.h"
+#include "cmDSPMakefile.h"
 #include <iostream>
 
-void SetArgs(cmPCBuilder& builder, int ac, char** av)
+void SetArgs(cmMakefile& builder, int ac, char** av)
 {
   for(int i =3; i < ac; i++)
     {
@@ -16,7 +16,7 @@ void SetArgs(cmPCBuilder& builder, int ac, char** av)
       {
       std::string path = arg.substr(2);
       std::cerr << "set makefile dir " << path.c_str() << std::endl;
-      builder.SetMakefileDirectory(path.c_str());
+      builder.SetCurrentDirectory(path.c_str());
       }
     if(arg.find("-O",0) != std::string::npos)
       {
@@ -45,17 +45,17 @@ main(int ac, char** av)
   std::string arg = av[2];
   if(arg.find("-DSP", 0) != std::string::npos)
     {
-    cmDSPBuilder builder;
+    cmDSPMakefile builder;
     SetArgs(builder, ac, av);
-    builder.SetInputMakefilePath(av[1]);
-    builder.CreateDSPFile();
+    builder.ReadMakefile(av[1]);
+    builder.OutputDSPFile();
     }
   else
     {
-    cmDSWBuilder builder;
+    cmDSWMakefile builder;
     SetArgs(builder, ac, av);
-    builder.SetInputMakefilePath(av[1]);
-    builder.CreateDSWFile();
+    builder.ReadMakefile(av[1]);
+    builder.OutputDSWFile();
     }
   return 0;
 }

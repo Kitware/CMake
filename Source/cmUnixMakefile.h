@@ -25,7 +25,9 @@
 class cmUnixMakefile : public cmMakefile
 {
 public:
-  // Write the makefile to the named file
+  /** 
+   * Write the makefile to the named file
+   */
   void OutputMakefile(const char* file);
 protected:
   void OutputDepends(std::ostream&);

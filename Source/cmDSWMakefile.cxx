@@ -2,12 +2,15 @@
 #pragma warning ( disable : 4786 )
 #endif
 #include "cmDSWMakefile.h"
-#include "cmDSPBuilder.h"
 #include "cmSystemTools.h"
+#include "cmDSPMakefile.h"
 #include <iostream>
 #include <fstream>
 #include <windows.h>
 
+// microsoft nonsense
+#undef GetCurrentDirectory
+#undef SetCurrentDirectory
 
 // virtual override, ouput the makefile 
 void cmDSWMakefile::OutputDSWFile()
@@ -27,80 +30,139 @@ void cmDSWMakefile::OutputDSWFile()
       MessageBox(0, m_OutputDirectory.c_str(), 0, MB_OK);
       }
     }
-  
-  
   std::string fname;
   fname = m_OutputDirectory;
   fname += "/";
   fname += this->m_LibraryName;
   fname += ".dsw";
   std::cerr << "writting dsw file " << fname.c_str() << std::endl;
-
   std::ofstream fout(fname.c_str());
   if(!fout)
     {
-    std::cerr  << "Error can not open " << fname.c_str() << " for write" << std::endl;
+    std::cerr  << "Error can not open " 
+	       << fname.c_str() << " for write" << std::endl;
     return;
     }
   this->WriteDSWFile(fout);
 }
 
-
-void cmDSWMakefile::WriteDSWFile(std::ostream& fout)
+// ------------------------------------------------
+// Recursive function to find all the CMakeLists.txt files
+// in a project.  As each file is read in, any directories in
+// the SUBDIR variable are also passed back to this function.
+// The result is a vector of cmDSPMakefile objects, one for
+// each directory with a CMakeLists.txt file
+//
+void cmDSWMakefile::FindAllCMakeListsFiles(const char* subdir,
+					   std::vector<cmDSPMakefile*>& makefiles)
 {
-  this->WriteDSWHeader(fout);
-  for(std::vector<std::string>::iterator i = m_SubDirectories.begin();
-      i != m_SubDirectories.end(); ++i)
-    {
-    const char* dir = (*i).c_str();
-    std::vector<std::string> dspnames = this->CreateDSPFile(dir);
-    std::cerr << "Create dsp for " << dspnames.size() << " number of dsp files in " << dir << std::endl;
-    for(std::vector<std::string>::iterator si = dspnames.begin();
-	si != dspnames.end(); ++si)
-      {
-      std::string dspname = *si;
-      std::cerr << "Create dsp for " << (*si).c_str() << std::endl;
-      if(dspname == "")
-	{
-	std::cerr << "Project name not found in " << dir << "/CMakeLists.txt" << std::endl;
-	std::cerr << "Skipping Project " << std::endl;
-	}
-      else
-	{
-	std::string subdir = "./";
-	subdir += dir;
-	this->WriteProject(fout, dspname.c_str(), subdir.c_str());
-	}
-      }
-    }
-  this->WriteDSWFooter(fout);
-}
-
-std::vector<std::string> cmDSWMakefile::CreateDSPFile(const char* subdir)
-{
-#undef GetCurrentDirectory
   std::string currentDir = this->GetCurrentDirectory();
   currentDir += "/";
   currentDir += subdir;
-  cmDSPBuilder dsp;
-  dsp.SetOutputHomeDirectory(this->GetOutputDirectory());
-  dsp.SetHomeDirectory(this->GetHomeDirectory());
-  dsp.SetMakefileDirectory(currentDir.c_str());
-  std::string outdir = m_OutputDirectory;
-  outdir += "/";
-  outdir += subdir;
-  dsp.SetOutputDirectory(outdir.c_str());
   currentDir += "/";
   currentDir += "CMakeLists.txt";
-  dsp.SetInputMakefilePath(currentDir.c_str());
-  dsp.CreateDSPFile();
-  return dsp.GetCreatedProjectNames();
+  // CMakeLists.txt exits in the subdirectory
+  // then create a cmDSPMakefile for it
+  if(cmSystemTools::FileExists(currentDir.c_str()))
+    {
+    // Create a new cmDSPMakefile to read the currentDir CMakeLists.txt file
+    cmDSPMakefile* dsp = new cmDSPMakefile;
+    // add it to the vector
+    makefiles.push_back(dsp);
+    // Set up the file with the current context
+    dsp->SetOutputHomeDirectory(this->GetOutputDirectory());
+    dsp->SetHomeDirectory(this->GetHomeDirectory());
+    // set the current directory in the Source as a full
+    // path
+    std::string currentDir = this->GetCurrentDirectory();
+    currentDir += "/";
+    currentDir += subdir;
+    dsp->SetCurrentDirectory(currentDir.c_str());
+    // Parse the CMakeLists.txt file
+    currentDir += "/CMakeLists.txt";
+    dsp->ReadMakefile(currentDir.c_str());
+    // Set the output directory which may be different than the source
+    std::string outdir = m_OutputDirectory;
+    outdir += "/";
+    outdir += subdir;
+    dsp->SetOutputDirectory(outdir.c_str());
+    // Create the DSP file
+    dsp->OutputDSPFile();
+    // Look at any sub directories parsed (SUBDIRS) and 
+    // recurse into them    
+    const std::vector<std::string>& subdirs = dsp->GetSubDirectories();
+    for(std::vector<std::string>::const_iterator i = subdirs.begin();
+	i != subdirs.end(); ++i)
+      {
+      // append the subdirectory to the current directoy subdir
+      std::string nextDir = subdir;
+      nextDir += "/";
+      nextDir += i->c_str();
+      // recurse into nextDir
+      this->FindAllCMakeListsFiles(nextDir.c_str(),
+				   makefiles);
+      }
+    }
+  else
+    {
+    std::cerr << "Can not find CMakeLists.txt in " << currentDir.c_str() 
+	      << std::endl;
+    }
+}
+
+
+// Write a DSW file to the stream
+void cmDSWMakefile::WriteDSWFile(std::ostream& fout)
+{
+  // Write out the header for a DSW file
+  this->WriteDSWHeader(fout);
+  // Create an array of dsp files for the project
+  std::vector<cmDSPMakefile*> dspfiles;
+  // loop over all the subdirectories for the DSW file,
+  // and find all sub directory projects
+  for(std::vector<std::string>::iterator j = m_SubDirectories.begin();
+      j != m_SubDirectories.end(); ++j)
+    {
+    this->FindAllCMakeListsFiles(j->c_str(), dspfiles);
+    }
+  // For each DSP file created insert them into the DSW file
+  for(std::vector<cmDSPMakefile*>::iterator k = dspfiles.begin();
+      k != dspfiles.end(); ++k)
+    {
+    // Get the directory for the dsp file, it comes
+    // from the source, so it has the source path which needs
+    // to be removed as this may be built in a different directory
+    // than the source
+    std::string dir = (*k)->GetCurrentDirectory();
+    // Get the home directory with the trailing slash
+    std::string homedir = this->GetHomeDirectory();
+    homedir += "/";
+    // make the directory relative by removing the home directory part
+    cmSystemTools::ReplaceString(dir, homedir.c_str(), "");
+    // Get the list of create dsp files from the cmDSPMakefile, more
+    // than one dsp could have been created per input CMakeLists.txt file
+    std::vector<std::string> dspnames = (*k)->GetCreatedProjectNames();
+    std::cerr << "Create dsp for " 
+	      << dspnames.size()
+	      << " number of dsp files in " << dir << std::endl;
+    for(std::vector<std::string>::iterator si = dspnames.begin();
+	si != dspnames.end(); ++si)
+      {
+      // Write the project into the DSW file
+      this->WriteProject(fout, si->c_str(), dir.c_str());
+      }
+    // delete the cmDSPMakefile object once done with it to avoid
+    // leaks
+    delete *k;
+    }
+  // Write the footer for the DSW file
+  this->WriteDSWFooter(fout);
 }
 
 
 void cmDSWMakefile::WriteProject(std::ostream& fout, 
-				  const char* dspname,
-				  const char* dir)
+				 const char* dspname,
+				 const char* dir)
 {
   fout << "###############################################################################\n\n";
   fout << "Project: \"" << dspname << "\"=" 

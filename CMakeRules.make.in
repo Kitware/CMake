@@ -1,5 +1,5 @@
-# include simple rules for building .o files
-@MAKEINCLUDE@ @MAKEQUOTE@@CMAKE_OBJ_DIR@/CMake/CMakeSimpleRules.make@MAKEQUOTE@
+# include simple rules for building .o files from source files
+@MAKEINCLUDE@ @MAKEQUOTE@@CMAKE_CONFIG_DIR@/CMake/CMakeSimpleRules.make@MAKEQUOTE@
 
 #
 # Makefile for 
@@ -10,18 +10,18 @@ all: CMakeTargets.make ${OBJ_SUB_DIRS} ${EXECUTABLES} ${SUBDIR_BUILD} ${BUILD_LI
 
 #------------------------------------------------------------------------------
 
-${CMAKE}: @fullSrcDir@/CMake/Source/*.cxx @fullSrcDir@/CMake/Source/*.h
-	cd @CMAKE_OBJ_DIR@/CMake/Source; ${MAKE} CMakeBuildTargets
+${CMAKE}: ${topdir}/CMake/Source/*.cxx ${topdir}/CMake/Source/*.h
+	cd ${CMAKE_CONFIG_DIR}/CMake/Source; ${MAKE} CMakeBuildTargets
 
 depend: ${CMAKE}
-	${CMAKE} ${srcdir}/CMakeLists.txt -S${srcdir} -I${srcdir} ${INCLUDE_FLAGS}
+	${MAKE} -${MAKEFLAGS} CMakeTargets.make
 
 
 clean: ${SUBDIR_CLEAN}
 	rm -f ${SRC_OBJ} ${EXECUTABLES} 
 
 CMakeTargets.make: ${CMAKE} ${srcdir}/CMakeLists.txt
-	${CMAKE} ${srcdir}/CMakeLists.txt -S${srcdir} -I${srcdir} ${INCLUDE_FLAGS}
+	${CMAKE} ${srcdir}/CMakeLists.txt -S${srcdir} -H${topdir} -B${CMAKE_CONFIG_DIR}
 
 #------------------------------------------------------------------------------
 # rules for the normal library
