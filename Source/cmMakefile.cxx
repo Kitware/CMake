@@ -465,15 +465,22 @@ void cmMakefile::AddCustomCommand(const char* source,
       sname += ".rule";
       if (!this->GetSource(sname.c_str()))
         {
-        m_Targets[target].GetSourceLists().push_back(source);
+        if (m_Targets.find(target) != m_Targets.end())
+          {
+          m_Targets[target].GetSourceLists().push_back(source);
+          }
+        else
+          {
+          cmSystemTools::Error("Attempt to add a custom rule to a target that does not exist yet for target ", target);
+          return;
+          }
         }
       }
     }
   else
     {
     this->AddCustomCommandToTarget(target, command, commandArgs, 
-                                   cmTarget::POST_BUILD,
-                                   comment);
+                                   cmTarget::POST_BUILD, comment);
     }
 }
 
@@ -930,7 +937,6 @@ void cmMakefile::AddExecutable(const char *exeName,
   target.GetSourceLists() = srcs;
   this->AddGlobalLinkInformation(exeName, target);
   m_Targets.insert(cmTargets::value_type(exeName,target));
-  
   
   // Add an entry into the cache 
   std::string exePath = exeName;
