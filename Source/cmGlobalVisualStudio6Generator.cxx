@@ -194,7 +194,7 @@ void cmGlobalVisualStudio6Generator::CollectSubprojects()
     m_SubProjectMap[name].push_back(m_LocalGenerators[i]);
     std::vector<std::string> const& pprojects 
       = m_LocalGenerators[i]->GetMakefile()->GetParentProjects();
-    for(int k =0; k < pprojects.size(); ++k)
+    for(unsigned int k =0; k < pprojects.size(); ++k)
       {
       m_SubProjectMap[pprojects[k]].push_back(m_LocalGenerators[i]);
       }

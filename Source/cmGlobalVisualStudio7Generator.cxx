@@ -392,7 +392,7 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout,
             && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))
           {
           bool skip = false;
-                if(l->first == "ALL_BUILD" )
+          if(l->first == "ALL_BUILD" )
             {
             if(doneAllBuild)
               {
@@ -662,7 +662,7 @@ void cmGlobalVisualStudio7Generator::CollectSubprojects()
     m_SubProjectMap[name].push_back(m_LocalGenerators[i]);
     std::vector<std::string> const& pprojects 
       = m_LocalGenerators[i]->GetMakefile()->GetParentProjects();
-    for(int k =0; k < pprojects.size(); ++k)
+    for(unsigned int k =0; k < pprojects.size(); ++k)
       {
       m_SubProjectMap[pprojects[k]].push_back(m_LocalGenerators[i]);
       }

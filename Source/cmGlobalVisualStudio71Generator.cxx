@@ -40,7 +40,8 @@ cmLocalGenerator *cmGlobalVisualStudio71Generator::CreateLocalGenerator()
 
 
 // Write a SLN file to the stream
-void cmGlobalVisualStudio71Generator::WriteSLNFile(std::ostream& fout)
+void cmGlobalVisualStudio71Generator::WriteSLNFile(std::ostream& fout,
+                                                   std::vector<cmLocalGenerator*>& generators)
 {
   // Write out the header for a SLN file
   this->WriteSLNHeader(fout);
@@ -48,13 +49,15 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(std::ostream& fout)
   // Get the home directory with the trailing slash
   std::string homedir = m_CMakeInstance->GetHomeDirectory();
   homedir += "/";
-    
+  bool doneAllBuild = false;
+  bool doneRunTests = false;
+  
   // For each cmMakefile, create a VCProj for it, and
   // add it to this SLN file
   unsigned int i;
-  for(i = 0; i < m_LocalGenerators.size(); ++i)
+  for(i = 0; i < generators.size(); ++i)
     {
-    cmMakefile* mf = m_LocalGenerators[i]->GetMakefile();
+    cmMakefile* mf = generators[i]->GetMakefile();
 
     // Get the source directory from the makefile
     std::string dir = mf->GetStartDirectory();
@@ -66,28 +69,28 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(std::ostream& fout)
     // than one dsp could have been created per input CMakeLists.txt file
     // for each target
     std::vector<std::string> dspnames = 
-      static_cast<cmLocalVisualStudio7Generator *>(m_LocalGenerators[i])
+      static_cast<cmLocalVisualStudio7Generator *>(generators[i])
       ->GetCreatedProjectNames();
-    cmTargets &tgts = m_LocalGenerators[i]->GetMakefile()->GetTargets();
+    cmTargets &tgts = generators[i]->GetMakefile()->GetTargets();
     cmTargets::iterator l = tgts.begin();
     for(std::vector<std::string>::iterator si = dspnames.begin(); 
         l != tgts.end(); ++l)
       {
       // special handling for the current makefile
-      if(mf == m_LocalGenerators[0]->GetMakefile())
+      if(mf == generators[0]->GetMakefile())
         {
         dir = "."; // no subdirectory for project generated
         // if this is the special ALL_BUILD utility, then
         // make it depend on every other non UTILITY project.
         // This is done by adding the names to the GetUtilities
         // vector on the makefile
-        if(l->first == "ALL_BUILD")
+        if(l->first == "ALL_BUILD" && !doneAllBuild)
           {
           unsigned int j;
-          for(j = 0; j < m_LocalGenerators.size(); ++j)
+          for(j = 0; j < generators.size(); ++j)
             {
             const cmTargets &atgts = 
-              m_LocalGenerators[j]->GetMakefile()->GetTargets();
+              generators[j]->GetMakefile()->GetTargets();
             for(cmTargets::const_iterator al = atgts.begin();
                 al != atgts.end(); ++al)
               {
@@ -124,8 +127,35 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(std::ostream& fout)
         {
         if ((l->second.GetType() != cmTarget::INSTALL_FILES)
             && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))
-          {
-          this->WriteProject(fout, si->c_str(), dir.c_str(),l->second);
+          {        
+          bool skip = false;
+          if(l->first == "ALL_BUILD" )
+            {
+            if(doneAllBuild)
+              {
+              skip = true;
+              }
+            else
+              {
+              doneAllBuild = true;
+              }
+            }
+          if(l->first == "RUN_TESTS")
+            {
+            if(doneRunTests)
+              {
+              skip = true;
+              }
+            else
+              {
+              doneRunTests = true;
+              }
+            }
+          if(!skip)
+            {
+            this->WriteProject(fout, si->c_str(), dir.c_str(),l->second);
+            }
+          
           ++si;
           }
         }
@@ -142,11 +172,11 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(std::ostream& fout)
   fout << "\tEndGlobalSection\n";
   fout << "\tGlobalSection(ProjectConfiguration) = postSolution\n";
   // loop over again and compute the depends
-  for(i = 0; i < m_LocalGenerators.size(); ++i)
+  for(i = 0; i < generators.size(); ++i)
     {
-    cmMakefile* mf = m_LocalGenerators[i]->GetMakefile();
+    cmMakefile* mf = generators[i]->GetMakefile();
     cmLocalVisualStudio7Generator* pg =  
-      static_cast<cmLocalVisualStudio7Generator*>(m_LocalGenerators[i]);
+      static_cast<cmLocalVisualStudio7Generator*>(generators[i]);
     // Get the list of create dsp files names from the cmVCProjWriter, more
     // than one dsp could have been created per input CMakeLists.txt file
     // for each target

@@ -43,7 +43,8 @@ public:
   virtual cmLocalGenerator *CreateLocalGenerator();
 
 protected:
-  virtual void WriteSLNFile(std::ostream& fout);
+  virtual void WriteSLNFile(std::ostream& fout,
+                            std::vector<cmLocalGenerator*>& generators);
   virtual void WriteProject(std::ostream& fout, 
                             const char* name, const char* path,
                             const cmTarget &t);
