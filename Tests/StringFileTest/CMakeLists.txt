@@ -55,6 +55,9 @@ FOREACH(var
   FILE(APPEND "${file}" "#define ${var} \"${${var}}\"\n")
 ENDFOREACH(var)
 
+EXEC_PROGRAM(${CMAKE_COMMAND} ARGS "-E chdir ${CMAKE_CURRENT_SOURCE_DIR} \"${CMAKE_COMMAND} -E echo \\\"Hello World\\\"\"")
+EXEC_PROGRAM(${CMAKE_COMMAND} ARGS "-E time \"${CMAKE_COMMAND} -E echo \\\"Hello World\\\"\"")
+
 # Write include file to a file
 STRING(REGEX REPLACE "includefile" "${file}" outfile "${infile}")
 FILE(WRITE "${CMAKE_CURRENT_BINARY_DIR}/OutputFile.h" "${outfile}")
