@@ -2078,7 +2078,7 @@ cmLocalUnixMakefileGenerator2
   // There are a few cases for the name of the target:
   //  - CMake target in this directory: depend on it.
   //  - CMake target in another directory: depend and add jump-and-build.
-  //  - Full path to an outside file: depend on it.
+  //  - Full path to a file: depend on it.
   //  - Other format (like -lm): do nothing.
 
   // If it is an executable or library target there will be a
@@ -2180,14 +2180,10 @@ cmLocalUnixMakefileGenerator2
     // directly.
     depends.push_back(name);
     }
-  else
+  else if(cmSystemTools::FileIsFullPath(name))
     {
-    // This is not a CMake target.  If it exists and is a full path we
-    // can depend on it.
-    if(cmSystemTools::FileExists(name) && cmSystemTools::FileIsFullPath(name))
-      {
-      depends.push_back(name);
-      }
+    // This is a path to a file.  Just trust that it will be present.
+    depends.push_back(name);
     }
 }
 
