@@ -70,6 +70,8 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args)
   m_Makefile->AddDefinition(srcdir.c_str(),
 	  m_Makefile->GetCurrentDirectory());
 
+  m_Makefile->AddDefinition("PROJECT_NAME", args[0].c_str());
+
   return true;
 }
 
