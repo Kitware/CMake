@@ -183,7 +183,7 @@ int do_cmaketest (int argc, char **argv)
     {
     // if there are spaces in the makeCommand, assume a full path
     // and convert it to a path with no spaces in it as the
-    // RunCommand does not like spaces
+    // RunSingleCommand does not like spaces
 #if defined(_WIN32) && !defined(__CYGWIN__)      
     if(makeCommand.find(' ') != std::string::npos)
       {
@@ -218,7 +218,8 @@ int do_cmaketest (int argc, char **argv)
     cleanCommand += " clean";
     std::cout << "Running make clean command: " << cleanCommand.c_str() << " ...\n";
     retVal = 0;
-    if (!cmSystemTools::RunCommand(cleanCommand.c_str(), output, retVal) || retVal)
+    if (!cmSystemTools::RunSingleCommand(cleanCommand.c_str(), &output, &retVal) || 
+      retVal)
       {
       std::cerr << "Error: " << cleanCommand.c_str() << "  execution failed\n";
       std::cerr << output.c_str() << "\n";
@@ -233,7 +234,7 @@ int do_cmaketest (int argc, char **argv)
 
   std::cout << "Running make command: " << makeCommand.c_str() << " ...\n";
   retVal = 0;
-  if (!cmSystemTools::RunCommand(makeCommand.c_str(), output, retVal))
+  if (!cmSystemTools::RunSingleCommand(makeCommand.c_str(), &output, &retVal))
     {
     std::cerr << "Error: " << makeCommand.c_str() <<  "  execution failed\n";
     std::cerr << output.c_str() << "\n";
@@ -310,7 +311,7 @@ int do_cmaketest (int argc, char **argv)
     }
   std::cout << "Running test executable: " << fullPath.c_str() << "\n";
   retVal = 0;
-  if (!cmSystemTools::RunCommand(fullPath.c_str(), output, retVal, 0, true))
+  if (!cmSystemTools::RunSingleCommand(fullPath.c_str(), &output, &retVal))
     {
     std::cerr << "Error: " << fullPath.c_str() << "  execution failed\n";
     // return to the original directory

@@ -591,12 +591,10 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
       time(&time_start);
       clock_start = clock();
       
-      cmSystemTools::RunCommand(command.c_str(), output, 0, true);
+      cmSystemTools::RunSingleCommand(command.c_str());
 
       clock_finish = clock();
       time(&time_finish);
-
-      std::cout << output.c_str();
 
       double clocks_per_sec = (double)CLOCKS_PER_SEC;
       std::cout << "Elapsed time: " 
@@ -621,10 +619,10 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
         }
 
       int retval = 0;
-      if ( cmSystemTools::RunCommand(command.c_str(), output, retval, 
-                                     directory.c_str(), false) )
+      int timeout = 0;
+      if ( cmSystemTools::RunSingleCommand(command.c_str(), 0, &retval, 
+                                           directory.c_str(), true, timeout) )
         {
-        std::cout << output.c_str();
         return retval;
         }        
 
