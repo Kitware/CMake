@@ -65,6 +65,12 @@ private:
   void WriteSettingList(std::ostream& fout, const char *name, 
                         cmTarget const *l);
   void WriteFileList(std::ostream& fout, const char *name, cmTarget const *l);
+  void WriteLinkOrder(std::ostream& fout, const char *name, cmTarget const *l);
+  void AddFileMapping(std::ostream& fout, const char *ftype,
+                      const char *ext, const char *comp,
+                      const char *edit, bool precomp,
+                      bool launch, bool res, bool ignored);
+  
 };
 
 #endif

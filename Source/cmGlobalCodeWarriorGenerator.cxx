@@ -46,7 +46,7 @@ int cmGlobalCodeWarriorGenerator::TryCompile(const char *,
                                              const char *targetName,
                                              std::string *output)
 {
-	return 1;
+  return 1;
 }
 
 ///! Create a local generator appropriate to this Global Generator
@@ -279,6 +279,7 @@ void cmGlobalCodeWarriorGenerator::WriteGroupList(std::ostream& fout)
     static_cast<cmLocalCodeWarriorGenerator *>(m_LocalGenerators[i])->WriteGroups(fout);
     }
   
+
   fout << "</GROUPLIST>\n";
 }
 
