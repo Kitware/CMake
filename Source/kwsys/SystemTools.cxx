@@ -1399,7 +1399,7 @@ kwsys_std::string SystemTools::GetFilenameLastExtension(const kwsys_std::string&
 {
   kwsys_std::string name = SystemTools::GetFilenameName(filename);
   kwsys_std::string::size_type dot_pos = name.rfind(".");
-  if(dot_pos != std::string::npos)
+  if(dot_pos != kwsys_std::string::npos)
     {
     return name.substr(dot_pos);
     }
