@@ -534,8 +534,6 @@ void cmLocalGenerator::AddBuildTargetRule(const char* llang, cmTarget& target)
   std::string flags; // should be set
   std::string linkFlags; // should be set 
   this->GetTargetFlags(linkLibs, flags, linkFlags, target);
-  // Change the type to utility
-//  target.SetType(cmTarget::UTILITY, target.GetName());
   std::string rule = m_Makefile->GetRequiredDefinition(createRule.c_str());
   this->ExpandRuleVariables(rule, 
                             llang, // language
