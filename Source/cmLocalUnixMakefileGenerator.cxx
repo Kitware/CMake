@@ -359,7 +359,7 @@ std::string cmLocalUnixMakefileGenerator::GetBaseTargetName(const char* n,
   // if there is no prefix on the target use the cmake definition
   if(!targetPrefix && prefixVar)
     {
-    targetPrefix = this->GetSafeDefinition(prefixVar);
+    targetPrefix = m_Makefile->GetSafeDefinition(prefixVar);
     }
   std::string name = targetPrefix?targetPrefix:"";
   name += n;
@@ -392,7 +392,7 @@ std::string cmLocalUnixMakefileGenerator::GetFullTargetName(const char* n,
   // if there is no suffix on the target use the cmake definition
   if(!targetSuffix && suffixVar)
     {
-    targetSuffix = this->GetSafeDefinition(suffixVar);
+    targetSuffix = m_Makefile->GetSafeDefinition(suffixVar);
     }
   std::string name = this->GetBaseTargetName(n, t);
   name += targetSuffix?targetSuffix:"";
@@ -679,7 +679,7 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
   std::string runtimeSep;
   std::vector<std::string> runtimeDirs;
 
-  std::string buildType =  this->GetSafeDefinition("CMAKE_BUILD_TYPE");
+  std::string buildType =  m_Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   buildType = cmSystemTools::UpperCase(buildType);
 
   bool cxx = tgt.HasCxx(); 
@@ -688,13 +688,13 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
     // if linking a c executable use the C runtime flag as cc
     // may not be the same program that creates shared libaries
     // and may have different flags
-    runtimeFlag = this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_RUNTIME_FLAG");
-    runtimeSep = this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_RUNTIME_FLAG_SEP");
+    runtimeFlag = m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_RUNTIME_FLAG");
+    runtimeSep = m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_RUNTIME_FLAG_SEP");
     }
   else
     { 
-    runtimeFlag = this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_RUNTIME_CXX_FLAG");
-    runtimeSep = this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_RUNTIME_CXX_FLAG_SEP");
+    runtimeFlag = m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_RUNTIME_CXX_FLAG");
+    runtimeSep = m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_RUNTIME_CXX_FLAG_SEP");
     }
   
   // concatenate all paths or no?
@@ -708,7 +708,7 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
   emitted.insert("");
   emitted.insert("/usr/lib");
   std::string libPathFlag = m_Makefile->GetDefinition("CMAKE_LIBRARY_PATH_FLAG");
-  std::string libLinkFlag = this->GetSafeDefinition("CMAKE_LINK_LIBRARY_FLAG");
+  std::string libLinkFlag = m_Makefile->GetSafeDefinition("CMAKE_LINK_LIBRARY_FLAG");
   // collect all the flags needed for linking libraries
   std::string linkLibs;
   
@@ -717,11 +717,11 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
     {
     if(cxx)
       {
-      linkLibs = this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS");
+      linkLibs = m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS");
       }
     else
       {
-      linkLibs = this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_LINK_FLAGS");
+      linkLibs = m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_LINK_FLAGS");
       }
     linkLibs += " ";
     }
@@ -758,7 +758,7 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
       }
     }
 
-  std::string linkSuffix = this->GetSafeDefinition("CMAKE_LINK_LIBRARY_SUFFIX");
+  std::string linkSuffix = m_Makefile->GetSafeDefinition("CMAKE_LINK_LIBRARY_SUFFIX");
   std::string regexp = ".*\\";
   regexp += linkSuffix;
   regexp += "$";
@@ -1008,9 +1008,9 @@ cmLocalUnixMakefileGenerator::ExpandRuleVariables(std::string& s,
                                                   const char* linkFlags)
 { 
   std::string cxxcompiler = this->ConvertToOutputForExisting(
-    this->GetSafeDefinition("CMAKE_CXX_COMPILER"));
+    m_Makefile->GetSafeDefinition("CMAKE_CXX_COMPILER"));
   std::string ccompiler = this->ConvertToOutputForExisting(
-    this->GetSafeDefinition("CMAKE_C_COMPILER"));
+    m_Makefile->GetSafeDefinition("CMAKE_C_COMPILER"));
   cmSystemTools::ReplaceString(s, "<CMAKE_CXX_COMPILER>", cxxcompiler.c_str());
   cmSystemTools::ReplaceString(s, "<CMAKE_C_COMPILER>", ccompiler.c_str());
   if(linkFlags)
@@ -1086,7 +1086,7 @@ cmLocalUnixMakefileGenerator::ExpandRuleVariables(std::string& s,
   while(rv->replace)
     {
     cmSystemTools::ReplaceString(s, rv->replace,
-                                 this->GetSafeDefinition(rv->lookup));
+                                 m_Makefile->GetSafeDefinition(rv->lookup));
     rv++;
     }  
 }
@@ -1266,15 +1266,15 @@ void cmLocalUnixMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
     {
     createRule = "CMAKE_C_CREATE_SHARED_LIBRARY";
     }
-  std::string buildType =  this->GetSafeDefinition("CMAKE_BUILD_TYPE");
+  std::string buildType =  m_Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   buildType = cmSystemTools::UpperCase(buildType); 
-  std::string linkFlags = this->GetSafeDefinition("CMAKE_SHARED_LINKER_FLAGS");
+  std::string linkFlags = m_Makefile->GetSafeDefinition("CMAKE_SHARED_LINKER_FLAGS");
   linkFlags += " ";
   if(buildType.size())
     {
     std::string build = "CMAKE_SHARED_LINKER_FLAGS_";
     build += buildType;
-    linkFlags += this->GetSafeDefinition(build.c_str());
+    linkFlags += m_Makefile->GetSafeDefinition(build.c_str());
     linkFlags += " ";
     }
   if(m_Makefile->IsOn("WIN32") && !(m_Makefile->IsOn("CYGWIN") || m_Makefile->IsOn("MINGW")))
@@ -1285,7 +1285,7 @@ void cmLocalUnixMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
       {
       if((*i)->GetSourceExtension() == "def")
         {
-        linkFlags += this->GetSafeDefinition("CMAKE_LINK_DEF_FILE_FLAG");
+        linkFlags += m_Makefile->GetSafeDefinition("CMAKE_LINK_DEF_FILE_FLAG");
         linkFlags += this->ConvertToRelativeOutputPath((*i)->GetFullPath().c_str());
         linkFlags += " ";
         }
@@ -1317,15 +1317,15 @@ void cmLocalUnixMakefileGenerator::OutputModuleLibraryRule(std::ostream& fout,
     {
     createRule = "CMAKE_C_CREATE_SHARED_MODULE";
     }
-  std::string buildType =  this->GetSafeDefinition("CMAKE_BUILD_TYPE");
+  std::string buildType =  m_Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   buildType = cmSystemTools::UpperCase(buildType); 
-  std::string linkFlags = this->GetSafeDefinition("CMAKE_MODULE_LINKER_FLAGS");
+  std::string linkFlags = m_Makefile->GetSafeDefinition("CMAKE_MODULE_LINKER_FLAGS");
   linkFlags += " ";
   if(buildType.size())
     {
     std::string build = "CMAKE_MODULE_LINKER_FLAGS_";
     build += buildType;
-    linkFlags += this->GetSafeDefinition(build.c_str());
+    linkFlags += m_Makefile->GetSafeDefinition(build.c_str());
     linkFlags += " ";
     }
   const char* targetLinkFlags = t.GetProperty("LINK_FLAGS");
@@ -1374,7 +1374,7 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
 {
   std::string linkFlags;
 
-  std::string buildType =  this->GetSafeDefinition("CMAKE_BUILD_TYPE");
+  std::string buildType =  m_Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   buildType = cmSystemTools::UpperCase(buildType);
   std::string flags;
   
@@ -1420,30 +1420,30 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
     + ") $(" + this->CreateMakeVariable(name, "_EXTERNAL_OBJS") 
     + ") $(" + this->CreateMakeVariable(name, "_DEPEND_LIBS") + ")";
   std::vector<std::string> rules;
-  linkFlags += this->GetSafeDefinition("CMAKE_EXE_LINKER_FLAGS");
+  linkFlags += m_Makefile->GetSafeDefinition("CMAKE_EXE_LINKER_FLAGS");
   linkFlags += " ";
   if(buildType.size())
     {
     std::string build = "CMAKE_EXE_LINKER_FLAGS_";
     build += buildType;
-    linkFlags += this->GetSafeDefinition(build.c_str());
+    linkFlags += m_Makefile->GetSafeDefinition(build.c_str());
     linkFlags += " ";
     }
 
   if(t.HasCxx())
     {
     rules.push_back(m_Makefile->GetDefinition("CMAKE_CXX_LINK_EXECUTABLE"));
-    flags += this->GetSafeDefinition("CMAKE_CXX_FLAGS");
+    flags += m_Makefile->GetSafeDefinition("CMAKE_CXX_FLAGS");
     flags += " ";
-    flags += this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_CXX_FLAGS");
+    flags += m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_CXX_FLAGS");
     flags += " ";
     }
   else
     {
     rules.push_back(m_Makefile->GetDefinition("CMAKE_C_LINK_EXECUTABLE"));
-    flags += this->GetSafeDefinition("CMAKE_C_FLAGS");
+    flags += m_Makefile->GetSafeDefinition("CMAKE_C_FLAGS");
     flags += " ";
-    flags += this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_C_FLAGS");
+    flags += m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_C_FLAGS");
     flags += " ";
     }
   cmOStringStream linklibs;
@@ -1470,18 +1470,18 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
     }
   if(cmSystemTools::IsOn(m_Makefile->GetDefinition("BUILD_SHARED_LIBS")))
     {
-    linkFlags += this->GetSafeDefinition("CMAKE_SHARED_BUILD_CXX_FLAGS");
+    linkFlags += m_Makefile->GetSafeDefinition("CMAKE_SHARED_BUILD_CXX_FLAGS");
     linkFlags += " ";
    }
   
   if ( t.GetPropertyAsBool("WIN32_EXECUTABLE") )
     {
-    linkFlags +=  this->GetSafeDefinition("CMAKE_CREATE_WIN32_EXE");
+    linkFlags +=  m_Makefile->GetSafeDefinition("CMAKE_CREATE_WIN32_EXE");
     linkFlags += " ";
     }
   else
     {
-    linkFlags +=  this->GetSafeDefinition("CMAKE_CREATE_CONSOLE_EXE");
+    linkFlags +=  m_Makefile->GetSafeDefinition("CMAKE_CREATE_CONSOLE_EXE");
     linkFlags += " ";
     }
   const char* targetLinkFlags = t.GetProperty("LINK_FLAGS");
@@ -1716,21 +1716,21 @@ void cmLocalUnixMakefileGenerator::OutputDependLibs(std::ostream& fout)
         std::string libpath = cacheValue;
         if(libType && std::string(libType) == "SHARED")
           {
-          library = this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_PREFIX");
+          library = m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_PREFIX");
           library += *lib;
-          library += this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_SUFFIX");
+          library += m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_SUFFIX");
           }
         else if(libType && std::string(libType) == "MODULE")
           {
-          library = this->GetSafeDefinition("CMAKE_SHARED_MODULE_PREFIX");
+          library = m_Makefile->GetSafeDefinition("CMAKE_SHARED_MODULE_PREFIX");
           library += *lib;
-          library += this->GetSafeDefinition("CMAKE_SHARED_MODULE_SUFFIX");
+          library += m_Makefile->GetSafeDefinition("CMAKE_SHARED_MODULE_SUFFIX");
           }
         else if(libType && std::string(libType) == "STATIC")
           {
-          library = this->GetSafeDefinition("CMAKE_STATIC_LIBRARY_PREFIX");
+          library = m_Makefile->GetSafeDefinition("CMAKE_STATIC_LIBRARY_PREFIX");
           library += *lib;
-          library += this->GetSafeDefinition("CMAKE_STATIC_LIBRARY_SUFFIX");
+          library += m_Makefile->GetSafeDefinition("CMAKE_STATIC_LIBRARY_SUFFIX");
           }
         else
           {
@@ -1875,21 +1875,21 @@ void cmLocalUnixMakefileGenerator::OutputLibDepend(std::ostream& fout,
     const char* libType = m_Makefile->GetDefinition(ltname.c_str());
     if(libType && std::string(libType) == "SHARED")
       {
-      libpath += this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_PREFIX");
+      libpath += m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_PREFIX");
       libpath += name;
-      libpath += this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_SUFFIX");
+      libpath += m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_SUFFIX");
       }
     else if (libType && std::string(libType) == "MODULE")
       {
-      libpath += this->GetSafeDefinition("CMAKE_SHARED_MODULE_PREFIX");
+      libpath += m_Makefile->GetSafeDefinition("CMAKE_SHARED_MODULE_PREFIX");
       libpath += name;
-      libpath += this->GetSafeDefinition("CMAKE_SHARED_MODULE_SUFFIX");
+      libpath += m_Makefile->GetSafeDefinition("CMAKE_SHARED_MODULE_SUFFIX");
       }
     else if (libType && std::string(libType) == "STATIC")
       {
-      libpath += this->GetSafeDefinition("CMAKE_STATIC_LIBRARY_PREFIX");
+      libpath += m_Makefile->GetSafeDefinition("CMAKE_STATIC_LIBRARY_PREFIX");
       libpath += name;
-      libpath += this->GetSafeDefinition("CMAKE_STATIC_LIBRARY_SUFFIX");
+      libpath += m_Makefile->GetSafeDefinition("CMAKE_STATIC_LIBRARY_SUFFIX");
       }
     fout << this->ConvertToRelativeOutputPath(libpath.c_str()) << " ";
     }
@@ -2702,30 +2702,30 @@ OutputBuildObjectFromSource(std::ostream& fout,
     }
   std::string sourceFile = 
     this->ConvertToRelativeOutputPath(source.GetFullPath().c_str()); 
-  std::string buildType =  this->GetSafeDefinition("CMAKE_BUILD_TYPE");
+  std::string buildType =  m_Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   buildType = cmSystemTools::UpperCase(buildType);
   switch(format)
     {
     case cmSystemTools::C_FILE_FORMAT:
       {
       rules.push_back(m_Makefile->GetDefinition("CMAKE_C_COMPILE_OBJECT"));
-      flags += this->GetSafeDefinition("CMAKE_C_FLAGS");
+      flags += m_Makefile->GetSafeDefinition("CMAKE_C_FLAGS");
       flags += " ";
       if(buildType.size())
         {
         std::string build = "CMAKE_C_FLAGS_";
         build += buildType;
-        flags +=  this->GetSafeDefinition(build.c_str());
+        flags +=  m_Makefile->GetSafeDefinition(build.c_str());
         flags += " ";
         }
       if(shared)
         {
-        flags += this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_C_FLAGS");
+        flags += m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_C_FLAGS");
         flags += " ";
         }  
       if(cmSystemTools::IsOn(m_Makefile->GetDefinition("BUILD_SHARED_LIBS")))
         {
-        flags += this->GetSafeDefinition("CMAKE_SHARED_BUILD_C_FLAGS");
+        flags += m_Makefile->GetSafeDefinition("CMAKE_SHARED_BUILD_C_FLAGS");
         flags += " ";
         }
       break;
@@ -2733,23 +2733,23 @@ OutputBuildObjectFromSource(std::ostream& fout,
     case cmSystemTools::CXX_FILE_FORMAT:
       {
       rules.push_back(m_Makefile->GetDefinition("CMAKE_CXX_COMPILE_OBJECT"));
-      flags += this->GetSafeDefinition("CMAKE_CXX_FLAGS");
+      flags += m_Makefile->GetSafeDefinition("CMAKE_CXX_FLAGS");
       flags += " "; 
       if(buildType.size())
         {
         std::string build = "CMAKE_CXX_FLAGS_";
         build += buildType;
-        flags +=  this->GetSafeDefinition(build.c_str());
+        flags +=  m_Makefile->GetSafeDefinition(build.c_str());
         flags += " ";
         }
       if(shared)
         {
-        flags += this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_CXX_FLAGS");
+        flags += m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_CXX_FLAGS");
         flags += " ";
         }
       if(cmSystemTools::IsOn(m_Makefile->GetDefinition("BUILD_SHARED_LIBS")))
         {
-        flags += this->GetSafeDefinition("CMAKE_SHARED_BUILD_CXX_FLAGS");
+        flags += m_Makefile->GetSafeDefinition("CMAKE_SHARED_BUILD_CXX_FLAGS");
         flags += " ";
         }
       break;
@@ -3047,16 +3047,6 @@ void cmLocalUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
     count++;
     }
   fout << "\n";
-}
-
-const char* cmLocalUnixMakefileGenerator::GetSafeDefinition(const char* def)
-{
-  const char* ret = m_Makefile->GetDefinition(def);
-  if(!ret)
-    {
-    return "";
-    }
-  return ret;
 }
 
 std::string cmLocalUnixMakefileGenerator::LowerCasePath(const char* path)

@@ -297,16 +297,6 @@ void cmLocalGenerator::AddInstallRule(std::ostream& fout, const char* dest,
     << " FILES \"" << sfiles.c_str() << "\")\n";
 }
 
-const char* cmLocalGenerator::GetSafeDefinition(const char* def)
-{
-  const char* ret = m_Makefile->GetDefinition(def);
-  if(!ret)
-    {
-    return "";
-    }
-  return ret;
-}
-
 std::string cmLocalGenerator::GetFullTargetName(const char* n,
   const cmTarget& t)
 {
@@ -338,12 +328,12 @@ std::string cmLocalGenerator::GetFullTargetName(const char* n,
   // if there is no prefix on the target use the cmake definition
   if(!targetPrefix && prefixVar)
     {
-    targetPrefix = this->GetSafeDefinition(prefixVar);
+    targetPrefix = m_Makefile->GetSafeDefinition(prefixVar);
     }
   // if there is no suffix on the target use the cmake definition
   if(!targetSuffix && suffixVar)
     {
-    targetSuffix = this->GetSafeDefinition(suffixVar);
+    targetSuffix = m_Makefile->GetSafeDefinition(suffixVar);
     }
   std::string name = targetPrefix?targetPrefix:"";
   name += n;

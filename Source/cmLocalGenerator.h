@@ -75,8 +75,6 @@ public:
   /** Get the full name of the target's file, without path.  */
   std::string GetFullTargetName(const char* n, const cmTarget& t);
 
-  virtual const char* GetSafeDefinition(const char*);
-
   std::string ConvertToRelativeOutputPath(const char* p);
   
   // flag to determine if this project should be included in a parent project

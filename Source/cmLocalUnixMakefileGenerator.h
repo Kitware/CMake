@@ -91,7 +91,6 @@ protected:
   void AddDependenciesToSourceFile(cmDependInformation const*info,
                                    cmSourceFile *i,
                                    std::set<cmDependInformation const*> *visited);
-  virtual const char* GetSafeDefinition(const char*);
   virtual void ProcessDepends(const cmMakeDepend &md);
   virtual void OutputMakefile(const char* file, bool withDepends);
   virtual void OutputTargetRules(std::ostream& fout);
