@@ -95,29 +95,36 @@ bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& args)
         {
         cmSourceFile header_file;
         cmSourceFile source_file;
-        header_file.SetIsAnAbstractClass(curr.IsAnAbstractClass());
-        source_file.SetIsAnAbstractClass(curr.IsAnAbstractClass());
+        cmSourceFile moc_file;
         header_file.SetName(curr.GetSourceName().c_str(), 
                     m_Makefile->GetCurrentOutputDirectory(),
                      "h",false);
         source_file.SetName(curr.GetSourceName().c_str(), 
                     m_Makefile->GetCurrentOutputDirectory(),
                      "cxx",false);
+        std::string moc_source_name("moc_");
+        moc_source_name = moc_source_name + curr.GetSourceName().c_str();
+        moc_file.SetName(moc_source_name.c_str(), 
+                    m_Makefile->GetCurrentOutputDirectory(),
+                     "cxx",false);
         std::string origname = cdir + "/" + curr.GetSourceName() + "." +
             curr.GetSourceExtension();
-        std::string hname = cdir + "/" + header_file.GetSourceName() + "." +
-            header_file.GetSourceExtension();
+        std::string hname = header_file.GetFullPath();
         m_WrapUserInterface.push_back(origname);
         // add starting depends
+        moc_file.GetDepends().push_back(hname);
         source_file.GetDepends().push_back(hname);
         source_file.GetDepends().push_back(origname);
         header_file.GetDepends().push_back(origname);
         m_WrapHeadersClasses.push_back(header_file);
         m_WrapSourcesClasses.push_back(source_file);
+        m_WrapMocClasses.push_back(moc_file);
         unsigned int last_files=m_WrapSourcesClasses.size()-1;
-        m_Makefile->AddSource(m_WrapHeadersClasses[last_files],
+        m_Makefile->AddSource(header_file,
             m_HeaderList.c_str());
-        m_Makefile->AddSource(m_WrapSourcesClasses[last_files],
+        m_Makefile->AddSource(source_file,
+            m_SourceList.c_str());
+        m_Makefile->AddSource(moc_file,
             m_SourceList.c_str());
         }
       }
@@ -133,6 +140,7 @@ void cmQTWrapUICommand::FinalPass()
   int lastHeadersClass = m_WrapHeadersClasses.size();
   std::vector<std::string> depends;
   std::string uic_exe = "${QT_UIC_EXE}";
+  std::string moc_exe = "${QT_MOC_EXE}";
 
 
   // wrap all the .h files
@@ -148,9 +156,8 @@ void cmQTWrapUICommand::FinalPass()
 
   for(int classNum = 0; classNum < lastHeadersClass; classNum++)
     {
-    // Add output to build list
-
     // set up .ui to .h and .cxx command
+
     std::string hres = m_Makefile->GetCurrentOutputDirectory();
     hres += "/";
     hres += m_WrapHeadersClasses[classNum].GetSourceName() + "." +
@@ -161,7 +168,12 @@ void cmQTWrapUICommand::FinalPass()
     cxxres += m_WrapSourcesClasses[classNum].GetSourceName() + "." +
         m_WrapSourcesClasses[classNum].GetSourceExtension();
 
-    ui_list = ui_list + " " + hres + " " + cxxres;
+    std::string mocres = m_Makefile->GetCurrentOutputDirectory();
+    mocres += "/";
+    mocres += m_WrapMocClasses[classNum].GetSourceName() + "." +
+        m_WrapMocClasses[classNum].GetSourceExtension();
+
+    ui_list = ui_list + " " + hres + " " + cxxres + " " + mocres;
     
     std::vector<std::string> hargs;
     hargs.push_back("-o");
@@ -175,6 +187,11 @@ void cmQTWrapUICommand::FinalPass()
     cxxargs.push_back(cxxres);
     cxxargs.push_back(m_WrapUserInterface[classNum]);
 
+    std::vector<std::string> mocargs;
+    mocargs.push_back("-o");
+    mocargs.push_back(mocres);
+    mocargs.push_back(hres);
+
     m_Makefile->AddCustomCommand(m_WrapUserInterface[classNum].c_str(),
                                  uic_exe.c_str(), hargs, depends, 
                                  hres.c_str(), m_LibraryName.c_str());
@@ -184,6 +201,13 @@ void cmQTWrapUICommand::FinalPass()
     m_Makefile->AddCustomCommand(m_WrapUserInterface[classNum].c_str(),
                                  uic_exe.c_str(), cxxargs, depends, 
                                  cxxres.c_str(), m_LibraryName.c_str());
+
+    depends.clear();
+    depends.push_back(moc_exe);
+
+    m_Makefile->AddCustomCommand(hres.c_str(),
+                                 moc_exe.c_str(), mocargs, depends, 
+                                 mocres.c_str(), m_LibraryName.c_str());
 
     }
 

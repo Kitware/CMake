@@ -69,6 +69,7 @@ private:
    */
   std::vector<cmSourceFile> m_WrapSourcesClasses;
   std::vector<cmSourceFile> m_WrapHeadersClasses;
+  std::vector<cmSourceFile> m_WrapMocClasses;
   /**
    * List of header files that pprovide the source for m_WrapClasses.
    */
