@@ -192,13 +192,11 @@ protected:
   virtual void OutputBuildTargetInDirWindows(std::ostream& fout,
                                       const char* path,
                                       const char* library,
-                                      const char* fullpath,
-                                      const char* outputPath);
+                                      const char* fullpath);
   virtual void OutputBuildTargetInDir(std::ostream& fout,
                                       const char* path,
                                       const char* library,
-                                      const char* fullpath,
-                                      const char* outputPath);
+                                      const char* fullpath);
   ///! return true if the two paths are the same
   virtual bool SamePath(const char* path1, const char* path2);
   virtual std::string GetOutputExtension(const char* sourceExtension);

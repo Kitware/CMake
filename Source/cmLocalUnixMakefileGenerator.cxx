@@ -1673,10 +1673,7 @@ void cmLocalUnixMakefileGenerator::OutputDependLibs(std::ostream& fout)
         this->OutputBuildTargetInDir(fout,
                                      cacheValue,
                                      library.c_str(),
-                                     libpath.c_str(),
-                                     m_Makefile->
-                                     GetDefinition("LIBRARY_OUTPUT_PATH")
-                                     );
+                                     libpath.c_str());
         }
       // something other than a library...
       else
@@ -1696,10 +1693,7 @@ void cmLocalUnixMakefileGenerator::OutputDependLibs(std::ostream& fout)
         this->OutputBuildTargetInDir(fout,
                                      cacheValue,
                                      fullName.c_str(),
-                                     exepath.c_str(),
-                                     m_Makefile->
-                                     GetDefinition("EXECUTABLE_OUTPUT_PATH")
-          );
+                                     exepath.c_str());
         }
       }
     }
@@ -1708,45 +1702,33 @@ void cmLocalUnixMakefileGenerator::OutputDependLibs(std::ostream& fout)
 void cmLocalUnixMakefileGenerator::OutputBuildTargetInDirWindows(std::ostream& fout,
                                                                  const char* path,
                                                                  const char* library,
-                                                                 const char* fullpath,
-                                                                 const char* libOutPath)
+                                                                 const char* fullpath)
 {
-  const char* makeTarget = library;
-  std::string jumpBack = 
+  std::string jumpBack =
     cmSystemTools::RelativePath(cmSystemTools::GetProgramPath(fullpath).c_str(),
                                 m_Makefile->GetCurrentOutputDirectory());
   jumpBack = this->ConvertToOutputForExisting(jumpBack.c_str());
   std::string wpath = this->ConvertToOutputForExisting(path);
   std::string wfullpath = this->ConvertToOutputForExisting(fullpath);
 
-  if(libOutPath && strcmp( libOutPath, "" ) != 0)
-    {
-    makeTarget = wfullpath.c_str();
-    }
   fout << wfullpath
        << ":\n\tcd " << wpath  << "\n"
        << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.depends\n"
        << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.check_depends\n"
        << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) -f cmake.check_depends\n"
-       << "\t$(MAKE) $(MAKESILENT) " << makeTarget
+       << "\t$(MAKE) $(MAKESILENT) " << library
        << "\n\tcd " << jumpBack << "\n";
 }
 
 void cmLocalUnixMakefileGenerator::OutputBuildTargetInDir(std::ostream& fout,
                                                      const char* path,
                                                      const char* library,
-                                                     const char* fullpath,
-                                                     const char* outputPath)
+                                                     const char* fullpath)
 {
   if(m_WindowsShell)
     {
-    this->OutputBuildTargetInDirWindows(fout, path, library, fullpath, outputPath);
+    this->OutputBuildTargetInDirWindows(fout, path, library, fullpath);
     return;
-    }
-  const char* makeTarget = library;
-  if(outputPath && strcmp( outputPath, "" ) != 0)
-    {
-    makeTarget = fullpath;
     }
   fout << this->ConvertToOutputForExisting(fullpath)
        << ":\n\tcd " << this->ConvertToOutputForExisting(path)
@@ -1754,7 +1736,7 @@ void cmLocalUnixMakefileGenerator::OutputBuildTargetInDir(std::ostream& fout,
        << "; $(MAKE) $(MAKESILENT) cmake.check_depends"
        << "; $(MAKE) $(MAKESILENT) -f cmake.check_depends"
        << "; $(MAKE) $(MAKESILENT) "
-       << this->ConvertToRelativeOutputPath(makeTarget) << "\n\n"; 
+       << library << "\n\n";
 }
 
 
