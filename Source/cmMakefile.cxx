@@ -399,7 +399,7 @@ void cmMakefile::GenerateTestfile()
   std::string fname;
   fname = this->GetCurrentOutputDirectory();
   fname += "/";
-  fname += "Testfile";
+  fname += "CMakeTestfile.txt";
 
   // Open the output Testfile
   std::ofstream fout(fname.c_str());
