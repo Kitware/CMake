@@ -17,16 +17,21 @@
 #include "cmSourceFilesCommand.h"
 #include <stdlib.h> // required for atof
 
+bool cmSourceFilesCommand::IsDeprecated(int major, int minor)
+{
+  if ( major >= 1 && minor >= 4 )
+    {
+    this->SetError("The SOURCE_FILES command was deprecated in CMake version 1.4 and will be removed in later versions of CMake. You should modify your CMakeLists.txt files to use the SET command instead, or set the cache value of CMAKE_BACKWARDS_COMPATIBILITY to 1.2 or less.\n");
+    return true;
+    }
+  return false;
+}
+
 // cmSourceFilesCommand
 bool cmSourceFilesCommand::InitialPass(std::vector<std::string> const& args)
 {
   const char* versionValue
     = m_Makefile->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
-  if (atof(versionValue) > 1.4)
-    {
-    this->SetError("The SOURCE_FILES command was deprecated in CMake version 1.4 and will be removed in later versions of CMake. You should modify your CMakeLists.txt files to use the SET command instead, or set the cache value of CMAKE_BACKWARDS_COMPATIBILITY to 1.2 or less.\n");
-    return false;
-    }
   if (atof(versionValue) > 1.2)
     {
     cmSystemTools::Message("The SOURCE_FILES command was deprecated in CMake version 1.4 and will be removed in later versions. You should modify your CMakeLists.txt files to use the SET command instead, or set the cache value of CMAKE_BACKWARDS_COMPATIBILITY to 1.2 or less.\n","Warning");

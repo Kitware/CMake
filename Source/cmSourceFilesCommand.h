@@ -69,7 +69,12 @@ public:
     {
     return "Deprecated.  Use SET to list sources in a variable.";
     }
-  
+
+  /**
+   * This determines if the method is deprecated or not
+   */
+  virtual bool IsDeprecated(int major, int minor);
+
   /**
    * More documentation.
    */
