@@ -118,7 +118,7 @@ static const char* cmCTestErrorMatches[] = {
   ": Invalid loader fixup for symbol",
   ": internal link edit command failed",
   ": Unrecognized option \\`.*\\'",
-  "\", line [0-9]+\\.[0-9]+:",
+  "\", line [0-9]+\\.[0-9]+: [0-9]+-[0-9]+ \\([SI]\\)",
   0
 };
 
@@ -144,6 +144,7 @@ static const char* cmCTestWarningMatches[] = {
   "WARNING: ",
   "([^ :]+) : warning",
   "([^:]+): warning",
+  "\", line [0-9]+\\.[0-9]+: [0-9]+-[0-9]+ \\([W]\\)",
   0
 };
 
