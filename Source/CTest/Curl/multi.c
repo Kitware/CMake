@@ -30,6 +30,9 @@
 #include "transfer.h"
 #include "url.h"
 #include "connect.h"
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 /* The last #include file should be: */
 #ifdef MALLOCDEBUG
