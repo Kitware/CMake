@@ -44,13 +44,13 @@ void cmAddTestCommand::FinalPass()
   std::string fname;
   fname = m_Makefile->GetStartOutputDirectory();
   fname += "/";
-  if ( m_Makefile->IsSet("DART_ROOT") )
+  if ( m_Makefile->IsSet("CTEST_NEW_FORMAT") )
     {
-    fname += "DartTestfile.txt";
+    fname += "CTestTestfile.cmake";
     }
   else
     {
-    fname += "CTestTestfile.cmake";
+    fname += "DartTestfile.txt";
     }
   
 

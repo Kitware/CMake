@@ -1032,13 +1032,13 @@ void cmGlobalGenerator::SetupTests()
     std::string fname;
     fname = m_CMakeInstance->GetStartOutputDirectory();
     fname += "/";
-    if ( m_LocalGenerators[0]->GetMakefile()->IsSet("DART_ROOT") )
+    if ( m_LocalGenerators[0]->GetMakefile()->IsSet("CTEST_NEW_FORMAT") )
       {
-      fname += "DartTestfile.txt";
+      fname += "CTestTestfile.txt";
       }
     else
       {
-      fname += "CTestTestfile.txt";
+      fname += "DartTestfile.txt";
       }
     
     // If the file doesn't exist, then ENABLE_TESTING hasn't been run

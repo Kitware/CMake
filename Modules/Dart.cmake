@@ -302,9 +302,16 @@ IF(BUILD_TESTING)
 
     # Use CTest
     # configure files
-    CONFIGURE_FILE(
-      ${CMAKE_ROOT}/Modules/DartConfiguration.tcl.in
-      ${PROJECT_BINARY_DIR}/CTestConfiguration.ini )
+    
+    IF(CTEST_NEW_FORMAT)
+      CONFIGURE_FILE(
+        ${CMAKE_ROOT}/Modules/DartConfiguration.tcl.in
+        ${PROJECT_BINARY_DIR}/CTestConfiguration.ini )
+    ELSE(CTEST_NEW_FORMAT)
+      CONFIGURE_FILE(
+        ${CMAKE_ROOT}/Modules/DartConfiguration.tcl.in
+        ${PROJECT_BINARY_DIR}/DartConfiguration.tcl )
+    ENDIF(CTEST_NEW_FORMAT)
 
     #
     # Section 3:
