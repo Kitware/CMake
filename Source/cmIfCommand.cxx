@@ -43,13 +43,29 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 bool cmIfFunctionBlocker::
 IsFunctionBlocked(const char *name, const std::vector<std::string> &args, 
-                  cmMakefile &)
+                  cmMakefile &mf)
 {
   if (!strcmp(name,"ELSE") || !strcmp(name,"ENDIF"))
     {
     if (args == m_Args)
       {
       return false;
+      }
+    else if(args.empty())
+      {
+      std::string err = "Empty arguments for ";
+      err += name;
+      err += ".  Did you mean ";
+      err += name;
+      err += "( ";
+      for(std::vector<std::string>::const_iterator a = m_Args.begin();
+          a != m_Args.end();++a)
+        {
+        err += *a;
+        err += " ";
+        }
+      err += ")?";
+      cmSystemTools::Error(err.c_str());
       }
     }
   return true;
