@@ -769,6 +769,9 @@ bool cmSystemTools::RunCommand(const char* command,
 
 std::string cmSystemTools::TemporaryFileName()
 {
+  /** \warning in Unix is recomended to use mkstemp( char * ) 
+   instead of tempnam in order to avoid the security
+   risk of setting rights with 0666 */
   return tempnam(0, "cmake");
 }
   
