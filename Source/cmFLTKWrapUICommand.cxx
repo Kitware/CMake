@@ -65,14 +65,6 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args)
     return false;
     }
 
-  std::string outputGUIDirectory = m_Makefile->GetCurrentOutputDirectory();
-
-  if(!cmSystemTools::MakeDirectory( outputGUIDirectory.c_str() ) )
-    {
-    cmSystemTools::Error("Error failed create GUI directory:",
-                                          outputGUIDirectory.c_str() );
-                             
-    }
 
   // what is the current source dir
   std::string cdir = m_Makefile->GetCurrentDirectory();
@@ -91,9 +83,11 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args)
     return false;
     }
 
+  std::string outputDirectory = m_Makefile->GetCurrentOutputDirectory();
+
   // Some of the generated files are *.h so the directory "GUI" 
   // where they are created have to be added to the include path
-  m_Makefile->AddIncludeDirectory( outputGUIDirectory.c_str() );
+  m_Makefile->AddIncludeDirectory( outputDirectory.c_str() );
 
   for(std::vector<cmSourceFile>::iterator i = l->second.begin(); 
       i != l->second.end(); i++)
@@ -107,9 +101,9 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args)
       cmSourceFile source_file;
       const bool headerFileOnly = true;
       header_file.SetName(curr.GetSourceName().c_str(), 
-                  outputGUIDirectory.c_str(), "h",headerFileOnly);
+                  outputDirectory.c_str(), "h",headerFileOnly);
       source_file.SetName(curr.GetSourceName().c_str(), 
-                  outputGUIDirectory.c_str(), "cxx",!headerFileOnly);
+                  outputDirectory.c_str(), "cxx",!headerFileOnly);
       std::string origname = cdir + "/" + curr.GetSourceName() + "." +
           curr.GetSourceExtension();
       std::string hname   = header_file.GetFullPath();
