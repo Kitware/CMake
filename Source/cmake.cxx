@@ -24,6 +24,8 @@
 #include "cmVariableWatch.h"
 #include "cmVersion.h"
 
+#include "cmLocalUnixMakefileGenerator2.h"
+
 // only build kdevelop generator on non-windows platforms
 // when not bootstrapping cmake
 #if !defined(_WIN32)
@@ -820,6 +822,12 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
           }
         }
       return result;
+      }
+
+    // Internal CMake dependency scanning support.
+    else if (args[1] == "cmake_depends" && args.size() >= 5)
+      {
+      return cmLocalUnixMakefileGenerator2::ScanDependencies(args)? 0 : 1;
       }
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
