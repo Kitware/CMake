@@ -17,7 +17,7 @@ IF (BUILD_DOCUMENTATION)
   INCLUDE(${CMAKE_ROOT}/Modules/FindUnixCommands.cmake)
   INCLUDE(${CMAKE_ROOT}/Modules/FindDoxygen.cmake)
   INCLUDE(${CMAKE_ROOT}/Modules/FindGnuplot.cmake)
-  INCLUDE(${CMAKE_ROOT}/Modules/FindHhc.cmake)
+  INCLUDE(${CMAKE_ROOT}/Modules/FindHTMLHelp.cmake)
   INCLUDE(${CMAKE_ROOT}/Modules/FindPerl.cmake)
   INCLUDE(${CMAKE_ROOT}/Modules/FindWget.cmake)
 
