@@ -60,6 +60,10 @@ static const char *telnetoptions[]=
 
 #define NTELOPTS 40 
 
+#ifdef SE
+# undef SE
+#endif
+
 /*
  * First some defines
  */
