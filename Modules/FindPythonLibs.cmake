@@ -12,8 +12,10 @@ INCLUDE(CMakeFindFrameworks)
 
 IF(WIN32)
   FIND_LIBRARY(PYTHON_DEBUG_LIBRARY
-    NAMES python23_d python22_d python21_d python20_d python
+    NAMES python24_d python23_d python22_d python21_d python20_d python
     PATHS
+    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.4\\InstallPath]/libs/Debug
+    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.4\\InstallPath]/libs
     [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.3\\InstallPath]/libs/Debug
     [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.3\\InstallPath]/libs
     [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.2\\InstallPath]/libs/Debug
@@ -30,13 +32,15 @@ IF(WIN32)
 ENDIF(WIN32)
 
 FIND_LIBRARY(PYTHON_LIBRARY
-  NAMES python23 python2.3 python2.3.dll
+  NAMES python24 python2.4 python2.4.dll
+        python23 python2.3 python2.3.dll
         python22 python2.2 python2.2.dll
         python21 python2.1 python2.1.dll
         python20 python2.0 python2.0.dll
         python16 python1.6 python1.6.dll
         python15 python1.5 python1.5.dll
   PATHS
+  /usr/lib/python2.4/config
   /usr/lib/python2.3/config
   /usr/lib/python2.2/config
   /usr/lib/python2.1/config
@@ -45,6 +49,7 @@ FIND_LIBRARY(PYTHON_LIBRARY
   /usr/lib/python1.5/config
   /usr/lib
   /usr/local/lib
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.4\\InstallPath]/libs
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.3\\InstallPath]/libs
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.2\\InstallPath]/libs
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.1\\InstallPath]/libs
@@ -58,7 +63,7 @@ CMAKE_FIND_FRAMEWORKS(Python)
 SET(PYTHON_FRAMEWORK_INCLUDES)
 IF(Python_FRAMEWORKS)
   IF(NOT PYTHON_INCLUDE_PATH)
-    FOREACH(version 2.3 2.2 2.1 2.0 1.6 1.5)
+    FOREACH(version 2.4 2.3 2.2 2.1 2.0 1.6 1.5)
       FOREACH(dir ${Python_FRAMEWORKS})
         SET(PYTHON_FRAMEWORK_INCLUDES ${PYTHON_FRAMEWORK_INCLUDES}
           ${dir}/Versions/${version}/include/python${version})
@@ -69,6 +74,7 @@ ENDIF(Python_FRAMEWORKS)
 
 FIND_PATH(PYTHON_INCLUDE_PATH Python.h
   ${PYTHON_FRAMEWORK_INCLUDES}
+  /usr/include/python2.4
   /usr/include/python2.3
   /usr/include/python2.2
   /usr/include/python2.1
@@ -77,6 +83,7 @@ FIND_PATH(PYTHON_INCLUDE_PATH Python.h
   /usr/include/python1.5
   /usr/include
   /usr/local/include
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.4\\InstallPath]/include
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.3\\InstallPath]/include
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.2\\InstallPath]/include
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.1\\InstallPath]/include
