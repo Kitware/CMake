@@ -20,6 +20,11 @@ FIND_PROGRAM(TCL_TCLSH
   tclsh83 tclsh8.3
   tclsh82 tclsh8.2
   tclsh80 tclsh8.0
+  PATHS
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.4;Root]/bin
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.3;Root]/bin
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.2;Root]/bin
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.0;Root]/bin
 )
 
 IF (WIN32)

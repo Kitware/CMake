@@ -13,6 +13,11 @@ ENDIF(UNIX)
 
 FIND_PROGRAM(TK_WISH
   NAMES wish wish84 wish8.4 wish83 wish8.3 wish82 wish8.2 wish80
+  PATHS
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.4;Root]/bin
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.3;Root]/bin
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.2;Root]/bin
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.0;Root]/bin
 )
 
 IF (WIN32)
