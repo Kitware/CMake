@@ -73,19 +73,20 @@ bool cmCablePackageCommand::Invoke(std::vector<std::string>& args)
   {  
   // We must add a custom rule to cause the cable_config.xml to be re-built
   // when it is removed.  Rebuilding it means re-running CMake.
-  std::string cMakeLists = "\"";
-  cMakeLists += m_Makefile->GetStartDirectory();
+  std::string cMakeLists = m_Makefile->GetStartDirectory();
   cMakeLists += "/";
-  cMakeLists += "CMakeLists.txt\"";
+  cMakeLists += "CMakeLists.txt";
 
   std::string command;
 #if defined(_WIN32) && !defined(__CYGWIN__)
+  cMakeLists = "\""+cMakeLists+"\"";
   command = "\"";
   command += m_Makefile->GetHomeDirectory();
   command += "/CMake/Source/CMakeSetupCMD\" \"";
   command += cMakeLists;
   command += "\" -DSP";
 #else
+  cMakeLists = cmSystemTools::EscapeSpaces(cMakeLists.c_str());
   command = "\"";
   command += m_Makefile->GetHomeOutputDirectory();  
   command += "/CMake/Source/CMakeBuildTargets\" \"";
