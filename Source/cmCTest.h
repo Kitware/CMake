@@ -203,7 +203,7 @@ private:
   std::string             m_StartTest;
   std::string             m_EndTest;
 
-  bool                    m_TestModel;
+  int                     m_TestModel;
 
   /**
    * Generate the Dart compatible output

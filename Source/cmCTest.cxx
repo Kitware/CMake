@@ -283,8 +283,8 @@ void cmCTest::Initialize()
     if ( tag.size() == 0 )
       {
 #ifdef HAVE_CURL
-      std::cout << "TestModel: " << this->GetTestModelString() << std::endl;
-      std::cout << "TestModel: " << m_TestModel << std::endl;
+      //std::cout << "TestModel: " << this->GetTestModelString() << std::endl;
+      //std::cout << "TestModel: " << m_TestModel << std::endl;
       if ( m_TestModel == cmCTest::NIGHTLY )
         {
         int hour;
@@ -303,7 +303,7 @@ void cmCTest::Initialize()
           m_DartConfiguration["NightlyStartTime"].c_str(), 
           &tctime);
         tctime = time(0);
-        std::cout << "Seconds: " << tctime << std::endl;
+        //std::cout << "Seconds: " << tctime << std::endl;
         if ( ntime > tctime )
           {
           // If nightlySeconds is in the past, this is the current
@@ -312,9 +312,9 @@ void cmCTest::Initialize()
           // dashboard to be opened, so subtract 24 hours to get the
           // time of the current open dashboard
           ntime -= (24 * 60 * 60 );
-          std::cout << "Pick yesterday" << std::endl;
+          //std::cout << "Pick yesterday" << std::endl;
           }
-        std::cout << "nightlySeconds: " << ntime << std::endl;
+        //std::cout << "nightlySeconds: " << ntime << std::endl;
         lctime = gmtime(&ntime);
         }
 #endif
