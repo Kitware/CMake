@@ -21,7 +21,7 @@ This file must be translated to C and modified to build everywhere.
 
 Run flex like this:
 
-  flex -ocmListFileLexer.c cmListFileLexer.in.l
+  flex --prefix=cmListFileLexer_yy -ocmListFileLexer.c cmListFileLexer.in.l
 
 Modify cmListFileLexer.c:
   - remove TABs
@@ -40,7 +40,7 @@ Modify cmListFileLexer.c:
 
 /* Setup the proper yylex declaration.  */
 #define YY_EXTRA_TYPE cmListFileLexer*
-#define YY_DECL int yylex (yyscan_t yyscanner, cmListFileLexer* lexer)
+#define YY_DECL int cmListFileLexer_yylex (yyscan_t yyscanner, cmListFileLexer* lexer)
 
 /* Disable some warnings.  */
 #if defined(_MSC_VER)
@@ -83,7 +83,7 @@ static void cmListFileLexerDestroy(cmListFileLexer* lexer);
 /* Replace the lexer input function.  */
 #undef YY_INPUT
 #define YY_INPUT(buf, result, max_size) \
-  { result = cmListFileLexerInput(yyget_extra(yyscanner), buf, max_size); }
+  { result = cmListFileLexerInput(cmListFileLexer_yyget_extra(yyscanner), buf, max_size); }
 
 /*--------------------------------------------------------------------------*/
 %}
@@ -285,8 +285,8 @@ static void cmListFileLexerInit(cmListFileLexer* lexer)
 {
   if(lexer->file || lexer->string_buffer)
     {
-    yylex_init(&lexer->scanner);
-    yyset_extra(lexer, lexer->scanner);
+    cmListFileLexer_yylex_init(&lexer->scanner);
+    cmListFileLexer_yyset_extra(lexer, lexer->scanner);
     }
 }
 
@@ -295,7 +295,7 @@ static void cmListFileLexerDestroy(cmListFileLexer* lexer)
 {
   if(lexer->file || lexer->string_buffer)
     {
-    yylex_destroy(lexer->scanner);
+    cmListFileLexer_yylex_destroy(lexer->scanner);
     if(lexer->file)
       {
       fclose(lexer->file);
@@ -380,7 +380,7 @@ cmListFileLexer_Token* cmListFileLexer_Scan(cmListFileLexer* lexer)
     {
     return 0;
     }
-  if(yylex(lexer->scanner, lexer))
+  if(cmListFileLexer_yylex(lexer->scanner, lexer))
     {
     return &lexer->token;
     }
