@@ -701,7 +701,7 @@ bool cmSystemTools::RunCommand(const char* command,
   fgets(buffer, BUFFER_SIZE, cpipe);
   while(!feof(cpipe))
     {
-    std::cout << buffer;
+    std::cout << buffer << std::flush;
     output += buffer;
     fgets(buffer, BUFFER_SIZE, cpipe);
     }
@@ -900,7 +900,6 @@ void cmSystemTools::SplitProgramPath(const char* in_name,
  */
 std::string cmSystemTools::CollapseFullPath(const char* in_name)
 {
-  std::cerr << "CollapseFullPath " << in_name << "\n";
   std::string dir, file;
   cmSystemTools::SplitProgramPath(in_name, dir, file);
   // Ultra-hack warning:
