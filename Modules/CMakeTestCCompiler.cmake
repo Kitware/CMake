@@ -17,6 +17,12 @@ IF(NOT CMAKE_C_COMPILER_WORKS)
     "is not able to compile a simple test program.\nIt fails "
     "with the following output:\n ${OUTPUT}\n\n"
     "CMake will not be able to correctly generate this project.")
+  FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeError.log
+    "Determining if the C compiler works failed with "
+    "the following output:\n${OUTPUT}\n\n")
 ELSE(NOT CMAKE_C_COMPILER_WORKS)
   MESSAGE(STATUS "Check for working C compiler: ${CMAKE_C_COMPILER} -- works")
+  FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeOutput.log
+    "Determining if the C compiler works passed with "
+    "the following output:\n${OUTPUT}\n\n")
 ENDIF(NOT CMAKE_C_COMPILER_WORKS)

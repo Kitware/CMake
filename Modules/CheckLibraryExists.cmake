@@ -28,6 +28,10 @@ MACRO(CHECK_LIBRARY_EXISTS LIBRARY FUNCTION LOCATION VARIABLE)
     IF(${VARIABLE})
       MESSAGE(STATUS "Looking for ${FUNCTION} in ${LIBRARY} - found")
       SET(${VARIABLE} 1 CACHE INTERNAL "Have library ${LIBRARY}")
+      FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeOutput.log 
+        "Determining if the function ${FUNCTION} exists in the ${LIBRARY} "
+        "passed with the following output:\n"
+        "${OUTPUT}\n\n")
     ELSE(${VARIABLE})
       MESSAGE(STATUS "Looking for ${FUNCTION} in ${LIBRARY} - not found")
       SET(${VARIABLE} "" CACHE INTERNAL "Have library ${LIBRARY}")

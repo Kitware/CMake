@@ -9,9 +9,9 @@ SET( MFC_FOUND "NO" )
 # Add MFC support if win32 and not cygwin and not borland
 IF( WIN32 )
   IF( NOT CYGWIN )
-     IF( NOT BORLAND )
-       SET( MFC_FOUND "YES" )
-     ENDIF( NOT BORLAND )
+    IF( NOT BORLAND )
+      SET( MFC_FOUND "YES" )
+    ENDIF( NOT BORLAND )
   ENDIF( NOT CYGWIN )
 ENDIF( WIN32 )
 

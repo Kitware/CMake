@@ -11,10 +11,16 @@ IF("CMAKE_STD_NAMESPACE" MATCHES "^CMAKE_STD_NAMESPACE$")
     MESSAGE(STATUS "Check for STD namespace - found")
     SET (CMAKE_NO_STD_NAMESPACE 0 CACHE INTERNAL 
          "Does the compiler support std::.")
+    FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeOutput.log
+      "Determining if the CXX compiler has std namespace passed with "
+      "the following output:\n${OUTPUT}\n\n")
   ELSE (CMAKE_STD_NAMESPACE)
     MESSAGE(STATUS "Check for STD namespace - not found")
     SET (CMAKE_NO_STD_NAMESPACE 1 CACHE INTERNAL 
        "Does the compiler support std::.")
+    FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeError.log
+      "Determining if the CXX compiler has std namespace failed with "
+      "the following output:\n${OUTPUT}\n\n")
   ENDIF (CMAKE_STD_NAMESPACE)
 ENDIF("CMAKE_STD_NAMESPACE" MATCHES "^CMAKE_STD_NAMESPACE$")
 
