@@ -73,6 +73,11 @@ public:
   static void ExpandRegistryValues(std::string& source);
 
   /**
+   * make sure on windows that paths with // are converted to \\
+   */
+  static std::string HandleNetworkPaths(const char*);
+
+  /**
    * Return a string equivalent to the input string, but with all " " replaced
    * with "\ " to escape the spaces.
    */

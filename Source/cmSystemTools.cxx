@@ -313,11 +313,34 @@ void cmSystemTools::ExpandRegistryValues(std::string& source)
 }
 
 
+std::string cmSystemTools::HandleNetworkPaths(const char* str)
+{
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  std::string result;
+  // watch for network paths, MSVC can't seem to load // 
+  if (strlen(str) > 2 && str[0] == '/' && str[1] == '/')
+    {
+    result = "\\\\";
+    result += (str + 2);
+    }
+  else
+    {
+    result += str;
+    }
+#else
+  std::string result = "";
+#endif
+  return result;
+}
+
 std::string cmSystemTools::EscapeSpaces(const char* str)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  std::string result = str;
-  return "\""+result+"\"";
+  std::string result;
+  
+  result = "\"";
+  result += cmSystemTools::HandleNetworkPaths(str);
+  return result+"\"";
 #else
   std::string result = "";
   for(const char* ch = str; *ch != '\0'; ++ch)

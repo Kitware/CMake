@@ -72,19 +72,8 @@ void cmDSPWriter::OutputDSPFile()
   std::vector<std::string>::iterator i;
   for(i = includes.begin(); i != includes.end(); ++i)
     {
-    m_IncludeOptions +=  "/I \"";
-    // watch for network paths, MSVC can't seem to load // 
-    if (strlen(i->c_str()) > 2 && i->c_str()[0] == '/' && 
-        i->c_str()[1] == '/')
-      {
-      m_IncludeOptions += "\\\\";
-      m_IncludeOptions += (i->c_str() + 2);
-      }
-    else
-      {
-      m_IncludeOptions += *i;
-      }
-    m_IncludeOptions += "\" ";
+    m_IncludeOptions +=  "/I ";
+    m_IncludeOptions += cmSystemTools::EscapeSpaces(i->c_str());
     }
   
   // Create the DSP or set of DSP's for libraries and executables
@@ -156,20 +145,22 @@ void cmDSPWriter::AddDSPBuildRule(cmSourceGroup& sourceGroup)
     return;
   }
   dspname += ".dsp";
-  std::string makefileIn = "\"";
-  makefileIn += m_Makefile->GetStartDirectory();
+  std::string makefileIn = m_Makefile->GetStartDirectory();
   makefileIn += "/";
-  makefileIn += "CMakeLists.txt\"";
+  makefileIn += "CMakeLists.txt";
+  makefileIn = cmSystemTools::HandleNetworkPaths(makefileIn.c_str());
   std::string dsprule = "${CMAKE_COMMAND} ";
+  m_Makefile->ExpandVariablesInString(dsprule);
+  dsprule = cmSystemTools::HandleNetworkPaths(dsprule.c_str());
   dsprule += makefileIn;
   dsprule += " -DSP -H\"";
-  dsprule += m_Makefile->GetHomeDirectory();
+  dsprule += cmSystemTools::HandleNetworkPaths(m_Makefile->GetHomeDirectory());
   dsprule += "\" -S\"";
-  dsprule += m_Makefile->GetStartDirectory();
+  dsprule += cmSystemTools::HandleNetworkPaths(m_Makefile->GetStartDirectory());
   dsprule += "\" -O\"";
-  dsprule += m_Makefile->GetStartOutputDirectory();
+  dsprule += cmSystemTools::HandleNetworkPaths(m_Makefile->GetStartOutputDirectory());
   dsprule += "\" -B\"";
-  dsprule += m_Makefile->GetHomeOutputDirectory();
+  dsprule += cmSystemTools::HandleNetworkPaths(m_Makefile->GetHomeOutputDirectory());
   dsprule += "\"";
   m_Makefile->ExpandVariablesInString(dsprule);
   
@@ -259,7 +250,7 @@ void cmDSPWriter::WriteDSPFile(std::ostream& fout,
 
       // Tell MS-Dev what the source is.  If the compiler knows how to
       // build it, then it will.
-      fout << "SOURCE=" << source.c_str() << "\n\n";
+      fout << "SOURCE=" << cmSystemTools::EscapeSpaces(source.c_str()) << "\n\n";
       if (!commands.empty())
         {
         // Loop through every custom command generating code from the
@@ -329,7 +320,7 @@ void cmDSPWriter::WriteCustomRule(std::ostream& fout,
     for(std::set<std::string>::const_iterator d = depends.begin();
 	d != depends.end(); ++d)
       {
-	fout << "\\\n\t\"" << d->c_str() << "\"";
+	fout << "\\\n\t" << cmSystemTools::EscapeSpaces(d->c_str());
       }
     fout << "\n";
 
@@ -479,16 +470,16 @@ void cmDSPWriter::WriteDSPHeader(std::ostream& fout, const char *libName,
       libPath += "/";
       }
     libOptions += " /LIBPATH:\"";
-    libOptions += libPath;
+    libOptions += cmSystemTools::HandleNetworkPaths(libPath.c_str());
     libOptions += "$(IntDir)\" ";
     libOptions += " /LIBPATH:\"";
-    libOptions += libPath;
+    libOptions += cmSystemTools::HandleNetworkPaths(libPath.c_str());
     libOptions += "\" ";
     libMultiLineOptions += "# ADD LINK32 /LIBPATH:\"";
-    libMultiLineOptions += libPath; 
+    libMultiLineOptions += cmSystemTools::HandleNetworkPaths(libPath.c_str()); 
     libMultiLineOptions += "$(IntDir)\" ";
     libMultiLineOptions += " /LIBPATH:\"";
-    libMultiLineOptions += libPath;
+    libMultiLineOptions += cmSystemTools::HandleNetworkPaths(libPath.c_str()); 
     libMultiLineOptions += "\" \n";
     }
   if(exePath.size())
@@ -499,16 +490,16 @@ void cmDSPWriter::WriteDSPHeader(std::ostream& fout, const char *libName,
       exePath += "/";
       }
     libOptions += " /LIBPATH:\"";
-    libOptions += exePath;
+    libOptions += cmSystemTools::HandleNetworkPaths(exePath.c_str());
     libOptions += "$(IntDir)\" ";
     libOptions += " /LIBPATH:\"";
-    libOptions += exePath;
+    libOptions += cmSystemTools::HandleNetworkPaths(exePath.c_str());
     libOptions += "\" ";
     libMultiLineOptions += "# ADD LINK32 /LIBPATH:\"";
-    libMultiLineOptions += exePath; 
+    libMultiLineOptions += cmSystemTools::HandleNetworkPaths(exePath.c_str()); 
     libMultiLineOptions += "$(IntDir)\" ";
     libMultiLineOptions += " /LIBPATH:\"";
-    libMultiLineOptions += exePath;
+    libMultiLineOptions += cmSystemTools::HandleNetworkPaths(exePath.c_str());
     libMultiLineOptions += "\" \n";
     }
   std::vector<std::string>::iterator i;
@@ -516,17 +507,17 @@ void cmDSPWriter::WriteDSPHeader(std::ostream& fout, const char *libName,
   for(i = libdirs.begin(); i != libdirs.end(); ++i)
     {
     libOptions += " /LIBPATH:\"";
-    libOptions += *i;
+    libOptions += cmSystemTools::HandleNetworkPaths(i->c_str());
     libOptions += "/$(IntDir)\" ";
     libOptions += " /LIBPATH:\"";
-    libOptions += *i;
+    libOptions += cmSystemTools::HandleNetworkPaths(i->c_str());
     libOptions += "\" ";
 
     libMultiLineOptions += "# ADD LINK32 /LIBPATH:\"";
-    libMultiLineOptions += *i; 
+    libMultiLineOptions += cmSystemTools::HandleNetworkPaths(i->c_str()); 
     libMultiLineOptions += "/$(IntDir)\" ";
     libMultiLineOptions += " /LIBPATH:\"";
-    libMultiLineOptions += *i;
+    libMultiLineOptions += cmSystemTools::HandleNetworkPaths(i->c_str());
     libMultiLineOptions += "\" \n";
     }
   // find link libraries
@@ -546,21 +537,6 @@ void cmDSPWriter::WriteDSPHeader(std::ostream& fout, const char *libName,
         lib += ".lib";
         }
       lib = cmSystemTools::EscapeSpaces(lib.c_str());
-      // watch for network paths, MSVC can't seem to load // 
-      if (strlen(lib.c_str()) > 2 && lib.c_str()[0] == '/' && 
-          lib.c_str()[1] == '/')
-        {
-        std::string lib2 = "\\\\";
-        lib2 += (lib.c_str() + 2);
-        lib = lib2;
-        }
-      if (strlen(lib.c_str()) > 3 && lib.c_str()[0] == '"' && 
-          lib.c_str()[1] == '/' && lib.c_str()[2] == '/')
-        {
-        std::string lib2 = "\"\\\\";
-        lib2 += (lib.c_str() + 3);
-        lib = lib2;
-        }
 
       if (j->second == cmTarget::GENERAL)
         {
@@ -630,9 +606,9 @@ void cmDSPWriter::WriteDSPHeader(std::ostream& fout, const char *libName,
                                    m_IncludeOptions.c_str());
       cmSystemTools::ReplaceString(line, "OUTPUT_LIBNAME",libName);
       cmSystemTools::ReplaceString(line, "LIBRARY_OUTPUT_PATH",
-                                   libPath.c_str());
+                                   cmSystemTools::HandleNetworkPaths(libPath.c_str()).c_str());
       cmSystemTools::ReplaceString(line, "EXECUTABLE_OUTPUT_PATH",
-                                   exePath.c_str());
+                                   cmSystemTools::HandleNetworkPaths(exePath.c_str()).c_str());
       cmSystemTools::ReplaceString(line, 
                                    "EXTRA_DEFINES", 
 				   m_Makefile->GetDefineFlags());
