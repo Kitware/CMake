@@ -90,7 +90,7 @@ IF (WIN32)
   )
 ELSE (WIN32)
   FIND_PROGRAM(PS2PDF_CONVERTER
-    NAMES ps2pdf14 psd2pdf
+    NAMES ps2pdf14 ps2pdf
   )
 ENDIF (WIN32)
 
