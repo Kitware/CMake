@@ -52,36 +52,62 @@ bool cmSetCommand::Invoke(std::vector<std::string>& args)
     {
       return true;
     }
-  if(args[1] == "CACHE")
-    { 
-    const char* type = "STRING"; // default type is string
-    if(args.size() > 2)
-      {
-      type = args[2].c_str();
-      }
-    m_Makefile->AddDefinition(args[0].c_str(), "");
-    cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
-                                                 "",
-						 "Value Computed by CMake",
-                                                 cmCacheManager::StringToType(type));
-    return true;
-    }
-  
-  // expand value
-  m_Makefile->ExpandVariablesInString(args[1]);
-  m_Makefile->AddDefinition(args[0].c_str(), args[1].c_str());
-
-  // should we store the result in the cache ?
-  if (args.size() > 2 && args[2] == "CACHE")
+// here are the options with the num
+//  SET VAR                               
+//  SET VAR value                             
+//  SET VAR CACHE|CACHE_NO_REPLACE        
+//  SET VAR value CACHE|CACHE_NO_REPLACE      
+//  SET VAR CACHE|CACHE_NO_REPLACE TYPE   
+//  SET VAR value CACHE|CACHE_NO_REPLACE TYPE 
+  const char* type = "STRING"; // set a default type of STRING
+  const char* value = "";// set a default value of the empty string
+  if(args.size() > 1)
     {
-    const char* type = "STRING"; // default type is string
-    if(args.size() > 3)
+    // always expand the first argument
+    m_Makefile->ExpandVariablesInString(args[1]);
+    value = args[1].c_str();
+    }
+  // get the current cache value for the variable
+  const char* cacheValue = 
+    cmCacheManager::GetInstance()->GetCacheValue(args[0].c_str());
+  // assume this will not be cached
+  bool cache = false;
+  // search the arguments for key words CACHE and CACHE_NO_REPLACE
+  for(int i = 1; i < args.size() && !cache; ++i)
+    {
+    if(args[i] == "CACHE_NO_REPLACE")
       {
-      type = args[3].c_str();
+      // if already in cache, ignore entire command
+      if(cacheValue)
+        {
+        return true;
+        }
+      cache = true;
       }
+    if(args[i] == "CACHE")
+      {
+      cache == true;
+      }
+    // if this is to be cached, find the value and type
+    if(cache)
+      {
+      // if this is the 
+      if(i == 1)
+        {
+        value = "";
+        }
+      if(i+1 < args.size())
+        {
+        type = args[i+1].c_str();
+        }
+      }
+    }
+  m_Makefile->AddDefinition(args[0].c_str(), value);
+  if(cache)
+    {
     cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
-                                                 args[1].c_str(),
-						 "Value Computed by CMake",
+                                                 value,
+                                                 "Value Computed by CMake",
                                                  cmCacheManager::StringToType(type));
     }
   return true;
