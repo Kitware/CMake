@@ -1343,50 +1343,86 @@ void CMakeSetupDialog::OnDoubleclickedAdvancedValues()
 }
 
 // Handle param or single dropped file.
-// If the dropped file is a build directory or any file in a 
-// build directory, set the source dir from the cache file,
-// otherwise set the source and build dirs to this file (or dir).
-
-void CMakeSetupDialog::ChangeDirectoriesFromFile(const char* buffer)
+void CMakeSetupDialog::ChangeDirectoriesFromFile(const char* arg)
 {
-  // Get the path to this file
-
-  std::string path = buffer;
-  if (!cmSystemTools::FileIsDirectory(path.c_str()))
+  // Check if the argument refers to a CMakeCache.txt or
+  // CMakeLists.txt file.
+  std::string listPath;
+  std::string cachePath;
+  bool argIsFile = false;
+  if(cmSystemTools::FileIsDirectory(arg))
     {
-    path = cmSystemTools::GetFilenamePath(path);
-    }
-  else
-    {
+    std::string path = cmSystemTools::CollapseFullPath(arg);
     cmSystemTools::ConvertToUnixSlashes(path);
+    std::string cacheFile = path;
+    cacheFile += "/CMakeCache.txt";
+    std::string listFile = path;
+    listFile += "/CMakeLists.txt";
+    if(cmSystemTools::FileExists(cacheFile.c_str()))
+      {
+      cachePath = path;
+      }
+    if(cmSystemTools::FileExists(listFile.c_str()))
+      {
+      listPath = path;
+      }
     }
-
-  // Check if it's a build dir and grab the cache
-
-  std::string cache_file = path;
-  cache_file += "/CMakeCache.txt";
-
-  cmCacheManager *cachem = this->m_CMakeInstance->GetCacheManager();
-
-  cmCacheManager::CacheIterator it = 
-    cachem->NewIterator();
-
-  if (cmSystemTools::FileExists(cache_file.c_str()) &&
-      cachem->LoadCache(path.c_str()) &&
-      it.Find("CMAKE_HOME_DIRECTORY"))
+  else if(cmSystemTools::FileExists(arg))
     {
-    path = cmSystemTools::ConvertToOutputPath(path.c_str());
-    this->m_WhereBuild = path.c_str();
-
-    path = cmSystemTools::ConvertToOutputPath(it.GetValue());
-    this->m_WhereSource = path.c_str();
+    argIsFile = true;
+    std::string fullPath = cmSystemTools::CollapseFullPath(arg);
+    std::string name = cmSystemTools::GetFilenameName(fullPath.c_str());
+    name = cmSystemTools::LowerCase(name);
+    if(name == "cmakecache.txt")
+      {
+      cachePath = cmSystemTools::GetFilenamePath(fullPath.c_str());
+      }
+    else if(name == "cmakelists.txt")
+      {
+      listPath = cmSystemTools::GetFilenamePath(fullPath.c_str());
+      }
     }
-  else
+  
+  // If there is a CMakeCache.txt file, use its settings.
+  if(cachePath.length() > 0)
     {
-    path = cmSystemTools::ConvertToOutputPath(path.c_str());
-    this->m_WhereSource = this->m_WhereBuild = path.c_str();
+    cmCacheManager* cachem = m_CMakeInstance->GetCacheManager();
+    cmCacheManager::CacheIterator it = cachem->NewIterator();
+    if(cachem->LoadCache(cachePath.c_str()) && it.Find("CMAKE_HOME_DIRECTORY"))
+      {
+      std::string path = cmSystemTools::ConvertToOutputPath(cachePath.c_str());
+      m_WhereBuild = path.c_str();
+      
+      path = cmSystemTools::ConvertToOutputPath(it.GetValue());
+      m_WhereSource = path.c_str();
+      return;
+      }
+    }
+  
+  // If there is a CMakeLists.txt file, use it as the source tree.
+  if(listPath.length() > 0)
+    {
+    std::string path = cmSystemTools::ConvertToOutputPath(listPath.c_str());
+    m_WhereSource = path.c_str();
+    
+    if(argIsFile)
+      {
+      // Source CMakeLists.txt file given.  It was probably dropped
+      // onto the window or executable.  Default to an in-source
+      // build.
+      m_WhereBuild = path.c_str();
+      }
+    else
+      {
+      // Source directory given on command line.  Use current working
+      // directory as build tree.
+      std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
+      path = cmSystemTools::ConvertToOutputPath(cwd.c_str());
+      m_WhereBuild = path.c_str();
+      }
     }
 }
+
 
 // The framework calls this member function when the user releases the
 // left mouse button over a window that has registered itself as the 

@@ -97,8 +97,9 @@ protected:
   void FillCacheManagerFromCacheGUI();
   // Create a shortcut on the desktop with the current Source/Build dir.
   int CreateShortcut();
-  // Handle param or single dropped file.
-  void ChangeDirectoriesFromFile(const char *file);
+  
+  // Set initial directories from a file path.
+  void ChangeDirectoriesFromFile(const char* arg);
   
   HICON m_hIcon;
   CString m_RegistryKey;
