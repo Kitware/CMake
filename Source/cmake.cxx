@@ -141,12 +141,12 @@ void cmake::AddCMakePaths(const std::vector<std::string>& args)
 #endif
     }
 #ifdef CMAKE_PREFIX
-  else if(!cmSystemTools::FileExists(cMakeSelf.c_str()))
+  if(!cmSystemTools::FileExists(cMakeSelf.c_str()))
     {
     cMakeSelf = CMAKE_PREFIX "/bin/cmake";
     }
 #endif
-  else if(!cmSystemTools::FileExists(cMakeSelf.c_str()))
+  if(!cmSystemTools::FileExists(cMakeSelf.c_str()))
     {
     cmSystemTools::Error("CMAKE can not find the command line program cmake. "
                          "Attempted path: ", cMakeSelf.c_str());
@@ -177,16 +177,16 @@ void cmake::AddCMakePaths(const std::vector<std::string>& args)
       cMakeRoot = cMakeRoot.substr(0, slashPos);
       }
     // is there no Modules direcory there?
-    modules = cMakeRoot + "/Modules/FindVTK.cmake";
+    modules = cMakeRoot + "/Modules/FindVTK.cmake"; 
     }
   
-  else if (!cmSystemTools::FileExists(modules.c_str()))
+  if (!cmSystemTools::FileExists(modules.c_str()))
     {
     // try exe/../share/cmake
     modules = cMakeRoot + "/share/CMake/Modules/FindVTK.cmake";
     }
 #ifdef CMAKE_ROOT_DIR
-  else if (!cmSystemTools::FileExists(modules.c_str()))
+  if (!cmSystemTools::FileExists(modules.c_str()))
     {
     // try compiled in root directory
     cMakeRoot = CMAKE_ROOT_DIR;
@@ -194,21 +194,21 @@ void cmake::AddCMakePaths(const std::vector<std::string>& args)
     }
 #endif
 #ifdef CMAKE_PREFIX
-  else if (!cmSystemTools::FileExists(modules.c_str()))
+  if (!cmSystemTools::FileExists(modules.c_str()))
     {
     // try compiled in install prefix
     cMakeRoot = CMAKE_PREFIX "/share/CMake";
     modules = cMakeRoot + "/Modules/FindVTK.cmake";
     }
 #endif
-  else if (!cmSystemTools::FileExists(modules.c_str()))
+  if (!cmSystemTools::FileExists(modules.c_str()))
     {
     // try 
     cMakeRoot  = cmSystemTools::GetProgramPath(cMakeSelf.c_str());
     cMakeRoot += "/share/CMake";
     modules = cMakeRoot +  "/Modules/FindVTK.cmake";
     }
-  else if (!cmSystemTools::FileExists(modules.c_str()))
+  if (!cmSystemTools::FileExists(modules.c_str()))
     {
     // couldn't find modules
     cmSystemTools::Error("Could not find CMAKE_ROOT !!!\n", 
