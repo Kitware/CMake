@@ -17,6 +17,8 @@
 #include "cmUseMangledMesaCommand.h"
 #include "cmSystemTools.h"
 
+#include <cmsys/RegularExpression.hxx>
+
 // cmUseMangledMesaCommand
 bool cmUseMangledMesaCommand::InitialPass(std::vector<std::string> const& args)
 { 
@@ -91,11 +93,11 @@ CopyAndFullPathMesaHeader(const char* source,
   // input file at the same time
   std::string inLine;  
   // regular expression for any #include line
-  cmRegularExpression includeLine("^[ \t]*#[ \t]*include[ \t]*[<\"]([^\">]+)[\">]");
+  cmsys::RegularExpression includeLine("^[ \t]*#[ \t]*include[ \t]*[<\"]([^\">]+)[\">]");
   // regular expression for gl/ or GL/ in a file (match(1) of above)
-  cmRegularExpression glDirLine("(gl|GL)(/|\\\\)([^<\"]+)");
+  cmsys::RegularExpression glDirLine("(gl|GL)(/|\\\\)([^<\"]+)");
   // regular expression for gl GL or xmesa in a file (match(1) of above)
-  cmRegularExpression glLine("(gl|GL|xmesa)");
+  cmsys::RegularExpression glLine("(gl|GL|xmesa)");
   while(cmSystemTools::GetLineFromStream(fin,inLine))
     {
     if(includeLine.find(inLine.c_str()))

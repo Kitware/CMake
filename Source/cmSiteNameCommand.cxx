@@ -16,6 +16,8 @@
 =========================================================================*/
 #include "cmSiteNameCommand.h"
 
+#include <cmsys/RegularExpression.hxx>
+
 // cmSiteNameCommand
 bool cmSiteNameCommand::InitialPass(std::vector<std::string> const& args)
 {
@@ -72,7 +74,7 @@ bool cmSiteNameCommand::InitialPass(std::vector<std::string> const& args)
       {
       // remove any white space from the host name
       std::string hostRegExp = "[ \t\n\r]*([^\t\n\r ]*)[ \t\n\r]*";
-      cmRegularExpression hostReg (hostRegExp.c_str());
+      cmsys::RegularExpression hostReg (hostRegExp.c_str());
       if (hostReg.find(host.c_str()))
         {
         // strip whitespace
@@ -109,7 +111,7 @@ bool cmSiteNameCommand::InitialPass(std::vector<std::string> const& args)
             std::string RegExp = ".*Name:[ \t\n]*";
             RegExp += host;
             RegExp += "\\.([^ \t\n\r]*)[ \t\n\r]*Address:";
-            cmRegularExpression reg( RegExp.c_str() );
+            cmsys::RegularExpression reg( RegExp.c_str() );
             if(reg.find(nsOutput.c_str()))
               {
               siteName += '.' + cmSystemTools::LowerCase(reg.match(1));

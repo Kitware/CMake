@@ -19,8 +19,9 @@
 #include "cmSystemTools.h"
 #include "cmCacheManager.h"
 #include "cmMakefile.h"
-#include "cmRegularExpression.h"
 #include "stdio.h"
+
+#include <cmsys/RegularExpression.hxx>
 
 #if defined(_WIN32) || defined(__CYGWIN__)
 # include <windows.h>
@@ -84,9 +85,9 @@ bool cmCacheManager::ParseEntry(const char* entry,
                                 CacheEntryType& type)
 {
   // input line is:         key:type=value
-  cmRegularExpression reg("^([^:]*):([^=]*)=(.*[^\t ]|[\t ]*)[\t ]*$");
+  cmsys::RegularExpression reg("^([^:]*):([^=]*)=(.*[^\t ]|[\t ]*)[\t ]*$");
   // input line is:         "key":type=value
-  cmRegularExpression regQuoted("^\"([^\"]*)\":([^=]*)=(.*[^\t ]|[\t ]*)[\t ]*$");
+  cmsys::RegularExpression regQuoted("^\"([^\"]*)\":([^=]*)=(.*[^\t ]|[\t ]*)[\t ]*$");
   bool flag = false;
   if(regQuoted.find(entry))
     {

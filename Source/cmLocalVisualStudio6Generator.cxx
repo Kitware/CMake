@@ -22,6 +22,8 @@
 #include "cmCacheManager.h"
 #include <queue>
 
+#include <cmsys/RegularExpression.hxx>
+
 cmLocalVisualStudio6Generator::cmLocalVisualStudio6Generator()
 {
 }
@@ -607,7 +609,7 @@ void cmLocalVisualStudio6Generator::SetBuildType(BuildType b,
   // possible
   std::ifstream fin(m_DSPHeaderTemplate.c_str());
 
-  cmRegularExpression reg("# Name ");
+  cmsys::RegularExpression reg("# Name ");
   if(!fin)
     {
     cmSystemTools::Error("Error Reading ", m_DSPHeaderTemplate.c_str());

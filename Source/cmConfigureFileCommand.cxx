@@ -16,6 +16,8 @@
 =========================================================================*/
 #include "cmConfigureFileCommand.h"
 
+#include <cmsys/RegularExpression.hxx>
+
 // cmConfigureFileCommand
 bool cmConfigureFileCommand::InitialPass(std::vector<std::string> const& args)
 {
@@ -106,7 +108,7 @@ void cmConfigureFileCommand::ConfigureFile()
     // now copy input to output and expand variables in the
     // input file at the same time
     std::string inLine;
-    cmRegularExpression cmdefine("#cmakedefine[ \t]*([A-Za-z_0-9]*)");
+    cmsys::RegularExpression cmdefine("#cmakedefine[ \t]*([A-Za-z_0-9]*)");
     while( cmSystemTools::GetLineFromStream(fin, inLine) )
       {
       m_Makefile->ExpandVariablesInString(inLine, m_EscapeQuotes, m_AtOnly);

@@ -18,6 +18,7 @@
 #include "cmStandardIncludes.h"
 #include "cmSystemTools.h"
 
+#include <cmsys/RegularExpression.hxx>
 
 void cmDependInformation::AddDependencies(cmDependInformation* info)
 {
@@ -189,7 +190,7 @@ void cmMakeDepend::GenerateDependInformation(cmDependInformation* info)
 // #include directives
 void cmMakeDepend::DependWalk(cmDependInformation* info)
 {
-  cmRegularExpression includeLine("^[ \t]*#[ \t]*include[ \t]*[<\"]([^\">]+)[\">]");
+  cmsys::RegularExpression includeLine("^[ \t]*#[ \t]*include[ \t]*[<\"]([^\">]+)[\">]");
   std::ifstream fin(info->m_FullPath.c_str());
   if(!fin)
     {

@@ -29,6 +29,9 @@
 #include "cmake.h"
 #include <stdio.h>  // required for sprintf
 #include <stdlib.h> // required for atoi
+
+#include <cmsys/RegularExpression.hxx>
+
 // default is not to be building executables
 cmMakefile::cmMakefile()
 {
@@ -458,7 +461,7 @@ void cmMakefile::AddCustomCommand(const char* source,
         d != outputs.end(); ++d)
       {
       // if this looks like a real file then use is as the main depend
-      cmRegularExpression SourceFiles("\\.(C|M|c|c\\+\\+|cc|cpp|cxx|m|mm|rc|def|r|odl|idl|hpj|bat|h|h\\+\\+|hm|hpp|hxx|in|txx|inl)$");
+      cmsys::RegularExpression SourceFiles("\\.(C|M|c|c\\+\\+|cc|cpp|cxx|m|mm|rc|def|r|odl|idl|hpj|bat|h|h\\+\\+|hm|hpp|hxx|in|txx|inl)$");
       if (SourceFiles.find(source))
         {
         this->AddCustomCommandToOutput(d->c_str(), command, commandArgs, 
@@ -1461,7 +1464,7 @@ void cmMakefile::RemoveVariablesInString(std::string& source,
 {
   if(!atOnly)
     {
-    cmRegularExpression var("(\\${[A-Za-z_0-9]*})");
+    cmsys::RegularExpression var("(\\${[A-Za-z_0-9]*})");
     while (var.find(source))
       {
       source.erase(var.start(),var.end() - var.start());
@@ -1470,13 +1473,13 @@ void cmMakefile::RemoveVariablesInString(std::string& source,
   
   if(!atOnly)
     {
-    cmRegularExpression varb("(\\$ENV{[A-Za-z_0-9]*})");
+    cmsys::RegularExpression varb("(\\$ENV{[A-Za-z_0-9]*})");
     while (varb.find(source))
       {
       source.erase(varb.start(),varb.end() - varb.start());
       }
     }
-  cmRegularExpression var2("(@[A-Za-z_0-9]*@)");
+  cmsys::RegularExpression var2("(@[A-Za-z_0-9]*@)");
   while (var2.find(source))
     {
     source.erase(var2.start(),var2.end() - var2.start());

@@ -15,6 +15,8 @@
 
 =========================================================================*/
 #include "cmStringCommand.h"
+#include <cmsys/RegularExpression.hxx>
+
 #include <stdlib.h> // required for atoi
 //----------------------------------------------------------------------------
 bool cmStringCommand::InitialPass(std::vector<std::string> const& args)
@@ -136,7 +138,7 @@ bool cmStringCommand::RegexMatch(std::vector<std::string> const& args)
     }
   
   // Compile the regular expression.
-  cmRegularExpression re;
+  cmsys::RegularExpression re;
   if(!re.compile(regex.c_str()))
     {
     std::string e = "sub-command REGEX, mode MATCH failed to compile regex \""+regex+"\".";
@@ -179,7 +181,7 @@ bool cmStringCommand::RegexMatchAll(std::vector<std::string> const& args)
     }
   
   // Compile the regular expression.
-  cmRegularExpression re;
+  cmsys::RegularExpression re;
   if(!re.compile(regex.c_str()))
     {
     std::string e = "sub-command REGEX, mode MATCHALL failed to compile regex \""+regex+"\".";
@@ -277,7 +279,7 @@ bool cmStringCommand::RegexReplace(std::vector<std::string> const& args)
     }
   
   // Compile the regular expression.
-  cmRegularExpression re;
+  cmsys::RegularExpression re;
   if(!re.compile(regex.c_str()))
     {
     std::string e = "sub-command REGEX, mode REPLACE failed to compile regex \""+regex+"\".";

@@ -5,7 +5,6 @@ cmake.cxx
 cmakewizard.cxx
 cmMakeDepend.cxx
 cmMakefile.cxx
-cmRegularExpression.cxx
 cmSourceFile.cxx
 cmSystemTools.cxx
 cmDocumentation.cxx
@@ -25,7 +24,6 @@ cmake.h
 cmakewizard.h
 cmMakeDepend.h
 cmMakefile.h
-cmRegularExpression.h
 cmSourceFile.h
 cmSystemTools.h
 cmDynamicLoader.h

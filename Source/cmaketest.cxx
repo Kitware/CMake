@@ -16,11 +16,11 @@
 =========================================================================*/
 #include "cmaketest.h"
 #include "cmSystemTools.h"
-#include "cmRegularExpression.h"
 #include "cmake.h"
 #include "cmListFileCache.h"
 #include "cmCacheManager.h"
 #include "cmDynamicLoader.h"
+
 #if defined(_WIN32) && !defined(__CYGWIN__) 
 #include "windows.h"
 #endif

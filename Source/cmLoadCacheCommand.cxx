@@ -16,6 +16,7 @@
 =========================================================================*/
 #include "cmLoadCacheCommand.h"
 
+#include <cmsys/RegularExpression.hxx>
 
 // cmLoadCacheCommand
 bool cmLoadCacheCommand::InitialPass(std::vector<std::string> const& args)
@@ -202,9 +203,9 @@ bool cmLoadCacheCommand::ParseEntry(const char* entry, std::string& var,
                                     std::string& value)
 {
   // input line is:         key:type=value
-  cmRegularExpression reg("^([^:]*):([^=]*)=(.*[^\t ]|[\t ]*)[\t ]*$");
+  cmsys::RegularExpression reg("^([^:]*):([^=]*)=(.*[^\t ]|[\t ]*)[\t ]*$");
   // input line is:         "key":type=value
-  cmRegularExpression regQuoted("^\"([^\"]*)\":([^=]*)=(.*[^\t ]|[\t ]*)[\t ]*$");
+  cmsys::RegularExpression regQuoted("^\"([^\"]*)\":([^=]*)=(.*[^\t ]|[\t ]*)[\t ]*$");
   bool flag = false;
   if(regQuoted.find(entry))
     {

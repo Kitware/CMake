@@ -18,7 +18,8 @@
 #define cmSourceGroup_h
 
 #include "cmStandardIncludes.h"
-#include "cmRegularExpression.h"
+#include <cmsys/RegularExpression.hxx>
+
 class cmSourceFile;
 
 /** \class cmSourceGroup
@@ -57,7 +58,7 @@ private:
   /**
    * The regular expression matching the files in the group.
    */
-  cmRegularExpression m_GroupRegex;
+  cmsys::RegularExpression m_GroupRegex;
   
   /**
    * vector of all source files in this source group

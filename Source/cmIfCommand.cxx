@@ -17,6 +17,8 @@
 #include "cmIfCommand.h"
 #include <stdlib.h> // required for atof
 
+#include <cmsys/RegularExpression.hxx>
+
 bool cmIfFunctionBlocker::
 IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
 {
@@ -217,7 +219,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
   if (args.size() == 3 && (args[1] == "MATCHES"))
     {
     def = cmIfCommand::GetVariableOrString(args[0].c_str(), makefile);
-    cmRegularExpression regEntry(args[2].c_str());
+    cmsys::RegularExpression regEntry(args[2].c_str());
     
     // check for black line or comment
     if (!regEntry.find(def))

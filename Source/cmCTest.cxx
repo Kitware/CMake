@@ -15,9 +15,10 @@
 
 =========================================================================*/
 #include "cmCTest.h"
-#include "cmRegularExpression.h"
 #include "cmSystemTools.h"
 #include "cmListFileCache.h"
+
+#include <cmsys/RegularExpression.hxx>
 
 #ifdef HAVE_CURL
 # include "cmCTestSubmit.h"
@@ -590,10 +591,10 @@ int cmCTest::UpdateDirectory()
   std::vector<cmStdString> lines;
   cmSystemTools::Split(goutput.c_str(), lines);
   std::cout << "Updated; gathering version information" << std::endl;
-  cmRegularExpression date_author("^date: +([^;]+); +author: +([^;]+); +state: +[^;]+;");
-  cmRegularExpression revision("^revision +([^ ]*) *$");
-  cmRegularExpression end_of_file("^=============================================================================$");
-  cmRegularExpression end_of_comment("^----------------------------$");
+  cmsys::RegularExpression date_author("^date: +([^;]+); +author: +([^;]+); +state: +[^;]+;");
+  cmsys::RegularExpression revision("^revision +([^ ]*) *$");
+  cmsys::RegularExpression end_of_file("^=============================================================================$");
+  cmsys::RegularExpression end_of_comment("^----------------------------$");
   std::string current_path = "";
   bool first_file = true;
 
@@ -974,7 +975,7 @@ int cmCTest::BuildDirectory()
   // Errors
   for ( cc = 0; cmCTestErrorMatches[cc]; cc ++ )
     {
-    cmRegularExpression re(cmCTestErrorMatches[cc]);
+    cmsys::RegularExpression re(cmCTestErrorMatches[cc]);
     std::vector<std::string>::size_type kk;
     for ( kk = 0; kk < lines.size(); kk ++ )
       {
@@ -987,7 +988,7 @@ int cmCTest::BuildDirectory()
   // Warnings
   for ( cc = 0; cmCTestWarningMatches[cc]; cc ++ )
     {
-    cmRegularExpression re(cmCTestWarningMatches[cc]);
+    cmsys::RegularExpression re(cmCTestWarningMatches[cc]);
     std::vector<std::string>::size_type kk;
     for ( kk = 0; kk < lines.size(); kk ++ )
       {
@@ -1000,7 +1001,7 @@ int cmCTest::BuildDirectory()
   // Errors exceptions
   for ( cc = 0; cmCTestErrorExceptions[cc]; cc ++ )
     {
-    cmRegularExpression re(cmCTestErrorExceptions[cc]);
+    cmsys::RegularExpression re(cmCTestErrorExceptions[cc]);
     std::vector<int>::size_type kk;
     for ( kk =0; kk < markedLines.size(); kk ++ )
       {
@@ -1016,7 +1017,7 @@ int cmCTest::BuildDirectory()
   // Warning exceptions
   for ( cc = 0; cmCTestWarningExceptions[cc]; cc ++ )
     {
-    cmRegularExpression re(cmCTestWarningExceptions[cc]);
+    cmsys::RegularExpression re(cmCTestWarningExceptions[cc]);
     std::vector<int>::size_type kk;
     for ( kk =0; kk < markedLines.size(); kk ++ )
       {
@@ -1614,9 +1615,9 @@ void cmCTest::ProcessDirectory(std::vector<std::string> &passed,
   int firstTest = 1;
   long line = 0;
   
-  cmRegularExpression ireg(this->m_IncludeRegExp.c_str());
-  cmRegularExpression ereg(this->m_ExcludeRegExp.c_str());
-  cmRegularExpression dartStuff("([\t\n ]*<DartMeasurement.*/DartMeasurement[a-zA-Z]*>[\t ]*[\n]*)");
+  cmsys::RegularExpression ireg(this->m_IncludeRegExp.c_str());
+  cmsys::RegularExpression ereg(this->m_ExcludeRegExp.c_str());
+  cmsys::RegularExpression dartStuff("([\t\n ]*<DartMeasurement.*/DartMeasurement[a-zA-Z]*>[\t ]*[\n]*)");
 
   bool parseError;
   while ( fin )

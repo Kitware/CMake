@@ -30,7 +30,6 @@ CMAKE_SOURCES="\
   cmDocumentation \
   cmGlobalGenerator \
   cmLocalGenerator \
-  cmRegularExpression \
   cmSourceFile \
   cmSystemTools \
   cmGlobalUnixMakefileGenerator \

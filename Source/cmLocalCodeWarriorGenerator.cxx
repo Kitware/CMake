@@ -22,6 +22,8 @@ PURPOSE.  See the above copyright notices for more information.
 #include "cmCacheManager.h"
 #include "cmake.h"
 
+#include <cmsys/RegularExpression.hxx>
+
 cmLocalCodeWarriorGenerator::cmLocalCodeWarriorGenerator()
 {
 }
@@ -168,9 +170,9 @@ void cmLocalCodeWarriorGenerator::WriteSettingList(std::ostream& fout,
   // library paths
 
   // now add in the libraries we depend on
-  cmRegularExpression isAframework("[ \t]*\\-framework");
-  cmRegularExpression isEnvironment("\\${");
-  cmRegularExpression isUNIX("[ \t]*\\-l([^ \t]+)");
+  cmsys::RegularExpression isAframework("[ \t]*\\-framework");
+  cmsys::RegularExpression isEnvironment("\\${");
+  cmsys::RegularExpression isUNIX("[ \t]*\\-l([^ \t]+)");
   const cmTarget::LinkLibraries& libs = l->GetLinkLibraries();
   cmTarget::LinkLibraries::const_iterator lib = libs.begin();
   for(; lib != libs.end(); ++lib)
@@ -564,9 +566,9 @@ void cmLocalCodeWarriorGenerator::WriteFileList(std::ostream& fout,
     }
   
   // now add in the libraries we depend on
-  cmRegularExpression isAframework("[ \t]*\\-framework");
-  cmRegularExpression isEnvironment("\\${");
-  cmRegularExpression isUNIX("[ \t]*\\-l([^ \t]+)");
+  cmsys::RegularExpression isAframework("[ \t]*\\-framework");
+  cmsys::RegularExpression isEnvironment("\\${");
+  cmsys::RegularExpression isUNIX("[ \t]*\\-l([^ \t]+)");
   const cmTarget::LinkLibraries& libs = l->GetLinkLibraries();
   cmTarget::LinkLibraries::const_iterator lib = libs.begin();
   for(; lib != libs.end(); ++lib)
@@ -694,9 +696,9 @@ void cmLocalCodeWarriorGenerator::WriteLinkOrder(std::ostream& fout,
     }
 
   // now add in the libraries we depend on
-  cmRegularExpression isAframework("[ \t]*\\-framework");
-  cmRegularExpression isEnvironment("\\${");
-  cmRegularExpression isUNIX("[ \t]*\\-l([^ \t]+)");
+  cmsys::RegularExpression isAframework("[ \t]*\\-framework");
+  cmsys::RegularExpression isEnvironment("\\${");
+  cmsys::RegularExpression isUNIX("[ \t]*\\-l([^ \t]+)");
   const cmTarget::LinkLibraries& libs = l->GetLinkLibraries();
   cmTarget::LinkLibraries::const_iterator lib = libs.begin();
   
@@ -814,7 +816,7 @@ void cmLocalCodeWarriorGenerator::WriteLinkOrder(std::ostream& fout,
 
   // we need at least one framework for the XML to be valid
   // generate framework list
-  cmRegularExpression reg("[ \t]*\\-framework[ \t]+([^ \t]+)");
+  cmsys::RegularExpression reg("[ \t]*\\-framework[ \t]+([^ \t]+)");
   std::vector<std::string> frameworks;
   
   lib = libs.begin();
@@ -967,9 +969,9 @@ void cmLocalCodeWarriorGenerator::WriteGroup(std::ostream& fout,
     }
 
   // now add in the libraries we depend on
-  cmRegularExpression isAframework("[ \t]*\\-framework");
-  cmRegularExpression isEnvironment("\\${");
-  cmRegularExpression isUNIX("[ \t]*\\-l([^ \t]+)");
+  cmsys::RegularExpression isAframework("[ \t]*\\-framework");
+  cmsys::RegularExpression isEnvironment("\\${");
+  cmsys::RegularExpression isUNIX("[ \t]*\\-l([^ \t]+)");
   const cmTarget::LinkLibraries& libs = l->GetLinkLibraries();
   cmTarget::LinkLibraries::const_iterator lib = libs.begin();
   for(; lib != libs.end(); ++lib)

@@ -16,6 +16,8 @@
 =========================================================================*/
 #include "cmBuildNameCommand.h"
 
+#include <cmsys/RegularExpression.hxx>
+
 // cmBuildNameCommand
 bool cmBuildNameCommand::InitialPass(std::vector<std::string> const& args)
 {
@@ -28,7 +30,7 @@ bool cmBuildNameCommand::InitialPass(std::vector<std::string> const& args)
   if(cacheValue)
     {
     // do we need to correct the value? 
-    cmRegularExpression reg("[()/]");
+    cmsys::RegularExpression reg("[()/]");
     if (reg.find(cacheValue))
       {
       std::string cv = cacheValue;
@@ -53,7 +55,7 @@ bool cmBuildNameCommand::InitialPass(std::vector<std::string> const& args)
     if(buildname.length())
       {
       std::string RegExp = "([^ ]*) [^ ]* ([^ ]*) ";
-      cmRegularExpression reg( RegExp.c_str() );
+      cmsys::RegularExpression reg( RegExp.c_str() );
       if(reg.find(buildname.c_str()))
         {
         buildname = reg.match(1) + "-" + reg.match(2);

@@ -16,7 +16,8 @@
 =========================================================================*/
 #include "cmListFileCache.h"
 #include "cmSystemTools.h"
-#include "cmRegularExpression.h"
+
+#include <cmsys/RegularExpression.hxx>
 
 cmListFileCache* cmListFileCache::Instance = 0;
 
@@ -174,10 +175,10 @@ bool cmListFileCache::ParseFunction(std::ifstream& fin,
     {
     ++line;
     RemoveComments(inbuffer);
-    cmRegularExpression blankLine("^[ \t\r]*$");
-    cmRegularExpression oneLiner("^[ \t]*([A-Za-z_0-9]*)[ \t]*\\((.*)\\)[ \t\r]*$");
-    cmRegularExpression multiLine("^[ \t]*([A-Za-z_0-9]*)[ \t]*\\((.*)$");
-    cmRegularExpression lastLine("^(.*)\\)[ \t\r]*$");
+    cmsys::RegularExpression blankLine("^[ \t\r]*$");
+    cmsys::RegularExpression oneLiner("^[ \t]*([A-Za-z_0-9]*)[ \t]*\\((.*)\\)[ \t\r]*$");
+    cmsys::RegularExpression multiLine("^[ \t]*([A-Za-z_0-9]*)[ \t]*\\((.*)$");
+    cmsys::RegularExpression lastLine("^(.*)\\)[ \t\r]*$");
 
     // check for blank line or comment
     if(blankLine.find(inbuffer.c_str()) )
@@ -258,9 +259,9 @@ void cmListFileCache::GetArguments(std::string& line,
                                  std::vector<cmListFileArgument>& arguments)
 {
   // Match a normal argument (not quoted, no spaces).
-  cmRegularExpression normalArgument("[ \t]*(([^ \t\r\\]|[\\].)+)[ \t\r]*");
+  cmsys::RegularExpression normalArgument("[ \t]*(([^ \t\r\\]|[\\].)+)[ \t\r]*");
   // Match a quoted argument (surrounded by double quotes, spaces allowed).
-  cmRegularExpression quotedArgument("[ \t]*(\"([^\"\\]|[\\].)*\")[ \t\r]*");
+  cmsys::RegularExpression quotedArgument("[ \t]*(\"([^\"\\]|[\\].)*\")[ \t\r]*");
 
   bool done = false;
   while(!done)

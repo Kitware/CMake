@@ -22,6 +22,8 @@
 #include "cmMakeDepend.h"
 #include "cmCacheManager.h"
 #include "cmGeneratedFileStream.h"
+
+#include <cmsys/RegularExpression.hxx>
 #include <stdio.h>
 
 cmLocalUnixMakefileGenerator::cmLocalUnixMakefileGenerator()
@@ -565,7 +567,7 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
   std::string regexp = ".*\\";
   regexp += linkSuffix;
   regexp += "$";
-  cmRegularExpression hasSuffix(regexp.c_str());
+  cmsys::RegularExpression hasSuffix(regexp.c_str());
   std::string librariesLinked;
   const cmTarget::LinkLibraries& libs = tgt.GetLinkLibraries();
   for(cmTarget::LinkLibraries::const_iterator lib = libs.begin();
@@ -579,7 +581,7 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
     // if a variable expands to nothing.
     if (lib->first.size() == 0) continue;
     // if it is a full path break it into -L and -l
-    cmRegularExpression reg("([ \t]*\\-l)|([ \t]*\\-framework)|(\\${)");
+    cmsys::RegularExpression reg("([ \t]*\\-l)|([ \t]*\\-framework)|(\\${)");
     if(lib->first.find('/') != std::string::npos
        && !reg.find(lib->first))
       {
@@ -597,8 +599,8 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
           runtimeDirs.push_back( libpath );
           }
         }  
-      cmRegularExpression libname("^lib([^/]*)(\\.so|\\.lib|\\.dll|\\.sl|\\.a|\\.dylib).*");
-      cmRegularExpression libname_noprefix("([^/]*)(\\.so|\\.lib|\\.dll|\\.sl|\\.a|\\.dylib).*");
+      cmsys::RegularExpression libname("^lib([^/]*)(\\.so|\\.lib|\\.dll|\\.sl|\\.a|\\.dylib).*");
+      cmsys::RegularExpression libname_noprefix("([^/]*)(\\.so|\\.lib|\\.dll|\\.sl|\\.a|\\.dylib).*");
       if(libname.find(file))
         {
         // Library had "lib" prefix.

@@ -16,11 +16,11 @@
 =========================================================================*/
 #include "cmSystemTools.h"   
 #include <stdio.h>
-#include "cmRegularExpression.h"
 #include <ctype.h>
 #include <errno.h>
 #include <time.h>
 
+#include <cmsys/RegularExpression.hxx>
 #include <cmsys/Directory.hxx>
 
 // support for realpath call
@@ -76,7 +76,7 @@ void cmSystemTools::ExpandRegistryValues(std::string& source)
   // The "[^]]" part of this expression will match any character except
   // a close square-bracket.  The ']' character must be the first in the
   // list of characters inside the [^...] block of the expression.
-  cmRegularExpression regEntry("\\[(HKEY[^]]*)\\]");
+  cmsys::RegularExpression regEntry("\\[(HKEY[^]]*)\\]");
   
   // check for black line or comment
   while (regEntry.find(source))
@@ -263,7 +263,7 @@ bool cmSystemTools::IsOn(const char* val)
 
 bool cmSystemTools::IsNOTFOUND(const char* val)
 {
-  cmRegularExpression reg("-NOTFOUND$");
+  cmsys::RegularExpression reg("-NOTFOUND$");
   if(reg.find(val))
     {
     return true;
@@ -539,7 +539,7 @@ bool cmSystemTools::RunCommand(const char* command,
     // one set of quotes in the arguments
     if(count > 2)
       {
-      cmRegularExpression quoted("^\"([^\"]*)\"[ \t](.*)");
+      cmsys::RegularExpression quoted("^\"([^\"]*)\"[ \t](.*)");
       if(quoted.find(command))
         {
         std::string shortCmd;
@@ -609,7 +609,7 @@ void cmSystemTools::Glob(const char *directory, const char *regexp,
                          std::vector<std::string>& files)
 {
   cmsys::Directory d;
-  cmRegularExpression reg(regexp);
+  cmsys::RegularExpression reg(regexp);
   
   if (d.Load(directory))
     {

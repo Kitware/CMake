@@ -19,8 +19,9 @@
 
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
-#include "cmRegularExpression.h"
 #include "cmStandardIncludes.h"
+
+#include <cmsys/RegularExpression.hxx>
 
 /** \class cmDependInformation
  * \brief Store dependency information for a single source file.
@@ -150,8 +151,8 @@ protected:
 
   const cmMakefile* m_Makefile;
   bool m_Verbose;
-  cmRegularExpression m_IncludeFileRegularExpression;
-  cmRegularExpression m_ComplainFileRegularExpression;
+  cmsys::RegularExpression m_IncludeFileRegularExpression;
+  cmsys::RegularExpression m_ComplainFileRegularExpression;
   std::vector<std::string> m_IncludeDirectories;
   typedef std::map<cmStdString, cmDependInformation*> DependInformationMap;
   DependInformationMap m_DependInformationMap;
