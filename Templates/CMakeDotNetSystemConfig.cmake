@@ -52,6 +52,23 @@ SET (CMAKE_SIZEOF_SHORT     2   CACHE INTERNAL "Size of short data type")
 SET (CMAKE_SIZEOF_FLOAT     4   CACHE INTERNAL "Size of float data type")
 SET (CMAKE_SIZEOF_DOUBLE    8   CACHE INTERNAL "Size of double data type")
 
+# Suffixes
+
+SET (CMAKE_EXECUTABLE_SUFFIX ".exe" CACHE INTERNAL
+     "Executable suffix.")
+
+SET (CMAKE_MODULE_SUFFIX ".dll" CACHE INTERNAL 
+     "Module library suffix.")
+
+SET (CMAKE_OBJECT_FILE_SUFFIX ".obj" CACHE INTERNAL 
+     "Object file suffix.")
+
+SET (CMAKE_SHLIB_SUFFIX ".dll" CACHE INTERNAL 
+     "Shared library suffix.")
+
+SET (CMAKE_STATICLIB_SUFFIX ".lib" CACHE INTERNAL 
+     "Static library suffix.")
+
 # The following variables are advanced 
 
 MARK_AS_ADVANCED(
@@ -64,6 +81,9 @@ CMAKE_USE_WIN32_THREADS
 CMAKE_MAKE_PROGRAM
 CMAKE_EXTRA_LINK_FLAGS
 MICROSOFT_DEVENV
+CMAKE_EXECUTABLE_SUFFIX
+CMAKE_MODULE_SUFFIX
+CMAKE_OBJECT_FILE_SUFFIX
+CMAKE_SHLIB_SUFFIX
+CMAKE_STATICLIB_SUFFIX
 )
-
-
