@@ -96,7 +96,7 @@ int cmGlobalVisualStudio6Generator::TryCompile(const char *,
   cmSystemTools::ChangeDirectory(bindir);
   // if there are spaces in the makeCommand, assume a full path
   // and convert it to a path with no spaces in it as the
-  // RunCommand does not like spaces
+  // RunSingleCommand does not like spaces
 #if defined(_WIN32) && !defined(__CYGWIN__)      
   if(makeCommand.find(' ') != std::string::npos)
     {
@@ -116,7 +116,9 @@ int cmGlobalVisualStudio6Generator::TryCompile(const char *,
     }
   makeCommand += " - Debug\"";
   int retVal;
-  if (!cmSystemTools::RunCommand(makeCommand.c_str(), *output, retVal, 0, false))
+  int timeout = cmGlobalGenerator::s_TryCompileTimeout;
+  if (!cmSystemTools::RunSingleCommand(makeCommand.c_str(), output, 
+      &retVal, 0, false, timeout))
     {
     std::string e = "Error executing make program \"";
     e += originalCommand;

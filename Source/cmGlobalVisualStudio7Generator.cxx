@@ -66,7 +66,7 @@ int cmGlobalVisualStudio7Generator::TryCompile(const char *,
 
   // if there are spaces in the makeCommand, assume a full path
   // and convert it to a path with no spaces in it as the
-  // RunCommand does not like spaces
+  // RunSingleCommand does not like spaces
 #if defined(_WIN32) && !defined(__CYGWIN__)      
   if(makeCommand.find(' ') != std::string::npos)
     {
@@ -86,8 +86,9 @@ int cmGlobalVisualStudio7Generator::TryCompile(const char *,
     }
   
   int retVal;
-  if (!cmSystemTools::RunCommand(makeCommand.c_str(), *output, retVal, 
-                                 0, false))
+  int timeout = cmGlobalGenerator::s_TryCompileTimeout;
+  if (!cmSystemTools::RunSingleCommand(makeCommand.c_str(), output, &retVal, 
+      0, false, timeout))
     {
     cmSystemTools::Error("Generator: execution of devenv failed.");
     // return to the original directory

@@ -24,6 +24,8 @@
 #include <windows.h>
 #endif
 
+int cmGlobalGenerator::s_TryCompileTimeout = 0;
+
 cmGlobalGenerator::cmGlobalGenerator()
 {
 // do nothing duh
@@ -485,7 +487,9 @@ int cmGlobalGenerator::TryCompile(const char *, const char *bindir,
     makeCommand += " all";
     }
   int retVal;
-  if (!cmSystemTools::RunCommand(makeCommand.c_str(), *output, retVal, 0, false))
+  int timeout = cmGlobalGenerator::s_TryCompileTimeout;
+  if (!cmSystemTools::RunSingleCommand(makeCommand.c_str(), output, 
+      &retVal, 0, false, timeout))
     {
     cmSystemTools::Error("Generator: execution of make failed.");
     // return to the original directory

@@ -102,6 +102,7 @@ public:
 
   void SetConfiguredFilesPath(const char* s){m_ConfiguredFilesPath = s;}
   void GetLocalGenerators(std::vector<cmLocalGenerator *>&g) { g = m_LocalGenerators;}
+  static int s_TryCompileTimeout;
   
 protected:
   cmStdString m_FindMakeProgramFile;
