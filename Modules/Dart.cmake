@@ -22,7 +22,32 @@ IF(BUILD_TESTING)
   #
 
   # the project must have a DartConfig.cmake file
-  INCLUDE(${PROJECT_SOURCE_DIR}/DartConfig.cmake)
+  IF(EXISTS ${PROJECT_SOURCE_DIR}/DartConfig.cmake)
+    INCLUDE(${PROJECT_SOURCE_DIR}/DartConfig.cmake)
+  ELSE(EXISTS ${PROJECT_SOURCE_DIR}/DartConfig.cmake)
+    # Dashboard is opened for submissions for a 24 hour period starting at
+    # the specified NIGHLY_START_TIME. Time is specified in 24 hour format.
+    SET (NIGHTLY_START_TIME "00:00:00 EDT")
+
+    # Dart server to submit results (used by client)
+    SET (DROP_SITE "public.kitware.com")
+    SET (DROP_LOCATION "/incoming")
+    SET (DROP_SITE_USER "anonymous")
+    SET (DROP_SITE_PASSWORD "random@ringworld")
+    SET (DROP_SITE_MODE "active")
+    SET (TRIGGER_SITE "http://${DROP_SITE}/cgi-bin/Submit-Random-TestingResults.pl")
+
+    # Project Home Page
+    SET (PROJECT_URL "http://www.kitware.com")
+
+    # Dart server configuration 
+    SET (ROLLUP_URL "http://${DROP_SITE}/cgi-bin/random-rollup-dashboard.sh")
+    #SET (CVS_WEB_URL "")
+    #SET (CVS_WEB_CVSROOT "")
+
+    #SET (USE_DOXYGEN "Off")
+    #SET (DOXYGEN_URL "" )
+  ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/DartConfig.cmake)
 
   # make program just needs to use CMAKE_MAKE_PROGRAM which is required
   # to be defined by cmake 
