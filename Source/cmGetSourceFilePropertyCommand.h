@@ -54,8 +54,8 @@ public:
     {
       return
         "GET_SOURCE_FILE_PROPERTY(VAR file [ABSTRACT|WRAP_EXCLUDE|FLAGS]) "
-        "Get properties on a file.   The syntax for the command is to list all the files you want "
-        "to change, and then provide the values you want to set next.";
+        "Get a property from a source file.   The value of the property is stored  "
+        "in the variable VAR.";
     }
   
   cmTypeMacro(cmGetSourceFilePropertyCommand, cmCommand);
