@@ -1,3 +1,3 @@
 #ifdef __GNUC__
-THIS_IS_GNU
+void THIS_IS_GNU();
 #endif
