@@ -335,7 +335,22 @@ void cmBorlandMakefileGenerator::OutputMakefile(const char* file)
           if (tgts.find(l->first)==tgts.end())
             {
             std::string path = cmSystemTools::FindFile(libname.c_str(),linkdirs);
-            if (path.size()) libname = path;
+            if (path.size())
+              {
+              libname = path;
+              }
+            else
+              // if we can't find it - and it's not a target - and it has no path
+              // already specified, it must be in OUTDIRLIB from another
+              // makefile in the same project !
+              {
+              std::string path = cmSystemTools::GetFilenamePath(libname);
+              if (path.size()==0)
+                {
+                libname = "$(OUTDIRLIB)\\" + libname;
+                }
+              // otherwise just leave it alone
+              }
             }
           else
             {
