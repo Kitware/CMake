@@ -365,12 +365,12 @@ int cmCTestScriptHandler::RunConfigurationScript(cmCTest* ctest,
     }
   if (!m_ScriptHasRun)
     {
-    return this->RunCurrentScript(ctest);
+    return this->RunCurrentScript();
     }
   return result;
 }
 
-int cmCTestScriptHandler::RunCurrentScript(cmCTest* ctest)
+int cmCTestScriptHandler::RunCurrentScript()
 {
   int result;
 

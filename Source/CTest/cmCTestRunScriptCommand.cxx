@@ -22,7 +22,7 @@ bool cmCTestRunScriptCommand::InitialPass(std::vector<std::string> const& args)
 {
   if(args.size() < 1 )
     {
-    m_CTestScriptHandler->RunCurrentScript(m_CTest);
+    m_CTestScriptHandler->RunCurrentScript();
     return true;
     }
 

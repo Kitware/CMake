@@ -86,7 +86,7 @@ public:
    * Run a script
    */
   static bool RunScript(cmCTest* ctest, const char *script);
-  int RunCurrentScript(cmCTest* ctest);
+  int RunCurrentScript();
     
   /*
    * Empty Binary Directory

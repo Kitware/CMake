@@ -17,6 +17,7 @@
 #include "cmCTestSleepCommand.h"
 
 #include "cmCTestScriptHandler.h"
+#include <stdlib.h> // required for atoi
 
 bool cmCTestSleepCommand::InitialPass(
   std::vector<std::string> const& args)
