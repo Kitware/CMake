@@ -116,7 +116,7 @@ bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn)
   
   const char* cacheValue
     = m_Makefile->GetDefinition(args[0].c_str());
-  if(cacheValue && strcmp(cacheValue, "NOTFOUND"))
+  if(cacheValue && !cmSystemTools::IsNOTFOUND(cacheValue))
     { 
     return true;
     }
