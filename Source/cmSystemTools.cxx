@@ -810,7 +810,19 @@ bool cmSystemTools::DoesFileExistWithExtensions(
 
 bool cmSystemTools::cmCopyFile(const char* source, const char* destination)
 {
-  return Superclass::CopyFileAlways(source, destination);
+  mode_t perm = 0;
+  return cmSystemTools::GetPermissions(source, perm) && 
+    Superclass::CopyFileAlways(source, destination) &&
+    cmSystemTools::SetPermissions(destination, perm);
+}
+
+bool cmSystemTools::CopyFileIfDifferent(const char* source, 
+  const char* destination)
+{
+  mode_t perm = 0;
+  return cmSystemTools::GetPermissions(source, perm) && 
+    Superclass::CopyFileIfDifferent(source, destination) &&
+    cmSystemTools::SetPermissions(destination, perm);
 }
 
 void cmSystemTools::Glob(const char *directory, const char *regexp,

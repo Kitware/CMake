@@ -150,6 +150,8 @@ public:
   
   ///! Copy a file.
   static bool cmCopyFile(const char* source, const char* destination);
+  static bool CopyFileIfDifferent(const char* source, 
+    const char* destination);
 
   /**
    * Run an executable command and put the stdout in output.

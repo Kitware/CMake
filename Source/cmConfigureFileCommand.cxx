@@ -74,6 +74,8 @@ void cmConfigureFileCommand::ConfigureFile()
 {
   m_Makefile->AddCMakeDependFile(m_InputFile.c_str());
   cmSystemTools::ConvertToUnixSlashes(m_OuputFile);
+  mode_t perm = 0;
+  cmSystemTools::GetPermissions(m_InputFile.c_str(), perm);
   std::string::size_type pos = m_OuputFile.rfind('/');
   if(pos != std::string::npos)
     {
@@ -142,6 +144,7 @@ void cmConfigureFileCommand::ConfigureFile()
     cmSystemTools::CopyFileIfDifferent(tempOutputFile.c_str(),
       m_OuputFile.c_str());
     cmSystemTools::RemoveFile(tempOutputFile.c_str());
+    cmSystemTools::SetPermissions(m_OuputFile.c_str(), perm);
     }
 }
 
