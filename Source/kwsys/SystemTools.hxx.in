@@ -322,6 +322,12 @@ public:
   /** Check if the given file or directory is in subdirectory of dir */
   static bool IsSubDirectory(const char* fileOrDir, const char* dir);
 
+  /** Check if the given file exists in one of the parent directory of the
+   * given file or directory and if it does, return the name of the file.
+   * Toplevel specifies the top-most directory to where it will look.*/
+  static kwsys_stl::string FileExistsInParentDirectories(const char* fname,
+    const char* directory, const char* toplevel);
+
 protected:
   // these two functions can be called from ConvertToOutputPath
   /**
