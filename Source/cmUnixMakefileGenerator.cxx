@@ -187,6 +187,7 @@ void cmUnixMakefileGenerator::OutputExecutableRules(std::ostream& fout)
     linkLibs += *j;
     linkLibs += " ";
     }
+  std::string librariesLinked;
   std::vector<std::string>& libs = m_Makefile->GetLinkLibraries();
   for(j = libs.begin(); j != libs.end(); ++j)
     {
@@ -194,11 +195,15 @@ void cmUnixMakefileGenerator::OutputExecutableRules(std::ostream& fout)
     if((pos == std::string::npos || pos > 0)
        && (*j).find("${") == std::string::npos)
       {
-      linkLibs += "-l";
+      librariesLinked += "-l";
       }
-    linkLibs += *j;
-    linkLibs += " ";
+    librariesLinked += *j;
+    librariesLinked += " ";
     }
+  // Add these in twice so order does not matter
+  linkLibs += librariesLinked;
+  linkLibs += librariesLinked;
+  
   std::vector<std::string>& libsUnix = m_Makefile->GetLinkLibrariesUnix();
   for(j = libsUnix.begin(); j != libsUnix.end(); ++j)
     {
