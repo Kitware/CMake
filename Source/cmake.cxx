@@ -79,7 +79,7 @@ void cmake::Usage(const char* program)
     }
   std::cerr << ")";
   std::cerr << "\n-DVAR:TYPE=VALUE (create a cache file entry)";
-  std::cerr << "\n-i (puts cmake in wizard mode)\n";
+  std::cerr << "\n-i (puts cmake in wizard mode, not available for ccmake)\n";
 }
 
 // Parse the args
