@@ -16,42 +16,68 @@
 =========================================================================*/
 #include "cmSourceGroup.h"
 
-
-/**
- * The constructor initializes the group's regular expression.
- */
-cmSourceGroup::cmSourceGroup(const char* name, const char* regex):
-  m_Name(name),
-  m_GroupRegex(regex)
+//----------------------------------------------------------------------------
+cmSourceGroup::cmSourceGroup(const char* name, const char* regex): m_Name(name)
 {
+  this->SetGroupRegex(regex);
 }
 
-
-/**
- * Copy constructor.
- */
-cmSourceGroup::cmSourceGroup(const cmSourceGroup& r):
-  m_Name(r.m_Name),
-  m_GroupRegex(r.m_GroupRegex),
-  m_SourceFiles(r.m_SourceFiles)
+//----------------------------------------------------------------------------
+void cmSourceGroup::SetGroupRegex(const char* regex)
 {
+  if(regex)
+    {
+    m_GroupRegex.compile(regex);
+    }
+  else
+    {
+    m_GroupRegex.compile("^$");
+    }
 }
-
-
-/**
- * Returns whether the given name matches the group's regular expression.
- */
-bool cmSourceGroup::Matches(const char* name)
+  
+//----------------------------------------------------------------------------
+void cmSourceGroup::AddGroupFile(const char* name)
+{
+  m_GroupFiles.insert(name);
+}
+  
+//----------------------------------------------------------------------------
+const char* cmSourceGroup::GetName() const
+{
+  return m_Name.c_str();
+}
+  
+//----------------------------------------------------------------------------
+bool cmSourceGroup::MatchesRegex(const char* name)
 {
   return m_GroupRegex.find(name);
 }
 
+//----------------------------------------------------------------------------
+bool cmSourceGroup::MatchesFiles(const char* name)
+{
+  std::set<cmStdString>::const_iterator i = m_GroupFiles.find(name);
+  if(i != m_GroupFiles.end())
+    {
+    return true;
+    }
+  return false;
+}
 
-/**
- * Add a source to the group that the compiler will know how to build.
- */
-void cmSourceGroup::AddSource(const char* /* name */, const cmSourceFile* sf)
+//----------------------------------------------------------------------------
+void cmSourceGroup::AssignSource(const cmSourceFile* sf)
 {
   m_SourceFiles.push_back(sf);
 }
 
+//----------------------------------------------------------------------------
+const std::vector<const cmSourceFile*>& cmSourceGroup::GetSourceFiles() const
+{
+  return m_SourceFiles;
+}
+
+//----------------------------------------------------------------------------
+std::vector<const cmSourceFile*>& cmSourceGroup::GetSourceFiles()
+{
+  return m_SourceFiles;
+}

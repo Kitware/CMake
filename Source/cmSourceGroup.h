@@ -25,29 +25,56 @@ class cmSourceFile;
 /** \class cmSourceGroup
  * \brief Hold a group of sources as specified by a SOURCE_GROUP command.
  *
- * cmSourceGroup holds all the source files and corresponding commands
- * for files matching the regular expression specified for the group.
+ * cmSourceGroup holds a regular expression and a list of files.  When
+ * local generators are about to generate the rules for a target's
+ * files, the set of source groups is consulted to group files
+ * together.  A file is placed into the last source group that lists
+ * the file by name.  If no group lists the file, it is placed into
+ * the last group whose regex matches it.
  */
 class cmSourceGroup
 {
 public:
   cmSourceGroup(const char* name, const char* regex);
-  cmSourceGroup(const cmSourceGroup&);
   ~cmSourceGroup() {}
   
-  void SetGroupRegex(const char* regex)
-    { m_GroupRegex.compile(regex); }
-  void AddSource(const char* name, const cmSourceFile*);
-  const char* GetName() const
-    { return m_Name.c_str(); }
-  bool Matches(const char *);
+  /**
+   * Set the regular expression for this group.
+   */
+  void SetGroupRegex(const char* regex);
+  
+  /**
+   * Add a file name to the explicit list of files for this group.
+   */
+  void AddGroupFile(const char* name);
+  
+  /**
+   * Get the name of this group.
+   */
+  const char* GetName() const;
+  
+  /**
+   * Check if the given name matches this group's regex.
+   */
+  bool MatchesRegex(const char* name);
+  
+  /**
+   * Check if the given name matches this group's explicit file list.
+   */
+  bool MatchesFiles(const char* name);
+  
+  /**  
+   * Assign the given source file to this group.  Used only by
+   * generators.
+   */
+  void AssignSource(const cmSourceFile* sf);
 
   /**
-   * Get the list of the source files used by this target
+   * Get the list of the source files that have been assigned to this
+   * source group.
    */
-  const std::vector<const cmSourceFile*> &GetSourceFiles() const 
-    {return m_SourceFiles;}
-  std::vector<const cmSourceFile*> &GetSourceFiles() {return m_SourceFiles;}
+  const std::vector<const cmSourceFile*>& GetSourceFiles() const;
+  std::vector<const cmSourceFile*>& GetSourceFiles();
   
 private:
   /**
@@ -61,7 +88,13 @@ private:
   cmsys::RegularExpression m_GroupRegex;
   
   /**
-   * vector of all source files in this source group
+   * Set of file names explicitly added to this group.
+   */
+  std::set<cmStdString> m_GroupFiles;
+  
+  /**
+   * Vector of all source files that have been assigned to
+   * this group.
    */
   std::vector<const cmSourceFile*> m_SourceFiles;
 };

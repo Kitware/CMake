@@ -24,37 +24,60 @@ bool cmSourceGroupCommand::InitialPass(std::vector<std::string> const& args)
     this->SetError("called with incorrect number of arguments");
     return false;
     }  
-  
-  if ( args[1] == "REGULAR_EXPRESSION" && args.size() == 3 )
-    {
-    m_Makefile->AddSourceGroup(args[0].c_str(), args[2].c_str());
-    return true;
-    }
 
-  if ( args[1] == "FILES"  )
+  // Get the source group with the given name.
+  cmSourceGroup* sg = m_Makefile->GetSourceGroup(args[0].c_str());
+  if(!sg)
     {
-    cmSourceGroup* sg =  m_Makefile->GetSourceGroup(args[0].c_str());
-    if ( !sg )
-      {
-      m_Makefile->AddSourceGroup(args[0].c_str(), 0);
-      sg =  m_Makefile->GetSourceGroup(args[0].c_str());
-      }
-    unsigned int cc;
-    for ( cc = 2; cc < args.size(); cc ++ )
-      {
-      sg->AddSource(args[cc].c_str(), 0);
-      }
-    
-    return true;
+    m_Makefile->AddSourceGroup(args[0].c_str(), 0);
+    sg = m_Makefile->GetSourceGroup(args[0].c_str());
     }
   
-  if ( args.size() == 2 )
+  // Process arguments.
+  bool doingFiles = false;
+  for(unsigned int i=1; i < args.size(); ++i)
     {
-    m_Makefile->AddSourceGroup(args[0].c_str(), args[1].c_str());
-    return true;
+    if(args[i] == "REGULAR_EXPRESSION")
+      {
+      // Next argument must specify the regex.
+      if(i+1 < args.size())
+        {
+        ++i;
+        sg->SetGroupRegex(args[i].c_str());
+        }
+      else
+        {
+        this->SetError("REGULAR_EXPRESSION argument given without a regex.");
+        return false;
+        }
+      doingFiles = false;
+      }
+    else if(args[i] == "FILES")
+      {
+      // Next arguments will specify files.
+      doingFiles = true;
+      }
+    else if(doingFiles)
+      {
+      // Convert name to full path and add to the group's list.
+      std::string src = args[i].c_str();
+      if(!cmSystemTools::FileIsFullPath(src.c_str()))
+        {
+        src = m_Makefile->GetCurrentDirectory();
+        src += "/";
+        src += args[i];
+        }
+      sg->AddGroupFile(src.c_str());
+      }
+    else
+      {
+      cmOStringStream err;
+      err << "Unknown argument \"" << args[i].c_str() << "\".  "
+          << "Perhaps the FILES keyword is missing.\n";
+      this->SetError(err.str().c_str());
+      return false;
+      }
     }
-
-  this->SetError("called with incorrect number of arguments");
-  return false;
+  
+  return true;
 }
-

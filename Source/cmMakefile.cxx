@@ -1535,17 +1535,21 @@ cmSourceGroup&
 cmMakefile::FindSourceGroup(const char* source,
                             std::vector<cmSourceGroup> &groups)
 {
-  std::string file = source;
-  std::string::size_type pos = file.rfind('/');
-  if(pos != std::string::npos)
-    {
-    file = file.substr(pos+1);
-    }
-
+  // First search for a group that lists the file explicitly.
   for(std::vector<cmSourceGroup>::reverse_iterator sg = groups.rbegin();
       sg != groups.rend(); ++sg)
     {
-    if(sg->Matches(file.c_str()))
+    if(sg->MatchesFiles(source))
+      {
+      return *sg;
+      }
+    }
+  
+  // Now search for a group whose regex matches the file.
+  for(std::vector<cmSourceGroup>::reverse_iterator sg = groups.rbegin();
+      sg != groups.rend(); ++sg)
+    {
+    if(sg->MatchesRegex(source))
       {
       return *sg;
       }
@@ -1840,7 +1844,6 @@ cmSourceFile* cmMakefile::GetOrCreateSource(const char* sourceName,
   return ret;
 }
 
-  
 cmSourceFile* cmMakefile::AddSource(cmSourceFile const&sf)
 {
   // check to see if it exists

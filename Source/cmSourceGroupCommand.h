@@ -71,10 +71,14 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  SOURCE_GROUP(name regex)\n"
-      "Defines a new source group.  Any file whose name matches the regular "
-      "expression will be placed in this group.  The LAST regular expression "
-      "of all defined SOURCE_GROUPs that matches the file will be selected.";
+      "  SOURCE_GROUP(name [REGULAR_EXPRESSION regex] [FILES src1 src2 ...])\n"
+      "Defines a group into which sources will be placed in project files.  "
+      "This is mainly used to setup file tabs in Visual Studio.  "
+      "Any file whose name is listed or matches the regular expression will "
+      "be placed in this group.  If a file matches multiple groups, the LAST "
+      "group that explicitly lists the file will be favored, if any.  If no "
+      "group explicitly lists the file, the LAST group whose regular "
+      "expression matches the file will be favored.";
     }
   
   cmTypeMacro(cmSourceGroupCommand, cmCommand);

@@ -252,7 +252,7 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
     std::string source = (*i)->GetFullPath();
     cmSourceGroup& sourceGroup = m_Makefile->FindSourceGroup(source.c_str(),
                                                              sourceGroups);
-    sourceGroup.AddSource(source.c_str(), *i);
+    sourceGroup.AssignSource(*i);
     // while we are at it, if it is a .rule file then for visual studio 6 we
     // must generate it
     if ((*i)->GetSourceExtension() == "rule")

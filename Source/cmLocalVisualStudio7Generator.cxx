@@ -695,7 +695,7 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
       }
     cmSourceGroup& sourceGroup = 
       m_Makefile->FindSourceGroup(source.c_str(), sourceGroups);
-    sourceGroup.AddSource(source.c_str(), *i);
+    sourceGroup.AssignSource(*i);
     }
   
   // open the project
