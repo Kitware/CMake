@@ -711,3 +711,9 @@ std::string cmNMakeMakefileGenerator::CreateMakeVariable(const char* s, const ch
   cmSystemTools::ReplaceString(ret, "-", "_");
   return ret;
 }
+
+std::string cmNMakeMakefileGenerator::LowerCasePath(const char* path)
+{
+  return cmSystemTools::LowerCase(path);
+}
+

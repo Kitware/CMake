@@ -90,7 +90,7 @@ protected:
   virtual std::string ConvertToOutputPath(const char* s);
 
   virtual std::string CreateMakeVariable(const char* s, const char* s2);
-
+  virtual std::string LowerCasePath(const char* path);
 private:
   std::string m_LibraryPathOption;// option to specifiy a link path -LIBPATH 
   std::string m_LibraryLinkOption; // option to specify a library (like -l, empty for nmake)

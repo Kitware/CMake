@@ -169,6 +169,13 @@ protected:
       return std::string(s) + std::string(s2);
     }
   
+  ///! if the OS is case insensitive then return a lower case of the path.
+  virtual std::string LowerCasePath(const char* path)
+    {
+      return std::string(path);
+    }
+  
+  
 protected:
   std::string m_ExecutableOutputPath;
   std::string m_LibraryOutputPath;
