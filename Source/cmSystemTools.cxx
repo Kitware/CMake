@@ -240,7 +240,7 @@ void cmSystemTools::ReportLastSystemError(const char* msg)
 {
   std::string m = msg;
   m += ": System Error: ";
-  m += SystemTools::GetLastSystemError();
+  m += Superclass::GetLastSystemError();
   cmSystemTools::Error(m.c_str());
 }
 
@@ -602,7 +602,7 @@ bool cmSystemTools::DoesFileExistWithExtensions(
 
 bool cmSystemTools::cmCopyFile(const char* source, const char* destination)
 {
-  return SystemTools::CopyFileAlways(source, destination);
+  return Superclass::CopyFileAlways(source, destination);
 }
 
 void cmSystemTools::Glob(const char *directory, const char *regexp,
@@ -870,7 +870,7 @@ cmSystemTools::FileFormat cmSystemTools::GetFileFormat(const char* cext)
 bool cmSystemTools::Split(const char* s, std::vector<cmStdString>& l)
 {
   std::vector<std::string> temp;
-  if(!SystemTools::Split(s, temp))
+  if(!Superclass::Split(s, temp))
     {
     return false;
     }
