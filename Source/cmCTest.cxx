@@ -1247,7 +1247,8 @@ int cmCTest::CoverageDirectory()
 
   for ( cc = 0; cc < files.size(); cc ++ )
     {
-    std::string command = coverageCommand + " -l \"" + files[cc] + "\"";
+    std::string command = coverageCommand + " -o \"" + files[cc] + "\"";
+    command += " -l \"" + files[cc] + "\"";
     std::string output;
     int retVal = 0;
     //std::cout << "Run gcov on " << files[cc] << std::flush;
@@ -1282,11 +1283,16 @@ int cmCTest::CoverageDirectory()
   for ( cc = 0; cc < cfiles.size(); cc ++ )
     {
     std::string& fname = cfiles[cc];
-    //std::cout << "File: " << fname << std::endl;
+    //    std::cout << "File: " << fname << std::endl;
     if ( strcmp(fname.substr(fname.size()-5, 5).c_str(), ".gcov") == 0 )
       {
       files.push_back(fname);
       std::string::size_type pos = fname.find(".da.");
+      std::string::size_type pos2 = fname.find(".da##");
+      if(pos2 != fname.npos)
+        {
+        pos = pos2+1;
+        }
       if ( pos != fname.npos )
         {
         pos += 4;
@@ -1302,10 +1308,10 @@ int cmCTest::CoverageDirectory()
         }
       }
     }
-  for ( cc = 0; cc < files.size(); cc ++ )
-    {
-    //std::cout << "File: " << files[cc] << std::endl;
-    }
+  // for ( cc = 0; cc < files.size(); cc ++ )
+  //     {
+  //     std::cout << "File: " << files[cc] << std::endl;
+  //     }
 
   std::map<std::string, std::vector<std::string> >::iterator it;
   cmCTest::tm_CoverageMap coverageresults;
@@ -1323,7 +1329,7 @@ int cmCTest::CoverageDirectory()
 
   for ( it = sourcefiles.begin(); it != sourcefiles.end(); it ++ )
     {
-    //std::cerr << "Source file: " << it->first << std::endl;
+      //    std::cerr << "Source file: " << it->first << std::endl;
     std::vector<std::string> &gfiles = it->second;
     for ( cc = 0; cc < gfiles.size(); cc ++ )
       {
@@ -1377,12 +1383,15 @@ int cmCTest::CoverageDirectory()
           }
         cov.m_Show = true;
         }
+      //      std::cerr << "number of lines " << lines.size() << "\n";
       for ( cc = 0; cc < lines.size(); cc ++ )
         {
         std::string& line = lines[cc];
+        //std::cerr << line << "\n";
         std::string sub = line.substr(0, strlen("      ######"));
         int count = atoi(sub.c_str());
-        if ( sub.compare("      ######") == 0 )
+        if ( sub.compare(0, strlen("    #####"), "    #####") == 0 
+             || sub.compare("      ######") == 0 )
           {
           if ( covlines[cc] == -1 )
             {
