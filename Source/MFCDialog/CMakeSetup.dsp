@@ -54,7 +54,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /machine:I386
-# ADD LINK32 ../Release/CMakeLib.lib /nologo /subsystem:windows /machine:I386
+# ADD LINK32 ../Release/CMakeLib.lib rpcrt4.lib /nologo /subsystem:windows /machine:I386
 # SUBTRACT LINK32 /incremental:yes
 
 !ELSEIF  "$(CFG)" == "CMakeSetup - Win32 Debug"
@@ -82,7 +82,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 ../Debug/CMakeLib.lib /subsystem:windows /incremental:no /debug /machine:I386 /pdbtype:sept
+# ADD LINK32 ../Debug/CMakeLib.lib rpcrt4.lib /subsystem:windows /profile /debug /machine:I386
 # SUBTRACT LINK32 /nologo
 
 !ENDIF 
