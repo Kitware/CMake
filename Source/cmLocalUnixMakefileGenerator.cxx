@@ -1004,7 +1004,8 @@ void cmLocalUnixMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout,
                           targetPrefix,
                           targetSuffix,
                           createRule,
-                          "static library", 0);
+                          "static library",
+                          t.GetProperty("LINK_FLAGS"));
   
 }
 
