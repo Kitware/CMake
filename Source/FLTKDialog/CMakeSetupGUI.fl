@@ -1,0 +1,74 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0010 
+header_name {.h} 
+code_name {.cpp} 
+gridx 5 
+gridy 5 
+snap 3
+class CMakeSetupGUI {open
+} {
+  Function {CMakeSetupGUI()} {} {
+    Fl_Window dialogWindow {
+      label CMakeSetupDialog
+      xywh {542 411 563 363} visible
+    } {
+      Fl_Input sourcePathTextInput {
+        label {Where is the source code: }
+        callback {SetSourcePath( sourcePathTextInput->value() );} selected
+        xywh {219 15 200 20} labelsize 11 when 8 textsize 11
+      }
+      Fl_Button {} {
+        label {Browse...}
+        callback {BrowseForSourcePath();}
+        xywh {426 14 65 22} labelsize 11
+      }
+      Fl_Input binaryPathTextInput {
+        label {Where do you want to build the binaries: }
+        callback {SetBinaryPath( binaryPathTextInput->value() );}
+        xywh {219 50 200 20} labelsize 11 when 8 textsize 11
+      }
+      Fl_Button {} {
+        label {Browse...}
+        callback {BrowseForBinaryPath();}
+        xywh {426 50 65 22} labelsize 11
+      }
+      Fl_Button {} {
+        label Close
+        callback {Close()}
+        xywh {345 331 77 23} labelsize 11
+      }
+      Fl_Button {} {
+        label {Build Project Files}
+        callback {BuildProjectFiles();}
+        xywh {123 332 101 23} labelsize 11
+      }
+      Fl_Group {} {open
+        xywh {25 80 515 222} box ENGRAVED_FRAME labelsize 11 align 0
+      } {
+        Fl_Scroll {} {
+          label {Cache Values} open
+          xywh {40 98 485 190} type VERTICAL_ALWAYS box DOWN_BOX labelsize 11 align 5
+        } {}
+      }
+      Fl_Box {} {
+        label {Right click on cache entries for additional options}
+        xywh {141 305 275 25} labelsize 11
+      }
+    }
+  }
+  Function {~CMakeSetupGUI()} {} {}
+  Function {Close(void)} {return_type {virtual void}
+  } {}
+  Function {BuildProjectFiles(void)} {return_type {virtual void}
+  } {}
+  Function {BrowseForSourcePath(void)} {return_type {virtual void}
+  } {}
+  Function {BrowseForBinaryPath(void)} {return_type {virtual void}
+  } {}
+  Function {Show(void)} {return_type {virtual void}
+  } {}
+  Function {SetBinaryPath(const char *)} {return_type {virtual void}
+  } {}
+  Function {SetSourcePath(const char *)} {return_type {virtual void}
+  } {}
+} 
