@@ -207,23 +207,33 @@ void cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
                              "broken CMakeLists.txt file or a problematic release of "
                              "CMake");
         }
-      // try and load the configured file first
-      std::string loadedLang = "CMAKE_";
-      loadedLang +=  lang;
-      loadedLang += "_COMPILER_LOADED";
-      if(!mf->GetDefinition(loadedLang.c_str()))
+
+      // If the existing build tree was already configured with this
+      // version of CMake then try to load the configured file first
+      // to avoid duplicate compiler tests.
+      unsigned int cacheMajor = mf->GetCacheMajorVersion();
+      unsigned int cacheMinor = mf->GetCacheMinorVersion();
+      unsigned int selfMajor = cmMakefile::GetMajorVersion();
+      unsigned int selfMinor = cmMakefile::GetMinorVersion();
+      if(selfMajor == cacheMajor && selfMinor == cacheMinor)
         {
-        fpath = rootBin;
-        fpath += "/CMake";
-        fpath += lang;
-        fpath += "Compiler.cmake";
-        if(cmSystemTools::FileExists(fpath.c_str()))
+        std::string loadedLang = "CMAKE_";
+        loadedLang +=  lang;
+        loadedLang += "_COMPILER_LOADED";
+        if(!mf->GetDefinition(loadedLang.c_str()))
           {
-          if(!mf->ReadListFile(0,fpath.c_str()))
+          fpath = rootBin;
+          fpath += "/CMake";
+          fpath += lang;
+          fpath += "Compiler.cmake";
+          if(cmSystemTools::FileExists(fpath.c_str()))
             {
-            cmSystemTools::Error("Could not find cmake module file:", fpath.c_str());
+            if(!mf->ReadListFile(0,fpath.c_str()))
+              {
+              cmSystemTools::Error("Could not find cmake module file:", fpath.c_str());
+              }
+            this->SetLanguageEnabled(lang, mf);
             }
-          this->SetLanguageEnabled(lang, mf);
           }
         }
       
