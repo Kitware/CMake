@@ -175,6 +175,12 @@ class cmake
   ///! Parse command line arguments
   void SetArgs(const std::vector<std::string>&);
 
+  ///! Is this cmake running as a result of a TRY_COMPILE command
+  bool GetIsInTryCompile() { return m_InTryCompile; }
+  
+  ///! Is this cmake running as a result of a TRY_COMPILE command
+  void SetIsInTryCompile(bool i) { m_InTryCompile = i; }
+  
 protected:
   typedef std::map<cmStdString, cmCommand*> RegisteredCommandsMap;
   RegisteredCommandsMap m_Commands;
@@ -204,5 +210,6 @@ protected:
 private:
   bool m_Verbose;
   bool m_Local;
+  bool m_InTryCompile;
 };
 

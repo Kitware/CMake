@@ -37,6 +37,7 @@
 cmake::cmake()
 {
   m_Verbose = false;
+  m_InTryCompile = false;
   m_CacheManager = new cmCacheManager;
   m_GlobalGenerator = 0;
   this->AddDefaultCommands();
