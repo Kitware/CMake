@@ -126,7 +126,7 @@ cmMakefile::~cmMakefile()
       delete d->second;
       }
     }
-  std::list<cmFunctionBlocker *>::const_iterator pos;
+  std::list<cmFunctionBlocker *>::iterator pos;
   for (pos = m_FunctionBlockers.begin(); 
        pos != m_FunctionBlockers.end(); pos = m_FunctionBlockers.begin())
     {
@@ -275,7 +275,7 @@ bool cmMakefile::ReadListFile(const char* filename, const char* external)
       m_cmCurrentListFile = filename;
       }
     // loop over current function blockers and record them
-    std::list<cmFunctionBlocker *>::const_iterator pos;
+    std::list<cmFunctionBlocker *>::iterator pos;
     for (pos = m_FunctionBlockers.begin(); 
          pos != m_FunctionBlockers.end(); ++pos)
       {
@@ -354,7 +354,7 @@ bool cmMakefile::ReadListFile(const char* filename, const char* external)
   if (filename)
     {
     // loop over all function blockers to see if any block this command
-    std::list<cmFunctionBlocker *>::const_iterator pos;
+    std::list<cmFunctionBlocker *>::iterator pos;
     for (pos = m_FunctionBlockers.begin(); 
          pos != m_FunctionBlockers.end(); ++pos)
       {
@@ -1232,7 +1232,7 @@ bool cmMakefile::IsFunctionBlocked(const char *name,
     }
 
   // loop over all function blockers to see if any block this command
-  std::list<cmFunctionBlocker *>::const_iterator pos;
+  std::list<cmFunctionBlocker *>::iterator pos;
   std::vector<std::string> expandedArguments = args;
   for(std::vector<std::string>::iterator i = expandedArguments.begin();
       i != expandedArguments.end(); ++i)
