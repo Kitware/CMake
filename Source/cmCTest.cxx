@@ -4041,7 +4041,7 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
       }
     // return to the original directory
     cmSystemTools::ChangeDirectory(cwd.c_str());
-    retVal = 1;
+    return 1;
     }
 
   if(outstring)
