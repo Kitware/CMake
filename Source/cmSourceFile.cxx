@@ -108,6 +108,17 @@ void cmSourceFile::SetName(const char* name, const char* dir)
     m_FullPath = hname;
     return;
   }
+  //
+  hname = pathname;
+  hname += ".cpp";
+  if(cmSystemTools::FileExists(hname.c_str()))
+    {
+    m_SourceExtension = "cpp";
+    m_HeaderFileOnly = false;
+    m_FullPath = hname;
+    return;
+    }
+
   hname = pathname;
   hname += ".h";
   if(cmSystemTools::FileExists(hname.c_str()))
