@@ -60,6 +60,8 @@ int main(int,char *[])
       DumpInformation_BINARY_DIR "/../../CMakeOutput.log",
       DumpInformation_BINARY_DIR "/../../CMakeError.log",
       DumpInformation_BINARY_DIR "/../../Bootstrap.cmk/cmake_bootstrap.log",
+      DumpInformation_BINARY_DIR "/../../Source/cmsys/Configure.hxx",
+      DumpInformation_BINARY_DIR "/../../Source/cmsys/Configure.h",
       0
     };
 
