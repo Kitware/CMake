@@ -68,7 +68,7 @@ public:
     {
     return
       "BUILD_COMMAND(NAME MAKECOMMAND)\n"
-      "Within CMAKE set NAME to the command that will build this project from the command line using MAKECOMMAND.";
+      "Within CMAKE set NAME to the command that will build this project from the command line using MAKECOMMAND.   MAKECOMMAND should be msdev, nmake, make or one of the end use build tools.   This command will construct the command line to use that will build all the targets in this project.   This is useful for testing systems.";
     }
   
   cmTypeMacro(cmBuildCommand, cmCommand);

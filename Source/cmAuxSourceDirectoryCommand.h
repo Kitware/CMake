@@ -57,7 +57,7 @@ public:
   virtual const char* GetTerseDocumentation() 
     {
     return "Add all the source files found in the specified\n"
-           "directory to the build as source list NAME.";
+           "directory to the variable name specified.";
     }
   
   /**
@@ -66,7 +66,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "AUX_SOURCE_DIRECTORY(dir srcListName)";
+      "AUX_SOURCE_DIRECTORY(dir VARIABLE)";
     }
   
   cmTypeMacro(cmAuxSourceDirectoryCommand, cmCommand);

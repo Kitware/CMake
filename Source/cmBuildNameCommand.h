@@ -58,7 +58,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Set a CMAKE variable to the build type.";
+    return "Depricated command.  Use ${CMAKE_SYSTEM} and ${CMAKE_CXX_COMPILER} instead..";
     }
   
   /**

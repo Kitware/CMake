@@ -44,7 +44,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "A list of abstract classes, useful for wrappers.";
+    return "Depricated command, see SET_SOURCE_FILES_PROPERTIES.";
     }
   
   /**
@@ -53,7 +53,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
       return
-        "ABSTRACT_FILES(file1 file2 ..)";
+        "ABSTRACT_FILES(file1 file2 ..).";
     }
   
   cmTypeMacro(cmAbstractFilesCommand, cmCommand);

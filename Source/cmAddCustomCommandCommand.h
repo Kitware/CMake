@@ -88,7 +88,22 @@ public:
     return
       "ADD_CUSTOM_COMMAND([SOURCE source] [COMMAND command] TARGET target "
       "[ARGS [args...]] [DEPENDS [depends...]] [OUTPUTS [outputs...]] [COMMENT comment])\n"
-      "Add a custom command.";
+      "This defines a new command that can be executed during the build "
+      "process.  In makefile terms this creates a new target in the following form:<pre><code>\n"
+      "OUTPUT1: SOURCE DEPENDS\n"
+      "         COMAND ARGS\n"
+      "OUTPUT2: SOURCE DEPENDS\n"
+      "         COMAND ARGS\n"
+      "  Example of usage:\n"
+      "  ADD_CUSTOM_COMMAND(\n"
+      "      SOURCE ${VTK_TIFF_FAX_EXE} \n"
+      "      COMMAND ${VTK_TIFF_FAX_EXE} \n"
+      "      ARGS -c const ${VTK_BINARY_DIR}/Utilities/tiff/tif_fax3sm.c \n"
+      "      TARGET vtktiff \n"
+      "      OUTPUTS ${VTK_BINARY_DIR}/Utilities/tiff/tif_fax3sm.c\n"
+      "                    )\n"
+      "This will create custom target which will generate file tif_fax3sm.c\n"
+      "using command ${VTK_TIFF_FAX_EXE}.</pre></code>";
     }
   
   cmTypeMacro(cmAddCustomCommandCommand, cmCommand);

@@ -53,7 +53,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Add an executable to the project that uses the specified srclists";
+    return "Add an executable to the project that uses the specified source files.";
     }
   
   /**
@@ -62,13 +62,12 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "ADD_EXECUTABLE(exename srclist srclist srclist ...)\n"
-      "ADD_EXECUTABLE(exename WIN32 srclist srclist srclist ...)"
+      "ADD_EXECUTABLE(exename [WIN32] source1 source2 ... sourceN)\n"
       "This command adds an executable target to the current directory. "
-      "The executable will be built from the source files / source lists "
+      "The executable will be built from the list of source files "
       "specified. The second argument to this command can be WIN32 "
       "which indicates that the executable (when compiled on windows) "
-      "is a windows app (using WinMain)not a console app (using main).";
+      "is a windows app (using WinMain) not a console app (using main).";
     }
   
   cmTypeMacro(cmAddExecutableCommand, cmCommand);
