@@ -337,6 +337,15 @@ std::string cmLocalUnixMakefileGenerator::GetOutputExtension(const char* s)
 std::string cmLocalUnixMakefileGenerator::GetBaseTargetName(const char* n,
                                                             const cmTarget& t)
 {
+  std::string pathPrefix = "";
+#ifdef __APPLE__
+  if ( t.GetPropertyAsBool("MACOSX_BUNDLE") )
+    {
+    pathPrefix = n;
+    pathPrefix += ".app/Contents/MacOS/";
+    }
+#endif
+    
   const char* targetPrefix = t.GetProperty("PREFIX");
   const char* prefixVar = 0;
   switch(t.GetType())
@@ -361,7 +370,7 @@ std::string cmLocalUnixMakefileGenerator::GetBaseTargetName(const char* n,
     {
     targetPrefix = m_Makefile->GetSafeDefinition(prefixVar);
     }
-  std::string name = targetPrefix?targetPrefix:"";
+  std::string name = pathPrefix + (targetPrefix?targetPrefix:"");
   name += n;
   return name;
 }
