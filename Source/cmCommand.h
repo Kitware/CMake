@@ -92,6 +92,14 @@ public:
     }
 
   /**
+   * This determines if the method is deprecated or not. 
+   */
+  virtual bool IsDeprecated(int /*major*/, int /*minor*/)
+    {
+    return false;
+    }
+
+  /**
    * The name of the command as specified in CMakeList.txt.
    */
   virtual const char* GetName() = 0;
