@@ -59,10 +59,24 @@ bool cmBuildNameCommand::Invoke(std::vector<std::string>& args)
   if(m_Makefile->GetDefinition("UNIX"))
     {
     buildname = "";
-    cmSystemTools::RunCommand("uname",
+    cmSystemTools::RunCommand("uname -a",
                               buildname);
+    if(buildname.length())
+      {
+      std::string RegExp = "([^ ]*) [^ ]* ([^ ]*) ";
+      cmRegularExpression reg( RegExp.c_str() );
+      if(reg.find(buildname.c_str()))
+	{
+	buildname = reg.match(1) + "-" + reg.match(2);
+	}
+      }
+
     }
-    
+
+  std::string compiler = "-${CXX}";
+  m_Makefile->ExpandVariablesInString ( compiler );
+  buildname += compiler;
+  
   cmCacheManager::GetInstance()->
     AddCacheEntry("BUILDNAME",
                   buildname.c_str(),
