@@ -15,6 +15,7 @@
 
 =========================================================================*/
 #include "cmSourceFilesRemoveCommand.h"
+#include <stdlib.h> // required for atof
 
 // cmSourceFilesRemoveCommand
 bool cmSourceFilesRemoveCommand::InitialPass(std::vector<std::string> const& args)

@@ -17,6 +17,7 @@
 #include "cmAbstractFilesCommand.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
+#include <stdlib.h> // required for atof
 
 // cmAbstractFilesCommand
 bool cmAbstractFilesCommand::InitialPass(std::vector<std::string> const& args)

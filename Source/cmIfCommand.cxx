@@ -15,6 +15,7 @@
 
 =========================================================================*/
 #include "cmIfCommand.h"
+#include <stdlib.h> // required for atof
 
 bool cmIfFunctionBlocker::
 IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)

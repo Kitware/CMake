@@ -15,6 +15,7 @@
 
 =========================================================================*/
 #include "cmWrapExcludeFilesCommand.h"
+#include <stdlib.h> // required for atof
 
 // cmWrapExcludeFilesCommand
 bool cmWrapExcludeFilesCommand::InitialPass(std::vector<std::string> const& argsIn)

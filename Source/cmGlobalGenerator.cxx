@@ -18,6 +18,7 @@
 #include "cmLocalGenerator.h"
 #include "cmake.h"
 #include "cmMakefile.h"
+#include <stdlib.h> // required for atof
 
 cmGlobalGenerator::cmGlobalGenerator()
 {

@@ -15,6 +15,7 @@
 
 =========================================================================*/
 #include "cmSourceFilesCommand.h"
+#include <stdlib.h> // required for atof
 
 // cmSourceFilesCommand
 bool cmSourceFilesCommand::InitialPass(std::vector<std::string> const& args)

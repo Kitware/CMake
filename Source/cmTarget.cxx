@@ -20,6 +20,7 @@
 
 #include <map>
 #include <set>
+#include <stdlib.h> // required for atof
 
 
 void cmTarget::SetType(TargetType type)

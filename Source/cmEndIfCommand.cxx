@@ -15,7 +15,7 @@
 
 =========================================================================*/
 #include "cmEndIfCommand.h"
-
+#include <stdlib.h> // required for atof
 bool cmEndIfCommand::InitialPass(std::vector<std::string> const&)
 {
   const char* versionValue
