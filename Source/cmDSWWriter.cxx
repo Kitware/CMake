@@ -172,7 +172,7 @@ void cmDSWWriter::WriteDSWFile(std::ostream& fout)
           }
         }
       // Write the project into the DSW file
-      if (l->first.compare(0,26, "INCLUDE_EXTERNAL_MSPROJECT") == 0)
+      if (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
       {
         cmCustomCommand cc = l->second.GetCustomCommands()[0];
         
