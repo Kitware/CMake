@@ -103,8 +103,7 @@ bool cmGlobalKdevelopGenerator
 {
   cmMakefile* mf =lg->GetMakefile();
   std::string projectDir = projectDirIn + "/";
-  std::string filename = outputDir+"/" + std::string(mf->GetProjectName()) 
-    +".kdevelop.filelist";
+  std::string filename = outputDir+ "/" + projectname +".kdevelop.filelist";
 
   std::set<cmStdString> files;
   std::string tmp;
