@@ -155,7 +155,7 @@ void cmMakefile::Print() const
 
 bool cmMakefile::CommandExists(const char* name) const
 {
-  return m_LocalGenerator->GetGlobalGenerator()->GetCMakeInstance()->CommandExists(name);
+  return this->GetCMakeInstance()->CommandExists(name);
 }
 
 bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff)
@@ -170,7 +170,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff)
   std::string name = lff.m_Name;
   // execute the command
   cmCommand *rm = 
-    m_LocalGenerator->GetGlobalGenerator()->GetCMakeInstance()->GetCommand(name.c_str());
+    this->GetCMakeInstance()->GetCommand(name.c_str());
   if(rm)
     {
     cmCommand* usedCommand = rm->Clone();
@@ -349,7 +349,7 @@ bool cmMakefile::ReadListFile(const char* filename, const char* external)
 
 void cmMakefile::AddCommand(cmCommand* wg)
 {
-  m_LocalGenerator->GetGlobalGenerator()->GetCMakeInstance()->AddCommand(wg);
+  this->GetCMakeInstance()->AddCommand(wg);
 }
 
   // Set the make file 
@@ -1497,12 +1497,12 @@ cmVariableWatch *cmMakefile::GetVariableWatch() const
 
 cmCacheManager *cmMakefile::GetCacheManager() const
 {
-  return m_LocalGenerator->GetGlobalGenerator()->GetCMakeInstance()->GetCacheManager();
+  return this->GetCMakeInstance()->GetCacheManager();
 }
 
 bool cmMakefile::GetLocal() const
 {
-  return m_LocalGenerator->GetGlobalGenerator()->GetCMakeInstance()->GetLocal();
+  return this->GetCMakeInstance()->GetLocal();
 }
 void cmMakefile::DisplayStatus(const char* message, float s)
 {

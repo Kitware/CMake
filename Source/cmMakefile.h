@@ -31,6 +31,7 @@ class cmLocalGenerator;
 class cmMakeDepend;
 class cmSourceFile;
 class cmVariableWatch;
+class cmake;
 
 /** \class cmMakefile
  * \brief Process the input CMakeLists.txt file.
@@ -532,7 +533,6 @@ public:
    * given a current CMakeLists file name
    */
   cmCacheManager *GetCacheManager() const;
-  cmake *GetCMakeInstance() const;
   cmVariableWatch* GetVariableWatch() const;
 
   //! Determine wether this is a local or global build.
@@ -608,7 +608,12 @@ private:
   void PrintStringVector(const char* s, const std::vector<std::string>& v) const;
   void AddDefaultDefinitions();
   std::list<cmFunctionBlocker *> m_FunctionBlockers;
-  
+
+  /**
+   * Get the instance
+   */ 
+  cmake *GetCMakeInstance() const;
+
   typedef std::map<cmStdString, cmData*> DataMap;
   DataMap m_DataMap;
   bool m_Inheriting;
