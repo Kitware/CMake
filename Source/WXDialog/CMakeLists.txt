@@ -45,15 +45,19 @@ IF ( CMAKE_WX_CAN_COMPILE )
                 COMMAND ${CMAKE_COMMAND}
                 ARGS -E copy
                 ${EXECUTABLE_OUTPUT_PATH}/wxCMakeSetup
-                ${EXECUTABLE_OUTPUT_PATH}/CMake.app/Contents/MacOS/wxCMakeSetup
+                ${EXECUTABLE_OUTPUT_PATH}/CMake.app/Contents/MacOS/wxCMakeSetup.lala
                 TARGET wxCMakeSetup)
+    ADD_EXECUTABLE(CMake.app/Contents/MacOS/wxCMakeSetup ${WIN32_EXECUTABLE} ${WX_SRCS})
+    TARGET_LINK_LIBRARIES(CMake.app/Contents/MacOS/wxCMakeSetup ${WXWINDOWS_LIBRARY})
+    TARGET_LINK_LIBRARIES(CMake.app/Contents/MacOS/wxCMakeSetup CMakeLib)
+
     ADD_CUSTOM_COMMAND(
-                SOURCE wxCMakeSetup
+                SOURCE CMake.app/Contents/MacOS/wxCMakeSetup
                 COMMAND ${CMAKE_COMMAND}
                 ARGS -E chdir ${EXECUTABLE_OUTPUT_PATH}/CMake.app/Contents/MacOS
                 `${CMAKE_WX_CONFIG} --rezflags`
                 ${EXECUTABLE_OUTPUT_PATH}/CMake.app/Contents/MacOS/wxCMakeSetup
-                TARGET wxCMakeSetup
+                TARGET CMake.app/Contents/MacOS/wxCMakeSetup
                 )
   ENDIF(APPLE)
 
