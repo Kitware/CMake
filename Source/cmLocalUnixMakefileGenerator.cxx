@@ -2194,7 +2194,6 @@ OutputBuildObjectFromSource(std::ostream& fout,
     {
     flags += extraCompileFlags;
     }
-  flags += "$(INCLUDE_FLAGS) ";
   std::string sourceFile = 
     cmSystemTools::ConvertToOutputPath(source.GetFullPath().c_str()); 
   std::string buildType =  this->GetSafeDefinition("CMAKE_BUILD_TYPE");
@@ -2216,6 +2215,11 @@ OutputBuildObjectFromSource(std::ostream& fout,
       if(shared)
         {
         flags += this->GetSafeDefinition("CMAKE_SHARED_LIBRARY_C_FLAGS");
+        flags += " ";
+        }  
+      if(cmSystemTools::IsOn(m_Makefile->GetDefinition("BUILD_SHARED_LIBS")))
+        {
+        flags += this->GetSafeDefinition("CMAKE_SHARED_BUILD_C_FLAGS");
         flags += " ";
         }
       break;
@@ -2272,6 +2276,7 @@ OutputBuildObjectFromSource(std::ostream& fout,
                            sourceFile.c_str());
       break;
     } 
+  flags += "$(INCLUDE_FLAGS) ";
   // expand multi-command semi-colon separated lists
   // of commands into separate commands
   std::vector<std::string> commands;

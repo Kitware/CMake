@@ -1,6 +1,19 @@
+# Borland shared library issues:
+# When building dll's with borland, the run time dll c/c++ library from
+# borland must be used.   This is specified with the -tWR compiler option.
+# This flag must be present during compilation of c and c++ files and
+# for the linking of exe and dll files.   But wait, there is more,
+# the -tWR flag must come after the  -tWD and -tWM flags, but before the -tWC flag.
+# Order counts, so be careful!
+# if building static, you don't want the -tWR flag as it will make your program
+# depend on the borland run time dll.
+# So, if a project has CMAKE_BUILD_SHARED on, then the -tWR flag is added all over, and
+# it is left out if not.
+
 SET(CMAKE_LIBRARY_PATH_FLAG "-L")
 SET(CMAKE_LINK_LIBRARY_FLAG "")
 SET(CMAKE_SHARED_BUILD_CXX_FLAGS "-tWR")
+SET(CMAKE_SHARED_BUILD_C_FLAGS "-tWR")
 
 SET(CMAKE_START_TEMP_FILE "@&&|\n")
 SET(CMAKE_END_TEMP_FILE "\n|")
@@ -20,7 +33,7 @@ SET(CMAKE_CXX_CREATE_SHARED_MODULE ${CMAKE_CXX_CREATE_SHARED_LIBRARY})
 
 # create a C shared library
 SET(CMAKE_C_CREATE_SHARED_LIBRARY 
- "<CMAKE_C_COMPILER> ${CMAKE_START_TEMP_FILE}-e<TARGET> -tWD <LINK_LIBRARIES> <LINK_FLAGS>  <OBJECTS>${CMAKE_END_TEMP_FILE}"
+ "<CMAKE_C_COMPILER> ${CMAKE_START_TEMP_FILE}-e<TARGET> -tWD  <LINK_FLAGS> -tWR <LINK_LIBRARIES> <OBJECTS>${CMAKE_END_TEMP_FILE}"
  "implib ${CMAKE_START_TEMP_FILE}-w <TARGET_BASE>.lib <TARGET_BASE>.dll${CMAKE_END_TEMP_FILE}"
 )
 
