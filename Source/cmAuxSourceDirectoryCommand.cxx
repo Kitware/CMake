@@ -78,6 +78,8 @@ bool cmAuxSourceDirectoryCommand::InitialPass(std::vector<std::string> const& ar
             sourceListValue += ";";
             }
           sourceListValue += cmfile.GetSourceName();
+          sourceListValue += ".";
+          sourceListValue += cmfile.GetSourceExtension();
           }
         }
       }
