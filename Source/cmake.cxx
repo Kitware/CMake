@@ -324,7 +324,9 @@ int cmake::Generate(const std::vector<std::string>& args, bool buildMakefiles)
       }
     else
       {
-#if defined(_WIN32) && !defined(__CYGWIN__)  
+#if defined(__BORLANDC__)
+      gen = new cmBorlandMakefileGenerator;
+#elif defined(_WIN32) && !defined(__CYGWIN__)  
       gen = new cmMSProjectGenerator;
 #else
       gen = new cmUnixMakefileGenerator;

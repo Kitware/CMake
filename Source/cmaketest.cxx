@@ -61,7 +61,7 @@ int main (int argc, char *argv[])
   // now build the test
   std::string makeCommand = MAKEPROGRAM;
   makeCommand += " ";
-#if defined(_WIN32) && !defined(__CYGWIN__)
+#if defined(_WIN32) && !defined(__CYGWIN__) && !defined(__BORLANDC__)
   makeCommand += executableName;
   makeCommand += ".dsw /MAKE \"ALL_BUILD - Debug\" /REBUILD";
 #else
@@ -116,6 +116,15 @@ int main (int argc, char *argv[])
   if(cmSystemTools::FileExists(tryPath.c_str()))
     {
     fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
+    }
+  if(!cmSystemTools::FileExists(fullPath.c_str()))
+    {
+    std::cerr << "Could not find path to executable, perhaps it was not built: " <<
+      executableName << "\n";
+    std::cerr << "Error: " << fullPath.c_str() << "  execution failed\n";
+    // return to the original directory
+    cmSystemTools::ChangeDirectory(cwd.c_str());
+    return 1;
     }
   if (!cmSystemTools::RunCommand(fullPath.c_str(), output))
     {

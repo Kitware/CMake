@@ -26,6 +26,9 @@ IF(BUILD_TESTING)
 
   # find programs used by testing
   # look for the make program
+  IF(  BCB_BIN_PATH )
+    FIND_PROGRAM(MAKEPROGRAM make ${BCB_BIN_PATH} )
+  ENDIF( BCB_BIN_PATH )
   IF(NOT UNIX) 
     FIND_PROGRAM(MAKEPROGRAM msdev )
   ENDIF(NOT UNIX)
