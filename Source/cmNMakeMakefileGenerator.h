@@ -98,6 +98,8 @@ protected:
   virtual void OutputLinkLibraries(std::ostream& fout,
                                    const char* targetLibrary,
                                    const cmTarget &tgt);
+  virtual std::string GetOutputExtension(const char* sourceExtension); 
+  virtual void OutputIncludeMakefile(std::ostream&, const char* file);
 private:
   bool m_QuoteNextCommand;      // if this is true, OutputMakeRule
                                 // will not quote the next commands

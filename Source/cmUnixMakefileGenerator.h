@@ -151,6 +151,8 @@ protected:
                               const char* command2 = 0,
                               const char* command3 = 0,
                               const char* command4 = 0);
+  virtual std::string GetOutputExtension(const char* sourceExtension);
+  virtual void OutputIncludeMakefile(std::ostream&, const char* file);
   void SetObjectFileExtension(const char* e) { m_ObjectFileExtension = e;}
   void SetExecutableExtension(const char* e) { m_ExecutableExtension = e;}
   void SetStaticLibraryExtension(const char* e) {m_StaticLibraryExtension = e;}

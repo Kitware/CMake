@@ -24,6 +24,8 @@ SET (CMAKE_USE_WIN32_THREADS 1 CACHE BOOL "Use the win32 thread library")
 SET (CMAKE_STANDARD_WINDOWS_LIBRARIES "kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib" CACHE STRING "Libraries linked by defalut with all applications")
 SET (CMAKE_SHLIB_SUFFIX       ".dll" CACHE STRING "Shared library suffix")
 SET (CMAKE_MODULE_SUFFIX      ".dll" CACHE STRING "Module library suffix")
+SET (CMAKE_MAKE_PROGRAM      "nmake" CACHE STRING "Program used to build from makefiles.")
+
 
 
 

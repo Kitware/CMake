@@ -63,4 +63,5 @@ SET (CMAKE_COMPILER_IS_GNUCXX     @CMAKE_COMPILER_IS_GNUCXX@ CACHE INTERNAL "Is 
 SET (CMAKE_ANSI_CFLAGS     @CMAKE_ANSI_CFLAGS@ CACHE INTERNAL "What flags are required by the c++ compiler to make it ansi.")
 SET (CMAKE_ANSI_CXXFLAGS     @CMAKE_ANSI_CXXFLAGS@ CACHE INTERNAL "What flags are required by the c++ compiler to make it ansi.")
 SET (CMAKE_NO_EXPLICIT_TEMPLATE_INSTANTIATION       @CMAKE_NO_EXPLICIT_TEMPLATE_INSTANTIATION@  CACHE INTERNAL "does the compiler not support explicit template instantiation.")
+FIND_PROGRAM(CMAKE_MAKE_PROGRAM NAMES gmake make )
 

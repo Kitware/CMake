@@ -58,6 +58,7 @@ bool cmBuildCommand::InitialPass(std::vector<std::string> const& args)
   std::string makecommand;
   std::string makeprogram = args[1];
   m_Makefile->ExpandVariablesInString(makeprogram);
+  std::string compiler = m_Makefile->GetDefinition("CMAKE_CXX_COMPILER");
   if(makeprogram.find("msdev") != std::string::npos ||
      makeprogram.find("MSDEV") != std::string::npos )
     {
@@ -70,10 +71,11 @@ bool cmBuildCommand::InitialPass(std::vector<std::string> const& args)
     }
   else if(makeprogram.find("Borland") != std::string::npos ||
           makeprogram.find("BORLAND") != std::string::npos ||
-          makeprogram.find("borland") != std::string::npos)
+          makeprogram.find("borland") != std::string::npos ||
+          compiler.find("Borland") != std::string::npos)
     {
     makecommand = makeprogram;
-    makecommand += " -K";
+    makecommand += " -i";
     }
   else
     {

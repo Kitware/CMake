@@ -137,7 +137,7 @@ void cmNMakeMakefileGenerator::BuildInSubDirectory(std::ostream& fout,
     cmSystemTools::ConvertToWindowsSlashes(dir);
     fout << "\tif not exist " << dir.c_str() << " " 
          << "$(MAKE) rebuild_cache\n"
-         << "\tcd \".\\" << directory << "\"\n"
+         << "\tcd .\\" << directory << "\n"
          << "\t$(MAKE) -$(MAKEFLAGS) " << target1 << "\n";
     }
   if(target2)
@@ -146,7 +146,7 @@ void cmNMakeMakefileGenerator::BuildInSubDirectory(std::ostream& fout,
     }
   std::string currentDir = m_Makefile->GetCurrentOutputDirectory();
   cmSystemTools::ConvertToWindowsSlashes(currentDir);
-  fout << "\tcd \"" << currentDir.c_str() << "\"\n";
+  fout << "\tcd " << currentDir.c_str() << "\n";
 }
 
 // This needs to be overriden because nmake requires commands to be quoted
@@ -235,11 +235,15 @@ OutputBuildObjectFromSource(std::ostream& fout,
                             bool shared)
 { 
   std::string comment = "Build ";
-  std::string objectFile = std::string(shortName) + ".obj";
+  std::string objectFile = std::string(shortName) + 
+    this->GetOutputExtension(source.GetSourceExtension().c_str());
+  std::cerr << "short name  objectfile " << objectFile.c_str() << " " << shortName << "\n";
+  
   comment += objectFile + "  From ";
   comment += source.GetFullPath();
   std::string compileCommand;
   std::string ext = source.GetSourceExtension();
+  std::cerr << "ext " << ext.c_str() << "\n";
   if(ext == "c" )
     {
     compileCommand = "$(CMAKE_C_COMPILER) $(CMAKE_CFLAGS) ";
@@ -255,11 +259,22 @@ OutputBuildObjectFromSource(std::ostream& fout,
     }
   else if (ext == "rc")
     {
-    std::cerr << "rc file " << source.GetFullPath() << "\n";
+    compileCommand = "$(RC) /fo\"";
+    compileCommand += objectFile;
+    compileCommand += "\" ";
+    compileCommand += source.GetFullPath();
     }
   else if (ext == "def")
     {
     std::cerr << "def file " << source.GetFullPath() << "\n";
+    }
+  else if (ext == "ico")
+    {
+    std::cerr << "ico file " << source.GetFullPath() << "\n";
+    }
+  else if (ext == "rc2")
+    {
+    std::cerr << "rc2 file " << source.GetFullPath() << "\n";
     }
   // assume c++ if not c rc or def
   else
@@ -348,6 +363,11 @@ void cmNMakeMakefileGenerator::OutputExecutableRule(std::ostream& fout,
   command += "$(" + std::string(name) + "_SRC_OBJS) ";
   command += " /Fe" + m_ExecutableOutputPath + name;
   command += ".exe /link ";
+  if(t.GetType() == cmTarget::WIN32_EXECUTABLE)
+    {
+    command +=  " /subsystem:windows ";
+    }
+  
   std::strstream linklibs;
   this->OutputLinkLibraries(linklibs, 0, t);
   linklibs << std::ends;
@@ -412,3 +432,26 @@ void cmNMakeMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
     fout << linkLibs << "$(CMAKE_STANDARD_WINDOWS_LIBRARIES) ";
     }
 }
+
+
+std::string cmNMakeMakefileGenerator::GetOutputExtension(const char* s)
+{
+  std::string sourceExtension = s;
+  if(sourceExtension == "def" || sourceExtension == "ico" || sourceExtension == "rc2")
+    {
+    return "";
+    }
+  if(sourceExtension == "rc")
+    {
+    return ".res";
+    }
+  return ".obj";
+}
+
+
+void cmNMakeMakefileGenerator::OutputIncludeMakefile(std::ostream& fout,
+                                                     const char* file)
+{
+  fout << "!include " << file << "\n";
+}
+

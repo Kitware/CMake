@@ -24,15 +24,9 @@ IF(BUILD_TESTING)
   # the project must have a DartConfig.cmake file
   INCLUDE(${PROJECT_SOURCE_DIR}/DartConfig.cmake)
 
-  # find programs used by testing
-  # look for the make program
-  IF(  BCB_BIN_PATH )
-    FIND_PROGRAM(MAKEPROGRAM make ${BCB_BIN_PATH} )
-  ENDIF( BCB_BIN_PATH )
-  IF(NOT UNIX) 
-    FIND_PROGRAM(MAKEPROGRAM msdev )
-  ENDIF(NOT UNIX)
-  FIND_PROGRAM(MAKEPROGRAM NAMES gmake make )
+  # make program just needs to use CMAKE_MAKE_PROGRAM which is required
+  # to be defined by cmake 
+  SET(MAKEPROGRAM ${CMAKE_MAKE_PROGRAM})
   FIND_PROGRAM(CVSCOMMAND cvs )
   FIND_PROGRAM(COMPRESSIONCOMMAND NAMES gzip compress zip )
   FIND_PROGRAM(GUNZIPCOMMAND gunzip )

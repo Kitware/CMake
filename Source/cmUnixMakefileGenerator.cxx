@@ -271,8 +271,21 @@ void cmUnixMakefileGenerator::OutputMakefile(const char* file)
   // only add the depend include if the depend file exists
   if(cmSystemTools::FileExists(dependName.c_str()))
     {
-    fout << "include cmake.depends\n";
+    this->OutputIncludeMakefile(fout, "cmake.depends");
     }
+}
+
+void cmUnixMakefileGenerator::OutputIncludeMakefile(std::ostream& fout,
+                                                    const char* file)
+{
+  fout << "include " << file << "\n";
+}
+
+
+std::string 
+cmUnixMakefileGenerator::GetOutputExtension(const char* sourceExtension)
+{
+  return m_ObjectFileExtension;
 }
 
 
@@ -345,9 +358,13 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
 	  {
 	    if(!i->IsAHeaderFileOnly())
 	      {
-              fout << "\\\n" << i->GetSourceName() 
-                   << m_ObjectFileExtension << " ";
-	      }
+              std::string outExt(this->GetOutputExtension(i->GetSourceExtension().c_str()));
+              if(outExt.size())
+                {
+                fout << "\\\n" << i->GetSourceName() 
+                     << outExt.c_str() << " ";
+                }
+              }
 	  }
 	fout << "\n\n";
       }
