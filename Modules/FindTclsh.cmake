@@ -10,7 +10,7 @@
 # avoid finding the cygwin version on a Win32 build.
 IF(WIN32)
   IF(UNIX)
-    FIND_PROGRAM(TCL_TCLSH cygtclsh80)
+    FIND_PROGRAM(TCL_TCLSH NAMES cygtclsh83 cygtclsh80)
   ENDIF(UNIX)
 ENDIF(WIN32)
 
