@@ -644,7 +644,7 @@ int cmake::Configure(const char *arg0, const std::vector<std::string>* args)
       }
     else
       {
-#if defined(__BORLANDC__)
+#if defined(__BORLANDC__) && defined(_WIN32)
       this->SetGlobalGenerator(new cmGlobalBorlandMakefileGenerator);
 #elif defined(_WIN32) && !defined(__CYGWIN__)  
       this->SetGlobalGenerator(new cmGlobalVisualStudio6Generator);
