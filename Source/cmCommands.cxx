@@ -8,6 +8,7 @@
 #include "cmAddDefinitionsCommand.cxx"
 #include "cmAddExecutableCommand.cxx"
 #include "cmAddLibraryCommand.cxx"
+#include "cmAddTestCommand.cxx"
 #include "cmAuxSourceDirectoryCommand.cxx"
 #include "cmBuildCommand.cxx"
 #include "cmBuildNameCommand.cxx"
@@ -68,6 +69,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmAddDefinitionsCommand);
   commands.push_back(new cmAddExecutableCommand);
   commands.push_back(new cmAddLibraryCommand);
+  commands.push_back(new cmAddTestCommand);
   commands.push_back(new cmAuxSourceDirectoryCommand);
   commands.push_back(new cmBuildCommand);
   commands.push_back(new cmBuildNameCommand);
