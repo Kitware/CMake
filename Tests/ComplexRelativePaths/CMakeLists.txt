@@ -19,7 +19,7 @@ IF (EXISTS ${Complex_SOURCE_DIR}/VarTests.cmake)
   INCLUDE(${Complex_SOURCE_DIR}/VarTests.cmake)
 ENDIF (EXISTS ${Complex_SOURCE_DIR}/VarTests.cmake)
 
-LOAD_CACHE(${Complex_SOURCE_DIR}
+LOAD_CACHE(${Complex_SOURCE_DIR}/Cache
            EXCLUDE
              CACHE_TEST_VAR_EXCLUDED
            INCLUDE_INTERNALS
