@@ -308,13 +308,15 @@ bool cmMakefile::ReadListFile(const char* filename_in, const char* external_in)
       std::string parentList = this->GetParentListFileName(filename);
       if (parentList != "")
         {
-          std::string srcdir = m_cmCurrentDirectory;
-          std::string bindir = m_CurrentOutputDirectory;
+          std::string srcdir = this->GetCurrentDirectory();
+          std::string bindir = this->GetCurrentOutputDirectory();
 
           std::string::size_type pos = parentList.rfind('/');
 
-          m_cmCurrentDirectory = parentList.substr(0, pos);
-          m_CurrentOutputDirectory = m_HomeOutputDirectory + parentList.substr(m_cmHomeDirectory.size(), pos - m_cmHomeDirectory.size());
+          this->SetCurrentDirectory(parentList.substr(0, pos).c_str());
+          this->SetCurrentOutputDirectory((m_HomeOutputDirectory +
+                                           parentList.substr(m_cmHomeDirectory.size(),
+                                                             pos - m_cmHomeDirectory.size())).c_str());
 
           // if not found, oops
           if(pos == std::string::npos)
@@ -325,8 +327,8 @@ bool cmMakefile::ReadListFile(const char* filename_in, const char* external_in)
           this->ReadListFile(parentList.c_str());
 
           // restore the current directory
-          m_cmCurrentDirectory = srcdir;
-          m_CurrentOutputDirectory = bindir;    
+          this->SetCurrentDirectory(srcdir.c_str());
+          this->SetCurrentOutputDirectory(bindir.c_str());
         }
     }
 
