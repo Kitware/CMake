@@ -330,9 +330,10 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       {
       // skip for now
       }
-    else if(arg.find("--script",0) == 0)
+    else if(arg.find("-P",0) == 0)
       {
       // skip for now
+      i++;
       }
     else if(arg.find("--debug-trycompile",0) == 0)
       {
