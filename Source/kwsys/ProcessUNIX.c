@@ -50,6 +50,7 @@ do.
 #include <sys/time.h>  /* struct timeval */
 #include <sys/types.h> /* pid_t, fd_set */
 #include <sys/wait.h>  /* waitpid */
+#include <sys/stat.h>  /* open mode */
 #include <unistd.h>    /* pipe, close, fork, execvp, select, _exit */
 #include <fcntl.h>     /* fcntl */
 #include <errno.h>     /* errno */
