@@ -48,15 +48,32 @@ bool cmMarkAsAdvancedCommand::InitialPass(std::vector<std::string> const& args)
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  for(unsigned int i =0; i < args.size(); ++i)
+  unsigned int i =0;
+  const char* value = "1";
+  bool overwrite = false;
+  if(args[0] == "CLEAR" || args[0] == "FORCE")
+    {
+    overwrite = true;
+    if(args[0] == "CLEAR")
+      {
+      value = "0";
+      }
+    i = 1;
+    }
+  for(; i < args.size(); ++i)
     {
     std::string variable = args[i];
     variable += "-ADVANCED";
     std::string doc = "Advanced flag for variable: ";
     doc += args[i];
-    m_Makefile->AddCacheDefinition(variable.c_str(), "1",
-                                   doc.c_str(),
-                                   cmCacheManager::INTERNAL);
+    // if not CLEAR or FORCE or it is not yet defined,
+    // then define variable-ADVANCED
+    if(overwrite || !m_Makefile->GetDefinition(variable.c_str()))
+      {
+      m_Makefile->AddCacheDefinition(variable.c_str(), value,
+                                     doc.c_str(),
+                                     cmCacheManager::INTERNAL);      
+      }
     }
   return true;
 }

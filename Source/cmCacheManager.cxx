@@ -563,9 +563,11 @@ bool cmCacheManager::IsAdvanced(const char* key)
 {
   std::string advancedVar = key;
   advancedVar += "-ADVANCED";
-  if(cmCacheManager::GetInstance()->GetCacheEntry(advancedVar.c_str()))
+  const char* value = 
+    cmCacheManager::GetInstance()->GetCacheValue(advancedVar.c_str());
+  if(value)
     {
-    return true;
+    return cmSystemTools::IsOn(value);
     }
   return false;
 }

@@ -633,9 +633,7 @@ void CMakeSetupDialog::FillCacheGUIFromCacheManager()
 
     if(!m_AdvancedValues)
       {
-      std::string advancedVar = key;
-      advancedVar += "-ADVANCED";
-      if(cmCacheManager::GetInstance()->GetCacheEntry(advancedVar.c_str()))
+      if(cmCacheManager::GetInstance()->IsAdvanced(key))
         {
         continue;
         }
