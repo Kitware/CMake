@@ -55,7 +55,7 @@ int cmXMLParser::ParseFile(const char* file)
     return 0;
     }
 
-  ostringstream str;
+  cmOStringStream str;
   str << ifs.rdbuf();
   return this->Parse(str.str().c_str());
 }
