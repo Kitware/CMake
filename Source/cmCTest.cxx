@@ -1398,8 +1398,8 @@ int cmCTest::SubmitResults()
     url += m_DartConfiguration["DropSiteUser"] + ":" + 
       m_DartConfiguration["DropSitePassword"] + "@" + 
       m_DartConfiguration["DropSite"] + 
-      m_DartConfiguration["DropLocation:"];
-    submit.SubmitUsingFTP(files, prefix, url);
+      m_DartConfiguration["DropLocation"];
+    submit.SubmitUsingFTP(m_ToplevelPath+"/Testing/CDart", files, prefix, url);
     }
   else
     {
