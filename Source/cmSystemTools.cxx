@@ -438,6 +438,7 @@ bool cmSystemTools::RunSingleCommand(
     }
   else
     {
+    std::cerr << cmsysProcess_GetErrorString(cp) << "\n";
     result = false;
     }
   
@@ -1063,3 +1064,66 @@ bool cmSystemTools::CreateSymlink(const char* origName, const char* newName)
   return (symlink(origName, newName) >= 0);
 }
 #endif
+
+
+std::vector<std::string> cmSystemTools::SplitString(const char* p, char sep)
+{
+  std::string path = p;
+  std::vector<std::string> paths;
+  std::string::size_type pos1 = 0;
+  std::string::size_type pos2 = path.find(sep, pos1+1);
+  while(pos2 != std::string::npos)
+    {
+    paths.push_back(path.substr(pos1+1, pos2-pos1-1));
+    pos1 = pos2;
+    pos2 = path.find(sep, pos1+1);
+    } 
+  paths.push_back(path.substr(pos1+1, pos2-pos1-1));
+  
+  return paths;
+}
+
+
+// compute the relative path from here to there
+std::string cmSystemTools::RelativePath(const char* local, const char* remote)
+{
+#ifdef _WIN32
+  std::string lowerCaseLocal = cmSystemTools::LowerCase(std::string(local));
+  std::string lowerCaseRemote = cmSystemTools::LowerCase(std::string(remote));
+  remote = lowerCaseRemote.c_str();
+  local = lowerCaseLocal.c_str();
+#endif
+  // check for driveletter: as the start of the path
+  // if not on the same drive then full path to remote must be used.
+  if(local[0] && local[0] != '/')
+    {
+    if(remote[0] && local[0] != remote[0])
+      {
+      return remote;
+      }
+    }
+  std::string relativePath;     // result string
+  // split up both paths into arrays of strings using / as a separator
+  std::vector<std::string> fileSplit = cmSystemTools::SplitString(local);
+  std::vector<std::string> relativeSplit = cmSystemTools::SplitString(remote);
+  // count up how many mathing directory names there are from the start
+  int sameCount = 0;
+  while(sameCount < fileSplit.size()-1 && sameCount < relativeSplit.size()-1 && 
+        fileSplit[sameCount] == relativeSplit[sameCount])
+    {
+    sameCount++;
+    }
+  // put in sameCount number of ../ into the path
+  int i;
+  for(i = sameCount; i < fileSplit.size(); ++i)
+    {
+    relativePath += "../";
+    }
+  // now put the rest of path that did not match back
+  for(i = sameCount; i < relativeSplit.size()-1; ++i)
+    {
+    relativePath += relativeSplit[i] + "/";
+    }
+  relativePath += relativeSplit[i];
+  return relativePath;
+}

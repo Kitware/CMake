@@ -231,7 +231,9 @@ protected:
 
   /** Output an echo command to the Makefile */
   void OutputEcho(std::ostream& fout, const char *msg);
-    
+
+  ///! final processing for a path to be put in a makefile
+  std::string ConvertToMakefilePath(const char* p);
 protected:
   int m_MakefileVariableSize;
   std::map<cmStdString, cmStdString> m_MakeVariableMap;
@@ -241,6 +243,12 @@ protected:
   std::string m_MakeSilentFlag;
   std::string m_ExecutableOutputPath;
   std::string m_LibraryOutputPath;
+  std::string m_RelativePathToSourceDir;
+  std::string m_RelativePathToBinaryDir;
+  std::string m_CurrentOutputDirectory;
+  std::string m_HomeOutputDirectory;
+  std::string m_HomeDirectory;
+  std::string m_HomeOutputDirectoryNoSlash;
   bool m_WindowsShell;
   bool m_PassMakeflags;
 private:

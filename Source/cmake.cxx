@@ -275,6 +275,8 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       {
       directoriesSet = true;
       std::string path = arg.substr(2);
+      path = cmSystemTools::CollapseFullPath(path.c_str());
+      cmSystemTools::ConvertToUnixSlashes(path);
       this->SetHomeDirectory(path.c_str());
       }
     else if(arg.find("-S",0) == 0)
@@ -282,18 +284,24 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       directoriesSet = true;
       m_Local = true;
       std::string path = arg.substr(2);
+      path = cmSystemTools::CollapseFullPath(path.c_str());
+      cmSystemTools::ConvertToUnixSlashes(path);
       this->SetStartDirectory(path.c_str());
       }
     else if(arg.find("-O",0) == 0)
       {
       directoriesSet = true;
       std::string path = arg.substr(2);
+      path = cmSystemTools::CollapseFullPath(path.c_str());
+      cmSystemTools::ConvertToUnixSlashes(path);
       this->SetStartOutputDirectory(path.c_str());
       }
     else if(arg.find("-B",0) == 0)
       {
       directoriesSet = true;
       std::string path = arg.substr(2);
+      path = cmSystemTools::CollapseFullPath(path.c_str());
+      cmSystemTools::ConvertToUnixSlashes(path);
       this->SetHomeOutputDirectory(path.c_str());
       }
     else if(arg.find("-V",0) == 0)
