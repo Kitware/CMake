@@ -19,7 +19,7 @@ SET (CMAKE_AR                 "@CMAKE_AR@" CACHE FILEPATH
 SET (CMAKE_CXX_COMPILER       "@CXX@" CACHE FILEPATH "CXX compiler used.")
 SET (CMAKE_CXX_FLAGS          "@CXXFLAGS@" CACHE STRING 
         "Flags used by CXX compiler")
-SET (CMAKE_TEMPLATE_FLAGS     "@CMAKE_TEMPLATE_FLAGS@" CACHE 
+SET (CMAKE_TEMPLATE_FLAGS     "@CMAKE_TEMPLATE_FLAGS@" CACHE STRING
         "CXX template flags used by compiler")
 SET (CMAKE_C_COMPILER         "@CC@" CACHE FILEPATH
         "C compiler used.")
