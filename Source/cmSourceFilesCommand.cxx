@@ -56,15 +56,16 @@ bool cmSourceFilesCommand::InitialPass(std::vector<std::string>& args)
     cmSourceFile file;
     file.SetIsAnAbstractClass(false);
     std::string path = cmSystemTools::GetFilenamePath(copy);
-    if (path == "")
-      {
-      file.SetName(cmSystemTools::GetFilenameName(copy.c_str()).c_str(), 
-                   m_Makefile->GetCurrentDirectory());
-      }
-    else
+    // if this is a full path then 
+    if((path.size() && path[0] == '/') ||
+       (path.size() > 1 && path[1] == ':'))
       {
       file.SetName(cmSystemTools::GetFilenameName(copy.c_str()).c_str(), 
                    path.c_str());
+      }
+    else
+      {
+      file.SetName(i->c_str(), m_Makefile->GetCurrentDirectory());
       }
     m_Makefile->AddSource(file, args[0].c_str());
     }
