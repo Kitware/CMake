@@ -90,7 +90,7 @@ IF(BUILD_TESTING)
     ADD_CUSTOM_TARGET(NightlyTest 
     ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Test)
     ADD_CUSTOM_TARGET(NightlyCoverage 
-    ${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Coverage)
+    ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Coverage)
     ADD_CUSTOM_TARGET(NightlySubmit 
     ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Submit)
     ADD_CUSTOM_TARGET(NightlyDashboardStart 
