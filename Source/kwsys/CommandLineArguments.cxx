@@ -102,6 +102,18 @@ void CommandLineArguments::Initialize(int argc, const char* const argv[])
 }
 
 //----------------------------------------------------------------------------
+void CommandLineArguments::Initialize(int argc, char* argv[])
+{
+  int cc;
+
+  this->Initialize();
+  for ( cc = 1; cc < argc; cc ++ )
+    {
+    this->ProcessArgument(argv[cc]);
+    }
+}
+
+//----------------------------------------------------------------------------
 void CommandLineArguments::Initialize()
 {
   this->Internals->Argv.clear();

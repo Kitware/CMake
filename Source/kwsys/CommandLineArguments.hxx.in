@@ -86,6 +86,7 @@ public:
    * Initialize internal data structures. This should be called before parsing.
    */
   void Initialize(int argc, const char* const argv[]);
+  void Initialize(int argc, char* argv[]);
 
   /**
    * Initialize internal data structure and pass arguments one by one. This is
