@@ -672,11 +672,14 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
     else if (args[1] == "chdir" && args.size() >= 4)
       {
       std::string directory = args[2];
-      std::string command = args[3];
+      std::string command = "\"";
+      command += args[3];
+      command += "\"";
       for (std::string::size_type cc = 4; cc < args.size(); cc ++)
         {
-        command += " ";
+        command += " \"";
         command += args[cc];
+        command += "\"";
         }
 
       int retval = 0;
