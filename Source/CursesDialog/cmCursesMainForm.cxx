@@ -1041,7 +1041,6 @@ void cmCursesMainForm::HandleInput()
         CurrentForm = this; 
         this->Render(1,1,x,y);
         set_current_field(m_Form, cur);
-        delete msgs;
         }
       // display last errors
       else if ( key == 'l' )
@@ -1054,7 +1053,6 @@ void cmCursesMainForm::HandleInput()
         msgs->HandleInput();
         CurrentForm = this;
         this->Render(1,1,x,y);
-        delete msgs;
         }
       else if ( key == '/' )
         {
