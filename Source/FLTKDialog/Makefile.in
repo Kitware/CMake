@@ -1,12 +1,17 @@
 srcdir        = @srcdir@
 VPATH         = @srcdir@
 
-FLTK_LIB_DIR = @FLTK_LIB_DIR@
+FLTK_LIB_DIR     = @FLTK_LIB_DIR@
 FLTK_INCLUDE_DIR = @FLTK_INCLUDE_DIR@
+
+OPENGL_LIB_DIR     = @OPENGL_LIB_DIR@
+OPENGL_INCLUDE_DIR = @OPENGL_INCLUDE_DIR@
 
 CMAKE_CONFIG_DIR = @CMAKE_CONFIG_DIR@
 CXX           = @CXX@
 CXXFLAGS      = -DCMAKE_ROOT_DIR='"@CMAKE_ROOT_DIR@"' @CXXFLAGS@ -I${FLTK_INCLUDE_DIR} -DCMAKE_HAS_AUTOCONF -I${CMAKE_CONFIG_DIR}/Source
+
+LIBS          =  @LIBS@ -lfltk -lGL -L${FLTK_LIB_DIR}  -L${OPENGL_LIB_DIR}
 
 .SUFFIXES: .cxx .java .class
 
@@ -46,8 +51,10 @@ CMakeSetupGUI.o : $(DEPENDS)
 CMakeSetupGUIImplementation.o  : $(DEPENDS)
 FLTKDialog.o  : $(DEPENDS)
 FLTKPropertyList.o : $(DEPENDS)
+FLTKPropertyItemRow.o : $(DEPENDS)
+FLTKPropertyNameButtonWithHelp.o : $(DEPENDS)
 
 
 CMakeSetupGUI: ${OBJS}
-	${CXX} ${OBJS} ${CXXFLAGS} -L${FLTK_LIB_DIR}  -lfltk -lGL -o CMakeSetupGUI
+	${CXX} ${OBJS} ${CXXFLAGS} ${LIBS} -o CMakeSetupGUI
 
