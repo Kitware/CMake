@@ -117,10 +117,7 @@ public:
   /**
    * Set the cmake test mode (experimental, nightly, continuous).
    */
-  void SetTestModel(int mode)
-    {
-    m_TestModel = mode;
-    }
+  void SetTestModel(int mode);
 
   std::string GetTestModelString();
   static int GetTestModelFromString(const char* str);
@@ -356,7 +353,10 @@ private:
   tm_VectorOfStrings       m_CustomPostTest;
   tm_VectorOfStrings       m_CustomPreMemCheck;
   tm_VectorOfStrings       m_CustomPostMemCheck;
-
+  bool                     m_InteractiveDebugMode;
+  
+  void BlockTestErrorDiagnostics();
+  
   int ExecuteCommands(tm_VectorOfStrings& vec);
 
   /**

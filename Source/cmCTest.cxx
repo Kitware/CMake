@@ -359,6 +359,7 @@ cmCTest::cmCTest()
   m_ShowOnly               = false;
   m_RunConfigurationScript = false;
   m_TestModel              = cmCTest::EXPERIMENTAL;
+  m_InteractiveDebugMode   = true;
   m_TimeOut                = 0;
   m_CompatibilityMode      = 0;
   int cc; 
@@ -370,6 +371,11 @@ cmCTest::cmCTest()
 
 int cmCTest::Initialize()
 {
+  if(!m_InteractiveDebugMode)
+    {
+    this->BlockTestErrorDiagnostics();
+    }
+  
   m_ToplevelPath = cmSystemTools::GetCurrentWorkingDirectory();
   cmSystemTools::ConvertToUnixSlashes(m_ToplevelPath);
   if ( !this->ReadCustomConfigurationFileTree(m_ToplevelPath.c_str()) )
@@ -510,6 +516,21 @@ void cmCTest::UpdateCTestConfiguration()
     {
     m_TimeOut = atoi(m_DartConfiguration["TimeOut"].c_str());
     }
+}
+
+void cmCTest::BlockTestErrorDiagnostics()
+{
+  cmSystemTools::PutEnv("DART_TEST_FROM_DART=1");
+  cmSystemTools::PutEnv("DASHBOARD_TEST_FROM_CTEST=1");
+#if defined(_WIN32)
+  SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX); 
+#endif
+}
+
+void cmCTest::SetTestModel(int mode)
+{
+  m_InteractiveDebugMode = false;
+  m_TestModel = mode;
 }
 
 bool cmCTest::SetTest(const char* ttype)
@@ -4147,6 +4168,11 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
     if( arg.find("--tomorrow-tag",0) == 0 )
       {
       m_TomorrowTag = true;
+      }
+    if( arg.find("--interactive-debug-mode",0) == 0 && i < args.size() - 1 )
+      {
+      i++;
+      m_InteractiveDebugMode = cmSystemTools::IsOn(args[i].c_str());
       }
     if( arg.find("--compatibility-mode",0) == 0 )
       {
