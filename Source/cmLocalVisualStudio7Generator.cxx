@@ -1257,7 +1257,7 @@ cmLocalVisualStudio7Generator::WriteProjectStart(std::ostream& fout,
     {
     if (m_Version == 8)
       {
-      fout << "\tVersion=\"8.0\"\n";
+      fout << "\tVersion=\"8.00\"\n";
       }
     else
       {
