@@ -615,7 +615,7 @@ void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
       // put out a rule to build the library if it does not exist
       fout << libpath.c_str()
            << ":\n\tcd " << cacheValue 
-           << "; make " << m_LibraryOutputPath << library.c_str() << "\n\n";
+           << "; ${MAKE} " << m_LibraryOutputPath << library.c_str() << "\n\n";
       }
     }
 }
