@@ -82,7 +82,10 @@ public:
   std::vector<std::string> *GetConfigurations();
       
 protected:
-  virtual void WriteSLNFile(std::ostream& fout);
+  void CollectSubprojects();
+  void OutputSLNFile(const char* projectName,
+                     std::vector<cmLocalGenerator*>& generators);
+  virtual void WriteSLNFile(std::ostream& fout, std::vector<cmLocalGenerator*>& generators);
   virtual void WriteProject(std::ostream& fout, 
                             const char* name, const char* path,
                             const cmTarget &t);
@@ -103,6 +106,7 @@ protected:
 
   std::vector<std::string> m_Configurations;
   std::map<cmStdString, cmStdString> m_GUIDMap;
+  std::map<cmStdString, std::vector<cmLocalGenerator*> > m_SubProjectMap;
 };
 
 #endif

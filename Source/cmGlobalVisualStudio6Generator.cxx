@@ -156,12 +156,24 @@ cmLocalGenerator *cmGlobalVisualStudio6Generator::CreateLocalGenerator()
 
 void cmGlobalVisualStudio6Generator::Generate()
 {
+  // collect sub-projects
+  this->CollectSubprojects();
+  
   // add a special target that depends on ALL projects for easy build
-  // of Debug only
+  // of one configuration only.  
   std::vector<std::string> srcs;
-  m_LocalGenerators[0]->GetMakefile()->
-    AddUtilityCommand("ALL_BUILD", "echo","\"Build all projects\"",false,srcs);
-
+  std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
+  for(it = m_SubProjectMap.begin(); it!= m_SubProjectMap.end(); ++it)
+    {
+    std::vector<cmLocalGenerator*>& gen = it->second;
+    // add the ALL_BUILD to the first local generator of each project
+    if(gen.size())
+      {
+      gen[0]->GetMakefile()->
+        AddUtilityCommand("ALL_BUILD", "echo","\"Build all projects\"",false,srcs);
+      }
+    }
+  
   // add the Run Tests command
   this->SetupTests();
   
@@ -172,30 +184,177 @@ void cmGlobalVisualStudio6Generator::Generate()
   this->OutputDSWFile();
 }
 
-// output the DSW file
-void cmGlobalVisualStudio6Generator::OutputDSWFile()
-{ 
-  // create the dsw file name
-  std::string fname;
-  fname = m_CMakeInstance->GetStartOutputDirectory();
+// populate the m_SubProjectMap 
+void cmGlobalVisualStudio6Generator::CollectSubprojects()
+{
+  unsigned int i;
+  for(i = 0; i < m_LocalGenerators.size(); ++i)
+    {
+    std::string name = m_LocalGenerators[i]->GetMakefile()->GetProjectName();
+    m_SubProjectMap[name].push_back(m_LocalGenerators[i]);
+    std::vector<std::string> const& pprojects 
+      = m_LocalGenerators[i]->GetMakefile()->GetParentProjects();
+    for(int k =0; k < pprojects.size(); ++k)
+      {
+      m_SubProjectMap[pprojects[k]].push_back(m_LocalGenerators[i]);
+      }
+    }
+}
+
+// Write a DSW file to the stream
+void cmGlobalVisualStudio6Generator::WriteDSWFile(std::ostream& fout,
+                                                  std::vector<cmLocalGenerator*>& generators)
+{
+  // Write out the header for a DSW file
+  this->WriteDSWHeader(fout);
+  
+  // Get the home directory with the trailing slash
+  std::string homedir = m_CMakeInstance->GetHomeDirectory();
+  homedir += "/";
+    
+  unsigned int i;
+  bool doneAllBuild = false;
+  bool doneRunTests = false;
+  for(i = 0; i < generators.size(); ++i)
+    {
+    cmMakefile* mf = generators[i]->GetMakefile();
+    
+    // Get the source directory from the makefile
+    std::string dir = mf->GetStartDirectory();
+    // remove the home directory and / from the source directory
+    // this gives a relative path 
+    cmSystemTools::ReplaceString(dir, homedir.c_str(), "");
+
+    // Get the list of create dsp files names from the LocalGenerator, more
+    // than one dsp could have been created per input CMakeLists.txt file
+    // for each target
+    std::vector<std::string> dspnames = 
+      static_cast<cmLocalVisualStudio6Generator *>(generators[i])
+      ->GetCreatedProjectNames();
+    cmTargets &tgts = generators[i]->GetMakefile()->GetTargets();
+    cmTargets::iterator l = tgts.begin();
+    for(std::vector<std::string>::iterator si = dspnames.begin(); 
+        l != tgts.end(); ++l)
+      {
+      // special handling for the current makefile
+      if(mf == generators[0]->GetMakefile())
+        {
+        dir = "."; // no subdirectory for project generated
+        // if this is the special ALL_BUILD utility, then
+        // make it depend on every other non UTILITY project.
+        // This is done by adding the names to the GetUtilities
+        // vector on the makefile
+        if(l->first == "ALL_BUILD" && !doneAllBuild)
+          {
+          unsigned int j;
+          for(j = 0; j < generators.size(); ++j)
+            {
+            const cmTargets &atgts = 
+              generators[j]->GetMakefile()->GetTargets();
+            for(cmTargets::const_iterator al = atgts.begin();
+                al != atgts.end(); ++al)
+              {
+              if (al->second.IsInAll())
+                {
+                if (al->second.GetType() == cmTarget::UTILITY)
+                  {
+                  l->second.AddUtility(al->first.c_str());
+                  }
+                else
+                  {
+                  l->second.AddLinkLibrary(al->first, cmTarget::GENERAL);
+                  }
+                }
+              }
+            }
+          }
+        }
+      // Write the project into the DSW file
+      if (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
+        {
+        cmCustomCommand cc = l->second.GetPreLinkCommands()[0];
+        
+        // dodgy use of the cmCustomCommand's members to store the 
+        // arguments from the INCLUDE_EXTERNAL_MSPROJECT command
+        std::vector<std::string> stuff = cc.GetDepends();
+        std::vector<std::string> depends;
+        depends.push_back(cc.GetOutput());
+        this->WriteExternalProject(fout, stuff[0].c_str(), stuff[1].c_str(), depends);
+        ++si;
+        }
+      else 
+        {
+        if ((l->second.GetType() != cmTarget::INSTALL_FILES)
+            && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))
+          {
+          bool skip = false;
+          // skip ALL_BUILD and RUN_TESTS if they have already been added
+          if(l->first == "ALL_BUILD" )
+            {
+            if(doneAllBuild)
+              {
+              skip = true;
+              }
+            else
+              {
+              doneAllBuild = true;
+              }
+            }
+          if(l->first == "RUN_TESTS")
+            {
+            if(doneRunTests)
+              {
+              skip = true;
+              }
+            else
+              {
+              doneRunTests = true;
+              }
+            }
+          if(!skip)
+            {
+            this->WriteProject(fout, si->c_str(), dir.c_str(),l->second);
+            }
+          ++si;
+          }
+        }
+      }
+    }
+  
+  // Write the footer for the DSW file
+  this->WriteDSWFooter(fout);
+}
+
+void cmGlobalVisualStudio6Generator::OutputDSWFile(const char* projectName,
+                                                   std::vector<cmLocalGenerator*>& generators)
+{
+  if(generators.size() == 0)
+    {
+    return;
+    }
+  std::string fname = generators[0]->GetMakefile()->GetStartOutputDirectory();
   fname += "/";
-  if(strlen(m_LocalGenerators[0]->GetMakefile()->GetProjectName()))
-    {
-    fname += m_LocalGenerators[0]->GetMakefile()->GetProjectName();
-    }
-  else
-    {
-    fname += "Project";
-    }
+  fname += generators[0]->GetMakefile()->GetProjectName();
   fname += ".dsw";
   std::ofstream fout(fname.c_str());
   if(!fout)
     {
-    cmSystemTools::Error("Error can not open DSW file for write: "
-                         ,fname.c_str());
+    cmSystemTools::Error("Error can not open DSW file for write: ",
+                         fname.c_str());
     return;
     }
-  this->WriteDSWFile(fout);
+  this->WriteDSWFile(fout, generators);
+}
+
+// output the DSW file
+void cmGlobalVisualStudio6Generator::OutputDSWFile()
+{ 
+  std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
+  for(it = m_SubProjectMap.begin(); it!= m_SubProjectMap.end(); ++it)
+    {
+    std::vector<cmLocalGenerator*>& gen = it->second;
+    this->OutputDSWFile(it->first.c_str(), it->second);
+    }
 }
 
 
@@ -249,105 +408,19 @@ void cmGlobalVisualStudio6Generator::SetupTests()
     if (cmSystemTools::FileExists(fname.c_str()))
       {
       std::vector<std::string> srcs;
-      m_LocalGenerators[0]->GetMakefile()->
-        AddUtilityCommand("RUN_TESTS", ctest.c_str(), "-D $(IntDir)",false,srcs);
-      }
-    }
-}
-
-// Write a DSW file to the stream
-void cmGlobalVisualStudio6Generator::WriteDSWFile(std::ostream& fout)
-{
-  // Write out the header for a DSW file
-  this->WriteDSWHeader(fout);
-  
-  
-  // Get the home directory with the trailing slash
-  std::string homedir = m_CMakeInstance->GetHomeDirectory();
-  homedir += "/";
-    
-  unsigned int i;
-  for(i = 0; i < m_LocalGenerators.size(); ++i)
-    {
-    cmMakefile* mf = m_LocalGenerators[i]->GetMakefile();
-    
-    // Get the source directory from the makefile
-    std::string dir = mf->GetStartDirectory();
-    // remove the home directory and / from the source directory
-    // this gives a relative path 
-    cmSystemTools::ReplaceString(dir, homedir.c_str(), "");
-
-    // Get the list of create dsp files names from the LocalGenerator, more
-    // than one dsp could have been created per input CMakeLists.txt file
-    // for each target
-    std::vector<std::string> dspnames = 
-      static_cast<cmLocalVisualStudio6Generator *>(m_LocalGenerators[i])
-      ->GetCreatedProjectNames();
-    cmTargets &tgts = m_LocalGenerators[i]->GetMakefile()->GetTargets();
-    cmTargets::iterator l = tgts.begin();
-    for(std::vector<std::string>::iterator si = dspnames.begin(); 
-        l != tgts.end(); ++l)
-      {
-      // special handling for the current makefile
-      if(mf == m_LocalGenerators[0]->GetMakefile())
+      std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
+      for(it = m_SubProjectMap.begin(); it!= m_SubProjectMap.end(); ++it)
         {
-        dir = "."; // no subdirectory for project generated
-        // if this is the special ALL_BUILD utility, then
-        // make it depend on every other non UTILITY project.
-        // This is done by adding the names to the GetUtilities
-        // vector on the makefile
-        if(l->first == "ALL_BUILD")
+        std::vector<cmLocalGenerator*>& gen = it->second;
+        // add the ALL_BUILD to the first local generator of each project
+        if(gen.size())
           {
-          unsigned int j;
-          for(j = 0; j < m_LocalGenerators.size(); ++j)
-            {
-            const cmTargets &atgts = 
-              m_LocalGenerators[j]->GetMakefile()->GetTargets();
-            for(cmTargets::const_iterator al = atgts.begin();
-                al != atgts.end(); ++al)
-              {
-              if (al->second.IsInAll())
-                {
-                if (al->second.GetType() == cmTarget::UTILITY)
-                  {
-                  l->second.AddUtility(al->first.c_str());
-                  }
-                else
-                  {
-                  l->second.AddLinkLibrary(al->first, cmTarget::GENERAL);
-                  }
-                }
-              }
-            }
-          }
-        }
-      // Write the project into the DSW file
-      if (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
-        {
-        cmCustomCommand cc = l->second.GetPreLinkCommands()[0];
-        
-        // dodgy use of the cmCustomCommand's members to store the 
-        // arguments from the INCLUDE_EXTERNAL_MSPROJECT command
-        std::vector<std::string> stuff = cc.GetDepends();
-        std::vector<std::string> depends;
-        depends.push_back(cc.GetOutput());
-        this->WriteExternalProject(fout, stuff[0].c_str(), stuff[1].c_str(), depends);
-        ++si;
-        }
-      else 
-        {
-        if ((l->second.GetType() != cmTarget::INSTALL_FILES)
-            && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))
-          {
-          this->WriteProject(fout, si->c_str(), dir.c_str(),l->second);
-          ++si;
+          gen[0]->GetMakefile()->
+            AddUtilityCommand("RUN_TESTS", ctest.c_str(), "-D $(IntDir)",false,srcs);
           }
         }
       }
     }
-  
-  // Write the footer for the DSW file
-  this->WriteDSWFooter(fout);
 }
 
 

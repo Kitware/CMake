@@ -252,6 +252,10 @@ public:
     return m_ProjectName.c_str();
     }
   
+  std::vector<std::string> const& GetParentProjects()
+    {
+      return m_ParentProjects;
+    }
   /**
    * Set the name of the library.
    */
@@ -630,6 +634,7 @@ protected:
   std::string m_cmCurrentListFile;
 
   std::string m_ProjectName;    // project name
+  std::vector<std::string> m_ParentProjects;
 
   // libraries, classes, and executables
   cmTargets m_Targets;

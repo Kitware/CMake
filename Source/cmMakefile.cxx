@@ -954,6 +954,10 @@ void cmMakefile::RemoveDefinition(const char* name)
 
 void cmMakefile::SetProjectName(const char* p)
 {
+  if(m_ProjectName.size())
+    {
+    m_ParentProjects.push_back(m_ProjectName);
+    }
   m_ProjectName = p;
 }
 

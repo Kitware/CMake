@@ -157,8 +157,17 @@ void cmGlobalVisualStudio7Generator::SetupTests()
     if (cmSystemTools::FileExists(fname.c_str()))
       {
       std::vector<std::string> srcs;
-      m_LocalGenerators[0]->GetMakefile()->
-        AddUtilityCommand("RUN_TESTS", ctest.c_str(), "-D $(IntDir)",false, srcs);
+      std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
+      for(it = m_SubProjectMap.begin(); it!= m_SubProjectMap.end(); ++it)
+        {
+        std::vector<cmLocalGenerator*>& gen = it->second;
+        // add the ALL_BUILD to the first local generator of each project
+        if(gen.size())
+          {
+          gen[0]->GetMakefile()->
+            AddUtilityCommand("RUN_TESTS", ctest.c_str(), "-D $(IntDir)",false,srcs);
+          }
+        }
       }
     }
 }
@@ -233,11 +242,22 @@ void cmGlobalVisualStudio7Generator::GenerateConfigurations(cmMakefile* mf)
 
 void cmGlobalVisualStudio7Generator::Generate()
 {
+  // collect sub-projects
+  this->CollectSubprojects();
   // add a special target that depends on ALL projects for easy build
   // of Debug only
   std::vector<std::string> srcs;
-  m_LocalGenerators[0]->GetMakefile()->
-    AddUtilityCommand("ALL_BUILD", "echo","\"Build all projects\"",false, srcs);
+  std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
+  for(it = m_SubProjectMap.begin(); it!= m_SubProjectMap.end(); ++it)
+    {
+    std::vector<cmLocalGenerator*>& gen = it->second;
+    // add the ALL_BUILD to the first local generator of each project
+    if(gen.size())
+      {
+      gen[0]->GetMakefile()->
+        AddUtilityCommand("ALL_BUILD", "echo","\"Build all projects\"",false,srcs);
+      }
+    }
   
   // add the Run Tests command
   this->SetupTests();
@@ -249,42 +269,42 @@ void cmGlobalVisualStudio7Generator::Generate()
   this->OutputSLNFile();
 }
 
-// output the SLN file
-void cmGlobalVisualStudio7Generator::OutputSLNFile()
-{ 
-  // if this is an out of source build, create the output directory
-  if(strcmp(m_CMakeInstance->GetStartOutputDirectory(),
-            m_CMakeInstance->GetHomeDirectory()) != 0)
+void cmGlobalVisualStudio7Generator::OutputSLNFile(const char* projectName,
+                                                   std::vector<cmLocalGenerator*>& generators)
+{
+  if(generators.size() == 0)
     {
-    if(!cmSystemTools::MakeDirectory(m_CMakeInstance->GetStartOutputDirectory()))
-      {
-      cmSystemTools::Error("Error creating output directory for SLN file",
-                           m_CMakeInstance->GetStartOutputDirectory());
-      }
+    return;
     }
-  // create the dsw file name
-  std::string fname;
-  fname = m_CMakeInstance->GetStartOutputDirectory();
+  std::string fname = generators[0]->GetMakefile()->GetStartOutputDirectory();
   fname += "/";
-  if(strlen(m_LocalGenerators[0]->GetMakefile()->GetProjectName()) == 0)
-    {
-    m_LocalGenerators[0]->GetMakefile()->SetProjectName("Project");
-    }
-  fname += m_LocalGenerators[0]->GetMakefile()->GetProjectName();
+  fname += generators[0]->GetMakefile()->GetProjectName();
   fname += ".sln";
   std::ofstream fout(fname.c_str());
   if(!fout)
     {
-    cmSystemTools::Error("Error can not open SLN file for write: "
-                         ,fname.c_str());
+    cmSystemTools::Error("Error can not open DSW file for write: ",
+                         fname.c_str());
     return;
     }
-  this->WriteSLNFile(fout);
+  this->WriteSLNFile(fout, generators);
+}
+
+// output the SLN file
+void cmGlobalVisualStudio7Generator::OutputSLNFile()
+{ 
+  std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
+  for(it = m_SubProjectMap.begin(); it!= m_SubProjectMap.end(); ++it)
+    {
+    std::vector<cmLocalGenerator*>& gen = it->second;
+    this->OutputSLNFile(it->first.c_str(), it->second);
+    }
 }
 
 
 // Write a SLN file to the stream
-void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout)
+void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout,
+                                                  std::vector<cmLocalGenerator*>& generators)
 {
   // Write out the header for a SLN file
   this->WriteSLNHeader(fout);
@@ -292,13 +312,15 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout)
   // Get the home directory with the trailing slash
   std::string homedir = m_CMakeInstance->GetHomeDirectory();
   homedir += "/";
-    
+  bool doneAllBuild = false;
+  bool doneRunTests = false;
+  
   // For each cmMakefile, create a VCProj for it, and
   // add it to this SLN file
   unsigned int i;
-  for(i = 0; i < m_LocalGenerators.size(); ++i)
+  for(i = 0; i < generators.size(); ++i)
     {
-    cmMakefile* mf = m_LocalGenerators[i]->GetMakefile();
+    cmMakefile* mf = generators[i]->GetMakefile();
 
     // Get the source directory from the makefile
     std::string dir = mf->GetStartDirectory();
@@ -310,28 +332,28 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout)
     // than one dsp could have been created per input CMakeLists.txt file
     // for each target
     std::vector<std::string> dspnames = 
-      static_cast<cmLocalVisualStudio7Generator *>(m_LocalGenerators[i])
+      static_cast<cmLocalVisualStudio7Generator *>(generators[i])
       ->GetCreatedProjectNames();
-    cmTargets &tgts = m_LocalGenerators[i]->GetMakefile()->GetTargets();
+    cmTargets &tgts = generators[i]->GetMakefile()->GetTargets();
     cmTargets::iterator l = tgts.begin();
     for(std::vector<std::string>::iterator si = dspnames.begin(); 
         l != tgts.end(); ++l)
       {
       // special handling for the current makefile
-      if(mf == m_LocalGenerators[0]->GetMakefile())
+      if(mf == generators[0]->GetMakefile())
         {
         dir = "."; // no subdirectory for project generated
         // if this is the special ALL_BUILD utility, then
         // make it depend on every other non UTILITY project.
         // This is done by adding the names to the GetUtilities
         // vector on the makefile
-        if(l->first == "ALL_BUILD")
+        if(l->first == "ALL_BUILD" && !doneAllBuild)
           {
           unsigned int j;
-          for(j = 0; j < m_LocalGenerators.size(); ++j)
+          for(j = 0; j < generators.size(); ++j)
             {
             const cmTargets &atgts = 
-              m_LocalGenerators[j]->GetMakefile()->GetTargets();
+              generators[j]->GetMakefile()->GetTargets();
             for(cmTargets::const_iterator al = atgts.begin();
                 al != atgts.end(); ++al)
               {
@@ -369,7 +391,33 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout)
         if ((l->second.GetType() != cmTarget::INSTALL_FILES)
             && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))
           {
-          this->WriteProject(fout, si->c_str(), dir.c_str(),l->second);
+          bool skip = false;
+                if(l->first == "ALL_BUILD" )
+            {
+            if(doneAllBuild)
+              {
+              skip = true;
+              }
+            else
+              {
+              doneAllBuild = true;
+              }
+            }
+          if(l->first == "RUN_TESTS")
+            {
+            if(doneRunTests)
+              {
+              skip = true;
+              }
+            else
+              {
+              doneRunTests = true;
+              }
+            }
+          if(!skip)
+            {
+            this->WriteProject(fout, si->c_str(), dir.c_str(),l->second);
+            }
           ++si;
           }
         }
@@ -389,11 +437,11 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout)
        << "\tGlobalSection(ProjectDependencies) = postSolution\n";
 
   // loop over again and compute the depends
-  for(i = 0; i < m_LocalGenerators.size(); ++i)
+  for(i = 0; i < generators.size(); ++i)
     {
-    cmMakefile* mf = m_LocalGenerators[i]->GetMakefile();
+    cmMakefile* mf = generators[i]->GetMakefile();
     cmLocalVisualStudio7Generator* pg =  
-      static_cast<cmLocalVisualStudio7Generator*>(m_LocalGenerators[i]);
+      static_cast<cmLocalVisualStudio7Generator*>(generators[i]);
     // Get the list of create dsp files names from the cmVCProjWriter, more
     // than one dsp could have been created per input CMakeLists.txt file
     // for each target
@@ -416,11 +464,11 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout)
   fout << "\tEndGlobalSection\n";
   fout << "\tGlobalSection(ProjectConfiguration) = postSolution\n";
   // loop over again and compute the depends
-  for(i = 0; i < m_LocalGenerators.size(); ++i)
+  for(i = 0; i < generators.size(); ++i)
     {
-    cmMakefile* mf = m_LocalGenerators[i]->GetMakefile();
+    cmMakefile* mf = generators[i]->GetMakefile();
     cmLocalVisualStudio7Generator* pg =  
-      static_cast<cmLocalVisualStudio7Generator*>(m_LocalGenerators[i]);
+      static_cast<cmLocalVisualStudio7Generator*>(generators[i]);
     // Get the list of create dsp files names from the cmVCProjWriter, more
     // than one dsp could have been created per input CMakeLists.txt file
     // for each target
@@ -602,4 +650,21 @@ void cmGlobalVisualStudio7Generator::GetDocumentation(cmDocumentationEntry& entr
   entry.name = this->GetName();
   entry.brief = "Generates Visual Studio .NET 2002 project files.";
   entry.full = "";
+}
+
+// populate the m_SubProjectMap 
+void cmGlobalVisualStudio7Generator::CollectSubprojects()
+{
+  unsigned int i;
+  for(i = 0; i < m_LocalGenerators.size(); ++i)
+    {
+    std::string name = m_LocalGenerators[i]->GetMakefile()->GetProjectName();
+    m_SubProjectMap[name].push_back(m_LocalGenerators[i]);
+    std::vector<std::string> const& pprojects 
+      = m_LocalGenerators[i]->GetMakefile()->GetParentProjects();
+    for(int k =0; k < pprojects.size(); ++k)
+      {
+      m_SubProjectMap[pprojects[k]].push_back(m_LocalGenerators[i]);
+      }
+    }
 }
