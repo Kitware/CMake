@@ -738,13 +738,13 @@ void cmUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     "# the standard shell for make\n"
     "SHELL = /bin/sh\n"
     "\n"
-    "CMAKE_LIB_EXT          = @CMAKE_LIB_EXT@\n"
+    "CMAKE_LIB_EXT       = @CMAKE_LIB_EXT@\n"
     "CMAKE_RANLIB        = @CMAKE_RANLIB@\n"
-    "CMAKE_AR        = @CMAKE_AR@\n"
-    "CMAKE_CC            = @CMAKE_CC@\n"
-    "CMAKE_CFLAGS        = @CMAKE_CC_FLAGS@ @CMAKE_SHLIB_CFLAGS@ \n"
+    "CMAKE_AR            = @CMAKE_AR@\n"
+    "CMAKE_C_COMPILER    = @CMAKE_C_COMPILER@\n"
+    "CMAKE_CFLAGS        = @CMAKE_C_FLAGS@ @CMAKE_SHLIB_CFLAGS@ \n"
     "\n"
-    "CMAKE_CXX           = @CMAKE_CXX@\n"
+    "CMAKE_CXX_COMPILER  = @CMAKE_CXX_COMPILER@\n"
     "CMAKE_CXXFLAGS      = @CMAKE_CXX_FLAGS@ @CMAKE_SHLIB_CFLAGS@ @CMAKE_TEMPLATE_FLAGS@ \n"
     "\n"
     "CMAKE_SHLIB_BUILD_FLAGS = @CMAKE_SHLIB_BUILD_FLAGS@\n"
@@ -783,12 +783,12 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                        "# build c file",
                        ".c.o", 
                        0,
-                       "${CMAKE_CC} ${CMAKE_CFLAGS} ${INCLUDE_FLAGS} -c $< -o $@");
+                       "${CMAKE_C_COMPILER} ${CMAKE_CFLAGS} ${INCLUDE_FLAGS} -c $< -o $@");
   this->OutputMakeRule(fout, 
                        "# build cplusplus file",
                        ".cxx.o", 
                        0,
-                       "${CMAKE_CXX} ${CMAKE_CXXFLAGS} ${INCLUDE_FLAGS} -c $< -o $@");  this->OutputMakeRule(fout, 
+                       "${CMAKE_CXX_COMPILER} ${CMAKE_CXXFLAGS} ${INCLUDE_FLAGS} -c $< -o $@");  this->OutputMakeRule(fout, 
                        "Default build rule",
                        "all",
                        "Makefile cmake.depends ${TARGETS} ${SUBDIR_BUILD} ${CMAKE_COMMAND}",
