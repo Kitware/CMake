@@ -1285,6 +1285,7 @@ cmMSDotNETGenerator::CombineCommands(const cmSourceGroup::Commands &commands,
     totalCommandStr += temp;
     totalCommandStr += " ";
     totalCommandStr += c->second.m_Arguments;
+    totalCommandStr += "\n";
     totalCommand.Merge(c->second);
     }      
   // Create a dummy file with the name of the source if it does
