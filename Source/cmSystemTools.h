@@ -166,6 +166,15 @@ public:
    */
    static bool IsOff(const char* val);
 
+  static std::string FindProgram(const char* name,
+				 const std::vector<std::string>& = std::vector<std::string>());
+  
+  static bool FileIsDirectory(const char* name);
+  static std::string GetCurrentWorkingDirectory();
+  static std::string GetProgramPath(const char*);
+  static void SplitProgramPath(const char* in_name, std::string& dir, std::string& file);
+  static std::string CollapseFullPath(const char*);
+  
   static long int ModifiedTime(const char* filename);
 
 private:

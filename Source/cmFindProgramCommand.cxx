@@ -76,27 +76,21 @@ bool cmFindProgramCommand::Invoke(std::vector<std::string>& args)
     m_Makefile->ExpandVariablesInString(exp);
     path.push_back(exp);
     }
-  cmSystemTools::GetPath(path);
-
-  for(unsigned int k=0; k < path.size(); k++)
+  
+  // Try to find the program.
+  std::string result = cmSystemTools::FindProgram(i->c_str(), path);
+  
+  if(result != "")
     {
-    std::string tryPath = path[k];
-    tryPath += "/";
-    tryPath += *i;
-#ifdef _WIN32
-    tryPath += ".exe";
-#endif
-    if(cmSystemTools::FileExists(tryPath.c_str()))
-      {
-      // Save the value in the cache
-      cmCacheManager::GetInstance()->AddCacheEntry(define,
-                                                   tryPath.c_str(),
-                                                   "Path to a program.",
-                                                   cmCacheManager::FILEPATH);
-      m_Makefile->AddDefinition(define, tryPath.c_str());
-      return true;
-      }
+    // Save the value in the cache
+    cmCacheManager::GetInstance()->AddCacheEntry(define,
+                                                 result.c_str(),
+                                                 "Path to a program.",
+                                                 cmCacheManager::FILEPATH);
+    m_Makefile->AddDefinition(define, result.c_str());
+    return true;
     }
+  
   return false;
 }
 

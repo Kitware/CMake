@@ -53,6 +53,14 @@ inline int Mkdir(const char* dir)
 {
   return _mkdir(dir);
 }
+inline const char* Getcwd(char* buf, unsigned int len)
+{
+  return _getcwd(buf, len);
+}
+inline int Chdir(const char* dir)
+{
+  return _chdir(dir);
+}
 #else
 #include <sys/types.h>
 #include <fcntl.h>
@@ -60,6 +68,14 @@ inline int Mkdir(const char* dir)
 inline int Mkdir(const char* dir)
 {
   return mkdir(dir, 00777);
+}
+inline const char* Getcwd(char* buf, unsigned int len)
+{
+  return getcwd(buf, len);
+}
+inline int Chdir(const char* dir)
+{
+  return chdir(dir);
 }
 #endif
 
@@ -560,4 +576,140 @@ bool cmSystemTools::IsOff(const char* val)
     }
   return (v == "OFF" || v == "0" || v == "NO" || v == "FALSE" || 
 	  v == "N" || v == "NOTFOUND");
+}
+
+
+/**
+ * Find the executable with the given name.  Searches the given path and then
+ * the system search path.  Returns the full path to the executable if it is
+ * found.  Otherwise, the empty string is returned.
+ */
+std::string cmSystemTools::FindProgram(const char* name,
+				       const std::vector<std::string>& userPaths)
+{
+  // See if the executable exists as written.
+  if(cmSystemTools::FileExists(name))
+    {
+    return cmSystemTools::CollapseFullPath(name);
+    }
+    
+  // Add the system search path to our path.
+  std::vector<std::string> path = userPaths;
+  cmSystemTools::GetPath(path);
+  
+  for(std::vector<std::string>::const_iterator p = path.begin();
+      p != path.end(); ++p)
+    {
+    std::string tryPath = *p;
+    tryPath += "/";
+    tryPath += name;
+    if(cmSystemTools::FileExists(tryPath.c_str()))
+      {
+      return cmSystemTools::CollapseFullPath(tryPath.c_str());
+      }
+    tryPath += cmSystemTools::GetExecutableExtension();
+    if(cmSystemTools::FileExists(tryPath.c_str()))
+      {
+      return cmSystemTools::CollapseFullPath(tryPath.c_str());
+      }
+    }
+  
+  // Couldn't find the program.
+  return "";
+}
+
+bool cmSystemTools::FileIsDirectory(const char* name)
+{  
+  struct stat fs;
+  if(stat(name, &fs) == 0)
+    {
+#if _WIN32
+    return ((fs.st_mode & _S_IFDIR) != 0);
+#else
+    return S_ISDIR(fs.st_mode);
+#endif
+    }
+  else
+    {
+    return false;
+    }
+}
+
+
+std::string cmSystemTools::GetCurrentWorkingDirectory()
+{
+  char buf[2048];
+  std::string path = Getcwd(buf, 2048);
+  return path;
+}
+
+/**
+ * Given the path to a program executable, get the directory part of the path with the
+ * file stripped off.  If there is no directory part, the empty string is returned.
+ */
+std::string cmSystemTools::GetProgramPath(const char* in_name)
+{
+  std::string dir, file;
+  cmSystemTools::SplitProgramPath(in_name, dir, file);
+  return dir;
+}
+
+/**
+ * Given the path to a program executable, get the directory part of the path with the
+ * file stripped off.  If there is no directory part, the empty string is returned.
+ */
+void cmSystemTools::SplitProgramPath(const char* in_name,
+				     std::string& dir,
+				     std::string& file)
+{
+  dir = in_name;
+  file = "";
+  cmSystemTools::ConvertToUnixSlashes(dir);
+  
+  if(!cmSystemTools::FileIsDirectory(dir.c_str()))
+    {
+    std::string::size_type slashPos = dir.rfind("/");
+    if(slashPos != std::string::npos)      
+      {
+      file = dir.substr(slashPos+1) + file;
+      dir = dir.substr(0, slashPos);
+      }
+    else
+      {
+      file = dir;
+      dir = "";
+      }
+    }
+  
+  if((dir != "") && !cmSystemTools::FileIsDirectory(dir.c_str()))
+    {
+    std::string oldDir = in_name;
+    cmSystemTools::ConvertToUnixSlashes(oldDir);
+    cmSystemTools::Error("Error splitting file name off end of path:\n",
+                         oldDir.c_str());
+    dir = in_name;
+    return;
+    }
+}
+
+/**
+ * Given a path to a file or directory, convert it to a full path.
+ * This collapses away relative paths.  The full path is returned.
+ */
+std::string cmSystemTools::CollapseFullPath(const char* in_name)
+{
+  std::string dir, file;
+  cmSystemTools::SplitProgramPath(in_name, dir, file);
+  // Ultra-hack warning:
+  // This changes to the target directory, saves the working directory,
+  // and then changes back to the original working directory.
+  std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
+  if(dir != "") { Chdir(dir.c_str()); }
+  std::string newDir = cmSystemTools::GetCurrentWorkingDirectory();
+  Chdir(cwd.c_str());
+
+  cmSystemTools::ConvertToUnixSlashes(newDir);
+  std::string newPath = newDir+"/"+file;
+  
+  return newPath;
 }
