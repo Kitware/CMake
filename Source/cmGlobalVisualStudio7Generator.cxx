@@ -404,7 +404,7 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout)
       if ((l->second.GetType() != cmTarget::INSTALL_FILES)
           && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))
         {
-        this->WriteProjectConfigurations(fout, si->c_str());
+        this->WriteProjectConfigurations(fout, si->c_str(), l->second.IsInAll());
         ++si;
         }
       }
@@ -488,14 +488,18 @@ void cmGlobalVisualStudio7Generator::WriteProjectDepends(std::ostream& fout,
 // the libraries it uses are also done here
 void 
 cmGlobalVisualStudio7Generator::WriteProjectConfigurations(std::ostream& fout, 
-                                                           const char* name)
+                                                           const char* name, 
+                                                           bool in_all_build)
 {
   std::string guid = this->CreateGUID(name);
   for(std::vector<std::string>::iterator i = m_Configurations.begin();
       i != m_Configurations.end(); ++i)
     {
-    fout << "\t\t{" << guid << "}." << *i << ".ActiveCfg = " << *i << "|Win32\n"
-         << "\t\t{" << guid << "}." << *i << ".Build.0 = " << *i << "|Win32\n";
+    fout << "\t\t{" << guid << "}." << *i << ".ActiveCfg = " << *i << "|Win32\n";
+    if (in_all_build)
+      {
+      fout << "\t\t{" << guid << "}." << *i << ".Build.0 = " << *i << "|Win32\n";
+      }
     }
 }
 
