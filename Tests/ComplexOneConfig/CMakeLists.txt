@@ -140,6 +140,15 @@ GET_SOURCE_FILE_PROPERTY(FILE_HAS_ABSTRACT nonexisting_file2 ABSTRACT)
 GET_SOURCE_FILE_PROPERTY(FILE_HAS_WRAP_EXCLUDE nonexisting_file2 WRAP_EXCLUDE)
 GET_SOURCE_FILE_PROPERTY(FILE_COMPILE_FLAGS nonexisting_file2 COMPILE_FLAGS)
 
+SET_SOURCE_FILES_PROPERTIES(nonexisting_file3 PROPERTIES
+	                    GENERATED 1
+	                    ABSTRACT 1
+                            WRAP_EXCLUDE 1
+                            COMPILE_FLAGS "-foo -bar")
+GET_SOURCE_FILE_PROPERTY(FILE_HAS_ABSTRACT nonexisting_file3 ABSTRACT)
+GET_SOURCE_FILE_PROPERTY(FILE_HAS_WRAP_EXCLUDE nonexisting_file3 WRAP_EXCLUDE)
+GET_SOURCE_FILE_PROPERTY(FILE_COMPILE_FLAGS nonexisting_file3 COMPILE_FLAGS)
+
 #
 # Test registry (win32)
 # Create a file, put its path in a registry key, try to find the file in that
