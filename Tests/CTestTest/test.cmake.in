@@ -13,6 +13,7 @@ SET (CTEST_BINARY_NAME kwsysBin)
 
 # which ctest command to use for running the dashboard
 SET (CTEST_COMMAND 
+  "\"${CTEST_EXECUTABLE_NAME}\" --version"
   "\"${CTEST_EXECUTABLE_NAME}\" -D Experimental -A \"${CTEST_SCRIPT_DIRECTORY}/${CTEST_SCRIPT_NAME}\""
   )
 
