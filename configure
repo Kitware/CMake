@@ -1681,23 +1681,23 @@ $RUNMAKE
 
 else
   PRGNAME=configure # Should be `basename $0`
-  DIRNAME=Bootstrap
+  DIRNAME=Bootstrap.cmk
 
   # Check if the bootstrap directory already exists.
-  if test -d Bootstrap; then
+  if test -d ${DIRNAME}; then
     :
   else
     # if it does not create one
-    mkdir Bootstrap
+    mkdir ${DIRNAME}
   fi
   if (
     # Build bootstrap cmake
-    cd Bootstrap
+    cd ${DIRNAME}
     echo "Bootstrapping to directory `pwd`"
     BUILD_CMAKE_IN_SUBDIR=true $CMAKE_ROOT_DIR/$PRGNAME $ac_configure_args
   ); then
     # run cmake 
-    Bootstrap/Source/cmake $fullSrcDir
+    ${DIRNAME}/Source/cmake $fullSrcDir
 
     # run cmake depends
     $RUNMAKE depend
