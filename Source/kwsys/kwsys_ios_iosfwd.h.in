@@ -21,7 +21,7 @@
 #pragma warning (disable: 4702)
 #endif
 
-#if @KWSYS_NAMESPACE@_IOS_HAVE_ANSI
+#if @KWSYS_NAMESPACE@_IOS_USE_ANSI
 # include <iosfwd>
 # include <fstream>
 #else
@@ -33,7 +33,7 @@ class ofstream;
 class ostream;
 #endif
 
-#if !@KWSYS_NAMESPACE@_IOS_HAVE_SSTREAM
+#if !@KWSYS_NAMESPACE@_IOS_USE_SSTREAM
 namespace @KWSYS_NAMESPACE@_ios
 {
   using @KWSYS_NAMESPACE@_ios_namespace::fstream;

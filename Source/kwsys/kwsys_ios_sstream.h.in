@@ -21,7 +21,7 @@
 # define kwsys_stl @KWSYS_NAMESPACE@_stl
 #endif
 
-#if @KWSYS_NAMESPACE@_IOS_HAVE_SSTREAM
+#if @KWSYS_NAMESPACE@_IOS_USE_SSTREAM
 # ifdef _MSC_VER
 #  pragma warning (push, 1)
 #  pragma warning (disable: 4702)
@@ -35,11 +35,11 @@
 #  pragma warning (push, 1)
 #  pragma warning (disable: 4702)
 # endif
-# if @KWSYS_NAMESPACE@_IOS_HAVE_ANSI
+# if @KWSYS_NAMESPACE@_IOS_USE_ANSI
 #  include <strstream>
-# elif @KWSYS_NAMESPACE@_IOS_HAVE_STRSTREAM_H
+# elif @KWSYS_NAMESPACE@_IOS_USE_STRSTREAM_H
 #  include <strstream.h>
-# elif @KWSYS_NAMESPACE@_IOS_HAVE_STRSTREA_H
+# elif @KWSYS_NAMESPACE@_IOS_USE_STRSTREA_H
 #  include <strstrea.h>
 # endif
 # ifdef _MSC_VER
