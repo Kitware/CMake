@@ -136,8 +136,11 @@ bool cmCTestSubmit::SubmitUsingFTP(const std::string& localprefix,
         }
 
       ftpfile = ::fopen(local_file.c_str(), "rb");
-      //std::cout << "upload file: " << local_file.c_str() << " to " 
-      //          << upload_as.c_str() << std::endl;
+      if ( m_Verbose )
+        {
+        std::cout << "upload file: " << local_file.c_str() << " to " 
+                  << upload_as.c_str() << std::endl;
+        }
 
       //std::cout << "File is opened: " << ftpfile << std::endl;
 
