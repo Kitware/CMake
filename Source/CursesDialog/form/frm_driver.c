@@ -783,7 +783,7 @@ static void Undo_Justification(FIELD  * field, WINDOW * win)
 
   if (len>0)
     {
-      assert(win);
+      assert(win != 0);
       wmove(win,0,0);
       waddnstr(win,bp,len);
     }
@@ -808,7 +808,7 @@ static bool Check_Char(FIELDTYPE * typ, int ch, TypeArgument *argp)
     {
       if (typ->status & _LINKED_TYPE)
 	{
-	  assert(argp);
+	  assert(argp != 0);
 	  return(
 	    Check_Char(typ->left ,ch,argp->left ) ||
 	    Check_Char(typ->right,ch,argp->right) );
@@ -2560,14 +2560,14 @@ static bool Next_Choice(FIELDTYPE * typ, FIELD *field, TypeArgument *argp)
 
   if (typ->status & _LINKED_TYPE)
     {
-      assert(argp);
+      assert(argp != 0);
       return(
 	     Next_Choice(typ->left ,field,argp->left) ||
 	     Next_Choice(typ->right,field,argp->right) );
     } 
   else
     {
-      assert(typ->next);
+      assert(typ->next != 0);
       return typ->next(field,(void *)argp);
     }
 }
@@ -2592,14 +2592,14 @@ static bool Previous_Choice(FIELDTYPE *typ, FIELD *field, TypeArgument *argp)
 
   if (typ->status & _LINKED_TYPE)
     {
-      assert(argp);
+      assert(argp != 0);
       return(
 	     Previous_Choice(typ->left ,field,argp->left) ||
 	     Previous_Choice(typ->right,field,argp->right));
     } 
   else 
     {
-      assert(typ->prev);
+      assert(typ->prev != 0);
       return typ->prev(field,(void *)argp);
     }
 }
@@ -2673,7 +2673,7 @@ static bool Check_Field(FIELDTYPE *typ, FIELD *field, TypeArgument *argp)
       if (field->opts & O_NULLOK)
 	{
 	  char *bp = field->buf;
-	  assert(bp);
+	  assert(bp != 0);
 	  while(is_blank(*bp))
 	    { bp++; }
 	  if (*bp == '\0') 
@@ -2682,7 +2682,7 @@ static bool Check_Field(FIELDTYPE *typ, FIELD *field, TypeArgument *argp)
 
       if (typ->status & _LINKED_TYPE)
 	{
-	  assert(argp);
+	  assert(argp != 0);
 	  return( 
 		 Check_Field(typ->left ,field,argp->left ) ||
 		 Check_Field(typ->right,field,argp->right) );
@@ -3667,7 +3667,7 @@ int form_driver(FORM * form, int  c)
   if (!(form->field))
     RETURN(E_NOT_CONNECTED);
   
-  assert(form->page);
+  assert(form->page != 0);
   
   if (c==FIRST_ACTIVE_MAGIC)
     {

@@ -116,7 +116,7 @@ bool data_ahead(const FORM *form)
       int pos;
 
       field = form->current;
-      assert(form->w);
+      assert(form->w != 0);
 
       large_buffer = (field->cols > SMALL_BUFFER_SIZE);
       if (large_buffer)
@@ -124,7 +124,7 @@ bool data_ahead(const FORM *form)
       else
 	bp = buffer;
 
-      assert(bp);
+      assert(bp != 0);
       
       if (Single_Line_Field(field))
 	{

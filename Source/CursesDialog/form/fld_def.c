@@ -101,7 +101,7 @@ _nc_Make_Argument(const FIELDTYPE *typ, va_list *ap, int *err)
 	    *err += 1;
       } else 
 	{
-	  assert(typ->makearg);
+	  assert(typ->makearg != 0);
 	  if ( !(res=(TypeArgument *)typ->makearg(ap)) ) 
 	    *err += 1;
 	}
@@ -174,7 +174,7 @@ _nc_Free_Argument(const FIELDTYPE * typ, TypeArgument * argp)
   
   if (typ->status & _LINKED_TYPE)
     {
-      assert(argp);
+      assert(argp != 0);
       _nc_Free_Argument(typ->left ,argp->left );
       _nc_Free_Argument(typ->right,argp->right);
       free(argp);
@@ -231,7 +231,7 @@ _nc_Copy_Type(FIELD *dst, FIELD const *src)
 void
 _nc_Free_Type(FIELD *field)
 {
-  assert(field);
+  assert(field != 0);
   if (field->type) 
     field->type->ref--;
   _nc_Free_Argument(field->type,(TypeArgument *)(field->arg));

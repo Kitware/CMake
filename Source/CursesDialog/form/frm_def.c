@@ -78,7 +78,7 @@ static FIELD *Insert_Field_By_Position(FIELD *newfield, FIELD *head)
 {
   FIELD *current, *newhead;
   
-  assert(newfield);
+  assert(newfield != 0);
 
   if (!head)
     { /* empty list is trivial */
@@ -156,7 +156,7 @@ static int Connect_Fields(FORM  * form, FIELD ** fields)
   int maximum_row_in_field, maximum_col_in_field;
   _PAGE *pg;
   
-  assert(form);
+  assert(form != 0);
 
   form->field    = fields;
   form->maxfield = 0;
