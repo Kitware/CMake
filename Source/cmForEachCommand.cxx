@@ -40,6 +40,8 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
       std::vector<std::string>::const_iterator j = m_Args.begin();
       ++j;
       
+      std::string tmps;
+      cmListFileArgument arg;
       for( ; j != m_Args.end(); ++j)
         {   
         // Invoke all the functions that were collected in the block.
@@ -52,9 +54,10 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
                  m_Functions[c].m_Arguments.begin();
                k != m_Functions[c].m_Arguments.end(); ++k)
             {
-            std::string tmps = k->Value;
+            tmps = k->Value;
             cmSystemTools::ReplaceString(tmps, variable.c_str(), j->c_str());
-            cmListFileArgument arg(tmps, k->Quoted);
+            arg.Value = tmps;
+            arg.Quoted = k->Quoted;
             newLFF.m_Arguments.push_back(arg);
             }
           mf.ExecuteCommand(newLFF);

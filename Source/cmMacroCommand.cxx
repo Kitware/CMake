@@ -44,6 +44,9 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
   // so we look for macro invocations
   if(lff.m_Name == m_Args[0])
     {
+    std::string tmps;
+    cmListFileArgument arg;
+    std::string variable;
     // Expand the argument list to the macro.
     std::vector<std::string> expandedArguments;
     mf.ExpandArguments(lff.m_Arguments, expandedArguments);
@@ -71,16 +74,17 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
              m_Functions[c].m_Arguments.begin();
            k != m_Functions[c].m_Arguments.end(); ++k)
         {
-        std::string tmps = k->Value;
+        tmps = k->Value;
         for (unsigned int j = 1; j < m_Args.size(); ++j)
           {
-          std::string variable = "${";
+          variable = "${";
           variable += m_Args[j];
           variable += "}"; 
           cmSystemTools::ReplaceString(tmps, variable.c_str(),
                                        expandedArguments[j-1].c_str());
           }
-        cmListFileArgument arg(tmps, k->Quoted);
+        arg.Value = tmps;
+        arg.Quoted = k->Quoted;
         newLFF.m_Arguments.push_back(arg);
         }
       if(!mf.ExecuteCommand(newLFF))
