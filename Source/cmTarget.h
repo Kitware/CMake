@@ -121,6 +121,11 @@ private:
   typedef std::map< std::string, std::set< std::string > > DependencyMap;
 
   /**
+   * Maps a canonical library name to it's proper type
+   */
+  typedef std::map< std::string, std::pair<std::string,LinkLibraryType> > LibTypeMap;
+
+  /**
    * For each library in the link line, return a canonical name. The
    * orginal library names have complicated forms, such as "x",
    * "libx.so", "/full/path/libx.a", "-lx", and "-framework x".
@@ -146,7 +151,8 @@ private:
    * specified, and inserts them into \param dep_map.
    */
   void GatherDependencies( const cmMakefile& mf, const std::string& lib,
-                           DependencyMap& dep_map ) const;
+                           DependencyMap& dep_map,
+                           LibTypeMap& lib_map ) const;
 
   /**
    * Returns true if lib1 depends on lib2 according to \param
