@@ -669,13 +669,18 @@ AddCustomCommandToOutput(const char* outputIn,
       }
     // create a cmSourceFile for the output
     file = this->GetOrCreateSource(outName.c_str(), true);
-    // always mark as generated
-    file->SetProperty("GENERATED","1");
+    if(file)
+      {
+      // always mark as generated
+      file->SetProperty("GENERATED","1");
+      }
     }
   
   // always create the output and mark it generated
-  cmSourceFile *out = this->GetOrCreateSource(output.c_str(), true);
-  out->SetProperty("GENERATED","1");
+  if(cmSourceFile *out = this->GetOrCreateSource(output.c_str(), true))
+    {
+    out->SetProperty("GENERATED","1");
+    }
   
   std::vector<std::string> depends2(depends);
   if (main_dependency && main_dependency[0] != '\0')
@@ -689,11 +694,14 @@ AddCustomCommandToOutput(const char* outputIn,
     {
     cc->SetComment(comment);
     }
-  if (file->GetCustomCommand())
+  if(file)
     {
-    delete file->GetCustomCommand();
+    if (file->GetCustomCommand())
+      {
+      delete file->GetCustomCommand();
+      }
+    file->SetCustomCommand(cc);
     }
-  file->SetCustomCommand(cc);
 }
 
 void cmMakefile::
