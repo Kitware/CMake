@@ -270,7 +270,7 @@ bool ReadAValue(std::string &res, const char *key)
 void cmSystemTools::ExpandRegistryValues(std::string& source)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  cmRegularExpression regEntry("\\[(HKEY[A-Za-z0-9_~\\:\\-\\(\\)\\.]*)\\]");
+  cmRegularExpression regEntry("\\[(HKEY[A-Za-z0-9_~\\:\\-\\(\\)\\.\\; ]*)\\]");
   
   // check for black line or comment
   while (regEntry.find(source))
