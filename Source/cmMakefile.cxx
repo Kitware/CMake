@@ -1020,7 +1020,8 @@ void cmMakefile::AddUtilityCommand(const char* utilityName,
 cmSourceFile *cmMakefile::GetSourceFileWithOutput(const char *cname)
 {
   std::string name = cname;
-  
+  std::string out;
+
   // look through all the source files that have custom commands
   // and see if the custom command has the passed source file as an output
   // keep in mind the possible .rule extension that may be tacked on
@@ -1031,7 +1032,7 @@ cmSourceFile *cmMakefile::GetSourceFileWithOutput(const char *cname)
     if ((*i)->GetCustomCommand())
       {
       // is the output of the custom command match the source files name
-      std::string out = (*i)->GetCustomCommand()->GetOutput();
+      out = (*i)->GetCustomCommand()->GetOutput();
       if (out.rfind(name) != out.npos &&
           out.rfind(name) == out.size() - name.size())
         {
