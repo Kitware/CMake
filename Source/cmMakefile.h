@@ -62,6 +62,11 @@ class cmMakefile
 {
 public:
   /**
+   * Return a string version number for CMake 
+   */
+  static const char *GetVersion() {return "0.1";}
+  
+  /**
    * Construct an empty makefile.
    */
   cmMakefile();

@@ -61,13 +61,9 @@ int main(int ac, char** av)
 
 void cmake::Usage(const char* program)
 {
-  std::cerr << "Usage: " << program << " srcdir " 
-            << "-Ssource_start_directory "
-            << "-Ooutput_start_directory "
-            << "-Hsource_home_directory "
-            << "-Boutput_home_directory\n"
-            << "Where start directories are the current place in the tree,"
-    "and the home directories are the top.\n";
+  std::cerr << "cmake version " << cmMakefile::GetVersion() << "\n";
+  std::cerr << "Usage: " << program << " srcdir \n" 
+            << "Where cmake is run from the directory where you want the object files written\n";
 }
 
 // Parse the args

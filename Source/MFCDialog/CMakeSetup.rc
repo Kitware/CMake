@@ -89,25 +89,26 @@ IDD_CMakeSetupDialog_DIALOG DIALOGEX 0, 0, 375, 226
 STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
 CAPTION "CMakeSetupDialog"
-FONT 8, "MS Sans Serif", 0, 0, 0x1
+FONT 8, "MS Sans Serif"
 BEGIN
-    DEFPUSHBUTTON   "Close",IDOK,231,206,50,14
-    PUSHBUTTON      "Browse...",IDC_BUTTON2,269,5,43,13
-    LTEXT           "Where is the source code:",IDC_STATIC,39,6,86,9
-    PUSHBUTTON      "Browse...",IDC_BUTTON3,268,25,43,13
-    LTEXT           "Where do you want to build the binaries:",IDC_STATIC,1,
+    DEFPUSHBUTTON   "Close",IDOK,219,206,50,14
+    PUSHBUTTON      "Browse...",IDC_BUTTON2,286,5,43,13
+    RTEXT           "Where is the source code:",IDC_STATIC,52,6,86,9
+    PUSHBUTTON      "Browse...",IDC_BUTTON3,286,25,43,13
+    RTEXT           "Where do you want to build the binaries:",IDC_STATIC,10,
                     27,128,9
-    PUSHBUTTON      "Build Project Files",IDC_BuildProjects,81,205,67,15
+    PUSHBUTTON      "Build Project Files",IDC_BuildProjects,95,205,67,15
     GROUPBOX        "Cache Values",IDC_STATIC,9,43,356,141
     LISTBOX         IDC_LIST2,15,55,344,122,LBS_OWNERDRAWVARIABLE | 
                     LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | 
                     WS_HSCROLL | WS_TABSTOP
     CTEXT           "Right click on cache entries for additional options",
                     IDC_STATIC,19,190,333,11
-    COMBOBOX        IDC_WhereBuild,129,26,133,68,CBS_DROPDOWN | WS_VSCROLL | 
+    COMBOBOX        IDC_WhereBuild,147,25,133,68,CBS_DROPDOWN | WS_VSCROLL | 
                     WS_TABSTOP
-    COMBOBOX        IDC_WhereSource,127,6,135,66,CBS_DROPDOWN | WS_VSCROLL | 
+    COMBOBOX        IDC_WhereSource,147,5,133,66,CBS_DROPDOWN | WS_VSCROLL | 
                     WS_TABSTOP
+    LTEXT           "Static",IDC_CMAKE_VERSION,3,211,70,13,SS_CENTERIMAGE
 END
 
 
