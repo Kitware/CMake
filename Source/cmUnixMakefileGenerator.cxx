@@ -604,8 +604,17 @@ void cmUnixMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
   std::string command = "$(RM) lib";
   command += name;
   command += "$(SHLIB_SUFFIX)";
-  std::string command2 = "$(CMAKE_CXX_COMPILER)  $(CMAKE_SHLIB_LINK_FLAGS) "
-    "$(CMAKE_SHLIB_BUILD_FLAGS) $(CMAKE_CXX_FLAGS) -o \\\n";
+  std::string command2;
+  if(t.HasCxx())
+    {
+    command2 = "$(CMAKE_CXX_COMPILER)  $(CMAKE_SHLIB_LINK_FLAGS) "
+      "$(CMAKE_SHLIB_BUILD_FLAGS) $(CMAKE_CXX_FLAGS) -o \\\n";
+    }
+  else
+    {
+    command2 = "$(CMAKE_C_COMPILER)  $(CMAKE_SHLIB_LINK_FLAGS) "
+      "$(CMAKE_SHLIB_BUILD_FLAGS) $(CMAKE_C_FLAGS) -o \\\n";
+    }
   command2 += "\t  ";
   std::string libName = m_LibraryOutputPath + "lib" + std::string(name) + "$(SHLIB_SUFFIX)";
   libName = this->ConvertToOutputPath(libName.c_str());
@@ -639,8 +648,17 @@ void cmUnixMakefileGenerator::OutputModuleLibraryRule(std::ostream& fout,
   depend += this->CreateMakeVariable(name, "_SRC_OBJS") 
     + ") $(" + this->CreateMakeVariable(name, "_DEPEND_LIBS") + ")";
   std::string command = "$(RM) lib" + std::string(name) + "$(MODULE_SUFFIX)";
-  std::string command2 = "$(CMAKE_CXX_COMPILER)  $(CMAKE_MODULE_LINK_FLAGS) "
-    "$(CMAKE_MODULE_BUILD_FLAGS) $(CMAKE_CXX_FLAGS) -o \\\n";
+  std::string command2;
+  if(t.HasCxx())
+    {
+    command2 = "$(CMAKE_CXX_COMPILER)  $(CMAKE_SHLIB_LINK_FLAGS) "
+      "$(CMAKE_SHLIB_BUILD_FLAGS) $(CMAKE_CXX_FLAGS) -o \\\n";
+    }
+  else
+    {
+    command2 = "$(CMAKE_C_COMPILER)  $(CMAKE_SHLIB_LINK_FLAGS) "
+      "$(CMAKE_SHLIB_BUILD_FLAGS) $(CMAKE_C_FLAGS) -o \\\n";
+    }
   command2 += "\t  ";
   std::string libName = m_LibraryOutputPath + "lib" + std::string(name) + "$(MODULE_SUFFIX)";
   libName = this->ConvertToOutputPath(libName.c_str());
@@ -705,8 +723,17 @@ void cmUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
   std::string depend = "$(";
   depend += this->CreateMakeVariable(name, "_SRC_OBJS") 
     + ") $(" + this->CreateMakeVariable(name, "_DEPEND_LIBS") + ")";
-  std::string command = 
-    "$(CMAKE_CXX_COMPILER) $(CMAKE_SHLIB_LINK_FLAGS) $(CMAKE_CXX_FLAGS) ";
+  std::string command;
+  if(t.HasCxx())
+    {
+    command = 
+      "$(CMAKE_CXX_COMPILER) $(CMAKE_SHLIB_LINK_FLAGS) $(CMAKE_CXX_FLAGS) ";
+    }
+  else
+    {
+    command = 
+      "$(CMAKE_C_COMPILER) $(CMAKE_SHLIB_LINK_FLAGS) $(CMAKE_C_FLAGS) ";
+    }
   command += "$(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
   std::strstream linklibs;
   this->OutputLinkLibraries(linklibs, 0, t);
@@ -1451,10 +1478,9 @@ void cmUnixMakefileGenerator::RecursiveGenerateCacheOnly()
       mf->AddDefinition("RUN_CONFIGURE", true);
       }
     cmUnixMakefileGenerator* gen = 
-      static_cast<cmUnixMakefileGenerator*>(this->CreateObject());
+      static_cast<cmUnixMakefileGenerator*>(mf->GetMakefileGenerator());
     gen->SetCacheOnlyOn();
     gen->SetRecurseOff();
-    mf->SetMakefileGenerator(gen);
     mf->GenerateMakefile();
     }
   // CLEAN up the makefiles created
@@ -1470,7 +1496,6 @@ void cmUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     "# the standard shell for make\n"
     "SHELL = /bin/sh\n"
     "\n"
-    "CMAKE_LIB_EXT       = @CMAKE_LIB_EXT@\n"
     "CMAKE_RANLIB        = @CMAKE_RANLIB@\n"
     "CMAKE_AR            = @CMAKE_AR@\n"
     "CMAKE_AR_ARGS       = @CMAKE_AR_ARGS@\n"
@@ -2034,7 +2059,7 @@ void cmUnixMakefileGenerator::SetLocal (bool local)
     }
 }
 
-void cmUnixMakefileGenerator::ComputeSystemInfo()
+void cmUnixMakefileGenerator::EnableLanguage(const char* lang)
 {
   if (m_CacheOnly)
     {
@@ -2057,21 +2082,38 @@ void cmUnixMakefileGenerator::ComputeSystemInfo()
       envCC[4999] = 0;
       putenv(envCC);
       }
-    // currently we run configure shell script here to determine the info
     std::string output;
-    std::string cmd = "cd ";
-    cmd += this->ConvertToOutputPath(m_Makefile->GetHomeOutputDirectory());
-    cmd += "; ";
-    const char* root
-      = m_Makefile->GetDefinition("CMAKE_ROOT");
-    cmd += root;
-    cmd += "/Templates/configure";
-    cmSystemTools::RunCommand(cmd.c_str(), output);
+    std::string root 
+      = this->ConvertToOutputPath(m_Makefile->GetDefinition("CMAKE_ROOT"));
+    // if no lang specified use CXX
+    if(!lang )
+      {
+      lang = "CXX";
+      }
+    // if CXX or C,  then enable C
+    if((!this->GetLanguageEnabled(lang) && lang[0] == 'C'))
+      {
+      std::string cmd = root;
+      cmd += "/Templates/cconfigure";
+      cmSystemTools::RunCommand(cmd.c_str(), output, 
+                                this->ConvertToOutputPath(m_Makefile->GetHomeOutputDirectory()).c_str());
+      std::string fpath = m_Makefile->GetHomeOutputDirectory();
+      fpath += "/CCMakeSystemConfig.cmake";
+      m_Makefile->ReadListFile(NULL,fpath.c_str());
+      this->SetLanguageEnabled("C");
+      }
+    // if CXX 
+    if(!this->GetLanguageEnabled(lang)  || strcmp(lang, "CXX") == 0)
+      {
+      std::string cmd = root;
+      cmd += "/Templates/cxxconfigure";
+      cmSystemTools::RunCommand(cmd.c_str(), output, 
+                                this->ConvertToOutputPath(m_Makefile->GetHomeOutputDirectory()).c_str());
+      std::string fpath = m_Makefile->GetHomeOutputDirectory();
+      fpath += "/CXXCMakeSystemConfig.cmake";
+      m_Makefile->ReadListFile(NULL,fpath.c_str());
+      this->SetLanguageEnabled("CXX");
+      }
     m_Makefile->AddDefinition("RUN_CONFIGURE", true);
     }
-
-  // now load the settings
-  std::string fpath = m_Makefile->GetHomeOutputDirectory();
-  fpath += "/CMakeSystemConfig.cmake";
-  m_Makefile->ReadListFile(NULL,fpath.c_str());
 }

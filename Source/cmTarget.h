@@ -71,6 +71,8 @@ public:
     {return m_SourceFiles;}
   std::vector<cmSourceFile*> &GetSourceFiles() {return m_SourceFiles;}
 
+  ///! does this target have a cxx file in it
+  bool HasCxx() const;
   /**
    * Get the list of the source files used by this target
    */

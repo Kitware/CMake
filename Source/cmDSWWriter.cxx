@@ -121,20 +121,9 @@ void cmDSWWriter::WriteDSWFile(std::ostream& fout)
       k != allListFiles.end(); ++k)
     {
     cmMakefile* mf = *k;
-    cmMSProjectGenerator* pg = 0;
-    // if not this makefile, then create a new generator
-    if(m_Makefile != mf)
-      {
-      // Create an MS generator with DSW off, so it only creates dsp files
-      pg = new cmMSProjectGenerator;
-      }
-    else
-      {
-      pg = (cmMSProjectGenerator*)m_Makefile->GetMakefileGenerator();
-      }
+    cmMSProjectGenerator* pg = (cmMSProjectGenerator*)mf->GetMakefileGenerator();
     // make sure the generator is building dsp files
     pg->BuildDSWOff();
-    mf->SetMakefileGenerator(pg);
     mf->GenerateMakefile();
     // Get the source directory from the makefile
     std::string dir = mf->GetStartDirectory();

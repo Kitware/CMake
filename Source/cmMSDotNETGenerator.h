@@ -64,7 +64,7 @@ public:
    * Try to determine system infomation such as shared library
    * extension, pthreads, byte order etc.  
    */
-  virtual void ComputeSystemInfo();
+  virtual void EnableLanguage(const char*);
 
 protected:  
   /**

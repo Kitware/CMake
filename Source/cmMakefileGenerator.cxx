@@ -19,6 +19,7 @@
 // static list of registered generators
 std::map<cmStdString, cmMakefileGenerator*>
 cmMakefileGenerator::s_RegisteredGenerators;
+std::map<cmStdString, bool> cmMakefileGenerator::s_LanguageEnabled;
 
 
 void cmMakefileGenerator::SetMakefile(cmMakefile* mf)
@@ -77,3 +78,25 @@ cmMakefileGenerator::CreateGenerator(const char* name)
     }
   return 0;
 }
+
+
+
+void cmMakefileGenerator::SetLanguageEnabled(const char* l)
+{
+  s_LanguageEnabled[l] = true;
+}
+
+
+
+bool cmMakefileGenerator::GetLanguageEnabled(const char* l)
+{
+  return (s_LanguageEnabled.count(l) > 0);
+}
+
+
+
+void cmMakefileGenerator::ClearEnabledLanguages()
+{
+  s_LanguageEnabled.clear();
+}
+

@@ -1,0 +1,51 @@
+# 
+# CMakeLocal.make.in should be in the directory where you run configure
+# in, which need not be the source directory
+#
+SET (CMAKE_AR                 "@CMAKE_AR@" CACHE FILEPATH 
+     "Archive program used to make archive libraries.")
+
+SET (CMAKE_AR_ARGS            "@CMAKE_AR_ARGS@" CACHE STRING 
+     "Arguments for CMAKE_AR program to create an archive library.")
+
+SET (CMAKE_CXX_COMPILER       "@CXX@" CACHE FILEPATH 
+     "Name of C++ compiler used.")
+
+SET (CMAKE_CXX_FLAGS          "@CXXFLAGS@" CACHE STRING 
+     "Flags used by CXX compiler.")
+
+SET (CMAKE_TEMPLATE_FLAGS     "@CMAKE_TEMPLATE_FLAGS@" CACHE STRING
+     "CXX template flags used by compiler.")
+
+SET (CMAKE_NO_ANSI_STREAM_HEADERS @CMAKE_NO_ANSI_STREAM_HEADERS@ CACHE INTERNAL 
+     "Does the compiler support headers like iostream.")
+
+SET (CMAKE_NO_STD_NAMESPACE   @CMAKE_NO_STD_NAMESPACE@  CACHE INTERNAL 
+     "Does the compiler support std::.")
+
+SET (CMAKE_NO_ANSI_FOR_SCOPE  @CMAKE_NO_ANSI_FOR_SCOPE@  CACHE INTERNAL 
+     "Does the compiler support ansi for scoping.")
+
+SET (CMAKE_COMPILER_IS_GNUCXX @CMAKE_COMPILER_IS_GNUCXX@ CACHE INTERNAL 
+     "Is the compile GNU C++.")
+
+SET (CMAKE_ANSI_CXXFLAGS      "@CMAKE_ANSI_CXXFLAGS@" CACHE INTERNAL 
+     "What flags are required by the c++ compiler to make it ansi.")
+
+SET (CMAKE_NO_EXPLICIT_TEMPLATE_INSTANTIATION       @CMAKE_NO_EXPLICIT_TEMPLATE_INSTANTIATION@  CACHE INTERNAL 
+     "Does the compiler not support explicit template instantiation.")
+
+# The following variables are advanced 
+
+MARK_AS_ADVANCED(
+CMAKE_CXX_COMPILER
+CMAKE_AR
+CMAKE_AR_ARGS
+CMAKE_TEMPLATE_FLAGS
+CMAKE_NO_ANSI_STREAM_HEADERS
+CMAKE_NO_ANSI_FOR_SCOPE
+CMAKE_NO_STD_NAMESPACE
+CMAKE_COMPILER_IS_GNUCXX
+CMAKE_ANSI_CXXFLAGS
+CMAKE_NO_EXPLICIT_TEMPLATE_INSTANTIATION
+)

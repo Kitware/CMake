@@ -36,7 +36,7 @@ cmBorlandMakefileGenerator::~cmBorlandMakefileGenerator()
 }
 
 
-void cmBorlandMakefileGenerator::ComputeSystemInfo()
+void cmBorlandMakefileGenerator::EnableLanguage(const char*)
 {
   // now load the settings
   if(!m_Makefile->GetDefinition("CMAKE_ROOT"))
@@ -53,11 +53,15 @@ void cmBorlandMakefileGenerator::ComputeSystemInfo()
     message += outdir;
     cmSystemTools::Error(message.c_str());
     }
+  if(!this->GetLanguageEnabled("CXX"))
+    {
+    std::string fpath = 
+      m_Makefile->GetDefinition("CMAKE_ROOT");
+    fpath += "/Templates/CMakeBorlandWindowsSystemConfig.cmake";
+    m_Makefile->ReadListFile(NULL,fpath.c_str());
+    this->SetLanguageEnabled("CXX");
+    }
   
-  std::string fpath = 
-    m_Makefile->GetDefinition("CMAKE_ROOT");
-  fpath += "/Templates/CMakeBorlandWindowsSystemConfig.cmake";
-  m_Makefile->ReadListFile(NULL,fpath.c_str());
 }
 
 

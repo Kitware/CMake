@@ -431,23 +431,18 @@ void cmMakefile::AddSource(cmSourceFile& cmfile, const char *srclist)
   m_Sources[srclist].push_back(this->AddSource(cmfile));
 }
 
-struct FindSrcByName : std::binary_function<cmSourceFile*, cmSourceFile*, bool>
-{
-  public:
-    bool operator () (const cmSourceFile *f, const cmSourceFile *test) const
-    {
-      return (f->GetSourceName() == test->GetSourceName());
-    }
-};
 
-void cmMakefile::RemoveSource(cmSourceFile& cmfile,const char *srclist)
+void cmMakefile::RemoveSource(cmSourceFile& cmfile, const char *srclist)
 {
   std::vector<cmSourceFile*> &maplist = m_Sources[srclist];
-  std::vector<cmSourceFile*>::iterator f =
-    std::find_if(maplist.begin(), maplist.end(), std::bind2nd(FindSrcByName(),&cmfile));
-  if (f!=maplist.end())
+  for( std::vector<cmSourceFile*>::iterator f = maplist.begin(); 
+       f != maplist.end(); ++f)
     {
+    if((*f)->GetSourceName() == cmfile.GetSourceName())
+      {
       maplist.erase(f);
+      return;
+      }
     }
 }
 
@@ -1079,8 +1074,7 @@ void cmMakefile::RemoveVariablesInString(std::string& source,
 // This is done by reading the sub directory CMakeLists.txt files,
 // then calling this function with the new cmMakefile object
 void 
-cmMakefile::FindSubDirectoryCMakeListsFiles(std::vector<cmMakefile*>&
-                                            makefiles)
+cmMakefile::FindSubDirectoryCMakeListsFiles(std::vector<cmMakefile*>& makefiles)
 { 
   // loop over all the sub directories of this makefile
   const std::vector<std::string>& subdirs = this->GetSubDirectories();
@@ -1102,6 +1096,7 @@ cmMakefile::FindSubDirectoryCMakeListsFiles(std::vector<cmMakefile*>&
     else
       {
       cmMakefile* mf = new cmMakefile;
+      mf->SetMakefileGenerator(m_MakefileGenerator->CreateObject());
       makefiles.push_back(mf);
       // initialize new makefile
       mf->SetHomeOutputDirectory(this->GetHomeOutputDirectory());
@@ -1322,3 +1317,7 @@ cmSourceFile* cmMakefile::AddSource(cmSourceFile const&sf)
 }
 
   
+void cmMakefile::EnableLanguage(const char* lang)
+{
+  m_MakefileGenerator->EnableLanguage(lang);
+}

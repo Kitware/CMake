@@ -399,8 +399,8 @@ int cmake::Generate(const std::vector<std::string>& args, bool buildMakefiles)
   // setup CMAKE_ROOT and CMAKE_COMMAND
   this->AddCMakePaths(args);
 
-  // compute system info
-  gen->ComputeSystemInfo();
+  // reset any system configuration information
+  cmMakefileGenerator::ClearEnabledLanguages();
 
   std::string lf = mf.GetStartDirectory();
   lf +=  "/CMakeLists.txt";

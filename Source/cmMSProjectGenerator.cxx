@@ -55,7 +55,7 @@ void cmMSProjectGenerator::SetLocal(bool local)
   m_BuildDSW = !local;
 }
 
-void cmMSProjectGenerator::ComputeSystemInfo()
+void cmMSProjectGenerator::EnableLanguage(const char*)
 {
   // now load the settings
   if(!m_Makefile->GetDefinition("CMAKE_ROOT"))

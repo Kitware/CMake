@@ -97,7 +97,7 @@ std::string cmNMakeMakefileGenerator::ShortPathCommand(const char* command)
 }
 
 
-void cmNMakeMakefileGenerator::ComputeSystemInfo()
+void cmNMakeMakefileGenerator::EnableLanguage(const char*)
 {
   // now load the settings
   if(!m_Makefile->GetDefinition("CMAKE_ROOT"))
@@ -106,10 +106,14 @@ void cmNMakeMakefileGenerator::ComputeSystemInfo()
       "CMAKE_ROOT has not been defined, bad GUI or driver program");
     return;
     }
-  std::string fpath = 
-    m_Makefile->GetDefinition("CMAKE_ROOT");
-  fpath += "/Templates/CMakeNMakeWindowsSystemConfig.cmake";
-  m_Makefile->ReadListFile(NULL,fpath.c_str());
+  if(!this->GetLanguageEnabled("CXX"))
+    {
+    std::string fpath = 
+      m_Makefile->GetDefinition("CMAKE_ROOT");
+    fpath += "/Templates/CMakeNMakeWindowsSystemConfig.cmake";
+    m_Makefile->ReadListFile(NULL,fpath.c_str());
+    this->SetLanguageEnabled("CXX");
+    }
 }
 
 

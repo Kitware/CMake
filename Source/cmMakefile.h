@@ -501,7 +501,9 @@ public:
   /** Recursivly read and create a cmMakefile object for
    *  all CMakeLists.txt files in the GetSubDirectories list.
    *  Once the file is found, it ReadListFile is called on
-   *  the cmMakefile created for it.
+   *  the cmMakefile created for it.  CreateObject is called on 
+   *  the prototype to create a cmMakefileGenerator for each cmMakefile that 
+   *  is created.
    */
   void FindSubDirectoryCMakeListsFiles(std::vector<cmMakefile*>& makefiles);
   
@@ -523,6 +525,9 @@ public:
   /** Check if a command exists. */
   bool CommandExists(const char* name) const;
     
+  ///! Enable support for the named language, if null then all languages are enabled.
+  void EnableLanguage(const char* );
+  
 protected:
   std::string m_Prefix;
   std::vector<std::string> m_AuxSourceDirectories; // 

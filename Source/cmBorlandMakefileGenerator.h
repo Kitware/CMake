@@ -41,7 +41,7 @@ public:
     { return new cmBorlandMakefileGenerator;}
 
   ///! figure out about the current system information
-  virtual void ComputeSystemInfo(); 
+  virtual void EnableLanguage(const char*); 
 protected:
   virtual void OutputMakeVariables(std::ostream&);
   

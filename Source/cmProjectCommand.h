@@ -73,7 +73,12 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "PROJECT(projectname) Sets the name of the Microsoft workspace .dsw file. Does nothing on UNIX currently\n";
+      "PROJECT(projectname [C++ C Java])\n"
+      "Sets the name of the project.  "
+      "This creates the variables projectname_BINARY_DIR and projectname_SOURCE_DIR.  "
+      "Optionally you can specify which languages your project supports.  "
+      "By default all languages are supported.  If you do not have a C++ compiler, but want" 
+      " to build a c program with cmake, then use this option.";
     }
   
   cmTypeMacro(cmProjectCommand, cmCommand);

@@ -69,11 +69,19 @@ public:
    * Try to determine system infomation such as shared library
    * extension, pthreads, byte order etc.  
    */
-  virtual void ComputeSystemInfo() = 0;
+  virtual void EnableLanguage(const char*) = 0;
 
   virtual ~cmMakefileGenerator(){};
+  
+  /**
+   * Set/Get and Clear the enabled languages.  
+   */
+  static void SetLanguageEnabled(const char*);
+  static bool GetLanguageEnabled(const char*);
+  static void ClearEnabledLanguages();
 protected:
   static std::map<cmStdString, cmMakefileGenerator*> s_RegisteredGenerators;
+  static std::map<cmStdString, bool> s_LanguageEnabled;
   cmMakefile* m_Makefile;
 };
 

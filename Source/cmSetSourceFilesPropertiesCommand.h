@@ -53,7 +53,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
       return
-        "SET_SOURCE_FILES_PROPERTIES(flags file1 file2 [ABSTRACT|WRAP_EXCLUDE|GENERATED|COMPILE_FLAGS] [flags]) "
+        "SET_SOURCE_FILES_PROPERTIES(file1 file2 .. filen [ABSTRACT|WRAP_EXCLUDE|GENERATED|COMPILE_FLAGS] [flags]) "
         "Set properties on a file.   The syntax for the command is to list all the files you want "
         "to change, and then provide the values you want to set next.";
     }

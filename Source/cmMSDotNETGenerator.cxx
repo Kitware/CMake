@@ -88,7 +88,7 @@ void cmMSDotNETGenerator::SetLocal(bool local)
   m_BuildSLN = !local;
 }
 
-void cmMSDotNETGenerator::ComputeSystemInfo()
+void cmMSDotNETGenerator::EnableLanguage(const char*)
 {
   // now load the settings
   if(!m_Makefile->GetDefinition("CMAKE_ROOT"))
@@ -97,10 +97,14 @@ void cmMSDotNETGenerator::ComputeSystemInfo()
       "CMAKE_ROOT has not been defined, bad GUI or driver program");
     return;
     }
-  std::string fpath = 
-    m_Makefile->GetDefinition("CMAKE_ROOT");
-  fpath += "/Templates/CMakeDotNetSystemConfig.cmake";
-  m_Makefile->ReadListFile(NULL,fpath.c_str());
+  if(!this->GetLanguageEnabled("CXX"))
+    {
+    std::string fpath = 
+      m_Makefile->GetDefinition("CMAKE_ROOT");
+    fpath += "/Templates/CMakeDotNetSystemConfig.cmake";
+    m_Makefile->ReadListFile(NULL,fpath.c_str());
+    this->SetLanguageEnabled("CXX");
+    }
 }
 
 
@@ -187,20 +191,10 @@ void cmMSDotNETGenerator::WriteSLNFile(std::ostream& fout)
       k != allListFiles.end(); ++k)
     {
     cmMakefile* mf = *k;
-    cmMSDotNETGenerator* pg = 0;
-    // if not this makefile, then create a new generator
-    if(m_Makefile != mf)
-      {
-      // Create an MS generator with SLN off, so it only creates dsp files
-      pg = new cmMSDotNETGenerator;
-      }
-    else
-      {
-      pg = static_cast<cmMSDotNETGenerator*>(m_Makefile->GetMakefileGenerator());
-      }
+    cmMSDotNETGenerator* pg = 
+      static_cast<cmMSDotNETGenerator*>(mf->GetMakefileGenerator());
     // make sure the generator is building dsp files
     pg->BuildSLNOff();
-    mf->SetMakefileGenerator(pg);
     mf->GenerateMakefile();
     // Get the source directory from the makefile
     std::string dir = mf->GetStartDirectory();

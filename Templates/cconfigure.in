@@ -1,0 +1,631 @@
+# Process this file with autoconf to produce a configure script.
+AC_INIT()
+
+
+#
+# check for some programs we use
+#
+
+# save the CFLAGS and CXXFLAGS specified by the user
+save_CFLAGS=$CFLAGS
+
+AC_PROG_CC
+
+
+# restore the flags specified by the user and get rid of any flags
+# found by autoconf (we do not want -02 -g by default)
+CFLAGS=$save_CFLAGS
+
+
+AC_PROG_RANLIB
+AC_PROG_INSTALL
+
+AC_CHECK_SIZEOF(int, 4)
+CMAKE_SIZEOF_INT=$ac_cv_sizeof_int
+AC_SUBST(CMAKE_SIZEOF_INT)
+AC_CHECK_SIZEOF(long, 4)
+CMAKE_SIZEOF_LONG=$ac_cv_sizeof_long
+AC_SUBST(CMAKE_SIZEOF_LONG)
+AC_CHECK_SIZEOF(void *, 4)
+CMAKE_SIZEOF_VOID_P=$ac_cv_sizeof_void_p
+AC_SUBST(CMAKE_SIZEOF_VOID_P)
+AC_CHECK_SIZEOF(char, 1)
+CMAKE_SIZEOF_CHAR=$ac_cv_sizeof_char
+AC_SUBST(CMAKE_SIZEOF_CHAR)
+AC_CHECK_SIZEOF(short, 2)
+CMAKE_SIZEOF_SHORT=$ac_cv_sizeof_short
+AC_SUBST(CMAKE_SIZEOF_SHORT)
+AC_CHECK_SIZEOF(float, 4)
+CMAKE_SIZEOF_FLOAT=$ac_cv_sizeof_float
+AC_SUBST(CMAKE_SIZEOF_FLOAT)
+AC_CHECK_SIZEOF(double, 8)
+CMAKE_SIZEOF_DOUBLE=$ac_cv_sizeof_double
+AC_SUBST(CMAKE_SIZEOF_DOUBLE)
+
+# check for X11 support
+AC_PATH_XTRA
+CMAKE_HAS_X=0
+if test "$no_x"a = a; then
+CMAKE_HAS_X=1
+fi
+AC_SUBST(CMAKE_HAS_X)
+
+# get byte swapping info
+AC_C_BIGENDIAN
+if test $ac_cv_c_bigendian = yes; then
+  CMAKE_WORDS_BIGENDIAN=1
+fi
+AC_SUBST(CMAKE_WORDS_BIGENDIAN)
+
+
+# some stuff Tcl uses
+#
+AC_CHECK_HEADER(limits.h, HAVE_LIMITS_H=-DHAVE_LIMITS_H,HAVE_LIMITS_H="")
+AC_SUBST(CMAKE_HAVE_LIMITS_H)
+AC_HAVE_HEADERS(unistd.h, HAVE_UNISTD_H=-DHAVE_UNISTD_H,HAVE_UNISTD_H="")
+AC_SUBST(CMAKE_HAVE_UNISTD_H)
+
+# Step 1: set the variable "system" to hold the name and version number
+# for the system.  This can usually be done via the "uname" command, but
+# there are a few systems, like Next, where this doesn't work.
+
+AC_MSG_CHECKING([system version (for dynamic loading)])
+if test -f /usr/lib/NextStep/software_version; then
+  system=NEXTSTEP-`awk '/3/,/3/' /usr/lib/NextStep/software_version`
+else
+    system=`uname -s`-`uname -r`
+    if test "$?" -ne 0 ; then
+	AC_MSG_RESULT([unknown (can't find uname command)])
+	system=unknown
+    else
+	# Special check for weird MP-RAS system (uname returns weird
+	# results, and the version is kept in special file).
+    
+	if test -r /etc/.relid -a "X`uname -n`" = "X`uname -s`" ; then
+	    system=MP-RAS-`awk '{print $3}' /etc/.relid'`
+	fi
+	AC_MSG_RESULT($system)
+    fi
+fi
+
+#
+# use shared libs
+#
+
+
+CMAKE_shared_ok="yes"
+# the following is an excerpt from the tcl7.5b2 configure.in
+#--------------------------------------------------------------------
+#	The statements below define a collection of symbols related to
+#	dynamic loading and shared libraries:
+#
+#	CMAKE_SHLIB_CFLAGS -	Flags to pass to cc when compiling the components
+#			of a shared library (may request position-independent
+#			code, among other things).
+#	CMAKE_SHLIB_LD_LIBS -	Dependent libraries for the linker to scan when
+#			creating shared libraries.  This symbol typically
+#			goes at the end of the "ld" commands that build
+#			shared libraries. The value of the symbol if
+#			"${LIBS}" if all of the dependent libraries should
+#			be specified when creating a shared library.  If
+#			dependent libraries should not be specified (as on
+#			SunOS 4.x, where they cause the link to fail, or in
+#			general if Tcl and Tk aren't themselves shared
+#			libraries), then this symbol has an empty string
+#			as its value.
+#	CMAKE_SHLIB_SUFFIX -	Suffix to use for the name of the shared library.  An
+#			empty string means we don't know how to use shared
+#			libraries on this platform.
+#	CMAKE_SHLIB_BUILD_FLAGS -
+#                       Flags to use when building a shared library.	
+#	CMAKE_SHLIB_LINK_FLAGS -	
+#                       Flags to pass to the compiler when linking object
+#			files into an executable application binary such
+#			as tclsh.
+#       CMAKE_SHLIB_RUNTIME_FLAG -
+#                       Flag used to specify the runtime directories (e.g. "-R" or
+#                       "-Wl,-rpath,"). If null, no attempt is make to specify the
+#                       runtime paths.
+#       CMAKE_SHLIB_RUNTIME_SEP -
+#                       If null, then each path is a separate argument. If not null,
+#                       then all the directories are joined together, separated by
+#                       $(CMAKE_SHLIB_RUNTIME_SEP) and appended to
+#                       $(CMAKE_SHLIB_RUNTIME_FLAG). When not null, this is
+#                       typically a colon ":".
+#--------------------------------------------------------------------
+
+
+# Step 2: check for existence of -ldl library.  This is needed because
+# Linux can use either -ldl or -ldld for dynamic loading.
+
+AC_CHECK_LIB(dl, dlopen, have_dl=yes, have_dl=no)
+
+# Step 4: set configuration options based on system name and version.
+
+fullSrcDir=`cd $srcdir; pwd`
+AC_SUBST(fullSrcDir)
+case $system in
+    AIX-*)
+	# AIX: can't link shared library extensions unless Tcl and Tk are
+	# also shared libraries.
+	CMAKE_SHLIB_CFLAGS=""
+	CMAKE_SHLIB_LD_LIBS='${LIBS}'
+	CMAKE_SHLIB_SUFFIX="..o"
+	CMAKE_MODULE_SUFFIX="..o"
+	CMAKE_DL_LIBS=""
+        AC_CHECK_LIB(ld,printf, CMAKE_DL_LIBS="-lld")
+	CMAKE_SHLIB_LINK_FLAGS=""
+	CMAKE_MODULE_LINK_FLAGS=""
+        CMAKE_SHLIB_RUNTIME_FLAG=""
+        CMAKE_SHLIB_RUNTIME_SEP=""  
+        if test $ac_cv_prog_gcc = yes; then
+  	  CMAKE_SHLIB_BUILD_FLAGS='-shared -Wl,-G'
+  	  CMAKE_MODULE_BUILD_FLAGS='-shared -Wl,-G'
+	  CMAKE_SHLIB_LINK_FLAGS='-Wl,-brtl'
+	  CMAKE_MODULE_LINK_FLAGS='-Wl,-brtl'
+          CMAKE_MODULE_SUFFIX=".so"
+          CMAKE_SHLIB_SUFFIX=".so"
+        fi
+	;;
+    Darwin-*)
+	CMAKE_SHLIB_CFLAGS=""
+	CMAKE_SHLIB_LD_LIBS=""
+	CMAKE_SHLIB_SUFFIX=".dylib"
+	CMAKE_MODULE_SUFFIX=".so"
+	CMAKE_DL_LIBS=""
+	CMAKE_SHLIB_BUILD_FLAGS="-dynamiclib"
+	CMAKE_SHLIB_LINK_FLAGS=""
+	CMAKE_MODULE_BUILD_FLAGS="-bundle -flat_namespace -undefined suppress"
+	CMAKE_MODULE_LINK_FLAGS=""
+        CMAKE_SHLIB_RUNTIME_FLAG=""
+        CMAKE_SHLIB_RUNTIME_SEP=":"
+	;;
+    HP-UX-*)
+	CMAKE_SHLIB_CFLAGS="+Z"
+	CMAKE_SHLIB_LD_LIBS=""
+	CMAKE_SHLIB_SUFFIX=".sl"
+	CMAKE_MODULE_SUFFIX=".sl"
+	CMAKE_DL_LIBS="-ldld"
+	CMAKE_SHLIB_BUILD_FLAGS='+Z -Wl,-E -b -L/usr/lib'
+	CMAKE_SHLIB_LINK_FLAGS='-Wl,+s'
+	CMAKE_MODULE_BUILD_FLAGS='+Z -Wl,-E -b -L/usr/lib'
+	CMAKE_MODULE_LINK_FLAGS='-Wl,+s'
+        CMAKE_SHLIB_RUNTIME_FLAG='-Wl,+b,'
+        CMAKE_SHLIB_RUNTIME_SEP=':'
+        if test $ac_cv_prog_gcc = yes; then
+	  CMAKE_SHLIB_CFLAGS="-fPIC"
+  	  CMAKE_SHLIB_BUILD_FLAGS='-shared -Wl,-E -Wl,-b'
+	  CMAKE_SHLIB_LINK_FLAGS='-Wl,+s'
+  	  CMAKE_MODULE_BUILD_FLAGS='-shared -Wl,-E -Wl,-b'
+	  CMAKE_MODULE_LINK_FLAGS='-Wl,+s'
+          CMAKE_SHLIB_RUNTIME_FLAG='-Wl,+b,'
+          CMAKE_SHLIB_RUNTIME_SEP=':'
+        fi
+	;;
+    IRIX-5.*)
+	CMAKE_SHLIB_CFLAGS=""
+	CMAKE_SHLIB_LD_LIBS=""
+	CMAKE_SHLIB_SUFFIX=".so"
+	CMAKE_MODULE_SUFFIX=".so"
+	CMAKE_DL_LIBS=""
+	CMAKE_SHLIB_BUILD_FLAGS="-shared -rdata_shared"
+	CMAKE_MODULE_BUILD_FLAGS="-shared -rdata_shared"
+        CMAKE_SHLIB_RUNTIME_FLAG="-Wl,-rpath,"
+        CMAKE_SHLIB_RUNTIME_SEP=":"
+	;;
+    IRIX-6* | IRIX64-6* | IRIX-64-6*)
+	CMAKE_SHLIB_CFLAGS=""
+	CMAKE_SHLIB_LD_LIBS=""
+	CMAKE_SHLIB_SUFFIX=".so"
+	CMAKE_MODULE_SUFFIX=".so"
+	CMAKE_DL_LIBS=""
+	CMAKE_SHLIB_BUILD_FLAGS="-shared -rdata_shared"
+	CMAKE_MODULE_BUILD_FLAGS="-shared -rdata_shared"
+        CMAKE_SHLIB_RUNTIME_FLAG="-Wl,-rpath,"
+        CMAKE_SHLIB_RUNTIME_SEP=":"
+	;;
+    Linux*)
+	CMAKE_SHLIB_CFLAGS="-fPIC"
+	CMAKE_SHLIB_LD_LIBS=""
+	CMAKE_SHLIB_SUFFIX=".so"
+	CMAKE_MODULE_SUFFIX=".so"
+	CMAKE_SHLIB_BUILD_FLAGS="-shared"
+	CMAKE_MODULE_BUILD_FLAGS="-shared"
+	if test "$have_dl" = yes; then
+	    CMAKE_DL_LIBS="-ldl"
+	    CMAKE_SHLIB_LINK_FLAGS="-rdynamic"
+	    CMAKE_MODULE_LINK_FLAGS="-rdynamic"
+            CMAKE_SHLIB_RUNTIME_FLAG="-Wl,-rpath,"
+            CMAKE_SHLIB_RUNTIME_SEP=":"
+	else
+	    AC_CHECK_HEADER(dld.h, [
+		CMAKE_DL_LIBS="-ldld"
+		CMAKE_SHLIB_LINK_FLAGS=""
+		CMAKE_MODULE_LINK_FLAGS=""
+                CMAKE_SHLIB_RUNTIME_FLAG="-Wl,-rpath,"
+                CMAKE_SHLIB_RUNTIME_SEP=""])
+	fi
+	;;
+    CYGWIN_NT*)
+        CMAKE_SHLIB_CFLAGS=""
+        CMAKE_DL_LIBS="-lgdi32" 
+        CMAKE_SHLIB_BUILD_FLAGS="-shared"
+        CMAKE_MODULE_BUILD_FLAGS="-shared"
+        CMAKE_SHLIB_SUFFIX=".dll"
+        CMAKE_MODULE_SUFFIX=".dll"
+        CMAKE_SHLIB_LINK_FLAGS=""
+        CMAKE_MODULE_LINK_FLAGS=""
+        CMAKE_SHLIB_RUNTIME_FLAG=""
+        CMAKE_SHLIB_RUNTIME_SEP=""
+        ;;
+    MP-RAS-02*)
+	CMAKE_SHLIB_CFLAGS="-K PIC"
+	CMAKE_SHLIB_LD_LIBS=""
+	CMAKE_SHLIB_SUFFIX=".so"
+	CMAKE_MODULE_SUFFIX=".so"
+	CMAKE_DL_LIBS="-ldl"
+	CMAKE_SHLIB_LINK_FLAGS=""
+	CMAKE_MODULE_LINK_FLAGS=""
+        CMAKE_SHLIB_RUNTIME_FLAG=""
+        CMAKE_SHLIB_RUNTIME_SEP=""
+	;;
+    MP-RAS-*)
+	CMAKE_SHLIB_CFLAGS="-K PIC"
+	CMAKE_SHLIB_LD_LIBS=""
+	CMAKE_SHLIB_SUFFIX=".so"
+	CMAKE_MODULE_SUFFIX=".so"
+	CMAKE_DL_LIBS="-ldl"
+	CMAKE_SHLIB_LINK_FLAGS="-Wl,-Bexport"
+	CMAKE_MODULE_LINK_FLAGS="-Wl,-Bexport"
+        CMAKE_SHLIB_RUNTIME_FLAG=""
+        CMAKE_SHLIB_RUNTIME_SEP=""
+	;;
+    NetBSD-*|FreeBSD-*)
+	# Not available on all versions:  check for include file.
+	if test -f /usr/include/dlfcn.h; then
+	    CMAKE_SHLIB_CFLAGS="-fPIC"
+	    CMAKE_SHLIB_LD_LIBS=""
+	    CMAKE_SHLIB_SUFFIX=".so"
+	    CMAKE_MODULE_SUFFIX=".so"
+	    CMAKE_DL_LIBS=""
+	    CMAKE_SHLIB_BUILD_FLAGS="-shared"
+	    CMAKE_SHLIB_LINK_FLAGS=""
+	    CMAKE_MODULE_BUILD_FLAGS="-shared"
+	    CMAKE_MODULE_LINK_FLAGS=""
+            CMAKE_SHLIB_RUNTIME_FLAG="-Wl,-rpath,"
+            CMAKE_SHLIB_RUNTIME_SEP=":"
+	else
+	    CMAKE_SHLIB_CFLAGS=""
+	    CMAKE_SHLIB_LD_LIBS=""
+	    CMAKE_SHLIB_SUFFIX="..o"
+	    CMAKE_MODULE_SUFFIX="..o"
+	    CMAKE_DL_LIBS=""
+	    CMAKE_SHLIB_LINK_FLAGS=""
+	    CMAKE_MODULE_LINK_FLAGS=""
+            CMAKE_SHLIB_RUNTIME_FLAG=""
+            CMAKE_SHLIB_RUNTIME_SEP=""
+	fi
+	;;
+    NEXTSTEP-*)
+	CMAKE_SHLIB_CFLAGS=""
+	CMAKE_SHLIB_LD_LIBS=""
+	CMAKE_SHLIB_SUFFIX=".so"
+	CMAKE_MODULE_SUFFIX=".so"
+	CMAKE_DL_LIBS=""
+	CMAKE_SHLIB_LINK_FLAGS=""
+	CMAKE_MODULE_LINK_FLAGS=""
+        CMAKE_SHLIB_RUNTIME_FLAG=""
+        CMAKE_SHLIB_RUNTIME_SEP=""
+	;;
+    OSF1-1.[012])
+	# OSF/1 1.[012] from OSF, and derivatives, including Paragon OSF/1
+	CMAKE_SHLIB_CFLAGS=""
+	# Hack: make package name same as library name
+	CMAKE_SHLIB_LD_LIBS=""
+	CMAKE_SHLIB_SUFFIX=".so"
+	CMAKE_MODULE_SUFFIX=".so"
+	CMAKE_DL_LIBS=""
+	CMAKE_SHLIB_LINK_FLAGS=""
+	CMAKE_MODULE_LINK_FLAGS=""
+        CMAKE_SHLIB_RUNTIME_FLAG=""
+        CMAKE_SHLIB_RUNTIME_SEP=""
+	;;
+    OSF1-1.*)
+	# OSF/1 1.3 from OSF using ELF, and derivatives, including AD2
+	CMAKE_SHLIB_CFLAGS="-fpic"
+	CMAKE_SHLIB_LD_LIBS=""
+	CMAKE_SHLIB_SUFFIX=".so"
+	CMAKE_MODULE_SUFFIX=".so"
+	CMAKE_DL_LIBS=""
+	CMAKE_SHLIB_LINK_FLAGS=""
+	CMAKE_MODULE_LINK_FLAGS=""
+        CMAKE_SHLIB_RUNTIME_FLAG=""
+        CMAKE_SHLIB_RUNTIME_SEP=""
+	;;
+    OSF1-V*)
+        # Digital OSF/1
+	CMAKE_SHLIB_CFLAGS=""
+	CMAKE_SHLIB_LD_LIBS=""
+	CMAKE_SHLIB_SUFFIX=".so"
+	CMAKE_MODULE_SUFFIX=".so"
+	CMAKE_DL_LIBS=""
+	CMAKE_SHLIB_BUILD_FLAGS='-shared -Wl,-expect_unresolved,\\*'
+	CMAKE_SHLIB_LINK_FLAGS=''
+	CMAKE_MODULE_BUILD_FLAGS='-shared -Wl,-expect_unresolved,\\*'
+	CMAKE_MODULE_LINK_FLAGS=''
+        if test $ac_cv_prog_gcc = yes; then
+          CMAKE_SHLIB_RUNTIME_FLAG="-Wl,-rpath,"
+        else
+          CMAKE_SHLIB_RUNTIME_FLAG="-rpath "
+        fi
+        CMAKE_SHLIB_RUNTIME_SEP=":"
+	;;
+    RISCos-*)
+	CMAKE_SHLIB_CFLAGS="-G 0"
+	CMAKE_SHLIB_LD_LIBS=""
+	CMAKE_SHLIB_SUFFIX="..o"
+	CMAKE_MODULE_SUFFIX="..o"
+	CMAKE_DL_LIBS=""
+	CMAKE_SHLIB_LINK_FLAGS="-Wl,-D,08000000"
+	CMAKE_MODULE_LINK_FLAGS="-Wl,-D,08000000"
+        CMAKE_SHLIB_RUNTIME_FLAG=""
+        CMAKE_SHLIB_RUNTIME_SEP=""
+	;;
+    SCO_SV-3.2*)
+        # Note, dlopen is available only on SCO 3.2.5 and greater.  However,
+        # this test works, since "uname -s" was non-standard in 3.2.4 and
+        # below.
+	CMAKE_SHLIB_CFLAGS="-Kpic -belf"
+	CMAKE_SHLIB_LD_LIBS=""
+	CMAKE_SHLIB_SUFFIX=".so"
+	CMAKE_MODULE_SUFFIX=".so"
+	CMAKE_DL_LIBS=""
+	CMAKE_SHLIB_LINK_FLAGS="-belf -Wl,-Bexport"
+	CMAKE_SHLIB_MODULE_FLAGS="-belf -Wl,-Bexport"
+        CMAKE_SHLIB_RUNTIME_FLAG=""
+        CMAKE_SHLIB_RUNTIME_SEP=""
+	;;
+     SINIX*5.4*)
+	CMAKE_SHLIB_CFLAGS="-K PIC"
+	CMAKE_SHLIB_LD_LIBS=""
+	CMAKE_SHLIB_SUFFIX=".so"
+	CMAKE_MODULE_SUFFIX=".so"
+	CMAKE_DL_LIBS="-ldl"
+	CMAKE_SHLIB_LINK_FLAGS=""
+	CMAKE_MODULE_LINK_FLAGS=""
+        CMAKE_SHLIB_RUNTIME_FLAG=""
+        CMAKE_SHLIB_RUNTIME_SEP=""
+	;;
+    SunOS-4*)
+	CMAKE_SHLIB_CFLAGS="-PIC"
+	CMAKE_SHLIB_LD_LIBS=""
+	CMAKE_SHLIB_SUFFIX=".so"
+	CMAKE_MODULE_SUFFIX=".so"
+	CMAKE_DL_LIBS="-ldl"
+	CMAKE_SHLIB_BUILD_FLAGS='-shared -Wl,-r -nostdlib'
+	CMAKE_SHLIB_LINK_FLAGS=''
+	CMAKE_MODULE_BUILD_FLAGS='-shared -Wl,-r -nostdlib'
+	CMAKE_MODULE_LINK_FLAGS=''
+        CMAKE_SHLIB_RUNTIME_FLAG="-Wl,-R,"
+        CMAKE_SHLIB_RUNTIME_SEP=":"
+	;;
+    SunOS-5*)
+	CMAKE_SHLIB_CFLAGS="-KPIC"
+	CMAKE_SHLIB_LD_LIBS='${LIBS}'
+	CMAKE_SHLIB_SUFFIX=".so"
+	CMAKE_MODULE_SUFFIX=".so"
+	CMAKE_DL_LIBS="-ldl"
+	CMAKE_SHLIB_BUILD_FLAGS='-G'
+	CMAKE_SHLIB_LINK_FLAGS=''
+	CMAKE_MODULE_BUILD_FLAGS='-G'
+	CMAKE_MODULE_LINK_FLAGS=''
+        CMAKE_SHLIB_RUNTIME_FLAG="-R "
+        CMAKE_SHLIB_RUNTIME_SEP=":"
+        if test $ac_cv_prog_gcc = yes; then
+	  CMAKE_SHLIB_BUILD_FLAGS='-shared -nostdlib'
+	  CMAKE_SHLIB_LINK_FLAGS=''
+	  CMAKE_MODULE_BUILD_FLAGS='-shared -nostdlib'
+	  CMAKE_MODULE_LINK_FLAGS=''
+          CMAKE_SHLIB_RUNTIME_FLAG="-Wl,-R,"
+          CMAKE_SHLIB_RUNTIME_SEP=":"
+        fi
+	;;
+    ULTRIX-4.*)
+	CMAKE_SHLIB_CFLAGS="-G 0"
+	CMAKE_SHLIB_SUFFIX="..o"
+	CMAKE_MODULE_SUFFIX="..o"
+	CMAKE_SHLIB_LD_LIBS=""
+	CMAKE_DL_LIBS=""
+	CMAKE_SHLIB_LINK_FLAGS="-Wl,-D,08000000"
+	CMAKE_MODULE_LINK_FLAGS="-Wl,-D,08000000"
+        CMAKE_SHLIB_RUNTIME_FLAG=""
+        CMAKE_SHLIB_RUNTIME_SEP=""
+	;;
+    UNIX_SV*)
+	CMAKE_SHLIB_CFLAGS="-K PIC"
+	CMAKE_SHLIB_LD_LIBS=""
+	CMAKE_SHLIB_SUFFIX=".so"
+	CMAKE_MODULE_SUFFIX=".so"
+	CMAKE_DL_LIBS="-ldl"
+	CMAKE_SHLIB_LINK_FLAGS="-Wl,-Bexport"
+	CMAKE_MODULE_LINK_FLAGS="-Wl,-Bexport"
+        CMAKE_SHLIB_RUNTIME_FLAG=""
+        CMAKE_SHLIB_RUNTIME_SEP=""
+	;;
+esac
+export CMAKE_SHLIB_SUFFIX
+export CMAKE_MODULE_SUFFIX
+
+# If we're running gcc, then change the C flags for compiling shared
+# libraries to the right flags for gcc, instead of those for the
+# standard manufacturer compiler.
+if test $ac_cv_prog_gcc = yes; then
+  CMAKE_SHLIB_CFLAGS="-fPIC"
+fi
+# if running on cygwin remove -fPIC flag
+case $system in 
+  CYGWIN_NT*)
+    CMAKE_SHLIB_CFLAGS=""
+    ;;
+  Darwin*) #don't need -fPIC on Darwin (on by default)
+    CMAKE_SHLIB_CFLAGS=""
+    ;;
+esac
+
+# If the user has supplied C flags for compiling shared objects, use
+# those instead
+if test "${SHLIB_CFLAGS}" != ""; then
+  CMAKE_SHLIB_CFLAGS="${SHLIB_CFLAGS}"
+fi
+CMAKE_LD_SEARCH_FLAGS="${LD_SEARCH_FLAGS}"
+
+
+AC_SUBST(CMAKE_SHLIB_LINK_FLAGS)
+AC_SUBST(CMAKE_SHLIB_BUILD_FLAGS)
+AC_SUBST(CMAKE_MODULE_LINK_FLAGS)
+AC_SUBST(CMAKE_MODULE_BUILD_FLAGS)
+AC_SUBST(CMAKE_SHLIB_CFLAGS)
+AC_SUBST(CMAKE_DL_LIBS)
+AC_SUBST(CMAKE_SHLIB_LD_LIBS)
+AC_SUBST(CMAKE_SHLIB_SUFFIX)
+AC_SUBST(CMAKE_MODULE_SUFFIX)
+AC_SUBST(CMAKE_SHLIB_RUNTIME_FLAG)
+AC_SUBST(CMAKE_SHLIB_RUNTIME_SEP)
+
+
+##########################
+##			##
+## Check thread support ##
+##			##
+##########################
+# initialize thread vars
+CMAKE_THREAD_LIBS=""
+use_sproc=no
+CMAKE_USE_SPROC=0
+CMAKE_USE_PTHREADS=0
+CMAKE_HP_PTHREADS=0
+
+##########################
+##                      ##
+##      sproc           ##
+##                      ##
+##########################
+# check for sproc
+force_sproc=no
+AC_ARG_WITH(sproc,
+         [  --with-sproc           use sproc instead of pthreads if possible],
+         if test "$withval" = yes; then
+         force_sproc=yes
+         fi,)
+
+
+
+AC_CHECK_HEADERS(sys/prctl.h, [use_sproc=yes])
+if test "$use_sproc" = "yes"; then
+case $system in
+    Linux* | IRIX64-6.5 | IRIX-6.5) 
+        if test "$force_sproc" = "yes"; then
+           CMAKE_USE_SPROC=1
+        else
+	  use_sproc=no
+    	fi
+	;;
+    IRIX*)
+	CMAKE_USE_SPROC=1
+	;;
+esac
+fi
+use_pthreads=no
+AC_CHECK_HEADERS(pthread.h, [use_pthreads=yes])
+if test "$use_pthreads" = "yes"; then
+  if test "$use_sproc" = "no"; then
+    AC_CHECK_LIB(pthreads, pthread_create, CMAKE_THREAD_LIBS="-lpthreads")
+    AC_CHECK_LIB(pthread, pthread_create, CMAKE_THREAD_LIBS="-lpthread")
+# Work around Solaris 5.6 and 5.7 bug:
+    if test "`uname -s -r`" = "SunOS 5.6"; then
+      AC_CHECK_LIB(thread, thr_create, CMAKE_THREAD_LIBS="$CMAKE_THREAD_LIBS -lthread")
+    fi
+    if test "`uname -s -r`" = "SunOS 5.7"; then
+      AC_CHECK_LIB(thread, thr_create, CMAKE_THREAD_LIBS="$CMAKE_THREAD_LIBS -lthread")
+    fi
+	CMAKE_USE_PTHREADS=1
+  fi
+fi
+
+# on an HP with pthread we need to use -lcma
+# on dec alphas we have had problems as well
+if test "$use_pthreads" = "yes"; then
+case $system in
+    HP-UX-*)
+	CMAKE_THREAD_LIBS="-lcma"
+	CMAKE_USE_PTHREADS=1 
+	CMAKE_HP_PTHREADS=1
+	;;
+    OSF1-V*)
+	CMAKE_USE_PTHREADS=0
+        CMAKE_THREAD_LIBS=""
+        ;;
+    FreeBSD*)
+	CMAKE_USE_PTHREADS=0
+	CMAKE_THREAD_LIBS=""
+	;;   
+    CYGWIN_NT*)
+        CMAKE_THREAD_LIBS=""
+	CMAKE_USE_WIN32_THREADS=0
+        CMAKE_USE_PTHREADS=1
+        ;;
+esac
+fi
+
+AC_SUBST(CMAKE_USE_SPROC)
+AC_SUBST(CMAKE_USE_PTHREADS)
+AC_SUBST(CMAKE_USE_WIN32_THREADS)
+AC_SUBST(CMAKE_HP_PTHREADS)
+AC_SUBST(CMAKE_THREAD_LIBS)
+
+
+CMAKE_ANSI_CFLAGS=""
+# on hp use -Aa for ansi
+if test $ac_cv_prog_gcc = no; then
+case $system in
+    HP-UX-*)
+        echo $ac_n "checking whether ${CC} accepts -Aa""... $ac_c" 1>&6
+        echo 'void f(){}' > conftest.c
+        if test -z "`${CC} -Aa -c conftest.c 2>&1`"; then
+          echo "$ac_t""yes" 1>&6
+          CMAKE_ANSI_CFLAGS="$CMAKE_ANSI_CFLAGS -Aa"
+        else
+          echo "$ac_t""no" 1>&6
+        fi
+        echo $ac_n "checking whether ${CC} accepts -Ae""... $ac_c" 1>&6
+        if test -z "`${CC} -Ae -c conftest.c 2>&1`"; then
+          echo "$ac_t""yes" 1>&6
+          CMAKE_ANSI_CFLAGS="$CMAKE_ANSI_CFLAGS -Ae"
+        else
+          echo "$ac_t""no" 1>&6
+        fi
+        rm -f conftest*
+	;;   
+esac
+fi
+AC_SUBST(CMAKE_ANSI_CFLAGS)
+
+
+if test $ac_cv_prog_gcc = yes; then
+  SHLIB_CFLAGS="-fPIC"
+fi
+
+# find make to use to build cmake, prefer gmake
+AC_PATH_PROGS(CMAKE_AR_TMP, ar)
+CMAKE_AR="$CMAKE_AR_TMP"
+CMAKE_AR_ARGS="cr"
+AC_SUBST(CMAKE_AR)
+AC_SUBST(CMAKE_AR_ARGS)
+
+
+CMAKE_SYSTEM="$system"
+AC_SUBST(CMAKE_SYSTEM)
+# generate output files.
+# create mkdir files just to make some of the directories
+
+AC_OUTPUT( CCMakeSystemConfig.cmake )

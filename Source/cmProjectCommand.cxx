@@ -19,7 +19,7 @@
 // cmProjectCommand
 bool cmProjectCommand::InitialPass(std::vector<std::string> const& args)
 {
-  if(args.size() != 1 )
+  if(args.size() < 1 )
     {
     this->SetError("PROJECT called with incorrect number of arguments");
     return false;
@@ -48,6 +48,17 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args)
 
   m_Makefile->AddDefinition("PROJECT_NAME", args[0].c_str());
 
+  if(args.size() > 1)
+    {
+    for(size_t i =1; i < args.size(); ++i)
+      {
+      m_Makefile->EnableLanguage(args[i].c_str());
+      }
+    }
+  else
+    {
+    m_Makefile->EnableLanguage(0);
+    }
   return true;
 }
 

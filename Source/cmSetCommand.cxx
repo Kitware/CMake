@@ -49,7 +49,7 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args)
     if(args[1] != "CACHE" && args[2] != "CACHE")
       {
       value = args[1];
-      for(unsigned int i =2; i < args.size(); ++i)
+      for(size_t i =2; i < args.size(); ++i)
         {
         value += ";";
         value += args[i];
