@@ -54,6 +54,9 @@
 # define @KWSYS_NAMESPACE@_ios @KWSYS_NAMESPACE@_ios
 #endif
 
+/* Whether struct stat has the st_mtim member for high resolution times.  */
+#define @KWSYS_NAMESPACE@_STAT_HAS_ST_MTIM @KWSYS_STAT_HAS_ST_MTIM@
+
 /* If building a C++ file in kwsys itself, give the source file
    access to the macros without a configured namespace.  */
 #if defined(KWSYS_NAMESPACE)
@@ -68,6 +71,7 @@
 # define KWSYS_IOS_USE_SSTREAM     @KWSYS_NAMESPACE@_IOS_USE_SSTREAM
 # define KWSYS_IOS_USE_STRSTREAM_H @KWSYS_NAMESPACE@_IOS_USE_STRSTREAM_H
 # define KWSYS_IOS_USE_STRSTREA_H  @KWSYS_NAMESPACE@_IOS_USE_STRSTREA_H
+# define KWSYS_STAT_HAS_ST_MTIM    @KWSYS_NAMESPACE@_STAT_HAS_ST_MTIM
 #endif
 
 #endif
