@@ -132,6 +132,6 @@ bool cmFindLibraryCommand::Invoke(std::vector<std::string>& args)
                                                "NOTFOUND",
                                                helpString.c_str(),
                                                cmCacheManager::PATH);
-  return false;
+  return true;
 }
 

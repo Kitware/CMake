@@ -415,8 +415,8 @@ void cmDSPMakefile::WriteDSPHeader(std::ostream& fout, const char *libName,
     libOptions += "\" ";
     }
   // find link libraries
-  cmMakefile::LinkLibraries& libs = m_Makefile->GetLinkLibraries();
-  cmMakefile::LinkLibraries::const_iterator j;
+  const cmTarget::LinkLibraries& libs = target.GetLinkLibraries();
+  cmTarget::LinkLibraries::const_iterator j;
   for(j = libs.begin(); j != libs.end(); ++j)
     {
     // add libraries to executables and dlls (but never include
@@ -424,19 +424,19 @@ void cmDSPMakefile::WriteDSPHeader(std::ostream& fout, const char *libName,
     if (!target.IsALibrary() || 
         (m_LibraryBuildType == DLL && libName != j->first))
       {
-      if (j->second == cmMakefile::GENERAL)
+      if (j->second == cmTarget::GENERAL)
         {
         libOptions += " ";
         libOptions += j->first;
         libOptions += ".lib ";
         }
-      if (j->second == cmMakefile::DEBUG)
+      if (j->second == cmTarget::DEBUG)
         {
         libDebugOptions += " ";
         libDebugOptions += j->first;
         libDebugOptions += ".lib ";
         }
-      if (j->second == cmMakefile::OPTIMIZED)
+      if (j->second == cmTarget::OPTIMIZED)
         {
         libOptimizedOptions += " ";
         libOptimizedOptions += j->first;

@@ -70,7 +70,7 @@ protected:
   void OutputMakeFlags(std::ostream&);
   void OutputVerbatim(std::ostream&);
   void OutputTargetRules(std::ostream& fout);
-  void OutputLinkLibraries(std::ostream&, const char*);
+  void OutputLinkLibraries(std::ostream&, const char*, const cmTarget &);
   void OutputTargets(std::ostream&);
   void OutputSubDirectoryRules(std::ostream&);
   void OutputDependInformation(std::ostream&);

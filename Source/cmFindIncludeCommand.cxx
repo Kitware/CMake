@@ -44,11 +44,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // cmFindIncludeCommand
 bool cmFindIncludeCommand::Invoke(std::vector<std::string>& args)
 {
-  if(args.size() < 2 )
-    {
-    this->SetError("called with incorrect number of arguments");
-    return false;
-    }
+  this->SetError("This has been deprecated, please use FIND_PATH command instead ");
+  return false;
+  
+  
   // Now check and see if the value has been stored in the cache
   // already, if so use that value and don't look for the program
   const char* cacheValue

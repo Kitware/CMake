@@ -38,47 +38,67 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =========================================================================*/
-#include "cmTarget.h"
-#include "cmMakefile.h"
+#ifndef cmTargetLinkLibrariesCommand_h
+#define cmTargetLinkLibrariesCommand_h
 
-void cmTarget::GenerateSourceFilesFromSourceLists(const cmMakefile &mf)
+#include "cmStandardIncludes.h"
+#include "cmCommand.h"
+
+/** \class cmTargetLinkLibrariesCommand
+ * \brief Specify a list of libraries to link into executables.
+ *
+ * cmTargetLinkLibrariesCommand is used to specify a list of libraries to link
+ * into executable(s) or shared objects. The names of the libraries
+ * should be those defined by the LIBRARY(library) command(s).  
+ */
+class cmTargetLinkLibrariesCommand : public cmCommand
 {
-  // for each src lists add the classes
-  for (std::vector<std::string>::const_iterator s = m_SourceLists.begin();
-       s != m_SourceLists.end(); ++s)
+public:
+  /**
+   * This is a virtual constructor for the command.
+   */
+  virtual cmCommand* Clone() 
     {
-    // replace any variables
-    std::string temps = *s;
-    mf.ExpandVariablesInString(temps);
-    // look for a srclist
-    if (mf.GetSources().find(temps) != mf.GetSources().end())
-      {
-      const std::vector<cmSourceFile> &clsList = 
-        mf.GetSources().find(temps)->second;
-      m_SourceFiles.insert(m_SourceFiles.end(), clsList.begin(), clsList.end());
-      }
-    // if one wasn't found then assume it is a single class
-    else
-      {
-      cmSourceFile file;
-      file.SetIsAnAbstractClass(false);
-      file.SetName(temps.c_str(), mf.GetCurrentDirectory());
-      m_SourceFiles.push_back(file);
-      }
+    return new cmTargetLinkLibrariesCommand;
     }
-}
 
-void cmTarget::MergeLibraries(const LinkLibraries &ll)
-{
-  typedef std::vector<std::pair<std::string,LinkLibraryType> > LinkLibraries;
+  /**
+   * This is called when the command is first encountered in
+   * the CMakeLists.txt file.
+   */
+  virtual bool Invoke(std::vector<std::string>& args);
 
-  LinkLibraries::const_iterator p = ll.begin();
-  for (;p != ll.end(); ++p)
+  /**
+   * The name of the command as specified in CMakeList.txt.
+   */
+  virtual const char* GetName() { return "TARGET_LINK_LIBRARIES";}
+
+  /**
+   * Succinct documentation.
+   */
+  virtual const char* GetTerseDocumentation() 
     {
-	  if (std::find(m_LinkLibraries.begin(),m_LinkLibraries.end(),*p) == m_LinkLibraries.end())
-      {
-      m_LinkLibraries.push_back(*p);
-      }
+    return 
+      "Specify a list of libraries to be linked into\n"
+      "executables or shared objects.";
     }
-}
+  
+  /**
+   * More documentation.
+   */
+  virtual const char* GetFullDocumentation()
+    {
+    return
+      "TARGET_LINK_LIBRARIES(target library1 <debug | optimized> library2 ...)\n"
+      "Specify a list of libraries to be linked into the specified target\n"
+      "The debug and optimized strings may be used to indicate that\n"
+      "the next library listed is to be used only for that specific\n"
+      "type of build";
+    }
+  
+  cmTypeMacro(cmTargetLinkLibrariesCommand, cmCommand);
+};
 
+
+
+#endif

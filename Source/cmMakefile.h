@@ -146,9 +146,7 @@ public:
   /**
    * Get a list of link libraries in the build.
    */
-  enum LinkLibraryType {GENERAL, DEBUG, OPTIMIZED};
-  typedef std::vector<std::pair<std::string,LinkLibraryType> > LinkLibraries;
-  LinkLibraries& GetLinkLibraries()
+  cmTarget::LinkLibraries& GetLinkLibraries()
     { 
     return m_LinkLibraries;
     }
@@ -157,7 +155,9 @@ public:
    * Add a link library to the build.
    */
   void AddLinkLibrary(const char*);
-  void AddLinkLibrary(const char*, LinkLibraryType type);
+  void AddLinkLibrary(const char*, cmTarget::LinkLibraryType type);
+  void AddLinkLibraryForTarget(const char *tgt, const char*, 
+                               cmTarget::LinkLibraryType type);
 
   /**
    * Add a link directory to the build.
@@ -236,22 +236,12 @@ public:
    * CMakeLists files by recursing up the tree starting at the StartDirectory
    * and going up until it reaches the HomeDirectory.  
    */
-  void SetHomeDirectory(const char* dir) 
-    {
-    m_cmHomeDirectory = dir;
-    cmSystemTools::ConvertToUnixSlashes(m_cmHomeDirectory);
-    this->AddDefinition("CMAKE_SOURCE_DIR", this->GetHomeDirectory());
-    }
+  void SetHomeDirectory(const char* dir);
   const char* GetHomeDirectory() const
     {
     return m_cmHomeDirectory.c_str();
     }
-  void SetHomeOutputDirectory(const char* lib)
-    {
-    m_HomeOutputDirectory = lib;
-    cmSystemTools::ConvertToUnixSlashes(m_HomeOutputDirectory);
-    this->AddDefinition("CMAKE_BINARY_DIR", this->GetHomeOutputDirectory());
-    }
+  void SetHomeOutputDirectory(const char* lib);
   const char* GetHomeOutputDirectory() const
     {
     return m_HomeOutputDirectory.c_str();
@@ -427,6 +417,12 @@ public:
   void ExpandVariablesInString(std::string& source) const;
 
   /**
+   * Remove any remaining variables in the string. Anything with ${var} or
+   * @var@ will be removed.  
+   */
+  void RemoveVariablesInString(std::string& source) const;
+
+  /**
    * Expand variables in the makefiles ivars such as link directories etc
    */
   void ExpandVariables();  
@@ -445,6 +441,11 @@ public:
    */
   void GenerateCacheOnly();
 
+  /**
+   * find what source group this source is in
+   */
+  void ReadSystemConfiguration(const char *fname);
+  
   /**
    * find what source group this source is in
    */
@@ -474,7 +475,7 @@ protected:
   std::vector<std::string> m_LinkDirectories;
   std::vector<std::string> m_Utilities;
   std::vector<std::string> m_UtilityDirectories;
-  LinkLibraries m_LinkLibraries;
+  cmTarget::LinkLibraries m_LinkLibraries;
   std::string m_IncludeFileRegularExpression;
   std::string m_DefineFlags;
   std::vector<cmSourceGroup> m_SourceGroups;

@@ -83,8 +83,39 @@ void cmMakefile::AddDefaultCommands()
 #if defined(__CYGWIN__)
   this->AddDefinition("UNIX", "1");
 #endif
+  
 }
 
+void cmMakefile::ReadSystemConfiguration(const char *fname)
+{
+  std::ifstream fin(fname);
+  if(!fin)
+    {
+    cmSystemTools::Error("error can not open file ", fname);
+    return;
+    }
+
+  cmRegularExpression aDef("^Define[ \t]*([A-Za-z_0-9]*)[ \t]*([A-Za-z_0-9]*)[ \t]*$");  
+  const int BUFFER_SIZE = 4096;
+  char inbuffer[BUFFER_SIZE];
+  while (fin)
+    {
+    if(fin.getline(inbuffer, BUFFER_SIZE ) )
+      {
+      if(aDef.find(inbuffer))
+        {
+        // the arguments are the second match
+        std::string def = aDef.match(1);
+        std::string val = aDef.match(2);
+        // add the definition if true
+        if (cmSystemTools::IsOn(val.c_str()))
+          {
+          this->AddDefinition(def.c_str(),val.c_str());
+          }
+        }
+      }
+    }
+}
 
 cmMakefile::~cmMakefile()
 {
@@ -309,6 +340,12 @@ void cmMakefile::GenerateMakefile()
     {
     (*i)->FinalPass();
     }
+  // merge libraries
+  for (cmTargets::iterator l = m_Targets.begin();
+       l != m_Targets.end(); l++)
+    {
+    l->second.MergeLibraries(m_LinkLibraries);
+    }
   // now do the generation
   m_MakefileGenerator->GenerateMakefile();
 }
@@ -359,15 +396,27 @@ void cmMakefile::AddUtilityDirectory(const char* dir)
   m_UtilityDirectories.push_back(dir);
 }
 
-void cmMakefile::AddLinkLibrary(const char* lib, LinkLibraryType llt)
+void cmMakefile::AddLinkLibrary(const char* lib, cmTarget::LinkLibraryType llt)
 {
   m_LinkLibraries.push_back(
-    std::pair<std::string, LinkLibraryType>(lib,llt));
+	  std::pair<std::string, cmTarget::LinkLibraryType>(lib,llt));
+}
+
+void cmMakefile::AddLinkLibraryForTarget(const char *target,
+                                         const char* lib, 
+                                         cmTarget::LinkLibraryType llt)
+{
+  if (m_Targets.find(target) != m_Targets.end())
+    {
+    m_Targets[target].GetLinkLibraries().
+      push_back(
+        std::pair<std::string, cmTarget::LinkLibraryType>(lib,llt));
+    }
 }
 
 void cmMakefile::AddLinkLibrary(const char* lib)
 {
-  this->AddLinkLibrary(lib,GENERAL);
+  this->AddLinkLibrary(lib,cmTarget::GENERAL);
 }
 
 void cmMakefile::AddLinkDirectory(const char* dir)
@@ -513,7 +562,7 @@ void cmMakefile::ExpandVariables()
     {
     this->ExpandVariablesInString(*j);
     }
-  LinkLibraries::iterator j2, end2;
+  cmTarget::LinkLibraries::iterator j2, end2;
   j2 = m_LinkLibraries.begin();
   end2 = m_LinkLibraries.end();
   for(; j2 != end2; ++j2)
@@ -581,6 +630,19 @@ void cmMakefile::ExpandVariablesInString(std::string& source) const
     }
 }
 
+void cmMakefile::RemoveVariablesInString(std::string& source) const
+{
+  cmRegularExpression var("(\\${[A-Za-z_0-9]*})");
+  cmRegularExpression var2("(@[A-Za-z_0-9]*@)");
+  while (var.find(source))
+    {
+    source.erase(var.start(),var.end());
+    }
+  while (var2.find(source))
+    {
+    source.erase(var2.start(),var2.end());
+    }
+}
 
 // recursive function to create a vector of cmMakefile objects
 // This is done by reading the sub directory CMakeLists.txt files,
@@ -773,4 +835,28 @@ void cmMakefile::RemoveFunctionBlocker(const char *name,
     }
   
   return;
+}
+
+void cmMakefile::SetHomeDirectory(const char* dir) 
+{
+  m_cmHomeDirectory = dir;
+  cmSystemTools::ConvertToUnixSlashes(m_cmHomeDirectory);
+  this->AddDefinition("CMAKE_SOURCE_DIR", this->GetHomeDirectory());
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  std::string fpath = dir;
+  fpath += "/CMake/CMakeWindowsSystemConfig.txt";
+  this->ReadSystemConfiguration(fpath.c_str());
+#endif
+}
+
+void cmMakefile::SetHomeOutputDirectory(const char* lib)
+{
+  m_HomeOutputDirectory = lib;
+  cmSystemTools::ConvertToUnixSlashes(m_HomeOutputDirectory);
+  this->AddDefinition("CMAKE_BINARY_DIR", this->GetHomeOutputDirectory());
+#if !defined(_WIN32) || defined(__CYGWIN__)
+  std::string fpath = lib;
+  fpath += "/CMakeSystemConfig.txt";
+  this->ReadSystemConfiguration(fpath.c_str());
+#endif
 }

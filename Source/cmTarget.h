@@ -82,6 +82,19 @@ public:
   std::vector<cmSourceFile> &GetSourceFiles() {return m_SourceFiles;}
 
   /**
+   * Get the list of the source files used by this target
+   */
+  enum LinkLibraryType {GENERAL, DEBUG, OPTIMIZED};
+  typedef std::vector<std::pair<std::string,LinkLibraryType> > LinkLibraries;
+  const LinkLibraries &GetLinkLibraries() const {return m_LinkLibraries;}
+  LinkLibraries &GetLinkLibraries() {return m_LinkLibraries;}
+  
+  /**
+   * Merge Link LIbraries into this targets current list 
+   */
+  void MergeLibraries(const LinkLibraries &ll);
+    
+  /**
    * Generate the SourceFilesList from the SourceLists. This should only be
    * done once to be safe.  
    */
@@ -92,6 +105,7 @@ private:
   std::vector<std::string> m_SourceLists;
   bool m_IsALibrary;
   std::vector<cmSourceFile> m_SourceFiles;
+  LinkLibraries m_LinkLibraries;
 };
 
 typedef std::map<std::string,cmTarget> cmTargets;

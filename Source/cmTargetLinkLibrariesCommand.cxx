@@ -38,47 +38,39 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =========================================================================*/
-#include "cmTarget.h"
-#include "cmMakefile.h"
+#include "cmTargetLinkLibrariesCommand.h"
 
-void cmTarget::GenerateSourceFilesFromSourceLists(const cmMakefile &mf)
+// cmTargetLinkLibrariesCommand
+bool cmTargetLinkLibrariesCommand::Invoke(std::vector<std::string>& args)
 {
-  // for each src lists add the classes
-  for (std::vector<std::string>::const_iterator s = m_SourceLists.begin();
-       s != m_SourceLists.end(); ++s)
+  if(args.size() < 2)
     {
-    // replace any variables
-    std::string temps = *s;
-    mf.ExpandVariablesInString(temps);
-    // look for a srclist
-    if (mf.GetSources().find(temps) != mf.GetSources().end())
+    this->SetError("called with incorrect number of arguments");
+    return false;
+    }
+  // add libraries, nothe that there is an optional prefix 
+  // of debug and optimized than can be used
+  for(std::vector<std::string>::iterator i = args.begin();
+      i != args.end(); ++i)
+    {
+    if (*i == "debug")
       {
-      const std::vector<cmSourceFile> &clsList = 
-        mf.GetSources().find(temps)->second;
-      m_SourceFiles.insert(m_SourceFiles.end(), clsList.begin(), clsList.end());
+      ++i;
+      m_Makefile->AddLinkLibraryForTarget(args[0].c_str(),i->c_str(),
+                                          cmTarget::DEBUG);
       }
-    // if one wasn't found then assume it is a single class
+    else if (*i == "optimized")
+      {
+      ++i;
+      m_Makefile->AddLinkLibraryForTarget(args[0].c_str(),i->c_str(),
+                                 cmTarget::OPTIMIZED);
+      }
     else
       {
-      cmSourceFile file;
-      file.SetIsAnAbstractClass(false);
-      file.SetName(temps.c_str(), mf.GetCurrentDirectory());
-      m_SourceFiles.push_back(file);
+      m_Makefile->AddLinkLibraryForTarget(args[0].c_str(),i->c_str(),
+                                          cmTarget::GENERAL);  
       }
     }
-}
-
-void cmTarget::MergeLibraries(const LinkLibraries &ll)
-{
-  typedef std::vector<std::pair<std::string,LinkLibraryType> > LinkLibraries;
-
-  LinkLibraries::const_iterator p = ll.begin();
-  for (;p != ll.end(); ++p)
-    {
-	  if (std::find(m_LinkLibraries.begin(),m_LinkLibraries.end(),*p) == m_LinkLibraries.end())
-      {
-      m_LinkLibraries.push_back(*p);
-      }
-    }
+  return true;
 }
 

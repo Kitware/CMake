@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmSystemTools.h"
 #include "cmDSPMakefile.h"
 #include "cmMSProjectGenerator.h"
+#include "cmCacheManager.h"
 
 
 cmDSWMakefile::cmDSWMakefile(cmMakefile* m)
@@ -151,9 +152,9 @@ void cmDSWMakefile::WriteProject(std::ostream& fout,
   fout << "{{{\n";
 
   // insert Begin Project Dependency  Project_Dep_Name project stuff here 
-  cmMakefile::LinkLibraries::const_iterator j, jend;
-  j = project->GetMakefile()->GetLinkLibraries().begin();
-  jend = project->GetMakefile()->GetLinkLibraries().end();
+  cmTarget::LinkLibraries::const_iterator j, jend;
+  j = l.GetLinkLibraries().begin();
+  jend = l.GetLinkLibraries().end();
   for(;j!= jend; ++j)
     {
     if(j->first != dspname)
@@ -161,9 +162,15 @@ void cmDSWMakefile::WriteProject(std::ostream& fout,
       if (!l.IsALibrary() || 
           project->GetLibraryBuildType() == cmDSPMakefile::DLL)
         {
-        fout << "Begin Project Dependency\n";
-        fout << "Project_Dep_Name " << j->first << "\n";
-        fout << "End Project Dependency\n";
+        // is the library part of this DSW ? If so add dependency
+        const char* cacheValue
+          = cmCacheManager::GetInstance()->GetCacheValue(j->first.c_str());
+        if(cacheValue)
+          {
+          fout << "Begin Project Dependency\n";
+          fout << "Project_Dep_Name " << j->first << "\n";
+          fout << "End Project Dependency\n";
+          }
         }
       }
     }

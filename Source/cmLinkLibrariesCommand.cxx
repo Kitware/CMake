@@ -57,13 +57,13 @@ bool cmLinkLibrariesCommand::Invoke(std::vector<std::string>& args)
       {
       ++i;
       m_Makefile->AddLinkLibrary(i->c_str(),
-                                 cmMakefile::DEBUG);
+                                 cmTarget::DEBUG);
       }
     else if (*i == "optimized")
       {
       ++i;
       m_Makefile->AddLinkLibrary(i->c_str(),
-                                 cmMakefile::OPTIMIZED);
+                                 cmTarget::OPTIMIZED);
       }
     else
       {

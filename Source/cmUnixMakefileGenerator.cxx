@@ -140,7 +140,8 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
  * to the name of the library.  This will not link a library against itself.
  */
 void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
-                                                  const char* targetLibrary)
+                                                  const char* targetLibrary,
+                                                  const cmTarget &tgt)
 {
   // collect all the flags needed for linking libraries
   std::string linkLibs;        
@@ -158,14 +159,14 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
     linkLibs += " ";
     }
   std::string librariesLinked;
-  cmMakefile::LinkLibraries& libs = m_Makefile->GetLinkLibraries();
-  cmMakefile::LinkLibraries::const_iterator j2;
+  const cmTarget::LinkLibraries& libs = tgt.GetLinkLibraries();
+  cmTarget::LinkLibraries::const_iterator j2;
   for(j2 = libs.begin(); j2 != libs.end(); ++j2)
     {
     // Don't link the library against itself!
     if(targetLibrary && (j2->first == targetLibrary)) continue;
     // don't look at debug libraries
-    if (j2->second == cmMakefile::DEBUG) continue;
+    if (j2->second == cmTarget::DEBUG) continue;
     std::string::size_type pos = j2->first.find("-l");
     if((pos == std::string::npos || pos > 0)
        && j2->first.find("${") == std::string::npos)
@@ -213,7 +214,7 @@ void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
       fout << "\t  lib" << l->first << "$(SHLIB_SUFFIX) \\\n";
       fout << "\t  ${KIT_OBJ} ${" << l->first << 
         "_SRC_OBJS} ";
-      this->OutputLinkLibraries(fout, l->first.c_str());
+      this->OutputLinkLibraries(fout, l->first.c_str(), l->second);
       fout << "\n\n";
       }
     else
@@ -222,7 +223,7 @@ void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
         l->first << "_SRC_OBJS} ${CMAKE_DEPEND_LIBS}\n";
       fout << "\t${CXX}  ${CXX_FLAGS} ${" << 
         l->first << "_SRC_OBJS} ";
-      this->OutputLinkLibraries(fout, NULL);
+      this->OutputLinkLibraries(fout, NULL,l->second);
       fout << " -o " << l->first << "\n\n";
       }
     }
@@ -234,8 +235,8 @@ void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
 void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
 {
   fout << "CMAKE_DEPEND_LIBS = ";
-  cmMakefile::LinkLibraries& libs = m_Makefile->GetLinkLibraries();
-  cmMakefile::LinkLibraries::const_iterator lib2;
+  cmTarget::LinkLibraries& libs = m_Makefile->GetLinkLibraries();
+  cmTarget::LinkLibraries::const_iterator lib2;
   // Search the list of libraries that will be linked into
   // the executable
   for(lib2 = libs.begin(); lib2 != libs.end(); ++lib2)

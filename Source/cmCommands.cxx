@@ -14,6 +14,7 @@
 #include "cmIncludeDirectoryCommand.cxx"
 #include "cmLinkDirectoriesCommand.cxx"
 #include "cmLinkLibrariesCommand.cxx"
+#include "cmTargetLinkLibrariesCommand.cxx"
 #include "cmProjectCommand.cxx"
 #include "cmSourceFilesCommand.cxx"
 #include "cmSourceFilesRequireCommand.cxx"
@@ -24,6 +25,7 @@
 #include "cmWin32DefinesCommand.cxx"
 #include "cmWin32LibrariesCommand.cxx"
 #include "cmWin32IncludeDirectoryCommand.cxx"
+#include "cmConfigureFile.cxx"
 #include "cmConfigureFileNoAutoconf.cxx"
 #include "cmCableCommand.cxx"
 #include "cmCableData.cxx"
@@ -64,6 +66,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmIncludeDirectoryCommand);
   commands.push_back(new cmLinkDirectoriesCommand);
   commands.push_back(new cmLinkLibrariesCommand);
+  commands.push_back(new cmTargetLinkLibrariesCommand);
   commands.push_back(new cmProjectCommand);
   commands.push_back(new cmSourceFilesCommand);
   commands.push_back(new cmSourceFilesRequireCommand);
@@ -74,6 +77,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmWin32DefinesCommand);
   commands.push_back(new cmWin32LibrariesCommand);
   commands.push_back(new cmWin32IncludeDirectoryCommand);
+  commands.push_back(new cmConfigureFile);
   commands.push_back(new cmConfigureFileNoAutoconf);
   commands.push_back(new cmCableDefineSetCommand);
   commands.push_back(new cmCableOpenNamespaceCommand);
