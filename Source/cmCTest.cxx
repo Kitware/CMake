@@ -3701,7 +3701,14 @@ int cmCTest::RunConfigurationScript(const std::string& total_script_arg)
   // make sure the required info is here
   if (!srcDir || !binDir || !ctestCmd)
     {
-    cmSystemTools::Error("Some required settings in the configuration file were missing");    
+    std::string message = "CTEST_SOURCE_DIRECTORY = ";
+    message += (srcDir) ? srcDir: "(Null)";
+    message += "\nCTEST_BINARY_DIRECTORY = ";
+    message += (srcDir) ? binDir: "(Null)";
+    message += "\nCTEST_CMAKE_COMMAND = ";
+    message += (ctestCmd) ? ctestCmd: "(Null)";
+    cmSystemTools::Error("Some required settings in the configuration file were missing:\n",
+                         message.c_str());
     return 4;
     }
 
