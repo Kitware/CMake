@@ -59,7 +59,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Find an include path.";
+    return "Find an include path for a given header file.";
     }
   
   /**
@@ -68,7 +68,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "FIND_INCLUDE(DEFINE try1 try2 ...)";
+      "FIND_INCLUDE(DEFINE include extraPath1 extraPath2 ...)";
     }
   
   cmTypeMacro(cmFindIncludeCommand, cmCommand);
