@@ -2025,7 +2025,7 @@ void cmCTest::ProcessDirectory(cmCTest::tm_VectorOfStrings &passed,
           << it->m_Directory.c_str() << "\n";
         }
       last_directory = it->m_Directory;
-      cmSystemTools::ChangeDirectory(last_directory.c_str());
+      cmSystemTools::ChangeDirectory(it->m_Directory.c_str());
       }
     cres.m_Name = testname;
     if ( m_ShowOnly )
