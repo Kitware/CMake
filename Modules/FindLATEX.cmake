@@ -5,6 +5,7 @@
 #  LATEX_COMPILE        = the full path to the LaTeX compiler
 #  BIBTEX_COMPILE       = the full path to the BibTeX compiler
 #  DVIPDF_COMPILE       = the full path to the DVIPDF converter
+#  PS2PDF_COMPILE       = the full path to the PS2PDF converter
 #  DVIPS_COMPILE        = the full path to the DVIPS converter
 #  MAKEINDEX_COMPILE    = the full path to the MakeIndex compiler
 #
@@ -27,5 +28,9 @@ FIND_PROGRAM(DVIPS_COMPILE
 
 FIND_PROGRAM(MAKEINDEX_COMPILE
   NAMES makeindex
+)
+
+FIND_PROGRAM(PS2PDF_COMPILE
+  NAMES ps2pdf
 )
 
