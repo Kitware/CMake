@@ -727,6 +727,10 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
       if(soName != realName)
         {
         std::string fname = cmSystemTools::GetFilenameName(realName);
+        if(cmSystemTools::FileExists(soName.c_str()))
+          {
+          cmSystemTools::RemoveFile(soName.c_str());
+          }
         if(!cmSystemTools::CreateSymlink(fname.c_str(), soName.c_str()))
           {
           result = 1;
@@ -735,6 +739,10 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
       if(name != soName)
         {
         std::string fname = cmSystemTools::GetFilenameName(soName);
+        if(cmSystemTools::FileExists(soName.c_str()))
+          {
+          cmSystemTools::RemoveFile(name.c_str());
+          }
         if(!cmSystemTools::CreateSymlink(fname.c_str(), name.c_str()))
           {
           result = 1;
