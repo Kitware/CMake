@@ -143,12 +143,8 @@ bool cmDependsFortran::WriteDependencies(std::ostream& os)
     // Require only modules not provided in the same source.
     if(parser.Provides.find(*i) == parser.Provides.end())
       {
-      // Temporary hack for Fortran: choose case depending on platform
-#if defined(__sgi)
-      std::string m = cmSystemTools::UpperCase(*i);
-#else
+      // Always use lower case for the mod stamp file name.
       std::string m = cmSystemTools::LowerCase(*i);
-#endif
       os << m_TargetFile.c_str() << ": " << m.c_str() << ".mod.stamp"
          << std::endl;
       os << m_TargetFile.c_str() << ".requires: " << i->c_str() << ".mod.proxy"
@@ -182,14 +178,12 @@ bool cmDependsFortran::WriteDependencies(std::ostream& os)
     for(std::set<cmStdString>::const_iterator i = parser.Provides.begin();
         i != parser.Provides.end(); ++i)
       {
-      // Temporary hack for Fortran: choose case depending on platform
-#if defined(__sgi)
-      std::string m = cmSystemTools::UpperCase(*i);
-#else
+      // Always use lower case for the mod stamp file name.  The
+      // cmake_copy_f90_mod will call back to this class, which will
+      // try various cases for the real mod file name.
       std::string m = cmSystemTools::LowerCase(*i);
-#endif
-      os << "\t@$(CMAKE_COMMAND) -E copy_if_different "
-         << m.c_str() << ".mod " << m.c_str() << ".mod.stamp\n";
+      os << "\t$(CMAKE_COMMAND) -E cmake_copy_f90_mod "
+         << i->c_str() << " " << m.c_str() << ".mod.stamp\n";
       }
     os << "\t@touch " << m_TargetFile.c_str() << ".provides\n";
     }
@@ -256,6 +250,53 @@ bool cmDependsFortran::CheckDependencies(std::istream&)
 {
   // TODO: Parse and check dependencies.
   return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
+{
+  // Implements
+  //
+  //   $(CMAKE_COMMAND) -E cmake_copy_f90_mod input.mod output.mod.stamp
+  //
+  // Note that the case of the .mod file depends on the compiler.  In
+  // the future this copy could also account for the fact that some
+  // compilers include a timestamp in the .mod file so it changes even
+  // when the interface described in the module does not.
+
+  std::string mod = args[2];
+  mod += ".mod";
+  std::string stamp = args[3];
+  std::string mod_upper = cmSystemTools::UpperCase(mod.c_str());
+  std::string mod_lower = cmSystemTools::LowerCase(mod.c_str());
+
+  if(cmSystemTools::FileExists(mod_upper.c_str()))
+    {
+    if(!cmSystemTools::CopyFileIfDifferent(mod_upper.c_str(), stamp.c_str()))
+      {
+      std::cerr << "Error copying Fortran module from \""
+                << mod_upper.c_str() << "\" to \"" << stamp.c_str()
+                << "\".\n";
+      return false;
+      }
+    return true;
+    }
+  else if(cmSystemTools::FileExists(mod_lower.c_str()))
+    {
+    if(!cmSystemTools::CopyFileIfDifferent(mod_lower.c_str(), stamp.c_str()))
+      {
+      std::cerr << "Error copying Fortran module from \""
+                << mod_lower.c_str() << "\" to \"" << stamp.c_str()
+                << "\".\n";
+      return false;
+      }
+    return true;
+    }
+
+  std::cerr << "Error copying Fortran module \"" << args[2].c_str()
+            << "\".  Tried \"" << mod_upper.c_str()
+            << "\" and \"" << mod_lower.c_str() << "\".\n";
+  return false;
 }
 
 //----------------------------------------------------------------------------

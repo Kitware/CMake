@@ -39,6 +39,11 @@ public:
   /** Virtual destructor to cleanup subclasses properly.  */
   virtual ~cmDependsFortran();
 
+  /** Callback from build system after a .mod file has been generated
+      by a Fortran90 compiler to copy the .mod file to the
+      corresponding stamp file.  */
+  static bool CopyModule(const std::vector<std::string>& args);
+
   /** Method to find an included file in the include path.  Fortran
       always searches the directory containing the including source
       first.  */

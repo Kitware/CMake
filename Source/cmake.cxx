@@ -23,11 +23,12 @@
 #include "cmCommand.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
+# include "cmDependsFortran.h" // For -E cmake_copy_f90_mod callback.
 # include "cmVariableWatch.h"
 # include "cmVersion.h"
 #endif
 
-#include "cmLocalUnixMakefileGenerator2.h"
+#include "cmLocalUnixMakefileGenerator2.h" // For -E cmake_depends callback.
 
 // only build kdevelop generator on non-windows platforms
 // when not bootstrapping cmake
@@ -833,6 +834,14 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
       {
       return cmLocalUnixMakefileGenerator2::ScanDependencies(args)? 0 : 1;
       }
+
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+    // Internal CMake Fortran module support.
+    else if (args[1] == "cmake_copy_f90_mod" && args.size() >= 4)
+      {
+      return cmDependsFortran::CopyModule(args)? 0 : 1;
+      }
+#endif
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
     // Write registry value
