@@ -431,8 +431,8 @@ std::string cmSystemTools::ConvertToUnixOutputPath(const char* path)
 {
   std::string ret = path;
   
-  // remove //
-  std::string::size_type pos = 0;
+  // remove // except at the beginning might be a cygwin drive
+  std::string::size_type pos = 1;
   while((pos = ret.find("//", pos)) != std::string::npos)
     {
     ret.erase(pos, 1);
