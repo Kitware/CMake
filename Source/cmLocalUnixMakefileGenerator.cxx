@@ -1092,8 +1092,10 @@ cmLocalUnixMakefileGenerator::ExpandRuleVariables(std::string& s,
   int pos = 0;
   while(ruleReplaceVars[pos])
     {
-    if(lang)
-      {
+    for(std::vector<std::string>::iterator i = enabledLanguages.begin();   
+        i != enabledLanguages.end(); ++i)   
+      { 
+      lang = i->c_str();
       std::string replace = "<";
       replace += ruleReplaceVars[pos];
       replace += ">";
@@ -1112,8 +1114,8 @@ cmLocalUnixMakefileGenerator::ExpandRuleVariables(std::string& s,
         {
         cmSystemTools::ReplaceString(s, actualReplace.c_str(), replace.c_str());
         }
-      pos++;
       }
+    pos++;
     }
 }
 
