@@ -373,7 +373,7 @@ void cmMakefile::FinalPass()
 }
 
   // Generate the output file
-void cmMakefile::GenerateMakefile()
+void cmMakefile::ConfigureFinalPass()
 {
   this->FinalPass();
   const char* versionValue

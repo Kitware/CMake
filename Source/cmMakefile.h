@@ -98,9 +98,10 @@ public:
     { return m_LocalGenerator;}
 
   /**
-   * Produce the output makefile.
+   * Perform FinalPass, Library dependency analysis etc before output of the
+   * makefile.  
    */
-  void GenerateMakefile();
+  void ConfigureFinalPass();
   
   /**
    * run the final pass on all commands.
