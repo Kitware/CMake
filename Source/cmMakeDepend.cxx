@@ -90,9 +90,9 @@ void cmMakeDepend::SetMakefile(const cmMakefile* makefile)
     m_Makefile->m_ComplainFileRegularExpression.c_str());
   
   // Now extract any include paths from the makefile flags
-  const std::vector<std::string>& includes =
+  const std::set<std::string>& includes =
     m_Makefile->GetIncludeDirectories();
-  for(std::vector<std::string>::const_iterator j = includes.begin();
+  for(std::set<std::string>::const_iterator j = includes.begin();
       j != includes.end(); ++j)
     {
     std::string path = *j;

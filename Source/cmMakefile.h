@@ -383,11 +383,11 @@ public:
   /**
    * Get a list of include directories in the build.
    */
-  std::vector<std::string>& GetIncludeDirectories()
+  std::set<std::string>& GetIncludeDirectories()
     { 
     return m_IncludeDirectories;
     }
-  const std::vector<std::string>& GetIncludeDirectories() const
+  const std::set<std::string>& GetIncludeDirectories() const
     { 
     return m_IncludeDirectories;
     }
@@ -395,7 +395,7 @@ public:
   /**
    * Get a list of link directories in the build.
    */
-  std::vector<std::string>& GetLinkDirectories()
+  std::set<std::string>& GetLinkDirectories()
     { 
     return m_LinkDirectories;
     }
@@ -481,11 +481,6 @@ public:
    */
   void ExpandVariables();  
 
-  /**
-   * Strip Duplicate directories from Library and Include paths
-   */
-  void cmMakefile::StripDuplicateDirectories();
-      
   /** Recursivly read and create a cmMakefile object for
    *  all CMakeLists.txt files in the GetSubDirectories list.
    *  Once the file is found, it ReadListFile is called on
@@ -528,8 +523,8 @@ protected:
   SourceMap m_Sources; 
 
   std::vector<std::string> m_SubDirectories; // list of sub directories
-  std::vector<std::string> m_IncludeDirectories;
-  std::vector<std::string> m_LinkDirectories;
+  std::set<std::string> m_IncludeDirectories;
+  std::set<std::string> m_LinkDirectories;
   std::vector<std::string> m_ListFiles; // list of command files loaded
   
   
@@ -560,6 +555,7 @@ private:
   friend class cmMakeDepend;	// make depend needs direct access 
 				// to the m_Sources array 
   void PrintStringVector(const char* s, const std::vector<std::string>& v) const;
+  void PrintStringVector(const char* s, const std::set<std::string>& v) const;
   void AddDefaultCommands();
   void AddDefaultDefinitions();
   std::set<cmFunctionBlocker *> m_FunctionBlockers;

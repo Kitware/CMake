@@ -68,8 +68,8 @@ void cmDSPWriter::OutputDSPFile()
     }
 
   // Setup /I and /LIBPATH options for the resulting DSP file
-  std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();
-  std::vector<std::string>::iterator i;
+  std::set<std::string>& includes = m_Makefile->GetIncludeDirectories();
+  std::set<std::string>::iterator i;
   for(i = includes.begin(); i != includes.end(); ++i)
     {
     m_IncludeOptions +=  "/I \"";
@@ -504,8 +504,8 @@ void cmDSPWriter::WriteDSPHeader(std::ostream& fout, const char *libName,
     libMultiLineOptions += exePath;
     libMultiLineOptions += "\" \n";
     }
-  std::vector<std::string>::iterator i;
-  std::vector<std::string>& libdirs = m_Makefile->GetLinkDirectories();
+  std::set<std::string>::iterator i;
+  std::set<std::string>& libdirs = m_Makefile->GetLinkDirectories();
   for(i = libdirs.begin(); i != libdirs.end(); ++i)
     {
     libOptions += " /LIBPATH:\"";

@@ -170,6 +170,17 @@ void cmMakefile::PrintStringVector(const char* s, const std::vector<std::string>
   std::cout << " )\n";
 }
 
+void cmMakefile::PrintStringVector(const char* s, const std::set<std::string>& v) const
+{
+  std::cout << s << ": ( \n";
+  for(std::set<std::string>::const_iterator i = v.begin();
+      i != v.end(); ++i)
+    {
+    std::cout << (*i).c_str() << " ";
+    }
+  std::cout << " )\n";
+}
+
 
 // call print on all the classes in the makefile
 void cmMakefile::Print() const
@@ -409,8 +420,6 @@ void cmMakefile::FinalPass()
   // do all the variable expansions here
   this->ExpandVariables();
 
-  this->StripDuplicateDirectories();
-
   // give all the commands a chance to do something
   // after the file has been parsed before generation
   for(std::vector<cmCommand*>::iterator i = m_UsedCommands.begin();
@@ -536,7 +545,7 @@ void cmMakefile::AddLinkLibrary(const char* lib)
 
 void cmMakefile::AddLinkDirectory(const char* dir)
 {
-  m_LinkDirectories.push_back(dir);
+  m_LinkDirectories.insert(dir);
 }
 
 void cmMakefile::AddSubDirectory(const char* sub)
@@ -546,7 +555,7 @@ void cmMakefile::AddSubDirectory(const char* sub)
 
 void cmMakefile::AddIncludeDirectory(const char* inc)
 {
-  m_IncludeDirectories.push_back(inc);
+  m_IncludeDirectories.insert(inc);
 }
 
 void cmMakefile::AddDefinition(const char* name, const char* value)
@@ -730,19 +739,31 @@ std::string cmMakefile::GetParentListFileName(const char *currentFileName)
 void cmMakefile::ExpandVariables()
 {
   // Now expand varibles in the include and link strings
-  std::vector<std::string>::iterator j, begin, end;
+  std::set<std::string>::iterator j, begin, end;
   begin = m_IncludeDirectories.begin();
   end = m_IncludeDirectories.end();
+  std::set<std::string> new_set;
+  std::string x;
+  
   for(j = begin; j != end; ++j)
     {
-    this->ExpandVariablesInString(*j);
+    x= *j;
+    this->ExpandVariablesInString(x);
+    new_set.insert(x);
     }
+  m_IncludeDirectories = new_set;
+
+  new_set.clear();
   begin = m_LinkDirectories.begin();
   end = m_LinkDirectories.end();
   for(j = begin; j != end; ++j)
     {
-    this->ExpandVariablesInString(*j);
+    x = *j;
+    this->ExpandVariablesInString(x);
+    new_set.insert(x);
     }
+  m_LinkDirectories = new_set;
+
   cmTarget::LinkLibraries::iterator j2, end2;
   j2 = m_LinkLibraries.begin();
   end2 = m_LinkLibraries.end();
@@ -791,29 +812,6 @@ int cmMakefile::DumpDocumentationToFile(const char *fileName)
 
   return 1;
 }
-
-
-  // Remove duplicate directories from the library and include paths.
-void cmMakefile::StripDuplicateDirectories()
-{
-  std::vector<std::string>::iterator begin, end;
-  // remove duplicates from m_IncludeDirectories
-  begin = m_IncludeDirectories.begin();
-  end = m_IncludeDirectories.end();
-  std::list<std::string> tmp1(begin, end);
-  tmp1.sort();
-  m_IncludeDirectories.clear();
-  std::unique_copy(tmp1.begin(), tmp1.end(), std::back_inserter(m_IncludeDirectories));
-
-  // remove duplicates from m_LinkDirectories
-  begin = m_LinkDirectories.begin();
-  end = m_LinkDirectories.end();
-  std::list<std::string> tmp2(begin, end);
-  tmp2.sort();
-  m_LinkDirectories.clear();
-  std::unique_copy(tmp2.begin(), tmp2.end(), std::back_inserter(m_LinkDirectories));
-}
-
 
 
 void cmMakefile::ExpandVariablesInString(std::string& source) const

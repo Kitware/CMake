@@ -298,9 +298,9 @@ void cmCableWrapTclCommand::GenerateCableClassFiles(const char* name,
   commandArgs += m_Makefile->GetStartDirectory();
   commandArgs += "\"";
     
-  const std::vector<std::string>& includes = 
+  const std::set<std::string>& includes = 
     m_Makefile->GetIncludeDirectories();
-  for(std::vector<std::string>::const_iterator i = includes.begin();
+  for(std::set<std::string>::const_iterator i = includes.begin();
       i != includes.end(); ++i)
     {
       commandArgs += " -I";
