@@ -24,9 +24,21 @@
 #include "windows.h"
 #endif
 
+
+// Create a class to clean up all the registered generators in case of return
+struct CleanUp
+{
+  ~CleanUp()
+    {
+      cmMakefileGenerator::UnRegisterGenerators();
+    }
+};
+
+
 // this is a test driver program for cmake.
 int main (int argc, char **argv)
 {
+  CleanUp cleanup;
   if (argc < 4)
     {
     std::cerr << "Usage: " << argv[0] << " test-src-dir test-bin-dir test-executable\n";
@@ -69,20 +81,22 @@ int main (int argc, char **argv)
   cmSystemTools::ChangeDirectory(binaryDirectory);
 
   std::vector<std::string> args;
+  std::string intdir = ".";
+#ifdef  CMAKE_INTDIR
+  intdir = CMAKE_INTDIR;
+#endif
 
   // make sure the same generator is used
   // use this program as the cmake to be run, it should not
   // be run that way but the cmake object requires a vailid path
-  std::string cmakeCommand = CMAKE_COMMAND;
-  if(cmakeCommand[0] == '\\' && cmakeCommand[1] == '\"')
-    {
-    cmakeCommand = cmakeCommand.substr(2, cmakeCommand.size()-4);
-    }
-  if(cmakeCommand[0] == '\"')
-    {
-    cmakeCommand = cmakeCommand.substr(1, cmakeCommand.size()-2);
-    }
+  std::string cmakeCommand = CMAKE_BINARY_DIR;
+  cmakeCommand += "/Source";
+  cmakeCommand += "/";
+  cmakeCommand += intdir;
+  cmakeCommand += "/cmake";
+  cmakeCommand += cmSystemTools::GetExecutableExtension();
 
+  std::cout << "*** " << cmakeCommand << "\n";
   args.push_back(cmakeCommand.c_str());
   args.push_back(sourceDirectory);
   std::string generator = "-G";
@@ -143,10 +157,6 @@ int main (int argc, char **argv)
   std::string lowerCaseCommand = makeCommand;
   cmSystemTools::LowerCase(lowerCaseCommand);
   std::string dartMakeCommand = DART_MAKECOMMAND;
-  std::string buildtype = "Debug";
-#ifdef  CMAKE_INTDIR
-  buildtype = CMAKE_INTDIR;
-#endif
   // if msdev is the make program then do the following
   // MSDEV 6.0
   if(lowerCaseCommand.find("msdev") != std::string::npos)
@@ -163,7 +173,7 @@ int main (int argc, char **argv)
     makeCommand += " ";
     makeCommand += projectName;
     makeCommand += ".dsw /MAKE \"ALL_BUILD - ";
-    makeCommand += buildtype + "\" /REBUILD";
+    makeCommand += intdir + "\" /REBUILD";
     }
   // MSDEV 7.0 .NET
   else if (lowerCaseCommand.find("devenv") != std::string::npos)
@@ -177,7 +187,7 @@ int main (int argc, char **argv)
     makeCommand += " ";
     makeCommand += projectName;
     makeCommand += ".sln /rebuild ";
-    makeCommand += buildtype + " /project ALL_BUILD";
+    makeCommand += intdir + " /project ALL_BUILD";
     }
   // command line make program
   else
@@ -224,7 +234,7 @@ int main (int argc, char **argv)
     fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
     }
   // try the Debug extension
-  tryPath = buildtype + "/";
+  tryPath = intdir + "/";
   tryPath += cmSystemTools::GetFilenameName(executableName);
   if(cmSystemTools::FileExists(tryPath.c_str()))
     {
@@ -245,7 +255,7 @@ int main (int argc, char **argv)
     }
   tryPath = executableDirectory;
   tryPath += "/";
-  tryPath += buildtype + "/";
+  tryPath += intdir + "/";
   tryPath += executableName;
   tryPath += cmSystemTools::GetExecutableExtension();
   if(cmSystemTools::FileExists(tryPath.c_str()))
@@ -280,7 +290,6 @@ int main (int argc, char **argv)
   std::cout << output << "\n";
   // return to the original directory
   cmSystemTools::ChangeDirectory(cwd.c_str());
-  cmMakefileGenerator::UnRegisterGenerators();
   if(ret)
     {
     cmSystemTools::Error("test executable ", fullPath.c_str(), 

@@ -36,7 +36,7 @@ cmCableClassSet.obj \
 cmListFileCache.obj \
 cmSourceGroup.obj
 
-cmake: ${OBJS}
+cmake.exe: ${OBJS}
 	bcc32 -ecmake ${OBJS} 
 
 
