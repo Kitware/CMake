@@ -1,29 +1,32 @@
 WELCOME TO CROSS-PLATFORM MAKE (CMake)
 -------------------------------------
 
-CMake is a cross-platform, extensible build environment. It currently generates
-Unix makefiles and Microsoft Visual C++ projects/workspaces.
+CMake is a cross-platform, extensible build environment. It currently
+generates Unix makefiles and Microsoft Visual C++ projects/workspaces. Other
+OS/compiler targets are being added to this open-source system, and you can
+add your own, if desired.
 
 To use CMake, create CMakeLists.txt in each directory that makes up your
-source repository. The CMakeLists.txt file contains rules. Each rule does
-something different, like defining a list of source code, include directories,
-etc. Once CMake has processed all the rules in all the CMakeLists.txt files,
-it generates the appropriate "makefile(s)" for the system/compiler that you
-are on.
+source repository. The CMakeLists.txt file contains commands. Each command
+does something different, like defining a list of source code, include
+directories, makefile targets, rules, etc. Once CMake has processed all the
+commands in all the CMakeLists.txt files, it generates the appropriate
+"makefile(s)" for the system/compiler that you are on.
 
-THE BOOK OF RULES
------------------
+CMake Commands
+--------------
 
-The key to using CMake is to learn the rules. Each rule has the same format:
+The key to using CMake is to learn the commands. Each command has the 
+same format:
 
-    NAME_OF_RULE(args....)
+    NAME_OF_COMMAND(args....)
 
 where args is a white-space separated listed of arguments. (Arguments 
 containing spaces should be quoted). For example:
 
     INCLUDE_DIRECTORIES(./ d:/include "c:/Program Files/include")
 
-note that Unix-style slashes are used. The rules may reference CMake
+note that Unix-style slashes are used. The commands may reference CMake
 variables, either built-in or defined variables. Two important variables
 are built-in to CMake:
 
@@ -40,11 +43,11 @@ A rule might reference these as follows:
 
 using the ${} delimiters.
         
-Here is a list of current rules. You may also wish to view
+Here is a list of current commands. You may also wish to view
 the Doxygen documentation (if available) or generate it with
 the doxygen.config file in this directory.
 
-Rules: (Generated with cmDumpDocumentation)
+Rules: (Generated with cmDumpDocumentation.cxx)
 ------------------------------------------
 
     ABSTRACT_FILES - A list of abstract classes, useful for wrappers.
@@ -81,13 +84,13 @@ Rules: (Generated with cmDumpDocumentation)
     The directories can use built in definitions like 
     CMAKE_BINARY_DIR and CMAKE_SOURCE_DIR.
 
-    LINK_LIBRARIES - Specify a list of libraries to be linked into executables or 
-    shared objects.
+    LINK_LIBRARIES - Specify a list of libraries to be linked into executables 
+    or shared objects.
     Usage: LINK_LIBRARIES(library1 library2)
     Specify a list of libraries to be linked into
-    executables or shared objects.  This rule is passed
-    down to all other rules. The library name should be
-    the same as the name used in the LIBRARY(library) rule.
+    executables or shared objects.  This command is passed
+    down to all other commands. The library name should be
+    the same as the name used in the LIBRARY(library) command.
 
     PROJECT - Set a name for the entire project. One argument.
     Usage: PROJECT(projectname)
@@ -139,11 +142,10 @@ To build a project on Windows:
     load CMake/Source/CMakeSetup.dsw
     Build it
     Run it
-    Specify paths
+    Specify paths (i.e., CMAKE_SOURCE_DIR and CMAKE_BINARY_DIR)
 
-    Load ITK.dsw
-    Build Common, Numerics, then any of the many executables, 
-    or do a Batch build with debug only.
+    Load (project).dsw (the PROJECT(project) command specified the name)
+    Build the appropriate workspaces wihin the project.
 
 
 Unix:
@@ -169,20 +171,37 @@ These programs/files are used to drive CMake on Unix:
 
 
 Unix install:
-In place (object files end up in source code directory):
+In-place builds (object files end up in source code directory):
 
     ./configure
     make
 
-Other directory (object files are in another directory):
+Other-directory builds (object files are in another directory, and
+assuming that the source code is in ./project and the following
+procedure is performed starting in directory ./):
 
-    mkdir Insight-build
-    cd Insight-build
-    ../Insight/configure
+    mkdir project-build (project is the name of your project)
+    cd project-build
+    ../project/configure
     make
+
+
+ADDING COMMANDS
+---------------
+Rules can be added to CMake by deriving new commands from the class cmCommand 
+(defined in CMake/Source/cmCommand.h/.cxx).
+
+
+ADDING MAKEFILE SUPPORT
+-----------------------
+Different types of makefiles (corresponding to a different compiler and/or
+operating system) can be added by subclassing from cmMakefileGenerator 
+(defined in cmMakefileGenerator.h/.cxx). Makefile generators process the 
+information defined by the commands in CMakeLists.txt to generate the 
+appropriate makefile(s).
 
 
 FOR MORE INFORMATION
 --------------------
-Contact Bill Hoffman bill.hoffman@kitware.com who is the
-principal developer.
+Contact Bill Hoffman bill.hoffman@kitware.com (principal developer)
+or Will Schroeder will.schroeder@kitware.com (documentation grunt).
