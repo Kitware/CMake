@@ -398,7 +398,7 @@ void CMakeSetupDialog::OnBrowseWhereBuild()
 
 void CMakeSetupDialog::RunCMake(bool generateProjectFiles)
 {
-    if(!cmSystemTools::FileExists(m_WhereBuild))
+  if(!cmSystemTools::FileExists(m_WhereBuild))
     {
     std::string message =
       "Build directory does not exist, should I create it?\n\n"
@@ -419,12 +419,8 @@ void CMakeSetupDialog::RunCMake(bool generateProjectFiles)
 
   // get all the info from the dialog
   this->UpdateData();
-  if(!m_BuildPathChanged)
-    {
-    // if the build path has not changed save the 
-    // current GUI values to the cache
-    this->SaveCacheFromGUI();
-    }
+  // always save the current gui values to disk
+  this->SaveCacheFromGUI();
   // Make sure we are working from the cache on disk
   this->LoadCacheFromDiskToGUI();
   // create a cmake object
