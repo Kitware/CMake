@@ -83,6 +83,7 @@ class ostringstream: public ostrstream
 public:
   typedef ostrstream Superclass;
   ostringstream() {}
+  ostringstream(const kwsys_stl::string& s) { *this << s.c_str(); }
   kwsys_stl::string str()
     {
     ostringstream_cleanup cleanup(*this);
@@ -90,6 +91,11 @@ public:
     int pcount = this->pcount();
     const char* ptr = this->Superclass::str();
     return kwsys_stl::string(ptr?ptr:"", pcount);
+    }
+  void str(const kwsys_stl::string& s)
+    {
+    this->~ostringstream();
+    new (this) ostringstream(s);
     }
 private:
   ostringstream(const ostringstream&);
