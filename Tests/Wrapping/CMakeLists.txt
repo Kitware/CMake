@@ -24,15 +24,6 @@ ELSE (EXECUTABLE_OUTPUT_PATH)
 ENDIF (EXECUTABLE_OUTPUT_PATH)
 
 #
-# Link to CMake lib
-#
-FIND_LIBRARY (CMAKE_LIB
-              CMakeLib 
-              ${Wrapping_BINARY_DIR}/../../Source/${CMAKE_CFG_INTDIR})
-
-LINK_LIBRARIES (${CMAKE_LIB})
-
-#
 # Add exe
 #
 ADD_EXECUTABLE (wrapping wrapping.cxx)

@@ -24,18 +24,6 @@ ELSE (EXECUTABLE_OUTPUT_PATH)
 ENDIF (EXECUTABLE_OUTPUT_PATH)
 
 #
-# Link to CMake lib
-#
-FIND_LIBRARY(CMAKE_LIB
-             CMakeLib 
-             ${Wrapping_BINARY_DIR}/../../Source/${CMAKE_CFG_INTDIR})
-
-# Specify the same one for debug/optimized to increase coverage
-LINK_LIBRARIES(${CMAKE_LIB}
-               debug ${CMAKE_LIB}
-               optimized ${CMAKE_LIB})
-
-#
 # Include Dart
 # (will also set NSLOOKUP, HOSTNAME, etc.)
 #
