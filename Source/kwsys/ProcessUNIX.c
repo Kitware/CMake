@@ -1044,20 +1044,21 @@ static int kwsysProcessInitialize(kwsysProcess* cp)
   memset(cp->CommandExitCodes, 0, sizeof(int)*cp->NumberOfCommands);
 
   /* Allocate memory to save the real working directory.  */
-  {
-#if defined(MAXPATHLEN)
-  cp->RealWorkingDirectoryLength = MAXPATHLEN;
-#elif defined(PATH_MAX)
-  cp->RealWorkingDirectoryLength = PATH_MAX;
-#else
-  cp->RealWorkingDirectoryLength = 4096;
-#endif
-  cp->RealWorkingDirectory = malloc(cp->RealWorkingDirectoryLength);
-  if(!cp->RealWorkingDirectory)
+  if ( cp->WorkingDirectory )
     {
-    return 0;
+#if defined(MAXPATHLEN)
+    cp->RealWorkingDirectoryLength = MAXPATHLEN;
+#elif defined(PATH_MAX)
+    cp->RealWorkingDirectoryLength = PATH_MAX;
+#else
+    cp->RealWorkingDirectoryLength = 4096;
+#endif
+    cp->RealWorkingDirectory = malloc(cp->RealWorkingDirectoryLength);
+    if(!cp->RealWorkingDirectory)
+      {
+      return 0;
+      }
     }
-  }
 
   return 1;
 }
