@@ -27,7 +27,8 @@ cmCableData::cmCableData(const cmCableCommand* owner,
   m_Owner(owner),
   m_Indentation(0),
   m_Package(NULL),
-  m_PackageNamespaceDepth(0)
+  m_PackageNamespaceDepth(0),
+  m_PackageClassIndex(-1)
 {
   this->OpenOutputFile(configurationFile);
 }
@@ -166,6 +167,9 @@ void cmCableData::BeginPackage(cmCablePackageCommand* command)
   
   // Open this package.
   m_Package = command;
+  
+  // Write out the package's header.
+  m_Package->WritePackageHeader();
   
   // Save the package's opening namespace depth for later verification
   // on the end of the package.

@@ -16,6 +16,30 @@
 #include "cmCableSourceFilesCommand.h"
 #include "cmCacheManager.h"
 
+void cmCableSourceFilesCommand::FinalPass()
+{
+  // Get the index of the current package's cmClassFile.
+  // If it doesn't exist, ignore this command.
+  int index = m_CableData->GetPackageClassIndex();
+  if(index < 0)
+    { return; }
+  
+  // The package's file has not yet been generated yet.  The dependency
+  // finder will need hints.  Add one for each source file.
+  cmClassFile& cFile = m_Makefile->GetClasses()[index];
+  
+  std::string curPath = m_Makefile->GetCurrentDirectory();
+  curPath += "/";
+  
+  for(Entries::const_iterator f = m_Entries.begin();
+      f != m_Entries.end(); ++f)
+    {
+    std::string header = curPath+*f+".h";
+    cFile.m_Depends.push_back(header);
+    }
+}
+
+
 /**
  * Write the CABLE configuration code to indicate header dependencies for
  * a package.

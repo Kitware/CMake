@@ -32,14 +32,51 @@ bool cmCablePackageCommand::Invoke(std::vector<std::string>& args)
   m_PackageName = args[0];
   
   // Ask the cable data to begin the package.  This may call another
-  // cmCablePackageCommand's WritePackageFooter().
+  // cmCablePackageCommand's WritePackageFooter().  This will call
+  // this cmCablePackageCommand's WritePackageHeader().
   m_CableData->BeginPackage(this);
   
-  // Write the configuration for this command.
-  // The cmCableData::EndPackage() later on will call WritePackageFooter().
-  this->WritePackageHeader();
+  // Add custom rules to the makefile to generate this package's source
+  // files.
+  std::vector<std::string> depends;
+  depends.push_back("cable_config.xml");
+  
+  std::string command = "${CABLE}";
+  m_Makefile->ExpandVariablesInString(command);  
+  depends.push_back(command);
+  command += " cable_config.xml";
+  
+  std::string packageFile = "Cxx/"+m_PackageName+"_cxx";
+  std::string packageHeader = packageFile+".h";
+  std::string packageSource = packageFile+".cxx";
+  
+  // A rule for the package's header file.
+  m_Makefile->AddCustomCommand("",
+                               packageHeader.c_str(),
+                               command.c_str(),
+                               depends);
+  
+  // A rule for the package's source file.
+  m_Makefile->AddCustomCommand("",
+                               packageSource.c_str(),
+                               command.c_str(),
+                               depends);
   
   return true;
+}
+
+
+void cmCablePackageCommand::FinalPass()
+{
+  // Add a rule to build the generated package.
+  std::string fileName = "Cxx/"+m_PackageName+"_cxx";
+  std::string filePath = m_Makefile->GetStartOutputDirectory();
+  cmClassFile file;
+  file.m_AbstractClass = false;
+  file.SetName(fileName.c_str(), filePath.c_str(), "cxx", false);
+  
+  m_CableData->SetPackageClassIndex(m_Makefile->GetClasses().size());
+  m_Makefile->AddClass(file);
 }
 
 
