@@ -31,10 +31,12 @@ public:
   // list of current composites.
   bool LookForCacheEntry(const char* key);
 
-  static const int MIN_WIDTH;
-  static const int MIN_HEIGHT;
-  static const int IDEAL_WIDTH;
-  static const int MAX_WIDTH;
+  enum {
+    MIN_WIDTH = 65,
+    MIN_HEIGHT = 6,
+    IDEAL_WIDTH = 80,
+    MAX_WIDTH = 512
+  };
 
   // Description:
   // This method should normally  called only by the form.

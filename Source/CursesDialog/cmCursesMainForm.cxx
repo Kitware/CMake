@@ -11,10 +11,6 @@
 #include "cmCursesCacheEntryComposite.h"
 #include "cmCursesLongMessageForm.h"
 
-const int cmCursesMainForm::MIN_WIDTH  = 65;
-const int cmCursesMainForm::MIN_HEIGHT = 6;
-const int cmCursesMainForm::IDEAL_WIDTH = 80;
-const int cmCursesMainForm::MAX_WIDTH = 512;
 
 inline int ctrl(int z)
 {
