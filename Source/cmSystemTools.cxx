@@ -127,32 +127,46 @@ std::string cmSystemTools::EscapeQuotes(const char* str)
 std::string cmSystemTools::EscapeSpaces(const char* str)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  std::string result;
-  
-  // if there are spaces
-  std::string temp = str;
-  if (temp.find(" ") != std::string::npos && 
-      temp.find("\"")==std::string::npos)
+  bool useDoubleQ = true;
+#else
+  bool useDoubleQ = false;
+#endif
+  if(cmSystemTools::s_ForceUnixPaths)
     {
-    result = "\"";
-    result += str;
-    result += "\"";
+    useDoubleQ = false;
+    }
+  
+  if(useDoubleQ)
+    {
+    std::string result;
+    
+    // if there are spaces
+    std::string temp = str;
+    if (temp.find(" ") != std::string::npos && 
+        temp.find("\"")==std::string::npos)
+      {
+      result = "\"";
+      result += str;
+      result += "\"";
+      return result;
+      }
+    return str;
+    }
+  else
+    {
+    std::string result = "";
+    for(const char* ch = str; *ch != '\0'; ++ch)
+      {
+      if(*ch == ' ')
+        {
+        result += '\\';
+        }
+      result += *ch;
+      }
     return result;
     }
-  return str;
-#else
-  std::string result = "";
-  for(const char* ch = str; *ch != '\0'; ++ch)
-    {
-    if(*ch == ' ')
-      {
-      result += '\\';
-      }
-    result += *ch;
-    }
-  return result;
-#endif
 }
+
 
 std::string cmSystemTools::RemoveEscapes(const char* s)
 {
