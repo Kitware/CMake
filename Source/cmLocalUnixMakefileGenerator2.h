@@ -89,6 +89,12 @@ protected:
                              const char* order, const std::string& last);
   void WriteRequiresRule(std::ostream& ruleFileStream, const cmTarget& target,
                          const char* targetFullPath);
+  void WriteConvenienceRules(std::ostream& ruleFileStream,
+                             const cmTarget& target,
+                             const char* targetFullPath);
+  void WriteConvenienceRule(std::ostream& ruleFileStream,
+                            const char* realTarget,
+                            const char* helpTarget);
   void WriteExecutableRule(std::ostream& ruleFileStream,
                            const char* ruleFileName,
                            const cmTarget& target,

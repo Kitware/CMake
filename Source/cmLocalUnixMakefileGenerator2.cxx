@@ -23,6 +23,14 @@
 
 #include <queue>
 
+// Quick-switch for generating old makefiles.
+#if 0
+# define CMLUMG_MAKEFILE_NAME "Makefile"
+#else
+# define CMLUMG_WRITE_OLD_MAKEFILE
+# define CMLUMG_MAKEFILE_NAME "Makefile2"
+#endif
+
 //----------------------------------------------------------------------------
 cmLocalUnixMakefileGenerator2::cmLocalUnixMakefileGenerator2()
 {
@@ -48,8 +56,18 @@ void cmLocalUnixMakefileGenerator2::Generate(bool fromTheTop)
 {
   // TODO: Think about unifying generation of "@" for silent commands.
 
+#ifdef CMLUMG_WRITE_OLD_MAKEFILE
   // Generate old style for now.
   this->cmLocalUnixMakefileGenerator::Generate(fromTheTop);
+#else
+  // Make sure we never run a local generate.
+  if(!fromTheTop)
+    {
+    cmSystemTools::Error("Local generate invoked in ",
+                         m_Makefile->GetStartOutputDirectory());
+    return;
+    }
+#endif
 
   // Generate the rule files for each target.
   const cmTargets& targets = m_Makefile->GetTargets();
@@ -90,7 +108,7 @@ void cmLocalUnixMakefileGenerator2::GenerateMakefile()
   // because the check-build-system step compares the makefile time to
   // see if the build system must be regenerated.
   std::string makefileName = m_Makefile->GetStartOutputDirectory();
-  makefileName += "/Makefile2";
+  makefileName += "/" CMLUMG_MAKEFILE_NAME;
   cmGeneratedFileStream makefileStream(makefileName.c_str());
   if(!makefileStream)
     {
@@ -126,9 +144,11 @@ void cmLocalUnixMakefileGenerator2::GenerateMakefile()
 void cmLocalUnixMakefileGenerator2::GenerateCMakefile()
 {
   std::string makefileName = m_Makefile->GetStartOutputDirectory();
-  makefileName += "/Makefile2";
+  makefileName += "/" CMLUMG_MAKEFILE_NAME;
   std::string cmakefileName = makefileName;
   cmakefileName += ".cmake";
+
+  // TODO: Use relative paths in this generated file.
 
   // Open the output file.
   cmGeneratedFileStream cmakefileStream(cmakefileName.c_str());
@@ -169,6 +189,7 @@ void cmLocalUnixMakefileGenerator2::GenerateCMakefile()
     << "# The corresponding makefile is:\n"
     << "SET(CMAKE_MAKEFILE_OUTPUTS\n"
     << "  \"" << makefileName.c_str() << "\"\n"
+    << "  \"" << m_Makefile->GetHomeOutputDirectory() << "/cmake.check_cache\"\n"
     << "  )\n\n";
 
   // Set the set of files to check for dependency integrity.
@@ -816,7 +837,7 @@ cmLocalUnixMakefileGenerator2
 
   // Build command to run CMake to check if anything needs regenerating.
   std::string cmakefileName = m_Makefile->GetStartOutputDirectory();
-  cmakefileName += "/Makefile2.cmake";
+  cmakefileName += "/" CMLUMG_MAKEFILE_NAME ".cmake";
   std::string runRule =
     "@$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)";
   runRule += " --check-build-system ";
@@ -1204,6 +1225,8 @@ cmLocalUnixMakefileGenerator2
 ::WriteRequiresRule(std::ostream& ruleFileStream, const cmTarget& target,
                     const char* targetFullPath)
 {
+  // TODO: Avoid using requires target except when needed for
+  // Fortran/Java dependencies.
   std::vector<std::string> depends;
   std::vector<std::string> no_commands;
   std::string reqComment = "Requirements for target ";
@@ -1213,6 +1236,49 @@ cmLocalUnixMakefileGenerator2
   depends.push_back(targetFullPath);
   this->WriteMakeRule(ruleFileStream, reqComment.c_str(), 0,
                       reqTarget.c_str(), depends, no_commands);
+}
+
+//----------------------------------------------------------------------------
+void
+cmLocalUnixMakefileGenerator2
+::WriteConvenienceRules(std::ostream& ruleFileStream, const cmTarget& target,
+                        const char* targetFullPath)
+{
+  // Add a rule to build the target by name.
+  std::string localName = this->GetFullTargetName(target.GetName(), target);
+  localName = this->ConvertToRelativeOutputPath(localName.c_str());
+  this->WriteConvenienceRule(ruleFileStream, targetFullPath,
+                             localName.c_str());
+
+  // Add a target with the canonical name (no prefix, suffix or path).
+  if(localName != target.GetName())
+    {
+    this->WriteConvenienceRule(ruleFileStream, targetFullPath,
+                               target.GetName());
+    }
+}
+
+//----------------------------------------------------------------------------
+void
+cmLocalUnixMakefileGenerator2
+::WriteConvenienceRule(std::ostream& ruleFileStream,
+                       const char* realTarget,
+                       const char* helpTarget)
+{
+  // A rule is only needed if the names are different.
+  if(strcmp(realTarget, helpTarget) != 0)
+    {
+    // The helper target depends on the real target.
+    std::vector<std::string> depends;
+    depends.push_back(realTarget);
+
+    // There are no commands.
+    std::vector<std::string> no_commands;
+
+    // Write the rule.
+    this->WriteMakeRule(ruleFileStream, "Convenience name for target.", 0,
+                        helpTarget, depends, no_commands);
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -1269,14 +1335,12 @@ cmLocalUnixMakefileGenerator2
   depends.push_back(ruleFileName);
 
   // Construct the full path to the executable that will be generated.
+  // TODO: Try to convert this to use a relative path.
   std::string targetFullPath = m_ExecutableOutputPath;
   if(targetFullPath.length() == 0)
     {
     targetFullPath = m_Makefile->GetStartOutputDirectory();
-    if(targetFullPath.size() && targetFullPath[targetFullPath.size()-1] != '/')
-      {
-      targetFullPath += "/";
-      }
+    targetFullPath += "/";
     }
 #ifdef __APPLE__
   if(target.GetPropertyAsBool("MACOSX_BUNDLE"))
@@ -1381,7 +1445,9 @@ cmLocalUnixMakefileGenerator2
   buildEcho += "...";
   this->WriteMakeRule(ruleFileStream, 0, buildEcho.c_str(),
                       targetFullPath.c_str(), depends, commands);
-  // TODO: Add "local" target and canonical target name as rules.
+
+  // Write convenience targets.
+  this->WriteConvenienceRules(ruleFileStream, target, targetFullPath.c_str());
 
   // Write driver rule for this target.
   this->WriteRequiresRule(ruleFileStream, target, targetFullPath.c_str());
@@ -1634,7 +1700,8 @@ cmLocalUnixMakefileGenerator2
   this->WriteMakeRule(ruleFileStream, 0, buildEcho.c_str(),
                       targetFullPath.c_str(), depends, commands);
 
-  // TODO: Add "local" target and canonical target name as rules.
+  // Write convenience targets.
+  this->WriteConvenienceRules(ruleFileStream, target, targetFullPath.c_str());
 
   // Write driver rule for this target.
   this->WriteRequiresRule(ruleFileStream, target, targetFullPath.c_str());
@@ -1966,7 +2033,7 @@ cmLocalUnixMakefileGenerator2
     {
     cmd += "@";
     }
-  cmd += "$(MAKE) -f Makefile2 ";
+  cmd += "$(MAKE) -f " CMLUMG_MAKEFILE_NAME " ";
 
   // Pass down verbosity level.
   if(m_MakeSilentFlag.size())
