@@ -81,7 +81,11 @@ protected:
   void WriteSpecialTargetsTop(std::ostream& makefileStream);
   void WriteSpecialTargetsBottom(std::ostream& makefileStream);
   void WriteRuleFileIncludes(std::ostream& makefileStream);
-  void WriteAllRule(std::ostream& makefileStream);
+  void WriteAllRules(std::ostream& makefileStream);
+  void WriteDependRules(std::ostream& makefileStream);
+  void WriteBuildRules(std::ostream& makefileStream);
+  void WriteDriverRules(std::ostream& makefileStream, const char* pass,
+                        const char* local1, const char* local2=0);
   void WriteSubdirRules(std::ostream& makefileStream, const char* pass);
   void WriteSubdirRule(std::ostream& makefileStream, const char* pass,
                        const char* subdir, std::string& last);

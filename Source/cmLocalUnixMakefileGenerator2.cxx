@@ -124,11 +124,20 @@ void cmLocalUnixMakefileGenerator2::GenerateMakefile()
   // Write special targets that belong at the top of the file.
   this->WriteSpecialTargetsTop(makefileStream);
 
-  // Write the directory-level build rules.
-  this->WriteAllRule(makefileStream);
+  // Write rules to build dependencies and targets.
+  this->WriteAllRules(makefileStream);
 
-  // Write the subdirectory driver rules.
-  this->WriteSubdirRules(makefileStream, "all");
+  // Write dependency generation rules.
+  this->WriteDependRules(makefileStream);
+
+  // Write main build rules.
+  this->WriteBuildRules(makefileStream);
+
+  // Write clean rules. TODO: CONTINUE HERE
+  //this->WriteCleanRules(makefileStream);
+
+  // TODO: Write install rules.
+  //this->WriteInstallRules(makefileStream);
 
   // Write include statements to get rules for this directory.
   this->WriteRuleFileIncludes(makefileStream);
@@ -835,72 +844,22 @@ cmLocalUnixMakefileGenerator2
     << "# Special targets provided by cmake.\n"
     << "\n";
 
-  // Build command to run CMake to check if anything needs regenerating.
-  std::string cmakefileName = m_Makefile->GetStartOutputDirectory();
-  cmakefileName += "/" CMLUMG_MAKEFILE_NAME ".cmake";
-  std::string runRule =
-    "@$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)";
-  runRule += " --check-build-system ";
-  runRule += this->ConvertToRelativeOutputPath(cmakefileName.c_str());
-
   // Write the main entry point target.  This must be the VERY first
-  // target so that make with no arguments will run it.  The
-  // dependencies and commands generated for this rule must not depend
-  // on listfile contents because the build system check might
-  // regenerate the makefile but it might not get read again by make
-  // before the commands run.
+  // target so that make with no arguments will run it.
   {
+  // Just depend on the all target to drive the build.
   std::vector<std::string> depends;
-  std::vector<std::string> commands;
-  // Check the build system in this directory.
-  depends.push_back("cmake_check_build_system");
-
-  // Recursively build pre-order directories.
-  commands.push_back(this->GetRecursiveMakeCall("all.subdirs.pre", true));
-
-  // Recursively build dependencies.
-  commands.push_back(this->GetRecursiveMakeCall("all.depends", true));
-
-  // Recursively build targets.
-  commands.push_back(this->GetRecursiveMakeCall("all.build", true));
-
-  // Recursively build post-order directories.
-  commands.push_back(this->GetRecursiveMakeCall("all.subdirs.post", true));
+  std::vector<std::string> no_commands;
+  depends.push_back("all");
 
   // Write the rule.
-  std::string preEcho = "Entering directory ";
-  preEcho += m_Makefile->GetStartOutputDirectory();
-  std::string postEcho = "Finished directory ";
-  postEcho += m_Makefile->GetStartOutputDirectory();
   this->WriteMakeRule(makefileStream,
                       "Default target executed when no arguments are "
                       "given to make.",
-                      preEcho.c_str(),
-                      "all",
+                      0,
+                      "default_target",
                       depends,
-                      commands,
-                      postEcho.c_str());
-  }
-
-  // Write special "cmake_check_build_system" target to run cmake with
-  // the --check-build-system flag.
-  {
-  std::vector<std::string> no_depends;
-  std::vector<std::string> commands;
-  commands.push_back(runRule);
-  std::string preEcho = "Checking build system in ";
-  preEcho += m_Makefile->GetStartOutputDirectory();
-  preEcho += "...";
-  this->WriteMakeRule(makefileStream,
-                      "Special rule to run CMake to check the build system "
-                      "integrity.\n"
-                      "No rule that depends on this can have "
-                      "commands that come from listfiles\n"
-                      "because they might be regenerated.",
-                      preEcho.c_str(),
-                      "cmake_check_build_system",
-                      no_depends,
-                      commands);
+                      no_commands);
   }
 
   // Write special "rebuild_cache" target to re-run cmake.
@@ -957,6 +916,35 @@ cmLocalUnixMakefileGenerator2
     << "# Special targets to cleanup operation of make.\n"
     << "\n";
 
+  // Write special "cmake_check_build_system" target to run cmake with
+  // the --check-build-system flag.
+  {
+  // Build command to run CMake to check if anything needs regenerating.
+  std::string cmakefileName = m_Makefile->GetStartOutputDirectory();
+  cmakefileName += "/" CMLUMG_MAKEFILE_NAME ".cmake";
+  std::string runRule =
+    "@$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)";
+  runRule += " --check-build-system ";
+  runRule += this->ConvertToRelativeOutputPath(cmakefileName.c_str());
+
+  std::vector<std::string> no_depends;
+  std::vector<std::string> commands;
+  commands.push_back(runRule);
+  std::string preEcho = "Checking build system in ";
+  preEcho += m_Makefile->GetStartOutputDirectory();
+  preEcho += "...";
+  this->WriteMakeRule(makefileStream,
+                      "Special rule to run CMake to check the build system "
+                      "integrity.\n"
+                      "No rule that depends on this can have "
+                      "commands that come from listfiles\n"
+                      "because they might be regenerated.",
+                      preEcho.c_str(),
+                      "cmake_check_build_system",
+                      no_depends,
+                      commands);
+  }
+
   std::vector<std::string> no_commands;
 
   // Write special target to silence make output.  This must be after
@@ -988,18 +976,35 @@ cmLocalUnixMakefileGenerator2
 //----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator2
-::WriteAllRule(std::ostream& makefileStream)
+::WriteAllRules(std::ostream& makefileStream)
 {
   // Write section header.
   this->WriteDivider(makefileStream);
   makefileStream
-    << "# Main rules for this directory.\n"
+    << "# Rules to build dependencies and targets.\n"
     << "\n";
 
-  const cmTargets& targets = m_Makefile->GetTargets();
+  // Write rules to traverse the directory tree building dependencies
+  // and targets.
+  this->WriteDriverRules(makefileStream, "all", "depend.local", "build.local");
+}
 
-  // Output top level dependency rule.
-  {
+//----------------------------------------------------------------------------
+void
+cmLocalUnixMakefileGenerator2::WriteDependRules(std::ostream& makefileStream)
+{
+  // Write section header.
+  this->WriteDivider(makefileStream);
+  makefileStream
+    << "# Rules for computing dependencies.\n"
+    << "\n";
+
+  // Write rules to traverse the directory tree building dependencies.
+  this->WriteDriverRules(makefileStream, "depend", "depend.local");
+
+  // Write the rule to build dependencies in this directory.  It just
+  // depends on all targets' dependencies.
+  const cmTargets& targets = m_Makefile->GetTargets();
   std::vector<std::string> depends;
   std::vector<std::string> commands;
   for(cmTargets::const_iterator t = targets.begin(); t != targets.end(); ++t)
@@ -1029,15 +1034,29 @@ cmLocalUnixMakefileGenerator2
 
   // Write the rule.
   this->WriteMakeRule(makefileStream,
-                      "Main dependencies target for this directory.",
+                      "Build dependencies for this directory.",
                       0,
-                      "all.depends",
+                      "depend.local",
                       depends,
                       commands);
-  }
+}
 
-  // Output top level build rule.
-  {
+//----------------------------------------------------------------------------
+void
+cmLocalUnixMakefileGenerator2::WriteBuildRules(std::ostream& makefileStream)
+{
+  // Write section header.
+  this->WriteDivider(makefileStream);
+  makefileStream
+    << "# Rules for building targets.\n"
+    << "\n";
+
+  // Write rules to traverse the directory tree building targets.
+  this->WriteDriverRules(makefileStream, "build", "build.local");
+
+  // Write the rule to build targets in this directory.  It just
+  // depends on all targets.
+  const cmTargets& targets = m_Makefile->GetTargets();
   std::vector<std::string> depends;
   std::vector<std::string> commands;
   for(cmTargets::const_iterator t = targets.begin(); t != targets.end(); ++t)
@@ -1063,12 +1082,62 @@ cmLocalUnixMakefileGenerator2
 
   // Write the rule.
   this->WriteMakeRule(makefileStream,
-                      "Main build target for this directory.",
+                      "Build targets in this directory.",
                       0,
-                      "all.build",
+                      "build.local",
                       depends,
                       commands);
-  }
+}
+
+//----------------------------------------------------------------------------
+void
+cmLocalUnixMakefileGenerator2
+::WriteDriverRules(std::ostream& makefileStream, const char* pass,
+                   const char* local1, const char* local2)
+{
+  // Write a set of targets that will traverse the directory structure
+  // in order and build given local targets in each directory.
+
+  // The dependencies and commands generated for this rule must not
+  // depend on listfile contents because the build system check might
+  // regenerate the makefile but it might not get read again by make
+  // before the commands run.
+  std::vector<std::string> depends;
+  std::vector<std::string> commands;
+
+  // Check the build system in this directory.
+  depends.push_back("cmake_check_build_system");
+
+  // Recursively handle pre-order directories.
+  std::string preTarget = pass;
+  preTarget += ".pre-order";
+  commands.push_back(this->GetRecursiveMakeCall(preTarget.c_str(), true));
+
+  // Recursively build the local targets in this directory.
+  if(local1)
+    {
+    commands.push_back(this->GetRecursiveMakeCall(local1, true));
+    }
+  if(local2)
+    {
+    commands.push_back(this->GetRecursiveMakeCall(local2, true));
+    }
+
+  // Recursively handle post-order directories.
+  std::string postTarget = pass;
+  postTarget += ".post-order";
+  commands.push_back(this->GetRecursiveMakeCall(postTarget.c_str(), true));
+
+  // Write the rule.
+  std::string preEcho = "Entering directory ";
+  preEcho += m_Makefile->GetStartOutputDirectory();
+  std::string postEcho = "Finished directory ";
+  postEcho += m_Makefile->GetStartOutputDirectory();
+  this->WriteMakeRule(makefileStream, 0, preEcho.c_str(),
+                      pass, depends, commands, postEcho.c_str());
+
+  // Write the subdirectory traversal rules.
+  this->WriteSubdirRules(makefileStream, pass);
 }
 
 //----------------------------------------------------------------------------
@@ -1076,12 +1145,6 @@ void
 cmLocalUnixMakefileGenerator2
 ::WriteSubdirRules(std::ostream& makefileStream, const char* pass)
 {
-  // Write the section header.
-  this->WriteDivider(makefileStream);
-  makefileStream
-    << "# Subdirectory driver targets for " << pass << "\n"
-    << "\n";
-
   // Iterate through subdirectories.  Only entries in which the
   // boolean is true should be included.  Keep track of the last
   // pre-order and last post-order rule created so that ordering can
@@ -1213,8 +1276,9 @@ cmLocalUnixMakefileGenerator2
 
   // Build the make target name.
   std::string tgt = pass;
-  tgt += ".subdirs.";
+  tgt += ".";
   tgt += order;
+  tgt += "-order";
 
   // Write the rule.
   this->WriteMakeRule(makefileStream, comment.c_str(), 0,
