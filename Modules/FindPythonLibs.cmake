@@ -9,8 +9,8 @@
 #
 
 IF(WIN32)
-  FIND_LIBRARY(PYTHON_DEBUG_LIBRARY 
-    NAMES python23_d python22_d python21_d python20_d python 
+  FIND_LIBRARY(PYTHON_DEBUG_LIBRARY
+    NAMES python23_d python22_d python21_d python20_d python
     PATHS
     [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.3\\InstallPath]/libs/Debug
     [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.3\\InstallPath]/libs
@@ -27,8 +27,8 @@ IF(WIN32)
   )
 ENDIF(WIN32)
 
-FIND_LIBRARY(PYTHON_LIBRARY 
-  NAMES python23 python2.3 python22 python2.2 python21 python2.1 
+FIND_LIBRARY(PYTHON_LIBRARY
+  NAMES python23 python2.3 python22 python2.2 python21 python2.1
         python20 python2.0 python16 python1.6 python15 python1.5
   PATHS
   /usr/lib/python2.3/config
@@ -80,8 +80,8 @@ FIND_PATH(PYTHON_INCLUDE_PATH Python.h
 
 IF (WIN32)
   MARK_AS_ADVANCED(
-    PYTHON_DEBUG_LIBRARY 
-    PYTHON_LIBRARY 
+    PYTHON_DEBUG_LIBRARY
+    PYTHON_LIBRARY
     PYTHON_INCLUDE_PATH
   )
 ENDIF(WIN32)
