@@ -31,85 +31,109 @@
 (defvar cmake-tab-width 2)
 
 ; Regular expressions used by line indentation function.
+
+(defconst cmake-regex-blank "^[ \t]*$")
+
 (defconst cmake-regex-comment "#.*")
-(defconst cmake-regex-identifier "[A-Za-z][A-Za-z0-9_]*")
-(defconst cmake-regex-quoted "\"\\([^\n\"\\\\]\\|\\\\.\\)*\"")
-(defconst cmake-regex-arguments (concat "\\(" cmake-regex-quoted
-                                        "\\|" "[^\n()#\"\\\\]"
-                                        "\\|" "\\\\."
-                                        "\\|" "\\$(" cmake-regex-identifier ")"
-                                        "\\)*"))
-(defconst cmake-indent-comment-line (concat "^[ \t]*" cmake-regex-comment))
-(defconst cmake-indent-blank-regex "^[ \t]*$")
-(defconst cmake-indent-open-regex (concat "^[ \t]*" cmake-regex-identifier
-                                          "[ \t]*(" cmake-regex-arguments
-                                          "\\(" cmake-regex-comment "\\)?"
-                                          "\n"))
-(defconst cmake-indent-close-regex (concat "^" cmake-regex-arguments
-                                           ")[ \t]*"
-                                           "\\(" cmake-regex-comment "\\)?"
-                                           "\n"))
-(defconst cmake-indent-begin-regex "^[ \t]*\\(IF\\|MACRO\\|FOREACH\\|ELSE\\)[ \t]*(")
-(defconst cmake-indent-end-regex "^[ \t]*\\(ENDIF\\|ENDFOREACH\\|ENDMACRO\\|ELSE\\)[ \t]*(")
+(defconst cmake-regex-paren-left "(")
+(defconst cmake-regex-paren-right ")")
+(defconst cmake-regex-argument-quoted "\"\\([^\"\\\\]\\|\\\\\\(.\\|\n\\)\\)*\"")
+(defconst cmake-regex-argument-unquoted "\\([^ \t\r\n()#\"\\\\]\\|\\\\.\\)+")
+
+(defconst cmake-regex-token (concat "\\(" cmake-regex-comment
+                                    "\\|" cmake-regex-paren-left
+                                    "\\|" cmake-regex-paren-right
+                                    "\\|" cmake-regex-argument-unquoted
+                                    "\\|" cmake-regex-argument-quoted
+                                    "\\)"))
+
+(defconst cmake-regex-indented (concat "^\\("
+                                       cmake-regex-token
+                                       "\\|" "[ \t\r\n]"
+                                       "\\)*"))
+
+(defconst cmake-regex-block-open "^\\(IF\\|MACRO\\|FOREACH\\|ELSE\\)")
+(defconst cmake-regex-block-close "^[ \t]*\\(ENDIF\\|ENDFOREACH\\|ENDMACRO\\|ELSE\\)[ \t]*(")
+
+(defun cmake-line-starts-inside-string ()
+  "Determine whether the beginning of the current line is in a string."
+  (if (save-excursion
+        (beginning-of-line)
+        (let ((parse-end (point)))
+          (beginning-of-buffer)
+          (nth 3 (parse-partial-sexp (point) parse-end))
+          )
+        )
+      t
+    nil
+    )
+  )
+
+(defun cmake-find-last-indented-line ()
+  "Move to the beginning of the last line that has meaningful indentation."
+  (let ((point-start (point))
+        region)
+    (forward-line -1)
+    (setq region (buffer-substring-no-properties (point) point-start))
+    (while (and (not (bobp))
+                (or (looking-at cmake-regex-blank)
+                    (not (and (string-match cmake-regex-indented region)
+                              (= (length region) (match-end 0))))))
+      (forward-line -1)
+      (setq region (buffer-substring-no-properties (point) point-start))
+      )
+    )
+  )
 
 ; Line indentation function.
 (defun cmake-indent ()
   "Indent current line as CMAKE code."
   (interactive)
   (beginning-of-line)
-  (if (bobp)
-      (indent-line-to 0)
-    (let (cur-indent)
+  (if (cmake-line-starts-inside-string)
+      ()
+    (if (bobp)
+        (indent-line-to 0)
+      (let ((point-start (point))
+            token cur-indent)
 
-      ; Search back for previous non-blank line.
-      (save-excursion
-        (forward-line -1)
-        (while (and (not (bobp)) (looking-at cmake-indent-blank-regex))
-          (forward-line -1)
-          )
+        (save-excursion
+          ; Search back for the last indented line.
+          (cmake-find-last-indented-line)
 
-        ; Start with previous non-blank line's indentation.
-        (setq cur-indent (current-indentation))
+          ; Start with the indentation on this line.
+          (setq cur-indent (current-indentation))
 
-        ; If previous line is a comment line, just use its
-        ; indentation.  Otherwise, adjust indentation based on the
-        ; line's contents.
-        (if (not (looking-at cmake-indent-comment-line))
-            (progn
-              ; If previous line begins a block, we indent this line.
-              (if (looking-at cmake-indent-begin-regex)
-                  (setq cur-indent (+ cur-indent cmake-tab-width))
-                )
-
-              ; If previous line opens a command invocation, we indent
-              ; this line.
-              (if (looking-at cmake-indent-open-regex)
-                  (setq cur-indent (+ cur-indent cmake-tab-width))
-                )
-
-              ; If previous line closes a command invocation, we unindent
-              ; this line.
-              (if (looking-at cmake-indent-close-regex)
-                  (setq cur-indent (- cur-indent cmake-tab-width))
-                )
+          ; Search forward counting tokens that adjust indentation.
+          (while (re-search-forward cmake-regex-token point-start t)
+            (setq token (match-string 0))
+            (if (string-match cmake-regex-paren-left token)
+                (setq cur-indent (+ cur-indent cmake-tab-width))
               )
+            (if (string-match cmake-regex-paren-right token)
+                (setq cur-indent (- cur-indent cmake-tab-width))
+              )
+            (if (string-match cmake-regex-block-open token)
+                (setq cur-indent (+ cur-indent cmake-tab-width))
+              )
+            )
           )
-        )
 
+        ; If this is the end of a block, decrease indentation.
+        (if (looking-at cmake-regex-block-close)
+            (setq cur-indent (- cur-indent cmake-tab-width))
+          )
 
-      ; If this line ends a block, we unindent it.
-      (if (looking-at cmake-indent-end-regex)
-          (setq cur-indent (- cur-indent cmake-tab-width))
-        )
-
-      ; Indent this line by the amount selected.
-      (if (< cur-indent 0)
-          (indent-line-to 0)
-        (indent-line-to cur-indent)
+        ; Indent this line by the amount selected.
+        (if (< cur-indent 0)
+            (indent-line-to 0)
+          (indent-line-to cur-indent)
+          )
         )
       )
     )
   )
+
 ; (regexp-opt '("ABSTRACT_FILES" "ADD_CUSTOM_COMMAND" "ADD_CUSTOM_TARGET" "ADD_DEFINITIONS" "ADD_DEPENDENCIES" "ADD_EXECUTABLE" "ADD_LIBRARY" "ADD_TEST" "AUX_SOURCE_DIRECTORY" "BUILD_COMMAND" "BUILD_NAME" "CMAKE_MINIMUM_REQUIRED" "CONFIGURE_FILE" "CREATE_TEST_SOURCELIST" "CREATE_TEST_SOURCELIST " "ELSE" "ENABLE_TESTING" "ENABLE_TESTING " "ENDFOREACH" "ENDIF" "EXEC_PROGRAM" "EXPORT_LIBRARY_DEPENDENCIES" "FIND_FILE" "FIND_LIBRARY" "FIND_PACKAGE" "FIND_PATH" "FIND_PROGRAM" "FLTK_WRAP_UI" "FOREACH" "GET_CMAKE_PROPERTY" "GET_FILENAME_COMPONENT" "GET_SOURCE_FILE_PROPERTY" "GET_TARGET_PROPERTY" "IF" "INCLUDE" "INCLUDE_DIRECTORIES" "INCLUDE_EXTERNAL_MSPROJECT" "INCLUDE_REGULAR_EXPRESSION" "INSTALL_FILES" "INSTALL_PROGRAMS" "INSTALL_TARGETS" "ITK_WRAP_TCL" "LINK_DIRECTORIES" "LINK_LIBRARIES" "LOAD_CACHE" "LOAD_COMMAND" "MACRO" "MAKE_DIRECTORY" "MARK_AS_ADVANCED" "MESSAGE" "OPTION" "OUTPUT_REQUIRED_FILES" "PROJECT" "QT_WRAP_CPP" "QT_WRAP_UI" "REMOVE" "SEPARATE_ARGUMENTS" "SET" "SET_SOURCE_FILES_PROPERTIES" "SET_TARGET_PROPERTIES" "SITE_NAME" "SOURCE_FILES" "SOURCE_FILES_REMOVE" "SOURCE_GROUP" "STRING" "SUBDIRS" "SUBDIR_DEPENDS" "TARGET_LINK_LIBRARIES" "TRY_COMPILE" "TRY_RUN" "USE_MANGLED_MESA" "UTILITY_SOURCE" "VARIABLE_REQUIRES" "VTK_MAKE_INSTANTIATOR" "VTK_MAKE_INSTANTIATOR " "VTK_WRAP_JAVA" "VTK_WRAP_PYTHON" "VTK_WRAP_TCL" "WRAP_EXCLUDE_FILES" "WRITE_FILE" ) t)
 ; run the above in the scatch  buffer to generate the string that
 ; goes in (list '("the regexp string" . font-lock-function-name-face)
