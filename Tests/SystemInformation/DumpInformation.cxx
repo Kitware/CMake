@@ -9,7 +9,7 @@ int main(int, char*[])
     printf("Error, could not open file %s\n", CMAKE_DUMP_FILE);
     return -1;
     }
-  printf("#Note less than will show up as { and greater than will be }\n");
+  printf("#CMake System Variables are:");
   while(!feof(file))
     {
     int ch = fgetc(file);
