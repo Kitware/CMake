@@ -280,7 +280,7 @@ void cmLocalBorlandMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout
 
   command += " $(";
   command += this->CreateMakeVariable(name, "_SRC_OBJS_QUOTED") + ")";
-  command += "\n|\n";
+  command += "\n|";
   std::string comment = "rule to build static library: ";
   comment += name;
   std::string customCommands = this->CreateTargetRules(t, name);
