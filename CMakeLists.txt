@@ -30,6 +30,8 @@ IF (BUILD_TESTING)
   # Dart server configuration 
   SET (CVS_WEB_URL "http://${DROP_SITE}/cgi-bin/cmakecvsweb.cgi/CMake/" 
        CACHE INTERNAL "URL for revision control system")
+  SET (CVS_WEB_CVSROOT "CMake" CACHE INTERNAL 
+       "Symbolic name for the CVSROOT in cvsweb")
   SET (DOXYGEN_URL "http://${DROP_SITE}/CMake/Doxygen/html/" 
        CACHE INTERNAL "URL for source code documentation")
   SET (GNATS_WEB_URL "http://${DROP_SITE}/cgi-bin/gnatsweb.pl/CMake/" 

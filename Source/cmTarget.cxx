@@ -61,7 +61,27 @@ void cmTarget::GenerateSourceFilesFromSourceLists(const cmMakefile &mf)
       {
       const std::vector<cmSourceFile> &clsList = 
         mf.GetSources().find(temps)->second;
-      m_SourceFiles.insert(m_SourceFiles.end(), clsList.begin(), clsList.end());
+      // if we ahave a limited build list, use it
+      if (m_LimitedBuildList.empty())
+        {
+        m_SourceFiles.insert(m_SourceFiles.end(), 
+                             clsList.begin(), 
+                             clsList.end());
+        }
+      else
+        {
+        std::vector<cmSourceFile>::const_iterator si = clsList.begin();
+        for (; si != clsList.end(); ++si)
+          {
+          // is it on the approved list ?
+          if (std::find(m_LimitedBuildList.begin(),
+                   m_LimitedBuildList.end(),
+                   si->GetFullPath()) != m_LimitedBuildList.end())
+            {
+            m_SourceFiles.push_back(*si);
+            }
+          }
+        }
       }
     // if one wasn't found then assume it is a single class
     else
@@ -69,7 +89,19 @@ void cmTarget::GenerateSourceFilesFromSourceLists(const cmMakefile &mf)
       cmSourceFile file;
       file.SetIsAnAbstractClass(false);
       file.SetName(temps.c_str(), mf.GetCurrentDirectory());
-      m_SourceFiles.push_back(file);
+      if (m_LimitedBuildList.empty())
+        {
+        m_SourceFiles.push_back(file);
+        }
+      else
+        {
+        if (std::find(m_LimitedBuildList.begin(),
+                 m_LimitedBuildList.end(),
+                 file.GetFullPath()) != m_LimitedBuildList.end())
+          {
+          m_SourceFiles.push_back(file);
+          }
+        }
       }
     }
 

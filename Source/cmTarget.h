@@ -87,6 +87,13 @@ public:
   std::vector<std::string> &GetSourceLists() {return m_SourceLists;}
   
   /**
+   * Get the list of the source lists used by this target
+   */
+  const std::vector<std::string> &GetLimitedBuildList() const 
+    {return m_LimitedBuildList;}
+  std::vector<std::string> &GetLimitedBuildList() {return m_LimitedBuildList;}
+  
+  /**
    * Get the list of the source files used by this target
    */
   const std::vector<cmSourceFile> &GetSourceFiles() const 
@@ -126,7 +133,9 @@ public:
   void AddUtility(const char* u) { m_Utilities.insert(u);}
   ///! Get the utilities used by this target
   std::set<std::string>const& GetUtilities() const { return m_Utilities; }
+
 private:
+  std::vector<std::string> m_LimitedBuildList;
   std::vector<cmCustomCommand> m_CustomCommands;
   std::vector<std::string> m_SourceLists;
   TargetType m_TargetType;
