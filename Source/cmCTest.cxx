@@ -283,6 +283,8 @@ void cmCTest::Initialize()
     if ( tag.size() == 0 )
       {
 #ifdef HAVE_CURL
+      std::cout << "TestModel: " << this->GetTestModelString() << std::endl;
+      std::cout << "TestModel: " << m_TestModel << std::endl;
       if ( m_TestModel == cmCTest::NIGHTLY )
         {
         int hour;
@@ -449,25 +451,26 @@ std::string cmCTest::FindExecutable(const char *exe)
 
 int cmCTest::UpdateDirectory()
 {
+  int count = 0;
   std::string::size_type cc, kk;
   std::string cvsCommand = m_DartConfiguration["CVSCommand"];
   if ( cvsCommand.size() == 0 )
     {
     std::cerr << "Cannot find CVSCommand key in the DartConfiguration.tcl" << std::endl;
-    return 1;
+    return -1;
     }
   std::string cvsOptions = m_DartConfiguration["CVSUpdateOptions"];
   if ( cvsOptions.size() == 0 )
     {
     std::cerr << "Cannot find CVSUpdateOptions key in the DartConfiguration.tcl" << std::endl;
-    return 1;
+    return -1;
     }
 
   std::string sourceDirectory = m_DartConfiguration["SourceDirectory"];
   if ( sourceDirectory.size() == 0 )
     {
     std::cerr << "Cannot find SourceDirectory  key in the DartConfiguration.tcl" << std::endl;
-    return 1;
+    return -1;
     }
 
   std::string extra_update_opts;
@@ -549,6 +552,7 @@ int cmCTest::UpdateDirectory()
     char mod = line[0];
     if ( line[1] == ' ' && mod != '?' )
       {
+      count ++;
       const char* file = line + 2;
       //std::cout << "Line" << cc << ": " << mod << " - " << file << std::endl;
       std::string logcommand = cvsCommand + " -z3 log -N " + file +
@@ -765,9 +769,9 @@ int cmCTest::UpdateDirectory()
     {
     std::cerr << "Error(s) when updating the project" << std::endl;
     std::cerr << "Output: " << goutput << std::endl;
-    return 1;
+    return -1;
     }
-  return 0;
+  return count;
 }
 
 int cmCTest::ConfigureDirectory()
@@ -1870,6 +1874,7 @@ int cmCTest::ProcessTests()
   int res = 0;
   bool notest = true;
   int cc;
+  int update_count = 0;
 
   for ( cc = 0; cc < LAST_TEST; cc ++ )
     {
@@ -1881,7 +1886,15 @@ int cmCTest::ProcessTests()
     }
   if ( m_Tests[UPDATE_TEST] || m_Tests[ALL_TEST] )
     {
-    res += this->UpdateDirectory();
+    update_count = this->UpdateDirectory(); 
+    if ( update_count < 0 )
+      {
+      res += 1;
+      }
+    }
+  if ( m_TestModel == cmCTest::CONTINUOUS && !update_count )
+    {
+    return 0;
     }
   if ( m_Tests[CONFIGURE_TEST] || m_Tests[ALL_TEST] )
     {

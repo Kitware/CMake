@@ -128,16 +128,16 @@ public:
 
 private:
   enum {
-    FIRST_TEST    = 0,
-    UPDATE_TEST,
-    CONFIGURE_TEST,
-    BUILD_TEST,
-    TEST_TEST,
-    COVERAGE_TEST,
-    PURIFY_TEST,
-    SUBMIT_TEST,
-    ALL_TEST,
-    LAST_TEST
+    FIRST_TEST     = 0,
+    UPDATE_TEST    = 1,
+    CONFIGURE_TEST = 2,
+    BUILD_TEST     = 3,
+    TEST_TEST      = 4,
+    COVERAGE_TEST  = 5,
+    PURIFY_TEST    = 6,
+    SUBMIT_TEST    = 7,
+    ALL_TEST       = 8,
+    LAST_TEST      = 9
   };
 
   struct cmCTestTestResult

@@ -72,6 +72,7 @@ int main (int argc, char *argv[])
                 str == "Continuous" )
         {
         inst.SetTestModel(cmCTest::CONTINUOUS);
+        std::cout << "Continuous" << std::endl;
         }
       else
         {
