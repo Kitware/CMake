@@ -229,7 +229,7 @@ void cmDocumentation::PrintUsageSection(std::ostream& os,
                                         const cmDocumentationEntry* section)
 {
   if(!section) { return; }
-  std::ios::fmtflags flags = os.flags();
+  long flags = static_cast<long>(os.flags());
   os.setf(flags | std::ios::left);
   for(const cmDocumentationEntry* op = section; op->brief; ++op)
     {
