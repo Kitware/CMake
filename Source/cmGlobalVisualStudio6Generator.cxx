@@ -87,7 +87,7 @@ int cmGlobalVisualStudio6Generator::TryCompile(const char *,
   makeCommand += " - Debug\"";
 
   int retVal;
-  if (!cmSystemTools::RunCommand(makeCommand.c_str(), *output, retVal))
+  if (!cmSystemTools::RunCommand(makeCommand.c_str(), *output, retVal, 0, false))
     {
     cmSystemTools::Error("Generator: execution of msdev failed.");
     // return to the original directory
@@ -326,7 +326,7 @@ void cmGlobalVisualStudio6Generator::WriteProject(std::ostream& fout,
     for(;j!= jend; ++j)
       {
       if(j->first != dspname)
-	{
+        {
         // is the library part of this DSW ? If so add dependency
         std::string libPath = j->first + "_CMAKE_PATH";
         const char* cacheValue
@@ -362,8 +362,8 @@ void cmGlobalVisualStudio6Generator::WriteProject(std::ostream& fout,
 // Note, that dependencies from executables to 
 // the libraries it uses are also done here
 void cmGlobalVisualStudio6Generator::WriteExternalProject(std::ostream& fout, 
-			       const char* name,
-			       const char* location,
+                               const char* name,
+                               const char* location,
                                const std::vector<std::string>& dependencies)
 {
  fout << "#########################################################"
