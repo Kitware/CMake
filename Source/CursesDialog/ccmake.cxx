@@ -120,6 +120,8 @@ int main(int argc, char** argv)
   delete cmCursesForm::CurrentForm;
   cmCursesForm::CurrentForm = 0;
 
+  std::cout << std::endl << std::endl;
+  
   return 0;
 
 }
