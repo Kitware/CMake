@@ -40,7 +40,7 @@ public:
 
   bool m_UseRegExp;
   std::string m_RegExp;
-
+  std::string m_ConfigType;
 private:
 };
 

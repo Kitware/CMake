@@ -58,7 +58,21 @@ std::string ctest::FindExecutable(const char *exe)
   std::string file;
 
   cmSystemTools::SplitProgramPath(exe, dir, file);
-  
+  if(m_ConfigType != "")
+    {
+    if(TryExecutable(dir.c_str(), file.c_str(), &fullPath, m_ConfigType.c_str()))
+      {
+      return fullPath;
+      }
+    std::string tried = dir;
+    dir += "/";
+    dir += m_ConfigType;
+    dir += "/";
+    dir += file;
+    cmSystemTools::Error("config type specified on the command line, but test executable not found.",
+                         dir.c_str());
+    return "";
+    }
   if (TryExecutable(dir.c_str(),file.c_str(),&fullPath,"."))
     {
     return fullPath;
@@ -183,7 +197,6 @@ void ctest::ProcessDirectory(int &passed, std::vector<std::string> &failed)
          */
         std::string output;
         int retVal;
-
         if (!cmSystemTools::RunCommand(testCommand.c_str(), output, 
                                        retVal, false) || retVal != 0)
           {
@@ -245,6 +258,11 @@ int main (int argc, char *argv[])
   for(unsigned int i=1; i < args.size(); ++i)
     {
     std::string arg = args[i];
+    if(arg.find("-D",0) == 0 && i < args.size() - 1)
+      {
+      inst.m_ConfigType = args[i+1];
+      }
+    
     if(arg.find("-R",0) == 0 && i < args.size() - 1)
       {
       inst.m_UseRegExp = true;
