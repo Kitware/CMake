@@ -281,6 +281,68 @@ setupCurlSession(xmlrpc_env *       const envP,
                  xmlrpc_mem_block * const callXmlP,
                  xmlrpc_mem_block * const responseXmlP) {
 
+  char proxy[1024];
+  char proxyUser[1024];
+  int proxy_type = 0;
+
+  if ( getenv("HTTP_PROXY") )
+    {
+    proxy_type = 1;
+    if (getenv("HTTP_PROXY_PORT") )
+      {
+      sprintf(proxy, "%s:%s", getenv("HTTP_PROXY"), getenv("HTTP_PROXY_PORT"));
+      }
+    else
+      {
+      sprintf(proxy, "%s", getenv("HTTP_PROXY"));
+      }
+    if ( getenv("HTTP_PROXY_TYPE") )
+      {
+      /* HTTP/SOCKS4/SOCKS5 */
+      if ( strcmp(getenv("HTTP_PROXY_TYPE"), "HTTP") == 0 )
+        {
+        proxy_type = 1;
+        }
+      else if ( strcmp(getenv("HTTP_PROXY_TYPE"), "SOCKS4") == 0 )
+        {
+        proxy_type = 2;
+        }
+      else if ( strcmp(getenv("HTTP_PROXY_TYPE"), "SOCKS5") == 0 )
+        {
+        proxy_type = 3;
+        }
+      }
+    if ( getenv("HTTP_PROXY_USER") )
+      {
+      strcpy(proxyUser, getenv("HTTP_PROXY_USER"));
+      }
+    if ( getenv("HTTP_PROXY_PASSWD") )
+      {
+      strcat(proxyUser, ":");
+      strcat(proxyUser, getenv("HTTP_PROXY_PASSWD"));
+      }
+    }
+    /* Using proxy */
+    if ( proxy_type > 0 )
+      {
+      curl_easy_setopt(curlSessionP, CURLOPT_PROXY, proxy); 
+      switch (proxy_type)
+        {
+      case 2:
+        curl_easy_setopt(curlSessionP, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS4);
+        break;
+      case 3:
+        curl_easy_setopt(curlSessionP, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
+        break;
+      default:
+        curl_easy_setopt(curlSessionP, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);           
+        if (*proxyUser)
+          {
+          curl_easy_setopt(curlSessionP, CURLOPT_PROXYUSERPWD, proxyUser);
+          }
+        }
+      }
+
     curl_easy_setopt(curlSessionP, CURLOPT_POST, 1 );
     curl_easy_setopt(curlSessionP, CURLOPT_URL, curlTransactionP->serverUrl);
     XMLRPC_MEMBLOCK_APPEND(char, envP, callXmlP, "\0", 1);
