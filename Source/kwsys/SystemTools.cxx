@@ -140,6 +140,11 @@ extern int putenv (char *__string) __THROW;
 namespace KWSYS_NAMESPACE
 {
 
+class SystemToolsTranslationMap : 
+    public kwsys_stl::map<kwsys_stl::string,kwsys_stl::string>
+{
+};
+
 double
 SystemTools::GetTime(void)
 {
@@ -1137,8 +1142,9 @@ bool SystemTools::RemoveADirectory(const char* source)
  * the system search path.  Returns the full path to the file if it is
  * found.  Otherwise, the empty string is returned.
  */
-kwsys_stl::string SystemTools::FindFile(const char* name, 
-                                       const kwsys_stl::vector<kwsys_stl::string>& userPaths)
+kwsys_stl::string SystemTools
+::FindFile(const char* name, 
+           const kwsys_stl::vector<kwsys_stl::string>& userPaths)
 {
   // Add the system search path to our path first
   kwsys_stl::vector<kwsys_stl::string> path; 
@@ -1242,8 +1248,9 @@ kwsys_stl::string SystemTools::FindProgram(
  * the system search path.  Returns the full path to the library if it is
  * found.  Otherwise, the empty string is returned.
  */
-kwsys_stl::string SystemTools::FindLibrary(const char* name,
-                                       const kwsys_stl::vector<kwsys_stl::string>& userPaths)
+kwsys_stl::string SystemTools
+::FindLibrary(const char* name,
+              const kwsys_stl::vector<kwsys_stl::string>& userPaths)
 {
   // See if the executable exists as written.
   if(SystemTools::FileExists(name) &&
@@ -1462,27 +1469,26 @@ kwsys_stl::string SystemTools::CollapseFullPath(const char* in_relative)
   return SystemTools::CollapseFullPath(in_relative, 0);
 }
 
-kwsys_stl::map<kwsys_stl::string,kwsys_stl::string> SystemTools::TranslationMap;
-
 void SystemTools::AddTranslationPath(const char * a, const char * b)
 {
   kwsys_stl::string path_a = a;
   kwsys_stl::string path_b = b;
   SystemTools::ConvertToUnixSlashes(path_a);
   SystemTools::ConvertToUnixSlashes(path_b);
-  // First check this is a directory path, since we don't want the table to grow
-  // too fat
+  // First check this is a directory path, since we don't want the table to
+  // grow too fat
   if( SystemTools::FileIsDirectory( path_a.c_str() ) )
     {
     // Make sure the path is a full path and does not contain no '..'
-    if( SystemTools::FileIsFullPath(path_b.c_str()) && path_b.find("..") == kwsys_stl::string::npos )
+    if( SystemTools::FileIsFullPath(path_b.c_str()) && path_b.find("..") 
+        == kwsys_stl::string::npos )
       {
       // Before inserting make sure path ends with '/'
       path_a += '/'; path_b += '/';
       if( !(path_a == path_b) )
         {
-        TranslationMap.insert(
-            kwsys_stl::pair<kwsys_stl::string,kwsys_stl::string>(path_a, path_b));
+        SystemTools::TranslationMap->insert(
+          SystemToolsTranslationMap::value_type(path_a, path_b));
         }
       }
     }
@@ -1499,8 +1505,8 @@ void SystemTools::CheckTranslationPath(kwsys_stl::string & path)
   // In case a file was specified we still have to go through this:
   // Now convert any path found in the table back to the one desired:
   kwsys_stl::map<kwsys_stl::string,kwsys_stl::string>::const_iterator it;
-  for(it  = TranslationMap.begin();
-      it != TranslationMap.end();
+  for(it  = SystemTools::TranslationMap->begin();
+      it != SystemTools::TranslationMap->end();
       ++it )
     {
     // We need to check of the path is a substring of the other path
@@ -2004,6 +2010,46 @@ bool SystemTools::SetPermissions(const char* file, mode_t mode)
 
   return true;
 }
+
+
+// These must NOT be initialized.  Default initialization to zero is
+// necessary.
+unsigned int SystemToolsManagerCount;
+SystemToolsTranslationMap *SystemTools::TranslationMap;
+
+// SystemToolsManager manages the SystemTools singleton.
+// SystemToolsManager should be included in any translation unit
+// that will use SystemTools or that implements the singleton
+// pattern. It makes sure that the SystemTools singleton is created
+// before and destroyed after all other singletons in CMake.
+
+SystemToolsManager::SystemToolsManager()
+{
+  if(++SystemToolsManagerCount == 1)
+    {
+    SystemTools::ClassInitialize();
+    }
+}
+
+SystemToolsManager::~SystemToolsManager()
+{
+  if(--SystemToolsManagerCount == 0)
+    {
+    SystemTools::ClassFinalize();
+    }
+}
+
+void SystemTools::ClassInitialize()
+{
+  SystemTools::TranslationMap = new SystemToolsTranslationMap;
+}
+
+void SystemTools::ClassFinalize()
+{
+  delete SystemTools::TranslationMap;
+}
+
+
 } // namespace KWSYS_NAMESPACE
 
 #if defined(_MSC_VER) && defined(_DEBUG)
@@ -2033,3 +2079,4 @@ namespace KWSYS_NAMESPACE
 void SystemTools::EnableMSVCDebugHook() {}
 } // namespace KWSYS_NAMESPACE
 #endif
+

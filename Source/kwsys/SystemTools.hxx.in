@@ -36,6 +36,9 @@ typedef unsigned short mode_t;
 namespace @KWSYS_NAMESPACE@
 {
 
+class SystemToolsManager;
+class SystemToolsTranslationMap;
+
 /** \class SystemTools
  * \brief A collection of useful platform-independent system functions.
  */
@@ -331,11 +334,35 @@ protected:
 
 private:
   /**
+   * Allocate the std::map that serve as the Path Translation table.
+   */
+  static void ClassInitialize();
+
+  /**
+   * Deallocate the std::map that serve as the Path Translation table.
+   */
+  static void ClassFinalize();
+
+  /**
    * Path translation table from dir to refdir
    * Each time 'dir' will be found it will be replace by 'refdir'
    */
-  static kwsys_stl::map<kwsys_stl::string,kwsys_stl::string> TranslationMap;
+  static SystemToolsTranslationMap *TranslationMap;
+  
+  friend class SystemToolsManager;
 };
+
+class @KWSYS_NAMESPACE@_EXPORT SystemToolsManager
+{
+public:
+  SystemToolsManager();
+  ~SystemToolsManager();
+};
+
+// This instance will show up in any translation unit that uses
+// SystemTools. It will make sure SystemTools is initialized 
+// before it is used and is the last static object destroyed.
+static SystemToolsManager SystemToolsManagerInstance;
 
 } // namespace @KWSYS_NAMESPACE@
 
