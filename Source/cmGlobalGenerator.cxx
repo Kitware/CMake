@@ -137,6 +137,15 @@ void cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
       dst2 += "/CMake";
       dst2 += lang;
       dst2 += "Compiler.cmake";
+      cmSystemTools::CopyFileIfDifferent(src2.c_str(), dst2.c_str()); 
+      src2 = m_ConfiguredFilesPath;
+      src2 += "/CMake";
+      src2 += lang;
+      src2 += "Platform.cmake";
+      dst2 = rootBin;
+      dst2 += "/CMake";
+      dst2 += lang;
+      dst2 += "Platform.cmake";
       cmSystemTools::CopyFileIfDifferent(src2.c_str(), dst2.c_str());
       }
     rootBin = m_ConfiguredFilesPath;
@@ -145,6 +154,16 @@ void cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
   // **** Step 1, find and make sure CMAKE_MAKE_PROGRAM is defined
   this->FindMakeProgram(mf);
 
+  // try and load the CMakeSystem.cmake if it is there
+  std::string fpath = rootBin;
+  if(!mf->GetDefinition("CMAKE_SYSTEM_LOADED"))
+    {
+    fpath += "/CMakeSystem.cmake";
+    if(cmSystemTools::FileExists(fpath.c_str()))
+      {
+      mf->ReadListFile(0,fpath.c_str());
+      }
+    }
   // **** Step 2, Load the CMakeDetermineSystem.cmake file and find out
   // what platform we are running on
   if (!isLocal &&  !mf->GetDefinition("CMAKE_SYSTEM_NAME"))
@@ -166,7 +185,7 @@ void cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
     }
   // **** Step 3, load the CMakeSystem.cmake from the binary directory
   // this file is configured by the CMakeDetermineSystem.cmake file
-  std::string fpath = rootBin;
+  fpath = rootBin;
   if(!mf->GetDefinition("CMAKE_SYSTEM_LOADED"))
     {
     fpath += "/CMakeSystem.cmake";
@@ -188,6 +207,26 @@ void cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
                              "broken CMakeLists.txt file or a problematic release of "
                              "CMake");
         }
+      // try and load the configured file first
+      std::string loadedLang = "CMAKE_";
+      loadedLang +=  lang;
+      loadedLang += "_COMPILER_LOADED";
+      if(!mf->GetDefinition(loadedLang.c_str()))
+        {
+        fpath = rootBin;
+        fpath += "/CMake";
+        fpath += lang;
+        fpath += "Compiler.cmake";
+        if(cmSystemTools::FileExists(fpath.c_str()))
+          {
+          if(!mf->ReadListFile(0,fpath.c_str()))
+            {
+            cmSystemTools::Error("Could not find cmake module file:", fpath.c_str());
+            }
+          this->SetLanguageEnabled(lang, mf);
+          }
+        }
+      
       needTestLanguage = true; // must test a language after finding it
       // read determine LANG compiler
       std::string determineCompiler = "CMakeDetermine";

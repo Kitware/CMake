@@ -26,6 +26,42 @@
 #include "cmake.h"
 #include <cmsys/RegularExpression.hxx>
 
+
+
+// Ideas for moving this stuff into the global generator
+//  Right now in your local generator you read and write a file to build
+//  up a list of all files in the project.
+//  Basically, there does not need to be a local kdevlop generator at all,
+//  it can just use the unix makefile one.  Then in the global generators
+//  Generate method you do something like this:
+//    unsigned int i;
+//    for(i = 0; i < m_LocalGenerators.size(); ++i)
+//      {
+//       // Get list of targets and sources from local generator i
+//       // add them to a file map like you do now in the local generator
+//      }
+//   // now write out the     Project.filelist file and Project.kdevlop files
+//  It should most likely do the same thing as the visual studio generators and
+//  write out all the sub-projects as well.  And also honor the exclude from above
+//  option.
+
+//  I guess at the end of the day it should do something like this:
+//  TopProject.kdevelop
+//  TopProject.kdevelop.filelist
+//  SubProject/SubProject.kdevelop
+//  SubProject/SubProject.kdevelop.filelist
+//  if SubProject was in a SUBDIR(EXCLUDE_FROM_ALL SubProject)
+//  then its files should not be in TopProject.filelist.
+//  If you look at these functions you can see how the visual studio
+//  cmGlobalVisualStudio7Generator::Generate()  // generate the project
+//  void cmGlobalVisualStudio7Generator::CollectSubprojects() // create a map of project names to local
+//  // generators
+//  void cmGlobalVisualStudio7Generator::OutputSLNFile(cmLocalGenerator* root,
+//                                                     std::vector<cmLocalGenerator*>& generators)
+//  // output a project for each project and sub project
+
+
+
 cmLocalKdevelopGenerator::cmLocalKdevelopGenerator()
   :cmLocalUnixMakefileGenerator()
 {
