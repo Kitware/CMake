@@ -58,7 +58,7 @@ bool cmSourceFilesCommand::InitialPass(std::vector<std::string> const& argsIn)
       generated = 1;
       continue;
       }
-    cmSourceFile* sf = m_Makefile->GetSource(copy.c_str());
+    cmSourceFile* sf = m_Makefile->GetSource(cmSystemTools::GetFilenameName(copy).c_str());
     if(sf)
       {
       // if the source file is already in the makefile,
