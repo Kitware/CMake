@@ -18,6 +18,10 @@
 #cmakedefine CMAKE_NO_ANSI_STREAM_HEADERS
 #cmakedefine CMAKE_NO_ANSI_FOR_SCOPE
 
+#define CACHE_TEST_VAR1 "${CACHE_TEST_VAR1}"
+#define CACHE_TEST_VAR2 "${CACHE_TEST_VAR2}"
+#define CACHE_TEST_VAR3 "${CACHE_TEST_VAR3}"
+
 // Needed to check for files
 
 #define BINARY_DIR "${Complex_BINARY_DIR}"
@@ -27,4 +31,3 @@
 #define BUILD_COMMAND_VAR "${BUILD_COMMAND_VAR}"
 #define BUILD_NAME_VAR "${BUILD_NAME_VAR}"
 #define SITE_NAME_VAR "${SITE_NAME_VAR}"
-

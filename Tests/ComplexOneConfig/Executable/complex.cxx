@@ -3,16 +3,7 @@
 #include "file2.h"
 #include "sharedFile.h"
 #include "cmStandardIncludes.h"
-#include <sys/stat.h>
-#include <stdio.h>
-
-#if defined(_MSC_VER) || defined(__BORLANDC__)
-#define _unlink unlink
-#else
-#include <sys/types.h>
-#include <fcntl.h>
-#include <unistd.h>
-#endif
+#include "cmSystemTools.h"
 
 int passed = 0;
 int failed = 0;
@@ -31,14 +22,13 @@ void Passed(const char* Message, const char* m2="")
 
 void TestAndRemoveFile(const char* filename) 
 {
-  struct stat fs;
-  if (stat(filename, &fs) != 0)
+  if (!cmSystemTools::FileExists(filename))
     {
     Failed("Could not find file: ", filename);
     }
   else
     {
-    if (unlink(filename) != 0)
+    if (!cmSystemTools::RemoveFile(filename))
       {
       Failed("Unable to remove file. It does not imply that this test failed, but it *will* be corrupted thereafter if this file is not removed: ", filename);
       }
@@ -48,6 +38,26 @@ void TestAndRemoveFile(const char* filename)
       }
     }
 }
+
+void TestDir(const char* filename) 
+{
+  if (!cmSystemTools::FileExists(filename))
+    {
+    Failed("Could not find dir: ", filename);
+    }
+  else
+    {
+    if (!cmSystemTools::FileIsDirectory(filename))
+      {
+      Failed("Unable to check if file is a directory: ", filename);
+      }
+    else
+      {
+      Passed("Find dir: ", filename);
+      }
+    }
+}
+
 
 int main()
 {
@@ -234,17 +244,66 @@ int main()
     }
 #endif
 
-  // A post-build custom-command has been attached to the lib.
+#ifndef CACHE_TEST_VAR1
+  Failed("the LOAD_CACHE or CONFIGURE_FILE command is broken, "
+         "CACHE_TEST_VAR1 is not defined.");
+#else
+  if(strcmp(CACHE_TEST_VAR1, "foo") != 0)
+    {
+    Failed("the FOREACH, SET or CONFIGURE_FILE command is broken, "
+           "CACHE_TEST_VAR1 == ", CACHE_TEST_VAR1);
+    }
+  else
+    {
+    Passed("CACHE_TEST_VAR1 == ", CACHE_TEST_VAR1);
+    }
+#endif
+
+#ifndef CACHE_TEST_VAR2
+  Failed("the LOAD_CACHE or CONFIGURE_FILE command is broken, "
+         "CACHE_TEST_VAR2 is not defined.");
+#else
+  if(strcmp(CACHE_TEST_VAR2, "bar") != 0)
+    {
+    Failed("the FOREACH, SET or CONFIGURE_FILE command is broken, "
+           "CACHE_TEST_VAR2 == ", CACHE_TEST_VAR2);
+    }
+  else
+    {
+    Passed("CACHE_TEST_VAR2 == ", CACHE_TEST_VAR2);
+    }
+#endif
+
+#ifndef CACHE_TEST_VAR3
+  Failed("the LOAD_CACHE or CONFIGURE_FILE command is broken, "
+         "CACHE_TEST_VAR3 is not defined.");
+#else
+  if(strcmp(CACHE_TEST_VAR3, "1") != 0)
+    {
+    Failed("the FOREACH, SET or CONFIGURE_FILE command is broken, "
+           "CACHE_TEST_VAR3 == ", CACHE_TEST_VAR3);
+    }
+  else
+    {
+    Passed("CACHE_TEST_VAR3 == ", CACHE_TEST_VAR3);
+    }
+#endif
+
+  // A post-build custom-command has been attached to the lib (see Library/).
   // It run ${CREATE_FILE_EXE} which will create the file
-  // ${Complex_BINARY_DIR}/postbuild.txt.
+  // ${Complex_BINARY_DIR}/Library/postbuild.txt.
 
-  TestAndRemoveFile(BINARY_DIR "/postbuild.txt");
+  TestAndRemoveFile(BINARY_DIR "/Library/postbuild.txt");
 
-  // A custom target has been created.
+  // A custom target has been created (see Library/).
   // It run ${CREATE_FILE_EXE} which will create the file
-  // ${Complex_BINARY_DIR}/custom_target1.txt.
+  // ${Complex_BINARY_DIR}/Library/custom_target1.txt.
 
-  TestAndRemoveFile(BINARY_DIR "/custom_target1.txt");
+  TestAndRemoveFile(BINARY_DIR "/Library/custom_target1.txt");
+
+  // A directory has been created.
+
+  TestDir(BINARY_DIR "/make_dir");
 
   std::cout << "Passed: " << passed << "\n";
   if(failed)

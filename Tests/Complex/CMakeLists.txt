@@ -1,5 +1,5 @@
 #
-# A simple test case
+# A more complex test case
 #
 PROJECT (Complex)
 
@@ -13,6 +13,8 @@ ENDIF (CMAKE_ANSI_CXXFLAGS)
 ADD_DEFINITIONS(-DCMAKE_IS_FUN)
 
 INCLUDE(${Complex_SOURCE_DIR}/VarTests.txt)
+
+LOAD_CACHE(${Complex_SOURCE_DIR})
 
 CONFIGURE_FILE(
   ${Complex_SOURCE_DIR}/cmTestConfigure.h.in
@@ -58,4 +60,26 @@ OPTION(EXEC_PROGRAM "Test EXEC_PROGRAM" ON)
 IF (EXEC_PROGRAM) 
   EXEC_PROGRAM("echo EXEC_PROGRAM")
 ENDIF (EXEC_PROGRAM) 
+
+#
+# More coverage
+#
+ABSTRACT_FILES(
+  ExtraSources/file1.cxx
+)
+
+INSTALL_FILES(/tmp .h ${Complex_BINARY_DIR}/cmTestConfigure.h)
+
+#
+# Create directory.
+# The 'complex' executable will then test if this dir exists,
+# sadly it won't be able to remove it.
+#
+MAKE_DIRECTORY("${Complex_BINARY_DIR}/make_dir")
+
+#
+# Test Cable
+#
+CABLE_CLASS_SET(Float float)
+CABLE_CLASS_SET(Mesh "itk::Mesh<$Float>")
 
