@@ -590,6 +590,13 @@ void cmDSPWriter::WriteDSPHeader(std::ostream& fout, const char *libName,
     {
       fin.getline(buffer, 2048);
       std::string line = buffer;
+      const char* mfcFlag = m_Makefile->GetDefinition("CMAKE_MFC_FLAG");
+      if(!mfcFlag)
+        {
+        mfcFlag = "0";
+        }
+      cmSystemTools::ReplaceString(line, "CMAKE_MFC_FLAG",
+                                   mfcFlag);
       cmSystemTools::ReplaceString(line, "CM_LIBRARIES",
                                    libOptions.c_str());
       cmSystemTools::ReplaceString(line, "CM_DEBUG_LIBRARIES",

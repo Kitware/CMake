@@ -35,9 +35,13 @@ ADD_DEFINITIONS(-DCMAKE_BUILD_WITH_CMAKE)
 
 IF (WIN32)
   SOURCE_FILES(SRCS cmDSWWriter.cxx cmDSPWriter.cxx cmMSProjectGenerator.cxx)
-ELSE (WIN32)
-  SOURCE_FILES(SRCS cmUnixMakefileGenerator.cxx)
+  IF(NOT UNIX)
+    SUBDIRS(MFCDialog)
+  ENDIF(NOT UNIX)
 ENDIF (WIN32)
+
+SOURCE_FILES(SRCS cmUnixMakefileGenerator.cxx)
+
 
 # create a library used by the command line and the GUI
 ADD_LIBRARY(CMakeLib SRCS)
