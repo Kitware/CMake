@@ -47,6 +47,8 @@ IF(BUILD_TESTING)
   # set the build command
   BUILD_COMMAND(MAKECOMMAND ${MAKEPROGRAM} )
 
+  SET (DELIVER_CONTINUOUS_EMAIL "Off" CACHE BOOL "Should Dart server send email when build errors are found in Continuous builds?")
+
   MARK_AS_ADVANCED(
     SITE 
     BUILDNAME 
@@ -58,6 +60,7 @@ IF(BUILD_TESTING)
     GUNZIPCOMMAND
     COMPRESSIONCOMMAND
     CVSCOMMAND
+    DELIVER_CONTINUOUS_EMAIL
   )
 
   #
