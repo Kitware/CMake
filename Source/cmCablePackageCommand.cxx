@@ -38,11 +38,9 @@ bool cmCablePackageCommand::Invoke(std::vector<std::string>& args)
   
   // Add custom rules to the makefile to generate this package's source
   // files.
-  std::vector<std::string> depends;
-  depends.push_back("cable_config.xml");
-  
   std::string command = "${CABLE}";
   m_Makefile->ExpandVariablesInString(command);  
+  std::vector<std::string> depends;  
   depends.push_back(command);
   command += " cable_config.xml";
   
@@ -51,13 +49,13 @@ bool cmCablePackageCommand::Invoke(std::vector<std::string>& args)
   std::string packageSource = packageFile+".cxx";
   
   // A rule for the package's header file.
-  m_Makefile->AddCustomCommand("",
+  m_Makefile->AddCustomCommand("cable_config.xml",
                                packageHeader.c_str(),
                                command.c_str(),
                                depends);
   
   // A rule for the package's source file.
-  m_Makefile->AddCustomCommand("",
+  m_Makefile->AddCustomCommand("cable_config.xml",
                                packageSource.c_str(),
                                command.c_str(),
                                depends);
