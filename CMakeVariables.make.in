@@ -84,7 +84,7 @@ BIN_INSTALL_DIR = $(INSTALL_ROOT)$(exec_prefix)/bin
 # set up the path to the rulesgen program
 CMAKE = @CMAKE_OBJ_DIR@/CMake/Source/CMakeBuildTargets
 KIT_OBJ =  ${SRC_OBJ} ${EXTRA_KIT_OBJ}
-BUILD_LIB_FILE  = lib${ME}${ITK_LIB_EXT}
+
 
 # ***** BEGIN VARIBLES THAT CAN BE OVERRIDDEN IN CMakeLocal.make.in **************
 

@@ -82,7 +82,12 @@ void cmUnixMakefile::OutputMakefile(const char* file)
       }
     fout << "\n";
     }
-  fout << "ME = " <<  this->GetLibraryName() << "\n\n";
+  if(strlen(this->GetLibraryName()) > 0)
+    {
+    fout << "ME = " <<  this->GetLibraryName() << "\n\n";
+    fout << "BUILD_LIB_FILE = lib${ME}${ITK_LIB_EXT}\n\n";
+    }
+
   for(int i =0; i < m_MakeVerbatim.size(); i++)
     {
     fout << m_MakeVerbatim[i] << "\n";
