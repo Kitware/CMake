@@ -129,11 +129,24 @@ public:
   const char* GetLanguageOutputExtensionForLanguage(const char* lang);
   ///! What is the output extension for a given source file extension.
   const char* GetLanguageOutputExtensionFromExtension(const char* lang);
+
+  /**
+   * Convert the given remote path to a relative path with respect to
+   * the given local path.  The local path must be given in component
+   * form (see SystemTools::SplitPath) without a trailing slash.  The
+   * remote path must use forward slashes and not already be escaped
+   * or quoted.
+   */
+  std::string ConvertToRelativePath(const std::vector<std::string>& local,
+                                    const char* remote);
+
 protected:
   // Fill the m_ProjectMap, this must be called after m_LocalGenerators has been populated.
   void FillProjectMap();
   bool IsExcluded(cmLocalGenerator* root, cmLocalGenerator* gen);
   void FindMakeProgram(cmMakefile*);
+
+  void ConfigureRelativePaths();
   
   bool m_ForceUnixPaths;
   cmStdString m_FindMakeProgramFile;
@@ -157,6 +170,11 @@ private:
   std::map<cmStdString, cmStdString> m_LanguageToOutputExtension;
   std::map<cmStdString, cmStdString> m_ExtensionToLanguage;
   std::map<cmStdString, cmStdString> m_LanguageToLinkerPreference; 
+
+  // The prefix required of a path to be converted to a relative path.
+  // No sequence of ../.. will ever go past this path.  This is the
+  // longest common path between the top level source and build trees.
+  std::string m_RelativePathTop;
 };
 
 #endif

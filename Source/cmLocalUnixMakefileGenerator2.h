@@ -198,11 +198,9 @@ protected:
                                 const cmSourceFile& source);
   const char* GetSourceFileLanguage(const cmSourceFile& source);
   std::string ConvertToFullPath(const std::string& localPath);
-  std::string ConvertToRelativePath(const char* p);
   std::string ConvertToRelativeOutputPath(const char* p);
   void ConfigureOutputPaths();
   void FormatOutputPath(std::string& path, const char* name);
-  bool ComparePath(const char* c1, const char* c2);
 
   void AppendTargetDepends(std::vector<std::string>& depends,
                            const cmTarget& target);
@@ -277,13 +275,6 @@ private:
 
   // Set of object file names that will be built in this directory.
   std::set<cmStdString> m_ObjectFiles;
-
-  // The prefix required of a path to be converted to a relative path.
-  // No sequence of ../.. will ever go past this path.
-  std::string m_RelativePathTop;
-
-  // The pre-split current output directory.
-  std::vector<std::string> m_CurrentOutputDirectoryComponents;
 };
 
 #endif

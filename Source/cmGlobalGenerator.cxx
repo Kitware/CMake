@@ -24,6 +24,8 @@
 #include <windows.h>
 #endif
 
+#include <assert.h>
+
 int cmGlobalGenerator::s_TryCompileTimeout = 0;
 
 cmGlobalGenerator::cmGlobalGenerator()
@@ -487,7 +489,10 @@ void cmGlobalGenerator::Configure()
     delete m_LocalGenerators[i];
     }
   m_LocalGenerators.clear();
-  
+
+  // Setup relative path generation.
+  this->ConfigureRelativePaths();
+
   // start with this directory
   cmLocalGenerator *lg = this->CreateLocalGenerator();
   m_LocalGenerators.push_back(lg);
@@ -572,6 +577,7 @@ void cmGlobalGenerator::Configure()
     m_CMakeInstance->UpdateProgress("Configuring done", -1);
     }
 }
+
 
 // loop through the directories creating cmLocalGenerators and Configure()
 void cmGlobalGenerator::RecursiveConfigure(cmLocalGenerator *lg, 
@@ -875,5 +881,135 @@ cmTarget* cmGlobalGenerator::FindTarget(const char* name)
       }
     }
   return 0;
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalGenerator::ConfigureRelativePaths()
+{
+  // Identify the longest shared path component between the source
+  // directory and the build directory.
+  std::vector<std::string> source;
+  std::vector<std::string> binary;
+  cmSystemTools::SplitPath(m_CMakeInstance->GetHomeDirectory(), source);
+  cmSystemTools::SplitPath(m_CMakeInstance->GetHomeOutputDirectory(), binary);
+  unsigned int common=0;
+  while(common < source.size() && common < binary.size() &&
+        cmSystemTools::ComparePath(source[common].c_str(),
+                                   binary[common].c_str()))
+    {
+    ++common;
+    }
+
+  // Require more than just the root portion of the path to be in
+  // common before allowing relative paths.  Also disallow relative
+  // paths if the build tree is a network path.  The current working
+  // directory on Windows cannot be a network path.  Therefore
+  // relative paths cannot work with network paths.
+  if(common > 1 && source[0] != "//")
+    {
+    // Build the minimum prefix required of a path to be converted to
+    // a relative path.
+    source.erase(source.begin()+common, source.end());
+    m_RelativePathTop = cmSystemTools::JoinPath(source);
+    }
+  else
+    {
+    // Disable relative paths.
+    m_RelativePathTop = "";
+    }
+}
+
+//----------------------------------------------------------------------------
+std::string
+cmGlobalGenerator::ConvertToRelativePath(const std::vector<std::string>& local,
+                                         const char* in_remote)
+{
+  // The path should never be quoted.
+  assert(in_remote[0] != '\"');
+
+  // The local path should never have a trailing slash.
+  assert(local.size() > 0 && !(local[local.size()-1] == ""));
+
+  // If the path is already relative or relative paths are disabled
+  // then just return the path.
+  if(m_RelativePathTop.size() == 0 ||
+     !cmSystemTools::FileIsFullPath(in_remote))
+    {
+    return in_remote;
+    }
+
+  // If the path does not begin with the minimum relative path prefix
+  // then do not convert it.
+  std::string original = in_remote;
+  if(original.size() < m_RelativePathTop.size() ||
+     !cmSystemTools::ComparePath(
+       original.substr(0, m_RelativePathTop.size()).c_str(),
+       m_RelativePathTop.c_str()))
+    {
+    return in_remote;
+    }
+
+  // Identify the longest shared path component between the remote
+  // path and the local path.
+  std::vector<std::string> remote;
+  cmSystemTools::SplitPath(in_remote, remote);
+  unsigned int common=0;
+  while(common < remote.size() &&
+        common < local.size() &&
+        cmSystemTools::ComparePath(remote[common].c_str(),
+                                   local[common].c_str()))
+    {
+    ++common;
+    }
+
+  // If the entire path is in common then just return a ".".
+  if(common == remote.size() &&
+     common == local.size())
+    {
+    return ".";
+    }
+
+  // If the entire path is in common except for a trailing slash then
+  // just return a "./".
+  if(common+1 == remote.size() &&
+     remote[common].size() == 0 &&
+     common == local.size())
+    {
+    return "./";
+    }
+
+  // Construct the relative path.
+  std::string relative;
+
+  // First add enough ../ to get up to the level of the shared portion
+  // of the path.  Leave off the trailing slash.  Note that the last
+  // component of local will never be empty because local should never
+  // have a trailing slash.
+  for(unsigned int i=common; i < local.size(); ++i)
+    {
+    relative += "..";
+    if(i < local.size()-1)
+      {
+      relative += "/";
+      }
+    }
+
+  // Now add the portion of the destination path that is not included
+  // in the shared portion of the path.  Add a slash the first time
+  // only if there was already something in the path.  If there was a
+  // trailing slash in the input then the last iteration of the loop
+  // will add a slash followed by an empty string which will preserve
+  // the trailing slash in the output.
+  for(unsigned int i=common; i < remote.size(); ++i)
+    {
+    if(relative.size() > 0)
+      {
+      relative += "/";
+      }
+    relative += remote[i];
+    }
+
+  // Finally return the path.
+  return relative;
 }
 

@@ -51,6 +51,16 @@ void cmLocalGenerator::Configure()
   std::string currentStart = m_Makefile->GetStartDirectory();
   currentStart += "/CMakeLists.txt";
   m_Makefile->ReadListFile(currentStart.c_str());
+
+  // Setup the current output directory components for use by
+  // ConvertToRelativePath.
+  std::string outdir =
+    cmSystemTools::CollapseFullPath(m_Makefile->GetCurrentOutputDirectory());
+  cmSystemTools::SplitPath(outdir.c_str(), m_CurrentOutputDirectoryComponents);
+
+  // Check whether relative paths should be used for optionally
+  // relative paths.
+  m_UseRelativePaths = m_Makefile->IsOn("CMAKE_USE_RELATIVE_PATHS");
 }
 
 void cmLocalGenerator::SetGlobalGenerator(cmGlobalGenerator *gg)
@@ -402,83 +412,6 @@ std::string cmLocalGenerator::GetFullTargetName(const char* n,
   name += n;
   name += targetSuffix?targetSuffix:"";
   return name;
-}
-
-
-std::string cmLocalGenerator::ConvertToRelativeOutputPath(const char* p)
-{
-  if ( !m_Makefile->IsOn("CMAKE_USE_RELATIVE_PATHS") )
-    {
-    return cmSystemTools::ConvertToOutputPath(p);
-    }
-  // NOTE, much of this was copied to 
-  // cmGlobalXCodeGenerator::ConvertToRelativeOutputPath
-  // fixes here should be made there as well.
-
-  // copy to a string class
-  std::string pathIn = p;
-  // check to see if the path is already relative, it is
-  // considered relative if one of the following is true
-  // - has no / in it at all
-  // - does not start with / or drive leter :
-  // - starts with a ".."
-  if(pathIn.find('/') == pathIn.npos ||        
-     (pathIn[0] != '/' && pathIn[1] != ':') || 
-     pathIn.find("..") == 0)
-    {
-    return cmSystemTools::ConvertToOutputPath(p);
-    } 
-
-  // do not use relative paths for network build trees
-  // the network paths do not work
-  const char* outputDirectory = m_Makefile->GetHomeOutputDirectory();
-  if ( outputDirectory && *outputDirectory && *(outputDirectory+1) &&
-    outputDirectory[0] == '/' && outputDirectory[1] == '/' )
-    {
-    return cmSystemTools::ConvertToOutputPath(p);
-    }
-  // if the path is double quoted remove the double quotes
-  if(pathIn.size() && pathIn[0] == '\"')
-    {
-    pathIn = pathIn.substr(1, pathIn.size()-2);
-    } 
-  // The first time this is called
-  // initialize m_CurrentOutputDirectory to contain
-  // the full path to the current output directory
-  // This has to be done here and not in the constructor
-  // because the output directory is not yet set in the constructor.
-  if(m_CurrentOutputDirectory.size() == 0)
-    {
-    m_CurrentOutputDirectory = cmSystemTools::CollapseFullPath(m_Makefile->GetCurrentOutputDirectory());
-    }
-  // Given that we are in m_CurrentOutputDirectory how to we
-  // get to pathIn with a relative path, store in ret
-  std::string ret = cmSystemTools::RelativePath(m_CurrentOutputDirectory.c_str(), pathIn.c_str());
-  // If the path is 0 sized make it a .
-  // this happens when pathIn is the same as m_CurrentOutputDirectory
-  if(ret.size() == 0)
-    {
-    ret = ".";
-    }
-  // if there was a trailing / there still is one, and
-  // if there was not one, there still is not one
-  if(ret[ret.size()-1] == '/' && 
-     pathIn[pathIn.size()-1] != '/')
-    {
-    ret.erase(ret.size()-1, 1);
-    }
-  if(ret[ret.size()-1] != '/' && 
-     pathIn[pathIn.size()-1] == '/')
-    {
-    ret += "/";
-    }
-  // Now convert the relative path to an output path
-  ret = cmSystemTools::ConvertToOutputPath(ret.c_str());
-  // finally return the path 
-  // at this point it should be relative and in the correct format
-  // for the native build system.  (i.e. \ for windows and / for unix,
-  // and correct escaping/quoting of spaces in the path
-  return ret;
 }
 
 void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname, 
@@ -1355,4 +1288,47 @@ cmLocalGenerator::ConstructScript(const cmCustomCommandLines& commandLines,
     script += newline;
     }
   return script;
+}
+
+//----------------------------------------------------------------------------
+std::string cmLocalGenerator::ConvertToRelativePath(const char* remote)
+{
+  return (m_GlobalGenerator
+          ->ConvertToRelativePath(m_CurrentOutputDirectoryComponents,
+                                  remote));
+}
+
+//----------------------------------------------------------------------------
+std::string
+cmLocalGenerator::ConvertToRelativeOutputPath(const char* remote)
+{
+  // TODO: Make this behave like its documentation...always convert.
+  // This involves identifying all calls to it that should be calls to
+  // the optional one.
+  return this->ConvertToOptionallyRelativeOutputPath(remote);
+}
+
+//----------------------------------------------------------------------------
+std::string
+cmLocalGenerator::ConvertToOptionallyRelativePath(const char* remote)
+{
+  if(m_UseRelativePaths)
+    {
+    return this->ConvertToRelativePath(remote);
+    }
+  else
+    {
+    return remote;
+    }
+}
+
+//----------------------------------------------------------------------------
+std::string
+cmLocalGenerator::ConvertToOptionallyRelativeOutputPath(const char* remote)
+{
+  // Convert the path to a relative path.
+  std::string relative = this->ConvertToOptionallyRelativePath(remote);
+
+  // Now convert it to an output path.
+  return cmSystemTools::ConvertToOutputPath(relative.c_str());
 }

@@ -33,8 +33,6 @@
 #include <memory> // auto_ptr
 #include <queue>
 
-#include <assert.h>
-
 // TODO: Convert makefile name to a runtime switch.
 #define CMLUMG_MAKEFILE_NAME "Makefile"
 
@@ -1998,6 +1996,7 @@ cmLocalUnixMakefileGenerator2
   for(std::vector<std::string>::const_iterator i = objects.begin();
       i != objects.end(); ++i)
     {
+    // TODO: Make sure we don't escape spaces and quote.
     ruleFileStream
       << " \\\n"
       << "\"" << this->ConvertToRelativeOutputPath(i->c_str()) << "\"";
@@ -2310,94 +2309,6 @@ cmLocalUnixMakefileGenerator2
 
 //----------------------------------------------------------------------------
 std::string
-cmLocalUnixMakefileGenerator2::ConvertToRelativePath(const char* p)
-{
-  // The path should never be quoted.
-  assert(p[0] != '\"');
-
-  // If the path is already relative or relative paths are disabled
-  // then just return the path.
-  if(m_RelativePathTop.size() == 0 || !cmSystemTools::FileIsFullPath(p))
-    {
-    return p;
-    }
-
-  // If the path does not begin with the minimum relative path prefix
-  // then do not convert it.
-  std::string original = p;
-  if(original.size() < m_RelativePathTop.size() ||
-     !this->ComparePath(original.substr(0, m_RelativePathTop.size()).c_str(),
-                        m_RelativePathTop.c_str()))
-    {
-    return p;
-    }
-
-  // Identify the longest shared path component between the given path
-  // and the current output directory.
-  std::vector<std::string> path;
-  cmSystemTools::SplitPath(p, path);
-  unsigned int common=0;
-  while(common < path.size() &&
-        common < m_CurrentOutputDirectoryComponents.size() &&
-        this->ComparePath(path[common].c_str(),
-                          m_CurrentOutputDirectoryComponents[common].c_str()))
-    {
-    ++common;
-    }
-
-  // If the entire path is in common then just return a ".".
-  if(common == path.size() &&
-     common == m_CurrentOutputDirectoryComponents.size())
-    {
-    return ".";
-    }
-
-  // If the entire path is in common except for a trailing slash then
-  // just return a "./".
-  if(common+1 == path.size() && path[common].size() == 0 &&
-     common == m_CurrentOutputDirectoryComponents.size())
-    {
-    return "./";
-    }
-
-  // Construct the relative path.
-  std::string relative;
-
-  // First add enough ../ to get up to the level of the shared portion
-  // of the path.  Leave off the trailing slash.  Note that the last
-  // component of m_CurrentOutputDirectoryComponents will never be
-  // empty because m_CurrentOutputDirectory does not have a trailing
-  // slash.
-  for(unsigned int i=common; i < m_CurrentOutputDirectoryComponents.size(); ++i)
-    {
-    relative += "..";
-    if(i < m_CurrentOutputDirectoryComponents.size()-1)
-      {
-      relative += "/";
-      }
-    }
-
-  // Now add the portion of the destination path that is not included
-  // in the shared portion of the path.  Add a slash the first time
-  // only if there was already something in the path.  If there was a
-  // trailing slash in the input then the last iteration of the loop
-  // will add a slash followed by an empty string which will preserve
-  // the trailing slash in the output.
-  for(unsigned int i=common; i < path.size(); ++i)
-    {
-    if(relative.size() > 0)
-      {
-      relative += "/";
-      }
-    relative += path[i];
-    }
-
-  // Finally return the path.
-  return relative;
-}
-
-//----------------------------------------------------------------------------
-std::string
 cmLocalUnixMakefileGenerator2::ConvertToRelativeOutputPath(const char* p)
 {
   // Convert the path to a relative path.
@@ -2423,52 +2334,6 @@ void cmLocalUnixMakefileGenerator2::ConfigureOutputPaths()
     {
     m_ExecutableOutputPath = exeOut;
     this->FormatOutputPath(m_ExecutableOutputPath, "EXECUTABLE");
-    }
-
-  // Setup fully collapsed paths.
-  m_CurrentOutputDirectory =
-    cmSystemTools::CollapseFullPath(m_Makefile->GetCurrentOutputDirectory());
-  m_HomeOutputDirectory =
-    cmSystemTools::CollapseFullPath(m_Makefile->GetHomeOutputDirectory());
-  m_HomeDirectory =
-    cmSystemTools::CollapseFullPath(m_Makefile->GetHomeDirectory());
-
-  // Identify the longest shared path component between the source
-  // directory and the build directory.
-  std::vector<std::string> source;
-  std::vector<std::string> binary;
-  cmSystemTools::SplitPath(m_HomeDirectory.c_str(), source);
-  cmSystemTools::SplitPath(m_HomeOutputDirectory.c_str(), binary);
-  unsigned int common=0;
-  while(common < source.size() && common < binary.size() &&
-        this->ComparePath(source[common].c_str(), binary[common].c_str()))
-    {
-    ++common;
-    }
-
-  // Require more than just the root portion of the path to be in
-  // common before allowing relative paths.  Also disallow relative
-  // paths if the build tree is a network path.  The current working
-  // directory on Windows cannot be a network path.  Therefore
-  // relative paths cannot work with network paths.
-  if(common > 1 && source[0] != "//")
-    {
-    // Build the minimum prefix required of a path to be converted to
-    // a relative path.
-    m_RelativePathTop = source[0];
-    for(unsigned int i=1; i < common; ++i)
-      {
-      if(i > 1)
-        {
-        m_RelativePathTop += "/";
-        }
-      m_RelativePathTop += source[i];
-      }
-
-    // Split the current output directory now to save time when
-    // converting paths.
-    cmSystemTools::SplitPath(m_CurrentOutputDirectory.c_str(),
-                             m_CurrentOutputDirectoryComponents);
     }
 }
 
@@ -2501,16 +2366,6 @@ void cmLocalUnixMakefileGenerator2::FormatOutputPath(std::string& path,
     // Add this as a link directory automatically.
     m_Makefile->AddLinkDirectory(path.c_str());
     }
-}
-
-//----------------------------------------------------------------------------
-bool cmLocalUnixMakefileGenerator2::ComparePath(const char* c1, const char* c2)
-{
-#if defined(_WIN32) || defined(__APPLE__)
-  return cmSystemTools::Strucmp(c1, c2) == 0;
-#else
-  return strcmp(c1, c2) == 0;
-#endif
 }
 
 //----------------------------------------------------------------------------

@@ -77,8 +77,35 @@ public:
   /** Get the full name of the target's file, without path.  */
   std::string GetFullTargetName(const char* n, const cmTarget& t);
 
-  std::string ConvertToRelativeOutputPath(const char* p);
-  
+  /**
+   * Convert the given remote path to a relative path with respect to
+   * this generator's output directory.  The remote path must use
+   * forward slashes and not already be escaped or quoted.
+   */
+  std::string ConvertToRelativePath(const char* remote);
+
+  /**
+   * Convert to an output path that is relative to the current output
+   * directory.  The remote path must use forward slashes and not
+   * already be escaped or quoted.
+   */
+  std::string ConvertToRelativeOutputPath(const char* remote);
+
+  /**
+   * Calls ConvertToRelativePath conditionally on the cache option
+   * CMAKE_USE_RELATIVE_PATHS.  The remote path must use forward
+   * slashes and not already be escaped or quoted.
+   */
+  std::string ConvertToOptionallyRelativePath(const char* remote);
+
+  /**
+   * Convert the given path to an output path that is optionally
+   * relative based on the cache option CMAKE_USE_RELATIVE_PATHS.  The
+   * remote path must use forward slashes and not already be escaped
+   * or quoted.
+   */
+  std::string ConvertToOptionallyRelativeOutputPath(const char* remote);
+
   // flag to determine if this project should be included in a parent project
   bool GetExcludeAll()
     {
@@ -156,10 +183,7 @@ protected:
   // members used for relative path function ConvertToMakefilePath
   std::string m_RelativePathToSourceDir;
   std::string m_RelativePathToBinaryDir;
-  std::string m_CurrentOutputDirectory;
-  std::string m_HomeOutputDirectory;
-  std::string m_HomeDirectory;
-  std::string m_HomeOutputDirectoryNoSlash;
+  std::vector<std::string> m_CurrentOutputDirectoryComponents;
   bool m_ExcludeFromAll;
   cmLocalGenerator* m_Parent;
   std::map<cmStdString, cmStdString> m_LanguageToIncludeFlags;
