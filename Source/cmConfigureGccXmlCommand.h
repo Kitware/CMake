@@ -97,7 +97,7 @@ public:
   cmTypeMacro(cmConfigureGccXmlCommand, cmCommand);
   
 protected:
-  std::string GetSupportDirectory(const char*);
+  bool GetSupportDirectory(const char*);
   bool FindVcIncludeFlags();
   bool FindGccIncludeFlags();
   bool FindMproIncludeFlags();

@@ -67,34 +67,29 @@ bool cmConfigureGccXmlCommand::InitialPass(std::vector<std::string>& args)
   
   // Get the gccxml support directory location.  This is based on the
   // executable location.
-  m_SupportDir = this->GetSupportDirectory(args[0].c_str());
+  if(!this->GetSupportDirectory(args[0].c_str()))
+    { return false; }
   
 #if defined(_WIN32) && !defined(__CYGWIN__)
   // On Windows, we will just look at VcInclude/FLAGS.txt for now.
   if(!this->FindVcIncludeFlags())
-    {
-    return false;
-    }
+    { return false; }
 #else
   // On UNIX, we have to determine which compiler is being used, and
   // attempt to use that compiler's support directory.
   if(this->CompilerIsGCC())
     {
     if(!this->FindGccIncludeFlags())
-      {
-      return false;
-      }
+      { return false; }
     }
   else if(this->CompilerIsMipsPro())
     {
     if(!this->FindMproIncludeFlags())
-      {
-      return false;
-      }
+      { return false; }
     }
   else
     {
-    this->SetError("Compiler is not supported by GCC-XML!");
+    this->SetError("Compiler is not supported by GCC-XML!\n");
     return false;
     }
 #endif
@@ -116,10 +111,18 @@ bool cmConfigureGccXmlCommand::InitialPass(std::vector<std::string>& args)
  * support library tree.  Subdirectories of the returned location should
  * contain the compiler-specific support libraries.
  */
-std::string cmConfigureGccXmlCommand::GetSupportDirectory(const char* exeLoc)
+bool cmConfigureGccXmlCommand::GetSupportDirectory(const char* exeLoc)
 {
   std::string gccxml = exeLoc;
   m_Makefile->ExpandVariablesInString(gccxml);
+
+  if(!cmSystemTools::FileExists(gccxml.c_str()))
+    {
+    std::string err = "Can't find GCC-XML at given path: ";
+    err += gccxml;
+    this->SetError(err.c_str());
+    return false;
+    }
   
   std::string dir;
   std::string file;
@@ -137,7 +140,8 @@ std::string cmConfigureGccXmlCommand::GetSupportDirectory(const char* exeLoc)
     }
 #endif
   
-  return dir;
+  m_SupportDir = dir;
+  return true;
 }
 
 
@@ -249,7 +253,7 @@ bool cmConfigureGccXmlCommand::CompilerIsMipsPro() const
   const char* compiler = m_Makefile->GetDefinition("CMAKE_CXX_COMPILER");
   if(!compiler) { return false; }
   std::string command = compiler;
-  command += " -version";
+  command += " -version 2>&1";
   std::string output;
   if(!cmSystemTools::RunCommand(command.c_str(), output, false))
     { return false; }
