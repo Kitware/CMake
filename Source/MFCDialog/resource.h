@@ -15,6 +15,8 @@
 #define IDC_LIST2                       1007
 #define IDC_LIST3                       1010
 #define IDC_CMAKE_VERSION               1014
+#define IDC_FRAME                       1015
+#define IDC_MouseHelpCaption            1016
 
 // Next default values for new objects
 // 
@@ -22,7 +24,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        133
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1015
+#define _APS_NEXT_CONTROL_VALUE         1017
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

@@ -35,10 +35,15 @@ protected:
   enum { IDD = IDD_CMakeSetupDialog_DIALOG };
   CString	m_WhereSource;
   CString	m_WhereBuild;
+  CButton	m_ListFrame;
   bool          m_BuildPathChanged;
   CComboBox     m_WhereSourceControl;
   CComboBox     m_WhereBuildControl;
   CPropertyList m_CacheEntriesList;
+  CStatic       m_MouseHelp;
+  CStatic       m_VersionDisplay;
+  CButton       m_BuildProjects;
+  CButton       m_CancelButton;
   //}}AFX_DATA
   
   // ClassWizard generated virtual function overrides
@@ -72,6 +77,8 @@ protected:
   afx_msg void OnSelendokWhereBuild();
   afx_msg void OnChangeWhereSource();
   afx_msg void OnSelendokWhereSource();
+  afx_msg void OnSize(UINT nType, int cx, int cy);
+  afx_msg void OnGetMinMaxInfo( MINMAXINFO FAR* lpMMI );
   //}}AFX_MSG
   DECLARE_MESSAGE_MAP()
 };

@@ -27,6 +27,11 @@ protected:
 // Dialog Data
   //{{AFX_DATA(CMakeSetupDialog)
 	enum { IDD = IDD_CMakeSetupDialog_DIALOG };
+	CButton	m_CancelButton;
+	CStatic	m_MouseHelp;
+	CStatic	m_VersionDisplay;
+	CButton	m_BuildProjects;
+	CButton	m_ListFrame;
 	CComboBox	m_WhereSourceControl;
 	CComboBox	m_WhereBuildControl;
 	CListBox	m_CacheEntriesList;
@@ -52,19 +57,12 @@ protected:
   afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
   afx_msg void OnPaint();
   afx_msg HCURSOR OnQueryDragIcon();
-  afx_msg void OnBrowse();
   virtual void OnOK();
-  afx_msg void OnButton3();
 	afx_msg void OnBuildProjects();
 	afx_msg void OnChangeWhereBuild();
 	afx_msg void OnChangeWhereSource();
-	afx_msg void OnEditchangeWhereBuild();
-	afx_msg void OnEditchangeWhereSource();
-	afx_msg void OnSelchangeWhereSource();
-	afx_msg void OnSelchangeWhereBuild();
-	afx_msg void OnEditupdateWhereBuild();
-	afx_msg void OnCloseupWhereBuild();
 	afx_msg void OnSelendokWhereBuild();
+	afx_msg void OnSize(UINT nType, int cx, int cy);
 	//}}AFX_MSG
   DECLARE_MESSAGE_MAP()
 };

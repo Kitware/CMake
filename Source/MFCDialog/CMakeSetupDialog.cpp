@@ -87,6 +87,11 @@ void CMakeSetupDialog::DoDataExchange(CDataExchange* pDX)
 {
   CDialog::DoDataExchange(pDX);
   //{{AFX_DATA_MAP(CMakeSetupDialog)
+	DDX_Control(pDX, IDOK, m_CancelButton);
+	DDX_Control(pDX, IDC_MouseHelpCaption, m_MouseHelp);
+	DDX_Control(pDX, IDC_CMAKE_VERSION, m_VersionDisplay);
+	DDX_Control(pDX, IDC_BuildProjects, m_BuildProjects);
+	DDX_Control(pDX, IDC_FRAME, m_ListFrame);
 	DDX_Control(pDX, IDC_WhereSource, m_WhereSourceControl);
 	DDX_Control(pDX, IDC_WhereBuild, m_WhereBuildControl);
 	DDX_Control(pDX, IDC_LIST2, m_CacheEntriesList);
@@ -101,12 +106,14 @@ BEGIN_MESSAGE_MAP(CMakeSetupDialog, CDialog)
   ON_WM_PAINT()
   ON_WM_QUERYDRAGICON()
   ON_BN_CLICKED(IDC_BuildProjects, OnBuildProjects)
+  ON_CBN_EDITCHANGE(IDC_WhereBuild, OnChangeWhereBuild)
+  ON_CBN_EDITCHANGE(IDC_WhereSource, OnChangeWhereSource)
+  ON_CBN_SELCHANGE(IDC_WhereBuild, OnSelendokWhereBuild)
   ON_BN_CLICKED(IDC_BUTTON2, OnBrowseWhereSource)
   ON_BN_CLICKED(IDC_BUTTON3, OnBrowseWhereBuild)
-  ON_CBN_EDITCHANGE(IDC_WhereBuild, OnChangeWhereBuild)
-  ON_CBN_SELCHANGE(IDC_WhereBuild, OnSelendokWhereBuild)
   ON_CBN_SELENDOK(IDC_WhereSource, OnSelendokWhereSource)
-  ON_CBN_EDITCHANGE(IDC_WhereSource, OnChangeWhereSource)
+	ON_WM_SIZE()
+  ON_WM_GETMINMAXINFO()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -571,4 +578,35 @@ void CMakeSetupDialog::SaveCacheFromGUI()
     }
 }
 
+
+
+void CMakeSetupDialog::OnSize(UINT nType, int cx, int cy) 
+{
+  CDialog::OnSize(nType, cx, cy);
+  // TODO: Add your message handler code here
+  if(m_CacheEntriesList.m_hWnd)
+    {
+    m_ListFrame.SetWindowPos(&wndTop, 0, 0, cx-28, cy-137,
+                             SWP_NOMOVE | SWP_NOZORDER);
+    m_CacheEntriesList.SetWindowPos(&wndTop, 0, 0, cx-48, cy-168,
+                                    SWP_NOMOVE | SWP_NOZORDER);
+    m_BuildProjects.SetWindowPos(&wndTop, 143, cy-33, 0, 0, 
+                                 SWP_NOSIZE | SWP_NOZORDER);
+    m_MouseHelp.SetWindowPos(&wndTop, 159, cy-57,
+                             0, 0,
+                             SWP_NOSIZE | SWP_NOZORDER);
+    m_CancelButton.SetWindowPos(&wndTop, 329, cy-33, 0, 0, 
+                                 SWP_NOSIZE | SWP_NOZORDER);
+    m_VersionDisplay.SetWindowPos(&wndTop, 5, cy-23, 0, 0,
+                                  SWP_NOSIZE | SWP_NOZORDER);
+    }
+  
+}
+
+
+void CMakeSetupDialog::OnGetMinMaxInfo( MINMAXINFO FAR* lpMMI )
+{
+  lpMMI->ptMinTrackSize.x = 550;
+  lpMMI->ptMinTrackSize.y = 272;
+}
 
