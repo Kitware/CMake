@@ -38,8 +38,8 @@ IF ( CMAKE_WX_CAN_COMPILE )
     SET(APPLE_GUI_COPYRIGHT "Copyright 2002 Kitware Inc.")
     CONFIGURE_FILE(${CMAKE_ROOT}/Templates/AppleInfo.plist
                    ${EXECUTABLE_OUTPUT_PATH}/CMake.app/Contents/Info.plist)
-    WRITE_FILE(${EXECUTABLE_OUTPUT_PATH}/CMake.app/Contents/PkgInfo "APPL????")
-    
+    #WRITE_FILE(${EXECUTABLE_OUTPUT_PATH}/CMake.app/Contents/PkgInfo "APPL????")
+
     ADD_CUSTOM_COMMAND(
                 SOURCE wxCMakeSetup
                 COMMAND ${CMAKE_COMMAND}
@@ -52,7 +52,9 @@ IF ( CMAKE_WX_CAN_COMPILE )
                 COMMAND ${CMAKE_COMMAND}
                 ARGS -E chdir ${EXECUTABLE_OUTPUT_PATH}/CMake.app/Contents/MacOS
                 `${CMAKE_WX_CONFIG} --rezflags`
-                ${EXECUTABLE_OUTPUT_PATH}/CMake.app/Contents/MacOS/wxCMakeSetup)             
+                ${EXECUTABLE_OUTPUT_PATH}/CMake.app/Contents/MacOS/wxCMakeSetup
+                TARGET wxCMakeSetup
+                )
   ENDIF(APPLE)
 
   INSTALL_TARGETS(/bin wxCMakeSetup)
