@@ -364,8 +364,6 @@ void (*signal ()) ();
 int
 main ()
 {
-int i;
-  ;
   return 0;
 }
 #endif
