@@ -1708,13 +1708,13 @@ cmSourceFile* cmMakefile::GetOrCreateSource(const char* sourceName,
                                             bool generated)
 {
   // make it a full path first
-  std::string path = cmSystemTools::GetFilenamePath(sourceName);
   std::string src = sourceName;
-  if (path.empty())
+  bool relative = !cmSystemTools::FileIsFullPath(sourceName);
+  if(relative)
     {
     src = this->GetCurrentDirectory();
     src += "/";
-    src += cmSystemTools::GetFilenameName(sourceName);
+    src += sourceName;
     }
   
   // check to see if it exists
@@ -1726,11 +1726,11 @@ cmSourceFile* cmMakefile::GetOrCreateSource(const char* sourceName,
 
   // OK a source file object doesn't exist for the source
   // maybe we made a bad call on assuming it was in the src tree
-  if (generated && path.empty())
+  if (generated && relative)
     {
     src = this->GetCurrentOutputDirectory();
     src += "/";
-    src += cmSystemTools::GetFilenameName(sourceName);
+    src += sourceName;
     }
   ret = this->GetSource(src.c_str());
   if (ret)
@@ -1740,7 +1740,7 @@ cmSourceFile* cmMakefile::GetOrCreateSource(const char* sourceName,
   
   // we must create one
   cmSourceFile file; 
-  path = cmSystemTools::GetFilenamePath(src);
+  std::string path = cmSystemTools::GetFilenamePath(src);
   if(generated)
     {
     std::string ext = cmSystemTools::GetFilenameLastExtension(src);
