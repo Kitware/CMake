@@ -65,6 +65,17 @@ public:
   int ConfigureDirectory();
 
   /**
+   * Do submit testing results
+   */
+  int SubmitResults();
+  std::string GetSubmitResultsPrefix();
+
+  /**
+   * Check if CTest file exists
+   */
+  bool CTestFileExists(const std::string& filename);
+
+  /**
    * Run the test for a directory and any subdirectories
    */
   void ProcessDirectory(std::vector<std::string> &passed, 
@@ -106,6 +117,7 @@ private:
     TEST_TEST,
     COVERAGE_TEST,
     PURIFY_TEST,
+    SUBMIT_TEST,
     ALL_TEST,
     LAST_TEST
   };
