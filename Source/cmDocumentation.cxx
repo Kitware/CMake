@@ -193,9 +193,9 @@ bool cmDocumentation::PrintRequestedDocumentation(std::ostream& os)
     if(i->second.length() > 0)
       {
 #ifdef _WIN32
-      fout = new ofstream(i->second.c_str(), ios::out | ios::binary);
+      fout = new std::ofstream(i->second.c_str(), std::ios::out | std::ios::binary);
 #else
-      fout = new ofstream(i->second.c_str(), ios::out);
+      fout = new std::ofstream(i->second.c_str(), std::ios::out);
 #endif
       if(fout)
         {
