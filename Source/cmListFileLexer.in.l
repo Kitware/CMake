@@ -28,6 +28,7 @@ Modify cmListFileLexer.c:
   - remove the yyunput function
   - add a statement "(void)yyscanner;" to the top of these methods:
       yy_fatal_error, yyalloc, yyrealloc, yyfree
+  - remove all YY_BREAK lines occurring right after return statements
 
 */
 

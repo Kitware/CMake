@@ -492,6 +492,7 @@ Modify cmListFileLexer.c:
   - remove the yyunput function
   - add a statement "(void)yyscanner;" to the top of these methods:
       yy_fatal_error, yyalloc, yyrealloc, yyfree
+  - remove all YY_BREAK lines occurring right after return statements
 
 */
 
@@ -860,7 +861,6 @@ YY_RULE_SETUP
   lexer->column = 1;
   return 1;
 }
-        YY_BREAK
 case 2:
 YY_RULE_SETUP
 #line 93 "cmListFileLexer.in.l"
@@ -877,7 +877,6 @@ YY_RULE_SETUP
   lexer->column += yyleng;
   return 1;
 }
-        YY_BREAK
 case 4:
 YY_RULE_SETUP
 #line 104 "cmListFileLexer.in.l"
@@ -887,7 +886,6 @@ YY_RULE_SETUP
   lexer->column += yyleng;
   return 1;
 }
-        YY_BREAK
 case 5:
 YY_RULE_SETUP
 #line 111 "cmListFileLexer.in.l"
@@ -897,7 +895,6 @@ YY_RULE_SETUP
   lexer->column += yyleng;
   return 1;
 }
-        YY_BREAK
 case 6:
 YY_RULE_SETUP
 #line 118 "cmListFileLexer.in.l"
@@ -907,7 +904,6 @@ YY_RULE_SETUP
   lexer->column += yyleng;
   return 1;
 }
-        YY_BREAK
 case 7:
 YY_RULE_SETUP
 #line 125 "cmListFileLexer.in.l"
@@ -945,7 +941,6 @@ YY_RULE_SETUP
   BEGIN(INITIAL);
   return 1;
 }
-        YY_BREAK
 case 11:
 YY_RULE_SETUP
 #line 149 "cmListFileLexer.in.l"
@@ -970,7 +965,6 @@ YY_RULE_SETUP
   lexer->column += yyleng;
   return 1;
 }
-        YY_BREAK
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(STRING):
 #line 165 "cmListFileLexer.in.l"
@@ -979,7 +973,6 @@ case YY_STATE_EOF(STRING):
   cmListFileLexerSetToken(lexer, 0, 0);
   return 0;
 }
-        YY_BREAK
 case 14:
 YY_RULE_SETUP
 #line 171 "cmListFileLexer.in.l"
