@@ -106,11 +106,11 @@ void cmBorlandMakefileGenerator::OutputMakeVariables(std::ostream& fout)
   fout << "RM = " << this->ConvertToOutputPath(ccommand.c_str()) << " remove -f\n";
   std::string ccompiler = m_Makefile->GetDefinition("CMAKE_C_COMPILER");
   fout << "CMAKE_C_COMPILER  = " 
-       << this->ShortPath(ccompiler.c_str())
+       << this->ConvertToOutputPath(ccompiler.c_str())
        << "\n";
   std::string cxxcompiler = m_Makefile->GetDefinition("CMAKE_CXX_COMPILER");
   fout << "CMAKE_CXX_COMPILER  = "
-       << this->ShortPath(cxxcompiler.c_str())
+       << this->ConvertToOutputPath(cxxcompiler.c_str())
        << "\n";
   
   if(m_Makefile->GetDefinition("CMAKE_EDIT_COMMAND"))
