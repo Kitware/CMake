@@ -110,6 +110,18 @@ public:
   static kwsys_stl::string Capitalized(const kwsys_stl::string&);
   
   /**
+   * Return capitalized words (i.e the first letter of each word is
+   *  uppercased all other are left untouched though).
+   */
+  static kwsys_stl::string CapitalizedWords(const kwsys_stl::string&);
+  
+  /**
+   * Return uncapitalized words (i.e the first letter of each word is 
+   * lowercased all other are left untouched though).
+   */
+  static kwsys_stl::string UnCapitalizedWords(const kwsys_stl::string&);
+  
+  /**
    * Return a lower case string
    */
   static kwsys_stl::string LowerCase(const kwsys_stl::string&);
@@ -120,10 +132,45 @@ public:
   static kwsys_stl::string UpperCase(const kwsys_stl::string&);
   
   /**
+   * Count char in string
+   */
+  static size_t CountChar(const char* str, char c);
+  
+  /**
+   * Remove some characters from a string.
+   * Return a pointer to the new resulting string (allocated with 'new')
+   */
+  static char* RemoveChars(const char* str, const char *toremove);
+
+  /**
+   * Remove remove all but 0->9, A->F from a string.
+   * Return a pointer to the new resulting string (allocated with 'new')
+   */
+  static char* RemoveCharsButUpperHex(const char* str);
+  
+  /**
+   * Replace some characters by another character in a string (in-place)
+   * Return a pointer to string
+   */
+  static char* ReplaceChars(char* str, const char *toreplace,char replacement);
+  
+  /**
+   * Returns a pointer to the last occurence of str2 in str1
+   */
+  static const char* FindLastString(const char* str1, const char* str2);
+  
+  /**
+   * Make a duplicate of the string similar to the strdup C function
+   * but use new to create the 'new' string, so one can use
+   * 'delete' to remove it. Returns 0 if the input is empty.
+   */
+  static char* DuplicateString(const char* str);
+  
+  /**
    * Return the string cropped to a given length by removing chars in the
    * center of the string and replacing them with an ellipsis (...)
    */
-  static kwsys_stl::string Crop(const kwsys_stl::string&, size_t max_len);
+  static kwsys_stl::string CropString(const kwsys_stl::string&, size_t max_len);
   
   /**
    * do a case-independent string comparison
@@ -338,6 +385,13 @@ public:
 
   /** Return file's creation time (Win32: works only for NTFS, not FAT).  */
   static long int CreationTime(const char* filename);
+
+  /** 
+   * Convert a string in __DATE__ or __TIMESTAMP__ format into a time_t.
+   * Return false on error, true on success
+   */
+  static bool ConvertDateMacroString(const char *str, time_t *tmt);
+  static bool ConvertTimeStampMacroString(const char *str, time_t *tmt);
 
   ///! for windows return the short path for the given path, unix just a pass through
   static bool GetShortPath(const char* path, kwsys_stl::string& result);
