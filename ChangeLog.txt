@@ -5,6 +5,132 @@
    cvs2cl.pl.  See http://www.red-bean.com/~kfogel/cvs2cl.shtml for more.
   -+- -+- -+- -+- -+- -+- -+- -+- -+- -+- -+- -+- -+- -+- -+- -+- -+- -+-
 
+2001-12-07 19:31  hoffman
+
+	* Source/cmaketest.cxx: ENH: convert to windows paths
+
+2001-12-07 18:10  hoffman
+
+	* Source/cmaketest.cxx: ENH: use windows paths to run commands and
+	escape spaces
+
+2001-12-07 15:58  hoffman
+
+	* Source/cmBorlandMakefileGenerator.cxx,
+	Source/cmNMakeMakefileGenerator.cxx,
+	Source/cmUnixMakefileGenerator.cxx,
+	Source/cmUnixMakefileGenerator.h: ENH: add custom commands for
+	targets
+
+2001-12-07 15:32  barre
+
+	* Templates/CMakeBorlandWindowsSystemConfig.cmake: Remove "unused
+	var" warning from C_FLAGS
+
+2001-12-07 01:02  barre
+
+	* Source/cmNMakeMakefileGenerator.cxx: Do not output library search
+	path if the library path option/flag is empty + add
+	CMAKE_LINKER_HIDE_PARAMETERS since some linkers just do not support
+	the @<< syntax
+
+2001-12-07 01:02  barre
+
+	* Templates/CMakeNMakeWindowsSystemConfig.cmake: Add
+	CMAKE_LINKER_HIDE_PARAMETERS since some linkers just do not support
+	the @<< syntax
+
+2001-12-06 22:40  andy
+
+	* Source/CursesDialog/cmCursesMainForm.cxx: Fix bug with string
+
+2001-12-06 22:09  hoffman
+
+	* Source/cmakewizard.cxx: ENH: call convert to unix slashes for
+	path and filepath entries
+
+2001-12-06 22:07  berk
+
+	* Source/CursesDialog/cmCursesMainForm.cxx: Added support for ~.
+
+2001-12-06 21:50  martink
+
+	* Source/cmSystemTools.cxx: handle tildas
+
+2001-12-06 18:31  barre
+
+	* Source/cmUnixMakefileGenerator.cxx: Lib path should be converted
+	to native path too.
+
+2001-12-06 18:31  barre
+
+	* Source/cmBorlandMakefileGenerator.cxx,
+	Source/cmBorlandMakefileGenerator.h,
+	Source/cmNMakeMakefileGenerator.cxx,
+	Source/cmNMakeMakefileGenerator.h: Fix the command quoting pb
+	(remove m_QuoteNextCommand), move ConvertToNativePath to NMake gen
+
+2001-12-06 16:49  martink
+
+	* Modules/FindTCL.cmake: now broken into pieces
+
+2001-12-06 16:49  martink
+
+	* Modules/FindTclsh.cmake, Modules/FindWish.cmake: new modules
+
+2001-12-06 16:49  martink
+
+	* Source/CursesDialog/ccmake.cxx: Cleaning last line at exit.
+
+2001-12-06 16:49  martink
+
+	* Modules/FindDart.cmake: better docs
+
+2001-12-06 16:49  martink
+
+	* Modules/Dart.cmake: better use of modules
+
+2001-12-06 15:24  martink
+
+	* Templates/CMakeSystemConfig.cmake.in: made install prefix non
+	advanced
+
+2001-12-05 21:05  barre
+
+	* Source/MFCDialog/CMakeSetupDialog.cpp: If Shift is pressed with
+	'OK', then don't quit
+
+2001-12-05 20:36  perera
+
+	* Modules/FindTCL.cmake: ENH: add more possible names for
+	executables.
+
+2001-12-05 20:28  barre
+
+	* Source/cmNMakeMakefileGenerator.cxx, Source/cmCacheManager.cxx,
+	Source/MFCDialog/CMakeSetupDialog.cpp: Add single quotes feature.
+
+2001-12-05 20:00  barre
+
+	* Templates/CMakeNMakeWindowsSystemConfig.cmake: Add single quotes
+	feature.
+
+2001-12-05 17:07  martink
+
+	* Source/cmMakefile.h: up version
+
+2001-12-05 16:59  martink
+
+	* Source/cmMakefile.h: up version
+
+2001-12-05 16:38  hoffman
+
+	* ChangeLog.txt: new version
+
+2001-12-05 16:37  will
+
+	* CMake.pdf: updated from rtf
+
 2001-12-05 16:32  hoffman
 
 	* CMake.rtf: ENH: update cvs path
@@ -2592,8 +2718,21 @@
 
 2001-08-06 19:01  king
 
-	* CMake.pdf, CMake.rtf: Removing Web directory from CMake.  It is
-	moving to a separate, parallel CVS module called "CMakeWeb"
+	* Web/index.html, Web/Art/CMakeBanner.jpg, Web/Art/CMakeBanner.psd,
+	Web/Art/CMakeGUI.jpg, Web/Art/CMakeLogo.gif, Web/Art/CMakeLogo.ppt,
+	Web/Art/CMakeLogo.psd, Web/Art/SideBar.jpg, Web/Art/SideBar.psd,
+	Web/Art/acl.gif, Web/Art/asci.gif, Web/Art/asci_little.gif,
+	Web/Art/itkLogoSmallTransparentBackground.gif,
+	Web/Art/nlm_logo.gif, Web/Art/swooshSmall.gif, Web/HTML/About.html,
+	CMake.pdf, CMake.rtf, Web/HTML/Documentation.html,
+	Web/HTML/Download.html, Web/HTML/Examples.html, Web/HTML/FAQ.html,
+	Web/HTML/Features.html, Web/HTML/Head.html, Web/HTML/Install.html,
+	Web/HTML/MailingLists.html, Web/HTML/News.html,
+	Web/HTML/SideBar.html, Web/HTML/Sponsors.html, Web/HTML/Style.css,
+	Web/HTML/Table.html, Web/HTML/Testing.html,
+	Web/HTML/TestingSetup.html, Web/HTML/cmakeExample.tar.gz: Removing
+	Web directory from CMake.  It is moving to a separate, parallel CVS
+	module called "CMakeWeb"
 
 2001-08-03 19:47  king
 
@@ -2809,6 +2948,10 @@
 	current compiler.  Currently only implemented correctly for Visual
 	C++ in Windows.
 
+2001-07-20 19:05  millerjv
+
+	* Web/index.html: FIX: changed hyperlink color from white/white
+
 2001-07-20 15:41  millerjv
 
 	* Modules/Dart.cmake: ENH: Added Purify targets
@@ -2886,10 +3029,25 @@
 	AUX_SOURCE_DIRECTORY will only add files that have a "source"
 	extension.
 
+2001-07-16 20:49  hoffman
+
+	* Web/HTML/About.html, Web/HTML/Documentation.html,
+	Web/HTML/Download.html, Web/HTML/Examples.html, Web/HTML/FAQ.html,
+	Web/HTML/Features.html, Web/HTML/Install.html,
+	Web/HTML/MailingLists.html, Web/HTML/News.html,
+	Web/HTML/SideBar.html, Web/HTML/Sponsors.html,
+	Web/HTML/Testing.html, Web/HTML/TestingSetup.html: ENH: add
+	TestingSetup
+
 2001-07-16 19:19  ibanez
 
 	* Modules/FindGLU.cmake, Modules/FindGLUT.cmake:      Search path
 	for OpenGL related libraries
+
+2001-07-16 15:17  king
+
+	* Web/HTML/Sponsors.html: ERR: ITK is the original sponsoring
+	project for CMake, not itself.
 
 2001-07-16 14:14  hoffman
 
@@ -3084,6 +3242,18 @@
 	Source/cmVTKWrapPythonCommand.cxx, Source/cmVTKWrapTclCommand.cxx:
 	Better error checking.
 
+2001-06-29 21:06  martink
+
+	* Web/Art/CMakeLogo.gif: cmake logo for dashboard
+
+2001-06-29 20:59  martink
+
+	* Web/Art/CMakeLogo.gif: cmake logo for dashboard
+
+2001-06-29 20:55  martink
+
+	* Web/Art/CMakeLogo.gif: cmake logo for dashboard
+
 2001-06-29 20:46  martink
 
 	* Source/cmConfigureFileCommand.cxx: better configure file command
@@ -3091,6 +3261,10 @@
 2001-06-29 20:06  nobody
 
 	* CMakeLists.txt: added logo
+
+2001-06-29 17:43  martink
+
+	* Web/Art/CMakeLogo.gif: cmake logo for dashboard
 
 2001-06-29 13:53  martink
 
@@ -3194,6 +3368,10 @@
 
 	* Source/cmDSPWriter.cxx: BUG: Check for building shared libraries
 	should read from makefile's setting, not directly from the cache.
+
+2001-06-27 17:57  will
+
+	* Web/HTML/Download.html: added binary download
 
 2001-06-27 17:12  martink
 
@@ -3643,6 +3821,24 @@
 	Source/FLTKDialog/FLTKPropertyNameButtonWithHelp.cxx: ENH: Absolute
 	path to cmake resolved
 
+2001-06-15 11:40  will
+
+	* Web/HTML/Features.html: ENH:Added features
+
+2001-06-15 11:34  will
+
+	* Web/HTML/About.html, Web/HTML/Features.html,
+	Web/HTML/SideBar.html: ENH:Added features
+
+2001-06-15 11:24  will
+
+	* Web/index.html, Web/HTML/Sponsors.html: Updated ASCI link
+
+2001-06-14 21:29  king
+
+	* Web/HTML/Download.html: ENH: Updated anonymous checkout commands
+	for new repository root location.
+
 2001-06-14 21:06  biddi
 
 	* Source/cmSourceFile.cxx: ERR: allow *.cpp as well as *.cxx etc
@@ -3657,6 +3853,15 @@
 	Source/FLTKDialog/FLTKPropertyNameButtonWithHelp.cxx,
 	Source/FLTKDialog/FLTKPropertyNameButtonWithHelp.h: Include
 	directory names are Case sensitive in Unix.
+
+2001-06-14 16:48  will
+
+	* Web/HTML/Sponsors.html: Refined Jim Ahrens changes
+
+2001-06-14 16:42  will
+
+	* Web/index.html, Web/HTML/Sponsors.html, Web/Art/asci.gif,
+	Web/Art/asci_little.gif: Feedback from Jim Ahrens
 
 2001-06-14 15:45  martink
 
@@ -3704,6 +3909,10 @@
 
 	* Source/FLTKDialog/CMakeSetupGUIImplementation.cxx: ENH: Search
 	for cmake executable full path added (window/unix)
+
+2001-06-13 13:37  will
+
+	* Web/HTML/SideBar.html: Added dashboard
 
 2001-06-13 04:16  ibanez
 
@@ -3928,6 +4137,12 @@
 	GCCXML_FLAGS cache entries.  This also allowed the correct
 	generation of gccxml rules.
 
+2001-06-08 15:28  will
+
+	* Web/HTML/Documentation.html, Web/HTML/Documentation.html,
+	Web/HTML/Documentation.html, Web/HTML/Documentation.html:
+	Documentation updated
+
 2001-06-08 04:18  perera
 
 	* Source/cmUnixMakefileGenerator.cxx,
@@ -4028,6 +4243,11 @@
 	Source/cmMSProjectGenerator.cxx, Source/cmMSProjectGenerator.h:
 	ENH: rename DSWMakefile and DSPMakefile to DSWWriter and DSPWriter
 
+2001-06-06 17:37  will
+
+	* Web/HTML/About.html, Web/HTML/Documentation.html: ENH:Some more
+	tweaks
+
 2001-06-06 17:18  hoffman
 
 	* Source/cmAbstractFilesCommand.cxx,
@@ -4110,6 +4330,22 @@
 	* Source/cmMakefile.cxx: Change name of file created from Testfile
 	to CMakeTestfile.txt
 
+2001-06-06 14:29  will
+
+	* Web/HTML/Examples.html: ENH:More tweaks
+
+2001-06-06 14:25  will
+
+	* Web/HTML/Download.html, Web/HTML/Install.html,
+	Web/HTML/SideBar.html: ENH:More tweaks
+
+2001-06-06 14:11  will
+
+	* Web/Art/CMakeGUI.jpg, Web/HTML/About.html,
+	Web/HTML/Documentation.html, Web/HTML/Examples.html,
+	Web/HTML/SideBar.html, Web/HTML/Sponsors.html, Web/HTML/Table.html,
+	Web/HTML/cmakeExample.tar.gz: ENH:Some enhancements to the examples
+
 2001-06-06 13:43  martink
 
 	* Source/cmSystemTools.cxx: better regexp for reg entries
@@ -4117,6 +4353,28 @@
 2001-06-06 13:43  martink
 
 	* Modules/FindJNI.cmake: better tests
+
+2001-06-06 13:07  will
+
+	* Web/Art/CMakeBanner.jpg: Didn't kb
+
+2001-06-06 13:07  will
+
+	* Web/Art/CMakeBanner.jpg: ERR:Didn't -kb
+
+2001-06-06 12:49  will
+
+	* Web/index.html, Web/Art/CMakeBanner.jpg, Web/Art/CMakeBanner.psd,
+	Web/Art/CMakeLogo.ppt, Web/Art/CMakeLogo.psd, Web/Art/SideBar.jpg,
+	Web/Art/SideBar.psd, Web/Art/acl.gif,
+	Web/Art/itkLogoSmallTransparentBackground.gif,
+	Web/Art/nlm_logo.gif, Web/Art/swooshSmall.gif, Web/HTML/About.html,
+	Web/HTML/Documentation.html, Web/HTML/Download.html,
+	Web/HTML/Examples.html, Web/HTML/FAQ.html, Web/HTML/Head.html,
+	Web/HTML/MailingLists.html, Web/HTML/News.html,
+	Web/HTML/SideBar.html, Web/HTML/Sponsors.html, Web/HTML/Style.css,
+	Web/HTML/Table.html, Web/HTML/Testing.html: ENH:First incarnation
+	of web pages
 
 2001-06-06 11:47  millerjv
 
