@@ -21,6 +21,7 @@
 #include "cmGlobalGenerator.h"
 #include <cmsys/Directory.hxx>
 #include "cmGlob.h"
+#include "cmDynamicLoader.h"
 
 #include "cmCTestSubmit.h"
 #include "curl/curl.h"
@@ -33,7 +34,8 @@
 #include <time.h>
 #include <math.h>
 #include <float.h>
-#include "cmDynamicLoader.h"
+
+#include <memory> // auto_ptr
 
 #define SAFEDIV(x,y) (((y)!=0)?((x)/(y)):(0))
 #define DEBUGOUT std::cout << __LINE__ << " "; std::cout
@@ -3499,7 +3501,7 @@ int cmCTest::RunConfigurationScript(const std::string& total_script_arg)
   gg.SetCMakeInstance(&cm);
 
   // read in the list file to fill the cache
-  cmLocalGenerator *lg = gg.CreateLocalGenerator();
+  std::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
   lg->SetGlobalGenerator(&gg);
 
   // set a variable with the path to the current script
@@ -4930,7 +4932,7 @@ int cmCTest::ReadCustomConfigurationFileTree(const char* dir)
   cmake cm;
   cmGlobalGenerator gg;
   gg.SetCMakeInstance(&cm);
-  cmLocalGenerator *lg = gg.CreateLocalGenerator();
+  std::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
   lg->SetGlobalGenerator(&gg);
   cmMakefile *mf = lg->GetMakefile();
 
