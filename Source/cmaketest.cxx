@@ -36,20 +36,24 @@ int main (int argc, char *argv[])
     {
     cmSystemTools::MakeDirectory(argv[2]);
     }
+
   const char* sourceDirectory = argv[1];
   const char* binaryDirectory = argv[2];
   const char* executableName = argv[3];
   const char* executableDirectory = "";
+
   if(argc > 4)
     {
     executableDirectory = argv[4];
     }
+
   const char* projectName = executableName;
   if(argc > 5)
     {
     projectName = argv[5];
     }
   
+
   /**
    * Run an executable command and put the stdout in output.
    */
@@ -60,8 +64,9 @@ int main (int argc, char *argv[])
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
   std::cout << "Changing into directory: " << binaryDirectory << "\n";
   cmSystemTools::ChangeDirectory(binaryDirectory);
-  cmake cm;
+
   std::vector<std::string> args;
+
   // make sure the same generator is used
   // use this program as the cmake to be run, it should not
   // be run that way but the cmake object requires a vailid path
@@ -74,12 +79,15 @@ int main (int argc, char *argv[])
     {
     cmakeCommand = cmakeCommand.substr(1, cmakeCommand.size()-2);
     }
+
   args.push_back(cmakeCommand.c_str());
   args.push_back(sourceDirectory);
   std::string generator = "-G";
   generator += CMAKE_GENERATOR;
   args.push_back(generator);
   std::cout << "Generating build files...\n";
+
+  cmake cm;
   if (cm.Generate(args) != 0)
     {
     std::cerr << "Error: cmake execution failed\n";
@@ -88,7 +96,20 @@ int main (int argc, char *argv[])
     return 1;
     }
   std::cout << "Done Generating build files.\n";
+
+  cmake cm2;
+  std::cout << "Generating build files (again)...\n";
+  if (cm2.Generate(args) != 0)
+    {
+    std::cerr << "Error: cmake execution failed\n";
+    // return to the original directory
+    cmSystemTools::ChangeDirectory(cwd.c_str());
+    return 1;
+    }
+  std::cout << "Done Generating build files (again).\n";
+
   cmListFileCache::GetInstance()->ClearCache();
+
   // now build the test
   std::string makeCommand = MAKEPROGRAM;
   if(makeCommand.size() == 0)
@@ -101,6 +122,7 @@ int main (int argc, char *argv[])
 #endif
   std::string lowerCaseCommand = makeCommand;
   cmSystemTools::LowerCase(lowerCaseCommand);
+
   // if msdev is the make program then do the following
   if(lowerCaseCommand.find("msdev") != std::string::npos)
     {
@@ -129,7 +151,7 @@ int main (int argc, char *argv[])
     // clean first
     std::string cleanCommand = makeCommand;
     cleanCommand += " clean";
-    std::cout << "Running make command: " << cleanCommand.c_str() << " ...\n";
+    std::cout << "Running make clean command: " << cleanCommand.c_str() << " ...\n";
     if (!cmSystemTools::RunCommand(cleanCommand.c_str(), output))
       {
       std::cerr << "Error: " << cleanCommand.c_str() << "  execution failed\n";
