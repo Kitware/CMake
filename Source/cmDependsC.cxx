@@ -198,24 +198,10 @@ bool cmDependsC::CheckDependencies(std::istream& is)
       dependee = dependee.substr(0, pos+1);
       }
 
-    // Convert dependee to a full path.
-    if(!cmSystemTools::FileIsFullPath(dependee.c_str()))
-      {
-      dependee = cmSystemTools::CollapseFullPath(dependee.c_str(),
-                                                 m_Directory.c_str());
-      }
-
     // Strip whitespace from the depender.
     if((pos = depender.find_last_not_of(" \t\r\n")) != std::string::npos)
       {
       depender = depender.substr(0, pos+1);
-      }
-
-    // Convert depender to a full path.
-    if(!cmSystemTools::FileIsFullPath(depender.c_str()))
-      {
-      depender = cmSystemTools::CollapseFullPath(depender.c_str(),
-                                                 m_Directory.c_str());
       }
 
     // Dependencies must be regenerated if the dependee does not exist
