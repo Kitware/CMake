@@ -22,11 +22,15 @@
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
-#include <pthread.h>
+#include "xmlrpc_pthreads.h"
 
 #include <curl/curl.h>
 #include <curl/types.h>
 #include <curl/easy.h>
+
+#ifndef WIN32
+#  include <unistd.h>
+#endif
 
 #if defined (WIN32) && defined(_DEBUG)
 #  include <crtdbg.h>
@@ -348,7 +352,6 @@ destroyCurlTransaction(curlTransaction * const curlTransactionP) {
 }
 
 
-#include <unistd.h>
 static void
 performCurlTransaction(xmlrpc_env *      const envP,
                        curlTransaction * const curlTransactionP) {

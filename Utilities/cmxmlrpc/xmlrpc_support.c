@@ -30,6 +30,10 @@
 #include <string.h>
 #include <ctype.h>
 
+#ifdef WIN32
+# define vsnprintf _vsnprintf
+#endif
+
 #include "xmlrpc.h"
 #include "xmlrpc_int.h"
 

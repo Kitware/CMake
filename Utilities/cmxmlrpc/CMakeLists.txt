@@ -1,5 +1,7 @@
 PROJECT(XMLRPC)
 
+INCLUDE_REGULAR_EXPRESSION("^.*$")
+
 # Include all the necessary files for macros
 SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake")
 
@@ -43,7 +45,8 @@ SET(DIRECTORY_SEPARATOR "/")
 INCLUDE_DIRECTORIES(
   "${CMAKE_CURRENT_SOURCE_DIR}"
   "${CMAKE_CURRENT_BINARY_DIR}"
-  "${CMAKE_EXPAT_INCLUDES}"
+  ${CMAKE_EXPAT_INCLUDES}
+  ${CMAKE_CURL_INCLUDES}
   )
 
 CONFIGURE_FILE(
@@ -66,11 +69,19 @@ SET(xmlrpc_SRCS
   xmlrpc_parse.c
   xmlrpc_registry.c
   xmlrpc_serialize.c
+  xmlrpc_curl_transport.c
   #xmlrpc_server_abyss.c
   xmlrpc_struct.c
   xmlrpc_strutil.c
   xmlrpc_support.c
   xmlrpc_utf8.c
+  casprintf.c
   )
+IF(WIN32)
+  SET(xmlrpc_SRCS ${xmlrpc_SRCS}
+    win32_pthreads.c
+    )
+ENDIF(WIN32)
 
 ADD_LIBRARY(cmXMLRPC ${xmlrpc_SRCS})
+TARGET_LINK_LIBRARIES(cmXMLRPC ${CMAKE_EXPAT_LIBRARIES} ${CMAKE_CURL_LIBRARIES})

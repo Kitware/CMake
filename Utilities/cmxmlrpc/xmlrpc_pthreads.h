@@ -23,11 +23,14 @@
 ** OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 ** SUCH DAMAGE. */
 
+#ifndef xmlrpc_pthreads_h_
+#define xmlrpc_pthreads_h_
+
 #ifndef WIN32
 #       define _REENTRANT
 #       include <pthread.h>
 #elif defined (WIN32)
-
+/*typedef PVOID HANDLE; */
 typedef HANDLE pthread_t;
 typedef CRITICAL_SECTION pthread_mutex_t;
 
@@ -64,3 +67,4 @@ extern int pthread_mutex_destroy(pthread_mutex_t *mp);
 
 #endif
 
+#endif

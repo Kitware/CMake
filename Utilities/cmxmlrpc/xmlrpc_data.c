@@ -680,7 +680,7 @@ mkStructFromVal(xmlrpc_env *    const envP,
 static void
 getValue(xmlrpc_env *    const envP, 
          const char**    const format, 
-         va_list *             args,
+         va_list *       const args,
          xmlrpc_value ** const valPP);
 
 

@@ -279,7 +279,7 @@ typedef struct _xmlrpc_mem_block {
 } xmlrpc_mem_block;
 
 /* Allocate a new xmlrpc_mem_block. */
-xmlrpc_mem_block* xmlrpc_mem_block_new (xmlrpc_env* env, size_t size);
+xmlrpc_mem_block* xmlrpc_mem_block_new (xmlrpc_env* const env, size_t const size);
 
 /* Destroy an existing xmlrpc_mem_block, and everything it contains. */
 void xmlrpc_mem_block_free (xmlrpc_mem_block* block);
@@ -302,11 +302,11 @@ xmlrpc_mem_block_contents(const xmlrpc_mem_block * const block);
 /* Resize an xmlrpc_mem_block, preserving as much of the contents as
 ** possible. */
 void xmlrpc_mem_block_resize
-    (xmlrpc_env* env, xmlrpc_mem_block* block, size_t size);
+    (xmlrpc_env* const env, xmlrpc_mem_block* const block, size_t const size);
 
 /* Append data to an existing xmlrpc_mem_block. */
 void xmlrpc_mem_block_append
-    (xmlrpc_env* env, xmlrpc_mem_block* block, void *data, size_t len);
+    (xmlrpc_env* const env, xmlrpc_mem_block* const block, void *const data, size_t const len);
 
 #define XMLRPC_MEMBLOCK_NEW(type,env,size) \
     xmlrpc_mem_block_new((env), sizeof(type) * (size))
@@ -387,11 +387,11 @@ xmlrpc_abort_if_array_bad(xmlrpc_value * const arrayP);
     xmlrpc_abort_if_array_bad(val)
 
 /* Increment the reference count of an xmlrpc_value. */
-extern void xmlrpc_INCREF (xmlrpc_value* value);
+extern void xmlrpc_INCREF (xmlrpc_value* const value);
 
 /* Decrement the reference count of an xmlrpc_value. If there
 ** are no more references, free it. */
-extern void xmlrpc_DECREF (xmlrpc_value* value);
+extern void xmlrpc_DECREF (xmlrpc_value* const value);
 
 /* Get the type of an XML-RPC value. */
 extern xmlrpc_type xmlrpc_value_type (xmlrpc_value* value);
@@ -465,9 +465,9 @@ xmlrpc_array_size(xmlrpc_env *         const env,
 ** Increments the reference count of 'value' if no fault occurs.
 ** Sets XMLRPC_TYPE_ERROR if 'array' is not an array. */
 extern void
-xmlrpc_array_append_item (xmlrpc_env*   env,
-                          xmlrpc_value* array,
-                          xmlrpc_value* value);
+xmlrpc_array_append_item (xmlrpc_env*   const env,
+                          xmlrpc_value* const array,
+                          xmlrpc_value* const value);
 
 void
 xmlrpc_array_read_item(xmlrpc_env *         const envP,
@@ -620,11 +620,11 @@ xmlrpc_struct_read_member(xmlrpc_env *    const envP,
    Deprecated.
 */
 void
-xmlrpc_struct_get_key_and_value(xmlrpc_env *    env,
-                                xmlrpc_value *  strct,
-                                int             index,
-                                xmlrpc_value ** out_keyval,
-                                xmlrpc_value ** out_value);
+xmlrpc_struct_get_key_and_value(xmlrpc_env *    const env,
+                                xmlrpc_value *  const strct,
+                                int             const index,
+                                xmlrpc_value ** const out_keyval,
+                                xmlrpc_value ** const out_value);
 
 
 /*=========================================================================

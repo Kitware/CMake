@@ -28,9 +28,6 @@ extern xmlrpc_server_info *
 xmlrpc_server_info_copy(xmlrpc_env *env, xmlrpc_server_info *aserver);
 
 
-/* A timeout in milliseconds. */
-typedef unsigned long timeout_t;
-
 /*=========================================================================
 ** Transport Implementation functions.
 **=========================================================================
