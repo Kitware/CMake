@@ -1335,11 +1335,24 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                        "all",
                        "cmake.depends $(TARGETS) $(SUBDIR_BUILD)",
                        0);
-  this->OutputMakeRule(fout, 
-                       "remove generated files",
-                       "clean",
-                       "$(SUBDIR_CLEAN)",
-                       "rm -f $(CLEAN_OBJECT_FILES) $(EXECUTABLES) $(TARGETS)");
+  if (m_Makefile->IsOn("QT_WRAP_CPP"))
+    { 
+    this->OutputMakeRule(fout, 
+                         "remove generated files",
+                         "clean",
+                         "$(SUBDIR_CLEAN)",
+                         "rm -f $(CLEAN_OBJECT_FILES) $(EXECUTABLES)"
+                         " $(TARGETS) ${GENERATED_QT_FILES}");
+    }
+  else  
+    {
+    this->OutputMakeRule(fout, 
+                         "remove generated files",
+                         "clean",
+                         "$(SUBDIR_CLEAN)",
+                         "rm -f $(CLEAN_OBJECT_FILES) $(EXECUTABLES)"
+                         " $(TARGETS)");
+    }
   this->OutputMakeRule(fout, 
                        "Rule to build the cmake.depends and Makefile as side effect",
                        "cmake.depends",

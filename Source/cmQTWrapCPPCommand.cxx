@@ -61,7 +61,8 @@ bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& args)
   
   if(cmSystemTools::IsOff(QT_WRAP_CPP_value))
     {
-    return true;
+    this->SetError("called with QT_WRAP_CPP off : ");
+    return false;
     }
 
   // what is the current source dir
@@ -96,7 +97,8 @@ bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& args)
         std::string newName = "moc_" + curr.GetSourceName();
         file.SetName(newName.c_str(), m_Makefile->GetCurrentOutputDirectory(),
                      "cxx",false);
-        std::string hname = cdir + "/" + curr.GetSourceName() + ".h";
+        std::string hname = cdir + "/" + curr.GetSourceName() + "." +
+            curr.GetSourceExtension();
         m_WrapHeaders.push_back(hname);
         // add starting depends
         file.GetDepends().push_back(hname);
@@ -111,7 +113,8 @@ bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& args)
 
 void cmQTWrapCPPCommand::FinalPass() 
 {
-  // first we add the rules for all the .h to Java.cxx files
+
+  // first we add the rules for all the .h to Moc files
   int lastClass = m_WrapClasses.size();
   std::vector<std::string> depends;
   std::string moc_exe = "${QT_MOC_EXE}";
@@ -119,6 +122,8 @@ void cmQTWrapCPPCommand::FinalPass()
 
   // wrap all the .h files
   depends.push_back(moc_exe);
+
+  std::string moc_list(""); 
 
   for(int classNum = 0; classNum < lastClass; classNum++)
     {
@@ -129,6 +134,8 @@ void cmQTWrapCPPCommand::FinalPass()
     std::string res = m_Makefile->GetCurrentOutputDirectory();
     res += "/";
     res += m_WrapClasses[classNum].GetSourceName() + ".cxx";
+
+    moc_list = moc_list + " " + res;
     
     std::vector<std::string> args;
     args.push_back("-o");
@@ -141,7 +148,8 @@ void cmQTWrapCPPCommand::FinalPass()
 
     }
 
-  
+  m_Makefile->AddDefinition("GENERATED_QT_FILES",moc_list.c_str());
+
 }
 
 
