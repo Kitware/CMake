@@ -70,11 +70,12 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "FIND_PROGRAM(NAME executable1 extrapath extrapath ... [DOC helpstring]) "
+      "FIND_PROGRAM(DEFINE_NAME executableName [NAMES name1 name2 name3...] [PATHS path1 path2 path3...] [NO_SYSTEM_PATH] [DOC helpstring]) "
       "Find the executable in the system PATH or in any extra paths specified in the command."
-      "A cache entry called NAME is created to store the result.   NOTFOUND is the value"
+      "A cache entry called DEFILE_NAME is created to store the result. NOTFOUND is the value"
       " used if the program was not found.  If DOC is specified the next argument is the "
-      "documentation string for the cache entry NAME.";
+      "documentation string for the cache entry NAME."
+      "If NO_SYSTEM_PATH is specified the contents of system PATH is not used";
     }
   
   cmTypeMacro(cmFindProgramCommand, cmCommand);

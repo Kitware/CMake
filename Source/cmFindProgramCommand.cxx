@@ -76,6 +76,7 @@ bool cmFindProgramCommand::InitialPass(std::vector<std::string> const& argsIn)
   bool foundName = false;
   bool foundPath = false;
   bool doingNames = true;
+  bool no_system_path = false;
   for (unsigned int j = 1; j < args.size(); ++j)
     {
     if(args[j] == "NAMES")
@@ -87,6 +88,10 @@ bool cmFindProgramCommand::InitialPass(std::vector<std::string> const& argsIn)
       {
       doingNames = false;
       foundPath = true;
+      }
+    else if (args[j] == "NO_SYSTEM_PATH")
+      {
+      no_system_path = true;
       }
     else
       { 
@@ -123,7 +128,9 @@ bool cmFindProgramCommand::InitialPass(std::vector<std::string> const& argsIn)
       i != names.end() ; ++i)
     {
     // Try to find the program.
-    std::string result = cmSystemTools::FindProgram(i->c_str(), path);
+    std::string result = cmSystemTools::FindProgram(i->c_str(), 
+                                                    path, 
+                                                    no_system_path);
     if(result != "")
       {
       // Save the value in the cache
