@@ -93,12 +93,12 @@ struct tm* cmCTest::GetNightlyTime(std::string str,
       std::cout << "   Future time, subtract day: " << ntime << std::endl;
       }
     }
-  if ( (tctime - ntime) >  dayLength )
+  if ( tctime > (ntime + dayLength) )
     {
     ntime += dayLength;
     if ( verbose )
       {
-      std::cout << "   Past time, subtract day: " << ntime << std::endl;
+      std::cout << "   Past time, add day: " << ntime << std::endl;
       }
     }
   //std::cout << "nightlySeconds: " << ntime << std::endl;
