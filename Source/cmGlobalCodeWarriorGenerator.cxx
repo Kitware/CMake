@@ -36,7 +36,7 @@ void cmGlobalCodeWarriorGenerator::EnableLanguage(std::vector<std::string>const&
       mf->GetRequiredDefinition("CMAKE_ROOT");
     fpath += "/Templates/CMakeCodeWarriorConfig.cmake";
     mf->ReadListFile(0,fpath.c_str());
-    this->SetLanguageEnabled("CXX");
+    this->SetLanguageEnabled("CXX", mf);
     }
 }
 
