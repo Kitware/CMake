@@ -410,7 +410,15 @@ bool cmCacheManager::SaveCache(const char* path)
       std::string key;
       std::string rkey = i.GetName();
       std::string helpstring;
-      helpstring = i.GetProperty("HELPSTRING");
+      const char* hs = i.GetProperty("HELPSTRING")
+      if ( hs )
+        {
+        helpstring = i.GetProperty("HELPSTRING");
+        }
+      else
+        {
+        helpstring = "";
+        }
       cmCacheManager::OutputHelpString(fout, helpstring.c_str());
       // support : in key name by double quoting 
       if(rkey.find(':') != std::string::npos ||
