@@ -18,6 +18,17 @@ IF(STAGE2)
   ADD_EXECUTABLE (SimpleInstallS2 inst.cxx foo.c foo.h)
   TARGET_LINK_LIBRARIES(SimpleInstallS2 ${TEST1_LIBRARY} ${TEST2_LIBRARY})
 
+  ADD_CUSTOM_COMMAND(
+    TARGET SimpleInstallS2
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND}
+    ARGS ${EXTRA_INSTALL_FLAGS} 
+    "-P${CMAKE_CURRENT_BINARY_DIR}/cmake_install.cmake"
+    COMMENT "Install Project"
+    )
+
+  INSTALL_TARGETS(/bin SimpleInstallS2)
+
 ELSE(STAGE2)
   # this is stage 1, so create libraries and modules and install everything
   ADD_LIBRARY(test1 STATIC lib1.cxx)
