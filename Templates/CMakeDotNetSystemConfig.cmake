@@ -1,5 +1,15 @@
 # Microsoft specific config file 
 
+# try to find the devenv executable because 
+# visual studio 7 does not automatically put it in your PATH
+FIND_PROGRAM(MICROSOFT_DEVENV
+        NAMES devenv
+        PATHS
+        [HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\7.0\\Setup\\VS;EnvironmentDirectory]
+        "c:/Program Files/Microsoft Visual Studio .NET/Common7/IDE"
+        "c:/Program Files/Microsoft Visual Studio.NET/Common7/IDE"
+)
+
 SET (CMAKE_CXX_COMPILER  cl CACHE STRING 
      "Name of C++ compiler used.")
 
@@ -18,14 +28,15 @@ SET (CMAKE_CXX_USE_RTTI 1 CACHE BOOL
 SET (CMAKE_USE_WIN32_THREADS 1 CACHE BOOL 
      "Use the win32 thread library")
 
-SET (CMAKE_MAKE_PROGRAM "devenv" CACHE STRING 
-     "Program used to build from dsp files.")
+SET (CMAKE_MAKE_PROGRAM "${MICROSOFT_DEVENV}" CACHE STRING 
+     "Program used to build from project files.")
 
 SET (BUILDNAME "Win32-DotNET-devenv" CACHE STRING 
      "Name used by dart to specify the build name.")
 
 SET (CMAKE_CONFIGURATION_TYPES "Debug Release MinSizeRel RelWithDebInfo" CACHE STRING 
      "Space separated list of supported configuration types, only supports Debug, Release, MinSizeRel, and RelWithDebInfo, anything else will be ignored.")
+
 
 # We will hardcode them for now. Make sure to fix that in the future
 SET (CMAKE_SIZEOF_INT       4   CACHE INTERNAL "Size of int data type")
@@ -47,6 +58,7 @@ CMAKE_CXX_WARNING_LEVEL
 CMAKE_USE_WIN32_THREADS
 CMAKE_MAKE_PROGRAM
 CMAKE_EXTRA_LINK_FLAGS
+MICROSOFT_DEVENV
 )
 
 
