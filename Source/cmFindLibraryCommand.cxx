@@ -52,7 +52,22 @@ bool cmFindLibraryCommand::Invoke(std::vector<std::string>& args)
   // Now check and see if the value has been stored in the cache
   // already, if so use that value and don't look for the program
   std::string helpString = "Where can the ";
-  helpString += args[1] + " library be found";
+  if(args[1] == "NAMES")
+    {
+    int i = 2;
+    while(args[i] != "PATHS" && i < args.size())
+      {
+      helpString = "( ";
+      helpString +=  args[i];
+      helpString +=  " ";
+      i++;
+      }
+    }
+  else
+    {
+    helpString += args[1];
+    }
+  helpString += " library be found";
   const char* cacheValue
     = cmCacheManager::GetInstance()->GetCacheValue(args[0].c_str());
   if(cacheValue && strcmp(cacheValue, "NOTFOUND"))

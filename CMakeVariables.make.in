@@ -73,7 +73,6 @@ THREAD_LIBS          = @CMAKE_THREAD_LIBS@
 # run-time.  INSTALL_ROOT is prepended to $prefix and $exec_prefix
 # when installing files.
 INSTALL_ROOT    =
-INSTALL         = @CMAKE_INSTALL@
 LIB_INSTALL_DIR = $(INSTALL_ROOT)$(exec_prefix)/lib
 BIN_INSTALL_DIR = $(INSTALL_ROOT)$(exec_prefix)/bin
 
