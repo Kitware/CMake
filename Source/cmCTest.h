@@ -21,6 +21,8 @@
 
 #include "cmStandardIncludes.h"
 
+class cmMakefile;
+
 class cmCTest
 {
 public:
@@ -37,7 +39,7 @@ public:
   /**
    * Initialize and finalize testing
    */
-  void Initialize();
+  int Initialize();
   void Finalize();
 
   /**
@@ -314,6 +316,24 @@ private:
   bool                     m_BuildNoClean;
   bool                     m_BuildNoCMake;
   std::string              m_NotesFiles;
+
+  int ReadCustomConfigurationFileTree(const char* dir);
+  void PopulateCustomVector(cmMakefile* mf, const char* definition, tm_VectorOfStrings& vec);
+
+  tm_VectorOfStrings       m_CustomErrorMatches;
+  tm_VectorOfStrings       m_CustomErrorExceptions;
+  tm_VectorOfStrings       m_CustomWarningMatches;
+  tm_VectorOfStrings       m_CustomWarningExceptions;
+
+  tm_VectorOfStrings       m_CustomTestsIgnore;
+  tm_VectorOfStrings       m_CustomMemCheckIgnore;
+
+  tm_VectorOfStrings       m_CustomPreTest;
+  tm_VectorOfStrings       m_CustomPostTest;
+  tm_VectorOfStrings       m_CustomPreMemCheck;
+  tm_VectorOfStrings       m_CustomPostMemCheck;
+
+  int ExecuteCommands(tm_VectorOfStrings& vec);
 
   //! Reread the configuration file
   void UpdateCTestConfiguration();
