@@ -436,7 +436,7 @@ bool cmSystemTools::RunSingleCommand(
         }
       }
     }
-  else
+  else if(cmsysProcess_GetState(cp) == cmsysProcess_State_Error)
     {
     std::cerr << cmsysProcess_GetErrorString(cp) << "\n";
     result = false;
