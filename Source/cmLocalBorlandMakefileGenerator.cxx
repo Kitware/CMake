@@ -307,7 +307,7 @@ void cmLocalBorlandMakefileGenerator::OutputExecutableRule(std::ostream& fout,
   depend += this->CreateMakeVariable(name, "_SRC_OBJS") + ") $(" + 
     this->CreateMakeVariable(name, "_DEPEND_LIBS") + ")";
   std::string command = 
-    "$(CMAKE_CXX_COMPILER) ";
+    "$(CMAKE_CXX_COMPILER) @&&|\n";
   command += " $(CMAKE_LINKER_FLAGS) -e" + target;
   if(cmSystemTools::IsOn(m_Makefile->GetDefinition("BUILD_SHARED_LIBS")))
     {
@@ -325,7 +325,7 @@ void cmLocalBorlandMakefileGenerator::OutputExecutableRule(std::ostream& fout,
   this->OutputLinkLibraries(linklibs, 0, t);
   command += linklibs.str();
   command += " $(" +  this->CreateMakeVariable(name, "_SRC_OBJS") + ")";
-  
+  command += "\n|";
   std::string comment = "rule to build executable: ";
   comment += name;
   std::string customCommands = this->CreateTargetRules(t, name);
