@@ -22,11 +22,21 @@ ${path}
 )
 
 IF (FLTK_FLUID_EXE)
-  SET ( FLTK_WRAP_UI 1 CACHE BOOL "Can we honour the FLTK_WRAP_UI command" )
+  SET ( FLTK_WRAP_UI 1 CACHE INTERNAL "Can we honour the FLTK_WRAP_UI command" )
 ENDIF (FLTK_FLUID_EXE)
 
-MARK_AS_ADVANCED(
-  FLTK_INCLUDE_PATH
-  FLTK_LIBRARY
-  FLTK_FLUID_EXE
-)
+
+#
+#  Set HAS_FLTK
+#  This is the final flag that will be checked by
+#  other code that requires FLTK for compile/run.
+#
+IF(FLTK_FLUID_EXE)
+  IF(FLTK_INCLUDE_PATH)
+    IF(FLTK_LIBRARY)
+      SET (HAS_FLTK 1 CACHE INTERNAL "FLTK library, headers and Fluid are available")
+    ENDIF(FLTK_LIBRARY)
+  ENDIF(FLTK_INCLUDE_PATH)
+ENDIF(FLTK_FLUID_EXE)
+
+
