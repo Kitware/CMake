@@ -25,12 +25,6 @@ static const cmDocumentationEntry cmDocumentationStandardOptions[] =
    "If a file is specified, the copyright is written into it."},
   {"--help", "Print usage information and exit.",
    "Usage describes the basic command line interface and its options."},
-  {"--help-command cmd [file]", "Print help for a single command and exit.",
-   "Full documentation specific to the given command is displayed."},
-  {"--help-command-list [file]", "List available listfile commands and exit.",
-   "The list contains all commands for which help may be obtained by using "
-   "the --help-command argument followed by a command name.  If a file is "
-   "specified, the help is written into it."},
   {"--help-full [file]", "Print full help and exit.",
    "Full help displays most of the documentation provided by the UNIX "
    "man page.  It is provided for use on non-UNIX platforms, but is "

@@ -72,6 +72,12 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
    "each variable."},
   {"-N", "View mode only.",
    "Only load the cache. Do not actually run configure and generate steps."},
+  {"--help-command cmd [file]", "Print help for a single command and exit.",
+   "Full documentation specific to the given command is displayed."},
+  {"--help-command-list [file]", "List available listfile commands and exit.",
+   "The list contains all commands for which help may be obtained by using "
+   "the --help-command argument followed by a command name.  If a file is "
+   "specified, the help is written into it."},
   {0,0,0}
 };
 
