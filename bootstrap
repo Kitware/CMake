@@ -307,7 +307,7 @@ objs=""
 for a in ${CMAKE_SOURCES}; do
   objs="${objs} ${a}.o"
 done
-cmake_cxx_flags="${cmake_ansi_cxx_flags} ${cmake_cxx_flags} -DCMAKE_ROOT_DIR='\"`cmake_escape \"${cmake_source_dir}\"`\"' -DCMAKE_BOOTSTRAP -I`cmake_escape \"${cmake_source_dir}/Source\"` -I${cmake_bootstrap_dir}"
+cmake_cxx_flags="${cmake_ansi_cxx_flags} ${cmake_cxx_flags} -DCMAKE_ROOT_DIR='\"${cmake_source_dir}\"' -DCMAKE_BOOTSTRAP -I`cmake_escape \"${cmake_source_dir}/Source\"` -I`cmake_escape \"${cmake_bootstrap_dir}\"`"
 echo "cmake: ${objs}" > "${cmake_bootstrap_dir}/Makefile"
 echo "	${cmake_cxx_compiler} ${cmake_cxx_flags} ${objs} -o cmake" >> "${cmake_bootstrap_dir}/Makefile"
 for a in ${CMAKE_SOURCES}; do
