@@ -1206,6 +1206,7 @@ std::string cmSystemTools::CollapseFullPath(const char* in_name)
 #  endif
 # endif
   realpath(dir.c_str(), resolved_name);
+  dir = resolved_name;
   return dir + "/" + file;
 #endif
 }
