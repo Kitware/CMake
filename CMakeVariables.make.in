@@ -126,7 +126,7 @@ BIN_INSTALL_DIR = $(INSTALL_ROOT)$(exec_prefix)/bin
 
 # set up the path to the rulesgen program
 CMAKE = @CMAKE_CONFIG_DIR@/CMake/Source/CMakeBuildTargets
-KIT_OBJ =  ${SRC_OBJ} ${EXTRA_KIT_OBJ}
+KIT_OBJ =  ${EXTRA_KIT_OBJ}
 
 
 
