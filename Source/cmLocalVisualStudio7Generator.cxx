@@ -555,7 +555,7 @@ void cmLocalVisualStudio7Generator::OutputDefineFlags(std::ostream& fout)
       define = defs.substr(pos+2);
       done = true;
       }
-    cmSystemTools::ReplaceString(define, "\"", "&quot;");
+    cmSystemTools::ReplaceString(define, "\"", "");
     fout << define << ",";
     if(!done)
       {
