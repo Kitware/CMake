@@ -659,8 +659,15 @@ cmLocalUnixMakefileGenerator2
   std::string dir = "CMakeCustomRules.dir";
   cmSystemTools::MakeDirectory(this->ConvertToFullPath(dir).c_str());
 
-  // Construct the name of the rule file.
-  std::string customName = this->GetCustomBaseName(cc);
+  // Convert the output name to a relative path if possible.
+  std::string output = this->ConvertToRelativePath(cc.GetOutput());
+
+  // Construct the name of the rule file by transforming the output
+  // name to a valid file name.  Since the output is already a file
+  // everything but the path characters is valid.
+  std::string customName = output;
+  cmSystemTools::ReplaceString(customName, "../", "___");
+  cmSystemTools::ReplaceString(customName, "/", "_");
   std::string ruleFileName = dir;
   ruleFileName += "/";
   ruleFileName += customName;
@@ -689,7 +696,7 @@ cmLocalUnixMakefileGenerator2
     }
   this->WriteDisclaimer(ruleFileStream);
   ruleFileStream
-    << "# Custom command rule file for " << customName.c_str() << ".\n\n";
+    << "# Custom command rule file for " << output.c_str() << ".\n\n";
 
   // Collect the commands.
   std::vector<std::string> commands;
@@ -709,13 +716,13 @@ cmLocalUnixMakefileGenerator2
     comment = cc.GetComment();
     }
   std::string preEcho = "Generating ";
-  preEcho += customName;
+  preEcho += output;
   preEcho += "...";
   this->WriteMakeRule(ruleFileStream, comment, preEcho.c_str(),
                       cc.GetOutput(), depends, commands);
 
   // Write the clean rule for this custom command.
-  std::string cleanTarget = customName;
+  std::string cleanTarget = output;
   cleanTarget += ".clean";
   commands.clear();
   depends.clear();
@@ -2278,32 +2285,6 @@ cmLocalUnixMakefileGenerator2
   obj += "/";
   obj += objectName;
   return obj;
-}
-
-//----------------------------------------------------------------------------
-std::string
-cmLocalUnixMakefileGenerator2
-::GetCustomBaseName(const cmCustomCommand& cc)
-{
-  // If the full path to the output file includes this build
-  // directory, we want to use the relative path for the filename of
-  // the custom file.  Otherwise, we will use just the filename
-  // portion.
-  std::string customName;
-  if(cmSystemTools::FileIsFullPath(cc.GetOutput()) &&
-     (std::string(cc.GetOutput()).find(m_Makefile->GetStartOutputDirectory()) == 0))
-    {
-    // Use the relative path but convert it to a valid file name.
-    customName =
-      cmSystemTools::RelativePath(m_Makefile->GetStartOutputDirectory(),
-                                  cc.GetOutput());
-    cmSystemTools::ReplaceString(customName, "/", "_");
-    }
-  else
-    {
-    customName = cmSystemTools::GetFilenameName(cc.GetOutput());
-    }
-  return customName;
 }
 
 //----------------------------------------------------------------------------

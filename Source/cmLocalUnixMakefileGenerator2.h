@@ -196,7 +196,6 @@ protected:
   std::string GetSubdirTargetName(const char* pass, const char* subdir);
   std::string GetObjectFileName(const cmTarget& target,
                                 const cmSourceFile& source);
-  std::string GetCustomBaseName(const cmCustomCommand& cc);
   const char* GetSourceFileLanguage(const cmSourceFile& source);
   std::string ConvertToFullPath(const std::string& localPath);
   std::string ConvertToRelativePath(const char* p);
