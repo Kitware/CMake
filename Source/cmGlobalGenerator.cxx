@@ -284,12 +284,66 @@ void cmGlobalGenerator::Configure()
   // now do it
   this->RecursiveConfigure(lg,0.0f,0.9f);
 
+  std::set<std::string> notFoundMap;
   // after it is all done do a ConfigureFinalPass
+  cmCacheManager* manager = 0;
   for (i = 0; i < m_LocalGenerators.size(); ++i)
     {
+    manager = m_LocalGenerators[i]->GetMakefile()->GetCacheManager();
     m_LocalGenerators[i]->ConfigureFinalPass();
-    m_CMakeInstance->UpdateProgress("Configuring", 
+    cmTargets const& targets = m_LocalGenerators[i]->GetMakefile()->GetTargets(); 
+    for (cmTargets::const_iterator l = targets.begin();
+         l != targets.end(); l++)
+      {
+      cmTarget::LinkLibraries libs = l->second.GetLinkLibraries();
+      for(cmTarget::LinkLibraries::iterator lib = libs.begin();
+          lib != libs.end(); ++lib)
+        {
+        if(cmSystemTools::IsNOTFOUND(lib->first.c_str()))
+          {
+          std::string not = lib->first.substr(0, lib->first.size()-9);
+          notFoundMap.insert(not);
+          }
+        }
+      std::vector<std::string>& incs = 
+        m_LocalGenerators[i]->GetMakefile()->GetIncludeDirectories();
+      
+      for( std::vector<std::string>::iterator lib = incs.begin();
+           lib != incs.end(); ++lib)
+        {
+        if(cmSystemTools::IsNOTFOUND(lib->c_str()))
+          {
+          std::string not = lib->substr(0, lib->size()-9); 
+          notFoundMap.insert(not);
+          }
+        }
+      m_CMakeInstance->UpdateProgress("Configuring", 
                                     0.9f+0.1f*(i+1.0f)/m_LocalGenerators.size());
+      }
+    }
+
+  if(notFoundMap.size())
+    {
+    std::string notFoundVars;
+    for(std::set<std::string>::iterator i = notFoundMap.begin();
+        i != notFoundMap.end(); ++i)
+      { 
+      notFoundVars += *i;
+      if(manager)
+        {
+        cmCacheManager::CacheIterator it = 
+          manager->GetCacheIterator(i->c_str());
+        if(it.GetPropertyAsBool("ADVANCED"))
+          {
+          notFoundVars += " (ADVANCED)";
+          }
+        }
+      notFoundVars += "\n";
+      }
+    cmSystemTools::Error("This project requires some variables to be set,\n"
+                         "and cmake can not find them.\n"
+                         "Please set the following variables:\n",
+                         notFoundVars.c_str());
     }
   m_CMakeInstance->UpdateProgress("Configuring done", -1);
 }

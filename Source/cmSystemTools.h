@@ -213,10 +213,13 @@ public:
    * not the same as !IsOn(...) because there are a number of
    * ambiguous values such as "/usr/local/bin" a path will result in
    * IsON and IsOff both returning false. Note that the special path
-   * NOTFOUND or IGNORE will cause IsOff to return true. 
+   * NOTFOUND, *-NOTFOUND or IGNORE will cause IsOff to return true. 
    */
   static bool IsOff(const char* val);
 
+  ///! Return true if value is NOTFOUND or ends in -NOTFOUND.
+  static bool IsNOTFOUND(const char* value);
+  
   ///! Find a file in the system PATH, with optional extra paths.
   static std::string FindFile(const char* name,
                                  const std::vector<std::string>& path= std::vector<std::string>());

@@ -385,6 +385,7 @@ void cmMakefile::ConfigureFinalPass()
   bool oldVersion = (!versionValue || atof(versionValue) < 1.4);
   // merge libraries
   
+  std::string notFoundVars;
   for (cmTargets::iterator l = m_Targets.begin();
        l != m_Targets.end(); l++)
     {

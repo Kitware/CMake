@@ -56,7 +56,7 @@ bool cmFindFileCommand::InitialPass(std::vector<std::string> const& argsIn)
   // already, if so use that value and don't look for the program
   const char* cacheValue
     = m_Makefile->GetDefinition(define);
-  if(cacheValue && strcmp(cacheValue, "NOTFOUND"))
+  if(cacheValue && !cmSystemTools::IsNOTFOUND(cacheValue))
     {
     return true;
     }
@@ -87,8 +87,9 @@ bool cmFindFileCommand::InitialPass(std::vector<std::string> const& argsIn)
       return true;
       }
     }
+  std::string s = args[0] + "-NOTFOUND";
   m_Makefile->AddCacheDefinition(args[0].c_str(),
-                                 "NOTFOUND",
+                                 s.c_str(),
                                  helpString.c_str(),
                                  cmCacheManager::FILEPATH);
   return true;

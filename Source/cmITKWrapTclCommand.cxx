@@ -222,8 +222,8 @@ std::string cmITKWrapTclCommand::GetCableFromCache() const
     { return cable; }
 
   m_Makefile->AddCacheDefinition("CABLE",
-                                 "NOTFOUND",
+                                 "CABLE-NOTFOUND",
                                  "Path to CABLE executable.",
                                  cmCacheManager::FILEPATH);
-  return "NOTFOUND";
+  return "CABLE-NOTFOUND";
 }

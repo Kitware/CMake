@@ -31,7 +31,7 @@ bool cmGetFilenameComponentCommand::InitialPass(std::vector<std::string> const& 
   if(args.size() == 4 && args[3] == "CACHE")
     {
     const char* cacheValue = m_Makefile->GetDefinition(args[0].c_str());
-    if(cacheValue && strcmp(cacheValue, "NOTFOUND"))
+    if(cacheValue && !cmSystemTools::IsNOTFOUND(cacheValue))
       {
       return true;
       }

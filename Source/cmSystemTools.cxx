@@ -1188,6 +1188,17 @@ bool cmSystemTools::IsOn(const char* val)
   return (v == "ON" || v == "1" || v == "YES" || v == "TRUE" || v == "Y");
 }
 
+bool cmSystemTools::IsNOTFOUND(const char* val)
+{
+  cmRegularExpression reg("-NOTFOUND$");
+  if(reg.find(val))
+    {
+    return true;
+    }
+  return std::string("NOTFOUND") == val;
+}
+
+
 bool cmSystemTools::IsOff(const char* val)
 {
   if (!val || strlen(val) == 0)
@@ -1202,7 +1213,7 @@ bool cmSystemTools::IsOff(const char* val)
     *c = toupper(*c);
     }
   return (v == "OFF" || v == "0" || v == "NO" || v == "FALSE" || 
-          v == "N" || v == "NOTFOUND" || v == "IGNORE");
+          v == "N" || cmSystemTools::IsNOTFOUND(v.c_str()) || v == "IGNORE");
 }
 
 

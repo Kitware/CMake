@@ -50,7 +50,7 @@ bool cmFindPathCommand::InitialPass(std::vector<std::string> const& argsIn)
 
   const char* cacheValue
     = m_Makefile->GetDefinition(args[0].c_str());
-  if(cacheValue && strcmp(cacheValue, "NOTFOUND"))
+  if(cacheValue && !cmSystemTools::IsNOTFOUND(cacheValue))
     { 
     return true;
     }
@@ -100,7 +100,7 @@ bool cmFindPathCommand::InitialPass(std::vector<std::string> const& argsIn)
     }
   
   m_Makefile->AddCacheDefinition(args[0].c_str(),
-                                 "NOTFOUND",
+                                 (args[0] + "-NOTFOUND").c_str(),
                                  helpString.c_str(),
                                  cmCacheManager::PATH);
   return true;

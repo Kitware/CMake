@@ -163,8 +163,8 @@ void cmSourceFile::SetProperty(const char* prop, const char* value)
     }
   if (!value)
     {
-        value = "NOTFOUND";
-        }
+    value = "NOTFOUND";
+    }
   m_Properties[prop] = value;
 }
 

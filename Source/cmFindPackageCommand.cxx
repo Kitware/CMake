@@ -234,7 +234,7 @@ std::string cmFindPackageCommand::SearchForConfig() const
       }
     }
   
-  return "NOTFOUND";
+  return this->Variable + "-NOTFOUND";
 }
 
 //----------------------------------------------------------------------------

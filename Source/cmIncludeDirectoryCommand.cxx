@@ -35,11 +35,6 @@ bool cmIncludeDirectoryCommand::InitialPass(std::vector<std::string> const& args
 
   for(; i != args.end(); ++i)
     {
-    if ( *i == "NOTFOUND" )
-      {
-      this->SetError("CMake attempted to put directory that was not found to the list of include directories.");
-      return false;
-      }
     m_Makefile->AddIncludeDirectory((*i).c_str(), before);
     }
   return true;

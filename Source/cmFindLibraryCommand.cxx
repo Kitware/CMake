@@ -135,8 +135,9 @@ bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn)
       return true;
       } 
     }
+  std::string s = args[0] + "-NOTFOUND";
   m_Makefile->AddCacheDefinition(args[0].c_str(),
-                                 "NOTFOUND",
+                                 s.c_str(),
                                  helpString.c_str(),
                                  cmCacheManager::FILEPATH);
   return true;
