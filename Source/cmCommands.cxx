@@ -53,7 +53,11 @@
 #include "cmLoadCommandCommand.cxx"
 #endif
 
-void GetPredefinedCommands(std::list<cmCommand*>& commands)
+void GetPredefinedCommands(std::list<cmCommand*>&
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  commands
+#endif
+  )
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   commands.push_back(new cmAbstractFilesCommand);
