@@ -88,6 +88,7 @@ int DumpForCoverage()
   doc.PrintDocumentation(cmDocumentation::Full, std::cout);
   doc.PrintDocumentation(cmDocumentation::HTML, std::cout);
   doc.PrintDocumentation(cmDocumentation::Man, std::cout);
+  return 0;
 }
 
 int main(int ac, char** av)
