@@ -63,7 +63,8 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
           mf.ExecuteCommand(newLFF);
           }
         }
-      return false;
+      mf.RemoveFunctionBlocker(lff);
+      return true;
       }
     }
 

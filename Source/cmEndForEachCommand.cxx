@@ -18,18 +18,7 @@
 
 bool cmEndForEachCommand::InvokeInitialPass(std::vector<cmListFileArgument> const& args)
 {
-  if(args.size() < 1 )
-    {
-    this->SetError("called with incorrect number of arguments");
-    return false;
-    }
-
-  // remove any function blockers for this define
-  cmListFileFunction lff;
-  lff.m_Name = "ENDFOREACH";
-  lff.m_Arguments = args;
-  m_Makefile->RemoveFunctionBlocker(lff);
-  
-  return true;
+  this->SetError("An ENDFOREACH command was found outside of a proper FOREACH ENDFOREACH structure. Or its arguments did not match the opening FOREACH command.");
+  return false;
 }
 
