@@ -69,9 +69,22 @@ bool cmSiteNameCommand::InitialPass(std::vector<std::string>& args)
   std::string host;
   cmSystemTools::RunCommand(hostname,
                             host);
+  if (host.length())
+    {
+    // remove any white space from the host name
+    std::string hostRegExp = "[ \t\n\r]*([^\t\n\r ]*)[ \t\n\r]*";
+    cmRegularExpression hostReg (hostRegExp.c_str());
+    if (hostReg.find(host.c_str()))
+      {
+      // strip whitespace
+      host = hostReg.match(1);
+      }
+    }
+  
   std::string siteName = host;
   if(host.length())
     {
+    // try to find the domain name for this computer
     std::string nsCmd = nslookup;
     nsCmd += " ";
     nsCmd += host;
@@ -93,6 +106,8 @@ bool cmSiteNameCommand::InitialPass(std::vector<std::string>& args)
                   siteName.c_str(),
                   "Name of the computer/site where compile is being run",
                   cmCacheManager::STRING);
+
+  m_Makefile->AddDefinition("SITE", siteName.c_str());
   return true;
 }
 

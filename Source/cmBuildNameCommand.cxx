@@ -86,6 +86,8 @@ bool cmBuildNameCommand::InitialPass(std::vector<std::string>& args)
                   buildname.c_str(),
                   "Name of build.",
                   cmCacheManager::STRING);
+
+  m_Makefile->AddDefinition("BUILDNAME", buildname.c_str());
   return true;
 }
 
