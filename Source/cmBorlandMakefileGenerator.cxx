@@ -251,12 +251,10 @@ void cmBorlandMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
   command += "-e";
   command += target;
   command += " ";
-  std::strstream linklibs;
+  cmStringStream linklibs;
   this->OutputLinkLibraries(linklibs, name, t);
-  linklibs << std::ends;
   // then the linker options -L and libraries (any other order will fail!)
   command += linklibs.str();
-  delete [] linklibs.str();
   // then list of object files 
   command += " $(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
   std::string command2 = "implib -w ";
@@ -353,11 +351,9 @@ void cmBorlandMakefileGenerator::OutputExecutableRule(std::ostream& fout,
     {
     command += " -tWC ";
     }
-  std::strstream linklibs;
+  cmStringStream linklibs;
   this->OutputLinkLibraries(linklibs, 0, t);
-  linklibs << std::ends;
   command += linklibs.str();
-  delete [] linklibs.str();
   command += " $(" +  this->CreateMakeVariable(name, "_SRC_OBJS") + ")";
   
   std::string comment = "rule to build executable: ";

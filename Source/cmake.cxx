@@ -43,7 +43,7 @@ cmake::cmake()
 
 void cmake::Usage(const char* program)
 {
-  std::strstream errorStream;
+  cmStringStream errorStream;
 
   errorStream << "cmake version " << cmMakefile::GetMajorVersion()
             << "." << cmMakefile::GetMinorVersion() << "\n";
@@ -61,9 +61,9 @@ void cmake::Usage(const char* program)
     {
     errorStream << "\"" << i->c_str() << "\" ";
     }
-	  errorStream << ")\n" << std::ends;
+	  errorStream << ")\n";
 
-  cmSystemTools::Error(errorStream.str());
+  cmSystemTools::Error(errorStream.str().c_str());
 }
 
 // Parse the args
@@ -519,7 +519,7 @@ int cmake::Generate(const std::vector<std::string>& args, bool buildMakefiles)
 
 void CMakeCommandUsage(const char* program)
 {
-  std::strstream errorStream;
+  cmStringStream errorStream;
 
   errorStream 
     << "cmake version " << cmMakefile::GetMajorVersion()
@@ -530,14 +530,14 @@ void CMakeCommandUsage(const char* program)
     << "Available commands: \n"
     << "  copy file destination   - copy file to destination (either file or directory)\n"
     << "  remove file1 file2 ...  - remove the file(s)\n"
-    << "  time command [args] ... - run command and return elapsed time\n"
+    << "  time command [args] ... - run command and return elapsed time\n";
 #if defined(_WIN32) && !defined(__CYGWIN__)
+  errorStream
     << "  write_regv key value    - write registry value\n"
-    << "  delete_regv key         - delete registry value\n"
+    << "  delete_regv key         - delete registry value\n";
 #endif
-    << std::ends;
 
-  cmSystemTools::Error(errorStream.str());
+  cmSystemTools::Error(errorStream.str().c_str());
 }
 
 int cmake::CMakeCommand(std::vector<std::string>& args)

@@ -38,13 +38,19 @@
 #endif
 
 #ifndef CMAKE_NO_ANSI_STREAM_HEADERS
-#include <fstream>
-#include <iostream>
-#include <strstream>
+#  include <fstream>
+#  include <iostream>
 #else
-#include <fstream.h>
-#include <iostream.h>
-#include <strstream.h>
+#  include <fstream.h>
+#  include <iostream.h>
+#endif
+
+#if !defined(CMAKE_NO_ANSI_STRING_STREAM)
+#  include <sstream>
+#elif !defined(CMAKE_NO_ANSI_STREAM_HEADERS)
+#  include <strstream>
+#else
+#  include <strstream.h>
 #endif
 
 // we must have stl with the standard include style
@@ -100,7 +106,13 @@ using ::cerr;
 using ::cin;
 using ::ifstream;
 using ::ofstream;
-using ::strstream;
+  
+#if !defined(CMAKE_NO_ANSI_STRING_STREAM)
+  using ::stringstream;
+#else
+  using ::strstream;
+#endif
+  
 using ::endl;
 using ::ends;
 using ::flush;
@@ -136,5 +148,45 @@ struct cmStdString : public std::string
   cmStdString(const StdString& s, size_type pos=0, size_type n=npos):
     StdString(s, pos, n) {}
 };
-  
+
+// Define cmStringStream wrapper to hide differences between
+// std::stringstream and the old strstream.
+#if !defined(CMAKE_NO_ANSI_STRING_STREAM)
+class cmStringStream: public std::stringstream
+{
+public:
+  cmStringStream() {}
+private:
+  cmStringStream(const cmStringStream&);
+  void operator=(const cmStringStream&);
+};
+#else
+class cmStrStreamCleanup
+{
+public:
+  cmStrStreamCleanup(std::strstream& ostr): m_StrStream(ostr) {}
+  ~cmStrStreamCleanup() { m_StrStream.rdbuf()->freeze(0); }
+  static void IgnoreUnusedVariable(const cmStrStreamCleanup&) {}
+protected:
+  std::strstream& m_StrStream;
+};
+
+class cmStringStream: public std::strstream
+{
+public:
+  typedef std::strstream Superclass;
+  cmStringStream() {}
+  std::string str()
+    {
+      cmStrStreamCleanup cleanup(*this);
+      cmStrStreamCleanup::IgnoreUnusedVariable(cleanup);
+      const char* ptr = this->Superclass::str();
+      return std::string(ptr, ptr+this->pcount());
+    }
+private:
+  cmStringStream(const cmStringStream&);
+  void operator=(const cmStringStream&);
+};
+#endif
+
 #endif

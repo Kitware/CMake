@@ -655,11 +655,9 @@ void cmUnixMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
   libName = this->ConvertToOutputPath(libName.c_str());
   command2 += libName + " \\\n";
   command2 += "\t  $(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
-  std::strstream linklibs;
+  cmStringStream linklibs;
   this->OutputLinkLibraries(linklibs, name, t);
-  linklibs << std::ends;
   command2 += linklibs.str();
-  delete [] linklibs.str();
   std::string customCommands = this->CreateTargetRules(t, name);
   const char* cc = 0;
   if(customCommands.size() > 0)
@@ -699,11 +697,9 @@ void cmUnixMakefileGenerator::OutputModuleLibraryRule(std::ostream& fout,
   libName = this->ConvertToOutputPath(libName.c_str());
   command2 += libName + " \\\n";
   command2 += "\t  $(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
-  std::strstream linklibs;
+  cmStringStream linklibs;
   this->OutputLinkLibraries(linklibs, std::string(name).c_str(), t);
-  linklibs << std::ends;
   command2 += linklibs.str();
-  delete [] linklibs.str();
   std::string customCommands = this->CreateTargetRules(t, name);
   const char* cc = 0;
   if(customCommands.size() > 0)
@@ -778,9 +774,8 @@ void cmUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
       "$(CMAKE_C_COMPILER) $(CMAKE_C_SHLIB_LINK_FLAGS) $(CMAKE_C_FLAGS) ";
     }
   command += "$(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
-  std::strstream linklibs;
+  cmStringStream linklibs;
   this->OutputLinkLibraries(linklibs, 0, t);
-  linklibs << std::ends;
   command += linklibs.str();
   std::string outputFile = m_ExecutableOutputPath + name;
   command += " -o " + this->ConvertToOutputPath(outputFile.c_str());

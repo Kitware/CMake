@@ -1068,12 +1068,11 @@ bool cmSystemTools::FilesDiffer(const char* source,
   if(statSource.st_size != static_cast<long>(finSource.gcount()) ||
      statSource.st_size != static_cast<long>(finDestination.gcount()))
     {
-    std::strstream msg;
+    cmStringStream msg;
     msg << "FilesDiffer failed to read files (allocated: " 
         << statSource.st_size << ", read source: " <<  finSource.gcount() 
-        << ", read dest: " << finDestination.gcount() << std::ends;
-    cmSystemTools::Error(msg.str());
-    delete [] msg.str();
+        << ", read dest: " << finDestination.gcount();
+    cmSystemTools::Error(msg.str().c_str());
     delete [] source_buf;
     delete [] dest_buf;
     return false;
@@ -1176,12 +1175,10 @@ void cmSystemTools::cmCopyFile(const char* source,
 
   if (statSource.st_size != statDestination.st_size)
     {
-    std::strstream msg;
+    cmStringStream msg;
     msg << "CopyFile failed to copy files (sizes differ, source: " 
-        << statSource.st_size << " , dest: " << statDestination.st_size 
-        << std::ends;
-    cmSystemTools::Error(msg.str());
-    delete [] msg.str();
+        << statSource.st_size << " , dest: " << statDestination.st_size;
+    cmSystemTools::Error(msg.str().c_str());
     }
 }
 
@@ -1427,7 +1424,7 @@ bool cmSystemTools::RunCommand(const char* command,
   if (WIFSIGNALED(retVal))
     {
     retVal = WTERMSIG(retVal);
-    std::strstream error;
+    cmStringStream error;
     error << "\nProcess terminated due to ";
     switch (retVal)
       {
@@ -1455,9 +1452,7 @@ bool cmSystemTools::RunCommand(const char* command,
 	error << "signal " << retVal;
 	break;
       }
-    error << std::ends;
     output += error.str();
-    error.rdbuf()->freeze(0);
     }
   return false;
 #endif

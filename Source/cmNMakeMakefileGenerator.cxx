@@ -431,11 +431,9 @@ void cmNMakeMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
 
   command += " $(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
 
-  std::strstream linklibs;
+  cmStringStream linklibs;
   this->OutputLinkLibraries(linklibs, name, t);
-  linklibs << std::ends;
   command += linklibs.str();
-  delete [] linklibs.str();
 
   const std::vector<cmSourceFile*>& sources = t.GetSourceFiles();
   for(std::vector<cmSourceFile*>::const_iterator i = sources.begin();
@@ -541,9 +539,8 @@ void cmNMakeMakefileGenerator::OutputExecutableRule(std::ostream& fout,
     command +=  " /subsystem:windows ";
     }
   
-  std::strstream linklibs;
+  cmStringStream linklibs;
   this->OutputLinkLibraries(linklibs, 0, t);
-  linklibs << std::ends;
   command += linklibs.str();
 
   std::string comment = "rule to build executable: ";

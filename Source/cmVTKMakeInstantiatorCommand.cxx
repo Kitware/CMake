@@ -216,10 +216,9 @@ cmVTKMakeInstantiatorCommand
 std::string
 cmVTKMakeInstantiatorCommand::GenerateCreationFileName(unsigned int block)
 {
-  std::strstream nameStr;
-  nameStr << m_ClassName.c_str() << block << ".cxx" << std::ends;
+  cmStringStream nameStr;
+  nameStr << m_ClassName.c_str() << block << ".cxx";
   std::string result = nameStr.str();
-  delete [] nameStr.str();
   return result;
 }
 
