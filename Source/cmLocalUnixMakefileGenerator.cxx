@@ -2802,35 +2802,24 @@ void cmLocalUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
   replace = target;
   m_Makefile->ExpandVariablesInString(replace);
   
-  if(depends.size() > 1)
+  std::string tgt = cmSystemTools::ConvertToOutputPath(replace.c_str());
+  if(depends.empty())
     {
-    // Create a proxy target collecting all the dependencies.  This
-    // allows for very long dependency lists.
-    std::string tgt = cmSystemTools::ConvertToOutputPath(replace.c_str());
-    for(std::vector<std::string>::const_iterator dep = depends.begin();
-        dep != depends.end(); ++dep)
-      {
-      replace = *dep;
-      m_Makefile->ExpandVariablesInString(replace);
-      fout << tgt.c_str() << ".dependency_list:: " << replace.c_str() << "\n";
-      }
-
-    // Forward dependencies through the proxy target.
-    fout << tgt.c_str() << ": " << tgt.c_str() << ".dependency_list\n";
+    fout << tgt.c_str() << ":\n";
     }
   else
     {
-    fout << cmSystemTools::ConvertToOutputPath(replace.c_str()) << ":";
-  
+    // Split dependencies into multiple rule lines.  This allows for
+    // very long dependency lists.
     for(std::vector<std::string>::const_iterator dep = depends.begin();
         dep != depends.end(); ++dep)
       {
       replace = *dep;
       m_Makefile->ExpandVariablesInString(replace);
-      fout << " " << replace.c_str();
+      fout << tgt.c_str() << ": " << replace.c_str() << "\n";
       }
-    fout << "\n";
     }
+  
   int count = 0;
   for (std::vector<std::string>::const_iterator i = commands.begin();
        i != commands.end(); ++i) 
