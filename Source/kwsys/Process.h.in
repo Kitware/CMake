@@ -1,0 +1,172 @@
+/*=========================================================================
+
+  Program:   KWSys - Kitware System Library
+  Module:    $RCSfile$
+  Language:  C++
+  Date:      $Date$
+  Version:   $Revision$
+
+  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
+  See http://www.cmake.org/HTML/Copyright.html for details.
+
+     This software is distributed WITHOUT ANY WARRANTY; without even 
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     PURPOSE.  See the above copyright notices for more information.
+
+=========================================================================*/
+#ifndef @KWSYS_NAMESPACE@_Process_h
+#define @KWSYS_NAMESPACE@_Process_h
+
+#define kwsys(x) @KWSYS_NAMESPACE@##x
+#define kwsysProcess_STDOUT kwsys(Process_STDOUT)
+#define kwsysProcess_STDERR kwsys(Process_STDERR)
+#define kwsysProcess_Timeout kwsys(Process_Timeout)
+#define kwsysProcess_Starting kwsys(Process_Starting)
+#define kwsysProcess_Executing kwsys(Process_Executing)
+#define kwsysProcess_Expired kwsys(Process_Expired)
+#define kwsysProcess_Exited kwsys(Process_Exited)
+#define kwsysProcess_Killed kwsys(Process_Killed)
+#define kwsysProcess_Signalled kwsys(Process_Signalled)
+#define kwsysProcess_Error kwsys(Process_Error)
+#define kwsysProcess_State kwsys(Process_State)
+#define kwsysProcess_Pipes_e kwsys(Process_Pipes_e)
+#define kwsysProcess_State_e kwsys(Process_State_e)
+#define kwsysProcess_s kwsys(Process_s)
+#define kwsysProcess kwsys(Process)
+#define kwsysProcess_New kwsys(Process_New)
+#define kwsysProcess_Delete kwsys(Process_Delete)
+#define kwsysProcess_SetCommand kwsys(Process_SetCommand)
+#define kwsysProcess_SetTimeout kwsys(Process_SetTimeout)
+#define kwsysProcess_GetState kwsys(Process_GetState)
+#define kwsysProcess_GetExitCode kwsys(Process_GetExitCode)
+#define kwsysProcess_GetErrorString kwsys(Process_GetErrorString)
+#define kwsysProcess_Execute kwsys(Process_Execute)
+#define kwsysProcess_WaitForData kwsys(Process_WaitForData)
+#define kwsysProcess_WaitForExit kwsys(Process_WaitForExit)
+#define kwsysProcess_Kill kwsys(Process_Kill)
+
+#if defined(__cplusplus)
+extern "C"
+{
+#endif
+
+typedef enum kwsysProcess_Pipes_e
+{
+  kwsysProcess_STDOUT=1,
+  kwsysProcess_STDERR=2,
+  kwsysProcess_Timeout=255
+} kwsysProcess_Pipes;
+
+typedef enum kwsysProcess_State_e
+{
+  kwsysProcess_Starting,  /* Between New and Execute; No process run yet */
+  kwsysProcess_Executing, /* Process is running */
+  kwsysProcess_Expired,   /* Process timeout expired and was killed */
+  kwsysProcess_Exited,    /* Process exited */
+  kwsysProcess_Killed,    /* Process was killed by Kill */
+  kwsysProcess_Signalled, /* Process was terminated by a signal (crash / ctrl-C) */
+  kwsysProcess_Error      /* Internal error of Process */
+} kwsysProcess_State;
+
+typedef struct kwsysProcess_s kwsysProcess;
+
+kwsysProcess* kwsysProcess_New();
+
+void kwsysProcess_Delete(kwsysProcess* cp);
+
+void kwsysProcess_SetCommand(kwsysProcess* cp, char const* const* command);
+
+void kwsysProcess_SetTimeout(kwsysProcess* cp, double timeout);
+
+/*
+ * Get the current internal state of the kwsysProcess instance
+ */
+int kwsysProcess_GetState(kwsysProcess* cp);
+
+/*
+ * Get process return code or when signalled, get the signal code 
+ */
+int kwsysProcess_GetExitCode(kwsysProcess* cp);
+
+/*
+ * On kwsysProcess_Error get the error message
+ */
+const char* kwsysProcess_GetErrorString(kwsysProcess* cp);
+
+void kwsysProcess_Execute(kwsysProcess* cp);
+
+/*
+ * Block until data available on requested pipe or one of the timeouts expired,
+ * or the process exits. If the pipe is not specified, data on that pipe are
+ * ignored.
+ *
+ * pipes - a list of interested pipes - kwsysProcess_STDOUT | kwsysProcess_STDERR
+ * data - returns pointer to data if read, NULL otherwise
+ * length - length of the returned data
+ * userTimeout - timeout for the current kwsysProcess_WaitForData call
+ *     the userTimeout will contain the remaining time
+ *
+ * Returns:
+ *    0 - Process exited or killed or process timeout expired with no data
+ *        available, or no process running.
+ *    PIPE id otherwise:
+ *       kwsysProcess_STDOUT - if stdout is returned
+ *       kwsysProcess_STDERR - if stderr is returned
+ *       kwsysProcess_Timeout - if user timeout expired
+ */ 
+int kwsysProcess_WaitForData(kwsysProcess* cp, int pipes, char** data, int* length,
+                          double* userTimeout);
+
+/*
+ * Block until the process exits or the timeout expires. If no process is
+ * running, return immediatly.
+ *
+ * Returns:
+ *    0 - When user timeout expires
+ *    1 - Otherwise
+ */
+int kwsysProcess_WaitForExit(kwsysProcess* cp, double* userTimeout);
+
+/* 
+ * Kills the process.  kwsysProcess_WaitForExit should still be called
+ * after kwsysProcess_Kill.
+ */
+void kwsysProcess_Kill(kwsysProcess* cp);
+
+#if defined(__cplusplus)
+} /* extern "C" */
+#endif
+
+
+/* If we are building a kwsysProcess .c file, let it use these macros.  */
+#if !defined(KWSYS_IN_PROCESS_C)
+# undef kwsys
+# undef kwsysProcess_STDOUT
+# undef kwsysProcess_STDERR
+# undef kwsysProcess_Timeout
+# undef kwsysProcess_Starting
+# undef kwsysProcess_Executing
+# undef kwsysProcess_Expired
+# undef kwsysProcess_Exited
+# undef kwsysProcess_Killed
+# undef kwsysProcess_Signalled
+# undef kwsysProcess_Error
+# undef kwsysProcess_State
+# undef kwsysProcess_Pipes_e
+# undef kwsysProcess_State_e
+# undef kwsysProcess_s
+# undef kwsysProcess
+# undef kwsysProcess_New
+# undef kwsysProcess_Delete
+# undef kwsysProcess_SetCommand
+# undef kwsysProcess_SetTimeout
+# undef kwsysProcess_GetState
+# undef kwsysProcess_GetExitCode
+# undef kwsysProcess_GetErrorString
+# undef kwsysProcess_Execute
+# undef kwsysProcess_WaitForData
+# undef kwsysProcess_WaitForExit
+# undef kwsysProcess_Kill
+#endif
+
+#endif
