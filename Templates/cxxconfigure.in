@@ -74,7 +74,18 @@ case $system in
           echo "$ac_t""no" 1>&6
         fi
         rm -f conftest*
-	;;  
+	;;      
+     OSF1-*)
+        echo $ac_n "checking whether ${CXX} accepts -std strict_ansi""... $ac_c" 1>&6
+        echo 'void f(){}' > conftest.c
+        if test -z "`${CXX} -std strict_ansi -c conftest.c 2>&1`"; then
+          echo "$ac_t""yes" 1>&6
+          CMAKE_ANSI_CXXFLAGS="-std strict_ansi"
+        else
+          echo "$ac_t""no" 1>&6
+        fi
+        rm -f conftest*
+        ;;
 esac
 fi
 AC_SUBST(CMAKE_ANSI_CXXFLAGS)
