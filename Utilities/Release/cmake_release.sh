@@ -23,8 +23,8 @@
 [ -z "$REMOTE" ] && SELF="$0"
 CVSROOT=":pserver:anonymous@www.cmake.org:/cvsroot/CMake"
 CVSROOT_GREP=":pserver:anonymous@www.cmake.org:[0-9]*/cvsroot/CMake"
-TAG="Release-1-6-0"
-VERSION="1.6.0"
+TAG="Release-1-6-2"
+VERSION="1.6.2"
 RELEASE="1"
 PREVIOUS_VERSION="1.4.7"
 PREVIOUS_RELEASE="1"
@@ -40,7 +40,51 @@ DOC_DIR="/doc/cmake"
 #-----------------------------------------------------------------------------
 usage()
 {
-    echo "Usage!!"
+    cat <<EOF
+CMake Release Script Usage:
+  $0 [command]
+
+Typical usage:
+  Cleanup remote host's release directory:
+
+    $0 remote <host> clean
+
+  Create binary release tarball:
+
+    $0 remote_binary <host>
+
+  Create source release tarball:
+
+    $0 remote_source <host>
+
+  Upload tarballs:
+
+    $0 upload
+
+  Create and upload cygwin package:
+
+    $0 cygwin_package
+    $0 cygwin_upload
+
+Available commands:
+
+EOF
+    cat "$0" | awk '
+/^#--*$/               { doc=1; text="" }
+
+/(^#$|^#[^-].*$)/     {
+  if(doc)
+    {
+    if(text != "") { text = sprintf("%s  %s\n", text, $0) }
+    else           { text = sprintf("  %s\n", $0) }
+    }
+}
+
+/^[A-Za-z0-9_]*\(\)$/ {
+  doc=0;
+  if(text != "") { printf("%s:\n%s\n", $0, text) }
+}
+'
 }
 
 #-----------------------------------------------------------------------------
@@ -62,6 +106,13 @@ check_host()
 }
 
 #-----------------------------------------------------------------------------
+# Run a command on the specified remote host.
+#
+#  remote <host> [command]
+#
+# Only one level of remote invocation is allowed.  The <host>
+# specification must be a valid ssh destination with public
+# key authentication and no password.
 remote()
 {
     check_host "$1" || return 1
@@ -77,6 +128,14 @@ remote()
 }
 
 #-----------------------------------------------------------------------------
+# Copy tarballs from the specified host.
+#
+#  remote_copy <host> [EXPR]
+#
+# The <host> specification must be a valid ssh destination
+# with public key authentication and no password.  Only
+# files matching the given expression are copied.  If
+# no expression is given, "*" is used.
 remote_copy()
 {
     check_host "$1" || return 1
@@ -102,6 +161,12 @@ remote_copy_binary()
 }
 
 #-----------------------------------------------------------------------------
+# Create source tarballs on the specified host and copy them locally.
+#
+#  remote_source <host>
+#
+# The <host> specification must be a valid ssh destination
+# with public key authentication and no password.
 remote_source()
 {
     check_host "$1" || return 1
@@ -110,6 +175,12 @@ remote_source()
 }
 
 #-----------------------------------------------------------------------------
+# Create binary tarballs on the specified host and copy them locally.
+#
+#  remote_binary <host>
+#
+# The <host> specification must be a valid ssh destination
+# with public key authentication and no password.
 remote_binary()
 {
     check_host "$1" || return 1
@@ -118,10 +189,16 @@ remote_binary()
 }
 
 #-----------------------------------------------------------------------------
+# Upload any tarballs in the current directory to the CMake FTP site.
+#
+#  upload
+#
+# The user must be able to ssh to kitware@www.cmake.org with public
+# key authentication and no password.
 upload()
 {
     echo "------- Copying tarballs to www.cmake.org. -------"
-    scp cmake-${VERSION}*tar.* www.cmake.org:/projects/FTP/pub/cmake
+    scp cmake-${VERSION}*tar.* kitware@www.cmake.org:/projects/FTP/pub/cmake
     echo "---- Done copying tarballs to www.cmake.org. -----"
 }
 
@@ -135,6 +212,10 @@ setup()
 }
 
 #-----------------------------------------------------------------------------
+# Remove the release root directory.
+#
+#  clean
+#
 clean()
 {
     cd "${HOME}" &&
@@ -215,6 +296,10 @@ checkout()
 }
 
 #-----------------------------------------------------------------------------
+# Create source tarballs for CMake.
+#
+#  source_tarball
+#
 source_tarball()
 {
     [ -z "${DONE_source_tarball}" ] || return 0 ; DONE_source_tarball="yes"
@@ -355,6 +440,10 @@ EOF
 }
 
 #-----------------------------------------------------------------------------
+# Create binary tarballs for CMake.
+#
+#  binary_tarball
+#
 binary_tarball()
 {
     [ -z "${DONE_binary_tarball}" ] || return 0 ; DONE_binary_tarball="yes"
@@ -484,6 +573,11 @@ cygwin_package_script()
 }
 
 #-----------------------------------------------------------------------------
+# Create the CMake cygwin package files.
+#
+#  cygwin_package
+#
+# This command should be run from a cygwin prompt.
 cygwin_package()
 {
     [ -z "${DONE_cygwin_package}" ] || return 0 ; DONE_cygwin_package="yes"
@@ -505,6 +599,11 @@ cygwin_package()
 }
 
 #-----------------------------------------------------------------------------
+# Upload the CMake cygwin package files.
+#
+#  cygwin_upload
+#
+# This should be run after "cygwin_package".
 cygwin_upload()
 {
     setup || return 1
@@ -512,11 +611,16 @@ cygwin_upload()
     scp Cygwin/Package/cmake-${VERSION}-${RELEASE}-src.tar.bz2 \
         Cygwin/Package/cmake-${VERSION}-${RELEASE}.tar.bz2 \
         Cygwin/Package/setup.hint \
-        www.cmake.org:/projects/FTP/pub/cmake/cygwin
+        kitware@www.cmake.org:/projects/FTP/pub/cmake/cygwin
     echo "---- Done copying cygwin packages to www.cmake.org. -----"
 }
 
 #-----------------------------------------------------------------------------
+# Install CMake into the OSX package directory structure.
+#
+#  osx_install
+#
+# This will build CMake if it is not already built.
 osx_install()
 {
     [ -z "${DONE_osx_install}" ] || return 0 ; DONE_osx_install="yes"
