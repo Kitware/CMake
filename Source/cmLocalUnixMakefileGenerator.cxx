@@ -1422,7 +1422,6 @@ void cmLocalUnixMakefileGenerator::OutputBuildTargetInDirWindows(std::ostream& f
   std::string jumpBack;
   if(m_UseRelativePaths)
     {
-    cmSystemTools::Message("using relative paths??");
     jumpBack = cmSystemTools::RelativePath(cmSystemTools::GetProgramPath(path).c_str(),
                                            m_Makefile->GetCurrentOutputDirectory());
     }
