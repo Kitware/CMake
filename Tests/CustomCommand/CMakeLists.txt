@@ -20,7 +20,7 @@ SET (EXECUTABLE_OUTPUT_PATH
 #
 ################################################################
 # add the executable that will generate the file
-ADD_EXECUTABLE(generator generator.c)
+ADD_EXECUTABLE(generator generator.cxx)
 
 # the folowing assumes that a cmSourceFile
 # is instantiated for the output, with GENERATED 1
@@ -37,7 +37,7 @@ ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_BINARY_DIR}/generated.c
 #
 ################################################################
 # add the executable that will generate the file
-ADD_EXECUTABLE(wrapper wrapper.c)
+ADD_EXECUTABLE(wrapper wrapper.cxx)
 
 # the following assumes that a cmSourceFile
 # is instantiated for the output, with GENERATED 1
