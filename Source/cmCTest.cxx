@@ -2099,6 +2099,7 @@ std::string cmCTest::GetTestModelString()
     }
   return "Experimental";
 }
+
 bool cmCTest::RunMakeCommand(const char* command, std::string* output,
     int* retVal, const char* dir, bool verbose, int timeout, std::ofstream& ofs)
 {
@@ -2159,6 +2160,7 @@ bool cmCTest::RunMakeCommand(const char* command, std::string* output,
     if ( ofs )
       {
       ofs.write(data, length);
+      ofs.flush();
       }
     }
   std::cout << " Size of output: ";
