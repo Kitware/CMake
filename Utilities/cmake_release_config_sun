@@ -1,15 +1,18 @@
 RELEASE_TAG="Release-1-4"
 VERSION="1.4"
 PLATFORM="sparc-sunos57-static"
-CMAKE="/space/berk/CMake-build/Source/cmake"
 CURSES_LIBRARY="/usr/lib/libcurses.a"
 FORM_LIBRARY="/usr/lib/libform.a"
 
-CMAKE_CACHE_ENTRIES="
+# Write entries into the cache file before building cmake.
+WriteCMakeCache()
+{
+${CAT} > CMakeCache.txt <<EOF
+BUILD_TESTING:BOOL=OFF
 CMAKE_CXX_SHLIB_LINK_FLAGS:STRING=-static
 CMAKE_CXX_SHLIB_BUILD_FLAGS:STRING=
 CMAKE_CXX_SHLIB_RUNTIME_FLAG:STRING=
 CURSES_LIBRARY:FILEPATH=${CURSES_LIBRARY}
 FORM_LIBRARY:FILEPATH=${FORM_LIBRARY}
-"
-
+EOF
+}

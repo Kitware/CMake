@@ -1,13 +1,16 @@
 RELEASE_TAG="Release-1-4"
 VERSION="1.4"
 PLATFORM="hpux-static"
-CMAKE="/home/hoffman/CMake-aCC/Source/cmake"
 CC="cc"
 CXX="aCC"
 
-CMAKE_CACHE_ENTRIES="
+# Write entries into the cache file before building cmake.
+WriteCMakeCache()
+{
+${CAT} > CMakeCache.txt <<EOF
+BUILD_TESTING:BOOL=OFF
 CMAKE_CXX_SHLIB_LINK_FLAGS:STRING=-Wl,-a,archive
 CMAKE_CXX_SHLIB_BUILD_FLAGS:STRING=
 CMAKE_CXX_SHLIB_RUNTIME_FLAG:STRING=
-"
-
+EOF
+}

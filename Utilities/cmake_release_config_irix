@@ -1,7 +1,6 @@
 RELEASE_TAG="Release-1-4"
 VERSION="1.4"
 PLATFORM="irix65"
-CMAKE="/rolle/insight/CMake-CC-dashboard/Source/cmake"
 CC="cc"
 CXX="CC"
 
