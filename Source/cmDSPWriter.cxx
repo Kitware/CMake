@@ -513,14 +513,14 @@ void cmDSPWriter::WriteDSPHeader(std::ostream& fout, const char *libName,
     {
     libOptions += " /LIBPATH:\"";
     libOptions += *i;
-    libOptions += "/$(OUTDIR)\" ";
+    libOptions += "/$(IntDir)\" ";
     libOptions += " /LIBPATH:\"";
     libOptions += *i;
     libOptions += "\" ";
 
     libMultiLineOptions += "# ADD LINK32 /LIBPATH:\"";
     libMultiLineOptions += *i; 
-    libMultiLineOptions += "/$(OUTDIR)\" ";
+    libMultiLineOptions += "/$(IntDir)\" ";
     libMultiLineOptions += " /LIBPATH:\"";
     libMultiLineOptions += *i;
     libMultiLineOptions += "\" \n";
