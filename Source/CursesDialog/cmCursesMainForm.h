@@ -84,9 +84,14 @@ public:
   virtual void AddError(const char* message, const char* title);
 
   /**
-   * Used to run cmake.
+   * Used to do a configure.
    */
-  int RunCMake(bool generateMakefiles);
+  int Configure();
+
+  /**
+   * Used to generate 
+   */
+  int Generate();
 
   /**
    * Used by main program

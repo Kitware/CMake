@@ -133,7 +133,7 @@ int main(int argc, char** argv)
   cmCursesForm::CurrentForm = myform;
 
   myform->InitializeUI();
-  if (myform->RunCMake(false) == 0 )
+  if (myform->Configure() == 0 )
     {
     myform->Render(1, 1, x, y);
     myform->HandleInput();
