@@ -4069,6 +4069,11 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
       generator += m_BuildGenerator;
       args.push_back(generator);
       }
+    if ( m_ConfigType.size() > 0 )
+      {
+      std::string btype = "-DBUILD_TYPE:STRING=" + m_ConfigType;
+      args.push_back(btype);
+      }
 
     for(k=0; k < m_BuildOptions.size(); ++k)
       {
