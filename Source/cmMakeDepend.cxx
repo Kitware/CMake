@@ -95,7 +95,9 @@ void cmMakeDepend::SetMakefile(const cmMakefile* makefile)
   for(std::vector<std::string>::const_iterator j = includes.begin();
       j != includes.end(); ++j)
     {
-    this->AddSearchPath(j->c_str());
+    std::string path = *j;
+    m_Makefile->ExpandVariablesInString(path);
+    this->AddSearchPath(path.c_str());
     }
 }
 
