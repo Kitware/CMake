@@ -38,7 +38,7 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args)
       ++s;
       use_win32 = true;
       }
-    else if ( *s == "MACBUNDLE" )
+    else if ( *s == "MACOSX_BUNDLE" )
       {
       ++s;
       use_macbundle = true;

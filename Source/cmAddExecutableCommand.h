@@ -61,16 +61,17 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  ADD_EXECUTABLE(exename [WIN32] [MACBUNDLE] source1\n"
+      "  ADD_EXECUTABLE(exename [WIN32] [MACOSX_BUNDLE] source1\n"
       "                 source2 ... sourceN)\n"
       "This command adds an executable target to the current directory.  "
       "The executable will be built from the list of source files "
       "specified.\n"
-      "After specifying the executable name, WIN32 and/or MACBUNDLE can "
+      "After specifying the executable name, WIN32 and/or MACOSX_BUNDLE can "
       "be specified. WIN32 indicates that the executable (when compiled on "
       "windows) is a windows app (using WinMain) not a console app (using main). "
-      "MACBUNDLE indicates that when build on Mac OSX, executable should be in "
-      "the bundle form. The MACBUNDLE also allows several variables to be specified:\n"
+      "MACOSX_BUNDLE indicates that when build on Mac OSX, executable should "
+      "be in the bundle form. The MACOSX_BUNDLE also allows several variables "
+      "to be specified:\n"
       "  MACOSX_BUNDLE_INFO_STRING\n"
       "  MACOSX_BUNDLE_ICON_FILE\n"
       "  MACOSX_BUNDLE_GUI_IDENTIFIER\n"
