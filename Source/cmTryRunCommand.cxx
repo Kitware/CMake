@@ -114,7 +114,10 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv)
   std::string cacheFile = binaryDirectory;
   cacheFile += "/CMakeLists.txt";
   cmListFileCache::GetInstance()->FlushCache(cacheFile.c_str());
-  cmTryCompileCommand::CleanupFiles(binaryDirectory.c_str());
+  if(!m_Makefile->GetCMakeInstance()->GetDebugTryCompile())
+    {
+    cmTryCompileCommand::CleanupFiles(binaryDirectory.c_str());
+    }
   return true;
 }
 
