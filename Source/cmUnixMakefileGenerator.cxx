@@ -1527,9 +1527,10 @@ void cmUnixMakefileGenerator::OutputSourceObjectBuildRules(std::ostream& fout)
           sourceName = source->GetFullPath();
           shortName = cmSystemTools::GetFilenameName(source->GetSourceName());
           }
-        shortName += source->GetSourceExtension();
+        std::string shortNameWithExt = shortName +
+          source->GetSourceExtension();
         // Only output a rule for each .o once.
-        if(rules.find(shortName) == rules.end())
+        if(rules.find(shortNameWithExt) == rules.end())
           {
           this->OutputBuildObjectFromSource(fout,
                                             shortName.c_str(),
