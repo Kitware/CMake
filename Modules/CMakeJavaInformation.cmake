@@ -1,5 +1,4 @@
 # this is a place holder if java needed flags for javac they would go here.
-SET(CMAKE_STATIC_LIBRARY_SUFFIX_Java ".jar")
 IF(NOT CMAKE_Java_CREATE_STATIC_LIBRARY)
   SET(CMAKE_Java_CREATE_STATIC_LIBRARY
       "<CMAKE_Java_ARCHIVE> -cf <TARGET> *.class") 

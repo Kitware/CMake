@@ -342,8 +342,19 @@ std::string cmLocalUnixMakefileGenerator::GetBaseTargetName(const char* n,
     }
   // if there is no prefix on the target use the cmake definition
   if(!targetPrefix && prefixVar)
-    {
-    targetPrefix = m_Makefile->GetSafeDefinition(prefixVar);
+    { 
+    // first check for a language specific suffix var
+    const char* ll = t.GetLinkerLanguage(this->GetGlobalGenerator());
+    if(ll)
+      {
+      std::string langPrefix = prefixVar + std::string("_") + ll;
+      targetPrefix = m_Makefile->GetDefinition(langPrefix.c_str());
+      }
+    // if there not a language specific suffix then use the general one 
+    if(!targetPrefix)
+      {
+      targetPrefix = m_Makefile->GetSafeDefinition(prefixVar);
+      }
     }
   std::string name = pathPrefix + (targetPrefix?targetPrefix:"");
   name += n;
