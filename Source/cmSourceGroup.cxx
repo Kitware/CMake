@@ -57,8 +57,7 @@ cmSourceGroup::cmSourceGroup(const char* name, const char* regex):
 cmSourceGroup::cmSourceGroup(const cmSourceGroup& r):
   m_Name(r.m_Name),
   m_GroupRegex(r.m_GroupRegex),
-  m_Sources(r.m_Sources),
-  m_CustomCommands(r.m_CustomCommands)
+  m_BuildRules(r.m_BuildRules)
 {
 }
 
@@ -73,6 +72,21 @@ bool cmSourceGroup::Matches(const char* name)
 
 
 /**
+ * Add a source to the group that the compiler will know how to build.
+ */
+void cmSourceGroup::AddSource(const char* name)
+{
+  BuildRules::iterator s = m_BuildRules.find(name);
+  if(s == m_BuildRules.end())
+    {
+    // The source was not found.  Add it with no commands.
+    m_BuildRules[name];
+    return;
+    }
+}
+
+
+/**
  * Add a source and corresponding custom command to the group.  If the
  * source already exists, the command will be added to its set of commands.
  * If the command also already exists, the given dependencies and outputs
@@ -80,13 +94,13 @@ bool cmSourceGroup::Matches(const char* name)
  */
 void cmSourceGroup::AddCustomCommand(const cmCustomCommand &cmd)
 {
-  CustomCommands::iterator s = m_CustomCommands.find(cmd.GetSourceName());
-  if(s == m_CustomCommands.end())
+  BuildRules::iterator s = m_BuildRules.find(cmd.GetSourceName());
+  if(s == m_BuildRules.end())
     {
     // The source was not found.  Add it with this command.
-    m_CustomCommands[cmd.GetSourceName()][cmd.GetCommand()].
+    m_BuildRules[cmd.GetSourceName()][cmd.GetCommand()].
       m_Depends.insert(cmd.GetDepends().begin(),cmd.GetDepends().end());
-    m_CustomCommands[cmd.GetSourceName()][cmd.GetCommand()].
+    m_BuildRules[cmd.GetSourceName()][cmd.GetCommand()].
       m_Outputs.insert(cmd.GetOutputs().begin(),cmd.GetOutputs().end());
     return;
     }

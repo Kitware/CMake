@@ -101,7 +101,6 @@ private:
   void WriteDSPEndGroup(std::ostream& fout);
   void WriteDSPHeader(std::ostream& fout, const char *libName,
                       const cmTarget &tgt);
-  void WriteDSPBuildRule(std::ostream& fout, const char*);
   void WriteDSPBuildRule(std::ostream& fout);
   void WriteDSPFooter(std::ostream& fout);
   void AddDSPBuildRule(cmSourceGroup&);

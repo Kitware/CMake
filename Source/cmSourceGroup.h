@@ -77,20 +77,17 @@ public:
   /**
    * Map from source to command map.
    */
-  typedef std::map<std::string, Commands>  CustomCommands;
+  typedef std::map<std::string, Commands>  BuildRules;
 
   bool Matches(const char* name);
   void SetGroupRegex(const char* regex)
     { m_GroupRegex.compile(regex); }
-  void AddSource(const char* name)
-    { m_Sources.push_back(name); }
+  void AddSource(const char* name);
   void AddCustomCommand(const cmCustomCommand &cmd);
   const char* GetName() const
     { return m_Name.c_str(); }
-  const std::vector<std::string>& GetSources() const
-    { return m_Sources; }
-  const CustomCommands& GetCustomCommands() const
-    { return m_CustomCommands; }
+  const BuildRules& GetBuildRules() const
+    { return m_BuildRules; }
   
 private:
   /**
@@ -104,14 +101,11 @@ private:
   cmRegularExpression m_GroupRegex;
   
   /**
-   * The sources in this group that the compiler will know how to build.
+   * Map from source name to the commands to build from the source.
+   * Some commands may build from files that the compiler also knows how to
+   * build.
    */
-  std::vector<std::string> m_Sources;
-  
-  /**
-   * The custom commands in this group and their corresponding sources.
-   */
-  CustomCommands m_CustomCommands;  
+  BuildRules m_BuildRules;  
 };
 
 #endif

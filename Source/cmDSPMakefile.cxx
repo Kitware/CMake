@@ -239,10 +239,9 @@ void cmDSPMakefile::WriteDSPFile(std::ostream& fout,
   for(std::vector<cmSourceGroup>::const_iterator sg = sourceGroups.begin();
       sg != sourceGroups.end(); ++sg)
     {
-    const std::vector<std::string>& sources = sg->GetSources();
-    const cmSourceGroup::CustomCommands& customCommands = sg->GetCustomCommands();
+    const cmSourceGroup::BuildRules& buildRules = sg->GetBuildRules();
     // If the group is empty, don't write it at all.
-    if(sources.empty() && customCommands.empty())
+    if(buildRules.empty())
       { continue; }
     
     // If the group has a name, write the header.
@@ -252,24 +251,21 @@ void cmDSPMakefile::WriteDSPFile(std::ostream& fout,
       this->WriteDSPBeginGroup(fout, name.c_str(), "");
       }
     
-    // Loop through each source in the source group.
-    for(std::vector<std::string>::const_iterator s = sources.begin();
-        s != sources.end(); ++s)
-      {
-      this->WriteDSPBuildRule(fout, s->c_str());
-      }    
-    
-    // Loop through each custom command in the source group.
-    for(cmSourceGroup::CustomCommands::const_iterator cc =
-          customCommands.begin(); cc != customCommands.end(); ++ cc)
+    // Loop through each build rule in the source group.
+    for(cmSourceGroup::BuildRules::const_iterator cc =
+          buildRules.begin(); cc != buildRules.end(); ++ cc)
       {
       std::string source = cc->first;
       const cmSourceGroup::Commands& commands = cc->second;
 
-      fout << "# Begin Source File\n\n";
+      fout << "# Begin Source File\n\n";\
+
+      // Tell MS-Dev what the source is.  If the compiler knows how to
+      // build it, then it will.
       fout << "SOURCE=" << source << "\n\n";
       
-      // Loop through every command generating code from the current source.
+      // Loop through every custom command generating code from the
+      // current source.
       for(cmSourceGroup::Commands::const_iterator c = commands.begin();
           c != commands.end(); ++c)
         {
@@ -493,14 +489,3 @@ void cmDSPMakefile::WriteDSPFooter(std::ostream& fout)
       fout << buffer << std::endl;
     }
 }
-
-
-void cmDSPMakefile::WriteDSPBuildRule(std::ostream& fout, const char* path)
-{
-  fout << "# Begin Source File\n\n";
-  fout << "SOURCE=" 
-       << path << "\n";
-  fout << "# End Source File\n";
-}
-
-  
