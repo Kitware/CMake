@@ -6,4 +6,5 @@ int main(int argc, char *argv[])
   
   fprintf(fp,"int generated() { return 3; }\n");
   fclose(fp);
+  return 0;
 }

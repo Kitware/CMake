@@ -6,4 +6,5 @@ int main(int argc, char *argv[])
   
   fprintf(fp,"int wrapped() { return 5; }\n");
   fclose(fp);
+  return 0;
 }
