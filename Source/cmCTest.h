@@ -145,6 +145,13 @@ private:
     std::string m_PostContext;
   };
 
+  // Some structures needed for cvs update
+  struct StringPair : 
+    public std::pair<std::string, std::string>{};
+  struct UpdateFiles : public std::vector<StringPair>{};
+  struct AuthorsToUpdatesMap : 
+    public std::map<std::string, UpdateFiles>{};
+
   struct cmCTestCoverage
   {
     cmCTestCoverage()
