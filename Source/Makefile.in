@@ -32,7 +32,7 @@ cmCableClassSet.o \
 cmListFileCache.o \
 cmSourceGroup.o
 
-DEPENDS = $(srcdir)/*.h  cmConfigure.h
+DEPENDS = cmConfigure.h
 
 cmCollectFlags.o : $(DEPENDS)
 cmake.o  : $(DEPENDS)
