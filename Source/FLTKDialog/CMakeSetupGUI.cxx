@@ -127,7 +127,7 @@ void CMakeSetupGUI::Show(void) {
 }
 
 bool CMakeSetupGUI::SetBinaryPath(const char *) {
-}
+return true;}
 
 bool CMakeSetupGUI::SetSourcePath(const char *) {
-}
+return true;}

@@ -583,7 +583,7 @@ void CMakeSetupDialog::SaveCacheFromGUI()
 void CMakeSetupDialog::OnSize(UINT nType, int cx, int cy) 
 {
   CDialog::OnSize(nType, cx, cy);
-  // TODO: Add your message handler code here
+  
   if(m_CacheEntriesList.m_hWnd)
     {
     m_ListFrame.SetWindowPos(&wndTop, 0, 0, cx-28, cy-137,
