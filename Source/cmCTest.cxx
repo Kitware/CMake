@@ -3851,6 +3851,7 @@ void CMakeStdoutCallback(const char* m, int len, void* s)
 int cmCTest::RunCMakeAndTest(std::string* outstring)
 {  
   cmSystemTools::ResetErrorOccuredFlag();
+  cmListFileCache::GetInstance()->ClearCache();
   std::string cmakeOutString;
   cmSystemTools::SetErrorCallback(CMakeMessageCallback, &cmakeOutString);
   cmSystemTools::SetStdoutCallback(CMakeStdoutCallback, &cmakeOutString);
@@ -3888,38 +3889,54 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
     }
   if (cm.Run(args) != 0)
     {
-    std::cerr << "Error: cmake execution failed\n";
-    std::cerr << cmakeOutString << "\n";
+    out << "Error: cmake execution failed\n";
+    out << cmakeOutString << "\n";
     // return to the original directory
     cmSystemTools::ChangeDirectory(cwd.c_str());
+    if(outstring)
+      {
+      *outstring = out.str();
+      }
+    else
+      {
+      std::cerr << out << "\n";
+      }
     return 1;
     }
   if(m_BuildTwoConfig)
     {
     if (cm.Run(args) != 0)
       {
-      std::cerr << "Error: cmake execution failed\n";
-      std::cerr << cmakeOutString << "\n";
+      out << "Error: cmake execution failed\n";
+      out << cmakeOutString << "\n";
       // return to the original directory
       cmSystemTools::ChangeDirectory(cwd.c_str());
+      if(outstring)
+        {
+        *outstring = out.str();
+        }
+      else
+        {
+        std::cerr << out << "\n";
+        }
       return 1;
       }
     }
   cmSystemTools::SetErrorCallback(0, 0);
-  if(outstring)
-    {
-    *outstring += cmakeOutString;
-    }
-  else
-    {
-    std::cout << cmakeOutString << "\n";
-    }
-  
-  cmListFileCache::GetInstance()->ClearCache();
+  out << cmakeOutString << "\n";
   if(m_BuildMakeProgram.size() == 0)
     {
-    std::cerr << "Error: cmake does not have a valid MAKEPROGRAM\n";
-    std::cerr << "Did you specify a --build-makeprogram and a --build-generator?\n";
+    out << "Error: cmake does not have a valid MAKEPROGRAM\n";
+    out << "Did you specify a --build-makeprogram and a --build-generator?\n";
+    if(outstring)
+      {
+      *outstring = out.str();
+      }
+    else
+      {
+      std::cerr << out << "\n";
+      }
+    return 1;
     }
   int retVal = 0;
   std::string makeCommand = cmSystemTools::ConvertToOutputPath(m_BuildMakeProgram.c_str());
@@ -4001,6 +4018,7 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
           }
         return 1;
         }
+      out << output;
       }
         
     if(m_BuildTarget.size())
@@ -4036,6 +4054,7 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
     {
     if(outstring)
       {
+      *outstring = out.str();
       *outstring += "Building of project failed\n";
       *outstring += output;
       *outstring += "\n";
@@ -4043,20 +4062,25 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
     else
       {
       std::cerr << "Building of project failed\n";
-      std::cout << output << "\n";
+      std::cerr << out << output << "\n";
       }
     // return to the original directory
     cmSystemTools::ChangeDirectory(cwd.c_str());
     return 1;
     }
 
-  if(outstring)
-    {
-    *outstring += output;
-    }
+  out << output;
   
   if(m_TestCommand.size() == 0)
     {
+    if(outstring)
+      {
+      *outstring = out.str();
+      }
+    else
+      {
+      std::cout << out << "\n";
+      }
     return retVal;
     }
   
@@ -4138,7 +4162,7 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
       }
     if(outstring)
       {
-      *outstring +=  out.str();
+      *outstring =  out.str();
       }
     else
       {
@@ -4153,7 +4177,6 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
   testCommand.push_back(fullPath.c_str());
   for(k=0; k < m_TestCommandArgs.size(); ++k)
     {
-    out << m_TestCommandArgs[k].c_str() << "\n";
     testCommand.push_back(m_TestCommandArgs[k].c_str());
     }
   testCommand.push_back(0);
@@ -4169,7 +4192,7 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
   out << outs << "\n";
   if(outstring)
     {
-    *outstring += out.str();
+    *outstring = out.str();
     }
   else
     {
