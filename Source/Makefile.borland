@@ -45,3 +45,5 @@ ccommand.exe: ccommand.obj cmSystemTools.obj cmRegularExpression.obj
 
 
 
+clean:
+	del ${OBJS} cmake.exe ccommand.exe
