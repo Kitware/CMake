@@ -89,7 +89,7 @@ public:
   
 protected:
 
-  void ConfigureOutputPaths();
+  virtual void ConfigureOutputPaths();
   void AddDependenciesToSourceFile(cmDependInformation const*info,
                                    cmSourceFile *i,
                                    std::set<cmDependInformation const*> *visited);
