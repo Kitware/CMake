@@ -1,0 +1,15 @@
+#include "doc1.h"
+
+int generated();
+int wrapped();
+
+int main ()
+{
+  if (generated()*wrapped()*doc() == 3*5*7)
+    {
+    return 0;
+    }
+  
+  return -1;
+}
+
