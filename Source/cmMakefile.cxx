@@ -85,7 +85,7 @@ bool cmMakefile::ReadMakefile(const char* filename)
         cmSystemTools::ReadList(m_SubDirectories, fin);
 	}
       }
-    else if(line.find("EXECUTABLES") != std::string::npos)
+    else if(line.find("EXECUTABLES") != std::string::npos || line.find("TESTS") != std::string::npos )
       {
       if(line.find("\\") != std::string::npos)
 	{
