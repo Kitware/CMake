@@ -30,14 +30,22 @@ bool cmWriteFileCommand::InitialPass(std::vector<std::string> const& argsIn)
   std::vector<std::string>::const_iterator i = args.begin();
 
   std::string fileName = *i;
+  bool overwrite = true;
   i++;
 
   for(;i != args.end(); ++i)
     {
-    message += *i;
+    if ( *i == "APPEND" )
+      {
+      overwrite = false;
+      }
+    else
+      {
+      message += *i;
+      }
     }
 
-  std::ofstream file(fileName.c_str(), std::ios::app);
+  std::ofstream file(fileName.c_str(), overwrite?std::ios::out : std::ios::app);
   if ( !file )
     {
     cmSystemTools::Error("Internal CMake error when trying to open file: ",
