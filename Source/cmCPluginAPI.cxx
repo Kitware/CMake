@@ -22,6 +22,9 @@
 #include "cmMakefile.h"
 #include "cmCPluginAPI.h"
 
+extern "C" 
+{
+  
 void *cmGetClientData(void *info)
 {
   return ((cmLoadedCommandInfo *)info)->ClientData;
@@ -452,6 +455,8 @@ void cmRemoveFile(const char *name)
 {
   cmSystemTools::RemoveFile(name);
 }
+
+} // close the extern "C" scope
 
 cmCAPI cmStaticCAPI =
 {
