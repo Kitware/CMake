@@ -658,6 +658,7 @@ void CMakeCommandUsage(const char* program)
     << "  chdir dir cmd [args]... - run command in a given directory\n"
     << "  copy file destination   - copy file to destination (either file or directory)\n"
     << "  copy_if_different in-file out-file   - copy file if input has changed\n"
+    << "  copy_directory source destination    - copy directory 'source' content to directory 'destination'\n"
     << "  echo [string]...        - displays arguments as text\n"
     << "  remove file1 file2 ...  - remove the file(s)\n"
     << "  time command [args] ... - run command and return elapsed time\n";
@@ -693,6 +694,19 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
       if(!cmSystemTools::CopyFileIfDifferent(args[2].c_str(), args[3].c_str()))
         {
         std::cerr << "Error copying file (if different) from \""
+                  << args[2].c_str() << "\" to \"" << args[3].c_str()
+                  << "\".\n";
+        return 1;
+        }
+      return 0;
+      }
+
+    // Copy directory content
+    if (args[1] == "copy_directory" && args.size() == 4)
+      {
+      if(!cmSystemTools::CopyADirectory(args[2].c_str(), args[3].c_str()))
+        {
+        std::cerr << "Error copying directory from \""
                   << args[2].c_str() << "\" to \"" << args[3].c_str()
                   << "\".\n";
         return 1;
