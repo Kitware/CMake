@@ -12,9 +12,19 @@
 (defvar cmake-tab-width 2)
 
 ; Regular expressions used by line indentation function.
+(defconst cmake-regex-quoted "\"\\([^\n\"\\\\]\\|\\\\.\\)*\"")
+(defconst cmake-regex-unquoted "\\([^\n \t()\\\\]\\|\\\\.\\)+")
+(defconst cmake-regex-arguments (concat "\\(" cmake-regex-quoted
+                                        "\\|" cmake-regex-unquoted
+                                        "\\|[ \t]\\)*"))
+(defconst cmake-regex-comment "\\(#[^\n]*\\)?")
+(defconst cmake-regex-identifier "[A-Za-z][A-Za-z0-9_]*")
 (defconst cmake-indent-blank-regex "^[ \t]*$")
-(defconst cmake-indent-open-regex "^[^()\n]*([^()\n]*\\(#[^\n]*\\)?\n")
-(defconst cmake-indent-close-regex "^[^()\n]*)[ \t]*\\(#[^\n]*\\)?\n")
+(defconst cmake-indent-open-regex (concat "^[ \t]*" cmake-regex-identifier
+                                          "[ \t]*(" cmake-regex-arguments
+                                          cmake-indent-comment-regex "\n"))
+(defconst cmake-indent-close-regex (concat "^" cmake-regex-arguments
+                                           ")[ \t]*" cmake-indent-comment-regex "\n"))
 (defconst cmake-indent-begin-regex "^[ \t]*\\(IF\\|MACRO\\|FOREACH\\|ELSE\\)")
 (defconst cmake-indent-end-regex "^[ \t]*\\(ENDIF\\|ENDFOREACH\\|ENDMACRO\\|ELSE\\)")
 
