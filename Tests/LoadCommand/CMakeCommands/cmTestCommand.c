@@ -55,7 +55,7 @@ static void Destructor(void *inf)
 }
 
 #ifdef MUCHO_MUDSLIDE
-void CM_PLUGIN_EXPORT cmInitializeCommand(cmLoadedCommandInfo *info)
+void CM_PLUGIN_EXPORT CMAKE_TEST_COMMANDInit(cmLoadedCommandInfo *info)
 {
   info->InitialPass = InitialPass;
   info->FinalPass = FinalPass;
