@@ -397,6 +397,7 @@ OutputBuildObjectFromSource(std::ostream& fout,
     compileCommand += " " + output_object_file_flag;
     compileCommand += objectFile;
     }
+
   this->OutputMakeRule(fout,
                        comment.c_str(),
                        objectFile.c_str(),
@@ -420,7 +421,15 @@ void cmNMakeMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
     m_Makefile->GetDefinition("CMAKE_LINKER_OUTPUT_FILE_FLAG");
   m_Makefile->ExpandVariablesInString(linker_output_file_flag);
 
-  std::string command = "$(CMAKE_LINKER) $(CMAKE_LINKER_SHARED_LIBRARY_FLAG) @<<\n\t $(CMAKE_LINKER_FLAGS) " + linker_output_file_flag;
+  std::string command = "$(CMAKE_LINKER) $(CMAKE_LINKER_SHARED_LIBRARY_FLAG)";
+
+  bool hide_param = m_Makefile->IsOn("CMAKE_LINKER_HIDE_PARAMETERS");
+  if (hide_param)
+    {
+    command += " @<<\n\t";
+    }
+
+  command += " $(CMAKE_LINKER_FLAGS) " + linker_output_file_flag;
 
   std::string dllpath = m_LibraryOutputPath +  std::string(name) + m_SharedLibraryExtension;
   command += cmSystemTools::EscapeSpaces(dllpath.c_str());
@@ -432,6 +441,7 @@ void cmNMakeMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
   linklibs << std::ends;
   command += linklibs.str();
   delete [] linklibs.str();
+
   const std::vector<cmSourceFile>& sources = t.GetSourceFiles();
   for(std::vector<cmSourceFile>::const_iterator i = sources.begin();
       i != sources.end(); ++i)
@@ -442,7 +452,13 @@ void cmNMakeMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
       command += i->GetFullPath();
       }
     }
-  command += "\n<<\n";
+
+  command += "\n";
+  if (hide_param)
+    {
+    command += "<<\n";
+    }
+
   this->OutputMakeRule(fout, "rules for a shared library",
                        target.c_str(),
                        depend.c_str(),
@@ -474,11 +490,14 @@ void cmNMakeMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout,
 
   std::string libpath = m_LibraryOutputPath + std::string(name) + m_StaticLibraryExtension;
   command += cmSystemTools::EscapeSpaces(libpath.c_str());
+
   command += " $(";
   command += std::string(name) + "_SRC_OBJS)";
   command += "\n<<\n";
+
   std::string comment = "rule to build static library: ";
   comment += name;
+
   this->OutputMakeRule(fout,
                        comment.c_str(),
                        target.c_str(),
@@ -518,8 +537,10 @@ void cmNMakeMakefileGenerator::OutputExecutableRule(std::ostream& fout,
   this->OutputLinkLibraries(linklibs, 0, t);
   linklibs << std::ends;
   command += linklibs.str();
+
   std::string comment = "rule to build executable: ";
   comment += name;
+
   this->OutputMakeRule(fout, 
                        comment.c_str(),
                        target.c_str(),
@@ -537,23 +558,30 @@ void cmNMakeMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
 
   // Embed runtime search paths if possible and if required.
   // collect all the flags needed for linking libraries
+  // Do not try if there is no library path option (it is set to -L or
+  // -LIBPATH for some linker, but some others do not even support link
+  // search path).
   std::string linkLibs;
-  std::vector<std::string>& libdirs = m_Makefile->GetLinkDirectories();
-  for(std::vector<std::string>::iterator libDir = libdirs.begin();
-      libDir != libdirs.end(); ++libDir)
-    { 
-    std::string libpath = ShortPath(libDir->c_str());
-    if(emitted.insert(libpath).second)
-      {
-      // Expand content because this value might have
-      // trailing space (since it is directly prepended to the filename)
-      std::string replaceVars = m_LibraryPathOption;
-      m_Makefile->ExpandVariablesInString(replaceVars);
 
-      linkLibs += replaceVars;
-      cmSystemTools::ConvertToWindowsSlashes(libpath);
-      linkLibs += libpath;
-      linkLibs += " ";
+  // Expand content because this value might have
+  // trailing space (since it is directly prepended to the filename)
+  std::string lib_path_opt = m_LibraryPathOption;
+  m_Makefile->ExpandVariablesInString(lib_path_opt);
+        
+  if (lib_path_opt.size())
+    {
+    std::vector<std::string>& libdirs = m_Makefile->GetLinkDirectories();
+    for(std::vector<std::string>::iterator libDir = libdirs.begin();
+        libDir != libdirs.end(); ++libDir)
+      { 
+      std::string libpath = ShortPath(libDir->c_str());
+      if(emitted.insert(libpath).second)
+        {
+        linkLibs += lib_path_opt;
+        cmSystemTools::ConvertToWindowsSlashes(libpath);
+        linkLibs += libpath;
+        linkLibs += " ";
+        }
       }
     }
 
