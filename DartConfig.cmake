@@ -21,7 +21,6 @@ SET (PROJECT_URL "http://www.cmake.org")
 
 # Dart server configuration 
 SET (ROLLUP_URL "http://${DROP_SITE}/cgi-bin/cmake-rollup-dashboard.sh")
-#SET (CVS_WEB_URL "http://${DROP_SITE}/cgi-bin/cvsweb.cgi/CMake/")
 SET (CVS_WEB_URL "http://${DROP_SITE}/cgi-bin/viewcvs.cgi/")
 SET (CVS_WEB_CVSROOT "CMake")
 SET (USE_DOXYGEN "On")
@@ -36,16 +35,17 @@ MARK_AS_ADVANCED(BUILD_DOXYGEN)
 # Continuous email delivery variables
 SET (CONTINUOUS_FROM "cmake-dashboard@public.kitware.com")
 SET (SMTP_MAILHOST "public.kitware.com")
-SET (CONTINUOUS_MONITOR_LIST "cmake-dashboard@public.kitware.com andy.cedilnik@kitware.com")
+SET (CONTINUOUS_MONITOR_LIST "cmake-dashboard@public.kitware.com")
 SET (CONTINUOUS_BASE_URL "${PROJECT_URL}/Testing")
 
 SET (DELIVER_BROKEN_BUILD_EMAIL_WITH_TEST_FAILURES ON)
 SET (DELIVER_BROKEN_BUILD_EMAIL "Continuous Nightly")
 SET (EMAIL_FROM "cmake-dashboard@public.kitware.com")
-SET (DARTBOARD_BASE_URL "http://www.cmake.org/Testing")
+SET (DARTBOARD_BASE_URL "${PROJECT_URL}/Testing")
 
 SET (DELIVER_BROKEN_BUILD_EMAIL_WITH_CONFIGURE_FAILURES 1)
 SET (DELIVER_BROKEN_BUILD_EMAIL_WITH_BUILD_ERRORS 1)
 SET (DELIVER_BROKEN_BUILD_EMAIL_WITH_BUILD_WARNINGS 1)
 SET (DELIVER_BROKEN_BUILD_EMAIL_WITH_TEST_NOT_RUNS 1)
 SET (DELIVER_BROKEN_BUILD_EMAIL_WITH_TEST_FAILURES 1)
+
