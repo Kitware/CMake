@@ -442,6 +442,7 @@ void cmCursesMainForm::RunCMake(bool generateMakefiles)
   touchwin(stdscr);
   refresh();
   endwin();
+  std::cerr << "Running CMake, please wait...\n\r";
   // always save the current gui values to disk
   this->FillCacheManagerFromUI();
   cmCacheManager::GetInstance()->SaveCache(cmSystemTools::GetCurrentWorkingDirectory().c_str());
