@@ -119,7 +119,7 @@ void cmGlobalGenerator::EnableLanguage(const char* lang,
       static char envCC[5000];
       std::string env = "CC=${CMAKE_C_COMPILER}";
       mf->ExpandVariablesInString(env);
-      unsigned int size = env.size();
+      unsigned int size = static_cast<unsigned int>(env.size());
       if(size > 4999)
         {
         size = 4999;
@@ -148,7 +148,7 @@ void cmGlobalGenerator::EnableLanguage(const char* lang,
       {
       std::string env = "CXX=${CMAKE_CXX_COMPILER}";
       mf->ExpandVariablesInString(env); 
-      unsigned int size = env.size();
+      unsigned int size =  static_cast<unsigned int>(env.size());
       if(size > 4999)
         {
         size = 4999;
