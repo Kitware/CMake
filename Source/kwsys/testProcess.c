@@ -96,19 +96,18 @@ int test5(int argc, const char* argv[])
 int test6(int argc, const char* argv[])
 {
   int i;
-  char runaway[TEST6_SIZE+2];
+  char runaway[TEST6_SIZE+1];
   (void)argc; (void)argv;
   for(i=0;i < TEST6_SIZE;++i)
     {
     runaway[i] = '.';
     }
   runaway[TEST6_SIZE] = '\n';
-  runaway[TEST6_SIZE] = 0;
 
   /* Generate huge amounts of output to test killing.  */
   for(;;)
     {
-    fwrite(runaway, 1, TEST6_SIZE+2, stdout);
+    fwrite(runaway, 1, TEST6_SIZE+1, stdout);
     fflush(stdout);
     }
   return 0;
