@@ -357,14 +357,8 @@ void cmCursesMainForm::UpdateStatusBar()
   if (entry)
     {
     helpString = entry->m_HelpString.c_str();
-    if (strlen(helpString) > 127)
-      {
-      sprintf(help,"%127s", helpString);
-      }
-    else
-      {
-      sprintf(help,"%s", helpString);
-      }
+    strncpy(help, helpString, 127);
+    help[127] = '\0';
     }
   else
     {
