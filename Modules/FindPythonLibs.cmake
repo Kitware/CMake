@@ -71,3 +71,15 @@ IF (WIN32)
     PYTHON_INCLUDE_PATH
   )
 ENDIF(WIN32)
+
+# Python Should be built and installed as a Framework on OSX
+IF (APPLE)
+  IF (EXISTS ~/Library/Frameworks/Python.framework)
+    SET (PYTHON_LIBRARY "-framework Python" CACHE FILEPATH "Python Framework" FORCE)
+    SET (PYTHON_INCLUDE_PATH "~/Library/Frameworks/Python.framework/Headers" CACHE INTERNAL "Hack into the framework")
+  ENDIF (EXISTS ~/Library/Frameworks/Python.framework)
+  IF (EXISTS /Library/Frameworks/Python.framework)
+    SET (PYTHON_LIBRARY "-framework Python" CACHE FILEPATH "Python Framework" FORCE)
+    SET (PYTHON_INCLUDE_PATH "/Library/Frameworks/Python.framework/Headers" CACHE INTERNAL "Hack into the framework")
+  ENDIF (EXISTS /Library/Frameworks/Python.framework)
+ENDIF (APPLE)
