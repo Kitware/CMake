@@ -83,9 +83,25 @@ FEATURES:
 Add include and directories to the build on windows.
 For unix just add them to the CMakeLocal.make.in
 Add a --with idea, sets a #define in the config.h file
+Create a directory
+Run a command
 
 CLEANUP:
 Change ME to LIBRARY, and add PROJECT=
 Remove the rest of the ITK_* stuff
 move the libs used from the top into the testing...
+
+
+FEATURES
+1. run a command in the current build directory
+2. make a directory
+3. search for 3rd party software and define some variables
+that can be used in the CMakeLists.txt files.  Perhaps from
+some central CMake.in file.
+4. Have cmake define some stuff like:
+  SITE, OS-REV, COMPILER-VERSION
+(use configure for unix, and add stuff to the pc version for windows.)
+
+BUGS:
+1. allow multiple registry entries on windows
 
