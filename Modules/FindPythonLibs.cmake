@@ -13,8 +13,8 @@ FIND_LIBRARY(PYTHON_DEBUG_LIBRARY
   PATHS
   /usr/lib
   /usr/local/lib
-  [HKEY_LOCAL_MACHINE\SOFTWARE\Python\PythonCore\2.1\InstallPath]/libs/Debug
-  [HKEY_LOCAL_MACHINE\SOFTWARE\Python\PythonCore\2.0\InstallPath]/libs/Debug
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.1\\InstallPath]/libs/Debug
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.0\\InstallPath]/libs/Debug
 )
 
 FIND_LIBRARY(PYTHON_LIBRARY 
@@ -24,8 +24,8 @@ FIND_LIBRARY(PYTHON_LIBRARY
   /usr/lib/python2.1/config
   /usr/lib/python2.0/config
   /usr/local/lib
-  [HKEY_LOCAL_MACHINE\SOFTWARE\Python\PythonCore\2.1\InstallPath]/libs
-  [HKEY_LOCAL_MACHINE\SOFTWARE\Python\PythonCore\2.0\InstallPath]/libs
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.1\\InstallPath]/libs
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.0\\InstallPath]/libs
 )
   
 FIND_PATH(PYTHON_INCLUDE_PATH Python.h
@@ -33,7 +33,7 @@ FIND_PATH(PYTHON_INCLUDE_PATH Python.h
   /usr/include/python2.1
   /usr/include/python2.0
   /usr/local/include
-  [HKEY_LOCAL_MACHINE\SOFTWARE\Python\PythonCore\2.1\InstallPath]/include
-  [HKEY_LOCAL_MACHINE\SOFTWARE\Python\PythonCore\2.0\InstallPath]/include
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.1\\InstallPath]/include
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\2.0\\InstallPath]/include
 )
 

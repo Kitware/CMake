@@ -524,9 +524,9 @@ void cmSystemTools::GetArguments(std::string& line,
                                  std::vector<std::string>& arguments)
 {
   // Match a normal argument (not quoted, no spaces).
-  cmRegularExpression normalArgument("[\t ]*([^\" \t]+)[\t ]*");
+  cmRegularExpression normalArgument("[ \t]*(([^ \t\\]|[\\].)+)[ \t]*");
   // Match a quoted argument (surrounded by double quotes, spaces allowed).
-  cmRegularExpression quotedArgument("[\t ]*(\"[^\"]*\")[\t ]*");
+  cmRegularExpression quotedArgument("[ \t]*(\"([^\"\\]|[\\].)*\")[ \t]*");
 
   bool done = false;
   while(!done)
@@ -539,6 +539,7 @@ void cmSystemTools::GetArguments(std::string& line,
     if(foundQuoted && foundNormal)
       {
       // Both matches were found.  Take the earlier one.
+      // Favor double-quoted version if there is a tie.
       if(normalArgument.start(1) < quotedArgument.start(1))
         {
         arg = normalArgument.match(1);
@@ -570,10 +571,49 @@ void cmSystemTools::GetArguments(std::string& line,
       }
     if(!done)
       {
-      arguments.push_back(arg);
+      arguments.push_back(cmSystemTools::RemoveEscapes(arg.c_str()));
       line = line.substr(endpos, line.length() - endpos);
       }
     }
+}
+
+
+std::string cmSystemTools::RemoveEscapes(const char* s)
+{
+  std::string result = "";
+  for(const char* ch = s; *ch; ++ch)
+    {
+    if(*ch == '\\')
+      {
+      ++ch;
+      switch (*ch)
+        {
+        case '\\': result.insert(result.end(), '\\'); break;
+        case '"': result.insert(result.end(), '"'); break;
+        case ' ': result.insert(result.end(), ' '); break;
+        case 't': result.insert(result.end(), '\t'); break;
+        case 'n': result.insert(result.end(), '\n'); break;
+        case 'r': result.insert(result.end(), '\r'); break;
+        case '0': result.insert(result.end(), '\0'); break;
+        case '\0':
+          {
+          cmSystemTools::Error("Trailing backslash in argument:\n", s);
+          return result;
+          }
+        default:
+          {
+          std::string chStr(1, *ch);
+          cmSystemTools::Error("Invalid escape sequence \\", chStr.c_str(),
+                               "\nin argument ", s);
+          }
+        }
+      }
+    else
+      {
+      result.insert(result.end(), *ch);
+      }
+    }
+  return result;
 }
 
 void cmSystemTools::Error(const char* m1, const char* m2,

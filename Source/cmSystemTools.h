@@ -132,6 +132,13 @@ public:
    */
   static void GetArguments(std::string& line,
                            std::vector<std::string>& arguments);
+  
+  /**
+   * Given a string, replace any escape sequences with the corresponding
+   * characters.
+   */
+  static std::string RemoveEscapes(const char*);
+  
 
   /**
    *  Add the paths from the environment variable PATH to the 

@@ -30,10 +30,10 @@ FIND_LIBRARY(TCL_LIBRARY
   /usr/lib 
   /usr/local/lib
   "C:/Program Files/Tcl/lib" 
-  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.4;Root]/lib
-  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.3;Root]/lib
-  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.2;Root]/lib
-  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.0;Root]/lib
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.4;Root]/lib
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.3;Root]/lib
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.2;Root]/lib
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.0;Root]/lib
   "${TCL_TCLSH_PATH}/../lib"
   "${TK_WISH_PATH}/../lib"
 )
@@ -44,10 +44,10 @@ FIND_LIBRARY(TK_LIBRARY
   /usr/lib 
   /usr/local/lib
   "C:/Program Files/Tcl/lib" 
-  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.4;Root]/lib
-  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.3;Root]/lib
-  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.2;Root]/lib
-  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.0;Root]/lib
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.4;Root]/lib
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.3;Root]/lib
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.2;Root]/lib
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.0;Root]/lib
   "${TCL_TCLSH_PATH}/../lib"
   "${TK_WISH_PATH}/../lib"
 )
@@ -56,10 +56,10 @@ FIND_PATH(TCL_INCLUDE_PATH tcl.h
   /usr/include 
   /usr/local/include
   "C:/Program Files/Tcl/include" 
-  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.4;Root]/include
-  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.3;Root]/include
-  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.2;Root]/include
-  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.0;Root]/include
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.4;Root]/include
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.3;Root]/include
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.2;Root]/include
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.0;Root]/include
   "${TCL_TCLSH_PATH}/../include"
   "${TK_WISH_PATH}/../include"
 )
@@ -68,10 +68,10 @@ FIND_PATH(TK_INCLUDE_PATH tk.h
   /usr/include 
   /usr/local/include
   "C:/Program Files/Tcl/include" 
-  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.4;Root]/include
-  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.3;Root]/include
-  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.2;Root]/include
-  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.0;Root]/include
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.4;Root]/include
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.3;Root]/include
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.2;Root]/include
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.0;Root]/include
   "${TCL_TCLSH_PATH}/../include"
   "${TK_WISH_PATH}/../include"
 )
@@ -80,10 +80,10 @@ FIND_PATH(TK_INTERNAL_PATH tkWinInt.h
   /usr/include 
   /usr/local/include
   "C:/Program Files/Tcl/include" 
-  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.4;Root]/include
-  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.3;Root]/include
-  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.2;Root]/include
-  [HKEY_LOCAL_MACHINE\SOFTWARE\Scriptics\Tcl\8.0;Root]/include
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.4;Root]/include
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.3;Root]/include
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.2;Root]/include
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.0;Root]/include
   "${TCL_TCLSH_PATH}/../include"
   "${TK_WISH_PATH}/../include"
 )
