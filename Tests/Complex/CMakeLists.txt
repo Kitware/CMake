@@ -3,8 +3,18 @@
 #
 PROJECT (Complex)
 
+#
+# Define a macro
+#
+MACRO(ASSERT value msg)
+  IF (NOT ${value})
+    MESSAGE ("Assertion failure:" ${msg} )
+  ENDIF (NOT ${value})
+ENDMACRO(ASSERT)
+ 
+# invoke the macro
+ASSERT(Complex_BINARY_DIR "The PROJECT command is broken")
 
-  
 #
 # Use the ansi CXX compile flag for building cmake
 #
