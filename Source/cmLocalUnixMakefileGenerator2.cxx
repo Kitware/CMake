@@ -2662,7 +2662,8 @@ cmLocalUnixMakefileGenerator2
     std::string cmd = commandLine[0];
     cmSystemTools::ReplaceString(cmd, "/./", "/");
     cmd = this->ConvertToRelativePath(cmd.c_str());
-    if(cmd.find("/") == cmd.npos)
+    if(cmd.find("/") == cmd.npos &&
+       commandLine[0].find("/") != cmd.npos)
       {
       // Add a leading "./" for executables in the current directory.
       cmd = "./" + cmd;
