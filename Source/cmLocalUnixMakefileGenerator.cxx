@@ -2220,7 +2220,7 @@ void cmLocalUnixMakefileGenerator::OutputSubDirectoryRules(std::ostream& fout)
                                "SUBDIR_PREORDER_BUILD",
                                "default_target",
                                "default_target",
-                               0, "$(TARGETS)",
+                               0, 0,
                                SubDirectories,
                                false, 2);
   this->OutputSubDirectoryVars(fout, "SUBDIR_CLEAN", "clean",
