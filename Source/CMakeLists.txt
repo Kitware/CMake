@@ -251,6 +251,19 @@ IF(BUILD_TESTING)
     --build-options
      "-DCMAKE_INSTALL_PREFIX:PATH=${SimpleInstallInstallDir}"
     --test-command   ${SimpleInstallInstallDir}/bin/SimpleInstall)
+  ADD_TEST(SimpleInstall-Stage2 ${CMAKE_CTEST_COMMAND}
+    --build-and-test 
+    "${CMake_SOURCE_DIR}/Tests/SimpleInstall"
+    "${CMake_BINARY_DIR}/Tests/SimpleInstallS2"
+    --build-generator ${CMAKE_GENERATOR}
+    --build-project TestSimpleInstall
+    --build-makeprogram ${MAKEPROGRAM}
+    --build-two-config
+    --build-options
+     "-DCMAKE_INSTALL_PREFIX:PATH=${SimpleInstallInstallDir}"
+     "-DSTAGE2:BOOL=1"
+    --test-command 
+    ${CMake_BINARY_DIR}/Tests/SimpleInstallS2/ExecPath/SimpleInstallS2)
 
   ADD_TEST(X11  ${CMAKE_CTEST_COMMAND}
     --build-and-test 
