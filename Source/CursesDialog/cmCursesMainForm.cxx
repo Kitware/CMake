@@ -592,7 +592,7 @@ int cmCursesMainForm::Configure()
     int x,y;
     getmaxyx(stdscr, y, x);
     cmCursesLongMessageForm* msgs = new cmCursesLongMessageForm(m_Errors,
-								"Errors which during last pass.");
+								"Errors occurred during the last pass.");
     CurrentForm = msgs;
     msgs->Render(1,1,x,y);
     msgs->HandleInput();
@@ -648,7 +648,7 @@ int cmCursesMainForm::Generate()
     int x,y;
     getmaxyx(stdscr, y, x);
     cmCursesLongMessageForm* msgs = new cmCursesLongMessageForm(m_Errors,
-								"Errors which during last pass.");
+								"Errors occurred during the last pass.");
     CurrentForm = msgs;
     msgs->Render(1,1,x,y);
     msgs->HandleInput();
@@ -887,7 +887,7 @@ void cmCursesMainForm::HandleInput()
 	{
 	getmaxyx(stdscr, y, x);
 	cmCursesLongMessageForm* msgs = new cmCursesLongMessageForm(m_Errors,
-								    "Errors which during last pass.");
+								    "Errors occurred during the last pass.");
 	CurrentForm = msgs;
 	msgs->Render(1,1,x,y);
 	msgs->HandleInput();
