@@ -40,7 +40,7 @@ bool cmAddCustomTargetCommand::InitialPass(std::vector<std::string> const& args)
       }
     }
   std::string command;
-  if(s != args.end())
+  if(s != args.end() && *s != "DEPENDS")
     {
     command = *s;
     ++s;
