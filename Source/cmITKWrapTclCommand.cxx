@@ -88,6 +88,10 @@ bool cmITKWrapTclCommand::CreateCableRule(const char* configFile)
     {
     commandArgs.push_back("--gccxml-compiler");
     commandArgs.push_back(tmp);
+    tmp = "${CMAKE_CXX_FLAGS}";
+    m_Makefile->ExpandVariablesInString(tmp);
+    commandArgs.push_back("--gccxml-cxxflags");
+    commandArgs.push_back(tmp);
     }
 #endif
   const char* gccxml = m_Makefile->GetDefinition("ITK_GCCXML_EXECUTABLE");
