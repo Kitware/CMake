@@ -254,10 +254,10 @@ void cmake::AddCMakePaths(const std::vector<std::string>& args)
   // Find ccommand
   std::string cCommand = cmSystemTools::GetFilenamePath(cMakeSelf) +
     "/ccommand" + cmSystemTools::GetFilenameExtension(cMakeSelf);
-  if( !cmSystemTools::FileExists(cMakeSelf.c_str()))
+  if( !cmSystemTools::FileExists(cCommand.c_str()))
     {
     cmSystemTools::Error("CMAKE can not find the command line program "
-			 "ccommand. Attempted path: ", cMakeSelf.c_str());
+			 "ccommand. Attempted path: ", cCommand.c_str());
     return;
     }
 
@@ -265,6 +265,21 @@ void cmake::AddCMakePaths(const std::vector<std::string>& args)
   cmCacheManager::GetInstance()->AddCacheEntry
     ("CCOMMAND_COMMAND",cCommand.c_str(),
      "Path to CMakeCommand executable.", cmCacheManager::INTERNAL);
+
+  // Find and save the command to edit the cache
+  std::string editCacheCommand = cmSystemTools::GetFilenamePath(cMakeSelf) +
+    "/ccmake" + cmSystemTools::GetFilenameExtension(cMakeSelf);
+  if( !cmSystemTools::FileExists(editCacheCommand.c_str()))
+    {
+    editCacheCommand = cmSystemTools::GetFilenamePath(cMakeSelf) +
+      "/CMakeSetup" + cmSystemTools::GetFilenameExtension(cMakeSelf);
+    }
+  if(cmSystemTools::FileExists(editCacheCommand.c_str()))
+    {
+    cmCacheManager::GetInstance()->AddCacheEntry
+      ("CMAKE_EDIT_COMMAND", editCacheCommand.c_str(),
+       "Path to cache edit program executable.", cmCacheManager::INTERNAL);
+    }
   
   // do CMAKE_ROOT, look for the environment variable first
   std::string cMakeRoot;

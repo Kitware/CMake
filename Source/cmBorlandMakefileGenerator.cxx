@@ -106,17 +106,23 @@ void cmBorlandMakefileGenerator::OutputMakeVariables(std::ostream& fout)
   fout << "RM = " << this->ConvertToOutputPath(ccommand.c_str()) << " remove -f\n";
   std::string ccompiler = m_Makefile->GetDefinition("CMAKE_C_COMPILER");
   fout << "CMAKE_C_COMPILER  = " 
-       << this->ConvertToOutputPath(ccompiler.c_str())
+       << this->ShortPath(ccompiler.c_str())
        << "\n";
   std::string cxxcompiler = m_Makefile->GetDefinition("CMAKE_CXX_COMPILER");
   fout << "CMAKE_CXX_COMPILER  = "
-       << this->ConvertToOutputPath(cxxcompiler.c_str())
+       << this->ShortPath(cxxcompiler.c_str())
        << "\n";
-
+  
+  if(m_Makefile->GetDefinition("CMAKE_EDIT_COMMAND"))
+    {
+    fout << "CMAKE_EDIT_COMMAND = "
+         << this->ShortPath(m_Makefile->GetDefinition("CMAKE_EDIT_COMMAND"))
+         << "\n";
+    }
   
   std::string cmakecommand = m_Makefile->GetDefinition("CMAKE_COMMAND");
   fout << "CMAKE_COMMAND = " 
-       << this->ConvertToOutputPath(cmakecommand.c_str()) << "\n";
+       << this->ShortPath(cmakecommand.c_str()) << "\n";
 
   fout << replaceVars.c_str();
   fout << "CMAKE_CURRENT_SOURCE = " 
@@ -135,7 +141,7 @@ void cmBorlandMakefileGenerator::OutputMakeVariables(std::ostream& fout)
   std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();
   std::vector<std::string>::iterator i;
   fout << "-I" << 
-    this->ConvertToOutputPath(m_Makefile->GetStartDirectory()) << " ";
+    this->ShortPath(m_Makefile->GetStartDirectory()) << " ";
   for(i = includes.begin(); i != includes.end(); ++i)
     {
     std::string include = *i;

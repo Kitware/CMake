@@ -1610,6 +1610,12 @@ void cmUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
   fout << "CMAKE_COMMAND = "
        << this->ConvertToOutputPath(m_Makefile->GetDefinition("CMAKE_COMMAND"))
        << "\n";
+  if(m_Makefile->GetDefinition("CMAKE_EDIT_COMMAND"))
+    {
+    fout << "CMAKE_EDIT_COMMAND = "
+         << this->ConvertToOutputPath(m_Makefile->GetDefinition("CMAKE_EDIT_COMMAND"))
+         << "\n";
+    }
 
   fout << "CMAKE_CURRENT_SOURCE = " << 
     this->ConvertToOutputPath(m_Makefile->GetStartDirectory()) << "\n";
@@ -1864,6 +1870,18 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                        "$(CMAKE_BINARY_DIR)/CMakeCache.txt",
                        "$(CMAKE_COMMAND) "
                        "-H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)");
+  // if CMAKE_EDIT_COMMAND is defined then add a rule to run it
+  // called edit_cache
+  if(m_Makefile->GetDefinition("CMAKE_EDIT_COMMAND"))
+    {
+    this->OutputMakeRule(fout, 
+                         "Edit the CMakeCache.txt file with ccmake or CMakeSetup",
+                         "edit_cache",
+                         0,
+                         "$(CMAKE_EDIT_COMMAND) "
+                         "-H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)");
+    }
+  
   this->OutputMakeRule(fout, 
                        "Create CMakeCache.txt file",
                        "$(CMAKE_BINARY_DIR)/CMakeCache.txt",

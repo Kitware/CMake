@@ -192,6 +192,13 @@ void cmNMakeMakefileGenerator::OutputMakeVariables(std::ostream& fout)
   fout << "CMAKE_COMMAND                          = "
        << this->ShortPath(cmakecommand.c_str()) << "\n";
 
+  if(m_Makefile->GetDefinition("CMAKE_EDIT_COMMAND"))
+    {
+    fout << "CMAKE_EDIT_COMMAND = "
+         << this->ShortPath(m_Makefile->GetDefinition("CMAKE_EDIT_COMMAND"))
+         << "\n";
+    }
+
   fout << "CMAKE_CURRENT_SOURCE                   = " 
        << this->ShortPath(m_Makefile->GetStartDirectory() )
        << "\n";
