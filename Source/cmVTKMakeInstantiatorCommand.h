@@ -85,6 +85,12 @@ protected:
   
   void GenerateHeaderFile(std::ostream&);
   void GenerateImplementationFile(std::ostream&);
+  
+  void OldGenerateHeaderFile(std::ostream&);
+  void OldGenerateImplementationFile(std::ostream&);
+  std::string OldGenerateCreationFileName(unsigned int group);
+  void OldGenerateCreationFile(std::ostream&, unsigned int groupStart,
+                               unsigned int groupSize);
 };
 
 
