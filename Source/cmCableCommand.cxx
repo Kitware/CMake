@@ -72,10 +72,10 @@ void cmCableCommand::SetupCableData()
   pathName += "/cable_config.xml";
   m_CableData = new cmCableData(this, pathName);
   
-  std::vector<string> depends;
-  depends.push_back("cable_config.xml");
-  m_Makefile->AddCustomCommand("source_cable_config.xml",
-                               "result_file",
-                               "cable cable_config.xml",
-                               depends);
+//  std::vector<std::string> depends;
+//  depends.push_back("cable_config.xml");
+//  m_Makefile->AddCustomCommand("source_cable_config.xml",
+//                               "result_file",
+//                               "cable cable_config.xml",
+//                               depends);
 }
