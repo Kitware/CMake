@@ -1790,6 +1790,7 @@ void cmCTest::ProcessDirectory(std::vector<std::string> &passed,
                 fprintf(stderr,"Other");
                 cres.m_Status = cmCTest::OTHER_FAULT;
                 }
+              fprintf(stderr,"\n");
               }
             else if ( res == cmsysProcess_State_Error )
               {
