@@ -164,14 +164,14 @@ static BOOL RealPopenCreateProcess(const char *cmdstring,
       ZeroMemory(s2, x);
       sprintf(
 	s2,
-	"%s \"%s%s%s\"",
+	"%s %s%s%s",
 	modulepath,
 	s1,
 	s3,
 	cmdstring);
       sprintf(
 	s2,
-	"%s \"%s\"",
+	"%s %s",
 	modulepath,
 	cmdstring);
       }
