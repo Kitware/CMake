@@ -52,6 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 class cmFunctionBlocker;
 class cmCommand;
 class cmMakefileGenerator;
+class cmMakeDepend;
 
 /** \class cmMakefile
  * \brief Process the input CMakeLists.txt file.
