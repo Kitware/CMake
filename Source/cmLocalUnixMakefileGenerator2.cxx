@@ -3061,18 +3061,31 @@ cmLocalUnixMakefileGenerator2
     makefileStream
       << "# Targets to make sure needed libraries exist.\n"
       << "# These will jump to other directories to build targets.\n"
+      << "# Note that extra dependencies are added to enforce an ordering\n"
+      << "# that prevents parallel jumps.\n"
       << "\n";
     }
 
-  std::vector<std::string> depends;
-  std::vector<std::string> commands;
+  // Keep track of the last jump target written.
+  std::string lastJump;
+
+  // Add each jump rule.
   for(std::map<cmStdString, RemoteTarget>::iterator
         jump = m_JumpAndBuild.begin(); jump != m_JumpAndBuild.end(); ++jump)
     {
     const cmLocalUnixMakefileGenerator2::RemoteTarget& rt = jump->second;
     const char* destination = rt.m_BuildDirectory.c_str();
 
-    // Construct the dependency and build target names.
+    // Depend on the previously written jump rule to make sure only
+    // one jump happens at a time.  This avoids problems with multiple
+    // jump paths leading to the same target at the same time.
+    std::vector<std::string> depends;
+    if(!lastJump.empty())
+      {
+      depends.push_back(lastJump);
+      }
+
+    // Construct the dependency and build target names for the destination.
     std::string dep = jump->first;
     dep += ".dir/";
     dep += jump->first;
@@ -3083,7 +3096,7 @@ cmLocalUnixMakefileGenerator2
     tgt = this->ConvertToRelativeOutputPath(tgt.c_str());
 
     // Add the pre-jump message.
-    commands.clear();
+    std::vector<std::string> commands;
     std::string jumpPreEcho = "Jumping to ";
     jumpPreEcho += rt.m_BuildDirectory.c_str();
     jumpPreEcho += " to build ";
@@ -3147,6 +3160,9 @@ cmLocalUnixMakefileGenerator2
     // Write the rule.
     this->WriteMakeRule(makefileStream, 0,
                         rt.m_FilePath.c_str(), depends, commands);
+
+    // This is now the last jump target written.
+    lastJump = rt.m_FilePath;
     }
 }
 
