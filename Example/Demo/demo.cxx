@@ -1,4 +1,3 @@
-#include <iostream>
 #include "hello.h"
 
 extern Hello hello;
