@@ -152,7 +152,7 @@ struct cmStdString : public std::string
 // Define cmStringStream wrapper to hide differences between
 // std::stringstream and the old strstream.
 #if !defined(CMAKE_NO_ANSI_STRING_STREAM)
-class cmStringStream: public std::stringstream
+class cmStringStream: public std::ostringstream
 {
 public:
   cmStringStream() {}
@@ -164,17 +164,17 @@ private:
 class cmStrStreamCleanup
 {
 public:
-  cmStrStreamCleanup(std::strstream& ostr): m_StrStream(ostr) {}
+  cmStrStreamCleanup(std::ostrstream& ostr): m_StrStream(ostr) {}
   ~cmStrStreamCleanup() { m_StrStream.rdbuf()->freeze(0); }
   static void IgnoreUnusedVariable(const cmStrStreamCleanup&) {}
 protected:
-  std::strstream& m_StrStream;
+  std::ostrstream& m_StrStream;
 };
 
-class cmStringStream: public std::strstream
+class cmStringStream: public std::ostrstream
 {
 public:
-  typedef std::strstream Superclass;
+  typedef std::ostrstream Superclass;
   cmStringStream() {}
   std::string str()
     {
