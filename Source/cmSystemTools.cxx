@@ -1248,13 +1248,15 @@ void cmSystemTools::cmCopyFile(const char* source,
     {
     cmSystemTools::Error("CopyFile failed to copy files!");
     }
-
-  if (statSource.st_size != statDestination.st_size)
+  else
     {
-    cmOStringStream msg;
-    msg << "CopyFile failed to copy files (sizes differ, source: " 
-        << statSource.st_size << " , dest: " << statDestination.st_size;
-    cmSystemTools::Error(msg.str().c_str());
+    if (statSource.st_size != statDestination.st_size)
+      {
+      cmOStringStream msg;
+      msg << "CopyFile failed to copy files (sizes differ, source: " 
+          << statSource.st_size << " , dest: " << statDestination.st_size;
+      cmSystemTools::Error(msg.str().c_str());
+      }
     }
 }
 
