@@ -1,6 +1,6 @@
 PROJECT(CMake)
 
-SUBDIRS(Source Modules Templates)
+SUBDIRS(Source Modules Templates Utilities)
 
 # Include the standard Dart testing module
 INCLUDE (${CMAKE_ROOT}/Modules/Dart.cmake)
