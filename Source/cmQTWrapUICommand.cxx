@@ -193,22 +193,27 @@ void cmQTWrapUICommand::FinalPass()
     mocargs.push_back(mocres);
     mocargs.push_back(hres);
 
-    m_Makefile->AddCustomCommand(m_WrapUserInterface[classNum].c_str(),
-                                 uic_exe.c_str(), hargs, depends, 
-                                 hres.c_str(), m_LibraryName.c_str());
+    depends.clear();
+    depends.push_back(m_WrapUserInterface[classNum]);
+    m_Makefile->AddCustomCommandToOutput(
+      hres.c_str(),
+      uic_exe.c_str(), hargs, 0,
+      depends);
 
     depends.push_back(hres);
 
-    m_Makefile->AddCustomCommand(m_WrapUserInterface[classNum].c_str(),
-                                 uic_exe.c_str(), cxxargs, depends, 
-                                 cxxres.c_str(), m_LibraryName.c_str());
+    m_Makefile->AddCustomCommandToOutput(
+      cxxres.c_str(),
+      uic_exe.c_str(), cxxargs, 0, depends);
+
+
 
     depends.clear();
-    depends.push_back(moc_exe);
+    depends.push_back(hres);
 
-    m_Makefile->AddCustomCommand(hres.c_str(),
-                                 moc_exe.c_str(), mocargs, depends, 
-                                 mocres.c_str(), m_LibraryName.c_str());
+    m_Makefile->AddCustomCommandToOutput(
+      mocres.c_str(),
+      moc_exe.c_str(), mocargs, 0, depends);
 
     }
 
