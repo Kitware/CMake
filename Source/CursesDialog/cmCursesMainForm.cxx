@@ -639,8 +639,7 @@ int cmCursesMainForm::Configure(int noconfigure)
   // always save the current gui values to disk
   this->FillCacheManagerFromUI();
   this->m_CMakeInstance->GetCacheManager()->SaveCache(
-    cmSystemTools::GetCurrentWorkingDirectory().c_str());
-
+    m_CMakeInstance->GetHomeOutputDirectory());
   
   // Get rid of previous errors
   m_Errors = std::vector<std::string>();

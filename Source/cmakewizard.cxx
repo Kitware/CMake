@@ -116,8 +116,7 @@ void cmakewizard::RunWizard(std::vector<std::string> const& args)
     this->ShowMessage("\n");
     // load the cache from disk
     cmCacheManager *cachem = make.GetCacheManager();
-    cachem->
-      LoadCache(cmSystemTools::GetCurrentWorkingDirectory().c_str());
+    cachem->LoadCache(make.GetHomeOutputDirectory());
     cmCacheManager::CacheIterator i = cachem->NewIterator();
     // iterate over all entries in the cache
     for(;!i.IsAtEnd(); i.Next())
@@ -151,7 +150,7 @@ void cmakewizard::RunWizard(std::vector<std::string> const& args)
         }
       askedCache[key] = i.GetValue();
       }
-    cachem->SaveCache(cmSystemTools::GetCurrentWorkingDirectory().c_str());
+    cachem->SaveCache(make.GetHomeOutputDirectory());
     }
   while(asked);
   make.Generate();
