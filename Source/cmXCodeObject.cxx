@@ -20,6 +20,14 @@ cmXCodeObject::cmXCodeObject(PBXType ptype, Type type)
   str << (void*)this;
   m_Id = str.str();
   cmSystemTools::ReplaceString(m_Id, "0x", "");
+  if(m_Id.size() < 24)
+    {
+    int diff = 24 - m_Id.size();
+    for(int i =0; i < diff; ++i)
+      {
+      m_Id += "0";
+      }
+    }
   m_Type = type;
   if(m_Type == OBJECT)
     {

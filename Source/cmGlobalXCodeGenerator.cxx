@@ -35,6 +35,7 @@ void cmGlobalXCodeGenerator::EnableLanguage(std::vector<std::string>const& lang,
 { 
   mf->AddDefinition("CMAKE_GENERATOR_CC", "gcc");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "g++");
+  mf->AddDefinition("CMAKE_GENERATOR_NO_COMPILER_ENV", "1");
   this->cmGlobalGenerator::EnableLanguage(lang, mf);
 }
 
@@ -64,6 +65,7 @@ int cmGlobalXCodeGenerator::TryCompile(const char *,
    */
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
   cmSystemTools::ChangeDirectory(bindir);
+  std::cerr << "ChangeDirectory " << bindir << "\n";
 //  Usage: xcodebuild [-project <projectname>] [-activetarget] 
 //         [-alltargets] [-target <targetname>]... [-activebuildstyle] 
 //         [-buildstyle <buildstylename>] [-optionalbuildstyle <buildstylename>] 
@@ -72,13 +74,14 @@ int cmGlobalXCodeGenerator::TryCompile(const char *,
 
   makeCommand += " -project ";
   makeCommand += projectName;
+  makeCommand += ".xcode";
   makeCommand += " build ";
   if (targetName)
     {
     makeCommand += "-target ";
     makeCommand += targetName;
     }
-  
+  makeCommand += " -buildstyle Development ";
   int retVal;
   int timeout = cmGlobalGenerator::s_TryCompileTimeout;
   if (!cmSystemTools::RunSingleCommand(makeCommand.c_str(), output, &retVal, 
@@ -89,6 +92,8 @@ int cmGlobalXCodeGenerator::TryCompile(const char *,
     cmSystemTools::ChangeDirectory(cwd.c_str());
     return 1;
     }
+  std::cerr << makeCommand << "\n";
+  std::cerr << "build worked " << retVal << "\n";;
   cmSystemTools::ChangeDirectory(cwd.c_str());
   return retVal;
 }
@@ -167,8 +172,21 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
   cmXCodeObject* settings = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
   buildFile->AddAttribute("settings", settings);
   fileRef->AddAttribute("fileEncoding", this->CreateString("4"));
+  std::string lang = 
+    this->GetLanguageFromExtension(sf->GetSourceExtension().c_str());
+  std::string sourcecode = "sourcecode";
+  if(lang == "C")
+    {
+      sourcecode += ".c.c";
+    }
+  // default to c++
+  else
+    {
+      sourcecode += ".cpp.cpp";
+    }
+
   fileRef->AddAttribute("lastKnownFileType", 
-                        this->CreateString("sourcecode.cpp.cpp"));
+                        this->CreateString(sourcecode.c_str()));
   fileRef->AddAttribute("path", this->CreateString(
     lg->ConvertToRelativeOutputPath(sf->GetFullPath().c_str()).c_str()));
   fileRef->AddAttribute("refType", this->CreateString("4"));
