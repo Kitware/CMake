@@ -60,6 +60,7 @@ static struct tm* GetNightlyTime(std::string str, bool verbose, bool tomorrowtag
   if ( verbose )
     {
     std::cout << "Determine Nightly Start Time" << std::endl;
+    std::cout << "   Specified time: " << str.c_str() << std::endl;
     }
   //Convert the nightly start time to seconds. Since we are
   //providing only a time and a timezone, the current date of
@@ -75,7 +76,7 @@ static struct tm* GetNightlyTime(std::string str, bool verbose, bool tomorrowtag
   tctime = time(0);
   if ( verbose )
     {
-    std::cout << "   Get the current time: " << ntime << std::endl;
+    std::cout << "   Get the current time: " << tctime << std::endl;
     }
 
   const int dayLength = 24 * 60 * 60;
@@ -94,7 +95,7 @@ static struct tm* GetNightlyTime(std::string str, bool verbose, bool tomorrowtag
       std::cout << "   Future time, subtract day: " << ntime << std::endl;
       }
     }
-  if ( (ntime - tctime) >  dayLength )
+  if ( (tctime - ntime) >  dayLength )
     {
     ntime += dayLength;
     if ( verbose )
