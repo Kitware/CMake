@@ -922,9 +922,9 @@ void cmMainFrame::UpdateCacheValuesDisplay()
   if ( this->m_Update )
     {
     // all the current values are not new any more
-    cmMainFrame::CacheMapType* items = this->m_CacheEntries;
-    for(cmMainFrame::CacheMapType::iterator i = items->begin();
-        i != items->end(); ++i)
+    cmMainFrame::CacheMapType* uitems = this->m_CacheEntries;
+    for(cmMainFrame::CacheMapType::iterator i = uitems->begin();
+        i != uitems->end(); ++i)
       {
       cmCacheProperty* item = i->second;
       item->SetNewFlag( false );
@@ -933,9 +933,9 @@ void cmMainFrame::UpdateCacheValuesDisplay()
 
   // redraw the list
   this->m_CacheValuesPanel->SetBackgroundColour(*wxWHITE);
-  cmMainFrame::CacheMapType* items = this->m_CacheEntries;
-  for(cmMainFrame::CacheMapType::iterator i = items->begin();
-      i != items->end(); ++i)
+  cmMainFrame::CacheMapType* nitems = this->m_CacheEntries;
+  for(cmMainFrame::CacheMapType::iterator i = nitems->begin();
+      i != nitems->end(); ++i)
     {
     cmCacheProperty* item = i->second;
     item->Remove(this->m_CacheValuesSizer, this->m_CacheValuesPanel);
@@ -1025,9 +1025,9 @@ void cmMainFrame::UpdateCacheValuesDisplay()
   if(this->m_CacheEntries->size() > 0 && !cmSystemTools::GetErrorOccuredFlag())
     {
     bool enable = true;
-    cmMainFrame::CacheMapType* items = this->m_CacheEntries;
-    for(cmMainFrame::CacheMapType::iterator i = items->begin();
-        i != items->end(); i++)
+    cmMainFrame::CacheMapType* eitems = this->m_CacheEntries;
+    for(cmMainFrame::CacheMapType::iterator i = eitems->begin();
+        i != eitems->end(); i++)
       {
       cmCacheProperty* item = i->second;
       if(item && item->GetNewFlag() && !item->IsRemoved())
@@ -1062,8 +1062,8 @@ void cmMainFrame::UpdateCacheValuesDisplay()
   int height = 0;
   // redraw the list
   cmMainFrame::CacheMapType::iterator nexti;
-  for(cmMainFrame::CacheMapType::iterator i = items->begin();
-      i != items->end(); i = nexti)
+  for(cmMainFrame::CacheMapType::iterator i = nitems->begin();
+      i != nitems->end(); i = nexti)
     {
     cmCacheProperty* item = i->second;
     nexti = i;
@@ -1071,12 +1071,12 @@ void cmMainFrame::UpdateCacheValuesDisplay()
     if ( item->IsRemoved() )
       {
       delete item;
-      items->erase(i);
+      nitems->erase(i);
       }
     }
   
-  for(cmMainFrame::CacheMapType::iterator i = items->begin();
-      i != items->end(); i++)
+  for(cmMainFrame::CacheMapType::iterator i = nitems->begin();
+      i != nitems->end(); i++)
     {
     cmCacheProperty* item = i->second;
     if((showadvancedvalues || !item->IsAdvanced()) && !item->GetNewFlag() )
@@ -1090,8 +1090,8 @@ void cmMainFrame::UpdateCacheValuesDisplay()
         }
       }
     }
-  for(cmMainFrame::CacheMapType::reverse_iterator i = items->rbegin();
-      i != items->rend(); i++)
+  for(cmMainFrame::CacheMapType::reverse_iterator i = nitems->rbegin();
+      i != nitems->rend(); i++)
     {
     cmCacheProperty* item = i->second;
     if((showadvancedvalues || !item->IsAdvanced()) && item->GetNewFlag())
