@@ -21,6 +21,7 @@
  * $Id$
  ***************************************************************************/
 
+#include "setup.h"
 #ifdef WIN32
 #include <windows.h>
 #endif
@@ -65,6 +66,7 @@ gettimeofday (struct timeval *tp, void *nothing)
   tp->tv_sec = Sec;
   tp->tv_usec = Usec;
 #endif
+  (void)nothing;
   return 1;
 }
 #define HAVE_GETTIMEOFDAY

@@ -659,7 +659,7 @@ static int dprintf_formatf(
     else
       prec = -1;
 
-    alt = p->flags & FLAGS_ALT;
+    alt = (char)(p->flags & FLAGS_ALT);
     
     switch (p->type) {
     case FORMAT_INT:
@@ -707,7 +707,7 @@ static int dprintf_formatf(
       {
         signed_num = (long) num;
       
-        is_neg = signed_num < 0;
+        is_neg = (char)(signed_num < 0);
         num = is_neg ? (- signed_num) : signed_num;
       }
       goto number;
@@ -937,7 +937,7 @@ static int dprintf_formatf(
       else if (!(p->flags & FLAGS_SHORT))
         *(int *) p->data.ptr = done;
       else
-        *(short int *) p->data.ptr = done;
+        *(short int *) p->data.ptr = (short int)done;
       break;
 
     default:
@@ -1023,7 +1023,7 @@ static int alloc_addbyter(int output, FILE *data)
     infop->alloc *= 2;
   }
 
-  infop->buffer[ infop->len ] = output;
+  infop->buffer[ infop->len ] = (char)output;
 
   infop->len++;
 
