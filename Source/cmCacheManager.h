@@ -90,6 +90,7 @@ public:
    * can be different than just a path input
    */
   static CacheEntryType StringToType(const char*);
+  static const char* TypeToString(CacheEntryType);
   
   ///! Load a cache for given makefile.  Loads from ouput home.
   bool LoadCache(cmMakefile*); 

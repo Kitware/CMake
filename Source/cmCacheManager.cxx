@@ -37,6 +37,15 @@ const char* cmCacheManagerTypes[] =
   0
 };
 
+const char* cmCacheManager::TypeToString(cmCacheManager::CacheEntryType type)
+{
+  if ( type > 6 || type < 0 )
+    {
+    return cmCacheManagerTypes[6];
+    }
+  return cmCacheManagerTypes[type];
+}
+
 cmCacheManager::CacheEntryType cmCacheManager::StringToType(const char* s)
 {
   int i = 0;
