@@ -16,6 +16,8 @@
 =========================================================================*/
 #include "cmGetSourceFilePropertyCommand.h"
 
+#include "cmSourceFile.h"
+
 // cmSetSourceFilePropertyCommand
 bool cmGetSourceFilePropertyCommand::InitialPass(
   std::vector<std::string> const& args)

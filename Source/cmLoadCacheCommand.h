@@ -17,6 +17,8 @@
 #ifndef cmLoadCacheCommand_h
 #define cmLoadCacheCommand_h
 
+#include "cmCommand.h"
+
 /** \class cmLoadCacheCommand
  * \brief load a cache file
  *

@@ -19,6 +19,8 @@
 
 #include "cmCommand.h"
 
+#include "cmSourceFile.h"
+
 /** \class cmQTWrapCPPCommand
  * \brief Create moc file rules for QT classes
  *

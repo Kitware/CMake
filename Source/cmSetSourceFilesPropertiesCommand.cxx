@@ -16,6 +16,8 @@
 =========================================================================*/
 #include "cmSetSourceFilesPropertiesCommand.h"
 
+#include "cmSourceFile.h"
+
 // cmSetSourceFilesPropertiesCommand
 bool cmSetSourceFilesPropertiesCommand::InitialPass(
   std::vector<std::string> const& args)

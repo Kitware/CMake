@@ -15,8 +15,10 @@
 
 =========================================================================*/
 #include "cmVTKMakeInstantiatorCommand.h"
+
 #include "cmCacheManager.h"
 #include "cmGeneratedFileStream.h"
+#include "cmSourceFile.h"
 
 bool
 cmVTKMakeInstantiatorCommand

@@ -19,6 +19,8 @@
 
 #include "cmCommand.h"
 
+#include "cmSourceFile.h"
+
 /** \class cmVTKWrapJavaCommand
  * \brief Create Java Language bindings for classes
  *

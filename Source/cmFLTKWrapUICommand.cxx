@@ -16,6 +16,8 @@
 =========================================================================*/
 #include "cmFLTKWrapUICommand.h"
 
+#include "cmSourceFile.h"
+
 // cmFLTKWrapUICommand
 bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args)
 {

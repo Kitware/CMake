@@ -15,6 +15,9 @@
 
 =========================================================================*/
 #include "cmSourceFilesCommand.h"
+
+#include "cmSourceFile.h"
+
 #include <stdlib.h> // required for atof
 
 bool cmSourceFilesCommand::IsDeprecated(int major, int minor)

@@ -15,6 +15,9 @@
 
 =========================================================================*/
 #include "cmWrapExcludeFilesCommand.h"
+
+#include "cmSourceFile.h"
+
 #include <stdlib.h> // required for atof
 
 // cmWrapExcludeFilesCommand

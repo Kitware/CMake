@@ -19,6 +19,8 @@
 
 #include "cmCommand.h"
 
+#include "cmSourceFile.h"
+
 /** \class cmQTWrapUICommand
  * \brief Create .h and .cxx files rules for QT user interfaces files
  *

@@ -16,6 +16,8 @@
 =========================================================================*/
 #include "cmGetCMakePropertyCommand.h"
 
+#include "cmake.h"
+
 // cmGetCMakePropertyCommand
 bool cmGetCMakePropertyCommand::InitialPass(
   std::vector<std::string> const& args)

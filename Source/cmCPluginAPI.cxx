@@ -22,6 +22,8 @@
 #include "cmMakefile.h"
 #include "cmCPluginAPI.h"
 
+#include "cmSourceFile.h"
+
 extern "C" 
 {
   

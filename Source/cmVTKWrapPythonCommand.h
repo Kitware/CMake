@@ -19,6 +19,8 @@
 
 #include "cmCommand.h"
 
+#include "cmSourceFile.h"
+
 /** \class cmVTKWrapPythonCommand
  * \brief Create Python Language bindings for classes
  *

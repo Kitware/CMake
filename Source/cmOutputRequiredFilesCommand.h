@@ -18,6 +18,7 @@
 #define cmOutputRequiredFilesCommand_h
 
 #include "cmCommand.h"
+#include "cmMakeDepend.h"
 
 /** \class cmOutputRequiredFilesCommand
  * \brief Output a list of required files for a source file

@@ -19,6 +19,8 @@
 
 #include "cmCommand.h"
 
+#include "cmSourceFile.h"
+
 /** \class cmVTKWrapTclCommand
  * \brief Create Tcl Wrappers for VTK classes.
  *
