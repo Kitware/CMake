@@ -39,6 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =========================================================================*/
 #include "cmAddExecutableCommand.h"
+#include "cmCacheManager.h"
 
 // cmExecutableCommand
 bool cmAddExecutableCommand::Invoke(std::vector<std::string>& args)
@@ -52,7 +53,12 @@ bool cmAddExecutableCommand::Invoke(std::vector<std::string>& args)
   std::vector<std::string>::iterator s = args.begin();
   std::vector<std::string> srclists(++s, args.end());
   
-  m_Makefile->AddExecutable(args[0].c_str(),srclists);
+  m_Makefile->AddExecutable(args[0].c_str(),srclists); 
+  // Add an entry into the cache 
+  cmCacheManager::GetInstance()->
+    AddCacheEntry(args[0].c_str(),
+                  m_Makefile->GetCurrentOutputDirectory(),
+                  "Path to an executable", cmCacheManager::INTERNAL);
   return true;
 }
 
