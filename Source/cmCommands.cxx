@@ -41,6 +41,7 @@
 #include "cmWrapTclCommand.cxx"
 #include "cmBuildSharedLibrariesCommand.cxx"
 #include "cmUtilitySourceCommand.cxx"
+#include "cmIncludeRegularExpressionCommand.cxx"
 
 void GetPredefinedCommands(std::list<cmCommand*>& commands)
 {
@@ -79,6 +80,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmWrapTclCommand);
   commands.push_back(new cmBuildSharedLibrariesCommand);
   commands.push_back(new cmUtilitySourceCommand);
+  commands.push_back(new cmIncludeRegularExpressionCommand);
 }
 
   

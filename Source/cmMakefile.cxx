@@ -26,6 +26,9 @@
 // default is not to be building executables
 cmMakefile::cmMakefile()
 {
+  // Setup the default include file regular expression.
+  m_IncludeFileRegularExpression = "^itk|^vtk|^vnl|^vcl|^f2c";
+  
   m_DefineFlags = " ";
   m_MakefileGenerator = 0;
   this->AddDefaultCommands();

@@ -103,12 +103,6 @@ public:
    */
   void DoDepends();
 
-  /** 
-   * Set a regular expression that include files must match
-   * in order to be considered as part of the depend information.
-   */
-  void SetIncludeRegularExpression(const char* regex);
-
   /**
    * Add a directory to the search path for include files.
    */

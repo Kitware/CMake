@@ -20,14 +20,7 @@
 cmMakeDepend::cmMakeDepend()
 {
   m_Verbose = false;
-  m_IncludeFileRegularExpression.compile("^itk|^vtk|^vnl|^vcl|^f2c");
-}
-
-
-// only files matching this regular expression with be considered
-void cmMakeDepend::SetIncludeRegularExpression(const char* prefix)
-{
-  m_IncludeFileRegularExpression.compile(prefix);
+  m_IncludeFileRegularExpression.compile("");
 }
 
 
@@ -49,6 +42,10 @@ cmMakeDepend::~cmMakeDepend()
 void cmMakeDepend::SetMakefile(cmMakefile* makefile)
 {
   m_Makefile = makefile;
+
+  // Now extract the include file regular expression from the makefile.
+  m_IncludeFileRegularExpression.compile(
+    m_Makefile->m_IncludeFileRegularExpression.c_str());
   
   // Now extract any include paths from the makefile flags
   std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();

@@ -246,7 +246,16 @@ public:
       return m_CurrentOutputDirectory.c_str();
     }
   //@}
-  
+
+  /** 
+   * Set a regular expression that include files must match
+   * in order to be considered as part of the depend information.
+   */
+  void SetIncludeRegularExpression(const char* regex)
+    {
+      m_IncludeFileRegularExpression = regex;
+    }
+
   /**
    * Specify the name of the library that is built by this makefile.
    */
@@ -429,6 +438,7 @@ protected:
   std::vector<std::string> m_LinkLibraries;
   std::vector<std::string> m_LinkLibrariesWin32;
   std::vector<std::string> m_LinkLibrariesUnix;
+  std::string m_IncludeFileRegularExpression;
   std::string m_DefineFlags;
   std::vector<customCommand> m_CustomCommands;
   typedef std::map<std::string, cmCommand*> RegisteredCommandsMap;
