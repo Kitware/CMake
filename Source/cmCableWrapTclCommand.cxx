@@ -61,6 +61,8 @@ public:
   void AddParsedFlags(std::vector<std::string>& resultArgs);
   
 private:
+  void AddFlag(const std::string&);
+  
   std::vector<std::string> m_Flags;
 };
 
@@ -69,24 +71,23 @@ void cmCableWrapTclCommand::cmGccXmlFlagsParser::Parse(const char* in_flags)
   // Prepare a work string for searching.
   std::string flags = in_flags;
   
-  // Look for " -" separating arguments.  Currently the find_*_options
-  // scripts always output a single space between arguments, so we don't
-  // need to worry about removing extra whitespace.
+  // Look for " -" separating arguments.
   
-  // The first argument starts at the beginning of the string.
-  std::string::size_type leftPos = 0;
+  // The first argument starts at the first "-" character.
+  std::string::size_type leftPos = flags.find_first_of("-");
+  if(leftPos == std::string::npos) { return; }
   std::string::size_type rightPos = flags.find(" -", leftPos);
   while(rightPos != std::string::npos)
     {
     // Pull out and store this argument.
-    m_Flags.push_back(flags.substr(leftPos, rightPos-leftPos));
+    this->AddFlag(flags.substr(leftPos, rightPos-leftPos));
     
     // The next argument starts at the '-' from the previously found " -".
     leftPos = rightPos+1;
     rightPos = flags.find(" -", leftPos);
     }
   // Pull out and store the last argument.
-  m_Flags.push_back(flags.substr(leftPos, std::string::npos));
+  this->AddFlag(flags.substr(leftPos, std::string::npos));
 }
 
 void
@@ -100,6 +101,33 @@ cmCableWrapTclCommand::cmGccXmlFlagsParser
     }
 }
 
+/**
+ * Used by Parse() to insert a parsed flag.  Strips trailing whitespace from
+ * the argument.
+ *
+ * Includes a hack to split "-o /dev/null" into two arguments since
+ * the parser only splits arguments with " -" occurrences.
+ */
+void
+cmCableWrapTclCommand::cmGccXmlFlagsParser
+::AddFlag(const std::string& flag)
+{
+  std::string tmp = flag.substr(0, flag.find_last_not_of(" \t")+1);
+  if(tmp == "-o /dev/null")
+    {
+    m_Flags.push_back("-o");
+    m_Flags.push_back("/dev/null");
+    }
+  else if(tmp == "-D__int64='long long'")
+    {
+    m_Flags.push_back("-D__int64='long");
+    m_Flags.push_back("long'");
+    }
+  else
+    {
+    m_Flags.push_back(tmp);
+    }
+}
 
 cmCableWrapTclCommand::cmCableWrapTclCommand():
   m_CableClassSet(NULL), m_MakeDepend(new cmMakeDepend)
@@ -404,12 +432,11 @@ void cmCableWrapTclCommand::GenerateCableClassFiles(const char* name,
   
   std::vector<std::string> commandArgs;
   this->AddGccXmlFlagsFromCache(commandArgs);
-  //commandArgs.push_back(m_Makefile->GetDefineFlags());
   
   {
   std::string tmp = "-I";
   tmp += m_Makefile->GetStartDirectory();
-  commandArgs.push_back(cmSystemTools::EscapeSpaces(tmp.c_str()));
+  commandArgs.push_back(tmp.c_str());
   }
     
   const std::vector<std::string>& includes = 
@@ -419,7 +446,8 @@ void cmCableWrapTclCommand::GenerateCableClassFiles(const char* name,
     {
     std::string tmp = "-I";
     tmp += i->c_str();
-    commandArgs.push_back(cmSystemTools::EscapeSpaces(tmp.c_str()));
+    m_Makefile->ExpandVariablesInString(tmp);
+    commandArgs.push_back(tmp.c_str());
     }
   std::string tmp = "-fxml=";
   tmp += classXmlName;
@@ -556,6 +584,7 @@ cmCableWrapTclCommand
     parser = new cmGccXmlFlagsParser("cmGccXmlFlagsParser");
     m_Makefile->RegisterData(parser);
     parser->Parse(this->GetGccXmlFlagsFromCache().c_str());
+    parser->Parse(m_Makefile->GetDefineFlags());
     }
   
   // Use the parsed flags in the single instance.
