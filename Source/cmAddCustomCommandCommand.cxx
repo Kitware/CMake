@@ -134,7 +134,7 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
           comment = copy;
           break;
         default:
-          this->SetError("Wrong syntax. Unknow type of argument.");
+          this->SetError("Wrong syntax. Unknown type of argument.");
           return false;
         }
       }
