@@ -213,6 +213,32 @@ static const char* cmCTestMemCheckResultStrings[] = {
   0
 };
 
+static const char* cmCTestMemCheckResultLongStrings[] = {
+  "ABR",
+  "ABW",
+  "ABWL",
+  "COR",
+  "EXU",
+  "FFM",
+  "FIM",
+  "Mismatched deallocation",
+  "FMR",
+  "FMW",
+  "FUM",
+  "IPR",
+  "IPW",
+  "MAF",
+  "Memory Leak",
+  "Potential Memory Leak",
+  "NPR",
+  "ODS",
+  "Invalid syscall param",
+  "PLK",
+  "Uninitialized Memory Conditional",
+  "Uninitialized Memory Read",
+  0
+};
+
 std::string cmCTest::MakeXMLSafe(const std::string& str)
 {
   cmOStringStream ost;
@@ -325,7 +351,7 @@ cmCTest::cmCTest()
   m_RunConfigurationScript = false;
   m_TestModel              = cmCTest::EXPERIMENTAL;
   m_TimeOut                = 0;
-  m_CompatibilityMode      = 1;
+  m_CompatibilityMode      = 0;
   int cc; 
   for ( cc=0; cc < cmCTest::LAST_TEST; cc ++ )
     {
@@ -2450,7 +2476,7 @@ int cmCTest::TestDirectory(bool memcheck)
     {
     std::ofstream xmlfile;
     if( !this->OpenOutputFile(m_CurrentTag, 
-        (memcheck ? (m_CompatibilityMode?"Purify.xml":"MemCheck.xml") : "Test.xml"), xmlfile) )
+        (memcheck ? (m_CompatibilityMode?"Purify.xml":"DynamicAnalysis.xml") : "Test.xml"), xmlfile) )
       {
       std::cerr << "Cannot create " << (memcheck ? "memory check" : "testing")
         << " XML file" << std::endl;
@@ -2534,9 +2560,9 @@ int cmCTest::SubmitResults()
       std::cerr << "Problem globbing" << std::endl;
       }
     }
-  if ( this->CTestFileExists("MemCheck.xml") )
+  if ( this->CTestFileExists("DynamicAnalysis.xml") )
     {
-    files.push_back("MemCheck.xml");
+    files.push_back("DynamicAnalysis.xml");
     }
   if ( this->CTestFileExists("Purify.xml") )
     {
@@ -2658,7 +2684,22 @@ void cmCTest::GenerateDartMemCheckOutput(std::ostream& os)
     }
   else
     {
-    os << "<MemCheck>" << std::endl;
+    os << "<DynamicAnalysis Checker=\"";
+    switch ( m_MemoryTesterStyle )
+      {
+    case cmCTest::VALGRIND:
+      os << "Valgrind";
+      break;
+    case cmCTest::PURIFY:
+      os << "Purify";
+      break;
+    case cmCTest::BOUNDS_CHECKER:
+      os << "BoundsChecker";
+      break;
+    default:
+      os << "Unknown";
+      }
+    os << "\">" << std::endl;
     }
   os << "\t<StartDateTime>" << m_StartTest << "</StartDateTime>\n"
     << "\t<TestList>\n";
@@ -2671,6 +2712,10 @@ void cmCTest::GenerateDartMemCheckOutput(std::ostream& os)
       << "</Test>" << std::endl;
     }
   os << "\t</TestList>\n";
+  std::cout << "-- Processing memory checking output: ";
+  unsigned int total = m_TestResults.size();
+  unsigned int step = total / 10;
+  unsigned int current = 0;
   for ( cc = 0; cc < m_TestResults.size(); cc ++ )
     {
     cmCTestTestResult *result = &m_TestResults[cc];
@@ -2700,19 +2745,58 @@ void cmCTest::GenerateDartMemCheckOutput(std::ostream& os)
       << this->MakeXMLSafe(result->m_FullCommandLine) 
       << "</FullCommandLine>\n"
       << "\t\t<Results>" << std::endl;
-    for ( kk = 0; cmCTestMemCheckResultStrings[kk]; kk ++ )
+    if ( m_CompatibilityMode )
       {
-      os << "\t\t\t<" << cmCTestMemCheckResultStrings[kk] << ">"
-        << memcheckresults[kk] 
-        << "</" << cmCTestMemCheckResultStrings[kk] << ">" << std::endl;
-      m_MemoryTesterGlobalResults[kk] += memcheckresults[kk];
+      for ( kk = 0; cmCTestMemCheckResultStrings[kk]; kk ++ )
+        {
+        os << "\t\t\t<" << cmCTestMemCheckResultStrings[kk] << ">"
+          << memcheckresults[kk] 
+          << "</" << cmCTestMemCheckResultStrings[kk] << ">" << std::endl;
+        m_MemoryTesterGlobalResults[kk] += memcheckresults[kk];
+        }
+      }
+    else
+      {
+      for ( kk = 0; cmCTestMemCheckResultLongStrings[kk]; kk ++ )
+        {
+        if ( memcheckresults[kk] )
+          {
+          os << "\t\t\t<Defect type=\"" << cmCTestMemCheckResultLongStrings[kk] << "\">"
+            << memcheckresults[kk] 
+            << "</Defect>" << std::endl;
+          }
+        m_MemoryTesterGlobalResults[kk] += memcheckresults[kk];
+        }
       }
     os 
       << "\t\t</Results>\n"
       << "\t<Log>\n" << memcheckstr << std::endl
       << "\t</Log>\n"
       << "\t</Test>" << std::endl;
+    if ( current < cc )
+      {
+      std::cout << "#";
+      std::cout.flush();
+      current += step;
+      }
     }
+  std::cout << std::endl;
+  std::cerr << "Memory checking results:" << std::endl;
+  os << "\t<DefectList>" << std::endl;
+  for ( cc = 0; cmCTestMemCheckResultStrings[cc]; cc ++ )
+    {
+    if ( m_MemoryTesterGlobalResults[cc] )
+      {
+      std::cerr.width(35);
+      std::cerr << cmCTestMemCheckResultLongStrings[cc] << " - " 
+        << m_MemoryTesterGlobalResults[cc] << std::endl;
+      if ( !m_CompatibilityMode )
+        {
+        os << "\t\t<Defect Type=\"" << cmCTestMemCheckResultLongStrings[cc] << "\"/>" << std::endl;
+        }
+      }
+    }
+  os << "\t</DefectList>" << std::endl;
 
   os << "\t<EndDateTime>" << m_EndTest << "</EndDateTime>" << std::endl;
   if ( m_CompatibilityMode )
@@ -2721,17 +2805,11 @@ void cmCTest::GenerateDartMemCheckOutput(std::ostream& os)
     }
   else
     {
-    os << "</MemCheck>" << std::endl;
+    os << "</DynamicAnalysis>" << std::endl;
     }
   this->EndXML(os);
 
 
-  std::cerr << "Memory checking results:" << std::endl;
-  for ( cc = 0; cmCTestMemCheckResultStrings[cc]; cc ++ )
-    {
-    std::cerr << "\t\t" << cmCTestMemCheckResultStrings[cc] << " - " 
-      << m_MemoryTesterGlobalResults[cc] << std::endl;
-    }
 }
 
 void cmCTest::GenerateDartTestOutput(std::ostream& os)
@@ -3264,6 +3342,10 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output, int *re
     {
     output->append(&*tempOutput.begin(), tempOutput.size());
     }
+  if ( m_Verbose )
+    {
+    std::cout << "-- Process completed" << std::endl;
+    }
 
   int result = cmsysProcess_GetState(cp);
 
@@ -3712,7 +3794,7 @@ bool cmCTest::ProcessMemCheckValgrindOutput(const std::string& str, std::string&
 {
   std::vector<cmStdString> lines;
   cmSystemTools::Split(str.c_str(), lines);
-
+ 
   std::string::size_type cc;
 
   cmOStringStream ostr;
@@ -3744,6 +3826,8 @@ bool cmCTest::ProcessMemCheckValgrindOutput(const std::string& str, std::string&
     "== .*Syscall param .* contains uninitialised or unaddressable byte\\(s\\)");
   cmsys::RegularExpression vgIPW("== .*Invalid write of size [0-9]");
 
+  //double sttime = cmSystemTools::GetTime();
+  //std::cout << "Start test: " << lines.size() << std::endl;
   for ( cc = 0; cc < lines.size(); cc ++ )
     {
     if ( valgrindLine.find(lines[cc]) )
@@ -3770,6 +3854,7 @@ bool cmCTest::ProcessMemCheckValgrindOutput(const std::string& str, std::string&
       ostr << cmCTest::MakeXMLSafe(lines[cc]) << std::endl;
       }
     }
+  //std::cout << "End test (elapsed: " << (cmSystemTools::GetTime() - sttime) << std::endl;
   log = ostr.str();
   return true;
 }
@@ -3784,11 +3869,11 @@ bool cmCTest::ProcessMemCheckOutput(const std::string& str, std::string& log, in
 
   if ( m_MemoryTesterStyle == cmCTest::VALGRIND )
     {
-    return ProcessMemCheckValgrindOutput(str, log, results);
+    return this->ProcessMemCheckValgrindOutput(str, log, results);
     }
   else if ( m_MemoryTesterStyle == cmCTest::PURIFY )
     {
-    return ProcessMemCheckPurifyOutput(str, log, results);
+    return this->ProcessMemCheckPurifyOutput(str, log, results);
     }
   else if ( m_MemoryTesterStyle == cmCTest::BOUNDS_CHECKER )
     {
@@ -3916,6 +4001,10 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
     if( arg.find("--tomorrow-tag",0) == 0 )
       {
       m_TomorrowTag = true;
+      }
+    if( arg.find("--compatibility-mode",0) == 0 )
+      {
+      m_CompatibilityMode = true;
       }
     if( arg.find("-D",0) == 0 && i < args.size() - 1 )
       {
