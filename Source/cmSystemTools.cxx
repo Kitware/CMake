@@ -1894,6 +1894,34 @@ std::string cmSystemTools::CollapseFullPath(const char* in_name)
 #endif
 }
 
+bool cmSystemTools::Split(const char* str, std::vector<cmStdString>& lines)
+{
+  std::string data(str);
+  std::string::size_type lpos = 0;
+  while(lpos < data.length())
+    {
+    std::string::size_type rpos = data.find_first_of("\n", lpos);
+    if(rpos == std::string::npos)
+      {
+      // Line ends at end of string without a newline.
+      lines.push_back(data.substr(lpos));
+      return false;
+      }
+    if((rpos > lpos) && (data[rpos-1] == '\r'))
+      {
+      // Line ends in a "\r\n" pair, remove both characters.
+      lines.push_back(data.substr(lpos, (rpos-1)-lpos));
+      }
+    else
+      {
+      // Line ends in a "\n", remove the character.
+      lines.push_back(data.substr(lpos, rpos-lpos));
+      }
+    lpos = rpos+1;
+    }
+  return true;
+}
+
 /**
  * Return path of a full filename (no trailing slashes).
  * Warning: returned path is converted to Unix slashes format.

@@ -218,11 +218,11 @@ public:
 
   ///! Find a file in the system PATH, with optional extra paths.
   static std::string FindFile(const char* name,
-				 const std::vector<std::string>& path= std::vector<std::string>());
+                                 const std::vector<std::string>& path= std::vector<std::string>());
 
   ///! Find an executable in the system PATH, with optional extra paths.
   static std::string FindProgram(const char* name,
-				 const std::vector<std::string>& path = std::vector<std::string>(),
+                                 const std::vector<std::string>& path = std::vector<std::string>(),
                                  bool no_system_path = false);
 
   ///! Find a library in the system PATH, with optional extra paths.
@@ -293,6 +293,10 @@ public:
   static void EnableRunCommandOutput() {s_DisableRunCommandOutput = false; }
   static bool GetRunCommandOutput() { return s_DisableRunCommandOutput; }
 
+  /** Split a string on its newlines into multiple lines.  Returns
+      false only if the last line stored had no newline.  */
+  static bool Split(const char* str, std::vector<cmStdString>& lines);
+  
   /**
    * Come constants for different file formats.
    */
