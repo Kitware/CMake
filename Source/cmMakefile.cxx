@@ -408,6 +408,9 @@ void cmMakefile::FinalPass()
 {
   // do all the variable expansions here
   this->ExpandVariables();
+
+  this->StripDuplicateDirectories();
+
   // give all the commands a chance to do something
   // after the file has been parsed before generation
   for(std::vector<cmCommand*>::iterator i = m_UsedCommands.begin();
@@ -788,6 +791,29 @@ int cmMakefile::DumpDocumentationToFile(const char *fileName)
 
   return 1;
 }
+
+
+  // Remove duplicate directories from the library and include paths.
+void cmMakefile::StripDuplicateDirectories()
+{
+  std::vector<std::string>::iterator begin, end;
+  // remove duplicates from m_IncludeDirectories
+  begin = m_IncludeDirectories.begin();
+  end = m_IncludeDirectories.end();
+  std::list<std::string> tmp1(begin, end);
+  tmp1.sort();
+  m_IncludeDirectories.clear();
+  std::unique_copy(tmp1.begin(), tmp1.end(), std::back_inserter(m_IncludeDirectories));
+
+  // remove duplicates from m_LinkDirectories
+  begin = m_LinkDirectories.begin();
+  end = m_LinkDirectories.end();
+  std::list<std::string> tmp2(begin, end);
+  tmp2.sort();
+  m_LinkDirectories.clear();
+  std::unique_copy(tmp2.begin(), tmp2.end(), std::back_inserter(m_LinkDirectories));
+}
+
 
 
 void cmMakefile::ExpandVariablesInString(std::string& source) const

@@ -480,6 +480,11 @@ public:
    * Expand variables in the makefiles ivars such as link directories etc
    */
   void ExpandVariables();  
+
+  /**
+   * Strip Duplicate directories from Library and Include paths
+   */
+  void cmMakefile::StripDuplicateDirectories();
       
   /** Recursivly read and create a cmMakefile object for
    *  all CMakeLists.txt files in the GetSubDirectories list.
