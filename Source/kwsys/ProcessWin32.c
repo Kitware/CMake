@@ -140,6 +140,9 @@ struct kwsysProcess_s
   /* The working directory for the child process.  */
   char* WorkingDirectory;
   
+  /* Whether to hide the child process's window.  */
+  int HideWindow;
+  
   /* On Win9x platforms, the path to the forwarding executable.  */
   char* Win9x;
   
@@ -638,17 +641,21 @@ void kwsysProcess_SetWorkingDirectory(kwsysProcess* cp, const char* dir)
 /*--------------------------------------------------------------------------*/
 int kwsysProcess_GetOption(kwsysProcess* cp, int optionId)
 {
-  (void)cp;
-  (void)optionId;
-  return 0;
+  switch(optionId)
+    {
+    case kwsysProcess_Option_HideWindow: return cp->HideWindow;
+    default: return 0;
+    }
 }
 
 /*--------------------------------------------------------------------------*/
 void kwsysProcess_SetOption(kwsysProcess* cp, int optionId, int value)
 {
-  (void)cp;
-  (void)optionId;
-  (void)value;
+  switch(optionId)
+    {
+    case kwsysProcess_Option_HideWindow: cp->HideWindow = value; break;
+    default: break;
+    }
 }
 
 /*--------------------------------------------------------------------------*/
@@ -692,6 +699,7 @@ void kwsysProcess_Execute(kwsysProcess* cp)
 
   /* Windows child startup control data.  */
   STARTUPINFO si;
+  DWORD dwCreationFlags=0;
   
   /* Do not execute a second time.  */
   if(cp->State == kwsysProcess_State_Executing)
@@ -761,39 +769,31 @@ void kwsysProcess_Execute(kwsysProcess* cp)
     /* The forwarding executable is given a handle to the error pipe
        and a handle to the kill event.  */
     cp->RealCommand = malloc(strlen(cp->Win9x)+strlen(cp->Command)+100);
-    sprintf(cp->RealCommand, "%s %p %p %s", cp->Win9x,
-            cp->Pipe[CMPE_PIPE_ERROR].Write,
-            cp->Win9xKillEvent, cp->Command);
+    sprintf(cp->RealCommand, "%s %p %p %d %s", cp->Win9x,
+            cp->Pipe[CMPE_PIPE_ERROR].Write, cp->Win9xKillEvent,
+            cp->HideWindow, cp->Command);
     }
   else
     {
     /* Not Windows 9x */    
     cp->RealCommand = strdup(cp->Command);
     }
-
+  
   /* Connect the child's output pipes to the threads.  */
   si.dwFlags = STARTF_USESTDHANDLES;
   si.hStdOutput = cp->Pipe[CMPE_PIPE_STDOUT].Write;
   si.hStdError = cp->Pipe[CMPE_PIPE_STDERR].Write;
   
-  /* Hide the forwarding executable console on Windows 9x.  */
-  si.dwFlags |= STARTF_USESHOWWINDOW;  
-  if(cp->Win9x)
-    {
-    si.wShowWindow = SW_HIDE;
-    }
-  else
-    {
-    si.wShowWindow = SW_SHOWDEFAULT;
-    }
+  /* Decide whether a child window should be shown.  */
+  si.dwFlags |= STARTF_USESHOWWINDOW;
+  si.wShowWindow = cp->HideWindow?SW_HIDE:SW_SHOWDEFAULT;
   
   /* The timeout period starts now.  */
   cp->StartTime = kwsysProcessTimeGetCurrent();
   cp->TimeoutTime = kwsysProcessTimeFromDouble(-1);
   
   /* CREATE THE CHILD PROCESS */
-  if(!CreateProcess(0, cp->RealCommand, 0, 0, TRUE,
-                    cp->Win9x? CREATE_NEW_CONSOLE:DETACHED_PROCESS, 0,
+  if(!CreateProcess(0, cp->RealCommand, 0, 0, TRUE, dwCreationFlags, 0,
                     cp->WorkingDirectory, &si, &cp->ProcessInformation))
     {
     kwsysProcessCleanup(cp, 1);

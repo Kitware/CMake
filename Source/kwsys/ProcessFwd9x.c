@@ -54,6 +54,9 @@ int main()
      This is parsed off the command line.  */
   HANDLE killEvent = 0;
   
+  /* Flag for whether to hide window of child process.  */
+  int hideWindow = 0;
+  
   /* An array of the handles on which we wait when the child is
      running.  */
   HANDLE waitHandles[2] = {0, 0};
@@ -79,6 +82,11 @@ int main()
   while(*cmdLine && *cmdLine == ' ') { ++cmdLine; }
   sscanf(cmdLine, "%p", &killEvent);
   
+  /* Parse the hide window flag.  */
+  while(*cmdLine && *cmdLine != ' ') { ++cmdLine; }
+  while(*cmdLine && *cmdLine == ' ') { ++cmdLine; }
+  sscanf(cmdLine, "%d", &hideWindow);
+  
   /* Skip to the beginning of the command line of the real child.  */
   while(*cmdLine && *cmdLine != ' ') { ++cmdLine; }
   while(*cmdLine && *cmdLine == ' ') { ++cmdLine; }
@@ -88,7 +96,7 @@ int main()
   ZeroMemory(&pi, sizeof(pi));
   si.cb = sizeof(si);
   si.dwFlags = STARTF_USESTDHANDLES|STARTF_USESHOWWINDOW;
-  si.wShowWindow = SW_SHOWDEFAULT;
+  si.wShowWindow = hideWindow?SW_HIDE:SW_SHOWDEFAULT;
   si.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
   si.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
   si.hStdError = GetStdHandle(STD_ERROR_HANDLE);
