@@ -23,7 +23,7 @@
 #include "cmGlob.h"
 #include "cmDynamicLoader.h"
 
-#include "cmcTestScriptHandler.h"
+#include "cmCTestScriptHandler.h"
 #include "cmCTestSubmit.h"
 #include "curl/curl.h"
 
