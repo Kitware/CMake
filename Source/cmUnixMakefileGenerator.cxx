@@ -2082,15 +2082,18 @@ void cmUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
          && replace.find("$(MAKE)") != 0)
         {
         std::string echostring = replace;
-        cmSystemTools::ReplaceString(echostring, "\n\t", "\n\techo ");
         // for unix we want to quote the output of echo
         // for nmake and borland, the echo should not be quoted
         if(strcmp(this->GetName(), "Unix Makefiles") == 0)
           {
+	  cmSystemTools::ReplaceString(echostring, "\\\n", " ");
+          cmSystemTools::ReplaceString(echostring, " \t", "   ");
+          cmSystemTools::ReplaceString(echostring, "\n\t", "\"\n\techo \"");
           fout << "\techo \"" << echostring.c_str() << "\"\n";
           }
         else
           {
+	  cmSystemTools::ReplaceString(echostring, "\n\t", "\n\techo ");
           fout << "\techo " << echostring.c_str() << "\n";
           }
         }
