@@ -193,6 +193,7 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
     }
   std::string librariesLinked;
   const cmTarget::LinkLibraries& libs = tgt.GetLinkLibraries();
+  cmRegularExpression reg("lib(.*)(\\.so$|\\.a|\\.sl$)");
   for(cmTarget::LinkLibraries::const_iterator lib = libs.begin();
       lib != libs.end(); ++lib)
     {
@@ -210,6 +211,10 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
       linkLibs += cmSystemTools::EscapeSpaces(dir.c_str());
       linkLibs += " ";
       librariesLinked += "-l";
+      if(reg.find(file))
+        {
+        file = reg.match(1);
+        }
       librariesLinked += file;
       librariesLinked += " ";
       }

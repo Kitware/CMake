@@ -687,7 +687,7 @@ bool cmSystemTools::RunCommand(const char* command,
   fgets(buffer, BUFFER_SIZE, cpipe);
   while(!feof(cpipe))
     {
-    std::cout << buffer;
+    std::cout << buffer << std::flush;
     output += buffer;
     fgets(buffer, BUFFER_SIZE, cpipe);
     }
@@ -779,23 +779,23 @@ std::string cmSystemTools::FindLibrary(const char* name,
     tryPath = *p;
     tryPath += "/lib";
     tryPath += name;
-    tryPath + ".so";
+    tryPath += ".so";
     if(cmSystemTools::FileExists(tryPath.c_str()))
       {
       return cmSystemTools::CollapseFullPath(tryPath.c_str());
       }
     tryPath = *p;
-    tryPath = "/lib";
+    tryPath += "/lib";
     tryPath += name;
-    tryPath + ".a";
+    tryPath += ".a";
     if(cmSystemTools::FileExists(tryPath.c_str()))
       {
       return cmSystemTools::CollapseFullPath(tryPath.c_str());
       }
     tryPath = *p;
-    tryPath = "/lib";
+    tryPath += "/lib";
     tryPath += name;
-    tryPath + ".sl";
+    tryPath += ".sl";
     if(cmSystemTools::FileExists(tryPath.c_str()))
       {
       return cmSystemTools::CollapseFullPath(tryPath.c_str());
@@ -886,7 +886,6 @@ void cmSystemTools::SplitProgramPath(const char* in_name,
  */
 std::string cmSystemTools::CollapseFullPath(const char* in_name)
 {
-  std::cerr << "CollapseFullPath " << in_name << "\n";
   std::string dir, file;
   cmSystemTools::SplitProgramPath(in_name, dir, file);
   // Ultra-hack warning:

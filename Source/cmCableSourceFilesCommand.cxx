@@ -75,8 +75,6 @@ void cmCableSourceFilesCommand::WriteConfiguration() const
   std::ostream& os = m_CableData->GetOutputStream();
   cmCableData::Indentation indent = m_CableData->GetIndentation();
   
-  cmRegularExpression needCdataBlock("[&<>]");
-  
   os << indent << "<Headers>" << std::endl;
   for(Entries::const_iterator f = m_Entries.begin();
       f != m_Entries.end(); ++f)
