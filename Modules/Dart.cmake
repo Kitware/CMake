@@ -102,10 +102,10 @@ IF(BUILD_TESTING)
     ADD_CUSTOM_TARGET(Experimental 
     ${TCLSHCOMMAND} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Start Build Test Submit)
 
-    ENABLE_TESTING()
   ELSE(TCLSHCOMMAND)
     MESSAGE("Could not find TCLSHCOMMAND, disabling testing." "Error")   
   ENDIF(TCLSHCOMMAND)
+  ENABLE_TESTING()
 
   ENDIF (DART_ROOT)
 ENDIF(BUILD_TESTING)
