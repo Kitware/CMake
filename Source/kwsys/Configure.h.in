@@ -21,7 +21,7 @@
 # if defined(@KWSYS_NAMESPACE@_EXPORTS)
 #  define @KWSYS_NAMESPACE@_EXPORT __declspec(dllexport)
 # else
-#  define @KWSYS_NAMESPACE@_EXPORT __declspec(dllexport)
+#  define @KWSYS_NAMESPACE@_EXPORT __declspec(dllimport)
 # endif
 #else
 # define @KWSYS_NAMESPACE@_EXPORT
