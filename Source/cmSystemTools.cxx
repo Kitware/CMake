@@ -22,6 +22,8 @@
 #include <ctype.h>
 #include "cmDirectory.h"
 #include "cmMakefile.h"
+#include <errno.h>
+
 
 // support for realpath call
 #ifndef _WIN32
@@ -1203,9 +1205,13 @@ void cmSystemTools::cmCopyFile(const char* source,
   std::ifstream fin(source);
 #endif
   if(!fin)
-    {
-    cmSystemTools::Error("CopyFile failed to open input file \"",
-                         source, "\"");
+    { 
+    std::string m = "CopyFile failed to open input file \"";
+    m += source;
+    m += "\"";
+    m += " System Error: ";
+    m += strerror(errno);
+    cmSystemTools::Error(m.c_str());
     return;
     }
 
@@ -1218,8 +1224,12 @@ void cmSystemTools::cmCopyFile(const char* source,
 #endif
   if(!fout)
     {
-    cmSystemTools::Error("CopyFile failed to open output file \"",
-                         destination, "\"");
+    std::string m = "CopyFile failed to open output file \"";
+    m += destination;
+    m += "\"";
+    m += " System Error: ";
+    m += strerror(errno);
+    cmSystemTools::Error(m.c_str());
     return;
     }
   
