@@ -504,10 +504,13 @@ const char *cmSystemTools::ConvertToWindowsSlashesAndCleanUp(std::string& path)
 {
   cmSystemTools::ConvertToWindowsSlashes(path);
   std::string::size_type pos = 0;
-  pos = 0;
-  while((pos = path.find("\\\\", pos)) != std::string::npos)
+  if(path.size() > 1)
     {
-    path.erase(pos, 1);
+      pos = 1;
+      while((pos = path.find("\\\\", pos)) != std::string::npos)
+	{
+	  path.erase(pos, 1);
+	}
     }
   return path.c_str();
 }
