@@ -319,6 +319,7 @@ xmlrpc_mem_block *xmlrpc_wcs_to_utf8 (xmlrpc_env *env,
     xmlrpc_mem_block *output;
     unsigned char *buffer;
     wchar_t wc;
+    int cwc;
 
     XMLRPC_ASSERT_ENV_OK(env);
     XMLRPC_ASSERT_PTR_OK(wcs_data);
@@ -334,13 +335,14 @@ xmlrpc_mem_block *xmlrpc_wcs_to_utf8 (xmlrpc_env *env,
     bytes_used = 0;
     for (i = 0; i < wcs_len; i++) {
         wc = wcs_data[i];
-        if (wc <= 0x007F) {
+        cwc = wc;
+        if (cwc <= 0x007F) {
             buffer[bytes_used++] = wc & 0x7F;
-        } else if (wc <= 0x07FF) {
+        } else if (cwc <= 0x07FF) {
             /* 110xxxxx 10xxxxxx */
             buffer[bytes_used++] = 0xC0 | (wc >> 6);
             buffer[bytes_used++] = 0x80 | (wc & 0x3F);
-        } else if (wc <= 0xFFFF) {
+        } else if (cwc <= 0xFFFF) {
             /* 1110xxxx 10xxxxxx 10xxxxxx */
             buffer[bytes_used++] = 0xE0 | (wc >> 12);
             buffer[bytes_used++] = 0x80 | ((wc >> 6) & 0x3F);
