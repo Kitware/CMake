@@ -121,8 +121,10 @@ std::string cmLocalGenerator::ConvertToRelativeOutputPath(const char* p)
     {
     relpath = ".";
     }
-  cmSystemTools::ReplaceString(ret, m_HomeOutputDirectoryNoSlash.c_str(),
-                               relpath.c_str());
+  if(ret == m_HomeOutputDirectoryNoSlash)
+    {
+    ret = relpath;
+    }
   ret = cmSystemTools::ConvertToOutputPath(ret.c_str());
   return ret;
 }
