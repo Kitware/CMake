@@ -29,6 +29,8 @@ class cmMakefile;
 class cmCacheManager
 {
 public:
+  class CacheIterator;
+  friend class cmCacheManager::CacheIterator;
   enum CacheEntryType{ BOOL=0, PATH, FILEPATH, STRING, INTERNAL,STATIC,UNINITIALIZED };
 
 private:
@@ -68,7 +70,6 @@ public:
     CacheEntry const& GetEntry() const { return m_Position->second; }
     CacheEntry& GetEntry() { return m_Position->second; }
   };
-  friend class cmCacheManager::CacheIterator;
   
   ///! return an iterator to iterate through the cache map
   cmCacheManager::CacheIterator NewIterator() 
