@@ -24,7 +24,14 @@ bool cmSiteNameCommand::InitialPass(std::vector<std::string> const& args)
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-
+  std::vector<std::string> paths;
+  paths.push_back("/usr/bsd");
+  paths.push_back("/usr/sbin");
+  paths.push_back("/usr/bin");
+  paths.push_back("/bin");
+  paths.push_back("/sbin");
+  paths.push_back("/usr/local/bin");
+  
   const char* cacheValue
     = m_Makefile->GetDefinition(args[0].c_str());
   if(cacheValue)
@@ -40,7 +47,7 @@ bool cmSiteNameCommand::InitialPass(std::vector<std::string> const& args)
     }
   else 
     {
-    hostname_cmd = cmSystemTools::FindProgram("hostname");
+    hostname_cmd = cmSystemTools::FindProgram("hostname", paths);
     }
   
   std::string siteName = "unknown";
@@ -84,7 +91,7 @@ bool cmSiteNameCommand::InitialPass(std::vector<std::string> const& args)
           }
         else
           {
-          nslookup_cmd = cmSystemTools::FindProgram("nslookup");
+          nslookup_cmd = cmSystemTools::FindProgram("nslookup", paths);
           }
 
         // try to find the domain name for this computer
