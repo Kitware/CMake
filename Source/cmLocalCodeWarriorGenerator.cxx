@@ -209,11 +209,13 @@ void cmLocalCodeWarriorGenerator::WriteSettingList(std::ostream& fout,
       fout << "</VALUE></SETTING>\n";
       break;
     case cmTarget::EXECUTABLE:
+    case cmTarget::WIN32_EXECUTABLE:
       fout << "Application" << "</VALUE></SETTING>\n";
       fout << "<SETTING><NAME>MWProject_PPC_outfile</NAME><VALUE>";
       fout << tgtName << cmSystemTools::GetExecutableExtension();
       fout << "</VALUE></SETTING>\n";
       break;
+    default:;
     }
   
   fout << "<SETTING><NAME>MWProject_PPC_filecreator</NAME><VALUE>????" << "</VALUE></SETTING>\n";
