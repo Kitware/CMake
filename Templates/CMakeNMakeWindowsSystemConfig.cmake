@@ -1,10 +1,6 @@
 # Microsoft specific config file 
+# NOTE: all entries in here MUST be CACHE values, regular SET will NOT WORK!
 
-SET (WORDS_BIGENDIAN )
-
-SET (HAVE_LIMITS_H   1)
-
-SET (HAVE_UNISTD_H   1)
 
 # Suffixes
 

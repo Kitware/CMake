@@ -1,4 +1,5 @@
-# microsoft specific config file 
+# borland specific configure file
+# NOTE: all entries in here MUST be CACHE values, regular SET will NOT WORK!
 
 FIND_PATH(BCB_BIN_PATH bcc32.exe
   "C:/Program Files/Borland/CBuilder5/Bin"
@@ -7,13 +8,7 @@ FIND_PATH(BCB_BIN_PATH bcc32.exe
   [HKEY_LOCAL_MACHINE/SOFTWARE/Borland/C++Builder/5.0/RootDir]/Bin
 )
 
-SET (BORLAND 1)
-
-SET (WORDS_BIGENDIAN )
-
-SET (HAVE_LIMITS_H   1)
-
-SET (HAVE_UNISTD_H   1)
+SET (BORLAND 1 CACHE INTERNAL "This is the borland generator")
 
 SET (CMAKE_C_COMPILER ${BCB_BIN_PATH}/bcc32  CACHE FILEPATH
      "Name of C compiler used.")

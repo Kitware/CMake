@@ -1,10 +1,5 @@
 # Microsoft specific config file 
 
-SET (WORDS_BIGENDIAN )
-
-SET (HAVE_LIMITS_H   1)
-
-SET (HAVE_UNISTD_H   1)
 
 SET (CMAKE_CXX_COMPILER  cl CACHE STRING 
      "Name of C++ compiler used.")
