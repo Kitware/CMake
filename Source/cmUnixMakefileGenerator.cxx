@@ -563,7 +563,7 @@ void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
         {
         // if the library is not in the current directory, then get the full
         // path to it
-        std::string libpath = cacheValue;
+        libpath = cacheValue;
         if(m_LibraryOutputPath.size())
           {
           libpath = m_LibraryOutputPath;
@@ -577,7 +577,8 @@ void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
       else
         {
         // library is in current Makefile so use lib as a prefix
-        libpath = "lib";
+        libpath = m_LibraryOutputPath;
+        libpath += "lib";
         }
       // add the library name
       libpath += lib2->first;
@@ -1019,7 +1020,8 @@ void cmUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
       switch (l->second.GetType())
 	{
 	case cmTarget::LIBRARY:
-	  fout << "\t$(INSTALL_DATA) lib" << l->first;
+	  fout << "\t$(INSTALL_DATA) " << m_LibraryOutputPath << "lib" 
+               << l->first;
 	  if(dll)
 	    {
 	      fout << m_Makefile->GetDefinition("CMAKE_SHLIB_SUFFIX");
@@ -1032,7 +1034,8 @@ void cmUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
 	  break;
 	case cmTarget::WIN32_EXECUTABLE:
 	case cmTarget::EXECUTABLE:
-          fout << "\t$(INSTALL_PROGRAM) " << l->first
+          fout << "\t$(INSTALL_PROGRAM) " << m_ExecutableOutputPath 
+               << l->first
                << cmSystemTools::GetExecutableExtension()
 	       << " " << prefix << l->second.GetInstallPath() << "\n";
 	  break;
