@@ -219,7 +219,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
 //----------------------------------------------------------------------------
 bool cmFindPackageCommand::FindModule(bool& found, bool quiet)
 {
-  std::string module = "/Find";
+  std::string module = "Find";
   module += this->Name;
   module += ".cmake";
   std::string mfile = m_Makefile->GetModulesFile(module.c_str());
