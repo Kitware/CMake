@@ -58,6 +58,10 @@ struct cmListFileFunction
 
 struct cmListFile
 {
+  cmListFile() 
+    :m_ModifiedTime(0) 
+    {
+    }
   long int m_ModifiedTime;
   std::vector<cmListFileFunction> m_Functions;
 };
