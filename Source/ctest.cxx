@@ -53,7 +53,66 @@ int main (int argc, char *argv[])
       inst.m_ShowOnly = true;
       }
 
-    if( ( arg.find("-T",0) == 0 || arg.find("--dart-mode",0) == 0 ) && 
+    if( arg.find("-D",0) == 0 && i < args.size() - 1 )
+      {
+      inst.m_DartMode = true;
+      std::string arg = args[i+1];
+      if ( arg == "Experimental" )
+        {
+        inst.SetTestModel(cmCTest::EXPERIMENTAL);
+        inst.SetTest("Start");
+        inst.SetTest("Configure");
+        inst.SetTest("Build");
+        inst.SetTest("Test");
+        inst.SetTest("Coverage");
+        inst.SetTest("Submit");
+        }
+      else if ( arg == "Continuous" )
+        {
+        inst.SetTestModel(cmCTest::CONTINUOUS);
+        inst.SetTest("Start");
+        inst.SetTest("Update");
+        inst.SetTest("Configure");
+        inst.SetTest("Build");
+        inst.SetTest("Test");
+        inst.SetTest("Coverage");
+        inst.SetTest("Submit");
+        }
+      else if ( arg == "Nightly" )
+        {
+        inst.SetTestModel(cmCTest::NIGHTLY);
+        inst.SetTest("Start");
+        inst.SetTest("Update");
+        inst.SetTest("Configure");
+        inst.SetTest("Build");
+        inst.SetTest("Test");
+        inst.SetTest("Coverage");
+        inst.SetTest("Submit");
+        }
+      else if ( arg == "MemoryCheck" )
+        {
+        inst.SetTestModel(cmCTest::EXPERIMENTAL);
+        inst.SetTest("Start");
+        inst.SetTest("Configure");
+        inst.SetTest("Build");
+        inst.SetTest("Purify");
+        inst.SetTest("Coverage");
+        inst.SetTest("Submit");
+        }
+      else if ( arg == "NightlyMemoryCheck" )
+        {
+        inst.SetTestModel(cmCTest::NIGHTLY);
+        inst.SetTest("Start");
+        inst.SetTest("Update");
+        inst.SetTest("Configure");
+        inst.SetTest("Build");
+        inst.SetTest("Purify");
+        inst.SetTest("Coverage");
+        inst.SetTest("Submit");
+        }
+      }
+
+    if( ( arg.find("-T",0) == 0 ) && 
         (i < args.size() -1) )
       {
       inst.m_DartMode = true;

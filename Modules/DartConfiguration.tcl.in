@@ -1,0 +1,53 @@
+# This file is configured by CMake automatically as DartConfiguration.tcl
+# If you choose not to use CMake, this file may be hand configured, by
+# filling in the required variables.
+
+
+# Configuration directories and files
+SourceDirectory: @PROJECT_SOURCE_DIR@
+BuildDirectory: @PROJECT_BINARY_DIR@
+
+# Dart options
+
+# CVS options
+# Default is "-d -P -A"
+CVSUpdateOptions: @CVS_UPDATE_OPTIONS@
+
+# Site is something like machine.domain, i.e. pragmatic.crd
+Site: @SITE@
+
+# Build name is osname-revision-compiler, i.e. Linux-2.4.2-2smp-c++
+BuildName: @BUILDNAME@
+
+# Submission information
+DropSite: @DROP_SITE@
+DropLocation: @DROP_LOCATION@
+DropSiteUser: @DROP_SITE_USER@
+DropSitePassword: @DROP_SITE_PASSWORD@
+DropSiteMode: @DROP_SITE_MODE@
+DropMethod: @DROP_METHOD@
+TriggerSite: @TRIGGER_SITE@
+
+# Dashboard start time
+NightlyStartTime: @NIGHTLY_START_TIME@
+
+# Commands for the build/test/submit cycle
+ConfigureCommand: "@CMAKE_COMMAND@" "@PROJECT_SOURCE_DIR@"
+CMakeCommand: @CMAKE_COMMAND@
+MakeCommand: @MAKECOMMAND@
+CVSCommand: @CVSCOMMAND@
+ScpCommand: @SCPCOMMAND@
+PurifyCommand: @PURIFYCOMMAND@
+ValgrindCommand: @VALGRIND_COMMAND@
+ValgrindCommandOptions: @VALGRIND_COMMAND_OPTIONS@
+# Compression commands
+GunzipCommand: @GUNZIPCOMMAND@
+CompressionCommand: @COMPRESSIONCOMMAND@
+CompressionType: @COMPRESSIONCOMMAND@
+
+# Testing options
+# TimeOut is the amount of time in seconds to wait for processes
+# to complete during testing.  After TimeOut seconds, the
+# process will be summaily terminated.
+# Currently set to 25 minutes
+TimeOut: @DART_TESTING_TIMEOUT@

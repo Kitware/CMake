@@ -155,40 +155,40 @@ ADD_EXECUTABLE(cmaketest cmaketest.cxx)
 TARGET_LINK_LIBRARIES(cmaketest CMakeLib)
 
 IF(BUILD_TESTING)
-    ADD_TEST(DumpDocumentation ${CMake_BINARY_DIR}/Source/DumpDocumentation
+    ADD_TEST(DumpDocumentation ${CMake_BINARY_DIR}/bin/DumpDocumentation
       --all-for-coverage)
 
-    ADD_TEST(SystemInformation ${CMake_BINARY_DIR}/Source/cmaketest 
+    ADD_TEST(SystemInformation ${CMake_BINARY_DIR}/bin/cmaketest 
       ${CMake_SOURCE_DIR}/Tests/SystemInformation
       ${CMake_BINARY_DIR}/Tests/SystemInformation 
       DumpInformation)
 
-    ADD_TEST(TryCompile ${CMake_BINARY_DIR}/Source/cmaketest 
+    ADD_TEST(TryCompile ${CMake_BINARY_DIR}/bin/cmaketest 
       ${CMake_SOURCE_DIR}/Tests/TryCompile
       ${CMake_BINARY_DIR}/Tests/TryCompile 
       TryCompile)
 
-    ADD_TEST(simple ${CMake_BINARY_DIR}/Source/cmaketest 
+    ADD_TEST(simple ${CMake_BINARY_DIR}/bin/cmaketest 
       ${CMake_SOURCE_DIR}/Tests/Simple 
       ${CMake_BINARY_DIR}/Tests/Simple 
       simple)
 
-    ADD_TEST(conly ${CMake_BINARY_DIR}/Source/cmaketest 
+    ADD_TEST(conly ${CMake_BINARY_DIR}/bin/cmaketest 
       ${CMake_SOURCE_DIR}/Tests/COnly 
       ${CMake_BINARY_DIR}/Tests/COnly 
       conly)
 
-    ADD_TEST(X11 ${CMake_BINARY_DIR}/Source/cmaketest 
+    ADD_TEST(X11 ${CMake_BINARY_DIR}/bin/cmaketest 
       ${CMake_SOURCE_DIR}/Tests/X11
       ${CMake_BINARY_DIR}/Tests/X11 
       UseX11)
 
-    ADD_TEST(LoadedCommand ${CMake_BINARY_DIR}/Source/cmaketest 
+    ADD_TEST(LoadedCommand ${CMake_BINARY_DIR}/bin/cmaketest 
       ${CMake_SOURCE_DIR}/Tests/LoadCommand 
       ${CMake_BINARY_DIR}/Tests/LoadCommand 
       LoadedCommand)
 
-    ADD_TEST(LoadedCommandOneConfig ${CMake_BINARY_DIR}/Source/cmaketest 
+    ADD_TEST(LoadedCommandOneConfig ${CMake_BINARY_DIR}/bin/cmaketest 
       ${CMake_SOURCE_DIR}/Tests/LoadCommand 
       ${CMake_BINARY_DIR}/Tests/LoadCommandOneConfig
       LoadedCommand ONLY_ONE_CONFIG)
@@ -199,33 +199,33 @@ IF(BUILD_TESTING)
       SET(COMPILER_IS_COMO 1)
     ENDIF(CMAKE_BASE_NAME MATCHES "^como$")
     IF(NOT COMPILER_IS_COMO)
-      ADD_TEST(complex ${CMake_BINARY_DIR}/Source/cmaketest 
+      ADD_TEST(complex ${CMake_BINARY_DIR}/bin/cmaketest 
         ${CMake_SOURCE_DIR}/Tests/Complex 
         ${CMake_BINARY_DIR}/Tests/Complex 
         complex 
         ${CMake_BINARY_DIR}/Tests/Complex/bin)
 
-      ADD_TEST(complexOneConfig ${CMake_BINARY_DIR}/Source/cmaketest 
+      ADD_TEST(complexOneConfig ${CMake_BINARY_DIR}/bin/cmaketest 
         ${CMake_SOURCE_DIR}/Tests/Complex 
         ${CMake_BINARY_DIR}/Tests/ComplexOneConfig 
         complex 
         ${CMake_BINARY_DIR}/Tests/ComplexOneConfig/bin ONLY_ONE_CONFIG)
     ENDIF(NOT COMPILER_IS_COMO)
 
-    ADD_TEST(Example ${CMake_BINARY_DIR}/Source/cmaketest 
+    ADD_TEST(Example ${CMake_BINARY_DIR}/bin/cmaketest 
       ${CMake_SOURCE_DIR}/Example
       ${CMake_BINARY_DIR}/Example
       helloDemo
       ${CMake_BINARY_DIR}/Example/Demo
       HELLO)
 
-    ADD_TEST(testing ${CMake_BINARY_DIR}/Source/cmaketest 
+    ADD_TEST(testing ${CMake_BINARY_DIR}/bin/cmaketest 
       ${CMake_SOURCE_DIR}/Tests/Testing 
       ${CMake_BINARY_DIR}/Tests/Testing
       testing
       ${CMake_BINARY_DIR}/Tests/Testing/bin)
 
-    ADD_TEST(wrapping ${CMake_BINARY_DIR}/Source/cmaketest 
+    ADD_TEST(wrapping ${CMake_BINARY_DIR}/bin/cmaketest 
       ${CMake_SOURCE_DIR}/Tests/Wrapping 
       ${CMake_BINARY_DIR}/Tests/Wrapping
       wrapping
@@ -239,97 +239,97 @@ IF(BUILD_TESTING)
      QT_UIC_EXE)
 
     IF (QT_FOUND)
-      ADD_TEST(qtwrapping ${CMake_BINARY_DIR}/Source/cmaketest 
+      ADD_TEST(qtwrapping ${CMake_BINARY_DIR}/bin/cmaketest 
         ${CMake_SOURCE_DIR}/Tests/Wrapping 
         ${CMake_BINARY_DIR}/Tests/Wrapping
         qtwrapping
         ${CMake_BINARY_DIR}/Tests/Wrapping/bin)
     ENDIF (QT_FOUND)
 
-    ADD_TEST(testdriver1 ${CMake_BINARY_DIR}/Source/cmaketest 
+    ADD_TEST(testdriver1 ${CMake_BINARY_DIR}/bin/cmaketest 
       ${CMake_SOURCE_DIR}/Tests/TestDriver 
       ${CMake_BINARY_DIR}/Tests/TestDriver
       TestDriverTest
       ${CMake_BINARY_DIR}/Tests/Wrapping/bin
       TestDriverTest test1)
 
-    ADD_TEST(testdriver2 ${CMake_BINARY_DIR}/Source/cmaketest 
+    ADD_TEST(testdriver2 ${CMake_BINARY_DIR}/bin/cmaketest 
       ${CMake_SOURCE_DIR}/Tests/TestDriver 
       ${CMake_BINARY_DIR}/Tests/TestDriver
       TestDriverTest
       ${CMake_BINARY_DIR}/Tests/Wrapping/bin
       TestDriverTest test2)
 
-    ADD_TEST(testdriver3 ${CMake_BINARY_DIR}/Source/cmaketest 
+    ADD_TEST(testdriver3 ${CMake_BINARY_DIR}/bin/cmaketest 
       ${CMake_SOURCE_DIR}/Tests/TestDriver 
       ${CMake_BINARY_DIR}/Tests/TestDriver
       TestDriverTest
       ${CMake_BINARY_DIR}/Tests/Wrapping/bin
       TestDriverTest subdir/test3)
 
-    ADD_TEST(dependency_w_libout ${CMake_BINARY_DIR}/Source/cmaketest 
+    ADD_TEST(dependency_w_libout ${CMake_BINARY_DIR}/bin/cmaketest 
       ${CMake_SOURCE_DIR}/Tests/Dependency 
       ${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut
       exec
       ${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut/Exec
       Dependency CMAKE_ARGS -DLIBRARY_OUTPUT_PATH:PATH=${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut/Lib)
 
-    ADD_TEST(dependency_wo_lib_out ${CMake_BINARY_DIR}/Source/cmaketest 
+    ADD_TEST(dependency_wo_lib_out ${CMake_BINARY_DIR}/bin/cmaketest 
       ${CMake_SOURCE_DIR}/Tests/Dependency 
       ${CMake_BINARY_DIR}/Tests/Dependency/WOLibOut
       exec
       ${CMake_BINARY_DIR}/Tests/Dependency/WOLibOut/Exec
       Dependency)
 
-    ADD_TEST(dependency2 ${CMake_BINARY_DIR}/Source/cmaketest 
+    ADD_TEST(dependency2 ${CMake_BINARY_DIR}/bin/cmaketest 
       ${CMake_SOURCE_DIR}/Tests/Dependency 
       ${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut
       exec2
       ${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut/Exec2
       Dependency CMAKE_ARGS -DLIBRARY_OUTPUT_PATH:PATH=${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut/Lib)
 
-    ADD_TEST(dependency3 ${CMake_BINARY_DIR}/Source/cmaketest 
+    ADD_TEST(dependency3 ${CMake_BINARY_DIR}/bin/cmaketest 
       ${CMake_SOURCE_DIR}/Tests/Dependency 
       ${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut
       exec3
       ${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut/Exec3
       Dependency CMAKE_ARGS -DLIBRARY_OUTPUT_PATH:PATH=${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut/Lib)
 
-    ADD_TEST(dependency4 ${CMake_BINARY_DIR}/Source/cmaketest 
+    ADD_TEST(dependency4 ${CMake_BINARY_DIR}/bin/cmaketest 
       ${CMake_SOURCE_DIR}/Tests/Dependency 
       ${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut
       exec4
       ${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut/Exec4
       Dependency CMAKE_ARGS -DLIBRARY_OUTPUT_PATH:PATH=${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut/Lib)
 
-    ADD_TEST(linkline ${CMake_BINARY_DIR}/Source/cmaketest 
+    ADD_TEST(linkline ${CMake_BINARY_DIR}/bin/cmaketest 
       ${CMake_SOURCE_DIR}/Tests/LinkLine
       ${CMake_BINARY_DIR}/Tests/LinkLine
       Exec
       ${CMake_BINARY_DIR}/Tests/LinkLine
       LinkLine)
 
-    ADD_TEST(linkorder1 ${CMake_BINARY_DIR}/Source/cmaketest 
+    ADD_TEST(linkorder1 ${CMake_BINARY_DIR}/bin/cmaketest 
       ${CMake_SOURCE_DIR}/Tests/LinkLineOrder
       ${CMake_BINARY_DIR}/Tests/LinkLineOrder
       Exec1
       ${CMake_BINARY_DIR}/Tests/LinkLineOrder
       LinkLineOrder)
 
-    ADD_TEST(linkorder2 ${CMake_BINARY_DIR}/Source/cmaketest 
+    ADD_TEST(linkorder2 ${CMake_BINARY_DIR}/bin/cmaketest 
       ${CMake_SOURCE_DIR}/Tests/LinkLineOrder
       ${CMake_BINARY_DIR}/Tests/LinkLineOrder
       Exec2
       ${CMake_BINARY_DIR}/Tests/LinkLineOrder
       LinkLineOrder)
 
-    ADD_TEST(curl ${CMake_BINARY_DIR}/Source/cmaketest 
+    ADD_TEST(curl ${CMake_BINARY_DIR}/bin/cmaketest 
              ${CMake_SOURCE_DIR}/Source/CTest/Curl
              ${CMake_BINARY_DIR}/Tests/Curl
              LIBCURL)
 
     IF (APPLE)
-      ADD_TEST(objc++ ${CMake_BINARY_DIR}/Source/cmaketest
+      ADD_TEST(objc++ ${CMake_BINARY_DIR}/bin/cmaketest
 		        ${CMake_SOURCE_DIR}/Tests/Objc++
 			${CMake_BINARY_DIR}/Tests/Objc++
 			objc++)
