@@ -698,7 +698,8 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
         {
         if(!this->FindTarget(d->c_str()))
           {
-          makefileStream << "\\\n" << *d;
+          makefileStream << "\\\n" << this
+            ->ConvertToRelativeOutputPath(d->c_str());
           }
         else
           {
@@ -885,7 +886,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
         l != linkdirs.end(); ++l)
       {
       std::string libpath = 
-        this->ConvertToRelativeOutputPath(l->c_str());
+        this->XCodeEscapePath(l->c_str());
       if(emitted.insert(libpath).second)
         {
         dirs += libpath + " ";
@@ -904,7 +905,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   for(;i != includes.end(); ++i)
     {
     std::string incpath = 
-      this->ConvertToRelativeOutputPath(i->c_str());
+      this->XCodeEscapePath(i->c_str());
     dirs += incpath + " ";
     }
   if(dirs.size())
@@ -1389,7 +1390,8 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
        t->GetType() == cmTarget::MODULE_LIBRARY)
       {
       makefileStream << "\\\n\t"
-                     << this->GetTargetFullPath(target->GetcmTarget());
+                     << this->
+        ConvertToRelativeOutputPath(this->GetTargetFullPath(target->GetcmTarget()).c_str());
       }
     }
   makefileStream << "\n\n"; 
@@ -1407,7 +1409,7 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
       {
       if(emitted.insert(*d).second)
         {
-        makefileStream << *d << ":\n";
+        makefileStream << this->ConvertToRelativeOutputPath(d->c_str()) << ":\n";
         }
       }
     }
@@ -1428,14 +1430,15 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
       {
       std::vector<cmStdString> const& deplibs = target->GetDependLibraries();
       std::string tfull = this->GetTargetFullPath(target->GetcmTarget());
-      makefileStream << tfull << ": ";
+      makefileStream << this->ConvertToRelativeOutputPath(tfull.c_str()) << ": ";
       for(std::vector<cmStdString>::const_iterator d = deplibs.begin();
           d != deplibs.end(); ++d)
         {
-        makefileStream << "\\\n\t" << *d;
+        makefileStream << "\\\n\t" << this->ConvertToRelativeOutputPath(d->c_str());
         }
       makefileStream << "\n";
-      makefileStream << "\t/bin/rm -f " << tfull << "\n";
+      makefileStream << "\t/bin/rm -f "
+                     << this->ConvertToRelativeOutputPath(tfull.c_str()) << "\n";
       makefileStream << "\n\n";
       }
     }
@@ -1554,5 +1557,18 @@ std::string cmGlobalXCodeGenerator::ConvertToRelativeOutputPath(const char* p)
   // at this point it should be relative and in the correct format
   // for the native build system.  (i.e. \ for windows and / for unix,
   // and correct escaping/quoting of spaces in the path
+  return ret;
+}
+
+std::string cmGlobalXCodeGenerator::XCodeEscapePath(const char* p)
+{
+  std::string ret = p;
+  if(ret.find(' ') != ret.npos)
+    {
+    std::string t = ret;
+    ret = "\\\"";
+    ret += t;
+    ret += "\\\"";
+    }
   return ret;
 }

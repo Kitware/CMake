@@ -69,6 +69,7 @@ public:
   virtual void Generate();
 
 private: 
+  std::string XCodeEscapePath(const char* p);
   std::string ConvertToRelativeOutputPath(const char* p);
   void CreateCustomCommands(cmXCodeObject* buildPhases,
                             cmXCodeObject* sourceBuildPhase,
