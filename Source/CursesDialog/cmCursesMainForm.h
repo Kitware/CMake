@@ -123,6 +123,10 @@ protected:
   // Remove an entry from the interface and the cache.
   void RemoveEntry(const char* value);
 
+  // Jump to the cache value with index idx. If string str is
+  // specified, it will stop on widget that contain that string.
+  void JumpToCacheEntry(int idx, const char* str);
+
   // Copies of cache entries stored in the user interface
   std::vector<cmCursesCacheEntryComposite*>* m_Entries;
   // Errors produced during last run of cmake
@@ -153,6 +157,10 @@ protected:
 
   int m_InitialWidth;
   cmake *m_CMakeInstance;
+
+  std::string m_SearchString;
+  std::string m_OldSearchString;
+  bool m_SearchMode;
 };
 
 #endif // __cmCursesMainForm_h

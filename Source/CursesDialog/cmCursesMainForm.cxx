@@ -54,6 +54,9 @@ cmCursesMainForm::cmCursesMainForm(std::vector<std::string> const& args,
   m_Args[0] = whereCMake;
   m_CMakeInstance->SetArgs(m_Args);
   m_CMakeInstance->SetCMakeCommand(whereCMake.c_str());
+  m_SearchString = "";
+  m_OldSearchString = "";
+  m_SearchMode = false;
 }
 
 cmCursesMainForm::~cmCursesMainForm()
@@ -789,6 +792,8 @@ void cmCursesMainForm::FillCacheManagerFromUI()
     }
 }
 
+#include <unistd.h>
+
 void cmCursesMainForm::HandleInput()
 {
   int x,y;
@@ -807,6 +812,16 @@ void cmCursesMainForm::HandleInput()
     {
     this->UpdateStatusBar();
     this->PrintKeys();
+    if ( m_SearchMode )
+      {
+      std::string searchstr = "Search: " + m_SearchString;
+      this->UpdateStatusBar( searchstr.c_str() );
+      this->PrintKeys(1);
+      curses_move(y-5,searchstr.size());
+      //curses_move(1,1);
+      touchwin(stdscr); 
+      refresh();
+      }
     int key = getch();
 
     getmaxyx(stdscr, y, x);
@@ -829,11 +844,47 @@ void cmCursesMainForm::HandleInput()
     currentWidget = reinterpret_cast<cmCursesWidget*>(field_userptr(
       currentField));
 
-    // Ask the current widget if it wants to handle input
     bool widgetHandled;
-    
-    if (currentWidget)
+
+    if ( m_SearchMode )
       {
+      if ( key == 10 || key == KEY_ENTER )
+        {
+        m_SearchMode = false;
+        if ( m_SearchString.size() > 0 )
+          {
+          this->JumpToCacheEntry(-1, m_SearchString.c_str());
+          m_OldSearchString = m_SearchString;
+          }
+        m_SearchString = "";
+        }
+      /*
+      else if ( key == KEY_ESCAPE )
+        {
+        m_SearchMode = false;
+        }
+      */
+      else if ( key >= 'a' && key <= 'z' || 
+                key >= 'A' && key <= 'Z' ||
+                key >= '0' && key <= '9' ||
+                key == '_' )
+        {
+        if ( m_SearchString.size() < x-10 )
+          {
+          m_SearchString += key;
+          }
+        }
+      else if ( key == ctrl('h') || key == KEY_BACKSPACE || key == KEY_DC )
+        {
+        if ( m_SearchString.size() > 0 )
+          {
+          m_SearchString.resize(m_SearchString.size()-1);
+          }
+        }
+      }
+    else if (currentWidget && !m_SearchMode)
+      {
+      // Ask the current widget if it wants to handle input
       widgetHandled = currentWidget->HandleInput(key, this, stdscr);
       if (widgetHandled)
         {
@@ -842,7 +893,7 @@ void cmCursesMainForm::HandleInput()
         this->PrintKeys();
         }
       }
-    if (!currentWidget || !widgetHandled)
+    if ((!currentWidget || !widgetHandled) && !m_SearchMode)
       {
       // If the current widget does not want to handle input, 
       // we handle it.
@@ -963,6 +1014,21 @@ void cmCursesMainForm::HandleInput()
         CurrentForm = this;
         this->Render(1,1,x,y);
         }
+      else if ( key == '/' )
+        {
+        m_SearchMode = true;
+        this->UpdateStatusBar("Search");
+        this->PrintKeys(1);
+        touchwin(stdscr);
+        refresh();
+        }
+      else if ( key == 'n' )
+        {
+        if ( m_OldSearchString.size() > 0 )
+          {
+          this->JumpToCacheEntry(-1, m_OldSearchString.c_str());
+          }
+        }
       // switch advanced on/off
       else if ( key == 't' )
         {
@@ -1070,6 +1136,75 @@ int cmCursesMainForm::LoadCache(const char *)
   return r;
 }
   
+void cmCursesMainForm::JumpToCacheEntry(int idx, const char* astr)
+{
+  std::string str;
+  if ( astr )
+    {
+    str = cmSystemTools::LowerCase(astr);
+    }
+
+  if ( idx > m_NumberOfVisibleEntries )
+    {
+    return;
+    }
+  if ( idx < 0 && str.size() == 0)
+    {
+    return;
+    }
+  FIELD* cur = current_field(m_Form);
+  int start_index = field_index(cur);
+  int findex = start_index;
+  while ( (findex / 3) != idx ) 
+    {
+    if ( str.size() > 0 )
+      {
+      cmCursesWidget* lbl = 0;
+      if ( findex >= 0 )
+        {
+        lbl = reinterpret_cast<cmCursesWidget*>(field_userptr(m_Fields[findex-2]));
+        }
+      if ( lbl )
+        {
+        const char* curField = lbl->GetValue();
+        if ( curField )
+          {
+          std::string cfld = cmSystemTools::LowerCase(curField);
+          if ( cfld.find(str) != cfld.npos && findex != start_index )
+            {
+            break;
+            }
+          }
+        }
+      }
+    if ( findex >= 3* m_NumberOfVisibleEntries-1 )
+      {
+      set_current_field(m_Form, m_Fields[2]);
+      }
+    else if (new_page(m_Fields[findex+1]))
+      {
+      form_driver(m_Form, REQ_NEXT_PAGE);
+      }
+    else
+      {
+      form_driver(m_Form, REQ_NEXT_FIELD);
+      }
+    /*
+    char buffer[1024];
+    sprintf(buffer, "Line: %d != %d / %d\n", findex, idx, m_NumberOfVisibleEntries);
+    touchwin(stdscr); 
+    refresh();
+    this->UpdateStatusBar( buffer );
+    usleep(100000);
+    */
+    cur = current_field(m_Form);
+    findex = field_index(cur);
+    if ( findex == start_index )
+      {
+      break;
+      }
+    }
+}
 
 
 const char* cmCursesMainForm::s_ConstHelpMessage = 
