@@ -534,6 +534,8 @@ public:
    */
   void ExecuteCommand(std::string &name, std::vector<std::string> const& args);
   
+  /** Check if a command exists. */
+  bool CommandExists(const char* name) const;
     
 protected:
   std::string m_Prefix;

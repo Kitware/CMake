@@ -214,7 +214,10 @@ void cmMakefile::Print() const
     }
 }
 
-
+bool cmMakefile::CommandExists(const char* name) const
+{
+  return (m_Commands.find(name) != m_Commands.end());
+}
       
 void cmMakefile::ExecuteCommand(std::string &name,
                                 std::vector<std::string> const& arguments)
@@ -1186,7 +1189,6 @@ cmMakefile::FindSourceGroup(const char* source,
   // Shouldn't get here, but just in case, return the default group.
   return groups.front();
 }
-
 
 bool cmMakefile::IsFunctionBlocked(const char *name,
                                    std::vector<std::string> const&args)
