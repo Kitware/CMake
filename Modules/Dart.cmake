@@ -244,8 +244,11 @@ IF(BUILD_TESTING)
     #
 
     # add testing targets
-    ADD_CUSTOM_TARGET(Experimental ${CMAKE_CTEST_COMMAND} -D Experimental)
-
+    FOREACH(mode Experimental Nightly Continuous NightlyMemoryCheck)
+      ADD_CUSTOM_TARGET(${mode} ${CMAKE_CTEST_COMMAND} -D ${mode})
+    ENDFOREACH(mode)
+  
+ 
     # for non IDE based builds nmake and make 
     # add all these extra targets 
     IF(${CMAKE_MAKE_PROGRAM} MATCHES make)
