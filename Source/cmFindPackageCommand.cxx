@@ -162,7 +162,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     {
     cmOStringStream e;
     e << this->Variable << " is not set.  It must be set to the directory "
-      << "containing " << this->Config << " so in order to use "
+      << "containing " << this->Config << " in order to use "
       << this->Name << ".";
     cmSystemTools::Error(e.str().c_str());
     result = true;
