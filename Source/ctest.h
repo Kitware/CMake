@@ -60,7 +60,10 @@ public:
   /**
    * constructor
    */
-  ctest() {}
+  ctest() {m_UseRegExp = false;}
+
+  bool m_UseRegExp;
+  std::string m_RegExp;
 
 private:
 };
