@@ -32,6 +32,10 @@
 #define for if(false) {} else for
 #endif
 
+#ifdef __ICL
+#pragma warning ( disable : 985 )
+#endif
+
 #ifndef CMAKE_NO_ANSI_STREAM_HEADERS
 #include <fstream>
 #include <iostream>
