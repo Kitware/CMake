@@ -101,6 +101,11 @@ bool cmVTKWrapTclCommand::InitialPass(std::vector<std::string>& args)
         j != sources.end(); ++j)
       {   
       cmMakefile::SourceMap::iterator l = Classes.find(*j);
+      if (l == Classes.end())
+	{
+	this->SetError("bad source list passed to VTKWrapTclCommand");
+	return false;
+	}
       for(std::vector<cmSourceFile>::iterator i = l->second.begin(); 
           i != l->second.end(); i++)
         {

@@ -70,6 +70,11 @@ bool cmVTKWrapPythonCommand::InitialPass(std::vector<std::string>& args)
       j != args.end(); ++j)
     {   
     cmMakefile::SourceMap::iterator l = Classes.find(*j);
+    if (l == Classes.end())
+      {
+      this->SetError("bad source list passed to VTKWrapPythonCommand");
+      return false;
+      }
     for(std::vector<cmSourceFile>::iterator i = l->second.begin(); 
         i != l->second.end(); i++)
       {
