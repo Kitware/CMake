@@ -1,6 +1,6 @@
 # -------------------------------------------------------------------------
 # Doxygen documentation batch
-# modified by S. Barre (Time-stamp: <2002-02-13 18:49:35 barre>
+# modified by S. Barre (Time-stamp: <2003-01-16 14:04:41 barre>
 # -------------------------------------------------------------------------
 
 # Path to several tools (_PROG to avoid the typical GZIP env var pb)
@@ -14,15 +14,15 @@
 #   TAR_PROG=@TAR@           (INCLUDE(${CMAKE_ROOT}/Modules/FindCygwin.cmake))
 #   WGET_PROG=@WGET@         (INCLUDE(${CMAKE_ROOT}/Modules/FindWget.cmake))
 #
-export DOXYGEN_PROG="@DOXYGEN@"   # Doxygen
-export GZIP_PROG="@GZIP@"         # gzip (Unix-like 'gzip compressor')
-export GNUPLOT_PROG="@GNUPLOT@"   # gnuplot (data plotting program)
-export HHC_PROG="@HHC@"           # HTML Help Compiler
-export MV_PROG="@MV@"             # mv (Unix-like 'move/rename files')
-export PERL_PROG="@PERL@"         # Perl
-export RM_PROG="@RM@"             # rm (Unix-like 'remove files')
-export TAR_PROG="@TAR@"           # tar (Unix-like 'archiver')
-export WGET_PROG="@WGET@"         # wget (remote file retrieval)
+export DOXYGEN_PROG="@DOXYGEN@"        # Doxygen
+export GZIP_PROG="@GZIP@"              # gzip (Unix-like 'gzip compressor')
+export GNUPLOT_PROG="@GNUPLOT@"        # gnuplot (data plotting program)
+export HHC_PROG="@HTML_HELP_COMPILER@" # HTML Help Compiler
+export MV_PROG="@MV@"                  # mv (Unix-like 'move/rename files')
+export PERL_PROG="@PERL@"              # Perl
+export RM_PROG="@RM@"                  # rm (Unix-like 'remove files')
+export TAR_PROG="@TAR@"                # tar (Unix-like 'archiver')
+export WGET_PROG="@WGET@"              # wget (remote file retrieval)
 
 # PROJECT_NAME:
 # Documentation/project name. Used in some of the resulting file names and
