@@ -29,12 +29,19 @@ bool cmCabilInstantiateCommand::Invoke(std::vector<std::string>& args)
   
   // This command instance needs to use the cmCabilData instance.
   this->SetupCabilData();
-
-  std::vector<std::string>::const_iterator arg = args.begin();
   
-  // Get the output file into which the configuration code is to be
-  // written.  The name of the file is the first argument.
-  m_OutputFile = m_CabilData->GetOutputFile(*arg++, this);
+  // The output file must be opened in the output directory.
+  std::string file = m_Makefile->GetStartOutputDirectory();
+  
+  // The first argument is the file into which the configuration code is to be
+  // written.
+  std::vector<std::string>::const_iterator arg = args.begin();
+
+  // Concatenate the file name onto the path.
+  file += "/" + *arg++;
+  
+  // Get the OutputFile corresponding to this file name.
+  m_OutputFile = m_CabilData->GetOutputFile(file, this);
   
   // The rest of the arguments are the elements to be placed in the set.
   for(; arg != args.end(); ++arg)
