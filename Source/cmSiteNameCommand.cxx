@@ -79,7 +79,7 @@ bool cmSiteNameCommand::InitialPass(std::vector<std::string> const& args)
       host = hostReg.match(1);
       }
     }
-  
+
   std::string siteName = host;
   if(host.length())
     {
@@ -90,13 +90,14 @@ bool cmSiteNameCommand::InitialPass(std::vector<std::string> const& args)
     std::string nsOutput;
     cmSystemTools::RunCommand(nsCmd.c_str(),
                               nsOutput);
+
     std::string RegExp = ".*Name:[ \t\n]*";
     RegExp += host;
     RegExp += "\\.([^ \t\n\r]*)[ \t\n\r]*Address:";
     cmRegularExpression reg( RegExp.c_str() );
     if(reg.find(nsOutput.c_str()))
       {
-      siteName = cmSystemTools::LowerCase(reg.match(1));
+      siteName += '.' + cmSystemTools::LowerCase(reg.match(1));
       }
     }
   
