@@ -609,6 +609,13 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
       }
     }
   fout << "\n\n";
+  const char * additional_clean_files = m_Makefile->GetDefinition("ADDITIONAL_MAKE_CLEAN_FILES");
+  if ( additional_clean_files && strlen(additional_clean_files) > 0 )
+    {
+    fout << "ADDITIONAL_MAKE_CLEAN_FILES = ";
+    fout << additional_clean_files;
+    fout << "\n\n";
+    }
   const char * qt_files = m_Makefile->GetDefinition("GENERATED_QT_FILES");
   if (qt_files != NULL && 
       strlen(m_Makefile->GetDefinition("GENERATED_QT_FILES"))>0)
@@ -2536,7 +2543,7 @@ void cmLocalUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                        "clean",
                        "$(SUBDIR_CLEAN)",
                        "-@ $(RM) $(CLEAN_OBJECT_FILES) "
-                       " $(TARGETS) $(TARGET_EXTRAS) $(GENERATED_QT_FILES) $(GENERATED_FLTK_FILES)");
+                       " $(TARGETS) $(TARGET_EXTRAS) $(GENERATED_QT_FILES) $(GENERATED_FLTK_FILES) $(ADDITIONAL_MAKE_CLEAN_FILES)");
 
   // collect up all the sources
   std::vector<std::string> allsources;
