@@ -317,6 +317,7 @@ public:
     {
       m_StartOutputDirectory = lib;
       cmSystemTools::ConvertToUnixSlashes(m_StartOutputDirectory);
+      cmSystemTools::MakeDirectory(m_StartOutputDirectory.c_str());
     }
   const char* GetStartOutputDirectory() const
     {
