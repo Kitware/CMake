@@ -1703,6 +1703,28 @@ bool cmSystemTools::FileIsDirectory(const char* name)
     }
 }
 
+bool cmSystemTools::DoesFileExistWithExtensions(
+  const char* name,
+  const std::vector<std::string>& headerExts)
+{
+  std::string hname;
+
+  for( std::vector<std::string>::const_iterator ext = headerExts.begin();
+       ext != headerExts.end(); ++ext )
+    {
+    hname = name;
+    hname += ".";
+    hname += *ext;
+    if(cmSystemTools::FileExists(hname.c_str()))
+      {
+      return true;
+      }
+    }
+  return false;
+}
+
+
+
 int cmSystemTools::ChangeDirectory(const char *dir)
 {
   return Chdir(dir);
