@@ -128,7 +128,10 @@ CMakeSetupDialog::CMakeSetupDialog(const CMakeCommandLineInfo& cmdInfo,
   cmSystemTools::SetErrorCallback(MFCMessageCallback);
   m_RegistryKey  = "Software\\Kitware\\CMakeSetup\\Settings\\StartPath";
   m_CacheEntriesList.m_CMakeSetupDialog = this;
-  
+
+  m_CMakeInstance = new cmake;
+  m_CMakeInstance->SetProgressCallback(updateProgress, (void *)this);
+
   //{{AFX_DATA_INIT(CMakeSetupDialog)
 	//}}AFX_DATA_INIT
 
@@ -164,9 +167,6 @@ CMakeSetupDialog::CMakeSetupDialog(const CMakeCommandLineInfo& cmdInfo,
 
   m_oldCX = -1;
   m_deltaXRemainder = 0;
-  m_CMakeInstance = new cmake;
-  m_CMakeInstance->SetProgressCallback(updateProgress, (void *)this);
-  
 }
 
 CMakeSetupDialog::~CMakeSetupDialog()
@@ -1338,7 +1338,7 @@ void CMakeSetupDialog::ChangeDirectoriesFromFile(const char* buffer)
     path = ConvertToWindowsPath(path.c_str());
     this->m_WhereBuild = path.c_str();
 
-    path = ConvertToWindowsPath(it.GetName());
+    path = ConvertToWindowsPath(it.GetValue());
     this->m_WhereSource = path.c_str();
     }
   else
