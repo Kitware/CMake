@@ -2887,6 +2887,11 @@ OutputBuildObjectFromSource(std::ostream& fout,
     {
     switch(format)
       {
+      // these are all handled by the if(lang) step now
+      case cmSystemTools::C_FILE_FORMAT:
+      case cmSystemTools::CXX_FILE_FORMAT:
+      case cmSystemTools::FORTRAN_FILE_FORMAT:
+        break;
       case cmSystemTools::HEADER_FILE_FORMAT:
         return;
       case cmSystemTools::DEFINITION_FILE_FORMAT:

@@ -91,7 +91,6 @@ public:
   cmLocalGenerator* GetParent(){return m_Parent;}
   void SetParent(cmLocalGenerator* g) { m_Parent = g;}
 
-  const char* GetFileLanguage(const char*);
 protected:
   virtual void AddInstallRule(std::ostream& fout, const char* dest, int type, 
     const char* files, bool optional = false, const char* properties = 0);
