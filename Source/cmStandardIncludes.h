@@ -118,7 +118,7 @@ extern int putenv (char *__string) __THROW;
 # endif
 #endif
 
-#if defined( _MSC_VER ) || defined( __BORLANDC__ )
+#if defined( _MSC_VER )
 typedef unsigned short mode_t;
 #endif
 

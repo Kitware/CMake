@@ -20,6 +20,7 @@
 #include "cmStandardIncludes.h"
 
 #include <cmsys/SystemTools.hxx>
+#include <sys/types.h>
 
 /** \class cmSystemTools
  * \brief A collection of useful functions for CMake.
