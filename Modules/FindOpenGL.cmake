@@ -104,8 +104,7 @@ ELSE (WIN32)
 ENDIF (WIN32)
 
 SET( OPENGL_FOUND "NO" )
-IF(OPENGL_INCLUDE_DIR)
-  IF(OPENGL_gl_LIBRARY)
+IF(OPENGL_gl_LIBRARY)
 
     IF(OPENGL_xmesa_INCLUDE_DIR)
       SET( OPENGL_XMESA_FOUND "YES" )
@@ -127,13 +126,11 @@ IF(OPENGL_INCLUDE_DIR)
 
     SET (OPENGL_LIBRARY ${OPENGL_LIBRARIES})
 
-  ENDIF(OPENGL_gl_LIBRARY)
+ENDIF(OPENGL_gl_LIBRARY)
 
-  # This deprecated setting is for backward compatibility with CMake1.4
+# This deprecated setting is for backward compatibility with CMake1.4
+SET(OPENGL_INCLUDE_PATH ${OPENGL_INCLUDE_DIR})
 
-  SET(OPENGL_INCLUDE_PATH ${OPENGL_INCLUDE_DIR})
-
-ENDIF(OPENGL_INCLUDE_DIR)
 
 # On OSX, OpenGL is always there - this will need refining for those 
 # using OpenGL with X11
