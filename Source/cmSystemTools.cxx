@@ -1221,15 +1221,6 @@ std::string cmSystemTools::RelativePath(const char* local, const char* remote)
     cmSystemTools::Error("RelativePath must be passed a full path to remote: ", remote);
     }
   
-  // check for driveletter: as the start of the path
-  // if not on the same drive then full path to local must be used.
-  if(local[0] && local[0] != '/')
-    {
-    if(remote[0] && local[0] != remote[0])
-      {
-      return remote;
-      }
-    }
   // split up both paths into arrays of strings using / as a separator
   std::string localString = local;
   std::vector<cmStdString> localSplit = cmSystemTools::SplitString(local, '/', true); 
@@ -1257,7 +1248,12 @@ std::string cmSystemTools::RelativePath(const char* local, const char* remote)
     remoteSplit[sameCount] = "";
     sameCount++;
     }
-
+  // If there is nothing in common with the paths, then just return the remote
+  if(sameCount == 0)
+    {
+    return remote;
+    }
+  
   // for each entry that is not common in the local path
   // add a ../ to the finalpath array, this gets us out of the local
   // path into the remote dir
