@@ -21,6 +21,7 @@
 #include "cmSourceFile.h"
 #include "cmCacheManager.h"
 #include "cmake.h"
+#include <queue>
 
 cmLocalVisualStudio7Generator::cmLocalVisualStudio7Generator()
 {
@@ -85,6 +86,9 @@ void cmLocalVisualStudio7Generator::OutputVCProjFile()
   // clear project names
   m_CreatedProjectNames.clear();
 
+  // expand vars for custom commands
+  m_Makefile->ExpandVariablesInCustomCommands();  
+
   // build any targets
   cmTargets &tgts = m_Makefile->GetTargets();
   for(cmTargets::iterator l = tgts.begin(); 
@@ -127,7 +131,7 @@ void cmLocalVisualStudio7Generator::CreateSingleVCProj(const char *lname, cmTarg
 }
 
 
-void cmLocalVisualStudio7Generator::AddVCProjBuildRule(cmSourceGroup& sourceGroup)
+void cmLocalVisualStudio7Generator::AddVCProjBuildRule()
 {
   std::string dspname = *(m_CreatedProjectNames.end()-1);
   if(dspname == "ALL_BUILD")
@@ -142,22 +146,29 @@ void cmLocalVisualStudio7Generator::AddVCProjBuildRule(cmSourceGroup& sourceGrou
   std::string dsprule = "${CMAKE_COMMAND}";
   m_Makefile->ExpandVariablesInString(dsprule);
   dsprule = cmSystemTools::ConvertToOutputPath(dsprule.c_str());
-  std::string args = makefileIn;
-  args += " -H";
+  std::vector<std::string> argv;
+  argv.push_back(makefileIn);
+  makefileIn = m_Makefile->GetStartDirectory();
+  makefileIn += "/";
+  makefileIn += "CMakeLists.txt";
+  std::string args;
+  args = "-H";
   args +=
     cmSystemTools::ConvertToOutputPath(m_Makefile->GetHomeDirectory());
-  args += " -S";
-  args += 
+  argv.push_back(args);
+  args = "-S";
+  args +=
     cmSystemTools::ConvertToOutputPath(m_Makefile->GetStartDirectory());
-  args += " -O";
+  argv.push_back(args);
+  args = "-O";
   args += 
     cmSystemTools::ConvertToOutputPath(m_Makefile->GetStartOutputDirectory());
-  args += " -B";
+  argv.push_back(args);
+  args = "-B";
   args += 
     cmSystemTools::ConvertToOutputPath(m_Makefile->GetHomeOutputDirectory());
-  args += "";
-  m_Makefile->ExpandVariablesInString(args);
-
+  argv.push_back(args);
+  
   std::string configFile = 
     m_Makefile->GetDefinition("CMAKE_ROOT");
   configFile += "/Templates/CMakeWindowsSystemConfig.cmake";
@@ -175,14 +186,9 @@ void cmLocalVisualStudio7Generator::AddVCProjBuildRule(cmSourceGroup& sourceGrou
     {
     listFiles.push_back(configFile);
     }
-  
-  std::vector<std::string> outputs;
-  outputs.push_back(dspname);
-  cmCustomCommand cc(makefileIn.c_str(), dsprule.c_str(),
-                     args.c_str(),
-                     listFiles, 
-                     outputs);
-  sourceGroup.AddCustomCommand(cc);
+  m_Makefile->AddCustomCommandToOutput(dspname.c_str(), dsprule.c_str(), 
+                                       argv, makefileIn.c_str(), listFiles,
+                                       NULL, true);
 }
 
 
@@ -359,10 +365,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     }
   fout << "\"\n/>\n";
   fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCMIDLTool\"/>\n";
-  fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCPostBuildEventTool\"";
   this->OutputTargetRules(fout, target, libName);
-  fout << "/>\n";
-  fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCPreBuildEventTool\"/>\n";
   this->OutputBuildTool(fout, configName, libName, target);
   fout << "\t\t</Configuration>\n";
 }
@@ -635,18 +638,104 @@ void cmLocalVisualStudio7Generator::OutputDefineFlags(std::ostream& fout)
 }
 
 void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout, 
-                                 const char *libName,
-                                 cmTarget &target)
+                                                    const char *libName,
+                                                    cmTarget &target)
 {
   // get the configurations
   std::vector<std::string> *configs = 
-    static_cast<cmGlobalVisualStudio7Generator *>(m_GlobalGenerator)->GetConfigurations();
+    static_cast<cmGlobalVisualStudio7Generator *>
+    (m_GlobalGenerator)->GetConfigurations();
   
+  // if we should add regen rule then...
+  const char *suppRegenRule = 
+    m_Makefile->GetDefinition("CMAKE_SUPPRESS_REGENERATION");
+  if (!cmSystemTools::IsOn(suppRegenRule))
+    {
+    this->AddVCProjBuildRule();
+    }
+
   // We may be modifying the source groups temporarily, so make a copy.
   std::vector<cmSourceGroup> sourceGroups = m_Makefile->GetSourceGroups();
   
   // get the classes from the source lists then add them to the groups
-  std::vector<cmSourceFile*> const& classes = target.GetSourceFiles();
+  std::vector<cmSourceFile*> & classes = target.GetSourceFiles();
+  // use a deck to keep track of processed source files
+  std::queue<std::string> srcFilesToProcess;
+  std::string name;
+  for(std::vector<cmSourceFile*>::const_iterator i = classes.begin(); 
+      i != classes.end(); ++i)
+    {
+    std::string name = (*i)->GetSourceName();
+    if ((*i)->GetSourceExtension() != "rule")
+      {
+      name += ".";
+      name += (*i)->GetSourceExtension();
+      }
+    srcFilesToProcess.push(name);
+    }
+  // add in the project file itself
+  name = libName;
+  name += ".vcproj.cmake";
+  srcFilesToProcess.push(name);
+  // add in the library depends for cusotm targets
+  if (target.GetType() == cmTarget::UTILITY)
+    {
+    cmCustomCommand &c = target.GetPostBuildCommands()[0];
+    for (std::vector<std::string>::iterator i = c.GetDepends().begin();
+         i != c.GetDepends().end(); ++i)
+      {
+      srcFilesToProcess.push(*i);
+      }
+    }
+  while (!srcFilesToProcess.empty())
+    {
+    // is this source the output of a custom command
+    cmSourceFile* outsf = 
+      m_Makefile->GetSourceFileWithOutput(srcFilesToProcess.front().c_str());
+    if (outsf)
+      {
+      // is it not already in the target?
+      if (std::find(classes.begin(),classes.end(),outsf) == classes.end())
+        {
+        // then add the source to this target and add it to the queue
+        classes.push_back(outsf);
+        std::string name = outsf->GetSourceName();
+        if (outsf->GetSourceExtension() != "rule")
+          {
+          name += ".";
+          name += outsf->GetSourceExtension();
+          }
+        srcFilesToProcess.push(name);
+        }
+      // add its dependencies to the list to check
+      unsigned int i;
+      for (i = 0; i < outsf->GetCustomCommand()->GetDepends().size(); ++i)
+        {
+        std::string dep = cmSystemTools::GetFilenameName(
+          outsf->GetCustomCommand()->GetDepends()[i]);
+        if (cmSystemTools::GetFilenameLastExtension(dep) == ".exe")
+          {
+          dep = cmSystemTools::GetFilenameWithoutLastExtension(dep);
+          }
+        // watch for target dependencies,
+        std::string libPath = dep + "_CMAKE_PATH";
+        const char* cacheValue = m_Makefile->GetDefinition(libPath.c_str());
+        if (cacheValue)
+          {
+          // add the depend as a utility on the target
+          target.AddUtility(dep.c_str());
+          }
+        else
+          {
+          srcFilesToProcess.push(dep);
+          }
+        }
+      }
+    // finished with this SF move to the next
+    srcFilesToProcess.pop();
+    }
+
+  // get the classes from the source lists then add them to the groups
   for(std::vector<cmSourceFile*>::const_iterator i = classes.begin(); 
       i != classes.end(); i++)
     {
@@ -656,23 +745,9 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
       {
       m_ModuleDefinitionFile = (*i)->GetFullPath();
       }
-    
-    cmSourceGroup& sourceGroup = m_Makefile->FindSourceGroup(source.c_str(),
-                                                             sourceGroups);
-    sourceGroup.AddSource(source.c_str(), *i);
-    }
-  
-  // add any custom rules to the source groups
-  for (std::vector<cmCustomCommand>::const_iterator cr = 
-         target.GetCustomCommands().begin(); 
-       cr != target.GetCustomCommands().end(); ++cr)
-    {
     cmSourceGroup& sourceGroup = 
-      m_Makefile->FindSourceGroup(cr->GetSourceName().c_str(),
-                                  sourceGroups);
-    cmCustomCommand cc(*cr);
-    cc.ExpandVariables(*m_Makefile);
-    sourceGroup.AddCustomCommand(cc);
+      m_Makefile->FindSourceGroup(source.c_str(), sourceGroups);
+    sourceGroup.AddSource(source.c_str(), *i);
     }
   
   // open the project
@@ -682,34 +757,18 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
 
   fout << "\t<Files>\n";
 
-  // if we should add regen rule then...
-  const char *suppRegenRule = 
-    m_Makefile->GetDefinition("CMAKE_SUPPRESS_REGENERATION");
-
-  // Find the group in which the CMakeLists.txt source belongs, and add
-  // the rule to generate this VCProj file.
-  if (!cmSystemTools::IsOn(suppRegenRule))
-    {
-    for(std::vector<cmSourceGroup>::reverse_iterator sg = 
-          sourceGroups.rbegin();
-        sg != sourceGroups.rend(); ++sg)
-      {
-      if(sg->Matches("CMakeLists.txt"))
-        {
-        this->AddVCProjBuildRule(*sg);
-        break;
-        }    
-      }
-    }
 
   // Loop through every source group.
   for(std::vector<cmSourceGroup>::const_iterator sg = sourceGroups.begin();
       sg != sourceGroups.end(); ++sg)
     {
-    const cmSourceGroup::BuildRules& buildRules = sg->GetBuildRules();
+    const std::vector<const cmSourceFile *> &sourceFiles = 
+      sg->GetSourceFiles();
     // If the group is empty, don't write it at all.
-    if(buildRules.empty())
-      { continue; }
+    if(sourceFiles.empty())
+      { 
+      continue; 
+      }
     
     // If the group has a name, write the header.
     std::string name = sg->GetName();
@@ -718,45 +777,41 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
       this->WriteVCProjBeginGroup(fout, name.c_str(), "");
       }
     
-    // Loop through each build rule in the source group.
-    for(cmSourceGroup::BuildRules::const_iterator cc =
-          buildRules.begin(); cc != buildRules.end(); ++ cc)
+    // Loop through each source in the source group.
+    for(std::vector<const cmSourceFile *>::const_iterator sf =
+          sourceFiles.begin(); sf != sourceFiles.end(); ++sf)
       {
-      std::string source = cc->first;
-      const cmSourceGroup::Commands& commands = cc->second.m_Commands;
+      std::string source = (*sf)->GetFullPath();
+      const cmCustomCommand *command = (*sf)->GetCustomCommand();
       std::string compileFlags;
       std::string additionalDeps;
-      if(cc->second.m_SourceFile)
+
+      // Check for extra compiler flags.
+      const char* cflags = (*sf)->GetProperty("COMPILE_FLAGS");
+      if(cflags)
         {
-        // Check for extra compiler flags.
-        const char* cflags = cc->second.m_SourceFile->GetProperty("COMPILE_FLAGS");
-        if(cflags)
+        compileFlags = cflags;
+        }
+      if(cmSystemTools::GetFileFormat((*sf)->GetSourceExtension().c_str())
+         == cmSystemTools::CXX_FILE_FORMAT)
+        {
+        // force a C++ file type
+        compileFlags += " /TP ";
+        }
+      // Check for extra object-file dependencies.
+      const char* deps = (*sf)->GetProperty("OBJECT_DEPENDS");
+      if(deps)
+        {
+        std::vector<std::string> depends;
+        cmSystemTools::ExpandListArgument(deps, depends);
+        if(!depends.empty())
           {
-          compileFlags = cc->second.m_SourceFile->GetProperty("COMPILE_FLAGS");
-          }
-        if(cmSystemTools::GetFileFormat(
-             cc->second.m_SourceFile->GetSourceExtension().c_str())
-           == cmSystemTools::CXX_FILE_FORMAT)
-          {
-          // force a C++ file type
-          compileFlags += " /TP ";
-          }
-        // Check for extra object-file dependencies.
-        const char* deps =
-          cc->second.m_SourceFile->GetProperty("OBJECT_DEPENDS");
-        if(deps)
-          {
-          std::vector<std::string> depends;
-          cmSystemTools::ExpandListArgument(deps, depends);
-          if(!depends.empty())
+          std::vector<std::string>::iterator i = depends.begin();
+          additionalDeps = this->ConvertToXMLOutputPath(i->c_str());
+          for(++i;i != depends.end(); ++i)
             {
-            std::vector<std::string>::iterator i = depends.begin();
-            additionalDeps = this->ConvertToXMLOutputPath(i->c_str());
-            for(++i;i != depends.end(); ++i)
-              {
-              additionalDeps += ";";
-              additionalDeps += this->ConvertToXMLOutputPath(i->c_str());
-              }
+            additionalDeps += ";";
+            additionalDeps += this->ConvertToXMLOutputPath(i->c_str());
             }
           }
         }
@@ -767,18 +822,20 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
         // Tell MS-Dev what the source is.  If the compiler knows how to
         // build it, then it will.
         fout << "\t\t\t\tRelativePath=\"" << d << "\">\n";
-        if (!commands.empty())
+        if (command)
           {
-          cmSourceGroup::CommandFiles totalCommand;
           std::string totalCommandStr;
-          totalCommandStr = this->CombineCommands(commands, totalCommand,
-                                                  source.c_str());
-          const char* comment = totalCommand.m_Comment.c_str();
+          totalCommandStr = 
+            cmSystemTools::ConvertToOutputPath(command->GetCommand().c_str()); 
+          totalCommandStr += " ";
+          totalCommandStr += command->GetArguments();
+          totalCommandStr += "\n";
+          const char* comment = command->GetComment().c_str();
           const char* flags = compileFlags.size() ? compileFlags.c_str(): 0;
           this->WriteCustomRule(fout, source.c_str(), totalCommandStr.c_str(), 
                                 (*comment?comment:"Custom Rule"),
-                                totalCommand.m_Depends,
-                                totalCommand.m_Outputs, flags);
+                                command->GetDepends(),
+                                command->GetOutput().c_str(), flags);
           }
         else if(compileFlags.size() || additionalDeps.length())
           {
@@ -820,13 +877,14 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
 }
 
 
-void cmLocalVisualStudio7Generator::WriteCustomRule(std::ostream& fout,
-                                          const char* source,
-                                          const char* command,
-                                          const char* comment,
-                                          const std::set<std::string>& depends,
-                                          const std::set<std::string>& outputs,
-                                          const char* compileFlags)
+void cmLocalVisualStudio7Generator::
+WriteCustomRule(std::ostream& fout,
+                const char* source,
+                const char* command,
+                const char* comment,
+                const std::vector<std::string>& depends,
+                const char *output,
+                const char* compileFlags)
 {
   std::string cmd = command;
   cmSystemTools::ReplaceString(cmd, "\"", "&quot;");
@@ -847,17 +905,13 @@ void cmLocalVisualStudio7Generator::WriteCustomRule(std::ostream& fout,
     fout << "\t\t\t\t\t<Tool\n"
          << "\t\t\t\t\tName=\"VCCustomBuildTool\"\n"
          << "\t\t\t\t\tDescription=\"Building " << comment;
-    std::set<std::string>::const_iterator it;
-    for ( it = outputs.begin(); it != outputs.end(); it ++ )
-      {
-      fout << " " << *it;
-      }
+    fout << " " << output;
     fout << "\"\n"
          << "\t\t\t\t\tCommandLine=\"" << cmd << "\n\"\n"
          << "\t\t\t\t\tAdditionalDependencies=\"";
     // Write out the dependencies for the rule.
     std::string temp;
-    for(std::set<std::string>::const_iterator d = depends.begin();
+    for(std::vector<std::string>::const_iterator d = depends.begin();
         d != depends.end(); ++d)
       {
       fout << this->ConvertToXMLOutputPath(d->c_str())
@@ -865,26 +919,14 @@ void cmLocalVisualStudio7Generator::WriteCustomRule(std::ostream& fout,
       }
     fout << "\"\n";
     fout << "\t\t\t\t\tOutputs=\"";
-    if(outputs.size() == 0)
+    if(output == 0)
       {
       fout << source << "_force";
       }
     
     bool first = true;
-    // Write a rule for every output generated by this command.
-    for(std::set<std::string>::const_iterator output = outputs.begin();
-        output != outputs.end(); ++output)
-      {
-      if(!first)
-        {
-        fout << ";";
-        }
-      else
-        {
-        first = false;
-        }
-      fout << this->ConvertToXMLOutputPathSingle(output->c_str());
-      }
+    // Write a rule for the output generated by this command.
+    fout << this->ConvertToXMLOutputPathSingle(output);
     fout << "\"/>\n";
     fout << "\t\t\t\t</FileConfiguration>\n";
     }
@@ -907,85 +949,90 @@ void cmLocalVisualStudio7Generator::WriteVCProjEndGroup(std::ostream& fout)
 }
 
 
-
-
-
-std::string
-cmLocalVisualStudio7Generator::CombineCommands(
-  const cmSourceGroup::Commands &commands,
-  cmSourceGroup::CommandFiles &totalCommand,
-  const char *source)
-  
-{
-  // Loop through every custom command generating code from the
-  // current source.
-  // build up the depends and outputs and commands 
-  std::string totalCommandStr = "";
-  std::string temp;
-  for(cmSourceGroup::Commands::const_iterator c = commands.begin();
-      c != commands.end(); ++c)
-    {
-    temp= 
-      cmSystemTools::ConvertToOutputPath(c->second.m_Command.c_str()); 
-    totalCommandStr += temp;
-    totalCommandStr += " ";
-    totalCommandStr += c->second.m_Arguments;
-    totalCommandStr += "\n";
-    totalCommand.Merge(c->second);
-    totalCommand.m_Comment = c->second.m_Comment.c_str();
-    }      
-  // Create a dummy file with the name of the source if it does
-  // not exist
-  if(totalCommand.m_Outputs.empty())
-    { 
-    std::string dummyFile = m_Makefile->GetStartOutputDirectory();
-    dummyFile += "/";
-    dummyFile += source;
-    if(!cmSystemTools::FileExists(dummyFile.c_str()))
-      {
-      std::ofstream fout(dummyFile.c_str());
-      fout << "Dummy file created by cmake as unused source for utility command.\n";
-      }
-    }
-  return totalCommandStr;
-}
-
-
 // look for custom rules on a target and collect them together
-
 void cmLocalVisualStudio7Generator::OutputTargetRules(std::ostream& fout,
-                                            const cmTarget &target, 
-                                            const char *libName)
+                                                      const cmTarget &target, 
+                                                      const char *libName)
 {
-  if (target.GetType() >= cmTarget::UTILITY)
+  if (target.GetType() > cmTarget::UTILITY)
     {
     return;
     }
   
-  // Find the group in which the lix exe custom rules belong
+  // add the pre build rules
+  fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCPreBuildEventTool\"";
   bool init = false;
   for (std::vector<cmCustomCommand>::const_iterator cr = 
-         target.GetCustomCommands().begin(); 
-       cr != target.GetCustomCommands().end(); ++cr)
+         target.GetPreBuildCommands().begin(); 
+       cr != target.GetPreBuildCommands().end(); ++cr)
     {
     cmCustomCommand cc(*cr);
     cc.ExpandVariables(*m_Makefile);
-    if (cc.GetSourceName() == libName)
+    if(!init)
       {
-      if(!init)
-        {
-        fout << "\nCommandLine=\"";
-        init = true;
-        }
-      std::string args = cc.GetArguments();
-      cmSystemTools::ReplaceString(args, "\"", "&quot;");
-      fout << this->ConvertToXMLOutputPath(cc.GetCommand().c_str()) << " " << args << "\n";
+      fout << "\nCommandLine=\"";
+      init = true;
       }
+    std::string args = cc.GetArguments();
+    cmSystemTools::ReplaceString(args, "\"", "&quot;");
+    fout << this->ConvertToXMLOutputPath(cc.GetCommand().c_str()) << " " << 
+      args << "\n";
     }
   if (init)
     {
     fout << "\"";
     }
+  fout << "/>\n";
+
+  // add the pre Link rules
+  fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCPreLinkEventTool\"";
+  init = false;
+  for (std::vector<cmCustomCommand>::const_iterator cr = 
+         target.GetPreLinkCommands().begin(); 
+       cr != target.GetPreLinkCommands().end(); ++cr)
+    {
+    cmCustomCommand cc(*cr);
+    cc.ExpandVariables(*m_Makefile);
+    if(!init)
+      {
+      fout << "\nCommandLine=\"";
+      init = true;
+      }
+    std::string args = cc.GetArguments();
+    cmSystemTools::ReplaceString(args, "\"", "&quot;");
+    fout << this->ConvertToXMLOutputPath(cc.GetCommand().c_str()) << " " << 
+      args << "\n";
+    }
+  if (init)
+    {
+    fout << "\"";
+    }
+  fout << "/>\n";
+  
+  // add the PostBuild rules
+  fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCPostBuildEventTool\"";
+  init = false;
+  for (std::vector<cmCustomCommand>::const_iterator cr = 
+         target.GetPostBuildCommands().begin(); 
+       cr != target.GetPostBuildCommands().end(); ++cr)
+    {
+    cmCustomCommand cc(*cr);
+    cc.ExpandVariables(*m_Makefile);
+    if(!init)
+      {
+      fout << "\nCommandLine=\"";
+      init = true;
+      }
+    std::string args = cc.GetArguments();
+    cmSystemTools::ReplaceString(args, "\"", "&quot;");
+    fout << this->ConvertToXMLOutputPath(cc.GetCommand().c_str()) << " " << 
+      args << "\n";
+    }
+  if (init)
+    {
+    fout << "\"";
+    }
+  fout << "/>\n";
 }
 
 void 

@@ -422,7 +422,8 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
       for(std::vector<cmSourceFile*>::iterator i = classes.begin(); 
           i != classes.end(); i++)
         {
-        if(!(*i)->GetPropertyAsBool("HEADER_FILE_ONLY"))
+        if(!(*i)->GetPropertyAsBool("HEADER_FILE_ONLY") && 
+           !(*i)->GetCustomCommand())
           {
           std::string outExt(
             this->GetOutputExtension((*i)->GetSourceExtension().c_str()));
@@ -439,7 +440,8 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
       for(std::vector<cmSourceFile*>::iterator i = classes.begin(); 
           i != classes.end(); i++)
         {
-        if(!(*i)->GetPropertyAsBool("HEADER_FILE_ONLY"))
+        if(!(*i)->GetPropertyAsBool("HEADER_FILE_ONLY") &&
+           !(*i)->GetCustomCommand())
           {
           std::string outExt(this->GetOutputExtension((*i)->GetSourceExtension().c_str()));
           if(outExt.size())
@@ -676,31 +678,77 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
     }
 }
 
-
-std::string cmLocalUnixMakefileGenerator::CreateTargetRules(const cmTarget &target,
-                                                       const char* targetName)
+std::string cmLocalUnixMakefileGenerator::CreatePreBuildRules(
+  const cmTarget &target, const char* targetName)
 {
   std::string customRuleCode = "";
   bool initNext = false;
   for (std::vector<cmCustomCommand>::const_iterator cr = 
-         target.GetCustomCommands().begin(); 
-       cr != target.GetCustomCommands().end(); ++cr)
+         target.GetPreBuildCommands().begin(); 
+       cr != target.GetPreBuildCommands().end(); ++cr)
     {
     cmCustomCommand cc(*cr);
     cc.ExpandVariables(*m_Makefile);
-    if (cc.GetSourceName() == targetName)
+    if(initNext)
       {
-      if(initNext)
-        {
-        customRuleCode += "\n\t";
-        }
-      else
-        {
-        initNext = true;
-        }
-      std::string command = cmSystemTools::ConvertToOutputPath(cc.GetCommand().c_str());
-      customRuleCode += command + " " + cc.GetArguments();
+      customRuleCode += "\n\t";
       }
+    else
+      {
+      initNext = true;
+      }
+    std::string command = cmSystemTools::ConvertToOutputPath(cc.GetCommand().c_str());
+    customRuleCode += command + " " + cc.GetArguments();
+    }
+  return customRuleCode;
+}
+
+std::string cmLocalUnixMakefileGenerator::CreatePreLinkRules(
+  const cmTarget &target, const char* targetName)
+{
+  std::string customRuleCode = "";
+  bool initNext = false;
+  for (std::vector<cmCustomCommand>::const_iterator cr = 
+         target.GetPreLinkCommands().begin(); 
+       cr != target.GetPreLinkCommands().end(); ++cr)
+    {
+    cmCustomCommand cc(*cr);
+    cc.ExpandVariables(*m_Makefile);
+    if(initNext)
+      {
+      customRuleCode += "\n\t";
+      }
+    else
+      {
+      initNext = true;
+      }
+    std::string command = cmSystemTools::ConvertToOutputPath(cc.GetCommand().c_str());
+    customRuleCode += command + " " + cc.GetArguments();
+    }
+  return customRuleCode;
+}
+
+std::string cmLocalUnixMakefileGenerator::CreatePostBuildRules(
+  const cmTarget &target, const char* targetName)
+{
+  std::string customRuleCode = "";
+  bool initNext = false;
+  for (std::vector<cmCustomCommand>::const_iterator cr = 
+         target.GetPostBuildCommands().begin(); 
+       cr != target.GetPostBuildCommands().end(); ++cr)
+    {
+    cmCustomCommand cc(*cr);
+    cc.ExpandVariables(*m_Makefile);
+    if(initNext)
+      {
+      customRuleCode += "\n\t";
+      }
+    else
+      {
+      initNext = true;
+      }
+    std::string command = cmSystemTools::ConvertToOutputPath(cc.GetCommand().c_str());
+    customRuleCode += command + " " + cc.GetArguments();
     }
   return customRuleCode;
 }
@@ -848,9 +896,21 @@ void cmLocalUnixMakefileGenerator::OutputLibraryRule(std::ostream& fout,
   // expand multi-command semi-colon separated lists
   // of commands into separate commands
   std::vector<std::string> commands;
+  // collect custom commands for this target and add them to the list
+  std::string customCommands = this->CreatePreBuildRules(t, name);
+  if(customCommands.size() > 0)
+    {
+    commands.push_back(customCommands);
+    }
+  // collect custom commands for this target and add them to the list
+  customCommands = this->CreatePreLinkRules(t, name);
+  if(customCommands.size() > 0)
+    {
+    commands.push_back(customCommands);
+    }
   cmSystemTools::ExpandList(rules, commands);
   // collect custom commands for this target and add them to the list
-  std::string customCommands = this->CreateTargetRules(t, name);
+  customCommands = this->CreatePostBuildRules(t, name);
   if(customCommands.size() > 0)
     {
     commands.push_back(customCommands);
@@ -1072,8 +1132,18 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
   std::string comment = "executable";
   
   std::vector<std::string> commands;
+  std::string customCommands = this->CreatePreBuildRules(t, name);
+  if(customCommands.size() > 0)
+    {
+    commands.push_back(customCommands.c_str());
+    }
+  customCommands = this->CreatePreLinkRules(t, name);
+  if(customCommands.size() > 0)
+    {
+    commands.push_back(customCommands.c_str());
+    }
   cmSystemTools::ExpandList(rules, commands);
-  std::string customCommands = this->CreateTargetRules(t, name);
+  customCommands = this->CreatePostBuildRules(t, name);
   if(customCommands.size() > 0)
     {
     commands.push_back(customCommands.c_str());
@@ -1127,8 +1197,18 @@ void cmLocalUnixMakefileGenerator::OutputUtilityRule(std::ostream& fout,
                                                 const char* name,
                                                 const cmTarget &t)
 {
-  std::string customCommands = this->CreateTargetRules(t, name);
   const char* cc = 0;
+  std::string customCommands = this->CreatePreBuildRules(t, name);
+  std::string customCommands2 = this->CreatePreLinkRules(t, name);
+  if(customCommands2.size() > 0)
+    {
+    customCommands += customCommands2;
+    }
+  customCommands2 = this->CreatePostBuildRules(t, name);
+  if(customCommands2.size() > 0)
+    {
+    customCommands += customCommands2;
+    }
   if(customCommands.size() > 0)
     {
     cc = customCommands.c_str();
@@ -1136,7 +1216,7 @@ void cmLocalUnixMakefileGenerator::OutputUtilityRule(std::ostream& fout,
   std::string comment = "Utility";
   std::string depends;
   std::string replaceVars;
-  const std::vector<cmCustomCommand> &ccs = t.GetCustomCommands();
+  const std::vector<cmCustomCommand> &ccs = t.GetPostBuildCommands();
   for(std::vector<cmCustomCommand>::const_iterator i = ccs.begin();
       i != ccs.end(); ++i)
     {
@@ -1513,6 +1593,17 @@ void cmLocalUnixMakefileGenerator::OutputExeDepend(std::ostream& fout,
     exepath += cmSystemTools::GetExecutableExtension();
     fout << cmSystemTools::ConvertToOutputPath(exepath.c_str()) << " ";
     }
+  // if it isn't in the cache, it might still be a utility target
+  // so check for that
+  else
+    {
+    std::map<cmStdString, cmTarget>& targets = m_Makefile->GetTargets();
+    if (targets.find(name) != targets.end())
+      {
+      fout << name << " ";
+      }
+    }
+  
 }
 
 
@@ -1707,9 +1798,6 @@ void cmLocalUnixMakefileGenerator::OutputSubDirectoryRules(std::ostream& fout)
                                SubDirectories);
 }
 
-
-
-
 // Output the depend information for all the classes 
 // in the makefile.  These would have been generated
 // by the class cmMakeDepend GenerateMakefile
@@ -1821,126 +1909,76 @@ void cmLocalUnixMakefileGenerator::OutputCheckDepends(std::ostream& fout)
 //   (tab)   command...
 void cmLocalUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
 {
-  // We may be modifying the source groups temporarily, so make a copy.
-  std::vector<cmSourceGroup> sourceGroups = m_Makefile->GetSourceGroups();
+  // we cannot provide multiple rules for a single output
+  // so we will keep track of outputs to make sure we don't write
+  // two rules. First found wins
+  std::set<std::string> processedOutputs;
   
-  const cmTargets &tgts = m_Makefile->GetTargets();
-  for(cmTargets::const_iterator tgt = tgts.begin(); 
-      tgt != tgts.end(); ++tgt)
+  // first output all custom rules
+  const std::vector<cmSourceFile*>& sources = m_Makefile->GetSourceFiles();
+  for(std::vector<cmSourceFile*>::const_iterator i = sources.begin();
+      i != sources.end(); ++i)
     {
-    // add any custom rules to the source groups
-    for (std::vector<cmCustomCommand>::const_iterator cr = 
-           tgt->second.GetCustomCommands().begin(); 
-         cr != tgt->second.GetCustomCommands().end(); ++cr)
+    if ((*i)->GetCustomCommand())
       {
-      // if the source for the custom command is the same name
-      // as the target, then to not create a rule in the makefile for
-      // the custom command, as the command will be fired when the other target 
-      // is built.  
-      if ( cr->GetSourceName().compare(tgt->first) !=0)
+      cmCustomCommand *c = (*i)->GetCustomCommand();
+      // escape spaces and convert to native slashes path for
+      // the command
+      const char* comment = c->GetComment().c_str();
+      std::string command = c->GetCommand();
+      cmSystemTools::ReplaceString(command, "/./", "/");
+      command = cmSystemTools::ConvertToOutputPath(command.c_str());
+      command += " ";
+      // now add the arguments
+      command += c->GetArguments();
+      std::string depends;
+      // Collect out all the dependencies for this rule.
+      for(std::vector<std::string>::const_iterator d =
+            c->GetDepends().begin();
+          d != c->GetDepends().end(); ++d)
         {
-        cmSourceGroup& sourceGroup = 
-          m_Makefile->FindSourceGroup(cr->GetSourceName().c_str(),
-                                      sourceGroups);
-        cmCustomCommand cc(*cr);
-        cc.ExpandVariables(*m_Makefile);
-        sourceGroup.AddCustomCommand(cc);
+        std::string dep = *d;
+        m_Makefile->ExpandVariablesInString(dep);
+
+        // watch for target dependencies,
+        std::string libPath = dep + "_CMAKE_PATH";
+        const char* cacheValue = m_Makefile->GetDefinition(libPath.c_str());
+        if (cacheValue)
+          {
+          libPath = cacheValue;
+          if (m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH") && 
+              m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH")[0] != '\0')
+            {
+            libPath = m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
+            }
+          libPath += "/";
+          libPath += dep;
+          libPath += cmSystemTools::GetExecutableExtension();
+          dep = libPath;
+          }
+        cmSystemTools::ReplaceString(dep, "/./", "/");
+        cmSystemTools::ReplaceString(dep, "/$(IntDir)/", "/");
+        dep = cmSystemTools::ConvertToOutputPath(dep.c_str());
+        depends += " ";
+        depends += dep;
+        } 
+      // output rule
+      if (processedOutputs.find(c->GetOutput()) == processedOutputs.end())
+        {
+        this->OutputMakeRule(fout,
+                             (*comment?comment:"Custom command"),
+                             c->GetOutput().c_str(),
+                             depends.c_str(),
+                             command.c_str());
+        processedOutputs.insert(c->GetOutput());
+        }
+      else
+        {
+        cmSystemTools::Error("An output was found with multiple rules on how to build it for output: ",
+                             c->GetOutput().c_str());
         }
       }
     }
-
-  // Loop through every source group.
-  for(std::vector<cmSourceGroup>::const_iterator sg =
-        sourceGroups.begin(); sg != sourceGroups.end(); ++sg)
-    {
-    const cmSourceGroup::BuildRules& buildRules = sg->GetBuildRules();
-    if(buildRules.empty())
-      { continue; }
-    
-    std::string name = sg->GetName();
-    if(name != "")
-      {
-      fout << "# Start of source group \"" << name.c_str() << "\"\n";
-      }
-    
-    // Loop through each source in the source group.
-    for(cmSourceGroup::BuildRules::const_iterator cc =
-          buildRules.begin(); cc != buildRules.end(); ++ cc)
-      {
-      std::string source = cc->first;
-      const cmSourceGroup::Commands& commands = cc->second.m_Commands;
-      // Loop through every command generating code from the current source.
-      for(cmSourceGroup::Commands::const_iterator c = commands.begin();
-          c != commands.end(); ++c)
-        {
-        // escape spaces and convert to native slashes path for
-        // the command
-        const char* comment = c->second.m_Comment.c_str();
-        std::string command = c->second.m_Command;
-        cmSystemTools::ReplaceString(command, "/./", "/");
-        command = cmSystemTools::ConvertToOutputPath(command.c_str());
-        command += " ";
-        // now add the arguments
-        command += c->second.m_Arguments;
-        const cmSourceGroup::CommandFiles& commandFiles = c->second;
-        // if the command has no outputs, then it is a utility command
-        // with no outputs
-        if(commandFiles.m_Outputs.size() == 0)
-          {
-          std::string depends;
-          // collect out all the dependencies for this rule.
-          for(std::set<std::string>::const_iterator d =
-                commandFiles.m_Depends.begin();
-              d != commandFiles.m_Depends.end(); ++d)
-            { 
-            std::string dep = *d;
-            cmSystemTools::ReplaceString(dep, "/./", "/");
-            cmSystemTools::ReplaceString(dep, "/$(IntDir)/", "/");
-            dep = cmSystemTools::ConvertToOutputPath(dep.c_str());
-            depends += " ";
-            depends += dep;
-            }
-          // output rule
-          this->OutputMakeRule(fout,
-                               (*comment?comment:"Custom command"),
-                               source.c_str(),
-                               depends.c_str(),
-                               command.c_str());
-          }
-        // Write a rule for every output generated by this command.
-        for(std::set<std::string>::const_iterator output =
-              commandFiles.m_Outputs.begin();
-            output != commandFiles.m_Outputs.end(); ++output)
-          {
-          std::string src = cmSystemTools::ConvertToOutputPath(source.c_str());
-          std::string depends;
-          depends +=  src;
-          // Collect out all the dependencies for this rule.
-          for(std::set<std::string>::const_iterator d =
-                commandFiles.m_Depends.begin();
-              d != commandFiles.m_Depends.end(); ++d)
-            {
-            std::string dep = *d;
-            cmSystemTools::ReplaceString(dep, "/./", "/");
-            cmSystemTools::ReplaceString(dep, "/$(IntDir)/", "/");
-            dep = cmSystemTools::ConvertToOutputPath(dep.c_str());
-            depends += " ";
-            depends += dep;
-            } 
-          // output rule
-          this->OutputMakeRule(fout,
-                               (*comment?comment:"Custom command"),
-                               output->c_str(),
-                               depends.c_str(),
-                               command.c_str());
-          }
-        }
-      }
-    if(name != "")
-      {
-      fout << "# End of source group \"" << name.c_str() << "\"\n\n";
-      }
-    }  
 }
 
 std::string 
@@ -2185,7 +2223,7 @@ void cmLocalUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
   // collect up all the sources
   std::string allsources;
   std::map<cmStdString, cmTarget>& targets = m_Makefile->GetTargets();
-  for(std::map<cmStdString, cmTarget>::const_iterator target = targets.begin(); 
+  for(std::map<cmStdString,cmTarget>::const_iterator target = targets.begin(); 
       target != targets.end(); ++target)
     {
     // Iterate over every source for this target.
@@ -2501,11 +2539,13 @@ void cmLocalUnixMakefileGenerator::OutputSourceObjectBuildRules(std::ostream& fo
       exportsDef = "-D"+ export_symbol;
       }
     // Iterate over every source for this target.
-    const std::vector<cmSourceFile*>& sources = target->second.GetSourceFiles();
+    const std::vector<cmSourceFile*>& sources = 
+      target->second.GetSourceFiles();
     for(std::vector<cmSourceFile*>::const_iterator source = sources.begin(); 
         source != sources.end(); ++source)
       {
-      if(!(*source)->GetPropertyAsBool("HEADER_FILE_ONLY"))
+      if(!(*source)->GetPropertyAsBool("HEADER_FILE_ONLY") && 
+         !(*source)->GetCustomCommand())
         {
         std::string shortName;
         std::string sourceName;
@@ -2513,11 +2553,15 @@ void cmLocalUnixMakefileGenerator::OutputSourceObjectBuildRules(std::ostream& fo
         // directory, we want to use the relative path for the
         // filename of the object file.  Otherwise, we will use just
         // the filename portion.
-        if((cmSystemTools::GetFilenamePath((*source)->GetFullPath()).find(m_Makefile->GetCurrentDirectory()) == 0)
-           || (cmSystemTools::GetFilenamePath((*source)->GetFullPath()).find(m_Makefile->
-                                                                          GetCurrentOutputDirectory()) == 0))
+        if((cmSystemTools::GetFilenamePath(
+              (*source)->GetFullPath()).find(
+                m_Makefile->GetCurrentDirectory()) == 0)
+           || (cmSystemTools::GetFilenamePath(
+                 (*source)->GetFullPath()).find(
+                   m_Makefile->GetCurrentOutputDirectory()) == 0))
           {
-          sourceName = (*source)->GetSourceName()+"."+(*source)->GetSourceExtension();
+          sourceName = (*source)->GetSourceName()+"."+
+            (*source)->GetSourceExtension();
           shortName = (*source)->GetSourceName();
           
           // The path may be relative.  See if a directory needs to be

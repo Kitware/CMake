@@ -121,6 +121,22 @@ public:
   /**
    * Add a custom command to the build.
    */
+  void AddCustomCommandToOutput(const char* output,
+                                const char* command,
+                                const std::vector<std::string>& commandArgs,
+                                const char *main_dependency,
+                                const std::vector<std::string>& depends,
+                                const char *comment = 0,
+                                bool replace = false);
+  void AddCustomCommandToTarget(const char* target,
+                                const char* command,
+                                const std::vector<std::string>& commandArgs,
+                                cmTarget::CustomCommandType type,
+                                const char *comment = 0);
+  
+  /**
+   * Add a custom command to the build.
+   */
   void AddCustomCommand(const char* source,
                         const char* command,
                         const std::vector<std::string>& commandArgs,
@@ -156,7 +172,8 @@ public:
   void AddUtilityCommand(const char* utilityName,
                          const char* command,
                          const char* arguments,
-                         bool all);
+                         bool all,
+                         const std::vector<std::string> &depends);
   void AddUtilityCommand(const char* utilityName,
                          const char* command,
                          const char* arguments,
@@ -417,6 +434,14 @@ public:
   cmSourceFile* GetSource(const char* sourceName) const;
   ///! Add a new cmSourceFile to the list of sources for this makefile.
   cmSourceFile* AddSource(cmSourceFile const&);
+
+  /** Get a cmSourceFile pointer for a given source name, if the name is
+   *  not found, then create the source file and return it. generated 
+   * indicates if it is a generated file, this is used in determining
+   * how to create the source file instance e.g. name
+   */
+  cmSourceFile* GetOrCreateSource(const char* sourceName, 
+                                  bool generated = false);
   
   /**
    * Obtain a list of auxiliary source directories.
@@ -508,7 +533,8 @@ public:
    * Expand variables in the makefiles ivars such as link directories etc
    */
   void ExpandVariables();  
-
+  void ExpandVariablesInCustomCommands();
+  
   /**
    * find what source group this source is in
    */
@@ -559,6 +585,19 @@ public:
    */ 
   cmake *GetCMakeInstance() const;
 
+  /**
+   * Get all the source files this makefile knows about
+   */
+  const std::vector<cmSourceFile*> &GetSourceFiles() const 
+    {return m_SourceFiles;}
+  std::vector<cmSourceFile*> &GetSourceFiles() {return m_SourceFiles;}
+
+  /**
+   * Is there a source file that has the provided source file as an output?
+   * if so then return it
+   */
+  cmSourceFile *GetSourceFileWithOutput(const char *outName);
+  
 protected:
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(const char* name, cmTarget& target);

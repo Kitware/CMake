@@ -19,7 +19,6 @@
 
 #include "cmStandardIncludes.h"
 #include "cmRegularExpression.h"
-#include "cmCustomCommand.h"
 class cmSourceFile;
 
 /** \class cmSourceGroup
@@ -35,47 +34,20 @@ public:
   cmSourceGroup(const cmSourceGroup&);
   ~cmSourceGroup() {}
   
-  struct CommandFiles
-  {
-    CommandFiles() {}
-    CommandFiles(const CommandFiles& r):
-      m_Comment(r.m_Comment), m_Outputs(r.m_Outputs), m_Depends(r.m_Depends) {}
-    
-    void Merge(const CommandFiles &r);
-    
-    std::string m_Command;
-    std::string m_Arguments;
-    std::string m_Comment;
-    std::set<std::string> m_Outputs;
-    std::set<std::string> m_Depends;
-  };
-  
-  /**
-   * Map from command to its output/depends sets.
-   */
-  typedef std::map<cmStdString, CommandFiles> Commands;
-
-  struct SourceAndCommands
-  {
-    SourceAndCommands(): m_SourceFile(0) {}
-    const cmSourceFile* m_SourceFile;
-    Commands m_Commands;
-  };
-  /**
-   * Map from source to command map.
-   */
-  typedef std::map<cmStdString, SourceAndCommands>  BuildRules;
-
-  bool Matches(const char* name);
   void SetGroupRegex(const char* regex)
     { m_GroupRegex.compile(regex); }
   void AddSource(const char* name, const cmSourceFile*);
-  void AddCustomCommand(const cmCustomCommand &cmd);
   const char* GetName() const
     { return m_Name.c_str(); }
-  const BuildRules& GetBuildRules() const
-    { return m_BuildRules; }
-  void Print() const;
+  bool Matches(const char *);
+
+  /**
+   * Get the list of the source files used by this target
+   */
+  const std::vector<const cmSourceFile*> &GetSourceFiles() const 
+    {return m_SourceFiles;}
+  std::vector<const cmSourceFile*> &GetSourceFiles() {return m_SourceFiles;}
+  
 private:
   /**
    * The name of the source group.
@@ -88,11 +60,9 @@ private:
   cmRegularExpression m_GroupRegex;
   
   /**
-   * Map from source name to the commands to build from the source.
-   * Some commands may build from files that the compiler also knows how to
-   * build.
+   * vector of all source files in this source group
    */
-  BuildRules m_BuildRules;  
+  std::vector<const cmSourceFile*> m_SourceFiles;
 };
 
 #endif

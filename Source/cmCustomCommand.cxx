@@ -20,47 +20,48 @@
 /**
  * The constructor
  */
-cmCustomCommand::cmCustomCommand(const char *src, const char *command,
+cmCustomCommand::cmCustomCommand(const char *command,
                                  const char* arguments,
                                  std::vector<std::string> dep,
-                                 std::vector<std::string> out):
-  m_Source(src),
+                                 const char *out):
   m_Command(command),
   m_Arguments(arguments),
-  m_Depends(dep),
-  m_Outputs(out)
+  m_Depends(dep)
 {
+  if (out)
+    {
+    m_Output = out;
+    }
 }
 
+cmCustomCommand::cmCustomCommand(const char *command,
+                                 const char* arguments):
+  m_Command(command),
+  m_Arguments(arguments)
+{
+}
 
 /**
  * Copy constructor.
  */
 cmCustomCommand::cmCustomCommand(const cmCustomCommand& r):
-  m_Source(r.m_Source),
   m_Command(r.m_Command),
   m_Arguments(r.m_Arguments),
   m_Comment(r.m_Comment),
   m_Depends(r.m_Depends),
-  m_Outputs(r.m_Outputs)
+  m_Output(r.m_Output)
 {
 }
 
 void cmCustomCommand::ExpandVariables(const cmMakefile &mf)
 {
-  mf.ExpandVariablesInString(m_Source);
   mf.ExpandVariablesInString(m_Command);
   mf.ExpandVariablesInString(m_Arguments);
+  mf.ExpandVariablesInString(m_Output);
 
   for (std::vector<std::string>::iterator i = m_Depends.begin();
        i != m_Depends.end(); ++i)
     {
     mf.ExpandVariablesInString(*i);
     }
-  for (std::vector<std::string>::iterator i = m_Outputs.begin();
-       i != m_Outputs.end(); ++i)
-    {
-    mf.ExpandVariablesInString(*i);
-    }  
 }
-

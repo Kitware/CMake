@@ -29,6 +29,7 @@ bool cmSetSourceFilesPropertiesCommand::InitialPass(
   // first collect up the list of files
   std::vector<std::string> propertyPairs;
   bool doingFiles = true;
+  bool generated = false;
   int numFiles = 0;
   std::vector<std::string>::const_iterator j;
   for(j= args.begin(); j != args.end();++j)
@@ -49,6 +50,7 @@ bool cmSetSourceFilesPropertiesCommand::InitialPass(
     else if(*j == "GENERATED")
       {
       doingFiles = false;
+      generated = true;
       propertyPairs.push_back("GENERATED");
       propertyPairs.push_back("1");
       }
@@ -84,7 +86,18 @@ bool cmSetSourceFilesPropertiesCommand::InitialPass(
       while (j != args.end())
         {
         propertyPairs.push_back(*j);
-        ++j;
+        if(*j == "GENERATED")
+          {
+          ++j;
+          if(j != args.end() && cmSystemTools::IsOn(j->c_str()))
+            {
+            generated = true;
+            }
+          }
+        else
+          {
+          ++j;
+          }
         if(j == args.end())
           {
           this->SetError("called with incorrect number of arguments.");
@@ -112,67 +125,13 @@ bool cmSetSourceFilesPropertiesCommand::InitialPass(
   unsigned int k;
   for(i = 0; i < numFiles; ++i)
     {   
-    // if the file is already in the makefile just set properites on it
-    cmSourceFile* sf = m_Makefile->GetSource(args[i].c_str());
-    if(sf)
+    // get the source file
+    cmSourceFile* sf =
+      m_Makefile->GetOrCreateSource(args[i].c_str(), generated);
+    // now loop through all the props and set them
+    for (k = 0; k < propertyPairs.size(); k = k + 2)
       {
-      // now loop through all the props and set them
-      for (k = 0; k < propertyPairs.size(); k = k + 2)
-        {
-        sf->SetProperty(propertyPairs[k].c_str(),propertyPairs[k+1].c_str());
-        }
-      }
-    // if file is not already in the makefile, then add it
-    else
-      { 
-      std::string newfile = args[i];
-      cmSourceFile file; 
-      std::string path = cmSystemTools::GetFilenamePath(newfile);
-      // now loop through all the props and set them
-      for (k = 0; k < propertyPairs.size(); k = k + 2)
-        {
-        file.SetProperty(propertyPairs[k].c_str(),propertyPairs[k+1].c_str());
-        }
-      if(file.GetPropertyAsBool("GENERATED"))
-        {
-        std::string ext = cmSystemTools::GetFilenameExtension(newfile);
-        std::string name_no_ext = cmSystemTools::GetFilenameName(newfile.c_str());
-        name_no_ext = name_no_ext.substr(0, name_no_ext.length()-ext.length());
-        if ( ext.length() && ext[0] == '.' )
-          {
-          ext = ext.substr(1);
-          }
-        if((path.size() && path[0] == '/') ||
-           (path.size() > 1 && path[1] == ':'))
-          {
-          file.SetName(name_no_ext.c_str(), path.c_str(), ext.c_str(), false);
-          }
-        else
-          {
-          file.SetName(name_no_ext.c_str(), m_Makefile->GetCurrentOutputDirectory(), 
-                       ext.c_str(), false);
-          }
-        }
-      else
-        {
-        // if this is a full path then 
-        if((path.size() && path[0] == '/') ||
-           (path.size() > 1 && path[1] == ':'))
-          {
-          file.SetName(cmSystemTools::GetFilenameName(newfile.c_str()).c_str(), 
-                       path.c_str(),
-                       m_Makefile->GetSourceExtensions(),
-                       m_Makefile->GetHeaderExtensions());
-          }
-        else
-          {
-          file.SetName(newfile.c_str(), m_Makefile->GetCurrentDirectory(),
-                       m_Makefile->GetSourceExtensions(),
-                       m_Makefile->GetHeaderExtensions());
-          }    
-        }
-      // add the source file to the makefile
-      m_Makefile->AddSource(file);
+      sf->SetProperty(propertyPairs[k].c_str(),propertyPairs[k+1].c_str());
       }
     }
   return true;

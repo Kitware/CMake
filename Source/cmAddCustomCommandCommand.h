@@ -86,42 +86,69 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  ADD_CUSTOM_COMMAND(TARGET target\n"
-      "                     [SOURCE source]\n"
-      "                     [COMMAND command]\n"
+      "There are two main signatures for ADD_CUSTOM_COMMAND "
+      "The first signature is for adding a custom command "
+      "to a source file.\n" 
+      "  ADD_CUSTOM_COMMAND(OUTPUT result\n"
+      "                     COMMAND command\n"
       "                     [ARGS [args...]]\n"
+      "                     [MAIN_DEPENDENCY depend]\n"
       "                     [DEPENDS [depends...]]\n"
-      "                     [OUTPUTS [outputs...]]\n"
       "                     [COMMENT comment])\n"
       "This defines a new command that can be executed during the build "
       "process.  In makefile terms this creates a new target in the "
       "following form:\n"
-      "  OUTPUT1: SOURCE DEPENDS\n"
-      "           COMAND ARGS\n"
-      "  OUTPUT2: SOURCE DEPENDS\n"
-      "           COMAND ARGS\n"
-      "The TARGET must be specified, but it is not the make target of the "
-      "build rule.  It is the target (library, executable, or custom target) "
-      "that will use the output generated from this rule.  This is necessary "
-      "to choose a project file in which to generate the rule for Visual "
-      "Studio.\n"
-      "Example of usage:\n"
-      "  ADD_CUSTOM_COMMAND(\n"
-      "    TARGET tiff\n"
-      "    SOURCE ${TIFF_FAX_EXE}\n"
-      "    COMMAND ${TIFF_FAX_EXE}\n"
-      "    ARGS -c const ${TIFF_BINARY_DIR}/tif_fax3sm.c\n"
-      "    OUTPUTS ${TIFF_BINARY_DIR}/tif_fax3sm.c\n"
-      "  )\n"
-      "This will create custom target which will generate file tif_fax3sm.c "
-      "using command ${TIFF_FAX_EXE}.  The rule will be executed as part of "
-      "building the tiff library because it includes tif_fax3sm.c as a "
-      "source file with the GENERATED property.";
+      "  OUTPUT: MAIN_DEPENDENCY DEPENDS\n"
+      "          COMMAND ARGS\n"
+      "\n"
+      "The second signature adds a custom command to a target "
+      "such as a library or executable. This is useful for "
+      "performing an operation before or after building the target "
+      "\n"
+      "  ADD_CUSTOM_COMMAND(TARGET target\n"
+      "                     PRE_BUILD | PRE_LINK | POST_BUILD\n"
+      "                     COMMAND command\n"
+      "                     [ARGS [args...]]\n"
+      "                     [COMMENT comment])\n"
+      "This defines a new command that will be associated with "
+      "building the specified target. When the command will "
+      "happen is determined by whether you specify\n"
+      "PRE_BUILD - run before all other dependencies\n"
+      "PRE_LINK - run after other dependencies\n"
+      "POST_BUILD - run after the target has been built\n";
     }
   
   cmTypeMacro(cmAddCustomCommandCommand, cmCommand);
 };
 
+
+/*
+  
+target: normal depends
+  pre rules
+  normal rules
+  post rules
+
+output1: source other depends
+  rule
+  
+output2: source other dpeends
+  rule
+
+
+another option is
+
+output1: depends
+  rule
+      
+output2: depends
+  rule
+
+
+  
+use case1 - an executable that depending on args create diff output files
+
+*/
 
 
 #endif

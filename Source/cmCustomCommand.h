@@ -28,10 +28,13 @@ class cmMakefile;
 class cmCustomCommand
 {
 public:
-  cmCustomCommand(const char *src, const char *command,
+  cmCustomCommand(const char *command,
                   const char* arguments,
                   std::vector<std::string> dep,
-                  std::vector<std::string> out);
+                  const char *out);
+  cmCustomCommand(const char *command,
+                  const char* arguments);
+  cmCustomCommand() {};
   cmCustomCommand(const cmCustomCommand& r);
   
   /**
@@ -39,12 +42,6 @@ public:
    * this objects members.
    */
   void ExpandVariables(const cmMakefile &);
-
-  /**
-   * Return the name of the source file. I'm not sure if this is a full path or not.
-   */
-  std::string GetSourceName() const {return m_Source;}
-  void SetSourceName(const char *name) {m_Source = name;}
 
   ///! Return the command to execute with arguments
   std::string GetCommandAndArguments() const
@@ -54,7 +51,11 @@ public:
   std::string GetCommand() const {return m_Command;}
   void SetCommand(const char *cmd) {m_Command = cmd;}
 
-  ///! Return the command to execute
+  ///! Return the output
+  std::string GetOutput() const {return m_Output;}
+  void SetOutput(const char *cm) {m_Output = cm;}
+
+  ///! Return the comment
   std::string GetComment() const {return m_Comment;}
   void SetComment(const char *cm) {m_Comment = cm;}
 
@@ -68,19 +69,12 @@ public:
   const std::vector<std::string> &GetDepends() const {return m_Depends;}
   std::vector<std::string> &GetDepends() {return m_Depends;}
   
-  /**
-   * Return the vector that holds the list of outputs of this command
-   */
-  const std::vector<std::string> &GetOutputs() const {return m_Outputs;}
-  std::vector<std::string> &GetOutputs() {return m_Outputs;}
-  
 private:
-  std::string m_Source;
   std::string m_Command;
   std::string m_Arguments;
   std::string m_Comment;
+  std::string m_Output;
   std::vector<std::string> m_Depends;
-  std::vector<std::string> m_Outputs;
 };
 
 

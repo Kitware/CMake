@@ -187,8 +187,12 @@ protected:
   ///! return true if the two paths are the same
   virtual bool SamePath(const char* path1, const char* path2);
   virtual std::string GetOutputExtension(const char* sourceExtension);
-  std::string CreateTargetRules(const cmTarget &target,
-                                const char* targetName);
+  std::string CreatePreBuildRules(const cmTarget &target,
+                                  const char* targetName);
+  std::string CreatePreLinkRules(const cmTarget &target,
+                                 const char* targetName);
+  std::string CreatePostBuildRules(const cmTarget &target,
+                                   const char* targetName);
   virtual std::string CreateMakeVariable(const char* s, const char* s2);
   
   ///! if the OS is case insensitive then return a lower case of the path.

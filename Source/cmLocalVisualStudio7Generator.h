@@ -22,9 +22,8 @@
 class cmMakeDepend;
 class cmTarget;
 class cmSourceFile;
-
-// please remove me.... Yuck
-#include "cmSourceGroup.h"
+class cmCustomCommand;
+class cmSourceGroup;
 
 /** \class cmLocalVisualStudio7Generator
  * \brief Write a LocalUnix makefiles.
@@ -74,7 +73,7 @@ private:
   void CreateSingleVCProj(const char *lname, cmTarget &tgt);
   void WriteVCProjFile(std::ostream& fout, const char *libName, 
                        cmTarget &tgt);
-  void AddVCProjBuildRule(cmSourceGroup&);
+  void AddVCProjBuildRule();
   void WriteConfigurations(std::ostream& fout,
                            const char *libName,
                            const cmTarget &tgt);
@@ -107,15 +106,12 @@ private:
                           const char* group,
                           const char* filter);
   void WriteVCProjEndGroup(std::ostream& fout);
-  std::string CombineCommands(const cmSourceGroup::Commands &commands,
-                              cmSourceGroup::CommandFiles &totalCommand,
-                              const char *source);
   void WriteCustomRule(std::ostream& fout,
                        const char* source,
                        const char* command,
                        const char* comment,
-                       const std::set<std::string>& depends,
-                       const std::set<std::string>& outputs,
+                       const std::vector<std::string>& depends,
+                       const char* output,
                        const char* extraFlags);
 
   std::vector<std::string> m_CreatedProjectNames;

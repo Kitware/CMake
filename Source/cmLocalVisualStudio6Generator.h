@@ -22,9 +22,8 @@
 class cmMakeDepend;
 class cmTarget;
 class cmSourceFile;
-
-// please remove me.... Yuck
-#include "cmSourceGroup.h"
+class cmSourceGroup;
+class cmCustomCommand;
 
 /** \class cmLocalVisualStudio6Generator
  * \brief Write a LocalUnix makefiles.
@@ -84,21 +83,17 @@ private:
                       const cmTarget &tgt, std::vector<cmSourceGroup> &sgs);
 
   void WriteDSPFooter(std::ostream& fout);
-  void AddDSPBuildRule(cmSourceGroup&);
+  void AddDSPBuildRule();
   void WriteCustomRule(std::ostream& fout,
                        const char* source,
                        const char* command,
                        const char* comment,
-                       const std::set<std::string>& depends,
-                       const std::set<std::string>& outputs,
+                       const std::vector<std::string>& depends,
+                       const char* output,
                        const char* flags);
 
   std::string CreateTargetRules(const cmTarget &target, 
                                 const char *libName);
-  std::string CombineCommands(const cmSourceGroup::Commands &commands,
-                              cmSourceGroup::CommandFiles &totalCommand,
-                              const char *source);
-
   std::string m_IncludeOptions;
   std::vector<std::string> m_Configurations;
 };

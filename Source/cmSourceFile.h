@@ -18,6 +18,7 @@
 #define cmSourceFile_h
 
 #include "cmStandardIncludes.h"
+#include "cmCustomCommand.h"
 
 /** \class cmSourceFile
  * \brief Represent a class loaded from a makefile.
@@ -34,6 +35,11 @@ public:
    */
   cmSourceFile()
     {
+      m_CustomCommand = 0;
+    }
+  ~cmSourceFile()
+    {
+      if (m_CustomCommand) { delete m_CustomCommand; }
     }
   
   /**
@@ -45,6 +51,15 @@ public:
                const std::vector<std::string>& sourceExts,
                const std::vector<std::string>& headerExts);
 
+  /**
+   * Get the list of the custom commands for this source file
+   */
+  const cmCustomCommand *GetCustomCommand() const 
+    {return m_CustomCommand;}
+  cmCustomCommand *GetCustomCommand() {return m_CustomCommand;}
+  void SetCustomCommand(cmCustomCommand *cc) 
+    { m_CustomCommand = cc;}
+    
   /**
    * Set the name of the file, given the directory the file should be in.  IN
    * this version the extension is provided in the call. This is useful for
@@ -77,8 +92,7 @@ public:
   void SetSourceName(const char *name) {m_SourceName = name;}
 
   /**
-   * The file name associated with stripped off directory and extension.
-   * (In most cases this is the name of the class.)
+   * The file extension associated with source file
    */
   const std::string &GetSourceExtension() const {return m_SourceExtension;}
   void SetSourceExtension(const char *name) {m_SourceExtension = name;}
@@ -90,8 +104,8 @@ public:
   std::vector<std::string> &GetDepends() {return m_Depends;}
 
 private:
-
   std::map<cmStdString,cmStdString> m_Properties;
+  cmCustomCommand *m_CustomCommand;
   std::string m_FullPath;
   std::string m_SourceName;
   std::string m_SourceExtension;

@@ -146,8 +146,9 @@ void cmGlobalVisualStudio6Generator::Generate()
 {
   // add a special target that depends on ALL projects for easy build
   // of Debug only
+  std::vector<std::string> srcs;
   m_LocalGenerators[0]->GetMakefile()->
-    AddUtilityCommand("ALL_BUILD", "echo","\"Build all projects\"",false);
+    AddUtilityCommand("ALL_BUILD", "echo","\"Build all projects\"",false,srcs);
 
   // add the Run Tests command
   this->SetupTests();
@@ -235,8 +236,9 @@ void cmGlobalVisualStudio6Generator::SetupTests()
     // If the file doesn't exist, then ENABLE_TESTING hasn't been run
     if (cmSystemTools::FileExists(fname.c_str()))
       {
+      std::vector<std::string> srcs;
       m_LocalGenerators[0]->GetMakefile()->
-        AddUtilityCommand("RUN_TESTS", ctest.c_str(), "-D $(IntDir)",false);
+        AddUtilityCommand("RUN_TESTS", ctest.c_str(), "-D $(IntDir)",false,srcs);
       }
     }
 }
@@ -310,12 +312,13 @@ void cmGlobalVisualStudio6Generator::WriteDSWFile(std::ostream& fout)
       // Write the project into the DSW file
       if (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
         {
-        cmCustomCommand cc = l->second.GetCustomCommands()[0];
+        cmCustomCommand cc = l->second.GetPreLinkCommands()[0];
         
         // dodgy use of the cmCustomCommand's members to store the 
         // arguments from the INCLUDE_EXTERNAL_MSPROJECT command
         std::vector<std::string> stuff = cc.GetDepends();
-        std::vector<std::string> depends = cc.GetOutputs();
+        std::vector<std::string> depends;
+        depends.push_back(cc.GetOutput());
         this->WriteExternalProject(fout, stuff[0].c_str(), stuff[1].c_str(), depends);
         ++si;
         }

@@ -20,6 +20,7 @@
 #include "cmSystemTools.h"
 #include "cmSourceFile.h"
 #include "cmCacheManager.h"
+#include <queue>
 
 cmLocalVisualStudio6Generator::cmLocalVisualStudio6Generator()
 {
@@ -73,6 +74,9 @@ void cmLocalVisualStudio6Generator::OutputDSPFile()
 
   // clear project names
   m_CreatedProjectNames.clear();
+
+  // expand vars for custom commands
+  m_Makefile->ExpandVariablesInCustomCommands();
 
   // build any targets
   cmTargets &tgts = m_Makefile->GetTargets();
@@ -154,7 +158,7 @@ void cmLocalVisualStudio6Generator::CreateSingleDSP(const char *lname, cmTarget 
 }
 
 
-void cmLocalVisualStudio6Generator::AddDSPBuildRule(cmSourceGroup& sourceGroup)
+void cmLocalVisualStudio6Generator::AddDSPBuildRule()
 {
   std::string dspname = *(m_CreatedProjectNames.end()-1);
   if(dspname == "ALL_BUILD")
@@ -169,20 +173,28 @@ void cmLocalVisualStudio6Generator::AddDSPBuildRule(cmSourceGroup& sourceGroup)
   std::string dsprule = "${CMAKE_COMMAND}";
   m_Makefile->ExpandVariablesInString(dsprule);
   dsprule = cmSystemTools::ConvertToOutputPath(dsprule.c_str());
-  std::string args = makefileIn;
-  args += " -H";
+  std::vector<std::string> argv;
+  argv.push_back(makefileIn);
+  makefileIn = m_Makefile->GetStartDirectory();
+  makefileIn += "/";
+  makefileIn += "CMakeLists.txt";
+  std::string args;
+  args = "-H";
   args +=
     cmSystemTools::ConvertToOutputPath(m_Makefile->GetHomeDirectory());
-  args += " -S";
+  argv.push_back(args);
+  args = "-S";
   args +=
     cmSystemTools::ConvertToOutputPath(m_Makefile->GetStartDirectory());
-  args += " -O";
+  argv.push_back(args);
+  args = "-O";
   args += 
     cmSystemTools::ConvertToOutputPath(m_Makefile->GetStartOutputDirectory());
-  args += " -B";
+  argv.push_back(args);
+  args = "-B";
   args += 
     cmSystemTools::ConvertToOutputPath(m_Makefile->GetHomeOutputDirectory());
-  m_Makefile->ExpandVariablesInString(args);
+  argv.push_back(args);
 
   std::string configFile = 
     m_Makefile->GetDefinition("CMAKE_ROOT");
@@ -201,14 +213,9 @@ void cmLocalVisualStudio6Generator::AddDSPBuildRule(cmSourceGroup& sourceGroup)
     {
     listFiles.push_back(configFile);
     }
-  
-  std::vector<std::string> outputs;
-  outputs.push_back(dspname);
-  cmCustomCommand cc(makefileIn.c_str(), dsprule.c_str(),
-                     args.c_str(),
-                     listFiles, 
-                     outputs);
-  sourceGroup.AddCustomCommand(cc);
+  m_Makefile->AddCustomCommandToOutput(dspname.c_str(), dsprule.c_str(), 
+                                       argv, makefileIn.c_str(), listFiles,
+                                       NULL, true);
 }
 
 
@@ -219,8 +226,87 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
   // We may be modifying the source groups temporarily, so make a copy.
   std::vector<cmSourceGroup> sourceGroups = m_Makefile->GetSourceGroups();
   
+  // if we should add regen rule then...
+  const char *suppRegenRule = 
+    m_Makefile->GetDefinition("CMAKE_SUPPRESS_REGENERATION");
+  if (!cmSystemTools::IsOn(suppRegenRule))
+    {
+    this->AddDSPBuildRule();
+    }
+
   // get the classes from the source lists then add them to the groups
-  std::vector<cmSourceFile*> classes = target.GetSourceFiles();
+  std::vector<cmSourceFile*> & classes = target.GetSourceFiles();
+  // use a deck to keep track of processed source files
+  std::queue<std::string> srcFilesToProcess;
+  std::string name;
+  for(std::vector<cmSourceFile*>::const_iterator i = classes.begin(); 
+      i != classes.end(); ++i)
+    {
+    name = (*i)->GetSourceName();
+    if ((*i)->GetSourceExtension() != "rule")
+      {
+      name += ".";
+      name += (*i)->GetSourceExtension();
+      }
+    srcFilesToProcess.push(name);
+    }
+  name = libName;
+  name += ".dsp.cmake";
+  srcFilesToProcess.push(name);
+  // add in the library depends for cusotm targets
+  if (target.GetType() == cmTarget::UTILITY)
+    {
+    cmCustomCommand &c = target.GetPostBuildCommands()[0];
+    for (std::vector<std::string>::iterator i = c.GetDepends().begin();
+         i != c.GetDepends().end(); ++i)
+      {
+      srcFilesToProcess.push(*i);
+      }
+    }
+  while (!srcFilesToProcess.empty())
+    {
+    // is this source the output of a custom command
+    cmSourceFile* outsf = 
+      m_Makefile->GetSourceFileWithOutput(srcFilesToProcess.front().c_str());
+    if (outsf)
+      {
+      // is it not already in the target?
+      if (std::find(classes.begin(),classes.end(),outsf) == classes.end())
+        {
+        // then add the source to this target and add it to the queue
+        classes.push_back(outsf);
+        std::string name = outsf->GetSourceName();
+        if (outsf->GetSourceExtension() != "rule")
+          {
+          name += ".";
+          name += outsf->GetSourceExtension();
+          }
+        srcFilesToProcess.push(name);
+        }
+      // add its dependencies to the list to check
+      unsigned int i;
+      for (i = 0; i < outsf->GetCustomCommand()->GetDepends().size(); ++i)
+        {
+        std::string dep = cmSystemTools::GetFilenameName(
+          outsf->GetCustomCommand()->GetDepends()[i]);
+        // watch for target dependencies,
+        std::string libPath = dep + "_CMAKE_PATH";
+        const char* cacheValue = m_Makefile->GetDefinition(libPath.c_str());
+        if (cacheValue)
+          {
+          // add the depend as a utility on the target
+          target.AddUtility(dep.c_str());
+          }
+        else
+          {
+          srcFilesToProcess.push(dep);
+          }
+        }
+      }
+    // finished with this SF move to the next
+    srcFilesToProcess.pop();
+    }
+
   for(std::vector<cmSourceFile*>::iterator i = classes.begin(); 
       i != classes.end(); i++)
     {
@@ -231,49 +317,20 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
     sourceGroup.AddSource(source.c_str(), *i);
     }
   
-  // add any custom rules to the source groups
-  for (std::vector<cmCustomCommand>::const_iterator cr = 
-         target.GetCustomCommands().begin(); 
-       cr != target.GetCustomCommands().end(); ++cr)
-    {
-    cmSourceGroup& sourceGroup = 
-      m_Makefile->FindSourceGroup(cr->GetSourceName().c_str(),
-                                  sourceGroups);
-    cmCustomCommand cc(*cr);
-    cc.ExpandVariables(*m_Makefile);
-    sourceGroup.AddCustomCommand(cc);
-    }
-  
   // Write the DSP file's header.
   this->WriteDSPHeader(fout, libName, target, sourceGroups);
-  
-  // if we should add regen rule then...
-  const char *suppRegenRule = 
-    m_Makefile->GetDefinition("CMAKE_SUPPRESS_REGENERATION");
-  
-  // Find the group in which the CMakeLists.txt source belongs, and add
-  // the rule to generate this DSP file.
-  if (!cmSystemTools::IsOn(suppRegenRule))
-    {
-    for(std::vector<cmSourceGroup>::reverse_iterator sg = sourceGroups.rbegin();
-        sg != sourceGroups.rend(); ++sg)
-      {
-      if(sg->Matches("CMakeLists.txt"))
-        {
-        this->AddDSPBuildRule(*sg);
-        break;
-        }    
-      }
-    }
   
   // Loop through every source group.
   for(std::vector<cmSourceGroup>::const_iterator sg = sourceGroups.begin();
       sg != sourceGroups.end(); ++sg)
     {
-    const cmSourceGroup::BuildRules& buildRules = sg->GetBuildRules();
+    const std::vector<const cmSourceFile *> &sourceFiles = 
+      sg->GetSourceFiles();
     // If the group is empty, don't write it at all.
-    if(buildRules.empty())
-      { continue; }
+    if(sourceFiles.empty())
+      { 
+      continue; 
+      }
     
     // If the group has a name, write the header.
     std::string name = sg->GetName();
@@ -282,37 +339,32 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
       this->WriteDSPBeginGroup(fout, name.c_str(), "");
       }
     
-    // Loop through each build rule in the source group.
-    for(cmSourceGroup::BuildRules::const_iterator cc =
-          buildRules.begin(); cc != buildRules.end(); ++ cc)
+    // Loop through each source in the source group.
+    for(std::vector<const cmSourceFile *>::const_iterator sf =
+          sourceFiles.begin(); sf != sourceFiles.end(); ++sf)
       {
-      std::string source = cc->first;
-      const cmSourceGroup::Commands& commands = cc->second.m_Commands;
-      std::vector<std::string> depends;
+      std::string source = (*sf)->GetFullPath();
+      const cmCustomCommand *command = 
+        (*sf)->GetCustomCommand();
       std::string compileFlags;
-      if(cc->second.m_SourceFile)
+      std::vector<std::string> depends;
+      const char* cflags = (*sf)->GetProperty("COMPILE_FLAGS");
+      if(cflags)
         {
-        // Check for extra compiler flags.
-        const char* cflags = cc->second.m_SourceFile->GetProperty("COMPILE_FLAGS");
-        if(cflags)
-          {
-          compileFlags = cflags;
-          }
-        if(cmSystemTools::GetFileFormat(
-             cc->second.m_SourceFile->GetSourceExtension().c_str())
-           == cmSystemTools::CXX_FILE_FORMAT)
-          {
-          // force a C++ file type
-          compileFlags += " /TP ";
-          }
-        
-        // Check for extra object-file dependencies.
-        const char* dependsValue =
-          cc->second.m_SourceFile->GetProperty("OBJECT_DEPENDS");
-        if(dependsValue)
-          {
-          cmSystemTools::ExpandListArgument(dependsValue, depends);
-          }
+        compileFlags = cflags;
+        }
+      if(cmSystemTools::GetFileFormat((*sf)->GetSourceExtension().c_str())
+         == cmSystemTools::CXX_FILE_FORMAT)
+        {
+        // force a C++ file type
+        compileFlags += " /TP ";
+        }
+      
+      // Check for extra object-file dependencies.
+      const char* dependsValue = (*sf)->GetProperty("OBJECT_DEPENDS");
+      if(dependsValue)
+        {
+        cmSystemTools::ExpandListArgument(dependsValue, depends);
         }
       if (source != libName || target.GetType() == cmTarget::UTILITY)
         {
@@ -334,18 +386,20 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
             }
           fout << "\n";
           }
-        if (!commands.empty())
+        if (command)
           {
-          cmSourceGroup::CommandFiles totalCommand;
           std::string totalCommandStr;
-          totalCommandStr = this->CombineCommands(commands, totalCommand,
-                                                  source.c_str());
-          const char* comment = totalCommand.m_Comment.c_str(); 
+          totalCommandStr = 
+            cmSystemTools::ConvertToOutputPath(command->GetCommand().c_str()); 
+          totalCommandStr += " ";
+          totalCommandStr += command->GetArguments();
+          totalCommandStr += "\n";
+          const char* comment = command->GetComment().c_str();
           const char* flags = compileFlags.size() ? compileFlags.c_str(): 0;
           this->WriteCustomRule(fout, source.c_str(), totalCommandStr.c_str(), 
                                 (*comment?comment:"Custom Rule"),
-                                totalCommand.m_Depends, 
-                                totalCommand.m_Outputs, flags);
+                                command->GetDepends(), 
+                                command->GetOutput().c_str(), flags);
           }
         else if(compileFlags.size())
           {
@@ -384,8 +438,8 @@ void cmLocalVisualStudio6Generator::WriteCustomRule(std::ostream& fout,
                                   const char* source,
                                   const char* command,
                                   const char* comment,
-                                  const std::set<std::string>& depends,
-                                  const std::set<std::string>& outputs,
+                                  const std::vector<std::string>& depends,
+                                  const char *output,
                                   const char* flags
                                   )
 {
@@ -406,7 +460,7 @@ void cmLocalVisualStudio6Generator::WriteCustomRule(std::ostream& fout,
       }
     // Write out the dependencies for the rule.
     fout << "USERDEP__HACK=";
-    for(std::set<std::string>::const_iterator d = depends.begin();
+    for(std::vector<std::string>::const_iterator d = depends.begin();
         d != depends.end(); ++d)
       {
       fout << "\\\n\t" << 
@@ -417,21 +471,16 @@ void cmLocalVisualStudio6Generator::WriteCustomRule(std::ostream& fout,
     fout << "# PROP Ignore_Default_Tool 1\n";
     fout << "# Begin Custom Build - Building " << comment 
          << " $(InputPath)\n\n";
-    if(outputs.size() == 0)
+    if(output == 0)
       {
       fout << source << "_force :  \"$(SOURCE)\" \"$(INTDIR)\" \"$(OUTDIR)\"";
       fout << command << "\n\n";
       }
     
     // Write a rule for every output generated by this command.
-    for(std::set<std::string>::const_iterator output = outputs.begin();
-        output != outputs.end(); ++output)
-      {
-      fout << cmSystemTools::ConvertToOutputPath(output->c_str())
-           << " :  \"$(SOURCE)\" \"$(INTDIR)\" \"$(OUTDIR)\"";
-      fout << command << "\n\n";
-      }
-    
+    fout << cmSystemTools::ConvertToOutputPath(output)
+         << " :  \"$(SOURCE)\" \"$(INTDIR)\" \"$(OUTDIR)\"";
+    fout << command << "\n\n";
     fout << "# End Custom Build\n\n";
     }
   
@@ -544,46 +593,6 @@ void cmLocalVisualStudio6Generator::SetBuildType(BuildType b,
     }
 }
 
-std::string
-cmLocalVisualStudio6Generator::CombineCommands(const cmSourceGroup::Commands &commands,
-                             cmSourceGroup::CommandFiles &totalCommand,
-                             const char *source)
-  
-{
-  // Loop through every custom command generating code from the
-  // current source.
-  // build up the depends and outputs and commands 
-  std::string totalCommandStr = "";
-  std::string temp;
-  for(cmSourceGroup::Commands::const_iterator c = commands.begin();
-      c != commands.end(); ++c)
-    {
-    totalCommandStr += "\n\t";
-    temp= c->second.m_Command; 
-    temp = cmSystemTools::ConvertToOutputPath(temp.c_str());
-    totalCommandStr += temp;
-    totalCommandStr += " ";
-    totalCommandStr += c->second.m_Arguments;
-    totalCommand.Merge(c->second);
-    totalCommand.m_Comment = c->second.m_Comment.c_str();
-    }      
-  // Create a dummy file with the name of the source if it does
-  // not exist
-  if(totalCommand.m_Outputs.empty())
-    { 
-    std::string dummyFile = m_Makefile->GetStartOutputDirectory();
-    dummyFile += "/";
-    dummyFile += source;
-    if(!cmSystemTools::FileExists(dummyFile.c_str()))
-      {
-      std::ofstream fout(dummyFile.c_str());
-      fout << "Dummy file created by cmake as unused source for utility command.\n";
-      }
-    }
-  return totalCommandStr;
-}
-
-
 // look for custom rules on a target and collect them together
 std::string 
 cmLocalVisualStudio6Generator::CreateTargetRules(const cmTarget &target, 
@@ -591,39 +600,85 @@ cmLocalVisualStudio6Generator::CreateTargetRules(const cmTarget &target,
 {
   std::string customRuleCode = "";
 
-  if (target.GetType() >= cmTarget::UTILITY)
+  if (target.GetType() > cmTarget::UTILITY)
     {
     return customRuleCode;
     }
+
+  // are there any rules?
+  if (target.GetPreBuildCommands().size() + 
+      target.GetPreLinkCommands().size() + 
+      target.GetPostBuildCommands().size() == 0)
+    {
+    return customRuleCode;
+    }
+    
+  customRuleCode = "# Begin Special Build Tool\n";
   
-  // Find the group in which the lix exe custom rules belong
+  // Do the PreBuild and PreLink (VS6 does not support both)
   bool init = false;
   for (std::vector<cmCustomCommand>::const_iterator cr = 
-         target.GetCustomCommands().begin(); 
-       cr != target.GetCustomCommands().end(); ++cr)
+         target.GetPreBuildCommands().begin(); 
+       cr != target.GetPreBuildCommands().end(); ++cr)
     {
     cmCustomCommand cc(*cr);
     cc.ExpandVariables(*m_Makefile);
-    if (cc.GetSourceName() == libName)
+    if (!init)
       {
-      if (!init)
-        {
-        // header stuff
-        customRuleCode = "# Begin Special Build Tool\nPostBuild_Cmds=";
-        init = true;
-        }
-      else
-        {
-        customRuleCode += "\t";
-        }
-      customRuleCode += cmSystemTools::ConvertToOutputPath(cc.GetCommand().c_str()) + " " + cc.GetArguments();
+      // header stuff
+      customRuleCode = "PreLink_Cmds=";
+      init = true;
       }
+    else
+      {
+      customRuleCode += "\t";
+      }
+    customRuleCode += cmSystemTools::ConvertToOutputPath(cc.GetCommand().c_str()) + " " + cc.GetArguments();
     }
 
-  if (init)
+  for (std::vector<cmCustomCommand>::const_iterator cr = 
+         target.GetPreLinkCommands().begin(); 
+       cr != target.GetPreLinkCommands().end(); ++cr)
     {
-    customRuleCode += "\n# End Special Build Tool\n";
+    cmCustomCommand cc(*cr);
+    cc.ExpandVariables(*m_Makefile);
+    if (!init)
+      {
+      // header stuff
+      customRuleCode = "PreLink_Cmds=";
+      init = true;
+      }
+    else
+      {
+      customRuleCode += "\t";
+      }
+    customRuleCode += cmSystemTools::ConvertToOutputPath(cc.GetCommand().c_str()) + " " + cc.GetArguments();
     }
+
+  // do the post build rules
+  init = false;
+  for (std::vector<cmCustomCommand>::const_iterator cr = 
+         target.GetPostBuildCommands().begin(); 
+       cr != target.GetPostBuildCommands().end(); ++cr)
+    {
+    cmCustomCommand cc(*cr);
+    cc.ExpandVariables(*m_Makefile);
+    if (!init)
+      {
+      // header stuff
+      customRuleCode = "PostBuild_Cmds=";
+      init = true;
+      }
+    else
+      {
+      customRuleCode += "\t";
+      }
+    customRuleCode += 
+      cmSystemTools::ConvertToOutputPath(cc.GetCommand().c_str()) + 
+      " " + cc.GetArguments();
+    }
+
+  customRuleCode += "\n# End Special Build Tool\n";
   return customRuleCode;
 }
 

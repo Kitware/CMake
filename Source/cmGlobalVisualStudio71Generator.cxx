@@ -109,12 +109,13 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(std::ostream& fout)
       // Write the project into the SLN file
       if (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
         {
-        cmCustomCommand cc = l->second.GetCustomCommands()[0];
+        cmCustomCommand cc = l->second.GetPreLinkCommands()[0];
         
         // dodgy use of the cmCustomCommand's members to store the 
         // arguments from the INCLUDE_EXTERNAL_MSPROJECT command
         std::vector<std::string> stuff = cc.GetDepends();
-        std::vector<std::string> depends = cc.GetOutputs();
+        std::vector<std::string> depends;
+        depends.push_back(cc.GetOutput());
         this->WriteExternalProject(fout, stuff[0].c_str(), 
                                    stuff[1].c_str(), depends);
         ++si;

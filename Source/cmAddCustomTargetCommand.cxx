@@ -45,14 +45,25 @@ bool cmAddCustomTargetCommand::InitialPass(std::vector<std::string> const& args)
     command = *s;
     ++s;
     }
-  for (;s != args.end(); ++s)
+  for (;s != args.end() && *s != "DEPENDS"; ++s)
     {
     arguments += cmSystemTools::EscapeSpaces(s->c_str());
     arguments += " ";
     }
+  std::vector<std::string> depends;
+  // skip depends keyword
+  if (s != args.end())
+    {
+    ++s;
+    }
+  while (s != args.end()) 
+    {
+    depends.push_back(*s);  
+    ++s;
+    }
   m_Makefile->AddUtilityCommand(args[0].c_str(), 
                                 command.c_str(),
-                                arguments.c_str(), all);
+                                arguments.c_str(), all, depends);
 
   return true;
 }

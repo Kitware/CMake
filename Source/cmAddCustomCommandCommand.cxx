@@ -15,14 +15,14 @@
 
 =========================================================================*/
 #include "cmAddCustomCommandCommand.h"
-
+#include "cmTarget.h"
 
 // cmAddCustomCommandCommand
 bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args)
 {
   /* Let's complain at the end of this function about the lack of a particular
-     arg. For the moment, let's say that COMMAND, TARGET are always 
-     required.
+     arg. For the moment, let's say that COMMAND, and either TARGET or SOURCE
+     are required.
   */
   if (args.size() < 4)
     {
@@ -30,15 +30,19 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
       return false;
     }
 
-  std::string source, command, target, comment;
+  std::string source, command, target, comment, output, main_dependency;
   std::vector<std::string> command_args, depends, outputs;
 
+  cmTarget::CustomCommandType cctype = cmTarget::POST_BUILD;
+  
   enum tdoing {
     doing_source,
     doing_command,
     doing_target,
     doing_args,
     doing_depends,
+    doing_main_dependency,
+    doing_output,
     doing_outputs,
     doing_comment,
     doing_nothing
@@ -58,6 +62,18 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
       {
       doing = doing_command;
       }
+    else if(copy == "PRE_BUILD")
+      {
+      cctype = cmTarget::PRE_BUILD;
+      }
+    else if(copy == "PRE_LINK")
+      {
+      cctype = cmTarget::PRE_LINK;
+      }
+    else if(copy == "POST_BUILD")
+      {
+      cctype = cmTarget::POST_BUILD;
+      }
     else if(copy == "TARGET")
       {
       doing = doing_target;
@@ -74,6 +90,14 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
       {
       doing = doing_outputs;
       }
+    else if (copy == "OUTPUT")
+      {
+      doing = doing_output;
+      }
+    else if (copy == "MAIN_DEPENDENCY")
+      {
+      doing = doing_main_dependency;
+      }
     else if (copy == "COMMENT")
       {
       doing = doing_comment;
@@ -84,6 +108,12 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
         {
         case doing_source:
           source = copy;
+          break;
+        case doing_output:
+          output = copy;
+          break;
+        case doing_main_dependency:
+          main_dependency = copy;
           break;
         case doing_command:
           command = copy;
@@ -114,21 +144,36 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
      For the moment, let's say that COMMAND, TARGET are always 
      required.
   */
-  
-  if(target.empty())
+  if (output.empty() && target.empty())
     {
-    this->SetError("Wrong syntax. Empty TARGET.");
+    this->SetError("Wrong syntax. A TARGET or OUTPUT must be specified.");
     return false;
     }
-
-  // If source is empty, use target as source, so that this command
-  // can be used to just attach a commmand to a target
-
-  if(source.empty())
+  
+  // If source is empty, use the target 
+  if(source.empty() && output.empty())
     {
-    source = target;
+    m_Makefile->AddCustomCommandToTarget(target.c_str(), 
+                                         command.c_str(), 
+                                         command_args, 
+                                         cctype,
+                                         comment.c_str());
+    return true;
     }
 
+  // If target is empty, use the output
+  if(target.empty())
+    {
+    m_Makefile->AddCustomCommandToOutput(output.c_str(), 
+                                         command.c_str(), 
+                                         command_args, 
+                                         main_dependency.c_str(),
+                                         depends, 
+                                         comment.c_str());
+    return true;
+    }
+
+  // otherwise backwards compatiblity mode
   m_Makefile->AddCustomCommand(source.c_str(), 
                                command.c_str(), 
                                command_args, 

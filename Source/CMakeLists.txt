@@ -159,6 +159,12 @@ IF(BUILD_TESTING)
     ADD_TEST(DumpDocumentation ${EXECUTABLE_OUTPUT_PATH}/DumpDocumentation
       --all-for-coverage)
 
+    ADD_TEST(CustomCommand ${EXECUTABLE_OUTPUT_PATH}/cmaketest 
+      ${CMake_SOURCE_DIR}/Tests/CustomCommand
+      ${CMake_BINARY_DIR}/Tests/CustomCommand 
+      CustomCommand
+      ${CMake_BINARY_DIR}/Tests/CustomCommand/bin)
+
     ADD_TEST(SystemInformation ${EXECUTABLE_OUTPUT_PATH}/cmaketest 
       ${CMake_SOURCE_DIR}/Tests/SystemInformation
       ${CMake_BINARY_DIR}/Tests/SystemInformation 

@@ -34,6 +34,8 @@ public:
                     SHARED_LIBRARY, MODULE_LIBRARY, UTILITY, INSTALL_FILES, 
                     INSTALL_PROGRAMS };
 
+  enum CustomCommandType { PRE_BUILD, PRE_LINK, POST_BUILD };
+
   /**
    * Return the type of target.
    */
@@ -57,8 +59,18 @@ public:
   /**
    * Get the list of the custom commands for this target
    */
-  const std::vector<cmCustomCommand> &GetCustomCommands() const {return m_CustomCommands;}
-  std::vector<cmCustomCommand> &GetCustomCommands() {return m_CustomCommands;}
+  const std::vector<cmCustomCommand> &GetPreBuildCommands() const 
+    {return m_PreBuildCommands;}
+  std::vector<cmCustomCommand> &GetPreBuildCommands() 
+    {return m_PreBuildCommands;}
+  const std::vector<cmCustomCommand> &GetPreLinkCommands() const 
+    {return m_PreLinkCommands;}
+  std::vector<cmCustomCommand> &GetPreLinkCommands() 
+    {return m_PreLinkCommands;}
+  const std::vector<cmCustomCommand> &GetPostBuildCommands() const 
+    {return m_PostBuildCommands;}
+  std::vector<cmCustomCommand> &GetPostBuildCommands() 
+    {return m_PostBuildCommands;}
 
   /**
    * Get the list of the source lists used by this target
@@ -186,7 +198,9 @@ private:
 
 
 private:
-  std::vector<cmCustomCommand> m_CustomCommands;
+  std::vector<cmCustomCommand> m_PreBuildCommands;
+  std::vector<cmCustomCommand> m_PreLinkCommands;
+  std::vector<cmCustomCommand> m_PostBuildCommands;
   std::vector<std::string> m_SourceLists;
   TargetType m_TargetType;
   std::vector<cmSourceFile*> m_SourceFiles;

@@ -65,6 +65,7 @@ cmMakefile::cmMakefile()
   this->AddSourceGroup("Source Files", 
                        "\\.(C|M|c|c\\+\\+|cc|cpp|cxx|m|mm|rc|def|r|odl|idl|hpj|bat)$");
   this->AddSourceGroup("Header Files", "\\.(h|h\\+\\+|hm|hpp|hxx|in|txx|inl)$");
+  this->AddSourceGroup("CMake Rules", "\\.rule$");
   this->AddDefaultDefinitions();
 }
 
@@ -169,7 +170,7 @@ void cmMakefile::Print() const
   for( std::vector<cmSourceGroup>::const_iterator i = m_SourceGroups.begin();
        i != m_SourceGroups.end(); ++i)
     {
-    i->Print();
+    std::cout << "Source Group: " << i->GetName() << std::endl;
     }
 }
 
@@ -441,6 +442,7 @@ void cmMakefile::ConfigureFinalPass()
 }
 
 
+// this is the old style signature, we convert to new style
 void cmMakefile::AddCustomCommand(const char* source,
                                   const char* command,
                                   const std::vector<std::string>& commandArgs,
@@ -449,37 +451,29 @@ void cmMakefile::AddCustomCommand(const char* source,
                                   const char *target,
                                   const char *comment) 
 {
-  // find the target, 
-  if (m_Targets.find(target) != m_Targets.end())
+  if (strcmp(source,target))
     {
-    std::string expandC = command;
-    this->ExpandVariablesInString(expandC);
-    std::string c = cmSystemTools::EscapeSpaces(expandC.c_str());
-
-    std::string combinedArgs;
-    unsigned int i;
-    
-    for (i = 0; i < commandArgs.size(); ++i)
+    // what a pain, for backwards compatibility we will try to
+    // convert this to an output based rule... so for each output..
+    for(std::vector<std::string>::const_iterator d = outputs.begin();
+        d != outputs.end(); ++d)
       {
-      expandC = commandArgs[i].c_str();
-      this->ExpandVariablesInString(expandC);
-      combinedArgs += cmSystemTools::EscapeSpaces(expandC.c_str());
-      combinedArgs += " ";
+      this->AddCustomCommandToOutput(d->c_str(), command, commandArgs, 
+                                     source, depends, comment);
+      // add the output to the target?
+      std::string sname = *d;
+      sname += ".rule";
+      if (!this->GetSource(sname.c_str()))
+        {
+        m_Targets[target].GetSourceLists().push_back(source);
+        }
       }
-    
-    cmCustomCommand cc(source,c.c_str(),combinedArgs.c_str(),depends,outputs);
-    if ( comment && comment[0] )
-      {
-      cc.SetComment(comment);
-      }
-    m_Targets[target].GetCustomCommands().push_back(cc);
-    std::string cacheCommand = command;
-    this->ExpandVariablesInString(cacheCommand);
-    if(this->GetCacheManager()->GetCacheValue(cacheCommand.c_str()))
-      {
-      m_Targets[target].AddUtility(
-        this->GetCacheManager()->GetCacheValue(cacheCommand.c_str()));
-      }
+    }
+  else
+    {
+    this->AddCustomCommandToTarget(target, command, commandArgs, 
+                                   cmTarget::POST_BUILD,
+                                   comment);
     }
 }
 
@@ -492,7 +486,138 @@ void cmMakefile::AddCustomCommand(const char* source,
 {
   std::vector<std::string> outputs;
   outputs.push_back(output);
-  this->AddCustomCommand(source, command, commandArgs, depends, outputs, target);
+  this->AddCustomCommand(source, command, commandArgs, depends, 
+                         outputs, target);
+}
+
+void cmMakefile::
+AddCustomCommandToOutput(const char* output,
+                         const char* command,
+                         const std::vector<std::string>& commandArgs,
+                         const char *main_dependency,
+                         const std::vector<std::string>& depends,
+                         const char *comment,
+                         bool replace)
+{
+  cmSourceFile *file = 0;
+  std::string outName = output;
+  outName += ".rule";
+  
+  // OK this rule will be placed on a generated output file unless the main
+  // depednency was specified.
+  if (main_dependency && main_dependency[0] != '\0')
+    {
+    file = this->GetSource(main_dependency);
+    if (file && file->GetCustomCommand() && !replace)
+      {
+      // generate a source instead
+      file = 0;
+      }
+    else
+      {
+      file = this->GetOrCreateSource(main_dependency);
+      }
+    }
+
+  if (!file)
+    {
+    file = this->GetSource(outName.c_str());
+    if (file && file->GetCustomCommand() && !replace)
+      {
+      cmSystemTools::Error("Attempt to add a custom rule to an output that already has a custom rule. For output: ",  output);
+      return;
+      }
+    // create a cmSourceFile for the output
+    file = this->GetOrCreateSource(outName.c_str(), true);
+    // always mark as generated
+    file->SetProperty("GENERATED","1");
+    }
+  
+  // always create the output and mark it generated
+  cmSourceFile *out = this->GetOrCreateSource(output, true);
+  out->SetProperty("GENERATED","1");
+  
+  // process the command
+  std::string expandC = command;
+  this->ExpandVariablesInString(expandC);
+  std::string c = cmSystemTools::EscapeSpaces(expandC.c_str());
+  
+  std::string combinedArgs;
+  unsigned int i;
+  for (i = 0; i < commandArgs.size(); ++i)
+    {
+    expandC = commandArgs[i].c_str();
+    this->ExpandVariablesInString(expandC);
+    combinedArgs += cmSystemTools::EscapeSpaces(expandC.c_str());
+    combinedArgs += " ";
+    }
+  std::vector<std::string> depends2(depends);
+  if (main_dependency && main_dependency[0] != '\0')
+    {
+    depends2.push_back(main_dependency);
+    }
+  cmCustomCommand *cc = 
+    new cmCustomCommand(c.c_str(),combinedArgs.c_str(),depends2, output);
+  if ( comment && comment[0] )
+    {
+    cc->SetComment(comment);
+    }
+  if (file->GetCustomCommand())
+    {
+    delete file->GetCustomCommand();
+    }
+  file->SetCustomCommand(cc);
+}
+
+void cmMakefile::
+AddCustomCommandToTarget(const char* target, const char* command,
+                         const std::vector<std::string>& commandArgs,
+                         cmTarget::CustomCommandType type,
+                         const char *comment) 
+{
+  // find the target, 
+  if (m_Targets.find(target) != m_Targets.end())
+    {
+    std::string expandC = command;
+    this->ExpandVariablesInString(expandC);
+    std::string c = cmSystemTools::EscapeSpaces(expandC.c_str());
+    
+    std::string combinedArgs;
+    unsigned int i;
+    
+    for (i = 0; i < commandArgs.size(); ++i)
+      {
+      expandC = commandArgs[i].c_str();
+      this->ExpandVariablesInString(expandC);
+      combinedArgs += cmSystemTools::EscapeSpaces(expandC.c_str());
+      combinedArgs += " ";
+      }
+    
+    cmCustomCommand cc(c.c_str(),combinedArgs.c_str());
+    if ( comment && comment[0] )
+      {
+      cc.SetComment(comment);
+      }
+    switch (type)
+      {
+      case cmTarget::PRE_BUILD:
+        m_Targets[target].GetPreBuildCommands().push_back(cc);
+        break;
+      case cmTarget::PRE_LINK:
+        m_Targets[target].GetPreLinkCommands().push_back(cc);
+        break;
+      case cmTarget::POST_BUILD:
+        m_Targets[target].GetPostBuildCommands().push_back(cc);
+        break;
+      }
+    std::string cacheCommand = command;
+    this->ExpandVariablesInString(cacheCommand);
+    if(this->GetCacheManager()->GetCacheValue(cacheCommand.c_str()))
+      {
+      m_Targets[target].AddUtility(
+        this->GetCacheManager()->GetCacheValue(cacheCommand.c_str()));
+      }
+    }
 }
 
 void cmMakefile::AddDefineFlag(const char* flag)
@@ -799,11 +924,12 @@ void cmMakefile::AddExecutable(const char *exeName,
 void cmMakefile::AddUtilityCommand(const char* utilityName,
                                    const char* command,
                                    const char* arguments,
-                                   bool all)
+                                   bool all,
+                                   const std::vector<std::string> &depends)
 {
   std::vector<std::string> empty;
   this->AddUtilityCommand(utilityName,command,arguments,all,
-                          empty,empty);
+                          depends, empty);
 }
 
 void cmMakefile::AddUtilityCommand(const char* utilityName,
@@ -816,10 +942,53 @@ void cmMakefile::AddUtilityCommand(const char* utilityName,
   cmTarget target;
   target.SetType(cmTarget::UTILITY);
   target.SetInAll(all);
-  cmCustomCommand cc(utilityName, command, arguments, dep, out);
-  target.GetCustomCommands().push_back(cc);
+  if (out.size() > 1)
+    {
+    cmSystemTools::Error(
+      "Utility targets can only have one output. For utilityNamed: ",
+      utilityName);
+    return;
+    }
+  if (out.size())
+    {
+    cmCustomCommand cc(command, arguments, dep, out[0].c_str());
+    target.GetPostBuildCommands().push_back(cc);
+    }
+  else
+    {
+    cmCustomCommand cc(command, arguments, dep, NULL);
+    target.GetPostBuildCommands().push_back(cc);
+    }
   m_Targets.insert(cmTargets::value_type(utilityName,target));
 }
+
+cmSourceFile *cmMakefile::GetSourceFileWithOutput(const char *cname)
+{
+  std::string name = cname;
+  
+  // look through all the source files that have custom commands
+  // and see if the custom command has the passed source file as an output
+  // keep in mind the possible .rule extension that may be tacked on
+  for(std::vector<cmSourceFile*>::const_iterator i = m_SourceFiles.begin(); 
+      i != m_SourceFiles.end(); ++i)
+    {
+    // does this source file have a custom command?
+    if ((*i)->GetCustomCommand())
+      {
+      // is the output of the custom command match the source files name
+      std::string out = (*i)->GetCustomCommand()->GetOutput();
+      if (out.rfind(name) != out.npos &&
+          out.rfind(name) == out.size() - name.size())
+        {
+        return *i;
+        }
+      }
+    }
+  
+  // otherwise return NULL
+  return NULL;
+}
+
 
 cmSourceGroup* cmMakefile::GetSourceGroup(const char* name)
 {
@@ -943,6 +1112,19 @@ void cmMakefile::ExpandVariables()
       l != m_LinkLibraries.end(); ++l)
     {
     this->ExpandVariablesInString(l->first);
+    }
+}
+
+void cmMakefile::ExpandVariablesInCustomCommands()
+{
+  for(std::vector<cmSourceFile*>::iterator i = m_SourceFiles.begin();
+      i != m_SourceFiles.end(); ++i)
+    {
+    cmCustomCommand *cc = (*i)->GetCustomCommand();
+    if (cc)
+      {
+      cc->ExpandVariables(*this);
+      }
     }
 }
 
@@ -1254,7 +1436,7 @@ cmMakefile::FindSourceGroup(const char* source,
   std::string::size_type pos = file.rfind('/');
   if(pos != std::string::npos)
     {
-    file = file.substr(pos, file.length()-pos);
+    file = file.substr(pos+1);
     }
 
   for(std::vector<cmSourceGroup>::reverse_iterator sg = groups.rbegin();
@@ -1402,11 +1584,11 @@ cmSourceFile* cmMakefile::GetSource(const char* sourceName) const
 {
   std::string s = cmSystemTools::GetFilenameName(sourceName);
   std::string ext;
-  std::string::size_type pos = s.rfind('.');
-  if(pos != std::string::npos)
+  ext = cmSystemTools::GetFilenameLastExtension(s);
+  s = s.substr(0, s.length()-ext.length());
+  if ( ext.length() && ext[0] == '.' )
     {
-    ext = s.substr(pos+1, s.size() - pos-1);
-    s = s.substr(0, pos);
+    ext = ext.substr(1);
     }
   for(std::vector<cmSourceFile*>::const_iterator i = m_SourceFiles.begin();
       i != m_SourceFiles.end(); ++i)
@@ -1422,8 +1604,71 @@ cmSourceFile* cmMakefile::GetSource(const char* sourceName) const
   return 0;
 }
 
+cmSourceFile* cmMakefile::GetOrCreateSource(const char* sourceName, 
+                                            bool generated)
+{
+  // check to see if it exists
+  cmSourceFile* ret = this->GetSource(sourceName);
+  if (ret)
+    {
+    return ret;
+    }
+  
+  // we must create one
+  std::string newfile = sourceName;
+  cmSourceFile file; 
+  std::string path = cmSystemTools::GetFilenamePath(newfile);
+  if(generated)
+    {
+    std::string ext = cmSystemTools::GetFilenameLastExtension(newfile);
+    std::string name_no_ext = cmSystemTools::GetFilenameName(newfile.c_str());
+    name_no_ext = name_no_ext.substr(0, name_no_ext.length()-ext.length());
+    if ( ext.length() && ext[0] == '.' )
+      {
+      ext = ext.substr(1);
+      }
+    if((path.size() && path[0] == '/') ||
+       (path.size() > 1 && path[1] == ':'))
+      {
+      file.SetName(name_no_ext.c_str(), path.c_str(), ext.c_str(), false);
+      }
+    else
+      {
+      file.SetName(name_no_ext.c_str(), this->GetCurrentOutputDirectory(), 
+                   ext.c_str(), false);
+      }
+    }
+  else
+    {
+    // if this is a full path then 
+    if((path.size() && path[0] == '/') ||
+       (path.size() > 1 && path[1] == ':'))
+      {
+      file.SetName(cmSystemTools::GetFilenameName(newfile.c_str()).c_str(), 
+                   path.c_str(),
+                   this->GetSourceExtensions(),
+                   this->GetHeaderExtensions());
+      }
+    else
+      {
+      file.SetName(newfile.c_str(), this->GetCurrentDirectory(), 
+                   this->GetSourceExtensions(),
+                   this->GetHeaderExtensions());
+      }    
+    }
+  // add the source file to the makefile
+  this->AddSource(file);
+  ret = this->GetSource(sourceName);
+  if (!ret)
+    {
+    cmSystemTools::Error(
+      "CMake failed to properly look up cmSourceFile: ", sourceName);
+    int i = *(int *)0x0;
+    }
+  return ret;
+}
 
-
+  
 cmSourceFile* cmMakefile::AddSource(cmSourceFile const&sf)
 {
   // check to see if it exists

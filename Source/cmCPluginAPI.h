@@ -145,6 +145,19 @@ typedef struct
   void   (*RemoveFile)(const char *f1);
   void   (*Free)(void *);
   
+  /*=========================================================================
+    The following are new functions added after 1.6
+  =========================================================================*/
+  void  (*AddCustomCommandToOutput) (void *mf, const char* output,
+                                     const char* command,
+                                     int numArgs, const char **args,
+                                     const char* main_dependency,
+                                     int numDepends, const char **depends);
+  void  (*AddCustomCommandToTarget) (void *mf, const char* target,
+                                     const char* command,
+                                     int numArgs, const char **args,
+                                     int commandType);
+  
   /* this is the end of the C function stub API structure */ 
 } cmCAPI;
 
@@ -176,6 +189,12 @@ define the different types of compiles a library may be
 #define CM_LIBRARY_DEBUG 1
 #define CM_LIBRARY_OPTIMIZED 2
 
+/*=========================================================================
+define the different types of custom commands for a target
+=========================================================================*/
+#define CM_PRE_BUILD  0
+#define CM_PRE_LINK   1
+#define CM_POST_BUILD 2
   
 /*=========================================================================
 Finally we define the key data structures and function prototypes

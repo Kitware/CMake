@@ -239,6 +239,56 @@ void cmAddCustomCommand(void *arg, const char* source,
   mf->AddCustomCommand(source, command, args2, depends2, outputs2, target);
 }
 
+void cmAddCustomCommandToOutput(void *arg, const char* output,
+                                const char* command,
+                                int numArgs, const char **args,
+                                const char* main_dependency,
+                                int numDepends, const char **depends)
+{
+  cmMakefile *mf = static_cast<cmMakefile *>(arg);
+  int i;
+  std::vector<std::string> args2;
+  for (i = 0; i < numArgs; ++i)
+    {
+    args2.push_back(args[i]);
+    }
+  std::vector<std::string> depends2;
+  for (i = 0; i < numDepends; ++i)
+    {
+    depends2.push_back(depends[i]);
+    }
+  mf->AddCustomCommandToOutput(output, command, args2, main_dependency,
+                               depends2);
+}
+
+void cmAddCustomCommandToTarget(void *arg, const char* target,
+                                const char* command,
+                                int numArgs, const char **args,
+                                int commandType)
+{
+  cmMakefile *mf = static_cast<cmMakefile *>(arg);
+  int i;
+  std::vector<std::string> args2;
+  for (i = 0; i < numArgs; ++i)
+    {
+    args2.push_back(args[i]);
+    }
+  switch (commandType)
+    {
+    case CM_PRE_BUILD:
+      mf->AddCustomCommandToTarget(target, command, args2, 
+                                   cmTarget::PRE_BUILD);
+      break;
+    case CM_PRE_LINK:
+      mf->AddCustomCommandToTarget(target, command, args2, 
+                                   cmTarget::PRE_LINK);
+      break;
+    case CM_POST_BUILD:
+      mf->AddCustomCommandToTarget(target, command, args2, 
+                                   cmTarget::POST_BUILD);
+      break;
+    }
+}
 
 void cmAddLinkLibraryForTarget(void *arg, const char *tgt, const char*value, 
                                int libtype)
@@ -546,5 +596,8 @@ cmCAPI cmStaticCAPI =
   cmGetFilenamePath,
   cmRemoveFile,
   cmFree,
+
+  cmAddCustomCommandToOutput,
+  cmAddCustomCommandToTarget,
 };
 
