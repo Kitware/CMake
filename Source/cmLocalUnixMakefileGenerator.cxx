@@ -2302,17 +2302,24 @@ void cmLocalUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
     ctest += "ctest";
     ctest += cmSystemTools::GetExecutableExtension();
     }
-  if (cmSystemTools::FileExists(ctest.c_str()))
+  if (!cmSystemTools::FileExists(ctest.c_str()))
     {
-    fout << "ARGS=\n";
-    std::string cmd = this->ConvertToOutputForExisting(ctest.c_str());
-    cmd += " $(ARGS)";
-    this->OutputMakeRule(fout, 
-                         "tests",
-                         "test",
-                         "",
-                         cmd.c_str());
+    if ( !m_Makefile->GetDefinition("PROJECT_NAME") ||
+      strcmp(m_Makefile->GetDefinition("PROJECT_NAME"), "CMake") )
+      {
+      return;
+      }
+    ctest = m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
+    ctest += "/ctest";
     }
+  fout << "ARGS=\n";
+  std::string cmd = this->ConvertToOutputForExisting(ctest.c_str());
+  cmd += " $(ARGS)";
+  this->OutputMakeRule(fout, 
+                       "tests",
+                       "test",
+                       "",
+                       cmd.c_str());
 }
 
 void 
