@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+
+<!--#include virtual="/CMake/HTML/Head.html"-->
+
+<body bgcolor="#FFFFFF" leftmargin=0 topmargin=0 text="black" link="#FFFFFF" 
+vlink="#000000" alink="#000000">
+
+<!--#include virtual="/CMake/HTML/Table.html"-->
+
+<tr>
+<!--#include virtual="/CMake/HTML/SideBar.html"-->
+
+    <td width="550" valign="top" bgcolor="#FFFFFF">
+    <div align="left">
+
+    <font size=5>CMake </font> is an extensible, open-source system that
+    manages the build process in an operating system and compiler independent
+    manner. Unlike many cross-platform systems, CMake is designed to be used
+    in conjunction with the native build environment. Simple configuration
+    files placed in each source directory (called CMakeLists.txt files) are
+    used to generate standard build files (e.g., makefiles on Unix and
+    projects/workspaces in Windows MSVC) which are used in the usual
+    way. CMake can compile source code, create libraries, generate wrappers,
+    and build executables in arbitrary combinations. CMake supports in-place
+    and out-of-place builds, and can therefore support multiple builds from a
+    single source tree. CMake also supports static and dynamic library
+    builds.  Another nice feature of CMake is that it generates a cache file
+    that is designed to be used with a graphical editor. For example, when
+    CMake runs, it locates include files, libraries, and executable, and may
+    encounter optional build directives. This information is gathered into
+    the cache, which may be changed by the user prior to the generation of
+    the native build files. (The following figure is the CMake cache GUI in
+    the Windows MSVC environment.)
+    <P>
+
+    CMake is designed to support complex directory hierarchies and
+    applications dependent on several libraries. For example, CMake supports
+    projects consisting of multiple toolkits (i.e., libraries), where each
+    toolkit might contain several directories, and the application depends on
+    the toolkits plus additional code. CMake can also handle situations where
+    executables must be built in order to generate code that is then compiled
+    and linked into a final application. Because CMake is open source, and has
+    a simple, extensible design, CMake can be extended as necessary to support
+    new features.
+    <P>
+
+    Using CMake is simple. The build process is controlled by creating one or
+    more CMakeLists.txt files in each directory (including subdirectories)
+    that make up a project. Each CMakeLists.txt consists of one or more
+    commands. Each command has the form COMMAND (args...) where COMMAND is
+    the name of the command, and args is a white-space separated list of
+    arguments. CMake provides many pre-defined commands, but if you need to,
+    you can add your own commands. In addition, the advanced user can add
+    other makefile generators for a particular compiler/OS combination.
+    (While Unix and MSVC++ is supported currently, other developers are
+    adding other compiler/OS support.) You may wish to study the
+    <a href="/CMake/HTML/Examples.html">examples</a> page to see more
+    details.
+
+    <h3>A Summary Of Features</h3>
+    CMake has several powerful features. These include:
+    <ul>
+      <li>Supports complex, large build environments. CMake has been
+          proven in several large projects.
+      <li>Generates native build files (e.g., makefiles on Unix;
+          workspaces/projects on MS Visual C++). Therefore standard
+          tools can be used on any platform/compiler configuration.
+      <li>Has powerful commands include the ability to locate
+          include files, libraries, executables; include external
+          CMake files that encapsulate standard functionality;
+          interfaces to testing systems; supports recursive
+          directory traversal with variable inheritance; can run
+          external programs; supports conditional builds; supports
+          regular expression expansion; and so on.
+      <li>Supports in-place and out-of-place builds. Multiple
+          compilation trees are possible from a single source tree.
+      <li>Can be easily extended to add new features.
+      <li>CMake is open source.
+      <li>CMake operates with a cache designed to be interfaced with
+          a graphical editor. The cache provides optional interaction
+          to conditionally control the build process.
+    </ul>
+
+    <h3>The Origins of CMake</h3> CMake was created in response to the need
+    for a powerful, cross-platform build environment for the Insight
+    Segmentation and Registration Toolkit (ITK) funded by NLM as part of the
+    Visible Human Project. It grew out of an earlier system called
+    <b>pcmaker</b> created by Ken Martin and other developers to support the
+    <a href="http://public.kitware.com/vtk.html">Visualization Toolkit
+    (VTK)</a> open source 3D graphics and visualization system. To create
+    CMake, Bill Hoffman at Kitware incorporated some key ideas from pcmaker,
+    with the thought to adopt some of the functionality of the Unix
+    <b>configure</b> tool. The initial CMake implementation was mid-2000,
+    with acclerated development occuring in early 2001. Many improvements
+    were due to the influences of other developers incorporating CMake into
+    their own systems. For example, the 
+    <a href="http://www.robots.ox.ac.uk/~vxl/">VXL</a> software community
+    adopted CMake as their build environment, contributing many essential
+    features. Brad King added several features in order to support the CABLE
+    automated wrapping environment and 
+    <a href="http://public.kitware.com/GCC_XML">gcc-XML</a>, and 
+    GE Corporate R&D required support of their testing infrastructure 
+    (the <a href="http://public.kitware.com/Insight/Testing/HTML/TestingResults/Dashboard/MostRecentResults-Nightly/Dashboard.html">quality dashboard</a>). Other
+    features were added by Ken Martin to support the transition of VTK's
+    build environment to CMake, and to support ParaView, a parallel
+    visualization system to support the 
+    <a href="http://www.acl.lanl.gov/">Advanced Computing Lab</a> at Los Alamos
+    National Laboratory.
+
+    <h3>How Do I Learn CMake?</h3> CMake is a young and rapidly growing
+    system. It has already seen extensive use in very large software systems
+    such as VTK, VXL, and ITK, and is therefore, quite
+    stable. Unfortuneately, the pace of development has outstripped the pace
+    of documentation. As a result, the best way to learn about CMake is to
+    study existing CMake installations, and to rely on the CMake mailing
+    list. There is some existing documentation, but until later in 2001 the
+    documentation should be treated with caution. Please go to the
+    <a href="/CMake/HTML/Documentation.html">documentation</a> for more
+    information.
+
+    </div>
+    </td>
+</tr>
+
+</table>
+
+</td>
+</tr>
+</table>
+
+</body>
+</html>
