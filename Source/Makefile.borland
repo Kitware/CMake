@@ -32,7 +32,6 @@ cmCommands.obj \
 cmTarget.obj \
 cmCustomCommand.obj \
 cmCacheManager.obj \
-cmCableClassSet.obj \
 cmListFileCache.obj \
 cmSourceGroup.obj
 

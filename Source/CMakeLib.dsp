@@ -99,10 +99,6 @@ SOURCE=.\cmBorlandMakefileGenerator.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=.\cmCableClassSet.cxx
-# End Source File
-# Begin Source File
-
 SOURCE=.\cmCacheManager.cxx
 # End Source File
 # Begin Source File
