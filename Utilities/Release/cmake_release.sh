@@ -20,7 +20,7 @@
 # CMake UNIX Release Script.
 #
 
-SELF="$0"
+[ -z "$REMOTE" ] && SELF="$0"
 CVSROOT=":pserver:anonymous@www.cmake.org:/cvsroot/CMake"
 CVSROOT_GREP=":pserver:anonymous@www.cmake.org:[0-9]*/cvsroot/CMake"
 TAG="Release-1-6"
@@ -58,7 +58,9 @@ remote()
     shift
     REMOTE_TASK="$@"
     echo "------- Running remote task on $HOST. -------"
-    (echo "TASK=\"${REMOTE_TASK}\"" && cat $SELF) | ssh "$HOST" /bin/sh 2>/dev/null
+    (echo "REMOTE=\"1\"" &&
+     echo "TASK=\"${REMOTE_TASK}\"" &&
+     cat $SELF) | ssh "$HOST" /bin/sh 2>/dev/null
     echo "-------- Remote task on $HOST done.  --------"
 }
 
@@ -207,6 +209,7 @@ configure()
     echo "Running configure ..." &&
     (
         cd "cmake-${VERSION}-${PLATFORM}" &&
+        export CC CXX CFLAGS CXXFLAGS &&
         ../cmake-${VERSION}/configure --prefix=${PREFIX}
     ) >Logs/configure.log 2>&1 || error_log Logs/configure.log
 }
@@ -314,7 +317,7 @@ package()
 }
 
 if [ -z "$TASK" ]; then
-    TASK="$@"
+    [ -z "$REMOTE" ] && TASK="$@"
 fi
 
 if [ -z "$TASK" ]; then
