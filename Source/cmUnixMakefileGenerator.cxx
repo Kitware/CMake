@@ -870,7 +870,8 @@ void cmUnixMakefileGenerator::OutputBuildLibraryInDir(std::ostream& fout,
 						      const char* fullpath)
 {
   const char* makeTarget = library;
-  if(m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH"))
+  const char* libOutPath = m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH");
+  if(libOutPath && strcmp( libOutPath, "" ) != 0)
     {
     makeTarget = fullpath;
     }
