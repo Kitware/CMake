@@ -84,12 +84,18 @@ void cmCableCommand::SetupCableData()
   std::string cMakeLists = m_Makefile->GetStartDirectory();
   cMakeLists += "/";
   cMakeLists += "CMakeLists.txt";
-  std::string command = m_Makefile->GetHomeOutputDirectory();  
-  command += "/CMake/Source/";
-  command += cmSystemTools::GetCMakeExecutableName();
-  command += " " + cMakeLists;
-  command += " ";
-  command += cmSystemTools::GetCMakeExecutableOptions();
+
+  std::string command;
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  command = m_Makefile->GetHomeDirectory();  
+  command += "/CMake/Source/CMakeSetupCMD ";
+  command += cMakeLists;
+  command += " -DSP";
+#else
+  command = m_Makefile->GetHomeOutputDirectory();  
+  command += "/CMake/Source/CMakeBuildTargets ";
+  command += cMakeLists;
+#endif
   command += " -H";
   command += m_Makefile->GetHomeDirectory();
   command += " -S";
