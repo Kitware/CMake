@@ -11,11 +11,11 @@
 
 # try to find the Tcl libraries in a few places and names
 FIND_LIBRARY(TCL_LIBRARY
-             NAMES tcl tcl82 tcl80 
+             NAMES tcl tcl83 tcl82 tcl80 
              PATHS  /usr/lib "C:/Program Files/Tcl/lib" /usr/local/lib)
 
 FIND_LIBRARY(TK_LIBRARY 
-             NAMES tk tk82 tk80
+             NAMES tk tk83 tk82 tk80
              PATHS /usr/lib "C:/Program Files/Tcl/lib" /usr/local/lib)
 
 # add in the include path    
