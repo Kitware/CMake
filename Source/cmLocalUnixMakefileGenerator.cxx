@@ -538,7 +538,7 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
           if(outExt.size())
             {
             fout << "\\\n" 
-                 << this->ConvertToRelativeOutputPath((*i)->GetSourceName().c_str())
+                 << this->ConvertToMakeTarget(this->ConvertToRelativeOutputPath((*i)->GetSourceName().c_str()).c_str())
                  << outExt.c_str() << " ";
             }
           }
@@ -554,7 +554,7 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
           std::string outExt(this->GetOutputExtension((*i)->GetSourceExtension().c_str()));
           if(outExt.size())
             {
-            fout << "\\\n\"" << this->ConvertToRelativeOutputPath((*i)->GetSourceName().c_str())
+            fout << "\\\n\"" << this->ConvertToMakeTarget(ConvertToRelativeOutputPath((*i)->GetSourceName().c_str()).c_str())
                  << outExt.c_str() << "\" ";
             }
           }
