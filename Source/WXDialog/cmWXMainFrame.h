@@ -66,6 +66,7 @@ public:
   void OnPopupMenu(wxMouseEvent& event);
   void OnCacheStatusBar(wxEvent& event);
   void OnStatusBar(wxEvent& event);
+  void OnExitTimer(wxEvent& event);
 
   //! Callbacks for menu events
   void OnPopupMenuIgnore(wxEvent& event);
@@ -214,6 +215,7 @@ private:
 
   CacheMapType*                           m_CacheEntries;
   cmake*                                  m_CMakeInstance;
+  wxTimer*                                m_ExitTimer;
 
   enum Events {
     ID_MainFrame,

@@ -216,12 +216,17 @@ cmMainFrame::cmMainFrame(const wxString& title, const wxSize& size)
   this->ConnectEvent( this->m_GeneratorMenu, wxEVT_COMMAND_TEXT_UPDATED,
                       (wxObjectEventFunction) &cmMainFrame::OnGeneratorSelected );
 
+
+  this->ConnectEvent( this, wxEVT_TIMER,
+                      (wxObjectEventFunction) &cmMainFrame::OnExitTimer );
+
   this->Connect(cmCacheProperty::Menu_Popup_Ignore, wxEVT_COMMAND_MENU_SELECTED,
                 (wxObjectEventFunction) &cmMainFrame::OnPopupMenuIgnore);
   this->Connect(cmCacheProperty::Menu_Popup_Delete, wxEVT_COMMAND_MENU_SELECTED,
                 (wxObjectEventFunction) &cmMainFrame::OnPopupMenuDelete);
   this->Connect(cmCacheProperty::Menu_Popup_Help, wxEVT_COMMAND_MENU_SELECTED,
                 (wxObjectEventFunction) &cmMainFrame::OnPopupMenuHelp);
+
 }
 
 cmMainFrame::~cmMainFrame()
@@ -489,12 +494,18 @@ void cmMainFrame::OnPropertyChanged(wxEvent& event)
 
 void cmMainFrame::OnResize(wxSizeEvent& event)
 {
-
+  
   this->wxFrame::OnSize(event);
   // Expand inner pannel when window resizes
   this->ResizeInternal();
-
 }
+
+void cmMainFrame::OnExitTimer(wxEvent& event)
+{
+  this->Close();
+  this->Refresh();
+}
+
 void cmMainFrame::ResizeInternal()
 {
   // Expand inner pannel when window resizes
@@ -588,6 +599,12 @@ void cmMainFrame::Initialize(cmCommandLineInfo* cmdInfo)
   */
   this->LoadCacheFromDiskToGUI();
 
+  if ( cmdInfo->m_ExitAfterLoad )
+    {
+    std::cout << "Set timer" << std::endl;
+    this->m_ExitTimer = new wxTimer(this, this->GetId());
+    this->m_ExitTimer->Start(3000);
+    }
 }
 
 //! Set the current generator
