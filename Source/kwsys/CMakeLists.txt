@@ -77,6 +77,13 @@ IF(NOT KWSYS_NAMESPACE)
   SET(KWSYS_USE_Process 1)
   SET(KWSYS_USE_RegularExpression 1)
   SET(KWSYS_USE_SystemTools 1)
+
+  # Enable testing.
+  INCLUDE(${CMAKE_ROOT}/Modules/Dart.cmake)
+  MARK_AS_ADVANCED(BUILD_TESTING DART_ROOT TCL_TCLSH)
+  IF(BUILD_TESTING)
+    ENABLE_TESTING()
+  ENDIF(BUILD_TESTING)
 ENDIF(NOT KWSYS_NAMESPACE)
 
 #-----------------------------------------------------------------------------
@@ -373,4 +380,12 @@ IF(KWSYS_STANDALONE)
   TARGET_LINK_LIBRARIES(testIOS ${KWSYS_NAMESPACE})
   TARGET_LINK_LIBRARIES(testProcess ${KWSYS_NAMESPACE})
   TARGET_LINK_LIBRARIES(test1 ${KWSYS_NAMESPACE})
+
+  IF(BUILD_TESTING)
+    ADD_TEST(testProcess-1 testProcess 1)
+    ADD_TEST(testProcess-2 testProcess 2)
+    ADD_TEST(testProcess-3 testProcess 3)
+    ADD_TEST(testProcess-4 testProcess 4)
+    ADD_TEST(testProcess-5 testProcess 5)
+  ENDIF(BUILD_TESTING)
 ENDIF(KWSYS_STANDALONE)
