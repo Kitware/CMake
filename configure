@@ -1118,7 +1118,10 @@ else
   cat conftest.$ac_ext >&5
   rm -rf conftest*
   
-  CMAKE_NO_ANSI_STREAM_HEADERS=1
+  cat >> confdefs.h <<\EOF
+#define CMAKE_NO_ANSI_STREAM_HEADERS 1
+EOF
+
   echo "$ac_t""no" 1>&6
   
 fi
@@ -1133,12 +1136,11 @@ cross_compiling=$ac_cv_prog_cc_cross
   CXXFLAGS="$CXXFLAGS_ORIG"
 fi
 
-
 # check non-g++ compilers to see if they have std::stringstream
 CXXFLAGS_ORIG="$CXXFLAGS"
 CXXFLAGS="$CMAKE_ANSI_CXXFLAGS $CXXFLAGS"
 echo $ac_n "checking for ansi standard C++ stringstream""... $ac_c" 1>&6
-echo "configure:1142: checking for ansi standard C++ stringstream" >&5
+echo "configure:1144: checking for ansi standard C++ stringstream" >&5
 
 ac_ext=C
 # CXXFLAGS is not in ac_cpp because -g, -O, etc. are not valid cpp options.
@@ -1148,7 +1150,7 @@ ac_link='${CXX-g++} -o conftest${ac_exeext} $CXXFLAGS $CPPFLAGS $LDFLAGS conftes
 cross_compiling=$ac_cv_prog_cxx_cross
 
 cat > conftest.$ac_ext <<EOF
-#line 1152 "configure"
+#line 1154 "configure"
 #include "confdefs.h"
 
 #include <sstream>
@@ -1157,7 +1159,7 @@ int main() {
 
 ; return 0; }
 EOF
-if { (eval echo configure:1161: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:1163: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   
 echo "$ac_t""yes" 1>&6
@@ -1167,7 +1169,10 @@ else
   cat conftest.$ac_ext >&5
   rm -rf conftest*
   
-CMAKE_NO_ANSI_STRING_STREAM=1
+cat >> confdefs.h <<\EOF
+#define CMAKE_NO_ANSI_STRING_STREAM 1
+EOF
+
 echo "$ac_t""no" 1>&6
 
 fi
@@ -1181,13 +1186,12 @@ cross_compiling=$ac_cv_prog_cc_cross
 
 CXXFLAGS="$CXXFLAGS_ORIG"
 
-
 # check to see if stl is in the std namespace
 if test $ac_cv_prog_gxx = no; then
   CXXFLAGS_ORIG="$CXXFLAGS"
   CXXFLAGS="$CMAKE_ANSI_CXXFLAGS $CXXFLAGS"
   echo $ac_n "checking whether the std namespace is supported""... $ac_c" 1>&6
-echo "configure:1191: checking whether the std namespace is supported" >&5
+echo "configure:1195: checking whether the std namespace is supported" >&5
   
   ac_ext=C
 # CXXFLAGS is not in ac_cpp because -g, -O, etc. are not valid cpp options.
@@ -1197,7 +1201,7 @@ ac_link='${CXX-g++} -o conftest${ac_exeext} $CXXFLAGS $CPPFLAGS $LDFLAGS conftes
 cross_compiling=$ac_cv_prog_cxx_cross
 
   cat > conftest.$ac_ext <<EOF
-#line 1201 "configure"
+#line 1205 "configure"
 #include "confdefs.h"
 
   #include <list>
@@ -1207,7 +1211,7 @@ int main() {
 
 ; return 0; }
 EOF
-if { (eval echo configure:1211: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:1215: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   
   echo "$ac_t""yes" 1>&6
@@ -1217,7 +1221,10 @@ else
   cat conftest.$ac_ext >&5
   rm -rf conftest*
   
-  CMAKE_NO_STD_NAMESPACE=1
+  cat >> confdefs.h <<\EOF
+#define CMAKE_NO_STD_NAMESPACE 1
+EOF
+
   echo "$ac_t""no" 1>&6
   
 fi
@@ -1232,13 +1239,12 @@ cross_compiling=$ac_cv_prog_cc_cross
   CXXFLAGS="$CXXFLAGS_ORIG"
 fi
 
-
 # check to see if for scoping is supported
 if test $ac_cv_prog_gxx = no; then
   CXXFLAGS_ORIG="$CXXFLAGS"
   CXXFLAGS="$CMAKE_ANSI_CXXFLAGS $CXXFLAGS"
   echo $ac_n "checking ansi for scope support""... $ac_c" 1>&6
-echo "configure:1242: checking ansi for scope support" >&5
+echo "configure:1248: checking ansi for scope support" >&5
   
   ac_ext=C
 # CXXFLAGS is not in ac_cpp because -g, -O, etc. are not valid cpp options.
@@ -1248,7 +1254,7 @@ ac_link='${CXX-g++} -o conftest${ac_exeext} $CXXFLAGS $CPPFLAGS $LDFLAGS conftes
 cross_compiling=$ac_cv_prog_cxx_cross
 
   cat > conftest.$ac_ext <<EOF
-#line 1252 "configure"
+#line 1258 "configure"
 #include "confdefs.h"
 
   void foo() { for(int i;;); for(int i;;); }
@@ -1257,7 +1263,7 @@ int main() {
 
 ; return 0; }
 EOF
-if { (eval echo configure:1261: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:1267: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   
   echo "$ac_t""yes" 1>&6
@@ -1267,7 +1273,10 @@ else
   cat conftest.$ac_ext >&5
   rm -rf conftest*
   
-  CMAKE_NO_ANSI_FOR_SCOPE=1
+  cat >> confdefs.h <<\EOF
+#define CMAKE_NO_ANSI_FOR_SCOPE 1
+EOF
+
   echo "$ac_t""no" 1>&6
   
 fi
@@ -1282,14 +1291,13 @@ cross_compiling=$ac_cv_prog_cc_cross
   CXXFLAGS="$CXXFLAGS_ORIG"
 fi
 
-
 # find make to use to build cmake, prefer gmake
 for ac_prog in gmake make
 do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:1293: checking for $ac_word" >&5
+echo "configure:1301: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_RUNMAKE'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1463,10 +1471,6 @@ s%@CMAKE_ROOT_DIR@%$CMAKE_ROOT_DIR%g
 s%@CMAKE_CONFIG_DIR@%$CMAKE_CONFIG_DIR%g
 s%@CMAKE_ANSI_CFLAGS@%$CMAKE_ANSI_CFLAGS%g
 s%@CMAKE_ANSI_CXXFLAGS@%$CMAKE_ANSI_CXXFLAGS%g
-s%@CMAKE_NO_ANSI_STREAM_HEADERS@%$CMAKE_NO_ANSI_STREAM_HEADERS%g
-s%@CMAKE_NO_ANSI_STRING_STREAM@%$CMAKE_NO_ANSI_STRING_STREAM%g
-s%@CMAKE_NO_STD_NAMESPACE@%$CMAKE_NO_STD_NAMESPACE%g
-s%@CMAKE_NO_ANSI_FOR_SCOPE@%$CMAKE_NO_ANSI_FOR_SCOPE%g
 s%@RUNMAKE@%$RUNMAKE%g
 
 CEOF
