@@ -238,7 +238,7 @@ void cmSystemTools::Stdout(const char* s)
   else
     {
     std::cout << s;
-    std::cout << std::flush;
+    std::cout.flush();
     }
 }
 
@@ -251,6 +251,7 @@ void cmSystemTools::Stdout(const char* s, int length)
   else
     {
     std::cout.write(s, length);
+    std::cout.flush();
     }
 }
 
