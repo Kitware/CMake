@@ -20,7 +20,7 @@
 #include "cmStandardIncludes.h"
 #include "cmRegularExpression.h"
 #include "cmCustomCommand.h"
-
+class cmSourceFile;
 
 /** \class cmSourceGroup
  * \brief Hold a group of sources as specified by a SOURCE_GROUP command.
@@ -54,15 +54,21 @@ public:
    */
   typedef std::map<cmStdString, CommandFiles> Commands;
 
+  struct SourceAndCommands
+  {
+    SourceAndCommands(): m_SourceFile(0) {}
+    const cmSourceFile* m_SourceFile;
+    Commands m_Commands;
+  };
   /**
    * Map from source to command map.
    */
-  typedef std::map<cmStdString, Commands>  BuildRules;
+  typedef std::map<cmStdString, SourceAndCommands>  BuildRules;
 
   bool Matches(const char* name);
   void SetGroupRegex(const char* regex)
     { m_GroupRegex.compile(regex); }
-  void AddSource(const char* name);
+  void AddSource(const char* name, const cmSourceFile*);
   void AddCustomCommand(const cmCustomCommand &cmd);
   const char* GetName() const
     { return m_Name.c_str(); }

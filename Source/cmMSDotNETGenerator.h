@@ -110,7 +110,8 @@ private:
                        const char* source,
                        const char* command,
                        const std::set<std::string>& depends,
-                       const std::set<std::string>& outputs);
+                       const std::set<std::string>& outputs,
+                       const char* extraFlags);
 
   void OutputTargetRules(std::ostream& fout,
                          const cmTarget &target, 

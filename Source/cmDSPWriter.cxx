@@ -210,7 +210,7 @@ void cmDSPWriter::WriteDSPFile(std::ostream& fout,
     std::string source = i->GetFullPath();
     cmSourceGroup& sourceGroup = m_Makefile->FindSourceGroup(source.c_str(),
                                                              sourceGroups);
-    sourceGroup.AddSource(source.c_str());
+    sourceGroup.AddSource(source.c_str(), &(*i));
     }
   
   // add any custom rules to the source groups
@@ -262,8 +262,12 @@ void cmDSPWriter::WriteDSPFile(std::ostream& fout,
           buildRules.begin(); cc != buildRules.end(); ++ cc)
       {
       std::string source = cc->first;
-      const cmSourceGroup::Commands& commands = cc->second;
-
+      const cmSourceGroup::Commands& commands = cc->second.m_Commands;
+      const char* compileFlags = 0;
+      if(cc->second.m_SourceFile)
+        {
+        compileFlags = cc->second.m_SourceFile->GetCompileFlags();
+        }
       if (source != libName || target.GetType() == cmTarget::UTILITY)
         {
         fout << "# Begin Source File\n\n";
@@ -280,7 +284,24 @@ void cmDSPWriter::WriteDSPFile(std::ostream& fout,
                                                   source.c_str());
           this->WriteCustomRule(fout, source.c_str(), totalCommandStr.c_str(), 
                                 totalCommand.m_Depends, 
-                                totalCommand.m_Outputs);
+                                totalCommand.m_Outputs, compileFlags);
+          }
+        else if(compileFlags)
+          {
+          for(std::vector<std::string>::iterator i
+                = m_Configurations.begin(); i != m_Configurations.end(); ++i)
+            { 
+            if (i == m_Configurations.begin())
+              {
+              fout << "!IF  \"$(CFG)\" == " << i->c_str() << std::endl;
+              }
+            else 
+              {
+              fout << "!ELSEIF  \"$(CFG)\" == " << i->c_str() << std::endl;
+              }
+            fout << "\n# ADD CPP " << compileFlags << "\n\n";
+            } 
+          fout << "!ENDIF\n\n";
           }
         fout << "# End Source File\n";
         }
@@ -299,10 +320,12 @@ void cmDSPWriter::WriteDSPFile(std::ostream& fout,
 
 
 void cmDSPWriter::WriteCustomRule(std::ostream& fout,
-                                    const char* source,
-                                    const char* command,
-                                    const std::set<std::string>& depends,
-                                    const std::set<std::string>& outputs)
+                                  const char* source,
+                                  const char* command,
+                                  const std::set<std::string>& depends,
+                                  const std::set<std::string>& outputs,
+                                  const char* flags
+                                  )
 {
   std::vector<std::string>::iterator i;
   for(i = m_Configurations.begin(); i != m_Configurations.end(); ++i)
@@ -315,7 +338,10 @@ void cmDSPWriter::WriteCustomRule(std::ostream& fout,
       {
       fout << "!ELSEIF  \"$(CFG)\" == " << i->c_str() << std::endl;
       }
-    
+    if(flags)
+      {
+      fout << "\n# ADD CPP " << flags << "\n\n";
+      }
     // Write out the dependencies for the rule.
     fout << "USERDEP__HACK=";
     for(std::set<std::string>::const_iterator d = depends.begin();

@@ -1360,7 +1360,7 @@ void cmUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
           buildRules.begin(); cc != buildRules.end(); ++ cc)
       {
       std::string source = cc->first;
-      const cmSourceGroup::Commands& commands = cc->second;
+      const cmSourceGroup::Commands& commands = cc->second.m_Commands;
       // Loop through every command generating code from the current source.
       for(cmSourceGroup::Commands::const_iterator c = commands.begin();
           c != commands.end(); ++c)
@@ -1918,6 +1918,11 @@ void cmUnixMakefileGenerator::OutputSourceObjectBuildRules(std::ostream& fout)
         // Only output a rule for each .o once.
         if(rules.find(shortNameWithExt) == rules.end())
           {
+          if(source->GetCompileFlags())
+            {
+            exportsDef += source->GetCompileFlags();
+            exportsDef += " ";
+            }
           this->OutputBuildObjectFromSource(fout,
                                             shortName.c_str(),
                                             *source,

@@ -769,6 +769,11 @@ void cmMSDotNETGenerator::WriteConfiguration(std::ostream& fout,
          << "\t\t\t\tInlineFunctionExpansion=\"1\"\n"
          << "\t\t\t\tPreprocessorDefinitions=\"WIN32,NDEBUG,_WINDOWS";
     }
+  if(target.GetType() == cmTarget::SHARED_LIBRARY
+     || target.GetType() == cmTarget::MODULE_LIBRARY)
+    {
+    fout << "," << libName << "_EXPORTS";
+    }
   this->OutputDefineFlags(fout);
   fout << "\"\n";
   if(m_Makefile->IsOn("CMAKE_CXX_USE_RTTI"))
@@ -801,14 +806,41 @@ void cmMSDotNETGenerator::OutputBuildTool(std::ostream& fout,
     {
     case cmTarget::STATIC_LIBRARY:
     {
-      std::string libpath = m_LibraryOutputPath + "$(OutDir)/" + libName + ".lib";
+      std::string libpath = m_LibraryOutputPath + 
+        "$(OutDir)/" + libName + ".lib";
       fout << "\t\t\t<Tool\n"
            << "\t\t\t\tName=\"VCLibrarianTool\"\n"
-           << "\t\t\t\t\tOutputFile=\"" << this->ConvertToXMLOutputPath(libpath.c_str()) << ".\"/>\n";
+           << "\t\t\t\t\tOutputFile=\"" 
+           << this->ConvertToXMLOutputPath(libpath.c_str()) << ".\"/>\n";
       break;
     }
     case cmTarget::SHARED_LIBRARY:
     case cmTarget::MODULE_LIBRARY:
+      fout << "\t\t\t<Tool\n"
+           << "\t\t\t\tName=\"VCLinkerTool\"\n"
+           << "\t\t\t\tAdditionalOptions=\"/MACHINE:I386\"\n"
+           << "\t\t\t\tAdditionalDependencies=\" odbc32.lib odbccp32.lib ";
+      this->OutputLibraries(fout, configName, libName, target);
+      fout << "\"\n";
+      fout << "\t\t\t\tOutputFile=\"" 
+           << m_ExecutableOutputPath << configName << "/" 
+           << libName << ".dll\"\n";
+      fout << "\t\t\t\tLinkIncremental=\"1\"\n";
+      fout << "\t\t\t\tSuppressStartupBanner=\"TRUE\"\n";
+      fout << "\t\t\t\tAdditionalLibraryDirectories=\"";
+      this->OutputLibraryDirectories(fout, configName, libName, target);
+      fout << "\"\n";
+      fout << "\t\t\t\tProgramDatabaseFile=\"" << m_LibraryOutputPath 
+           << "$(OutDir)\\" << libName << ".pdb\"\n";
+      if(strcmp(configName, "Debug") == 0)
+        {
+        fout << "\t\t\t\tGenerateDebugInformation=\"TRUE\"\n";
+        }
+      fout << "\t\t\t\tStackReserveSize=\"" 
+           << m_Makefile->GetDefinition("CMAKE_CXX_STACK_SIZE") << "\"\n";
+      fout << "\t\t\t\tImportLibrary=\"" 
+           << m_ExecutableOutputPath << configName << "/" 
+           << libName << ".lib\"/>\n";
       break;
     case cmTarget::EXECUTABLE:
     case cmTarget::WIN32_EXECUTABLE:
@@ -843,9 +875,6 @@ void cmMSDotNETGenerator::OutputBuildTool(std::ostream& fout,
       fout << "\t\t\t\tStackReserveSize=\"" 
            << m_Makefile->GetDefinition("CMAKE_CXX_STACK_SIZE") << "\"/>\n";
       break;
-
-      fout << "\t\t\t\tSubSystem=\"2\"\n";
-
     case cmTarget::UTILITY:
       break;
     }
@@ -961,7 +990,7 @@ void cmMSDotNETGenerator::WriteVCProjFile(std::ostream& fout,
     std::string source = i->GetFullPath();
     cmSourceGroup& sourceGroup = m_Makefile->FindSourceGroup(source.c_str(),
                                                              sourceGroups);
-    sourceGroup.AddSource(source.c_str());
+    sourceGroup.AddSource(source.c_str(), &(*i));
     }
   
   // add any custom rules to the source groups
@@ -1017,8 +1046,12 @@ void cmMSDotNETGenerator::WriteVCProjFile(std::ostream& fout,
           buildRules.begin(); cc != buildRules.end(); ++ cc)
       {
       std::string source = cc->first;
-      const cmSourceGroup::Commands& commands = cc->second;
-
+      const cmSourceGroup::Commands& commands = cc->second.m_Commands;
+      const char* compileFlags = 0;
+      if(cc->second.m_SourceFile)
+        {
+        compileFlags = cc->second.m_SourceFile->GetCompileFlags();
+        }
       if (source != libName || target.GetType() == cmTarget::UTILITY)
         {
         fout << "\t\t\t<File\n";
@@ -1034,7 +1067,21 @@ void cmMSDotNETGenerator::WriteVCProjFile(std::ostream& fout,
                                                   source.c_str());
           this->WriteCustomRule(fout, source.c_str(), totalCommandStr.c_str(), 
                                 totalCommand.m_Depends, 
-                                totalCommand.m_Outputs);
+                                totalCommand.m_Outputs, compileFlags);
+          }
+        else if(compileFlags)
+          {
+          for(std::vector<std::string>::iterator i
+                = m_Configurations.begin(); i != m_Configurations.end(); ++i)
+            {
+            fout << "\t\t\t\t<FileConfiguration\n"
+                 << "\t\t\t\t\tName=\""  << *i << "|Win32\">\n"
+                 << "\t\t\t\t\t<Tool\n"
+                 << "\t\t\t\t\tName=\"VCCLCompilerTool\"\n"
+                 << "\t\t\t\t\tAdditionalOptions=\""
+                 << compileFlags << "\"/>\n"
+                 << "\t\t\t\t</FileConfiguration>\n";
+            }
           }
         fout << "\t\t\t</File>\n";
         }
@@ -1054,10 +1101,11 @@ void cmMSDotNETGenerator::WriteVCProjFile(std::ostream& fout,
 
 
 void cmMSDotNETGenerator::WriteCustomRule(std::ostream& fout,
-                                    const char* source,
-                                    const char* command,
-                                    const std::set<std::string>& depends,
-                                    const std::set<std::string>& outputs)
+                                          const char* source,
+                                          const char* command,
+                                          const std::set<std::string>& depends,
+                                          const std::set<std::string>& outputs,
+                                          const char* compileFlags)
 {
   std::string cmd = command;
   cmSystemTools::ReplaceString(cmd, "\"", "&quot;");
@@ -1066,6 +1114,13 @@ void cmMSDotNETGenerator::WriteCustomRule(std::ostream& fout,
     {
     fout << "\t\t\t\t<FileConfiguration\n";
     fout << "\t\t\t\t\tName=\"" << *i << "|Win32\">\n";
+    if(compileFlags)
+      {
+      fout << "\t\t\t\t\t<Tool\n"
+           << "\t\t\t\t\tName=\"VCCLCompilerTool\"\n"
+           << "\t\t\t\t\tAdditionalOptions=\""
+           << compileFlags << "\"/>\n";
+      }
     fout << "\t\t\t\t\t<Tool\n"
          << "\t\t\t\t\tName=\"VCCustomBuildTool\"\n"
          << "\t\t\t\t\tCommandLine=\"" << cmd << "\n\"\n"

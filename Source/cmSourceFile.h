@@ -107,10 +107,14 @@ public:
   const std::vector<std::string> &GetDepends() const {return m_Depends;}
   std::vector<std::string> &GetDepends() {return m_Depends;}
 
+  ///! Set/Get per file compiler flags
+  void SetCompileFlags(const char* f)  { m_CompileFlags = f;}
+  const char* GetCompileFlags() const { return m_CompileFlags.size() ? m_CompileFlags.c_str(): 0; }
 private:
   bool m_AbstractClass;
   bool m_WrapExclude;
   bool m_HeaderFileOnly;
+  std::string m_CompileFlags;
   std::string m_FullPath;
   std::string m_SourceName;
   std::string m_SourceExtension;

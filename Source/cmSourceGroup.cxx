@@ -50,13 +50,15 @@ bool cmSourceGroup::Matches(const char* name)
 /**
  * Add a source to the group that the compiler will know how to build.
  */
-void cmSourceGroup::AddSource(const char* name)
+void cmSourceGroup::AddSource(const char* name, const cmSourceFile* sf)
 {
   BuildRules::iterator s = m_BuildRules.find(name);
   if(s == m_BuildRules.end())
     {
+    SourceAndCommands sc;
+    sc.m_SourceFile = sf;
     // The source was not found.  Add it with no commands.
-    m_BuildRules[name];
+    m_BuildRules[name] = sc;
     return;
     }
 }
@@ -75,7 +77,8 @@ void cmSourceGroup::AddCustomCommand(const cmCustomCommand &cmd)
   if(s == m_BuildRules.end())
     {
     // The source was not found.  Add it with this command.
-    CommandFiles& cmdFiles = m_BuildRules[cmd.GetSourceName()][commandAndArgs];
+    CommandFiles& cmdFiles = 
+      m_BuildRules[cmd.GetSourceName()].m_Commands[commandAndArgs];
     cmdFiles.m_Command = cmd.GetCommand();
     cmdFiles.m_Arguments = cmd.GetArguments();
     cmdFiles.m_Depends.insert(cmd.GetDepends().begin(),cmd.GetDepends().end());
@@ -84,7 +87,7 @@ void cmSourceGroup::AddCustomCommand(const cmCustomCommand &cmd)
     }
   
   // The source already exists.  See if the command exists.
-  Commands& commands = s->second;
+  Commands& commands = s->second.m_Commands;
   Commands::iterator c = commands.find(commandAndArgs);
   if(c == commands.end())
     {
@@ -113,8 +116,8 @@ void cmSourceGroup::Print() const
       i != m_BuildRules.end(); ++i)
     {
     std::cout << "BuildRule: " << i->first.c_str() << "\n";
-    for(Commands::const_iterator j = i->second.begin();
-        j != i->second.end(); ++j)
+    for(Commands::const_iterator j = i->second.m_Commands.begin();
+        j != i->second.m_Commands.end(); ++j)
       {
       std::cout << "FullCommand: " << j->first.c_str() << "\n";
       std::cout << "Command: " << j->second.m_Command.c_str() << "\n";
