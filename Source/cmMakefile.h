@@ -66,8 +66,8 @@ public:
   /**
    * Return major and minor version numbers for cmake.
    */
-  static unsigned int GetMajorVersion() { return 0;}
-  static unsigned int GetMinorVersion() { return 99;}
+  static unsigned int GetMajorVersion() { return 1;}
+  static unsigned int GetMinorVersion() { return 0;}
   /**
    * Return the major and minor version of the cmake that
    * was used to write the currently loaded cache, note
