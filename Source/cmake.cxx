@@ -145,18 +145,15 @@ void cmake::SetArgs(cmMakefile& builder, int ac, char** av)
 // at the end of this CMAKE_ROOT and CMAAKE_COMMAND should be added to the cache
 void cmake::AddCMakePaths(char **av)
 {
-// Find our own exectuable.
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  std::string cMakeSelf = "\""+cmSystemTools::FindProgram(av[0])+"\"";
-#else
+  // Find our own exectuable.
   std::string cMakeSelf = cmSystemTools::FindProgram(av[0]);
-#endif
 
   // Save the value in the cache
-  cmCacheManager::GetInstance()->AddCacheEntry("CMAKE_COMMAND",
-                                               cMakeSelf.c_str(),
-                                               "Path to CMake executable.",
-                                               cmCacheManager::INTERNAL);
+  cmCacheManager::GetInstance()->AddCacheEntry
+    ("CMAKE_COMMAND",
+     cmSystemTools::EscapeSpaces(cMakeSelf.c_str()).c_str(),
+     "Path to CMake executable.",
+     cmCacheManager::INTERNAL);
 
   // do CMAKE_ROOT, look for the environment variable first
   std::string cMakeRoot;
