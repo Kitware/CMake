@@ -955,7 +955,18 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
     libMultiLineOptionsForDebug +=  extraLinkOptions;
     libMultiLineOptionsForDebug += " \n";
     }
-
+  if(const char* stdLibs =  m_Makefile->GetDefinition("CMAKE_STANDARD_LIBRARIES"))
+    {
+    libOptions += " ";
+    libOptions += stdLibs;
+    libOptions += " ";
+    libMultiLineOptions += "# ADD LINK32 ";
+    libMultiLineOptions +=  stdLibs;
+    libMultiLineOptions += " \n";
+    libMultiLineOptionsForDebug += "# ADD LINK32 ";
+    libMultiLineOptionsForDebug +=  stdLibs;
+    libMultiLineOptionsForDebug += " \n";
+    }
   if(const char* targetLinkFlags = target.GetProperty("LINK_FLAGS"))
     {
     libOptions += " ";

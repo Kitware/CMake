@@ -617,7 +617,9 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
           extraLinkOptions.c_str()).c_str();
         }
       fout << "\"\n"
-           << "\t\t\t\tAdditionalDependencies=\" odbc32.lib odbccp32.lib ";
+           << "\t\t\t\tAdditionalDependencies=\""
+           << m_Makefile->GetDefinition("CMAKE_STANDARD_LIBRARIES") 
+           << " ";
       this->OutputLibraries(fout, configName, libName, target);
       fout << "\"\n";
       temp = m_ExecutableOutputPath;

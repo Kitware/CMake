@@ -69,8 +69,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /machine:I386  /IGNORE:4089
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /machine:I386  /IGNORE:4089
+# ADD BASE LINK32 /nologo /subsystem:windows /machine:I386  /IGNORE:4089
+# ADD LINK32  /nologo /subsystem:windows /machine:I386  /IGNORE:4089
 CM_MULTILINE_OPTIMIZED_LIBRARIES
 CM_MULTILINE_LIBRARIES
 
@@ -101,8 +101,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept /IGNORE:4089
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept /IGNORE:4089
+# ADD BASE LINK32 /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept /IGNORE:4089
+# ADD LINK32 /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept /IGNORE:4089
 CM_MULTILINE_DEBUG_LIBRARIES
 CM_MULTILINE_LIBRARIES_FOR_DEBUG
 
@@ -131,8 +131,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /machine:I386 /pdbtype:sept /IGNORE:4089
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows  /machine:I386 /pdbtype:sept /IGNORE:4089
+# ADD BASE LINK32 /nologo /subsystem:windows /machine:I386 /pdbtype:sept /IGNORE:4089
+# ADD LINK32 /nologo /subsystem:windows  /machine:I386 /pdbtype:sept /IGNORE:4089
 CM_MULTILINE_OPTIMIZED_LIBRARIES
 CM_MULTILINE_LIBRARIES
 
@@ -163,8 +163,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /machine:I386  /IGNORE:4089
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /debug /machine:I386  /IGNORE:4089
+# ADD BASE LINK32 /nologo /subsystem:windows /machine:I386  /IGNORE:4089
+# ADD LINK32 /nologo /subsystem:windows /debug /machine:I386  /IGNORE:4089
 CM_MULTILINE_OPTIMIZED_LIBRARIES
 CM_MULTILINE_LIBRARIES
 
