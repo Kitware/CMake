@@ -556,7 +556,6 @@ cmCAPI cmStaticCAPI =
   cmFreeArguments,
   cmSetClientData,
   cmSetError,
-  cmDisplayStatus,
   cmAddCacheDefinition,
   cmAddCustomCommand,
   cmAddDefineFlag,
@@ -606,5 +605,6 @@ cmCAPI cmStaticCAPI =
 
   cmAddCustomCommandToOutput,
   cmAddCustomCommandToTarget,
+  cmDisplayStatus,
 };
 
