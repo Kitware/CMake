@@ -17,6 +17,25 @@
 // This class represents a cmake invocation. It is the top level class when
 // running cmake. Most cmake based GUIS should primarily create an instance
 // of this class and communicate with it.
+//
+// The basic process for a GUI is as follows:
+//
+// 1) Create a cmake instance
+// 2) Set the Home & Start directories, generator, and cmake command. this
+//    can be done using the Set methods or by using SetArgs and passing in
+//    command line arguments.
+// 3) Load the cache by calling LoadCache (duh)
+// 4) if you are using command line arguments with -D or -C flags then
+//    call SetCacheArgs (or if for some other reason you want to modify the 
+//    cache, do it now.
+// 5) Finally call Configure
+// 6) Let the user change values and go back to step 5
+// 7) call Generate
+//
+// If your GUI allows the user to change the start & home directories then
+// you must at a minimum redo steps 2 through 7. 
+//
+
 
 #include "cmStandardIncludes.h"
 #include "cmSystemTools.h"
