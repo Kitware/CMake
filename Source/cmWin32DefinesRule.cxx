@@ -1,6 +1,19 @@
+/*=========================================================================
+
+  Program:   Insight Segmentation & Registration Toolkit
+  Module:    $RCSfile$
+  Language:  C++
+  Date:      $Date$
+  Version:   $Revision$
+
+
+  Copyright (c) 2000 National Library of Medicine
+  All rights reserved.
+
+  See COPYRIGHT.txt for copyright details.
+
+=========================================================================*/
 #include "cmWin32DefinesRule.h"
-
-
 
 cmWin32DefinesRule::cmWin32DefinesRule()
 {
@@ -8,7 +21,6 @@ cmWin32DefinesRule::cmWin32DefinesRule()
   this->EnabledOff();
 #endif
 }
-
 
 // cmWin32DefinesRule
 bool cmWin32DefinesRule::Invoke(std::vector<std::string>& args)
