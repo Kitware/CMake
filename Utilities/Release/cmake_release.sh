@@ -647,7 +647,7 @@ win32_zipfile()
         rm -rf cmake-${VERSION}-x86-win.zip &&
         zip -r cmake-${VERSION}-x86-win.zip CMake \
             -x CMake/INSTALL.LOG -x CMake/UNWISE.EXE -x CMake/WiseUpdt.exe &&
-        mv cmake-${VERSION}-x86-win.zip ${RELEASE_ROOT}/Win32 &&
+        mv cmake-${VERSION}-x86-win.zip ${RELEASE_ROOT}/Win32
     ) >Logs/win32_zipfile.log 2>&1 || error_log Logs/win32_zipfile.log
 }
 
