@@ -476,6 +476,15 @@ int cmGlobalGenerator::TryCompile(const char *, const char *bindir,
     cmSystemTools::ChangeDirectory(cwd.c_str());
     return 1;
     }
+  
+  // The SGI MipsPro 7.3 compiler does not return an error code when
+  // the source has a #error in it!  This is a work-around for such
+  // compilers.
+  if((retVal == 0) && (output->find("#error") != std::string::npos))
+    {
+    retVal = 1;
+    }
+  
   cmSystemTools::ChangeDirectory(cwd.c_str());
   return retVal;
 }
