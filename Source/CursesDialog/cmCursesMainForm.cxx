@@ -1072,7 +1072,7 @@ void cmCursesMainForm::HandleInput()
           }
         }
       // delete cache entry
-      else if ( key == 'd' )
+      else if ( key == 'd' && m_NumberOfVisibleEntries )
         {
         m_OkToGenerate = false;
         FIELD* cur = current_field(m_Form);
