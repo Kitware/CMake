@@ -781,13 +781,11 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
                                        m_CurrentMakefile->GetDefineFlags());
   cmSystemTools::ReplaceString(flags, "\"", "\\\"");
   productName = target.GetName();
-  bool needLinkDirs = true;
   
   switch(target.GetType())
     {
     case cmTarget::STATIC_LIBRARY:
       {
-      needLinkDirs = false;
       if(m_LibraryOutputPath.size())
         {
         buildSettings->AddAttribute("SYMROOT", 
