@@ -88,8 +88,8 @@ public:
     {
     return
       "SUBDIRS(dir1 dir2 ...)\n"
-      "Add a list of subdirectories to the build.\n"
-      "This will cause any CMakeLists.txt files in the sub directories\n"
+      "Add a list of subdirectories to the build. "
+      "This will cause any CMakeLists.txt files in the sub directories "
       "to be processed by CMake.";
     }
   
