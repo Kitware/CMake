@@ -129,16 +129,18 @@ void cmMakeDepend::GenerateDependInformation(cmDependInformation* info)
     return;
     }
 
+  bool found = false;
+  
   // If the file exists, use it to find dependency information.
   if(cmSystemTools::FileExists(path))
     {
     // Use the real file to find its dependencies.
     this->DependWalk(info);
-    return;
+    found = true;
     }
   
-  // The file doesn't exist.  See if the cmSourceFile for it has any files
-  // specified as dependency hints.
+  // See if the cmSourceFile for it has any files specified as
+  // dependency hints.
   if(info->m_cmSourceFile != 0)
     {
     // Get the cmSourceFile corresponding to this.
@@ -147,7 +149,7 @@ void cmMakeDepend::GenerateDependInformation(cmDependInformation* info)
     // file.
     if(!cFile.GetDepends().empty())
       {
-      // Initial dependencies have been given.  Use them to begin the
+      // Dependency hints have been given.  Use them to begin the
       // recursion.
       for(std::vector<std::string>::const_iterator file =
             cFile.GetDepends().begin(); file != cFile.GetDepends().end(); 
@@ -157,21 +159,24 @@ void cmMakeDepend::GenerateDependInformation(cmDependInformation* info)
         }
       
       // Found dependency information.  We are done.
-      return;
+      found = true;
       }
     }
   
-  // Couldn't find any dependency information.
-  if(m_ComplainFileRegularExpression.find(info->m_IncludeName.c_str()))
+  if(!found)
     {
-    cmSystemTools::Error("error cannot find dependencies for ", path);
+    // Couldn't find any dependency information.
+    if(m_ComplainFileRegularExpression.find(info->m_IncludeName.c_str()))
+      {
+      cmSystemTools::Error("error cannot find dependencies for ", path);
+      }
+    else
+      {
+      // Destroy the name of the file so that it won't be output as a
+      // dependency.
+      info->m_FullPath = "";
+      }
     }
-  else
-    {
-    // Destroy the name of the file so that it won't be output as a
-    // dependency.
-    info->m_FullPath = "";
-    }  
 }
 
 // This function actually reads the file specified and scans it for
