@@ -44,7 +44,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // cmFLTKWrapUICommand
 bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args)
 {
-  std::cout << "args.size()=" << args.size() << std::endl;
   if(args.size() < 2 )
     {
     this->SetError("called with incorrect number of arguments");
@@ -100,7 +99,8 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args)
                    "cxx",false);
       std::string origname = cdir + "/" + curr.GetSourceName() + "." +
           curr.GetSourceExtension();
-      std::string hname = header_file.GetFullPath();
+      std::string hname   = header_file.GetFullPath();
+      std::string cxxname = source_file.GetFullPath();
       m_WrapUserInterface.push_back(origname);
       // add starting depends
       source_file.GetDepends().push_back(hname);
@@ -110,6 +110,19 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args)
       m_GeneratedSourcesClasses.push_back(source_file);
       m_Makefile->AddSource(source_file,
                             m_GeneratedSourceList.c_str());
+
+      cmTarget htarget;
+      htarget.SetType( cmTarget::GENERATED_CODE );
+      cmTargets::value_type hpair( hname, htarget );
+      m_Makefile->GetTargets().insert( hpair );
+
+      cmTarget cxxtarget;
+      cxxtarget.SetType( cmTarget::GENERATED_CODE );
+      cmTargets::value_type cxxpair( cxxname, cxxtarget );
+      m_Makefile->GetTargets().insert( cxxpair );
+
+
+
       }
     }
   
@@ -125,17 +138,7 @@ void cmFLTKWrapUICommand::FinalPass()
   std::string fluid_exe = "${FLTK_FLUID_EXE}";
 
 
-  // wrap all the .h files
-  depends.push_back(fluid_exe);
-
-  const char * FLUID_GENERATED_FILES_value=
-      m_Makefile->GetDefinition("FLUID_GENERATED_FILES");
-  std::string ui_list("");
-  if (FLUID_GENERATED_FILES_value!=0)
-    {
-    ui_list=ui_list+FLUID_GENERATED_FILES_value;
-    } 
-
+  // Generate code for all the .fl files
   for(int classNum = 0; classNum < lastHeadersClass; classNum++)
     {
     // set up .fl to .h and .cxx command
@@ -149,24 +152,29 @@ void cmFLTKWrapUICommand::FinalPass()
     cxxres += m_GeneratedSourcesClasses[classNum].GetSourceName() + "." +
         m_GeneratedSourcesClasses[classNum].GetSourceExtension();
 
-    ui_list = ui_list + " " + hres + " " + cxxres;
-    
     std::vector<std::string> cxxargs;
+    cxxargs.push_back("-c"); // instructs Fluid to run in command line
     cxxargs.push_back("-h"); // optionally rename .h files
     cxxargs.push_back(hres);
     cxxargs.push_back("-o"); // optionally rename .cxx files
     cxxargs.push_back(cxxres);
-    cxxargs.push_back(m_WrapUserInterface[classNum]);
+    cxxargs.push_back(m_WrapUserInterface[classNum]);// name of the GUI fluid file
 
     depends.push_back(hres);
 
+    // Add command for generating the .h file
     m_Makefile->AddCustomCommand(m_WrapUserInterface[classNum].c_str(),
                                  fluid_exe.c_str(), cxxargs, depends, 
-                                 cxxres.c_str(), m_GeneratedSourceList.c_str());
+                                 cxxres.c_str(), hres.c_str() );
+
+
+    // Add command for generating the .cxx file
+    m_Makefile->AddCustomCommand(m_WrapUserInterface[classNum].c_str(),
+                                 fluid_exe.c_str(), cxxargs, depends, 
+                                 cxxres.c_str(), cxxres.c_str() );
+
 
     }
-
-  m_Makefile->AddDefinition("FLUID_GENERATED_FILES",ui_list.c_str());
 
 }
 
