@@ -84,7 +84,7 @@ std::string cmGlob::ConvertExpression(const std::string& expr)
     else if ( c == '[' )
       {
       std::string::size_type j = i;
-      if ( j < n && expr[j] == '!' )
+      if ( j < n && ( expr[j] == '!' || expr[j] == '^' ) )
         {
         j = j+1;
         }
@@ -116,7 +116,7 @@ std::string cmGlob::ConvertExpression(const std::string& expr)
             }
           }
         i = j+1;
-        if ( stuff[0] == '!' )
+        if ( stuff[0] == '!' || stuff[0] == '^' )
           {
           stuff = '^' + stuff.substr(1);
           }
