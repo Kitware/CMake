@@ -36,7 +36,7 @@ public:
    * When true is returned, PrintRequestedDocumentation should be
    * called.
    */
-  bool CheckOptions(int argc, char** argv);
+  bool CheckOptions(int argc, const char* const* argv);
   
   /**
    * Print help requested on the command line.  Call after

@@ -222,7 +222,7 @@ bool cmDocumentation::PrintRequestedDocumentation(std::ostream& os)
 }
 
 //----------------------------------------------------------------------------
-bool cmDocumentation::CheckOptions(int argc, char** argv)
+bool cmDocumentation::CheckOptions(int argc, const char* const* argv)
 {
   // Providing zero arguments gives usage information.
   if(argc == 1)
