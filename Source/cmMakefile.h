@@ -58,12 +58,12 @@ public:
   /**
    * Construct an empty makefile.
    */
-  cmMakefile();
+  CM_EXPORT cmMakefile();
 
   /**
    * Destructor.
    */
-  ~cmMakefile();
+  CM_EXPORT ~cmMakefile();
 
   /**
    * Read and parse a CMakeLists.txt file.
@@ -415,7 +415,7 @@ public:
    * If the variable is not found in this makefile instance, the
    * cache is then queried.
    */
-  const char* GetDefinition(const char*) const;
+  CM_EXPORT const char* GetDefinition(const char*) const;
   
   /** Test a boolean cache entry to see if it is true or false, 
    *  returns false if no entry defined.
@@ -454,7 +454,7 @@ public:
    * Dump documentation to a file. If 0 is returned, the
    * operation failed.
    */
-  int DumpDocumentationToFile(std::ostream&);
+  CM_EXPORT int DumpDocumentationToFile(std::ostream&);
 
   /**
    * Expand all defined varibles in the string.  

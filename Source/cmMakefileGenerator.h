@@ -36,9 +36,9 @@ public:
   ///! Register a generator
   static void RegisterGenerator(cmMakefileGenerator*);
   ///! delete all registered generators, useful for clean up
-  static void UnRegisterGenerators();
+  CM_EXPORT static void UnRegisterGenerators();
   ///! Get the names of the current registered generators
-  static void GetRegisteredGenerators(std::vector<std::string>& names);
+  CM_EXPORT static void GetRegisteredGenerators(std::vector<std::string>& names);
   
   ///! Get the name for the generator.
   virtual const char* GetName() = 0;
@@ -80,9 +80,10 @@ public:
   static bool GetLanguageEnabled(const char*);
   static void ClearEnabledLanguages();
 protected:
+  cmMakefile* m_Makefile;
+private:
   static std::map<cmStdString, cmMakefileGenerator*> s_RegisteredGenerators;
   static std::map<cmStdString, bool> s_LanguageEnabled;
-  cmMakefile* m_Makefile;
 };
 
 #endif
