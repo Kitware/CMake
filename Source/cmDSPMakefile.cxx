@@ -442,7 +442,7 @@ void cmDSPMakefile::WriteDSPHeader(std::ostream& fout, const char *libName,
       if (j->second == cmTarget::GENERAL)
         {
         libOptions += " ";
-        libOptions += j->first;
+        libOptions +=  cmSystemTools::EscapeSpaces(j->first.c_str());
         if(j->first.find(".lib") == std::string::npos)
           {
           libOptions += ".lib ";
@@ -451,7 +451,7 @@ void cmDSPMakefile::WriteDSPHeader(std::ostream& fout, const char *libName,
       if (j->second == cmTarget::DEBUG)
         {
         libDebugOptions += " ";
-        libDebugOptions += j->first;
+        libDebugOptions += cmSystemTools::EscapeSpaces(j->first.c_str());
         if(j->first.find(".lib") == std::string::npos)
           {
           libDebugOptions += ".lib ";
@@ -460,7 +460,7 @@ void cmDSPMakefile::WriteDSPHeader(std::ostream& fout, const char *libName,
       if (j->second == cmTarget::OPTIMIZED)
         {
         libOptimizedOptions += " ";
-        libOptimizedOptions += j->first;
+        libOptimizedOptions +=  cmSystemTools::EscapeSpaces(j->first.c_str());
         if(j->first.find(".lib") == std::string::npos)
           {
           libOptimizedOptions += ".lib ";
