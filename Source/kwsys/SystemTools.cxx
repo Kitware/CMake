@@ -25,6 +25,7 @@
 
 #include <ctype.h>
 #include <errno.h>
+#include <malloc.h> /* for malloc/free on some systems */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
