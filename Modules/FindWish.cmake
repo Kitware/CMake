@@ -15,3 +15,8 @@ FIND_PROGRAM(TK_WISH
   NAMES wish wish84 wish8.4 wish83 wish8.3 wish82 wish80
 )
 
+IF (WIN32)
+  MARK_AS_ADVANCED(
+    TK_WISH
+    )
+ENDIF(WIN32)

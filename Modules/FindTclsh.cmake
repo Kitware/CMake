@@ -22,3 +22,9 @@ FIND_PROGRAM(TCL_TCLSH
   tclsh82 tclsh8.2
   tclsh80 tclsh8.0
 )
+
+IF (WIN32)
+  MARK_AS_ADVANCED(
+    TCL_TCLSH
+    )
+ENDIF(WIN32)
