@@ -77,10 +77,13 @@ bool cmITKWrapTclCommand::CreateCableRule(const char* configFile)
   std::string tmp = tclFile+".cxx";
   commandArgs.push_back(tmp);
 #if !defined(_WIN32) || defined(__CYGWIN__)
-  commandArgs.push_back("--gccxml-compiler");
-  tmp = "${CXX}";
+  tmp = "${CMAKE_CXX_COMPILER}";
   m_Makefile->ExpandVariablesInString(tmp);
-  commandArgs.push_back(tmp);
+  if(tmp.length() > 0)
+    {
+    commandArgs.push_back("--gccxml-compiler");
+    commandArgs.push_back(tmp);
+    }
 #endif
   tmp = "-I";
   tmp += m_Makefile->GetStartDirectory();
