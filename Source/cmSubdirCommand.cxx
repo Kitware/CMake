@@ -26,12 +26,25 @@ bool cmSubdirCommand::InitialPass(std::vector<std::string> const& argsIn)
     }
   std::vector<std::string> args;
   cmSystemTools::ExpandListArguments(argsIn, args);
+  bool res = true;
 
   for(std::vector<std::string>::const_iterator i = args.begin();
       i != args.end(); ++i)
     {
-    m_Makefile->AddSubDirectory(i->c_str());
+    std::string directory = std::string(m_Makefile->GetCurrentDirectory()) + 
+      "/" + i->c_str();
+    if ( cmSystemTools::FileIsDirectory(directory.c_str()) )
+      {
+      m_Makefile->AddSubDirectory(i->c_str());
+      }
+    else
+      {
+      std::string error = "Incorrect SUBDIRS command. Directory: ";
+      error += directory + " does not exists.";
+      this->SetError(error.c_str());   
+      res = false;
+      }
     }
-  return true;
+  return res;
 }
 
