@@ -181,7 +181,7 @@ CMakeSetupDialog::CMakeSetupDialog(const CMakeCommandLineInfo& cmdInfo,
     this->m_WhereSource = _T("");
     this->m_WhereBuild = _T("");
     this->m_AdvancedValues = FALSE;
-    this->m_GeneratorChoiceString = _T("");
+    this->m_GeneratorChoiceString = cmdInfo.m_GeneratorChoiceString;
     this->ChangeDirectoriesFromFile((LPCTSTR)cmdInfo.m_LastUnknownParameter);
     }
 
@@ -1422,6 +1422,8 @@ void CMakeSetupDialog::ChangeDirectoriesFromFile(const char* arg)
       
       path = ConvertToWindowsPath(it.GetValue());
       m_WhereSource = path.c_str();
+      
+      m_GeneratorChoiceString = _T("");
       return;
       }
     }
