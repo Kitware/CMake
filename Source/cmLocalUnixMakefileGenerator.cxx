@@ -678,7 +678,7 @@ static RuleVariables ruleReplaceVars[] =
 
   {"<CMAKE_AR>", "CMAKE_AR"},
   {"<CMAKE_RANLIB>", "CMAKE_RANLIB"},
-  {0}
+  {0, 0}
 };
 
 
