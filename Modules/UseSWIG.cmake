@@ -122,10 +122,9 @@ MACRO(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
   ENDFOREACH(it)
 
   SET(swig_special_flags)
+  # default is c, so add c++ flag if it is c++
   IF(swig_source_file_cplusplus)
     SET(swig_special_flags ${swig_special_flags} "-c++")
-  ELSE(swig_source_file_cplusplus)
-    SET(swig_special_flags ${swig_special_flags} "-c")
   ENDIF(swig_source_file_cplusplus)
   SET(swig_extra_flags)
   IF(SWIG_MODULE_${name}_EXTRA_FLAGS)
