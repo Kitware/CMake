@@ -74,21 +74,16 @@ void cmDSPMakefile::OutputDSPFile()
       {
       if(i->find("Release") == std::string::npos)
 	{
-	m_DebugLibraryOptions += "/Debug\" ";
+	m_DebugLibraryOptions += "/$(OUTDIR)\" ";
 	}
       }
     }
   m_DebugLibraryOptions += "/STACK:10000000 ";
   // add any extra define flags 
   m_ReleaseLibraryOptions = m_DebugLibraryOptions;
-  cmSystemTools::ReplaceString(m_ReleaseLibraryOptions, "Debug", "Release");
   m_DebugDLLLibraryOptions = m_DebugLibraryOptions;
-  cmSystemTools::ReplaceString(m_DebugDLLLibraryOptions, "Debug", "DebugDLL");
   m_ReleaseDLLLibraryOptions = m_DebugDLLLibraryOptions;
-  cmSystemTools::ReplaceString(m_ReleaseDLLLibraryOptions, "Debug", "Release");
   m_ReleaseMinSizeLibraryOptions = m_ReleaseLibraryOptions;
-  cmSystemTools::ReplaceString(m_ReleaseMinSizeLibraryOptions, 
-                               "Release", "ReleaseMinSize");
   
   // Create the DSP or set of DSP's for libraries and executables
   if(strlen(m_Makefile->GetLibraryName()) != 0)
