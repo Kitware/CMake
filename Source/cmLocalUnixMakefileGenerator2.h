@@ -107,7 +107,7 @@ protected:
   void AddConfigVariableFlags(std::string& flags, const char* var);
   void AppendFlags(std::string& flags, const char* newFlags);
   void AppendLibDepend(std::vector<std::string>& depends, const char* name);
-  void AppendRecursiveMake(std::string& cmd, const char* file, const char* tgt);
+  std::string GetRecursiveMakeCall(const char* tgt);
   void WriteJumpAndBuildRules(std::ostream& makefileStream);
 
   static bool ScanDependenciesC(const char* objFile, const char* srcFile,

@@ -667,28 +667,48 @@ cmLocalUnixMakefileGenerator2
   runRule += " --check-rerun ";
   runRule += this->ConvertToRelativeOutputPath(cmakefileName.c_str());
 
-  // Construct recursive calls for the directory-level rules.
-  std::string depRule;
-  std::string allRule;
-  this->AppendRecursiveMake(depRule, "Makefile2", "all.depends");
-  this->AppendRecursiveMake(allRule, "Makefile2", "all.build");
-
   // Write the main entry point target.  This must be the VERY first
   // target so that make with no arguments will run it.
+  {
+  std::vector<std::string> depends;
+  std::vector<std::string> commands;
+  // Check the build system in this directory.
+  depends.push_back("cmake_check_rerun");
+
+  // Recursively build dependencies.
+  commands.push_back(this->GetRecursiveMakeCall("all.depends"));
+
+  // Recursively build targets.
+  commands.push_back(this->GetRecursiveMakeCall("all.build"));
+
+  // Write the rule.
+  std::string preEcho = "Entering directory ";
+  preEcho += m_Makefile->GetStartOutputDirectory();
+  std::string postEcho = "Finished directory ";
+  postEcho += m_Makefile->GetStartOutputDirectory();
+  this->WriteMakeRule(makefileStream,
+                      "Default target executed when no arguments are "
+                      "given to make.",
+                      preEcho.c_str(),
+                      "all",
+                      depends,
+                      commands,
+                      postEcho.c_str());
+  }
+
+  // Write special "cmake_check_rerun" target to run cmake with the
+  // --check-rerun flag.
   {
   std::vector<std::string> no_depends;
   std::vector<std::string> commands;
   commands.push_back(runRule);
-  commands.push_back(depRule);
-  commands.push_back(allRule);
   this->WriteMakeRule(makefileStream,
-                      "Default target executed when no arguments are "
-                      "given to make.",
-                      "Checking build system...",
-                      "all",
+                      "Special rule to run CMake to check the build system "
+                      "integrity.",
+                      "Checking build system integrity...",
+                      "cmake_check_rerun",
                       no_depends,
-                      commands,
-                      "Targets are up-to-date.");
+                      commands);
   }
 
   // Write special "rebuild_cache" target to re-run cmake.
@@ -1533,14 +1553,12 @@ cmLocalUnixMakefileGenerator2
 }
 
 //----------------------------------------------------------------------------
-void
+std::string
 cmLocalUnixMakefileGenerator2
-::AppendRecursiveMake(std::string& cmd, const char* file, const char* tgt)
+::GetRecursiveMakeCall(const char* tgt)
 {
   // Call make on the given file.
-  cmd += "$(MAKE) -f ";
-  cmd += file;
-  cmd += " ";
+  std::string cmd = "$(MAKE) -f Makefile2 ";
 
   // Pass down verbosity level.
   if(m_MakeSilentFlag.size())
@@ -1560,6 +1578,8 @@ cmLocalUnixMakefileGenerator2
 
   // Add the target.
   cmd += tgt;
+
+  return cmd;
 }
 
 //----------------------------------------------------------------------------
@@ -1567,28 +1587,82 @@ void
 cmLocalUnixMakefileGenerator2
 ::WriteJumpAndBuildRules(std::ostream& makefileStream)
 {
+  // Write the header for this section.
+  if(!m_JumpAndBuild.empty())
+    {
+    this->WriteDivider(makefileStream);
+    makefileStream
+      << "# Targets to make sure needed libraries exist.\n"
+      << "# These will jump to other directories to build targets.\n"
+      << "\n";
+    }
+
   std::vector<std::string> depends;
   std::vector<std::string> commands;
-  commands.push_back("");
   for(std::map<cmStdString, RemoteTarget>::iterator
         jump = m_JumpAndBuild.begin(); jump != m_JumpAndBuild.end(); ++jump)
     {
     const cmLocalUnixMakefileGenerator2::RemoteTarget& rt = jump->second;
-    std::string& cmd = commands[0];
+    const char* dest = rt.m_BuildDirectory.c_str();
+    commands.clear();
+
     if(m_WindowsShell)
       {
-      // TODO: implement windows version.
-      cmd = "";
+      // On Windows we must perform each step separately and then jump
+      // back because the shell keeps the working directory between
+      // commands.
+      std::string cmd = "cd ";
+      cmd += this->ConvertToOutputForExisting(dest);
+      commands.push_back(cmd);
+
+      // Check the build system in destination directory.
+      commands.push_back(this->GetRecursiveMakeCall("cmake_check_rerun"));
+
+      // Build the targets's dependencies.
+      std::string dep = jump->first;
+      dep += ".depends";
+      commands.push_back(this->GetRecursiveMakeCall(dep.c_str()));
+
+      // Build the target.
+      std::string tgt = jump->first;
+      tgt += ".requires";
+      commands.push_back(this->GetRecursiveMakeCall(tgt.c_str()));
+
+      // Jump back to the starting directory.
+      cmd = "cd ";
+      cmd += this->ConvertToOutputForExisting(m_Makefile->GetStartOutputDirectory());
+      commands.push_back(cmd);
       }
     else
       {
-      cmd = "cd ";
-      cmd += this->ConvertToOutputForExisting(rt.m_BuildDirectory.c_str());
-      cmd += "; ";
+      // On UNIX we must construct a single shell command to jump and
+      // build because make resets the directory between each command.
+      std::string cmd = "cd ";
+      cmd += this->ConvertToOutputForExisting(dest);
+
+      // Check the build system in destination directory.
+      cmd += " && ";
+      cmd += this->GetRecursiveMakeCall("cmake_check_rerun");
+
+      // Build the targets's dependencies.
+      std::string dep = jump->first;
+      dep += ".dir/";
+      dep += jump->first;
+      dep += ".depends";
+      cmd += " && ";
+      cmd += this->GetRecursiveMakeCall(dep.c_str());
+
+      // Build the target.
       std::string tgt = jump->first;
       tgt += ".requires";
-      this->AppendRecursiveMake(cmd, "Makefile2", tgt.c_str());
+      cmd += " && ";
+      cmd += this->GetRecursiveMakeCall(tgt.c_str());
+
+      // Add the command as a single line.
+      commands.push_back(cmd);
       }
+
+    // Write the rule.
     std::string jumpPreEcho = "Jumping to ";
     jumpPreEcho += rt.m_BuildDirectory.c_str();
     jumpPreEcho += " to build ";
