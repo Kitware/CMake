@@ -403,7 +403,7 @@ std::string cmSystemTools::Capitalized(const std::string& s)
 
 
 // convert windows slashes to unix slashes \ with /
-void cmSystemTools::ConvertToUnixSlashes(std::string& path)
+const char *cmSystemTools::ConvertToUnixSlashes(std::string& path)
 {
   std::string::size_type pos = 0;
   while((pos = path.find('\\', pos)) != std::string::npos)
@@ -416,10 +416,11 @@ void cmSystemTools::ConvertToUnixSlashes(std::string& path)
     {
     path = path.substr(0, path.size()-1);
     }
+  return path.c_str();
 }
 
-// convert windows slashes to unix slashes \ with /
-void cmSystemTools::CleanUpWindowsSlashes(std::string& path)
+// convert windows slashes to unix slashes 
+const char *cmSystemTools::ConvertToWindowsSlashes(std::string& path)
 {
   std::string::size_type pos = 0;
   while((pos = path.find('/', pos)) != std::string::npos)
@@ -432,14 +433,21 @@ void cmSystemTools::CleanUpWindowsSlashes(std::string& path)
     {
     path = path.substr(0, path.size()-1);
     }
-  // remove any duplicate // slashes
+  return path.c_str();
+}
+
+// convert Unix slashes / to Windows slashes \ and cleanup double \\
+const char *cmSystemTools::ConvertToWindowsSlashesAndCleanUp(std::string& path)
+{
+  cmSystemTools::ConvertToWindowsSlashes(path);
+  std::string::size_type pos = 0;
   pos = 0;
   while((pos = path.find("\\\\", pos)) != std::string::npos)
     {
     path.erase(pos, 1);
     }
+  return path.c_str();
 }
-
 
 bool cmSystemTools::ParseFunction(std::ifstream& fin,
                                   std::string& name,
