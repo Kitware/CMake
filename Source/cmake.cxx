@@ -670,7 +670,6 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
       {
       std::string directory = args[2];
       std::string command = args[3];
-      std::string output;
       for (std::string::size_type cc = 4; cc < args.size(); cc ++)
         {
         command += " ";
