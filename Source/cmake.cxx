@@ -356,12 +356,12 @@ int cmake::Generate(const std::vector<std::string>& args, bool buildMakefiles)
   // Read and parse the input makefile
   mf.MakeStartDirectoriesCurrent();
   cmCacheManager::GetInstance()->LoadCache(&mf);
-  if(mf.GetDefinition("CMAKE_START_DIRECTORY"))
+  if(mf.GetDefinition("CMAKE_HOME_DIRECTORY"))
     {
     std::string cacheStart = 
-      cmSystemTools::CollapseFullPath(mf.GetDefinition("CMAKE_START_DIRECTORY"));
+      cmSystemTools::CollapseFullPath(mf.GetDefinition("CMAKE_HOME_DIRECTORY"));
     std::string currentStart = 
-      cmSystemTools::CollapseFullPath(mf.GetStartDirectory());
+      cmSystemTools::CollapseFullPath(mf.GetHomeDirectory());
 #ifdef _WIN32
     cacheStart = cmSystemTools::LowerCase(cacheStart);
     currentStart = cmSystemTools::LowerCase(currentStart);
@@ -377,7 +377,7 @@ int cmake::Generate(const std::vector<std::string>& args, bool buildMakefiles)
       return -1;
       }
     }
-  mf.AddCacheDefinition("CMAKE_START_DIRECTORY", mf.GetStartDirectory(),
+  mf.AddCacheDefinition("CMAKE_HOME_DIRECTORY", mf.GetHomeDirectory(),
                         "Start directory with the top level CMakeLists.txt file for this project",
                         cmCacheManager::INTERNAL);
   
