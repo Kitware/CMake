@@ -23,7 +23,7 @@ Run flex like this:
 
   flex --prefix=cmDependsJava_yy --header-file=cmDependsJavaLexer.h -ocmDependsJavaLexer.cxx cmDependsJavaLexer.in.l
 
-Modify cmDependsJavaLexer.c:
+Modify cmDependsJavaLexer.cxx:
   - remove TABs
   - remove "yyscanner" argument from these methods:
       yy_fatal_error, yyalloc, yyrealloc, yyfree
@@ -33,6 +33,7 @@ Modify cmDependsJavaLexer.h:
   - remove TABs
   - remove the yy_init_globals function
   - remove the block that includes unistd.h
+  - remove #line directives (avoids bogus warning on old Sun)
 
 */
 
