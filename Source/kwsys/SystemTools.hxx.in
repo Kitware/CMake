@@ -21,6 +21,11 @@
 #include <@KWSYS_NAMESPACE@/std/string>
 #include <@KWSYS_NAMESPACE@/std/vector>
 
+/* Define this macro temporarily to keep the code readable.  */
+#if !defined (KWSYS_NAMESPACE) && !defined(@KWSYS_NAMESPACE@_NAME_IS_KWSYS)
+# define kwsys_std @KWSYS_NAMESPACE@_std
+#endif
+
 namespace @KWSYS_NAMESPACE@
 {
 
@@ -286,5 +291,10 @@ protected:
 };
 
 } // namespace @KWSYS_NAMESPACE@
+
+/* Undefine temporary macro.  */
+#if !defined (KWSYS_NAMESPACE) && !defined(@KWSYS_NAMESPACE@_NAME_IS_KWSYS)
+# undef kwsys_std
+#endif
 
 #endif

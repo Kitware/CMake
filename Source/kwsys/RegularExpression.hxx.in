@@ -39,6 +39,11 @@
 
 #include <@KWSYS_NAMESPACE@/std/string>
 
+/* Define this macro temporarily to keep the code readable.  */
+#if !defined (KWSYS_NAMESPACE) && !defined(@KWSYS_NAMESPACE@_NAME_IS_KWSYS)
+# define kwsys_std @KWSYS_NAMESPACE@_std
+#endif
+
 namespace @KWSYS_NAMESPACE@
 {
 
@@ -381,5 +386,10 @@ inline kwsys_std::string RegularExpression::match(int n) const
 }
 
 } // namespace @KWSYS_NAMESPACE@
+
+/* Undefine temporary macro.  */
+#if !defined (KWSYS_NAMESPACE) && !defined(@KWSYS_NAMESPACE@_NAME_IS_KWSYS)
+# undef kwsys_std
+#endif
 
 #endif

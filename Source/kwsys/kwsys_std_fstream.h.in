@@ -24,11 +24,11 @@
 #pragma warning (disable: 4702)
 #endif
 
-#if !defined(KWSYS_NO_ANSI_STREAM_HEADERS)
+#if !defined(@KWSYS_NAMESPACE@_NO_ANSI_STREAM_HEADERS)
 # include <fstream>
 #else
 # include <fstream.h>
-# if !defined(KWSYS_NO_STD_NAMESPACE) && !defined(KWSYS_FAKE_STD_NAMESPACE)
+# if !defined(@KWSYS_NAMESPACE@_NO_STD_NAMESPACE) && !defined(@KWSYS_NAMESPACE@_FAKE_STD_NAMESPACE)
 namespace std
 {
   using ::ostream;

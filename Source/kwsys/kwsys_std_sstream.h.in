@@ -19,7 +19,12 @@
 
 #include <@KWSYS_NAMESPACE@/Configure.hxx>
 
-#if !defined(KWSYS_NO_ANSI_STRING_STREAM)
+/* Define this macro temporarily to keep the code readable.  */
+#if !defined (KWSYS_NAMESPACE) && !defined(@KWSYS_NAMESPACE@_NAME_IS_KWSYS)
+# define kwsys_std @KWSYS_NAMESPACE@_std
+#endif
+
+#if !defined(@KWSYS_NAMESPACE@_NO_ANSI_STRING_STREAM)
 # ifdef _MSC_VER
 #  pragma warning (push, 1)
 #  pragma warning (disable: 4702)
@@ -33,11 +38,11 @@
 #  pragma warning (push, 1)
 #  pragma warning (disable: 4702)
 # endif
-# if !defined(KWSYS_NO_ANSI_STREAM_HEADERS)
+# if !defined(@KWSYS_NAMESPACE@_NO_ANSI_STREAM_HEADERS)
 #  include <strstream>
 # else
 #  include <strstream.h>
-#  if !defined(KWSYS_NO_STD_NAMESPACE) && !defined(KWSYS_FAKE_STD_NAMESPACE)
+#  if !defined(@KWSYS_NAMESPACE@_NO_STD_NAMESPACE) && !defined(@KWSYS_NAMESPACE@_FAKE_STD_NAMESPACE)
 namespace std
 {
   using ::ostream;
@@ -60,7 +65,7 @@ namespace std
 
 # include <@KWSYS_NAMESPACE@/std/string>
 
-# if !defined(KWSYS_NO_STD_NAMESPACE)
+# if !defined(@KWSYS_NAMESPACE@_NO_STD_NAMESPACE)
 namespace std
 {
 # endif
@@ -114,10 +119,15 @@ private:
   void operator=(const istringstream&);
 };
 
-# if !defined(KWSYS_NO_STD_NAMESPACE)
+# if !defined(@KWSYS_NAMESPACE@_NO_STD_NAMESPACE)
 }
 # endif
 
+#endif
+
+/* Undefine temporary macro.  */
+#if !defined (KWSYS_NAMESPACE) && !defined(@KWSYS_NAMESPACE@_NAME_IS_KWSYS)
+# undef kwsys_std
 #endif
 
 #endif

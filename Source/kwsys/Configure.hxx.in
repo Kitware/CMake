@@ -17,20 +17,53 @@
 #ifndef @KWSYS_NAMESPACE@_Configure_hxx
 #define @KWSYS_NAMESPACE@_Configure_hxx
 
-/* This configuration should match for all instances of kwsys.  */
-#cmakedefine KWSYS_NO_STD_NAMESPACE
-#cmakedefine KWSYS_NO_ANSI_STREAM_HEADERS
-#cmakedefine KWSYS_NO_ANSI_STRING_STREAM
-#cmakedefine KWSYS_NO_ANSI_FOR_SCOPE
-
-#if defined(__GNUC__) && (__GNUC__ < 3)
-# define KWSYS_FAKE_STD_NAMESPACE
+/* Defined if kwsys namespace is "kwsys".  */
+#if @KWSYS_NAME_IS_KWSYS@
+# define @KWSYS_NAMESPACE@_NAME_IS_KWSYS
 #endif
 
-#if defined(KWSYS_NO_STD_NAMESPACE)
-# define kwsys_std
+/* Defined if no ANSI C++ stream headers are present.  */
+#if @KWSYS_NO_ANSI_STREAM_HEADERS@
+# define @KWSYS_NAMESPACE@_NO_ANSI_STREAM_HEADERS
+#endif
+
+/* Defined if no ANSI C++ <sstream> header is present.  */
+#if @KWSYS_NO_ANSI_STRING_STREAM@
+# define @KWSYS_NAMESPACE@_NO_ANSI_STRING_STREAM
+#endif
+
+/* Defined if no std namespace is present.  */
+#if @KWSYS_NO_STD_NAMESPACE@
+# define @KWSYS_NAMESPACE@_NO_STD_NAMESPACE
+#endif
+
+/* Defined if std namespace is the GCC hack.  */
+#if defined(__GNUC__) && (__GNUC__ < 3)
+# define @KWSYS_NAMESPACE@_FAKE_STD_NAMESPACE
+#endif
+
+/* Define the std namespace macro.  */
+#if defined(@KWSYS_NAMESPACE@_NO_STD_NAMESPACE)
+# define @KWSYS_NAMESPACE@_std
 #else
-# define kwsys_std std
+# define @KWSYS_NAMESPACE@_std std
+#endif
+
+/* If building a C++ file in kwsys itself, give the source file
+   access to the macros without a configured namespace.  */
+#if defined(KWSYS_NAMESPACE)
+# if !defined(@KWSYS_NAMESPACE@_NAME_IS_KWSYS)
+#  define kwsys_std @KWSYS_NAMESPACE@_std
+# endif
+# if defined(@KWSYS_NAMESPACE@_NO_STD_NAMESPACE)
+#  define KWSYS_NO_STD_NAMESPACE
+# endif
+# if defined(@KWSYS_NAMESPACE@_NO_ANSI_STREAM_HEADERS)
+#  define KWSYS_NO_ANSI_STREAM_HEADERS
+# endif
+# if defined(@KWSYS_NAMESPACE@_NO_ANSI_STRING_STREAM)
+#  define KWSYS_NO_ANSI_STRING_STREAM
+# endif
 #endif
 
 #endif
