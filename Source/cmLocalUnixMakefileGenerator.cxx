@@ -352,6 +352,12 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
           prefixVar = "CMAKE_SHARED_MODULE_PREFIX";
           suffixVar = "CMAKE_SHARED_MODULE_SUFFIX";
           break;
+        case cmTarget::EXECUTABLE:
+        case cmTarget::WIN32_EXECUTABLE:
+        case cmTarget::UTILITY:
+        case cmTarget::INSTALL_FILES:
+        case cmTarget::INSTALL_PROGRAMS:
+          break;
         }
       // if it is a library this will be set
       if(prefixVar)
