@@ -163,6 +163,7 @@ public:
    * Add a define flag to the build.
    */
   void AddDefineFlag(const char* definition);
+  void RemoveDefineFlag(const char* definition);
 
   /**
    * Add an executable to the build.

@@ -766,6 +766,11 @@ void cmMakefile::AddDefineFlag(const char* flag)
 }
 
 
+void cmMakefile::RemoveDefineFlag(const char* flag)
+{
+  cmSystemTools::ReplaceString(m_DefineFlags, flag, " ");
+}
+
 void cmMakefile::AddLinkLibrary(const char* lib, cmTarget::LinkLibraryType llt)
 {
   m_LinkLibraries.push_back(

@@ -58,6 +58,7 @@
 #include "cmMessageCommand.cxx"
 #include "cmOptionCommand.cxx"
 #include "cmProjectCommand.cxx"
+#include "cmRemoveDefinitionsCommand.cxx"
 #include "cmSeparateArgumentsCommand.cxx"
 #include "cmSetCommand.cxx"
 #include "cmSetSourceFilesPropertiesCommand.cxx"
@@ -150,6 +151,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmMessageCommand);
   commands.push_back(new cmOptionCommand);
   commands.push_back(new cmProjectCommand);
+  commands.push_back(new cmRemoveDefinitionsCommand);
   commands.push_back(new cmSeparateArgumentsCommand);
   commands.push_back(new cmSetCommand);
   commands.push_back(new cmSetSourceFilesPropertiesCommand);
