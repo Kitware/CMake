@@ -629,9 +629,9 @@ void cmSystemTools::GetArguments(std::string& line,
                                  std::vector<std::string>& arguments)
 {
   // Match a normal argument (not quoted, no spaces).
-  cmRegularExpression normalArgument("[ \t]*(([^ \t\\]|[\\].)+)[ \t]*");
+  cmRegularExpression normalArgument("[ \t]*(([^ \t\r\\]|[\\].)+)[ \t\r]*");
   // Match a quoted argument (surrounded by double quotes, spaces allowed).
-  cmRegularExpression quotedArgument("[ \t]*(\"([^\"\\]|[\\].)*\")[ \t]*");
+  cmRegularExpression quotedArgument("[ \t]*(\"([^\"\\]|[\\].)*\")[ \t\r]*");
 
   bool done = false;
   while(!done)
