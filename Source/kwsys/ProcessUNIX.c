@@ -99,6 +99,8 @@ static kwsysProcessTime kwsysProcessTimeSubtract(kwsysProcessTime in1, kwsysProc
 static void kwsysProcessSetExitException(kwsysProcess* cp, int sig);
 static void kwsysProcessChildErrorExit(int errorPipe);
 static void kwsysProcessRestoreDefaultSignalHandlers(void);
+static pid_t kwsysProcessFork(kwsysProcess* cp,
+                              kwsysProcessCreateInformation* si);
 static void kwsysProcessKill(pid_t process_id);
 
 /*--------------------------------------------------------------------------*/
@@ -126,6 +128,12 @@ struct kwsysProcess_s
 
   /* The working directory for the process. */
   char* WorkingDirectory;
+
+  /* Whether to create the child as a detached process.  */
+  int OptionDetach;
+
+  /* Whether the child was created as a detached process.  */
+  int Detached;
 
   /* Time at which the child started.  Negative for no timeout.  */
   kwsysProcessTime StartTime;
@@ -217,7 +225,14 @@ void kwsysProcess_Delete(kwsysProcess* cp)
   /* If the process is executing, wait for it to finish.  */
   if(cp->State == kwsysProcess_State_Executing)
     {
-    kwsysProcess_WaitForExit(cp, 0);
+    if(cp->Detached)
+      {
+      kwsysProcess_Disown(cp);
+      }
+    else
+      {
+      kwsysProcess_WaitForExit(cp, 0);
+      }
     }
 
   /* Free memory.  */
@@ -445,17 +460,31 @@ void kwsysProcess_SetPipeShared(kwsysProcess* cp, int pipe, int shared)
 /*--------------------------------------------------------------------------*/
 int kwsysProcess_GetOption(kwsysProcess* cp, int optionId)
 {
-  (void)cp;
-  (void)optionId;
-  return 0;
+  if(!cp)
+    {
+    return 0;
+    }
+
+  switch(optionId)
+    {
+    case kwsysProcess_Option_Detach: return cp->OptionDetach;
+    default: return 0;
+    }
 }
 
 /*--------------------------------------------------------------------------*/
 void kwsysProcess_SetOption(kwsysProcess* cp, int optionId, int value)
 {
-  (void)cp;
-  (void)optionId;
-  (void)value;
+  if(!cp)
+    {
+    return;
+    }
+
+  switch(optionId)
+    {
+    case kwsysProcess_Option_Detach: cp->OptionDetach = value; break;
+    default: break;
+    }
 }
 
 /*--------------------------------------------------------------------------*/
@@ -673,6 +702,45 @@ void kwsysProcess_Execute(kwsysProcess* cp)
 
   /* The process has now started.  */
   cp->State = kwsysProcess_State_Executing;
+  cp->Detached = cp->OptionDetach;
+}
+
+/*--------------------------------------------------------------------------*/
+kwsysEXPORT void kwsysProcess_Disown(kwsysProcess* cp)
+{
+  int i;
+
+  /* Make sure a detached child process is running.  */
+  if(!cp || !cp->Detached || cp->State != kwsysProcess_State_Executing)
+    {
+    return;
+    }
+
+  /* Close any pipes that are still open.  */
+  for(i=0; i < KWSYSPE_PIPE_COUNT; ++i)
+    {
+    if(cp->PipeReadEnds[i] >= 0)
+      {
+      /* If the pipe was reported by the last call to select, we must
+         read from it.  Ignore the data.  */
+      if(FD_ISSET(cp->PipeReadEnds[i], &cp->PipeSet))
+        {
+        /* We are handling this pipe now.  Remove it from the set.  */
+        FD_CLR(cp->PipeReadEnds[i], &cp->PipeSet);
+
+        /* The pipe is ready to read without blocking.  Keep trying to
+           read until the operation is not interrupted.  */
+        while((read(cp->PipeReadEnds[i], cp->PipeBuffer,
+                    KWSYSPE_PIPE_BUFFER_SIZE) < 0) && (errno == EINTR));
+        }
+
+      /* We are done reading from this pipe.  */
+      kwsysProcessCleanupDescriptor(&cp->PipeReadEnds[i]);
+      --cp->PipesLeft;
+      }
+    }
+
+  cp->State = kwsysProcess_State_Disowned;
 }
 
 /*--------------------------------------------------------------------------*/
@@ -901,21 +969,22 @@ int kwsysProcess_WaitForExit(kwsysProcess* cp, double* userTimeout)
   /* Wait for each child to terminate.  The process should have
      already exited because KWSYSPE_PIPE_TERM has been closed by this
      point.  Repeat the call until it is not interrupted.  */
-  {
-  int i;
-  for(i=0; i < cp->NumberOfCommands; ++i)
+  if(!cp->Detached)
     {
-    while(((result = waitpid(cp->ForkPIDs[i],
-                             &cp->CommandExitCodes[i], 0)) < 0) &&
-          (errno == EINTR));
-    if(result <= 0 && cp->State != kwsysProcess_State_Error)
+    int i;
+    for(i=0; i < cp->NumberOfCommands; ++i)
       {
-      /* Unexpected error.  Report the first time this happens.  */
-      strncpy(cp->ErrorMessage, strerror(errno), KWSYSPE_PIPE_BUFFER_SIZE);
-      cp->State = kwsysProcess_State_Error;
+      while(((result = waitpid(cp->ForkPIDs[i],
+                               &cp->CommandExitCodes[i], 0)) < 0) &&
+            (errno == EINTR));
+      if(result <= 0 && cp->State != kwsysProcess_State_Error)
+        {
+        /* Unexpected error.  Report the first time this happens.  */
+        strncpy(cp->ErrorMessage, strerror(errno), KWSYSPE_PIPE_BUFFER_SIZE);
+        cp->State = kwsysProcess_State_Error;
+        }
       }
     }
-  }
 
   /* Check if there was an error in one of the waitpid calls.  */
   if(cp->State == kwsysProcess_State_Error)
@@ -1225,7 +1294,7 @@ static int kwsysProcessCreate(kwsysProcess* cp, int index,
     }
 
   /* Fork off a child process.  */
-  cp->ForkPIDs[index] = fork();
+  cp->ForkPIDs[index] = kwsysProcessFork(cp, si);
   if(cp->ForkPIDs[index] < 0)
     {
     return 0;
@@ -1717,6 +1786,61 @@ static void kwsysProcessRestoreDefaultSignalHandlers(void)
 #ifdef SIGUNUSED
   sigaction(SIGUNUSED, &act, 0);
 #endif
+}
+
+/*--------------------------------------------------------------------------*/
+static pid_t kwsysProcessFork(kwsysProcess* cp,
+                              kwsysProcessCreateInformation* si)
+{
+  /* Create a detached process if requested.  */
+  if(cp->OptionDetach)
+    {
+    /* Create an intermediate process.  */
+    pid_t middle_pid = fork();
+    if(middle_pid < 0)
+      {
+      /* Fork failed.  Return as if we were not detaching.  */
+      return middle_pid;
+      }
+    else if(middle_pid == 0)
+      {
+      /* This is the intermediate process.  Create the real child.  */
+      pid_t child_pid = fork();
+      if(child_pid == 0)
+        {
+        /* This is the real child process.  There is nothing to do here.  */
+        return 0;
+        }
+      else
+        {
+        /* Use the error pipe to report the pid to the real parent.  */
+        while((write(si->ErrorPipe[1], &child_pid, sizeof(child_pid)) < 0) &&
+              (errno == EINTR));
+
+        /* Exit without cleanup.  The parent holds all resources.  */
+        _exit(0);
+        }
+      }
+    else
+      {
+      /* This is the original parent process.  The intermediate
+         process will use the error pipe to report the pid of the
+         detached child.  */
+      pid_t child_pid;
+      int status;
+      while((read(si->ErrorPipe[0], &child_pid, sizeof(child_pid)) < 0) &&
+            (errno == EINTR));
+
+      /* Wait for the intermediate process to exit and clean it up.  */
+      while((waitpid(middle_pid, &status, 0) < 0) && (errno == EINTR));
+      return child_pid;
+      }
+    }
+  else
+    {
+    /* Not creating a detached process.  Use normal fork.  */
+    return fork();
+    }
 }
 
 /*--------------------------------------------------------------------------*/

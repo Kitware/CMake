@@ -1137,6 +1137,13 @@ void kwsysProcess_Execute(kwsysProcess* cp)
 }
 
 /*--------------------------------------------------------------------------*/
+void kwsysProcess_Disown(kwsysProcess* cp)
+{
+  /* TODO: Implement windows version.  */
+  (void)cp;
+}
+
+/*--------------------------------------------------------------------------*/
 
 int kwsysProcess_WaitForData(kwsysProcess* cp, char** data, int* length,
                              double* userTimeout)
