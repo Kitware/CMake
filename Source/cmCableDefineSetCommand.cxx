@@ -39,7 +39,10 @@ bool cmCableDefineSetCommand::Invoke(std::vector<std::string>& args)
   // The rest of the arguments are the elements to be placed in the set.
   for(; arg != args.end(); ++arg)
     {
-    m_Elements.push_back(Element(this->GenerateTag(*arg), *arg));
+    // If the element cannot be added, return an error.
+    // This can occur when a tag is not specified and can't be generated.
+    if(!this->AddElement(*arg))
+      { return false; }
     }
   
   // Write this command's configuration output.
@@ -87,14 +90,52 @@ void cmCableDefineSetCommand::WriteConfiguration() const
 
 
 /**
+ * Add an element to the set.  The given string is the argument to the
+ * command describing the element.  There are two formats allowed:
+ *  "code" = The code describing the element to CABLE is simply given.
+ *           The GenerateTag() method will guess at a good tag for the
+ *           code.
+ *  "tag:code" = The left side of a single colon is text describing the tag.
+ *               GenerateTag() will not be called.
+ */
+bool cmCableDefineSetCommand::AddElement(const std::string& arg)
+{
+  // A regular expression to match the tagged element specification.
+  cmRegularExpression tagGiven("^([A-Za-z_0-9]*)[ \t]*:[ \t]*([^:].*|::.*)$");
+  
+  std::string tag;
+  std::string code;
+
+  if(tagGiven.find(arg.c_str()))
+    {
+    // A tag was given.  Use it.
+    tag = tagGiven.match(1);
+    code = tagGiven.match(2);
+    }
+  else
+    {
+    // No tag was given.  Try to generate one.
+    if(!this->GenerateTag(arg, tag))
+      { return false; }
+    code = arg;
+    }
+  
+  // Add an element with the given tag and code.
+  m_Elements.push_back(Element(tag, code));
+  return true;
+}
+
+
+/**
  * Given the string representing a set element, automatically generate
  * the CABLE element tag for it.
  *
  * **This function determines how the output language of all
  * CABLE-generated wrappers will look!**
  */
-std::string
-cmCableDefineSetCommand::GenerateTag(const std::string& element) const
+bool
+cmCableDefineSetCommand::GenerateTag(const std::string& element,
+                                     std::string& tag)
 {
   // Hold the regular expressions for matching against the element.
   cmRegularExpression regex;
@@ -103,47 +144,48 @@ cmCableDefineSetCommand::GenerateTag(const std::string& element) const
   // The set's elements have their own tags, so we don't need one.
   regex.compile("^[ \t]*\\$");
   if(regex.find(element))
-    { return ""; }
+    { tag = ""; return true; }
   
   // Test for simple integer
   regex.compile("^[ \t]*([0-9]*)[ \t]*$");
   if(regex.find(element))
     {
-    std::string tag = "_";
+    tag = "_";
     tag.append(regex.match(1));
-    return tag;
+    return true;
     }
 
   // Test for basic integer type
   regex.compile("^[ \t]*(unsigned[ ]|signed[ ])?[ \t]*(char|short|int|long|long[ ]long)[ \t]*$");
   if(regex.find(element))
     {
-    std::string tag = "_";
+    tag = "_";
     if(regex.match(1) == "unsigned ")
       { tag.append("u"); }
     if(regex.match(2) == "long long")
       { tag.append("llong"); }
     else
       { tag.append(regex.match(2)); }
-    return tag;
+    return true;
     }
 
   // Test for basic floating-point type
   regex.compile("^[ \t]*(long[ ])?[ \t]*(float|double)[ \t]*$");
   if(regex.find(element))
     {
-    std::string tag = "_";
+    tag = "_";
     if(regex.match(1) == "long ")
       tag.append("l");
     tag.append(regex.match(2));
-    return tag;
+    return true;
     }
 
   // Test for basic wide-character type
   regex.compile("^[ \t]*(wchar_t)[ \t]*$");
   if(regex.find(element))
     {
-    return "_wchar";
+    tag = "_wchar";
+    return true;
     }
 
   // Test for plain type name (without template arguments).
@@ -151,7 +193,8 @@ cmCableDefineSetCommand::GenerateTag(const std::string& element) const
   if(regex.find(element))
     {
     // The tag is the same as the type.
-    return regex.match(1);
+    tag = regex.match(1);
+    return true;
     }
   
   // Test for template class instance.
@@ -160,8 +203,17 @@ cmCableDefineSetCommand::GenerateTag(const std::string& element) const
     {
     // The tag is the type without arguments (the arguments may have
     // their own tags).
-    return regex.match(1);
+    tag = regex.match(1);
+    return true;
     }
   
-  return "NO_AUTO_TAG";
+  // We can't generate a tag.
+  std::string err =
+    ("doesn't know how to generate tag for element \""+element+"\" in set \""
+     +m_SetName+"\"\nPlease specify one with the \"tag:element\" syntax.");
+  this->SetError(err.c_str());
+
+  tag = "";
+  
+  return false;
 }

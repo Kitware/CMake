@@ -69,17 +69,19 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "CABLE_DEFINE_SET(name_of_set member1 member2 ...)\n"
-      "Generates a Set definition in the CABLE configuration.  Tags are\n"
-      "automatically generated.  The sets are referenced in other CABLE\n"
-      "commands by a '$' immediately followed by the set name (ex. $SetName).";
+      "CABLE_DEFINE_SET(name_of_set [[tag1]:]memeber1 [[tag2]:]member2 ...)\n"
+      "Generates a Set definition in the CABLE configuration.  The sets are\n"
+      "referenced in other CABLE commands by a '$' immediately followed by\n"
+      "the set name (ex. $SetName).  If a the \"tag:\" syntax is not used,\n"
+      "an attempt is made to auto-generate a meaningful tag.\n";
     }
 
   cmTypeMacro(cmCableDefineSetCommand, cmCableCommand);
   
 private:
   void WriteConfiguration() const;
-  std::string GenerateTag(const std::string&) const;
+  bool AddElement(const std::string&);
+  bool GenerateTag(const std::string&, std::string&);
 private:  
   typedef std::pair<std::string, std::string>  Element;
   typedef std::vector<Element>  Elements;
