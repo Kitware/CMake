@@ -668,7 +668,8 @@ IF(BUILD_TESTING)
         --build-makeprogram ${MAKEPROGRAM}
         --build-two-config 
         --build-run-dir "${CMake_BINARY_DIR}/Tests/Java/"
-        --test-command ${JAVA_RUNTIME} -classpath hello.jar HelloWorld)
+#        --test-command ${JAVA_RUNTIME} -classpath hello.jar HelloWorld)
+        --test-command ${JAVA_RUNTIME} HelloWorld)
     ENDIF(JAVA_COMPILE)
   ENDIF(CMAKE_GENERATOR MATCHES "Makefiles")
   
