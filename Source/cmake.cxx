@@ -40,7 +40,6 @@
 #endif
 
 #include <stdlib.h> // required for atoi
-#include <fstream>
 
 #ifdef __APPLE__
 #include <sys/types.h>
