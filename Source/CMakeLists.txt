@@ -47,7 +47,7 @@ IF (WIN32)
 ENDIF (WIN32)
 
 IF (UNIX)
-  INCLUDE (${CMAKE_ROOT}/Modules/FindCurses.cmake)
+  INCLUDE (${CMAKE_ROOT}/Modules/FindCurses.cmake OPTIONAL)
   IF (CURSES_LIBRARY)
     SUBDIRS(CursesDialog/form)
     SUBDIRS(CursesDialog)
