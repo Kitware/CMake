@@ -430,7 +430,8 @@ void cmUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
               commandFiles.m_Outputs.begin();
             output != commandFiles.m_Outputs.end(); ++output)
           {
-          fout << output->c_str() << ": " << source.c_str();
+          std::string src = cmSystemTools::EscapeSpaces(source.c_str());
+          fout << output->c_str() << ": " << src.c_str();
           // Write out all the dependencies for this rule.
           for(std::set<std::string>::const_iterator d =
                 commandFiles.m_Depends.begin();
