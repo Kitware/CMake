@@ -81,7 +81,6 @@ int main(int ac, char *av[])
   int i, NumTests, testNum, partial_match;
   char *arg, *test_name;
   int count;
-  int result;
   int testToRun = -1;
 
   @CMAKE_TESTDRIVER_ARGVC_FUNCTION@
