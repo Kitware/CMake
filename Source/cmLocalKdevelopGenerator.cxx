@@ -26,7 +26,6 @@
 #include "cmake.h"
 #include <cmsys/RegularExpression.hxx>
 
-
 cmLocalKdevelopGenerator::cmLocalKdevelopGenerator()
   :cmLocalUnixMakefileGenerator()
 {
@@ -44,69 +43,59 @@ void cmLocalKdevelopGenerator::Generate(bool fromTheTop)
     {
     return;
     }
-
-  bool containsTargets=false;
-  std::string executable;
-  cmTargets& targets=m_Makefile->GetTargets();
-  for (cmTargets::const_iterator ti = targets.begin(); ti != targets.end(); ti++)
+  // Does this local generator contain a PROJECT command
+  // if so, then generate a kdevelop project for it
+  if (strcmp(m_Makefile->GetDefinition("PROJECT_BINARY_DIR"), m_Makefile->GetStartOutputDirectory())==0)
     {
-    switch (ti->second.GetType())
-      {
-      case cmTarget::EXECUTABLE:
-        executable=ti->first;
-      case cmTarget::STATIC_LIBRARY:
-      case cmTarget::SHARED_LIBRARY:
-      case cmTarget::MODULE_LIBRARY:
-      case cmTarget::UTILITY:
-        containsTargets=true;
-        break;
-      case cmTarget::INSTALL_FILES:
-      case cmTarget::INSTALL_PROGRAMS:
-      default:
-        break;
-      }
-    }
-
-  if (containsTargets)
-    {
-    std::string filelistDir=m_Makefile->GetHomeOutputDirectory();
-    //build the project name by taking the subdir
-    std::vector<cmLocalGenerator *> lgs;
-    m_GlobalGenerator->GetLocalGenerators(lgs);
-    std::string projectName=lgs[0]->GetMakefile()->GetProjectName();
-
+    std::string outputDir=m_Makefile->GetStartOutputDirectory();
+    std::string projectDir=m_Makefile->GetHomeDirectory();
+    std::string projectName=m_Makefile->GetProjectName();
+    
     std::string cmakeFilePattern("CMakeLists.txt;*.cmake;");
-
-    if (!this->CreateFilelistFile(filelistDir, projectName, cmakeFilePattern))
+    
+    if (!this->CreateFilelistFile(outputDir, projectDir, projectName, cmakeFilePattern))
       {
       return;
       }
 
-    this->CreateProjectFile(filelistDir, projectName, executable, cmakeFilePattern);
+    //try to find the name of an executable so we have something to run from kdevelop
+    // for now just pick the first executable found
+    std::string executable;
+    cmTargets& targets=m_Makefile->GetTargets();
+    for (cmTargets::const_iterator ti = targets.begin(); ti != targets.end(); ti++)
+      {
+      if (ti->second.GetType()==cmTarget::EXECUTABLE)
+        {
+        executable=ti->first;
+        break;
+        }
+      }
+    this->CreateProjectFile(outputDir, projectDir, projectName, executable, cmakeFilePattern);
     }
 }
 
-void cmLocalKdevelopGenerator::CreateProjectFile(const std::string& dir,
+void cmLocalKdevelopGenerator::CreateProjectFile(const std::string& outputDir,
+                                                 const std::string& projectDir,
                                                  const std::string& projectname, 
                                                  const std::string& executable,
                                                  const std::string& cmakeFilePattern)
 {
-  std::string filename=m_Makefile->GetStartOutputDirectory();
-  filename+="/";
+  std::string filename=outputDir+"/";
   filename+=projectname+".kdevelop";
 
   if (cmSystemTools::FileExists(filename.c_str()))
     {
-    this->MergeProjectFiles(dir, filename, executable, cmakeFilePattern);
+    this->MergeProjectFiles(outputDir, projectDir, filename, executable, cmakeFilePattern);
     }
   else
     {
-    this->CreateNewProjectFile(dir, filename, executable, cmakeFilePattern);
+    this->CreateNewProjectFile(outputDir, projectDir, filename, executable, cmakeFilePattern);
     }
    
 }
 
-void cmLocalKdevelopGenerator::MergeProjectFiles(const std::string& dir, 
+void cmLocalKdevelopGenerator::MergeProjectFiles(const std::string& outputDir, 
+                                                 const std::string& projectDir, 
                                                  const std::string& filename, 
                                                  const std::string& executable, 
                                                  const std::string& cmakeFilePattern)
@@ -114,7 +103,7 @@ void cmLocalKdevelopGenerator::MergeProjectFiles(const std::string& dir,
   std::ifstream oldProjectFile(filename.c_str());
   if (!oldProjectFile)
     {
-    this->CreateNewProjectFile(dir, filename, executable, cmakeFilePattern);
+    this->CreateNewProjectFile(outputDir, projectDir, filename, executable, cmakeFilePattern);
     return;
     }
 
@@ -139,36 +128,45 @@ void cmLocalKdevelopGenerator::MergeProjectFiles(const std::string& dir,
        it!=lines.end(); it++)
     {
     const char* line=(*it).c_str();
-
+    // skip these tags as they are always replaced
     if ((strstr(line, "<projectdirectory>")!=0)
         || (strstr(line, "<projectmanagement>")!=0)
         || (strstr(line, "<absoluteprojectpath>")!=0)
+        || (strstr(line, "<filelistdirectory>")!=0)
         || (strstr(line, "<buildtool>")!=0)
         || (strstr(line, "<builddir>")!=0))
       {
       continue;
       }
 
+    // output the line from the file if it is not one of the above tags
     fout<<*it<<"\n";
-
+    // if this is the <general> tag output the stuff that goes in the general tag
     if (strstr(line, "<general>"))
       {
       fout<<"  <projectmanagement>KDevCustomProject</projectmanagement>\n";
-      fout<<"  <projectdirectory>"<<dir.c_str()<<"</projectdirectory>\n";   //this one is important
-      fout<<"  <absoluteprojectpath>true</absoluteprojectpath>\n";          //and this one
+      fout<<"  <projectdirectory>"<<projectDir.c_str()<<"</projectdirectory>\n";   //this one is important
+      fout<<"  <absoluteprojectpath>true</absoluteprojectpath>\n";                 //and this one
       }
-
+    // inside kdevcustomproject the <filelistdirectory> must be put
+    if (strstr(line, "<kdevcustomproject>"))
+      {
+      fout<<"    <filelistdirectory>"<<outputDir.c_str()<<"</filelistdirectory>\n";
+      }
+    // buildtool and builddir go inside <build>
     if (strstr(line, "<build>"))
       {
-      fout<<"      <buildtool>make</buildtool>\n";                                        //this one is important
-      fout<<"      <builddir>"<<m_Makefile->GetStartOutputDirectory()<<"</builddir>\n";   //and this one
-
+      fout<<"      <buildtool>make</buildtool>\n";                  //this one is important
+      fout<<"      <builddir>"<<outputDir.c_str()<<"</builddir>\n"; //and this one
       }
     }
 }
 
-void cmLocalKdevelopGenerator::CreateNewProjectFile(const std::string& dir, const std::string& filename,
-                                                    const std::string& executable, const std::string& cmakeFilePattern)
+void cmLocalKdevelopGenerator::CreateNewProjectFile(const std::string& outputDir,
+                                                    const std::string& projectDir,
+                                                    const std::string& filename,
+                                                    const std::string& executable,
+                                                    const std::string& cmakeFilePattern)
 {
 
   cmGeneratedFileStream tempFile(filename.c_str());
@@ -190,15 +188,16 @@ void cmLocalKdevelopGenerator::CreateNewProjectFile(const std::string& dir, cons
   fout<<"  <projectmanagement>KDevCustomProject</projectmanagement>\n";
   fout<<"  <primarylanguage>C++</primarylanguage>\n";
   fout<<"  <ignoreparts/>\n";
-  fout<<"  <projectdirectory>"<<dir.c_str()<<"</projectdirectory>\n";   //this one is important
+  fout<<"  <projectdirectory>"<<projectDir.c_str()<<"</projectdirectory>\n";   //this one is important
   fout<<"  <absoluteprojectpath>true</absoluteprojectpath>\n";          //and this one
   fout<<"  <secondaryLanguages>\n";
   fout<<"     <language>C</language>\n";
   fout<<"  </secondaryLanguages>\n";
   fout<<"  </general>\n";
   fout<<"  <kdevcustomproject>\n";
+  fout<<"    <filelistdirectory>"<<outputDir.c_str()<<"</filelistdirectory>\n";
   fout<<"    <run>\n";
-  fout<<"      <mainprogram>"<<m_Makefile->GetStartOutputDirectory()<<"/"<<executable.c_str()<<"</mainprogram>\n";
+  fout<<"      <mainprogram>"<<outputDir.c_str()<<"/"<<executable.c_str()<<"</mainprogram>\n";
   fout<<"      <directoryradio>custom</directoryradio>\n";
   fout<<"      <customdirectory>/</customdirectory>\n";
   fout<<"      <programargs></programargs>\n";
@@ -208,7 +207,7 @@ void cmLocalKdevelopGenerator::CreateNewProjectFile(const std::string& dir, cons
   fout<<"    </run>\n";
   fout<<"    <build>\n";
   fout<<"      <buildtool>make</buildtool>\n";                                        //this one is important
-  fout<<"      <builddir>"<<m_Makefile->GetStartOutputDirectory()<<"</builddir>\n";   //and this one
+  fout<<"      <builddir>"<<outputDir.c_str()<<"</builddir>\n";   //and this one
   fout<<"    </build>\n";
   fout<<"    <make>\n";
   fout<<"      <abortonerror>false</abortonerror>\n";
@@ -275,54 +274,76 @@ void cmLocalKdevelopGenerator::CreateNewProjectFile(const std::string& dir, cons
   fout<<"    </tree>\n";
   fout<<"  </kdevfileview>\n";
   fout<<"</kdevelop>\n";
+  
 }
 
-bool cmLocalKdevelopGenerator::CreateFilelistFile(const std::string& _dir, 
+bool cmLocalKdevelopGenerator::CreateFilelistFile(const std::string& outputDir, const std::string& _projectDir,
                                                   const std::string& projectname,
                                                   std::string& cmakeFilePattern)
 {
-  std::string filelistDir=_dir+"/";
-  std::string filename=filelistDir+projectname+".kdevelop.filelist";
+  std::string projectDir=_projectDir+"/";
+  std::string filename=outputDir+"/"+projectname+".kdevelop.filelist";
 
   std::set<cmStdString> files;
-
-  //get all cmake files
   std::string tmp;
-  const std::vector<std::string>& listFiles=m_Makefile->GetListFiles();
-  for (std::vector<std::string>::const_iterator it=listFiles.begin(); it!=listFiles.end(); it++)
+
+  // loop over all local generators in the entire project
+  // This should be moved into the global generator 
+  // FIXME
+  std::vector<cmLocalGenerator *> lgs;
+  m_GlobalGenerator->GetLocalGenerators(lgs);
+  for (std::vector<cmLocalGenerator*>::const_iterator it=lgs.begin(); it!=lgs.end(); it++)
     {
-    tmp=*it;
-    cmSystemTools::ReplaceString(tmp, filelistDir.c_str(), "");
-    if (tmp[0]!='/')
+    cmMakefile* makefile=(*it)->GetMakefile();
+    // if the makefile GetStartOutputDirectory is not a substring of the outputDir
+    // then skip it
+    if (strstr(makefile->GetStartOutputDirectory(), outputDir.c_str())==0)
       {
-      files.insert(tmp);
-      tmp=cmSystemTools::GetFilenameName(tmp);
-      //add all files which dont match the default */CMakeLists.txt;*cmake; to the file pattern
-      if ((tmp!="CMakeLists.txt")
-          && (strstr(tmp.c_str(), ".cmake")==0))
+      continue;
+      }
+    // This means the makefile is a sub-makefile of the current project
+    //get all cmake files
+    const std::vector<std::string>& listFiles=makefile->GetListFiles();
+    for (std::vector<std::string>::const_iterator it=listFiles.begin(); it!=listFiles.end(); it++)
+      {
+      tmp=*it;
+      cmSystemTools::ReplaceString(tmp, projectDir.c_str(), "");
+      // make sure the file is part of this source tree
+      if (tmp[0]!='/')
         {
-        cmakeFilePattern+=tmp+";";
+        files.insert(tmp);
+        tmp=cmSystemTools::GetFilenameName(tmp);
+        //add all files which dont match the default */CMakeLists.txt;*cmake; to the file pattern
+        if ((tmp!="CMakeLists.txt")
+            && (strstr(tmp.c_str(), ".cmake")==0))
+          {
+          cmakeFilePattern+=tmp+";";
+          }
+        }
+      }
+  
+    //get all sources
+    cmTargets& targets=makefile->GetTargets();
+    for (cmTargets::const_iterator ti = targets.begin(); ti != targets.end(); ti++)
+      {
+      const std::vector<cmSourceFile*>& sources=ti->second.GetSourceFiles();
+      for (std::vector<cmSourceFile*>::const_iterator it=sources.begin();
+           it!=sources.end(); it++)
+        {
+        files.insert((*it)->GetFullPath());
+        }
+      for (std::vector<std::string>::const_iterator it=listFiles.begin();
+           it!=listFiles.end(); it++)
+        {
+        tmp=*it;
+        cmSystemTools::ReplaceString(tmp, projectDir.c_str(), "");
+        if (tmp[0]!='/')
+          {
+          files.insert(tmp.c_str());
+          }
         }
       }
     }
-  
-  //get all sources
-  cmTargets& targets=m_Makefile->GetTargets();
-  for (cmTargets::const_iterator ti = targets.begin(); ti != targets.end(); ti++)
-    {
-    const std::vector<cmSourceFile*>& sources=ti->second.GetSourceFiles();
-    for (std::vector<cmSourceFile*>::const_iterator it=sources.begin();
-      it!=sources.end(); it++)
-      {
-      files.insert((*it)->GetFullPath());
-      }
-    for (std::vector<std::string>::const_iterator it=listFiles.begin();
-      it!=listFiles.end(); it++)
-      {
-      files.insert(it->c_str());
-      }
-    }
-
 
   //check if the output file already exists and read it
   //insert all files which exist into the set of files
@@ -335,7 +356,7 @@ bool cmLocalKdevelopGenerator::CreateFilelistFile(const std::string& _dir,
         {
         continue;
         }
-      std::string completePath=filelistDir+tmp;
+      std::string completePath=projectDir+tmp;
       if (cmSystemTools::FileExists(completePath.c_str()))
         {
         files.insert(tmp);
@@ -343,7 +364,6 @@ bool cmLocalKdevelopGenerator::CreateFilelistFile(const std::string& _dir,
       }
     oldFilelist.close();
     }
-   
 
   cmGeneratedFileStream tempFile(filename.c_str());
   tempFile.SetAlwaysCopy(true);
@@ -356,9 +376,15 @@ bool cmLocalKdevelopGenerator::CreateFilelistFile(const std::string& _dir,
    
   for (std::set<cmStdString>::const_iterator it=files.begin(); it!=files.end(); it++)
     {
-    fout<< cmSystemTools::RelativePath(_dir.c_str(), it->c_str())<<"\n";
+    // get the full path to the file
+    tmp=cmSystemTools::CollapseFullPath(it->c_str());
+    // make it relative to the project dir
+    cmSystemTools::ReplaceString(tmp, projectDir.c_str(), "");
+    // only put relative paths
+    if (tmp.size() && tmp[0] != '/')
+      {
+      fout << tmp.c_str() <<"\n";
+      }
     }
   return true;
 }
-
-

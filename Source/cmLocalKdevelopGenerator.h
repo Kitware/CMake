@@ -48,14 +48,24 @@ public:
    */
   virtual void Generate(bool fromTheTop);
 protected:
-   ///Create the foo.kdevelop file. This one calls MergeProjectFiles() if it already exists, otherwise createNewProjectFile()
-   void CreateProjectFile(const std::string& dir, const std::string& projectname, const std::string& executable, const std::string& cmakeFilePattern);
-   /// Create the foo.kdevelop.filelist file, return false if it doesn't succeed
-   bool CreateFilelistFile(const std::string& dir, const std::string& projectname, std::string& cmakeFilePattern);
-   ///Reads the old foo.kdevelop line by line and only replaces the "important" lines
-   void MergeProjectFiles(const std::string& dir, const std::string& filename, const std::string& executable, const std::string& cmakeFilePattern);
-   ///Creates a new foo.kdevelop file
-   void CreateNewProjectFile(const std::string& dir, const std::string& filename, const std::string& executable, const std::string& cmakeFilePattern);
+  /**
+    Create the foo.kdevelop file. This one calls MergeProjectFiles() 
+    if it already exists, otherwise createNewProjectFile()
+  */
+  void CreateProjectFile(const std::string& outputDir, const std::string& projectDir,
+                         const std::string& projectname, const std::string& executable, 
+                         const std::string& cmakeFilePattern);
+  ///! Create the foo.kdevelop.filelist file, return false if it doesn't succeed
+  bool CreateFilelistFile(const std::string& outputDir, const std::string& projectDir, 
+                          const std::string& projectname, std::string& cmakeFilePattern);
+  ///! Reads the old foo.kdevelop line by line and only replaces the "important" lines
+  void MergeProjectFiles(const std::string& outputDir, const std::string& projectDir,
+                         const std::string& filename, const std::string& executable,
+                         const std::string& cmakeFilePattern);
+  ///! Creates a new foo.kdevelop file
+  void CreateNewProjectFile(const std::string& outputDir, const std::string& projectDir, 
+                            const std::string& filename, const std::string& executable, 
+                            const std::string& cmakeFilePattern);
 
 };
 
