@@ -350,7 +350,7 @@ private:
   /**
    * Get the list of tests in directory and subdirectories.
    */
-  void cmCTest::GetListOfTests(tm_ListOfTests* testlist, bool memcheck);
+  void GetListOfTests(tm_ListOfTests* testlist, bool memcheck);
 
   //! Reread the configuration file
   void UpdateCTestConfiguration();
