@@ -536,7 +536,6 @@ cmLocalUnixMakefileGenerator2
   depEcho += lang;
   depEcho += " dependencies of ";
   depEcho += this->ConvertToRelativeOutputPath(obj.c_str());
-  depEcho += "...";
   this->AppendEcho(commands, depEcho.c_str());
 
   // Add a command to call CMake to scan dependencies.  CMake will
@@ -601,7 +600,6 @@ cmLocalUnixMakefileGenerator2
   buildEcho += lang;
   buildEcho += " object ";
   buildEcho += this->ConvertToRelativeOutputPath(obj.c_str());
-  buildEcho += "...";
   this->AppendEcho(commands, buildEcho.c_str());
 
   // Construct the compile rules.
@@ -714,7 +712,6 @@ cmLocalUnixMakefileGenerator2
   std::vector<std::string> commands;
   std::string preEcho = "Generating ";
   preEcho += output;
-  preEcho += "...";
   this->AppendEcho(commands, preEcho.c_str());
   this->AppendCustomCommand(commands, cc);
 
@@ -1622,7 +1619,6 @@ cmLocalUnixMakefileGenerator2
   buildEcho += linkLanguage;
   buildEcho += " executable ";
   buildEcho += targetOutPath;
-  buildEcho += "...";
   this->AppendEcho(commands, buildEcho.c_str());
 
   // Build a list of compiler flags and linker flags.
@@ -1907,7 +1903,6 @@ cmLocalUnixMakefileGenerator2
       buildEcho += " library "; break;
     }
   buildEcho += targetOutPath.c_str();
-  buildEcho += "...";
   this->AppendEcho(commands, buildEcho.c_str());
 
   // Add a command to remove any existing files for this library.
@@ -3101,7 +3096,6 @@ cmLocalUnixMakefileGenerator2
     jumpPreEcho += rt.m_BuildDirectory.c_str();
     jumpPreEcho += " to build ";
     jumpPreEcho += jump->first;
-    jumpPreEcho += "...";
     this->AppendEcho(commands, jumpPreEcho.c_str());
 
     // Build the jump-and-build command list.
@@ -3154,7 +3148,6 @@ cmLocalUnixMakefileGenerator2
     // Add the post-jump message.
     std::string jumpPostEcho = "Returning to ";
     jumpPostEcho += m_Makefile->GetStartOutputDirectory();
-    jumpPostEcho += "...";
     this->AppendEcho(commands, jumpPostEcho.c_str());
 
     // Write the rule.
