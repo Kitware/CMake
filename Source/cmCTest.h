@@ -95,7 +95,8 @@ public:
    */
   void ProcessDirectory(tm_VectorOfStrings &passed, 
                         tm_VectorOfStrings &failed,
-                        bool memcheck);
+                        bool memcheck,
+                        std::ostream* logfile);
 
   /**
    * Find the executable for a test
@@ -359,7 +360,8 @@ private:
 
   //! Run command specialized for tests. Returns process status and retVal is
   // return value or exception.
-  int RunTest(std::vector<const char*> args, std::string* output, int *retVal);
+  int RunTest(std::vector<const char*> args, std::string* output, int *retVal, 
+    std::ostream* logfile);
 
   std::string GenerateRegressionImages(const std::string& xml);
   const char* GetTestStatus(int status);

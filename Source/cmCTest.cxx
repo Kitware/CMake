@@ -1791,7 +1791,7 @@ void cmCTest::GenerateDartBuildOutput(std::ostream& os,
   
 void cmCTest::ProcessDirectory(cmCTest::tm_VectorOfStrings &passed, 
                              cmCTest::tm_VectorOfStrings &failed,
-                             bool memcheck)
+                             bool memcheck, std::ostream* logfile)
 {
   // does the DartTestfile.txt exist ?
   if(!cmSystemTools::FileExists("DartTestfile.txt"))
@@ -1831,7 +1831,7 @@ void cmCTest::ProcessDirectory(cmCTest::tm_VectorOfStrings &passed,
         if (cmSystemTools::FileIsDirectory(nwd.c_str()))
           {
           cmSystemTools::ChangeDirectory(nwd.c_str());
-          this->ProcessDirectory(passed, failed, memcheck);
+          this->ProcessDirectory(passed, failed, memcheck, logfile);
           }
         }
       // return to the original directory
@@ -1984,11 +1984,33 @@ void cmCTest::ProcessDirectory(cmCTest::tm_VectorOfStrings &passed,
           std::cout << "Memory check command: " << memcheckcommand << std::endl;
           }
         }
+      if ( logfile )
+        {
+        *logfile << "Command: ";
+        tm_VectorOfStrings::size_type ll;
+        for ( ll = 0; ll < arguments.size()-1; ll ++ )
+          {
+          *logfile << "\"" << arguments[ll] << "\" ";
+          }
+        *logfile 
+          << std::endl 
+          << "Directory: " << cmSystemTools::GetCurrentWorkingDirectory() << std::endl 
+          << "Output:" << std::endl 
+          << "----------------------------------------------------------"
+          << std::endl;
+        }
       int res = 0;
       if ( !m_ShowOnly )
         {
-        res = this->RunTest(arguments, &output, &retVal);
+        res = this->RunTest(arguments, &output, &retVal, logfile);
         }
+      if ( logfile )
+        {
+        *logfile 
+          << "----------------------------------------------------------"
+          << std::endl << std::endl;
+        }
+      
       clock_finish = cmSystemTools::GetTime();
 
       cres.m_ExecutionTime = (double)(clock_finish - clock_start);
@@ -2196,8 +2218,14 @@ int cmCTest::TestDirectory(bool memcheck)
   cmCTest::tm_VectorOfStrings failed;
   int total;
 
+  std::ofstream ofs;
+  std::ofstream *olog = 0;
+  if ( this->OpenOutputFile("Temporary", (memcheck?"LastMemCheck.xml":"LastTest.log"), ofs) )
+    {
+    olog = &ofs;
+    }
   m_StartTest = ::CurrentTime();
-  this->ProcessDirectory(passed, failed, memcheck);
+  this->ProcessDirectory(passed, failed, memcheck, olog);
   m_EndTest = ::CurrentTime();
 
   total = int(passed.size()) + int(failed.size());
@@ -2933,7 +2961,8 @@ int cmCTest::RunMakeCommand(const char* command, std::string* output,
   return result;
 }
 
-int cmCTest::RunTest(std::vector<const char*> argv, std::string* output, int *retVal)
+int cmCTest::RunTest(std::vector<const char*> argv, std::string* output, int *retVal,
+  std::ostream* log)
 {
   if(cmSystemTools::SameFile(argv[0], m_CTestSelf.c_str()))
     {
@@ -2946,9 +2975,17 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output, int *re
         args.push_back(argv[i]);
         }
       }
+    if ( *log )
+      {
+      *log << "* Run internal CTest" << std::endl;
+      }
     std::string oldpath = cmSystemTools::GetCurrentWorkingDirectory();
     
     *retVal = inst.Run(args, output);
+    if ( *log )
+      {
+      *log << output->c_str();
+      }
     cmSystemTools::ChangeDirectory(oldpath.c_str());
     
     if(m_Verbose)
@@ -2986,6 +3023,11 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output, int *re
       {
       std::cout.write(data, length);
       std::cout.flush();
+      }
+    if ( log )
+      {
+      log->write(data, length);
+      log->flush();
       }
     }
 
@@ -4405,7 +4447,7 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
     out << m_TestCommandArgs[k] << " ";
     }
   out << "\n";
-  int runTestRes = this->RunTest(testCommand, &outs, &retval);
+  int runTestRes = this->RunTest(testCommand, &outs, &retval, 0);
   if(runTestRes != cmsysProcess_State_Exited || retval != 0)
     {
     out << "Test failed to run.\n";
