@@ -1220,7 +1220,6 @@ std::string cmSystemTools::RelativePath(const char* local, const char* remote)
     }
   
   // split up both paths into arrays of strings using / as a separator
-  std::string localString = local;
   std::vector<cmStdString> localSplit = cmSystemTools::SplitString(local, '/', true); 
   std::vector<cmStdString> remoteSplit = cmSystemTools::SplitString(remote, '/', true);
   std::vector<cmStdString> commonPath; // store shared parts of path in this array
