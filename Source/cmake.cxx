@@ -246,30 +246,6 @@ void cmake::SetArgs(const std::vector<std::string>& args)
 {
   m_Local = false;
   bool directoriesSet = false;
-  // watch for cmake and cmake srcdir invocations
-  if (args.size() <= 2)
-    {
-    directoriesSet = true;
-    this->SetHomeOutputDirectory
-      (cmSystemTools::GetCurrentWorkingDirectory().c_str());
-    this->SetStartOutputDirectory
-      (cmSystemTools::GetCurrentWorkingDirectory().c_str());
-    if (args.size() == 2 && args[1].find("-G") != 0)
-      {
-      this->SetHomeDirectory
-        (cmSystemTools::CollapseFullPath(args[1].c_str()).c_str());
-      this->SetStartDirectory
-        (cmSystemTools::CollapseFullPath(args[1].c_str()).c_str());
-      }
-    else
-      {
-      this->SetHomeDirectory
-        (cmSystemTools::GetCurrentWorkingDirectory().c_str());
-      this->SetStartDirectory
-        (cmSystemTools::GetCurrentWorkingDirectory().c_str());
-      }
-    }
-
   for(unsigned int i=1; i < args.size(); ++i)
     {
     std::string arg = args[i];
