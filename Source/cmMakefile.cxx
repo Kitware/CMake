@@ -2396,6 +2396,7 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
       cmSystemTools::Error(
         "Could not open file for write in copy operation ", 
                            tempOutputFile.c_str());
+      cmSystemTools::ReportLastSystemError("");
       return 0;
       }
     std::ifstream fin(sinfile.c_str());

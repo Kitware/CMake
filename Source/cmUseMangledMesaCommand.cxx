@@ -80,6 +80,7 @@ CopyAndFullPathMesaHeader(const char* source,
     {
     cmSystemTools::Error("Could not open file for write in copy operation: ", 
                          tempOutputFile.c_str(), outdir);
+    cmSystemTools::ReportLastSystemError("");
     return;
     }
   std::ifstream fin(source);

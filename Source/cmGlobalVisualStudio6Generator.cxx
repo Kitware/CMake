@@ -364,6 +364,7 @@ void cmGlobalVisualStudio6Generator::OutputDSWFile(cmLocalGenerator* root,
     {
     cmSystemTools::Error("Error can not open DSW file for write: ",
                          fname.c_str());
+    cmSystemTools::ReportLastSystemError("");
     return;
     }
   this->WriteDSWFile(fout, root, generators);

@@ -82,6 +82,7 @@ void cmExportLibraryDependenciesCommand::FinalPass()
   if (!fout)
     {
     cmSystemTools::Error("Error Writing ", fname.c_str());
+    cmSystemTools::ReportLastSystemError("");
     return;
     }
   cmake* cm = m_Makefile->GetCMakeInstance();

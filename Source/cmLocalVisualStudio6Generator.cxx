@@ -149,6 +149,7 @@ void cmLocalVisualStudio6Generator::CreateSingleDSP(const char *lname, cmTarget 
   if(!fout)
     {
     cmSystemTools::Error("Error Writing ", fname.c_str());
+    cmSystemTools::ReportLastSystemError("");
     }
   this->WriteDSPFile(fout,lname,target);
   fout.close();

@@ -60,7 +60,8 @@ int DumpHTML(const char* outname)
   std::ofstream fout(outname);
   if(!fout)
     {
-    std::cerr << "failed to open output file: " << outname << "\n";
+    std::cerr << "failed to open output file: " << outname << "\n";  
+    cmSystemTools::ReportLastSystemError("");
     return -1;
     }
 
@@ -104,6 +105,7 @@ int DumpForCoverage(const char* outname)
     if(!fout)
       {
       std::cerr << "failed to open output file: " << outname << "\n";
+      cmSystemTools::ReportLastSystemError("");
       return -1;
       }
     return DumpForCoverageToStream(fout);

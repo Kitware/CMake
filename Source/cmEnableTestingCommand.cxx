@@ -39,6 +39,7 @@ void cmEnableTestingCommand::FinalPass()
   if (!fout)
     {
     cmSystemTools::Error("Error Writing ", fname.c_str());
+    cmSystemTools::ReportLastSystemError("");
     return;
     }
   

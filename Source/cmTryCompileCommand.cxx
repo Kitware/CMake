@@ -141,6 +141,7 @@ int cmTryCompileCommand::CoreTryCompileCode(
       {
       cmSystemTools::Error("Failed to create CMakeList file for ", 
                            outFileName.c_str());
+      cmSystemTools::ReportLastSystemError("");
       return -1;
       }
     

@@ -94,6 +94,7 @@ void cmGlobalCodeWarriorGenerator::OutputProject()
     {
     cmSystemTools::Error("Error can not open project file for write: "
                          ,fname.c_str());
+    cmSystemTools::ReportLastSystemError("");
     return;
     }
   this->WriteProject(fout);

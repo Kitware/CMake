@@ -192,6 +192,7 @@ void cmLocalUnixMakefileGenerator::OutputMakefile(const char* file,
   if(!fout)
     {
     cmSystemTools::Error("Error can not open for write: ", file);
+    cmSystemTools::ReportLastSystemError("");
     return;
     }
   fout << "# CMAKE generated Makefile, DO NOT EDIT!\n"

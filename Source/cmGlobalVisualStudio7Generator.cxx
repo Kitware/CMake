@@ -291,6 +291,7 @@ void cmGlobalVisualStudio7Generator::OutputSLNFile(cmLocalGenerator* root,
     {
     cmSystemTools::Error("Error can not open DSW file for write: ",
                          fname.c_str());
+    cmSystemTools::ReportLastSystemError("");
     return;
     }
   this->WriteSLNFile(fout.GetStream(), root, generators);

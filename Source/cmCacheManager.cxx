@@ -327,9 +327,10 @@ bool cmCacheManager::SaveCache(const char* path)
   tempFile += ".tmp";
   std::ofstream fout(tempFile.c_str());
   if(!fout)
-    {
+    {  
     cmSystemTools::Error("Unable to open cache file for save. ", 
                          cacheFile.c_str());
+    cmSystemTools::ReportLastSystemError("");
     return false;
     }
   // before writting the cache, update the version numbers

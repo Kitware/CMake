@@ -171,6 +171,7 @@ bool cmVTKWrapPythonCommand::WriteInit(const char *kitName,
   FILE *fout = fopen(tempOutputFile.c_str(),"w");
   if (!fout)
     {
+    cmSystemTools::ReportLastSystemError("cmVTKWrapPythonCommand error:");
     return false;
     }
   

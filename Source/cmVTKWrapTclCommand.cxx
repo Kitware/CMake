@@ -219,6 +219,7 @@ bool cmVTKWrapTclCommand::WriteInit(const char *kitName,
   if (!fout)
     {
     cmSystemTools::Error("Failed to open TclInit file for ", tempOutputFile.c_str());
+    cmSystemTools::ReportLastSystemError("");
     return false;
     }
 
