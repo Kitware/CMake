@@ -861,9 +861,19 @@ WriteCustomRule(std::ostream& fout,
     std::string temp;
     for(std::vector<std::string>::const_iterator d = depends.begin();
         d != depends.end(); ++d)
-      {
-      fout << this->ConvertToXMLOutputPath(d->c_str())
-           << ";";
+      {  
+      std::string dep = cmSystemTools::GetFilenameName(*d);
+      if (cmSystemTools::GetFilenameLastExtension(dep) == ".exe")
+        {
+        dep = cmSystemTools::GetFilenameWithoutLastExtension(dep);
+        }
+      std::string libPath = dep + "_CMAKE_PATH";
+      const char* cacheValue = m_Makefile->GetDefinition(libPath.c_str());
+      if (!cacheValue)
+        {
+        fout << this->ConvertToXMLOutputPath(d->c_str())
+             << ";";
+        }
       }
     fout << "\"\n";
     fout << "\t\t\t\t\tOutputs=\"";

@@ -375,7 +375,7 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
           fout << "USERDEP__HACK=";
           for(std::vector<std::string>::const_iterator d = depends.begin();
               d != depends.end(); ++d)
-            {
+            { 
             fout << "\\\n\t" << 
               cmSystemTools::ConvertToOutputPath(d->c_str());
             }
@@ -458,8 +458,18 @@ void cmLocalVisualStudio6Generator::WriteCustomRule(std::ostream& fout,
     for(std::vector<std::string>::const_iterator d = depends.begin();
         d != depends.end(); ++d)
       {
-      fout << "\\\n\t" << 
-        cmSystemTools::ConvertToOutputPath(d->c_str());
+      std::string dep = cmSystemTools::GetFilenameName(*d);
+      if (cmSystemTools::GetFilenameLastExtension(dep) == ".exe")
+        {
+        dep = cmSystemTools::GetFilenameWithoutLastExtension(dep);
+        }
+      std::string libPath = dep + "_CMAKE_PATH";
+      const char* cacheValue = m_Makefile->GetDefinition(libPath.c_str());
+      if (!cacheValue)
+        {
+        fout << "\\\n\t" << 
+          cmSystemTools::ConvertToOutputPath(d->c_str());
+        }
       }
     fout << "\n";
 
