@@ -31,7 +31,7 @@
 #include <cmsys/Process.h>
 #include <cmsys/Base64.h>
 
-#include <stdlib.h> // required for atoi
+#include <stdlib.h> 
 #include <time.h>
 #include <math.h>
 #include <float.h>
@@ -2591,12 +2591,13 @@ int cmCTest::RunConfigurationScript()
 
   // no popup widows
   cmSystemTools::SetRunCommandHideConsole(true);
-  
+
   // get some info that should be set
   cmMakefile *mf = lg->GetMakefile();
   const char *srcDir = mf->GetDefinition("CTEST_SOURCE_DIRECTORY");
   const char *binDir = mf->GetDefinition("CTEST_BINARY_DIRECTORY");
   const char *ctestCmd = mf->GetDefinition("CTEST_COMMAND");
+  const char *ctestEnv = mf->GetDefinition("CTEST_ENVIRONMENT");
 
   // make sure the required info is here
   if (!srcDir || !binDir || !ctestCmd)
@@ -2605,6 +2606,34 @@ int cmCTest::RunConfigurationScript()
     return -3;
     }
   
+  // set any environment variables
+  if (ctestEnv)
+    {
+    static char ctestEnvStatic[100][5000];
+    std::vector<std::string> envArgs;
+    cmSystemTools::ExpandListArgument(ctestEnv,envArgs);
+    int numArgs = envArgs.size();
+    // we have a hard limit of 100 env args due to stupid format of putenv
+    if (numArgs > 100)
+      {
+      numArgs = 100;
+      }
+    // for each variable/argument do a putenv
+    int i;
+    for (i = 0; i < numArgs; ++i)
+      {
+      // also limit args to be at most 4K long
+      std::string::size_type size = envArgs[i].size();
+      if(size > 4999)
+        {
+        size = 4999;
+        }
+      strncpy(ctestEnvStatic[i], envArgs[i].c_str(), size);
+      ctestEnvStatic[i][4999] = 0;
+      putenv(ctestEnvStatic[i]);
+      }
+    }
+    
   // clear the binary directory?
   if (mf->IsOn("CTEST_START_WITH_EMPTY_BINARY_DIRECTORY"))
     {
@@ -2652,15 +2681,22 @@ int cmCTest::RunConfigurationScript()
   // put the initial cache into the bin dir
   if (mf->GetDefinition("CTEST_INITIAL_CACHE"))
     {
-    // the cache file will always be next to the configuration script
-    std::string initialCache = 
-      cmSystemTools::GetFilenamePath(m_ConfigurationScript);
-    initialCache += "/";
-    initialCache += mf->GetDefinition("CTEST_INITIAL_CACHE");
-    std::string destCache = binDir;
-    destCache += "/CMakeCache.txt";
-    cmSystemTools::CopyFileIfDifferent(initialCache.c_str(),
-                                       destCache.c_str());
+    const char *initCache = mf->GetDefinition("CTEST_INITIAL_CACHE");
+    std::string cacheFile = binDir;
+    cacheFile += "/CMakeCache.txt";
+    std::ofstream fout(cacheFile.c_str());
+    if(!fout)
+      {
+      return -6;
+      }
+    
+    fout.write(initCache, strlen(initCache));
+  
+    // Make sure the operating system has finished writing the file
+    // before closing it.  This will ensure the file is finished before
+    // the check below.
+    fout.flush();
+    fout.close();
     }
   
   // do an initial cmake to setup the DartConfig file
@@ -2679,7 +2715,7 @@ int cmCTest::RunConfigurationScript()
     if (!res || retVal != 0)
       {
       cmSystemTools::Error("Unable to run cmake");    
-      return -6;
+      return -7;
       }
     }
   
@@ -2695,7 +2731,7 @@ int cmCTest::RunConfigurationScript()
   if (!res /* || retVal != 0 */)
     {
     cmSystemTools::Error("Unable to run ctest");    
-    return -6;
+    return -8;
     }
 
   return 0;  
