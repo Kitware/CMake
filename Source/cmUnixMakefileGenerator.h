@@ -98,6 +98,8 @@ protected:
                                        const cmTarget &);
   virtual void OutputExecutableRule(std::ostream&, const char* name,
                                     const cmTarget &);
+  virtual void OutputUtilityRule(std::ostream&, const char* name,
+                                 const cmTarget &);
   
   virtual void OutputTargets(std::ostream&);
   virtual void OutputSubDirectoryRules(std::ostream&);

@@ -785,6 +785,27 @@ void cmUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
                        cc);
 }
 
+
+
+void cmUnixMakefileGenerator::OutputUtilityRule(std::ostream& fout,
+                                                const char* name,
+                                                const cmTarget &t)
+{
+  std::string customCommands = this->CreateTargetRules(t, name);
+  const char* cc = 0;
+  if(customCommands.size() > 0)
+    {
+    cc = customCommands.c_str();
+    }
+  std::string comment = "Rule to build Utility ";
+  comment += name;
+  this->OutputMakeRule(fout, 
+                       comment.c_str(),
+                       name,
+                       0,
+                       cc);
+}
+
   
 
 void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
@@ -810,6 +831,8 @@ void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
         this->OutputExecutableRule(fout, l->first.c_str(), l->second);
         break;
       case cmTarget::UTILITY:
+        this->OutputUtilityRule(fout, l->first.c_str(), l->second);
+        break;
         // This is handled by the OutputCustomRules method
       case cmTarget::INSTALL_FILES:
         // This is handled by the OutputInstallRules method
@@ -1386,7 +1409,11 @@ void cmUnixMakefileGenerator::OutputCustomRules(std::ostream& fout)
            tgt->second.GetCustomCommands().begin(); 
          cr != tgt->second.GetCustomCommands().end(); ++cr)
       {
-      if ( cr->GetSourceName() != tgt->first )
+      // if the source for the custom command is the same name
+      // as the target, then to not create a rule in the makefile for
+      // the custom command, as the command will be fired when the other target 
+      // is built.  
+      if ( cr->GetSourceName().compare(tgt->first) !=0)
 	{
 	cmSourceGroup& sourceGroup = 
 	  m_Makefile->FindSourceGroup(cr->GetSourceName().c_str(),
