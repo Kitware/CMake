@@ -48,7 +48,6 @@ cmLocalUnixMakefileGenerator2::cmLocalUnixMakefileGenerator2()
   m_MakefileVariableSize = 0;
   m_IgnoreLibPrefix = false;
   m_PassMakeflags = false;
-  m_UseRelativePaths = false;
 }
 
 //----------------------------------------------------------------------------
@@ -580,7 +579,7 @@ cmLocalUnixMakefileGenerator2
 
   // Get the output paths for source and object files.
   std::string sourceFile =
-    this->ConvertToRelativeOutputPath(source.GetFullPath().c_str());
+    this->ConvertToOptionallyRelativeOutputPath(source.GetFullPath().c_str());
   std::string objectFile =
     this->ConvertToRelativeOutputPath(obj.c_str());
 
@@ -2321,9 +2320,6 @@ cmLocalUnixMakefileGenerator2::ConvertToRelativeOutputPath(const char* p)
 //----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator2::ConfigureOutputPaths()
 {
-  // Save whether to use relative paths.
-  m_UseRelativePaths = m_Makefile->IsOn("CMAKE_USE_RELATIVE_PATHS");
-
   // Format the library and executable output paths.
   if(const char* libOut = m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH"))
     {
