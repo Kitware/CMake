@@ -331,8 +331,10 @@ void kwsysProcess_Execute(kwsysProcess* cp)
   /* If this is the child process, run the real process.  */  
   if(cp->ForkPID == 0)
     {
-    /* Close stdin.  */
-    close(0);
+    /* We used to close stdin, but some programs do not like being run
+       without stdin.  Just use whatever stdin the parent program is
+       using.  */
+    /*close(0);*/
     
     /* Setup the stdout/stderr pipes.  */
     dup2(cp->PipeWriteEnds[KWSYSPE_PIPE_STDOUT], 1);
