@@ -353,6 +353,10 @@ public:
    */
   static void SetRunCommandHideConsole(bool v){s_RunCommandHideConsole = v;}
   static bool GetRunCommandHideConsole(){ return s_RunCommandHideConsole;}
+  /** Call cmSystemTools::Error with the message m, plus the
+   * result of strerror(errno)
+   */
+  static void ReportLastSystemError(const char* m);
   
   /** When building DEBUG with MSVC, this enables a hook that prevents
    * error dialogs from popping up if the program is being run from

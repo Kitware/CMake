@@ -280,7 +280,12 @@ void cmTryCompileCommand::CleanupFiles(const char* binDir)
         }
       else
         {
-        cmSystemTools::RemoveFile(fullPath.c_str());
+        if(!cmSystemTools::RemoveFile(fullPath.c_str()))
+          {
+          std::string m = "Remove failed on file: ";
+          m += fullPath;
+          cmSystemTools::ReportLastSystemError(m.c_str());
+          }
         }
       }
     }

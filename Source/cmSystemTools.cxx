@@ -15,7 +15,6 @@
 
 =========================================================================*/
 #include "cmSystemTools.h"   
-#include "errno.h"
 #include <stdio.h>
 #include <sys/stat.h>
 #include "cmRegularExpression.h"
@@ -1165,6 +1164,15 @@ long int cmSystemTools::ModifiedTime(const char* filename)
     }
 }
 
+
+void cmSystemTools::ReportLastSystemError(const char* msg)
+{
+  int e = errno;
+  std::string m = msg;
+  m += ": System Error: ";
+  m += strerror(e);
+  cmSystemTools::Error(m.c_str());
+}
 
   
 bool cmSystemTools::RemoveFile(const char* source)
