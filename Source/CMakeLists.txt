@@ -634,6 +634,17 @@ IF(BUILD_TESTING)
     ADD_TEST(CTestTest ${CMAKE_CTEST_COMMAND}
       -S "${CMake_BINARY_DIR}/Tests/CTestTest/test.cmake" -V
       )
+  IF(UNIX)
+    ADD_TEST(BootstrapTest ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      ${CMake_SOURCE_DIR}
+      ${CMake_BINARY_DIR}/Tests/BootstrapTest
+      --build-nocmake 
+      --build-makeprogram ${CMake_SOURCE_DIR}/bootstrap
+      --test-command ${CMake_BINARY_DIR}/Tests/BootstrapTest/Bootstrap.cmk/cmake --version)
+      
+  ENDIF(UNIX)
+
 
   ENDIF (CTEST_TEST_CTEST)
 
@@ -698,8 +709,6 @@ IF(BUILD_TESTING)
       --build-options -DCMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE:FILEPATH=${CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE}
       --test-command UseWX
     )
-
-      
   ENDIF (CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE OR WXWINDOWS_INCLUDE_DIR)
 
   IF(UNIX)
