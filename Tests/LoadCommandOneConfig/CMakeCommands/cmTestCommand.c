@@ -10,7 +10,7 @@ typedef struct
 
 
 /* do almost everything in the initial pass */
-int InitialPass(void *inf, void *mf, int argc, char *argv[])
+static int InitialPass(void *inf, void *mf, int argc, char *argv[])
 {
   cmLoadedCommandInfo *info = (cmLoadedCommandInfo *)inf;
 
@@ -32,7 +32,7 @@ int InitialPass(void *inf, void *mf, int argc, char *argv[])
   return 1;
 }
 
-void FinalPass(void *inf, void *mf) 
+static void FinalPass(void *inf, void *mf) 
 {
   cmLoadedCommandInfo *info = (cmLoadedCommandInfo *)inf;
   /* get our client data from initial pass */
@@ -45,7 +45,7 @@ void FinalPass(void *inf, void *mf)
     }
 }
 
-void Destructor(void *inf) 
+static void Destructor(void *inf) 
 {
   cmLoadedCommandInfo *info = (cmLoadedCommandInfo *)inf;
   /* get our client data from initial pass */
