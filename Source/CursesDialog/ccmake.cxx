@@ -127,7 +127,15 @@ int main(int argc, char** argv)
   cmCursesMainForm* myform;
 
   myform = new cmCursesMainForm(args, x);
-  myform->LoadCache(cacheDir.c_str());
+  if(myform->LoadCache(cacheDir.c_str()))
+    {
+    curses_clear();
+    touchwin(stdscr);
+    endwin();
+    delete myform;
+    std::cerr << "Error running cmake::LoadCache().  Aboriting.\n";
+    return 1;
+    }
 
   cmSystemTools::SetErrorCallback(CMakeErrorHandler, myform);
 

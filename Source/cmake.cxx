@@ -924,7 +924,11 @@ int cmake::Run(const std::vector<std::string>& args)
   m_CMakeCommand = args[0];
   
   // load the cache
-  this->LoadCache();
+  if(this->LoadCache() < 0)
+    {
+    cmSystemTools::Error("Error executing cmake::LoadCache().  Aborting.\n");
+    return -1;
+    }
   
   // Add any cache args
   this->SetCacheArgs(args);

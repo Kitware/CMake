@@ -1058,11 +1058,16 @@ void cmCursesMainForm::HandleInput()
     }
 }
 
-void cmCursesMainForm::LoadCache(const char *)
+int cmCursesMainForm::LoadCache(const char *)
 
 {
-  m_CMakeInstance->LoadCache(); 
+  int r = m_CMakeInstance->LoadCache(); 
+  if(r < 0)
+    {
+    return r;
+    }
   m_CMakeInstance->SetCacheArgs(m_Args);
+  return r;
 }
   
 

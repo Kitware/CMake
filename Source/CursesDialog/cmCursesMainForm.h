@@ -101,7 +101,7 @@ public:
   /**
    * Used by main program
    */
-  void LoadCache(const char *dir);
+  int LoadCache(const char *dir);
   
   /**
    * Progress callback
