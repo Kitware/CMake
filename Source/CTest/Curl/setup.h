@@ -35,7 +35,7 @@
 #define CURL_DISABLE_GOPHER
 #endif
 
-#if !defined(WIN32) && defined(__WIN32__)
+#if !defined(WIN32) && (defined(__WIN32__) || defined(_WIN32))
 /* This should be a good Borland fix. Alexander J. Oss told us! */
 #define WIN32
 #endif
@@ -122,6 +122,15 @@ defined(HAVE_LIBSSL) && defined(HAVE_LIBCRYPTO)
    */
 
 #ifdef WIN32
+/* Disable unnecessary warnings on Visual Studio */
+#ifdef _MSC_VER
+#pragma warning ( disable : 4127 )
+#pragma warning ( disable : 4514 )
+#pragma warning ( disable : 4706 )
+#pragma warning ( disable : 4131 ) /* Old style declaration */
+#pragma warning ( disable : 4055 ) /* Cast void*(*)() to void* */
+struct _RPC_ASYNC_STATE;
+#endif
 #if !defined(__GNUC__) || defined(__MINGW32__)
 #define sclose(x) closesocket(x)
 #define sread(x,y,z) recv(x,y,z,0)
@@ -172,7 +181,6 @@ typedef struct addrinfo Curl_ipconnect;
 typedef struct hostent Curl_addrinfo;
 typedef struct in_addr Curl_ipconnect;
 #endif
-
 
 
 #endif /* __CONFIG_H */
