@@ -493,6 +493,10 @@ public:
   const std::vector<std::string>& GetListFiles() const
     { return m_ListFiles; }
   
+  ///! When the file changes cmake will be re-run from the build system.
+  void AddCMakeDependFile(const char* file)
+    { m_ListFiles.push_back(file);}
+  
   /**
    * Dump documentation to a file. If 0 is returned, the
    * operation failed.

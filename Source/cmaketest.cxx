@@ -3,6 +3,9 @@
 #include "cmake.h"
 #include "cmListFileCache.h"
 #include "cmMakefileGenerator.h"
+#if defined(_WIN32) && !defined(__CYGWIN__) && !defined(__BORLANDC__)
+#include "windows.h"
+#endif
 
 // this is a test driver program for cmake.
 int main (int argc, char *argv[])
@@ -60,8 +63,21 @@ int main (int argc, char *argv[])
   cmListFileCache::GetInstance()->ClearCache();
   // now build the test
   std::string makeCommand = MAKEPROGRAM;
-  makeCommand += " ";
 #if defined(_WIN32) && !defined(__CYGWIN__) && !defined(__BORLANDC__)
+  // if there are spaces in the makeCommand, assume a full path
+  // and convert it to a path with no spaces in it as the
+  // RunCommand does not like spaces
+  if(makeCommand.find(' ') != std::string::npos)
+    {
+    char *buffer = new char[makeCommand.size()+1];
+    if(GetShortPathName(makeCommand.c_str(), buffer, 
+                        makeCommand.size()+1) != 0)
+      {
+      makeCommand = buffer;
+      delete [] buffer;
+      }
+    }
+  makeCommand += " ";
   makeCommand += executableName;
   makeCommand += ".dsw /MAKE \"ALL_BUILD - Debug\" /REBUILD";
 #else
