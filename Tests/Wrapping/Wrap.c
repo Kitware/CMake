@@ -1,12 +1,7 @@
 #include <stdio.h>
 
-int main(int argc, char* argv[])
+int main()
 {
-  int cc;
-  for ( cc = 1; cc < argc; cc ++ )
-    {
-    printf("%s ", argv[cc]);
-    }
-  printf("\n");
+  printf("Hello\n");
   return 0;
 }
