@@ -22,17 +22,15 @@
 bool cmAbstractFilesCommand::InitialPass(std::vector<std::string> const& args)
 {
   const char* versionValue
-    = m_Makefile->GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
-  if (versionValue && atof(versionValue) > 1.2)
+    = m_Makefile->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
+  if (atof(versionValue) > 1.4)
     {
-    this->SetError("The ABSTRACT_FILES command has been deprecated in CMake version 1.4. You should use the SET_SOURCE_FILES_PROPERTIES command instead.\n");
+    this->SetError("The ABSTRACT_FILES command was deprecated in CMake version 1.4 and will be removed in later versions of CMake. You should modify your CMakeLists.txt files to use the SET command instead, or set the cache value of CMAKE_BACKWARDS_COMPATIBILITY to 1.2 or less.\n");
     return false;
     }
-  
-  if(args.size() < 1 )
+  if (atof(versionValue) > 1.2)
     {
-    this->SetError("called with incorrect number of arguments");
-    return false;
+    cmSystemTools::Message("The ABSTRACT_FILES command was deprecated in CMake version 1.4 and will be removed in later versions. You should modify your CMakeLists.txt files to use the SET command instead, or set the cache value of CMAKE_BACKWARDS_COMPATIBILITY to 1.2 or less.\n","Warning");
     }
 
   bool ret = true;
