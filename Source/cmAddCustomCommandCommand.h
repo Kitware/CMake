@@ -24,7 +24,25 @@
  *
  *  cmAddCustomCommandCommand defines a new command that can
  *  be executed within the CMake
+ *
+ *  In makefile terms this creates new target in the following form:
+ *  OUTPUT1: SOURCE DEPENDS
+ *           COMMAND ARGS
+ *  OUTPUT2: SOURCE DEPENDS
+ *           COMMAND ARGS
+ *  ...
+ *  Example of usage:
+ *  ADD_CUSTOM_COMMAND(
+ *             SOURCE ${VTK_TIFF_FAX_EXE} 
+ *             COMMAND ${VTK_TIFF_FAX_EXE} 
+ *             ARGS -c const ${VTK_BINARY_DIR}/Utilities/tiff/tif_fax3sm.c 
+ *             TARGET vtktiff 
+ *             OUTPUTS ${VTK_BINARY_DIR}/Utilities/tiff/tif_fax3sm.c
+ *                    )
+ *  This will create custom target which will generate file tif_fax3sm.c
+ *  using command ${VTK_TIFF_FAX_EXE}.
  */
+
 class cmAddCustomCommandCommand : public cmCommand
 {
 public:

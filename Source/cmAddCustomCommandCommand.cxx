@@ -31,6 +31,7 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
 
   std::string source, command, target;
   std::vector<std::string> command_args, depends, outputs;
+  std::string outDir = m_Makefile->GetCurrentOutputDirectory();
 
   enum tdoing {
     doing_source,
@@ -129,7 +130,31 @@ bool cmAddCustomCommandCommand::InitialPass(std::vector<std::string> const& args
 			       depends, 
                                outputs, 
                                target.c_str());
+
+  int cc = outputs.size()-1;
+  while( cc >= 0 ) 
+    {
+      std::string fileName = outputs[cc];
+
+      std::string directory = cmSystemTools::GetFilenamePath(fileName);
+      if ( directory == std::string() )
+	{
+	  directory = outDir;
+	}
+      fileName = cmSystemTools::GetFilenameName(fileName);
+
+      std::string::size_type pos = fileName.rfind(".");
+      fileName = fileName.substr(0, pos);
+      // Add the generated source to the package target's source list.
+      cmSourceFile file;
+      file.SetName(fileName.c_str(), directory.c_str(), "c", false);
+      m_Makefile->AddSource(file, target.c_str());
+      cc--;
+    }
+  m_Makefile->GetTargets()[target.c_str()].GetSourceLists().push_back(target);
+  
   return true;
 }
+
 
 
