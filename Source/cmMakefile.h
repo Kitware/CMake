@@ -350,6 +350,7 @@ public:
    * Get the list of targets
    */
   cmTargets &GetTargets() { return m_Targets; }
+  const cmTargets &GetTargets() const { return m_Targets; }
 
   /**
    * Get a list of the build subdirectories.
@@ -363,6 +364,10 @@ public:
    * Get a list of include directories in the build.
    */
   std::vector<std::string>& GetIncludeDirectories()
+    { 
+    return m_IncludeDirectories;
+    }
+  const std::vector<std::string>& GetIncludeDirectories() const
     { 
     return m_IncludeDirectories;
     }
