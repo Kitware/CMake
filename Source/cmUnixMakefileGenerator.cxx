@@ -1154,6 +1154,11 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                        "cmake.depends ${TARGETS} ${SUBDIR_BUILD} ${CMAKE_COMMAND}",
                        0);
   this->OutputMakeRule(fout, 
+                       "run any tests",
+                       "test",
+                       "",
+                       "ctest");
+  this->OutputMakeRule(fout, 
                        "remove generated files",
                        "clean",
                        "${SUBDIR_CLEAN}",

@@ -825,16 +825,24 @@ bool cmSystemTools::RunCommand(const char* command,
                                std::string& output,
                                bool verbose)
 {
+  int foo;
+  return cmSystemTools::RunCommand(command, output, foo, verbose);
+}
+
+bool cmSystemTools::RunCommand(const char* command, 
+                               std::string& output,
+                               int &retVal, bool verbose)
+{
   const int BUFFER_SIZE = 4096;
   char buffer[BUFFER_SIZE];
-
+  
 #if defined(WIN32) && !defined(__CYGWIN__)
   std::string commandToFile = command;
   commandToFile += " > ";
   std::string tempFile;
   tempFile += cmSystemTools::TemporaryFileName();
   commandToFile += tempFile;
-  system(commandToFile.c_str());
+  retVal = system(commandToFile.c_str());
   std::ifstream fin(tempFile.c_str());
   if(!fin)
     {
@@ -879,7 +887,7 @@ bool cmSystemTools::RunCommand(const char* command,
     output += buffer;
     fgets(buffer, BUFFER_SIZE, cpipe);
     }
-  pclose(cpipe);
+  retVal = pclose(cpipe);
   return true;
 #endif
 }

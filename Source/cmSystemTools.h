@@ -251,7 +251,9 @@ public:
    */
   static bool RunCommand(const char* command, std::string& output,
                          bool verbose = true);
-
+  static bool RunCommand(const char* command, std::string& output,
+                         int &retVal, bool verbose = true);
+  
   ///! Generate a temporary file name
   static std::string TemporaryFileName();
 

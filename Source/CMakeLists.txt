@@ -54,6 +54,8 @@ LINK_DIRECTORIES(${CMake_BINARY_DIR}/Sources)
 
 ADD_EXECUTABLE(cmake cmakemain)
 
+ADD_EXECUTABLE(ctest ctest.cxx cmSystemTools.cxx cmRegularExpression.cxx)
+
 IF(BUILD_TESTING)
   IF (DART_ROOT)
     ADD_EXECUTABLE(cmaketest cmaketest.cxx cmSystemTools.cxx)
@@ -74,4 +76,5 @@ ENDIF(BUILD_TESTING)
 
 
 INSTALL_TARGETS(/bin cmake)
+INSTALL_TARGETS(/bin ctest)
 
