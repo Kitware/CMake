@@ -264,7 +264,7 @@ bool cmWin32ProcessExecution::StartProcess(
   const char* cmd, const char* path, bool verbose)
 {
   this->Initialize();
-  this->m_Verbose = verbose;
+  m_Verbose = verbose;
   return this->PrivateOpen(cmd, path, _O_RDONLY | _O_TEXT, POPEN_3);
 }
 
@@ -287,7 +287,8 @@ static BOOL RealPopenCreateProcess(const char *cmdstring,
                                    HANDLE hStdout,
                                    HANDLE hStderr,
                                    HANDLE *hProcess,
-                                   bool hideWindows)
+                                   bool hideWindows,
+                                   std::string& output)
 {
   PROCESS_INFORMATION piProcInfo;
   STARTUPINFO siStartInfo;
@@ -431,9 +432,9 @@ static BOOL RealPopenCreateProcess(const char *cmdstring,
     //std::cout << "Process created..." << std::endl;
     return TRUE;
     }
-  m_Output += "CreateProcessError ";
-  m_Output += s2;
-  m_Output += "\n";
+  output += "CreateProcessError ";
+  output += s2;
+  output += "\n";
   return FALSE;
 }
 
@@ -637,22 +638,24 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
     {
     if (!RealPopenCreateProcess(cmdstring,
                                 path,
-                                this->m_ConsoleSpawn.c_str(),
+                                m_ConsoleSpawn.c_str(),
                                 hChildStdinRd,
                                 hChildStdoutWr,
                                 hChildStdoutWr,
-                                &hProcess, m_HideWindows))
+                                &hProcess, m_HideWindows,
+                                m_Output))
       return NULL;
     }
   else 
     {
     if (!RealPopenCreateProcess(cmdstring,
                                 path,
-                                this->m_ConsoleSpawn.c_str(),
+                                m_ConsoleSpawn.c_str(),
                                 hChildStdinRd,
                                 hChildStdoutWr,
                                 hChildStderrWr,
-                                &hProcess, m_HideWindows))
+                                &hProcess, m_HideWindows,
+                                m_Output))
       return NULL;
     }
 
@@ -692,21 +695,21 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
     return false;
     }
   
-  this->m_ProcessHandle = hProcess;
+  m_ProcessHandle = hProcess;
   if ( fd1 >= 0 )
     {
-    //  this->m_StdIn = f1;
-    this->m_pStdIn = fd1;
+    //  m_StdIn = f1;
+    m_pStdIn = fd1;
     }
   if ( fd2 >= 0 )
     {
-    //  this->m_StdOut = f2;
-    this->m_pStdOut = fd2;
+    //  m_StdOut = f2;
+    m_pStdOut = fd2;
     }
   if ( fd3 >= 0 )
     {
-    //  this->m_StdErr = f3;
-    this->m_pStdErr = fd3;
+    //  m_StdErr = f3;
+    m_pStdErr = fd3;
     }
 
   return true;
@@ -751,7 +754,7 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
 
 bool cmWin32ProcessExecution::PrivateClose(int /* timeout */)
 {
-  HANDLE hProcess = this->m_ProcessHandle;
+  HANDLE hProcess = m_ProcessHandle;
 
   int result = -1;
   DWORD exit_code;
@@ -764,8 +767,8 @@ bool cmWin32ProcessExecution::PrivateClose(int /* timeout */)
     bool have_some = false;
     struct _stat fsout;
     struct _stat fserr;
-    int rout = _fstat(this->m_pStdOut, &fsout);
-    int rerr = _fstat(this->m_pStdErr, &fserr);
+    int rout = _fstat(m_pStdOut, &fsout);
+    int rerr = _fstat(m_pStdErr, &fserr);
     if ( rout && rerr )
       {
       break;
@@ -773,9 +776,9 @@ bool cmWin32ProcessExecution::PrivateClose(int /* timeout */)
     if (fserr.st_size > 0)
       {
       char buffer[1023];
-      int len = read(this->m_pStdErr, buffer, 1023);
+      int len = read(m_pStdErr, buffer, 1023);
       buffer[len] = 0;
-      if ( this->m_Verbose )
+      if ( m_Verbose )
         {
         std::cout << buffer << std::flush;
         }
@@ -785,9 +788,9 @@ bool cmWin32ProcessExecution::PrivateClose(int /* timeout */)
     if (fsout.st_size > 0)
       {
       char buffer[1023];
-      int len = read(this->m_pStdOut, buffer, 1023);
+      int len = read(m_pStdOut, buffer, 1023);
       buffer[len] = 0;
-      if ( this->m_Verbose )
+      if ( m_Verbose )
         {
         std::cout << buffer << std::flush;
         }
@@ -831,8 +834,8 @@ bool cmWin32ProcessExecution::PrivateClose(int /* timeout */)
 
   /* Free up the native handle at this point */
   CloseHandle(hProcess);
-  this->m_ExitValue = result;
-  this->m_Output = output;
+  m_ExitValue = result;
+  m_Output += output;
   if ( result < 0 )
     {
     return false;
