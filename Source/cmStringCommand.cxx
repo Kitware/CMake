@@ -250,14 +250,14 @@ bool cmStringCommand::RegexReplace(std::vector<std::string> const& args)
   std::string::size_type base = 0;
   while(re.find(input.c_str()+base))
     {
-    std::string::size_type l = re.start();
+    std::string::size_type l2 = re.start();
     std::string::size_type r = re.end();
     
     // Concatenate the part of the input that was not matched.
-    output += input.substr(base, l);
+    output += input.substr(base, l2);
     
     // Make sure the match had some text.
-    if(r-l == 0)
+    if(r-l2 == 0)
       {
       std::string e = "sub-command REGEX, mode REPLACE regex \""+regex+"\" matched an empty string.";
       this->SetError(e.c_str());
