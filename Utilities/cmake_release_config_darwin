@@ -1,0 +1,14 @@
+RELEASE_TAG="Release-1-4-4"
+VERSION="1.4.4"
+PLATFORM="darwin"
+CC="cc"
+CXX="c++"
+
+# Write entries into the cache file before building cmake.
+WriteCMakeCache()
+{
+${CAT} > CMakeCache.txt <<EOF
+BUILD_TESTING:BOOL=OFF
+CURSES_LIBRARY:FILEPATH=/usr/local/lib/libncurses.a
+EOF
+}
