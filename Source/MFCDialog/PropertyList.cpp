@@ -381,6 +381,21 @@ void CPropertyList::OnCheckBox()
   m_Dirty = true;
 }
 
+// Insane Microsoft way of setting the initial directory
+// for the Shbrowseforfolder function...
+//  SetSelProc
+//  Callback procedure to set the initial selection of the browser.
+
+int CALLBACK SetSelProc( HWND hWnd, UINT uMsg, LPARAM lParam, LPARAM
+                         lpData )
+{
+  if (uMsg==BFFM_INITIALIZED)
+    {
+    ::SendMessage(hWnd, BFFM_SETSELECTION, TRUE, lpData );
+    }
+  return 0;
+}
+
 void CPropertyList::OnButton()
 {
   CPropertyItem* pItem = (CPropertyItem*) GetItemDataPtr(m_curSel);
@@ -426,17 +441,26 @@ void CPropertyList::OnButton()
   else if (pItem->m_nItemType == CPropertyList::FILE)
     {
     CString SelectedFile; 
-    CString Filter("Gif Files (*.gif)|*.gif||");
+    CString Filter("All Files (*.*)||");
 	
     CFileDialog FileDlg(TRUE, NULL, NULL, NULL,
 			Filter);
-		
+    CString initialDir;
     CString currPath = pItem->m_curValue;
+    if (currPath.GetLength() > 0)
+      {
+      int endSlash = currPath.ReverseFind('\\');
+      if(endSlash == -1)
+        {
+        endSlash = currPath.ReverseFind('/');
+        }
+      initialDir = currPath.Left(endSlash);
+      }		
+    initialDir.Replace("/", "\\");
     FileDlg.m_ofn.lpstrTitle = "Select file";
     if (currPath.GetLength() > 0)
-      FileDlg.m_ofn.lpstrInitialDir = currPath.Left(
-        currPath.GetLength() - currPath.ReverseFind('\\'));
-
+      FileDlg.m_ofn.lpstrInitialDir = initialDir;
+    
     if(IDOK == FileDlg.DoModal())
       {
       SelectedFile = FileDlg.GetPathName();
@@ -450,15 +474,28 @@ void CPropertyList::OnButton()
     }
    else if (pItem->m_nItemType == CPropertyList::PATH)
     {
+    CString initialDir;
+    CString currPath = pItem->m_curValue;
+    if (currPath.GetLength() > 0)
+      {
+      int endSlash = currPath.ReverseFind('\\');
+      if(endSlash == -1)
+        {
+        endSlash = currPath.ReverseFind('/');
+        }
+      initialDir = currPath.Left(endSlash);
+      }
+    initialDir.Replace("/", "\\");
     char szPathName[4096];
     BROWSEINFO bi;
-    
+    bi.lpfn = SetSelProc;
+    bi.lParam = (LPARAM)(LPCSTR) initialDir;
+
     bi.hwndOwner = m_hWnd;
     bi.pidlRoot = NULL;
     bi.pszDisplayName = (LPTSTR)szPathName;
     bi.lpszTitle = "Select Directory";
     bi.ulFlags = BIF_EDITBOX | BIF_RETURNONLYFSDIRS;
-    bi.lpfn = NULL;
     
     LPITEMIDLIST pidl = SHBrowseForFolder(&bi);
     
