@@ -304,9 +304,9 @@ bool cmLocalKdevelopGenerator::CreateFilelistFile(const std::string& outputDir, 
     // This means the makefile is a sub-makefile of the current project
     //get all cmake files
     const std::vector<std::string>& listFiles=makefile->GetListFiles();
-    for (std::vector<std::string>::const_iterator it=listFiles.begin(); it!=listFiles.end(); it++)
+    for (std::vector<std::string>::const_iterator lt=listFiles.begin(); lt!=listFiles.end(); lt++)
       {
-      tmp=*it;
+      tmp=*lt;
       cmSystemTools::ReplaceString(tmp, projectDir.c_str(), "");
       // make sure the file is part of this source tree
       if (tmp[0]!='/')
@@ -332,10 +332,10 @@ bool cmLocalKdevelopGenerator::CreateFilelistFile(const std::string& outputDir, 
         {
         files.insert((*it)->GetFullPath());
         }
-      for (std::vector<std::string>::const_iterator it=listFiles.begin();
-           it!=listFiles.end(); it++)
+      for (std::vector<std::string>::const_iterator lt=listFiles.begin();
+           lt!=listFiles.end(); lt++)
         {
-        tmp=*it;
+        tmp=*lt;
         cmSystemTools::ReplaceString(tmp, projectDir.c_str(), "");
         if (tmp[0]!='/')
           {
