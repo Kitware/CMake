@@ -51,6 +51,21 @@ public:
                                   std::vector<std::string>& argsOut);
 
   /**
+   * Read a registry value
+   */
+  static bool ReadRegistryValue(const char *key, std::string &value);
+
+  /**
+   * Write a registry value
+   */
+  static bool WriteRegistryValue(const char *key, const char *value);
+
+  /**
+   * Delete a registry value
+   */
+  static bool DeleteRegistryValue(const char *key);
+
+  /**
    * Look for and replace registry values in a string
    */
   static void ExpandRegistryValues(std::string& source);
