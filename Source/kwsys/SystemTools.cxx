@@ -2240,7 +2240,7 @@ void SystemTools::SplitPath(const char* p,
   components.clear();
   // Identify the root component.
   const char* c = p;
-  if(c[0] == '/' && c[1] == '/')
+  if((c[0] == '/' && c[1] == '/') || (c[0] == '\\' && c[1] == '\\'))
     {
     // Network path.
     components.push_back("//");
@@ -2252,7 +2252,7 @@ void SystemTools::SplitPath(const char* p,
     components.push_back("/");
     c += 1;
     }
-  else if(c[0] && c[1] == ':' && c[2] == '/')
+  else if(c[0] && c[1] == ':' && (c[2] == '/' || c[2] == '\\'))
     {
     // Windows path.
     kwsys_stl::string root = "_:/";
@@ -2279,7 +2279,7 @@ void SystemTools::SplitPath(const char* p,
   const char* last = first;
   for(;*last; ++last)
     {
-    if(*last == '/')
+    if(*last == '/' || *last == '\\')
       {
       // End of a component.  Save it.
       components.push_back(kwsys_stl::string(first, last-first));

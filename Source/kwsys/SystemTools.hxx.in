@@ -292,8 +292,7 @@ public:
    * The remaining components form the path.  If there is a trailing
    * slash then the last component is the empty string.  The
    * components can be recombined as "c[0]c[1]/c[2]/.../c[n]" to
-   * produce the original path.  The input is assumed to be formatted
-   * with forward slashes.
+   * produce the original path.
    */
   static void SplitPath(const char* p,
                         kwsys_stl::vector<kwsys_stl::string>& components);
