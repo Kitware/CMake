@@ -77,6 +77,6 @@ void updateProgress(const char *msg, float prog, void*)
 {
   if ( prog < 0 )
     {
-    cout << "-- " << msg << endl;
+    std::cout << "-- " << msg << std::endl;
     }
 }
