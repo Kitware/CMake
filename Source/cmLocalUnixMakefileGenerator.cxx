@@ -1433,6 +1433,10 @@ void cmLocalUnixMakefileGenerator::BuildInSubDirectoryWindows(std::ostream& fout
   if(target1)
     {
     std::string dir = cmSystemTools::ConvertToOutputPath(directory);
+    if(dir[0] == '\"')
+      {
+      dir = dir.substr(1, dir.size()-2);
+      }
     fout << "\tif not exist \"" << dir << "\\$(NULL)\""
          << " " 
          << "$(MAKE) $(MAKESILENT) rebuild_cache\n";
@@ -1823,7 +1827,10 @@ cmLocalUnixMakefileGenerator::ConvertToOutputForExisting(const char* p)
   // if there is one
   if(ret.find(' ') != std::string::npos)
     {
-    cmSystemTools::GetShortPath(ret.c_str(), ret);
+    if(!cmSystemTools::GetShortPath(ret.c_str(), ret))
+      {
+      ret = p;
+      }
     }
   return ret;
 }
