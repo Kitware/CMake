@@ -38,87 +38,66 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =========================================================================*/
-#include "cmIfCommand.h"
-#include "cmCacheManager.h"
+#ifndef cmSetCommand_h
+#define cmSetCommand_h
 
-bool cmIfFunctionBlocker::
-IsFunctionBlocked(const char *name, const std::vector<std::string> &args, 
-                  const cmMakefile &mf) const
+#include "cmStandardIncludes.h"
+#include "cmCommand.h"
+
+/** \class cmSetCommand
+ * \brief Set a CMAKE variable
+ *
+ * cmSetCommand sets a variable to a value with expansion.  
+ */
+class cmSetCommand : public cmCommand
 {
-  if (strcmp(name,"ELSE") && strcmp(name,"ENDIF"))
+public:
+  /**
+   * This is a virtual constructor for the command.
+   */
+  virtual cmCommand* Clone() 
     {
-    return true;
-    }
-  if (m_Not && args.size() == 2)
-    {
-    if (strcmp(args[0].c_str(),"NOT"))
-      {
-      return true;
-      }
-    if (strcmp(args[1].c_str(),m_Define.c_str()))
-      {
-      return true;
-      }
-    }
-  else
-    {
-    if (strcmp(args[0].c_str(),m_Define.c_str()))
-      {
-      return true;
-      }
-    }
-  return false;
-}
-
-bool cmIfFunctionBlocker::
-ShouldRemove(const char *name, const std::vector<std::string> &args, 
-             const cmMakefile &mf) const
-{
-  return !this->IsFunctionBlocked(name,args,mf);
-}
-
-bool cmIfCommand::Invoke(std::vector<std::string>& args)
-{
-  if(args.size() < 1 )
-    {
-    this->SetError("called with incorrect number of arguments");
-    return false;
+    return new cmSetCommand;
     }
 
-  // check for the NOT vale
-  const char *def;
-  if (args.size() == 2 && (args[0] == "NOT"))
+  /**
+   * This is called when the command is first encountered in
+   * the CMakeLists.txt file.
+   */
+  virtual bool Invoke(std::vector<std::string>& args);
+
+  /**
+   * This determines if the command gets propagated down
+   * to makefiles located in subdirectories.
+   */
+  virtual bool IsInherited() {return true;}
+
+  /**
+   * The name of the command as specified in CMakeList.txt.
+   */
+  virtual const char* GetName() {return "SET";}
+  
+  /**
+   * Succinct documentation.
+   */
+  virtual const char* GetTerseDocumentation() 
     {
-    def = m_Makefile->GetDefinition(args[1].c_str());
-    if(!cmSystemTools::IsOff(def))
-      {
-      // create a function blocker
-      cmIfFunctionBlocker *f = new cmIfFunctionBlocker();
-      f->m_Define = args[1];
-      f->m_Not = true;
-      m_Makefile->AddFunctionBlocker(f);
-      }
-    else
-      {
-      // do nothing
-      }
-    }
-  else
-    {
-    def = m_Makefile->GetDefinition(args[0].c_str());
-    if(!cmSystemTools::IsOff(def))
-      {
-      // do nothing
-      }
-    else
-      {
-      // create a function blocker
-      cmIfFunctionBlocker *f = new cmIfFunctionBlocker();
-      f->m_Define = args[0];
-      m_Makefile->AddFunctionBlocker(f);
-      }
+    return "Set a CMAKE variable to a value";
     }
   
-  return true;
-}
+  /**
+   * More documentation.
+   */
+  virtual const char* GetFullDocumentation()
+    {
+    return
+      "SET(FOO BAR)\n"
+      "Within CMAKE sets FOO to the value BAR. BAR is expanded before FOO is set to it.";
+    }
+  
+  cmTypeMacro(cmSetCommand, cmCommand);
+};
 
+
+
+#endif

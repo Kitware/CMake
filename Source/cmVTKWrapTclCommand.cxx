@@ -184,7 +184,8 @@ bool cmVTKWrapTclCommand::WriteInit(const char *kitName,
                                     std::vector<std::string>& classes)
 {
   unsigned int i;
-  FILE *fout = fopen(outFileName.c_str(),"w");
+  std::string tempOutputFile = outFileName + ".tmp";
+  FILE *fout = fopen(tempOutputFile.c_str(),"w");
   if (!fout)
     {
     return false;
@@ -258,6 +259,11 @@ bool cmVTKWrapTclCommand::WriteInit(const char *kitName,
   
   fprintf(fout,"  return TCL_OK;\n}\n");
   fclose(fout);
+
+  // copy the file if different
+  cmSystemTools::CopyFileIfDifferent(tempOutputFile.c_str(),
+                                     outFileName.c_str());
+  cmSystemTools::RemoveFile(tempOutputFile.c_str());
 
   return true;
 }

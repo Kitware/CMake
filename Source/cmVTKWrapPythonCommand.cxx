@@ -185,7 +185,8 @@ bool cmVTKWrapPythonCommand::WriteInit(const char *kitName,
 {
   unsigned int i;
   
-  FILE *fout = fopen(outFileName.c_str(),"w");
+  std::string tempOutputFile = outFileName + ".tmp";
+  FILE *fout = fopen(tempOutputFile.c_str(),"w");
   if (!fout)
     {
     return false;
@@ -230,6 +231,10 @@ bool cmVTKWrapPythonCommand::WriteInit(const char *kitName,
   fclose(fout);
   
   
+  // copy the file if different
+  cmSystemTools::CopyFileIfDifferent(tempOutputFile.c_str(),
+                                     outFileName.c_str());
+  cmSystemTools::RemoveFile(tempOutputFile.c_str());
   return true;
 }
 

@@ -38,87 +38,33 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =========================================================================*/
-#include "cmIfCommand.h"
-#include "cmCacheManager.h"
+#include "cmSetCommand.h"
 
-bool cmIfFunctionBlocker::
-IsFunctionBlocked(const char *name, const std::vector<std::string> &args, 
-                  const cmMakefile &mf) const
-{
-  if (strcmp(name,"ELSE") && strcmp(name,"ENDIF"))
-    {
-    return true;
-    }
-  if (m_Not && args.size() == 2)
-    {
-    if (strcmp(args[0].c_str(),"NOT"))
-      {
-      return true;
-      }
-    if (strcmp(args[1].c_str(),m_Define.c_str()))
-      {
-      return true;
-      }
-    }
-  else
-    {
-    if (strcmp(args[0].c_str(),m_Define.c_str()))
-      {
-      return true;
-      }
-    }
-  return false;
-}
-
-bool cmIfFunctionBlocker::
-ShouldRemove(const char *name, const std::vector<std::string> &args, 
-             const cmMakefile &mf) const
-{
-  return !this->IsFunctionBlocked(name,args,mf);
-}
-
-bool cmIfCommand::Invoke(std::vector<std::string>& args)
+// cmSetCommand
+bool cmSetCommand::Invoke(std::vector<std::string>& args)
 {
   if(args.size() < 1 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-
-  // check for the NOT vale
-  const char *def;
-  if (args.size() == 2 && (args[0] == "NOT"))
+  if (args.size() == 1)
     {
-    def = m_Makefile->GetDefinition(args[1].c_str());
-    if(!cmSystemTools::IsOff(def))
-      {
-      // create a function blocker
-      cmIfFunctionBlocker *f = new cmIfFunctionBlocker();
-      f->m_Define = args[1];
-      f->m_Not = true;
-      m_Makefile->AddFunctionBlocker(f);
-      }
-    else
-      {
-      // do nothing
-      }
-    }
-  else
-    {
-    def = m_Makefile->GetDefinition(args[0].c_str());
-    if(!cmSystemTools::IsOff(def))
-      {
-      // do nothing
-      }
-    else
-      {
-      // create a function blocker
-      cmIfFunctionBlocker *f = new cmIfFunctionBlocker();
-      f->m_Define = args[0];
-      m_Makefile->AddFunctionBlocker(f);
-      }
+      return true;
     }
   
+  // expand value
+  m_Makefile->ExpandVariablesInString(args[1]);
+  m_Makefile->AddDefinition(args[0].c_str(), args[1].c_str());
+
+  // should we store the result in the cache ?
+  if (args.size() > 2 && args[2] == "CACHE")
+    {
+    cmCacheManager::GetInstance()->AddCacheEntry(args[0].c_str(),
+                                                 args[1].c_str(),
+						 "Value Computed by CMake",
+                                                 cmCacheManager::STRING);
+    }
   return true;
 }
 

@@ -49,19 +49,40 @@ bool cmElseCommand::Invoke(std::vector<std::string>& args)
     return false;
     }
 
-  // check to see if the argument is defined first
-  const char *def = m_Makefile->GetDefinition(args[0].c_str());
-  if(!cmSystemTools::IsOff(def))
+  // check for the NOT vale
+  const char *def;
+  if (args.size() == 2 && (args[0] == "NOT"))
     {
-    // add block
-    cmIfFunctionBlocker *f = new cmIfFunctionBlocker();
-    f->m_Define = args[0];
-    m_Makefile->AddFunctionBlocker(f);
+    def = m_Makefile->GetDefinition(args[1].c_str());
+    if(!cmSystemTools::IsOff(def))
+      {
+      // remove any function blockers for this define
+      m_Makefile->RemoveFunctionBlocker("ENDIF",args);
+      }
+    else
+      {
+      // create a function blocker
+      cmIfFunctionBlocker *f = new cmIfFunctionBlocker();
+      f->m_Define = args[1];
+      f->m_Not = true;
+      m_Makefile->AddFunctionBlocker(f);
+      }
     }
   else
     {
-    // remove any function blockers for this define
-    m_Makefile->RemoveFunctionBlocker("ENDIF",args);
+    def = m_Makefile->GetDefinition(args[0].c_str());
+    if(!cmSystemTools::IsOff(def))
+      {
+      // create a function blocker
+      cmIfFunctionBlocker *f = new cmIfFunctionBlocker();
+      f->m_Define = args[0];
+      m_Makefile->AddFunctionBlocker(f);
+      }
+    else
+      {
+      // remove any function blockers for this define
+      m_Makefile->RemoveFunctionBlocker("ENDIF",args);
+      }
     }
   
   return true;

@@ -53,12 +53,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 class cmIfFunctionBlocker : public cmFunctionBlocker
 {
 public:
+  cmIfFunctionBlocker() {m_Not = false;}
   virtual ~cmIfFunctionBlocker() {}
   virtual bool IsFunctionBlocked(const char *name, const std::vector<std::string> &args, 
                                  const cmMakefile &mf) const;
   virtual bool ShouldRemove(const char *name, const std::vector<std::string> &args, 
                             const cmMakefile &mf) const;
   std::string m_Define;
+  bool m_Not;
 };
 
 /** \class cmIfCommand
@@ -108,7 +110,8 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "IF(define)";
+      "IF (define) Starts an if block. Optionally there it can be invoked as\n"
+      "IF (NOT Define) the matching ELSE and ENDIF require the NOT as well.";
     }
   
   cmTypeMacro(cmIfCommand, cmCommand);
