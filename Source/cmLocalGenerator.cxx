@@ -132,6 +132,12 @@ void cmLocalGenerator::GenerateInstallRules()
   for(cmTargets::const_iterator l = tgts.begin(); 
     l != tgts.end(); l++)
     {
+    const char* preinstall = l->second.GetProperty("PRE_INSTALL_SCRIPT");
+    const char* postinstall = l->second.GetProperty("POST_INSTALL_SCRIPT");
+    if ( preinstall )
+      {
+      fout << "INCLUDE(\"" << preinstall << "\")" << std::endl;
+      }
     if (l->second.GetInstallPath() != "")
       {
       destination = prefix + l->second.GetInstallPath();
@@ -139,12 +145,6 @@ void cmLocalGenerator::GenerateInstallRules()
       const char* dest = destination.c_str();
       int type = l->second.GetType();
 
-      const char* preinstall = l->second.GetProperty("PRE_INSTALL_SCRIPT");
-      const char* postinstall = l->second.GetProperty("POST_INSTALL_SCRIPT");
-      if ( preinstall )
-        {
-        fout << "INCLUDE(\"" << preinstall << "\")" << std::endl;
-        }
 
       std::string fname;
       const char* files;
@@ -242,10 +242,10 @@ void cmLocalGenerator::GenerateInstallRules()
       default:
         break;
         }
-      if ( postinstall )
-        {
-        fout << "INCLUDE(\"" << postinstall << "\")" << std::endl;
-        }
+      }
+    if ( postinstall )
+      {
+      fout << "INCLUDE(\"" << postinstall << "\")" << std::endl;
       }
     }
   cmMakefile* mf = this->GetMakefile();
