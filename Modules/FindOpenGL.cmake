@@ -41,16 +41,6 @@ IF (WIN32)
       SET (OPENGL_glu_LIBRARY glu32 CACHE STRING "GLU library for win32")
     ENDIF(BORLAND)
 
-    # No extra include path needed because OpenGL includes are with
-    # the system includes but, cmake will create makefiles with
-    # "-I${OPENGL_INCLUDE_DIR}" options if OPENGL_INCLUDE_DIR is
-    # not set.  OPENGL_INCLUDE_DIR cannot be set to "" because the
-    # resulting -I option to "cl" will eat the following
-    # "-IC:\really\needed" option.  This is a kludge to get around
-    # cmake not ignoring INCLUDE_DIRECTORIES commands with empty
-    # strings.
-    SET( OPENGL_INCLUDE_DIR "${PROJECT_SOURCE_DIR}" )
-
   ENDIF (CYGWIN)
 
 ELSE (WIN32)
