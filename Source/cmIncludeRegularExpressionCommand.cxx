@@ -43,12 +43,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // cmIncludeRegularExpressionCommand
 bool cmIncludeRegularExpressionCommand::InitialPass(std::vector<std::string>& args)
 {
-  if(args.size() != 1)
+  if((args.size() < 1) || (args.size() > 2))
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
   m_Makefile->SetIncludeRegularExpression(args[0].c_str());
+  
+  if(args.size() > 1)
+    {
+    m_Makefile->SetComplainRegularExpression(args[1].c_str());
+    }
   
   return true;
 }

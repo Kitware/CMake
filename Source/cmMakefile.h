@@ -346,6 +346,15 @@ public:
       m_IncludeFileRegularExpression = regex;
     }
 
+  /** 
+   * Set a regular expression that include files that are not found
+   * must match in order to be considered a problem.
+   */
+  void SetComplainRegularExpression(const char* regex)
+    {
+      m_ComplainFileRegularExpression = regex;
+    }
+
   /**
    * Get the list of targets
    */
@@ -493,6 +502,7 @@ protected:
   cmTarget::LinkLibraries m_LinkLibraries;
 
   std::string m_IncludeFileRegularExpression;
+  std::string m_ComplainFileRegularExpression;
   std::string m_DefineFlags;
   std::vector<cmSourceGroup> m_SourceGroups;
   typedef std::map<std::string, cmCommand*> RegisteredCommandsMap;

@@ -53,9 +53,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // default is not to be building executables
 cmMakefile::cmMakefile()
 {
-  // Setup the default include file regular expression.
-  // Should be changed to something like "\\.(h|hh|hpp|hxx)$" or "^.*$"
-  m_IncludeFileRegularExpression = "^itk|^vtk|^vnl|^vcl|^f2c";
+  // Setup the default include file regular expression (match everything).
+  m_IncludeFileRegularExpression = "^.*$";
+  // Setup the default include complaint regular expression (match nothing).
+  m_ComplainFileRegularExpression = "^$";
   
   m_DefineFlags = " ";
   m_MakefileGenerator = 0;

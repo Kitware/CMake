@@ -180,6 +180,7 @@ protected:
   const cmMakefile* m_Makefile;
   bool m_Verbose;
   cmRegularExpression m_IncludeFileRegularExpression;
+  cmRegularExpression m_ComplainFileRegularExpression;
   DependArray m_DependInformation;
   std::vector<std::string> m_IncludeDirectories;
 };

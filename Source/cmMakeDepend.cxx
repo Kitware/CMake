@@ -45,7 +45,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 cmMakeDepend::cmMakeDepend()
 {
   m_Verbose = false;
-  m_IncludeFileRegularExpression.compile("");
+  m_IncludeFileRegularExpression.compile("^.*$");
+  m_ComplainFileRegularExpression.compile("^$");
 }
 
 
@@ -71,6 +72,8 @@ void cmMakeDepend::SetMakefile(const cmMakefile* makefile)
   // Now extract the include file regular expression from the makefile.
   m_IncludeFileRegularExpression.compile(
     m_Makefile->m_IncludeFileRegularExpression.c_str());
+  m_ComplainFileRegularExpression.compile(
+    m_Makefile->m_ComplainFileRegularExpression.c_str());
   
   // Now extract any include paths from the makefile flags
   const std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();
@@ -200,7 +203,16 @@ void cmMakeDepend::Depend(cmDependInformation* info)
     }
   
   // Couldn't find any dependency information.
-  cmSystemTools::Error("error cannot find dependencies for ", path);
+  if(m_ComplainFileRegularExpression.find(info->m_IncludeName.c_str()))
+    {
+    cmSystemTools::Error("error cannot find dependencies for ", path);
+    }
+  else
+    {
+    // Destroy the name of the file so that it won't be output as a
+    // dependency.
+    info->m_FullPath = "";
+    }
 }
 
 
@@ -208,6 +220,7 @@ void cmMakeDepend::Depend(cmDependInformation* info)
 // #include directives
 void cmMakeDepend::DependWalk(cmDependInformation* info, const char* file)
 {
+  cmRegularExpression includeLine("^[ \t]*#[ \t]*include[ \t]*[<\"]([^\">]+)[\">]");
   std::ifstream fin(file);
   if(!fin)
     {
@@ -216,37 +229,12 @@ void cmMakeDepend::DependWalk(cmDependInformation* info, const char* file)
     }
   
   char line[255];
-  while(!fin.eof() && !fin.fail())
+  for(fin.getline(line, 255); !fin.eof()&&!fin.fail(); fin.getline(line, 255))
     {
-    fin.getline(line, 255);
-    if(!strncmp(line, "#include", 8))
+    if(includeLine.find(line))
       {
-      // if it is an include line then create a string class
-      std::string currentline = line;
-      size_t qstart = currentline.find('\"', 8);
-      size_t qend;
-      // if a quote is not found look for a <
-      if(qstart == std::string::npos)
-	{
-	qstart = currentline.find('<', 8);
-	// if a < is not found then move on
-	if(qstart == std::string::npos)
-	  {
-	  cmSystemTools::Error("unknown include directive ", 
-                               currentline.c_str() );
-	  continue;
-	  }
-	else
-	  {
-	  qend = currentline.find('>', qstart+1);
-	  }
-	}
-      else
-	{
-	qend = currentline.find('\"', qstart+1);
-	}
       // extract the file being included
-      std::string includeFile = currentline.substr(qstart+1, qend - qstart-1);
+      std::string includeFile = includeLine.match(1);
       // see if the include matches the regular expression
       if(!m_IncludeFileRegularExpression.find(includeFile))
 	{
@@ -352,6 +340,7 @@ std::string cmMakeDepend::FullPath(const char* fname)
       }
     }
 
+  // Couldn't find the file.
   return std::string(fname);
 }
 

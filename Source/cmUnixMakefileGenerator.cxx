@@ -128,7 +128,12 @@ void cmUnixMakefileGenerator::ProcessDepends(const cmMakeDepend &md)
                  info->m_IndexSet.begin();
                indx != info->m_IndexSet.end(); ++indx)
             {
-            i->GetDepends().push_back(md.GetDependInformation()[*indx]->m_FullPath);
+            // Make sure the full path is given.  If not, the dependency was
+            // not found.
+            if(md.GetDependInformation()[*indx]->m_FullPath != "")
+              {
+              i->GetDepends().push_back(md.GetDependInformation()[*indx]->m_FullPath);
+              }
             }
           }
         }
