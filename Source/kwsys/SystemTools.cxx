@@ -1016,10 +1016,12 @@ bool SystemTools::RemoveFile(const char* source)
 kwsys_std::string SystemTools::FindFile(const char* name, 
                                        const kwsys_std::vector<kwsys_std::string>& userPaths)
 {
-  // Add the system search path to our path.
-  kwsys_std::vector<kwsys_std::string> path = userPaths;
+  // Add the system search path to our path first
+  kwsys_std::vector<kwsys_std::string> path;
   SystemTools::GetPath(path);
-
+  // now add the additional paths
+  path.insert(path.end(), userPaths.begin(), userPaths.end());
+  // now look for the file
   kwsys_std::string tryPath;
   for(kwsys_std::vector<kwsys_std::string>::const_iterator p = path.begin();
       p != path.end(); ++p)
@@ -1065,12 +1067,14 @@ kwsys_std::string SystemTools::FindProgram(const char* name,
     }
 
   // Add the system search path to our path.
-  kwsys_std::vector<kwsys_std::string> path = userPaths;
+  kwsys_std::vector<kwsys_std::string> path;
   if (!no_system_path)
     {
     SystemTools::GetPath(path);
     }
-
+  // now add the additional paths
+  path.insert(path.end(), userPaths.begin(), userPaths.end());
+  
   for(kwsys_std::vector<kwsys_std::string>::const_iterator p = path.begin();
       p != path.end(); ++p)
     {
@@ -1122,9 +1126,10 @@ kwsys_std::string SystemTools::FindLibrary(const char* name,
     }
   
   // Add the system search path to our path.
-  kwsys_std::vector<kwsys_std::string> path = userPaths;
+  kwsys_std::vector<kwsys_std::string> path;
   SystemTools::GetPath(path);
-  
+   // now add the additional paths
+  path.insert(path.end(), userPaths.begin(), userPaths.end());
   kwsys_std::string tryPath;
   for(kwsys_std::vector<kwsys_std::string>::const_iterator p = path.begin();
       p != path.end(); ++p)
