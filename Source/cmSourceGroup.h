@@ -65,6 +65,8 @@ public:
     CommandFiles(const CommandFiles& r):
       m_Outputs(r.m_Outputs), m_Depends(r.m_Depends) {}
     
+    void Merge(const CommandFiles &r);
+    
     std::set<std::string> m_Outputs;
     std::set<std::string> m_Depends;
   };

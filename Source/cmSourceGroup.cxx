@@ -121,3 +121,19 @@ void cmSourceGroup::AddCustomCommand(const cmCustomCommand &cmd)
   commandFiles.m_Depends.insert(cmd.GetDepends().begin(), cmd.GetDepends().end());
   commandFiles.m_Outputs.insert(cmd.GetOutputs().begin(), cmd.GetOutputs().end());
 }
+
+void cmSourceGroup::CommandFiles::Merge(const CommandFiles &r)
+{
+  std::set<std::string>::const_iterator dep = r.m_Depends.begin();
+  std::set<std::string>::const_iterator out = r.m_Outputs.begin();
+  for (;dep != r.m_Depends.end(); ++dep)
+    {
+    this->m_Depends.insert(*dep);
+    }
+  for (;out != r.m_Outputs.end(); ++out)
+    {
+    this->m_Outputs.insert(*out);
+    }
+}
+
+
