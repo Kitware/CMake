@@ -33,7 +33,7 @@ static const cmDocumentationEntry cmDocumentationName[] =
 static const cmDocumentationEntry cmDocumentationUsage[] =
 {
   {0,
-   "cmake <path-to-source>", 0},
+   "cmake [options] <path-to-source>", 0},
   {0,0,0}
 };
 
@@ -42,6 +42,13 @@ static const cmDocumentationEntry cmDocumentationDescription[] =
 {
   {0,
    "CMake reads ... ", 0},
+  {0,0,0}
+};
+
+//----------------------------------------------------------------------------
+static const cmDocumentationEntry cmDocumentationOptions[] =
+{
+  {"-i", "Run in wizard mode.", 0},
   {0,0,0}
 };
 
@@ -70,6 +77,7 @@ int do_cmake(int ac, char** av)
     doc.SetName(cmDocumentationName);
     doc.SetUsage(cmDocumentationUsage);
     doc.SetDescription(cmDocumentationDescription);
+    doc.SetOptions(cmDocumentationOptions);
     doc.SetCommands(&commands[0]);
     doc.Print(ht, std::cout);
     return 0;
