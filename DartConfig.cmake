@@ -23,6 +23,7 @@ SET (USE_DOXYGEN "On")
 SET (DOXYGEN_URL "http://www.cmake.org/doc/nightly/html/" )
 OPTION(BUILD_DOXYGEN "Build source documentation using doxygen" "Off")
 SET (DOXYGEN_CONFIG "${PROJECT_BINARY_DIR}/doxygen.config" )
+MARK_AS_ADVANCED(BUILD_DOXYGEN)
 
 SET (USE_GNATS "Off")
 SET (GNATS_WEB_URL "http://${DROP_SITE}/cgi-bin/gnatsweb.pl/CMake/")
