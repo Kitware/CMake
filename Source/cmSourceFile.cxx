@@ -127,7 +127,7 @@ void cmSourceFile::SetName(const char* name, const char* dir,
       }
     }
 
-  std::string errorMsg = "Tried";
+  std::string errorMsg = "\n\nTried";
   for( std::vector<std::string>::const_iterator ext = sourceExts.begin();
        ext != sourceExts.end(); ++ext )
     {
@@ -140,10 +140,8 @@ void cmSourceFile::SetName(const char* name, const char* dir,
     errorMsg += " .";
     errorMsg += *ext;
     }
-  errorMsg += " for ";
-  
-  cmSystemTools::Error("can not find file ", pathname.c_str());
-  cmSystemTools::Error(errorMsg.c_str(), pathname.c_str());
+  cmSystemTools::Error("can not find file ", pathname.c_str(), 
+                       errorMsg.c_str());
 }
 
 
