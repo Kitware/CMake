@@ -94,6 +94,8 @@ static void cmListFileLexerDestroy(cmListFileLexer* lexer);
 %pointer
 %x STRING
 
+MAKEVAR \$\([A-Za-z0-9_]*\)
+
 %%
 
 \n {
@@ -129,7 +131,7 @@ static void cmListFileLexerDestroy(cmListFileLexer* lexer);
   return 1;
 }
 
-([^ \t\r\n\(\)#\\\"]|\\.)([^ \t\r\n\(\)#\\]|\\.)* {
+({MAKEVAR}|[^ \t\r\n\(\)#\\\"]|\\.)({MAKEVAR}|[^ \t\r\n\(\)#\\]|\\.)* {
   lexer->token.type = cmListFileLexer_Token_ArgumentUnquoted;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
   lexer->column += yyleng;

@@ -27,6 +27,14 @@ MESSAGE("Output: [${var}]")
 SET(var \\ \" \  \t \n \r \# \( \) \0)
 MESSAGE("Output: [${var}]")
 
+# Make-style unquoted argument test
+SET(var $(VAR1)$(VAR2)/$(VAR3))
+MESSAGE("Output: [${var}]")
+STRING(COMPARE EQUAL "${var}" "$(VAR1)$(VAR2)/$(VAR3)" result)
+IF(NOT result)
+  MESSAGE(SEND_ERROR "Unquoted $(VAR) syntax is broken.")
+ENDIF(NOT result)
+
 # Make directories test
 FILE(MAKE_DIRECTORY 
   "${CMAKE_CURRENT_BINARY_DIR}/Includes" 

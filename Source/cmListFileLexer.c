@@ -363,11 +363,12 @@ struct yy_trans_info
         flex_int32_t yy_verify;
         flex_int32_t yy_nxt;
         };
-static yyconst flex_int16_t yy_accept[27] =
+static yyconst flex_int16_t yy_accept[33] =
     {   0,
         0,    0,    0,    0,   15,    6,   12,    1,    7,    2,
-        3,    4,    6,   13,    8,    9,   10,   11,    6,    0,
-        2,    5,    6,    8,    0,    0
+        6,    3,    4,    6,   13,    8,    9,   10,   11,    6,
+        6,    0,    2,    0,    5,    6,    8,    0,    0,    0,
+        0,    0
     } ;
 
 static yyconst flex_int32_t yy_ec[256] =
@@ -375,17 +376,17 @@ static yyconst flex_int32_t yy_ec[256] =
         1,    1,    1,    1,    1,    1,    1,    1,    2,    3,
         1,    1,    2,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    2,    1,    4,    5,    1,    1,    1,    1,    6,
-        7,    1,    1,    1,    1,    1,    1,    8,    8,    8,
-        8,    8,    8,    8,    8,    8,    8,    1,    1,    1,
-        1,    1,    1,    1,    9,    9,    9,    9,    9,    9,
-        9,    9,    9,    9,    9,    9,    9,    9,    9,    9,
-        9,    9,    9,    9,    9,    9,    9,    9,    9,    9,
-        1,   10,    1,    1,    9,    1,    9,    9,    9,    9,
+        1,    2,    1,    4,    5,    6,    1,    1,    1,    7,
+        8,    1,    1,    1,    1,    1,    1,    9,    9,    9,
+        9,    9,    9,    9,    9,    9,    9,    1,    1,    1,
+        1,    1,    1,    1,   10,   10,   10,   10,   10,   10,
+       10,   10,   10,   10,   10,   10,   10,   10,   10,   10,
+       10,   10,   10,   10,   10,   10,   10,   10,   10,   10,
+        1,   11,    1,    1,   10,    1,   10,   10,   10,   10,
 
-        9,    9,    9,    9,    9,    9,    9,    9,    9,    9,
-        9,    9,    9,    9,    9,    9,    9,    9,    9,    9,
-        9,    9,    1,    1,    1,    1,    1,    1,    1,    1,
+       10,   10,   10,   10,   10,   10,   10,   10,   10,   10,
+       10,   10,   10,   10,   10,   10,   10,   10,   10,   10,
+       10,   10,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -402,49 +403,58 @@ static yyconst flex_int32_t yy_ec[256] =
         1,    1,    1,    1,    1
     } ;
 
-static yyconst flex_int32_t yy_meta[11] =
+static yyconst flex_int32_t yy_meta[12] =
     {   0,
-        1,    2,    3,    4,    2,    2,    2,    1,    1,    1
+        1,    2,    3,    4,    2,    1,    2,    5,    6,    6,
+        1
     } ;
 
-static yyconst flex_int16_t yy_base[32] =
+static yyconst flex_int16_t yy_base[40] =
     {   0,
-        0,    0,    8,   16,   17,    6,   63,   63,   63,    0,
-       63,   63,   26,    0,    5,   63,   63,   34,    4,   37,
-        0,    0,    0,    3,    0,   63,   44,   48,   52,   56,
-       60
+        0,    0,    9,   18,   26,   24,   91,   91,   91,    0,
+       30,   91,   91,   35,    0,   14,   91,   91,   43,   17,
+       16,   46,    0,   11,    0,   11,    6,   52,    8,    7,
+        6,   91,   56,   62,   68,   74,   80,   82,   84
     } ;
 
-static yyconst flex_int16_t yy_def[32] =
+static yyconst flex_int16_t yy_def[40] =
     {   0,
-       26,    1,   27,   27,   26,   28,   26,   26,   26,   29,
-       26,   26,   26,   30,   31,   26,   26,   31,   28,   28,
-       29,   13,   19,   31,   18,    0,   26,   26,   26,   26,
-       26
+       32,    1,   33,   33,   32,   34,   32,   32,   32,   35,
+       34,   32,   32,   11,   36,   37,   32,   32,   37,   11,
+       11,   34,   35,   38,   14,   11,   37,   37,   39,   38,
+       39,    0,   32,   32,   32,   32,   32,   32,   32
     } ;
 
-static yyconst flex_int16_t yy_nxt[74] =
+static yyconst flex_int16_t yy_nxt[103] =
     {   0,
-        6,    7,    8,    9,   10,   11,   12,    6,   13,   14,
-       16,   17,   25,   20,   25,   20,   26,   18,   16,   17,
-       26,   26,   26,   26,   26,   18,   19,   26,   26,   19,
-       26,   26,   26,   22,   22,   20,   24,   24,   19,   26,
-       26,   19,   19,   19,   15,   15,   15,   15,   19,   26,
-       26,   19,   21,   21,   26,   21,   23,   23,   26,   23,
-       24,   24,    5,   26,   26,   26,   26,   26,   26,   26,
-       26,   26,   26
+        6,    7,    8,    9,   10,   11,   12,   13,    6,   14,
+       15,   17,   18,   20,   26,   20,   28,   32,   26,   19,
+       17,   18,   29,   32,   28,   32,   32,   32,   19,   21,
+       32,   32,   32,   32,   22,   21,   24,   32,   32,   32,
+       22,   32,   32,   25,   25,   27,   27,   20,   32,   32,
+       20,   32,   20,   20,   27,   27,   16,   16,   16,   16,
+       16,   16,   20,   32,   32,   20,   32,   20,   23,   23,
+       32,   23,   23,   23,   26,   26,   32,   26,   26,   26,
+       27,   27,   32,   32,   27,   27,   30,   30,   31,   31,
+        5,   32,   32,   32,   32,   32,   32,   32,   32,   32,
+
+       32,   32
     } ;
 
-static yyconst flex_int16_t yy_chk[74] =
+static yyconst flex_int16_t yy_chk[103] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        3,    3,   24,   19,   15,    6,    5,    3,    4,    4,
-        0,    0,    0,    0,    0,    4,   13,    0,    0,   13,
-        0,    0,    0,   13,   13,   13,   18,   18,   20,    0,
-        0,   20,   20,   20,   27,   27,   27,   27,   28,    0,
-        0,   28,   29,   29,    0,   29,   30,   30,    0,   30,
-       31,   31,   26,   26,   26,   26,   26,   26,   26,   26,
-       26,   26,   26
+        1,    3,    3,   31,   30,   29,   27,   26,   24,    3,
+        4,    4,   21,   20,   16,    5,    0,    0,    4,    6,
+        0,    0,    0,    0,    6,   11,   11,    0,    0,    0,
+       11,   14,    0,   14,   14,   19,   19,   22,    0,    0,
+       22,    0,   22,   22,   28,   28,   33,   33,   33,   33,
+       33,   33,   34,    0,    0,   34,    0,   34,   35,   35,
+        0,   35,   35,   35,   36,   36,    0,   36,   36,   36,
+       37,   37,    0,    0,   37,   37,   38,   38,   39,   39,
+       32,   32,   32,   32,   32,   32,   32,   32,   32,   32,
+
+       32,   32
     } ;
 
 /* Table of booleans, true if rule could match eol. */
@@ -549,7 +559,7 @@ static void cmListFileLexerDestroy(cmListFileLexer* lexer);
 
 /*--------------------------------------------------------------------------*/
 
-#line 555 "cmListFileLexer.c"
+#line 565 "cmListFileLexer.c"
 
 #define INITIAL 0
 #define STRING 1
@@ -763,10 +773,10 @@ YY_DECL
         register int yy_act;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-#line 97 "cmListFileLexer.in.l"
+#line 99 "cmListFileLexer.in.l"
 
 
-#line 774 "cmListFileLexer.c"
+#line 784 "cmListFileLexer.c"
 
         if ( yyg->yy_init )
                 {
@@ -819,13 +829,13 @@ yy_match:
                         while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
                                 {
                                 yy_current_state = (int) yy_def[yy_current_state];
-                                if ( yy_current_state >= 27 )
+                                if ( yy_current_state >= 33 )
                                         yy_c = yy_meta[(unsigned int) yy_c];
                                 }
                         yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
                         ++yy_cp;
                         }
-                while ( yy_base[yy_current_state] != 63 );
+                while ( yy_base[yy_current_state] != 91 );
 
 yy_find_action:
                 yy_act = yy_accept[yy_current_state];
@@ -864,7 +874,7 @@ do_action:      /* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 99 "cmListFileLexer.in.l"
+#line 101 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_Newline;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
@@ -874,14 +884,14 @@ YY_RULE_SETUP
 }
 case 2:
 YY_RULE_SETUP
-#line 107 "cmListFileLexer.in.l"
+#line 109 "cmListFileLexer.in.l"
 {
   lexer->column += yyleng;
 }
         YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 111 "cmListFileLexer.in.l"
+#line 113 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_ParenLeft;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
@@ -890,7 +900,7 @@ YY_RULE_SETUP
 }
 case 4:
 YY_RULE_SETUP
-#line 118 "cmListFileLexer.in.l"
+#line 120 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_ParenRight;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
@@ -899,7 +909,7 @@ YY_RULE_SETUP
 }
 case 5:
 YY_RULE_SETUP
-#line 125 "cmListFileLexer.in.l"
+#line 127 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_Identifier;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
@@ -908,7 +918,7 @@ YY_RULE_SETUP
 }
 case 6:
 YY_RULE_SETUP
-#line 132 "cmListFileLexer.in.l"
+#line 134 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_ArgumentUnquoted;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
@@ -917,7 +927,7 @@ YY_RULE_SETUP
 }
 case 7:
 YY_RULE_SETUP
-#line 139 "cmListFileLexer.in.l"
+#line 141 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_ArgumentQuoted;
   cmListFileLexerSetToken(lexer, "", 0);
@@ -928,7 +938,7 @@ YY_RULE_SETUP
 case 8:
 /* rule 8 can match eol */
 YY_RULE_SETUP
-#line 146 "cmListFileLexer.in.l"
+#line 148 "cmListFileLexer.in.l"
 {
   cmListFileLexerAppend(lexer, yytext, yyleng);
   lexer->column += yyleng;
@@ -937,7 +947,7 @@ YY_RULE_SETUP
 case 9:
 /* rule 9 can match eol */
 YY_RULE_SETUP
-#line 151 "cmListFileLexer.in.l"
+#line 153 "cmListFileLexer.in.l"
 {
   cmListFileLexerAppend(lexer, yytext, yyleng);
   ++lexer->line;
@@ -946,7 +956,7 @@ YY_RULE_SETUP
         YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 157 "cmListFileLexer.in.l"
+#line 159 "cmListFileLexer.in.l"
 {
   lexer->column += yyleng;
   BEGIN(INITIAL);
@@ -954,14 +964,14 @@ YY_RULE_SETUP
 }
 case 11:
 YY_RULE_SETUP
-#line 163 "cmListFileLexer.in.l"
+#line 165 "cmListFileLexer.in.l"
 {
   cmListFileLexerAppend(lexer, yytext, yyleng);
   lexer->column += yyleng;
 }
         YY_BREAK
 case YY_STATE_EOF(STRING):
-#line 168 "cmListFileLexer.in.l"
+#line 170 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_BadString;
   BEGIN(INITIAL);
@@ -969,14 +979,14 @@ case YY_STATE_EOF(STRING):
 }
 case 12:
 YY_RULE_SETUP
-#line 174 "cmListFileLexer.in.l"
+#line 176 "cmListFileLexer.in.l"
 {
   lexer->column += yyleng;
 }
         YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 178 "cmListFileLexer.in.l"
+#line 180 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_BadCharacter;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
@@ -984,7 +994,7 @@ YY_RULE_SETUP
   return 1;
 }
 case YY_STATE_EOF(INITIAL):
-#line 185 "cmListFileLexer.in.l"
+#line 187 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_None;
   cmListFileLexerSetToken(lexer, 0, 0);
@@ -992,10 +1002,10 @@ case YY_STATE_EOF(INITIAL):
 }
 case 14:
 YY_RULE_SETUP
-#line 191 "cmListFileLexer.in.l"
+#line 193 "cmListFileLexer.in.l"
 ECHO;
         YY_BREAK
-#line 1012 "cmListFileLexer.c"
+#line 1022 "cmListFileLexer.c"
 
         case YY_END_OF_BUFFER:
                 {
@@ -1279,7 +1289,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
                 while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
                         {
                         yy_current_state = (int) yy_def[yy_current_state];
-                        if ( yy_current_state >= 27 )
+                        if ( yy_current_state >= 33 )
                                 yy_c = yy_meta[(unsigned int) yy_c];
                         }
                 yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
@@ -1308,11 +1318,11 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
         while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
                 {
                 yy_current_state = (int) yy_def[yy_current_state];
-                if ( yy_current_state >= 27 )
+                if ( yy_current_state >= 33 )
                         yy_c = yy_meta[(unsigned int) yy_c];
                 }
         yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
-        yy_is_jam = (yy_current_state == 26);
+        yy_is_jam = (yy_current_state == 32);
 
         return yy_is_jam ? 0 : yy_current_state;
 }
@@ -2048,6 +2058,7 @@ void *yyalloc (yy_size_t  size , yyscan_t yyscanner)
 
 void *yyrealloc  (void * ptr, yy_size_t  size , yyscan_t yyscanner)
 {
+        (void)yyscanner;
         /* The cast to (char *) in the following accommodates both
          * implementations that use char* generic pointers, and those
          * that use void* generic pointers.  It works with the latter
@@ -2055,7 +2066,6 @@ void *yyrealloc  (void * ptr, yy_size_t  size , yyscan_t yyscanner)
          * any pointer type to void*, and deal with argument conversions
          * as though doing an assignment.
          */
-        (void)yyscanner;
         return (void *) realloc( (char *) ptr, size );
 }
 
@@ -2079,7 +2089,7 @@ void yyfree (void * ptr , yyscan_t yyscanner)
 #undef YY_DECL_IS_OURS
 #undef YY_DECL
 #endif
-#line 191 "cmListFileLexer.in.l"
+#line 193 "cmListFileLexer.in.l"
 
 
 
