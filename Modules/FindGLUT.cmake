@@ -7,8 +7,7 @@
 #
 
 IF (WIN32)
-  FIND_LIBRARY(GLUT_LIBRARY glut32)
-
+  SET (GLUT_LIBRARY glut32 CACHE STRING "GLUT library for win32")
 ELSE (WIN32)
   FIND_PATH(GLUT_INCLUDE_PATH GL/glut.h 
   /usr/include 
