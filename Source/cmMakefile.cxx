@@ -519,7 +519,15 @@ AddCustomCommandToOutput(const char* output,
     {
     file = this->GetSource(main_dependency);
     if (file && file->GetCustomCommand() && !replace)
-      {
+      {  
+      cmCustomCommand* cc = file->GetCustomCommand();
+      // if the command and args are the same
+      // as the command already there, then silently skip
+      // this add command
+      if(cc->IsEquivalent(command, combinedArgs.c_str()))
+        {
+        return;
+        }
       // generate a source instead
       file = 0;
       }
