@@ -76,22 +76,11 @@ bool cmCablePackageCommand::Invoke(std::vector<std::string>& args)
   std::string cMakeLists = m_Makefile->GetStartDirectory();
   cMakeLists += "/";
   cMakeLists += "CMakeLists.txt";
-
-  std::string command;
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  cMakeLists = "\""+cMakeLists+"\"";
-  command = "\"";
-  command += m_Makefile->GetHomeDirectory();
-  command += "/CMake/Source/CMakeSetupCMD\" \"";
-  command += cMakeLists;
-  command += "\" -DSP";
-#else
   cMakeLists = cmSystemTools::EscapeSpaces(cMakeLists.c_str());
-  command = "\"";
-  command += m_Makefile->GetHomeOutputDirectory();  
-  command += "/CMake/Source/CMakeBuildTargets\" \"";
-  command += cMakeLists;
-  command += "\"";
+
+  std::string command = "${CMAKE} "+cMakeLists;
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  command += " -DSP";
 #endif
   command += " -H\"";
   command += m_Makefile->GetHomeDirectory();
@@ -102,6 +91,7 @@ bool cmCablePackageCommand::Invoke(std::vector<std::string>& args)
   command += "\" -B\"";
   command += m_Makefile->GetHomeOutputDirectory();
   command += "\"";
+  m_Makefile->ExpandVariablesInString(command);
 
   std::vector<std::string> depends;
   m_Makefile->AddCustomCommand(cMakeLists.c_str(), 
