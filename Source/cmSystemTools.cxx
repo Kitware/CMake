@@ -239,7 +239,7 @@ bool cmSystemTools::MakeDirectory(const char* path)
 #endif      
       )
       {
-      cmSystemTools::Error("Faild to create directory:", path);
+      cmSystemTools::Error("Failed to create directory:", path);
       return false;
       }
     }
