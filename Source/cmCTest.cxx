@@ -554,8 +554,7 @@ int cmCTest::UpdateDirectory()
       count ++;
       const char* file = line + 2;
       //std::cout << "Line" << cc << ": " << mod << " - " << file << std::endl;
-      std::string logcommand = cvsCommand + " -z3 log -N " + file +
-        " " + extra_update_opts;
+      std::string logcommand = cvsCommand + " -z3 log -N " + file;
       //std::cout << "Do log: " << logcommand << std::endl;
       std::string output;
       res = cmSystemTools::RunCommand(logcommand.c_str(), output, 

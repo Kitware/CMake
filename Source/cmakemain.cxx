@@ -80,4 +80,8 @@ void updateProgress(const char *msg, float prog, void*)
     {
     std::cout << "-- " << msg << std::endl;
     }
+  //else
+  //{
+  //std::cout << "-- " << msg << " " << prog << std::endl;
+  //}
 }
