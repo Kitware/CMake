@@ -2457,7 +2457,6 @@ int cmCTest::TestDirectory(bool memcheck)
 
       std::cerr << "\nThe following tests FAILED:\n";
       this->OpenOutputFile("Temporary", "LastTestsFailed.log", ofs);
-      std::cerr << "\nThe following tests FAILED:\n";
 
       std::vector<cmCTest::cmCTestTestResult>::iterator ftit;
       for(ftit = m_TestResults.begin();
@@ -2724,7 +2723,11 @@ void cmCTest::GenerateDartMemCheckOutput(std::ostream& os)
     std::string memcheckstr;
     int memcheckresults[cmCTest::NO_MEMORY_FAULT];
     int kk;
-    this->ProcessMemCheckOutput(result->m_Output, memcheckstr, memcheckresults);
+    bool res = this->ProcessMemCheckOutput(result->m_Output, memcheckstr, memcheckresults);
+    if ( res && result->m_Status == cmCTest::COMPLETED )
+      {
+      continue;
+      }
     os << "\t<Test Status=\"";
     if ( result->m_Status == cmCTest::COMPLETED )
       {
@@ -3783,6 +3786,8 @@ bool cmCTest::ProcessMemCheckPurifyOutput(const std::string&, std::string& log,
 
   cmsys::RegularExpression pfW("^\\[[WEI]\\] ([A-Z][A-Z][A-Z][A-Z]*): ");
 
+  int defects = 0;
+
   std::string line;
   while ( cmSystemTools::GetLineFromStream(ifs, line) )
     {
@@ -3808,11 +3813,16 @@ bool cmCTest::ProcessMemCheckPurifyOutput(const std::string&, std::string& log,
       {
       ostr << "<b>" << cmCTestMemCheckResultStrings[failure] << "</b> ";
       results[failure] ++;
+      defects ++;
       }
     ostr << cmCTest::MakeXMLSafe(line) << std::endl;
     }
 
   log = ostr.str();
+  if ( defects )
+    {
+    return false;
+    }
   return true;
 }
 
@@ -3826,6 +3836,8 @@ bool cmCTest::ProcessMemCheckValgrindOutput(const std::string& str, std::string&
 
   cmOStringStream ostr;
   log = "";
+
+  int defects = 0;
 
   cmsys::RegularExpression valgrindLine("^==[0-9][0-9]*==");
 
@@ -3877,12 +3889,17 @@ bool cmCTest::ProcessMemCheckValgrindOutput(const std::string& str, std::string&
         {
         ostr << "<b>" << cmCTestMemCheckResultStrings[failure] << "</b> ";
         results[failure] ++;
+        defects ++;
         }
       ostr << cmCTest::MakeXMLSafe(lines[cc]) << std::endl;
       }
     }
   //std::cout << "End test (elapsed: " << (cmSystemTools::GetTime() - sttime) << std::endl;
   log = ostr.str();
+  if ( defects )
+    {
+    return false;
+    }
   return true;
 }
 
