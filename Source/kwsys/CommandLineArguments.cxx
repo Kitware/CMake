@@ -480,6 +480,12 @@ void CommandLineArguments::SetLineLength(unsigned int ll)
 }
 
 //----------------------------------------------------------------------------
+const char* CommandLineArguments::GetArgv0()
+{
+  return this->Internals->Argv0.c_str();
+}
+
+//----------------------------------------------------------------------------
 void CommandLineArguments::GenerateHelp()
 {
   kwsys_ios::ostringstream str;

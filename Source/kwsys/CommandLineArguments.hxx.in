@@ -137,6 +137,11 @@ public:
   void SetLineLength(unsigned int);
   unsigned int GetLineLength();
 
+  /**
+   * Get the executable name (argv0)
+   */
+  const char* GetArgv0();
+
 protected:
 
   void GenerateHelp();
