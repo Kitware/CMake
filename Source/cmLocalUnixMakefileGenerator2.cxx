@@ -274,6 +274,15 @@ void cmLocalUnixMakefileGenerator2::GenerateDirectoryInformationFile()
   // Write the do not edit header.
   this->WriteDisclaimer(infoFileStream);
 
+  // Tell the dependency scanner to use unix paths if necessary.
+  if(cmSystemTools::GetForceUnixPaths())
+    {
+    infoFileStream
+      << "# Force unix paths in dependencies.\n"
+      << "SET(CMAKE_FORCE_UNIX_PATHS 1)\n"
+      << "\n";
+    }
+
   // Store the include search path for this directory.
   infoFileStream
     << "# The C and CXX include file search paths:\n";
@@ -2343,16 +2352,21 @@ cmLocalUnixMakefileGenerator2::ConvertToQuotedOutputPath(const char* p)
     return "\"\"";
     }
 
-  // Fix root component slash direction for windows.
+  // Choose a slash direction and fix root component.
+  const char* slash = "/";
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  for(std::string::iterator i = components[0].begin();
-      i != components[0].end(); ++i)
-    {
-    if(*i == '/')
-      {
-      *i = '\\';
-      }
-    }
+   if(!cmSystemTools::GetForceUnixPaths())
+     {
+     slash = "\\";
+     for(std::string::iterator i = components[0].begin();
+       i != components[0].end(); ++i)
+       {
+       if(*i == '/')
+         {
+         *i = '\\';
+         }
+       }
+     }
 #endif
 
   // Begin the quoted result with the root component.
@@ -2369,11 +2383,7 @@ cmLocalUnixMakefileGenerator2::ConvertToQuotedOutputPath(const char* p)
       {
       if(!first)
         {
-#if defined(_WIN32) && !defined(__CYGWIN__)
-        result += "\\";
-#else
-        result += "/";
-#endif
+        result += slash;
         }
       result += components[i];
       first = false;
@@ -3175,6 +3185,18 @@ cmLocalUnixMakefileGenerator2
      !cmSystemTools::GetErrorOccuredFlag())
     {
     haveDirectoryInfo = true;
+    }
+
+  // Test whether we need to force Unix paths.
+  if(haveDirectoryInfo)
+    {
+    if(const char* force = mf->GetDefinition("CMAKE_FORCE_UNIX_PATHS"))
+      {
+      if(!cmSystemTools::IsOff(force))
+        {
+        cmSystemTools::SetForceUnixPaths(true);
+        }
+      }
     }
 
   // Get the set of include directories.
