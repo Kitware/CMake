@@ -641,6 +641,9 @@ void cmGlobalGenerator::LocalGenerate()
   // start with this directory
   cmLocalGenerator *lg = this->CreateLocalGenerator();
 
+  // Setup relative path generation.
+  this->ConfigureRelativePaths();
+
   // set the Start directories
   lg->GetMakefile()->SetStartDirectory(m_CMakeInstance->GetStartDirectory());
   lg->GetMakefile()->SetStartOutputDirectory(m_CMakeInstance->GetStartOutputDirectory());
