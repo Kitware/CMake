@@ -29,10 +29,9 @@
 /****************************************************************************
  *   Author: Juergen Pfeifer <juergen.pfeifer@gmx.net> 1995,1997            *
  ****************************************************************************/
-#ifdef __hpux
- #define _XOPEN_SOURCE_EXTENDED
-#endif /* __hpux */
+#define _XOPEN_SOURCE_EXTENDED
 #include "form.priv.h"
+#undef _XOPEN_SOURCE_EXTENDED
 
 MODULE_ID("$Id$")
 
