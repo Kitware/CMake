@@ -105,6 +105,7 @@ bool cmSetCommand::InitialPass(std::vector<std::string>& args)
       {
       std::string error = "Error in arguments to cache, expected CACHE found:";
       error += args[cacheStart];
+      error += "\n";
       this->SetError(error.c_str());
       return false;
       }
