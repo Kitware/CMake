@@ -425,6 +425,10 @@ done
 cd "${cmake_bootstrap_dir}"
 rm -rf "${cmake_bootstrap_dir}/${TMPFILE}"
 
+if [ -z "${cmake_make_processor}" ]; then
+  cmake_error "Cannot find apropriate Makefile processor on this system.
+Please specify one using environment variable MAKE."
+fi
 echo "Make processor on this system is: ${cmake_make_processor}"
 
 # Ok, we have CC, CXX, and MAKE.
