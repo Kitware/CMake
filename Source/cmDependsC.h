@@ -34,9 +34,10 @@ public:
   /** Scanning need to know the build directory name, the relative
       path from the build directory to the target file, the source
       file from which to start scanning, and the include file search
-      path.  */
+      path.  It also uses the include file regular expressions.  */
   cmDependsC(const char* dir, const char* targetFile,
-             const char* sourceFile, std::vector<std::string> const& includes);
+             const char* sourceFile, std::vector<std::string> const& includes,
+             const char* scanRegex, const char* complainRegex);
 
   /** Virtual destructor to cleanup subclasses properly.  */
   virtual ~cmDependsC();
@@ -56,7 +57,12 @@ protected:
   std::vector<std::string> const* m_IncludePath;
 
   // Regular expression to identify C preprocessor include directives.
-  cmsys::RegularExpression m_IncludeLineRegex;
+  cmsys::RegularExpression m_IncludeRegexLine;
+
+  // Regular expressions to choose which include files to scan
+  // recursively and which to complain about not finding.
+  cmsys::RegularExpression m_IncludeRegexScan;
+  cmsys::RegularExpression m_IncludeRegexComplain;
 
   // Data structures for dependency graph walk.
   std::set<cmStdString> m_Encountered;

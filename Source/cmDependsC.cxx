@@ -23,18 +23,23 @@ cmDependsC::cmDependsC(const char* dir, const char* targetFile):
   cmDepends(dir, targetFile),
   m_SourceFile(),
   m_IncludePath(0),
-  m_IncludeLineRegex()
+  m_IncludeRegexLine(),
+  m_IncludeRegexScan(),
+  m_IncludeRegexComplain()
 {
 }
 
 //----------------------------------------------------------------------------
 cmDependsC::cmDependsC(const char* dir, const char* targetFile,
                        const char* sourceFile,
-                       std::vector<std::string> const& includes):
+                       std::vector<std::string> const& includes,
+                       const char* scanRegex, const char* complainRegex):
   cmDepends(dir, targetFile),
   m_SourceFile(sourceFile),
   m_IncludePath(&includes),
-  m_IncludeLineRegex("^[ \t]*#[ \t]*include[ \t]*[<\"]([^\">]+)[\">]")
+  m_IncludeRegexLine("^[ \t]*#[ \t]*include[ \t]*[<\"]([^\">]+)[\">]"),
+  m_IncludeRegexScan(scanRegex),
+  m_IncludeRegexComplain(complainRegex)
 {
 }
 
@@ -61,6 +66,7 @@ bool cmDependsC::WriteDependencies(std::ostream& os)
   // Walk the dependency graph starting with the source file.
   bool first = true;
   m_Unscanned.push(m_SourceFile);
+  m_Encountered.clear();
   m_Encountered.insert(m_SourceFile);
   std::set<cmStdString> dependencies;
   std::set<cmStdString> scanned;
@@ -74,7 +80,10 @@ bool cmDependsC::WriteDependencies(std::ostream& os)
     std::string fullName;
     if(first || cmSystemTools::FileIsFullPath(fname.c_str()))
       {
-      fullName = fname;
+      if(cmSystemTools::FileExists(fname.c_str()))
+        {
+        fullName = fname;
+        }
       }
     else
       {
@@ -92,8 +101,16 @@ bool cmDependsC::WriteDependencies(std::ostream& os)
         }
       }
 
+    // Complain if the file cannot be found and matches the complain
+    // regex.
+    if(fullName.empty() && m_IncludeRegexComplain.find(fname.c_str()))
+      {
+      cmSystemTools::Error("Cannot find file \"", fname.c_str(), "\".");
+      return false;
+      }
+
     // Scan the file if it was found and has not been scanned already.
-    if(fullName.size() && (scanned.find(fullName) == scanned.end()))
+    if(!fullName.empty() && (scanned.find(fullName) == scanned.end()))
       {
       // Record scanned files.
       scanned.insert(fullName);
@@ -113,7 +130,6 @@ bool cmDependsC::WriteDependencies(std::ostream& os)
 
     first = false;
     }
-  m_Encountered.clear();
 
   // Write the dependencies to the output stream.
   for(std::set<cmStdString>::iterator i=dependencies.begin();
@@ -228,16 +244,16 @@ void cmDependsC::Scan(std::istream& is)
   std::string line;
   while(cmSystemTools::GetLineFromStream(is, line))
     {
-    // Match include directives.  TODO: Support include regex and
-    // ignore regex.  Possibly also support directory-based inclusion
-    // in dependencies.
-    if(m_IncludeLineRegex.find(line.c_str()))
+    // Match include directives.
+    if(m_IncludeRegexLine.find(line.c_str()))
       {
       // Get the file being included.
-      std::string includeFile = m_IncludeLineRegex.match(1);
+      std::string includeFile = m_IncludeRegexLine.match(1);
 
-      // Queue the file if it has not yet been encountered.
-      if(m_Encountered.find(includeFile) == m_Encountered.end())
+      // Queue the file if it has not yet been encountered and it
+      // matches the regular expression for recursive scanning.
+      if(m_Encountered.find(includeFile) == m_Encountered.end() &&
+         m_IncludeRegexScan.find(includeFile.c_str()))
         {
         m_Encountered.insert(includeFile);
         m_Unscanned.push(includeFile);

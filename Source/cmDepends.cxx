@@ -42,7 +42,7 @@ cmDepends::~cmDepends()
 }
 
 //----------------------------------------------------------------------------
-void cmDepends::Write()
+bool cmDepends::Write()
 {
   // Try to generate dependencies for the target file.
   cmGeneratedFileStream fout(m_DependsMakeFile.c_str());
@@ -52,6 +52,11 @@ void cmDepends::Write()
     // Dependencies were generated.  Touch the mark file.
     std::ofstream fmark(m_DependsMarkFile.c_str());
     fmark << "Dependencies updated for " << m_TargetFile.c_str() << std::endl;
+    return true;
+    }
+  else
+    {
+    return false;
     }
 }
 

@@ -37,7 +37,7 @@ public:
   virtual ~cmDepends();
 
   /** Write dependencies for the target file.  */
-  void Write();
+  bool Write();
 
   /** Check dependencies for the target file.  */
   void Check();

@@ -234,6 +234,7 @@ void cmLocalUnixMakefileGenerator2::GenerateCMakefile()
     << "SET(CMAKE_MAKEFILE_OUTPUTS\n"
     << "  \"" << this->ConvertToRelativePath(makefileName.c_str()).c_str() << "\"\n"
     << "  \"" << this->ConvertToRelativePath(check.c_str()).c_str() << "\"\n"
+    << "  \"CMakeDirectoryInformation.cmake\"\n"
     << "  )\n\n";
 
   // Set the set of files to check for dependency integrity.
@@ -525,8 +526,7 @@ cmLocalUnixMakefileGenerator2
   // touch the corresponding depends file after scanning dependencies.
   cmOStringStream depCmd;
   // TODO: Account for source file properties and directory-level
-  // definitions when scanning for dependencies.  Also account for
-  // include/ignore regular expressions.
+  // definitions when scanning for dependencies.
   depCmd << "$(CMAKE_COMMAND) -E cmake_depends " << lang << " "
          << this->ConvertToRelativeOutputPath(obj.c_str()) << " "
          << this->ConvertToRelativeOutputPath(source.GetFullPath().c_str());
@@ -2854,20 +2854,41 @@ cmLocalUnixMakefileGenerator2
       }
     }
 
+  // Get the include file regular expression.
+  std::string includeRegexScan = "^.*$";
+  std::string includeRegexComplain = "^$";
+  if(haveDirectoryInfo)
+    {
+    std::string scanRegexVar = "CMAKE_";
+    scanRegexVar += lang;
+    scanRegexVar += "_INCLUDE_REGEX_SCAN";
+    if(const char* scanRegex = mf->GetDefinition(scanRegexVar.c_str()))
+      {
+      includeRegexScan = scanRegex;
+      }
+    std::string complainRegexVar = "CMAKE_";
+    complainRegexVar += lang;
+    complainRegexVar += "_INCLUDE_REGEX_COMPLAIN";
+    if(const char* complainRegex = mf->GetDefinition(complainRegexVar.c_str()))
+      {
+      includeRegexComplain = complainRegex;
+      }
+    }
+
   // Dispatch the scan for each language.
   if(lang == "C" || lang == "CXX" || lang == "RC")
     {
     // TODO: Handle RC (resource files) dependencies correctly.
-    cmDependsC scanner(".", objFile, srcFile, includes);
-    scanner.Write();
-    return true;
+    cmDependsC scanner(".", objFile, srcFile, includes,
+                       includeRegexScan.c_str(), includeRegexComplain.c_str());
+    return scanner.Write();
+    true;
     }
 #ifdef CMAKE_BUILD_WITH_CMAKE
   else if(lang == "Fortran")
     {
     cmDependsFortran scanner(".", objFile, srcFile, includes);
-    scanner.Write();
-    return true;
+    return scanner.Write();
     }
 #endif
   return false;
