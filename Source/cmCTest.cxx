@@ -167,6 +167,7 @@ static const char* cmCTestWarningExceptions[] = {
   "warning LNK4089: all references to [^ \\t]+ discarded by .OPT:REF",
   "ld32: WARNING 85: definition of dataKey in",
   "cc: warning 422: Unknown option \"\\+b\\.\" ignored", 
+  "_with_warning_C",
   0
 };
 
