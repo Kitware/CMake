@@ -1352,7 +1352,6 @@ int cmMakefile::TryCompile(const char *srcdir, const char *bindir,
   // be run that way but the cmake object requires a vailid path
   std::string cmakeCommand = this->GetDefinition("CMAKE_COMMAND");
   cmake cm;
-  cm.AddCMakePaths(cmakeCommand.c_str());
   cm.SetIsInTryCompile(true);
   cmGlobalGenerator *gg = 
     cm.CreateGlobalGenerator(m_LocalGenerator->GetGlobalGenerator()->GetName());
@@ -1371,12 +1370,14 @@ int cmMakefile::TryCompile(const char *srcdir, const char *bindir,
   cm.SetHomeOutputDirectory(bindir);
   cm.SetStartDirectory(srcdir);
   cm.SetStartOutputDirectory(bindir);
+  cm.SetCMakeCommand(cmakeCommand.c_str());
+  cm.LoadCache();
   
   // to save time we pass the EnableLanguage info directly
   gg->EnableLanguagesFromGenerator(m_LocalGenerator->GetGlobalGenerator(),
                                    this);
   
-  if (cm.Configure(cmakeCommand.c_str()) != 0)
+  if (cm.Configure() != 0)
     {
     cmSystemTools::Error(
       "Internal CMake error, TryCompile configure of cmake failed");

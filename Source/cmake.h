@@ -119,7 +119,15 @@ class cmake
    * GlobalGenerator. This in turn will read in an process all the CMakeList
    * files for the tree. It will not produce any actual Makefiles, or
    * workspaces. Generate does that.  */
-  int Configure(const char *cmakeexec, const std::vector<std::string> *args = 0);
+  int Configure();
+
+  /**
+   * Configure the cmMakefiles. This routine will create a GlobalGenerator if
+   * one has not already been set. It will then Call Configure on the
+   * GlobalGenerator. This in turn will read in an process all the CMakeList
+   * files for the tree. It will not produce any actual Makefiles, or
+   * workspaces. Generate does that.  */
+  int LoadCache();
 
   ///! Create a GlobalGenerator
   cmGlobalGenerator* CreateGlobalGenerator(const char* name);
@@ -135,6 +143,9 @@ class cmake
 
   ///! get the cmCachemManager used by this invocation of cmake
   cmCacheManager *GetCacheManager() { return m_CacheManager; }
+  
+  ///! set the cmake command this instance of cmake should use
+  void SetCMakeCommand(const char* cmd) { m_CMakeCommand = cmd; }
   
   /**
    * Given a variable name, return its value (as a string).
@@ -164,10 +175,7 @@ class cmake
    * Is cmake in the process of a local cmake invocation. If so, we know the
    * cache is already configured and ready to go. 
    */
-  bool GetLocal() 
-    {
-      return m_Local;
-    }
+  bool GetLocal() { return m_Local; }
   
   ///! Display command line useage
   void Usage(const char *program);
@@ -181,10 +189,8 @@ class cmake
   ///! Is this cmake running as a result of a TRY_COMPILE command
   void SetIsInTryCompile(bool i) { m_InTryCompile = i; }
   
-  /**
-   * Generate CMAKE_ROOT and CMAKE_COMMAND cache entries
-   */
-  int AddCMakePaths(const char *arg0);
+  ///! Parse command line arguments that might set cache values
+  void SetCacheArgs(const std::vector<std::string>&);
 
 protected:
   typedef std::map<cmStdString, cmCommand*> RegisteredCommandsMap;
@@ -198,18 +204,21 @@ protected:
   std::string m_cmStartDirectory; 
   std::string m_StartOutputDirectory;
 
-  ///! Parse command line arguments that might set cache values
-  void SetCacheArgs(const std::vector<std::string>&);
-
   ///! read in a cmake list file to initialize the cache
   void ReadListFile(const char *path);
   
   ///! used by Run
   int LocalGenerate();
 
+  /**
+   * Generate CMAKE_ROOT and CMAKE_COMMAND cache entries
+   */
+  int AddCMakePaths(const char *arg0);
+
 private:
   bool m_Verbose;
   bool m_Local;
   bool m_InTryCompile;
+  std::string m_CMakeCommand;
 };
 

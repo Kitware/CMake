@@ -580,7 +580,9 @@ void CMakeSetupDialog::RunCMake(bool generateProjectFiles)
     m_CMakeInstance->SetStartOutputDirectory(m_WhereBuild);
     m_CMakeInstance->SetGlobalGenerator(
       m_CMakeInstance->CreateGlobalGenerator(m_GeneratorChoiceString));
-    if(m_CMakeInstance->Configure(m_PathToExecutable) != 0)
+    m_CMakeInstance->SetCMakeCommand(m_PathToExecutable);
+    m_CMakeInstance->LoadCache();
+    if(m_CMakeInstance->Configure() != 0)
       {
       cmSystemTools::Error(
         "Error in configuration process, project files may be invalid");

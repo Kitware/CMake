@@ -625,15 +625,8 @@ void cmake::SetGlobalGenerator(cmGlobalGenerator *gg)
   gg->SetCMakeInstance(this);
 }
 
-int cmake::Configure(const char *arg0, const std::vector<std::string>* args)
+int cmake::Configure()
 {
-  // Read in the cache, but not for a try compile 
-  // because there will be no cache
-  if (!m_InTryCompile)
-    {
-    m_CacheManager->LoadCache(this->GetHomeOutputDirectory());
-    }
-
   // do a sanity check on some values
   if(m_CacheManager->GetCacheValue("CMAKE_HOME_DIRECTORY"))
     {
@@ -659,18 +652,6 @@ int cmake::Configure(const char *arg0, const std::vector<std::string>* args)
                                   this->GetHomeDirectory(),
                                   "Start directory with the top level CMakeLists.txt file for this project",
                                   cmCacheManager::INTERNAL);
-    }
-  
-  // extract command line arguments that might add cache entries
-  if (args)
-    {
-    this->SetCacheArgs(*args);
-    }
-
-  // setup CMAKE_ROOT and CMAKE_COMMAND
-  if(!this->AddCMakePaths(arg0))
-    {
-    return -3;
     }
   
   // no generator specified on the command line
@@ -785,6 +766,15 @@ int cmake::Run(const std::vector<std::string>& args)
   // Process the arguments
   this->SetArgs(args);
   
+  // set the cmake command
+  m_CMakeCommand = args[0];
+  
+  // load the cache
+  this->LoadCache();
+  
+  // Add any cache args
+  this->SetCacheArgs(args);
+  
   // if we are local do the local thing, otherwise do global
   if (m_Local)
     {
@@ -792,7 +782,7 @@ int cmake::Run(const std::vector<std::string>& args)
     }
 
   // otherwise global
-  int ret = this->Configure(args[0].c_str(),&args);
+  int ret = this->Configure();
   if (ret)
     {
     return ret;
@@ -890,5 +880,23 @@ void cmake::AddDefaultCommands()
     {
     this->AddCommand(*i);
     }
+}
+
+int cmake::LoadCache()
+{
+  m_CacheManager->LoadCache(this->GetHomeOutputDirectory());
+
+  if (m_CMakeCommand.size() < 2)
+    {
+    cmSystemTools::Error("cmake command was not specified prior to loading the cache in cmake.cxx");
+    return -1;
+    }
+  
+  // setup CMAKE_ROOT and CMAKE_COMMAND
+  if(!this->AddCMakePaths(m_CMakeCommand.c_str()))
+    {
+    return -3;
+    }
+  return 0;
 }
 

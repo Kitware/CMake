@@ -89,6 +89,9 @@ void cmakewizard::RunWizard(std::vector<std::string> const& args)
   cmSystemTools::DisableRunCommandOutput();
   cmake make;
   make.SetArgs(args);
+  make.SetCMakeCommand(args[0].c_str());
+  make.LoadCache();
+  make.SetCacheArgs(args);
   std::map<std::string,std::string> askedCache;
   bool asked = false;
   // continue asking questions until no new questions are asked
@@ -98,7 +101,7 @@ void cmakewizard::RunWizard(std::vector<std::string> const& args)
     // run cmake
     this->ShowMessage("Please wait while cmake processes CMakeLists.txt files....\n");
 
-    make.Configure(args[0].c_str(),&args);
+    make.Configure();
     this->ShowMessage("\n");
     // load the cache from disk
     cmCacheManager *cachem = make.GetCacheManager();
