@@ -870,7 +870,7 @@ void cmMakefile::ExpandVariablesInString(std::string& source,
       // $ENV{var} case
       else if(markerPos+4 < source.size() && 
               source[markerPos+4] == '{' &&
-              !source.compare(markerPos+1, 3, "ENV"))
+              !source.substr(markerPos+1, 3).compare("ENV"))
         {
         endVariableMarker = '}';
         markerStartSize = 5;
