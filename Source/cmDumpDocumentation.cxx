@@ -19,6 +19,8 @@
 // 
 #include "cmake.h"
 
+#include "cmDocumentation.h"
+
 int main(int ac, char** av)
 {
   cmSystemTools::EnableMSVCDebugHook();
@@ -34,6 +36,13 @@ int main(int ac, char** av)
     std::cerr << "failed to open output file: " << outname << "\n";
     return -1;
     }
-  cmi.DumpDocumentationToFile(fout);
+
+  cmDocumentation doc;
+  std::vector<cmDocumentationEntry> commands;
+  cmi.GetCommandDocumentation(commands);
+  doc.AddSection("Documentation for Commands of CMake " CMake_VERSION_STRING,
+                 &commands[0]);
+  doc.Print(cmDocumentation::HTMLForm, fout);
+  
   return 0;
 }
