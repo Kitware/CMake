@@ -36,6 +36,7 @@
 ***************************************************************************/
 
 #define _XOPEN_SOURCE_EXTENDED
+#define _WCHAR_T
 #include "form.priv.h"
 #undef _XOPEN_SOURCE_EXTENDED
 

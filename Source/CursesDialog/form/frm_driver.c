@@ -30,6 +30,7 @@
  *   Author: Juergen Pfeifer <juergen.pfeifer@gmx.net> 1995,1997            *
  ****************************************************************************/
 #define _XOPEN_SOURCE_EXTENDED
+#define _WCHAR_T
 #include "form.priv.h"
 #undef _XOPEN_SOURCE_EXTENDED
 
