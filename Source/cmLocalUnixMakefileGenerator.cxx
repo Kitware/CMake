@@ -309,32 +309,6 @@ void cmLocalUnixMakefileGenerator::OutputMakefile(const char* file,
 }
 
 
-
-std::string cmLocalUnixMakefileGenerator::GetOutputExtension(const char* s)
-{
-  if(m_Makefile->IsOn("WIN32") && !(m_Makefile->IsOn("CYGWIN") || m_Makefile->IsOn("MINGW")))
-    {
-    std::string sourceExtension = s;
-    if(sourceExtension == "def")
-      {
-      return "";
-      }
-    if(sourceExtension == "ico" || sourceExtension == "rc2")
-      {
-      return "";
-      }
-    if(sourceExtension == "rc")
-      {
-      return ".res";
-      }
-    return ".obj";
-    }
-  else
-    {
-    return ".o";
-    }
-}
-
 std::string cmLocalUnixMakefileGenerator::GetBaseTargetName(const char* n,
                                                             const cmTarget& t)
 {
@@ -380,7 +354,7 @@ std::string cmLocalUnixMakefileGenerator::GetFullTargetName(const char* n,
                                                             const cmTarget& t)
 {
   const char* targetSuffix = t.GetProperty("SUFFIX");
-  const char* suffixVar = 0;
+  std::string suffixVar;
   switch(t.GetType())
     {
     case cmTarget::STATIC_LIBRARY:
@@ -400,9 +374,20 @@ std::string cmLocalUnixMakefileGenerator::GetFullTargetName(const char* n,
       break;
     }
   // if there is no suffix on the target use the cmake definition
-  if(!targetSuffix && suffixVar)
+  if(!targetSuffix && suffixVar.size())
     {
-    targetSuffix = m_Makefile->GetSafeDefinition(suffixVar);
+    // first check for a language specific suffix var
+    const char* ll = t.GetLinkerLanguage(this->GetGlobalGenerator());
+    if(ll)
+      {
+      std::string langSuff = suffixVar + std::string("_") + ll;
+      targetSuffix = m_Makefile->GetDefinition(langSuff.c_str());
+      }
+    // if there not a language specific suffix then use the general one 
+    if(!targetSuffix)
+      {
+      targetSuffix = m_Makefile->GetSafeDefinition(suffixVar.c_str());
+      }
     }
   std::string name = this->GetBaseTargetName(n, t);
   name += targetSuffix?targetSuffix:"";
@@ -540,9 +525,10 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
         {
         if(!(*i)->GetPropertyAsBool("HEADER_FILE_ONLY") && 
            !(*i)->GetCustomCommand())
-          {
-          std::string outExt(
-            this->GetOutputExtension((*i)->GetSourceExtension().c_str()));
+          { 
+          std::string outExt = 
+            m_GlobalGenerator->GetLanguageOutputExtensionFromExtension(
+              (*i)->GetSourceExtension().c_str());
           if(outExt.size() && !(*i)->GetPropertyAsBool("EXTERNAL_OBJECT") )
             {
             fout << "\\\n";
@@ -560,8 +546,9 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
         if(!(*i)->GetPropertyAsBool("HEADER_FILE_ONLY") && 
            !(*i)->GetCustomCommand())
           {
-          std::string outExt(
-            this->GetOutputExtension((*i)->GetSourceExtension().c_str()));
+          std::string outExt = 
+            m_GlobalGenerator->GetLanguageOutputExtensionFromExtension(
+              (*i)->GetSourceExtension().c_str());
           if(outExt.size() && (*i)->GetPropertyAsBool("EXTERNAL_OBJECT") )
             {
             fout << "\\\n";
@@ -577,7 +564,9 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
         if(!(*i)->GetPropertyAsBool("HEADER_FILE_ONLY") &&
            !(*i)->GetCustomCommand())
           {
-          std::string outExt(this->GetOutputExtension((*i)->GetSourceExtension().c_str()));
+          std::string outExt = 
+            m_GlobalGenerator->GetLanguageOutputExtensionFromExtension(
+              (*i)->GetSourceExtension().c_str());
           if(outExt.size() && !(*i)->GetPropertyAsBool("EXTERNAL_OBJECT") )
             {
             std::string ofname = (*i)->GetSourceName() + outExt;
@@ -594,7 +583,9 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
         if(!(*i)->GetPropertyAsBool("HEADER_FILE_ONLY") &&
            !(*i)->GetCustomCommand())
           {
-          std::string outExt(this->GetOutputExtension((*i)->GetSourceExtension().c_str()));
+          std::string outExt = 
+            m_GlobalGenerator->GetLanguageOutputExtensionFromExtension(
+              (*i)->GetSourceExtension().c_str());
           if(outExt.size() && (*i)->GetPropertyAsBool("EXTERNAL_OBJECT") )
             {
             fout << "\\\n\"" << this->ConvertToMakeTarget(ConvertToRelativeOutputPath((*i)->GetFullPath().c_str()).c_str()) << "\" ";
@@ -702,20 +693,13 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
   std::string buildType =  m_Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   buildType = cmSystemTools::UpperCase(buildType);
 
-  bool cxx = tgt.HasCxx(); 
-  if(!cxx )
-    {
-    // if linking a c executable use the C runtime flag as cc
-    // may not be the same program that creates shared libaries
-    // and may have different flags
-    runtimeFlag = m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_RUNTIME_FLAG");
-    runtimeSep = m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_RUNTIME_FLAG_SEP");
-    }
-  else
-    { 
-    runtimeFlag = m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_RUNTIME_CXX_FLAG");
-    runtimeSep = m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_RUNTIME_CXX_FLAG_SEP");
-    }
+  const char* linkLanguage = tgt.GetLinkerLanguage(this->GetGlobalGenerator());
+  std::string runTimeFlagVar = "CMAKE_SHARED_LIBRARY_RUNTIME_";
+  runTimeFlagVar += linkLanguage;
+  runTimeFlagVar += "_FLAG";
+  std::string runTimeFlagSepVar = runTimeFlagVar + "_SEP";
+  runtimeFlag = m_Makefile->GetSafeDefinition(runTimeFlagVar.c_str());
+  runtimeSep = m_Makefile->GetSafeDefinition(runTimeFlagSepVar.c_str());
   
   // concatenate all paths or no?
   bool runtimeConcatenate = ( runtimeSep!="" );
@@ -733,16 +717,12 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
   std::string linkLibs;
   
   // Flags to link an executable to shared libraries.
+  std::string linkFlagsVar = "CMAKE_SHARED_LIBRARY_LINK_";
+  linkFlagsVar += linkLanguage;
+  linkFlagsVar += "_FLAGS";
   if( tgt.GetType() == cmTarget::EXECUTABLE )
     {
-    if(cxx)
-      {
-      linkLibs = m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS");
-      }
-    else
-      {
-      linkLibs = m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_LINK_FLAGS");
-      }
+    linkLibs = m_Makefile->GetSafeDefinition(linkFlagsVar.c_str());
     linkLibs += " ";
     }
   
@@ -832,7 +812,6 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
         // then add the lib prefix back into the name
         if(m_IgnoreLibPrefix)
           {
-          std::cout << "m_IgnoreLibPrefix\n";
           file = "lib" + file;
           }
         librariesLinked += file;
@@ -986,35 +965,30 @@ std::string cmLocalUnixMakefileGenerator::CreatePostBuildRules(
 
 struct RuleVariables
 {
-  const char* replace;
-  const char* lookup;
+  const char* variable;
 };
 
-static RuleVariables ruleReplaceVars[] =
+
+// List of variables that are replaced when
+// rules are expanced.  These variables are
+// replaced in the form <var> with GetSafeDefinition(var).
+// ${LANG} is replaced in the variable first with all enabled 
+// languages.
+static const char* ruleReplaceVars[] =
 {
-  {"<CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS>", "CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS"},
-  {"<CMAKE_SHARED_MODULE_CREATE_CXX_FLAGS>", "CMAKE_SHARED_MODULE_CREATE_CXX_FLAGS"}, 
-  {"<CMAKE_SHARED_MODULE_CREATE_FORTAN_FLAGS>", "CMAKE_SHARED_MODULE_CREATE_FORTAN_FLAGS"}, 
-  {"<CMAKE_SHARED_MODULE_C_FLAGS>", "CMAKE_SHARED_MODULE_C_FLAGS"},
-  {"<CMAKE_SHARED_MODULE_Fortran_FLAGS>", "CMAKE_SHARED_MODULE_Fortran_FLAGS"},
-  {"<CMAKE_SHARED_MODULE_CXX_FLAGS>", "CMAKE_SHARED_MODULE_CXX_FLAGS"},
-  {"<CMAKE_SHARED_LIBRARY_C_FLAGS>", "CMAKE_SHARED_LIBRARY_C_FLAGS"},
-  {"<CMAKE_SHARED_LIBRARY_Fortran_FLAGS>", "CMAKE_SHARED_LIBRARY_Fortran_FLAGS"},
-  {"<CMAKE_SHARED_LIBRARY_CXX_FLAGS>", "CMAKE_SHARED_LIBRARY_CXX_FLAGS"},
-  {"<CMAKE_CXX_LINK_FLAGS>", "CMAKE_CXX_LINK_FLAGS"},
-
-  {"<CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS>", "CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS"},
-  {"<CMAKE_SHARED_LIBRARY_CREATE_Fortran_FLAGS>", "CMAKE_SHARED_LIBRARY_CREATE_Fortran_FLAGS"},
-  {"<CMAKE_SHARED_MODULE_CREATE_C_FLAGS>", "CMAKE_SHARED_MODULE_CREATE_C_FLAGS"},
-  {"<CMAKE_SHARED_LIBRARY_SONAME_C_FLAG>", "CMAKE_SHARED_LIBRARY_SONAME_C_FLAG"},
-  {"<CMAKE_SHARED_LIBRARY_SONAME_Fortran_FLAG>", "CMAKE_SHARED_LIBRARY_SONAME_Fortran_FLAG"},
-  {"<CMAKE_SHARED_LIBRARY_SONAME_CXX_FLAG>", "CMAKE_SHARED_LIBRARY_SONAME_CXX_FLAG"},
-  {"<CMAKE_C_LINK_FLAGS>", "CMAKE_C_LINK_FLAGS"},
-  {"<CMAKE_Fortran_LINK_FLAGS>", "CMAKE_Fortran_LINK_FLAGS"},
-
-  {"<CMAKE_AR>", "CMAKE_AR"},
-  {"<CMAKE_RANLIB>", "CMAKE_RANLIB"},
-  {0, 0}
+  "CMAKE_SHARED_LIBRARY_CREATE_${LANG}_FLAGS",
+  "CMAKE_SHARED_MODULE_CREATE_${LANG}_FLAGS",
+  "CMAKE_SHARED_MODULE_${LANG}_FLAGS", 
+  "CMAKE_SHARED_LIBRARY_${LANG}_FLAGS",
+  "CMAKE_${LANG}_LINK_FLAGS",
+  "CMAKE_SHARED_LIBRARY_SONAME_${LANG}_FLAG",
+  "CMAKE_${LANG}_ARCHIVE",
+  "CMAKE_${LANG}_COMPILER",
+  "CMAKE_AR",
+  "CMAKE_CURRENT_SOURCE_DIR",
+  "CMAKE_CURRENT_BINARY_DIR",
+  "CMAKE_RANLIB",
+  0
 };
 
 
@@ -1033,15 +1007,9 @@ cmLocalUnixMakefileGenerator::ExpandRuleVariables(std::string& s,
                                                   const char* targetSOName,
                                                   const char* linkFlags)
 { 
-  std::string cxxcompiler = this->ConvertToOutputForExisting(
-    m_Makefile->GetSafeDefinition("CMAKE_CXX_COMPILER"));
-  std::string ccompiler = this->ConvertToOutputForExisting(
-    m_Makefile->GetSafeDefinition("CMAKE_C_COMPILER"));
-  std::string fcompiler = this->ConvertToOutputForExisting(
-    m_Makefile->GetSafeDefinition("CMAKE_Fortran_COMPILER"));
-  cmSystemTools::ReplaceString(s, "<CMAKE_Fortran_COMPILER>", fcompiler.c_str());
-  cmSystemTools::ReplaceString(s, "<CMAKE_CXX_COMPILER>", cxxcompiler.c_str());
-  cmSystemTools::ReplaceString(s, "<CMAKE_C_COMPILER>", ccompiler.c_str());
+  std::vector<std::string> enabledLanguages;
+  m_GlobalGenerator->GetEnabledLanguages(enabledLanguages);
+
   if(linkFlags)
     {
     cmSystemTools::ReplaceString(s, "<LINK_FLAGS>", linkFlags);
@@ -1111,13 +1079,31 @@ cmLocalUnixMakefileGenerator::ExpandRuleVariables(std::string& s,
     cmSystemTools::ReplaceString(s, "<LINK_LIBRARIES>", linkLibs);
     }
   
-  RuleVariables* rv = ruleReplaceVars;
-  while(rv->replace)
+  // loop over language specific replace variables
+  int pos = 0;
+  while(ruleReplaceVars[pos])
     {
-    cmSystemTools::ReplaceString(s, rv->replace,
-                                 m_Makefile->GetSafeDefinition(rv->lookup));
-    rv++;
-    }  
+    std::string replace = "<";
+    replace += ruleReplaceVars[pos];
+    replace += ">";
+    std::string replaceWith = ruleReplaceVars[pos];
+    for(std::vector<std::string>::iterator i = enabledLanguages.begin();
+        i != enabledLanguages.end(); ++i)
+      {
+      std::string actualReplace = replace;
+      cmSystemTools::ReplaceString(actualReplace, "${LANG}", i->c_str());
+      std::string actualReplaceWith = replaceWith;
+      cmSystemTools::ReplaceString(actualReplaceWith, "${LANG}", i->c_str());
+      std::string replace = m_Makefile->GetSafeDefinition(actualReplaceWith.c_str());
+      // if the variable is not a FLAG then treat it like a path
+      if(actualReplaceWith.find("_FLAG") == actualReplaceWith.npos)
+        {
+        replace = this->ConvertToOutputForExisting(replace.c_str());
+        }
+      cmSystemTools::ReplaceString(s, actualReplace.c_str(), replace.c_str());
+      }
+    pos++;
+    }
 }
 
   
@@ -1176,8 +1162,10 @@ void cmLocalUnixMakefileGenerator::OutputLibraryRule(std::ostream& fout,
     }
 
   // get the objects that are used to link this library
-  std::string objs = "$(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") $(" + this->CreateMakeVariable(name, "_EXTERNAL_OBJS") + ") ";
-  std::string objsQuoted = "$(" + this->CreateMakeVariable(name, "_SRC_OBJS_QUOTED") + ") $(" + this->CreateMakeVariable(name, "_EXTERNAL_OBJS_QUOTED") + ") ";
+  std::string objs = "$(" + this->CreateMakeVariable(name, "_SRC_OBJS") 
+    + ") $(" + this->CreateMakeVariable(name, "_EXTERNAL_OBJS") + ") ";
+  std::string objsQuoted = "$(" + this->CreateMakeVariable(name, "_SRC_OBJS_QUOTED") 
+    + ") $(" + this->CreateMakeVariable(name, "_EXTERNAL_OBJS_QUOTED") + ") ";
   // create a variable with the objects that this library depends on
   std::string depend =
     objs + " $(" + this->CreateMakeVariable(name, "_DEPEND_LIBS") + ")";
@@ -1289,23 +1277,10 @@ void cmLocalUnixMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
                                                            const char* name, 
                                                            const cmTarget &t)
 {
-  const char* createRule;
-  if(t.HasCxx())
-    {
-    createRule = "CMAKE_CXX_CREATE_SHARED_LIBRARY";
-    } 
-  else
-    {
-    if(t.HasFortran())
-      { 
-      createRule = "CMAKE_Fortran_CREATE_SHARED_LIBRARY";
-      }
-    else
-      {
-      createRule = "CMAKE_C_CREATE_SHARED_LIBRARY";
-      }
-    }
-  
+  const char* linkLanguage = t.GetLinkerLanguage(this->GetGlobalGenerator());
+  std::string createRule = "CMAKE_";
+  createRule += linkLanguage;
+  createRule += "_CREATE_SHARED_LIBRARY";
   std::string buildType =  m_Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   buildType = cmSystemTools::UpperCase(buildType); 
   std::string linkFlags = m_Makefile->GetSafeDefinition("CMAKE_SHARED_LINKER_FLAGS");
@@ -1339,7 +1314,7 @@ void cmLocalUnixMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
     linkFlags += " ";
     }
   this->OutputLibraryRule(fout, name, t,
-                          createRule,
+                          createRule.c_str(),
                           "shared library",
                           linkFlags.c_str());
 }
@@ -1348,23 +1323,10 @@ void cmLocalUnixMakefileGenerator::OutputModuleLibraryRule(std::ostream& fout,
                                                       const char* name, 
                                                       const cmTarget &t)
 {
-  const char* createRule;
-  if(t.HasCxx())
-    {
-    createRule = "CMAKE_CXX_CREATE_SHARED_MODULE";
-    } 
-  else
-    {
-    if(t.HasFortran())
-      { 
-      createRule = "CMAKE_Fortran_CREATE_SHARED_MODULE";
-      }
-    else
-      {
-      createRule = "CMAKE_C_CREATE_SHARED_MODULE";
-      }
-    }
-  
+  const char* linkLanguage = t.GetLinkerLanguage(this->GetGlobalGenerator());
+  std::string createRule = "CMAKE_";
+  createRule += linkLanguage;
+  createRule += "_CREATE_SHARED_MODULE";
   std::string buildType =  m_Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   buildType = cmSystemTools::UpperCase(buildType); 
   std::string linkFlags = m_Makefile->GetSafeDefinition("CMAKE_MODULE_LINKER_FLAGS");
@@ -1383,7 +1345,7 @@ void cmLocalUnixMakefileGenerator::OutputModuleLibraryRule(std::ostream& fout,
     linkFlags += " ";
     }
   this->OutputLibraryRule(fout, name, t,
-                          createRule,
+                          createRule.c_str(),
                           "shared module",
                           linkFlags.c_str());
 }
@@ -1393,23 +1355,10 @@ void cmLocalUnixMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout,
                                                       const char* name, 
                                                       const cmTarget &t)
 {
-  const char* createRule;
-  if(t.HasCxx())
-    {
-    createRule = "CMAKE_CXX_CREATE_STATIC_LIBRARY";
-    }
-  else
-    {
-    if(t.HasFortran())
-      { 
-      createRule = "CMAKE_Fortran_CREATE_STATIC_LIBRARY";
-      }
-    else
-      {
-      createRule = "CMAKE_C_CREATE_STATIC_LIBRARY";
-      }
-    }
-  
+  const char* linkLanguage = t.GetLinkerLanguage(this->GetGlobalGenerator());
+  std::string createRule = "CMAKE_";
+  createRule += linkLanguage;
+  createRule += "_CREATE_STATIC_LIBRARY";
   std::string linkFlags;
   const char* targetLinkFlags = t.GetProperty("STATIC_LIBRARY_FLAGS");
   if(targetLinkFlags)
@@ -1418,7 +1367,7 @@ void cmLocalUnixMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout,
     linkFlags += " ";
     }
   this->OutputLibraryRule(fout, name, t,
-                          createRule,
+                          createRule.c_str(),
                           "static library",
                           linkFlags.c_str());
   
@@ -1486,34 +1435,23 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
     linkFlags += m_Makefile->GetSafeDefinition(build.c_str());
     linkFlags += " ";
     }
+  const char* linkLanguage = t.GetLinkerLanguage(this->GetGlobalGenerator());
 
-  if(t.HasCxx())
-    {
-    rules.push_back(m_Makefile->GetRequiredDefinition("CMAKE_CXX_LINK_EXECUTABLE"));
-    flags += m_Makefile->GetSafeDefinition("CMAKE_CXX_FLAGS");
-    flags += " ";
-    flags += m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_CXX_FLAGS");
-    flags += " ";
-    }
-  else
-    {
-    if(t.HasFortran())
-      {
-      rules.push_back(m_Makefile->GetRequiredDefinition("CMAKE_Fortran_LINK_EXECUTABLE"));
-      flags += m_Makefile->GetSafeDefinition("CMAKE_Fortran_FLAGS");
-      flags += " ";
-      flags += m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_Fortran_FLAGS");
-      flags += " ";
-      }
-    else
-      {
-      rules.push_back(m_Makefile->GetRequiredDefinition("CMAKE_C_LINK_EXECUTABLE"));
-      flags += m_Makefile->GetSafeDefinition("CMAKE_C_FLAGS");
-      flags += " ";
-      flags += m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_C_FLAGS");
-      flags += " ";
-      }
-    }
+  std::string langVar = "CMAKE_";
+  langVar += linkLanguage;
+  
+  std::string ruleVar = langVar + "_LINK_EXECUTABLE";
+  std::string flagsVar = langVar + "_FLAGS";
+  std::string sharedFlagsVar = "CMAKE_SHARED_LIBRARY_";
+  sharedFlagsVar += langVar;
+  sharedFlagsVar += "_FLAGS";
+  
+  rules.push_back(m_Makefile->GetRequiredDefinition(ruleVar.c_str()));
+  flags += m_Makefile->GetSafeDefinition(flagsVar.c_str());
+  flags += " ";
+  flags += m_Makefile->GetSafeDefinition(sharedFlagsVar.c_str());
+  flags += " ";
+
   cmOStringStream linklibs;
   this->OutputLinkLibraries(linklibs, 0, t);
   std::string comment = "executable";
@@ -1538,7 +1476,9 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
     }
   if(cmSystemTools::IsOn(m_Makefile->GetDefinition("BUILD_SHARED_LIBS")))
     {
-    linkFlags += m_Makefile->GetSafeDefinition("CMAKE_SHARED_BUILD_CXX_FLAGS");
+    std::string sFlagVar = std::string("CMAKE_SHARED_BUILD_") + linkLanguage 
+      + std::string("_FLAGS");
+    linkFlags += m_Makefile->GetSafeDefinition(sFlagVar.c_str());
     linkFlags += " ";
    }
   
@@ -2325,7 +2265,10 @@ bool cmLocalUnixMakefileGenerator::OutputObjectDepends(std::ostream& fout)
               dep != (*source)->GetDepends().end(); ++dep)
             {
             std::string s = (*source)->GetSourceName();
-            s += this->GetOutputExtension((*source)->GetSourceExtension().c_str());
+            std::string outExt = 
+              m_GlobalGenerator->GetLanguageOutputExtensionFromExtension(
+                (*source)->GetSourceExtension().c_str());
+            s += outExt;
             fout << this->ConvertToRelativeOutputPath(s.c_str()) << " : "
                  << this->ConvertToRelativeOutputPath(dep->c_str()) << "\n";
             ret = true;
@@ -2555,8 +2498,17 @@ void cmLocalUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
   fout << "CMAKE_BINARY_DIR = " << 
     this->ConvertToRelativeOutputPath(m_Makefile->GetHomeOutputDirectory())
        << "\n";
-  // Output Include paths
-  fout << "INCLUDE_FLAGS = ";
+  fout << "\n\n";
+}
+
+cmStdString& cmLocalUnixMakefileGenerator::GetIncludeFlags(const char* lang)
+{
+  if(m_LanguageToIncludeFlags.count(lang))
+    {
+    return m_LanguageToIncludeFlags[lang];
+    }
+    // Output Include paths
+  cmOStringStream includeFlags;
   std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();
   std::vector<std::string>::iterator i;
   std::map<cmStdString, cmStdString> implicitIncludes;
@@ -2592,11 +2544,31 @@ void cmLocalUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
       includeSourceDir = true;
       }
     }
+  std::string flagVar = "CMAKE_INCLUDE_FLAG_";
+  flagVar += lang;
+  const char* includeFlag = m_Makefile->GetDefinition(flagVar.c_str());
+  flagVar = "CMAKE_INCLUDE_FLAG_SEP_";
+  flagVar += lang;
+  const char* sep = m_Makefile->GetDefinition(flagVar.c_str());
+
+  bool repeatFlag = true; // should the include flag be repeated like ie. -IA -IB
+  if(!sep)
+    {
+    sep = " ";
+    }
+  else
+    {
+    // if there is a separator then the flag is not repeated but is only given once
+    // i.e.  -classpath a:b:c
+    repeatFlag = false;
+    }
+  bool flagUsed = false;
   if(includeSourceDir)
     {
-    fout << "-I"
+    includeFlags << includeFlag
          << this->ConvertToOutputForExisting(m_Makefile->GetStartDirectory())
-         << " ";
+         << sep;
+    flagUsed = true;
     }
 
   implicitIncludes["/usr/include"] = "/usr/include";
@@ -2619,13 +2591,24 @@ void cmLocalUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     // implementations because the wrong headers may be found first.
     if(implicitIncludes.find(include) == implicitIncludes.end())
       {
-      fout << "-I" << this->ConvertToOutputForExisting(i->c_str()) << " ";
+      if(!flagUsed || repeatFlag)
+        {
+        includeFlags << includeFlag;
+        flagUsed = true;
+        }
+      includeFlags << this->ConvertToOutputForExisting(i->c_str()) << sep;
       }
     }
-  fout << m_Makefile->GetDefineFlags();
-  fout << "\n\n";
+  std::string flags = includeFlags.str();
+  // remove trailing separators
+  if((sep[0] != ' ') && flags[flags.size()-1] == sep[0])
+    {
+    flags[flags.size()-1] = ' ';
+    }
+  flags += m_Makefile->GetDefineFlags();
+  m_LanguageToIncludeFlags[lang] = flags;
+  return m_LanguageToIncludeFlags[lang];
 }
-
 
 void cmLocalUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
 {
@@ -2827,13 +2810,12 @@ OutputBuildObjectFromSource(std::ostream& fout,
     return;
     }
 
-  std::string comment = "object file";
-  std::string objectFile = std::string(shortName) + 
-    this->GetOutputExtension(source.GetSourceExtension().c_str());
+  std::string outputExt = 
+    m_GlobalGenerator->GetLanguageOutputExtensionFromExtension(
+      source.GetSourceExtension().c_str());
+  std::string objectFile = std::string(shortName) + outputExt;
   objectFile = this->CreateSafeUniqueObjectFileName(objectFile.c_str());
   objectFile = this->ConvertToRelativeOutputPath(objectFile.c_str());
-  cmSystemTools::FileFormat format = 
-    cmSystemTools::GetFileFormat(source.GetSourceExtension().c_str());
   std::vector<std::string> rules;
   std::string flags;
   if(extraCompileFlags)
@@ -2848,6 +2830,19 @@ OutputBuildObjectFromSource(std::ostream& fout,
   const char* lang = 
     m_GlobalGenerator->GetLanguageFromExtension(source.GetSourceExtension().c_str());
   // for now if the lang is defined add the rules and flags for it
+  std::string comment = outputExt;
+  comment += " file";
+  if(lang)
+    {
+    comment += " from ";
+    comment += lang;
+    comment += ": ";
+    if(comment.size() < 18)
+      {
+      comment.resize(18, ' ');
+      }
+    }
+  
   if(lang)
     {
     std::string varString = "CMAKE_";
@@ -2883,44 +2878,17 @@ OutputBuildObjectFromSource(std::ostream& fout,
       flags += " ";
       }
     }
-  // the language is not defined, fall back on old stuff
   else
-    {
-    switch(format)
+    { 
+    // if the language is not defined and should not be ignored,
+    // then produce an error
+    if(!m_GlobalGenerator->IgnoreFile(source.GetSourceExtension().c_str()))
       {
-      // these are all handled by the if(lang) step now
-      case cmSystemTools::C_FILE_FORMAT:
-      case cmSystemTools::CXX_FILE_FORMAT:
-      case cmSystemTools::FORTRAN_FILE_FORMAT:
-        break;
-      case cmSystemTools::HEADER_FILE_FORMAT:
-        return;
-      case cmSystemTools::DEFINITION_FILE_FORMAT:
-        return;
-      case cmSystemTools::OBJECT_FILE_FORMAT:
-        return;
-      case cmSystemTools::RESOURCE_FILE_FORMAT:
-        {
-        // use rc rule here if it is defined
-        const char* rule = m_Makefile->GetDefinition("CMAKE_COMPILE_RESOURCE");
-        if(rule)
-          {
-          rules.push_back(rule);
-          }
-        }
-      break;
-      case cmSystemTools::NO_FILE_FORMAT:
-      case cmSystemTools::JAVA_FILE_FORMAT:
-      case cmSystemTools::STATIC_LIBRARY_FILE_FORMAT:
-      case cmSystemTools::SHARED_LIBRARY_FILE_FORMAT:
-      case cmSystemTools::MODULE_FILE_FORMAT:
-      case cmSystemTools::UNKNOWN_FILE_FORMAT:
-        cmSystemTools::Error("Unexpected file type ",
-                             sourceFile.c_str());
-        break;
-      } 
+      cmSystemTools::Error("Unexpected file type ",
+                           sourceFile.c_str());
+      }
     }
-  flags += "$(INCLUDE_FLAGS) ";
+  flags += this->GetIncludeFlags(lang);
   // expand multi-command semi-colon separated lists
   // of commands into separate commands
   std::vector<std::string> commands;
@@ -2964,8 +2932,7 @@ OutputBuildObjectFromSource(std::ostream& fout,
 
 void cmLocalUnixMakefileGenerator::OutputSourceObjectBuildRules(std::ostream& fout)
 {
-  fout << "# Rules to build " << this->GetOutputExtension("")
-       << " files from their sources:\n";
+  fout << "# Rules to build source files :\n\n";
 
   std::set<std::string> rules;
   

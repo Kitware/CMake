@@ -72,7 +72,7 @@ public:
   void SetLanguageEnabled(const char*, cmMakefile* mf);
   bool GetLanguageEnabled(const char*);
   void ClearEnabledLanguages();
-
+  void GetEnabledLanguages(std::vector<std::string>& lang);
   /**
    * Try to determine system infomation such as shared library
    * extension, pthreads, byte order etc.  
@@ -107,6 +107,14 @@ public:
   bool GetForceUnixPaths() {return m_ForceUnixPaths;}
   ///! return the language for the given extension
   const char* GetLanguageFromExtension(const char* ext);
+  ///! is an extension to be ignored
+  bool IgnoreFile(const char* ext);
+  ///! What is the preference for linkers and this language (None or Prefered)
+  const char* GetLinkerPreference(const char* lang);
+  ///! What is the output extension for a given language.
+  const char* GetLanguageOutputExtensionForLanguage(const char* lang);
+  ///! What is the output extension for a given source file extension.
+  const char* GetLanguageOutputExtensionFromExtension(const char* lang);
 protected:
   bool IsExcluded(cmLocalGenerator* root, cmLocalGenerator* gen);
   void FindMakeProgram(cmMakefile*);
@@ -121,8 +129,13 @@ protected:
   void RecursiveConfigure(cmLocalGenerator *lg, float start, float end);
   
 private:
+  // If you add a new map here, make sure it is copied
+  // in EnableLanguagesFromGenerator 
+  std::map<cmStdString, bool> m_IgnoreExtensions;
   std::map<cmStdString, bool> m_LanguageEnabled;
+  std::map<cmStdString, cmStdString> m_LanguageToOutputExtension;
   std::map<cmStdString, cmStdString> m_ExtensionToLanguage;
+  std::map<cmStdString, cmStdString> m_LanguageToLinkerPreference;
 };
 
 #endif

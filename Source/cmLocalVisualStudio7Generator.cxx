@@ -321,24 +321,27 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   std::string flagsRelease = " ";
   std::string flagsMinSize = " ";
   std::string flagsDebug = " ";
-  std::string flagsDebugRel = " ";
-  if(target.HasCxx())
+  std::string flagsDebugRel = " "; 
+  if(strcmp(configType, "10") != 0)
     {
-    flags = m_Makefile->GetRequiredDefinition("CMAKE_CXX_FLAGS");
-    flagsRelease += m_Makefile->GetRequiredDefinition("CMAKE_CXX_FLAGS_RELEASE");
-    flagsMinSize += m_Makefile->GetRequiredDefinition("CMAKE_CXX_FLAGS_MINSIZEREL");
-    flagsDebug += m_Makefile->GetRequiredDefinition("CMAKE_CXX_FLAGS_DEBUG");
-    flagsDebugRel += m_Makefile->GetRequiredDefinition("CMAKE_CXX_FLAGS_RELWITHDEBINFO");
-    }
-  else
-    {
-    flags = m_Makefile->GetRequiredDefinition("CMAKE_C_FLAGS");
-    flagsRelease += m_Makefile->GetRequiredDefinition("CMAKE_C_FLAGS_RELEASE");
-    flagsMinSize += m_Makefile->GetRequiredDefinition("CMAKE_C_FLAGS_MINSIZEREL");
-    flagsDebug += m_Makefile->GetRequiredDefinition("CMAKE_C_FLAGS_DEBUG");
-    flagsDebugRel += m_Makefile->GetRequiredDefinition("CMAKE_C_FLAGS_RELWITHDEBINFO");
-    }
+    const char* linkLanguage = target.GetLinkerLanguage(this->GetGlobalGenerator());
+    std::string baseFlagVar = "CMAKE_";
+    baseFlagVar += linkLanguage;
+    baseFlagVar += "_FLAGS";
+    flags = m_Makefile->GetRequiredDefinition(baseFlagVar.c_str());
+    
+    std::string flagVar = baseFlagVar + "_RELEASE";
+    flagsRelease += m_Makefile->GetRequiredDefinition(flagVar.c_str());
 
+    flagVar = baseFlagVar + "_MINSIZEREL";
+    flagsMinSize += m_Makefile->GetRequiredDefinition(flagVar.c_str());
+
+    flagVar = baseFlagVar + "_DEBUG";
+    flagsDebug += m_Makefile->GetRequiredDefinition(flagVar.c_str());
+
+    flagVar = baseFlagVar + "_RELWITHDEBINFO";
+    flagsDebugRel += m_Makefile->GetRequiredDefinition(flagVar.c_str());
+    }
 
   std::string programDatabase;
   const char* pre = "WIN32,_DEBUG,_WINDOWS";
@@ -574,6 +577,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     }
     case cmTarget::SHARED_LIBRARY:
     case cmTarget::MODULE_LIBRARY:
+      {
       fout << "\t\t\t<Tool\n"
            << "\t\t\t\tName=\"VCLinkerTool\"\n"
            << "\t\t\t\tAdditionalOptions=\"/MACHINE:I386";
@@ -620,10 +624,14 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
         {
         fout << "\t\t\t\tGenerateDebugInformation=\"TRUE\"\n";
         }
-      if(target.HasCxx())
+      const char* linkLanguage = target.GetLinkerLanguage(this->GetGlobalGenerator());
+      std::string stackVar = "CMAKE_";
+      stackVar += linkLanguage;
+      stackVar += "_STACK_SIZE";
+      const char* stackVal = m_Makefile->GetDefinition(stackVar.c_str());
+      if(stackVal)
         {
-        fout << "\t\t\t\tStackReserveSize=\"" 
-             << m_Makefile->GetRequiredDefinition("CMAKE_CXX_STACK_SIZE") << "\"\n";
+        fout << "\t\t\t\tStackReserveSize=\"" << stackVal  << "\"\n";
         }
       temp = m_LibraryOutputPath;
       temp += configName;
@@ -632,9 +640,11 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       temp += debugPostfix;
       temp += ".lib";
       fout << "\t\t\t\tImportLibrary=\"" << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"/>\n";
+      }
       break;
     case cmTarget::EXECUTABLE:
-
+      {
+    
       fout << "\t\t\t<Tool\n"
            << "\t\t\t\tName=\"VCLinkerTool\"\n"
            << "\t\t\t\tAdditionalOptions=\"/MACHINE:I386"; 
@@ -682,14 +692,19 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       else
         {      
         fout << "\t\t\t\tSubSystem=\"1\"\n";
-        }
-      if(target.HasCxx())
+        } 
+      const char* linkLanguage = target.GetLinkerLanguage(this->GetGlobalGenerator());
+      std::string stackVar = "CMAKE_";
+      stackVar += linkLanguage;
+      stackVar += "_STACK_SIZE";
+      const char* stackVal = m_Makefile->GetDefinition(stackVar.c_str());
+      if(stackVal)
         {
-        fout << "\t\t\t\tStackReserveSize=\"" 
-             << m_Makefile->GetRequiredDefinition("CMAKE_CXX_STACK_SIZE") << "\"";
+        fout << "\t\t\t\tStackReserveSize=\"" << stackVal << "\"";
         }
       fout << "/>\n";
       break;
+      }
     case cmTarget::UTILITY:
       break;
     }
@@ -922,8 +937,9 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
         {
         compileFlags = cflags;
         }
-      if(cmSystemTools::GetFileFormat((*sf)->GetSourceExtension().c_str())
-         == cmSystemTools::CXX_FILE_FORMAT)
+      const char* lang = 
+        m_GlobalGenerator->GetLanguageFromExtension((*sf)->GetSourceExtension().c_str());
+      if(lang && strcmp(lang, "CXX") == 0)
         {
         // force a C++ file type
         compileFlags += " /TP ";

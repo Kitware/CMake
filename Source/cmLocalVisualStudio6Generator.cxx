@@ -340,8 +340,9 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
         {
         compileFlags = cflags;
         }
-      if(cmSystemTools::GetFileFormat((*sf)->GetSourceExtension().c_str())
-         == cmSystemTools::CXX_FILE_FORMAT)
+      const char* lang = 
+        m_GlobalGenerator->GetLanguageFromExtension((*sf)->GetSourceExtension().c_str());
+      if(strcmp(lang, "CXX") == 0)
         {
         // force a C++ file type
         compileFlags += " /TP ";
@@ -1058,33 +1059,29 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
     std::string flagsDebug = " ";
     std::string flagsDebugRel = " ";
     // if CXX is on and the target contains cxx code then add the cxx flags
-    if ( gen->GetLanguageEnabled("CXX") && target.HasCxx() )
-      {
-      flagsRelease = m_Makefile->GetRequiredDefinition("CMAKE_CXX_FLAGS_RELEASE");
-      flagsRelease += " -DCMAKE_INTDIR=\\\"Release\\\" ";
-      flagsMinSize = m_Makefile->GetRequiredDefinition("CMAKE_CXX_FLAGS_MINSIZEREL");
-      flagsMinSize += " -DCMAKE_INTDIR=\\\"MinSizeRel\\\" ";
-      flagsDebug = m_Makefile->GetRequiredDefinition("CMAKE_CXX_FLAGS_DEBUG");
-      flagsDebug += " -DCMAKE_INTDIR=\\\"Debug\\\" ";
-      flagsDebugRel = m_Makefile->GetRequiredDefinition("CMAKE_CXX_FLAGS_RELWITHDEBINFO");
-      flagsDebugRel += " -DCMAKE_INTDIR=\\\"RelWithDebInfo\\\" ";
-      flags = " ";
-      flags = m_Makefile->GetRequiredDefinition("CMAKE_CXX_FLAGS");
-      }
-    // if C and the target is not CXX
-    else if(gen->GetLanguageEnabled("C") && !target.HasCxx())
-      {
-      flagsRelease += m_Makefile->GetRequiredDefinition("CMAKE_C_FLAGS_RELEASE");
-      flagsRelease += " -DCMAKE_INTDIR=\\\"Release\\\"";
-      flagsMinSize += m_Makefile->GetRequiredDefinition("CMAKE_C_FLAGS_MINSIZEREL");
-      flagsMinSize += " -DCMAKE_INTDIR=\\\"MinSizeRel\\\"";
-      flagsDebug += m_Makefile->GetRequiredDefinition("CMAKE_C_FLAGS_DEBUG");
-      flagsDebug += " -DCMAKE_INTDIR=\\\"Debug\\\"";
-      flagsDebugRel += m_Makefile->GetRequiredDefinition("CMAKE_C_FLAGS_RELWITHDEBINFO");
-      flagsDebugRel += " -DCMAKE_INTDIR=\\\"RelWithDebInfo\\\"";
-      flags = " ";
-      flags = m_Makefile->GetRequiredDefinition("CMAKE_C_FLAGS");
-      }
+    std::string baseFlagVar = "CMAKE_";
+    const char* linkLanguage = target.GetLinkerLanguage(this->GetGlobalGenerator());
+    baseFlagVar += "CMAKE_";
+    baseFlagVar += linkLanguage;
+    baseFlagVar += "_FLAGS";
+    flags = m_Makefile->GetRequiredDefinition(baseFlagVar.c_str());
+    
+    std::string flagVar = baseFlagVar + "_RELEASE";
+    flagsRelease = m_Makefile->GetRequiredDefinition(flagVar.c_str());
+    flagsRelease += " -DCMAKE_INTDIR=\\\"Release\\\" ";
+
+    flagVar = baseFlagVar + "_MINSIZEREL";
+    flagsMinSize = m_Makefile->GetRequiredDefinition(flagVar.c_str());
+    flagsMinSize += " -DCMAKE_INTDIR=\\\"MinSizeRel\\\" ";
+
+    flagVar = baseFlagVar + "_DEBUG";
+    flagsDebug = m_Makefile->GetRequiredDefinition(flagVar.c_str());
+    flagsDebug += " -DCMAKE_INTDIR=\\\"Debug\\\" ";
+
+    flagVar = baseFlagVar + "_RELWITHDEBINFO";
+    flagsDebugRel = m_Makefile->GetRequiredDefinition(flagVar.c_str());
+    flagsDebugRel += " -DCMAKE_INTDIR=\\\"RelWithDebInfo\\\" ";
+
     // if unicode is not found, then add -D_MBCS
     std::string defs = m_Makefile->GetDefineFlags();
     if(flags.find("D_UNICODE") == flags.npos &&
@@ -1097,7 +1094,6 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
     // There are not separate CXX and C template files, so we use the same
     // variable names.   The previous code sets up flags* variables to contain
     // the correct C or CXX flags
-    cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_RELEASE", flagsRelease.c_str());
     cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_MINSIZEREL", flagsMinSize.c_str());
     cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_DEBUG", flagsDebug.c_str());
     cmSystemTools::ReplaceString(line,"CMAKE_CXX_FLAGS_RELWITHDEBINFO", flagsDebugRel.c_str());

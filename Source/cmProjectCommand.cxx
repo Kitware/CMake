@@ -51,6 +51,8 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args)
   std::vector<std::string> languages;
   if(args.size() > 1)
     {
+    bool hasCXX = false;
+    bool hasC = false;
     for(size_t i =1; i < args.size(); ++i)
       {
       languages.push_back(args[i]);

@@ -33,6 +33,7 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv)
 
   // build an arg list for TryCompile and extract the runArgs
   std::vector<std::string> tryCompile;
+  std::string outputVariable;
   std::string runArgs;
   unsigned int i;
   for (i = 1; i < argv.size(); ++i)
@@ -51,13 +52,22 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv)
         {
         tryCompile.push_back(argv[i]);
         }
-      }
-    else
+      } 
+    else 
       {
       tryCompile.push_back(argv[i]);
+      if (argv[i] == "OUTPUT_VARIABLE")
+        {  
+        if ( argv.size() <= (i+1) )
+          {
+          cmSystemTools::Error(
+            "OUTPUT_VARIABLE specified but there is no variable");
+          return false;
+          }
+        outputVariable = argv[i+1];
+        }
       }
     }
-  
   // do the try compile
   int res = cmTryCompileCommand::CoreTryCompileCode(m_Makefile, tryCompile, false);
   
@@ -102,6 +112,18 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv)
       int timeout = 0;
       cmSystemTools::RunSingleCommand(finalCommand.c_str(), &output, &retVal, 
         0, false, timeout);
+      if(outputVariable.size())
+        {
+        // if the TryCompileCore saved output in this outputVariable then
+        // prepend that output to this output
+        const char* compileOutput = m_Makefile->GetDefinition(outputVariable.c_str());
+        if(compileOutput)
+          {
+          output = std::string(compileOutput) + output;
+          }
+        m_Makefile->AddDefinition(outputVariable.c_str(), output.c_str());
+        }
+      
       // set the run var
       char retChar[1000];
       sprintf(retChar,"%i",retVal);

@@ -1028,23 +1028,22 @@ void cmMakefile::AddLibrary(const char* lname, int shared,
   switch (shared)
     {
     case 0:
-      target.SetType(cmTarget::STATIC_LIBRARY);
+      target.SetType(cmTarget::STATIC_LIBRARY, lname);
       break;
     case 1:
-      target.SetType(cmTarget::SHARED_LIBRARY);
+      target.SetType(cmTarget::SHARED_LIBRARY, lname);
       break;
     case 2:
-      target.SetType(cmTarget::MODULE_LIBRARY);
+      target.SetType(cmTarget::MODULE_LIBRARY, lname);
       break;
     default:
-      target.SetType(cmTarget::STATIC_LIBRARY);
+      target.SetType(cmTarget::STATIC_LIBRARY, lname);
     }
 
   // Clear its dependencies. Otherwise, dependencies might persist
   // over changes in CMakeLists.txt, making the information stale and
   // hence useless.
   target.ClearDependencyInformation( *this, lname );
-  
   target.SetInAll(true);
   target.GetSourceLists() = srcs;
   this->AddGlobalLinkInformation(lname, target);
@@ -1095,7 +1094,7 @@ cmTarget* cmMakefile::AddExecutable(const char *exeName,
                                const std::vector<std::string> &srcs)
 {
   cmTarget target;
-  target.SetType(cmTarget::EXECUTABLE);
+  target.SetType(cmTarget::EXECUTABLE, exeName);
   target.SetInAll(true);
   target.GetSourceLists() = srcs;
   this->AddGlobalLinkInformation(exeName, target);
@@ -1132,7 +1131,7 @@ void cmMakefile::AddUtilityCommand(const char* utilityName,
                                    const std::vector<std::string> &out)
 {
   cmTarget target;
-  target.SetType(cmTarget::UTILITY);
+  target.SetType(cmTarget::UTILITY, utilityName);
   target.SetInAll(all);
   if (out.size() > 1)
     {

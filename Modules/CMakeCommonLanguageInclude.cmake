@@ -2,6 +2,10 @@
 # cache values that can be initialized in the platform-compiler.cmake file
 # it may be included by more than one language.
 
+SET (CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS_INIT} $ENV{LDFLAGS}
+     CACHE STRING "Flags used by the linker.")
+
+
 IF(NOT CMAKE_NOT_USING_CONFIG_FLAGS)
 # default build type is none
   IF(NOT CMAKE_NO_BUILD_TYPE)

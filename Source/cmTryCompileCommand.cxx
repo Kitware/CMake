@@ -17,6 +17,7 @@
 #include "cmTryCompileCommand.h"
 #include "cmake.h"
 #include "cmCacheManager.h"
+#include "cmGlobalGenerator.h"
 #include "cmListFileCache.h"
 #include <cmsys/Directory.hxx>
 
@@ -146,56 +147,38 @@ int cmTryCompileCommand::CoreTryCompileCode(
       }
     
     std::string source = argv[2];
-    cmSystemTools::FileFormat format = 
-      cmSystemTools::GetFileFormat( 
-        cmSystemTools::GetFilenameExtension(source).c_str());
-    if ( format == cmSystemTools::C_FILE_FORMAT )
+    const char* lang = mf->GetCMakeInstance()->GetGlobalGenerator()->GetLanguageFromExtension(
+      cmSystemTools::GetFilenameExtension(source).c_str());
+    if(lang)
       {
-      fprintf(fout, "PROJECT(CMAKE_TRY_COMPILE C)\n");      
-      }
-    else if ( format == cmSystemTools::CXX_FILE_FORMAT )
-      {
-      fprintf(fout, "PROJECT(CMAKE_TRY_COMPILE C CXX)\n");      
-      }
-    else if ( format == cmSystemTools::FORTRAN_FILE_FORMAT )
-      {
-      fprintf(fout, "PROJECT(CMAKE_TRY_COMPILE Fortran)\n");      
+      fprintf(fout, "PROJECT(CMAKE_TRY_COMPILE %s)\n", lang);
       }
     else
       {
-      cmSystemTools::Error("Unknown file format for file: ", source.c_str(), 
-                           "; TRY_COMPILE only works for C, CXX, and FORTRAN files");
+      std::vector<std::string> lang;
+      mf->GetCMakeInstance()->GetGlobalGenerator()->GetEnabledLanguages(lang);
+      std::string msg = "TRY_COMPILE only works for enabled languages files,"
+        "\nCurrently enabled languages are:\n";
+      for(std::vector<std::string>::iterator l = lang.begin();
+          l != lang.end(); ++l)
+        {
+        msg += *l;
+        msg += " ";
+        }
+      cmSystemTools::Error("Unknown file format for file: ", source.c_str(), msg.c_str());
       return -1;
       }
-    const char* cflags = mf->GetDefinition("CMAKE_C_FLAGS"); 
+    std::string langFlags = "CMAKE_";
+    langFlags +=  lang;
+    langFlags += "_FLAGS";
     fprintf(fout, "SET(CMAKE_VERBOSE_MAKEFILE 1)\n");
-    fprintf(fout, "SET(CMAKE_C_FLAGS \"${CMAKE_C_FLAGS}");
-    if(cflags)
+    fprintf(fout, "SET(CMAKE_%s_FLAGS \"${CMAKE_%s_FLAGS}", lang, lang);
+    const char* flags = mf->GetDefinition(langFlags.c_str()); 
+    if(flags)
       {
-      fprintf(fout, " %s ", cflags);
+      fprintf(fout, " %s ", flags);
       }
     fprintf(fout, " ${COMPILE_DEFINITIONS}\")\n");
-    // CXX specific flags
-    if(format == cmSystemTools::CXX_FILE_FORMAT )
-      {
-      const char* cxxflags = mf->GetDefinition("CMAKE_CXX_FLAGS");
-      fprintf(fout, "SET(CMAKE_CXX_FLAGS \"${CMAKE_CXX_FLAGS} ");
-      if(cxxflags)
-        {
-        fprintf(fout, " %s ", cxxflags);
-        }
-      fprintf(fout, " ${COMPILE_DEFINITIONS}\")\n");
-      }
-    if(format == cmSystemTools::FORTRAN_FILE_FORMAT )
-      {
-      const char* fflags = mf->GetDefinition("CMAKE_Fortran_FLAGS");
-      fprintf(fout, "SET(CMAKE_Fortran_FLAGS \"${CMAKE_Fortran_FLAGS} ");
-      if(fflags)
-        {
-        fprintf(fout, " %s ", fflags);
-        }
-      fprintf(fout, " ${COMPILE_DEFINITIONS}\")\n");
-      }
     fprintf(fout, "INCLUDE_DIRECTORIES(${INCLUDE_DIRECTORIES})\n");
     fprintf(fout, "LINK_DIRECTORIES(${LINK_DIRECTORIES})\n");
     // handle any compile flags we need to pass on

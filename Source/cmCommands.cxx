@@ -80,6 +80,7 @@
 #include "cmAbstractFilesCommand.cxx"
 #include "cmAuxSourceDirectoryCommand.cxx"
 #include "cmExportLibraryDependencies.cxx"
+#include "cmEnableLanguageCommand.cxx"
 #include "cmFLTKWrapUICommand.cxx"
 #include "cmGetCMakePropertyCommand.cxx"
 #include "cmGetDirectoryPropertyCommand.cxx"
@@ -171,6 +172,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   commands.push_back(new cmAbstractFilesCommand);
   commands.push_back(new cmAuxSourceDirectoryCommand);
+  commands.push_back(new cmEnableLanguageCommand);
   commands.push_back(new cmExportLibraryDependenciesCommand);
   commands.push_back(new cmFLTKWrapUICommand);
   commands.push_back(new cmGetCMakePropertyCommand);

@@ -29,7 +29,7 @@ bool cmInstallProgramsCommand::InitialPass(std::vector<std::string> const& args)
   m_TargetName = "INSTALL_PROGRAMS_"+args[0];
   cmTarget& target = m_Makefile->GetTargets()[m_TargetName];
   target.SetInAll(false);
-  target.SetType(cmTarget::INSTALL_PROGRAMS);
+  target.SetType(cmTarget::INSTALL_PROGRAMS, m_TargetName.c_str());
   target.SetInstallPath(args[0].c_str());
 
   std::vector<std::string>::const_iterator s = args.begin();

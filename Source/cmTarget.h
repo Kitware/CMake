@@ -19,6 +19,7 @@
 
 #include "cmCustomCommand.h"
 class cmSourceFile;
+class cmGlobalGenerator;
 
 /** \class cmTarget
  * \brief Represent a library or executable target loaded from a makefile.
@@ -46,7 +47,10 @@ public:
   /**
    * Set the target type
    */
-  void SetType(TargetType f);
+  void SetType(TargetType f, const char* name);
+
+  ///! Set/Get the name of the target
+  const char* GetName() const {return m_Name.c_str();}
 
   /**
    * Indicate whether the target is part of the all target
@@ -85,11 +89,6 @@ public:
     {return m_SourceFiles;}
   std::vector<cmSourceFile*> &GetSourceFiles() {return m_SourceFiles;}
 
-  ///! does this target have a cxx file in it
-  bool HasCxx() const;
-
-  ///! does this target have a fortran file in it
-  bool HasFortran() const;
   /**
    * Get the list of the source files used by this target
    */
@@ -156,6 +155,8 @@ public:
    */
   void TraceVSDependencies(std::string projName, cmMakefile *mf);  
 
+  ///! Return the prefered linker language for this target
+  const char* GetLinkerLanguage(cmGlobalGenerator*) const;
 private:
   /**
    * A list of direct dependencies. Use in conjunction with DependencyMap.
@@ -210,7 +211,9 @@ private:
   void GatherDependencies( const cmMakefile& mf, const std::string& lib,
                            DependencyMap& dep_map ); 
 
+  
 private:
+  std::string m_Name;
   std::vector<cmCustomCommand> m_PreBuildCommands;
   std::vector<cmCustomCommand> m_PreLinkCommands;
   std::vector<cmCustomCommand> m_PostBuildCommands;

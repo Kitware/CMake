@@ -636,12 +636,13 @@ IF(BUILD_TESTING)
       )
 
   ENDIF (CTEST_TEST_CTEST)
+
   IF(CMAKE_GENERATOR MATCHES "Makefiles")
     # see if we can find a fortran compiler on the machine
     # if so, add the fortran test and see if it works.
     SET(CMAKE_Fortran_COMPILER_LIST ifort ifc efc f95 pgf95 
-      lf95 xlf95 fort gfortran f90  pgf90   xlf90   epcf90 f77 
-      fort77 frt pgf77  xlf  fl32 af77 g77  )
+      lf95 xlf95 fort gfortran f90  pgf90   xlf90  
+      epcf90 f77  fort77 frt pgf77  xlf  fl32 af77 g77  )
     FIND_PROGRAM(CMAKE_Fortran_COMPILER_FULLPATH NAMES ${CMAKE_Fortran_COMPILER_LIST} )
     MARK_AS_ADVANCED(CMAKE_Fortran_COMPILER_FULLPATH)
     IF(CMAKE_Fortran_COMPILER_FULLPATH)
@@ -650,13 +651,27 @@ IF(BUILD_TESTING)
         "${CMake_SOURCE_DIR}/Tests/Fortran"
         "${CMake_BINARY_DIR}/Tests/Fortran"
         --build-generator ${CMAKE_GENERATOR}
-        --build-project Simple
+        --build-project testf
         --build-makeprogram ${MAKEPROGRAM}
         --build-two-config
         --test-command testf)
     ENDIF(CMAKE_Fortran_COMPILER_FULLPATH)
+
+    INCLUDE(FindJava)
+    IF(JAVA_COMPILE)
+      ADD_TEST(Java ${CMAKE_CTEST_COMMAND}
+        --build-and-test 
+        "${CMake_SOURCE_DIR}/Tests/Java"
+        "${CMake_BINARY_DIR}/Tests/Java"
+        --build-generator ${CMAKE_GENERATOR}
+        --build-project hello
+        --build-makeprogram ${MAKEPROGRAM}
+        --build-two-config 
+        --build-run-dir "${CMake_BINARY_DIR}/Tests/Java/"
+        --test-command ${JAVA_RUNTIME} -classpath hello.jar HelloWorld)
+    ENDIF(JAVA_COMPILE)
   ENDIF(CMAKE_GENERATOR MATCHES "Makefiles")
-     
+  
   IF (CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE OR WXWINDOWS_INCLUDE_DIR)
     # Will be set if the wxwindows gui is on
     ADD_TEST(UseWX ${CMAKE_CTEST_COMMAND}

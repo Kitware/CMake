@@ -190,10 +190,10 @@ void cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
         }
       needTestLanguage = true; // must test a language after finding it
       // read determine LANG compiler
-      std::string determinCompiler = "CMakeDetermine";
-      determinCompiler += lang;
-      determinCompiler += "Compiler.cmake";
-      std::string determineFile = mf->GetModulesFile(determinCompiler.c_str());
+      std::string determineCompiler = "CMakeDetermine";
+      determineCompiler += lang;
+      determineCompiler += "Compiler.cmake";
+      std::string determineFile = mf->GetModulesFile(determineCompiler.c_str());
       if(!mf->ReadListFile(0,determineFile.c_str()))
         {
         cmSystemTools::Error("Could not find cmake module file:", determineFile.c_str());
@@ -310,8 +310,31 @@ void cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
     }
 }
 
+const char* cmGlobalGenerator::GetLanguageOutputExtensionForLanguage(const char* lang)
+{
+  if(m_LanguageToOutputExtension.count(lang) > 0)
+    {
+    return m_LanguageToOutputExtension[lang].c_str();
+    }
+  return "";
+}
+
+const char* cmGlobalGenerator::GetLanguageOutputExtensionFromExtension(const char* ext)
+{
+  const char* lang = this->GetLanguageFromExtension(ext);
+  return this->GetLanguageOutputExtensionForLanguage(lang);
+}
+
+
 const char* cmGlobalGenerator::GetLanguageFromExtension(const char* ext)
 {
+  // if there is an extension and it starts with . then
+  // move past the . because the extensions are not stored with a .
+  // in the map
+  if(ext && *ext == '.')
+    {
+    ++ext;
+    }
   if(m_ExtensionToLanguage.count(ext) > 0)
     {
     return m_ExtensionToLanguage[ext].c_str();
@@ -325,8 +348,28 @@ void cmGlobalGenerator::SetLanguageEnabled(const char* l, cmMakefile* mf)
     {
     return;
     }
+  std::string outputExtensionVar = std::string("CMAKE_") + 
+    std::string(l) + std::string("_OUTPUT_EXTENSION");
+  const char* outputExtension = mf->GetDefinition(outputExtensionVar.c_str());
+  if(outputExtension)
+    {
+    m_LanguageToOutputExtension[l] = outputExtension;
+    }
+  
+  std::string linkerPrefVar = std::string("CMAKE_") + 
+    std::string(l) + std::string("_LINKER_PREFERENCE");
+  const char* linkerPref = mf->GetDefinition(linkerPrefVar.c_str());
+  if(!linkerPref)
+    {
+    linkerPref = "None";
+    }
+  m_LanguageToLinkerPreference[l] = linkerPref;
+  
   std::string extensionsVar = std::string("CMAKE_") + 
     std::string(l) + std::string("_SOURCE_FILE_EXTENSIONS");
+  std::string ignoreExtensionsVar = std::string("CMAKE_") + 
+    std::string(l) + std::string("_IGNORE_EXTENSIONS");
+  std::string ignoreExts = mf->GetSafeDefinition(ignoreExtensionsVar.c_str());
   std::string exts = mf->GetSafeDefinition(extensionsVar.c_str());
   std::vector<std::string> extensionList;
   cmSystemTools::ExpandListArgument(exts, extensionList);
@@ -335,9 +378,18 @@ void cmGlobalGenerator::SetLanguageEnabled(const char* l, cmMakefile* mf)
     {
     m_ExtensionToLanguage[*i] = l;
     }
-  
+  cmSystemTools::ExpandListArgument(ignoreExts, extensionList);
+  for(std::vector<std::string>::iterator i = extensionList.begin();
+      i != extensionList.end(); ++i)
+    {
+    m_IgnoreExtensions[*i] = true;
+    }
   m_LanguageEnabled[l] = true;
 
+}
+bool cmGlobalGenerator::IgnoreFile(const char* l)
+{
+  return (m_IgnoreExtensions.count(l) > 0);
 }
 
 bool cmGlobalGenerator::GetLanguageEnabled(const char* l)
@@ -609,6 +661,9 @@ void cmGlobalGenerator::EnableLanguagesFromGenerator(cmGlobalGenerator *gen )
   // copy the enabled languages
   this->m_LanguageEnabled = gen->m_LanguageEnabled;
   this->m_ExtensionToLanguage = gen->m_ExtensionToLanguage;
+  this->m_IgnoreExtensions = gen->m_IgnoreExtensions;
+  this->m_LanguageToOutputExtension = gen->m_LanguageToOutputExtension;
+  this->m_LanguageToLinkerPreference = gen->m_LanguageToLinkerPreference;
 }
 
 //----------------------------------------------------------------------------
@@ -635,3 +690,20 @@ bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
 }
 
 
+void cmGlobalGenerator::GetEnabledLanguages(std::vector<std::string>& lang)
+{
+  for(std::map<cmStdString, bool>::iterator i = m_LanguageEnabled.begin(); 
+      i != m_LanguageEnabled.end(); ++i)
+    {
+    lang.push_back(i->first);
+    }
+}
+
+const char* cmGlobalGenerator::GetLinkerPreference(const char* lang)
+{
+  if(m_LanguageToLinkerPreference.count(lang))
+    {
+    return m_LanguageToLinkerPreference[lang].c_str();
+    }
+  return "None";
+}

@@ -88,6 +88,7 @@ public:
   void SetPassMakeflags(bool s){m_PassMakeflags = s;}
   
 protected:
+  
   void AddDependenciesToSourceFile(cmDependInformation const*info,
                                    cmSourceFile *i,
                                    std::set<cmDependInformation const*> *visited);
@@ -198,7 +199,6 @@ protected:
 
   ///! return true if the two paths are the same
   virtual bool SamePath(const char* path1, const char* path2);
-  virtual std::string GetOutputExtension(const char* sourceExtension);
   std::string CreatePreBuildRules(const cmTarget &target,
                                   const char* targetName);
   std::string CreatePreLinkRules(const cmTarget &target,
@@ -239,12 +239,13 @@ protected:
    */
   std::string& CreateSafeUniqueObjectFileName(const char* sin);
 
-  ///! final processing for a path to be put in a makefile
+  cmStdString& GetIncludeFlags(const char* lang);
 protected:
   int m_MakefileVariableSize;
   std::map<cmStdString, cmStdString> m_MakeVariableMap;
   std::map<cmStdString, cmStdString> m_ShortMakeVariableMap;
   std::map<cmStdString, cmStdString> m_UniqueObjectNamesMap;
+  std::map<cmStdString, cmStdString> m_LanguageToIncludeFlags;
   bool m_IgnoreLibPrefix;
   std::string m_IncludeDirective;
   std::string m_MakeSilentFlag;

@@ -31,7 +31,7 @@ bool cmInstallFilesCommand::InitialPass(std::vector<std::string> const& argsIn)
   m_TargetName = "INSTALL_FILES_"+args[0];
   cmTarget& target = m_Makefile->GetTargets()[m_TargetName];
   target.SetInAll(false);
-  target.SetType(cmTarget::INSTALL_FILES);
+  target.SetType(cmTarget::INSTALL_FILES, m_TargetName.c_str());
   target.SetInstallPath(args[0].c_str());
   
   if((args.size() > 1) && (args[1] == "FILES"))

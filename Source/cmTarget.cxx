@@ -17,15 +17,16 @@
 #include "cmTarget.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
-
+#include "cmGlobalGenerator.h"
 #include <map>
 #include <set>
 #include <queue>
 #include <stdlib.h> // required for atof
 
 
-void cmTarget::SetType(TargetType type)
+void cmTarget::SetType(TargetType type, const char* name)
 {
+  m_Name = name;
   // only add dependency information for library targets
   m_TargetType = type;
   if(m_TargetType >= STATIC_LIBRARY && m_TargetType <= MODULE_LIBRARY) {
@@ -419,46 +420,6 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
   
 }
 
-bool cmTarget::HasCxx() const
-{
-  if(this->GetProperty("HAS_CXX"))
-    {
-    return true;
-    }
-  for(std::vector<cmSourceFile*>::const_iterator i =  m_SourceFiles.begin();
-      i != m_SourceFiles.end(); ++i)
-    {
-    if(cmSystemTools::GetFileFormat((*i)->GetSourceExtension().c_str())
-       == cmSystemTools::CXX_FILE_FORMAT)
-      {
-      return true;
-      }
-    }
-  return false;
-}
-
-bool cmTarget::HasFortran() const
-{
-  if(this->GetProperty("HAS_FORTRAN"))
-    {
-    return true;
-    }
-  for(std::vector<cmSourceFile*>::const_iterator i =  m_SourceFiles.begin();
-      i != m_SourceFiles.end(); ++i)
-    {
-    if(cmSystemTools::GetFileFormat((*i)->GetSourceExtension().c_str())
-       == cmSystemTools::FORTRAN_FILE_FORMAT)
-      {
-      return true;
-      }
-    }
-  return false;
-}
-
-
-
-
-
 void
 cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
 {
@@ -782,4 +743,69 @@ bool cmTarget::GetPropertyAsBool(const char* prop) const
     return cmSystemTools::IsOn(i->second.c_str());
     }
   return false;
+}
+
+const char* cmTarget::GetLinkerLanguage(cmGlobalGenerator* gg) const
+{
+  if(this->GetProperty("HAS_CXX"))
+    {
+    const_cast<cmTarget*>(this)->SetProperty("LINKER_LANGUAGE", "CXX");
+    }
+  const char* linkerLang = this->GetProperty("LINKER_LANGUAGE");
+  if(linkerLang)
+    {
+    return linkerLang;
+    }
+  std::set<cmStdString> languages;
+  for(std::vector<cmSourceFile*>::const_iterator i = m_SourceFiles.begin();
+      i != m_SourceFiles.end(); ++i)
+    {
+    const char* lang = 
+      gg->GetLanguageFromExtension((*i)->GetSourceExtension().c_str());
+    if(lang)
+      {
+      languages.insert(lang);
+      }
+    }
+  if(languages.size() == 0)
+    {
+    std::string m = "Error Target: ";
+    m += m_Name + " contains no source files with an enabled languages.";
+    cmSystemTools::Error(m.c_str());
+    return "(NullLanguage)";
+    }
+  if(languages.size() == 1)
+    {
+    const_cast<cmTarget*>(this)->SetProperty("LINKER_LANGUAGE", languages.begin()->c_str());
+    return this->GetProperty("LINKER_LANGUAGE");
+    }
+  const char* prefLang = 0;
+  for(std::set<cmStdString>::const_iterator s = languages.begin(); 
+      s != languages.end(); ++s)
+    {
+    const char* lpref = gg->GetLinkerPreference(s->c_str());
+    if(lpref[0] == 'P')
+      {
+      if(prefLang && !(*s == prefLang))
+        {
+        std::string m = "Error Target: ";
+        m += m_Name + " Contains more than one Prefered language: ";
+        m += *s;
+        m += " and ";
+        m += prefLang;
+        m += "\nYou must set the LINKER_LANGUAGE property for this target.";
+        cmSystemTools::Error(m.c_str());
+        }
+      else
+        {
+        prefLang = s->c_str();
+        }
+      }
+    }
+  if(!prefLang)
+    {
+    prefLang = languages.begin()->c_str();
+    }
+  const_cast<cmTarget*>(this)->SetProperty("LINKER_LANGUAGE", languages.begin()->c_str());
+  return this->GetProperty("LINKER_LANGUAGE");
 }
