@@ -134,20 +134,7 @@ void cmake::AddCMakePaths(const std::vector<std::string>& args)
   cmSystemTools::ConvertToUnixSlashes(cMakeSelf);
   cMakeSelf = cmSystemTools::FindProgram(cMakeSelf.c_str());
 
-  if(!cmCacheManager::GetInstance()->GetCacheValue("LIBRARY_OUTPUT_PATH"))
-    {
-    cmCacheManager::GetInstance()->AddCacheEntry("LIBRARY_OUTPUT_PATH", "",
-                                                 "Single output directory for building all libraries.",
-                                                 cmCacheManager::PATH);
-    } 
-  if(!cmCacheManager::GetInstance()->GetCacheValue("EXECUTABLE_OUTPUT_PATH"))
-    {
-    cmCacheManager::GetInstance()->AddCacheEntry("EXECUTABLE_OUTPUT_PATH", "",
-                                                 "Single output directory for building all executables.",
-                                                 cmCacheManager::PATH);
-    }
- 
-  // Save the value in the cache
+   // Save the value in the cache
   cmCacheManager::GetInstance()->AddCacheEntry
     ("CMAKE_COMMAND",
      cmSystemTools::EscapeSpaces(cMakeSelf.c_str()).c_str(),
@@ -238,12 +225,31 @@ int cmake::Generate(const std::vector<std::string>& args)
   lf +=  "/CMakeLists.txt";
   if(!mf.ReadListFile(lf.c_str()))
     {
-      this->Usage(args[0].c_str());
-      return -1;
+    this->Usage(args[0].c_str());
+    return -1;
     }
   mf.GenerateMakefile();
+  
+  // Before saving the cache
+  // if the project did not define LIBRARY_OUTPUT_PATH and
+  // EXECUTABLE_OUTPUT_PATH, add them now, so users
+  // can edit the values in the cache.
+  if(!cmCacheManager::GetInstance()->GetCacheValue("LIBRARY_OUTPUT_PATH"))
+    {
+    cmCacheManager::GetInstance()->AddCacheEntry("LIBRARY_OUTPUT_PATH", "",
+                                                 "Single output directory for building all libraries.",
+                                                 cmCacheManager::PATH);
+    } 
+  if(!cmCacheManager::GetInstance()->GetCacheValue("EXECUTABLE_OUTPUT_PATH"))
+    {
+    cmCacheManager::GetInstance()->AddCacheEntry("EXECUTABLE_OUTPUT_PATH", "",
+                                                 "Single output directory for building all executables.",
+                                                 cmCacheManager::PATH);
+    }
+  
+  
   cmCacheManager::GetInstance()->SaveCache(&mf);
-
+  
   if(m_Verbose)
     {
     cmCacheManager::GetInstance()->PrintCache(std::cout);
