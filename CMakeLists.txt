@@ -36,6 +36,6 @@ SET(EXECUTABLE_OUTPUT_PATH ${CMake_BINARY_DIR}/Source CACHE PATH
   "Where to put the executables for CMake"
 )
 
-INCLUDE_REGULAR_EXPRESSION("^(\\.\\./)?(cm|CMake|form).*")
+INCLUDE_REGULAR_EXPRESSION("^(\\.\\./)?(cm|CMake|form|ctest).*")
 
 INSTALL_FILES(/man/man1 "cmake\\.1")
