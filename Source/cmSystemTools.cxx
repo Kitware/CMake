@@ -15,12 +15,14 @@
 =========================================================================*/
 #include "cmSystemTools.h"
 #include "errno.h"
+#include "stdio.h"
 #include <sys/stat.h>
 #include "cmRegularExpression.h"
 
 #if defined(_MSC_VER) || defined(__BORLANDC__)
 #include <windows.h>
 #include <direct.h>
+#define _unlink unlink
 inline int Mkdir(const char* dir)
 {
   return _mkdir(dir);
@@ -34,6 +36,8 @@ inline int Mkdir(const char* dir)
   return mkdir(dir, 00700);
 }
 #endif
+
+bool cmSystemTools::s_ErrorOccured = false;
 
 // adds the elements of the env variable path to the arg passed in
 void cmSystemTools::GetPath(std::vector<std::string>& path)
@@ -327,11 +331,109 @@ void cmSystemTools::Error(const char* m1, const char* m2)
     {
     message += m2;
     }
+  cmSystemTools::s_ErrorOccured = true;
 #if defined(_WIN32) && !defined(__CYGWIN__)
   ::MessageBox(0, message.c_str(), 0, MB_OK);
   std::cerr << message.c_str() << std::endl;
 #else
   std::cerr << message.c_str() << std::endl;
 #endif
+}
+
+
+
+void cmSystemTools::CopyFileIfDifferent(const char* source,
+                                        const char* destination)
+{
+  if(cmSystemTools::FilesDiffer(source, destination))
+    {
+    cmSystemTools::Error("doing copy ", destination);
+    cmSystemTools::cmCopyFile(source, destination);
+    }
+}
+
+  
+bool cmSystemTools::FilesDiffer(const char* source,
+                                const char* destination)
+{
+  struct stat statSource;
+  if (stat(source, &statSource) != 0) 
+    {
+    return true;
+    }
+  struct stat statDestination;
+  if (stat(destination, &statDestination) != 0) 
+    {
+    return true;
+    }
+  if(statSource.st_size != statDestination.st_size)
+    {
+    return true;
+    }
+  std::ifstream finSource(source);
+  std::ifstream finDestination(destination);
+  if(!finSource || !finDestination)
+    {
+    return true;
+    }
+  
+  while(finSource && finDestination)
+    {
+    char s, d;
+    finSource >> s;
+    finDestination >> d;
+    if(s != d)
+      {
+      return true;
+      }
+    }
+  return false;
+}
+
+
+
+void cmSystemTools::cmCopyFile(const char* source,
+                             const char* destination)
+{
+  std::ifstream fin(source);
+  char buff[4096];
+  std::ofstream fout(destination);
+  if(!fout )
+    {
+    cmSystemTools::Error("CopyFile failed to open input file", source);
+    }
+  if(!fin)
+    {
+    cmSystemTools::Error("CopyFile failed to open output file", destination);
+    }
+  while(fin)
+    {
+    fin.getline(buff, 4096);
+    if(fin)
+      {
+      fout << buff << "\n";
+      }
+    }
+}
+
+// return true if the file exists
+long int cmSystemTools::ModifiedTime(const char* filename)
+{
+  struct stat fs;
+  if (stat(filename, &fs) != 0) 
+    {
+    return 0;
+    }
+  else
+    {
+    return (long int)fs.st_mtime;
+    }
+}
+
+
+  
+void cmSystemTools::RemoveFile(const char* source)
+{
+  unlink(source);
 }
 

@@ -18,6 +18,7 @@
 #include "cmSystemTools.h"
 #include "cmCacheManager.h"
 #include "cmMakefile.h"
+#include "cmRegularExpression.h"
 
 const char* cmCacheManagerTypes[] = 
 { "BOOL",
@@ -68,21 +69,27 @@ bool cmCacheManager::LoadCache(cmMakefile* mf)
     }
   const int bsize = 4096;
   char buffer[bsize];
-  std::string inputLine;
+  // input line is:         key:type=value
+  cmRegularExpression reg("(.*):(.*)=(.*)");
   while(fin)
     {
     // Format is key:type=value
     CacheEntry e;
-    std::string key;
-    fin.getline(buffer, bsize, ':');
-    key = buffer;
-    fin.getline(buffer, bsize, '=');
-    e.m_Type = cmCacheManager::StringToType(buffer);
-    fin.getline(buffer, bsize); // last token is separated by a newline
-    e.m_Value = buffer;
-    if(fin)
+    fin.getline(buffer, bsize);
+    // skip blank lines and comment lines
+    if(buffer[0] == '#' || buffer[0] == 0)
       {
-      m_Cache[key] = e;
+      continue;
+      }
+    if(reg.find(buffer))
+      {
+      e.m_Type = cmCacheManager::StringToType(reg.match(2).c_str());
+      e.m_Value = reg.match(3);
+      m_Cache[reg.match(1)] = e;
+      }
+    else
+      {
+      cmSystemTools::Error("Parse error in cache file ", cacheFile.c_str());
       }
     }
   return true;
@@ -92,13 +99,25 @@ bool cmCacheManager::SaveCache(cmMakefile* mf)
 {
   std::string cacheFile = mf->GetHomeOutputDirectory();
   cacheFile += "/CMakeCache.txt";
-  std::ofstream fout(cacheFile.c_str());
+  std::string tempFile = cacheFile;
+  tempFile += ".tmp";
+  std::ofstream fout(tempFile.c_str());
   if(!fout)
     {
     cmSystemTools::Error("Unable to open cache file for save. ", 
                          cacheFile.c_str());
     return false;
     }
+  fout << "# This is the CMakeCache file.\n"
+       << "# You can edit this file to change values found and used by cmake.\n"
+       << "# If you do not want to change any of the values, simply exit the editor.\n"
+       << "# If you do want to change a value, simply edit, save, and exit the editor.\n"
+       << "# The syntax for the file is as follows:\n"
+       << "# KEY:TYPE=VALUE\n"
+       << "# KEY is the name of a varible in the cache.\n"
+       << "# TYPE is a hint to GUI's for the type of VALUE, DO NOT EDIT TYPE!.\n"
+       << "# VALUE is the current value for the KEY.\n\n";
+
   for( std::map<std::string, CacheEntry>::iterator i = m_Cache.begin();
        i != m_Cache.end(); ++i)
     {
@@ -109,6 +128,10 @@ bool cmCacheManager::SaveCache(cmMakefile* mf)
          << (*i).second.m_Value << "\n";
     }
   fout << "\n";
+  fout.close();
+  cmSystemTools::CopyFileIfDifferent(tempFile.c_str(),
+                                     cacheFile.c_str());
+  cmSystemTools::RemoveFile(tempFile.c_str());
   return true;
 }
 
@@ -130,3 +153,20 @@ const char* cmCacheManager::GetCacheValue(const char* key)
     }
   return 0;
 }
+
+
+void cmCacheManager::PrintCache(std::ostream& out)
+{
+  out << "=================================================" << std::endl;
+  out << "CMakeCache Contents:" << std::endl;
+  for(std::map<std::string, CacheEntry>::iterator i = m_Cache.begin();
+      i != m_Cache.end(); ++i)
+    {
+    out << (*i).first.c_str() << " = " << (*i).second.m_Value.c_str() << std::endl;
+    }
+  out << "\n\n";
+  out << "To change values in the CMakeCache, \nedit CMakeCache.txt in your output directory.\n";
+  out << "=================================================" << std::endl;
+}
+
+

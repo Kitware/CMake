@@ -49,11 +49,13 @@ void cmConfigureFileNoAutoconf::FinalPass()
     std::string path = m_OuputFile.substr(0, pos);
     cmSystemTools::MakeDirectory(path.c_str());
     }
-  std::ofstream fout(m_OuputFile.c_str());
+  std::string tempOutputFile = m_OuputFile;
+  tempOutputFile += ".tmp";
+  std::ofstream fout(tempOutputFile.c_str());
   if(!fout)
     {
     cmSystemTools::Error("Could not open file for write in copy operatation", 
-                         m_OuputFile.c_str());
+                         tempOutputFile.c_str());
     return;
     }
   // now copy input to output and expand varibles in the
@@ -64,10 +66,19 @@ void cmConfigureFileNoAutoconf::FinalPass()
   while(fin)
     {
     fin.getline(buffer, bufSize);
-    inLine = buffer;
-    m_Makefile->ExpandVariablesInString(inLine);
-    fout << inLine << "\n";
+    if(fin)
+      {
+      inLine = buffer;
+      m_Makefile->ExpandVariablesInString(inLine);
+      fout << inLine << "\n";
+      }
     }
+  // close the files before attempting to copy
+  fin.close();
+  fout.close();
+  cmSystemTools::CopyFileIfDifferent(tempOutputFile.c_str(),
+                                     m_OuputFile.c_str());
+  cmSystemTools::RemoveFile(tempOutputFile.c_str());
 #endif
 }
 

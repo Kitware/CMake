@@ -20,8 +20,15 @@ depend: ${CMAKE} ${SUBDIR_DEPEND}
 clean: ${SUBDIR_CLEAN}
 	rm -f ${SRC_OBJ} ${EXECUTABLES} 
 
-CMakeTargets.make: ${CMAKE} ${srcdir}/CMakeLists.txt
+CMakeTargets.make: ${CMAKE} ${srcdir}/CMakeLists.txt 
 	${CMAKE} ${currentdir}/CMakeLists.txt -S${currentdir} -O${currentbindir} -H${topdir} -B${CMAKE_CONFIG_DIR}
+
+rebuild_cache: ${CMAKE_CONFIG_DIR}/CMakeCache.txt
+	rm -f ${CMAKE_CONFIG_DIR}/CMakeCache.txt
+	${CMAKE} ${topdir}/CMakeLists.txt -MakeCache -S${topdir} -O${CMAKE_CONFIG_DIR} -H${topdir} -B${CMAKE_CONFIG_DIR}
+
+${CMAKE_CONFIG_DIR}/CMakeCache.txt:
+	${CMAKE} ${topdir}/CMakeLists.txt -MakeCache -S${topdir} -O${CMAKE_CONFIG_DIR} -H${topdir} -B${CMAKE_CONFIG_DIR}
 
 #------------------------------------------------------------------------------
 # rules for the normal library

@@ -1,0 +1,8 @@
+srcdir        = @srcdir@
+VPATH         = @srcdir@
+
+topall:
+	cd . ;  ${MAKE} -${MAKEFLAGS} CMakeTargets.make
+	cd . ;  ${MAKE} -${MAKEFLAGS} all
+
+@MAKEINCLUDE@ @MAKEQUOTE@@CMAKE_CONFIG_DIR@/CMake/CMakeMaster.make@MAKEQUOTE@

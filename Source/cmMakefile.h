@@ -346,6 +346,19 @@ public:
    */
   void ExpandVariables();
 
+  /** Recursivly read and create a cmMakefile object for
+   *  all CMakeLists.txt files in the GetSubDirectories list.
+   *  Once the file is found, it ReadListFile is called on
+   *  the cmMakefile created for it.
+   */
+  void FindSubDirectoryCMakeListsFiles(std::vector<cmMakefile*>& makefiles);
+  
+  /** Generate the cache file only.  This is done
+   *  by calling FindSubDirectoryCMakeListsFiles which
+   *  will cause all the rules to fire, and the cache to
+   *  be filled.
+   */
+  void GenerateCacheOnly();
 protected:
   std::string m_Prefix;
   std::vector<std::string> m_AuxSourceDirectories; // 

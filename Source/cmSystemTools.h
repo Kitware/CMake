@@ -47,9 +47,7 @@ public:
    */
   static void ConvertToUnixSlashes(std::string& path);
  
-  /**
-   * Return true if a file exists in the current directory.
-   */
+  ///! Return true if a file exists in the current directory.
   static bool FileExists(const char* filename);
 
   /**
@@ -91,7 +89,36 @@ public:
    * Display an error message.
    */
   static void Error(const char* m, const char* m2=0 );
+
+  ///! Return true if there was an error at any point.
+  static bool GetErrorOccuredFlag() 
+    {
+      return cmSystemTools::s_ErrorOccured;
+    }
   
+  /**
+   * Copy the source file to the destination file only
+   * if the two files differ.  
+   */
+  static void CopyFileIfDifferent(const char* source,
+                                  const char* destination);
+  
+  ///! Compare the contents of two files.  Return true if different.
+  static bool FilesDiffer(const char* source,
+                          const char* destination);
+  ///! Copy a file.
+  static void cmCopyFile(const char* source,
+                       const char* destination);
+  
+  ///! Remove a file.
+  static void RemoveFile(const char* source);
+  
+  
+  static long int ModifiedTime(const char* filename);
+  
+
+private:
+  static bool s_ErrorOccured;
 };
 
 

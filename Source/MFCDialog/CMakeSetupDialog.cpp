@@ -272,9 +272,26 @@ void CMakeSetupDialog::OnOK()
   mf.ReadListFile(makefileIn);
   // Move this to the cache editor
   mf.GenerateMakefile();
-  CDialog::OnOK();
   cmCacheManager::GetInstance()->SaveCache(&mf);
+  std::string command;
+  command = "notepad ";
+  std::string cachefile = m_WhereBuild;
+  cachefile += "/CMakeCache.txt";
+  command += cachefile.c_str();
+  long int originalMT = cmSystemTools::ModifiedTime(cachefile.c_str());
+  system(command.c_str());
+  long int afterEditMT = cmSystemTools::ModifiedTime(cachefile.c_str());
+  // if the cache was changed, re-generate the project
+  if(originalMT != afterEditMT)
+    {
+    cmCacheManager::GetInstance()->LoadCache(&mf);
+    mf.GenerateMakefile();
+    cmCacheManager::GetInstance()->SaveCache(&mf);
+    }
+  
+  // parent class 
   this->SaveToRegistry();
+  CDialog::OnOK();
 }
 
 void CMakeSetupDialog::OnButton3() 

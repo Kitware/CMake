@@ -16,15 +16,8 @@
 #include "cmDSPMakefile.h"
 #include "cmStandardIncludes.h"
 #include "cmSystemTools.h"
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#undef GetCurrentDirectory
 
-static void Die(const char* message)
-{
-  MessageBox(0, message, 0, MB_OK);
-  exit(-1);
-}
+
 cmDSPMakefile::~cmDSPMakefile()
 {
 }
@@ -37,7 +30,18 @@ cmDSPMakefile::cmDSPMakefile(cmMakefile*mf)
 
 void cmDSPMakefile::OutputDSPFile()
 { 
-  // Setup /I and /LIBPATH options
+  // If not an in source build, then create the output directory
+  if(strcmp(m_Makefile->GetStartOutputDirectory(),
+            m_Makefile->GetHomeDirectory()) != 0)
+    {
+    if(!cmSystemTools::MakeDirectory(m_Makefile->GetStartOutputDirectory()))
+      {
+      cmSystemTools::Error("Error creating directory ",
+                           m_Makefile->GetStartOutputDirectory());
+      }
+    }
+
+  // Setup /I and /LIBPATH options for the resulting DSP file
   std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();
   std::vector<std::string>::iterator i;
   for(i = includes.begin(); i != includes.end(); ++i)
@@ -77,20 +81,10 @@ void cmDSPMakefile::OutputDSPFile()
   // add any extra define flags 
   m_ReleaseLibraryOptions = m_DebugLibraryOptions;
   cmSystemTools::ReplaceString(m_ReleaseLibraryOptions, "Debug", "Release");
-  // If the output directory is not the m_cmHomeDirectory
-  // then create it.
-  if(strcmp(m_Makefile->GetStartOutputDirectory(),
-            m_Makefile->GetHomeDirectory()) != 0)
-    {
-    if(!cmSystemTools::MakeDirectory(m_Makefile->GetStartOutputDirectory()))
-      {
-      std::string message = "Error creating directory ";
-      message += m_Makefile->GetStartOutputDirectory();
-      Die(message.c_str());
-      }
-    }
   
-  // if there is a library, build it
+
+  
+  // Create the DSP or set of DSP's for libraries and executables
   if(strlen(m_Makefile->GetLibraryName()) != 0)
     {
     this->SetBuildType(STATIC_LIBRARY);
@@ -117,9 +111,8 @@ void cmDSPMakefile::CreateExecutableDSPFiles()
       std::ofstream fout(fname.c_str());
       if(!fout)
         {
-        std::string message = "Error Writing ";
-        message += fname;
-        Die(message.c_str());
+        cmSystemTools::Error("Error Writing ",
+                             fname.c_str());
         }
       else
         {
@@ -153,9 +146,8 @@ void cmDSPMakefile::CreateSingleDSP()
   std::ofstream fout(fname.c_str());
   if(!fout)
     {
-    std::string message = "Error Writing ";
-    message += fname;
-    Die(message.c_str());
+    cmSystemTools::Error("Error Writing ",
+                         fname.c_str());
     }
   this->WriteDSPFile(fout);
 }
@@ -257,9 +249,7 @@ void cmDSPMakefile::WriteDSPHeader(std::ostream& fout)
   std::ifstream fin(m_DSPHeaderTemplate.c_str());
   if(!fin)
     {
-    std::string message = "Error Reading ";
-    message += m_DSPHeaderTemplate;
-    Die(message.c_str());
+    cmSystemTools::Error("Error Reading ", m_DSPHeaderTemplate.c_str());
     }
   char buffer[2048];
 
@@ -288,9 +278,8 @@ void cmDSPMakefile::WriteDSPFooter(std::ostream& fout)
   std::ifstream fin(m_DSPFooterTemplate.c_str());
   if(!fin)
     {
-    std::string message = "Error Reading ";
-    message += m_DSPFooterTemplate;
-    Die(message.c_str());
+    cmSystemTools::Error("Error Reading ",
+                         m_DSPFooterTemplate.c_str());
     }
   char buffer[2048];
   while(fin)

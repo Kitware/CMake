@@ -43,12 +43,18 @@ int main(int ac, char** av)
   // Create a makefile
   cmMakefile mf;
   mf.AddDefinition("UNIX", "1");
+  bool makeCache = false;
   // Parse the command line
   if(ac > 2)
     {
     for(int i =2; i < ac; i++)
       {
       std::string arg = av[i];
+      // Set the start source directory with a -S dir options
+      if(arg.find("-MakeCache",0) == 0)
+	{
+        makeCache = true;
+	}
       // Set the start source directory with a -S dir options
       if(arg.find("-S",0) == 0)
 	{
@@ -75,7 +81,12 @@ int main(int ac, char** av)
 	}
       }
     }
-  mf.SetMakefileGenerator(new cmUnixMakefileGenerator);
+  // Only generate makefiles if not trying to make the cache
+  if(!makeCache)
+    {
+    mf.SetMakefileGenerator(new cmUnixMakefileGenerator);
+    }
+  
 
   // Read and parse the input makefile
   mf.MakeStartDirectoriesCurrent();
@@ -85,6 +96,24 @@ int main(int ac, char** av)
     Usage(av[0]);
     return -1;
     }
-  mf.GenerateMakefile();
+  if(makeCache)
+    {
+    mf.GenerateCacheOnly();
+    }
+  else
+    {
+    mf.GenerateMakefile();
+    }
   cmCacheManager::GetInstance()->SaveCache(&mf);
+  if(makeCache)
+    {
+    cmCacheManager::GetInstance()->PrintCache(cout);
+    }
+  
+  if(cmSystemTools::GetErrorOccuredFlag())
+    {
+    return -1;
+    }
+  return 0;
 }
+

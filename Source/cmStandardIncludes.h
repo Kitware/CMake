@@ -20,6 +20,11 @@
 #ifndef cmStandardIncludes_h
 #define cmStandardIncludes_h
 
+// include configure generated  header to define
+// CMAKE_NO_ANSI_STREAM_HEADERS and CMAKE_NO_STD_NAMESPACE
+#ifdef CMAKE_HAS_AUTOCONF
+#include "cmConfigure.h"
+#endif
 
 #ifdef _MSC_VER
 #pragma warning ( disable : 4786 )

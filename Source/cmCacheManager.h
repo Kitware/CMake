@@ -52,6 +52,8 @@ public:
   //! Get a value from the cache given a key
   const char* GetCacheValue(const char* key);
   
+  //! Print the cache to a stream
+  void PrintCache(std::ostream&);
 private:
   static cmCacheManager* s_Instance;
   class CacheEntry

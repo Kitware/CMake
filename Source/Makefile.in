@@ -7,7 +7,7 @@ VPATH         = @srcdir@
 # command for changing into this directory
 
 # let cmake know that this was done with autoconf
-KIT_FLAGS = -DCMAKE_HAS_AUTOCONF
+KIT_FLAGS = -DCMAKE_HAS_AUTOCONF  -I${CMAKE_CONFIG_DIR}/CMake/Source 
 @MAKEINCLUDE@ @MAKEQUOTE@@CMAKE_CONFIG_DIR@/CMake/CMakeVariables.make@MAKEQUOTE@
 @MAKEINCLUDE@ @MAKEQUOTE@@CMAKE_CONFIG_DIR@/CMake/CMakeSimpleRules.make@MAKEQUOTE@
 
@@ -24,22 +24,23 @@ cmUnixMakefileGenerator.o \
 cmCommands.o \
 cmCacheManager.o
 
+DEPENDS = $(srcdir)/*.h ${CMAKE_CONFIG_DIR}/CMake/Source/cmConfigure.h
 
-cmCollectFlags.o : $(srcdir)/*.h 
-CMakeBuildTargets.o  : $(srcdir)/*.h
-cmMakeDepend.o : $(srcdir)/*.h
-cmMakefile.o : $(srcdir)/*.h
-cmMakefileGenerator.o : $(srcdir)/*.h
-cmAuxSourceDirectoryCommand.o : $(srcdir)/*.h
-cmRegularExpression.o : $(srcdir)/*.h
-cmClassFile.o : $(srcdir)/*.h
-cmDirectory.o : $(srcdir)/*.h
-cmUnixMakefileGenerator.o : $(srcdir)/*.h
-cmCommands.o : $(srcdir)/*.h
-cmCacheManager.o : $(srcdir)/*.h
+cmCollectFlags.o : $(DEPENDS)
+CMakeBuildTargets.o  : $(DEPENDS)
+cmMakeDepend.o : $(DEPENDS)
+cmMakefile.o : $(DEPENDS)
+cmMakefileGenerator.o : $(DEPENDS)
+cmAuxSourceDirectoryCommand.o : $(DEPENDS)
+cmRegularExpression.o : $(DEPENDS)
+cmClassFile.o : $(DEPENDS)
+cmDirectory.o : $(DEPENDS)
+cmUnixMakefileGenerator.o : $(DEPENDS)
+cmCommands.o : $(DEPENDS)
+cmCacheManager.o : $(DEPENDS)
 
 
 
 CMakeBuildTargets: ${OBJS}
-	${CXX}  ${OBJS} ${CXX_FLAGS}  -o CMakeBuildTargets
+	${CXX} ${OBJS} ${CXX_FLAGS}  -o CMakeBuildTargets
 

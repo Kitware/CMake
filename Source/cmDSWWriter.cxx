@@ -20,9 +20,6 @@
 #include "cmMSProjectGenerator.h"
 #include <windows.h>
 
-// microsoft nonsense
-#undef GetCurrentDirectory
-#undef SetCurrentDirectory
 
 cmDSWMakefile::cmDSWMakefile(cmMakefile* m)
 {
@@ -32,22 +29,17 @@ cmDSWMakefile::cmDSWMakefile(cmMakefile* m)
 // output the DSW file
 void cmDSWMakefile::OutputDSWFile()
 { 
-  if(m_Makefile->GetStartOutputDirectory() == "")
-    {
-    // default to build in place
-    m_Makefile->SetStartOutputDirectory(m_Makefile->GetHomeDirectory());
-    }
-  // If the output directory is not the m_cmHomeDirectory
-  // then create it.
+  // if this is an out of source build, create the output directory
   if(strcmp(m_Makefile->GetStartOutputDirectory(),
             m_Makefile->GetHomeDirectory()) != 0)
     {
     if(!cmSystemTools::MakeDirectory(m_Makefile->GetStartOutputDirectory()))
       {
-      MessageBox(0, "Error creating directory ", 0, MB_OK);
-      MessageBox(0, m_Makefile->GetStartOutputDirectory(), 0, MB_OK);
+      cmSystemTools::Error("Error creating output directory for DSW file",
+                           m_Makefile->GetStartOutputDirectory());
       }
     }
+  // create the dsw file name
   std::string fname;
   fname = m_Makefile->GetStartOutputDirectory();
   fname += "/";
@@ -56,80 +48,11 @@ void cmDSWMakefile::OutputDSWFile()
   std::ofstream fout(fname.c_str());
   if(!fout)
     {
-    cmSystemTools::Error("Error can not open for write: " , fname.c_str());
+    cmSystemTools::Error("Error can not open DSW file for write: "
+                         ,fname.c_str());
     return;
     }
   this->WriteDSWFile(fout);
-}
-
-// ------------------------------------------------
-// Recursive function to find all the CMakeLists.txt files
-// in a project.  As each file is read in, any directories in
-// the SUBDIR variable are also passed back to this function.
-// The result is a vector of cmDSPMakefile objects, one for
-// each directory with a CMakeLists.txt file
-//
-void 
-cmDSWMakefile
-::FindAllCMakeListsFiles(const char* subdir,
-                         std::vector<cmMSProjectGenerator*>& makefiles)
-{
-  std::string currentDir = m_Makefile->GetCurrentDirectory();
-  currentDir += "/";
-  currentDir += subdir;
-  currentDir += "/";
-  currentDir += "CMakeLists.txt";
-  // CMakeLists.txt exits in the subdirectory
-  // then create a cmDSPMakefile for it
-  if(cmSystemTools::FileExists(currentDir.c_str()))
-    {
-    // Create a new cmDSPMakefile to read the currentDir CMakeLists.txt file
-    cmMSProjectGenerator* pg = new cmMSProjectGenerator;
-    pg->BuildDSWOff();
-    cmMakefile* mf = new cmMakefile;
-    mf->SetMakefileGenerator(pg);
-    // add it to the vector
-    makefiles.push_back(pg);
-    // Set up the file with the current context
-    mf->SetHomeOutputDirectory(m_Makefile->GetStartOutputDirectory());
-    mf->SetHomeDirectory(m_Makefile->GetHomeDirectory());
-    // Set the output directory which may be different than the source
-    std::string outdir = m_Makefile->GetStartOutputDirectory();
-    outdir += "/";
-    outdir += subdir;
-    mf->SetStartOutputDirectory(outdir.c_str());
-    // set the current directory in the Source as a full
-    // path
-    std::string currentDir = m_Makefile->GetStartDirectory();
-    currentDir += "/";
-    currentDir += subdir;
-    mf->SetStartDirectory(currentDir.c_str());
-    // Parse the CMakeLists.txt file
-    currentDir += "/CMakeLists.txt";
-    mf->MakeStartDirectoriesCurrent();
-    mf->ReadListFile(currentDir.c_str());
-    // Create the DSP file
-    mf->GenerateMakefile();
-    // Look at any sub directories parsed (SUBDIRS) and 
-    // recurse into them    
-    const std::vector<std::string>& subdirs = mf->GetSubDirectories();
-    for(std::vector<std::string>::const_iterator i = subdirs.begin();
-	i != subdirs.end(); ++i)
-      {
-      // append the subdirectory to the current directoy subdir
-      std::string nextDir = subdir;
-      nextDir += "/";
-      nextDir += i->c_str();
-      // recurse into nextDir
-      this->FindAllCMakeListsFiles(nextDir.c_str(),
-				   makefiles);
-      }
-    }
-  else
-    {
-    cmSystemTools::Error("Can not find CMakeLists.txt in ",
-                         currentDir.c_str());
-    }
 }
 
 
@@ -138,57 +61,59 @@ void cmDSWMakefile::WriteDSWFile(std::ostream& fout)
 {
   // Write out the header for a DSW file
   this->WriteDSWHeader(fout);
-  // Create an array of dsp files for the project
-  std::vector<cmMSProjectGenerator*> dspfiles;
-  // loop over all the subdirectories for the DSW file,
-  // and find all sub directory projects
-  const std::vector<std::string>& dirs = m_Makefile->GetSubDirectories();
-  for(std::vector<std::string>::const_iterator j = dirs.begin();
-      j != dirs.end(); ++j)
+  
+  // Create a list of cmMakefile created from all the
+  // CMakeLists.txt files that are in sub directories of
+  // this one.
+  std::vector<cmMakefile*> allListFiles;
+  m_Makefile->FindSubDirectoryCMakeListsFiles(allListFiles);
+  
+  // For each cmMakefile, create a DSP for it, and
+  // add it to this DSW file
+  for(std::vector<cmMakefile*>::iterator k = allListFiles.begin();
+      k != allListFiles.end(); ++k)
     {
-    this->FindAllCMakeListsFiles(j->c_str(), dspfiles);
-    }
-  // For each DSP file created insert them into the DSW file
-  for(std::vector<cmMSProjectGenerator*>::iterator k = dspfiles.begin();
-      k != dspfiles.end(); ++k)
-    {
-    // Get the directory for the dsp file, it comes
-    // from the source, so it has the source path which needs
-    // to be removed as this may be built in a different directory
-    // than the source
-    std::string dir = (*k)->GetDSPMakefile()->
-      GetMakefile()->GetStartDirectory();
+    cmMakefile* mf = *k;
+    // Create an MS generator with DSW off, so it only creates dsp files
+    cmMSProjectGenerator* pg = new cmMSProjectGenerator;
+    pg->BuildDSWOff();
+    mf->SetMakefileGenerator(pg);
+    mf->GenerateMakefile();
+    // Get the source directory from the makefile
+    std::string dir = mf->GetStartDirectory();
     // Get the home directory with the trailing slash
     std::string homedir = m_Makefile->GetHomeDirectory();
     homedir += "/";
-    // make the directory relative by removing the home directory part
+    // remove the home directory and / from the source directory
+    // this gives a relative path 
     cmSystemTools::ReplaceString(dir, homedir.c_str(), "");
-    // Get the list of create dsp files from the cmDSPMakefile, more
+    // Get the list of create dsp files names from the cmDSPMakefile, more
     // than one dsp could have been created per input CMakeLists.txt file
     std::vector<std::string> dspnames =
-      (*k)->GetDSPMakefile()->GetCreatedProjectNames();
+      pg->GetDSPMakefile()->GetCreatedProjectNames();
     for(std::vector<std::string>::iterator si = dspnames.begin();
 	si != dspnames.end(); ++si)
       {
       // Write the project into the DSW file
       this->WriteProject(fout, si->c_str(), dir.c_str(), 
-                         (*k)->GetDSPMakefile());
+                         pg->GetDSPMakefile());
       }
-    // delete the cmDSPMakefile object once done with it to avoid
-    // leaks
-    delete (*k)->GetDSPMakefile()->GetMakefile();
+    // delete the cmMakefile which also deletes the cmMSProjectGenerator
+    delete mf;
     }
   // Write the footer for the DSW file
   this->WriteDSWFooter(fout);
 }
 
 
+// Write a dsp file into the DSW file,
+// Note, that dependencies from executables to 
+// the libraries it uses are also done here
 void cmDSWMakefile::WriteProject(std::ostream& fout, 
 				 const char* dspname,
 				 const char* dir,
                                  cmDSPMakefile* project)
 {
-  project->GetMakefile()->ExpandVariables();
   fout << "#########################################################"
     "######################\n\n";
   fout << "Project: \"" << dspname << "\"=" 
@@ -204,17 +129,18 @@ void cmDSWMakefile::WriteProject(std::ostream& fout,
     end = project->GetMakefile()->GetLinkLibraries().end();
     for(;i!= end; ++i)
       {
-		if (strcmp(i->c_str(),dspname))
-			{
-			fout << "Begin Project Dependency\n";
-			fout << "Project_Dep_Name " << *i << "\n";
-			fout << "End Project Dependency\n";
-			}
+      if (strcmp(i->c_str(),dspname))
+        {
+        fout << "Begin Project Dependency\n";
+        fout << "Project_Dep_Name " << *i << "\n";
+        fout << "End Project Dependency\n";
+        }
       }
     }
   fout << "}}}\n\n";
 }
 
+// Standard end of dsw file
 void cmDSWMakefile::WriteDSWFooter(std::ostream& fout)
 {
   fout << "######################################################"
@@ -227,6 +153,7 @@ void cmDSWMakefile::WriteDSWFooter(std::ostream& fout)
 }
 
   
+// ouput standard header for dsw file
 void cmDSWMakefile::WriteDSWHeader(std::ostream& fout)
 {
   fout << "Microsoft Developer Studio Workspace File, Format Version 6.00\n";

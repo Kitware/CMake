@@ -460,3 +460,68 @@ void cmMakefile::ExpandVariablesInString(std::string& source)
     }
 }
 
+
+// recursive function to create a vector of cmMakefile objects
+// This is done by reading the sub directory CMakeLists.txt files,
+// then calling this function with the new cmMakefile object
+void 
+cmMakefile::FindSubDirectoryCMakeListsFiles(std::vector<cmMakefile*>&
+                                            makefiles)
+{ 
+  // loop over all the sub directories of this makefile
+  const std::vector<std::string>& subdirs = this->GetSubDirectories();
+  for(std::vector<std::string>::const_iterator i = subdirs.begin();
+      i != subdirs.end(); ++i)
+    {
+    std::string subdir = *i;
+    // Create a path to the list file in the sub directory
+    std::string listFile = this->GetCurrentDirectory();
+    listFile += "/";
+    listFile += subdir;
+    listFile += "/CMakeLists.txt";
+    // if there is a CMakeLists.txt file read it
+    if(!cmSystemTools::FileExists(listFile.c_str()))
+      {
+      cmSystemTools::Error("CMakeLists.txt file missing from sub directory:",
+                           listFile.c_str());
+      }
+    else
+      {
+      cmMakefile* mf = new cmMakefile;
+      makefiles.push_back(mf);
+      // initialize new makefile
+      mf->SetHomeOutputDirectory(this->GetHomeOutputDirectory());
+      mf->SetHomeDirectory(this->GetHomeDirectory());
+      // add the subdir to the start output directory
+      std::string outdir = this->GetStartOutputDirectory();
+      outdir += "/";
+      outdir += subdir;
+      mf->SetStartOutputDirectory(outdir.c_str());
+      // add the subdir to the start source directory
+      std::string currentDir = this->GetStartDirectory();
+      currentDir += "/";
+      currentDir += subdir;
+      mf->SetStartDirectory(currentDir.c_str());
+      // Parse the CMakeLists.txt file
+      currentDir += "/CMakeLists.txt";
+      mf->MakeStartDirectoriesCurrent();
+      mf->ReadListFile(currentDir.c_str());
+      // recurse into nextDir
+      mf->FindSubDirectoryCMakeListsFiles(makefiles);
+      }
+    }
+}
+
+      
+void cmMakefile::GenerateCacheOnly()
+{
+  std::vector<cmMakefile*> makefiles;
+  this->FindSubDirectoryCMakeListsFiles(makefiles);
+  for(int i =0; i < makefiles.size(); ++i)
+    {
+    delete makefiles[i];
+    }
+}
+
+  
+
