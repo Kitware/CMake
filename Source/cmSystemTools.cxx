@@ -799,7 +799,7 @@ std::string cmSystemTools::FindLibrary(const char* name,
       return cmSystemTools::CollapseFullPath(tryPath.c_str());
       }
     tryPath = *p;
-    tryPath = "/lib";
+    tryPath += "/lib";
     tryPath += name;
     tryPath += ".a";
     if(cmSystemTools::FileExists(tryPath.c_str()))
@@ -807,7 +807,7 @@ std::string cmSystemTools::FindLibrary(const char* name,
       return cmSystemTools::CollapseFullPath(tryPath.c_str());
       }
     tryPath = *p;
-    tryPath = "/lib";
+    tryPath += "/lib";
     tryPath += name;
     tryPath += ".sl";
     if(cmSystemTools::FileExists(tryPath.c_str()))

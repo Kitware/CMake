@@ -19,15 +19,12 @@ ELSE (WIN32)
   )
 
 
-  FIND_LIBRARY(OPENGL_LIB_PATH GL
+  FIND_LIBRARY(OPENGL_LIBRARY GL
   /usr/lib 
   /usr/local/lib 
   /opt/graphics/OpenGL/lib 
   /usr/openwin/lib 
   /usr/X11R6/lib
   )
-
-  # right now we only look for -lgl maybe in future also mesa
-  SET (OPENGL_LIBRARY GL CACHE)
 
 ENDIF (WIN32)
