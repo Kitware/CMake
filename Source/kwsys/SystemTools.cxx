@@ -1657,7 +1657,6 @@ static int SystemToolsDebugReport(int, char* message, int*)
 {
   fprintf(stderr, message);
   exit(1);
-  return 0;
 }
 void SystemTools::EnableMSVCDebugHook()
 {
