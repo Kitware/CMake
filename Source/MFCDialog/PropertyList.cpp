@@ -435,7 +435,7 @@ void CPropertyList::OnButton()
 			Filter);
     CString initialDir;
     CString currPath = pItem->m_curValue;
-    if (currPath == "NOTFOUND")
+    if (currPath.Right(9) == "-NOTFOUND" || currPath == "NOTFOUND")
       {
       currPath = "";
       }
