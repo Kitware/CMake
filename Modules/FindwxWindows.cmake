@@ -351,7 +351,7 @@ IF (UNIX)
     ## extract linkdirs (-L) for rpath
     ## use regular expression to match wildcard equivalent "-L*<endchar>"
     ## with <endchar> is a space or a semicolon
-    STRING(REGEX MATCHALL "[-][L]([^ ;])+" WXWINDOWS_LINK_DIRECTORIES_WITH_PREFIX ${WX_CONFIG_LIBS} )
+    STRING(REGEX MATCHALL "[-][L]([^ ;])+" WXWINDOWS_LINK_DIRECTORIES_WITH_PREFIX "${WX_CONFIG_LIBS}" )
     #MESSAGE("DBG  WXWINDOWS_LINK_DIRECTORIES_WITH_PREFIX=${WXWINDOWS_LINK_DIRECTORIES_WITH_PREFIX}")
     
     ## remove prefix -L because we need the pure directory for LINK_DIRECTORIES
