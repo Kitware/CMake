@@ -396,7 +396,7 @@ std::string cmLocalGenerator::ConvertToRelativeOutputPath(const char* p)
      (pathIn[0] != '/' && pathIn[1] != ':') || 
      pathIn.find("..") == 0)
     {
-    return pathIn;
+    return cmSystemTools::ConvertToOutputPath(p);
     } 
 
   // do not use relative paths for network build trees
