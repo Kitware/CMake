@@ -104,7 +104,10 @@ public:
                          std::string& var,
                          std::string& value,
                          CacheEntryType& type);
-  
+
+  ///! Get a value from the cache given a key
+  const char* GetCacheValue(const char* key) const;
+
 protected:
   ///! Add an entry into the cache
   void AddCacheEntry(const char* key, const char* value, 
@@ -112,9 +115,6 @@ protected:
 
   ///! Add a BOOL entry into the cache
   void AddCacheEntry(const char* key, bool, const char* helpString);
-  
-  ///! Get a value from the cache given a key
-  const char* GetCacheValue(const char* key) const;
 
 private:
   static void OutputHelpString(std::ofstream& fout, 
