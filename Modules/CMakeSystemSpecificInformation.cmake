@@ -120,6 +120,21 @@ SET(CMAKE_VERBOSE_MAKEFILE FALSE CACHE BOOL "If this value is on, makefiles will
 # default build type is none
 SET (CMAKE_BUILD_TYPE "" CACHE STRING 
      "Choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel.")
+
+# Add these settings to the cache.
+SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}" CACHE STRING
+     "Flags used by the compiler during all build types.")
+SET (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}" CACHE STRING
+     "Flags used by the compiler during debug builds.")
+SET (CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL}" CACHE STRING
+     "Flags used by the compiler during release minsize builds.")
+SET (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}" CACHE STRING
+     "Flags used by the compiler during release builds (/MD /Ob1 /Oi /Ot /Oy /Gs will produce slightly less optimized but smaller files).")
+SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}" CACHE STRING
+     "Flags used by the compiler during Release with Debug Info builds.")
+SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS}" CACHE STRING
+     "Flags for C compiler.")
+
 MARK_AS_ADVANCED(
 CMAKE_VERBOSE_MAKEFILE 
 CMAKE_CXX_FLAGS

@@ -49,24 +49,12 @@ SET(CMAKE_CREATE_WIN32_EXE -tW -tWM )
 # extra flags for a console app
 SET(CMAKE_CREATE_CONSOLE_EXE -tWC )
 
-SET (CMAKE_CXX_FLAGS "-w- -whid -waus -wpar -tWM -P" CACHE STRING
-     "Flags used to compile c++ files.")
-
-SET (CMAKE_CXX_FLAGS_DEBUG "-Od -v" CACHE STRING
-     "Flags used by the compiler during debug builds.")
-
-SET (CMAKE_CXX_FLAGS_MINSIZEREL "-O1" CACHE STRING
-     "Flags used by the compiler during release minsize builds.")
-
-SET (CMAKE_CXX_FLAGS_RELEASE "-O2" CACHE STRING
-     "Release flags.")
-
-SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO "-Od" CACHE STRING
-     "Flags used by the compiler during Release with Debug Info builds.")
-
-
-SET (CMAKE_C_FLAGS "-w- -whid -waus -tWM" CACHE STRING
-     "Flags for C compiler.")
+SET (CMAKE_CXX_FLAGS "-w- -whid -waus -wpar -tWM -P")
+SET (CMAKE_CXX_FLAGS_DEBUG "-Od -v")
+SET (CMAKE_CXX_FLAGS_MINSIZEREL "-O1")
+SET (CMAKE_CXX_FLAGS_RELEASE "-O2")
+SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO "-Od")
+SET (CMAKE_C_FLAGS "-w- -whid -waus -tWM")
 
 SET (CMAKE_STANDARD_LIBRARIES "import32.lib" CACHE STRING 
      "Libraries linked by defalut with all applications.")
