@@ -98,7 +98,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   upperDir += "_DIR";
   upperFound += "_FOUND";
   bool needCompatibility = false;
-  if(upperDir != this->Variable)
+  if(!(upperDir == this->Variable))
     {
     const char* versionValue =
       m_Makefile->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
@@ -183,7 +183,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
                               m_Makefile->GetDefinition(foundVar.c_str()));
     }
   
-  if(upperDir != this->Variable)
+  if(!(upperDir == this->Variable))
     {
     if(needCompatibility)
       {
