@@ -35,28 +35,23 @@ bool cmCablePackageCommand::Invoke(std::vector<std::string>& args)
   // cmCablePackageCommand's WritePackageFooter().  This will call
   // this cmCablePackageCommand's WritePackageHeader().
   m_CableData->BeginPackage(this);
-  
+
+  // Tell the makefile that it needs the "cable" utility.  
+  m_Makefile->AddUtility("cable");
+
   // Add custom rules to the makefile to generate this package's source
   // files.
   std::string command = "${CABLE}";
-  m_Makefile->ExpandVariablesInString(command);  
+  m_Makefile->ExpandVariablesInString(command);
   std::vector<std::string> depends;  
   depends.push_back(command);
   command += " cable_config.xml";
   
-  std::string packageFile = "Cxx/"+m_PackageName+"_cxx";
-  std::string packageHeader = packageFile+".h";
-  std::string packageSource = packageFile+".cxx";
-  
-  // A rule for the package's header file.
-  m_Makefile->AddCustomCommand("cable_config.xml",
-                               packageHeader.c_str(),
-                               command.c_str(),
-                               depends);
+  std::string packageFile = "Cxx/"+m_PackageName+"_cxx.cxx";
   
   // A rule for the package's source file.
   m_Makefile->AddCustomCommand("cable_config.xml",
-                               packageSource.c_str(),
+                               packageFile.c_str(),
                                command.c_str(),
                                depends);
   
