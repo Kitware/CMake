@@ -91,7 +91,7 @@ bool cmFileCommand::HandleWriteCommand(std::vector<std::string> const& args,
     this->SetError(error.c_str());
     return false;
     }
-  file << message << std::endl;
+  file << message;
   file.close();
   return true;
 }
