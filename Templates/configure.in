@@ -158,7 +158,7 @@ case $system in
 	CMAKE_SHLIB_SUFFIX=".so"
 	CMAKE_DL_LIBS=""
 	CMAKE_SHLIB_BUILD_FLAGS="-shared -rdata_shared"
-        CMAKE_SHLIB_RUNTIME_FLAG="-Wl,-rpath"
+        CMAKE_SHLIB_RUNTIME_FLAG="-Wl,-rpath,"
         CMAKE_SHLIB_RUNTIME_SEP=":"
 	;;
     Linux*)
@@ -208,11 +208,12 @@ case $system in
     NetBSD-*|FreeBSD-*)
 	# Not available on all versions:  check for include file.
 	if test -f /usr/include/dlfcn.h; then
-	    CMAKE_SHLIB_CFLAGS="-fpic"
+	    CMAKE_SHLIB_CFLAGS="-fPIC"
 	    CMAKE_SHLIB_LD_LIBS=""
 	    CMAKE_SHLIB_SUFFIX=".so"
 	    CMAKE_DL_LIBS=""
-	    CMAKE_SHLIB_LINK_FLAGS="-shared"
+	    CMAKE_SHLIB_BUILD_FLAGS="-shared"
+	    CMAKE_SHLIB_LINK_FLAGS=""
             CMAKE_SHLIB_RUNTIME_FLAG="-Wl,-rpath,"
             CMAKE_SHLIB_RUNTIME_SEP=":"
 	else
@@ -356,7 +357,11 @@ case $system in
     ;;
 esac
 
-CMAKE_SHLIB_CFLAGS="${SHLIB_CFLAGS}"
+# If the user has supplied C flags for compiling shared objects, use
+# those instead
+if test "${SHLIB_CFLAGS}" != ""; then
+  CMAKE_SHLIB_CFLAGS="${SHLIB_CFLAGS}"
+fi
 CMAKE_LD_SEARCH_FLAGS="${LD_SEARCH_FLAGS}"
 
 

@@ -405,6 +405,8 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
 
   if(outputRuntime && runtimeDirs.size()>0)
     {
+    // For the runtime search directories, do a "-Wl,-rpath,a:b:c" or
+    // a "-R a -R b -R c" type link line
     fout << runtimeFlag;
     std::vector<std::string>::iterator itr = runtimeDirs.begin();
     fout << *itr;
@@ -427,6 +429,8 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
 
 void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
 {
+  bool dll = cmCacheManager::GetInstance()->IsOn("BUILD_SHARED_LIBS");
+
   // for each target
   const cmTargets &tgts = m_Makefile->GetTargets();
   for(cmTargets::const_iterator l = tgts.begin(); 
@@ -459,8 +463,12 @@ void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
       {
       fout << l->first << ": ${" << 
         l->first << "_SRC_OBJS} ${CMAKE_DEPEND_LIBS}\n";
-      fout << "\t${CMAKE_CXX_COMPILER} ${CMAKE_SHLIB_LINK_FLAGS} ${CMAKE_CXXFLAGS} ${" << 
-        l->first << "_SRC_OBJS} ";
+      fout << "\t${CMAKE_CXX_COMPILER} ";
+      if (dll)
+        {
+        fout << "${CMAKE_SHLIB_LINK_FLAGS} ";
+        }
+      fout << "${CMAKE_CXXFLAGS} ${" << l->first << "_SRC_OBJS} ";
       this->OutputLinkLibraries(fout, NULL,l->second);
       fout << " -o " << l->first << "\n\n";
       }
