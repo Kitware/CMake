@@ -312,6 +312,10 @@ void cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
 
 const char* cmGlobalGenerator::GetLanguageOutputExtensionForLanguage(const char* lang)
 {
+  if(!lang) 
+    {
+    return "";
+    }
   if(m_LanguageToOutputExtension.count(lang) > 0)
     {
     return m_LanguageToOutputExtension[lang].c_str();
@@ -321,6 +325,10 @@ const char* cmGlobalGenerator::GetLanguageOutputExtensionForLanguage(const char*
 
 const char* cmGlobalGenerator::GetLanguageOutputExtensionFromExtension(const char* ext)
 {
+  if(!ext)
+    {
+    return "";
+    }
   const char* lang = this->GetLanguageFromExtension(ext);
   return this->GetLanguageOutputExtensionForLanguage(lang);
 }

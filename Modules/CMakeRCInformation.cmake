@@ -15,7 +15,7 @@ SET (CMAKE_RC_FLAGS "${CMAKE_RC_FLAGS_ENV_INIT} $ENV{RCFLAGS} ${CMAKE_RC_FLAGS_I
 
 # now define the following rule variables
 # CMAKE_RC_COMPILE_OBJECT
-
+SET(CMAKE_INCLUDE_FLAG_RC "-I")
 # compile a Resource file into an object file
 IF(NOT CMAKE_RC_COMPILE_OBJECT)
   SET(CMAKE_RC_COMPILE_OBJECT
