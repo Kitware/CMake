@@ -1199,10 +1199,14 @@ std::string cmSystemTools::CollapseFullPath(const char* in_name)
 # ifdef MAXPATHLEN
   char resolved_name[MAXPATHLEN];
 # else
+#  ifdef PATH_MAX
   char resolved_name[PATH_MAX];
+#  else
+  char resolved_name[5024];
+#  endif
 # endif
-   realpath(in_name, resolved_name);
-   return resolved_name;
+  realpath(in_name, resolved_name);
+  return resolved_name;
 #endif
 }
 
