@@ -1323,7 +1323,7 @@ cmData* cmMakefile::LookupData(const char* name) const
 
 cmSourceFile* cmMakefile::GetSource(const char* sourceName) const
 {
-  std::string s = sourceName;
+  std::string s = cmSystemTools::GetFilenameName(sourceName);
   std::string ext;
   std::string::size_type pos = s.rfind('.');
   if(pos != std::string::npos)
