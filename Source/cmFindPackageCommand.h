@@ -86,7 +86,7 @@ public:
   
   cmTypeMacro(cmFindPackageCommand, cmCommand);
 private:
-  bool FindModule(bool& found);
+  bool FindModule(bool& found, bool quiet);
   bool FindConfig();
   std::string SearchForConfig() const;
   bool ReadListFile(const char* f);

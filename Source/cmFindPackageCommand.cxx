@@ -55,7 +55,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   
   // See if there is a Find<name>.cmake module.
   bool foundModule = false;
-  if(!this->FindModule(foundModule))
+  if(!this->FindModule(foundModule, quiet))
     {
     return false;
     }
@@ -124,7 +124,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
 }
 
 //----------------------------------------------------------------------------
-bool cmFindPackageCommand::FindModule(bool& found)
+bool cmFindPackageCommand::FindModule(bool& found, bool quiet)
 {
   // Search the CMAKE_MODULE_PATH for a Find<name>.cmake module.
   found = false;
@@ -157,6 +157,17 @@ bool cmFindPackageCommand::FindModule(bool& found)
     if(cmSystemTools::FileExists(module.c_str()))
       {
       found = true;
+      
+      if(quiet)
+        {
+        // Tell the module that is about to be read that it should find
+        // quietly.
+        std::string quietly = this->Name;
+        quietly += "_FIND_QUIETLY";
+        m_Makefile->AddDefinition(quietly.c_str(), "1");
+        }
+      
+      // Load the module we found.
       return this->ReadListFile(module.c_str());
       }
     }
