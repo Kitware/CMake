@@ -3,7 +3,7 @@
 int main(int ac, char** av)
 {
   cmake cm;
-  if(ac < 2)
+  if(ac < 1)
     {
       cm.Usage(av[0]);
       return -1;
