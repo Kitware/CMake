@@ -616,7 +616,7 @@ void kwsysProcess_Kill(kwsysProcess* cp)
 
 /*--------------------------------------------------------------------------*/
 /* Initialize a process control structure for kwsysProcess_Execute.  */
-void kwsysProcessInitialize(kwsysProcess* cp)
+static void kwsysProcessInitialize(kwsysProcess* cp)
 {
   int i;
   for(i=0; i < KWSYSPE_PIPE_COUNT; ++i)
@@ -643,7 +643,7 @@ void kwsysProcessInitialize(kwsysProcess* cp)
 /*--------------------------------------------------------------------------*/
 /* Free all resources used by the given kwsysProcess instance that were
    allocated by kwsysProcess_Execute.  */
-void kwsysProcessCleanup(kwsysProcess* cp, int error)
+static void kwsysProcessCleanup(kwsysProcess* cp, int error)
 {
   int i;
   
@@ -668,7 +668,7 @@ void kwsysProcessCleanup(kwsysProcess* cp, int error)
 
 /*--------------------------------------------------------------------------*/
 /* Close the given file descriptor if it is open.  Reset its value to -1.  */
-void kwsysProcessCleanupDescriptor(int* pfd)
+static void kwsysProcessCleanupDescriptor(int* pfd)
 {
   if(pfd && *pfd >= 0)
     {
@@ -682,8 +682,8 @@ void kwsysProcessCleanupDescriptor(int* pfd)
 /*--------------------------------------------------------------------------*/
 /* Get the time at which either the process or user timeout will
    expire.  Returns 1 if the user timeout is first, and 0 otherwise.  */
-int kwsysProcessGetTimeoutTime(kwsysProcess* cp, double* userTimeout,
-                               kwsysProcessTime* timeoutTime)
+static int kwsysProcessGetTimeoutTime(kwsysProcess* cp, double* userTimeout,
+                                      kwsysProcessTime* timeoutTime)
 {
   /* The first time this is called, we need to calculate the time at
      which the child will timeout.  */
@@ -715,8 +715,8 @@ int kwsysProcessGetTimeoutTime(kwsysProcess* cp, double* userTimeout,
 /*--------------------------------------------------------------------------*/
 /* Get the length of time before the given timeout time arrives.
    Returns 1 if the time has already arrived, and 0 otherwise.  */
-int kwsysProcessGetTimeoutLeft(kwsysProcessTime* timeoutTime,
-                               kwsysProcessTime* timeoutLength)
+static int kwsysProcessGetTimeoutLeft(kwsysProcessTime* timeoutTime,
+                                      kwsysProcessTime* timeoutLength)
 {
   if(timeoutTime->tv_sec < 0)
     {
@@ -742,7 +742,7 @@ int kwsysProcessGetTimeoutLeft(kwsysProcessTime* timeoutTime,
 }
 
 /*--------------------------------------------------------------------------*/
-kwsysProcessTime kwsysProcessTimeGetCurrent()
+static kwsysProcessTime kwsysProcessTimeGetCurrent()
 {
   kwsysProcessTime current;
   gettimeofday(&current, 0);
@@ -750,13 +750,13 @@ kwsysProcessTime kwsysProcessTimeGetCurrent()
 }
 
 /*--------------------------------------------------------------------------*/
-double kwsysProcessTimeToDouble(kwsysProcessTime t)
+static double kwsysProcessTimeToDouble(kwsysProcessTime t)
 {
   return (double)t.tv_sec + t.tv_usec*0.000001;  
 }
 
 /*--------------------------------------------------------------------------*/
-kwsysProcessTime kwsysProcessTimeFromDouble(double d)
+static kwsysProcessTime kwsysProcessTimeFromDouble(double d)
 {
   kwsysProcessTime t;
   t.tv_sec = (long)d;
@@ -765,14 +765,14 @@ kwsysProcessTime kwsysProcessTimeFromDouble(double d)
 }
 
 /*--------------------------------------------------------------------------*/
-int kwsysProcessTimeLess(kwsysProcessTime in1, kwsysProcessTime in2)
+static int kwsysProcessTimeLess(kwsysProcessTime in1, kwsysProcessTime in2)
 {
   return ((in1.tv_sec < in2.tv_sec) ||
           ((in1.tv_sec == in2.tv_sec) && (in1.tv_usec < in2.tv_usec)));
 }
 
 /*--------------------------------------------------------------------------*/
-kwsysProcessTime kwsysProcessTimeAdd(kwsysProcessTime in1, kwsysProcessTime in2)
+static kwsysProcessTime kwsysProcessTimeAdd(kwsysProcessTime in1, kwsysProcessTime in2)
 {
   kwsysProcessTime out;
   out.tv_sec = in1.tv_sec + in2.tv_sec;
@@ -786,7 +786,7 @@ kwsysProcessTime kwsysProcessTimeAdd(kwsysProcessTime in1, kwsysProcessTime in2)
 }
 
 /*--------------------------------------------------------------------------*/
-kwsysProcessTime kwsysProcessTimeSubtract(kwsysProcessTime in1, kwsysProcessTime in2)
+static kwsysProcessTime kwsysProcessTimeSubtract(kwsysProcessTime in1, kwsysProcessTime in2)
 {
   kwsysProcessTime out;
   out.tv_sec = in1.tv_sec - in2.tv_sec;
@@ -803,7 +803,7 @@ kwsysProcessTime kwsysProcessTimeSubtract(kwsysProcessTime in1, kwsysProcessTime
 /* When the child process encounters an error before its program is
    invoked, this is called to report the error to the parent and
    exit.  */
-void kwsysProcessChildErrorExit(kwsysProcess* cp)
+static void kwsysProcessChildErrorExit(kwsysProcess* cp)
 {
   /* Construct the error message.  */
   char buffer[KWSYSPE_PIPE_BUFFER_SIZE];
@@ -818,7 +818,7 @@ void kwsysProcessChildErrorExit(kwsysProcess* cp)
 
 /*--------------------------------------------------------------------------*/
 /* Restores all signal handlers to their default values.  */
-void kwsysProcessRestoreDefaultSignalHandlers()
+static void kwsysProcessRestoreDefaultSignalHandlers()
 {
   struct sigaction act;
   act.sa_handler = SIG_DFL;
