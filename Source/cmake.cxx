@@ -100,7 +100,7 @@ void cmake::SetCacheArgs(cmMakefile& builder,
         {
           cmCacheManager::GetInstance()->AddCacheEntry(
             var.c_str(), 
-            cmSystemTools::EscapeSpaces(value.c_str()).c_str(),
+            value.c_str(),
             "No help, variable specified on the command line.",
             type);
         }
