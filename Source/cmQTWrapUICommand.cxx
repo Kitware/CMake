@@ -101,16 +101,16 @@ bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& argsIn)
         {
         headerListValue += ";";
         }
-      headerListValue += header_file.GetSourceName() + ".h";
+      headerListValue += header_file.GetFullPath();
       
       // create the list of sources
       if (sourceListValue.size() > 0)
         {
         sourceListValue += ";";
         }
-      sourceListValue += source_file.GetSourceName() + ".cxx";
+      sourceListValue += source_file.GetFullPath();
       sourceListValue += ";";
-      sourceListValue += moc_file.GetSourceName() + ".cxx";
+      sourceListValue += moc_file.GetFullPath();
       }
     }
   
