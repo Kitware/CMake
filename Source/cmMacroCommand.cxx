@@ -107,9 +107,15 @@ ShouldRemove(const cmListFileFunction&, cmMakefile &)
 }
 
 void cmMacroFunctionBlocker::
-ScopeEnded(cmMakefile &) 
+ScopeEnded(cmMakefile &mf) 
 {
-  // macros never leave scope
+  // macros never leave scope but we should have seen the ENDMACRO call by now
+  if (m_Executing != true)
+    {
+    cmSystemTools::Error("The end of a CMakeLists file was reached with a MACRO statement that was not closed properly. Within the directory: ", 
+                         mf.GetCurrentDirectory(), " with macro ", 
+                         m_Args[0].c_str());
+    }
 }
 
 bool cmMacroCommand::InitialPass(std::vector<std::string> const& args)
