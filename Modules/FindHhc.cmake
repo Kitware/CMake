@@ -1,0 +1,9 @@
+# 
+# this module looks for Microsoft HTML Help Compiler
+#
+
+FIND_PROGRAM(HHC
+  hhc
+  "C:/Program Files/HTML Help Workshop" 
+  "[HKEY_CURRENT_USER\\Software\\Microsoft\\HTML Help Workshop;InstallDir]"
+)
