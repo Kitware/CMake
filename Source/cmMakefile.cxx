@@ -428,8 +428,6 @@ void cmMakefile::GenerateMakefile()
        l != m_Targets.end(); l++)
     {
     l->second.GenerateSourceFilesFromSourceLists(*this);
-    l->second.MergeLibraries(m_LinkLibraries);
-    l->second.MergeDirectories(m_LinkDirectories);
     l->second.AnalyzeLibDependencies(*this);
     }
   // now do the generation
@@ -520,14 +518,30 @@ void cmMakefile::AddLinkLibrary(const char* lib, cmTarget::LinkLibraryType llt)
 void cmMakefile::AddLinkLibraryForTarget(const char *target,
                                          const char* lib, 
                                          cmTarget::LinkLibraryType llt)
-{
-  if (m_Targets.find(target) != m_Targets.end())
+{ 
+  cmTargets::iterator i = m_Targets.find(target);
+  if ( i != m_Targets.end())
     {
-    m_Targets[target].AddLinkLibrary( *this, target, lib, llt );
+    i->second.AddLinkLibrary( *this, target, lib, llt );
     }
   else
     {
     cmSystemTools::Error("Attempt to add link libraries to non-existant target: ",  target, " for lib ", lib);
+    }
+}
+
+void cmMakefile::AddLinkDirectoryForTarget(const char *target,
+                                           const char* d)
+{
+  cmTargets::iterator i = m_Targets.find(target);
+  if ( i != m_Targets.end())
+    {
+    i->second.AddLinkDirectory( d );
+    }
+  else
+    {
+    cmSystemTools::Error("Attempt to add link directories to non-existant target: ", 
+                         target, " for directory ", d);
     }
 }
 
@@ -654,7 +668,20 @@ void cmMakefile::AddLibrary(const char* lname, int shared,
 
   target.SetInAll(true);
   target.GetSourceLists() = srcs;
+  std::vector<std::string>::iterator j;
+  for(j = m_LinkDirectories.begin();
+      j != m_LinkDirectories.end(); ++j)
+    {
+    target.AddLinkDirectory(j->c_str());
+    }
   m_Targets.insert(cmTargets::value_type(lname,target));
+  cmTarget::LinkLibraries::iterator  i;
+  for(i = m_LinkLibraries.begin(); i != m_LinkLibraries.end(); ++i)
+    {
+    this->AddLinkLibraryForTarget(lname, i->first.c_str(), i->second);
+    }
+  
+  
 
   // Add an entry into the cache 
   cmCacheManager::GetInstance()->
@@ -727,7 +754,18 @@ void cmMakefile::AddExecutable(const char *exeName,
     }
   target.SetInAll(true);
   target.GetSourceLists() = srcs;
+  std::vector<std::string>::iterator j;
+  for(j = m_LinkDirectories.begin();
+      j != m_LinkDirectories.end(); ++j)
+    {
+    target.AddLinkDirectory(j->c_str());
+    }
   m_Targets.insert(cmTargets::value_type(exeName,target));
+  cmTarget::LinkLibraries::iterator  i;
+  for(i = m_LinkLibraries.begin(); i != m_LinkLibraries.end(); ++i)
+    {
+    this->AddLinkLibraryForTarget(exeName, i->first.c_str(), i->second);
+    }
   
   // Add an entry into the cache 
   cmCacheManager::GetInstance()->

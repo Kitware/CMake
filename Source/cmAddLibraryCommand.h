@@ -44,13 +44,6 @@ public:
   virtual bool InitialPass(std::vector<std::string> const& args);
 
   /**
-   * This is called at the end after all the information specified by
-   * the command is accumulated. This is where we add in the
-   * dependencies that were globally specified.
-   */
-  virtual void FinalPass();
-
-  /**
    * The name of the command as specified in CMakeList.txt.
    */
   virtual const char* GetName() { return "ADD_LIBRARY";}

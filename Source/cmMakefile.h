@@ -155,22 +155,6 @@ public:
                          const std::vector<std::string> &depends,
                          const std::vector<std::string> &outputs);
 
-//    /**
-//     * Get a list of link libraries in the build.
-//     */
-//    cmTarget::LinkLibraries& GetLinkLibraries()
-//      { 
-//      return m_LinkLibraries;
-//      }
-
-  /**
-   * Get a list of link libraries in the build.
-   */
-  const cmTarget::LinkLibraries& GetLinkLibraries() const
-    { 
-    return m_LinkLibraries;
-    }
-
   /**
    * Add a link library to the build.
    */
@@ -178,6 +162,7 @@ public:
   void AddLinkLibrary(const char*, cmTarget::LinkLibraryType type);
   void AddLinkLibraryForTarget(const char *tgt, const char*, 
                                cmTarget::LinkLibraryType type);
+  void AddLinkDirectoryForTarget(const char *tgt, const char* d);
 
   /**
    * Add a link directory to the build.

@@ -72,13 +72,4 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& argsIn)
   return true;
 }
 
-void cmAddLibraryCommand::FinalPass()
-{
-  const cmTarget::LinkLibraries& libs = m_Makefile->GetLinkLibraries();
 
-  for( cmTarget::LinkLibraries::const_iterator i = libs.begin();
-       i != libs.end(); ++i )
-    {
-    m_Makefile->AddDependencyToCache( m_LibName.c_str(), i->first );
-    }
-}

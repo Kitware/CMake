@@ -3,10 +3,10 @@
 # specify them in the correct order.
 
 LINK_LIBRARIES( Two )
+LINK_LIBRARIES( Five )
 
 ADD_LIBRARY( SixA SixASrc.c )
 
 ADD_LIBRARY( SixB SixBSrc.c )
 TARGET_LINK_LIBRARIES( SixB Four )
 
-LINK_LIBRARIES( Five )

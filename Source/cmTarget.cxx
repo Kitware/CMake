@@ -67,16 +67,6 @@ void cmTarget::GenerateSourceFilesFromSourceLists( cmMakefile &mf)
     }
 }
 
-void cmTarget::MergeLibraries(const LinkLibraries &ll)
-{
-  m_LinkLibraries.insert( m_LinkLibraries.end(), ll.begin(), ll.end() );
-}
-
-void cmTarget::MergeDirectories(const std::vector<std::string>  &ld)
-{
-  m_LinkDirectories.insert( m_LinkDirectories.end(), ld.begin(), ld.end() );
-}
-
 
 void cmTarget::AddLinkLibrary(const std::string& lib, 
                               LinkLibraryType llt)
@@ -276,7 +266,9 @@ void cmTarget::Emit( const std::string& lib,
 {
   // It's already been emitted
   if( emitted.find(lib) != emitted.end() )
+    {
     return;
+    }
 
   // If this library hasn't been visited before, then emit all its
   // dependencies before emitting the library itself. If it has been

@@ -81,6 +81,7 @@ public:
   const LinkLibraries &GetLinkLibraries() const {return m_LinkLibraries;}
 
   const std::vector<std::string>& GetLinkDirectories() const {return m_LinkDirectories;}
+  void AddLinkDirectory(const char* d) { m_LinkDirectories.push_back(d);}
 
   /**
    * Set the path where this target should be installed. This is relative to
@@ -96,16 +97,6 @@ public:
   void AddLinkLibrary(const std::string& lib, 
                       LinkLibraryType llt);
 
-  /**
-   * Merge Link Libraries into this targets current list 
-   */
-  void MergeLibraries(const LinkLibraries &ll);
-
-  /**
-   * Merge Link Directories into this targets current list 
-   */
-  void MergeDirectories(const std::vector<std::string> &ld);
-    
   /**
    * Generate the SourceFilesList from the SourceLists. This should only be
    * done once to be safe.  

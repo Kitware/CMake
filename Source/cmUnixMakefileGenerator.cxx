@@ -890,22 +890,6 @@ void cmUnixMakefileGenerator::OutputDependLibs(std::ostream& fout)
       // A library should not depend on itself!
       emitted.insert(l->first);
       
-      // First look at all makefile level link libraries.
-      const cmTarget::LinkLibraries& libs = m_Makefile->GetLinkLibraries();
-      for(cmTarget::LinkLibraries::const_iterator lib = libs.begin();
-          lib != libs.end(); ++lib)
-        {
-        // Record that this library was used.
-        used.insert(lib->first);
-
-        // Don't emit the same library twice for this target.
-        if(emitted.insert(lib->first).second)
-          {
-          // Output this dependency.
-          this->OutputLibDepend(fout, lib->first.c_str());
-          }
-        }
-      
       // Now, look at all link libraries specific to this target.
       const cmTarget::LinkLibraries& tlibs = l->second.GetLinkLibraries();
       for(cmTarget::LinkLibraries::const_iterator lib = tlibs.begin();

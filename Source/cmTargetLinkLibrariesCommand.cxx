@@ -57,12 +57,12 @@ bool cmTargetLinkLibrariesCommand::InitialPass(std::vector<std::string> const& a
       const char* dir = m_Makefile->GetDefinition(i->c_str());
       if( dir )
         {
-        m_Makefile->AddLinkDirectory( dir );
+        m_Makefile->AddLinkDirectoryForTarget(args[0].c_str(), dir );
         }
       }
     else
       {
-      m_Makefile->AddLinkDirectory( ldir );
+      m_Makefile->AddLinkDirectoryForTarget(args[0].c_str(), ldir );
       }
     } 
   return true;
