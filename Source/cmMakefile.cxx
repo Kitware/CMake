@@ -63,6 +63,7 @@ cmMakefile::cmMakefile()
   this->AddSourceGroup("Header Files", "\\.(h|hh|hpp|hxx|hm|inl)$");
   this->AddDefaultCommands();
   this->AddDefaultDefinitions();
+  cmCacheManager::GetInstance()->DefineCache(this);
 }
 
 void cmMakefile::AddDefaultCommands()

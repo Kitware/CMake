@@ -341,10 +341,10 @@ void CMakeSetupDialog::OnBuildProjects()
     // current GUI values to the cache
     this->SaveCacheFromGUI();
     }
-  // Make sure we are working from the cache on disk
-  this->LoadCacheFromDiskToGUI();
   // Create a makefile object
   cmMakefile makefile;
+  // Make sure we are working from the cache on disk
+  this->LoadCacheFromDiskToGUI();
   makefile.SetMakefileGenerator(new cmMSProjectGenerator);
   makefile.SetHomeDirectory(m_WhereSource);
   makefile.SetStartOutputDirectory(m_WhereBuild);
@@ -361,6 +361,7 @@ void CMakeSetupDialog::OnBuildProjects()
   // update the GUI with any new values in the caused by the
   // generation process
   this->LoadCacheFromDiskToGUI();
+  cmCacheManager::GetInstance()->DefineCache(&makefile);
   // save source and build paths to registry
   this->SaveToRegistry();
   // path is not up-to-date
