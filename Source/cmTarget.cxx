@@ -72,13 +72,23 @@ void cmTarget::GenerateSourceFilesFromSourceLists( cmMakefile &mf)
         {
         const char* varValue = 
           mf.GetDefinition(temps.c_str());
-        if (varValue)
+        // if the definition exists
+        // and it has an extension in it then assume it is a source file
+        // the problem is that ADD_EXECUTABLE creates a definition with the
+        // same name as the executable which could be the same name as the
+        // source file without the extension, so if you do this:
+        // ADD_EXECUTABLE(foo foo) where foo.cxx is a source file, then
+        // foo will be varValue will be defined to the path of the executable, but
+        // not a source list as we expect, so look for a "." in the string to see
+        // if it is a file or not.
+        if (varValue
+            && strchr(varValue, '.'))
           {
           std::vector<std::string> tval;
           tval.push_back(varValue);
           std::vector<std::string> args;
           cmSystemTools::ExpandListArguments(tval, args);
-          int i;
+          unsigned int i;
           for (i = 0; i < args.size(); ++i)
             {
             if (mf.GetSource(args[i].c_str()))
