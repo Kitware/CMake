@@ -36,8 +36,18 @@ typedef unsigned short mode_t;
 namespace @KWSYS_NAMESPACE@
 {
 
-class SystemToolsManager;
 class SystemToolsTranslationMap;
+class @KWSYS_NAMESPACE@_EXPORT SystemToolsManager
+{
+public:
+  SystemToolsManager();
+  ~SystemToolsManager();
+};
+
+// This instance will show up in any translation unit that uses
+// SystemTools. It will make sure SystemTools is initialized 
+// before it is used and is the last static object destroyed.
+static SystemToolsManager SystemToolsManagerInstance;
 
 /** \class SystemTools
  * \brief A collection of useful platform-independent system functions.
@@ -356,6 +366,14 @@ private:
   static void ClassFinalize();
 
   /**
+   * This method prevents warning on SGI
+   */
+  SystemToolsManager* GetSystemToolsManager()
+    {
+    return &SystemToolsManagerInstance;
+    }
+
+  /**
    * Path translation table from dir to refdir
    * Each time 'dir' will be found it will be replace by 'refdir'
    */
@@ -363,18 +381,6 @@ private:
   
   friend class SystemToolsManager;
 };
-
-class @KWSYS_NAMESPACE@_EXPORT SystemToolsManager
-{
-public:
-  SystemToolsManager();
-  ~SystemToolsManager();
-};
-
-// This instance will show up in any translation unit that uses
-// SystemTools. It will make sure SystemTools is initialized 
-// before it is used and is the last static object destroyed.
-static SystemToolsManager SystemToolsManagerInstance;
 
 } // namespace @KWSYS_NAMESPACE@
 
