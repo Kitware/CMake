@@ -471,7 +471,9 @@ void cmMakefile::AddCustomCommand(const char* source,
   // find the target, 
   if (m_Targets.find(target) != m_Targets.end())
     {
-    std::string c = cmSystemTools::EscapeSpaces(command);
+    std::string expandC = command;
+    this->ExpandVariablesInString(expandC);
+    std::string c = cmSystemTools::EscapeSpaces(expandC.c_str());
 
     std::string combinedArgs;
     unsigned int i;
