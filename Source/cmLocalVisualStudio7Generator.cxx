@@ -253,32 +253,26 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
        << "\t\t\t\tName=\"VCCLCompilerTool\"\n"
        << "\t\t\t\tAdditionalOptions=\"";
   std::string flags;
+  std::string flagsRelease = " ";
+  std::string flagsMinSize = " ";
+  std::string flagsDebug = " ";
+  std::string flagsDebugRel = " ";
   if(target.HasCxx())
     {
     flags = m_Makefile->GetDefinition("CMAKE_CXX_FLAGS");
+    flagsRelease += m_Makefile->GetDefinition("CMAKE_CXX_FLAGS_RELEASE");
+    flagsMinSize += m_Makefile->GetDefinition("CMAKE_CXX_FLAGS_MINSIZEREL");
+    flagsDebug += m_Makefile->GetDefinition("CMAKE_CXX_FLAGS_DEBUG");
+    flagsDebugRel += m_Makefile->GetDefinition("CMAKE_CXX_FLAGS_RELWITHDEBINFO");
     }
   else
     {
-    if(m_Makefile->GetDefinition("CMAKE_C_FLAGS"))
-      {
-      flags = m_Makefile->GetDefinition("CMAKE_C_FLAGS");
-      }
+    flags = m_Makefile->GetDefinition("CMAKE_C_FLAGS");
+    flagsRelease += m_Makefile->GetDefinition("CMAKE_C_FLAGS_RELEASE");
+    flagsMinSize += m_Makefile->GetDefinition("CMAKE_C_FLAGS_MINSIZEREL");
+    flagsDebug += m_Makefile->GetDefinition("CMAKE_C_FLAGS_DEBUG");
+    flagsDebugRel += m_Makefile->GetDefinition("CMAKE_C_FLAGS_RELWITHDEBINFO");
     }
-  cmSystemTools::ReplaceString(flags, "\"", "&quot;");
-  fout << flags;
-
-  fout << " -DCMAKE_INTDIR=\\&quot;" << configName << "\\&quot;" 
-       << "\"\n";
-
-  fout << "\t\t\t\tAdditionalIncludeDirectories=\"";
-  std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();
-  std::vector<std::string>::iterator i = includes.begin();
-  for(;i != includes.end(); ++i)
-    {
-    std::string ipath = this->ConvertToXMLOutputPath(i->c_str());
-    fout << ipath << ";";
-    }
-  fout << "\"\n";
   
 // Optimization = 0  None Debug  /O0
 // Optimization = 1  MinSize     /O1
@@ -295,34 +289,92 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
 // InlineFunctionExpansion = 2 any time you can
 
 
+  int runtime = 0;
+  int optimized = 0;
+  int inlineFunctions = 0;
+  const char* pre = "WIN32,_DEBUG,_WINDOWS";
+  // set the flags and defaults for
+  // runtime, optimized, and inlineFunctions , and
+  // default pre processor flags
   if(strcmp(configName, "Debug") == 0)
     {
-    fout << "\t\t\t\tOptimization=\"0\"\n"
-         << "\t\t\t\tRuntimeLibrary=\"3\"\n"
-         << "\t\t\t\tInlineFunctionExpansion=\"0\"\n"
-         << "\t\t\t\tPreprocessorDefinitions=\"WIN32,_DEBUG,_WINDOWS";
+    inlineFunctions = 0;
+    flags += flagsDebug;
+    optimized = 0;
+    runtime = 3;
+    pre = "WIN32,_DEBUG,_WINDOWS";
     }
-  else if(strcmp(configName, "Release") == 0)
+  else if (strcmp(configName, "Release") == 0)
     {
-    fout << "\t\t\t\tOptimization=\"2\"\n"
-         << "\t\t\t\tRuntimeLibrary=\"2\"\n"
-         << "\t\t\t\tInlineFunctionExpansion=\"1\"\n"
-         << "\t\t\t\tPreprocessorDefinitions=\"WIN32,NDEBUG,_WINDOWS";
+    inlineFunctions = 1;
+    optimized =2;
+    pre = "WIN32,NDEBUG,_WINDOWS";
+    flags += flagsRelease;
+    runtime = 2;
     }
   else if(strcmp(configName, "MinSizeRel") == 0)
     {
-    fout << "\t\t\t\tOptimization=\"1\"\n"
-         << "\t\t\t\tRuntimeLibrary=\"2\"\n"
-         << "\t\t\t\tInlineFunctionExpansion=\"1\"\n"
-         << "\t\t\t\tPreprocessorDefinitions=\"WIN32,NDEBUG,_WINDOWS";
+    inlineFunctions = 1;
+    runtime = 2;
+    optimized = 1;
+    pre = "WIN32,NDEBUG,_WINDOWS";
+    flags += flagsMinSize;
     }
   else if(strcmp(configName, "RelWithDebInfo") == 0)
     {
-    fout << "\t\t\t\tOptimization=\"2\"\n"
-         << "\t\t\t\tRuntimeLibrary=\"2\"\n"
-         << "\t\t\t\tInlineFunctionExpansion=\"1\"\n"
-         << "\t\t\t\tPreprocessorDefinitions=\"WIN32,NDEBUG,_WINDOWS";
+    inlineFunctions = 1;
+    optimized = 2;
+    runtime = 2;
+    pre = "WIN32,NDEBUG,_WINDOWS";
+    flags += flagsDebugRel;
     }
+  
+  cmSystemTools::ReplaceString(flags, "\"", "&quot;");
+  fout << flags;
+
+  fout << " -DCMAKE_INTDIR=\\&quot;" << configName << "\\&quot;" 
+       << "\"\n";
+
+  fout << "\t\t\t\tAdditionalIncludeDirectories=\"";
+  std::vector<std::string>& includes = m_Makefile->GetIncludeDirectories();
+  std::vector<std::string>::iterator i = includes.begin();
+  for(;i != includes.end(); ++i)
+    {
+    std::string ipath = this->ConvertToXMLOutputPath(i->c_str());
+    fout << ipath << ";";
+    }
+  fout << "\"\n";
+  // check the flags for the run time library flag options
+  // if there is a match set the run time flag
+  if(flags.find("MTd") != flags.npos)
+    {
+    runtime = 1;
+    }
+  else if (flags.find("MDd") != flags.npos)
+    {
+    runtime = 3;
+    }
+  else if (flags.find("MLd") != flags.npos)
+    {
+    runtime = 5;
+    }
+  else if (flags.find("MT") != flags.npos)
+    {
+    runtime = 0;
+    }
+  else if (flags.find("MD") != flags.npos)
+    {
+    runtime = 2;
+    }
+  else if (flags.find("ML") != flags.npos)
+    {
+    runtime = 4;
+    }
+
+  fout << "\t\t\t\tOptimization=\"" << optimized << "\"\n"
+       << "\t\t\t\tRuntimeLibrary=\"" << runtime << "\"\n"
+       << "\t\t\t\tInlineFunctionExpansion=\"" << inlineFunctions << "\"\n"
+       << "\t\t\t\tPreprocessorDefinitions=\"" << pre;
   if(target.GetType() == cmTarget::SHARED_LIBRARY
      || target.GetType() == cmTarget::MODULE_LIBRARY)
     {
