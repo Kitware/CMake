@@ -39,6 +39,9 @@ private:
     std::string m_Value;
     CacheEntryType m_Type;
     std::map<cmStdString,cmStdString> m_Properties;
+    bool m_Initialized;
+    CacheEntry() : m_Value(""), m_Type(UNINITIALIZED), m_Initialized(false)
+      {}
   };
 
 public:
@@ -59,6 +62,7 @@ public:
     const char* GetValue() const { return this->GetEntry().m_Value.c_str(); }
     void SetValue(const char*);
     CacheEntryType GetType() const { return this->GetEntry().m_Type; }
+    bool Initialized() { return this->GetEntry().m_Initialized; }
     cmCacheManager &m_Container;
     std::map<cmStdString, CacheEntry>::iterator m_Position;
     CacheIterator(cmCacheManager &cm) : m_Container(cm) {

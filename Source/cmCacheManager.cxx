@@ -247,6 +247,7 @@ bool cmCacheManager::LoadCache(const char* path,
             }
           else
             {
+            e.m_Initialized = true;
             m_Cache[entryKey] = e;
             }
           }
@@ -363,7 +364,7 @@ bool cmCacheManager::SaveCache(const char* path)
     {
     const CacheEntry& ce = (*i).second; 
     CacheEntryType t = ce.m_Type;
-    if(t == cmCacheManager::UNINITIALIZED)
+    if(t == cmCacheManager::UNINITIALIZED || !ce.m_Initialized)
       {
       /*
         // This should be added in, but is not for now.
@@ -423,6 +424,11 @@ bool cmCacheManager::SaveCache(const char* path)
   for( cmCacheManager::CacheIterator i = this->NewIterator();
        !i.IsAtEnd(); i.Next())
     {
+    if ( !i.Initialized() )
+      {
+      continue;
+      }
+
     CacheEntryType t = i.GetType();
     bool advanced = i.PropertyExists("ADVANCED");
     if ( advanced )
@@ -581,7 +587,8 @@ cmCacheManager::CacheIterator cmCacheManager::GetCacheIterator(const char *key)
 const char* cmCacheManager::GetCacheValue(const char* key) const
 {
   CacheEntryMap::const_iterator i = m_Cache.find(key);
-  if(i != m_Cache.end() && i->second.m_Type != cmCacheManager::UNINITIALIZED)
+  if(i != m_Cache.end() && i->second.m_Type != cmCacheManager::UNINITIALIZED &&
+    i->second.m_Initialized)
     {
     return i->second.m_Value.c_str();
     }
@@ -616,10 +623,11 @@ void cmCacheManager::AddCacheEntry(const char* key,
   if ( value )
     {
     e.m_Value = value;
+    e.m_Initialized = true;
     }
   else 
     {
-    e.m_Value = "(none)";
+    e.m_Value = "";
     }
   e.m_Type = type;
   // make sure we only use unix style paths
@@ -682,7 +690,15 @@ void cmCacheManager::CacheIterator::SetValue(const char* value)
     return;
     }
   CacheEntry* entry = &this->GetEntry();
-  entry->m_Value = value;
+  if ( value )
+    {
+    entry->m_Value = value;
+    entry->m_Initialized = true;
+    }
+  else
+    {
+    entry->m_Value = "";
+    }
 }
 
 const char* cmCacheManager::CacheIterator::GetProperty(const char* property) const

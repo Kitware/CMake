@@ -842,7 +842,8 @@ void cmMakefile::AddCacheDefinition(const char* name, const char* value,
   const char* val = value;
   cmCacheManager::CacheIterator it = 
     this->GetCacheManager()->GetCacheIterator(name);
-  if(!it.IsAtEnd() && (it.GetType() == cmCacheManager::UNINITIALIZED))
+  if(!it.IsAtEnd() && (it.GetType() == cmCacheManager::UNINITIALIZED) &&
+    it.Initialized())
     {
     val = it.GetValue();
     }
