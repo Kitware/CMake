@@ -177,7 +177,12 @@ bool cmCacheManager::LoadCache(const char* path,
 	  // not visible in the gui
 	  if (!internal)
 	    {
-	    e.m_Type = INTERNAL;
+            e.m_HelpString = "DO NOT EDIT, ";
+            e.m_HelpString += entryKey;
+            e.m_HelpString += " loaded from external file.  "
+              "To change this value edit this file: ";
+            e.m_HelpString += path;
+            e.m_HelpString += "/CMakeCache.txt"	;
 	    }
 	  e.m_Value = regQuoted.match(3);
 	  m_Cache[entryKey] = e;
@@ -204,6 +209,12 @@ bool cmCacheManager::LoadCache(const char* path,
 	  if (!internal)
 	    {
 	    e.m_Type = INTERNAL;
+            e.m_HelpString = "DO NOT EDIT, ";
+            e.m_HelpString += entryKey;
+            e.m_HelpString += " loaded from external file.  "
+              "To change this value edit this file: ";
+            e.m_HelpString += path;
+            e.m_HelpString += "/CMakeCache.txt";
 	    }
 	  e.m_Value = reg.match(3);
 	  m_Cache[entryKey] = e;
