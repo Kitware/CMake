@@ -134,7 +134,8 @@ void ctest::ProcessDirectory(int &passed, std::vector<std::string> &failed)
 
   std::string name;
   std::vector<std::string> args;
-  cmRegularExpression var(this->m_RegExp.c_str());
+  cmRegularExpression ireg(this->m_IncludeRegExp.c_str());
+  cmRegularExpression ereg(this->m_ExcludeRegExp.c_str());
   cmRegularExpression dartStuff("([\t\n ]*<DartMeasurement.*/DartMeasurement[a-zA-Z]*>[\t ]*[\n]*)");
 
   bool parseError;
@@ -164,7 +165,19 @@ void ctest::ProcessDirectory(int &passed, std::vector<std::string> &failed)
       
       if (name == "ADD_TEST")
         {
-        if (this->m_UseRegExp && !var.find(args[0].c_str()))
+        if (this->m_UseExcludeRegExp && 
+            this->m_UseExcludeRegExpFirst && 
+            ereg.find(args[0].c_str()))
+          {
+          continue;
+          }
+        if (this->m_UseIncludeRegExp && !ireg.find(args[0].c_str()))
+          {
+          continue;
+          }
+        if (this->m_UseExcludeRegExp && 
+            !this->m_UseExcludeRegExpFirst && 
+            ereg.find(args[0].c_str()))
           {
           continue;
           }
@@ -265,8 +278,15 @@ int main (int argc, char *argv[])
     
     if(arg.find("-R",0) == 0 && i < args.size() - 1)
       {
-      inst.m_UseRegExp = true;
-      inst.m_RegExp  = args[i+1];
+      inst.m_UseIncludeRegExp = true;
+      inst.m_IncludeRegExp  = args[i+1];
+      }
+
+    if(arg.find("-E",0) == 0 && i < args.size() - 1)
+      {
+      inst.m_UseExcludeRegExp = true;
+      inst.m_ExcludeRegExp  = args[i+1];
+      inst.m_UseExcludeRegExpFirst = inst.m_UseIncludeRegExp ? false : true;
       }
     }
 

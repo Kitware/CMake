@@ -36,10 +36,19 @@ public:
   /**
    * constructor
    */
-  ctest() {m_UseRegExp = false;}
+  ctest() {
+    m_UseIncludeRegExp = false;
+    m_UseExcludeRegExp = false;
+    m_UseExcludeRegExpFirst = false;
+  }
 
-  bool m_UseRegExp;
-  std::string m_RegExp;
+  bool m_UseIncludeRegExp;
+  std::string m_IncludeRegExp;
+
+  bool m_UseExcludeRegExp;
+  bool m_UseExcludeRegExpFirst;
+  std::string m_ExcludeRegExp;
+
   std::string m_ConfigType;
 private:
 };
