@@ -51,11 +51,13 @@ bool cmConfigureFileCommand::Invoke(std::vector<std::string>& args)
   m_InputFile = args[0];
   m_OuputFile = args[1];
   m_CopyOnly = false;
-  if(args[2] == "COPYONLY")
+  if(args.size() >= 3)
     {
-    m_CopyOnly  = true;
+    if(args[2] == "COPYONLY")
+      {
+      m_CopyOnly  = true;
+      }
     }
-  
   return true;
 }
 
