@@ -121,7 +121,7 @@ cmLibHandle cmDynamicLoader::OpenLibrary(const char* libname )
 
 int cmDynamicLoader::CloseLibrary(cmLibHandle lib)
 {
-  return shl_unload(lib);
+  return !shl_unload(lib);
 }
 
 cmDynamicLoaderFunction
@@ -183,7 +183,7 @@ int cmDynamicLoader::CloseLibrary(cmLibHandle lib)
   (void)lib;
 
   NSUnLinkModule(lib, FALSE);
-  return 0;
+  return 1;
 }
 
 cmDynamicLoaderFunction
@@ -309,7 +309,7 @@ cmLibHandle cmDynamicLoader::OpenLibrary(const char* libname )
 
 int cmDynamicLoader::CloseLibrary(cmLibHandle lib)
 {
-  return (int)dlclose(lib);
+  return !(int)dlclose(lib);
 }
 
 cmDynamicLoaderFunction
