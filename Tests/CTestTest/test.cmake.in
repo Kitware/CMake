@@ -15,12 +15,12 @@ SET (CTEST_NOTES_FILE "@CMAKE_CURRENT_BINARY_DIR@/Note.txt")
 
 # which ctest command to use for running the dashboard
 SET (CTEST_COMMAND 
-  "@CTEST_COMMAND@ -T Start -T Configure -T Build -T Test -T Submit -M Experimental -A ${CTEST_NOTES_FILE} -R SystemInformation -E CTestTest"
+  "\"@CTEST_COMMAND@\" -T Start -T Configure -T Build -T Test -T Submit -M Experimental -A ${CTEST_NOTES_FILE} -R SystemInformation -E CTestTest"
   )
 
 # what cmake command to use for configuring this dashboard
 SET (CTEST_CMAKE_COMMAND        
-  "@CMAKE_COMMAND@"
+  "\"@CMAKE_COMMAND@\""
   )
 
 
