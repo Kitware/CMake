@@ -35,7 +35,7 @@ IF(CABLE_BUILD_DIR)
                  ${CABLE_BINARY_DIR}/CableTclFacility
                  ${CABLE_BINARY_DIR}/CableTclFacility/*)
   ENDIF(CABLE_LIBRARY_PATH)
-  
+
   IF(CABLE_EXECUTABLE_PATH)
     FIND_PROGRAM(CABLE NAMES cable PATHS
                  ${CABLE_EXECUTABLE_PATH}
@@ -45,22 +45,22 @@ IF(CABLE_BUILD_DIR)
                  ${CABLE_BINARY_DIR}/Executables
                  ${CABLE_BINARY_DIR}/Executables/*)
   ENDIF(CABLE_EXECUTABLE_PATH)
-   
+
   FIND_PATH(CABLE_INCLUDE_DIR CableTclFacility/ctCalls.h
             ${CABLE_SOURCE_DIR})
 ELSE(CABLE_BUILD_DIR)
   # Find the cable executable in the path.
   FIND_PROGRAM(CABLE NAMES cable)
-  
+
   # Get the path where the executable sits, but without the executable
   # name on it.
   GET_FILENAME_COMPONENT(CABLE_ROOT_BIN ${CABLE} PATH)
-  
+
   # Find the cable include directory in a path relative to the cable
   # executable.
   FIND_PATH(CABLE_INCLUDE_DIR CableTclFacility/ctCalls.h
             ${CABLE_ROOT_BIN}/../share/Cable/include)
-  
+
   # Find the WrapTclFacility library in a path relative to the cable
   # executable.
   FIND_LIBRARY(CABLE_TCL_LIBRARY NAMES CableTclFacility PATHS

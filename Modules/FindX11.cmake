@@ -1,9 +1,8 @@
 #
 # try to find X11 libraries on UNIX systems once done this will define
 #
-# X11_INCLUDE_PATH = where the GL include directory can be found
-# X11_LIB_PATH     = where the GL library can be found
-# X11_LIBRARY      = the name of the OpenGL library to link with
+# X11_INCLUDE_PATH = where the X11 include directory can be found
+# X11_LIBRARY      = the name of the X11 library to link with
 #
 
 IF (WIN32)
@@ -16,6 +15,9 @@ ELSE (WIN32)
   /opt/graphics/OpenGL/include 
   /usr/X11R6/include 
   )
+  MARK_AS_ADVANCED(
+    X11_INCLUDE_PATH
+  )
 
   FIND_LIBRARY(X11_LIBRARY libX11.so
   /usr/lib 
@@ -25,3 +27,7 @@ ELSE (WIN32)
   )
 
 ENDIF (WIN32)
+
+MARK_AS_ADVANCED(
+  X11_LIBRARY
+)

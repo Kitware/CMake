@@ -4,7 +4,6 @@
 # the library is. This code sets the following variables:
 #
 #  TCL_TCLSH        = the full path to the tclsh binary (tcl tcl80 etc)
-#  TK_WISH          = the full path to the wish binary (wish wish80 etc)
 #
 
 # In cygwin, look for the cygwin version first.  Don't look for it later to
