@@ -1635,7 +1635,7 @@ void SystemTools::SplitPath(const char* p,
   else if(c[0] && c[1] == ':' && c[2] == '/')
     {
     // Windows path.
-    std::string root = "_:/";
+    kwsys_stl::string root = "_:/";
     root[0] = c[0];
     components.push_back(root);
     c += 3;
@@ -1643,7 +1643,7 @@ void SystemTools::SplitPath(const char* p,
   else if(c[0] && c[1] == ':')
     {
     // Path relative to a windows drive working directory.
-    std::string root = "_:";
+    kwsys_stl::string root = "_:";
     root[0] = c[0];
     components.push_back(root);
     c += 2;
@@ -1662,7 +1662,7 @@ void SystemTools::SplitPath(const char* p,
     if(*last == '/')
       {
       // End of a component.  Save it.
-      components.push_back(std::string(first, last-first));
+      components.push_back(kwsys_stl::string(first, last-first));
       first = last+1;
       }
     }
@@ -1670,7 +1670,7 @@ void SystemTools::SplitPath(const char* p,
   // Save the last component unless there were no components.
   if(last != c)
     {
-    components.push_back(std::string(first, last-first));
+    components.push_back(kwsys_stl::string(first, last-first));
     }
 }
 
