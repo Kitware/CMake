@@ -9,7 +9,7 @@ ENDIF(NOT CMAKE_Java_CREATE_STATIC_LIBRARY)
 # compile a Java file into an object file
 IF(NOT CMAKE_Java_COMPILE_OBJECT)
   SET(CMAKE_Java_COMPILE_OBJECT
-    "<CMAKE_Java_COMPILER>   <FLAGS> <SOURCE> -d \"<CMAKE_CURRENT_BINARY_DIR>\"")
+    "<CMAKE_Java_COMPILER>   <FLAGS> <SOURCE> -d <CMAKE_CURRENT_BINARY_DIR>")
 ENDIF(NOT CMAKE_Java_COMPILE_OBJECT)
 
 # set java include flag option and the separator for multiple include paths
