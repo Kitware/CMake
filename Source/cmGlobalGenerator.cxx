@@ -165,7 +165,7 @@ int cmGlobalGenerator::TryCompile(const char *, const char *bindir,
     makeCommand += " all";
     }
   int retVal;
-  if (!cmSystemTools::RunCommand(makeCommand.c_str(), output, retVal))
+  if (!cmSystemTools::RunCommand(makeCommand.c_str(), output, retVal, 0, false))
     {
     cmSystemTools::Error("Generator: execution of make failed.");
     // return to the original directory
