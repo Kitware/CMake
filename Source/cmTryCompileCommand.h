@@ -75,18 +75,21 @@ public:
     {
     return
       "  TRY_COMPILE(RESULT_VAR bindir srcdir\n"
-      "              projectName <CMAKE_FLAGS <Flags>>)\n"
+      "              projectName <CMAKE_FLAGS <Flags>>\n"
+      "              <OUTPUT_VARIABLE var>)\n"
       "Try compiling a program.  Return the success or failure in RESULT_VAR.  "
       "If <target name> is specified then build just that target "
       "otherwise the all or ALL_BUILD target is built.\n"
       "  TRY_COMPILE(RESULT_VAR bindir srcfile\n"
       "              <CMAKE_FLAGS <Flags>>\n"
-      "              <COMPILE_DEFINITIONS <flags> ...>)\n"
+      "              <COMPILE_DEFINITIONS <flags> ...>\n"
+      "              <OUTPUT_VARIABLE var>)\n"
       "Try compiling a srcfile.  Return the success or failure in RESULT_VAR.  "
       "CMAKE_FLAGS can be used to pass -DVAR:TYPE=VALUE flags to cmake.  The "
       "COMPILE_DEFINITIONS are -Ddefinition that will be passed to the "
       "compile line. If srcfile is specified the files in bindir/CMakeTmp "
-      "are cleaned.";
+      "are cleaned automatically. If OUTPUT_VARIABLE is specified, then the "
+      "output from the build process is stored in the given variable.";
     }
   
   cmTypeMacro(cmTryCompileCommand, cmCommand);
