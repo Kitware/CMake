@@ -5,7 +5,11 @@
 # any makefiles or projects.
 IF(NOT CMAKE_C_COMPILER_WORKS)
   MESSAGE(STATUS "Check for working C compiler: ${CMAKE_C_COMPILER}")
-  FILE(WRITE ${CMAKE_BINARY_DIR}/CMakeTmp/testCCompiler.c "int main(){return 0;}\n")
+  FILE(WRITE ${CMAKE_BINARY_DIR}/CMakeTmp/testCCompiler.c
+    "#ifdef __cplusplus\n"
+    "# error \"The CMAKE_C_COMPILER is set to a C++ compiler\"\n"
+    "#endif\n"
+    "int main(){return 0;}\n")
   TRY_COMPILE(CMAKE_C_COMPILER_WORKS ${CMAKE_BINARY_DIR} 
     ${CMAKE_BINARY_DIR}/CMakeTmp/testCCompiler.c
     OUTPUT_VARIABLE OUTPUT)
