@@ -334,9 +334,6 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     }
 
 
-  int runtime = 0;
-  int optimized = 0;
-  int inlineFunctions = 0;
   std::string programDatabase;
   const char* pre = "WIN32,_DEBUG,_WINDOWS";
   std::string debugPostfix = "";
