@@ -83,5 +83,6 @@ class cmake
 private:
   bool m_Verbose;
   bool m_Local;
+  bool m_UsePathTranslation;
 };
 
