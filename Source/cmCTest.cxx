@@ -564,7 +564,7 @@ int cmCTest::UpdateDirectory()
     {
     res = cmSystemTools::RunSingleCommand(command.c_str(), &goutput, 
       &retVal, sourceDirectory.c_str(),
-      m_Verbose, m_TimeOut);
+      m_Verbose, 0 /*m_TimeOut*/);
     if ( this->OpenOutputFile("Temporary", "LastUpdate.log", ofs) )
       {
       ofs << goutput << std::endl;; 
@@ -619,7 +619,7 @@ int cmCTest::UpdateDirectory()
       std::string output;
       res = cmSystemTools::RunSingleCommand(logcommand.c_str(), &output, 
         &retVal, sourceDirectory.c_str(),
-        m_Verbose, m_TimeOut);
+        m_Verbose, 0 /*m_TimeOut*/);
       if ( ofs )
         {
         ofs << output << std::endl;
@@ -861,7 +861,7 @@ int cmCTest::ConfigureDirectory()
 
   std::string output;
   int retVal = 0;
-  bool res = true;
+  int res = 0;
   if ( !m_ShowOnly )
     {
     std::ofstream os; 
@@ -875,7 +875,7 @@ int cmCTest::ConfigureDirectory()
     this->OpenOutputFile("Temporary", "LastConfigure.log", ofs);
     res = this->RunMakeCommand(cCommand.c_str(), &output, 
       &retVal, buildDirectory.c_str(),
-      m_Verbose, m_TimeOut, ofs);
+      m_Verbose, 0, ofs);
 
     if ( ofs )
       {
@@ -891,7 +891,7 @@ int cmCTest::ConfigureDirectory()
          << m_DartConfiguration["Site"] << "\">\n"
          << "<Configure>\n"
          << "\t<StartDateTime>" << start_time << "</StartDateTime>" << std::endl;
-      if ( retVal )
+      if ( res == cmsysProcess_State_Exited && retVal )
         {
         os << retVal;
         }
@@ -941,19 +941,19 @@ int cmCTest::BuildDirectory()
   m_StartBuild = ::CurrentTime();
   std::string output;
   int retVal = 0;
-  bool res = true;
+  int res = cmsysProcess_State_Exited;
   if ( !m_ShowOnly )
     {
     res = this->RunMakeCommand(makeCommand.c_str(), &output, 
       &retVal, buildDirectory.c_str(), 
-      m_Verbose, m_TimeOut, ofs);
+      m_Verbose, 0, ofs);
     }
   else
     {
     std::cout << "Build with command: " << makeCommand << std::endl;
     }
   m_EndBuild = ::CurrentTime();
-  if (! res || retVal )
+  if (res != cmsysProcess_State_Exited || retVal )
     {
     std::cerr << "Error(s) when building project" << std::endl;
     }
@@ -1230,7 +1230,7 @@ int cmCTest::CoverageDirectory()
       {
       res = cmSystemTools::RunSingleCommand(command.c_str(), &output, 
         &retVal, opath.c_str(),
-        m_Verbose, m_TimeOut);
+        m_Verbose, 0 /*m_TimeOut*/);
       }
     if ( res && retVal == 0 )
       {
@@ -1713,6 +1713,8 @@ void cmCTest::ProcessDirectory(std::vector<std::string> &passed,
           {
           std::cerr << "Unable to find executable: " << 
             args[1].Value.c_str() << "\n";
+          cres.m_Status = cmCTest::NOT_RUN;
+          m_TestResults.push_back( cres );
           continue;
           }
         
@@ -2041,36 +2043,53 @@ void cmCTest::GenerateDartTestOutput(std::ostream& os)
   for ( cc = 0; cc < m_TestResults.size(); cc ++ )
     {
     cmCTestTestResult *result = &m_TestResults[cc];
-    os << "\t<Test Status=\"" << (result->m_Status==cmCTest::COMPLETED?"passed":"failed")
-       << "\">\n"
-       << "\t\t<Name>" << this->MakeXMLSafe(result->m_Name) << "</Name>\n"
-       << "\t\t<Path>" << this->MakeXMLSafe(result->m_Path) << "</Path>\n"
-       << "\t\t<FullName>" << this->MakeXMLSafe(result->m_Path) 
-       << "/" << this->MakeXMLSafe(result->m_Name) << "</FullName>\n"
-       << "\t\t<FullCommandLine>" 
-       << this->MakeXMLSafe(result->m_FullCommandLine) 
-       << "</FullCommandLine>\n"
-       << "\t\t<Results>" << std::endl;
-    if ( result->m_Status != cmCTest::COMPLETED || result->m_ReturnValue )
+    os << "\t<Test Status=\"";
+    if ( result->m_Status == cmCTest::COMPLETED )
       {
-      os << "\t\t\t<NamedMeasurement type=\"text/string\" name=\"Exit Code\"><Value>"
-         << this->GetTestStatus(result->m_Status) << "</Value></NamedMeasurement>\n"
-         << "\t\t\t<NamedMeasurement type=\"text/string\" name=\"Exit Value\"><Value>"
-         << result->m_ReturnValue << "</Value></NamedMeasurement>" << std::endl;
+      os << "passed";
       }
-    os << result->m_RegressionImages;
-    os << "\t\t\t<NamedMeasurement type=\"numeric/double\" "
-       << "name=\"Execution Time\"><Value>"
-       << result->m_ExecutionTime << "</Value></NamedMeasurement>\n"
-       << "\t\t\t<NamedMeasurement type=\"text/string\" "
-       << "name=\"Completion Status\"><Value>"
-       << result->m_CompletionStatus << "</Value></NamedMeasurement>\n"
-       << "\t\t\t<Measurement>\n"
-       << "\t\t\t\t<Value>" << this->MakeXMLSafe(result->m_Output) 
-       << "</Value>\n"
-       << "\t\t\t</Measurement>\n"
-       << "\t\t</Results>\n"
-       << "\t</Test>" << std::endl;
+    else if ( result->m_Status == cmCTest::NOT_RUN )
+      {
+      os << "notrun";
+      }
+    else
+      {
+      os << "failed";
+      }
+    os << "\">\n"
+      << "\t\t<Name>" << this->MakeXMLSafe(result->m_Name) << "</Name>\n"
+      << "\t\t<Path>" << this->MakeXMLSafe(result->m_Path) << "</Path>\n"
+      << "\t\t<FullName>" << this->MakeXMLSafe(result->m_Path) 
+      << "/" << this->MakeXMLSafe(result->m_Name) << "</FullName>\n"
+      << "\t\t<FullCommandLine>" 
+      << this->MakeXMLSafe(result->m_FullCommandLine) 
+      << "</FullCommandLine>\n"
+      << "\t\t<Results>" << std::endl;
+    if ( result->m_Status != cmCTest::NOT_RUN )
+      {
+      if ( result->m_Status != cmCTest::COMPLETED || result->m_ReturnValue )
+        {
+        os << "\t\t\t<NamedMeasurement type=\"text/string\" name=\"Exit Code\"><Value>"
+          << this->GetTestStatus(result->m_Status) << "</Value></NamedMeasurement>\n"
+          << "\t\t\t<NamedMeasurement type=\"text/string\" name=\"Exit Value\"><Value>"
+          << result->m_ReturnValue << "</Value></NamedMeasurement>" << std::endl;
+        }
+      os << result->m_RegressionImages;
+      os << "\t\t\t<NamedMeasurement type=\"numeric/double\" "
+        << "name=\"Execution Time\"><Value>"
+        << result->m_ExecutionTime << "</Value></NamedMeasurement>\n";
+      os 
+        << "\t\t\t<NamedMeasurement type=\"text/string\" "
+        << "name=\"Completion Status\"><Value>"
+        << result->m_CompletionStatus << "</Value></NamedMeasurement>\n";
+      }
+    os 
+      << "\t\t\t<Measurement>\n"
+      << "\t\t\t\t<Value>" << this->MakeXMLSafe(result->m_Output) 
+      << "</Value>\n"
+      << "\t\t\t</Measurement>\n"
+      << "\t\t</Results>\n"
+      << "\t</Test>" << std::endl;
     }
   
   os << "\t<EndDateTime>" << m_EndTest << "</EndDateTime>\n"
@@ -2277,7 +2296,7 @@ std::string cmCTest::GenerateRegressionImages(const std::string& xml)
   return ostr.str();
 }
 
-bool cmCTest::RunMakeCommand(const char* command, std::string* output,
+int cmCTest::RunMakeCommand(const char* command, std::string* output,
     int* retVal, const char* dir, bool verbose, int timeout, std::ofstream& ofs)
 {
   std::vector<cmStdString> args = cmSystemTools::ParseArguments(command);
@@ -2356,24 +2375,25 @@ bool cmCTest::RunMakeCommand(const char* command, std::string* output,
   
   cmsysProcess_WaitForExit(cp, 0);
   
-  bool result = true;
-  if(cmsysProcess_GetState(cp) == cmsysProcess_State_Exited)
+  int result = cmsysProcess_GetState(cp);
+
+  if(result == cmsysProcess_State_Exited)
     {
-    if ( retVal )
-      {
-      *retVal = cmsysProcess_GetExitValue(cp);
-      }
-    else
-      {
-      if ( cmsysProcess_GetExitValue(cp) !=  0 )
-        {
-        result = false;
-        }
-      }
+    *retVal = cmsysProcess_GetExitValue(cp);
     }
-  else
+  else if(result == cmsysProcess_State_Exception)
     {
-    result = false;
+    *retVal = cmsysProcess_GetExitException(cp);
+    std::cout << "There was an exception: " << *retVal << std::endl;
+    }
+  else if(result == cmsysProcess_State_Expired)
+    {
+    std::cout << "There was a timeout" << std::endl;
+    } 
+  else if(result == cmsysProcess_State_Error)
+    {
+    *output += "\n*** ERROR executing: ";
+    *output += cmsysProcess_GetErrorString(cp);
     }
   
   cmsysProcess_Delete(cp);

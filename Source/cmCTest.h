@@ -140,7 +140,7 @@ private:
     ALL_TEST       = 9,
     LAST_TEST      = 10
   };
-
+  
   enum { // Program statuses
     NOT_RUN = 0,
     TIMEOUT,
@@ -238,8 +238,14 @@ private:
   std::string MakeXMLSafe(const std::string&);
   std::string MakeURLSafe(const std::string&);
 
-  bool RunMakeCommand(const char* command, std::string* output,
-    int* retVal, const char* dir, bool verbose, int timeout, std::ofstream& ofs);
+  //! Run command specialized for make and configure. Returns process status
+  // and retVal is return value or exception.
+  int RunMakeCommand(const char* command, std::string* output,
+    int* retVal, const char* dir, bool verbose, int timeout, 
+    std::ofstream& ofs);
+
+  //! Run command specialized for tests. Returns process status and retVal is
+  // return value or exception.
   int RunTest( const char* command, std::string* output, int *retVal);
 
   std::string GenerateRegressionImages(const std::string& xml);
