@@ -21,6 +21,10 @@
 #include "cmake.h"
 #include <cmsys/Process.h>
 
+#include <stdlib.h> 
+#include <math.h>
+#include <float.h>
+
 #define SAFEDIV(x,y) (((y)!=0)?((x)/(y)):(0))
 
 
