@@ -54,6 +54,17 @@ CMakeLocal.make       -> Place for hand configuration
 CMakeTargets.make     -> generated rules for make style build in each directory
 MakefileTemplate.make -> master makefile template used by configure to generate Makefiles
 
+
+Note on adding targets inside "BEGIN/END MAKE VERBATIM" lines:
+
+  By default, after "includ"ing a makefile, make will attempt to bring
+that included file up to date.  So, when you first run configure, your
+makefiles will _not_ contain the target you have asked for inside the
+VERBATIM tags.  However, it will be added by CMake when make attempts
+to bring the included make files up to date.  NOTE: this will make
+your head hurt if you think about it too long.  Just accept that it
+works to ask for a build target that does not yet exist.
+
 Unix install:
 In place:
 ./configure
