@@ -12,24 +12,8 @@
 #  TK_WISH          = the full path to the wish binary (wish wish80 etc)
 #
 
-# if unix look for the cyg version first to avoid finding it 
-# on a windows box running only win32 builds
-IF(UNIX)
-  FIND_PROGRAM(TCL_TCLSH cygtclsh80)
-ENDIF(UNIX)
-
-FIND_PROGRAM(TCL_TCLSH
-  NAMES tclsh tclsh84 tclsh8.4 tclsh83 tclsh8.3 tclsh82 tclsh80 cygtclsh80
-)
-
-# if UNIX is defined, then look for the cygwin version first
-IF(UNIX)
-  FIND_PROGRAM(TK_WISH cygwish80 )
-ENDIF(UNIX)
-
-FIND_PROGRAM(TK_WISH
-  NAMES wish wish84 wish8.4 wish83 wish8.3 wish82 wish80
-)
+INCLUDE(${CMAKE_ROOT}/Modules/FindTclsh.cmake)
+INCLUDE(${CMAKE_ROOT}/Modules/FindWish.cmake)
 
 GET_FILENAME_COMPONENT(TCL_TCLSH_PATH ${TCL_TCLSH} PATH)
 
