@@ -2184,7 +2184,23 @@ std::string cmMakefile::FindLibrary(const char* name,
         }
       }
     }
-  
+  if(m_LocalGenerator->GetGlobalGenerator()->GetLanguageEnabled("C"))
+    {
+    std::string voidsize = this->GetRequiredDefinition("CMAKE_SIZEOF_VOID_P");
+    int size = atoi(voidsize.c_str());
+    if(size == 8)
+      {
+      path.push_back("/usr/X11R6/lib64");
+      path.push_back("/usr/local/lib64");
+      path.push_back("/usr/lib64");
+      }
+    if(size == 4)
+      {
+      path.push_back("/usr/X11R6/lib32");
+      path.push_back("/usr/local/lib32");
+      path.push_back("/usr/lib32");
+      }
+    }
   return cmSystemTools::FindLibrary(name, path);
 }
 
