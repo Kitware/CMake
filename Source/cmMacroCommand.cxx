@@ -50,7 +50,13 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
     // make sure the number of arguments matches
     if (expandedArguments.size() != m_Args.size() - 1)
       {
-      cmSystemTools::Error("A macro was invoked without the correct number of arguments. The macro name was: ", m_Args[0].c_str());
+      cmOStringStream error;
+      error << "Error in cmake code at\n"
+            << lff.m_FilePath << ":" << lff.m_Line << ":\n"
+            << "Invocation of macro \""
+            << lff.m_Name.c_str() << "\" with incorrect number of arguments.";
+      cmSystemTools::Error(error.str().c_str());
+      return true;
       }
     
     // Invoke all the functions that were collected in the block.
