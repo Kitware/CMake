@@ -2487,13 +2487,26 @@ void cmLocalUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
   std::vector<std::string>::iterator i;
   fout << "-I" << 
     this->ConvertToOutputForExisting(m_Makefile->GetStartDirectory()) << " ";
+  std::map<cmStdString, cmStdString> implicitIncludes;
+  implicitIncludes["/usr/include"] = "/usr/include";
+  if(m_Makefile->GetDefinition("CMAKE_PLATFORM_IMPLICIT_INCLUDE_DIRECTORIES"))
+    {
+    std::string arg = m_Makefile->GetDefinition("CMAKE_PLATFORM_IMPLICIT_INCLUDE_DIRECTORIES");
+    std::vector<std::string> implicitIncludeVec;
+    cmSystemTools::ExpandListArgument(arg, implicitIncludeVec);
+    for(int k =0; k < implicitIncludeVec.size(); k++)
+      {
+      implicitIncludes[implicitIncludeVec[k]] = implicitIncludeVec[k];
+      }
+    }
+  
   for(i = includes.begin(); i != includes.end(); ++i)
     {
     std::string include = *i;
     // Don't output a -I for the standard include path "/usr/include".
     // This can cause problems with certain standard library
     // implementations because the wrong headers may be found first.
-    if(include != "/usr/include")
+    if(implicitIncludes.find(include) == implicitIncludes.end())
       {
       fout << "-I" << this->ConvertToOutputForExisting(i->c_str()) << " ";
       }
