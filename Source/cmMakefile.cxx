@@ -866,29 +866,29 @@ int cmMakefile::DumpDocumentationToFile(std::ostream& f)
 }
 
 
-void cmMakefile::ExpandVariablesInString(std::string& source) const
+const char *cmMakefile::ExpandVariablesInString(std::string& source) const
 {
-  this->ExpandVariablesInString(source, false);
+  return this->ExpandVariablesInString(source, false);
 }
 
-void cmMakefile::ExpandVariablesInString(std::string& source, 
+const char *cmMakefile::ExpandVariablesInString(std::string& source,
                                          bool escapeQuotes) const
 {
   // This method replaces ${VAR} and @VAR@ where VAR is looked up
   // in the m_Definitions map, if not found in the map, nothing is expanded.
   // It also supports the $ENV{VAR} syntax where VAR is looked up in
   // the current environment variables.
-  
+
   // start by look for $ or @ in the string
   std::string::size_type markerPos = source.find_first_of("$@");
   // if not found, or found as the last character, then leave quickly as
   // nothing needs to be expanded
   if((markerPos == std::string::npos) || (markerPos >= source.size()-1))
     {
-    return;
+    return source.c_str();
     }
   // current position
-  std::string::size_type currentPos =0; // start at 0 
+  std::string::size_type currentPos =0; // start at 0
   std::string result; // string with replacements
   // go until the the end of the string
   while((markerPos != std::string::npos) && (markerPos < source.size()-1))
@@ -907,7 +907,7 @@ void cmMakefile::ExpandVariablesInString(std::string& source,
         markerStartSize = 2;
         }
       // $ENV{var} case
-      else if(markerPos+4 < source.size() && 
+      else if(markerPos+4 < source.size() &&
               source[markerPos+4] == '{' &&
               !source.substr(markerPos+1, 3).compare("ENV"))
         {
@@ -932,7 +932,7 @@ void cmMakefile::ExpandVariablesInString(std::string& source,
       {
       markerPos += markerStartSize; // move past marker
       // find the end variable marker starting at the markerPos
-      std::string::size_type endVariablePos = 
+      std::string::size_type endVariablePos =
         source.find(endVariableMarker, markerPos);
       if(endVariablePos == std::string::npos)
         {
@@ -955,7 +955,7 @@ void cmMakefile::ExpandVariablesInString(std::string& source,
         if (markerStartSize == 5) // $ENV{
           {
           char *ptr = getenv(var.c_str());
-          if (ptr) 
+          if (ptr)
             {
             if (escapeQuotes)
               {
@@ -985,7 +985,7 @@ void cmMakefile::ExpandVariablesInString(std::string& source,
             }
           }
         // if found add to result, if not, then it gets blanked
-        if (!found) 
+        if (!found)
           {
           // if no definition is found then add the var back
           if(endVariableMarker == '@')
@@ -1006,9 +1006,10 @@ void cmMakefile::ExpandVariablesInString(std::string& source,
         }
       }
     markerPos = source.find_first_of("$@", currentPos);
-    } 
+    }
   result += source.substr(currentPos); // pick up the rest of the string
   source = result;
+  return source.c_str();
 }
 
 void cmMakefile::RemoveVariablesInString(std::string& source) const
