@@ -6,7 +6,9 @@ SET_SOURCE_FILES_PROPERTIES(complex
                             COMPILE_FLAGS "-DFILE_HAS_EXTRA_COMPILE_FLAGS")
 ADD_EXECUTABLE(complex complex)
 SET(COMPLEX_LIBS CMakeTestLibrary;CMakeTestLibraryShared;CMakeTestCLibraryShared)
-TARGET_LINK_LIBRARIES(complex ${COMPLEX_LIBS})
+
+# Use LINK_LIBRARIES instead of TARGET_LINK_LIBRARIES to 
+LINK_LIBRARIES(${COMPLEX_LIBS})
 
 #
 # Link to CMake lib
