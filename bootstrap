@@ -49,39 +49,19 @@ EOF
   exit 10
 }
 
-cmake_verbose=
-cmake_prefix_dir="/usr/local"
-for a in "$@"; do
-  if echo $a | grep "^--prefix="; then
-    cmake_prefix_dir=`echo $a | sed "s/^--prefix=//"`
-  fi
-  if echo $a | grep "^--help"; then
-    cmake_usage
-  fi
-  if echo $a | grep "^--verbose"; then
-    cmake_verbose=TRUE
-  fi
-done
-
-if [ -n "${cmake_verbose}" ]; then
+cmake_error()
+{
   echo "---------------------------------------------"
-  echo "Source directory: ${cmake_source_dir}"
-  echo "Binary directory: ${cmake_binary_dir}"
-  echo "Prefix directory: ${cmake_prefix_dir}"
-  echo "System:           ${cmake_system}"
-fi
-
-echo "---------------------------------------------"
-
-[ -d "${cmake_bootstrap_dir}" ] || mkdir "${cmake_bootstrap_dir}"
-if [ ! -d "${cmake_bootstrap_dir}" ]; then
-  echo "Cannot create directory ${cmake_bootstrap_dir} to bootstrap CMake."
-  exit 5
-fi
-cd "${cmake_bootstrap_dir}"
-
-rm -f "${cmake_bootstrap_dir}/cmake_bootstrap.log"
-rm -f "${cmake_bootstrap_dir}/cmConfigure.h"
+  echo "Error when bootstrapping CMake:" 
+  echo "$*"
+  echo "---------------------------------------------"
+  if [ -f cmake_bootstrap.log ]; then
+    echo "Log of errors:"
+    cat cmake_bootstrap.log
+    echo "---------------------------------------------"
+  fi
+  exit 1
+}
 
 cmake_report ()
 {
@@ -160,6 +140,39 @@ cmake_try_make ()
   return 0
 }
 
+cmake_verbose=
+cmake_prefix_dir="/usr/local"
+for a in "$@"; do
+  if echo $a | grep "^--prefix="; then
+    cmake_prefix_dir=`echo $a | sed "s/^--prefix=//"`
+  fi
+  if echo $a | grep "^--help"; then
+    cmake_usage
+  fi
+  if echo $a | grep "^--verbose"; then
+    cmake_verbose=TRUE
+  fi
+done
+
+if [ -n "${cmake_verbose}" ]; then
+  echo "---------------------------------------------"
+  echo "Source directory: ${cmake_source_dir}"
+  echo "Binary directory: ${cmake_binary_dir}"
+  echo "Prefix directory: ${cmake_prefix_dir}"
+  echo "System:           ${cmake_system}"
+fi
+
+echo "---------------------------------------------"
+
+[ -d "${cmake_bootstrap_dir}" ] || mkdir "${cmake_bootstrap_dir}"
+if [ ! -d "${cmake_bootstrap_dir}" ]; then
+  cmake_error "Cannot create directory ${cmake_bootstrap_dir} to bootstrap CMake."
+fi
+cd "${cmake_bootstrap_dir}"
+
+rm -f "${cmake_bootstrap_dir}/cmake_bootstrap.log"
+rm -f "${cmake_bootstrap_dir}/cmConfigure.h"
+
 cmake_c_flags=${CFLAGS}
 cmake_cxx_flags=${CXXFLAGS}
 
@@ -189,9 +202,8 @@ done
 rm -f "${TMPFILE}.c"
 
 if [ -z "${cmake_c_compiler}" ]; then
-  echo "Cannot find apropriate C compiler on this system."
-  echo "Please specify one using environment variable CC."
-  exit 1
+  cmake_error "Cannot find apropriate C compiler on this system.
+Please specify one using environment variable CC."
 fi
 echo "C compiler on this system is: ${cmake_c_compiler} ${cmake_c_flags}"
 
@@ -222,9 +234,8 @@ rm -f "${TMPFILE}.cxx"
 
 
 if [ -z "${cmake_cxx_compiler}" ]; then
-  echo "Cannot find apropriate C++ compiler on this system."
-  echo "Please specify one using environment variable CXX."
-  exit 1
+  cmake_error "Cannot find apropriate C++ compiler on this system.
+Please specify one using environment variable CXX."
 fi
 echo "C++ compiler on this system is: ${cmake_cxx_compiler} ${cmake_cxx_flags}"
 
@@ -351,8 +362,7 @@ echo "---------------------------------------------"
 ${cmake_make_processor}
 RES=$?
 if [ "${RES}" -ne "0" ]; then
-  echo "Problem while bootstrapping CMake"
-  exit 8
+  cmake_error "Problem while bootstrapping CMake"
 fi
 cd "${cmake_binary_dir}"
 "${cmake_bootstrap_dir}/cmake" "${cmake_source_dir}"
