@@ -339,7 +339,13 @@ public:
    * entry in the m_Definitions map.  Also @var@ is
    * expanded to match autoconf style expansions.
    */
-  void ExpandVariblesInString(std::string& source);
+  void ExpandVariablesInString(std::string& source);
+
+  /**
+   * Expand variables in the makefiles ivars such as link directories etc
+   */
+  void ExpandVariables();
+
 protected:
   std::string m_Prefix;
   std::vector<std::string> m_AuxSourceDirectories; // 
@@ -383,11 +389,6 @@ private:
    * given a current CMakeLists file name
    */
   std::string GetParentListFileName(const char *listFileName);
-
-  /**
-   * Parse a file for includes links and libs
-   */
-  void ExpandVaribles();
 
   void ReadClasses(std::ifstream& fin, bool t);
   friend class cmMakeDepend;	// make depend needs direct access 

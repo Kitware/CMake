@@ -226,7 +226,7 @@ void cmMakefile::SetMakefileGenerator(cmMakefileGenerator* mf)
 void cmMakefile::GenerateMakefile()
 {
   // do all the variable expansions here
-  this->ExpandVaribles();
+  this->ExpandVariables();
   // set the makefile on the generator
   m_MakefileGenerator->SetMakefile(this);
   // give all the commands a chance to do something
@@ -373,7 +373,7 @@ std::string cmMakefile::GetParentListFileName(const char *currentFileName)
 // expance CMAKE_BINARY_DIR and CMAKE_SOURCE_DIR in the
 // include and library directories.
 
-void cmMakefile::ExpandVaribles()
+void cmMakefile::ExpandVariables()
 {
   // make sure binary and source dir are defined
   this->AddDefinition("CMAKE_BINARY_DIR", this->GetHomeOutputDirectory());
@@ -385,13 +385,19 @@ void cmMakefile::ExpandVaribles()
   end = m_IncludeDirectories.end();
   for(j = begin; j != end; ++j)
     {
-    this->ExpandVariblesInString(*j);
+    this->ExpandVariablesInString(*j);
     }
   begin = m_LinkDirectories.begin();
   end = m_LinkDirectories.end();
   for(j = begin; j != end; ++j)
     {
-    this->ExpandVariblesInString(*j);
+    this->ExpandVariablesInString(*j);
+    }
+  begin = m_LinkLibraries.begin();
+  end = m_LinkLibraries.end();
+  for(j = begin; j != end; ++j)
+    {
+    this->ExpandVariablesInString(*j);
     }
 }
 
@@ -436,7 +442,7 @@ int cmMakefile::DumpDocumentationToFile(const char *fileName)
 }
 
 
-void cmMakefile::ExpandVariblesInString(std::string& source)
+void cmMakefile::ExpandVariablesInString(std::string& source)
 {
   for(DefinitionMap::iterator i = m_Definitions.begin();
       i != m_Definitions.end(); ++i)

@@ -33,8 +33,8 @@ void cmConfigureFileNoAutoconf::FinalPass()
 #ifdef CMAKE_HAS_AUTOCONF
   return;
 #else  
-  m_Makefile->ExpandVariblesInString(m_InputFile);
-  m_Makefile->ExpandVariblesInString(m_OuputFile);
+  m_Makefile->ExpandVariablesInString(m_InputFile);
+  m_Makefile->ExpandVariablesInString(m_OuputFile);
   std::ifstream fin(m_InputFile.c_str());
   if(!fin)
     {
@@ -65,7 +65,7 @@ void cmConfigureFileNoAutoconf::FinalPass()
     {
     fin.getline(buffer, bufSize);
     inLine = buffer;
-    m_Makefile->ExpandVariblesInString(inLine);
+    m_Makefile->ExpandVariablesInString(inLine);
     fout << inLine << "\n";
     }
 #endif

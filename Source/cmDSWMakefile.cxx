@@ -157,7 +157,7 @@ void cmDSWMakefile::WriteDSWFile(std::ostream& fout)
     // to be removed as this may be built in a different directory
     // than the source
     std::string dir = (*k)->GetDSPMakefile()->
-      GetMakefile()->GetCurrentDirectory();
+      GetMakefile()->GetStartDirectory();
     // Get the home directory with the trailing slash
     std::string homedir = m_Makefile->GetHomeDirectory();
     homedir += "/";
@@ -187,6 +187,7 @@ void cmDSWMakefile::WriteProject(std::ostream& fout,
 				 const char* dir,
                                  cmDSPMakefile* project)
 {
+  project->GetMakefile()->ExpandVariables();
   fout << "###############################################################################\n\n";
   fout << "Project: \"" << dspname << "\"=" 
        << dir << "\\" << dspname << ".dsp - Package Owner=<4>\n\n";
@@ -201,9 +202,12 @@ void cmDSWMakefile::WriteProject(std::ostream& fout,
     end = project->GetMakefile()->GetLinkLibraries().end();
     for(;i!= end; ++i)
       {
-      fout << "Begin Project Dependency\n";
-      fout << "Project_Dep_Name " << *i << "\n";
-      fout << "End Project Dependency\n";
+		if (strcmp(i->c_str(),dspname))
+			{
+			fout << "Begin Project Dependency\n";
+			fout << "Project_Dep_Name " << *i << "\n";
+			fout << "End Project Dependency\n";
+			}
       }
     }
   fout << "}}}\n\n";

@@ -82,6 +82,12 @@ public:
                            std::vector<std::string>& arguments);
 
   /**
+   *  Add the paths from the environment variable PATH to the 
+   *  string vector passed in.
+   */
+  static void GetPath(std::vector<std::string>& path);
+
+  /**
    * Display an error message.
    */
   static void Error(const char* m, const char* m2=0 );

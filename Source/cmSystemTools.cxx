@@ -35,6 +35,31 @@ inline int Mkdir(const char* dir)
 }
 #endif
 
+// adds the elements of the env variable path to the arg passed in
+void cmSystemTools::GetPath(std::vector<std::string>& path)
+{
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  char* pathSep = ";";
+#else
+  char* pathSep = ":";
+#endif
+  std::string pathEnv = getenv("PATH");
+  std::string::size_type start =0;
+  bool done = false;
+  while(!done)
+    {
+    std::string::size_type endpos = pathEnv.find(pathSep, start);
+    if(endpos != std::string::npos)
+      {
+      path.push_back(pathEnv.substr(start, endpos-start));
+      start = endpos+1;
+      }
+    else
+      {
+      done = true;
+      }
+    }
+}
 
 bool cmSystemTools::MakeDirectory(const char* path)
 {

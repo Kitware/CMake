@@ -69,7 +69,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "FIND_LIBRARY(DEFINE try1 try2)";
+      "FIND_LIBRARY(DEFINE libraryName path1 path2 path3...)";
     }
 };
 

@@ -16,32 +16,6 @@
 #include "cmFindProgramCommand.h"
 #include <stdlib.h>
 #include <stdio.h>
-
-static void GetPath(std::vector<std::string>& path)
-{
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  char* pathSep = ";";
-#else
-  char* pathSep = ":";
-#endif
-  std::string pathEnv = getenv("PATH");
-  std::string::size_type start =0;
-  bool done = false;
-  while(!done)
-    {
-    std::string::size_type endpos = pathEnv.find(pathSep, start);
-    if(endpos != std::string::npos)
-      {
-      path.push_back(pathEnv.substr(start, endpos-start));
-      start = endpos+1;
-      }
-    else
-      {
-      done = true;
-      }
-    }
-}
-
   
 
 // cmFindProgramCommand
@@ -54,7 +28,8 @@ bool cmFindProgramCommand::Invoke(std::vector<std::string>& args)
     }
 
   std::vector<std::string> path;
-  GetPath(path);
+  cmSystemTools::GetPath(path);
+
   std::vector<std::string>::iterator i = args.begin();
   const char* define = (*i).c_str();
   i++;
