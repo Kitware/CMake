@@ -65,11 +65,5 @@ bool cmOptionCommand::InitialPass(std::vector<std::string> const& args)
                                    cmSystemTools::IsOn(initialValue.c_str()),
                                    args[1].c_str());
     }
-  else
-    {
-    m_Makefile->AddCacheDefinition(args[0].c_str(),
-                                   cmSystemTools::IsOn(cacheValue), args[1].c_str());
-    }
-
   return true;
 }
