@@ -15,35 +15,46 @@
 
 =========================================================================*/
 
-#ifndef cmCTestUpdateHandler_h
-#define cmCTestUpdateHandler_h
+#ifndef cmCTestGenericHandler_h
+#define cmCTestGenericHandler_h
 
 
-#include "cmCTestGenericHandler.h"
-#include "cmListFileCache.h"
+#include "cmStandardIncludes.h"
 
-/** \class cmCTestUpdateHandler
- * \brief A class that handles ctest -S invocations
+class cmCTest;
+class cmMakefile;
+
+/** \class cmCTestGenericHandler
+ * \brief A superclass of all CTest Handlers
  *
  */
-class cmCTestUpdateHandler : public cmCTestGenericHandler
+class cmCTestGenericHandler
 {
 public:
-
-  /*
-   * The main entry point for this class
+  /**
+   * If verbose then more informaiton is printed out
    */
-  int UpdateDirectory();
-  
-  cmCTestUpdateHandler();
-  
-private:
-  // Some structures needed for cvs update
-  struct StringPair : 
-    public std::pair<std::string, std::string>{};
-  struct UpdateFiles : public std::vector<StringPair>{};
-  struct AuthorsToUpdatesMap : 
-    public std::map<std::string, UpdateFiles>{};
+  void SetVerbose(bool val) { m_Verbose = val; }
+
+  /**
+   * Populate internals from CTest custom scripts
+   */
+  void PopulateCustomVectors(cmMakefile *) {}
+
+  /**
+   * Set the CTest instance
+   */
+  void SetCTestInstance(cmCTest* ctest) { m_CTest = ctest; }
+
+  /**
+   * Construct handler
+   */
+  cmCTestGenericHandler();
+
+protected:
+  bool m_Verbose;
+  cmCTest *m_CTest;
 };
 
 #endif
+

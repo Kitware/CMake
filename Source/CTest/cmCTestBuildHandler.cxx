@@ -156,8 +156,6 @@ cmCTestWarningErrorFileLine[] = {
 //----------------------------------------------------------------------
 cmCTestBuildHandler::cmCTestBuildHandler()
 {
-  m_Verbose = false; 
-  m_CTest = 0;
   int cc;
   for ( cc = 0; cmCTestWarningErrorFileLine[cc].m_RegularExpressionString; ++ cc )
     {
@@ -194,10 +192,8 @@ void cmCTestBuildHandler::PopulateCustomVectors(cmMakefile *mf)
 //----------------------------------------------------------------------
 //clearly it would be nice if this were broken up into a few smaller
 //functions and commented...
-int cmCTestBuildHandler::BuildDirectory(cmCTest *ctest_inst)
+int cmCTestBuildHandler::BuildDirectory()
 {
-  m_CTest = ctest_inst;
-  
   std::cout << "Build project" << std::endl;
   std::string makeCommand = m_CTest->GetDartConfiguration("MakeCommand");
   if ( makeCommand.size() == 0 )

@@ -19,35 +19,27 @@
 #define cmCTestCoverageHandler_h
 
 
-#include "cmStandardIncludes.h"
+#include "cmCTestGenericHandler.h"
 #include "cmListFileCache.h"
 
-class cmCTest;
 class cmGeneratedFileStream;
 
 /** \class cmCTestCoverageHandler
  * \brief A class that handles coverage computaiton for ctest
  *
  */
-class cmCTestCoverageHandler
+class cmCTestCoverageHandler : public cmCTestGenericHandler
 {
 public:
 
   /*
    * The main entry point for this class
    */
-  int CoverageDirectory(cmCTest *);
-  
-  /*
-   * If verbose then more informaiton is printed out
-   */
-  void SetVerbose(bool val) { m_Verbose = val; }
+  int CoverageDirectory();
   
   cmCTestCoverageHandler();
   
 private:
-  bool m_Verbose;
-  cmCTest *m_CTest;
   bool ShouldIDoCoverage(const char* file, const char* srcDir,
     const char* binDir, bool verbose);
   bool StartLogFile(cmGeneratedFileStream& ostr, int logFileCount);

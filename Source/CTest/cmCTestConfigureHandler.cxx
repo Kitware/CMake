@@ -34,10 +34,8 @@ cmCTestConfigureHandler::cmCTestConfigureHandler()
 //----------------------------------------------------------------------
 //clearly it would be nice if this were broken up into a few smaller
 //functions and commented...
-int cmCTestConfigureHandler::ConfigureDirectory(cmCTest *ctest_inst)
+int cmCTestConfigureHandler::ConfigureDirectory()
 {
-  m_CTest = ctest_inst;
-
   std::cout << "Configure project" << std::endl;
   std::string cCommand = m_CTest->GetDartConfiguration("ConfigureCommand");
   if ( cCommand.size() == 0 )

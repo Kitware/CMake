@@ -154,10 +154,8 @@ bool cmCTestCoverageHandler::ShouldIDoCoverage(const char* file, const char* src
 //----------------------------------------------------------------------
 //clearly it would be nice if this were broken up into a few smaller
 //functions and commented...
-int cmCTestCoverageHandler::CoverageDirectory(cmCTest *ctest_inst)
+int cmCTestCoverageHandler::CoverageDirectory()
 {
-  m_CTest = ctest_inst;
-
   int error = 0;
 
   std::string sourceDir = m_CTest->GetDartConfiguration("SourceDirectory");

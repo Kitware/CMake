@@ -6,7 +6,7 @@
   Date:      $Date$
   Version:   $Revision$
 
-  Copyright (c) 2002 Kitware, Inc. All rights reserved.
+  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
      This software is distributed WITHOUT ANY WARRANTY; without even 
@@ -15,27 +15,11 @@
 
 =========================================================================*/
 
-#ifndef cmCTestConfigureHandler_h
-#define cmCTestConfigureHandler_h
-
-
 #include "cmCTestGenericHandler.h"
-#include "cmListFileCache.h"
 
-/** \class cmCTestConfigureHandler
- * \brief A class that handles ctest -S invocations
- *
- */
-class cmCTestConfigureHandler : public cmCTestGenericHandler
+cmCTestGenericHandler::cmCTestGenericHandler()
 {
-public:
+  m_Verbose = false;
+  m_CTest = 0;
+}
 
-  /*
-   * The main entry point for this class
-   */
-  int ConfigureDirectory();
-  
-  cmCTestConfigureHandler();
-};
-
-#endif

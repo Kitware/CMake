@@ -125,7 +125,7 @@ void cmCTestScriptHandler::AddConfigurationScript(const char *script)
 //----------------------------------------------------------------------
 // the generic entry point for handling scripts, this routine will run all
 // the scripts provides a -S arguments
-int cmCTestScriptHandler::RunConfigurationScript(cmCTest* ctest)
+int cmCTestScriptHandler::RunConfigurationScript()
 {
   int res = 0;
   std::vector<cmStdString>::iterator it;
@@ -134,7 +134,7 @@ int cmCTestScriptHandler::RunConfigurationScript(cmCTest* ctest)
         it ++ )
     {
     // for each script run it
-    res += this->RunConfigurationScript(ctest,
+    res += this->RunConfigurationScript(
       cmSystemTools::CollapseFullPath(it->c_str()));
     }
   return res;
@@ -157,8 +157,7 @@ void cmCTestScriptHandler::UpdateElapsedTime()
 //----------------------------------------------------------------------
 // this sets up some variables for thew script to use, creates the required
 // cmake instance and generators, and then reads in the script
-int cmCTestScriptHandler::ReadInScript(cmCTest* ctest, 
-                                       const std::string& total_script_arg)
+int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
 {
   // if the argument has a , in it then it needs to be broken into the fist
   // argument (which is the script) and the second argument which will be
@@ -201,7 +200,7 @@ int cmCTestScriptHandler::ReadInScript(cmCTest* ctest,
                                    cmSystemTools::GetFilenameName(
                                      script).c_str());
   m_LocalGenerator->GetMakefile()->AddDefinition("CTEST_EXECUTABLE_NAME",
-                                   ctest->GetCTestExecutable());
+                                   m_CTest->GetCTestExecutable());
 
   this->UpdateElapsedTime();
   
@@ -209,15 +208,15 @@ int cmCTestScriptHandler::ReadInScript(cmCTest* ctest,
   // for ctest commands to clean this up. If a couple more commands are
   // created with the same format lets do that - ken
   cmCTestCommand* newCom = new cmCTestRunScriptCommand;
-  newCom->m_CTest = ctest;
+  newCom->m_CTest = m_CTest;
   newCom->m_CTestScriptHandler = this;
   m_CMake->AddCommand(newCom);
   newCom = new cmCTestEmptyBinaryDirectoryCommand;
-  newCom->m_CTest = ctest;
+  newCom->m_CTest = m_CTest;
   newCom->m_CTestScriptHandler = this;
   m_CMake->AddCommand(newCom);
   newCom = new cmCTestSleepCommand;
-  newCom->m_CTest = ctest;
+  newCom->m_CTest = m_CTest;
   newCom->m_CTestScriptHandler = this;
   m_CMake->AddCommand(newCom);
   
@@ -349,8 +348,7 @@ void cmCTestScriptHandler::SleepInSeconds(unsigned int secondsToWait)
 
 //----------------------------------------------------------------------
 // run a specific script
-int cmCTestScriptHandler::RunConfigurationScript(cmCTest* ctest,
-  const std::string& total_script_arg)
+int cmCTestScriptHandler::RunConfigurationScript(const std::string& total_script_arg)
 {
   int result;
   
@@ -358,7 +356,7 @@ int cmCTestScriptHandler::RunConfigurationScript(cmCTest* ctest,
     cmSystemTools::GetTime();
   
   // read in the script
-  result = this->ReadInScript(ctest, total_script_arg);
+  result = this->ReadInScript(total_script_arg);
   if (result)
     {
     return result;
@@ -761,11 +759,12 @@ void cmCTestScriptHandler::RestoreBackupDirectories()
     }
 }
 
-bool cmCTestScriptHandler::RunScript(cmCTest *ctest, const char *sname)
+bool cmCTestScriptHandler::RunScript(cmCTest* ctest, const char *sname)
 {
   cmCTestScriptHandler* sh = new cmCTestScriptHandler();
+  sh->SetCTestInstance(ctest);
   sh->AddConfigurationScript(sname);
-  sh->RunConfigurationScript(ctest);
+  sh->RunConfigurationScript();
   delete sh;
   return true;
 }

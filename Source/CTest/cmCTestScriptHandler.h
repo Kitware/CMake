@@ -19,14 +19,13 @@
 #define cmCTestScriptHandler_h
 
 
-#include "cmStandardIncludes.h"
+#include "cmCTestGenericHandler.h"
 #include "cmListFileCache.h"
 
 class cmMakefile;
 class cmLocalGenerator;
 class cmGlobalGenerator;
 class cmake;
-class cmCTest;
 
 /** \class cmCTestScriptHandler
  * \brief A class that handles ctest -S invocations
@@ -63,7 +62,7 @@ class cmCTest;
  *   CTEST_SCRIPT_NAME
  *
  */
-class cmCTestScriptHandler
+class cmCTestScriptHandler : public cmCTestGenericHandler
 {
 public:
 
@@ -75,12 +74,7 @@ public:
   /**
    * Run a dashboard using a specified confiuration script
    */
-  int RunConfigurationScript(cmCTest* ctest);
-
-  /*
-   * If verbose then more informaiton is printed out
-   */
-  void SetVerbose(bool val) { m_Verbose = val; }
+  int RunConfigurationScript();
 
   /*
    * Run a script
@@ -104,7 +98,7 @@ public:
   
 private:
   // reads in a script
-  int ReadInScript(cmCTest* ctest, const std::string& total_script_arg);
+  int ReadInScript(const std::string& total_script_arg);
 
   // extract vars from the script to set ivars
   int ExtractVariables();
@@ -119,12 +113,11 @@ private:
   int BackupDirectories();
   void RestoreBackupDirectories();
 
-  int RunConfigurationScript(cmCTest* ctest, const std::string& script);
+  int RunConfigurationScript(const std::string& script);
   int RunConfigurationDashboard();
 
   std::vector<cmStdString> m_ConfigurationScripts;
 
-  bool m_Verbose;
   bool m_Backup;
   bool m_EmptyBinDir;
   bool m_EmptyBinDirOnce;

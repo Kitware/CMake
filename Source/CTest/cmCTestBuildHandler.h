@@ -19,31 +19,25 @@
 #define cmCTestBuildHandler_h
 
 
-#include "cmStandardIncludes.h"
+#include "cmCTestGenericHandler.h"
 #include "cmListFileCache.h"
 
 #include <cmsys/RegularExpression.hxx>
 
-class cmCTest;
 class cmMakefile;
 
 /** \class cmCTestBuildHandler
  * \brief A class that handles ctest -S invocations
  *
  */
-class cmCTestBuildHandler
+class cmCTestBuildHandler : public cmCTestGenericHandler
 {
 public:
 
   /*
    * The main entry point for this class
    */
-  int BuildDirectory(cmCTest *);
-  
-  /*
-   * If verbose then more informaiton is printed out
-   */
-  void SetVerbose(bool val) { m_Verbose = val; }
+  int BuildDirectory();
   
   cmCTestBuildHandler();
   
@@ -76,9 +70,6 @@ private:
                                std::vector<cmCTestBuildErrorWarning>,
                                double elapsed_time);
   
-
-  bool m_Verbose;
-  cmCTest *m_CTest;
 
   std::string             m_StartBuild;
   std::string             m_EndBuild;

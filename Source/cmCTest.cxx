@@ -246,6 +246,13 @@ cmCTest::cmCTest()
   this->TestHandler      = new cmCTestTestHandler;
   this->UpdateHandler    = new cmCTestUpdateHandler;
   this->ConfigureHandler = new cmCTestConfigureHandler;
+
+  this->BuildHandler->SetCTestInstance(this);
+  this->CoverageHandler->SetCTestInstance(this);
+  this->ScriptHandler->SetCTestInstance(this);
+  this->TestHandler->SetCTestInstance(this);
+  this->UpdateHandler->SetCTestInstance(this);
+  this->ConfigureHandler->SetCTestInstance(this);
 }
 
 cmCTest::~cmCTest() 
@@ -720,7 +727,7 @@ int cmCTest::ProcessTests()
     }
   if ( m_Tests[UPDATE_TEST] || m_Tests[ALL_TEST] )
     {
-    update_count = this->UpdateHandler->UpdateDirectory(this); 
+    update_count = this->UpdateHandler->UpdateDirectory(); 
     if ( update_count < 0 )
       {
       res |= cmCTest::UPDATE_ERRORS;
@@ -732,7 +739,7 @@ int cmCTest::ProcessTests()
     }
   if ( m_Tests[CONFIGURE_TEST] || m_Tests[ALL_TEST] )
     {
-    if (this->ConfigureHandler->ConfigureDirectory(this))
+    if (this->ConfigureHandler->ConfigureDirectory())
       {
       res |= cmCTest::CONFIGURE_ERRORS;
       }
@@ -740,7 +747,7 @@ int cmCTest::ProcessTests()
   if ( m_Tests[BUILD_TEST] || m_Tests[ALL_TEST] )
     {
     this->UpdateCTestConfiguration();
-    if (this->BuildHandler->BuildDirectory(this))
+    if (this->BuildHandler->BuildDirectory())
       {
       res |= cmCTest::BUILD_ERRORS;
       }
@@ -748,7 +755,7 @@ int cmCTest::ProcessTests()
   if ( m_Tests[TEST_TEST] || m_Tests[ALL_TEST] || notest )
     {
     this->UpdateCTestConfiguration();
-    if (this->TestHandler->TestDirectory(this,false))
+    if (this->TestHandler->TestDirectory(false))
       {
       res |= cmCTest::TEST_ERRORS;
       }
@@ -756,7 +763,7 @@ int cmCTest::ProcessTests()
   if ( m_Tests[COVERAGE_TEST] || m_Tests[ALL_TEST] )
     {
     this->UpdateCTestConfiguration();
-    if (this->CoverageHandler->CoverageDirectory(this))
+    if (this->CoverageHandler->CoverageDirectory())
       {
       res |= cmCTest::COVERAGE_ERRORS;
       }
@@ -764,7 +771,7 @@ int cmCTest::ProcessTests()
   if ( m_Tests[MEMCHECK_TEST] || m_Tests[ALL_TEST] )
     {
     this->UpdateCTestConfiguration();
-    if (this->TestHandler->TestDirectory(this,true))
+    if (this->TestHandler->TestDirectory(true))
       {
       res |= cmCTest::MEMORY_ERRORS;
       }
@@ -1600,7 +1607,7 @@ int cmCTest::Run(std::vector<std::string>const& args, std::string* output)
     // call process directory
     if (this->m_RunConfigurationScript)
       {
-      res = this->ScriptHandler->RunConfigurationScript(this);
+      res = this->ScriptHandler->RunConfigurationScript();
       }
     else
       {

@@ -192,8 +192,6 @@ inline int GetNextRealNumber(std::string const& in,
 //----------------------------------------------------------------------
 cmCTestTestHandler::cmCTestTestHandler()
 {
-  m_Verbose = false; 
-  m_CTest = 0;
   m_UseUnion = false;
   
   m_UseIncludeRegExp       = false;
@@ -234,10 +232,8 @@ void cmCTestTestHandler::PopulateCustomVectors(cmMakefile *mf)
 //----------------------------------------------------------------------
 //clearly it would be nice if this were broken up into a few smaller
 //functions and commented...
-int cmCTestTestHandler::TestDirectory(cmCTest *ctest_inst, bool memcheck)
+int cmCTestTestHandler::TestDirectory(bool memcheck)
 {
-  m_CTest = ctest_inst;
-
   m_TestResults.clear();
   std::cout << (memcheck ? "Memory check" : "Test") << " project" << std::endl;
   if ( memcheck )

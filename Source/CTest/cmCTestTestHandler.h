@@ -19,30 +19,24 @@
 #define cmCTestTestHandler_h
 
 
-#include "cmStandardIncludes.h"
+#include "cmCTestGenericHandler.h"
 #include "cmListFileCache.h"
 
-class cmCTest;
 class cmMakefile;
 
 /** \class cmCTestTestHandler
  * \brief A class that handles ctest -S invocations
  *
  */
-class cmCTestTestHandler
+class cmCTestTestHandler : public cmCTestGenericHandler
 {
 public:
 
   /*
    * The main entry point for this class
    */
-  int TestDirectory(cmCTest *, bool memcheck);
+  int TestDirectory(bool memcheck);
   
-  /*
-   * If verbose then more informaiton is printed out
-   */
-  void SetVerbose(bool val) { m_Verbose = val; }
-
   /*
    * When both -R and -I are used should te resulting test list be the
    * intersection or the union of the lists. By default it is the
@@ -113,9 +107,6 @@ private:
     BAD_COMMAND,
     COMPLETED
   };
-
-  bool m_Verbose;
-  cmCTest *m_CTest;
 
   std::string              m_MemoryTester;
   std::vector<cmStdString> m_MemoryTesterOptionsParsed;

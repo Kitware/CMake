@@ -49,10 +49,8 @@ cmCTestUpdateHandler::cmCTestUpdateHandler()
 //----------------------------------------------------------------------
 //clearly it would be nice if this were broken up into a few smaller
 //functions and commented...
-int cmCTestUpdateHandler::UpdateDirectory(cmCTest *ctest_inst)
+int cmCTestUpdateHandler::UpdateDirectory()
 {
-  m_CTest = ctest_inst;
-  
   int count = 0;
   std::string::size_type cc, kk;
   std::string cvsCommand = m_CTest->GetDartConfiguration("CVSCommand");
