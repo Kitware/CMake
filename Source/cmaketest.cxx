@@ -26,26 +26,9 @@
 #endif
 
 
-// Create a class to clean up all the registered generators in case of return
-struct CleanUp
-{
-  ~CleanUp()
-    {
-      cmMakefileGenerator::UnRegisterGenerators();
-      cmCacheManager::DeleteInstance();
-
-    }
-  void UseIt() 
-    {
-    }
-};
-
-
 // this is a test driver program for cmake.
 int main (int argc, char **argv)
 {
-  CleanUp cleanup;
-  cleanup.UseIt();
   if (argc < 4)
     {
     std::cerr << "Usage: " << argv[0] << " test-src-dir test-bin-dir test-executable\n";
@@ -302,6 +285,5 @@ int main (int argc, char **argv)
     cmSystemTools::Error("test executable ", fullPath.c_str(), 
                          "returned a non-zero value");
     }
-  cmCacheManager::DeleteInstance();
   return ret;
 }
