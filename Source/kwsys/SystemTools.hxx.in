@@ -254,7 +254,14 @@ public:
    */
   static void SplitPath(const char* p,
                         kwsys_stl::vector<kwsys_stl::string>& components);
-  
+
+  /**
+   * Join components of a path name into a single string.  See
+   * SplitPath for the format of the components.
+   */
+  static kwsys_stl::string
+  JoinPath(const kwsys_stl::vector<kwsys_stl::string>& components);
+
   ///! return path of a full filename (no trailing slashes).
   static kwsys_stl::string GetFilenamePath(const kwsys_stl::string&);
 
