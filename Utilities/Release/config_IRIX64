@@ -1,13 +1,24 @@
-PLATFORM="irix64"
+if [ -f "${RELEASE_ROOT}/Tarballs/cmake-${VERSION}-irix64-n32.tar.gz" ]; then
+    PLATFORM="irix64-64"
+    CFLAGS="-64"
+    CXXFLAGS="-64"
+    LDFLAGS="-64"
+else
+    PLATFORM="irix64-n32"
+    CFLAGS="-n32"
+    CXXFLAGS="-n32"
+    LDFLAGS="-n32"
+fi
+
 CC="cc"
 CXX="CC"
-MAKE="gmake -j 20"
+MAKE="gmake"
+BUILD_FLAGS="-j 20"
+BOOTSTRAP_FLAGS="--parallel=20"
+INSTALL_DIR="Install-${PLATFORM}"
 
 # Write entries into the cache file before building cmake.
 write_cache()
 {
-cat > CMakeCache.txt <<EOF
-BUILD_TESTING:BOOL=ON
-CMAKE_VERBOSE_MAKEFILE:BOOL=TRUE
-EOF
+write_standard_cache
 }

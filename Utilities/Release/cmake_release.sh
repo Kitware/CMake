@@ -23,7 +23,7 @@
 #
 
 # Release version number.
-TAG="Release-1-8-0"
+TAG="Release-1-8"
 CMAKE_VERSION="1.8"
 VERSION="${CMAKE_VERSION}.0"
 RELEASE="1"
@@ -37,6 +37,7 @@ CVSROOT_GREP=":pserver:anonymous@www.cmake.org:[0-9]*/cvsroot/CMake"
 # CMake release root directory.
 RELEASE_ROOT_NAME="CMakeReleaseRoot"
 RELEASE_ROOT="${HOME}/${RELEASE_ROOT_NAME}"
+INSTALL_DIR="Install"
 
 # Installation prefix used during tarball creation.  Tarballs are
 # relative to the installation prefix and do not include this in their
@@ -52,8 +53,10 @@ CXX=""
 CFLAGS=""
 CXXFLAGS=""
 
-# Provide a default make.
-MAKE=make
+# Provide a default make and build flags.
+MAKE="make"
+BUILD_FLAGS=""
+BOOTSTRAP_FLAGS=""
 
 # Details of remote invocation.
 [ -z "$REMOTE" ] && SELF="$0"
@@ -294,12 +297,12 @@ config()
     utilities || return 1
     CONFIG_FILE="config_`uname`"
     echo "Loading ${CONFIG_FILE} ..."
-    . ${RELEASE_ROOT}/ReleaseUtilities/${CONFIG_FILE} >Logs/config.log 2>&1 || error_log Logs/config.log
+    . "${RELEASE_ROOT}/ReleaseUtilities/${CONFIG_FILE}" >Logs/config.log 2>&1 || error_log Logs/config.log
     if [ -z "${CC}" ] || [ -z "${CXX}" ] || [ -z "${PLATFORM}" ]; then
         echo "${CONFIG_FILE} should specify CC, CXX, and PLATFORM." &&
         return 1
     fi
-    export CC CXX CFLAGS CXXFLAGS PATH LD_LIBRARY_PATH
+    export CC CXX CFLAGS CXXFLAGS LDFLAGS PATH LD_LIBRARY_PATH MAKE
 }
 
 #-----------------------------------------------------------------------------
@@ -343,8 +346,39 @@ source_tarball()
 #-----------------------------------------------------------------------------
 write_cache()
 {
+    write_standard_cache
+}
+
+#-----------------------------------------------------------------------------
+write_standard_cache()
+{
     cat > CMakeCache.txt <<EOF
-BUILD_TESTING:BOOL=OFF
+BUILD_TESTING:BOOL=ON
+CMAKE_SKIP_RPATH:BOOL=1
+CMAKE_VERBOSE_MAKEFILE:BOOL=1
+HAVE_LIBDL:INTERNAL=0
+HAVE_DLOPEN:INTERNAL=0
+HAVE_GETHOSTBYADDR_R:INTERNAL=0
+HAVE_GETHOSTBYADDR_R_5:INTERNAL=0
+HAVE_GETHOSTBYADDR_R_5_REENTRANT:INTERNAL=0
+HAVE_GETHOSTBYADDR_R_7:INTERNAL=0
+HAVE_GETHOSTBYADDR_R_7_REENTRANT:INTERNAL=0
+HAVE_GETHOSTBYADDR_R_8:INTERNAL=0
+HAVE_GETHOSTBYADDR_R_8_REENTRANT:INTERNAL=0
+HAVE_GETHOSTBYNAME_R:INTERNAL=0
+HAVE_GETHOSTBYNAME_R_3:INTERNAL=0
+HAVE_GETHOSTBYNAME_R_3_REENTRANT:INTERNAL=0
+HAVE_GETHOSTBYNAME_R_5:INTERNAL=0
+HAVE_GETHOSTBYNAME_R_5_REENTRANT:INTERNAL=0
+HAVE_GETHOSTBYNAME_R_6:INTERNAL=0
+HAVE_GETHOSTBYNAME_R_6_REENTRANT:INTERNAL=0
+HAVE_GETPASS_R:INTERNAL=0
+HAVE_GMTIME_R:INTERNAL=0
+HAVE_INET_NTOA_R:INTERNAL=0
+HAVE_INET_NTOA_R_DECL:INTERNAL=0
+HAVE_INET_NTOA_R_DECL_REENTRANT:INTERNAL=0
+HAVE_LOCALTIME_R:INTERNAL=0
+HAVE_STRTOK_R:INTERNAL=0
 EOF
 }
 
@@ -372,7 +406,7 @@ configure()
     echo "Running bootstrap ..." &&
     (
         cd "cmake-${VERSION}-${PLATFORM}" &&
-        ../cmake-${VERSION}/bootstrap --prefix=${PREFIX}
+        ../cmake-${VERSION}/bootstrap --prefix=${PREFIX} ${BOOTSTRAP_FLAGS}
     ) >Logs/configure.log 2>&1 || error_log Logs/configure.log
 }
 
@@ -387,7 +421,7 @@ build()
     echo "Running make ..." &&
     (
         cd "cmake-${VERSION}-${PLATFORM}" &&
-        ${MAKE}
+        ${MAKE} ${BUILD_FLAGS}
     ) >Logs/build.log 2>&1 || error_log Logs/build.log
 }
 
@@ -396,7 +430,7 @@ tests()
 {
     [ -z "${DONE_tests}" ] || return 0 ; DONE_tests="yes"
     config || return 1
-    [ -f "cmake-${VERSION}-${PLATFORM}/Source/ccmake" ] || build || return 1
+    [ -f "cmake-${VERSION}-${PLATFORM}/bin/ccmake" ] || build || return 1
     echo "Running tests ..." &&
     (
         cd "cmake-${VERSION}-${PLATFORM}" &&
@@ -413,9 +447,9 @@ install()
     [ -d "cmake-${VERSION}-${PLATFORM}/Tests/Simple" ] || tests || return 1
     echo "Running make install ..." &&
     (
-        rm -rf Install &&
+        rm -rf ${INSTALL_DIR} &&
         cd "cmake-${VERSION}-${PLATFORM}" &&
-        ${MAKE} install DESTDIR="${RELEASE_ROOT}/Install"
+        ${MAKE} install DESTDIR="${RELEASE_ROOT}/${INSTALL_DIR}"
     ) >Logs/install.log 2>&1 || error_log Logs/install.log
 }
 
@@ -424,10 +458,10 @@ strip()
 {
     [ -z "${DONE_strip}" ] || return 0 ; DONE_strip="yes"
     config || return 1
-    [ -f "Install/usr/local/bin/ccmake" ] || install || return 1
+    [ -f "${INSTALL_DIR}/usr/local/bin/ccmake" ] || install || return 1
     echo "Stripping executables ..." &&
     (
-        strip Install${PREFIX}/bin/*
+        strip ${INSTALL_DIR}${PREFIX}/bin/*
     ) >Logs/strip.log 2>&1 || error_log Logs/strip.log
 }
 
@@ -436,21 +470,21 @@ manifest()
 {
     [ -z "${DONE_manifest}" ] || return 0 ; DONE_manifest="yes"
     config || return 1
-    [ -f "Install/usr/local/bin/ccmake" ] || install || return 1
+    [ -f "${INSTALL_DIR}/usr/local/bin/ccmake" ] || install || return 1
     echo "Writing MANIFEST ..." &&
     (
-        mkdir -p Install${PREFIX}${DOC_DIR} &&
-        rm -rf Install${PREFIX}${DOC_DIR}/MANIFEST &&
-        touch Install${PREFIX}${DOC_DIR}/MANIFEST &&
-        cd Install${PREFIX} &&
+        mkdir -p ${INSTALL_DIR}${PREFIX}${DOC_DIR} &&
+        rm -rf ${INSTALL_DIR}${PREFIX}${DOC_DIR}/MANIFEST &&
+        touch ${INSTALL_DIR}${PREFIX}${DOC_DIR}/MANIFEST &&
+        cd ${INSTALL_DIR}${PREFIX} &&
         FILES=`find . -type f |sed 's/^\.\///'` &&
         cd ${RELEASE_ROOT} &&
-        (cat >> Install${PREFIX}${DOC_DIR}/MANIFEST <<EOF
+        (cat >> ${INSTALL_DIR}${PREFIX}${DOC_DIR}/MANIFEST <<EOF
 ${FILES}
 EOF
         ) &&
-        rm -rf Install/README &&
-        (cat > Install/README <<EOF
+        rm -rf ${INSTALL_DIR}/README &&
+        (cat > ${INSTALL_DIR}/README <<EOF
 CMake $VERSION binary for $PLATFORM
 
 Extract the file "cmake-${VERSION}-${PLATFORM}-files.tar" into your
@@ -478,14 +512,14 @@ binary_tarball()
     echo "Creating binary tarballs ..." &&
     (
         mkdir -p Tarballs &&
-        rm -rf Install/cmake-${VERSION}-${PLATFORM}-files.tar &&
+        rm -rf ${INSTALL_DIR}/cmake-${VERSION}-${PLATFORM}-files.tar &&
         (
-            cd Install${PREFIX} &&
-            tar cvf ${RELEASE_ROOT}/Install/cmake-${VERSION}-${PLATFORM}-files.tar *
+            cd ${INSTALL_DIR}${PREFIX} &&
+            tar cvf ${RELEASE_ROOT}/${INSTALL_DIR}/cmake-${VERSION}-${PLATFORM}-files.tar *
         ) &&
         rm -rf Tarballs/cmake-${VERSION}-${PLATFORM}.tar* &&
         (
-            cd Install &&
+            cd ${INSTALL_DIR} &&
             tar cvf ${RELEASE_ROOT}/Tarballs/cmake-${VERSION}-${PLATFORM}.tar cmake-${VERSION}-${PLATFORM}-files.tar README
         ) &&
         (
@@ -675,7 +709,7 @@ osx_install()
 {
     [ -z "${DONE_osx_install}" ] || return 0 ; DONE_osx_install="yes"
     config || return 1
-    [ -f "cmake-${VERSION}-${PLATFORM}/Source/ccmake" ] || build || return 1
+    [ -f "cmake-${VERSION}-${PLATFORM}/bin/ccmake" ] || build || return 1
     if [ -z "${WX_RESOURCES}" ]; then
         echo "${CONFIG_FILE} should specify WX_RESOURCES."
         return 1
@@ -691,7 +725,7 @@ osx_install()
             ${MAKE} install DESTDIR="${RELEASE_ROOT}/OSX/Package_Root"
         ) &&
         cp cmake-${VERSION}/Copyright.txt OSX/Resources/License.txt &&
-        cp -r cmake-${VERSION}-${PLATFORM}/Source/CMake.app OSX/Package_Root/Applications &&
+        cp -r cmake-${VERSION}-${PLATFORM}/bin/CMake.app OSX/Package_Root/Applications &&
         echo "APPL????" > OSX/Package_Root/Applications/CMake.app/Contents/PkgInfo &&
         cp "${WX_RESOURCES}" OSX/Package_Root/Applications/CMake.app/Contents/Resources/wxCMakeSetup.rsrc
     ) >Logs/osx_install.log 2>&1 || error_log Logs/osx_install.log

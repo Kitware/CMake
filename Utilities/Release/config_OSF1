@@ -9,9 +9,9 @@ TCL_TCLSH="/usr/local/bin/tclsh8.3"
 # Write entries into the cache file before building cmake.
 write_cache()
 {
-cat > CMakeCache.txt <<EOF
-BUILD_TESTING:BOOL=ON
-CMAKE_VERBOSE_MAKEFILE:BOOL=TRUE
+write_standard_cache
+
+cat >> CMakeCache.txt <<EOF
 FLTK_INCLUDE_PATH:PATH=${FLTK_INCLUDE_PATH}
 FLTK_LIBRARY:FILEPATH=${FLTK_LIBRARY}
 TCL_TCLSH:FILEPATH=${TCL_TCLSH}

@@ -53,7 +53,7 @@ build()
   (
   cd ${BINARY_DIR} &&
   make &&
-  ./Source/ctest
+  ./bin/ctest
   )
 }
 
