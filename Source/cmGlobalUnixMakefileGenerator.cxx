@@ -23,6 +23,22 @@
 void cmGlobalUnixMakefileGenerator::EnableLanguage(const char* lang, 
                                                    cmMakefile *mf)
 {
+  bool isLocal = m_CMakeInstance->GetLocal();
+  const char* majv = mf->GetDefinition("CMAKE_CACHE_MAJOR_VERSION");
+  const char* minv = mf->GetDefinition("CMAKE_CACHE_MINOR_VERSION");
+  const char* relv = mf->GetDefinition("CMAKE_CACHE_RELEASE_VERSION");
+  bool cacheSameCMake = false;
+  if(majv && atoi(majv) == cmMakefile::GetMajorVersion()
+     && minv && atoi(minv) == cmMakefile::GetMinorVersion()
+     && relv && (strcmp(relv, cmMakefile::GetReleaseVersion()) == 0))
+    {
+    cacheSameCMake = true;
+    }
+  if(!cacheSameCMake)
+    {
+    isLocal = false;
+    }
+
   // if no lang specified use CXX
   if(!lang )
     {
@@ -39,7 +55,7 @@ void cmGlobalUnixMakefileGenerator::EnableLanguage(const char* lang,
   bool needCXXBackwards = false;
   
   // check for a C compiler and configure it
-  if(!m_CMakeInstance->GetLocal() &&
+  if(!isLocal &&
      !this->GetLanguageEnabled("C") && 
      lang[0] == 'C')
     {
@@ -63,7 +79,7 @@ void cmGlobalUnixMakefileGenerator::EnableLanguage(const char* lang,
     } 
   
   // check for a CXX compiler and configure it
-  if(!m_CMakeInstance->GetLocal() &&
+  if(!isLocal &&
      !this->GetLanguageEnabled("CXX") &&
      strcmp(lang, "CXX") == 0)
     {
@@ -101,7 +117,7 @@ void cmGlobalUnixMakefileGenerator::EnableLanguage(const char* lang,
     mf->ReadListFile(0,fpath.c_str());
     }
   
-  if(!m_CMakeInstance->GetLocal())
+  if(!isLocal)
     {
     // At this point we should have enough info for a try compile
     // which is used in the backward stuff

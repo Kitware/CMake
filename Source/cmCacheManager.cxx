@@ -279,6 +279,10 @@ bool cmCacheManager::SaveCache(const char* path)
                       "Major version of cmake used to create the "
                       "current loaded cache", cmCacheManager::INTERNAL);
 
+  this->AddCacheEntry("CMAKE_CACHE_RELEASE_VERSION", cmMakefile::GetReleaseVersion(),
+                      "Major version of cmake used to create the "
+                      "current loaded cache", cmCacheManager::INTERNAL);
+
   // Let us store the current working directory so that if somebody
   // Copies it, he will not be surprised
   std::string currentcwd = path;
