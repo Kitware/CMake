@@ -3,9 +3,11 @@
 # This module defines
 # QT_INCLUDE_PATH, where to find qt.h, etc.
 # QT_QT_LIBRARY, where to find the qt library
-# QT_MOX_EXE, where to find the moc tool
+# QT_MOC_EXE, where to find the moc tool
+# QT_UIC_EXE, where to find the uic tool
 # USE_QT_FILE, a file for any CMakeLists.txt file to include to actually link against qt
 # QT_WRAP_CPP, This allows the QT_WRAP_CPP command to work.
+# QT_WRAP_UI, This allows the QT_WRAP_UI command to work.
 
 
 IF (UNIX)
@@ -29,6 +31,11 @@ IF (UNIX)
     ${path}
   )
 
+  FIND_FILE(QT_UIC_EXE uic
+    ${QTDIR}/bin
+    ${path}
+  )
+
 ENDIF (UNIX)
 
 IF (WIN32)
@@ -48,12 +55,21 @@ IF (WIN32)
     ${path}
   )
 
+  FIND_FILE(QT_MOC_EXE uic.exe
+    ${QTDIR}/bin
+    ${path}
+  )
+
 ENDIF (WIN32)
 
 
 IF (QT_MOC_EXE)
   SET ( QT_WRAP_CPP 1 CACHE BOOL "Can we honour the QT_WRAP_CPP command" )
 ENDIF (QT_MOC_EXE)
+
+IF (QT_UIC_EXE)
+  SET ( QT_WRAP_UI 1 CACHE BOOL "Can we honour the QT_WRAP_UI command" )
+ENDIF (QT_UIC_EXE)
 
 
 
