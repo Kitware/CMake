@@ -1112,6 +1112,9 @@ std::string cmSystemTools::FindProgram(const char* name,
       {
       return cmSystemTools::CollapseFullPath(tryPath.c_str());
       }
+    tryPath = *p;
+    tryPath += "/";
+    tryPath += name;
 #endif
     tryPath += cmSystemTools::GetExecutableExtension();
     if(cmSystemTools::FileExists(tryPath.c_str()) &&
