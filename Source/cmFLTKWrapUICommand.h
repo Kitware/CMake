@@ -73,8 +73,8 @@ private:
    * generating .cxx and .h files
    */
   std::vector<std::string> m_WrapUserInterface;
+  std::string m_Target;
   std::string m_GUISourceList;
-  std::string m_GeneratedSourceList;
 };
 
 

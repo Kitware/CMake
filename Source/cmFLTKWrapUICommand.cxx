@@ -77,9 +77,9 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args)
   // what is the current source dir
   std::string cdir = m_Makefile->GetCurrentDirectory();
 
-  // keep the library name
-  m_GUISourceList       = args[0];  // Source List of the GUI source files 
-  m_GeneratedSourceList = args[1];  // Source List to insert the generated .cxx files
+  // get parameter for the command
+  m_Target              = args[0];  // Target that will use the generated files
+  m_GUISourceList       = args[1];  // Source List of the GUI source files 
 
   cmMakefile::SourceMap &GUISources = m_Makefile->GetSources();
  
@@ -121,17 +121,6 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args)
       header_file.GetDepends().push_back(origname);
       m_GeneratedHeadersClasses.push_back(header_file);
       m_GeneratedSourcesClasses.push_back(source_file);
-
-      m_Makefile->AddSource(header_file, m_GeneratedSourceList.c_str());
-      m_Makefile->AddSource(source_file, m_GeneratedSourceList.c_str());
-
-      m_Makefile->AddSource(header_file, m_GeneratedSourceList.c_str());
-      m_Makefile->AddSource(source_file, m_GeneratedSourceList.c_str());
-
-      cmTarget cxxtarget;
-      cxxtarget.SetType( cmTarget::GENERATED_CODE );
-      cmTargets::value_type cxxpair( cxxname, cxxtarget );
-      m_Makefile->GetTargets().insert( cxxpair );
 
       }
     }
@@ -177,10 +166,13 @@ void cmFLTKWrapUICommand::FinalPass()
     outputs.push_back( cxxres );
     outputs.push_back( hres   );
      
-    // Add command for generating the .h file
+    // Add command for generating the .h and .cxx files
     m_Makefile->AddCustomCommand(m_WrapUserInterface[classNum].c_str(),
                                  fluid_exe.c_str(), cxxargs, depends, 
-                                 outputs, cxxres.c_str() );
+                                 outputs, m_Target.c_str() );
+    
+    m_Makefile->GetTargets()[m_Target].GetSourceFiles().push_back( m_GeneratedSourcesClasses[classNum] );
+        
     }
 }
 
