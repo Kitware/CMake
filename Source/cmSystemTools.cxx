@@ -378,19 +378,10 @@ bool cmSystemTools::RunCommand(const char* command,
     return false;
     }
   
-  // Change to specified working directory.
-  std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-  if(dir)
-    {
-    if(cmSystemTools::ChangeDirectory(dir) < 0)
-      {
-      return false;
-      }
-    }
-  
   output = "";
   cmsysProcess* cp = cmsysProcess_New();
   cmsysProcess_SetCommand(cp, &*argv.begin());
+  cmsysProcess_SetWorkingDirectory(cp, dir);
   cmsysProcess_Execute(cp);
   
   char* data;
@@ -419,12 +410,6 @@ bool cmSystemTools::RunCommand(const char* command,
     }
   
   cmsysProcess_Delete(cp);
-  
-  // Restore old working directory.
-  if(dir)
-    {
-    cmSystemTools::ChangeDirectory(cwd.c_str());
-    }
   
   return result;
 }
