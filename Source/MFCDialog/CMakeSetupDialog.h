@@ -138,6 +138,7 @@ protected:
   cmake *m_CMakeInstance;
   HCURSOR m_Cursor;
   bool m_RunningConfigure;
+  bool m_GeneratorPicked;
 };
 
 //{{AFX_INSERT_LOCATION}}

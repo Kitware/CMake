@@ -158,6 +158,7 @@ CMakeSetupDialog::CMakeSetupDialog(const CMakeCommandLineInfo& cmdInfo,
                                    CWnd* pParent /*=NULL*/)
   : CDialog(CMakeSetupDialog::IDD, pParent)
 { 
+  m_GeneratorPicked = false;
   m_Cursor = LoadCursor(NULL, IDC_ARROW);
   m_RunningConfigure = false;
   cmSystemTools::SetRunCommandHideConsole(true);
@@ -713,6 +714,11 @@ void CMakeSetupDialog::RunCMake(bool generateProjectFiles)
 // Callback for build projects button
 void CMakeSetupDialog::OnConfigure() 
 {
+ //  if(!m_GeneratorPicked)
+//     {
+//     // generator has not been picked add one here
+//     }
+  
   // enable error messages each time configure is pressed
   cmSystemTools::EnableMessages();
   this->RunCMake(false);
@@ -773,8 +779,13 @@ void CMakeSetupDialog::OnChangeWhereBuild()
     this->m_WhereSource = path.c_str();
     this->m_WhereSourceControl.SetWindowText(this->m_WhereSource);
     this->OnChangeWhereSource();
+    m_GeneratorPicked = true;
     }
-
+  else
+    {
+    m_GeneratorPicked = false;
+    }
+  
   m_CacheEntriesList.RemoveAll();
   m_CacheEntriesList.ShowWindow(SW_SHOW);
   this->LoadCacheFromDiskToGUI();
@@ -979,6 +990,7 @@ void CMakeSetupDialog::LoadCacheFromDiskToGUI()
       cachem->GetCacheIterator("CMAKE_GENERATOR");
     if(!it.IsAtEnd())
       {
+      m_GeneratorPicked = true;
       std::string curGen = it.GetValue();
       if(m_GeneratorChoiceString != curGen.c_str())
         {
@@ -1330,6 +1342,15 @@ void CMakeSetupDialog::OnHelpButton()
 
 void CMakeSetupDialog::OnDeleteButton() 
 {
+  std::string message = "Are you sure you want to delete the CMakeCache.txt file for:\n";
+  message += m_WhereBuild;
+  if(::MessageBox(0, message.c_str(), "Delete Cache?", 
+                  MB_YESNO|MB_TASKMODAL) == IDNO)
+    {
+    return;
+    }
+  m_GeneratorPicked = false;
+
   if(m_WhereBuild != "" && this->m_CMakeInstance)
     {
     this->m_CMakeInstance->GetCacheManager()->DeleteCache(m_WhereBuild);
