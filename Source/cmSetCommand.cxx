@@ -24,6 +24,42 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args)
     this->SetError("called with incorrect number of arguments");
     return false;
     }
+  
+  // watch for ENV signatures
+  const char* variable = args[0].c_str(); // VAR is always first
+  bool haveEnvVariable = false;
+  if (!strncmp(variable,"ENV{",4) && strlen(variable) > 5)
+    {
+    // what is the variable name
+    char *varName = new char [strlen(variable)];
+    strncpy(varName,variable+4,strlen(variable)-5);
+    varName[strlen(variable)-5] = '\0';
+    std::string putEnvArg = varName;
+    putEnvArg += "=";
+    
+    // what is the current value if any
+    const char *currValue = getenv(varName);
+
+    // will it be set to something, then set it
+    if (args.size() > 1 && args[1].size())
+      {
+      // but only if it is different from current value
+      if (!currValue || strcmp(currValue,args[1].c_str()))
+        {
+        putEnvArg += args[1];
+        cmSystemTools::PutEnv(putEnvArg.c_str());
+        }
+      return true;
+      }
+    
+    // if it will be cleared, then clear it if it isn;t already clear
+    if (currValue)
+      {
+      cmSystemTools::PutEnv(putEnvArg.c_str());
+      }
+    return true;
+    }
+  
   // SET (VAR) // Removes the definition of VAR.
   if (args.size() == 1)
     {
@@ -35,7 +71,6 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args)
   //  SET (VAR value )
   //  SET (VAR CACHE TYPE "doc String" [FORCE])
   //  SET (VAR value CACHE TYPE "doc string" [FORCE])
-  const char* variable = args[0].c_str(); // VAR is always first
   std::string value;  // optional
   bool cache = false; // optional
   bool force = false; // optional

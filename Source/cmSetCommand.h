@@ -87,7 +87,10 @@ public:
       "then this always writes into the current makefile. The FORCE option "
       "will overwrite the CACHE value removing any changes by the USER.\n"
       "  SET(VAR VALUE1 ... VALUEN).\n"
-      "In this case VAR is set to a ; separated list of values.";
+      "In this case VAR is set to a ; separated list of values.\n"
+      "VAR can be an environment variable such as:\n"
+      "  SET( ENV{PATH} /home/martink )\n"
+      "in which case the environment variable will be set.";
     }
   
   cmTypeMacro(cmSetCommand, cmCommand);
