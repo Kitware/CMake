@@ -16,13 +16,14 @@
 =========================================================================*/
 #include "cmTryCompileCommand.h"
 #include "cmCacheManager.h"
+#include "cmListFileCache.h"
 
 int cmTryCompileCommand::CoreTryCompileCode(
   cmMakefile *mf, std::vector<std::string> const& argv, bool clean)
 {
   // which signature were we called with ?
-  bool srcFileSignature = true;
-  int i;
+  bool srcFileSignature = false;
+  unsigned int i;
   
   // where will the binaries be stored
   const char* binaryDirectory = argv[1].c_str();
@@ -30,25 +31,13 @@ int cmTryCompileCommand::CoreTryCompileCode(
   const char* projectName = 0;
   const char* targetName = 0;
   std::string tmpString;
-  
-  // compute the binary dir when TRY_COMPILE is called with a src file
-  // signature
-  if (srcFileSignature)
+
+  // do we have a srcfile signature
+  if (argv.size() == 3 || argv[3] == "CMAKE_FLAGS" || argv[3] == "COMPILE_DEFINITIONS")
     {
-    tmpString = argv[1] + "/CMakeTmp";
-    binaryDirectory = tmpString.c_str();
+    srcFileSignature = true;
     }
-  // make sure the binary directory exists
-  cmSystemTools::MakeDirectory(binaryDirectory);
-  
-  // do not allow recursive try Compiles
-  if (!strcmp(binaryDirectory,mf->GetHomeOutputDirectory()))
-    {
-    cmSystemTools::Error("Attempt at a recursive or nested TRY_COMPILE", 
-                         binaryDirectory);
-    return -1;
-    }
-  
+
   // look for CMAKE_FLAGS and store them
   std::vector<std::string> cmakeFlags;
   for (i = 3; i < argv.size(); ++i)
@@ -62,15 +51,11 @@ int cmTryCompileCommand::CoreTryCompileCode(
         }
       break;
       }
-    else
-      {
-      srcFileSignature = false;
-      }
     }
 
   // look for COMPILE_DEFINITIONS and store them
   std::vector<std::string> compileFlags;
-  for (i = 0; i < argv.size(); ++i)
+  for (i = 3; i < argv.size(); ++i)
     {
     if (argv[i] == "COMPILE_DEFINITIONS")
       {
@@ -90,6 +75,25 @@ int cmTryCompileCommand::CoreTryCompileCode(
       }
     }
   
+  // compute the binary dir when TRY_COMPILE is called with a src file
+  // signature
+  if (srcFileSignature)
+    {
+    tmpString = argv[1] + "/CMakeTmp";
+    binaryDirectory = tmpString.c_str();
+    }
+  // make sure the binary directory exists
+  cmSystemTools::MakeDirectory(binaryDirectory);
+  
+  // do not allow recursive try Compiles
+  if (!strcmp(binaryDirectory,mf->GetHomeOutputDirectory()))
+    {
+    cmSystemTools::Error("Attempt at a recursive or nested TRY_COMPILE", 
+                         binaryDirectory);
+    return -1;
+    }
+  
+  std::string outFileName = tmpString + "/CMakeLists.txt";
   // which signature are we using? If we are using var srcfile bindir
   if (srcFileSignature)
     {
@@ -102,7 +106,6 @@ int cmTryCompileCommand::CoreTryCompileCode(
     sourceDirectory = binaryDirectory;
 
     // now create a CMakeList.txt file in that directory
-    std::string outFileName = tmpString + "/CMakeLists.txt";
     FILE *fout = fopen(outFileName.c_str(),"w");
     if (!fout)
       {
@@ -150,7 +153,7 @@ int cmTryCompileCommand::CoreTryCompileCode(
   
   // if They specified clean then we clean up what we can
   if (srcFileSignature && clean)
-    {
+    {    
     cmDirectory dir;
     dir.Load(binaryDirectory);
     size_t fileNum;
@@ -164,7 +167,8 @@ int cmTryCompileCommand::CoreTryCompileCode(
         fullPath += dir.GetFile(fileNum);
         cmSystemTools::RemoveFile(fullPath.c_str());
         }
-      }
+      }    
+    cmListFileCache::GetInstance()->FlushCache(outFileName.c_str());
     }
   
   return res;
