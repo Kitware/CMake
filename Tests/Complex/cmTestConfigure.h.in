@@ -25,6 +25,8 @@
 #define CACHE_TEST_VAR1 "${CACHE_TEST_VAR1}"
 #define CACHE_TEST_VAR2 "${CACHE_TEST_VAR2}"
 #define CACHE_TEST_VAR3 "${CACHE_TEST_VAR3}"
+#cmakedefine CACHE_TEST_VAR_EXCLUDED
+#define CACHE_TEST_VAR_INTERNAL "${CACHE_TEST_VAR_INTERNAL}"
 
 // Test internal CMake vars from C++ flags
 

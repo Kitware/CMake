@@ -54,4 +54,5 @@ ABSTRACT_FILES(
 )
 
 INSTALL_FILES(/tmp .h ${Complex_BINARY_DIR}/cmTestConfigure.h)
+INSTALL_FILES(/tmp .cxx ${Complex_BINARY_DIR}/cmTestConfigure.h)
 

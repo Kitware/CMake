@@ -19,7 +19,11 @@ IF (EXISTS ${Complex_SOURCE_DIR}/VarTests.cmake)
   INCLUDE(${Complex_SOURCE_DIR}/VarTests.cmake)
 ENDIF (EXISTS ${Complex_SOURCE_DIR}/VarTests.cmake)
 
-LOAD_CACHE(${Complex_SOURCE_DIR})
+LOAD_CACHE(${Complex_SOURCE_DIR}
+           EXCLUDE
+             CACHE_TEST_VAR_EXCLUDED
+           INCLUDE_INTERNALS
+             CACHE_TEST_VAR_INTERNAL)
 
 #
 # Configure file 
@@ -31,11 +35,15 @@ CONFIGURE_FILE(
 
 #
 # Specify include and lib dirs 
+# (BEFORE is for coverage)
 #
 INCLUDE_DIRECTORIES(
-  ${Complex_BINARY_DIR}
   ${Complex_SOURCE_DIR}/Library
   ${Complex_SOURCE_DIR}/../../Source
+)
+
+INCLUDE_DIRECTORIES(BEFORE
+  ${Complex_BINARY_DIR}
 )
 
 INCLUDE_REGULAR_EXPRESSION("^(cmTest|file|sharedFile).*$")
@@ -65,6 +73,7 @@ SUBDIR_DEPENDS(Executable Library)
 # Exec program (TODO: test a result)
 # Increase coverage.
 #
+MESSAGE("Trying to increase coverage...")
 OPTION(NO_EXEC_PROGRAM "Do not test EXEC_PROGRAM" 0)
 IF (NOT NO_EXEC_PROGRAM)
   EXEC_PROGRAM("echo NO_EXEC_PROGRAM" "${Complex_BINARY_DIR}")

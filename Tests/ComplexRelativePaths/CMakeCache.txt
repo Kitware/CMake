@@ -21,3 +21,14 @@ CACHE_TEST_VAR2:FILEPATH=bar
 
 //A var.
 CACHE_TEST_VAR3:BOOL=1
+
+//A var.
+CACHE_TEST_VAR_EXCLUDED:BOOL=1
+
+
+########################
+# INTERNAL cache entries
+########################
+
+//A var.
+CACHE_TEST_VAR_INTERNAL:INTERNAL=bar
