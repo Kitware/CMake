@@ -2497,6 +2497,7 @@ void cmLocalUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
 
   // CMake versions below 2.0 would add the source tree to the -I path
   // automatically.  Preserve compatibility.
+  bool includeSourceDir = false;
   const char* versionValue =
     m_Makefile->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
   if(versionValue)
@@ -2505,10 +2506,31 @@ void cmLocalUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     int minor = 0;
     if(sscanf(versionValue, "%d.%d", &major, &minor) == 2 && major < 2)
       {
-      fout << "-I"
-           << this->ConvertToOutputForExisting(m_Makefile->GetStartDirectory())
-           << " ";
+      includeSourceDir = true;
       }
+    }
+  const char* vtkSourceDir =
+    m_Makefile->GetDefinition("VTK_SOURCE_DIR");
+  if(vtkSourceDir)
+    {
+    // Special hack for VTK 4.0 - 4.4.
+    const char* vtk_major = m_Makefile->GetDefinition("VTK_MAJOR_VERSION");
+    const char* vtk_minor = m_Makefile->GetDefinition("VTK_MINOR_VERSION");
+    vtk_major = vtk_major? vtk_major : "4";
+    vtk_minor = vtk_minor? vtk_minor : "4";
+    int major = 0;
+    int minor = 0;
+    if(sscanf(vtk_major, "%d", &major) && sscanf(vtk_minor, "%d", &minor) &&
+       major == 4 && minor <= 4)
+      {
+      includeSourceDir = true;
+      }
+    }
+  if(includeSourceDir)
+    {
+    fout << "-I"
+         << this->ConvertToOutputForExisting(m_Makefile->GetStartDirectory())
+         << " ";
     }
 
   implicitIncludes["/usr/include"] = "/usr/include";
