@@ -1,3 +1,6 @@
+#ifndef cmXCodeObject_h
+#define cmXCodeObject_h
+
 #include "cmStandardIncludes.h"
 
 class cmXCodeObject
@@ -31,13 +34,14 @@ public:
     {
       m_List.push_back(value);
     }
-  void Indent(int level, std::ostream& out);
+  static void Indent(int level, std::ostream& out);
   void Print(std::ostream& out);
-  static void PrintAll(std::ostream& out);
+  static void PrintList(std::vector<cmXCodeObject*> const&, std::ostream& out);
   const char* GetId()
     {
       return m_Id.c_str();
     }
+private:
   Type m_Type;
   cmStdString m_Id;
   PBXType m_IsA;
@@ -45,5 +49,5 @@ public:
   std::vector<cmXCodeObject*> m_List;
   std::map<cmStdString, cmXCodeObject*> m_ObjectAttributes;
   std::map<cmStdString, cmStdString> m_StringAttributes;
-  static std::vector<cmXCodeObject*> s_AllObjects;
 };
+#endif
