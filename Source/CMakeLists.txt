@@ -24,7 +24,6 @@ cmake.h
 cmakewizard.h
 cmMakeDepend.h
 cmMakefile.h
-cmMakefileGenerator.h
 cmRegularExpression.h
 cmSourceFile.h
 cmSystemTools.h
