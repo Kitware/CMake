@@ -280,7 +280,7 @@ int main (int argc, char *argv[])
     cmSystemTools::ChangeDirectory(cwd.c_str());
     return 1;
     }  
-  
+  std::cout << output << "\n";
   // return to the original directory
   cmSystemTools::ChangeDirectory(cwd.c_str());
   cmMakefileGenerator::UnRegisterGenerators();
