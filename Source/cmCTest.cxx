@@ -2164,7 +2164,13 @@ std::string cmCTest::GetShortPathToFile(const char* fname)
     return fname;
     }
   cmSystemTools::ConvertToUnixSlashes(*res);
-  return "./" + *res;
+
+  std::string path = "./" + *res;
+  if ( path[path.size()-1] == '/' )
+    {
+    path = path.substr(0, path.size()-1);
+    }
+  return path;
 }
 
 std::string cmCTest::GetDartConfiguration(const char *name)
