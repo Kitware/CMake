@@ -90,7 +90,7 @@ public:
 
   virtual void WriteConfiguration() const;
 
-  cmTypeMacro(cmCableInstantiateClassCommand, cmCableInstantiateCommand);
+  cmTypeMacro(cmCableInstantiateClassCommand, cmCablePackageEntryCommand);
 protected:
   typedef cmCablePackageEntryCommand::Entries  Entries;
 };
