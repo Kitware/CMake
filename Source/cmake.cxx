@@ -78,6 +78,13 @@ cmCommand *cmake::GetCommand(const char *name)
 void cmake::AddCommand(cmCommand* wg)
 {
   std::string name = wg->GetName();
+  // if the command already exists, free the old one
+  RegisteredCommandsMap::iterator pos = m_Commands.find(name);
+  if (pos != m_Commands.end())
+    {
+    delete pos->second;
+    m_Commands.erase(pos);
+    }
   m_Commands.insert( RegisteredCommandsMap::value_type(name, wg));
 }
 
