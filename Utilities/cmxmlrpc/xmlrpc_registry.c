@@ -682,7 +682,7 @@ system_methodSignature(xmlrpc_env *env,
     xmlrpc_value *ignored1, *ignored2, *ignored3;
     xmlrpc_value *item, *current, *result;
     int at_sig_start;
-    char *sig, *code;
+    char *sig, *code = 0;
 
     XMLRPC_ASSERT_ENV_OK(env);
     XMLRPC_ASSERT_VALUE_OK(param_array);
