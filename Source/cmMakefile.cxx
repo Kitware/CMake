@@ -39,6 +39,9 @@ cmMakefile::cmMakefile()
   m_ComplainFileRegularExpression = "^$";
   // Source and header file extensions that we can handle
 
+  // Set up a list of source and header extensions
+  // these are used to find files when the extension 
+  // is not given
   // The "c" extension MUST precede the "C" extension.
   m_SourceFileExtensions.push_back( "c" );
   m_SourceFileExtensions.push_back( "C" );

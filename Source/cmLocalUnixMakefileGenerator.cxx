@@ -2843,106 +2843,77 @@ OutputBuildObjectFromSource(std::ostream& fout,
     this->ConvertToRelativeOutputPath(source.GetFullPath().c_str()); 
   std::string buildType =  m_Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   buildType = cmSystemTools::UpperCase(buildType);
-  switch(format)
+  // find out what language the source file is
+  const char* lang = 
+    m_GlobalGenerator->GetLanguageFromExtension(source.GetSourceExtension().c_str());
+  // for now if the lang is defined add the rules and flags for it
+  if(lang)
     {
-    case cmSystemTools::C_FILE_FORMAT:
+    std::string varString = "CMAKE_";
+    varString += lang;
+    varString += "_COMPILE_OBJECT";
+    rules.push_back(m_Makefile->GetRequiredDefinition(varString.c_str()));
+    varString = "CMAKE_";
+    varString += lang;
+    varString += "_FLAGS";
+    flags += m_Makefile->GetSafeDefinition(varString.c_str());
+    flags += " ";
+    if(buildType.size())
       {
-      rules.push_back(m_Makefile->GetRequiredDefinition("CMAKE_C_COMPILE_OBJECT"));
-      flags += m_Makefile->GetSafeDefinition("CMAKE_C_FLAGS");
+      varString += "_";
+      varString += buildType;
+      flags +=  m_Makefile->GetSafeDefinition(varString.c_str());
       flags += " ";
-      if(buildType.size())
-        {
-        std::string build = "CMAKE_C_FLAGS_";
-        build += buildType;
-        flags +=  m_Makefile->GetSafeDefinition(build.c_str());
-        flags += " ";
-        }
-      if(shared)
-        {
-        flags += m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_C_FLAGS");
-        flags += " ";
-        }  
-      if(cmSystemTools::IsOn(m_Makefile->GetDefinition("BUILD_SHARED_LIBS")))
-        {
-        flags += m_Makefile->GetSafeDefinition("CMAKE_SHARED_BUILD_C_FLAGS");
-        flags += " ";
-        }
-      break;
       }
-    case cmSystemTools::CXX_FILE_FORMAT:
+    if(shared)
       {
-      rules.push_back(m_Makefile->GetRequiredDefinition("CMAKE_CXX_COMPILE_OBJECT"));
-      flags += m_Makefile->GetSafeDefinition("CMAKE_CXX_FLAGS");
-      flags += " "; 
-      if(buildType.size())
-        {
-        std::string build = "CMAKE_CXX_FLAGS_";
-        build += buildType;
-        flags +=  m_Makefile->GetSafeDefinition(build.c_str());
-        flags += " ";
-        }
-      if(shared)
-        {
-        flags += m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_CXX_FLAGS");
-        flags += " ";
-        }
-      if(cmSystemTools::IsOn(m_Makefile->GetDefinition("BUILD_SHARED_LIBS")))
-        {
-        flags += m_Makefile->GetSafeDefinition("CMAKE_SHARED_BUILD_CXX_FLAGS");
-        flags += " ";
-        }
-      break;
+      varString = "CMAKE_SHARED_LIBRARY_";
+      varString += lang;
+      varString += "_FLAGS";
+      flags += m_Makefile->GetSafeDefinition(varString.c_str());
+      flags += " ";
       }
-    case cmSystemTools::FORTRAN_FILE_FORMAT:
-       {
-       rules.push_back(m_Makefile->GetRequiredDefinition("CMAKE_Fortran_COMPILE_OBJECT"));
-       flags += m_Makefile->GetSafeDefinition("CMAKE_Fortran_FLAGS");
-       flags += " "; 
-       if(buildType.size())
-         {
-         std::string build = "CMAKE_Fortran_FLAGS_";
-         build += buildType;
-         flags +=  m_Makefile->GetSafeDefinition(build.c_str());
-         flags += " ";
-         }
-       if(shared)
-         {
-         flags += m_Makefile->GetSafeDefinition("CMAKE_SHARED_LIBRARY_Fortran_FLAGS");
-         flags += " ";
-         }
-       if(cmSystemTools::IsOn(m_Makefile->GetDefinition("BUILD_SHARED_LIBS")))
-         {
-         flags += m_Makefile->GetSafeDefinition("CMAKE_SHARED_BUILD_Fortran_FLAGS");
-         flags += " ";
-         }
-       break;
-       }
-    case cmSystemTools::HEADER_FILE_FORMAT:
-      return;
-    case cmSystemTools::DEFINITION_FILE_FORMAT:
-      return;
-    case cmSystemTools::OBJECT_FILE_FORMAT:
-      return;
-    case cmSystemTools::RESOURCE_FILE_FORMAT:
+    if(cmSystemTools::IsOn(m_Makefile->GetDefinition("BUILD_SHARED_LIBS")))
       {
-      // use rc rule here if it is defined
-      const char* rule = m_Makefile->GetDefinition("CMAKE_COMPILE_RESOURCE");
-      if(rule)
-        {
-        rules.push_back(rule);
-        }
+      varString = "CMAKE_SHARED_BUILD_";
+      varString += lang;
+      varString += "_FLAGS";
+      flags += m_Makefile->GetSafeDefinition(varString.c_str());
+      flags += " ";
       }
+    }
+  // the language is not defined, fall back on old stuff
+  else
+    {
+    switch(format)
+      {
+      case cmSystemTools::HEADER_FILE_FORMAT:
+        return;
+      case cmSystemTools::DEFINITION_FILE_FORMAT:
+        return;
+      case cmSystemTools::OBJECT_FILE_FORMAT:
+        return;
+      case cmSystemTools::RESOURCE_FILE_FORMAT:
+        {
+        // use rc rule here if it is defined
+        const char* rule = m_Makefile->GetDefinition("CMAKE_COMPILE_RESOURCE");
+        if(rule)
+          {
+          rules.push_back(rule);
+          }
+        }
       break;
-    case cmSystemTools::NO_FILE_FORMAT:
-    case cmSystemTools::JAVA_FILE_FORMAT:
-    case cmSystemTools::STATIC_LIBRARY_FILE_FORMAT:
-    case cmSystemTools::SHARED_LIBRARY_FILE_FORMAT:
-    case cmSystemTools::MODULE_FILE_FORMAT:
-    case cmSystemTools::UNKNOWN_FILE_FORMAT:
-      cmSystemTools::Error("Unexpected file type ",
-                           sourceFile.c_str());
-      break;
-    } 
+      case cmSystemTools::NO_FILE_FORMAT:
+      case cmSystemTools::JAVA_FILE_FORMAT:
+      case cmSystemTools::STATIC_LIBRARY_FILE_FORMAT:
+      case cmSystemTools::SHARED_LIBRARY_FILE_FORMAT:
+      case cmSystemTools::MODULE_FILE_FORMAT:
+      case cmSystemTools::UNKNOWN_FILE_FORMAT:
+        cmSystemTools::Error("Unexpected file type ",
+                             sourceFile.c_str());
+        break;
+      } 
+    }
   flags += "$(INCLUDE_FLAGS) ";
   // expand multi-command semi-colon separated lists
   // of commands into separate commands

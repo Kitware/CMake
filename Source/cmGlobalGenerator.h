@@ -69,7 +69,7 @@ public:
   /**
    * Set/Get and Clear the enabled languages.  
    */
-  void SetLanguageEnabled(const char*);
+  void SetLanguageEnabled(const char*, cmMakefile* mf);
   bool GetLanguageEnabled(const char*);
   void ClearEnabledLanguages();
 
@@ -105,6 +105,8 @@ public:
   static int s_TryCompileTimeout;
   
   bool GetForceUnixPaths() {return m_ForceUnixPaths;}
+  ///! return the language for the given extension
+  const char* GetLanguageFromExtension(const char* ext);
 protected:
   bool IsExcluded(cmLocalGenerator* root, cmLocalGenerator* gen);
   void FindMakeProgram(cmMakefile*);
@@ -120,6 +122,7 @@ protected:
   
 private:
   std::map<cmStdString, bool> m_LanguageEnabled;
+  std::map<cmStdString, cmStdString> m_ExtensionToLanguage;
 };
 
 #endif

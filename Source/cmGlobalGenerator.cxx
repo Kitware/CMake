@@ -96,7 +96,6 @@ void cmGlobalGenerator::FindMakeProgram(cmMakefile* mf)
   
 }
 
-
 // enable the given language
 void cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
                                        cmMakefile *mf)
@@ -116,8 +115,30 @@ void cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
     }
   bool needTestLanguage = false;
   std::string rootBin = mf->GetHomeOutputDirectory();
+  // If the configuration files path has been set,
+  // then we are in a try compile and need to copy the enable language
+  // files into the try compile directory
   if(m_ConfiguredFilesPath.size())
     {
+    std::string src = m_ConfiguredFilesPath;
+    src += "/CMakeSystem.cmake";
+    std::string dst = rootBin;
+    dst += "/CMakeSystem.cmake";
+    cmSystemTools::CopyFileIfDifferent(src.c_str(), dst.c_str());
+    for(std::vector<std::string>::const_iterator l = languages.begin();
+        l != languages.end(); ++l)
+      {
+      const char* lang = l->c_str();
+      std::string src = m_ConfiguredFilesPath;
+      src += "/CMake";
+      src += lang;
+      src += "Compiler.cmake";
+      std::string dst = rootBin;
+      dst += "/CMake";
+      dst += lang;
+      dst += "Compiler.cmake";
+      cmSystemTools::CopyFileIfDifferent(src.c_str(), dst.c_str());
+      }
     rootBin = m_ConfiguredFilesPath;
     }
 
@@ -178,7 +199,6 @@ void cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
         cmSystemTools::Error("Could not find cmake module file:", determineFile.c_str());
         }
       
-      this->SetLanguageEnabled(lang);
       // put ${CMake_(LANG)_COMPILER_ENV_VAR}=${CMAKE_(LANG)_COMPILER into the
       // environment, in case user scripts want to run configure, or sub cmakes
       std::string compilerName = "CMAKE_";
@@ -194,7 +214,7 @@ void cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
       env += envVarValue;
       cmSystemTools::PutEnv(env.c_str());
       }
-
+    
     // **** Step 5, Load the configured language compiler file, if not loaded.
     // look to see if CMAKE_(LANG)_COMPILER_LOADED is set, 
     // if not then load the CMake(LANG)Compiler.cmake file from the
@@ -213,7 +233,7 @@ void cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
         {
         cmSystemTools::Error("Could not find cmake module file:", fpath.c_str());
         }
-      this->SetLanguageEnabled(lang);
+      this->SetLanguageEnabled(lang, mf);
       }
     }
   
@@ -244,7 +264,6 @@ void cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
         cmSystemTools::Error("Could not find cmake module file:", fpath.c_str());
         }
       }
-  
     // **** Step 7, Test the compiler for the language just setup
     // At this point we should have enough info for a try compile
     // which is used in the backward stuff
@@ -283,15 +302,38 @@ void cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
             }
           }
         }
-      
       }
     }
 }
 
-
-void cmGlobalGenerator::SetLanguageEnabled(const char* l)
+const char* cmGlobalGenerator::GetLanguageFromExtension(const char* ext)
 {
+  if(m_ExtensionToLanguage.count(ext) > 0)
+    {
+    return m_ExtensionToLanguage[ext].c_str();
+    }
+  return 0;
+}
+
+void cmGlobalGenerator::SetLanguageEnabled(const char* l, cmMakefile* mf)
+{
+  if(m_LanguageEnabled.count(l) > 0)
+    {
+    return;
+    }
+  std::string extensionsVar = std::string("CMAKE_") + 
+    std::string(l) + std::string("_SOURCE_FILE_EXTENSIONS");
+  std::string exts = mf->GetSafeDefinition(extensionsVar.c_str());
+  std::vector<std::string> extensionList;
+  cmSystemTools::ExpandListArgument(exts, extensionList);
+  for(std::vector<std::string>::iterator i = extensionList.begin();
+      i != extensionList.end(); ++i)
+    {
+    m_ExtensionToLanguage[*i] = l;
+    }
+  
   m_LanguageEnabled[l] = true;
+
 }
 
 bool cmGlobalGenerator::GetLanguageEnabled(const char* l)
@@ -560,11 +602,9 @@ void cmGlobalGenerator::EnableLanguagesFromGenerator(cmGlobalGenerator *gen )
   this->GetCMakeInstance()->AddCacheEntry("CMAKE_MAKE_PROGRAM", make,
                                           "make program",
                                           cmCacheManager::FILEPATH);
-  for(std::map<cmStdString, bool>::iterator i = gen->m_LanguageEnabled.begin();
-      i != gen->m_LanguageEnabled.end(); ++i)
-    {
-    this->SetLanguageEnabled(i->first.c_str());
-    }
+  // copy the enabled languages
+  this->m_LanguageEnabled = gen->m_LanguageEnabled;
+  this->m_ExtensionToLanguage = gen->m_ExtensionToLanguage;
 }
 
 //----------------------------------------------------------------------------

@@ -517,3 +517,10 @@ std::string cmLocalGenerator::ConvertToRelativeOutputPath(const char* p)
   ret = cmSystemTools::ConvertToOutputPath(ret.c_str());
   return ret;
 }
+
+
+const char* cmLocalGenerator::GetFileLanguage(const char* ext)
+{
+  // fill a map of languages enabled
+  return 0;
+}
