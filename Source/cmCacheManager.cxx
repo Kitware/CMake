@@ -83,9 +83,9 @@ bool cmCacheManager::ParseEntry(const char* entry,
                                 std::string& value)
 {
   // input line is:         key:type=value
-  cmsys::RegularExpression reg("^([^:]*)=(.*[^\t ]|[\t ]*)[\t ]*$");
+  cmsys::RegularExpression reg("^([^:]*)=(.*[^\r\t ]|[\r\t ]*)[\r\t ]*$");
   // input line is:         "key":type=value
-  cmsys::RegularExpression regQuoted("^\"([^\"]*)\"=(.*[^\t ]|[\t ]*)[\t ]*$");
+  cmsys::RegularExpression regQuoted("^\"([^\"]*)\"=(.*[^\r\t ]|[\r\t ]*)[\r\t ]*$");
   bool flag = false;
   if(regQuoted.find(entry))
     {
@@ -120,9 +120,9 @@ bool cmCacheManager::ParseEntry(const char* entry,
                                 CacheEntryType& type)
 {
   // input line is:         key:type=value
-  cmsys::RegularExpression reg("^([^:]*):([^=]*)=(.*[^\t ]|[\t ]*)[\t ]*$");
+  cmsys::RegularExpression reg("^([^:]*):([^=]*)=(.*[^\r\t ]|[\r\t ]*)[\r\t ]*$");
   // input line is:         "key":type=value
-  cmsys::RegularExpression regQuoted("^\"([^\"]*)\":([^=]*)=(.*[^\t ]|[\t ]*)[\t ]*$");
+  cmsys::RegularExpression regQuoted("^\"([^\"]*)\":([^=]*)=(.*[^\r\t ]|[\r\t ]*)[\r\t ]*$");
   bool flag = false;
   if(regQuoted.find(entry))
     {
@@ -182,6 +182,7 @@ bool cmCacheManager::LoadCache(const char* path,
     while(*realbuffer != '0' &&
           (*realbuffer == ' ' ||
            *realbuffer == '\t' ||
+           *realbuffer == '\r' ||
            *realbuffer == '\n'))
       {
       realbuffer++;
