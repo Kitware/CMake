@@ -521,7 +521,7 @@ void cmMainFrame::ResizeInternal()
 }
 
 void cmMainFrame::OnBrowseSource(wxCommandEvent&)
-{
+{  
   std::string path = this->m_PathSource->GetValue().c_str();
   if ( path == "PathSource" )
     {
@@ -1193,7 +1193,7 @@ void cmMainFrame::ClearCache()
 
 }
 
-void cmMainFrame::OnBinaryAccepted(wxCommandEvent& event)
+void cmMainFrame::OnBinaryAccepted(wxCommandEvent&)
 {
   std::cout << "Pressed enter in binary field" << std::endl;
 }
@@ -1308,14 +1308,11 @@ void cmMainFrame::LoadFromRegistry()
         }
       }
     }
-  
   delete conf;
-
 }
 
 void cmMainFrame::SaveToRegistry()
 {
-
   //wxConfigBase *conf = (wxConfigBase*) wxConfigBase::Get();//new wxConfig("CMakeSetup");
   wxConfig *conf = new wxConfig("CMakeSetup");
   conf->SetPath("Settings/StartPath");

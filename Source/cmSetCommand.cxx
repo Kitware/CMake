@@ -60,25 +60,28 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args)
       return true;
       }
     }
-  
+
   // look for FORCE argument
   if (args.size() > 4 && args[args.size()-1] == "FORCE")
     {
     force = true;
     }
   
+  std::vector<std::string>::size_type arg4, arg5;
+  arg4 = 4 + (force ? 1 : 0);
+  arg5 = 5 + (force ? 1 : 0);
   if(args.size() == 2)
     {
     // SET (VAR value )
     value= args[1];
     }
-  else if(args.size() == 4 + (force ? 1 : 0))
+  else if(args.size() == arg4)
     {
     // SET (VAR CACHE TYPE "doc String")
     cache = true;
     cacheStart = 1;
     }
-  else if(args.size() == 5 + (force ? 1 : 0))
+  else if(args.size() == arg5)
     {
     //  SET (VAR value CACHE TYPE "doc string")
     cache = true;
