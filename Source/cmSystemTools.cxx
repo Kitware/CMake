@@ -182,6 +182,7 @@ void cmSystemTools::ReplaceString(std::string& source,
                                    const char* with)
 {
   std::string::size_type lengthReplace = strlen(replace);
+  std::string::size_type lengthWith = strlen(with);
   std::string rest;
   std::string::size_type start = source.find(replace);
   while(start != std::string::npos)
@@ -190,7 +191,7 @@ void cmSystemTools::ReplaceString(std::string& source,
     source = source.substr(0, start);
     source += with;
     source += rest;
-    start = source.find(replace, start + lengthReplace );
+    start = source.find(replace, start + lengthWith );
     }
 }
 
