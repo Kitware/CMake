@@ -8,7 +8,8 @@
 #  PYTHON_DEBUG_LIBRARY = the full path to the debug library found
 #
 
-FIND_LIBRARY(PYTHON_DEBUG_LIBRARY python python21_d python20_d
+FIND_LIBRARY(PYTHON_DEBUG_LIBRARY 
+  NAMES python python21_d python20_d
   PATHS
   /usr/lib
   /usr/local/lib
@@ -16,7 +17,8 @@ FIND_LIBRARY(PYTHON_DEBUG_LIBRARY python python21_d python20_d
   [HKEY_LOCAL_MACHINE\SOFTWARE\Python\PythonCore\2.0\InstallPath]/libs/Debug
 )
 
-FIND_LIBRARY(PYTHON_LIBRARY python python21 python20
+FIND_LIBRARY(PYTHON_LIBRARY 
+  NAMES python python21 python20
   PATHS
   /usr/lib
   /usr/local/lib
