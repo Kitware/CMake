@@ -52,7 +52,14 @@ bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& args)
 
   // Now check and see if the value has been stored in the cache
   // already, if so use that value and don't look for the program
-  if(!m_Makefile->IsOn("QT_WRAP_CPP"))
+  const char* QT_WRAP_CPP_value = m_Makefile->GetDefinition("QT_WRAP_CPP");
+  if (QT_WRAP_CPP_value==0)
+    {
+    this->SetError("called with QT_WRAP_CPP undefined");
+    return false;
+    }
+  
+  if(cmSystemTools::IsOff(QT_WRAP_CPP_value))
     {
     return true;
     }
@@ -107,11 +114,11 @@ void cmQTWrapCPPCommand::FinalPass()
   // first we add the rules for all the .h to Java.cxx files
   int lastClass = m_WrapClasses.size();
   std::vector<std::string> depends;
-  std::string wjava = "${QT_MOC_EXE}";
+  std::string moc_exe = "${QT_MOC_EXE}";
 
 
   // wrap all the .h files
-  depends.push_back(wjava);
+  depends.push_back(moc_exe);
 
   for(int classNum = 0; classNum < lastClass; classNum++)
     {
@@ -127,7 +134,7 @@ void cmQTWrapCPPCommand::FinalPass()
     args.push_back(m_WrapHeaders[classNum]);
 
     m_Makefile->AddCustomCommand(m_WrapHeaders[classNum].c_str(),
-                                 wjava.c_str(), args, depends, 
+                                 moc_exe.c_str(), args, depends, 
                                  res.c_str(), m_LibraryName.c_str());
 
     }
