@@ -691,13 +691,14 @@ int cmCTest::UpdateDirectory()
            << "\t\t<CheckinDate>" << sdate1 << "</CheckinDate>\n"
            << "\t\t<Author>" << sauthor1 << "</Author>\n"
            << "\t\t<Email>" << semail1 << "</Email>\n"
-           << "\t\t<Log>" << comment1 << "</Log>\n"
+           << "\t\t<Log>" << this->MakeXMLSafe(comment1) << "</Log>\n"
            << "\t\t<Revision>" << srevision1 << "</Revision>\n"
-           << "\t\t<PriorRevision>" << srevision2 << "</PriorRevision>\n"
-           << "\t\t<Revisions>" << std::endl;
+           << "\t\t<PriorRevision>" << srevision2 << "</PriorRevision>"
+           << std::endl;
         if ( srevision2 != srevision1 )
           {
           os
+            << "\t\t<Revisions>\n"
             << "\t\t\t<Revision>" << srevision1 << "</Revision>\n"
             << "\t\t\t<PreviousRevision>" << srevision2 << "</PreviousRevision>\n"
             << "\t\t\t<Author>" << sauthor1<< "</Author>\n"
@@ -845,7 +846,7 @@ int cmCTest::ConfigureDirectory()
         }
       os << "<ConfigureCommand>" << cCommand.c_str() << "</ConfigureCommand>" << std::endl;
       //std::cout << "End" << std::endl;
-      os << "<Log>" << output << "</Log>" << std::endl;
+      os << "<Log>" << this->MakeXMLSafe(output) << "</Log>" << std::endl;
       std::string end_time = ::CurrentTime();
       os << "\t<ConfigureStatus>" << retVal << "</ConfigureStatus>\n"
          << "\t<EndDateTime>" << end_time << "</EndDateTime>\n"
