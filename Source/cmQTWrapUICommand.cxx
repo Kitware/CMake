@@ -50,6 +50,7 @@ bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& argsIn)
   m_HeaderList = args[1];
   m_SourceList = args[2];
   std::string sourceListValue;
+  std::string headerListValue;
   const char *def = m_Makefile->GetDefinition(m_SourceList.c_str());  
   if (def)
     {
@@ -96,12 +97,17 @@ bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& argsIn)
       m_Makefile->AddSource(moc_file);
       
       // create the list of sources
+      if (headerListValue.size() > 0)
+        {
+        headerListValue += ";";
+        }
+      headerListValue += header_file.GetSourceName() + ".h";
+      
+      // create the list of sources
       if (sourceListValue.size() > 0)
         {
         sourceListValue += ";";
         }
-      sourceListValue += header_file.GetSourceName() + ".h";
-      sourceListValue += ";";
       sourceListValue += source_file.GetSourceName() + ".cxx";
       sourceListValue += ";";
       sourceListValue += moc_file.GetSourceName() + ".cxx";
@@ -109,6 +115,7 @@ bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& argsIn)
     }
   
   m_Makefile->AddDefinition(m_SourceList.c_str(), sourceListValue.c_str());  
+  m_Makefile->AddDefinition(m_HeaderList.c_str(), headerListValue.c_str());  
   return true;
 }
 
