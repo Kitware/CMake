@@ -238,6 +238,7 @@ bool cmDependsFortran::WriteDependencies(std::ostream& os)
 //----------------------------------------------------------------------------
 bool cmDependsFortran::CheckDependencies(std::istream&)
 {
+  // TODO: Parse and check dependencies.
   return true;
 }
 
