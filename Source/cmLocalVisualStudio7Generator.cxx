@@ -664,14 +664,35 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
       std::string source = cc->first;
       const cmSourceGroup::Commands& commands = cc->second.m_Commands;
       const char* compileFlags = 0;
+      std::string additionalDeps;
       if(cc->second.m_SourceFile)
         {
+        // Check for extra compiler flags.
         compileFlags = cc->second.m_SourceFile->GetProperty("COMPILE_FLAGS");
+        
+        // Check for extra object-file dependencies.
+        const char* deps =
+          cc->second.m_SourceFile->GetProperty("OBJECT_DEPENDS");
+        if(deps)
+          {
+          std::vector<std::string> depends;
+          cmSystemTools::ExpandListArgument(deps, depends);
+          if(!depends.empty())
+            {
+            std::vector<std::string>::iterator i = depends.begin();
+            additionalDeps = this->ConvertToXMLOutputPath(i->c_str());
+            for(++i;i != depends.end(); ++i)
+              {
+              additionalDeps += ";";
+              additionalDeps += this->ConvertToXMLOutputPath(i->c_str());
+              }
+            }
+          }
         }
       if (source != libName || target.GetType() == cmTarget::UTILITY)
         {
         fout << "\t\t\t<File\n";
-        std::string d = cmSystemTools::ConvertToOutputPath(source.c_str());
+        std::string d = this->ConvertToXMLOutputPath(source.c_str());
         // remove double quotes from the string
         cmSystemTools::ReplaceString(d, "\"", "");
         // Tell MS-Dev what the source is.  If the compiler knows how to
@@ -689,7 +710,7 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
                                 totalCommand.m_Depends,
                                 totalCommand.m_Outputs, compileFlags);
           }
-        else if(compileFlags)
+        else if(compileFlags || additionalDeps.length())
           {
           for(std::vector<std::string>::iterator i = configs->begin(); 
               i != configs->end(); ++i)
@@ -697,9 +718,18 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
             fout << "\t\t\t\t<FileConfiguration\n"
                  << "\t\t\t\t\tName=\""  << *i << "|Win32\">\n"
                  << "\t\t\t\t\t<Tool\n"
-                 << "\t\t\t\t\tName=\"VCCLCompilerTool\"\n"
-                 << "\t\t\t\t\tAdditionalOptions=\""
-                 << compileFlags << "\"/>\n"
+                 << "\t\t\t\t\tName=\"VCCLCompilerTool\"\n";
+            if(compileFlags)
+              {
+              fout << "\t\t\t\t\tAdditionalOptions=\""
+                   << compileFlags << "\"\n";
+              }
+            if(additionalDeps.length())
+              {
+              fout << "\t\t\t\t\tAdditionalDependencies=\""
+                   << additionalDeps.c_str() << "\"\n";
+              }
+            fout << "\t\t\t\t\t/>\n"
                  << "\t\t\t\t</FileConfiguration>\n";
             }
           }
@@ -783,7 +813,7 @@ void cmLocalVisualStudio7Generator::WriteCustomRule(std::ostream& fout,
         {
         first = false;
         }
-      fout << output->c_str();
+      fout << this->ConvertToXMLOutputPath(output->c_str());
       }
     fout << "\"/>\n";
     fout << "\t\t\t\t</FileConfiguration>\n";

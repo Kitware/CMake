@@ -2351,6 +2351,23 @@ OutputBuildObjectFromSource(std::ostream& fout,
                               objectFile.c_str(),
                               flags.c_str());
     }
+  
+  std::vector<std::string> sourceAndDeps;
+  sourceAndDeps.push_back(sourceFile);
+  
+  // Check for extra object-file dependencies.
+  const char* additionalDeps = source.GetProperty("OBJECT_DEPENDS");
+  if(additionalDeps)
+    {
+    std::vector<std::string> depends;
+    cmSystemTools::ExpandListArgument(additionalDeps, depends);
+    for(std::vector<std::string>::iterator i = depends.begin();
+        i != depends.end(); ++i)
+      {
+      sourceAndDeps.push_back(cmSystemTools::ConvertToOutputPath(i->c_str()));
+      }
+    }
+  
   this->OutputMakeRule(fout,
                        comment.c_str(),
                        objectFile.c_str(),
@@ -2478,6 +2495,20 @@ void cmLocalUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
                                                   const char* depends, 
                                                   const std::vector<std::string>& commands)
 {
+  std::vector<std::string> depend;
+  if(depends)
+    {
+    depend.push_back(depends);
+    }
+  this->OutputMakeRule(fout, comment, target, depend, commands);
+}
+
+void cmLocalUnixMakefileGenerator::OutputMakeRule(std::ostream& fout, 
+                                                  const char* comment,
+                                                  const char* target,
+                                                  const std::vector<std::string>& depends,
+                                                  const std::vector<std::string>& commands)
+{
   if(!target)
     {
     cmSystemTools::Error("no target for OutputMakeRule");
@@ -2497,13 +2528,14 @@ void cmLocalUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
 
   replace = target;
   m_Makefile->ExpandVariablesInString(replace);
-  fout << cmSystemTools::ConvertToOutputPath(replace.c_str()) << ": ";
+  fout << cmSystemTools::ConvertToOutputPath(replace.c_str()) << ":";
 
-  if(depends)
+  for(std::vector<std::string>::const_iterator dep = depends.begin();
+      dep != depends.end(); ++dep)
     {
-    replace = depends;
+    replace = *dep;
     m_Makefile->ExpandVariablesInString(replace);
-    fout << replace.c_str();
+    fout << " " << replace.c_str();
     }
   fout << "\n";
   int count = 0;

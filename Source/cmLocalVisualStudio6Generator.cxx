@@ -280,10 +280,20 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
       {
       std::string source = cc->first;
       const cmSourceGroup::Commands& commands = cc->second.m_Commands;
+      std::vector<std::string> depends;
       const char* compileFlags = 0;
       if(cc->second.m_SourceFile)
         {
+        // Check for extra compiler flags.
         compileFlags = cc->second.m_SourceFile->GetProperty("COMPILE_FLAGS");
+        
+        // Check for extra object-file dependencies.
+        const char* dependsValue =
+          cc->second.m_SourceFile->GetProperty("OBJECT_DEPENDS");
+        if(dependsValue)
+          {
+          cmSystemTools::ExpandListArgument(dependsValue, depends);
+          }
         }
       if (source != libName || target.GetType() == cmTarget::UTILITY)
         {
@@ -293,6 +303,18 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
         // build it, then it will.
         fout << "SOURCE=" << 
           cmSystemTools::ConvertToOutputPath(source.c_str()) << "\n\n";
+        if(!depends.empty())
+          {
+          // Write out the dependencies for the rule.
+          fout << "USERDEP__HACK=";
+          for(std::vector<std::string>::const_iterator d = depends.begin();
+              d != depends.end(); ++d)
+            {
+            fout << "\\\n\t" << 
+              cmSystemTools::ConvertToOutputPath(d->c_str());
+            }
+          fout << "\n";
+          }
         if (!commands.empty())
           {
           cmSourceGroup::CommandFiles totalCommand;
@@ -385,7 +407,7 @@ void cmLocalVisualStudio6Generator::WriteCustomRule(std::ostream& fout,
     for(std::set<std::string>::const_iterator output = outputs.begin();
         output != outputs.end(); ++output)
       {
-      fout << "\"" << output->c_str()
+      fout << "\"" << cmSystemTools::ConvertToOutputPath(output->c_str())
            << "\" :  \"$(SOURCE)\" \"$(INTDIR)\" \"$(OUTDIR)\"";
       fout << command << "\n\n";
       }

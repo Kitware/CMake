@@ -163,6 +163,12 @@ protected:
   virtual void OutputMakeRule(std::ostream&, 
                               const char* comment,
                               const char* target,
+                              const std::vector<std::string>& depends,
+                              const std::vector<std::string>& commands);
+
+  virtual void OutputMakeRule(std::ostream&, 
+                              const char* comment,
+                              const char* target,
                               const char* depends, 
                               const char* command,
                               const char* command2 = 0,

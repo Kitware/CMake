@@ -64,6 +64,19 @@ bool cmSetSourceFilesPropertiesCommand::InitialPass(
         }
       propertyPairs.push_back(*j);
       }
+    else if(*j == "OBJECT_DEPENDS")
+      {
+      doingFiles = false;
+      propertyPairs.push_back("OBJECT_DEPENDS");
+      ++j;
+      if(j == args.end())
+        {
+        this->SetError("called with incorrect number of arguments "
+                       "OBJECT_DEPENDS with no dependencies");
+        return false;
+        }
+      propertyPairs.push_back(*j);
+      }
     else if(*j == "PROPERTIES")
       {
       doingFiles = false;
