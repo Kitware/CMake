@@ -26,6 +26,23 @@ SET(JAVA_AWT_INCLUDE_DIRECTORIES
   /usr/local/lib/java/include
   )
 
+FOREACH(JAVA_PROG "${JAVA_RUNTIME}" "${JAVA_COMPILE}" "${JAVA_ARCHIVE}")
+  GET_FILENAME_COMPONENT(jpath "${JAVA_PROG}" PATH)
+  FOREACH(JAVA_INC_PATH ../include ../java/include ../share/java/include)
+    IF(EXISTS ${jpath}/${JAVA_INC_PATH})
+      SET(JAVA_AWT_INCLUDE_DIRECTORIES ${JAVA_AWT_INCLUDE_DIRECTORIES} "${jpath}/${JAVA_INC_PATH}")
+    ENDIF(EXISTS ${jpath}/${JAVA_INC_PATH})
+  ENDFOREACH(JAVA_INC_PATH)
+  FOREACH(JAVA_LIB_PATH 
+    ../lib ../jre/lib ../jre/lib/i386 
+    ../java/lib ../java/jre/lib ../java/jre/lib/i386 
+    ../share/java/lib ../share/java/jre/lib ../share/java/jre/lib/i386)
+    IF(EXISTS ${jpath}/${JAVA_LIB_PATH})
+      SET(JAVA_AWT_LIBRARY_DIRECTORIES ${JAVA_AWT_LIBRARY_DIRECTORIES} "${jpath}/${JAVA_LIB_PATH}")
+    ENDIF(EXISTS ${jpath}/${JAVA_LIB_PATH})
+  ENDFOREACH(JAVA_LIB_PATH)
+ENDFOREACH(JAVA_PROG)
+
 IF(APPLE)
   IF(EXISTS ~/Library/Frameworks/JavaEmbedding.framework)
     SET(JAVA_HAVE_FRAMEWORK 1)
