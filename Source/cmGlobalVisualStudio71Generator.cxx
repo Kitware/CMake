@@ -128,7 +128,6 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(std::ostream& fout,
         depends.push_back(cc.GetOutput());
         this->WriteExternalProject(fout, stuff[0].c_str(), 
                                    stuff[1].c_str(), depends);
-        ++si;
         }
       else 
         {

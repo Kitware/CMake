@@ -34,6 +34,8 @@ void cmGlobalVisualStudio7Generator::EnableLanguage(std::vector<std::string>cons
   mf->AddDefinition("CMAKE_CFG_INTDIR","$(IntDir)");
   mf->AddDefinition("CMAKE_GENERATOR_CC", "cl");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "cl");
+  mf->AddDefinition("CMAKE_GENERATOR_RC", "rc");
+  mf->AddDefinition("CMAKE_GENERATOR_Fortran", "ifort");
   
   // Create list of configurations requested by user's cache, if any.
   this->GenerateConfigurations(mf);
@@ -396,7 +398,6 @@ void cmGlobalVisualStudio7Generator::WriteSLNFile(std::ostream& fout,
         depends.push_back(cc.GetOutput());
         this->WriteExternalProject(fout, stuff[0].c_str(), 
                                    stuff[1].c_str(), depends);
-        ++si;
         }
       else 
         {
