@@ -1,12 +1,7 @@
-# This is a sample configure.in for CMake
-# To use CMake, you must put the CMake directory and
-# all of its source into the top level of your source tree.
-# You need to have the configure script in .. from CMake.
-
 # Process this file with autoconf to produce a configure script.
 AC_INIT()
 
-AC_CONFIG_HEADER(itkConfigure.h)
+AC_CONFIG_HEADER(CMake/Source/cmConfigure.h)
 
 CMAKE_CONFIG_DIR=`pwd`
 AC_SUBST(CMAKE_CONFIG_DIR)
@@ -481,7 +476,7 @@ case $system in
     HP-UX-*.08.*|HP-UX-*.09.*|HP-UX-*.10.*)
         echo $ac_n "checking whether ${CC} accepts -Aa""... $ac_c" 1>&6
         echo 'void f(){}' > conftest.c
-        if test -z "`${CC} -Aa -c conftest.cc 2>&1`"; then
+        if test -z "`${CC} -Aa -c conftest.c 2>&1`"; then
           echo "$ac_t""yes" 1>&6
           ANSI_CFLAGS="-Aa"
         else
@@ -517,6 +512,41 @@ if test $ac_cv_prog_gxx = no; then
 fi
 AC_SUBST(CMAKE_TEMPLATE_FLAGS)
 
+# check no g++ compilers to see if they have the standard 
+# ansi stream files (without the .h)
+if test $ac_cv_prog_gxx = no; then
+  AC_MSG_CHECKING( ansi standard C++ stream headers ) 
+  echo "******"
+  rm -rf conftest.*
+  cat > conftest.cc <<!
+#include <iostream>
+!
+  if test -z "`${CXX} -c conftest.cc 2>&1`"; then
+    echo "$ac_t""yes" 1>&6
+  else
+    AC_DEFINE(CMAKE_NO_STD_NAMESPACE)
+    echo "$ac_t""no" 1>&6
+  fi
+fi
+
+# check to see if stl is in the std namespace
+if test $ac_cv_prog_gxx = no; then
+  echo "******"
+  AC_MSG_CHECKING( ansi standard namespace support ) 
+  rm -rf conftest.*
+  cat > conftest.cc <<!
+#include <list>
+void foo() { std::list<int> l; }
+!
+  if test -z "`${CXX} -c conftest.cc 2>&1`"; then
+    echo "$ac_t""yes" 1>&6
+  else
+    AC_DEFINE(CMAKE_NO_ANSI_STREAM_HEADERS)
+    echo "$ac_t""no" 1>&6
+  fi
+fi
+
+
 if test "$CC" = "gcc" -o `$CC -v 2>&1 | grep -c gcc` != "0" ; then
   SHLIB_CFLAGS="-fPIC"
 fi
@@ -533,10 +563,8 @@ fi
 
 AC_SUBST(EXTRA_GCC_FLAG)
 
-
-# run any sub directory cofigure scripts here
-
-AC_CONFIG_SUBDIRS(Code/Insight3DParty/vxl/vcl)
+AC_CONFIG_SUBDIRS(Code/Numerics/vxl)
+AC_CONFIG_SUBDIRS(Code/Numerics/vxl/vcl)
 
 # *****************************************
 # 
@@ -592,6 +620,42 @@ SUBDIR_CMAKE_TARGETS=`echo $allDirs | sed -e 's|\\([[A-Za-z0-9_/]][[A-Za-z0-9_/]
 #  end of extract SUBDIRS out of CMakeLists.txt files
 # 
 
+#
+# Build two variables (SITE, INSTANCE) used for setting up testing
+#
+
+AC_ARG_WITH(site,
+         [  --with-site             sitename used for testing],
+         [site_specified=$withval], [site_specified=none])
+
+AC_ARG_WITH(buildname,
+         [  --with-buildname        name of build used for testing],
+         [buildname_specified=$withval], [buildname_specified=none])
+
+# Determine the site (domain) name
+AC_PATH_PROG(HOSTNAME, hostname, hostname, $PATH:/usr/bsd:/usr/sbin:/usr/bin:/bin:/sbin)
+AC_PATH_PROG(NSLOOKUP, nslookup, nslookup, $PATH:/usr/bin:/usr/sbin:/usr/local/bin)
+# Fallback site
+myhostname=`$HOSTNAME`
+SITE=`$NSLOOKUP $myhostname | grep \^Name: | cut -d. -f2- | tr [A-Z] [a-z]`
+if test ! "$site_specified" = none; then
+	SITE=$site_specified
+fi
+if test -z "$SITE"; then
+	SITE=nosite
+fi
+AC_SUBST(SITE)
+
+# Setup the instance name (OS, Revision, Compiler, and someday Compiler Revision)
+COMPILER=`echo $CXX | cut -d ' ' -f1`
+COMPILER=`basename $COMPILER`
+BUILDNAME=$system-$COMPILER
+BUILDNAME=`echo $BUILDNAME | tr [\(\/] _ | tr -d \)`
+if test ! "$buildname_specified" = none; then
+	BUILDNAME=$buildname_specified
+fi
+AC_SUBST(BUILDNAME)
+
 
 # output to the top level Makefile, which must be present
 # create the toplevel CMakeTargets.make file
@@ -601,7 +665,7 @@ SUBDIR_CMAKE_TARGETS=`echo $allDirs | sed -e 's|\\([[A-Za-z0-9_/]][[A-Za-z0-9_/]
 # sub directories found in CMakeLists.txt files
 
 AC_OUTPUT(
-Makefile:CMake/CMakeMakefileTemplate.in
+Makefile:CMake/CMakeTopMakefileTemplate.in
 CMakeTargets.make:CMake/CMakeTargets.make.in 
 CMake/CMakeSimpleRules.make 
 CMake/CMakeMaster.make 
@@ -614,9 +678,18 @@ $SUBDIR_CMAKE_TARGETS
 )
 
 
-
 # force a rebuild of rulesgen which will rebuild CMakeTargets.make
 # this has to be done because configure generates empty CMakeTargets.make files
 # for makes other than gnu.
 rm -f CMake/Source/CMakeBuildTargets
 rm -f CMake/Source/CMakeBuildTargets.exe
+# build the CMakeBuildTargets program
+(cd CMake/Source; make CMakeBuildTargets)
+# if there is no cache file then create one
+if test ! -f $CMAKE_CONFIG_DIR/CMakeCache.txt; then
+        echo  CMake/Source/CMakeBuildTargets.exe ${fullSrcDir}/CMakeLists.txt -MakeCache -S${fullSrcDir} -O${CMAKE_CONFIG_DIR} -H${fullSrcDir} -B${CMAKE_CONFIG_DIR}
+        CMake/Source/CMakeBuildTargets.exe ${fullSrcDir}/CMakeLists.txt -MakeCache -S${fullSrcDir} -O${CMAKE_CONFIG_DIR} -H${fullSrcDir} -B${CMAKE_CONFIG_DIR}
+fi
+echo CMakeCache.txt location: ${CMAKE_CONFIG_DIR}/CMakeCache.txt
+
+
