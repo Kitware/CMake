@@ -199,7 +199,7 @@ bool cmMakefile::ReadListFile(const char* filename)
           }
         else
           {
-          cmSystemTools::Error("unknown CMake function", name.c_str());
+          cmSystemTools::Error("unknown CMake command ", name.c_str());
           }
         }
       }
