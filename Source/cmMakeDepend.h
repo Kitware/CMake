@@ -51,8 +51,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * This structure stores the depend information for a single source file.
  */
-struct cmDependInformation
+class cmDependInformation
 {
+public:
   /**
    * Construct with dependency generation marked not done; instance
    * not placed in cmMakefile's list.
@@ -85,7 +86,7 @@ struct cmDependInformation
    * The index into the cmMakefile::m_Classes list.
    * The index value of 0 indicates that it is not in the list.
    */
-  cmSourceFile *m_ClassFileIndex;	
+  const cmSourceFile *m_ClassFileIndex;	
   
   /**
    * This flag indicates whether dependency checking has been
@@ -113,24 +114,37 @@ public:
   /**
    * Destructor.
    */
-  ~cmMakeDepend();
+  virtual ~cmMakeDepend();
   
   /** 
    * Set the makefile that is used as a source of classes.
    */
-  void SetMakefile(cmMakefile* makefile); 
+  virtual void SetMakefile(const cmMakefile* makefile); 
 
   /** 
    * Generate the depend information
    */
-  void DoDepends();
+  virtual void GenerateDependInformation();
+
+  /** 
+   * Get the depend info struct for a source file
+   */
+  const cmDependInformation *GetDependInformationForSourceFile(const cmSourceFile &sf) const;
+  const cmDependInformation *GetDependInformationForSourceFile(const char *) const;
+
+  /** 
+   * Get the depend info struct
+   */
+  typedef std::vector<cmDependInformation*> DependArray;
+  const DependArray &GetDependInformation() const { 
+    return m_DependInformation; }
 
   /**
    * Add a directory to the search path for include files.
    */
-  void AddSearchPath(const char*);
+  virtual void AddSearchPath(const char*);
 
-private: 
+protected: 
   /**
    * Add a source file to the search path.
    */
@@ -140,22 +154,22 @@ private:
    * Find the index into the m_DependInformation array
    * that matches the given m_IncludeName.
    */
-  int FindInformation(const char* includeName);
+  virtual int FindInformation(const char* includeName);
 
   /**
    * Compute the depend information for this class.
    */
-  void Depend(cmDependInformation* info);
+  virtual void Depend(cmDependInformation* info);
 
   /**
    * Compute the depend information for this class.
    */
-  void DependWalk(cmDependInformation* info, const char* file);
+  virtual void DependWalk(cmDependInformation* info, const char* file);
   
   /**
    * Add a dependency.  Possibly walk it for more dependencies.
    */
-  void AddDependency(cmDependInformation* info, const char* file);
+  virtual void AddDependency(cmDependInformation* info, const char* file);
 
   /** 
    * Find the full path name for the given file name.
@@ -163,10 +177,9 @@ private:
    */
   std::string FullPath(const char*);
 
-  cmMakefile* m_Makefile;
+  const cmMakefile* m_Makefile;
   bool m_Verbose;
   cmRegularExpression m_IncludeFileRegularExpression;
-  typedef std::vector<cmDependInformation*> DependArray;
   DependArray m_DependInformation;
   std::vector<std::string> m_IncludeDirectories;
 };

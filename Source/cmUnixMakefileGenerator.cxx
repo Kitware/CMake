@@ -71,9 +71,39 @@ void cmUnixMakefileGenerator::GenerateMakefile()
     // Generate depends 
     cmMakeDepend md;
     md.SetMakefile(m_Makefile);
-    md.DoDepends();
+    md.GenerateDependInformation();
+    this->ProcessDepends(md);
     // output the makefile fragment
     this->OutputMakefile("Makefile"); 
+    }
+}
+
+void cmUnixMakefileGenerator::ProcessDepends(const cmMakeDepend &md)
+{
+  // Now create cmDependInformation objects for files in the directory
+  cmTargets &tgts = m_Makefile->GetTargets();
+  for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); l++)
+    {
+    std::vector<cmSourceFile> &classes = l->second.GetSourceFiles();
+    for(std::vector<cmSourceFile>::iterator i = classes.begin(); 
+        i != classes.end(); ++i)
+      {
+      if(!i->GetIsAHeaderFileOnly())
+        {
+        // get the depends
+        const cmDependInformation *info = 
+          md.GetDependInformationForSourceFile(*i);
+        if (info)
+          {
+          for( cmDependInformation::IndexSet::const_iterator indx = 
+                 info->m_IndexSet.begin();
+               indx != info->m_IndexSet.end(); ++indx)
+            {
+            i->GetDepends().push_back(md.GetDependInformation()[*indx]->m_FullPath);
+            }
+          }
+        }
+      }
     }
 }
 
