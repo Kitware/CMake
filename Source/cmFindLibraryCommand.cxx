@@ -127,9 +127,7 @@ bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn)
   for(std::vector<std::string>::iterator i = names.begin();
       i != names.end() ; ++i)
     {
-    library = cmSystemTools::FindLibrary(i->c_str(),
-                                         path,
-                                         m_Makefile);
+    library = m_Makefile->FindLibrary(i->c_str(), path);
     if(library != "")
       {  
       m_Makefile->AddCacheDefinition(args[0].c_str(),

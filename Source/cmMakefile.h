@@ -19,7 +19,6 @@
 
 #include "cmStandardIncludes.h"
 #include "cmData.h"
-#include "cmSourceFile.h"
 #include "cmSystemTools.h"
 #include "cmSourceGroup.h"
 #include "cmTarget.h"
@@ -29,6 +28,7 @@ class cmFunctionBlocker;
 class cmCommand;
 class cmLocalGenerator;
 class cmMakeDepend;
+class cmSourceFile;
 
 /** \class cmMakefile
  * \brief Process the input CMakeLists.txt file.
@@ -183,6 +183,12 @@ public:
    * Add an include directory to the build.
    */
   void AddIncludeDirectory(const char*, bool before = false);
+
+  /**
+   * Find a library (as in cmSystemTools) but add in compiler specific paths
+   */
+  std::string FindLibrary(const char* name,
+                          const std::vector<std::string>& path);
 
   /**
    * Add a variable definition to the build. This variable

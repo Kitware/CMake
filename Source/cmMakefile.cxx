@@ -1459,3 +1459,79 @@ void cmMakefile::DisplayStatus(const char* message, float s)
   this->GetLocalGenerator()->GetGlobalGenerator()
     ->GetCMakeInstance()->UpdateProgress(message, s);
 }
+
+/**
+ * Find the library with the given name.  Searches the given path and then
+ * the system search path.  Returns the full path to the library if it is
+ * found.  Otherwise, the empty string is returned.
+ */
+std::string cmMakefile::FindLibrary(const char* name,
+                                    const std::vector<std::string>& userPaths)
+{
+  // See if the executable exists as written.
+  if(cmSystemTools::FileExists(name))
+    {
+    return cmSystemTools::CollapseFullPath(name);
+    }
+  
+  // Add the system search path to our path.
+  std::vector<std::string> path = userPaths;
+  cmSystemTools::GetPath(path);
+
+  // Add some lib directories specific to compilers, depending on the
+  // current generator, so that library that might have been stored here
+  // can be found too.
+  // i.e. Microsoft Visual Studio or .Net: path to compiler/../Lib
+  //      Borland: path to compiler/../Lib
+  const char* genName = this->GetDefinition("CMAKE_GENERATOR");
+  if (genName)
+    {
+    if (!strcmp(genName, "NMake Makefiles") ||
+        !strcmp(genName, "Visual Studio 6"))
+      {
+      const char* compiler = this->GetDefinition("CMAKE_CXX_COMPILER");
+      if (compiler)
+        {
+        std::string compiler_path = cmSystemTools::FindProgram(compiler);
+        if (compiler_path.size())
+          {
+          std::string lib_path = 
+            cmSystemTools::GetFilenamePath(
+              cmSystemTools::GetFilenamePath(compiler_path)) + "/Lib";
+          path.push_back(lib_path);
+          }
+        }
+      }
+    else if (!strcmp(genName, "Visual Studio 7"))
+      {
+      // It is likely that the compiler won't be in the path for .Net, but
+      // we know where devenv is.
+      const char* devenv = this->GetDefinition("MICROSOFT_DEVENV");
+      if (devenv)
+        {
+        std::string devenv_path = cmSystemTools::FindProgram(devenv);
+        if (devenv_path.size())
+          {
+          std::string vc7_path = 
+            cmSystemTools::GetFilenamePath(
+              cmSystemTools::GetFilenamePath(
+                cmSystemTools::GetFilenamePath(devenv_path))) + "/Vc7";
+          path.push_back(vc7_path + "/lib");
+          path.push_back(vc7_path + "/PlatformSDK/lib");
+          }
+        }
+      }
+    else if (!strcmp(genName, "Borland Makefiles"))
+      {
+      const char* bcb_bin_path = this->GetDefinition("BCB_BIN_PATH");
+      if (bcb_bin_path)
+        {
+        std::string lib_path = 
+          cmSystemTools::GetFilenamePath(bcb_bin_path) + "/Lib";
+        path.push_back(lib_path);
+        }
+      }
+    }
+  
+  return cmSystemTools::FindLibrary(name, path);
+}
