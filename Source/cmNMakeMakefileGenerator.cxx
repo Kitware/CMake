@@ -726,6 +726,7 @@ void cmNMakeMakefileGenerator::OutputBuildLibraryInDir(std::ostream& fout,
   fout << cmSystemTools::EscapeSpaces(fullpath)
        << ":\n\tcd " << cmSystemTools::EscapeSpaces(path)  << "\n"
        << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.depends\n"
+       << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.check_depends\n"
        << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) -f cmake.check_depends\n"
        << "\t$(MAKE) $(MAKESILENT) " << cmSystemTools::EscapeSpaces(fullpath)
        << "\n\tcd " <<

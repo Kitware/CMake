@@ -249,10 +249,11 @@ void cmUnixMakefileGenerator::OutputMakefile(const char* file)
   // Set up the default target as the VERY first target, so that make with no arguments will run it
   this->
     OutputMakeRule(fout, 
-                   "Default target executed when no arguments are given to make, first make sure cmake.depends is up-to-date, then check the sources, then build the all target",
+                   "Default target executed when no arguments are given to make, first make sure cmake.depends exists, cmake.check_depends is up-to-date, check the sources, then build the all target",
                    "default_target",
                    0,
                    "$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.depends",
+                   "$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.check_depends",
                    "$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) -f cmake.check_depends",
                    "$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) all");
   
@@ -900,6 +901,7 @@ void cmUnixMakefileGenerator::OutputBuildLibraryInDir(std::ostream& fout,
   fout << cmSystemTools::EscapeSpaces(fullpath)
        << ":\n\tcd " << cmSystemTools::EscapeSpaces(path)
        << "; $(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.depends"
+       << "; $(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.check_depends"
        << "; $(MAKE) -$(MAKEFLAGS) $(MAKESILENT) -f cmake.check_depends"
        << "; $(MAKE) $(MAKESILENT) " << makeTarget << "\n\n"; 
 }
@@ -1598,7 +1600,7 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                          " $(TARGETS)");
     }
   // collect up all the sources
-  std::string allsources("$(CMAKE_MAKEFILE_SOURCES) ");
+  std::string allsources;
   std::map<cmStdString, cmTarget>& targets = m_Makefile->GetTargets();
   for(std::map<cmStdString, cmTarget>::const_iterator target = targets.begin(); 
       target != targets.end(); ++target)
@@ -1619,11 +1621,20 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
   this->OutputMakeRule(fout, 
                        "Rule to build the cmake.depends and Makefile as side effect, if a source cmakelist file is out of date.",
                        "cmake.depends",
+                       "$(CMAKE_MAKEFILE_SOURCES)",
+                       "$(CMAKE_COMMAND) "
+                       "-S$(CMAKE_CURRENT_SOURCE) -O$(CMAKE_CURRENT_BINARY) "
+                       "-H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)"
+    );
+  this->OutputMakeRule(fout, 
+                       "Rule to build the cmake.check_depends and Makefile as side effect, if any source file has changed.",
+                       "cmake.check_depends",
                        allsources.c_str(),
                        "$(CMAKE_COMMAND) "
                        "-S$(CMAKE_CURRENT_SOURCE) -O$(CMAKE_CURRENT_BINARY) "
                        "-H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)"
     );
+  
   this->OutputMakeRule(fout, 
                        "Rule to force the build of cmake.depends",
                        "depend",
