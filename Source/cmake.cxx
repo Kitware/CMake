@@ -555,7 +555,7 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
 
       int retval = 0;
       if ( cmSystemTools::RunCommand(command.c_str(), output, retval, 
-				     directory.c_str(), true) )
+				     directory.c_str(), false) )
 	{
 	std::cout << output.c_str();
 	return retval;
