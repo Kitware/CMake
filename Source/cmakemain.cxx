@@ -48,7 +48,21 @@ static const cmDocumentationEntry cmDocumentationDescription[] =
 //----------------------------------------------------------------------------
 static const cmDocumentationEntry cmDocumentationOptions[] =
 {
-  {"-i", "Run in wizard mode.", 0},
+  CMAKE_STANDARD_OPTIONS_TABLE,
+  {"-i", "Run in wizard mode.",
+   "Wizard mode runs cmake interactively without a GUI.  The user is "
+   "prompted to answer questions about the project configuration.  "
+   "The answers are used to set cmake cache values."},
+  {0,0,0}
+};
+
+//----------------------------------------------------------------------------
+static const cmDocumentationEntry cmDocumentationNOTE[] =
+{
+  {0,
+   "CMake no longer configures a project when run with no arguments.  "
+   "In order to configure the project in the current directory, run\n"
+   "  cmake .", 0},
   {0,0,0}
 };
 
@@ -71,6 +85,7 @@ int do_cmake(int ac, char** av)
   cmDocumentation doc;
   if(cmDocumentation::Type ht = doc.CheckOptions(ac, av))
     {
+    // Construct and print requested documentation.
     cmake hcm;
     std::vector<cmDocumentationEntry> commands;
     hcm.GetCommandDocumentation(commands);
@@ -80,6 +95,19 @@ int do_cmake(int ac, char** av)
     doc.SetOptionsSection(cmDocumentationOptions);
     doc.SetCommandsSection(&commands[0]);
     doc.PrintDocumentation(ht, std::cout);
+  
+    // If we were run with no arguments, but a CMakeLists.txt file
+    // exists, the user may have been trying to use the old behavior
+    // of cmake to build a project in-source.  Print a message
+    // explaining the change to standard error and return an error
+    // condition in case the program is running from a script.
+    if((ac == 1) && cmSystemTools::FileExists("CMakeLists.txt"))
+      {
+      doc.ClearSections();
+      doc.AddSection("NOTE", cmDocumentationNOTE);
+      doc.Print(cmDocumentation::UsageForm, std::cerr);
+      return 1;
+      }
     return 0;
     }
   

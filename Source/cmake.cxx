@@ -898,27 +898,6 @@ bool cmake::CacheVersionMatches()
 // handle a command line invocation
 int cmake::Run(const std::vector<std::string>& args)
 {
-  // a quick check for args
-  if(args.size() == 1 && !cmSystemTools::FileExists("CMakeLists.txt"))
-    {
-    this->Usage(args[0].c_str());
-    return -1;
-    }
-
-  // look for obvious request for help
-  for(unsigned int i=1; i < args.size(); ++i)
-    {
-    std::string arg = args[i];
-    if(arg.find("-help",0) != std::string::npos ||
-       arg.find("--help",0) != std::string::npos ||
-       arg.find("/?",0) != std::string::npos ||
-       arg.find("-usage",0) != std::string::npos)
-      {
-      this->Usage(args[0].c_str());
-      return -1;
-      }
-    }
-
   // Process the arguments
   this->SetArgs(args);
   
@@ -927,8 +906,9 @@ int cmake::Run(const std::vector<std::string>& args)
   srcList += "/CMakeLists.txt";
   if(!cmSystemTools::FileExists(srcList.c_str()))
     {
-    cmSystemTools::Error("The source directory does not appear to contain CMakeLists.txt\n");
-    this->Usage(args[0].c_str());
+    cmSystemTools::Error(
+      "The source directory does not appear to contain CMakeLists.txt.\n"
+      "Specify --help for usage.");
     return -1;
     }
   

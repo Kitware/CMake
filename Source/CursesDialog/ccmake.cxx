@@ -51,6 +51,13 @@ static const cmDocumentationEntry cmDocumentationDescription[] =
   {0,0,0}
 };
 
+//----------------------------------------------------------------------------
+static const cmDocumentationEntry cmDocumentationOptions[] =
+{
+  CMAKE_STANDARD_OPTIONS_TABLE,
+  {0,0,0}
+};
+
 cmCursesForm* cmCursesForm::CurrentForm=0;
 
 extern "C"
@@ -94,7 +101,7 @@ int main(int argc, char** argv)
     doc.SetNameSection(cmDocumentationName);
     doc.SetUsageSection(cmDocumentationUsage);
     doc.SetDescriptionSection(cmDocumentationDescription);
-    doc.SetOptionsSection(0);
+    doc.SetOptionsSection(cmDocumentationOptions);
     doc.SetCommandsSection(&commands[0]);
     doc.PrintDocumentation(ht, std::cout);
     return 0;
