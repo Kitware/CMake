@@ -9,49 +9,28 @@
 IF (UNIX)
   SET(CMAKE_HAS_X 0)
 
-  FIND_PATH(CMAKE_X11_INCLUDE_PATH X11/X.h
-    /usr/include 
+  SET(CMAKE_X11_INC_SEARCH_PATH
+    /usr/X11R6/include 
     /usr/local/include 
+    /usr/include/X11
     /usr/openwin/include 
     /usr/openwin/share/include 
-    /usr/X11R6/include 
-    /usr/include/X11
     /opt/graphics/OpenGL/include
+    /usr/include
   )
 
-  FIND_PATH(CMAKE_Xlib_INCLUDE_PATH X11/Xlib.h
-    /usr/include 
-    /usr/local/include 
-    /usr/openwin/include 
-    /usr/openwin/share/include 
-    /usr/X11R6/include 
-    /usr/include/X11
-    /opt/graphics/OpenGL/include
-  )
-
-  FIND_PATH(CMAKE_Xutil_INCLUDE_PATH X11/Xutil.h
-    /usr/include 
-    /usr/local/include 
-    /usr/openwin/include 
-    /usr/openwin/share/include 
-    /usr/X11R6/include 
-    /usr/include/X11
-    /opt/graphics/OpenGL/include
-  )
-
-  FIND_LIBRARY(CMAKE_X11_LIB X11
-    /usr/lib 
+  SET(CMAKE_X11_LIB_SEARCH_PATH
+    /usr/X11R6/lib
     /usr/local/lib 
     /usr/openwin/lib 
-    /usr/X11R6/lib
+    /usr/lib 
   )
 
-  FIND_LIBRARY(CMAKE_Xext_LIB Xext
-    /usr/lib 
-    /usr/local/lib 
-    /usr/openwin/lib 
-    /usr/X11R6/lib
-  )
+  FIND_PATH(CMAKE_X11_INCLUDE_PATH X11/X.h ${CMAKE_X11_INC_SEARCH_PATH})
+  FIND_PATH(CMAKE_Xlib_INCLUDE_PATH X11/Xlib.h ${CMAKE_X11_INC_SEARCH_PATH})
+  FIND_PATH(CMAKE_Xutil_INCLUDE_PATH X11/Xutil.h ${CMAKE_X11_INC_SEARCH_PATH})
+  FIND_LIBRARY(CMAKE_X11_LIB X11 ${CMAKE_X11_LIB_SEARCH_PATH})
+  FIND_LIBRARY(CMAKE_Xext_LIB Xext ${CMAKE_X11_LIB_SEARCH_PATH})
 
   IF(CMAKE_X11_INCLUDE_PATH)
     SET(CMAKE_X_INCLUDE_DIRS ${CMAKE_X_INCLUDE_DIRS} ${CMAKE_X11_INCLUDE_PATH})
