@@ -5,7 +5,7 @@
 #include "cmCommand.h"
 
 /** \class cmVTKWrapTclCommand
- * \brief Define a command that searches for an include file.
+ * \brief Create Tcl Wrappers for VTK classes.
  *
  * cmVTKWrapTclCommand is used to define a CMake variable include
  * path location by specifying a file and list of directories.
@@ -61,7 +61,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "VTK_WRAP_TCL(resultingLibraryName SourceListName SourceLists ...)";
+      "VTK_WRAP_TCL(resultingLibraryName [SOURCES] SourceListName SourceLists ... [COMMANDS CommandName1 CommandName2 ...])";
     }
 
   /**
@@ -76,6 +76,7 @@ private:
   std::vector<std::string> m_WrapHeaders;
   std::string m_LibraryName;
   std::string m_SourceList;
+  std::vector<std::string> m_Commands;
 };
 
 
