@@ -312,7 +312,7 @@ void cmExpandSourceListArguments(void *arg,
     }
   mf->ExpandSourceListArguments(args2, result, startArgumentIndex);
   int resargc = static_cast<int>(result.size());
-  char **resargv = NULL;
+  char **resargv = 0;
   if (resargc)
     {
     resargv = (char **)malloc(resargc*sizeof(char *));

@@ -114,7 +114,7 @@ bool cmLoadedCommand::InitialPass(std::vector<std::string> const& args)
   
   // create argc and argv and then invoke the command
   int argc = static_cast<int> (args.size());
-  char **argv = NULL;
+  char **argv = 0;
   if (argc)
     {
     argv = (char **)malloc(argc*sizeof(char *));
