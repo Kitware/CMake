@@ -143,8 +143,7 @@ int CPropertyList::AddProperty(const char* name,
         {
         pItem->m_curValue = value;
         pItem->m_HelpString = helpString;
-        m_Dirty = true;
-        Invalidate();
+        InvalidateList();
         }
       return i;
       }
@@ -350,8 +349,11 @@ void CPropertyList::OnChangeEditBox()
   m_editBox.GetWindowText(newStr);
 	
   CPropertyItem* pItem = (CPropertyItem*) GetItemDataPtr(m_curSel);
-  pItem->m_curValue = newStr;
-  m_Dirty = true;
+  if(pItem->m_curValue != newStr)
+    {
+    pItem->m_curValue = newStr;
+    m_Dirty = true;
+    }
 }
 
 void CPropertyList::OnCheckBox()
@@ -408,7 +410,7 @@ void CPropertyList::OnButton()
       cmSystemTools::ConvertToUnixSlashes(path);
       pItem->m_curValue = path.c_str();
       m_Dirty = true;
-      Invalidate();
+      InvalidateList();
       }
     }
    else if (pItem->m_nItemType == CPropertyList::PATH)
@@ -427,7 +429,7 @@ void CPropertyList::OnButton()
       cmSystemTools::ConvertToUnixSlashes(path);
       pItem->m_curValue = path.c_str();
       m_Dirty = true;
-      Invalidate();
+      InvalidateList();
       }
     }
 }
@@ -579,7 +581,7 @@ void CPropertyList::OnDelete()
   m_PropertyItems.erase(pItem);
   delete pItem;
   this->DeleteString(m_curSel);
-  Invalidate();
+  InvalidateList();
 }
 
 void CPropertyList::OnHelp()
@@ -603,5 +605,12 @@ void CPropertyList::RemoveAll()
     delete pItem;
     this->DeleteString(0);
     }
-  Invalidate();
+  InvalidateList();
 }
+
+void CPropertyList::InvalidateList()
+{
+  Invalidate();
+  m_Dirty = true;
+}
+

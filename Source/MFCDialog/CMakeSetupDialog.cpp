@@ -108,6 +108,7 @@ BEGIN_MESSAGE_MAP(CMakeSetupDialog, CDialog)
   ON_WM_SYSCOMMAND()
   ON_WM_PAINT()
   ON_WM_QUERYDRAGICON()
+  ON_BN_CLICKED(IDOK, OnOK)
   ON_BN_CLICKED(IDC_BuildProjects, OnBuildProjects)
   ON_CBN_EDITCHANGE(IDC_WhereBuild, OnChangeWhereBuild)
   ON_CBN_EDITCHANGE(IDC_WhereSource, OnChangeWhereSource)
@@ -444,6 +445,7 @@ void CMakeSetupDialog::OnBuildProjects()
   m_BuildPathChanged = false;
   // put the cursor back
   ::SetCursor(LoadCursor(NULL, IDC_ARROW));
+  m_CacheEntriesList.ClearDirty();
 }
 
 
@@ -658,3 +660,19 @@ void CMakeSetupDialog::OnGetMinMaxInfo( MINMAXINFO FAR* lpMMI )
   lpMMI->ptMinTrackSize.y = 272;
 }
 
+void CMakeSetupDialog::OnOK()
+{
+  if(m_CacheEntriesList.IsDirty())
+    {
+    if(MessageBox("You have changed options but not rebuilt, "
+		  "are you sure you want to exit?", "Confirm Exit",
+		  MB_YESNO) == IDYES)
+      {
+      CDialog::OnOK();
+      }
+    }
+  else
+    {
+    CDialog::OnOK();
+    }
+}

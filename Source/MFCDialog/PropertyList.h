@@ -55,6 +55,9 @@ public:
 
 // Operations
 public:
+  bool IsDirty() { return m_Dirty;  }
+  void ClearDirty() { m_Dirty = false;  }
+  
   int AddItem(CString txt);
   int AddProperty(const char* name,
                   const char* value,
@@ -107,7 +110,8 @@ protected:
   void InvertLine(CDC* pDC,CPoint ptFrom,CPoint ptTo);
   void DisplayButton(CRect region);
   int AddPropItem(CPropertyItem* pItem);
-
+  void InvalidateList();
+  
   CComboBox m_cmbBox;
   CEdit m_editBox;
   CButton m_btnCtrl;
