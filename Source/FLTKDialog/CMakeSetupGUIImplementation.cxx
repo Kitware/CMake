@@ -14,9 +14,10 @@
 
 void FLTKMessageCallback(const char* message, const char* title, bool& nomore)
 {
-  int ok = 
-    fl_ask(message, "Press cancel to suppress any further messages.");
-  if(!ok)
+  std::string msg = message;
+  msg += "\nPress cancel to suppress any further messages.";
+  int choice = fl_choice( msg.c_str(), "Cancel","Ok","");
+  if(choice==0)
     {
     nomore = true;
     }
@@ -586,7 +587,6 @@ CMakeSetupGUIImplementation
         m_CacheEntriesList.SetDirty();
         }
     }
-
 }
 
 
