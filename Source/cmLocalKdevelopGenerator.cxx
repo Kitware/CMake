@@ -74,6 +74,8 @@ void cmLocalKdevelopGenerator::Generate(bool fromTheTop)
     }
 }
 
+/* create the project file, if it already exists, merge it with the existing one,
+otherwise create a new one */
 void cmLocalKdevelopGenerator::CreateProjectFile(const std::string& outputDir,
                                                  const std::string& projectDir,
                                                  const std::string& projectname, 
@@ -107,6 +109,9 @@ void cmLocalKdevelopGenerator::MergeProjectFiles(const std::string& outputDir,
     return;
     }
 
+   /* Read the existing project file (line by line), copy all lines into the
+    new project file, except the ones which can be reliably set from contents
+    of the CMakeLists.txt */    
   std::string tmp;
   std::vector<std::string> lines;
   while (cmSystemTools::GetLineFromStream(oldProjectFile, tmp))
@@ -365,6 +370,7 @@ bool cmLocalKdevelopGenerator::CreateFilelistFile(const std::string& outputDir, 
     oldFilelist.close();
     }
 
+  //now write the new filename
   cmGeneratedFileStream tempFile(filename.c_str());
   tempFile.SetAlwaysCopy(true);
   std::ostream&  fout = tempFile.GetStream();
