@@ -117,14 +117,14 @@ void cmConfigureFileCommand::ConfigureFile()
     std::ofstream fout(tempOutputFile.c_str());
     if(!fout)
       {
-      cmSystemTools::Error("Could not open file for write in copy operatation", 
+      cmSystemTools::Error("Could not open file for write in copy operatation ", 
                            tempOutputFile.c_str());
       return;
       }
     std::ifstream fin(m_InputFile.c_str());
     if(!fin)
       {
-      cmSystemTools::Error("Could not open file for read in copy operatation",
+      cmSystemTools::Error("Could not open file for read in copy operatation ",
                            m_InputFile.c_str());
       return;
       }
