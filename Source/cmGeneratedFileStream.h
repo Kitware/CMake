@@ -35,8 +35,12 @@ protected:
   // The destructor renames the temporary output file to the real name.
   ~cmGeneratedFileStreamBase();
 
-  // Internal method to setup the instance for a given file name.
+  // Internal methods to handle the temporary file.  Open is always
+  // called before the real stream is opened.  Close is always called
+  // after the real stream is closed and m_Okay is set to whether the
+  // real stream was still valid for writing when it was closed.
   void Open(const char* name);
+  void Close();
 
   // Internal file replacement implementation.
   int RenameFile(const char* oldname, const char* newname);
@@ -53,7 +57,7 @@ protected:
   // Whether to do a copy-if-different.
   bool m_CopyIfDifferent;
 
-  // Whether the destination file should be replaced.
+  // Whether the real file stream was valid when it was closed.
   bool m_Okay;
 
   // Whether the destionation file is compressed
@@ -99,11 +103,19 @@ public:
 
   /**
    * Open an output file by name.  This should be used only with a
-   * default-constructed stream.  It automatically generates a name
-   * for the temporary file.  If the file cannot be opened an error
-   * message is produced unless the second argument is set to true.
+   * non-open stream.  It automatically generates a name for the
+   * temporary file.  If the file cannot be opened an error message is
+   * produced unless the second argument is set to true.
    */
   cmGeneratedFileStream& Open(const char* name, bool quiet=false);
+
+  /**
+   * Close the output file.  This should be used only with an open
+   * stream.  The temporary file is atomically renamed to the
+   * destionation file if the stream is still valid when this method
+   * is called.
+   */
+  cmGeneratedFileStream& Close();
 
   /**
    * Set whether copy-if-different is done.

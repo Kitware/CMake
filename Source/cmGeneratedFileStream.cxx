@@ -80,6 +80,22 @@ cmGeneratedFileStream::Open(const char* name, bool quiet)
 }
 
 //----------------------------------------------------------------------------
+cmGeneratedFileStream&
+cmGeneratedFileStream::Close()
+{
+  // Save whether the temporary output file is valid before closing.
+  m_Okay = (*this)?true:false;
+
+  // Close the temporary output file.
+  this->Stream::close();
+
+  // Remove the temporary file (possibly by renaming to the real file).
+  this->cmGeneratedFileStreamBase::Close();
+
+  return *this;
+}
+
+//----------------------------------------------------------------------------
 void cmGeneratedFileStream::SetCopyIfDifferent(bool copy_if_different)
 {
   m_CopyIfDifferent = copy_if_different;
@@ -103,13 +119,29 @@ cmGeneratedFileStreamBase::cmGeneratedFileStreamBase():
 
 //----------------------------------------------------------------------------
 cmGeneratedFileStreamBase::cmGeneratedFileStreamBase(const char* name):
-  m_Name(name),
-  m_TempName(name),
+  m_Name(),
+  m_TempName(),
   m_CopyIfDifferent(false),
   m_Okay(false),
   m_Compress(false)
 {
+  this->Open(name);
+}
+
+//----------------------------------------------------------------------------
+cmGeneratedFileStreamBase::~cmGeneratedFileStreamBase()
+{
+  this->Close();
+}
+
+//----------------------------------------------------------------------------
+void cmGeneratedFileStreamBase::Open(const char* name)
+{
+  // Save the original name of the file.
+  m_Name = name;
+
   // Create the name of the temporary file.
+  m_TempName = name;
   m_TempName += ".tmp";
 
   // Make sure the temporary file that will be used is not present.
@@ -117,7 +149,7 @@ cmGeneratedFileStreamBase::cmGeneratedFileStreamBase(const char* name):
 }
 
 //----------------------------------------------------------------------------
-cmGeneratedFileStreamBase::~cmGeneratedFileStreamBase()
+void cmGeneratedFileStreamBase::Close()
 {
   std::string resname = m_Name;
   if ( m_Compress )
@@ -151,20 +183,6 @@ cmGeneratedFileStreamBase::~cmGeneratedFileStreamBase()
   // Else, the destination was not replaced.
   //
   // Always delete the temporary file. We never want it to stay around.
-  cmSystemTools::RemoveFile(m_TempName.c_str());
-}
-
-//----------------------------------------------------------------------------
-void cmGeneratedFileStreamBase::Open(const char* name)
-{
-  // Save the original name of the file.
-  m_Name = name;
-
-  // Create the name of the temporary file.
-  m_TempName = name;
-  m_TempName += ".tmp";
-
-  // Make sure the temporary file that will be used is not present.
   cmSystemTools::RemoveFile(m_TempName.c_str());
 }
 
