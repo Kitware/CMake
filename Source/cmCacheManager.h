@@ -35,28 +35,19 @@ public:
    */
   enum CacheEntryType{ BOOL=0, PATH, STRING  };
   static CacheEntryType StringToType(const char*);
-  /**
-   * Singleton pattern get instance of the cmCacheManager.
-   */
+  //! Singleton pattern get instance of the cmCacheManager.
   static cmCacheManager* GetInstance();
-  /**
-   * Load a cache from file
-   */
+
+  //! Load a cache from file
   bool LoadCache(const char* path);
   
-  /**
-   * Save the cache to a file
-   */
+  //! Save the cache to a file
   bool SaveCache(const char* path);
   
-  /**
-   * Add an entry into the cache
-   */
+  //! Add an entry into the cache
   void AddCacheEntry(const char* key, const char* value, CacheEntryType type);
   
-  /**
-   * Get a value from the cache given a key
-   */
+  //! Get a value from the cache given a key
   const char* GetCacheValue(const char* key);
 private:
   static cmCacheManager* s_Instance;
