@@ -519,7 +519,12 @@ void cmCursesMainForm::RunCMake(bool generateMakefiles)
   m_OkToGenerate = true;
   if(make.Generate(m_Args, generateMakefiles) != 0 || !m_Errors.empty())
     {
-    m_OkToGenerate = false;
+    // see if there was an error
+    if(cmSystemTools::GetErrorOccuredFlag())
+      {
+      m_OkToGenerate = false;
+      }
+    // reset error condition
     cmSystemTools::ResetErrorOccuredFlag();
     int x,y;
     getmaxyx(stdscr, y, x);
