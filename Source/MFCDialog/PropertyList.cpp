@@ -433,6 +433,10 @@ void CPropertyList::OnButton()
 			Filter);
     CString initialDir;
     CString currPath = pItem->m_curValue;
+    if (currPath == "NOTFOUND")
+      {
+      currPath = "";
+      }
     if (currPath.GetLength() > 0)
       {
       int endSlash = currPath.ReverseFind('\\');
