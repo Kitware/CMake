@@ -35,7 +35,7 @@ void cmGlobalCodeWarriorGenerator::EnableLanguage(const char*,
     std::string fpath = 
       mf->GetDefinition("CMAKE_ROOT");
     fpath += "/Templates/CMakeDotNetSystemConfig.cmake";
-    mf->ReadListFile(NULL,fpath.c_str());
+    mf->ReadListFile(0,fpath.c_str());
     this->SetLanguageEnabled("CXX");
     }
 }
