@@ -159,7 +159,10 @@ void cmMakeDepend::GenerateDependInformation(cmDependInformation* info)
             t != m_IncludeDirectories.end(); ++t)
           {
           std::string incpath = *t;
-          incpath = incpath + "/";
+          if (incpath.size() && incpath[incpath.size() - 1] != '/')
+            {
+            incpath = incpath + "/";
+            }
           incpath = incpath + path;
           if (srcFile->GetFullPath() == incpath)
             {
@@ -302,7 +305,10 @@ std::string cmMakeDepend::FullPath(const char* fname, const char *extraPath)
       i != m_IncludeDirectories.end(); ++i)
     {
     std::string path = *i;
-    path = path + "/";
+    if (path.size() && path[path.size() - 1] != '/')
+      {
+      path = path + "/";
+      }
     path = path + fname;
     if(cmSystemTools::FileExists(path.c_str()))
       {
@@ -313,7 +319,10 @@ std::string cmMakeDepend::FullPath(const char* fname, const char *extraPath)
   if (extraPath)
     {
     std::string path = extraPath;
-    path = path + "/";
+    if (path.size() && path[path.size() - 1] != '/')
+      {
+      path = path + "/";
+      }
     path = path + fname;
     if(cmSystemTools::FileExists(path.c_str()))
       {
