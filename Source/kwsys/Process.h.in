@@ -81,7 +81,7 @@ typedef struct kwsysProcess_s kwsysProcess;
 /**
  * Create a new Process instance.
  */
-kwsysEXPORT kwsysProcess* kwsysProcess_New();
+kwsysEXPORT kwsysProcess* kwsysProcess_New(void);
 
 /**
  * Delete an existing Process instance.  If the instance is currently
