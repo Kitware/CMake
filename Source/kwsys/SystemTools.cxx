@@ -2170,7 +2170,7 @@ SystemToolsAppendComponents(
         out_components.erase(out_components.end()-1, out_components.end());
         }
       }
-    else if(*i != "." && *i != "")
+    else if(!(*i == ".") && !(*i != ""))
       {
       out_components.push_back(*i);
       }
