@@ -19,10 +19,12 @@ TARGET_LINK_LIBRARIES(complex
 IF(WIN32)
   # we must copy the dll to the correct location
   FIND_FILE(CMAKE_DLL CMakeLib.dll ${Complex_BINARY_DIR}/../../Source ${Complex_BINARY_DIR}/../../Source/Debug)
+  FIND_FILE(CMAKE_DLL libCMakeLib.dll ${Complex_BINARY_DIR}/../../Source ${Complex_BINARY_DIR}/../../Source/Debug)
+  GET_FILENAME_COMPONENT(CMAKE_DLL_NAME ${CMAKE_DLL} NAME)
   IF (CMAKE_DLL)
     CONFIGURE_FILE(
         ${CMAKE_DLL}
-        ${Complex_BINARY_DIR}/bin/CMakeLib.dll COPYONLY)
+        ${Complex_BINARY_DIR}/bin/${CMAKE_DLL_NAME} COPYONLY)
   ENDIF (CMAKE_DLL)
 ENDIF (WIN32)
 
