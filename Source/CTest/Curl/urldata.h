@@ -1,33 +1,31 @@
 #ifndef __URLDATA_H
 #define __URLDATA_H
-/*****************************************************************************
+/***************************************************************************
  *                                  _   _ ____  _     
  *  Project                     ___| | | |  _ \| |    
  *                             / __| | | | |_) | |    
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2001, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2002, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
- * In order to be useful for every potential user, curl and libcurl are
- * dual-licensed under the MPL and the MIT/X-derivate licenses.
- *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at http://curl.haxx.se/docs/copyright.html.
+ * 
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
- * furnished to do so, under the terms of the MPL or the MIT/X-derivate
- * licenses. You may pick one of these licenses.
+ * furnished to do so, under the terms of the COPYING file.
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
  * $Id$
- *****************************************************************************/
+ ***************************************************************************/
 
 /* This file is for lib internal stuff */
 
 #include "setup.h"
-#include "hostip.h"
-#include "hash.h"
 
 #define PORT_FTP 21
 #define PORT_TELNET 23
@@ -81,9 +79,15 @@
 #include <curl/curl.h>
 
 #include "http_chunks.h" /* for the structs and enum stuff */
+#include "hostip.h"
+#include "hash.h"
+
+#ifdef HAVE_ZLIB_H
+#include <zlib.h>               /* for content-encoding 08/28/02 jhrg */
+#endif
 
 /* Download buffer size, keep it fairly big for speed reasons */
-#define BUFSIZE (1024*20)
+#define BUFSIZE CURL_MAX_WRITE_SIZE
 
 /* Initial size of the buffer to store headers in, it'll be enlarged in case
    of need. */
@@ -136,14 +140,15 @@ struct ssl_config_data {
   long version;          /* what version the client wants to use */
   long certverifyresult; /* result from the certificate verification */
   long verifypeer;       /* set TRUE if this is desired */
-  long verifyhost;       /* 0: no verif, 1: check that CN exists, 2: CN must match hostname */
+  long verifyhost;       /* 0: no verify
+                            1: check that CN exists
+                            2: CN must match hostname */
   char *CApath;          /* DOES NOT WORK ON WINDOWS */
   char *CAfile;          /* cerficate to verify peer against */
   char *random_file;     /* path to file containing "random" data */
   char *egdsocket;       /* path to file containing the EGD daemon socket */
   char *cipher_list;     /* list of ciphers to use */
-
-  long numsessions;                 /* SSL session id cache size */
+  long numsessions;      /* SSL session id cache size */
 };
 
 /****************************************************************************
@@ -179,7 +184,13 @@ struct FTP {
   char *entrypath; /* the PWD reply when we logged on */
 
   char *cache;       /* data cache between getresponse()-calls */
-  size_t cache_size; /* size of cache in bytes */                    
+  size_t cache_size; /* size of cache in bytes */
+  bool dont_check;  /* Set to TRUE to prevent the final (post-transfer)
+                       file size and 226/250 status check. It should still
+                       read the line, just ignore the result. */
+  bool no_transfer; /* nothing was transfered, (possibly because a resumed
+                       transfer already was complete) */
+
 };
 
 /****************************************************************************
@@ -199,12 +210,18 @@ struct ConnectBits {
   bool httpproxy;    /* if set, this transfer is done through a http proxy */
   bool user_passwd;    /* do we use user+password for this connection? */
   bool proxy_user_passwd; /* user+password for the proxy? */
-
+  bool ipv6_ip; /* we communicate with a remove site specified with pure IPv6
+                   IP address */
   bool use_range;
   bool rangestringalloc; /* the range string is malloc()'ed */
 
-  bool resume_done; /* nothing was transfered, resumed transfer already
-                       complete */
+  bool do_more; /* this is set TRUE if the ->curl_do_more() function is
+                   supposed to be called, after ->curl_do() */
+
+  bool upload_chunky; /* set TRUE if we are doing chunked transfer-encoding
+                         on upload */
+
+  bool getheader;        /* TRUE if header parsing is wanted */
 };
 
 /*
@@ -220,6 +237,13 @@ struct Curl_transfer_keeper {
   struct timeval start;         /* transfer started at this time */
   struct timeval now;           /* current time */
   bool header;                  /* incoming data has HTTP header */
+  enum {
+    HEADER_NORMAL,      /* no bad header at all */
+    HEADER_PARTHEADER,  /* part of the chunk is a bad header, the rest is
+                           normal data */
+    HEADER_ALLBAD       /* all was believed to be header */
+  } badheader;                  /* the header was deemed bad and will be
+                                   written as body */
   int headerline;               /* counts header lines to better track the
                                    first one */
   char *hbufp;                  /* points at *end* of header line */
@@ -236,18 +260,31 @@ struct Curl_transfer_keeper {
   bool write_after_100_header;  /* should we enable the write after
                                    we received a 100-continue/timeout
                                    or directly */
+  int content_encoding;         /* What content encoding. sec 3.5, RFC2616. */
+
+#define IDENTITY 0              /* No encoding */
+#define DEFLATE 1               /* zlib delfate [RFC 1950 & 1951] */
+#define GZIP 2                  /* gzip algorithm [RFC 1952] */
+#define COMPRESS 3              /* Not handled, added for completeness */
+
+#ifdef HAVE_LIBZ
+  bool zlib_init;               /* True if zlib already initialized;
+                                   undefined if Content-Encdoing header. */
+  z_stream z;                   /* State structure for zlib. */
+#endif
 
   /* for the low speed checks: */
   time_t timeofdoc;
   long bodywrites;
   int writetype;
 
-  /* the highest fd we use + 1 */
-  struct SessionHandle *data;
-  struct connectdata *conn;
   char *buf;
   char *uploadbuf;
   int maxfd;
+
+  /* pointers to the actual descriptors we check */
+  fd_set *readfdp;
+  fd_set *writefdp;
 
   /* the file descriptors to play with */
   fd_set readfd;
@@ -256,6 +293,8 @@ struct Curl_transfer_keeper {
   fd_set wkeepfd;
   int keepon;
 
+  bool upload_done; /* set to TRUE when doing chunked transfer-encoding upload
+                       and we're uploading the last chunk */
 };
 
 
@@ -282,11 +321,11 @@ struct connectdata {
 #define PROT_FTPS    (1<<9)
 #define PROT_SSL     (1<<10) /* protocol requires SSL */
 
-  Curl_addrinfo *hostaddr; /* IP-protocol independent host info pointer list */
-  char *hostent_buf; /* pointer to allocated memory for name info */
+  /* the particular host we use, in two different ways */
+  struct Curl_dns_entry *connect_addr;
 
 #ifdef ENABLE_IPV6
-  struct addrinfo *serv_addr;   /* the particular host we use */
+  struct addrinfo *serv_addr;
 #else
   struct sockaddr_in serv_addr;
 #endif
@@ -324,6 +363,12 @@ struct connectdata {
   CURLcode (*curl_do)(struct connectdata *connect);
   CURLcode (*curl_done)(struct connectdata *connect);
 
+  /* If the curl_do() function is better made in two halves, this
+   * curl_do_more() function will be called afterwards, if set. For example
+   * for doing the FTP stuff after the PASV/PORT command.
+   */
+  CURLcode (*curl_do_more)(struct connectdata *connect);
+
   /* This function *MAY* be set to a protocol-dependent function that is run
    * after the connect() and everything is done, as a step in the connection.
    */ 
@@ -344,7 +389,6 @@ struct connectdata {
   /* READ stuff */
   int sockfd;            /* socket to read from or -1 */
   int size;              /* -1 if unknown at this point */
-  bool getheader;        /* TRUE if header parsing is wanted */
   long *bytecountp;      /* return number of bytes read or NULL */
           
   /* WRITE stuff */
@@ -357,6 +401,7 @@ struct connectdata {
   struct dynamically_allocated_data {
     char *proxyuserpwd; /* free later if not NULL! */
     char *uagent; /* free later if not NULL! */
+    char *accept_encoding; /* free later if not NULL! 08/28/02 jhrg */
     char *userpwd; /* free later if not NULL! */
     char *rangeline; /* free later if not NULL! */
     char *ref; /* free later if not NULL! */
@@ -410,8 +455,10 @@ struct connectdata {
       buffer, so the next read should read from where this pointer points to,
       and the 'upload_present' contains the number of bytes available at this
       position */
-  char *upload_fromhere;                                   
+  char *upload_fromhere;
 };
+
+/* The end of connectdata. 08/27/02 jhrg */
 
 /*
  * Struct to keep statistical and informational data.
@@ -451,6 +498,7 @@ struct Progress {
   double t_connect;
   double t_pretransfer;
   double t_starttransfer;
+  double t_redirect;
 
   struct timeval start;
   struct timeval t_startsingle;
@@ -483,6 +531,12 @@ typedef enum {
 #define MAX_CURL_PASSWORD_LENGTH 256
 
 struct UrlState {
+  enum {
+    Curl_if_none,
+    Curl_if_easy,
+    Curl_if_multi
+  } used_interface;
+
   /* buffers to store authentication data in, as parsed from input options */
   char user[MAX_CURL_USER_LENGTH];
   char passwd[MAX_CURL_PASSWORD_LENGTH];
@@ -542,6 +596,8 @@ struct DynamicStatic {
   bool proxy_alloc; /* http proxy string is malloc()'ed */
   char *referer;    /* referer string */
   bool referer_alloc; /* referer sting is malloc()ed */
+  struct curl_slist *cookielist; /* list of cookie files set by
+                                    curl_easy_setopt(COOKIEFILE) calls */
 };
 
 /*
@@ -553,7 +609,8 @@ struct DynamicStatic {
  */
 
 struct UserDefined {
-  FILE *err;    /* the stderr writes goes here */
+  FILE *err;         /* the stderr user data goes here */
+  void *debugdata;   /* the data that will be passed to fdebug */
   char *errorbuffer; /* store failure messages in here */
   char *proxyuserpwd;  /* Proxy <user:password>, if used */
   long proxyport; /* If non-zero, use this port number by default. If the
@@ -574,6 +631,7 @@ struct UserDefined {
   bool free_referer; /* set TRUE if 'referer' points to a string we
                         allocated */
   char *useragent;   /* User-Agent string */
+  char *encoding;    /* Accept-Encoding string 08/28/02 jhrg */
   char *postfields;  /* if POST, set the fields' values here */
   size_t postfieldsize; /* if POST, this might have a size to use instead of
                            strlen(), and then the data *may* be binary (contain
@@ -584,6 +642,7 @@ struct UserDefined {
   curl_write_callback fwrite_header; /* function that stores headers */
   curl_read_callback fread;          /* function that reads the input */
   curl_progress_callback fprogress;  /* function for progress information */
+  curl_debug_callback fdebug;      /* function that write informational data */
   void *progress_client; /* pointer to pass to the progress callback */
   curl_passwd_callback fpasswd;      /* call for password */
   void *passwd_client;               /* pass to the passwd callback */
@@ -603,6 +662,7 @@ struct UserDefined {
   char *key_passwd;     /* plain text private key password */
   char *crypto_engine;  /* name of the crypto engine to use */
   char *cookiejar;      /* dump all cookies to this file */
+  bool cookiesession;   /* new cookie session? */
   bool crlf;            /* convert crlf on ftp upload(?) */
   struct curl_slist *quote;     /* after connection is established */
   struct curl_slist *postquote; /* after the transfer */
@@ -622,7 +682,10 @@ struct UserDefined {
   char *krb4_level; /* what security level */
   struct ssl_config_data ssl;  /* user defined SSL stuff */
 
+  curl_proxytype proxytype; /* what kind of proxy that is in use */
+
   int dns_cache_timeout; /* DNS cache timeout */
+  long buffer_size;      /* size of receive buffer to use */
   
 /* Here follows boolean settings that define how to behave during
    this session. They are STATIC, set by libcurl users or at least initially
@@ -645,13 +708,15 @@ struct UserDefined {
   bool no_body;
   bool set_port;
   bool upload;
-  bool use_netrc;
+  enum CURL_NETRC_OPTION
+       use_netrc;        /* defined in include/curl.h */
   bool verbose;
   bool krb4;             /* kerberos4 connection requested */
   bool reuse_forbid;     /* forbidden to be reused, close after use */
   bool reuse_fresh;      /* do not re-use an existing connection  */
   bool expect100header;  /* TRUE if we added Expect: 100-continue */
   bool ftp_use_epsv;     /* if EPSV is to be attempted or not */
+  bool no_signal;        /* do not use any signal/alarm handler */
 
   bool global_dns_cache;
 };
@@ -668,7 +733,8 @@ struct UserDefined {
  * 'struct urlstate' instead.  */
 
 struct SessionHandle {
-  curl_hash          *hostcache;
+  curl_hash *hostcache;
+  curl_share *share;           /* Share, handles global variable mutexing */
   struct UserDefined set;      /* values set by the libcurl user */
   struct DynamicStatic change; /* possibly modified userdefined data */
 

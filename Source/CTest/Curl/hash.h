@@ -1,36 +1,33 @@
 #ifndef __HASH_H
 #define __HASH_H
-/*****************************************************************************
+/***************************************************************************
  *                                  _   _ ____  _     
  *  Project                     ___| | | |  _ \| |    
  *                             / __| | | | |_) | |    
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2000, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2002, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
- * In order to be useful for every potential user, curl and libcurl are
- * dual-licensed under the MPL and the MIT/X-derivate licenses.
- *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at http://curl.haxx.se/docs/copyright.html.
+ * 
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
- * furnished to do so, under the terms of the MPL or the MIT/X-derivate
- * licenses. You may pick one of these licenses.
+ * furnished to do so, under the terms of the COPYING file.
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
  * $Id$
- *****************************************************************************/
+ ***************************************************************************/
 
 #include "setup.h"
 
 #include <stddef.h>
 
 #include "llist.h"
-
-#define CURL_HASH_KEY_IS_STRING 0
-#define CURL_HASH_KEY_IS_NUM    1
 
 typedef void (*curl_hash_dtor)(void *);
 
@@ -41,45 +38,31 @@ typedef struct _curl_hash {
   size_t           size;
 } curl_hash;
 
-typedef struct _curl_hash_key {
-  union {
-    struct {
-      char *val;
-      unsigned int len;
-    } str;
-
-    unsigned long num;
-  } value;
-
-  int type;
-} curl_hash_key;
-
 typedef struct _curl_hash_element {
-  curl_hash_key  key;
-  void          *ptr;
+  void   *ptr;
+  char   *key;
+  size_t key_len;
 } curl_hash_element;
 
 
-void curl_hash_init(curl_hash *h, int slots, curl_hash_dtor dtor);
-curl_hash *curl_hash_alloc(int slots, curl_hash_dtor dtor);
-int curl_hash_add_or_update(curl_hash *h, char *str_key, unsigned int str_key_len, 
-                             unsigned long num_key, const void *p);
-int curl_hash_extended_delete(curl_hash *h, char *str_key, unsigned int str_key_len, 
-                               unsigned long num_key);
-int curl_hash_extended_find(curl_hash *h, char *str_key, unsigned int str_key_len, 
-                             unsigned long num_key, void **p);
-void curl_hash_apply(curl_hash *h, void *user, void (*cb)(void *, curl_hash_element *));
-size_t curl_hash_count(curl_hash *h);
-void curl_hash_clean(curl_hash *h);
-void curl_hash_destroy(curl_hash *h);
-
-#define curl_hash_find(h, key, key_len, p) curl_hash_extended_find(h, key, key_len, 0, p)
-#define curl_hash_delete(h, key, key_len) curl_hash_extended_delete(h, key, key_len, 0)
-#define curl_hash_add(h, key, key_len, p) curl_hash_add_or_update(h, key, key_len, 0, p)
-#define curl_hash_update curl_hash_add
-#define curl_hash_index_find(h, key, p) curl_hash_extended_find(h, NULL, 0, key, p)
-#define curl_hash_index_delete(h, key) curl_hash_extended_delete(h, NULL, 0, key)
-#define curl_hash_index_add(h, key, p) curl_hash_add_or_update(h, NULL, 0, key, p)
-#define curl_hash_index_update curl_hash_index_add
+void Curl_hash_init(curl_hash *, int, curl_hash_dtor);
+curl_hash *Curl_hash_alloc(int, curl_hash_dtor);
+int Curl_hash_add(curl_hash *, char *, size_t, const void *);
+int Curl_hash_delete(curl_hash *h, char *key, size_t key_len);
+void *Curl_hash_pick(curl_hash *, char *, size_t);
+void Curl_hash_apply(curl_hash *h, void *user,
+                     void (*cb)(void *user, void *ptr));
+int Curl_hash_count(curl_hash *h);
+void Curl_hash_clean(curl_hash *h);
+void Curl_hash_clean_with_criterium(curl_hash *h, void *user, int (*comp)(void *, void *));
+void Curl_hash_destroy(curl_hash *h);
 
 #endif
+
+/*
+ * local variables:
+ * eval: (load-file "../curl-mode.el")
+ * end:
+ * vim600: fdm=marker
+ * vim: et sw=2 ts=2 sts=2 tw=78
+ */

@@ -1,25 +1,25 @@
-/*****************************************************************************
+/***************************************************************************
  *                                  _   _ ____  _     
  *  Project                     ___| | | |  _ \| |    
  *                             / __| | | | |_) | |    
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2002, Daniel Stenberg, <daniel@haxx.se>, et al
+ * Copyright (C) 1998 - 2002, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
- * In order to be useful for every potential user, curl and libcurl are
- * dual-licensed under the MPL and the MIT/X-derivate licenses.
- *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at http://curl.haxx.se/docs/copyright.html.
+ * 
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
- * furnished to do so, under the terms of the MPL or the MIT/X-derivate
- * licenses. You may pick one of these licenses.
+ * furnished to do so, under the terms of the COPYING file.
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
  * $Id$
- *****************************************************************************/
+ ***************************************************************************/
 
 #include "setup.h"
 
@@ -33,7 +33,7 @@
 #include "memdebug.h"
 #endif
 void 
-curl_llist_init(curl_llist *l, curl_llist_dtor dtor)
+Curl_llist_init(curl_llist *l, curl_llist_dtor dtor)
 {
   l->size = 0;
   l->dtor = dtor;
@@ -42,7 +42,7 @@ curl_llist_init(curl_llist *l, curl_llist_dtor dtor)
 }
 
 curl_llist *
-curl_llist_alloc(curl_llist_dtor dtor)
+Curl_llist_alloc(curl_llist_dtor dtor)
 {
   curl_llist *list;
 
@@ -50,13 +50,13 @@ curl_llist_alloc(curl_llist_dtor dtor)
   if(NULL == list)
     return NULL;
 
-  curl_llist_init(list, dtor);
+  Curl_llist_init(list, dtor);
 
   return list;
 }
 
 int
-curl_llist_insert_next(curl_llist *list, curl_llist_element *e, const void *p)
+Curl_llist_insert_next(curl_llist *list, curl_llist_element *e, const void *p)
 {
   curl_llist_element  *ne;
 
@@ -84,7 +84,7 @@ curl_llist_insert_next(curl_llist *list, curl_llist_element *e, const void *p)
 }
 
 int 
-curl_llist_insert_prev(curl_llist *list, curl_llist_element *e, const void *p)
+Curl_llist_insert_prev(curl_llist *list, curl_llist_element *e, const void *p)
 {
   curl_llist_element *ne;
 
@@ -111,7 +111,7 @@ curl_llist_insert_prev(curl_llist *list, curl_llist_element *e, const void *p)
 }
 
 int 
-curl_llist_remove(curl_llist *list, curl_llist_element *e, void *user)
+Curl_llist_remove(curl_llist *list, curl_llist_element *e, void *user)
 {
   if (e == NULL || list->size == 0)
     return 1;
@@ -139,28 +139,28 @@ curl_llist_remove(curl_llist *list, curl_llist_element *e, void *user)
 }
 
 int 
-curl_llist_remove_next(curl_llist *list, curl_llist_element *e, void *user)
+Curl_llist_remove_next(curl_llist *list, curl_llist_element *e, void *user)
 {
-  return curl_llist_remove(list, e->next, user);
+  return Curl_llist_remove(list, e->next, user);
 }
 
 int 
-curl_llist_remove_prev(curl_llist *list, curl_llist_element *e, void *user)
+Curl_llist_remove_prev(curl_llist *list, curl_llist_element *e, void *user)
 {
-  return curl_llist_remove(list, e->prev, user);
+  return Curl_llist_remove(list, e->prev, user);
 }
 
 size_t 
-curl_llist_count(curl_llist *list)
+Curl_llist_count(curl_llist *list)
 {
   return list->size;
 }
 
 void 
-curl_llist_destroy(curl_llist *list, void *user)
+Curl_llist_destroy(curl_llist *list, void *user)
 {
   while (list->size > 0) {
-    curl_llist_remove(list, CURL_LLIST_TAIL(list), user);
+    Curl_llist_remove(list, CURL_LLIST_TAIL(list), user);
   }
 
   free(list);

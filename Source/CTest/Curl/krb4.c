@@ -40,6 +40,7 @@
 
 #include "setup.h"
 
+#ifndef CURL_DISABLE_FTP
 #ifdef KRB4
 
 #include "security.h"
@@ -197,7 +198,7 @@ krb4_auth(void *app_data, struct connectdata *conn)
   int checksum;
   u_int32_t cs;
   struct krb4_data *d = app_data;
-  char *host = conn->hostaddr->h_name;
+  char *host = conn->hostname;
   ssize_t nread;
   int l = sizeof(conn->local_addr);
   struct SessionHandle *data = conn->data;
@@ -362,7 +363,7 @@ void Curl_krb_kauth(struct connectdata *conn)
   if (strcmp ((char*)tktcopy.dat + 8,
               KRB_TICKET_GRANTING_TICKET) != 0) {
     afs_string_to_key (passwd,
-                       krb_realmofhost(conn->hostaddr->h_name),
+                       krb_realmofhost(conn->hostname),
                        &key);
     des_key_sched (&key, schedule);
     des_pcbc_encrypt((des_cblock*)tkt.dat, (des_cblock*)tktcopy.dat,
@@ -391,6 +392,7 @@ void Curl_krb_kauth(struct connectdata *conn)
 }
 
 #endif /* KRB4 */
+#endif /* CURL_DISABLE_FTP */
 
 /*
  * local variables:

@@ -21,18 +21,14 @@
  * $Id$
  ***************************************************************************/
 
-#ifndef _CURL_STRTOK_R_H
-#define _CURL_STRTOK_R_H
-
-#include "setup.h"
-#include <stddef.h>
-
-#ifndef HAVE_STRTOK_R
-char *Curl_strtok_r(char *s, const char *delim, char **last);
-#define strtok_r Curl_strtok_r
-#else
-#include <string.h>
-#endif
-
-#endif
-
+CURLcode Curl_unencode_deflate_write(struct SessionHandle *data, 
+                                     struct Curl_transfer_keeper *k, 
+                                     ssize_t nread);
+          
+/*
+ * local variables:
+ * eval: (load-file "../curl-mode.el")
+ * end:
+ * vim600: fdm=marker
+ * vim: et sw=2 ts=2 sts=2 tw=78
+ */

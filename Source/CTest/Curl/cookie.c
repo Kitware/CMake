@@ -1,25 +1,25 @@
-/*****************************************************************************
+/***************************************************************************
  *                                  _   _ ____  _     
  *  Project                     ___| | | |  _ \| |    
  *                             / __| | | | |_) | |    
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2002, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2002, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
- * In order to be useful for every potential user, curl and libcurl are
- * dual-licensed under the MPL and the MIT/X-derivate licenses.
- *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at http://curl.haxx.se/docs/copyright.html.
+ * 
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
- * furnished to do so, under the terms of the MPL or the MIT/X-derivate
- * licenses. You may pick one of these licenses.
+ * furnished to do so, under the terms of the COPYING file.
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
  * $Id$
- *****************************************************************************/
+ ***************************************************************************/
 
 /***
 
@@ -79,6 +79,8 @@ Example set of cookies:
 
 #include "setup.h"
 
+#ifndef CURL_DISABLE_HTTP
+
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -93,6 +95,21 @@ Example set of cookies:
 #include "memdebug.h"
 #endif
 
+static void
+free_cookiemess(struct Cookie *co)
+{
+  if(co->domain)
+    free(co->domain);
+  if(co->path)
+    free(co->path);
+  if(co->name)
+    free(co->name);
+  if(co->value)
+    free(co->value);
+
+  free(co);
+}
+
 /****************************************************************************
  *
  * Curl_cookie_add()
@@ -104,7 +121,7 @@ Example set of cookies:
 struct Cookie *
 Curl_cookie_add(struct CookieInfo *c,
                 bool httpheader, /* TRUE if HTTP header-style line */
-                char *lineptr,   /* first non-space of the line */
+                char *lineptr,   /* first character of the line */
                 char *domain)    /* default domain */
 {
   struct Cookie *clist;
@@ -129,6 +146,10 @@ Curl_cookie_add(struct CookieInfo *c,
     /* This line was read off a HTTP-header */
     char *sep;
     semiptr=strchr(lineptr, ';'); /* first, find a semicolon */
+
+    while(*lineptr && isspace((int)*lineptr))
+      lineptr++;
+
     ptr = lineptr;
     do {
       /* we have a <what>=<this> pair or a 'secure' word here */
@@ -145,6 +166,8 @@ Curl_cookie_add(struct CookieInfo *c,
                        name, what)) {
           /* this is a <name>=<what> pair */
 
+          char *whatptr;
+
           /* Strip off trailing whitespace from the 'what' */
           int len=strlen(what);
           while(len && isspace((int)what[len-1])) {
@@ -152,15 +175,21 @@ Curl_cookie_add(struct CookieInfo *c,
             len--;
           }
 
+          /* Skip leading whitespace from the 'what' */
+          whatptr=what;
+          while(isspace((int)*whatptr)) {
+            whatptr++;
+          }
+
           if(strequal("path", name)) {
-            co->path=strdup(what);
+            co->path=strdup(whatptr);
           }
           else if(strequal("domain", name)) {
-            co->domain=strdup(what);
-            co->field1= (what[0]=='.')?2:1;
+            co->domain=strdup(whatptr);
+            co->field1= (whatptr[0]=='.')?2:1;
           }
           else if(strequal("version", name)) {
-            co->version=strdup(what);
+            co->version=strdup(whatptr);
           }
           else if(strequal("max-age", name)) {
             /* Defined in RFC2109:
@@ -172,17 +201,17 @@ Curl_cookie_add(struct CookieInfo *c,
                cookie should be discarded immediately.
 
              */
-            co->maxage = strdup(what);
+            co->maxage = strdup(whatptr);
             co->expires =
               atoi((*co->maxage=='\"')?&co->maxage[1]:&co->maxage[0]) + now;
           }
           else if(strequal("expires", name)) {
-            co->expirestr=strdup(what);
+            co->expirestr=strdup(whatptr);
             co->expires = curl_getdate(what, &now);
           }
           else if(!co->name) {
             co->name = strdup(name);
-            co->value = strdup(what);
+            co->value = strdup(whatptr);
           }
           /*
             else this is the second (or more) name we don't know
@@ -318,20 +347,17 @@ Curl_cookie_add(struct CookieInfo *c,
     if(7 != fields) {
       /* we did not find the sufficient number of fields to recognize this
          as a valid line, abort and go home */
-
-      if(co->domain)
-        free(co->domain);
-      if(co->path)
-        free(co->path);
-      if(co->name)
-        free(co->name);
-      if(co->value)
-        free(co->value);
-
-      free(co);
+      free_cookiemess(co);
       return NULL;
     }
 
+  }
+
+  if(!c->running &&    /* read from a file */
+     c->newsession &&  /* clean session cookies */
+     !co->expires) {   /* this is a session cookie since it doesn't expire! */
+    free_cookiemess(co);
+    return NULL;
   }
 
   co->livecookie = c->running;
@@ -347,7 +373,13 @@ Curl_cookie_add(struct CookieInfo *c,
       /* the names are identical */
 
       if(clist->domain && co->domain) {
-        if(strequal(clist->domain, co->domain))
+        if(strequal(clist->domain, co->domain) ||
+           (clist->domain[0]=='.' &&
+            strequal(&(clist->domain[1]), co->domain)) ||
+           (co->domain[0]=='.' &&
+            strequal(clist->domain, &(co->domain[1]))) )
+          /* The domains are identical, or at least identical if you skip the
+             preceeding dot */
           replace_old=TRUE;
       }
       else if(!clist->domain && !co->domain)
@@ -448,8 +480,12 @@ Curl_cookie_add(struct CookieInfo *c,
  * Inits a cookie struct to read data from a local file. This is always
  * called before any cookies are set. File may be NULL.
  *
+ * If 'newsession' is TRUE, discard all "session cookies" on read from file.
+ *
  ****************************************************************************/
-struct CookieInfo *Curl_cookie_init(char *file, struct CookieInfo *inc)
+struct CookieInfo *Curl_cookie_init(char *file,
+                                    struct CookieInfo *inc,
+                                    bool newsession)
 {
   char line[MAX_COOKIE_LINE];
   struct CookieInfo *c;
@@ -477,11 +513,13 @@ struct CookieInfo *Curl_cookie_init(char *file, struct CookieInfo *inc)
   else
     fp = file?fopen(file, "r"):NULL;
 
+  c->newsession = newsession; /* new session? */
+
   if(fp) {
     char *lineptr;
     bool headerline;
     while(fgets(line, MAX_COOKIE_LINE, fp)) {
-      if(strnequal("Set-Cookie:", line, 11)) {
+      if(checkprefix("Set-Cookie:", line)) {
         /* This is a cookie line, get it! */
         lineptr=&line[11];
         headerline=TRUE;
@@ -499,7 +537,7 @@ struct CookieInfo *Curl_cookie_init(char *file, struct CookieInfo *inc)
       fclose(fp);
   }
 
-  c->running = TRUE; /* now, we're running */
+  c->running = TRUE;          /* now, we're running */
 
   return c;
 }
@@ -549,8 +587,8 @@ struct Cookie *Curl_cookie_getlist(struct CookieInfo *c,
 
             /* now check the left part of the path with the cookies path
                requirement */
-            if(!co->path ||
-               strnequal(path, co->path, strlen(co->path))) {
+           if(!co->path ||
+              checkprefix(co->path, path) ) {
 
                /* and now, we know this is a match and we should create an
                   entry for the return-linked-list */
@@ -728,6 +766,8 @@ int main(int argc, char **argv)
 }
 
 #endif
+
+#endif /* CURL_DISABLE_HTTP */
 
 /*
  * local variables:

@@ -1,27 +1,27 @@
 #ifndef __COOKIE_H
 #define __COOKIE_H
-/*****************************************************************************
+/***************************************************************************
  *                                  _   _ ____  _     
  *  Project                     ___| | | |  _ \| |    
  *                             / __| | | | |_) | |    
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2000, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2002, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
- * In order to be useful for every potential user, curl and libcurl are
- * dual-licensed under the MPL and the MIT/X-derivate licenses.
- *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at http://curl.haxx.se/docs/copyright.html.
+ * 
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
- * furnished to do so, under the terms of the MPL or the MIT/X-derivate
- * licenses. You may pick one of these licenses.
+ * furnished to do so, under the terms of the COPYING file.
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
  * $Id$
- *****************************************************************************/
+ ***************************************************************************/
 
 #include <stdio.h>
 #ifdef WIN32
@@ -55,9 +55,10 @@ struct CookieInfo {
   /* linked list of cookies we know of */
   struct Cookie *cookies;
 
-  char *filename; /* file we read from/write to */
-  bool running;   /* state info, for cookie adding information */
+  char *filename;  /* file we read from/write to */
+  bool running;    /* state info, for cookie adding information */
   long numcookies; /* number of cookies in the "jar" */
+  bool newsession; /* new session, discard session cookies on load */
 };
 
 /* This is the maximum line length we accept for a cookie line */
@@ -75,7 +76,7 @@ struct CookieInfo {
 struct Cookie *Curl_cookie_add(struct CookieInfo *, bool header, char *line,
                                char *domain);
 
-struct CookieInfo *Curl_cookie_init(char *, struct CookieInfo *);
+struct CookieInfo *Curl_cookie_init(char *, struct CookieInfo *, bool);
 struct Cookie *Curl_cookie_getlist(struct CookieInfo *, char *, char *, bool);
 void Curl_cookie_freelist(struct Cookie *);
 void Curl_cookie_cleanup(struct CookieInfo *);

@@ -1,25 +1,25 @@
-/*****************************************************************************
+/***************************************************************************
  *                                  _   _ ____  _     
  *  Project                     ___| | | |  _ \| |    
  *                             / __| | | | |_) | |    
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2001, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2002, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
- * In order to be useful for every potential user, curl and libcurl are
- * dual-licensed under the MPL and the MIT/X-derivate licenses.
- *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at http://curl.haxx.se/docs/copyright.html.
+ * 
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
- * furnished to do so, under the terms of the MPL or the MIT/X-derivate
- * licenses. You may pick one of these licenses.
+ * furnished to do so, under the terms of the COPYING file.
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
  * $Id$
- *****************************************************************************/
+ ***************************************************************************/
 
 /*
  * The original SSL code for curl was written by
@@ -54,6 +54,15 @@
 #else
 #undef HAVE_USERDATA_IN_PWD_CALLBACK
 #endif
+
+#if OPENSSL_VERSION_NUMBER >= 0x00907001L
+/* ENGINE_load_private_key() takes four arguments */
+#define HAVE_ENGINE_LOAD_FOUR_ARGS
+#else
+/* ENGINE_load_private_key() takes three arguments */
+#undef HAVE_ENGINE_LOAD_FOUR_ARGS
+#endif
+
 
 #ifndef HAVE_USERDATA_IN_PWD_CALLBACK
 static char global_passwd[64];
@@ -223,30 +232,22 @@ int cert_stuff(struct connectdata *conn,
       SSL_CTX_set_default_passwd_cb(conn->ssl.ctx, passwd_callback);
     }
 
-#if 0
-    if (SSL_CTX_use_certificate_file(conn->ssl.ctx,
-                                     cert_file,
-                                     SSL_FILETYPE_PEM) != 1) {
-      failf(data, "unable to set certificate file (wrong password?)");
-      return(0);
-    }
-    if (key_file == NULL)
-      key_file=cert_file;
-
-    if (SSL_CTX_use_PrivateKey_file(conn->ssl.ctx,
-                                    key_file,
-                                    SSL_FILETYPE_PEM) != 1) {
-      failf(data, "unable to set public key file");
-      return(0);
-    }
-#else
-    /* The '#ifdef 0' section above was removed on 17-dec-2001 */
-
     file_type = do_file_type(cert_type);
 
     switch(file_type) {
     case SSL_FILETYPE_PEM:
+      /* SSL_CTX_use_certificate_chain_file() only works on PEM files */
+      if (SSL_CTX_use_certificate_chain_file(conn->ssl.ctx,
+                                             cert_file) != 1) {
+        failf(data, "unable to set certificate file (wrong password?)");
+        return 0;
+      }
+      break;
+
     case SSL_FILETYPE_ASN1:
+      /* SSL_CTX_use_certificate_file() works with either PEM or ASN1, but
+         we use the case above for PEM so this can only be performed with
+         ASN1 files. */
       if (SSL_CTX_use_certificate_file(conn->ssl.ctx,
                                        cert_file,
                                        file_type) != 1) {
@@ -283,11 +284,17 @@ int cert_stuff(struct connectdata *conn,
       {                         /* XXXX still needs some work */
         EVP_PKEY *priv_key = NULL;
         if (conn && conn->data && conn->data->engine) {
+#ifdef HAVE_ENGINE_LOAD_FOUR_ARGS
+          UI_METHOD *ui_method = UI_OpenSSL();
+#endif
           if (!key_file || !key_file[0]) {
             failf(data, "no key set to load from crypto engine\n");
             return 0;
           }
           priv_key = ENGINE_load_private_key(conn->data->engine,key_file,
+#ifdef HAVE_ENGINE_LOAD_FOUR_ARGS
+                                             ui_method,
+#endif
                                              data->set.key_passwd);
           if (!priv_key) {
             failf(data, "failed to load private key from crypto engine\n");
@@ -315,8 +322,6 @@ int cert_stuff(struct connectdata *conn,
       return 0;
     }
 
-#endif
-    
     ssl=SSL_new(conn->ssl.ctx);
     x509=SSL_get_certificate(ssl);
     
@@ -717,7 +722,7 @@ Curl_SSLConnect(struct connectdata *conn)
                     data->set.key,
                     data->set.key_type)) {
       /* failf() is already done in cert_stuff() */
-      return CURLE_SSL_CONNECT_ERROR;
+      return CURLE_SSL_CERTPROBLEM;
     }
   }
 
@@ -725,7 +730,7 @@ Curl_SSLConnect(struct connectdata *conn)
     if (!SSL_CTX_set_cipher_list(conn->ssl.ctx,
                                  data->set.ssl.cipher_list)) {
       failf(data, "failed setting cipher list");
-      return CURLE_SSL_CONNECT_ERROR;
+      return CURLE_SSL_CIPHER;
     }
   }
 
@@ -734,11 +739,12 @@ Curl_SSLConnect(struct connectdata *conn)
                        SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT|
                        SSL_VERIFY_CLIENT_ONCE,
                        cert_verify_callback);
-    if (!SSL_CTX_load_verify_locations(conn->ssl.ctx,
+    if ((data->set.ssl.CAfile || data->set.ssl.CApath) &&
+        !SSL_CTX_load_verify_locations(conn->ssl.ctx,
                                        data->set.ssl.CAfile,
                                        data->set.ssl.CApath)) {
       failf(data,"error setting cerficate verify locations");
-      return CURLE_SSL_CONNECT_ERROR;
+      return CURLE_SSL_CACERT;
     }
   }
   else

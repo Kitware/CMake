@@ -1,25 +1,25 @@
-/*****************************************************************************
+/***************************************************************************
  *                                  _   _ ____  _     
  *  Project                     ___| | | |  _ \| |    
  *                             / __| | | | |_) | |    
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2001, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2002, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
- * In order to be useful for every potential user, curl and libcurl are
- * dual-licensed under the MPL and the MIT/X-derivate licenses.
- *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at http://curl.haxx.se/docs/copyright.html.
+ * 
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
- * furnished to do so, under the terms of the MPL or the MIT/X-derivate
- * licenses. You may pick one of these licenses.
+ * furnished to do so, under the terms of the COPYING file.
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
  * $Id$
- *****************************************************************************/
+ ***************************************************************************/
 
 #include "setup.h"
 
@@ -44,6 +44,10 @@
 #include "sendf.h"
 
 #include "progress.h"
+
+#define _MPRINTF_REPLACE /* use our functions only */
+#include <curl/mprintf.h>
+
 
 static void time2str(char *r, int t)
 {
@@ -103,6 +107,15 @@ void Curl_pgrsDone(struct connectdata *conn)
   }
 }
 
+/* reset all times except redirect */
+void Curl_pgrsResetTimes(struct SessionHandle *data)
+{
+  data->progress.t_nslookup = 0.0;
+  data->progress.t_connect = 0.0;
+  data->progress.t_pretransfer = 0.0;
+  data->progress.t_starttransfer = 0.0;
+}
+
 void Curl_pgrsTime(struct SessionHandle *data, timerid timer)
 {
   switch(timer) {
@@ -133,6 +146,10 @@ void Curl_pgrsTime(struct SessionHandle *data, timerid timer)
     break;
   case TIMER_POSTRANSFER:
     /* this is the normal end-of-transfer thing */
+    break;
+  case TIMER_REDIRECT:
+    data->progress.t_redirect =
+      (double)Curl_tvdiff(Curl_tvnow(), data->progress.start)/1000.0;
     break;
   }
 }
@@ -327,8 +344,8 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   /* If we have a total estimate, we can display that and the expected
      time left */
   if(total_estimate) {
-    time2str(time_left, total_estimate-(int) data->progress.timespent); 
-    time2str(time_total, total_estimate);
+    time2str(time_left, (int)(total_estimate - data->progress.timespent)); 
+    time2str(time_total, (int)total_estimate);
   }
   else {
     /* otherwise we blank those times */
@@ -336,7 +353,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
     strcpy(time_total, "--:--:--");
   }
   /* The time spent so far is always known */
-  time2str(time_current, data->progress.timespent);
+  time2str(time_current, (int)data->progress.timespent);
 
   /* Get the total amount of data expected to get transfered */
   total_expected_transfer = 

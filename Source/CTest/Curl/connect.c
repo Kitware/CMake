@@ -1,25 +1,25 @@
-/*****************************************************************************
+/***************************************************************************
  *                                  _   _ ____  _     
  *  Project                     ___| | | |  _ \| |    
  *                             / __| | | | |_) | |    
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2001, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2002, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
- * In order to be useful for every potential user, curl and libcurl are
- * dual-licensed under the MPL and the MIT/X-derivate licenses.
- *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at http://curl.haxx.se/docs/copyright.html.
+ * 
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
- * furnished to do so, under the terms of the MPL or the MIT/X-derivate
- * licenses. You may pick one of these licenses.
+ * furnished to do so, under the terms of the COPYING file.
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
  * $Id$
- *****************************************************************************/
+ ***************************************************************************/
 
 #include "setup.h"
 
@@ -185,7 +185,6 @@ int waitconnect(int sockfd, /* socket */
   return 0;
 }
 
-#ifndef ENABLE_IPV6
 static CURLcode bindlocal(struct connectdata *conn,
                           int sockfd)
 {
@@ -207,22 +206,28 @@ static CURLcode bindlocal(struct connectdata *conn,
    *************************************************************/
   if (strlen(data->set.device)<255) {
     struct sockaddr_in sa;
-    struct hostent *h=NULL;
-    char *hostdataptr=NULL;
+    struct Curl_dns_entry *h=NULL;
     size_t size;
     char myhost[256] = "";
     in_addr_t in;
 
     if(Curl_if2ip(data->set.device, myhost, sizeof(myhost))) {
-      h = Curl_resolv(data, myhost, 0, &hostdataptr);
+      /*
+       * We now have the numerical IPv4-style x.y.z.w in the 'myhost' buffer
+       */
+      h = Curl_resolv(data, myhost, 0);
     }
     else {
       if(strlen(data->set.device)>1) {
-        h = Curl_resolv(data, data->set.device, 0, &hostdataptr);
-      }
-      if(h) {
-        /* we know data->set.device is shorter than the myhost array */
-        strcpy(myhost, data->set.device);
+        /*
+         * This was not an interface, resolve the name as a host name
+         * or IP number
+         */
+        h = Curl_resolv(data, data->set.device, 0);
+        if(h) {
+          /* we know data->set.device is shorter than the myhost array */
+          strcpy(myhost, data->set.device);
+        }
       }
     }
 
@@ -242,11 +247,19 @@ static CURLcode bindlocal(struct connectdata *conn,
     if (INADDR_NONE != in) {
 
       if ( h ) {
+        Curl_addrinfo *addr = h->addr;
+
+        Curl_resolv_unlock(h);
+        /* we don't need it anymore after this function has returned */
+
         memset((char *)&sa, 0, sizeof(sa));
-        memcpy((char *)&sa.sin_addr,
-               h->h_addr,
-               h->h_length);
+#ifdef ENABLE_IPV6
+        memcpy((char *)&sa.sin_addr, addr->ai_addr, addr->ai_addrlen);        
+        sa.sin_family = addr->ai_family;
+#else
+        memcpy((char *)&sa.sin_addr, addr->h_addr, addr->h_length);
         sa.sin_family = AF_INET;
+#endif
         sa.sin_addr.s_addr = in;
         sa.sin_port = 0; /* get any port */
         
@@ -314,7 +327,7 @@ static CURLcode bindlocal(struct connectdata *conn,
 
   return CURLE_HTTP_PORT_FAILED;
 }
-#endif /* end of ipv4-specific section */
+
 
 static
 int socketerror(int sockfd)
@@ -330,21 +343,89 @@ int socketerror(int sockfd)
 }
 
 /*
+ * Curl_is_connected() is used from the multi interface to check if the
+ * firstsocket has connected.
+ */
+
+CURLcode Curl_is_connected(struct connectdata *conn,
+                           int sockfd,
+                           bool *connected)
+{
+  int rc;
+  struct SessionHandle *data = conn->data;
+
+  *connected = FALSE; /* a very negative world view is best */
+
+  if(data->set.timeout || data->set.connecttimeout) {
+    /* there is a timeout set */
+
+    /* Evaluate in milliseconds how much time that has passed */
+    long has_passed = Curl_tvdiff(Curl_tvnow(), data->progress.start);
+
+    /* subtract the most strict timeout of the ones */
+    if(data->set.timeout && data->set.connecttimeout) {
+      if (data->set.timeout < data->set.connecttimeout)
+        has_passed -= data->set.timeout*1000;
+      else 
+        has_passed -= data->set.connecttimeout*1000;
+    }
+    else if(data->set.timeout)
+      has_passed -= data->set.timeout*1000;
+    else
+      has_passed -= data->set.connecttimeout*1000;
+
+    if(has_passed > 0 ) {
+      /* time-out, bail out, go home */
+      failf(data, "Connection time-out");
+      return CURLE_OPERATION_TIMEOUTED;
+    }
+  }
+
+  /* check for connect without timeout as we want to return immediately */
+  rc = waitconnect(sockfd, 0);
+
+  if(0 == rc) {
+    int err = socketerror(sockfd);
+    if ((0 == err) || (EISCONN == err)) {
+      /* we are connected, awesome! */
+      *connected = TRUE;
+      return CURLE_OK;
+    }
+    /* nope, not connected for real */
+    if(err)
+      return CURLE_COULDNT_CONNECT;
+  }
+
+  /*
+   * If the connection phase is "done" here, we should attempt to connect
+   * to the "next address" in the Curl_hostaddr structure that we resolved
+   * before. But we don't have that struct around anymore and we can't just
+   * keep a pointer since the cache might in fact have gotten pruned by the
+   * time we want to read this... Alas, we don't do this yet.
+   */
+
+  return CURLE_OK;
+}
+
+
+/*
  * TCP connect to the given host with timeout, proxy or remote doesn't matter.
  * There might be more than one IP address to try out. Fill in the passed
  * pointer with the connected socket.
  */
 
 CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
-                          Curl_addrinfo *remotehost, /* use one in here */
+                          struct Curl_dns_entry *remotehost, /* use this one */
                           int port,                  /* connect to this */
                           int *sockconn,             /* the connected socket */
-                          Curl_ipconnect **addr)     /* the one we used */
+                          Curl_ipconnect **addr,     /* the one we used */
+                          bool *connected)           /* really connected? */
 {
   struct SessionHandle *data = conn->data;
   int rc;
   int sockfd=-1;
   int aliasindex=0;
+  char *hostname;
 
   struct timeval after;
   struct timeval before = Curl_tvnow();
@@ -353,6 +434,9 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
    * Figure out what maximum time we have left
    *************************************************************/
   long timeout_ms=300000; /* milliseconds, default to five minutes */
+
+  *connected = FALSE; /* default to not connected */
+
   if(data->set.timeout || data->set.connecttimeout) {
     double has_passed;
 
@@ -385,6 +469,13 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
     }
   }
 
+  hostname = data->change.proxy?conn->proxyhost:conn->hostname;
+  infof(data, "About to connect() to %s%s%s:%d\n",
+        conn->bits.ipv6_ip?"[":"",
+        hostname,
+        conn->bits.ipv6_ip?"]":"",
+        port);
+
 #ifdef ENABLE_IPV6
   /*
    * Connecting with IPv6 support is so much easier and cleanly done
@@ -393,10 +484,18 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
     struct addrinfo *ai;
     port =0; /* prevent compiler warning */
 
-    for (ai = remotehost; ai; ai = ai->ai_next, aliasindex++) {
+    for (ai = remotehost->addr; ai; ai = ai->ai_next, aliasindex++) {
       sockfd = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
       if (sockfd < 0)
         continue;
+
+      if(conn->data->set.device) {
+        /* user selected to bind the outgoing socket to a specified "device"
+           before doing connect */
+        CURLcode res = bindlocal(conn, sockfd);
+        if(res)
+          return res;
+      }
 
       /* set socket non-blocking */
       Curl_nonblock(sockfd, TRUE);
@@ -417,17 +516,21 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
         case EAGAIN:
 #endif
         case EINTR:
-
           /* asynchronous connect, wait for connect or timeout */
+          if(data->state.used_interface == Curl_if_multi)
+            /* don't hang when doing multi */
+            timeout_ms = 0;
+
           rc = waitconnect(sockfd, timeout_ms);
           break;
         case ECONNREFUSED: /* no one listening */
         default:
           /* unknown error, fallthrough and try another address! */
-          failf(data, "Failed to connect");
+          failf(data, "Failed connect to %s: %d", hostname, error);
           break;
         }
       }
+
       if(0 == rc) {
         /* we might be connected, if the socket says it is OK! Ask it! */
         int err;
@@ -435,9 +538,16 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
         err = socketerror(sockfd);
         if ((0 == err) || (EISCONN == err)) {
           /* we are connected, awesome! */
+          *connected = TRUE; /* this is truly a connect */
           break;
         }
+        failf(data, "socket error: %d", err);
         /* we are _not_ connected, it was a false alert, continue please */
+      }
+      else if(data->state.used_interface == Curl_if_multi) {
+        /* When running the multi interface, we bail out here */
+        rc = 0;
+        break;
       }
 
       /* connect failed or timed out */
@@ -454,10 +564,8 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
       before = after;
       continue;
     }
-    if (sockfd < 0) {
-      failf(data, "connect() failed");
+    if (sockfd < 0)
       return CURLE_COULDNT_CONNECT;
-    }
 
     /* leave the socket in non-blocking mode */
 
@@ -468,7 +576,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   /*
    * Connecting with IPv4-only support
    */
-  if(!remotehost->h_addr_list[0]) {
+  if(!remotehost->addr->h_addr_list[0]) {
     /* If there is no addresses in the address list, then we return
        error right away */
     failf(data, "no address available");
@@ -495,17 +603,17 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   /* This is the loop that attempts to connect to all IP-addresses we
      know for the given host. One by one. */
   for(rc=-1, aliasindex=0;
-      rc && (struct in_addr *)remotehost->h_addr_list[aliasindex];
+      rc && (struct in_addr *)remotehost->addr->h_addr_list[aliasindex];
       aliasindex++) {
     struct sockaddr_in serv_addr;
 
     /* do this nasty work to do the connect */
     memset((char *) &serv_addr, '\0', sizeof(serv_addr));
     memcpy((char *)&(serv_addr.sin_addr),
-           (struct in_addr *)remotehost->h_addr_list[aliasindex],
+           (struct in_addr *)remotehost->addr->h_addr_list[aliasindex],
            sizeof(struct in_addr));
-    serv_addr.sin_family = remotehost->h_addrtype;
-    serv_addr.sin_port = htons(port);
+    serv_addr.sin_family = remotehost->addr->h_addrtype;
+    serv_addr.sin_port = htons((unsigned short)port);
   
     rc = connect(sockfd, (struct sockaddr *)&serv_addr,
                  sizeof(serv_addr));
@@ -523,13 +631,17 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
          */
       case EAGAIN:
 #endif
-
         /* asynchronous connect, wait for connect or timeout */
+        if(data->state.used_interface == Curl_if_multi)
+          /* don't hang when doing multi */
+          timeout_ms = 0;
+
         rc = waitconnect(sockfd, timeout_ms);
         break;
       default:
         /* unknown error, fallthrough and try another address! */
-        failf(data, "Failed to connect to IP number %d", aliasindex+1);
+        failf(data, "Failed to connect to %s IP number %d: %d",
+              hostname, aliasindex+1, error);
         break;
       }
     }
@@ -538,6 +650,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
       int err = socketerror(sockfd);
       if ((0 == err) || (EISCONN == err)) {
         /* we are connected, awesome! */
+        *connected = TRUE; /* this is a true connect */
         break;
       }
       /* nope, not connected for real */
@@ -545,6 +658,12 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
     }
 
     if(0 != rc) {
+      if(data->state.used_interface == Curl_if_multi) {
+        /* When running the multi interface, we bail out here */
+        rc = 0;
+        break;
+      }
+
       /* get a new timeout for next attempt */
       after = Curl_tvnow();
       timeout_ms -= Curl_tvdiff(after, before);
@@ -561,7 +680,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
     /* no good connect was made */
     sclose(sockfd);
     *sockconn = -1;
-    failf(data, "Couldn't connect to host");
+    failf(data, "Connect failed");
     return CURLE_COULDNT_CONNECT;
   }
 
@@ -569,7 +688,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
 
   if(addr)
     /* this is the address we've connected to */
-    *addr = (struct in_addr *)remotehost->h_addr_list[aliasindex];
+    *addr = (struct in_addr *)remotehost->addr->h_addr_list[aliasindex];
 #endif
 
   /* allow NULL-pointers to get passed in */

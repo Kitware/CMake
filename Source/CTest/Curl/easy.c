@@ -1,25 +1,25 @@
-/*****************************************************************************
+/***************************************************************************
  *                                  _   _ ____  _     
  *  Project                     ___| | | |  _ \| |    
  *                             / __| | | | |_) | |    
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2000, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2002, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
- * In order to be useful for every potential user, curl and libcurl are
- * dual-licensed under the MPL and the MIT/X-derivate licenses.
- *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at http://curl.haxx.se/docs/copyright.html.
+ * 
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
- * furnished to do so, under the terms of the MPL or the MIT/X-derivate
- * licenses. You may pick one of these licenses.
+ * furnished to do so, under the terms of the COPYING file.
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
  * $Id$
- *****************************************************************************/
+ ***************************************************************************/
 
 #include "setup.h"
 
@@ -238,7 +238,7 @@ CURLcode curl_easy_perform(CURL *curl)
       data->hostcache = Curl_global_host_cache_get();
     }
     else {
-      data->hostcache = curl_hash_alloc(7, Curl_freeaddrinfo);
+      data->hostcache = Curl_hash_alloc(7, Curl_freeaddrinfo);
     }
   }
 
@@ -249,7 +249,7 @@ void curl_easy_cleanup(CURL *curl)
 {
   struct SessionHandle *data = (struct SessionHandle *)curl;
   if (!Curl_global_host_cache_use(data)) {
-    curl_hash_destroy(data->hostcache);
+    Curl_hash_destroy(data->hostcache);
   }
   Curl_close(data);
 }
@@ -312,7 +312,8 @@ CURL *curl_easy_duphandle(CURL *incurl)
     /* If cookies are enabled in the parent handle, we enable them
        in the clone as well! */
     outcurl->cookies = Curl_cookie_init(data->cookies->filename,
-                                        outcurl->cookies);
+                                        outcurl->cookies,
+                                        data->set.cookiesession);
 
   /* duplicate all values in 'change' */
   if(data->change.url) {

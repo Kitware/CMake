@@ -1,36 +1,40 @@
-/*****************************************************************************
+/***************************************************************************
  *                                  _   _ ____  _     
  *  Project                     ___| | | |  _ \| |    
  *                             / __| | | | |_) | |    
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2001, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2002, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
- * In order to be useful for every potential user, curl and libcurl are
- * dual-licensed under the MPL and the MIT/X-derivate licenses.
- *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at http://curl.haxx.se/docs/copyright.html.
+ * 
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
- * furnished to do so, under the terms of the MPL or the MIT/X-derivate
- * licenses. You may pick one of these licenses.
+ * furnished to do so, under the terms of the COPYING file.
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
  * $Id$
- *****************************************************************************/
+ ***************************************************************************/
 
 #include "setup.h"
 #include <stdlib.h>
 #include <string.h>
 #include <curl/curl.h>
 
-#include "multi.h" /* will become <curl/multi.h> soon */
-
 #include "urldata.h"
 #include "transfer.h"
 #include "url.h"
+#include "connect.h"
+
+/* The last #include file should be: */
+#ifdef MALLOCDEBUG
+#include "memdebug.h"
+#endif
 
 struct Curl_message {
   /* the 'CURLMsg' is the part that is visible to the external user */
@@ -40,11 +44,13 @@ struct Curl_message {
 
 typedef enum {
   CURLM_STATE_INIT,
-  CURLM_STATE_CONNECT,
-  CURLM_STATE_DO,
-  CURLM_STATE_PERFORM,
-  CURLM_STATE_DONE,
-  CURLM_STATE_COMPLETED,
+  CURLM_STATE_CONNECT,     /* connect has been sent off */
+  CURLM_STATE_WAITCONNECT, /* we're awaiting the connect to finalize */
+  CURLM_STATE_DO,          /* send off the request (part 1) */
+  CURLM_STATE_DO_MORE,     /* send off the request (part 2) */
+  CURLM_STATE_PERFORM,     /* transfer data */
+  CURLM_STATE_DONE,        /* post data transfer operation */
+  CURLM_STATE_COMPLETED,   /* operation complete */
 
   CURLM_STATE_LAST /* not a true state, never use this */
 } CURLMstate;
@@ -59,6 +65,13 @@ struct Curl_one_easy {
 
   CURLMstate state;  /* the handle's state */
   CURLcode result;   /* previous result */
+
+  struct Curl_message *msg; /* A pointer to one single posted message.
+                               Cleanup should be done on this pointer NOT on
+                               the linked list in Curl_multi.  This message
+                               will be deleted when this handle is removed
+                               from the multi-handle */
+  int msg_num; /* number of messages left in 'msg' to return */
 };
 
 
@@ -78,10 +91,8 @@ struct Curl_multi {
   /* This is the amount of entries in the linked list above. */
   int num_easy;
 
-  /* this is a linked list of posted messages */
-  struct Curl_message *msgs;
-  /* amount of messages in the queue */
-  int num_msgs;
+  int num_msgs; /* total amount of messages in the easy handles */
+
   /* Hostname cache */
   curl_hash *hostcache;
 };
@@ -171,6 +182,9 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
     /* If the 'state' is not INIT or COMPLETED, we might need to do something
        nice to put the easy_handle in a good known state when this returns. */
 
+    /* clear out the usage of the shared DNS cache */
+    easy->easy_handle->hostcache = NULL;
+    
     /* make the previous node point to our next */
     if(easy->prev)
       easy->prev->next = easy->next;
@@ -180,6 +194,8 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
     
     /* NOTE NOTE NOTE
        We do not touch the easy handle here! */
+    if (easy->msg)
+      free(easy->msg);
     free(easy);
 
     multi->num_easy--; /* one less to care about now */
@@ -211,6 +227,32 @@ CURLMcode curl_multi_fdset(CURLM *multi_handle,
     switch(easy->state) {
     default:
       break;
+    case CURLM_STATE_WAITCONNECT:
+    case CURLM_STATE_DO_MORE:
+      {
+        /* when we're waiting for a connect, we wait for the socket to
+           become writable */
+        struct connectdata *conn = easy->easy_conn;
+        int sockfd;
+
+        if(CURLM_STATE_WAITCONNECT == easy->state) {
+          sockfd = conn->firstsocket;
+          FD_SET(sockfd, write_fd_set);
+        }
+        else {
+          /* When in DO_MORE state, we could be either waiting for us
+             to connect to a remote site, or we could wait for that site
+             to connect to us. It makes a difference in the way: if we
+             connect to the site we wait for the socket to become writable, if 
+             the site connects to us we wait for it to become readable */
+          sockfd = conn->secondarysocket;
+          FD_SET(sockfd, write_fd_set);
+        }
+
+        if(sockfd > *max_fd)
+          *max_fd = sockfd;
+      }
+      break;
     case CURLM_STATE_PERFORM:
       /* This should have a set of file descriptors for us to set.  */
       /* after the transfer is done, go DONE */
@@ -237,6 +279,8 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
   struct Curl_one_easy *easy;
   bool done;
   CURLMcode result=CURLM_OK;
+  struct Curl_message *msg = NULL;
+  bool connected;
 
   *running_handles = 0; /* bump this once for every living handle */
 
@@ -245,14 +289,23 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
 
   easy=multi->easy.next;
   while(easy) {
+
+#ifdef MALLOCDEBUG
+    fprintf(stderr, "HANDLE %p: State: %x\n",
+            (char *)easy, easy->state);
+#endif
+
     switch(easy->state) {
     case CURLM_STATE_INIT:
       /* init this transfer. */
       easy->result=Curl_pretransfer(easy->easy_handle);
+
       if(CURLE_OK == easy->result) {
         /* after init, go CONNECT */
         easy->state = CURLM_STATE_CONNECT;
         result = CURLM_CALL_MULTI_PERFORM; 
+        
+        easy->easy_handle->state.used_interface = Curl_if_multi;
       }
       break;
     case CURLM_STATE_CONNECT:
@@ -261,7 +314,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
       }
       else {
         if (multi->hostcache == NULL) {
-          multi->hostcache = curl_hash_alloc(7, Curl_freeaddrinfo);
+          multi->hostcache = Curl_hash_alloc(7, Curl_freeaddrinfo);
         }
 
         easy->easy_handle->hostcache = multi->hostcache;
@@ -270,43 +323,133 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
       /* Connect. We get a connection identifier filled in. */
       easy->result = Curl_connect(easy->easy_handle, &easy->easy_conn);
 
-      /* after connect, go DO */
+      /* after the connect has been sent off, go WAITCONNECT */
       if(CURLE_OK == easy->result) {
-        easy->state = CURLM_STATE_DO;
+        easy->state = CURLM_STATE_WAITCONNECT;
         result = CURLM_CALL_MULTI_PERFORM; 
       }
       break;
+
+    case CURLM_STATE_WAITCONNECT:
+      {
+        bool connected;
+        easy->result = Curl_is_connected(easy->easy_conn,
+                                         easy->easy_conn->firstsocket,
+                                         &connected);
+        if(connected)
+          easy->result = Curl_protocol_connect(easy->easy_conn, NULL);
+
+        if(CURLE_OK != easy->result) {
+          /* failure detected */
+          Curl_disconnect(easy->easy_conn); /* close the connection */
+          easy->easy_conn = NULL;           /* no more connection */
+          break;
+        }
+
+        if(connected) {
+          /* after the connect has completed, go DO */
+          easy->state = CURLM_STATE_DO;
+          result = CURLM_CALL_MULTI_PERFORM; 
+        }
+      }
+      break;
+
     case CURLM_STATE_DO:
       /* Do the fetch or put request */
       easy->result = Curl_do(&easy->easy_conn);
-      /* after do, go PERFORM */
       if(CURLE_OK == easy->result) {
-        if(CURLE_OK == Curl_readwrite_init(easy->easy_conn)) {
+
+        /* after do, go PERFORM... or DO_MORE */
+        if(easy->easy_conn->bits.do_more) {
+          /* we're supposed to do more, but we need to sit down, relax
+             and wait a little while first */
+          easy->state = CURLM_STATE_DO_MORE;
+          result = CURLM_OK;
+        }
+        else {
+          /* we're done with the DO, now PERFORM */
+          easy->result = Curl_readwrite_init(easy->easy_conn);
+          if(CURLE_OK == easy->result) {
+            easy->state = CURLM_STATE_PERFORM;
+            result = CURLM_CALL_MULTI_PERFORM; 
+          }
+        }
+      }
+      break;
+
+    case CURLM_STATE_DO_MORE:
+      /*
+       * First, check if we really are ready to do more.
+       */
+      easy->result = Curl_is_connected(easy->easy_conn,
+                                       easy->easy_conn->secondarysocket,
+                                       &connected);
+      if(connected) {
+        /*
+         * When we are connected, DO MORE and then go PERFORM
+         */
+        easy->result = Curl_do_more(easy->easy_conn);
+
+        if(CURLE_OK == easy->result)
+          easy->result = Curl_readwrite_init(easy->easy_conn);
+
+        if(CURLE_OK == easy->result) {
           easy->state = CURLM_STATE_PERFORM;
           result = CURLM_CALL_MULTI_PERFORM; 
         }
       }
       break;
+
     case CURLM_STATE_PERFORM:
       /* read/write data if it is ready to do so */
       easy->result = Curl_readwrite(easy->easy_conn, &done);
-      /* hm, when we follow redirects, we may need to go back to the CONNECT
-         state */
+
+      if(easy->result)  {
+        /* The transfer phase returned error, we mark the connection to get
+         * closed to prevent being re-used. This is becasue we can't
+         * possibly know if the connection is in a good shape or not now. */
+        easy->easy_conn->bits.close = TRUE;
+
+        if(-1 !=easy->easy_conn->secondarysocket) {
+          /* if we failed anywhere, we must clean up the secondary socket if
+             it was used */
+          sclose(easy->easy_conn->secondarysocket);
+          easy->easy_conn->secondarysocket=-1;
+        }
+        Curl_posttransfer(easy->easy_handle);
+        Curl_done(easy->easy_conn);
+      }
+
       /* after the transfer is done, go DONE */
-      if(TRUE == done) {
+      else if(TRUE == done) {
+
         /* call this even if the readwrite function returned error */
-        easy->result = Curl_posttransfer(easy->easy_handle);
-        easy->state = CURLM_STATE_DONE;
-        result = CURLM_CALL_MULTI_PERFORM; 
+        Curl_posttransfer(easy->easy_handle);
+
+        /* When we follow redirects, must to go back to the CONNECT state */
+        if(easy->easy_conn->newurl) {
+          easy->result = Curl_follow(easy->easy_handle,
+                                     strdup(easy->easy_conn->newurl));
+          if(CURLE_OK == easy->result) {
+            easy->state = CURLM_STATE_CONNECT;
+            result = CURLM_CALL_MULTI_PERFORM;
+          }
+        }
+        else {
+          easy->state = CURLM_STATE_DONE;
+          result = CURLM_CALL_MULTI_PERFORM; 
+        }
       }
       break;
     case CURLM_STATE_DONE:
       /* post-transfer command */
       easy->result = Curl_done(easy->easy_conn);
-      /* after we have DONE what we're supposed to do, go COMPLETED */
-      if(CURLE_OK == easy->result)
-        easy->state = CURLM_STATE_COMPLETED;
+
+      /* after we have DONE what we're supposed to do, go COMPLETED, and
+         it doesn't matter what the Curl_done() returned! */
+      easy->state = CURLM_STATE_COMPLETED;
       break;
+
     case CURLM_STATE_COMPLETED:
       /* this is a completed transfer, it is likely to still be connected */
 
@@ -317,30 +460,66 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
       return CURLM_INTERNAL_ERROR;
     }
 
-    if((CURLM_STATE_COMPLETED != easy->state) &&
-       (CURLE_OK != easy->result)) {
-      /*
-       * If an error was returned, and we aren't in completed now,
-       * then we go to completed and consider this transfer aborted.
-       */
-      easy->state = CURLM_STATE_COMPLETED;
+    if(CURLM_STATE_COMPLETED != easy->state) {
+      if(CURLE_OK != easy->result)
+        /*
+         * If an error was returned, and we aren't in completed state now,
+         * then we go to completed and consider this transfer aborted.  */
+        easy->state = CURLM_STATE_COMPLETED;
+      else
+        /* this one still lives! */
+        (*running_handles)++;
     }
-    else if(CURLM_STATE_COMPLETED != easy->state)
-      /* this one still lives! */
-      (*running_handles)++;
+
+    if ((CURLM_STATE_COMPLETED == easy->state) && !easy->msg) {
+      /* clear out the usage of the shared DNS cache */
+      easy->easy_handle->hostcache = NULL;
+
+      /* now add a node to the Curl_message linked list with this info */
+      msg = (struct Curl_message *)malloc(sizeof(struct Curl_message));
+
+      if(!msg)
+        return CURLM_OUT_OF_MEMORY;
+
+      msg->extmsg.msg = CURLMSG_DONE;
+      msg->extmsg.easy_handle = easy->easy_handle;
+      msg->extmsg.data.result = easy->result;
+      msg->next=NULL;
+
+      easy->msg = msg;
+      easy->msg_num = 1; /* there is one unread message here */
+
+      multi->num_msgs++; /* increase message counter */
+    }
 
     easy = easy->next; /* operate on next handle */
   }
+
   return result;
 }
 
 CURLMcode curl_multi_cleanup(CURLM *multi_handle)
 {
   struct Curl_multi *multi=(struct Curl_multi *)multi_handle;
+  struct Curl_one_easy *easy;
+  struct Curl_one_easy *nexteasy;
+
   if(GOOD_MULTI_HANDLE(multi)) {
     multi->type = 0; /* not good anymore */
-    curl_hash_destroy(multi->hostcache);
+    Curl_hash_destroy(multi->hostcache);
+
     /* remove all easy handles */
+    easy = multi->easy.next;
+    while(easy) {
+      nexteasy=easy->next;
+      /* clear out the usage of the shared DNS cache */
+      easy->easy_handle->hostcache = NULL;
+
+      if (easy->msg)
+        free(easy->msg);
+      free(easy);
+      easy = nexteasy;
+    }
 
     free(multi);
 
@@ -350,7 +529,35 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
     return CURLM_BAD_HANDLE;
 }
 
-CURLMsg *curl_multi_info_read(CURLM *multi_handle, int *msgs_in_queue);
+CURLMsg *curl_multi_info_read(CURLM *multi_handle, int *msgs_in_queue)
+{
+  struct Curl_multi *multi=(struct Curl_multi *)multi_handle;
+
+  if(GOOD_MULTI_HANDLE(multi)) {
+    struct Curl_one_easy *easy;
+    
+    if(!multi->num_msgs)
+      return NULL; /* no messages left to return */
+
+    easy=multi->easy.next;
+    while(easy) {
+      if(easy->msg_num) {
+        easy->msg_num--;
+        break;
+      }
+      easy = easy->next;
+    }
+    if(!easy)
+      return NULL; /* this means internal count confusion really */
+
+    multi->num_msgs--;
+    *msgs_in_queue = multi->num_msgs;
+
+    return &easy->msg->extmsg;
+  }
+  else
+    return NULL;
+}
 
 /*
  * local variables:

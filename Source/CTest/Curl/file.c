@@ -1,28 +1,29 @@
-/*****************************************************************************
+/***************************************************************************
  *                                  _   _ ____  _     
  *  Project                     ___| | | |  _ \| |    
  *                             / __| | | | |_) | |    
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2000, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2002, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
- * In order to be useful for every potential user, curl and libcurl are
- * dual-licensed under the MPL and the MIT/X-derivate licenses.
- *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at http://curl.haxx.se/docs/copyright.html.
+ * 
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
- * furnished to do so, under the terms of the MPL or the MIT/X-derivate
- * licenses. You may pick one of these licenses.
+ * furnished to do so, under the terms of the COPYING file.
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
  * $Id$
- *****************************************************************************/
+ ***************************************************************************/
 
 #include "setup.h"
 
+#ifndef CURL_DISABLE_FILE
 /* -- WIN32 approved -- */
 #include <stdio.h>
 #include <string.h>
@@ -140,7 +141,7 @@ CURLcode Curl_file(struct connectdata *conn)
   */
   CURLcode res = CURLE_OK;
   struct stat statbuf;
-  ssize_t expected_size=-1;
+  double expected_size=-1;
   ssize_t nread;
   struct SessionHandle *data = conn->data;
   char *buf = data->state.buffer;
@@ -155,8 +156,18 @@ CURLcode Curl_file(struct connectdata *conn)
 /*VMS?? -- This only works reliable for STREAMLF files */
   if( -1 != fstat(fd, &statbuf)) {
     /* we could stat it, then read out the size */
-    expected_size = statbuf.st_size;
+    expected_size = (double)statbuf.st_size;
   }
+
+  /* Added by Dolbneff A.V & Spiridonoff A.V */
+  if (conn->resume_from <= expected_size)
+    expected_size -= conn->resume_from;
+  else
+    /* Is this error code suitable in such situation? */
+    return CURLE_FTP_BAD_DOWNLOAD_RESUME;
+
+  if (expected_size == 0)
+    return CURLE_OK;
 
   /* The following is a shortcut implementation of file reading
      this is both more efficient than the former call to download() and
@@ -164,6 +175,10 @@ CURLcode Curl_file(struct connectdata *conn)
      in Winsock */
   if(expected_size != -1)
     Curl_pgrsSetDownloadSize(data, expected_size);
+
+  if(conn->resume_from)
+    /* Added by Dolbneff A.V & Spiridonoff A.V */
+    lseek(fd, conn->resume_from, SEEK_SET);
 
   while (res == CURLE_OK) {
     nread = read(fd, buf, BUFSIZE-1);
@@ -204,3 +219,4 @@ CURLcode Curl_file(struct connectdata *conn)
  * vim600: fdm=marker
  * vim: et sw=2 ts=2 sts=2 tw=78
  */
+#endif

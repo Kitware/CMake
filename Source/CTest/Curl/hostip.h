@@ -1,28 +1,29 @@
 #ifndef __HOSTIP_H
 #define __HOSTIP_H
-/*****************************************************************************
+/***************************************************************************
  *                                  _   _ ____  _     
  *  Project                     ___| | | |  _ \| |    
  *                             / __| | | | |_) | |    
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2000, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2002, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
- * In order to be useful for every potential user, curl and libcurl are
- * dual-licensed under the MPL and the MIT/X-derivate licenses.
- *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at http://curl.haxx.se/docs/copyright.html.
+ * 
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
- * furnished to do so, under the terms of the MPL or the MIT/X-derivate
- * licenses. You may pick one of these licenses.
+ * furnished to do so, under the terms of the COPYING file.
  *
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
  * $Id$
- *****************************************************************************/
+ ***************************************************************************/
 
+#include "setup.h"
 #include "hash.h"
 
 struct addrinfo;
@@ -35,16 +36,34 @@ curl_hash *Curl_global_host_cache_get(void);
 
 #define Curl_global_host_cache_use(__p) ((__p)->set.global_dns_cache)
 
-Curl_addrinfo *Curl_resolv(struct SessionHandle *data,
-                           char *hostname,
-                           int port,
-                           char **bufp);
+struct Curl_dns_entry {
+  Curl_addrinfo *addr;
+  time_t timestamp;
+  long inuse;      /* use-counter, make very sure you decrease this
+                      when you're done using the address you received */
+#ifdef MALLOCDEBUG
+  char *entry_id;
+#endif
+};
 
-/* Get name info */
-Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
-                                char *hostname,
-                                int port,
-                                char **bufp);
+/*
+ * Curl_resolv() returns an entry with the info for the specified host
+ * and port.
+ *
+ * The returned data *MUST* be "unlocked" with Curl_resolv_unlock() after
+ * use, or we'll leak memory!
+ */
+
+struct Curl_dns_entry *Curl_resolv(struct SessionHandle *data,
+                                   char *hostname,
+                                   int port);
+
+/* unlock a previously resolved dns entry */
+#define Curl_resolv_unlock(dns) dns->inuse--
+
+/* for debugging purposes only: */
+void Curl_scan_cache_used(void *user, void *ptr);
+
 /* free name info */
 void Curl_freeaddrinfo(void *freethis);
 
