@@ -565,10 +565,16 @@ void cmMainFrame::Initialize(cmCommandLineInfo* cmdInfo)
   this->LoadFromRegistry();
   std::vector<std::string> names;
   this->m_CMakeInstance->GetRegisteredGenerators(names);
+  int cc = 0;
   for(std::vector<std::string>::iterator i = names.begin();
       i != names.end(); ++i)
     {
     this->m_GeneratorMenu->Append(i->c_str());
+    if ( *i == "Unix Makefiles" )
+      {
+      this->m_GeneratorMenu->SetSelection(cc);
+      }
+    cc ++;
     }
 
   //{{AFX_DATA_INIT(CMakeSetupDialog)
@@ -731,6 +737,19 @@ void cmMainFrame::UpdateSourceBuildMenus()
 
 void cmMainFrame::RunCMake(bool generateProjectFiles)
 {
+  if(this->m_GeneratorMenu->GetSelection() < 0 ||
+     std::string(this->m_GeneratorMenu->GetValue().c_str()) == "") 
+    {
+    std::string bindir = this->GetBinaryDir();
+    if ( bindir.find("-") != bindir.npos )
+      {
+      std::string message = 
+        "Generator not specified. Please specify the generator for\n"
+        "building the project.";
+      wxMessageBox(message.c_str(), "CMake Error", wxICON_ERROR | wxOK );
+      return;
+      }
+    }
   if(std::string(this->m_GeneratorMenu->GetValue().c_str()) == "Borland Makefiles") 
     {
     std::string bindir = this->GetBinaryDir();
