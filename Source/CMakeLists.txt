@@ -133,6 +133,11 @@ IF(BUILD_TESTING)
       ${CMake_BINARY_DIR}/Tests/COnly 
       conly)
 
+    ADD_TEST(LoadedCommand ${CMake_BINARY_DIR}/Source/cmaketest 
+      ${CMake_SOURCE_DIR}/Tests/LoadCommand 
+      ${CMake_BINARY_DIR}/Tests/LoadCommand 
+      LoadedCommand)
+
     ADD_TEST(complex ${CMake_BINARY_DIR}/Source/cmaketest 
       ${CMake_SOURCE_DIR}/Tests/Complex 
       ${CMake_BINARY_DIR}/Tests/Complex 
