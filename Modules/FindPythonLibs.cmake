@@ -23,6 +23,7 @@ FIND_LIBRARY(PYTHON_LIBRARY
   NAMES python python21 python2.1 python20 python2.0
   PATHS
   /usr/lib
+  /usr/lib/python1.5/config
   /usr/lib/python2.1/config
   /usr/lib/python2.0/config
   /usr/local/lib
@@ -32,6 +33,7 @@ FIND_LIBRARY(PYTHON_LIBRARY
 
 FIND_PATH(PYTHON_INCLUDE_PATH Python.h
   /usr/include
+  /usr/include/python1.5
   /usr/include/python2.1
   /usr/include/python2.0
   /usr/local/include
