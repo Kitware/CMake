@@ -210,6 +210,11 @@ kwsysProcess* kwsysProcess_New()
   
   /* Allocate a process control structure.  */
   cp = (kwsysProcess*)malloc(sizeof(kwsysProcess));
+  if(!cp)
+    {
+    /* Could not allocate memory for the control structure.  */
+    return 0;
+    }
   ZeroMemory(cp, sizeof(*cp));
   
   /* Set initial status.  */
