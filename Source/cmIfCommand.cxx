@@ -45,29 +45,20 @@ bool cmIfFunctionBlocker::
 IsFunctionBlocked(const char *name, const std::vector<std::string> &args, 
                   const cmMakefile &mf) const
 {
-  if (strcmp(name,"ELSE") && strcmp(name,"ENDIF"))
+  if (!strcmp(name,"ELSE") || !strcmp(name,"ENDIF"))
     {
-    return true;
-    }
-  if (m_Not && args.size() == 2)
-    {
-    if (strcmp(args[0].c_str(),"NOT"))
+    if (m_Not && (args.size() == 2) && !strcmp(args[0].c_str(),"NOT") &&
+        !strcmp(args[1].c_str(),m_Define.c_str()))
       {
-      return true;
+      return false;
       }
-    if (strcmp(args[1].c_str(),m_Define.c_str()))
+    if (!m_Not && (args.size() == 1) && 
+        !strcmp(args[0].c_str(),m_Define.c_str()))
       {
-      return true;
+      return false;
       }
     }
-  else
-    {
-    if (strcmp(args[0].c_str(),m_Define.c_str()))
-      {
-      return true;
-      }
-    }
-  return false;
+  return true;
 }
 
 bool cmIfFunctionBlocker::
@@ -85,7 +76,7 @@ bool cmIfCommand::Invoke(std::vector<std::string>& args)
     return false;
     }
 
-  // check for the NOT vale
+  // check for the NOT value
   const char *def;
   if (args.size() == 2 && (args[0] == "NOT"))
     {
