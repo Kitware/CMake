@@ -90,9 +90,7 @@ protected:
   void WriteSpecialTargetsBottom(std::ostream& makefileStream);
   void WriteRuleFileIncludes(std::ostream& makefileStream);
   void WriteAllRules(std::ostream& makefileStream);
-  void WritePassRules(std::ostream& makefileStream,
-                      const char* pass, const char* comment,
-                      const std::vector<std::string>& depends);
+  void WritePassRules(std::ostream& makefileStream, const char* pass);
   void WriteDriverRules(std::ostream& makefileStream, const char* pass,
                         const char* local1, const char* local2=0);
   void WriteSubdirRules(std::ostream& makefileStream, const char* pass);
@@ -100,6 +98,8 @@ protected:
                        const char* subdir, std::string& last);
   void WriteSubdirDriverRule(std::ostream& makefileStream, const char* pass,
                              const char* order, const std::string& last);
+  void WriteLocalRule(std::ostream& ruleFileStream, const char* pass,
+                      const char* dependency);
   void WriteConvenienceRules(std::ostream& ruleFileStream,
                              const cmTarget& target,
                              const char* targetOutPath);
@@ -154,6 +154,7 @@ protected:
   void WriteTargetRequiresRule(std::ostream& ruleFileStream,
                                const cmTarget& target,
                                const std::vector<std::string>& provides_requires);
+  void WriteLocalCleanRule(std::ostream& makefileStream);
   void WriteCMakeArgument(std::ostream& os, const char* s);
   std::string GetTargetDirectory(const cmTarget& target);
   std::string GetSubdirTargetName(const char* pass, const char* subdir);
@@ -210,12 +211,6 @@ private:
 
   // Set of custom rule files that have been generated.
   std::set<cmStdString> m_CustomRuleFiles;
-
-  // List of target-level rules for each pass.  These are populated by
-  // target rule file writing methods.
-  std::vector<std::string> m_DependTargets;
-  std::vector<std::string> m_BuildTargets;
-  std::vector<std::string> m_CleanTargets;
 
   // The prefix required of a path to be converted to a relative path.
   // No sequence of ../.. will ever go past this path.
