@@ -220,12 +220,12 @@ public:
   /**
    * Index to start of first find.
    */
-  inline long start() const;
+  inline std::string::size_type start() const;
 
   /**
    * Index to end of first find.
    */
-  inline long end() const;
+  inline std::string::size_type end() const;
 
   /**
    * Returns true if two regular expressions have the same
@@ -259,8 +259,8 @@ public:
    * Destructor.
    */
   // awf added
-  int start(int n) const;
-  int end(int n) const;
+  std::string::size_type start(int n) const;
+  std::string::size_type end(int n) const;
   std::string match(int n) const;
   
 private: 
@@ -306,7 +306,7 @@ inline cmRegularExpression::~cmRegularExpression ()
 /**
  * Set the start position for the regular expression.
  */
-inline long cmRegularExpression::start () const 
+inline std::string::size_type cmRegularExpression::start () const 
 {
   return(this->startp[0] - searchstring);
 }
@@ -315,7 +315,7 @@ inline long cmRegularExpression::start () const
 /**
  * Returns the start/end index of the last item found.
  */
-inline long cmRegularExpression::end () const 
+inline std::string::size_type cmRegularExpression::end () const 
 {
   return(this->endp[0] - searchstring);
 }
@@ -350,7 +350,7 @@ inline void cmRegularExpression::set_invalid ()
 /**
  * Return start index of nth submatch. start(0) is the start of the full match.
  */
-inline int cmRegularExpression::start(int n) const
+inline std::string::size_type cmRegularExpression::start(int n) const
 {
   return this->startp[n] - searchstring;
 }
@@ -359,7 +359,7 @@ inline int cmRegularExpression::start(int n) const
 /**
  * Return end index of nth submatch. end(0) is the end of the full match.
  */
-inline int cmRegularExpression::end(int n) const
+inline std::string::size_type cmRegularExpression::end(int n) const
 {
   return this->endp[n] - searchstring;
 }

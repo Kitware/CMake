@@ -179,9 +179,9 @@ void cmSystemTools::ReplaceString(std::string& source,
                                    const char* replace,
                                    const char* with)
 {
-  int lengthReplace = strlen(replace);
+  std::string::size_type lengthReplace = strlen(replace);
   std::string rest;
-  size_t start = source.find(replace);
+  std::string::size_type start = source.find(replace);
   while(start != std::string::npos)
     {
     rest = source.substr(start+lengthReplace);
@@ -393,7 +393,7 @@ std::string cmSystemTools::UpperCase(const std::string& s)
 }
 
 
-// convert windows slashes to unix slashes \ with /
+// convert windows slashes to unix slashes 
 void cmSystemTools::ConvertToUnixSlashes(std::string& path)
 {
   std::string::size_type pos = 0;

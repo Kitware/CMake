@@ -27,7 +27,7 @@
 cmMSDotNETGenerator::cmMSDotNETGenerator()
 {
   m_Configurations.push_back("Debug");
-//  m_Configurations.push_back("Release");
+  m_Configurations.push_back("Release");
 //  m_Configurations.push_back("MinSizeRel");
 //  m_Configurations.push_back("RelWithDebInfo");
   // default to building a sln project file
@@ -66,7 +66,7 @@ void cmMSDotNETGenerator::ComputeSystemInfo()
     }
   std::string fpath = 
     m_Makefile->GetDefinition("CMAKE_ROOT");
-  fpath += "/Templates/CMakeWindowsSystemConfig.cmake";
+  fpath += "/Templates/CMakeDotNetSystemConfig.cmake";
   m_Makefile->ReadListFile(NULL,fpath.c_str());
 }
 
@@ -742,7 +742,9 @@ void cmMSDotNETGenerator::WriteConfiguration(std::ostream& fout,
 
   fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCCustomBuildTool\"/>\n";
   fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCMIDLTool\"/>\n";
-  fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCPostBuildEventTool\"/>\n";
+  fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCPostBuildEventTool\"";
+  this->OutputTargetRules(fout, target, libName);
+  fout << "/>\n";
   fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCPreBuildEventTool\"/>\n";
   this->OutputBuildTool(fout, configName, libName, target);
   fout << "\t\t</Configuration>\n";
@@ -838,7 +840,7 @@ void cmMSDotNETGenerator::OutputLibraryDirectories(std::ostream& fout,
         {
         fout << ",";
         }
-      fout << lpath;
+      fout << lpath << "\\$(INTDIR)," << lpath;
       hasone = true;
       }
     }
@@ -873,13 +875,17 @@ void cmMSDotNETGenerator::OutputDefineFlags(std::ostream& fout)
   std::string defs = m_Makefile->GetDefineFlags();
   std::string::size_type pos = defs.find("-D");
   bool done = pos == std::string::npos;
+  if(!done)
+    {
+    fout << ",";
+    }
   while(!done)
     {
     std::string::size_type nextpos = defs.find("-D", pos+2);
     std::string define;
     if(nextpos != std::string::npos)
       {
-      define = defs.substr(pos+2, nextpos - pos -2);
+      define = defs.substr(pos+2, nextpos - pos -3);
       }
     else
       {
@@ -1113,15 +1119,14 @@ cmMSDotNETGenerator::CombineCommands(const cmSourceGroup::Commands &commands,
 
 
 // look for custom rules on a target and collect them together
-std::string 
-cmMSDotNETGenerator::CreateTargetRules(const cmTarget &target, 
-                               const char *libName)
-{
-  std::string customRuleCode = "";
 
+void cmMSDotNETGenerator::OutputTargetRules(std::ostream& fout,
+                                            const cmTarget &target, 
+                                            const char *libName)
+{
   if (target.GetType() >= cmTarget::UTILITY)
     {
-    return customRuleCode;
+    return;
     }
   
   // Find the group in which the lix exe custom rules belong
@@ -1134,25 +1139,18 @@ cmMSDotNETGenerator::CreateTargetRules(const cmTarget &target,
     cc.ExpandVariables(*m_Makefile);
     if (cc.GetSourceName() == libName)
       {
-      if (!init)
+      if(!init)
         {
-        // header stuff
-        customRuleCode = "# Begin Special Build Tool\nPostBuild_Cmds=";
+        fout << "\nCommandLine=\"";
         init = true;
         }
-      else
-        {
-        customRuleCode += "\t";
-        }
-      customRuleCode += cc.GetCommand() + " " + cc.GetArguments();
+      fout << cc.GetCommand() << " " << cc.GetArguments() << "\n";
       }
     }
-
   if (init)
     {
-    customRuleCode += "\n# End Special Build Tool\n";
+    fout << "\"";
     }
-  return customRuleCode;
 }
 
 void cmMSDotNETGenerator::WriteProjectStart(std::ostream& fout, const char *libName,

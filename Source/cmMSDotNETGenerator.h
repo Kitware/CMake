@@ -112,8 +112,9 @@ private:
                        const std::set<std::string>& depends,
                        const std::set<std::string>& outputs);
 
-  std::string CreateTargetRules(const cmTarget &target, 
-                                const char *libName);
+  void OutputTargetRules(std::ostream& fout,
+                         const cmTarget &target, 
+                         const char *libName);
   std::string CombineCommands(const cmSourceGroup::Commands &commands,
                               cmSourceGroup::CommandFiles &totalCommand,
                               const char *source);
