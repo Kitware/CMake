@@ -66,7 +66,7 @@ bool cmBuildCommand::InitialPass(std::vector<std::string>& args)
     makecommand += "\"";
     makecommand += " ";
     makecommand += m_Makefile->GetProjectName();
-    makecommand += ".dsw /MAKE \"ALL_BUILD - Release\" /REBUILD";
+    makecommand += ".dsw /MAKE \"ALL_BUILD - Release\" ";
     }
   else
     {
