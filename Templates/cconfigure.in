@@ -214,7 +214,7 @@ case $system in
 	CMAKE_SHLIB_BUILD_FLAGS="-shared -rdata_shared"
 	CMAKE_MODULE_BUILD_FLAGS="-shared -rdata_shared"
         CMAKE_SHLIB_RUNTIME_FLAG="-Wl,-rpath,"
-        CMAKE_SHLIB_RUNTIME_SEP=":"
+        CMAKE_SHLIB_RUNTIME_SEP=""
 	;;
     IRIX-6* | IRIX64-6* | IRIX-64-6*)
 	CMAKE_SHLIB_CFLAGS=""
@@ -225,7 +225,7 @@ case $system in
 	CMAKE_SHLIB_BUILD_FLAGS="-shared -rdata_shared"
 	CMAKE_MODULE_BUILD_FLAGS="-shared -rdata_shared"
         CMAKE_SHLIB_RUNTIME_FLAG="-Wl,-rpath,"
-        CMAKE_SHLIB_RUNTIME_SEP=":"
+        CMAKE_SHLIB_RUNTIME_SEP=""
 	;;
     Linux*)
 	CMAKE_SHLIB_CFLAGS="-fPIC"
