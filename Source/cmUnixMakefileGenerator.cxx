@@ -133,11 +133,10 @@ void cmUnixMakefileGenerator::OutputMakefile(const char* file)
   this->OutputDependencies(fout);
   this->OutputTargets(fout);
   this->OutputSubDirectoryRules(fout);
-  std::string dependName;
+  std::string dependName = m_Makefile->GetStartOutputDirectory();
+  dependName += "/cmake.depends";
   if(!this->m_CacheOnly)
     {
-    dependName = m_Makefile->GetStartOutputDirectory();
-    dependName += "/cmake.depends";
     std::ofstream dependout(dependName.c_str());
     if(!dependout)
       {

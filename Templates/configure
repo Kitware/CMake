@@ -2809,10 +2809,13 @@ case $system in
     FreeBSD*)
 	CMAKE_USE_PTHREADS=0
 	CMAKE_THREAD_LIBS=""
-	;;
+	;;   
+    CYGWIN_NT*)
+        CMAKE_THREAD_LIBS=""
+	CMAKE_USE_PTHREADS=0
+        ;;
 esac
 fi
-
 
 
 
@@ -2867,7 +2870,7 @@ fi
 # ansi stream files (without the .h)
 if test $ac_cv_prog_gxx = no; then
   echo $ac_n "checking ansi standard C++ stream headers ""... $ac_c" 1>&6
-echo "configure:2871: checking ansi standard C++ stream headers " >&5 
+echo "configure:2874: checking ansi standard C++ stream headers " >&5 
   echo "******"
   rm -rf conftest.*
   cat > conftest.cc <<!
@@ -2888,7 +2891,7 @@ fi
 if test $ac_cv_prog_gxx = no; then
   echo "******"
   echo $ac_n "checking ansi standard namespace support ""... $ac_c" 1>&6
-echo "configure:2892: checking ansi standard namespace support " >&5 
+echo "configure:2895: checking ansi standard namespace support " >&5 
   rm -rf conftest.*
   cat > conftest.cc <<!
 #include <list>
@@ -2916,7 +2919,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:2920: checking for $ac_word" >&5
+echo "configure:2923: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_RUNMAKE'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -2956,7 +2959,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:2960: checking for $ac_word" >&5
+echo "configure:2963: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_CMAKE_AR'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else

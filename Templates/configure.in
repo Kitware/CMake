@@ -386,10 +386,13 @@ case $system in
     FreeBSD*)
 	CMAKE_USE_PTHREADS=0
 	CMAKE_THREAD_LIBS=""
-	;;
+	;;   
+    CYGWIN_NT*)
+        CMAKE_THREAD_LIBS=""
+	CMAKE_USE_PTHREADS=0
+        ;;
 esac
 fi
-
 
 AC_SUBST(CMAKE_USE_SPROC)
 AC_SUBST(CMAKE_USE_PTHREADS)
