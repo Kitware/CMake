@@ -130,12 +130,25 @@ void cmDSWMakefile::WriteProject(std::ostream& fout,
     {
     for(;i!= end; ++i)
       {
-      if (strcmp(i->c_str(),dspname))
+      if(*i != dspname)
         {
         fout << "Begin Project Dependency\n";
         fout << "Project_Dep_Name " << *i << "\n";
         fout << "End Project Dependency\n";
         }
+      }
+    }
+
+  // write utility dependencies.
+  i = project->GetMakefile()->GetUtilities().begin();
+  end = project->GetMakefile()->GetUtilities().end();
+  for(;i!= end; ++i)
+    {
+    if(*i != dspname)
+      {
+      fout << "Begin Project Dependency\n";
+      fout << "Project_Dep_Name " << *i << "\n";
+      fout << "End Project Dependency\n";
       }
     }
   fout << "}}}\n\n";

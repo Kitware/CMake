@@ -38,7 +38,7 @@ public:
    * in the makefile.  These would have been generated
    * by the class cmMakeDepend.
    */
-  void OutputDepends(std::ostream&);
+  void OutputObjectDepends(std::ostream&);
 
 protected:
   void OutputMakefile(const char* file);
@@ -48,7 +48,7 @@ protected:
   void OutputExecutableRules(std::ostream&);
   void OutputSubDirectoryRules(std::ostream&);
   void OutputDependInformation(std::ostream&);
-  void OutputDependLibraries(std::ostream&);
+  void OutputDependencies(std::ostream&);
   void OutputCustomRules(std::ostream&);
 };
 

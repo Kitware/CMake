@@ -106,6 +106,8 @@ void cmMakefile::Print()
   this->PrintStringVector("m_LinkLibraries", m_LinkLibraries);
   this->PrintStringVector("m_LinkLibrariesWin32", m_LinkLibrariesWin32);
   this->PrintStringVector("m_LinkLibrariesUnix", m_LinkLibrariesUnix);
+  this->PrintStringVector("m_Utilities", m_Utilities);
+  this->PrintStringVector("m_UtilityDirectories", m_UtilityDirectories);
 }
 
 // Parse the given CMakeLists.txt file into a list of classes.
@@ -283,6 +285,16 @@ bool cmMakefile::HasExecutables()
       }
     }
   return false;
+}
+
+void cmMakefile::AddUtility(const char* util)
+{
+  m_Utilities.push_back(util);
+}
+
+void cmMakefile::AddUtilityDirectory(const char* dir)
+{
+  m_UtilityDirectories.push_back(dir);
 }
 
 void cmMakefile::AddLinkLibrary(const char* lib)

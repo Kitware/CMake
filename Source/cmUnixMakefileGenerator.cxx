@@ -58,7 +58,7 @@ void cmUnixMakefileGenerator::OutputMakefile(const char* file)
   this->OutputVerbatim(fout);
   this->OutputExecutableRules(fout);
   this->OutputSubDirectoryRules(fout);
-  this->OutputDepends(fout);
+  this->OutputObjectDepends(fout);
   this->OutputCustomRules(fout);
 }
 
@@ -102,7 +102,7 @@ void cmUnixMakefileGenerator::OutputSourceToObjectList(std::ostream& fout)
 
 // output the list of libraries that the executables 
 // in this makefile will depend on.
-void cmUnixMakefileGenerator::OutputDependLibraries(std::ostream& fout)
+void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
 {
   std::vector<std::string>& libs = m_Makefile->GetLinkLibraries();
   std::vector<std::string>& libdirs = m_Makefile->GetLinkDirectories();
@@ -126,6 +126,29 @@ void cmUnixMakefileGenerator::OutputDependLibraries(std::ostream& fout)
         libpath += *lib;
         libpath += "${CMAKE_LIB_EXT}";
         fout << libpath << " ";
+        found = true;
+        }
+      }
+    }
+
+  std::vector<std::string>& utils = m_Makefile->GetUtilities();
+  std::vector<std::string>& utildirs = m_Makefile->GetUtilityDirectories();
+  std::vector<std::string>::iterator util;
+  // Search the list of utilities that may be used to generate code for
+  // this project.
+  for(util = utils.begin(); util != utils.end(); ++util)
+    {
+    bool found = false;
+    // loop over the list of directories that the utilities might
+    // be in, looking for an EXECUTABLES=(util) line.
+    for(dir = utildirs.begin(); dir != utildirs.end() && !found; ++dir)
+      {
+      std::string expression = "EXECUTABLES.*=.*";
+      expression += util->c_str();
+      if(cmSystemTools::Grep(dir->c_str(), "CMakeTargets.make",
+                             expression.c_str()))
+        {
+        fout << *util << " ";
         found = true;
         }
       }
@@ -217,7 +240,7 @@ void cmUnixMakefileGenerator::OutputExecutableRules(std::ostream& fout)
   // each executable will depend on.  This will have all the
   // libraries that the executable uses
   fout << "CMAKE_DEPEND_LIBS = ";
-  this->OutputDependLibraries(fout);
+  this->OutputDependencies(fout);
   // Now create rules for all of the executables to be built
   std::vector<cmClassFile>& Classes = m_Makefile->GetClasses();
   for(unsigned int i = 0; i < Classes.size(); i++)
@@ -340,7 +363,7 @@ void cmUnixMakefileGenerator::OutputSubDirectoryRules(std::ostream& fout)
 // Output the depend information for all the classes 
 // in the makefile.  These would have been generated
 // by the class cmMakeDepend GenerateMakefile
-void cmUnixMakefileGenerator::OutputDepends(std::ostream& fout)
+void cmUnixMakefileGenerator::OutputObjectDepends(std::ostream& fout)
 {
   std::vector<cmClassFile>& Classes = m_Makefile->GetClasses();
   for(unsigned int i = 0; i < Classes.size(); i++)

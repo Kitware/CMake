@@ -88,6 +88,16 @@ public:
   void AddExecutable(cmClassFile&);
 
   /**
+   * Add a utility on which this project depends.
+   */
+  void AddUtility(const char*);
+
+  /**
+   * Add a directory in which a utility may be built.
+   */
+  void AddUtilityDirectory(const char*);
+
+  /**
    * Add a link library to the build.
    */
   void AddLinkLibrary(const char*);
@@ -274,6 +284,22 @@ public:
     }
   
   /**
+   * Get a list of utilities on which the project depends.
+   */
+  std::vector<std::string>& GetUtilities()
+    { 
+    return m_Utilities;
+    }
+
+  /**
+   * Get a list of directories that may contain the Utilities.
+   */
+  std::vector<std::string>& GetUtilityDirectories()
+    { 
+    return m_UtilityDirectories;
+    }
+
+  /**
    * Get a list of link libraries in the build.
    */
   std::vector<std::string>& GetLinkLibraries()
@@ -396,6 +422,8 @@ protected:
   std::vector<std::string> m_MakeVerbatim; // lines copied from input file
   std::vector<std::string> m_IncludeDirectories;
   std::vector<std::string> m_LinkDirectories;
+  std::vector<std::string> m_Utilities;
+  std::vector<std::string> m_UtilityDirectories;
   std::vector<std::string> m_LinkLibraries;
   std::vector<std::string> m_LinkLibrariesWin32;
   std::vector<std::string> m_LinkLibrariesUnix;

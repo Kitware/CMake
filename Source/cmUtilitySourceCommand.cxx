@@ -60,13 +60,18 @@ bool cmUtilitySourceCommand::Invoke(std::vector<std::string>& args)
       { return true; }
     }
   
-  // The source exists.  Construct the cache entry for the executable's
-  // location.
+  // The source exists.
   std::string cmakeCFGout = m_Makefile->GetDefinition("CMAKE_CFG_OUTDIR");
-  std::string utilityExecutable = m_Makefile->GetCurrentOutputDirectory();
-  utilityExecutable =
-    (utilityExecutable+"/"+relativeSource+"/"+cmakeCFGout+"/"
-     +utilityName+cmSystemTools::GetExecutableExtension());
+  std::string utilityDirectory = m_Makefile->GetCurrentOutputDirectory();
+  utilityDirectory += "/"+relativeSource;
+  
+  // Tell the makefile where to look for this utility.
+  m_Makefile->AddUtilityDirectory(utilityDirectory.c_str());
+  
+  // Construct the cache entry for the executable's location.
+  std::string utilityExecutable =
+    utilityDirectory+"/"+cmakeCFGout+"/"
+    +utilityName+cmSystemTools::GetExecutableExtension();
   
   // Enter the value into the cache.
   cmCacheManager::GetInstance()->AddCacheEntry(cacheEntry.c_str(),
