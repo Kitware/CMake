@@ -36,14 +36,14 @@ recentBinaryDirectoriesBrowser->hide();}
         xywh {453 49 65 22} shortcut 0x80062 labelsize 11
       }
       Fl_Button m_CancelButton {
-        label Quit
+        label Cancel
         callback {ClickOnCancel();}
-        xywh {435 331 77 23} shortcut 0x80071 labelsize 11
+        xywh {390 332 100 23} shortcut 0x80071 labelsize 11
       }
       Fl_Button m_ConfigureButton {
-        label {Configure Only}
+        label Configure
         callback {ClickOnConfigure();}
-        xywh {50 332 120 23} shortcut 0x8006d labelsize 11
+        xywh {105 332 100 23} shortcut 0x8006d labelsize 11
       }
       Fl_Group {} {
         xywh {25 80 515 222} box ENGRAVED_BOX labelsize 11 align 0 resizable
@@ -80,9 +80,9 @@ recentBinaryDirectoriesBrowser->hide();}
         xywh {15 70 535 115} type Hold box BORDER_BOX hide
       }
       Fl_Button m_OKButton {
-        label {Configure and Generate Makefiles}
+        label OK
         callback {ClickOnOK();} selected
-        xywh {210 332 190 23} shortcut 0x8006d labelsize 11
+        xywh {250 332 100 23} shortcut 0x8006d labelsize 11
       }
     }
   }

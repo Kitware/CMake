@@ -114,12 +114,12 @@ CMakeSetupGUI::CMakeSetupGUI() {
       o->labelsize(11);
       o->callback((Fl_Callback*)cb_Browse1);
     }
-    { Fl_Button* o = m_CancelButton = new Fl_Button(435, 331, 77, 23, "Quit");
+    { Fl_Button* o = m_CancelButton = new Fl_Button(390, 332, 100, 23, "Cancel");
       o->shortcut(0x80071);
       o->labelsize(11);
       o->callback((Fl_Callback*)cb_m_CancelButton);
     }
-    { Fl_Button* o = m_ConfigureButton = new Fl_Button(50, 332, 120, 23, "Configure Only");
+    { Fl_Button* o = m_ConfigureButton = new Fl_Button(105, 332, 100, 23, "Configure");
       o->shortcut(0x8006d);
       o->labelsize(11);
       o->callback((Fl_Callback*)cb_m_ConfigureButton);
@@ -167,7 +167,7 @@ CMakeSetupGUI::CMakeSetupGUI() {
       o->callback((Fl_Callback*)cb_recentBinaryDirectoriesBrowser);
       o->hide();
     }
-    { Fl_Button* o = m_OKButton = new Fl_Button(210, 332, 190, 23, "Configure and Generate Makefiles");
+    { Fl_Button* o = m_OKButton = new Fl_Button(250, 332, 100, 23, "OK");
       o->shortcut(0x8006d);
       o->labelsize(11);
       o->callback((Fl_Callback*)cb_m_OKButton);
