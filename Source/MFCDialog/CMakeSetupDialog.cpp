@@ -21,30 +21,6 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-// Convert to Win32 path (slashes). But it's not in cmSystemTools, so 
-// the 2 billions people that are using the CMake API can not mistake
-// it with cmMakeMyCoffeeButNoSugarPlease().
-
-std::string ConvertToWindowsPath(const char* path)
-{
-  // Convert to output path.
-  // Remove the "" around it (if any) since it's an output path for
-  // the shell. If another shell-oriented feature is not designed 
-  // for a GUI use, then we are in trouble.
-
-  std::string s = cmSystemTools::ConvertToOutputPath(path);
-  std::string::iterator i = s.begin();
-  if (*i == '\"')
-    {
-    s.erase(i, i + 1);
-    }
-  i = s.begin() + s.length() - 1;
-  if (*i == '\"')
-    {
-    s.erase(i, i + 1);
-    }
-  return s;
-}
 
 /////////////////////////////////////////////////////////////////////////////
 // CAboutDlg dialog used for App About
@@ -747,7 +723,7 @@ void CMakeSetupDialog::OnChangeWhereBuild()
       cachem->LoadCache(path.c_str()) &&
       it.Find("CMAKE_HOME_DIRECTORY"))
     {
-    path = ConvertToWindowsPath(it.GetValue());
+    path = cmSystemTools::ConvertToOutputPath(it.GetValue());
     this->m_WhereSource = path.c_str();
     this->m_WhereSourceControl.SetWindowText(this->m_WhereSource);
     this->OnChangeWhereSource();
@@ -1399,15 +1375,15 @@ void CMakeSetupDialog::ChangeDirectoriesFromFile(const char* buffer)
       cachem->LoadCache(path.c_str()) &&
       it.Find("CMAKE_HOME_DIRECTORY"))
     {
-    path = ConvertToWindowsPath(path.c_str());
+    path = cmSystemTools::ConvertToOutputPath(path.c_str());
     this->m_WhereBuild = path.c_str();
 
-    path = ConvertToWindowsPath(it.GetValue());
+    path = cmSystemTools::ConvertToOutputPath(it.GetValue());
     this->m_WhereSource = path.c_str();
     }
   else
     {
-    path = ConvertToWindowsPath(path.c_str());
+    path = cmSystemTools::ConvertToOutputPath(path.c_str());
     this->m_WhereSource = this->m_WhereBuild = path.c_str();
     }
 }
