@@ -215,6 +215,7 @@ CURLcode Curl_dict(struct connectdata *conn)
         return result;
     }
   }
+  (void)nthdef;
 
   return CURLE_OK;
 }

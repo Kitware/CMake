@@ -1202,7 +1202,7 @@ CURLcode Curl_telnet(struct connectdata *conn)
     case WAIT_TIMEOUT:
     {
       unsigned char outbuf[2];
-      int out_count = 0;
+      int out_count;
       ssize_t bytes_written;
       char *buffer = buf;
 
@@ -1239,7 +1239,7 @@ CURLcode Curl_telnet(struct connectdata *conn)
     case WAIT_OBJECT_0 + 1:
     {
       unsigned char outbuf[2];
-      int out_count = 0;
+      int out_count;
       ssize_t bytes_written;
       char *buffer = buf;
 
@@ -1300,6 +1300,10 @@ CURLcode Curl_telnet(struct connectdata *conn)
   close_event_func = NULL;
   event_select_func = NULL;
   enum_netevents_func = NULL;
+  (void)create_event_func;
+  (void)close_event_func;
+  (void)event_select_func;
+  (void)enum_netevents_func;
 
   /* We called LoadLibrary, so call FreeLibrary */
   if (!FreeLibrary(wsock2))

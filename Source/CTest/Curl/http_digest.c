@@ -59,8 +59,8 @@ CURLdigest Curl_input_digest(struct connectdata *conn,
                                               header */
 {
   bool more = TRUE;
-  char *token = NULL;
-  char *tmp = NULL;
+  char *token;
+  char *tmp;
   bool foundAuth = FALSE;
   bool foundAuthInt = FALSE;
   struct SessionHandle *data=conn->data;
@@ -91,7 +91,7 @@ CURLdigest Curl_input_digest(struct connectdata *conn,
     while(more) {
       char value[32];
       char content[128];
-      size_t totlen=0;
+      size_t totlen;
 
       while(*header && isspace((int)*header))
         header++;
@@ -224,7 +224,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   unsigned char ha2[33];/* 32 digits and 1 zero byte */
   char cnoncebuf[7];
   char *cnonce;
-  char *tmp = NULL;
+  char *tmp;
   struct timeval now;
 
   char **allocuserpwd;

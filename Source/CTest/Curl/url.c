@@ -1869,6 +1869,7 @@ static int handleSock5Proxy(const char *proxy_name,
     if(rc == CURLRESOLV_PENDING)
       /* this requires that we're in "wait for resolve" state */
       rc = Curl_wait_for_resolv(conn, &dns);
+    (void)rc;
 
     /*
      * We cannot use 'hostent' as a struct that Curl_resolv() returns.  It
@@ -2401,10 +2402,11 @@ static CURLcode CreateConnection(struct SessionHandle *data,
      * For compatibility, the all-uppercase versions of these variables are
      * checked if the lowercase versions don't exist.
      */
-    char *no_proxy=NULL;
+    char *no_proxy;
     char *no_proxy_tok_buf;
     char *proxy=NULL;
     char proxy_env[128];
+    (void)proxy;
 
     no_proxy=curl_getenv("no_proxy");
     if(!no_proxy)

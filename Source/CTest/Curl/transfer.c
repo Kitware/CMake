@@ -1163,6 +1163,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             k->keepon &= ~KEEP_WRITE; /* we're done writing */
             FD_ZERO(&k->wkeepfd);
             writedone = TRUE;
+            (void)writedone;
             break;
           }
 
@@ -1337,7 +1338,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
 CURLcode Curl_readwrite_init(struct connectdata *conn)
 {
-  struct SessionHandle *data = conn->data;
+  struct SessionHandle *data;
   struct Curl_transfer_keeper *k = &conn->keep;
 
   /* NB: the content encoding software depends on this initialization of
@@ -1856,6 +1857,7 @@ CURLcode Curl_follow(struct SessionHandle *data,
 
   data->change.url = newurl;
   newurl = NULL; /* don't free! */
+  (void)newurl;
 
   infof(data, "Issue another request to this URL: '%s'\n", data->change.url);
 
@@ -1953,8 +1955,8 @@ static CURLcode
 Curl_connect_host(struct SessionHandle *data,
                   struct connectdata **conn)
 {
-  CURLcode res = CURLE_OK;
-  int urlchanged = FALSE;
+  CURLcode res;
+  int urlchanged;
 
   do {
     bool async;
@@ -2086,6 +2088,8 @@ CURLcode Curl_perform(struct SessionHandle *data)
         /* Curl_do() failed, clean up left-overs in the done-call */
         res2 = Curl_done(&conn, res);
 
+      (void)res2;
+
       /*
        * Important: 'conn' cannot be used here, since it may have been closed
        * in 'Curl_done' or other functions.
@@ -2158,7 +2162,7 @@ Curl_Transfer(struct connectdata *c_conn, /* connection data */
  */
 CURLcode Curl_pretransfersec(struct connectdata *conn)
 {
-  CURLcode status = CURLE_OK;
+  CURLcode status;
   struct SessionHandle *data = conn->data;
   struct connectdata *sec_conn = NULL;   /* secondary connection */
 

@@ -933,6 +933,7 @@ static int dprintf_formatf(
           fptr += len;
           left -= len;
         }
+        (void)left;
         if (p->flags & FLAGS_LONG)
           *fptr++ = 'l';
 

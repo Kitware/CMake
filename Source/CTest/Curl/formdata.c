@@ -374,7 +374,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
   FormInfo *first_form, *current_form, *form = NULL;
   CURLFORMcode return_value = CURL_FORMADD_OK;
   const char *prevtype = NULL;
-  struct curl_httppost *post = NULL;
+  struct curl_httppost *post;
   CURLformoption option;
   struct curl_forms *forms = NULL;
   char *array_value=NULL; /* value read from an array */

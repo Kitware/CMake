@@ -443,7 +443,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
                                 int port,
                                 int *waitp)
 {
-  struct hostent *h = NULL;
+  struct hostent *h;
   struct SessionHandle *data = conn->data;
   in_addr_t in;
 

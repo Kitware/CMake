@@ -276,7 +276,6 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
 
   *nreadp=0;
   perline=0;
-  keepon=TRUE;
 
   while((*nreadp<BUFSIZE) && (keepon && !result)) {
     /* check and reset timeout value every lap */
@@ -913,7 +912,7 @@ CURLcode ftp_sendquote(struct connectdata *conn, struct curl_slist *quote)
 static
 CURLcode ftp_getfiletime(struct connectdata *conn, char *file)
 {
-  CURLcode result=CURLE_OK;
+  CURLcode result;
   int ftpcode; /* for ftp status */
   ssize_t nread;
   char *buf = conn->data->state.buffer;
@@ -1050,7 +1049,7 @@ static
 CURLcode ftp_use_port(struct connectdata *conn)
 {
   struct SessionHandle *data=conn->data;
-  curl_socket_t portsock= CURL_SOCKET_BAD;
+  curl_socket_t portsock;
   ssize_t nread;
   int ftpcode; /* receive FTP response codes in this */
   CURLcode result;
@@ -1306,6 +1305,7 @@ CURLcode ftp_use_port(struct connectdata *conn)
         int rc = Curl_resolv(conn, myhost, 0, &h);
         if(rc == CURLRESOLV_PENDING)
           rc = Curl_wait_for_resolv(conn, &h);
+        (void)rc;
         if(h) {
           addr = h->addr;
           /* when we return from this function, we can forget about this entry
@@ -1625,6 +1625,7 @@ CURLcode ftp_use_pasv(struct connectdata *conn,
   }
 #endif   /* CURL_DISABLE_HTTP */
 
+  (void)rc;
   return CURLE_OK;
 }
 
@@ -1724,6 +1725,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
 
             /* no data to transfer */
             result=Curl_Transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+            (void)result;
 
             /* Set no_transfer so that we won't get any error in
              * Curl_ftp_done() because we didn't transfer anything! */
@@ -1791,7 +1793,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
 
     if(conn->bits.use_range && conn->range) {
       curl_off_t from, to;
-      curl_off_t totalsize=-1;
+      curl_off_t totalsize;
       char *ptr;
       char *ptr2;
 
@@ -1924,6 +1926,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
         if (downloadsize == 0) {
           /* no data to transfer */
           result=Curl_Transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+          (void)result;
           infof(data, "File already completely downloaded\n");
 
           /* Set no_transfer so that we won't get any error in Curl_ftp_done()
@@ -2253,7 +2256,7 @@ CURLcode ftp_perform(struct connectdata *conn,
  */
 CURLcode Curl_ftp(struct connectdata *conn)
 {
-  CURLcode retcode = CURLE_OK;
+  CURLcode retcode;
 
   if (conn->sec_conn) /* 3rd party transfer */
     retcode = ftp_3rdparty(conn);
@@ -2279,7 +2282,7 @@ CURLcode Curl_ftpsendf(struct connectdata *conn,
   char s[256];
   size_t write_len;
   char *sptr=s;
-  CURLcode res = CURLE_OK;
+  CURLcode res;
 
   va_list ap;
   va_start(ap, fmt);
@@ -2381,7 +2384,7 @@ CURLcode Curl_ftp_disconnect(struct connectdata *conn)
  */
 static CURLcode ftp_mkd(struct connectdata *conn, char *path)
 {
-  CURLcode result=CURLE_OK;
+  CURLcode result;
   int ftpcode; /* for ftp status */
   ssize_t nread;
 
@@ -2477,7 +2480,7 @@ static CURLcode ftp_cwd_and_mkd(struct connectdata *conn, char *path)
  */
 static CURLcode ftp_3rdparty_pretransfer(struct connectdata *conn)
 {
-  CURLcode result = CURLE_OK;
+  CURLcode result;
   struct SessionHandle *data = conn->data;
   struct connectdata *sec_conn = conn->sec_conn;
 
@@ -2512,7 +2515,7 @@ static CURLcode ftp_3rdparty_pretransfer(struct connectdata *conn)
  */
 static CURLcode ftp_3rdparty_transfer(struct connectdata *conn)
 {
-  CURLcode result = CURLE_OK;
+  CURLcode result;
   ssize_t nread;
   int ftpcode, ip[4], port[2];
   struct SessionHandle *data = conn->data;
@@ -2756,7 +2759,7 @@ CURLcode ftp_regular_transfer(struct connectdata *conn)
  */
 static CURLcode ftp_3rdparty(struct connectdata *conn)
 {
-  CURLcode retcode = CURLE_OK;
+  CURLcode retcode;
 
   conn->proto.ftp->ctl_valid = conn->sec_conn->proto.ftp->ctl_valid = TRUE;
   conn->size = conn->sec_conn->size = -1;

@@ -385,7 +385,7 @@ int Curl_resolv(struct connectdata *conn,
                 int port,
                 struct Curl_dns_entry **entry)
 {
-  char *entry_id = NULL;
+  char *entry_id;
   struct Curl_dns_entry *dns = NULL;
   size_t entry_len;
   int wait;

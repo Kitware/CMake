@@ -112,6 +112,7 @@ char *curl_version(void)
   strcpy(ptr, LIBCURL_NAME "/" LIBCURL_VERSION );
   ptr=strchr(ptr, '\0');
   left -= strlen(ptr);
+  (void)left;
 
 #ifdef USE_SSLEAY
   {

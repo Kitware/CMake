@@ -309,7 +309,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
   struct Curl_one_easy *easy;
   bool done;
   CURLMcode result=CURLM_OK;
-  struct Curl_message *msg = NULL;
+  struct Curl_message *msg;
   bool connected;
   bool async;
 

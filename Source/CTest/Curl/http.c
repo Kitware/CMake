@@ -916,7 +916,7 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
   bool keepon=TRUE;
   ssize_t gotbytes;
   char *ptr;
-  long timeout = 3600; /* default timeout in seconds */
+  long timeout; /* default timeout in seconds */
   struct timeval interval;
   fd_set rkeepfd;
   fd_set readfd;
@@ -979,7 +979,6 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
 
     nread=0;
     perline=0;
-    keepon=TRUE;
 
     while((nread<BUFSIZE) && (keepon && !error)) {
       readfd = rkeepfd;     /* set every lap */
@@ -1230,7 +1229,7 @@ CURLcode Curl_http(struct connectdata *conn)
 {
   struct SessionHandle *data=conn->data;
   char *buf = data->state.buffer; /* this is a short cut to the buffer */
-  CURLcode result=CURLE_OK;
+  CURLcode result;
   struct HTTP *http;
   char *ppath = conn->path;
   char *host = conn->host.name;

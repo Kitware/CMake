@@ -428,6 +428,7 @@ union yyalloc
         Stack = &yyptr->Stack;                                          \
         yynewbytes = yystacksize * sizeof (*Stack) + YYSTACK_GAP_MAXIMUM; \
         yyptr += yynewbytes / sizeof (*yyptr);                          \
+        (void)yyptr;                                                    \
       }                                                                 \
     while (0)
 
@@ -1767,6 +1768,7 @@ yyerrlab:
 #endif /* YYERROR_VERBOSE */
         yyerror ("syntax error");
     }
+  (void)yynerrs;
 
 
 

@@ -53,9 +53,9 @@ static int gettimeofday(struct timeval *tp, void *nothing)
    ** of multimedia apis offer a better time resolution
    ** of 1ms.Need to link against winmm.lib for this
    **/
-  unsigned long Ticks = 0;
-  unsigned long Sec =0;
-  unsigned long Usec = 0;
+  unsigned long Ticks;
+  unsigned long Sec;
+  unsigned long Usec;
   Ticks = timeGetTime();
 
   Sec = Ticks/1000;
