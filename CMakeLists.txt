@@ -4,7 +4,7 @@ SUBDIRS(Source Modules Templates)
 
 # Include the standard Dart testing module
 INCLUDE (${CMAKE_ROOT}/Modules/Dart.cmake)
-INCLUDE (${CMAKE_BINARY_DIR}/Source/InitialConfigureFlags.cmake)
+INCLUDE (OPTIONAL ${CMAKE_BINARY_DIR}/Source/InitialConfigureFlags.cmake)
 IF(CMAKE_CONFIGURE_INSTALL_PREFIX)
   SET(CMAKE_INSTALL_PREFIX ${CMAKE_CONFIGURE_INSTALL_PREFIX} )
 ENDIF(CMAKE_CONFIGURE_INSTALL_PREFIX)
