@@ -172,8 +172,10 @@ TARGET_LINK_LIBRARIES(DumpDocumentation CMakeLib)
 
 # Build special executable for running programs on Windows 98
 IF(WIN32)
-  ADD_EXECUTABLE(cmw9xcom cmw9xcom.cxx)
-  TARGET_LINK_LIBRARIES(cmw9xcom CMakeLib)
+  IF(NOT UNIX)
+    ADD_EXECUTABLE(cmw9xcom cmw9xcom.cxx)
+    TARGET_LINK_LIBRARIES(cmw9xcom CMakeLib)
+  ENDIF(NOT UNIX)
 ENDIF(WIN32)
 
 # Build CTest executable
