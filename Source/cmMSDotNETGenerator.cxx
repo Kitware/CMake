@@ -1187,7 +1187,7 @@ void cmMSDotNETGenerator::WriteCustomRule(std::ostream& fout,
         }
       else
         {
-        first = true;
+        first = false;
         }
       fout << output->c_str();
       }
