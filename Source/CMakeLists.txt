@@ -158,11 +158,14 @@ IF(BUILD_TESTING)
       wrapping
       ${CMake_BINARY_DIR}/Tests/Wrapping/bin)
 
-    ADD_TEST(qtwrapping ${CMake_BINARY_DIR}/Source/cmaketest 
-      ${CMake_SOURCE_DIR}/Tests/Wrapping 
-      ${CMake_BINARY_DIR}/Tests/Wrapping
-      qtwrapping
-      ${CMake_BINARY_DIR}/Tests/Wrapping/bin)
+    INCLUDE ( ${CMAKE_ROOT}/Modules/FindQt.cmake )
+    IF (QT_FOUND)
+      ADD_TEST(qtwrapping ${CMake_BINARY_DIR}/Source/cmaketest 
+        ${CMake_SOURCE_DIR}/Tests/Wrapping 
+        ${CMake_BINARY_DIR}/Tests/Wrapping
+        qtwrapping
+        ${CMake_BINARY_DIR}/Tests/Wrapping/bin)
+    ENDIF (QT_FOUND)
 
     ADD_TEST(testdriver1 ${CMake_BINARY_DIR}/Source/cmaketest 
       ${CMake_SOURCE_DIR}/Tests/TestDriver 

@@ -27,7 +27,6 @@ ENDIF (EXECUTABLE_OUTPUT_PATH)
 # Add exe
 #
 ADD_EXECUTABLE (wrapping wrapping.cxx)
-ADD_EXECUTABLE (qtwrapping qtwrappingmain.cxx QTUI_S_SRCS)
 
 #
 # Test VTK wrappers
@@ -84,7 +83,12 @@ CONFIGURE_FILE(
 SET (QT_WRAP_CPP "On")
 SET (QT_MOC_EXE "echo")
 
-INCLUDE( ../../Modules/FindQt.cmake )
+INCLUDE( ${CMAKE_ROOT}/Modules/FindQt.cmake )
+
+IF (QT_FOUND)
+
+ADD_EXECUTABLE (qtwrapping qtwrappingmain.cxx QTUI_S_SRCS)
+
 INCLUDE_DIRECTORIES( ${QT_INCLUDE_DIR} )
 INCLUDE_DIRECTORIES( ./ )
 
@@ -98,6 +102,8 @@ SET (QTUI_SRCS
   qtwrapping.ui
 )
 QT_WRAP_UI (qtwrapping QTUI_H_SRCS QTUI_S_SRCS QTUI_SRCS)
+
+ENDIF (QT_FOUND)
 
 #
 # FLTK Wrappers
