@@ -56,14 +56,16 @@ int main(int argc, char** argv)
 
   int x,y;
   getmaxyx(w, y, x);
-
+  std::string whereCMake = cmSystemTools::GetProgramPath(argv[0]);
+  whereCMake += "/cmake";
   if ( argc == 2 )
     {
-    myform = new cmCursesMainForm(argv[1], argv[0], newCache);
+
+    myform = new cmCursesMainForm(argv[1], whereCMake.c_str(), newCache);
     }
   else
     {
-    myform = new cmCursesMainForm("", argv[0], newCache);
+    myform = new cmCursesMainForm("", whereCMake.c_str(), newCache);
     }
   myform->InitializeUI(w);
   myform->Render(1, 1, x, y);
