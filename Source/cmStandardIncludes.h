@@ -150,8 +150,11 @@ using ::ends;
 using ::flush;
 }
 // The string class is missing these operators so add them
+#if !defined(cmsys_STL_STRING_NEQ_CHAR_DEFINED)
+# define cmsys_STL_STRING_NO_NEQ_CHAR
 inline bool operator!=(std::string const& a, const char* b)
 { return !(a==std::string(b)); }
+#endif
 
 inline bool operator==(std::string const& a, const char* b)
 { return (a==std::string(b)); }
