@@ -17,7 +17,7 @@
 #include "cmEndIfCommand.h"
 #include "cmCacheManager.h"
 
-bool cmEndIfCommand::InitialPass(std::vector<std::string> const& args)
+bool cmEndIfCommand::InitialPass(std::vector<std::string> const&)
 {
   this->SetError("An ENDIF command was found outside of a proper IF ENDIF structure. Or its arguments did not match the opening IF command.");
   return false;
