@@ -341,7 +341,7 @@ bool cmCacheManager::SaveCache(const char* path)
                       " was created", cmCacheManager::INTERNAL);
 
   fout << "# This is the CMakeCache file.\n"
-       << "# For build in directory: " << path << "\n"
+       << "# For build in directory: " << currentcwd << "\n"
        << "# You can edit this file to change values found and used by cmake.\n"
        << "# If you do not want to change any of the values, simply exit the editor.\n"
        << "# If you do want to change a value, simply edit, save, and exit the editor.\n"
