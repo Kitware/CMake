@@ -2587,7 +2587,7 @@ void cmLocalUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
   tgt = this->ConvertToMakeTarget(tgt.c_str());
   if(depends.empty())
     {
-    fout << tgt.c_str() << ":\n";
+    fout << tgt.c_str() << " :\n";
     }
   else
     {
@@ -2599,7 +2599,7 @@ void cmLocalUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
       replace = *dep;
       m_Makefile->ExpandVariablesInString(replace);
       replace = this->ConvertToMakeTarget(replace.c_str());
-      fout << tgt.c_str() << ": " << replace.c_str() << "\n";
+      fout << tgt.c_str() << " : " << replace.c_str() << "\n";
       }
     }
   

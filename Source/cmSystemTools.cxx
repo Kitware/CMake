@@ -426,15 +426,18 @@ bool cmSystemTools::RunSingleCommand(
     {
     verbose = false;
     }
+  std::string argsTemp;
+  std::string program;
+  cmSystemTools::SplitProgramFromArgs(command, program, argsTemp);
+  std::vector<cmStdString> args = cmSystemTools::ParseArguments(argsTemp.c_str());
 
-  std::vector<cmStdString> args = cmSystemTools::ParseArguments(command);
-
-  if(args.size() < 1)
+  if(program.size() < 1)
     {
     return false;
     }
   
   std::vector<const char*> argv;
+  argv.push_back(program.c_str());
   for(std::vector<cmStdString>::const_iterator a = args.begin();
       a != args.end(); ++a)
     {

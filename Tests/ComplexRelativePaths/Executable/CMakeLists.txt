@@ -11,7 +11,7 @@ LINK_DIRECTORIES(${Complex_BINARY_DIR}/../../Source/kwsys)
 SET(COMPLEX_LIBS CMakeTestLibrary;CMakeTestLibraryShared;CMakeTestCLibraryShared)
 LINK_LIBRARIES(${COMPLEX_LIBS})
 
-
+ADD_EXECUTABLE(A A.cxx)
 ADD_EXECUTABLE(complex complex)
 ADD_EXECUTABLE(complex.file complex.file.cxx)
 IF (UNIX)
