@@ -1123,15 +1123,7 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
 		       0,
                        "${CMAKE_COMMAND} "
                        "-H${CMAKE_SOURCE_DIR} -B${CMAKE_BINARY_DIR}");
-  // do not put this command in for the cmake project
-  if(strcmp(m_Makefile->GetProjectName(), "CMake") != 0)
-    {
-    this->OutputMakeRule(fout, 
-                         "Rebuild cmake dummy rule",
-                         "${CMAKE_COMMAND}",
-                         0,
-                         "echo \"cmake might be out of date\"");
-    }
+
   this->OutputMakeRule(fout, 
                        "Rule to keep make from removing Makefiles "
                        "if control-C is hit during a run of cmake.",
@@ -1139,7 +1131,38 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                        "Makefile cmake.depends",
                        0);
   
+  this->OutputSourceObjectBuildRules(fout);
+  // see if there is already a target for a cmake executable in this
+  // makefile
+  bool buildingCMake = false;
+  std::map<std::string, cmTarget>& targets = m_Makefile->GetTargets();
+  for(cmTargets::const_iterator l = targets.begin(); 
+      l != targets.end(); l++)
+    {
+    if ((l->second.GetType() == cmTarget::EXECUTABLE ||
+         l->second.GetType() == cmTarget::WIN32_EXECUTABLE) &&
+        l->second.IsInAll())
+      {
+      if(l->first == "cmake")
+        {
+        buildingCMake = true;
+        }
+      }
+    }
+  // do not put this command in for the cmake project
+  if(!buildingCMake)
+    {
+    this->OutputMakeRule(fout, 
+                         "Rebuild cmake dummy rule",
+                         "${CMAKE_COMMAND}",
+                         0,
+                         "echo \"cmake might be out of date\"");
+    }
+}
 
+
+void cmUnixMakefileGenerator::OutputSourceObjectBuildRules(std::ostream& fout)
+{
   fout << "# Rules to build .o files from their sources:\n";
 
   std::set<std::string> rules;
@@ -1155,7 +1178,7 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
     for(std::vector<cmSourceFile>::const_iterator source = sources.begin(); 
         source != sources.end(); ++source)
       {
-     if(!source->IsAHeaderFileOnly())
+      if(!source->IsAHeaderFileOnly())
         {
         std::string shortName;
         std::string sourceName;
