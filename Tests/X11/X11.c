@@ -2,27 +2,11 @@
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <stdlib.h>
 
-char hello[]="hello.world";
-char hi[]="Hi";
-
-main(argc, argv)
-int argc;
-char **argv;
+int main()
 {
   Display *mydisplay;
-  Window  mywindow;
-  GC mygc;
-
-  XEvent myevent;
-  KeySym mykey;
-
-  XSizeHints myhint;
-  int myscreen;
-  unsigned long myforeground, mybackground;
-  int i;
-  char text[10];
-  int done;
   char* display = ":0";
 
 
@@ -34,10 +18,9 @@ char **argv;
   mydisplay=XOpenDisplay(display);
   if ( mydisplay )
     {
-    printf("Opened...\n");
     XCloseDisplay(mydisplay);
     }
-  exit(0);
+  return 0;
 }
 
 
