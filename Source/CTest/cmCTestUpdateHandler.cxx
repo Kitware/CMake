@@ -207,14 +207,14 @@ int cmCTestUpdateHandler::ProcessHandler()
 
 
   // Get source dir
-  std::string sourceDirectory = m_CTest->GetDartConfiguration("SourceDirectory");
-  if ( sourceDirectory.empty() )
+  const char* sourceDirectory = this->GetOption("SourceDirectory");
+  if ( !sourceDirectory )
     {
     std::cerr << "Cannot find SourceDirectory  key in the DartConfiguration.tcl" << std::endl;
     return -1;
     }
 
-  std::cout << "Updating the repository: " << sourceDirectory.c_str() << std::endl;
+  std::cout << "Updating the repository: " << sourceDirectory << std::endl;
 
   // Get update command
   std::string updateCommand = m_CTest->GetDartConfiguration("UpdateCommand");
@@ -324,7 +324,7 @@ int cmCTestUpdateHandler::ProcessHandler()
     if ( !m_CTest->GetShowOnly() )
       {
       res = cmSystemTools::RunSingleCommand(command.c_str(), &goutput, 
-        &retVal, sourceDirectory.c_str(),
+        &retVal, sourceDirectory,
         m_Verbose, 0 /*m_TimeOut*/);
       if ( ofs )
         {
@@ -382,7 +382,7 @@ int cmCTestUpdateHandler::ProcessHandler()
   if ( !m_CTest->GetShowOnly() )
     {
     res = cmSystemTools::RunSingleCommand(command.c_str(), &goutput, 
-      &retVal, sourceDirectory.c_str(),
+      &retVal, sourceDirectory,
       m_Verbose, 0 /*m_TimeOut*/);
     if ( ofs )
       {
@@ -505,7 +505,7 @@ int cmCTestUpdateHandler::ProcessHandler()
         std::cout << "* Get file update information: " << logcommand.c_str() << std::endl;
         }
       res = cmSystemTools::RunSingleCommand(logcommand.c_str(), &output, 
-        &retVal, sourceDirectory.c_str(),
+        &retVal, sourceDirectory,
         m_Verbose, 0 /*m_TimeOut*/);
       if ( ofs )
         {

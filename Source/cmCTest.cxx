@@ -368,13 +368,19 @@ int cmCTest::Initialize(const char* binary_dir)
   return 1;
 }
 
-void cmCTest::UpdateCTestConfiguration()
+bool cmCTest::UpdateCTestConfiguration()
 {
+  std::string fileName = m_BinaryDir + "/DartConfiguration.tcl";
+  if ( !cmSystemTools::FileExists(fileName.c_str()) )
+    {
+    std::cerr << "Cannot find file: " << fileName.c_str() << std::endl;
+    return false;
+    }
   // parse the dart test file
-  std::ifstream fin("DartConfiguration.tcl");
+  std::ifstream fin(fileName.c_str());
   if(!fin)
     {
-    return;
+    return false;
     }
 
   char buffer[1024];
@@ -415,6 +421,7 @@ void cmCTest::UpdateCTestConfiguration()
     m_TimeOut = atoi(m_DartConfiguration["TimeOut"].c_str());
     m_CompressXMLFiles = cmSystemTools::IsOn(m_DartConfiguration["CompressSubmission"].c_str());
     }
+  return true;
 }
 
 void cmCTest::BlockTestErrorDiagnostics()
@@ -710,7 +717,25 @@ std::string cmCTest::GetSubmitResultsPrefix()
   return name;
 }
 
+cmCTestGenericHandler* cmCTest::GetHandler(const char* handler)
+{
+  cmCTest::t_TestingHandlers::iterator it = m_TestingHandlers.find(handler);
+  if ( it == m_TestingHandlers.end() )
+    {
+    return 0;
+    }
+  return it->second;
+}
 
+int cmCTest::ExecuteHandler(const char* shandler)
+{
+  cmCTestGenericHandler* handler = this->GetHandler(shandler);
+  if ( !handler )
+    {
+    return -1;
+    }
+  return handler->ProcessHandler(); 
+}
 
 int cmCTest::ProcessTests()
 {
@@ -729,7 +754,9 @@ int cmCTest::ProcessTests()
     }
   if ( m_Tests[UPDATE_TEST] || m_Tests[ALL_TEST] )
     {
-    update_count = m_TestingHandlers["update"]->ProcessHandler(); 
+    cmCTestGenericHandler* uphandler = this->GetHandler("update");
+    uphandler->SetOption("SourceDirectory", this->GetDartConfiguration("SourceDirectory").c_str());
+    update_count = uphandler->ProcessHandler(); 
     if ( update_count < 0 )
       {
       res |= cmCTest::UPDATE_ERRORS;
@@ -2223,8 +2250,8 @@ void cmCTest::PopulateCustomInteger(cmMakefile* mf, const char* def, int& val)
 
 std::string cmCTest::GetShortPathToFile(const char* cfname)
 {
-  const std::string& sourceDir = GetDartConfiguration("SourceDirectory");
-  const std::string& buildDir = GetDartConfiguration("BuildDirectory");
+  const std::string& sourceDir = this->GetDartConfiguration("SourceDirectory");
+  const std::string& buildDir = this->GetDartConfiguration("BuildDirectory");
   std::string fname = cmSystemTools::CollapseFullPath(cfname);
 
   // Find relative paths to both directories

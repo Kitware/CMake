@@ -181,8 +181,17 @@ public:
   int RunTest(std::vector<const char*> args, std::string* output, int *retVal, 
     std::ostream* logfile);
 
-private:
+  /**
+   * Execute handler and return its result. If the handler fails, it returns negative value.
+   */
+  int ExecuteHandler(const char* handler);
 
+  /* 
+   * Get the handler object
+   */
+  cmCTestGenericHandler* GetHandler(const char* handler);
+
+private:
   std::string m_ConfigType;
   bool m_Verbose;
   bool m_ProduceXML;
@@ -263,7 +272,7 @@ private:
   
 
   //! Reread the configuration file
-  void UpdateCTestConfiguration();
+  bool UpdateCTestConfiguration();
 
   //! Create not from files.
   int GenerateDartNotesOutput(std::ostream& os, const tm_VectorOfStrings& files);
