@@ -93,7 +93,7 @@ void cmSystemTools::GetPath(std::vector<std::string>& path)
   // A hack to make the below algorithm work.  
   if(pathEnv[pathEnv.length()-1] != ':')
     {
-    pathEnv += ":";  
+    pathEnv += pathSep;
     }
   std::string::size_type start =0;
   bool done = false;
