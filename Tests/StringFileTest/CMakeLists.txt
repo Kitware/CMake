@@ -60,6 +60,8 @@ STRING(REGEX REPLACE "includefile" "${file}" outfile "${infile}")
 FILE(WRITE "${CMAKE_CURRENT_BINARY_DIR}/OutputFile.h" "${outfile}")
 
 # Test file glob
+FILE(GLOB_RECURSE src_files "${CMAKE_CURRENT_SOURCE_DIR}/*")
+MESSAGE(STATUS "Files in ${CMAKE_CURRENT_SOURCE_DIR} are ${src_files}")
 FILE(GLOB src_files "${CMAKE_CURRENT_SOURCE_DIR}/[sS][!a-su-zA-Z0-9][^a-qs-zA-Z0-9]ing?ile*.cxx")
 
 ADD_EXECUTABLE(StringFileTest ${src_files})

@@ -205,6 +205,7 @@ void cmGlob::ProcessDirectory(std::string::size_type start,
       {
       continue;
       }
+
     if ( m_Internals->Expressions[start].find(d.GetFile(cc)) )
       {
       if ( last )
@@ -233,6 +234,10 @@ bool cmGlob::FindFiles(const std::string& inexpr)
     expr = cmsys::SystemTools::GetCurrentWorkingDirectory();
     expr += "/" + inexpr;
     }
+  if ( expr[1] == ':' && expr[0] != '/' )
+    {
+    expr = expr.substr(2);
+    }
   for ( cc = 0; cc < expr.size(); cc ++ )
     {
     int ch = expr[cc];
@@ -253,8 +258,24 @@ bool cmGlob::FindFiles(const std::string& inexpr)
     {
     this->AddExpression(cexpr.c_str());
     }
-
-  this->ProcessDirectory(0, "/", true);
+  if ( inexpr[1] == ':' && inexpr[0] != '/' )
+    {
+    std::string startdir = "A:/";
+    if ( inexpr[0] >= 'a' && inexpr[0] <= 'z' ||
+      inexpr[0] >= 'A' && inexpr[0] <= 'Z')
+      {
+      startdir[0] = inexpr[0];
+      this->ProcessDirectory(0, startdir, true);
+      }
+    else 
+      {
+      return false;
+      }
+    }
+  else
+    {
+    this->ProcessDirectory(0, "/", true);
+    }
   return true;
 }
 
