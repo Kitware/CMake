@@ -218,12 +218,14 @@ cmake_try_run ()
 # Run a make test. First argument is the make interpreter.
 cmake_try_make ()
 {
-  MAKE_PROC=$1
+  MAKE_PROC="$1"
+  MAKE_FLAGS="$2"
   echo "Try: ${MAKE_PROC}"
-  ${MAKE_PROC}
+  "${MAKE_PROC}" ${MAKE_FLAGS}
   RES=$?
   if [ "${RES}" -ne "0" ]; then
-    echo "${MAKE_PROC} does not work";return 1
+    echo "${MAKE_PROC} does not work"
+    return 1
   fi
   if [ ! -f "test" ] && [ ! -f "test.exe" ]; then
     echo "${COMPILER} does not produce output"
@@ -397,6 +399,7 @@ echo "C++ compiler on this system is: ${cmake_cxx_compiler} ${cmake_cxx_flags}"
 # Test Make
 
 cmake_make_processor=
+cmake_make_flags=
 
 # If MAKE is set, use that for make processor, otherwise use list of known make
 if [ -n "${MAKE}" ]; then
@@ -411,14 +414,17 @@ mkdir "${cmake_bootstrap_dir}/${TMPFILE}"
 cd "${cmake_bootstrap_dir}/${TMPFILE}"
 cat>"Makefile"<<EOF
 test: test.c
-	${cmake_c_compiler} -o test test.c
+	"${cmake_c_compiler}" -o test test.c
 EOF
 cat>"test.c"<<EOF
 #include <stdio.h>
 int main(){ printf("1\n"); return 0; }
 EOF
+if [ "x${cmake_parallel_make}" != "x" ]; then
+  cmake_make_flags="${cmake_make_flags} -j ${cmake_parallel_make}"
+fi
 for a in ${cmake_make_processors}; do
-  if [ -z "${cmake_make_processor}" ] && cmake_try_make "${a}" >> cmake_bootstrap.log 2>&1; then
+  if [ -z "${cmake_make_processor}" ] && cmake_try_make "${a}" "${cmake_make_flags}" >> cmake_bootstrap.log 2>&1; then
     cmake_make_processor="${a}"
   fi
 done
@@ -680,7 +686,7 @@ echo "---------------------------------------------"
 
 # Run make to build bootstrap cmake
 if [ "x${cmake_parallel_make}" != "x" ]; then
-  ${cmake_make_processor} -j ${cmake_parallel_make}
+  ${cmake_make_processor} ${cmake_make_flags}
 else
   ${cmake_make_processor}
 fi
