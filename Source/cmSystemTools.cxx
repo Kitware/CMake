@@ -1587,7 +1587,7 @@ std::string cmSystemTools::FindLibrary(const char* name,
     if (genName)
       {
       if (!strcmp(genName, "NMake Makefiles") ||
-          !strncmp(genName, "Visual Studio ", 14))
+          !strcmp(genName, "Visual Studio 6"))
         {
         const char* compiler = makefile->GetDefinition("CMAKE_CXX_COMPILER");
         if (compiler)
@@ -1599,6 +1599,25 @@ std::string cmSystemTools::FindLibrary(const char* name,
               cmSystemTools::GetFilenamePath(
                 cmSystemTools::GetFilenamePath(compiler_path)) + "/Lib";
             path.push_back(lib_path);
+            }
+          }
+        }
+      else if (!strcmp(genName, "Visual Studio 7"))
+        {
+        // It is likely that the compiler won't be in the path for .Net, but
+        // we know where devenv is.
+        const char* devenv = makefile->GetDefinition("MICROSOFT_DEVENV");
+        if (devenv)
+          {
+          std::string devenv_path = cmSystemTools::FindProgram(devenv);
+          if (devenv_path.size())
+            {
+            std::string vc7_path = 
+              cmSystemTools::GetFilenamePath(
+                cmSystemTools::GetFilenamePath(
+                  cmSystemTools::GetFilenamePath(devenv_path))) + "/Vc7";
+            path.push_back(vc7_path + "/lib");
+            path.push_back(vc7_path + "/PlatformSDK/lib");
             }
           }
         }
