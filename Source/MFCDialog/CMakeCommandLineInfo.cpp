@@ -20,6 +20,11 @@ CMakeCommandLineInfo::CMakeCommandLineInfo()
   this->m_AdvancedValues = FALSE;
   this->m_GeneratorChoiceString = _T("");
   this->m_LastUnknownParameter = _T("");
+  
+  // Find the path to the CMakeSetup executable.
+  char fname[4096];
+  ::GetModuleFileName(0, fname, 4096);
+  m_Argv0 = fname;
 } 
 
 CMakeCommandLineInfo::~CMakeCommandLineInfo()
@@ -51,6 +56,25 @@ int CMakeCommandLineInfo::GetBoolValue(const CString& v) {
 
 void CMakeCommandLineInfo::ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast)
 {
+  // Construct the full name of the argument.
+  cmStdString value;
+  if(bFlag)
+    {
+    value = "-";
+    }
+  value += lpszParam;
+  
+  // Add the argument and reset the argv table in case strings were
+  // moved.
+  m_Arguments.push_back(value);
+  m_Argv.clear();
+  m_Argv.push_back(m_Argv0.c_str());
+  for(unsigned int i=0; i < m_Arguments.size(); ++i)
+    {
+    m_Argv.push_back(m_Arguments[i].c_str());
+    }
+  
+  // Look for known flags.
   if(!bFlag)
     {
     this->m_LastUnknownParameter = lpszParam;

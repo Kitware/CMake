@@ -28,6 +28,8 @@
 #error include 'stdafx.h' before including this file for PCH
 #endif
 
+#include "../cmStandardIncludes.h"
+
 ///////////////////////////////////////////////////////////////
 // CMakeCommandLineInfo:
 // See CMakeCommandLineInfo.cpp for the implementation of this class
@@ -46,7 +48,14 @@ public:
   BOOL m_AdvancedValues;
   CString m_GeneratorChoiceString;
   CString m_LastUnknownParameter;
-
+  
+  int GetArgC() { return static_cast<int>(m_Argv.size()); }
+  const char*const* GetArgV() { return &*m_Argv.begin(); }
+  
+  std::string m_Argv0;
+  std::vector<cmStdString> m_Arguments;
+  std::vector<const char*> m_Argv;
+  
   // Operations
 public:
   void ParseParam(const TCHAR* pszParam, BOOL bFlag, BOOL bLast); 
