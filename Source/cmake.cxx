@@ -715,7 +715,33 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
         }        
 
       return 1;
-    }
+      }
+
+    // Internal CMake shared library support.
+    else if (args[1] == "cmake_symlink_library" && args.size() == 5)
+      {
+      int result = 0;
+      std::string realName = args[2];
+      std::string soName = args[3];
+      std::string name = args[4];
+      if(soName != realName)
+        {
+        std::string fname = cmSystemTools::GetFilenameName(realName);
+        if(!cmSystemTools::CreateSymlink(fname.c_str(), soName.c_str()))
+          {
+          result = 1;
+          }
+        }
+      if(name != soName)
+        {
+        std::string fname = cmSystemTools::GetFilenameName(soName);
+        if(!cmSystemTools::CreateSymlink(fname.c_str(), name.c_str()))
+          {
+          result = 1;
+          }
+        }
+      return 0;
+      }
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
     // Write registry value
