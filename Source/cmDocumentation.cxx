@@ -172,6 +172,13 @@ void cmDocumentation::PrintDocumentation(Type ht, std::ostream& os)
 //----------------------------------------------------------------------------
 cmDocumentation::Type cmDocumentation::CheckOptions(int argc, char** argv)
 {
+  // Providing zero arguments gives usage information.
+  if(argc == 1)
+    {
+    return cmDocumentation::Usage;
+    }
+  
+  // Search for supported help options.
   for(int i=1; i < argc; ++i)
     {
     if((strcmp(argv[i], "-help") == 0) ||
@@ -402,9 +409,9 @@ void cmDocumentation::PrintSectionUsage(std::ostream& os,
       os << "\n";
       this->TextIndent = "";
       this->PrintFormatted(os, op->brief);
-      os << "\n";
       }
     }
+  os << "\n";
 }
 
 //----------------------------------------------------------------------------
