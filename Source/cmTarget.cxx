@@ -813,16 +813,12 @@ const char* cmTarget::GetCreateRuleVariable()
     { 
     case cmTarget::STATIC_LIBRARY:
       return "_CREATE_STATIC_LIBRARY";
-      break;
     case cmTarget::SHARED_LIBRARY:
       return "_CREATE_SHARED_LIBRARY";
-      break;
     case cmTarget::MODULE_LIBRARY:
       return "_CREATE_SHARED_MODULE";
-      break; 
     case cmTarget::EXECUTABLE:
       return "_LINK_EXECUTABLE";
-      break; 
     case cmTarget::UTILITY:
     case cmTarget::INSTALL_FILES:
     case cmTarget::INSTALL_PROGRAMS:
@@ -838,13 +834,10 @@ const char* cmTarget::GetSuffixVariable() const
     {
     case cmTarget::STATIC_LIBRARY:
       return "CMAKE_STATIC_LIBRARY_SUFFIX";
-      break;
     case cmTarget::SHARED_LIBRARY:
       return "CMAKE_SHARED_LIBRARY_SUFFIX";
-      break;
     case cmTarget::MODULE_LIBRARY:
       return "CMAKE_SHARED_MODULE_SUFFIX";
-      break;
     case cmTarget::EXECUTABLE:
       return cmSystemTools::GetExecutableExtension();
     case cmTarget::UTILITY:
@@ -862,13 +855,10 @@ const char* cmTarget::GetPrefixVariable() const
     {
     case cmTarget::STATIC_LIBRARY:
       return "CMAKE_STATIC_LIBRARY_PREFIX";
-      break;
     case cmTarget::SHARED_LIBRARY:
       return "CMAKE_SHARED_LIBRARY_PREFIX";
-      break;
     case cmTarget::MODULE_LIBRARY:
       return "CMAKE_SHARED_MODULE_PREFIX";
-      break;
     case cmTarget::EXECUTABLE:
       return cmSystemTools::GetExecutableExtension();
     case cmTarget::UTILITY:
