@@ -3,8 +3,7 @@
 
 #include "../cmStandardIncludes.h"
 #include "cmCursesForm.h"
-#include <curses.h>
-#include <form.h>
+#include "cmCursesStandardIncludes.h"
 
 class cmCursesCacheEntryComposite;
 

@@ -1,8 +1,7 @@
 #ifndef __cmCursesForm_h
 #define __cmCursesForm_h
 
-#include <curses.h>
-#include <form.h>
+#include "cmCursesStandardIncludes.h"
 
 class cmCursesForm
 {

@@ -2,8 +2,7 @@
 #define __cmCursesLabelWidget_h
 
 #include "cmCursesWidget.h"
-#include <curses.h>
-#include <form.h>
+#include "cmCursesStandardIncludes.h"
 
 
 class cmCursesLabelWidget : public cmCursesWidget
