@@ -213,13 +213,9 @@ kwsysEXPORT const char* kwsysProcess_GetErrorString(kwsysProcess* cp);
 kwsysEXPORT void kwsysProcess_Execute(kwsysProcess* cp);
 
 /**
- * Block until data are available on a requested pipe, a timeout
- * expires, or the child process terminates.  Arguments are as
- * follows:
+ * Block until data are available on a pipe, a timeout expires, or the
+ * child process terminates.  Arguments are as follows:
  *
- *  pipes   = Flags for the child output pipes of interest to the caller.
- *            Possible values are Pipe_STDOUT and Pipe_STDERR.  Multiple
- *            pipes may be specified by using the bitwise OR operator '|'.
  *  data    = If data are read, the pointer to which this points is
  *            set to point to the data.
  *  length  = If data are read, the integer to which this points is
@@ -241,9 +237,8 @@ kwsysEXPORT void kwsysProcess_Execute(kwsysProcess* cp);
  *                  call.  Time elapsed has been subtracted from timeout
  *                  argument.
  */
-kwsysEXPORT int kwsysProcess_WaitForData(kwsysProcess* cp, int pipes,
-                                         char** data, int* length,
-                                         double* timeout);
+kwsysEXPORT int kwsysProcess_WaitForData(kwsysProcess* cp, char** data,
+                                         int* length, double* timeout);
 enum kwsysProcess_Pipes_e
 {
   kwsysProcess_Pipe_STDOUT=1,

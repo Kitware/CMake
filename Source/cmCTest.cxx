@@ -2363,9 +2363,7 @@ int cmCTest::RunMakeCommand(const char* command, std::string* output,
     std::cout << "   Each . represents " << tick_len << " bytes of output" << std::endl;
     std::cout << "    " << std::flush;
     }
-  while(cmsysProcess_WaitForData(cp, (cmsysProcess_Pipe_STDOUT |
-                                      cmsysProcess_Pipe_STDERR),
-                                 &data, &length, 0))
+  while(cmsysProcess_WaitForData(cp, &data, &length, 0))
     {
     if ( output )
       {
@@ -2454,9 +2452,7 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output, int *re
   
   char* data;
   int length;
-  while(cmsysProcess_WaitForData(cp, (cmsysProcess_Pipe_STDOUT |
-                                      cmsysProcess_Pipe_STDERR),
-                                 &data, &length, 0))
+  while(cmsysProcess_WaitForData(cp, &data, &length, 0))
     {
     if ( output )
       {

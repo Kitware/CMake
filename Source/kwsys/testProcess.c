@@ -66,9 +66,7 @@ int runChild(const char* cmd[], int state, int exception, int value)
   kwsysProcess_SetTimeout(kp, 3);
   kwsysProcess_Execute(kp);
   
-  while(kwsysProcess_WaitForData(kp, (kwsysProcess_Pipe_STDOUT |
-                                      kwsysProcess_Pipe_STDERR),
-                                 &data, &length, 0))
+  while(kwsysProcess_WaitForData(kp, &data, &length, 0))
     {
     fwrite(data, 1, length, stdout);
     fflush(stdout);

@@ -921,7 +921,7 @@ void kwsysProcess_Execute(kwsysProcess* cp)
 
 /*--------------------------------------------------------------------------*/
 
-int kwsysProcess_WaitForData(kwsysProcess* cp, int pipes, char** data, int* length,
+int kwsysProcess_WaitForData(kwsysProcess* cp, char** data, int* length,
                              double* userTimeout)
 {
   kwsysProcessTime userStartTime;
@@ -997,17 +997,13 @@ int kwsysProcess_WaitForData(kwsysProcess* cp, int pipes, char** data, int* leng
         /* The pipe closed.  */
         --cp->PipesLeft;
         }
-      else if(pipes & (1 << cp->CurrentIndex))
+      else if(data && length)
         {
-        /* Caller wants this data.  Report it.  */
+        /* Report this data.  */
         *data = cp->Pipe[cp->CurrentIndex].DataBuffer;
         *length = cp->Pipe[cp->CurrentIndex].DataLength;
         pipeId = (1 << cp->CurrentIndex);
         done = 1;
-        }
-      else
-        {
-        /* Caller does not care about this pipe.  Ignore the data.  */
         }
       }
     else
@@ -1074,7 +1070,7 @@ int kwsysProcess_WaitForExit(kwsysProcess* cp, double* userTimeout)
     }
 
   /* Wait for the process to terminate.  Ignore all data.  */
-  while((pipe = kwsysProcess_WaitForData(cp, 0, 0, 0, userTimeout)) > 0)
+  while((pipe = kwsysProcess_WaitForData(cp, 0, 0, userTimeout)) > 0)
     {
     if(pipe == kwsysProcess_Pipe_Timeout)
       {

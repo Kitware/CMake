@@ -403,9 +403,7 @@ bool cmSystemTools::RunSingleCommand(
   std::vector<char> tempOutput;
   char* data;
   int length;
-  while(cmsysProcess_WaitForData(cp, (cmsysProcess_Pipe_STDOUT |
-                                      cmsysProcess_Pipe_STDERR),
-                                 &data, &length, 0))
+  while(cmsysProcess_WaitForData(cp, &data, &length, 0))
     {
     if ( output )
       {
