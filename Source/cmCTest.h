@@ -25,6 +25,11 @@ class cmCTest
 {
 public:
   /**
+   * Run a dashboard using a specified confiuration script
+   */
+  int RunConfigurationScript();
+  
+  /**
    * Initialize and finalize testing
    */
   void Initialize();
@@ -119,6 +124,9 @@ public:
   bool m_Verbose;
   bool m_DartMode;
   bool m_ShowOnly;
+
+  bool m_RunConfigurationScript;
+  std::string m_ConfigurationScript;
 
   enum {
     EXPERIMENTAL,

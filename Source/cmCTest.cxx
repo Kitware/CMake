@@ -15,7 +15,11 @@
 
 =========================================================================*/
 #include "cmCTest.h"
-#include "cmSystemTools.h"
+#include "cmake.h"
+#include "cmMakefile.h"
+#include "cmLocalGenerator.h"
+#include "cmGlobalGenerator.h"
+#include <cmsys/Directory.hxx>
 #include "cmListFileCache.h"
 
 #ifdef HAVE_CURL
@@ -258,14 +262,15 @@ bool TryExecutable(const char *dir, const char *file,
 
 cmCTest::cmCTest() 
 { 
-  m_UseIncludeRegExp      = false;
-  m_UseExcludeRegExp      = false;
-  m_UseExcludeRegExpFirst = false;
-  m_Verbose               = false;
-  m_DartMode              = false;
-  m_ShowOnly              = false;
-  m_TestModel             = cmCTest::EXPERIMENTAL;
-  m_TimeOut               = 0;
+  m_UseIncludeRegExp       = false;
+  m_UseExcludeRegExp       = false;
+  m_UseExcludeRegExpFirst  = false;
+  m_Verbose                = false;
+  m_DartMode               = false;
+  m_ShowOnly               = false;
+  m_RunConfigurationScript = false;
+  m_TestModel              = cmCTest::EXPERIMENTAL;
+  m_TimeOut                = 0;
   int cc; 
   for ( cc=0; cc < cmCTest::LAST_TEST; cc ++ )
     {
@@ -2517,4 +2522,153 @@ const char* cmCTest::GetTestStatus(int status)
     return "No Status";
     }
   return statuses[status];
+}
+
+
+void cmCTestRemoveDirectory(const char *binDir)
+{
+  cmsys::Directory dir;
+  dir.Load(binDir);
+  size_t fileNum;
+  for (fileNum = 0; fileNum <  dir.GetNumberOfFiles(); ++fileNum)
+    {
+    if (strcmp(dir.GetFile(static_cast<unsigned long>(fileNum)),".") &&
+        strcmp(dir.GetFile(static_cast<unsigned long>(fileNum)),".."))
+      {
+      std::string fullPath = binDir;
+      fullPath += "/";
+      fullPath += dir.GetFile(static_cast<unsigned long>(fileNum));
+      if(cmSystemTools::FileIsDirectory(fullPath.c_str()))
+        {
+        cmCTestRemoveDirectory(fullPath.c_str());
+        }
+      else
+        {
+        if(!cmSystemTools::RemoveFile(fullPath.c_str()))
+          {
+          std::string m = "Remove failed on file: ";
+          m += fullPath;
+          cmSystemTools::ReportLastSystemError(m.c_str());
+          }
+        }
+      }
+    }
+}
+
+int cmCTest::RunConfigurationScript()
+{
+  m_ConfigurationScript = 
+    cmSystemTools::CollapseFullPath(m_ConfigurationScript.c_str());
+    
+  // make sure the file exists
+  if (!cmSystemTools::FileExists(m_ConfigurationScript.c_str()))
+    {
+    return -1;
+    }
+  
+  // create a cmake instance to read the configuration script
+  cmake cm;
+  cmGlobalGenerator gg;
+  gg.SetCMakeInstance(&cm);
+  
+  // read in the list file to fill the cache
+  cmLocalGenerator *lg = gg.CreateLocalGenerator();
+  lg->SetGlobalGenerator(&gg);
+  if (!lg->GetMakefile()->ReadListFile(0, m_ConfigurationScript.c_str()))
+    {
+    return -2;
+    }
+
+  // no popup widows
+  cmSystemTools::SetRunCommandHideConsole(true);
+  
+  // get some info that should be set
+  cmMakefile *mf = lg->GetMakefile();
+  const char *srcDir = mf->GetDefinition("CTEST_SOURCE_DIRECTORY");
+  const char *binDir = mf->GetDefinition("CTEST_BINARY_DIRECTORY");
+  const char *ctestCmd = mf->GetDefinition("CTEST_COMMAND");
+
+  // make sure the required info is here
+  if (!srcDir || !binDir || !ctestCmd)
+    {
+    cmSystemTools::Error("Some required settings in the configuration file were missing");    
+    return -3;
+    }
+  
+  // clear the binary directory?
+  if (mf->IsOn("CTEST_START_WITH_EMPTY_BINARY_DIRECTORY"))
+    {
+    // try to avoid deleting directories that we shouldn't
+    std::string check = binDir;
+    check += "/CMakeCache.txt";
+    if (cmSystemTools::FileExists(check.c_str()))
+      {
+      cmCTestRemoveDirectory(binDir);
+      }
+    }
+  
+  // make sure the binary directory exists
+  if (!cmSystemTools::FileExists(binDir))
+    {
+    if (!cmSystemTools::MakeDirectory(binDir))
+      {
+      cmSystemTools::Error("Unable to create the binary directory");    
+      return -4;
+      }
+    }
+  
+  std::string command;
+  std::string output;
+  int retVal = 0;
+  bool res = 0; 
+  
+  // do an initial cvs update on the src dir
+  const char *cvsCmd = mf->GetDefinition("CTEST_CVS_COMMAND");
+  if (cvsCmd)
+    {
+    command = cvsCmd;
+    output.empty();
+    retVal = 0;
+    res = cmSystemTools::RunSingleCommand(command.c_str(), &output, 
+                                          &retVal, binDir,
+                                          m_Verbose, 0 /*m_TimeOut*/);
+    }
+  
+  // put the initial cache into the bin dir
+  if (mf->GetDefinition("CTEST_INITIAL_CACHE"))
+    {
+    // the cache file will always be next to the configuration script
+    std::string initialCache = 
+      cmSystemTools::GetFilenamePath(m_ConfigurationScript);
+    initialCache += "/";
+    initialCache += mf->GetDefinition("CTEST_INITIAL_CACHE");
+    std::string destCache = binDir;
+    destCache += "/CMakeCache.txt";
+    cmSystemTools::CopyFileIfDifferent(initialCache.c_str(),
+                                       destCache.c_str());
+    }
+  
+  // do an initial cmake to setup the DartConfig file
+  const char *cmakeCmd = mf->GetDefinition("CTEST_CMAKE_COMMAND");
+  if (cmakeCmd)
+    {
+    command = cmakeCmd;
+    command += " ";
+    command += srcDir;
+    output.empty();
+    retVal = 0;
+    res = cmSystemTools::RunSingleCommand(command.c_str(), &output, 
+                                          &retVal, binDir,
+                                          m_Verbose, 0 /*m_TimeOut*/);
+    }
+  
+  // run ctest
+  command = ctestCmd;
+  output.empty();
+  retVal = 0;
+  res = cmSystemTools::RunSingleCommand(command.c_str(), &output, 
+                                        &retVal, binDir,
+                                        m_Verbose, 0 /*m_TimeOut*/);
+
+  return 0;  
 }

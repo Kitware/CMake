@@ -73,6 +73,12 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
    "a dashboard test. All tests are ModeTest, where Mode can be Experimental, "
    "Nightly, and Continuous, and Test can be Start, Update, Configure, "
    "Build, Test, Coverage, and Submit."},
+  {"-S <ConfigScript>", "Execute a dashboard for a configuration",
+   "This option tells ctest to load in a configuration script which sets "
+   "a number of parameters such as the binary and source directories. Then "
+   "ctest will do what is required to create and run a dashboard. This "
+   "option basically sets up a dashboard and then runs ctest -D with the "
+   "appropriate options."},
   {0,0,0}
 };
 
@@ -146,6 +152,12 @@ int main (int argc, char *argv[])
       inst.m_ShowOnly = true;
       }
 
+    if( arg.find("-S",0) == 0 && i < args.size() - 1 )
+      {
+      inst.m_RunConfigurationScript = true;
+      inst.m_ConfigurationScript = args[i+1];
+      }
+    
     if( arg.find("-D",0) == 0 && i < args.size() - 1 )
       {
       inst.m_DartMode = true;
@@ -367,10 +379,18 @@ int main (int argc, char *argv[])
     }
 
   // call process directory
-  inst.Initialize();
-  int res = inst.ProcessTests();
-  inst.Finalize();
-
+  int res;
+  if (inst.m_RunConfigurationScript)
+    {
+    res = inst.RunConfigurationScript();
+    }
+  else
+    {
+    inst.Initialize();
+    res = inst.ProcessTests();
+    inst.Finalize();
+    }
+  
   return res;
 }
 
