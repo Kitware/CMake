@@ -35,7 +35,7 @@ bool cmIncludeCommand::InitialPass(std::vector<std::string> const& args)
     optional = args[1] == "OPTIONAL";
     }
   
-  if(fname.find("/") == fname.npos)
+  if(!cmSystemTools::FileIsFullPath(fname.c_str()))
     {
     // Not a path. Maybe module.
     std::string module = fname;
