@@ -1,3 +1,6 @@
+# try to load any previously computed information for C on this platform
+INCLUDE( ${CMAKE_BINARY_DIR}/CMakeCPlatform.cmake OPTIONAL)
+
 SET(CMAKE_LIBRARY_PATH_FLAG "-LIBPATH:")
 SET(CMAKE_LINK_LIBRARY_FLAG "")
 SET(WIN32 1)
@@ -55,14 +58,22 @@ IF(CMAKE_GENERATOR MATCHES "Visual Studio 7" OR CMAKE_GENERATOR MATCHES "Visual 
   MARK_AS_ADVANCED(CMAKE_CONFIGURATION_TYPES CMAKE_CXX_STACK_SIZE CMAKE_CXX_WARNING_LEVEL)
 ENDIF(CMAKE_GENERATOR MATCHES "Visual Studio 7" OR CMAKE_GENERATOR MATCHES "Visual Studio 8")
 # does the compiler support pdbtype and is it the newer compiler
-SET(CMAKE_COMPILER_SUPPORTS_PDBTYPE 1)
-SET(CMAKE_COMPILER_2005 0)
 IF(CMAKE_GENERATOR MATCHES  "Visual Studio 8")
   SET(CMAKE_COMPILER_2005 1)
 ENDIF(CMAKE_GENERATOR MATCHES  "Visual Studio 8")
+
+# for nmake we need to compute some information about the compiler 
+# that is being used.
+# the compiler may be free command line, 6, 7, or 71, and
+# each have properties that must be determined.  
+# to avoid running these tests with each cmake run, the
+# test results are saved in CMakeCPlatform.cmake, a file
+# that is automatically copied into try_compile directories
+# by the global generator.
 IF(CMAKE_GENERATOR MATCHES "NMake Makefiles")
   IF(NOT CMAKE_VC_COMPILER_TESTS_RUN)
     SET(CMAKE_VC_COMPILER_TESTS 1)
+    MESSAGE("running CMAKE_VC_COMPILER_TESTS_RUN")
     EXEC_PROGRAM(${CMAKE_C_COMPILER} 
       ARGS /nologo -EP \"${CMAKE_ROOT}/Modules/CMakeTestNMakeCLVersion.c\" 
       OUTPUT_VARIABLE CMAKE_COMPILER_OUTPUT 
@@ -71,9 +82,13 @@ IF(CMAKE_GENERATOR MATCHES "NMake Makefiles")
     IF(NOT CMAKE_COMPILER_RETURN)
       IF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*VERSION=1[3-9][0-9][0-9].*" )
         SET(CMAKE_COMPILER_SUPPORTS_PDBTYPE 0)
+      ELSE("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*VERSION=1[3-9][0-9][0-9].*" )
+        SET(CMAKE_COMPILER_SUPPORTS_PDBTYPE 1)
       ENDIF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*VERSION=1[3-9][0-9][0-9].*" )
       IF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*VERSION=1[4-9][0-9][0-9].*" )
         SET(CMAKE_COMPILER_2005 1)
+      ELSE("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*VERSION=1[4-9][0-9][0-9].*" )
+        SET(CMAKE_COMPILER_2005 0)
       ENDIF("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*VERSION=1[4-9][0-9][0-9].*" )
     ENDIF(NOT CMAKE_COMPILER_RETURN)
     # try to figure out if we are running the free command line
@@ -91,7 +106,6 @@ IF(CMAKE_GENERATOR MATCHES "NMake Makefiles")
     ELSE(CMAKE_COMPILER_RETURN)
       SET(CMAKE_USING_VC_FREE_TOOLS 0)
     ENDIF(CMAKE_COMPILER_RETURN)
-    SET(CMAKE_VC_COMPILER_TESTS_RUN 1 CACHE INTERNAL "") 
   ENDIF(NOT CMAKE_VC_COMPILER_TESTS_RUN)
 ENDIF(CMAKE_GENERATOR MATCHES "NMake Makefiles")
 
@@ -164,3 +178,8 @@ SET (CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO_INIT ${CMAKE_EXE_LINKER_FLAGS_DEBU
 SET (CMAKE_MODULE_LINKER_FLAGS_INIT ${CMAKE_SHARED_LINKER_FLAGS_INIT})
 SET (CMAKE_MODULE_LINKER_FLAGS_DEBUG_INIT ${CMAKE_SHARED_LINKER_FLAGS_DEBUG_INIT})
 SET (CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO_INIT ${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO_INIT})
+
+
+# save computed information for this platform
+CONFIGURE_FILE(${CMAKE_ROOT}/Modules/Platform/Windows-cl.cmake.in 
+               ${CMAKE_BINARY_DIR}/CMakeCPlatform.cmake IMMEDIATE)

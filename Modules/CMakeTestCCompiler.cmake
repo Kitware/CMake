@@ -12,7 +12,8 @@ IF(NOT CMAKE_C_COMPILER_WORKS)
     "int main(){return 0;}\n")
   TRY_COMPILE(CMAKE_C_COMPILER_WORKS ${CMAKE_BINARY_DIR} 
     ${CMAKE_BINARY_DIR}/CMakeTmp/testCCompiler.c
-    OUTPUT_VARIABLE OUTPUT)
+    OUTPUT_VARIABLE OUTPUT) 
+  SET(C_TEST_WAS_RUN 1)
 ENDIF(NOT CMAKE_C_COMPILER_WORKS)
 
 IF(NOT CMAKE_C_COMPILER_WORKS)
@@ -25,8 +26,11 @@ IF(NOT CMAKE_C_COMPILER_WORKS)
     "with the following output:\n ${OUTPUT}\n\n"
     "CMake will not be able to correctly generate this project.")
 ELSE(NOT CMAKE_C_COMPILER_WORKS)
-  MESSAGE(STATUS "Check for working C compiler: ${CMAKE_C_COMPILER} -- works")
-  FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeOutput.log
-    "Determining if the C compiler works passed with "
-    "the following output:\n${OUTPUT}\n\n")
+  IF(C_TEST_WAS_RUN)
+    MESSAGE(STATUS "Check for working C compiler: ${CMAKE_C_COMPILER} -- works")
+    FILE(APPEND ${CMAKE_BINARY_DIR}/CMakeOutput.log
+      "Determining if the C compiler works passed with "
+      "the following output:\n${OUTPUT}\n\n") 
+  ENDIF(C_TEST_WAS_RUN)
+  SET(CMAKE_C_COMPILER_WORKS 1 CACHE INTERNAL "")
 ENDIF(NOT CMAKE_C_COMPILER_WORKS)
