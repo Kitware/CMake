@@ -59,7 +59,7 @@ bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& argsIn)
     std::string command;
     command = "cd ";
     command += args[1].c_str();
-    command += "; ";
+    command += " && ";
     command += args[0].c_str();
     cmSystemTools::RunCommand(command.c_str(), output);
     }
