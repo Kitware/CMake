@@ -7,13 +7,18 @@
 #  TK_WISH          = the full path to the wish binary (wish wish80 etc)
 #
 
-# if unix look for the cyg version first to avoid finding it 
-# on a windows box running only win32 builds
-IF(UNIX)
-  FIND_PROGRAM(TCL_TCLSH cygtclsh80)
-ENDIF(UNIX)
+# In cygwin, look for the cygwin version first.  Don't look for it later to
+# avoid finding the cygwin version on a Win32 build.
+IF(WIN32)
+  IF(UNIX)
+    FIND_PROGRAM(TCL_TCLSH cygtclsh80)
+  ENDIF(UNIX)
+ENDIF(WIN32)
 
 FIND_PROGRAM(TCL_TCLSH
-  NAMES tclsh tclsh84 tclsh8.4 tclsh83 tclsh8.3 tclsh82 tclsh80 cygtclsh80
+  NAMES tclsh
+  tclsh84 tclsh8.4
+  tclsh83 tclsh8.3
+  tclsh82 tclsh8.2
+  tclsh80 tclsh8.0
 )
-
