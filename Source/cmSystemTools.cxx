@@ -16,7 +16,7 @@
 =========================================================================*/
 #include "cmSystemTools.h"   
 #include "errno.h"
-#include "stdio.h"
+#include <stdio.h>
 #include <sys/stat.h>
 #include "cmRegularExpression.h"
 #include <ctype.h>

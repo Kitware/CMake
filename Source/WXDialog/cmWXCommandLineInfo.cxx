@@ -87,7 +87,7 @@ int cmCommandLineInfo::GetBoolValue(const std::string& v) {
 // Parse param
 
 void cmCommandLineInfo::ParseParam(const std::string& parameter, 
-                                   bool know_about, bool last)
+                                   bool know_about, bool /*last*/)
 {
   if(!know_about)
     {

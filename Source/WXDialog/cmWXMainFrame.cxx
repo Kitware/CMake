@@ -500,7 +500,7 @@ void cmMainFrame::OnResize(wxSizeEvent& event)
   this->ResizeInternal();
 }
 
-void cmMainFrame::OnExitTimer(wxEvent& event)
+void cmMainFrame::OnExitTimer(wxEvent&)
 {
   this->Close();
   this->Refresh();
@@ -1045,9 +1045,6 @@ void cmMainFrame::UpdateCacheValuesDisplay()
 
   // Fix size
   int sx, sy;
-  int total = max * count + 4;
-  wxSize sizersize = this->m_CacheValuesSizer->GetSize();
-  
   this->m_CacheValuesScroll->GetClientSize(&sx, &sy);
   wxSize size2 = this->m_CacheValuesPanel->GetSize();
   sy = size2.GetHeight();

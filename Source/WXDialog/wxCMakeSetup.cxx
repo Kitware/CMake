@@ -87,8 +87,8 @@ public:
     {
       wxPanel *panel = new wxPanel(this, -1);
       panel->SetBackgroundColour(*wxRED);
-      wxTextCtrl * text = new wxTextCtrl(panel, -1, "Test", wxPoint(40, 5));
-      wxButton * bt = new wxButton(panel, -1, "Test", wxPoint(-1, 5));
+      new wxTextCtrl(panel, -1, "Test", wxPoint(40, 5));
+      new wxButton(panel, -1, "Test", wxPoint(-1, 5));
     }
 };
 

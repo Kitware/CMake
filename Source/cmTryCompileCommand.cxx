@@ -206,13 +206,16 @@ bool cmTryCompileCommand::InitialPass(std::vector<std::string> const& argv)
   
   return true;
 }
-     
+
+static void cmTryCompileCommandNotUsed(bool){}
+
 void cmTryCompileCommand::CleanupFiles(const char* binDir, bool recursive)
 {
   if ( !binDir )
     {
     return;
     }
+  cmTryCompileCommandNotUsed(recursive);
 #ifdef WIN32
   if ( recursive )
     {
