@@ -267,10 +267,11 @@ fi
 # Check if C++ compiler works
 TMPFILE=`cmake_tmp_file`
 cat>"${TMPFILE}.cxx"<<EOF
-#include<iostream.h>
+#include <stdio.h>
+class NeedCXX {};
 int main()
 {
-  cout << 1 << endl;
+  printf("1\n");
   return 0;
 }
 EOF
