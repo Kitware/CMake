@@ -27,6 +27,7 @@
 #include <limits.h>
 #include <stdlib.h>
 #include <sys/param.h>
+#include <sys/wait.h>
 #endif
 
 #if defined(_MSC_VER) || defined(__BORLANDC__)
@@ -1019,6 +1020,8 @@ bool cmSystemTools::RunCommand(const char* command,
     {
     std::cout << "running " << command << std::endl;
     }
+  fflush(stdout);
+  fflush(stderr);
   FILE* cpipe = popen(command, "r");
   if(!cpipe)
     {
@@ -1034,7 +1037,10 @@ bool cmSystemTools::RunCommand(const char* command,
     output += buffer;
     fgets(buffer, BUFFER_SIZE, cpipe);
     }
+
   retVal = pclose(cpipe);
+  retVal = WEXITSTATUS(retVal);
+  std::cout << "*** cmSystemTools: return value from " << command << " is "<< retVal << "\n";
   return true;
 #endif
 }
