@@ -247,6 +247,10 @@ void CMakeSetupDialog::OnOK()
 { 
   // get all the info from the screen
   this->UpdateData();
+  if(m_WhereBuild == "")
+    {
+    m_WhereBuild = m_WhereSource;
+    }
   
   // configure the system for VC60
   cmWindowsConfigure config;
