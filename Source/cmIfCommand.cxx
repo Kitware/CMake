@@ -16,7 +16,7 @@
 =========================================================================*/
 #include "cmIfCommand.h"
 #include <stdlib.h> // required for atof
-#include <deque>
+#include <list>
 #include <cmsys/RegularExpression.hxx>
 
 bool cmIfFunctionBlocker::
@@ -177,7 +177,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
   
   
   // store the reduced args in this vector
-  std::deque<std::string> newArgs;
+  std::list<std::string> newArgs;
   int reducible;
   unsigned int i;
   
@@ -186,19 +186,25 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
     {   
     newArgs.push_back(args[i]);
     }
+  std::list<std::string>::iterator argP1;
+  std::list<std::string>::iterator argP2;
   
   // now loop through the arguments and see if we can reduce any of them
   // we do this multiple times. Once for each level of precedence
   do
     {
     reducible = 0;
-    std::deque<std::string>::iterator arg = newArgs.begin();
+    std::list<std::string>::iterator arg = newArgs.begin();
     while (arg != newArgs.end())
       {
+      argP1 = arg;
+      argP1++;
+      argP2 = argP1;
+      argP2++;
       // does a file exist
-      if (*arg == "EXISTS" && arg + 1  != newArgs.end())
+      if (*arg == "EXISTS" && argP1  != newArgs.end())
         {
-        if(cmSystemTools::FileExists((arg + 1)->c_str()))
+        if(cmSystemTools::FileExists((argP1)->c_str()))
           {
           *arg = "1";
           }
@@ -206,13 +212,17 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
           {
           *arg = "0";
           }
-        newArgs.erase(arg+1);
+        newArgs.erase(argP1);
+        argP1 = arg;
+        argP1++;
+        argP2 = argP1;
+        argP2++;
         reducible = 1;
         }
       // does a command exist
-      if (*arg == "COMMAND" && arg + 1  != newArgs.end())
+      if (*arg == "COMMAND" && argP1  != newArgs.end())
         {
-        if(makefile->CommandExists((arg + 1)->c_str()))
+        if(makefile->CommandExists((argP1)->c_str()))
           {
           *arg = "1";
           }
@@ -220,13 +230,17 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
           {
           *arg = "0";
           }
-        newArgs.erase(arg+1);
+        newArgs.erase(argP1);
+        argP1 = arg;
+        argP1++;
+        argP2 = argP1;
+        argP2++;
         reducible = 1;
         }
       // is a variable defined
-      if (*arg == "DEFINED" && arg + 1  != newArgs.end())
+      if (*arg == "DEFINED" && argP1  != newArgs.end())
         {
-        def = makefile->GetDefinition((arg + 1)->c_str());
+        def = makefile->GetDefinition((argP1)->c_str());
         if(def)
           {
           *arg = "1";
@@ -235,7 +249,11 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
           {
           *arg = "0";
           }
-        newArgs.erase(arg+1);
+        newArgs.erase(argP1);
+        argP1 = arg;
+        argP1++;
+        argP2 = argP1;
+        argP2++;
         reducible = 1;
         }
       ++arg;
@@ -249,14 +267,19 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
   do
     {
     reducible = 0;
-    std::deque<std::string>::iterator arg = newArgs.begin();
+    std::list<std::string>::iterator arg = newArgs.begin();
+    
     while (arg != newArgs.end())
       {
-      if (arg + 1 != newArgs.end() && arg + 2 != newArgs.end() &&
-          *(arg + 1) == "MATCHES") 
+      argP1 = arg;
+      argP1++;
+      argP2 = argP1;
+      argP2++;
+      if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
+          *(argP1) == "MATCHES") 
         {
         def = cmIfCommand::GetVariableOrString(arg->c_str(), makefile);
-        cmsys::RegularExpression regEntry((arg+2)->c_str());
+        cmsys::RegularExpression regEntry((argP2)->c_str());
         if (regEntry.find(def))
           {
           *arg = "1";
@@ -265,25 +288,33 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
           {
           *arg = "0";
           }
-        newArgs.erase(arg+2);
-        newArgs.erase(arg+1);
+        newArgs.erase(argP2);
+        newArgs.erase(argP1);
+        argP1 = arg;
+        argP1++;
+        argP2 = argP1;
+        argP2++;
         reducible = 1;
         }
 
-      if (arg + 1 != newArgs.end() && *arg == "MATCHES") 
+      if (argP1 != newArgs.end() && *arg == "MATCHES") 
         {
         *arg = "0";
-        newArgs.erase(arg+1);
+        newArgs.erase(argP1);
+        argP1 = arg;
+        argP1++;
+        argP2 = argP1;
+        argP2++;
         reducible = 1;
         }
 
-      if (arg + 1 != newArgs.end() && arg + 2 != newArgs.end() &&
-          (*(arg + 1) == "LESS" || *(arg + 1) == "GREATER" || 
-           *(arg + 1) == "EQUAL")) 
+      if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
+          (*(argP1) == "LESS" || *(argP1) == "GREATER" || 
+           *(argP1) == "EQUAL")) 
         {
         def = cmIfCommand::GetVariableOrString(arg->c_str(), makefile);
-        def2 = cmIfCommand::GetVariableOrString((arg + 2)->c_str(), makefile);
-        if (*(arg + 1) == "LESS")
+        def2 = cmIfCommand::GetVariableOrString((argP2)->c_str(), makefile);
+        if (*(argP1) == "LESS")
           {
           if(atof(def) < atof(def2))
             {
@@ -294,7 +325,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
             *arg = "0";
             }
           }
-        else if (*(arg + 1) == "GREATER")
+        else if (*(argP1) == "GREATER")
           {
           if(atof(def) > atof(def2))
             {
@@ -316,17 +347,21 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
             *arg = "0";
             }
           }          
-        newArgs.erase(arg+2);
-        newArgs.erase(arg+1);
+        newArgs.erase(argP2);
+        newArgs.erase(argP1);
+        argP1 = arg;
+        argP1++;
+        argP2 = argP1;
+        argP2++;
         reducible = 1;
         }
 
-      if (arg + 1 != newArgs.end() && arg + 2 != newArgs.end() &&
-          (*(arg + 1) == "STRLESS" || *(arg + 1) == "STRGREATER")) 
+      if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
+          (*(argP1) == "STRLESS" || *(argP1) == "STRGREATER")) 
         {
         def = cmIfCommand::GetVariableOrString(arg->c_str(), makefile);
-        def2 = cmIfCommand::GetVariableOrString((arg + 2)->c_str(), makefile);
-        if (*(arg + 1) == "STRLESS")
+        def2 = cmIfCommand::GetVariableOrString((argP2)->c_str(), makefile);
+        if (*(argP1) == "STRLESS")
           {
           if(strcmp(def,def2) < 0)
             {
@@ -348,8 +383,12 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
             *arg = "0";
             }
           }          
-        newArgs.erase(arg+2);
-        newArgs.erase(arg+1);
+        newArgs.erase(argP2);
+        newArgs.erase(argP1);
+        argP1 = arg;
+        argP1++;
+        argP2 = argP1;
+        argP2++;
         reducible = 1;
         }
 
@@ -364,12 +403,16 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
   do
     {
     reducible = 0;
-    std::deque<std::string>::iterator arg = newArgs.begin();
+    std::list<std::string>::iterator arg = newArgs.begin();
     while (arg != newArgs.end())
       {
-      if (arg + 1 != newArgs.end() && *arg == "NOT")
+      argP1 = arg;
+      argP1++;
+      argP2 = argP1;
+      argP2++;
+      if (argP1 != newArgs.end() && *arg == "NOT")
         {
-        def = cmIfCommand::GetVariableOrNumber((arg + 1)->c_str(), makefile);
+        def = cmIfCommand::GetVariableOrNumber((argP1)->c_str(), makefile);
         if(!cmSystemTools::IsOff(def))
           {
           *arg = "0";
@@ -378,7 +421,11 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
           {
           *arg = "1";
           }
-        newArgs.erase(arg+1);
+        newArgs.erase(argP1);
+        argP1 = arg;
+        argP1++;
+        argP2 = argP1;
+        argP2++;
         reducible = 1;
         }
       ++arg;
@@ -391,14 +438,18 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
   do
     {
     reducible = 0;
-    std::deque<std::string>::iterator arg = newArgs.begin();
+    std::list<std::string>::iterator arg = newArgs.begin();
     while (arg != newArgs.end())
       {
-      if (arg + 1 != newArgs.end() && *(arg + 1) == "AND" && 
-          arg + 2 != newArgs.end())
+      argP1 = arg;
+      argP1++;
+      argP2 = argP1;
+      argP2++;
+      if (argP1 != newArgs.end() && *(argP1) == "AND" && 
+          argP2 != newArgs.end())
         {
         def = cmIfCommand::GetVariableOrNumber(arg->c_str(), makefile);
-        def2 = cmIfCommand::GetVariableOrNumber((arg + 2)->c_str(), makefile);
+        def2 = cmIfCommand::GetVariableOrNumber((argP2)->c_str(), makefile);
         if(cmSystemTools::IsOff(def) || cmSystemTools::IsOff(def2))
           {
           *arg = "0";
@@ -407,16 +458,20 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
           {
           *arg = "1";
           }
-        newArgs.erase(arg+2);
-        newArgs.erase(arg+1);
+        newArgs.erase(argP2);
+        newArgs.erase(argP1);
+        argP1 = arg;
+        argP1++;
+        argP2 = argP1;
+        argP2++;
         reducible = 1;
         }
 
-      if (arg + 1 != newArgs.end() && *(arg + 1) == "OR" && 
-          arg + 2 != newArgs.end())
+      if (argP1 != newArgs.end() && *(argP1) == "OR" && 
+          argP2 != newArgs.end())
         {
         def = cmIfCommand::GetVariableOrNumber(arg->c_str(), makefile);
-        def2 = cmIfCommand::GetVariableOrNumber((arg + 2)->c_str(), makefile);
+        def2 = cmIfCommand::GetVariableOrNumber((argP2)->c_str(), makefile);
         if(cmSystemTools::IsOff(def) && cmSystemTools::IsOff(def2))
           {
           *arg = "0";
@@ -425,8 +480,12 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
           {
           *arg = "1";
           }
-        newArgs.erase(arg+2);
-        newArgs.erase(arg+1);
+        newArgs.erase(argP2);
+        newArgs.erase(argP1);
+        argP1 = arg;
+        argP1++;
+        argP2 = argP1;
+        argP2++;
         reducible = 1;
         }
   
@@ -439,11 +498,11 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
   if (newArgs.size() == 1)
     {
     isValid = true;
-    if (newArgs[0] == "0")
+    if (*newArgs.begin() == "0")
       {
       return false;
       }
-    if (newArgs[0] == "1")
+    if (*newArgs.begin() == "1")
       {
       return true;
       }
