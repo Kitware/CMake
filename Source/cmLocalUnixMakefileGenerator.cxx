@@ -2039,7 +2039,7 @@ void cmLocalUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
 {
   const char* root
     = m_Makefile->GetDefinition("CMAKE_ROOT");
-  fout << "INSTALL = " << root << "/Templates/install-sh -c\n";
+  fout << "INSTALL = \"" << root << "/Templates/install-sh\" -c\n";
   fout << "INSTALL_PROGRAM = $(INSTALL)\n";
   fout << "INSTALL_DATA =    $(INSTALL) -m 644\n";
   
