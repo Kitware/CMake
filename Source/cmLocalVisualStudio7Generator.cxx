@@ -434,13 +434,16 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
 
   fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCCustomBuildTool\"/>\n";
   fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCResourceCompilerTool\"\n"
-       << "AdditionalIncludeDirectories=\"";
+       << "\t\t\t\tAdditionalIncludeDirectories=\"";
   for(i = includes.begin();i != includes.end(); ++i)
     {
     std::string ipath = this->ConvertToXMLOutputPath(i->c_str());
     fout << ipath << ";";
     }
-  fout << "\"\n/>\n";
+  fout << "\"\n"
+       << "\t\t\t\tPreprocessorDefinitions=\"" << pre;
+  this->OutputDefineFlags(fout);
+  fout << "\" />\n";
   fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCMIDLTool\"/>\n";
   this->OutputTargetRules(fout, target, libName);
   this->OutputBuildTool(fout, configName, libName, target);
