@@ -449,8 +449,11 @@ void cmCursesMainForm::UpdateStatusBar()
   // Get the key of the current entry
   FIELD* cur = current_field(m_Form);
   int index = field_index(cur);
-  cmCursesWidget* lbl = reinterpret_cast<cmCursesWidget*>(field_userptr(
-                                                            m_Fields[index-2]));
+  cmCursesWidget* lbl = 0;
+  if ( index >= 0 )
+    {
+    lbl = reinterpret_cast<cmCursesWidget*>(field_userptr(m_Fields[index-2]));
+    }
   char help[128] = "";
   const char* curField = "";
   if ( lbl )
