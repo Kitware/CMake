@@ -422,6 +422,7 @@ void CMakeSetupDialog::OnBuildProjects()
   // Create a makefile object
   cmMakefile makefile;
   makefile.SetMakefileGenerator(new cmMSProjectGenerator);
+  makefile.GetMakefileGenerator()->ComputeSystemInfo();
   makefile.SetHomeDirectory(m_WhereSource);
   makefile.SetStartOutputDirectory(m_WhereBuild);
   makefile.SetHomeOutputDirectory(m_WhereBuild);
