@@ -442,7 +442,7 @@ void cmGlobalVisualStudio7Generator::WriteProject(std::ostream& fout,
                                const cmTarget&)
 {
   std::string d = cmSystemTools::ConvertToOutputPath(dir);
-  fout << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\" = \"" 
+  fout << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"" 
        << dspname << "\", \""
        << d << "\\" << dspname << ".vcproj\", \"{"
        << this->CreateGUID(dspname) << "}\"\nEndProject\n";
