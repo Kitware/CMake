@@ -175,6 +175,7 @@ static const char* cmCTestWarningMatches[] = {
   "([^ :]+) : warning",
   "([^:]+): warning",
   "\", line [0-9]+\\.[0-9]+: [0-9]+-[0-9]+ \\(W\\)",
+  "^cxx: Warning:",
   0
 };
 

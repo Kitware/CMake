@@ -88,10 +88,24 @@ MACRO(CMAKE_IMPORT_BUILD_SETTINGS SETTINGS_FILE)
     IF(WIN32)
       IF(CMAKE_BUILD_TOOL_MISMATCH)
         MESSAGE(SEND_ERROR
+                "This project, ${PROJECT_NAME}, depends on the project "
+                "${CMAKE_BUILD_SETTING_PROJECT_NAME}. Unfortunately "
                 "${CMAKE_BUILD_SETTING_PROJECT_NAME} was built using "
-                "\"${CMAKE_BUILD_TOOL2}\", but ${PROJECT_NAME} "
-                "is using \"${CMAKE_BUILD_TOOL1}\".  The build will fail.  "
-                "Try selecting a different CMake Generator.")
+                "\"${CMAKE_BUILD_TOOL2}\", but you are trying to build "
+                "${PROJECT_NAME} using \"${CMAKE_BUILD_TOOL1}\"."
+                "In order for this build to succeed, both projects must be "
+                "built with the same Generator. To change the Generator you "
+                "are using for the project ${PROJECT_NAME}, you must "
+                "delete the cache, and then rerun cmake and this "
+                "time select the same Generator that was used to build "
+                "${CMAKE_BUILD_SETTING_PROJECT_NAME}. If "
+                "${CMAKE_BUILD_SETTING_PROJECT_NAME} was built using a "
+                "generator that you do not have (for example it was built "
+                "with Visual Studio 6 and you only have 7) then you will "
+                "need to select a different version of "
+                "${CMAKE_BUILD_SETTING_PROJECT_NAME} or rebuild "
+                "${CMAKE_BUILD_SETTING_PROJECT_NAME} with the correct "
+                "generator. ")
       ENDIF(CMAKE_BUILD_TOOL_MISMATCH)
     ENDIF(WIN32)
 
