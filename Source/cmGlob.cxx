@@ -143,13 +143,11 @@ void cmGlob::ProcessDirectory(std::string::size_type start,
   cmsys::Directory d;
   if ( !d.Load(dir.c_str()) )
     {
-    //std::cout << "Cannot open directory: " << dir.c_str() << std::endl;
     return;
     }
   unsigned long cc;
   std::string fullname;
   bool last = ( start == m_Internals->Expressions.size()-1 );
-  //std::cout << "Last: " << last << " Dironly: " << dir_only << std::endl;
   for ( cc = 0; cc < d.GetNumberOfFiles(); cc ++ )
     {
     if ( strcmp(d.GetFile(cc), ".") == 0 ||
@@ -168,25 +166,18 @@ void cmGlob::ProcessDirectory(std::string::size_type start,
 
     if ( (!dir_only || !last) && !cmsys::SystemTools::FileIsDirectory(fullname.c_str()) )
       {
-      //std::cout << " Ignore: " << fullname.c_str() << std::endl;
       continue;
       }
     if ( m_Internals->Expressions[start].find(d.GetFile(cc)) )
       {
-      //std::cout << " Matches: " << fullname.c_str() << std::endl;
       if ( last )
         {
-        //std::cout << "--- find file: " << fullname.c_str() << "---" << std::endl;
         m_Internals->Files.push_back(fullname);
         }
       else
         {
         this->ProcessDirectory(start+1, fullname, dir_only);
         }
-      }
-    else
-      {
-      //std::cout << " Not Matches: " << fullname.c_str() << std::endl;
       }
     }
 }
@@ -205,7 +196,6 @@ bool cmGlob::FindFiles(const std::string& inexpr)
     expr = cmsys::SystemTools::GetCurrentWorkingDirectory();
     expr += "/" + inexpr;
     }
-  std::cout << "Expr: " << expr << std::endl;
   for ( cc = 0; cc < expr.size(); cc ++ )
     {
     int ch = expr[cc];
