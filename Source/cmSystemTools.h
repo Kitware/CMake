@@ -258,6 +258,9 @@ public:
   ///! return file name without its last (shortest) extension.
   static std::string GetFilenameWithoutLastExtension(const std::string&);
   
+  /** Return whether the path represents a full path (not relative).  */
+  static bool FileIsFullPath(const char*);
+  
   static long int ModifiedTime(const char* filename);
 
   /**
