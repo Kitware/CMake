@@ -112,7 +112,6 @@ int main()
   lib += cmDynamicLoader::LibPrefix();
   lib += "CMakeTestModule";
   lib += cmDynamicLoader::LibExtension();
-  
   cmLibHandle handle = cmDynamicLoader::OpenLibrary(lib.c_str());
   if(!handle)
     {
@@ -121,17 +120,27 @@ int main()
   else
     {
     cmDynamicLoaderFunction fun = 
-      cmDynamicLoader::GetSymbolAddress(handle, "ModuleFunction"); 
+    cmDynamicLoader::GetSymbolAddress(handle, "ModuleFunction"); 
+    if(!fun)
+      {
+      fun = cmDynamicLoader::GetSymbolAddress(handle, "_ModuleFunction");
+      }
     typedef int (*TEST_FUNCTION)();
     TEST_FUNCTION testFun = (TEST_FUNCTION)fun;
-    int ret = (*testFun)();
-    if(!ret)
+    if(!testFun)
       {
-      cmFailed("ModuleFunction called from module did not return valid return");
+      cmFailed("Could not find symbol ModuleFunction in library ");
       }
-    cmPassed("Module loaded and ModuleFunction called correctly");
+    else
+      {
+        int ret = (*testFun)();
+        if(!ret)
+          {
+          cmFailed("ModuleFunction call did not return valid return.");
+          }
+        cmPassed("Module loaded and ModuleFunction called correctly.");
+      }
     }
-    
   if(sharedFunction() != 1)
     {
     cmFailed("Call to sharedFunction from shared library failed.");
