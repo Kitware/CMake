@@ -166,6 +166,9 @@ int cmGlobalGenerator::TryCompile(const char *, const char *bindir,
     {
     makeCommand += " ";
     makeCommand += target;
+#ifdef WIN32
+    makeCommand += ".exe";
+#endif // WIN32
     }
   else
     {
