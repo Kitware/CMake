@@ -5,6 +5,281 @@
    cvs2cl.pl.  See http://www.red-bean.com/~kfogel/cvs2cl.shtml for more.
   -+- -+- -+- -+- -+- -+- -+- -+- -+- -+- -+- -+- -+- -+- -+- -+- -+- -+-
 
+2001-09-18 14:38  will
+
+	* CMake.pdf: ENH:Updated documentation
+
+2001-09-17 21:40  hoffman
+
+	* CMake.rtf: ENH: update for new version
+
+2001-09-17 20:34  hoffman
+
+	* Source/cmFindFileCommand.cxx: BUG: fix return when file is not
+	found
+
+2001-09-17 20:34  hoffman
+
+	* Source/cmUseMangledMesaCommand.cxx,
+	Source/cmUseMangledMesaCommand.h: ENH: change to take a path as
+	input
+
+2001-09-17 18:16  king
+
+	* Modules/FindCABLE.cmake: ENH: Added find support for looking at
+	Cable's build directory if the user sets the CABLE_BUILD_DIR cache
+	entry.
+
+2001-09-17 17:58  hoffman
+
+	* Source/cmCommands.cxx, Source/cmUseMangledMesaCommand.cxx,
+	Source/cmUseMangledMesaCommand.h: ENH: add Use mangled mesa command
+
+2001-09-17 16:07  blezek
+
+	* Modules/Dart.cmake: ENH: NightlyCoverage got lost
+
+2001-09-14 20:36  martink
+
+	* Source/cmVTKWrapTclCommand.cxx, Source/cmVTKWrapJavaCommand.cxx,
+	Source/cmVTKWrapPythonCommand.cxx: now uses five argument version
+	of wrap commands
+
+2001-09-14 20:26  hoffman
+
+	* Source/cmMakefileGenerator.cxx, Source/cmStandardIncludes.h,
+	Source/cmUnixMakefileGenerator.cxx,
+	Source/cmUnixMakefileGenerator.h, Source/cmakemain.cxx,
+	Source/MFCDialog/CMakeSetupDialog.cpp: remove memory leaks
+
+2001-09-14 19:18  hoffman
+
+	* Source/cmDSPWriter.cxx: fix error in cygwin
+
+2001-09-14 19:18  hoffman
+
+	* Source/cmMakefileGenerator.cxx, Source/cmMakefileGenerator.h: add
+	support for clean up
+
+2001-09-14 19:18  hoffman
+
+	* Source/cmListFileCache.h: initialize class
+
+2001-09-14 14:14  martink
+
+	* Templates/DLLHeader.dsptemplate, Templates/EXEHeader.dsptemplate,
+	Templates/EXEWinHeader.dsptemplate,
+	Templates/UtilityHeader.dsptemplate,
+	Templates/staticLibHeader.dsptemplate: made Debug the default
+	configuration
+
+2001-09-14 12:34  barre
+
+	* Modules/FindTCL.cmake: move cygtclsh80 to the end of list,
+	otherwise it might be found while the non-cygwin wish8x.exe will be
+	found too. If wish8x.exe is found, then the non-cygwin tclsh8x.exe
+	must be found too.
+
+2001-09-13 18:45  martink
+
+	* Modules/Dart.cmake: added back some targets for UNIX
+
+2001-09-13 15:27  martink
+
+	* Source/cmSystemTools.h, Source/cmSystemTools.cxx: added shortest
+	ext function
+
+2001-09-12 21:09  lorensen
+
+	* Source/cmSiteNameCommand.cxx: ENH: drop the case of the site
+	name. This makes it consistent with Dart's usage.
+
+2001-09-12 21:09  lorensen
+
+	* Source/cmSystemTools.cxx, Source/cmSystemTools.h: ENH: Added
+	LowerCase method.
+
+2001-09-12 19:18  king
+
+	* Source/cmCableWrapTclCommand.cxx, Source/cmCableWrapTclCommand.h:
+	ENH: Added parsing of gccxml flags into separate arguments for
+	setting the custom command.  This is necessary since the custom
+	command now takes a vector of individual command line options
+	instead of a single string.
+
+2001-09-12 01:45  biddi
+
+	* Templates/CMakeWindowsBorlandConfig.cmake: ERR: Spelling
+
+2001-09-12 01:45  biddi
+
+	* Source/cmBorlandMakefileGenerator.cpp,
+	Source/cmBorlandMakefileGenerator.h, Source/cmSystemTools.cxx: ERR:
+	Change to EscapeSpaces forces rework of Borland generator <sigh>
+	Add clause to prevent adding quotes when they're already present,
+	then stuff them onto all lib paths to prevent forward slashes
+	causing trouble.
+
+2001-09-11 23:58  biddi
+
+	* Source/cmSystemTools.cxx, Source/cmSystemTools.h: ENH: Add a
+	findfile routine (as opposed to find executable or library) which
+	doesn't add any extensions - Borland make needs full paths to
+	certain dependencies otherwise linking doesn't work properly
+	(dependencies aren't checked)
+
+2001-09-11 23:58  biddi
+
+	* Source/cmBorlandMakefileGenerator.cpp,
+	Source/cmBorlandMakefileGenerator.h: ENH: Major fix of the Borland
+	generator which addresses the problem of libraries with
+	dependencies (other libraries) not linking when required.
+	Dependency checking required the full path to be supplied to each
+	file when they're not in the current directory (very tedious). All
+	seems to be working nicely now.
+
+2001-09-11 19:17  martink
+
+	* Source/ctest.cxx: updated testing
+
+2001-09-11 18:58  martink
+
+	* Source/cmDSPWriter.cxx: include fixes
+
+2001-09-11 18:42  martink
+
+	* Modules/Dart.cmake: reduced the number of targets
+
+2001-09-11 18:42  martink
+
+	* Source/cmaketest.cxx: bug in testing code
+
+2001-09-11 17:44  hoffman
+
+	* Source/cmBorlandMakefileGenerator.cpp: BUG: fix build with
+	non-borland compiler
+
+2001-09-11 17:40  martink
+
+	* Source/cmDSPWriter.cxx: fix for include paths
+
+2001-09-10 19:11  martink
+
+	* Modules/Dart.cmake: reduced targets and merged tclsh commands
+
+2001-09-10 19:11  martink
+
+	* Source/cmCableWrapTclCommand.cxx, Source/cmDSPWriter.cxx,
+	Source/cmMakefile.cxx, Source/cmMakefile.h,
+	Source/cmSystemTools.cxx, Source/cmVTKWrapJavaCommand.cxx,
+	Source/cmVTKWrapPythonCommand.cxx, Source/cmVTKWrapTclCommand.cxx:
+	various windows fixes
+
+2001-09-10 15:03  berk
+
+	* Source/CMakeLists.txt: Typo in link command.
+
+2001-09-08 16:09  biddi
+
+	* Source/cmBorlandMakefileGenerator.cpp,
+	Source/cmBorlandMakefileGenerator.h: ERR: Forgot to put back a
+	backslash
+
+2001-09-08 14:02  biddi
+
+	* Source/cmBorlandMakefileGenerator.cpp: ERR: LINK_DIR must ot have
+	backslah at end. Fix plus cleanup of some code.
+
+2001-09-07 14:08  martink
+
+	* Source/cmDirectory.cxx: fixed bug in mismatched directory opens
+	consuming file descriptors
+
+2001-09-07 13:40  king
+
+	* Source/cmConfigureGccXmlCommand.cxx: ENH: Removed addition of
+	compiler support directory include option since the find_*_options
+	scripts now include it automatically.
+
+2001-09-06 22:02  hoffman
+
+	* Source/CMakeLists.txt, Source/cmBorlandMakefileGenerator.cpp:
+	BUG: clean up lib and exe output paths
+
+2001-09-06 21:28  hoffman
+
+	* Source/CMakeLib.dsp, Source/cmBorlandMakefileGenerator.cpp,
+	Source/cmBorlandMakefileGenerator.h, Source/cmMSProjectGenerator.h,
+	Source/cmMakefileGenerator.cxx, Source/cmMakefileGenerator.h,
+	Source/cmUnixMakefileGenerator.h, Source/cmake.cxx, Source/cmake.h,
+	Source/MFCDialog/CMakeSetup.rc,
+	Source/MFCDialog/CMakeSetupDialog.cpp,
+	Source/MFCDialog/CMakeSetupDialog.h, Source/MFCDialog/resource.h,
+	Templates/CMakeWindowsBorlandConfig.cmake: ENH: integrate borland
+	support
+
+2001-09-04 20:29  biddi
+
+	* Source/cmBorlandMakefileGenerator.cpp,
+	Source/cmBorlandMakefileGenerator.h,
+	Templates/CMakeWindowsBorlandConfig.cmake: NEW: First check in of
+	Borland Makefile Generator and template stuff
+
+2001-09-04 20:07  hoffman
+
+	* Source/cmAddCustomTargetCommand.cxx, Source/cmCustomCommand.cxx,
+	Source/cmCustomCommand.h, Source/cmDSPWriter.cxx,
+	Source/cmDSWWriter.cxx, Source/cmMakefile.cxx, Source/cmMakefile.h,
+	Source/cmSourceGroup.cxx, Source/cmSourceGroup.h,
+	Source/cmVTKWrapJavaCommand.cxx: ENH: separate command from its
+	arguments in the custom command.  This allows the generator on
+	windows to change the slashes for just the command
+
+2001-09-01 21:13  biddi
+
+	* Source/cmBuildCommand.cxx: ENH: Added a clause for Borland
+	compiler compatibility
+
+2001-09-01 20:55  barre
+
+	* Source/cmDSPWriter.cxx: Convert path format back to Windows
+	slashes syntax. Mandatory for Win98 build.
+
+2001-09-01 20:55  barre
+
+	* Source/cmSystemTools.cxx: fix comment pb
+
+2001-09-01 20:12  biddi
+
+	* Source/cmSystemTools.cxx, Source/cmSystemTools.h: ENH: Windows
+	and Unix slash conversions return a char*, clean function seperated
+	from Convert function
+
+2001-09-01 20:12  biddi
+
+	* Source/cmMakefile.cxx, Source/cmMakefile.h: ENH: ExpandVariables
+	functions return a char * for convenience
+
+2001-09-01 01:10  starreveld
+
+	* Source/cmUnixMakefileGenerator.cxx: 
+	
+	ENH: Generate compile lines for .m, .M, and .mm files (ObjC and
+	ObjC++)
+
+2001-08-30 21:32  hoffman
+
+	* Source/cmMakefile.cxx: BUG: fix incorrect deletion of function
+	blockers
+
+2001-08-30 20:19  martink
+
+	* Source/cmMakefile.h, Source/cmMakefile.h: version rev
+
+2001-08-30 20:06  hoffman
+
+	* ChangeLog, ChangeLog.txt, ChangeLog: [no log message]
+
 2001-08-30 19:54  hoffman
 
 	* ChangeLog.txt: ENH: add autogenerated changelog
