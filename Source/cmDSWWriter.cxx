@@ -222,19 +222,19 @@ void cmDSWWriter::WriteProject(std::ostream& fout,
   fout << "{{{\n";
 
   // insert Begin Project Dependency  Project_Dep_Name project stuff here 
-  cmTarget::LinkLibraries::const_iterator j, jend;
-  j = target.GetLinkLibraries().begin();
-  jend = target.GetLinkLibraries().end();
-  for(;j!= jend; ++j)
+  if (target.GetType() != cmTarget::STATIC_LIBRARY)
     {
-    if(j->first != dspname)
+    cmTarget::LinkLibraries::const_iterator j, jend;
+    j = target.GetLinkLibraries().begin();
+    jend = target.GetLinkLibraries().end();
+    for(;j!= jend; ++j)
       {
-      if (target.GetType() != cmTarget::STATIC_LIBRARY)
-        {
+      if(j->first != dspname)
+	{
         // is the library part of this DSW ? If so add dependency
         const char* cacheValue
           = m_Makefile->GetDefinition(j->first.c_str());
-        if(cacheValue)
+        if(cacheValue || (strcmp(dspname, "ALL_BUILD") == 0))
           {
           fout << "Begin Project Dependency\n";
           fout << "Project_Dep_Name " << j->first << "\n";
