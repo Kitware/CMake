@@ -53,6 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef _MSC_VER
 #pragma warning ( disable : 4786 )
+#pragma warning ( disable : 4503 )
 // for loop scoping hack
 #define for if(false) {} else for
 #endif
