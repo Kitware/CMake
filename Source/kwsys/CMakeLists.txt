@@ -181,6 +181,7 @@ IF(NOT KWSYS_HEADER_ROOT)
   SET(KWSYS_HEADER_ROOT "${PROJECT_BINARY_DIR}")
 ENDIF(NOT KWSYS_HEADER_ROOT)
 SET(KWSYS_HEADER_DIR "${KWSYS_HEADER_ROOT}/${KWSYS_NAMESPACE}")
+INCLUDE_DIRECTORIES(${KWSYS_HEADER_ROOT})
 
 #-----------------------------------------------------------------------------
 # Create STL header wrappers to block warnings in the STL headers and
@@ -375,7 +376,6 @@ ENDIF(KWSYS_USE_Process)
 #-----------------------------------------------------------------------------
 # Setup testing if not being built as part of another project.
 IF(KWSYS_STANDALONE)
-  INCLUDE_DIRECTORIES(${KWSYS_HEADER_ROOT})
   ADD_EXECUTABLE(testIOS testIOS.cxx)
   ADD_EXECUTABLE(testProcess testProcess.c)
   ADD_EXECUTABLE(test1 test1.cxx)
