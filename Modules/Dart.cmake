@@ -11,6 +11,8 @@
 OPTION(BUILD_TESTING "Build the testing tree." "On")
 
 IF(BUILD_TESTING)
+  ENABLE_TESTING()
+
   INCLUDE(${CMAKE_ROOT}/Modules/FindDart.cmake)
 
   #
@@ -29,11 +31,20 @@ IF(BUILD_TESTING)
     SET (NIGHTLY_START_TIME "00:00:00 EDT")
 
     # Dart server to submit results (used by client)
-    SET (DROP_SITE "public.kitware.com")
-    SET (DROP_LOCATION "/incoming")
-    SET (DROP_SITE_USER "anonymous")
-    SET (DROP_SITE_PASSWORD "random@ringworld")
-    SET (DROP_SITE_MODE "active")
+    # There should be an option to specify submit method, but I will leave it
+    # commented until we decide what to do with it.
+    # SET(DROP_METHOD "http" CACHE STRING "Set the CTest submit method. Valid options are http and ftp")
+    IF(DROP_METHOD MATCHES http)
+      SET (DROP_SITE "public.kitware.com")
+      SET (DROP_LOCATION "/cgi-bin/HTTPUploadDartFile.cgi")
+    ELSE(DROP_METHOD MATCHES http)
+      SET (DROP_SITE "public.kitware.com")
+      SET (DROP_LOCATION "/incoming")
+      SET (DROP_SITE_USER "anonymous")
+      SET (DROP_SITE_PASSWORD "random@ringworld")
+      SET (DROP_SITE_MODE "active")
+    ENDIF(DROP_METHOD MATCHES http)
+
     SET (TRIGGER_SITE "http://${DROP_SITE}/cgi-bin/Submit-Random-TestingResults.pl")
 
     # Project Home Page
@@ -78,9 +89,6 @@ IF(BUILD_TESTING)
   SET(MEMORYCHECK_SUPPRESSIONS_FILE "" CACHE FILEPATH "File that contains suppressions for the memmory checker")
   FIND_PROGRAM(SCPCOMMAND scp DOC "Path to scp command, used by some Dart clients for submitting results to a Dart server (when not using ftp for submissions)")
   FIND_PROGRAM(COVERAGE_COMMAND gcov DOC "Path to the coverage program that Dart client uses for performing coverage inspection")
-
-  # find a tcl shell command
-  INCLUDE(${CMAKE_ROOT}/Modules/FindTclsh.cmake)
 
   # set the site name
   SITE_NAME(SITE)
@@ -153,8 +161,13 @@ IF(BUILD_TESTING)
   # 
   # Make necessary directories and configure testing scripts
   #
+  # find a tcl shell command
+  IF(DART_ROOT)
+    INCLUDE(${CMAKE_ROOT}/Modules/FindTclsh.cmake)
+  ENDIF(DART_ROOT)
 
-  IF (DART_ROOT)
+
+  IF (DART_ROOT AND TCL_TCLSH)
     # make directories in the binary tree
     FILE(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/Testing/HTML/TestingResults/Dashboard
       ${PROJECT_BINARY_DIR}/Testing/HTML/TestingResults/Sites/${SITE}/${BUILDNAME})
@@ -172,84 +185,78 @@ IF(BUILD_TESTING)
     #
 
     # add testing targets
-    IF(TCL_TCLSH)
-      SET(DART_EXPERIMENTAL_NAME Experimental)
-      IF(DART_EXPERIMENTAL_USE_PROJECT_NAME)
-        SET(DART_EXPERIMENTAL_NAME "${DART_EXPERIMENTAL_NAME}${PROJECT_NAME}")
-      ENDIF(DART_EXPERIMENTAL_USE_PROJECT_NAME)
-      ADD_CUSTOM_TARGET(${DART_EXPERIMENTAL_NAME}
-        ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Start Update Configure Build Test)
-      ADD_CUSTOM_TARGET(${DART_EXPERIMENTAL_NAME}Submit 
-        ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Submit)
+    SET(DART_EXPERIMENTAL_NAME Experimental)
+    IF(DART_EXPERIMENTAL_USE_PROJECT_NAME)
+      SET(DART_EXPERIMENTAL_NAME "${DART_EXPERIMENTAL_NAME}${PROJECT_NAME}")
+    ENDIF(DART_EXPERIMENTAL_USE_PROJECT_NAME)
+    ADD_CUSTOM_TARGET(${DART_EXPERIMENTAL_NAME}
+      ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Start Update Configure Build Test)
+    ADD_CUSTOM_TARGET(${DART_EXPERIMENTAL_NAME}Submit 
+      ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Submit)
 
-      # for non IDE based builds nmake and make 
-      # add all these extra targets 
-      IF(${CMAKE_MAKE_PROGRAM} MATCHES make)
-        # Make targets for Experimental builds
-        ADD_CUSTOM_TARGET(ExperimentalStart
-          ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Start)
-        ADD_CUSTOM_TARGET(ExperimentalUpdate   
-          ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Start Update)
-        ADD_CUSTOM_TARGET(ExperimentalConfigure   
-          ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Start Configure)
-        ADD_CUSTOM_TARGET(ExperimentalBuild   
-          ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Start Build)
-        ADD_CUSTOM_TARGET(ExperimentalTest 
-          ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Test)
-        ADD_CUSTOM_TARGET(ExperimentalCoverage 
-          ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Coverage)
-        ADD_CUSTOM_TARGET(ExperimentalDashboardStart 
-          ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental DashboardStart)
-        ADD_CUSTOM_TARGET(ExperimentalDashboardEnd 
-          ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental DashboardEnd)
+    # for non IDE based builds nmake and make 
+    # add all these extra targets 
+    IF(${CMAKE_MAKE_PROGRAM} MATCHES make)
+      # Make targets for Experimental builds
+      ADD_CUSTOM_TARGET(ExperimentalStart
+        ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Start)
+      ADD_CUSTOM_TARGET(ExperimentalUpdate   
+        ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Start Update)
+      ADD_CUSTOM_TARGET(ExperimentalConfigure   
+        ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Start Configure)
+      ADD_CUSTOM_TARGET(ExperimentalBuild   
+        ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Start Build)
+      ADD_CUSTOM_TARGET(ExperimentalTest 
+        ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Test)
+      ADD_CUSTOM_TARGET(ExperimentalCoverage 
+        ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental Coverage)
+      ADD_CUSTOM_TARGET(ExperimentalDashboardStart 
+        ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental DashboardStart)
+      ADD_CUSTOM_TARGET(ExperimentalDashboardEnd 
+        ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Experimental DashboardEnd)
 
-        # Continuous
-        ADD_CUSTOM_TARGET(Continuous 
-          ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Continuous Start Update Configure Build Test Submit)
-        ADD_CUSTOM_TARGET(ContinuousStart
-          ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Continuous Start)
-        ADD_CUSTOM_TARGET(ContinuousUpdate
-          ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Continuous Update)
-        ADD_CUSTOM_TARGET(ContinuousConfigure
-          ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Continuous Configure)
-        ADD_CUSTOM_TARGET(ContinuousBuild   
-          ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Continuous Build)
-        ADD_CUSTOM_TARGET(ContinuousTest 
-          ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Continuous Test)
-        ADD_CUSTOM_TARGET(ContinuousCoverage 
-          ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Continuous Coverage)
-        ADD_CUSTOM_TARGET(ContinuousSubmit 
-          ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Continuous Submit)
+      # Continuous
+      ADD_CUSTOM_TARGET(Continuous 
+        ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Continuous Start Update Configure Build Test Submit)
+      ADD_CUSTOM_TARGET(ContinuousStart
+        ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Continuous Start)
+      ADD_CUSTOM_TARGET(ContinuousUpdate
+        ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Continuous Update)
+      ADD_CUSTOM_TARGET(ContinuousConfigure
+        ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Continuous Configure)
+      ADD_CUSTOM_TARGET(ContinuousBuild   
+        ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Continuous Build)
+      ADD_CUSTOM_TARGET(ContinuousTest 
+        ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Continuous Test)
+      ADD_CUSTOM_TARGET(ContinuousCoverage 
+        ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Continuous Coverage)
+      ADD_CUSTOM_TARGET(ContinuousSubmit 
+        ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Continuous Submit)
 
-        # Nightly
-        ADD_CUSTOM_TARGET(Nightly 
-          ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Start Update Configure Build Test Submit)
-        ADD_CUSTOM_TARGET(NightlyStart
-          ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Start)
-        ADD_CUSTOM_TARGET(NightlyUpdate
-          ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Update)
-        ADD_CUSTOM_TARGET(NightlyConfigure
-          ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Configure)
-        ADD_CUSTOM_TARGET(NightlyBuild   
-          ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Build)
-        ADD_CUSTOM_TARGET(NightlyTest 
-          ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Test)
-        ADD_CUSTOM_TARGET(NightlyCoverage 
-          ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Coverage)
-        ADD_CUSTOM_TARGET(NightlySubmit 
-          ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Submit)
-        ADD_CUSTOM_TARGET(NightlyDashboardStart 
-          ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly DashboardStart)
-        ADD_CUSTOM_TARGET(NightlyDashboardEnd 
-          ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly DashboardEnd)
-      ENDIF (${CMAKE_MAKE_PROGRAM} MATCHES make)
+      # Nightly
+      ADD_CUSTOM_TARGET(Nightly 
+        ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Start Update Configure Build Test Submit)
+      ADD_CUSTOM_TARGET(NightlyStart
+        ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Start)
+      ADD_CUSTOM_TARGET(NightlyUpdate
+        ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Update)
+      ADD_CUSTOM_TARGET(NightlyConfigure
+        ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Configure)
+      ADD_CUSTOM_TARGET(NightlyBuild   
+        ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Build)
+      ADD_CUSTOM_TARGET(NightlyTest 
+        ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Test)
+      ADD_CUSTOM_TARGET(NightlyCoverage 
+        ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Coverage)
+      ADD_CUSTOM_TARGET(NightlySubmit 
+        ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly Submit)
+      ADD_CUSTOM_TARGET(NightlyDashboardStart 
+        ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly DashboardStart)
+      ADD_CUSTOM_TARGET(NightlyDashboardEnd 
+        ${TCL_TCLSH} ${DART_ROOT}/Source/Client/DashboardManager.tcl ${PROJECT_BINARY_DIR}/DartConfiguration.tcl Nightly DashboardEnd)
+    ENDIF (${CMAKE_MAKE_PROGRAM} MATCHES make)
 
-    ELSE(TCL_TCLSH)
-      MESSAGE("Could not find TCL_TCLSH, disabling testing." "Error")   
-    ENDIF(TCL_TCLSH)
-    ENABLE_TESTING()
-
-  ELSE(DART_ROOT)
+  ELSE(DART_ROOT AND TCL_TCLSH)
     # make directories in the binary tree
     FILE(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/Testing/Temporary)
     GET_FILENAME_COMPONENT(CMAKE_HOST_PATH ${CMAKE_COMMAND} PATH)
@@ -281,10 +288,10 @@ IF(BUILD_TESTING)
         FOREACH(mode Experimental Nightly Continuous NightlyMemoryCheck)
           ADD_CUSTOM_TARGET(${mode} ${CMAKE_CTEST_COMMAND} -D ${mode})
         ENDFOREACH(mode)
-      SET (DART_COMMON_TARGETS_ADDED 1)
+        SET (DART_COMMON_TARGETS_ADDED 1)
       ENDIF (NOT DART_COMMON_TARGETS_ADDED)
     ENDIF(${CMAKE_MAKE_PROGRAM} MATCHES make)
-      
+
 
     # for non IDE based builds nmake and make 
     # add all these extra targets 
@@ -298,7 +305,7 @@ IF(BUILD_TESTING)
         ENDFOREACH(testtype)
       ENDFOREACH(mode)
     ENDIF (${CMAKE_MAKE_PROGRAM} MATCHES make)
-  ENDIF (DART_ROOT)
+  ENDIF (DART_ROOT AND TCL_TCLSH)
 ENDIF(BUILD_TESTING)
 
 #
