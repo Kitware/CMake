@@ -158,6 +158,8 @@ public:
 
 private:
   void SetTestsToRunInformation(const char*);
+  void ExpandTestsToRunInformation(int numPossibleTests);
+  std::string TestsToRunString;
   
   enum {
     FIRST_TEST     = 0,

@@ -2005,6 +2005,9 @@ void cmCTest::ProcessDirectory(cmCTest::tm_VectorOfStrings &passed,
       << std::endl;
     }
 
+  // expand the test list
+  this->ExpandTestsToRunInformation((int)tmsize);
+  
   int cnt = 0;
   tm_ListOfTests::iterator it;
   std::string last_directory = "";
@@ -4839,7 +4842,7 @@ inline int GetNextNumber(std::string const& in,
                          
 void cmCTest::SetTestsToRunInformation(const char* in)
 {
-  std::string testArgs = in;
+  this->TestsToRunString = in;
   // if the argument is a file, then read it and use the contents as the string
   if(cmSystemTools::FileExists(in))
     {
@@ -4848,25 +4851,29 @@ void cmCTest::SetTestsToRunInformation(const char* in)
     char* buff = new char[filelen+1];
     fin.getline(buff, filelen);
     buff[fin.gcount()] = 0;
-    testArgs = buff;
+    this->TestsToRunString = buff;
     }
+}
+
+void cmCTest::ExpandTestsToRunInformation(int numTests)
+{
   int start = -1;
   int end = -1;
   int stride = -1;
   std::string::size_type pos = 0;
   std::string::size_type pos2;
   // read start
-  if(GetNextNumber(testArgs, start, pos, pos2))
+  if(GetNextNumber(this->TestsToRunString, start, pos, pos2))
     {
     // read end
-    if(GetNextNumber(testArgs, end, pos, pos2))
+    if(GetNextNumber(this->TestsToRunString, end, pos, pos2))
       {
       // read stride
-      if(GetNextNumber(testArgs, stride, pos, pos2))
+      if(GetNextNumber(this->TestsToRunString, stride, pos, pos2))
         {
         int val =0;
         // now read specific numbers
-        while(GetNextNumber(testArgs, val, pos, pos2))
+        while(GetNextNumber(this->TestsToRunString, val, pos, pos2))
           {
           m_TestsToRun.push_back(val);
           }
@@ -4874,25 +4881,37 @@ void cmCTest::SetTestsToRunInformation(const char* in)
         }
       }
     }
+
+  // if start and specific tests are not specified then we assume we start at
+  // 1
+  if(start == -1 && !m_TestsToRun.size())
+    {
+    start = 1;
+    }
+
+  // if end and specific tests are not specified then we assume we end with
+  // the last test
+  if(end == -1 && !m_TestsToRun.size())
+    {
+    end = numTests;
+    }
+  
+  // if the stride wasn't specified then it defaults to 1
   if(stride == -1)
     {
     stride = 1;
     }
-  if(end != -1 && start != -1 && stride != 0 && stride != -1)
+
+  // if we have a range then add it
+  if(end != -1 && start != -1)
     {
     for(int i =start; i <= end; i+= stride)
       {
       m_TestsToRun.push_back(i);
       }
     }
-  else
-    {
-    if(start != -1)
-      {
-      m_TestsToRun.push_back(start);
-      }
-    }
-    // sort the array
+
+  // sort the array
   std::sort(m_TestsToRun.begin(), m_TestsToRun.end(), std::less<int>());
   // remove duplicates
   std::vector<int>::iterator new_end = 
