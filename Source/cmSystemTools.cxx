@@ -2434,16 +2434,16 @@ void cmSystemTools::SplitProgramFromArgs(const char* path,
 # include <stdlib.h>
 static int cmSystemToolsDebugReport(int, char* message, int*)
 {
-  if(getenv("DART_TEST_FROM_DART"))
-    {
-    fprintf(stderr, message);
-    exit(1);
-    }
+  fprintf(stderr, message);
+  exit(1);
   return 0;
 }
 void cmSystemTools::EnableMSVCDebugHook()
 {
-  _CrtSetReportHook(cmSystemToolsDebugReport);
+  if(getenv("DART_TEST_FROM_DART"))
+    {
+    _CrtSetReportHook(cmSystemToolsDebugReport);
+    }
 }
 #else
 void cmSystemTools::EnableMSVCDebugHook()

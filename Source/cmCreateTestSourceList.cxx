@@ -96,7 +96,8 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)
     "#include <ctype.h>\n"
     "#include <stdio.h>\n"
     "#include <string.h>\n"
-    "#include <stdlib.h>\n";
+    "#include <stdlib.h>\n"
+    "\n";
   fout <<
     "#if defined(_MSC_VER) && defined(_DEBUG)\n"
     "/* MSVC debug hook to prevent dialogs when running from DART.  */\n"
@@ -104,11 +105,8 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)
     "static int TestDriverDebugReport(int type, char* message, int* retVal)\n"
     "{\n"
     "  (void)type; (void)retVal;\n"
-    "  if(getenv(\"DART_TEST_FROM_DART\"))\n"
-    "    {\n"
-    "    fprintf(stderr, message);\n"
-    "    exit(1);\n"
-    "    }\n"
+    "  fprintf(stderr, message);\n"
+    "  exit(1);\n"
     "  return 0;\n"
     "}\n"
     "#endif\n";
@@ -221,8 +219,11 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)
     "  char *arg, *test_name;\n"
     "  \n"
     "#if defined(_MSC_VER) && defined(_DEBUG)\n"
-    "  /* Put in hook for debug library.  */\n"
-    "  _CrtSetReportHook(TestDriverDebugReport);\n"
+    "  /* If running from DART, put in debug hook.  */\n"
+    "  if(getenv(\"DART_TEST_FROM_DART\"))\n"
+    "    {\n"
+    "    _CrtSetReportHook(TestDriverDebugReport);\n"
+    "    }\n"
     "#endif\n"
     "  \n"
     "  NumTests = " << numTests << ";\n"
