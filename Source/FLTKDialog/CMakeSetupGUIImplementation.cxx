@@ -146,7 +146,7 @@ CMakeSetupGUIImplementation
   m_PathToExecutable = absolutePath;
 
 #if defined(_WIN32)
-  m_PathToExecutable += "/CMake.exe";
+  m_PathToExecutable += "/Debug/CMake.exe";
 #else
   m_PathToExecutable += "/cmake";
 #endif

@@ -50,6 +50,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifdef CMAKE_HAS_AUTOCONF
 #include "cmConfigure.h"
 #endif
+#ifdef CMAKE_BUILD_WITH_CMAKE
+#include "cmConfigure.cmake.h"
+#endif
 
 #ifdef _MSC_VER
 #pragma warning ( disable : 4786 )

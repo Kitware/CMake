@@ -74,6 +74,13 @@ void cmSourceFile::SetName(const char* name, const char* dir)
   std::string hname = pathname;
   if(cmSystemTools::FileExists(hname.c_str()))
     {
+    std::string::size_type pos = hname.rfind('.');
+    if(pos != std::string::npos)
+      {
+      m_SourceExtension = hname.substr(pos+1, hname.size()-pos);
+      m_SourceName = hname.substr(0, pos);
+      }
+    
     m_HeaderFileOnly = false;
     m_FullPath = hname;
     return;

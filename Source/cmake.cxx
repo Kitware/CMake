@@ -164,7 +164,7 @@ void cmake::AddCMakePaths(const std::vector<std::string>& args)
       modules = cMakeRoot + "/share/CMake/Modules";
       if (!cmSystemTools::FileIsDirectory(modules.c_str()))
 	{
-#if !defined(_WIN32) || defined(__CYGWIN__)
+#ifdef CMAKE_ROOT_DIR
 	// try compiled in value on UNIX
         cMakeRoot = CMAKE_ROOT_DIR;
         modules = cMakeRoot + "/Modules";

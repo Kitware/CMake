@@ -1,0 +1,5 @@
+#cmakedefine CMAKE_NO_STD_NAMESPACE
+#cmakedefine CMAKE_NO_ANSI_STREAM_HEADERS
+#define  CMAKE_ROOT_DIR "${CMake_SOURCE_DIR}"
+
+

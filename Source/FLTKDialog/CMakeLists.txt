@@ -1,10 +1,10 @@
 SOURCE_FILES(SRCS
-CMakeSetupGUI
-CMakeSetupGUIImplementation
-FLTKDialog
-FLTKPropertyItemRow
-FLTKPropertyList
-FLTKPropertyNameButtonWithHelp
+CMakeSetupGUI.cxx
+CMakeSetupGUIImplementation.cxx
+FLTKDialog.cxx
+FLTKPropertyItemRow.cxx
+FLTKPropertyList.cxx
+FLTKPropertyNameButtonWithHelp.cxx
 )
 
 

@@ -8,26 +8,35 @@ IF(FLTK_LIBRARY)
 ENDIF(FLTK_LIBRARY)
 
 SOURCE_FILES(SRCS
-cmake  
-cmMakeDepend
-cmMakefile
-cmMakefileGenerator
-cmRegularExpression
-cmSourceFile
-cmSystemTools
-cmDirectory
-cmCommands
-cmTarget
-cmCustomCommand
-cmCacheManager
-cmCableClassSet
-cmSourceGroup
+cmake
+cmMakeDepend.cxx
+cmMakefile.cxx
+cmMakefileGenerator.cxx
+cmRegularExpression.cxx
+cmSourceFile.cxx
+cmSystemTools.cxx
+cmDirectory.cxx
+cmCommands.cxx
+cmTarget.cxx
+cmCustomCommand.cxx
+cmCacheManager.cxx
+cmCableClassSet.cxx
+cmSourceGroup.cxx
 )
 
+# configure the .h file
+CONFIGURE_FILE(
+${CMake_SOURCE_DIR}/Source/cmConfigure.cmake.h.in 
+${CMake_BINARY_DIR}/Source/cmConfigure.cmake.h )
+# add the include path to find the .h 
+INCLUDE_DIRECTORIES(${CMake_BINARY_DIR}/Source)
+# let cmake know it is supposed to use it
+ADD_DEFINITIONS(-DCMAKE_BUILD_WITH_CMAKE)
+
 IF (WIN32)
-  SOURCE_FILES(SRCS cmDSWWriter cmDSPWriter cmMSProjectGenerator)
+  SOURCE_FILES(SRCS cmDSWWriter.cxx cmDSPWriter.cxx cmMSProjectGenerator.cxx)
 ELSE (WIN32)
-  SOURCE_FILES(SRCS cmUnixMakefileGenerator)
+  SOURCE_FILES(SRCS cmUnixMakefileGenerator.cxx)
 ENDIF (WIN32)
 
 # create a library used by the command line and the GUI

@@ -2944,19 +2944,17 @@ echo "configure:2939: checking ansi standard C++ stream headers " >&5
   if test -z "`${CXX} -c conftest.cc 2>&1`"; then
     echo "$ac_t""yes" 1>&6
   else
-    cat >> confdefs.h <<\EOF
-#define CMAKE_NO_STD_NAMESPACE 1
-EOF
-
+    CMAKE_NO_STD_NAMESPACE="1"
     echo "$ac_t""no" 1>&6
   fi
 fi
+
 
 # check to see if stl is in the std namespace
 if test $ac_cv_prog_gxx = no; then
   echo "******"
   echo $ac_n "checking ansi standard namespace support ""... $ac_c" 1>&6
-echo "configure:2960: checking ansi standard namespace support " >&5 
+echo "configure:2958: checking ansi standard namespace support " >&5 
   rm -rf conftest.*
   cat > conftest.cc <<!
 #include <list>
@@ -2965,13 +2963,11 @@ void foo() { std::list<int> l; }
   if test -z "`${CXX} -c conftest.cc 2>&1`"; then
     echo "$ac_t""yes" 1>&6
   else
-    cat >> confdefs.h <<\EOF
-#define CMAKE_NO_ANSI_STREAM_HEADERS 1
-EOF
-
+    CMAKE_NO_ANSI_STREAM_HEADERS="1"
     echo "$ac_t""no" 1>&6
   fi
 fi
+
 
 
 if test "$CC" = "gcc" -o `$CC -v 2>&1 | grep -c gcc` != "0" ; then
@@ -2984,7 +2980,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:2988: checking for $ac_word" >&5
+echo "configure:2984: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_RUNMAKE'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3024,7 +3020,7 @@ do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:3028: checking for $ac_word" >&5
+echo "configure:3024: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_CMAKE_AR'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3241,6 +3237,8 @@ s%@CMAKE_HP_PTHREADS@%$CMAKE_HP_PTHREADS%g
 s%@CMAKE_THREAD_LIBS@%$CMAKE_THREAD_LIBS%g
 s%@CMAKE_ANSI_CFLAGS@%$CMAKE_ANSI_CFLAGS%g
 s%@CMAKE_TEMPLATE_FLAGS@%$CMAKE_TEMPLATE_FLAGS%g
+s%@CMAKE_NO_STD_NAMESPACE@%$CMAKE_NO_STD_NAMESPACE%g
+s%@CMAKE_NO_ANSI_STREAM_HEADERS@%$CMAKE_NO_ANSI_STREAM_HEADERS%g
 s%@RUNMAKE@%$RUNMAKE%g
 s%@CMAKE_AR@%$CMAKE_AR%g
 

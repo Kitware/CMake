@@ -520,10 +520,11 @@ if test $ac_cv_prog_gxx = no; then
   if test -z "`${CXX} -c conftest.cc 2>&1`"; then
     echo "$ac_t""yes" 1>&6
   else
-    AC_DEFINE(CMAKE_NO_STD_NAMESPACE)
+    CMAKE_NO_STD_NAMESPACE="1"
     echo "$ac_t""no" 1>&6
   fi
 fi
+AC_SUBST(CMAKE_NO_STD_NAMESPACE)
 
 # check to see if stl is in the std namespace
 if test $ac_cv_prog_gxx = no; then
@@ -537,10 +538,11 @@ void foo() { std::list<int> l; }
   if test -z "`${CXX} -c conftest.cc 2>&1`"; then
     echo "$ac_t""yes" 1>&6
   else
-    AC_DEFINE(CMAKE_NO_ANSI_STREAM_HEADERS)
+    CMAKE_NO_ANSI_STREAM_HEADERS="1"
     echo "$ac_t""no" 1>&6
   fi
 fi
+AC_SUBST(CMAKE_NO_ANSI_STREAM_HEADERS)
 
 
 if test "$CC" = "gcc" -o `$CC -v 2>&1 | grep -c gcc` != "0" ; then
