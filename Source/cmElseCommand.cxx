@@ -145,10 +145,14 @@ bool cmElseCommand::InitialPass(std::vector<std::string> const& args)
   if (args.size() == 3 && (args[1] == "MATCHES"))
     {
     def = m_Makefile->GetDefinition(args[0].c_str());
+    if (!def)
+      {
+      def = args[0].c_str();
+      }
     cmRegularExpression regEntry(args[2].c_str());
     
     // check for black line or comment
-    if (def && regEntry.find(def))
+    if (regEntry.find(def))
       {
       f = new cmIfFunctionBlocker();
       }
