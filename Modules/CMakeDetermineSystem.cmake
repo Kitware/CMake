@@ -38,6 +38,8 @@ IF(UNIX)
       SET(CMAKE_SYSTEM_PROCESSOR "unknown")
     ENDIF(${CMAKE_SYSTEM_PROCESSOR} MATCHES "--help")
     SET(CMAKE_UNAME ${CMAKE_UNAME} CACHE INTERNAL "uname command")
+    # processor may have double quote in the name, and that needs to be removed
+    STRING(REGEX REPLACE "\"" "" CMAKE_SYSTEM_PROCESSOR ${CMAKE_SYSTEM_PROCESSOR})
   ENDIF(CMAKE_UNAME)
 ELSE(UNIX)
   IF(WIN32)
