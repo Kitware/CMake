@@ -33,6 +33,7 @@
 #include "cmCableWrapTclCommand.cxx"
 #include "cmConfigureFileCommand.cxx"
 #include "cmConfigureGccXmlCommand.cxx"
+#include "cmCreateTestSourceList.cxx"
 #include "cmElseCommand.cxx"
 #include "cmEnableTestingCommand.cxx"
 #include "cmEndForEachCommand.cxx"
@@ -99,6 +100,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmCableWrapTclCommand);
   commands.push_back(new cmConfigureFileCommand);
   commands.push_back(new cmConfigureGccXmlCommand);
+  commands.push_back(new cmCreateTestSourceList);
   commands.push_back(new cmElseCommand);
   commands.push_back(new cmEnableTestingCommand);  
   commands.push_back(new cmEndForEachCommand);

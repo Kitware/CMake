@@ -86,12 +86,23 @@ int main (int argc, char *argv[])
   std::string generator = "-G";
   generator += CMAKE_GENERATOR;
   args.push_back(generator);
-
+  
+  std::vector<std::string> progArgs;
   if(argc > 6)
     {
-    for (int j = 6; j < argc ; j++) 
+    if(strcmp(argv[6] , "CMAKE_ARGS") == 0)
       {
-      args.push_back(argv[j]);
+      for (int j = 7; j < argc ; j++) 
+        {
+        args.push_back(argv[j]);
+        }
+      }
+    else
+      {
+      for(int j = 6; j < argc; j++)
+        {
+        progArgs.push_back(argv[j]);
+        }
       }
     }
   
@@ -254,6 +265,12 @@ int main (int argc, char *argv[])
     return 1;
     }
   fullPath = cmSystemTools::ConvertToOutputPath(fullPath.c_str());
+  for(std::vector<std::string>::iterator p = progArgs.begin();
+      p != progArgs.end(); ++p)
+    {
+    fullPath += " ";
+    fullPath += *p;
+    }
   std::cout << "Running test executable: " << fullPath.c_str() << "\n";
   int ret = 0;
   if (!cmSystemTools::RunCommand(fullPath.c_str(), output, ret, 0, true))

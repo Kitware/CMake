@@ -131,6 +131,25 @@ IF(BUILD_TESTING)
       wrapping
       ${CMake_BINARY_DIR}/Tests/Wrapping/bin)
 
+    ADD_TEST(testdriver1 ${CMake_BINARY_DIR}/Source/cmaketest 
+      ${CMake_SOURCE_DIR}/Tests/TestDriver 
+      ${CMake_BINARY_DIR}/Tests/TestDriver
+      TestDriverTest
+      ${CMake_BINARY_DIR}/Tests/Wrapping/bin
+      TestDriverTest test1)
+    ADD_TEST(testdriver2 ${CMake_BINARY_DIR}/Source/cmaketest 
+      ${CMake_SOURCE_DIR}/Tests/TestDriver 
+      ${CMake_BINARY_DIR}/Tests/TestDriver
+      TestDriverTest
+      ${CMake_BINARY_DIR}/Tests/Wrapping/bin
+      TestDriverTest test2)
+    ADD_TEST(testdriver3 ${CMake_BINARY_DIR}/Source/cmaketest 
+      ${CMake_SOURCE_DIR}/Tests/TestDriver 
+      ${CMake_BINARY_DIR}/Tests/TestDriver
+      TestDriverTest
+      ${CMake_BINARY_DIR}/Tests/Wrapping/bin
+      TestDriverTest test3)
+
   ENDIF (DART_ROOT)
 ENDIF(BUILD_TESTING)
 
