@@ -39,7 +39,7 @@ void SetArgs(cmMakefile& builder, int ac, char** av)
 }
 
 
-main(int ac, char** av)
+int main(int ac, char** av)
 {
   if(ac < 3)
     {

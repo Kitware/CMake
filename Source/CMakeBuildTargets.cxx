@@ -5,7 +5,7 @@
 
 // This is the main program used to gentrate makefile fragments 
 // from CMakeLists.txt input files.   
-main(int ac, char** av)
+int main(int ac, char** av)
 {
   if(ac < 2)
     {
