@@ -1094,7 +1094,7 @@ cmLocalUnixMakefileGenerator::ExpandRuleVariables(std::string& s,
       cmSystemTools::ReplaceString(actualReplace, "${LANG}", i->c_str());
       std::string actualReplaceWith = replaceWith;
       cmSystemTools::ReplaceString(actualReplaceWith, "${LANG}", i->c_str());
-      std::string replace = m_Makefile->GetSafeDefinition(actualReplaceWith.c_str());
+      replace = m_Makefile->GetSafeDefinition(actualReplaceWith.c_str());
       // if the variable is not a FLAG then treat it like a path
       if(actualReplaceWith.find("_FLAG") == actualReplaceWith.npos)
         {
