@@ -20,6 +20,7 @@
 #include "cmSystemTools.h"
 #include "cmSourceFile.h"
 #include "cmCacheManager.h"
+#include "cmake.h"
 
 #include <cmsys/RegularExpression.hxx>
 
@@ -732,6 +733,7 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
   std::string libOptimizedOptions;
 
   std::string libMultiLineOptions;
+  std::string libMultiLineOptionsForDebug;
   std::string libMultiLineDebugOptions;
   std::string libMultiLineOptimizedOptions;
 
@@ -772,6 +774,12 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
       libMultiLineOptions += " /LIBPATH:";
       libMultiLineOptions += lpath;
       libMultiLineOptions += " \n";
+      libMultiLineOptionsForDebug += "# ADD LINK32 /LIBPATH:";
+      libMultiLineOptionsForDebug += lpathIntDir;
+      libMultiLineOptionsForDebug += " ";
+      libMultiLineOptionsForDebug += " /LIBPATH:";
+      libMultiLineOptionsForDebug += lpath;
+      libMultiLineOptionsForDebug += " \n";
       }
     }
   if(exePath.size())
@@ -800,6 +808,12 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
       libMultiLineOptions += " /LIBPATH:";
       libMultiLineOptions += lpath;
       libMultiLineOptions += " \n";
+      libMultiLineOptionsForDebug += "# ADD LINK32 /LIBPATH:";
+      libMultiLineOptionsForDebug += lpathIntDir;
+      libMultiLineOptionsForDebug += " ";
+      libMultiLineOptionsForDebug += " /LIBPATH:";
+      libMultiLineOptionsForDebug += lpath;
+      libMultiLineOptionsForDebug += " \n";
       }
     }
   std::vector<std::string>::const_iterator i;
@@ -830,6 +844,12 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
       libMultiLineOptions += " /LIBPATH:";
       libMultiLineOptions += lpath;
       libMultiLineOptions += " \n";
+      libMultiLineOptionsForDebug += "# ADD LINK32 /LIBPATH:";
+      libMultiLineOptionsForDebug += lpathIntDir;
+      libMultiLineOptionsForDebug += " ";
+      libMultiLineOptionsForDebug += " /LIBPATH:";
+      libMultiLineOptionsForDebug += lpath;
+      libMultiLineOptionsForDebug += " \n";
       }
     }
   
@@ -847,9 +867,19 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
         (target.GetType()==cmTarget::MODULE_LIBRARY && libName != j->first))
       {
       std::string lib = j->first;
+      std::string libDebug = j->first;
+      std::string libPath = j->first + "_CMAKE_PATH";
+      const char* cacheValue
+        = m_GlobalGenerator->GetCMakeInstance()->GetCacheDefinition(
+          libPath.c_str());
+      if ( cacheValue && m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX") )
+        { 
+        libDebug += m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX");
+        }
       if(j->first.find(".lib") == std::string::npos)
         {
         lib += ".lib";
+        libDebug += ".lib";
         }
       lib = cmSystemTools::ConvertToOutputPath(lib.c_str());
 
@@ -861,6 +891,9 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
         libMultiLineOptions += "# ADD LINK32 ";
         libMultiLineOptions +=  lib;
         libMultiLineOptions += "\n";
+        libMultiLineOptionsForDebug += "# ADD LINK32 ";
+        libMultiLineOptionsForDebug +=  libDebug;
+        libMultiLineOptionsForDebug += "\n";
         }
       if (j->second == cmTarget::DEBUG)
         {
@@ -868,7 +901,7 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
         libDebugOptions += lib;
 
         libMultiLineDebugOptions += "# ADD LINK32 ";
-        libMultiLineDebugOptions += lib;
+        libMultiLineDebugOptions += libDebug;
         libMultiLineDebugOptions += "\n";
         }
       if (j->second == cmTarget::OPTIMIZED)
@@ -904,6 +937,9 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
     libMultiLineOptions += "# ADD LINK32 ";
     libMultiLineOptions +=  extraLinkOptions;
     libMultiLineOptions += " \n";
+    libMultiLineOptionsForDebug += "# ADD LINK32 ";
+    libMultiLineOptionsForDebug +=  extraLinkOptions;
+    libMultiLineOptionsForDebug += " \n";
     }
 
   if(const char* targetLinkFlags = target.GetProperty("LINK_FLAGS"))
@@ -914,6 +950,9 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
     libMultiLineOptions += "# ADD LINK32 ";
     libMultiLineOptions +=  targetLinkFlags;
     libMultiLineOptions += " \n";
+    libMultiLineOptionsForDebug += "# ADD LINK32 ";
+    libMultiLineOptionsForDebug +=  targetLinkFlags;
+    libMultiLineOptionsForDebug += " \n";
     }
 
   
@@ -947,6 +986,8 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
     cmSystemTools::ReplaceString(line, "CM_OPTIMIZED_LIBRARIES",
                                  libOptimizedOptions.c_str());
 
+    cmSystemTools::ReplaceString(line, "CM_MULTILINE_LIBRARIES_FOR_DEBUG",
+                                 libMultiLineOptionsForDebug.c_str());
     cmSystemTools::ReplaceString(line, "CM_MULTILINE_LIBRARIES",
                                  libMultiLineOptions.c_str());
     cmSystemTools::ReplaceString(line, "CM_MULTILINE_DEBUG_LIBRARIES",
@@ -970,6 +1011,10 @@ void cmLocalVisualStudio6Generator::WriteDSPHeader(std::ostream& fout, const cha
     cmSystemTools::ReplaceString(line, 
                                  "EXTRA_DEFINES", 
                                  m_Makefile->GetDefineFlags());
+    const char* debugPostfix
+      = m_Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX");
+    cmSystemTools::ReplaceString(line, "DEBUG_POSTFIX", 
+      debugPostfix?debugPostfix:"");
     cmGlobalGenerator* gen = this->GetGlobalGenerator();
     // store flags for each configuration
     std::string flags = " ";

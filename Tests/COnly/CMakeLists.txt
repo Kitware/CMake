@@ -1,5 +1,7 @@
 # a simple C only test case
 PROJECT (conly C)
+
+SET(CMAKE_DEBUG_POSTFIX "_test_debug_postfix")
 ADD_LIBRARY(testc1 STATIC libc1.c)
 ADD_LIBRARY(testc2 SHARED libc2.c)
 ADD_EXECUTABLE (conly conly.c foo.c foo.h)
