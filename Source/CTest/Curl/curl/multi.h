@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2002, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -44,18 +44,34 @@
   o Enable the application to select() on its own file descriptors and curl's
     file descriptors simultaneous easily.
   
-  Example sources using this interface is here: ../multi/
-
 */
+#if defined(_WIN32) && !defined(WIN32)
+/* Chris Lewis mentioned that he doesn't get WIN32 defined, only _WIN32 so we
+   make this adjustment to catch this. */
+#define WIN32 1
+#endif
 
 #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
-#include <winsock.h>
+#include <winsock2.h>
 #else
+
+/* HP-UX systems version 9, 10 and 11 lack sys/select.h and so does oldish
+   libc5-based Linux systems. Only include it on system that are known to
+   require it! */
+#if defined(_AIX) || defined(NETWARE)
+#include <sys/select.h>
+#endif
+
 #include <sys/socket.h>
 #include <sys/time.h>
+#include <sys/types.h>
 #endif
 
 #include "curl.h"
+
+#ifdef  __cplusplus
+extern "C" {
+#endif
 
 typedef void CURLM;
 
@@ -71,7 +87,7 @@ typedef enum {
 
 typedef enum {
   CURLMSG_NONE, /* first, not used */
-  CURLMSG_DONE, /* This easy handle has completed. 'whatever' points to
+  CURLMSG_DONE, /* This easy handle has completed. 'result' contains
                    the CURLcode of the transfer */
   CURLMSG_LAST /* last, not used */
 } CURLMSG;
@@ -187,4 +203,19 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle);
 CURLMsg *curl_multi_info_read(CURLM *multi_handle,
                               int *msgs_in_queue);
 
+/*
+ * NAME curl_multi_strerror()
+ *
+ * DESCRIPTION
+ *
+ * The curl_multi_strerror function may be used to turn a CURLMcode value
+ * into the equivalent human readable error string.  This is useful
+ * for printing meaningful error messages.
+ */
+const char *curl_multi_strerror(CURLMcode);
+
+#ifdef __cplusplus
+} /* end of extern "C" */
+#endif
+  
 #endif

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2002, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,21 +26,16 @@
 #include <curl/curl.h>
 
 #include "urldata.h"
+#include "getinfo.h"
 
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
-
-#ifdef  VMS
-#include        <stdlib.h>
-#endif
+#include <stdlib.h>
+#include "memory.h"
 
 /* Make this the last #include */
-#ifdef MALLOCDEBUG
 #include "memdebug.h"
-#else
-#include <stdlib.h>
-#endif
 
 /*
  * This is supposed to be called in the beginning of a permform() session
@@ -103,8 +98,11 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
   case CURLINFO_EFFECTIVE_URL:
     *param_charp = data->change.url?data->change.url:(char *)"";
     break;
-  case CURLINFO_HTTP_CODE:
+  case CURLINFO_RESPONSE_CODE:
     *param_longp = data->info.httpcode;
+    break;
+  case CURLINFO_HTTP_CONNECTCODE:
+    *param_longp = data->info.httpproxycode;
     break;
   case CURLINFO_FILETIME:
     *param_longp = data->info.filetime;
@@ -131,25 +129,25 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
     *param_doublep = data->progress.t_starttransfer;
     break;
   case CURLINFO_SIZE_UPLOAD:
-    *param_doublep =  data->progress.uploaded;
+    *param_doublep =  (double)data->progress.uploaded;
     break;
   case CURLINFO_SIZE_DOWNLOAD:
-    *param_doublep = data->progress.downloaded;
+    *param_doublep = (double)data->progress.downloaded;
     break;
   case CURLINFO_SPEED_DOWNLOAD:
-    *param_doublep =  data->progress.dlspeed;
+    *param_doublep =  (double)data->progress.dlspeed;
     break;
   case CURLINFO_SPEED_UPLOAD:
-    *param_doublep = data->progress.ulspeed;
+    *param_doublep = (double)data->progress.ulspeed;
     break;
   case CURLINFO_SSL_VERIFYRESULT:
     *param_longp = data->set.ssl.certverifyresult;
     break;
   case CURLINFO_CONTENT_LENGTH_DOWNLOAD:
-    *param_doublep = data->progress.size_dl;
+    *param_doublep = (double)data->progress.size_dl;
     break;
   case CURLINFO_CONTENT_LENGTH_UPLOAD:
-    *param_doublep = data->progress.size_ul;
+    *param_doublep = (double)data->progress.size_ul;
     break;
   case CURLINFO_REDIRECT_TIME:
     *param_doublep =  data->progress.t_redirect;
@@ -161,18 +159,16 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
     *param_charp = data->info.contenttype;
     break;
   case CURLINFO_PRIVATE:
-    *param_charp = data->set.private?data->set.private:(char *)"";
+    *param_charp = data->set.private;
+    break;
+  case CURLINFO_HTTPAUTH_AVAIL:
+    *param_longp = data->info.httpauthavail;
+    break;
+  case CURLINFO_PROXYAUTH_AVAIL:
+    *param_longp = data->info.proxyauthavail;
     break;
   default:
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
   return CURLE_OK;
 }
-
-/*
- * local variables:
- * eval: (load-file "../curl-mode.el")
- * end:
- * vim600: fdm=marker
- * vim: et sw=2 ts=2 sts=2 tw=78
- */

@@ -1,18 +1,18 @@
 #ifndef __CURL_EASY_H
 #define __CURL_EASY_H
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2002, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -60,6 +60,19 @@ CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ...);
  * curl_easy_setopt() invokes in every thread.
  */
 CURL* curl_easy_duphandle(CURL *curl);
+
+/*
+ * NAME curl_easy_reset()
+ *
+ * DESCRIPTION
+ *
+ * Re-initializes a CURL handle to the default values. This puts back the
+ * handle to the same state as it was in when it was just created.
+ *
+ * It does keep: live connections, the Session ID cache, the DNS cache and the
+ * cookies.
+ */
+void curl_easy_reset(CURL *curl);
 
 #ifdef  __cplusplus
 }

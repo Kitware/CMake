@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2002, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,6 +22,6 @@
  *
  * $Id$
  ***************************************************************************/
-int Curl_base64_encode(const void *data, int size, char **str);
-int Curl_base64_decode(const char *str, void *data);
+size_t Curl_base64_encode(const char *input, size_t size, char **str);
+size_t Curl_base64_decode(const char *source, char *dest);
 #endif

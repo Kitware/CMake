@@ -8,7 +8,7 @@
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2002, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,27 +26,30 @@
 
 #include "setup.h"
 #include <curl/curl.h>
+#include "cookie.h"
 
 /* this struct is libcurl-private, don't export details */
 struct Curl_share {
   unsigned int specifier;
-  unsigned int locked;
-  unsigned int dirty;
+  volatile unsigned int dirty;
   
   curl_lock_function lockfunc;
   curl_unlock_function unlockfunc;
   void *clientdata;
+
+  curl_hash *hostcache;
+  struct CookieInfo *cookies;
 };
 
-CURLSHcode Curl_share_aquire_lock (struct SessionHandle *, curl_lock_data);
-CURLSHcode Curl_share_release_lock (struct SessionHandle *, curl_lock_data);
+CURLSHcode Curl_share_lock (
+    struct SessionHandle *, 
+    curl_lock_data,
+    curl_lock_access
+    );
+
+CURLSHcode Curl_share_unlock (
+    struct SessionHandle *, 
+    curl_lock_data
+    );
 
 #endif /* __CURL_SHARE_H */
-
-/*
- * local variables:
- * eval: (load-file "../curl-mode.el")
- * end:
- * vim600: fdm=marker
- * vim: et sw=2 ts=2 sts=2 tw=78
- */

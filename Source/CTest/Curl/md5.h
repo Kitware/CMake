@@ -1,5 +1,5 @@
-#ifndef __GETPASS_H
-#define __GETPASS_H
+#ifndef __MD5_H
+#define __MD5_H
 /***************************************************************************
  *                                  _   _ ____  _     
  *  Project                     ___| | | |  _ \| |    
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2002, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,14 +22,8 @@
  *
  * $Id$
  ***************************************************************************/
-#ifndef HAVE_GETPASS_R
-/* If there's a system-provided function named like this, we trust it is
-   also found in one of the standard headers. */
 
-/*
- * Returning NULL will abort the continued operation!
- */
-char* getpass_r(const char *prompt, char* buffer, size_t buflen );
-#endif
+void Curl_md5it(unsigned char *output,
+                unsigned char *input);
 
 #endif

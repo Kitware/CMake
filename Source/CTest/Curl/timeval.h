@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2002, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,18 +23,22 @@
  * $Id$
  ***************************************************************************/
 
+/*
+ * CAUTION: this header is designed to work when included by the app-side
+ * as well as the library. Do not mix with library internals!
+ */
+
 #include "setup.h"
 
 #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
 #include <time.h>
-#include <winsock.h>
 #else
 #include <sys/time.h>
 #endif
 
-
 #ifndef HAVE_GETTIMEOFDAY
-#if !defined(_WINSOCKAPI_) && !defined(__MINGW32__)
+#if !defined(_WINSOCKAPI_) && !defined(__MINGW32__) && !defined(_AMIGASF) && \
+    !defined(__LCC__)
 struct timeval {
  long tv_sec;
  long tv_usec;
@@ -42,11 +46,29 @@ struct timeval {
 #endif
 #endif
 
-struct timeval Curl_tvnow (void);
+struct timeval curlx_tvnow(void);
 
-/* the diff is from now on returned in number of milliseconds! */
-long Curl_tvdiff (struct timeval t1, struct timeval t2);
+/*
+ * Make sure that the first argument (t1) is the more recent time and t2 is
+ * the older time, as otherwise you get a weird negative time-diff back...
+ *
+ * Returns: the time difference in number of milliseconds.
+ */
+long curlx_tvdiff(struct timeval t1, struct timeval t2);
 
-long Curl_tvlong (struct timeval t1);
+/*
+ * Same as curlx_tvdiff but with full usec resolution.
+ *
+ * Returns: the time difference in seconds with subsecond resolution.
+ */
+double curlx_tvdiff_secs(struct timeval t1, struct timeval t2);
+
+long Curl_tvlong(struct timeval t1);
+
+/* These two defines below exist to provide the older API for library
+   internals only. */
+#define Curl_tvnow() curlx_tvnow()
+#define Curl_tvdiff(x,y) curlx_tvdiff(x,y)
+#define Curl_tvdiff_secs(x,y) curlx_tvdiff_secs(x,y)
 
 #endif

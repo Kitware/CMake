@@ -10,22 +10,22 @@
  * Copyright (c) 1995, 1996, 1997, 1998, 1999 Kungliga Tekniska Högskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of the Institute nor the names of its contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE INSTITUTE AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -41,15 +41,17 @@
 #include "setup.h"
 
 #ifndef CURL_DISABLE_FTP
-#ifdef KRB4
+#ifdef HAVE_KRB4
 
 #include "security.h"
 #include "base64.h"
 #include <stdlib.h>
+#ifdef HAVE_NETDB_H
 #include <netdb.h>
-#include <syslog.h>
+#endif
 #include <string.h>
 #include <krb.h>
+#include <des.h>
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h> /* for getpid() */
@@ -57,27 +59,27 @@
 
 #include "ftp.h"
 #include "sendf.h"
+#include "krb4.h"
+#include "memory.h"
 
 #if defined(HAVE_INET_NTOA_R) && !defined(HAVE_INET_NTOA_R_DECL)
 #include "inet_ntoa_r.h"
 #endif
 
 /* The last #include file should be: */
-#ifdef MALLOCDEBUG
 #include "memdebug.h"
-#endif
 
 #define LOCAL_ADDR (&conn->local_addr)
-#define REMOTE_ADDR (&conn->serv_addr)
+#define REMOTE_ADDR conn->ip_addr->ai_addr
 #define myctladdr LOCAL_ADDR
 #define hisctladdr REMOTE_ADDR
 
 struct krb4_data {
-    des_cblock key;
-    des_key_schedule schedule;
-    char name[ANAME_SZ];
-    char instance[INST_SZ];
-    char realm[REALM_SZ];
+  des_cblock key;
+  des_key_schedule schedule;
+  char name[ANAME_SZ];
+  char instance[INST_SZ];
+  char realm[REALM_SZ];
 };
 
 #ifndef HAVE_STRLCPY
@@ -85,18 +87,18 @@ struct krb4_data {
 static size_t
 strlcpy (char *dst, const char *src, size_t dst_sz)
 {
-    size_t n;
-    char *p;
+  size_t n;
+  char *p;
 
-    for (p = dst, n = 0;
-         n + 1 < dst_sz && *src != '\0';
-         ++p, ++src, ++n)
-        *p = *src;
-    *p = '\0';
-    if (*src == '\0')
-        return n;
-    else
-        return n + strlen (src);
+  for (p = dst, n = 0;
+       n + 1 < dst_sz && *src != '\0';
+       ++p, ++src, ++n)
+    *p = *src;
+  *p = '\0';
+  if (*src == '\0')
+    return n;
+  else
+    return n + strlen (src);
 }
 #else
 size_t strlcpy (char *dst, const char *src, size_t dst_sz);
@@ -115,24 +117,25 @@ static int
 krb4_decode(void *app_data, void *buf, int len, int level,
             struct connectdata *conn)
 {
-    MSG_DAT m;
-    int e;
-    struct krb4_data *d = app_data;
-    
-    if(level == prot_safe)
-        e = krb_rd_safe(buf, len, &d->key,
-                        (struct sockaddr_in *)REMOTE_ADDR,
-                        (struct sockaddr_in *)LOCAL_ADDR, &m);
-    else
-        e = krb_rd_priv(buf, len, d->schedule, &d->key, 
-                        (struct sockaddr_in *)REMOTE_ADDR,
-                        (struct sockaddr_in *)LOCAL_ADDR, &m);
-    if(e){
-        syslog(LOG_ERR, "krb4_decode: %s", krb_get_err_text(e));
-        return -1;
-    }
-    memmove(buf, m.app_data, m.app_length);
-    return m.app_length;
+  MSG_DAT m;
+  int e;
+  struct krb4_data *d = app_data;
+
+  if(level == prot_safe)
+    e = krb_rd_safe(buf, len, &d->key,
+                    (struct sockaddr_in *)REMOTE_ADDR,
+                    (struct sockaddr_in *)LOCAL_ADDR, &m);
+  else
+    e = krb_rd_priv(buf, len, d->schedule, &d->key,
+                    (struct sockaddr_in *)REMOTE_ADDR,
+                    (struct sockaddr_in *)LOCAL_ADDR, &m);
+  if(e) {
+    struct SessionHandle *data = conn->data;
+    infof(data, "krb4_decode: %s\n", krb_get_err_text(e));
+    return -1;
+  }
+  memmove(buf, m.app_data, m.app_length);
+  return m.app_length;
 }
 
 static int
@@ -149,43 +152,47 @@ static int
 krb4_encode(void *app_data, void *from, int length, int level, void **to,
             struct connectdata *conn)
 {
-    struct krb4_data *d = app_data;
-    *to = malloc(length + 31);
-    if(level == prot_safe)
-        return krb_mk_safe(from, *to, length, &d->key, 
-                           (struct sockaddr_in *)LOCAL_ADDR,
-                           (struct sockaddr_in *)REMOTE_ADDR);
-    else if(level == prot_private)
-        return krb_mk_priv(from, *to, length, d->schedule, &d->key, 
-                           (struct sockaddr_in *)LOCAL_ADDR,
-                           (struct sockaddr_in *)REMOTE_ADDR);
-    else
-        return -1;
+  struct krb4_data *d = app_data;
+  *to = malloc(length + 31);
+  if(level == prot_safe)
+    return krb_mk_safe(from, *to, length, &d->key,
+                       (struct sockaddr_in *)LOCAL_ADDR,
+                       (struct sockaddr_in *)REMOTE_ADDR);
+  else if(level == prot_private)
+    return krb_mk_priv(from, *to, length, d->schedule, &d->key,
+                       (struct sockaddr_in *)LOCAL_ADDR,
+                       (struct sockaddr_in *)REMOTE_ADDR);
+  else
+    return -1;
 }
 
 static int
-mk_auth(struct krb4_data *d, KTEXT adat, 
+mk_auth(struct krb4_data *d, KTEXT adat,
         const char *service, char *host, int checksum)
 {
-    int ret;
-    CREDENTIALS cred;
-    char sname[SNAME_SZ], inst[INST_SZ], realm[REALM_SZ];
+  int ret;
+  CREDENTIALS cred;
+  char sname[SNAME_SZ], inst[INST_SZ], realm[REALM_SZ];
 
-    strlcpy(sname, service, sizeof(sname));
-    strlcpy(inst, krb_get_phost(host), sizeof(inst));
-    strlcpy(realm, krb_realmofhost(host), sizeof(realm));
-    ret = krb_mk_req(adat, sname, inst, realm, checksum);
-    if(ret)
-        return ret;
-    strlcpy(sname, service, sizeof(sname));
-    strlcpy(inst, krb_get_phost(host), sizeof(inst));
-    strlcpy(realm, krb_realmofhost(host), sizeof(realm));
-    ret = krb_get_cred(sname, inst, realm, &cred);
-    memmove(&d->key, &cred.session, sizeof(des_cblock));
-    des_key_sched(&d->key, d->schedule);
-    memset(&cred, 0, sizeof(cred));
+  strlcpy(sname, service, sizeof(sname));
+  strlcpy(inst, krb_get_phost(host), sizeof(inst));
+  strlcpy(realm, krb_realmofhost(host), sizeof(realm));
+  ret = krb_mk_req(adat, sname, inst, realm, checksum);
+  if(ret)
     return ret;
+  strlcpy(sname, service, sizeof(sname));
+  strlcpy(inst, krb_get_phost(host), sizeof(inst));
+  strlcpy(realm, krb_realmofhost(host), sizeof(realm));
+  ret = krb_get_cred(sname, inst, realm, &cred);
+  memmove(&d->key, &cred.session, sizeof(des_cblock));
+  des_key_sched(&d->key, d->schedule);
+  memset(&cred, 0, sizeof(cred));
+  return ret;
 }
+
+#ifdef HAVE_KRB_GET_OUR_IP_FOR_REALM
+int krb_get_our_ip_for_realm(char *, struct in_addr *);
+#endif
 
 static int
 krb4_auth(void *app_data, struct connectdata *conn)
@@ -198,13 +205,13 @@ krb4_auth(void *app_data, struct connectdata *conn)
   int checksum;
   u_int32_t cs;
   struct krb4_data *d = app_data;
-  char *host = conn->hostname;
+  char *host = conn->host.name;
   ssize_t nread;
   int l = sizeof(conn->local_addr);
   struct SessionHandle *data = conn->data;
   CURLcode result;
 
-  if(getsockname(conn->firstsocket,
+  if(getsockname(conn->sock[FIRSTSOCKET],
                  (struct sockaddr *)LOCAL_ADDR, &l) < 0)
     perror("getsockname()");
 
@@ -216,7 +223,7 @@ krb4_auth(void *app_data, struct connectdata *conn)
     Curl_infof(data, "%s\n", krb_get_err_text(ret));
     return AUTH_CONTINUE;
   }
-  
+
 #ifdef HAVE_KRB_GET_OUR_IP_FOR_REALM
   if (krb_get_config_bool("nat_in_use")) {
     struct sockaddr_in *localaddr  = (struct sockaddr_in *)LOCAL_ADDR;
@@ -242,7 +249,7 @@ krb4_auth(void *app_data, struct connectdata *conn)
   }
 #endif
 
-  if(Curl_base64_encode(adat.dat, adat.length, &p) < 0) {
+  if(Curl_base64_encode((char *)adat.dat, adat.length, &p) < 1) {
     Curl_failf(data, "Out of memory base64-encoding");
     return AUTH_CONTINUE;
   }
@@ -268,17 +275,17 @@ krb4_auth(void *app_data, struct connectdata *conn)
     return AUTH_ERROR;
   }
   p += 5;
-  len = Curl_base64_decode(p, adat.dat);
+  len = Curl_base64_decode(p, (char *)adat.dat);
   if(len < 0) {
     Curl_failf(data, "Failed to decode base64 from server");
     return AUTH_ERROR;
   }
   adat.length = len;
-  ret = krb_rd_safe(adat.dat, adat.length, &d->key, 
-                    (struct sockaddr_in *)hisctladdr, 
+  ret = krb_rd_safe(adat.dat, adat.length, &d->key,
+                    (struct sockaddr_in *)hisctladdr,
                     (struct sockaddr_in *)myctladdr, &msg_data);
   if(ret) {
-    Curl_failf(data, "Error reading reply from server: %s", 
+    Curl_failf(data, "Error reading reply from server: %s",
                krb_get_err_text(ret));
     return AUTH_ERROR;
   }
@@ -317,7 +324,7 @@ CURLcode Curl_krb_kauth(struct connectdata *conn)
 
   save = Curl_set_command_prot(conn, prot_private);
 
-  result = Curl_ftpsendf(conn, "SITE KAUTH %s", conn->data->state.user);
+  result = Curl_ftpsendf(conn, "SITE KAUTH %s", conn->user);
 
   if(result)
     return result;
@@ -328,7 +335,7 @@ CURLcode Curl_krb_kauth(struct connectdata *conn)
 
   if(conn->data->state.buffer[0] != '3'){
     Curl_set_command_prot(conn, save);
-    return;
+    return CURLE_FTP_WEIRD_SERVER_REPLY;
   }
 
   p = strstr(conn->data->state.buffer, "T=");
@@ -339,7 +346,7 @@ CURLcode Curl_krb_kauth(struct connectdata *conn)
   }
 
   p += 2;
-  tmp = Curl_base64_decode(p, &tkt.dat);
+  tmp = Curl_base64_decode(p, (char *)tkt.dat);
   if(tmp < 0) {
     Curl_failf(conn->data, "Failed to decode base64 in reply.\n");
     Curl_set_command_prot(conn, save);
@@ -347,7 +354,7 @@ CURLcode Curl_krb_kauth(struct connectdata *conn)
   }
   tkt.length = tmp;
   tktcopy.length = tkt.length;
-    
+
   p = strstr(conn->data->state.buffer, "P=");
   if(!p) {
     Curl_failf(conn->data, "Bad reply from server");
@@ -358,26 +365,26 @@ CURLcode Curl_krb_kauth(struct connectdata *conn)
   for(; *p && *p != ' ' && *p != '\r' && *p != '\n'; p++);
   *p = 0;
 
-  des_string_to_key (conn->data->state.passwd, &key);
+  des_string_to_key (conn->passwd, &key);
   des_key_sched(&key, schedule);
-    
-  des_pcbc_encrypt((des_cblock*)tkt.dat, (des_cblock*)tktcopy.dat,
+
+  des_pcbc_encrypt((void *)tkt.dat, (void *)tktcopy.dat,
                    tkt.length,
                    schedule, &key, DES_DECRYPT);
   if (strcmp ((char*)tktcopy.dat + 8,
               KRB_TICKET_GRANTING_TICKET) != 0) {
-    afs_string_to_key (passwd,
-                       krb_realmofhost(conn->hostname),
-                       &key);
-    des_key_sched (&key, schedule);
-    des_pcbc_encrypt((des_cblock*)tkt.dat, (des_cblock*)tktcopy.dat,
+    afs_string_to_key(passwd,
+                      krb_realmofhost(conn->host.name),
+                      &key);
+    des_key_sched(&key, schedule);
+    des_pcbc_encrypt((void *)tkt.dat, (void *)tktcopy.dat,
                      tkt.length,
                      schedule, &key, DES_DECRYPT);
   }
   memset(key, 0, sizeof(key));
   memset(schedule, 0, sizeof(schedule));
   memset(passwd, 0, sizeof(passwd));
-  if(Curl_base64_encode(tktcopy.dat, tktcopy.length, &p) < 0) {
+  if(Curl_base64_encode((char *)tktcopy.dat, tktcopy.length, &p) < 1) {
     failf(conn->data, "Out of memory base64-encoding.");
     Curl_set_command_prot(conn, save);
     return CURLE_OUT_OF_MEMORY;
@@ -397,13 +404,5 @@ CURLcode Curl_krb_kauth(struct connectdata *conn)
   return CURLE_OK;
 }
 
-#endif /* KRB4 */
+#endif /* HAVE_KRB4 */
 #endif /* CURL_DISABLE_FTP */
-
-/*
- * local variables:
- * eval: (load-file "../curl-mode.el")
- * end:
- * vim600: fdm=marker
- * vim: et sw=2 ts=2 sts=2 tw=78
- */

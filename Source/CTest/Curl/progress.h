@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2002, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -40,10 +40,10 @@ typedef enum {
   
 void Curl_pgrsDone(struct connectdata *);
 void Curl_pgrsStartNow(struct SessionHandle *data);
-void Curl_pgrsSetDownloadSize(struct SessionHandle *data, double size);
-void Curl_pgrsSetUploadSize(struct SessionHandle *data, double size);
-void Curl_pgrsSetDownloadCounter(struct SessionHandle *data, double size);
-void Curl_pgrsSetUploadCounter(struct SessionHandle *data, double size);
+void Curl_pgrsSetDownloadSize(struct SessionHandle *data, curl_off_t size);
+void Curl_pgrsSetUploadSize(struct SessionHandle *data, curl_off_t size);
+void Curl_pgrsSetDownloadCounter(struct SessionHandle *data, curl_off_t size);
+void Curl_pgrsSetUploadCounter(struct SessionHandle *data, curl_off_t size);
 int Curl_pgrsUpdate(struct connectdata *);
 void Curl_pgrsResetTimes(struct SessionHandle *data);
 void Curl_pgrsTime(struct SessionHandle *data, timerid timer);

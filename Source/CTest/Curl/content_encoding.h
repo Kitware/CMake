@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2002, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,15 +20,22 @@
  *
  * $Id$
  ***************************************************************************/
+#include "setup.h"
+
+/*
+ * Comma-separated list all supported Content-Encodings ('identity' is implied)
+ */
+#ifdef HAVE_LIBZ
+#define ALL_CONTENT_ENCODINGS "deflate, gzip"
+#else
+#define ALL_CONTENT_ENCODINGS "identity"
+#endif
 
 CURLcode Curl_unencode_deflate_write(struct SessionHandle *data, 
                                      struct Curl_transfer_keeper *k, 
                                      ssize_t nread);
-          
-/*
- * local variables:
- * eval: (load-file "../curl-mode.el")
- * end:
- * vim600: fdm=marker
- * vim: et sw=2 ts=2 sts=2 tw=78
- */
+
+CURLcode
+Curl_unencode_gzip_write(struct SessionHandle *data, 
+                         struct Curl_transfer_keeper *k,
+                         ssize_t nread);

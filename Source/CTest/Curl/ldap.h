@@ -8,7 +8,7 @@
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2002, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -25,6 +25,5 @@
  ***************************************************************************/
 #ifndef CURL_DISABLE_LDAP
 CURLcode Curl_ldap(struct connectdata *conn);
-CURLcode Curl_ldap_done(struct connectdata *conn);
 #endif
 #endif /* __LDAP_H */

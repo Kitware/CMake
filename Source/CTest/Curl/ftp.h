@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2002, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -25,11 +25,11 @@
 
 #ifndef CURL_DISABLE_FTP
 CURLcode Curl_ftp(struct connectdata *conn);
-CURLcode Curl_ftp_done(struct connectdata *conn);
+CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode);
 CURLcode Curl_ftp_connect(struct connectdata *conn);
 CURLcode Curl_ftp_disconnect(struct connectdata *conn);
 CURLcode Curl_ftpsendf(struct connectdata *, const char *fmt, ...);
-CURLcode Curl_GetFTPResponse(int *nread, struct connectdata *conn,
+CURLcode Curl_GetFTPResponse(ssize_t *nread, struct connectdata *conn,
                              int *ftpcode);
 CURLcode Curl_ftp_nextconnect(struct connectdata *conn);
 #endif

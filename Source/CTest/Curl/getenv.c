@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2002, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -35,9 +35,10 @@
 #include <unixlib.h>
 #endif
 
-#ifdef MALLOCDEBUG
+#include <curl/curl.h>
+#include "memory.h"
+
 #include "memdebug.h"
-#endif
 
 static
 char *GetEnv(const char *variable)
@@ -53,8 +54,7 @@ char *GetEnv(const char *variable)
 #ifdef  VMS
   char *env = getenv(variable);
   if (env && strcmp("HOME",variable) == 0) {
-    /* VMS does not work because of warning on icc */
-    /*        env = decc$translate_vms(env);       */
+        env = decc$translate_vms(env);
   }
 #else
   /* no length control */
@@ -68,11 +68,3 @@ char *curl_getenv(const char *v)
 {
   return GetEnv(v);
 }
-
-/*
- * local variables:
- * eval: (load-file "../curl-mode.el")
- * end:
- * vim600: fdm=marker
- * vim: et sw=2 ts=2 sts=2 tw=78
- */

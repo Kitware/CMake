@@ -1,16 +1,16 @@
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2002, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -31,20 +31,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "memory.h"
+
+#define _MPRINTF_REPLACE /* use our functions only */
+#include <curl/mprintf.h>
 
 /* The last #include file should be: */
-#ifdef MALLOCDEBUG
 #include "memdebug.h"
-#endif
 
-char *curl_escape(const char *string, int length)
+char *curl_escape(const char *string, int inlength)
 {
-  int alloc = (length?length:(int)strlen(string))+1;  
-  char *ns = malloc(alloc);
+  size_t alloc = (inlength?(size_t)inlength:strlen(string))+1;
+  char *ns;
   char *testing_ptr = NULL;
   unsigned char in;
-  int newlen = alloc;
-  int index=0;
+  size_t newlen = alloc;
+  int strindex=0;
+  size_t length;
+
+  ns = malloc(alloc);
+  if(!ns)
+    return NULL;
 
   length = alloc-1;
   while(length--) {
@@ -65,59 +72,64 @@ char *curl_escape(const char *string, int length)
           ns = testing_ptr;
         }
       }
-      sprintf(&ns[index], "%%%02X", in);
+      snprintf(&ns[strindex], 4, "%%%02X", in);
 
-      index+=3;
+      strindex+=3;
     }
     else {
       /* just copy this */
-      ns[index++]=in;
+      ns[strindex++]=in;
     }
     string++;
   }
-  ns[index]=0; /* terminate it */
+  ns[strindex]=0; /* terminate it */
   return ns;
 }
+
+#define ishex(in) ((in >= 'a' && in <= 'f') || \
+                   (in >= 'A' && in <= 'F') || \
+                   (in >= '0' && in <= '9'))
 
 char *curl_unescape(const char *string, int length)
 {
   int alloc = (length?length:(int)strlen(string))+1;
   char *ns = malloc(alloc);
   unsigned char in;
-  int index=0;
-  unsigned int hex;
- 
-  if( !ns ) {
+  int strindex=0;
+  long hex;
+
+  if( !ns )
     return NULL;
-  }  
-  
+
   while(--alloc > 0) {
     in = *string;
-    if('%' == in) {
-      /* encoded part */
-      if(sscanf(string+1, "%02X", &hex)) {
-        in = (unsigned char)hex;
-        string+=2;
-        alloc-=2;
-      }
+    if(('%' == in) && ishex(string[1]) && ishex(string[2])) {
+      /* this is two hexadecimal digits following a '%' */
+      char hexstr[3];
+      char *ptr;
+      hexstr[0] = string[1];
+      hexstr[1] = string[2];
+      hexstr[2] = 0;
+
+      hex = strtol(hexstr, &ptr, 16);
+
+      in = (unsigned char)hex; /* this long is never bigger than 255 anyway */
+      string+=2;
+      alloc-=2;
     }
-    
-    ns[index++] = in;
+
+    ns[strindex++] = in;
     string++;
   }
-  ns[index]=0; /* terminate it */
+  ns[strindex]=0; /* terminate it */
   return ns;
 }
 
+/* For operating systems/environments that use different malloc/free
+   ssystems for the app and for this library, we provide a free that uses
+   the library's memory system */
 void curl_free(void *p)
 {
-  free(p);
+  if(p)
+    free(p);
 }
-
-/*
- * local variables:
- * eval: (load-file "../curl-mode.el")
- * end:
- * vim600: fdm=marker
- * vim: et sw=2 ts=2 sts=2 tw=78
- */

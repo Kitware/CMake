@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2002, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -35,7 +35,6 @@
 #include <errno.h>
 
 #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
-#include <winsock.h>
 #include <time.h>
 #include <io.h>
 #else
@@ -44,7 +43,6 @@
 #endif
 #include <netinet/in.h>
 #include <sys/time.h>
-#include <sys/resource.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -76,13 +74,13 @@
 
 #include "progress.h"
 #include "strequal.h"
+#include "dict.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 CURLcode Curl_dict(struct connectdata *conn)
 {
-  int nth;
   char *word;
   char *ppath;
   char *database = NULL;
@@ -91,9 +89,10 @@ CURLcode Curl_dict(struct connectdata *conn)
                           by RFC 2229 */
   CURLcode result=CURLE_OK;
   struct SessionHandle *data=conn->data;
+  curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
 
   char *path = conn->path;
-  long *bytecount = &conn->bytecount;
+  curl_off_t *bytecount = &conn->bytecount;
 
   if(conn->bits.user_passwd) {
     /* AUTH is missing */
@@ -129,14 +128,8 @@ CURLcode Curl_dict(struct connectdata *conn)
     if ((strategy == NULL) || (*strategy == (char)0)) {
       strategy = (char *)".";
     }
-    if ((nthdef == NULL) || (*nthdef == (char)0)) {
-      nth = 0;
-    }
-    else {
-      nth = atoi(nthdef);
-    }
       
-    result = Curl_sendf(conn->firstsocket, conn,
+    result = Curl_sendf(sockfd, conn,
                         "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\n"
                         "MATCH "
                         "%s "    /* database */
@@ -151,7 +144,7 @@ CURLcode Curl_dict(struct connectdata *conn)
     if(result)
       failf(data, "Failed sending DICT request");
     else
-      result = Curl_Transfer(conn, conn->firstsocket, -1, FALSE, bytecount,
+      result = Curl_Transfer(conn, FIRSTSOCKET, -1, FALSE, bytecount,
                              -1, NULL); /* no upload */      
     if(result)
       return result;
@@ -179,14 +172,8 @@ CURLcode Curl_dict(struct connectdata *conn)
     if ((database == NULL) || (*database == (char)0)) {
       database = (char *)"!";
     }
-    if ((nthdef == NULL) || (*nthdef == (char)0)) {
-      nth = 0;
-    }
-    else {
-      nth = atoi(nthdef);
-    }
       
-    result = Curl_sendf(conn->firstsocket, conn,
+    result = Curl_sendf(sockfd, conn,
                         "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\n"
                         "DEFINE "
                         "%s "     /* database */
@@ -197,7 +184,7 @@ CURLcode Curl_dict(struct connectdata *conn)
     if(result)
       failf(data, "Failed sending DICT request");
     else
-      result = Curl_Transfer(conn, conn->firstsocket, -1, FALSE, bytecount,
+      result = Curl_Transfer(conn, FIRSTSOCKET, -1, FALSE, bytecount,
                              -1, NULL); /* no upload */
     
     if(result)
@@ -215,27 +202,19 @@ CURLcode Curl_dict(struct connectdata *conn)
         if (ppath[i] == ':')
           ppath[i] = ' ';
       }
-      result = Curl_sendf(conn->firstsocket, conn,
+      result = Curl_sendf(sockfd, conn,
                           "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\n"
                           "%s\n"
                           "QUIT\n", ppath);
       if(result)
         failf(data, "Failed sending DICT request");
       else
-        result = Curl_Transfer(conn, conn->firstsocket, -1, FALSE, bytecount,
+        result = Curl_Transfer(conn, FIRSTSOCKET, -1, FALSE, bytecount,
                                -1, NULL);
       if(result)
         return result;
     }
   }
-  (void)nth;
+
   return CURLE_OK;
 }
-
-/*
- * local variables:
- * eval: (load-file "../curl-mode.el")
- * end:
- * vim600: fdm=marker
- * vim: et sw=2 ts=2 sts=2 tw=78
- */
