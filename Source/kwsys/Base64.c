@@ -14,7 +14,7 @@ the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
 PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
-#define KWSYS_IN_PROCESS_C
+#define KWSYS_IN_BASE64_C
 #include <Base64.h>
 
 /*--------------------------------------------------------------------------*/
