@@ -90,6 +90,12 @@ bool cmITKWrapTclCommand::CreateCableRule(const char* configFile)
     commandArgs.push_back(tmp);
     }
 #endif
+  const char* gccxml = m_Makefile->GetDefinition("ITK_GCCXML_EXECUTABLE");
+  if(gccxml)
+    {
+    commandArgs.push_back("--gccxml");
+    commandArgs.push_back(gccxml);
+    }
   tmp = "-I";
   tmp += m_Makefile->GetStartDirectory();
   commandArgs.push_back(tmp);
