@@ -27,11 +27,35 @@ void cmCableSourceFilesCommand::WriteConfiguration() const
   
   cmRegularExpression needCdataBlock("[&<>]");
   
+  // Look for the files on a path relative to the current CMakeLists.txt.
+  std::string curPath = m_Makefile->GetCurrentDirectory();
+  curPath += "/";
+  
   os << indent << "<Headers>" << std::endl;
   for(Entries::const_iterator f = m_Entries.begin();
       f != m_Entries.end(); ++f)
     {
-    os << indent << "  <File name=\"" << f->c_str() << ".h\"/>" << std::endl;
+    std::string file = curPath+*f;
+    
+    // Look for the normal include file.
+    std::string header = file+".h";
+    if(cmSystemTools::FileExists(header.c_str()))
+      {
+      os << indent << "  <File name=\"" << header.c_str() << "\"/>"
+         << std::endl;
+      }
+    else
+      {
+      cmSystemTools::Error("Unable to find source file ", header.c_str());
+      }
+    
+    // Look for an instantiation file.
+    std::string instantiation = file+".txx";
+    if(cmSystemTools::FileExists(instantiation.c_str()))
+      {
+      os << indent << "  <File name=\"" << instantiation.c_str()
+         << "\" purpose=\"instantiate\"/>" << std::endl;
+      }
     }
   os << indent << "</Headers>" << std::endl;
 }
