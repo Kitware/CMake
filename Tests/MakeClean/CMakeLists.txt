@@ -1,5 +1,7 @@
 PROJECT(MakeClean)
 
+SET(CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS}")
+
 # Build the to-clean project.
 TRY_COMPILE(TOCLEAN_BUILT
   ${MakeClean_BINARY_DIR}/ToClean
