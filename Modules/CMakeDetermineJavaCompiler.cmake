@@ -29,13 +29,13 @@ IF(NOT CMAKE_JAVA_COMPILER)
   ENDIF($ENV{JAVA_ARCHIVE} MATCHES ".+")
 
   SET(JAVA_BIN_PATH
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.4;JavaHome]/bin"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.3;JavaHome]/bin"
     /usr/bin
     /usr/lib/java/bin
     /usr/share/java/bin
     /usr/local/bin
     /usr/local/java/bin
-    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.4;JavaHome]/bin"
-    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.3;JavaHome]/bin"
     )
   # if no compiler has been specified yet, then look for one
   IF(CMAKE_JAVA_COMPILER_INIT)

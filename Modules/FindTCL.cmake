@@ -28,14 +28,14 @@ GET_FILENAME_COMPONENT(TK_WISH_PATH ${TK_WISH} PATH)
 SET (TCLTK_POSSIBLE_LIB_PATHS
   "${TCL_TCLSH_PATH}/../lib"
   "${TK_WISH_PATH}/../lib"
-  /usr/lib 
-  /usr/local/lib
   "C:/Program Files/Tcl/lib" 
   "C:/Tcl/lib" 
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.4;Root]/lib
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.3;Root]/lib
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.2;Root]/lib
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.0;Root]/lib
+  /usr/lib 
+  /usr/local/lib
 )
 
 FIND_LIBRARY(TCL_LIBRARY
@@ -87,18 +87,18 @@ SET (TCLTK_POSSIBLE_INCLUDE_PATHS
   /Library/Frameworks/Tk.framework/PrivateHeaders
   "${TCL_TCLSH_PATH}/../include"
   "${TK_WISH_PATH}/../include"
-  /usr/include 
-  /usr/local/include
-  /usr/include/tcl8.4
-  /usr/include/tcl8.3
-  /usr/include/tcl8.2
-  /usr/include/tcl8.0
   "C:/Program Files/Tcl/include" 
   "C:/Tcl/include" 
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.4;Root]/include
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.3;Root]/include
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.2;Root]/include
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.0;Root]/include
+  /usr/include 
+  /usr/local/include
+  /usr/include/tcl8.4
+  /usr/include/tcl8.3
+  /usr/include/tcl8.2
+  /usr/include/tcl8.0
 )
 
 FIND_PATH(TCL_INCLUDE_PATH tcl.h 
