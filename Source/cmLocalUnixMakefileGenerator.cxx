@@ -1324,11 +1324,11 @@ void cmLocalUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
   target += cmSystemTools::GetExecutableExtension();  
   target = this->ConvertToRelativeOutputPath(target.c_str());
   bool needsLocalTarget = false;
-  if(target.find('/') != target.npos)
+  if(target.find('/', 2) != target.npos)
     {
     needsLocalTarget = true;
     }
-  
+
   std::string objs = "$(" + this->CreateMakeVariable(name, "_SRC_OBJS") + ") ";
   std::string depend = "$(";
   depend += this->CreateMakeVariable(name, "_SRC_OBJS") 
@@ -1922,7 +1922,13 @@ BuildInSubDirectoryWindows(std::ostream& fout,
   std::string currentDir = dir;
   cmSystemTools::ConvertToUnixSlashes(currentDir);
   std::string cdback = "..";
-  for(unsigned int i =0; i < currentDir.size(); ++i)
+  unsigned int i = 0;
+  if(currentDir.size() > 2 && currentDir[0] == '.' && currentDir[1] == '/')
+    {
+    // start past ./ if it starts with ./
+    i = 2;
+    }
+  for(; i < currentDir.size(); ++i)
     {
     if(currentDir[i] == '/')
       {

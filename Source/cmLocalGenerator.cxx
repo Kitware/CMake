@@ -65,12 +65,15 @@ void cmLocalGenerator::ConfigureFinalPass()
 
 std::string cmLocalGenerator::ConvertToRelativeOutputPath(const char* p)
 {
+  // do not use relative paths for network build trees
+  // the network paths do not work
   const char* outputDirectory = m_Makefile->GetHomeOutputDirectory();
   if ( outputDirectory && *outputDirectory && *(outputDirectory+1) && 
     outputDirectory[0] == '/' && outputDirectory[1] == '/' )
     {
     return cmSystemTools::ConvertToOutputPath(p);
     }
+  
   // The first time this is called, initialize all
   // the path ivars that are used.   This can not 
   // be moved to the constructor because all the paths are not set yet.
@@ -103,6 +106,13 @@ std::string cmLocalGenerator::ConvertToRelativeOutputPath(const char* p)
 
   // Do the work of converting to a relative path 
   std::string pathIn = p;
+  bool ispath = false;
+  if(pathIn.find('/') == pathIn.npos)
+    {
+    return pathIn;
+    }
+  
+
   std::string ret = pathIn;
   if(m_CurrentOutputDirectory.size() <= ret.size())
     {
@@ -169,6 +179,13 @@ std::string cmLocalGenerator::ConvertToRelativeOutputPath(const char* p)
     )
     {
     ret = relpath;
+    }
+  if(ret.size() && ret[0] != '/' && ret[0] != '.')
+    {
+    if(ret.size() > 1 && ret[1] != ':')
+      {
+      ret = std::string("./") + ret;
+      }
     }
   ret = cmSystemTools::ConvertToOutputPath(ret.c_str());
   return ret;
