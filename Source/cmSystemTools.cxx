@@ -805,7 +805,8 @@ bool cmSystemTools::IsOff(const char* val)
 
 
 bool cmSystemTools::RunCommand(const char* command, 
-                               std::string& output)
+                               std::string& output,
+                               bool verbose)
 {
   const int BUFFER_SIZE = 4096;
   char buffer[BUFFER_SIZE];
@@ -820,12 +821,15 @@ bool cmSystemTools::RunCommand(const char* command,
   std::ifstream fin(tempFile.c_str());
   if(!fin)
     {
-    std::string errormsg = "RunCommand produced no output: command: \"";
-    errormsg += command;
-    errormsg += "\"";
-    errormsg += "\nOutput file: ";
-    errormsg += tempFile;
-    cmSystemTools::Error(errormsg.c_str());
+    if(verbose)
+      {
+      std::string errormsg = "RunCommand produced no output: command: \"";
+      errormsg += command;
+      errormsg += "\"";
+      errormsg += "\nOutput file: ";
+      errormsg += tempFile;
+      cmSystemTools::Error(errormsg.c_str());
+      }
     fin.close();
     cmSystemTools::RemoveFile(tempFile.c_str());
     return false;
@@ -839,7 +843,10 @@ bool cmSystemTools::RunCommand(const char* command,
   cmSystemTools::RemoveFile(tempFile.c_str());
   return true;
 #else
-  std::cout << "running " << command << std::endl;
+  if(verbose)
+    {
+    std::cout << "running " << command << std::endl;
+    }
   FILE* cpipe = popen(command, "r");
   if(!cpipe)
     {
@@ -848,7 +855,10 @@ bool cmSystemTools::RunCommand(const char* command,
   fgets(buffer, BUFFER_SIZE, cpipe);
   while(!feof(cpipe))
     {
-    std::cout << buffer << std::flush;
+    if(verbose)
+      {
+      std::cout << buffer << std::flush;
+      }
     output += buffer;
     fgets(buffer, BUFFER_SIZE, cpipe);
     }

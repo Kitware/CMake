@@ -245,8 +245,12 @@ public:
    * Run an executable command and put the stdout in output.
    * A temporary file is created in the binaryDir for storing the
    * output because windows does not have popen.
+   *
+   * If verbose is false, no user-viewable output from the program
+   * being run will be generated.
    */
-  static bool RunCommand(const char* command, std::string& output);
+  static bool RunCommand(const char* command, std::string& output,
+                         bool verbose = true);
 
   ///! Generate a temporary file name
   static std::string TemporaryFileName();
