@@ -35,13 +35,8 @@
 
 #include <assert.h>
 
-// Quick-switch for generating old makefiles.
-#if 1
-# define CMLUMG_MAKEFILE_NAME "Makefile"
-#else
-# define CMLUMG_WRITE_OLD_MAKEFILE
-# define CMLUMG_MAKEFILE_NAME "Makefile2"
-#endif
+// TODO: Convert makefile name to a runtime switch.
+#define CMLUMG_MAKEFILE_NAME "Makefile"
 
 // TODO: Add "help" target.
 // TODO: Identify remaining relative path violations.
@@ -50,6 +45,12 @@
 //----------------------------------------------------------------------------
 cmLocalUnixMakefileGenerator2::cmLocalUnixMakefileGenerator2()
 {
+  m_WindowsShell = false;
+  m_IncludeDirective = "include";
+  m_MakefileVariableSize = 0;
+  m_IgnoreLibPrefix = false;
+  m_PassMakeflags = false;
+  m_UseRelativePaths = false;
 }
 
 //----------------------------------------------------------------------------
@@ -70,10 +71,6 @@ void cmLocalUnixMakefileGenerator2::SetEmptyCommand(const char* cmd)
 //----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator2::Generate(bool fromTheTop)
 {
-#ifdef CMLUMG_WRITE_OLD_MAKEFILE
-  // Generate old style for now.
-  this->cmLocalUnixMakefileGenerator::Generate(fromTheTop);
-#else
   // Make sure we never run a local generate.
   if(!fromTheTop)
     {
@@ -82,10 +79,8 @@ void cmLocalUnixMakefileGenerator2::Generate(bool fromTheTop)
     return;
     }
 
-  // Handle EXECUTABLE_OUTPUT_PATH and LIBRARY_OUTPUT_PATH since
-  // superclass generator is not called.
+  // Setup our configuration variables for this directory.
   this->ConfigureOutputPaths();
-#endif
 
   // Generate the rule files for each target.
   const cmTargets& targets = m_Makefile->GetTargets();
@@ -1797,7 +1792,7 @@ cmLocalUnixMakefileGenerator2
   std::string targetNameSO;
   std::string targetNameReal;
   std::string targetNameBase;
-  this->GetLibraryNames(target.GetName(), target,
+  this->GetLibraryNames(target,
                         targetName, targetNameSO,
                         targetNameReal, targetNameBase);
 
@@ -2379,11 +2374,22 @@ cmLocalUnixMakefileGenerator2::ConvertToRelativeOutputPath(const char* p)
 }
 
 //----------------------------------------------------------------------------
-void
-cmLocalUnixMakefileGenerator2::ConfigureOutputPaths()
+void cmLocalUnixMakefileGenerator2::ConfigureOutputPaths()
 {
-  // Call superclass version first.
-  this->cmLocalUnixMakefileGenerator::ConfigureOutputPaths();
+  // Save whether to use relative paths.
+  m_UseRelativePaths = m_Makefile->IsOn("CMAKE_USE_RELATIVE_PATHS");
+
+  // Format the library and executable output paths.
+  if(const char* libOut = m_Makefile->GetDefinition("LIBRARY_OUTPUT_PATH"))
+    {
+    m_LibraryOutputPath = libOut;
+    this->FormatOutputPath(m_LibraryOutputPath, "LIBRARY");
+    }
+  if(const char* exeOut = m_Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH"))
+    {
+    m_ExecutableOutputPath = exeOut;
+    this->FormatOutputPath(m_ExecutableOutputPath, "EXECUTABLE");
+    }
 
   // Setup fully collapsed paths.
   m_CurrentOutputDirectory =
@@ -2429,6 +2435,37 @@ cmLocalUnixMakefileGenerator2::ConfigureOutputPaths()
     // converting paths.
     cmSystemTools::SplitPath(m_CurrentOutputDirectory.c_str(),
                              m_CurrentOutputDirectoryComponents);
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmLocalUnixMakefileGenerator2::FormatOutputPath(std::string& path,
+                                                     const char* name)
+{
+  if(!path.empty())
+    {
+    // Convert the output path to a full path in case it is
+    // specified as a relative path.  Treat a relative path as
+    // relative to the current output directory for this makefile.
+    path =
+      cmSystemTools::CollapseFullPath(path.c_str(),
+                                      m_Makefile->GetStartOutputDirectory());
+
+    // Add a trailing slash for easy appending later.
+    if(path.empty() || path[path.size()-1] != '/')
+      {
+      path += "/";
+      }
+
+    // Make sure the output path exists on disk.
+    if(!cmSystemTools::MakeDirectory(path.c_str()))
+      {
+      cmSystemTools::Error("Error failed to create ",
+                           name, "_OUTPUT_PATH directory:", path.c_str());
+      }
+
+    // Add this as a link directory automatically.
+    m_Makefile->AddLinkDirectory(path.c_str());
     }
 }
 
@@ -2682,6 +2719,292 @@ cmLocalUnixMakefileGenerator2
     commands.push_back(remove);
     }
 }
+
+//============================================================================
+//----------------------------------------------------------------------------
+void cmLocalUnixMakefileGenerator2::OutputEcho(std::ostream& fout,
+                                               const char* msg)
+{
+  std::string echostring = msg;
+  // For UNIX we want to quote the output of echo.
+  // For NMake and Borland, the echo should not be quoted.
+  if(strcmp(m_GlobalGenerator->GetName(), "Unix Makefiles") == 0)
+    {
+    cmSystemTools::ReplaceString(echostring, "\\\n", " ");
+    cmSystemTools::ReplaceString(echostring, " \t", "   ");
+    cmSystemTools::ReplaceString(echostring, "\n\t", "\"\n\t@echo \"");
+    fout << "\t@echo \"" << echostring.c_str() << "\"\n";
+    }
+  else
+    {
+    cmSystemTools::ReplaceString(echostring, "\n\t", "\n\t@echo ");
+    fout << "\t@echo " << echostring.c_str() << "\n";
+    }
+}
+
+//----------------------------------------------------------------------------
+bool
+cmLocalUnixMakefileGenerator2::SamePath(const char* path1, const char* path2)
+{
+  if (strcmp(path1, path2) == 0)
+    {
+    return true;
+    }
+#if defined(_WIN32) || defined(__APPLE__)
+  return
+    (cmSystemTools::LowerCase(this->ConvertToOutputForExisting(path1)) ==
+     cmSystemTools::LowerCase(this->ConvertToOutputForExisting(path2)));
+#else
+  return false;
+#endif
+}
+
+//----------------------------------------------------------------------------
+std::string
+cmLocalUnixMakefileGenerator2::GetBaseTargetName(const cmTarget& t)
+{
+  std::string pathPrefix = "";
+#ifdef __APPLE__
+  if ( t.GetPropertyAsBool("MACOSX_BUNDLE") )
+    {
+    pathPrefix = t.GetName();
+    pathPrefix += ".app/Contents/MacOS/";
+    }
+#endif
+
+  const char* targetPrefix = t.GetProperty("PREFIX");
+  const char* prefixVar = t.GetPrefixVariable();
+  // if there is no prefix on the target use the cmake definition
+  if(!targetPrefix && prefixVar)
+    {
+    // first check for a language specific suffix var
+    const char* ll = t.GetLinkerLanguage(this->GetGlobalGenerator());
+    if(ll)
+      {
+      std::string langPrefix = prefixVar + std::string("_") + ll;
+      targetPrefix = m_Makefile->GetDefinition(langPrefix.c_str());
+      }
+    // if there not a language specific suffix then use the general one
+    if(!targetPrefix)
+      {
+      targetPrefix = m_Makefile->GetSafeDefinition(prefixVar);
+      }
+    }
+  std::string name = pathPrefix + (targetPrefix?targetPrefix:"");
+  name += t.GetName();
+  return name;
+}
+
+//----------------------------------------------------------------------------
+void cmLocalUnixMakefileGenerator2::GetLibraryNames(const cmTarget& t,
+                                                    std::string& name,
+                                                    std::string& soName,
+                                                    std::string& realName,
+                                                    std::string& baseName)
+{
+  // Check for library version properties.
+  const char* version = t.GetProperty("VERSION");
+  const char* soversion = t.GetProperty("SOVERSION");
+  if((t.GetType() != cmTarget::SHARED_LIBRARY &&
+      t.GetType() != cmTarget::MODULE_LIBRARY) ||
+     !m_Makefile->GetDefinition("CMAKE_SHARED_LIBRARY_SONAME_C_FLAG"))
+    {
+    // Versioning is supported only for shared libraries and modules,
+    // and then only when the platform supports an soname flag.
+    version = 0;
+    soversion = 0;
+    }
+  if(version && !soversion)
+    {
+    // The soversion must be set if the library version is set.  Use
+    // the library version as the soversion.
+    soversion = version;
+    }
+
+  // The library name.
+  name = this->GetFullTargetName(t.GetName(), t);
+
+  // The library's soname.
+  soName = name;
+  if(soversion)
+    {
+    soName += ".";
+    soName += soversion;
+    }
+
+  // The library's real name on disk.
+  realName = name;
+  if(version)
+    {
+    realName += ".";
+    realName += version;
+    }
+  else if(soversion)
+    {
+    realName += ".";
+    realName += soversion;
+    }
+
+  // The library name without extension.
+  baseName = this->GetBaseTargetName(t);
+}
+
+//----------------------------------------------------------------------------
+std::string
+cmLocalUnixMakefileGenerator2
+::ConvertToMakeTarget(const char* tgt)
+{
+  // Make targets should not have a leading './' for a file in the
+  // directory containing the makefile.
+  std::string ret = tgt;
+  if(ret.size() > 2 &&
+     (ret[0] == '.') &&
+     ( (ret[1] == '/') || ret[1] == '\\'))
+    {
+    std::string upath = ret;
+    cmSystemTools::ConvertToUnixSlashes(upath);
+    if(upath.find(2, '/') == upath.npos)
+      {
+      ret = ret.substr(2, ret.size()-2);
+      }
+    }
+  return ret;
+}
+
+//----------------------------------------------------------------------------
+std::string&
+cmLocalUnixMakefileGenerator2::CreateSafeUniqueObjectFileName(const char* sin)
+{
+  if ( m_Makefile->IsOn("CMAKE_MANGLE_OBJECT_FILE_NAMES") )
+    {
+    std::map<cmStdString,cmStdString>::iterator it = m_UniqueObjectNamesMap.find(sin);
+    if ( it == m_UniqueObjectNamesMap.end() )
+      {
+      std::string ssin = sin;
+      bool done;
+      int cc = 0;
+      char rpstr[100];
+      sprintf(rpstr, "_p_");
+      cmSystemTools::ReplaceString(ssin, "+", rpstr);
+      std::string sssin = sin;
+      do
+        {
+        done = true;
+        for ( it = m_UniqueObjectNamesMap.begin();
+          it != m_UniqueObjectNamesMap.end();
+          ++ it )
+          {
+          if ( it->second == ssin )
+            {
+            done = false;
+            }
+          }
+        if ( done )
+          {
+          break;
+          }
+        sssin = ssin;
+        cmSystemTools::ReplaceString(ssin, "_p_", rpstr);
+        sprintf(rpstr, "_p%d_", cc++);
+        }
+      while ( !done );
+      m_UniqueObjectNamesMap[sin] = ssin;
+      }
+    }
+  else
+    {
+    m_UniqueObjectNamesMap[sin] = sin;
+    }
+  return m_UniqueObjectNamesMap[sin];
+}
+
+//----------------------------------------------------------------------------
+std::string
+cmLocalUnixMakefileGenerator2
+::CreateMakeVariable(const char* sin, const char* s2in)
+{
+  std::string s = sin;
+  std::string s2 = s2in;
+  std::string unmodified = s;
+  unmodified += s2;
+  // if there is no restriction on the length of make variables
+  // and there are no "." charactors in the string, then return the
+  // unmodified combination.
+  if(!m_MakefileVariableSize && unmodified.find('.') == s.npos)
+    {
+    return unmodified;
+    }
+
+  // see if the variable has been defined before and return
+  // the modified version of the variable
+  std::map<cmStdString, cmStdString>::iterator i = m_MakeVariableMap.find(unmodified);
+  if(i != m_MakeVariableMap.end())
+    {
+    return i->second;
+    }
+  // start with the unmodified variable
+  std::string ret = unmodified;
+  // if this there is no value for m_MakefileVariableSize then
+  // the string must have bad characters in it
+  if(!m_MakefileVariableSize)
+    {
+    cmSystemTools::ReplaceString(ret, ".", "_");
+    int ni = 0;
+    char buffer[5];
+    // make sure the _ version is not already used, if
+    // it is used then add number to the end of the variable
+    while(m_ShortMakeVariableMap.count(ret) && ni < 1000)
+      {
+      ++ni;
+      sprintf(buffer, "%04d", ni);
+      ret = unmodified + buffer;
+      }
+    m_ShortMakeVariableMap[ret] = "1";
+    m_MakeVariableMap[unmodified] = ret;
+    return ret;
+    }
+
+  // if the string is greater the 32 chars it is an invalid vairable name
+  // for borland make
+  if(static_cast<int>(ret.size()) > m_MakefileVariableSize)
+    {
+    int keep = m_MakefileVariableSize - 8;
+    int size = keep + 3;
+    std::string str1 = s;
+    std::string str2 = s2;
+    // we must shorten the combined string by 4 charactors
+    // keep no more than 24 charactors from the second string
+    if(static_cast<int>(str2.size()) > keep)
+      {
+      str2 = str2.substr(0, keep);
+      }
+    if(static_cast<int>(str1.size()) + static_cast<int>(str2.size()) > size)
+      {
+      str1 = str1.substr(0, size - str2.size());
+      }
+    char buffer[5];
+    int ni = 0;
+    sprintf(buffer, "%04d", ni);
+    ret = str1 + str2 + buffer;
+    while(m_ShortMakeVariableMap.count(ret) && ni < 1000)
+      {
+      ++ni;
+      sprintf(buffer, "%04d", ni);
+      ret = str1 + str2 + buffer;
+      }
+    if(ni == 1000)
+      {
+      cmSystemTools::Error("Borland makefile variable length too long");
+      return unmodified;
+      }
+    // once an unused variable is found
+    m_ShortMakeVariableMap[ret] = "1";
+    }
+  // always make an entry into the unmodified to variable map
+  m_MakeVariableMap[unmodified] = ret;
+  return ret;
+}
+//============================================================================
 
 //----------------------------------------------------------------------------
 std::string

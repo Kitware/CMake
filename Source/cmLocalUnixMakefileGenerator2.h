@@ -17,7 +17,7 @@
 #ifndef cmLocalUnixMakefileGenerator2_h
 #define cmLocalUnixMakefileGenerator2_h
 
-#include "cmLocalUnixMakefileGenerator.h"
+#include "cmLocalGenerator.h"
 
 class cmCustomCommand;
 class cmDependInformation;
@@ -32,7 +32,7 @@ class cmSourceFile;
  * cmLocalUnixMakefileGenerator2 produces a LocalUnix makefile from its
  * member m_Makefile.
  */
-class cmLocalUnixMakefileGenerator2 : public cmLocalUnixMakefileGenerator
+class cmLocalUnixMakefileGenerator2 : public cmLocalGenerator
 {
 public:
   ///! Set cache only and recurse to false by default.
@@ -44,6 +44,42 @@ public:
       a target.  This is used to avoid errors on some make
       implementations.  */
   void SetEmptyCommand(const char* cmd);
+
+  /**
+   * Set to true if the shell being used is the windows shell.
+   * This controls if statements in the makefile and the SHELL variable.
+   * The default is false.
+   */
+  void SetWindowsShell(bool v)  {m_WindowsShell = v;}
+
+  /**
+   * Set the string used to include one makefile into another default
+   * is include.
+   */
+  void SetIncludeDirective(const char* s) { m_IncludeDirective = s; }
+
+  /**
+   * Set the flag used to keep the make program silent.
+   */
+  void SetMakeSilentFlag(const char* s) { m_MakeSilentFlag = s; }
+
+  /**
+   * Set max makefile variable size, default is 0 which means unlimited.
+   */
+  void SetMakefileVariableSize(int s) { m_MakefileVariableSize = s; }
+
+  /**
+   * If ignore lib prefix is true, then do not strip lib from the name
+   * of a library.
+   */
+  void SetIgnoreLibPrefix(bool s) { m_IgnoreLibPrefix = s; }
+
+  /**
+   * If true, then explicitly pass MAKEFLAGS on the make all target for makes
+   * that do not use environment variables.
+   *
+   */
+  void SetPassMakeflags(bool s){m_PassMakeflags = s;}
 
   /**
    * Generate the makefile for this directory. fromTheTop indicates if this
@@ -165,7 +201,8 @@ protected:
   std::string ConvertToFullPath(const std::string& localPath);
   std::string ConvertToRelativePath(const char* p);
   std::string ConvertToRelativeOutputPath(const char* p);
-  virtual void ConfigureOutputPaths();
+  void ConfigureOutputPaths();
+  void FormatOutputPath(std::string& path, const char* name);
   bool ComparePath(const char* c1, const char* c2);
 
   void AppendTargetDepends(std::vector<std::string>& depends,
@@ -181,6 +218,19 @@ protected:
                            const cmCustomCommand& cc);
   void AppendCleanCommand(std::vector<std::string>& commands,
                           const std::vector<std::string>& files);
+
+  //==========================================================================
+  void OutputEcho(std::ostream& fout, const char* msg);
+  bool SamePath(const char* path1, const char* path2);
+  std::string GetBaseTargetName(const cmTarget& t);
+  void GetLibraryNames(const cmTarget& t,
+                       std::string& name, std::string& soName,
+                       std::string& realName, std::string& baseName);
+  std::string ConvertToMakeTarget(const char* tgt);
+  std::string& CreateSafeUniqueObjectFileName(const char* sin);
+  std::string CreateMakeVariable(const char* sin, const char* s2in);
+  //==========================================================================
+
   std::string GetRecursiveMakeCall(const char* tgt);
   void WriteJumpAndBuildRules(std::ostream& makefileStream);
 
@@ -206,6 +256,19 @@ private:
 
   // Command used when a rule has no dependencies or commands.
   std::vector<std::string> m_EmptyCommands;
+
+  //==========================================================================
+  // Configuration settings.
+  int m_MakefileVariableSize;
+  std::map<cmStdString, cmStdString> m_MakeVariableMap;
+  std::map<cmStdString, cmStdString> m_ShortMakeVariableMap;
+  std::map<cmStdString, cmStdString> m_UniqueObjectNamesMap;
+  std::string m_IncludeDirective;
+  std::string m_MakeSilentFlag;
+  std::string m_ExecutableOutputPath;
+  std::string m_LibraryOutputPath;
+  bool m_PassMakeflags;
+  //==========================================================================
 
   // List of make rule files that need to be included by the makefile.
   std::vector<std::string> m_IncludeRuleFiles;
