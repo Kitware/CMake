@@ -63,7 +63,7 @@ void cmCursesStringWidget::OnReturn(cmCursesMainForm* fm, WINDOW*)
     }
 }
 
-void cmCursesStringWidget::OnType(int& key, cmCursesMainForm* fm, WINDOW* w)
+void cmCursesStringWidget::OnType(int& key, cmCursesMainForm* fm, WINDOW*)
 {
   form_driver(fm->GetForm(), key);
 }

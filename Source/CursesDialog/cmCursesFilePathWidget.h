@@ -17,9 +17,9 @@
 #ifndef __cmCursesFilePathWidget_h
 #define __cmCursesFilePathWidget_h
 
-#include "cmCursesStringWidget.h"
+#include "cmCursesPathWidget.h"
 
-class cmCursesFilePathWidget : public cmCursesStringWidget
+class cmCursesFilePathWidget : public cmCursesPathWidget
 {
 public:
   cmCursesFilePathWidget(int width, int height, int left, int top);

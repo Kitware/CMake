@@ -29,49 +29,6 @@ cmCursesPathWidget::cmCursesPathWidget(int width, int height,
   m_CurrentIndex = 0;
 }
 
-void GlobDirs(const std::string& fullPath,
-              std::vector<std::string>& files,
-              std::ofstream& of)
-{
-  if ( fullPath[fullPath.size()-1] != '*' )
-    {
-    files.push_back(fullPath);
-    return;
-    }
-  std::string path = cmSystemTools::GetFilenamePath(fullPath);
-  std::string ppath = cmSystemTools::GetFilenameName(fullPath);
-  ppath = ppath.substr(0, ppath.size()-1);
-  of << "Search in directory: " << path << std::endl;
-  of << "Search pattern: " << ppath << std::endl;
-
-  cmDirectory d;
-  if (d.Load(path.c_str()))
-    {
-    for (unsigned int i = 0; i < d.GetNumberOfFiles(); ++i)
-      {
-      if((std::string(d.GetFile(i)) != ".")
-         && (std::string(d.GetFile(i)) != ".."))
-        {
-        std::string fname = path;
-        fname +="/";
-        fname += d.GetFile(i);
-        std::string sfname = d.GetFile(i);
-        if(cmSystemTools::FileIsDirectory(fname.c_str()))
-          {
-          of << "Compare: " << sfname.substr(0, ppath.size()) << " and "
-             << ppath << std::endl;
-          if ( sfname.size() >= ppath.size() && 
-               sfname.substr(0, ppath.size()) == 
-               ppath )
-            {
-            files.push_back(fname);
-            }
-          }
-        }
-      }
-    }
-}
-
 void cmCursesPathWidget::OnType(int& key, cmCursesMainForm* fm, WINDOW* w)
 {
   m_Cycle = false;
@@ -82,7 +39,6 @@ void cmCursesPathWidget::OnType(int& key, cmCursesMainForm* fm, WINDOW* w)
 
 void cmCursesPathWidget::OnTab(cmCursesMainForm* fm, WINDOW* w)
 {
-  std::ofstream of("lala.log");
   std::string::size_type cc;
   if ( !this->GetString() )
     {
@@ -93,28 +49,24 @@ void cmCursesPathWidget::OnTab(cmCursesMainForm* fm, WINDOW* w)
   form_driver(form, REQ_PREV_FIELD);
   std::string cstr = this->GetString();
   cstr = cstr.substr(0, cstr.find_last_not_of(" \t\n\r")+1);
-  of << "Cstr: " << cstr << " <> " << m_LastString << std::endl;
   if ( m_LastString != cstr )
     {
     m_Cycle = false;
     m_CurrentIndex = 0;
     m_LastGlob = "";
-    of << "Reset" << std::endl;
     }
   std::string glob;
   if ( m_Cycle )
     {
-    of << "We are cycling, try same glob" << std::endl;
     glob = m_LastGlob;
     }
   else
     {
     glob = cstr + "*";
-    of << "Try new glob: " << glob << std::endl;
     }
   std::vector<std::string> dirs;
 
-  ::GlobDirs(glob.c_str(), dirs, of);
+  cmSystemTools::SimpleGlob(glob.c_str(), dirs, (m_Type == cmCacheManager::PATH?-1:0));
   if ( m_CurrentIndex < dirs.size() )
     {
     cstr = dirs[m_CurrentIndex];
@@ -124,12 +76,6 @@ void cmCursesPathWidget::OnTab(cmCursesMainForm* fm, WINDOW* w)
     cstr = cstr.substr(0, cstr.size()-1);
     }
 
-  of << "Glob: " << glob << std::endl;
-  for ( cc =0; cc < dirs.size(); cc ++ )
-    {
-    of << "\t" << cc << ": " << dirs[cc] << std::endl;
-    }
-  
   this->SetString(cstr.c_str());
   touchwin(w); 
   wrefresh(w); 
