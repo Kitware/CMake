@@ -547,6 +547,11 @@ public:
    */
   void ExpandArguments(std::vector<cmListFileArgument> const& inArgs,
                        std::vector<std::string>& outArgs);
+  /**
+   * Get the instance
+   */ 
+  cmake *GetCMakeInstance() const;
+
 protected:
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(const char* name, cmTarget& target);
@@ -608,11 +613,6 @@ private:
   void PrintStringVector(const char* s, const std::vector<std::string>& v) const;
   void AddDefaultDefinitions();
   std::list<cmFunctionBlocker *> m_FunctionBlockers;
-
-  /**
-   * Get the instance
-   */ 
-  cmake *GetCMakeInstance() const;
 
   typedef std::map<cmStdString, cmData*> DataMap;
   DataMap m_DataMap;

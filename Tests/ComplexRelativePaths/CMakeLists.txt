@@ -236,3 +236,4 @@ ENDIF(NOT STRING_REGEX_PASSED)
 #
 SUBDIRS(Library Executable)
 SUBDIR_DEPENDS(Executable Library)
+EXPORT_LIBRARY_DEPENDENCIES(${Complex_BINARY_DIR}/ComplexLibraryDepends.cmake)

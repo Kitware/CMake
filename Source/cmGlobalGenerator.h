@@ -98,6 +98,8 @@ public:
     return this->m_CMakeInstance; };
 
   void SetConfiguredFilesPath(const char* s){m_ConfiguredFilesPath = s;}
+  void GetLocalGenerators(std::vector<cmLocalGenerator *>&g) { g = m_LocalGenerators;}
+  
 protected:
   cmStdString m_FindMakeProgramFile;
   cmStdString m_ConfiguredFilesPath;
