@@ -28,6 +28,7 @@ class cmCTest
 {
 public:
   typedef std::vector<cmStdString> tm_VectorOfStrings;
+  typedef std::vector<cmListFileArgument> tm_VectorOfListFileArgs;
 
   ///! Process Command line arguments
   int Run(std::vector<std::string>const&, std::string* output = 0);
@@ -243,7 +244,6 @@ private:
     std::string m_PostContext;
   };
 
-  typedef std::vector<cmListFileArgument> tm_VectorOfListFileArgs;
   struct cmCTestTestProperties
     {
     cmStdString Name;
