@@ -206,7 +206,7 @@ void cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalXCodeGenerator::CreateXCodeObjects(cmLocalGenerator* root,
+void cmGlobalXCodeGenerator::CreateXCodeObjects(cmLocalGenerator* ,
                                                 std::vector<cmLocalGenerator*>&
                                                 generators
                                                 )
