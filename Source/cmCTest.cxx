@@ -4344,6 +4344,18 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
             else
               {
               failed.push_back(tryPath);
+              std::string filepath = cmSystemTools::GetFilenamePath(m_TestCommand);
+              std::string filename = cmSystemTools::GetFilenameName(m_TestCommand);
+              tryPath = filepath + "/" + m_ConfigType + "/" + filepath;
+              if ( cmSystemTools::FileExists(tryPath.c_str()) &&
+                !cmSystemTools::FileIsDirectory(tryPath.c_str()) )
+                {
+                fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
+                }
+              else
+                {
+                failed.push_back(tryPath);
+                }
               }
             }
           }
