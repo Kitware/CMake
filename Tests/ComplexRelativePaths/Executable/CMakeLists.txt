@@ -27,6 +27,22 @@ ELSE(UNIX)
   ENDIF(NOT BORLAND)
 ENDIF (UNIX)
 
+# Test pre-build/pre-link/post-build rules for an executable.
+ADD_CUSTOM_COMMAND(TARGET complex PRE_BUILD
+                   COMMAND ${CREATE_FILE_EXE}
+                   ARGS "${Complex_BINARY_DIR}/Executable/prebuild.txt")
+ADD_CUSTOM_COMMAND(TARGET complex PRE_BUILD
+                   COMMAND ${CREATE_FILE_EXE}
+                   ARGS "${Complex_BINARY_DIR}/Executable/prelink.txt")
+ADD_CUSTOM_COMMAND(TARGET complex POST_BUILD
+                   COMMAND ${CREATE_FILE_EXE}
+                   ARGS "${Complex_BINARY_DIR}/Executable/postbuild.txt")
+ADD_CUSTOM_COMMAND(TARGET complex POST_BUILD
+                   COMMAND ${CMAKE_COMMAND}
+                   ARGS -E copy
+                        "${Complex_BINARY_DIR}/Executable/postbuild.txt"
+                        "${Complex_BINARY_DIR}/Executable/postbuild2.txt")
+
 SET_SOURCE_FILES_PROPERTIES(complex
   COMPILE_FLAGS "-DFILE_HAS_EXTRA_COMPILE_FLAGS"
   OBJECT_DEPENDS ${Complex_BINARY_DIR}/cmTestGeneratedHeader.h

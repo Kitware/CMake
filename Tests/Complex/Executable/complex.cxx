@@ -734,16 +734,24 @@ int main()
 #endif
 
   // ----------------------------------------------------------------------
-  // A post-build custom-command has been attached to the lib (see Library/).
-  // It runs ${CREATE_FILE_EXE} which will create a file.
-  // It also copies that file again using CCOMMAND.
+  // Some pre-build/pre-link/post-build custom-commands have been
+  // attached to the lib (see Library/).
+  // Each runs ${CREATE_FILE_EXE} which will create a file.
+  // It also copies that file again using cmake -E.
+  // Similar rules have been added to this executable.
   //
   // WARNING: if you run 'complex' manually, this *will* fail, because
   // the file was removed the last time 'complex' was run, and it is
   // only created during a build.
 
+  TestAndRemoveFile(BINARY_DIR "/Library/prebuild.txt");
+  TestAndRemoveFile(BINARY_DIR "/Library/prelink.txt");
   TestAndRemoveFile(BINARY_DIR "/Library/postbuild.txt");
   TestAndRemoveFile(BINARY_DIR "/Library/postbuild2.txt");
+  TestAndRemoveFile(BINARY_DIR "/Executable/prebuild.txt");
+  TestAndRemoveFile(BINARY_DIR "/Executable/prelink.txt");
+  TestAndRemoveFile(BINARY_DIR "/Executable/postbuild.txt");
+  TestAndRemoveFile(BINARY_DIR "/Executable/postbuild2.txt");
 
   // ----------------------------------------------------------------------
   // A custom target has been created (see Library/).

@@ -55,21 +55,26 @@ ENDIF(${FOO_BAR_VAR} MATCHES "BAR")
 
 
 #
-# Attach a post-build custom-command to the lib.
-# It runs ${CREATE_FILE_EXE} which will create a file.
+# Attach pre-build/pre-link/post-build custom-commands to the lib.
+# Each runs ${CREATE_FILE_EXE} which will create a file.
 # The 'complex' executable will then test if this file exists and remove it.
 #
 ADD_DEPENDENCIES(CMakeTestLibraryShared create_file)
 MESSAGE("complex bin dir is ${Complex_BINARY_DIR}")
-ADD_CUSTOM_COMMAND(COMMAND ${CREATE_FILE_EXE}
-                   ARGS "${Complex_BINARY_DIR}/Library/postbuild.txt"
-                   TARGET CMakeTestLibraryShared)
-
-ADD_CUSTOM_COMMAND(COMMAND ${CMAKE_COMMAND}
+ADD_CUSTOM_COMMAND(TARGET CMakeTestLibraryShared PRE_BUILD
+                   COMMAND ${CREATE_FILE_EXE}
+                   ARGS "${Complex_BINARY_DIR}/Library/prebuild.txt")
+ADD_CUSTOM_COMMAND(TARGET CMakeTestLibraryShared PRE_BUILD
+                   COMMAND ${CREATE_FILE_EXE}
+                   ARGS "${Complex_BINARY_DIR}/Library/prelink.txt")
+ADD_CUSTOM_COMMAND(TARGET CMakeTestLibraryShared POST_BUILD
+                   COMMAND ${CREATE_FILE_EXE}
+                   ARGS "${Complex_BINARY_DIR}/Library/postbuild.txt")
+ADD_CUSTOM_COMMAND(TARGET CMakeTestLibraryShared POST_BUILD
+                   COMMAND ${CMAKE_COMMAND}
                    ARGS -E copy
                         "${Complex_BINARY_DIR}/Library/postbuild.txt"
-                        "${Complex_BINARY_DIR}/Library/postbuild2.txt"
-                   TARGET CMakeTestLibraryShared)
+                        "${Complex_BINARY_DIR}/Library/postbuild2.txt")
 
 #
 # Add a custom target.
