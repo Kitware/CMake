@@ -25,6 +25,7 @@ char **argv;
   int done;
 
   mydisplay=XOpenDisplay("");
+/*
   myscreen=DefaultScreen(mydisplay);
   myforeground=BlackPixel(mydisplay, myscreen);
 
@@ -34,6 +35,7 @@ char **argv;
                                myhint.height, 5,
                                myforeground, mybackground );
   XDestroyWindow(mydisplay, mywindow);
+*/
   XCloseDisplay(mydisplay);
   exit(0);
 }
