@@ -979,6 +979,7 @@ WriteCustomRule(std::ostream& fout,
         {
         dep = cmSystemTools::GetFilenameWithoutLastExtension(dep);
         }
+      // check to see if the dependency is another target built by cmake
       std::string libPath = dep + "_CMAKE_PATH";
       const char* cacheValue = m_Makefile->GetDefinition(libPath.c_str());
       if (cacheValue && *cacheValue)
@@ -997,7 +998,7 @@ WriteCustomRule(std::ostream& fout,
           libPath = cacheValue;
           }
         libPath += "/";
-        libPath += "$(INTDIR)";
+        libPath += "$(INTDIR)/";
         libPath += dep;
         libPath += ".exe";
         fout << this->ConvertToXMLOutputPath(libPath.c_str())
