@@ -1176,6 +1176,12 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
     {
     this->ReadListFile(pre_load.c_str());
     }
+  pre_load = this->GetHomeOutputDirectory();
+  pre_load += "/PreLoad.cmake";
+  if ( cmSystemTools::FileExists(pre_load.c_str()) )
+    {
+    this->ReadListFile(pre_load.c_str());
+    }
  
   std::string systemFile = this->GetHomeOutputDirectory();
   systemFile += "/CMakeSystem.cmake";
