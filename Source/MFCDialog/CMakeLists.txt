@@ -5,6 +5,7 @@ CMakeSetupDialog.cpp
 PathDialog.cpp
 PropertyList.cpp
 StdAfx.cpp
+CMakeCommandLineInfo.cpp
 res/CMakeSetupDialog.ico
 res/CMakeSetupDialog.rc2
 )
