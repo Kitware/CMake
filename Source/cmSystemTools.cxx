@@ -64,7 +64,9 @@ const char* cmSystemTools::GetWindows9xComspecSubstitute()
 }
 
 void (*cmSystemTools::s_ErrorCallback)(const char*, const char*, bool&, void*);
+void (*cmSystemTools::s_StdoutCallback)(const char*, int len, void*);
 void* cmSystemTools::s_ErrorCallbackClientData = 0;
+void* cmSystemTools::s_StdoutCallbackClientData = 0;
 
 // replace replace with with as many times as it shows up in source.
 // write the result into source.
@@ -219,6 +221,37 @@ void cmSystemTools::SetErrorCallback(ErrorCallback f, void* clientData)
 {
   s_ErrorCallback = f;
   s_ErrorCallbackClientData = clientData;
+}
+
+void cmSystemTools::SetStdoutCallback(StdoutCallback f, void* clientData)
+{
+  s_StdoutCallback = f;
+  s_StdoutCallbackClientData = clientData;
+}
+
+void cmSystemTools::Stdout(const char* s)
+{
+  if(s_StdoutCallback)
+    {
+    (*s_StdoutCallback)(s, strlen(s), s_StdoutCallbackClientData);
+    }
+  else
+    {
+    std::cout << s;
+    std::cout << std::flush;
+    }
+}
+
+void cmSystemTools::Stdout(const char* s, int length)
+{
+  if(s_StdoutCallback)
+    {
+    (*s_StdoutCallback)(s, length, s_StdoutCallbackClientData);
+    }
+  else
+    {
+    std::cout.write(s, length);
+    }
 }
 
 void cmSystemTools::Message(const char* m1, const char *title)
@@ -411,7 +444,7 @@ bool cmSystemTools::RunSingleCommand(
       }
     if(verbose)
       {
-      std::cout.write(data, length);
+      cmSystemTools::Stdout(data, length);
       }
     }
   
@@ -590,7 +623,9 @@ bool RunCommandViaPopen(const char* command,
   char buffer[BUFFER_SIZE];
   if(verbose)
     {
-    std::cout << "running " << command << std::endl;
+    cmSystemTools::Stdout("running ");
+    cmSystemTools::Stdout(command);
+    cmSystemTools::Stdout("\n");
     }
   fflush(stdout);
   fflush(stderr);
@@ -604,7 +639,7 @@ bool RunCommandViaPopen(const char* command,
     {
     if(verbose)
       {
-      std::cout << buffer << std::flush;
+      cmSystemTools::Stdout(buffer);
       }
     output += buffer;
     fgets(buffer, BUFFER_SIZE, cpipe);

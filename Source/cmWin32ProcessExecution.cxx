@@ -220,7 +220,7 @@ bool cmWin32ProcessExecution::BorlandRunCommand(
           output += buf;
           if (verbose)
             {
-            std::cout << buf << std::flush; 
+            cmSystemTools::Stdout(buf);
             }
           }
         }
@@ -230,7 +230,7 @@ bool cmWin32ProcessExecution::BorlandRunCommand(
         output += buf;
         if(verbose) 
           {
-          std::cout << buf << std::flush;
+          cmSystemTools::Stdout(buf);
           }
  
         }
@@ -791,7 +791,7 @@ bool cmWin32ProcessExecution::PrivateClose(int /* timeout */)
       buffer[len] = 0;
       if ( m_Verbose )
         {
-        std::cout << buffer << std::flush;
+        cmSystemTools::Stdout(buffer);
         }
       output += buffer;
       have_some = true;
@@ -803,7 +803,7 @@ bool cmWin32ProcessExecution::PrivateClose(int /* timeout */)
       buffer[len] = 0;
       if ( m_Verbose )
         {
-        std::cout << buffer << std::flush;
+        cmSystemTools::Stdout(buffer);
         }
       output += buffer;
       have_some = true;

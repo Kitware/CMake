@@ -26,6 +26,9 @@ class cmCTest
 public:
   typedef std::vector<cmStdString> tm_VectorOfStrings;
 
+  ///! Process Command line arguments
+  int Run(std::vector<std::string>const&, std::string* output = 0);
+  
   /**
    * Run a dashboard using a specified confiuration script
    */
@@ -289,6 +292,21 @@ private:
 
   int                     m_CompatibilityMode;
 
+  // information for the --build-and-test options
+  std::string              m_ExecutableDirectory;
+  std::string              m_CMakeSelf;
+  std::string              m_CTestSelf;
+  std::string              m_SourceDir;
+  std::string              m_BinaryDir;
+  std::string              m_BuildGenerator;
+  std::string              m_BuildMakeProgram;
+  std::string              m_BuildProject;
+  std::string              m_BuildTarget;
+  std::vector<std::string> m_BuildOptions;
+  std::string              m_TestCommand;
+  std::vector<std::string> m_TestCommandArgs;
+  bool                     m_BuildTwoConfig;
+  bool                     m_BuildNoClean;
   std::string             m_NotesFiles;
 
   //! Reread the configuration file
@@ -335,8 +353,12 @@ private:
   bool ProcessMemCheckValgrindOutput(const std::string& str, std::string& log, int* results);
   bool ProcessMemCheckPurifyOutput(const std::string& str, std::string& log, int* results);
 
-  //! Initialize memory checking subsystem.
+  ///! Run CMake and build a test and then run it as a single test.
+  int RunCMakeAndTest(std::string* output);
+  ///! Initialize memory checking subsystem.
   bool InitializeMemoryChecking();
+  ///! Find the running cmake
+  void FindRunningCMake(const char* arg0);
 };
 
 #endif

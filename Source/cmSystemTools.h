@@ -81,6 +81,12 @@ public:
    */
   static void Message(const char* m, const char* title=0);
 
+  ///! Send a string to stdout
+  static void Stdout(const char* s);
+  static void Stdout(const char* s, int length);
+  typedef  void (*StdoutCallback)(const char*, int length, void*);
+  static void SetStdoutCallback(StdoutCallback, void* clientData=0);
+
   ///! Return true if there was an error at any point.
   static bool GetErrorOccuredFlag() 
     {
@@ -258,7 +264,9 @@ private:
   static bool s_DisableMessages;
   static bool s_DisableRunCommandOutput;
   static ErrorCallback s_ErrorCallback;
+  static StdoutCallback s_StdoutCallback;
   static void* s_ErrorCallbackClientData;
+  static void* s_StdoutCallbackClientData;
 
   static std::string s_Windows9xComspecSubstitute;
 };

@@ -532,6 +532,14 @@ int cmake::AddCMakePaths(const char *arg0)
     editCacheCommand = cmSystemTools::GetFilenamePath(cMakeSelf) +
       "/CMakeSetup" + cmSystemTools::GetFilenameExtension(cMakeSelf);
     }
+  std::string ctestCommand = cmSystemTools::GetFilenamePath(cMakeSelf) +
+    "/ctest" + cmSystemTools::GetFilenameExtension(cMakeSelf);
+  if(cmSystemTools::FileExists(ctestCommand.c_str()))
+    {
+    this->m_CacheManager->AddCacheEntry
+      ("CMAKE_CTEST_COMMAND", ctestCommand.c_str(),
+       "Path to ctest program executable.", cmCacheManager::INTERNAL);
+    }
   if(cmSystemTools::FileExists(editCacheCommand.c_str()))
     {
     this->m_CacheManager->AddCacheEntry
