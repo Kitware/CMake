@@ -586,6 +586,11 @@ void cmMakefile::AddCacheDefinition(const char* name, bool value, const char* do
   this->AddDefinition(name, value);
 }
 
+void cmMakefile::RemoveDefinition(const char* name)
+{
+  m_Definitions.erase(DefinitionMap::key_type(name));
+}
+
 void cmMakefile::SetProjectName(const char* p)
 {
   m_ProjectName = p;

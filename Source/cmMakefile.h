@@ -200,6 +200,12 @@ public:
   void AddCacheDefinition(const char* name, bool, const char* doc);
 
   /**
+   * Remove a variable definition from the build.  This is not valid
+   * for cache entries, and will only affect the current makefile.
+   */
+  void RemoveDefinition(const char* name);
+  
+  /**
    * Specify the name of the project for this build.
    */
   void SetProjectName(const char*);
