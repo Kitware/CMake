@@ -164,6 +164,11 @@ protected:
                               const char* command2 = 0,
                               const char* command3 = 0,
                               const char* command4 = 0);
+  virtual void OutputBuildTargetInDirWindows(std::ostream& fout,
+                                      const char* path,
+                                      const char* library,
+                                      const char* fullpath,
+                                      const char* outputPath);
   virtual void OutputBuildTargetInDir(std::ostream& fout,
                                       const char* path,
                                       const char* library,

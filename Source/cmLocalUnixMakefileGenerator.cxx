@@ -1222,12 +1222,41 @@ void cmLocalUnixMakefileGenerator::OutputDependLibs(std::ostream& fout)
     }
 }
 
+void cmLocalUnixMakefileGenerator::OutputBuildTargetInDirWindows(std::ostream& fout,
+                                                                 const char* path,
+                                                                 const char* library,
+                                                                 const char* fullpath,
+                                                                 const char* libOutPath)
+{
+  const char* makeTarget = library;
+  std::string currentDir = 
+    cmSystemTools::ConvertToOutputPath(m_Makefile->GetCurrentOutputDirectory());
+  std::string wpath = cmSystemTools::ConvertToOutputPath(path);
+  std::string wfullpath = cmSystemTools::ConvertToOutputPath(fullpath);
+  if(libOutPath && strcmp( libOutPath, "" ) != 0)
+    {
+    makeTarget = wfullpath.c_str();
+    }
+  fout << wfullpath
+       << ":\n\tcd " << wpath  << "\n"
+       << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.depends\n"
+       << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) cmake.check_depends\n"
+       << "\t$(MAKE) -$(MAKEFLAGS) $(MAKESILENT) -f cmake.check_depends\n"
+       << "\t$(MAKE) $(MAKESILENT) " << makeTarget
+       << "\n\tcd " << currentDir << "\n";
+}
+
 void cmLocalUnixMakefileGenerator::OutputBuildTargetInDir(std::ostream& fout,
                                                      const char* path,
                                                      const char* library,
                                                      const char* fullpath,
                                                      const char* outputPath)
 {
+  if(m_WindowsShell)
+    {
+    this->OutputBuildTargetInDirWindows(fout, path, library, fullpath, outputPath);
+    return;
+    }
   const char* makeTarget = library;
   if(outputPath && strcmp( outputPath, "" ) != 0)
     {
