@@ -186,7 +186,7 @@ Curl_cookie_add(struct CookieInfo *c,
           }
           else if(strequal("domain", name)) {
             co->domain=strdup(whatptr);
-            co->field1= (whatptr[0]=='.')?2:1;
+            co->field1= (char)((whatptr[0]=='.')?2:1);
           }
           else if(strequal("version", name)) {
             co->version=strdup(whatptr);
@@ -314,7 +314,7 @@ Curl_cookie_add(struct CookieInfo *c,
 
            We don't currently take advantage of this knowledge.
         */
-        co->field1=strequal(ptr, "TRUE")+1; /* store information */
+        co->field1=(char)(strequal(ptr, "TRUE")+1); /* store information */
         break;
       case 2:
         /* It turns out, that sometimes the file format allows the path
@@ -330,7 +330,7 @@ Curl_cookie_add(struct CookieInfo *c,
         fields++; /* add a field and fall down to secure */
         /* FALLTHROUGH */
       case 3:
-        co->secure = strequal(ptr, "TRUE");
+        co->secure = (bool)strequal(ptr, "TRUE");
         break;
       case 4:
         co->expires = atoi(ptr);

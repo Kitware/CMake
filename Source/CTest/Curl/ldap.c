@@ -108,6 +108,7 @@ static void DynaClose(void)
 static void * DynaGetFunction(const char *name)
 {
   void *func = NULL;
+  (void)name;
 
 #if defined(HAVE_DLOPEN) || defined(HAVE_LIBDL)
   if (libldap) {

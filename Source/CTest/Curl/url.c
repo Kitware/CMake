@@ -336,7 +336,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
         Curl_global_host_cache_init();
       }
 
-      data->set.global_dns_cache = use_cache;
+      data->set.global_dns_cache = (bool)use_cache;
     }
     break;
   case CURLOPT_SSL_CIPHER_LIST:
@@ -398,33 +398,33 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      * When this transfer is done, it must not be left to be reused by a
      * subsequent transfer but shall be closed immediately.
      */
-    data->set.reuse_forbid = va_arg(param, long)?TRUE:FALSE;
+    data->set.reuse_forbid = (bool)(va_arg(param, long)?TRUE:FALSE);
     break;
   case CURLOPT_FRESH_CONNECT:
     /*
      * This transfer shall not use a previously cached connection but
      * should be made with a fresh new connect!
      */
-    data->set.reuse_fresh = va_arg(param, long)?TRUE:FALSE;
+    data->set.reuse_fresh = (bool)(va_arg(param, long)?TRUE:FALSE);
     break;
   case CURLOPT_VERBOSE:
     /*
      * Verbose means infof() calls that give a lot of information about
      * the connection and transfer procedures as well as internal choices.
      */
-    data->set.verbose = va_arg(param, long)?TRUE:FALSE;
+    data->set.verbose = (bool)(va_arg(param, long)?TRUE:FALSE);
     break;
   case CURLOPT_HEADER:
     /*
      * Set to include the header in the general data output stream.
      */
-    data->set.http_include_header = va_arg(param, long)?TRUE:FALSE;
+    data->set.http_include_header = (bool)(va_arg(param, long)?TRUE:FALSE);
     break;
   case CURLOPT_NOPROGRESS:
     /*
      * Shut off the internal supported progress meter
      */
-    data->set.hide_progress = va_arg(param, long)?TRUE:FALSE;
+    data->set.hide_progress = (bool)(va_arg(param, long)?TRUE:FALSE);
     if(data->set.hide_progress)
       data->progress.flags |= PGRS_HIDE;
     else
@@ -434,20 +434,20 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     /*
      * Do not include the body part in the output data stream.
      */
-    data->set.no_body = va_arg(param, long)?TRUE:FALSE;
+    data->set.no_body = (bool)(va_arg(param, long)?TRUE:FALSE);
     break;
   case CURLOPT_FAILONERROR:
     /*
      * Don't output the >=300 error code HTML-page, but instead only
      * return error.
      */
-    data->set.http_fail_on_error = va_arg(param, long)?TRUE:FALSE;
+    data->set.http_fail_on_error = (bool)(va_arg(param, long)?TRUE:FALSE);
     break;
   case CURLOPT_UPLOAD:
     /*
      * We want to sent data to the remote host
      */
-    data->set.upload = va_arg(param, long)?TRUE:FALSE;
+    data->set.upload = (bool)(va_arg(param, long)?TRUE:FALSE);
     if(data->set.upload)
       /* If this is HTTP, PUT is what's needed to "upload" */
       data->set.httpreq = HTTPREQ_PUT;
@@ -457,20 +457,20 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      * Try to get the file time of the remote document. The time will
      * later (possibly) become available using curl_easy_getinfo().
      */
-    data->set.get_filetime = va_arg(param, long)?TRUE:FALSE;
+    data->set.get_filetime = (bool)(va_arg(param, long)?TRUE:FALSE);
     break;
   case CURLOPT_FTPLISTONLY:
     /*
      * An FTP option that changes the command to one that asks for a list
      * only, no file info details.
      */
-    data->set.ftp_list_only = va_arg(param, long)?TRUE:FALSE;
+    data->set.ftp_list_only = (bool)(va_arg(param, long)?TRUE:FALSE);
     break;
   case CURLOPT_FTPAPPEND:
     /*
      * We want to upload and append to an existing (FTP) file.
      */
-    data->set.ftp_append = va_arg(param, long)?TRUE:FALSE;
+    data->set.ftp_append = (bool)(va_arg(param, long)?TRUE:FALSE);
     break;
   case CURLOPT_NETRC:
     /*
@@ -482,7 +482,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     /*
      * Follow Location: header hints on a HTTP-server.
      */
-    data->set.http_follow_location = va_arg(param, long)?TRUE:FALSE;
+    data->set.http_follow_location = (bool)(va_arg(param, long)?TRUE:FALSE);
     break;
   case CURLOPT_HTTP_VERSION:
     /*
@@ -498,7 +498,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      *
      * Transfer using ASCII (instead of BINARY).
      */
-    data->set.ftp_ascii = va_arg(param, long)?TRUE:FALSE;
+    data->set.ftp_ascii = (bool)(va_arg(param, long)?TRUE:FALSE);
     break;
   case CURLOPT_PUT:
     /*
@@ -607,11 +607,11 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      * Use FTP PORT, this also specifies which IP address to use
      */
     data->set.ftpport = va_arg(param, char *);
-    data->set.ftp_use_port = data->set.ftpport?1:0;
+    data->set.ftp_use_port = (bool)(data->set.ftpport?TRUE:FALSE);
     break;
 
   case CURLOPT_FTP_USE_EPSV:
-    data->set.ftp_use_epsv = va_arg(param, long)?TRUE:FALSE;
+    data->set.ftp_use_epsv = (bool)(va_arg(param, long)?TRUE:FALSE);
     break;
 
   case CURLOPT_HTTPHEADER:
@@ -733,7 +733,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     /*
      * Switch on automatic referer that gets set if curl follows locations.
      */
-    data->set.http_auto_referer = va_arg(param, long)?1:0;
+    data->set.http_auto_referer = (bool)(va_arg(param, long)?TRUE:FALSE);
     break;
   case CURLOPT_PROXY:
     /*
@@ -759,7 +759,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     /*
      * Tunnel operations through the proxy instead of normal proxy use
      */
-    data->set.tunnel_thru_httpproxy = va_arg(param, long)?TRUE:FALSE;
+    data->set.tunnel_thru_httpproxy = (bool)(va_arg(param, long)?TRUE:FALSE);
     break;
   case CURLOPT_PROXYPORT:
     /*
@@ -1001,7 +1001,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     /*
      * Kludgy option to enable CRLF convertions. Subject for removal.
      */
-    data->set.crlf = va_arg(param, long)?TRUE:FALSE;
+    data->set.crlf = (bool)(va_arg(param, long)?TRUE:FALSE);
     break;
   case CURLOPT_INTERFACE:
     /*
@@ -1015,7 +1015,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      * A string that defines the krb4 security level.
      */
     data->set.krb4_level = va_arg(param, char *);
-    data->set.krb4=data->set.krb4_level?TRUE:FALSE;
+    data->set.krb4=(bool)(data->set.krb4_level?TRUE:FALSE);
     break;
   case CURLOPT_SSL_VERIFYPEER:
     /*
@@ -1067,7 +1067,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      * The application asks not to set any signal() or alarm() handlers,
      * even when using a timeout.
      */
-    data->set.no_signal = va_arg(param, long) ? TRUE : FALSE;
+    data->set.no_signal = (bool)(va_arg(param, long) ? TRUE : FALSE);
     break;
 
   case CURLOPT_SHARE:
@@ -1766,21 +1766,22 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   conn->firstsocket = -1;     /* no file descriptor */
   conn->secondarysocket = -1; /* no file descriptor */
   conn->connectindex = -1;    /* no index */
-  conn->bits.httpproxy = (data->change.proxy && *data->change.proxy &&
+  conn->bits.httpproxy = (bool)((data->change.proxy && *data->change.proxy &&
                           (data->set.proxytype == CURLPROXY_HTTP))?
-    TRUE:FALSE; /* http proxy or not */
-  conn->bits.use_range = data->set.set_range?TRUE:FALSE; /* range status */
+    TRUE:FALSE); /* http proxy or not */
+  conn->bits.use_range = (bool)(data->set.set_range?TRUE:FALSE); 
+                 /* range status */
   conn->range = data->set.set_range;              /* clone the range setting */
   conn->resume_from = data->set.set_resume_from;   /* inherite resume_from */
 
   /* Default protocol-independent behavior doesn't support persistant
      connections, so we set this to force-close. Protocols that support
      this need to set this to FALSE in their "curl_do" functions. */
-  conn->bits.close = TRUE;
+  conn->bits.close = (bool)TRUE;
 
   /* inherite initial knowledge from the data struct */
-  conn->bits.user_passwd = data->set.userpwd?1:0;
-  conn->bits.proxy_user_passwd = data->set.proxyuserpwd?1:0;
+  conn->bits.user_passwd = (bool)(data->set.userpwd?TRUE:FALSE);
+  conn->bits.proxy_user_passwd = (bool)(data->set.proxyuserpwd?TRUE:FALSE);
 
   /* maxdownload must be -1 on init, as 0 is a valid value! */
   conn->maxdownload = -1;  /* might have been used previously! */
@@ -1793,7 +1794,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
      is later set "for real" using Curl_pgrsStartNow(). */
   conn->data->progress.start = conn->created; 
 
-  conn->bits.upload_chunky =
+  conn->bits.upload_chunky = (bool)(
     ((conn->protocol&PROT_HTTP) &&
      data->set.upload &&
      (data->set.infilesize == -1) &&
@@ -1801,7 +1802,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     /* HTTP, upload, unknown file size and not HTTP 1.0 */
     TRUE:
   /* else, no chunky upload */
-  FALSE;
+  FALSE);
 
   conn->fread = data->set.fread;
   conn->fread_in = data->set.in;
@@ -2030,7 +2031,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
         /* Now, build <protocol>_proxy and check for such a one to use */
         while(*protop)
-          *envp++ = tolower(*protop++);
+          *envp++ = (char)tolower(*protop++);
 
         /* append _proxy */
         strcpy(envp, "_proxy");
@@ -2053,7 +2054,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
         if(!prox && !strequal("http_proxy", proxy_env)) {
           /* There was no lowercase variable, try the uppercase version: */
           for(envp = proxy_env; *envp; envp++)
-            *envp = toupper(*envp);
+            *envp = (char)toupper(*envp);
           prox=curl_getenv(proxy_env);
         }
 
@@ -2236,7 +2237,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     if(type) {
       char command;
       *type=0;                     /* it was in the middle of the hostname */
-      command = toupper(type[6]);
+      command = (char)toupper(type[6]);
       switch(command) {
       case 'A': /* ASCII mode */
         data->set.ftp_ascii = 1;

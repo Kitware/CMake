@@ -96,7 +96,7 @@ char *curl_unescape(const char *string, int length)
     if('%' == in) {
       /* encoded part */
       if(sscanf(string+1, "%02X", &hex)) {
-        in = hex;
+        in = (unsigned char)hex;
         string+=2;
         alloc-=2;
       }

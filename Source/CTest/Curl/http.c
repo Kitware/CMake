@@ -113,7 +113,7 @@ static int readmoredata(char *buffer,
     return 0;
   
   /* make sure that a HTTP request is never sent away chunked! */
-  conn->bits.forbidchunk= (http->sending == HTTPSEND_REQUEST)?TRUE:FALSE;
+  conn->bits.forbidchunk=(bool)((http->sending==HTTPSEND_REQUEST)?TRUE:FALSE);
 
   if(http->postsize <= fullsize) {
     memcpy(buffer, http->postdata, http->postsize);
@@ -716,7 +716,7 @@ CURLcode Curl_http(struct connectdata *conn)
   if(data->cookies) {
     co = Curl_cookie_getlist(data->cookies,
                              host, ppath,
-                             (conn->protocol&PROT_HTTPS?TRUE:FALSE));
+                             (bool)(conn->protocol&PROT_HTTPS?TRUE:FALSE));
   }
   if (data->change.proxy && *data->change.proxy &&
       !data->set.tunnel_thru_httpproxy &&

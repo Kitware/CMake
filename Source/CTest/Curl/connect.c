@@ -70,6 +70,7 @@
 #define EINPROGRESS WSAEINPROGRESS
 #define EWOULDBLOCK WSAEWOULDBLOCK
 #define EISCONN     WSAEISCONN
+#undef HAVE_DISABLED_NONBLOCKING
 #endif
 
 #include "urldata.h"
@@ -124,7 +125,7 @@ int Curl_nonblock(int socket,    /* operate on this */
 #ifdef HAVE_IOCTLSOCKET
   int flags;
   flags = nonblock;
-  return ioctlsocket(socket, FIONBIO, &flags);
+  return ioctlsocket(socket, FIONBIO, (unsigned long*)&flags);
 #define SETBLOCK 3
 #endif
 
@@ -326,6 +327,8 @@ static CURLcode bindlocal(struct connectdata *conn,
 #endif /* end of HAVE_INET_NTOA */
 #endif /* end of not WIN32 */
 
+  (void)conn;
+  (void)sockfd;
   return CURLE_HTTP_PORT_FAILED;
 }
 
