@@ -41,6 +41,7 @@ ADD_CUSTOM_COMMAND(
   TARGET SimpleInstall
   POST_BUILD
   COMMAND ${CMAKE_COMMAND}
-  ARGS ${EXTRA_INSTALL_FLAGS} -Pcmake_install.cmake
+  ARGS ${EXTRA_INSTALL_FLAGS} 
+    "-P${CMAKE_CURRENT_BINARY_DIR}/cmake_install.cmake"
   COMMENT "Install Project"
   )
