@@ -202,34 +202,39 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& argsIn)
 
   // try loading the shared library / dll
   cmLibHandle lib = cmDynamicLoader::OpenLibrary(fullPath.c_str());
-  if(lib)
+  if(!lib)
     {
-    // find the init function
-    std::string initFuncName = args[0] + "Init";
-    CM_INIT_FUNCTION initFunction
-      = (CM_INIT_FUNCTION)
-      cmDynamicLoader::GetSymbolAddress(lib, initFuncName.c_str());
-    if ( !initFunction )
-      {
-      initFuncName = "_";
-      initFuncName += args[0];
-      initFuncName += "Init";
-      initFunction = (CM_INIT_FUNCTION)(
-        cmDynamicLoader::GetSymbolAddress(lib, initFuncName.c_str()));
-      }
-    // if the symbol is found call it to set the name on the 
-    // function blocker
-    if(initFunction)
-      {
-      // create a function blocker and set it up
-      cmLoadedCommand *f = new cmLoadedCommand();
-      (*initFunction)(&f->info);
-      m_Makefile->AddCommand(f);
-      return true;
-      }
-    this->SetError("Attempt to load command failed. "
-                   "No init function found.");
+    std::string err = "Attempt to load the library ";
+    err += fullPath + " failed";
+    this->SetError(err.c_str());
+    return false;
     }
+  
+  // find the init function
+  std::string initFuncName = args[0] + "Init";
+  CM_INIT_FUNCTION initFunction
+    = (CM_INIT_FUNCTION)
+    cmDynamicLoader::GetSymbolAddress(lib, initFuncName.c_str());
+  if ( !initFunction )
+    {
+    initFuncName = "_";
+    initFuncName += args[0];
+    initFuncName += "Init";
+    initFunction = (CM_INIT_FUNCTION)(
+      cmDynamicLoader::GetSymbolAddress(lib, initFuncName.c_str()));
+    }
+  // if the symbol is found call it to set the name on the 
+  // function blocker
+  if(initFunction)
+    {
+    // create a function blocker and set it up
+    cmLoadedCommand *f = new cmLoadedCommand();
+    (*initFunction)(&f->info);
+    m_Makefile->AddCommand(f);
+    return true;
+    }
+  this->SetError("Attempt to load command failed. "
+                 "No init function found.");
   return false;
 }
 
