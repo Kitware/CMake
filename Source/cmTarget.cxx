@@ -134,21 +134,27 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
   // simply a set of libraries separated by ";". There should always
   // be a trailing ";". These library names are not canonical, in that
   // they may be "-framework x", "-ly", "/path/libz.a", etc.
-  std::string targetEntry = target;
-  targetEntry += "_LIB_DEPENDS";
-  std::string dependencies;
-  const char* old_val = mf.GetDefinition( targetEntry.c_str() );
-  if( old_val )
+  // only add depend information for library targets
+  if(m_TargetType >= STATIC_LIBRARY && m_TargetType <= MODULE_LIBRARY)
     {
-    dependencies += old_val;
+    std::string targetEntry = target;
+    targetEntry += "_LIB_DEPENDS";
+    std::string dependencies;
+    const char* old_val = mf.GetDefinition( targetEntry.c_str() );
+    if( old_val )
+      {
+      dependencies += old_val;
+      }
+    if( dependencies.find( lib ) == std::string::npos )
+      {
+      dependencies += lib;
+      dependencies += ";";
+      }
+    mf.AddCacheDefinition( targetEntry.c_str(), dependencies.c_str(),
+                           "Dependencies for the target", 
+                           cmCacheManager::STATIC );
     }
-  if( dependencies.find( lib ) == std::string::npos )
-    {
-    dependencies += lib;
-    dependencies += ";";
-    }
-  mf.AddCacheDefinition( targetEntry.c_str(), dependencies.c_str(),
-                         "Dependencies for the target", cmCacheManager::STATIC );
+  
 }
 
 bool cmTarget::HasCxx() const

@@ -659,6 +659,14 @@ void cmMakefile::SetProjectName(const char* p)
 
 void cmMakefile::AddGlobalLinkInformation(const char* name, cmTarget& target)
 {
+  // for these targets do not add anything
+  switch(target.GetType())
+    {
+    case cmTarget::UTILITY:
+    case cmTarget::INSTALL_FILES:
+    case cmTarget::INSTALL_PROGRAMS:
+      return;
+    }
   std::vector<std::string>::iterator j;
   for(j = m_LinkDirectories.begin();
       j != m_LinkDirectories.end(); ++j)
@@ -766,7 +774,6 @@ void cmMakefile::AddExecutable(const char *exeName,
   target.SetInAll(true);
   target.GetSourceLists() = srcs;
   this->AddGlobalLinkInformation(exeName, target);
-
   m_Targets.insert(cmTargets::value_type(exeName,target));
   
   
