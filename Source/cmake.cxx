@@ -63,9 +63,6 @@
 #  include <sys/types.h>
 #  include <sys/time.h>
 #  include <sys/resource.h>
-#  if defined(CMAKE_BUILD_WITH_CMAKE)
-#    include "cmGlobalCodeWarriorGenerator.h"
-#  endif
 #endif
 
 #include <memory> // auto_ptr
@@ -1453,11 +1450,6 @@ void cmake::AddDefaultGenerators()
     &cmGlobalBorlandMakefileGenerator::New;
   m_Generators[cmGlobalNMakeMakefileGenerator::GetActualName()] =
     &cmGlobalNMakeMakefileGenerator::New;
-#else
-# if defined(__APPLE__) && defined(CMAKE_BUILD_WITH_CMAKE)
-  m_Generators[cmGlobalCodeWarriorGenerator::GetActualName()] =
-    &cmGlobalCodeWarriorGenerator::New;
-# endif
 #endif
   m_Generators[cmGlobalUnixMakefileGenerator::GetActualName()] =
     &cmGlobalUnixMakefileGenerator::New;

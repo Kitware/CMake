@@ -80,15 +80,6 @@ INCLUDE_DIRECTORIES(${CMake_SOURCE_DIR}/Source)
 # let cmake know it is supposed to use it
 ADD_DEFINITIONS(-DCMAKE_BUILD_WITH_CMAKE)
 
-IF (APPLE)
-  SET(SRCS ${SRCS}
-    cmGlobalCodeWarriorGenerator.cxx
-    cmLocalCodeWarriorGenerator.cxx
-    cmGlobalCodeWarriorGenerator.h
-    cmLocalCodeWarriorGenerator.h
-    )
-ENDIF (APPLE)
-
 # Kdevelop only works on UNIX and not windows
 IF(UNIX)
   SET(SRCS ${SRCS}
