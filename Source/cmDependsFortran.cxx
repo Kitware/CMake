@@ -265,10 +265,12 @@ bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
   // when the interface described in the module does not.
 
   std::string mod = args[2];
-  mod += ".mod";
   std::string stamp = args[3];
   std::string mod_upper = cmSystemTools::UpperCase(mod.c_str());
   std::string mod_lower = cmSystemTools::LowerCase(mod.c_str());
+  mod += ".mod";
+  mod_upper += ".mod";
+  mod_lower += ".mod";
 
   if(cmSystemTools::FileExists(mod_upper.c_str()))
     {
