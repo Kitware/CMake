@@ -67,7 +67,7 @@ bool cmIfFunctionBlocker::
 ShouldRemove(const char *name, const std::vector<std::string> &args, 
              cmMakefile &) 
 {
-  if (!strcmp(name,"ELSE") || !strcmp(name,"ENDIF"))
+  if (!strcmp(name,"ENDIF"))
     {
     if (args == m_Args)
       {
