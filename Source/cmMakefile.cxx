@@ -1209,6 +1209,12 @@ cmMakefile::FindSourceGroup(const char* source,
 bool cmMakefile::IsFunctionBlocked(const char *name,
                                    std::vector<std::string> const&args)
 {
+  // if there are no blockers get out of here
+  if (m_FunctionBlockers.begin() == m_FunctionBlockers.end())
+    {
+    return false;
+    }
+
   // loop over all function blockers to see if any block this command
   std::set<cmFunctionBlocker *>::const_iterator pos;
   std::vector<std::string> expandedArguments = args;
@@ -1334,10 +1340,12 @@ cmSourceFile* cmMakefile::GetSource(const char* sourceName) const
   for(std::vector<cmSourceFile*>::const_iterator i = m_SourceFiles.begin();
       i != m_SourceFiles.end(); ++i)
     {
-    if((*i)->GetSourceName() == s 
-       && (ext.size() == 0 || (ext == (*i)->GetSourceExtension())))
+    if ((*i)->GetSourceNameReference() == s)
       {
-      return *i;
+      if ((ext.size() == 0 || (ext == (*i)->GetSourceExtension())))
+        {
+        return *i;
+        }
       }
     }
   return 0;

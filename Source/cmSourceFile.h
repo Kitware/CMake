@@ -92,6 +92,7 @@ public:
    * (In most cases this is the name of the class.)
    */
   std::string GetSourceName() const {return m_SourceName;}
+  const std::string &GetSourceNameReference() const {return m_SourceName;}
   void SetSourceName(const char *name) {m_SourceName = name;}
 
   /**
