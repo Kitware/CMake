@@ -133,7 +133,6 @@ protected:
   virtual void OutputCustomRules(std::ostream&);
   virtual void OutputMakeVariables(std::ostream&);
   virtual void OutputMakeRules(std::ostream&);
-  virtual void OutputInstallRules(std::ostream&);
   virtual void OutputSourceObjectBuildRules(std::ostream& fout);
   virtual void OutputBuildObjectFromSource(std::ostream& fout,
                                            const char* shortName,

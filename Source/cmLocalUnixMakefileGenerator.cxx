@@ -300,7 +300,6 @@ void cmLocalUnixMakefileGenerator::OutputMakefile(const char* file,
     }
   this->OutputCustomRules(fout);
   this->OutputMakeRules(fout);
-  this->OutputInstallRules(fout);
   // only add the depend include if the depend file exists
   if(cmSystemTools::FileExists(dependName.c_str()))
     {
@@ -432,6 +431,7 @@ void cmLocalUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
   this->OutputEcho(fout,"... all (the default if no target is provided)");
   this->OutputEcho(fout,"... clean");
   this->OutputEcho(fout,"... depend");
+  this->OutputEcho(fout,"... install");
   this->OutputEcho(fout,"... rebuild_cache");
 
   // libraries
@@ -2124,10 +2124,6 @@ void cmLocalUnixMakefileGenerator::OutputSubDirectoryRules(std::ostream& fout)
                                "depend",
                                0, 0,
                                SubDirectories);
-  this->OutputSubDirectoryVars(fout, "SUBDIR_INSTALL", "install",
-                               "install",
-                               0, 0,
-                               SubDirectories);
 }
 
 // Output the depend information for all the classes 
@@ -2408,166 +2404,6 @@ void cmLocalUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
 }
 
 
-void cmLocalUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
-{
-  // Install is not currently supported on windows
-  if(m_WindowsShell)
-    {
-    return;
-    }
-  std::string cmakecommand = this->ConvertToOutputForExisting(
-    m_Makefile->GetDefinition("CMAKE_COMMAND"));
-
-  const char* root
-    = m_Makefile->GetDefinition("CMAKE_ROOT");
-  fout << "INSTALL = \"" << root << "/Templates/install-sh\" -c\n";
-  fout << "INSTALL_PROGRAM = $(INSTALL)\n";
-  fout << "INSTALL_DATA =    $(INSTALL) -m 644\n";
-  
-  const cmTargets &tgts = m_Makefile->GetTargets();
-  fout << "install: $(SUBDIR_INSTALL)\n";
-  fout << "\t@echo \"Installing ...\"\n";
-  
-  const char* prefix
-    = m_Makefile->GetDefinition("CMAKE_INSTALL_PREFIX");
-  if (!prefix)
-    {
-    prefix = "/usr/local";
-    }
-
-  for(cmTargets::const_iterator l = tgts.begin(); 
-      l != tgts.end(); l++)
-    {
-    if (l->second.GetInstallPath() != "")
-      {
-      // first make the directories for each target 
-      fout << "\t@if [ ! -d \"$(DESTDIR)" << prefix << l->second.GetInstallPath() << 
-        "\" ] ; then \\\n";
-      fout << "\t   echo \"Making directory \\\"$(DESTDIR)" << prefix 
-           << l->second.GetInstallPath() << "\\\" \"; \\\n";
-      fout << "\t   mkdir -p \"$(DESTDIR)" << prefix << l->second.GetInstallPath() 
-           << "\"; \\\n";
-      fout << "\t   chmod 755 \"$(DESTDIR)" <<  prefix << l->second.GetInstallPath() 
-           << "\"; \\\n";
-      fout << "\t else true; \\\n";
-      fout << "\t fi\n";
-      std::string fname;
-      // now install the target
-      switch (l->second.GetType())
-        {
-        case cmTarget::STATIC_LIBRARY:
-        case cmTarget::SHARED_LIBRARY:
-        case cmTarget::MODULE_LIBRARY:
-          {
-          std::string targetName;
-          std::string targetNameSO;
-          std::string targetNameReal;
-          std::string targetNameBase;
-          this->GetLibraryNames(l->first.c_str(), l->second,
-                                targetName, targetNameSO,
-                                targetNameReal, targetNameBase);
-          std::string installName = "$(DESTDIR)";
-          installName += prefix;
-          installName += l->second.GetInstallPath();
-          installName += "/";
-          std::string installNameSO = installName;
-          std::string installNameReal = installName;
-          installName += targetName;
-          installNameSO += targetNameSO;
-          installNameReal += targetNameReal;
-          fname = m_LibraryOutputPath;
-          fname += targetNameReal;
-          fout << "\t$(INSTALL_DATA) " << this->ConvertToRelativeOutputPath(fname.c_str())
-               << " \"$(DESTDIR)" << prefix << l->second.GetInstallPath() << "\"\n";
-          fout << "\t" << cmakecommand << " -E cmake_symlink_library \""
-               << installNameReal << "\" \"" << installNameSO << "\" \"" << installName
-               << "\"\n";
-          }; break;
-        case cmTarget::EXECUTABLE:
-          fname = m_ExecutableOutputPath;
-          fname += this->GetFullTargetName(l->first.c_str(), l->second);
-          fout << "\t$(INSTALL_PROGRAM) " << this->ConvertToRelativeOutputPath(fname.c_str())
-               << " \"$(DESTDIR)" << prefix << l->second.GetInstallPath() << "\"\n";
-          break;
-        case cmTarget::INSTALL_FILES:
-          {
-          std::string sourcePath = m_Makefile->GetCurrentDirectory();
-          std::string binaryPath = m_Makefile->GetCurrentOutputDirectory();
-          sourcePath += "/";
-          binaryPath += "/";
-          const std::vector<std::string> &sf = l->second.GetSourceLists();
-          std::vector<std::string>::const_iterator i;
-          for (i = sf.begin(); i != sf.end(); ++i)
-            {
-            std::string f = *i;
-            if(f.substr(0, sourcePath.length()) == sourcePath)
-              {
-              f = f.substr(sourcePath.length());
-              }
-            else if(f.substr(0, binaryPath.length()) == binaryPath)
-              {
-              f = f.substr(binaryPath.length());
-              }
-            fout << "\t@echo \"Installing " << f.c_str() << " \"\n"; 
-            // avoid using install-sh to install install-sh
-            // does not work on windows.... 
-            if(*i == "install-sh")
-              {
-              fout << "\tcp ";
-              }
-            else
-              {
-              fout << "\t$(INSTALL_DATA) ";
-              }
-            
-            fout << this->ConvertToRelativeOutputPath(i->c_str())
-                 << " \"$(DESTDIR)" << prefix << l->second.GetInstallPath() << "\"\n";
-            }
-          }
-          break;
-        case cmTarget::INSTALL_PROGRAMS:
-          {
-          std::string sourcePath = m_Makefile->GetCurrentDirectory();
-          std::string binaryPath = m_Makefile->GetCurrentOutputDirectory();
-          sourcePath += "/";
-          binaryPath += "/";
-          const std::vector<std::string> &sf = l->second.GetSourceLists();
-          std::vector<std::string>::const_iterator i;
-          for (i = sf.begin(); i != sf.end(); ++i)
-            {
-            std::string f = *i;
-            if(f.substr(0, sourcePath.length()) == sourcePath)
-              {
-              f = f.substr(sourcePath.length());
-              }
-            else if(f.substr(0, binaryPath.length()) == binaryPath)
-              {
-              f = f.substr(binaryPath.length());
-              }
-            fout << "\t@echo \"Installing " << f.c_str() << " \"\n"; 
-            // avoid using install-sh to install install-sh
-            // does not work on windows.... 
-            if(*i == "install-sh")
-              {
-              fout << "\t   @cp ";
-              }
-            else
-              {
-              fout << "\t   @$(INSTALL_PROGRAM) ";
-              }
-            fout << this->ConvertToRelativeOutputPath(i->c_str())
-                 << " \"$(DESTDIR)" << prefix << l->second.GetInstallPath() << "\"\n";
-            }
-          }
-          break;
-        case cmTarget::UTILITY:
-        default:
-          break;
-        }
-      }
-    }
-}
-
 void cmLocalUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
 {
   this->OutputMakeRule(fout, 
@@ -2736,6 +2572,9 @@ void cmLocalUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                          "",
                          cmd.c_str());
     }
+  this->OutputMakeRule(fout, "installation", "install", "", 
+    "$(CMAKE_COMMAND) -P cmake_install.cmake");
+
 }
 
 void 
