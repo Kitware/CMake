@@ -160,6 +160,7 @@ static const char* cmCTestErrorExceptions[] = {
   "makefile:",
   "Makefile:",
   ":[ \\t]+Where:",
+  "([^ :]+):([0-9]+): Warning",
   0
 };
 
@@ -178,6 +179,7 @@ static const char* cmCTestWarningMatches[] = {
   "\", line [0-9]+\\.[0-9]+: [0-9]+-[0-9]+ \\(W\\)",
   "^cxx: Warning:",
   ".*file: .* has no symbols",
+  "([^ :]+):([0-9]+): Warning",
   0
 };
 
