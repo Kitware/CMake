@@ -59,7 +59,6 @@ void cmLocalCodeWarriorGenerator::WriteTargets(std::ostream& fout)
         targetOutputName += ".dylib";
         break;
       case cmTarget::EXECUTABLE:
-      case cmTarget::WIN32_EXECUTABLE:
         targetOutputName +=  cmSystemTools::GetExecutableExtension();
         break;
       default:;
@@ -452,7 +451,6 @@ void cmLocalCodeWarriorGenerator::WriteSettingList(std::ostream& fout,
       fout << "SharedLibrary";
       break;
     case cmTarget::EXECUTABLE:
-    case cmTarget::WIN32_EXECUTABLE:
       targetOutputType = "APPL";
       fout << "ApplicationPackage";
       break;
@@ -513,7 +511,6 @@ void cmLocalCodeWarriorGenerator::WriteSettingList(std::ostream& fout,
       fout << "SharedLibrary";
       break;
     case cmTarget::EXECUTABLE:
-    case cmTarget::WIN32_EXECUTABLE:
       targetOutputType = "APPL";
       fout << "ApplicationPackage";
       break;
