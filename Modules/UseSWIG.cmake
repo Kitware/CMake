@@ -100,8 +100,10 @@ MACRO(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
     "${swig_source_file_name_we}")
   SET(swig_generated_file_fullname
     "${swig_generated_file_fullname}/${swig_source_file_name_we}")
+  # add the language into the name of the file (i.e. TCL_wrap)
+  # this allows for the same .i file to be wrapped into different languages
   SET(swig_generated_file_fullname
-    "${swig_generated_file_fullname}_wrap")
+    "${swig_generated_file_fullname}${SWIG_MODULE_${name}_LANGUAGE}_wrap")
 
   IF(swig_source_file_cplusplus)
     SET(swig_generated_file_fullname
