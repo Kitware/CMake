@@ -770,6 +770,7 @@ void cmSystemTools::cmCopyFile(const char* source,
     {
     cmSystemTools::Error("CopyFile failed to open input file \"",
                          source, "\"");
+    return;
     }
   std::ofstream fout(destination,
 #ifdef _WIN32                     
@@ -780,6 +781,7 @@ void cmSystemTools::cmCopyFile(const char* source,
     {
     cmSystemTools::Error("CopyFile failed to open output file \"",
                          destination, "\"");
+    return;
     }
   while(fin.getline(buffer, buffer_length, '\n') || fin.gcount())
     {
