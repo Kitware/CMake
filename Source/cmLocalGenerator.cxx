@@ -385,6 +385,20 @@ std::string cmLocalGenerator::ConvertToRelativeOutputPath(const char* p)
     {
     return cmSystemTools::ConvertToOutputPath(p);
     }
+  // copy to a string class
+  std::string pathIn = p;
+  // check to see if the path is already relative, it is
+  // considered relative if one of the following is true
+  // - has no / in it at all
+  // - does not start with / or drive leter :
+  // - starts with a ".."
+  if(pathIn.find('/') == pathIn.npos ||        
+     (pathIn[0] != '/' && pathIn[1] != ':') || 
+     pathIn.find("..") == 0)
+    {
+    return pathIn;
+    } 
+
   // do not use relative paths for network build trees
   // the network paths do not work
   const char* outputDirectory = m_Makefile->GetHomeOutputDirectory();
@@ -393,128 +407,47 @@ std::string cmLocalGenerator::ConvertToRelativeOutputPath(const char* p)
     {
     return cmSystemTools::ConvertToOutputPath(p);
     }
-
-  // The first time this is called, initialize all
-  // the path ivars that are used.   This can not
-  // be moved to the constructor because all the paths are not set yet.
-  if(m_CurrentOutputDirectory.size() == 0)
-    {
-    m_CurrentOutputDirectory = m_Makefile->GetCurrentOutputDirectory();
-    m_HomeOutputDirectory =  m_Makefile->GetHomeOutputDirectory();
-    m_HomeDirectory = m_Makefile->GetHomeDirectory();
-    if(m_RelativePathToSourceDir.size() == 0)
-      {
-      m_RelativePathToSourceDir = cmSystemTools::RelativePath(
-        m_CurrentOutputDirectory.c_str(),
-        m_HomeDirectory.c_str());
-      std::string path = m_CurrentOutputDirectory;
-      cmSystemTools::ReplaceString(path, m_HomeOutputDirectory.c_str(), "");
-      unsigned i;
-      m_RelativePathToBinaryDir = "";
-      for(i =0; i < path.size(); ++i)
-        {
-        if(path[i] == '/')
-          {
-          m_RelativePathToBinaryDir += "../";
-          }
-        }
-      }
-    m_HomeOutputDirectoryNoSlash = m_HomeOutputDirectory;
-    m_HomeOutputDirectory += "/";
-    m_CurrentOutputDirectory += "/";
-    }
-
-  // Do the work of converting to a relative path
-  std::string pathIn = p;
-  if(pathIn.find('/') == pathIn.npos)
-    {
-    return pathIn;
-    }
-
+  // if the path is double quoted remove the double quotes
   if(pathIn.size() && pathIn[0] == '\"')
     {
     pathIn = pathIn.substr(1, pathIn.size()-2);
-    }
-
-  std::string ret = pathIn;
-  if(m_CurrentOutputDirectory.size() <= ret.size())
+    } 
+  // The first time this is called
+  // initialize m_CurrentOutputDirectory to contain
+  // the full path to the current output directory
+  // This has to be done here and not in the constructor
+  // because the output directory is not yet set in the constructor.
+  if(m_CurrentOutputDirectory.size() == 0)
     {
-    std::string sub = ret.substr(0, m_CurrentOutputDirectory.size());
-    if(
-#if defined(_WIN32) || defined(__APPLE__)
-      cmSystemTools::LowerCase(sub) ==
-      cmSystemTools::LowerCase(m_CurrentOutputDirectory)
-#else
-      sub == m_CurrentOutputDirectory
-#endif
-      )
-      {
-      ret = ret.substr(m_CurrentOutputDirectory.size(), ret.npos);
-      }
+    m_CurrentOutputDirectory = cmSystemTools::CollapseFullPath(m_Makefile->GetCurrentOutputDirectory());
     }
-  if(m_HomeDirectory.size() <= ret.size())
+  // Given that we are in m_CurrentOutputDirectory how to we
+  // get to pathIn with a relative path, store in ret
+  std::string ret = cmSystemTools::RelativePath(m_CurrentOutputDirectory.c_str(), pathIn.c_str());
+  // If the path is 0 sized make it a .
+  // this happens when pathIn is the same as m_CurrentOutputDirectory
+  if(ret.size() == 0)
     {
-    std::string sub = ret.substr(0, m_HomeDirectory.size());
-    if(
-#if defined(_WIN32) || defined(__APPLE__)
-      cmSystemTools::LowerCase(sub) ==
-      cmSystemTools::LowerCase(m_HomeDirectory)
-#else
-      sub == m_HomeDirectory
-#endif
-      )
-      {
-      ret = m_RelativePathToSourceDir + ret.substr(m_HomeDirectory.size(), ret.npos);
-      }
+    ret = ".";
     }
-  if(m_HomeOutputDirectory.size() <= ret.size())
+  // if there was a trailing / there still is one, and
+  // if there was not one, there still is not one
+  if(ret[ret.size()-1] == '/' && 
+     pathIn[pathIn.size()-1] != '/')
     {
-    std::string sub = ret.substr(0, m_HomeOutputDirectory.size());
-    if(
-#if defined(_WIN32) || defined(__APPLE__)
-      cmSystemTools::LowerCase(sub) ==
-      cmSystemTools::LowerCase(m_HomeOutputDirectory)
-#else
-      sub == m_HomeOutputDirectory
-#endif
-      )
-      {
-      ret = m_RelativePathToBinaryDir + ret.substr(m_HomeOutputDirectory.size(), ret.npos);
-      }
+    ret.erase(ret.size()-1, 1);
     }
-
-  std::string relpath = m_RelativePathToBinaryDir;
-  if(relpath.size())
+  if(ret[ret.size()-1] != '/' && 
+     pathIn[pathIn.size()-1] == '/')
     {
-    relpath.erase(relpath.size()-1, 1);
+    ret += "/";
     }
-  else
-    {
-    relpath = ".";
-    }
-  if(
-#if defined(_WIN32) || defined(__APPLE__)
-    cmSystemTools::LowerCase(ret) ==
-    cmSystemTools::LowerCase(m_HomeOutputDirectoryNoSlash)
-#else
-    ret == m_HomeOutputDirectoryNoSlash
-#endif
-    )
-    {
-    ret = relpath;
-    }
-
-  // Relative paths should always start in a '.', so add a './' if
-  // necessary.
-  if(ret.size()
-     && ret[0] != '\"' && ret[0] != '/' && ret[0] != '.' && ret[0] != '$')
-    {
-    if(ret.size() > 1 && ret[1] != ':')
-      {
-      ret = std::string("./") + ret;
-      }
-    }
+  // Now convert the relative path to an output path
   ret = cmSystemTools::ConvertToOutputPath(ret.c_str());
+  // finally return the path 
+  // at this point it should be relative and in the correct format
+  // for the native build system.  (i.e. \ for windows and / for unix,
+  // and correct escaping/quoting of spaces in the path
   return ret;
 }
 
