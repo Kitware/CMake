@@ -18,6 +18,11 @@
 #include "cmake.h"
 #include "cmCacheManager.h"
 
+
+// On Mac OSX getline looks like it is broken, so we have to use
+// fgets. This is why we are including stdio.h.
+#include <stdio.h>
+
 cmakewizard::cmakewizard()
 {
   m_ShowAdvanced = false;
@@ -33,7 +38,7 @@ void cmakewizard::AskUser(const char* key, cmCacheManager::CacheIterator& iter)
   std::cout << "New Value (Enter to keep current value): ";
   char buffer[4096];
   buffer[0] = 0;
-  std::cin.getline(buffer, sizeof(buffer));
+  fgets(buffer, sizeof(buffer)-1, stdin);
   if(buffer[0])
     {
     std::string value = buffer;
@@ -59,7 +64,7 @@ bool cmakewizard::AskAdvanced()
   std::cout << "Would you like to see advanced options? [No]:";  
   char buffer[4096];
   buffer[0] = 0;
-  std::cin.getline(buffer, sizeof(buffer));
+  fgets(buffer, sizeof(buffer)-1, stdin);
   if(buffer[0])
     {
     if(buffer[0] == 'y' || buffer[0] == 'Y')
