@@ -703,7 +703,15 @@ void cmSystemTools::ConvertToUnixSlashes(std::string& path)
     pos++;
     }
   // Remove all // from the path just like most unix shells
-  while((pos = path.find("//", 0)) != std::string::npos)
+  int start_find = 0;
+
+#ifdef _WIN32
+  // However, on windows if the first characters are both slashes,
+  // then keep them that way, so that network paths can be handled.
+  start_find = 1;
+#endif
+
+  while((pos = path.find("//", start_find)) != std::string::npos)
     {
     cmSystemTools::ReplaceString(path, "//", "/");
     }
