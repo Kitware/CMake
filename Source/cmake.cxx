@@ -84,12 +84,10 @@ void cmake::SetArgs(cmMakefile& builder, int ac, char** av)
       (cmSystemTools::GetCurrentWorkingDirectory().c_str());
     if (ac == 2)
       {
-      std::string hdir = cmSystemTools::GetCurrentWorkingDirectory()
-	+ "/" + av[1];
       builder.SetHomeDirectory
-	(cmSystemTools::CollapseFullPath(hdir.c_str()).c_str());
+	(cmSystemTools::CollapseFullPath(av[1]).c_str());
       builder.SetStartDirectory
-	(cmSystemTools::CollapseFullPath(hdir.c_str()).c_str());
+	(cmSystemTools::CollapseFullPath(av[1]).c_str());
       }
     else
       {
@@ -146,7 +144,9 @@ void cmake::SetArgs(cmMakefile& builder, int ac, char** av)
 void cmake::AddCMakePaths(char **av)
 {
   // Find our own exectuable.
-  std::string cMakeSelf = cmSystemTools::FindProgram(av[0]);
+  std::string cMakeSelf = av[0];
+  cmSystemTools::ConvertToUnixSlashes(cMakeSelf);
+  cMakeSelf = cmSystemTools::FindProgram(cMakeSelf.c_str());
 
   // Save the value in the cache
   cmCacheManager::GetInstance()->AddCacheEntry

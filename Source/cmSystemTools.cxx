@@ -734,7 +734,13 @@ std::string cmSystemTools::FindProgram(const char* name,
     {
     return cmSystemTools::CollapseFullPath(name);
     }
-    
+  std::string tryPath = name;
+  tryPath += cmSystemTools::GetExecutableExtension();
+  if(cmSystemTools::FileExists(tryPath.c_str()))
+    {
+    return cmSystemTools::CollapseFullPath(tryPath.c_str());
+    }
+  
   // Add the system search path to our path.
   std::vector<std::string> path = userPaths;
   cmSystemTools::GetPath(path);
@@ -742,7 +748,7 @@ std::string cmSystemTools::FindProgram(const char* name,
   for(std::vector<std::string>::const_iterator p = path.begin();
       p != path.end(); ++p)
     {
-    std::string tryPath = *p;
+    tryPath = *p;
     tryPath += "/";
     tryPath += name;
     if(cmSystemTools::FileExists(tryPath.c_str()))
