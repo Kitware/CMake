@@ -957,28 +957,52 @@ bool cmSystemTools::FilesDiffer(const char* source,
     {
     return true;
     }
+
   struct stat statDestination;
   if (stat(destination, &statDestination) != 0) 
     {
     return true;
     }
+
   if(statSource.st_size != statDestination.st_size)
     {
     return true;
     }
+
+#ifdef _WIN32
+  std::ifstream finSource(source, std::ios::binary | std::ios::in);
+  std::ifstream finDestination(destination, std::ios::binary | std::ios::in);
+#else
   std::ifstream finSource(source);
   std::ifstream finDestination(destination);
+#endif
   if(!finSource || !finDestination)
     {
     return true;
     }
-  char* buffer1 = new char[statSource.st_size];
-  char* buffer2 = new char[statSource.st_size];
-  finSource.read(buffer1, statSource.st_size);
-  finDestination.read(buffer2, statSource.st_size);
-  int ret = memcmp(buffer1, buffer2, statSource.st_size);
-  delete [] buffer2;
-  delete [] buffer1;
+
+  char* source_buf = new char[statSource.st_size];
+  char* dest_buf = new char[statSource.st_size];
+
+  finSource.read(source_buf, statSource.st_size);
+  finDestination.read(dest_buf, statSource.st_size);
+
+  if(statSource.st_size != finSource.gcount() ||
+     statSource.st_size != finDestination.gcount())
+    {
+    cmSystemTools::Error("FilesDiffer failed reading files!");
+    delete [] dest_buf;
+    delete [] source_buf;
+    return false;
+    }
+
+  int ret = memcmp((const void*)source_buf, 
+                   (const void*)dest_buf, 
+                   statSource.st_size);
+
+  delete [] dest_buf;
+  delete [] source_buf;
+
   return ret != 0;
 }
 
