@@ -626,8 +626,9 @@ bool SystemTools::SameFile(const char* file1, const char* file2)
 // return true if the file exists
 bool SystemTools::FileExists(const char* filename)
 {
-  struct stat fs;
-  if (stat(filename, &fs) != 0) 
+//  struct stat fs;
+//  if (stat(filename, &fs) != 0) 
+  if ( access(filename, F_OK) != 0 )
     {
     return false;
     }

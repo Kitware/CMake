@@ -4095,61 +4095,61 @@ int cmCTest::RunCMakeAndTest(std::string* outstring)
   else
     {
     failed.push_back(m_TestCommand);
-    }
-  std::string tryPath = m_TestCommand;
-  tryPath += cmSystemTools::GetExecutableExtension();
-  if(cmSystemTools::FileExists(tryPath.c_str()))
-    {
-    fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
-    }
-  else
-    {
-    failed.push_back(tryPath);
-    }
-  // try the Debug extension
-  tryPath = m_ConfigType + "/";
-  tryPath += cmSystemTools::GetFilenameName(m_TestCommand);
-  if(cmSystemTools::FileExists(tryPath.c_str()))
-    {
-    fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
-    }
-  else
-    {
-    failed.push_back(tryPath);
-    }
-  tryPath += cmSystemTools::GetExecutableExtension();
-  if(cmSystemTools::FileExists(tryPath.c_str()))
-    {
-    fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
-    }
-  else
-    {
-    failed.push_back(tryPath);
-    }
-  tryPath = m_ExecutableDirectory;
-  tryPath += "/";
-  tryPath += m_TestCommand;
-  tryPath += cmSystemTools::GetExecutableExtension();
-  if(cmSystemTools::FileExists(tryPath.c_str()))
-    {
-    fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
-    }
-  else
-    {
-    failed.push_back(tryPath);
-    }
-  tryPath = m_ExecutableDirectory;
-  tryPath += "/";
-  tryPath += m_ConfigType + "/";
-  tryPath += m_TestCommand;
-  tryPath += cmSystemTools::GetExecutableExtension();
-  if(cmSystemTools::FileExists(tryPath.c_str()))
-    {
-    fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
-    }
-  else
-    {
-    failed.push_back(tryPath);
+    std::string tryPath = m_TestCommand;
+    tryPath += cmSystemTools::GetExecutableExtension();
+    if(cmSystemTools::FileExists(tryPath.c_str()))
+      {
+      fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
+      }
+    else
+      {
+      failed.push_back(tryPath);
+      // try the Debug extension
+      tryPath = m_ConfigType + "/";
+      tryPath += cmSystemTools::GetFilenameName(m_TestCommand);
+      if(cmSystemTools::FileExists(tryPath.c_str()))
+        {
+        fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
+        }
+      else
+        {
+        failed.push_back(tryPath);
+        tryPath += cmSystemTools::GetExecutableExtension();
+        if(cmSystemTools::FileExists(tryPath.c_str()))
+          {
+          fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
+          }
+        else
+          {
+          failed.push_back(tryPath);
+          tryPath = m_ExecutableDirectory;
+          tryPath += "/";
+          tryPath += m_TestCommand;
+          tryPath += cmSystemTools::GetExecutableExtension();
+          if(cmSystemTools::FileExists(tryPath.c_str()))
+            {
+            fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
+            }
+          else
+            {
+            failed.push_back(tryPath);
+            tryPath = m_ExecutableDirectory;
+            tryPath += "/";
+            tryPath += m_ConfigType + "/";
+            tryPath += m_TestCommand;
+            tryPath += cmSystemTools::GetExecutableExtension();
+            if(cmSystemTools::FileExists(tryPath.c_str()))
+              {
+              fullPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
+              }
+            else
+              {
+              failed.push_back(tryPath);
+              }
+            }
+          }
+        }
+      }
     }
   if(!cmSystemTools::FileExists(fullPath.c_str()))
     {
