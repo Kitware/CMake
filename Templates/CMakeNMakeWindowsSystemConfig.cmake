@@ -30,8 +30,20 @@ SET (CMAKE_C_LIBPATH_FLAG "-LIBPATH:" CACHE STRING
 SET (CMAKE_LINKER link CACHE FILEPATH
      "Name of linker used.")
 
-SET (CMAKE_LINKER_FLAGS "/nologo" CACHE STRING
+SET (CMAKE_LINKER_FLAGS "/nologo /STACK:10000000 /machine:I386" CACHE STRING
      "Flags used by the linker.")
+
+SET (CMAKE_LINKER_FLAGS_RELEASE "" CACHE STRING
+     "Flags used by the linker during release builds.")
+
+SET (CMAKE_LINKER_FLAGS_RELWITHDEBINFO "/debug /pdbtype:sept" CACHE STRING
+     "Flags used by the linker during Release with Debug Info builds.")
+
+SET (CMAKE_LINKER_FLAGS_MINSIZEREL "/stack:0x989680" CACHE STRING
+     "Flags used by the linker during release minsize builds.")
+
+SET (CMAKE_LINKER_FLAGS_DEBUG "/debug /pdbtype:sept" CACHE STRING
+     "Flags used by the linker during debug builds.")
 
 SET (CMAKE_LINKER_SHARED_LIBRARY_FLAG "/dll" CACHE STRING
      "Flags used to create a shared library.")
@@ -101,6 +113,10 @@ CMAKE_C_LINK_EXECUTABLE_FLAG
 CMAKE_C_LIBPATH_FLAG
 CMAKE_LINKER
 CMAKE_LINKER_FLAGS
+CMAKE_LINKER_FLAGS_RELEASE
+CMAKE_LINKER_FLAGS_RELWITHDEBINFO
+CMAKE_LINKER_FLAGS_MINSIZEREL
+CMAKE_LINKER_FLAGS_DEBUG
 CMAKE_LINKER_SHARED_LIBRARY_FLAG
 CMAKE_LINKER_STATIC_LIBRARY_FLAG
 CMAKE_LINKER_OUTPUT_FILE_FLAG
