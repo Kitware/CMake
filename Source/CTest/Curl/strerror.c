@@ -539,11 +539,20 @@ const char *Curl_strerror(struct connectdata *conn, int err)
     /* this version of strerror_r() only *might* use the buffer we pass to
        the function, but it always returns the error message as a pointer,
        so we must copy that string unconditionally */
+    if ( !msg )
+      {
+      msg = "Unknown System Error";
+      }
     strncpy(buf, msg, max);
   }
 #endif /* end of HAVE_GLIBC_STRERROR_R */
 #else /* HAVE_STRERROR_R */
-  strncpy(buf, strerror(err), max);
+  char *msg = strerror(err);
+  if ( !msg )
+    {
+    msg = "Unknown System Error";
+    }
+  strncpy(buf, msg, max);
 #endif /* end of HAVE_STRERROR_R */
 #endif /* end of ! Windows */
 
