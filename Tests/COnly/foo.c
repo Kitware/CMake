@@ -1,1 +1,1 @@
-const char* foo = "Foo";
+char* foo = "Foo";

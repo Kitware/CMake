@@ -1,1 +1,1 @@
-extern const char* foo;
+extern char* foo;
