@@ -101,18 +101,39 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
 //----------------------------------------------------------------------------
 bool cmFindPackageCommand::FindModule(bool& found)
 {
-  // If there is a find module, use it.
-  std::string module = m_Makefile->GetDefinition("CMAKE_ROOT");
-  module += "/Modules/Find";
-  module += this->Name;
-  module += ".cmake";
+  // Search the CMAKE_MODULE_PATH for a Find<name>.cmake module.
   found = false;
-  // TODO: CMAKE_PACKAGE_PATH for looking for Find<name>.cmake
-  // modules?
-  if(cmSystemTools::FileExists(module.c_str()))
+  std::string module;
+  std::vector<std::string> modulePath;
+  const char* def = m_Makefile->GetDefinition("CMAKE_MODULE_PATH");
+  if(def)
     {
-    found = true;
-    return this->ReadListFile(module.c_str());
+    cmSystemTools::ExpandListArgument(def, modulePath);
+    }
+  
+  // Also search in the standard modules location.
+  def = m_Makefile->GetDefinition("CMAKE_ROOT");
+  if(def)
+    {
+    std::string rootModules = def;
+    rootModules += "/Modules";
+    modulePath.push_back(rootModules);
+    }
+  
+  // Look through the possible module directories.
+  for(std::vector<std::string>::iterator i = modulePath.begin();
+      i != modulePath.end(); ++i)
+    {
+    module = *i;
+    cmSystemTools::ConvertToUnixSlashes(module);
+    module += "/Find";
+    module += this->Name;
+    module += ".cmake";
+    if(cmSystemTools::FileExists(module.c_str()))
+      {
+      found = true;
+      return this->ReadListFile(module.c_str());
+      }
     }
   return true;
 }
