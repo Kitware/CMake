@@ -1754,6 +1754,7 @@ void cmCTest::ProcessDirectory(std::vector<std::string> &passed,
             {
             fprintf(stderr,"   Passed\n");
             passed.push_back(args[0].Value); 
+            cres.m_Status = cmCTest::COMPLETED;
             }
           else
             {
