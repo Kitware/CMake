@@ -299,8 +299,8 @@ private:
   {"-G<generator-name>", "Specify a makefile generator.", \
    "CMake may support multiple native build systems on certain platforms.  " \
    "A makefile generator is responsible for generating a particular build " \
-   "system.  Possible generator names are\n" \
-   "  \"Unix Makefiles\" - Standard UNIX Makefiles"}
+   "system.  Possible generator names are specified in the Generators " \
+   "section."}
 
 #define CMAKE_STANDARD_INTRODUCTION \
   {0, \
