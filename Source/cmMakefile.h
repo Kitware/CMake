@@ -667,6 +667,11 @@ public:
   ///! Return true if the directory is preorder.
   bool IsDirectoryPreOrder(const char* dir);
   
+  ///! Set/Get a property of this directory 
+  void SetProperty(const char *prop, const char *value);
+  const char *GetProperty(const char *prop) const;
+  bool GetPropertyAsBool(const char *prop) const;
+
 protected:
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(const char* name, cmTarget& target);
@@ -743,6 +748,8 @@ private:
   DefinitionMap::key_type  m_TemporaryDefinitionKey;
 
   cmsys::RegularExpression m_cmDefineRegex;
+
+  std::map<cmStdString,cmStdString> m_Properties;
 };
 
 

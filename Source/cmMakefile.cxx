@@ -2400,3 +2400,38 @@ bool cmMakefile::CheckInfiniteLoops()
     }
   return true;
 }
+
+void cmMakefile::SetProperty(const char* prop, const char* value)
+{
+  if (!prop)
+    {
+    return;
+    }
+  if (!value)
+    {
+    value = "NOTFOUND";
+    }
+  m_Properties[prop] = value;
+}
+
+const char *cmMakefile::GetProperty(const char* prop) const
+{
+  std::map<cmStdString,cmStdString>::const_iterator i = 
+    m_Properties.find(prop);
+  if (i != m_Properties.end())
+    {
+    return i->second.c_str();
+    }
+  return 0;
+}
+
+bool cmMakefile::GetPropertyAsBool(const char* prop) const
+{
+  std::map<cmStdString,cmStdString>::const_iterator i = 
+    m_Properties.find(prop);
+  if (i != m_Properties.end())
+    {
+    return cmSystemTools::IsOn(i->second.c_str());
+    }
+  return false;
+}

@@ -146,7 +146,8 @@ MACRO(SWIG_ADD_MODULE name language)
     SWIG_ADD_SOURCE_TO_MODULE(${name} swig_generated_source ${it})
     SET(swig_generated_sources ${swig_generated_sources} "${swig_generated_source}")
   ENDFOREACH(it)
-  SET(ADDITIONAL_MAKE_CLEAN_FILES ${ADDITIONAL_MAKE_CLEAN_FILES} ${swig_generated_sources})
+  SET_DIRECTORY_PROPERTIES(PROPERTIES
+    ADDITIONAL_MAKE_CLEAN_FILES "${ADDITIONAL_MAKE_CLEAN_FILES};${swig_generated_sources}")
   ADD_LIBRARY(${SWIG_MODULE_${name}_REAL_NAME}
     MODULE
     ${swig_generated_sources}

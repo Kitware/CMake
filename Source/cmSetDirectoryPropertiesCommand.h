@@ -34,6 +34,12 @@ public:
   virtual bool InitialPass(std::vector<std::string> const& args);
 
   /**
+   * This determines if the command gets propagated down
+   * to makefiles located in subdirectories.
+   */
+  virtual bool IsInherited() {return true;}
+
+  /**
    * The name of the command as specified in CMakeList.txt.
    */
   virtual const char* GetName() { return "SET_DIRECTORY_PROPERTIES";}
@@ -55,8 +61,10 @@ public:
         "  SET_DIRECTORY_PROPERTIES(PROPERTIES prop1 value1 prop2 value2)\n"
         "Set a property for the current directory and subdirectories. If the "
         "property is not found, CMake will report an error. The properties "
-        "include: INCLUDE_DIRECTORIES, LINK_DIRECTORIES, and "
-        "INCLUDE_REGULAR_EXPRESSION.";
+        "include: INCLUDE_DIRECTORIES, LINK_DIRECTORIES, "
+        "INCLUDE_REGULAR_EXPRESSION, and ADDITIONAL_MAKE_CLEAN_FILES.\n"
+        "ADDITIONAL_MAKE_CLEAN_FILES is a list of files that will be cleaned "
+        "as a part of \"make clean\" stage.";
     }
   
   cmTypeMacro(cmSetDirectoryPropertiesCommand, cmCommand);

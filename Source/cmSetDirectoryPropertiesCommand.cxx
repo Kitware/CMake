@@ -68,9 +68,15 @@ bool cmSetDirectoryPropertiesCommand::InitialPass(
       }
     else
       {
-      std::string emsg = "Unknown directory property: " + args[1];
-      this->SetError(emsg.c_str());
-      return false;
+      if ( prop == "ADDITIONAL_MAKE_CLEAN_FILES" )
+        {
+        // This property is not inherrited
+        if ( strcmp(m_Makefile->GetCurrentDirectory(), m_Makefile->GetStartDirectory()) != 0 )
+          {
+          continue;
+          }
+        }
+      m_Makefile->SetProperty(prop.c_str(), value.c_str());
       }
     }
   

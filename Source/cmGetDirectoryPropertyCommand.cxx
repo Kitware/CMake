@@ -95,6 +95,12 @@ bool cmGetDirectoryPropertyCommand::InitialPass(
     }
   else
     {
+    const char *prop = m_Makefile->GetProperty(args[1].c_str());
+    if (prop)
+      {
+      m_Makefile->AddDefinition(variable.c_str(), prop);
+      return true;
+      }
     std::string emsg = "Unknown directory property: " + args[1];
     this->SetError(emsg.c_str());
     return false;
