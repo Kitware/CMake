@@ -202,6 +202,9 @@ void cmDSPMakefile::WriteDSPFile(std::ostream& fout)
   this->WriteDSPBeginGroup(fout, "Header Files", "h;hpp;hxx;hm;inl");
   this->WriteDSPBuildRules(fout,"h;hpp;hxx;hm;inl");
   this->WriteDSPEndGroup(fout);
+  this->WriteDSPBeginGroup(fout, "XML Files", "xml");
+  this->WriteDSPBuildRules(fout,"xml");
+  this->WriteDSPEndGroup(fout);
   this->WriteDSPBuildRule(fout);
   this->WriteDSPFooter(fout);
 }
