@@ -542,7 +542,7 @@ int cmake::CMakeCommand(std::vector<std::string>& args)
     }
 
     // Clock command
-    else if (args[1] == "chdir" && args.size() == 4)
+    else if (args[1] == "chdir" && args.size() >= 4)
       {
       std::string directory = args[2];
       std::string command = args[3];
