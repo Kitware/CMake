@@ -322,7 +322,7 @@ int CommandLineArguments::Parse()
 void CommandLineArguments::GetRemainingArguments(int* argc, char*** argv)
 {
   CommandLineArguments::Internal::VectorOfStrings::size_type size 
-    = this->Internals->Argv.size() - this->Internals->LastArgument;
+    = this->Internals->Argv.size() - this->Internals->LastArgument + 1;
   CommandLineArguments::Internal::VectorOfStrings::size_type cc;
 
   // Copy Argv0 as the first argument
