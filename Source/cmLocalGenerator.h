@@ -33,7 +33,7 @@ class cmLocalGenerator
 {
 public:
   cmLocalGenerator();
-  ~cmLocalGenerator();
+  virtual ~cmLocalGenerator();
   
   /**
    * Generate the makefile for this directory. fromTheTop indicates if this
