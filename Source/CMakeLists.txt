@@ -642,6 +642,7 @@ IF(BUILD_TESTING)
       ${CMake_SOURCE_DIR}
       ${CMake_BINARY_DIR}/Tests/BootstrapTest
       --build-nocmake 
+      --build-noclean
       --build-makeprogram ${CMake_SOURCE_DIR}/bootstrap
       --test-command ${CMake_BINARY_DIR}/Tests/BootstrapTest/Bootstrap.cmk/cmake)
   ENDIF(UNIX)
