@@ -28,6 +28,11 @@ bool cmLinkLibrariesCommand::InitialPass(std::vector<std::string> const& args)
   for(std::vector<std::string>::const_iterator i = args.begin();
       i != args.end(); ++i)
     {
+    if ( *i == "NOTFOUND" )
+      {
+      this->SetError("CMake attempted to put directory that was not found to the list of include directories.");
+      return false;
+      }
     if (*i == "debug")
       {
       ++i;

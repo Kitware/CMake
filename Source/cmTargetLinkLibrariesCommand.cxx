@@ -36,6 +36,12 @@ bool cmTargetLinkLibrariesCommand::InitialPass(std::vector<std::string> const& a
   
   for(++i; i != args.end(); ++i)
     {
+    if ( *i == "NOTFOUND" )
+      {
+      this->SetError("CMake attempted to put library that was not found to the list of libraries.");
+      return false;
+      }
+ 
     if (*i == "debug")
       {
       ++i;
