@@ -7,7 +7,8 @@
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
-#include "../cmMakefile.h"
+
+
 #include "PropertyList.h"
 /////////////////////////////////////////////////////////////////////////////
 // CMakeSetupDialog dialog
@@ -18,10 +19,13 @@ class CMakeSetupDialog : public CDialog
 public:
   CMakeSetupDialog(CWnd* pParent = NULL);	// standard constructor
 protected:
-  bool Browse(CString&, const char* title);
+  //! Load cache file from m_WhereBuild and display in GUI editor
+  void LoadCacheFromDiskToGUI();
+  //! Save GUI values to cmCacheManager and then save to disk.
+  void SaveCacheFromGUI();
   void SaveToRegistry();
   void LoadFromRegistry();
-  void InitMakefile();
+  bool Browse(CString&, const char* title);
   void ReadRegistryValue(HKEY hKey,
 			 CString *val,
 			 const char *key,
@@ -29,13 +33,9 @@ protected:
 // Dialog Data
   //{{AFX_DATA(CMakeSetupDialog)
   enum { IDD = IDD_CMakeSetupDialog_DIALOG };
-  cmMakefile    m_Makefile;
-  bool          m_InitMakefile;
-  bool          m_GUIInitialized;
   CString	m_WhereSource;
   CString	m_WhereBuild;
-  CString	m_WhereSourceLast;
-  CString	m_WhereBuildLast;
+  bool          m_BuildPathChanged;
   CPropertyList m_CacheEntriesList;
   //}}AFX_DATA
   
@@ -48,6 +48,12 @@ protected:
 // Implementation
 protected:
   
+  // copy from the cache manager to the cache edit list box
+  void FillCacheGUIFromCacheManager();
+  // copy from the list box to the cache manager
+  void FillCacheManagerFromCacheGUI();
+  
+  
   HICON m_hIcon;
   CString m_RegistryKey;
   // Generated message map functions
@@ -56,17 +62,11 @@ protected:
   afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
   afx_msg void OnPaint();
   afx_msg HCURSOR OnQueryDragIcon();
-  afx_msg void OnChangeEdit1();
-  afx_msg void OnBrowse();
-  virtual void OnOK();
+  afx_msg void OnBrowseWhereSource();
   virtual void OnBuildProjects();
-  afx_msg void OnButton3();
-  
-  // copy from the cache manager to the cache edit list box
-  void FillCacheEditorFromCacheManager();
-  // copy from the list box to the cache manager
-  void FillCacheManagerFromCacheEditor();
-  
+  afx_msg void OnBrowseWhereBuild();
+  afx_msg void OnChangeWhereBuild();
+  afx_msg void OnChangeWhereSource();
   //}}AFX_MSG
   DECLARE_MESSAGE_MAP()
 };

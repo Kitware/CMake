@@ -1,23 +1,7 @@
-#if !defined(AFX_PROPERTYLIST_H__74205380_1B56_11D4_BC48_00105AA2186F__INCLUDED_)
-#define AFX_PROPERTYLIST_H__74205380_1B56_11D4_BC48_00105AA2186F__INCLUDED_
+#ifndef CPROPERTYLIST_H
+#define CPROPERTYLIST_H
 
-#if _MSC_VER > 1000
-#pragma once
-#endif // _MSC_VER > 1000
-// PropertyList.h : header file
-//
 
-#define PIT_COMBO	0  //PIT = property item type
-#define PIT_EDIT	1
-#define PIT_COLOR	2
-#define PIT_FONT	3
-#define PIT_FILE	4
-#define PIT_CHECKBOX    5
-
-#define IDC_PROPCMBBOX   712
-#define IDC_PROPEDITBOX  713
-#define IDC_PROPBTNCTRL  714
-#define IDC_PROPCHECKBOXCTRL 715
 
 #include "../cmStandardIncludes.h"
 
@@ -51,6 +35,16 @@ class CPropertyList : public CListBox
 {
 // Construction
 public:
+  enum ItemType 
+    {
+      COMBO = 0,
+      EDIT,
+      COLOR,
+      FONT,
+      FILE,
+      CHECKBOX,
+      PATH
+    };
   CPropertyList();
   
 // Attributes
@@ -67,7 +61,7 @@ public:
     {
       return m_PropertyItems;
     }
-  
+  void RemoveAll();
   CPropertyItem* GetItem(int index);
 // Overrides
   // ClassWizard generated virtual function overrides
@@ -76,7 +70,6 @@ public:
   virtual void MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct);
   virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 protected:
-  int AddPropItem(CPropertyItem* pItem);
   virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
   virtual void PreSubclassWindow();
   //}}AFX_VIRTUAL
@@ -85,7 +78,7 @@ protected:
 public:
   virtual ~CPropertyList();
 
-	// Generated message map functions
+  // Generated message map functions
 protected:
   //{{AFX_MSG(CPropertyList)
   afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
@@ -104,12 +97,11 @@ protected:
   afx_msg void OnDelete();
   afx_msg void OnCheckBox();
 
-  
-
   DECLARE_MESSAGE_MAP()
 
   void InvertLine(CDC* pDC,CPoint ptFrom,CPoint ptTo);
   void DisplayButton(CRect region);
+  int AddPropItem(CPropertyItem* pItem);
 
   CComboBox m_cmbBox;
   CEdit m_editBox;

@@ -7,6 +7,7 @@
 #include "../cmDSWMakefile.h"
 #include "../cmMSProjectGenerator.h"
 #include "../cmCacheManager.h"
+#include "../cmMakefile.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -95,55 +96,7 @@ CMakeSetupDialog::CMakeSetupDialog(CWnd* pParent /*=NULL*/)
     }
   m_WhereSource = startPath;
   this->LoadFromRegistry();
-  m_InitMakefile = false;
-  m_GUIInitialized = false;
-  this->InitMakefile();
-  
-}
-
-void CMakeSetupDialog::InitMakefile()
-{
-  if(m_InitMakefile)
-    {
-    // if no change in source or build then
-    // do not re-init the m_Makefile
-    if(m_WhereSource == m_WhereSourceLast
-       && m_WhereBuild == m_WhereBuildLast)
-      {
-      return;
-      }
-    }
-  if(m_WhereBuild == "")
-    {
-    m_WhereBuild = m_WhereSource;
-    }
-  if(m_WhereSource == "")
-    {
-    return;
-    }
-  // save the values for these so we can detect
-  // when the GUI has changed them
-  m_WhereBuildLast = m_WhereBuild;
-  m_WhereSourceLast = m_WhereSource;
-  m_InitMakefile = true;
-  // set up the cmMakefile member
-  m_Makefile.SetMakefileGenerator(new cmMSProjectGenerator);
-  m_Makefile.SetHomeDirectory(m_WhereSource);
-  // Set the output directory
-  m_Makefile.SetStartOutputDirectory(m_WhereBuild);
-  m_Makefile.SetHomeOutputDirectory(m_WhereBuild);
-  // set the directory which contains the CMakeLists.txt
-  m_Makefile.SetStartDirectory(m_WhereSource);
-  // Create the master DSW file and all children dsp files for ITK
-  // Set the CMakeLists.txt file
-  m_Makefile.MakeStartDirectoriesCurrent();
-  // Create a string for the cache file
-  cmCacheManager::GetInstance()->LoadCache(&m_Makefile);
-  // if the GUI is already up, then reset it to the loaded cache
-  if(m_GUIInitialized)
-    {
-    this->FillCacheEditorFromCacheManager();
-    }
+  m_BuildPathChanged = false;
 }
 
 void CMakeSetupDialog::DoDataExchange(CDataExchange* pDX)
@@ -161,11 +114,12 @@ BEGIN_MESSAGE_MAP(CMakeSetupDialog, CDialog)
   ON_WM_SYSCOMMAND()
   ON_WM_PAINT()
   ON_WM_QUERYDRAGICON()
-  ON_EN_CHANGE(IDC_WhereSource, OnChangeEdit1)
-  ON_BN_CLICKED(IDC_BUTTON2, OnBrowse)
-  ON_BN_CLICKED(IDC_BUTTON3, OnButton3)
-	ON_BN_CLICKED(IDC_BuildProjects, OnBuildProjects)
-	//}}AFX_MSG_MAP
+  ON_BN_CLICKED(IDC_BUTTON2, OnBrowseWhereSource)
+  ON_BN_CLICKED(IDC_BUTTON3, OnBrowseWhereBuild)
+  ON_BN_CLICKED(IDC_BuildProjects, OnBuildProjects)
+  ON_EN_CHANGE(IDC_WhereBuild, OnChangeWhereBuild)
+  ON_EN_CHANGE(IDC_WhereSource, OnChangeWhereSource)
+  //}}AFX_MSG_MAP
   END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -197,13 +151,7 @@ BEGIN_MESSAGE_MAP(CMakeSetupDialog, CDialog)
   //  when the application's main window is not a dialog
   SetIcon(m_hIcon, TRUE);			// Set big icon
   SetIcon(m_hIcon, FALSE);		// Set small icon
-	
-  // TODO: Add extra initialization here
-  if(m_InitMakefile)
-    {
-    this->FillCacheEditorFromCacheManager();
-    }
-  m_GUIInitialized = true;
+  this->LoadCacheFromDiskToGUI();
   return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
@@ -256,18 +204,8 @@ HCURSOR CMakeSetupDialog::OnQueryDragIcon()
   return (HCURSOR) m_hIcon;
 }
 
-void CMakeSetupDialog::OnChangeEdit1() 
-{
-  // TODO: If this is a RICHEDIT control, the control will not
-  // send this notification unless you override the CDialog::OnInitDialog()
-  // function and call CRichEditCtrl().SetEventMask()
-  // with the ENM_CHANGE flag ORed into the mask.
-	
-  // TODO: Add your control notification handler code here
-	
-}
 
-void CMakeSetupDialog::OnBrowse() 
+void CMakeSetupDialog::OnBrowseWhereSource() 
 {
   this->UpdateData();
   Browse(m_WhereSource, "Enter Path to Insight Source");
@@ -298,13 +236,8 @@ bool CMakeSetupDialog::Browse(CString &result, const char *title)
   return bSuccess;
 }
 
-void CMakeSetupDialog::OnOK() 
-{ 
- 
-  CDialog::OnOK();
-}
 
-void CMakeSetupDialog::OnButton3() 
+void CMakeSetupDialog::OnBrowseWhereBuild() 
 {
   this->UpdateData();
   Browse(m_WhereBuild, "Enter Path to Insight Build");
@@ -385,27 +318,45 @@ void CMakeSetupDialog::OnBuildProjects()
   ::SetCursor(LoadCursor(NULL, IDC_WAIT));
   // get all the info from the screen
   this->UpdateData();
-  // re-init the m_Makefile
-  this->InitMakefile();
-  // copy the GUI cache values into the cache manager
-  this->FillCacheManagerFromCacheEditor();
+  if(!m_BuildPathChanged)
+    {
+    // if the build path has not changed save the 
+    // current GUI values to the cache
+    this->SaveCacheFromGUI();
+    }
+  // Make sure we are working from the cache on disk
+  this->LoadCacheFromDiskToGUI();
+  // Create a makefile object
+  cmMakefile makefile;
+  makefile.SetMakefileGenerator(new cmMSProjectGenerator);
+  makefile.SetHomeDirectory(m_WhereSource);
+  makefile.SetStartOutputDirectory(m_WhereBuild);
+  makefile.SetHomeOutputDirectory(m_WhereBuild);
+  makefile.SetStartDirectory(m_WhereSource);
+  makefile.MakeStartDirectoriesCurrent();
   CString makefileIn = m_WhereSource;
   makefileIn += "/CMakeLists.txt";
-  m_Makefile.ReadListFile(makefileIn);
-  // Move this to the cache editor
-  m_Makefile.GenerateMakefile();
-  cmCacheManager::GetInstance()->SaveCache(&m_Makefile);
+  makefile.ReadListFile(makefileIn);
+  // Generate the project files
+  makefile.GenerateMakefile();
+  // Save the cache
+  cmCacheManager::GetInstance()->SaveCache(&makefile);
   // update the GUI with any new values in the caused by the
   // generation process
-  this->FillCacheEditorFromCacheManager();
+  this->LoadCacheFromDiskToGUI();
+  // save source and build paths to registry
   this->SaveToRegistry();
+  // path is not up-to-date
+  m_BuildPathChanged = false;
   ::SetCursor(LoadCursor(NULL, IDC_ARROW));
 }
 
 
  // copy from the cache manager to the cache edit list box
-void CMakeSetupDialog::FillCacheEditorFromCacheManager()
+void CMakeSetupDialog::FillCacheGUIFromCacheManager()
 {
+  // Clear the current GUI
+  m_CacheEntriesList.RemoveAll();
   const cmCacheManager::CacheEntryMap &cache =
     cmCacheManager::GetInstance()->GetCacheMap();
   for(cmCacheManager::CacheEntryMap::const_iterator i = cache.begin();
@@ -420,26 +371,26 @@ void CMakeSetupDialog::FillCacheEditorFromCacheManager()
           {
           m_CacheEntriesList.AddProperty(key,
                                          "ON",
-                                         PIT_CHECKBOX,"");
+                                         CPropertyList::CHECKBOX,"");
           }
         else
           {
           m_CacheEntriesList.AddProperty(key,
                                          "OFF",
-                                         PIT_CHECKBOX,"");
+                                         CPropertyList::CHECKBOX,"");
           }
         break;
       case cmCacheManager::PATH:
         m_CacheEntriesList.AddProperty(key, value.m_Value.c_str(),
-                                       PIT_FILE,"");
+                                       CPropertyList::PATH,"");
         break;
       case cmCacheManager::FILEPATH:
         m_CacheEntriesList.AddProperty(key, value.m_Value.c_str(),
-                                       PIT_FILE,"");
+                                       CPropertyList::FILE,"");
         break;
       case cmCacheManager::STRING:
         m_CacheEntriesList.AddProperty(key, value.m_Value.c_str(),
-                                       PIT_EDIT,"");
+                                       CPropertyList::EDIT,"");
         break;
       case cmCacheManager::INTERNAL:
         break;
@@ -449,7 +400,7 @@ void CMakeSetupDialog::FillCacheEditorFromCacheManager()
 }
 
   // copy from the list box to the cache manager
-void CMakeSetupDialog::FillCacheManagerFromCacheEditor()
+void CMakeSetupDialog::FillCacheManagerFromCacheGUI()
 { 
     cmCacheManager::GetInstance()->GetCacheMap();
   std::set<CPropertyItem*> items = m_CacheEntriesList.GetItems();
@@ -476,3 +427,46 @@ void CMakeSetupDialog::FillCacheManagerFromCacheEditor()
 
   
   
+
+void CMakeSetupDialog::OnChangeWhereBuild() 
+{
+  this->UpdateData();
+  std::string cachefile = m_WhereBuild;
+  cachefile += "/CMakeCache.txt";
+  if(cmSystemTools::FileExists(cachefile.c_str()))
+    {
+    m_CacheEntriesList.ShowWindow(SW_SHOW);
+    this->LoadCacheFromDiskToGUI();
+    m_BuildPathChanged = true;
+    }
+  else
+    {
+    m_CacheEntriesList.RemoveAll();
+    }
+  
+}
+
+void CMakeSetupDialog::OnChangeWhereSource() 
+{
+  this->UpdateData();
+}
+
+//! Load cache file from m_WhereBuild and display in GUI editor
+void CMakeSetupDialog::LoadCacheFromDiskToGUI()
+{
+  if(m_WhereBuild != "")
+    {
+    cmCacheManager::GetInstance()->LoadCache(m_WhereBuild);
+    this->FillCacheGUIFromCacheManager();
+    }
+}
+
+//! Save GUI values to cmCacheManager and then save to disk.
+void CMakeSetupDialog::SaveCacheFromGUI()
+{
+  this->FillCacheManagerFromCacheGUI();
+  if(m_WhereBuild != "")
+    {
+    cmCacheManager::GetInstance()->SaveCache(m_WhereBuild);
+    }
+}

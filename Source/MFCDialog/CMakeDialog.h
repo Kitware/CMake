@@ -48,11 +48,12 @@ protected:
   afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
   afx_msg void OnPaint();
   afx_msg HCURSOR OnQueryDragIcon();
-  afx_msg void OnChangeEdit1();
   afx_msg void OnBrowse();
   virtual void OnOK();
   afx_msg void OnButton3();
 	afx_msg void OnBuildProjects();
+	afx_msg void OnChangeWhereBuild();
+	afx_msg void OnChangeWhereSource();
 	//}}AFX_MSG
   DECLARE_MESSAGE_MAP()
 };

@@ -27,7 +27,7 @@ cmCustomCommand.o \
 cmCacheManager.o \
 cmSourceGroup.o
 
-DEPENDS = $(srcdir)/*.h $(srcdir)/*.cxx ${CMAKE_CONFIG_DIR}/CMake/Source/cmConfigure.h
+DEPENDS = $(srcdir)/*.h  ${CMAKE_CONFIG_DIR}/CMake/Source/cmConfigure.h
 
 cmCollectFlags.o : $(DEPENDS)
 CMakeBuildTargets.o  : $(DEPENDS)
@@ -40,7 +40,7 @@ cmSourceFile.o : $(DEPENDS)
 cmDirectory.o : $(DEPENDS)
 cmCustomCommand.o : $(DEPENDS)
 cmUnixMakefileGenerator.o : $(DEPENDS)
-cmCommands.o : $(DEPENDS)
+cmCommands.o : $(DEPENDS) $(srcdir)/*.cxx
 cmTarget.o : $(DEPENDS)
 cmCacheManager.o : $(DEPENDS)
 cmSourceGroup.o : $(DEPENDS)

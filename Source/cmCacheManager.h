@@ -50,10 +50,14 @@ public:
 
   
   //! Load a cache for given makefile.  Loads from ouput home.
-  bool LoadCache(cmMakefile*);
+  bool LoadCache(cmMakefile*); 
+  //! Load a cache for given makefile.  Loads from path/CMakeCache.txt.
+  bool LoadCache(const char* path);
   
-  //! Save cache for given makefile.  Saves to ouput home CMakeCache.txt
+  //! Save cache for given makefile.  Saves to ouput home CMakeCache.txt.
   bool SaveCache(cmMakefile*) const;
+  //! Save cache for given makefile.  Saves to ouput path/CMakeCache.txt
+  bool SaveCache(const char* path) const;
   
   //! Add an entry into the cache
   void AddCacheEntry(const char* key, const char* value, CacheEntryType type);

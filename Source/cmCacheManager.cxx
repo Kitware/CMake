@@ -59,7 +59,13 @@ cmCacheManager* cmCacheManager::GetInstance()
 
 bool cmCacheManager::LoadCache(cmMakefile* mf)
 {
-  std::string cacheFile = mf->GetHomeOutputDirectory();
+  return this->LoadCache(mf->GetHomeOutputDirectory());
+}
+
+
+bool cmCacheManager::LoadCache(const char* path)
+{
+  std::string cacheFile = path;
   cacheFile += "/CMakeCache.txt";
   // clear the old cache
   m_Cache.clear();
@@ -98,7 +104,13 @@ bool cmCacheManager::LoadCache(cmMakefile* mf)
 
 bool cmCacheManager::SaveCache(cmMakefile* mf) const
 {
-  std::string cacheFile = mf->GetHomeOutputDirectory();
+  return this->SaveCache(mf->GetHomeOutputDirectory());
+}
+
+
+bool cmCacheManager::SaveCache(const char* path) const
+{
+  std::string cacheFile = path;
   cacheFile += "/CMakeCache.txt";
   std::string tempFile = cacheFile;
   tempFile += ".tmp";
@@ -110,6 +122,7 @@ bool cmCacheManager::SaveCache(cmMakefile* mf) const
     return false;
     }
   fout << "# This is the CMakeCache file.\n"
+       << "# For build in directory: " << path << "\n"
        << "# You can edit this file to change values found and used by cmake.\n"
        << "# If you do not want to change any of the values, simply exit the editor.\n"
        << "# If you do want to change a value, simply edit, save, and exit the editor.\n"

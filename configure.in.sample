@@ -573,53 +573,6 @@ AC_CONFIG_SUBDIRS(Code/Numerics/vxl/vcl)
 #  and any sub directories recursivley 
 #
 
-echo "Searching CMakeLists.txt files for all sub directories"
-# the result of a the directories found is stored in allDirs
-allDirs=
-# start looking in the current directory .
-searchDirs=$srcdir
-# loop until the flag dirHasListsFile is set to falls
-dirHasListsFile=:
-while $dirHasListsFile; do
-    # reset the varible used to store the full paths to the directory
-    # outside the for loop
-    fullPathDirs=
-    # loop over all directorirs in the current searchDirs varible
-    for currentDir in $searchDirs;do
-	# look for a CMakeLists.txt file in the current directory
-	if test -e$currentDir/CMakeLists.txt; then
-	    # extract the SUBDIRS varible from the CMakeLists.txt file
-	    dirsInListsFile=`cat $currentDir/CMakeLists.txt | sed -e :a -e '/SUBDIRS.*\\\\$/N; s/\\\\\\n//; ta' | grep SUBDIRS | sed -e "s/SUBDIRS//g; s/(//g;s/)//g" `
-	    # add the current directory to any sub dirs found
-	    # in the above search of CMakeLists.txt
-	    for subdir in $dirsInListsFile;do
-		fullPathDirs="$fullPathDirs $currentDir/$subdir"
-		allDirs="$allDirs $currentDir/$subdir"
-	    done
-	fi
-    done
-    # now get ready to search any directories found in the above for loop
-    searchDirs=$fullPathDirs
-    # check to see if searchDirs is emtpy
-    if test "x$searchDirs" = x; then
-	dirHasListsFile=false
-    fi
-done  # continue while loop until dirHasListsFile=false
-
-if test "x$srcdir" = x.; then
-    allDirs=`echo $allDirs | sed -e "s|\./||g"`
-else
-    allDirs=`echo $allDirs | sed -e "s|$srcdir/||g"`
-fi
-SUBDIR_MAKEFILES=`echo $allDirs | sed -e 's|\\([[A-Za-z0-9_/]][[A-Za-z0-9_/]]*\\)|\1/Makefile:CMake/CMakeMakefileTemplate.in|g'`
-
-SUBDIR_CMAKE_TARGETS=`echo $allDirs | sed -e 's|\\([[A-Za-z0-9_/]][[A-Za-z0-9_/]]*\\)|\1/CMakeTargets.make:CMake/CMakeTargets.make.in|g'`
-
-#
-# *****************************************
-#  end of extract SUBDIRS out of CMakeLists.txt files
-# 
-
 #
 # Build two variables (SITE, INSTANCE) used for setting up testing
 #
@@ -673,8 +626,6 @@ CMake/CMakeVariables.make
 CMake/CMakeRules.make 
 CMake/Source/CMakeTargets.make:CMake/dummy.in 
 CMake/Source/Makefile
-$SUBDIR_MAKEFILES
-$SUBDIR_CMAKE_TARGETS
 )
 
 

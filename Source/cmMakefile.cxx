@@ -609,6 +609,37 @@ void cmMakefile::GenerateCacheOnly()
 {
   std::vector<cmMakefile*> makefiles;
   this->FindSubDirectoryCMakeListsFiles(makefiles);
+  for(std::vector<cmMakefile*>::iterator i = makefiles.begin();
+      i != makefiles.end(); ++i)
+    {
+    cmMakefile* mf = *i;
+    std::string source = mf->GetHomeDirectory();
+    source += "/CMake/CMakeMakefileTemplate.in";
+    cmSystemTools::MakeDirectory(mf->GetStartOutputDirectory());
+    std::string dest = mf->GetStartOutputDirectory();
+    dest += "/Makefile";
+    std::ofstream fout(dest.c_str());
+    if(!fout)
+      {
+      cmSystemTools::Error("Failed to open file for write " , dest.c_str());
+      }
+    else
+      {
+      if(strcmp(mf->GetHomeDirectory(), 
+                mf->GetHomeOutputDirectory()) == 0)
+        {
+        fout << "srcdir        = .\n\n";
+        }
+      else
+        {
+        fout << "srcdir        = " <<  mf->GetStartDirectory() << "\n";
+        fout << "VPATH         = " <<  mf->GetStartDirectory() << "\n";
+        }
+      }
+    fout << "include "
+         << mf->GetHomeOutputDirectory() << "/CMake/CMakeMaster.make\n";
+    }
+  
   for(unsigned int i =0; i < makefiles.size(); ++i)
     {
     delete makefiles[i];

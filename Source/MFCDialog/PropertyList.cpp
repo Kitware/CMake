@@ -4,11 +4,10 @@
 #include "stdafx.h"
 #include "PropertyList.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
+#define IDC_PROPCMBBOX   712
+#define IDC_PROPEDITBOX  713
+#define IDC_PROPBTNCTRL  714
+#define IDC_PROPCHECKBOXCTRL 715
 
 /////////////////////////////////////////////////////////////////////////////
 // CPropertyList
@@ -154,6 +153,8 @@ int CPropertyList::AddProperty(const char* name,
       {
       pItem = *p;
       pItem->m_Removed = false;
+      pItem->m_curValue = value; 
+      Invalidate();
       }
     }
   // if it is not found, then create a new one
@@ -197,7 +198,7 @@ void CPropertyList::OnSelchange()
   if (m_CheckBoxControl)
     m_CheckBoxControl.ShowWindow(SW_HIDE);
   
-  if (pItem->m_nItemType==PIT_COMBO)
+  if (pItem->m_nItemType==CPropertyList::COMBO)
     {
     //display the combo box.  If the combo box has already been
     //created then simply move it to the new location, else create it
@@ -207,7 +208,9 @@ void CPropertyList::OnSelchange()
     else
       {	
       rect.bottom += 100;
-      m_cmbBox.Create(CBS_DROPDOWNLIST | CBS_NOINTEGRALHEIGHT | WS_VISIBLE | WS_CHILD | WS_BORDER,
+      m_cmbBox.Create(CBS_DROPDOWNLIST 
+                      | CBS_NOINTEGRALHEIGHT | WS_VISIBLE 
+                      | WS_CHILD | WS_BORDER,
                       rect,this,IDC_PROPCMBBOX);
       m_cmbBox.SetFont(&m_SSerif8Font);
       }
@@ -237,7 +240,7 @@ void CPropertyList::OnSelchange()
     else
       m_cmbBox.SetCurSel(0);
     }
-  else if (pItem->m_nItemType==PIT_EDIT)
+  else if (pItem->m_nItemType==CPropertyList::EDIT)
     {
     //display edit box
     m_nLastBox = 1;
@@ -247,7 +250,8 @@ void CPropertyList::OnSelchange()
       m_editBox.MoveWindow(rect);
     else
       {	
-      m_editBox.Create(ES_LEFT | ES_AUTOHSCROLL | WS_VISIBLE | WS_CHILD | WS_BORDER,
+      m_editBox.Create(ES_LEFT | ES_AUTOHSCROLL | WS_VISIBLE 
+                       | WS_CHILD | WS_BORDER,
                        rect,this,IDC_PROPEDITBOX);
       m_editBox.SetFont(&m_SSerif8Font);
       }
@@ -259,14 +263,16 @@ void CPropertyList::OnSelchange()
     //set the text in the edit box to the property's current value
     m_editBox.SetWindowText(lBoxSelText);
     }
-  else if (pItem->m_nItemType == PIT_CHECKBOX)
+  else if (pItem->m_nItemType == CPropertyList::CHECKBOX)
     {
     rect.bottom -= 3;
     if (m_CheckBoxControl)
       m_CheckBoxControl.MoveWindow(rect);
     else
       {	
-      m_CheckBoxControl.Create("check",BS_CHECKBOX | BM_SETCHECK |BS_LEFTTEXT | WS_VISIBLE | WS_CHILD,
+      m_CheckBoxControl.Create("check",BS_CHECKBOX 
+                               | BM_SETCHECK |BS_LEFTTEXT 
+                               | WS_VISIBLE | WS_CHILD,
                                rect,this,IDC_PROPCHECKBOXCTRL);
       m_CheckBoxControl.SetFont(&m_SSerif8Font);
       }
@@ -377,7 +383,7 @@ void CPropertyList::OnButton()
 
   //display the appropriate common dialog depending on what type
   //of chooser is associated with the property
-  if (pItem->m_nItemType == PIT_COLOR)
+  if (pItem->m_nItemType == CPropertyList::COLOR)
     {
     COLORREF initClr;
     CString currClr = pItem->m_curValue;
@@ -413,7 +419,7 @@ void CPropertyList::OnButton()
       Invalidate();
       }
     }
-  else if (pItem->m_nItemType == PIT_FILE)
+  else if (pItem->m_nItemType == CPropertyList::FILE)
     {
     CString SelectedFile; 
     CString Filter("Gif Files (*.gif)|*.gif||");
@@ -438,7 +444,32 @@ void CPropertyList::OnButton()
       Invalidate();
       }
     }
-  else if (pItem->m_nItemType == PIT_FONT)
+   else if (pItem->m_nItemType == CPropertyList::PATH)
+    {
+    char szPathName[4096];
+    BROWSEINFO bi;
+    
+    bi.hwndOwner = m_hWnd;
+    bi.pidlRoot = NULL;
+    bi.pszDisplayName = (LPTSTR)szPathName;
+    bi.lpszTitle = "Select Directory";
+    bi.ulFlags = BIF_EDITBOX | BIF_RETURNONLYFSDIRS;
+    bi.lpfn = NULL;
+    
+    LPITEMIDLIST pidl = SHBrowseForFolder(&bi);
+    
+    BOOL bSuccess = SHGetPathFromIDList(pidl, szPathName);
+    CString SelectedFile; 
+    if(bSuccess)
+      {
+      SelectedFile = szPathName;
+      m_btnCtrl.ShowWindow(SW_HIDE);
+      pItem->m_curValue = SelectedFile;
+      m_Dirty = true;
+      Invalidate();
+      }
+    }
+  else if (pItem->m_nItemType == CPropertyList::FONT)
     {	
     CFontDialog FontDlg(NULL,CF_EFFECTS | CF_SCREENFONTS,NULL,this);
 		
@@ -598,3 +629,14 @@ void CPropertyList::OnDelete()
   Invalidate();
 }
 
+void CPropertyList::RemoveAll()
+{
+  int c = this->GetCount();
+  for(int i =0; i < c; ++i)
+    {
+    CPropertyItem* pItem = (CPropertyItem*) GetItemDataPtr(0);
+    pItem->m_Removed = true;
+    this->DeleteString(0);
+    }
+  Invalidate();
+}
