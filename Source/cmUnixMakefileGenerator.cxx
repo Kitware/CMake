@@ -341,7 +341,7 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
     std::vector<cmSourceFile> classes = l->second.GetSourceFiles();
     if (classes.begin() != classes.end())
       {
-      fout << "${" << l->first << "_SRC_OBJS} ";
+      fout << "$(" << l->first << "_SRC_OBJS) ";
       }
     }
   fout << "\n\n";
@@ -517,17 +517,17 @@ void cmUnixMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
                                                       const cmTarget &t)
 {
   std::string target = m_LibraryOutputPath + "lib" + name + "$(SHLIB_SUFFIX)";
-  std::string depend = "${";
+  std::string depend = "$(";
   depend += name;
-  depend += "_SRC_OBJS} ${" + std::string(name) + "_DEPEND_LIBS}";
+  depend += "_SRC_OBJS) $(" + std::string(name) + "_DEPEND_LIBS)";
   std::string command = "rm -f lib";
   command += name;
   command += "$(SHLIB_SUFFIX)";
-  std::string command2 = "$(CMAKE_CXX_COMPILER)  ${CMAKE_SHLIB_LINK_FLAGS} "
-    "${CMAKE_SHLIB_BUILD_FLAGS} ${CMAKE_CXXFLAGS} -o \\\n";
+  std::string command2 = "$(CMAKE_CXX_COMPILER)  $(CMAKE_SHLIB_LINK_FLAGS) "
+    "$(CMAKE_SHLIB_BUILD_FLAGS) $(CMAKE_CXXFLAGS) -o \\\n";
   command2 += "\t  ";
   command2 += m_LibraryOutputPath + "lib" + std::string(name) + "$(SHLIB_SUFFIX) \\\n";
-  command2 += "\t  ${" + std::string(name) + "_SRC_OBJS} ";
+  command2 += "\t  $(" + std::string(name) + "_SRC_OBJS) ";
   std::strstream linklibs;
   this->OutputLinkLibraries(linklibs, name, t);
   linklibs << std::ends;
@@ -545,14 +545,14 @@ void cmUnixMakefileGenerator::OutputModuleLibraryRule(std::ostream& fout,
                                                       const cmTarget &t)
 {
   std::string target = m_LibraryOutputPath + "lib" + std::string(name) + "$(MODULE_SUFFIX)";
-  std::string depend =  "${";
-  depend += std::string(name) + "_SRC_OBJS} ${" + std::string(name) + "_DEPEND_LIBS}";
+  std::string depend =  "$(";
+  depend += std::string(name) + "_SRC_OBJS) $(" + std::string(name) + "_DEPEND_LIBS)";
   std::string command = "rm -f lib" + std::string(name) + "$(MODULE_SUFFIX)";
-  std::string command2 = "$(CMAKE_CXX_COMPILER)  ${CMAKE_MODULE_LINK_FLAGS} "
-    "${CMAKE_MODULE_BUILD_FLAGS} ${CMAKE_CXXFLAGS} -o \\\n";
+  std::string command2 = "$(CMAKE_CXX_COMPILER)  $(CMAKE_MODULE_LINK_FLAGS) "
+    "$(CMAKE_MODULE_BUILD_FLAGS) $(CMAKE_CXXFLAGS) -o \\\n";
   command2 += "\t  ";
   command2 += m_LibraryOutputPath + "lib" + std::string(name) + "$(MODULE_SUFFIX) \\\n";
-  command2 += "\t  ${" + std::string(name) + "_SRC_OBJS} ";
+  command2 += "\t  $(" + std::string(name) + "_SRC_OBJS) ";
   std::strstream linklibs;
   this->OutputLinkLibraries(linklibs, std::string(name).c_str(), t);
   linklibs << std::ends;
@@ -571,15 +571,15 @@ void cmUnixMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout,
                                                       const cmTarget & t)
 {
   std::string target = m_LibraryOutputPath + "lib" + std::string(name) + ".a";
-  std::string depend = "${";
-  depend += std::string(name) + "_SRC_OBJS}";
-  std::string command = "${CMAKE_AR} ${CMAKE_AR_ARGS} ";
+  std::string depend = "$(";
+  depend += std::string(name) + "_SRC_OBJS)";
+  std::string command = "$(CMAKE_AR) $(CMAKE_AR_ARGS) ";
   command += m_LibraryOutputPath;
   command += "lib";
   command += name;
-  command += ".a ${";
-  command += std::string(name) + "_SRC_OBJS}";
-  std::string command2 = "${CMAKE_RANLIB} ";
+  command += ".a $(";
+  command += std::string(name) + "_SRC_OBJS)";
+  std::string command2 = "$(CMAKE_RANLIB) ";
   command2 += m_LibraryOutputPath;
   command2 += "lib";
   command2 += std::string(name) + ".a";
@@ -598,11 +598,11 @@ void cmUnixMakefileGenerator::OutputExecutableRule(std::ostream& fout,
                                                    const cmTarget & t)
 {
   std::string target = m_ExecutableOutputPath + name;
-  std::string depend = "${";
-  depend += std::string(name) + "_SRC_OBJS} ${" + std::string(name) + "_DEPEND_LIBS}";
+  std::string depend = "$(";
+  depend += std::string(name) + "_SRC_OBJS) $(" + std::string(name) + "_DEPEND_LIBS)";
   std::string command = 
-    "${CMAKE_CXX_COMPILER} ${CMAKE_SHLIB_LINK_FLAGS} ${CMAKE_CXXFLAGS} ";
-  command += "${" + std::string(name) + "_SRC_OBJS} ";
+    "$(CMAKE_CXX_COMPILER) $(CMAKE_SHLIB_LINK_FLAGS) $(CMAKE_CXXFLAGS) ";
+  command += "$(" + std::string(name) + "_SRC_OBJS) ";
   std::strstream linklibs;
   this->OutputLinkLibraries(linklibs, 0, t);
   linklibs << std::ends;
@@ -758,7 +758,7 @@ void cmUnixMakefileGenerator::OutputDependLibs(std::ostream& fout)
       // put out a rule to build the library if it does not exist
       fout << libpath.c_str()
            << ":\n\tcd " << cacheValue 
-           << "; ${MAKE} " << m_LibraryOutputPath << library.c_str() << "\n\n";
+           << "; $(MAKE) " << m_LibraryOutputPath << library.c_str() << "\n\n";
       }
     }
 }
@@ -841,8 +841,8 @@ void cmUnixMakefileGenerator::OutputMakeFlags(std::ostream& fout)
                        "Default target executed when no arguments are given to make",
                        "default_target",
                        0,
-                       "${MAKE} -${MAKEFLAGS} cmake.depends",
-                       "${MAKE} -${MAKEFLAGS} all");
+                       "$(MAKE) -$(MAKEFLAGS) cmake.depends",
+                       "$(MAKE) -$(MAKEFLAGS) all");
 }
 
 
@@ -911,14 +911,14 @@ OutputSubDirectoryVars(std::ostream& fout,
     fout << "\n";
     if(target1)
       {
-	fout << "\t@if test ! -d " << SubDirectories[i].c_str() << "; then ${MAKE} rebuild_cache; fi\n"
+	fout << "\t@if test ! -d " << SubDirectories[i].c_str() << "; then $(MAKE) rebuild_cache; fi\n"
 	  "\tcd " << SubDirectories[i].c_str()
-           << "; ${MAKE} -${MAKEFLAGS} " << target1 << "\n";
+           << "; $(MAKE) -$(MAKEFLAGS) " << target1 << "\n";
       }
     if(target2)
       {
       fout << "\t@cd " << SubDirectories[i].c_str()
-           << "; ${MAKE} -${MAKEFLAGS} " << target2 << "\n";
+           << "; $(MAKE) -$(MAKEFLAGS) " << target2 << "\n";
       }
     }
   fout << "\n\n";
@@ -1160,7 +1160,7 @@ void cmUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     "THREAD_LIBS              = @CMAKE_THREAD_LIBS@\n"
     "\n"
     "# set up the path to the rulesgen program\n"
-    "CMAKE_COMMAND = ${CMAKE_COMMAND}\n"
+    "CMAKE_COMMAND = ${CMAKE_COMMAND}"
     "\n"
     "\n"
     "\n";
@@ -1170,6 +1170,8 @@ void cmUnixMakefileGenerator::OutputMakeVariables(std::ostream& fout)
   fout << replaceVars.c_str();
   fout << "CMAKE_CURRENT_SOURCE = " << m_Makefile->GetStartDirectory() << "\n";
   fout << "CMAKE_CURRENT_BINARY = " << m_Makefile->GetStartOutputDirectory() << "\n";
+  fout << "CMAKE_SOURCE_DIR = " << m_Makefile->GetHomeDirectory() << "\n";
+  fout << "CMAKE_BINARY_DIR = " << m_Makefile->GetHomeOutputDirectory() << "\n";
 }
 
 
@@ -1178,11 +1180,11 @@ void cmUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
   const char* root
     = m_Makefile->GetDefinition("CMAKE_ROOT");
   fout << "INSTALL = " << root << "/Templates/install-sh -c\n";
-  fout << "INSTALL_PROGRAM = ${INSTALL}\n";
-  fout << "INSTALL_DATA =    ${INSTALL} -m 644\n";
+  fout << "INSTALL_PROGRAM = $(INSTALL)\n";
+  fout << "INSTALL_DATA =    $(INSTALL) -m 644\n";
   
   const cmTargets &tgts = m_Makefile->GetTargets();
-  fout << "install: ${SUBDIR_INSTALL}\n";
+  fout << "install: $(SUBDIR_INSTALL)\n";
   fout << "\t@echo \"Installing ...\"\n";
   
   const char* prefix
@@ -1256,7 +1258,7 @@ void cmUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
               }
 	    fout << *i
 		 << " " << prefix << l->second.GetInstallPath() << "; \\\n";
-	    fout << "\t elif [ -f ${srcdir}/" << *i << " ] ; then \\\n";
+	    fout << "\t elif [ -f $(srcdir)/" << *i << " ] ; then \\\n";
             // avoid using install-sh to install install-sh
             // does not work on windows....
             if(*i == "install-sh")
@@ -1267,7 +1269,7 @@ void cmUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
               {
               fout << "\t   $(INSTALL_DATA) ";
               }
-	    fout << "${srcdir}/" << *i 
+	    fout << "$(srcdir)/" << *i 
 		 << " " << prefix << l->second.GetInstallPath() << "; \\\n";
 	    fout << "\telse \\\n";
 	    fout << "\t   echo \" ERROR!!! Unable to find: " << *i 
@@ -1296,7 +1298,7 @@ void cmUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
               }
 	    fout << *i
 		 << " " << prefix << l->second.GetInstallPath() << "; \\\n";
-	    fout << "\t elif [ -f ${srcdir}/" << *i << " ] ; then \\\n";
+	    fout << "\t elif [ -f $(srcdir)/" << *i << " ] ; then \\\n";
             // avoid using install-sh to install install-sh
             // does not work on windows....
             if(*i == "install-sh")
@@ -1307,7 +1309,7 @@ void cmUnixMakefileGenerator::OutputInstallRules(std::ostream& fout)
               {
               fout << "\t   $(INSTALL_PROGRAM) ";
               }
-	    fout << "${srcdir}/" << *i 
+	    fout << "$(srcdir)/" << *i 
 		 << " " << prefix << l->second.GetInstallPath() << "; \\\n";
 	    fout << "\telse \\\n";
 	    fout << "\t   echo \" ERROR!!! Unable to find: " << *i 
@@ -1331,38 +1333,38 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
   this->OutputMakeRule(fout, 
                        "Default build rule",
                        "all",
-                       "cmake.depends ${TARGETS} ${SUBDIR_BUILD} ${CMAKE_COMMAND}",
+                       "cmake.depends $(TARGETS) $(SUBDIR_BUILD)",
                        0);
   this->OutputMakeRule(fout, 
                        "remove generated files",
                        "clean",
-                       "${SUBDIR_CLEAN}",
-                       "rm -f ${CLEAN_OBJECT_FILES} ${EXECUTABLES} ${TARGETS}");
+                       "$(SUBDIR_CLEAN)",
+                       "rm -f $(CLEAN_OBJECT_FILES) $(EXECUTABLES) $(TARGETS)");
   this->OutputMakeRule(fout, 
                        "Rule to build the cmake.depends and Makefile as side effect",
                        "cmake.depends",
-                       "${CMAKE_COMMAND} ${CMAKE_MAKEFILE_SOURCES} ",
-                       "${CMAKE_COMMAND} "
-                       "-S${CMAKE_CURRENT_SOURCE} -O${CMAKE_CURRENT_BINARY} "
+                       "$(CMAKE_MAKEFILE_SOURCES) ",
+                       "$(CMAKE_COMMAND) "
+                       "-S$(CMAKE_CURRENT_SOURCE) -O$(CMAKE_CURRENT_BINARY) "
                        "-H${CMAKE_SOURCE_DIR} -B${CMAKE_BINARY_DIR}");
   this->OutputMakeRule(fout, 
                        "Rule to force the build of cmake.depends",
                        "depend",
-                       "${SUBDIR_DEPEND}",
-                       "${CMAKE_COMMAND} "
-                       "-S${CMAKE_CURRENT_SOURCE} -O${CMAKE_CURRENT_BINARY} "
+                       "$(SUBDIR_DEPEND)",
+                       "$(CMAKE_COMMAND) "
+                       "-S$(CMAKE_CURRENT_SOURCE) -O$(CMAKE_CURRENT_BINARY) "
                        "-H${CMAKE_SOURCE_DIR} -B${CMAKE_BINARY_DIR}");  
   this->OutputMakeRule(fout, 
-                       "Rebuild the cache",
+                       "Rebuild CMakeCache.txt file",
                        "rebuild_cache",
                        "${CMAKE_BINARY_DIR}/CMakeCache.txt",
-                       "${CMAKE_COMMAND} "
+                       "$(CMAKE_COMMAND) "
                        "-H${CMAKE_SOURCE_DIR} -B${CMAKE_BINARY_DIR}");
   this->OutputMakeRule(fout, 
-                       "Rebuild the cache",
+                       "Create CMakeCache.txt file",
                        "${CMAKE_BINARY_DIR}/CMakeCache.txt",
 		       0,
-                       "${CMAKE_COMMAND} "
+                       "$(CMAKE_COMMAND) "
                        "-H${CMAKE_SOURCE_DIR} -B${CMAKE_BINARY_DIR}");
 
   this->OutputMakeRule(fout, 
@@ -1373,33 +1375,6 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
                        0);
   
   this->OutputSourceObjectBuildRules(fout);
-  // see if there is already a target for a cmake executable in this
-  // makefile
-  bool buildingCMake = false;
-  std::map<cmStdString, cmTarget>& targets = m_Makefile->GetTargets();
-  for(cmTargets::const_iterator l = targets.begin(); 
-      l != targets.end(); l++)
-    {
-    if ((l->second.GetType() == cmTarget::EXECUTABLE ||
-         l->second.GetType() == cmTarget::WIN32_EXECUTABLE) &&
-        l->second.IsInAll())
-      {
-      if(l->first == "cmake")
-        {
-        buildingCMake = true;
-        }
-      }
-    }
-  // do not put this command in for the cmake project
-  if(!buildingCMake)
-    {
-    this->OutputMakeRule(fout, 
-                         "Rebuild cmake dummy rule",
-                         "${CMAKE_COMMAND}",
-                         0,
-                         "echo \"cmake might be out of date\"");
-    }
-
   // find ctest
   std::string ctest = m_Makefile->GetDefinition("CMAKE_COMMAND");
   ctest = cmSystemTools::GetFilenamePath(ctest.c_str());
@@ -1474,18 +1449,19 @@ void cmUnixMakefileGenerator::OutputSourceObjectBuildRules(std::ostream& fout)
         if(rules.find(shortName) == rules.end())
           {
           rules.insert(shortName);
-          fout << shortName.c_str() << ".o : " << sourceName.c_str() << "\n";
+          fout << shortName.c_str() << ".o : " << source->GetFullPath().c_str() << "\n";
           std::string ext = source->GetSourceExtension();
           if ( ext == "cxx" || ext == "cc" || ext == "cpp" || ext == "C" || 
 	       ext =="m"    || ext == "M"  || ext == "mm")
             {
-            fout << "\t${CMAKE_CXX_COMPILER} ${CMAKE_CXXFLAGS} " << exportsDef.c_str()
-                 << (shared? "${CMAKE_SHLIB_CFLAGS} ":"") << "${INCLUDE_FLAGS} -c $< -o $@\n\n";
+            fout << "\t$(CMAKE_CXX_COMPILER) $(CMAKE_CXXFLAGS) " << exportsDef.c_str()
+                 << (shared? "$(CMAKE_SHLIB_CFLAGS) ":"") 
+                 << "$(INCLUDE_FLAGS) -c $< -o $@\n\n ";
             }
           else if ( ext == "c" )
             {
-            fout << "\t${CMAKE_C_COMPILER} ${CMAKE_CFLAGS} " << exportsDef.c_str()
-                 << (shared? "${CMAKE_SHLIB_CFLAGS} ":"") << "${INCLUDE_FLAGS} -c $< -o $@\n\n";
+            fout << "\t$(CMAKE_C_COMPILER) $(CMAKE_CFLAGS) " << exportsDef.c_str()
+                 << (shared? "$(CMAKE_SHLIB_CFLAGS) ":"") << "$(INCLUDE_FLAGS) -c $< -o $@\n\n";
             }
           }
         }
