@@ -30,7 +30,39 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)
   cmSystemTools::ExpandListArguments(argsIn, args);
   
   std::vector<std::string>::iterator i = args.begin();
-
+  std::string extraInclude;
+  std::string function;
+  std::vector<std::string> tests;
+  // extract extra include and function ot
+  for(; i != args.end(); i++)
+    {
+    if(*i == "EXTRA_INCLUDE")
+      {
+      ++i;
+      if(i == args.end())
+        {
+        this->SetError("incorrect arguments to EXTRA_INCLUDE");
+        return false;
+        }
+      extraInclude = *i;
+      }
+    else if(*i == "FUNCTION")
+      {
+      ++i;
+      if(i == args.end())
+        {
+        this->SetError("incorrect arguments to FUNCTION");
+        return false;
+        }
+      function = *i;
+      }
+    else
+      {
+      tests.push_back(*i);
+      }
+    }
+  i = tests.begin();
+  
   // Name of the source list
 
   const char* sourceList = i->c_str();
@@ -59,8 +91,13 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)
   fout << 
     "#include <ctype.h>\n"
     "#include <stdio.h>\n"
-    "#include <string.h>\n"
-
+    "#include <string.h>\n";
+  if(extraInclude.size())
+    {
+    fout << "#include \"" << extraInclude << "\"\n";
+    }
+  
+  fout <<
     "\n"
     "// Forward declare test functions\n"
     "\n";
@@ -75,8 +112,12 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)
   // For the moment:
   //   - replace spaces ' ', ':' and '/' with underscores '_'
 
-  for(i = testsBegin; i != args.end(); ++i)
+  for(i = testsBegin; i != tests.end(); ++i)
     {
+    if(*i == "EXTRA_INCLUDE")
+      {
+      break;
+      }
     std::string func_name = *i;
     cmSystemTools::ConvertToUnixSlashes(func_name);
     cmSystemTools::ReplaceString(func_name, " ", "_");
@@ -101,7 +142,7 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)
 
   int numTests = 0;
   std::vector<std::string>::iterator j;
-  for(i = testsBegin, j = tests_func_name.begin(); i != args.end(); ++i, ++j)
+  for(i = testsBegin, j = tests_func_name.begin(); i != tests.end(); ++i, ++j)
     {
     fout << 
       "  {\n"
@@ -138,7 +179,14 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)
     "  int NumTests = " << numTests << ";\n"
     "  int i;\n"
     "  \n"
-    "  // If no test name was given\n"
+    "  // If no test name was given\n";
+  if(function.size())
+    {
+    fout << "  // process command line with user function\n"
+         << "  " << function << "(&ac, &av);\n";
+    }
+  
+  fout <<
     "  if (ac < 2)\n"
     "    {\n"
     "    // If there is only one test, then run it with the arguments\n"
@@ -218,7 +266,7 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& argsIn)
                 false);
   m_Makefile->AddSource(cfile, sourceList);
   
-  for(i = testsBegin; i != args.end(); ++i)
+  for(i = testsBegin; i != tests.end(); ++i)
     {
     cmSourceFile cfile;
     cfile.SetIsAnAbstractClass(false);

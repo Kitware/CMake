@@ -67,13 +67,16 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "CREATE_TEST_SOURCELIST(SourceListName DriverName test1 test2 test3"
+      "CREATE_TEST_SOURCELIST(SourceListName DriverName test1 test2 test3 EXTRA_INCLUDE include.h FUNCTION function)"
       "The list of source files needed to build the testdriver will be in SourceListName.\n"
       "DriverName.cxx is the name of the test driver program.\n"
       "The rest of the arguments consist of a list of test source files, can be "
       "; separated.  Each test source file should have a function in it that "
       "is the same name as the file with no extension (foo.cxx should have int foo();) "
-      "DriverName.cxx will be able to call each of the tests by name on the command line.";
+      "DriverName.cxx will be able to call each of the tests by name on the command line. "
+      "If EXTRA_INCLUDE is specified, then the next argument is included into the generated file. "
+      "If FUNCTION is specified, then the next argument is taken as a function name that is passed "
+      "a pointer to ac and av.  This can be used to add extra command line processing to each test. ";
     }
   
   cmTypeMacro(cmCreateTestSourceList, cmCommand);
