@@ -59,6 +59,8 @@ public:
   static cmMakefileGenerator* CreateGenerator(const char* name);
   ///! Register a generator
   static void RegisterGenerator(cmMakefileGenerator*);
+  ///! delete all registered generators, useful for clean up
+  static void UnRegisterGenerators();
   ///! Get the names of the current registered generators
   static void GetRegisteredGenerators(std::vector<std::string>& names);
   

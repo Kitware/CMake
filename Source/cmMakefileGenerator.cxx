@@ -50,6 +50,17 @@ void cmMakefileGenerator::SetMakefile(cmMakefile* mf)
   m_Makefile = mf;
 }
 
+void cmMakefileGenerator::UnRegisterGenerators()
+{
+   for(std::map<cmStdString, cmMakefileGenerator*>::iterator i
+        = s_RegisteredGenerators.begin(); 
+      i != s_RegisteredGenerators.end(); ++i)
+    {
+    delete i->second;
+    }
+   s_RegisteredGenerators = std::map<cmStdString, cmMakefileGenerator*>();
+}
+
 void cmMakefileGenerator::GetRegisteredGenerators(std::vector<std::string>& names)
 {
   for(std::map<cmStdString, cmMakefileGenerator*>::iterator i
