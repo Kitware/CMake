@@ -1,8 +1,8 @@
 AUX_SOURCE_DIRECTORY(ExtraSources LibrarySources)
 
 # SOURCE_FILES_REMOVE is used for Coverage
-SOURCE_FILES(LibrarySources file2 create_file.cxx)
-SOURCE_FILES_REMOVE(LibrarySources create_file.cxx) 
+SOURCE_FILES(LibrarySources file2 GENERATED nonexisting_file)
+SOURCE_FILES_REMOVE(LibrarySources GENERATED nonexisting_file) 
 ADD_LIBRARY(CMakeTestLibrary LibrarySources)
 
 SOURCE_FILES(SharedLibrarySources sharedFile)
