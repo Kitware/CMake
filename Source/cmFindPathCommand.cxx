@@ -86,7 +86,11 @@ bool cmFindPathCommand::InitialPass(std::vector<std::string> const& argsIn)
     tryPath += args[1];
     if(cmSystemTools::FileExists(tryPath.c_str()))
       {
-      path[k] = cmSystemTools::CollapseFullPath(path[k].c_str());
+      path[k] = cmSystemTools::CollapseFullPath(path[k].c_str()); 
+      if(path[k].size() && path[k][path[k].size()-1] == '/')
+        {
+        path[k] = path[k].substr(0, path[k].size()-1);
+        }
       m_Makefile->AddCacheDefinition(args[0].c_str(),
                                      path[k].c_str(),
                                      helpString.c_str(),

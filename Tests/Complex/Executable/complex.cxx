@@ -42,9 +42,9 @@ void ForceStringUse()
 
 // ======================================================================
 
-void cmFailed(const char* Message, const char* m2= "")
+void cmFailed(const char* Message, const char* m2= "", const char* m3 = "")
 {
-  std::cout << "FAILED: " << Message << m2 << "\n"; 
+  std::cout << "FAILED: " << Message << m2 << m3 << "\n"; 
   cm_failed++;
 }
 
@@ -774,10 +774,11 @@ int main()
 #ifndef REGISTRY_TEST_PATH
   cmFailed("the CONFIGURE_FILE command is broken, REGISTRY_TEST_PATH is not defined.");
 #else
+  std::cout << "REGISTRY_TEST_PATH == " << REGISTRY_TEST_PATH << "\n";
   if(stricmp(REGISTRY_TEST_PATH, BINARY_DIR "/registry_dir") != 0)
     {
     cmFailed("the 'read registry value' function or CONFIGURE_FILE command is broken. REGISTRY_TEST_PATH == ", 
-             REGISTRY_TEST_PATH);
+             REGISTRY_TEST_PATH, " is not " BINARY_DIR "/registry_dir");
     }
   else
     {
