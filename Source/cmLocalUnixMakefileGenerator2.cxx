@@ -527,7 +527,7 @@ cmLocalUnixMakefileGenerator2
       depends.push_back(i->c_str());
       }
     }
-  depends.push_back(ruleFileName);
+  this->AppendRuleDepend(depends, ruleFileName.c_str());
 
   // Write the dependency generation rule.
   {
@@ -723,7 +723,7 @@ cmLocalUnixMakefileGenerator2
   this->AppendCustomDepend(depends, cc);
 
   // Add a dependency on the rule file itself.
-  depends.push_back(ruleFileName);
+  this->AppendRuleDepend(depends, ruleFileName.c_str());
 
   // Write the rule.
   const char* comment = 0;
@@ -807,7 +807,7 @@ cmLocalUnixMakefileGenerator2
   this->AppendTargetDepends(depends, target);
 
   // Add a dependency on the rule file itself.
-  depends.push_back(ruleFileName);
+  this->AppendRuleDepend(depends, ruleFileName.c_str());
 
   // Write the rule.
   this->WriteMakeRule(ruleFileStream, 0,
@@ -1585,7 +1585,7 @@ cmLocalUnixMakefileGenerator2
   this->AppendTargetDepends(depends, target);
 
   // Add a dependency on the rule file itself.
-  depends.push_back(ruleFileName);
+  this->AppendRuleDepend(depends, ruleFileName);
 
   // Construct the full path to the executable that will be generated.
   std::string targetFullPath = m_ExecutableOutputPath;
@@ -1850,7 +1850,7 @@ cmLocalUnixMakefileGenerator2
   this->AppendTargetDepends(depends, target);
 
   // Add a dependency on the rule file itself.
-  depends.push_back(ruleFileName);
+  this->AppendRuleDepend(depends, ruleFileName);
 
   // Get the language to use for linking this library.
   const char* linkLanguage =
@@ -2073,7 +2073,7 @@ cmLocalUnixMakefileGenerator2
     }
 
   // Depend on the rule file itself.
-  depends.push_back(ruleFileName);
+  this->AppendRuleDepend(depends, ruleFileName);
 
   // Write the rule.
   this->WriteMakeRule(ruleFileStream, 0,
@@ -2602,6 +2602,21 @@ cmLocalUnixMakefileGenerator2
     {
     // This is a path to a file.  Just trust that it will be present.
     depends.push_back(name);
+    }
+}
+
+//----------------------------------------------------------------------------
+void
+cmLocalUnixMakefileGenerator2
+::AppendRuleDepend(std::vector<std::string>& depends,
+                   const char* ruleFileName)
+{
+  // Add a dependency on the rule file itself unless an option to skip
+  // it is specifically enabled by the user or project.
+  const char* nodep = m_Makefile->GetDefinition("CMAKE_SKIP_RULE_DEPENDENCY");
+  if(!nodep || cmSystemTools::IsOff(nodep))
+    {
+    depends.push_back(ruleFileName);
     }
 }
 
