@@ -119,7 +119,9 @@ class cmake
   /**
    * Handle a command line invocation of cmake.
    */
-  int Run(const std::vector<std::string>&args);
+  int Run(const std::vector<std::string>&args)
+    { this->Run(args, false); }
+  int Run(const std::vector<std::string>&args, bool noconfigure);
 
   /**
    * Generate the SourceFilesList from the SourceLists. This should only be

@@ -909,7 +909,7 @@ bool cmake::CacheVersionMatches()
 }
 
 // handle a command line invocation
-int cmake::Run(const std::vector<std::string>& args)
+int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
 {
   // Process the arguments
   this->SetArgs(args);
@@ -940,6 +940,11 @@ int cmake::Run(const std::vector<std::string>& args)
  
   std::string systemFile = this->GetHomeOutputDirectory();
   systemFile += "/CMakeSystem.cmake";
+
+  if ( noconfigure )
+    {
+    return 0;
+    }
 
   int ret = 0;
   // if not local or the cmake version has changed since the last run
