@@ -145,15 +145,6 @@ int main(int argc, char** argv)
       {
       cacheDir = arg.substr(2);
       }
-    if(arg.find("-help",0) != std::string::npos ||
-       arg.find("--help",0) != std::string::npos ||
-       arg.find("/?",0) != std::string::npos ||
-       arg.find("-usage",0) != std::string::npos)
-      {
-      cmake msg;
-      msg.Usage(args[0].c_str());
-      return -1;
-      }
     }
 
   cmSystemTools::DisableRunCommandOutput();
