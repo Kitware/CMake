@@ -564,7 +564,6 @@ int ctest::BuildDirectory()
   // > 1 - warning
   std::vector<int> markedLines(lines.size(), 0);
   
-  cmCTestBuildErrorWarning cerw;
   int cc;
   // Errors
   for ( cc = 0; cmCTestErrorMatches[cc]; cc ++ )
