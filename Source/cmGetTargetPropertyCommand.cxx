@@ -39,7 +39,7 @@ bool cmGetTargetPropertyCommand::InitialPass(
       return true;
       }
     }
-  m_Makefile->AddDefinition(var, "NOT_FOUND");
+  m_Makefile->AddDefinition(var, "NOTFOUND");
   return true;
 }
 

@@ -39,7 +39,7 @@ bool cmGetSourceFilePropertyCommand::InitialPass(
       }
     }
 
-  m_Makefile->AddDefinition(var, "NOT_FOUND");
+  m_Makefile->AddDefinition(var, "NOTFOUND");
   return true;
 }
 
