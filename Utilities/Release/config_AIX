@@ -6,6 +6,6 @@ CXX="xlC"
 write_cache()
 {
 cat > CMakeCache.txt <<EOF
-BUILD_TESTING:BOOL=OFF
+BUILD_TESTING:BOOL=ON
 EOF
 }

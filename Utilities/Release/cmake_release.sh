@@ -283,11 +283,25 @@ build()
 }
 
 #-----------------------------------------------------------------------------
+tests()
+{
+    [ -z "${DONE_tests}" ] || return 0 ; DONE_tests="yes"
+    config || return 1
+    [ -f "cmake-${VERSION}-${PLATFORM}/Source/ccmake" ] || build || return 1
+    echo "Running tests ..." &&
+    (
+        cd "cmake-${VERSION}-${PLATFORM}" &&
+        rm -rf Tests &&
+        ./Source/ctest -V
+    ) >Logs/tests.log 2>&1 || error_log Logs/tests.log
+}
+
+#-----------------------------------------------------------------------------
 install()
 {
     [ -z "${DONE_install}" ] || return 0 ; DONE_install="yes"
     config || return 1
-    [ -f "cmake-${VERSION}-${PLATFORM}/Source/ccmake" ] || build || return 1
+    [ -d "cmake-${VERSION}-${PLATFORM}/Tests/Simple" ] || tests || return 1
     echo "Running make install ..." &&
     (
         rm -rf Install &&
