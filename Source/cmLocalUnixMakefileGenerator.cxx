@@ -768,6 +768,18 @@ cmLocalUnixMakefileGenerator::ExpandRuleVariables(std::string& s,
     }
   if(targetBase)
     {
+    // special case for quoted paths with spaces 
+    // if you see <TARGET_BASE>.lib then put the .lib inside
+    // the quotes, same for .dll
+    if((strlen(targetBase) > 1) && targetBase[0] == '\"')
+      {
+      std::string base = targetBase;
+      base[base.size()-1] = '.';
+      std::string baseLib = base + "lib\"";
+      std::string baseDll = base + "dll\"";
+      cmSystemTools::ReplaceString(s, "<TARGET_BASE>.lib", baseLib.c_str());
+      cmSystemTools::ReplaceString(s, "<TARGET_BASE>.dll", baseDll.c_str());
+      }
     cmSystemTools::ReplaceString(s, "<TARGET_BASE>", targetBase);
     }
   if(linkLibs)
