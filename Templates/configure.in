@@ -477,7 +477,20 @@ case $system in
     ;;
 esac
 
-# if running on darwin no explicit template instantiations
+CMAKE_NO_EXPLICIT_TEMPLATE_INSTANTIATION=""
+if test $ac_cv_prog_gxx = no; then
+    echo $ac_n "checking whether ${CXX} supports explicit instantiation""... $ac_c" 1>&6
+  echo 'template<class T>class x{};template class x<int>;' > conftest.cc
+  if test -z "`${CXX} -c conftest.cc 2>&1`"; then
+    echo "$ac_t""yes" 1>&6
+  else
+    echo "$ac_t""no" 1>&6
+    CMAKE_NO_EXPLICIT_TEMPLATE_INSTANTIATION="1"
+  fi
+  rm -f conftest*
+fi
+# if running on darwin no explicit template instantiations even though
+# syntax is supported.
 case $system in 
   Darwin*) 
     CMAKE_NO_EXPLICIT_TEMPLATE_INSTANTIATION="1"
