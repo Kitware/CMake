@@ -131,7 +131,7 @@ bool cmCTestSubmit::SubmitUsingFTP(const cmStdString& localprefix,
         }
 
       // enable uploading
-      ::curl_easy_setopt(curl, CURLOPT_UPLOAD, TRUE) ;
+      ::curl_easy_setopt(curl, CURLOPT_UPLOAD, 1) ;
 
       cmStdString local_file = localprefix + "/" + files[cc];
       cmStdString upload_as = url + "/" + remoteprefix + files[cc];
@@ -171,8 +171,8 @@ bool cmCTestSubmit::SubmitUsingFTP(const cmStdString& localprefix,
       fclose(ftpfile);
       if ( res )
         {
-        std::cout << "  Error when uploading file: " << local_file.c_str() << std::endl;
-        std::cout << "  Error message was: " << error_buffer << std::endl;
+        std::cerr << "  Error when uploading file: " << local_file.c_str() << std::endl;
+        std::cerr << "  Error message was: " << error_buffer << std::endl;
         *m_LogFile << "  Error when uploading file: " << local_file.c_str() << std::endl
           << "  Error message was: " << error_buffer << std::endl;
         ::curl_easy_cleanup(curl);
@@ -228,10 +228,10 @@ bool cmCTestSubmit::SubmitUsingHTTP(const cmStdString& localprefix,
         }
 
       /* enable uploading */
-      curl_easy_setopt(curl, CURLOPT_UPLOAD, TRUE) ;
+      curl_easy_setopt(curl, CURLOPT_UPLOAD, 1) ;
 
       /* HTTP PUT please */
-      curl_easy_setopt(curl, CURLOPT_PUT, TRUE);
+      curl_easy_setopt(curl, CURLOPT_PUT, 1);
       if ( m_Verbose )
         {
         ::curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
@@ -302,7 +302,7 @@ bool cmCTestSubmit::SubmitUsingHTTP(const cmStdString& localprefix,
       fclose(ftpfile);
       if ( res )
         {
-        std::cout << "  Error when uploading file: " << local_file.c_str() << std::endl;
+        std::cerr << "  Error when uploading file: " << local_file.c_str() << std::endl;
         *m_LogFile << "  Error when uploading file: " << local_file.c_str() << std::endl
           << "  Error message was: " << error_buffer << std::endl;
         ::curl_easy_cleanup(curl);
@@ -396,7 +396,7 @@ bool cmCTestSubmit::TriggerUsingHTTP(const std::vector<cmStdString>& files,
       curl_easy_setopt(curl, CURLOPT_URL, turl.c_str());
       if ( curl_easy_perform(curl) )
         {
-        std::cout << "  Error when triggering: " << turl.c_str() << std::endl;
+        std::cerr << "  Error when triggering: " << turl.c_str() << std::endl;
         *m_LogFile << "\tTrigerring failed with error: " << error_buffer << std::endl;
         ::curl_easy_cleanup(curl);
         ::curl_global_cleanup(); 
@@ -486,7 +486,7 @@ bool cmCTestSubmit::SubmitUsingSCP(
       retVal = cmsysProcess_GetExitException(cp);
       if ( m_Verbose )
         {
-        std::cout << "\tThere was an exception: " << retVal << std::endl;
+        std::cerr << "\tThere was an exception: " << retVal << std::endl;
         }
       *m_LogFile << "\tThere was an exception: " << retVal << std::endl;
       problems ++;
@@ -495,7 +495,7 @@ bool cmCTestSubmit::SubmitUsingSCP(
       {
       if ( m_Verbose )
         {
-        std::cout << "\tThere was a timeout" << std::endl;
+        std::cerr << "\tThere was a timeout" << std::endl;
         }
       *m_LogFile << "\tThere was a timeout" << std::endl;
       problems ++;
@@ -504,7 +504,7 @@ bool cmCTestSubmit::SubmitUsingSCP(
       {
       if ( m_Verbose )
         {
-        std::cout << "\tError executing SCP: "
+        std::cerr << "\tError executing SCP: "
           << cmsysProcess_GetErrorString(cp) << std::endl;
         }
       *m_LogFile << "\tError executing SCP: "
