@@ -88,7 +88,7 @@ IF(BUILD_TESTING)
   ENDIF(NOT UPDATE_TYPE)
 
   IF(NOT UPDATE_TYPE)
-    MESSAGE(SEND_ERROR "Cannot determine repository type. Please set UPDATE_TYPE to 'cvs' or 'svn'")
+    MESSAGE(STATUS "Cannot determine repository type. Please set UPDATE_TYPE to 'cvs' or 'svn'. CTest update will not work.")
   ENDIF(NOT UPDATE_TYPE)
 
   IF(UPDATE_TYPE MATCHES "[Cc][Vv][Ss]")
