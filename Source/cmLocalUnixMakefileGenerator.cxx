@@ -1339,7 +1339,6 @@ void cmLocalUnixMakefileGenerator::OutputCheckDepends(std::ostream& fout)
   fout << "default:\n";
   fout << "\t$(MAKE) $(MAKESILENT) -f cmake.check_depends all\n"
        << "\t$(MAKE) $(MAKESILENT) -f cmake.check_depends cmake.depends\n\n";
-  fout << "all: ";
   for(std::map<cmStdString, cmTarget>::const_iterator target = targets.begin(); 
       target != targets.end(); ++target)
     {
@@ -1363,7 +1362,7 @@ void cmLocalUnixMakefileGenerator::OutputCheckDepends(std::ostream& fout)
             if(emittedLowerPath.insert(lowerpath).second)
               {
               emitted.insert(dependfile);
-              fout << " \\\n" << dependfile ;
+              fout << "all:: " << dependfile << "\n";
               }
             }
           }
@@ -1371,13 +1370,12 @@ void cmLocalUnixMakefileGenerator::OutputCheckDepends(std::ostream& fout)
       }
     }
   fout << "\n\n# if any of these files changes run make dependlocal\n";
-  fout << "cmake.depends: ";
   std::set<std::string>::iterator i;
   for(i = emitted.begin(); i != emitted.end(); ++i)
     {
-    fout << " \\\n" << *i;
+    fout << "cmake.depends:: " << *i << 
+      "\n\t$(MAKE) $(MAKESILENT) dependlocal\n\n";
     }
-  fout << "\n\t$(MAKE) $(MAKESILENT) dependlocal\n\n";
   fout << "\n\n";
   fout << "# if a .h file is removed then run make dependlocal\n\n";
   for(std::set<std::string>::iterator i = emitted.begin();
