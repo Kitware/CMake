@@ -12,3 +12,8 @@ FIND_LIBRARY(MPI_LIBRARY
              NAMES mpi mpich
              PATHS /usr/lib /usr/local/lib /usr/local/mpi/lib)
 
+FIND_LIBRARY(MPI_EXTRA_LIBRARY 
+             NAMES mpi++
+             PATHS /usr/lib /usr/local/lib /usr/local/mpi/lib)
+
+MARK_AS_ADVANCED(MPI_INCLUDE_PATH MPI_LIBRARY MPI_EXTRA_LIBRARY)
