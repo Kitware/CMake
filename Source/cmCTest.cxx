@@ -2157,7 +2157,6 @@ void cmCTest::ProcessDirectory(cmCTest::tm_VectorOfStrings &passed,
     if ( m_ShowOnly )
       {
       std::cerr.width(3);
-      std::cerr.setf(std::ios_base::right);
       std::cerr << cnt << "/";
       std::cerr.width(3);
       std::cerr << tmsize << " Testing ";
