@@ -179,7 +179,8 @@ CMakeSetupDialog::CMakeSetupDialog(const CMakeCommandLineInfo& cmdInfo,
     {
     this->m_WhereSource = cmdInfo.m_WhereSource;
     this->m_WhereBuild = cmdInfo.m_WhereBuild;
-    this->m_GeneratorChoiceString = cmdInfo.m_GeneratorChoiceString;
+    this->m_GeneratorDialog.m_GeneratorChoiceString = 
+      cmdInfo.m_GeneratorChoiceString;
     this->m_AdvancedValues = cmdInfo.m_AdvancedValues;
     }
   else
@@ -187,7 +188,8 @@ CMakeSetupDialog::CMakeSetupDialog(const CMakeCommandLineInfo& cmdInfo,
     this->m_WhereSource = _T("");
     this->m_WhereBuild = _T("");
     this->m_AdvancedValues = FALSE;
-    this->m_GeneratorChoiceString = cmdInfo.m_GeneratorChoiceString;
+    this->m_GeneratorDialog.m_GeneratorChoiceString = 
+      cmdInfo.m_GeneratorChoiceString;
     this->ChangeDirectoriesFromFile((LPCTSTR)cmdInfo.m_LastUnknownParameter);
     }
 
@@ -219,12 +221,10 @@ void CMakeSetupDialog::DoDataExchange(CDataExchange* pDX)
   CDialog::DoDataExchange(pDX);
   //{{AFX_DATA_MAP(CMakeSetupDialog)
         DDX_Control(pDX, IDC_AdvancedValues, m_AdvancedValuesControl);
-        DDX_Control(pDX, IDC_BuildForLabel, m_BuildForLabel);
         DDX_Control(pDX, IDC_BROWSE_SOURCE, m_BrowseSource);
         DDX_Control(pDX, IDC_BROWSE_BUILD, m_BrowseBuild);
         DDX_Control(pDX, IDC_DELETE_BUTTON, m_DeleteButton);
         DDX_Control(pDX, IDC_HELP_BUTTON, m_HelpButton);
-        DDX_Control(pDX, IDC_Generator, m_GeneratorChoice);
         DDX_Control(pDX, IDC_OK, m_OKButton);
         DDX_Control(pDX, IDCANCEL, m_CancelButton);
         DDX_CBStringExact(pDX, IDC_WhereSource, m_WhereSource);
@@ -236,7 +236,6 @@ void CMakeSetupDialog::DoDataExchange(CDataExchange* pDX)
         DDX_Control(pDX, IDC_MouseHelpCaption, m_MouseHelp);
         DDX_Control(pDX, IDC_PROGRESS, m_StatusDisplay);
         DDX_Control(pDX, IDC_BuildProjects, m_Configure);
-        DDX_CBStringExact(pDX, IDC_Generator, m_GeneratorChoiceString);
         DDX_Check(pDX, IDC_AdvancedValues, m_AdvancedValues);
         //}}AFX_DATA_MAP
 }
@@ -256,7 +255,6 @@ BEGIN_MESSAGE_MAP(CMakeSetupDialog, CDialog)
   ON_WM_SIZE()
   ON_WM_GETMINMAXINFO()
   ON_BN_CLICKED(IDC_OK, OnOk)
-  ON_CBN_EDITCHANGE(IDC_Generator, OnEditchangeGenerator)
   ON_BN_CLICKED(IDC_DELETE_BUTTON, OnDeleteButton)
   ON_BN_CLICKED(IDC_HELP_BUTTON, OnHelpButton)
   ON_BN_CLICKED(IDC_AdvancedValues, OnAdvancedValues)
@@ -317,53 +315,11 @@ BOOL CMakeSetupDialog::OnInitDialog()
   SetIcon(m_hIcon, FALSE);                // Set small icon
   // Load source and build dirs from registry
   this->LoadFromRegistry();
-  std::vector<std::string> names;
-  this->m_CMakeInstance->GetRegisteredGenerators(names);
-  for(std::vector<std::string>::iterator i = names.begin();
-      i != names.end(); ++i)
-    {
-    m_GeneratorChoice.AddString(i->c_str());
-    }
-  if (m_GeneratorChoiceString == _T("")) 
-    {
-    // check for vs7 in registry then decide what default to use
-    std::string mp;
-    mp = "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\8.0\\Setup;Dbghelp_path]";
-    cmSystemTools::ExpandRegistryValues(mp);
-    if(mp != "/registry")
-      {
-      m_GeneratorChoiceString = "Visual Studio 8 2005";
-      }
-    else
-      {
-      mp = "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\7.1;InstallDir]";
-      cmSystemTools::ExpandRegistryValues(mp);
-      if (mp != "/registry")
-        {
-        m_GeneratorChoiceString = "Visual Studio 7 .NET 2003";
-        }
-      else
-        {
-        mp = "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\7.0;InstallDir]";
-        cmSystemTools::ExpandRegistryValues(mp);
-        if (mp != "/registry")
-          {
-          m_GeneratorChoiceString = "Visual Studio 7";
-          }
-        else
-          {
-          m_GeneratorChoiceString = "Visual Studio 6";
-          }
-        }
-      }
-    }
-  
 
   // try to load the cmake cache from disk
   this->LoadCacheFromDiskToGUI();
   m_WhereBuildControl.LimitText(2048);
   m_WhereSourceControl.LimitText(2048);
-  m_GeneratorChoice.LimitText(2048);
     
   // Set the version number
   char tmp[1024];
@@ -686,7 +642,7 @@ void CMakeSetupDialog::RunCMake(bool generateProjectFiles)
     m_CMakeInstance->SetHomeOutputDirectory(m_WhereBuild);
     m_CMakeInstance->SetStartOutputDirectory(m_WhereBuild);
     m_CMakeInstance->SetGlobalGenerator(
-      m_CMakeInstance->CreateGlobalGenerator(m_GeneratorChoiceString));
+      m_CMakeInstance->CreateGlobalGenerator(m_GeneratorDialog.m_GeneratorChoiceString));
     m_CMakeInstance->SetCMakeCommand(m_PathToExecutable);
     m_CMakeInstance->LoadCache();
     if(m_CMakeInstance->Configure() != 0)
@@ -714,10 +670,28 @@ void CMakeSetupDialog::RunCMake(bool generateProjectFiles)
 // Callback for build projects button
 void CMakeSetupDialog::OnConfigure() 
 {
- //  if(!m_GeneratorPicked)
-//     {
-//     // generator has not been picked add one here
-//     }
+  if(!m_GeneratorPicked)
+    {
+    m_GeneratorDialog.m_CMakeInstance = this->m_CMakeInstance;
+    if(m_GeneratorDialog.DoModal() != IDOK)
+      {
+      return;
+      }
+    // save the generator choice in the registry
+    HKEY hKey;
+    DWORD dwDummy;
+    
+    if(RegCreateKeyEx(HKEY_CURRENT_USER, 
+                      m_RegistryKey,
+                      0, "", REG_OPTION_NON_VOLATILE, KEY_READ|KEY_WRITE, 
+                      NULL, &hKey, &dwDummy) == ERROR_SUCCESS) 
+      {
+      // save some values
+      RegSetValueEx(hKey, _T("LastGenerator"), 0, REG_SZ, 
+                    (CONST BYTE *)(const char *)m_GeneratorDialog.m_GeneratorChoiceString, 
+                    m_GeneratorDialog.m_GeneratorChoiceString.GetLength());
+      }
+    }
   
   // enable error messages each time configure is pressed
   cmSystemTools::EnableMessages();
@@ -992,9 +966,9 @@ void CMakeSetupDialog::LoadCacheFromDiskToGUI()
       {
       m_GeneratorPicked = true;
       std::string curGen = it.GetValue();
-      if(m_GeneratorChoiceString != curGen.c_str())
+      if(m_GeneratorDialog.m_GeneratorChoiceString != curGen.c_str())
         {
-        m_GeneratorChoiceString = curGen.c_str();
+        m_GeneratorDialog.m_GeneratorChoiceString = curGen.c_str();
         this->UpdateData(FALSE);
         }
       }
@@ -1049,18 +1023,6 @@ void CMakeSetupDialog::OnSize(UINT nType, int cx, int cy)
                                          0, 0,
                                          SWP_NOCOPYBITS | 
                                          SWP_NOSIZE | SWP_NOZORDER);
-    m_BuildForLabel.GetWindowRect(&cRect);
-    this->ScreenToClient(&cRect);
-    m_BuildForLabel.SetWindowPos(&wndTop, cRect.left + deltax, 
-                                 cRect.top, 
-                                 0, 0,
-                                 SWP_NOCOPYBITS | SWP_NOSIZE | SWP_NOZORDER);
-    m_GeneratorChoice.GetWindowRect(&cRect);
-    this->ScreenToClient(&cRect);
-    m_GeneratorChoice.SetWindowPos(&wndTop, cRect.left + deltax, 
-                                   cRect.top, 
-                                   0, 0,
-                                   SWP_NOCOPYBITS | SWP_NOSIZE | SWP_NOZORDER);
     m_BrowseSource.GetWindowRect(&cRect);
     this->ScreenToClient(&cRect);
     m_BrowseSource.SetWindowPos(&wndTop, cRect.left + deltax, 
@@ -1196,13 +1158,6 @@ void CMakeSetupDialog::OnOk()
     }
 }
 
-void CMakeSetupDialog::OnEditchangeGenerator() 
-{
-        // TODO: Add your control notification handler code here
-        
-}
-
-
 // Create a shortcut on the desktop with the current Source/Build dir.
 int CMakeSetupDialog::CreateShortcut() 
 {
@@ -1296,7 +1251,7 @@ int CMakeSetupDialog::CreateShortcut()
       }
     
     // Set the arguments of the shortcut.
-    CString args = " /H=\"" + m_WhereSource + "\" /B=\"" + m_WhereBuild + "\" /G=\"" + m_GeneratorChoiceString + "\" /A=\"" + (m_AdvancedValues ? "TRUE" : "FALSE") + "\"";
+    CString args = " /H=\"" + m_WhereSource + "\" /B=\"" + m_WhereBuild + "\" /G=\"" + m_GeneratorDialog.m_GeneratorChoiceString + "\" /A=\"" + (m_AdvancedValues ? "TRUE" : "FALSE") + "\"";
     
     hres = psl->SetArguments(args);
 
@@ -1445,7 +1400,7 @@ void CMakeSetupDialog::ChangeDirectoriesFromFile(const char* arg)
       path = ConvertToWindowsPath(it.GetValue());
       m_WhereSource = path.c_str();
       
-      m_GeneratorChoiceString = _T("");
+      m_GeneratorDialog.m_GeneratorChoiceString = _T("");
       return;
       }
     }

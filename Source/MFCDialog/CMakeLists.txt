@@ -1,11 +1,19 @@
 SET( SRCS 
+  CMakeSetup.h
   CMakeSetup.cpp
+  MakeHelp.h
   MakeHelp.cpp
+  CMakeGenDialog.h
+  CMakeGenDialog.cpp
   CMakeSetup.rc
+  CMakeSetupDialog.h
   CMakeSetupDialog.cpp
+  PathDialog.h
   PathDialog.cpp
   PropertyList.cpp
+  StdAfx.h
   StdAfx.cpp
+  resource.h
   CMakeCommandLineInfo.cpp
 )
 

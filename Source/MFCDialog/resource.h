@@ -10,6 +10,7 @@
 #define IDS_CREATESHORTCUT              102
 #define IDR_MAINFRAME                   128
 #define IDD_CMAKE_HELP_DIALOG           133
+#define IDD_GEN_DIALOG                  134
 #define IDC_WhereSource                 1001
 #define IDC_BUTTON2                     1002
 #define IDC_BROWSE_SOURCE               1002
@@ -37,7 +38,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        134
+#define _APS_NEXT_RESOURCE_VALUE        135
 #define _APS_NEXT_COMMAND_VALUE         32771
 #define _APS_NEXT_CONTROL_VALUE         1030
 #define _APS_NEXT_SYMED_VALUE           102

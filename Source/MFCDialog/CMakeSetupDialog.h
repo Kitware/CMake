@@ -26,6 +26,8 @@ PURPOSE.  See the above copyright notices for more information.
 
 
 #include "PropertyList.h"
+#include "CMakeGenDialog.h"
+
 /////////////////////////////////////////////////////////////////////////////
 // CMakeSetupDialog dialog
 
@@ -61,12 +63,10 @@ protected:
   //{{AFX_DATA(CMakeSetupDialog)
   enum { IDD = IDD_CMakeSetupDialog_DIALOG };
   CButton       m_AdvancedValuesControl;
-  CStatic       m_BuildForLabel;
   CButton       m_BrowseSource;
   CButton       m_BrowseBuild;
   CButton m_HelpButton;
   CButton m_DeleteButton;
-  CComboBox       m_GeneratorChoice;
   CButton m_OKButton;
   CButton m_CancelButton;
   CString       m_WhereSource;
@@ -79,7 +79,6 @@ protected:
   CStatic       m_MouseHelp;
   CStatic       m_StatusDisplay;
   CButton       m_Configure;
-  CString m_GeneratorChoiceString;
   BOOL    m_AdvancedValues;
   //}}AFX_DATA
   
@@ -122,7 +121,6 @@ protected:
   afx_msg void OnSize(UINT nType, int cx, int cy);
   afx_msg void OnGetMinMaxInfo( MINMAXINFO FAR* lpMMI );
   afx_msg void OnOk();
-  afx_msg void OnEditchangeGenerator();
   afx_msg void OnHelpButton();
   afx_msg void OnDeleteButton();
   afx_msg void OnAdvancedValues();
@@ -139,6 +137,9 @@ protected:
   HCURSOR m_Cursor;
   bool m_RunningConfigure;
   bool m_GeneratorPicked;
+
+  CCMakeGenDialog m_GeneratorDialog;
+
 };
 
 //{{AFX_INSERT_LOCATION}}
