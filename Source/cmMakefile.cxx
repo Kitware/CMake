@@ -52,7 +52,6 @@ cmMakefile::cmMakefile()
   this->AddSourceGroup("Header Files", "\\.(h|hh|hpp|hxx|hm|inl)$");
   this->AddDefaultCommands();
   this->AddDefaultDefinitions();
-  cmCacheManager::GetInstance()->DefineCache(this);
 }
 
 unsigned int cmMakefile::GetCacheMajorVersion()
@@ -885,7 +884,7 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
                                                 bool atOnly) const
 {
   // This method replaces ${VAR} and @VAR@ where VAR is looked up
-  // in the m_Definitions map, if not found in the map, nothing is expanded.
+  // with GetDefinition(), if not found in the map, nothing is expanded.
   // It also supports the $ENV{VAR} syntax where VAR is looked up in
   // the current environment variables.
 

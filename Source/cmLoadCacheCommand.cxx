@@ -73,6 +73,8 @@ bool cmLoadCacheCommand::InitialPass(std::vector<std::string> const& argsIn)
       }
     }
 
+  // Loop over each build directory listed in the arguments.  Each
+  // directory has a cache file.
   for(i=0; i<args.size(); i++)
     {
     if ((args[i] == "EXCLUDE") || (args[i] == "INCLUDE_INTERNALS"))
@@ -82,7 +84,6 @@ bool cmLoadCacheCommand::InitialPass(std::vector<std::string> const& argsIn)
     m_Makefile->ExpandVariablesInString(args[i]);
     cmCacheManager::GetInstance()->LoadCache(args[i].c_str(), false,
 					     excludes, includes);
-    cmCacheManager::GetInstance()->DefineCache(m_Makefile);
     }
 
 

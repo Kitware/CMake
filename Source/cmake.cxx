@@ -384,9 +384,6 @@ int cmake::Generate(const std::vector<std::string>& args, bool buildMakefiles)
   // compute system info
   gen->ComputeSystemInfo();
 
-  // Transfer the cache into the makefile's definitions.
-  cmCacheManager::GetInstance()->DefineCache(&mf);
-
   std::string lf = mf.GetStartDirectory();
   lf +=  "/CMakeLists.txt";
   if(!mf.ReadListFile(lf.c_str()))

@@ -58,9 +58,6 @@ public:
 		 std::set<std::string>& excludes,
 		 std::set<std::string>& includes);
 
-  ///! Put cache definitions into makefile
-  void DefineCache(cmMakefile*); 
-  
   ///! Save cache for given makefile.  Saves to ouput home CMakeCache.txt.
   bool SaveCache(cmMakefile*) ;
   ///! Save cache for given makefile.  Saves to ouput path/CMakeCache.txt
