@@ -526,7 +526,7 @@ void cmLocalUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
   std::string regexp = ".*\\";
   regexp += linkSuffix;
   regexp += "$";
-  cmRegularExpression hasSuffix(linkSuffix.c_str());
+  cmRegularExpression hasSuffix(regexp.c_str());
   std::string librariesLinked;
   const cmTarget::LinkLibraries& libs = tgt.GetLinkLibraries();
   for(cmTarget::LinkLibraries::const_iterator lib = libs.begin();
