@@ -343,7 +343,6 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
        << "\t\t\t\tName=\"VCCLCompilerTool\"\n"
        << "\t\t\t\tAdditionalOptions=\"";
 
-  cmSystemTools::ReplaceString(flags, "\"", "&quot;");
   // check the flags for the run time library flag options
   // if there is a match set the run time flag
   if(flags.find("MTd") != flags.npos)
@@ -382,7 +381,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     cmSystemTools::ReplaceString(flags, "/ML", "");
     runtime = 4;
     }
-  fout << flags;
+  fout << this->EscapeForXML(flags.c_str()).c_str();
 
   fout << " -DCMAKE_INTDIR=\\&quot;" << configName << "\\&quot;" 
        << "\"\n";
@@ -885,7 +884,7 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
             if(compileFlags.size())
               {
               fout << "\t\t\t\t\tAdditionalOptions=\""
-                   << compileFlags << "\"\n";
+                   << this->EscapeForXML(compileFlags.c_str()) << "\"\n";
               }
             if(additionalDeps.length())
               {
@@ -936,7 +935,7 @@ WriteCustomRule(std::ostream& fout,
       fout << "\t\t\t\t\t<Tool\n"
            << "\t\t\t\t\tName=\"VCCLCompilerTool\"\n"
            << "\t\t\t\t\tAdditionalOptions=\""
-           << compileFlags << "\"/>\n";
+           << this->EscapeForXML(compileFlags) << "\"/>\n";
       }
     fout << "\t\t\t\t\t<Tool\n"
          << "\t\t\t\t\tName=\"VCCustomBuildTool\"\n"
