@@ -8,16 +8,28 @@
 #  JAVA_ARCHIVE        = the full path to the Java archiver
 #
 
+SET(JAVA_BIN_PATH
+  /usr/bin
+  /usr/lib/java/bin
+  /usr/share/java/bin
+  /usr/local/bin
+  /usr/local/java/bin
+  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.4;JavaHome]/bin"
+  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.3;JavaHome]/bin"
+  )
 FIND_PROGRAM(JAVA_RUNTIME
   NAMES java
+  PATHS ${JAVA_BIN_PATH}
 )
 
 FIND_PROGRAM(JAVA_ARCHIVE
   NAMES jar
+  PATHS ${JAVA_BIN_PATH}
 )
 
 FIND_PROGRAM(JAVA_COMPILE
   NAMES javac
+  PATHS ${JAVA_BIN_PATH}
 )
 
 MARK_AS_ADVANCED(
