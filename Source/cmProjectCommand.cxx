@@ -68,6 +68,14 @@ bool cmProjectCommand::Invoke(std::vector<std::string>& args)
 		  m_Makefile->GetCurrentDirectory(),
 		  "Value Computed by CMake", cmCacheManager::STATIC);
   
+  bindir = "PROJECT_BINARY_DIR";
+  srcdir = "PROJECT_SOURCE_DIR";
+
+  m_Makefile->AddDefinition(bindir.c_str(),
+	  m_Makefile->GetCurrentOutputDirectory());
+  m_Makefile->AddDefinition(srcdir.c_str(),
+	  m_Makefile->GetCurrentDirectory());
+
   return true;
 }
 
