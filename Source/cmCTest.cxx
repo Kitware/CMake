@@ -47,7 +47,7 @@ static std::string CurrentTime()
   struct tm* t = localtime(&currenttime);
   //return ::CleanString(ctime(&currenttime));
   char current_time[1024];
-  strftime(current_time, 1000, "%a %b %e %T %Z %Y", t);
+  strftime(current_time, 1000, "%a %b %d %H:%M:%S %Z %Y", t);
   //std::cout << "Current_Time: " << current_time << std::endl;
   return ::CleanString(current_time);
 }
