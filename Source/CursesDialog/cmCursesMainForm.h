@@ -4,6 +4,7 @@
 #include <iostream>
 #include <curses.h>
 #include <form.h>
+#include "cmStandardIncludes.h"
 #include "cmCursesForm.h"
 
 class cmCursesCacheEntryComposite;
