@@ -50,6 +50,9 @@ public:
   /** Called from command-line hook to scan dependencies.  */
   static bool ScanDependencies(std::vector<std::string> const& args);
 
+  /** Called from command-line hook to check dependencies.  */
+  static void CheckDependencies(const char* depCheck);
+
 protected:
 
   void GenerateMakefile();
@@ -57,6 +60,7 @@ protected:
   void GenerateTargetRuleFile(const cmTarget& target);
   void GenerateObjectRuleFile(const cmTarget& target,
                               const cmSourceFile& source);
+  std::string GenerateDependsMakeFile(const char* file);
   void WriteMakeRule(std::ostream& os,
                      const char* comment,
                      const char* preEcho,
@@ -112,6 +116,10 @@ protected:
 
   static bool ScanDependenciesC(const char* objFile, const char* srcFile,
                                 std::vector<std::string> const& includes);
+  static void CheckDependencies(const char* dir, const char* file);
+  static void WriteEmptyDependMakeFile(const char* file,
+                                       const char* depMarkFileFull,
+                                       const char* depMakeFileFull);
 private:
   // Map from target name to build directory containing it for
   // jump-and-build targets.
@@ -121,6 +129,9 @@ private:
     std::string m_FilePath;
   };
   std::map<cmStdString, RemoteTarget> m_JumpAndBuild;
+
+  // List the files for which to check dependency integrity.
+  std::set<cmStdString> m_CheckDependFiles;
 };
 
 #endif

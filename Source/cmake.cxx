@@ -25,11 +25,7 @@
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 # include "cmVariableWatch.h"
 # include "cmVersion.h"
-#endif
-
-
-#if defined(CMAKE_BUILD_WITH_CMAKE)
-#include "cmLocalUnixMakefileGenerator2.h"
+# include "cmLocalUnixMakefileGenerator2.h"
 #endif
 
 // only build kdevelop generator on non-windows platforms
@@ -317,9 +313,9 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       cmSystemTools::ConvertToUnixSlashes(path);
       this->SetHomeOutputDirectory(path.c_str());
       }
-    else if((i < args.size()-1) && (arg.find("--check-rerun",0) == 0))
+    else if((i < args.size()-1) && (arg.find("--check-build-system",0) == 0))
       {
-      m_CheckRerun = args[++i];
+      m_CheckBuildSystem = args[++i];
       }
     else if(arg.find("-V",0) == 0)
       {
@@ -1268,8 +1264,8 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
   if(m_ScriptMode || !m_Local || !this->CacheVersionMatches() ||
      !cmSystemTools::FileExists(systemFile.c_str()) )
     {
-    // Check whether we should really do a generate.
-    if(!this->CheckRerun())
+    // Check the state of the build system to see if we need to regenerate.
+    if(!this->CheckBuildSystem())
       {
       return 0;
       }
@@ -1572,16 +1568,23 @@ void cmake::UpdateConversionPathTable()
     }
 }
 
-int cmake::CheckRerun()
+//----------------------------------------------------------------------------
+int cmake::CheckBuildSystem()
 {
+  // This method will check the integrity of the build system if the
+  // option was given on the command line.  It reads the given file to
+  // determine whether CMake should rerun.  If it does rerun then the
+  // generation step will check the integrity of dependencies.  If it
+  // does not then we need to check the integrity here.
+
   // If no file is provided for the check, we have to rerun.
-  if(m_CheckRerun.size() == 0)
+  if(m_CheckBuildSystem.size() == 0)
     {
     return 1;
     }
 
   // If the file provided does not exist, we have to rerun.
-  if(!cmSystemTools::FileExists(m_CheckRerun.c_str()))
+  if(!cmSystemTools::FileExists(m_CheckBuildSystem.c_str()))
     {
     return 1;
     }
@@ -1594,7 +1597,7 @@ int cmake::CheckRerun()
   std::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
   lg->SetGlobalGenerator(&gg);
   cmMakefile* mf = lg->GetMakefile();
-  if(!mf->ReadListFile(0, m_CheckRerun.c_str()) ||
+  if(!mf->ReadListFile(0, m_CheckBuildSystem.c_str()) ||
      cmSystemTools::GetErrorOccuredFlag())
     {
     // There was an error reading the file.  Just rerun.
@@ -1629,6 +1632,14 @@ int cmake::CheckRerun()
         }
       }
     }
+
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  // We do not need to rerun CMake.  Check dependency integrity.
+  if(const char* depCheck = mf->GetDefinition("CMAKE_DEPENDS_CHECK"))
+    {
+    cmLocalUnixMakefileGenerator2::CheckDependencies(depCheck);
+    }
+#endif
 
   // No need to rerun.
   return 0;

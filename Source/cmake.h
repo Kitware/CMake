@@ -286,7 +286,12 @@ protected:
   
   ///! used by Run
   int LocalGenerate();
-  int CheckRerun();
+
+  /**
+   * Method called to check build system integrity at build time.
+   * Returns 1 if CMake should rerun and 0 otherwise.
+   */
+  int CheckBuildSystem();
 
   /**
    * Generate CMAKE_ROOT and CMAKE_COMMAND cache entries
@@ -307,7 +312,7 @@ private:
   std::string m_CMakeCommand;
   std::string m_CXXEnvironment;
   std::string m_CCEnvironment;
-  std::string m_CheckRerun;
+  std::string m_CheckBuildSystem;
   bool m_DebugTryCompile;
   
   void UpdateConversionPathTable();
