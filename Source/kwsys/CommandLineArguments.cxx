@@ -20,6 +20,7 @@
 #include KWSYS_HEADER(stl/map)
 #include KWSYS_HEADER(stl/set)
 #include KWSYS_HEADER(ios/sstream)
+#include KWSYS_HEADER(ios/iostream)
 
 #include <stdio.h>
 

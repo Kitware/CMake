@@ -13,14 +13,16 @@
 =========================================================================*/
 #include <kwsys/CommandLineArguments.hxx>
 
+#include <kwsys/ios/iostream>
+
 void* random_ptr = (void*)0x123;
 
 int argument(const char* arg, const char* value, void* call_data)
 {
-  cout << "Got argument: \"" << arg << "\" value: \"" << (value?value:"(null)") << "\"" << endl;
+  kwsys_ios::cout << "Got argument: \"" << arg << "\" value: \"" << (value?value:"(null)") << "\"" << kwsys_ios::endl;
   if ( call_data != random_ptr )
     {
-    cerr << "Problem processing call_data" << endl;
+    kwsys_ios::cerr << "Problem processing call_data" << kwsys_ios::endl;
     return 0;
     }
   return 1;
@@ -28,10 +30,10 @@ int argument(const char* arg, const char* value, void* call_data)
 
 int unknown_argument(const char* argument, void* call_data)
 {
-  cout << "Got unknown argument: \"" << argument << "\"" << endl;
+  kwsys_ios::cout << "Got unknown argument: \"" << argument << "\"" << kwsys_ios::endl;
   if ( call_data != random_ptr )
     {
-    cerr << "Problem processing call_data" << endl;
+    kwsys_ios::cerr << "Problem processing call_data" << kwsys_ios::endl;
     return 0;
     }
   return 1;
@@ -83,28 +85,28 @@ int main(int argc, char* argv[])
 
   if ( !arg.Parse() )
     {
-    cerr << "Problem parsing arguments" << endl;
+    kwsys_ios::cerr << "Problem parsing arguments" << kwsys_ios::endl;
     res = 1;
     }
-  cout << "Help: " << arg.GetHelp() << endl;
+  kwsys_ios::cout << "Help: " << arg.GetHelp() << kwsys_ios::endl;
 
-  cout << "Some int variable was set to: " << some_int_variable << endl;
-  cout << "Some double variable was set to: " << some_double_variable << endl;
+  kwsys_ios::cout << "Some int variable was set to: " << some_int_variable << kwsys_ios::endl;
+  kwsys_ios::cout << "Some double variable was set to: " << some_double_variable << kwsys_ios::endl;
   if ( some_string_variable )
     {
-    cout << "Some string variable was set to: " << some_string_variable << endl;
+    kwsys_ios::cout << "Some string variable was set to: " << some_string_variable << kwsys_ios::endl;
     delete [] some_string_variable;
     }
   else
     {
-    cerr << "Problem setting string variable" << endl;
+    kwsys_ios::cerr << "Problem setting string variable" << kwsys_ios::endl;
     res = 1;
     }
-  cout << "Some STL String variable was set to: " << some_stl_string_variable.c_str() << endl;
-  cout << "Some bool variable was set to: " << some_bool_variable << endl;
-  cout << "Some bool variable was set to: " << some_bool_variable1 << endl;
-  cout << "bool_arg1 variable was set to: " << bool_arg1 << endl;
-  cout << "bool_arg2 variable was set to: " << bool_arg2 << endl;
-  cout << endl;
+  kwsys_ios::cout << "Some STL String variable was set to: " << some_stl_string_variable.c_str() << kwsys_ios::endl;
+  kwsys_ios::cout << "Some bool variable was set to: " << some_bool_variable << kwsys_ios::endl;
+  kwsys_ios::cout << "Some bool variable was set to: " << some_bool_variable1 << kwsys_ios::endl;
+  kwsys_ios::cout << "bool_arg1 variable was set to: " << bool_arg1 << kwsys_ios::endl;
+  kwsys_ios::cout << "bool_arg2 variable was set to: " << bool_arg2 << kwsys_ios::endl;
+  kwsys_ios::cout << kwsys_ios::endl;
   return res;
 }
