@@ -665,7 +665,16 @@ void cmMakefile::AddLibrary(const char* lname, int shared,
     default:
       target.SetType(cmTarget::STATIC_LIBRARY);
     }
+  // Clear its dependencies. Otherwise, dependencies might persist
+  // over changes in CMakeLists.txt, making the information stale and
+  // hence useless.
+  std::string depname = lname;
+  depname += "_LIB_DEPENDS";
+  cmCacheManager::GetInstance()->
+    AddCacheEntry(depname.c_str(), "",
+                  "Dependencies for target", cmCacheManager::INTERNAL);
 
+  
   target.SetInAll(true);
   target.GetSourceLists() = srcs;
   std::vector<std::string>::iterator j;
@@ -723,14 +732,6 @@ void cmMakefile::AddLibrary(const char* lname, int shared,
 		      cmCacheManager::INTERNAL);
     }
 
-  // Clear its dependencies. Otherwise, dependencies might persist
-  // over changes in CMakeLists.txt, making the information stale and
-  // hence useless.
-  std::string depname = lname;
-  depname += "_LIB_DEPENDS";
-  cmCacheManager::GetInstance()->
-    AddCacheEntry(depname.c_str(), "",
-                  "Dependencies for target", cmCacheManager::INTERNAL);
 }
 
 void cmMakefile::AddExecutable(const char *exeName, 

@@ -80,6 +80,25 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
 {
   m_LinkLibraries.push_back( std::pair<std::string, cmTarget::LinkLibraryType>(lib,llt) );
 
+  if(llt != cmTarget::GENERAL)
+    {
+    std::string linkTypeName = this->CanonicalLibraryName(lib);
+    linkTypeName += "_LINK_TYPE";
+    switch(llt)
+      {
+      case cmTarget::DEBUG:
+        mf.AddCacheDefinition(linkTypeName.c_str(),
+                              "debug", "Library is used for debug links only", 
+                              cmCacheManager::INTERNAL);
+        break;
+      case cmTarget::OPTIMIZED:
+        mf.AddCacheDefinition(linkTypeName.c_str(),
+                              "optimized", "Library is used for debug links only", 
+                              cmCacheManager::INTERNAL);
+        break;
+      }
+    }
+  
   mf.AddDependencyToCache( target, lib );
 }
 
@@ -127,7 +146,7 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
     // if a variable expands to nothing.
     if (lib->first.size() == 0) continue;
 
-    std::string cname = CanonicalLibraryName(lib->first);
+    std::string cname = this->CanonicalLibraryName(lib->first);
     lib_order.push_back( cname );
     if( lib_map.end() == lib_map.find( cname ) )
       {
@@ -140,7 +159,7 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
   // have specified them
   for( LinkLine::iterator i = orig_libs.begin(); i != orig_libs.end(); ++i )
     {
-    GatherDependencies( mf, *i, dep_map, lib_map );
+    this->GatherDependencies( mf, *i, dep_map, lib_map );
     }
 
   // For the rest, get implicit dependencies. A library x depends
@@ -193,7 +212,6 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
   // for all the new libraries added by the dependency analysis.
   const char* libOutPath = mf.GetDefinition("LIBRARY_OUTPUT_PATH");
   bool addLibDirs = (libOutPath==0 || strcmp(libOutPath,"")==0);
-
   m_LinkLibraries.clear();
   for( std::vector<std::string>::reverse_iterator i = link_line.rbegin();
        i != link_line.rend(); ++i )
@@ -217,7 +235,22 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
             }
           }
         }
-      m_LinkLibraries.push_back( std::make_pair(*i,GENERAL) );
+      std::string linkType = *i;
+      linkType += "_LINK_TYPE";
+      cmTarget::LinkLibraryType llt = cmTarget::GENERAL;
+      const char* linkTypeString = mf.GetDefinition( linkType.c_str() );
+      if(linkTypeString)
+        {
+        if(strcmp(linkTypeString, "debug") == 0)
+          {
+          llt = cmTarget::DEBUG;
+          }
+        if(strcmp(linkTypeString, "optimized") == 0)
+          {
+          llt = cmTarget::OPTIMIZED;
+          }
+        }
+      m_LinkLibraries.push_back( std::make_pair(*i,llt) );
       }
     else
       {
@@ -247,10 +280,10 @@ std::string cmTarget::CanonicalLibraryName( const std::string& lib ) const
       {
       return libname_noprefix.match(1);
       }
-	else
-	  {
-	  return file;
-	  }
+    else
+      {
+      return file;
+      }
     }
   else
     {

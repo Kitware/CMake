@@ -67,14 +67,6 @@ IF (WIN32)
   ENDIF(NOT UNIX)
 ENDIF (WIN32)
 
-IF (UNIX)
-  INCLUDE (${CMake_SOURCE_DIR}/Modules/FindCurses.cmake OPTIONAL)
-  IF (CURSES_LIBRARY)
-    SUBDIRS(CursesDialog/form)
-    INCLUDE(${CMake_SOURCE_DIR}/Source/CursesDialog/CMakeLists.txt)
-  ENDIF (CURSES_LIBRARY)
-ENDIF (UNIX)
-
 SET(SRCS ${SRCS} cmUnixMakefileGenerator.cxx cmUnixMakefileGenerator.h)
 
 
@@ -90,6 +82,15 @@ ADD_EXECUTABLE(DumpDocumentation cmDumpDocumentation)
 
 ADD_EXECUTABLE(ctest ctest.cxx cmSystemTools.cxx cmRegularExpression.cxx)
 ADD_EXECUTABLE(ccommand ccommand.cxx cmSystemTools.cxx cmMakefile.cxx)
+
+
+IF (UNIX)
+  INCLUDE (${CMake_SOURCE_DIR}/Modules/FindCurses.cmake OPTIONAL)
+  IF (CURSES_LIBRARY)
+    SUBDIRS(CursesDialog/form)
+    INCLUDE(${CMake_SOURCE_DIR}/Source/CursesDialog/CMakeLists.txt)
+  ENDIF (CURSES_LIBRARY)
+ENDIF (UNIX)
 
 IF (NOT DART_ROOT)
 SET(MAKEPROGRAM ${CMAKE_MAKE_PROGRAM})

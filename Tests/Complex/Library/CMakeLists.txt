@@ -20,6 +20,17 @@ SOURCE_FILES(LibrarySources
 SOURCE_FILES_REMOVE(LibrarySources create_file.cxx GENERATED nonexisting_file) 
 ADD_LIBRARY(CMakeTestLibrary LibrarySources)
 
+IF(WIN32)
+  IF(NOT CYGWIN)
+    TARGET_LINK_LIBRARIES(CMakeTestLibrary
+                      debug 
+                      user32.lib)
+    TARGET_LINK_LIBRARIES(CMakeTestLibrary
+                      optimized 
+                      kernel32.lib)
+  ENDIF(NOT CYGWIN)
+ENDIF(WIN32)
+
 #
 # Create shared library
 #
