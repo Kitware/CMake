@@ -840,13 +840,15 @@ std::string cmSystemTools::FindProgram(const char* name,
 				       const std::vector<std::string>& userPaths)
 {
   // See if the executable exists as written.
-  if(cmSystemTools::FileExists(name))
+  if(cmSystemTools::FileExists(name) &&
+      !cmSystemTools::FileIsDirectory(name))
     {
     return cmSystemTools::CollapseFullPath(name);
     }
   std::string tryPath = name;
   tryPath += cmSystemTools::GetExecutableExtension();
-  if(cmSystemTools::FileExists(tryPath.c_str()))
+  if(cmSystemTools::FileExists(tryPath.c_str()) &&
+     !cmSystemTools::FileIsDirectory(tryPath.c_str()))
     {
     return cmSystemTools::CollapseFullPath(tryPath.c_str());
     }
@@ -861,12 +863,14 @@ std::string cmSystemTools::FindProgram(const char* name,
     tryPath = *p;
     tryPath += "/";
     tryPath += name;
-    if(cmSystemTools::FileExists(tryPath.c_str()))
+    if(cmSystemTools::FileExists(tryPath.c_str()) &&
+      !cmSystemTools::FileIsDirectory(tryPath.c_str()))
       {
       return cmSystemTools::CollapseFullPath(tryPath.c_str());
       }
     tryPath += cmSystemTools::GetExecutableExtension();
-    if(cmSystemTools::FileExists(tryPath.c_str()))
+    if(cmSystemTools::FileExists(tryPath.c_str()) &&
+       !cmSystemTools::FileIsDirectory(tryPath.c_str()))
       {
       return cmSystemTools::CollapseFullPath(tryPath.c_str());
       }
