@@ -2188,17 +2188,21 @@ std::string cmMakefile::FindLibrary(const char* name,
     {
     std::string voidsize = this->GetRequiredDefinition("CMAKE_SIZEOF_VOID_P");
     int size = atoi(voidsize.c_str());
+    std::vector<std::string> path64;
     if(size == 8)
       {
-      path.push_back("/usr/X11R6/lib64");
-      path.push_back("/usr/local/lib64");
-      path.push_back("/usr/lib64");
-      }
-    if(size == 4)
-      {
-      path.push_back("/usr/X11R6/lib32");
-      path.push_back("/usr/local/lib32");
-      path.push_back("/usr/lib32");
+      // add a 64 to the name of all the search paths
+      for(std::vector<std::string>::iterator i = path.begin(); 
+          i != path.end(); ++i)
+        {
+        std::string s = *i;
+        s += "64";
+        path64.push_back(s);
+        }
+      // now append the regular names
+      path64.insert(path64.end(), path.begin(), path.end());
+      // now look for the library in the 64 bit path
+      return cmSystemTools::FindLibrary(name, path64);
       }
     }
   return cmSystemTools::FindLibrary(name, path);
