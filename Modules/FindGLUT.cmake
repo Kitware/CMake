@@ -7,26 +7,32 @@
 #
 
 IF (WIN32)
-  SET (GLUT_LIBRARY glut32 CACHE STRING "GLUT library for win32")
+  IF (CYGWIN)
+    FIND_LIBRARY(GLUT_LIBRARY glut32
+      /usr/lib/w32api
+    )
+  ELSE (CYGWIN)
+    FIND_LIBRARY(GLUT_LIBRARY glut32)
+  ENDIF (CYGWIN)
 ELSE (WIN32)
   FIND_PATH(GLUT_INCLUDE_PATH GL/glut.h 
-  /usr/include 
-  /usr/include/GL
-  /usr/local/include 
-  /usr/openwin/share/include 
-  /opt/graphics/OpenGL/include 
-  /usr/X11R6/include 
+    /usr/include 
+    /usr/include/GL
+    /usr/local/include 
+    /usr/openwin/share/include 
+    /opt/graphics/OpenGL/include 
+    /usr/X11R6/include 
   )
   MARK_AS_ADVANCED(
     GLUT_INCLUDE_PATH
   )
 
   FIND_LIBRARY(GLUT_LIBRARY glut
-  /usr/lib 
-  /usr/local/lib 
-  /opt/graphics/OpenGL/lib 
-  /usr/openwin/lib 
-  /usr/X11R6/lib
+    /usr/lib 
+    /usr/local/lib 
+    /opt/graphics/OpenGL/lib 
+    /usr/openwin/lib 
+    /usr/X11R6/lib
   )
 
 ENDIF (WIN32)
