@@ -18,10 +18,36 @@
 
 #include "cmStandardIncludes.h"
 
-
 class ctest
 {
 public:
+  /**
+   * Initialize and finalize testing
+   */
+  void Initialize();
+  void Finalize();
+
+  /**
+   * Process the tests. This is the main routine. The execution of the
+   * tests should look like this:
+   *
+   * ctest foo;
+   * foo.Initialize();
+   * // Set some things on foo
+   * foo.ProcessTests();
+   * foo.Finalize();
+   */
+  int ProcessTests();
+
+  /**
+   * Try to build the project
+   */
+  void BuildDirectory();
+
+  /**
+   * Do revision control update of directory
+   */
+  void UpdateDirectory();
 
   /**
    * Run the test for a directory and any subdirectories
@@ -30,19 +56,24 @@ public:
                         std::vector<std::string> &failed);
 
   /**
+   * Generate the Dart compatible output
+   */
+  void GenerateDartOutput(std::ostream& os);
+
+  /**
    * Find the executable for a test
    */
   std::string FindExecutable(const char *exe);
 
   /**
+   * Set the cmake test
+   */
+  bool SetTest(const char*);
+
+  /**
    * constructor
    */
-  ctest() {
-    m_UseIncludeRegExp      = false;
-    m_UseExcludeRegExp      = false;
-    m_UseExcludeRegExpFirst = false;
-    m_Verbose               = false;
-  }
+  ctest();
 
   bool m_UseIncludeRegExp;
   std::string m_IncludeRegExp;
@@ -53,6 +84,37 @@ public:
 
   std::string m_ConfigType;
   bool m_Verbose;
+  bool m_DartMode;
+
 private:
+  enum {
+    FIRST_TEST    = 0,
+    UPDATE_TEST,
+    BUILD_TEST,
+    TEST_TEST,
+    COVERAGE_TEST,
+    PURIFY_TEST,
+    ALL_TEST,
+    LAST_TEST
+  };
+
+  struct cmCTestTestResult
+  {
+    std::string m_Name;
+    std::string m_Path;
+    std::string m_FullCommandLine;
+    double      m_ExecutionTime;
+    int         m_ReturnValue;
+    std::string m_CompletionStatus;
+    std::string m_Output;
+  };
+
+  typedef std::vector<cmCTestTestResult> tm_TestResultsVector;
+  typedef std::map<std::string, std::string> tm_DartConfigurationMap;
+
+  tm_TestResultsVector    m_TestResults;
+  std::string             m_ToplevelPath;
+  tm_DartConfigurationMap m_DartConfiguration;
+  int                     m_Tests[LAST_TEST];
 };
 
