@@ -429,7 +429,9 @@ HCURSOR CMakeSetupDialog::OnQueryDragIcon()
 // Browse button
 bool CMakeSetupDialog::Browse(CString &result, const char *title)
 {
-  CPathDialog dlg("Select Path", title, result); 
+  CString initialDir = result;
+  initialDir.Replace("/", "\\");
+  CPathDialog dlg("Select Path", title, initialDir); 
   if(dlg.DoModal()==IDOK)
     {
     result =  dlg.GetPathName();
