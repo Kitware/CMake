@@ -841,81 +841,71 @@ void cmSystemTools::ExpandListArgument(const std::string& arg,
   if(arg.find(';') == std::string::npos)
     {
     newargs.push_back(arg);
+    return;
     }
-  else
+  // Break the string at non-escaped semicolons not nested in [].
+  int squareNesting = 0;
+  for(const char* c = arg.c_str(); *c; ++c)
     {
-    std::string::size_type start = 0;
-    std::string::size_type endpos = 0;
-    const std::string::size_type size = arg.size();
-    // break up ; separated sections of the string into separate strings
-    while(endpos != size)
+    switch(*c)
       {
-      endpos = arg.find(';', start); 
-      if(endpos == std::string::npos)
+      case '\\':
         {
-        endpos = arg.size();
-        }
-      else
-        {
-        // skip right over escaped ; ( \; )
-        while((endpos != std::string::npos)
-              && (endpos > 0) 
-              && ((arg)[endpos-1] == '\\') )
+        // We only want to allow escaping of semicolons.  Other
+        // escapes should not be processed here.
+        ++c;
+        if(*c == ';')
           {
-          endpos = arg.find(';', endpos+1);
-          }
-        if(endpos == std::string::npos)
-          {
-          endpos = arg.size();
-          }
-        }
-      std::string::size_type len = endpos - start;
-      if (len > 0)
-        {
-        // check for a closing ] after the start position
-        if(arg.find('[', start) == std::string::npos)
-          {
-          // if there is no [ in the string then keep it
-          newarg = arg.substr(start, len);
+          newarg += ';';
           }
         else
           {
-          int opencount = 0;
-          int closecount = 0;
-          for(std::string::size_type j = start; j < endpos; ++j)
+          newarg += '\\';
+          if(*c)
             {
-            if(arg.at(j) == '[')
-              {
-              ++opencount;
-              }
-            else if (arg.at(j) == ']')
-              {
-              ++closecount;
-              }
+            newarg += *c;
             }
-          if(opencount != closecount)
-            {
-            // skip this one
-            endpos = arg.find(';', endpos+1);  
-            if(endpos == std::string::npos)
-              {
-              endpos = arg.size();
-              }
-            len = endpos - start;
-            }
-          newarg = arg.substr(start, len);
           }
-        // unescape semicolons 
-        std::string::size_type pos = newarg.find("\\;");
-        while (pos != std::string::npos)
+        } break;
+      case '[':
+        {
+        ++squareNesting;
+        newarg += '[';
+        } break;
+      case ']':
+        {
+        --squareNesting;
+        newarg += ']';
+        } break;
+      case ';':
+        {
+        // Break the string here if we are not nested inside square
+        // brackets.
+        if(squareNesting == 0)
           {
-          newarg.erase(pos, 1);
-          pos = newarg.find("\\;");
+          if(newarg.length())
+            {
+            // Add an argument if the string is not empty.
+            newargs.push_back(newarg);
+            newarg = "";
+            }
           }
-        newargs.push_back(newarg);
-        }
-      start = endpos+1;
+        else
+          {
+          newarg += ';';
+          }
+        } break;
+      default:
+        {
+        // Just append this character.
+        newarg += *c;
+        } break;
       }
+    }
+  if(newarg.length())
+    {
+    // Add the last argument if the string is not empty.
+    newargs.push_back(newarg);
     }
 }
 
