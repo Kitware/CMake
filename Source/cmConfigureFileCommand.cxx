@@ -52,32 +52,42 @@ bool cmConfigureFileCommand::InitialPass(std::vector<std::string>& args)
   m_OuputFile = args[1];
   m_CopyOnly = false;
   m_EscapeQuotes = false;
-  if(args.size() >= 3)
+  m_Immediate = false;
+  for(unsigned int i=2;i < args.size();++i)
     {
-    if(args[2] == "COPYONLY")
+    if(args[i] == "COPYONLY")
       {
-      m_CopyOnly  = true;
+      m_CopyOnly = true;
       }
-    if(args[2] == "ESCAPE_QUOTES")
+    else if(args[i] == "ESCAPE_QUOTES")
       {
-      m_EscapeQuotes  = true;
+      m_EscapeQuotes = true;
       }
-    }
-  if(args.size() >= 4)
-    {  
-    if(args[3] == "COPYONLY")
+    else if(args[i] == "IMMEDIATE")
       {
-      m_CopyOnly  = true;
-      }
-    if(args[3] == "ESCAPE_QUOTES")
-      {
-      m_EscapeQuotes  = true;
+      m_Immediate = true;
       }
     }
+  
+  // If we were told to copy the file immediately, then do it on the
+  // first pass (now).
+  if(m_Immediate)
+    {
+    this->ConfigureFile();
+    }
+  
   return true;
 }
 
 void cmConfigureFileCommand::FinalPass()
+{
+  if(!m_Immediate)
+    {
+    this->ConfigureFile();
+    }
+}
+
+void cmConfigureFileCommand::ConfigureFile()
 {
   m_Makefile->ExpandVariablesInString(m_InputFile);
   m_Makefile->ExpandVariablesInString(m_OuputFile);

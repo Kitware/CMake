@@ -77,26 +77,28 @@ public:
   virtual const char* GetFullDocumentation()
     {
       return
-        "CONFIGURE_FILE(InputFile OutputFile [COPYONLY] [ESCAPE_QUOTES])\n"
+        "CONFIGURE_FILE(InputFile OutputFile [COPYONLY] [ESCAPE_QUOTES] [IMMEDIATE])\n"
 	"The Input and Ouput files have to have full paths.\n"
 	"They can also use variables like CMAKE_BINARY_DIR,CMAKE_SOURCE_DIR. "
         "This command replaces any variables in the input file with their "
         "values as determined by CMake. If a variables in not defined, it "
         "will be replaced with nothing.  If COPYONLY is passed in, then "
         "then no varible expansion will take place. If ESCAPE_QUOTES is "
-        "passed in then any substitued quotes will be C style escaped.";
+        "passed in then any substitued quotes will be C style escaped. "
+        "If IMMEDIATE is specified, then the file will be configured with "
+        "the current values of CMake variables instead of waiting until the "
+        "end of CMakeLists processing.";
     }
 
-  /**
-   * Create the header files in this pass.  This is so
-   * all varibles can be expaned.
-   */
   virtual void FinalPass();
 private:
+  void ConfigureFile();
+  
   std::string m_InputFile;
   std::string m_OuputFile;
   bool m_CopyOnly;
   bool m_EscapeQuotes;
+  bool m_Immediate;
 };
 
 
