@@ -1594,12 +1594,17 @@ kwsys_stl::string SystemTools::CollapseFullPath(const char* in_relative,
   if(!initialized)
     {
     initialized = 1;
+    // add some special translation paths for unix
+    // these are not added for windows because drive
+    // letters need to be maintained.  Also, there
+    // are not sym-links and mount points on windows anyway.
+#if !defined( _WIN32 ) 
     //Also add some good default one:
     // This one should always be there it fix a bug on sgi
     SystemTools::AddTranslationPath("/tmp_mnt/", "/");
-  
     //This is a good default also:
     SystemTools::AddKeepPath("/tmp/");
+#endif
     }
 
   // Now we need to update the translation table with this potentially new path
