@@ -344,7 +344,11 @@ const char* cmDynamicLoader::LibPrefix()
 
 const char* cmDynamicLoader::LibExtension()
 {
+#ifdef __CYGWIN__
+  return ".dll";
+#else
   return ".so";
+#endif
 }
 
 const char* cmDynamicLoader::LastError()

@@ -166,7 +166,7 @@ int cmGlobalGenerator::TryCompile(const char *, const char *bindir,
     {
     makeCommand += " ";
     makeCommand += target;
-#ifdef WIN32
+#if defined(_WIN32) || defined(__CYGWIN__)
     makeCommand += ".exe";
 #endif // WIN32
     }
@@ -175,7 +175,6 @@ int cmGlobalGenerator::TryCompile(const char *, const char *bindir,
     makeCommand += " all";
     }
   int retVal;
-  
   if (!cmSystemTools::RunCommand(makeCommand.c_str(), *output, retVal, 0, false))
     {
     cmSystemTools::Error("Generator: execution of make failed.");
