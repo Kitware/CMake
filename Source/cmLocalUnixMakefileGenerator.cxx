@@ -1707,7 +1707,7 @@ void cmLocalUnixMakefileGenerator::OutputBuildTargetInDirWindows(std::ostream& f
                                                                  const char* fullpath)
 {
   std::string jumpBack =
-    cmSystemTools::RelativePath(cmSystemTools::GetProgramPath(fullpath).c_str(),
+    cmSystemTools::RelativePath(cmSystemTools::GetProgramPath(path).c_str(),
                                 m_Makefile->GetCurrentOutputDirectory());
   jumpBack = this->ConvertToOutputForExisting(jumpBack.c_str());
   std::string wpath = this->ConvertToOutputForExisting(path);
