@@ -60,6 +60,7 @@ static void cmDependsJavaError(yyscan_t yyscanner, const char* message);
 #endif
 #ifdef _MSC_VER
 # pragma warning (disable: 4102) /* Unused goto label.  */
+# pragma warning (disable: 4065) /* Switch statement contains default but no case. */
 #endif
 %}
 
@@ -76,30 +77,30 @@ static void cmDependsJavaError(yyscan_t yyscanner, const char* message);
 /* Tokens */
 %token ABSTRACT
 %token ASSERT
-%token BOOLEAN
+%token BOOLEAN_TYPE
 %token BREAK
-%token BYTE
+%token BYTE_TYPE
 %token CASE
 %token CATCH
-%token CHAR
+%token CHAR_TYPE
 %token CLASS
 %token CONTINUE
 %token DEFAULT
 %token DO
-%token DOUBLE
+%token DOUBLE_TYPE
 %token ELSE
 %token EXTENDS
 %token FINAL
 %token FINALLY
-%token FLOAT
+%token FLOAT_TYPE
 %token FOR
 %token IF
 %token IMPLEMENTS
 %token IMPORT
 %token INSTANCEOF
-%token INT
+%token INT_TYPE
 %token INTERFACE
-%token LONG
+%token LONG_TYPE
 %token NATIVE
 %token NEW
 %token PACKAGE
@@ -107,7 +108,7 @@ static void cmDependsJavaError(yyscan_t yyscanner, const char* message);
 %token PROTECTED
 %token PUBLIC
 %token RETURN
-%token SHORT
+%token SHORT_TYPE
 %token STATIC
 %token STRICTFP
 %token SUPER
@@ -279,42 +280,42 @@ ReferenceType
 }
 
 PrimitiveType:
-BYTE
+BYTE_TYPE
 {
   ELEMENTSTART(0);
 }
 |
-SHORT
+SHORT_TYPE
 {
   ELEMENTSTART(0);
 }
 |
-INT
+INT_TYPE
 {
   ELEMENTSTART(0);
 }
 |
-LONG
+LONG_TYPE
 {
   ELEMENTSTART(0);
 }
 |
-CHAR
+CHAR_TYPE
 {
   ELEMENTSTART(0);
 }
 |
-FLOAT
+FLOAT_TYPE
 {
   ELEMENTSTART(0);
 }
 |
-DOUBLE
+DOUBLE_TYPE
 {
   ELEMENTSTART(0);
 }
 |
-BOOLEAN
+BOOLEAN_TYPE
 {
   ELEMENTSTART(0);
 }

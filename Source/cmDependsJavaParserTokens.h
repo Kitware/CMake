@@ -31,30 +31,30 @@
    enum yytokentype {
      ABSTRACT = 258,
      ASSERT = 259,
-     BOOLEAN = 260,
+     BOOLEAN_TYPE = 260,
      BREAK = 261,
-     BYTE = 262,
+     BYTE_TYPE = 262,
      CASE = 263,
      CATCH = 264,
-     CHAR = 265,
+     CHAR_TYPE = 265,
      CLASS = 266,
      CONTINUE = 267,
      DEFAULT = 268,
      DO = 269,
-     DOUBLE = 270,
+     DOUBLE_TYPE = 270,
      ELSE = 271,
      EXTENDS = 272,
      FINAL = 273,
      FINALLY = 274,
-     FLOAT = 275,
+     FLOAT_TYPE = 275,
      FOR = 276,
      IF = 277,
      IMPLEMENTS = 278,
      IMPORT = 279,
      INSTANCEOF = 280,
-     INT = 281,
+     INT_TYPE = 281,
      INTERFACE = 282,
-     LONG = 283,
+     LONG_TYPE = 283,
      NATIVE = 284,
      NEW = 285,
      PACKAGE = 286,
@@ -62,7 +62,7 @@
      PROTECTED = 288,
      PUBLIC = 289,
      RETURN = 290,
-     SHORT = 291,
+     SHORT_TYPE = 291,
      STATIC = 292,
      STRICTFP = 293,
      SUPER = 294,
@@ -136,30 +136,30 @@
 #endif
 #define ABSTRACT 258
 #define ASSERT 259
-#define BOOLEAN 260
+#define BOOLEAN_TYPE 260
 #define BREAK 261
-#define BYTE 262
+#define BYTE_TYPE 262
 #define CASE 263
 #define CATCH 264
-#define CHAR 265
+#define CHAR_TYPE 265
 #define CLASS 266
 #define CONTINUE 267
 #define DEFAULT 268
 #define DO 269
-#define DOUBLE 270
+#define DOUBLE_TYPE 270
 #define ELSE 271
 #define EXTENDS 272
 #define FINAL 273
 #define FINALLY 274
-#define FLOAT 275
+#define FLOAT_TYPE 275
 #define FOR 276
 #define IF 277
 #define IMPLEMENTS 278
 #define IMPORT 279
 #define INSTANCEOF 280
-#define INT 281
+#define INT_TYPE 281
 #define INTERFACE 282
-#define LONG 283
+#define LONG_TYPE 283
 #define NATIVE 284
 #define NEW 285
 #define PACKAGE 286
@@ -167,7 +167,7 @@
 #define PROTECTED 288
 #define PUBLIC 289
 #define RETURN 290
-#define SHORT 291
+#define SHORT_TYPE 291
 #define STATIC 292
 #define STRICTFP 293
 #define SUPER 294

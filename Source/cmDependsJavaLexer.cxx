@@ -1059,7 +1059,7 @@ YY_RULE_SETUP
 case 9:
 YY_RULE_SETUP
 #line 99 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return BOOLEAN; }
+{ KEYWORD; return BOOLEAN_TYPE; }
   YY_BREAK
 case 10:
 YY_RULE_SETUP
@@ -1069,7 +1069,7 @@ YY_RULE_SETUP
 case 11:
 YY_RULE_SETUP
 #line 101 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return BYTE; }
+{ KEYWORD; return BYTE_TYPE; }
   YY_BREAK
 case 12:
 YY_RULE_SETUP
@@ -1084,7 +1084,7 @@ YY_RULE_SETUP
 case 14:
 YY_RULE_SETUP
 #line 104 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return CHAR; }
+{ KEYWORD; return CHAR_TYPE; }
   YY_BREAK
 case 15:
 YY_RULE_SETUP
@@ -1109,7 +1109,7 @@ YY_RULE_SETUP
 case 19:
 YY_RULE_SETUP
 #line 109 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return DOUBLE; }
+{ KEYWORD; return DOUBLE_TYPE; }
   YY_BREAK
 case 20:
 YY_RULE_SETUP
@@ -1134,7 +1134,7 @@ YY_RULE_SETUP
 case 24:
 YY_RULE_SETUP
 #line 114 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return FLOAT; }
+{ KEYWORD; return FLOAT_TYPE; }
   YY_BREAK
 case 25:
 YY_RULE_SETUP
@@ -1164,7 +1164,7 @@ YY_RULE_SETUP
 case 30:
 YY_RULE_SETUP
 #line 120 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return INT; }
+{ KEYWORD; return INT_TYPE; }
   YY_BREAK
 case 31:
 YY_RULE_SETUP
@@ -1174,7 +1174,7 @@ YY_RULE_SETUP
 case 32:
 YY_RULE_SETUP
 #line 122 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return LONG; }
+{ KEYWORD; return LONG_TYPE; }
   YY_BREAK
 case 33:
 YY_RULE_SETUP
@@ -1214,7 +1214,7 @@ YY_RULE_SETUP
 case 40:
 YY_RULE_SETUP
 #line 130 "cmDependsJavaLexer.in.l"
-{ KEYWORD; return SHORT; }
+{ KEYWORD; return SHORT_TYPE; }
   YY_BREAK
 case 41:
 YY_RULE_SETUP

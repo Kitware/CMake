@@ -64,30 +64,30 @@
    enum yytokentype {
      ABSTRACT = 258,
      ASSERT = 259,
-     BOOLEAN = 260,
+     BOOLEAN_TYPE = 260,
      BREAK = 261,
-     BYTE = 262,
+     BYTE_TYPE = 262,
      CASE = 263,
      CATCH = 264,
-     CHAR = 265,
+     CHAR_TYPE = 265,
      CLASS = 266,
      CONTINUE = 267,
      DEFAULT = 268,
      DO = 269,
-     DOUBLE = 270,
+     DOUBLE_TYPE = 270,
      ELSE = 271,
      EXTENDS = 272,
      FINAL = 273,
      FINALLY = 274,
-     FLOAT = 275,
+     FLOAT_TYPE = 275,
      FOR = 276,
      IF = 277,
      IMPLEMENTS = 278,
      IMPORT = 279,
      INSTANCEOF = 280,
-     INT = 281,
+     INT_TYPE = 281,
      INTERFACE = 282,
-     LONG = 283,
+     LONG_TYPE = 283,
      NATIVE = 284,
      NEW = 285,
      PACKAGE = 286,
@@ -95,7 +95,7 @@
      PROTECTED = 288,
      PUBLIC = 289,
      RETURN = 290,
-     SHORT = 291,
+     SHORT_TYPE = 291,
      STATIC = 292,
      STRICTFP = 293,
      SUPER = 294,
@@ -169,30 +169,30 @@
 #endif
 #define ABSTRACT 258
 #define ASSERT 259
-#define BOOLEAN 260
+#define BOOLEAN_TYPE 260
 #define BREAK 261
-#define BYTE 262
+#define BYTE_TYPE 262
 #define CASE 263
 #define CATCH 264
-#define CHAR 265
+#define CHAR_TYPE 265
 #define CLASS 266
 #define CONTINUE 267
 #define DEFAULT 268
 #define DO 269
-#define DOUBLE 270
+#define DOUBLE_TYPE 270
 #define ELSE 271
 #define EXTENDS 272
 #define FINAL 273
 #define FINALLY 274
-#define FLOAT 275
+#define FLOAT_TYPE 275
 #define FOR 276
 #define IF 277
 #define IMPLEMENTS 278
 #define IMPORT 279
 #define INSTANCEOF 280
-#define INT 281
+#define INT_TYPE 281
 #define INTERFACE 282
-#define LONG 283
+#define LONG_TYPE 283
 #define NATIVE 284
 #define NEW 285
 #define PACKAGE 286
@@ -200,7 +200,7 @@
 #define PROTECTED 288
 #define PUBLIC 289
 #define RETURN 290
-#define SHORT 291
+#define SHORT_TYPE 291
 #define STATIC 292
 #define STRICTFP 293
 #define SUPER 294
@@ -338,6 +338,7 @@ static void cmDependsJavaError(yyscan_t yyscanner, const char* message);
 #endif
 #ifdef _MSC_VER
 # pragma warning (disable: 4102) /* Unused goto label.  */
+# pragma warning (disable: 4065) /* Switch statement contains default but no case. */
 #endif
 
 
@@ -367,7 +368,7 @@ typedef int YYSTYPE;
 
 
 /* Line 214 of yacc.c.  */
-#line 371 "cmDependsJavaParser.cxx"
+#line 372 "cmDependsJavaParser.cxx"
 
 #if ! defined (yyoverflow) || YYERROR_VERBOSE
 
@@ -687,42 +688,42 @@ static const short int yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const unsigned short int yyrline[] =
 {
-       0,   190,   190,   199,   207,   215,   223,   231,   239,   248,
-     256,   265,   273,   282,   287,   292,   297,   302,   307,   312,
-     317,   323,   331,   340,   350,   359,   368,   376,   386,   392,
-     399,   406,   412,   419,   428,   438,   448,   457,   465,   474,
-     483,   489,   498,   504,   513,   519,   528,   540,   548,   557,
-     569,   582,   590,   598,   607,   615,   624,   624,   624,   625,
-     626,   626,   626,   626,   626,   626,   627,   630,   640,   649,
-     658,   667,   677,   683,   692,   701,   710,   718,   727,   736,
-     742,   751,   759,   767,   775,   784,   792,   801,   807,   815,
-     824,   832,   841,   850,   859,   867,   876,   884,   892,   901,
-     910,   920,   927,   937,   947,   954,   961,   964,   970,   980,
-     990,  1000,  1006,  1016,  1026,  1036,  1045,  1055,  1066,  1076,
-    1083,  1093,  1102,  1112,  1121,  1131,  1137,  1147,  1156,  1166,
-    1176,  1183,  1192,  1201,  1210,  1219,  1227,  1236,  1245,  1255,
-    1265,  1274,  1284,  1294,  1301,  1310,  1320,  1329,  1339,  1348,
-    1355,  1365,  1374,  1384,  1393,  1402,  1412,  1422,  1431,  1441,
-    1450,  1459,  1468,  1477,  1486,  1496,  1505,  1514,  1523,  1532,
-    1542,  1551,  1560,  1569,  1578,  1587,  1596,  1605,  1614,  1623,
-    1632,  1641,  1651,  1661,  1672,  1682,  1692,  1701,  1710,  1719,
-    1728,  1737,  1746,  1756,  1766,  1776,  1786,  1793,  1800,  1807,
-    1817,  1824,  1834,  1844,  1853,  1863,  1872,  1882,  1889,  1896,
-    1903,  1911,  1918,  1928,  1935,  1945,  1955,  1962,  1972,  1981,
-    1991,  2001,  2010,  2020,  2029,  2039,  2050,  2057,  2064,  2075,
-    2085,  2095,  2105,  2114,  2124,  2131,  2141,  2150,  2160,  2167,
-    2177,  2186,  2196,  2205,  2211,  2220,  2229,  2238,  2247,  2257,
-    2267,  2274,  2284,  2291,  2301,  2310,  2320,  2329,  2338,  2347,
-    2357,  2364,  2374,  2383,  2393,  2403,  2409,  2416,  2426,  2436,
-    2446,  2457,  2467,  2478,  2488,  2499,  2509,  2519,  2528,  2537,
-    2546,  2555,  2565,  2575,  2585,  2594,  2603,  2612,  2621,  2631,
-    2641,  2651,  2660,  2669,  2678,  2688,  2697,  2706,  2713,  2722,
-    2731,  2740,  2750,  2759,  2768,  2778,  2787,  2796,  2805,  2815,
-    2824,  2833,  2842,  2851,  2860,  2870,  2879,  2888,  2898,  2907,
-    2917,  2926,  2936,  2945,  2955,  2964,  2974,  2983,  2993,  3002,
-    3012,  3021,  3031,  3041,  3051,  3060,  3070,  3079,  3088,  3097,
-    3106,  3115,  3124,  3133,  3142,  3151,  3160,  3169,  3179,  3189,
-    3199,  3208
+       0,   191,   191,   200,   208,   216,   224,   232,   240,   249,
+     257,   266,   274,   283,   288,   293,   298,   303,   308,   313,
+     318,   324,   332,   341,   351,   360,   369,   377,   387,   393,
+     400,   407,   413,   420,   429,   439,   449,   458,   466,   475,
+     484,   490,   499,   505,   514,   520,   529,   541,   549,   558,
+     570,   583,   591,   599,   608,   616,   625,   625,   625,   626,
+     627,   627,   627,   627,   627,   627,   628,   631,   641,   650,
+     659,   668,   678,   684,   693,   702,   711,   719,   728,   737,
+     743,   752,   760,   768,   776,   785,   793,   802,   808,   816,
+     825,   833,   842,   851,   860,   868,   877,   885,   893,   902,
+     911,   921,   928,   938,   948,   955,   962,   965,   971,   981,
+     991,  1001,  1007,  1017,  1027,  1037,  1046,  1056,  1067,  1077,
+    1084,  1094,  1103,  1113,  1122,  1132,  1138,  1148,  1157,  1167,
+    1177,  1184,  1193,  1202,  1211,  1220,  1228,  1237,  1246,  1256,
+    1266,  1275,  1285,  1295,  1302,  1311,  1321,  1330,  1340,  1349,
+    1356,  1366,  1375,  1385,  1394,  1403,  1413,  1423,  1432,  1442,
+    1451,  1460,  1469,  1478,  1487,  1497,  1506,  1515,  1524,  1533,
+    1543,  1552,  1561,  1570,  1579,  1588,  1597,  1606,  1615,  1624,
+    1633,  1642,  1652,  1662,  1673,  1683,  1693,  1702,  1711,  1720,
+    1729,  1738,  1747,  1757,  1767,  1777,  1787,  1794,  1801,  1808,
+    1818,  1825,  1835,  1845,  1854,  1864,  1873,  1883,  1890,  1897,
+    1904,  1912,  1919,  1929,  1936,  1946,  1956,  1963,  1973,  1982,
+    1992,  2002,  2011,  2021,  2030,  2040,  2051,  2058,  2065,  2076,
+    2086,  2096,  2106,  2115,  2125,  2132,  2142,  2151,  2161,  2168,
+    2178,  2187,  2197,  2206,  2212,  2221,  2230,  2239,  2248,  2258,
+    2268,  2275,  2285,  2292,  2302,  2311,  2321,  2330,  2339,  2348,
+    2358,  2365,  2375,  2384,  2394,  2404,  2410,  2417,  2427,  2437,
+    2447,  2458,  2468,  2479,  2489,  2500,  2510,  2520,  2529,  2538,
+    2547,  2556,  2566,  2576,  2586,  2595,  2604,  2613,  2622,  2632,
+    2642,  2652,  2661,  2670,  2679,  2689,  2698,  2707,  2714,  2723,
+    2732,  2741,  2751,  2760,  2769,  2779,  2788,  2797,  2806,  2816,
+    2825,  2834,  2843,  2852,  2861,  2871,  2880,  2889,  2899,  2908,
+    2918,  2927,  2937,  2946,  2956,  2965,  2975,  2984,  2994,  3003,
+    3013,  3022,  3032,  3042,  3052,  3061,  3071,  3080,  3089,  3098,
+    3107,  3116,  3125,  3134,  3143,  3152,  3161,  3170,  3180,  3190,
+    3200,  3209
 };
 #endif
 
@@ -731,33 +732,33 @@ static const unsigned short int yyrline[] =
    First, the terminals, then, starting at YYNTOKENS, nonterminals. */
 static const char *const yytname[] =
 {
-  "$end", "error", "$undefined", "ABSTRACT", "ASSERT", "BOOLEAN", "BREAK",
-  "BYTE", "CASE", "CATCH", "CHAR", "CLASS", "CONTINUE", "DEFAULT", "DO",
-  "DOUBLE", "ELSE", "EXTENDS", "FINAL", "FINALLY", "FLOAT", "FOR", "IF",
-  "IMPLEMENTS", "IMPORT", "INSTANCEOF", "INT", "INTERFACE", "LONG",
-  "NATIVE", "NEW", "PACKAGE", "PRIVATE", "PROTECTED", "PUBLIC", "RETURN",
-  "SHORT", "STATIC", "STRICTFP", "SUPER", "SWITCH", "SYNCHRONIZED", "THIS",
-  "THROW", "THROWS", "TRANSIENT", "TRY", "VOID", "VOLATILE", "WHILE",
-  "BOOLEANLITERAL", "CHARACTERLITERAL", "DECIMALINTEGERLITERAL",
-  "FLOATINGPOINTLITERAL", "HEXINTEGERLITERAL", "NULLLITERAL",
-  "STRINGLITERAL", "NAME", "AND", "ANDAND", "ANDEQUALS", "BRACKETEND",
-  "BRACKETSTART", "CARROT", "CARROTEQUALS", "COLON", "COMMA", "CURLYEND",
-  "CURLYSTART", "DIVIDE", "DIVIDEEQUALS", "DOLLAR", "DOT", "EQUALS",
-  "EQUALSEQUALS", "EXCLAMATION", "EXCLAMATIONEQUALS", "GREATER",
-  "GTEQUALS", "GTGT", "GTGTEQUALS", "GTGTGT", "GTGTGTEQUALS",
-  "LESLESEQUALS", "LESSTHAN", "LTEQUALS", "LTLT", "MINUS", "MINUSEQUALS",
-  "MINUSMINUS", "PAREEND", "PARESTART", "PERCENT", "PERCENTEQUALS", "PIPE",
-  "PIPEEQUALS", "PIPEPIPE", "PLUS", "PLUSEQUALS", "PLUSPLUS", "QUESTION",
-  "SEMICOL", "TILDE", "TIMES", "TIMESEQUALS", "ERROR", "$accept", "Goal",
-  "Literal", "IntegerLiteral", "Type", "PrimitiveType", "ReferenceType",
-  "ClassOrInterfaceType", "ClassType", "InterfaceType", "ArrayType",
-  "Name", "SimpleName", "Identifier", "QualifiedName", "SimpleType",
-  "CompilationUnit", "PackageDeclarationopt", "ImportDeclarations",
-  "TypeDeclarations", "PackageDeclaration", "ImportDeclaration",
-  "SingleTypeImportDeclaration", "TypeImportOnDemandDeclaration",
-  "TypeDeclaration", "Modifiers", "Modifier", "ClassHeader",
-  "ClassDeclaration", "Modifiersopt", "Super", "Interfaces",
-  "InterfaceTypeList", "ClassBody", "ClassBodyDeclarations",
+  "$end", "error", "$undefined", "ABSTRACT", "ASSERT", "BOOLEAN_TYPE",
+  "BREAK", "BYTE_TYPE", "CASE", "CATCH", "CHAR_TYPE", "CLASS", "CONTINUE",
+  "DEFAULT", "DO", "DOUBLE_TYPE", "ELSE", "EXTENDS", "FINAL", "FINALLY",
+  "FLOAT_TYPE", "FOR", "IF", "IMPLEMENTS", "IMPORT", "INSTANCEOF",
+  "INT_TYPE", "INTERFACE", "LONG_TYPE", "NATIVE", "NEW", "PACKAGE",
+  "PRIVATE", "PROTECTED", "PUBLIC", "RETURN", "SHORT_TYPE", "STATIC",
+  "STRICTFP", "SUPER", "SWITCH", "SYNCHRONIZED", "THIS", "THROW", "THROWS",
+  "TRANSIENT", "TRY", "VOID", "VOLATILE", "WHILE", "BOOLEANLITERAL",
+  "CHARACTERLITERAL", "DECIMALINTEGERLITERAL", "FLOATINGPOINTLITERAL",
+  "HEXINTEGERLITERAL", "NULLLITERAL", "STRINGLITERAL", "NAME", "AND",
+  "ANDAND", "ANDEQUALS", "BRACKETEND", "BRACKETSTART", "CARROT",
+  "CARROTEQUALS", "COLON", "COMMA", "CURLYEND", "CURLYSTART", "DIVIDE",
+  "DIVIDEEQUALS", "DOLLAR", "DOT", "EQUALS", "EQUALSEQUALS", "EXCLAMATION",
+  "EXCLAMATIONEQUALS", "GREATER", "GTEQUALS", "GTGT", "GTGTEQUALS",
+  "GTGTGT", "GTGTGTEQUALS", "LESLESEQUALS", "LESSTHAN", "LTEQUALS", "LTLT",
+  "MINUS", "MINUSEQUALS", "MINUSMINUS", "PAREEND", "PARESTART", "PERCENT",
+  "PERCENTEQUALS", "PIPE", "PIPEEQUALS", "PIPEPIPE", "PLUS", "PLUSEQUALS",
+  "PLUSPLUS", "QUESTION", "SEMICOL", "TILDE", "TIMES", "TIMESEQUALS",
+  "ERROR", "$accept", "Goal", "Literal", "IntegerLiteral", "Type",
+  "PrimitiveType", "ReferenceType", "ClassOrInterfaceType", "ClassType",
+  "InterfaceType", "ArrayType", "Name", "SimpleName", "Identifier",
+  "QualifiedName", "SimpleType", "CompilationUnit",
+  "PackageDeclarationopt", "ImportDeclarations", "TypeDeclarations",
+  "PackageDeclaration", "ImportDeclaration", "SingleTypeImportDeclaration",
+  "TypeImportOnDemandDeclaration", "TypeDeclaration", "Modifiers",
+  "Modifier", "ClassHeader", "ClassDeclaration", "Modifiersopt", "Super",
+  "Interfaces", "InterfaceTypeList", "ClassBody", "ClassBodyDeclarations",
   "ClassBodyDeclaration", "ClassMemberDeclaration", "FieldDeclaration",
   "VariableDeclarators", "VariableDeclarator", "VariableDeclaratorId",
   "VariableInitializer", "MethodDeclaration", "MethodHeader", "Throwsopt",
@@ -2206,7 +2207,7 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 191 "cmDependsJavaParser.y"
+#line 192 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -2216,7 +2217,7 @@ yyreduce:
     break;
 
   case 3:
-#line 200 "cmDependsJavaParser.y"
+#line 201 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -2226,7 +2227,7 @@ yyreduce:
     break;
 
   case 4:
-#line 208 "cmDependsJavaParser.y"
+#line 209 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -2236,7 +2237,7 @@ yyreduce:
     break;
 
   case 5:
-#line 216 "cmDependsJavaParser.y"
+#line 217 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -2246,7 +2247,7 @@ yyreduce:
     break;
 
   case 6:
-#line 224 "cmDependsJavaParser.y"
+#line 225 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -2256,7 +2257,7 @@ yyreduce:
     break;
 
   case 7:
-#line 232 "cmDependsJavaParser.y"
+#line 233 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -2266,7 +2267,7 @@ yyreduce:
     break;
 
   case 8:
-#line 240 "cmDependsJavaParser.y"
+#line 241 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -2276,7 +2277,7 @@ yyreduce:
     break;
 
   case 9:
-#line 249 "cmDependsJavaParser.y"
+#line 250 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -2286,7 +2287,7 @@ yyreduce:
     break;
 
   case 10:
-#line 257 "cmDependsJavaParser.y"
+#line 258 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -2296,7 +2297,7 @@ yyreduce:
     break;
 
   case 11:
-#line 266 "cmDependsJavaParser.y"
+#line 267 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -2306,7 +2307,7 @@ yyreduce:
     break;
 
   case 12:
-#line 274 "cmDependsJavaParser.y"
+#line 275 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -2316,63 +2317,63 @@ yyreduce:
     break;
 
   case 13:
-#line 283 "cmDependsJavaParser.y"
+#line 284 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(0);
 }
     break;
 
   case 14:
-#line 288 "cmDependsJavaParser.y"
+#line 289 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(0);
 }
     break;
 
   case 15:
-#line 293 "cmDependsJavaParser.y"
+#line 294 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(0);
 }
     break;
 
   case 16:
-#line 298 "cmDependsJavaParser.y"
+#line 299 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(0);
 }
     break;
 
   case 17:
-#line 303 "cmDependsJavaParser.y"
+#line 304 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(0);
 }
     break;
 
   case 18:
-#line 308 "cmDependsJavaParser.y"
+#line 309 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(0);
 }
     break;
 
   case 19:
-#line 313 "cmDependsJavaParser.y"
+#line 314 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(0);
 }
     break;
 
   case 20:
-#line 318 "cmDependsJavaParser.y"
+#line 319 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(0);
 }
     break;
 
   case 21:
-#line 324 "cmDependsJavaParser.y"
+#line 325 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -2382,7 +2383,7 @@ yyreduce:
     break;
 
   case 22:
-#line 332 "cmDependsJavaParser.y"
+#line 333 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -2392,7 +2393,7 @@ yyreduce:
     break;
 
   case 23:
-#line 341 "cmDependsJavaParser.y"
+#line 342 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   STORECLASS(yyvsp[0].str);
@@ -2403,7 +2404,7 @@ yyreduce:
     break;
 
   case 24:
-#line 351 "cmDependsJavaParser.y"
+#line 352 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -2413,7 +2414,7 @@ yyreduce:
     break;
 
   case 25:
-#line 360 "cmDependsJavaParser.y"
+#line 361 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -2423,7 +2424,7 @@ yyreduce:
     break;
 
   case 26:
-#line 369 "cmDependsJavaParser.y"
+#line 370 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   CHECKEMPTY(2);
@@ -2433,7 +2434,7 @@ yyreduce:
     break;
 
   case 27:
-#line 377 "cmDependsJavaParser.y"
+#line 378 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   STORECLASS(yyvsp[-1].str);
@@ -2444,7 +2445,7 @@ yyreduce:
     break;
 
   case 28:
-#line 387 "cmDependsJavaParser.y"
+#line 388 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   yyval.str = yyvsp[0].str;
@@ -2452,7 +2453,7 @@ yyreduce:
     break;
 
   case 29:
-#line 393 "cmDependsJavaParser.y"
+#line 394 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   yyval.str = yyvsp[0].str;
@@ -2460,7 +2461,7 @@ yyreduce:
     break;
 
   case 30:
-#line 400 "cmDependsJavaParser.y"
+#line 401 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   yyval.str = yyvsp[0].str;
@@ -2468,7 +2469,7 @@ yyreduce:
     break;
 
   case 31:
-#line 407 "cmDependsJavaParser.y"
+#line 408 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   yyval.str = yyvsp[0].str;
@@ -2476,7 +2477,7 @@ yyreduce:
     break;
 
   case 32:
-#line 413 "cmDependsJavaParser.y"
+#line 414 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   yyval.str = yyvsp[0].str;
@@ -2484,7 +2485,7 @@ yyreduce:
     break;
 
   case 33:
-#line 420 "cmDependsJavaParser.y"
+#line 421 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   yyGetParser->AddClassFound(yyvsp[-2].str);
@@ -2495,7 +2496,7 @@ yyreduce:
     break;
 
   case 34:
-#line 429 "cmDependsJavaParser.y"
+#line 430 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   STORECLASS(yyvsp[-2].str);
@@ -2507,7 +2508,7 @@ yyreduce:
     break;
 
   case 35:
-#line 439 "cmDependsJavaParser.y"
+#line 440 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   STORECLASS(yyvsp[-2].str);
@@ -2519,7 +2520,7 @@ yyreduce:
     break;
 
   case 36:
-#line 449 "cmDependsJavaParser.y"
+#line 450 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -2529,7 +2530,7 @@ yyreduce:
     break;
 
   case 37:
-#line 458 "cmDependsJavaParser.y"
+#line 459 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -2539,7 +2540,7 @@ yyreduce:
     break;
 
   case 38:
-#line 466 "cmDependsJavaParser.y"
+#line 467 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -2549,7 +2550,7 @@ yyreduce:
     break;
 
   case 39:
-#line 475 "cmDependsJavaParser.y"
+#line 476 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -2559,7 +2560,7 @@ yyreduce:
     break;
 
   case 40:
-#line 483 "cmDependsJavaParser.y"
+#line 484 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(0);
   yyval.str = 0;
@@ -2568,7 +2569,7 @@ yyreduce:
     break;
 
   case 41:
-#line 490 "cmDependsJavaParser.y"
+#line 491 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -2578,7 +2579,7 @@ yyreduce:
     break;
 
   case 42:
-#line 498 "cmDependsJavaParser.y"
+#line 499 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(0);
   yyval.str = 0;
@@ -2587,7 +2588,7 @@ yyreduce:
     break;
 
   case 43:
-#line 505 "cmDependsJavaParser.y"
+#line 506 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   CHECKEMPTY(2);
@@ -2597,7 +2598,7 @@ yyreduce:
     break;
 
   case 44:
-#line 513 "cmDependsJavaParser.y"
+#line 514 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(0);
   yyval.str = 0;
@@ -2606,7 +2607,7 @@ yyreduce:
     break;
 
   case 45:
-#line 520 "cmDependsJavaParser.y"
+#line 521 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   CHECKEMPTY(2);
@@ -2616,7 +2617,7 @@ yyreduce:
     break;
 
   case 46:
-#line 529 "cmDependsJavaParser.y"
+#line 530 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   yyGetParser->SetCurrentPackage(yyvsp[-1].str);
@@ -2629,7 +2630,7 @@ yyreduce:
     break;
 
   case 47:
-#line 541 "cmDependsJavaParser.y"
+#line 542 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -2639,7 +2640,7 @@ yyreduce:
     break;
 
   case 48:
-#line 549 "cmDependsJavaParser.y"
+#line 550 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -2649,7 +2650,7 @@ yyreduce:
     break;
 
   case 49:
-#line 558 "cmDependsJavaParser.y"
+#line 559 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   yyGetParser->AddPackagesImport(yyvsp[-1].str);
@@ -2662,7 +2663,7 @@ yyreduce:
     break;
 
   case 50:
-#line 570 "cmDependsJavaParser.y"
+#line 571 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(5);
   std::string str = yyvsp[-3].str;
@@ -2676,7 +2677,7 @@ yyreduce:
     break;
 
   case 51:
-#line 583 "cmDependsJavaParser.y"
+#line 584 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -2686,7 +2687,7 @@ yyreduce:
     break;
 
   case 52:
-#line 591 "cmDependsJavaParser.y"
+#line 592 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -2696,7 +2697,7 @@ yyreduce:
     break;
 
   case 53:
-#line 599 "cmDependsJavaParser.y"
+#line 600 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -2706,7 +2707,7 @@ yyreduce:
     break;
 
   case 54:
-#line 608 "cmDependsJavaParser.y"
+#line 609 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -2716,7 +2717,7 @@ yyreduce:
     break;
 
   case 55:
-#line 616 "cmDependsJavaParser.y"
+#line 617 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   CHECKEMPTY(2);
@@ -2726,7 +2727,7 @@ yyreduce:
     break;
 
   case 67:
-#line 631 "cmDependsJavaParser.y"
+#line 632 "cmDependsJavaParser.y"
     {
   yyGetParser->StartClass(yyvsp[0].str);
   ELEMENTSTART(3);
@@ -2736,7 +2737,7 @@ yyreduce:
     break;
 
   case 68:
-#line 641 "cmDependsJavaParser.y"
+#line 642 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   CHECKEMPTY(2);
@@ -2747,7 +2748,7 @@ yyreduce:
     break;
 
   case 69:
-#line 650 "cmDependsJavaParser.y"
+#line 651 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(2);
@@ -2758,7 +2759,7 @@ yyreduce:
     break;
 
   case 70:
-#line 659 "cmDependsJavaParser.y"
+#line 660 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -2769,7 +2770,7 @@ yyreduce:
     break;
 
   case 71:
-#line 668 "cmDependsJavaParser.y"
+#line 669 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(4);
   CHECKEMPTY(4);
@@ -2780,7 +2781,7 @@ yyreduce:
     break;
 
   case 72:
-#line 677 "cmDependsJavaParser.y"
+#line 678 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(0);
   yyval.str = 0;
@@ -2789,7 +2790,7 @@ yyreduce:
     break;
 
   case 73:
-#line 684 "cmDependsJavaParser.y"
+#line 685 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -2799,7 +2800,7 @@ yyreduce:
     break;
 
   case 74:
-#line 693 "cmDependsJavaParser.y"
+#line 694 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   CHECKEMPTY(2);
@@ -2809,7 +2810,7 @@ yyreduce:
     break;
 
   case 75:
-#line 702 "cmDependsJavaParser.y"
+#line 703 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   CHECKEMPTY(2);
@@ -2819,7 +2820,7 @@ yyreduce:
     break;
 
   case 76:
-#line 711 "cmDependsJavaParser.y"
+#line 712 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -2829,7 +2830,7 @@ yyreduce:
     break;
 
   case 77:
-#line 719 "cmDependsJavaParser.y"
+#line 720 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -2839,7 +2840,7 @@ yyreduce:
     break;
 
   case 78:
-#line 728 "cmDependsJavaParser.y"
+#line 729 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -2849,7 +2850,7 @@ yyreduce:
     break;
 
   case 79:
-#line 736 "cmDependsJavaParser.y"
+#line 737 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   yyval.str = 0;
@@ -2858,7 +2859,7 @@ yyreduce:
     break;
 
   case 80:
-#line 743 "cmDependsJavaParser.y"
+#line 744 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   CHECKEMPTY(2);
@@ -2868,7 +2869,7 @@ yyreduce:
     break;
 
   case 81:
-#line 752 "cmDependsJavaParser.y"
+#line 753 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -2878,7 +2879,7 @@ yyreduce:
     break;
 
   case 82:
-#line 760 "cmDependsJavaParser.y"
+#line 761 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -2888,7 +2889,7 @@ yyreduce:
     break;
 
   case 83:
-#line 768 "cmDependsJavaParser.y"
+#line 769 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -2898,7 +2899,7 @@ yyreduce:
     break;
 
   case 84:
-#line 776 "cmDependsJavaParser.y"
+#line 777 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -2908,7 +2909,7 @@ yyreduce:
     break;
 
   case 85:
-#line 785 "cmDependsJavaParser.y"
+#line 786 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -2918,7 +2919,7 @@ yyreduce:
     break;
 
   case 86:
-#line 793 "cmDependsJavaParser.y"
+#line 794 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -2928,14 +2929,14 @@ yyreduce:
     break;
 
   case 87:
-#line 802 "cmDependsJavaParser.y"
+#line 803 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(4);
 }
     break;
 
   case 88:
-#line 808 "cmDependsJavaParser.y"
+#line 809 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -2945,7 +2946,7 @@ yyreduce:
     break;
 
   case 89:
-#line 816 "cmDependsJavaParser.y"
+#line 817 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -2955,7 +2956,7 @@ yyreduce:
     break;
 
   case 90:
-#line 825 "cmDependsJavaParser.y"
+#line 826 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -2965,7 +2966,7 @@ yyreduce:
     break;
 
   case 91:
-#line 833 "cmDependsJavaParser.y"
+#line 834 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -2975,7 +2976,7 @@ yyreduce:
     break;
 
   case 92:
-#line 842 "cmDependsJavaParser.y"
+#line 843 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   yyGetParser->DeallocateParserType(&(yyvsp[0].str));
@@ -2986,7 +2987,7 @@ yyreduce:
     break;
 
   case 93:
-#line 851 "cmDependsJavaParser.y"
+#line 852 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -2996,7 +2997,7 @@ yyreduce:
     break;
 
   case 94:
-#line 860 "cmDependsJavaParser.y"
+#line 861 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3006,7 +3007,7 @@ yyreduce:
     break;
 
   case 95:
-#line 868 "cmDependsJavaParser.y"
+#line 869 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3016,7 +3017,7 @@ yyreduce:
     break;
 
   case 96:
-#line 877 "cmDependsJavaParser.y"
+#line 878 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   CHECKEMPTY(2);
@@ -3026,7 +3027,7 @@ yyreduce:
     break;
 
   case 97:
-#line 885 "cmDependsJavaParser.y"
+#line 886 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   CHECKEMPTY(2);
@@ -3036,7 +3037,7 @@ yyreduce:
     break;
 
   case 98:
-#line 893 "cmDependsJavaParser.y"
+#line 894 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -3046,7 +3047,7 @@ yyreduce:
     break;
 
   case 99:
-#line 902 "cmDependsJavaParser.y"
+#line 903 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(4);
   CHECKEMPTY(4);
@@ -3057,7 +3058,7 @@ yyreduce:
     break;
 
   case 100:
-#line 911 "cmDependsJavaParser.y"
+#line 912 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(4);
   CHECKEMPTY(4);
@@ -3068,7 +3069,7 @@ yyreduce:
     break;
 
   case 101:
-#line 920 "cmDependsJavaParser.y"
+#line 921 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(0);
   yyval.str = 0;
@@ -3078,7 +3079,7 @@ yyreduce:
     break;
 
   case 102:
-#line 928 "cmDependsJavaParser.y"
+#line 929 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3089,7 +3090,7 @@ yyreduce:
     break;
 
   case 103:
-#line 938 "cmDependsJavaParser.y"
+#line 939 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(4);
   yyGetParser->DeallocateParserType(&(yyvsp[-3].str));
@@ -3101,7 +3102,7 @@ yyreduce:
     break;
 
   case 104:
-#line 948 "cmDependsJavaParser.y"
+#line 949 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
 
@@ -3109,7 +3110,7 @@ yyreduce:
     break;
 
   case 105:
-#line 954 "cmDependsJavaParser.y"
+#line 955 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(0);
   yyval.str = 0;
@@ -3119,7 +3120,7 @@ yyreduce:
     break;
 
   case 107:
-#line 965 "cmDependsJavaParser.y"
+#line 966 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
 
@@ -3127,7 +3128,7 @@ yyreduce:
     break;
 
   case 108:
-#line 971 "cmDependsJavaParser.y"
+#line 972 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -3138,7 +3139,7 @@ yyreduce:
     break;
 
   case 109:
-#line 981 "cmDependsJavaParser.y"
+#line 982 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -3149,7 +3150,7 @@ yyreduce:
     break;
 
   case 110:
-#line 991 "cmDependsJavaParser.y"
+#line 992 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   CHECKEMPTY(2);
@@ -3160,7 +3161,7 @@ yyreduce:
     break;
 
   case 111:
-#line 1001 "cmDependsJavaParser.y"
+#line 1002 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
 
@@ -3168,7 +3169,7 @@ yyreduce:
     break;
 
   case 112:
-#line 1007 "cmDependsJavaParser.y"
+#line 1008 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -3179,7 +3180,7 @@ yyreduce:
     break;
 
   case 113:
-#line 1017 "cmDependsJavaParser.y"
+#line 1018 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3190,7 +3191,7 @@ yyreduce:
     break;
 
   case 114:
-#line 1027 "cmDependsJavaParser.y"
+#line 1028 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   CHECKEMPTY(2);
@@ -3201,7 +3202,7 @@ yyreduce:
     break;
 
   case 115:
-#line 1037 "cmDependsJavaParser.y"
+#line 1038 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(4);
   CHECKEMPTY(4);
@@ -3212,7 +3213,7 @@ yyreduce:
     break;
 
   case 116:
-#line 1046 "cmDependsJavaParser.y"
+#line 1047 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(5);
   CHECKEMPTY(5);
@@ -3223,7 +3224,7 @@ yyreduce:
     break;
 
   case 117:
-#line 1056 "cmDependsJavaParser.y"
+#line 1057 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(4);
   yyGetParser->DeallocateParserType(&(yyvsp[-3].str));
@@ -3235,7 +3236,7 @@ yyreduce:
     break;
 
   case 118:
-#line 1067 "cmDependsJavaParser.y"
+#line 1068 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(4);
   CHECKEMPTY(4);
@@ -3246,7 +3247,7 @@ yyreduce:
     break;
 
   case 119:
-#line 1076 "cmDependsJavaParser.y"
+#line 1077 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(0);
   yyval.str = 0;
@@ -3256,7 +3257,7 @@ yyreduce:
     break;
 
   case 120:
-#line 1084 "cmDependsJavaParser.y"
+#line 1085 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   CHECKEMPTY(2);
@@ -3267,7 +3268,7 @@ yyreduce:
     break;
 
   case 121:
-#line 1094 "cmDependsJavaParser.y"
+#line 1095 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(5);
   CHECKEMPTY(5);
@@ -3278,7 +3279,7 @@ yyreduce:
     break;
 
   case 122:
-#line 1103 "cmDependsJavaParser.y"
+#line 1104 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(5);
   CHECKEMPTY(5);
@@ -3289,7 +3290,7 @@ yyreduce:
     break;
 
   case 123:
-#line 1113 "cmDependsJavaParser.y"
+#line 1114 "cmDependsJavaParser.y"
     {
   yyGetParser->StartClass(yyvsp[0].str);
   ELEMENTSTART(3);
@@ -3299,7 +3300,7 @@ yyreduce:
     break;
 
   case 124:
-#line 1122 "cmDependsJavaParser.y"
+#line 1123 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   CHECKEMPTY(2);
@@ -3310,7 +3311,7 @@ yyreduce:
     break;
 
   case 125:
-#line 1131 "cmDependsJavaParser.y"
+#line 1132 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(0);
   yyval.str = 0;
@@ -3319,7 +3320,7 @@ yyreduce:
     break;
 
   case 126:
-#line 1138 "cmDependsJavaParser.y"
+#line 1139 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3330,7 +3331,7 @@ yyreduce:
     break;
 
   case 127:
-#line 1148 "cmDependsJavaParser.y"
+#line 1149 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   CHECKEMPTY(2);
@@ -3341,7 +3342,7 @@ yyreduce:
     break;
 
   case 128:
-#line 1157 "cmDependsJavaParser.y"
+#line 1158 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -3352,7 +3353,7 @@ yyreduce:
     break;
 
   case 129:
-#line 1167 "cmDependsJavaParser.y"
+#line 1168 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -3363,7 +3364,7 @@ yyreduce:
     break;
 
   case 130:
-#line 1176 "cmDependsJavaParser.y"
+#line 1177 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(0);
   yyval.str = 0;
@@ -3373,7 +3374,7 @@ yyreduce:
     break;
 
   case 131:
-#line 1184 "cmDependsJavaParser.y"
+#line 1185 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   yyval.str = 0;
@@ -3383,7 +3384,7 @@ yyreduce:
     break;
 
   case 132:
-#line 1193 "cmDependsJavaParser.y"
+#line 1194 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3394,7 +3395,7 @@ yyreduce:
     break;
 
   case 133:
-#line 1202 "cmDependsJavaParser.y"
+#line 1203 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3405,7 +3406,7 @@ yyreduce:
     break;
 
   case 134:
-#line 1211 "cmDependsJavaParser.y"
+#line 1212 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3416,7 +3417,7 @@ yyreduce:
     break;
 
   case 135:
-#line 1220 "cmDependsJavaParser.y"
+#line 1221 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   yyval.str = 0;
@@ -3426,7 +3427,7 @@ yyreduce:
     break;
 
   case 136:
-#line 1228 "cmDependsJavaParser.y"
+#line 1229 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3437,7 +3438,7 @@ yyreduce:
     break;
 
   case 137:
-#line 1237 "cmDependsJavaParser.y"
+#line 1238 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   yyval.str = 0;
@@ -3447,7 +3448,7 @@ yyreduce:
     break;
 
   case 138:
-#line 1246 "cmDependsJavaParser.y"
+#line 1247 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3458,7 +3459,7 @@ yyreduce:
     break;
 
   case 139:
-#line 1256 "cmDependsJavaParser.y"
+#line 1257 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   CHECKEMPTY(2);
@@ -3469,7 +3470,7 @@ yyreduce:
     break;
 
   case 140:
-#line 1266 "cmDependsJavaParser.y"
+#line 1267 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3480,7 +3481,7 @@ yyreduce:
     break;
 
   case 141:
-#line 1275 "cmDependsJavaParser.y"
+#line 1276 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   CHECKEMPTY(2);
@@ -3491,7 +3492,7 @@ yyreduce:
     break;
 
   case 142:
-#line 1285 "cmDependsJavaParser.y"
+#line 1286 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -3502,7 +3503,7 @@ yyreduce:
     break;
 
   case 143:
-#line 1294 "cmDependsJavaParser.y"
+#line 1295 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   yyval.str = 0;
@@ -3512,7 +3513,7 @@ yyreduce:
     break;
 
   case 144:
-#line 1302 "cmDependsJavaParser.y"
+#line 1303 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3523,7 +3524,7 @@ yyreduce:
     break;
 
   case 145:
-#line 1311 "cmDependsJavaParser.y"
+#line 1312 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   CHECKEMPTY(2);
@@ -3534,7 +3535,7 @@ yyreduce:
     break;
 
   case 146:
-#line 1321 "cmDependsJavaParser.y"
+#line 1322 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3545,7 +3546,7 @@ yyreduce:
     break;
 
   case 147:
-#line 1330 "cmDependsJavaParser.y"
+#line 1331 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -3556,7 +3557,7 @@ yyreduce:
     break;
 
   case 148:
-#line 1340 "cmDependsJavaParser.y"
+#line 1341 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(4);
   yyval.str = 0;
@@ -3566,7 +3567,7 @@ yyreduce:
     break;
 
   case 149:
-#line 1348 "cmDependsJavaParser.y"
+#line 1349 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   yyval.str = 0;
@@ -3576,7 +3577,7 @@ yyreduce:
     break;
 
   case 150:
-#line 1356 "cmDependsJavaParser.y"
+#line 1357 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3587,7 +3588,7 @@ yyreduce:
     break;
 
   case 151:
-#line 1366 "cmDependsJavaParser.y"
+#line 1367 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3598,7 +3599,7 @@ yyreduce:
     break;
 
   case 152:
-#line 1375 "cmDependsJavaParser.y"
+#line 1376 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(2);
@@ -3609,7 +3610,7 @@ yyreduce:
     break;
 
   case 153:
-#line 1385 "cmDependsJavaParser.y"
+#line 1386 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3620,7 +3621,7 @@ yyreduce:
     break;
 
   case 154:
-#line 1394 "cmDependsJavaParser.y"
+#line 1395 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3631,7 +3632,7 @@ yyreduce:
     break;
 
   case 155:
-#line 1403 "cmDependsJavaParser.y"
+#line 1404 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3642,7 +3643,7 @@ yyreduce:
     break;
 
   case 156:
-#line 1413 "cmDependsJavaParser.y"
+#line 1414 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(2);
@@ -3653,7 +3654,7 @@ yyreduce:
     break;
 
   case 157:
-#line 1423 "cmDependsJavaParser.y"
+#line 1424 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(3);
@@ -3664,7 +3665,7 @@ yyreduce:
     break;
 
   case 158:
-#line 1432 "cmDependsJavaParser.y"
+#line 1433 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(2);
@@ -3675,7 +3676,7 @@ yyreduce:
     break;
 
   case 159:
-#line 1442 "cmDependsJavaParser.y"
+#line 1443 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3686,7 +3687,7 @@ yyreduce:
     break;
 
   case 160:
-#line 1451 "cmDependsJavaParser.y"
+#line 1452 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3697,7 +3698,7 @@ yyreduce:
     break;
 
   case 161:
-#line 1460 "cmDependsJavaParser.y"
+#line 1461 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3708,7 +3709,7 @@ yyreduce:
     break;
 
   case 162:
-#line 1469 "cmDependsJavaParser.y"
+#line 1470 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3719,7 +3720,7 @@ yyreduce:
     break;
 
   case 163:
-#line 1478 "cmDependsJavaParser.y"
+#line 1479 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3730,7 +3731,7 @@ yyreduce:
     break;
 
   case 164:
-#line 1487 "cmDependsJavaParser.y"
+#line 1488 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3741,7 +3742,7 @@ yyreduce:
     break;
 
   case 165:
-#line 1497 "cmDependsJavaParser.y"
+#line 1498 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3752,7 +3753,7 @@ yyreduce:
     break;
 
   case 166:
-#line 1506 "cmDependsJavaParser.y"
+#line 1507 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3763,7 +3764,7 @@ yyreduce:
     break;
 
   case 167:
-#line 1515 "cmDependsJavaParser.y"
+#line 1516 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3774,7 +3775,7 @@ yyreduce:
     break;
 
   case 168:
-#line 1524 "cmDependsJavaParser.y"
+#line 1525 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3785,7 +3786,7 @@ yyreduce:
     break;
 
   case 169:
-#line 1533 "cmDependsJavaParser.y"
+#line 1534 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3796,7 +3797,7 @@ yyreduce:
     break;
 
   case 170:
-#line 1543 "cmDependsJavaParser.y"
+#line 1544 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3807,7 +3808,7 @@ yyreduce:
     break;
 
   case 171:
-#line 1552 "cmDependsJavaParser.y"
+#line 1553 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3818,7 +3819,7 @@ yyreduce:
     break;
 
   case 172:
-#line 1561 "cmDependsJavaParser.y"
+#line 1562 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3829,7 +3830,7 @@ yyreduce:
     break;
 
   case 173:
-#line 1570 "cmDependsJavaParser.y"
+#line 1571 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3840,7 +3841,7 @@ yyreduce:
     break;
 
   case 174:
-#line 1579 "cmDependsJavaParser.y"
+#line 1580 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3851,7 +3852,7 @@ yyreduce:
     break;
 
   case 175:
-#line 1588 "cmDependsJavaParser.y"
+#line 1589 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3862,7 +3863,7 @@ yyreduce:
     break;
 
   case 176:
-#line 1597 "cmDependsJavaParser.y"
+#line 1598 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3873,7 +3874,7 @@ yyreduce:
     break;
 
   case 177:
-#line 1606 "cmDependsJavaParser.y"
+#line 1607 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3884,7 +3885,7 @@ yyreduce:
     break;
 
   case 178:
-#line 1615 "cmDependsJavaParser.y"
+#line 1616 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3895,7 +3896,7 @@ yyreduce:
     break;
 
   case 179:
-#line 1624 "cmDependsJavaParser.y"
+#line 1625 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3906,7 +3907,7 @@ yyreduce:
     break;
 
   case 180:
-#line 1633 "cmDependsJavaParser.y"
+#line 1634 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3917,7 +3918,7 @@ yyreduce:
     break;
 
   case 181:
-#line 1642 "cmDependsJavaParser.y"
+#line 1643 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3928,7 +3929,7 @@ yyreduce:
     break;
 
   case 182:
-#line 1652 "cmDependsJavaParser.y"
+#line 1653 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3939,7 +3940,7 @@ yyreduce:
     break;
 
   case 183:
-#line 1662 "cmDependsJavaParser.y"
+#line 1663 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   yyGetParser->DeallocateParserType(&(yyvsp[-2].str));
@@ -3951,7 +3952,7 @@ yyreduce:
     break;
 
   case 184:
-#line 1673 "cmDependsJavaParser.y"
+#line 1674 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -3962,7 +3963,7 @@ yyreduce:
     break;
 
   case 185:
-#line 1683 "cmDependsJavaParser.y"
+#line 1684 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   CHECKEMPTY(2);
@@ -3973,7 +3974,7 @@ yyreduce:
     break;
 
   case 186:
-#line 1693 "cmDependsJavaParser.y"
+#line 1694 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3984,7 +3985,7 @@ yyreduce:
     break;
 
   case 187:
-#line 1702 "cmDependsJavaParser.y"
+#line 1703 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -3995,7 +3996,7 @@ yyreduce:
     break;
 
   case 188:
-#line 1711 "cmDependsJavaParser.y"
+#line 1712 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -4006,7 +4007,7 @@ yyreduce:
     break;
 
   case 189:
-#line 1720 "cmDependsJavaParser.y"
+#line 1721 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -4017,7 +4018,7 @@ yyreduce:
     break;
 
   case 190:
-#line 1729 "cmDependsJavaParser.y"
+#line 1730 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -4028,7 +4029,7 @@ yyreduce:
     break;
 
   case 191:
-#line 1738 "cmDependsJavaParser.y"
+#line 1739 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -4039,7 +4040,7 @@ yyreduce:
     break;
 
   case 192:
-#line 1747 "cmDependsJavaParser.y"
+#line 1748 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -4050,7 +4051,7 @@ yyreduce:
     break;
 
   case 193:
-#line 1757 "cmDependsJavaParser.y"
+#line 1758 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(5);
   CHECKEMPTY(5);
@@ -4061,7 +4062,7 @@ yyreduce:
     break;
 
   case 194:
-#line 1767 "cmDependsJavaParser.y"
+#line 1768 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(7);
   CHECKEMPTY(7);
@@ -4072,7 +4073,7 @@ yyreduce:
     break;
 
   case 195:
-#line 1777 "cmDependsJavaParser.y"
+#line 1778 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(7);
   CHECKEMPTY(7);
@@ -4083,7 +4084,7 @@ yyreduce:
     break;
 
   case 196:
-#line 1787 "cmDependsJavaParser.y"
+#line 1788 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(5);
 
@@ -4091,7 +4092,7 @@ yyreduce:
     break;
 
   case 197:
-#line 1794 "cmDependsJavaParser.y"
+#line 1795 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(4);
 
@@ -4099,7 +4100,7 @@ yyreduce:
     break;
 
   case 198:
-#line 1800 "cmDependsJavaParser.y"
+#line 1801 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(0);
   yyval.str = 0;
@@ -4109,7 +4110,7 @@ yyreduce:
     break;
 
   case 199:
-#line 1808 "cmDependsJavaParser.y"
+#line 1809 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -4120,7 +4121,7 @@ yyreduce:
     break;
 
   case 200:
-#line 1817 "cmDependsJavaParser.y"
+#line 1818 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(0);
   yyval.str = 0;
@@ -4130,7 +4131,7 @@ yyreduce:
     break;
 
   case 201:
-#line 1825 "cmDependsJavaParser.y"
+#line 1826 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   CHECKEMPTY(2);
@@ -4141,7 +4142,7 @@ yyreduce:
     break;
 
   case 202:
-#line 1835 "cmDependsJavaParser.y"
+#line 1836 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   CHECKEMPTY(2);
@@ -4152,7 +4153,7 @@ yyreduce:
     break;
 
   case 203:
-#line 1845 "cmDependsJavaParser.y"
+#line 1846 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -4163,7 +4164,7 @@ yyreduce:
     break;
 
   case 204:
-#line 1854 "cmDependsJavaParser.y"
+#line 1855 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   CHECKEMPTY(2);
@@ -4174,7 +4175,7 @@ yyreduce:
     break;
 
   case 205:
-#line 1864 "cmDependsJavaParser.y"
+#line 1865 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -4185,7 +4186,7 @@ yyreduce:
     break;
 
   case 206:
-#line 1873 "cmDependsJavaParser.y"
+#line 1874 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   CHECKEMPTY(2);
@@ -4196,7 +4197,7 @@ yyreduce:
     break;
 
   case 207:
-#line 1883 "cmDependsJavaParser.y"
+#line 1884 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(5);
 
@@ -4204,7 +4205,7 @@ yyreduce:
     break;
 
   case 208:
-#line 1890 "cmDependsJavaParser.y"
+#line 1891 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(5);
 
@@ -4212,7 +4213,7 @@ yyreduce:
     break;
 
   case 209:
-#line 1897 "cmDependsJavaParser.y"
+#line 1898 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(7);
 
@@ -4220,7 +4221,7 @@ yyreduce:
     break;
 
   case 210:
-#line 1905 "cmDependsJavaParser.y"
+#line 1906 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(9);
 
@@ -4228,7 +4229,7 @@ yyreduce:
     break;
 
   case 211:
-#line 1911 "cmDependsJavaParser.y"
+#line 1912 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   yyval.str = 0;
@@ -4238,7 +4239,7 @@ yyreduce:
     break;
 
   case 212:
-#line 1919 "cmDependsJavaParser.y"
+#line 1920 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -4249,7 +4250,7 @@ yyreduce:
     break;
 
   case 213:
-#line 1928 "cmDependsJavaParser.y"
+#line 1929 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(0);
   yyval.str = 0;
@@ -4259,7 +4260,7 @@ yyreduce:
     break;
 
   case 214:
-#line 1936 "cmDependsJavaParser.y"
+#line 1937 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -4270,7 +4271,7 @@ yyreduce:
     break;
 
   case 215:
-#line 1947 "cmDependsJavaParser.y"
+#line 1948 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(9);
   yyval.str = 0;
@@ -4280,7 +4281,7 @@ yyreduce:
     break;
 
   case 216:
-#line 1955 "cmDependsJavaParser.y"
+#line 1956 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(0);
   yyval.str = 0;
@@ -4290,7 +4291,7 @@ yyreduce:
     break;
 
   case 217:
-#line 1963 "cmDependsJavaParser.y"
+#line 1964 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -4301,7 +4302,7 @@ yyreduce:
     break;
 
   case 218:
-#line 1973 "cmDependsJavaParser.y"
+#line 1974 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -4312,7 +4313,7 @@ yyreduce:
     break;
 
   case 219:
-#line 1982 "cmDependsJavaParser.y"
+#line 1983 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -4323,7 +4324,7 @@ yyreduce:
     break;
 
   case 220:
-#line 1992 "cmDependsJavaParser.y"
+#line 1993 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -4334,7 +4335,7 @@ yyreduce:
     break;
 
   case 221:
-#line 2002 "cmDependsJavaParser.y"
+#line 2003 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -4345,7 +4346,7 @@ yyreduce:
     break;
 
   case 222:
-#line 2011 "cmDependsJavaParser.y"
+#line 2012 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -4356,7 +4357,7 @@ yyreduce:
     break;
 
   case 223:
-#line 2021 "cmDependsJavaParser.y"
+#line 2022 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -4367,7 +4368,7 @@ yyreduce:
     break;
 
   case 224:
-#line 2030 "cmDependsJavaParser.y"
+#line 2031 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(5);
   CHECKEMPTY(5);
@@ -4378,7 +4379,7 @@ yyreduce:
     break;
 
   case 225:
-#line 2040 "cmDependsJavaParser.y"
+#line 2041 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   yyGetParser->DeallocateParserType(&(yyvsp[-1].str));
@@ -4390,7 +4391,7 @@ yyreduce:
     break;
 
   case 226:
-#line 2050 "cmDependsJavaParser.y"
+#line 2051 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(0);
   yyval.str = 0;
@@ -4400,7 +4401,7 @@ yyreduce:
     break;
 
   case 227:
-#line 2058 "cmDependsJavaParser.y"
+#line 2059 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
 
@@ -4408,7 +4409,7 @@ yyreduce:
     break;
 
   case 228:
-#line 2065 "cmDependsJavaParser.y"
+#line 2066 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   yyGetParser->DeallocateParserType(&(yyvsp[-1].str));
@@ -4420,7 +4421,7 @@ yyreduce:
     break;
 
   case 229:
-#line 2076 "cmDependsJavaParser.y"
+#line 2077 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -4431,7 +4432,7 @@ yyreduce:
     break;
 
   case 230:
-#line 2086 "cmDependsJavaParser.y"
+#line 2087 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -4442,7 +4443,7 @@ yyreduce:
     break;
 
   case 231:
-#line 2096 "cmDependsJavaParser.y"
+#line 2097 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(5);
   CHECKEMPTY(5);
@@ -4453,7 +4454,7 @@ yyreduce:
     break;
 
   case 232:
-#line 2106 "cmDependsJavaParser.y"
+#line 2107 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -4464,7 +4465,7 @@ yyreduce:
     break;
 
   case 233:
-#line 2115 "cmDependsJavaParser.y"
+#line 2116 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(4);
   CHECKEMPTY(4);
@@ -4475,7 +4476,7 @@ yyreduce:
     break;
 
   case 234:
-#line 2124 "cmDependsJavaParser.y"
+#line 2125 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   yyval.str = 0;
@@ -4485,7 +4486,7 @@ yyreduce:
     break;
 
   case 235:
-#line 2132 "cmDependsJavaParser.y"
+#line 2133 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -4496,7 +4497,7 @@ yyreduce:
     break;
 
   case 236:
-#line 2142 "cmDependsJavaParser.y"
+#line 2143 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -4507,7 +4508,7 @@ yyreduce:
     break;
 
   case 237:
-#line 2151 "cmDependsJavaParser.y"
+#line 2152 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   CHECKEMPTY(2);
@@ -4518,7 +4519,7 @@ yyreduce:
     break;
 
   case 238:
-#line 2161 "cmDependsJavaParser.y"
+#line 2162 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(5);
 
@@ -4526,7 +4527,7 @@ yyreduce:
     break;
 
   case 239:
-#line 2168 "cmDependsJavaParser.y"
+#line 2169 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   CHECKEMPTY(2);
@@ -4537,7 +4538,7 @@ yyreduce:
     break;
 
   case 240:
-#line 2178 "cmDependsJavaParser.y"
+#line 2179 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -4548,7 +4549,7 @@ yyreduce:
     break;
 
   case 241:
-#line 2187 "cmDependsJavaParser.y"
+#line 2188 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -4559,7 +4560,7 @@ yyreduce:
     break;
 
   case 242:
-#line 2197 "cmDependsJavaParser.y"
+#line 2198 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -4570,7 +4571,7 @@ yyreduce:
     break;
 
   case 243:
-#line 2206 "cmDependsJavaParser.y"
+#line 2207 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
 
@@ -4578,7 +4579,7 @@ yyreduce:
     break;
 
   case 244:
-#line 2212 "cmDependsJavaParser.y"
+#line 2213 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -4589,7 +4590,7 @@ yyreduce:
     break;
 
   case 245:
-#line 2221 "cmDependsJavaParser.y"
+#line 2222 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -4600,7 +4601,7 @@ yyreduce:
     break;
 
   case 246:
-#line 2230 "cmDependsJavaParser.y"
+#line 2231 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -4611,7 +4612,7 @@ yyreduce:
     break;
 
   case 247:
-#line 2239 "cmDependsJavaParser.y"
+#line 2240 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -4622,7 +4623,7 @@ yyreduce:
     break;
 
   case 248:
-#line 2248 "cmDependsJavaParser.y"
+#line 2249 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -4633,7 +4634,7 @@ yyreduce:
     break;
 
   case 249:
-#line 2258 "cmDependsJavaParser.y"
+#line 2259 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(6);
   CHECKEMPTY(6);
@@ -4644,7 +4645,7 @@ yyreduce:
     break;
 
   case 250:
-#line 2267 "cmDependsJavaParser.y"
+#line 2268 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(0);
   yyval.str = 0;
@@ -4654,7 +4655,7 @@ yyreduce:
     break;
 
   case 251:
-#line 2275 "cmDependsJavaParser.y"
+#line 2276 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -4665,7 +4666,7 @@ yyreduce:
     break;
 
   case 252:
-#line 2284 "cmDependsJavaParser.y"
+#line 2285 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(0);
   yyval.str = 0;
@@ -4675,7 +4676,7 @@ yyreduce:
     break;
 
   case 253:
-#line 2292 "cmDependsJavaParser.y"
+#line 2293 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -4686,7 +4687,7 @@ yyreduce:
     break;
 
   case 254:
-#line 2302 "cmDependsJavaParser.y"
+#line 2303 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -4697,7 +4698,7 @@ yyreduce:
     break;
 
   case 255:
-#line 2311 "cmDependsJavaParser.y"
+#line 2312 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -4708,7 +4709,7 @@ yyreduce:
     break;
 
   case 256:
-#line 2321 "cmDependsJavaParser.y"
+#line 2322 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(4);
   CHECKEMPTY(4);
@@ -4719,7 +4720,7 @@ yyreduce:
     break;
 
   case 257:
-#line 2330 "cmDependsJavaParser.y"
+#line 2331 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(4);
   CHECKEMPTY(4);
@@ -4730,7 +4731,7 @@ yyreduce:
     break;
 
   case 258:
-#line 2339 "cmDependsJavaParser.y"
+#line 2340 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(4);
   CHECKEMPTY(4);
@@ -4741,7 +4742,7 @@ yyreduce:
     break;
 
   case 259:
-#line 2348 "cmDependsJavaParser.y"
+#line 2349 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(4);
   CHECKEMPTY(4);
@@ -4752,7 +4753,7 @@ yyreduce:
     break;
 
   case 260:
-#line 2357 "cmDependsJavaParser.y"
+#line 2358 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(0);
   yyval.str = 0;
@@ -4762,7 +4763,7 @@ yyreduce:
     break;
 
   case 261:
-#line 2365 "cmDependsJavaParser.y"
+#line 2366 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -4773,7 +4774,7 @@ yyreduce:
     break;
 
   case 262:
-#line 2375 "cmDependsJavaParser.y"
+#line 2376 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -4784,7 +4785,7 @@ yyreduce:
     break;
 
   case 263:
-#line 2384 "cmDependsJavaParser.y"
+#line 2385 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   CHECKEMPTY(2);
@@ -4795,7 +4796,7 @@ yyreduce:
     break;
 
   case 264:
-#line 2394 "cmDependsJavaParser.y"
+#line 2395 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -4806,7 +4807,7 @@ yyreduce:
     break;
 
   case 265:
-#line 2404 "cmDependsJavaParser.y"
+#line 2405 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
 
@@ -4814,7 +4815,7 @@ yyreduce:
     break;
 
   case 266:
-#line 2410 "cmDependsJavaParser.y"
+#line 2411 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
 
@@ -4822,7 +4823,7 @@ yyreduce:
     break;
 
   case 267:
-#line 2417 "cmDependsJavaParser.y"
+#line 2418 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   yyGetParser->DeallocateParserType(&(yyvsp[0].str));
@@ -4834,7 +4835,7 @@ yyreduce:
     break;
 
   case 268:
-#line 2427 "cmDependsJavaParser.y"
+#line 2428 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   yyGetParser->DeallocateParserType(&(yyvsp[0].str));
@@ -4846,7 +4847,7 @@ yyreduce:
     break;
 
   case 269:
-#line 2437 "cmDependsJavaParser.y"
+#line 2438 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   yyGetParser->DeallocateParserType(&(yyvsp[0].str));
@@ -4858,7 +4859,7 @@ yyreduce:
     break;
 
   case 270:
-#line 2447 "cmDependsJavaParser.y"
+#line 2448 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   yyGetParser->DeallocateParserType(&(yyvsp[0].str));
@@ -4870,7 +4871,7 @@ yyreduce:
     break;
 
   case 271:
-#line 2458 "cmDependsJavaParser.y"
+#line 2459 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(4);
   yyGetParser->DeallocateParserType(&(yyvsp[-3].str));
@@ -4882,7 +4883,7 @@ yyreduce:
     break;
 
   case 272:
-#line 2468 "cmDependsJavaParser.y"
+#line 2469 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(6);
   yyGetParser->DeallocateParserType(&(yyvsp[-5].str));
@@ -4895,7 +4896,7 @@ yyreduce:
     break;
 
   case 273:
-#line 2479 "cmDependsJavaParser.y"
+#line 2480 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(6);
   yyGetParser->DeallocateParserType(&(yyvsp[-3].str));
@@ -4907,7 +4908,7 @@ yyreduce:
     break;
 
   case 274:
-#line 2489 "cmDependsJavaParser.y"
+#line 2490 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(6);
   yyGetParser->DeallocateParserType(&(yyvsp[-3].str));
@@ -4919,7 +4920,7 @@ yyreduce:
     break;
 
   case 275:
-#line 2500 "cmDependsJavaParser.y"
+#line 2501 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(4);
   yyGetParser->DeallocateParserType(&(yyvsp[-3].str));
@@ -4931,7 +4932,7 @@ yyreduce:
     break;
 
   case 276:
-#line 2510 "cmDependsJavaParser.y"
+#line 2511 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(4);
   CHECKEMPTY(4);
@@ -4942,7 +4943,7 @@ yyreduce:
     break;
 
   case 277:
-#line 2520 "cmDependsJavaParser.y"
+#line 2521 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -4953,7 +4954,7 @@ yyreduce:
     break;
 
   case 278:
-#line 2529 "cmDependsJavaParser.y"
+#line 2530 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   yyGetParser->DeallocateParserType(&(yyvsp[0].str));
@@ -4964,7 +4965,7 @@ yyreduce:
     break;
 
   case 279:
-#line 2538 "cmDependsJavaParser.y"
+#line 2539 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -4975,7 +4976,7 @@ yyreduce:
     break;
 
   case 280:
-#line 2547 "cmDependsJavaParser.y"
+#line 2548 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -4986,7 +4987,7 @@ yyreduce:
     break;
 
   case 281:
-#line 2556 "cmDependsJavaParser.y"
+#line 2557 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -4997,7 +4998,7 @@ yyreduce:
     break;
 
   case 282:
-#line 2566 "cmDependsJavaParser.y"
+#line 2567 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   CHECKEMPTY(2);
@@ -5008,7 +5009,7 @@ yyreduce:
     break;
 
   case 283:
-#line 2576 "cmDependsJavaParser.y"
+#line 2577 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   CHECKEMPTY(2);
@@ -5019,7 +5020,7 @@ yyreduce:
     break;
 
   case 284:
-#line 2586 "cmDependsJavaParser.y"
+#line 2587 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -5030,7 +5031,7 @@ yyreduce:
     break;
 
   case 285:
-#line 2595 "cmDependsJavaParser.y"
+#line 2596 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -5041,7 +5042,7 @@ yyreduce:
     break;
 
   case 286:
-#line 2604 "cmDependsJavaParser.y"
+#line 2605 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   CHECKEMPTY(2);
@@ -5052,7 +5053,7 @@ yyreduce:
     break;
 
   case 287:
-#line 2613 "cmDependsJavaParser.y"
+#line 2614 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   CHECKEMPTY(2);
@@ -5063,7 +5064,7 @@ yyreduce:
     break;
 
   case 288:
-#line 2622 "cmDependsJavaParser.y"
+#line 2623 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -5074,7 +5075,7 @@ yyreduce:
     break;
 
   case 289:
-#line 2632 "cmDependsJavaParser.y"
+#line 2633 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   CHECKEMPTY(2);
@@ -5085,7 +5086,7 @@ yyreduce:
     break;
 
   case 290:
-#line 2642 "cmDependsJavaParser.y"
+#line 2643 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   CHECKEMPTY(2);
@@ -5096,7 +5097,7 @@ yyreduce:
     break;
 
   case 291:
-#line 2652 "cmDependsJavaParser.y"
+#line 2653 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -5107,7 +5108,7 @@ yyreduce:
     break;
 
   case 292:
-#line 2661 "cmDependsJavaParser.y"
+#line 2662 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   CHECKEMPTY(2);
@@ -5118,7 +5119,7 @@ yyreduce:
     break;
 
   case 293:
-#line 2670 "cmDependsJavaParser.y"
+#line 2671 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(2);
   CHECKEMPTY(2);
@@ -5129,7 +5130,7 @@ yyreduce:
     break;
 
   case 294:
-#line 2679 "cmDependsJavaParser.y"
+#line 2680 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -5140,7 +5141,7 @@ yyreduce:
     break;
 
   case 295:
-#line 2689 "cmDependsJavaParser.y"
+#line 2690 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(5);
   CHECKEMPTY(5);
@@ -5151,7 +5152,7 @@ yyreduce:
     break;
 
   case 296:
-#line 2698 "cmDependsJavaParser.y"
+#line 2699 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(4);
   CHECKEMPTY(4);
@@ -5162,7 +5163,7 @@ yyreduce:
     break;
 
   case 297:
-#line 2707 "cmDependsJavaParser.y"
+#line 2708 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(5);
 
@@ -5170,7 +5171,7 @@ yyreduce:
     break;
 
   case 298:
-#line 2714 "cmDependsJavaParser.y"
+#line 2715 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -5181,7 +5182,7 @@ yyreduce:
     break;
 
   case 299:
-#line 2723 "cmDependsJavaParser.y"
+#line 2724 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -5192,7 +5193,7 @@ yyreduce:
     break;
 
   case 300:
-#line 2732 "cmDependsJavaParser.y"
+#line 2733 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -5203,7 +5204,7 @@ yyreduce:
     break;
 
   case 301:
-#line 2741 "cmDependsJavaParser.y"
+#line 2742 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -5214,7 +5215,7 @@ yyreduce:
     break;
 
   case 302:
-#line 2751 "cmDependsJavaParser.y"
+#line 2752 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -5225,7 +5226,7 @@ yyreduce:
     break;
 
   case 303:
-#line 2760 "cmDependsJavaParser.y"
+#line 2761 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -5236,7 +5237,7 @@ yyreduce:
     break;
 
   case 304:
-#line 2769 "cmDependsJavaParser.y"
+#line 2770 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -5247,7 +5248,7 @@ yyreduce:
     break;
 
   case 305:
-#line 2779 "cmDependsJavaParser.y"
+#line 2780 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -5258,7 +5259,7 @@ yyreduce:
     break;
 
   case 306:
-#line 2788 "cmDependsJavaParser.y"
+#line 2789 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -5269,7 +5270,7 @@ yyreduce:
     break;
 
   case 307:
-#line 2797 "cmDependsJavaParser.y"
+#line 2798 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -5280,7 +5281,7 @@ yyreduce:
     break;
 
   case 308:
-#line 2806 "cmDependsJavaParser.y"
+#line 2807 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -5291,7 +5292,7 @@ yyreduce:
     break;
 
   case 309:
-#line 2816 "cmDependsJavaParser.y"
+#line 2817 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -5302,7 +5303,7 @@ yyreduce:
     break;
 
   case 310:
-#line 2825 "cmDependsJavaParser.y"
+#line 2826 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -5313,7 +5314,7 @@ yyreduce:
     break;
 
   case 311:
-#line 2834 "cmDependsJavaParser.y"
+#line 2835 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -5324,7 +5325,7 @@ yyreduce:
     break;
 
   case 312:
-#line 2843 "cmDependsJavaParser.y"
+#line 2844 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -5335,7 +5336,7 @@ yyreduce:
     break;
 
   case 313:
-#line 2852 "cmDependsJavaParser.y"
+#line 2853 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -5346,7 +5347,7 @@ yyreduce:
     break;
 
   case 314:
-#line 2861 "cmDependsJavaParser.y"
+#line 2862 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -5357,7 +5358,7 @@ yyreduce:
     break;
 
   case 315:
-#line 2871 "cmDependsJavaParser.y"
+#line 2872 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -5368,7 +5369,7 @@ yyreduce:
     break;
 
   case 316:
-#line 2880 "cmDependsJavaParser.y"
+#line 2881 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -5379,7 +5380,7 @@ yyreduce:
     break;
 
   case 317:
-#line 2889 "cmDependsJavaParser.y"
+#line 2890 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -5390,7 +5391,7 @@ yyreduce:
     break;
 
   case 318:
-#line 2899 "cmDependsJavaParser.y"
+#line 2900 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -5401,7 +5402,7 @@ yyreduce:
     break;
 
   case 319:
-#line 2908 "cmDependsJavaParser.y"
+#line 2909 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -5412,7 +5413,7 @@ yyreduce:
     break;
 
   case 320:
-#line 2918 "cmDependsJavaParser.y"
+#line 2919 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -5423,7 +5424,7 @@ yyreduce:
     break;
 
   case 321:
-#line 2927 "cmDependsJavaParser.y"
+#line 2928 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -5434,7 +5435,7 @@ yyreduce:
     break;
 
   case 322:
-#line 2937 "cmDependsJavaParser.y"
+#line 2938 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -5445,7 +5446,7 @@ yyreduce:
     break;
 
   case 323:
-#line 2946 "cmDependsJavaParser.y"
+#line 2947 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -5456,7 +5457,7 @@ yyreduce:
     break;
 
   case 324:
-#line 2956 "cmDependsJavaParser.y"
+#line 2957 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -5467,7 +5468,7 @@ yyreduce:
     break;
 
   case 325:
-#line 2965 "cmDependsJavaParser.y"
+#line 2966 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -5478,7 +5479,7 @@ yyreduce:
     break;
 
   case 326:
-#line 2975 "cmDependsJavaParser.y"
+#line 2976 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -5489,7 +5490,7 @@ yyreduce:
     break;
 
   case 327:
-#line 2984 "cmDependsJavaParser.y"
+#line 2985 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -5500,7 +5501,7 @@ yyreduce:
     break;
 
   case 328:
-#line 2994 "cmDependsJavaParser.y"
+#line 2995 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -5511,7 +5512,7 @@ yyreduce:
     break;
 
   case 329:
-#line 3003 "cmDependsJavaParser.y"
+#line 3004 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(5);
   CHECKEMPTY(5);
@@ -5522,7 +5523,7 @@ yyreduce:
     break;
 
   case 330:
-#line 3013 "cmDependsJavaParser.y"
+#line 3014 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -5533,7 +5534,7 @@ yyreduce:
     break;
 
   case 331:
-#line 3022 "cmDependsJavaParser.y"
+#line 3023 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -5544,7 +5545,7 @@ yyreduce:
     break;
 
   case 332:
-#line 3032 "cmDependsJavaParser.y"
+#line 3033 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   CHECKEMPTY(3);
@@ -5555,7 +5556,7 @@ yyreduce:
     break;
 
   case 333:
-#line 3042 "cmDependsJavaParser.y"
+#line 3043 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   yyGetParser->DeallocateParserType(&(yyvsp[0].str));
@@ -5567,7 +5568,7 @@ yyreduce:
     break;
 
   case 334:
-#line 3052 "cmDependsJavaParser.y"
+#line 3053 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -5578,7 +5579,7 @@ yyreduce:
     break;
 
   case 335:
-#line 3061 "cmDependsJavaParser.y"
+#line 3062 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -5589,7 +5590,7 @@ yyreduce:
     break;
 
   case 336:
-#line 3071 "cmDependsJavaParser.y"
+#line 3072 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -5600,7 +5601,7 @@ yyreduce:
     break;
 
   case 337:
-#line 3080 "cmDependsJavaParser.y"
+#line 3081 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -5611,7 +5612,7 @@ yyreduce:
     break;
 
   case 338:
-#line 3089 "cmDependsJavaParser.y"
+#line 3090 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -5622,7 +5623,7 @@ yyreduce:
     break;
 
   case 339:
-#line 3098 "cmDependsJavaParser.y"
+#line 3099 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -5633,7 +5634,7 @@ yyreduce:
     break;
 
   case 340:
-#line 3107 "cmDependsJavaParser.y"
+#line 3108 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -5644,7 +5645,7 @@ yyreduce:
     break;
 
   case 341:
-#line 3116 "cmDependsJavaParser.y"
+#line 3117 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -5655,7 +5656,7 @@ yyreduce:
     break;
 
   case 342:
-#line 3125 "cmDependsJavaParser.y"
+#line 3126 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -5666,7 +5667,7 @@ yyreduce:
     break;
 
   case 343:
-#line 3134 "cmDependsJavaParser.y"
+#line 3135 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -5677,7 +5678,7 @@ yyreduce:
     break;
 
   case 344:
-#line 3143 "cmDependsJavaParser.y"
+#line 3144 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -5688,7 +5689,7 @@ yyreduce:
     break;
 
   case 345:
-#line 3152 "cmDependsJavaParser.y"
+#line 3153 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -5699,7 +5700,7 @@ yyreduce:
     break;
 
   case 346:
-#line 3161 "cmDependsJavaParser.y"
+#line 3162 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -5710,7 +5711,7 @@ yyreduce:
     break;
 
   case 347:
-#line 3170 "cmDependsJavaParser.y"
+#line 3171 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -5721,7 +5722,7 @@ yyreduce:
     break;
 
   case 348:
-#line 3180 "cmDependsJavaParser.y"
+#line 3181 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -5732,7 +5733,7 @@ yyreduce:
     break;
 
   case 349:
-#line 3190 "cmDependsJavaParser.y"
+#line 3191 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -5743,7 +5744,7 @@ yyreduce:
     break;
 
   case 350:
-#line 3200 "cmDependsJavaParser.y"
+#line 3201 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(1);
   CHECKEMPTY(1);
@@ -5754,7 +5755,7 @@ yyreduce:
     break;
 
   case 351:
-#line 3209 "cmDependsJavaParser.y"
+#line 3210 "cmDependsJavaParser.y"
     {
   ELEMENTSTART(3);
   STORECLASS(yyvsp[-2].str);
@@ -5769,7 +5770,7 @@ yyreduce:
     }
 
 /* Line 1010 of yacc.c.  */
-#line 5773 "cmDependsJavaParser.cxx"
+#line 5774 "cmDependsJavaParser.cxx"
 
   yyvsp -= yylen;
   yyssp -= yylen;
@@ -5994,7 +5995,7 @@ yyreturn:
 }
 
 
-#line 3218 "cmDependsJavaParser.y"
+#line 3219 "cmDependsJavaParser.y"
 
 /* End of grammar */
 
