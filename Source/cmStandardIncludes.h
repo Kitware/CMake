@@ -27,6 +27,10 @@
 #include "cmConfigure.h"
 #endif
 
+#if !defined(_WIN32) && defined(__COMO__)
+# define _BSD_SOURCE
+#endif
+
 #ifdef _MSC_VER
 #pragma warning ( disable : 4786 )
 #pragma warning ( disable : 4503 )
