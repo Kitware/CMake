@@ -282,7 +282,7 @@ Curl_hash_clean_with_criterium(curl_hash *h, void *user,
 int 
 Curl_hash_count(curl_hash *h)
 {
-  return h->size;
+  return (int)h->size;
 }
 /* }}} */
 

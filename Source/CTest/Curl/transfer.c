@@ -134,8 +134,8 @@ static int fillbuffer(struct connectdata *conn,
     conn->upload_fromhere += 10; /* 32bit hex + CRLF */
   }
   
-  nread = conn->fread(conn->upload_fromhere, 1,
-                      buffersize, conn->fread_in);
+  nread = (int)conn->fread(conn->upload_fromhere, 1,
+                           buffersize, conn->fread_in);
           
   if(!conn->bits.forbidchunk && conn->bits.upload_chunky) {
     /* if chunked Transfer-Encoding */
@@ -294,7 +294,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 char *newbuff;
                 long newsize=MAX((k->hbuflen+nread)*3/2,
                                  data->state.headersize*2);
-                hbufp_index = k->hbufp - data->state.headerbuff;
+                hbufp_index = (int)(k->hbufp - data->state.headerbuff);
                 newbuff = (char *)realloc(data->state.headerbuff, newsize);
                 if(!newbuff) {
                   failf (data, "Failed to alloc memory for big header!");
@@ -321,7 +321,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             }
 
             /* decrease the size of the remaining buffer */
-            nread -= (k->end_ptr - k->str)+1; 
+            nread -= (int)((k->end_ptr - k->str)+1); 
 
             k->str = k->end_ptr + 1; /* move past new line */
 
@@ -334,10 +334,10 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             if (k->hbuflen + (k->str - k->str_start) >=
                 data->state.headersize) {
               char *newbuff;
-              long newsize=MAX((k->hbuflen+
+              long newsize=(long)MAX((k->hbuflen+
                                 (k->str-k->str_start))*3/2,
                                data->state.headersize*2);
-              hbufp_index = k->hbufp - data->state.headerbuff;
+              hbufp_index = (int)(k->hbufp - data->state.headerbuff);
               newbuff = (char *)realloc(data->state.headerbuff, newsize);
               if(!newbuff) {
                 failf (data, "Failed to alloc memory for big header!");
@@ -351,7 +351,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             /* copy to end of line */
             strncpy (k->hbufp, k->str_start, k->str - k->str_start);
             k->hbufp += k->str - k->str_start;
-            k->hbuflen += k->str - k->str_start;
+            k->hbuflen += (int)(k->str - k->str_start);
             *k->hbufp = 0;
               
             k->p = data->state.headerbuff;
@@ -420,7 +420,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               if (data->set.http_include_header)
                 k->writetype |= CLIENTWRITE_BODY;
 
-              headerlen = k->p - data->state.headerbuff;
+              headerlen = (int)(k->p - data->state.headerbuff);
 
               result = Curl_client_write(data, k->writetype,
                                          data->state.headerbuff,

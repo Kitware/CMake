@@ -155,7 +155,7 @@ void Curl_failf(struct SessionHandle *data, const char *fmt, ...)
     data->state.errorbuf = TRUE; /* wrote error string */
 
     if(data->set.verbose) {
-      int len = strlen(data->set.errorbuffer);
+      int len = (int)strlen(data->set.errorbuffer);
       bool doneit=FALSE;
       if(len < CURL_ERROR_SIZE) {
         doneit = TRUE;
@@ -189,7 +189,7 @@ CURLcode Curl_sendf(int sockfd, struct connectdata *conn,
     return CURLE_OUT_OF_MEMORY; /* failure */
 
   bytes_written=0;
-  write_len = strlen(s);
+  write_len = (int)strlen(s);
   sptr = s;
 
   do {
@@ -265,7 +265,7 @@ CURLcode Curl_write(struct connectdata *conn, int sockfd,
     else
 #endif /* KRB4 */
     {
-      bytes_written = swrite(sockfd, mem, len);
+      bytes_written = (int)swrite(sockfd, mem, (int)len);
     }
     if(-1 == bytes_written) {
 #ifdef WIN32
@@ -374,7 +374,7 @@ int Curl_read(struct connectdata *conn,
       nread = Curl_sec_read(conn, sockfd, buf, buffersize);
     else
 #endif
-      nread = sread (sockfd, buf, buffersize);
+      nread = sread (sockfd, buf, (int)buffersize);
 
     if(-1 == nread) {
 #ifdef WIN32

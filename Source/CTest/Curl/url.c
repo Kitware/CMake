@@ -1426,8 +1426,8 @@ static int handleSock5Proxy(
     /* Needs user name and password */
     int userlen, pwlen, len;
 
-    userlen = strlen(proxy_name);
-    pwlen = strlen(proxy_password);
+    userlen = (int)strlen(proxy_name);
+    pwlen = (int)strlen(proxy_password);
 
     /*   username/password request looks like
      * +----+------+----------+------+----------+
@@ -1813,7 +1813,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
    * other parts of the code will rely on this fact
    ***********************************************************/
 #define LEAST_PATH_ALLOC 256
-  urllen=strlen(data->change.url);
+  urllen=(int)strlen(data->change.url);
   if(urllen < LEAST_PATH_ALLOC)
     urllen=LEAST_PATH_ALLOC;
   
@@ -2009,9 +2009,9 @@ static CURLcode CreateConnection(struct SessionHandle *data,
         unsigned int namelen;
         char *endptr = strchr(conn->name, ':');
         if(endptr)
-          namelen=endptr-conn->name;
+          namelen=(unsigned int)(endptr-conn->name);
         else
-          namelen=strlen(conn->name);
+          namelen=(unsigned int)strlen(conn->name);
 
         if(strlen(nope) <= namelen) {
           char *checkn=
@@ -2779,7 +2779,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     char *authorization;
     snprintf(data->state.buffer, BUFSIZE, "%s:%s",
              data->state.proxyuser, data->state.proxypasswd);
-    if(Curl_base64_encode(data->state.buffer, strlen(data->state.buffer),
+    if(Curl_base64_encode(data->state.buffer, (int)strlen(data->state.buffer),
                           &authorization) >= 0) {
       if(conn->allocptr.proxyuserpwd)
         free(conn->allocptr.proxyuserpwd);

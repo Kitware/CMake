@@ -129,6 +129,8 @@ defined(HAVE_LIBSSL) && defined(HAVE_LIBCRYPTO)
 #pragma warning ( disable : 4706 )
 #pragma warning ( disable : 4131 ) /* Old style declaration */
 #pragma warning ( disable : 4055 ) /* Cast void*(*)() to void* */
+#pragma warning ( disable : 4311 ) /* Allow cast from void* to long/int */
+#pragma warning ( disable : 4312 ) /* Allow cast from long to char* */
 struct _RPC_ASYNC_STATE;
 #endif
 #if !defined(__GNUC__) || defined(__MINGW32__)

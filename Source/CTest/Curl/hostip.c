@@ -240,7 +240,7 @@ struct Curl_dns_entry *Curl_resolv(struct SessionHandle *data,
 #endif
 
   /* Create an entry id, based upon the hostname and port */
-  entry_len = strlen(hostname);
+  entry_len = (int)strlen(hostname);
   entry_id = create_hostcache_id(hostname, port, &entry_len);
   /* If we can't create the entry id, fail */
   if (!entry_id)
@@ -279,7 +279,7 @@ struct Curl_dns_entry *Curl_resolv(struct SessionHandle *data,
   /* Remove outdated and unused entries from the hostcache */
   hostcache_prune(data->hostcache, 
                   data->set.dns_cache_timeout, 
-                  now);
+                  (int)now);
 
   HOSTCACHE_RETURN(dns);
 }
@@ -412,7 +412,7 @@ static struct hostent* pack_hostent(char** buf, struct hostent* orig)
 
   int i;
   char *str;
-  int len;
+  size_t len;
 
   bufptr = *buf;
   copy = (struct hostent*)bufptr;

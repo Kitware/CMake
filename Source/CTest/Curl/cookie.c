@@ -169,7 +169,7 @@ Curl_cookie_add(struct CookieInfo *c,
           char *whatptr;
 
           /* Strip off trailing whitespace from the 'what' */
-          int len=strlen(what);
+          size_t len=strlen(what);
           while(len && isspace((int)what[len-1])) {
             what[len-1]=0;
             len--;
@@ -203,11 +203,11 @@ Curl_cookie_add(struct CookieInfo *c,
              */
             co->maxage = strdup(whatptr);
             co->expires =
-              atoi((*co->maxage=='\"')?&co->maxage[1]:&co->maxage[0]) + now;
+              atoi((*co->maxage=='\"')?&co->maxage[1]:&co->maxage[0]) + (long)now;
           }
           else if(strequal("expires", name)) {
             co->expirestr=strdup(whatptr);
-            co->expires = curl_getdate(what, &now);
+            co->expires = (long)curl_getdate(what, &now);
           }
           else if(!co->name) {
             co->name = strdup(name);
@@ -560,7 +560,7 @@ struct Cookie *Curl_cookie_getlist(struct CookieInfo *c,
    struct Cookie *newco;
    struct Cookie *co;
    time_t now = time(NULL);
-   int hostlen=strlen(host);
+   int hostlen=(int)strlen(host);
    int domlen;
 
    struct Cookie *mainco=NULL;
@@ -578,7 +578,7 @@ struct Cookie *Curl_cookie_getlist(struct CookieInfo *c,
          (co->secure?secure:TRUE) ) {
 
          /* now check if the domain is correct */
-         domlen=co->domain?strlen(co->domain):0;
+         domlen=co->domain?(int)strlen(co->domain):0;
          if(!co->domain ||
             ((domlen<=hostlen) &&
              strequal(host+(hostlen-domlen), co->domain)) ) {

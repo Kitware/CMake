@@ -171,7 +171,7 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
          We expect another 'datasize' of data. We have 'length' right now,
          it can be more or less than 'datasize'. Get the smallest piece.
       */
-      piece = (ch->datasize >= length)?length:ch->datasize;
+      piece = (int)((ch->datasize >= length)?length:ch->datasize);
 
       /* Write the data portion available */
       /* Added content-encoding here; untested but almost identical to the

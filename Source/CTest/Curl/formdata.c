@@ -563,7 +563,7 @@ static int AllocAndCopy (char **buffer, int buffer_length)
   if (buffer_length)
     length = buffer_length;
   else {
-    length = strlen(*buffer);
+    length = (int)strlen(*buffer);
     add = 1;
   }
   *buffer = (char*)malloc(length+add);
@@ -1011,7 +1011,7 @@ static int AddFormData(struct FormData **formp,
 
   /* we make it easier for plain strings: */
   if(!length)
-    length = strlen((char *)line);
+    length = (long)strlen((char *)line);
 
   newform->line = (char *)malloc(length+1);
   memcpy(newform->line, line, length);
@@ -1057,7 +1057,7 @@ char *Curl_FormBoundary(void)
   if(!retstring)
     return NULL; /* failed */
 
-  srand(time(NULL)+randomizer++); /* seed */
+  srand((unsigned int)(time(NULL)+randomizer++)); /* seed */
 
   strcpy(retstring, "curl"); /* bonus commercials 8*) */
 
@@ -1239,7 +1239,7 @@ CURLcode Curl_getFormData(struct FormData **finalform,
         /*VMS?? Stream files are OK, as are FIXED & VAR files WITHOUT implied CC */
         /*VMS?? For implied CC, every record needs to have a \n appended & 1 added to SIZE */
         if(fileread) {
-          while((nread = fread(buffer, 1, 1024, fileread)))
+          while((nread = (int)fread(buffer, 1, 1024, fileread)))
             size += AddFormData(&form, buffer, nread);
 
           if(fileread != stdin)
@@ -1316,7 +1316,7 @@ int Curl_FormReader(char *buffer,
 
   form=(struct Form *)mydata;
 
-  wantedsize = size * nitems;
+  wantedsize = (int)(size * nitems);
 
   if(!form->data)
     return 0; /* nothing, error, empty */
@@ -1362,7 +1362,7 @@ int Curl_FormReadOneLine(char *buffer,
 
   form=(struct Form *)mydata;
 
-  wantedsize = size * nitems;
+  wantedsize = (int)(size * nitems);
 
   if(!form->data)
     return -1; /* nothing, error, empty */

@@ -592,7 +592,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
     return CURLE_COULDNT_CONNECT;
   }
   /* create an IPv4 TCP socket */
-  sockfd = socket(AF_INET, SOCK_STREAM, 0);
+  sockfd = (int)socket(AF_INET, SOCK_STREAM, 0);
   if(-1 == sockfd) {
     failf(data, "couldn't create socket");
     return CURLE_COULDNT_CONNECT; /* big time error */

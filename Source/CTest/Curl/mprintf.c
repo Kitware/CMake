@@ -732,8 +732,8 @@ static int dprintf_formatf(
           *w-- = digits[num % base];
           num /= base;
         }
-        width -= workend - w;
-        prec -= workend - w;
+        width -= (long)(workend - w);
+        prec -= (long)(workend - w);
         
         if (alt && base == 8 && prec <= 0) {
           *w-- = '0';
@@ -812,7 +812,7 @@ static int dprintf_formatf(
         
         if (prec != -1 && (size_t) prec < len)
           len = prec;
-        width -= len;
+        width -= (long)len;
 
         if (p->flags & FLAGS_ALT)
           OUTCHAR('"');
@@ -933,9 +933,9 @@ static int dprintf_formatf(
       else
 #endif
         if (p->flags & FLAGS_LONG)
-          *(long int *) p->data.ptr = done;
+          *(long int *) p->data.ptr = (long int)done;
       else if (!(p->flags & FLAGS_SHORT))
-        *(int *) p->data.ptr = done;
+        *(int *) p->data.ptr = (int)done;
       else
         *(short int *) p->data.ptr = (short int)done;
       break;
@@ -946,7 +946,7 @@ static int dprintf_formatf(
     f = *end++; /* goto end of %-code */
 
   }
-  return done;
+  return (int)done;
 }
 
 /* fputc() look-alike */

@@ -146,7 +146,7 @@ static CURLcode AllowServerConnect(struct SessionHandle *data,
       struct sockaddr_in add;
 
       getsockname(sock, (struct sockaddr *) &add, (socklen_t *)&size);
-      s=accept(sock, (struct sockaddr *) &add, (socklen_t *)&size);
+      s=(int)accept(sock, (struct sockaddr *) &add, (socklen_t *)&size);
 
       sclose(sock); /* close the first socket */
 
@@ -263,7 +263,7 @@ CURLcode Curl_GetFTPResponse(int *nreadp, /* return number of bytes read */
         /* we had data in the "cache", copy that instead of doing an actual
            read */
         memcpy(ptr, ftp->cache, ftp->cache_size);
-        gotbytes = ftp->cache_size;
+        gotbytes = (int)ftp->cache_size;
         free(ftp->cache);    /* free the cache */
         ftp->cache = NULL;   /* clear the pointer */
         ftp->cache_size = 0; /* zero the size just in case */
@@ -1210,7 +1210,7 @@ CURLcode ftp_use_port(struct connectdata *conn)
       h = Curl_resolv(data, myhost, 0);
     }
     else {
-      int len = strlen(data->set.ftpport);
+      size_t len = strlen(data->set.ftpport);
       if(len>1)
         h = Curl_resolv(data, data->set.ftpport, 0);
       if(h)
@@ -1236,7 +1236,7 @@ CURLcode ftp_use_port(struct connectdata *conn)
     Curl_resolv_unlock(h);
 
   if ( h || sa_filled_in) {
-    if( (portsock = socket(AF_INET, SOCK_STREAM, 0)) >= 0 ) {
+    if( (portsock = (int)socket(AF_INET, SOCK_STREAM, 0)) >= 0 ) {
       int size;
       
       /* we set the secondary socket variable to this for now, it
@@ -1592,17 +1592,17 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
            input. If we knew it was a proper file we could've just
            fseek()ed but we only have a stream here */
         do {
-          int readthisamountnow = (conn->resume_from - passed);
-          int actuallyread;
+          size_t readthisamountnow = (conn->resume_from - passed);
+          size_t actuallyread;
 
           if(readthisamountnow > BUFSIZE)
             readthisamountnow = BUFSIZE;
 
-          actuallyread =
+          actuallyread = 
             conn->fread(data->state.buffer, 1, readthisamountnow,
                         conn->fread_in);
 
-          passed += actuallyread;
+          passed += (int)actuallyread;
           if(actuallyread != readthisamountnow) {
             failf(data, "Could only read %d bytes from the input", passed);
             return CURLE_FTP_COULDNT_USE_REST;
@@ -1867,7 +1867,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
         char *bytes;
         bytes=strstr(buf, " bytes");
         if(bytes--) {
-          int index=bytes-buf;
+          int index=(int)(bytes-buf);
           /* this is a hint there is size information in there! ;-) */
           while(--index) {
             /* scan for the parenthesis and break there */
@@ -2066,7 +2066,8 @@ CURLcode Curl_ftp(struct connectdata *conn)
   ftp->file = strrchr(conn->ppath, '/');
   if(ftp->file) {
     if(ftp->file != conn->ppath)
-      dirlength=ftp->file-conn->ppath; /* don't count the traling slash */
+      /* don't count the traling slash */
+      dirlength=(int)(ftp->file-conn->ppath); 
 
     ftp->file++; /* point to the first letter in the file name part or
                     remain NULL */
@@ -2138,7 +2139,7 @@ CURLcode Curl_ftpsendf(struct connectdata *conn,
   strcat(s, "\r\n"); /* append a trailing CRLF */
 
   bytes_written=0;
-  write_len = strlen(s);
+  write_len = (int)strlen(s);
 
   do {
     res = Curl_write(conn, conn->firstsocket, sptr, write_len,

@@ -728,7 +728,7 @@ yynewstate:
 #endif
 
       /* Get the current used size of the three stacks, in elements.  */
-      int size = yyssp - yyss + 1;
+      int size = (int)(yyssp - yyss + 1);
 
 #ifdef yyoverflow
       /* Each stack pointer address is followed by the size of
@@ -1855,7 +1855,7 @@ LookupWord (yylval, buff)
       }
 
   /* Strip off any plural and try the units table again. */
-  i = strlen (buff) - 1;
+  i = (int)strlen (buff) - 1;
   if (buff[i] == 's')
     {
       buff[i] = '\0';
