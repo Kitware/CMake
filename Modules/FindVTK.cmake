@@ -29,7 +29,7 @@
 
 # Construct consitent error messages for use below.
 SET(VTK_DIR_DESCRIPTION "directory containing VTKConfig.cmake.  This is either the root of the build tree, or PREFIX/lib/vtk for an installation.  For VTK 4.0, this is the location of UseVTK.cmake.  This is either the root of the build tree or PREFIX/include/vtk for an installation.")
-SET(VTK_DIR_MESSAGE "VTK not found.  Set VTK_DIR to the ${VTK_DIR_DESCRIPTION}")
+SET(VTK_DIR_MESSAGE "VTK not found.  Set the VTK_DIR cmake cache entry to the ${VTK_DIR_DESCRIPTION}")
 
 # Search only if the location is not already known.
 IF(NOT VTK_DIR)
