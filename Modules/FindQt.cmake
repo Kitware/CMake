@@ -55,7 +55,7 @@ IF (WIN32)
     ${path}
   )
 
-  FIND_FILE(QT_MOC_EXE uic.exe
+  FIND_FILE(QT_UIC_EXE uic.exe
     ${QTDIR}/bin
     ${path}
   )
