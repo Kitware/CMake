@@ -60,7 +60,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "MESSAGE([SEND_ERROR | STATUS] \"message to display\"...)\n"
+      "MESSAGE([SEND_ERROR | STATUS | FATAL_ERROR] \"message to display\"...)\n"
       "The arguments are messages to display. If the first argument is SEND_ERROR then an error is raised. If the first argument is STATUS then the message is diaplyed in the progress line for the GUI";
     }
   

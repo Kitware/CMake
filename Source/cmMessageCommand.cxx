@@ -28,6 +28,7 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& args)
   std::vector<std::string>::const_iterator i = args.begin();
 
   bool send_error = false;
+  bool fatal_error = false;
   bool status = false;
   if (*i == "SEND_ERROR")
     {
@@ -36,11 +37,19 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& args)
     }
   else
     {
-      if (*i == "STATUS")
+    if (*i == "STATUS")
+      {
+      status = true;
+      ++i;
+      }
+    else
+      {
+      if (*i == "FATAL_ERROR")
         {
-          status = true;
-          ++i;
+        fatal_error = true;
+        ++i;
         }
+      }
     }
 
   for(;i != args.end(); ++i)
@@ -63,7 +72,10 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& args)
           cmSystemTools::Message(message.c_str());
         }
     }
-
+  if(fatal_error)
+    {
+    cmSystemTools::SetFatalErrorOccured();
+    }
   return true;
 }
 

@@ -176,7 +176,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff)
     cmCommand* usedCommand = rm->Clone();
     usedCommand->SetMakefile(this);
     bool keepCommand = false;
-    if(usedCommand->GetEnabled())
+    if(usedCommand->GetEnabled() && !cmSystemTools::GetFatalErrorOccured())
       {
       // if not running in inherit mode or
       // if the command is inherited then InitialPass it.
@@ -208,12 +208,15 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff)
     }
   else
     {
-    cmOStringStream error;
-    error << "Error in cmake code at\n"
-          << lff.m_FilePath << ":" << lff.m_Line << ":\n"
-          << "Unknown CMake command \"" << lff.m_Name.c_str() << "\".";
-    cmSystemTools::Error(error.str().c_str());
-    result = false;
+    if(!cmSystemTools::GetFatalErrorOccured())
+      {
+      cmOStringStream error;
+      error << "Error in cmake code at\n"
+            << lff.m_FilePath << ":" << lff.m_Line << ":\n"
+            << "Unknown CMake command \"" << lff.m_Name.c_str() << "\".";
+      cmSystemTools::Error(error.str().c_str());
+      result = false;
+      }
     }
   
   return result;

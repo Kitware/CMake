@@ -162,12 +162,23 @@ public:
   ///! Return true if there was an error at any point.
   static bool GetErrorOccuredFlag() 
     {
-      return cmSystemTools::s_ErrorOccured;
+      return cmSystemTools::s_ErrorOccured || cmSystemTools::s_FatalErrorOccured;
+    }
+  ///! If this is set to true, cmake stops processing commands.
+  static void SetFatalErrorOccured()
+    {
+      cmSystemTools::s_FatalErrorOccured = true;
+    }
+ ///! Return true if there was an error at any point.
+  static bool GetFatalErrorOccured() 
+    {
+      return cmSystemTools::s_FatalErrorOccured;
     }
 
-  ///! Set the error occured flag back to false
+  ///! Set the error occured flag and fatal error back to false
   static void ResetErrorOccuredFlag()
     {
+      cmSystemTools::s_FatalErrorOccured = false;
       cmSystemTools::s_ErrorOccured = false;
     }
   
@@ -364,6 +375,7 @@ protected:
 private:
   static bool s_RunCommandHideConsole;
   static bool s_ErrorOccured;
+  static bool s_FatalErrorOccured;
   static bool s_DisableMessages;
   static bool s_DisableRunCommandOutput;
   static ErrorCallback s_ErrorCallback;

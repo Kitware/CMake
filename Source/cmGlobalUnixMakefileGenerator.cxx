@@ -41,11 +41,19 @@ void cmGlobalUnixMakefileGenerator::EnableLanguage(const char* lang,
       cmSystemTools::Error("CMAKE_C_COMPILER not set, after EnableLanguage");
       return;
       }
-    std::string path = cmSystemTools::FindProgram(mf->GetDefinition("CMAKE_C_COMPILER"));
+    const char* cc = mf->GetDefinition("CMAKE_C_COMPILER");
+    std::string path = cmSystemTools::FindProgram(cc);
     if(path.size() == 0)
       {
       std::string message = "your C compiler: ";
-      message +=  mf->GetDefinition("CMAKE_C_COMPILER"); 
+      if(cc)
+        {
+        message +=  cc;
+        }
+      else
+        {
+        message += "(NULL)";
+        }
       message += " was not found in your path.   "
           "For CMake to correctly use try compile commands, the compiler must "
           "be in your path.   Please add the compiler to your PATH environment,"
@@ -54,11 +62,20 @@ void cmGlobalUnixMakefileGenerator::EnableLanguage(const char* lang,
       }
     if(strcmp(lang, "CXX") == 0)
       {
-      path = cmSystemTools::FindProgram(mf->GetDefinition("CMAKE_CXX_COMPILER"));
+      const char* cxx = mf->GetDefinition("CMAKE_CXX_COMPILER");
+      path = cmSystemTools::FindProgram(cxx);
       if(path.size() == 0)
         {
         std::string message = "your C++ compiler: ";
-        message +=  mf->GetDefinition("CMAKE_CXX_COMPILER");
+        if(cxx)
+          {
+          message +=  cxx;
+          }
+        else
+          {
+          message +=  "(NULL)";
+          }
+        
         message += " was not found in your path.   "
           "For CMake to correctly use try compile commands, the compiler must "
           "be in your path.   Please add the compiler to your PATH environment,"

@@ -213,12 +213,14 @@ void cmGlobalGenerator::EnableLanguage(const char* lang,
       {
       if (!m_CMakeInstance->GetIsInTryCompile())
         {
+        std::string ifpath = root + "/Modules/CMakeTestCCompiler.cmake";
+        mf->ReadListFile(0,ifpath.c_str());
         // for old versions of CMake ListFiles
         const char* versionValue
           = mf->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
         if (atof(versionValue) <= 1.4)
           {
-          std::string ifpath = root + "/Modules/CMakeBackwardCompatibilityC.cmake";
+          ifpath = root + "/Modules/CMakeBackwardCompatibilityC.cmake";
           mf->ReadListFile(0,ifpath.c_str()); 
           }
         }
@@ -227,6 +229,8 @@ void cmGlobalGenerator::EnableLanguage(const char* lang,
       {
       if (!m_CMakeInstance->GetIsInTryCompile())
         {
+        std::string ifpath = root + "/Modules/CMakeTestCXXCompiler.cmake";
+        mf->ReadListFile(0,ifpath.c_str());
         // for old versions of CMake ListFiles
         const char* versionValue
           = mf->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");

@@ -129,6 +129,7 @@ cmSystemTools::GetTime(void)
 bool cmSystemTools::s_RunCommandHideConsole = false;
 bool cmSystemTools::s_DisableRunCommandOutput = false;
 bool cmSystemTools::s_ErrorOccured = false;
+bool cmSystemTools::s_FatalErrorOccured = false;
 bool cmSystemTools::s_DisableMessages = false;
 
 std::string cmSystemTools::s_Windows9xComspecSubstitute = "command.com";
@@ -1536,6 +1537,10 @@ std::string cmSystemTools::FindProgram(const char* name,
                                        const std::vector<std::string>& userPaths,
                                        bool no_system_path)
 {
+  if(!name)
+    {
+    return "";
+    }
   // See if the executable exists as written.
   if(cmSystemTools::FileExists(name) &&
       !cmSystemTools::FileIsDirectory(name))
