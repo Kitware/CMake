@@ -194,7 +194,7 @@ bool cmVTKWrapPythonCommand::WriteInit(const char *kitName,
 
   fprintf(fout,"\nstatic PyMethodDef Py%s_ClassMethods[] = {\n",
 	  kitName);
-  fprintf(fout,"{NULL, NULL}};\n\n");
+  fprintf(fout,"{NULL, NULL, 0, NULL}};\n\n");
   
 #ifdef _WIN32
   fprintf(fout,"extern  \"C\" {__declspec( dllexport) void init%s();}\n\n",kitName);
