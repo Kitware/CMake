@@ -296,13 +296,13 @@ int cmCTestUpdateHandler::UpdateDirectory(cmCTest *ctest_inst)
             {
             srevision2 = srevision1;
             }
-          os << "\t\t<File Directory=\"" << path << "\">" << fname 
+          os << "\t\t<File Directory=\"" << cmCTest::MakeXMLSafe(path) << "\">" << cmCTest::MakeXMLSafe(fname)
             << "</File>\n"
-            << "\t\t<Directory>" << path << "</Directory>\n"
-            << "\t\t<FullName>" << file << "</FullName>\n"
-            << "\t\t<CheckinDate>" << sdate1 << "</CheckinDate>\n"
-            << "\t\t<Author>" << sauthor1 << "</Author>\n"
-            << "\t\t<Email>" << semail1 << "</Email>\n"
+            << "\t\t<Directory>" << cmCTest::MakeXMLSafe(path) << "</Directory>\n"
+            << "\t\t<FullName>" << cmCTest::MakeXMLSafe(file) << "</FullName>\n"
+            << "\t\t<CheckinDate>" << cmCTest::MakeXMLSafe(sdate1) << "</CheckinDate>\n"
+            << "\t\t<Author>" << cmCTest::MakeXMLSafe(sauthor1) << "</Author>\n"
+            << "\t\t<Email>" << cmCTest::MakeXMLSafe(semail1) << "</Email>\n"
             << "\t\t<Log>" << cmCTest::MakeXMLSafe(comment1) << "</Log>\n"
             << "\t\t<Revision>" << srevision1 << "</Revision>\n"
             << "\t\t<PriorRevision>" << srevision2 << "</PriorRevision>"
@@ -313,18 +313,18 @@ int cmCTestUpdateHandler::UpdateDirectory(cmCTest *ctest_inst)
               << "\t\t<Revisions>\n"
               << "\t\t\t<Revision>" << srevision1 << "</Revision>\n"
               << "\t\t\t<PreviousRevision>" << srevision2 << "</PreviousRevision>\n"
-              << "\t\t\t<Author>" << sauthor1<< "</Author>\n"
-              << "\t\t\t<Date>" << sdate1 << "</Date>\n"
+              << "\t\t\t<Author>" << cmCTest::MakeXMLSafe(sauthor1) << "</Author>\n"
+              << "\t\t\t<Date>" << cmCTest::MakeXMLSafe(sdate1) << "</Date>\n"
               << "\t\t\t<Comment>" << cmCTest::MakeXMLSafe(comment1) << "</Comment>\n"
-              << "\t\t\t<Email>" << semail1 << "</Email>\n"
+              << "\t\t\t<Email>" << cmCTest::MakeXMLSafe(semail1) << "</Email>\n"
               << "\t\t</Revisions>\n"
               << "\t\t<Revisions>\n"
               << "\t\t\t<Revision>" << srevision2 << "</Revision>\n"
               << "\t\t\t<PreviousRevision>" << srevision2 << "</PreviousRevision>\n"
-              << "\t\t\t<Author>" << sauthor2<< "</Author>\n"
-              << "\t\t\t<Date>" << sdate2 << "</Date>\n"
+              << "\t\t\t<Author>" << cmCTest::MakeXMLSafe(sauthor2) << "</Author>\n"
+              << "\t\t\t<Date>" << cmCTest::MakeXMLSafe(sdate2) << "</Date>\n"
               << "\t\t\t<Comment>" << cmCTest::MakeXMLSafe(comment2) << "</Comment>\n"
-              << "\t\t\t<Email>" << semail2 << "</Email>\n"
+              << "\t\t\t<Email>" << cmCTest::MakeXMLSafe(semail2) << "</Email>\n"
               << "\t\t</Revisions>" << std::endl;
             }
           if ( mod == 'C' )
