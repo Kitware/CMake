@@ -19,7 +19,6 @@
 #include "cmRegularExpression.h"
 #include "cmake.h"
 #include "cmListFileCache.h"
-#include "cmMakefileGenerator.h"
 #include "cmCacheManager.h"
 #if defined(_WIN32) && !defined(__CYGWIN__) 
 #include "windows.h"
