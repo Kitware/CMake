@@ -46,7 +46,9 @@
 
 
 struct clientTransport {
+#if defined (HAVE_PTHREADS)
     pthread_mutex_t listLock;
+#endif
     struct list_head rpcList;
         /* List of all RPCs that exist for this transport.  An RPC exists
            from the time the user requests it until the time the user 
@@ -79,7 +81,9 @@ typedef struct {
         */
     xmlrpc_mem_block * responseXmlP;
     xmlrpc_bool threadExists;
+#if defined(HAVE_PTHREADS)
     pthread_t thread;
+#endif
     transport_asynch_complete complete;
         /* Routine to call to complete the RPC after it is complete HTTP-wise.
            NULL if none.
