@@ -20,6 +20,7 @@
 // like to have CMake to build CMake.   
 #include "cmCommands.h"
 #include "cmAbstractFilesCommand.cxx"
+#include "cmAddCustomCommandCommand.cxx"
 #include "cmAddCustomTargetCommand.cxx"
 #include "cmAddDefinitionsCommand.cxx"
 #include "cmAddDependenciesCommand.cxx"
@@ -62,6 +63,7 @@
 #include "cmOptionCommand.cxx"
 #include "cmOutputRequiredFilesCommand.cxx"
 #include "cmProjectCommand.cxx"
+#include "cmRemoveCommand.cxx"
 #include "cmSetCommand.cxx"
 #include "cmSetSourceFilesPropertiesCommand.cxx"
 #include "cmSiteNameCommand.cxx"
@@ -74,18 +76,18 @@
 #include "cmUseMangledMesaCommand.cxx"
 #include "cmUtilitySourceCommand.cxx"
 #include "cmVariableRequiresCommand.cxx"
+#include "cmVTKMakeInstantiatorCommand.cxx"
 #include "cmVTKWrapJavaCommand.cxx"
 #include "cmVTKWrapPythonCommand.cxx"
 #include "cmVTKWrapTclCommand.cxx"
 #include "cmQTWrapCPPCommand.cxx"
 #include "cmQTWrapUICommand.cxx"
 #include "cmWrapExcludeFilesCommand.cxx"
-#include "cmAddCustomCommandCommand.cxx"
-#include "cmVTKMakeInstantiatorCommand.cxx"
 
 void GetPredefinedCommands(std::list<cmCommand*>& commands)
 {
   commands.push_back(new cmAbstractFilesCommand);
+  commands.push_back(new cmAddCustomCommandCommand);
   commands.push_back(new cmAddCustomTargetCommand);
   commands.push_back(new cmAddDefinitionsCommand);
   commands.push_back(new cmAddDependenciesCommand);
@@ -128,6 +130,7 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmOptionCommand);
   commands.push_back(new cmOutputRequiredFilesCommand);  
   commands.push_back(new cmProjectCommand);
+  commands.push_back(new cmRemoveCommand);
   commands.push_back(new cmSetCommand);
   commands.push_back(new cmSetSourceFilesPropertiesCommand);
   commands.push_back(new cmSiteNameCommand);
@@ -140,12 +143,11 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmUseMangledMesaCommand);
   commands.push_back(new cmUtilitySourceCommand);
   commands.push_back(new cmVariableRequiresCommand);
+  commands.push_back(new cmVTKMakeInstantiatorCommand);
   commands.push_back(new cmVTKWrapJavaCommand);
   commands.push_back(new cmVTKWrapPythonCommand);
   commands.push_back(new cmVTKWrapTclCommand);
   commands.push_back(new cmQTWrapCPPCommand);
   commands.push_back(new cmQTWrapUICommand);
   commands.push_back(new cmWrapExcludeFilesCommand);
-  commands.push_back(new cmAddCustomCommandCommand);
-  commands.push_back(new cmVTKMakeInstantiatorCommand);
 }

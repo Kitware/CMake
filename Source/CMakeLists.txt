@@ -1,3 +1,5 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 1.3)
+
 SET(SRCS
 cmake.cxx
 cmakewizard.cxx
