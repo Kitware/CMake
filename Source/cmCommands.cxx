@@ -51,9 +51,6 @@
 #include "cmVTKWrapPythonCommand.cxx"
 #include "cmVTKWrapTclCommand.cxx"
 #include "cmWrapExcludeFilesCommand.cxx"
-// Begin Special JB addition
-#include "cmVTKWrapGUICommand.cxx"
-// End Special JB addition
 
 void GetPredefinedCommands(std::list<cmCommand*>& commands)
 {
@@ -105,9 +102,6 @@ void GetPredefinedCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmVTKWrapPythonCommand);
   commands.push_back(new cmVTKWrapTclCommand);
   commands.push_back(new cmWrapExcludeFilesCommand);
-// Begin Special JB addition
-  commands.push_back(new cmVTKWrapGUICommand);
-// End Special JB addition
 }
 
 
