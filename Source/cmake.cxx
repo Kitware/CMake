@@ -224,6 +224,20 @@ void cmake::AddCMakePaths(const std::vector<std::string>& args)
  
 int cmake::Generate(const std::vector<std::string>& args)
 {
+  // look for obvious request for help
+  for(unsigned int i=1; i < args.size(); ++i)
+    {
+    std::string arg = args[i];
+    if(arg.find("-help",0) != std::string::npos ||
+       arg.find("--help",0) != std::string::npos ||
+       arg.find("/?",0) != std::string::npos ||
+       arg.find("-usage",0) != std::string::npos)
+      {
+      this->Usage(args[0].c_str());
+      return -1;
+      }
+    }
+  
   // Create a makefile
   cmMakefile mf;
 
