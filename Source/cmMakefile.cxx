@@ -976,6 +976,32 @@ const char* cmMakefile::GetDefinition(const char* name) const
   return def;
 }
 
+std::vector<std::string> cmMakefile::GetDefinitions(int cacheonly /* = 0 */) const
+{
+  std::map<std::string, int> definitions;
+  if ( !cacheonly )
+    {
+    DefinitionMap::const_iterator it;
+    for ( it = m_Definitions.begin(); it != m_Definitions.end(); it ++ )
+      {
+      definitions[it->first] = 1;
+      }
+    }
+  cmCacheManager::CacheIterator cit = this->GetCacheManager()->GetCacheIterator();
+  for ( cit.Begin(); !cit.IsAtEnd(); cit.Next() )
+    {
+    definitions[cit.GetName()] = 1;
+    }
+  
+  std::vector<std::string> res;
+
+  std::map<std::string, int>::iterator fit;
+  for ( fit = definitions.begin(); fit != definitions.end(); fit ++ )
+    {
+    res.push_back(fit->first);
+    }
+  return res;
+}
 
 
 const char *cmMakefile::ExpandVariablesInString(std::string& source) const

@@ -441,6 +441,13 @@ public:
    * cache is then queried.
    */
   const char* GetDefinition(const char*) const;
+
+  /**
+   * Get the list of all variables in the current space. If argument
+   * cacheonly is specified and is greater than 0, then only cache
+   * variables will be listed.
+   */
+  std::vector<std::string> GetDefinitions(int cacheonly=0) const;
   
   /** Test a boolean cache entry to see if it is true or false, 
    *  returns false if no entry defined.
