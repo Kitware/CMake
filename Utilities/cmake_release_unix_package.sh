@@ -33,6 +33,8 @@ fi
 
 # Make the source tarball if requested.
 if test "${CREATE_SOURCE_TARBALL}" = "yes" ; then
+  (
+  cd ${RELEASE_ROOT}
   TARBALL="${TARBALL_DIR}/${SOURCE_TARBALL_NAME}.tar"
   echo "Creating ${SOURCE_TARBALL_NAME}.tar"
   if ${TAR} cvf $TARBALL CMake-$VERSION \
@@ -48,9 +50,11 @@ if test "${CREATE_SOURCE_TARBALL}" = "yes" ; then
     echo "Creating $TARBALL.Z"
     ${COMPRESS} $TARBALL
   fi
+  )
 fi
 
 # Let the configuration file add some files.
+cd ${BUILD_DIR}
 CreateExtraFiles
 
 # Create the manifest file.
