@@ -439,36 +439,30 @@ void cmDSPMakefile::WriteDSPHeader(std::ostream& fout, const char *libName,
     if (!target.GetType() == cmTarget::LIBRARY || 
         (m_LibraryBuildType == DLL && libName != j->first))
       {
+      std::string lib = j->first;
+      if(j->first.find(".lib") == std::string::npos)
+        {
+        lib += ".lib";
+        }
+      lib = cmSystemTools::EscapeSpaces(lib.c_str());
       if (j->second == cmTarget::GENERAL)
         {
         libOptions += " ";
-        libOptions +=  cmSystemTools::EscapeSpaces(j->first.c_str());
-        if(j->first.find(".lib") == std::string::npos)
-          {
-          libOptions += ".lib ";
-          }
+        libOptions +=  lib;
         }
       if (j->second == cmTarget::DEBUG)
         {
         libDebugOptions += " ";
-        libDebugOptions += cmSystemTools::EscapeSpaces(j->first.c_str());
-        if(j->first.find(".lib") == std::string::npos)
-          {
-          libDebugOptions += ".lib ";
-          }
+        libDebugOptions += lib;
         }
       if (j->second == cmTarget::OPTIMIZED)
         {
         libOptimizedOptions += " ";
-        libOptimizedOptions +=  cmSystemTools::EscapeSpaces(j->first.c_str());
-        if(j->first.find(".lib") == std::string::npos)
-          {
-          libOptimizedOptions += ".lib ";
-          }
+        libOptimizedOptions +=  lib;
         }      
       }
     }
-  libOptions += "/STACK:10000000 ";
+  libOptions += " /STACK:10000000 ";
   
   std::ifstream fin(m_DSPHeaderTemplate.c_str());
   if(!fin)
