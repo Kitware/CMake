@@ -32,29 +32,33 @@ INSTALL_FILES(${CMAKE_DOC_DIR} FILES
   ${CMake_BINARY_DIR}/Docs/Copyright.txt
   ${CMake_BINARY_DIR}/Docs/cmake.txt
   ${CMake_BINARY_DIR}/Docs/cmake.html
-)
+  )
 SET(DOC_FILES ${DOC_FILES} ${CMake_BINARY_DIR}/Docs/cmake.txt)
 
 # Generate documentation for "ccmake" executable.
 IF(UNIX)
-  SET(CMD ${CMD_DIR}/ccmake${CMD_EXT})
-  ADD_CUSTOM_COMMAND(
-    TARGET documentation
-    COMMAND ${CMD}
-    ARGS --help-full ${CMake_BINARY_DIR}/Docs/ccmake.txt
-         --help-html ${CMake_BINARY_DIR}/Docs/ccmake.html
-         --help-man ${CMake_BINARY_DIR}/Docs/ccmake.1
-    DEPENDS ${CMD}
-    SOURCE ${CMake_SOURCE_DIR}/Utilities/Doxygen/authors.txt
-    OUTPUTS ${CMake_BINARY_DIR}/Docs/ccmake.txt
-    )
-  ADD_DEPENDENCIES(documentation ccmake)  
-  INSTALL_FILES(${CMAKE_MAN_DIR}/man1 FILES ${CMake_BINARY_DIR}/Docs/ccmake.1)
-  INSTALL_FILES(${CMAKE_DOC_DIR} FILES
-    ${CMake_BINARY_DIR}/Docs/ccmake.txt
-    ${CMake_BINARY_DIR}/Docs/ccmake.html
-    )
-  SET(DOC_FILES ${DOC_FILES} ${CMake_BINARY_DIR}/Docs/ccmake.txt)
+  IF(CURSES_LIBRARY)
+    SET(CMD ${CMD_DIR}/ccmake${CMD_EXT})
+    ADD_CUSTOM_COMMAND(
+      TARGET documentation
+      COMMAND ${CMD}
+      ARGS --help-full ${CMake_BINARY_DIR}/Docs/ccmake.txt
+           --help-html ${CMake_BINARY_DIR}/Docs/ccmake.html
+           --help-man ${CMake_BINARY_DIR}/Docs/ccmake.1
+      DEPENDS ${CMD}
+      SOURCE ${CMake_SOURCE_DIR}/Utilities/Doxygen/authors.txt
+      OUTPUTS ${CMake_BINARY_DIR}/Docs/ccmake.txt
+      )
+    ADD_DEPENDENCIES(documentation ccmake)  
+    INSTALL_FILES(${CMAKE_MAN_DIR}/man1 FILES
+      ${CMake_BINARY_DIR}/Docs/ccmake.1
+      )
+    INSTALL_FILES(${CMAKE_DOC_DIR} FILES
+      ${CMake_BINARY_DIR}/Docs/ccmake.txt
+      ${CMake_BINARY_DIR}/Docs/ccmake.html
+      )
+    SET(DOC_FILES ${DOC_FILES} ${CMake_BINARY_DIR}/Docs/ccmake.txt)
+  ENDIF(CURSES_LIBRARY)
 ENDIF(UNIX)
 
 # Drive documentation generation.
