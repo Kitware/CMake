@@ -1,0 +1,75 @@
+# determine the compiler to use for Java programs
+# NOTE, a generator may set CMAKE_JAVA_COMPILER before
+# loading this file to force a compiler.
+
+IF(NOT CMAKE_JAVA_COMPILER)
+  # prefer the environment variable CC
+  IF($ENV{JAVA_COMPILER} MATCHES ".+")
+    GET_FILENAME_COMPONENT(CMAKE_JAVA_COMPILER_INIT $ENV{JAVA_COMPILER} PROGRAM PROGRAM_ARGS CMAKE_JAVA_FLAGS_ENV_INIT)
+    IF(EXISTS ${CMAKE_JAVA_COMPILER_INIT})
+    ELSE(EXISTS ${CMAKE_JAVA_COMPILER_INIT})
+      MESSAGE(SEND_ERROR "Could not find compiler set in environment variable JAVA_COMPILER:\n$ENV{JAVA_COMPILER}.") 
+    ENDIF(EXISTS ${CMAKE_JAVA_COMPILER_INIT})
+  ENDIF($ENV{JAVA_COMPILER} MATCHES ".+")
+
+  IF($ENV{JAVA_RUNTIME} MATCHES ".+")
+    GET_FILENAME_COMPONENT(CMAKE_JAVA_RUNTIME_INIT $ENV{JAVA_RUNTIME} PROGRAM PROGRAM_ARGS CMAKE_JAVA_FLAGS_ENV_INIT)
+    IF(EXISTS ${CMAKE_JAVA_RUNTIME_INIT})
+    ELSE(EXISTS ${CMAKE_JAVA_RUNTIME_INIT})
+      MESSAGE(SEND_ERROR "Could not find compiler set in environment variable JAVA_RUNTIME:\n$ENV{JAVA_RUNTIME}.") 
+    ENDIF(EXISTS ${CMAKE_JAVA_RUNTIME_INIT})
+  ENDIF($ENV{JAVA_RUNTIME} MATCHES ".+")
+
+  IF($ENV{JAVA_ARCHIVE} MATCHES ".+")
+    GET_FILENAME_COMPONENT(CMAKE_JAVA_ARCHIVE_INIT $ENV{JAVA_ARCHIVE} PROGRAM PROGRAM_ARGS CMAKE_JAVA_FLAGS_ENV_INIT)
+    IF(EXISTS ${CMAKE_JAVA_ARCHIVE_INIT})
+    ELSE(EXISTS ${CMAKE_JAVA_ARCHIVE_INIT})
+      MESSAGE(SEND_ERROR "Could not find compiler set in environment variable JAVA_ARCHIVE:\n$ENV{JAVA_ARCHIVE}.") 
+    ENDIF(EXISTS ${CMAKE_JAVA_ARCHIVE_INIT})
+  ENDIF($ENV{JAVA_ARCHIVE} MATCHES ".+")
+
+  SET(JAVA_BIN_PATH
+    /usr/bin
+    /usr/lib/java/bin
+    /usr/share/java/bin
+    /usr/local/bin
+    /usr/local/java/bin
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.4;JavaHome]/bin"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.3;JavaHome]/bin"
+    )
+  # if no compiler has been specified yet, then look for one
+  IF(CMAKE_JAVA_COMPILER_INIT)
+    SET(CMAKE_JAVA_COMPILER ${CMAKE_JAVA_COMPILER_INIT} CACHE PATH "Java Compiler")
+  ELSE(CMAKE_JAVA_COMPILER_INIT)
+    FIND_PROGRAM(CMAKE_JAVA_COMPILER
+      NAMES javac
+      PATHS ${JAVA_BIN_PATH}
+    )    
+  ENDIF(CMAKE_JAVA_COMPILER_INIT)
+
+  # if no runtime has been specified yet, then look for one
+  IF(CMAKE_JAVA_RUNTIME_INIT)
+    SET(CMAKE_JAVA_RUNTIME ${CMAKE_JAVA_RUNTIME_INIT} CACHE PATH "Java Compiler")
+  ELSE(CMAKE_JAVA_RUNTIME_INIT)
+    FIND_PROGRAM(CMAKE_JAVA_RUNTIME
+      NAMES java
+      PATHS ${JAVA_BIN_PATH}
+    )    
+  ENDIF(CMAKE_JAVA_RUNTIME_INIT)
+
+  # if no archive has been specified yet, then look for one
+  IF(CMAKE_JAVA_ARCHIVE_INIT)
+    SET(CMAKE_JAVA_ARCHIVE ${CMAKE_JAVA_ARCHIVE_INIT} CACHE PATH "Java Compiler")
+  ELSE(CMAKE_JAVA_ARCHIVE_INIT)
+    FIND_PROGRAM(CMAKE_JAVA_ARCHIVE
+      NAMES jar
+      PATHS ${JAVA_BIN_PATH}
+    )    
+  ENDIF(CMAKE_JAVA_ARCHIVE_INIT)
+ENDIF(NOT CMAKE_JAVA_COMPILER)
+MARK_AS_ADVANCED(CMAKE_JAVA_COMPILER)  
+
+# configure variables set in this file for fast reload later on
+CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeJavaCompiler.cmake.in 
+               ${PROJECT_BINARY_DIR}/CMakeJavaCompiler.cmake IMMEDIATE @ONLY)
+MARK_AS_ADVANCED(CMAKE_AR CMAKE_JAVA_COMPILER_FULLPATH)

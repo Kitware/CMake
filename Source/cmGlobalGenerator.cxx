@@ -81,6 +81,16 @@ void cmGlobalGenerator::EnableLanguage(const char* lang,
     }
   bool needCBackwards = false;
   bool needCXXBackwards = false;
+
+  if (!isLocal &&
+      !this->GetLanguageEnabled("C") && !this->GetLanguageEnabled("CXX") &&
+      !this->GetLanguageEnabled("JAVA"))
+    {
+    // Read the DetermineSystem file
+    std::string systemFile = root;
+    systemFile += "/Modules/CMakeDetermineSystem.cmake";
+    mf->ReadListFile(0, systemFile.c_str());
+    }
   
   // check for a C compiler and configure it
   if(!isLocal &&
@@ -95,10 +105,6 @@ void cmGlobalGenerator::EnableLanguage(const char* lang,
                            "CMake");
       }
     needCBackwards = true;
-    // Read the DetermineSystem file
-    std::string systemFile = root;
-    systemFile += "/Modules/CMakeDetermineSystem.cmake";
-    mf->ReadListFile(0, systemFile.c_str());
     // read determine C compiler
     std::string determineCFile = root;
     determineCFile += "/Modules/CMakeDetermineCCompiler.cmake";
@@ -142,7 +148,17 @@ void cmGlobalGenerator::EnableLanguage(const char* lang,
       }
     }
  
-    
+   // check for a Java compiler and configure it
+  if(!isLocal &&
+     !this->GetLanguageEnabled("JAVA") &&
+     strcmp(lang, "JAVA") == 0)
+    {
+    std::string determineCFile = root;
+    determineCFile += "/Modules/CMakeDetermineJavaCompiler.cmake";
+    mf->ReadListFile(0,determineCFile.c_str());
+    this->SetLanguageEnabled("JAVA");
+    }
+   
   std::string fpath = rootBin;
   if(!mf->GetDefinition("CMAKE_SYSTEM_LOADED"))
     {
@@ -162,7 +178,13 @@ void cmGlobalGenerator::EnableLanguage(const char* lang,
     fpath += "/CMakeCXXCompiler.cmake";
     mf->ReadListFile(0,fpath.c_str());
     }
-  if(!mf->GetDefinition("CMAKE_SYSTEM_SPECIFIC_INFORMATION_LOADED"))
+  if(strcmp(lang, "JAVA") == 0 && !mf->GetDefinition("CMAKE_JAVA_COMPILER_LOADED"))
+    {
+    fpath = rootBin;
+    fpath += "/CMakeJavaCompiler.cmake";
+    mf->ReadListFile(0,fpath.c_str());
+    }
+  if ( lang[0] == 'C' && !mf->GetDefinition("CMAKE_SYSTEM_SPECIFIC_INFORMATION_LOADED"))
     {
     fpath = root;
     fpath += "/Modules/CMakeSystemSpecificInformation.cmake";
