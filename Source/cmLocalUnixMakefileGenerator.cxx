@@ -1308,14 +1308,13 @@ bool cmLocalUnixMakefileGenerator::OutputObjectDepends(std::ostream& fout)
         {
         if(!(*source)->GetDepends().empty())
           {
-          fout << (*source)->GetSourceName() << m_ObjectFileExtension << " :";
           // Iterate through all the dependencies for this source.
           for(std::vector<std::string>::const_iterator dep =
                 (*source)->GetDepends().begin();
               dep != (*source)->GetDepends().end(); ++dep)
             {
-            fout << " \\\n" 
-                 << cmSystemTools::ConvertToOutputPath(dep->c_str());
+            fout << (*source)->GetSourceName() << m_ObjectFileExtension << " : "
+                 << cmSystemTools::ConvertToOutputPath(dep->c_str()) << "\n";
             ret = true;
             }
           fout << "\n\n";
