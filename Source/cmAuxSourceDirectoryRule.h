@@ -59,7 +59,7 @@ public:
   /**
    * Succinct documentation.
    */
-  virtual const char* TerseDocumentation() 
+  virtual const char* GetTerseDocumentation() 
     {
     return "Add all the source files found in the specified\n"
            "directory to the build.";
@@ -68,7 +68,7 @@ public:
   /**
    * More documentation.
    */
-  virtual const char* FullDocumentation()
+  virtual const char* GetFullDocumentation()
     {
     return
       "AUX_SOURCE_DIRECTORY(dir)";

@@ -67,7 +67,7 @@ public:
   /**
    * Succinct documentation.
    */
-  virtual const char* TerseDocumentation() 
+  virtual const char* GetTerseDocumentation() 
     {
     return "Add -D flags to the command line for Unix only.";
     }
@@ -75,7 +75,7 @@ public:
   /**
    * More documentation.
    */
-  virtual const char* FullDocumentation()
+  virtual const char* GetFullDocumentation()
     {
     return
       "UNIX_DEFINES(-DFOO -DBAR)\n"

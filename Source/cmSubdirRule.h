@@ -57,7 +57,7 @@ public:
   /**
    * Succinct documentation.
    */
-  virtual const char* TerseDocumentation() 
+  virtual const char* GetTerseDocumentation() 
     {
     return "Add a list of subdirectories to the build.";
     }
@@ -65,7 +65,7 @@ public:
   /**
    * More documentation.
    */
-  virtual const char* FullDocumentation()
+  virtual const char* GetFullDocumentation()
     {
     return
       "SUBDIRS(dir1 dir2 ...)\n"

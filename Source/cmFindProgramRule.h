@@ -64,7 +64,7 @@ public:
   /**
    * Succinct documentation.
    */
-  virtual const char* TerseDocumentation() 
+  virtual const char* GetTerseDocumentation() 
     {
     return "Find an executable program.";
     }
@@ -72,7 +72,7 @@ public:
   /**
    * More documentation.
    */
-  virtual const char* FullDocumentation()
+  virtual const char* GetFullDocumentation()
     {
     return
       "FIND_PROGRAM(NAME executable1 executable2 ...)";

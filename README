@@ -91,7 +91,6 @@ Rules: (Generated with cmDumpDocumentation)
 
     PROJECT - Set a name for the entire project. One argument.
     Usage: PROJECT(projectname)
-    Set the name for the entire project.  This takes one argument.
 
     SOURCE_FILES - Add a list of source files.
     Usage: SOURCE_FILES(file1 file2 ...)
@@ -122,6 +121,7 @@ Rules: (Generated with cmDumpDocumentation)
 
     WIN32_LIBRARIES - Add libraries that are only used for Win32 programs.
     Usage: WIN32_LIBRARIES(library -lm ...)
+
 
 USING / BUILDING WITH CMAKE
 ---------------------------

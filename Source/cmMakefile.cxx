@@ -393,8 +393,8 @@ int cmMakefile::DumpDocumentationToFile(const char *fileName)
       j != m_RuleMakers.end(); ++j)
     {
     name = (*j).second->GetName();
-    terse = (*j).second->TerseDocumentation();
-    full = (*j).second->FullDocumentation();
+    terse = (*j).second->GetTerseDocumentation();
+    full = (*j).second->GetFullDocumentation();
     f << name << " - " << terse << std::endl
       << "Usage: " << full << std::endl << std::endl;
     }

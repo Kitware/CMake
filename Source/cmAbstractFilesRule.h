@@ -47,7 +47,7 @@ public:
   /**
    * Succinct documentation.
    */
-  virtual const char* TerseDocumentation() 
+  virtual const char* GetTerseDocumentation() 
     {
     return "A list of abstract classes, useful for wrappers.";
     }
@@ -55,7 +55,7 @@ public:
   /**
    * Longer documentation.
    */
-  virtual const char* FullDocumentation()
+  virtual const char* GetFullDocumentation()
     {
       return
         "ABSTRACT_FILES(file1 file2 ..)";

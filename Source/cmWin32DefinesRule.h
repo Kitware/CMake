@@ -67,7 +67,7 @@ public:
   /**
    * Succinct documentation.
    */
-  virtual const char* TerseDocumentation() 
+  virtual const char* GetTerseDocumentation() 
     {
     return "Add -D define flags to command line for Win32 environments.";
     }
@@ -75,7 +75,7 @@ public:
   /**
    * More documentation.
    */
-  virtual const char* FullDocumentation()
+  virtual const char* GetFullDocumentation()
     {
     return
       "WIN32_DEFINES(-DFOO -DBAR ...)\n"

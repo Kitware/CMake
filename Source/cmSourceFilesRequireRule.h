@@ -59,7 +59,7 @@ public:
   /**
    * Succinct documentation.
    */
-  virtual const char* TerseDocumentation() 
+  virtual const char* GetTerseDocumentation() 
     {
     return "Add a list of source files if the required \n"
            "variables are set.";
@@ -68,7 +68,7 @@ public:
   /**
    * More documentation.
    */
-  virtual const char* FullDocumentation()
+  virtual const char* GetFullDocumentation()
     {
     return
       "SOURCE_FILES_REQUIRE(var1 var2 ... SOURCES_BEGIN file1 file2 ...)";

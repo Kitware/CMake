@@ -57,7 +57,7 @@ public:
   /**
    * Succinct documentation.
    */
-  virtual const char* TerseDocumentation() 
+  virtual const char* GetTerseDocumentation() 
     {
     return "Set a name for the entire project. One argument.";
     }
@@ -65,11 +65,10 @@ public:
   /**
    * More documentation.
    */
-  virtual const char* FullDocumentation()
+  virtual const char* GetFullDocumentation()
     {
     return
-      "PROJECT(projectname)\n"
-      "Set the name for the entire project.  This takes one argument.";
+      "PROJECT(projectname)\n";
     }
 };
 

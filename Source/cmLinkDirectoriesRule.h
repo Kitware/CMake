@@ -64,7 +64,7 @@ public:
   /**
    * Succinct documentation.
    */
-  virtual const char* TerseDocumentation() 
+  virtual const char* GetTerseDocumentation() 
     {
     return "Specify link directories.";
     }
@@ -72,11 +72,11 @@ public:
   /**
    * More documentation.
    */
-  virtual const char* FullDocumentation()
+  virtual const char* GetFullDocumentation()
     {
     return
-      "Specify the paths to the libraries that will be linked in.\n"
       "LINK_DIRECTORIES(directory1 directory2 ...)\n"
+      "Specify the paths to the libraries that will be linked in.\n"
       "The directories can use built in definitions like \n"
       "CMAKE_BINARY_DIR and CMAKE_SOURCE_DIR.";
     }

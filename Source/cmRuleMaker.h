@@ -81,12 +81,12 @@ public:
   /**
    * Succinct documentation.
    */
-  virtual const char* TerseDocumentation() = 0;
+  virtual const char* GetTerseDocumentation() = 0;
 
   /**
    * More documentation.
    */
-  virtual const char* FullDocumentation() = 0;
+  virtual const char* GetFullDocumentation() = 0;
 
   /**
    * Enable the rule.

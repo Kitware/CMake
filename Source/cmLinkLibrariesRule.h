@@ -63,17 +63,17 @@ public:
   /**
    * Succinct documentation.
    */
-  virtual const char* TerseDocumentation() 
+  virtual const char* GetTerseDocumentation() 
     {
     return 
-      "Specify a list of libraries to be linked into executables or \n"
-      "shared objects.";
+      "Specify a list of libraries to be linked into\n"
+      "executables or shared objects.";
     }
   
   /**
    * More documentation.
    */
-  virtual const char* FullDocumentation()
+  virtual const char* GetFullDocumentation()
     {
     return
       "LINK_LIBRARIES(library1 library2)\n"
