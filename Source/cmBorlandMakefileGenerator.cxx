@@ -303,7 +303,7 @@ void cmBorlandMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout,
   deleteCommand += target;
 
   command += " $(";
-  command += std::string(name) + "_SRC_OBJS)";
+  command += std::string(name) + "_SRC_OBJS_QUOTED)";
   command += "\n|\n";
   std::string comment = "rule to build static library: ";
   comment += name;

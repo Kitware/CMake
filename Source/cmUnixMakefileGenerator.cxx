@@ -378,6 +378,21 @@ void cmUnixMakefileGenerator::OutputTargetRules(std::ostream& fout)
               }
 	  }
 	fout << "\n\n";
+	fout << l->first << "_SRC_OBJS_QUOTED = ";
+	for(std::vector<cmSourceFile>::iterator i = classes.begin(); 
+	    i != classes.end(); i++)
+	  {
+	    if(!i->IsAHeaderFileOnly())
+	      {
+              std::string outExt(this->GetOutputExtension(i->GetSourceExtension().c_str()));
+              if(outExt.size())
+                {
+                fout << "\\\n\"" << this->ConvertToNativePath(i->GetSourceName().c_str())
+                     << outExt.c_str() << "\" ";
+                }
+              }
+	  }
+	fout << "\n\n";
       }
     }
   fout << "CLEAN_OBJECT_FILES = ";
