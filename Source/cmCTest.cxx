@@ -2359,6 +2359,14 @@ int cmCTest::RunMakeCommand(const char* command, std::string* output,
     {
     if ( output )
       {
+      for(int cc =0; cc < length; ++cc)
+        {
+        if(data[cc] == 0)
+          {
+          data[cc] = '\n';
+          }
+        }
+      
       output->append(data, length);
       if ( !verbose )
         {
