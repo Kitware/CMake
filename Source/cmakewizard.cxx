@@ -24,8 +24,7 @@ cmakewizard::cmakewizard()
 }
 
   
-void cmakewizard::AskUser(const char* key, cmCacheManager::CacheIterator& iter,
-                          cmCacheManager *cacheManager)
+void cmakewizard::AskUser(const char* key, cmCacheManager::CacheIterator& iter)
 {
   std::cout << "Variable Name: " << key << "\n";
   const char* helpstring = iter.GetProperty("HELPSTRING");
@@ -118,7 +117,7 @@ void cmakewizard::RunWizard(std::vector<std::string> const& args)
           {
           if(m_ShowAdvanced || !i.GetPropertyAsBool("ADVANCED"))
             {
-            this->AskUser(key.c_str(), i, cachem);
+            this->AskUser(key.c_str(), i);
             asked = true;
             }
           }
@@ -127,7 +126,7 @@ void cmakewizard::RunWizard(std::vector<std::string> const& args)
         {    
         if(m_ShowAdvanced || !i.GetPropertyAsBool("ADVANCED"))
           {
-          this->AskUser(key.c_str(), i, cachem);
+          this->AskUser(key.c_str(), i);
           asked = true;
           }
         }
