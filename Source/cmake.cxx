@@ -869,11 +869,20 @@ int cmake::Run(const std::vector<std::string>& args)
   // Add any cache args
   this->SetCacheArgs(args);
  
+  std::string systemFile = this->GetHomeOutputDirectory();
+  systemFile += "/CMakeSystem.cmake";
+
   int ret = 0;
-  // if not local or the cmake version has changed
-  // since the last run of cmake, run a global generate
-  if(!m_Local || !this->CacheVersionMatches())
+  // if not local or the cmake version has changed since the last run
+  // of cmake, or CMakeSystem.cmake file is not in the root binary
+  // directory, run a global generate
+  if(!m_Local || !this->CacheVersionMatches() ||
+     !cmSystemTools::FileExists(systemFile.c_str()) )
     {
+    // If we are doing global generate, we better set start and start
+    // output directory to the root of the project.
+    this->SetStartDirectory(this->GetHomeDirectory());
+    this->SetStartOutputDirectory(this->GetHomeOutputDirectory());
     bool saveLocalFlag = m_Local;
     m_Local = false;
     ret = this->Configure();
