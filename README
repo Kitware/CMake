@@ -1,35 +1,62 @@
+WELCOME TO CROSS-PLATFORM MAKE
 
-CMakeLists.txt        -> File in each directory that contains classes, exe, etc
-CMakeLists.txt contains the following:
+CMake is a cross-platform, extensible build environment. It currently generates
+Unix makefiles and Microsoft Visual C++ projects/workspaces.
+
+To use CMake, create CMakeLists.txt in each directory that makes up your
+source repository. The CMakeLists.txt contains rules. Each rule does something
+different, like defines a list of source code, include directories, etc. Once
+CMake has processed all the rules in all the CMakeLists.txt files, it generates
+the appropriate "makefile(s)" for the system/compiler that you are on.
+
+THE BOOK OF RULES
+The key to using CMake is to learn the rules. Each rule has the same format:
+
+    NAME_OF_RULE(args....)
+
+where args is a white-space separated listed of arguments. (Arguments 
+containing spaces should be quoted. For example:
+
+    INCLUDE_DIRECTORIES(./ d:/include "c:/Program Files/include")
+
+note that Unix-style slashes are used.
+
+Here are the important rules.
+
 # build targets
-WIN32_SOURCE_FILES =
-UNIX_SOURCE_FILES  = 
-ABSTRACT_CLASSES =
-SUBDIRS =
-EXECUTABLES =
-# make flags
-# make flags can use these varibles:
-# ${CMAKE_BINARY_DIR}  The root of the build tree where the binaries are
-# ${CMAKE_SOURCE_DIR} The root of the source tree where configure is
-INCLUDE_DIRECTORIES = 
-LINK_DIRECTORIES =
-LINK_LIBRARIES = # use the same name as ME =
-WIN32_LIBRARIES =
-UNIX_LIBRARIES =
+WIN32_SOURCE_FILES(file1 file2 ...)
+
+UNIX_SOURCE_FILES()
+
+ABSTRACT_CLASSES(class1 class2 ...)
+
+SUBDIRS()
+
+EXECUTABLES()
 
 # name of the library to build
-ME =
+LIBRARY(library_name)
 
-# add make commands 
-BEGIN MAKE VERBATIM
-... # copy stuff into CMakeTargets.make directly
-LOCAL_BUILD_TARGETS = // These are done first before anything else
-END MAKE VERBATIM
-AUX_SOURCE_DIR = 
+# make flags
+# make flags can use these variables:
+# ${CMAKE_BINARY_DIR}  The root of the build tree where the binaries are
+# ${CMAKE_SOURCE_DIR} The root of the source tree where configure is
+
+INCLUDE_DIRECTORIES()
+
+LINK_DIRECTORIES()
+
+LINK_LIBRARIES() = # use the same name as the LIBRARY() rule specified
+WIN32_LIBRARIES()
+UNIX_LIBRARIES()
+
+# define other targtes/source directories
+AUX_SOURCE_DIR(dir1 dir2 ...)
 
 Windows / Visual Studio 6.0 programs
 CMakeSetup.exe      -> window MFC based GUI for configure on windows
 CMakeSetupCMD.exe   -> windows command line version of CMakeConfigure
+
 To Build on Windows:
 load CMake/Source/CMakeSetup.dsw
 Build it
@@ -54,16 +81,6 @@ CMakeLocal.make       -> Place for hand configuration
 CMakeTargets.make     -> generated rules for make style build in each directory
 MakefileTemplate.make -> master makefile template used by configure to generate Makefiles
 
-
-Note on adding targets inside "BEGIN/END MAKE VERBATIM" lines:
-
-  By default, after "includ"ing a makefile, make will attempt to bring
-that included file up to date.  So, when you first run configure, your
-makefiles will _not_ contain the target you have asked for inside the
-VERBATIM tags.  However, it will be added by CMake when make attempts
-to bring the included make files up to date.  NOTE: this will make
-your head hurt if you think about it too long.  Just accept that it
-works to ask for a build target that does not yet exist.
 
 Unix install:
 In place:
