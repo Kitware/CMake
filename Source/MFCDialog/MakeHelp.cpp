@@ -2,7 +2,7 @@
 //
 
 #include "stdafx.h"
-#include "cmakesetup.h"
+#include "CMakeSetup.h"
 #include "MakeHelp.h"
 
 #ifdef _DEBUG
