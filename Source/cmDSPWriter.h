@@ -67,16 +67,15 @@ private:
   std::string m_DSPFooterTemplate;
   std::vector<std::string> m_CreatedProjectNames;
   
-  void CreateSingleDSP(const char *lname, cmTarget &tgt, 
-                       const std::string &libs);
+  void CreateSingleDSP(const char *lname, cmTarget &tgt);
   void WriteDSPFile(std::ostream& fout, const char *libName, 
-                    cmTarget &tgt, const std::string &libs);
+                    cmTarget &tgt);
   void WriteDSPBeginGroup(std::ostream& fout, 
 			  const char* group,
 			  const char* filter);
   void WriteDSPEndGroup(std::ostream& fout);
   void WriteDSPHeader(std::ostream& fout, const char *libName,
-                      const std::string &libs);
+                      const cmTarget &tgt);
   void WriteDSPBuildRule(std::ostream& fout, const char*);
   void WriteDSPBuildRule(std::ostream& fout);
   void WriteDSPFooter(std::ostream& fout);

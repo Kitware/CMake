@@ -53,10 +53,8 @@ void cmDSPMakefile::OutputDSPFile()
     }
   
   // Create the DSP or set of DSP's for libraries and executables
-  const char* cacheValue
-    = cmCacheManager::GetInstance()->GetCacheValue("BUILD_SHARED_LIBS");
   m_LibraryBuildType = STATIC_LIBRARY;
-  if(cacheValue && strcmp(cacheValue,"0"))
+  if(cmCacheManager::GetInstance()->IsOn("BUILD_SHARED_LIBS"))
     {
     m_LibraryBuildType = DLL;
     }
@@ -69,30 +67,6 @@ void cmDSPMakefile::OutputDSPFile()
   for(cmTargets::iterator l = tgts.begin(); 
       l != tgts.end(); l++)
     {
-    std::string libOptions;
-    std::vector<std::string>& libdirs = m_Makefile->GetLinkDirectories();
-    for(i = libdirs.begin(); i != libdirs.end(); ++i)
-      {
-      libOptions += " /LIBPATH:\"";
-      libOptions += *i;
-      libOptions += "/$(OUTDIR)\" ";
-      libOptions += " /LIBPATH:\"";
-      libOptions += *i;
-      libOptions += "\" ";
-      }
-    std::vector<std::string>& libs = m_Makefile->GetLinkLibraries();
-    for(i = libs.begin(); i != libs.end(); ++i)
-      {
-      // add libraries to executables and dlls (but never include
-      // a library in a library, bad recursion)
-      if (!l->second.IsALibrary() || 
-          (m_LibraryBuildType == DLL && l->first.c_str() != *i))
-        {
-        libOptions += " ";
-        libOptions += *i;
-        libOptions += ".lib ";
-        }
-      }
     if (l->second.IsALibrary())
       {
       this->SetBuildType(m_LibraryBuildType, l->first.c_str());
@@ -101,13 +75,11 @@ void cmDSPMakefile::OutputDSPFile()
       {
       this->SetBuildType(EXECUTABLE,l->first.c_str());
       }
-    libOptions += "/STACK:10000000 ";
-    this->CreateSingleDSP(l->first.c_str(),l->second, libOptions);
+    this->CreateSingleDSP(l->first.c_str(),l->second);
     }
 }
 
-void cmDSPMakefile::CreateSingleDSP(const char *lname, cmTarget &target, 
-                                    const std::string &libOptions)
+void cmDSPMakefile::CreateSingleDSP(const char *lname, cmTarget &target)
 {
   std::string fname;
   fname = m_Makefile->GetStartOutputDirectory();
@@ -121,7 +93,7 @@ void cmDSPMakefile::CreateSingleDSP(const char *lname, cmTarget &target,
     {
     cmSystemTools::Error("Error Writing ", fname.c_str());
     }
-  this->WriteDSPFile(fout,lname,target, libOptions);
+  this->WriteDSPFile(fout,lname,target);
 }
 
 void cmDSPMakefile::WriteDSPBuildRule(std::ostream& fout)
@@ -189,11 +161,10 @@ void cmDSPMakefile::AddDSPBuildRule(cmSourceGroup& sourceGroup)
 
 void cmDSPMakefile::WriteDSPFile(std::ostream& fout, 
                                  const char *libName,
-                                 cmTarget &target, 
-                                 const std::string &libOptions)
+                                 cmTarget &target)
 {
   // Write the DSP file's header.
-  this->WriteDSPHeader(fout, libName, libOptions);
+  this->WriteDSPHeader(fout, libName, target);
   
   // We may be modifying the source groups temporarily, so make a copy.
   std::vector<cmSourceGroup> sourceGroups = m_Makefile->GetSourceGroups();
@@ -405,8 +376,55 @@ void cmDSPMakefile::SetBuildType(BuildType b, const char *libName)
 }
   
 void cmDSPMakefile::WriteDSPHeader(std::ostream& fout, const char *libName,
-                                   const std::string &libOptions)
+                                   const cmTarget &target)
 {
+  // determine the link directories
+  std::string libOptions;
+  std::string libDebugOptions;
+  std::string libOptimizedOptions;
+  std::vector<std::string>::iterator i;
+  std::vector<std::string>& libdirs = m_Makefile->GetLinkDirectories();
+  for(i = libdirs.begin(); i != libdirs.end(); ++i)
+    {
+    libOptions += " /LIBPATH:\"";
+    libOptions += *i;
+    libOptions += "/$(OUTDIR)\" ";
+    libOptions += " /LIBPATH:\"";
+    libOptions += *i;
+    libOptions += "\" ";
+    }
+  // find link libraries
+  cmMakefile::LinkLibraries& libs = m_Makefile->GetLinkLibraries();
+  cmMakefile::LinkLibraries::const_iterator j;
+  for(j = libs.begin(); j != libs.end(); ++j)
+    {
+    // add libraries to executables and dlls (but never include
+    // a library in a library, bad recursion)
+    if (!target.IsALibrary() || 
+        (m_LibraryBuildType == DLL && libName != j->first))
+      {
+      if (j->second == cmMakefile::GENERAL)
+        {
+        libOptions += " ";
+        libOptions += j->first;
+        libOptions += ".lib ";
+        }
+      if (j->second == cmMakefile::DEBUG)
+        {
+        libDebugOptions += " ";
+        libDebugOptions += j->first;
+        libDebugOptions += ".lib ";
+        }
+      if (j->second == cmMakefile::OPTIMIZED)
+        {
+        libOptimizedOptions += " ";
+        libOptimizedOptions += j->first;
+        libOptimizedOptions += ".lib ";
+        }      
+      }
+    }
+  libOptions += "/STACK:10000000 ";
+  
   std::ifstream fin(m_DSPHeaderTemplate.c_str());
   if(!fin)
     {
@@ -420,6 +438,10 @@ void cmDSPMakefile::WriteDSPHeader(std::ostream& fout, const char *libName,
       std::string line = buffer;
       cmSystemTools::ReplaceString(line, "CM_LIBRARIES",
                                    libOptions.c_str());
+      cmSystemTools::ReplaceString(line, "CM_DEBUG_LIBRARIES",
+                                   libDebugOptions.c_str());
+      cmSystemTools::ReplaceString(line, "CM_OPTIMIZED_LIBRARIES",
+                                   libOptimizedOptions.c_str());
       cmSystemTools::ReplaceString(line, "BUILD_INCLUDES",
                                    m_IncludeOptions.c_str());
       cmSystemTools::ReplaceString(line, "OUTPUT_LIBNAME",libName);

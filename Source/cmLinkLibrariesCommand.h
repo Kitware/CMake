@@ -70,11 +70,14 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "LINK_LIBRARIES(library1 library2)\n"
+      "LINK_LIBRARIES(library1 <debug | optimized> library2 ...)\n"
       "Specify a list of libraries to be linked into\n"
       "executables or shared objects.  This command is passed\n"
       "down to all other commands. The library name should be\n"
-      "the same as the name used in the LIBRARY(library) command.";
+      "the same as the name used in the LIBRARY(library) command.\n"
+      "The debug and optimized strings may be used to indicate that\n"
+      "the next library listed is to be used only for that specific\n"
+      "type of build";
     }
   
   cmTypeMacro(cmLinkLibrariesCommand, cmCommand);

@@ -127,7 +127,6 @@ void cmMakefile::Print() const
   this->PrintStringVector("m_MakeVerbatim ", m_MakeVerbatim); 
   this->PrintStringVector("m_IncludeDirectories;", m_IncludeDirectories);
   this->PrintStringVector("m_LinkDirectories", m_LinkDirectories);
-  this->PrintStringVector("m_LinkLibraries", m_LinkLibraries);
   this->PrintStringVector("m_Utilities", m_Utilities);
   this->PrintStringVector("m_UtilityDirectories", m_UtilityDirectories);
 }
@@ -335,9 +334,15 @@ void cmMakefile::AddUtilityDirectory(const char* dir)
   m_UtilityDirectories.push_back(dir);
 }
 
+void cmMakefile::AddLinkLibrary(const char* lib, LinkLibraryType llt)
+{
+  m_LinkLibraries.push_back(
+    std::pair<std::string, LinkLibraryType>(lib,llt));
+}
+
 void cmMakefile::AddLinkLibrary(const char* lib)
 {
-  m_LinkLibraries.push_back(lib);
+  this->AddLinkLibrary(lib,GENERAL);
 }
 
 void cmMakefile::AddLinkDirectory(const char* dir)
@@ -483,11 +488,12 @@ void cmMakefile::ExpandVariables()
     {
     this->ExpandVariablesInString(*j);
     }
-  begin = m_LinkLibraries.begin();
-  end = m_LinkLibraries.end();
-  for(j = begin; j != end; ++j)
+  LinkLibraries::iterator j2, end2;
+  j2 = m_LinkLibraries.begin();
+  end2 = m_LinkLibraries.end();
+  for(; j2 != end2; ++j2)
     {
-    this->ExpandVariablesInString(*j);
+    this->ExpandVariablesInString(j2->first);
     }
 }
 

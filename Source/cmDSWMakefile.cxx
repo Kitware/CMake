@@ -126,23 +126,24 @@ void cmDSWMakefile::WriteProject(std::ostream& fout,
   fout << "{{{\n";
 
   // insert Begin Project Dependency  Project_Dep_Name project stuff here 
-  std::vector<std::string>::iterator i, end;
-  i = project->GetMakefile()->GetLinkLibraries().begin();
-  end = project->GetMakefile()->GetLinkLibraries().end();
-  for(;i!= end; ++i)
+  cmMakefile::LinkLibraries::const_iterator j, jend;
+  j = project->GetMakefile()->GetLinkLibraries().begin();
+  jend = project->GetMakefile()->GetLinkLibraries().end();
+  for(;j!= jend; ++j)
     {
-    if(*i != dspname)
+    if(j->first != dspname)
       {
       if (!l.IsALibrary() || 
           project->GetLibraryBuildType() == cmDSPMakefile::DLL)
         {
         fout << "Begin Project Dependency\n";
-        fout << "Project_Dep_Name " << *i << "\n";
+        fout << "Project_Dep_Name " << j->first << "\n";
         fout << "End Project Dependency\n";
         }
       }
     }
-  
+
+  std::vector<std::string>::iterator i, end;
   // write utility dependencies.
   i = project->GetMakefile()->GetUtilities().begin();
   end = project->GetMakefile()->GetUtilities().end();

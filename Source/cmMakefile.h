@@ -119,9 +119,20 @@ public:
   void AddUtilityDirectory(const char*);
 
   /**
+   * Get a list of link libraries in the build.
+   */
+  enum LinkLibraryType {GENERAL, DEBUG, OPTIMIZED};
+  typedef std::vector<std::pair<std::string,LinkLibraryType> > LinkLibraries;
+  LinkLibraries& GetLinkLibraries()
+    { 
+    return m_LinkLibraries;
+    }
+
+  /**
    * Add a link library to the build.
    */
   void AddLinkLibrary(const char*);
+  void AddLinkLibrary(const char*, LinkLibraryType type);
 
   /**
    * Add a link directory to the build.
@@ -333,14 +344,6 @@ public:
     }
 
   /**
-   * Get a list of link libraries in the build.
-   */
-  std::vector<std::string>& GetLinkLibraries()
-    { 
-    return m_LinkLibraries;
-    }
-
-  /**
    * Return a list of source files in this makefile.
    */
   typedef std::map<std::string,std::vector<cmSourceFile> > SourceMap;
@@ -446,7 +449,7 @@ protected:
   std::vector<std::string> m_LinkDirectories;
   std::vector<std::string> m_Utilities;
   std::vector<std::string> m_UtilityDirectories;
-  std::vector<std::string> m_LinkLibraries;
+  LinkLibraries m_LinkLibraries;
   std::string m_IncludeFileRegularExpression;
   std::string m_DefineFlags;
   std::vector<cmSourceGroup> m_SourceGroups;

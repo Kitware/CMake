@@ -91,7 +91,7 @@ EXSTYLE WS_EX_APPWINDOW
 CAPTION "CMakeSetupDialog"
 FONT 8, "MS Sans Serif"
 BEGIN
-    DEFPUSHBUTTON   "Close",IDOK,319,39,50,14
+    DEFPUSHBUTTON   "Close",IDOK,231,206,50,14
     EDITTEXT        IDC_WhereSource,129,4,135,13,ES_AUTOHSCROLL
     PUSHBUTTON      "Browse...",IDC_BUTTON2,269,5,43,13
     LTEXT           "Where is the source code:",IDC_STATIC,39,6,86,9
@@ -99,11 +99,13 @@ BEGIN
     PUSHBUTTON      "Browse...",IDC_BUTTON3,268,25,43,13
     LTEXT           "Where do you want to build the binaries:",IDC_STATIC,1,
                     27,128,9
-    PUSHBUTTON      "Build Project Files",IDC_BuildProjects,6,39,67,15
-    GROUPBOX        "Cache Values",IDC_STATIC,2,67,370,156
-    LISTBOX         IDC_LIST2,13,84,344,122,LBS_OWNERDRAWVARIABLE | 
+    PUSHBUTTON      "Build Project Files",IDC_BuildProjects,81,205,67,15
+    GROUPBOX        "Cache Values",IDC_STATIC,9,43,356,141
+    LISTBOX         IDC_LIST2,15,55,344,122,LBS_OWNERDRAWVARIABLE | 
                     LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | 
                     WS_TABSTOP
+    CTEXT           "Right click on cache entries for additional options",
+                    IDC_STATIC,19,190,333,11
 END
 
 
@@ -164,11 +166,6 @@ BEGIN
         RIGHTMARGIN, 228
         TOPMARGIN, 7
         BOTTOMMARGIN, 48
-    END
-
-    IDD_CMakeSetupDialog_DIALOG, DIALOG
-    BEGIN
-        BOTTOMMARGIN, 215
     END
 END
 #endif    // APSTUDIO_INVOKED

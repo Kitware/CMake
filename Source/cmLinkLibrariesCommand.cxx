@@ -23,10 +23,27 @@ bool cmLinkLibrariesCommand::Invoke(std::vector<std::string>& args)
     this->SetError("called with incorrect number of arguments");
     return false;
     }
+  // add libraries, nothe that there is an optional prefix 
+  // of debug and optimized than can be used
   for(std::vector<std::string>::iterator i = args.begin();
       i != args.end(); ++i)
     {
-    m_Makefile->AddLinkLibrary((*i).c_str());
+    if (*i == "debug")
+      {
+      ++i;
+      m_Makefile->AddLinkLibrary(i->c_str(),
+                                 cmMakefile::DEBUG);
+      }
+    else if (*i == "optimized")
+      {
+      ++i;
+      m_Makefile->AddLinkLibrary(i->c_str(),
+                                 cmMakefile::OPTIMIZED);
+      }
+    else
+      {
+      m_Makefile->AddLinkLibrary(i->c_str());  
+      }
     }
   return true;
 }

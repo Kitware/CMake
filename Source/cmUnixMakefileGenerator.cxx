@@ -133,18 +133,21 @@ void cmUnixMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
     linkLibs += " ";
     }
   std::string librariesLinked;
-  std::vector<std::string>& libs = m_Makefile->GetLinkLibraries();
-  for(j = libs.begin(); j != libs.end(); ++j)
+  cmMakefile::LinkLibraries& libs = m_Makefile->GetLinkLibraries();
+  cmMakefile::LinkLibraries::const_iterator j2;
+  for(j2 = libs.begin(); j2 != libs.end(); ++j2)
     {
     // Don't link the library against itself!
-    if(targetLibrary && (*j == targetLibrary)) continue;
-    std::string::size_type pos = (*j).find("-l");
+    if(targetLibrary && (j2->first == targetLibrary)) continue;
+    // don't look at debug libraries
+    if (j2->second == cmMakefile::DEBUG) continue;
+    std::string::size_type pos = j2->first.find("-l");
     if((pos == std::string::npos || pos > 0)
-       && (*j).find("${") == std::string::npos)
+       && j2->first.find("${") == std::string::npos)
       {
       librariesLinked += "-l";
       }
-    librariesLinked += *j;
+    librariesLinked += j2->first;
     librariesLinked += " ";
     }
   linkLibs += librariesLinked;
@@ -206,22 +209,22 @@ void cmUnixMakefileGenerator::OutputTargets(std::ostream& fout)
 void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
 {
   fout << "CMAKE_DEPEND_LIBS = ";
-  std::vector<std::string>& libs = m_Makefile->GetLinkLibraries();
-  std::vector<std::string>::iterator dir, lib;
+  cmMakefile::LinkLibraries& libs = m_Makefile->GetLinkLibraries();
+  cmMakefile::LinkLibraries::const_iterator lib2;
   // Search the list of libraries that will be linked into
   // the executable
-  for(lib = libs.begin(); lib != libs.end(); ++lib)
+  for(lib2 = libs.begin(); lib2 != libs.end(); ++lib2)
     {
     // loop over the list of directories that the libraries might
     // be in, looking for an ADD_LIBRARY(lib...) line. This would
     // be stored in the cache
     const char* cacheValue
-      = cmCacheManager::GetInstance()->GetCacheValue(lib->c_str());
+      = cmCacheManager::GetInstance()->GetCacheValue(lib2->first.c_str());
     if(cacheValue)
       {
       std::string libpath = cacheValue;
       libpath += "/lib";
-      libpath += *lib;
+      libpath += lib2->first;
       libpath += "${CMAKE_LIB_EXT}";
       fout << libpath << " ";
       }
@@ -229,7 +232,7 @@ void cmUnixMakefileGenerator::OutputDependencies(std::ostream& fout)
 
   std::vector<std::string>& utils = m_Makefile->GetUtilities();
   std::vector<std::string>& utildirs = m_Makefile->GetUtilityDirectories();
-  std::vector<std::string>::iterator util;
+  std::vector<std::string>::iterator dir, util;
   // Search the list of utilities that may be used to generate code for
   // this project.
   for(util = utils.begin(); util != utils.end(); ++util)

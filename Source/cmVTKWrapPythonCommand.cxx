@@ -26,9 +26,7 @@ bool cmVTKWrapPythonCommand::Invoke(std::vector<std::string>& args)
 
   // Now check and see if the value has been stored in the cache
   // already, if so use that value and don't look for the program
-  const char* cacheValue
-    = cmCacheManager::GetInstance()->GetCacheValue("VTK_WRAP_PYTHON");
-  if(!cacheValue || !strcmp(cacheValue,"0"))
+  if(!cmCacheManager::GetInstance()->IsOn("VTK_WRAP_PYTHON"))
     {
     return true;
     }
