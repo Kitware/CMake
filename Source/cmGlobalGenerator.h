@@ -81,7 +81,7 @@ public:
    * loaded commands, not as part of the usual build process.
    */
   virtual int TryCompile(const char *srcdir, const char *bindir,
-                         const char *projectName);
+                         const char *projectName, const char *targetName);
 
   ///! Set the CMake instance
   void SetCMakeInstance(cmake *cm) {

@@ -46,7 +46,8 @@ void cmGlobalVisualStudio6Generator::EnableLanguage(const char*,
 
 int cmGlobalVisualStudio6Generator::TryCompile(const char *, 
                                                const char *bindir, 
-                                               const char *projectName)
+                                               const char *projectName,
+                                               const char *targetName)
 {
   // now build the test
   std::string makeCommand = 
@@ -80,9 +81,19 @@ int cmGlobalVisualStudio6Generator::TryCompile(const char *,
 #endif
   makeCommand += " ";
   makeCommand += projectName;
-  makeCommand += ".dsw /MAKE \"ALL_BUILD - Debug\" /REBUILD";
+  makeCommand += ".dsw /MAKE \"";
+  if (targetName)
+    {
+    makeCommand += targetName;
+    }
+  else
+    {
+    makeCommand += "ALL_BUILD";
+    }
+  makeCommand += " - Debug\" /REBUILD";
   
-  if (!cmSystemTools::RunCommand(makeCommand.c_str(), output))
+  int retVal;
+  if (!cmSystemTools::RunCommand(makeCommand.c_str(), output, retVal))
     {
     cmSystemTools::Error("Generator: execution of msdev failed.");
     // return to the original directory
@@ -90,7 +101,7 @@ int cmGlobalVisualStudio6Generator::TryCompile(const char *,
     return 1;
     }
   cmSystemTools::ChangeDirectory(cwd.c_str());
-  return 0;
+  return retVal;
 }
 
 ///! Create a local generator appropriate to this Global Generator

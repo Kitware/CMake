@@ -47,7 +47,8 @@ void cmGlobalVisualStudio7Generator::EnableLanguage(const char*,
 
 int cmGlobalVisualStudio7Generator::TryCompile(const char *, 
                                                const char *bindir, 
-                                               const char *projectName)
+                                               const char *projectName,
+                                               const char *targetName)
 {
   // now build the test
   std::string makeCommand = 
@@ -81,9 +82,18 @@ int cmGlobalVisualStudio7Generator::TryCompile(const char *,
 #endif
   makeCommand += " ";
   makeCommand += projectName;
-  makeCommand += ".sln /rebuild Debug /project ALL_BUILD";
+  makeCommand += ".sln /rebuild Debug /project ";
+  if (targetName)
+    {
+    makeCommand += targetName;
+    }
+  else
+    {
+    makeCommand += "ALL_BUILD";
+    }
   
-  if (!cmSystemTools::RunCommand(makeCommand.c_str(), output))
+  int retVal;
+  if (!cmSystemTools::RunCommand(makeCommand.c_str(), output, retVal))
     {
     cmSystemTools::Error("Generator: execution of devenv failed.");
     // return to the original directory
@@ -91,7 +101,7 @@ int cmGlobalVisualStudio7Generator::TryCompile(const char *,
     return 1;
     }
   cmSystemTools::ChangeDirectory(cwd.c_str());
-  return 0;
+  return retVal;
 }
 
 ///! Create a local generator appropriate to this Global Generator
