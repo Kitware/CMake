@@ -79,9 +79,9 @@ public:
    * Add a function blocker to this makefile
    */
   void AddFunctionBlocker(cmFunctionBlocker *fb)
-    { m_FunctionBlockers.insert(fb);}
+    { m_FunctionBlockers.push_back(fb);}
   void RemoveFunctionBlocker(cmFunctionBlocker *fb)
-    { m_FunctionBlockers.erase(fb);}
+    { m_FunctionBlockers.remove(fb);}
   void RemoveFunctionBlocker(const char *name, const std::vector<std::string> &args);
   
   /**
@@ -571,7 +571,7 @@ private:
   void PrintStringVector(const char* s, const std::vector<std::string>& v) const;
   void AddDefaultCommands();
   void AddDefaultDefinitions();
-  std::set<cmFunctionBlocker *> m_FunctionBlockers;
+  std::list<cmFunctionBlocker *> m_FunctionBlockers;
   
   typedef std::map<cmStdString, cmData*> DataMap;
   DataMap m_DataMap;

@@ -40,6 +40,7 @@ public:
   virtual void ScopeEnded(cmMakefile &mf);
   
   std::vector<std::string> m_Args;
+  bool m_IsBlocking;
 };
 
 /** \class cmIfCommand

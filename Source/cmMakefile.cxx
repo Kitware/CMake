@@ -126,12 +126,12 @@ cmMakefile::~cmMakefile()
       delete d->second;
       }
     }
-  std::set<cmFunctionBlocker *>::const_iterator pos;
+  std::list<cmFunctionBlocker *>::const_iterator pos;
   for (pos = m_FunctionBlockers.begin(); 
        pos != m_FunctionBlockers.end(); pos = m_FunctionBlockers.begin())
     {
     cmFunctionBlocker* b = *pos;
-    m_FunctionBlockers.erase(*pos);
+    m_FunctionBlockers.remove(*pos);
     delete b;
     }
   delete m_MakefileGenerator;
@@ -263,15 +263,26 @@ void cmMakefile::ExecuteCommand(std::string &name,
 //   is "filename" and not "external".
 bool cmMakefile::ReadListFile(const char* filename, const char* external)
 {
-  // keep track of the current file being read
+  // used to watch for blockers going out of scope
+  // e.g. mismatched IF statement
+  std::set<cmFunctionBlocker *> originalBlockers;
+
+      // keep track of the current file being read
   if (filename)
     {
     if(m_cmCurrentListFile != filename)
       {
       m_cmCurrentListFile = filename;
       }
+    // loop over current function blockers and record them
+    std::list<cmFunctionBlocker *>::const_iterator pos;
+    for (pos = m_FunctionBlockers.begin(); 
+         pos != m_FunctionBlockers.end(); ++pos)
+      {
+      originalBlockers.insert(*pos);
+      }
     }
-
+  
   // if this is not a remote makefile
   //  (if it were, this would be called from the "filename" call,
   //   rather than the "external" call)
@@ -343,11 +354,16 @@ bool cmMakefile::ReadListFile(const char* filename, const char* external)
   if (filename)
     {
     // loop over all function blockers to see if any block this command
-    std::set<cmFunctionBlocker *>::const_iterator pos;
+    std::list<cmFunctionBlocker *>::const_iterator pos;
     for (pos = m_FunctionBlockers.begin(); 
          pos != m_FunctionBlockers.end(); ++pos)
       {
-      (*pos)->ScopeEnded(*this);
+      // if this blocker was not in the original then send a 
+      // scope ended message
+      if (originalBlockers.find(*pos) == originalBlockers.end())
+        {
+        (*pos)->ScopeEnded(*this);
+        }
       }
     }
   
@@ -1216,7 +1232,7 @@ bool cmMakefile::IsFunctionBlocked(const char *name,
     }
 
   // loop over all function blockers to see if any block this command
-  std::set<cmFunctionBlocker *>::const_iterator pos;
+  std::list<cmFunctionBlocker *>::const_iterator pos;
   std::vector<std::string> expandedArguments = args;
   for(std::vector<std::string>::iterator i = expandedArguments.begin();
       i != expandedArguments.end(); ++i)
@@ -1249,14 +1265,14 @@ void cmMakefile::RemoveFunctionBlocker(const char *name,
 				       const std::vector<std::string> &args)
 {
   // loop over all function blockers to see if any block this command
-  std::set<cmFunctionBlocker *>::const_iterator pos;
-  for (pos = m_FunctionBlockers.begin(); 
-       pos != m_FunctionBlockers.end(); ++pos)
+  std::list<cmFunctionBlocker *>::reverse_iterator pos;
+  for (pos = m_FunctionBlockers.rbegin(); 
+       pos != m_FunctionBlockers.rend(); ++pos)
     {
     if ((*pos)->ShouldRemove(name, args, *this))
       {
       cmFunctionBlocker* b = *pos;
-      m_FunctionBlockers.erase(*pos);
+      m_FunctionBlockers.remove(*pos);
       delete b;
       return;
       }

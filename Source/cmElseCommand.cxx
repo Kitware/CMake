@@ -28,22 +28,18 @@ bool cmElseCommand::InitialPass(std::vector<std::string> const& args)
     return false;
     }
   
+  // first remove any function blockers for the IF
+  m_Makefile->RemoveFunctionBlocker("ELSE",args);
+
   // if is true create a blocker for the else
-  if (isTrue)
-    {
-    cmIfFunctionBlocker *f = new cmIfFunctionBlocker();
-    for(std::vector<std::string>::const_iterator j = args.begin();
-        j != args.end(); ++j)
-      {   
-      f->m_Args.push_back(*j);
-      }
-    m_Makefile->AddFunctionBlocker(f);
+  cmIfFunctionBlocker *f = new cmIfFunctionBlocker();
+  f->m_IsBlocking = isTrue;
+  for(std::vector<std::string>::const_iterator j = args.begin();
+      j != args.end(); ++j)
+    {   
+    f->m_Args.push_back(*j);
     }
-  else
-    {
-    // remove any function blockers for this define
-    m_Makefile->RemoveFunctionBlocker("ENDIF",args);
-    }
+  m_Makefile->AddFunctionBlocker(f);
   
   return true;
 }

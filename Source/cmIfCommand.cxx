@@ -44,14 +44,21 @@ IsFunctionBlocked(const char *name, const std::vector<std::string> &args,
       cmSystemTools::Error(err.c_str());
       }
     }
-  return true;
+  return m_IsBlocking;
 }
 
 bool cmIfFunctionBlocker::
 ShouldRemove(const char *name, const std::vector<std::string> &args, 
              cmMakefile &mf) 
 {
-  return !this->IsFunctionBlocked(name,args,mf);
+  if (!strcmp(name,"ELSE") || !strcmp(name,"ENDIF"))
+    {
+    if (args == m_Args)
+      {
+      return true;
+      }
+    }
+  return false;
 }
 
 void cmIfFunctionBlocker::
@@ -80,17 +87,15 @@ bool cmIfCommand::InitialPass(std::vector<std::string> const& args)
     return false;
     }
   
-  // if is isn't true create a blocker
-  if (!isTrue)
-    {
-    cmIfFunctionBlocker *f = new cmIfFunctionBlocker();
-    for(std::vector<std::string>::const_iterator j = args.begin();
-        j != args.end(); ++j)
-      {   
-      f->m_Args.push_back(*j);
-      }
-    m_Makefile->AddFunctionBlocker(f);
+  cmIfFunctionBlocker *f = new cmIfFunctionBlocker();
+  // if is isn't true block the commands
+  f->m_IsBlocking = !isTrue;
+  for(std::vector<std::string>::const_iterator j = args.begin();
+      j != args.end(); ++j)
+    {   
+    f->m_Args.push_back(*j);
     }
+  m_Makefile->AddFunctionBlocker(f);
   
   return true;
 }
