@@ -620,7 +620,17 @@ void CMakeSetupDialog::FillCacheGUIFromCacheManager()
       i != cache.end(); ++i)
     {
     const char* key = i->first.c_str();
-    const cmCacheManager::CacheEntry& value = i->second;
+    cmCacheManager::CacheEntry value = i->second;
+
+    // if value has trailing space or tab, enclose it in single quotes
+    // to enforce the fact that it has 'invisible' trailing stuff
+    if (value.m_Value.size() && 
+        (value.m_Value[value.m_Value.size() - 1] == ' ' || 
+         value.m_Value[value.m_Value.size() - 1] == '\t'))
+      {
+      value.m_Value = '\'' + value.m_Value +  '\'';
+      }
+
     if(!m_AdvancedValues)
       {
       std::string advancedVar = key;
@@ -722,7 +732,20 @@ void CMakeSetupDialog::FillCacheManagerFromCacheGUI()
         (const char*)item->m_propName);
     if (entry)
       {
-      entry->m_Value = item->m_curValue;
+      // if value is enclosed in single quotes ('foo') then remove them
+      // they were used to enforce the fact that it had 'invisible' 
+      // trailing stuff
+      if (item->m_curValue.GetLength() >= 2 &&
+          item->m_curValue[0] == '\'' && 
+          item->m_curValue[item->m_curValue.GetLength() - 1] == '\'') 
+        {
+        entry->m_Value = item->m_curValue.Mid(1, 
+                                              item->m_curValue.GetLength() - 2);
+        }
+      else
+        {
+        entry->m_Value = item->m_curValue;
+        }
       }
     }
 }

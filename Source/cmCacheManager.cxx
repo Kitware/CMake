@@ -127,21 +127,34 @@ bool cmCacheManager::ParseEntry(const char* entry,
   cmRegularExpression reg("^([^:]*):([^=]*)=(.*[^\t ]|[\t ]*)[\t ]*$");
   // input line is:         "key":type=value
   cmRegularExpression regQuoted("^\"([^\"]*)\":([^=]*)=(.*[^\t ]|[\t ]*)[\t ]*$");
+  bool flag = false;
   if(regQuoted.find(entry))
     {
     var = regQuoted.match(1);
     type = cmCacheManager::StringToType(regQuoted.match(2).c_str());
     value = regQuoted.match(3);
-    return true;
+    flag = true;
     }
   else if (reg.find(entry))
     {
     var = reg.match(1);
     type = cmCacheManager::StringToType(reg.match(2).c_str());
     value = reg.match(3);
-    return true;
+    flag = true;
     }
-  return false;
+
+  // if value is enclosed in single quotes ('foo') then remove them
+  // it is used to enclose trailing space or tab
+  if (flag && 
+      value.size() >= 2 &&
+      value[0] == '\'' && 
+      value[value.size() - 1] == '\'') 
+    {
+    value = value.substr(1, 
+                         value.size() - 2);
+    }
+
+  return flag;
 }
 
 bool cmCacheManager::LoadCache(const char* path,
@@ -365,8 +378,19 @@ bool cmCacheManager::SaveCache(const char* path)
         key = i->first;
         }
       fout << key.c_str() << ":"
-           << cmCacheManagerTypes[t] << "="
-           << ce.m_Value << "\n\n";
+           << cmCacheManagerTypes[t] << "=";
+      // if value has trailing space or tab, enclose it in single quotes
+      if (ce.m_Value.size() &&
+          (ce.m_Value[ce.m_Value.size() - 1] == ' ' || 
+           ce.m_Value[ce.m_Value.size() - 1] == '\t'))
+        {
+        fout << '\'' << ce.m_Value << '\'';
+        }
+      else
+        {
+        fout << ce.m_Value;
+        }
+      fout << "\n\n";
       }
     }
 
@@ -398,8 +422,19 @@ bool cmCacheManager::SaveCache(const char* path)
         key = i->first;
         }
       fout << key.c_str() << ":"
-           << cmCacheManagerTypes[t] << "="
-           << ce.m_Value << "\n";
+           << cmCacheManagerTypes[t] << "=";
+      // if value has trailing space or tab, enclose it in single quotes
+      if (ce.m_Value.size() &&
+          (ce.m_Value[ce.m_Value.size() - 1] == ' ' || 
+           ce.m_Value[ce.m_Value.size() - 1] == '\t'))
+        {
+        fout << '\'' << ce.m_Value << '\'';
+        }
+      else
+        {
+        fout << ce.m_Value;
+        }
+      fout << "\n";
       }
     }
   fout << "\n";
@@ -408,7 +443,7 @@ bool cmCacheManager::SaveCache(const char* path)
                                      cacheFile.c_str());
   cmSystemTools::RemoveFile(tempFile.c_str());
   return true;
-}
+    }
 
 void cmCacheManager::OutputHelpString(std::ofstream& fout, 
                                       const std::string& helpString)

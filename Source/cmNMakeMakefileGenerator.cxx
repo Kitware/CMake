@@ -51,7 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 cmNMakeMakefileGenerator::cmNMakeMakefileGenerator()
 {
-  m_LibraryPathOption = "$(CMAKE_C_LIBPATH_FLAG)";
+  this->SetLibraryPathOption("@CMAKE_C_LIBPATH_FLAG@"); // Use @ here
   this->SetObjectFileExtension("$(CMAKE_OBJECT_FILE_SUFFIX)");
   this->SetExecutableExtension("$(CMAKE_EXECUTABLE_SUFFIX)");
   this->SetLibraryPrefix("");
@@ -151,19 +151,14 @@ void cmNMakeMakefileGenerator::OutputMakeVariables(std::ostream& fout)
     "CMAKE_C_COMPILER                       = @CMAKE_C_COMPILER@\n"
     "CMAKE_C_FLAGS                          = @CMAKE_C_FLAGS@ @BUILD_FLAGS@\n"
 
-    "CMAKE_C_OUTPUT_OBJECT_FILE_FLAG        = @CMAKE_C_OUTPUT_OBJECT_FILE_FLAG@\n"
-    "CMAKE_C_OUTPUT_EXECUTABLE_FILE_FLAG    = @CMAKE_C_OUTPUT_EXECUTABLE_FILE_FLAG@\n"
     "CMAKE_C_LINK_EXECUTABLE_FLAG           = @CMAKE_C_LINK_EXECUTABLE_FLAG@\n"
-    "CMAKE_C_LIBPATH_FLAG                   = @CMAKE_C_LIBPATH_FLAG@\n"
     "CMAKE_CXX_FLAGS                        = @CMAKE_CXX_FLAGS@ @BUILD_FLAGS@\n"
     "CMAKE_CXX_COMPILER                     = @CMAKE_CXX_COMPILER@\n"
     "CMAKE_LINKER                           = @CMAKE_LINKER@\n"
     "CMAKE_LINKER_FLAGS                     = @CMAKE_LINKER_FLAGS@ @LINKER_BUILD_FLAGS@\n"
     "CMAKE_LINKER_SHARED_LIBRARY_FLAG       = @CMAKE_LINKER_SHARED_LIBRARY_FLAG@\n"
-    "CMAKE_LINKER_OUTPUT_FILE_FLAG          = @CMAKE_LINKER_OUTPUT_FILE_FLAG@\n"
     "CMAKE_LIBRARY_MANAGER                  = @CMAKE_LIBRARY_MANAGER@\n"
     "CMAKE_LIBRARY_MANAGER_FLAGS            = @CMAKE_LIBRARY_MANAGER_FLAGS@\n"
-    "CMAKE_LIBRARY_MANAGER_OUTPUT_FILE_FLAG = @CMAKE_LIBRARY_MANAGER_OUTPUT_FILE_FLAG@\n"
     "CMAKE_OBJECT_FILE_SUFFIX               = @CMAKE_OBJECT_FILE_SUFFIX@\n"
     "CMAKE_EXECUTABLE_SUFFIX                = @CMAKE_EXECUTABLE_SUFFIX@\n"
     "CMAKE_STATICLIB_SUFFIX                 = @CMAKE_STATICLIB_SUFFIX@\n"
@@ -350,7 +345,14 @@ OutputBuildObjectFromSource(std::ostream& fout,
     compileCommand += "$(INCLUDE_FLAGS) -c ";
     compileCommand += 
       cmSystemTools::EscapeSpaces(source.GetFullPath().c_str());
-    compileCommand += " $(CMAKE_C_OUTPUT_OBJECT_FILE_FLAG)";
+
+    // Need to get the definition here because this value might have
+    // trailing space (since it is directly prepended to the filename)
+    std::string output_object_file_flag = 
+      m_Makefile->GetDefinition("CMAKE_C_OUTPUT_OBJECT_FILE_FLAG");
+    m_Makefile->ExpandVariablesInString(output_object_file_flag);
+
+    compileCommand += " " + output_object_file_flag;
     compileCommand += objectFile;
     }
   else if (ext == "rc")
@@ -378,7 +380,14 @@ OutputBuildObjectFromSource(std::ostream& fout,
     compileCommand += "$(INCLUDE_FLAGS) -c ";
     compileCommand += 
       cmSystemTools::EscapeSpaces(source.GetFullPath().c_str());
-    compileCommand += " $(CMAKE_C_OUTPUT_OBJECT_FILE_FLAG)";
+
+    // Need to get the definition here because this value might have
+    // trailing space (since it is directly prepended to the filename)
+    std::string output_object_file_flag = 
+      m_Makefile->GetDefinition("CMAKE_C_OUTPUT_OBJECT_FILE_FLAG");
+    m_Makefile->ExpandVariablesInString(output_object_file_flag);
+
+    compileCommand += " " + output_object_file_flag;
     compileCommand += objectFile;
     }
   m_QuoteNextCommand = false;
@@ -398,11 +407,20 @@ void cmNMakeMakefileGenerator::OutputSharedLibraryRule(std::ostream& fout,
   std::string depend = "$(";
   depend += name;
   depend += "_SRC_OBJS) $(" + std::string(name) + "_DEPEND_LIBS)";
-  std::string command = "$(CMAKE_LINKER) $(CMAKE_LINKER_SHARED_LIBRARY_FLAG) @<<\n\t";
-  command += " $(" + std::string(name) + "_SRC_OBJS) $(CMAKE_LINKER_FLAGS) $(CMAKE_LINKER_OUTPUT_FILE_FLAG)";
+
+  // Need to get the definition here because this value might have
+  // trailing space (since it is directly prepended to the filename)
+  std::string linker_output_file_flag = 
+    m_Makefile->GetDefinition("CMAKE_LINKER_OUTPUT_FILE_FLAG");
+  m_Makefile->ExpandVariablesInString(linker_output_file_flag);
+
+  std::string command = "$(CMAKE_LINKER) $(CMAKE_LINKER_SHARED_LIBRARY_FLAG) @<<\n\t $(CMAKE_LINKER_FLAGS) " + linker_output_file_flag;
+
   std::string dllpath = m_LibraryOutputPath +  std::string(name) + m_SharedLibraryExtension;
   command += cmSystemTools::EscapeSpaces(dllpath.c_str());
-  command += " ";
+
+  command += " $(" + std::string(name) + "_SRC_OBJS) ";
+
   std::strstream linklibs;
   this->OutputLinkLibraries(linklibs, name, t);
   linklibs << std::ends;
@@ -440,7 +458,15 @@ void cmNMakeMakefileGenerator::OutputStaticLibraryRule(std::ostream& fout,
   std::string target = m_LibraryOutputPath + std::string(name) + m_StaticLibraryExtension;
   std::string depend = "$(";
   depend += std::string(name) + "_SRC_OBJS)";
-  std::string command = "$(CMAKE_LIBRARY_MANAGER) $(CMAKE_LIBRARY_MANAGER_FLAGS) @<<\n\t $(CMAKE_LIBRARY_MANAGER_OUTPUT_FILE_FLAG)";
+
+  // Need to get the definition here because this value might have
+  // trailing space (since it is directly prepended to the filename)
+  std::string library_manager_output_file_flag = 
+    m_Makefile->GetDefinition("CMAKE_LIBRARY_MANAGER_OUTPUT_FILE_FLAG");
+  m_Makefile->ExpandVariablesInString(library_manager_output_file_flag);
+
+  std::string command = "$(CMAKE_LIBRARY_MANAGER) $(CMAKE_LIBRARY_MANAGER_FLAGS) @<<\n\t " + library_manager_output_file_flag;
+
   std::string libpath = m_LibraryOutputPath + std::string(name) + m_StaticLibraryExtension;
   command += cmSystemTools::EscapeSpaces(libpath.c_str());
   command += " $(";
@@ -468,8 +494,16 @@ void cmNMakeMakefileGenerator::OutputExecutableRule(std::ostream& fout,
     "$(CMAKE_CXX_COMPILER) $(CMAKE_CXX_FLAGS) ";
   command += "$(" + std::string(name) + "_SRC_OBJS) ";
   std::string path = m_ExecutableOutputPath + name + m_ExecutableExtension;
-  command += " $(CMAKE_C_OUTPUT_EXECUTABLE_FILE_FLAG)" + 
+
+  // Need to get the definition here because this value might have
+  // trailing space (since it is directly prepended to the filename)
+  std::string output_executable_file_flag = 
+    m_Makefile->GetDefinition("CMAKE_C_OUTPUT_EXECUTABLE_FILE_FLAG");
+  m_Makefile->ExpandVariablesInString(output_executable_file_flag);
+
+  command += " " + output_executable_file_flag + 
     cmSystemTools::EscapeSpaces(path.c_str());
+
   command += " $(CMAKE_C_LINK_EXECUTABLE_FLAG) ";
   if(t.GetType() == cmTarget::WIN32_EXECUTABLE)
     {
@@ -508,7 +542,12 @@ void cmNMakeMakefileGenerator::OutputLinkLibraries(std::ostream& fout,
     std::string libpath = ShortPath(libDir->c_str());
     if(emitted.insert(libpath).second)
       {
-      linkLibs += m_LibraryPathOption;
+      // Expand content because this value might have
+      // trailing space (since it is directly prepended to the filename)
+      std::string replaceVars = m_LibraryPathOption;
+      m_Makefile->ExpandVariablesInString(replaceVars);
+
+      linkLibs += replaceVars;
       cmSystemTools::ConvertToWindowsSlashes(libpath);
       linkLibs += libpath;
       linkLibs += " ";
