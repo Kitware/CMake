@@ -88,7 +88,8 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
    "Stride are considered individual test numbers.  Start, End,or stride "
    "can be empty.  Optionally a file can be given that contains the same "
    "syntax as the command line."},
-  {"-U", "When both -R and -I are specified by default the intersection of "
+  {"-U", "Take the Union of -I and -R",
+   "When both -R and -I are specified by default the intersection of "
    "tests are run. By specifying -U the union of tests is run instead."},
   {"--interactive-debug-mode [0|1]", "Set the interactive mode to 0 or 1.",
    "This option causes ctest to run tests in either an interactive mode or a non-interactive mode. "
