@@ -810,7 +810,8 @@ void cmUnixMakefileGenerator::OutputUtilityRule(std::ostream& fout,
     }
   std::string comment = "Rule to build Utility ";
   comment += name;
-  std::string depends;
+  std::string depends; 
+  std::string replaceVars;
   const std::vector<cmCustomCommand> &ccs = t.GetCustomCommands();
   for(std::vector<cmCustomCommand>::const_iterator i = ccs.begin();
       i != ccs.end(); ++i)
@@ -820,7 +821,9 @@ void cmUnixMakefileGenerator::OutputUtilityRule(std::ostream& fout,
 	  d != dep.end(); ++d)
 	{
 	  depends +=  " \\\n";
-	  depends += *d;
+          replaceVars = *d;
+          m_Makefile->ExpandVariablesInString(replaceVars);
+	  depends += this->ConvertToOutputPath(replaceVars.c_str());
 	}
     }
   this->OutputMakeRule(fout, 
