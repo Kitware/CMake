@@ -29,7 +29,7 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv)
   // build an arg list for TryCompile and extract the runArgs
   std::vector<std::string> tryCompile;
   std::string runArgs;
-  int i;
+  unsigned int i;
   for (i = 1; i < argv.size(); ++i)
     {
     if (argv[i] == "ARGS")
