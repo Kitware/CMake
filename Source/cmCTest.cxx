@@ -1600,10 +1600,31 @@ int cmCTest::CoverageDirectory()
       continue;
       }
 
-    // Check if we should ignore the directory
+    // Check if we should ignore the directory, if we find a NoDartCoverage
+    // file in it or any of its parents
+    int do_coverage = 1;
     std::string coverage_dir = cmSystemTools::GetFilenamePath(cov.m_AbsolutePath.c_str());
-    coverage_dir += "/.NoDartCoverage";
-    if ( cmSystemTools::FileExists(coverage_dir.c_str()) )
+    do
+      {
+      std::string coverage_file = coverage_dir + "/.NoDartCoverage";
+      if ( cmSystemTools::FileExists(coverage_file.c_str()) )
+        {
+        do_coverage = 0;
+        break;
+        }
+      // is there a parent directory we can check
+      std::string::size_type pos = coverage_dir.rfind('/');
+      // if we could not find the directory return 0
+      if(pos == std::string::npos)
+        {
+        break;
+        }
+      coverage_dir = coverage_dir.substr(0, pos);
+      
+      }
+    while (coverage_dir.size() >= sourceDirectory.size());
+    
+    if (!do_coverage)
       {
       if ( m_Verbose )
         {
@@ -1611,7 +1632,7 @@ int cmCTest::CoverageDirectory()
         }
       continue;
       }
-
+    
     if ( ccount == 100 )
       {
       local_end_time = ::CurrentTime();
