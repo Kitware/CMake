@@ -132,10 +132,7 @@ void cmake::AddCMakePaths(const std::vector<std::string>& args)
   // Find our own executable.
   std::string cMakeSelf = args[0];
   cmSystemTools::ConvertToUnixSlashes(cMakeSelf);
-  if(!cmSystemTools::FileExists(cMakeSelf.c_str()))
-    {
-    cMakeSelf = cmSystemTools::FindProgram(cMakeSelf.c_str());
-    }
+  cMakeSelf = cmSystemTools::FindProgram(cMakeSelf.c_str());
   if(!cmSystemTools::FileExists(cMakeSelf.c_str()))
     {
 #ifdef CMAKE_BUILD_DIR
