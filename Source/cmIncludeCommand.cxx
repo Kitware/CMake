@@ -27,17 +27,32 @@ bool cmIncludeCommand::InitialPass(std::vector<std::string> const& args)
       return false;
     }
   bool optional = false;
+
+  std::string fname = args[0].c_str();
+
   if(args.size() == 2)
     {
     optional = args[1] == "OPTIONAL";
     }
   
+  if(fname.find("/") == fname.npos)
+    {
+    // Not a path. Maybe module.
+    std::string module = fname;
+    module += ".cmake";
+    std::string mfile = m_Makefile->GetModulesFile(module.c_str());
+    if ( mfile.size() )
+      {
+      std::cout << "Module found: " << mfile.c_str() << std::endl;
+      fname = mfile.c_str();
+      }
+    }
   bool readit = m_Makefile->ReadListFile( m_Makefile->GetCurrentListFile(), 
-                                          args[0].c_str());
+                                          fname.c_str() );
   if(!optional && !readit)
     {
     std::string m = "Could not find include file: ";
-    m += args[0];
+    m += fname;
     this->SetError(m.c_str());
     return false;
     }

@@ -75,10 +75,13 @@ public:
     {
     return
       "  INCLUDE(file1 [OPTIONAL])\n"
+      "  INCLUDE(module [OPTIONAL])\n"
       "Reads CMake listfile code from the given file.  Commands in the file "
       "are processed immediately as if they were written in place of the "
       "INCLUDE command.  If OPTIONAL is present, then no error "
-      "is raised if the file does not exist.";
+      "is raised if the file does not exist.\n"
+      "If module is specified instead of file, the file with name "
+      "module.cmake is searched in the CMAKE_MODULE_PATH.";
     }
   
   cmTypeMacro(cmIncludeCommand, cmCommand);

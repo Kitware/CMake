@@ -6,7 +6,7 @@ SET (TEST_COMMAND_TEST1 1)
 INCLUDE (${CMAKE_ROOT}/Modules/CheckTypeSize.cmake)
 CHECK_TYPE_SIZE(char  SIZEOF_CHAR)
 
-INCLUDE (${CMAKE_ROOT}/Modules/CheckFunctionExists.cmake)
+INCLUDE (CheckFunctionExists)
 CHECK_FUNCTION_EXISTS(printf        HAVE_PRINTF)
 CHECK_FUNCTION_EXISTS(vsblabla      HAVE_VSBLABLA)
 
