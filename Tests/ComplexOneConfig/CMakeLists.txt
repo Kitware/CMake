@@ -12,16 +12,6 @@ ENDIF (CMAKE_ANSI_CXXFLAGS)
 
 ADD_DEFINITIONS(-DCMAKE_IS_FUN)
 
-# use the ANSI flags to compile complex as it uses cmSystemTools from
-# the cmake library which requires ansi
-IF (CMAKE_ANSI_CXXFLAGS)
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_ANSI_CXXFLAGS}")  
-ENDIF (CMAKE_ANSI_CXXFLAGS)
-
-IF (CMAKE_ANSI_CFLAGS)
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_ANSI_CFLAGS}")  
-ENDIF (CMAKE_ANSI_CFLAGS)
-
 #
 # Include vars from a file and from a cache
 #
