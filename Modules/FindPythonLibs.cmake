@@ -50,18 +50,6 @@ FIND_LIBRARY(PYTHON_LIBRARY
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\1.6\\InstallPath]/libs
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\1.5\\InstallPath]/libs
 )
-IF(CYGWIN)
-  FIND_LIBRARY(PYTHON_LIBRARY
-    NAMES python2.3.dll python2.2.dll python2.1.dll
-          python2.0.dll python1.6.dll python1.5.dll
-    PATHS
-    /usr/lib/python2.3/config
-    /usr/lib/python2.2/config
-    /usr/lib/python2.1/config
-    /usr/lib/python2.0/config
-    /usr/lib/python1.6/config
-    /usr/lib/python1.5/config
-   )
 
 FIND_PATH(PYTHON_INCLUDE_PATH Python.h
   ~/Library/Frameworks/Python.framework/Headers
