@@ -110,8 +110,23 @@ int main (int argc, char *argv[])
   else
     {
     // assume a make sytle program
+    // clean first
+    std::string cleanCommand = makeCommand;
+    cleanCommand += " clean";
+    std::cout << "Running make command: " << cleanCommand.c_str() << " ...\n";
+    if (!cmSystemTools::RunCommand(cleanCommand.c_str(), output))
+      {
+      std::cerr << "Error: " << cleanCommand.c_str() << "  execution failed\n";
+      std::cerr << output.c_str() << "\n";
+      // return to the original directory
+      cmSystemTools::ChangeDirectory(cwd.c_str());
+      return 1;
+      }
+    
+    // now build
     makeCommand += " all";
     }
+
   std::cout << "Running make command: " << makeCommand.c_str() << " ...\n";
   if (!cmSystemTools::RunCommand(makeCommand.c_str(), output))
     {
