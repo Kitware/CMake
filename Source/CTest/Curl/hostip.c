@@ -571,7 +571,7 @@ static Curl_addrinfo *my_getaddrinfo(struct SessionHandle *data,
     h->h_addrtype = AF_INET;
     h->h_length = sizeof(*addrentry);
     h->h_name = &buf->h_name[0];
-    MakeIP(ntohl(in), h->h_name, sizeof(buf->h_name));
+    MakeIP(ntohl(in), (char*)h->h_name, sizeof(buf->h_name));
   }
 #if defined(HAVE_GETHOSTBYNAME_R)
   else {
