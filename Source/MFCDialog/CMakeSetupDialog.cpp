@@ -479,15 +479,10 @@ void CMakeSetupDialog::OnChangeWhereSource()
 void CMakeSetupDialog::OnChangeWhereBuild() 
 {
   this->UpdateData();
-  std::string cachefile = m_WhereBuild;
-  cachefile += "/CMakeCache.txt";
   m_CacheEntriesList.RemoveAll();
-  if(cmSystemTools::FileExists(cachefile.c_str()))
-    {
-    m_CacheEntriesList.ShowWindow(SW_SHOW);
-    this->LoadCacheFromDiskToGUI();
-    m_BuildPathChanged = true;
-    }
+  m_CacheEntriesList.ShowWindow(SW_SHOW);
+  this->LoadCacheFromDiskToGUI();
+  m_BuildPathChanged = true;
 }
 
 
