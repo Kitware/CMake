@@ -1004,7 +1004,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
       langVar += linkLanguage;
       std::string flagsVar = langVar + "_FLAGS";
       std::string sharedFlagsVar = "CMAKE_SHARED_LIBRARY_";
-      sharedFlagsVar += langVar;
+      sharedFlagsVar += linkLanguage;
       sharedFlagsVar += "_FLAGS";
       flags += m_Makefile->GetSafeDefinition(flagsVar.c_str());
       flags += " ";
