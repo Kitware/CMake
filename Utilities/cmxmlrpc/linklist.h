@@ -159,7 +159,7 @@ list_remove_tail(struct list_head * const anchorP) {
 
 static __inline__ void *
 list_foreach(struct list_head * const anchorP,
-             void * functionP(struct list_head *, void *),
+             void * functionP(struct list_head * const, void * const),
              void *             const context) {
 
     struct list_head * p;
