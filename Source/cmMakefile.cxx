@@ -57,6 +57,15 @@ cmMakefile::cmMakefile()
   m_IncludeFileRegularExpression = "^.*$";
   // Setup the default include complaint regular expression (match nothing).
   m_ComplainFileRegularExpression = "^$";
+  // Source and header file extensions that we can handle
+  m_SourceFileExtensions.push_back( "cxx" );
+  m_SourceFileExtensions.push_back( "cpp" );
+  m_SourceFileExtensions.push_back( "txx" );
+  m_SourceFileExtensions.push_back( "c" );
+  m_SourceFileExtensions.push_back( "M" );
+  m_SourceFileExtensions.push_back( "m" );
+
+  m_HeaderFileExtensions.push_back( "h" );
   
   m_DefineFlags = " ";
   m_MakefileGenerator = 0;

@@ -71,7 +71,9 @@ void cmTarget::GenerateSourceFilesFromSourceLists(const cmMakefile &mf)
       {
       cmSourceFile file;
       file.SetIsAnAbstractClass(false);
-      file.SetName(temps.c_str(), mf.GetCurrentDirectory());
+      file.SetName(temps.c_str(), mf.GetCurrentDirectory(),
+                   mf.GetSourceExtensions(),
+                   mf.GetHeaderExtensions());
       m_SourceFiles.push_back(file);
       }
     }

@@ -61,11 +61,15 @@ bool cmSourceFilesCommand::InitialPass(std::vector<std::string>& args)
        (path.size() > 1 && path[1] == ':'))
       {
       file.SetName(cmSystemTools::GetFilenameName(copy.c_str()).c_str(), 
-                   path.c_str());
+                   path.c_str(),
+                   m_Makefile->GetSourceExtensions(),
+                   m_Makefile->GetHeaderExtensions());
       }
     else
       {
-      file.SetName(i->c_str(), m_Makefile->GetCurrentDirectory());
+      file.SetName(i->c_str(), m_Makefile->GetCurrentDirectory(),
+                   m_Makefile->GetSourceExtensions(),
+                   m_Makefile->GetHeaderExtensions());
       }
     m_Makefile->AddSource(file, args[0].c_str());
     }

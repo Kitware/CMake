@@ -64,15 +64,17 @@ public:
     }
   
   /**
-   * Set the name of the file, given the directory
-   * the file should be in.  Various extensions are tried on 
-   * the name (e.g., .cxx, .cpp) in the directory to find the actual file.
+   * Set the name of the file, given the directory the file should be
+   * in.  The various extensions provided are tried on the name
+   * (e.g., cxx, cpp) in the directory to find the actual file.
    */
-  void SetName(const char* name, const char* dir);
+  void SetName(const char* name, const char* dir,
+               const std::vector<std::string>& sourceExts,
+               const std::vector<std::string>& headerExts);
 
   /**
    * Set the name of the file, given the directory the file should be in.  IN
-   * this version the extesion is provided in the call. This is useful for
+   * this version the extension is provided in the call. This is useful for
    * generated files that do not exist prior to the build.  
    */
   void SetName(const char* name, const char* dir, const char *ext, 

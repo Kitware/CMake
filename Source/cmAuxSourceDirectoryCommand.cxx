@@ -63,21 +63,30 @@ bool cmAuxSourceDirectoryCommand::InitialPass(std::vector<std::string>& args)
     for(int i =0; i < numfiles; ++i)
       {
       std::string file = dir.GetFile(i);
-      // ignore files less than f.cxx in length
-      if(file.size() > 4)
+      // Split the filename into base and extension
+      std::string::size_type dotpos = file.rfind(".");
+      if( dotpos != std::string::npos )
         {
-        // Remove the extension
-        std::string::size_type dotpos = file.rfind(".");
+        std::string ext = file.substr(dotpos+1);
         file = file.substr(0, dotpos);
-        std::string fullname = templateDirectory;
-        fullname += "/";
-        fullname += file;
-        // add the file as a class file so 
-        // depends can be done
-        cmSourceFile cmfile;
-        cmfile.SetName(fullname.c_str(), m_Makefile->GetCurrentDirectory());
-        cmfile.SetIsAnAbstractClass(false);
-        m_Makefile->AddSource(cmfile,args[1].c_str());
+        // Process only source files
+        if( file.size() != 0
+            && std::find( m_Makefile->GetSourceExtensions().begin(),
+                          m_Makefile->GetSourceExtensions().end(), ext )
+                 != m_Makefile->GetSourceExtensions().end() )
+          {
+          std::string fullname = templateDirectory;
+          fullname += "/";
+          fullname += file;
+          // add the file as a class file so 
+          // depends can be done
+          cmSourceFile cmfile;
+          cmfile.SetName(fullname.c_str(), m_Makefile->GetCurrentDirectory(),
+                         m_Makefile->GetSourceExtensions(),
+                         m_Makefile->GetHeaderExtensions());
+          cmfile.SetIsAnAbstractClass(false);
+          m_Makefile->AddSource(cmfile,args[1].c_str());
+          }
         }
       }
     }

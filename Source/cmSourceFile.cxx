@@ -48,7 +48,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // The class must be found in dir and end in name.cxx, name.txx, 
 // name.c or it will be considered a header file only class
 // and not included in the build process
-void cmSourceFile::SetName(const char* name, const char* dir)
+void cmSourceFile::SetName(const char* name, const char* dir,
+                           const std::vector<std::string>& sourceExts,
+                           const std::vector<std::string>& headerExts)
 {
   m_HeaderFileOnly = true;
 
@@ -94,81 +96,59 @@ void cmSourceFile::SetName(const char* name, const char* dir)
     return;
     }
   
-  // Try various extentions
-  hname = pathname;
-  hname += ".cxx";
-  if(cmSystemTools::FileExists(hname.c_str()))
+  // Next, try the various source extensions
+  for( std::vector<std::string>::const_iterator ext = sourceExts.begin();
+       ext != sourceExts.end(); ++ext )
     {
-    m_SourceExtension = "cxx";
-    m_HeaderFileOnly = false;
-    m_FullPath = hname;
-    return;
+    hname = pathname;
+    hname += ".";
+    hname += *ext;
+    if(cmSystemTools::FileExists(hname.c_str()))
+      {
+      m_SourceExtension = *ext;
+      m_HeaderFileOnly = false;
+      m_FullPath = hname;
+      return;
+      }
     }
+
+  // Finally, try the various header extensions
+  for( std::vector<std::string>::const_iterator ext = headerExts.begin();
+       ext != headerExts.end(); ++ext )
+    {
+    hname = pathname;
+    hname += ".";
+    hname += *ext;
+    if(cmSystemTools::FileExists(hname.c_str()))
+      {
+      m_SourceExtension = *ext;
+      m_FullPath = hname;
+      return;
+      }
+    }
+
+  std::string errorMsg = "Tried";
+  for( std::vector<std::string>::const_iterator ext = sourceExts.begin();
+       ext != sourceExts.end(); ++ext )
+    {
+    errorMsg += " .";
+    errorMsg += *ext;
+    }
+  for( std::vector<std::string>::const_iterator ext = headerExts.begin();
+       ext != headerExts.end(); ++ext )
+    {
+    errorMsg += " .";
+    errorMsg += *ext;
+    }
+  errorMsg += " for ";
   
-  hname = pathname;
-  hname += ".c";
-  if(cmSystemTools::FileExists(hname.c_str()))
-  {
-    m_HeaderFileOnly = false;
-    m_SourceExtension = "c";
-    m_FullPath = hname;
-    return;
-  }
-  hname = pathname;
-  hname += ".txx";
-  if(cmSystemTools::FileExists(hname.c_str()))
-  {
-    m_HeaderFileOnly = false;
-    m_SourceExtension = "txx";
-    m_FullPath = hname;
-    return;
-  }
-  //
-  hname = pathname;
-  hname += ".cpp";
-  if(cmSystemTools::FileExists(hname.c_str()))
-    {
-    m_SourceExtension = "cpp";
-    m_HeaderFileOnly = false;
-    m_FullPath = hname;
-    return;
-    }
-
-  hname = pathname;
-  hname += ".m";
-  if(cmSystemTools::FileExists(hname.c_str()))
-    {
-    m_SourceExtension = "m";
-    m_HeaderFileOnly = false;
-    m_FullPath = hname;
-    return;
-    }
-
-  hname = pathname;
-  hname += ".M";
-  if(cmSystemTools::FileExists(hname.c_str()))
-    {
-    m_SourceExtension = "M";
-    m_HeaderFileOnly = false;
-    m_FullPath = hname;
-    return;
-    }
-
-  hname = pathname;
-  hname += ".h";
-  if(cmSystemTools::FileExists(hname.c_str()))
-    {
-    m_SourceExtension = "h";
-    m_FullPath = hname;
-    return;
-    }
-  
-  cmSystemTools::Error("can not find file ", hname.c_str());
-  cmSystemTools::Error("Tried .cxx .c .txx .cpp .m .M .h for ", hname.c_str());
+  cmSystemTools::Error("can not find file ", pathname.c_str());
+  cmSystemTools::Error(errorMsg.c_str(), pathname.c_str());
 }
 
+
 void cmSourceFile::SetName(const char* name, const char* dir, const char *ext,
-                          bool hfo)
+                           bool hfo)
 {
   m_HeaderFileOnly = hfo;
   m_SourceName = name;

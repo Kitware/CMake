@@ -409,6 +409,17 @@ public:
   std::vector<std::string>& GetAuxSourceDirectories()
     {return m_AuxSourceDirectories;}
 
+  //@{
+  /**
+   * Return a list of extensions associated with source and header
+   * files
+   */
+  const std::vector<std::string>& GetSourceExtensions() const
+    {return m_SourceFileExtensions;}
+  const std::vector<std::string>& GetHeaderExtensions() const
+    {return m_HeaderFileExtensions;}
+  //@}
+
   /**
    * Given a variable name, return its value (as a string).
    */
@@ -510,6 +521,8 @@ protected:
 
   std::string m_IncludeFileRegularExpression;
   std::string m_ComplainFileRegularExpression;
+  std::vector<std::string> m_SourceFileExtensions;
+  std::vector<std::string> m_HeaderFileExtensions;
   std::string m_DefineFlags;
   std::vector<cmSourceGroup> m_SourceGroups;
   typedef std::map<std::string, cmCommand*> RegisteredCommandsMap;

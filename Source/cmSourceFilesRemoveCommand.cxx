@@ -52,7 +52,9 @@ bool cmSourceFilesRemoveCommand::InitialPass(std::vector<std::string>& args)
       i != args.end(); ++i)
     {
     cmSourceFile file;
-    file.SetName((*i).c_str(), m_Makefile->GetCurrentDirectory());
+    file.SetName((*i).c_str(), m_Makefile->GetCurrentDirectory(),
+                 m_Makefile->GetSourceExtensions(),
+                 m_Makefile->GetHeaderExtensions());
     m_Makefile->RemoveSource(file, args[0].c_str());
     }
   return true;
