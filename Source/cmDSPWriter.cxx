@@ -72,7 +72,7 @@ void cmDSPWriter::OutputDSPFile()
   std::vector<std::string>::iterator i;
   for(i = includes.begin(); i != includes.end(); ++i)
     {
-    m_IncludeOptions +=  "/I ";
+    m_IncludeOptions +=  " /I ";
     m_IncludeOptions += cmSystemTools::EscapeSpaces(i->c_str());
     }
   
