@@ -3,15 +3,6 @@
 #include "cmsys/RegularExpression.hxx"
 
 
-inline void printv(std::vector<cmStdString>& v)
-{
-  for(unsigned int i = 0; i < v.size(); ++i)
-    {
-    std::cerr << "[" << v[i] << "]" << " ";
-    }
-  std::cerr << "\n";
-}
-
 
 //-------------------------------------------------------------------
 bool cmOrderLinkDirectories::LibraryInDirectory(const char* dir, 
@@ -78,27 +69,6 @@ void cmOrderLinkDirectories::FindIndividualLibraryOrders()
     {
     std::vector<cmStdString>& dirs = m_LibraryToDirectories[lib->FullPath];
     m_DirectoryToAfterList[lib->Path] = dirs;
-    }
-}
-
-
-//-------------------------------------------------------------------
-void
-cmOrderLinkDirectories::PrintMap(const char* name,
-                       std::map<cmStdString, std::vector<cmStdString> >& m)
-{
-  std::cerr << name << "\n";
-  for(std::map<cmStdString, std::vector<cmStdString> >::iterator i =
-        m.begin(); i != m.end();
-      ++i)
-    {
-    std::cerr << i->first << ":  ";
-    for(std::vector<cmStdString>::iterator l = i->second.begin();
-        l != i->second.end(); ++l)
-      {
-      std::cerr << *l << " ";
-      }
-    std::cerr << "\n";
     }
 }
 
@@ -318,10 +288,6 @@ bool cmOrderLinkDirectories::DetermineLibraryPathOrder()
   // now turn libfoo.a into foo and foo.a into foo
   // This will prepare the link items for -litem 
   this->PrepareLinkTargets();
-  //  this->PrintMap("m_DirectoryToAfterList", m_DirectoryToAfterList);
-  //this->PrintMap("m_LibraryToDirectories", m_LibraryToDirectories);
-  //std::cerr << "link objects: ";
-  //printv(m_LinkItems);
   if(m_ImposibleDirectories.size())
     {
     return false;
@@ -354,3 +320,24 @@ std::string cmOrderLinkDirectories::GetWarnings()
   warning += "\n";
   return warning;
 }
+
+//-------------------------------------------------------------------
+void
+cmOrderLinkDirectories::PrintMap(const char* name,
+                       std::map<cmStdString, std::vector<cmStdString> >& m)
+{
+  std::cerr << name << "\n";
+  for(std::map<cmStdString, std::vector<cmStdString> >::iterator i =
+        m.begin(); i != m.end();
+      ++i)
+    {
+    std::cerr << i->first << ":  ";
+    for(std::vector<cmStdString>::iterator l = i->second.begin();
+        l != i->second.end(); ++l)
+      {
+      std::cerr << *l << " ";
+      }
+    std::cerr << "\n";
+    }
+}
+
