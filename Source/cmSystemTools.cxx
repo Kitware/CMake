@@ -346,17 +346,15 @@ bool cmSystemTools::WriteRegistryValue(const char *key, const char *value)
     {
     return false;
     }
-  else
+
+  if(RegSetValueEx(hKey, 
+                   (LPTSTR)valuename.c_str(), 
+                   0, 
+                   REG_SZ, 
+                   (CONST BYTE *)value, 
+                   (DWORD)(strlen(value) + 1)) == ERROR_SUCCESS)
     {
-    if(RegSetValueEx(hKey, 
-                     (LPTSTR)valuename.c_str(), 
-                     0, 
-                     REG_SZ, 
-                     (CONST BYTE *)value, 
-                     (DWORD)(strlen(value) + 1)) == ERROR_SUCCESS)
-      {
-      return true;
-      }
+    return true;
     }
 #endif
   return false;
