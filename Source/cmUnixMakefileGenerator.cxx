@@ -1511,15 +1511,27 @@ void cmUnixMakefileGenerator::OutputMakeRules(std::ostream& fout)
   this->BuildInSubDirectory(fout, 
                             m_Makefile->GetHomeOutputDirectory(),
                             "depend", 0);
+  const char* depend_subdirs = 0;
+  if(!m_Makefile->GetSubDirectories().empty())
+    {
+    this->OutputMakeRule(fout, 
+                         "Rule to force build of cmake.depend in subdirectories",
+                         "depend_subdirs",
+                         "$(SUBDIR_DEPEND)",
+                         0
+      );
+    depend_subdirs = "$(MAKE) -$(MAKEFLAGS)  $(MAKESILENT) depend_subdirs";
+    }
   this->OutputMakeRule(fout, 
                        "Rule to force the build of cmake.depends",
                        "depend",
-                       "$(SUBDIR_DEPEND)",
+                       0,
                        "$(CMAKE_COMMAND) "
                        "-S$(CMAKE_CURRENT_SOURCE) -O$(CMAKE_CURRENT_BINARY) "
                        "-H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)",
                        "-$(RM) cmake.depends_mark",
-                       "echo mark > cmake.depends_mark"
+                       "echo mark > cmake.depends_mark",
+                       depend_subdirs
     );
   this->OutputMakeRule(fout, 
                        "Rebuild CMakeCache.txt file",
@@ -1739,28 +1751,40 @@ void cmUnixMakefileGenerator::OutputMakeRule(std::ostream& fout,
     {
     replace = command;
     m_Makefile->ExpandVariablesInString(replace);
-    fout << "\t" << "echo " << replace.c_str() << "\n";
+    if(replace[0] != '-' || replace.find("echo") != 0)
+      {
+      fout << "\t" << "echo " << replace.c_str() << "\n";
+      }
     fout << "\t" << replace.c_str() << "\n";
     }
   if(command2)
     {
     replace = command2;
     m_Makefile->ExpandVariablesInString(replace);
-    fout << "\t" << "echo " << replace.c_str() << "\n";
+    if(replace[0] != '-' && replace.find("echo") != 0)
+      {
+      fout << "\t" << "echo " << replace.c_str() << "\n";
+      }
     fout << "\t" << replace.c_str() << "\n";
     }
   if(command3)
     {
     replace = command3;
     m_Makefile->ExpandVariablesInString(replace);
-    fout << "\t" << "echo " << replace.c_str() << "\n";
+    if(replace[0] != '-' && replace.find("echo") != 0)
+      {
+      fout << "\t" << "echo " << replace.c_str() << "\n";
+      }
     fout << "\t" << replace.c_str() << "\n";
     }
   if(command4)
     {
     replace = command4;
     m_Makefile->ExpandVariablesInString(replace);
-    fout << "\t" << "echo " << replace.c_str() << "\n";
+    if(replace[0] != '-' && replace.find("echo") != 0)
+      {
+      fout << "\t" << "echo " << replace.c_str() << "\n";
+      }
     fout << "\t" << replace.c_str() << "\n";
     }
   fout << "\n";

@@ -309,28 +309,40 @@ void cmNMakeMakefileGenerator::OutputMakeRule(std::ostream& fout,
     {
     replace = ShortPathCommand(command);
     m_Makefile->ExpandVariablesInString(replace);
-    fout << "\t" << "echo " << replace.c_str() << "\n";
+    if(replace[0] != '-' && replace.find("echo") != 0)
+      {
+      fout << "\t" << "echo " << replace.c_str() << "\n";
+      }
     fout << "\t" << replace.c_str() << "\n";
     }
   if(command2)
     {
     replace = ShortPathCommand(command2);
     m_Makefile->ExpandVariablesInString(replace);
-    fout << "\t" << "echo " << replace.c_str() << "\n";
+    if(replace[0] != '-' && replace.find("echo") != 0)
+      {
+      fout << "\t" << "echo " << replace.c_str() << "\n";
+      }
     fout << "\t" << replace.c_str() << "\n";
     }
   if(command3)
     {
     replace = ShortPathCommand(command3);
     m_Makefile->ExpandVariablesInString(replace);
-    fout << "\t" << "echo " << replace.c_str() << "\n";
+    if(replace[0] != '-' && replace.find("echo") != 0)
+      {
+      fout << "\t" << "echo " << replace.c_str() << "\n";
+      }
     fout << "\t" << replace.c_str() << "\n";
     }
   if(command4)
     {
     replace = ShortPathCommand(command4);
     m_Makefile->ExpandVariablesInString(replace);
-    fout << "\t" << "echo " << replace.c_str() << "\n";
+    if(replace[0] != '-' && replace.find("echo") != 0)
+      {
+      fout << "\t" << "echo " << replace.c_str() << "\n";
+      }
     fout << "\t" << replace.c_str() << "\n";
     }
   fout << "\n";
