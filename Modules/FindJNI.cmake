@@ -8,7 +8,7 @@
 #  JAVA_AWT_INCLUDE_PATH = the path to where jni.h can be found
 # 
         
-FIND_LIBRARY(JAVA_AWT_LIB_PATH jawt PATHS /usr/lib /usr/local/lib)
+FIND_LIBRARY(JAVA_AWT_LIBRARY jawt PATHS /usr/lib /usr/local/lib)
 
 # add in the include path    
 FIND_PATH(JAVA_INCLUDE_PATH jni.h /usr/include /usr/local/include)
